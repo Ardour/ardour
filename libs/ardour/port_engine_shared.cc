@@ -316,8 +316,7 @@ PortEngineSharedImpl::add_port (
 {
 	assert(name.size ());
 	if (find_port (name)) {
-		PBD::error << _("AlsaBackend::register_port: Port already exists:")
-		           << " (" << name << ")" << endmsg;
+		PBD::error << string_compose (_("%1::register_port: Port already exists: (%2)"), _instance_name, name) << endmsg;
 		return 0;
 	}
 
@@ -356,7 +355,7 @@ PortEngineSharedImpl::unregister_port (PortEngine::PortHandle port_handle)
 		PortIndex::iterator i = std::find (ps->begin(), ps->end(), static_cast<BackendPort*>(port_handle));
 
 		if (i == ps->end ()) {
-			PBD::error << _("AlsaBackend::unregister_port: Failed to find port") << endmsg;
+			PBD::error << string_compose (_("%1::unregister_port: Failed to find port"), _instance_name) << endmsg;
 			return;
 		}
 
@@ -429,12 +428,12 @@ PortEngineSharedImpl::set_port_name (PortEngine::PortHandle port, const std::str
 	std::string newname (_instance_name + ":" + name);
 
 	if (!valid_port (port)) {
-		PBD::error << _("AlsaBackend::set_port_name: Invalid Port") << endmsg;
+		PBD::error << string_compose (_("%1::set_port_name: Invalid Port"), _instance_name) << endmsg;
 		return -1;
 	}
 
 	if (find_port (newname)) {
-		PBD::error << _("AlsaBackend::set_port_name: Port with given name already exists") << endmsg;
+		PBD::error << string_compose (_("%1::set_port_name: Port with given name already exists"), _instance_name) << endmsg;
 		return -1;
 	}
 
@@ -455,7 +454,7 @@ std::string
 PortEngineSharedImpl::get_port_name (PortEngine::PortHandle port) const
 {
 	if (!valid_port (port)) {
-		PBD::warning << _("AlsaBackend::get_port_name: Invalid Port(s)") << endmsg;
+		PBD::warning << string_compose (_("AlsaBackend::get_port_name: Invalid Port(s)"), _instance_name) << endmsg;
 		return std::string ();
 	}
 	return static_cast<BackendPort*>(port)->name ();
@@ -465,7 +464,7 @@ PortFlags
 PortEngineSharedImpl::get_port_flags (PortEngine::PortHandle port) const
 {
 	if (!valid_port (port)) {
-		PBD::warning << _("AlsaBackend::get_port_flags: Invalid Port(s)") << endmsg;
+		PBD::warning << string_compose (_("%1::get_port_flags: Invalid Port(s)"), _instance_name) << endmsg;
 		return PortFlags (0);
 	}
 	return static_cast<BackendPort*>(port)->flags ();
@@ -475,7 +474,7 @@ int
 PortEngineSharedImpl::get_port_property (PortEngine::PortHandle port, const std::string& key, std::string& value, std::string& type) const
 {
 	if (!valid_port (port)) {
-		PBD::warning << _("AlsaBackend::get_port_property: Invalid Port(s)") << endmsg;
+		PBD::warning << string_compose (_("%1::get_port_property: Invalid Port(s)"), _instance_name) << endmsg;
 		return -1;
 	}
 	if (key == "http://jackaudio.org/metadata/pretty-name") {
@@ -492,7 +491,7 @@ int
 PortEngineSharedImpl::set_port_property (PortEngine::PortHandle port, const std::string& key, const std::string& value, const std::string& type)
 {
 	if (!valid_port (port)) {
-		PBD::warning << _("AlsaBackend::set_port_property: Invalid Port(s)") << endmsg;
+		PBD::warning << string_compose (_("%1::set_port_property: Invalid Port(s)"), _instance_name) << endmsg;
 		return -1;
 	}
 	if (key == "http://jackaudio.org/metadata/pretty-name" && type.empty ()) {
@@ -537,13 +536,11 @@ PortEngineSharedImpl::connect (const std::string& src, const std::string& dst)
 	BackendPort* dst_port = find_port (dst);
 
 	if (!src_port) {
-		PBD::error << _("AlsaBackend::connect: Invalid Source port:")
-		           << " (" << src <<")" << endmsg;
+		PBD::error << string_compose (_("%1::connect: Invalid Source port: (%2)"), _instance_name, src) << endmsg;
 		return -1;
 	}
 	if (!dst_port) {
-		PBD::error << _("AlsaBackend::connect: Invalid Destination port:")
-		           << " (" << dst <<")" << endmsg;
+		PBD::error << string_compose (_("%1::connect: Invalid Destination port: (%2)"), _instance_name, dst) << endmsg;
 		return -1;
 	}
 	return src_port->connect (dst_port);
@@ -556,7 +553,7 @@ PortEngineSharedImpl::disconnect (const std::string& src, const std::string& dst
 	BackendPort* dst_port = find_port (dst);
 
 	if (!src_port || !dst_port) {
-		PBD::error << _("AlsaBackend::disconnect: Invalid Port(s)") << endmsg;
+		PBD::error << string_compose (_("%1::disconnect: Invalid Port(s)"), _instance_name) << endmsg;
 		return -1;
 	}
 	return src_port->disconnect (dst_port);
@@ -567,12 +564,11 @@ PortEngineSharedImpl::connect (PortEngine::PortHandle src, const std::string& ds
 {
 	BackendPort* dst_port = find_port (dst);
 	if (!valid_port (src)) {
-		PBD::error << _("AlsaBackend::connect: Invalid Source Port Handle") << endmsg;
+		PBD::error << string_compose (_("%1::connect: Invalid Source Port Handle"), _instance_name) << endmsg;
 		return -1;
 	}
 	if (!dst_port) {
-		PBD::error << _("AlsaBackend::connect: Invalid Destination Port")
-		           << " (" << dst << ")" << endmsg;
+		PBD::error << string_compose (_("%1::connect: Invalid Destination Port: (%2)"), _instance_name, dst) << endmsg;
 		return -1;
 	}
 	return static_cast<BackendPort*>(src)->connect (dst_port);
@@ -583,7 +579,7 @@ PortEngineSharedImpl::disconnect (PortEngine::PortHandle src, const std::string&
 {
 	BackendPort* dst_port = find_port (dst);
 	if (!valid_port (src) || !dst_port) {
-		PBD::error << _("AlsaBackend::disconnect: Invalid Port(s)") << endmsg;
+		PBD::error << string_compose (_("%1::disconnect: Invalid Port(s)"), _instance_name) << endmsg;
 		return -1;
 	}
 	return static_cast<BackendPort*>(src)->disconnect (dst_port);
@@ -593,7 +589,7 @@ int
 PortEngineSharedImpl::disconnect_all (PortEngine::PortHandle port)
 {
 	if (!valid_port (port)) {
-		PBD::error << _("AlsaBackend::disconnect_all: Invalid Port") << endmsg;
+		PBD::error << string_compose (_("%1::disconnect_all: Invalid Port"), _instance_name) << endmsg;
 		return -1;
 	}
 	static_cast<BackendPort*>(port)->disconnect_all ();
@@ -604,7 +600,7 @@ bool
 PortEngineSharedImpl::connected (PortEngine::PortHandle port, bool /* process_callback_safe*/)
 {
 	if (!valid_port (port)) {
-		PBD::error << _("AlsaBackend::disconnect_all: Invalid Port") << endmsg;
+		PBD::error << string_compose (_("%1::disconnect_all: Invalid Port"), _instance_name) << endmsg;
 		return false;
 	}
 	return static_cast<BackendPort*>(port)->is_connected ();
@@ -616,7 +612,7 @@ PortEngineSharedImpl::connected_to (PortEngine::PortHandle src, const std::strin
 	BackendPort* dst_port = find_port (dst);
 #ifndef NDEBUG
 	if (!valid_port (src) || !dst_port) {
-		PBD::error << _("AlsaBackend::connected_to: Invalid Port") << endmsg;
+		PBD::error << string_compose (_("%1::connected_to: Invalid Port"), _instance_name) << endmsg;
 		return false;
 	}
 #endif
@@ -627,7 +623,7 @@ bool
 PortEngineSharedImpl::physically_connected (PortEngine::PortHandle port, bool /*process_callback_safe*/)
 {
 	if (!valid_port (port)) {
-		PBD::error << _("AlsaBackend::physically_connected: Invalid Port") << endmsg;
+		PBD::error << string_compose (_("%1::physically_connected: Invalid Port"), _instance_name) << endmsg;
 		return false;
 	}
 	return static_cast<BackendPort*>(port)->is_physically_connected ();
@@ -637,7 +633,7 @@ int
 PortEngineSharedImpl::get_connections (PortEngine::PortHandle port, std::vector<std::string>& names, bool /*process_callback_safe*/)
 {
 	if (!valid_port (port)) {
-		PBD::error << _("AlsaBackend::get_connections: Invalid Port") << endmsg;
+		PBD::error << string_compose (_("%1::get_connections: Invalid Port"), _instance_name) << endmsg;
 		return -1;
 	}
 
