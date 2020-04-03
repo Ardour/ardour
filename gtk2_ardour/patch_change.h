@@ -34,38 +34,36 @@ namespace MIDI {
 class PatchChange
 {
 public:
-	PatchChange(MidiRegionView&                   region,
-	            ArdourCanvas::Container*          parent,
-	            const std::string&                text,
-	            double                            height,
-	            double                            x,
-	            double                            y,
-	            ARDOUR::InstrumentInfo&           info,
-	            ARDOUR::MidiModel::PatchChangePtr patch,
-		    Gtkmm2ext::Color               outline_color,
-		    Gtkmm2ext::Color               fill_color);
+	PatchChange (MidiRegionView&                   region,
+	             ArdourCanvas::Container*          parent,
+	             double                            height,
+	             double                            x,
+	             double                            y,
+	             ARDOUR::InstrumentInfo&           info,
+	             ARDOUR::MidiModel::PatchChangePtr patch,
+	             Gtkmm2ext::Color                  outline_color,
+	             Gtkmm2ext::Color                  fill_color);
 
-	~PatchChange();
+	~PatchChange ();
 
-	void initialize_popup_menus();
+	void initialize_popup_menus ();
 
-	void on_patch_menu_selected(const MIDI::Name::PatchPrimaryKey& key);
-
+	void on_patch_menu_selected (const MIDI::Name::PatchPrimaryKey& key);
 
 	void move (ArdourCanvas::Duple);
 	void set_height (ArdourCanvas::Distance);
 	void hide ();
 	void show ();
 
-	double width() const { return _flag->width(); }
-	void set_text (std::string const & s) { _flag->set_text (s); }
+	void update_name ();
 
-	ARDOUR::MidiModel::PatchChangePtr patch()       const { return _patch; }
-	ArdourCanvas::Item*               canvas_item() const { return _flag; }
-	ArdourCanvas::Item&               item()        const { return *_flag; }
+	double                            width ()       const { return _flag->width (); }
+	ARDOUR::MidiModel::PatchChangePtr patch ()       const { return _patch; }
+	ArdourCanvas::Item*               canvas_item () const { return _flag; }
+	ArdourCanvas::Item&               item ()        const { return *_flag; }
 
 private:
-	bool event_handler (GdkEvent *);
+	bool event_handler (GdkEvent*);
 
 	MidiRegionView&                   _region;
 	ARDOUR::InstrumentInfo&           _info;

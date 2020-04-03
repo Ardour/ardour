@@ -131,7 +131,7 @@ public:
 	bool paste (samplepos_t pos, const ::Selection& selection, PasteContext& ctx, const int32_t sub_num);
 	void paste_internal (samplepos_t pos, unsigned paste_count, float times, const MidiCutBuffer&);
 
-	void add_canvas_patch_change (ARDOUR::MidiModel::PatchChangePtr patch, const std::string& displaytext, bool);
+	void add_canvas_patch_change (ARDOUR::MidiModel::PatchChangePtr patch);
 	void remove_canvas_patch_change (PatchChange* pc);
 
 	/** Look up the given time and channel in the 'automation' and set keys accordingly.

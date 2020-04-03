@@ -46,7 +46,6 @@ using Gtkmm2ext::Keyboard;
  */
 PatchChange::PatchChange(MidiRegionView&                   region,
                          ArdourCanvas::Container*          parent,
-                         const string&                     text,
                          double                            height,
                          double                            x,
                          double                            y,
@@ -67,16 +66,23 @@ PatchChange::PatchChange(MidiRegionView&                   region,
 		ArdourCanvas::Duple (x, y),
 		true);
 
-	CANVAS_DEBUG_NAME (_flag, text);
+	CANVAS_DEBUG_NAME (_flag, _info.get_patch_name (_patch->bank (), _patch->program (), _patch->channel ()));
 
 	_flag->Event.connect (sigc::mem_fun (*this, &PatchChange::event_handler));
 	_flag->set_font_description (UIConfiguration::instance().get_SmallFont());
-	_flag->set_text(text);
+
+	update_name ();
 }
 
 PatchChange::~PatchChange()
 {
 	delete _flag;
+}
+
+void
+PatchChange::update_name ()
+{
+	_flag->set_text (_info.get_patch_name (_patch->bank (), _patch->program (), _patch->channel ()));
 }
 
 void

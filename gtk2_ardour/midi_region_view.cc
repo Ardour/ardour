@@ -1353,16 +1353,14 @@ MidiRegionView::display_patch_changes_on_channel (uint8_t channel, bool active_c
 				p->hide();
 			} else {
 				const double x = trackview.editor().sample_to_pixel (region_samples);
-				const string patch_name = instrument_info().get_patch_name ((*i)->bank(), (*i)->program(), channel);
 				p->canvas_item()->set_position (ArdourCanvas::Duple (x, 1.0));
-				p->set_text (patch_name);
+				p->update_name ();
 
 				p->show();
 			}
 
 		} else {
-			const string patch_name = instrument_info().get_patch_name ((*i)->bank(), (*i)->program(), channel);
-			add_canvas_patch_change (*i, patch_name, active_channel);
+			add_canvas_patch_change (*i);
 		}
 	}
 }
@@ -1960,7 +1958,7 @@ MidiRegionView::step_sustain (Temporal::Beats beats)
  * @param active_channel true to display the flag as on an active channel, false to grey it out for an inactive channel.
  */
 void
-MidiRegionView::add_canvas_patch_change (MidiModel::PatchChangePtr patch, const string& displaytext, bool /*active_channel*/)
+MidiRegionView::add_canvas_patch_change (MidiModel::PatchChangePtr patch)
 {
 	samplecnt_t region_samples = source_beats_to_region_samples (patch->time());
 	const double x = trackview.editor().sample_to_pixel (region_samples);
@@ -1973,9 +1971,7 @@ MidiRegionView::add_canvas_patch_change (MidiModel::PatchChangePtr patch, const 
 	// up to date.
 	boost::shared_ptr<PatchChange> patch_change = boost::shared_ptr<PatchChange>(
 		new PatchChange(*this, group,
-				displaytext,
-				height,
-				x, 1.0,
+				height, x, 1.0,
 				instrument_info(),
 				patch,
 				_patch_change_outline,
@@ -3707,6 +3703,10 @@ void
 MidiRegionView::instrument_settings_changed ()
 {
 	redisplay_model();
+
+	for (PatchChanges::iterator x = _patch_changes.begin(); x != _patch_changes.end(); ++x) {
+		(*x).second->update_name ();
+	}
 }
 
 void
