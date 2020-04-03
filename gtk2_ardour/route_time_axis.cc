@@ -119,6 +119,8 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, ArdourCan
 	, plugins_submenu_item (0)
 	, route_group_menu (0)
 	, playlist_action_menu (0)
+	, overlaid_menu_item (0)
+	, stacked_menu_item (0)
 	, gm (sess, true, 75, 14)
 	, _ignore_set_layer_display (false)
 	, pan_automation_item(NULL)
@@ -691,6 +693,7 @@ RouteTimeAxisView::build_display_menu ()
 		i->set_active (overlaid != 0 && stacked == 0);
 		i->set_inconsistent (overlaid != 0 && stacked != 0);
 		i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::set_layer_display), Overlaid, true));
+		overlaid_menu_item = i;
 
 		if (unchangeable) {
 			i->set_sensitive (false);
@@ -701,6 +704,7 @@ RouteTimeAxisView::build_display_menu ()
 		i->set_active (overlaid == 0 && stacked != 0);
 		i->set_inconsistent (overlaid != 0 && stacked != 0);
 		i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::set_layer_display), Stacked, true));
+		stacked_menu_item = i;
 
 		if (unchangeable) {
 			i->set_sensitive (false);

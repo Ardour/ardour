@@ -260,7 +260,8 @@ protected:
 	Gtk::MenuItem*      plugins_submenu_item;
 	RouteGroupMenu*     route_group_menu;
 	Gtk::Menu*          playlist_action_menu;
-	Gtk::MenuItem*      playlist_item;
+	Gtk::MenuItem*      overlaid_menu_item;
+	Gtk::MenuItem*      stacked_menu_item;
 
 	void use_playlist (Gtk::RadioMenuItem *item, boost::weak_ptr<ARDOUR::Playlist> wpl);
 
