@@ -68,10 +68,23 @@ InstrumentInfo::set_internal_instrument (boost::shared_ptr<Processor> p)
 		//std::cerr << "InstrumentInfo::set_internal_instrument -- NO CHANGE\n";
 		return;
 	}
+	_midnam_changed.disconnect ();
 	//std::cerr << "InstrumentInfo::set_internal_instrument -> '" << (p ? p->name () : "(NULL)") << "'\n";
 	internal_instrument = p;
 	if (_external_instrument_model.empty () || _external_instrument_model == _("Unknown")) {
 		Changed (); /* EMIT SIGNAL */
+	}
+
+	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (p);
+	if (pi && pi->plugin ()->has_midnam ()) {
+		pi->plugin()->UpdatedMidnam.connect_same_thread (_midnam_changed, boost::bind (&InstrumentInfo::emit_changed, this));
+	}
+}
+
+void
+InstrumentInfo::emit_changed () {
+	if (_external_instrument_model.empty ()) {
+		Changed ();
 	}
 }
 

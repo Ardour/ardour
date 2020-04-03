@@ -86,6 +86,8 @@ private:
 		_plugin_mode = "";
 	}
 
+	void emit_changed ();
+
 	std::string _external_instrument_model;
 	std::string _external_instrument_mode;
 
@@ -93,6 +95,8 @@ private:
 	mutable std::string _plugin_mode;
 
 	boost::weak_ptr<ARDOUR::Processor> internal_instrument;
+
+	PBD::ScopedConnection _midnam_changed;
 };
 
 }
