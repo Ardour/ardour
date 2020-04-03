@@ -64,6 +64,7 @@ std::vector<AudioBackend::DeviceStatus> PortAudioBackend::_output_audio_device_s
 
 PortAudioBackend::PortAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	: AudioBackend (e, info)
+	, PortEngineSharedImpl (e, s_instance_name)
 	, _pcmio (0)
 	, _run (false)
 	, _active (false)
@@ -1200,184 +1201,6 @@ PortAudioBackend::my_name () const
 	return _instance_name;
 }
 
-uint32_t
-PortAudioBackend::port_name_size () const
-{
-	return 256;
-}
-
-int
-PortAudioBackend::set_port_name (PortEngine::PortHandle port, const std::string& name)
-{
-	if (!valid_port (port)) {
-		DEBUG_PORTS("set_port_name: Invalid Port(s)\n");
-		return -1;
-	}
-	return static_cast<PamPort*>(port)->set_name (_instance_name + ":" + name);
-}
-
-std::string
-PortAudioBackend::get_port_name (PortEngine::PortHandle port) const
-{
-	if (!valid_port (port)) {
-		DEBUG_PORTS("get_port_name: Invalid Port(s)\n");
-		return std::string ();
-	}
-	return static_cast<PamPort*>(port)->name ();
-}
-
-PortFlags
-PortAudioBackend::get_port_flags (PortEngine::PortHandle port) const
-{
-	if (!valid_port (port)) {
-		DEBUG_PORTS("get_port_flags: Invalid Port(s)\n");
-		return PortFlags (0);
-	}
-	return static_cast<PamPort*>(port)->flags ();
-}
-
-int
-PortAudioBackend::get_port_property (PortHandle port,
-                                     const std::string& key,
-                                     std::string& value,
-                                     std::string& type) const
-{
-	if (!valid_port (port)) {
-		DEBUG_PORTS("get_port_name: Invalid Port(s)\n");
-		return -1;
-	}
-
-	if (key == "http://jackaudio.org/metadata/pretty-name") {
-		type = "";
-		value = static_cast<PamPort*>(port)->pretty_name ();
-		if (!value.empty()) {
-			return 0;
-		}
-	}
-	return -1;
-}
-
-int
-PortAudioBackend::set_port_property (PortHandle port,
-                                     const std::string& key,
-                                     const std::string& value,
-                                     const std::string& type)
-{
-	if (!valid_port (port)) {
-		DEBUG_PORTS("get_port_name: Invalid Port(s)\n");
-		return -1;
-	}
-
-	if (key == "http://jackaudio.org/metadata/pretty-name" && type.empty ()) {
-		static_cast<PamPort*>(port)->set_pretty_name (value);
-		return 0;
-	}
-	return -1;
-}
-
-PortEngine::PortHandle
-PortAudioBackend::get_port_by_name (const std::string& name) const
-{
-	PortHandle port = (PortHandle) find_port (name);
-	return port;
-}
-
-int
-PortAudioBackend::get_ports (
-		const std::string& port_name_pattern,
-		DataType type, PortFlags flags,
-		std::vector<std::string>& port_names) const
-{
-	int rv = 0;
-	regex_t port_regex;
-	bool use_regexp = false;
-	if (port_name_pattern.size () > 0) {
-		if (!regcomp (&port_regex, port_name_pattern.c_str (), REG_EXTENDED|REG_NOSUB)) {
-			use_regexp = true;
-		}
-	}
-	for (size_t i = 0; i < _ports.size (); ++i) {
-		PamPort* port = _ports[i];
-		if ((port->type () == type) && flags == (port->flags () & flags)) {
-			if (!use_regexp || !regexec (&port_regex, port->name ().c_str (), 0, NULL, 0)) {
-				port_names.push_back (port->name ());
-				++rv;
-			}
-		}
-	}
-	if (use_regexp) {
-		regfree (&port_regex);
-	}
-	return rv;
-}
-
-DataType
-PortAudioBackend::port_data_type (PortEngine::PortHandle port) const
-{
-	if (!valid_port (port)) {
-		return DataType::NIL;
-	}
-	return static_cast<PamPort*>(port)->type ();
-}
-
-PortEngine::PortHandle
-PortAudioBackend::register_port (
-		const std::string& name,
-		ARDOUR::DataType type,
-		ARDOUR::PortFlags flags)
-{
-	if (name.size () == 0) { return 0; }
-	if (flags & IsPhysical) { return 0; }
-	return add_port (_instance_name + ":" + name, type, flags);
-}
-
-PortEngine::PortHandle
-PortAudioBackend::add_port (
-		const std::string& name,
-		ARDOUR::DataType type,
-		ARDOUR::PortFlags flags)
-{
-	assert(name.size ());
-	if (find_port (name)) {
-		DEBUG_PORTS(
-		    string_compose("register_port: Port already exists: (%1)\n", name));
-		return 0;
-	}
-	PamPort* port = NULL;
-	switch (type) {
-	case DataType::AUDIO:
-		port = new PortAudioPort(*this, name, flags);
-		break;
-	case DataType::MIDI:
-		port = new PortMidiPort(*this, name, flags);
-		break;
-	default:
-		DEBUG_PORTS("register_port: Invalid Data Type.\n");
-		return 0;
-	}
-
-	_ports.push_back (port);
-
-	return port;
-}
-
-void
-PortAudioBackend::unregister_port (PortEngine::PortHandle port_handle)
-{
-	if (!_run) {
-		return;
-	}
-	PamPort* port = static_cast<PamPort*>(port_handle);
-	std::vector<PamPort*>::iterator i = std::find (_ports.begin (), _ports.end (), static_cast<PamPort*>(port_handle));
-	if (i == _ports.end ()) {
-		DEBUG_PORTS("unregister_port: Failed to find port\n");
-		return;
-	}
-	disconnect_all(port_handle);
-	_ports.erase (i);
-	delete port;
-}
-
 int
 PortAudioBackend::register_system_audio_ports()
 {
@@ -1489,158 +1312,41 @@ PortAudioBackend::register_system_midi_ports()
 }
 
 void
-PortAudioBackend::unregister_ports (bool system_only)
-{
-	size_t i = 0;
-	_system_inputs.clear();
-	_system_outputs.clear();
-	_system_midi_in.clear();
-	_system_midi_out.clear();
-	while (i <  _ports.size ()) {
-		PamPort* port = _ports[i];
-		if (! system_only || (port->is_physical () && port->is_terminal ())) {
-			port->disconnect_all ();
-			delete port;
-			_ports.erase (_ports.begin() + i);
-		} else {
-			++i;
-		}
-	}
-}
-
-void
 PortAudioBackend::update_system_port_latecies ()
 {
-	for (std::vector<PamPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
+	for (std::vector<BackendPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
 		(*it)->update_connected_latency (true);
 	}
-	for (std::vector<PamPort*>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it) {
+	for (std::vector<BackendPort*>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it) {
 		(*it)->update_connected_latency (false);
 	}
 
-	for (std::vector<PamPort*>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it) {
+	for (std::vector<BackendPort*>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it) {
 		(*it)->update_connected_latency (true);
 	}
-	for (std::vector<PamPort*>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it) {
+	for (std::vector<BackendPort*>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it) {
 		(*it)->update_connected_latency (false);
 	}
 }
 
-int
-PortAudioBackend::connect (const std::string& src, const std::string& dst)
+BackendPort*
+PortAudioBackend::port_factory (std::string const & name, ARDOUR::DataType type, ARDOUR::PortFlags flags)
 {
-	PamPort* src_port = find_port (src);
-	PamPort* dst_port = find_port (dst);
+	BackendPort* port = 0;
 
-	if (!src_port) {
-		DEBUG_PORTS(string_compose("connect: Invalid Source port: (%1)\n", src));
-		return -1;
-	}
-	if (!dst_port) {
-		DEBUG_PORTS(string_compose("connect: Invalid Destination port: (%1)\n", dst));
-		return -1;
-	}
-	return src_port->connect (dst_port);
-}
-
-int
-PortAudioBackend::disconnect (const std::string& src, const std::string& dst)
-{
-	PamPort* src_port = find_port (src);
-	PamPort* dst_port = find_port (dst);
-
-	if (!src_port || !dst_port) {
-		DEBUG_PORTS("disconnect: Invalid Port(s)\n");
-		return -1;
-	}
-	return src_port->disconnect (dst_port);
-}
-
-int
-PortAudioBackend::connect (PortEngine::PortHandle src, const std::string& dst)
-{
-	PamPort* dst_port = find_port (dst);
-	if (!valid_port (src)) {
-		DEBUG_PORTS("connect: Invalid Source Port Handle\n");
-		return -1;
-	}
-	if (!dst_port) {
-		DEBUG_PORTS(string_compose("connect: Invalid Destination Port (%1)\n", dst));
-		return -1;
-	}
-	return static_cast<PamPort*>(src)->connect (dst_port);
-}
-
-int
-PortAudioBackend::disconnect (PortEngine::PortHandle src, const std::string& dst)
-{
-	PamPort* dst_port = find_port (dst);
-	if (!valid_port (src) || !dst_port) {
-		DEBUG_PORTS("disconnect: Invalid Port(s)\n");
-		return -1;
-	}
-	return static_cast<PamPort*>(src)->disconnect (dst_port);
-}
-
-int
-PortAudioBackend::disconnect_all (PortEngine::PortHandle port)
-{
-	if (!valid_port (port)) {
-		DEBUG_PORTS("disconnect_all: Invalid Port\n");
-		return -1;
-	}
-	static_cast<PamPort*>(port)->disconnect_all ();
-	return 0;
-}
-
-bool
-PortAudioBackend::connected (PortEngine::PortHandle port, bool /* process_callback_safe*/)
-{
-	if (!valid_port (port)) {
-		DEBUG_PORTS("disconnect_all: Invalid Port\n");
-		return false;
-	}
-	return static_cast<PamPort*>(port)->is_connected ();
-}
-
-bool
-PortAudioBackend::connected_to (PortEngine::PortHandle src, const std::string& dst, bool /*process_callback_safe*/)
-{
-	PamPort* dst_port = find_port (dst);
-	if (!valid_port (src) || !dst_port) {
-		DEBUG_PORTS("connected_to: Invalid Port\n");
-		return false;
-	}
-	return static_cast<PamPort*>(src)->is_connected (dst_port);
-}
-
-bool
-PortAudioBackend::physically_connected (PortEngine::PortHandle port, bool /*process_callback_safe*/)
-{
-	if (!valid_port (port)) {
-		DEBUG_PORTS("physically_connected: Invalid Port\n");
-		return false;
-	}
-	return static_cast<PamPort*>(port)->is_physically_connected ();
-}
-
-int
-PortAudioBackend::get_connections (PortEngine::PortHandle port, std::vector<std::string>& names, bool /*process_callback_safe*/)
-{
-	if (!valid_port (port)) {
-		DEBUG_PORTS("get_connections: Invalid Port\n");
-		return -1;
+	switch (type) {
+		case DataType::AUDIO:
+			port = new PortAudioPort (*this, name, flags);
+			break;
+		case DataType::MIDI:
+			port = new PortMidiPort (*this, name, flags);
+			break;
+		default:
+			PBD::error << string_compose (_("%1::register_port: Invalid Data Type."), _instance_name) << endmsg;
+			return 0;
 	}
 
-	assert (0 == names.size ());
-
-	const std::vector<PamPort*>& connected_ports = static_cast<PamPort*>(port)->get_connections ();
-
-	for (std::vector<PamPort*>::const_iterator i = connected_ports.begin (); i != connected_ports.end (); ++i) {
-		names.push_back ((*i)->name ());
-	}
-
-	return (int)names.size ();
+	return port;
 }
 
 /* MIDI */
@@ -1731,9 +1437,9 @@ void
 PortAudioBackend::set_latency_range (PortEngine::PortHandle port, bool for_playback, LatencyRange latency_range)
 {
 	if (!valid_port (port)) {
-		DEBUG_PORTS("PamPort::set_latency_range (): invalid port.\n");
+		DEBUG_PORTS("BackendPort::set_latency_range (): invalid port.\n");
 	}
-	static_cast<PamPort*>(port)->set_latency_range (latency_range, for_playback);
+	static_cast<BackendPort*>(port)->set_latency_range (latency_range, for_playback);
 }
 
 LatencyRange
@@ -1741,12 +1447,12 @@ PortAudioBackend::get_latency_range (PortEngine::PortHandle port, bool for_playb
 {
 	LatencyRange r;
 	if (!valid_port (port)) {
-		DEBUG_PORTS("PamPort::get_latency_range (): invalid port.\n");
+		DEBUG_PORTS("BackendPort::get_latency_range (): invalid port.\n");
 		r.min = 0;
 		r.max = 0;
 		return r;
 	}
-	PamPort* p = static_cast<PamPort*>(port);
+	BackendPort* p = static_cast<BackendPort*>(port);
 	assert(p);
 
 	r = p->latency_range (for_playback);
@@ -1764,91 +1470,6 @@ PortAudioBackend::get_latency_range (PortEngine::PortHandle port, bool for_playb
 	return r;
 }
 
-/* Discovering physical ports */
-
-bool
-PortAudioBackend::port_is_physical (PortEngine::PortHandle port) const
-{
-	if (!valid_port (port)) {
-		DEBUG_PORTS("PamPort::port_is_physical (): invalid port.\n");
-		return false;
-	}
-	return static_cast<PamPort*>(port)->is_physical ();
-}
-
-void
-PortAudioBackend::get_physical_outputs (DataType type, std::vector<std::string>& port_names)
-{
-	for (size_t i = 0; i < _ports.size (); ++i) {
-		PamPort* port = _ports[i];
-		if ((port->type () == type) && port->is_input () && port->is_physical ()) {
-			port_names.push_back (port->name ());
-		}
-	}
-}
-
-void
-PortAudioBackend::get_physical_inputs (DataType type, std::vector<std::string>& port_names)
-{
-	for (size_t i = 0; i < _ports.size (); ++i) {
-		PamPort* port = _ports[i];
-		if ((port->type () == type) && port->is_output () && port->is_physical ()) {
-			port_names.push_back (port->name ());
-		}
-	}
-}
-
-ChanCount
-PortAudioBackend::n_physical_outputs () const
-{
-	int n_midi = 0;
-	int n_audio = 0;
-	for (size_t i = 0; i < _ports.size (); ++i) {
-		PamPort* port = _ports[i];
-		if (port->is_output () && port->is_physical ()) {
-			switch (port->type ()) {
-			case DataType::AUDIO:
-				++n_audio;
-				break;
-			case DataType::MIDI:
-				++n_midi;
-				break;
-			default:
-				break;
-			}
-		}
-	}
-	ChanCount cc;
-	cc.set (DataType::AUDIO, n_audio);
-	cc.set (DataType::MIDI, n_midi);
-	return cc;
-}
-
-ChanCount
-PortAudioBackend::n_physical_inputs () const
-{
-	int n_midi = 0;
-	int n_audio = 0;
-	for (size_t i = 0; i < _ports.size (); ++i) {
-		PamPort* port = _ports[i];
-		if (port->is_input () && port->is_physical ()) {
-			switch (port->type ()) {
-			case DataType::AUDIO:
-				++n_audio;
-				break;
-			case DataType::MIDI:
-				++n_midi;
-				break;
-			default:
-				break;
-			}
-		}
-	}
-	ChanCount cc;
-	cc.set (DataType::AUDIO, n_audio);
-	cc.set (DataType::MIDI, n_midi);
-	return cc;
-}
 
 /* Getting access to the data buffer for a port */
 
@@ -1858,7 +1479,7 @@ PortAudioBackend::get_buffer (PortEngine::PortHandle port, pframes_t nframes)
 	assert (port);
 	assert (valid_port (port));
 	if (!port || !valid_port (port)) return NULL; // XXX remove me
-	return static_cast<PamPort*>(port)->get_buffer (nframes);
+	return static_cast<BackendPort*>(port)->get_buffer (nframes);
 }
 
 
@@ -1951,7 +1572,7 @@ PortAudioBackend::blocking_process_main(const float* interleaved_input_data,
 
 	i = 0;
 	/* Copy input audio data into input port buffers */
-	for (std::vector<PamPort*>::const_iterator it = _system_inputs.begin();
+	for (std::vector<BackendPort*>::const_iterator it = _system_inputs.begin();
 	     it != _system_inputs.end();
 	     ++it, ++i) {
 		assert(_system_inputs.size() == _pcmio->n_capture_channels());
@@ -1964,7 +1585,7 @@ PortAudioBackend::blocking_process_main(const float* interleaved_input_data,
 	process_incoming_midi ();
 
 	/* clear output buffers */
-	for (std::vector<PamPort*>::const_iterator it = _system_outputs.begin();
+	for (std::vector<BackendPort*>::const_iterator it = _system_outputs.begin();
 	     it != _system_outputs.end();
 	     ++it) {
 		memset((*it)->get_buffer(_samples_per_period),
@@ -2008,7 +1629,7 @@ PortAudioBackend::blocking_process_main(const float* interleaved_input_data,
 
 	/* write back audio */
 	i = 0;
-	for (std::vector<PamPort*>::const_iterator it = _system_outputs.begin();
+	for (std::vector<BackendPort*>::const_iterator it = _system_outputs.begin();
 	     it != _system_outputs.end();
 	     ++it, ++i) {
 		assert(_system_outputs.size() == _pcmio->n_playback_channels());
@@ -2041,7 +1662,7 @@ bool
 PortAudioBackend::blocking_process_freewheel()
 {
 	// zero audio input buffers
-	for (std::vector<PamPort*>::const_iterator it = _system_inputs.begin();
+	for (std::vector<BackendPort*>::const_iterator it = _system_inputs.begin();
 	     it != _system_inputs.end();
 	     ++it) {
 		memset((*it)->get_buffer(_samples_per_period),
@@ -2058,7 +1679,7 @@ PortAudioBackend::blocking_process_freewheel()
 	}
 
 	// drop all outgoing MIDI messages
-	for (std::vector<PamPort*>::const_iterator it = _system_midi_out.begin();
+	for (std::vector<BackendPort*>::const_iterator it = _system_midi_out.begin();
 	     it != _system_midi_out.end();
 	     ++it) {
 		void* bptr = (*it)->get_buffer(0);
@@ -2074,7 +1695,7 @@ void
 PortAudioBackend::process_incoming_midi ()
 {
 	uint32_t i = 0;
-	for (std::vector<PamPort*>::const_iterator it = _system_midi_in.begin();
+	for (std::vector<BackendPort*>::const_iterator it = _system_midi_in.begin();
 	     it != _system_midi_in.end();
 	     ++it, ++i) {
 		PortMidiBuffer* mbuf = static_cast<PortMidiBuffer*>((*it)->get_buffer(0));
@@ -2106,14 +1727,14 @@ void
 PortAudioBackend::process_outgoing_midi ()
 {
 	/* mixdown midi */
-	for (std::vector<PamPort*>::iterator it = _system_midi_out.begin();
+	for (std::vector<BackendPort*>::iterator it = _system_midi_out.begin();
 	     it != _system_midi_out.end();
 	     ++it) {
 		static_cast<PortMidiPort*>(*it)->next_period();
 	}
 	/* queue outgoing midi */
 	uint32_t i = 0;
-	for (std::vector<PamPort*>::const_iterator it = _system_midi_out.begin();
+	for (std::vector<BackendPort*>::const_iterator it = _system_midi_out.begin();
 	     it != _system_midi_out.end();
 	     ++it, ++i) {
 		const PortMidiBuffer* src =
@@ -2229,164 +1850,11 @@ extern "C" ARDOURBACKEND_API ARDOUR::AudioBackendInfo* descriptor ()
 
 
 /******************************************************************************/
-PamPort::PamPort (PortAudioBackend &b, const std::string& name, PortFlags flags)
-	: _osx_backend (b)
-	, _name  (name)
-	, _flags (flags)
-{
-	_capture_latency_range.min = 0;
-	_capture_latency_range.max = 0;
-	_playback_latency_range.min = 0;
-	_playback_latency_range.max = 0;
-}
-
-PamPort::~PamPort () {
-	disconnect_all ();
-}
-
-
-int PamPort::connect (PamPort *port)
-{
-	if (!port) {
-		DEBUG_PORTS("PamPort::connect (): invalid (null) port\n");
-		return -1;
-	}
-
-	if (type () != port->type ()) {
-		DEBUG_PORTS("PamPort::connect (): wrong port-type\n");
-		return -1;
-	}
-
-	if (is_output () && port->is_output ()) {
-		DEBUG_PORTS("PamPort::connect (): cannot inter-connect output ports.\n");
-		return -1;
-	}
-
-	if (is_input () && port->is_input ()) {
-		DEBUG_PORTS("PamPort::connect (): cannot inter-connect input ports.\n");
-		return -1;
-	}
-
-	if (this == port) {
-		DEBUG_PORTS("PamPort::connect (): cannot self-connect ports.\n");
-		return -1;
-	}
-
-	if (is_connected (port)) {
-#if 0 // don't bother to warn about this for now. just ignore it
-		PBD::error << _("PamPort::connect (): ports are already connected:")
-			<< " (" << name () << ") -> (" << port->name () << ")"
-			<< endmsg;
-#endif
-		return -1;
-	}
-
-	_connect (port, true);
-	return 0;
-}
-
-
-void PamPort::_connect (PamPort *port, bool callback)
-{
-	_connections.push_back (port);
-	if (callback) {
-		port->_connect (this, false);
-		_osx_backend.port_connect_callback (name(),  port->name(), true);
-	}
-}
-
-int PamPort::disconnect (PamPort *port)
-{
-	if (!port) {
-		DEBUG_PORTS("PamPort::disconnect (): invalid (null) port\n");
-		return -1;
-	}
-
-	if (!is_connected (port)) {
-		DEBUG_PORTS(string_compose(
-		    "PamPort::disconnect (): ports are not connected: (%1) -> (%2)\n",
-		    name(),
-		    port->name()));
-		return -1;
-	}
-	_disconnect (port, true);
-	return 0;
-}
-
-void PamPort::_disconnect (PamPort *port, bool callback)
-{
-	std::vector<PamPort*>::iterator it = std::find (_connections.begin (), _connections.end (), port);
-
-	assert (it != _connections.end ());
-
-	_connections.erase (it);
-
-	if (callback) {
-		port->_disconnect (this, false);
-		_osx_backend.port_connect_callback (name(),  port->name(), false);
-	}
-}
-
-
-void PamPort::disconnect_all ()
-{
-	while (!_connections.empty ()) {
-		_connections.back ()->_disconnect (this, false);
-		_osx_backend.port_connect_callback (name(),  _connections.back ()->name(), false);
-		_connections.pop_back ();
-	}
-}
-
-bool
-PamPort::is_connected (const PamPort *port) const
-{
-	return std::find (_connections.begin (), _connections.end (), port) != _connections.end ();
-}
-
-bool PamPort::is_physically_connected () const
-{
-	for (std::vector<PamPort*>::const_iterator it = _connections.begin (); it != _connections.end (); ++it) {
-		if ((*it)->is_physical ()) {
-			return true;
-		}
-	}
-	return false;
-}
-
-void
-PamPort::set_latency_range (const LatencyRange &latency_range, bool for_playback)
-{
-	if (for_playback) {
-		_playback_latency_range = latency_range;
-	} else {
-		_capture_latency_range = latency_range;
-	}
-
-	for (std::vector<PamPort*>::const_iterator it = _connections.begin (); it != _connections.end (); ++it) {
-		if ((*it)->is_physical ()) {
-			(*it)->update_connected_latency (is_input ());
-		}
-	}
-}
-
-void
-PamPort::update_connected_latency (bool for_playback)
-{
-	LatencyRange lr;
-	lr.min = lr.max = 0;
-	for (std::vector<PamPort*>::const_iterator it = _connections.begin (); it != _connections.end (); ++it) {
-		LatencyRange l;
-		l = (*it)->latency_range (for_playback);
-		lr.min = std::max (lr.min, l.min);
-		lr.max = std::max (lr.max, l.max);
-	}
-	set_latency_range (lr, for_playback);
-}
 
 /******************************************************************************/
 
 PortAudioPort::PortAudioPort (PortAudioBackend &b, const std::string& name, PortFlags flags)
-	: PamPort (b, name, flags)
+	: BackendPort (b, name, flags)
 {
 	memset (_buffer, 0, sizeof (_buffer));
 #ifndef PLATFORM_WINDOWS
@@ -2399,7 +1867,7 @@ PortAudioPort::~PortAudioPort () { }
 void* PortAudioPort::get_buffer (pframes_t n_samples)
 {
 	if (is_input ()) {
-		std::vector<PamPort*>::const_iterator it = get_connections ().begin ();
+		std::vector<BackendPort*>::const_iterator it = get_connections ().begin ();
 		if (it == get_connections ().end ()) {
 			memset (_buffer, 0, n_samples * sizeof (Sample));
 		} else {
@@ -2422,7 +1890,7 @@ void* PortAudioPort::get_buffer (pframes_t n_samples)
 
 
 PortMidiPort::PortMidiPort (PortAudioBackend &b, const std::string& name, PortFlags flags)
-	: PamPort (b, name, flags)
+	: BackendPort (b, name, flags)
 	, _n_periods (1)
 	, _bufperiod (0)
 {
@@ -2445,7 +1913,7 @@ void* PortMidiPort::get_buffer (pframes_t /* nframes */)
 {
 	if (is_input ()) {
 		(_buffer[_bufperiod]).clear ();
-		for (std::vector<PamPort*>::const_iterator i = get_connections ().begin ();
+		for (std::vector<BackendPort*>::const_iterator i = get_connections ().begin ();
 				i != get_connections ().end ();
 				++i) {
 			const PortMidiBuffer * src = static_cast<const PortMidiPort*>(*i)->const_buffer ();
