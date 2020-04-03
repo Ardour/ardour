@@ -900,6 +900,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\port_engine_shared.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\port_insert.cc"
 				>
 			</File>
@@ -2203,6 +2207,10 @@
 			</File>
 			<File
 				RelativePath="..\ardour\port.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\port_engine_shared.h"
 				>
 			</File>
 			<File
