@@ -2695,7 +2695,7 @@ Session::ensure_route_presentation_info_gap (PresentationInfo::order_t first_new
 list< boost::shared_ptr<AudioTrack> >
 Session::new_audio_track (int input_channels, int output_channels, RouteGroup* route_group,
                           uint32_t how_many, string name_template, PresentationInfo::order_t order,
-                          TrackMode mode)
+                          TrackMode mode, bool input_auto_connect)
 {
 	string track_name;
 	uint32_t track_id = 0;
@@ -2773,7 +2773,7 @@ Session::new_audio_track (int input_channels, int output_channels, RouteGroup* r
 	failed:
 	if (!new_routes.empty()) {
 		StateProtector sp (this);
-		add_routes (new_routes, true, true, false, order);
+		add_routes (new_routes, input_auto_connect, true, false, order);
 	}
 
 	return ret;

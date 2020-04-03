@@ -697,7 +697,8 @@ public:
 		uint32_t how_many,
 		std::string name_template,
 		PresentationInfo::order_t order,
-		TrackMode mode = Normal
+		TrackMode mode = Normal,
+		bool input_auto_connect = true
 		);
 
 	std::list<boost::shared_ptr<MidiTrack> > new_midi_track (
