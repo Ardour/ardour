@@ -23,6 +23,8 @@
 #include <map>
 #include <gtkmm/drawingarea.h>
 
+#include "keyboardlayout.h"
+
 #define NNOTES (128)
 
 class APianoKeyboard : public Gtk::DrawingArea
@@ -38,15 +40,6 @@ public:
 	sigc::signal<void, int, bool> PitchBend;
 	sigc::signal<void, bool>      SwitchOctave;
 
-	enum Layout {
-		QWERTY,
-		QWERTZ,
-		AZERTY,
-		DVORAK,
-		S_QWERTY,
-		S_QWERTZ
-	};
-
 	void sustain_press ();
 	void sustain_release ();
 
@@ -61,7 +54,7 @@ public:
 	void set_monophonic (bool monophonic);
 	void set_octave (int octave);
 	void set_octave_range (int octave_range);
-	void set_keyboard_layout (Layout layout);
+	void set_keyboard_layout (KeyboardLayout::Layout layout);
 	void set_velocities (int min_vel, int max_vel, int key_vel);
 
 protected:
@@ -88,18 +81,6 @@ private:
 	void release_key (int key);
 	void stop_sustained_notes ();
 	void stop_unsustained_notes ();
-
-	int  key_binding (const char* key) const;
-	void bind_key (const char* key, int note);
-	void clear_notes ();
-
-	void bind_keys_qwerty ();
-	void bind_keys_qwertz ();
-	void bind_keys_azerty ();
-	void bind_keys_dvorak ();
-
-	void bind_keys_basic_qwerty ();
-	void bind_keys_basic_qwertz ();
 
 	int get_note_for_xy (int x, int y) const;
 	int get_velocity_for_note_at_y (int note, int y) const;
@@ -144,8 +125,7 @@ private:
 
 	PKNote _notes[NNOTES];
 
-	std::map<std::string, int> _key_bindings;  /**< Table used to translate from PC keyboard character to MIDI note number. */
-	std::map<int, std::string> _note_bindings; /**< Table to translate from MIDI note number to PC keyboard character. */
+	KeyboardLayout _keyboard_layout;
 	std::map<std::string, int> _note_stack;
 
 	/* these are only valid during expose/draw */

@@ -63,8 +63,8 @@ APianoKeyboard::annotate_layout (cairo_t* cr, int note) const
 		return;
 	}
 
-	std::map<int, std::string>::const_iterator kv = _note_bindings.find (nkey);
-	if (kv == _note_bindings.end ()) {
+	const char* key_name = _keyboard_layout.note_binding (nkey);
+	if (!key_name) {
 		return;
 	}
 
@@ -75,7 +75,7 @@ APianoKeyboard::annotate_layout (cairo_t* cr, int note) const
 	int  tw, th;
 	char buf[32];
 	snprintf (buf, 16, "%lc",
-			gdk_keyval_to_unicode (gdk_keyval_to_upper (gdk_keyval_from_name (kv->second.c_str ()))));
+			gdk_keyval_to_unicode (gdk_keyval_to_upper (gdk_keyval_from_name (key_name))));
 	PangoLayout* pl = pango_cairo_create_layout (cr);
 	pango_layout_set_font_description (pl, _font_cue);
 	pango_layout_set_text (pl, buf, -1);
@@ -292,272 +292,6 @@ APianoKeyboard::stop_sustained_notes ()
 	}
 }
 
-int
-APianoKeyboard::key_binding (const char* key) const
-{
-	std::map<std::string, int>::const_iterator kv;
-	if (key && (kv = _key_bindings.find (key)) != _key_bindings.end ()) {
-		return kv->second;
-	}
-	return -1;
-}
-
-void
-APianoKeyboard::bind_key (const char* key, int note)
-{
-	_key_bindings[key]   = note;
-	_note_bindings[note] = key;
-}
-
-void
-APianoKeyboard::clear_notes ()
-{
-	_key_bindings.clear ();
-	_note_bindings.clear ();
-}
-
-void
-APianoKeyboard::bind_keys_qwerty ()
-{
-	clear_notes ();
-
-	bind_key ("space", 128);
-	bind_key ("Tab", 129);
-
-	/* Lower keyboard row - "zxcvbnm". */
-	bind_key ("z", 12); /* C0 */
-	bind_key ("s", 13);
-	bind_key ("x", 14);
-	bind_key ("d", 15);
-	bind_key ("c", 16);
-	bind_key ("v", 17);
-	bind_key ("g", 18);
-	bind_key ("b", 19);
-	bind_key ("h", 20);
-	bind_key ("n", 21);
-	bind_key ("j", 22);
-	bind_key ("m", 23);
-
-	/* Upper keyboard row, first octave - "qwertyu". */
-	bind_key ("q", 24);
-	bind_key ("2", 25);
-	bind_key ("w", 26);
-	bind_key ("3", 27);
-	bind_key ("e", 28);
-	bind_key ("r", 29);
-	bind_key ("5", 30);
-	bind_key ("t", 31);
-	bind_key ("6", 32);
-	bind_key ("y", 33);
-	bind_key ("7", 34);
-	bind_key ("u", 35);
-
-	/* Upper keyboard row, the rest - "iop". */
-	bind_key ("i", 36);
-	bind_key ("9", 37);
-	bind_key ("o", 38);
-	bind_key ("0", 39);
-	bind_key ("p", 40);
-
-	/* ignore */
-	bind_key ("a", -2);
-	bind_key ("f", -3);
-	bind_key ("1", -4);
-	bind_key ("4", -5);
-	bind_key ("8", -6);
-}
-
-void
-APianoKeyboard::bind_keys_qwertz ()
-{
-	bind_keys_qwerty ();
-
-	/* The only difference between QWERTY and QWERTZ is that the "y" and "z" are swapped together. */
-	bind_key ("y", 12);
-	bind_key ("z", 33);
-}
-
-void
-APianoKeyboard::bind_keys_azerty ()
-{
-	clear_notes ();
-
-	bind_key ("space", 128);
-	bind_key ("Tab", 129);
-
-	/* Lower keyboard row - "wxcvbn,". */
-	bind_key ("w", 12); /* C0 */
-	bind_key ("s", 13);
-	bind_key ("x", 14);
-	bind_key ("d", 15);
-	bind_key ("c", 16);
-	bind_key ("v", 17);
-	bind_key ("g", 18);
-	bind_key ("b", 19);
-	bind_key ("h", 20);
-	bind_key ("n", 21);
-	bind_key ("j", 22);
-	bind_key ("comma", 23);
-
-	/* Upper keyboard row, first octave - "azertyu". */
-	bind_key ("a", 24);
-	bind_key ("eacute", 25);
-	bind_key ("z", 26);
-	bind_key ("quotedbl", 27);
-	bind_key ("e", 28);
-	bind_key ("r", 29);
-	bind_key ("parenleft", 30);
-	bind_key ("t", 31);
-	bind_key ("minus", 32);
-	bind_key ("y", 33);
-	bind_key ("egrave", 34);
-	bind_key ("u", 35);
-
-	/* Upper keyboard row, the rest - "iop". */
-	bind_key ("i", 36);
-	bind_key ("ccedilla", 37);
-	bind_key ("o", 38);
-	bind_key ("agrave", 39);
-	bind_key ("p", 40);
-}
-
-void
-APianoKeyboard::bind_keys_dvorak ()
-{
-	clear_notes ();
-
-	bind_key ("space", 128);
-	bind_key ("Tab", 129);
-
-	/* Lower keyboard row - ";qjkxbm". */
-	bind_key ("semicolon", 12); /* C0 */
-	bind_key ("o", 13);
-	bind_key ("q", 14);
-	bind_key ("e", 15);
-	bind_key ("j", 16);
-	bind_key ("k", 17);
-	bind_key ("i", 18);
-	bind_key ("x", 19);
-	bind_key ("d", 20);
-	bind_key ("b", 21);
-	bind_key ("h", 22);
-	bind_key ("m", 23);
-	bind_key ("w", 24); /* overlaps with upper row */
-	bind_key ("n", 25);
-	bind_key ("v", 26);
-	bind_key ("s", 27);
-	bind_key ("z", 28);
-
-	/* Upper keyboard row, first octave - "',.pyfg". */
-	bind_key ("apostrophe", 24);
-	bind_key ("2", 25);
-	bind_key ("comma", 26);
-	bind_key ("3", 27);
-	bind_key ("period", 28);
-	bind_key ("p", 29);
-	bind_key ("5", 30);
-	bind_key ("y", 31);
-	bind_key ("6", 32);
-	bind_key ("f", 33);
-	bind_key ("7", 34);
-	bind_key ("g", 35);
-
-	/* Upper keyboard row, the rest - "crl". */
-	bind_key ("c", 36);
-	bind_key ("9", 37);
-	bind_key ("r", 38);
-	bind_key ("0", 39);
-	bind_key ("l", 40);
-#if 0
-	bind_key("slash", 41); /* extra F */
-	bind_key("bracketright", 42);
-	bind_key("equal", 43);
-#endif
-}
-
-void
-APianoKeyboard::bind_keys_basic_qwerty ()
-{
-	clear_notes ();
-
-	bind_key ("space", 128);
-	bind_key ("Tab", 129);
-
-	/* simple - middle rows only */
-	bind_key ("a", 12); /* C0 */
-	bind_key ("w", 13);
-	bind_key ("s", 14);
-	bind_key ("e", 15);
-	bind_key ("d", 16);
-	bind_key ("f", 17);
-	bind_key ("t", 18);
-	bind_key ("g", 19);
-	bind_key ("y", 20);
-	bind_key ("h", 21);
-	bind_key ("u", 22);
-	bind_key ("j", 23);
-
-	bind_key ("k", 24); /* C1 */
-	bind_key ("o", 25);
-	bind_key ("l", 26);
-	bind_key ("p", 27);
-	bind_key ("semicolon", 28);
-	bind_key ("apostrophe", 29);
-}
-
-void
-APianoKeyboard::bind_keys_basic_qwertz ()
-{
-	clear_notes ();
-
-	bind_key ("space", 128);
-	bind_key ("Tab", 129);
-
-	/* simple - middle rows only */
-	bind_key ("a", 12); /* C0 */
-	bind_key ("w", 13);
-	bind_key ("s", 14);
-	bind_key ("e", 15);
-	bind_key ("d", 16);
-	bind_key ("f", 17);
-	bind_key ("t", 18);
-	bind_key ("g", 19);
-	bind_key ("z", 20);
-	bind_key ("h", 21);
-	bind_key ("u", 22);
-	bind_key ("j", 23);
-
-	bind_key ("k", 24); /* C1 */
-	bind_key ("o", 25);
-	bind_key ("l", 26);
-	bind_key ("p", 27);
-	bind_key ("semicolon", 28);
-	bind_key ("apostrophe", 29);
-}
-
-static const char*
-get_keycode (GdkEventKey* event)
-{
-	/* We're not using event->keyval, because we need keyval with level set to 0.
-	   E.g. if user holds Shift and presses '7', we want to get a '7', not '&'. */
-
-#ifdef __APPLE__
-	/* gdkkeys-quartz.c does not implement gdk_keymap_lookup_key */
-	guint keyval;
-	gdk_keymap_translate_keyboard_state (NULL, event->hardware_keycode,
-	                                     (GdkModifierType)0, 0,
-	                                     &keyval, NULL, NULL, NULL);
-#else
-	GdkKeymapKey kk;
-	kk.keycode = event->hardware_keycode;
-	kk.level   = 0;
-	kk.group   = 0;
-
-	guint keyval = gdk_keymap_lookup_key (NULL, &kk);
-#endif
-	return gdk_keyval_name (gdk_keyval_to_lower (keyval));
-}
-
 bool
 APianoKeyboard::handle_fixed_keys (GdkEventKey* ev)
 {
@@ -623,8 +357,8 @@ APianoKeyboard::on_key_press_event (GdkEventKey* event)
 		return true;
 	}
 
-	char const* key = get_keycode (event);
-	int note = key_binding (key);
+	char const* key = KeyboardLayout::get_keycode (event);
+	int note = _keyboard_layout.key_binding (key);
 
 	if (note < -1) {
 		return true;
@@ -674,13 +408,13 @@ APianoKeyboard::on_key_release_event (GdkEventKey* event)
 		return true;
 	}
 
-	char const* key = get_keycode (event);
+	char const* key = KeyboardLayout::get_keycode (event);
 
 	if (!key) {
 		return false;
 	}
 
-	int note = key_binding (key);
+	int note = _keyboard_layout.key_binding (key);
 
 	if (note == 128) {
 		Rest (); /* EMIT SIGNAL */
@@ -987,8 +721,6 @@ APianoKeyboard::APianoKeyboard ()
 	_min_velocity = 1;
 	_max_velocity = 127;
 	_key_velocity = 100;
-
-	bind_keys_qwerty ();
 }
 
 APianoKeyboard::~APianoKeyboard ()
@@ -1161,27 +893,8 @@ APianoKeyboard::set_octave_range (int octave_range)
 }
 
 void
-APianoKeyboard::set_keyboard_layout (Layout layout)
+APianoKeyboard::set_keyboard_layout (KeyboardLayout::Layout layout)
 {
-	switch (layout) {
-		case QWERTY:
-			bind_keys_qwerty ();
-			break;
-		case QWERTZ:
-			bind_keys_qwertz ();
-			break;
-		case AZERTY:
-			bind_keys_azerty ();
-			break;
-		case DVORAK:
-			bind_keys_dvorak ();
-			break;
-		case S_QWERTY:
-			bind_keys_basic_qwerty ();
-			break;
-		case S_QWERTZ:
-			bind_keys_basic_qwertz ();
-			break;
-	}
+	_keyboard_layout.set_keyboard_layout (layout);
 	queue_draw ();
 }
