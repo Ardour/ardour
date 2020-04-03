@@ -2325,6 +2325,28 @@ RouteTimeAxisView::blink_rec_display (bool onoff)
 }
 
 void
+RouteTimeAxisView::toggle_layer_display ()
+{
+	/* this is a bit of a hack, but we implement toggle via the menu items,
+	   in order to keep them in sync with the visual state.
+	*/
+
+	if (!is_track()) {
+		return;
+	}
+
+	if (!display_menu) {
+		build_display_menu ();
+	}
+
+	if (dynamic_cast<RadioMenuItem*>(overlaid_menu_item)->get_active()) {
+		dynamic_cast<RadioMenuItem*>(stacked_menu_item)->set_active (true);
+	} else {
+		dynamic_cast<RadioMenuItem*>(overlaid_menu_item)->set_active (true);
+	}
+}
+
+void
 RouteTimeAxisView::set_layer_display (LayerDisplay d, bool apply_to_selection)
 {
 	if (_ignore_set_layer_display) {

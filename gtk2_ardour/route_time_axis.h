@@ -103,6 +103,7 @@ public:
 	void get_selectables (ARDOUR::samplepos_t start, ARDOUR::samplepos_t end, double top, double bot, std::list<Selectable *>&, bool within = false);
 	void get_inverted_selectables (Selection&, std::list<Selectable*>&);
 	void set_layer_display (LayerDisplay d, bool apply_to_selection = false);
+	void toggle_layer_display ();
 	LayerDisplay layer_display () const;
 
 	boost::shared_ptr<ARDOUR::Region> find_next_region (samplepos_t pos, ARDOUR::RegionPoint, int32_t dir);
