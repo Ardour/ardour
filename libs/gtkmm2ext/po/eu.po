@@ -1,0 +1,162 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR "Paul Davis"
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-04-02 13:17+0200\n"
+"PO-Revision-Date: 2020-04-02 17:51+0200\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 2.2.1\n"
+"Last-Translator: Porrumentzio <<porruren-grabatokia@riseup.net> <porrumentzio@riseup.net>>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language: eu\n"
+"X-Poedit-Bookmarks: 0,-1,-1,-1,-1,-1,-1,-1,-1,-1\n"
+
+#: actions.cc:215
+msgid "Unknown action name: %1/%2"
+msgstr "Ekintza-izen ezezaguna: %1/%2"
+
+#: action_model.cc:56 action_model.cc:171
+msgid "Disabled"
+msgstr "Desgaituta"
+
+#: action_model.cc:83
+msgid "Main_menu"
+msgstr "Menu_nagusia"
+
+#: action_model.cc:85
+msgid "JACK"
+msgstr "JACK"
+
+#: action_model.cc:87
+msgid "redirectmenu"
+msgstr "birbideratzemenua"
+
+#: action_model.cc:89
+msgid "Editor_menus"
+msgstr "Editore_menuak"
+
+#: action_model.cc:91
+msgid "RegionList"
+msgstr "EremuZerrenda"
+
+#: action_model.cc:93
+msgid "ProcessorMenu"
+msgstr "ProzesadoreMenua"
+
+#: bindings.cc:831 bindings.cc:833
+msgid "Window"
+msgstr "Leihoa"
+
+#: bindings.cc:831
+msgid " (Categorized)"
+msgstr " (Kategoriaka)"
+
+#: bindings.cc:833
+msgid " (Alphabetical)"
+msgstr " (Alfabetikoki)"
+
+#: bindings.cc:849
+msgid "Uncategorized"
+msgstr "Kategoriarik  gabe"
+
+#: cursors.cc:81
+msgid "cursor hotspots info file %1 has an error on line %2"
+msgstr "%1 fitxategiak errore bat du %2. linean"
+
+#: emscale.cc:52
+msgid "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+msgstr "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+
+#: gtk_ui.cc:123
+msgid "Log"
+msgstr "Erregistroa"
+
+#: gtk_ui.cc:392
+msgid ""
+"\n"
+"\n"
+"Shortcut: "
+msgstr ""
+"\n"
+"\n"
+"Laster-tekla: "
+
+#: gtk_ui.cc:691
+msgid "Press To Exit"
+msgstr "Sakatu irteteko"
+
+#: gtk_ui.cc:727
+msgid "I'm sorry %1, I can't do that"
+msgstr "%1, ezin da hori burutu"
+
+#: keyboard.cc:75
+msgid "Command"
+msgstr "Komandua"
+
+#: keyboard.cc:76 keyboard.cc:98
+msgid "Control"
+msgstr "Kontrola"
+
+#: keyboard.cc:77 keyboard.cc:82 keyboard.cc:100 keyboard.cc:105
+msgid "Key|Shift"
+msgstr "Maius"
+
+#: keyboard.cc:78
+msgid "Option"
+msgstr "Aukera"
+
+#: keyboard.cc:80
+msgid "Cmd"
+msgstr "Cmd"
+
+#: keyboard.cc:81 keyboard.cc:103
+msgid "Ctrl"
+msgstr "Ktrl"
+
+#: keyboard.cc:83
+msgid "Opt"
+msgstr "Opt"
+
+#: keyboard.cc:99 keyboard.cc:104
+msgid "Alt"
+msgstr "Alt"
+
+#: keyboard.cc:101
+msgid "Windows"
+msgstr "Windows"
+
+#: keyboard.cc:106
+msgid "Win"
+msgstr "Win"
+
+#: keyboard.cc:159 keyboard.cc:605
+msgid "Unknown"
+msgstr "Ezezaguna"
+
+#: keyboard.cc:616
+msgid "key bindings file not found at \"%2\" or contains errors."
+msgstr "laster-teklen fitxategia ez dago %2-(e)n edo akatsak ditu."
+
+#: keyboard.cc:642
+msgid "Keyboard binding found without a name"
+msgstr "Laster-teklak ez du izenik"
+
+#: keyboard.cc:672
+msgid "Cannot save key bindings to %1"
+msgstr "Ezin dira gorde laster-teklak %1-(e)n"
+
+#: keyboard.cc:688
+msgid "Cannot rename your own keybinding file (%1)"
+msgstr "Ezin da berrizendatu zure laster-teklen fitxategia (%1)"
+
+#: textviewer.cc:32
+msgid "Close"
+msgstr "Itxi"
