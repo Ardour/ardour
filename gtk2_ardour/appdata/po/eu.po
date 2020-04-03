@@ -1,0 +1,54 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: 2020-04-02 13:17+0200\n"
+"PO-Revision-Date: 2020-04-02 13:53+0200\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 2.2.1\n"
+"Last-Translator: Porrumentzio <<porruren-grabatokia@riseup.net> "
+"<porrumentzio@riseup.net>>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language: eu\n"
+
+#. (itstool) path: component/name
+#: /home/piper/Mahaigaina/Git/ardour/gtk2_ardour/ardour.appdata.xml.in.in:6
+msgid "Ardour"
+msgstr "Ardour"
+
+#. (itstool) path: component/summary
+#: /home/piper/Mahaigaina/Git/ardour/gtk2_ardour/ardour.appdata.xml.in.in:10
+msgid "Digital Audio Workstation"
+msgstr "Audio lan-estazio digitala"
+
+#. (itstool) path: description/p
+#: /home/piper/Mahaigaina/Git/ardour/gtk2_ardour/ardour.appdata.xml.in.in:12
+msgid ""
+"Ardour is a multi-channel digital audio workstation, allowing you to record, "
+"edit, mix and master audio and MIDI projects."
+msgstr ""
+"Ardour audio eta MIDI proiektuak grabatzeko, editatzeko, nahasteko eta "
+"masterizatzeko aukera ematen dizun kanal anitzeko lan-estazioa da."
+
+#. (itstool) path: description/p
+#: /home/piper/Mahaigaina/Git/ardour/gtk2_ardour/ardour.appdata.xml.in.in:16
+msgid ""
+"It is targeted at audio engineers, musicians, soundtrack editors and "
+"composers."
+msgstr ""
+"Audio-ingeniari, musikari, soinu-banda editore eta konpositoreei zuzenduta "
+"dago."
+
+#. (itstool) path: screenshot/caption
+#: /home/piper/Mahaigaina/Git/ardour/gtk2_ardour/ardour.appdata.xml.in.in:25
+msgid ""
+"The Editor window where you can arrange audio and MIDI data along a timeline"
+msgstr ""
+"Edizio-leihoan audio eta MIDI datuak antolatu ditzakezu denbora-lerroan zehar"
+
+#. (itstool) path: screenshot/caption
+#: /home/piper/Mahaigaina/Git/ardour/gtk2_ardour/ardour.appdata.xml.in.in:29
+msgid "The Mixer window which includes channel strips for each track and bus"
+msgstr "Nahasgailu leihoan pista eta bus bakoitzeko kanal-bandak daude"
