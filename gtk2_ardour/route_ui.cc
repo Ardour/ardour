@@ -2015,6 +2015,8 @@ RouteUI::setup_invert_buttons ()
 	uint32_t const N = _route ? _route->phase_control()->size() : 0;
 
 	if (_n_polarity_invert == N) {
+		/* buttons are already setup for this strip, but we should still set the values */
+		update_polarity_display ();
 		return;
 	}
 	_n_polarity_invert = N;
