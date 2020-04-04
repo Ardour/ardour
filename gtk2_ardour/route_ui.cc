@@ -2069,6 +2069,10 @@ RouteUI::setup_invert_buttons ()
 void
 RouteUI::update_polarity_display ()
 {
+	if (!_route) {
+		return;
+	}
+
 	uint32_t const N = _route->phase_control()->size();
 	if (N > _max_invert_buttons) {
 
