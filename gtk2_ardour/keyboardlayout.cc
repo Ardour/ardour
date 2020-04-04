@@ -77,7 +77,7 @@ KeyboardLayout::note_binding (int note) const
 }
 
 KeyboardLayout::Layout
-KeyboardLayout::get_layout (std::string const& l)
+KeyboardLayout::to_layout (std::string const& l)
 {
 	if (l == "QWERTY") {
 		return QWERTY;
