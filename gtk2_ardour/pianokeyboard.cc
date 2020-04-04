@@ -895,6 +895,6 @@ APianoKeyboard::set_octave_range (int octave_range)
 void
 APianoKeyboard::set_keyboard_layout (KeyboardLayout::Layout layout)
 {
-	_keyboard_layout.set_keyboard_layout (layout);
+	_keyboard_layout.set_layout (layout);
 	queue_draw ();
 }

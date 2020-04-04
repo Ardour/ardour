@@ -44,7 +44,7 @@ public:
 		S_QWERTZ
 	};
 
-	void set_keyboard_layout (Layout layout);
+	void set_layout (Layout layout);
 	int  key_binding (const char* key) const;
 	const char* note_binding (int note) const;
 
