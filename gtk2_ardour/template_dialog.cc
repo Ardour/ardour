@@ -487,7 +487,7 @@ TemplateManager::export_all_templates ()
 		error << string_compose(_("Could not make tmpdir: %1"), err->message) << endmsg;
 		return;
 	}
-	const string tmpdir (td);
+	const string tmpdir = PBD::canonical_path (td);
 	g_free (td);
 	g_clear_error (&err);
 
