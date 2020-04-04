@@ -257,6 +257,7 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "select-prev-stripable", _("Select Previous Strip"), sigc::bind (sigc::mem_fun(*this, &Editor::select_prev_stripable), false));
 
 	reg_sens (editor_actions, "toggle-all-existing-automation", _("Toggle All Existing Automation"), sigc::mem_fun (*this, &Editor::toggle_all_existing_automation));
+	reg_sens (editor_actions, "toggle-layer-display", _("Toggle Layer Display"), sigc::mem_fun (*this, &Editor::toggle_layer_display));
 
 	act = reg_sens (editor_actions, "track-record-enable-toggle", _("Toggle Record Enable"), sigc::mem_fun(*this, &Editor::toggle_record_enable));
 	ActionManager::track_selection_sensitive_actions.push_back (act);

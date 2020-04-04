@@ -8531,3 +8531,34 @@ Editor::toggle_all_existing_automation ()
 		tvl.foreach_stripable_time_axis (boost::bind (&StripableTimeAxisView::hide_all_automation, _1, false));
 	}
 }
+
+void
+Editor::toggle_layer_display ()
+{
+	TrackViewList & tvl (selection->tracks.empty() ? track_views : selection->tracks);
+	bool seen_stacked = false;
+	bool seen_overlaid = false;
+
+	for (TrackViewList::const_iterator t = tvl.begin(); t != tvl.end(); ++t) {
+		RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*> (*t);
+
+		if (!rtav || !rtav->is_track()) {
+			continue;
+		}
+
+		if (rtav->layer_display () == Stacked) {
+			seen_stacked = true;
+		} else if (rtav->layer_display() == Overlaid) {
+			seen_overlaid = true;
+		}
+	}
+
+	if (seen_stacked && seen_overlaid) {
+		/* inconsistent current display - go to overlaid */
+		tvl.foreach_route_time_axis (boost::bind (&RouteTimeAxisView::set_layer_display, _1, Overlaid));
+
+	} else {
+		tvl.foreach_route_time_axis (boost::bind (&RouteTimeAxisView::toggle_layer_display, _1));
+	}
+
+}

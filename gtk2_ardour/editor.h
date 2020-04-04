@@ -1509,6 +1509,7 @@ private:
 	bool select_new_marker;
 
 	void toggle_all_existing_automation ();
+	void toggle_layer_display ();
 
 	void reverse_selection ();
 	void edit_envelope ();
