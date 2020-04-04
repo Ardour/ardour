@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-02 13:17+0200\n"
-"PO-Revision-Date: 2020-04-03 17:33+0200\n"
+"PO-Revision-Date: 2020-04-04 17:56+0200\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1406,10 +1406,10 @@ msgid_plural ""
 "releasing %3 %4bytes of disk space"
 msgstr[0] ""
 "Fitxategi hau %2-(e)tik ezabatu da,\n"
-"%3 %4byte berreskuraraziz diskoan."
+"%3 %4byte berreskuraraziz diskoan"
 msgstr[1] ""
 "%1 fitxategi hauek %2-(e)tik ezabatu dira,\n"
-"%3 %4byte berreskuraraziz diskoan."
+"%3 %4byte berreskuraraziz diskoan"
 
 #: ardour_ui.cc:2452
 msgid ""
@@ -1431,11 +1431,27 @@ msgid_plural ""
 "\n"
 "will release an additional %3 %4bytes of disk space.\n"
 msgstr[0] ""
+"Fitxategi hau ez zen erabiltzen eta hona\n"
+"mugitu da: %2\n"
+"\n"
+"%5 berrabiarazi ondoren\n"
+"\n"
+"<span face=\"mono\">Saioa -> Garbitu -> Hustu zakarrontzia</span>\n"
+"\n"
+"aukeratu eta %3 %4byte berreskuratuko dira diskoan.\n"
 msgstr[1] ""
+"%1 fitxategi hauek ez ziren erabiltzen eta hona\n"
+"mugitu dira: %2\n"
+"\n"
+"%5 berrabiarazi ondoren\n"
+"\n"
+"<span face=\"mono\">Saioa -> Garbitu -> Hustu zakarrontzia</span>\n"
+"\n"
+"aukeratu eta %3 %4byte berreskuratuko dira diskoan.\n"
 
 #: ardour_ui.cc:2512
 msgid "Are you sure you want to clean-up?"
-msgstr ""
+msgstr "Ziur zaude garbitu nahi duzula?"
 
 #: ardour_ui.cc:2519
 msgid ""
@@ -1443,22 +1459,26 @@ msgid ""
 "ALL undo/redo information will be lost if you clean-up.\n"
 "Clean-up will move all unused files to a \"dead\" location."
 msgstr ""
+"Garbiketa suntsitzailea da.\n"
+"Desegiteko/berregiteko informazio GUZTIA galdu egingo da garbitzen bada.\n"
+"Garbiketak erabiltzen ez diren fitxategi guztiak \"hilda\" dagoen toki "
+"batera mugituko ditu."
 
 #: ardour_ui.cc:2527
 msgid "CleanupDialog"
-msgstr ""
+msgstr "GarbiketaLeihoa"
 
 #: ardour_ui.cc:2553
 msgid "Cleaned Files"
-msgstr ""
+msgstr "Garbitutako fitxategiak"
 
 #: ardour_ui.cc:2570
 msgid "deleted file"
-msgstr ""
+msgstr "ezabatutako fitxategia"
 
 #: ardour_ui.cc:2686
 msgid "You cannot add tracks or busses without a session already loaded."
-msgstr ""
+msgstr "Ezin duzu pista edo busik gehitu lehenago saiorik kargatu gabe."
 
 #: ardour_ui.cc:2788
 msgid ""
@@ -1468,6 +1488,11 @@ msgid ""
 "Specifically, it failed to write data to disk\n"
 "quickly enough to keep up with recording.\n"
 msgstr ""
+"Zure ordenagailuko disko gogorrak\n"
+"ezin izan du %1-(r)en erritmoa jarraitu.\n"
+"\n"
+"Zehazki, ezin izan ditu idatzi datuak\n"
+"grabazioarekin bat egoteko bezain azkar.\n"
 
 #: ardour_ui.cc:2817
 msgid ""
@@ -1477,10 +1502,15 @@ msgid ""
 "Specifically, it failed to read data from disk\n"
 "quickly enough to keep up with playback.\n"
 msgstr ""
+"Zure ordenagailuko disko gogorrak\n"
+"ezin izan du %1-(r)en erritmoa jarraitu.\n"
+"\n"
+"Zehazki, ezin izan ditu irakurri datuak\n"
+"grabazioarekin bat egoteko bezain azkar.\n"
 
 #: ardour_ui.cc:2847
 msgid "Crash Recovery"
-msgstr ""
+msgstr "Hutsegite-berreskuratzea"
 
 #: ardour_ui.cc:2848
 msgid ""
@@ -1492,50 +1522,68 @@ msgid ""
 "you, or it can ignore it. Please decide\n"
 "what you would like to do.\n"
 msgstr ""
+"Saio hau gorde gabe aldatu dela dirudi,\n"
+"edo grabazioaren erdian %1 edo \n"
+"ordenagailua itzalita egin dela.\n"
+"\n"
+"%1-(e)k edozein aldaketa berreskura dezake\n"
+"edo alde batera utzi. Mesedez, erabaki\n"
+"zer egin nahi duzun.\n"
 
 #: ardour_ui.cc:2860
 msgid "Ignore crash data"
-msgstr ""
+msgstr "Baztertu hutsegite-datuak"
 
 #: ardour_ui.cc:2861
 msgid "Recover from crash"
-msgstr ""
+msgstr "Berreskuratu hutsegitetik"
 
 #: ardour_ui2.cc:86
 msgid "Return to last playback start when stopped"
-msgstr ""
+msgstr "Gelditzean itzuli lehenagoko tokira"
 
 #: ardour_ui2.cc:87
 msgid "Playhead follows Range tool clicks, and Range selections"
-msgstr ""
+msgstr "Kurtsoreak barruti eraldaketei eta hautapenei jarraitzen die"
 
 #: ardour_ui2.cc:88
 msgid "Track Input Monitoring automatically follows transport state"
-msgstr ""
+msgstr "Pistaren sarrera-monitorizazioak garraioaren egoerari jarraitzen dio "
 
 #: ardour_ui2.cc:90 monitor_section.cc:135
 msgid ""
 "When active, something is soloed.\n"
 "Click to de-solo everything"
 msgstr ""
+"Piztuta badago, zerbait solo moduan dago.\n"
+"Egin klik solo guztiak kentzeko"
 
 #: ardour_ui2.cc:91
 msgid ""
 "When active, auditioning is taking place.\n"
 "Click to stop the audition"
 msgstr ""
+"Piztuta badago, zerbait entzute moduan dago.\n"
+"Egin klik entzutea gelditzeko"
 
+# loop = begizta
+# Hitz horrek ez dirudi oso ezaguna. Agian gabe hobeto izango da?
 #: ardour_ui2.cc:92
+#, fuzzy
 msgid "When active, there is a feedback loop."
-msgstr ""
+msgstr "Piztuta badago, berrelikadura dago."
 
+# egin klik eskuineko botoiarekin > eskuin-klik ???
 #: ardour_ui2.cc:93
+#, fuzzy
 msgid ""
 "<b>Primary Clock</b> right-click to set display mode. Click to edit, click"
 "+drag a digit or mouse-over+scroll wheel to modify.\n"
 "Text edits: right-to-left overwrite <tt>Esc</tt>: cancel; <tt>Enter</tt>: "
 "confirm; postfix the edit with '+' or '-' to enter delta times.\n"
 msgstr ""
+"<b>Erloju nagusia</b> eskuin-klik bistaratzeko modua ezartzeko. Egin klik "
+"editatzeko; aldatzeko, klik+arrastatu digitu bat edo kurtso\n"
 
 #: ardour_ui2.cc:94
 msgid ""
@@ -1547,11 +1595,11 @@ msgstr ""
 
 #: ardour_ui2.cc:95
 msgid "Reset All Peak Meters"
-msgstr ""
+msgstr "Berrezari gailur-neurgailu guztiak."
 
 #: ardour_ui2.cc:96
 msgid "Show Error Log and acknowledge warnings"
-msgstr ""
+msgstr "Erakutsi errore-erregistroa eta onartu abisuak"
 
 #: ardour_ui2.cc:98
 msgid ""
@@ -1559,18 +1607,21 @@ msgid ""
 "from live input to output, but any paths with delay-causing plugins will "
 "sound later than those without."
 msgstr ""
+"Ezgaitu atzerapen-konpentsazio plugin oro. Honek sarrera-irteera atzerapenak "
+"txikitzen ditu, baina atzerapenak eragiten dituzten pluginak dituzten "
+"kanalek beranduago sonatuko dute."
 
 #: ardour_ui2.cc:129
 msgid "[ERROR]: "
-msgstr ""
+msgstr "[ERROREA]: "
 
 #: ardour_ui2.cc:131
 msgid "[WARNING]: "
-msgstr ""
+msgstr "[ABISUA]: "
 
 #: ardour_ui2.cc:133
 msgid "[INFO]: "
-msgstr ""
+msgstr "[INFO]: "
 
 #: ardour_ui2.cc:287
 msgid "LogestSync|M-Clk"
@@ -1578,44 +1629,44 @@ msgstr ""
 
 #: ardour_ui2.cc:380 ardour_ui_ed.cc:481
 msgid "Auto Return"
-msgstr ""
+msgstr "Auto-itzulera"
 
 #: ardour_ui2.cc:381 ardour_ui_ed.cc:484
 msgid "Follow Range"
-msgstr ""
+msgstr "Jarraitu barrutia"
 
 #: ardour_ui2.cc:382 ardour_ui_ed.cc:461 mixer_strip.cc:2059
 #: mixer_strip.cc:2252 route_ui.cc:213
 msgid "In"
-msgstr ""
+msgstr "Sarrera"
 
 #: ardour_ui2.cc:383 ardour_ui_ed.cc:465 mixer_strip.cc:2071
 msgid "Out"
-msgstr ""
+msgstr "Irteera"
 
 #: ardour_ui2.cc:384
 msgid "Non-Layered"
-msgstr ""
+msgstr "Geruzarik ez"
 
 #: ardour_ui2.cc:386 ardour_ui_ed.cc:454
 msgid "All In"
-msgstr ""
+msgstr "Denak"
 
 #: ardour_ui2.cc:387 ardour_ui_ed.cc:456 ardour_ui_ed.cc:457
 msgid "All Disk"
-msgstr ""
+msgstr "Diskoa"
 
 #: ardour_ui2.cc:388
 msgid "Auto-Input"
-msgstr ""
+msgstr "Auto-sarrera"
 
 #: ardour_ui2.cc:390
 msgid "Disable PDC"
-msgstr ""
+msgstr "Desgaitu PDC"
 
 #: ardour_ui2.cc:391
 msgid "I/O Latency:"
-msgstr ""
+msgstr "S/I latentzia"
 
 #: ardour_ui2.cc:393
 msgid "Punch:"
@@ -1623,7 +1674,7 @@ msgstr ""
 
 #: ardour_ui2.cc:394
 msgid "Rec:"
-msgstr ""
+msgstr "Grb:"
 
 #: ardour_ui2.cc:399 ardour_ui2.cc:403 ardour_ui2.cc:407
 msgid ""
@@ -1631,6 +1682,9 @@ msgid ""
 "\n"
 "To re-attach the window, use the Window > %1 > Attach menu action"
 msgstr ""
+"Arrastatu fitxa hau mahaigainerantz %1 bere leiho propioan erakusteko\n"
+"\n"
+"Leihoa birkokatzeko, erabili Leihoa > %1 > Erantsi"
 
 #: ardour_ui2.cc:410
 msgid "Start recording at auto-punch start"
