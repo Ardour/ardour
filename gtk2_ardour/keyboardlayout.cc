@@ -32,7 +32,7 @@ KeyboardLayout::~KeyboardLayout ()
 }
 
 void
-KeyboardLayout::set_keyboard_layout (Layout layout)
+KeyboardLayout::set_layout (Layout layout)
 {
 	switch (layout) {
 		case QWERTY:
