@@ -186,7 +186,7 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	route_group_button.set_name ("route button");
 	playlist_button.set_name ("route button");
 	automation_button.set_name ("route button");
-	
+
 	route_group_button.signal_button_press_event().connect (sigc::mem_fun(*this, &RouteTimeAxisView::route_group_click), false);
 	playlist_button.signal_button_press_event().connect (sigc::mem_fun(*this, &RouteTimeAxisView::playlist_click), false);
 	automation_button.signal_button_press_event().connect (sigc::mem_fun(*this, &RouteTimeAxisView::automation_click), false);
@@ -859,9 +859,9 @@ RouteTimeAxisView::layer_display_menu_change (Gtk::MenuItem* item)
 
 	if (dynamic_cast<RadioMenuItem*>(item)->get_active()) {
 		if (item == stacked_menu_item) {
-			set_layer_display (Stacked, false);
+			set_layer_display (Stacked);
 		} else {
-			set_layer_display (Overlaid, false);
+			set_layer_display (Overlaid);
 		}
 	}
 }
@@ -2324,22 +2324,17 @@ RouteTimeAxisView::toggle_layer_display ()
 }
 
 void
-RouteTimeAxisView::set_layer_display (LayerDisplay d, bool apply_to_selection)
+RouteTimeAxisView::set_layer_display (LayerDisplay d)
 {
 	if (_ignore_set_layer_display) {
 		return;
 	}
 
-	if (apply_to_selection) {
-		_editor.get_selection().tracks.foreach_route_time_axis (boost::bind (&RouteTimeAxisView::set_layer_display, _1, d, false));
-	} else {
-
-		if (_view) {
-			_view->set_layer_display (d);
-		}
-
-		set_gui_property (X_("layer-display"), d);
+	if (_view) {
+		_view->set_layer_display (d);
 	}
+
+	set_gui_property (X_("layer-display"), d);
 }
 
 LayerDisplay
