@@ -43,7 +43,7 @@ PortMatrixComponent::PortMatrixComponent (PortMatrix* m, PortMatrixBody* b)
 PortMatrixComponent::~PortMatrixComponent ()
 {
 	if (_pixmap) {
-		g_object_unref (_pixmap);
+		gdk_pixmap_unref (_pixmap);
 	}
 }
 
@@ -76,7 +76,7 @@ PortMatrixComponent::get_pixmap (GdkDrawable *drawable)
 
 		/* make a pixmap of the right size */
 		if (_pixmap) {
-			g_object_unref (_pixmap);
+			gdk_pixmap_unref (_pixmap);
 		}
 		_pixmap = gdk_pixmap_new (drawable, _width, _height, -1);
 
