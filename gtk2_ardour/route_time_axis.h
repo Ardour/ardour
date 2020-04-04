@@ -291,6 +291,7 @@ protected:
 	UnderlayMirrorList _underlay_mirrors;
 
 	bool _ignore_set_layer_display;
+	void layer_display_menu_change (Gtk::MenuItem* item);
 
 protected:
 	void update_pan_track_visibility ();
