@@ -232,10 +232,10 @@ OSC_GUI::OSC_GUI (OSC& p)
 	sttable->attach (audio_buses, 1, 2, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	++stn;
 
-	label = manage (new Gtk::Label(_("Audio Auxes:")));
+	label = manage (new Gtk::Label(_("Foldback Busses:")));
 	label->set_alignment(1, .5);
 	sttable->attach (*label, 0, 1, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
-	sttable->attach (audio_auxes, 1, 2, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
+	sttable->attach (foldback_busses, 1, 2, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	++stn;
 
 	label = manage (new Gtk::Label(_("Midi Busses:")));
@@ -403,7 +403,7 @@ OSC_GUI::OSC_GUI (OSC& p)
 	audio_tracks.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
 	midi_tracks.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
 	audio_buses.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
-	audio_auxes.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
+	foldback_busses.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
 	midi_buses.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
 	control_masters.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
 	master_type.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
@@ -660,7 +660,7 @@ OSC_GUI::reshow_values ()
 	control_masters.set_active(def_strip & 16);
 	master_type.set_active(def_strip & 32);
 	monitor_type.set_active(def_strip & 64);
-	audio_auxes.set_active(def_strip & 128);
+	foldback_busses.set_active(def_strip & 128);
 	selected_tracks.set_active(def_strip & 256);
 	hidden_tracks.set_active(def_strip & 512);
 	usegroups.set_active(def_strip & 1024);
@@ -763,7 +763,7 @@ OSC_GUI::calculate_strip_types ()
 	if (monitor_type.get_active()) {
 		stvalue += 64;
 	}
-	if (audio_auxes.get_active()) {
+	if (foldback_busses.get_active()) {
 		stvalue += 128;
 	}
 	if (selected_tracks.get_active()) {
