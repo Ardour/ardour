@@ -46,6 +46,7 @@
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/utils.h"
 
+#include "ardour/directory_names.h"
 #include "ardour/filename_extensions.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/template_utils.h"
@@ -122,6 +123,7 @@ private:
 	void import_template_set ();
 
 	virtual std::string templates_dir () const = 0;
+	virtual std::string templates_dir_basename () const = 0;
 	virtual std::string template_file (const Gtk::TreeModel::const_iterator& item) const = 0;
 
 	virtual bool adjust_xml_tree (XMLTree& tree, const std::string& old_name, const std::string& new_name) const = 0;
@@ -158,6 +160,7 @@ private:
 	void delete_selected_template ();
 
 	std::string templates_dir () const;
+	virtual std::string templates_dir_basename () const;
 	std::string template_file (const Gtk::TreeModel::const_iterator& item) const;
 
 	bool adjust_xml_tree (XMLTree& tree, const std::string& old_name, const std::string& new_name) const;
@@ -179,11 +182,11 @@ private:
 	void delete_selected_template ();
 
 	std::string templates_dir () const;
+	virtual std::string templates_dir_basename () const;
 	std::string template_file (const Gtk::TreeModel::const_iterator& item) const;
 
 	bool adjust_xml_tree (XMLTree& tree, const std::string& old_name, const std::string& new_name) const;
 };
-
 
 
 TemplateDialog::TemplateDialog ()
@@ -591,8 +594,15 @@ TemplateManager::import_template_set ()
 	FileArchive ar (dialog.get_filename ());
 	PBD::ScopedConnectionList progress_connection;
 	ar.progress.connect_same_thread (progress_connection, boost::bind (&_set_progress, this, _1, _2));
-	ar.inflate (user_config_directory ());
 
+	for (std::string fn = ar.next_file_name(); !fn.empty(); fn = ar.next_file_name()) {
+		const size_t pos = fn.find (templates_dir_basename ());
+		if (pos == string::npos) {
+			continue;
+		}
+		const std::string dest = Glib::build_filename (user_config_directory(), fn.substr (pos));
+		ar.extract_current_file (dest);
+	}
 	vector<string> files;
 	PBD::find_files_matching_regex (files, templates_dir (), string ("\\.template$"), /* recurse = */ true);
 
@@ -782,6 +792,12 @@ SessionTemplateManager::templates_dir () const
 	return user_template_directory ();
 }
 
+string
+SessionTemplateManager::templates_dir_basename () const
+{
+	return string (templates_dir_name);
+}
+
 
 string
 SessionTemplateManager::template_file (const TreeModel::const_iterator& item) const
@@ -887,6 +903,12 @@ string
 RouteTemplateManager::templates_dir () const
 {
 	return user_route_template_directory ();
+}
+
+string
+RouteTemplateManager::templates_dir_basename () const
+{
+	return string (route_templates_dir_name);
 }
 
 
