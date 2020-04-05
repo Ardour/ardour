@@ -2484,15 +2484,9 @@ RegionCreateDrag::motion (GdkEvent* event, bool first_move)
 				_region->set_initial_position (f);
 			}
 
-			/* Don't use a zero-length region, and subtract 1 sample from the snapped length
-			   so that if this region is duplicated, its duplicate starts on
-			   a snap point rather than 1 sample after a snap point.  Otherwise things get
-			   a bit confusing as if a region starts 1 sample after a snap point, one cannot
-			   place snapped notes at the start of the region.
-			*/
 			if (f != grab_sample()) {
-				samplecnt_t const len = (samplecnt_t) fabs ((double)(f - grab_sample () - 1));
-				_region->set_length (len < 1 ? 1 : len, _editor->get_grid_music_divisions (event->button.state));
+				samplecnt_t const len = ::llabs (f - grab_sample ());
+				_region->set_length (len, _editor->get_grid_music_divisions (event->button.state));
 			}
 		}
 	}
