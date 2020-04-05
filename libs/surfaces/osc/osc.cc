@@ -628,6 +628,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, X_("/select/eq_q"), "if", sel_eq_q);
 		REGISTER_CALLBACK (serv, X_("/select/eq_shape"), "if", sel_eq_shape);
 		REGISTER_CALLBACK (serv, X_("/select/add_personal_send"), "s", sel_new_personal_send);
+		REGISTER_CALLBACK (serv, X_("/select/add_fldbck_send"), "s", sel_new_personal_send);
 
 		/* These commands require the route index in addition to the arg; TouchOSC (et al) can't use these  */
 		REGISTER_CALLBACK (serv, X_("/strip/mute"), "ii", route_mute);
@@ -1230,13 +1231,10 @@ OSC::routes_list (lo_message msg)
 				lo_message_add_string (reply, "MO");
 			} else if (boost::dynamic_pointer_cast<Route>(s) && !boost::dynamic_pointer_cast<Track>(s)) {
 				if (!(s->presentation_info().flags() & PresentationInfo::MidiBus)) {
-					// r->feeds (session->master_out()) may make more sense
-					if (session->master_out() && r->direct_feeds_according_to_reality (session->master_out())) {
-						// this is a bus
-						lo_message_add_string (reply, "B");
+					if (s->is_foldbackbus()) {
+						lo_message_add_string (reply, "FB");
 					} else {
-						// this is an Aux out
-						lo_message_add_string (reply, "AX");
+						lo_message_add_string (reply, "B");
 					}
 				} else {
 					lo_message_add_string (reply, "MB");
@@ -6406,8 +6404,8 @@ OSC::cue_parse (const char *path, const char* types, lo_arg **argv, int argc, lo
 		}
 	}
 	int ret = 1; /* unhandled */
-	if (!strncmp (path, X_("/cue/aux"), 8)) {
-		// set our Aux bus
+	if (!strncmp (path, X_("/cue/bus"), 8) || !strncmp (path, X_("/cue/aux"), 8)) {
+		// set our Foldback bus
 		if (argc) {
 			if (value) {
 				ret = cue_set ((uint32_t) value, msg);
@@ -6416,8 +6414,8 @@ OSC::cue_parse (const char *path, const char* types, lo_arg **argv, int argc, lo
 			}
 		}
 	}
-	else if (!strncmp (path, X_("/cue/connect_aux"), 16)) {
-		// Create new Aux bus
+	else if (!strncmp (path, X_("/cue/connect_output"), 16) || !strncmp (path, X_("/cue/connect_aux"), 16)) {
+		// connect Foldback bus output
 		string dest = "";
 		if (argc == 1 && types[0] == 's') {
 			dest = &argv[0]->s;
@@ -6434,7 +6432,7 @@ OSC::cue_parse (const char *path, const char* types, lo_arg **argv, int argc, lo
 			ret = 0;
 		}
 	}
-	else if (!strncmp (path, X_("/cue/new_aux"), 12)) {
+	else if (!strncmp (path, X_("/cue/new_bus"), 12) || !strncmp (path, X_("/cue/new_aux"), 12)) {
 		// Create new Aux bus
 		string name = "";
 		string dest_1 = "";
@@ -6457,7 +6455,7 @@ OSC::cue_parse (const char *path, const char* types, lo_arg **argv, int argc, lo
 		}
 	}
 	else if (!strncmp (path, X_("/cue/new_send"), 13)) {
-		// Create new send to aux
+		// Create new send to Foldback
 		string rt_name = "";
 		if (argc == 1 && types[0] == 's') {
 			rt_name = &argv[0]->s;
@@ -6466,16 +6464,16 @@ OSC::cue_parse (const char *path, const char* types, lo_arg **argv, int argc, lo
 			PBD::warning << "OSC: new_send has wrong number or type of parameters." << endmsg;
 		}
 	}
-	else if (!strncmp (path, X_("/cue/next_aux"), 13)) {
-		// switch to next Aux bus
+	else if (!strncmp (path, X_("/cue/next_bus"), 13) || !strncmp (path, X_("/cue/next_aux"), 13)) {
+		// switch to next Foldback bus
 		if ((!argc) || argv[0]->f || argv[0]->i) {
 			ret = cue_next (msg);
 		} else {
 			ret = 0;
 		}
 	}
-	else if (!strncmp (path, X_("/cue/previous_aux"), 17)) {
-		// switch to previous Aux bus
+	else if (!strncmp (path, X_("/cue/previous_bus"), 17) || !strncmp (path, X_("/cue/previous_aux"), 17)) {
+		// switch to previous Foldback bus
 		if ((!argc) || argv[0]->f || argv[0]->i) {
 			ret = cue_previous (msg);
 		} else {
