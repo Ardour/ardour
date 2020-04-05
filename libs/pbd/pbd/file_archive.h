@@ -33,9 +33,13 @@ class LIBPBD_API FileArchive
 {
 	public:
 		FileArchive (const std::string& url);
+		~FileArchive ();
 
 		int inflate (const std::string& destdir);
 		std::vector<std::string> contents ();
+
+		std::string next_file_name ();
+		int extract_current_file (const std::string& destpath);
 
 		/* these are mapped to libarchive's lzmaz
 		 * compression level 0..9
@@ -147,8 +151,13 @@ class LIBPBD_API FileArchive
 
 		bool is_url ();
 
+		struct archive* setup_file_archive ();
+
 		Request   _req;
 		pthread_t _tid;
+
+		struct archive_entry* _current_entry;
+		struct archive* _archive;
 };
 
 } /* namespace */

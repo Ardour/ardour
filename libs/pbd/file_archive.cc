@@ -153,6 +153,8 @@ setup_archive ()
 
 FileArchive::FileArchive (const std::string& url)
 	: _req (url)
+	, _current_entry (0)
+	, _archive (0)
 {
 	if (!_req.url) {
 		fprintf (stderr, "Invalid Archive URL/filename\n");
@@ -163,6 +165,14 @@ FileArchive::FileArchive (const std::string& url)
 		_req.mp.progress = this;
 	} else {
 		_req.mp.progress = 0;
+	}
+}
+
+FileArchive::~FileArchive ()
+{
+	if (_archive) {
+		archive_read_close (_archive);
+		archive_read_free (_archive);
 	}
 }
 
@@ -195,6 +205,73 @@ FileArchive::contents ()
 	} else {
 		return contents_file ();
 	}
+}
+
+std::string
+FileArchive::next_file_name ()
+{
+	assert (!_req.is_remote () && "FileArchive: Iterating over archive files not supported for remote archives.\n");
+
+	if (!_archive) {
+		_archive = setup_file_archive();
+		if (!_archive) {
+			return std::string();
+		}
+	}
+
+	int r = archive_read_next_header (_archive, &_current_entry);
+	if (!_req.mp.progress) {
+		// file i/o -- not URL
+		const uint64_t read = archive_filter_bytes (_archive, -1);
+		progress (read, _req.mp.length);
+	}
+
+	if (r == ARCHIVE_EOF) {
+		goto no_next;
+	}
+
+	if (r != ARCHIVE_OK) {
+		fprintf (stderr, "Error reading archive: %s\n", archive_error_string(_archive));
+		goto no_next;
+	}
+
+	return archive_entry_pathname (_current_entry);
+
+no_next:
+	_current_entry = 0;
+	return std::string();
+}
+
+int
+FileArchive::extract_current_file (const std::string& destpath)
+{
+	if (!_archive || !_current_entry) {
+		return 0;
+	}
+
+	int flags = ARCHIVE_EXTRACT_TIME;
+
+	struct archive *ext;
+
+	ext = archive_write_disk_new();
+	archive_write_disk_set_options(ext, flags);
+
+	archive_entry_set_pathname(_current_entry, destpath.c_str());
+	int r = archive_write_header(ext, _current_entry);
+	_current_entry = 0;
+	if (r != ARCHIVE_OK) {
+		fprintf (stderr, "Error reading archive: %s\n", archive_error_string(_archive));
+		return -1;
+	}
+
+	ar_copy_data (_archive, ext);
+	r = archive_write_finish_entry (ext);
+	if (r != ARCHIVE_OK) {
+		fprintf (stderr, "Error reading archive: %s\n", archive_error_string(_archive));
+		return -1;
+	}
+
+	return 0;
 }
 
 std::vector<std::string>
@@ -455,4 +532,22 @@ FileArchive::create (const std::map<std::string, std::string>& filemap, Compress
 #endif
 
 	return 0;
+}
+
+struct archive*
+FileArchive::setup_file_archive ()
+{
+	struct archive* a = setup_archive ();
+	GStatBuf statbuf;
+	if (!g_stat (_req.url, &statbuf)) {
+		_req.mp.length = statbuf.st_size;
+	} else {
+		_req.mp.length = -1;
+	}
+	if (ARCHIVE_OK != archive_read_open_filename (a, _req.url, 8192)) {
+		fprintf (stderr, "Error opening archive: %s\n", archive_error_string(a));
+		return 0;
+	}
+
+	return a;
 }
