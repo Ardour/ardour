@@ -2893,6 +2893,14 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 	Stateful::ForceIDRegeneration force_ids;
 	IO::disable_connecting ();
 
+	/* New v6 templates do have a version in the Route-Template,
+	 * we assume that all older, unversioned templates are
+	 * from Ardour 5.x
+	 * when Stateful::loading_state_version was 3002
+	 */
+	int version = 3002;
+	node.get_property (X_("version"), version);
+
 	while (how_many) {
 
 		/* We're going to modify the node contents a bit so take a
@@ -2967,13 +2975,15 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 			} else { /* NewPlaylist */
 
 				PBD::ID pid;
+				std::string default_type;
+				node.get_property(X_("default-type"), default_type);
 
-				if (node_copy.get_property (X_("audio-playlist"), pid)) {
+				if (node_copy.get_property (X_("audio-playlist"), pid) || (version < 5000 && default_type == "audio")) {
 					boost::shared_ptr<Playlist> playlist = PlaylistFactory::create (DataType::AUDIO, *this, name, false);
 					node_copy.set_property (X_("audio-playlist"), playlist->id());
 				}
 
-				if (node_copy.get_property (X_("midi-playlist"), pid)) {
+				if (node_copy.get_property (X_("midi-playlist"), pid) || (version < 5000 && default_type == "midi")) {
 					boost::shared_ptr<Playlist> playlist = PlaylistFactory::create (DataType::MIDI, *this, name, false);
 					node_copy.set_property (X_("midi-playlist"), playlist->id());
 				}
@@ -3044,14 +3054,6 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 			   upstream / downstream buses.
 			*/
 			node_copy.remove_node_and_delete (X_("Controllable"), X_("name"), X_("solo"));
-
-			/* New v6 templates do have a version in the Route-Template,
-			 * we assume that all older, unversioned templates are
-			 * from Ardour 5.x
-			 * when Stateful::loading_state_version was 3002
-			 */
-			int version = 3002;
-			node.get_property (X_("version"), version);
 
 			boost::shared_ptr<Route> route;
 
