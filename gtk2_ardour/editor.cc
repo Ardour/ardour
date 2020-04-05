@@ -2690,7 +2690,7 @@ Editor::snap_to (MusicSample& start, RoundMode direction, SnapPref pref, bool en
 	snap_to_internal (start, direction, pref, ensure_snap);
 }
 
-void
+static void
 check_best_snap (samplepos_t presnap, samplepos_t &test, samplepos_t &dist, samplepos_t &best)
 {
 	samplepos_t diff = abs (test - presnap);
@@ -2971,6 +2971,7 @@ Editor::snap_to_marker (samplepos_t presnap, RoundMode direction)
 void
 Editor::snap_to_internal (MusicSample& start, RoundMode direction, SnapPref pref, bool ensure_snap)
 {
+	UIConfiguration const& uic (UIConfiguration::instance ());
 	const samplepos_t presnap = start.sample;
 
 	samplepos_t test = max_samplepos; // for each snap, we'll use this value
@@ -2978,20 +2979,18 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, SnapPref pref
 	samplepos_t best = max_samplepos; // this records the best snap-result we've found so far
 
 	/* check snap-to-marker */
-	if ((pref == SnapToAny_Visual) && UIConfiguration::instance().get_snap_to_marks()) {
+	if ((pref == SnapToAny_Visual) && uic.get_snap_to_marks ()) {
 		test = snap_to_marker (presnap, direction);
-		check_best_snap(presnap, test, dist, best);
+		check_best_snap (presnap, test, dist, best);
 	}
 
-	const UIConfiguration& uic (UIConfiguration::instance());
-
 	/* check snap-to-region-{start/end/sync} */
-	if ((pref == SnapToAny_Visual) && (uic.get_snap_to_region_start() || uic.get_snap_to_region_end() || uic.get_snap_to_region_sync())) {
+	if ((pref == SnapToAny_Visual) && (uic.get_snap_to_region_start () || uic.get_snap_to_region_end () || uic.get_snap_to_region_sync ())) {
 
-		if (!region_boundary_cache.empty()) {
+		if (!region_boundary_cache.empty ()) {
 
-			vector<samplepos_t>::iterator prev = region_boundary_cache.begin();
-			vector<samplepos_t>::iterator next = std::upper_bound (region_boundary_cache.begin(), region_boundary_cache.end(), presnap);
+			vector<samplepos_t>::iterator prev = region_boundary_cache.begin ();
+			vector<samplepos_t>::iterator next = std::upper_bound (region_boundary_cache.begin (), region_boundary_cache.end (), presnap);
 			if (next != region_boundary_cache.begin ()) {
 				prev = next;
 				prev--;
@@ -3011,14 +3010,14 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, SnapPref pref
 
 		}
 
-		check_best_snap(presnap, test, dist, best);
+		check_best_snap (presnap, test, dist, best);
 	}
 
 	/* check Grid */
-	if (uic.get_snap_to_grid() && (_grid_type != GridTypeNone)) {
-		MusicSample pre(presnap, 0);
+	if (uic.get_snap_to_grid () && (_grid_type != GridTypeNone)) {
+		MusicSample pre (presnap, 0);
 		MusicSample post = snap_to_grid (pre, direction, pref);
-		check_best_snap(presnap, post.sample, dist, best);
+		check_best_snap (presnap, post.sample, dist, best);
 	}
 
 	/* now check "magnetic" state: is the grid within reasonable on-screen distance to trigger a snap?
