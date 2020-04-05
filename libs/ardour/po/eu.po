@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-02 13:17+0200\n"
-"PO-Revision-Date: 2020-04-04 16:16+0200\n"
+"PO-Revision-Date: 2020-04-05 19:39+0200\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -19,8 +19,9 @@ msgstr ""
 "Language: eu\n"
 
 #: analyser.cc:127 audioregion.cc:1791
+#, fuzzy
 msgid "Transient Analysis failed for %1."
-msgstr ""
+msgstr "%1-(e)rako behin-behineko analisiak huts egin du."
 
 #: analyser.cc:127
 msgid "Audio File Source"
@@ -73,7 +74,6 @@ msgid "Failed to request and reserve audio device"
 msgstr ""
 
 #: audio_backend.cc:51
-#, fuzzy
 msgid "Audio device Input/Output error"
 msgstr "Audio-gailuaren sarrera/irteera errorea"
 
@@ -102,7 +102,6 @@ msgid "Sample format is not supported"
 msgstr "Lagin-formatua ez da onartzen"
 
 #: audio_backend.cc:65
-#, fuzzy
 msgid "Sample rate is not supported"
 msgstr "Lagin-tasa ez da onartzen"
 
@@ -280,9 +279,8 @@ msgid "AudioEngine: cannot load module \"%1\" (%2)"
 msgstr "AudioMotorra: ez da “%1” modulua kargatu (%2)"
 
 #: audioengine.cc:854
-#, fuzzy
 msgid "AudioEngine: backend at \"%1\" has no descriptor function."
-msgstr "AudioMotorra:"
+msgstr "AudioMotorra: “%1”en atzealdeak deskriptore funtziorik ez du."
 
 #: audioengine.cc:947
 msgid "Could not create backend for %1: %2"
@@ -410,7 +408,7 @@ msgstr ""
 
 #: auditioner.cc:388
 msgid "Cannot audition empty file."
-msgstr ""
+msgstr "Ezin da fitxategi hutsa entzun."
 
 #: automatable.cc:103
 msgid "Automation node has no path property"
@@ -450,7 +448,7 @@ msgstr "Zabalera"
 
 #: automatable.cc:206
 msgid "Elevation"
-msgstr ""
+msgstr "Goratze"
 
 #: automation_control.cc:326
 msgid "record %1 automation"
@@ -459,8 +457,8 @@ msgstr "grabatu %1 automatizazioa"
 #: automation_list.cc:452
 msgid "automation list: cannot load coordinates from XML, all points ignored"
 msgstr ""
-"automatizazio-zerrenda: XML koordenatuak ezin dira kargatu, puntu guztiak "
-"alde batera utzi dira"
+"automatizazio-zerrenda: XML-ren koordenatuak ezin dira kargatu, puntu "
+"guztiak alde batera utzi dira"
 
 #: automation_list.cc:494
 msgid ""
@@ -484,7 +482,7 @@ msgstr "AutomatizazioZerrenda: "
 
 #: butler.cc:123
 msgid "Session: could not create butler thread"
-msgstr ""
+msgstr "Saioa: ezin izan da morroi-haria sortu"
 
 #: butler.cc:264 butler.cc:265
 msgid "Butler read ahead failure on dstream %1"
@@ -495,9 +493,8 @@ msgid "Butler write-behind failure on dstream %1"
 msgstr "Morroiaren idazte-akatsa %1 dstream-ean"
 
 #: control_protocol_manager.cc:133
-#, fuzzy
 msgid "Control protocol %1 was already active."
-msgstr "%1 kontrol-protokoloa jada "
+msgstr "%1 kontrol-protokoloa jada abian zegoen."
 
 #: control_protocol_manager.cc:161
 msgid "Control protocol support for %1 failed to activate"
@@ -505,7 +502,7 @@ msgstr ""
 
 #: control_protocol_manager.cc:224
 msgid "control protocol name \"%1\" has no descriptor"
-msgstr ""
+msgstr "“%1” kontrol-protokolo izenak deskriptorerik ez du"
 
 #: control_protocol_manager.cc:231
 msgid "control protocol name \"%1\" could not be initialized"
@@ -517,7 +514,7 @@ msgstr ""
 
 #: control_protocol_manager.cc:365
 msgid "looking for control protocols in %1\n"
-msgstr ""
+msgstr "kontrol-protokoloak %1-(e)n bilatzen\n"
 
 #: control_protocol_manager.cc:389
 msgid "Control protocol %1 not usable"
@@ -537,7 +534,7 @@ msgstr ""
 
 #: control_protocol_manager.cc:578
 msgid "Control protocol \"%1\" has no descriptor"
-msgstr "%1 kontrol-protokoloa deskriptorerik ez dauka"
+msgstr "%1 kontrol-protokoloa deskriptorerik ez du"
 
 #: convolver.cc:232
 msgid "Convolver: IR \"%1\" no usable audio-channels sound."
@@ -548,10 +545,12 @@ msgid "Convolver: IR \"%1\" file too long."
 msgstr ""
 
 #: cycle_timer.cc:41
+#, fuzzy
 msgid "CycleTimer::get_mhz(): can't open /proc/cpuinfo"
 msgstr "CycleTimer::get_mhz(): ezin da /proc/cpuinfo ireki"
 
 #: cycle_timer.cc:53
+#, fuzzy
 msgid "CycleTimer::get_mhz(): cannot locate cpu MHz in /proc/cpuinfo"
 msgstr "CycleTimer::get_mhz(): ezin da cpu MHz in /proc/cpuinfo aurkitu"
 
@@ -590,7 +589,6 @@ msgid ""
 msgstr ""
 
 #: disk_reader.cc:996
-#, fuzzy
 msgid "DiskReader %1: cannot read %2 from playlist at sample %3"
 msgstr ""
 "%1 DiskoIrakurlea: ezin da %2 irakurri %3 laginean dagoen erreprodukzio-"
@@ -804,9 +802,8 @@ msgid "empty format"
 msgstr "formatu hutsa"
 
 #: export_profile_manager.cc:770
-#, fuzzy
 msgid "Cannot load export format from %1"
-msgstr "Ezin da MIDI esportazio-informazioa kargatu %1-(e)tik"
+msgstr "Ezin da esportazio-formatua hemendik kargatu: %1"
 
 #: export_profile_manager.cc:776
 msgid "Cannot export format read from %1"
@@ -814,7 +811,7 @@ msgstr ""
 
 #: export_profile_manager.cc:785
 msgid "Ignored format '%1': encoder is not avilable"
-msgstr ""
+msgstr "Alde batera utzitako formatua ‘%1’: kodetzailea ez dago erabilgarri"
 
 #: export_profile_manager.cc:877
 msgid "No timespan has been selected!"
@@ -864,25 +861,27 @@ msgstr ""
 
 #: file_source.cc:250 file_source.cc:373
 msgid "FileSource: search path not set"
-msgstr ""
+msgstr "FitxategiIturburua: bilatze-bidea ez da ezarri"
 
 #: file_source.cc:433
 msgid ""
 "FileSource: \"%1\" is ambiguous when searching\n"
 "\t"
 msgstr ""
+"IturburuFitxategia: “%1” anbiguoa da bilatzerakoan\n"
+"\t"
 
 #: file_source.cc:440
 msgid "Filesource: cannot find required file (%1)"
-msgstr ""
+msgstr "FitxategiIturburua: ezin da beharrezko fitxategia aurkitu (%1)"
 
 #: file_source.cc:485
 msgid "Filesource: cannot find required file (%1): %2"
-msgstr ""
+msgstr "FitxategiIturburua: ezin da beharrezko fitxategia aurkitu (%1): %2"
 
 #: file_source.cc:493
 msgid "Filesource: cannot check for existing file (%1): %2"
-msgstr ""
+msgstr "FitxategiIturburua: ezin da dagoen fitxategia egiaztatu (%1): %2"
 
 #: file_source.cc:592
 msgid ""
@@ -940,18 +939,19 @@ msgstr ""
 #: filter.cc:68
 msgid "filter: error creating name for new file based on %1"
 msgstr ""
+"iragazketa: errorea %1 -(e)n oinarritutako fitxategi berria sortzerakoan"
 
 #: filter.cc:93
 msgid "filter: error creating new file %1 (%2)"
-msgstr ""
+msgstr "iragazketa: errorea %1 fitxategi berria sortzerakoan (%2)"
 
 #: find_session.cc:65
 msgid "cannot check session path %1 (%2)"
-msgstr ""
+msgstr "ezin da %1-(e)n saio-bidea egiaztatu (%2)"
 
 #: find_session.cc:91
 msgid "cannot check statefile %1 (%2)"
-msgstr ""
+msgstr "ezin da %1-(e)n fitxategi-egoera egiaztatu (%2)"
 
 #: find_session.cc:130
 msgid "%1 is not a snapshot file"
@@ -995,7 +995,7 @@ msgstr "Errorea fitxategi-artxiboa irakurtzerakoan"
 
 #: find_session.cc:258 find_session.cc:281
 msgid "Error extracting file-archive"
-msgstr ""
+msgstr "Errorea fitxategi-artxiboa ateratzerakoan"
 
 #: find_session.cc:265
 msgid "No Error"
@@ -1043,7 +1043,7 @@ msgstr "Monitore"
 
 #: globals.cc:598 session.cc:1269
 msgid "Master"
-msgstr ""
+msgstr "Master"
 
 #: globals.cc:600 midiport_manager.cc:71 port_manager.cc:1274
 #: port_manager.cc:1284
@@ -1115,8 +1115,9 @@ msgid "Copying %1"
 msgstr "%1 kopiatzen"
 
 #: import.cc:460
+#, fuzzy
 msgid "Track %1 of %2 contained no usable MIDI data"
-msgstr ""
+msgstr "%1 / %2 pistek MIDI datu erabilezinak zitu(zt)en"
 
 #: import.cc:470
 msgid "MIDI file could not be written (best guess: %1)"
@@ -1292,11 +1293,11 @@ msgstr "itzuli "
 
 #: ladspa_plugin.cc:100
 msgid "LADSPA: Unable to open module: "
-msgstr ""
+msgstr "LADSPA: Modulua irekitzeko ezgai: "
 
 #: ladspa_plugin.cc:106
 msgid "LADSPA: module has no descriptor function."
-msgstr ""
+msgstr "LADSPA: moduluak deskriptore-funtziorik ez du."
 
 #: ladspa_plugin.cc:113
 msgid "LADSPA: plugin has gone away since discovery!"
@@ -1318,11 +1319,11 @@ msgstr ""
 
 #: ladspa_plugin.cc:397 ladspa_plugin.cc:440
 msgid "LADSPA: no ladspa port number"
-msgstr ""
+msgstr "LADSPA: ladspa ataka-zenbakirik ez"
 
 #: ladspa_plugin.cc:402 ladspa_plugin.cc:446
 msgid "LADSPA: no ladspa port data"
-msgstr ""
+msgstr "LADSPA: ladspa ataka-daturik ez"
 
 #: ladspa_plugin.cc:836
 msgid "Could not locate HOME.  Preset not removed."
@@ -1437,7 +1438,7 @@ msgstr "LTCFitxategiIrakurgailua: ezin da “%1” fitxategia ireki (%3)"
 
 #: ltc_file_reader.cc:168
 msgid "LTCFileReader: \"%1\" is an empty audio file"
-msgstr ""
+msgstr "LTCFitxategiIrakurgailua: “%1” audio-fitxategia hutsik dago"
 
 #: ltc_file_reader.cc:192
 msgid "LTCFileReader:: invalid audio channel selected"
@@ -1453,11 +1454,11 @@ msgstr ""
 
 #: ltc_slave.cc:665
 msgid "flywheel"
-msgstr ""
+msgstr "flywheel"
 
 #: lua_api.cc:96
 msgid "Script with given name was not found\n"
-msgstr ""
+msgstr "Ez da emandako izenarekin script-ik aurkitu\n"
 
 #: lua_api.cc:105
 msgid "Failed to instantiate Lua Processor\n"
@@ -1493,7 +1494,7 @@ msgstr ""
 
 #: luascripting.cc:141
 msgid "Script '%1' has no valid descriptor."
-msgstr ""
+msgstr "‘%1’ script-ak deskriptore baliogabea du."
 
 #: midi_model.cc:518
 msgid "Change has no note, using note ID"
@@ -1533,7 +1534,7 @@ msgstr ""
 
 #: midi_patch_manager.cc:241
 msgid "Removing MIDI patch file %1"
-msgstr ""
+msgstr "%1 MIDI adabaki-fitxategia kentzen"
 
 #: midi_scene_changer.cc:312
 msgid "Scene "
@@ -1593,10 +1594,9 @@ msgstr "polaritate-kontrola"
 
 #: monitor_processor.cc:541
 msgid "solo control"
-msgstr ""
+msgstr "solo-kontrola"
 
 #: mp3filesource.cc:71
-#, fuzzy
 msgid "MPEG Layer %1 (%2 kbps)"
 msgstr "MPEG geruza %1 (%2 kbps)"
 
@@ -1640,14 +1640,13 @@ msgstr ""
 
 #: operations.cc:47
 msgid "region drag"
-msgstr ""
+msgstr "eremua arrastatzea"
 
 #: operations.cc:48
 msgid "selection grab"
 msgstr "hautaketa puntuala"
 
 #: operations.cc:49
-#, fuzzy
 msgid "region fill"
 msgstr "eremuaren betetzea"
 
@@ -1673,41 +1672,46 @@ msgstr ""
 
 #: panner_manager.cc:100
 msgid "looking for panners in %1\n"
-msgstr ""
+msgstr "panegailuak %1-(e)n bilatzen\n"
 
 #: panner_manager.cc:126
 msgid "Panner discovered: \"%1\" in %2\n"
-msgstr ""
+msgstr "Panegailua aurkitu da: “%1” %2-(e)n\n"
 
 #: panner_manager.cc:145
 msgid "PannerManager: cannot load module \"%1\" (%2)"
-msgstr ""
+msgstr "PanegailuKudeatzailea: ezin da “%1” modulua kargatu (%2)"
 
 #: panner_manager.cc:152
 msgid "PannerManager: module \"%1\" has no descriptor function."
-msgstr ""
+msgstr "PanegailuKudeatzailea: “%1” moduluak deskriptore funtziorik ez du."
 
 #: panner_manager.cc:253
 msgid "no panner discovered for in/out = %1/%2"
-msgstr ""
+msgstr "panegailurik ez da aurkitu sarrerarako/irteerarako = %1/%2"
 
 #: panner_shell.cc:127
+#, fuzzy
 msgid ""
 "No panner found: check that panners are being discovered correctly during "
 "startup."
-msgstr ""
+msgstr "Panegailurik ez da aurkitu: "
 
 #: panner_shell.cc:134
 msgid "select panner: %1\n"
-msgstr ""
+msgstr "hautatu panegailua: %1\n"
 
 #: panner_shell.cc:260
+#, fuzzy
 msgid "Unknown panner plugin \"%1\" found in pan state - ignored"
 msgstr ""
+"“%1” panegailuaren plugin ezezaguna aurkitu da pan-egoeran - alde batera "
+"utzi da"
 
 #: panner_shell.cc:266
+#, fuzzy
 msgid "panner plugin node has no type information!"
-msgstr ""
+msgstr "panegailuaren plugin nodoak ez dauka informazio motarik!"
 
 #: parameter_descriptor.cc:119
 msgid "Normal"
@@ -1731,59 +1735,60 @@ msgstr "Diskoa"
 
 #: parameter_descriptor.cc:259
 msgid "Note|C"
-msgstr "Note|C"
+msgstr "C"
 
 #: parameter_descriptor.cc:260
 msgid "Note|C#"
-msgstr "Note|C#"
+msgstr "C#"
 
 #: parameter_descriptor.cc:261
 msgid "Note|D"
-msgstr "Note|D"
+msgstr "D"
 
 #: parameter_descriptor.cc:262
 msgid "Note|D#"
-msgstr "Note|D#"
+msgstr "D#"
 
 #: parameter_descriptor.cc:263
 msgid "Note|E"
-msgstr "Note|E"
+msgstr "E"
 
 #: parameter_descriptor.cc:264
 msgid "Note|F"
-msgstr "Note|F"
+msgstr "F"
 
 #: parameter_descriptor.cc:265
 msgid "Note|F#"
-msgstr "Note|F#"
+msgstr "F#"
 
 #: parameter_descriptor.cc:266
 msgid "Note|G"
-msgstr "Note|G"
+msgstr "G"
 
 #: parameter_descriptor.cc:267
 msgid "Note|G#"
-msgstr "Note|G#"
+msgstr "G#"
 
 #: parameter_descriptor.cc:268
 msgid "Note|A"
-msgstr "Note|A"
+msgstr "A"
 
 #: parameter_descriptor.cc:269
 msgid "Note|A#"
-msgstr "Note|A#"
+msgstr "A#"
 
 #: parameter_descriptor.cc:270
 msgid "Note|B"
-msgstr "Note|B"
+msgstr "B"
 
 #: playlist.cc:2327
 msgid "region state node has no ID, ignored"
 msgstr ""
 
 #: playlist.cc:2343
+#, fuzzy
 msgid "Playlist: cannot create region from XML"
-msgstr ""
+msgstr "Erreprodukzio-zerrenda: ezin da XML-tik eremua sortu"
 
 #: playlist_source.cc:111
 msgid "No playlist ID in PlaylistSource XML!"
@@ -1819,7 +1824,7 @@ msgstr "?"
 
 #: plugin_insert.cc:524
 msgid "Plugin Enable"
-msgstr ""
+msgstr "Plugina gaitzea"
 
 #: plugin_insert.cc:727
 msgid "PluginInsert: VST Bypass failed, falling back to host bypass."
@@ -1925,7 +1930,7 @@ msgstr "Plugin-eskaneatzea burututa…"
 
 #: plugin_manager.cc:449
 msgid "Indexing Plugins..."
-msgstr ""
+msgstr "Pluginak indexatzen…"
 
 #: plugin_manager.cc:685
 msgid "LADSPA"
@@ -1941,7 +1946,7 @@ msgstr ""
 
 #: plugin_manager.cc:787
 msgid "LADSPA: module \"%1\" has no descriptor function."
-msgstr ""
+msgstr "LADSPA: “%1” moduluak deskriptore-funtziorik ez du."
 
 #: plugin_manager.cc:1020
 msgid "Disabled WindowsVST scan (safe mode)"
@@ -1989,7 +1994,7 @@ msgstr "i386 (32-bit)"
 
 #: plugin_manager.cc:1084
 msgid "Itanium"
-msgstr ""
+msgstr "Itanium"
 
 #: plugin_manager.cc:1087
 msgid "x64 (64-bit)"
@@ -2024,7 +2029,7 @@ msgstr ""
 
 #: plugin_manager.cc:1158
 msgid "Ignoring duplicate Windows VST plugin \"%1\""
-msgstr ""
+msgstr "Windows VST pluginaren kopia alde batera uzten"
 
 #: plugin_manager.cc:1170
 msgid " -> OK (VST Plugin \"%1\" was added)."
@@ -2076,11 +2081,11 @@ msgstr ""
 
 #: plugin_manager.cc:1674
 msgid "Could not save Plugin Order info to %1"
-msgstr ""
+msgstr "Ezin izan da pluginen ordenaren informazioa hemen gorde: %1"
 
 #: plugin_manager.cc:1711
 msgid "Could not save Plugin Tags info to %1"
-msgstr ""
+msgstr "Ezin izan da pluginen etiketeren informazioa hemen gorde: %1"
 
 #: plugin_manager.cc:1724
 msgid "Loading plugin meta data file %1"
@@ -2151,12 +2156,11 @@ msgstr "%1 ataka berrezartzeak huts egin du"
 
 #: port_manager.cc:1194
 msgid "Could not save MIDI port info to %1"
-msgstr ""
+msgstr "Ezin izan da MIDI atakaren informazioa hemen gorde: %1"
 
 #: port_manager.cc:1209
-#, fuzzy
 msgid "Cannot load MIDI port info from %1"
-msgstr "Ezin da MIDI ataka-informazioa kargatu %1-(e)tik"
+msgstr "Ezin da MIDI atakaren informazioa hemendik kargatu: %1"
 
 #: port_manager.cc:1229
 msgid "MIDI port info file %1 contains invalid information - please remove it."
@@ -2274,7 +2278,7 @@ msgstr ""
 
 #: route.cc:968
 msgid "processor could not be created. Ignored."
-msgstr ""
+msgstr "prozesadorea ezin izan da sortu. Alde batera utzi da."
 
 #: route.cc:2593 route.cc:2799
 msgid "Bad node sent to Route::set_state() [%1]"
@@ -2313,20 +2317,22 @@ msgid "hm"
 msgstr ""
 
 #: route.cc:5804
+#, fuzzy
 msgid "Leveler"
-msgstr ""
+msgstr "Mailagailua"
 
 #: route.cc:5806
 msgid "Compressor"
 msgstr "Konpresorea"
 
 #: route.cc:5808 route.cc:5810
+#, fuzzy
 msgid "Limiter"
-msgstr ""
+msgstr "Mugagailua"
 
 #: route.cc:5810
 msgid "Sidechain"
-msgstr ""
+msgstr "Sidechain"
 
 #: route.cc:5813 route.cc:5815 route.cc:5832 route.cc:5834
 msgid "???"
@@ -2362,14 +2368,12 @@ msgid "error writing tempo-adjusted data to %1"
 msgstr ""
 
 #: rt_tasklist.cc:95
-#, fuzzy
 msgid "Cannot create thread for TaskList!"
-msgstr "Ezin da ZereginZerrenda-rako haria sortu!"
+msgstr "Ezin da ZereginZerrendarako haria sortu!"
 
 #: send.cc:75
-#, fuzzy
 msgid "aux %1"
-msgstr "% osagarria"
+msgstr "%1 aux"
 
 #: send.cc:80 send.cc:488
 msgid "send %1"
@@ -2381,15 +2385,15 @@ msgstr "%1 foldback-a"
 
 #: send.cc:84
 msgid "programming error: send created using role %1"
-msgstr ""
+msgstr "programazio-errorea: bidalketa %1 funtzioa erabiliz sortu da"
 
 #: session.cc:350
 msgid "Session initialization failed"
-msgstr ""
+msgstr "Saioa hasieratzeak huts egin du"
 
 #: session.cc:367
 msgid "Failed to load template/snapshot state"
-msgstr ""
+msgstr "Txantiloia/argazkia kargatzeak huts egin du"
 
 #: session.cc:370
 msgid "Failed to parse template/snapshot state"
@@ -2397,7 +2401,7 @@ msgstr ""
 
 #: session.cc:381
 msgid "Failed to load state"
-msgstr ""
+msgstr "Egoera kargatzeak huts egin du"
 
 #: session.cc:391 session.cc:395 session.cc:398 session.cc:401 session.cc:404
 msgid "Cannot initialize session/engine: %1"
@@ -2413,7 +2417,7 @@ msgstr "TempoMapa baliogabea saio-fitxategian."
 
 #: session.cc:398
 msgid "Invalid or corrupt session state."
-msgstr ""
+msgstr "Saio-egoera baliogabea edo hondatuta."
 
 #: session.cc:401
 msgid "Port registration failed."
@@ -2443,7 +2447,7 @@ msgstr "Konfiguratu Klik"
 
 #: session.cc:515
 msgid "Set up standard connections"
-msgstr ""
+msgstr "Ezarri konexio estandarrak"
 
 #: session.cc:851
 msgid "could not setup Click I/O"
@@ -2475,7 +2479,7 @@ msgstr ""
 
 #: session.cc:1096 session.cc:1227
 msgid "cannot connect control output %1 to %2"
-msgstr ""
+msgstr "ezin da %1 kontrol-sarrera %2-(e)ra konektatu"
 
 #: session.cc:1311
 msgid "cannot create Auditioner: no auditioning of regions possible"
@@ -2513,7 +2517,7 @@ msgstr "MIDI "
 
 #: session.cc:2445
 msgid "Session: could not create new midi track."
-msgstr ""
+msgstr "Saioa: ezin izan da midi pista berria sortu."
 
 #: session.cc:2451
 msgid ""
@@ -2537,7 +2541,7 @@ msgstr "ezin da midi bus irteera berria konfiguratu"
 
 #: session.cc:2546 session.cc:2828
 msgid "Session: could not create new audio route."
-msgstr ""
+msgstr "Saioa: ezin izan da audio-bideratze berria sortu."
 
 #: session.cc:2721 session.cc:2729 session.cc:2804 session.cc:2812
 msgid "cannot configure %1 in/%2 out configuration for new audio track"
@@ -2545,7 +2549,7 @@ msgstr ""
 
 #: session.cc:2745
 msgid "Session: could not create new audio track."
-msgstr ""
+msgstr "Saioa: ezin izan da audio-pista berria sortu."
 
 #: session.cc:2779 session.cc:2782
 msgid "Bus"
@@ -2561,7 +2565,7 @@ msgstr ""
 
 #: session.cc:3081
 msgid "Session: could not create new route from template"
-msgstr ""
+msgstr "Saioa: ezin izan da bideratze berria txantiloitik sortu"
 
 #: session.cc:3118
 msgid "Adding new tracks/busses failed"
@@ -2720,10 +2724,11 @@ msgid "Export ended unexpectedly: %1"
 msgstr "Esportazioa ustekabean amaitu da: %1"
 
 #: session_ltc.cc:235
+#, fuzzy
 msgid ""
 "LTC encoder: invalid framerate - LTC encoding is disabled for the remainder "
 "of this session."
-msgstr ""
+msgstr "LTC kodeatzailea:"
 
 #: session_midi.cc:562
 msgid "Session: cannot send quarter-frame MTC message (%1)"
@@ -2735,7 +2740,7 @@ msgstr ""
 
 #: session_playlists.cc:486 session_playlists.cc:506
 msgid "Session: cannot create Playlist from XML description."
-msgstr ""
+msgstr "Saioa: ezin da erreprodukzio-zerrenda XML deskripziotik sortu."
 
 #: session_process.cc:200
 msgid "Session: error in no roll for %1"
@@ -2747,7 +2752,7 @@ msgstr ""
 
 #: session_state.cc:204
 msgid "solo cut control (dB)"
-msgstr ""
+msgstr "solo mozketa-kontrola (dB)"
 
 #: session_state.cc:225
 msgid "Set block size and sample rate"
@@ -2783,7 +2788,7 @@ msgstr "Saioaren egoera: "
 
 #: session_state.cc:398
 msgid "Reset Remote Controls"
-msgstr ""
+msgstr "Berrezarri urruneko kontrolak"
 
 #: session_state.cc:411 session_state.cc:441
 msgid "Filling playback buffers"
@@ -2811,7 +2816,7 @@ msgstr "Saioa: ezin da “%1” saioaren esportazio-karpeta sortu (%2)"
 
 #: session_state.cc:544
 msgid "Session: cannot create session backup folder \"%1\" (%2)"
-msgstr ""
+msgstr "Saioa: ezin da “%1” saioaren babeskopia-karpeta sortu (%2)"
 
 #: session_state.cc:552
 msgid "Session: cannot create session analysis folder \"%1\" (%2)"
@@ -2860,7 +2865,7 @@ msgstr "Ezin izan da sesio-fitxategia “%1” bidean ezabatu (%2)"
 
 #: session_state.cc:883
 msgid "state could not be saved to %1"
-msgstr ""
+msgstr "ezin izan da egoera %1-(e)n gorde"
 
 #: session_state.cc:885 session_state.cc:900
 #, fuzzy
@@ -2885,7 +2890,7 @@ msgstr ""
 
 #: session_state.cc:1023
 msgid "Session file %1 is not a session"
-msgstr ""
+msgstr "%1 saio-fitxategia ez da saioa"
 
 #: session_state.cc:1035
 msgid ""
@@ -2900,22 +2905,23 @@ msgstr ""
 #: session_state.cc:1556
 msgid "programming error: Session: incorrect XML node sent to set_state()"
 msgstr ""
+"programazio-errorea: Saioa: XML nodo baliogabea set_state()-ra bidali da"
 
 #: session_state.cc:1626
 msgid "Session: XML state has no options section"
-msgstr ""
+msgstr "Saioa: XML egoerak aukera sekziorik ez du"
 
 #: session_state.cc:1631
 msgid "Session: XML state has no metadata section"
-msgstr ""
+msgstr "Saioa: XML egoerak metadatu sekziorik ez du"
 
 #: session_state.cc:1642
 msgid "Session: XML state has no sources section"
-msgstr ""
+msgstr "Saioa: XML egoerak iturburu sekziorik ez du"
 
 #: session_state.cc:1649
 msgid "Session: XML state has no Tempo Map section"
-msgstr ""
+msgstr "Saioa: XML egoerak tempo-mapa sekziorik ez du"
 
 #: session_state.cc:1656
 msgid "Session: XML state has no locations section"
@@ -2923,15 +2929,15 @@ msgstr ""
 
 #: session_state.cc:1669
 msgid "Session: XML state has no Regions section"
-msgstr ""
+msgstr "Saioa: XML egoerak eremu sekziorik ez du"
 
 #: session_state.cc:1676
 msgid "Session: XML state has no playlists section"
-msgstr ""
+msgstr "Saioa: XML egoerak erreprodukzio-zerrenda sekziorik ez du"
 
 #: session_state.cc:1696
 msgid "Session: XML state has no bundles section"
-msgstr ""
+msgstr "Saioa: XML egoerak konexio-sorta sekziorik ez du"
 
 #: session_state.cc:1725
 msgid "Session: XML state has no routes section"
@@ -2943,19 +2949,19 @@ msgstr ""
 
 #: session_state.cc:1752
 msgid "Session: XML state has no edit groups section"
-msgstr ""
+msgstr "Saioa: XML egoerak edizio-talde sekziorik ez du"
 
 #: session_state.cc:1759
 msgid "Session: XML state has no mix groups section"
-msgstr ""
+msgstr "Saioa: XML egoerak nahasketa-talde sekziorik ez du"
 
 #: session_state.cc:1767
 msgid "Session: XML state has no click section"
-msgstr ""
+msgstr "Saioa: XML egoerak klik sekziorik ez du"
 
 #: session_state.cc:1836
 msgid "Session: cannot create Route from XML description."
-msgstr ""
+msgstr "Saioa: ezin da bideratzea XML deskripziotik sortu."
 
 #: session_state.cc:1840
 msgid "Loaded track/bus %1"
@@ -2975,7 +2981,7 @@ msgstr ""
 
 #: session_state.cc:2045
 msgid "Session: cannot create Region from XML description."
-msgstr ""
+msgstr "Saioa: ezin da eremua XML deskripziotik sortu."
 
 #: session_state.cc:2049
 msgid "Can not load state for region '%1'"
@@ -3030,7 +3036,7 @@ msgstr ""
 
 #: session_state.cc:2397
 msgid "Session: cannot create Source from XML description."
-msgstr ""
+msgstr "Saioa: ezin da iturburua XML deskripziotik sortu."
 
 #: session_state.cc:2426
 msgid ""
@@ -3189,7 +3195,7 @@ msgstr ""
 
 #: slavable.cc:124
 msgid "Master #%1 not found, assignment lost"
-msgstr ""
+msgstr "#%1 masterra ez da aurkitu, mandatua galdu da"
 
 #: slavable_automation_control.cc:387 slavable_automation_control.cc:460
 msgid "Merge VCA automation into %1"
@@ -3249,7 +3255,6 @@ msgid "Ogg/Vorbis"
 msgstr "Ogg/Vorbis"
 
 #: sndfile_helpers.cc:41
-#, fuzzy
 msgid "raw (no header)"
 msgstr "gordina (goibururik ez)"
 
@@ -3315,13 +3320,14 @@ msgstr ""
 
 #: sndfilesource.cc:359
 msgid "SndFileSource: cannot open file \"%1\" for %2"
-msgstr ""
+msgstr "AudioIturburuFitxat.: ezin da “%1” fitxategia %2-(r)entzat ireki"
 
 #: sndfilesource.cc:377
+#, fuzzy
 msgid ""
 "SndFileSource: file only contains %1 channels; %2 is invalid as a channel "
 "number"
-msgstr ""
+msgstr "AudioIturburuFitxat.:"
 
 #: sndfilesource.cc:392
 msgid "Cannot mark RF64 audio file for automatic downgrade to WAV: %1"
@@ -3338,13 +3344,15 @@ msgid "could not open file %1 for reading."
 msgstr "ezin izan da %1 fitxategia irakurtzeko ireki."
 
 #: sndfilesource.cc:521
+#, fuzzy
 msgid "SndFileSource: could not seek to sample %1 within %2 (%3)"
-msgstr ""
+msgstr "AudioIturburuFitxat.:"
 
 #: sndfilesource.cc:530
+#, fuzzy
 msgid ""
 "SndFileSource: @ %1 could not read %2 within %3 (%4) (len = %5, ret was %6)"
-msgstr ""
+msgstr "AudioIturburuFitxat.:"
 
 #: sndfilesource.cc:580
 msgid "attempt to write a non-writable audio file source (%1)"
@@ -3381,7 +3389,7 @@ msgstr "%1: ezin da %2 bilatu (libsndfile errorea: %3)"
 
 #: sndfilesource.cc:747
 msgid "SndFileSource: cannot open file \"%1\" for reading"
-msgstr ""
+msgstr "AudioIturburuFitxat.: ezin da “%1” fitxategia irakurtzeko ireki"
 
 #: solo_control.cc:198
 msgid "Cleared Explicit solo: %1\n"
@@ -3406,11 +3414,11 @@ msgstr ""
 
 #: speakers.cc:275
 msgid "Speaker information is missing - speaker ignored"
-msgstr ""
+msgstr "Bozgorailuaren informazioa falta da - bozgorailua alde batera utzi da"
 
 #: srcfilesource.cc:141
 msgid "SrcFileSource: %1"
-msgstr ""
+msgstr "IturburuFitxategia: %1"
 
 #: template_utils.cc:117 template_utils.cc:172
 msgid "(unknown)"
@@ -3507,7 +3515,7 @@ msgstr ""
 
 #: tempo.cc:4639 tempo.cc:4653
 msgid "Tempo map: could not set new state, restoring old one."
-msgstr ""
+msgstr "Tempo-mapa: ezin izan da egoera berria ezarri, aurrekora lehenerazten."
 
 #: tempo.cc:4695 tempo.cc:4696
 msgid "Multiple meter definitions found at %1"
@@ -3593,7 +3601,7 @@ msgstr "Guztiak"
 
 #: transport_master.cc:497
 msgid "Start/Stop"
-msgstr ""
+msgstr "Hasi/Gelditu"
 
 #: transport_master.cc:499
 msgid "Speed"
@@ -3654,15 +3662,15 @@ msgstr "Batu"
 
 #: utils.cc:421 utils.cc:438
 msgid "Slide"
-msgstr "Irristatu"
+msgstr "Irrist."
 
 #: utils.cc:423 utils.cc:444
 msgid "Ripple"
-msgstr "Uhindura"
+msgstr "Uhind."
 
 #: utils.cc:425 utils.cc:441
 msgid "Lock"
-msgstr "Blokeatu"
+msgstr "Blok."
 
 #: utils.cc:428
 msgid "programming error: unknown edit mode string \"%1\""
@@ -3687,7 +3695,7 @@ msgstr "%1 VCA : %2"
 
 #: vca.cc:217
 msgid "Master assignment inored to prevent recursion"
-msgstr ""
+msgstr "Masterraren mandatua alde batera utzi da errekurtsioa eragozteko"
 
 #: vca_manager.cc:206
 msgid "Cannot set state of a VCA"
