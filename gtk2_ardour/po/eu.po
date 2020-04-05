@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-02 13:17+0200\n"
-"PO-Revision-Date: 2020-04-04 17:56+0200\n"
+"PO-Revision-Date: 2020-04-05 20:12+0200\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1280,7 +1280,7 @@ msgstr "Grabazio-denbora eskuragarria"
 
 #: ardour_ui.cc:1365 editor_route_groups.cc:110
 msgid "Rec"
-msgstr "Grb"
+msgstr "Grab"
 
 #: ardour_ui.cc:1368
 msgid ">24h"
@@ -1544,11 +1544,11 @@ msgstr "Gelditzean itzuli lehenagoko tokira"
 
 #: ardour_ui2.cc:87
 msgid "Playhead follows Range tool clicks, and Range selections"
-msgstr "Kurtsoreak barruti eraldaketei eta hautapenei jarraitzen die"
+msgstr "Denbora-markak barruti eraldaketei eta hautapenei jarraitzen die"
 
 #: ardour_ui2.cc:88
 msgid "Track Input Monitoring automatically follows transport state"
-msgstr "Pistaren sarrera-monitorizazioak garraioaren egoerari jarraitzen dio "
+msgstr "Pistaren sarrera-monitorizazioak garraioaren egoerari jarraitzen dio"
 
 #: ardour_ui2.cc:90 monitor_section.cc:135
 msgid ""
@@ -1575,15 +1575,18 @@ msgstr "Piztuta badago, berrelikadura dago."
 
 # egin klik eskuineko botoiarekin > eskuin-klik ???
 #: ardour_ui2.cc:93
-#, fuzzy
 msgid ""
 "<b>Primary Clock</b> right-click to set display mode. Click to edit, click"
 "+drag a digit or mouse-over+scroll wheel to modify.\n"
 "Text edits: right-to-left overwrite <tt>Esc</tt>: cancel; <tt>Enter</tt>: "
 "confirm; postfix the edit with '+' or '-' to enter delta times.\n"
 msgstr ""
-"<b>Erloju nagusia</b> eskuin-klik bistaratzeko modua ezartzeko. Egin klik "
-"editatzeko; aldatzeko, klik+arrastatu digitu bat edo kurtso\n"
+"<b>Erloju nagusia</b> eskuin-klik bistaratze modua ezartzeko. Egin klik "
+"editatzeko; aldatzeko, klik+arrastatu digitua edo sagua\n"
+"gainean jarrita+korritze-gurpila.\n"
+"Testu-ediziorako: eskuinetik-ezkerrera gainidatzi <tt>Esc</tt>: utzi; "
+"<tt>Sartu tekla</tt>: berretsi; moldatu aldaketa '+' edo '-'\n"
+"teklekin delta-denbora sartzeko.\n"
 
 #: ardour_ui2.cc:94
 msgid ""
@@ -1592,10 +1595,16 @@ msgid ""
 "Text edits: right-to-left overwrite <tt>Esc</tt>: cancel; <tt>Enter</tt>: "
 "confirm; postfix the edit with '+' or '-' to enter delta times.\n"
 msgstr ""
+"<b>Erloju sekundarioa</b> eskuin-klik bistaratze modua ezartzeko. Egin klik "
+"editatzeko; aldatzeko, klik+arrastatu digitua edo sagua\n"
+"gainean jarrita+korritze-gurpila.\n"
+"Testu-ediziorako: eskuinetik-ezkerrera gainidatzi <tt>Esc</tt>: utzi; "
+"<tt>Sartu tekla</tt>: berretsi; moldatu aldaketa '+' edo '-'\n"
+"teklekin delta-denbora sartzeko.\n"
 
 #: ardour_ui2.cc:95
 msgid "Reset All Peak Meters"
-msgstr "Berrezari gailur-neurgailu guztiak."
+msgstr "Berrezari gailur-neurgailu guztiak"
 
 #: ardour_ui2.cc:96
 msgid "Show Error Log and acknowledge warnings"
@@ -1650,7 +1659,7 @@ msgstr "Geruzarik ez"
 
 #: ardour_ui2.cc:386 ardour_ui_ed.cc:454
 msgid "All In"
-msgstr "Denak"
+msgstr "Sarrera"
 
 #: ardour_ui2.cc:387 ardour_ui_ed.cc:456 ardour_ui_ed.cc:457
 msgid "All Disk"
@@ -1666,7 +1675,7 @@ msgstr "Desgaitu PDC"
 
 #: ardour_ui2.cc:391
 msgid "I/O Latency:"
-msgstr "S/I latentzia"
+msgstr "S/I latentzia:"
 
 #: ardour_ui2.cc:393
 msgid "Punch:"
@@ -1674,7 +1683,7 @@ msgstr ""
 
 #: ardour_ui2.cc:394
 msgid "Rec:"
-msgstr "Grb:"
+msgstr "Grab:"
 
 #: ardour_ui2.cc:399 ardour_ui2.cc:403 ardour_ui2.cc:407
 msgid ""
@@ -1699,25 +1708,29 @@ msgid ""
 "Force all tracks to monitor Input, unless they are explicitly set to monitor "
 "Disk"
 msgstr ""
+"Ezarri pista guztiak sarrera monitorizatzeko, diskoa monitorizatzeko "
+"ezarriak ez badaude"
 
 #: ardour_ui2.cc:414
 msgid ""
 "Force all tracks to monitor Disk playback, unless they are explicitly set to "
 "Input"
 msgstr ""
+"Ezarri pista guztiak diskoa monitorizatzeko, sarrera monitorizatzeko "
+"ezarriak ez badaude"
 
 #: ardour_ui2.cc:851 rc_option_editor.cc:3582 rc_option_editor.cc:3595
 #: rc_option_editor.cc:3607 rc_option_editor.cc:3609 rc_option_editor.cc:3611
 #: rc_option_editor.cc:3619 rc_option_editor.cc:3637 rc_option_editor.cc:3639
 #: rc_option_editor.cc:3647 rc_option_editor.cc:3658
 msgid "Appearance"
-msgstr ""
+msgstr "Itxura"
 
 #: ardour_ui2.cc:864 rc_option_editor.cc:2923 rc_option_editor.cc:2924
 #: rc_option_editor.cc:2925 rc_option_editor.cc:2936 rc_option_editor.cc:2937
 #: session_option_editor.cc:388
 msgid "Metronome"
-msgstr ""
+msgstr "Metronomoa"
 
 #: ardour_ui2.cc:877 ardour_ui_ed.cc:299 rc_option_editor.cc:3105
 #: rc_option_editor.cc:3118 rc_option_editor.cc:3126 rc_option_editor.cc:3137
@@ -1726,17 +1739,19 @@ msgstr ""
 #: rc_option_editor.cc:3210 rc_option_editor.cc:3218 rc_option_editor.cc:3221
 #: rc_option_editor.cc:3223 rc_option_editor.cc:3239
 msgid "Transport"
-msgstr ""
+msgstr "Garraioa"
 
 #: ardour_ui_access_web.cc:53
 msgid ""
 "<b>Just ask and wait for an answer.\n"
 "It may take from minutes to hours.</b>"
 msgstr ""
+"<b>Galdetu eta itxaron erantzuna.\n"
+"Minutu edo orduak igaro daitezke.</b>"
 
 #: ardour_ui_access_web.cc:55
 msgid "About the Chat"
-msgstr ""
+msgstr "Txataren inguruan"
 
 #: ardour_ui_access_web.cc:56
 msgid ""
@@ -1749,43 +1764,51 @@ msgid ""
 "You should just leave the chat window open and check back regularly until "
 "someone has answered your question."
 msgstr ""
+"Txataren barruan zaudenean, egin zure galdera eta itxaron erantzun bat. "
+"Benetako bizitza duten benetako pertsonek okupatzen dute txata; beraz, "
+"horietako asko pasiboki daude, eta baliteke minutu edo ordu batzuk geroago "
+"arte galdera ez irakurtzea.\n"
+"Beraz, mesedez, izan pazientzia eta itxaron erantzun bat.\n"
+"\n"
+"Txataren leihoa irekita utzi eta aldizka itzuli, norbaitek zure galderari "
+"erantzun arte."
 
 #: ardour_ui_dependents.cc:137
 msgid "Setup Editor"
-msgstr ""
+msgstr "Konfiguratu editorea"
 
 #: ardour_ui_dependents.cc:139
 msgid "Setup Mixer"
-msgstr ""
+msgstr "Konfiguratu Nahasgailua"
 
 #: ardour_ui_dependents.cc:146
 msgid "Reload Session History"
-msgstr ""
+msgstr "Birkargatu saio-historia"
 
 #: ardour_ui_dependents.cc:209
 msgid "Quit %1?"
-msgstr ""
+msgstr "%1 itxi?"
 
 #: ardour_ui_dependents.cc:261
 msgid "UI: cannot setup editor"
-msgstr ""
+msgstr "EI: ezin izan da konfiguratu editorea"
 
 #: ardour_ui_dependents.cc:266
 msgid "UI: cannot setup mixer"
-msgstr ""
+msgstr "EI: ezin izan da konfiguratu nahasgailua"
 
 #: ardour_ui_dependents.cc:271
 msgid "UI: cannot setup meterbridge"
-msgstr ""
+msgstr "EI: ezin izan da konfiguratu neurgailua"
 
 #: ardour_ui_dependents.cc:276
 msgid "UI: cannot setup luawindow"
-msgstr ""
+msgstr "EI: ezin izan da konfiguratu lua-leihoa"
 
 #: ardour_ui_dependents.cc:287 ardour_ui_ed.cc:160 ardour_ui_ed.cc:666
 #: rc_option_editor.cc:2108 rc_option_editor.cc:4176
 msgid "Preferences"
-msgstr ""
+msgstr "Hobespenak"
 
 #: ardour_ui_dependents.cc:288 ardour_ui_ed.cc:158 mixer_ui.cc:113
 #: mixer_ui.cc:431 rc_option_editor.cc:2580 rc_option_editor.cc:2589
@@ -1795,7 +1818,7 @@ msgstr ""
 #: rc_option_editor.cc:2669 rc_option_editor.cc:2677 rc_option_editor.cc:2685
 #: rc_option_editor.cc:2694 rc_option_editor.cc:2695
 msgid "Mixer"
-msgstr ""
+msgstr "Nahasgailua"
 
 #: ardour_ui_dependents.cc:289 ardour_ui_ed.cc:159 editor.cc:6064
 #: editor.cc:6311 public_editor.cc:35 rc_option_editor.cc:2300
@@ -1806,17 +1829,20 @@ msgstr ""
 #: rc_option_editor.cc:2428 rc_option_editor.cc:2442 rc_option_editor.cc:2453
 #: rc_option_editor.cc:2455 rc_option_editor.cc:2466 rc_option_editor.cc:2484
 msgid "Editor"
-msgstr ""
+msgstr "Editorea"
 
 #: ardour_ui_dependents.cc:443 editor_actions.cc:489
 msgid "Unset #%1"
 msgstr ""
 
 #: ardour_ui_dependents.cc:444
+#, fuzzy
 msgid ""
 "No action bound\n"
 "Right-click to assign"
 msgstr ""
+"Lotutako ekintzarik ez\n"
+"Eskuin-klik ezartzeko"
 
 #: ardour_ui_dependents.cc:448
 msgid ""
@@ -1829,15 +1855,15 @@ msgstr ""
 
 #: ardour_ui_dialogs.cc:306
 msgid "Don't close"
-msgstr ""
+msgstr "Ez itxi"
 
 #: ardour_ui_dialogs.cc:307
 msgid "Just close"
-msgstr ""
+msgstr "Itxi"
 
 #: ardour_ui_dialogs.cc:308
 msgid "Save and close"
-msgstr ""
+msgstr "Gorde eta itxi"
 
 #: ardour_ui_dialogs.cc:1004 ardour_ui_ed.cc:431 ardour_ui_ed.cc:442
 #: audio_clock.cc:2156 editor.cc:197 editor.cc:327 editor_actions.cc:611
@@ -1848,67 +1874,69 @@ msgstr ""
 #: session_option_editor.cc:114 session_option_editor.cc:116
 #: session_option_editor.cc:403
 msgid "Timecode"
-msgstr ""
+msgstr "Denbora-kodea"
 
 #: ardour_ui_dialogs.cc:1017 session_option_editor.cc:176
 #: session_option_editor.cc:184 session_option_editor.cc:208
 msgid "Media"
-msgstr ""
+msgstr "Multimedia"
 
 #: ardour_ui_ed.cc:143
 msgid "Escape (deselect all)"
-msgstr ""
+msgstr "Ihes (desautatu denak)"
 
 #: ardour_ui_ed.cc:148
 msgid "Close Current Dialog"
-msgstr ""
+msgstr "Itxi leiho hau"
 
 #: ardour_ui_ed.cc:152 rc_option_editor.cc:2868
 msgid "Session"
-msgstr ""
+msgstr "Saioa"
 
 #: ardour_ui_ed.cc:155 editor_actions.cc:172 editor_regions.cc:185
 #: port_group.cc:505 session_option_editor.cc:125 session_option_editor.cc:126
 #: session_option_editor.cc:133 session_option_editor.cc:140
 msgid "Sync"
-msgstr ""
+msgstr "Sink"
 
 #: ardour_ui_ed.cc:156 rc_option_editor.cc:2925
 msgid "Options"
-msgstr ""
+msgstr "Aukerak"
 
 #: ardour_ui_ed.cc:157
 msgid "Window"
-msgstr ""
+msgstr "Leihoa"
 
 #: ardour_ui_ed.cc:161 ardour_ui_ed.cc:676 ardour_ui_ed.cc:677
 #: ardour_ui_ed.cc:678
 msgid "Detach"
-msgstr ""
+msgstr "Banandu"
 
 #: ardour_ui_ed.cc:162
 msgid "Help"
-msgstr ""
+msgstr "Laguntza"
 
+# Misc. = Hainbat, anitz...
+# "Beste" erabaki dut ongi ulertzen dela iruditzen zaidalako.
 #: ardour_ui_ed.cc:163
 msgid "Misc. Shortcuts"
-msgstr ""
+msgstr "Beste laster-teklak"
 
 #: ardour_ui_ed.cc:164 session_option_editor.cc:176
 msgid "Audio File Format"
-msgstr ""
+msgstr "Audio-fitxategia formatua"
 
 #: ardour_ui_ed.cc:165
 msgid "File Type"
-msgstr ""
+msgstr "Fitxategi mota"
 
 #: ardour_ui_ed.cc:166 export_format_dialog.cc:82
 msgid "Sample Format"
-msgstr ""
+msgstr "Lagintze formatua"
 
 #: ardour_ui_ed.cc:167 rc_option_editor.cc:3342 rc_option_editor.cc:3343
 msgid "Control Surfaces"
-msgstr ""
+msgstr "Kontrol-gainazalak"
 
 #: ardour_ui_ed.cc:168 rc_option_editor.cc:3349 rc_option_editor.cc:3350
 #: rc_option_editor.cc:3356 rc_option_editor.cc:3365 rc_option_editor.cc:3376
@@ -1917,282 +1945,285 @@ msgstr ""
 #: rc_option_editor.cc:3540 rc_option_editor.cc:3554 rc_option_editor.cc:3557
 #: rc_option_editor.cc:3565 rc_option_editor.cc:3573 rc_option_editor.cc:3578
 msgid "Plugins"
-msgstr ""
+msgstr "Pluginak"
 
 #: ardour_ui_ed.cc:169 rc_option_editor.cc:2942
 msgid "Metering"
-msgstr ""
+msgstr "Neurgailuak"
 
 #: ardour_ui_ed.cc:170
 msgid "Fall Off Rate"
-msgstr ""
+msgstr "Erortze-tasa"
 
 #: ardour_ui_ed.cc:171
 msgid "Hold Time"
-msgstr ""
+msgstr "Mantentze-denbora"
 
 #: ardour_ui_ed.cc:172
 msgid "Denormal Handling"
-msgstr ""
+msgstr "Desnormaltze aukerak"
 
 #: ardour_ui_ed.cc:176 route_time_axis.cc:1596
 msgid "New..."
-msgstr ""
+msgstr "Berria..."
 
 #: ardour_ui_ed.cc:178
 msgid "Open..."
-msgstr ""
+msgstr "Ireki..."
 
 #: ardour_ui_ed.cc:179
 msgid "Recent..."
-msgstr ""
+msgstr "Azkenak..."
 
 #: ardour_ui_ed.cc:180 panner_editor.cc:29 playlist_selector.cc:66
 msgid "Close"
-msgstr ""
+msgstr "Itxi"
 
 #: ardour_ui_ed.cc:183
 msgid "Add Track, Bus or VCA..."
-msgstr ""
+msgstr "Gehitu pista, busa edo VCA..."
 
 #: ardour_ui_ed.cc:188
 msgid "Duplicate Tracks/Busses..."
-msgstr ""
+msgstr "Bikoiztu Pistak/Busak..."
 
 #: ardour_ui_ed.cc:194
 msgid "Cancel Solo"
-msgstr ""
+msgstr "Kendu soloa"
 
 #: ardour_ui_ed.cc:198
 msgid "Session|Scripting"
-msgstr ""
+msgstr "Scriptak"
 
 #: ardour_ui_ed.cc:201
 msgid "Open Video..."
-msgstr ""
+msgstr "Ireki bideoa..."
 
 #: ardour_ui_ed.cc:204
 msgid "Remove Video"
-msgstr ""
+msgstr "Ezabatu bideoa"
 
 #: ardour_ui_ed.cc:207
 msgid "Export to Video File..."
-msgstr ""
+msgstr "Esportatu bideo-artxibora..."
 
 #: ardour_ui_ed.cc:211
 msgid "Snapshot (& keep working on current version) ..."
-msgstr ""
+msgstr "Saio-argazkia (eta oraingo bertsioan jarraitu) ..."
 
 #: ardour_ui_ed.cc:214
 msgid "Snapshot (& switch to new version) ..."
-msgstr ""
+msgstr "Saio-argazkia (eta aldatu bertsio berrira) ..."
 
 #: ardour_ui_ed.cc:217
 msgid "Quick Snapshot (& keep working on current version) ..."
-msgstr ""
+msgstr "Saio-argazki azkarra (eta oraingo bertsioan jarraitu) ..."
 
 #: ardour_ui_ed.cc:220
 msgid "Quick Snapshot (& switch to new version) ..."
-msgstr ""
+msgstr "Saio-argazki azkarra (eta aldatu bertsio berrira) ..."
 
 #: ardour_ui_ed.cc:224
 msgid "Save As..."
-msgstr ""
+msgstr "Gorde honela..."
 
 #: ardour_ui_ed.cc:227
 msgid "Archive..."
-msgstr ""
+msgstr "Artxibatu..."
 
 #: ardour_ui_ed.cc:230 editor_actions.cc:1395 editor_markers.cc:919
 #: editor_snapshots.cc:141 foldback_strip.cc:1145 mixer_strip.cc:1716
 #: route_time_axis.cc:1592
 msgid "Rename..."
-msgstr ""
+msgstr "Berrizendatu..."
 
 #: ardour_ui_ed.cc:234
 msgid "Save Template..."
-msgstr ""
+msgstr "Gorde txantiloia..."
 
 #: ardour_ui_ed.cc:237
 msgid "Templates"
-msgstr ""
+msgstr "Txantiloiak"
 
 #: ardour_ui_ed.cc:240
 msgid "Metadata"
-msgstr ""
+msgstr "Metadatuak"
 
 #: ardour_ui_ed.cc:243
 msgid "Edit Metadata..."
-msgstr ""
+msgstr "Editatu metadatuak..."
 
 #: ardour_ui_ed.cc:246
 msgid "Import Metadata..."
-msgstr ""
+msgstr "Inportatu metadatuak..."
 
 #: ardour_ui_ed.cc:249 editor_export_audio.cc:70 export_channel_selector.cc:194
 #: export_channel_selector.cc:589 export_dialog.cc:161
 #: export_video_dialog.cc:86
 msgid "Export"
-msgstr ""
+msgstr "Esportatu"
 
 #: ardour_ui_ed.cc:252
 msgid "Flush Wastebasket"
-msgstr ""
+msgstr "Garbitu zakarrontzia"
 
 #: ardour_ui_ed.cc:260
 msgid "Quit"
-msgstr ""
+msgstr "Itxi"
 
 #: ardour_ui_ed.cc:261 ardour_ui_ed.cc:668 ardour_ui_ed.cc:669
 #: ardour_ui_ed.cc:670 automation_time_axis.cc:625 editor_markers.cc:918
 #: location_ui.cc:68 plugin_selector.cc:97 route_time_axis.cc:879
 msgid "Hide"
-msgstr ""
+msgstr "Ezkutatu"
 
 #: ardour_ui_ed.cc:264
 msgid "Show more UI preferences"
-msgstr ""
+msgstr "Erakutsi EI hobespen gehiago"
 
 #: ardour_ui_ed.cc:267
 msgid "Window|Scripting"
-msgstr ""
+msgstr "Scriptak"
 
 #: ardour_ui_ed.cc:268 meterbridge.cc:226 meterbridge.cc:232
 msgid "Window|Meterbridge"
-msgstr ""
+msgstr "Neurgailua"
 
 #: ardour_ui_ed.cc:270 midi_tracer.cc:48
 msgid "MIDI Tracer"
-msgstr ""
+msgstr "MIDI trazatzailea"
 
 #: ardour_ui_ed.cc:273
 msgid "Chat"
-msgstr ""
+msgstr "Txata"
 
 #: ardour_ui_ed.cc:275
 msgid "Help|Manual"
-msgstr ""
+msgstr "Eskuliburua"
 
 #: ardour_ui_ed.cc:276
 msgid "Manual|Reference"
-msgstr ""
+msgstr "Erreferentzia"
 
 #: ardour_ui_ed.cc:277
 msgid "Report a Bug"
-msgstr ""
+msgstr "Akatsen berri eman"
 
 #: ardour_ui_ed.cc:278
 msgid "Cheat Sheet"
-msgstr ""
+msgstr "Iruzur-orria"
 
 #: ardour_ui_ed.cc:279
 msgid "Website"
-msgstr ""
+msgstr "Web-orria"
 
 #: ardour_ui_ed.cc:280
 msgid "Development"
-msgstr ""
+msgstr "Garapena"
 
 #: ardour_ui_ed.cc:281
 msgid "User Forums"
-msgstr ""
+msgstr "Erabiltzaile-foruak"
 
 #: ardour_ui_ed.cc:282
 msgid "How to Report a Bug"
-msgstr ""
+msgstr "Nola eman akatsen berri"
 
 #: ardour_ui_ed.cc:284 luawindow.cc:101 luawindow.cc:693 plugin_ui.cc:467
 #: template_dialog.cc:321
 msgid "Save"
-msgstr ""
+msgstr "Gorde"
 
 #: ardour_ui_ed.cc:305 engine_dialog.cc:99 shuttle_control.cc:662
 msgid "Stop"
-msgstr ""
+msgstr "Gelditu"
 
 #: ardour_ui_ed.cc:308
 msgid "Roll"
-msgstr ""
+msgstr "Aurrera"
 
 #: ardour_ui_ed.cc:312 ardour_ui_ed.cc:315
 msgid "Start/Stop"
-msgstr ""
+msgstr "Hasi/Gelditu"
 
 #: ardour_ui_ed.cc:318
 msgid "Start/Continue/Stop"
-msgstr ""
+msgstr "Hasi/Jarraitu/Gelditu"
 
 #: ardour_ui_ed.cc:321
 msgid "Stop and Forget Capture"
-msgstr ""
+msgstr "Gelditu eta ahaztu argazkia"
 
 #: ardour_ui_ed.cc:325
 msgid "Play Loop Range"
-msgstr ""
+msgstr "Erreproduzitu loop-barrutia"
 
 #: ardour_ui_ed.cc:328
 msgid "Play Selection"
-msgstr ""
+msgstr "Erreproduzitu hautapena"
 
 #: ardour_ui_ed.cc:331
+#, fuzzy
 msgid "Play w/Preroll"
-msgstr ""
+msgstr "Erreproduzitu Preroll-ekin"
 
 #: ardour_ui_ed.cc:336
+#, fuzzy
 msgid "Record w/Preroll"
-msgstr ""
+msgstr "Grabatu Preroll-ekin"
 
 #: ardour_ui_ed.cc:340
+#, fuzzy
 msgid "Record w/Count-In"
-msgstr ""
+msgstr "Grabatu atzera-kontuarekin"
 
 #: ardour_ui_ed.cc:344
 msgid "Enable Record"
-msgstr ""
+msgstr "Aktibatu grabatzea"
 
 #: ardour_ui_ed.cc:347 ardour_ui_ed.cc:351
 msgid "Start Recording"
-msgstr ""
+msgstr "Hasi grabatzen"
 
 #: ardour_ui_ed.cc:355
 msgid "Rewind"
-msgstr ""
+msgstr "Birbobinatu"
 
 #: ardour_ui_ed.cc:358
 msgid "Rewind (Slow)"
-msgstr ""
+msgstr "Birbobinatu (mantso)"
 
 #: ardour_ui_ed.cc:361
 msgid "Rewind (Fast)"
-msgstr ""
+msgstr "Birbobinatu (azkar)"
 
 #: ardour_ui_ed.cc:364
 msgid "Forward"
-msgstr ""
+msgstr "Aurrera egin"
 
 #: ardour_ui_ed.cc:367
 msgid "Forward (Slow)"
-msgstr ""
+msgstr "Aurrera egin (mantso)"
 
 #: ardour_ui_ed.cc:370
 msgid "Forward (Fast)"
-msgstr ""
+msgstr "Aurrera egin (azkar)"
 
 #: ardour_ui_ed.cc:373
 msgid "Go to Zero"
-msgstr ""
+msgstr "Joan zerora"
 
 #: ardour_ui_ed.cc:376 ardour_ui_ed.cc:379
 msgid "Go to Start"
-msgstr ""
+msgstr "Joan hasierara"
 
 #: ardour_ui_ed.cc:382
 msgid "Go to End"
-msgstr ""
+msgstr "Joan amaierara"
 
 #: ardour_ui_ed.cc:385
 msgid "Go to Wall Clock"
-msgstr ""
+msgstr "Joan ordularira"
 
 #: ardour_ui_ed.cc:390 ardour_ui_ed.cc:393
 msgid "Numpad Decimal"
@@ -2240,28 +2271,28 @@ msgstr ""
 
 #: ardour_ui_ed.cc:427
 msgid "Focus On Clock"
-msgstr ""
+msgstr "Arreta erlojuan"
 
 #: ardour_ui_ed.cc:433 ardour_ui_ed.cc:444 editor_actions.cc:609
 msgid "Bars & Beats"
-msgstr ""
+msgstr "Konpas eta pultsuak"
 
 #: ardour_ui_ed.cc:435 ardour_ui_ed.cc:446
 msgid "Minutes & Seconds"
-msgstr ""
+msgstr "Minutu eta segundoak"
 
 #: ardour_ui_ed.cc:437 ardour_ui_ed.cc:448 audio_clock.cc:2159
 msgid "Seconds"
-msgstr ""
+msgstr "Segundoak"
 
 #: ardour_ui_ed.cc:439 ardour_ui_ed.cc:450 audio_clock.cc:2160 editor.cc:328
 #: editor_actions.cc:610
 msgid "Samples"
-msgstr ""
+msgstr "Laginak"
 
 #: ardour_ui_ed.cc:453
 msgid "All Input"
-msgstr ""
+msgstr "Sarrera"
 
 #: ardour_ui_ed.cc:460
 msgid "Punch In"
@@ -2277,174 +2308,178 @@ msgstr ""
 
 #: ardour_ui_ed.cc:469
 msgid "In/Out"
-msgstr ""
+msgstr "Sarrera/Irteera"
 
 #: ardour_ui_ed.cc:472
 msgid "Click"
-msgstr ""
+msgstr "Klaketa"
 
 #: ardour_ui_ed.cc:475
 msgid "Auto Input"
-msgstr ""
+msgstr "Auto-sarrera"
 
 #: ardour_ui_ed.cc:478
 msgid "Auto Play"
-msgstr ""
+msgstr "Auto-erreproduzitzea"
 
 #: ardour_ui_ed.cc:488
 msgid "Disable Latency Compensation"
-msgstr ""
+msgstr "Desgaitu atzerapen-konpentsazioa"
 
 #: ardour_ui_ed.cc:491 new_user_wizard.cc:406
 msgid "Monitor Section"
-msgstr ""
+msgstr "Monitorizazio-eremua"
 
 #: ardour_ui_ed.cc:494
 msgid "Sync Startup to Video"
-msgstr ""
+msgstr "Sinkronizatu hasiera bideora"
 
 #: ardour_ui_ed.cc:496
 msgid "Time Master"
-msgstr ""
+msgstr "Nagusia"
 
 #: ardour_ui_ed.cc:498
 msgid "Use External Positional Sync Source"
-msgstr ""
+msgstr "Erabili kanpoko kokapen-sinkronizazioa"
 
 #: ardour_ui_ed.cc:503
 msgid "Toggle Record Enable Track %1"
-msgstr ""
+msgstr "Gaitu/Desgaitu %1 pistaren grabazioa"
 
 #: ardour_ui_ed.cc:510
 msgid "Percentage"
-msgstr ""
+msgstr "Ehunekoa"
 
 #: ardour_ui_ed.cc:511 shuttle_control.cc:211
 msgid "Semitones"
-msgstr ""
+msgstr "Tonuerdiak"
 
 #: ardour_ui_ed.cc:515
 msgid "Send MTC"
-msgstr ""
+msgstr "Bidali MTC"
 
 #: ardour_ui_ed.cc:517
 msgid "Send MMC"
-msgstr ""
+msgstr "Bidali MMC"
 
 #: ardour_ui_ed.cc:519
 msgid "Use MMC"
-msgstr ""
+msgstr "Erabili MMC"
 
 #: ardour_ui_ed.cc:521
 msgid "Send MIDI Clock"
-msgstr ""
+msgstr "Bidali MIDI-erlojua"
 
 #: ardour_ui_ed.cc:527
+#, fuzzy
 msgid "Panic (Send MIDI all-notes-off)"
-msgstr ""
+msgstr "Ikara"
 
 #: ardour_ui_ed.cc:553
 msgid "Transition to Roll"
-msgstr ""
+msgstr "Trantsizioa aurreruntz"
 
 #: ardour_ui_ed.cc:557
 msgid "Transition to Reverse"
-msgstr ""
+msgstr "Trantsizioa atzeruntz"
 
 #: ardour_ui_ed.cc:561 ardour_ui_ed.cc:595
 msgid "Jump to Previous Mark"
-msgstr ""
+msgstr "Salto aurreko markara"
 
 #: ardour_ui_ed.cc:564 ardour_ui_ed.cc:593
 msgid "Jump to Next Mark"
-msgstr ""
+msgstr "Salto hurrengo markara"
 
 #: ardour_ui_ed.cc:567 editor_audio_import.cc:356 luawindow.cc:100
 #: pt_import_selector.cc:43 session_import_dialog.cc:82
 #: session_import_dialog.cc:104 session_metadata_dialog.cc:465 sfdb_ui.cc:638
 #: template_dialog.cc:225 editor_videotimeline.cc:94
 msgid "Import"
-msgstr ""
+msgstr "Inportatu"
 
 #: ardour_ui_ed.cc:571
 msgid "Stem export..."
-msgstr ""
+msgstr "Zatika esportatu..."
 
 #: ardour_ui_ed.cc:574
 msgid "Export to Audio File(s)..."
-msgstr ""
+msgstr "Esportatu audio-artxibo(ta)ra..."
 
 #: ardour_ui_ed.cc:577
 msgid "Clean-up Unused Sources..."
-msgstr ""
+msgstr "Garbitu erabili gabeko fitxategiak..."
 
 #: ardour_ui_ed.cc:581
 msgid "Clean-up Unused Regions..."
-msgstr ""
+msgstr "Garbitu erabili gabeko eremuak..."
 
 #: ardour_ui_ed.cc:585
 msgid "Rebuild Peak Files"
-msgstr ""
+msgstr "Berreraiki gailur-fitxategiak"
 
+# Playhead nola euskaratu?
+# Erreprodukzio-burua?
+# Denbora-marka?
 #: ardour_ui_ed.cc:598
 msgid "Set Session Start from Playhead"
-msgstr ""
+msgstr "Zehaztu saio-hasiera denbora-markaz"
 
 #: ardour_ui_ed.cc:600
 msgid "Set Session End from Playhead"
-msgstr ""
+msgstr "Zehaztu saio-amaiera denbora-markaz"
 
 #: ardour_ui_ed.cc:603
 msgid "Toggle Mark at Playhead"
-msgstr ""
+msgstr "Gaitu/Desgaitu marka denbora-markaz"
 
 #: ardour_ui_ed.cc:605 ardour_ui_ed.cc:607
 msgid "Add Mark from Playhead"
-msgstr ""
+msgstr "Gehitu marka denbora-markan"
 
 #: ardour_ui_ed.cc:610 ardour_ui_ed.cc:612
 msgid "Remove Mark at Playhead"
-msgstr ""
+msgstr "Ezabatu marka denbora-markan"
 
 #: ardour_ui_ed.cc:615
 msgid "Nudge Next Later"
-msgstr ""
+msgstr "Atzeratu gertukora"
 
 #: ardour_ui_ed.cc:617
 msgid "Nudge Next Earlier"
-msgstr ""
+msgstr "Aurreratu gertukora"
 
 #: ardour_ui_ed.cc:620
 msgid "Nudge Playhead Forward"
-msgstr ""
+msgstr "Aurreratu denbora-marka"
 
 #: ardour_ui_ed.cc:622
 msgid "Nudge Playhead Backward"
-msgstr ""
+msgstr "Atzeratu denbora-marka"
 
 #: ardour_ui_ed.cc:624
 msgid "Playhead to Next Grid"
-msgstr ""
+msgstr "Denbora-marka hurrengo gidara"
 
 #: ardour_ui_ed.cc:626
 msgid "Playhead to Previous Grid"
-msgstr ""
+msgstr "Denbora-marka aurreko gidara"
 
 #: ardour_ui_ed.cc:629
 msgid "Start Range from Playhead"
-msgstr ""
+msgstr "Hasi barrutia denbora-markan"
 
 #: ardour_ui_ed.cc:631
 msgid "Finish Range from Playhead"
-msgstr ""
+msgstr "Bukatu barrutia denbora-markan"
 
 #: ardour_ui_ed.cc:633 ardour_ui_ed.cc:645
 msgid "Start Range"
-msgstr ""
+msgstr "Hasi barrutia"
 
 #: ardour_ui_ed.cc:635 ardour_ui_ed.cc:647
 msgid "Finish Range"
-msgstr ""
+msgstr "Bukatu barrutia"
 
 #: ardour_ui_ed.cc:637
 msgid "Start Punch Range"
@@ -2456,173 +2491,181 @@ msgstr ""
 
 #: ardour_ui_ed.cc:641
 msgid "Start Loop Range"
-msgstr ""
+msgstr "Hasi loop-barrutia"
 
 #: ardour_ui_ed.cc:643
 msgid "Finish Loop Range"
-msgstr ""
+msgstr "Bukatu loop-barrutia"
 
 #: ardour_ui_ed.cc:650
 msgid "Select All Visible Lanes"
-msgstr ""
+msgstr "Hautatu prozesadore ikusgarri guztiak"
 
 #: ardour_ui_ed.cc:652
 msgid "Select All Tracks"
-msgstr ""
+msgstr "Hautatu pista guztiak"
 
 #: ardour_ui_ed.cc:654 export_timespan_selector.cc:66 processor_box.cc:3850
 msgid "Deselect All"
-msgstr ""
+msgstr "Desautatu guztiak"
 
 #: ardour_ui_ed.cc:656 editor.cc:2013 editor.cc:2091
 msgid "Invert Selection"
-msgstr ""
+msgstr "Alderantzikatu hautapena"
 
 #: ardour_ui_ed.cc:659
 msgid "Solo Selection"
-msgstr ""
+msgstr "Hautapena solo moduan"
 
 #: ardour_ui_ed.cc:672 ardour_ui_ed.cc:673 ardour_ui_ed.cc:674
 msgid "Attach"
-msgstr ""
+msgstr "Birkokatu"
 
 #: ardour_ui_ed.cc:680
 msgid "Show Mixer"
-msgstr ""
+msgstr "Erakutsi Nahasgailua"
 
 #: ardour_ui_ed.cc:681
 msgid "Show Editor"
-msgstr ""
+msgstr "Erakutsi Editorea"
 
 #: ardour_ui_ed.cc:687 ardour_ui_ed.cc:688 ardour_ui_ed.cc:689
 #: ardour_ui_ed.cc:695 ardour_ui_ed.cc:696 ardour_ui_ed.cc:697
 msgid "Change"
-msgstr ""
+msgstr "Aldaketa"
 
 #: ardour_ui_ed.cc:699
 msgid "Previous Tab"
-msgstr ""
+msgstr "Aurreko fitxa"
 
 #: ardour_ui_ed.cc:700
 msgid "Next Tab"
-msgstr ""
+msgstr "Hurrengo fitxa"
 
 #: ardour_ui_ed.cc:702
 msgid "Toggle Editor & Mixer"
-msgstr ""
+msgstr "Kommutatu Editorea eta Nahasgailua"
 
 #: ardour_ui_ed.cc:706
 msgid "Maximise Editor Space"
-msgstr ""
+msgstr "Maximizatu Editorea"
 
 #: ardour_ui_ed.cc:707
 msgid "Maximise Mixer Space"
-msgstr ""
+msgstr "Maximizatu Nahasgailua"
 
 #: ardour_ui_ed.cc:778
 msgid "Path to Session"
-msgstr ""
+msgstr "Bidea saiora"
 
 #: ardour_ui_ed.cc:779
 msgid "Active Peak-file Work"
-msgstr ""
+msgstr "Aktibatu gailur-fitxategia"
 
 #: ardour_ui_ed.cc:780
 msgid "File Format"
-msgstr ""
+msgstr "Fitxategi-formatua"
 
 #: ardour_ui_ed.cc:781
 msgid "Timecode Format"
-msgstr ""
+msgstr "Denbora-kode formatua"
 
 #: ardour_ui_ed.cc:783
 msgid "Disk Space"
-msgstr ""
+msgstr "Disko-espazioa"
 
 #: ardour_ui_ed.cc:787
 msgid "Wall Clock"
-msgstr ""
+msgstr "Ordua"
 
 #: ardour_ui_ed.cc:799
 msgid "Double click to open session folder."
-msgstr ""
+msgstr "Egin klik bikoitza saioaren karpeta irekitzeko."
 
 #: ardour_ui_ed.cc:800
 msgid "Double click to edit audio file format."
-msgstr ""
+msgstr "Egin klik bikoitza audio-fitxategiaren formatua aldatzeko."
 
 #: ardour_ui_ed.cc:801
 msgid "Double click to change timecode settings."
-msgstr ""
+msgstr "Egin klik bikoitza denbora-kode ezarpenak aldatzeko."
 
 #: ardour_ui_ed.cc:802
 msgid "Double click to show audio/midi setup."
-msgstr ""
+msgstr "Egin klik bikoitza audio/midi konfigurazioa erakusteko."
 
 #: ardour_ui_engine.cc:60
 msgid "This is a free/demo copy of %1. It has just switched to silent mode."
 msgstr ""
+"Hau %1-(r)en probazko/muxutrukeko bertsio bat da. Isilpean egotera aldatu da."
 
 #: ardour_ui_engine.cc:66
 msgid "%1 is now silent"
-msgstr ""
+msgstr "Orain %1 isilik dago"
 
 #: ardour_ui_engine.cc:68
 msgid ""
 "Please consider paying for a copy of %1 - you can pay whatever you want."
-msgstr ""
+msgstr "Pentsatu %1-(r)engatik ordaintzea - zuk nahi duzuna ordain dezakezu."
 
 #: ardour_ui_engine.cc:69
 msgid "Better yet become a subscriber - subscriptions start at US$1 per month."
 msgstr ""
+"Are hobeto, bihurtu harpidedun - harpidetza hilean $1 ordainduz hasten da."
 
 #: ardour_ui_engine.cc:70
 msgid "Pay for a copy (via the web)"
-msgstr ""
+msgstr "Ordaindu kopia batengatik (web-orritik)"
 
 #: ardour_ui_engine.cc:71
 msgid "Become a subscriber (via the web)"
-msgstr ""
+msgstr "Bihurtu harpidedun (web-orritik)"
 
 #: ardour_ui_engine.cc:90
 msgid "Remain silent"
-msgstr ""
+msgstr "Mantendu isilpean"
 
 #: ardour_ui_engine.cc:92
 msgid "Give me more time"
-msgstr ""
+msgstr "Eman denbora gehiago"
 
 #: ardour_ui_engine.cc:117
 msgid "xrun"
-msgstr ""
+msgstr "xrun"
 
 #: ardour_ui_engine.cc:126
 msgid "Recording was stopped because your system could not keep up."
 msgstr ""
+"Grabazioa gelditu egin da zure sistemak ezin izan duelako erritmoa mantendu."
 
 #: ardour_ui_engine.cc:153
 msgid ""
 "%1 is not connected to any audio backend.\n"
 "You cannot open or close sessions in this condition"
 msgstr ""
+"%1 ez dago inolako audio-motorrera konektatuta.\n"
+"Ezin duzu saiorik ireki edo itxi baldintza hauetan"
 
 #: ardour_ui_options.cc:64
 msgid ""
 "It is not possible to use JACK as the the sync source\n"
 " when the pull up/down setting is non-zero."
 msgstr ""
+"Ez da posible JACK sinkronizazio-motortzat erabiltzea\n"
+"igoera/jaitsiera posizioa zero ez denean."
 
 #: ardour_ui_options.cc:307 ardour_ui_options.cc:327
 msgid "SyncSource|Int."
-msgstr ""
+msgstr "Int."
 
 #: ardour_ui_options.cc:573
 msgid "Enable/Disable external positional sync"
-msgstr ""
+msgstr "Gaitu/Desgaitu kanpoko posizio-sikronizazioa"
 
 #: ardour_ui_options.cc:575
 msgid "Sync to JACK is not possible: video pull up/down is set"
 msgstr ""
+"Ez da posible JACKekin sinkronizatzea: bideo igoera/jaitsiera jada badago"
 
 #: ardour_ui_session.cc:88 startup_fsm.cc:851
 msgid ""
@@ -2630,14 +2673,17 @@ msgid ""
 "%1\n"
 "already exists. Do you want to open it?"
 msgstr ""
+"Saio hau\n"
+"%1\n"
+"jada badago. Ireki nahi duzu?"
 
 #: ardour_ui_session.cc:97 startup_fsm.cc:861
 msgid "Open Existing Session"
-msgstr ""
+msgstr "Ireki lehendik dagoen saioa"
 
 #: ardour_ui_session.cc:186 ardour_ui_session.cc:1100 startup_fsm.cc:673
 msgid "Extracting session-archive failed: %1"
-msgstr ""
+msgstr "Akatsa saio-fitxategia erauztean: %1"
 
 #: ardour_ui_session.cc:236 ardour_ui_session.cc:269 ardour_ui_session.cc:797
 #: startup_fsm.cc:741
@@ -2645,37 +2691,41 @@ msgid ""
 "To ensure compatibility with various systems\n"
 "session names may not contain a '%1' character"
 msgstr ""
+"Sistemen arteko bateragarritasuna ziurtatzeko,\n"
+"saioak ez du '%1' hizkirik eduki behar"
 
 #: ardour_ui_session.cc:261 startup_fsm.cc:774
 msgid "There is no existing session at \"%1\""
-msgstr ""
+msgstr "Ez dago saiorik \"%1\" direktorioan"
 
 #: ardour_ui_session.cc:390
 msgid "Please wait while %1 loads your session"
-msgstr ""
+msgstr "Itxaron %1-(e)k saioa kargatu arte"
 
 #: ardour_ui_session.cc:405
 msgid "Port Registration Error"
-msgstr ""
+msgstr "Ataka-erregisto errorea"
 
 #: ardour_ui_session.cc:406
 msgid "Click the Close button to try again."
-msgstr ""
+msgstr "Sakatu\"Itxi\" botoia berriro saiatzeko."
 
 #: ardour_ui_session.cc:426
 msgid ""
 "Session \"%1 (snapshot %2)\" did not load successfully:\n"
 "%3%4%5"
 msgstr ""
+"\"%1 (%2 saio-argazkia)\" saioa ez da ongi kargatu:\n"
+"%3%4%5"
 
 #: ardour_ui_session.cc:432 ardour_ui_session.cc:453 ardour_ui_session.cc:641
 #: ardour_ui_session.cc:654
 msgid "Loading Error"
-msgstr ""
+msgstr "Akatsa kargatzean"
 
 #: ardour_ui_session.cc:447
 msgid "Session \"%1 (snapshot %2)\" did not load successfully.%3%4"
-msgstr ""
+msgstr "\"%1 (%2 saio-argazkia)\" saioa ez da ongi kargatu: %3%4"
 
 #: ardour_ui_session.cc:463
 msgid ""
@@ -2688,10 +2738,18 @@ msgid ""
 "If you need to continue using tape tracks/destructive recording\n"
 "please use an older version of %1 to work on this session"
 msgstr ""
+"Saio honek (%1-(r)en bertsio zaharragokoak) gutxienez \n"
+"\"zinta-pista\" (grabaketa suntsikor) bat erabili zuen.\n"
+"\n"
+"Programak jada ez du hori onartzen. Zinta-pistak pista normaltzat "
+"birkonfiguratu dira.\n"
+"\n"
+"Zinta-pistak (grabaketa suntsikorrak) erabiltzen jarraitu nahi baduzu\n"
+"erabili %1-(r)en bertsio zaharrago bat saio honekin lan egiteko"
 
 #: ardour_ui_session.cc:472
 msgid "Tape Tracks No Longer Supported"
-msgstr ""
+msgstr "Zinta-pistak jada ez dira onartzen"
 
 #: ardour_ui_session.cc:494
 msgid ""
@@ -2699,30 +2757,33 @@ msgid ""
 "\n"
 "You will not be able to record or save."
 msgstr ""
+"Saio hau irakurtzeko soilik ireki da.\n"
+"\n"
+"Ezingo duzu ezer grabatu edo gorde."
 
 #: ardour_ui_session.cc:499
 msgid "Read-only Session"
-msgstr ""
+msgstr "Soilik irakurtzeko saioa"
 
 #: ardour_ui_session.cc:640
 msgid "Could not create session in \"%1\": %2%3%4"
-msgstr ""
+msgstr "Ezin izan da saioa %1-(e)n sortu: %2%3%4"
 
 #: ardour_ui_session.cc:653
 msgid "Could not create session in \"%1\"%2%3"
-msgstr ""
+msgstr "Ezin izan da saioa %1-(e)n sortu: %2%3"
 
 #: ardour_ui_session.cc:704
 msgid "Abort saving snapshot"
-msgstr ""
+msgstr "Ez gorde saio-argazkia"
 
 #: ardour_ui_session.cc:705
 msgid "Don't save now, just snapshot"
-msgstr ""
+msgstr "Ez gorde orain, soilik saio-argazkia atera"
 
 #: ardour_ui_session.cc:706 ardour_ui_session.cc:858
 msgid "Save it first"
-msgstr ""
+msgstr "Gorde lehenik"
 
 #: ardour_ui_session.cc:714 ardour_ui_session.cc:866
 msgid ""
@@ -2732,101 +2793,111 @@ msgid ""
 "\n"
 "\"Don't save now\" option."
 msgstr ""
+"%1-ek ezin izan du zure saioa gorde.\n"
+"\n"
+"Oraindik jarraitu nahi baduzu, erabili\n"
+"\n"
+"\"Ez gorde orain\" aukera."
 
 #: ardour_ui_session.cc:732
 msgid "Snapshot and switch"
-msgstr ""
+msgstr "Saio-argazkia eta aldatu"
 
 #: ardour_ui_session.cc:733 ardour_ui_session.cc:782
 msgid "New session name"
-msgstr ""
+msgstr "Saio-izen berria"
 
 #: ardour_ui_session.cc:735
 msgid "Take Snapshot"
-msgstr ""
+msgstr "Atera saio-argazkia"
 
 #: ardour_ui_session.cc:736
 msgid "Name of new snapshot"
-msgstr ""
+msgstr "Saio-argazki berriaren izena"
 
 #: ardour_ui_session.cc:778
 msgid "Name Session"
-msgstr ""
+msgstr "Izendatu saioa"
 
 #: ardour_ui_session.cc:779
 msgid "Session name"
-msgstr ""
+msgstr "Saioaren izena"
 
 #: ardour_ui_session.cc:781
 msgid "Rename Session"
-msgstr ""
+msgstr "Berrizendatu saioa"
 
 #: ardour_ui_session.cc:805
 msgid ""
 "That name is already in use by another directory/folder. Please try again."
-msgstr ""
+msgstr "Izen hori jada badago beste direktorio/karpeta batean. Saiatu berriro."
 
 #: ardour_ui_session.cc:813
 msgid ""
 "Renaming this session failed.\n"
 "Things could be seriously messed up at this point"
 msgstr ""
+"Saioa berrizendatzeak huts egin du.\n"
+"Kontua oso zapuztuta egon liteke puntu honetan"
 
 #: ardour_ui_session.cc:833
 #, c-format
 msgid "Copied %<PRId64> of %<PRId64>"
-msgstr ""
+msgstr "Kopiatuta %<PRId64>-(e)tik %<PRId64>-(e)ra"
 
 #: ardour_ui_session.cc:856
 msgid "Abort save-as"
-msgstr ""
+msgstr "Utzi \"Gorde honela\""
 
 #: ardour_ui_session.cc:857
 msgid "Don't save now, just save-as"
-msgstr ""
+msgstr "Ez gorde orain, soilik \"Gorde honela\""
 
 #: ardour_ui_session.cc:913 save_as_dialog.cc:35
 msgid "Save As"
-msgstr ""
+msgstr "Gorde honela"
 
 #: ardour_ui_session.cc:940
 msgid "Save As failed: %1"
-msgstr ""
+msgstr "Akatsa \"Gorde honela\" egitean: %1"
 
 #: ardour_ui_session.cc:977
 msgid "Session Archiving failed."
-msgstr ""
+msgstr "Akatsa saioa artxibatzean."
 
 #: ardour_ui_session.cc:1005
 msgid ""
 "To ensure compatibility with various systems\n"
 "snapshot names may not contain a '%1' character"
 msgstr ""
+"Sistemen arteko bateragarritasuna ziurtatzeko,\n"
+"saio-argazkiak ez du '%1' hizkirik eduki behar"
 
 #: ardour_ui_session.cc:1019
 msgid "Confirm Snapshot Overwrite"
-msgstr ""
+msgstr "Berretsi saio-argazkia gainidaztea"
 
 #: ardour_ui_session.cc:1020
 msgid "A snapshot already exists with that name. Do you want to overwrite it?"
 msgstr ""
+"Jada badago izen hori duen saio-argazki bat. Gainidatzi egin nahi duzu?"
 
 #: ardour_ui_session.cc:1042
 msgid "Open Session"
-msgstr ""
+msgstr "Ireki saioa"
 
 #: ardour_ui_session.cc:1066 session_dialog.cc:452 session_import_dialog.cc:179
 #: session_metadata_dialog.cc:921
 msgid "%1 sessions"
-msgstr ""
+msgstr "%1 saioak"
 
 #: ardour_ui_session.cc:1071 session_dialog.cc:457
 msgid "Session Archives"
-msgstr ""
+msgstr "Saio-fitxategiak"
 
 #: ardour_ui_session.cc:1157
 msgid "Unsaved Session"
-msgstr ""
+msgstr "Saio gordegabea"
 
 #: ardour_ui_session.cc:1178
 msgid ""
@@ -2838,6 +2909,13 @@ msgid ""
 "\n"
 "What do you want to do?"
 msgstr ""
+"\"%1\" saioa\n"
+"ez da gorde.\n"
+"\n"
+"Orain egindako edozein aldaketa\n"
+"galdu egingo da gorde ezean.\n"
+"\n"
+"Zer egin nahi duzu?"
 
 #: ardour_ui_session.cc:1181
 msgid ""
@@ -2849,10 +2927,17 @@ msgid ""
 "\n"
 "What do you want to do?"
 msgstr ""
+"\"%1\" saio-argazkia\n"
+"ez da gorde.\n"
+"\n"
+"Orain egindako edozein aldaketa\n"
+"galdu egingo da gorde ezean.\n"
+"\n"
+"Zer egin nahi duzu?"
 
 #: ardour_ui_session.cc:1195
 msgid "Prompter"
-msgstr ""
+msgstr "Prompterra"
 
 #: ardour_ui_startup.cc:167
 msgid ""
@@ -2868,10 +2953,21 @@ msgid ""
 "\n"
 "From now on, use the backup copy with older versions of %3"
 msgstr ""
+"%4Hau %3%5-(r)en bertsio zaharrago bateko saioa da\n"
+"\n"
+"%3-(e)k saio-fitxategi zahar hau kopiatu du:\n"
+"\n"
+"%6%1%7\n"
+"\n"
+"hona:\n"
+"\n"
+"%6%2%7\n"
+"\n"
+"Hemendik aurrera erabili babeskopia %3-(r)en bertsio zaharragoekin"
 
 #: ardour_ui_startup.cc:183
 msgid "Sample Rate Mismatch"
-msgstr ""
+msgstr "Lagin-tasan bat ez etortzea"
 
 #: ardour_ui_startup.cc:184
 msgid ""
@@ -2879,14 +2975,17 @@ msgid ""
 "%2 is currently running at %3 Hz.  If you load this session,\n"
 "audio may be played at the wrong sample rate.\n"
 msgstr ""
+"Saio hau %1 Hz-ko lagin-tasa batekin sortu zen, baina %2\n"
+"%3 Hz-tan lanean ari da. Saioa kargatzen baduzu,\n"
+"audioa lagin-tasa okerrean erreproduzitu daiteke.\n"
 
 #: ardour_ui_startup.cc:193
 msgid "Do not load session"
-msgstr ""
+msgstr "Ez kargatu saioa"
 
 #: ardour_ui_startup.cc:194
 msgid "Load session anyway"
-msgstr ""
+msgstr "Kargatu saioa dena den"
 
 #: ardour_ui_startup.cc:214
 msgid ""
@@ -2896,26 +2995,31 @@ msgid ""
 "Re-Configure the Audio Engine in\n"
 "Menu > Window > Audio/Midi Setup"
 msgstr ""
+"Saio hau %1 Hz-ko lagin-tasa batekin sortu zen, baina %2\n"
+"%3 Hz-tan lanean ari da.\n"
+"Audioa lagin-tasa okerrean grabatu eta erreproduzituko da.\n"
+"Birkonfiguratu audio-motorra hemen:\n"
+"Menua > Leihoa > Audio/Midi konfigurazioa"
 
 #: ardour_ui_startup.cc:380
 msgid "NSM: initialization failed"
-msgstr ""
+msgstr "NSM: hasieraketak huts egin du"
 
 #: ardour_ui_startup.cc:406
 msgid "NSM server did not announce itself"
-msgstr ""
+msgstr "NSM morroia ez da iragarri"
 
 #: ardour_ui_startup.cc:419
 msgid "NSM: no client ID provided"
-msgstr ""
+msgstr "NSM: ez da bezero-IDrik eman"
 
 #: ardour_ui_startup.cc:426
 msgid "NSM: no session created"
-msgstr ""
+msgstr "NSM: ez da saiorik sortu"
 
 #: ardour_ui_startup.cc:571 new_user_wizard.cc:419
 msgid "%1 is ready for use"
-msgstr ""
+msgstr "%1 erabiltzeko prest dago"
 
 #: ardour_ui_startup.cc:621
 msgid ""
@@ -2925,46 +3029,57 @@ msgid ""
 "You can view the memory limit with 'ulimit -l', and it is normally "
 "controlled by %2"
 msgstr ""
+"ABISUA: Zure sistemak muga bat du blokeatutako gehienezko memoria-"
+"kopururako. Horren ondorioz, %1 memoriarik gabe gera daiteke sistema "
+"memoriaz agortu baino lehen.\n"
+"\n"
+"Memoriaren muga 'ulimit -l' komandoarekin ikus dezakezu, eta normalean %2 "
+"bidez kontrolatzen da"
 
 #: ardour_ui_startup.cc:638
 msgid "Do not show this window again"
-msgstr ""
+msgstr "Ez erakutsi leiho hau berriro"
 
 #: ardour_ui_video.cc:70
 msgid "Video-Server was not launched by %1. The request to stop it is ignored."
 msgstr ""
+"%1-(e)k ez du bideo-morroia abiarazi. Gelditzeko eskaera ez da kontuan hartu."
 
 #: ardour_ui_video.cc:74
 msgid "Stop Video-Server"
-msgstr ""
+msgstr "Gelditu bideo-morroia"
 
 #: ardour_ui_video.cc:75
 msgid "Do you really want to stop the Video Server?"
-msgstr ""
+msgstr "Benetan gelditu nahi duzu bideo-morroia?"
 
 #: ardour_ui_video.cc:78
 msgid "Yes, Stop It"
-msgstr ""
+msgstr "Bai, gelditu"
 
 #: ardour_ui_video.cc:107
 msgid "The Video Server is already started."
-msgstr ""
+msgstr "Bideo-morroia jada lanean ari da."
 
 #: ardour_ui_video.cc:109
 msgid ""
 "An external Video Server is configured and can be reached. Not starting a "
 "new instance."
 msgstr ""
+"Kanpoko bideo-morroi bat konfiguratuta dago eta erabilgarri. Ez da "
+"instantzia berririk hasiko."
 
 #: ardour_ui_video.cc:117 ardour_ui_video.cc:229
 msgid ""
 "Could not connect to the Video Server. Start it or configure its access URL "
 "in Preferences."
 msgstr ""
+"Ezin izan da bideo-morroira konektatu. Abiarazi edo konfiguratu bere URL-"
+"sarbidea Hobespenetan."
 
 #: ardour_ui_video.cc:150
 msgid "Specified docroot is not an existing directory."
-msgstr ""
+msgstr "Zehaztutako \"docroota\" ez da existitzen den direktorio bat."
 
 #: ardour_ui_video.cc:156 ardour_ui_video.cc:162
 msgid "Given Video Server is not an executable file."
