@@ -837,7 +837,7 @@ private:
 
 	void toggle_latency_switch ();
 	void latency_switch_changed ();
-	void session_latency_updated ();
+	void session_latency_updated (bool);
 
 	void feedback_detected ();
 

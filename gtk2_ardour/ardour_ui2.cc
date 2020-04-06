@@ -604,7 +604,7 @@ ARDOUR_UI::setup_transport ()
 
 	/* initialize */
 	latency_switch_changed ();
-	session_latency_updated ();
+	session_latency_updated (true);
 
 	repack_transport_hbox ();
 	update_clock_visibility ();
@@ -631,8 +631,16 @@ ARDOUR_UI::latency_switch_changed ()
 }
 
 void
-ARDOUR_UI::session_latency_updated ()
+ARDOUR_UI::session_latency_updated (bool for_playback)
 {
+	if (!for_playback) {
+		/* latency updates happen in pairs, in the following order:
+		 *  - for capture
+		 *  - for playback
+		 */
+		return;
+	}
+
 	if (!_session) {
 		route_latency_value.set_text ("--");
 		io_latency_value.set_text ("--");
