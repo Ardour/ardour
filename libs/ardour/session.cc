@@ -6577,7 +6577,7 @@ Session::update_latency (bool playback)
 	}
 
 	DEBUG_TRACE (DEBUG::LatencyCompensation, "Engine latency callback: DONE\n");
-	LatencyUpdated (); /* EMIT SIGNAL */
+	LatencyUpdated (playback); /* EMIT SIGNAL */
 }
 
 void

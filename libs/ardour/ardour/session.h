@@ -514,7 +514,7 @@ public:
 	samplecnt_t worst_latency_preroll () const;
 	samplecnt_t worst_latency_preroll_buffer_size_ceil () const;
 
-	PBD::Signal0<void> LatencyUpdated;
+	PBD::Signal1<void, bool> LatencyUpdated;
 
 	struct SaveAs {
 		std::string new_parent_folder;  /* parent folder where new session folder will be created */
