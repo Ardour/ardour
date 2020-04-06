@@ -109,6 +109,8 @@ class LIBARDOUR_API PortManager
 	virtual void add_pending_port_deletion (Port*) = 0;
 	PBD::RingBuffer<Port*>& port_deletions_pending () { return _port_deletions_pending; }
 
+	bool check_for_amibiguous_latency (bool log = false) const;
+
 	/* per-Port monitoring */
 
 	bool can_request_input_monitoring () const;

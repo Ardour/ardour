@@ -1374,3 +1374,27 @@ PortManager::set_port_buffer_sizes (pframes_t n)
 		p->second->set_buffer_size (n);
 	}
 }
+
+bool
+PortManager::check_for_amibiguous_latency (bool log) const
+{
+	bool rv = false;
+	boost::shared_ptr<Ports> plist = ports.reader();
+	for (Ports::iterator p = plist->begin(); p != plist->end(); ++p) {
+		for (int c = 0; c < 1; ++c) {
+			LatencyRange range;
+			p->second->get_connected_latency_range (range, c ? true : false);
+			if (range.min != range.max) {
+				if (log) {
+					warning << string_compose(_("PortEngine: ambiguous %1 latency for port '%2' (%3, %4)"),
+							(c ? "playback" : "capture"), p->second->name(), range.min, range.max)
+					        << endmsg;
+					rv = true;
+				} else {
+				return true;
+				}
+			}
+		}
+	}
+	return rv;
+}
