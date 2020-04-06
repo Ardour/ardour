@@ -301,14 +301,14 @@ ArdourKnob::on_scroll_event (GdkEventScroll* ev)
 
 	boost::shared_ptr<PBD::Controllable> c = binding_proxy.get_controllable();
 	if (c) {
-		float val = c->get_interface();
+		float val = c->get_interface (true);
 
 		if ( ev->direction == GDK_SCROLL_UP )
 			val += scale;
 		else
 			val -= scale;
 
-		c->set_interface(val);
+		c->set_interface (val, true);
 	}
 
 	return true;
@@ -347,7 +347,7 @@ ArdourKnob::on_motion_notify_event (GdkEventMotion *ev)
 
 	_grabbed_x = ev->x;
 	_grabbed_y = ev->y;
-	float val = c->get_interface();
+	float val = c->get_interface (true);
 
 	if (_flags & Detent) {
 		const float px_deadzone = 42.f * ui_scale;
@@ -378,7 +378,7 @@ ArdourKnob::on_motion_notify_event (GdkEventMotion *ev)
 	}
 
 	val += delta * scale;
-	c->set_interface(val);
+	c->set_interface (val, true);
 
 	return true;
 }
@@ -474,7 +474,7 @@ ArdourKnob::controllable_changed (bool force_update)
 	boost::shared_ptr<PBD::Controllable> c = binding_proxy.get_controllable();
 	if (!c) return;
 
-	float val = c->get_interface();
+	float val = c->get_interface (true);
 	val = min( max(0.0f, val), 1.0f); // clamp
 
 	if (val == _val && !force_update) {
