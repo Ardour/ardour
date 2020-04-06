@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-02 13:17+0200\n"
-"PO-Revision-Date: 2020-04-05 19:39+0200\n"
+"PO-Revision-Date: 2020-04-06 20:04+0200\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -19,7 +19,6 @@ msgstr ""
 "Language: eu\n"
 
 #: analyser.cc:127 audioregion.cc:1791
-#, fuzzy
 msgid "Transient Analysis failed for %1."
 msgstr "%1-(e)rako behin-behineko analisiak huts egin du."
 
@@ -686,7 +685,7 @@ msgstr "Galerarik gabeko konpresioa"
 
 #: export_format_manager.cc:227 export_format_specification.cc:646
 msgid "Session rate"
-msgstr "Saio-abiadura"
+msgstr "Saio-tasa"
 
 #: export_format_specification.cc:598
 msgid "normalize loudness"
@@ -922,7 +921,7 @@ msgstr ""
 
 #: filesystem_paths.cc:207
 msgid "ARDOUR_DLL_PATH not set in environment - exiting\n"
-msgstr ""
+msgstr "ARDOUR_DLL_PATH ez da kokatu - irteten\n"
 
 #: filesystem_paths.cc:230
 msgid "Cannot determine %1 package directory"
@@ -930,11 +929,11 @@ msgstr "Ezin da %1 pakete-direktorioa zehaztu"
 
 #: filesystem_paths.cc:275
 msgid "ARDOUR_CONFIG_PATH not set in environment\n"
-msgstr ""
+msgstr "ARDOUR_CONFIG_PATH ez da kokatu\n"
 
 #: filesystem_paths.cc:296
 msgid "ARDOUR_DATA_PATH not set in environment\n"
-msgstr ""
+msgstr "ARDOUR_DATA_PATH ez da kokatu\n"
 
 #: filter.cc:68
 msgid "filter: error creating name for new file based on %1"
@@ -1269,7 +1268,7 @@ msgstr "%s irteera"
 
 #: io.cc:1601 session_bundles.cc:143 session_bundles.cc:177
 msgid "mono"
-msgstr ""
+msgstr "mono"
 
 #: io.cc:1603 session_bundles.cc:156 session_bundles.cc:191
 msgid "L"
@@ -1327,11 +1326,11 @@ msgstr "LADSPA: ladspa ataka-daturik ez"
 
 #: ladspa_plugin.cc:836
 msgid "Could not locate HOME.  Preset not removed."
-msgstr ""
+msgstr "Ezin izan da ETXEA aurkitu. Preseta ez da ezabatu."
 
 #: ladspa_plugin.cc:875 ladspa_plugin.cc:881
 msgid "Could not create %1.  Preset not saved. (%2)"
-msgstr ""
+msgstr "Ezin izan da %1 sortu. Preseta ez da gorde. (%2)"
 
 #: ladspa_plugin.cc:888
 msgid "Error saving presets file %1."
@@ -1339,7 +1338,7 @@ msgstr "Errorea %1 preset fitxategia gordetzerakoan."
 
 #: ladspa_plugin.cc:930
 msgid "Could not locate HOME.  Preset not saved."
-msgstr ""
+msgstr "Ezin izan da ETXEA aurkitu. Preseta ez da gorde."
 
 #: location.cc:477
 msgid "You cannot put a CD marker at this position"
@@ -1370,9 +1369,10 @@ msgid "XML node for Location has no flags information"
 msgstr ""
 
 #: location.cc:907
-#, fuzzy
 msgid "Locations: attempt to use unknown location as selected location"
-msgstr "Kokalekuak: "
+msgstr ""
+"Kokalekuak: kokaleku ezezaguna hautatutako kokalekua bezala erabiltzeko "
+"saiakera egin da"
 
 #: location.cc:1101
 msgid "incorrect XML mode passed to Locations::set_state"
@@ -1385,6 +1385,7 @@ msgstr "saioa"
 #: location.cc:1181
 msgid "could not load location from session file - ignored"
 msgstr ""
+"ezin izan da saio-fitxategiaren kokalekua kargatu - alde batera utzi da"
 
 #: location_importer.cc:62
 msgid "Locations"
@@ -1427,6 +1428,8 @@ msgid ""
 "A location with that name already exists.\n"
 "You may rename the imported location:"
 msgstr ""
+"Izen hori duen kokalekua jada badago.\n"
+"Inportatutako kokalekua berrizendatu dezakezu:"
 
 #: ltc_file_reader.cc:155
 msgid "LTCFileReader: cannot open file \"%1\""
@@ -1562,31 +1565,31 @@ msgstr ""
 
 #: monitor_processor.cc:55
 msgid "monitor dim"
-msgstr ""
+msgstr "pantaila distira"
 
 #: monitor_processor.cc:56
 msgid "monitor cut"
-msgstr ""
+msgstr "monitore mozketa"
 
 #: monitor_processor.cc:57
 msgid "monitor mono"
-msgstr ""
+msgstr "mono monitorea"
 
 #: monitor_processor.cc:60
 msgid "monitor dim level"
-msgstr ""
+msgstr "pantailaren distira maila"
 
 #: monitor_processor.cc:64
 msgid "monitor solo boost level"
-msgstr ""
+msgstr "solo monitorearen indartze maila"
 
 #: monitor_processor.cc:538
 msgid "cut control %1"
-msgstr ""
+msgstr "%1 mozketa-kontrola"
 
 #: monitor_processor.cc:539
 msgid "dim control"
-msgstr ""
+msgstr "pantaila distiraren kontrola"
 
 #: monitor_processor.cc:540
 msgid "polarity control"
@@ -1616,7 +1619,7 @@ msgstr ""
 
 #: operations.cc:41
 msgid "capture"
-msgstr ""
+msgstr "kapturatu"
 
 #: operations.cc:42
 msgid "paste"
@@ -1938,11 +1941,11 @@ msgstr "LADSPA"
 
 #: plugin_manager.cc:743
 msgid "Could not parse rdf file: %1"
-msgstr ""
+msgstr "Ezin izan da rdf fitxategia analizatu: %1"
 
 #: plugin_manager.cc:780
 msgid "LADSPA: cannot load module \"%1\" (%2)"
-msgstr ""
+msgstr "LADSPA: ezin da “%1” modulua kargatu (%2)"
 
 #: plugin_manager.cc:787
 msgid "LADSPA: module \"%1\" has no descriptor function."
@@ -1950,7 +1953,7 @@ msgstr "LADSPA: “%1” moduluak deskriptore-funtziorik ez du."
 
 #: plugin_manager.cc:1020
 msgid "Disabled WindowsVST scan (safe mode)"
-msgstr ""
+msgstr "WindowsVST eskaneatzea desgaituta (modu segurua)"
 
 #: plugin_manager.cc:1025
 msgid "--- Windows VST plugins Scan: %1"
@@ -2037,7 +2040,7 @@ msgstr " -> Ados (“%1” VST plugina gehitu da)."
 
 #: plugin_manager.cc:1211
 msgid "Disabled MacVST scan (safe mode)"
-msgstr ""
+msgstr "MacVST eskaneatzea desgaituta (modu segurua)"
 
 #: plugin_manager.cc:1231
 msgid "MacVST"
@@ -2051,7 +2054,7 @@ msgstr ""
 
 #: plugin_manager.cc:1338
 msgid "Disabled LinuxVST scan (safe mode)"
-msgstr ""
+msgstr "LinuxVST eskaneatzea desgaituta (modu segurua)"
 
 #: plugin_manager.cc:1351
 msgid "LXVST"
@@ -2072,8 +2075,9 @@ msgid "unknown plugin type \"%1\" - ignored"
 msgstr "“%1” plugin-mota ezezaguna - alde batera utzi da"
 
 #: plugin_manager.cc:1650
+#, fuzzy
 msgid "Loading plugin order file %1"
-msgstr ""
+msgstr "%1 pluginen ordenaren fitxategia kargatzen"
 
 #: plugin_manager.cc:1660
 msgid "Cannot parse Plugin Order info from %1"
@@ -2232,7 +2236,7 @@ msgstr "Errorea %1 azken saio-fitxategia irakurtzerakoan (%2)"
 
 #: recent_sessions.cc:117
 msgid "Cannot open recent template file %1 (%2)"
-msgstr ""
+msgstr "Ezin da %1 azken txantiloi-fitxategia ireki (%2)"
 
 #: recent_sessions.cc:180
 msgid "Error writing recent sessions file %1 (%2)"
@@ -2274,7 +2278,7 @@ msgstr "itzuli %1"
 
 #: route.cc:946 route.cc:3165 track.cc:879
 msgid "unknown Processor type \"%1\"; ignored"
-msgstr ""
+msgstr "“%1” prozesatzaile-mota ezezaguna; alde batera utzi da"
 
 #: route.cc:968
 msgid "processor could not be created. Ignored."
@@ -2282,7 +2286,7 @@ msgstr "prozesadorea ezin izan da sortu. Alde batera utzi da."
 
 #: route.cc:2593 route.cc:2799
 msgid "Bad node sent to Route::set_state() [%1]"
-msgstr ""
+msgstr "Nodo okerra hona bidali da: Route::set_state() [%1]"
 
 #: route.cc:2664
 msgid "Pannable state found for route (%1) without a panner!"
@@ -2298,23 +2302,23 @@ msgstr ""
 
 #: route.cc:5716 route.cc:5727
 msgid "lo"
-msgstr ""
+msgstr "lo"
 
 #: route.cc:5717
 msgid "mid"
-msgstr ""
+msgstr "mid"
 
 #: route.cc:5718 route.cc:5730
 msgid "hi"
-msgstr ""
+msgstr "hi"
 
 #: route.cc:5728
 msgid "lm"
-msgstr ""
+msgstr "lm"
 
 #: route.cc:5729
 msgid "hm"
-msgstr ""
+msgstr "hm"
 
 #: route.cc:5804
 #, fuzzy
@@ -2348,7 +2352,7 @@ msgstr "Erlazioa"
 
 #: route.cc:5830
 msgid "Rels"
-msgstr ""
+msgstr "Rels"
 
 #: route_group.cc:542
 msgid "You cannot subgroup MIDI tracks at this time"
@@ -2451,7 +2455,7 @@ msgstr "Ezarri konexio estandarrak"
 
 #: session.cc:851
 msgid "could not setup Click I/O"
-msgstr ""
+msgstr "ezin izan da Klik "
 
 #: session.cc:912
 msgid "cannot connect master output %1 to %2"
@@ -2491,7 +2495,7 @@ msgstr ""
 
 #: session.cc:1602
 msgid "Session: you can't use that location for session start/end)"
-msgstr ""
+msgstr "Saioa: ezin duzu kokaleku hori saioaren hasiera/bukaerarako erabili"
 
 #: session.cc:1636
 msgid ""
@@ -2557,7 +2561,7 @@ msgstr "Busa"
 
 #: session.cc:2901 session.cc:2911
 msgid "Session: UINT_MAX routes? impossible!"
-msgstr ""
+msgstr "Saio: UINT_MAX bideratzeak? Ezinezkoa!"
 
 #: session.cc:3052
 msgid "Session: cannot create track/bus from template description"
@@ -2631,17 +2635,17 @@ msgstr "irteera %<PRIu32>+%<PRIu32>"
 #: session_bundles.cc:171
 #, c-format
 msgid "in %s"
-msgstr "sarrera %s"
+msgstr "%s sarrera"
 
 #: session_bundles.cc:173
 #, c-format
 msgid "in %<PRIu32>"
-msgstr "sarrera %<PRIu32>"
+msgstr "%<PRIu32> sarrera"
 
 #: session_bundles.cc:188
 #, c-format
 msgid "in %<PRIu32>+%<PRIu32>"
-msgstr "sarrera %<PRIu32>+%<PRIu32>"
+msgstr "%<PRIu32>+%<PRIu32> sarrera"
 
 #: session_click.cc:275
 msgid "cannot open click soundfile %1 (%2)"
@@ -2768,7 +2772,7 @@ msgstr "Morroia ez da hasi"
 
 #: session_state.cc:251
 msgid "MIDI I/O thread did not start"
-msgstr ""
+msgstr "MIDI S/I haria ez da hasi"
 
 #: session_state.cc:269 session_state.cc:391
 msgid "Unexpected exception during session setup: "
@@ -2791,8 +2795,9 @@ msgid "Reset Remote Controls"
 msgstr "Berrezarri urruneko kontrolak"
 
 #: session_state.cc:411 session_state.cc:441
+#, fuzzy
 msgid "Filling playback buffers"
-msgstr ""
+msgstr "Erreprodukzio-bufferrak betetzen"
 
 #: session_state.cc:508
 msgid "Session: cannot create session peakfile folder \"%1\" (%2)"
@@ -2878,7 +2883,7 @@ msgstr ""
 
 #: session_state.cc:926
 msgid "Could not save backup file at path \"%1\" (%2)"
-msgstr ""
+msgstr "Ezin izan da babeskopia-fitxategia “%1” biderako ezabatu (%2)"
 
 #: session_state.cc:1002
 msgid "%1: session file \"%2\" doesn't exist!"
@@ -2925,7 +2930,7 @@ msgstr "Saioa: XML egoerak tempo-mapa sekziorik ez du"
 
 #: session_state.cc:1656
 msgid "Session: XML state has no locations section"
-msgstr ""
+msgstr "Saioa: XML egoerak kokaleku sekziorik ez du"
 
 #: session_state.cc:1669
 msgid "Session: XML state has no Regions section"
@@ -2941,11 +2946,11 @@ msgstr "Saioa: XML egoerak konexio-sorta sekziorik ez du"
 
 #: session_state.cc:1725
 msgid "Session: XML state has no routes section"
-msgstr ""
+msgstr "Saioa: XML egoerak bideratze sekziorik ez du"
 
 #: session_state.cc:1743
 msgid "Session: XML state has no route groups section"
-msgstr ""
+msgstr "Saioa: XML egoerak bideratze-talde sekziorik ez du"
 
 #: session_state.cc:1752
 msgid "Session: XML state has no edit groups section"
@@ -2985,7 +2990,7 @@ msgstr "Saioa: ezin da eremua XML deskripziotik sortu."
 
 #: session_state.cc:2049
 msgid "Can not load state for region '%1'"
-msgstr ""
+msgstr "Ezin da ‘%1’ eremuaren egoera kargatu"
 
 #: session_state.cc:2085
 msgid "Regions in compound description not found (ID's %1 and %2): ignored"
@@ -3100,7 +3105,7 @@ msgstr ""
 
 #: session_state.cc:3865
 msgid "history could not be saved to %1"
-msgstr ""
+msgstr "ezin izan da historia hemen gorde: %1"
 
 #: session_state.cc:3868
 #, fuzzy
@@ -3141,7 +3146,7 @@ msgstr "Ezin da irakurtzeko-bakarrik saioa berrizendatu."
 
 #: session_state.cc:4337
 msgid "Cannot rename session while recording"
-msgstr "Ezin da saioa berrizendatu grabatzen den bitartean"
+msgstr "Ezin da saioa berrizendatu grabatu bitartean"
 
 #: session_state.cc:4422 session_state.cc:4423 session_state.cc:4465
 #: session_state.cc:4469
@@ -3185,7 +3190,7 @@ msgstr ""
 
 #: session_transport.cc:1007
 msgid "Cannot loop - no loop range defined"
-msgstr ""
+msgstr "Ezin da loop egin - ez da loop barrutirik definitu"
 
 #: session_transport.cc:1591
 msgid ""
@@ -3199,7 +3204,7 @@ msgstr "#%1 masterra ez da aurkitu, mandatua galdu da"
 
 #: slavable_automation_control.cc:387 slavable_automation_control.cc:460
 msgid "Merge VCA automation into %1"
-msgstr ""
+msgstr "Konbinatu VCA automatizazio %1-(r)ekin"
 
 #: smf_source.cc:361
 msgid "Unable to read event prefix, corrupt MIDI ring"
@@ -3316,18 +3321,19 @@ msgstr "Big-endian (PowerPC)"
 
 #: sndfilesource.cc:274
 msgid "Cannot set flac compression level: %1"
-msgstr ""
+msgstr "Ezin da flac konpresio-maila ezarri: %1"
 
 #: sndfilesource.cc:359
 msgid "SndFileSource: cannot open file \"%1\" for %2"
 msgstr "AudioIturburuFitxat.: ezin da “%1” fitxategia %2-(r)entzat ireki"
 
 #: sndfilesource.cc:377
-#, fuzzy
 msgid ""
 "SndFileSource: file only contains %1 channels; %2 is invalid as a channel "
 "number"
-msgstr "AudioIturburuFitxat.:"
+msgstr ""
+"AudioIturburuFitxat.: fitxategiak %1 kanal ditu; %2 kanal-zenbaki gisa "
+"baliogabea da"
 
 #: sndfilesource.cc:392
 msgid "Cannot mark RF64 audio file for automatic downgrade to WAV: %1"
@@ -3344,15 +3350,16 @@ msgid "could not open file %1 for reading."
 msgstr "ezin izan da %1 fitxategia irakurtzeko ireki."
 
 #: sndfilesource.cc:521
-#, fuzzy
 msgid "SndFileSource: could not seek to sample %1 within %2 (%3)"
-msgstr "AudioIturburuFitxat.:"
+msgstr ""
+"AudioIturburuFitxat.: ezin izan da %1 lagina bilatu tarte honetan: %2 (%3)"
 
 #: sndfilesource.cc:530
-#, fuzzy
 msgid ""
 "SndFileSource: @ %1 could not read %2 within %3 (%4) (len = %5, ret was %6)"
-msgstr "AudioIturburuFitxat.:"
+msgstr ""
+"AudioIturburuFitxat.: @ %1-(e)k ezin izan du %2 irakurri tarte honetan: %3 "
+"(%4) (len = %5, ret was %6)"
 
 #: sndfilesource.cc:580
 msgid "attempt to write a non-writable audio file source (%1)"
@@ -3673,8 +3680,9 @@ msgid "Lock"
 msgstr "Blok."
 
 #: utils.cc:428
+#, fuzzy
 msgid "programming error: unknown edit mode string \"%1\""
-msgstr ""
+msgstr "programazio-errorea: "
 
 #: utils.cc:584
 msgid "programming error: unknown native header format: %1"
@@ -3699,4 +3707,4 @@ msgstr "Masterraren mandatua alde batera utzi da errekurtsioa eragozteko"
 
 #: vca_manager.cc:206
 msgid "Cannot set state of a VCA"
-msgstr ""
+msgstr "Ezin da VCA baten egoera ezin da ezarri"
