@@ -49,6 +49,7 @@
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/window_title.h"
 
+#include "ardour/audioengine.h"
 #include "ardour/profile.h"
 #include "ardour/session.h"
 #include "ardour/types.h"
@@ -641,7 +642,12 @@ ARDOUR_UI::session_latency_updated ()
 		float rate      = _session->nominal_sample_rate ();
 
 		route_latency_value.set_text (samples_as_time_string (wrl, rate));
-		io_latency_value.set_text (samples_as_time_string (wpl, rate));
+
+		if (_session->engine().check_for_amibiguous_latency (true)) {
+			io_latency_value.set_markup ("<span background=\"red\" foreground=\"white\">ambiguous</span>");
+		} else {
+			io_latency_value.set_text (samples_as_time_string (wpl, rate));
+		}
 	}
 }
 
