@@ -423,8 +423,8 @@ MidiTimeAxisView::setup_midnam_patches ()
 	if (model.empty() && _route->instrument_info().have_custom_plugin_info ()) {
 		/* use plugin's MIDNAM */
 		model_changed ("");
-	} else if (!_route->instrument_info().master_device_names()) {
-		/* switch to use default */
+	} else if (model.empty() || ! MIDI::Name::MidiPatchManager::instance ().master_device_by_model (model)) {
+		/* invalid model, switch to use default */
 		model_changed ("");
 	} else {
 		model_changed (model);
@@ -470,7 +470,7 @@ MidiTimeAxisView::model_changed (const std::string& m)
 	}
 
 	/* set new mode */
-	const std::string current_mode = gui_property (X_("midname-custom-device-mode"));
+	const std::string current_mode = gui_property (X_("midnam-custom-device-mode"));
 	std::string mode;
 	if (find (device_modes.begin(), device_modes.end(), current_mode) == device_modes.end()) {
 		if (device_modes.size() > 0) {
