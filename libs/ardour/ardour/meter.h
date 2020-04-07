@@ -2,7 +2,7 @@
  * Copyright (C) 2006-2012 David Robillard <d@drobilla.net>
  * Copyright (C) 2007-2017 Paul Davis <paul@linuxaudiosystems.com>
  * Copyright (C) 2009-2011 Carl Hetherington <carl@carlh.net>
- * Copyright (C) 2013-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2013-2020 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -97,8 +97,8 @@ private:
 	 */
 	ChanCount current_meters;
 
-	bool               _reset_dpm;
-	bool               _reset_max;
+	volatile gint _reset_dpm;
+	volatile gint _reset_max;
 
 	uint32_t           _bufcnt;
 	std::vector<float> _peak_buffer; // internal, integrate

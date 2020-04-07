@@ -2,7 +2,7 @@
  * Copyright (C) 2006-2016 David Robillard <d@drobilla.net>
  * Copyright (C) 2007-2017 Paul Davis <paul@linuxaudiosystems.com>
  * Copyright (C) 2009-2011 Carl Hetherington <carl@carlh.net>
- * Copyright (C) 2013-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2013-2020 Robin Gareus <robin@gareus.org>
  * Copyright (C) 2015-2016 Len Ovens <len@ovenwerks.net>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -50,8 +50,8 @@ PeakMeter::PeakMeter (Session& s, const std::string& name)
 	Vumeterdsp::init(s.nominal_sample_rate());
 	_pending_active = true;
 	_meter_type = MeterPeak;
-	_reset_dpm = true;
-	_reset_max = true;
+	_reset_dpm = 1;
+	_reset_max = 1;
 	_bufcnt = 0;
 	_combined_peak = 0;
 }
@@ -94,15 +94,12 @@ PeakMeter::run (BufferSet& bufs, samplepos_t /*start_sample*/, samplepos_t /*end
 	if (!_active && !_pending_active) {
 		return;
 	}
-	const bool do_reset_max = _reset_max;
-	// XXX max-peak is set from DPM's peak-buffer, so DPM also needs to be reset in sync:
-	const bool do_reset_dpm = _reset_dpm || do_reset_max;
 
-	_reset_max = false;
-	_reset_dpm = false;
+	const bool reset_max = g_atomic_int_compare_and_exchange (&_reset_max, 1, 0);
+	/* max-peak is set from DPM's peak-buffer, so DPM also needs to be reset in sync */
+	const bool reset_dpm = g_atomic_int_compare_and_exchange (&_reset_dpm, 1, 0) || reset_max;
+
 	_combined_peak = 0;
-
-	// cerr << "meter " << name() << " runs with " << bufs.available() << " inputs\n";
 
 	const uint32_t n_audio = min (current_meters.n_audio(), bufs.count().n_audio());
 	const uint32_t n_midi  = min (current_meters.n_midi(), bufs.count().n_midi());
@@ -113,10 +110,10 @@ PeakMeter::run (BufferSet& bufs, samplepos_t /*start_sample*/, samplepos_t /*end
 	const uint32_t zoh = _session.nominal_sample_rate() * .021;
 	_bufcnt += nframes;
 
-	// Meter MIDI in to the first n_midi peaks
+	/* Meter MIDI */
 	for (uint32_t i = 0; i < n_midi; ++i, ++n) {
 		float val = 0.0f;
-		if (do_reset_dpm) {
+		if (reset_dpm) {
 			_peak_power[n] = 0;
 		}
 		const MidiBuffer& buf (bufs.get_midi(i));
@@ -150,33 +147,33 @@ PeakMeter::run (BufferSet& bufs, samplepos_t /*start_sample*/, samplepos_t /*end
 		_max_peak_signal[n] = 0;
 	}
 
-	// Meter audio in to the rest of the peaks
+	/* Audio Meters */
 	for (uint32_t i = 0; i < n_audio; ++i, ++n) {
 		if (bufs.get_audio(i).silent()) {
 			_peak_buffer[n] = 0;
 		} else {
 			_peak_buffer[n] = compute_peak (bufs.get_audio(i).data(), nframes, _peak_buffer[n]);
 			_peak_buffer[n] = std::min (_peak_buffer[n], 100.f); // cut off at +40dBFS for falloff.
-			_max_peak_signal[n] = std::max(_peak_buffer[n], _max_peak_signal[n]); // todo sync reset
+			_max_peak_signal[n] = std::max(_peak_buffer[n], _max_peak_signal[n]);
 			_combined_peak = std::max(_peak_buffer[n], _combined_peak);
 		}
 
-		if (do_reset_max) {
+		if (reset_max) {
 			_max_peak_signal[n] = 0;
 		}
 
-		if (do_reset_dpm) {
+		if (reset_dpm) {
 			_peak_buffer[n] = 0;
 			_peak_power[n] = -std::numeric_limits<float>::infinity();
 		} else {
-			// falloff
+			/* falloff */
 			if (_peak_power[n] >  -318.8f) {
 				_peak_power[n] -= falloff_dB;
 			} else {
 				_peak_power[n] = -std::numeric_limits<float>::infinity();
 			}
 			_peak_power[n] = max(_peak_power[n], accurate_coefficient_to_dB(_peak_buffer[n]));
-			// integration buffer, retain peaks > 49Hz
+			/* integration buffer, retain peaks > 49Hz */
 			if (_bufcnt > zoh) {
 				_peak_buffer[n] = 0;
 			}
@@ -196,10 +193,14 @@ PeakMeter::run (BufferSet& bufs, samplepos_t /*start_sample*/, samplepos_t /*end
 		}
 	}
 
-	// Zero any excess peaks
+	/* Zero any excess peaks */
 	for (uint32_t i = n; i < _peak_power.size(); ++i) {
 		_peak_power[i] = -std::numeric_limits<float>::infinity();
 		_max_peak_signal[n] = 0;
+	}
+
+	if (reset_dpm) {
+		_combined_peak = 0;
 	}
 
 	if (_bufcnt > zoh) {
@@ -213,7 +214,7 @@ void
 PeakMeter::reset ()
 {
 	if (_active || _pending_active) {
-		_reset_dpm = true;
+		g_atomic_int_set (&_reset_dpm, 1);
 	} else {
 		for (size_t i = 0; i < _peak_power.size(); ++i) {
 			_peak_power[i] = -std::numeric_limits<float>::infinity();
@@ -225,7 +226,7 @@ PeakMeter::reset ()
 		}
 	}
 
-	// these are handled async just fine.
+	/* these are handled async just fine. */
 	for (size_t n = 0; n < _kmeter.size(); ++n) {
 		_kmeter[n]->reset();
 		_iec1meter[n]->reset();
@@ -238,7 +239,7 @@ void
 PeakMeter::reset_max ()
 {
 	if (_active || _pending_active) {
-		_reset_max = true;
+		g_atomic_int_set (&_reset_max, 1);
 		return;
 	}
 	for (size_t i = 0; i < _max_peak_signal.size(); ++i) {
@@ -283,7 +284,6 @@ PeakMeter::reflect_inputs (const ChanCount& in)
 	reset();
 	current_meters = in;
 	reset_max();
-	// ConfigurationChanged() postponed
 }
 
 void
