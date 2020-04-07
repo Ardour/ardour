@@ -365,7 +365,7 @@ VirtualKeyboardWindow::on_key_release_event (GdkEventKey* ev)
 void
 VirtualKeyboardWindow::select_keyboard_layout (std::string const& l)
 {
-	_piano.set_keyboard_layout (KeyboardLayout::get_layout (l));
+	_piano.set_keyboard_layout (KeyboardLayout::layout (l));
 	_piano.grab_focus ();
 }
 

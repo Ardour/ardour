@@ -48,7 +48,7 @@ public:
 	int  key_binding (const char* key) const;
 	const char* note_binding (int note) const;
 
-	static Layout get_layout (std::string const& l);
+	static Layout layout (std::string const& l);
 	static const char* get_keycode (GdkEventKey* event);
 
 private:
