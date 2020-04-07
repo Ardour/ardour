@@ -3406,6 +3406,14 @@ RCOptionEditor::RCOptionEditor ()
 		     );
 	add_option (_("Transport"), bo);
 
+	bo = new BoolOption (
+		     "recording-resets-xrun-count",
+		     _("Reset x-run counter when starting to record"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_recording_resets_xrun_count),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_recording_resets_xrun_count)
+		     );
+	add_option (_("Transport"), bo);
+
 
 	add_option (_("Transport"), new OptionEditorHeading (_("Transport Masters")));
 
