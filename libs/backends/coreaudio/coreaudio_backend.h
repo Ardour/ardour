@@ -423,8 +423,8 @@ class CoreAudioBackend : public AudioBackend, public PortEngineSharedImpl {
 		pthread_mutex_unlock (&_port_callback_mutex);
 	}
 
-	BackendPort * find_port_in (std::vector<BackendPort *> plist, const std::string& port_name) const {
-		for (std::vector<BackendPort*>::const_iterator it = plist.begin (); it != plist.end (); ++it) {
+	BackendPortPtr find_port_in (std::vector<BackendPortPtr> const & plist, const std::string& port_name) const {
+		for (std::vector<BackendPortPtr>::const_iterator it = plist.begin (); it != plist.end (); ++it) {
 			if ((*it)->name () == port_name) {
 				return *it;
 			}
