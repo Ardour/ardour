@@ -40,6 +40,7 @@
 #include "pot.h"
 #include "strip.h"
 #include "subview.h"
+#include "subview_modes.h"
 #include "surface.h"
  
 using namespace ARDOUR;
