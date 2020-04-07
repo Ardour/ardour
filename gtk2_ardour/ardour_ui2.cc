@@ -651,7 +651,7 @@ ARDOUR_UI::session_latency_updated (bool for_playback)
 
 		route_latency_value.set_text (samples_as_time_string (wrl, rate));
 
-		if (_session->engine().check_for_amibiguous_latency (true)) {
+		if (_session->engine().check_for_ambiguous_latency (true)) {
 			io_latency_value.set_markup ("<span background=\"red\" foreground=\"white\">ambiguous</span>");
 		} else {
 			io_latency_value.set_text (samples_as_time_string (wpl, rate));
