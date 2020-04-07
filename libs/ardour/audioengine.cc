@@ -1064,8 +1064,8 @@ AudioEngine::stop (bool for_latency)
 	}
 	_processed_samples = 0;
 	_measuring_latency = MeasureNone;
-	_latency_output_port = 0;
-	_latency_input_port = 0;
+	_latency_output_port.reset ();
+	_latency_input_port.reset ();
 
 	if (stop_engine) {
 		Port::PortDrop ();
