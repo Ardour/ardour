@@ -30,6 +30,8 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "pbd/stacktrace.h"
+
 #include "weak_libjack.h"
 
 #include "ardour/audio_backend.h"
@@ -43,6 +45,7 @@ class JackPort : public ProtoPort
 {
   public:
 	JackPort (jack_port_t* p) : jack_ptr (p) {}
+	~JackPort() { }
 
   private:
 	friend class JACKAudioBackend;
@@ -298,6 +301,9 @@ class JACKAudioBackend : public AudioBackend {
     static int  _graph_order_callback (void *arg);
     static void _registration_callback (jack_port_id_t, int, void *);
     static void _connect_callback (jack_port_id_t, jack_port_id_t, int, void *);
+
+	typedef std::map<void*,boost::shared_ptr<JackPort> > JackPorts;
+	mutable JackPorts _jack_ports; /* can be modified in ::get_port_by_name () */
 
     void connect_callback (jack_port_id_t, jack_port_id_t, int);
 

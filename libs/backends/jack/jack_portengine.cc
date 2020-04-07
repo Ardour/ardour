@@ -173,10 +173,27 @@ JACKAudioBackend::set_port_property (PortHandle port, const std::string& key, co
 }
 
 PortEngine::PortPtr
-JACKAudioBackend:: get_port_by_name (const std::string& name) const
+JACKAudioBackend::get_port_by_name (const std::string& name) const
 {
 	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, 0);
-	return boost::shared_ptr<ProtoPort> (new JackPort (jack_port_by_name (_priv_jack, name.c_str())));
+	jack_port_t * jack_port = jack_port_by_name (_priv_jack, name.c_str());
+
+	if (!jack_port) {
+		return PortEngine::PortPtr();
+	}
+
+	/* check if we have a shared_ptr<JackPort> for this already */
+
+	JackPorts::const_iterator i =  _jack_ports.find (jack_port);
+
+	if (i != _jack_ports.end()) {
+		return i->second;
+	}
+
+	boost::shared_ptr<JackPort> jp (new JackPort (jack_port));
+	_jack_ports.insert (std::make_pair (jack_port, jp));
+
+	return jp;
 }
 
 void
@@ -480,22 +497,28 @@ PortEngine::PortPtr
 JACKAudioBackend::register_port (const std::string& shortname, ARDOUR::DataType type, ARDOUR::PortFlags flags)
 {
 	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, 0);
-	jack_port_t* p = jack_port_register (_priv_jack, shortname.c_str(),
-	                                     ardour_data_type_to_jack_port_type (type),
-	                                     ardour_port_flags_to_jack_flags (flags),
-	                                     0);
-	if (!p) {
+	jack_port_t* jack_port = jack_port_register (_priv_jack, shortname.c_str(),
+	                                             ardour_data_type_to_jack_port_type (type),
+	                                             ardour_port_flags_to_jack_flags (flags),
+	                                             0);
+	if (!jack_port) {
 		return PortEngine::PortPtr();
 	}
 
-	return boost::shared_ptr<ProtoPort> (new JackPort (p));
+	 boost::shared_ptr<JackPort> jp (new JackPort (jack_port));
+
+	 _jack_ports.insert (std::make_pair (jack_port, jp));
+
+	 return jp;
 }
 
 void
 JACKAudioBackend::unregister_port (PortHandle port)
 {
 	GET_PRIVATE_JACK_POINTER (_priv_jack);
-	(void) jack_port_unregister (_priv_jack, boost::dynamic_pointer_cast<JackPort>(port)->jack_ptr);
+	boost::shared_ptr<JackPort> jp = boost::dynamic_pointer_cast<JackPort>(port);
+	_jack_ports.erase (jp->jack_ptr);
+	(void) jack_port_unregister (_priv_jack, jp->jack_ptr);
 }
 
 int
