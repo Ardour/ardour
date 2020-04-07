@@ -1376,7 +1376,7 @@ PortManager::set_port_buffer_sizes (pframes_t n)
 }
 
 bool
-PortManager::check_for_amibiguous_latency (bool log) const
+PortManager::check_for_ambiguous_latency (bool log) const
 {
 	bool rv = false;
 	boost::shared_ptr<Ports> plist = ports.reader();

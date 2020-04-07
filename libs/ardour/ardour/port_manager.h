@@ -116,7 +116,7 @@ public:
 		return _port_deletions_pending;
 	}
 
-	bool check_for_amibiguous_latency (bool log = false) const;
+	bool check_for_ambiguous_latency (bool log = false) const;
 
 	/* per-Port monitoring */
 
