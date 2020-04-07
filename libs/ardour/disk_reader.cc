@@ -750,12 +750,11 @@ DiskReader::seek (samplepos_t sample, bool complete_refill)
 {
 	/* called via non_realtime_locate() from butler thread */
 
-	uint32_t n;
 	int ret = -1;
-	ChannelList::iterator chan;
-	boost::shared_ptr<ChannelList> c = channels.reader();
 	const bool read_reversed = !_session.transport_will_roll_forwards ();
 	const bool read_loop = (bool) _loop_location;
+
+	boost::shared_ptr<ChannelList> c = channels.reader();
 
 	if (c->empty()) {
 		return 0;
@@ -791,7 +790,7 @@ DiskReader::seek (samplepos_t sample, bool complete_refill)
 		return 0;
 	}
 
-	for (n = 0, chan = c->begin(); chan != c->end(); ++chan, ++n) {
+	for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
 		(*chan)->rbuf->reset ();
 		assert ((*chan)->rbuf->reserved_size() == 0);
 	}
@@ -850,7 +849,7 @@ DiskReader::seek (samplepos_t sample, bool complete_refill)
 
 		shift = abs (shift);
 
-		for (n = 0, chan = c->begin(); chan != c->end(); ++chan, ++n) {
+		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
 			(*chan)->rbuf->increment_read_ptr (shift);
 		}
 	}
