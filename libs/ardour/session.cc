@@ -1897,6 +1897,9 @@ Session::enable_record ()
 			_last_record_location = _transport_sample;
 			send_immediate_mmc (MIDI::MachineControlCommand (MIDI::MachineControl::cmdRecordStrobe));
 
+			if (Config->get_recording_resets_xrun_count ()) {
+				reset_xrun_count ();
+			}
 			if (Config->get_monitoring_model() == HardwareMonitoring && config.get_auto_input()) {
 				set_track_monitor_input_status (true);
 			}
