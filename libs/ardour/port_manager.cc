@@ -1382,9 +1382,14 @@ PortManager::check_for_ambiguous_latency (bool log) const
 	boost::shared_ptr<Ports> plist = ports.reader();
 	for (Ports::iterator pi = plist->begin(); pi != plist->end(); ++pi) {
 		boost::shared_ptr<Port> const& p (pi->second);
-		if (! p->sends_output ()) {
+		if (! p->sends_output () || (p->flags () & IsTerminal)) {
 			continue;
 		}
+		if (boost::dynamic_pointer_cast<AsyncMIDIPort>(p)) {
+			continue;
+		}
+		assert (port_is_mine (p->name ()));
+
 		LatencyRange range;
 		p->get_connected_latency_range (range, true);
 		if (range.min != range.max) {
