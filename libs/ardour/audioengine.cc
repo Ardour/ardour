@@ -1571,11 +1571,11 @@ AudioEngine::stop_latency_detection ()
 
 	if (_latency_output_port) {
 		port_engine().unregister_port (_latency_output_port);
-		_latency_output_port = 0;
+		_latency_output_port.reset();
 	}
 	if (_latency_input_port) {
 		port_engine().unregister_port (_latency_input_port);
-		_latency_input_port = 0;
+		_latency_input_port.reset();
 	}
 
 	if (_running && _backend->can_change_systemic_latency_when_running()) {
