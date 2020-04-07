@@ -235,23 +235,22 @@ DiskReader::playlist_modified ()
 int
 DiskReader::use_playlist (DataType dt, boost::shared_ptr<Playlist> playlist)
 {
-        bool prior_playlist = false;
+	bool prior_playlist = false;
 
-        if (_playlists[dt]) {
-	        prior_playlist = true;
-        }
+	if (_playlists[dt]) {
+		prior_playlist = true;
+	}
 
-        if (DiskIOProcessor::use_playlist (dt, playlist)) {
+	if (DiskIOProcessor::use_playlist (dt, playlist)) {
 		return -1;
 	}
 
 	/* don't do this if we've already asked for it *or* if we are setting up
-	   the diskstream for the very first time - the input changed handling will
-	   take care of the buffer refill.
-	*/
+	 * the diskstream for the very first time - the input changed handling will
+	 * take care of the buffer refill. */
 
-        if (!(g_atomic_int_get (&_pending_overwrite) & PlaylistChanged) || prior_playlist) {
-	        _session.request_overwrite_buffer (_track, PlaylistChanged);
+	if (!(g_atomic_int_get (&_pending_overwrite) & PlaylistChanged) || prior_playlist) {
+		_session.request_overwrite_buffer (_track, PlaylistChanged);
 	}
 
 	return 0;
