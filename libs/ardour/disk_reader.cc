@@ -1256,7 +1256,7 @@ out:
 }
 
 void
-DiskReader::playlist_ranges_moved (list<Evoral::RangeMove<samplepos_t>> const& movements_samples, bool from_undo_or_shift)
+DiskReader::playlist_ranges_moved (list<Evoral::RangeMove<samplepos_t> > const& movements_samples, bool from_undo_or_shift)
 {
 	/* If we're coming from an undo, it will have handled
 	 * automation undo (it must, since automation-follows-regions
@@ -1275,9 +1275,9 @@ DiskReader::playlist_ranges_moved (list<Evoral::RangeMove<samplepos_t>> const& m
 		return;
 	}
 
-	list<Evoral::RangeMove<double>> movements;
+	list<Evoral::RangeMove<double> > movements;
 
-	for (list<Evoral::RangeMove<samplepos_t>>::const_iterator i = movements_samples.begin ();
+	for (list<Evoral::RangeMove<samplepos_t> >::const_iterator i = movements_samples.begin ();
 	     i != movements_samples.end ();
 	     ++i) {
 		movements.push_back (Evoral::RangeMove<double> (i->from, i->length, i->to));
@@ -1308,15 +1308,15 @@ DiskReader::playlist_ranges_moved (list<Evoral::RangeMove<samplepos_t>> const& m
 }
 
 void
-DiskReader::move_processor_automation (boost::weak_ptr<Processor> p, list<Evoral::RangeMove<samplepos_t>> const& movements_samples)
+DiskReader::move_processor_automation (boost::weak_ptr<Processor> p, list<Evoral::RangeMove<samplepos_t> > const& movements_samples)
 {
 	boost::shared_ptr<Processor> processor (p.lock ());
 	if (!processor) {
 		return;
 	}
 
-	list<Evoral::RangeMove<double>> movements;
-	for (list<Evoral::RangeMove<samplepos_t>>::const_iterator i = movements_samples.begin (); i != movements_samples.end (); ++i) {
+	list<Evoral::RangeMove<double> > movements;
+	for (list<Evoral::RangeMove<samplepos_t> >::const_iterator i = movements_samples.begin (); i != movements_samples.end (); ++i) {
 		movements.push_back (Evoral::RangeMove<double> (i->from, i->length, i->to));
 	}
 
