@@ -139,7 +139,7 @@ Port::drop ()
 	if (_port_handle) {
 		DEBUG_TRACE (DEBUG::Ports, string_compose ("drop handle for port %1\n", name()));
 		port_engine.unregister_port (_port_handle);
-		_port_handle = 0;
+		_port_handle.reset ();;
 	}
 }
 
