@@ -21,8 +21,8 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
- 
- 
+
+
 #include "pbd/convert.h"
 #include "pbd/failed_constructor.h"
 
@@ -42,12 +42,12 @@
 #include "subview.h"
 #include "subview_modes.h"
 #include "surface.h"
- 
+
 using namespace ARDOUR;
 using namespace ArdourSurface;
 using namespace Mackie;
 using namespace PBD;
-	
+
 #define ui_context() MackieControlProtocol::instance() /* a UICallback-derived object that specifies the event loop for signal handling */
 
 SubviewFactory* SubviewFactory::_instance = 0;
@@ -62,9 +62,9 @@ SubviewFactory* SubviewFactory::instance() {
 SubviewFactory::SubviewFactory() {};
 
 boost::shared_ptr<Subview> SubviewFactory::create_subview(
-		SubViewMode svm, 
-		MackieControlProtocol& mcp, 
-		boost::shared_ptr<ARDOUR::Stripable> subview_stripable) 
+		SubViewMode svm,
+		MackieControlProtocol& mcp,
+		boost::shared_ptr<ARDOUR::Stripable> subview_stripable)
 {
 	switch (svm) {
 		case SubViewMode::EQ:
@@ -91,7 +91,7 @@ Subview::Subview(MackieControlProtocol& mcp, boost::shared_ptr<ARDOUR::Stripable
 	init_strip_vectors();
 }
 
-Subview::~Subview() 
+Subview::~Subview()
 {
 	reset_all_vpot_controls();
 }
@@ -114,7 +114,7 @@ Subview::reset_all_vpot_controls()
 	}
 }
 
-void Subview::handle_vselect_event(uint32_t global_strip_position) 
+void Subview::handle_vselect_event(uint32_t global_strip_position)
 {
 	Strip* strip = 0;
 	Pot* vpot = 0;
@@ -188,7 +188,7 @@ Subview::init_strip_vectors()
 }
 
 void
-Subview::store_pointers(Strip* strip, Pot* vpot, std::string* pending_display, uint32_t global_strip_position) 
+Subview::store_pointers(Strip* strip, Pot* vpot, std::string* pending_display, uint32_t global_strip_position)
 {
 	if (global_strip_position >= _strips_over_all_surfaces.size() ||
 		global_strip_position >= _strip_vpots_over_all_surfaces.size() ||
@@ -196,7 +196,7 @@ Subview::store_pointers(Strip* strip, Pot* vpot, std::string* pending_display, u
 	{
 		return;
 	}
-	
+
 	_strips_over_all_surfaces[global_strip_position] = strip;
 	_strip_vpots_over_all_surfaces[global_strip_position] = vpot;
 	_strip_pending_displays_over_all_surfaces[global_strip_position] = pending_display;
@@ -207,11 +207,11 @@ Subview::retrieve_pointers(Strip** strip, Pot** vpot, std::string** pending_disp
 {
 	if (global_strip_position >= _strips_over_all_surfaces.size() ||
 		global_strip_position >= _strip_vpots_over_all_surfaces.size() ||
-		global_strip_position >= _strip_pending_displays_over_all_surfaces.size()) 
+		global_strip_position >= _strip_pending_displays_over_all_surfaces.size())
 	{
 		return false;
 	}
-	
+
 	*strip = _strips_over_all_surfaces[global_strip_position];
 	*vpot = _strip_vpots_over_all_surfaces[global_strip_position];
 	*pending_display = _strip_pending_displays_over_all_surfaces[global_strip_position];
@@ -227,9 +227,9 @@ Subview::retrieve_pointers(Strip** strip, Pot** vpot, std::string** pending_disp
 void Subview::do_parameter_display(std::string& display, const ParameterDescriptor& pd, float param_val, Strip* strip, bool screen_hold)
 {
 	display = Strip::format_paramater_for_display(
-			pd, 
-			param_val, 
-			strip->stripable(), 
+			pd,
+			param_val,
+			strip->stripable(),
 			screen_hold
 		);
 
@@ -243,20 +243,20 @@ void Subview::do_parameter_display(std::string& display, const ParameterDescript
 
 
 
-NoneSubview::NoneSubview(MackieControlProtocol& mcp, boost::shared_ptr<ARDOUR::Stripable> subview_stripable) 
+NoneSubview::NoneSubview(MackieControlProtocol& mcp, boost::shared_ptr<ARDOUR::Stripable> subview_stripable)
 	: Subview(mcp, subview_stripable)
 {}
 
-NoneSubview::~NoneSubview() 
+NoneSubview::~NoneSubview()
 {}
 
-bool NoneSubview::subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not) 
+bool NoneSubview::subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not)
 {
 	// always possible
 	return true;
 }
 
-void NoneSubview::update_global_buttons() 
+void NoneSubview::update_global_buttons()
 {
 	_mcp.update_global_button (Button::Send, off);
 	_mcp.update_global_button (Button::Plugin, off);
@@ -268,7 +268,7 @@ void NoneSubview::update_global_buttons()
 
 void NoneSubview::setup_vpot(
 		Strip* strip,
-		Pot* vpot, 
+		Pot* vpot,
 		std::string pending_display[2])
 {
 	// nothing to be done here. All pots are set in strip.cc
@@ -276,24 +276,24 @@ void NoneSubview::setup_vpot(
 
 
 
-EQSubview::EQSubview(MackieControlProtocol& mcp, boost::shared_ptr<ARDOUR::Stripable> subview_stripable) 
+EQSubview::EQSubview(MackieControlProtocol& mcp, boost::shared_ptr<ARDOUR::Stripable> subview_stripable)
 	: Subview(mcp, subview_stripable)
 {}
 
-EQSubview::~EQSubview() 
+EQSubview::~EQSubview()
 {}
 
-bool EQSubview::subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not) 
+bool EQSubview::subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not)
 {
 	if (r && r->eq_band_cnt() > 0) {
 		return true;
-	} 
-	
+	}
+
 	reason_why_not = "no EQ in the track/bus";
 	return false;
 }
 
-void EQSubview::update_global_buttons() 
+void EQSubview::update_global_buttons()
 {
 	_mcp.update_global_button (Button::Send, off);
 	_mcp.update_global_button (Button::Plugin, off);
@@ -305,17 +305,17 @@ void EQSubview::update_global_buttons()
 
 void EQSubview::setup_vpot(
 		Strip* strip,
-		Pot* vpot, 
+		Pot* vpot,
 		std::string pending_display[2])
 {
 	const uint32_t global_strip_position = _mcp.global_index (*strip);
 	store_pointers(strip, vpot, pending_display, global_strip_position);
-		
+
 	if (!_subview_stripable) {
 		return;
 	}
-	
-	
+
+
 	boost::shared_ptr<AutomationControl> pc;
 	std::string pot_id;
 
@@ -344,7 +344,7 @@ void EQSubview::setup_vpot(
 				band_name = _subview_stripable->eq_band_name (eq_band);
 				pot_id = band_name + "Gain";
 				break;
-			case 8: 
+			case 8:
 				pc = _subview_stripable->eq_shape_controllable(0);  //low band "bell" button
 				band_name = "lo";
 				pot_id = band_name + " Shp";
@@ -415,22 +415,22 @@ void EQSubview::setup_vpot(
 		} else {
 			pending_display[0] = std::string();
 		}
-		
+
 	} else {  //no controllable was found;  just clear this knob
 		vpot->set_control (boost::shared_ptr<AutomationControl>());
 		pending_display[0] = std::string();
 		pending_display[1] = std::string();
 	}
-	
+
 	notify_change (boost::weak_ptr<AutomationControl>(pc), global_strip_position, true);
 }
 
-void EQSubview::notify_change (boost::weak_ptr<ARDOUR::AutomationControl> pc, uint32_t global_strip_position, bool force) 
+void EQSubview::notify_change (boost::weak_ptr<ARDOUR::AutomationControl> pc, uint32_t global_strip_position, bool force)
 {
 	if (!_subview_stripable) {
 		return;
 	}
-	
+
 	Strip* strip = 0;
 	Pot* vpot = 0;
 	std::string* pending_display = 0;
@@ -450,24 +450,24 @@ void EQSubview::notify_change (boost::weak_ptr<ARDOUR::AutomationControl> pc, ui
 
 
 
-DynamicsSubview::DynamicsSubview(MackieControlProtocol& mcp, boost::shared_ptr<ARDOUR::Stripable> subview_stripable) 
+DynamicsSubview::DynamicsSubview(MackieControlProtocol& mcp, boost::shared_ptr<ARDOUR::Stripable> subview_stripable)
 	: Subview(mcp, subview_stripable)
 {}
 
-DynamicsSubview::~DynamicsSubview() 
+DynamicsSubview::~DynamicsSubview()
 {}
 
-bool DynamicsSubview::subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not) 
+bool DynamicsSubview::subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not)
 {
 	if (r && r->comp_enable_controllable()) {
 		return true;
 	}
-	
+
 	reason_why_not = "no dynamics in selected track/bus";
 	return false;
 }
 
-void DynamicsSubview::update_global_buttons() 
+void DynamicsSubview::update_global_buttons()
 {
 	_mcp.update_global_button (Button::Send, off);
 	_mcp.update_global_button (Button::Plugin, off);
@@ -479,16 +479,16 @@ void DynamicsSubview::update_global_buttons()
 
 void DynamicsSubview::setup_vpot(
 		Strip* strip,
-		Pot* vpot, 
+		Pot* vpot,
 		std::string pending_display[2])
 {
 	const uint32_t global_strip_position = _mcp.global_index (*strip);
 	store_pointers(strip, vpot, pending_display, global_strip_position);
-	
+
 	if (!_subview_stripable) {
 		return;
 	}
-	
+
 	boost::shared_ptr<AutomationControl> tc = _subview_stripable->comp_threshold_controllable ();
 	boost::shared_ptr<AutomationControl> sc = _subview_stripable->comp_speed_controllable ();
 	boost::shared_ptr<AutomationControl> mc = _subview_stripable->comp_mode_controllable ();
@@ -546,13 +546,13 @@ void DynamicsSubview::setup_vpot(
 }
 
 void
-DynamicsSubview::notify_change (boost::weak_ptr<ARDOUR::AutomationControl> pc, uint32_t global_strip_position, bool force, bool propagate_mode) 
+DynamicsSubview::notify_change (boost::weak_ptr<ARDOUR::AutomationControl> pc, uint32_t global_strip_position, bool force, bool propagate_mode)
 {
-	if (!_subview_stripable) 
+	if (!_subview_stripable)
 	{
 		return;
 	}
-	
+
 	Strip* strip = 0;
 	Pot* vpot = 0;
 	std::string* pending_display = 0;
@@ -583,24 +583,24 @@ DynamicsSubview::notify_change (boost::weak_ptr<ARDOUR::AutomationControl> pc, u
 
 
 
-SendsSubview::SendsSubview(MackieControlProtocol& mcp, boost::shared_ptr<ARDOUR::Stripable> subview_stripable) 
+SendsSubview::SendsSubview(MackieControlProtocol& mcp, boost::shared_ptr<ARDOUR::Stripable> subview_stripable)
 	: Subview(mcp, subview_stripable)
 {}
 
-SendsSubview::~SendsSubview() 
+SendsSubview::~SendsSubview()
 {}
 
-bool SendsSubview::subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not) 
+bool SendsSubview::subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not)
 {
 	if (r && r->send_level_controllable (0)) {
 		return true;
 	}
-	
+
 	reason_why_not = "no sends for selected track/bus";
 	return false;
 }
 
-void SendsSubview::update_global_buttons() 
+void SendsSubview::update_global_buttons()
 {
 	_mcp.update_global_button (Button::Send, on);
 	_mcp.update_global_button (Button::Plugin, off);
@@ -612,12 +612,12 @@ void SendsSubview::update_global_buttons()
 
 void SendsSubview::setup_vpot(
 		Strip* strip,
-		Pot* vpot, 
+		Pot* vpot,
 		std::string pending_display[2])
 {
 	const uint32_t global_strip_position = _mcp.global_index (*strip);
 	store_pointers(strip, vpot, pending_display, global_strip_position);
-	
+
 	if (!_subview_stripable) {
 		return;
 	}
@@ -646,7 +646,7 @@ SendsSubview::notify_send_level_change (uint32_t global_strip_position, bool for
 	if (!_subview_stripable) {
 		return;
 	}
-	
+
 	Strip* strip = 0;
 	Pot* vpot = 0;
 	std::string* pending_display = 0;
@@ -720,24 +720,24 @@ void SendsSubview::handle_vselect_event(uint32_t global_strip_position)
 
 
 
-TrackViewSubview::TrackViewSubview(MackieControlProtocol& mcp, boost::shared_ptr<ARDOUR::Stripable> subview_stripable) 
+TrackViewSubview::TrackViewSubview(MackieControlProtocol& mcp, boost::shared_ptr<ARDOUR::Stripable> subview_stripable)
 	: Subview(mcp, subview_stripable)
 {}
 
-TrackViewSubview::~TrackViewSubview() 
+TrackViewSubview::~TrackViewSubview()
 {}
 
-bool TrackViewSubview::subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not) 
+bool TrackViewSubview::subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not)
 {
 	if (r)  {
 		return true;
 	}
-	
+
 	reason_why_not = "no track view possible";
 	return false;
 }
 
-void TrackViewSubview::update_global_buttons() 
+void TrackViewSubview::update_global_buttons()
 {
 	_mcp.update_global_button (Button::Send, off);
 	_mcp.update_global_button (Button::Plugin, off);
@@ -748,13 +748,13 @@ void TrackViewSubview::update_global_buttons()
 }
 
 void TrackViewSubview::setup_vpot(
-		Strip* strip, 
-		Pot* vpot, 
+		Strip* strip,
+		Pot* vpot,
 		std::string pending_display[2])
 {
 	const uint32_t global_strip_position = _mcp.global_index (*strip);
 	store_pointers(strip, vpot, pending_display, global_strip_position);
-	
+
 	if (global_strip_position > 4) {
 		/* nothing to control */
 		vpot->set_control (boost::shared_ptr<AutomationControl>());
@@ -762,7 +762,7 @@ void TrackViewSubview::setup_vpot(
 		pending_display[1] = std::string();
 		return;
 	}
-	
+
 	if (!_subview_stripable) {
 		return;
 	}
@@ -814,7 +814,7 @@ void TrackViewSubview::setup_vpot(
 		}
 		break;
 	}
-	
+
 	if (!pc) {
 		pending_display[0] = std::string();
 		pending_display[1] = std::string();
@@ -830,7 +830,7 @@ TrackViewSubview::notify_change (AutomationType type, uint32_t global_strip_posi
 	if (!_subview_stripable) {
 		return;
 	}
-	
+
 	Strip* strip = 0;
 	Pot* vpot = 0;
 	std::string* pending_display = 0;
@@ -869,9 +869,9 @@ TrackViewSubview::notify_change (AutomationType type, uint32_t global_strip_posi
 	}
 
 	if (control) {
-		float val = control->get_value();		
+		float val = control->get_value();
 		do_parameter_display(pending_display[1], control->desc(), val, strip, screen_hold);
-		
+
 		/* update pot/encoder */
 		strip->surface()->write (vpot->set (control->internal_to_interface (val), true, Pot::wrap));
 	}
@@ -879,14 +879,14 @@ TrackViewSubview::notify_change (AutomationType type, uint32_t global_strip_posi
 
 
 
-PluginSubview::PluginSubview(MackieControlProtocol& mcp, boost::shared_ptr<ARDOUR::Stripable> subview_stripable) 
+PluginSubview::PluginSubview(MackieControlProtocol& mcp, boost::shared_ptr<ARDOUR::Stripable> subview_stripable)
 	: Subview(mcp, subview_stripable)
 {
 	_plugin_subview_state = boost::make_shared<PluginSelect>(*this);
 	connect_processors_changed_signal();
 }
 
-PluginSubview::~PluginSubview() 
+PluginSubview::~PluginSubview()
 {}
 
 void PluginSubview::connect_processors_changed_signal()
@@ -894,7 +894,7 @@ void PluginSubview::connect_processors_changed_signal()
 	boost::shared_ptr<Route> route = boost::dynamic_pointer_cast<Route> (_subview_stripable);
 	if (route)
 	{
-		route->processors_changed.connect(_subview_connections, MISSING_INVALIDATOR, boost::bind (&PluginSubview::handle_processors_changed, this), ui_context());	
+		route->processors_changed.connect(_subview_connections, MISSING_INVALIDATOR, boost::bind (&PluginSubview::handle_processors_changed, this), ui_context());
 	}
 }
 
@@ -903,7 +903,7 @@ void PluginSubview::handle_processors_changed()
 	_mcp.redisplay_subview_mode();
 }
 
-bool PluginSubview::subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not) 
+bool PluginSubview::subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not)
 {
 	if (r) {
 		boost::shared_ptr<Route> route = boost::dynamic_pointer_cast<Route> (r);
@@ -911,12 +911,12 @@ bool PluginSubview::subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripabl
 			return true;
 		}
 	}
-	
+
 	reason_why_not = "no plugins in selected track/bus";
 	return false;
 }
 
-void PluginSubview::update_global_buttons() 
+void PluginSubview::update_global_buttons()
 {
 	_mcp.update_global_button (Button::Send, off);
 	_mcp.update_global_button (Button::Plugin, on);
@@ -926,14 +926,14 @@ void PluginSubview::update_global_buttons()
 	_mcp.update_global_button (Button::Pan, off);
 }
 
-bool PluginSubview::permit_flipping_faders_and_pots() 
-{ 
-	return _plugin_subview_state->permit_flipping_faders_and_pots(); 
+bool PluginSubview::permit_flipping_faders_and_pots()
+{
+	return _plugin_subview_state->permit_flipping_faders_and_pots();
 }
 
 void PluginSubview::setup_vpot(
 		Strip* strip,
-		Pot* vpot, 
+		Pot* vpot,
 		std::string pending_display[2])
 {
 	const uint32_t global_strip_position = _mcp.global_index (*strip);
@@ -941,16 +941,16 @@ void PluginSubview::setup_vpot(
 	_plugin_subview_state->setup_vpot(strip, vpot, pending_display, global_strip_position, _subview_stripable);
 }
 
-void PluginSubview::handle_vselect_event(uint32_t global_strip_position) 
+void PluginSubview::handle_vselect_event(uint32_t global_strip_position)
 {
 	_plugin_subview_state->handle_vselect_event(global_strip_position, _subview_stripable);
 }
 
-bool PluginSubview::handle_cursor_right_press() 
+bool PluginSubview::handle_cursor_right_press()
 {
 	return _plugin_subview_state->handle_cursor_right_press();
 }
-	
+
 bool PluginSubview::handle_cursor_left_press()
 {
 	return _plugin_subview_state->handle_cursor_left_press();
@@ -988,22 +988,22 @@ PluginSubviewState::~PluginSubviewState()
 {}
 
 std::string
-PluginSubviewState::shorten_display_text(const std::string& text, std::string::size_type target_length) 
+PluginSubviewState::shorten_display_text(const std::string& text, std::string::size_type target_length)
 {
 	if (text.length() <= target_length) {
 		return text;
-	} 
-	
+	}
+
 	return PBD::short_version (text, target_length);
 }
 
-bool PluginSubviewState::handle_cursor_right_press() 
+bool PluginSubviewState::handle_cursor_right_press()
 {
 	_current_bank = _current_bank + 1;
 	bank_changed();
 	return true;
 }
-	
+
 bool PluginSubviewState::handle_cursor_left_press()
 {
 	if (_current_bank >= 1)
@@ -1030,7 +1030,7 @@ PluginSelect::~PluginSelect()
 
 void PluginSelect::setup_vpot(
 	    Strip* strip,
-		Pot* vpot, 
+		Pot* vpot,
 		std::string pending_display[2],
 		uint32_t global_strip_position,
 		boost::shared_ptr<ARDOUR::Stripable> subview_stripable)
@@ -1038,16 +1038,16 @@ void PluginSelect::setup_vpot(
 	if (!subview_stripable) {
 		return;
 	}
-	
+
 	boost::shared_ptr<Route> route = boost::dynamic_pointer_cast<Route> (subview_stripable);
 	if (!route) {
 		return;
 	}
 
 	uint32_t virtual_strip_position = calculate_virtual_strip_position(global_strip_position);
-	
+
 	boost::shared_ptr<Processor> plugin = route->nth_plugin(virtual_strip_position);
-	
+
 	if (plugin) {
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("plugin of strip %1 is %2\n", global_strip_position, plugin->display_name()));
 		pending_display[0] = string_compose("Ins%1Pl", virtual_strip_position + 1);
@@ -1066,14 +1066,14 @@ void PluginSelect::handle_vselect_event(uint32_t global_strip_position,
 	if (!subview_stripable) {
 		return;
 	}
-	
+
 	boost::shared_ptr<Route> route = boost::dynamic_pointer_cast<Route> (subview_stripable);
 	if (!route) {
 		return;
 	}
 
 	uint32_t virtual_strip_position = calculate_virtual_strip_position(global_strip_position);
-	
+
 	boost::shared_ptr<Processor> processor = route->nth_plugin(virtual_strip_position);
 	boost::shared_ptr<PluginInsert> plugin = boost::dynamic_pointer_cast<PluginInsert>(processor);
 	processor->ShowUI();
@@ -1101,7 +1101,7 @@ PluginEdit::PluginEdit(PluginSubview& context, boost::weak_ptr<PluginInsert> wea
 	}
 }
 
-PluginEdit::~PluginEdit() 
+PluginEdit::~PluginEdit()
 {}
 
 void PluginEdit::init()
@@ -1110,7 +1110,7 @@ void PluginEdit::init()
 	_weak_subview_plugin = boost::weak_ptr<ARDOUR::Plugin>(plugin_insert->plugin());
 	boost::shared_ptr<ARDOUR::Plugin> subview_plugin = _weak_subview_plugin.lock();
 	_plugin_input_parameter_indices.clear();
-	
+
 	if (!subview_plugin) {
 		return;
 	}
@@ -1135,13 +1135,13 @@ boost::shared_ptr<AutomationControl> PluginEdit::parameter_control(uint32_t glob
 	if (virtual_strip_position >= _plugin_input_parameter_indices.size()) {
 		return boost::shared_ptr<AutomationControl>();
 	}
-	
+
 	boost::shared_ptr<PluginInsert> plugin_insert = _weak_subview_plugin_insert.lock();
 	boost::shared_ptr<ARDOUR::Plugin> subview_plugin = _weak_subview_plugin.lock();
 	if (!plugin_insert || !subview_plugin) {
 		return boost::shared_ptr<AutomationControl>();
 	}
-	
+
 	uint32_t plugin_parameter_index = _plugin_input_parameter_indices[virtual_strip_position];
 	bool ok = false;
 	uint32_t controlid = subview_plugin->nth_parameter(plugin_parameter_index, ok);
@@ -1159,18 +1159,18 @@ bool PluginEdit::plugin_went_away() const
 	if (!plugin_insert || !subview_plugin) {
 		return true;
 	}
-	
+
 	// is plugin not registered with stripable any more?
 	boost::shared_ptr<Route> route = boost::dynamic_pointer_cast<Route> (_context.subview_stripable());
 	if (!route) {
 		return true;
 	}
-	
+
 	if (!route->processor_by_id(plugin_insert->id())) {
 		// plugin_insert is not registered with route any more -> it was removed
 		return true;
 	}
-	
+
 	return false;
 }
 
@@ -1181,7 +1181,7 @@ void PluginEdit::switch_to_plugin_select_state()
 
 void PluginEdit::setup_vpot(
 		Strip* strip,
-		Pot* vpot, 
+		Pot* vpot,
 		std::string pending_display[2],
 		uint32_t global_strip_position,
 		boost::shared_ptr<ARDOUR::Stripable> subview_stripable)
@@ -1190,7 +1190,7 @@ void PluginEdit::setup_vpot(
 		switch_to_plugin_select_state();
 		return;
 	}
-	
+
 	boost::shared_ptr<AutomationControl> c = parameter_control(global_strip_position);
 
 	if (!c) {
@@ -1207,7 +1207,7 @@ void PluginEdit::setup_vpot(
 }
 
 
-void PluginEdit::notify_parameter_change(Strip* strip, Pot* vpot, std::string pending_display[2], uint32_t global_strip_position) 
+void PluginEdit::notify_parameter_change(Strip* strip, Pot* vpot, std::string pending_display[2], uint32_t global_strip_position)
 {
 	boost::shared_ptr<AutomationControl> control = parameter_control(global_strip_position);
 	if (!control)
@@ -1217,7 +1217,7 @@ void PluginEdit::notify_parameter_change(Strip* strip, Pot* vpot, std::string pe
 
 	float val = control->get_value();
 	_context.do_parameter_display(pending_display[1], control->desc(), val, strip, false);
-	
+
 	if (vpot->control() == control) {
 		/* update pot/encoder */
 		strip->surface()->write(vpot->set (control->internal_to_interface (val), true, Pot::wrap));

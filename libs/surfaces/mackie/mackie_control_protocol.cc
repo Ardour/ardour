@@ -141,7 +141,7 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	, nudge_modifier_consumed_by_button (false)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::MackieControlProtocol\n");
-	
+
 	_subview = Mackie::SubviewFactory::instance()->create_subview(SubViewMode::None, *this, boost::shared_ptr<Stripable>());
 
 	DeviceInfo::reload_device_info ();
@@ -1409,7 +1409,7 @@ MackieControlProtocol::notify_record_state_changed ()
 				ls = on;
 				break;
 			case Session::Enabled:
-				
+
 				if(_device_info.is_qcon()){
 					// For qcon the rec button is two state only (on/off)
 					DEBUG_TRACE (DEBUG::MackieControl, "record state changed to enabled, LED on (QCon)\n");
@@ -1758,7 +1758,7 @@ MackieControlProtocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Strip
 
 		return false;
 	}
-	
+
 	_subview = Mackie::SubviewFactory::instance()->create_subview(sm, *this, r);
 	/* Catch the current subview stripable going away */
 	if (_subview->subview_stripable()) {
