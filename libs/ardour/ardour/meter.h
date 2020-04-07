@@ -23,14 +23,16 @@
 #define __ardour_meter_h__
 
 #include <vector>
-#include "ardour/libardour_visibility.h"
-#include "ardour/types.h"
-#include "ardour/processor.h"
+
 #include "pbd/fastlog.h"
 
-#include "ardour/kmeterdsp.h"
+#include "ardour/libardour_visibility.h"
+#include "ardour/processor.h"
+#include "ardour/types.h"
+
 #include "ardour/iec1ppmdsp.h"
 #include "ardour/iec2ppmdsp.h"
+#include "ardour/kmeterdsp.h"
 #include "ardour/vumeterdsp.h"
 
 namespace ARDOUR {
@@ -41,15 +43,16 @@ class Session;
 
 /** Meters peaks on the input and stores them for access.
  */
-class LIBARDOUR_API PeakMeter : public Processor {
+class LIBARDOUR_API PeakMeter : public Processor
+{
 public:
-        PeakMeter(Session& s, const std::string& name);
-        ~PeakMeter();
+	PeakMeter (Session& s, const std::string& name);
+	~PeakMeter ();
 
 	void reset ();
 	void reset_max ();
 
-	std::string display_name() const;
+	std::string display_name () const;
 
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
 	bool configure_io (ChanCount in, ChanCount out);
@@ -71,17 +74,16 @@ public:
 	/** Compute peaks */
 	void run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool);
 
-	void activate ()   { }
-	void deactivate () { }
+	void activate () {}
+	void deactivate () {}
 
-	ChanCount input_streams () const { return current_meters; }
+	ChanCount input_streams ()  const { return current_meters; }
 	ChanCount output_streams () const { return current_meters; }
 
 	float meter_level (uint32_t n, MeterType type);
 
-	void set_meter_type (MeterType t);
+	void      set_meter_type (MeterType t);
 	MeterType meter_type () const { return _meter_type; }
-
 
 	PBD::Signal1<void, MeterType> MeterTypeChanged;
 
@@ -101,15 +103,15 @@ private:
 	volatile gint _reset_max;
 
 	uint32_t           _bufcnt;
-	std::vector<float> _peak_buffer; // internal, integrate
-	std::vector<float> _peak_power;  // includes accurate falloff, hence dB
+	std::vector<float> _peak_buffer;     // internal, integrate
+	std::vector<float> _peak_power;      // includes accurate falloff, hence dB
 	std::vector<float> _max_peak_signal; // dB calculation is done on demand
-	float _combined_peak; // Mackie surfaces expect the highest peak of all track channels
+	float              _combined_peak;   // Mackie surfaces expect the highest peak of all track channels
 
-	std::vector<Kmeterdsp *> _kmeter;
-	std::vector<Iec1ppmdsp *> _iec1meter;
-	std::vector<Iec2ppmdsp *> _iec2meter;
-	std::vector<Vumeterdsp *> _vumeter;
+	std::vector<Kmeterdsp*>  _kmeter;
+	std::vector<Iec1ppmdsp*> _iec1meter;
+	std::vector<Iec2ppmdsp*> _iec2meter;
+	std::vector<Vumeterdsp*> _vumeter;
 
 	MeterType _meter_type;
 };
