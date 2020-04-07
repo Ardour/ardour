@@ -73,6 +73,7 @@
 #include "mackie_control_exception.h"
 #include "device_profile.h"
 #include "subview.h"
+#include "subview_modes.h"
 #include "surface_port.h"
 #include "surface.h"
 #include "strip.h"
