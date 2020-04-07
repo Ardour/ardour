@@ -83,6 +83,7 @@ DiskReader::ReaderChannelInfo::resize (samplecnt_t bufsize)
 	rbuf = new PlaybackBuffer<Sample> (bufsize);
 	/* touch memory to lock it */
 	memset (rbuf->buffer (), 0, sizeof (Sample) * rbuf->bufsize ());
+	initialized = false;
 }
 
 void
@@ -366,7 +367,7 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		const sampleoffset_t declick_offs         = _declick_offs;
 
 		for (n = 0, chan = c->begin (); chan != c->end (); ++chan, ++n) {
-			ChannelInfo* chaninfo (*chan);
+			ReaderChannelInfo* chaninfo = dynamic_cast<ReaderChannelInfo*> (*chan);
 			AudioBuffer& output (bufs.get_audio (n % n_buffers));
 
 			AudioBuffer& disk_buf ((ms & MonitoringInput) ? scratch_bufs.get_audio (n) : output);
@@ -391,7 +392,9 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			if (!declick_out) {
 				const samplecnt_t available = chaninfo->rbuf->read (disk_buf.data (), disk_samples_to_consume);
 
-				if (disk_samples_to_consume > available) {
+				if (available == 0 && !chaninfo->initialized) {
+					disk_buf.silence (disk_samples_to_consume);
+				} else if (disk_samples_to_consume > available) {
 					cerr << "underrun for " << _name << " Available samples: " << available << " required: " << disk_samples_to_consume << endl;
 					DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 underrun in %2, total space = %3 vs %4\n", DEBUG_THREAD_SELF, name (), available, disk_samples_to_consume));
 					Underrun ();
@@ -673,6 +676,8 @@ DiskReader::overwrite_existing_audio ()
 				ret = false;
 			}
 		}
+
+		rci->initialized = true;
 	}
 
 	return ret;
@@ -1231,6 +1236,7 @@ DiskReader::refill_audio (Sample* sum_buffer, Sample* mixdown_buffer, float* gai
 					ret = -1;
 				}
 			}
+			rci->initialized = true;
 		}
 
 		if (zero_fill) {

@@ -123,6 +123,7 @@ protected:
 			: DiskIOProcessor::ChannelInfo (buffer_size)
 			, pre_loop_buffer (0)
 			, pre_loop_buffer_size (0)
+			, initialized (false)
 		{
 			resize (buffer_size);
 			resize_preloop (preloop_size);
@@ -134,6 +135,7 @@ protected:
 
 		Sample* pre_loop_buffer;
 		samplecnt_t pre_loop_buffer_size;
+		bool initialized;
 	};
 
 	XMLNode& state ();
