@@ -60,6 +60,7 @@
 
 #include "mackie_control_protocol.h"
 #include "subview.h"
+#include "subview_modes.h"
 #include "surface_port.h"
 #include "surface.h"
 #include "strip.h"
@@ -517,7 +518,7 @@ Strip::vselect_event (Button&, ButtonState bs)
 		if (bs != press) {
 			return;
 		}
-		
+
 		_surface->mcp().subview()->handle_vselect_event(_surface->mcp().global_index (*this));
 		return;
 	}
@@ -660,9 +661,9 @@ Strip::handle_button (Button& button, ButtonState bs)
 
 std::string
 Strip::format_paramater_for_display(
-		ARDOUR::ParameterDescriptor const& desc, 
-		float val, 
-		boost::shared_ptr<ARDOUR::Stripable> stripable_for_non_mixbus_azimuth_automation, 
+		ARDOUR::ParameterDescriptor const& desc,
+		float val,
+		boost::shared_ptr<ARDOUR::Stripable> stripable_for_non_mixbus_azimuth_automation,
 		bool& overwrite_screen_hold)
 {
 	std::string formatted_parameter_display;
@@ -706,7 +707,7 @@ Strip::format_paramater_for_display(
 		}
 		break;
 	}
-	
+
 	return formatted_parameter_display;
 }
 
@@ -714,7 +715,7 @@ void
 Strip::do_parameter_display (ARDOUR::ParameterDescriptor const& desc, float val, bool screen_hold)
 {
 	pending_display[1] = format_paramater_for_display(desc, val, _stripable, screen_hold);
-	
+
 	if (screen_hold) {
 		/* we just queued up a parameter to be displayed.
 		   1 second from now, switch back to vpot mode display.
