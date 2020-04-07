@@ -76,7 +76,7 @@ Port::Port (std::string const & n, DataType t, PortFlags f)
 
 	if (!port_manager->running ()) {
 		DEBUG_TRACE (DEBUG::Ports, string_compose ("port-engine n/a postpone registering %1\n", name()));
-		_port_handle = 0; // created during ::reestablish() later
+		_port_handle.reset (); // created during ::reestablish() later
 	} else if ((_port_handle = port_engine.register_port (_name, t, _flags)) == 0) {
 		cerr << "Failed to register port \"" << _name << "\", reason is unknown from here\n";
 		throw failed_constructor ();

@@ -75,6 +75,12 @@ class PortManager;
  * documentation, on which this entire object is based.
  */
 
+class LIBARDOUR_API ProtoPort {
+  public:
+	ProtoPort() {}
+	virtual ~ProtoPort () {}
+};
+
 class LIBARDOUR_API PortEngine
 {
 public:
@@ -88,14 +94,24 @@ public:
 
 	/** Opaque handle to use as reference for Ports
 	 *
-	 * We use void* here so that the API can be defined for any implementation.
+	 * The handle needs to be lifetime managed (i.e. a shared_ptr type)
+	 * in order to allow RCU to provide lock-free cross-thread operations
+	 * on ports and ports containers.
 	 *
 	 * We could theoretically use a template (PortEngine\<T\>) and define
 	 * PortHandle as T, but this complicates the desired inheritance
 	 * pattern in which FooPortEngine handles things for the Foo API,
 	 * rather than being a derivative of PortEngine\<Foo\>.
+	 *
+	 * We use this to declare return values and members of structures.
 	 */
-	typedef void* PortHandle;
+	typedef boost::shared_ptr<ProtoPort> PortPtr;
+
+	/* We use this to declare arguments to methods/functions, in order to
+	 * avoid copying shared_ptr<ProtoPort> every time (a practice we use in
+	 * other contexts where we pass shared_ptr<T>). 
+	 */
+	typedef PortPtr const & PortHandle;
 
 	/** Return the name of this process as used by the port manager
 	 * when naming ports.
@@ -164,7 +180,7 @@ public:
 	 * @param name Full port-name to lookup
 	 * @return PortHandle if lookup was successful, or an "empty" PortHandle (analogous to a null pointer) if no such port exists.
 	 */
-	virtual PortHandle get_port_by_name (const std::string& name) const = 0;
+	virtual PortPtr get_port_by_name (const std::string& name) const = 0;
 
 	/** Find the set of ports whose names, types and flags match
 	 * specified values, place the names of each port into \p ports .
@@ -194,7 +210,7 @@ public:
 	 * @param flags flags of the port to create
 	 * @return a reference to the port, otherwise return a null pointer.
 	 */
-	virtual PortHandle register_port (const std::string& shortname, ARDOUR::DataType type, ARDOUR::PortFlags flags) = 0;
+	virtual PortPtr register_port (const std::string& shortname, ARDOUR::DataType type, ARDOUR::PortFlags flags) = 0;
 
 	/* Destroy the port referred to by \p port, including all resources
 	 * associated with it. This will also disconnect \p port from any ports it
@@ -202,7 +218,7 @@ public:
 	 *
 	 * @param port \ref PortHandle of the port to destroy
 	 */
-	virtual void       unregister_port (PortHandle port) = 0;
+	virtual void    unregister_port (PortHandle port) = 0;
 
 	/* Connection management */
 

@@ -974,24 +974,6 @@ CoreAudioBackend::register_system_audio_ports()
 }
 
 void
-CoreAudioBackend::update_system_port_latecies ()
-{
-	for (std::vector<BackendPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
-		(*it)->update_connected_latency (true);
-	}
-	for (std::vector<BackendPort*>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it) {
-		(*it)->update_connected_latency (false);
-	}
-
-	for (std::vector<BackendPort*>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it) {
-		(*it)->update_connected_latency (true);
-	}
-	for (std::vector<BackendPort*>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it) {
-		(*it)->update_connected_latency (false);
-	}
-}
-
-void
 CoreAudioBackend::coremidi_rediscover()
 {
 	if (!_run) { return; }
@@ -1275,7 +1257,7 @@ CoreAudioBackend::pre_process ()
 		manager.graph_order_callback();
 	}
 	if (connections_changed || ports_changed) {
-		update_system_port_latecies ();
+		update_system_port_latencies ();
 		engine.latency_callback(false);
 		engine.latency_callback(true);
 	}

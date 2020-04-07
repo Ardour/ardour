@@ -1303,24 +1303,6 @@ PortAudioBackend::register_system_midi_ports()
 	return 0;
 }
 
-void
-PortAudioBackend::update_system_port_latecies ()
-{
-	for (std::vector<BackendPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
-		(*it)->update_connected_latency (true);
-	}
-	for (std::vector<BackendPort*>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it) {
-		(*it)->update_connected_latency (false);
-	}
-
-	for (std::vector<BackendPort*>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it) {
-		(*it)->update_connected_latency (true);
-	}
-	for (std::vector<BackendPort*>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it) {
-		(*it)->update_connected_latency (false);
-	}
-}
-
 BackendPort*
 PortAudioBackend::port_factory (std::string const & name, ARDOUR::DataType type, ARDOUR::PortFlags flags)
 {
@@ -1775,7 +1757,7 @@ PortAudioBackend::process_port_connection_changes ()
 		manager.graph_order_callback();
 	}
 	if (connections_changed || ports_changed) {
-		update_system_port_latecies ();
+		update_system_port_latencies ();
 		engine.latency_callback(false);
 		engine.latency_callback(true);
 	}

@@ -263,18 +263,18 @@ DummyAudioBackend::set_buffer_size (uint32_t bs)
 	 */
 	LatencyRange lr;
 	lr.min = lr.max = _systemic_input_latency;
-	for (std::vector<BackendPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
+	for (std::vector<BackendPortPtr>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
 		set_latency_range (*it, false, lr);
 	}
-	for (std::vector<BackendPort*>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it) {
+	for (std::vector<BackendPortPtr>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it) {
 		set_latency_range (*it, false, lr);
 	}
 
 	lr.min = lr.max = _systemic_output_latency;
-	for (std::vector<BackendPort*>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it) {
+	for (std::vector<BackendPortPtr>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it) {
 		set_latency_range (*it, true, lr);
 	}
-	for (std::vector<BackendPort*>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it) {
+	for (std::vector<BackendPortPtr>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it) {
 		set_latency_range (*it, true, lr);
 	}
 
@@ -689,13 +689,18 @@ DummyAudioBackend::register_system_ports()
 	for (int i = 1; i <= a_ins; ++i) {
 		char tmp[64];
 		snprintf(tmp, sizeof(tmp), "system:capture_%d", i);
-		PortHandle p = add_port(std::string(tmp), DataType::AUDIO, static_cast<PortFlags>(IsOutput | IsPhysical | IsTerminal));
+		PortPtr p = add_port(std::string(tmp), DataType::AUDIO, static_cast<PortFlags>(IsOutput | IsPhysical | IsTerminal));
 		if (!p) return -1;
 		set_latency_range (p, false, lr);
-		_system_inputs.push_back (static_cast<DummyAudioPort*>(p));
-		std::string name = static_cast<DummyAudioPort*>(p)->setup_generator (gt, _samplerate, i - 1, a_ins);
+
+		boost::shared_ptr<DummyAudioPort> dp = boost::dynamic_pointer_cast<DummyAudioPort>(p);
+
+		_system_inputs.push_back (dp);
+
+		std::string name = dp->setup_generator (gt, _samplerate, i - 1, a_ins);
+
 		if (!name.empty ()) {
-			static_cast<DummyAudioPort*>(p)->set_pretty_name (name);
+			dp->set_pretty_name (name);
 		}
 	}
 
@@ -703,10 +708,10 @@ DummyAudioBackend::register_system_ports()
 	for (int i = 1; i <= a_out; ++i) {
 		char tmp[64];
 		snprintf(tmp, sizeof(tmp), "system:playback_%d", i);
-		PortHandle p = add_port(std::string(tmp), DataType::AUDIO, static_cast<PortFlags>(IsInput | IsPhysical | IsTerminal));
+		PortPtr p = add_port(std::string(tmp), DataType::AUDIO, static_cast<PortFlags>(IsInput | IsPhysical | IsTerminal));
 		if (!p) return -1;
 		set_latency_range (p, true, lr);
-		_system_outputs.push_back (static_cast<DummyAudioPort*>(p));
+		_system_outputs.push_back (boost::dynamic_pointer_cast<BackendPort>(p));
 	}
 
 	/* midi ports */
@@ -714,20 +719,24 @@ DummyAudioBackend::register_system_ports()
 	for (int i = 0; i < m_ins; ++i) {
 		char tmp[64];
 		snprintf(tmp, sizeof(tmp), "system:midi_capture_dummy_%d", i+1);
-		PortHandle p = add_port(std::string(tmp), DataType::MIDI, static_cast<PortFlags>(IsOutput | IsPhysical | IsTerminal));
+		PortPtr p = add_port(std::string(tmp), DataType::MIDI, static_cast<PortFlags>(IsOutput | IsPhysical | IsTerminal));
 		if (!p) return -1;
 		set_latency_range (p, false, lr);
-		_system_midi_in.push_back (static_cast<DummyMidiPort*>(p));
+
+		boost::shared_ptr<DummyMidiPort> dp = boost::dynamic_pointer_cast<DummyMidiPort>(p);
+
+		_system_midi_in.push_back (dp);
+
 		if (_midi_mode == MidiGenerator) {
-			std::string name = static_cast<DummyMidiPort*>(p)->setup_generator (i % NUM_MIDI_EVENT_GENERATORS, _samplerate);
+			std::string name = dp->setup_generator (i % NUM_MIDI_EVENT_GENERATORS, _samplerate);
 			if (!name.empty ()) {
-				static_cast<DummyMidiPort*>(p)->set_pretty_name (name);
+				dp->set_pretty_name (name);
 			}
 		}
 		else if (_midi_mode == MidiOneHz) {
-			std::string name = static_cast<DummyMidiPort*>(p)->setup_generator (-1, _samplerate);
+			std::string name = dp->setup_generator (-1, _samplerate);
 			if (!name.empty ()) {
-				static_cast<DummyMidiPort*>(p)->set_pretty_name (name);
+				dp->set_pretty_name (name);
 			}
 		}
 	}
@@ -739,7 +748,9 @@ DummyAudioBackend::register_system_ports()
 		PortHandle p = add_port(std::string(tmp), DataType::MIDI, static_cast<PortFlags>(IsInput | IsPhysical | IsTerminal));
 		if (!p) return -1;
 		set_latency_range (p, true, lr);
-		_system_midi_out.push_back (static_cast<DummyMidiPort*>(p));
+
+		boost::shared_ptr<DummyMidiPort> dp = boost::dynamic_pointer_cast<DummyMidiPort>(p);
+		_system_midi_out.push_back (dp);
 
 		if (_device == _("Loopback") && _midi_mode == MidiToAudio) {
 			std::stringstream ss;
@@ -749,28 +760,10 @@ DummyAudioBackend::register_system_ports()
 					ss << " >" << (apc + 1);
 				}
 			}
-			static_cast<DummyMidiPort*>(p)->set_pretty_name (ss.str());
+			dp->set_pretty_name (ss.str());
 		}
 	}
 	return 0;
-}
-
-void
-DummyAudioBackend::update_system_port_latecies ()
-{
-	for (std::vector<BackendPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
-		(*it)->update_connected_latency (true);
-	}
-	for (std::vector<BackendPort*>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it) {
-		(*it)->update_connected_latency (false);
-	}
-
-	for (std::vector<BackendPort*>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it) {
-		(*it)->update_connected_latency (true);
-	}
-	for (std::vector<BackendPort*>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it) {
-		(*it)->update_connected_latency (false);
-	}
 }
 
 BackendPort*
@@ -881,35 +874,35 @@ DummyAudioBackend::monitoring_input (PortEngine::PortHandle)
 /* Latency management */
 
 void
-DummyAudioBackend::set_latency_range (PortEngine::PortHandle port, bool for_playback, LatencyRange latency_range)
+DummyAudioBackend::set_latency_range (PortEngine::PortHandle port_handle, bool for_playback, LatencyRange latency_range)
 {
+	BackendPortPtr port = boost::dynamic_pointer_cast<BackendPort> (port_handle);
 	if (!valid_port (port)) {
 		PBD::error << _("DummyPort::set_latency_range (): invalid port.") << endmsg;
 	}
-	static_cast<DummyPort*>(port)->set_latency_range (latency_range, for_playback);
+	port->set_latency_range (latency_range, for_playback);
 }
 
 LatencyRange
-DummyAudioBackend::get_latency_range (PortEngine::PortHandle port, bool for_playback)
+DummyAudioBackend::get_latency_range (PortEngine::PortHandle port_handle, bool for_playback)
 {
 	LatencyRange r;
+	BackendPortPtr port = boost::dynamic_pointer_cast<BackendPort> (port_handle);
 	if (!valid_port (port)) {
 		PBD::error << _("DummyPort::get_latency_range (): invalid port.") << endmsg;
 		r.min = 0;
 		r.max = 0;
 		return r;
 	}
-	DummyPort *p =  static_cast<DummyPort*>(port);
-	assert(p);
 
-	r = p->latency_range (for_playback);
-	if (p->is_physical() && p->is_terminal()) {
-		if (p->is_input() && for_playback) {
+	r = port->latency_range (for_playback);
+	if (port->is_physical() && port->is_terminal()) {
+		if (port->is_input() && for_playback) {
 			const size_t l_in = _samples_per_period * .25;
 			r.min += l_in;
 			r.max += l_in;
 		}
-		if (p->is_output() && !for_playback) {
+		if (port->is_output() && !for_playback) {
 			/* with 'Loopback' there is exactly once cycle latency, divide it between In + Out; */
 			const size_t l_in = _samples_per_period * .25;
 			const size_t l_out = _samples_per_period - l_in;
@@ -923,11 +916,12 @@ DummyAudioBackend::get_latency_range (PortEngine::PortHandle port, bool for_play
 /* Getting access to the data buffer for a port */
 
 void*
-DummyAudioBackend::get_buffer (PortEngine::PortHandle port, pframes_t nframes)
+DummyAudioBackend::get_buffer (PortEngine::PortHandle port_handle, pframes_t nframes)
 {
+	BackendPortPtr port = boost::dynamic_pointer_cast<BackendPort> (port_handle);
 	assert (port);
 	assert (valid_port (port));
-	return static_cast<DummyPort*>(port)->get_buffer (nframes);
+	return port->get_buffer (nframes);
 }
 
 /* Engine Process */
@@ -952,11 +946,11 @@ DummyAudioBackend::main_process_thread ()
 		}
 
 		// re-set input buffers, generate on demand.
-		for (std::vector<BackendPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
-			static_cast<DummyPort*>(*it)->next_period();
+		for (std::vector<BackendPortPtr>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
+			boost::dynamic_pointer_cast<DummyPort>(*it)->next_period ();
 		}
-		for (std::vector<BackendPort*>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it) {
-			static_cast<DummyPort*>(*it)->next_period();
+		for (std::vector<BackendPortPtr>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it) {
+			boost::dynamic_pointer_cast<DummyPort>(*it)->next_period ();
 		}
 
 		if (engine.process_callback (samples_per_period)) {
@@ -967,28 +961,28 @@ DummyAudioBackend::main_process_thread ()
 		if (_device == _("Loopback") && _midi_mode != MidiToAudio) {
 			int opn = 0;
 			int opc = _system_outputs.size();
-			for (std::vector<BackendPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it, ++opn) {
-				DummyAudioPort* op = static_cast<DummyAudioPort*> (_system_outputs[(opn % opc)]);
-				static_cast<DummyAudioPort*>(*it)->fill_wavetable ((const float*)op->get_buffer (samples_per_period), samples_per_period);
+			for (std::vector<BackendPortPtr>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it, ++opn) {
+				BackendPortPtr op = _system_outputs[(opn % opc)];
+				boost::dynamic_pointer_cast<DummyAudioPort>(*it)->fill_wavetable ((const float*)op->get_buffer (samples_per_period), samples_per_period);
 			}
 		}
 
 		if (_midi_mode == MidiLoopback) {
 			int opn = 0;
 			int opc = _system_midi_out.size();
-			for (std::vector<BackendPort*>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it, ++opn) {
-				DummyMidiPort* op = static_cast<DummyMidiPort*> (_system_midi_out[(opn % opc)]);
+			for (std::vector<BackendPortPtr>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it, ++opn) {
+				boost::shared_ptr<DummyMidiPort> op = boost::dynamic_pointer_cast<DummyMidiPort> (_system_midi_out[(opn % opc)]);
 				op->get_buffer(0); // mix-down
-				static_cast<DummyMidiPort*>(*it)->set_loopback (op->const_buffer());
+				boost::dynamic_pointer_cast<DummyMidiPort>(*it)->set_loopback (op->const_buffer());
 			}
 		}
 		else if (_midi_mode == MidiToAudio) {
 			int opn = 0;
 			int opc = _system_midi_out.size();
-			for (std::vector<BackendPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it, ++opn) {
-				DummyMidiPort* op = static_cast<DummyMidiPort*> (_system_midi_out[(opn % opc)]);
+			for (std::vector<BackendPortPtr>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it, ++opn) {
+				boost::shared_ptr<DummyMidiPort> op = boost::dynamic_pointer_cast<DummyMidiPort> (_system_midi_out[(opn % opc)]);
 				op->get_buffer(0); // mix-down
-				static_cast<DummyAudioPort*>(*it)->midi_to_wavetable (op->const_buffer(), samples_per_period);
+				boost::dynamic_pointer_cast<DummyAudioPort>(*it)->midi_to_wavetable (op->const_buffer(), samples_per_period);
 			}
 		}
 
@@ -1039,7 +1033,7 @@ DummyAudioBackend::main_process_thread ()
 			manager.graph_order_callback();
 		}
 		if (connections_changed || ports_changed) {
-			update_system_port_latecies ();
+			update_system_port_latencies ();
 			engine.latency_callback(false);
 			engine.latency_callback(true);
 		}
@@ -1622,22 +1616,23 @@ void DummyAudioPort::generate (const pframes_t n_samples)
 	_gen_cycle = true;
 }
 
-void* DummyAudioPort::get_buffer (pframes_t n_samples)
+void*
+DummyAudioPort::get_buffer (pframes_t n_samples)
 {
 	if (is_input ()) {
-		const std::set<BackendPort *>& connections = get_connections ();
-		std::set<BackendPort*>::const_iterator it = connections.begin ();
+		const std::set<BackendPortPtr>& connections = get_connections ();
+		std::set<BackendPortPtr>::const_iterator it = connections.begin ();
 		if (it == connections.end ()) {
 			memset (_buffer, 0, n_samples * sizeof (Sample));
 		} else {
-			DummyAudioPort * source = static_cast<DummyAudioPort*>(*it);
+			boost::shared_ptr<DummyAudioPort> source = boost::dynamic_pointer_cast<DummyAudioPort>(*it);
 			assert (source && source->is_output ());
 			if (source->is_physical() && source->is_terminal()) {
 				source->get_buffer(n_samples); // generate signal.
 			}
 			memcpy (_buffer, source->const_buffer (), n_samples * sizeof (Sample));
 			while (++it != connections.end ()) {
-				source = static_cast<DummyAudioPort*>(*it);
+				source = boost::dynamic_pointer_cast<DummyAudioPort>(*it);
 				assert (source && source->is_output ());
 				Sample* dst = buffer ();
 				if (source->is_physical() && source->is_terminal()) {
@@ -1761,11 +1756,11 @@ void* DummyMidiPort::get_buffer (pframes_t n_samples)
 {
 	if (is_input ()) {
 		_buffer.clear ();
-		const std::set<BackendPort*>& connections = get_connections ();
-		for (std::set<BackendPort*>::const_iterator i = connections.begin ();
+		const std::set<BackendPortPtr>& connections = get_connections ();
+		for (std::set<BackendPortPtr>::const_iterator i = connections.begin ();
 				i != connections.end ();
 				++i) {
-			DummyMidiPort * source = static_cast<DummyMidiPort*>(*i);
+			boost::shared_ptr<DummyMidiPort> source = boost::dynamic_pointer_cast<DummyMidiPort>(*i);
 			if (source->is_physical() && source->is_terminal()) {
 				source->get_buffer(n_samples); // generate signal.
 			}

@@ -826,11 +826,8 @@ DiskWriter::do_flush (RunContext ctxt, bool force_flush)
 	uint32_t to_write;
 	int32_t ret = 0;
 	RingBufferNPT<Sample>::rw_vector vector;
-	RingBufferNPT<CaptureTransition>::rw_vector transvec;
 	samplecnt_t total;
 
-	transvec.buf[0] = 0;
-	transvec.buf[1] = 0;
 	vector.buf[0] = 0;
 	vector.buf[1] = 0;
 
@@ -1204,8 +1201,6 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 
   out:
 	reset_write_sources (mark_write_completed);
-
-  outout:
 
 	for (ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
 		delete *ci;

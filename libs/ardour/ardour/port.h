@@ -159,7 +159,7 @@ protected:
 
 	Port (std::string const &, DataType, PortFlags);
 
-	PortEngine::PortHandle _port_handle;
+	PortEngine::PortPtr _port_handle;
 
 	static bool       _connecting_blocked;
 	static pframes_t  _cycle_nframes; /* access only from process() tree */

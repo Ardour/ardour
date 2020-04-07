@@ -39,6 +39,16 @@ namespace ARDOUR {
 class JackConnection;
 class JACKSession;
 
+class JackPort : public ProtoPort
+{
+  public:
+	JackPort (jack_port_t* p) : jack_ptr (p) {}
+
+  private:
+	friend class JACKAudioBackend;
+	jack_port_t* jack_ptr;
+};
+
 class JACKAudioBackend : public AudioBackend {
   public:
     JACKAudioBackend (AudioEngine& e, AudioBackendInfo& info, boost::shared_ptr<JackConnection>);
@@ -133,7 +143,7 @@ class JACKAudioBackend : public AudioBackend {
     int         set_port_name (PortHandle, const std::string&);
     std::string get_port_name (PortHandle) const;
     PortFlags get_port_flags (PortHandle) const;
-    PortHandle  get_port_by_name (const std::string&) const;
+    PortPtr  get_port_by_name (const std::string&) const;
     int get_port_property (PortHandle, const std::string& key, std::string& value, std::string& type) const;
     int set_port_property (PortHandle, const std::string& key, const std::string& value, const std::string& type);
 
@@ -141,7 +151,7 @@ class JACKAudioBackend : public AudioBackend {
 
     DataType port_data_type (PortHandle) const;
 
-    PortHandle register_port (const std::string& shortname, ARDOUR::DataType, ARDOUR::PortFlags);
+    PortPtr register_port (const std::string& shortname, ARDOUR::DataType, ARDOUR::PortFlags);
     void  unregister_port (PortHandle);
 
     bool  connected (PortHandle, bool process_callback_safe);
@@ -310,4 +320,3 @@ class JACKAudioBackend : public AudioBackend {
 } // namespace
 
 #endif /* __ardour_audiobackend_h__ */
-

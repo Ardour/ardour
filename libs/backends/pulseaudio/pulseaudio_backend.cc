@@ -829,23 +829,15 @@ PulseAudioBackend::register_system_ports ()
 	for (int i = 1; i <= N_CHANNELS; ++i) {
 		char tmp[64];
 		snprintf (tmp, sizeof (tmp), "system:playback_%d", i);
-		PortHandle p = add_port (std::string (tmp), DataType::AUDIO, static_cast<PortFlags> (IsInput | IsPhysical | IsTerminal));
-		if (!p)
+		BackendPortPtr p = add_port (std::string (tmp), DataType::AUDIO, static_cast<PortFlags> (IsInput | IsPhysical | IsTerminal));
+		if (!p) {
 			return -1;
+		}
 		set_latency_range (p, true, lr);
-		BackendPort* ap = static_cast<BackendPort*> (p);
-		//ap->set_pretty_name ("")
-		_system_outputs.push_back (ap);
+		//p->set_pretty_name ("")
+		_system_outputs.push_back (p);
 	}
 	return 0;
-}
-
-void
-PulseAudioBackend::update_system_port_latecies ()
-{
-	for (std::vector<BackendPort*>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it) {
-		(*it)->update_connected_latency (false);
-	}
 }
 
 BackendPort*
@@ -946,49 +938,55 @@ bool
 /* Latency management */
 
 void
-PulseAudioBackend::set_latency_range (PortEngine::PortHandle port, bool for_playback, LatencyRange latency_range)
+PulseAudioBackend::set_latency_range (PortEngine::PortHandle port_handle, bool for_playback, LatencyRange latency_range)
 {
+	BackendPortPtr port = boost::dynamic_pointer_cast<BackendPort> (port_handle);
 	if (!valid_port (port)) {
 		PBD::error << _("PulsePort::set_latency_range (): invalid port.") << endmsg;
 	}
-	static_cast<BackendPort*> (port)->set_latency_range (latency_range, for_playback);
+	port->set_latency_range (latency_range, for_playback);
 }
 
 LatencyRange
-PulseAudioBackend::get_latency_range (PortEngine::PortHandle port, bool for_playback)
+PulseAudioBackend::get_latency_range (PortEngine::PortHandle port_handle, bool for_playback)
 {
+	BackendPortPtr port = boost::dynamic_pointer_cast<BackendPort> (port_handle);
 	LatencyRange r;
+
 	if (!valid_port (port)) {
 		PBD::error << _("PulsePort::get_latency_range (): invalid port.") << endmsg;
 		r.min = 0;
 		r.max = 0;
 		return r;
 	}
-	BackendPort* p = static_cast<BackendPort*> (port);
-	assert (p);
 
-	r = p->latency_range (for_playback);
-	if (p->is_physical () && p->is_terminal ()) {
-		if (p->is_input () && for_playback) {
+	r = port->latency_range (for_playback);
+
+	if (port->is_physical () && port->is_terminal ()) {
+		if (port->is_input () && for_playback) {
 			r.min += _samples_per_period + _systemic_audio_output_latency;
 			r.max += _samples_per_period + _systemic_audio_output_latency;
 		}
-		if (p->is_output () && !for_playback) {
+		if (port->is_output () && !for_playback) {
 			r.min += _samples_per_period;
 			r.max += _samples_per_period;
 		}
 	}
+
 	return r;
 }
 
 /* Getting access to the data buffer for a port */
 
 void*
-PulseAudioBackend::get_buffer (PortEngine::PortHandle port, pframes_t nframes)
+PulseAudioBackend::get_buffer (PortEngine::PortHandle port_handle, pframes_t nframes)
 {
+	BackendPortPtr port = boost::dynamic_pointer_cast<BackendPort> (port_handle);
+
 	assert (port);
 	assert (valid_port (port));
-	return static_cast<BackendPort*> (port)->get_buffer (nframes);
+
+	return port->get_buffer (nframes);
 }
 
 /* Engine Process */
@@ -1073,8 +1071,9 @@ PulseAudioBackend::main_process_thread ()
 			assert (_system_outputs.size () == N_CHANNELS);
 
 			/* interleave */
-			for (std::vector<BackendPort *>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it, ++i) {
-				const float* src = (const float*)(*it)->get_buffer (_samples_per_period);
+			for (std::vector<BackendPortPtr>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it, ++i) {
+				BackendPortPtr port = boost::dynamic_pointer_cast<BackendPort> (*it);
+				const float* src = (const float*) port->get_buffer (_samples_per_period);
 				for (size_t n = 0; n < _samples_per_period; ++n) {
 					buf[N_CHANNELS * n + i] = src[n];
 				}
@@ -1129,7 +1128,7 @@ PulseAudioBackend::main_process_thread ()
 			manager.graph_order_callback ();
 		}
 		if (connections_changed || ports_changed) {
-			update_system_port_latecies ();
+			update_system_port_latencies ();
 			engine.latency_callback (false);
 			engine.latency_callback (true);
 		}
@@ -1222,16 +1221,17 @@ void*
 PulseAudioPort::get_buffer (pframes_t n_samples)
 {
 	if (is_input ()) {
-		const std::set<BackendPort*>&          connections = get_connections ();
-		std::set<BackendPort*>::const_iterator it          = connections.begin ();
+		const std::set<BackendPortPtr>&          connections = get_connections ();
+		std::set<BackendPortPtr>::const_iterator it          = connections.begin ();
+
 		if (it == connections.end ()) {
 			memset (_buffer, 0, n_samples * sizeof (Sample));
 		} else {
-			PulseAudioPort* source = static_cast<PulseAudioPort*> (*it);
+			boost::shared_ptr<PulseAudioPort> source = boost::dynamic_pointer_cast<PulseAudioPort> (*it);
 			assert (source && source->is_output ());
 			memcpy (_buffer, source->const_buffer (), n_samples * sizeof (Sample));
 			while (++it != connections.end ()) {
-				source = static_cast<PulseAudioPort*> (*it);
+				source = boost::dynamic_pointer_cast<PulseAudioPort> (*it);
 				assert (source && source->is_output ());
 				Sample*       dst = buffer ();
 				const Sample* src = source->const_buffer ();
@@ -1269,11 +1269,11 @@ void* PulseMidiPort::get_buffer (pframes_t /*n_samples*/)
 {
 	if (is_input ()) {
 		_buffer.clear ();
-		const std::set<BackendPort*>& connections = get_connections ();
-		for (std::set<BackendPort*>::const_iterator i = connections.begin ();
+		const std::set<BackendPortPtr>& connections = get_connections ();
+		for (std::set<BackendPortPtr>::const_iterator i = connections.begin ();
 		     i != connections.end ();
 		     ++i) {
-			const PulseMidiBuffer* src = static_cast<PulseMidiPort*> (*i)->const_buffer ();
+			const PulseMidiBuffer* src = boost::dynamic_pointer_cast<PulseMidiPort> (*i)->const_buffer ();
 			for (PulseMidiBuffer::const_iterator it = src->begin (); it != src->end (); ++it) {
 				_buffer.push_back (*it);
 			}

@@ -464,12 +464,12 @@ AlsaAudioBackend::update_systemic_audio_latencies ()
 	LatencyRange lr;
 
 	lr.min = lr.max = lcpp + (_measure_latency ? 0 : _systemic_audio_input_latency);
-	for (std::vector<BackendPort*>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it) {
+	for (std::vector<BackendPortPtr>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it) {
 		set_latency_range (*it, true, lr);
 	}
 
 	lr.min = lr.max = (_measure_latency ? 0 : _systemic_audio_output_latency);
-	for (std::vector<BackendPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
+	for (std::vector<BackendPortPtr>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
 		set_latency_range (*it, false, lr);
 	}
 	update_latencies ();
@@ -480,18 +480,18 @@ AlsaAudioBackend::update_systemic_midi_latencies ()
 {
 	pthread_mutex_lock (&_device_port_mutex);
 	uint32_t i = 0;
-	for (std::vector<BackendPort*>::iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it, ++i) {
+	for (std::vector<BackendPortPtr>::iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it, ++i) {
 		assert (_rmidi_out.size() > i);
 		AlsaMidiOut *rm = _rmidi_out.at(i);
 		struct AlsaMidiDeviceInfo * nfo = midi_device_info (rm->name());
 		assert (nfo);
 		LatencyRange lr;
 		lr.min = lr.max = (_measure_latency ? 0 : nfo->systemic_output_latency);
-		set_latency_range (*it, true, lr);
+		set_latency_range (boost::dynamic_pointer_cast<AlsaAudioPort>(*it), true, lr);
 	}
 
 	i = 0;
-	for (std::vector<BackendPort*>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it, ++i) {
+	for (std::vector<BackendPortPtr>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it, ++i) {
 		assert (_rmidi_in.size() > i);
 		AlsaMidiIO *rm = _rmidi_in.at(i);
 		struct AlsaMidiDeviceInfo * nfo = midi_device_info (rm->name());
@@ -685,7 +685,7 @@ AlsaAudioBackend::set_midi_device_enabled (std::string const device, bool enable
 			// remove all ports provided by the given device
 			pthread_mutex_lock (&_device_port_mutex);
 			uint32_t i = 0;
-			for (std::vector<BackendPort*>::iterator it = _system_midi_out.begin (); it != _system_midi_out.end ();) {
+			for (std::vector<BackendPortPtr>::iterator it = _system_midi_out.begin (); it != _system_midi_out.end ();) {
 				assert (_rmidi_out.size() > i);
 				AlsaMidiOut *rm = _rmidi_out.at(i);
 				if (rm->name () != device) { ++it; ++i; continue; }
@@ -698,7 +698,7 @@ AlsaAudioBackend::set_midi_device_enabled (std::string const device, bool enable
 			}
 
 			i = 0;
-			for (std::vector<BackendPort*>::iterator it = _system_midi_in.begin (); it != _system_midi_in.end ();) {
+			for (std::vector<BackendPortPtr>::iterator it = _system_midi_in.begin (); it != _system_midi_in.end ();) {
 				assert (_rmidi_in.size() > i);
 				AlsaMidiIn *rm = _rmidi_in.at(i);
 				if (rm->name () != device) { ++it; ++i; continue; }
@@ -1192,7 +1192,7 @@ AlsaAudioBackend::register_system_audio_ports()
 		PortHandle p = add_port(std::string(tmp), DataType::AUDIO, static_cast<PortFlags>(IsOutput | IsPhysical | IsTerminal));
 		if (!p) return -1;
 		set_latency_range (p, false, lr);
-		BackendPort *ap = static_cast<BackendPort*>(p);
+		BackendPortPtr ap = boost::dynamic_pointer_cast<BackendPort>(p);
 		//ap->set_pretty_name ("")
 		_system_inputs.push_back (ap);
 	}
@@ -1204,7 +1204,7 @@ AlsaAudioBackend::register_system_audio_ports()
 		PortHandle p = add_port(std::string(tmp), DataType::AUDIO, static_cast<PortFlags>(IsInput | IsPhysical | IsTerminal));
 		if (!p) return -1;
 		set_latency_range (p, true, lr);
-		BackendPort *ap = static_cast<BackendPort*>(p);
+		BackendPortPtr ap = boost::dynamic_pointer_cast<BackendPort>(p);
 		//ap->set_pretty_name ("")
 		_system_outputs.push_back (ap);
 	}
@@ -1351,32 +1351,25 @@ AlsaAudioBackend::stop_listen_for_midi_device_changes ()
  * and capture-latency for _system_outputs
  */
 void
-AlsaAudioBackend::update_system_port_latecies ()
+AlsaAudioBackend::update_system_port_latencies ()
 {
-	for (std::vector<BackendPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
-		(*it)->update_connected_latency (true);
-	}
-	for (std::vector<BackendPort*>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it) {
-		(*it)->update_connected_latency (false);
-	}
-
 	pthread_mutex_lock (&_device_port_mutex);
-	for (std::vector<BackendPort*>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it) {
-		(*it)->update_connected_latency (true);
-	}
-	for (std::vector<BackendPort*>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it) {
-		(*it)->update_connected_latency (false);
-	}
+
+	PortEngineSharedImpl::update_system_port_latencies ();
+
 	pthread_mutex_unlock (&_device_port_mutex);
 
 	for (AudioSlaves::iterator s = _slaves.begin (); s != _slaves.end (); ++s) {
+
 		if ((*s)->dead) {
 			continue;
 		}
-		for (std::vector<BackendPort*>::const_iterator it = (*s)->inputs.begin (); it != (*s)->inputs.end (); ++it) {
+
+		for (std::vector<BackendPortPtr>::const_iterator it = (*s)->inputs.begin (); it != (*s)->inputs.end (); ++it) {
 			(*it)->update_connected_latency (true);
 		}
-		for (std::vector<BackendPort*>::const_iterator it = (*s)->outputs.begin (); it != (*s)->outputs.end (); ++it) {
+
+		for (std::vector<BackendPortPtr>::const_iterator it = (*s)->outputs.begin (); it != (*s)->outputs.end (); ++it) {
 			(*it)->update_connected_latency (false);
 		}
 	}
@@ -1472,8 +1465,8 @@ AlsaAudioBackend::register_system_midi_ports(const std::string device)
 					LatencyRange lr;
 					lr.min = lr.max = (nfo->systemic_output_latency);
 					set_latency_range (p, true, lr);
-					static_cast<AlsaMidiPort*>(p)->set_n_periods(_periods_per_cycle); // TODO check MIDI alignment
-					BackendPort *ap = static_cast<BackendPort*>(p);
+					boost::dynamic_pointer_cast<AlsaMidiPort>(p)->set_n_periods(_periods_per_cycle); // TODO check MIDI alignment
+					BackendPortPtr ap = boost::dynamic_pointer_cast<BackendPort>(p);
 					ap->set_pretty_name (replace_name_io (i->first, false));
 					pthread_mutex_lock (&_device_port_mutex);
 					_system_midi_out.push_back (ap);
@@ -1520,7 +1513,7 @@ AlsaAudioBackend::register_system_midi_ports(const std::string device)
 				LatencyRange lr;
 				lr.min = lr.max = (nfo->systemic_input_latency);
 				set_latency_range (p, false, lr);
-				BackendPort *ap = static_cast<BackendPort*>(p);
+				BackendPortPtr ap = boost::dynamic_pointer_cast<BackendPort>(p);
 				ap->set_pretty_name (replace_name_io (i->first, true));
 				pthread_mutex_lock (&_device_port_mutex);
 				_system_midi_in.push_back (ap);
@@ -1619,38 +1612,40 @@ AlsaAudioBackend::monitoring_input (PortEngine::PortHandle)
 /* Latency management */
 
 void
-AlsaAudioBackend::set_latency_range (PortEngine::PortHandle port, bool for_playback, LatencyRange latency_range)
+AlsaAudioBackend::set_latency_range (PortEngine::PortHandle port_handle, bool for_playback, LatencyRange latency_range)
 {
+	BackendPortPtr port = boost::dynamic_pointer_cast<BackendPort> (port_handle);
 	if (!valid_port (port)) {
 		PBD::error << _("AlsaPort::set_latency_range (): invalid port.") << endmsg;
 	}
-	static_cast<BackendPort*>(port)->set_latency_range (latency_range, for_playback);
+	port->set_latency_range (latency_range, for_playback);
 }
 
 LatencyRange
-AlsaAudioBackend::get_latency_range (PortEngine::PortHandle port, bool for_playback)
+AlsaAudioBackend::get_latency_range (PortEngine::PortHandle port_handle, bool for_playback)
 {
+	BackendPortPtr port = boost::dynamic_pointer_cast<BackendPort> (port_handle);
 	LatencyRange r;
+
 	if (!valid_port (port)) {
 		PBD::error << _("AlsaPort::get_latency_range (): invalid port.") << endmsg;
 		r.min = 0;
 		r.max = 0;
 		return r;
 	}
-	BackendPort *p = static_cast<BackendPort*>(port);
-	assert(p);
 
-	r = p->latency_range (for_playback);
-	if (p->is_physical() && p->is_terminal()) {
-		if (p->is_input() && for_playback) {
+	r = port->latency_range (for_playback);
+	if (port->is_physical() && port->is_terminal()) {
+		if (port->is_input() && for_playback) {
 			r.min += _samples_per_period;
 			r.max += _samples_per_period;
 		}
-		if (p->is_output() && !for_playback) {
+		if (port->is_output() && !for_playback) {
 			r.min += _samples_per_period;
 			r.max += _samples_per_period;
 		}
 	}
+
 	return r;
 }
 
@@ -1677,11 +1672,12 @@ AlsaAudioBackend::port_factory (std::string const & name, ARDOUR::DataType type,
 /* Getting access to the data buffer for a port */
 
 void*
-AlsaAudioBackend::get_buffer (PortEngine::PortHandle port, pframes_t nframes)
+AlsaAudioBackend::get_buffer (PortEngine::PortHandle port_handle, pframes_t nframes)
 {
+	BackendPortPtr port = boost::dynamic_pointer_cast<BackendPort> (port_handle);
 	assert (port);
 	assert (valid_port (port));
-	return static_cast<BackendPort*>(port)->get_buffer (nframes);
+	return port->get_buffer (nframes);
 }
 
 /* Engine Process */
@@ -1710,7 +1706,7 @@ AlsaAudioBackend::main_process_thread ()
 	/* warm up */
 	int cnt = std::max (8, (int)(_samplerate / _samples_per_period) / 2);
 	for (int w = 0; w < cnt; ++w) {
-		for (std::vector<BackendPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
+		for (std::vector<BackendPortPtr>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
 			memset ((*it)->get_buffer (_samples_per_period), 0, _samples_per_period * sizeof (Sample));
 		}
 		if (engine.process_callback (_samples_per_period)) {
@@ -1767,10 +1763,10 @@ AlsaAudioBackend::main_process_thread ()
 				if ((*s)->halt) {
 					/* slave died, unregister its ports (not rt-safe, but no matter) */
 					PBD::error << _("ALSA Slave device halted") << endmsg;
-					for (std::vector<BackendPort*>::const_iterator it = (*s)->inputs.begin (); it != (*s)->inputs.end (); ++it) {
+					for (std::vector<BackendPortPtr>::const_iterator it = (*s)->inputs.begin (); it != (*s)->inputs.end (); ++it) {
 						unregister_port (*it);
 					}
-					for (std::vector<BackendPort*>::const_iterator it = (*s)->outputs.begin (); it != (*s)->outputs.end (); ++it) {
+					for (std::vector<BackendPortPtr>::const_iterator it = (*s)->outputs.begin (); it != (*s)->outputs.end (); ++it) {
 						unregister_port (*it);
 					}
 					(*s)->inputs.clear ();
@@ -1810,8 +1806,8 @@ AlsaAudioBackend::main_process_thread ()
 				no_proc_errors = 0;
 
 				_pcmi->capt_init (_samples_per_period);
-				for (std::vector<BackendPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it, ++i) {
-					_pcmi->capt_chan (i, (float*)((*it)->get_buffer(_samples_per_period)), _samples_per_period);
+				for (std::vector<BackendPortPtr>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it, ++i) {
+					_pcmi->capt_chan (i, (float*)(*it)->get_buffer(_samples_per_period), _samples_per_period);
 				}
 				_pcmi->capt_done (_samples_per_period);
 
@@ -1820,8 +1816,8 @@ AlsaAudioBackend::main_process_thread ()
 						continue;
 					}
 					i = 0;
-					for (std::vector<BackendPort*>::const_iterator it = (*s)->inputs.begin (); it != (*s)->inputs.end (); ++it, ++i) {
-						(*s)->capt_chan (i, (float*)((*it)->get_buffer(_samples_per_period)), _samples_per_period);
+					for (std::vector<BackendPortPtr>::const_iterator it = (*s)->inputs.begin (); it != (*s)->inputs.end (); ++it, ++i) {
+						(*s)->capt_chan (i, (float*)(boost::dynamic_pointer_cast<BackendPort>(*it)->get_buffer(_samples_per_period)), _samples_per_period);
 					}
 				}
 
@@ -1829,7 +1825,7 @@ AlsaAudioBackend::main_process_thread ()
 				pthread_mutex_lock (&_device_port_mutex);
 				/* de-queue incoming midi*/
 				i = 0;
-				for (std::vector<BackendPort*>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it, ++i) {
+				for (std::vector<BackendPortPtr>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it, ++i) {
 					assert (_rmidi_in.size() > i);
 					AlsaMidiIn *rm = _rmidi_in.at(i);
 					void *bptr = (*it)->get_buffer(0);
@@ -1845,7 +1841,7 @@ AlsaAudioBackend::main_process_thread ()
 				}
 				pthread_mutex_unlock (&_device_port_mutex);
 
-				for (std::vector<BackendPort*>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it) {
+				for (std::vector<BackendPortPtr>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it) {
 					memset ((*it)->get_buffer (_samples_per_period), 0, _samples_per_period * sizeof (Sample));
 				}
 
@@ -1859,15 +1855,15 @@ AlsaAudioBackend::main_process_thread ()
 
 				/* only used when adding/removing MIDI device/system ports */
 				pthread_mutex_lock (&_device_port_mutex);
-				for (std::vector<BackendPort*>::iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it) {
-					static_cast<AlsaMidiPort*>(*it)->next_period();
+				for (std::vector<BackendPortPtr>::iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it) {
+					boost::dynamic_pointer_cast<AlsaMidiPort>(*it)->next_period();
 				}
 
 				/* queue outgoing midi */
 				i = 0;
-				for (std::vector<BackendPort*>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it, ++i) {
+				for (std::vector<BackendPortPtr>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it, ++i) {
 					assert (_rmidi_out.size() > i);
-					const AlsaMidiBuffer * src = static_cast<const AlsaMidiPort*>(*it)->const_buffer();
+					AlsaMidiBuffer const * src = boost::dynamic_pointer_cast<const AlsaMidiPort>(*it)->const_buffer();
 					AlsaMidiOut *rm = _rmidi_out.at(i);
 					rm->sync_time (clock1);
 					for (AlsaMidiBuffer::const_iterator mit = src->begin (); mit != src->end (); ++mit) {
@@ -1879,7 +1875,7 @@ AlsaAudioBackend::main_process_thread ()
 				/* write back audio */
 				i = 0;
 				_pcmi->play_init (_samples_per_period);
-				for (std::vector<BackendPort*>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it, ++i) {
+				for (std::vector<BackendPortPtr>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it, ++i) {
 					_pcmi->play_chan (i, (const float*)(*it)->get_buffer (_samples_per_period), _samples_per_period);
 				}
 				for (; i < _pcmi->nplay (); ++i) {
@@ -1892,8 +1888,8 @@ AlsaAudioBackend::main_process_thread ()
 						continue;
 					}
 					i = 0;
-					for (std::vector<BackendPort*>::const_iterator it = (*s)->outputs.begin (); it != (*s)->outputs.end (); ++it, ++i) {
-						(*s)->play_chan (i, (float*)((*it)->get_buffer(_samples_per_period)), _samples_per_period);
+					for (std::vector<BackendPortPtr>::const_iterator it = (*s)->outputs.begin (); it != (*s)->outputs.end (); ++it, ++i) {
+						(*s)->play_chan (i, (float*)(*it)->get_buffer(_samples_per_period), _samples_per_period);
 					}
 					(*s)->cycle_end ();
 				}
@@ -1920,14 +1916,14 @@ AlsaAudioBackend::main_process_thread ()
 			// Freewheelin'
 
 			// zero audio input buffers
-			for (std::vector<BackendPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
+			for (std::vector<BackendPortPtr>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
 				memset ((*it)->get_buffer (_samples_per_period), 0, _samples_per_period * sizeof (Sample));
 			}
 
 			clock1 = g_get_monotonic_time();
 			uint32_t i = 0;
 			pthread_mutex_lock (&_device_port_mutex);
-			for (std::vector<BackendPort*>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it, ++i) {
+			for (std::vector<BackendPortPtr>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it, ++i) {
 				static_cast<AlsaMidiBuffer*>((*it)->get_buffer(0))->clear ();
 				AlsaMidiIn *rm = _rmidi_in.at(i);
 				void *bptr = (*it)->get_buffer(0);
@@ -1953,7 +1949,7 @@ AlsaAudioBackend::main_process_thread ()
 
 			// drop all outgoing MIDI messages
 			pthread_mutex_lock (&_device_port_mutex);
-			for (std::vector<BackendPort*>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it) {
+			for (std::vector<BackendPortPtr>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it) {
 				void *bptr = (*it)->get_buffer(0);
 				midi_clear(bptr);
 			}
@@ -1989,7 +1985,7 @@ AlsaAudioBackend::main_process_thread ()
 			manager.graph_order_callback();
 		}
 		if (connections_changed || ports_changed) {
-			update_system_port_latecies (); // flush, clear
+			update_system_port_latencies (); // flush, clear
 			engine.latency_callback(false);
 			engine.latency_callback(true);
 		}
@@ -2031,10 +2027,9 @@ AlsaAudioBackend::add_slave (const char*  device,
 				break;
 			}
 		} while (1);
-		PortHandle p = add_port(std::string(tmp), DataType::AUDIO, static_cast<PortFlags>(IsOutput | IsPhysical | IsTerminal));
+		PortPtr p = add_port(std::string(tmp), DataType::AUDIO, static_cast<PortFlags>(IsOutput | IsPhysical | IsTerminal));
 		if (!p) goto errout;
-		BackendPort *ap = static_cast<BackendPort*>(p);
-		s->inputs.push_back (ap);
+		s->inputs.push_back (boost::dynamic_pointer_cast<BackendPort>(p));
 	}
 
 	for (uint32_t i = 0, n = 1; i < s->nplay (); ++i) {
@@ -2047,10 +2042,9 @@ AlsaAudioBackend::add_slave (const char*  device,
 				break;
 			}
 		} while (1);
-		PortHandle p = add_port(std::string(tmp), DataType::AUDIO, static_cast<PortFlags>(IsInput | IsPhysical | IsTerminal));
+		PortPtr p = add_port(std::string(tmp), DataType::AUDIO, static_cast<PortFlags>(IsInput | IsPhysical | IsTerminal));
 		if (!p) goto errout;
-		BackendPort *ap = static_cast<BackendPort*>(p);
-		s->outputs.push_back (ap);
+		s->outputs.push_back (boost::dynamic_pointer_cast<BackendPort> (p));
 	}
 
 	if (!s->start ()) {
@@ -2105,12 +2099,12 @@ AlsaAudioBackend::AudioSlave::update_latencies (uint32_t play, uint32_t capt)
 {
 	 LatencyRange lr;
 	 lr.min = lr.max = (capt);
-	 for (std::vector<BackendPort*>::const_iterator it = inputs.begin (); it != inputs.end (); ++it) {
+	 for (std::vector<BackendPortPtr>::const_iterator it = inputs.begin (); it != inputs.end (); ++it) {
 		(*it)->set_latency_range (lr, false);
 	 }
 
 	lr.min = lr.max = play;
-	for (std::vector<BackendPort*>::const_iterator it = outputs.begin (); it != outputs.end (); ++it) {
+	for (std::vector<BackendPortPtr>::const_iterator it = outputs.begin (); it != outputs.end (); ++it) {
 		(*it)->set_latency_range (lr, true);
 	}
 	printf (" ----- SLAVE LATENCY play=%d capt=%d\n", play, capt); // XXX DEBUG
@@ -2184,24 +2178,25 @@ AlsaAudioPort::AlsaAudioPort (AlsaAudioBackend &b, const std::string& name, Port
 	: BackendPort (b, name, flags)
 {
 	memset (_buffer, 0, sizeof (_buffer));
-	mlock(_buffer, sizeof (_buffer));
+	mlock (_buffer, sizeof (_buffer));
 }
 
 AlsaAudioPort::~AlsaAudioPort () { }
 
-void* AlsaAudioPort::get_buffer (pframes_t n_samples)
+void*
+AlsaAudioPort::get_buffer (pframes_t n_samples)
 {
 	if (is_input ()) {
-		const std::set<BackendPort *>& connections = get_connections ();
-		std::set<BackendPort*>::const_iterator it = connections.begin ();
+		const std::set<BackendPortPtr>& connections = get_connections ();
+		std::set<BackendPortPtr>::const_iterator it = connections.begin ();
 		if (it == connections.end ()) {
 			memset (_buffer, 0, n_samples * sizeof (Sample));
 		} else {
-			AlsaAudioPort const * source = static_cast<const AlsaAudioPort*>(*it);
+			boost::shared_ptr<const AlsaAudioPort> source = boost::dynamic_pointer_cast<const AlsaAudioPort>(*it);
 			assert (source && source->is_output ());
 			memcpy (_buffer, source->const_buffer (), n_samples * sizeof (Sample));
 			while (++it != connections.end ()) {
-				source = static_cast<const AlsaAudioPort*>(*it);
+				source = boost::dynamic_pointer_cast<const AlsaAudioPort>(*it);
 				assert (source && source->is_output ());
 				Sample* dst = buffer ();
 				const Sample* src = source->const_buffer ();
@@ -2241,11 +2236,11 @@ void* AlsaMidiPort::get_buffer (pframes_t /* nframes */)
 {
 	if (is_input ()) {
 		(_buffer[_bufperiod]).clear ();
-		const std::set<BackendPort*>& connections = get_connections ();
-		for (std::set<BackendPort*>::const_iterator i = connections.begin ();
+		const std::set<BackendPortPtr>& connections = get_connections ();
+		for (std::set<BackendPortPtr>::const_iterator i = connections.begin ();
 				i != connections.end ();
 				++i) {
-			const AlsaMidiBuffer * src = static_cast<const AlsaMidiPort*>(*i)->const_buffer ();
+			const AlsaMidiBuffer * src = boost::dynamic_pointer_cast<const AlsaMidiPort>(*i)->const_buffer ();
 			for (AlsaMidiBuffer::const_iterator it = src->begin (); it != src->end (); ++it) {
 				(_buffer[_bufperiod]).push_back (*it);
 			}

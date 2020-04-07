@@ -39,25 +39,28 @@ namespace ARDOUR {
 class PortEngineSharedImpl;
 class PortManager;
 
-class LIBARDOUR_API BackendPort
+class BackendPort;
+
+typedef boost::shared_ptr<BackendPort> BackendPortPtr;
+typedef boost::shared_ptr<BackendPort> const & BackendPortHandle;
+
+class LIBARDOUR_API BackendPort : public ProtoPort
 {
-protected:
+  protected:
 	BackendPort (PortEngineSharedImpl& b, const std::string&, PortFlags);
 
-public:
+  public:
 	virtual ~BackendPort ();
 
 	const std::string& name ()        const { return _name; }
 	const std::string& pretty_name () const { return _pretty_name; }
 
-	int set_name (const std::string& name)
-	{
+	int set_name (const std::string& name) {
 		_name = name;
 		return 0;
 	}
 
-	int set_pretty_name (const std::string& name)
-	{
+	int set_pretty_name (const std::string& name) {
 		_pretty_name = name;
 		return 0;
 	}
@@ -71,17 +74,16 @@ public:
 	bool is_terminal ()  const { return flags () & IsTerminal; }
 	bool is_connected () const { return _connections.size () != 0; }
 
-	bool is_connected (const BackendPort* port) const;
+	bool is_connected (BackendPortHandle port) const;
 	bool is_physically_connected () const;
 
-	const std::set<BackendPort*>& get_connections () const
-	{
+	const std::set<BackendPortPtr>& get_connections () const {
 		return _connections;
 	}
 
-	int  connect (BackendPort* port);
-	int  disconnect (BackendPort* port);
-	void disconnect_all ();
+	int  connect (BackendPortHandle port, BackendPortHandle self);
+	int  disconnect (BackendPortHandle port, BackendPortHandle self);
+	void disconnect_all (BackendPortHandle self);
 
 	virtual void* get_buffer (pframes_t nframes) = 0;
 
@@ -103,10 +105,10 @@ private:
 	const PortFlags        _flags;
 	LatencyRange           _capture_latency_range;
 	LatencyRange           _playback_latency_range;
-	std::set<BackendPort*> _connections;
+	std::set<BackendPortPtr> _connections;
 
-	void _connect (BackendPort*, bool);
-	void _disconnect (BackendPort*, bool);
+	void store_connection (BackendPortHandle);
+	void remove_connection (BackendPortHandle);
 
 }; // class BackendPort
 
@@ -129,7 +131,7 @@ public:
 	int                    set_port_name (PortEngine::PortHandle, const std::string&);
 	std::string            get_port_name (PortEngine::PortHandle) const;
 	PortFlags              get_port_flags (PortEngine::PortHandle) const;
-	PortEngine::PortHandle get_port_by_name (const std::string&) const;
+	PortEngine::PortPtr    get_port_by_name (const std::string&) const;
 
 	int get_port_property (PortEngine::PortHandle, const std::string& key, std::string& value, std::string& type) const;
 	int set_port_property (PortEngine::PortHandle, const std::string& key, const std::string& value, const std::string& type);
@@ -138,8 +140,8 @@ public:
 
 	DataType port_data_type (PortEngine::PortHandle) const;
 
-	PortEngine::PortHandle register_port (const std::string& shortname, ARDOUR::DataType, ARDOUR::PortFlags);
-	virtual void           unregister_port (PortEngine::PortHandle);
+	PortEngine::PortPtr register_port (const std::string& shortname, ARDOUR::DataType, ARDOUR::PortFlags);
+	virtual void        unregister_port (PortEngine::PortHandle);
 
 	int connect (const std::string& src, const std::string& dst);
 	int disconnect (const std::string& src, const std::string& dst);
@@ -158,36 +160,35 @@ public:
 protected:
 	std::string _instance_name;
 
-	std::vector<BackendPort*> _system_inputs;
-	std::vector<BackendPort*> _system_outputs;
-	std::vector<BackendPort*> _system_midi_in;
-	std::vector<BackendPort*> _system_midi_out;
+	std::vector<BackendPortPtr> _system_inputs;
+	std::vector<BackendPortPtr> _system_outputs;
+	std::vector<BackendPortPtr> _system_midi_in;
+	std::vector<BackendPortPtr> _system_midi_out;
+
+	virtual void update_system_port_latencies ();
 
 	void clear_ports ();
 
-	PortEngine::PortHandle add_port (const std::string& shortname, ARDOUR::DataType, ARDOUR::PortFlags);
-	void                   unregister_ports (bool system_only = false);
+	BackendPortPtr add_port (const std::string& shortname, ARDOUR::DataType, ARDOUR::PortFlags);
+	void                unregister_ports (bool system_only = false);
 
 	struct SortByPortName {
-		bool operator() (const BackendPort* lhs, const BackendPort* rhs) const
-		{
+		bool operator() (BackendPortHandle lhs, BackendPortHandle rhs) const {
 			return PBD::naturally_less (lhs->name ().c_str (), rhs->name ().c_str ());
 		}
 	};
 
-	typedef std::map<std::string, BackendPort*>    PortMap;   // fast lookup in _ports
-	typedef std::set<BackendPort*, SortByPortName> PortIndex; // fast lookup in _ports
+	typedef std::map<std::string, BackendPortPtr>    PortMap;   // fast lookup in _ports
+	typedef std::set<BackendPortPtr, SortByPortName> PortIndex; // fast lookup in _ports
 	SerializedRCUManager<PortMap>                  _portmap;
 	SerializedRCUManager<PortIndex>                _ports;
 
-	bool valid_port (PortEngine::PortHandle port) const
-	{
+	bool valid_port (BackendPortHandle port) const {
 		boost::shared_ptr<PortIndex> p = _ports.reader ();
-		return std::find (p->begin (), p->end (), static_cast<BackendPort*> (port)) != p->end ();
+		return std::find (p->begin (), p->end (), port) != p->end ();
 	}
 
-	BackendPort* find_port (const std::string& port_name) const
-	{
+	BackendPortPtr find_port (const std::string& port_name) const {
 		boost::shared_ptr<PortMap> p  = _portmap.reader ();
 		PortMap::const_iterator    it = p->find (port_name);
 		if (it == p->end ()) {

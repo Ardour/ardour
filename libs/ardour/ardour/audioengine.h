@@ -284,8 +284,8 @@ class LIBARDOUR_API AudioEngine : public PortManager, public SessionHandlePtr
 	MTDM*                     _mtdm;
 	MIDIDM*                   _mididm;
 	LatencyMeasurement        _measuring_latency;
-	PortEngine::PortHandle    _latency_input_port;
-	PortEngine::PortHandle    _latency_output_port;
+	PortEngine::PortPtr       _latency_input_port;
+	PortEngine::PortPtr       _latency_output_port;
 	samplecnt_t               _latency_flush_samples;
 	std::string               _latency_input_name;
 	std::string               _latency_output_name;

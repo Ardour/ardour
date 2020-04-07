@@ -1086,7 +1086,8 @@ JACKAudioBackend::n_physical (unsigned long flags) const
 	if (ports) {
 		for (uint32_t i = 0; ports[i]; ++i) {
 			if (!strstr (ports[i], "Midi-Through")) {
-				DataType t = port_data_type (jack_port_by_name (_priv_jack, ports[i]));
+				boost::shared_ptr<JackPort> jp (new JackPort (jack_port_by_name (_priv_jack, ports[i])));
+				DataType t = port_data_type (jp);
 				if (t != DataType::NIL) {
 					c.set (t, c.get (t) + 1);
 				}
