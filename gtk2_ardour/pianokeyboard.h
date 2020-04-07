@@ -23,7 +23,7 @@
 #include <map>
 #include <gtkmm/drawingarea.h>
 
-#include "keyboardlayout.h"
+#include "piano_key_bindings.h"
 
 #define NNOTES (128)
 
@@ -54,7 +54,7 @@ public:
 	void set_monophonic (bool monophonic);
 	void set_octave (int octave);
 	void set_octave_range (int octave_range);
-	void set_keyboard_layout (KeyboardLayout::Layout layout);
+	void set_keyboard_layout (PianoKeyBindings::Layout layout);
 	void set_velocities (int min_vel, int max_vel, int key_vel);
 
 protected:
@@ -125,7 +125,7 @@ private:
 
 	PKNote _notes[NNOTES];
 
-	KeyboardLayout _keyboard_layout;
+	PianoKeyBindings           _keyboard_layout;
 	std::map<std::string, int> _note_stack;
 
 	/* these are only valid during expose/draw */

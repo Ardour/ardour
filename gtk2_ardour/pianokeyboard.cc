@@ -357,7 +357,7 @@ APianoKeyboard::on_key_press_event (GdkEventKey* event)
 		return true;
 	}
 
-	char const* key = KeyboardLayout::get_keycode (event);
+	char const* key = PianoKeyBindings::get_keycode (event);
 	int note = _keyboard_layout.key_binding (key);
 
 	if (note < -1) {
@@ -408,7 +408,7 @@ APianoKeyboard::on_key_release_event (GdkEventKey* event)
 		return true;
 	}
 
-	char const* key = KeyboardLayout::get_keycode (event);
+	char const* key = PianoKeyBindings::get_keycode (event);
 
 	if (!key) {
 		return false;
@@ -893,7 +893,7 @@ APianoKeyboard::set_octave_range (int octave_range)
 }
 
 void
-APianoKeyboard::set_keyboard_layout (KeyboardLayout::Layout layout)
+APianoKeyboard::set_keyboard_layout (PianoKeyBindings::Layout layout)
 {
 	_keyboard_layout.set_layout (layout);
 	queue_draw ();

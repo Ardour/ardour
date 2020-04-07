@@ -20,19 +20,19 @@
 #include <cassert>
 #include <iostream>
 
-#include "keyboardlayout.h"
+#include "piano_key_bindings.h"
 
-KeyboardLayout::KeyboardLayout ()
+PianoKeyBindings::PianoKeyBindings ()
 {
 	bind_keys_qwerty ();
 }
 
-KeyboardLayout::~KeyboardLayout ()
+PianoKeyBindings::~PianoKeyBindings ()
 {
 }
 
 void
-KeyboardLayout::set_layout (Layout layout)
+PianoKeyBindings::set_layout (Layout layout)
 {
 	switch (layout) {
 		case QWERTY:
@@ -57,7 +57,7 @@ KeyboardLayout::set_layout (Layout layout)
 }
 
 int
-KeyboardLayout::key_binding (const char* key) const
+PianoKeyBindings::key_binding (const char* key) const
 {
 	std::map<std::string, int>::const_iterator kv;
 	if (key && (kv = _key_bindings.find (key)) != _key_bindings.end ()) {
@@ -67,7 +67,7 @@ KeyboardLayout::key_binding (const char* key) const
 }
 
 const char*
-KeyboardLayout::note_binding (int note) const
+PianoKeyBindings::note_binding (int note) const
 {
 	std::map<int, std::string>::const_iterator kv = _note_bindings.find (note);
 	if (kv == _note_bindings.end ()) {
@@ -76,8 +76,8 @@ KeyboardLayout::note_binding (int note) const
 	return kv->second.c_str();
 }
 
-KeyboardLayout::Layout
-KeyboardLayout::layout (std::string const& l)
+PianoKeyBindings::Layout
+PianoKeyBindings::layout (std::string const& l)
 {
 	if (l == "QWERTY") {
 		return QWERTY;
@@ -99,7 +99,7 @@ KeyboardLayout::layout (std::string const& l)
 }
 
 const char*
-KeyboardLayout::get_keycode (GdkEventKey* event)
+PianoKeyBindings::get_keycode (GdkEventKey* event)
 {
 	/* We're not using event->keyval, because we need keyval with level set to 0.
 	   E.g. if user holds Shift and presses '7', we want to get a '7', not '&'. */
@@ -122,21 +122,21 @@ KeyboardLayout::get_keycode (GdkEventKey* event)
 }
 
 void
-KeyboardLayout::bind_key (const char* key, int note)
+PianoKeyBindings::bind_key (const char* key, int note)
 {
 	_key_bindings[key]   = note;
 	_note_bindings[note] = key;
 }
 
 void
-KeyboardLayout::clear_notes ()
+PianoKeyBindings::clear_notes ()
 {
 	_key_bindings.clear ();
 	_note_bindings.clear ();
 }
 
 void
-KeyboardLayout::bind_keys_qwerty ()
+PianoKeyBindings::bind_keys_qwerty ()
 {
 	clear_notes ();
 
@@ -187,7 +187,7 @@ KeyboardLayout::bind_keys_qwerty ()
 }
 
 void
-KeyboardLayout::bind_keys_qwertz ()
+PianoKeyBindings::bind_keys_qwertz ()
 {
 	bind_keys_qwerty ();
 
@@ -197,7 +197,7 @@ KeyboardLayout::bind_keys_qwertz ()
 }
 
 void
-KeyboardLayout::bind_keys_azerty ()
+PianoKeyBindings::bind_keys_azerty ()
 {
 	clear_notes ();
 
@@ -241,7 +241,7 @@ KeyboardLayout::bind_keys_azerty ()
 }
 
 void
-KeyboardLayout::bind_keys_dvorak ()
+PianoKeyBindings::bind_keys_dvorak ()
 {
 	clear_notes ();
 
@@ -295,7 +295,7 @@ KeyboardLayout::bind_keys_dvorak ()
 }
 
 void
-KeyboardLayout::bind_keys_basic_qwerty ()
+PianoKeyBindings::bind_keys_basic_qwerty ()
 {
 	clear_notes ();
 
@@ -325,7 +325,7 @@ KeyboardLayout::bind_keys_basic_qwerty ()
 }
 
 void
-KeyboardLayout::bind_keys_basic_qwertz ()
+PianoKeyBindings::bind_keys_basic_qwertz ()
 {
 	clear_notes ();
 

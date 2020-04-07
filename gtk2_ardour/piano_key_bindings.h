@@ -17,8 +17,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _KEYBOARD_LAYOUT_H_
-#define _KEYBOARD_LAYOUT_H_
+#ifndef _PIANO_KEY_BINDINGS_H_
+#define _PIANO_KEY_BINDINGS_H_
 
 #include <map>
 #include <string>
@@ -29,11 +29,11 @@
  * Class for mapping PC keyboard keys to note pitches. Used by the
  * Virtual MIDI Keyboard.
  */
-class KeyboardLayout
+class PianoKeyBindings
 {
 public:
-	KeyboardLayout ();
-	~KeyboardLayout ();
+	PianoKeyBindings ();
+	~PianoKeyBindings ();
 
 	enum Layout {
 		QWERTY,
