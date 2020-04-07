@@ -192,7 +192,7 @@ protected:
 		boost::shared_ptr<PortMap> p  = _portmap.reader ();
 		PortMap::const_iterator    it = p->find (port_name);
 		if (it == p->end ()) {
-			return NULL;
+			return BackendPortPtr();
 		}
 		return (*it).second;
 	}
