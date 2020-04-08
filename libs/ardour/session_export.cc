@@ -277,6 +277,15 @@ Session::process_export_fw (pframes_t nframes)
 		butler_transport_work ();
 		g_atomic_int_set (&_butler->should_do_transport_work, 0);
 		butler_completed_transport_work ();
+		/* Session::process_with_events () sets _remaining_latency_preroll = 0
+		 * when being called with _transport_speed == 0.0.
+		 *
+		 * This can happen wit JACK, there is a process-callback before
+		 * freewheeling becomes active, after Session::start_audio_export().
+		 */
+		if (!_region_export) {
+			_remaining_latency_preroll = worst_latency_preroll_buffer_size_ceil ();
+		}
 
 		return;
 	}
