@@ -23,6 +23,7 @@
 
 #include "pbd/error.h"
 #include <glibmm/threads.h>
+#include <glibmm/timer.h>
 
 #include <midi++/mmc.h>
 
@@ -136,6 +137,8 @@ Session::start_audio_export (samplepos_t position, bool realtime, bool region_ex
 	   it here.
 	*/
 
+	Glib::usleep (engine().usecs_per_cycle ());
+	_butler->schedule_transport_work ();
 	_butler->wait_until_finished ();
 
 	/* get everyone to the right position */
