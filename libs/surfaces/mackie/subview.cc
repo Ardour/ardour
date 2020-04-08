@@ -61,22 +61,22 @@ SubviewFactory* SubviewFactory::instance() {
 SubviewFactory::SubviewFactory() {};
 
 boost::shared_ptr<Subview> SubviewFactory::create_subview(
-		SubViewMode svm,
+		Subview::Mode svm,
 		MackieControlProtocol& mcp,
 		boost::shared_ptr<ARDOUR::Stripable> subview_stripable)
 {
 	switch (svm) {
-		case SubViewMode::EQ:
+		case Subview::EQ:
 			return boost::make_shared<EQSubview>(mcp, subview_stripable);
-		case SubViewMode::Dynamics:
+		case Subview::Dynamics:
 			return boost::make_shared<DynamicsSubview>(mcp, subview_stripable);
-		case SubViewMode::Sends:
+		case Subview::Sends:
 			return boost::make_shared<SendsSubview>(mcp, subview_stripable);
-		case SubViewMode::TrackView:
+		case Subview::TrackView:
 			return boost::make_shared<TrackViewSubview>(mcp, subview_stripable);
-		case SubViewMode::Plugin:
+		case Subview::Plugin:
 			return boost::make_shared<PluginSubview>(mcp, subview_stripable);
-		case SubViewMode::None:
+		case Subview::None:
 		default:
 			return boost::make_shared<NoneSubview>(mcp, subview_stripable);
 	}
@@ -152,20 +152,20 @@ void Subview::handle_vselect_event(uint32_t global_strip_position)
 }
 
 bool
-Subview::subview_mode_would_be_ok (SubViewMode mode, boost::shared_ptr<Stripable> r, std::string& reason_why_not)
+Subview::subview_mode_would_be_ok (Subview::Mode mode, boost::shared_ptr<Stripable> r, std::string& reason_why_not)
 {
 	switch (mode) {
-	case SubViewMode::None:
+	case Subview::None:
 		return NoneSubview::subview_mode_would_be_ok(r, reason_why_not);
-	case SubViewMode::Sends:
+	case Subview::Sends:
 		return SendsSubview::subview_mode_would_be_ok(r, reason_why_not);
-	case SubViewMode::EQ:
+	case Subview::EQ:
 		return EQSubview::subview_mode_would_be_ok(r, reason_why_not);
-	case SubViewMode::Dynamics:
+	case Subview::Dynamics:
 		return DynamicsSubview::subview_mode_would_be_ok(r, reason_why_not);
-	case SubViewMode::TrackView:
+	case Subview::TrackView:
 		return TrackViewSubview::subview_mode_would_be_ok(r, reason_why_not);
-	case SubViewMode::Plugin:
+	case Subview::Plugin:
 		return PluginSubview::subview_mode_would_be_ok(r, reason_why_not);
 	}
 

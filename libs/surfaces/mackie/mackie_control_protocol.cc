@@ -141,7 +141,7 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::MackieControlProtocol\n");
 
-	_subview = Mackie::SubviewFactory::instance()->create_subview(SubViewMode::None, *this, boost::shared_ptr<Stripable>());
+	_subview = Mackie::SubviewFactory::instance()->create_subview(Subview::None, *this, boost::shared_ptr<Stripable>());
 
 	DeviceInfo::reload_device_info ();
 	DeviceProfile::reload_device_profiles ();
@@ -661,7 +661,7 @@ MackieControlProtocol::device_ready ()
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("device ready init (active=%1)\n", active()));
 	update_surfaces ();
-	set_subview_mode (Mackie::SubViewMode::None, boost::shared_ptr<Stripable>());
+	set_subview_mode (Mackie::Subview::None, boost::shared_ptr<Stripable>());
 	set_flip_mode (Normal);
 }
 
@@ -1723,7 +1723,7 @@ MackieControlProtocol::redisplay_subview_mode ()
 }
 
 bool
-MackieControlProtocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Stripable> r)
+MackieControlProtocol::set_subview_mode (Subview::Mode sm, boost::shared_ptr<Stripable> r)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("set subview mode %1 with stripable %2, current flip mode %3\n", sm, (r ? r->name() : string ("null")), _flip_mode));
 
@@ -1743,7 +1743,7 @@ MackieControlProtocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Strip
 			if (!surfaces.empty()) {
 				if (!reason_why_subview_not_possible.empty()) {
 					surfaces.front()->display_message_for (reason_why_subview_not_possible, 1000);
-					if (_subview->subview_mode() != Mackie::SubViewMode::None) {
+					if (_subview->subview_mode() != Mackie::Subview::None) {
 						/* redisplay current subview mode after
 						   that message goes away.
 						*/
@@ -1790,7 +1790,7 @@ MackieControlProtocol::set_view_mode (ViewMode m)
 
 	/* leave subview mode, whatever it was */
 	DEBUG_TRACE (DEBUG::MackieControl, "\t\t\tsubview mode reset in MackieControlProtocol::set_view_mode \n");
-	set_subview_mode (Mackie::SubViewMode::None, boost::shared_ptr<Stripable>());
+	set_subview_mode (Mackie::Subview::None, boost::shared_ptr<Stripable>());
 	display_view_mode ();
 }
 
@@ -2346,12 +2346,12 @@ MackieControlProtocol::stripable_selection_changed ()
 		 */
 
 		if (!set_subview_mode (_subview->subview_mode(), s)) {
-			set_subview_mode (Mackie::SubViewMode::None, boost::shared_ptr<Stripable>());
+			set_subview_mode (Mackie::Subview::None, boost::shared_ptr<Stripable>());
 		}
 	}
 	else {
 		// none selected or not on surface
-		set_subview_mode(Mackie::SubViewMode::None, boost::shared_ptr<Stripable>());
+		set_subview_mode(Mackie::Subview::None, boost::shared_ptr<Stripable>());
 	}
 }
 

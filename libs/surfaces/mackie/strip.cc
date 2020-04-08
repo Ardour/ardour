@@ -255,7 +255,7 @@ Strip::set_stripable (boost::shared_ptr<Stripable> r, bool /*with_messages*/)
 
 	_pan_mode = PanAzimuthAutomation;
 
-	if (_surface->mcp().subview()->subview_mode() == SubViewMode::None) {
+	if (_surface->mcp().subview()->subview_mode() == Subview::None) {
 		set_vpot_parameter (_pan_mode);
 	}
 
@@ -394,9 +394,9 @@ Strip::update_selection_state ()
 void
 Strip::show_stripable_name ()
 {
-	SubViewMode svm = _surface->mcp().subview()->subview_mode();
+	Subview::Mode svm = _surface->mcp().subview()->subview_mode();
 
-	if (svm != SubViewMode::None) {
+	if (svm != Subview::None) {
 		/* subview mode is responsible for upper line */
 		return;
 	}
@@ -512,7 +512,7 @@ Strip::select_event (Button&, ButtonState bs)
 void
 Strip::vselect_event (Button&, ButtonState bs)
 {
-	if (_surface->mcp().subview()->subview_mode() != SubViewMode::None) {
+	if (_surface->mcp().subview()->subview_mode() != Subview::None) {
 		/* most subview modes: vpot press acts like a button for toggle parameters */
 		if (bs != press) {
 			return;
@@ -899,7 +899,7 @@ Strip::update_meter ()
 		return;
 	}
 
-	if (_surface->mcp().subview()->subview_mode() != SubViewMode::None) {
+	if (_surface->mcp().subview()->subview_mode() != Subview::None) {
 		return;
 	}
 
@@ -987,7 +987,7 @@ Strip::unlock_controls ()
 string
 Strip::vpot_mode_string ()
 {
-	if (_surface->mcp().subview()->subview_mode() != SubViewMode::None) {
+	if (_surface->mcp().subview()->subview_mode() != Subview::None) {
 		return string();
 	}
 
@@ -1075,7 +1075,7 @@ Strip::return_to_vpot_mode_display ()
 	   back the mode where it shows what the VPot controls.
 	*/
 
-	if (_surface->mcp().subview()->subview_mode() != SubViewMode::None) {
+	if (_surface->mcp().subview()->subview_mode() != Subview::None) {
 		/* do nothing - second line shows value of current subview parameter */
 		return;
 	} else if (_stripable) {
@@ -1106,7 +1106,7 @@ Strip::next_pot_mode ()
 	}
 
 
-	if (_surface->mcp().subview()->subview_mode() != SubViewMode::None) {
+	if (_surface->mcp().subview()->subview_mode() != Subview::None) {
 		return;
 	}
 
@@ -1139,7 +1139,7 @@ void
 Strip::subview_mode_changed ()
 {
 	switch (_surface->mcp().subview()->subview_mode()) {
-	case SubViewMode::None:
+	case Subview::None:
 		set_vpot_parameter (_pan_mode);
 		/* need to show strip name again */
 		show_stripable_name ();
@@ -1150,11 +1150,11 @@ Strip::subview_mode_changed ()
 		notify_metering_state_changed ();
 		break;
 
-	case SubViewMode::EQ:
-	case SubViewMode::Dynamics:
-	case SubViewMode::Sends:
-	case SubViewMode::TrackView:
-	case SubViewMode::Plugin:
+	case Subview::EQ:
+	case Subview::Dynamics:
+	case Subview::Sends:
+	case Subview::TrackView:
+	case Subview::Plugin:
 		_surface->mcp().subview()->setup_vpot(this, _vpot, pending_display);
 		break;
 	}
@@ -1219,7 +1219,7 @@ Strip::reset_saved_values ()
 void
 Strip::notify_metering_state_changed()
 {
-	if (_surface->mcp().subview()->subview_mode() != SubViewMode::None) {
+	if (_surface->mcp().subview()->subview_mode() != Subview::None) {
 		return;
 	}
 

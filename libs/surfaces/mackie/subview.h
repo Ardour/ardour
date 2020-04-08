@@ -40,38 +40,28 @@ class Pot;
 class Strip;
 class Subview;
 class Surface;
-
-enum SubViewMode {
-	None,
-	EQ,
-	Dynamics,
-	Sends,
-	TrackView,
-	Plugin,
-};
-
-class SubviewFactory {
-  public:
-	static SubviewFactory* instance();
-
-	boost::shared_ptr<Subview> create_subview(SubViewMode svm,
-		MackieControlProtocol& mcp, boost::shared_ptr<ARDOUR::Stripable> subview_stripable);
-  protected:
-	SubviewFactory();
-  private:
-	static SubviewFactory* _instance;
-};
-
+class SubviewFactory;
 
 /**
 	This implements the subviews of the Mackie control in a Strategy pattern
 */
 class Subview {
   public:
+
+	enum Mode {
+		None,
+		EQ,
+		Dynamics,
+		Sends,
+		TrackView,
+		Plugin,
+	};
+
+
 	Subview(MackieControlProtocol& mcp, boost::shared_ptr<ARDOUR::Stripable> subview_stripable);
 	virtual ~Subview();
 
-	virtual SubViewMode subview_mode () const = 0;
+	virtual Mode subview_mode () const = 0;
 	virtual void update_global_buttons() = 0;
 	virtual bool permit_flipping_faders_and_pots() { return false; }
 	virtual void setup_vpot(
@@ -84,7 +74,7 @@ class Subview {
 	// returns true if press was handled in the subview, default is false
 	virtual bool handle_cursor_left_press() { return false; }
 
-	static bool subview_mode_would_be_ok (SubViewMode, boost::shared_ptr<ARDOUR::Stripable>, std::string& reason_why_not);
+	static bool subview_mode_would_be_ok (Subview::Mode, boost::shared_ptr<ARDOUR::Stripable>, std::string& reason_why_not);
 	boost::shared_ptr<ARDOUR::Stripable> subview_stripable() const { return _subview_stripable; }
 
 	void notify_subview_stripable_deleted ();
@@ -117,7 +107,7 @@ class NoneSubview : public Subview {
 	NoneSubview(MackieControlProtocol& mcp, boost::shared_ptr<ARDOUR::Stripable> subview_stripable);
 	virtual ~NoneSubview();
 
-	virtual SubViewMode subview_mode () const { return SubViewMode::None; }
+	virtual Mode subview_mode () const { return Subview::None; }
 	static bool subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not);
 
 	virtual void update_global_buttons();
@@ -132,7 +122,7 @@ class EQSubview : public Subview {
 	EQSubview(MackieControlProtocol& mcp, boost::shared_ptr<ARDOUR::Stripable> subview_stripable);
 	virtual ~EQSubview();
 
-	virtual SubViewMode subview_mode () const { return SubViewMode::EQ; }
+	virtual Mode subview_mode () const { return Subview::EQ; }
 	static bool subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not);
 	virtual void update_global_buttons();
 	virtual void setup_vpot(
@@ -147,7 +137,7 @@ class DynamicsSubview : public Subview {
 	DynamicsSubview(MackieControlProtocol& mcp, boost::shared_ptr<ARDOUR::Stripable> subview_stripable);
 	virtual ~DynamicsSubview();
 
-	virtual SubViewMode subview_mode () const { return SubViewMode::Dynamics; }
+	virtual Subview::Mode subview_mode () const { return Subview::Dynamics; }
 	static bool subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not);
 	virtual void update_global_buttons();
 	virtual void setup_vpot(
@@ -162,7 +152,7 @@ class SendsSubview : public Subview {
 	SendsSubview(MackieControlProtocol& mcp, boost::shared_ptr<ARDOUR::Stripable> subview_stripable);
 	virtual ~SendsSubview();
 
-	virtual SubViewMode subview_mode () const { return SubViewMode::Sends; }
+	virtual Subview::Mode subview_mode () const { return Subview::Sends; }
 	static bool subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not);
 	virtual void update_global_buttons();
 	virtual bool permit_flipping_faders_and_pots() { return true; }
@@ -180,7 +170,7 @@ class TrackViewSubview : public Subview {
 	TrackViewSubview(MackieControlProtocol& mcp, boost::shared_ptr<ARDOUR::Stripable> subview_stripable);
 	virtual ~TrackViewSubview();
 
-	virtual SubViewMode subview_mode () const { return SubViewMode::TrackView; }
+	virtual Subview::Mode subview_mode () const { return Subview::TrackView; }
 	static bool subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not);
 	virtual void update_global_buttons();
 	virtual void setup_vpot(
@@ -197,7 +187,7 @@ class PluginSubview : public Subview {
     PluginSubview(MackieControlProtocol& mcp, boost::shared_ptr<ARDOUR::Stripable> subview_stripable);
 	virtual ~PluginSubview();
 
-	virtual SubViewMode subview_mode () const { return SubViewMode::Plugin; }
+	virtual Subview::Mode subview_mode () const { return Subview::Plugin; }
 	static bool subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not);
 	virtual void update_global_buttons();
 	virtual bool permit_flipping_faders_and_pots();
@@ -286,7 +276,19 @@ class PluginEdit : public PluginSubviewState {
 	std::vector<uint32_t> _plugin_input_parameter_indices;
 };
 
-}
-}
+class SubviewFactory {
+  public:
+	static SubviewFactory* instance();
+
+	boost::shared_ptr<Subview> create_subview(Subview::Mode svm,
+		MackieControlProtocol& mcp, boost::shared_ptr<ARDOUR::Stripable> subview_stripable);
+  protected:
+	SubviewFactory();
+  private:
+	static SubviewFactory* _instance;
+};
+
+} /* namespace Mackie */
+} /* namespace ArdourSurface */
 
 #endif /* __ardour_mackie_control_protocol_subview_h__ */

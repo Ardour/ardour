@@ -142,7 +142,7 @@ class MackieControlProtocol
 	void set_automation_state (ARDOUR::AutoState);
 
 	void set_view_mode (ViewMode);
-	bool set_subview_mode (Mackie::SubViewMode, boost::shared_ptr<ARDOUR::Stripable>);
+	bool set_subview_mode (Mackie::Subview::Mode, boost::shared_ptr<ARDOUR::Stripable>);
 	bool redisplay_subview_mode ();
 	void set_flip_mode (FlipMode);
 	void display_view_mode ();
