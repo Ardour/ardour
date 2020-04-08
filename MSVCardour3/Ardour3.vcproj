@@ -968,6 +968,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\piano_key_bindings.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\piano_roll_header.cc"
 				>
 			</File>
@@ -2067,6 +2071,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\patch_change_widget.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\piano_key_bindings.h"
 				>
 			</File>
 			<File
