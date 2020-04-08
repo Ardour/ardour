@@ -46,7 +46,7 @@
 #include "timer.h"
 #include "device_info.h"
 #include "device_profile.h"
-#include "subview_modes.h"
+#include "subview.h"
 
 namespace ARDOUR {
 	class AutomationControl;
@@ -60,7 +60,6 @@ namespace MIDI {
 namespace ArdourSurface {
 
 namespace Mackie {
-	class Subview;
 	class Surface;
 	class Control;
 	class SurfacePort;

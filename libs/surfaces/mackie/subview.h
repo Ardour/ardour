@@ -24,7 +24,11 @@
 
 #include "ardour/types.h"
 
-#include "subview_modes.h"
+namespace ARDOUR {
+	class ParameterDescriptor;
+	class Plugin;
+	class PluginInsert;
+}
 
 namespace ArdourSurface {
 
@@ -36,6 +40,15 @@ class Pot;
 class Strip;
 class Subview;
 class Surface;
+
+enum SubViewMode {
+	None,
+	EQ,
+	Dynamics,
+	Sends,
+	TrackView,
+	Plugin,
+};
 
 class SubviewFactory {
   public:
