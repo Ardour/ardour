@@ -175,7 +175,7 @@ JACKAudioBackend::set_port_property (PortHandle port, const std::string& key, co
 PortEngine::PortPtr
 JACKAudioBackend::get_port_by_name (const std::string& name) const
 {
-	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, 0);
+	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, PortEngine::PortPtr());
 	jack_port_t * jack_port = jack_port_by_name (_priv_jack, name.c_str());
 
 	if (!jack_port) {
