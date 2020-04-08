@@ -251,7 +251,13 @@ void
 Session::process_export_fw (pframes_t nframes)
 {
 	if (!_export_rolling) {
-		ProcessExport (0);
+		try {
+			ProcessExport (0);
+		} catch (std::exception & e) {
+			/* pre-roll export must not throw */
+			assert (0);
+			export_status->abort (true);
+		}
 		return;
 	}
 
@@ -306,7 +312,13 @@ Session::process_export_fw (pframes_t nframes)
 				fail_roll (ns);
 			}
 
-			ProcessExport (ns);
+			try {
+				ProcessExport (ns);
+			} catch (std::exception & e) {
+				/* pre-roll export must not throw */
+				assert (0);
+				export_status->abort (true);
+			}
 
 			_remaining_latency_preroll -= ns;
 			remain -= ns;
