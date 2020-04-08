@@ -32,6 +32,7 @@
 
 #include "pbd/error.h"
 #include "pbd/strsplit.h"
+#include "pbd/unwind.h"
 
 #include "ardour/async_midi_port.h"
 #include "ardour/audio_backend.h"
@@ -81,7 +82,7 @@ PortManager::remove_all_ports ()
 	 * ports know that they have nothing to do.
 	 */
 
-	_port_remove_in_progress = true;
+	PBD::Unwinder<bool> uw (_port_remove_in_progress, true);
 
 	/* process lock MUST be held by caller
 	*/
@@ -102,8 +103,6 @@ PortManager::remove_all_ports ()
 	 */
 
 	_port_deletions_pending.reset ();
-
-	_port_remove_in_progress = false;
 }
 
 
