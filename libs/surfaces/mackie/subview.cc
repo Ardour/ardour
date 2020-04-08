@@ -67,18 +67,18 @@ boost::shared_ptr<Subview> SubviewFactory::create_subview(
 {
 	switch (svm) {
 		case Subview::EQ:
-			return boost::make_shared<EQSubview>(mcp, subview_stripable);
+			return boost::shared_ptr<EQSubview>(new EQSubview (mcp, subview_stripable));
 		case Subview::Dynamics:
-			return boost::make_shared<DynamicsSubview>(mcp, subview_stripable);
+			return boost::shared_ptr<DynamicsSubview>(new DynamicsSubview (mcp, subview_stripable));
 		case Subview::Sends:
-			return boost::make_shared<SendsSubview>(mcp, subview_stripable);
+			return boost::shared_ptr<SendsSubview>(new SendsSubview (mcp, subview_stripable));
 		case Subview::TrackView:
-			return boost::make_shared<TrackViewSubview>(mcp, subview_stripable);
+			return boost::shared_ptr<TrackViewSubview>(new TrackViewSubview (mcp, subview_stripable));
 		case Subview::Plugin:
-			return boost::make_shared<PluginSubview>(mcp, subview_stripable);
+			return boost::shared_ptr<PluginSubview>(new PluginSubview (mcp, subview_stripable));
 		case Subview::None:
 		default:
-			return boost::make_shared<NoneSubview>(mcp, subview_stripable);
+			return boost::shared_ptr<NoneSubview>(new NoneSubview (mcp, subview_stripable));
 	}
 }
 
