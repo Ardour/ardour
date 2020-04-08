@@ -356,6 +356,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\subview.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\surface.cc"
 				>
 			</File>
@@ -431,6 +435,10 @@
 			</File>
 			<File
 				RelativePath="..\strip.h"
+				>
+			</File>
+			<File
+				RelativePath="..\subview.h"
 				>
 			</File>
 			<File
