@@ -69,6 +69,8 @@ PulseAudioBackend::PulseAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 
 PulseAudioBackend::~PulseAudioBackend ()
 {
+	clear_ports ();
+
 	pthread_mutex_destroy (&_port_callback_mutex);
 }
 

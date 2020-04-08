@@ -89,6 +89,8 @@ AlsaAudioBackend::AlsaAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 
 AlsaAudioBackend::~AlsaAudioBackend ()
 {
+	clear_ports ();
+
 	pthread_mutex_destroy (&_port_callback_mutex);
 	pthread_mutex_destroy (&_device_port_mutex);
 }

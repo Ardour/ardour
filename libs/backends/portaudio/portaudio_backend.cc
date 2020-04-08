@@ -106,6 +106,8 @@ PortAudioBackend::~PortAudioBackend ()
 	delete _pcmio; _pcmio = 0;
 	delete _midiio; _midiio = 0;
 
+	clear_ports ();
+
 	pthread_mutex_destroy (&_port_callback_mutex);
 	pthread_mutex_destroy (&_freewheel_mutex);
 	pthread_cond_destroy (&_freewheel_signal);

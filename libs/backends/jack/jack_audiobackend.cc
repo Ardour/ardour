@@ -72,6 +72,7 @@ JACKAudioBackend::JACKAudioBackend (AudioEngine& e, AudioBackendInfo& info, boos
 
 JACKAudioBackend::~JACKAudioBackend()
 {
+	_jack_ports.clear ();
 }
 
 string
