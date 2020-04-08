@@ -154,8 +154,8 @@ public:
 	bool physically_connected (PortEngine::PortHandle, bool process_callback_safe);
 	int  get_connections (PortEngine::PortHandle, std::vector<std::string>&, bool process_callback_safe);
 
-	virtual void port_connect_callback (const std::string& a, const std::string& b, bool conn) = 0;
-	virtual void port_connect_add_remove_callback () = 0;
+	virtual void port_connect_callback (const std::string& a, const std::string& b, bool conn) {}
+	virtual void port_connect_add_remove_callback () {}
 
 protected:
 	std::string _instance_name;
