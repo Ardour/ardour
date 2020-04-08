@@ -314,8 +314,8 @@ ExportHandler::process_timespan (samplecnt_t samples)
 			export_status->current_postprocessing_cycle = 0;
 		} else {
 			finish_timespan ();
-			return 0;
 		}
+		return 1; /* trigger realtime_stop() */
 	}
 
 	return 0;

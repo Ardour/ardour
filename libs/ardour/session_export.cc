@@ -239,7 +239,10 @@ Session::process_export (pframes_t nframes)
 	try {
 		/* handle export - XXX what about error handling? */
 
-		ProcessExport (nframes);
+		if (ProcessExport (nframes).value_or (0) > 0) {
+			/* last cycle completed */
+			flush_all_inserts ();
+		}
 
 	} catch (std::exception & e) {
 		error << string_compose (_("Export ended unexpectedly: %1"), e.what()) << endmsg;
