@@ -677,7 +677,12 @@ DiskReader::overwrite_existing_audio ()
 			}
 		}
 
-		rci->initialized = true;
+		if (!rci->initialized) {
+			DEBUG_TRACE (DEBUG::DiskIO, string_compose ("Init ReaderChannel '%1' overwriting at: %2, avail: %3\n", name (), overwrite_sample, (*chan)->rbuf->read_space ()));
+			if ((*chan)->rbuf->read_space () > 0) {
+				rci->initialized = true;
+			}
+		}
 	}
 
 	return ret;
@@ -1219,12 +1224,12 @@ DiskReader::refill_audio (Sample* sum_buffer, Sample* mixdown_buffer, float* gai
 
 		if (to_read) {
 			ReaderChannelInfo* rci = dynamic_cast<ReaderChannelInfo*> (chan);
-			samplecnt_t        nread;
 
 			if (!_playlists[DataType::AUDIO]) {
 				chan->rbuf->write_zero (to_read);
 
 			} else {
+				samplecnt_t nread;
 				if ((nread = audio_read (sum_buffer, mixdown_buffer, gain_buffer, file_sample_tmp, to_read, rci, chan_n, reversed)) != to_read) {
 					error << string_compose (_("DiskReader %1: when refilling, cannot read %2 from playlist at sample %3"), name (), to_read, fsa) << endmsg;
 					ret = -1;
@@ -1236,7 +1241,10 @@ DiskReader::refill_audio (Sample* sum_buffer, Sample* mixdown_buffer, float* gai
 					ret = -1;
 				}
 			}
-			rci->initialized = true;
+			if (!rci->initialized) {
+				DEBUG_TRACE (DEBUG::DiskIO, string_compose (" -- Init ReaderChannel '%1' read: %2 samples, at: %4, avail: %5\n", name (), to_read, file_sample_tmp , rci->rbuf->read_space ()));
+				rci->initialized = true;
+			}
 		}
 
 		if (zero_fill) {
