@@ -881,7 +881,7 @@ TrackViewSubview::notify_change (AutomationType type, uint32_t global_strip_posi
 PluginSubview::PluginSubview(MackieControlProtocol& mcp, boost::shared_ptr<ARDOUR::Stripable> subview_stripable)
 	: Subview(mcp, subview_stripable)
 {
-	_plugin_subview_state = boost::make_shared<PluginSelect>(*this);
+	_plugin_subview_state = boost::shared_ptr<PluginSelect>(new PluginSelect (*this));
 	connect_processors_changed_signal();
 }
 
@@ -1077,7 +1077,7 @@ void PluginSelect::handle_vselect_event(uint32_t global_strip_position,
 	boost::shared_ptr<PluginInsert> plugin = boost::dynamic_pointer_cast<PluginInsert>(processor);
 	processor->ShowUI();
 	if (plugin) {
-		_context.set_state(boost::make_shared<PluginEdit>(_context, boost::weak_ptr<PluginInsert>(plugin)));
+		_context.set_state (boost::shared_ptr<PluginEdit> (new PluginEdit (_context, boost::weak_ptr<PluginInsert>(plugin))));
 	}
 }
 
@@ -1175,7 +1175,7 @@ bool PluginEdit::plugin_went_away() const
 
 void PluginEdit::switch_to_plugin_select_state()
 {
-	_context.set_state(boost::make_shared<PluginSelect>(_context));
+	_context.set_state (boost::shared_ptr <PluginSelect>(new PluginSelect (_context)));
 }
 
 void PluginEdit::setup_vpot(
