@@ -91,7 +91,7 @@ Port::Port (std::string const & n, DataType t, PortFlags f)
 /** Port destructor */
 Port::~Port ()
 {
-	DEBUG_TRACE (DEBUG::Destruction, string_compose ("destroying port @ %1 named %2\n", this, name()));
+	DEBUG_TRACE (PBD::DebugBits (DEBUG::Destruction|DEBUG::Ports), string_compose ("destroying port @ %1 named %2\n", this, name()));
 	drop ();
 }
 
