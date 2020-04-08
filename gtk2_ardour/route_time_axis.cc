@@ -2404,6 +2404,15 @@ RouteTimeAxisView::io_changed (IOChange /*change*/, void */*src*/)
 {
 	reset_meter ();
 	if (_route && !no_redraw) {
+		AudioStreamView* asv = dynamic_cast<AudioStreamView*>(_view);
+		if (asv) {
+			/* this needs to happen with the disk-reader's I/O changed,
+			 * however there is no dedicated signal for this, and in almost
+			 * call cases it follows I/O changes.
+			 * This is similar to ARDOUR_UI::cleanup_peakfiles, and
+			 * re-loads wave-form displays. */
+			asv->reload_waves ();
+		}
 		request_redraw ();
 	}
 }

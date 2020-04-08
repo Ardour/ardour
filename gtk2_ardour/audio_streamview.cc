@@ -178,6 +178,20 @@ AudioStreamView::redisplay_track ()
 }
 
 void
+AudioStreamView::reload_waves ()
+{
+	list<RegionView *>::iterator i;
+	for (i = region_views.begin(); i != region_views.end(); ++i) {
+		AudioRegionView* arv = dynamic_cast<AudioRegionView*> (*i);
+		if (!arv) {
+			continue;
+		}
+		arv->delete_waves();
+		arv->create_waves();
+	}
+}
+
+void
 AudioStreamView::setup_rec_box ()
 {
 	//cerr << _trackview.name() << " streamview SRB region_views.size() = " << region_views.size() << endl;

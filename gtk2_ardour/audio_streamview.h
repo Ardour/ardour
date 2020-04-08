@@ -67,6 +67,8 @@ public:
 	RegionView* create_region_view (boost::shared_ptr<ARDOUR::Region>, bool, bool);
 	void set_selected_points (PointSelection&);
 
+	void reload_waves ();
+
 private:
 	void setup_rec_box ();
 	void rec_peak_range_ready (samplepos_t start, ARDOUR::samplecnt_t cnt, boost::weak_ptr<ARDOUR::Source> src);
