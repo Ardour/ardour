@@ -96,6 +96,7 @@ DummyAudioBackend::DummyAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 
 DummyAudioBackend::~DummyAudioBackend ()
 {
+	clear_ports ();
 	pthread_mutex_destroy (&_port_callback_mutex);
 }
 
