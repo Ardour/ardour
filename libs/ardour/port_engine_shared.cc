@@ -41,7 +41,7 @@ BackendPort::BackendPort (PortEngineSharedImpl &b, const std::string& name, Port
 BackendPort::~BackendPort ()
 {
 	assert (_connections.empty());
-	std::cerr << "Backendport @ " << this << " being deleted\n";
+	std::cerr << "Backendport " << _name << " @ " << this << " being deleted\n";
 }
 
 int
@@ -366,6 +366,9 @@ PortEngineSharedImpl::unregister_port (PortEngine::PortHandle port_handle)
 		pm->erase (port->name());
 		ps->erase (i);
 	}
+
+	_ports.flush ();
+	_portmap.flush ();
 }
 
 
@@ -377,42 +380,53 @@ PortEngineSharedImpl::unregister_ports (bool system_only)
 	_system_midi_in.clear();
 	_system_midi_out.clear();
 
-	RCUWriter<PortIndex> index_writer (_ports);
-	RCUWriter<PortMap> map_writer (_portmap);
+	{
+		RCUWriter<PortIndex> index_writer (_ports);
+		RCUWriter<PortMap> map_writer (_portmap);
 
-	boost::shared_ptr<PortIndex> ps = index_writer.get_copy ();
-	boost::shared_ptr<PortMap> pm = map_writer.get_copy ();
+		boost::shared_ptr<PortIndex> ps = index_writer.get_copy ();
+		boost::shared_ptr<PortMap> pm = map_writer.get_copy ();
 
 
-	for (PortIndex::iterator i = ps->begin (); i != ps->end ();) {
-		PortIndex::iterator cur = i++;
-		BackendPortPtr port = *cur;
-		if (! system_only || (port->is_physical () && port->is_terminal ())) {
-			port->disconnect_all (port);
-			pm->erase (port->name());
-			ps->erase (cur);
+		for (PortIndex::iterator i = ps->begin (); i != ps->end ();) {
+			PortIndex::iterator cur = i++;
+			BackendPortPtr port = *cur;
+			if (! system_only || (port->is_physical () && port->is_terminal ())) {
+				port->disconnect_all (port);
+				pm->erase (port->name());
+				ps->erase (cur);
+			}
 		}
 	}
+
+	_ports.flush ();
+	_portmap.flush ();
 }
 
 void
 PortEngineSharedImpl::clear_ports ()
 {
-	RCUWriter<PortIndex> index_writer (_ports);
-	RCUWriter<PortMap> map_writer (_portmap);
+	{
+		RCUWriter<PortIndex> index_writer (_ports);
+		RCUWriter<PortMap> map_writer (_portmap);
 
-	boost::shared_ptr<PortIndex> ps = index_writer.get_copy();
-	boost::shared_ptr<PortMap> pm = map_writer.get_copy ();
+		boost::shared_ptr<PortIndex> ps = index_writer.get_copy();
+		boost::shared_ptr<PortMap> pm = map_writer.get_copy ();
 
-	if (ps->size () || pm->size ()) {
-		PBD::warning << _("PortEngineSharedImpl: recovering from unclean shutdown, port registry is not empty.") << endmsg;
-		_system_inputs.clear();
-		_system_outputs.clear();
-		_system_midi_in.clear();
-		_system_midi_out.clear();
-		ps->clear();
-		pm->clear();
+		if (ps->size () || pm->size ()) {
+			PBD::warning << _("PortEngineSharedImpl: recovering from unclean shutdown, port registry is not empty.") << endmsg;
+			_system_inputs.clear();
+			_system_outputs.clear();
+			_system_midi_in.clear();
+			_system_midi_out.clear();
+			ps->clear();
+			pm->clear();
+		}
 	}
+
+	_ports.flush ();
+	_portmap.flush ();
+
 }
 
 uint32_t
