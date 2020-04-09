@@ -112,6 +112,7 @@ ArdourWebsockets::start ()
 	     it != _components.end (); ++it) {
 		int rc = (*it)->start ();
 		if (rc != 0) {
+			BaseUI::quit ();
 			return -1;
 		}
 	}
