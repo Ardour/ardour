@@ -429,7 +429,7 @@ class CoreAudioBackend : public AudioBackend, public PortEngineSharedImpl {
 				return *it;
 			}
 		}
-		return NULL;
+		return BackendPortPtr();
 	}
 
 	BackendPort* port_factory (std::string const & name, ARDOUR::DataType type, ARDOUR::PortFlags);
