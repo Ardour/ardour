@@ -2869,6 +2869,8 @@ EngineControl::set_desired_sample_rate (uint32_t sr)
 void
 EngineControl::on_switch_page (GtkNotebookPage*, guint page_num)
 {
+	bool was_calibrating_midi = _measure_midi != 0;
+
 	if (page_num == 0) {
 		_measure_midi.reset();
 		update_sensitivity ();
@@ -2933,6 +2935,17 @@ EngineControl::on_switch_page (GtkNotebookPage*, guint page_num)
 	} else {
 		if (lm_running) {
 			end_latency_detection ();
+		}
+	}
+
+	/* after latency calibration the engine is running, continue to load session.
+	 * RESPONSE_OK is a NO-OP when the dialog is displayed as Window
+	 * from a running instance.
+	 */
+	if (page_num == 0 && _have_control && was_calibrating_midi && ARDOUR::AudioEngine::instance()->running()) {
+		boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
+		if (backend && backend->can_change_systemic_latency_when_running ()) {
+			response (RESPONSE_OK);
 		}
 	}
 }
@@ -3166,6 +3179,14 @@ EngineControl::use_latency_button_clicked ()
 		if (backend->can_change_systemic_latency_when_running ()) {
 			backend->set_systemic_input_latency (one_way);
 			backend->set_systemic_output_latency (one_way);
+
+			/* engine is running, continue to load session.
+			 * RESPONSE_OK is a NO-OP when the dialog is displayed as Window
+			 * from a running instance.
+			 */
+			notebook.set_current_page (0);
+			response (RESPONSE_OK);
+			return;
 		}
 
 		/* back to settings page */
