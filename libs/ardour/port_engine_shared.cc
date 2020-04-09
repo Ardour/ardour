@@ -451,6 +451,7 @@ PortEngineSharedImpl::set_port_name (PortEngine::PortHandle port_handle, const s
 		return -1;
 	}
 
+	const std::string old_name = port->name();
 	int ret =  port->set_name (newname);
 
 	if (ret == 0) {
@@ -458,7 +459,7 @@ PortEngineSharedImpl::set_port_name (PortEngine::PortHandle port_handle, const s
 		RCUWriter<PortMap> map_writer (_portmap);
 		boost::shared_ptr<PortMap> pm = map_writer.get_copy ();
 
-		pm->erase (port->name());
+		pm->erase (old_name);
 		pm->insert (make_pair (newname, port));
 	}
 
