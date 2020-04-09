@@ -20,8 +20,10 @@ const JSON_INF = 1.0e+128;
 
 class Connection {
 
-    constructor (host, port) {
-        this.socket = new WebSocket(`ws://${host}:${port}`);
+    // https://developer.mozilla.org/en-US/docs/Web/API/URL/host
+    
+    constructor (host) {
+        this.socket = new WebSocket(`ws://${host}`);
         this.socket.onopen = () => this.openCallback();
         this.socket.onclose = () => this.closeCallback();
         this.socket.onerror = (error) => this.errorCallback(error);

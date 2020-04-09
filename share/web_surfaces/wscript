@@ -1,0 +1,13 @@
+#!/usr/bin/env python
+import os
+
+def configure(conf):
+    pass
+
+def build(bld):
+    datadir = os.path.join(bld.env['DATADIR'], 'web_surfaces')
+    surfaces = bld.path.ant_glob ('**', excl='wscript')
+    bld.install_files (datadir, surfaces, relative_trick=True)
+
+def options(opt):
+    pass
