@@ -1,0 +1,79 @@
+@font-face {
+	font-family: 'junge-regular';
+	src: url('junge-regular-webfont.woff') format('woff'),
+		 url('junge-regular-webfont.ttf')  format('truetype');
+	font-weight: normal;
+	font-style: normal;
+}
+
+html {
+	height: 100%;
+}
+
+body {
+	font-family: 'junge-regular';
+	font-size: 16px;
+	height: 100%;
+	margin: 0;
+}
+
+div {
+	box-sizing: border-box;
+}
+
+a {
+	color: #337ab7;
+	text-decoration: none;
+}
+
+a:visited {
+	text-decoration: underline;
+}
+
+a:focus, a:hover {
+	color: #23527c;
+	text-decoration: underline;
+}
+
+#top-bar {
+	background: #212a30;
+	padding: 4px;
+}
+
+#logo {
+	height: 36px;
+	margin: 8px 8px 0 8px;
+}
+
+#content {
+	padding: 24px;
+}
+
+#content h1, #content h2 {
+	font-weight: normal;
+}
+
+#content h1 {
+	font-size: 1.8em;
+	margin: 0 0 2ex 0;
+	padding-bottom: .8ex;
+	/*border-bottom: 2px solid #ccc;*/
+}
+
+#content h2 {
+	font-size: 1.3em;
+	margin: 2ex 0 1ex 0;
+	border-bottom: 2px solid #ddd;
+}
+
+.surface-list {
+	margin-bottom: 6ex;
+}
+
+.surface-list > ul {
+	list-style-type: none;
+}
+
+.surface-list > ul > li {
+	margin: 4ex 0;
+}

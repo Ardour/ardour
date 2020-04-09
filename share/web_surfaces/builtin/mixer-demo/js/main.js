@@ -21,11 +21,8 @@
     const MAX_LOG_LINES = 1000;
     const FEEDBACK_NODES = ['strip_gain', 'strip_pan', 'strip_meter', 'strip_plugin_enable',
         'strip_plugin_param_value'];
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const host = window.location.hostname || '127.0.0.1';
-    const port = urlParams.get('port') || 9000;
-    const conn = new Connection(host, port);
+    
+    const conn = new Connection(location.host);
     const widgets = {};
 
     conn.messageCallback = (node, addr, val) => {
