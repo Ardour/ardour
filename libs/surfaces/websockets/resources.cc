@@ -142,7 +142,7 @@ ServerResources::read_manifests (std::string dir)
 	find_paths_matching_filter (subdirs, spath, dir_filter,
 		0 /*arg*/, true /*pass_fullpath*/, true /*return_fullpath*/, false /*recurse*/);
 
-	for (std::vector<std::string>::const_iterator it = subdirs.cbegin (); it != subdirs.cend (); ++it) {
+	for (std::vector<std::string>::const_iterator it = subdirs.begin (); it != subdirs.end (); ++it) {
 		std::string xml_path = Glib::build_filename (*it, manifest_filename);
 
 		if (!Glib::file_test (xml_path, Glib::FILE_TEST_EXISTS)) {
