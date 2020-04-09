@@ -38,6 +38,8 @@
 #endif
 #endif
 
+#define MAX_INDEX_SIZE	65536
+
 using namespace Glib;
 
 WebsocketsServer::WebsocketsServer (ArdourSurface::ArdourWebsockets& surface)
@@ -49,7 +51,6 @@ WebsocketsServer::WebsocketsServer (ArdourSurface::ArdourWebsockets& surface)
 	memset (&proto, 0, sizeof (lws_protocols));
 	proto.name                  = "lws-ardour";
 	proto.callback              = WebsocketsServer::lws_callback;
-	proto.per_session_data_size = 0;
 	proto.rx_buffer_size        = 0;
 	proto.id                    = 0;
 	proto.user                  = 0;
@@ -59,9 +60,29 @@ WebsocketsServer::WebsocketsServer (ArdourSurface::ArdourWebsockets& surface)
 	_lws_proto[0] = proto;
 	memset (&_lws_proto[1], 0, sizeof (lws_protocols));
 
+	// '/' is served by a static index.html file in the surface data directory
+	// inside it there is a 'builtin' subdirectory that contains all built-in
+	// surfaces so there is no need to create a dedicated mount point for them
+	// list of surfaces is available as a dynamically generated json file
+	memset (&_lws_mnt_index, 0, sizeof (lws_http_mount));
+	_lws_mnt_index.mountpoint      = "/";
+	_lws_mnt_index.mountpoint_len  = strlen (_lws_mnt_index.mountpoint);
+	_lws_mnt_index.origin_protocol = LWSMPRO_FILE;
+	_lws_mnt_index.origin          = _resources.index_dir ().c_str ();
+
+	// user defined surfaces in the user config directory
+	memset (&_lws_mnt_user, 0, sizeof (lws_http_mount));
+	_lws_mnt_user.mountpoint      = "/user";
+	_lws_mnt_user.mountpoint_len  = strlen (_lws_mnt_user.mountpoint);
+	_lws_mnt_user.origin_protocol = LWSMPRO_FILE;
+	_lws_mnt_user.origin          = _resources.user_dir ().c_str ();
+
+	_lws_mnt_index.mount_next = &_lws_mnt_user;
+
 	memset (&_lws_info, 0, sizeof (lws_context_creation_info));
 	_lws_info.port      = WEBSOCKET_LISTEN_PORT;
 	_lws_info.protocols = _lws_proto;
+	_lws_info.mounts    = &_lws_mnt_index;
 	_lws_info.uid       = -1;
 	_lws_info.gid       = -1;
 	_lws_info.user      = this;
@@ -141,7 +162,7 @@ WebsocketsServer::update_all_clients (const NodeState& state, bool force)
 	}
 }
 
-void
+int
 WebsocketsServer::add_poll_fd (struct lws_pollargs* pa)
 {
 	/* fd can be SOCKET or int depending platform */
@@ -168,14 +189,16 @@ WebsocketsServer::add_poll_fd (struct lws_pollargs* pa)
 	ctx.wg_iosrc  = Glib::RefPtr<Glib::IOSource> (0);
 
 	_fd_ctx[fd] = ctx;
+
+	return 0;
 }
 
-void
+int
 WebsocketsServer::mod_poll_fd (struct lws_pollargs* pa)
 {
 	LwsPollFdGlibSourceMap::iterator it = _fd_ctx.find (pa->fd);
 	if (it == _fd_ctx.end ()) {
-		return;
+		return 1;
 	}
 
 	it->second.lws_pfd.events = pa->events;
@@ -189,7 +212,7 @@ WebsocketsServer::mod_poll_fd (struct lws_pollargs* pa)
 
 		if (it->second.wg_iosrc) {
 			/* already polling for write */
-			return;
+			return 0;
 		}
 
 		RefPtr<IOSource> wg_iosrc = it->second.g_channel->create_watch (Glib::IO_OUT);
@@ -202,14 +225,16 @@ WebsocketsServer::mod_poll_fd (struct lws_pollargs* pa)
 			it->second.wg_iosrc = Glib::RefPtr<Glib::IOSource> (0);
 		}
 	}
+
+	return 0;
 }
 
-void
+int
 WebsocketsServer::del_poll_fd (struct lws_pollargs* pa)
 {
 	LwsPollFdGlibSourceMap::iterator it = _fd_ctx.find (pa->fd);
 	if (it == _fd_ctx.end ()) {
-		return;
+		return 1;
 	}
 
 	it->second.rg_iosrc->destroy ();
@@ -219,30 +244,36 @@ WebsocketsServer::del_poll_fd (struct lws_pollargs* pa)
 	}
 
 	_fd_ctx.erase (it);
+
+	return 0;
 }
 
-void
+int
 WebsocketsServer::add_client (Client wsi)
 {
 	_client_ctx.emplace (wsi, ClientContext (wsi));
 	dispatcher ().update_all_nodes (wsi); // send all state
+	return 0;
 }
 
-void
+int
 WebsocketsServer::del_client (Client wsi)
 {
 	ClientContextMap::iterator it = _client_ctx.find (wsi);
+
 	if (it != _client_ctx.end ()) {
 		_client_ctx.erase (it);
 	}
+
+	return 0;
 }
 
-void
+int
 WebsocketsServer::recv_client (Client wsi, void* buf, size_t len)
 {
 	NodeStateMessage msg (buf, len);
 	if (!msg.is_valid ()) {
-		return;
+		return 1;
 	}
 
 #ifndef NDEBUG
@@ -251,26 +282,28 @@ WebsocketsServer::recv_client (Client wsi, void* buf, size_t len)
 
 	ClientContextMap::iterator it = _client_ctx.find (wsi);
 	if (it == _client_ctx.end ()) {
-		return;
+		return 1;
 	}
 
 	/* avoid echo */
 	it->second.update_state (msg.state ());
 
 	dispatcher ().dispatch (wsi, msg);
+
+	return 0;
 }
 
-void
+int
 WebsocketsServer::write_client (Client wsi)
 {
 	ClientContextMap::iterator it = _client_ctx.find (wsi);
 	if (it == _client_ctx.end ()) {
-		return;
+		return 1;
 	}
 
 	ClientOutputBuffer& pending = it->second.output_buf ();
 	if (pending.empty ()) {
-		return;
+		return 0;
 	}
 
 	/* one lws_write() call per LWS_CALLBACK_SERVER_WRITEABLE callback */
@@ -279,13 +312,15 @@ WebsocketsServer::write_client (Client wsi)
 	pending.pop_front ();
 
 	unsigned char out_buf[1024];
-	size_t        len = msg.serialize (out_buf + LWS_PRE, 1024 - LWS_PRE);
+	int len = msg.serialize (out_buf + LWS_PRE, 1024 - LWS_PRE);
 
 	if (len > 0) {
 #ifndef NDEBUG
 		std::cerr << "TX " << msg.state ().debug_str () << std::endl;
 #endif
-		lws_write (wsi, out_buf + LWS_PRE, len, LWS_WRITE_TEXT);
+		if (lws_write (wsi, out_buf + LWS_PRE, len, LWS_WRITE_TEXT) != len) {
+			return 1;
+		}
 	} else {
 		PBD::error << "ArdourWebsockets: cannot serialize message" << endmsg;
 	}
@@ -293,21 +328,84 @@ WebsocketsServer::write_client (Client wsi)
 	if (!pending.empty ()) {
 		lws_callback_on_writable (wsi);
 	}
+
+	return 0;
 }
 
-void
-WebsocketsServer::reject_http_client (Client wsi)
+int
+WebsocketsServer::send_index_hdr (Client wsi)
 {
-	const char *html_body = "<p>This URL is not meant to be accessed via HTTP; for example using"
-		" a web browser. Refer to Ardour documentation for further information.</p>";
-	lws_return_http_status (wsi, 404, html_body);
+	char url[1024];
+
+	if (lws_hdr_copy (wsi, url, 1024, WSI_TOKEN_GET_URI) < 0) {
+		return 1;
+	}
+
+	if (strcmp (url, "/index.json") != 0) {
+		lws_return_http_status (wsi, 404, 0);
+		return 1;
+	}
+
+	unsigned char out_buf[1024],
+		*start = out_buf,
+		*p = start,
+		*end = &out_buf[sizeof(out_buf) - 1]; 
+
+#if LWS_LIBRARY_VERSION_MAJOR >= 3
+	lws_add_http_common_headers (wsi, HTTP_STATUS_OK, "application/json",
+		LWS_ILLEGAL_HTTP_CONTENT_LEN, &p, end);
+	lws_add_http_header_by_token (wsi, WSI_TOKEN_HTTP_CACHE_CONTROL,
+		reinterpret_cast<const unsigned char*> ("no-store"), 8, &p, end);
+
+	if (lws_finalize_write_http_header (wsi, start, &p, end) != 0) {
+		return 1;
+	}
+#else
+	lws_add_http_header_status (wsi, HTTP_STATUS_OK, &p, end);
+	lws_add_http_header_by_token (wsi, WSI_TOKEN_HTTP_CONTENT_TYPE,
+			reinterpret_cast<const unsigned char*> ("application/json"), 16, &p, end);
+	lws_add_http_header_by_token (wsi, WSI_TOKEN_CONNECTION,
+			reinterpret_cast<const unsigned char*> ("close"), 5, &p, end);
+	lws_add_http_header_by_token (wsi, WSI_TOKEN_HTTP_CACHE_CONTROL,
+			reinterpret_cast<const unsigned char*> ("no-store"), 8, &p, end);
+	lws_finalize_http_header (wsi, &p, end);
+
+	int len = p - start;
+
+	if (lws_write (wsi, start, len, LWS_WRITE_HTTP_HEADERS) != len) {
+		return 1;
+	}
+#endif
+
+	lws_callback_on_writable (wsi);
+
+	return 0;
+}
+
+int
+WebsocketsServer::send_index_body (Client wsi)
+{
+	std::string index = _resources.scan ();
+
+	char body[MAX_INDEX_SIZE];
+	//lws_strncpy (body, index.c_str (), sizeof(body));
+	memset (body, 0, sizeof (body));
+	strncpy (body, index.c_str (), sizeof(body) - 1);
+	int len = strlen (body);
+
+	if (lws_write (wsi, reinterpret_cast<unsigned char*> (body), len, LWS_WRITE_HTTP) != len) {
+		return 1;
+	}
+
+	lws_http_transaction_completed (wsi);
+
+	return -1;	// end connection
 }
 
 bool
 WebsocketsServer::io_handler (Glib::IOCondition ioc, lws_sockfd_type fd)
 {
-	/* IO_IN=1, IO_PRI=2, IO_ERR=8, IO_HUP=16 */
-	//printf ("io_handler ioc = %d\n", ioc);
+	/* IO_IN=1, IO_PRI=2, IO_OUT=4, IO_ERR=8, IO_HUP=16 */
 
 	LwsPollFdGlibSourceMap::iterator it = _fd_ctx.find (fd);
 	if (it == _fd_ctx.end ()) {
@@ -317,9 +415,7 @@ WebsocketsServer::io_handler (Glib::IOCondition ioc, lws_sockfd_type fd)
 	struct lws_pollfd* lws_pfd = &it->second.lws_pfd;
 	lws_pfd->revents           = ioc_to_events (ioc);
 
-	if (lws_service_fd (_lws_context, lws_pfd) < 0) {
-		return false;
-	}
+	lws_service_fd (_lws_context, lws_pfd);
 
 	return ioc & (Glib::IO_IN | Glib::IO_OUT);
 }
@@ -368,41 +464,48 @@ WebsocketsServer::lws_callback (struct lws* wsi, enum lws_callback_reasons reaso
 {
 	void*             ctx_userdata = lws_context_user (lws_get_context (wsi));
 	WebsocketsServer* server       = static_cast<WebsocketsServer*> (ctx_userdata);
+	int rc;
 
 	switch (reason) {
 		case LWS_CALLBACK_ADD_POLL_FD:
-			server->add_poll_fd (static_cast<struct lws_pollargs*> (in));
+			rc = server->add_poll_fd (static_cast<struct lws_pollargs*> (in));
 			break;
 
 		case LWS_CALLBACK_CHANGE_MODE_POLL_FD:
-			server->mod_poll_fd (static_cast<struct lws_pollargs*> (in));
+			rc = server->mod_poll_fd (static_cast<struct lws_pollargs*> (in));
 			break;
 
 		case LWS_CALLBACK_DEL_POLL_FD:
-			server->del_poll_fd (static_cast<struct lws_pollargs*> (in));
+			rc = server->del_poll_fd (static_cast<struct lws_pollargs*> (in));
 			break;
 
 		case LWS_CALLBACK_ESTABLISHED:
-			server->add_client (wsi);
+			rc = server->add_client (wsi);
 			break;
 
 		case LWS_CALLBACK_CLOSED:
-			server->del_client (wsi);
+			rc = server->del_client (wsi);
 			break;
 
 		case LWS_CALLBACK_RECEIVE:
-			server->recv_client (wsi, in, len);
+			rc = server->recv_client (wsi, in, len);
 			break;
 
 		case LWS_CALLBACK_SERVER_WRITEABLE:
-			server->write_client (wsi);
+			rc = server->write_client (wsi);
 			break;
 
+		/* will be called only if the requested url is not fulfilled
+		   by the any of the mount configurations (index, builtin, user) */
 		case LWS_CALLBACK_HTTP:
-			server->reject_http_client (wsi);
-			return 1;
+			rc = server->send_index_hdr (wsi);
 			break;
 
+		case LWS_CALLBACK_HTTP_WRITEABLE:
+			rc = server->send_index_body (wsi);
+			break;
+
+		case LWS_CALLBACK_CLOSED_HTTP:
 		case LWS_CALLBACK_FILTER_NETWORK_CONNECTION:
 		case LWS_CALLBACK_FILTER_PROTOCOL_CONNECTION:
 		case LWS_CALLBACK_SERVER_NEW_CLIENT_INSTANTIATED:
@@ -421,20 +524,18 @@ WebsocketsServer::lws_callback (struct lws* wsi, enum lws_callback_reasons reaso
 		case LWS_CALLBACK_HTTP_CONFIRM_UPGRADE:
 #endif
 #endif
+			/* do nothing but keep connection alive */
+			rc = 0;
 			break;
-
-		/* TODO: handle HTTP connections.
-		 * Serve static ctrl-surface pages, JS, CSS etc.
-		 */
 
 		default:
 #ifndef NDEBUG
 			/* see libwebsockets.h lws_callback_reasons */
 			std::cerr << "LWS: unhandled callback " << reason << std::endl;
 #endif
-			return -1;
+			rc = -1;
 			break;
 	}
 
-	return 0;
+	return rc;
 }

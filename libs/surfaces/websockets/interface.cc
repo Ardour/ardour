@@ -56,8 +56,8 @@ ardour_websockets_request_buffer_factory (uint32_t num_requests)
 }
 
 static ControlProtocolDescriptor ardour_websockets_descriptor = {
-	/*name :              */ SURFACE_NAME,
-	/*id :                */ SURFACE_ID,
+	/*name :              */ surface_name,
+	/*id :                */ surface_id,
 	/*ptr :               */ 0,
 	/*module :            */ 0,
 	/*mandatory :         */ 0,

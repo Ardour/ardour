@@ -38,6 +38,7 @@
 #include "component.h"
 #include "message.h"
 #include "state.h"
+#include "resources.h"
 
 #define WEBSOCKET_LISTEN_PORT 9000
 
@@ -62,6 +63,8 @@ public:
 
 private:
 	struct lws_protocols             _lws_proto[2];
+	struct lws_http_mount            _lws_mnt_index;
+	struct lws_http_mount            _lws_mnt_user;
 	struct lws_context_creation_info _lws_info;
 	struct lws_context*              _lws_context;
 
@@ -73,15 +76,18 @@ private:
 	typedef boost::unordered_map<Client, ClientContext> ClientContextMap;
 	ClientContextMap                                    _client_ctx;
 
-	void add_poll_fd (struct lws_pollargs*);
-	void mod_poll_fd (struct lws_pollargs*);
-	void del_poll_fd (struct lws_pollargs*);
+	ServerResources _resources;
 
-	void add_client (Client);
-	void del_client (Client);
-	void recv_client (Client, void* buf, size_t len);
-	void write_client (Client);
-	void reject_http_client (Client);
+	int add_poll_fd (struct lws_pollargs*);
+	int mod_poll_fd (struct lws_pollargs*);
+	int del_poll_fd (struct lws_pollargs*);
+
+	int add_client (Client);
+	int del_client (Client);
+	int recv_client (Client, void*, size_t);
+	int write_client (Client);
+	int send_index_hdr (Client);
+	int send_index_body (Client);
 
 	bool io_handler (Glib::IOCondition, lws_sockfd_type);
 
