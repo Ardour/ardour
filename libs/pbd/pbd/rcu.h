@@ -221,9 +221,8 @@ class /*LIBPBD_API*/ RCUWriter
 public:
 
 	RCUWriter(RCUManager<T>& manager)
-		: m_manager(manager) {
-		m_copy = m_manager.write_copy();
-	}
+		: m_manager(manager)
+		, m_copy (m_manager.write_copy()) {}
 
 	~RCUWriter() {
 		if (m_copy.unique()) {
@@ -246,7 +245,6 @@ public:
 			   XXX should we print a warning about this?
 			*/
 		}
-
 	}
 
 	boost::shared_ptr<T> get_copy() const { return m_copy; }
