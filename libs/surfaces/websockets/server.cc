@@ -352,23 +352,24 @@ WebsocketsServer::send_index_hdr (Client wsi)
 		*end = &out_buf[sizeof(out_buf) - 1]; 
 
 #if LWS_LIBRARY_VERSION_MAJOR >= 3
-	lws_add_http_common_headers (wsi, HTTP_STATUS_OK, "application/json",
-		LWS_ILLEGAL_HTTP_CONTENT_LEN, &p, end);
-	lws_add_http_header_by_token (wsi, WSI_TOKEN_HTTP_CACHE_CONTROL,
-		reinterpret_cast<const unsigned char*> ("no-store"), 8, &p, end);
+	if (   lws_add_http_common_headers (wsi, HTTP_STATUS_OK, "application/json", LWS_ILLEGAL_HTTP_CONTENT_LEN, &p, end)
+	    || lws_add_http_header_by_token (wsi, WSI_TOKEN_HTTP_CACHE_CONTROL, reinterpret_cast<const unsigned char*> ("no-store"), 8, &p, end)
+		 ) {
+		return 1;
+	}
 
 	if (lws_finalize_write_http_header (wsi, start, &p, end) != 0) {
 		return 1;
 	}
 #else
-	lws_add_http_header_status (wsi, HTTP_STATUS_OK, &p, end);
-	lws_add_http_header_by_token (wsi, WSI_TOKEN_HTTP_CONTENT_TYPE,
-			reinterpret_cast<const unsigned char*> ("application/json"), 16, &p, end);
-	lws_add_http_header_by_token (wsi, WSI_TOKEN_CONNECTION,
-			reinterpret_cast<const unsigned char*> ("close"), 5, &p, end);
-	lws_add_http_header_by_token (wsi, WSI_TOKEN_HTTP_CACHE_CONTROL,
-			reinterpret_cast<const unsigned char*> ("no-store"), 8, &p, end);
-	lws_finalize_http_header (wsi, &p, end);
+	if (   lws_add_http_header_status (wsi, HTTP_STATUS_OK, &p, end)
+	    || lws_add_http_header_by_token (wsi, WSI_TOKEN_HTTP_CONTENT_TYPE, reinterpret_cast<const unsigned char*> ("application/json"), 16, &p, end)
+	    || lws_add_http_header_by_token (wsi, WSI_TOKEN_CONNECTION, reinterpret_cast<const unsigned char*> ("close"), 5, &p, end)
+	    || lws_add_http_header_by_token (wsi, WSI_TOKEN_HTTP_CACHE_CONTROL, reinterpret_cast<const unsigned char*> ("no-store"), 8, &p, end)
+	    || lws_finalize_http_header (wsi, &p, end)
+	   ) {
+		return 1;
+	}
 
 	int len = p - start;
 
@@ -397,7 +398,9 @@ WebsocketsServer::send_index_body (Client wsi)
 		return 1;
 	}
 
-	lws_http_transaction_completed (wsi);
+	if (lws_http_transaction_completed (wsi)) {
+		return 1;
+	}
 
 	return -1;	// end connection
 }
