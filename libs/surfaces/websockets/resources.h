@@ -44,7 +44,6 @@ private:
 	std::string _user_dir;
 
 	std::string server_data_dir ();
-	std::string ardour_data_dir ();
 
 	SurfaceManifestVector read_manifests (std::string);
 

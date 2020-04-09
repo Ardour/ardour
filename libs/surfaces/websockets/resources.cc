@@ -116,31 +116,20 @@ ServerResources::server_data_dir ()
 	std::string env_dir (Glib::getenv (data_dir_env_var, defined));
 
 	if (defined) {
-		// useful for development
+		/* useful for development */
 		data_dir = env_dir;
 	} else {
-		data_dir = Glib::build_filename (ardour_data_dir (), data_dir_name);
+		/* use reverse iterator, since ardour_data_search_path() prefixes the user-data dir */
+		PBD::Searchpath s (ARDOUR::ardour_data_search_path ());
+		for (PBD::Searchpath::reverse_iterator i = s.rbegin (); i != s.rend(); ++i) {
+			data_dir = Glib::build_filename (*i, data_dir_name);
+			if (Glib::file_test(data_dir, Glib::FILE_TEST_EXISTS | Glib::FILE_TEST_IS_DIR)) {
+				break;
+			}
+		}
 	}
 
 	return data_dir;
-}
-
-std::string
-ServerResources::ardour_data_dir ()
-{
-	std::string data_dir;
-
-#ifdef PLATFORM_WINDOWS
-	// windows_search_path() returns a Searchpath with a single item
-	data_dir = ARDOUR::windows_search_path ().to_string ();
-#else
-    data_dir = Glib::getenv ("ARDOUR_DATA_PATH");
-    if (data_dir.empty()) {
-    	std::cerr << "ARDOUR_CONFIG_PATH not set in environment" << std::endl;
-    }
-#endif
-
-    return data_dir;
 }
 
 SurfaceManifestVector
