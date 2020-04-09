@@ -115,6 +115,7 @@ EngineControl::EngineControl ()
 	, queue_device_changed (false)
 	, _have_control (true)
 	, block_signals(0)
+	, _was_calibrating_midi (false)
 {
 	using namespace Notebook_Helpers;
 	vector<string> backend_names;
@@ -2869,8 +2870,6 @@ EngineControl::set_desired_sample_rate (uint32_t sr)
 void
 EngineControl::on_switch_page (GtkNotebookPage*, guint page_num)
 {
-	bool was_calibrating_midi = _measure_midi != 0;
-
 	if (page_num == 0) {
 		_measure_midi.reset();
 		update_sensitivity ();
@@ -2942,11 +2941,14 @@ EngineControl::on_switch_page (GtkNotebookPage*, guint page_num)
 	 * RESPONSE_OK is a NO-OP when the dialog is displayed as Window
 	 * from a running instance.
 	 */
-	if (page_num == 0 && _have_control && was_calibrating_midi && ARDOUR::AudioEngine::instance()->running()) {
-		boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
-		if (backend && backend->can_change_systemic_latency_when_running ()) {
-			response (RESPONSE_OK);
+	if (page_num == 0) {
+		if (_have_control && _was_calibrating_midi && ARDOUR::AudioEngine::instance()->running()) {
+			boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
+			if (backend && backend->can_change_systemic_latency_when_running ()) {
+				response (RESPONSE_OK);
+			}
 		}
+		_was_calibrating_midi = false;
 	}
 }
 
@@ -3162,6 +3164,7 @@ EngineControl::use_latency_button_clicked ()
 		if (backend->can_change_systemic_latency_when_running ()) {
 			backend->set_systemic_midi_input_latency (_measure_midi->name, one_way);
 			backend->set_systemic_midi_output_latency (_measure_midi->name, one_way);
+			_was_calibrating_midi = true;
 		}
 		notebook.set_current_page (midi_tab);
 	} else {

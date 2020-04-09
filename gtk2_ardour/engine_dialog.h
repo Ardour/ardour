@@ -373,6 +373,7 @@ private:
 	void midi_latency_adjustment_changed(Gtk::Adjustment *, MidiDeviceSettings, bool);
 	void midi_device_enabled_toggled(ArdourWidgets::ArdourButton *, MidiDeviceSettings);
 	sigc::connection lm_back_button_signal;
+	bool _was_calibrating_midi;
 };
 
 #endif /* __gtk2_ardour_engine_dialog_h__ */
