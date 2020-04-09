@@ -54,4 +54,4 @@ private:
 	                                        boost::shared_ptr<ARDOUR::PluginInsert>);
 };
 
-#endif // ardour_feedback_h
+#endif // _ardour_surface_websockets_feedback_h_

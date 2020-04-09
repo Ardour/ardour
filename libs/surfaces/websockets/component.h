@@ -63,4 +63,4 @@ protected:
 	ArdourSurface::ArdourWebsockets& _surface;
 };
 
-#endif // surface_component_h
+#endif // _ardour_surface_websockets_component_h_

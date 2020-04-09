@@ -48,4 +48,4 @@ private:
 	NodeState _state;
 };
 
-#endif // websockets_message_h
+#endif // _ardour_surface_websockets_message_h_

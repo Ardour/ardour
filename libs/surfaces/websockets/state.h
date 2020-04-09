@@ -81,4 +81,4 @@ private:
 std::size_t
 hash_value (const NodeState&);
 
-#endif // node_state_h
+#endif // _ardour_surface_websockets_state_h_

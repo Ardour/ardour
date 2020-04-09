@@ -65,4 +65,4 @@ private:
 	StripableVector                                           _strips;
 };
 
-#endif // ardour_strips_h
+#endif // _ardour_surface_websockets_strips_h_

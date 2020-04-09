@@ -59,4 +59,4 @@ private:
 	ClientOutputBuffer _output_buf;
 };
 
-#endif // client_context_h
+#endif // _ardour_surface_websockets_client_h_

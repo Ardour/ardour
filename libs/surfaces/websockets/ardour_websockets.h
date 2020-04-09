@@ -106,4 +106,4 @@ private:
 
 } // namespace ArdourSurface
 
-#endif // ardour_websockets_h
+#endif // _ardour_surface_websockets_h_

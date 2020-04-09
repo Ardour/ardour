@@ -32,4 +32,4 @@ public:
 	void   set_tempo (double);
 };
 
-#endif // ardour_globals_h
+#endif // _ardour_surface_websockets_globals_h_

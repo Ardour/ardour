@@ -55,4 +55,4 @@ private:
 	void update (Client, std::string, const AddressVector&, const ValueVector&);
 };
 
-#endif // websockets_dispatcher_h
+#endif // _ardour_surface_websockets_dispatcher_h_
