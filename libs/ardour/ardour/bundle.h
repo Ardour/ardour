@@ -52,8 +52,11 @@ class LIBARDOUR_API Bundle : public PBD::ScopedConnectionList
 	typedef std::vector<std::string> PortList;
 
 	struct Channel {
+		/* Constructor with no port name(s) */
 		Channel (std::string n, DataType t) : name (n), type (t) {}
+		/* Constructor with list of port names */
 		Channel (std::string n, DataType t, PortList p) : name (n), type (t), ports (p) {}
+		/* Constructor with a port name */
 		Channel (std::string n, DataType t, std::string const & p) : name (n), type (t) {
 			ports.push_back (p);
 		}
