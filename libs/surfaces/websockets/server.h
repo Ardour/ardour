@@ -91,4 +91,4 @@ private:
 	static int lws_callback (struct lws*, enum lws_callback_reasons, void*, void*, size_t);
 };
 
-#endif // websockets_server_h
+#endif // _ardour_surface_websockets_server_h_

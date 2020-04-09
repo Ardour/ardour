@@ -65,4 +65,4 @@ private:
 	std::string _s;
 };
 
-#endif // typed_value_h
+#endif // _ardour_surface_websockets_typed_value_h_
