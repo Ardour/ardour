@@ -110,9 +110,11 @@ Session::pre_export ()
 int
 Session::start_audio_export (samplepos_t position, bool realtime, bool region_export)
 {
+	assert (!engine().in_process_thread ());
+
 	if (!_exporting) {
 		pre_export ();
-	} else {
+	} else if (_transport_speed != 0) {
 		realtime_stop (true, true);
 	}
 
@@ -132,13 +134,21 @@ Session::start_audio_export (samplepos_t position, bool realtime, bool region_ex
 		_export_preroll = 1;
 	}
 
+	/* realtime_stop will have queued butler work (and TSFM),
+	 * but the butler may not run immediately, so well have
+	 * to wait for it to wake up and call
+	 * non_realtime_stop ().
+	 */
+	do {
+		Glib::usleep (engine().usecs_per_cycle ());
+		_butler->schedule_transport_work ();
+	} while (0 != post_transport_work ());
+
 	/* We're about to call Track::seek, so the butler must have finished everything
 	   up otherwise it could be doing do_refill in its thread while we are doing
 	   it here.
 	*/
 
-	Glib::usleep (engine().usecs_per_cycle ());
-	_butler->schedule_transport_work ();
 	_butler->wait_until_finished ();
 
 	/* get everyone to the right position */
@@ -241,7 +251,8 @@ Session::process_export (pframes_t nframes)
 
 		if (ProcessExport (nframes).value_or (0) > 0) {
 			/* last cycle completed */
-			flush_all_inserts ();
+			assert (_export_rolling);
+			stop_audio_export ();
 		}
 
 	} catch (std::exception & e) {
@@ -361,6 +372,7 @@ Session::stop_audio_export ()
 	*/
 
 	realtime_stop (true, true);
+	flush_all_inserts ();
 	_export_rolling = false;
 	_butler->schedule_transport_work ();
 
