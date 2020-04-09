@@ -498,7 +498,7 @@ then
 fi
 	
 # check the libs
-LIB_FILES=$(find ${BUNDLE_DIR}/lib -name "*.so" -type f)
+LIB_FILES=$(find ${BUNDLE_DIR}/lib -name "*.so" -type f | grep -v backends)
 
 for path in $LIB_FILES
 do
