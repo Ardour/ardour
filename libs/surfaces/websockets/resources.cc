@@ -1,0 +1,171 @@
+/*
+ * Copyright (C) 2020 Luciano Iam <lucianito@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the/GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <iostream>
+#include <sstream>
+
+#include <glibmm/fileutils.h>
+#include <glibmm/miscutils.h>
+
+#include "ardour/filesystem_paths.h"
+#include "pbd/file_utils.h"
+
+#include "resources.h"
+
+static const char* const data_dir_env_var = "ARDOUR_WEBSURFACES_PATH";
+static const char* const data_dir_name = "web_surfaces";
+static const char* const builtin_dir_name = "builtin";
+static const char* const manifest_filename = "manifest.xml";
+
+static bool
+dir_filter (const std::string &str, void* /*arg*/)
+{
+	return Glib::file_test (str, Glib::FILE_TEST_IS_DIR);
+}
+
+ServerResources::ServerResources ()
+    : _index_dir ("")
+    , _builtin_dir ("")
+    , _user_dir ("")
+{
+}
+
+const std::string&
+ServerResources::index_dir ()
+{
+	if (_index_dir.empty ()) {
+		_index_dir = server_data_dir ();
+	}
+
+	return _index_dir;
+}
+
+const std::string&
+ServerResources::builtin_dir ()
+{
+	if (_builtin_dir.empty ()) {
+		_builtin_dir = Glib::build_filename (server_data_dir (), builtin_dir_name);
+	}
+
+	return _builtin_dir;
+}
+
+const std::string&
+ServerResources::user_dir ()
+{
+	if (_user_dir.empty ()) {
+		_user_dir = Glib::build_filename (ARDOUR::user_config_directory (), data_dir_name);
+	}
+
+	return _user_dir;
+}
+
+std::string
+ServerResources::scan ()
+{
+	std::stringstream ss;
+
+	ss << "{\"builtin\":[";
+
+	SurfaceManifestVector builtin = read_manifests (builtin_dir ());
+
+	for (SurfaceManifestVector::iterator it = builtin.begin (); it != builtin.end (); ) {
+		ss << it->to_json ();
+		if (++it != builtin.end()) {
+			ss << ",";
+		}
+	}
+
+	ss << "],\"user\":[";
+
+	SurfaceManifestVector user = read_manifests (user_dir ());
+
+	for (SurfaceManifestVector::iterator it = user.begin (); it != user.end (); ) {
+		ss << it->to_json ();
+		if (++it != user.end()) {
+			ss << ",";
+		}
+	}
+
+	ss << "]}";
+
+	return ss.str ();
+}
+
+std::string
+ServerResources::server_data_dir ()
+{
+	std::string data_dir;
+
+	bool defined = false;
+	std::string env_dir (Glib::getenv (data_dir_env_var, defined));
+
+	if (defined) {
+		// useful for development
+		data_dir = env_dir;
+	} else {
+		data_dir = Glib::build_filename (ardour_data_dir (), data_dir_name);
+	}
+
+	return data_dir;
+}
+
+std::string
+ServerResources::ardour_data_dir ()
+{
+	std::string data_dir;
+
+#ifdef PLATFORM_WINDOWS
+	// windows_search_path() returns a Searchpath with a single item
+	data_dir = ARDOUR::windows_search_path ().to_string ();
+#else
+    data_dir = Glib::getenv ("ARDOUR_DATA_PATH");
+    if (data_dir.empty()) {
+    	std::cerr << "ARDOUR_CONFIG_PATH not set in environment" << std::endl;
+    }
+#endif
+
+    return data_dir;
+}
+
+SurfaceManifestVector
+ServerResources::read_manifests (std::string dir)
+{
+	SurfaceManifestVector    result;
+	std::vector<std::string> subdirs;
+	PBD::Searchpath          spath (dir);
+	
+	find_paths_matching_filter (subdirs, spath, dir_filter,
+		0 /*arg*/, true /*pass_fullpath*/, true /*return_fullpath*/, false /*recurse*/);
+
+	for (std::vector<std::string>::const_iterator it = subdirs.cbegin (); it != subdirs.cend (); ++it) {
+		std::string xml_path = Glib::build_filename (*it, manifest_filename);
+
+		if (!Glib::file_test (xml_path, Glib::FILE_TEST_EXISTS)) {
+			continue;
+		}
+
+		SurfaceManifest manifest (xml_path);
+
+		if (manifest.valid ()) {
+			result.push_back (manifest);
+		}
+	}
+
+	return result;
+}
