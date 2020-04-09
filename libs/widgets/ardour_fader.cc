@@ -25,7 +25,9 @@
 #include "pbd/stacktrace.h"
 
 #include "gtkmm2ext/cairo_widget.h"
+#include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/keyboard.h"
+#include "gtkmm2ext/rgb_macros.h"
 #include "gtkmm2ext/utils.h"
 
 #include "widgets/ardour_fader.h"
@@ -319,17 +321,29 @@ ArdourFader::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t
 	}
 
 	if (_layout && !_text.empty() && _orien == HORIZ) {
+		Gdk::Color bg_color;
 		cairo_save (cr);
 		if (_centered_text) {
 			/* center text */
 			cairo_move_to (cr, (w - _text_width)/2.0, h/2.0 - _text_height/2.0);
+			bg_color = get_style()->get_bg (get_state());
 		} else if (ds > .5 * w) {
 			cairo_move_to (cr, CORNER_OFFSET + 3, h/2.0 - _text_height/2.0);
-			cairo_set_operator(cr, CAIRO_OPERATOR_XOR);
+			bg_color = get_style()->get_fg (get_state());
 		} else {
 			cairo_move_to (cr, w - _text_width - CORNER_OFFSET - 3, h/2.0 - _text_height/2.0);
+			bg_color = get_style()->get_bg (get_state());
 		}
-		CairoWidget::set_source_rgb_a (cr, get_style()->get_text (get_state()), 1);
+
+		const uint32_t r = bg_color.get_red_p () * 255.0;
+		const uint32_t g = bg_color.get_green_p () * 255.0;
+		const uint32_t b = bg_color.get_blue_p () * 255.0;
+		const uint32_t a = 0xff;
+		uint32_t rgba = RGBA_TO_UINT (r, g, b, a);
+		rgba = contrasting_text_color (rgba);
+		Gdk::Color text_color;
+		text_color.set_rgb ((rgba >> 24)*256, ((rgba & 0xff0000) >> 16)*256, ((rgba & 0xff00) >> 8)*256);
+		CairoWidget::set_source_rgb_a (cr, text_color, 1.);
 		pango_cairo_show_layout (cr, _layout->gobj());
 		cairo_restore (cr);
 	}
