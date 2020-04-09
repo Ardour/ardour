@@ -27,6 +27,8 @@ def build(bld):
             server.cc
             feedback.cc
             dispatcher.cc
+            manifest.cc
+            resources.cc
     '''
     obj.export_includes = ['.']
     obj.defines      = [ 'PACKAGE="ardour_websockets"' ]

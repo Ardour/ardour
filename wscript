@@ -273,6 +273,7 @@ children = [
         'share/patchfiles',
         'share/plugin_metadata',
         'share/scripts',
+        'share/web_surfaces',
         'headless',
         'luasession',
         'session_utils',
