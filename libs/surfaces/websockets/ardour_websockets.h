@@ -39,11 +39,11 @@
 #include "server.h"
 #include "strips.h"
 
-#define SURFACE_NAME "WebSockets Server (Experimental)"
-#define SURFACE_ID   "uri://ardour.org/surfaces/ardour_websockets:0"
-
 namespace ArdourSurface
 {
+const char * const surface_name = "WebSockets Server (Experimental)";
+const char * const surface_id = "uri://ardour.org/surfaces/ardour_websockets:0";
+
 struct ArdourWebsocketsUIRequest : public BaseUI::BaseRequestObject {
 public:
 	ArdourWebsocketsUIRequest () {}
