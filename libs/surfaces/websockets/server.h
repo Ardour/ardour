@@ -40,7 +40,7 @@
 #include "state.h"
 #include "resources.h"
 
-#define WEBSOCKET_LISTEN_PORT 9000
+#define WEBSOCKET_LISTEN_PORT 3818
 
 struct LwsPollFdGlibSource {
 	struct lws_pollfd             lws_pfd;
