@@ -376,21 +376,15 @@ PortMatrixColumnLabels::render_channel_name (
 			);
 	}
 
-	if (_matrix->count_of_our_type (bc.bundle->nchannels()) > 1) {
+	cairo_save (cr);
+	cairo_rotate (cr, -angle());
 
-		/* only plot the name if the bundle has more than one channel;
-		   the name of a single channel is assumed to be redundant */
+	cairo_show_text (
+		cr,
+		bc.bundle->channel_name(bc.channel).c_str()
+		);
 
-		cairo_save (cr);
-		cairo_rotate (cr, -angle());
-
-		cairo_show_text (
-			cr,
-			bc.bundle->channel_name(bc.channel).c_str()
-			);
-
-		cairo_restore (cr);
-	}
+	cairo_restore (cr);
 }
 
 double
