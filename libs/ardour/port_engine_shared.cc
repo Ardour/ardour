@@ -41,7 +41,6 @@ BackendPort::BackendPort (PortEngineSharedImpl &b, const std::string& name, Port
 BackendPort::~BackendPort ()
 {
 	assert (_connections.empty());
-	std::cerr << "Backendport " << _name << " @ " << this << " being deleted\n";
 }
 
 int
