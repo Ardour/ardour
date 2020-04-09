@@ -64,6 +64,7 @@ JACKAudioBackend::JACKAudioBackend (AudioEngine& e, AudioBackendInfo& info, boos
 	, _target_systemic_output_latency (0)
 	, _current_sample_rate (0)
 	, _current_buffer_size (0)
+	, _jack_ports (new JackPorts)
 	, _session (0)
 {
 	_jack_connection->Connected.connect_same_thread (jack_connection_connection, boost::bind (&JACKAudioBackend::when_connected_to_jack, this));
@@ -72,7 +73,13 @@ JACKAudioBackend::JACKAudioBackend (AudioEngine& e, AudioBackendInfo& info, boos
 
 JACKAudioBackend::~JACKAudioBackend()
 {
-	_jack_ports.clear ();
+	{
+		RCUWriter<JackPorts> writer (_jack_ports);
+		boost::shared_ptr<JackPorts> jp = writer.get_copy ();
+		jp->clear ();
+	}
+
+	_jack_ports.flush ();
 }
 
 string

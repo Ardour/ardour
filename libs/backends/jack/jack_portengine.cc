@@ -182,16 +182,24 @@ JACKAudioBackend::get_port_by_name (const std::string& name) const
 		return PortEngine::PortPtr();
 	}
 
-	/* check if we have a shared_ptr<JackPort> for this already */
+	boost::shared_ptr<JackPorts> ports = _jack_ports.reader ();
 
-	JackPorts::const_iterator i =  _jack_ports.find (jack_port);
+	JackPorts::const_iterator i =  ports->find (jack_port);
 
-	if (i != _jack_ports.end()) {
+	if (i != ports->end()) {
 		return i->second;
 	}
 
-	boost::shared_ptr<JackPort> jp (new JackPort (jack_port));
-	_jack_ports.insert (std::make_pair (jack_port, jp));
+	boost::shared_ptr<JackPort> jp;
+
+	{
+		RCUWriter<JackPorts> writer (_jack_ports);
+		boost::shared_ptr<JackPorts> ports = writer.get_copy();
+		jp.reset (new JackPort (jack_port));
+		ports->insert (std::make_pair (jack_port, jp));
+	}
+
+	_jack_ports.flush ();
 
 	return jp;
 }
@@ -505,9 +513,18 @@ JACKAudioBackend::register_port (const std::string& shortname, ARDOUR::DataType 
 		return PortEngine::PortPtr();
 	}
 
-	 boost::shared_ptr<JackPort> jp (new JackPort (jack_port));
+	boost::shared_ptr<JackPort> jp;
 
-	 _jack_ports.insert (std::make_pair (jack_port, jp));
+	{
+		RCUWriter<JackPorts> writer (_jack_ports);
+		boost::shared_ptr<JackPorts> ports = writer.get_copy();
+
+		jp.reset (new JackPort (jack_port));
+
+		ports->insert (std::make_pair (jack_port, jp));
+	}
+
+	_jack_ports.flush();
 
 	 return jp;
 }
@@ -517,7 +534,16 @@ JACKAudioBackend::unregister_port (PortHandle port)
 {
 	GET_PRIVATE_JACK_POINTER (_priv_jack);
 	boost::shared_ptr<JackPort> jp = boost::dynamic_pointer_cast<JackPort>(port);
-	_jack_ports.erase (jp->jack_ptr);
+
+	{
+		RCUWriter<JackPorts> writer (_jack_ports);
+		boost::shared_ptr<JackPorts> ports = writer.get_copy();
+
+		ports->erase (jp->jack_ptr);
+	}
+
+	_jack_ports.flush ();
+
 	(void) jack_port_unregister (_priv_jack, jp->jack_ptr);
 }
 
