@@ -756,6 +756,8 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 		return BackendReinitializationError;
 	}
 
+	_measure_latency = for_latency_measurement;
+
 	clear_ports ();
 
 	/* reset internal state */
@@ -900,8 +902,6 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 		engine.sample_rate_change (_samplerate);
 		PBD::warning << _("AlsaAudioBackend: sample rate does not match.") << endmsg;
 	}
-
-	_measure_latency = for_latency_measurement;
 
 	register_system_midi_ports();
 
@@ -1187,7 +1187,7 @@ AlsaAudioBackend::register_system_audio_ports()
 	const uint32_t lcpp = (_periods_per_cycle - 2) * _samples_per_period;
 
 	/* audio ports */
-	lr.min = lr.max = (_systemic_audio_input_latency);
+	lr.min = lr.max = (_measure_latency ? 0 : _systemic_audio_input_latency);
 	for (int i = 1; i <= a_ins; ++i) {
 		char tmp[64];
 		snprintf(tmp, sizeof(tmp), "system:capture_%d", i);
@@ -1199,7 +1199,7 @@ AlsaAudioBackend::register_system_audio_ports()
 		_system_inputs.push_back (ap);
 	}
 
-	lr.min = lr.max = lcpp + (_systemic_audio_output_latency);
+	lr.min = lr.max = lcpp + (_measure_latency ? 0 : _systemic_audio_output_latency);
 	for (int i = 1; i <= a_out; ++i) {
 		char tmp[64];
 		snprintf(tmp, sizeof(tmp), "system:playback_%d", i);
@@ -1465,7 +1465,7 @@ AlsaAudioBackend::register_system_midi_ports(const std::string device)
 					delete mout;
 				} else {
 					LatencyRange lr;
-					lr.min = lr.max = (nfo->systemic_output_latency);
+					lr.min = lr.max = (_measure_latency ? 0 : nfo->systemic_output_latency);
 					set_latency_range (p, true, lr);
 					boost::dynamic_pointer_cast<AlsaMidiPort>(p)->set_n_periods(_periods_per_cycle); // TODO check MIDI alignment
 					BackendPortPtr ap = boost::dynamic_pointer_cast<BackendPort>(p);
@@ -1513,7 +1513,7 @@ AlsaAudioBackend::register_system_midi_ports(const std::string device)
 					continue;
 				}
 				LatencyRange lr;
-				lr.min = lr.max = (nfo->systemic_input_latency);
+				lr.min = lr.max = (_measure_latency ? 0 : nfo->systemic_input_latency);
 				set_latency_range (p, false, lr);
 				BackendPortPtr ap = boost::dynamic_pointer_cast<BackendPort>(p);
 				ap->set_pretty_name (replace_name_io (i->first, true));
