@@ -130,7 +130,7 @@ class AlsaAudioBackend : public AudioBackend, public PortEngineSharedImpl
 		bool is_realtime () const;
 
 		bool use_separate_input_and_output_devices () const { return true; }
-		bool match_input_output_devices_or_none () const { return true; }
+		bool match_input_output_devices_or_none () const { return false; }
 		bool can_set_period_size () const { return true; }
 
 		std::vector<DeviceStatus> enumerate_devices () const;
@@ -399,17 +399,17 @@ class AlsaAudioBackend : public AudioBackend, public PortEngineSharedImpl
 		void update_systemic_audio_latencies ();
 		void update_systemic_midi_latencies ();
 
-		/* additional re-sampled I/O */
-		bool add_slave (const char*  slave_device,
-		                unsigned int slave_rate,
-		                unsigned int slave_spp,
-		                unsigned int duplex = 3);
-
 		class AudioSlave : public AlsaDeviceReservation, public AlsaAudioSlave {
 			public:
+				enum DuplexMode {
+					HalfDuplexIn  = 1,
+					HalfDuplexOut = 2,
+					FullDuplex    = 3
+				};
+
 				AudioSlave (
 						const char*  device,
-						unsigned int duplex,
+						DuplexMode   duplex,
 						unsigned int master_rate,
 						unsigned int master_samples_per_period,
 						unsigned int slave_rate,
@@ -435,6 +435,13 @@ class AlsaAudioBackend : public AudioBackend, public PortEngineSharedImpl
 				PBD::ScopedConnection _halted_connection;
 				void halted ();
 		};
+
+		/* additional re-sampled I/O */
+		bool add_slave (const char*  slave_device,
+		                unsigned int slave_rate,
+		                unsigned int slave_spp,
+		                unsigned int slave_ppc,
+										AudioSlave::DuplexMode);
 
 		typedef std::vector<AudioSlave*> AudioSlaves;
 		AudioSlaves _slaves;
