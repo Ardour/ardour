@@ -139,10 +139,16 @@ Session::start_audio_export (samplepos_t position, bool realtime, bool region_ex
 	 * to wait for it to wake up and call
 	 * non_realtime_stop ().
 	 */
+	int timeout = std::max (10, (int)(nominal_sample_rate () / get_block_size ()));
 	do {
 		Glib::usleep (engine().usecs_per_cycle ());
 		_butler->schedule_transport_work ();
-	} while (0 != post_transport_work ());
+	} while (0 != post_transport_work () && --timeout > 0);
+
+	if (timeout != 0) {
+		error << _("Cannot prepare transport for export") << endmsg;
+		return -1;
+	}
 
 	/* We're about to call Track::seek, so the butler must have finished everything
 	   up otherwise it could be doing do_refill in its thread while we are doing
