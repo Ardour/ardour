@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-02 13:17+0200\n"
-"PO-Revision-Date: 2020-04-06 18:32+0200\n"
+"PO-Revision-Date: 2020-04-10 13:46+0200\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -863,7 +863,7 @@ msgid ""
 "%1 has found the file <i>%2</i> in the following places:\n"
 "\n"
 msgstr ""
-"%1-(e)k <i>%2</i> fitxategia aurkitu du toki hauetan:\n"
+"%1-(r)ek <i>%2</i> fitxategia aurkitu du toki hauetan:\n"
 "\n"
 
 #: ambiguous_file_dialog.cc:46
@@ -1134,7 +1134,7 @@ msgid ""
 "\n"
 "\"Just quit\" option."
 msgstr ""
-"%1-(e)k ezin izan du saioa gorde.\n"
+"%1-(r)ek ezin izan du saioa gorde.\n"
 "\n"
 "Hala ere saioa itxi nahi baduzu, erabili\n"
 "\n"
@@ -1524,9 +1524,9 @@ msgid ""
 msgstr ""
 "Saio hau gorde gabe aldatu dela dirudi,\n"
 "edo grabazioaren erdian %1 edo \n"
-"ordenagailua itzalita egin dela.\n"
+"ordenagailua itzali egin dela.\n"
 "\n"
-"%1-(e)k edozein aldaketa berreskura dezake\n"
+"%1-(r)ek edozein aldaketa berreskura dezake\n"
 "edo alde batera utzi. Mesedez, erabaki\n"
 "zer egin nahi duzun.\n"
 
@@ -1544,7 +1544,7 @@ msgstr "Gelditzean itzuli lehenagoko tokira"
 
 #: ardour_ui2.cc:87
 msgid "Playhead follows Range tool clicks, and Range selections"
-msgstr "Denbora-markak barruti eraldaketei eta hautapenei jarraitzen die"
+msgstr "Denbora-barrak barruti eraldaketei eta hautapenei jarraitzen die"
 
 #: ardour_ui2.cc:88
 msgid "Track Input Monitoring automatically follows transport state"
@@ -1647,11 +1647,11 @@ msgstr "Jarraitu barrutia"
 #: ardour_ui2.cc:382 ardour_ui_ed.cc:461 mixer_strip.cc:2059
 #: mixer_strip.cc:2252 route_ui.cc:213
 msgid "In"
-msgstr "Sarrera"
+msgstr "Sar."
 
 #: ardour_ui2.cc:383 ardour_ui_ed.cc:465 mixer_strip.cc:2071
 msgid "Out"
-msgstr "Irteera"
+msgstr "Irt."
 
 #: ardour_ui2.cc:384
 msgid "Non-Layered"
@@ -1679,11 +1679,11 @@ msgstr "S/I latentzia:"
 
 #: ardour_ui2.cc:393
 msgid "Punch:"
-msgstr "Grabazio-tartea:"
+msgstr "Grab-tartea:"
 
 #: ardour_ui2.cc:394
 msgid "Rec:"
-msgstr "Grab:"
+msgstr "Grabazioa:"
 
 #: ardour_ui2.cc:399 ardour_ui2.cc:403 ardour_ui2.cc:407
 msgid ""
@@ -1874,7 +1874,7 @@ msgstr "Gorde eta itxi"
 #: session_option_editor.cc:114 session_option_editor.cc:116
 #: session_option_editor.cc:403
 msgid "Timecode"
-msgstr "Denbora-kodea"
+msgstr "Denb-kodea"
 
 #: ardour_ui_dialogs.cc:1017 session_option_editor.cc:176
 #: session_option_editor.cc:184 session_option_editor.cc:208
@@ -2423,23 +2423,23 @@ msgstr "Berreraiki gailur-fitxategiak"
 # Denbora-marka?
 #: ardour_ui_ed.cc:598
 msgid "Set Session Start from Playhead"
-msgstr "Zehaztu saio-hasiera denbora-markaz"
+msgstr "Zehaztu saio-hasiera denbora-barraz"
 
 #: ardour_ui_ed.cc:600
 msgid "Set Session End from Playhead"
-msgstr "Zehaztu saio-amaiera denbora-markaz"
+msgstr "Zehaztu saio-amaiera denbora-barraz"
 
 #: ardour_ui_ed.cc:603
 msgid "Toggle Mark at Playhead"
-msgstr "Gaitu/Desgaitu marka denbora-markaz"
+msgstr "Gaitu/Desgaitu marka denbora-barraz"
 
 #: ardour_ui_ed.cc:605 ardour_ui_ed.cc:607
 msgid "Add Mark from Playhead"
-msgstr "Gehitu marka denbora-markan"
+msgstr "Gehitu marka denbora-barran"
 
 #: ardour_ui_ed.cc:610 ardour_ui_ed.cc:612
 msgid "Remove Mark at Playhead"
-msgstr "Ezabatu marka denbora-markan"
+msgstr "Ezabatu marka denbora-barran"
 
 #: ardour_ui_ed.cc:615
 msgid "Nudge Next Later"
@@ -2451,27 +2451,27 @@ msgstr "Aurreratu gertukora"
 
 #: ardour_ui_ed.cc:620
 msgid "Nudge Playhead Forward"
-msgstr "Eraman eskuinera denbora-marka"
+msgstr "Eraman eskuinera denbora-barra"
 
 #: ardour_ui_ed.cc:622
 msgid "Nudge Playhead Backward"
-msgstr "Eraman ezkerrera denbora-marka"
+msgstr "Eraman ezkerrera denbora-barra"
 
 #: ardour_ui_ed.cc:624
 msgid "Playhead to Next Grid"
-msgstr "Denbora-marka hurrengo gidara"
+msgstr "Denbora-barra hurrengo gidara"
 
 #: ardour_ui_ed.cc:626
 msgid "Playhead to Previous Grid"
-msgstr "Denbora-marka aurreko gidara"
+msgstr "Denbora-barra aurreko gidara"
 
 #: ardour_ui_ed.cc:629
 msgid "Start Range from Playhead"
-msgstr "Hasi barrutia denbora-markan"
+msgstr "Hasi barrutia denbora-barran"
 
 #: ardour_ui_ed.cc:631
 msgid "Finish Range from Playhead"
-msgstr "Bukatu barrutia denbora-markan"
+msgstr "Bukatu barrutia denbora-barran"
 
 #: ardour_ui_ed.cc:633 ardour_ui_ed.cc:645
 msgid "Start Range"
@@ -2499,7 +2499,7 @@ msgstr "Bukatu loop-barrutia"
 
 #: ardour_ui_ed.cc:650
 msgid "Select All Visible Lanes"
-msgstr "Hautatu prozesadore ikusgarri guztiak"
+msgstr "Hautatu prozesadore ikusgai guztiak"
 
 #: ardour_ui_ed.cc:652
 msgid "Select All Tracks"
@@ -3172,7 +3172,7 @@ msgstr "Minutuak:Segundoak"
 
 #: audio_clock.cc:2164
 msgid "Set from Playhead"
-msgstr "Ezarri denbora-markaz"
+msgstr "Ezarri denbora-barraz"
 
 #: audio_clock.cc:2165
 msgid "Locate to This Time"
@@ -3616,7 +3616,7 @@ msgstr "CD -markoa"
 
 #: editor.cc:204 editor.cc:222 editor_actions.cc:155 editor_actions.cc:542
 msgid "Playhead"
-msgstr "Denbora-marka"
+msgstr "Denb-barra"
 
 #: editor.cc:205 editor_actions.cc:544
 msgid "Marker"
@@ -3628,7 +3628,7 @@ msgstr "Sagua"
 
 #: editor.cc:211 editor_actions.cc:551
 msgid "Slide"
-msgstr "Irrist"
+msgstr "Irristatu"
 
 #: editor.cc:212
 msgid "Splice"
@@ -3948,23 +3948,23 @@ msgstr "Hautatu guztia edizio-puntutik ezkerrera"
 
 #: editor.cc:2021 editor.cc:2095
 msgid "Select All After Playhead"
-msgstr "Hautatu guztia denbora-markatik eskuinera"
+msgstr "Hautatu guztia denbora-barratik eskuinera"
 
 #: editor.cc:2022 editor.cc:2096
 msgid "Select All Before Playhead"
-msgstr "Hautatu guztia denbora-markatik ezkerrera"
+msgstr "Hautatu guztia denbora-barratik ezkerrera"
 
 #: editor.cc:2023
 msgid "Select All Between Playhead and Edit Point"
-msgstr "Hautatu guztia denbora-marka eta edizio-puntu artean"
+msgstr "Hautatu guztia denbora-barra eta edizio-puntu artean"
 
 #: editor.cc:2024
 msgid "Select All Within Playhead and Edit Point"
-msgstr "Hautatu guztia denbora-marka eta edizio-puntu barruan"
+msgstr "Hautatu guztia denbora-barra eta edizio-puntu barruan"
 
 #: editor.cc:2025
 msgid "Select Range Between Playhead and Edit Point"
-msgstr "Hautatu barrutia denbora-marka eta edizio-puntu artean"
+msgstr "Hautatu barrutia denbora-barra eta edizio-puntu artean"
 
 #: editor.cc:2027 editor.cc:2098 editor_actions.cc:165 editor_actions.cc:166
 #: transport_masters_dialog.cc:73
@@ -4023,7 +4023,7 @@ msgstr "Mugitu"
 msgid ""
 "Playhead position stored with a negative value - ignored (use zero instead)"
 msgstr ""
-"Denbora-marka balore negatibo batean ezarrita - baztertuta (erabili zero "
+"Denbora-barra balore negatibo batean ezarrita - baztertuta (erabili zero "
 "ordez)"
 
 #: editor.cc:3169 editor.cc:3834 editor.cc:3916 midi_channel_selector.cc:160
@@ -4121,7 +4121,7 @@ msgstr "Uzkurtu pistak"
 
 #: editor.cc:3349
 msgid "Number of visible tracks"
-msgstr "Pista ikusgarrien kopurua"
+msgstr "Ikus daitezken pisten kopurua"
 
 #: editor.cc:3350
 msgid "Grid Mode"
@@ -4183,7 +4183,7 @@ msgstr "Bikoizte aldiak:"
 #: editor.cc:3833 group_tabs.cc:605 route_group_dialog.cc:53
 #: time_info_box.cc:66
 msgid "Selection"
-msgstr "Hautapena"
+msgstr "Hautap."
 
 #: editor.cc:3836
 msgid "Fit 1 track"
@@ -4514,359 +4514,359 @@ msgstr "Erakutsi Editore-zerrenda"
 
 #: editor_actions.cc:198
 msgid "Playhead to Next Region Boundary"
-msgstr "Denbora-marka hurrengo eremuaren ertzera"
+msgstr "Denbora-barra hurrengo eremuaren ertzera"
 
 #: editor_actions.cc:199
 msgid "Playhead to Next Region Boundary (No Track Selection)"
-msgstr "Denbora-marka hurrengo eremuaren ertzera (pista-hautapenik ez)"
+msgstr "Denbora-barra hurrengo eremuaren ertzera (pista-hautapenik ez)"
 
 #: editor_actions.cc:200
 msgid "Playhead to Previous Region Boundary"
-msgstr "Denbora-marka aurreko eremuaren ertzera"
+msgstr "Denbora-barra aurreko eremuaren ertzera"
 
 #: editor_actions.cc:201
 msgid "Playhead to Previous Region Boundary (No Track Selection)"
-msgstr "Denbora-marka aurreko eremuaren ertzera (pista-hautapenik ez)"
+msgstr "Denbora-barra aurreko eremuaren ertzera (pista-hautapenik ez)"
 
 #: editor_actions.cc:203
 msgid "Playhead to Next Region Start"
-msgstr "Denbora-marka hurrengo eremuaren hasierara"
+msgstr "Denbora-barra hurrengo eremuaren hasierara"
 
 #: editor_actions.cc:204
 msgid "Playhead to Next Region End"
-msgstr "Denbora-marka hurrengo eremuaren amaierara"
+msgstr "Denbora-barra hurrengo eremuaren amaierara"
 
 #: editor_actions.cc:205
 msgid "Playhead to Next Region Sync"
-msgstr ""
+msgstr "Denbora-barra hurrengo eremuaren sinkronizazio-puntura"
 
 #: editor_actions.cc:207
 msgid "Playhead to Previous Region Start"
-msgstr ""
+msgstr "Denbora-barra aurreko eremuaren hasierara"
 
 #: editor_actions.cc:208
 msgid "Playhead to Previous Region End"
-msgstr ""
+msgstr "Denbora-barra aurreko eremuaren amaierara"
 
 #: editor_actions.cc:209
 msgid "Playhead to Previous Region Sync"
-msgstr ""
+msgstr "Denbora-barra aurreko eremuaren sinkronizazio-puntura"
 
 #: editor_actions.cc:211
 msgid "To Next Region Boundary"
-msgstr ""
+msgstr "Hurrengo eremuaren ertzera"
 
 #: editor_actions.cc:212
 msgid "To Next Region Boundary (No Track Selection)"
-msgstr ""
+msgstr "Hurrengo eremuaren ertzera (pista-hautapenik ez)"
 
 #: editor_actions.cc:213
 msgid "To Previous Region Boundary"
-msgstr ""
+msgstr "Aurreko eremuaren ertzera"
 
 #: editor_actions.cc:214
 msgid "To Previous Region Boundary (No Track Selection)"
-msgstr ""
+msgstr "Aurreko eremuaren ertzera (pista-hautapenik ez)"
 
 #: editor_actions.cc:216
 msgid "To Next Region Start"
-msgstr ""
+msgstr "Hurrengo eremuaren hasierara"
 
 #: editor_actions.cc:217
 msgid "To Next Region End"
-msgstr ""
+msgstr "Hurrengo eremuaren amaierara"
 
 #: editor_actions.cc:218
 msgid "To Next Region Sync"
-msgstr ""
+msgstr "Hurrengo eremuaren sinkronizazio-puntura"
 
 #: editor_actions.cc:220
 msgid "To Previous Region Start"
-msgstr ""
+msgstr "Aurreko eremuaren hasierara"
 
 #: editor_actions.cc:221
 msgid "To Previous Region End"
-msgstr ""
+msgstr "Aurreko eremuaren amaierara"
 
 #: editor_actions.cc:222
 msgid "To Previous Region Sync"
-msgstr ""
+msgstr "Aurreko eremuaren sinkronizazio-puntura"
 
 #: editor_actions.cc:224
 msgid "To Range Start"
-msgstr ""
+msgstr "Barruti hasierara"
 
 #: editor_actions.cc:225
 msgid "To Range End"
-msgstr ""
+msgstr "Barruti amaierara"
 
 #: editor_actions.cc:227
 msgid "Playhead to Range Start"
-msgstr ""
+msgstr "Denbora-barra barruti hasierara"
 
 #: editor_actions.cc:228
 msgid "Playhead to Range End"
-msgstr ""
+msgstr "Denbora-barra barruti amaierara"
 
 #: editor_actions.cc:236
 msgid "Edit Current Tempo"
-msgstr ""
+msgstr "Aldatu tempoa"
 
 #: editor_actions.cc:237
 msgid "Edit Current Meter"
-msgstr ""
+msgstr "Aldatu metrika"
 
 #: editor_actions.cc:244
 msgid "Select All Overlapping Edit Range"
-msgstr ""
+msgstr "Hautatu gainjarritako guztia edizio-barrutitzat"
 
 #: editor_actions.cc:245
 msgid "Select All Inside Edit Range"
-msgstr ""
+msgstr "Hautatu edizio-barrutiko guztia"
 
 #: editor_actions.cc:247
 msgid "Select Edit Range"
-msgstr ""
+msgstr "Hautatu edizio-barrutia"
 
 #: editor_actions.cc:249
 msgid "Select All in Punch Range"
-msgstr ""
+msgstr "Hautatu grabazio-tarteko guztia"
 
 #: editor_actions.cc:250
 msgid "Select All in Loop Range"
-msgstr ""
+msgstr "Hautatu guztia loop-barrutitzat"
 
 #: editor_actions.cc:252
 msgid "Select Next Track or Bus"
-msgstr ""
+msgstr "Hautatu hurrengo pista edo busa"
 
 #: editor_actions.cc:253
 msgid "Select Previous Track or Bus"
-msgstr ""
+msgstr "Hautatu aurreko pista edo busa"
 
 #: editor_actions.cc:255
 msgid "Select Next Strip"
-msgstr ""
+msgstr "Hautatu hurrengo kanala"
 
 #: editor_actions.cc:256
 msgid "Select Previous Strip"
-msgstr ""
+msgstr "Hautatu aurreko kanala"
 
 #: editor_actions.cc:258
 msgid "Toggle Record Enable"
-msgstr ""
+msgstr "Gaitu/Desgaitu grabaketa"
 
 #: editor_actions.cc:260
 msgid "Toggle Solo"
-msgstr ""
+msgstr "Gaitu/Desgaitu soloa"
 
 #: editor_actions.cc:262
 msgid "Toggle Mute"
-msgstr ""
+msgstr "Gaitu/Desgaitu mututzea"
 
 #: editor_actions.cc:264
 msgid "Toggle Solo Isolate"
-msgstr ""
+msgstr "Gaitu/Desgaitu solo bakartua"
 
 #: editor_actions.cc:269
 msgid "Save View %1"
-msgstr ""
+msgstr "Gorde %1 ikuspegia"
 
 #: editor_actions.cc:275
 msgid "Go to View %1"
-msgstr ""
+msgstr "Joan %1 ikuspegira"
 
 #: editor_actions.cc:281
 msgid "Locate to Mark %1"
-msgstr ""
+msgstr "Kokatu %1 markan"
 
 #: editor_actions.cc:289
 msgid "Zoom to Selection"
-msgstr ""
+msgstr "Zooma hautapenera"
 
 #: editor_actions.cc:290
 msgid "Zoom to Selection (Horizontal)"
-msgstr ""
+msgstr "Zooma hautapenera (horizontala)"
 
 #: editor_actions.cc:291
 msgid "Toggle Zoom State"
-msgstr ""
+msgstr "Gaitu/Desgaitu zoom egoera"
 
 #: editor_actions.cc:293
 msgid "Expand Track Height"
-msgstr ""
+msgstr "Zabaldu pista-altuera"
 
 #: editor_actions.cc:294
 msgid "Shrink Track Height"
-msgstr ""
+msgstr "Uzkurtu pista-altuera"
 
 #: editor_actions.cc:296
 msgid "Fit 1 Track"
-msgstr ""
+msgstr "Jarri pista 1"
 
 #: editor_actions.cc:297
 msgid "Fit 2 Tracks"
-msgstr ""
+msgstr "Jarri 2 pista"
 
 #: editor_actions.cc:298
 msgid "Fit 4 Tracks"
-msgstr ""
+msgstr "Jarri 4 pista"
 
 #: editor_actions.cc:299
 msgid "Fit 8 Tracks"
-msgstr ""
+msgstr "Jarri 8 pista"
 
 #: editor_actions.cc:300
 msgid "Fit 16 Tracks"
-msgstr ""
+msgstr "Jarri 16 pista"
 
 #: editor_actions.cc:301
 msgid "Fit 32 Tracks"
-msgstr ""
+msgstr "Jarri 32 pista"
 
 #: editor_actions.cc:302
 msgid "Fit All Tracks"
-msgstr ""
+msgstr "Doitu pista guztiak"
 
 #: editor_actions.cc:309
 msgid "Zoom to 5 min"
-msgstr ""
+msgstr "Zooma 5 minutura"
 
 #: editor_actions.cc:312
 msgid "Move Selected Tracks Up"
-msgstr ""
+msgstr "Igo hautatutako pistak"
 
 #: editor_actions.cc:314
 msgid "Move Selected Tracks Down"
-msgstr ""
+msgstr "Jaitsi hautatutako pistak"
 
 #: editor_actions.cc:317
 msgid "Scroll Tracks Up"
-msgstr ""
+msgstr "Korritu pistak gora"
 
 #: editor_actions.cc:318
 msgid "Scroll Tracks Down"
-msgstr ""
+msgstr "Korritu pistak behera"
 
 #: editor_actions.cc:319
 msgid "Step Tracks Up"
-msgstr ""
+msgstr "Igo pistak"
 
 #: editor_actions.cc:320
 msgid "Step Tracks Down"
-msgstr ""
+msgstr "Jaitsi pistak"
 
 #: editor_actions.cc:321
 msgid "Select Topmost Track"
-msgstr ""
+msgstr "Hautatu goi-goiko pista "
 
 #: editor_actions.cc:323
 msgid "Scroll Backward"
-msgstr ""
+msgstr "Korritu ezkerreruntz"
 
 #: editor_actions.cc:324
 msgid "Scroll Forward"
-msgstr ""
+msgstr "Korritu eskuineruntz"
 
 #: editor_actions.cc:325
 msgid "Center Playhead"
-msgstr ""
+msgstr "Zentratu denbora-barra"
 
 #: editor_actions.cc:326
 msgid "Center Edit Point"
-msgstr ""
+msgstr "Zentratu edizio-puntua"
 
 #: editor_actions.cc:328
 msgid "Playhead Forward"
-msgstr ""
+msgstr "Denbora-barra eskuineruntz"
 
 #: editor_actions.cc:329
 msgid "Playhead Backward"
-msgstr ""
+msgstr "Denbora-barra ezkerreruntz"
 
 #: editor_actions.cc:331
 msgid "Playhead to Active Mark"
-msgstr ""
+msgstr "Denbora-barra marka aktibora"
 
 #: editor_actions.cc:332
 msgid "Active Mark to Playhead"
-msgstr ""
+msgstr "Marka aktiboa denbora-barrara"
 
 #: editor_actions.cc:334
 msgid "Use Skip Ranges"
-msgstr ""
+msgstr "Erabili \"Saltatu barrutiak\""
 
 #: editor_actions.cc:341
 msgid "Play Selected Regions"
-msgstr ""
+msgstr "Erreproduzitu hautatutako eremuak"
 
 #: editor_actions.cc:342
 msgid "Tag Selected Regions"
-msgstr ""
+msgstr "Etiketatu hautatutako eremuak"
 
 #: editor_actions.cc:345
 msgid "Play from Edit Point and Return"
-msgstr ""
+msgstr "Erreproduzitu edizio-puntutik eta itzuli"
 
 #: editor_actions.cc:347
 msgid "Play Edit Range"
-msgstr ""
+msgstr "Erreproduzitu edizio-barrutia"
 
 #: editor_actions.cc:349
 msgid "Playhead to Mouse"
-msgstr ""
+msgstr "Denbora-barra sagura"
 
 #: editor_actions.cc:350
 msgid "Active Marker to Mouse"
-msgstr ""
+msgstr "Marka aktiboa sagura"
 
 #: editor_actions.cc:351
 msgid "Set Auto Punch In/Out from Playhead"
-msgstr ""
+msgstr "Ezarri grabazio-tarte automatikoaren S/I denbora-barraz"
 
 #: editor_actions.cc:356 editor_actions.cc:1463
 msgid "Multi-Duplicate..."
-msgstr ""
+msgstr "Multikopia..."
 
 #: editor_actions.cc:365
 msgid "Undo Selection Change"
-msgstr ""
+msgstr "Desegin hautapen-aldaketa"
 
 #: editor_actions.cc:366
 msgid "Redo Selection Change"
-msgstr ""
+msgstr "Berregin hautapen-aldaketa"
 
 #: editor_actions.cc:368
 msgid "Export Audio"
-msgstr ""
+msgstr "Esportatu audioa"
 
 #: editor_actions.cc:369 export_dialog.cc:532
 msgid "Export Range"
-msgstr ""
+msgstr "Esportatu barrutia"
 
 #: editor_actions.cc:374
 msgid "Separate Using Punch Range"
-msgstr ""
+msgstr "Banandu grabazio-tartea erabiliz"
 
 #: editor_actions.cc:375
 msgid "Separate Using Loop Range"
-msgstr ""
+msgstr "Banandu loop-barrutia erabiliz"
 
 #: editor_actions.cc:377 editor_actions.cc:402
 msgid "Crop"
-msgstr ""
+msgstr "Moztu"
 
 #: editor_actions.cc:384 rc_option_editor.cc:2455
 msgid "Split/Separate"
-msgstr ""
+msgstr "Banandu"
 
 #: editor_actions.cc:389
 msgid "Fade Range Selection"
-msgstr ""
+msgstr "Lausotu barruti-hautapena"
 
 #: editor_actions.cc:391
 msgid "Set Tempo from Edit Range = Bar"
-msgstr ""
+msgstr "Ezarri tempoa honen arabera: Edizio-barrutia = konpasa"
 
 #: editor_actions.cc:394
 msgid "Log"
@@ -4874,39 +4874,39 @@ msgstr "Erregistroa"
 
 #: editor_actions.cc:397 editor_actions.cc:399
 msgid "Move to Next Transient"
-msgstr ""
+msgstr "Mugitu hurrengo trantsitoriora"
 
 #: editor_actions.cc:398 editor_actions.cc:400
 msgid "Move to Previous Transient"
-msgstr ""
+msgstr "Mugitu aurreko trantsitoriora"
 
 #: editor_actions.cc:434
 msgid "Follow Playhead"
-msgstr ""
+msgstr "Jarraitu denbora-barra"
 
 #: editor_actions.cc:435
 msgid "Remove Last Capture"
-msgstr ""
+msgstr "Ezabatu azken saio-argazkia"
 
 #: editor_actions.cc:436 editor_ops.cc:5197
 msgid "Tag Last Capture"
-msgstr ""
+msgstr "Etiketatu azken saio-argazkia"
 
 #: editor_actions.cc:438
 msgid "Stationary Playhead"
-msgstr ""
+msgstr "Denbora-barra estatikoa"
 
 #: editor_actions.cc:440 insert_remove_time_dialog.cc:36
 msgid "Insert Time"
-msgstr ""
+msgstr "Txertatu denbora"
 
 #: editor_actions.cc:442 insert_remove_time_dialog.cc:36
 msgid "Remove Time"
-msgstr ""
+msgstr "Ezabatu denbora"
 
 #: editor_actions.cc:447
 msgid "Toggle Active"
-msgstr ""
+msgstr "Gaitu/Desgaitu pista"
 
 #: editor_actions.cc:449 editor_actions.cc:1392 editor_markers.cc:936
 #: editor_markers.cc:1031 editor_markers.cc:1053 editor_snapshots.cc:139
@@ -4915,388 +4915,389 @@ msgstr ""
 #: template_dialog.cc:222 transport_masters_dialog.cc:86
 #: vca_master_strip.cc:471 vca_time_axis.cc:467
 msgid "Remove"
-msgstr ""
+msgstr "Ezabatu"
 
 #: editor_actions.cc:452
 msgid "Fit Selection (Vertical)"
-msgstr ""
+msgstr "Doitu hautapena (bertikala)"
 
 #: editor_actions.cc:455 time_axis_view.cc:1359
 msgid "Largest"
-msgstr ""
+msgstr "Zabalena"
 
 #: editor_actions.cc:458 time_axis_view.cc:1360
 msgid "Larger"
-msgstr ""
+msgstr "Oso zabala"
 
 #: editor_actions.cc:461 editor_rulers.cc:254 rc_option_editor.cc:3693
 #: time_axis_view.cc:1361
 msgid "Large"
-msgstr ""
+msgstr "Zabala"
 
 #: editor_actions.cc:467 editor_rulers.cc:258 rc_option_editor.cc:3692
 #: time_axis_view.cc:1363
 msgid "Small"
-msgstr ""
+msgstr "Estua"
 
 #: editor_actions.cc:471
 msgid "Sound Selected MIDI Notes"
-msgstr ""
+msgstr "Erreproduzitu hautatutako MIDI notak"
 
 #: editor_actions.cc:476
 msgid "Zoom Focus Left"
-msgstr ""
+msgstr "Zoomaren fokua ezkerrean"
 
 #: editor_actions.cc:477
 msgid "Zoom Focus Right"
-msgstr ""
+msgstr "Zoomaren fokua eskuinean"
 
 #: editor_actions.cc:478
 msgid "Zoom Focus Center"
-msgstr ""
+msgstr "Zoomaren fokua erdian"
 
 #: editor_actions.cc:479
 msgid "Zoom Focus Playhead"
-msgstr ""
+msgstr "Zoomaren fokua denbora-markan"
 
 #: editor_actions.cc:480
 msgid "Zoom Focus Mouse"
-msgstr ""
+msgstr "Zoomaren fokua saguan"
 
 #: editor_actions.cc:481
 msgid "Zoom Focus Edit Point"
-msgstr ""
+msgstr "Zoomaren fokua edizio-puntuan"
 
 #: editor_actions.cc:483
 msgid "Next Zoom Focus"
-msgstr ""
+msgstr "Hurrengo zoom-fokua"
 
 #: editor_actions.cc:491
 msgid "no action bound"
-msgstr ""
+msgstr "lotutako ekintzarik ez"
 
 #: editor_actions.cc:498
 msgid "Smart Mode"
-msgstr ""
+msgstr "Modu adimenduna"
 
 #: editor_actions.cc:501
 msgid "Smart"
-msgstr ""
+msgstr "Adimen"
 
 #: editor_actions.cc:504
 msgid "Object Tool"
-msgstr ""
+msgstr "Objektu tresna"
 
 #: editor_actions.cc:509
 msgid "Range Tool"
-msgstr ""
+msgstr "Barruti tresna"
 
 #: editor_actions.cc:514
 msgid "Note Drawing Tool"
-msgstr ""
+msgstr "Nota-marrazte tresna"
 
 #: editor_actions.cc:519
 msgid "Audition Tool"
-msgstr ""
+msgstr "Entzute tresna"
 
 #: editor_actions.cc:524
 msgid "Time FX Tool"
-msgstr ""
+msgstr "Denbora-efektu tresna"
 
 #: editor_actions.cc:529
 msgid "Content Tool"
-msgstr ""
+msgstr "Eduki tresna"
 
 #: editor_actions.cc:534
 msgid "Cut Tool"
-msgstr ""
+msgstr "Ebakitze tresna"
 
 #: editor_actions.cc:539
 msgid "Step Mouse Mode"
-msgstr ""
+msgstr "Sagua pasatzeko modua"
 
 #: editor_actions.cc:546
 msgid "Change Edit Point"
-msgstr ""
+msgstr "Aldatu edizio-puntua"
 
 #: editor_actions.cc:547
 msgid "Change Edit Point Including Marker"
-msgstr ""
+msgstr "Aldatu edizio-puntua markak barne hartuz"
 
 #: editor_actions.cc:552
 msgid "EditMode|Lock"
-msgstr ""
+msgstr "Blokeoa"
 
 #: editor_actions.cc:553
 msgid "Cycle Edit Mode"
-msgstr ""
+msgstr "Edizio-modu ziklikoa"
 
 #: editor_actions.cc:555
 msgid "Snap & Grid"
-msgstr ""
+msgstr "Doitzea eta sareta"
 
 #: editor_actions.cc:559 rc_option_editor.cc:2568
 msgid "Grid"
-msgstr ""
+msgstr "Sareta"
 
 #: editor_actions.cc:560
 msgid "Magnetic"
-msgstr ""
+msgstr "Itsaskorra"
 
 #: editor_actions.cc:562
 msgid "Snap"
-msgstr ""
+msgstr "Doitzea"
 
 #: editor_actions.cc:566
 msgid "Toggle Snap"
-msgstr ""
+msgstr "Gaitu/Desgaitu doitzea"
 
 #: editor_actions.cc:567
 msgid "Next Quantize Grid Choice"
-msgstr ""
+msgstr "Hurrengo kuantizazio-saretako aukera"
 
 #: editor_actions.cc:568
 msgid "Previous Quantize Grid Choice"
-msgstr ""
+msgstr "Aurreko kuantizazio-saretako aukera"
 
 #: editor_actions.cc:598
 msgid "Show Marker Lines"
-msgstr ""
+msgstr "Ikusi marka-lineak"
 
 #: editor_actions.cc:608
 msgid "Loop/Punch"
-msgstr ""
+msgstr "Loop/Grab-tartea"
 
 #: editor_actions.cc:612
 msgid "Min:Sec"
-msgstr ""
+msgstr "Min:Seg"
 
 #: editor_actions.cc:614 editor_actions.cc:617 editor_rulers.cc:276
 #: rc_option_editor.cc:1549
 msgid "Video Monitor"
-msgstr ""
+msgstr "Bideo-monitorea"
 
 #: editor_actions.cc:616 rc_option_editor.cc:4040 rc_option_editor.cc:4041
 msgid "Video"
-msgstr ""
+msgstr "Bideoa"
 
 #: editor_actions.cc:619
 msgid "Always on Top"
-msgstr ""
+msgstr "Beti goian"
 
 #: editor_actions.cc:621
 msgid "Frame number"
-msgstr ""
+msgstr "Lagin-kopurua"
 
 #: editor_actions.cc:622
 msgid "Timecode Background"
-msgstr ""
+msgstr "Denb-kode atzealdea"
 
 #: editor_actions.cc:623
 msgid "Fullscreen"
-msgstr ""
+msgstr "Pantaila osoa"
 
 #: editor_actions.cc:624
 msgid "Letterbox"
-msgstr ""
+msgstr "Postontzia"
 
 #: editor_actions.cc:625
 msgid "Original Size"
-msgstr ""
+msgstr "Jatorrizko tamaina"
 
 #: editor_actions.cc:672
 msgid "Remove Unused"
-msgstr ""
+msgstr "Ezabatu erabili ez direnak"
 
 #: editor_actions.cc:674
 msgid "Import PT session"
-msgstr ""
+msgstr "Inportatu PT saioa"
 
 #: editor_actions.cc:679
 msgid "Import to Source List..."
-msgstr ""
+msgstr "Inportatu iturburu-zerrendara..."
 
 #: editor_actions.cc:682 session_import_dialog.cc:51
 #: session_import_dialog.cc:72
 msgid "Import from Session"
-msgstr ""
+msgstr "Inportatu saiotik"
 
 #: editor_actions.cc:686
 msgid "Bring all media into session folder"
-msgstr ""
+msgstr "Sartu multimedia guztia saioaren karpetan"
 
 #: editor_actions.cc:689
 msgid "Show Summary"
-msgstr ""
+msgstr "Erakutsi laburpena"
 
 #: editor_actions.cc:691
 msgid "Show Group Tabs"
-msgstr ""
+msgstr "Erakutsi talde-fitxak"
 
 #: editor_actions.cc:693
 msgid "Toggle MIDI Input Active for Editor-Selected Tracks/Busses"
 msgstr ""
+"Gaitu/Desgaitu MIDI sarrera aktiboak edizioz hautatutako pista edo busentzat"
 
 #: editor_actions.cc:698 quantize_dialog.cc:74 quantize_dialog.cc:131
 msgid "Quantize"
-msgstr ""
+msgstr "Kuantizatu"
 
 #: editor_actions.cc:1008 editor_actions.cc:1146 editor_actions.cc:1157
 #: editor_actions.cc:1212 editor_actions.cc:1223 editor_actions.cc:1270
 #: luainstance.cc:368 luainstance.cc:2254
 msgid "programming error: %1: %2"
-msgstr ""
+msgstr "programazio-akatsa: %1 %2"
 
 #: editor_actions.cc:1398
 msgid "Raise"
-msgstr ""
+msgstr "Altxa"
 
 #: editor_actions.cc:1401
 msgid "Raise to Top"
-msgstr ""
+msgstr "Altxa goraino"
 
 #: editor_actions.cc:1404
 msgid "Lower"
-msgstr ""
+msgstr "Jaitsi"
 
 #: editor_actions.cc:1407
 msgid "Lower to Bottom"
-msgstr ""
+msgstr "Jaitsi beheraino"
 
 #: editor_actions.cc:1410
 msgid "Move to Original Position"
-msgstr ""
+msgstr "Mugitu jatorrizko lekura"
 
 #: editor_actions.cc:1414
 msgid "Lock to Video"
-msgstr ""
+msgstr "Lotu bideora"
 
 #: editor_actions.cc:1415 editor_markers.cc:928 editor_markers.cc:963
 #: session_option_editor.cc:372
 msgid "Glue to Bars and Beats"
-msgstr ""
+msgstr "Itsatsi konpas eta pultsutara"
 
 #: editor_actions.cc:1418
 msgid "Remove Sync"
-msgstr ""
+msgstr "Ezabatu sinkronizazioa"
 
 #: editor_actions.cc:1421 mixer_strip.cc:2251 monitor_section.cc:261
 #: monitor_section.cc:327 monitor_section.cc:959 route_time_axis.cc:274
 #: route_time_axis.cc:590 vca_time_axis.cc:509
 msgid "Mute"
-msgstr ""
+msgstr "Mutu"
 
 #: editor_actions.cc:1424
 msgid "Normalize..."
-msgstr ""
+msgstr "Normalizatu..."
 
 #: editor_actions.cc:1427
 msgid "Reverse"
-msgstr ""
+msgstr "Aldrebes"
 
 #: editor_actions.cc:1430
 msgid "Make Mono Regions"
-msgstr ""
+msgstr "Sortu mono barrutiak"
 
 #: editor_actions.cc:1433
 msgid "Boost Gain"
-msgstr ""
+msgstr "Eman irabazia"
 
 #: editor_actions.cc:1436
 msgid "Cut Gain"
-msgstr ""
+msgstr "Kendu irabazia"
 
 #: editor_actions.cc:1439 editor_actions.cc:1525
 msgid "Reset Gain"
-msgstr ""
+msgstr "Berrezarri irabazia"
 
 #: editor_actions.cc:1442
 msgid "Pitch Shift..."
-msgstr ""
+msgstr "Aldatu tonua..."
 
 #: editor_actions.cc:1448
 msgid "Opaque"
-msgstr ""
+msgstr "Opakua"
 
 #: editor_actions.cc:1451 editor_regions.cc:186
 msgid "Fade In"
-msgstr ""
+msgstr "Sarrera-lausotzea"
 
 #: editor_actions.cc:1454 editor_regions.cc:187
 msgid "Fade Out"
-msgstr ""
+msgstr "Irteera-lausotzea"
 
 #: editor_actions.cc:1466
 msgid "Fill Track"
-msgstr ""
+msgstr "Bete pista"
 
 #: editor_actions.cc:1469 editor_markers.cc:1068
 msgid "Set Loop Range"
-msgstr ""
+msgstr "Ezarri loop-barrutia"
 
 #: editor_actions.cc:1475
 msgid "Set Punch"
-msgstr ""
+msgstr "Ezarri grabazio-tartea"
 
 #: editor_actions.cc:1478
 msgid "Add Single Range Marker"
-msgstr ""
+msgstr "Gehitu barruti-marka sinplea"
 
 #: editor_actions.cc:1481
 msgid "Add Range Marker Per Region"
-msgstr ""
+msgstr "Gehitu barruti-marka bana eremuko"
 
 #: editor_actions.cc:1484
 msgid "Snap Position to Grid"
-msgstr ""
+msgstr "Doitu kokalekua saretara"
 
 #: editor_actions.cc:1487
 msgid "Close Gaps"
-msgstr ""
+msgstr "Itxi tarteak"
 
 #: editor_actions.cc:1490
 msgid "Rhythm Ferret..."
-msgstr ""
+msgstr "Erritmo-kuxkuxeroa..."
 
 #: editor_actions.cc:1493
 msgid "Export..."
-msgstr ""
+msgstr "Esportatu..."
 
 #: editor_actions.cc:1496
 msgid "Separate Under"
-msgstr ""
+msgstr "Banandu azpian"
 
 #: editor_actions.cc:1498 editor_actions.cc:1499
 msgid "Set Fade In Length"
-msgstr ""
+msgstr "Zehaztu sarrera-lausotzearen luzera"
 
 #: editor_actions.cc:1500 editor_actions.cc:1501
 msgid "Set Fade Out Length"
-msgstr ""
+msgstr "Zehaztu irteera-lausotzearen luzera"
 
 #: editor_actions.cc:1503
 msgid "Set Tempo from Region = Bar"
-msgstr ""
+msgstr "Ezarri tempoa honen arabera: barrutia = konpasa"
 
 #: editor_actions.cc:1505
 msgid "Split at Percussion Onsets"
-msgstr ""
+msgstr "Banandu perkusio-hasieretan"
 
 #: editor_actions.cc:1508
 msgid "List Editor..."
-msgstr ""
+msgstr "Zerrenda-editorea..."
 
 #: editor_actions.cc:1511
 msgid "Properties..."
-msgstr ""
+msgstr "Propietateak..."
 
 #: editor_actions.cc:1513
 msgid "Play selected Regions"
-msgstr ""
+msgstr "Erreproduzitu hautatutako eremuak"
 
 #: editor_actions.cc:1514
 msgid "Tag selected Regions"
-msgstr ""
+msgstr "Etiketatu hautatutako eremuak"
 
 #: editor_actions.cc:1516
 msgid "Bounce (with processing)"
@@ -5308,19 +5309,19 @@ msgstr ""
 
 #: editor_actions.cc:1518
 msgid "Combine"
-msgstr ""
+msgstr "Konbinatu"
 
 #: editor_actions.cc:1519
 msgid "Uncombine"
-msgstr ""
+msgstr "Deskonbinatu"
 
 #: editor_actions.cc:1521
 msgid "Loudness Analysis..."
-msgstr ""
+msgstr "Bolumen-analisia..."
 
 #: editor_actions.cc:1522
 msgid "Spectral Analysis..."
-msgstr ""
+msgstr "Espektro-analisia..."
 
 #: editor_actions.cc:1524
 msgid "Reset Envelope"
@@ -5332,200 +5333,213 @@ msgstr ""
 
 #: editor_actions.cc:1533 editor_actions.cc:1534
 msgid "Insert Patch Change..."
-msgstr ""
+msgstr "Txertatu Patch aldaketa..."
 
 #: editor_actions.cc:1535
 msgid "Unlink from other copies"
-msgstr ""
+msgstr "Deslotu beste kopiengandik"
 
 #: editor_actions.cc:1536
 msgid "Strip Silence..."
-msgstr ""
+msgstr "Kendu isiltasuna..."
 
 #: editor_actions.cc:1537
 msgid "Set Range Selection"
-msgstr ""
+msgstr "Ezarri barruti-hautapena"
 
 #: editor_actions.cc:1539 editor_actions.cc:1540
 msgid "Nudge Later"
-msgstr ""
+msgstr "Eraman eskuinera"
 
 #: editor_actions.cc:1541 editor_actions.cc:1542
 msgid "Nudge Earlier"
-msgstr ""
+msgstr "Eraman ezkerrera"
 
 #: editor_actions.cc:1544
 msgid "Sequence Regions"
-msgstr ""
+msgstr "Sekuentziatu eremuak"
 
 #: editor_actions.cc:1546
 msgid "Nudge Later by Capture Offset"
-msgstr ""
+msgstr "Eraman eskuinera saio-argazkia konpentsatzeko"
 
 #: editor_actions.cc:1548
 msgid "Nudge Earlier by Capture Offset"
-msgstr ""
+msgstr "Eraman ezkerrera saio-argazkia konpentsatzeko"
 
 #: editor_actions.cc:1550
 msgid "Trim to Loop"
-msgstr ""
+msgstr "Moztu loop-era"
 
 #: editor_actions.cc:1551
 msgid "Trim to Punch"
-msgstr ""
+msgstr "Moztu grabazio-tartera"
 
 #: editor_actions.cc:1553
 msgid "Trim to Previous"
-msgstr ""
+msgstr "Moztu aurrekora"
 
 #: editor_actions.cc:1554
 msgid "Trim to Next"
-msgstr ""
+msgstr "Moztu hurrengora"
 
 #: editor_actions.cc:1558
 msgid "Insert Region from Source List"
-msgstr ""
+msgstr "Txertatu eremua iturburu-zerrendatik"
 
 #: editor_actions.cc:1562
 msgid "Set Sync Position"
-msgstr ""
+msgstr "Ezarri sinkronizaio-kokalekua"
 
 #: editor_actions.cc:1563
 msgid "Place Transient"
-msgstr ""
+msgstr "Jarri trantsitorioa"
 
 #: editor_actions.cc:1564
 msgid "Trim Start at Edit Point"
-msgstr ""
+msgstr "Moztu hasiera edizio-puntuan"
 
 #: editor_actions.cc:1565
 msgid "Trim End at Edit Point"
-msgstr ""
+msgstr "Moztu amaiera edizio-puntuan"
 
 #: editor_actions.cc:1566
 msgid "Align Start"
-msgstr ""
+msgstr "Lerrokatu hasiera"
 
 #: editor_actions.cc:1567
 msgid "Align Start Relative"
-msgstr ""
+msgstr "Lerrokatu hasiera erlatiboki"
 
 #: editor_actions.cc:1568
 msgid "Align End"
-msgstr ""
+msgstr "Lerrokatu amaiera"
 
 #: editor_actions.cc:1569
 msgid "Align End Relative"
-msgstr ""
+msgstr "Lerrokatu amaiera erlatiboki"
 
 #: editor_actions.cc:1570
 msgid "Align Sync"
-msgstr ""
+msgstr "Lerrokatu sinkronizazioa"
 
 #: editor_actions.cc:1571
 msgid "Align Sync Relative"
-msgstr ""
+msgstr "Lerrokatu sinkronizazioa erlatiboki"
 
 #: editor_actions.cc:1572 editor_actions.cc:1573
 msgid "Choose Top..."
-msgstr ""
+msgstr "Hautatu goi-goikoa..."
 
 #: editor_audio_import.cc:85 editor_audio_import.cc:107
 msgid "You can't import or embed an audiofile until you have a session loaded."
 msgstr ""
+"Ezin duzu inportatu edo txertatu audio-fitxategirik lehenago saiorik kargatu "
+"gabe."
 
 #: editor_audio_import.cc:91 editor_audio_import.cc:135
 msgid "Add Existing Media"
-msgstr ""
+msgstr "Gehitu lehendik dagoen multimedia"
 
 #: editor_audio_import.cc:183
 msgid ""
 "The session already contains a source file named %1.  Do you want to import "
 "%1 as a new file, or skip it?"
 msgstr ""
+"Saioak jada badu %1 izena duen iturburu-fitxategi bat. %1 fitxategi berri "
+"moduan inportatu nahi duzu, edo baztertu?"
 
 #: editor_audio_import.cc:185
 msgid ""
 "The session already contains a source file named %1.  Do you want to import "
 "%2 as a new source, or skip it?"
 msgstr ""
+"Saioak jada badu %1 izena duen iturburu-fitxategi bat. %2 iturburu berri "
+"moduan inportatu nahi duzu, edo baztertu?"
 
 #: editor_audio_import.cc:356 editor_pt_import.cc:96 editor_videotimeline.cc:94
 msgid "Cancel Import"
-msgstr ""
+msgstr "Utzi inportazioa"
 
 #: editor_audio_import.cc:640
 msgid "Editor: cannot open file \"%1\", (%2)"
-msgstr ""
+msgstr "Editorea: ezin da %1 fitxategia ireki, (%2)"
 
 #: editor_audio_import.cc:645
 msgid ""
 "%1\n"
 "This audiofile cannot be embedded. It must be imported!"
 msgstr ""
+"%1\n"
+"Audio-fitxategi hau ezin da txertatu. Inportatu egin behar da!"
 
 #: editor_audio_import.cc:654
 msgid "Cancel entire import"
-msgstr ""
+msgstr "Utzi osorik inportazioa"
 
 #: editor_audio_import.cc:655
 msgid "Don't embed it"
-msgstr ""
+msgstr "Ez txertatu"
 
 #: editor_audio_import.cc:656
 msgid "Embed all without questions"
-msgstr ""
+msgstr "Txertatu guztiak galdetu gabe"
 
 #: editor_audio_import.cc:659 editor_audio_import.cc:685
 #: export_format_dialog.cc:75
 msgid "Sample rate"
-msgstr ""
+msgstr "Lagin-tasa"
 
 #: editor_audio_import.cc:660 editor_audio_import.cc:686
 msgid ""
 "%1\n"
 "This audiofile's sample rate doesn't match the session sample rate!"
 msgstr ""
+"%1\n"
+"Audio-fitxategi honen lagin-tasa ez da saioarenaren berdina!"
 
 #: editor_audio_import.cc:682
 msgid "Embed it anyway"
-msgstr ""
+msgstr "Txertatu dena den"
 
 #: editor_pt_import.cc:82
 msgid "You can't import a PT session until you have a session loaded."
-msgstr ""
+msgstr "Ezin duzu PT saiorik inportatu lehenago saiorik kargatu gabe."
 
 #: editor_pt_import.cc:96
 msgid "PT Import"
-msgstr ""
+msgstr "Inportatu PT saioa"
 
 #: editor_pt_import.cc:112
 msgid "PT import may have missing files, check session log for details"
 msgstr ""
+"PT inportazioak fitxategi galduak izan ditzake, begiratu saio-erregistroa "
+"xehetasun gehiagorako"
 
 #: editor_pt_import.cc:115
 msgid "PT import complete!"
-msgstr ""
+msgstr "PT inportazioa osatu da!"
 
 #: editor_canvas_events.cc:1327 editor_drag.cc:1512
 msgid "Could not create new track after region placed in the drop zone"
 msgstr ""
+"Ezin izan da sortu pista berria arraste-eremuan dagoen eremuaren ondoren"
 
 #: editor_drag.cc:1402
 msgid "fixed time region drag"
-msgstr ""
+msgstr "denbora-finkoko eremua arrastatzea"
 
 #: editor_drag.cc:2413
 msgid "Ripple drag"
-msgstr ""
+msgstr "Uhindura arrastatzea"
 
 #: editor_drag.cc:2476
 msgid "create region"
-msgstr ""
+msgstr "sortu eremua"
 
 #: editor_drag.cc:2597 midi_region_view.cc:3104
 msgid "resize notes"
-msgstr ""
+msgstr "aldatu noten tamaina"
 
 #: editor_drag.cc:2780 editor_drag.cc:2815
 msgid ""
@@ -5534,118 +5548,122 @@ msgid ""
 "Locked to Video.\n"
 "The video cannot me moved."
 msgstr ""
+"Audio-eremu bat edo gehiago\n"
+"blokeatuta edota\n"
+"bideoari lotuta daude.\n"
+"Bideoa ezin da mugitu."
 
 #: editor_drag.cc:2850
 msgid "Video Start:"
-msgstr ""
+msgstr "Bideo-hasiera:"
 
 #: editor_drag.cc:2852
 msgid "Diff:"
-msgstr ""
+msgstr "Ezberd.:"
 
 #: editor_drag.cc:2874
 msgid "Move Video"
-msgstr ""
+msgstr "Mugitu bideoa"
 
 #: editor_drag.cc:3332
 msgid "move meter mark"
-msgstr ""
+msgstr "mugitu metrika-marka"
 
 #: editor_drag.cc:3334
 msgid "copy meter mark"
-msgstr ""
+msgstr "kopiatu metrika-marka"
 
 #: editor_drag.cc:3439
 msgid "inactive"
-msgstr ""
+msgstr "inaktibo"
 
 #: editor_drag.cc:3484
 msgid "move tempo mark"
-msgstr ""
+msgstr "mugitu tempo-marka"
 
 #: editor_drag.cc:3490
 msgid "copy tempo mark"
-msgstr ""
+msgstr "kopiatu tempo-marka"
 
 #: editor_drag.cc:3652
 msgid "stretch tempo"
-msgstr ""
+msgstr "luzatu tempoa"
 
 #: editor_drag.cc:3801
 msgid "twist tempo"
-msgstr ""
+msgstr "biratu tempoa"
 
 #: editor_drag.cc:3909
 msgid "stretch end tempo"
-msgstr ""
+msgstr "luzatu tempoa bukaeratik"
 
 #: editor_drag.cc:4230
 msgid "change fade in length"
-msgstr ""
+msgstr "aldatu sarrera-lausotzearen luzeera"
 
 #: editor_drag.cc:4357
 msgid "change fade out length"
-msgstr ""
+msgstr "aldatu irteera-lausotzearen luzeera"
 
 #: editor_drag.cc:4747
 msgid "move marker"
-msgstr ""
+msgstr "mugitu marka"
 
 #: editor_drag.cc:5012 editor_drag.cc:6414
 msgid "automation range move"
-msgstr ""
+msgstr "automatizazio-barrutia mugitzea"
 
 #: editor_drag.cc:5396
 msgid "An error occurred while executing time stretch operation"
-msgstr ""
+msgstr "Errorea gertatu da denbora-luzatzea burutzean"
 
 #: editor_drag.cc:5898
 msgid "programming_error: %1"
-msgstr ""
+msgstr "programazio_akatsa: %1"
 
 #: editor_drag.cc:5967 editor_drag.cc:5977
 msgid "new skip marker"
-msgstr ""
+msgstr "salto-marka berria"
 
 #: editor_drag.cc:5968
 msgid "skip"
-msgstr ""
+msgstr "salto egin"
 
 #: editor_drag.cc:5972 location_ui.cc:67
 msgid "CD"
-msgstr ""
+msgstr "CD"
 
 #: editor_drag.cc:5973
 msgid "new CD marker"
-msgstr ""
+msgstr "CD-marka berria"
 
 #: editor_drag.cc:5978 editor_route_groups.cc:441 mixer_ui.cc:2250
 msgid "unnamed"
-msgstr ""
+msgstr "izengabea"
 
 #: editor_drag.cc:6313
 msgid "Automation range drag created for invalid region type"
-msgstr ""
+msgstr "Eskualde baliogaberako sortutako automatizazio-barrutiko arrastea"
 
 #: editor_drag.cc:6827
 msgid "Create Note"
-msgstr ""
+msgstr "Sortu nota"
 
 #: editor_drag.cc:6882
 msgid "Create Hit"
-msgstr ""
+msgstr "Sortu kolpea"
 
 #: editor_route_groups.cc:102
 msgid "Col"
-msgstr ""
+msgstr "Zut"
 
 #: editor_route_groups.cc:102
 msgid "Group Tab Color"
-msgstr ""
+msgstr "Taldearen kolorea"
 
 #: editor_route_groups.cc:103
 msgid "Name of Group"
-msgstr ""
+msgstr "Taldearen izena"
 
 #: editor_route_groups.cc:104 editor_routes.cc:248
 msgid "Visible|V"
@@ -5653,79 +5671,79 @@ msgstr ""
 
 #: editor_route_groups.cc:104
 msgid "Group is visible?"
-msgstr ""
+msgstr "Taldea ikusgai?"
 
 #: editor_route_groups.cc:105
 msgid "On"
-msgstr ""
+msgstr "Piztuta"
 
 #: editor_route_groups.cc:105
 msgid "Group is enabled?"
-msgstr ""
+msgstr "Taldea aktibatuta?"
 
 #: editor_route_groups.cc:106
 msgid "Group|G"
-msgstr ""
+msgstr "T"
 
 #: editor_route_groups.cc:106
 msgid "Sharing Gain?"
-msgstr ""
+msgstr "Irabazia partekatzea?"
 
 #: editor_route_groups.cc:107
 msgid "Relative|Rel"
-msgstr ""
+msgstr "Erl"
 
 #: editor_route_groups.cc:107
 msgid "Relative Gain Changes?"
-msgstr ""
+msgstr "Irabazi-aldaketa erlatiboak?"
 
 #: editor_route_groups.cc:108 editor_regions.cc:181 editor_routes.cc:253
 #: mixer_strip.cc:2280 meter_strip.cc:372 route_time_axis.cc:2552
 #: time_axis_view.cc:1164 vca_time_axis.cc:64
 msgid "Mute|M"
-msgstr ""
+msgstr "M"
 
 #: editor_route_groups.cc:108
 msgid "Sharing Mute?"
-msgstr ""
+msgstr "Mututzea partekatzea?"
 
 #: editor_route_groups.cc:109 editor_routes.cc:254 mixer_strip.cc:2293
 #: meter_strip.cc:380 route_time_axis.cc:2549 vca_master_strip.cc:226
 #: vca_time_axis.cc:282
 msgid "Solo|S"
-msgstr ""
+msgstr "S"
 
 #: editor_route_groups.cc:109
 msgid "Sharing Solo?"
-msgstr ""
+msgstr "Soloa partekatzea?"
 
 #: editor_route_groups.cc:110
 msgid "Sharing Record-enable Status?"
-msgstr ""
+msgstr "Grabazio-gaitzea partekatzea?"
 
 #: editor_route_groups.cc:111
 msgid "Monitoring|Mon"
-msgstr ""
+msgstr "Mon"
 
 #: editor_route_groups.cc:111
 msgid "Sharing Monitoring Choice?"
-msgstr ""
+msgstr "Monitorizazio-aukera partekatzea?"
 
 #: editor_route_groups.cc:112
 msgid "Selection|Sel"
-msgstr ""
+msgstr "Hautap"
 
 #: editor_route_groups.cc:112
 msgid "Sharing Selected/Editing Status?"
-msgstr ""
+msgstr "Hautatze/Edizio egoera partekatzea?"
 
 #: editor_route_groups.cc:113 editor_routes.cc:249
 msgid "Active|A"
-msgstr ""
+msgstr "A"
 
 #: editor_route_groups.cc:113
 msgid "Sharing Active Status?"
-msgstr ""
+msgstr "Aktibo egotea partekatzea?"
 
 #: editor_export_audio.cc:97 editor_markers.cc:748 editor_markers.cc:845
 #: editor_markers.cc:1080 editor_markers.cc:1098 editor_markers.cc:1116
@@ -5736,193 +5754,195 @@ msgstr ""
 #: editor_markers.cc:1785 editor_mouse.cc:2431
 msgid "programming error: marker canvas item has no marker object pointer!"
 msgstr ""
+"programazio-akatsa: oihal-marka elementuak ez du objektu-markaren "
+"erakuslerik!"
 
 #: editor_export_audio.cc:118
 msgid "Confirm MIDI File Overwrite"
-msgstr ""
+msgstr "Berretsi MIDI fitxategia gainidaztea"
 
 #: editor_export_audio.cc:119 utils_videotl.cc:84
 msgid "A file with the same name already exists. Do you want to overwrite it?"
-msgstr ""
+msgstr "Jada badago izen bereko fitxategi bat. Gainidatzi egin nahi duzu?"
 
 #: editor_group_tabs.cc:184
 msgid "Fit to Window"
-msgstr ""
+msgstr "Doitu leihora"
 
 #: editor_markers.cc:148 mini_timeline.cc:578
 msgid "start"
-msgstr ""
+msgstr "hasiera"
 
 #: editor_markers.cc:149 mini_timeline.cc:579
 msgid "end"
-msgstr ""
+msgstr "amaiera"
 
 #: editor_markers.cc:660
 msgid "mark"
-msgstr ""
+msgstr "marka"
 
 #: editor_markers.cc:665 editor_ops.cc:2232 editor_ops.cc:2254
 #: editor_ops.cc:2391 editor_ops.cc:2428 location_ui.cc:1071
 msgid "add marker"
-msgstr ""
+msgstr "gehitu marka"
 
 #: editor_markers.cc:697 editor_markers.cc:1665
 msgid "set loop range"
-msgstr ""
+msgstr "ezarri loop-barrutia"
 
 #: editor_markers.cc:713 editor_markers.cc:1671
 msgid "set punch range"
-msgstr ""
+msgstr "ezarri grabatze-tartea"
 
 #: editor_markers.cc:730 editor_ops.cc:4275
 msgid "range"
-msgstr ""
+msgstr "barrutia"
 
 #: editor_markers.cc:733
 msgid "new range marker"
-msgstr ""
+msgstr "barruti-marka berria"
 
 #: editor_markers.cc:766 editor_ops.cc:2352 location_ui.cc:907
 msgid "remove marker"
-msgstr ""
+msgstr "ezabatu marka"
 
 #: editor_markers.cc:909
 msgid "Locate to Here"
-msgstr ""
+msgstr "Kokatu hemen"
 
 #: editor_markers.cc:910
 msgid "Play from Here"
-msgstr ""
+msgstr "Erreproduzitu hemendik"
 
 #: editor_markers.cc:911
 msgid "Move Mark to Playhead"
-msgstr ""
+msgstr "Mugitu marka denbora-barrara"
 
 #: editor_markers.cc:915
 msgid "Create Range to Next Marker"
-msgstr ""
+msgstr "Sortu barrutia hurrengo markaraino"
 
 #: editor_markers.cc:917 editor_markers.cc:973
 msgid "Promote to Time Origin"
-msgstr ""
+msgstr "Bultzatu denboraren jatorrira"
 
 #: editor_markers.cc:953
 msgid "Locate to Marker"
-msgstr ""
+msgstr "Kokatu markan"
 
 #: editor_markers.cc:954
 msgid "Play from Marker"
-msgstr ""
+msgstr "Erreproduzitu markatik"
 
 #: editor_markers.cc:957
 msgid "Set Marker from Playhead"
-msgstr ""
+msgstr "Ezarri marka denbora-barran"
 
 #: editor_markers.cc:958
 msgid "Set Range from Selection"
-msgstr ""
+msgstr "Ezarri barrutia hautapenean"
 
 #: editor_markers.cc:975
 msgid "Hide Range"
-msgstr ""
+msgstr "Ezkutatu barrutia"
 
 #: editor_markers.cc:976
 msgid "Rename Range..."
-msgstr ""
+msgstr "Berrizendatu barrutia..."
 
 #: editor_markers.cc:980
 msgid "Remove Range"
-msgstr ""
+msgstr "Ezabatu barrutia"
 
 #: editor_markers.cc:987
 msgid "Separate Regions in Range"
-msgstr ""
+msgstr "Banandu eremuak barrutian"
 
 #: editor_markers.cc:989
 msgid "Select Range"
-msgstr ""
+msgstr "Hautatu barrutia"
 
 #: editor_markers.cc:1005
 msgid "Don't Continue"
-msgstr ""
+msgstr "Ez jarraitu"
 
 #: editor_markers.cc:1007 utils_videotl.cc:71
 msgid "Continue"
-msgstr ""
+msgstr "Jarraitu"
 
 #: editor_markers.cc:1012
 msgid "Set Constant"
-msgstr ""
+msgstr "Ezarri konstantea"
 
 #: editor_markers.cc:1017
 msgid "Ramp to Next"
-msgstr ""
+msgstr "Arrapala hurrengora"
 
 #: editor_markers.cc:1022 editor_markers.cc:1047
 msgid "Lock to Music"
-msgstr ""
+msgstr "Lotu musikara"
 
 #: editor_markers.cc:1025 editor_markers.cc:1049
 msgid "Lock to Audio"
-msgstr ""
+msgstr "Lotu audiora"
 
 #: editor_markers.cc:1069
 msgid "Set Punch Range"
-msgstr ""
+msgstr "Ezarri grabazio-tartea"
 
 #: editor_markers.cc:1357
 msgid "loop range from marker"
-msgstr ""
+msgstr "loop-barrutia markatik"
 
 #: editor_markers.cc:1442
 msgid "change meter lock style"
-msgstr ""
+msgstr "aldatu metrikaren blokeo modua"
 
 #: editor_markers.cc:1463
 msgid "change tempo lock style"
-msgstr ""
+msgstr "aldatu tempoaren blokeo modua"
 
 #: editor_markers.cc:1489
 msgid "set tempo to constant"
-msgstr ""
+msgstr "ezarri tempoa konstantera"
 
 #: editor_markers.cc:1508
 msgid "Clamp Tempo"
-msgstr ""
+msgstr "Lotu tempoa"
 
 #: editor_markers.cc:1545
 msgid "ramp to next tempo"
-msgstr ""
+msgstr "arrapala hurrengo tempora"
 
 #: editor_markers.cc:1616 editor_ops.cc:2180
 msgid "New Name:"
-msgstr ""
+msgstr "Izen berria:"
 
 #: editor_markers.cc:1619
 msgid "Rename Mark"
-msgstr ""
+msgstr "Berrizendatu marka"
 
 #: editor_markers.cc:1621
 msgid "Rename Range"
-msgstr ""
+msgstr "Berrizendatu barrutia"
 
 #: editor_markers.cc:1628 editor_mouse.cc:2448 processor_box.cc:3330
 #: processor_box.cc:3846 route_time_axis.cc:1088 route_ui.cc:1715
 #: template_dialog.cc:223 vca_master_strip.cc:463
 msgid "Rename"
-msgstr ""
+msgstr "Berrizendatu"
 
 #: editor_markers.cc:1641
 msgid "rename marker"
-msgstr ""
+msgstr "berrizendatu marka"
 
 #: editor_markers.cc:1798
 msgid "change marker lock style"
-msgstr ""
+msgstr "aldatu markaren blokeo modua"
 
 #: editor_mixer.cc:105
 msgid "This screen is not tall enough to display the editor mixer"
-msgstr ""
+msgstr "Pantaila hau ez da editorean nahasgailua erakusteko bezain altua"
 
 #: editor_mouse.cc:235 rc_option_editor.cc:2486 rc_option_editor.cc:2488
 #: rc_option_editor.cc:2498 rc_option_editor.cc:2506 rc_option_editor.cc:2514
@@ -5930,216 +5950,224 @@ msgstr ""
 #: rc_option_editor.cc:2541 rc_option_editor.cc:2549 rc_option_editor.cc:2557
 #: rc_option_editor.cc:2565
 msgid "Editor/Snap"
-msgstr ""
+msgstr "Editorea/Doitzea"
 
 #: editor_mouse.cc:1466 editor_mouse.cc:1484 editor_tempodisplay.cc:476
 msgid ""
 "programming error: tempo marker canvas item has no marker object pointer!"
 msgstr ""
+"programazio-akatsa: tempoaren oihal-marka elementuak ez du objektu-markaren "
+"erakuslerik!"
 
 #: editor_mouse.cc:1471 editor_tempodisplay.cc:481
 msgid "programming error: marker for tempo is not a tempo marker!"
-msgstr ""
+msgstr "programazio-akatsa: tempoarentzako marka ez da tempo-marka!"
 
 #: editor_mouse.cc:1489 editor_tempodisplay.cc:597
 msgid "programming error: marker for meter is not a meter marker!"
-msgstr ""
+msgstr "programazio-akatsa: metrikarentzako marka ez da metrika-marka!"
 
 #: editor_mouse.cc:2192 editor_mouse.cc:2217 editor_mouse.cc:2230
 msgid ""
 "programming error: control point canvas item has no control point object "
 "pointer!"
 msgstr ""
+"programazio-akatsa: kontrol-puntuaren oihal-elementuak ez du kontrol-"
+"puntuaren erakuslerik!"
 
 #: editor_mouse.cc:2369
 msgid "start point trim"
-msgstr ""
+msgstr "mozteko hasiera-puntua"
 
 #: editor_mouse.cc:2394
 msgid "end point trim"
-msgstr ""
+msgstr "mozteko amaiera-puntua"
 
 #: editor_mouse.cc:2446
 msgid "Name for region:"
-msgstr ""
+msgstr "Eremuaren izena:"
 
 #: editor_ops.cc:208
 msgid "split"
-msgstr ""
+msgstr "banandu"
 
 #: editor_ops.cc:365
 msgid "alter selection"
-msgstr ""
+msgstr "aldatu hautapena"
 
 #: editor_ops.cc:407
 msgid "nudge regions forward"
-msgstr ""
+msgstr "eraman eremuak eskuinera"
 
 #: editor_ops.cc:465 editor_ops.cc:559
 msgid "nudge location forward"
-msgstr ""
+msgstr "eraman kokalekua eskuinera"
 
 #: editor_ops.cc:496
 msgid "nudge regions backward"
-msgstr ""
+msgstr "eraman eremuak ezkerrera"
 
 #: editor_ops.cc:591
 msgid "nudge forward"
-msgstr ""
+msgstr "eraman eskuinera"
 
 #: editor_ops.cc:615
 msgid "nudge backward"
-msgstr ""
+msgstr "eraman ezkerrera"
 
 #: editor_ops.cc:680
 msgid "sequence regions"
-msgstr ""
+msgstr "sekuentziatu eremuak"
 
 #: editor_ops.cc:2183 location_ui.cc:770
 msgid "New Range"
-msgstr ""
+msgstr "Barruti berria"
 
 #: editor_ops.cc:2185
 msgid "New Location Marker"
-msgstr ""
+msgstr "Kokapen-marka berria"
 
 #: editor_ops.cc:2280 editor_ops.cc:2306
 msgid "Set session start"
-msgstr ""
+msgstr "Zehaztu saio-hasiera"
 
 #: editor_ops.cc:2391
 msgid "add markers"
-msgstr ""
+msgstr "gehitu markak"
 
 #: editor_ops.cc:2495
 msgid "clear markers"
-msgstr ""
+msgstr "ezabatu markak"
 
 #: editor_ops.cc:2510
 msgid "clear ranges"
-msgstr ""
+msgstr "ezabatu barrutiak"
 
 #: editor_ops.cc:2526
 msgid "clear locations"
-msgstr ""
+msgstr "ezabatu kokalekuak"
 
 #: editor_ops.cc:2589
 msgid "insert region"
-msgstr ""
+msgstr "txertatu eremua"
 
 #: editor_ops.cc:2801
 msgid "raise regions"
-msgstr ""
+msgstr "igo eremuak"
 
 #: editor_ops.cc:2803
 msgid "raise region"
-msgstr ""
+msgstr "igo eremua"
 
 #: editor_ops.cc:2809
 msgid "raise regions to top"
-msgstr ""
+msgstr "igo eremuak goraino"
 
 #: editor_ops.cc:2811
 msgid "raise region to top"
-msgstr ""
+msgstr "igo eremua goraino"
 
 #: editor_ops.cc:2817
 msgid "lower regions"
-msgstr ""
+msgstr "jaitsi eremuak"
 
 #: editor_ops.cc:2819 editor_ops.cc:2827
 msgid "lower region"
-msgstr ""
+msgstr "jaitsi eremua"
 
 #: editor_ops.cc:2825
 msgid "lower regions to bottom"
-msgstr ""
+msgstr "jaitsi eremuak beheraino"
 
 #: editor_ops.cc:2910
 msgid "Rename Region"
-msgstr ""
+msgstr "Berrizendatu eremua"
 
 #: editor_ops.cc:2912 processor_box.cc:3328 route_ui.cc:1713
 msgid "New name:"
-msgstr ""
+msgstr "Izen berria:"
 
 #: editor_ops.cc:2948
 msgid "Rename failed. Check for characters such as '/' or ':'"
 msgstr ""
+"Berrizendatzeak huts egin du. Begiratu \"/\" edo \":\" bezalako hizkiak "
+"dauden"
 
 #: editor_ops.cc:3208
 msgid "separate"
-msgstr ""
+msgstr "banandu"
 
 #: editor_ops.cc:3328
 msgid "separate region under"
-msgstr ""
+msgstr "banandu azpiko eremuak"
 
 #: editor_ops.cc:3395
 msgid "Crop Regions to Time Selection"
-msgstr ""
+msgstr "Moztu eremuak denbora-hautapenera"
 
 #: editor_ops.cc:3406
 msgid "Crop Regions to Edit Range"
-msgstr ""
+msgstr "Moztu eremuak edizio-barrutira"
 
 #: editor_ops.cc:3560
 msgid "set sync point"
-msgstr ""
+msgstr "zehaztu sinkronizazio-puntua"
 
 #: editor_ops.cc:3584
 msgid "remove region sync"
-msgstr ""
+msgstr "ezabatu eremuko sinkronizazioa"
 
 #: editor_ops.cc:3606
 msgid "move regions to original position"
-msgstr ""
+msgstr "mugitu eremuak hasierako kokalekura"
 
 #: editor_ops.cc:3608
 msgid "move region to original position"
-msgstr ""
+msgstr "mugitu eremua hasierako kokalekura"
 
 #: editor_ops.cc:3629
 msgid "align selection"
-msgstr ""
+msgstr "lerrokatu hautapena"
 
 #: editor_ops.cc:3703
 msgid "align selection (relative)"
-msgstr ""
+msgstr "lerrokatu hautapena (erlatiboa)"
 
 #: editor_ops.cc:3737
 msgid "align region"
-msgstr ""
+msgstr "lerrokatu eremua"
 
 #: editor_ops.cc:3788
 msgid "trim front"
-msgstr ""
+msgstr "moztu hasiera"
 
 #: editor_ops.cc:3788
 msgid "trim back"
-msgstr ""
+msgstr "moztu amaiera"
 
 #: editor_ops.cc:3816
 msgid "trim to loop"
-msgstr ""
+msgstr "moztu loop-era"
 
 #: editor_ops.cc:3826
 msgid "trim to punch"
-msgstr ""
+msgstr "moztu grabazio-tartera"
 
 #: editor_ops.cc:3935
 msgid "trim to region"
-msgstr ""
+msgstr "moztu eremura"
 
 #: editor_ops.cc:3991
 msgid ""
 "Transport cannot be stopped, likely due to external timecode sync.\n"
 "Freezing a track requires the transport to be stopped."
 msgstr ""
+"Garraioa ezin da gelditu, seguru aski kanpoko sinkronizazioa dela eta.\n"
+"Pista bat izozteko garraioa gelditu behar da."
 
 #: editor_ops.cc:3994 editor_ops.cc:4009
 msgid "Cannot freeze"
-msgstr ""
+msgstr "Ezin da izoztu"
 
 #: editor_ops.cc:4006
 msgid ""
@@ -6148,8 +6176,14 @@ msgid ""
 "This is typically caused by plugins that generate stereo output from mono "
 "input or vice versa."
 msgstr ""
+"Pista/Bus hau ezin da izoztu, irteerara iritsi aurretik, seinaleak kanalak "
+"gehitu edo galtzen dituelako.\n"
+"Hau mono-estereo, edo alderantzizko, eraldaketa egiten duten pluginek eragin "
+"ohi dute."
 
+# Insert = intserto/txertaketa/txertatze... ???
 #: editor_ops.cc:4015
+#, fuzzy
 msgid ""
 "<b>%1</b>\n"
 "\n"
@@ -6159,22 +6193,28 @@ msgid ""
 "Freezing will only process the signal as far as the first send/insert/return/"
 "sidechain."
 msgstr ""
+"<b>%1</b>\n"
+"Pista honek gutxienez bidalketa/intserto/itzulera/sidechain bat dauka bere "
+"seinale-fluxuan.\n"
+"\n"
+"Izozteak lehen bidalketa/intserto/itzulera/sidechain-erarte soilik "
+"prozesatuko du seinalea."
 
 #: editor_ops.cc:4019
 msgid "Freeze anyway"
-msgstr ""
+msgstr "Izoztu dena den"
 
 #: editor_ops.cc:4020
 msgid "Don't freeze"
-msgstr ""
+msgstr "Ez izoztu"
 
 #: editor_ops.cc:4021
 msgid "Freeze Limits"
-msgstr ""
+msgstr "Izozte-mugak"
 
 #: editor_ops.cc:4036
 msgid "Cancel Freeze"
-msgstr ""
+msgstr "Utzi izoztea"
 
 #: editor_ops.cc:4067
 msgid ""
