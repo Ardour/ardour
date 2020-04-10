@@ -389,9 +389,12 @@ WebsocketsServer::send_index_body (Client wsi)
 	std::string index = _resources.scan ();
 
 	char body[MAX_INDEX_SIZE];
-	//lws_strncpy (body, index.c_str (), sizeof(body));
+#if LWS_LIBRARY_VERSION_MAJOR >= 3
+	lws_strncpy (body, index.c_str (), sizeof(body));
+#else
 	memset (body, 0, sizeof (body));
 	strncpy (body, index.c_str (), sizeof(body) - 1);
+#endif
 	int len = strlen (body);
 
 	if (lws_write (wsi, reinterpret_cast<unsigned char*> (body), len, LWS_WRITE_HTTP) != len) {
