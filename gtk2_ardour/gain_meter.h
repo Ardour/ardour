@@ -208,6 +208,9 @@ private:
 
 	bool level_meter_button_press (GdkEventButton *);
 	PBD::ScopedConnection _level_meter_connection;
+
+	bool _clear_meters;
+	bool _meter_peaked;
 };
 
 class GainMeter : public GainMeterBase, public Gtk::VBox

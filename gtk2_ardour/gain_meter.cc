@@ -106,6 +106,8 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	, meter_point_button (_("pre"))
 	, gain_astate_propagate (false)
 	, _data_type (DataType::AUDIO)
+	, _clear_meters (true)
+	, _meter_peaked (false)
 {
 	using namespace Menu_Helpers;
 
@@ -456,10 +458,7 @@ GainMeterBase::reset_peak_display ()
 		return;
 	}
 	_meter->reset_max();
-	level_meter->clear_meters();
-	max_peak = minus_infinity ();
-	peak_display.set_text (_("-inf"));
-	peak_display.set_name ("MixerStripPeakDisplay");
+	_clear_meters = true;
 }
 
 void
@@ -842,7 +841,15 @@ GainMeterBase::meter_channels() const
 void
 GainMeterBase::update_meters()
 {
-	char buf[32];
+	if (_clear_meters) {
+		max_peak = minus_infinity ();
+		level_meter->clear_meters ();
+		peak_display.set_text (_("-inf"));
+		peak_display.set_name ("MixerStripPeakDisplay");
+		_meter_peaked = false;
+		_clear_meters = false;
+	}
+
 	float mpeak = level_meter->update_meters();
 
 	if (mpeak > max_peak) {
@@ -850,12 +857,17 @@ GainMeterBase::update_meters()
 		if (mpeak <= -200.0f) {
 			peak_display.set_text (_("-inf"));
 		} else {
+			char buf[32];
 			snprintf (buf, sizeof(buf), "%.1f", mpeak);
 			peak_display.set_text (buf);
 		}
 	}
-	if (mpeak >= UIConfiguration::instance().get_meter_peak()) {
-		peak_display.set_name ("MixerStripPeakDisplayPeak");
+
+	bool peaking = mpeak >= UIConfiguration::instance().get_meter_peak();
+
+	if (!_meter_peaked && peaking) {
+			peak_display.set_name ("MixerStripPeakDisplayPeak");
+			_meter_peaked = true;
 	}
 }
 
