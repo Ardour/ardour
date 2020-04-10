@@ -77,17 +77,56 @@ PolyItem::render_path (Rect const & /* area */, Cairo::RefPtr<Cairo::Context> co
 	}
 
 	Points::const_iterator i = _points.begin();
-	Duple c (item_to_window (Duple (i->x, i->y)));
+	Duple c0 (item_to_window (Duple (i->x, i->y)));
 	const double pixel_adjust = (_outline_width == 1.0 ? 0.5 : 0.0);
 
-	context->move_to (c.x + pixel_adjust, c.y + pixel_adjust);
 	++i;
 
+	while (c0.x < -1.) {
+		Duple c1 (item_to_window (Duple (i->x, i->y)));
+		if (interpolate_line(c0, c1, -1)) {
+			break;
+		}
+		if (++i == _points.end()) {
+			c1.x = 0;
+			context->move_to (c1.x + pixel_adjust, c1.y + pixel_adjust);
+			_left = _right = c1;
+			return;
+		}
+		c0 = c1;
+	}
+
+	context->move_to (c0.x + pixel_adjust, c0.y + pixel_adjust);
+	_left = c0;
+
 	while (i != _points.end()) {
-		c = item_to_window (Duple (i->x, i->y));
+		Duple c = item_to_window (Duple (i->x, i->y));
+		if (c.x > 16383) {
+			if (interpolate_line (c0, c, 16383)) {
+				context->line_to (c0.x + pixel_adjust, c0.y + pixel_adjust);
+			}
+			break;
+		}
 		context->line_to (c.x + pixel_adjust, c.y + pixel_adjust);
+		c0 = c;
 		++i;
 	}
+	_right = c0;
+}
+
+bool
+PolyItem::interpolate_line (Duple& c0, Duple const& c1, Coord const x)
+{
+	if (c1.x <= c0.x) {
+		return false;
+	}
+	if (x < c0.x || x > c1.x) {
+		return false;
+	}
+
+	c0.y += ((x - c0.x) / (c1.x - c0.x)) * (c1.y - c0.y);
+	c0.x = x;
+	return true;
 }
 
 void

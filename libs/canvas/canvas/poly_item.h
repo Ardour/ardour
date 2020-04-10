@@ -45,6 +45,16 @@ protected:
 	void render_curve (Rect const&, Cairo::RefPtr<Cairo::Context>, Points const&, Points const&) const;
 
 	Points _points;
+
+	/* these return screen-cordidates of the most recent render_path() */
+	Duple const& leftedge () const { return _left; }
+	Duple const& rightedge () const { return _right; }
+
+private:
+	static bool interpolate_line (Duple&, Duple const&, Coord const);
+
+	mutable Duple _left;
+	mutable Duple _right;
 };
 
 }
