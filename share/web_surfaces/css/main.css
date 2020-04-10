@@ -35,6 +35,21 @@ a:focus, a:hover {
 	text-decoration: underline;
 }
 
+h1, h2 {
+	font-weight: normal;
+}
+
+h1 {
+	font-size: 1.8em;
+	margin: 0 0 2ex 0;
+	padding-bottom: .8ex;
+}
+
+h2 {
+	font-size: 1.3em;
+	margin: 2ex 0 1ex 0;
+}
+
 #top-bar {
 	background: #212a30;
 	padding: 4px;
@@ -49,20 +64,7 @@ a:focus, a:hover {
 	padding: 24px;
 }
 
-#content h1, #content h2 {
-	font-weight: normal;
-}
-
-#content h1 {
-	font-size: 1.8em;
-	margin: 0 0 2ex 0;
-	padding-bottom: .8ex;
-	/*border-bottom: 2px solid #ccc;*/
-}
-
-#content h2 {
-	font-size: 1.3em;
-	margin: 2ex 0 1ex 0;
+#index h2 {
 	border-bottom: 2px solid #ddd;
 }
 
