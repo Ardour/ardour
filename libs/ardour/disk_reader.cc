@@ -1720,8 +1720,7 @@ DiskReader::maybe_xfade_loop (Sample* buf, samplepos_t read_start, samplepos_t r
 	 * see also DiskReader::Declicker::run()
 	 */
 
-	cerr << "maybe_xfade, overlap style: " << enum_2_string (Evoral::coverage (fade_start, fade_end, read_start, read_end)) << endl;
-
+	cout << "maybe_xfade, overlap style: " << enum_2_string (Evoral::coverage (fade_start, fade_end, read_start, read_end)) << endl;
 
 	switch (Evoral::coverage (fade_start, fade_end, read_start, read_end)) {
 		case Evoral::OverlapInternal:
@@ -1774,7 +1773,7 @@ DiskReader::maybe_xfade_loop (Sample* buf, samplepos_t read_start, samplepos_t r
 			return;
 	}
 
-	cerr << "maybe xfade, bo = " << bo << " vo " << vo << " n " << n << endl;
+	cout << "maybe xfade, bo = " << bo << " vo " << vo << " n " << n << endl;
 
 	Sample* b    = &buf[bo];                   /* data to be faded out */
 	Sample* sbuf = &chan->pre_loop_buffer[vo]; /* pre-loop (maybe silence) to be faded in */
