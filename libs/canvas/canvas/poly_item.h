@@ -42,7 +42,6 @@ public:
 
 protected:
 	void render_path (Rect const&, Cairo::RefPtr<Cairo::Context>) const;
-	void render_curve (Rect const&, Cairo::RefPtr<Cairo::Context>, Points const&, Points const&) const;
 
 	Points _points;
 

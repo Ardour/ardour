@@ -130,43 +130,6 @@ PolyItem::interpolate_line (Duple& c0, Duple const& c1, Coord const x)
 }
 
 void
-PolyItem::render_curve (Rect const & area, Cairo::RefPtr<Cairo::Context> context, Points const & first_control_points, Points const & second_control_points) const
-{
-	if (_points.size() <= 2) {
-		render_path (area, context);
-		return;
-	}
-
-	Points::const_iterator cp1 = first_control_points.begin();
-	Points::const_iterator cp2 = second_control_points.begin();
-	Points::const_iterator p = _points.begin();
-	const double pixel_adjust = (_outline_width == 1.0 ? 0.5 : 0.0);
-
-	Duple c = item_to_window (Duple (p->x, p->y));
-	context->move_to (c.x + pixel_adjust, c.y + pixel_adjust);
-	++p;
-
-	while (p != _points.end()) {
-
-		Duple c1 = item_to_window (Duple (cp1->x, cp1->y));
-		Duple c2 = item_to_window (Duple (cp2->x, cp2->y));
-
-		c = item_to_window (Duple (p->x, p->y));
-
-		context->curve_to (c1.x + pixel_adjust,
-				   c1.y + pixel_adjust,
-				   c2.x + pixel_adjust,
-				   c2.y + pixel_adjust,
-				   c.x + pixel_adjust,
-				   c.y + pixel_adjust);
-
-		++cp1;
-		++cp2;
-		++p;
-	}
-}
-
-void
 PolyItem::set (Points const & points)
 {
 	if (_points != points) {
