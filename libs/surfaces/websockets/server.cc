@@ -397,6 +397,7 @@ WebsocketsServer::send_index_body (Client wsi)
 #endif
 	int len = strlen (body);
 
+	/* lws_write() expects a writable buffer */
 	if (lws_write (wsi, reinterpret_cast<unsigned char*> (body), len, LWS_WRITE_HTTP) != len) {
 		return 1;
 	}
