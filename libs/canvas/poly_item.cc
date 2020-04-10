@@ -67,7 +67,7 @@ PolyItem::compute_bounding_box () const
 }
 
 void
-PolyItem::render_path (Rect const& /* area */, Cairo::RefPtr<Cairo::Context> context) const
+PolyItem::render_path (Rect const& area, Cairo::RefPtr<Cairo::Context> context) const
 {
 	if (_points.size () < 2) {
 		return;
@@ -99,8 +99,8 @@ PolyItem::render_path (Rect const& /* area */, Cairo::RefPtr<Cairo::Context> con
 
 	while (i != _points.end ()) {
 		Duple c = item_to_window (Duple (i->x, i->y));
-		if (c.x > 16383) {
-			if (interpolate_line (c0, c, 16383)) {
+		if (c.x > area.x1) {
+			if (interpolate_line (c0, c, area.x1)) {
 				context->line_to (c0.x + pixel_adjust, c0.y + pixel_adjust);
 			}
 			break;
