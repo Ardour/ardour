@@ -356,6 +356,11 @@ PeakMeter::set_max_channels (const ChanCount& chn)
 float
 PeakMeter::meter_level (uint32_t n, MeterType type)
 {
+	if (g_atomic_int_get (&_reset_max)) {
+		/* max-peak implies DPM reset */
+		return minus_infinity ();
+	}
+
 	float mcptmp;
 	switch (type) {
 		case MeterKrms:
