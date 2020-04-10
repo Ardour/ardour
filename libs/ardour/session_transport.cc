@@ -1568,11 +1568,6 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC with speed = %1\n", _transport_speed));
 	TransportStateChange (); /* EMIT SIGNAL */
 	AutomationWatch::instance().transport_stop_automation_watches (_transport_sample);
-
-	if (_exporting && !_realtime_export) {
-		ptw = PostTransportWork (ptw & ~(PostTransportStop));
-		set_post_transport_work (ptw);
-	}
 }
 
 void
