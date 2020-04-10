@@ -145,7 +145,7 @@ Session::start_audio_export (samplepos_t position, bool realtime, bool region_ex
 		_butler->schedule_transport_work ();
 	} while (0 != post_transport_work () && --timeout > 0);
 
-	if (timeout != 0) {
+	if (timeout == 0) {
 		error << _("Cannot prepare transport for export") << endmsg;
 		return -1;
 	}
