@@ -1752,7 +1752,7 @@ DiskReader::maybe_xfade_loop (Sample* buf, samplepos_t read_start, samplepos_t r
 
 		case Evoral::OverlapStart:
 			/* read range starts before and ends within fade or at same end as fade */
-			n  = fade_end - read_start;
+			n  = read_end - fade_start;
 			vo = 0;
 			bo = fade_start - read_start;
 			break;
