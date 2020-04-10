@@ -61,19 +61,25 @@ AlsaAudioSlave::AlsaAudioSlave (
 	_ratio = (double) master_rate / (double) _pcmi.fsamp();
 
 #ifndef NDEBUG
-	fprintf (stdout, " --[[ ALSA Slave %s/%s ratio: %.4f\n", play_name, capt_name, _ratio);
+	fprintf (stdout, " --[[ ALSA Slave %s/%s ratio: %.4f\n",
+			capt_name ? capt_name : "-",
+			play_name ? play_name : "-",
+			_ratio);
 	_pcmi.printinfo ();
 	fprintf (stdout, " --]]\n");
 #endif
 
-	_src_capt.setup (_ratio, _pcmi.ncapt (), /*quality*/ 32); // save capture to master
-	_src_play.setup (1.0 / _ratio, _pcmi.nplay (), /*quality*/ 32); // master to slave play
+	if (_pcmi.ncapt () > 0) {
+		_src_capt.setup (_ratio, _pcmi.ncapt (), /*quality*/ 32); // save capture to master
+		_src_capt.set_rrfilt (100);
+		_capt_buff = (float*) malloc (sizeof(float) * _pcmi.ncapt () * _samples_per_period);
+	}
+	if (_pcmi.nplay () > 0) {
+		_src_play.setup (1.0 / _ratio, _pcmi.nplay (), /*quality*/ 32); // master to slave play
+		_src_play.set_rrfilt (100);
+		_play_buff = (float*) malloc (sizeof(float) * _pcmi.nplay () * _samples_per_period);
+	}
 
-	_src_capt.set_rrfilt (100);
-	_src_play.set_rrfilt (100);
-
-	_capt_buff = (float*) malloc (sizeof(float) * _pcmi.ncapt () * _samples_per_period);
-	_play_buff = (float*) malloc (sizeof(float) * _pcmi.nplay () * _samples_per_period);
 	_src_buff  = (float*) malloc (sizeof(float) * std::max (_pcmi.nplay (), _pcmi.ncapt ()));
 }
 
@@ -357,7 +363,9 @@ AlsaAudioSlave::cycle_start (double tme, double mst_speed, bool drain)
 	_src_capt.set_rratio (mst_speed / slave_speed);
 	_src_play.set_rratio (slave_speed / mst_speed);
 
-	memset (_capt_buff, 0, sizeof(float) * _pcmi.ncapt () * _samples_per_period);
+	if (_capt_buff) {
+		memset (_capt_buff, 0, sizeof(float) * _pcmi.ncapt () * _samples_per_period);
+	}
 
 	if (drain) {
 		g_atomic_int_set(&_draining, 1);
@@ -384,7 +392,7 @@ AlsaAudioSlave::cycle_start (double tme, double mst_speed, bool drain)
 	}
 
 	bool underflow = false;
-	while (_src_capt.out_count && _active) {
+	while (_src_capt.out_count && _active && nchn > 0) {
 		if (_rb_capture.read_space() < nchn) {
 			underflow = true;
 			break;
@@ -411,11 +419,13 @@ AlsaAudioSlave::cycle_start (double tme, double mst_speed, bool drain)
 		g_atomic_int_set(&_draining, 1);
 	}
 
-	if (!_active || underflow) {
+	if ((!_active || underflow) && _capt_buff) {
 		memset (_capt_buff, 0, sizeof(float) * _pcmi.ncapt () * _samples_per_period);
 	}
 
-	memset (_play_buff, 0, sizeof(float) * _pcmi.nplay () * _samples_per_period);
+	if (_play_buff) {
+		memset (_play_buff, 0, sizeof(float) * _pcmi.nplay () * _samples_per_period);
+	}
 }
 
 void
