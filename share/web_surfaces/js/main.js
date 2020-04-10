@@ -22,6 +22,7 @@
 
     async function fetchIndex (url) {
         const response = await fetch(url);
+        
         if (response.status == 200) {
             return await response.json();
         } else {
@@ -42,6 +43,7 @@
         ['builtin', 'user'].forEach((group) => {
             const ul = document.getElementById(group);
             let models = index[group];
+
             if (models.length > 0) {
                 models.sort((a, b) => a.name.localeCompare(b.name));
                 for (model of models) {
@@ -51,17 +53,26 @@
                 ul.parentNode.style.display = 'none';
             }
         });
+
+        document.getElementById('index').style.display = 'inline';
+    }
+
+    function printError (message) {
+        const error = document.getElementById('error');
+        error.innerHTML = message;
+        error.style.display = 'inline';
     }
 
     async function main () {
         try {
             const indexUrl = `${location.protocol}//${location.host}/${INDEX_RESOURCE}`;
             const index = await fetchIndex (indexUrl);
-            printIndex (index);
+            printIndex(index);
         } catch (err) {
-            const content = document.getElementById('content');
-            content.innerHTML = `<pre>${INDEX_RESOURCE}: ${err.message}</pre>`;
+            printError(`Error loading ${INDEX_RESOURCE}: ${err.message}`);
         }
+
+        document.getElementById('loading').style.display = 'none';
     }
 
     main();
