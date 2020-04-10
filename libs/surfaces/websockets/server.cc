@@ -405,7 +405,7 @@ WebsocketsServer::send_index_body (Client wsi)
 	/* lws_http_transaction_completed() returns 1 if the HTTP connection must close now
 	   Returns 0 and resets connection to wait for new HTTP header / transaction if possible */
 	if (lws_http_transaction_completed (wsi) != 1) {
-		return 1;
+		return -1;
 	}
 
 	return -1;	// end connection
