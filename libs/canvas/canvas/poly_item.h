@@ -46,8 +46,8 @@ protected:
 	Points _points;
 
 	/* these return screen-cordidates of the most recent render_path() */
-	Duple const& leftedge () const { return _left; }
-	Duple const& rightedge () const { return _right; }
+	Duple const& left_edge ()  const { return _left; }
+	Duple const& right_edge () const { return _right; }
 
 private:
 	static bool interpolate_line (Duple&, Duple const&, Coord const);

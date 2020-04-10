@@ -71,17 +71,17 @@ PolyLine::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 		Duple y (0, _y1);
 		float y1 = item_to_window (y).y;
 		render_path (area, context);
-		Duple const& c0 (rightedge ());
-		Duple const& c1 (leftedge ());
-		if (c0.x < vp.x1) {
-			context->line_to (vp.x1, c0.y);
+		Duple const& c0 (left_edge ());
+		Duple const& c1 (right_edge ());
+		if (c1.x < vp.x1) {
+			context->line_to (vp.x1, c1.y);
 			context->line_to (vp.x1, y1);
 		} else {
 			context->line_to (vp.x1, y1);
 		}
-		if (c1.x > vp.x0) {
+		if (c0.x > vp.x0) {
 			context->line_to (vp.x0, y1);
-			context->line_to (vp.x0, c1.y);
+			context->line_to (vp.x0, c0.y);
 		} else {
 			context->line_to (vp.x0, y1);
 		}
