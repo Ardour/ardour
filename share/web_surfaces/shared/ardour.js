@@ -42,6 +42,21 @@ export class Ardour {
 		}
 	}
 
+	async getSurfaceManifest () {
+		const response = await fetch('manifest.xml');
+
+		if (response.status == 200) {
+			const xmlText = await response.text();
+			const xmlDoc = new DOMParser().parseFromString(xmlText, 'text/xml');
+			return {
+				name: xmlDoc.getElementsByTagName('Name')[0].getAttribute('value'),
+				description: xmlDoc.getElementsByTagName('Description')[0].getAttribute('value')
+			}
+		} else {
+			throw new Error(`HTTP response status ${response.status}`);
+		}
+	}
+
 	// TO DO - add methods for dealing with messages flowing from/to the WebSockets channel
 
 }
