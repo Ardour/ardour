@@ -21,8 +21,8 @@
 
 #include "pbd/compose.h"
 
-#include "canvas/poly_item.h"
 #include "canvas/canvas.h"
+#include "canvas/poly_item.h"
 
 using namespace std;
 using namespace ArdourCanvas;
@@ -40,18 +40,16 @@ PolyItem::PolyItem (Item* parent)
 void
 PolyItem::compute_bounding_box () const
 {
-
-	if (!_points.empty()) {
-
+	if (!_points.empty ()) {
 		Rect bbox;
-		Points::const_iterator i = _points.begin();
+		Points::const_iterator i = _points.begin ();
 
 		bbox.x0 = bbox.x1 = i->x;
 		bbox.y0 = bbox.y1 = i->y;
 
 		++i;
 
-		while (i != _points.end()) {
+		while (i != _points.end ()) {
 			bbox.x0 = min (bbox.x0, i->x);
 			bbox.y0 = min (bbox.y0, i->y);
 			bbox.x1 = max (bbox.x1, i->x);
@@ -61,7 +59,6 @@ PolyItem::compute_bounding_box () const
 
 		_bounding_box = bbox.expand (_outline_width + 0.5);
 
-
 	} else {
 		_bounding_box = Rect ();
 	}
@@ -70,68 +67,70 @@ PolyItem::compute_bounding_box () const
 }
 
 void
-PolyItem::render_path (Rect const & /* area */, Cairo::RefPtr<Cairo::Context> context) const
+PolyItem::render_path (Rect const& area, Cairo::RefPtr<Cairo::Context> context) const
 {
-	if (_points.size() < 2) {
+	if (_points.size () < 2) {
 		return;
 	}
 
-	Points::const_iterator i = _points.begin();
-	Duple c (item_to_window (Duple (i->x, i->y)));
 	const double pixel_adjust = (_outline_width == 1.0 ? 0.5 : 0.0);
 
-	context->move_to (c.x + pixel_adjust, c.y + pixel_adjust);
+	Points::const_iterator i  = _points.begin ();
+	Duple                  c0 = item_to_window (Duple (i->x, i->y));
+
 	++i;
 
-	while (i != _points.end()) {
-		c = item_to_window (Duple (i->x, i->y));
+	while (c0.x < -1.) {
+		Duple c1 (item_to_window (Duple (i->x, i->y)));
+		if (interpolate_line (c0, c1, -1)) {
+			break;
+		}
+		if (++i == _points.end ()) {
+			c1.x = 0;
+			context->move_to (c1.x + pixel_adjust, c1.y + pixel_adjust);
+			_left = _right = c1;
+			return;
+		}
+		c0 = c1;
+	}
+
+	context->move_to (c0.x + pixel_adjust, c0.y + pixel_adjust);
+	_left = c0;
+
+	while (i != _points.end ()) {
+		Duple c = item_to_window (Duple (i->x, i->y));
+		if (c.x > area.x1) {
+			if (interpolate_line (c0, c, area.x1)) {
+				context->line_to (c0.x + pixel_adjust, c0.y + pixel_adjust);
+			}
+			break;
+		}
 		context->line_to (c.x + pixel_adjust, c.y + pixel_adjust);
+		c0 = c;
 		++i;
 	}
+	_right = c0;
 }
 
-void
-PolyItem::render_curve (Rect const & area, Cairo::RefPtr<Cairo::Context> context, Points const & first_control_points, Points const & second_control_points) const
+bool
+PolyItem::interpolate_line (Duple& c0, Duple const& c1, Coord const x)
 {
-	if (_points.size() <= 2) {
-		render_path (area, context);
-		return;
+	if (c1.x <= c0.x) {
+		return false;
+	}
+	if (x < c0.x || x > c1.x) {
+		return false;
 	}
 
-	Points::const_iterator cp1 = first_control_points.begin();
-	Points::const_iterator cp2 = second_control_points.begin();
-	Points::const_iterator p = _points.begin();
-	const double pixel_adjust = (_outline_width == 1.0 ? 0.5 : 0.0);
-
-	Duple c = item_to_window (Duple (p->x, p->y));
-	context->move_to (c.x + pixel_adjust, c.y + pixel_adjust);
-	++p;
-
-	while (p != _points.end()) {
-
-		Duple c1 = item_to_window (Duple (cp1->x, cp1->y));
-		Duple c2 = item_to_window (Duple (cp2->x, cp2->y));
-
-		c = item_to_window (Duple (p->x, p->y));
-
-		context->curve_to (c1.x + pixel_adjust,
-				   c1.y + pixel_adjust,
-				   c2.x + pixel_adjust,
-				   c2.y + pixel_adjust,
-				   c.x + pixel_adjust,
-				   c.y + pixel_adjust);
-
-		++cp1;
-		++cp2;
-		++p;
-	}
+	c0.y += ((x - c0.x) / (c1.x - c0.x)) * (c1.y - c0.y);
+	c0.x = x;
+	return true;
 }
 
 void
-PolyItem::set (Points const & points)
+PolyItem::set (Points const& points)
 {
 	if (_points != points) {
-
 		begin_change ();
 
 		_points = points;
@@ -141,7 +140,7 @@ PolyItem::set (Points const & points)
 	}
 }
 
-Points const &
+Points const&
 PolyItem::get () const
 {
 	return _points;
@@ -152,8 +151,8 @@ PolyItem::dump (ostream& o) const
 {
 	Item::dump (o);
 
-	o << _canvas->indent() << '\t' << _points.size() << " points" << endl;
-	for (Points::const_iterator i = _points.begin(); i != _points.end(); ++i) {
-		o << _canvas->indent() << "\t\t" << i->x << ", " << i->y << endl;
+	o << _canvas->indent () << '\t' << _points.size () << " points" << endl;
+	for (Points::const_iterator i = _points.begin (); i != _points.end (); ++i) {
+		o << _canvas->indent () << "\t\t" << i->x << ", " << i->y << endl;
 	}
 }

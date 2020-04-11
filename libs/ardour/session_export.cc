@@ -34,6 +34,7 @@
 #include "ardour/process_thread.h"
 #include "ardour/session.h"
 #include "ardour/track.h"
+#include "ardour/transport_fsm.h"
 
 #include "pbd/i18n.h"
 
@@ -142,10 +143,9 @@ Session::start_audio_export (samplepos_t position, bool realtime, bool region_ex
 	int timeout = std::max (10, (int)(nominal_sample_rate () / get_block_size ()));
 	do {
 		Glib::usleep (engine().usecs_per_cycle ());
-		_butler->schedule_transport_work ();
-	} while (0 != post_transport_work () && --timeout > 0);
+	} while (_transport_fsm->waiting_for_butler() && --timeout > 0);
 
-	if (timeout != 0) {
+	if (timeout == 0) {
 		error << _("Cannot prepare transport for export") << endmsg;
 		return -1;
 	}

@@ -1610,12 +1610,19 @@ CoreAudioPort::CoreAudioPort (CoreAudioBackend &b, const std::string& name, Port
 	: BackendPort (b, name, flags)
 {
 	memset (_buffer, 0, sizeof (_buffer));
-	mlock(_buffer, sizeof (_buffer));
+	mlock (_buffer, sizeof (_buffer));
+
+	_backend.port_connect_add_remove_callback (); // XXX -> RT
+
 }
 
-CoreAudioPort::~CoreAudioPort () { }
+CoreAudioPort::~CoreAudioPort ()
+{
+	_backend.port_connect_add_remove_callback (); // XXX -> RT
+}
 
-void* CoreAudioPort::get_buffer (pframes_t n_samples)
+void*
+CoreAudioPort::get_buffer (pframes_t n_samples)
 {
 	if (is_input ()) {
 		const std::set<BackendPortPtr>& connections = get_connections ();

@@ -198,7 +198,7 @@ float
 DiskReader::buffer_load () const
 {
 	/* Note: for MIDI it's not trivial to differentiate the following two cases:
-	 * 
+	 *
 	 * 1.  The playback buffer is empty because the system has run out of time to fill it.
 	 * 2.  The playback buffer is empty because there is no more data on the playlist.
 	 *
@@ -1750,7 +1750,7 @@ DiskReader::maybe_xfade_loop (Sample* buf, samplepos_t read_start, samplepos_t r
 
 		case Evoral::OverlapStart:
 			/* read range starts before and ends within fade or at same end as fade */
-			n  = fade_end - read_start;
+			n  = read_end - fade_start;
 			vo = 0;
 			bo = fade_start - read_start;
 			break;

@@ -70,6 +70,8 @@ PBD::Signal0<void> MeterStrip::ConfigurationChanged;
 MeterStrip::MeterStrip (int metricmode, MeterType mt)
 	: RouteUI ((Session*) 0)
 	, metric_type (MeterPeak)
+	, _clear_meters (true)
+	, _meter_peaked (false)
 	, _has_midi (false)
 	, _tick_bar (0)
 	, _strip_type (0)
@@ -127,6 +129,8 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	, RouteUI ((Session*) 0)
 	, _route (rt)
 	, metric_type (MeterPeak)
+	, _clear_meters (true)
+	, _meter_peaked (false)
 	, _has_midi (false)
 	, _tick_bar (0)
 	, _strip_type (0)
@@ -165,7 +169,6 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	peak_display.set_name ("meterbridge peakindicator");
 	peak_display.set_elements((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body));
 	set_tooltip (peak_display, _("Reset Peak"));
-	max_peak = minus_infinity();
 	peak_display.unset_flags (Gtk::CAN_FOCUS);
 	peak_display.set_size_request(PX_SCALE(12, 12), PX_SCALE(8, 8));
 	peak_display.set_corner_radius(2); // ardour-button scales this
@@ -417,12 +420,19 @@ MeterStrip::route_color_changed ()
 void
 MeterStrip::fast_update ()
 {
-	float mpeak = level_meter->update_meters();
-	if (mpeak > max_peak) {
-		max_peak = mpeak;
-		if (mpeak >= UIConfiguration::instance().get_meter_peak()) {
-			peak_display.set_active_state ( Gtkmm2ext::ExplicitActive );
-		}
+	if (_clear_meters) {
+		level_meter->clear_meters();
+		peak_display.set_active_state (Gtkmm2ext::Off);
+		_clear_meters = false;
+		_meter_peaked = false;
+	}
+
+	const float mpeak = level_meter->update_meters();
+	const bool peaking = mpeak > UIConfiguration::instance().get_meter_peak();
+
+	if (!_meter_peaked && peaking) {
+		peak_display.set_active_state ( Gtkmm2ext::ExplicitActive );
+		_meter_peaked = true;
 	}
 }
 
@@ -697,9 +707,7 @@ void
 MeterStrip::reset_peak_display ()
 {
 	_route->shared_peak_meter()->reset_max();
-	level_meter->clear_meters();
-	max_peak = -INFINITY;
-	peak_display.set_active_state ( Gtkmm2ext::Off );
+	_clear_meters = true;
 }
 
 bool
@@ -776,7 +784,7 @@ void
 MeterStrip::parameter_changed (std::string const & p)
 {
 	if (p == "meter-peak") {
-		max_peak = -INFINITY;
+		_clear_meters = true;
 	}
 	else if (p == "show-rec-on-meterbridge") {
 		update_button_box();

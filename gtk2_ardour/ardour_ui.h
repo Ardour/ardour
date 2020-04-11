@@ -545,11 +545,14 @@ private:
 	ArdourWidgets::ArdourButton action_script_call_btn[MAX_LUA_ACTION_BUTTONS];
 
 	Gtk::VBox alert_box;
+
 	Gtk::Table editor_meter_table;
 	ArdourWidgets::ArdourButton editor_meter_peak_display;
 	LevelMeterHBox *            editor_meter;
-	float                       editor_meter_max_peak;
-	bool                        editor_meter_peak_button_release (GdkEventButton*);
+
+	bool  _clear_editor_meter;
+	bool  _editor_meter_peaked;
+	bool  editor_meter_peak_button_release (GdkEventButton*);
 
 	void blink_handler (bool);
 	sigc::connection blink_connection;

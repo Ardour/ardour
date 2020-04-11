@@ -21,9 +21,9 @@
 #ifndef __CANVAS_POLY_ITEM_H__
 #define __CANVAS_POLY_ITEM_H__
 
-#include "canvas/visibility.h"
 #include "canvas/item.h"
 #include "canvas/outline.h"
+#include "canvas/visibility.h"
 
 namespace ArdourCanvas {
 
@@ -35,16 +35,25 @@ public:
 
 	virtual void compute_bounding_box () const;
 
-	virtual void set (Points const &);
-	Points const & get () const;
+	virtual void  set (Points const&);
+	Points const& get () const;
 
-        void dump (std::ostream&) const;
+	void dump (std::ostream&) const;
 
 protected:
-	void render_path (Rect const &, Cairo::RefPtr<Cairo::Context>) const;
-        void render_curve (Rect const &, Cairo::RefPtr<Cairo::Context>, Points const &, Points const &) const;
+	void render_path (Rect const&, Cairo::RefPtr<Cairo::Context>) const;
 
 	Points _points;
+
+	/* these return screen-cordidates of the most recent render_path() */
+	Duple const& left_edge ()  const { return _left; }
+	Duple const& right_edge () const { return _right; }
+
+private:
+	static bool interpolate_line (Duple&, Duple const&, Coord const);
+
+	mutable Duple _left;
+	mutable Duple _right;
 };
 
 }

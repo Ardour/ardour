@@ -316,6 +316,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, error_alert_button ( ArdourButton::just_led_default_elements )
 	, editor_meter_peak_display()
 	, editor_meter(0)
+	, _clear_editor_meter( true)
+	, _editor_meter_peaked (false)
 	, _numpad_locate_happening (false)
 	, _session_is_new (false)
 	, last_key_press_time (0)
@@ -1136,11 +1138,20 @@ ARDOUR_UI::every_point_zero_something_seconds ()
 	// august 2007: actual update frequency: 25Hz (40ms), not 100Hz
 
 	if (editor_meter && UIConfiguration::instance().get_show_editor_meter() && editor_meter_peak_display.is_mapped ()) {
-		float mpeak = editor_meter->update_meters();
-		if (mpeak > editor_meter_max_peak) {
-			if (mpeak >= UIConfiguration::instance().get_meter_peak()) {
-				editor_meter_peak_display.set_active_state ( Gtkmm2ext::ExplicitActive );
-			}
+
+		if (_clear_editor_meter) {
+			editor_meter->clear_meters();
+			editor_meter_peak_display.set_active_state (Gtkmm2ext::Off);
+			_clear_editor_meter = false;
+			_editor_meter_peaked = false;
+		}
+
+		const float mpeak = editor_meter->update_meters();
+		const bool peaking = mpeak > UIConfiguration::instance().get_meter_peak();
+
+		if (!_editor_meter_peaked && peaking) {
+			editor_meter_peak_display.set_active_state ( Gtkmm2ext::ExplicitActive );
+			_editor_meter_peaked = true;
 		}
 	}
 }
@@ -2935,9 +2946,7 @@ void
 ARDOUR_UI::reset_peak_display ()
 {
 	if (!_session || !_session->master_out() || !editor_meter) return;
-	editor_meter->clear_meters();
-	editor_meter_max_peak = -INFINITY;
-	editor_meter_peak_display.set_active_state ( Gtkmm2ext::Off );
+	_clear_editor_meter = true;
 }
 
 void

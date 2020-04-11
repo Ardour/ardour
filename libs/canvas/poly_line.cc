@@ -20,8 +20,8 @@
 
 #include <algorithm>
 
-#include "canvas/poly_line.h"
 #include "canvas/canvas.h"
+#include "canvas/poly_line.h"
 #include "canvas/utils.h"
 
 using namespace ArdourCanvas;
@@ -54,34 +54,35 @@ PolyLine::compute_bounding_box () const
 }
 
 void
-PolyLine::set_fill_y1 (double y1) {
+PolyLine::set_fill_y1 (double y1)
+{
 	begin_change ();
 	_bounding_box_dirty = true;
-	_y1 = y1;
+	_y1                 = y1;
 	end_change ();
 }
 
 void
-PolyLine::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
+PolyLine::render (Rect const& area, Cairo::RefPtr<Cairo::Context> context) const
 {
-	if (_fill && _y1 > 0 && _points.size() > 0) {
-		const ArdourCanvas::Rect& vp (_canvas->visible_area());
+	if (_fill && _y1 > 0 && _points.size () > 0) {
+		const ArdourCanvas::Rect& vp (_canvas->visible_area ());
 		setup_fill_context (context);
 
 		Duple y (0, _y1);
 		float y1 = item_to_window (y).y;
 		render_path (area, context);
-		Duple c0 (item_to_window (_points.back()));
-		Duple c1 (item_to_window (_points.front()));
-		if (c0.x < vp.x1) {
-			context->line_to (vp.x1, c0.y);
+		Duple const& c0 (left_edge ());
+		Duple const& c1 (right_edge ());
+		if (c1.x < vp.x1) {
+			context->line_to (vp.x1, c1.y);
 			context->line_to (vp.x1, y1);
 		} else {
 			context->line_to (vp.x1, y1);
 		}
-		if (c1.x > vp.x0) {
+		if (c0.x > vp.x0) {
 			context->line_to (vp.x0, y1);
-			context->line_to (vp.x0, c1.y);
+			context->line_to (vp.x0, c0.y);
 		} else {
 			context->line_to (vp.x0, y1);
 		}
@@ -97,35 +98,35 @@ PolyLine::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 }
 
 void
-PolyLine::set_steps (Points const & points, bool stepped)
+PolyLine::set_steps (Points const& points, bool stepped)
 {
 	if (!stepped) {
-		PolyItem::set(points);
+		PolyItem::set (points);
 		return;
 	}
 
 	Points copy;
-	for (Points::const_iterator p = points.begin(); p != points.end();) {
+	for (Points::const_iterator p = points.begin (); p != points.end ();) {
 		Points::const_iterator next = p;
 		++next;
 
-		copy.push_back(*p);
-		if (next != points.end() && next->x != p->x) {
-			copy.push_back(Duple(next->x, p->y));
+		copy.push_back (*p);
+		if (next != points.end () && next->x != p->x) {
+			copy.push_back (Duple (next->x, p->y));
 		}
 
 		p = next;
 	}
 
-	PolyItem::set(copy);
+	PolyItem::set (copy);
 }
 
 bool
-PolyLine::covers (Duple const & point) const
+PolyLine::covers (Duple const& point) const
 {
 	Duple p = window_to_item (point);
 
-	const Points::size_type npoints = _points.size();
+	const Points::size_type npoints = _points.size ();
 
 	if (npoints < 2) {
 		return false;
@@ -136,14 +137,13 @@ PolyLine::covers (Duple const & point) const
 
 	/* repeat for each line segment */
 
-	const Rect visible (window_to_item (_canvas->visible_area()));
+	const Rect visible (window_to_item (_canvas->visible_area ()));
 
 	for (i = 1, j = 0; i < npoints; ++i, ++j) {
-
-		Duple at;
+		Duple  at;
 		double t;
-		Duple a (_points[j]);
-		Duple b (_points[i]);
+		Duple  a (_points[j]);
+		Duple  b (_points[i]);
 
 		/*
 		  Clamp the line endpoints to the visible area of the canvas. If we do
@@ -165,7 +165,6 @@ PolyLine::covers (Duple const & point) const
 		if (d < _threshold + _outline_width) {
 			return true;
 		}
-
 	}
 
 	return false;

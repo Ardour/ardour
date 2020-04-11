@@ -131,7 +131,8 @@ private:
 	std::vector<ARDOUR::DataType> _types;
 	ARDOUR::MeterType metric_type;
 
-	float max_peak;
+	bool _clear_meters;
+	bool _meter_peaked;
 	bool _has_midi;
 	int _tick_bar;
 	int _strip_type;

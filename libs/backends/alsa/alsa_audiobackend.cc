@@ -2210,9 +2210,13 @@ AlsaAudioPort::AlsaAudioPort (AlsaAudioBackend &b, const std::string& name, Port
 {
 	memset (_buffer, 0, sizeof (_buffer));
 	mlock (_buffer, sizeof (_buffer));
+	_backend.port_connect_add_remove_callback (); // XXX -> RT
 }
 
-AlsaAudioPort::~AlsaAudioPort () { }
+AlsaAudioPort::~AlsaAudioPort ()
+{
+	_backend.port_connect_add_remove_callback (); // XXX -> RT
+}
 
 void*
 AlsaAudioPort::get_buffer (pframes_t n_samples)
@@ -2253,9 +2257,14 @@ AlsaMidiPort::AlsaMidiPort (AlsaAudioBackend &b, const std::string& name, PortFl
 	_buffer[0].reserve(256);
 	_buffer[1].reserve(256);
 	_buffer[2].reserve(256);
+
+	_backend.port_connect_add_remove_callback (); // XXX -> RT
 }
 
-AlsaMidiPort::~AlsaMidiPort () { }
+AlsaMidiPort::~AlsaMidiPort ()
+{
+	_backend.port_connect_add_remove_callback (); // XXX -> RT
+}
 
 struct MidiEventSorter {
 	bool operator() (AlsaMidiEvent const& a, AlsaMidiEvent const& b) {
