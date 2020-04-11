@@ -79,3 +79,9 @@ h2 {
 .surface-list > ul > li {
 	margin: 4ex 0;
 }
+
+.disk-path {
+	font-family: Monaco, monospace;
+	font-size: 0.66em;
+	color: #bbb;
+}

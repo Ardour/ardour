@@ -30,29 +30,36 @@
         }
     }
 
-    function buildItem (group, model) {
+    function buildItem (groupPath, surface) {
         const li = document.createElement('li');
         li.innerHTML = `<li>
-                        <a href="${group}/${model.id}/">${model.name}</a>
-                        <p>${model.description}</p>
+                        <a href="${groupPath}/${surface.path}/">${surface.name}</a>
+                        <p>${surface.description}</p>
                     </li>`;
         return li;
     }
 
     function printIndex (index) {
-        ['builtin', 'user'].forEach((group) => {
-            const ul = document.getElementById(group);
-            let models = index[group];
+        for (let group of index) {
+            const path = group['path'];
+            const span = document.querySelector(`#${path} span`);
+            span.innerHTML = group['diskPath'];
 
-            if (models.length > 0) {
-                models.sort((a, b) => a.name.localeCompare(b.name));
-                for (model of models) {
-                    ul.appendChild(buildItem(group, model));
+            let surfaces = group.surfaces;
+
+            if (surfaces.length > 0) {
+                const ul = document.querySelector(`#${path} > ul`);
+                surfaces.sort((a, b) => a.name.localeCompare(b.name));
+                
+                for (surface of surfaces) {
+                    ul.appendChild(buildItem(path, surface));
                 }
             } else {
-                ul.parentNode.style.display = 'none';
+                const p = document.createElement('p');
+                p.innerHTML = '<p>No surfaces found</p>';
+                document.getElementById(path).appendChild(p);
             }
-        });
+        }
 
         document.getElementById('index').style.display = 'inline';
     }
