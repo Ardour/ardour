@@ -72,11 +72,9 @@ SurfaceManifest::to_json ()
 {
 	std::stringstream ss;
 
-	std::string rel_path = Glib::path_get_basename (Glib::path_get_dirname (_path));
-
 	ss << "{"
 		<< "\"diskPath\":\"" << _path << "\""
-		<< ",\"path\":\"" << rel_path << "\""
+		<< ",\"path\":\"" << Glib::path_get_basename (_path) << "\""
 		<< ",\"name\":\"" << _name << "\""
 		<< ",\"description\":\"" << _description << "\""
 		<< "}";
