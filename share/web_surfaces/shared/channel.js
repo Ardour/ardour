@@ -28,10 +28,15 @@ export class Channel {
     open () {
         return new Promise((resolve, reject) => {
             this.socket = new WebSocket(`ws://${this.host}`);
+            this.socket.onclose = () => this.closeCallback();
             this.socket.onerror = (error) => this.errorCallback(error);
             this.socket.onmessage = (event) => this._onMessage(event);
             this.socket.onopen = resolve;
         });
+    }
+
+    closeCallback () {
+        // empty
     }
     
     errorCallback (error) {
