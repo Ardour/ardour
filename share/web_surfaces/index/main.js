@@ -16,48 +16,45 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+import { Ardour } from '../shared/ardour.js';
+
 (() => {
 
-    const INDEX_RESOURCE = 'index.json';
-
-    async function fetchIndex (url) {
-        const response = await fetch(url);
-        
-        if (response.status == 200) {
-            return await response.json();
-        } else {
-            throw new Error(`HTTP response status ${response.status}`);
+    async function main () {
+        try {
+            const index = await new Ardour().getAvailableSurfaces();
+            printIndex(index);
+        } catch (err) {
+            printError(`Error loading index: ${err.message}`);
         }
-    }
 
-    function buildItem (groupPath, surface) {
-        const li = document.createElement('li');
-        li.innerHTML = `<li>
-                        <a href="${groupPath}/${surface.path}/">${surface.name}</a>
-                        <p>${surface.description}</p>
-                    </li>`;
-        return li;
+        document.getElementById('loading').style.display = 'none';
     }
 
     function printIndex (index) {
-        for (let group of index) {
-            const path = group['path'];
-            const span = document.querySelector(`#${path} span`);
-            span.innerHTML = group['diskPath'];
-
-            let surfaces = group.surfaces;
+        for (const group of index) {
+            const surfaces = group.surfaces;
+            const groupPath = group['path'];
+            const groupPathSpan = document.querySelector(`#${groupPath} span`);
+            
+            groupPathSpan.innerHTML = group['diskPath'];
 
             if (surfaces.length > 0) {
-                const ul = document.querySelector(`#${path} > ul`);
+                const ul = document.querySelector(`#${groupPath} > ul`);
                 surfaces.sort((a, b) => a.name.localeCompare(b.name));
                 
-                for (surface of surfaces) {
-                    ul.appendChild(buildItem(path, surface));
+                for (const surface of surfaces) {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<li>
+                        <a href="${groupPath}/${surface.path}/">${surface.name}</a>
+                        <p>${surface.description}</p>
+                    </li>`;
+                    ul.appendChild(li);
                 }
             } else {
                 const p = document.createElement('p');
                 p.innerHTML = '<p>No surfaces found</p>';
-                document.getElementById(path).appendChild(p);
+                document.getElementById(groupPath).appendChild(p);
             }
         }
 
@@ -68,18 +65,6 @@
         const error = document.getElementById('error');
         error.innerHTML = message;
         error.style.display = 'inline';
-    }
-
-    async function main () {
-        try {
-            const indexUrl = `${location.protocol}//${location.host}/${INDEX_RESOURCE}`;
-            const index = await fetchIndex (indexUrl);
-            printIndex(index);
-        } catch (err) {
-            printError(`Error loading ${INDEX_RESOURCE}: ${err.message}`);
-        }
-
-        document.getElementById('loading').style.display = 'none';
     }
 
     main();
