@@ -16,16 +16,20 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+import { Channel } from '/shared/channel.js';
+import { Switch, DiscreteSlider, ContinuousSlider, LogarithmicSlider,
+        StripPanSlider, StripGainSlider, StripMeter } from './widget.js';
+
 (() => {
 
     const MAX_LOG_LINES = 1000;
     const FEEDBACK_NODES = ['strip_gain', 'strip_pan', 'strip_meter', 'strip_plugin_enable',
         'strip_plugin_param_value'];
     
-    const conn = new Connection(location.host);
+    const channel = new Channel(location.host);
     const widgets = {};
 
-    conn.messageCallback = (node, addr, val) => {
+    channel.messageCallback = (node, addr, val) => {
         log(`↙ ${node} (${addr}) = ${val}`, 'message-in');
 
         if (node == 'strip_desc') {
@@ -41,13 +45,15 @@
         }
     };
 
-    conn.closeCallback = () => {
+    channel.closeCallback = () => {
         log('Connection dropped', 'error');
     };
 
-    conn.errorCallback = () => {
+    channel.errorCallback = () => {
         log('Connection error', 'error');
     };
+
+    channel.open();
 
     function createStrip (addr, name) {
         const id = `strip-${addr[0]}`;
@@ -118,7 +124,7 @@
     function send (widget) {
         const val = widget.value;
         log(`↗ ${widget.node} (${widget.addr}) = ${val}`, 'message-out');
-        conn.send(widget.node, widget.addr, [val]);
+        channel.send(widget.node, widget.addr, [val]);
     }
 
     function createElem (html, parent) {

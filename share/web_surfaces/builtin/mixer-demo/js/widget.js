@@ -16,7 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-class Widget {
+export class Widget {
 
     constructor (node, addr, html) {
         this.node = node;
@@ -44,7 +44,7 @@ class Widget {
 
 }
 
-class Switch extends Widget {
+export class Switch extends Widget {
 
     constructor (node, addr) {
         super (node, addr, `<input type="checkbox" class="widget-switch">`);
@@ -61,7 +61,7 @@ class Switch extends Widget {
      
 }
 
-class Slider extends Widget {
+export class Slider extends Widget {
 
     constructor (node, addr, min, max, step) {
         const html = `<input type="range" class="widget-slider"
@@ -82,7 +82,7 @@ class Slider extends Widget {
 
 }
 
-class DiscreteSlider extends Slider {
+export class DiscreteSlider extends Slider {
 
     constructor (node, addr, min, max) {
         super(node, addr, min, max, 1);
@@ -90,7 +90,7 @@ class DiscreteSlider extends Slider {
 
 }
 
-class ContinuousSlider extends Slider {
+export class ContinuousSlider extends Slider {
 
     constructor (node, addr, min, max) {
         super(node, addr, min, max, 0.001);
@@ -98,7 +98,7 @@ class ContinuousSlider extends Slider {
 
 }
 
-class LogarithmicSlider extends ContinuousSlider {
+export class LogarithmicSlider extends ContinuousSlider {
 
     constructor (node, addr, min, max) {
         super(node, addr, 0, 1.0);
@@ -117,7 +117,7 @@ class LogarithmicSlider extends ContinuousSlider {
 
 }
 
-class StripPanSlider extends ContinuousSlider {
+export class StripPanSlider extends ContinuousSlider {
 
     constructor (node, addr) {
         super(node, addr, -1.0, 1.0);
@@ -125,7 +125,7 @@ class StripPanSlider extends ContinuousSlider {
 
 }
 
-class StripGainSlider extends ContinuousSlider {
+export class StripGainSlider extends ContinuousSlider {
 
     constructor (node, addr) {
         super(node, addr, 0, 1.0)
@@ -144,7 +144,7 @@ class StripGainSlider extends ContinuousSlider {
 
 }
 
-class StripMeter extends Widget {
+export class StripMeter extends Widget {
 
     constructor (node, addr) {
         super(node, addr, `<label></label>`);
