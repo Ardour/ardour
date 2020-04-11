@@ -80,9 +80,14 @@ ServerResources::scan ()
 {
 	std::stringstream ss;
 
-	ss << "[{\"path\":\"" << builtin_dir_name << "\",\"surfaces\":[";
+	std::string builtin_dir_str   = builtin_dir ();
+	SurfaceManifestVector builtin = read_manifests (builtin_dir_str);
 
-	SurfaceManifestVector builtin = read_manifests (builtin_dir ());
+	ss << "[{"
+		<< "\"diskPath\":\"" << builtin_dir_str << "\""
+		<< ",\"path\":\"" << builtin_dir_name << "\""
+		<< ",\"surfaces\":"
+		<< "[";
 
 	for (SurfaceManifestVector::iterator it = builtin.begin (); it != builtin.end (); ) {
 		ss << it->to_json ();
@@ -91,9 +96,14 @@ ServerResources::scan ()
 		}
 	}
 
-	ss << "]},{\"path\":\"" << user_dir_name << "\",\"surfaces\":[";
+	std::string user_dir_str   = user_dir ();
+	SurfaceManifestVector user = read_manifests (user_dir_str);
 
-	SurfaceManifestVector user = read_manifests (user_dir ());
+	ss << "]},{" 
+		<< "\"diskPath\":\"" << user_dir_str << "\""
+		<< ",\"path\":\"" << user_dir_name << "\"" 
+		<< ",\"surfaces\":" 
+		<< "[";
 
 	for (SurfaceManifestVector::iterator it = user.begin (); it != user.end (); ) {
 		ss << it->to_json ();
