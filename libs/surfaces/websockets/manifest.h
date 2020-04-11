@@ -29,16 +29,18 @@ public:
 
 	bool valid () { return _valid; }
 
-	std::string id () { return _id; }
+	std::string path () { return _path; }
 	std::string name () { return _name; }
 	std::string description () { return _description; }
 
 	std::string to_json ();
 
+	static bool exists_at_path (std::string);
+
 private:
 	bool _valid;
 
-	std::string _id;
+	std::string _path;
 	std::string _name;
 	std::string _description;
 };
