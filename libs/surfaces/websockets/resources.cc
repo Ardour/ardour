@@ -30,7 +30,7 @@
 static const char* const data_dir_env_var = "ARDOUR_WEBSURFACES_PATH";
 static const char* const data_dir_name = "web_surfaces";
 static const char* const builtin_dir_name = "builtin";
-static const char* const manifest_filename = "manifest.xml";
+static const char* const user_dir_name = "user";
 
 static bool
 dir_filter (const std::string &str, void* /*arg*/)
@@ -80,7 +80,7 @@ ServerResources::scan ()
 {
 	std::stringstream ss;
 
-	ss << "{\"builtin\":[";
+	ss << "[{\"path\":\"" << builtin_dir_name << "\",\"surfaces\":[";
 
 	SurfaceManifestVector builtin = read_manifests (builtin_dir ());
 
@@ -91,7 +91,7 @@ ServerResources::scan ()
 		}
 	}
 
-	ss << "],\"user\":[";
+	ss << "]},{\"path\":\"" << user_dir_name << "\",\"surfaces\":[";
 
 	SurfaceManifestVector user = read_manifests (user_dir ());
 
@@ -102,7 +102,7 @@ ServerResources::scan ()
 		}
 	}
 
-	ss << "]}";
+	ss << "]}]";
 
 	return ss.str ();
 }
@@ -143,13 +143,11 @@ ServerResources::read_manifests (std::string dir)
 		0 /*arg*/, true /*pass_fullpath*/, true /*return_fullpath*/, false /*recurse*/);
 
 	for (std::vector<std::string>::const_iterator it = subdirs.begin (); it != subdirs.end (); ++it) {
-		std::string xml_path = Glib::build_filename (*it, manifest_filename);
-
-		if (!Glib::file_test (xml_path, Glib::FILE_TEST_EXISTS)) {
+		if (!SurfaceManifest::exists_at_path (*it)) {
 			continue;
 		}
 
-		SurfaceManifest manifest (xml_path);
+		SurfaceManifest manifest (*it);
 
 		if (manifest.valid ()) {
 			result.push_back (manifest);

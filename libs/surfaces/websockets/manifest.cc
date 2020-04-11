@@ -18,15 +18,21 @@
 
 #include <iostream>
 #include <sstream>
+
+#include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 
 #include "pbd/xml++.h"
 
 #include "manifest.h"
 
-SurfaceManifest::SurfaceManifest (std::string xml_path)
+static const char* const manifest_filename = "manifest.xml";
+
+SurfaceManifest::SurfaceManifest (std::string path)
+	: _path (path)
 {
 	XMLTree tree;
+	std::string xml_path = Glib::build_filename (_path, manifest_filename);
 
 	if (!tree.read (xml_path.c_str())) {
 #ifndef NDEBUG
@@ -44,25 +50,18 @@ SurfaceManifest::SurfaceManifest (std::string xml_path)
 		
 		node->get_property ("value", value);
 
-		if (name == "Id") {
-			_id = value;
-		} else if (name == "Name") {
+		if (name == "Name") {
 			_name = value;
 		} else if (name == "Description") {
 			_description = value;
 		}
 	}
 
-#ifndef NDEBUG
 	if (_name.empty () || _description.empty ()) {
+#ifndef NDEBUG
 		std::cerr << "SurfaceManifest: missing properties in " << xml_path << std::endl;
-		return;
-	}
 #endif
-
-	if (_id.empty ()) {
-		// default to manifest subdirectory name
-		_id = Glib::path_get_basename (Glib::path_get_dirname (xml_path));
+		return;
 	}
 
 	_valid = true;
@@ -73,11 +72,21 @@ SurfaceManifest::to_json ()
 {
 	std::stringstream ss;
 
+	std::string rel_path = Glib::path_get_basename (Glib::path_get_dirname (_path));
+
 	ss << "{"
-		<< "\"id\":\"" << _id << "\""
+		<< "\"diskPath\":\"" << _path << "\""
+		<< ",\"path\":\"" << rel_path << "\""
 		<< ",\"name\":\"" << _name << "\""
 		<< ",\"description\":\"" << _description << "\""
 		<< "}";
 
 	return ss.str ();
+}
+
+bool
+SurfaceManifest::exists_at_path (std::string path)
+{
+	std::string xml_path = Glib::build_filename (path, manifest_filename);
+	return Glib::file_test (xml_path, Glib::FILE_TEST_EXISTS);
 }
