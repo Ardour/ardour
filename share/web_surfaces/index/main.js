@@ -33,13 +33,19 @@ import { Ardour } from '/shared/ardour.js';
 
     function printIndex (index) {
         for (const group of index) {
-            const span = document.querySelector(`#${group.path} span`);
-            span.innerHTML = group.diskPath;
+            const ul = document.querySelector(`#${group.path} > ul`);
+            
+            const li = document.createElement('li');
+            li.innerHTML = `<li>
+                <span>Filesystem location:</span>
+                &thinsp;
+                <span class="disk-path">${group.diskPath}</span>
+            </li>`;
+            ul.appendChild(li);
 
             if (group.surfaces.length > 0) {
-                const ul = document.querySelector(`#${group.path} > ul`);
                 group.surfaces.sort((a, b) => a.name.localeCompare(b.name));
-                
+
                 for (const surface of group.surfaces) {
                     const li = document.createElement('li');
                     li.innerHTML = `<li>
@@ -51,9 +57,9 @@ import { Ardour } from '/shared/ardour.js';
                     ul.appendChild(li);
                 }
             } else {
-                const p = document.createElement('p');
-                p.innerHTML = '<p>No surfaces found</p>';
-                document.getElementById(group.path).appendChild(p);
+                const li = document.createElement('li');
+                li.innerHTML = 'No surfaces found';
+                ul.appendChild(li);
             }
         }
 
