@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtkmm2ext\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-12-01 01:22+0100\n"
+"POT-Creation-Date: 2019-10-12 16:31-0600\n"
 "PO-Revision-Date: 2016-12-01 02:23+0100\n"
 "Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>\n"
 "Language-Team: \n"
@@ -19,19 +19,55 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-Basepath: ../\n"
 
-#: actions.cc:261
-msgid "Unknown action name: %1"
-msgstr "Nom d'action inconnu : %1"
+#: actions.cc:215
+msgid "Unknown action name: %1/%2"
+msgstr ""
 
-#: binding_proxy.cc:81
-msgid "operate controller now"
-msgstr "actionnez le contrôleur maintenant"
+#: action_model.cc:56 action_model.cc:171
+msgid "Disabled"
+msgstr ""
 
-#: bindable_button.cc:48
-msgid "button cannot watch state of non-existing Controllable\n"
-msgstr "le bouton ne peut pas surveiller l'état d'un contrôleur inexistant\n"
+#: action_model.cc:83
+msgid "Main_menu"
+msgstr ""
 
-#: cursors.cc:82
+#: action_model.cc:85
+msgid "JACK"
+msgstr ""
+
+#: action_model.cc:87
+msgid "redirectmenu"
+msgstr ""
+
+#: action_model.cc:89
+msgid "Editor_menus"
+msgstr ""
+
+#: action_model.cc:91
+msgid "RegionList"
+msgstr ""
+
+#: action_model.cc:93
+msgid "ProcessorMenu"
+msgstr ""
+
+#: bindings.cc:831 bindings.cc:833
+msgid "Window"
+msgstr ""
+
+#: bindings.cc:831
+msgid " (Categorized)"
+msgstr ""
+
+#: bindings.cc:833
+msgid " (Alphabetical)"
+msgstr ""
+
+#: bindings.cc:849
+msgid "Uncategorized"
+msgstr ""
+
+#: cursors.cc:81
 msgid "cursor hotspots info file %1 has an error on line %2"
 msgstr ""
 
@@ -39,11 +75,11 @@ msgstr ""
 msgid "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 msgstr "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 
-#: gtk_ui.cc:119
+#: gtk_ui.cc:122
 msgid "Log"
 msgstr "Journal"
 
-#: gtk_ui.cc:388
+#: gtk_ui.cc:391
 msgid ""
 "\n"
 "\n"
@@ -53,103 +89,107 @@ msgstr ""
 "\n"
 "Raccourci : "
 
-#: gtk_ui.cc:688
+#: gtk_ui.cc:658
 msgid "Press To Exit"
 msgstr "Appuyer pour quitter"
 
-#: gtk_ui.cc:724
+#: gtk_ui.cc:694
 msgid "I'm sorry %1, I can't do that"
 msgstr "Je suis désolé %1, je ne peux pas faire ça"
 
-#: keyboard.cc:71
+#: keyboard.cc:75
 msgid "Command"
 msgstr "Commande"
 
-#: keyboard.cc:72 keyboard.cc:94
+#: keyboard.cc:76 keyboard.cc:98
 msgid "Control"
 msgstr "Contrôle"
 
-#: keyboard.cc:73 keyboard.cc:78 keyboard.cc:96 keyboard.cc:101
+#: keyboard.cc:77 keyboard.cc:82 keyboard.cc:100 keyboard.cc:105
 msgid "Key|Shift"
 msgstr "Key|Maj."
 
-#: keyboard.cc:74
+#: keyboard.cc:78
 msgid "Option"
 msgstr "Option"
 
-#: keyboard.cc:76
+#: keyboard.cc:80
 msgid "Cmd"
 msgstr "Cmd"
 
-#: keyboard.cc:77 keyboard.cc:99
+#: keyboard.cc:81 keyboard.cc:103
 msgid "Ctrl"
 msgstr "Ctrl"
 
-#: keyboard.cc:79
+#: keyboard.cc:83
 msgid "Opt"
 msgstr "Opt"
 
-#: keyboard.cc:95 keyboard.cc:100
+#: keyboard.cc:99 keyboard.cc:104
 msgid "Alt"
 msgstr "Alt"
 
-#: keyboard.cc:97
+#: keyboard.cc:101
 msgid "Windows"
 msgstr "Windows"
 
-#: keyboard.cc:102
+#: keyboard.cc:106
 msgid "Win"
 msgstr "Win"
 
-#: keyboard.cc:154 keyboard.cc:635
+#: keyboard.cc:158 keyboard.cc:601
 msgid "Unknown"
 msgstr "Inconnu"
 
-#: keyboard.cc:646
+#: keyboard.cc:612
 msgid "key bindings file not found at \"%2\" or contains errors."
 msgstr ""
 "fichier de raccourcis-clavier introuvable dans \"%2\" ou contenant des "
 "erreurs."
 
-#: keyboard.cc:672
+#: keyboard.cc:638
 msgid "Keyboard binding found without a name"
 msgstr "raccourci-clavier trouvé sans nom"
 
-#: keyboard.cc:702
+#: keyboard.cc:668
 msgid "Cannot save key bindings to %1"
 msgstr "Impossible de sauvegarder les raccourcis-clavier dans %1"
 
-#: keyboard.cc:718
+#: keyboard.cc:684
 msgid "Cannot rename your own keybinding file (%1)"
 msgstr "Impossible de renommer votre propre fichier de raccourcis-clavier (%1)"
-
-#: paths_dialog.cc:32
-msgid "Add"
-msgstr "Ajouter"
-
-#: paths_dialog.cc:33
-msgid "Delete"
-msgstr "Supprimer"
-
-#: paths_dialog.cc:34
-msgid "Reset to Default"
-msgstr "Réinitialiser"
-
-#: paths_dialog.cc:109
-msgid "Add folder to search path"
-msgstr "Ajouter le dossier au chemin de recherche"
-
-#: tearoff.cc:57
-msgid "Click to tear this into its own window"
-msgstr "Cliquez pour afficher ceci dans une fenêtre séparée"
-
-#: tearoff.cc:63
-msgid "Click to put this back in the main window"
-msgstr "Cliquez pour remettre dans la fenêtre principale"
 
 #: textviewer.cc:32
 msgid "Close"
 msgstr "Fermer"
+
+#~ msgid "Unknown action name: %1"
+#~ msgstr "Nom d'action inconnu : %1"
+
+#~ msgid "operate controller now"
+#~ msgstr "actionnez le contrôleur maintenant"
+
+#~ msgid "button cannot watch state of non-existing Controllable\n"
+#~ msgstr ""
+#~ "le bouton ne peut pas surveiller l'état d'un contrôleur inexistant\n"
+
+#~ msgid "Add"
+#~ msgstr "Ajouter"
+
+#~ msgid "Delete"
+#~ msgstr "Supprimer"
+
+#~ msgid "Reset to Default"
+#~ msgstr "Réinitialiser"
+
+#~ msgid "Add folder to search path"
+#~ msgstr "Ajouter le dossier au chemin de recherche"
+
+#~ msgid "Click to tear this into its own window"
+#~ msgstr "Cliquez pour afficher ceci dans une fenêtre séparée"
+
+#~ msgid "Click to put this back in the main window"
+#~ msgstr "Cliquez pour remettre dans la fenêtre principale"
 
 #~ msgid "programming error: %1"
 #~ msgstr "erreur de programmation : %1"

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-13 18:09-0400\n"
+"POT-Creation-Date: 2019-10-12 16:31-0600\n"
 "PO-Revision-Date: 2016-03-27 10:27+0800\n"
 "Last-Translator: 一善鱼 <YQ-YSY@163.com>\n"
 "Language-Team: 一善鱼 YQ-YSY@163.com\n"
@@ -17,19 +17,55 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 1.8.4\n"
 
-#: actions.cc:261
-msgid "Unknown action name: %1"
-msgstr "未知的动作名称：%1"
+#: actions.cc:215
+msgid "Unknown action name: %1/%2"
+msgstr ""
 
-#: binding_proxy.cc:81
-msgid "operate controller now"
-msgstr "操作控制器现状"
+#: action_model.cc:56 action_model.cc:171
+msgid "Disabled"
+msgstr ""
 
-#: bindable_button.cc:48
-msgid "button cannot watch state of non-existing Controllable\n"
-msgstr "按钮无法观察非存在的可控状态\n"
+#: action_model.cc:83
+msgid "Main_menu"
+msgstr ""
 
-#: cursors.cc:82
+#: action_model.cc:85
+msgid "JACK"
+msgstr ""
+
+#: action_model.cc:87
+msgid "redirectmenu"
+msgstr ""
+
+#: action_model.cc:89
+msgid "Editor_menus"
+msgstr ""
+
+#: action_model.cc:91
+msgid "RegionList"
+msgstr ""
+
+#: action_model.cc:93
+msgid "ProcessorMenu"
+msgstr ""
+
+#: bindings.cc:831 bindings.cc:833
+msgid "Window"
+msgstr ""
+
+#: bindings.cc:831
+msgid " (Categorized)"
+msgstr ""
+
+#: bindings.cc:833
+msgid " (Alphabetical)"
+msgstr ""
+
+#: bindings.cc:849
+msgid "Uncategorized"
+msgstr ""
+
+#: cursors.cc:81
 msgid "cursor hotspots info file %1 has an error on line %2"
 msgstr "游标热点信息文件 %1 在线路 %2 上有一个错误"
 
@@ -37,11 +73,11 @@ msgstr "游标热点信息文件 %1 在线路 %2 上有一个错误"
 msgid "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 msgstr ""
 
-#: gtk_ui.cc:119
+#: gtk_ui.cc:122
 msgid "Log"
 msgstr "日志"
 
-#: gtk_ui.cc:388
+#: gtk_ui.cc:391
 msgid ""
 "\n"
 "\n"
@@ -51,101 +87,104 @@ msgstr ""
 "\n"
 "快捷键："
 
-#: gtk_ui.cc:688
+#: gtk_ui.cc:658
 msgid "Press To Exit"
 msgstr "按下退出"
 
-#: gtk_ui.cc:724
+#: gtk_ui.cc:694
 msgid "I'm sorry %1, I can't do that"
 msgstr "对不起 %1，我不能那样做"
 
-#: keyboard.cc:70
+#: keyboard.cc:75
 msgid "Command"
 msgstr "命令"
 
-#: keyboard.cc:71 keyboard.cc:93
+#: keyboard.cc:76 keyboard.cc:98
 msgid "Control"
 msgstr ""
 
-#: keyboard.cc:72 keyboard.cc:77 keyboard.cc:95 keyboard.cc:100
+#: keyboard.cc:77 keyboard.cc:82 keyboard.cc:100 keyboard.cc:105
 msgid "Key|Shift"
 msgstr "键|Shift"
 
-#: keyboard.cc:73
+#: keyboard.cc:78
 msgid "Option"
 msgstr "选项"
 
-#: keyboard.cc:75
+#: keyboard.cc:80
 msgid "Cmd"
 msgstr ""
 
-#: keyboard.cc:76 keyboard.cc:98
+#: keyboard.cc:81 keyboard.cc:103
 msgid "Ctrl"
 msgstr ""
 
-#: keyboard.cc:78
+#: keyboard.cc:83
 msgid "Opt"
 msgstr ""
 
-#: keyboard.cc:94 keyboard.cc:99
+#: keyboard.cc:99 keyboard.cc:104
 msgid "Alt"
 msgstr ""
 
-#: keyboard.cc:96
+#: keyboard.cc:101
 msgid "Windows"
 msgstr ""
 
-#: keyboard.cc:101
+#: keyboard.cc:106
 msgid "Win"
 msgstr ""
 
-#: keyboard.cc:152 keyboard.cc:685
+#: keyboard.cc:158 keyboard.cc:601
 msgid "Unknown"
 msgstr "未知"
 
-#: keyboard.cc:696
+#: keyboard.cc:612
 msgid "key bindings file not found at \"%2\" or contains errors."
 msgstr "在 \"%2\" 找不到按键绑定文件或者包含有错误。"
 
-#: keyboard.cc:722
+#: keyboard.cc:638
 msgid "Keyboard binding found without a name"
 msgstr "键盘绑定未发现一个名称"
 
-#: keyboard.cc:752
+#: keyboard.cc:668
 msgid "Cannot save key bindings to %1"
 msgstr "无法保存按键绑定到 %1"
 
-#: keyboard.cc:768
+#: keyboard.cc:684
 msgid "Cannot rename your own keybinding file (%1)"
 msgstr "无法重命名您自己的按键绑定文件（%1）"
-
-#: paths_dialog.cc:32
-msgid "Add"
-msgstr "添加"
-
-#: paths_dialog.cc:33
-msgid "Delete"
-msgstr "删除"
-
-#: paths_dialog.cc:34
-msgid "Reset to Default"
-msgstr "重置为默认"
-
-#: paths_dialog.cc:109
-msgid "Add folder to search path"
-msgstr "添加文件夹到搜索路径"
-
-#: tearoff.cc:57
-msgid "Click to tear this into its own window"
-msgstr "点击可把这个拆解到它自己的窗口中"
-
-#: tearoff.cc:63
-msgid "Click to put this back in the main window"
-msgstr "点击可把这个放回到主窗口中"
 
 #: textviewer.cc:32
 msgid "Close"
 msgstr "关闭"
+
+#~ msgid "Unknown action name: %1"
+#~ msgstr "未知的动作名称：%1"
+
+#~ msgid "operate controller now"
+#~ msgstr "操作控制器现状"
+
+#~ msgid "button cannot watch state of non-existing Controllable\n"
+#~ msgstr "按钮无法观察非存在的可控状态\n"
+
+#~ msgid "Add"
+#~ msgstr "添加"
+
+#~ msgid "Delete"
+#~ msgstr "删除"
+
+#~ msgid "Reset to Default"
+#~ msgstr "重置为默认"
+
+#~ msgid "Add folder to search path"
+#~ msgstr "添加文件夹到搜索路径"
+
+#~ msgid "Click to tear this into its own window"
+#~ msgstr "点击可把这个拆解到它自己的窗口中"
+
+#~ msgid "Click to put this back in the main window"
+#~ msgstr "点击可把这个放回到主窗口中"
 
 #~ msgid "motionfeedback: failed to open a temporary file for writing: %1"
 #~ msgstr "运动反馈：打开一个用于写入的模板文件失败：%1"

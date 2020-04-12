@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-13 18:09-0400\n"
+"POT-Creation-Date: 2019-10-12 16:31-0600\n"
 "PO-Revision-Date: 2013-06-13 22:33+0200\n"
 "Last-Translator: Pavel Fric <pavelfric@seznam.cz>\n"
 "Language-Team: Czech <kde-i18n-doc@kde.org>\n"
@@ -17,19 +17,55 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Lokalize 1.5\n"
 
-#: actions.cc:261
-msgid "Unknown action name: %1"
-msgstr "Neznámý název pro činnost: %1"
+#: actions.cc:215
+msgid "Unknown action name: %1/%2"
+msgstr ""
 
-#: binding_proxy.cc:81
-msgid "operate controller now"
-msgstr "Obsluhovat ovladač nyní"
+#: action_model.cc:56 action_model.cc:171
+msgid "Disabled"
+msgstr ""
 
-#: bindable_button.cc:48
-msgid "button cannot watch state of non-existing Controllable\n"
-msgstr "Tlačítko nemůže sledovat stav neexistujícího ovladatelného cíle\n"
+#: action_model.cc:83
+msgid "Main_menu"
+msgstr ""
 
-#: cursors.cc:82
+#: action_model.cc:85
+msgid "JACK"
+msgstr ""
+
+#: action_model.cc:87
+msgid "redirectmenu"
+msgstr ""
+
+#: action_model.cc:89
+msgid "Editor_menus"
+msgstr ""
+
+#: action_model.cc:91
+msgid "RegionList"
+msgstr ""
+
+#: action_model.cc:93
+msgid "ProcessorMenu"
+msgstr ""
+
+#: bindings.cc:831 bindings.cc:833
+msgid "Window"
+msgstr ""
+
+#: bindings.cc:831
+msgid " (Categorized)"
+msgstr ""
+
+#: bindings.cc:833
+msgid " (Alphabetical)"
+msgstr ""
+
+#: bindings.cc:849
+msgid "Uncategorized"
+msgstr ""
+
+#: cursors.cc:81
 msgid "cursor hotspots info file %1 has an error on line %2"
 msgstr ""
 
@@ -37,11 +73,11 @@ msgstr ""
 msgid "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 msgstr ""
 
-#: gtk_ui.cc:119
+#: gtk_ui.cc:122
 msgid "Log"
 msgstr "Zápis"
 
-#: gtk_ui.cc:388
+#: gtk_ui.cc:391
 msgid ""
 "\n"
 "\n"
@@ -51,102 +87,93 @@ msgstr ""
 "\n"
 "Kurzbefehl: "
 
-#: gtk_ui.cc:688
+#: gtk_ui.cc:658
 msgid "Press To Exit"
 msgstr "Stisknout pro ukončení"
 
-#: gtk_ui.cc:724
+#: gtk_ui.cc:694
 msgid "I'm sorry %1, I can't do that"
 msgstr "Bohužel to nelze udělat, %1"
 
-#: keyboard.cc:70
+#: keyboard.cc:75
 msgid "Command"
 msgstr "Příkaz"
 
-#: keyboard.cc:71 keyboard.cc:93
+#: keyboard.cc:76 keyboard.cc:98
 msgid "Control"
 msgstr "Ctrl"
 
-#: keyboard.cc:72 keyboard.cc:77 keyboard.cc:95 keyboard.cc:100
+#: keyboard.cc:77 keyboard.cc:82 keyboard.cc:100 keyboard.cc:105
 msgid "Key|Shift"
 msgstr "Key|Shift"
 
-#: keyboard.cc:73
+#: keyboard.cc:78
 msgid "Option"
 msgstr "Volba"
 
-#: keyboard.cc:75
+#: keyboard.cc:80
 msgid "Cmd"
 msgstr ""
 
-#: keyboard.cc:76 keyboard.cc:98
+#: keyboard.cc:81 keyboard.cc:103
 msgid "Ctrl"
 msgstr ""
 
-#: keyboard.cc:78
+#: keyboard.cc:83
 msgid "Opt"
 msgstr ""
 
-#: keyboard.cc:94 keyboard.cc:99
+#: keyboard.cc:99 keyboard.cc:104
 msgid "Alt"
 msgstr "Alt"
 
-#: keyboard.cc:96
+#: keyboard.cc:101
 msgid "Windows"
 msgstr ""
 
-#: keyboard.cc:101
+#: keyboard.cc:106
 msgid "Win"
 msgstr ""
 
-#: keyboard.cc:152 keyboard.cc:685
+#: keyboard.cc:158 keyboard.cc:601
 msgid "Unknown"
 msgstr "Neznámý"
 
-#: keyboard.cc:696
+#: keyboard.cc:612
 msgid "key bindings file not found at \"%2\" or contains errors."
 msgstr ""
 "Soubor s přiřazením kláves \"%2\"se nepodařilo najít, nebo obsahuje chyby."
 
-#: keyboard.cc:722
+#: keyboard.cc:638
 msgid "Keyboard binding found without a name"
 msgstr ""
 
-#: keyboard.cc:752
+#: keyboard.cc:668
 msgid "Cannot save key bindings to %1"
 msgstr ""
 
-#: keyboard.cc:768
+#: keyboard.cc:684
 msgid "Cannot rename your own keybinding file (%1)"
 msgstr ""
-
-#: paths_dialog.cc:32
-msgid "Add"
-msgstr ""
-
-#: paths_dialog.cc:33
-msgid "Delete"
-msgstr ""
-
-#: paths_dialog.cc:34
-msgid "Reset to Default"
-msgstr ""
-
-#: paths_dialog.cc:109
-msgid "Add folder to search path"
-msgstr ""
-
-#: tearoff.cc:57
-msgid "Click to tear this into its own window"
-msgstr "Klepněte pro odtržení do vlastního okna"
-
-#: tearoff.cc:63
-msgid "Click to put this back in the main window"
-msgstr "Klepněte pro ukotvení do hlavního okna"
 
 #: textviewer.cc:32
 msgid "Close"
 msgstr "Zavřít"
+
+#~ msgid "Unknown action name: %1"
+#~ msgstr "Neznámý název pro činnost: %1"
+
+#~ msgid "operate controller now"
+#~ msgstr "Obsluhovat ovladač nyní"
+
+#~ msgid "button cannot watch state of non-existing Controllable\n"
+#~ msgstr "Tlačítko nemůže sledovat stav neexistujícího ovladatelného cíle\n"
+
+#~ msgid "Click to tear this into its own window"
+#~ msgstr "Klepněte pro odtržení do vlastního okna"
+
+#~ msgid "Click to put this back in the main window"
+#~ msgstr "Klepněte pro ukotvení do hlavního okna"
 
 #~ msgid "Meta"
 #~ msgstr "Meta"

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-05-13 15:34+0200\n"
+"POT-Creation-Date: 2019-10-12 16:31-0600\n"
 "PO-Revision-Date: 2017-05-13 18:57+0100\n"
 "Last-Translator: Edgar Aichinger <edogawa@aon.at>\n"
 "Language-Team: German <>\n"
@@ -17,37 +17,55 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Lokalize 2.0\n"
 
-#: actions.cc:261
-msgid "Unknown action name: %1"
-msgstr "Unbekannter Aktionsname: %1"
-
-#: binding_proxy.cc:82
-msgid "operate controller now"
-msgstr "Jetzt den Kontroller bedienen"
-
-#: bindable_button.cc:48
-msgid "button cannot watch state of non-existing Controllable\n"
+#: actions.cc:215
+msgid "Unknown action name: %1/%2"
 msgstr ""
-"Schaltfläche kann den Status des nichtexistenten Kontrollzieles nicht "
-"verfolgen\n"
 
-#: bindings.cc:851 bindings.cc:853
+#: action_model.cc:56 action_model.cc:171
+msgid "Disabled"
+msgstr ""
+
+#: action_model.cc:83
+msgid "Main_menu"
+msgstr ""
+
+#: action_model.cc:85
+msgid "JACK"
+msgstr ""
+
+#: action_model.cc:87
+msgid "redirectmenu"
+msgstr ""
+
+#: action_model.cc:89
+msgid "Editor_menus"
+msgstr ""
+
+#: action_model.cc:91
+msgid "RegionList"
+msgstr ""
+
+#: action_model.cc:93
+msgid "ProcessorMenu"
+msgstr ""
+
+#: bindings.cc:831 bindings.cc:833
 msgid "Window"
 msgstr "Fenster"
 
-#: bindings.cc:851
+#: bindings.cc:831
 msgid " (Categorized)"
 msgstr " (Kategorisiert)"
 
-#: bindings.cc:853
+#: bindings.cc:833
 msgid " (Alphabetical)"
 msgstr "(Alfabetisch)"
 
-#: bindings.cc:869
+#: bindings.cc:849
 msgid "Uncategorized"
 msgstr "Unkategorisiert"
 
-#: cursors.cc:82
+#: cursors.cc:81
 msgid "cursor hotspots info file %1 has an error on line %2"
 msgstr "Die Datei mit den Cursor-Hotspot-Infos %1 hat einen Fehler in Zeile %2"
 
@@ -55,11 +73,11 @@ msgstr "Die Datei mit den Cursor-Hotspot-Infos %1 hat einen Fehler in Zeile %2"
 msgid "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 msgstr "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 
-#: gtk_ui.cc:118
+#: gtk_ui.cc:122
 msgid "Log"
 msgstr "Log"
 
-#: gtk_ui.cc:387
+#: gtk_ui.cc:391
 msgid ""
 "\n"
 "\n"
@@ -69,101 +87,105 @@ msgstr ""
 "\n"
 "Kurzbefehl: "
 
-#: gtk_ui.cc:687
+#: gtk_ui.cc:658
 msgid "Press To Exit"
 msgstr "Zum Beenden drücken"
 
-#: gtk_ui.cc:723
+#: gtk_ui.cc:694
 msgid "I'm sorry %1, I can't do that"
 msgstr "Leider kann ich das nicht tun, %1"
 
-#: keyboard.cc:71
+#: keyboard.cc:75
 msgid "Command"
 msgstr "Befehl"
 
-#: keyboard.cc:72 keyboard.cc:94
+#: keyboard.cc:76 keyboard.cc:98
 msgid "Control"
 msgstr "Strg"
 
-#: keyboard.cc:73 keyboard.cc:78 keyboard.cc:96 keyboard.cc:101
+#: keyboard.cc:77 keyboard.cc:82 keyboard.cc:100 keyboard.cc:105
 msgid "Key|Shift"
 msgstr "Umschalt"
 
-#: keyboard.cc:74
+#: keyboard.cc:78
 msgid "Option"
 msgstr "Option"
 
-#: keyboard.cc:76
+#: keyboard.cc:80
 msgid "Cmd"
 msgstr "Cmd"
 
-#: keyboard.cc:77 keyboard.cc:99
+#: keyboard.cc:81 keyboard.cc:103
 msgid "Ctrl"
 msgstr "Ctrl"
 
-#: keyboard.cc:79
+#: keyboard.cc:83
 msgid "Opt"
 msgstr "Alt"
 
-#: keyboard.cc:95 keyboard.cc:100
+#: keyboard.cc:99 keyboard.cc:104
 msgid "Alt"
 msgstr "Alt"
 
-#: keyboard.cc:97
+#: keyboard.cc:101
 msgid "Windows"
 msgstr "Windows"
 
-#: keyboard.cc:102
+#: keyboard.cc:106
 msgid "Win"
 msgstr "Win"
 
-#: keyboard.cc:154 keyboard.cc:597
+#: keyboard.cc:158 keyboard.cc:601
 msgid "Unknown"
 msgstr "Unbekannt"
 
-#: keyboard.cc:608
+#: keyboard.cc:612
 msgid "key bindings file not found at \"%2\" or contains errors."
 msgstr ""
 "Die Tastenkürzel-Datei \"%1\" konnte nicht gefunden werden oder enthält "
 "Fehler."
 
-#: keyboard.cc:634
+#: keyboard.cc:638
 msgid "Keyboard binding found without a name"
 msgstr "Tastenzuordnung ohne Namen gefunden"
 
-#: keyboard.cc:664
+#: keyboard.cc:668
 msgid "Cannot save key bindings to %1"
 msgstr "Kann Tastenzuordnungen nicht nach %1 sichern"
 
-#: keyboard.cc:680
+#: keyboard.cc:684
 msgid "Cannot rename your own keybinding file (%1)"
 msgstr "Kann Ihre eigene Tastaturkürzeldatei nicht umbenennen (%1)"
-
-#: paths_dialog.cc:32
-msgid "Add"
-msgstr "Hinzufügen"
-
-#: paths_dialog.cc:33
-msgid "Delete"
-msgstr "Löschen"
-
-#: paths_dialog.cc:34
-msgid "Reset to Default"
-msgstr "Auf Vorgabewert zurücksetzen"
-
-#: paths_dialog.cc:109
-msgid "Add folder to search path"
-msgstr "Ordner dem Suchpfad hinzufügen"
-
-#: tearoff.cc:57
-msgid "Click to tear this into its own window"
-msgstr "Klicken, um in ein eigenes Fenster abzureißen"
-
-#: tearoff.cc:63
-msgid "Click to put this back in the main window"
-msgstr "Klicken, um an das Hauptfenster anzudocken"
 
 #: textviewer.cc:32
 msgid "Close"
 msgstr "Schließen"
 
+#~ msgid "Unknown action name: %1"
+#~ msgstr "Unbekannter Aktionsname: %1"
+
+#~ msgid "operate controller now"
+#~ msgstr "Jetzt den Kontroller bedienen"
+
+#~ msgid "button cannot watch state of non-existing Controllable\n"
+#~ msgstr ""
+#~ "Schaltfläche kann den Status des nichtexistenten Kontrollzieles nicht "
+#~ "verfolgen\n"
+
+#~ msgid "Add"
+#~ msgstr "Hinzufügen"
+
+#~ msgid "Delete"
+#~ msgstr "Löschen"
+
+#~ msgid "Reset to Default"
+#~ msgstr "Auf Vorgabewert zurücksetzen"
+
+#~ msgid "Add folder to search path"
+#~ msgstr "Ordner dem Suchpfad hinzufügen"
+
+#~ msgid "Click to tear this into its own window"
+#~ msgstr "Klicken, um in ein eigenes Fenster abzureißen"
+
+#~ msgid "Click to put this back in the main window"
+#~ msgstr "Klicken, um an das Hauptfenster anzudocken"
