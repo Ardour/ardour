@@ -44,6 +44,8 @@ import { Ardour } from '/shared/ardour.js';
                     const li = document.createElement('li');
                     li.innerHTML = `<li>
                         <a href="${group.path}/${surface.path}/">${surface.name}</a>
+                        &thinsp;
+                        <span class="surface-version">(${surface.version})</span>
                         <p>${surface.description}</p>
                     </li>`;
                     ul.appendChild(li);
