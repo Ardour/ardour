@@ -658,6 +658,8 @@ Keyboard::store_keybindings (string const & path)
 	XMLNode* bnode;
 	int ret = 0;
 
+	DEBUG_TRACE (DEBUG::Bindings, string_compose ("save bindings to %1\n", path));
+
 	for (list<Bindings*>::const_iterator b = Bindings::bindings.begin(); b != Bindings::bindings.end(); ++b) {
 		bnode = new XMLNode (X_("Bindings"));
 		bnode->set_property (X_("name"), (*b)->name());
