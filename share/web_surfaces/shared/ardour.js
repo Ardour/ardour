@@ -16,7 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-import { MessageChannel } from './channel.js';
+import { MessageChannel, Node } from './channel.js';
 
 export class Ardour {
 
@@ -38,7 +38,7 @@ export class Ardour {
 		if (response.status == 200) {
 			return await response.json();
 		} else {
-			throw new Error(`HTTP response status ${response.status}`);
+			throw this._fetchResponseStatusError(response.status);
 		}
 	}
 
@@ -53,10 +53,70 @@ export class Ardour {
 				description: xmlDoc.getElementsByTagName('Description')[0].getAttribute('value')
 			}
 		} else {
-			throw new Error(`HTTP response status ${response.status}`);
+			throw this._fetchResponseStatusError(response.status);
 		}
 	}
 
-	// TO DO - add methods for dealing with messages flowing from/to the WebSockets channel
+	async getTempo () {
+		return await this._sendAndReceive(Node.TEMPO);
+	}
+	
+	async getStripGain (stripId) {
+		return await this._sendAndReceive(Node.STRIP_GAIN, [stripId]);
+	}
+
+	async getStripPan (stripId) {
+		return await this._sendAndReceive(Node.STRIP_PAN, [stripId]);
+	}
+
+	async getStripMute (stripId) {
+		return await this._sendAndReceive(Node.STRIP_MUTE, [stripId]);
+	}
+
+	async getStripPluginEnable (stripId, pluginId) {
+		return await this._sendAndReceive(Node.STRIP_PLUGIN_ENABLE, [stripId, pluginId]);
+	}
+
+	async getStripPluginParamValue (stripId, pluginId, paramId) {
+		return await this._sendAndReceive(Node.STRIP_PLUGIN_PARAM_VALUE, [stripId, pluginId, paramId]);
+	}
+
+	async setTempo (bpm) {
+		this._send(Node.TEMPO, [], [bpm]);
+	}
+
+	async setStripGain (stripId, db) {
+		this._send(Node.STRIP_GAIN, [stripId], [db]);
+	}
+
+	async setStripPan (stripId, value) {
+		this._send(Node.STRIP_PAN, [stripId], [value]);
+	}
+
+	async setStripMute (stripId, value) {
+		this._send(Node.STRIP_MUTE, [stripId], [value]);
+	}
+
+	async setStripPluginEnable (stripId, pluginId, value) {
+		this._send(Node.STRIP_PLUGIN_ENABLE, [stripId, pluginId], [value]);
+	}
+
+	async setStripPluginParamValue (stripId, pluginId, paramId, value) {
+		this._send(Node.STRIP_PLUGIN_PARAM_VALUE, [stripId, pluginId, paramId], [value]);
+	}
+
+	async _send (addr, node, val) {
+		this.channel.send(new Message(addr, node, val));
+	}
+
+	async _sendAndReceive (addr, node, val) {
+		this._send(addr, node, val);
+
+		// TO DO - wait for response
+	}
+
+	_fetchResponseStatusError (status) {
+		return new Error(`HTTP response status ${status}`);
+	}
 
 }
