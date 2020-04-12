@@ -125,7 +125,7 @@ ServerResources::server_data_dir ()
 	bool defined = false;
 	std::string env_dir (Glib::getenv (data_dir_env_var, defined));
 
-	if (defined) {
+	if (defined && !env_dir.empty ()) {
 		/* useful for development */
 		data_dir = env_dir;
 	} else {
