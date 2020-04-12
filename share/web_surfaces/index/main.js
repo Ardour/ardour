@@ -33,20 +33,17 @@ import { Ardour } from '/shared/ardour.js';
 
     function printIndex (index) {
         for (const group of index) {
-            const surfaces = group.surfaces;
-            const groupPath = group['path'];
-            const groupPathSpan = document.querySelector(`#${groupPath} span`);
-            
-            groupPathSpan.innerHTML = group['diskPath'];
+            const span = document.querySelector(`#${group.path} span`);
+            span.innerHTML = group.diskPath;
 
-            if (surfaces.length > 0) {
-                const ul = document.querySelector(`#${groupPath} > ul`);
-                surfaces.sort((a, b) => a.name.localeCompare(b.name));
+            if (group.surfaces.length > 0) {
+                const ul = document.querySelector(`#${group.path} > ul`);
+                group.surfaces.sort((a, b) => a.name.localeCompare(b.name));
                 
-                for (const surface of surfaces) {
+                for (const surface of group.surfaces) {
                     const li = document.createElement('li');
                     li.innerHTML = `<li>
-                        <a href="${groupPath}/${surface.path}/">${surface.name}</a>
+                        <a href="${group.path}/${surface.path}/">${surface.name}</a>
                         <p>${surface.description}</p>
                     </li>`;
                     ul.appendChild(li);
@@ -54,7 +51,7 @@ import { Ardour } from '/shared/ardour.js';
             } else {
                 const p = document.createElement('p');
                 p.innerHTML = '<p>No surfaces found</p>';
-                document.getElementById(groupPath).appendChild(p);
+                document.getElementById(group.path).appendChild(p);
             }
         }
 
