@@ -43,8 +43,8 @@ import { Switch, DiscreteSlider, ContinuousSlider, LogarithmicSlider,
             } else if (msg.node == 'strip_plugin_param_desc') {
                 createStripPluginParam (msg.addr, ...msg.val);
             } else if (FEEDBACK_NODES.includes(msg.node)) {
-                if (widgets[[msg.node, msg.addr]]) {
-                    widgets[[msg.node, msg.addr]].value = msg.val[0];
+                if (widgets[msg.hash]) {
+                    widgets[msg.hash].value = msg.val[0];
                 }
             }
         };
