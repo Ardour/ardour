@@ -19,7 +19,8 @@
  // This example does not call the high level API methods in ardour.js
  // but interacts directly with the low level message stream instead
 
-import { MessageChannel, Message } from '/shared/channel.js';
+import { Message } from '/shared/message.js';
+import { MessageChannel } from '/shared/channel.js';
 
 import { Switch, DiscreteSlider, ContinuousSlider, LogarithmicSlider,
         StripPanSlider, StripGainSlider, StripMeter } from './widget.js';
