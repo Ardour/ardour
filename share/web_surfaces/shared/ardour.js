@@ -160,13 +160,3 @@ export class Ardour {
 	}
 
 }
-
-async function main() {
-	const ard = new Ardour();
-	ard.errorCallback = (error) => {
-		alert(error);
-	};
-	await ard.open();
-}
-
-main();
