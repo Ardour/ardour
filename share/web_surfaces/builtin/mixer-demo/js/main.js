@@ -16,8 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
- // This demo does not use the API methods in ardour.js
- // but interacts directly with the message stream
+ // This example does not call the high level API methods in ardour.js
+ // but interacts directly with the low level message stream instead
 
 import { MessageChannel, Message } from '/shared/channel.js';
 
