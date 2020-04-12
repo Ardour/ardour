@@ -16,12 +16,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-import { MessageChannel, Node } from './channel.js';
+import { MessageChannel, Message, Node } from './channel.js';
 
 export class Ardour {
 
 	constructor () {
 		this.channel = new MessageChannel(location.host);
+		this.channel.messageCallback = (msg) => this._onChannelMessage(msg);
+		this.pendingRequest = null;
 	}
 
 	async open () {
@@ -31,6 +33,8 @@ export class Ardour {
 	close () {
 		this.channel.close();
 	}
+
+	// Surface metadata API over HTTP
 
 	async getAvailableSurfaces () {
 		const response = await fetch('/surfaces.json');
@@ -57,62 +61,77 @@ export class Ardour {
 		}
 	}
 
+	// Surface control API over WebSockets channel
+	// client needs to call open() first
+
 	async getTempo () {
-		return await this._sendAndReceive(Node.TEMPO);
+		return (await this._sendAndReceive(Node.TEMPO))[0];
 	}
 	
 	async getStripGain (stripId) {
-		return await this._sendAndReceive(Node.STRIP_GAIN, [stripId]);
+		return (await this._sendAndReceive(Node.STRIP_GAIN, [stripId]))[0];
 	}
 
 	async getStripPan (stripId) {
-		return await this._sendAndReceive(Node.STRIP_PAN, [stripId]);
+		return (await this._sendAndReceive(Node.STRIP_PAN, [stripId]))[0];
 	}
 
 	async getStripMute (stripId) {
-		return await this._sendAndReceive(Node.STRIP_MUTE, [stripId]);
+		return (await this._sendAndReceive(Node.STRIP_MUTE, [stripId]))[0];
 	}
 
 	async getStripPluginEnable (stripId, pluginId) {
-		return await this._sendAndReceive(Node.STRIP_PLUGIN_ENABLE, [stripId, pluginId]);
+		return (await this._sendAndReceive(Node.STRIP_PLUGIN_ENABLE, [stripId, pluginId]))[0];
 	}
 
 	async getStripPluginParamValue (stripId, pluginId, paramId) {
-		return await this._sendAndReceive(Node.STRIP_PLUGIN_PARAM_VALUE, [stripId, pluginId, paramId]);
+		return (await this._sendAndReceive(Node.STRIP_PLUGIN_PARAM_VALUE, [stripId, pluginId, paramId]))[0];
 	}
 
-	async setTempo (bpm) {
+	setTempo (bpm) {
 		this._send(Node.TEMPO, [], [bpm]);
 	}
 
-	async setStripGain (stripId, db) {
+	setStripGain (stripId, db) {
 		this._send(Node.STRIP_GAIN, [stripId], [db]);
 	}
 
-	async setStripPan (stripId, value) {
+	setStripPan (stripId, value) {
 		this._send(Node.STRIP_PAN, [stripId], [value]);
 	}
 
-	async setStripMute (stripId, value) {
+	setStripMute (stripId, value) {
 		this._send(Node.STRIP_MUTE, [stripId], [value]);
 	}
 
-	async setStripPluginEnable (stripId, pluginId, value) {
+	setStripPluginEnable (stripId, pluginId, value) {
 		this._send(Node.STRIP_PLUGIN_ENABLE, [stripId, pluginId], [value]);
 	}
 
-	async setStripPluginParamValue (stripId, pluginId, paramId, value) {
+	setStripPluginParamValue (stripId, pluginId, paramId, value) {
 		this._send(Node.STRIP_PLUGIN_PARAM_VALUE, [stripId, pluginId, paramId], [value]);
 	}
 
-	async _send (addr, node, val) {
-		this.channel.send(new Message(addr, node, val));
+	// Private methods
+
+	_send (node, addr, val) {
+		const msg = new Message(node, addr, val);
+		this.channel.send(msg);
+		return msg;
 	}
 
-	async _sendAndReceive (addr, node, val) {
-		this._send(addr, node, val);
+	async _sendAndReceive (node, addr, val) {
+		return new Promise((resolve, reject) => {
+			const hash = this._send(node, addr, val).hash;
+			this.pendingRequest = {resolve: resolve, hash: hash};
+		});
+	}
 
-		// TO DO - wait for response
+	_onChannelMessage (msg) {
+		if (this.pendingRequest && (this.pendingRequest.hash == msg.hash)) {
+			this.pendingRequest.resolve(msg.val);
+			this.pendingRequest = null;
+		}
 	}
 
 	_fetchResponseStatusError (status) {
@@ -120,3 +139,12 @@ export class Ardour {
 	}
 
 }
+
+async function test() {
+	const ardour = new Ardour();
+	await ardour.open();
+	const bpm = await ardour.setTempo(80);
+	console.log(bpm);
+}
+
+test();
