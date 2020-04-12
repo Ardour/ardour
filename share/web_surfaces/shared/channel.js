@@ -41,28 +41,32 @@ export class MessageChannel {
 
 	constructor (host) {
 		// https://developer.mozilla.org/en-US/docs/Web/API/URL/host
-		this.host = host;
+		this._host = host;
 	}
 
 	async open () {
 		return new Promise((resolve, reject) => {
-			this.socket = new WebSocket(`ws://${this.host}`);
+			this._socket = new WebSocket(`ws://${this._host}`);
 
-			this.socket.onclose = () => this.closeCallback();
+			this._socket.onclose = () => this.closeCallback();
 
-			this.socket.onerror = (error) => this.errorCallback(error);
+			this._socket.onerror = (error) => this.errorCallback(error);
 
-			this.socket.onmessage = (event) => {
+			this._socket.onmessage = (event) => {
 				this.messageCallback (Message.fromJsonText(event.data));
 			};
 
-			this.socket.onopen = resolve;
+			this._socket.onopen = resolve;
 		});
 	}
 
+	async close () {
+		this._socket.close();
+	}
+
 	send (msg) {
-		if (this.socket) {
-			this.socket.send(msg.toJsonText());
+		if (this._socket) {
+			this._socket.send(msg.toJsonText());
 		} else {
 			throw Error('MessageChannel: cannot call send() before open()');
 		}

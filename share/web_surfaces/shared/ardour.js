@@ -21,17 +21,27 @@ import { MessageChannel, Message, ANode } from './channel.js';
 export class Ardour {
 
 	constructor () {
-		this.channel = new MessageChannel(location.host);
-		this.channel.messageCallback = (msg) => this._onChannelMessage(msg);
-		this.pendingRequest = null;
+		this._channel = new MessageChannel(location.host);
+		this._channel.errorCallback = (error) => this.errorCallback();
+		this._channel.messageCallback = (msg) => this._onChannelMessage(msg);
+		this._pendingRequest = null;
 	}
 
 	async open () {
-		await this.channel.open();
+		this._channel.closeCallback = () => {
+			this.errorCallback(new Error('Message channel unexpectedly closed'));
+		};
+
+		await this._channel.open();
 	}
 
 	close () {
-		this.channel.close();
+		this._channel.closeCallback = () => {};
+		this._channel.close();
+	}
+	
+	errorCallback (error) {
+		// empty
 	}
 
 	messageCallback (msg) {
@@ -120,21 +130,21 @@ export class Ardour {
 
 	_send (node, addr, val) {
 		const msg = new Message(node, addr, val);
-		this.channel.send(msg);
+		this._channel.send(msg);
 		return msg;
 	}
 
 	async _sendAndReceive (node, addr, val) {
 		return new Promise((resolve, reject) => {
 			const hash = this._send(node, addr, val).hash;
-			this.pendingRequest = {resolve: resolve, hash: hash};
+			this._pendingRequest = {resolve: resolve, hash: hash};
 		});
 	}
 
 	_onChannelMessage (msg) {
-		if (this.pendingRequest && (this.pendingRequest.hash == msg.hash)) {
-			this.pendingRequest.resolve(msg.val);
-			this.pendingRequest = null;
+		if (this._pendingRequest && (this._pendingRequest.hash == msg.hash)) {
+			this._pendingRequest.resolve(msg.val);
+			this._pendingRequest = null;
 		} else {
 			this.messageCallback(msg);
 		}
@@ -145,3 +155,13 @@ export class Ardour {
 	}
 
 }
+
+async function main() {
+	const ard = new Ardour();
+	ard.errorCallback = (error) => {
+		alert(error);
+	};
+	await ard.open();
+}
+
+main();
