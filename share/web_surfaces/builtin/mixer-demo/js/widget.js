@@ -16,7 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-import { nodeAddressHash } from '/shared/channel.js';
+import { Message } from '/shared/message.js';
 
 export class Widget {
 
@@ -41,7 +41,7 @@ export class Widget {
     }
 
     get hash () {
-        return nodeAddressHash(this.node, this.addr);
+        return Message.hash(this.node, this.addr);
     }
 
 }
