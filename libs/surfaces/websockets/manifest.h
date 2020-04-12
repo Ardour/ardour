@@ -24,7 +24,7 @@
 class SurfaceManifest
 {
 public:
-	// all ardour control surfaces store presets in xml format
+	// all ardour control surfaces implement presets using xml format
 	SurfaceManifest (std::string);
 
 	bool valid () { return _valid; }
@@ -32,6 +32,7 @@ public:
 	std::string path () { return _path; }
 	std::string name () { return _name; }
 	std::string description () { return _description; }
+	std::string version () { return _version; }
 
 	std::string to_json ();
 
@@ -43,6 +44,7 @@ private:
 	std::string _path;
 	std::string _name;
 	std::string _description;
+	std::string _version;
 };
 
 #endif // _ardour_surface_websockets_manifest_h_

@@ -2,4 +2,5 @@
 <WebSurface>
   <Name value="Mixer Demo"/>
   <Description value="Mixer control capabilities demo aimed at developers"/>
+  <Version value="1.0.0"/>
 </WebSurface>
