@@ -196,7 +196,7 @@ AudioStreamView::setup_rec_box ()
 {
 	//cerr << _trackview.name() << " streamview SRB region_views.size() = " << region_views.size() << endl;
 
-	if (!_trackview.session()->transport_stopped()) {
+	if (!_trackview.session()->transport_stopped_or_stopping()) {
 
 		// cerr << "\trolling\n";
 
