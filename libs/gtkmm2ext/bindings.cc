@@ -1068,7 +1068,7 @@ Bindings::bound_name (KeyboardKey const& kb, Operation op) const
 	if (b == km.end()) {
 		return "";
 	}
-	return b->second.action_name;
+	return b->second.action->get_label();
 }
 
 bool
