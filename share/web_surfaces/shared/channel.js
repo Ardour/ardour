@@ -18,7 +18,7 @@
 
 const JSON_INF = 1.0e+128;
 
-export class ArdourMessageChannel {
+export class MessageChannel {
 
     constructor (host) {
         // https://developer.mozilla.org/en-US/docs/Web/API/URL/host

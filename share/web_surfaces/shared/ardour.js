@@ -16,12 +16,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-import { ArdourMessageChannel } from './channel.js';
+import { MessageChannel } from './channel.js';
 
 export class Ardour {
 
 	constructor () {
-		this.channel = new ArdourMessageChannel(location.host);
+		this.channel = new MessageChannel(location.host);
 	}
 
 	async open () {

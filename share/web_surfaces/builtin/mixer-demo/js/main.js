@@ -16,7 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-import { ArdourMessageChannel } from '/shared/channel.js';
+import { MessageChannel } from '/shared/channel.js';
 
 import { Switch, DiscreteSlider, ContinuousSlider, LogarithmicSlider,
         StripPanSlider, StripGainSlider, StripMeter } from './widget.js';
@@ -27,7 +27,7 @@ import { Switch, DiscreteSlider, ContinuousSlider, LogarithmicSlider,
     const FEEDBACK_NODES = ['strip_gain', 'strip_pan', 'strip_meter', 'strip_plugin_enable',
         'strip_plugin_param_value'];
     
-    const channel = new ArdourMessageChannel(location.host);
+    const channel = new MessageChannel(location.host);
     const widgets = {};
 
     main();
