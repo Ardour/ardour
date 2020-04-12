@@ -67,16 +67,27 @@ using Gtkmm2ext::Bindings;
 
 sigc::signal<void> KeyEditor::UpdateBindings;
 
-static void bindings_collision_dialog (Gtk::Window& parent, const std::string& bound_name)
+static bool
+bindings_collision_dialog (Gtk::Window& parent, const std::string& bound_name)
 {
 	ArdourDialog dialog (parent, _("Colliding keybindings"), true);
 	Label label (string_compose(
-				_("The key sequence is already bound to '%1'. Please remove the other binding first."), bound_name));
+				_("The key sequence is already bound to '%1'.\n\n"
+				  "You can replace the existing binding or cancel this action."), bound_name));
 
 	dialog.get_vbox()->pack_start (label, true, true);
-	dialog.add_button (_("Ok"), Gtk::RESPONSE_ACCEPT);
+
+	dialog.add_button (_("Cancel"), Gtk::RESPONSE_CANCEL);
+	dialog.add_button (_("Replace"), Gtk::RESPONSE_ACCEPT);
 	dialog.show_all ();
-	dialog.run();
+
+	switch (dialog.run()) {
+	case RESPONSE_ACCEPT:
+		return true;
+	default:
+		break;
+	}
+	return false;
 }
 
 KeyEditor::KeyEditor ()
@@ -166,7 +177,6 @@ KeyEditor::remove_tab (string const &name)
 			}
 		}
 	}
-	cerr << "Removed " << name << endl;
 }
 
 void
@@ -324,15 +334,33 @@ KeyEditor::Tab::bind (GdkEventKey* release_event, guint pressed_key)
 	GdkModifierType mod = (GdkModifierType)(Keyboard::RelevantModifierKeyMask & release_event->state);
 	Gtkmm2ext::KeyboardKey new_binding (mod, pressed_key);
 
-	if (bindings->is_bound (new_binding, Gtkmm2ext::Bindings::Press)) {
-		bindings_collision_dialog (owner, bindings->bound_name (new_binding, Gtkmm2ext::Bindings::Press));
-		return;
+	std::string old_path;
+
+	if (bindings->is_bound (new_binding, Gtkmm2ext::Bindings::Press, &old_path)) {
+		if (!bindings_collision_dialog (owner, bindings->bound_name (new_binding, Gtkmm2ext::Bindings::Press))) {
+			return;
+		}
 	}
 
+	TreeModel::iterator oit = data_model->children().end();
+
+	if (!old_path.empty()) {
+		/* Remove the binding for the old action */
+		if (!bindings->remove (Gtkmm2ext::Bindings::Press, old_path, false)) {
+			return;
+		}
+		oit = find_action_path (data_model->children().begin(), data_model->children().end(),  old_path);
+	}
+
+
+	/* Add (or replace) the binding for the chosen action */
 	bool result = bindings->replace (new_binding, Gtkmm2ext::Bindings::Press, action_path);
 
 	if (result) {
 		(*it)[columns.binding] = gtk_accelerator_get_label (new_binding.key(), (GdkModifierType) new_binding.state());
+		if (oit != data_model->children().end()) {
+			(*oit)[columns.binding] = "";
+		}
 		owner.unbind_button.set_sensitive (true);
 	}
 }
@@ -438,6 +466,7 @@ KeyEditor::Tab::sort_column_changed ()
 {
 	int column;
 	SortType type;
+
 	if (data_model->get_sort_column_id (column, type)) {
 		owner.sort_column = column;
 		owner.sort_type = type;
