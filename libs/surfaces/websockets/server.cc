@@ -341,7 +341,7 @@ WebsocketsServer::send_index_hdr (Client wsi)
 		return 1;
 	}
 
-	if (strcmp (url, "/index.json") != 0) {
+	if (strcmp (url, "/surfaces.json") != 0) {
 		lws_return_http_status (wsi, 404, 0);
 		return 1;
 	}
