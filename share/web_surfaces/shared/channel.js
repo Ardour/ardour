@@ -19,96 +19,96 @@
 const JSON_INF = 1.0e+128;
 
 export function nodeAddressHash(node, addr) {
-    return [node].concat(addr).join('_');
+	return [node].concat(addr).join('_');
 }
 
 export class MessageChannel {
 
-    constructor (host) {
-        // https://developer.mozilla.org/en-US/docs/Web/API/URL/host
-        this.host = host;
-    }
+	constructor (host) {
+		// https://developer.mozilla.org/en-US/docs/Web/API/URL/host
+		this.host = host;
+	}
 
-    open () {
-        return new Promise((resolve, reject) => {
-            this.socket = new WebSocket(`ws://${this.host}`);
+	open () {
+		return new Promise((resolve, reject) => {
+			this.socket = new WebSocket(`ws://${this.host}`);
 
-            this.socket.onclose = () => this.closeCallback();
+			this.socket.onclose = () => this.closeCallback();
 
-            this.socket.onerror = (error) => this.errorCallback(error);
+			this.socket.onerror = (error) => this.errorCallback(error);
 
-            this.socket.onmessage = (event) => {
-                this.messageCallback (Message.fromJsonText(event.data));
-            };
+			this.socket.onmessage = (event) => {
+				this.messageCallback (Message.fromJsonText(event.data));
+			};
 
-            this.socket.onopen = resolve;
-        });
-    }
+			this.socket.onopen = resolve;
+		});
+	}
 
-    send (msg) {
-        this.socket.send(msg.toJsonText());
-    }
+	send (msg) {
+		this.socket.send(msg.toJsonText());
+	}
 
-    closeCallback () {
-        // empty
-    }
-    
-    errorCallback (error) {
-        // empty
-    }
+	closeCallback () {
+		// empty
+	}
+	
+	errorCallback (error) {
+		// empty
+	}
 
-    messageCallback (msg) {
-        // empty
-    }
+	messageCallback (msg) {
+		// empty
+	}
 
 }
 
 
 export class Message {
 
-    constructor (node, addr, val) {
-        this.node = node;
-        this.addr = addr;
-        this.val = [];
+	constructor (node, addr, val) {
+		this.node = node;
+		this.addr = addr;
+		this.val = [];
 
-        for (const i in val) {
-            if (val[i] >= JSON_INF) {
-                this.val.push(Infinity);
-            } else if (val[i] <= -JSON_INF) {
-                this.val.push(-Infinity);
-            } else {
-                this.val.push(val[i]);
-            }
-        }
-    }
+		for (const i in val) {
+			if (val[i] >= JSON_INF) {
+				this.val.push(Infinity);
+			} else if (val[i] <= -JSON_INF) {
+				this.val.push(-Infinity);
+			} else {
+				this.val.push(val[i]);
+			}
+		}
+	}
+	
+	static fromJsonText (jsonText) {
+		let rawMsg = JSON.parse(jsonText);
+		return new Message(rawMsg.node, rawMsg.addr || [], rawMsg.val);
+	}
 
-    toJsonText () {
-        let val = [];
+	toJsonText () {
+		let val = [];
 
-        for (const i in this.val) {
-            if (this.val[i] == Infinity) {
-                val.push(JSON_INF);
-            } else if (this.val[i] == -Infinity) {
-                val.push(-JSON_INF);
-            } else {
-                val.push(this.val[i]);
-            }
-        }
-        
-        return JSON.stringify({node: this.node, addr: this.addr, val: val});
-    }
+		for (const i in this.val) {
+			if (this.val[i] == Infinity) {
+				val.push(JSON_INF);
+			} else if (this.val[i] == -Infinity) {
+				val.push(-JSON_INF);
+			} else {
+				val.push(this.val[i]);
+			}
+		}
+		
+		return JSON.stringify({node: this.node, addr: this.addr, val: val});
+	}
 
-    get hash () {
-        return nodeAddressHash(this.node, this.addr);
-    }
+	get hash () {
+		return nodeAddressHash(this.node, this.addr);
+	}
 
-    toString () {
-        return `${this.node} (${this.addr}) = ${this.val}`;
-    }
+	toString () {
+		return `${this.node} (${this.addr}) = ${this.val}`;
+	}
 
 }
-
-Message.fromJsonText = (jsonText) => {
-    let rawMsg = JSON.parse(jsonText);
-    return new Message(rawMsg.node, rawMsg.addr || [], rawMsg.val);
-};
