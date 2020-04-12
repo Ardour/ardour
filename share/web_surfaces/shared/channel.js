@@ -33,7 +33,7 @@ export const Node = Object.freeze({
 
 
 export function nodeAddressHash(node, addr) {
-	return [node].concat(addr).join('_');
+	return [node].concat(addr || []).join('_');
 }
 
 
@@ -44,7 +44,7 @@ export class MessageChannel {
 		this.host = host;
 	}
 
-	open () {
+	async open () {
 		return new Promise((resolve, reject) => {
 			this.socket = new WebSocket(`ws://${this.host}`);
 
