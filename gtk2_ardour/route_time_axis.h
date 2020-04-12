@@ -145,6 +145,7 @@ public:
 	void reset_meter ();
 	void clear_meter ();
 	void io_changed (ARDOUR::IOChange, void *);
+	void chan_count_changed ();
 	void meter_changed ();
 	void effective_gain_display () { gm.effective_gain_display(); }
 

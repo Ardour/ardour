@@ -321,6 +321,8 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		track()->FreezeChange.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::map_frozen, this), gui_context());
 		track()->SpeedChanged.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::speed_changed, this), gui_context());
 
+		track()->ChanCountChanged.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::chan_count_changed, this), gui_context());
+
 		/* pick up the correct freeze state */
 		map_frozen ();
 
@@ -2404,15 +2406,19 @@ RouteTimeAxisView::io_changed (IOChange /*change*/, void */*src*/)
 {
 	reset_meter ();
 	if (_route && !no_redraw) {
-		AudioStreamView* asv = dynamic_cast<AudioStreamView*>(_view);
-		if (asv) {
-			/* this needs to happen with the disk-reader's I/O changed,
-			 * however there is no dedicated signal for this, and in almost
-			 * call cases it follows I/O changes.
-			 * This is similar to ARDOUR_UI::cleanup_peakfiles, and
-			 * re-loads wave-form displays. */
-			asv->reload_waves ();
-		}
+		request_redraw ();
+	}
+}
+
+void
+RouteTimeAxisView::chan_count_changed ()
+{
+	AudioStreamView* asv = dynamic_cast<AudioStreamView*>(_view);
+	if (_route && !no_redraw && asv) {
+		/* This is similar to ARDOUR_UI::cleanup_peakfiles, and
+		 * re-loads wave-form displays. */
+		asv->reload_waves ();
+		reset_meter ();
 		request_redraw ();
 	}
 }
