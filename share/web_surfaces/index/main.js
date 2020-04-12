@@ -39,7 +39,7 @@ import { Ardour } from '/shared/ardour.js';
             li.innerHTML = `<li>
                 <span>Filesystem location:</span>
                 &thinsp;
-                <span class="disk-path">${group.diskPath}</span>
+                <span class="filesystem-path">${group.filesystemPath}</span>
             </li>`;
             ul.appendChild(li);
 
