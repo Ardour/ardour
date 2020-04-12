@@ -34,6 +34,10 @@ export class Ardour {
 		this.channel.close();
 	}
 
+	messageCallback (msg) {
+		// empty
+	}
+
 	// Surface metadata API over HTTP
 
 	async getAvailableSurfaces () {
@@ -62,7 +66,7 @@ export class Ardour {
 	}
 
 	// Surface control API over WebSockets channel
-	// client needs to call open() first
+	// clients need to call open() before calling these methods
 
 	async getTempo () {
 		return (await this._sendAndReceive(Node.TEMPO))[0];
@@ -131,6 +135,8 @@ export class Ardour {
 		if (this.pendingRequest && (this.pendingRequest.hash == msg.hash)) {
 			this.pendingRequest.resolve(msg.val);
 			this.pendingRequest = null;
+		} else {
+			this.messageCallback(msg);
 		}
 	}
 
