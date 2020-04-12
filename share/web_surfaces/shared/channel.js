@@ -61,7 +61,11 @@ export class MessageChannel {
 	}
 
 	send (msg) {
-		this.socket.send(msg.toJsonText());
+		if (this.socket) {
+			this.socket.send(msg.toJsonText());
+		} else {
+			throw Error('MessageChannel: cannot call send() before open()');
+		}
 	}
 
 	closeCallback () {
