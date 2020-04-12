@@ -268,12 +268,15 @@ Processor::configure_io (ChanCount in, ChanCount out)
 	   Derived classes must override and set _configured_output appropriately
 	   if this is not the case
 	*/
+	bool changed = _configured_input != in || _configured_output != out;
 
 	_configured_input = in;
 	_configured_output = out;
 	_configured = true;
 
-	ConfigurationChanged (in, out); /* EMIT SIGNAL */
+	if (changed) {
+		ConfigurationChanged (in, out); /* EMIT SIGNAL */
+	}
 
 	return true;
 }
