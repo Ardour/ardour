@@ -22,17 +22,17 @@ import { Ardour } from '/shared/ardour.js';
 
     async function main () {
         try {
-            const index = await new Ardour().getAvailableSurfaces();
-            printIndex(index);
+            const surfaces = await new Ardour().getAvailableSurfaces();
+            printSurfaces(surfaces);
         } catch (err) {
-            printError(`Error loading index: ${err.message}`);
+            printError(`Error loading surfaces list: ${err.message}`);
         }
 
         document.getElementById('loading').style.display = 'none';
     }
 
-    function printIndex (index) {
-        for (const group of index) {
+    function printSurfaces (surfaces) {
+        for (const group of surfaces) {
             const ul = document.querySelector(`#${group.path} > ul`);
             
             const li = document.createElement('li');
