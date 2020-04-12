@@ -16,6 +16,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+ // This demo does not use the API methods in ardour.js
+ // but interacts directly with the message stream
+
 import { MessageChannel, Message } from '/shared/channel.js';
 
 import { Switch, DiscreteSlider, ContinuousSlider, LogarithmicSlider,
