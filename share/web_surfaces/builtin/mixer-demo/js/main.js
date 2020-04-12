@@ -16,7 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-import { MessageChannel } from '/shared/channel.js';
+import { MessageChannel, Message } from '/shared/channel.js';
 
 import { Switch, DiscreteSlider, ContinuousSlider, LogarithmicSlider,
         StripPanSlider, StripGainSlider, StripMeter } from './widget.js';
@@ -33,18 +33,18 @@ import { Switch, DiscreteSlider, ContinuousSlider, LogarithmicSlider,
     main();
 
     function main () {
-        channel.messageCallback = (node, addr, val) => {
-            log(`↙ ${node} (${addr}) = ${val}`, 'message-in');
+        channel.messageCallback = (msg) => {
+            log(`↙ ${msg}`, 'message-in');
 
-            if (node == 'strip_desc') {
-                createStrip (addr, ...val);
-            } else if (node == 'strip_plugin_desc') {
-                createStripPlugin (addr, ...val);
-            } else if (node == 'strip_plugin_param_desc') {
-                createStripPluginParam (addr, ...val);
-            } else if (FEEDBACK_NODES.includes(node)) {
-                if (widgets[[node, addr]]) {
-                    widgets[[node, addr]].value = val[0];
+            if (msg.node == 'strip_desc') {
+                createStrip (msg.addr, ...msg.val);
+            } else if (msg.node == 'strip_plugin_desc') {
+                createStripPlugin (msg.addr, ...msg.val);
+            } else if (msg.node == 'strip_plugin_param_desc') {
+                createStripPluginParam (msg.addr, ...msg.val);
+            } else if (FEEDBACK_NODES.includes(msg.node)) {
+                if (widgets[[msg.node, msg.addr]]) {
+                    widgets[[msg.node, msg.addr]].value = msg.val[0];
                 }
             }
         };
@@ -127,9 +127,9 @@ import { Switch, DiscreteSlider, ContinuousSlider, LogarithmicSlider,
     }
 
     function send (widget) {
-        const val = widget.value;
-        log(`↗ ${widget.node} (${widget.addr}) = ${val}`, 'message-out');
-        channel.send(widget.node, widget.addr, [val]);
+        const msg = new Message(widget.node, widget.addr, [widget.value]);
+        log(`↗ ${msg}`, 'message-out');
+        channel.send(msg);
     }
 
     function createElem (html, parent) {

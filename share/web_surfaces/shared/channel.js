@@ -28,11 +28,21 @@ export class MessageChannel {
     open () {
         return new Promise((resolve, reject) => {
             this.socket = new WebSocket(`ws://${this.host}`);
+
             this.socket.onclose = () => this.closeCallback();
+
             this.socket.onerror = (error) => this.errorCallback(error);
-            this.socket.onmessage = (event) => this._onMessage(event);
+
+            this.socket.onmessage = (event) => {
+                this.messageCallback (Message.fromJsonText(event.data));
+            };
+
             this.socket.onopen = resolve;
         });
+    }
+
+    send (msg) {
+        this.socket.send(msg.toJsonText());
     }
 
     closeCallback () {
@@ -43,36 +53,58 @@ export class MessageChannel {
         // empty
     }
 
-    messageCallback (node, addr, val) {
+    messageCallback (msg) {
         // empty
     }
 
-    send (node, addr, val) {
+}
+
+
+export class Message {
+
+    constructor (node, addr, val) {
+        this.node = node;
+        this.addr = addr;
+        this.val = [];
+
         for (const i in val) {
-            if (val[i] == Infinity) {
-                val[i] = JSON_INF;
-            } else if (val[i] == -Infinity) {
-                val[i] = -JSON_INF;
+            if (val[i] >= JSON_INF) {
+                this.val.push(Infinity);
+            } else if (val[i] <= -JSON_INF) {
+                this.val.push(-Infinity);
+            } else {
+                this.val.push(val[i]);
+            }
+        }
+    }
+
+    toJsonText () {
+        let val = [];
+
+        for (const i in this.val) {
+            if (this.val[i] == Infinity) {
+                val.push(JSON_INF);
+            } else if (this.val[i] == -Infinity) {
+                val.push(-JSON_INF);
+            } else {
+                val.push(this.val[i]);
             }
         }
         
-        const json = JSON.stringify({node: node, addr: addr, val: val});
-
-        this.socket.send(json);
+        return JSON.stringify({node: this.node, addr: this.addr, val: val});
     }
 
-    _onMessage (event) {
-        const msg = JSON.parse(event.data);
+    get hash () {
+        return [this.node].concat(this.addr).join('_');
+    }
 
-        for (const i in msg.val) {
-            if (msg.val[i] >= JSON_INF) {
-                msg.val[i] = Infinity;
-            } else if (msg.val[i] <= -JSON_INF) {
-                msg.val[i] = -Infinity;
-            }
-        }
-
-        this.messageCallback(msg.node, msg.addr || [], msg.val);
+    toString () {
+        return `${this.node} (${this.addr}) = ${this.val}`;
     }
 
 }
+
+Message.fromJsonText = (jsonText) => {
+    let rawMsg = JSON.parse(jsonText);
+    return new Message(rawMsg.node, rawMsg.addr || [], rawMsg.val);
+};
