@@ -80,7 +80,7 @@ ServerResources::scan ()
 {
 	std::stringstream ss;
 
-	std::string builtin_dir_str   = builtin_dir ();
+	std::string builtin_dir_str   = PBD::canonical_path (builtin_dir ());
 	SurfaceManifestVector builtin = read_manifests (builtin_dir_str);
 
 	ss << "[{"
@@ -96,7 +96,7 @@ ServerResources::scan ()
 		}
 	}
 
-	std::string user_dir_str   = user_dir ();
+	std::string user_dir_str   = PBD::canonical_path (user_dir ());
 	SurfaceManifestVector user = read_manifests (user_dir_str);
 
 	ss << "]},{" 
