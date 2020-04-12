@@ -132,6 +132,8 @@ Track::init ()
 
 	_input->changed.connect_same_thread (*this, boost::bind (&Track::input_changed, this));
 
+	_disk_reader->ConfigurationChanged.connect_same_thread (*this, boost::bind (&Track::chan_count_changed, this));
+
 	return 0;
 }
 
@@ -141,6 +143,12 @@ Track::input_changed ()
 	if (_disk_writer && _alignment_choice == Automatic) {
 		set_align_choice_from_io ();
 	}
+}
+
+void
+Track::chan_count_changed ()
+{
+	ChanCountChanged (); /* EMIT SIGNAL */
 }
 
 XMLNode&

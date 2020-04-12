@@ -171,6 +171,7 @@ public:
 	PBD::Signal0<void> PlaylistChanged;
 	PBD::Signal0<void> SpeedChanged;
 	PBD::Signal0<void> AlignmentStyleChanged;
+	PBD::Signal0<void> ChanCountChanged;
 
 protected:
 	XMLNode& state (bool save_template);
@@ -218,13 +219,14 @@ protected:
 
 	AlignChoice _alignment_choice;
 	void set_align_choice_from_io ();
-	void input_changed ();
 
 	void use_captured_audio_sources (SourceList&, CaptureInfos const &);
 	void use_captured_midi_sources (SourceList&, CaptureInfos const &);
 
 private:
 	void parameter_changed (std::string const & p);
+	void input_changed ();
+	void chan_count_changed ();
 
 	std::string _diskstream_name;
 };
