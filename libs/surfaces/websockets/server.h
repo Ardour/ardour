@@ -86,8 +86,8 @@ private:
 	int del_client (Client);
 	int recv_client (Client, void*, size_t);
 	int write_client (Client);
-	int send_index_hdr (Client);
-	int send_index_body (Client);
+	int send_availsurf_hdr (Client);
+	int send_availsurf_body (Client);
 
 	bool io_handler (Glib::IOCondition, lws_sockfd_type);
 

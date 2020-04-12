@@ -333,7 +333,7 @@ WebsocketsServer::write_client (Client wsi)
 }
 
 int
-WebsocketsServer::send_index_hdr (Client wsi)
+WebsocketsServer::send_availsurf_hdr (Client wsi)
 {
 	char url[1024];
 
@@ -384,7 +384,7 @@ WebsocketsServer::send_index_hdr (Client wsi)
 }
 
 int
-WebsocketsServer::send_index_body (Client wsi)
+WebsocketsServer::send_availsurf_body (Client wsi)
 {
 	std::string index = _resources.scan ();
 
@@ -505,13 +505,13 @@ WebsocketsServer::lws_callback (struct lws* wsi, enum lws_callback_reasons reaso
 			break;
 
 		/* will be called only if the requested url is not fulfilled
-		   by the any of the mount configurations (index, builtin, user) */
+		   by the any of the mount configurations (builtin, user) */
 		case LWS_CALLBACK_HTTP:
-			rc = server->send_index_hdr (wsi);
+			rc = server->send_availsurf_hdr (wsi);
 			break;
 
 		case LWS_CALLBACK_HTTP_WRITEABLE:
-			rc = server->send_index_body (wsi);
+			rc = server->send_availsurf_body (wsi);
 			break;
 
 		case LWS_CALLBACK_CLOSED_HTTP:
