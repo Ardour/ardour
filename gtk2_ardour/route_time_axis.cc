@@ -2353,14 +2353,14 @@ RouteTimeAxisView::layer_display () const
 void
 RouteTimeAxisView::fast_update ()
 {
-	gm.get_level_meter().update_meters ();
+	gm.update_meters ();
 }
 
 void
 RouteTimeAxisView::hide_meter ()
 {
 	clear_meter ();
-	gm.get_level_meter().hide_meters ();
+	gm.hide_all_meters ();
 }
 
 void
@@ -2386,7 +2386,7 @@ RouteTimeAxisView::reset_meter ()
 void
 RouteTimeAxisView::clear_meter ()
 {
-	gm.get_level_meter().clear_meters ();
+	gm.reset_peak_display ();
 }
 
 void
