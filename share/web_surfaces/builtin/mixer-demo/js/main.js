@@ -16,11 +16,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
- // This example does not call the high level API methods in ardour.js
- // but interacts directly with the low level message stream instead
+ // This example does not call the API methods in ardour.js,
+ // instead it interacts at a lower level by coupling the widgets
+ // tightly to the message stream
 
 import { Message } from '/shared/message.js';
-import { MessageChannel } from '/shared/channel.js';
+import { Ardour } from '/shared/ardour.js';
 
 import { Switch, DiscreteSlider, ContinuousSlider, LogarithmicSlider,
         StripPanSlider, StripGainSlider, StripMeter } from './widget.js';
@@ -31,13 +32,13 @@ import { Switch, DiscreteSlider, ContinuousSlider, LogarithmicSlider,
     const FEEDBACK_NODES = ['strip_gain', 'strip_pan', 'strip_meter', 'strip_plugin_enable',
         'strip_plugin_param_value'];
     
-    const channel = new MessageChannel(location.host);
+    const ardour = new Ardour(location.host);
     const widgets = {};
 
     main();
 
     function main () {
-        channel.messageCallback = (msg) => {
+        ardour.messageCallback = (msg) => {
             log(`↙ ${msg}`, 'message-in');
 
             if (msg.node == 'strip_desc') {
@@ -53,15 +54,11 @@ import { Switch, DiscreteSlider, ContinuousSlider, LogarithmicSlider,
             }
         };
 
-        channel.closeCallback = () => {
-            log('Connection dropped', 'error');
+        ardour.errorCallback = () => {
+            log('Client error', 'error');
         };
 
-        channel.errorCallback = () => {
-            log('Connection error', 'error');
-        };
-
-        channel.open();
+        ardour.open();
     }
 
     function createStrip (addr, name) {
@@ -133,7 +130,7 @@ import { Switch, DiscreteSlider, ContinuousSlider, LogarithmicSlider,
     function send (widget) {
         const msg = new Message(widget.node, widget.addr, [widget.value]);
         log(`↗ ${msg}`, 'message-out');
-        channel.send(msg);
+        ardour.send(msg);
     }
 
     function createElem (html, parent) {
