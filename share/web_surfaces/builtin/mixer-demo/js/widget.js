@@ -39,7 +39,7 @@ export class Widget {
     }
 
     get hash () {
-        return [this.node, this.addr];
+        return [this.node].concat(this.addr).join('_');
     }
 
 }
