@@ -139,12 +139,3 @@ export class Ardour {
 	}
 
 }
-
-async function test() {
-	const ardour = new Ardour();
-	await ardour.open();
-	const bpm = await ardour.setTempo(80);
-	console.log(bpm);
-}
-
-test();
