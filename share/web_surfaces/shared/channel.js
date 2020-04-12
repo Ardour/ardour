@@ -18,6 +18,10 @@
 
 const JSON_INF = 1.0e+128;
 
+export function nodeAddressHash(node, addr) {
+    return [node].concat(addr).join('_');
+}
+
 export class MessageChannel {
 
     constructor (host) {
@@ -95,7 +99,7 @@ export class Message {
     }
 
     get hash () {
-        return [this.node].concat(this.addr).join('_');
+        return nodeAddressHash(this.node, this.addr);
     }
 
     toString () {
