@@ -18,7 +18,7 @@
 
 export const JSON_INF = 1.0e+128;
 
-export const Node = Object.freeze({
+export const ANode = Object.freeze({
 	TEMPO: 'tempo',
 	STRIP_DESC: 'strip_desc',
 	STRIP_METER: 'strip_meter',

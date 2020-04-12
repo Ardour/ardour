@@ -16,7 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-import { MessageChannel, Message, Node } from './channel.js';
+import { MessageChannel, Message, ANode } from './channel.js';
 
 export class Ardour {
 
@@ -69,51 +69,51 @@ export class Ardour {
 	// clients need to call open() before calling these methods
 
 	async getTempo () {
-		return (await this._sendAndReceive(Node.TEMPO))[0];
+		return (await this._sendAndReceive(ANode.TEMPO))[0];
 	}
 	
 	async getStripGain (stripId) {
-		return (await this._sendAndReceive(Node.STRIP_GAIN, [stripId]))[0];
+		return (await this._sendAndReceive(ANode.STRIP_GAIN, [stripId]))[0];
 	}
 
 	async getStripPan (stripId) {
-		return (await this._sendAndReceive(Node.STRIP_PAN, [stripId]))[0];
+		return (await this._sendAndReceive(ANode.STRIP_PAN, [stripId]))[0];
 	}
 
 	async getStripMute (stripId) {
-		return (await this._sendAndReceive(Node.STRIP_MUTE, [stripId]))[0];
+		return (await this._sendAndReceive(ANode.STRIP_MUTE, [stripId]))[0];
 	}
 
 	async getStripPluginEnable (stripId, pluginId) {
-		return (await this._sendAndReceive(Node.STRIP_PLUGIN_ENABLE, [stripId, pluginId]))[0];
+		return (await this._sendAndReceive(ANode.STRIP_PLUGIN_ENABLE, [stripId, pluginId]))[0];
 	}
 
 	async getStripPluginParamValue (stripId, pluginId, paramId) {
-		return (await this._sendAndReceive(Node.STRIP_PLUGIN_PARAM_VALUE, [stripId, pluginId, paramId]))[0];
+		return (await this._sendAndReceive(ANode.STRIP_PLUGIN_PARAM_VALUE, [stripId, pluginId, paramId]))[0];
 	}
 
 	setTempo (bpm) {
-		this._send(Node.TEMPO, [], [bpm]);
+		this._send(ANode.TEMPO, [], [bpm]);
 	}
 
 	setStripGain (stripId, db) {
-		this._send(Node.STRIP_GAIN, [stripId], [db]);
+		this._send(ANode.STRIP_GAIN, [stripId], [db]);
 	}
 
 	setStripPan (stripId, value) {
-		this._send(Node.STRIP_PAN, [stripId], [value]);
+		this._send(ANode.STRIP_PAN, [stripId], [value]);
 	}
 
 	setStripMute (stripId, value) {
-		this._send(Node.STRIP_MUTE, [stripId], [value]);
+		this._send(ANode.STRIP_MUTE, [stripId], [value]);
 	}
 
 	setStripPluginEnable (stripId, pluginId, value) {
-		this._send(Node.STRIP_PLUGIN_ENABLE, [stripId, pluginId], [value]);
+		this._send(ANode.STRIP_PLUGIN_ENABLE, [stripId, pluginId], [value]);
 	}
 
 	setStripPluginParamValue (stripId, pluginId, paramId, value) {
-		this._send(Node.STRIP_PLUGIN_PARAM_VALUE, [stripId, pluginId, paramId], [value]);
+		this._send(ANode.STRIP_PLUGIN_PARAM_VALUE, [stripId, pluginId, paramId], [value]);
 	}
 
 	// Private methods
