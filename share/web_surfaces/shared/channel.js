@@ -16,11 +16,26 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-const JSON_INF = 1.0e+128;
+export const JSON_INF = 1.0e+128;
+
+export const Node = Object.freeze({
+	TEMPO: "tempo",
+	STRIP_DESC: "strip_desc",
+	STRIP_METER: "strip_meter",
+	STRIP_GAIN: "strip_gain",
+	STRIP_PAN: "strip_pan",
+	STRIP_MUTE: "strip_mute",
+	STRIP_PLUGIN_DESC: "strip_plugin_desc",
+	STRIP_PLUGIN_ENABLE: "strip_plugin_enable",
+	STRUP_PLUGIN_PARAM_DESC: "strip_plugin_param_desc",
+	STRIP_PLUGIN_PARAM_VALUE: "strip_plugin_param_value"
+});
+
 
 export function nodeAddressHash(node, addr) {
 	return [node].concat(addr).join('_');
 }
+
 
 export class MessageChannel {
 
@@ -81,7 +96,7 @@ export class Message {
 			}
 		}
 	}
-	
+
 	static fromJsonText (jsonText) {
 		let rawMsg = JSON.parse(jsonText);
 		return new Message(rawMsg.node, rawMsg.addr || [], rawMsg.val);
