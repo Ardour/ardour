@@ -33,7 +33,7 @@ export class Ardour {
 	}
 
 	async getAvailableSurfaces () {
-		const response = await fetch('/index.json');
+		const response = await fetch('/surfaces.json');
 		
 		if (response.status == 200) {
 			return await response.json();
