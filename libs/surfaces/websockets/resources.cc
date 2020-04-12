@@ -84,7 +84,7 @@ ServerResources::scan ()
 	SurfaceManifestVector builtin = read_manifests (builtin_dir_str);
 
 	ss << "[{"
-		<< "\"diskPath\":\"" << builtin_dir_str << "\""
+		<< "\"filesystemPath\":\"" << builtin_dir_str << "\""
 		<< ",\"path\":\"" << builtin_dir_name << "\""
 		<< ",\"surfaces\":"
 		<< "[";
@@ -100,7 +100,7 @@ ServerResources::scan ()
 	SurfaceManifestVector user = read_manifests (user_dir_str);
 
 	ss << "]},{" 
-		<< "\"diskPath\":\"" << user_dir_str << "\""
+		<< "\"filesystemPath\":\"" << user_dir_str << "\""
 		<< ",\"path\":\"" << user_dir_name << "\"" 
 		<< ",\"surfaces\":" 
 		<< "[";
