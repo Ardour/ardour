@@ -65,7 +65,7 @@ export class Ardour {
 		}
 	}
 
-	// Surface control API over WebSockets channel
+	// Surface control API over WebSockets
 	// clients need to call open() before calling these methods
 
 	async getTempo () {
