@@ -1549,9 +1549,10 @@ Session::auto_loop_changed (Location* location)
 
 			} else {
 
-				// schedule a buffer overwrite to refill buffers with the new loop.
-
-				request_overwrite_buffer (boost::shared_ptr<Track>(), LoopChanged);
+				/* schedule a buffer overwrite to refill buffers with the new loop. */
+				SessionEvent *ev = new SessionEvent (SessionEvent::OverwriteAll, SessionEvent::Add, SessionEvent::Immediate, 0, 0, 0.0);
+				ev->overwrite = LoopChanged;
+				queue_event (ev);
 			}
 		}
 

@@ -53,6 +53,7 @@ public:
 		RangeStop,
 		RangeLocate,
 		Overwrite,
+		OverwriteAll,
 		Audition,
 		SetPlayAudioRange,
 		CancelPlayAudioRange,
