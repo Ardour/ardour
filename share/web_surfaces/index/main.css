@@ -80,6 +80,11 @@ h2 {
 	margin: 4ex 0;
 }
 
+.surface-version {
+	color: #337ab7;
+	font-size: 0.75em;
+}
+
 .disk-path {
 	font-family: Monaco, monospace;
 	font-size: 0.66em;
