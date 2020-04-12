@@ -113,7 +113,7 @@ class LIBGTKMM2EXT_API Bindings {
 
 		std::string action_name;
 		std::string group_name; /* may be empty */
-		Glib::RefPtr<Gtk::Action> action;
+		mutable Glib::RefPtr<Gtk::Action> action;
 	};
 	typedef std::map<KeyboardKey,ActionInfo> KeybindingMap;
 
@@ -140,7 +140,7 @@ class LIBGTKMM2EXT_API Bindings {
 	void remove (MouseButton, Operation);
 	bool activate (MouseButton, Operation);
 
-	bool is_bound (KeyboardKey const&, Operation) const;
+	bool is_bound (KeyboardKey const&, Operation, std::string* path = 0) const;
 	std::string bound_name (KeyboardKey const&, Operation) const;
 	bool is_registered (Operation op, std::string const& action_name) const;
 

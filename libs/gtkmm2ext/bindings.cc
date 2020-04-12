@@ -583,7 +583,10 @@ bool
 Bindings::replace (KeyboardKey kb, Operation op, string const & action_name, bool can_save)
 {
 	if (is_registered(op, action_name)) {
-		remove (op, action_name, can_save);
+		/* never save after the remove, because if can_save is true, we
+		   will save after we add the new binding.
+		*/
+		remove (op, action_name, false);
 	}
 
 	/* XXX need a way to get the old group name */
@@ -608,8 +611,8 @@ Bindings::add (KeyboardKey kb, Operation op, string const& action_name, XMLPrope
 		(void) kbm.insert (new_pair).first;
 	}
 
-	DEBUG_TRACE (DEBUG::Bindings, string_compose ("add binding between %1 and %2, group [%3]\n",
-	                                              kb, action_name, (group ? group->value() : string())));
+	DEBUG_TRACE (DEBUG::Bindings, string_compose ("add binding between %1 (%3) and %2, group [%3]\n",
+	                                              kb, action_name, (group ? group->value() : string()), op));
 
 	if (can_save) {
 		Keyboard::keybindings_changed ();
@@ -624,6 +627,7 @@ Bindings::remove (Operation op, std::string const& action_name, bool can_save)
 {
 	bool erased_action = false;
 	KeybindingMap& kbm = get_keymap (op);
+
 	for (KeybindingMap::iterator k = kbm.begin(); k != kbm.end(); ++k) {
 		if (k->second.action_name == action_name) {
 			kbm.erase (k);
@@ -1054,10 +1058,17 @@ Bindings::associate_all ()
 }
 
 bool
-Bindings::is_bound (KeyboardKey const& kb, Operation op) const
+Bindings::is_bound (KeyboardKey const& kb, Operation op, std::string* path) const
 {
 	const KeybindingMap& km = get_keymap(op);
-	return km.find(kb) != km.end();
+	KeybindingMap::const_iterator i = km.find (kb);
+	if (i != km.end()) {
+		if (path) {
+			*path = i->second.action_name;
+		}
+		return true;
+	}
+	return false;
 }
 
 std::string
@@ -1065,10 +1076,17 @@ Bindings::bound_name (KeyboardKey const& kb, Operation op) const
 {
 	const KeybindingMap& km = get_keymap(op);
 	KeybindingMap::const_iterator b = km.find(kb);
+
 	if (b == km.end()) {
-		return "";
+		return string();
 	}
-	return b->second.action->get_label();
+
+	if (!b->second.action) {
+		/* action is looked up lazily, so it may not have been set yet */
+		b->second.action = ActionManager::get_action (b->second.action_name, false);
+	}
+
+	return b->second.action->get_label ();
 }
 
 bool
