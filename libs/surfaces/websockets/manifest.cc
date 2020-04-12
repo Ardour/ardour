@@ -54,10 +54,12 @@ SurfaceManifest::SurfaceManifest (std::string path)
 			_name = value;
 		} else if (name == "Description") {
 			_description = value;
+		} else if (name == "Version") {
+			_version = value;
 		}
 	}
 
-	if (_name.empty () || _description.empty ()) {
+	if (_name.empty () || _description.empty () || _version.empty ()) {
 #ifndef NDEBUG
 		std::cerr << "SurfaceManifest: missing properties in " << xml_path << std::endl;
 #endif
@@ -76,6 +78,7 @@ SurfaceManifest::to_json ()
 		<< "\"path\":\"" << Glib::path_get_basename (_path) << "\""
 		<< ",\"name\":\"" << _name << "\""
 		<< ",\"description\":\"" << _description << "\""
+		<< ",\"version\":\"" << _version << "\""
 		<< "}";
 
 	return ss.str ();

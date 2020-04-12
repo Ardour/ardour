@@ -2,4 +2,5 @@
 <WebSurface>
   <Name value="Transport"/>
   <Description value="Provides basic transport control (under construction)"/>
+  <Version value="1.0.0"/>
 </WebSurface>
