@@ -22,35 +22,38 @@ import { MessageChannel } from './channel.js';
 export class Ardour {
 
 	constructor () {
-		this._channel = new MessageChannel(location.host);
-		this._channel.errorCallback = (error) => this.errorCallback();
-		this._channel.messageCallback = (msg) => this._onChannelMessage(msg);
+		this._callbacks = [];
 		this._pendingRequest = null;
+		this._channel = new MessageChannel(location.host);
+
+		this._channel.onError = (error) => {
+			this._fireCallbacks('error', error);
+		};
+
+		this._channel.onMessage = (msg) => {
+			this._onChannelMessage(msg);
+		};
+	}
+
+	addCallback (callback) {
+		this._callbacks.push(callback);
 	}
 
 	async open () {
-		this._channel.closeCallback = () => {
-			this.errorCallback(new Error('Message channel unexpectedly closed'));
+		this._channel.onClose = () => {
+			this._fireCallbacks('error', new Error('Message channel unexpectedly closed'));
 		};
 
 		await this._channel.open();
 	}
 
 	close () {
-		this._channel.closeCallback = () => {};
+		this._channel.onClose = () => {};
 		this._channel.close();
 	}
 
 	send (msg) {
 		this._channel.send(msg);
-	}
-	
-	errorCallback (error) {
-		// empty
-	}
-
-	messageCallback (msg) {
-		// empty
 	}
 
 	// Surface metadata API over HTTP
@@ -73,7 +76,8 @@ export class Ardour {
 			const xmlDoc = new DOMParser().parseFromString(xmlText, 'text/xml');
 			return {
 				name: xmlDoc.getElementsByTagName('Name')[0].getAttribute('value'),
-				description: xmlDoc.getElementsByTagName('Description')[0].getAttribute('value')
+				description: xmlDoc.getElementsByTagName('Description')[0].getAttribute('value'),
+				version: xmlDoc.getElementsByTagName('Version')[0].getAttribute('value')
 			}
 		} else {
 			throw this._fetchResponseStatusError(response.status);
@@ -151,7 +155,21 @@ export class Ardour {
 			this._pendingRequest.resolve(msg.val);
 			this._pendingRequest = null;
 		} else {
-			this.messageCallback(msg);
+			this._fireCallbacks('message', msg);
+			this._fireCallbacks(msg.node, ...msg.addr, ...msg.val);
+		}
+	}
+
+	_fireCallbacks (name, ...args) {
+		// name_with_underscores -> onNameWithUnderscores
+		const method = 'on' + name.split('_').map((s) => {
+			return s[0].toUpperCase() + s.slice(1).toLowerCase();
+		}).join('');
+
+		for (const callback of this._callbacks) {
+			if (method in callback) {
+				callback[method](...args)
+			}
 		}
 	}
 

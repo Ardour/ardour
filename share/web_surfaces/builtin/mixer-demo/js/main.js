@@ -38,26 +38,28 @@ import { Switch, DiscreteSlider, ContinuousSlider, LogarithmicSlider,
     main();
 
     function main () {
-        ardour.messageCallback = (msg) => {
-            log(`↙ ${msg}`, 'message-in');
+        ardour.addCallback({
+            onMessage: (msg) => {
+                log(`↙ ${msg}`, 'message-in');
 
-            if (msg.node == 'strip_desc') {
-                createStrip (msg.addr, ...msg.val);
-            } else if (msg.node == 'strip_plugin_desc') {
-                createStripPlugin (msg.addr, ...msg.val);
-            } else if (msg.node == 'strip_plugin_param_desc') {
-                createStripPluginParam (msg.addr, ...msg.val);
-            } else if (FEEDBACK_NODES.includes(msg.node)) {
-                if (widgets[msg.hash]) {
-                    widgets[msg.hash].value = msg.val[0];
+                if (msg.node == 'strip_desc') {
+                    createStrip (msg.addr, ...msg.val);
+                } else if (msg.node == 'strip_plugin_desc') {
+                    createStripPlugin (msg.addr, ...msg.val);
+                } else if (msg.node == 'strip_plugin_param_desc') {
+                    createStripPluginParam (msg.addr, ...msg.val);
+                } else if (FEEDBACK_NODES.includes(msg.node)) {
+                    if (widgets[msg.hash]) {
+                        widgets[msg.hash].value = msg.val[0];
+                    }
                 }
+            },
+
+            onError: () => {
+                log('Client error', 'error');
             }
-        };
-
-        ardour.errorCallback = () => {
-            log('Client error', 'error');
-        };
-
+        });
+        
         ardour.open();
     }
 
