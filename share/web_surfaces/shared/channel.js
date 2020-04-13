@@ -29,19 +29,19 @@ export class MessageChannel {
 		return new Promise((resolve, reject) => {
 			this._socket = new WebSocket(`ws://${this._host}`);
 
-			this._socket.onclose = () => this.closeCallback();
+			this._socket.onclose = () => this.onClose();
 
-			this._socket.onerror = (error) => this.errorCallback(error);
+			this._socket.onerror = (error) => this.onError(error);
 
 			this._socket.onmessage = (event) => {
-				this.messageCallback (Message.fromJsonText(event.data));
+				this.onMessage (Message.fromJsonText(event.data));
 			};
 
 			this._socket.onopen = resolve;
 		});
 	}
 
-	async close () {
+	close () {
 		this._socket.close();
 	}
 
@@ -53,16 +53,8 @@ export class MessageChannel {
 		}
 	}
 
-	closeCallback () {
-		// empty
-	}
-	
-	errorCallback (error) {
-		// empty
-	}
-
-	messageCallback (msg) {
-		// empty
-	}
+	onClose () {}
+	onError (error) {}
+	onMessage (msg) {}
 
 }
