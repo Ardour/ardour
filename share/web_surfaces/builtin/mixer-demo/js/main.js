@@ -20,7 +20,7 @@
  // instead it interacts at a lower level by coupling the widgets
  // tightly to the message stream
 
-import { Message } from '/shared/message.js';
+import { ANode, Message } from '/shared/message.js';
 import { Ardour } from '/shared/ardour.js';
 
 import { Switch, DiscreteSlider, ContinuousSlider, LogarithmicSlider,
@@ -29,8 +29,8 @@ import { Switch, DiscreteSlider, ContinuousSlider, LogarithmicSlider,
 (() => {
 
     const MAX_LOG_LINES = 1000;
-    const FEEDBACK_NODES = ['strip_gain', 'strip_pan', 'strip_meter', 'strip_plugin_enable',
-        'strip_plugin_param_value'];
+    const FEEDBACK_NODES = [ANode.STRIP_GAIN, ANode.STRIP_PAN, ANode.STRIP_METER,
+                            ANode.STRIP_PLUGIN_ENABLE, ANode.STRIP_PLUGIN_PARAM_VALUE];
     
     const ardour = new Ardour(location.host);
     const widgets = {};
@@ -42,11 +42,11 @@ import { Switch, DiscreteSlider, ContinuousSlider, LogarithmicSlider,
             onMessage: (msg) => {
                 log(`↙ ${msg}`, 'message-in');
 
-                if (msg.node == 'strip_desc') {
+                if (msg.node == ANode.STRIP_DESC) {
                     createStrip (msg.addr, ...msg.val);
-                } else if (msg.node == 'strip_plugin_desc') {
+                } else if (msg.node == ANode.STRIP_PLUGIN_DESC) {
                     createStripPlugin (msg.addr, ...msg.val);
-                } else if (msg.node == 'strip_plugin_param_desc') {
+                } else if (msg.node == ANode.STRIP_PLUGIN_PARAM_DESC) {
                     createStripPluginParam (msg.addr, ...msg.val);
                 } else if (FEEDBACK_NODES.includes(msg.node)) {
                     if (widgets[msg.hash]) {
