@@ -2414,7 +2414,6 @@ RegionRippleDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	// remove the regions being rippled from the dragging view, updating them to
 	// their new positions
-	remove_unselected_from_views (prev_amount, true);
 
 	if (allow_moves_across_tracks) {
 		if (orig_tav) {
@@ -2422,6 +2421,8 @@ RegionRippleDrag::finished (GdkEvent* event, bool movement_occurred)
 			// regions on the track the regions were dragged off, so we need
 			// to add the original track to the undo record
 			orig_tav->playlist()->clear_changes();
+			orig_tav->playlist()->clear_owned_changes();
+			remove_unselected_from_views (prev_amount, true);
 			vector<Command*> cmds;
 			orig_tav->playlist()->rdiff (cmds);
 			_editor->session()->add_commands (cmds);
@@ -2440,6 +2441,11 @@ RegionRippleDrag::finished (GdkEvent* event, bool movement_occurred)
 
 		for (pi = playlists.begin(); pi != playlists.end(); ++pi) {
 			(*pi)->clear_changes();
+			(*pi)->clear_owned_changes();
+		}
+		remove_unselected_from_views (prev_amount, true);
+
+		for (pi = playlists.begin(); pi != playlists.end(); ++pi) {
 			vector<Command*> cmds;
 			(*pi)->rdiff (cmds);
 			_editor->session()->add_commands (cmds);
