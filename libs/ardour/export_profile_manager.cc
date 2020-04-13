@@ -782,7 +782,7 @@ ExportProfileManager::load_format_from_disk (std::string const & path)
 	if (format->format_id() == ExportFormatBase::F_FFMPEG) {
 		std::string unused;
 		if (!ArdourVideoToolPaths::transcoder_exe (unused, unused)) {
-			error << string_compose (_("Ignored format '%1': encoder is not avilable"), path) << endmsg;
+			error << string_compose (_("Ignored format '%1': encoder is not available"), path) << endmsg;
 			return;
 		}
 	}

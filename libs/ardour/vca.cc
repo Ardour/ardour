@@ -214,7 +214,7 @@ VCA::assign (boost::shared_ptr<VCA> v)
 {
 	/* prevent recursive assignments */
 	if (assigned_to (_session.vca_manager_ptr (), v)) {
-		warning << _("Master assignment inored to prevent recursion") << endmsg;
+		warning << _("Master assignment ignored to prevent recursion") << endmsg;
 		return;
 	}
 	Slavable::assign (v);
