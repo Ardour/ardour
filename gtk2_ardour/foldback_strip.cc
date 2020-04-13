@@ -363,7 +363,7 @@ FoldbackStrip::init ()
 	insert_box->show ();
 	insert_box->set_session (_session);
 	insert_box->set_width (Wide);
-	insert_box->set_size_request (PX_SCALE(_width + 34), PX_SCALE(100));
+	insert_box->set_size_request (PX_SCALE(_width + 34), PX_SCALE(160));
 
 	mute_solo_table.set_homogeneous (true);
 	mute_solo_table.set_spacings (2);
@@ -532,6 +532,16 @@ FoldbackStrip::update_fb_level_control ()
 void
 FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 {
+	bool sh_snd = _showing_sends;
+	if (_route) {
+		// before we do anything unset show sends
+		Mixer_UI::instance()->show_spill (boost::shared_ptr<ARDOUR::Stripable>());
+		BusSendDisplayChanged (boost::shared_ptr<Route> ()); /* EMIT SIGNAL */
+		_showing_sends = false;
+		_show_sends_button.set_active (false);
+		send_blink_connection.disconnect ();
+	}
+
 	/// FIX NO route
 	if (!rt) {
 		clear_send_box ();
@@ -599,6 +609,16 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 
 	show ();
 	set_button_names ();
+
+	if (sh_snd) {
+		// if last route had shows sends let it remain active
+		Mixer_UI::instance()->show_spill (_route);
+		BusSendDisplayChanged (_route); /* EMIT SIGNAL */
+		_showing_sends = true;
+		_show_sends_button.set_active (true);
+		send_blink_connection = Timers::blink_connect (sigc::mem_fun (*this, &FoldbackStrip::send_blink));
+	}
+
 }
 
 // predicate for sort call in get_sorted_stripables
