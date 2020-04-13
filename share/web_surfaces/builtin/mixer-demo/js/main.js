@@ -38,6 +38,11 @@ import { Switch, DiscreteSlider, ContinuousSlider, LogarithmicSlider,
     main();
 
     function main () {
+        ardour.getSurfaceManifest().then((manifest) => {
+            const div = document.getElementById('manifest');
+            div.innerHTML = `${manifest.name} v${manifest.version}`;
+        });
+
         ardour.addCallback({
             onMessage: (msg) => {
                 log(`↙ ${msg}`, 'message-in');
