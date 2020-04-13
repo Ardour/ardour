@@ -3518,7 +3518,7 @@ Mixer_UI::register_actions ()
 	ActionManager::register_action (group, "select-none", _("Deselect all strips and processors"), sigc::mem_fun (*this, &Mixer_UI::select_none));
 
 	ActionManager::register_action (group, "select-next-stripable", _("Select Next Mixer Strip"), sigc::mem_fun (*this, &Mixer_UI::select_next_strip));
-	ActionManager::register_action (group, "select-prev-stripable", _("Scroll Previous Mixer Strip"), sigc::mem_fun (*this, &Mixer_UI::select_prev_strip));
+	ActionManager::register_action (group, "select-prev-stripable", _("Select Previous Mixer Strip"), sigc::mem_fun (*this, &Mixer_UI::select_prev_strip));
 
 	ActionManager::register_action (group, "scroll-left", _("Scroll Mixer Window to the left"), sigc::mem_fun (*this, &Mixer_UI::scroll_left));
 	ActionManager::register_action (group, "scroll-right", _("Scroll Mixer Window to the right"), sigc::mem_fun (*this, &Mixer_UI::scroll_right));

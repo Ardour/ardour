@@ -324,7 +324,7 @@ StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_i
 					 * show an extra message indicating
 					 * that something is not right.
 					 */
-					ArdourMessageDialog msg (_("Ardour's audioengine has stopped running unexpectedly.\nSomething is probably wrong with your audio/MIDI device settings."));
+					ArdourMessageDialog msg (_("The audio/MIDI engine has stopped running unexpectedly.\nSomething is probably wrong with your audio/MIDI device settings."));
 					msg.set_position (WIN_POS_CENTER);
 					msg.run();
 					/* This has been shown before, so we do

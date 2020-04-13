@@ -567,6 +567,6 @@ PatchChangeGridDialog::route_property_changed (const PBD::PropertyChange& what_c
 {
 	boost::shared_ptr<ARDOUR::Route> r = wr.lock ();
 	if (r && what_changed.contains (ARDOUR::Properties::name)) {
-		set_title (string_compose (_("Select Patch for \"%1\"'"), r->name()));
+		set_title (string_compose (_("Select Patch for \"%1\""), r->name()));
 	}
 }
