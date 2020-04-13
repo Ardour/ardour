@@ -27,7 +27,7 @@ export const ANode = Object.freeze({
 	STRIP_MUTE: 'strip_mute',
 	STRIP_PLUGIN_DESC: 'strip_plugin_desc',
 	STRIP_PLUGIN_ENABLE: 'strip_plugin_enable',
-	STRUP_PLUGIN_PARAM_DESC: 'strip_plugin_param_desc',
+	STRIP_PLUGIN_PARAM_DESC: 'strip_plugin_param_desc',
 	STRIP_PLUGIN_PARAM_VALUE: 'strip_plugin_param_value'
 });
 
