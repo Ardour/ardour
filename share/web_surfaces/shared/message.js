@@ -19,15 +19,15 @@
 export const JSON_INF = 1.0e+128;
 
 export const ANode = Object.freeze({
-	TEMPO: 'tempo',
-	STRIP_DESC: 'strip_desc',
-	STRIP_METER: 'strip_meter',
-	STRIP_GAIN: 'strip_gain',
-	STRIP_PAN: 'strip_pan',
-	STRIP_MUTE: 'strip_mute',
-	STRIP_PLUGIN_DESC: 'strip_plugin_desc',
-	STRIP_PLUGIN_ENABLE: 'strip_plugin_enable',
-	STRIP_PLUGIN_PARAM_DESC: 'strip_plugin_param_desc',
+	TEMPO:                    'tempo',
+	STRIP_DESC:               'strip_desc',
+	STRIP_METER:              'strip_meter',
+	STRIP_GAIN:               'strip_gain',
+	STRIP_PAN:                'strip_pan',
+	STRIP_MUTE:               'strip_mute',
+	STRIP_PLUGIN_DESC:        'strip_plugin_desc',
+	STRIP_PLUGIN_ENABLE:      'strip_plugin_enable',
+	STRIP_PLUGIN_PARAM_DESC:  'strip_plugin_param_desc',
 	STRIP_PLUGIN_PARAM_VALUE: 'strip_plugin_param_value'
 });
 
@@ -49,7 +49,7 @@ export class Message {
 		}
 	}
 
-	static hash (node, addr) {
+	static nodeAddrId (node, addr) {
 		return [node].concat(addr || []).join('_');
 	}
 
@@ -74,8 +74,8 @@ export class Message {
 		return JSON.stringify({node: this.node, addr: this.addr, val: val});
 	}
 
-	get hash () {
-		return Message.hash(this.node, this.addr);
+	get nodeAddrId () {
+		return Message.nodeAddrId(this.node, this.addr);
 	}
 
 	toString () {

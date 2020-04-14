@@ -20,14 +20,34 @@
 
  export class ArdourCallback {
 
-	onTempo (bpm) {}
-	onStripGain (stripId, db) {}
-	onStripPan (stripId, value) {}
-	onStripMute (stripId, value) {}
-	onStripPluginEnable (stripId, pluginId, value) {}
-	onStripPluginParamValue (stripId, pluginId, paramId, value) {}
+	// Connection status
+	onConnected () {}
+	onDisconnected () {}
 
+	// All messages and errors
  	onMessage (msg) {}	
  	onError (error) {}
 
- }
+	// Globals
+	onTempo (bpm) {}
+
+	// Strips
+	onStripDesc (stripId, name) {}
+	onStripMeter (stripId, db) {}
+	onStripGain (stripId, db) {}
+	onStripPan (stripId, value) {}
+	onStripMute (stripId, value) {}
+
+	// Strip plugins
+	onStripPluginDesc (stripId, pluginId, name) {}
+	onStripPluginEnable (stripId, pluginId, value) {}
+
+	// Strip plugin parameters
+	// valueType
+	//   'b' : boolean
+	//   'i' : integer
+	//   'd' : double
+	onStripPluginParamDesc (stripId, pluginId, paramId, name, valueType, min, max, isLog) {}
+	onStripPluginParamValue (stripId, pluginId, paramId, value) {}
+
+}
