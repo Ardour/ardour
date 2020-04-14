@@ -3812,8 +3812,8 @@ ProcessorBox::register_actions ()
 	ActionManager::engine_sensitive_actions.push_back (act);
 
 	ActionManager::register_action (processor_box_actions, X_("newaux"), _("New Aux Send ..."));
-	ActionManager::register_action (processor_box_actions, X_("newlisten"), _("New Monitor Send ..."));
-	ActionManager::register_action (processor_box_actions, X_("removelisten"), _("Remove Monitor Send ..."));
+	ActionManager::register_action (processor_box_actions, X_("newlisten"), _("New Foldback Send ..."));
+	ActionManager::register_action (processor_box_actions, X_("removelisten"), _("Remove Foldback Send ..."));
 
 	ActionManager::register_action (processor_box_actions, X_("controls"), _("Controls"));
 	ActionManager::register_action (processor_box_actions, X_("send_options"), _("Send Options"));
