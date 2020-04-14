@@ -1422,11 +1422,7 @@ SoundFileOmega::reset_options ()
 		   to do embedding (or if we are importing a MIDI file).
 		*/
 
-		if (UIConfiguration::instance().get_only_copy_imported_files()) {
-			copy_files_btn.set_sensitive (false);
-		} else {
-			copy_files_btn.set_sensitive (false);
-		}
+		copy_files_btn.set_sensitive (false);
 	}
 
 	bool same_size;
@@ -1601,28 +1597,13 @@ SoundFileOmega::reset_options ()
 	 * or any file if we are under nsm control */
 	must_copy |= _session->get_nsm_state() || have_a_midi_file || notebook.get_current_page() == 2;
 
-	if (UIConfiguration::instance().get_only_copy_imported_files()) {
-
-		if (selection_can_be_embedded_with_links && !must_copy) {
-			copy_files_btn.set_sensitive (true);
-		} else {
-			if (must_copy) {
-				copy_files_btn.set_active (true);
-			}
-			copy_files_btn.set_sensitive (false);
-		}
-
-	}  else {
-
-		if (must_copy) {
-			copy_files_btn.set_active (true);
-		}
-		copy_files_btn.set_sensitive (!must_copy);
+	if (must_copy || !selection_can_be_embedded_with_links) {
+		copy_files_btn.set_active (true);
 	}
+	copy_files_btn.set_sensitive (!must_copy && selection_can_be_embedded_with_links);
 
 	return true;
 }
-
 
 bool
 SoundFileOmega::bad_file_message()
