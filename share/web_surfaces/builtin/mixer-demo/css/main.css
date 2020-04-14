@@ -7,6 +7,8 @@ body {
     color: rgb(248,248,242);
     font-family: Helvetica, Arial, sans-serif;
     height: 100%;
+    width: 100%;
+    position: fixed;
     margin: 0;
 }
 
@@ -20,24 +22,44 @@ div {
     height: 100%;
 }
 
-#strips {
+#surface {
     flex: 1;
-    overflow: scroll;
-    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
     box-shadow: 0px 0px 10px #000;
 }
 
-#manifest {
+#top {
+    display: flex;
+    align-items: center;
     padding: 0.25em 0.5em;
-    opacity: 0.5;
-    background: rgba(0,0,0,0.4);
+    box-shadow: 0px 0px 10px #000;
+}
+
+#top > img {
+    height: 24px;
+}
+
+#top > span {
+    opacity: 0.75;
+    margin-left: 12px;
 }
 
 #log {
-    height: 6em;
+    height: 7em;
     overflow: scroll;
     overflow-x: hidden;
     background: rgba(0,0,0,0.4);
+}
+
+#strips {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: scroll;
+    overflow-x: hidden;
+    background: rgba(0,0,0,0.2);
 }
 
 #log pre {
@@ -64,10 +86,12 @@ div {
 }
 
 .strip {
-    margin: 5%;
-    padding: 2.5% 5%;
+    margin: 20px;
+    padding: 20px 40px;
     background: rgba(0,0,0,0.1);
     border-radius: 5px;
+    width: 100%;
+    max-width: 768px;
 }
 
 .slider-meter {
@@ -75,12 +99,12 @@ div {
 }
 
 .strip-slider {
-    margin-top: 2.5%;
+    margin-top: 20px;
 }
 
 .plugin {
-    margin: 5%;
-    padding: 2.5% 5%;
+    margin: 40px 0;
+    padding: 20px 40px;
     background: rgba(0,0,0,0.05);
     border-radius: 5px;
 }
@@ -90,7 +114,7 @@ div {
 }
 
 .plugin-param {
-    margin: 5%;
+    margin: 40px;
 }
 
 .plugin-param.boolean {

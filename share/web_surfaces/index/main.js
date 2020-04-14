@@ -16,13 +16,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-import { Ardour } from '/shared/ardour.js';
+import { ArdourClient } from '/shared/ardour.js';
 
 (() => {
 
     async function main () {
         try {
-            const surfaces = await new Ardour().getAvailableSurfaces();
+            const surfaces = await new ArdourClient().getAvailableSurfaces();
             printSurfaces(surfaces);
         } catch (err) {
             printError(`Error loading surfaces list: ${err.message}`);
