@@ -345,6 +345,11 @@ MidiTimeAxisView::processors_changed (RouteProcessorChange c)
 void
 MidiTimeAxisView::use_midnam_info ()
 {
+	/* Rebuild controller menu */
+	_controller_menu_map.clear ();
+	delete controller_menu;
+	controller_menu = 0;
+
 	setup_midnam_patches ();
 }
 
@@ -515,7 +520,6 @@ MidiTimeAxisView::model_changed (const std::string& m)
 	_controller_menu_map.clear ();
 	delete controller_menu;
 	controller_menu = 0;
-	build_automation_action_menu (false);
 
 	if (patch_change_dialog ()) {
 		patch_change_dialog ()->refresh ();
