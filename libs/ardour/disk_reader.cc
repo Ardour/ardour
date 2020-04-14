@@ -510,6 +510,14 @@ DiskReader::declick_in_progress () const
 void
 DiskReader::configuration_changed ()
 {
+	boost::shared_ptr<ChannelList> c = channels.reader ();
+	if (!c->empty ()) {
+		ReaderChannelInfo* chaninfo = dynamic_cast<ReaderChannelInfo*> (c->front ());
+		if (!chaninfo->initialized) {
+			seek (_session.transport_sample(), true);
+			return;
+		}
+	}
 	_session.request_overwrite_buffer (_track, LoopDisabled);
 }
 
