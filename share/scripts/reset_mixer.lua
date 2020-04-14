@@ -193,7 +193,21 @@ function factory() return function()
 
 		if pref["eq"]    then reset_eq_controls(route, disp, auto) end
 		if pref["comp"]  then reset_comp_controls(route, disp, auto) end
-		if pref["sends"] then reset_send_controls(route, disp, auto) end
+		if pref["sends"] then 
+			reset_send_controls(route, disp, auto)
+
+			-- Can't use reset() on this becuase ctrl:desc().normal 
+			-- for master_send_enable_controllable is 0, and we really 
+			-- want 1.
+			local msec = route:master_send_enable_controllable()
+			if not(msec:isnil()) then
+				msec:set_value(1, disp)
+				if auto then
+					ctrl:set_automation_state(auto)
+				end
+			end
+		end
+		
 		reset_plugins(route, pref, auto)
 
 		if pref["rec"] then
