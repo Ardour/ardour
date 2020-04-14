@@ -21,7 +21,7 @@
  // tightly to the message stream
 
 import { ANode, Message } from '/shared/message.js';
-import { Ardour } from '/shared/ardour.js';
+import { ArdourClient } from '/shared/ardour.js';
 
 import { Switch, DiscreteSlider, ContinuousSlider, LogarithmicSlider,
         StripPanSlider, StripGainSlider, StripMeter } from './widget.js';
@@ -32,7 +32,7 @@ import { Switch, DiscreteSlider, ContinuousSlider, LogarithmicSlider,
     const FEEDBACK_NODES = [ANode.STRIP_GAIN, ANode.STRIP_PAN, ANode.STRIP_METER,
                             ANode.STRIP_PLUGIN_ENABLE, ANode.STRIP_PLUGIN_PARAM_VALUE];
     
-    const ardour = new Ardour(location.host);
+    const ardour = new ArdourClient(location.host);
     const widgets = {};
 
     main();
@@ -40,7 +40,7 @@ import { Switch, DiscreteSlider, ContinuousSlider, LogarithmicSlider,
     function main () {
         ardour.getSurfaceManifest().then((manifest) => {
             const div = document.getElementById('manifest');
-            div.innerHTML = `${manifest.name} v${manifest.version}`;
+            div.innerHTML = `${manifest.name.toUpperCase()} v${manifest.version} — ${manifest.description}`;
         });
 
         ardour.addCallback({
@@ -75,7 +75,7 @@ import { Switch, DiscreteSlider, ContinuousSlider, LogarithmicSlider,
         createElem(`<label class="comp-name" for="${id}">∿&emsp;&emsp;${name}</label>`, div);
         
         // meter
-        const meter = new StripMeter('strip_meter', addr);
+        const meter = new StripMeter(ANode.STRIP_METER, addr);
         meter.el.classList.add('slider-meter');
         meter.attach(div);
         register(meter);
@@ -83,14 +83,14 @@ import { Switch, DiscreteSlider, ContinuousSlider, LogarithmicSlider,
         // gain
         let holder = createElem(`<div class="strip-slider"></div>`, div); 
         createElem(`<label>Gain</label>`, holder);
-        const gain = new StripGainSlider('strip_gain', addr);
+        const gain = new StripGainSlider(ANode.STRIP_GAIN, addr);
         gain.attach(holder, (val) => send(gain));
         register(gain);
 
         // pan
         holder = createElem(`<div class="strip-slider"></div>`, div); 
         createElem(`<label>Pan</label>`, holder);
-        const pan = new StripPanSlider('strip_pan', addr);
+        const pan = new StripPanSlider(ANode.STRIP_PAN, addr);
         pan.attach(holder, (val) => send(pan));
         register(pan);
     }
@@ -100,33 +100,33 @@ import { Switch, DiscreteSlider, ContinuousSlider, LogarithmicSlider,
         const id = `plugin-${addr[0]}-${addr[1]}`;
         const div = createElem(`<div class="plugin" id="${id}"></div>`, strip);
         createElem(`<label class="comp-name">⨍&emsp;&emsp;${name}</label>`, div);
-        const enable = new Switch('strip_plugin_enable', addr);
+        const enable = new Switch(ANode.STRIP_PLUGIN_ENABLE, addr);
         enable.el.classList.add('plugin-enable');
         enable.attach(div, (val) => send(enable));
         register(enable);
     }
 
-    function createStripPluginParam (addr, name, data_type, min, max, is_log) {
-        let param, clazz;
+    function createStripPluginParam (addr, name, dataType, min, max, isLog) {
+        let param, cssClass;
 
-        if (data_type == 'b') {
-            clazz = 'boolean';
-            param = new Switch('strip_plugin_param_value', addr);
-        } else if (data_type == 'i') {
-            clazz = 'discrete';
-            param = new DiscreteSlider('strip_plugin_param_value', addr, min, max);
-        } else if (data_type == 'd') {
-            clazz = 'continuous';
-            if (is_log) {
-                param = new LogarithmicSlider('strip_plugin_param_value', addr, min, max);
+        if (dataType == 'b') {
+            cssClass = 'boolean';
+            param = new Switch(ANode.STRIP_PLUGIN_PARAM_VALUE, addr);
+        } else if (dataType == 'i') {
+            cssClass = 'discrete';
+            param = new DiscreteSlider(ANode.STRIP_PLUGIN_PARAM_VALUE, addr, min, max);
+        } else if (dataType == 'd') {
+            cssClass = 'continuous';
+            if (isLog) {
+                param = new LogarithmicSlider(ANode.STRIP_PLUGIN_PARAM_VALUE, addr, min, max);
             } else {
-                param = new ContinuousSlider('strip_plugin_param_value', addr, min, max);
+                param = new ContinuousSlider(ANode.STRIP_PLUGIN_PARAM_VALUE, addr, min, max);
             }
         }
 
         const plugin = document.getElementById(`plugin-${addr[0]}-${addr[1]}`);
         const id = `param-${addr[0]}-${addr[1]}-${addr[2]}`;
-        const div = createElem(`<div class="plugin-param ${clazz}" id="${id}"></div>`, plugin);
+        const div = createElem(`<div class="plugin-param ${cssClass}" id="${id}"></div>`, plugin);
         createElem(`<label for="${id}">${name}</label>`, div);
 
         param.attach(div, (val) => send(param));

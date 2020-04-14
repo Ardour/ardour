@@ -16,18 +16,36 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
- // Example empty callback
+// Surface metadata API over HTTP
 
- export class ArdourCallback {
+export class MetadataMixin {
 
-	onTempo (bpm) {}
-	onStripGain (stripId, db) {}
-	onStripPan (stripId, value) {}
-	onStripMute (stripId, value) {}
-	onStripPluginEnable (stripId, pluginId, value) {}
-	onStripPluginParamValue (stripId, pluginId, paramId, value) {}
+	async getAvailableSurfaces () {
+		const response = await fetch('/surfaces.json');
+		
+		if (response.status == 200) {
+			return await response.json();
+		} else {
+			throw this._fetchResponseStatusError(response.status);
+		}
+	}
 
- 	onMessage (msg) {}	
- 	onError (error) {}
+	async getSurfaceManifest () {
+		const response = await fetch('manifest.xml');
 
- }
+		if (response.status == 200) {
+			const manifest = {};
+			const xmlText = await response.text();
+			const xmlDoc = new DOMParser().parseFromString(xmlText, 'text/xml');
+			
+			for (const child of xmlDoc.children[0].children) {
+				manifest[child.tagName.toLowerCase()] = child.getAttribute('value');
+			}
+
+			return manifest;
+		} else {
+			throw this._fetchResponseStatusError(response.status);
+		}
+	}
+
+}

@@ -16,10 +16,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-import { ANode, Message } from './message.js';
+import { MetadataMixin } from './metadata.js';
+import { ControlMixin } from './control.js';
+import { Message } from './message.js';
 import { MessageChannel } from './channel.js';
 
-export class Ardour {
+// See *Mixin for the available APIs
+
+class BaseArdourClient {
 
 	constructor () {
 		this._callbacks = [];
@@ -56,90 +60,11 @@ export class Ardour {
 		this._channel.send(msg);
 	}
 
-	// Surface metadata API over HTTP
-
-	async getAvailableSurfaces () {
-		const response = await fetch('/surfaces.json');
-		
-		if (response.status == 200) {
-			return await response.json();
-		} else {
-			throw this._fetchResponseStatusError(response.status);
-		}
-	}
-
-	async getSurfaceManifest () {
-		const response = await fetch('manifest.xml');
-
-		if (response.status == 200) {
-			const xmlText = await response.text();
-			const xmlDoc = new DOMParser().parseFromString(xmlText, 'text/xml');
-			return {
-				name: xmlDoc.getElementsByTagName('Name')[0].getAttribute('value'),
-				description: xmlDoc.getElementsByTagName('Description')[0].getAttribute('value'),
-				version: xmlDoc.getElementsByTagName('Version')[0].getAttribute('value')
-			}
-		} else {
-			throw this._fetchResponseStatusError(response.status);
-		}
-	}
-
-	// Surface control API over WebSockets
-	// clients need to call open() before calling these methods
-
-	async getTempo () {
-		return (await this._sendAndReceive(ANode.TEMPO))[0];
-	}
-	
-	async getStripGain (stripId) {
-		return (await this._sendAndReceive(ANode.STRIP_GAIN, [stripId]))[0];
-	}
-
-	async getStripPan (stripId) {
-		return (await this._sendAndReceive(ANode.STRIP_PAN, [stripId]))[0];
-	}
-
-	async getStripMute (stripId) {
-		return (await this._sendAndReceive(ANode.STRIP_MUTE, [stripId]))[0];
-	}
-
-	async getStripPluginEnable (stripId, pluginId) {
-		return (await this._sendAndReceive(ANode.STRIP_PLUGIN_ENABLE, [stripId, pluginId]))[0];
-	}
-
-	async getStripPluginParamValue (stripId, pluginId, paramId) {
-		return (await this._sendAndReceive(ANode.STRIP_PLUGIN_PARAM_VALUE, [stripId, pluginId, paramId]))[0];
-	}
-
-	setTempo (bpm) {
-		this._send(ANode.TEMPO, [], [bpm]);
-	}
-
-	setStripGain (stripId, db) {
-		this._send(ANode.STRIP_GAIN, [stripId], [db]);
-	}
-
-	setStripPan (stripId, value) {
-		this._send(ANode.STRIP_PAN, [stripId], [value]);
-	}
-
-	setStripMute (stripId, value) {
-		this._send(ANode.STRIP_MUTE, [stripId], [value]);
-	}
-
-	setStripPluginEnable (stripId, pluginId, value) {
-		this._send(ANode.STRIP_PLUGIN_ENABLE, [stripId, pluginId], [value]);
-	}
-
-	setStripPluginParamValue (stripId, pluginId, paramId, value) {
-		this._send(ANode.STRIP_PLUGIN_PARAM_VALUE, [stripId, pluginId, paramId], [value]);
-	}
-
 	// Private methods
 
 	_send (node, addr, val) {
 		const msg = new Message(node, addr, val);
-		this._channel.send(msg);
+		this.send(msg);
 		return msg;
 	}
 
@@ -177,4 +102,17 @@ export class Ardour {
 		return new Error(`HTTP response status ${status}`);
 	}
 
+}
+
+export class ArdourClient extends mixin(BaseArdourClient, ControlMixin, MetadataMixin) {}
+
+function mixin (dstClass, ...classes) {
+	for (const srcClass of classes) {
+		for (const methName of Object.getOwnPropertyNames(srcClass.prototype)) {
+			if (methName != 'constructor') {
+				dstClass.prototype[methName] = srcClass.prototype[methName];
+			}
+		}
+	}
+	return dstClass;
 }
