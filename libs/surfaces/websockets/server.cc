@@ -57,20 +57,22 @@ WebsocketsServer::WebsocketsServer (ArdourSurface::ArdourWebsockets& surface)
 #if LWS_LIBRARY_VERSION_MAJOR >= 3
 	proto.tx_packet_size = 0;
 #endif
+
 	_lws_proto[0] = proto;
 	memset (&_lws_proto[1], 0, sizeof (lws_protocols));
 
-	// '/' is served by a static index.html file in the surface data directory
-	// inside it there is a 'builtin' subdirectory that contains all built-in
-	// surfaces so there is no need to create a dedicated mount point for them
-	// list of surfaces is available as a dynamically generated json file
+	/* '/' is served by a static index.html file in the surface data directory
+	 * inside it there is a 'builtin' subdirectory that contains all built-in
+	 * surfaces so there is no need to create a dedicated mount point for them
+	 * list of surfaces is available as a dynamically generated json file
+	 */
 	memset (&_lws_mnt_index, 0, sizeof (lws_http_mount));
 	_lws_mnt_index.mountpoint      = "/";
 	_lws_mnt_index.mountpoint_len  = strlen (_lws_mnt_index.mountpoint);
 	_lws_mnt_index.origin_protocol = LWSMPRO_FILE;
 	_lws_mnt_index.origin          = _resources.index_dir ().c_str ();
 
-	// user defined surfaces in the user config directory
+	/* user defined surfaces in the user config directory */
 	memset (&_lws_mnt_user, 0, sizeof (lws_http_mount));
 	_lws_mnt_user.mountpoint      = "/user";
 	_lws_mnt_user.mountpoint_len  = strlen (_lws_mnt_user.mountpoint);
@@ -86,6 +88,15 @@ WebsocketsServer::WebsocketsServer (ArdourSurface::ArdourWebsockets& surface)
 	_lws_info.uid       = -1;
 	_lws_info.gid       = -1;
 	_lws_info.user      = this;
+
+#if LWS_LIBRARY_VERSION_MAJOR < 3
+	/* older libwebsockets does not define mime type for svg files */
+	memset (&_lws_vhost_opt, 0, sizeof (lws_protocol_vhost_options));
+	_lws_vhost_opt.name = ".svg";
+	_lws_vhost_opt.value = "image/svg+xml";
+	_lws_mnt_index.extra_mimetypes = &_lws_vhost_opt;
+	_lws_mnt_user.extra_mimetypes = &_lws_vhost_opt;
+#endif
 }
 
 int

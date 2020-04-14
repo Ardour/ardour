@@ -62,11 +62,14 @@ public:
 	void update_all_clients (const NodeState&, bool);
 
 private:
-	struct lws_protocols             _lws_proto[2];
-	struct lws_http_mount            _lws_mnt_index;
-	struct lws_http_mount            _lws_mnt_user;
-	struct lws_context_creation_info _lws_info;
-	struct lws_context*              _lws_context;
+#if LWS_LIBRARY_VERSION_MAJOR < 3
+	struct lws_protocol_vhost_options _lws_vhost_opt;
+#endif
+	struct lws_protocols              _lws_proto[2];
+	struct lws_http_mount             _lws_mnt_index;
+	struct lws_http_mount             _lws_mnt_user;
+	struct lws_context_creation_info  _lws_info;
+	struct lws_context*               _lws_context;
 
 	Glib::RefPtr<Glib::IOChannel> _channel;
 
