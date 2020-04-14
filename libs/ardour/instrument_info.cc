@@ -178,6 +178,29 @@ InstrumentInfo::master_device_names () const
 #endif
 }
 
+/* reverse lookup which "ChannelNameSet" use "UsesControlNameList <name>",
+ * then add all channels that the ChannelNameSet is AvailableForChannels.
+ */
+uint16_t
+InstrumentInfo::channels_for_control_list (std::string const& ctrl_name_list) const
+{
+	boost::shared_ptr<MasterDeviceNames> const& dev_names (MidiPatchManager::instance ().master_device_by_model (model ()));
+	uint16_t channels = 0;
+	for (int c = 0; c < 16; ++c) {
+		boost::shared_ptr<ChannelNameSet> const& chan_names (dev_names->channel_name_set_by_channel (mode (), c));
+		if (!chan_names || !chan_names->available_for_channel (c + 1)) {
+			continue;
+		}
+		if (chan_names->control_list_name () == ctrl_name_list) {
+			channels |= 0x0001 << c;
+		}
+	}
+	if (channels == 0) {
+		channels = 65535;
+	}
+	return channels;
+}
+
 boost::shared_ptr<ControlNameList>
 InstrumentInfo::control_name_list (uint8_t channel)
 {
