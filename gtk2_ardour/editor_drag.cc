@@ -2278,9 +2278,8 @@ RegionRippleDrag::RegionRippleDrag (Editor* e, ArdourCanvas::Item* i, RegionView
 	RegionSelection selected_regions = _editor->selection->regions;
 	selection_length = selected_regions.end_sample() - selected_regions.start();
 
-	// we'll only allow dragging to another track in ripple mode if all the regions
-	// being dragged start off on the same track
-	allow_moves_across_tracks = (selected_regions.playlists().size() == 1);
+	// Rippling accross tracks disabled. Rippling on all tracks is the way to go in the future.
+	allow_moves_across_tracks = false; // (selected_regions.playlists().size() == 1);
 	prev_tav = NULL;
 	prev_amount = 0;
 	exclude = new RegionList;
