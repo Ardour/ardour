@@ -424,7 +424,6 @@ Editor::drop_paths_part_two (const vector<string>& paths, samplepos_t sample, do
 
 		/* drop onto canvas background: create new tracks */
 
-		sample = 0;
 		InstrumentSelector is; // instantiation builds instrument-list and sets default.
 		do_import (midi_paths, Editing::ImportDistinctFiles, ImportAsTrack, SrcBest, SMFTrackName, SMFTempoIgnore, sample, is.selected_instrument());
 
