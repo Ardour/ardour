@@ -2314,6 +2314,9 @@ RegionRippleDrag::RegionRippleDrag (Editor* e, ArdourCanvas::Item* i, RegionView
 
 	if (allow_moves_across_tracks) {
 		orig_tav = &(*selected_regions.begin())->get_time_axis_view();
+		for (std::list<DraggingView>::const_iterator it = _views.begin(); it != _views.end(); ++it) {
+			_orig_tav_ripples.push_back((*it).view->region());
+		}
 	} else {
 		orig_tav = NULL;
 	}
@@ -2423,6 +2426,26 @@ RegionRippleDrag::finished (GdkEvent* event, bool movement_occurred)
 			orig_tav->playlist()->clear_changes();
 			orig_tav->playlist()->clear_owned_changes();
 			remove_unselected_from_views (prev_amount, true);
+
+			std::list<boost::shared_ptr<Region> >::const_iterator it = _orig_tav_ripples.begin();
+			for (; it != _orig_tav_ripples.end(); ++it) {
+				const boost::shared_ptr<Region> r = *it;
+				bool found = false;
+				for (std::list<DraggingView>::const_iterator it = _views.begin(); it != _views.end(); ++it) {
+					if (it->view->region() == r) {
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					const samplecnt_t pos_after = r->position();
+					const samplecnt_t pos_before = pos_after + selection_length;
+					r->set_position(pos_before);
+					r->clear_changes();
+					r->set_position(pos_after);
+				}
+			}
+
 			vector<Command*> cmds;
 			orig_tav->playlist()->rdiff (cmds);
 			_editor->session()->add_commands (cmds);

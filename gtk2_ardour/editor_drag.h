@@ -44,6 +44,7 @@
 
 namespace ARDOUR {
 	class Location;
+	class Region;
 	class TempoSection;
 }
 
@@ -520,6 +521,7 @@ private:
 	void add_all_after_to_views (TimeAxisView *tav, ARDOUR::samplepos_t where, const RegionSelection &exclude, bool drag_in_progress);
 	void remove_unselected_from_views (ARDOUR::samplecnt_t amount, bool move_regions);
 
+	std::list<boost::shared_ptr<ARDOUR::Region> > _orig_tav_ripples;
 };
 
 /** "Drag" to cut a region (action only on button release) */
@@ -1328,4 +1330,3 @@ private:
 };
 
 #endif /* __gtk2_ardour_editor_drag_h_ */
-
