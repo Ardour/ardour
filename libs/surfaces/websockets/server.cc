@@ -92,10 +92,10 @@ WebsocketsServer::WebsocketsServer (ArdourSurface::ArdourWebsockets& surface)
 #if LWS_LIBRARY_VERSION_MAJOR < 3
 	/* older libwebsockets does not define mime type for svg files */
 	memset (&_lws_vhost_opt, 0, sizeof (lws_protocol_vhost_options));
-	_lws_vhost_opt.name = ".svg";
-	_lws_vhost_opt.value = "image/svg+xml";
+	_lws_vhost_opt.name            = ".svg";
+	_lws_vhost_opt.value           = "image/svg+xml";
 	_lws_mnt_index.extra_mimetypes = &_lws_vhost_opt;
-	_lws_mnt_user.extra_mimetypes = &_lws_vhost_opt;
+	_lws_mnt_user.extra_mimetypes  = &_lws_vhost_opt;
 #endif
 }
 

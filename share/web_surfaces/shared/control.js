@@ -23,27 +23,27 @@ import { ANode } from './message.js';
 export class ControlMixin {
 
 	async getTempo () {
-		return (await this._sendAndReceive(ANode.TEMPO))[0];
+		return await this._sendRecvSingle(ANode.TEMPO);
 	}
 	
 	async getStripGain (stripId) {
-		return (await this._sendAndReceive(ANode.STRIP_GAIN, [stripId]))[0];
+		return await this._sendRecvSingle(ANode.STRIP_GAIN, [stripId]);
 	}
 
 	async getStripPan (stripId) {
-		return (await this._sendAndReceive(ANode.STRIP_PAN, [stripId]))[0];
+		return await this._sendRecvSingle(ANode.STRIP_PAN, [stripId]);
 	}
 
 	async getStripMute (stripId) {
-		return (await this._sendAndReceive(ANode.STRIP_MUTE, [stripId]))[0];
+		return await this._sendRecvSingle(ANode.STRIP_MUTE, [stripId]);
 	}
 
 	async getStripPluginEnable (stripId, pluginId) {
-		return (await this._sendAndReceive(ANode.STRIP_PLUGIN_ENABLE, [stripId, pluginId]))[0];
+		return await this._sendRecvSingle(ANode.STRIP_PLUGIN_ENABLE, [stripId, pluginId]);
 	}
 
 	async getStripPluginParamValue (stripId, pluginId, paramId) {
-		return (await this._sendAndReceive(ANode.STRIP_PLUGIN_PARAM_VALUE, [stripId, pluginId, paramId]))[0];
+		return await this._sendRecvSingle(ANode.STRIP_PLUGIN_PARAM_VALUE, [stripId, pluginId, paramId]);
 	}
 
 	setTempo (bpm) {

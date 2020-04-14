@@ -16,17 +16,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-import { MetadataMixin } from './metadata.js';
 import { ControlMixin } from './control.js';
+import { MetadataMixin } from './metadata.js';
 import { Message } from './message.js';
 import { MessageChannel } from './channel.js';
 
-// See *Mixin for the available APIs
+// See ControlMixin and MetadataMixin for available APIs
+// See ArdourCallback for an example callback implementation
 
 class BaseArdourClient {
 
 	constructor () {
 		this._callbacks = [];
+		this._connected = false;
 		this._pendingRequest = null;
 		this._channel = new MessageChannel(location.host);
 
@@ -39,21 +41,30 @@ class BaseArdourClient {
 		};
 	}
 
-	addCallback (callback) {
-		this._callbacks.push(callback);
+	addCallbacks (callbacks) {
+		this._callbacks.push(callbacks);
 	}
 
-	async open () {
-		this._channel.onClose = () => {
-			this._fireCallbacks('error', new Error('Message channel unexpectedly closed'));
+	async connect (autoReconnect) {
+		this._channel.onClose = async () => {
+			if (this._connected) {
+				this._fireCallbacks('disconnected');
+				this._connected = false;
+			}
+
+			if ((autoReconnect == null) || autoReconnect) {
+				await this._sleep(1000);
+				await this._connect();
+			}
 		};
 
-		await this._channel.open();
+		this._connect();
 	}
 
-	close () {
+	disconnect () {
 		this._channel.onClose = () => {};
 		this._channel.close();
+		this._connected = false;
 	}
 
 	send (msg) {
@@ -61,6 +72,12 @@ class BaseArdourClient {
 	}
 
 	// Private methods
+	
+	async _connect () {
+		await this._channel.open();
+		this._connected = true;
+		this._fireCallbacks('connected');
+	}
 
 	_send (node, addr, val) {
 		const msg = new Message(node, addr, val);
@@ -73,6 +90,10 @@ class BaseArdourClient {
 			const hash = this._send(node, addr, val).hash;
 			this._pendingRequest = {resolve: resolve, hash: hash};
 		});
+	}
+
+	async _sendRecvSingle (node, addr, val) {
+		return await this._sendAndReceive (node, addr, val)[0];
 	}
 
 	_onChannelMessage (msg) {
@@ -91,9 +112,9 @@ class BaseArdourClient {
 			return s[0].toUpperCase() + s.slice(1).toLowerCase();
 		}).join('');
 
-		for (const callback of this._callbacks) {
-			if (method in callback) {
-				callback[method](...args)
+		for (const callbacks of this._callbacks) {
+			if (method in callbacks) {
+				callbacks[method](...args)
 			}
 		}
 	}
@@ -102,15 +123,19 @@ class BaseArdourClient {
 		return new Error(`HTTP response status ${status}`);
 	}
 
+	async _sleep (t) {
+		return new Promise(resolve => setTimeout(resolve, 1000));
+	}
+
 }
 
 export class ArdourClient extends mixin(BaseArdourClient, ControlMixin, MetadataMixin) {}
 
 function mixin (dstClass, ...classes) {
 	for (const srcClass of classes) {
-		for (const methName of Object.getOwnPropertyNames(srcClass.prototype)) {
-			if (methName != 'constructor') {
-				dstClass.prototype[methName] = srcClass.prototype[methName];
+		for (const propName of Object.getOwnPropertyNames(srcClass.prototype)) {
+			if (propName != 'constructor') {
+				dstClass.prototype[propName] = srcClass.prototype[propName];
 			}
 		}
 	}

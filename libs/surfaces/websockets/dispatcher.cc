@@ -29,13 +29,13 @@ using namespace ARDOUR;
 #define NODE_METHOD_PAIR(x) (Node::x, &WebsocketsDispatcher::x##_handler)
 
 WebsocketsDispatcher::NodeMethodMap
-    WebsocketsDispatcher::_node_to_method = boost::assign::map_list_of
+	WebsocketsDispatcher::_node_to_method = boost::assign::map_list_of
 		NODE_METHOD_PAIR (tempo)
 		NODE_METHOD_PAIR (strip_gain)
-    NODE_METHOD_PAIR (strip_pan)
-    NODE_METHOD_PAIR (strip_mute)
-    NODE_METHOD_PAIR (strip_plugin_enable)
-    NODE_METHOD_PAIR (strip_plugin_param_value);
+		NODE_METHOD_PAIR (strip_pan)
+		NODE_METHOD_PAIR (strip_mute)
+		NODE_METHOD_PAIR (strip_plugin_enable)
+		NODE_METHOD_PAIR (strip_plugin_param_value);
 
 void
 WebsocketsDispatcher::dispatch (Client client, const NodeStateMessage& msg)
@@ -105,7 +105,6 @@ WebsocketsDispatcher::update_all_nodes (Client client)
 					val.push_back (std::string ("i"));
 					val.push_back (pd.lower);
 					val.push_back (pd.upper);
-					val.push_back (pd.integer_step);
 				} else {
 					val.push_back (std::string ("d"));
 					val.push_back (pd.lower);

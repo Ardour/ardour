@@ -20,36 +20,26 @@ import { Message } from '/shared/message.js';
 
 export class Widget {
 
-    constructor (node, addr, html) {
-        this.node = node;
-        this.addr = addr;
+    constructor (html) {
         const template = document.createElement('template');
         template.innerHTML = html;
         this.el = template.content.firstChild;
     }
 
-    attach (parent, callback) {
+    appendTo (parent) {
         parent.appendChild(this.el);
-
-        if (callback) {
-            this.callback = callback;
-        }
     }
 
     callback (value) {
         // do nothing by default
     }
 
-    get hash () {
-        return Message.hash(this.node, this.addr);
-    }
-
 }
 
 export class Switch extends Widget {
 
-    constructor (node, addr) {
-        super (node, addr, `<input type="checkbox" class="widget-switch">`);
+    constructor () {
+        super (`<input type="checkbox" class="widget-switch">`);
         this.el.addEventListener('input', (ev) => this.callback(this.value));
     }
 
@@ -65,10 +55,10 @@ export class Switch extends Widget {
 
 export class Slider extends Widget {
 
-    constructor (node, addr, min, max, step) {
+    constructor (min, max, step) {
         const html = `<input type="range" class="widget-slider"
             min="${min}" max="${max}" step="${step}">`;
-        super(node, addr, html);
+        super(html);
         this.min = min;
         this.max = max;
         this.el.addEventListener('input', (ev) => this.callback(this.value));
@@ -86,24 +76,24 @@ export class Slider extends Widget {
 
 export class DiscreteSlider extends Slider {
 
-    constructor (node, addr, min, max) {
-        super(node, addr, min, max, 1);
+    constructor (min, max, step) {
+        super(min, max, step || 1);
     }
 
 }
 
 export class ContinuousSlider extends Slider {
 
-    constructor (node, addr, min, max) {
-        super(node, addr, min, max, 0.001);
+    constructor (min, max) {
+        super(min, max, 0.001);
     }
 
 }
 
 export class LogarithmicSlider extends ContinuousSlider {
 
-    constructor (node, addr, min, max) {
-        super(node, addr, 0, 1.0);
+    constructor (min, max) {
+        super(0, 1.0);
         this.minVal = Math.log(min);
         this.maxVal = Math.log(max);
         this.scale = this.maxVal - this.minVal;
@@ -121,16 +111,16 @@ export class LogarithmicSlider extends ContinuousSlider {
 
 export class StripPanSlider extends ContinuousSlider {
 
-    constructor (node, addr) {
-        super(node, addr, -1.0, 1.0);
+    constructor () {
+        super(-1.0, 1.0);
     }
 
 }
 
 export class StripGainSlider extends ContinuousSlider {
 
-    constructor (node, addr) {
-        super(node, addr, 0, 1.0)
+    constructor () {
+        super(0, 1.0)
         this.minVal = -58.0;
         this.maxVal = 6.0;
         this.scale = (this.maxVal - this.minVal);
@@ -148,8 +138,8 @@ export class StripGainSlider extends ContinuousSlider {
 
 export class StripMeter extends Widget {
 
-    constructor (node, addr) {
-        super(node, addr, `<label></label>`);
+    constructor () {
+        super(`<label></label>`);
     }
 
     set value (val) {
