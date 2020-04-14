@@ -938,7 +938,7 @@ AddRouteDialog::refill_channel_setups ()
 		row[track_template_columns.name] = (*s)->name;
 		row[track_template_columns.path] = "urn:ardour:" + (*s)->path;
 		row[track_template_columns.description] = (*s)->description;
-		row[track_template_columns.modified_with] = _("{Factory Template}");
+		row[track_template_columns.modified_with] = string_compose ("{%1}", _("Factory Template"));
 
 		if ((*s)->name == "Create Audio Tracks Interactively" && Profile->get_mixbus ()) {
 			trk_template_chooser.get_selection()->select(row);

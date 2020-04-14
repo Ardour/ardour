@@ -576,8 +576,8 @@ SessionDialog::populate_session_templates ()
 		row[session_template_columns.name] = (*s)->name;
 		row[session_template_columns.path] = "urn:ardour:" + (*s)->path;
 		row[session_template_columns.description] = (*s)->description;
-		row[session_template_columns.modified_with_short] = _("{Factory Template}");
-		row[session_template_columns.modified_with_long] = _("{Factory Template}");
+		row[session_template_columns.modified_with_short] = string_compose ("{%1}", _("Factory Template"));
+		row[session_template_columns.modified_with_long] = string_compose ("{%1}", _("Factory Template"));
 	}
 
 	//Add any "template sessions" found in the user's preferences folder
