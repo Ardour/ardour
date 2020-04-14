@@ -507,6 +507,12 @@ DiskReader::declick_in_progress () const
 	return (_declick_amp.gain () != 0); // declick-out
 }
 
+void
+DiskReader::configuration_changed ()
+{
+	_session.request_overwrite_buffer (_track, LoopDisabled);
+}
+
 bool
 DiskReader::pending_overwrite () const
 {
@@ -521,6 +527,24 @@ DiskReader::set_pending_overwrite (OverwriteReason why)
 	/* called from audio thread, so we can use the read ptr and playback sample as we wish */
 
 	if (!c->empty ()) {
+
+		if (c->size () > 1) {
+			/* Align newly added buffers.
+			 *
+			 * overwrite_sample and file_sample[] are are maintained
+			 * per DiskReader, not per channel.
+			 * ::refill_audio() and ::overwrite_existing_audio() expect
+			 * that read-pointers and fill_level of all buffers are in sync.
+			 */
+			ChannelList::iterator chan = c->begin ();
+			for (++chan; chan != c->end (); ++chan) {
+				ReaderChannelInfo* chaninfo = dynamic_cast<ReaderChannelInfo*> (*chan);
+				if (!chaninfo->initialized) {
+					(*chan)->rbuf->align_to (*(c->front ()->rbuf));
+				}
+			}
+		}
+
 		const samplecnt_t reserved_size = c->front ()->rbuf->reserved_size ();
 		const samplecnt_t bufsize       = c->front ()->rbuf->bufsize ();
 

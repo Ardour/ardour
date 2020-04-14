@@ -193,7 +193,7 @@ DiskIOProcessor::configure_io (ChanCount in, ChanCount out)
 	}
 
 	if (changed) {
-		seek (_session.transport_sample());
+		configuration_changed ();
 	}
 
 	return Processor::configure_io (in, out);

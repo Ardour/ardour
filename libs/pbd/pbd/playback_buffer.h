@@ -65,8 +65,18 @@ public:
 		/* writer, when seeking, may block */
 		Glib::Threads::Mutex::Lock lm (_reset_lock);
 		SpinLock sl (_reservation_lock);
-		g_atomic_int_set (&write_idx, g_atomic_int_get (&read_idx));
+		g_atomic_int_set (&read_idx, 0);
+		g_atomic_int_set (&write_idx, 0);
 		g_atomic_int_set (&reserved, 0);
+	}
+
+	/* called from rt (reader) thread for new buffers */
+	void align_to (PlaybackBuffer const& other) {
+		Glib::Threads::Mutex::Lock lm (_reset_lock);
+		write_idx = other.write_idx;
+		read_idx  = other.read_idx;
+		reserved  = other.reserved;
+		memset (buf, 0, size * sizeof (T));
 	}
 
 	/* write-thread */

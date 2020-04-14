@@ -798,8 +798,14 @@ DiskWriter::set_note_mode (NoteMode m)
 		_midi_write_source->model()->set_note_mode(m);
 }
 
+void
+DiskWriter::configuration_changed ()
+{
+	seek (_session.transport_sample(), false);
+}
+
 int
-DiskWriter::seek (samplepos_t sample, bool complete_refill)
+DiskWriter::seek (samplepos_t sample, bool /*complete_refill*/)
 {
 	uint32_t n;
 	ChannelList::iterator chan;

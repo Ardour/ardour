@@ -223,6 +223,8 @@ private:
 	void get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, samplepos_t end_sample, MonitorState, BufferSet&, double speed, samplecnt_t distance);
 	void maybe_xfade_loop (Sample*, samplepos_t read_start, samplepos_t read_end, ReaderChannelInfo*);
 
+	void configuration_changed ();
+
 	bool overwrite_existing_audio ();
 	bool overwrite_existing_midi ();
 };

@@ -113,6 +113,7 @@ public:
 protected:
 	friend class Auditioner;
 	virtual int  seek (samplepos_t which_sample, bool complete_refill = false) = 0;
+	virtual void configuration_changed () = 0;
 
 protected:
 	Flag         _flags;

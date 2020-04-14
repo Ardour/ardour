@@ -145,6 +145,8 @@ protected:
 
 	int do_flush (RunContext context, bool force = false);
 
+	void configuration_changed ();
+
 private:
 	static samplecnt_t _chunk_samples;
 
