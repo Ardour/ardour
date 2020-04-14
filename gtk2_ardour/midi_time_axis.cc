@@ -859,12 +859,11 @@ MidiTimeAxisView::add_single_channel_controller_item(Menu_Helpers::MenuList& ctl
 /** Add a submenu with 1 item per channel for a controller on many channels. */
 void
 MidiTimeAxisView::add_multi_channel_controller_item(Menu_Helpers::MenuList& ctl_items,
+                                                    const uint16_t          channels,
                                                     int                     ctl,
                                                     const std::string&      name)
 {
 	using namespace Menu_Helpers;
-
-	const uint16_t selected_channels = midi_track()->get_playback_channel_mask();
 
 	Menu* chn_menu = manage (new Menu);
 	MenuList& chn_items (chn_menu->items());
@@ -882,7 +881,7 @@ MidiTimeAxisView::add_multi_channel_controller_item(Menu_Helpers::MenuList& ctl_
 		                      true, param_without_channel)));
 
 	for (uint8_t chn = 0; chn < 16; chn++) {
-		if (selected_channels & (0x0001 << chn)) {
+		if (channels & (0x0001 << chn)) {
 
 			/* for each selected channel, add a menu item for this controller */
 
@@ -928,30 +927,15 @@ MidiTimeAxisView::build_controller_menu ()
 	MenuList& items (controller_menu->items());
 
 	/* create several "top level" menu items for sets of controllers (16 at a
-	   time), and populate each one with a submenu for each controller+channel
-	   combination covering the currently selected channels for this track
-	*/
-
-	const uint16_t selected_channels = midi_track()->get_playback_channel_mask();
-
-	/* count the number of selected channels because we will build a different menu
-	   structure if there is more than 1 selected.
-	*/
-
-	int chn_cnt = 0;
-	for (uint8_t chn = 0; chn < 16; chn++) {
-		if (selected_channels & (0x0001 << chn)) {
-			if (++chn_cnt > 1) {
-				break;
-			}
-		}
-	}
+	 * time), and populate each one with a submenu for each controller+channel
+	 * combination covering the currently selected channels for this track
+	 */
 
 	size_t total_ctrls = _route->instrument_info().master_controller_count ();
 	if (total_ctrls > 0) {
+		/* Controllers names available in midnam file, generate fancy menu */
 		using namespace MIDI::Name;
 
-		/* Controllers names available in midnam file, generate fancy menu */
 		unsigned n_items  = 0;
 		unsigned n_groups = 0;
 
@@ -961,16 +945,24 @@ MidiTimeAxisView::build_controller_menu ()
 
 		MasterDeviceNames::ControlNameLists const& ctllist (_route->instrument_info().master_device_names ()->controls ());
 
-		bool to_top_level = total_ctrls < 32;
+		bool per_name_list = ctllist.size () > 1;
+		bool to_top_level = total_ctrls < 32 && !per_name_list;
 
-		/* TODO: This is not correct, should look up the currently applicable ControlNameList
-		   and only build a menu for that one. */
+		/* reverse lookup which "ChannelNameSet" has "UsesControlNameList <this list>"
+		 * then check for which channels it is valid "AvailableForChannels"
+		 */
+
 		for (MasterDeviceNames::ControlNameLists::const_iterator l = ctllist.begin(); l != ctllist.end(); ++l) {
+
+			uint16_t channels  = _route->instrument_info().channels_for_control_list (l->first);
+			bool multi_channel = 0 != (channels & (channels - 1));
+
 			boost::shared_ptr<ControlNameList> name_list = l->second;
 			Menu*                              ctl_menu  = NULL;
 
 			for (ControlNameList::Controls::const_iterator c = name_list->controls().begin();
 			     c != name_list->controls().end();) {
+
 				const uint16_t ctl = c->second->number();
 
 				/* Skip bank select controllers since they're handled specially */
@@ -985,8 +977,8 @@ MidiTimeAxisView::build_controller_menu ()
 					}
 
 					MenuList& ctl_items (ctl_menu->items());
-					if (chn_cnt > 1) {
-						add_multi_channel_controller_item(ctl_items, ctl, c->second->name());
+					if (multi_channel) {
+						add_multi_channel_controller_item(ctl_items, channels, ctl, c->second->name());
 					} else {
 						add_single_channel_controller_item(ctl_items, ctl, c->second->name());
 					}
@@ -1002,7 +994,9 @@ MidiTimeAxisView::build_controller_menu ()
 				if (++n_items == 32 || ctl < ctl_start || c == name_list->controls().end()) {
 					/* Submenu has 32 items or we're done, or a new name-list started:
 					 * add it to controller menu and reset */
-					items.push_back (MenuElem (string_compose (_("Controllers %1-%2"), ctl_start, ctl_end), *ctl_menu));
+					items.push_back (MenuElem (string_compose ("%1 %2-%3",
+									(per_name_list ? l->first.c_str() : _("Controllers")),
+									ctl_start, ctl_end), *ctl_menu));
 					ctl_menu = NULL;
 					n_items  = 0;
 					++n_groups;
@@ -1011,6 +1005,22 @@ MidiTimeAxisView::build_controller_menu ()
 		}
 	} else {
 		/* No controllers names, generate generic numeric menu */
+
+		const uint16_t selected_channels = midi_track()->get_playback_channel_mask();
+
+		/* count the number of selected channels because we will build a different menu
+		 * structure if there is more than 1 selected.
+		 */
+
+		int chn_cnt = 0;
+		for (uint8_t chn = 0; chn < 16; chn++) {
+			if (selected_channels & (0x0001 << chn)) {
+				if (++chn_cnt > 1) {
+					break;
+				}
+			}
+		}
+
 		for (int i = 0; i < 127; i += 32) {
 			Menu*     ctl_menu = manage (new Menu);
 			MenuList& ctl_items (ctl_menu->items());
@@ -1023,7 +1033,7 @@ MidiTimeAxisView::build_controller_menu ()
 
 				if (chn_cnt > 1) {
 					add_multi_channel_controller_item(
-						ctl_items, ctl, string_compose(_("Controller %1"), ctl));
+						ctl_items, selected_channels, ctl, string_compose(_("Controller %1"), ctl));
 				} else {
 					add_single_channel_controller_item(
 						ctl_items, ctl, string_compose(_("Controller %1"), ctl));
