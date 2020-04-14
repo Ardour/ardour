@@ -2443,7 +2443,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("General/Session"),
 	     new BoolOption (
 		     "only-copy-imported-files",
-		     _("Always copy imported files"),
+		     _("Drag and drop import always copies files to session"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_only_copy_imported_files),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_only_copy_imported_files)
 		     ));
