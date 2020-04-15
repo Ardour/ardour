@@ -3477,16 +3477,27 @@ void
 Mixer_UI::show_spill (boost::shared_ptr<Stripable> s)
 {
 	boost::shared_ptr<Stripable> ss = spilled_strip.lock();
-	if (ss != s) {
-		spilled_strip = s;
-		show_spill_change (s); /* EMIT SIGNAL */
-		if (s) {
-			_group_tabs->hide ();
-		} else {
-			_group_tabs->show ();
-		}
-		redisplay_track_list ();
+	if (ss == s) {
+		return;
 	}
+
+	spilled_strip = s;
+	_spill_gone_connection.disconnect ();
+	show_spill_change (s); /* EMIT SIGNAL */
+
+	if (s) {
+		s->DropReferences.connect (_spill_gone_connection, invalidator (*this), boost::bind (&Mixer_UI::spill_nothing, this), gui_context());
+		_group_tabs->hide ();
+	} else {
+		_group_tabs->show ();
+	}
+	redisplay_track_list ();
+}
+
+void
+Mixer_UI::spill_nothing ()
+{
+	show_spill (boost::shared_ptr<Stripable> ());
 }
 
 bool

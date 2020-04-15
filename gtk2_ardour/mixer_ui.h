@@ -431,6 +431,9 @@ private:
 	RouteProcessorSelection _selection;
 	AxisViewSelection _axis_targets;
 
+	void spill_nothing ();
+	PBD::ScopedConnection _spill_gone_connection;
+
 	void vca_assign (boost::shared_ptr<ARDOUR::VCA>);
 	void vca_unassign (boost::shared_ptr<ARDOUR::VCA>);
 
