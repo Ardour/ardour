@@ -131,7 +131,6 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess, ArdourCanva
 	, _channel_selector (0)
 	, _step_edit_item (0)
 	, controller_menu (0)
-	, poly_pressure_menu (0)
 	, _step_editor (0)
 {
 	_midnam_model_selector.disable_scrolling();
@@ -687,14 +686,9 @@ MidiTimeAxisView::build_automation_action_menu (bool for_selection)
 		build_controller_menu ();
 		automation_items.push_back (MenuElem (_("Controllers"), *controller_menu));
 
-		if (!poly_pressure_menu) {
-			poly_pressure_menu = new Gtk::Menu;
-		}
+		add_channel_command_menu_item (automation_items, _("Polyphonic Pressure"), MidiNotePressureAutomation, 0);
+		automation_items.back().set_sensitive (!for_selection || _editor.get_selection().tracks.size() == 1);
 
-		automation_items.push_back (MenuElem  (_("Polyphonic Pressure"), *poly_pressure_menu));
-
-		automation_items.back().set_sensitive (
-			!for_selection || _editor.get_selection().tracks.size() == 1);
 	} else {
 		automation_items.push_back (
 			MenuElem (string_compose ("<i>%1</i>", _("No MIDI Channels selected"))));
