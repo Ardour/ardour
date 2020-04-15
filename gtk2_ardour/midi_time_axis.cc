@@ -356,11 +356,6 @@ MidiTimeAxisView::use_midnam_info ()
 	for (AutomationTracks::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
 		switch (i->first.type()) {
 			case MidiCCAutomation:
-			case MidiPgmChangeAutomation:
-			case MidiPitchBenderAutomation:
-			case MidiChannelPressureAutomation:
-			case MidiNotePressureAutomation:
-			case MidiSystemExclusiveAutomation:
 				i->second->update_name_from_param ();
 				break;
 			default:
