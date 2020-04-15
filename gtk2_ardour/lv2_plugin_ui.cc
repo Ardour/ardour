@@ -390,7 +390,7 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 
 	features[fi] = NULL;
 #ifdef HAVE_LV2_1_17_2
-	assert (fi == features_count + (is_external_ui ? 3 : 1));
+	assert (fi == features_count + (is_external_ui ? 3 : 2));
 #else
 	assert (fi == features_count + (is_external_ui ? 2 : 1));
 #endif
