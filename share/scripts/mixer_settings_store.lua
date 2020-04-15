@@ -301,17 +301,28 @@ function factory () return function ()
 				local id = proc:to_stateful():id():to_s()
 				local plug = proc:to_insert ():plugin (0)
 				local ptype = proc:to_insert():plugin(0):get_info().type
-				local n = 0 -- count control-ports
-				for j = 0, plug:parameter_count () - 1 do -- iterate over all plugin parameters
-					if plug:parameter_is_control (j) then
-						local label = plug:parameter_label (j)
-						if plug:parameter_is_input (j) and label ~= "hidden" and label:sub (1,1) ~= "#" then
-							--local _, _, pd = ARDOUR.LuaAPI.plugin_automation(proc, n)
-							local val = ARDOUR.LuaAPI.get_processor_param(proc, j, true)
-							print(r:name(), "->", proc:display_name(), label, val)
-							params[j] = val
+				
+				local n = 0
+				for j = 0, plug:parameter_count() - 1 do -- Iterate over all plugin parameters
+					if plug:parameter_is_control(j) then
+						local label = plug:parameter_label(j)
+						if plug:parameter_is_input(j) and label ~= "hidden" and label:sub(1,1) ~= "#" then
+							local _, _, pd = ARDOUR.LuaAPI.plugin_automation(proc, n)
+							local val = ARDOUR.LuaAPI.get_processor_param(proc, n, true)
+
+							-- Clamp values at plugin max and min
+							if val < pd.lower then
+								val = pd.lower
+							end
+							
+							if val > pd.upper then
+								val = pd.upper
+							end
+							
+							print(r:name(), "->", proc:display_name(), "(#".. n ..")",  label, val)
+							params[n] = val
 						end
-						n = n + 1
+						n = n + 1 
 					end
 				end
 				i = i + 1

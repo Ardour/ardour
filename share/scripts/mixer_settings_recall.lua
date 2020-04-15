@@ -275,18 +275,29 @@ function factory ()
 				if proc:isnil() then goto nextline end
 				local plug = proc:to_insert():plugin(0)
 
-				for k, v in pairs(params) do
-					local label = plug:parameter_label(k)
-					if string.find(label, "Assign") or string.find(label, "Enable") then --@ToDo: Check Plugin type == LADSPA or VST?
-						enable[k] = v --queue any assignments/enables for after the initial parameter recalling to duck the 'in-on-change' feature
+				local ctl = 0
+				for j = 0, plug:parameter_count() - 1 do
+					if plug:parameter_is_control(j) then
+						local label = plug:parameter_label(j)
+						value = params[ctl]
+						if value then
+							if string.find(label, "Assign") or string.find(label, "Enable") then --@ToDo: Check Plugin type == LADSPA or VST?
+								enable[ctl] = value -- Queue enable assignment for later
+								goto skip_param
+							end
+							if not(ARDOUR.LuaAPI.set_processor_param(proc, ctl, value)) then
+								print("Could not set ctrl port " .. ctl .. " to " .. value)
+							end
+						end
+						::skip_param::
+						ctl = ctl + 1
 					end
-					print(string.format("%s (Port: %s) -> %s", label, k, v))
-					ARDOUR.LuaAPI.set_processor_param(proc, k, v)
 				end
 
 				for k, v in pairs(enable) do
 					ARDOUR.LuaAPI.set_processor_param(proc, k, v)
 				end
+
 				if act then proc:activate() else proc:deactivate() end
 			end
 
