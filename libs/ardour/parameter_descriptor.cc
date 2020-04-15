@@ -26,6 +26,7 @@
 #include "ardour/amp.h"
 #include "ardour/dB.h"
 #include "ardour/parameter_descriptor.h"
+#include "ardour/parameter_types.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/types.h"
 #include "ardour/utils.h"
@@ -43,8 +44,7 @@ ParameterDescriptor::ParameterDescriptor(const Evoral::Parameter& parameter)
 	, step(0)
 	, smallstep(0)
 	, largestep(0)
-	, integer_step(parameter.type() >= MidiCCAutomation &&
-	               parameter.type() <= MidiChannelPressureAutomation)
+	, integer_step(parameter_is_midi (parameter.type ()))
 	, sr_dependent(false)
 	, enumeration(false)
 {

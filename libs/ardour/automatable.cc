@@ -521,7 +521,7 @@ Automatable::control_factory(const Evoral::Parameter& param)
 	ParameterDescriptor               desc(param);
 	boost::shared_ptr<AutomationList> list;
 
-	if (param.type() >= MidiCCAutomation && param.type() <= MidiChannelPressureAutomation) {
+	if (parameter_is_midi (param.type())) {
 		MidiTrack* mt = dynamic_cast<MidiTrack*>(this);
 		if (mt) {
 			control = new MidiTrack::MidiControl(mt, param);

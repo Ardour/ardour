@@ -34,7 +34,7 @@ parameter_midi_type(AutomationType type)
 	case MidiCCAutomation:              return MIDI_CMD_CONTROL;          break;
 	case MidiPgmChangeAutomation:       return MIDI_CMD_PGM_CHANGE;       break;
 	case MidiChannelPressureAutomation: return MIDI_CMD_CHANNEL_PRESSURE; break;
-	case MidiNotePressureAutomation:    return MIDI_CMD_NOTE_PRESSURE; break;
+	case MidiNotePressureAutomation:    return MIDI_CMD_NOTE_PRESSURE;    break;
 	case MidiPitchBenderAutomation:     return MIDI_CMD_BENDER;           break;
 	case MidiSystemExclusiveAutomation: return MIDI_CMD_COMMON_SYSEX;     break;
 	default: return 0;
@@ -48,7 +48,7 @@ midi_parameter_type(uint8_t status)
 	case MIDI_CMD_CONTROL:          return MidiCCAutomation;              break;
 	case MIDI_CMD_PGM_CHANGE:       return MidiPgmChangeAutomation;       break;
 	case MIDI_CMD_CHANNEL_PRESSURE: return MidiChannelPressureAutomation; break;
-	case MIDI_CMD_NOTE_PRESSURE:    return MidiNotePressureAutomation; break;
+	case MIDI_CMD_NOTE_PRESSURE:    return MidiNotePressureAutomation;    break;
 	case MIDI_CMD_BENDER:           return MidiPitchBenderAutomation;     break;
 	case MIDI_CMD_COMMON_SYSEX:     return MidiSystemExclusiveAutomation; break;
 	default: return NullAutomation;
@@ -67,7 +67,7 @@ midi_parameter(const uint8_t* buf, const uint32_t len)
 	case MidiChannelPressureAutomation:
 		return Evoral::Parameter(MidiChannelPressureAutomation, channel);
 	case MidiNotePressureAutomation:
-		return Evoral::Parameter(MidiChannelPressureAutomation, channel);
+		return Evoral::Parameter(MidiNotePressureAutomation, channel);
 	case MidiPitchBenderAutomation:
 		return Evoral::Parameter(MidiPitchBenderAutomation, channel);
 	case MidiSystemExclusiveAutomation:
@@ -80,7 +80,14 @@ midi_parameter(const uint8_t* buf, const uint32_t len)
 inline bool
 parameter_is_midi(AutomationType type)
 {
-	return (type >= MidiCCAutomation) && (type <= MidiChannelPressureAutomation);
+	return (type >= MidiCCAutomation) && (type <= MidiNotePressureAutomation);
+}
+
+inline bool
+parameter_is_midi(Evoral::ParameterType t)
+{
+	AutomationType type = (AutomationType) t;
+	return (type >= MidiCCAutomation) && (type <= MidiNotePressureAutomation);
 }
 
 }  // namespace ARDOUR
