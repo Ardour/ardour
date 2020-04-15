@@ -2596,7 +2596,7 @@ RCOptionEditor::RCOptionEditor ()
 		     );
 	add_option (_("Editor"), bo);
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
-			_("<b>When enabled</b> The new points drawn in any automation lane will be placed on the existing line, regardless of mouse y-axis position."));
+			_("<b>When enabled</b> the new points drawn in any automation lane will be placed on the existing line, regardless of mouse y-axis position."));
 
 	ComboOption<FadeShape>* fadeshape = new ComboOption<FadeShape> (
 			"default-fade-shape",
@@ -2661,7 +2661,7 @@ RCOptionEditor::RCOptionEditor ()
 		    sigc::mem_fun (*_rc_config, &RCConfiguration::set_region_selection_after_split));
 
 	// TODO: decide which of these modes are really useful
-	rsas->add(None, _("Clear the Selected Regions"));
+	rsas->add(None, _("Clear the Region Selection"));
 	rsas->add(NewlyCreatedLeft, _("Select only the newly-created regions BEFORE the split point"));
 	rsas->add(NewlyCreatedRight, _("Select only the newly-created regions AFTER the split point"));
 	rsas->add(NewlyCreatedBoth, _("Select the newly-created regions"));
@@ -2919,7 +2919,7 @@ RCOptionEditor::RCOptionEditor ()
 		     );
 	add_option (_("Signal Flow"), bo);
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
-			string_compose (_("<b>When enabled,</b> and Transport->Auto-Input is enabled, %1 will always monitor audio inputs when transport is stopped, even if tracks aren't armed."),
+			string_compose (_("<b>When enabled</b>, and Transport->Auto-Input is enabled, %1 will always monitor audio inputs when transport is stopped, even if tracks aren't armed."),
 					PROGRAM_NAME));
 
 	if (!Profile->get_mixbus()) {
@@ -2935,7 +2935,7 @@ RCOptionEditor::RCOptionEditor ()
 		add_option (_("Signal Flow"), bo);
 		Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
 			_("<b>When enabled</b> the main output bus is auto-connected to the first N physical ports. "
-				"If the session has a monitor-section, the monitor-bus output is conneced the the hardware playback ports, "
+				"If the session has a monitor-section, the monitor-bus output is connected the the hardware playback ports, "
 				"otherwise the master-bus output is directly used for playback."));
 
 		ComboOption<AutoConnectOption>* iac = new ComboOption<AutoConnectOption> (
@@ -4183,7 +4183,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	quirks_head->set_note (string_compose (_("Rules for closing, minimizing, maximizing, and stay-on-top can vary \
 with each version of your OS, and the preferences that you've set in your OS.\n\n\
-You can adjust the options, below, to change how %1's windows and dialogs behave.\n\n\
+You can adjust the options, below, to change how application windows and dialogs behave.\n\n\
 These settings will only take effect after %1 is restarted.\n\
 	"), PROGRAM_NAME));
 

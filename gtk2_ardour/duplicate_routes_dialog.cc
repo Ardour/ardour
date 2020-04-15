@@ -32,7 +32,7 @@ using namespace ARDOUR;
 using namespace Gtk;
 
 DuplicateRouteDialog::DuplicateRouteDialog ()
-	: ArdourDialog (_("Duplicate Tracks & Busses"), false, false)
+	: ArdourDialog (_("Duplicate Tracks/Busses"), false, false)
 	, playlist_option_label (_("For each Track:"))
 	, copy_playlists_button (playlist_button_group, _("Copy playlist"))
 	, new_playlists_button (playlist_button_group, _("New playlist"))

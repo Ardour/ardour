@@ -142,7 +142,7 @@ EditorSources::EditorSources (Editor* e)
 		{ 1,   _("Tags"),      _("Tags") },
 		{ 2,   _("Take ID"),   _("Take ID") },
 		{ 3,   _("Orig Pos"),  _("Original Position of the file on timeline, when it was recorded") },
-		{ 4,   _("Path"),      _("Path (folder) of the file locationlosition of end of region") },
+		{ 4,   _("Path"),      _("Path (folder) of the file location") },
 		{ -1, 0, 0 }
 	};
 
@@ -640,7 +640,7 @@ EditorSources::remove_selected_sources ()
 
 	choices.push_back (_("No, do nothing."));
 	choices.push_back (_("Only remove the Regions that use these Sources."));
-	choices.push_back (_("Yes, remove the Regions and Sources (cannot be undone!"));
+	choices.push_back (_("Yes, remove the Regions and Sources (cannot be undone!)"));
 
 	Choice prompter (_("Remove selected Sources"), prompt, choices);
 
