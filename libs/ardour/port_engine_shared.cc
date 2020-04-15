@@ -231,7 +231,7 @@ bool
 PortEngineSharedImpl::port_is_physical (PortEngine::PortHandle port) const
 {
 	if (!valid_port (boost::dynamic_pointer_cast<BackendPort>(port))) {
-		PBD::error << _("BackendPort::port_is_physical (): invalid port.") << endmsg;
+		PBD::warning << _("BackendPort::port_is_physical (): invalid port.") << endmsg;
 		return false;
 	}
 	return boost::dynamic_pointer_cast<BackendPort>(port)->is_physical ();
@@ -471,7 +471,7 @@ PortEngineSharedImpl::get_port_name (PortEngine::PortHandle port_handle) const
 	BackendPortPtr port = boost::dynamic_pointer_cast<BackendPort>(port_handle);
 
 	if (!valid_port (port)) {
-		PBD::warning << string_compose (_("AlsaBackend::get_port_name: Invalid Port(s)"), _instance_name) << endmsg;
+		PBD::warning << string_compose (_("%1::get_port_name: invalid port"), _instance_name) << endmsg;
 		return std::string ();
 	}
 
@@ -482,7 +482,7 @@ PortFlags
 PortEngineSharedImpl::get_port_flags (PortEngine::PortHandle port) const
 {
 	if (!valid_port (boost::dynamic_pointer_cast<BackendPort>(port))) {
-		PBD::warning << string_compose (_("%1::get_port_flags: Invalid Port(s)"), _instance_name) << endmsg;
+		PBD::warning << string_compose (_("%1::get_port_flags: invalid port"), _instance_name) << endmsg;
 		return PortFlags (0);
 	}
 	return boost::static_pointer_cast<BackendPort>(port)->flags ();
@@ -492,7 +492,7 @@ int
 PortEngineSharedImpl::get_port_property (PortEngine::PortHandle port, const std::string& key, std::string& value, std::string& type) const
 {
 	if (!valid_port (boost::dynamic_pointer_cast<BackendPort>(port))) {
-		PBD::warning << string_compose (_("%1::get_port_property: Invalid Port(s)"), _instance_name) << endmsg;
+		PBD::warning << string_compose (_("%1::get_port_property: invalid port"), _instance_name) << endmsg;
 		return -1;
 	}
 	if (key == "http://jackaudio.org/metadata/pretty-name") {
@@ -509,7 +509,7 @@ int
 PortEngineSharedImpl::set_port_property (PortEngine::PortHandle port, const std::string& key, const std::string& value, const std::string& type)
 {
 	if (!valid_port (boost::dynamic_pointer_cast<BackendPort>(port))) {
-		PBD::warning << string_compose (_("%1::set_port_property: Invalid Port(s)"), _instance_name) << endmsg;
+		PBD::warning << string_compose (_("%1::set_port_property: invalid port"), _instance_name) << endmsg;
 		return -1;
 	}
 	if (key == "http://jackaudio.org/metadata/pretty-name" && type.empty ()) {
@@ -575,7 +575,7 @@ PortEngineSharedImpl::disconnect (const std::string& src, const std::string& dst
 	BackendPortPtr dst_port = find_port (dst);
 
 	if (!src_port || !dst_port) {
-		PBD::error << string_compose (_("%1::disconnect: Invalid Port(s)"), _instance_name) << endmsg;
+		PBD::warning << string_compose (_("%1::disconnect: invalid port"), _instance_name) << endmsg;
 		return -1;
 	}
 	return src_port->disconnect (dst_port, src_port);
@@ -610,7 +610,7 @@ PortEngineSharedImpl::disconnect (PortEngine::PortHandle src, const std::string&
 	BackendPortPtr dst_port = find_port (dst);
 
 	if (!valid_port (src_port) || !dst_port) {
-		PBD::error << string_compose (_("%1::disconnect: Invalid Port(s)"), _instance_name) << endmsg;
+		PBD::warning << string_compose (_("%1::disconnect: invalid port"), _instance_name) << endmsg;
 		return -1;
 	}
 	return src_port->disconnect (dst_port, src_port);
@@ -622,7 +622,7 @@ PortEngineSharedImpl::disconnect_all (PortEngine::PortHandle port_handle)
 	BackendPortPtr port = boost::dynamic_pointer_cast<BackendPort> (port_handle);
 
 	if (!valid_port (port)) {
-		PBD::error << string_compose (_("%1::disconnect_all: Invalid Port"), _instance_name) << endmsg;
+		PBD::warning << string_compose (_("%1::disconnect_all: invalid port"), _instance_name) << endmsg;
 		return -1;
 	}
 
