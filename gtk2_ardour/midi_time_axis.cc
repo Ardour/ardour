@@ -159,9 +159,9 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	}
 
 	/* This next call will result in our height being set up, so it must come after
-	   the creation of the piano roll / range scroomer as their visibility is set up
-	   when our height is.
-	*/
+	 * the creation of the piano roll / range scroomer as their visibility is set up
+	 * when our height is.
+	 */
 	RouteTimeAxisView::set_route (rt);
 
 	_view->apply_color (ARDOUR_UI_UTILS::gdk_color_to_rgba (color()), StreamView::RegionColor);
@@ -215,9 +215,9 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 			sigc::mem_fun (*this, &MidiTimeAxisView::toggle_note_selection));
 
 		/* Put the scroomer and the keyboard in a VBox with a padding
-		   label so that they can be reduced in height for stacked-view
-		   tracks.
-		*/
+		 * label so that they can be reduced in height for stacked-view
+		 * tracks.
+		 */
 
 		HSeparator* separator = manage (new HSeparator());
 		separator->set_name("TrackSeparator");
@@ -584,10 +584,10 @@ MidiTimeAxisView::set_height (uint32_t h, TrackHeightMode m)
 	}
 
 	/* We need to do this after changing visibility of our stuff, as it will
-	   eventually trigger a call to Editor::reset_controls_layout_width(),
-	   which needs to know if we have just shown or hidden a scroomer /
-	   piano roll.
-	*/
+	 * eventually trigger a call to Editor::reset_controls_layout_width(),
+	 * which needs to know if we have just shown or hidden a scroomer /
+	 * piano roll.
+	 */
 	RouteTimeAxisView::set_height (h, m);
 }
 
@@ -650,11 +650,11 @@ MidiTimeAxisView::build_automation_action_menu (bool for_selection)
 	using namespace Menu_Helpers;
 
 	/* If we have a controller menu, we need to detach it before
-	   RouteTimeAxis::build_automation_action_menu destroys the
-	   menu it is attached to.  Otherwise GTK destroys
-	   controller_menu's gobj, meaning that it can't be reattached
-	   below.  See bug #3134.
-	*/
+	 * RouteTimeAxis::build_automation_action_menu destroys the
+	 * menu it is attached to.  Otherwise GTK destroys
+	 * controller_menu's gobj, meaning that it can't be reattached
+	 * below.  See bug #3134.
+	 */
 
 	if (controller_menu) {
 		detach_menu (*controller_menu);
@@ -667,34 +667,29 @@ MidiTimeAxisView::build_automation_action_menu (bool for_selection)
 
 	uint16_t selected_channels = midi_track()->get_playback_channel_mask();
 
-	if (selected_channels !=  0) {
+	if (selected_channels != 0) {
 
 		automation_items.push_back (SeparatorElem());
 
 		/* these 2 MIDI "command" types are semantically more like automation
-		   than note data, but they are not MIDI controllers. We give them
-		   special status in this menu, since they will not show up in the
-		   controller list and anyone who actually knows something about MIDI
-		   (!) would not expect to find them there.
-		*/
+		 * than note data, but they are not MIDI controllers. We give them
+		 * special status in this menu, since they will not show up in the
+		 * controller list and anyone who actually knows something about MIDI
+		 * (!) would not expect to find them there.
+		 */
 
-		add_channel_command_menu_item (
-			automation_items, _("Bender"), MidiPitchBenderAutomation, 0);
-		automation_items.back().set_sensitive (
-			!for_selection || _editor.get_selection().tracks.size() == 1);
-		add_channel_command_menu_item (
-			automation_items, _("Pressure"), MidiChannelPressureAutomation, 0);
-		automation_items.back().set_sensitive (
-			!for_selection || _editor.get_selection().tracks.size() == 1);
+		add_channel_command_menu_item (automation_items, _("Bender"), MidiPitchBenderAutomation, 0);
+		automation_items.back().set_sensitive (!for_selection || _editor.get_selection().tracks.size() == 1);
+
+		add_channel_command_menu_item (automation_items, _("Pressure"), MidiChannelPressureAutomation, 0);
+		automation_items.back().set_sensitive (!for_selection || _editor.get_selection().tracks.size() == 1);
 
 		/* now all MIDI controllers. Always offer the possibility that we will
-		   rebuild the controllers menu since it might need to be updated after
-		   a channel mode change or other change. Also detach it first in case
-		   it has been used anywhere else.
-		*/
-
+		 * rebuild the controllers menu since it might need to be updated after
+		 * a channel mode change or other change. Also detach it first in case
+		 * it has been used anywhere else.
+		 */
 		build_controller_menu ();
-
 		automation_items.push_back (MenuElem (_("Controllers"), *controller_menu));
 
 		if (!poly_pressure_menu) {
@@ -739,7 +734,7 @@ MidiTimeAxisView::add_channel_command_menu_item (Menu_Helpers::MenuList& items,
 	using namespace Menu_Helpers;
 
 	/* count the number of selected channels because we will build a different menu
-	   structure if there is more than 1 selected.
+	 * structure if there is more than 1 selected.
 	 */
 
 	const uint16_t selected_channels = midi_track()->get_playback_channel_mask();
@@ -1545,9 +1540,8 @@ MidiTimeAxisView::get_per_region_note_selection_region_view (RegionView* rv, lis
 void
 MidiTimeAxisView::set_channel_mode (ChannelMode, uint16_t)
 {
-	/* hide all automation tracks that use the wrong channel(s) and show all those that use
-	   the right ones.
-	*/
+	/* hide all automation tracks that use the wrong channel(s) and show all those thatcw
+	 * use the right ones. */
 
 	const uint16_t selected_channels = midi_track()->get_playback_channel_mask();
 	bool changed = false;
@@ -1566,8 +1560,8 @@ MidiTimeAxisView::set_channel_mode (ChannelMode, uint16_t)
 
 			if ((selected_channels & (0x0001 << chn)) == 0) {
 				/* channel not in use. hiding it will trigger RouteTimeAxisView::automation_track_hidden()
-				   which will cause a redraw. We don't want one per channel, so block that with no_redraw.
-				*/
+				 * which will cause a redraw. We don't want one per channel, so block that with no_redraw.
+				 */
 				changed = track->set_marked_for_display (false) || changed;
 			} else {
 				changed = track->set_marked_for_display (true) || changed;
@@ -1677,8 +1671,8 @@ MidiTimeAxisView::get_channel_for_add () const
 	uint8_t channel = 0;
 
 	/* pick the highest selected channel, unless all channels are selected,
-	   which is interpreted to mean channel 1 (zero)
-	*/
+	 * which is interpreted to mean channel 1 (zero)
+	 */
 
 	for (uint16_t i = 0; i < 16; ++i) {
 		if (chn_mask & (1<<i)) {
