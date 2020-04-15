@@ -351,6 +351,22 @@ MidiTimeAxisView::use_midnam_info ()
 	controller_menu = 0;
 
 	setup_midnam_patches ();
+
+	/* update names on any automation lane with MIDNAM names */
+	for (AutomationTracks::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
+		switch (i->first.type()) {
+			case MidiCCAutomation:
+			case MidiPgmChangeAutomation:
+			case MidiPitchBenderAutomation:
+			case MidiChannelPressureAutomation:
+			case MidiNotePressureAutomation:
+			case MidiSystemExclusiveAutomation:
+				i->second->update_name_from_param ();
+				break;
+			default:
+				continue;
+		}
+	}
 }
 
 void
@@ -1316,6 +1332,9 @@ MidiTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool 
 			             *this,
 			             true,
 			             parent_canvas,
+			             /* this calls MidiTrack::describe_parameter()
+			              * -> instrument_info().get_controller_name()
+			              */
 			             _route->describe_parameter(param)));
 
 		if (_view) {

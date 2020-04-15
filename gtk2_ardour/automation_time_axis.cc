@@ -575,6 +575,22 @@ AutomationTimeAxisView::set_height (uint32_t h, TrackHeightMode m)
 }
 
 void
+AutomationTimeAxisView::update_name_from_param ()
+{
+	/* Note that this is intended for MidiTrack::describe_parameter()
+	 * -> instrument_info().get_controller_name()
+	 * It does not work with  parent/plug_name for plugins.
+	 */
+	boost::shared_ptr<ARDOUR::Route> r = boost::dynamic_pointer_cast<ARDOUR::Route> (_stripable);
+	if (!r) {
+		return;
+	}
+	_name = r->describe_parameter(_parameter);
+	set_tooltip (controls_ebox, _name);
+	name_label.set_text (_name);
+}
+
+void
 AutomationTimeAxisView::set_samples_per_pixel (double fpp)
 {
 	TimeAxisView::set_samples_per_pixel (fpp);

@@ -73,7 +73,7 @@ public:
 	                        TimeAxisView& parent,
 	                        bool show_regions,
 	                        ArdourCanvas::Canvas& canvas,
-	                        const std::string & name, /* translatable */
+	                        const std::string & name = "", /* translatable */
 	                        const std::string & plug_name = "");
 
 	~AutomationTimeAxisView();
@@ -82,6 +82,7 @@ public:
 	void set_samples_per_pixel (double);
 	std::string name() const { return _name; }
 	Gdk::Color color () const;
+	void update_name_from_param ();
 
 	boost::shared_ptr<ARDOUR::Stripable> stripable() const;
 	ARDOUR::PresentationInfo const & presentation_info () const;
