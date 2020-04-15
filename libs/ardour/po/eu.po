@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-02 13:17+0200\n"
-"PO-Revision-Date: 2020-04-10 13:47+0200\n"
+"PO-Revision-Date: 2020-04-15 11:56+0200\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -144,11 +144,11 @@ msgstr "Denbora errealeko baimenak eskuratzeko ezgai"
 
 #: audio_backend.cc:85
 msgid "Setting audio device thread priorities failed"
-msgstr ""
+msgstr "Audio-gailuaren hari-lehentasunak ezartzeak huts egin du"
 
 #: audio_backend.cc:87
 msgid "Setting MIDI device thread priorities failed"
-msgstr ""
+msgstr "MIDI gailuaren hari-lehentasunak ezartzeak huts egin du"
 
 #: audio_backend.cc:89
 msgid "Failed to start process thread"
@@ -410,7 +410,7 @@ msgstr "MIDI entzuterako sintetizadorea kargatzeak huts egin du."
 
 #: auditioner.cc:366
 msgid "Auditioning of regions other than Audio or Midi is not supported."
-msgstr ""
+msgstr "Audio edo Midi ez diren bestelako eremuak entzutea ez da onartzen."
 
 #: auditioner.cc:388
 msgid "Cannot audition empty file."
@@ -505,7 +505,7 @@ msgstr "%1 kontrol-protokoloa jada abian zegoen."
 
 #: control_protocol_manager.cc:161
 msgid "Control protocol support for %1 failed to activate"
-msgstr ""
+msgstr "%1-(e)n kontrol-protokoloarentzako laguntza ezin izan da aktibatu"
 
 #: control_protocol_manager.cc:224
 msgid "control protocol name \"%1\" has no descriptor"
@@ -529,7 +529,7 @@ msgstr "%1 kontrol-protokoloa ez erabilgarria"
 
 #: control_protocol_manager.cc:406
 msgid "Control surface protocol discovered: \"%1\"\n"
-msgstr ""
+msgstr "Kontrol gainazal-protokolo aurkitua: “%1”\n"
 
 #: control_protocol_manager.cc:422
 msgid "ControlProtocolManager: cannot load module \"%1\" (%2)"
@@ -545,9 +545,8 @@ msgid "Control protocol \"%1\" has no descriptor"
 msgstr "%1 kontrol-protokoloa deskriptorerik ez du"
 
 #: convolver.cc:232
-#, fuzzy
 msgid "Convolver: IR \"%1\" no usable audio-channels sound."
-msgstr "Konboluzioa: “%1” IR audio-kanal soinu ez erabilgarria."
+msgstr "Konboluzioa: “%1” IR audio-kanal soinua ez erabilgarria."
 
 #: convolver.cc:237
 msgid "Convolver: IR \"%1\" file too long."
@@ -591,11 +590,15 @@ msgstr "entzun"
 msgid ""
 "DiskReader %1: when overwriting(1), cannot read %2 from playlist at sample %3"
 msgstr ""
+"%1 DiskoIrakurlea: gainidazterakoan(1), ezin da %2 irakurri %3 laginean "
+"dagoen erreprodukzio-zerrendatik"
 
 #: disk_reader.cc:692
 msgid ""
 "DiskReader %1: when overwriting(2), cannot read %2 from playlist at sample %3"
 msgstr ""
+"%1 DiskoIrakurlea: gainidazterakoan(2), ezin da %2 irakurri %3 laginean "
+"dagoen erreprodukzio-zerrendatik"
 
 #: disk_reader.cc:996
 msgid "DiskReader %1: cannot read %2 from playlist at sample %3"
@@ -774,6 +777,8 @@ msgstr "%1 fitxategia %2-(e)ra igo da"
 msgid ""
 "upload to Soundcloud failed. Perhaps your email or password are incorrect?\n"
 msgstr ""
+"Soundcloud-era igotzeak huts egin du. Agian zure e-posta edo pasahitza oker "
+"daude?\n"
 
 #: export_handler.cc:627 export_handler.cc:630
 msgid "an error occurred while writing a TOC/CUE file: %1"
@@ -793,7 +798,7 @@ msgstr "%1 esportazio formatu-direktorioa sortzeko ezgai: %2"
 
 #: export_profile_manager.cc:276
 msgid "Unable to remove export preset %1: %2"
-msgstr ""
+msgstr "%1 esportazio-formatua ezabatzeko ezgai: %2"
 
 #: export_profile_manager.cc:365
 msgid "Selection"
@@ -801,11 +806,11 @@ msgstr "Hautaketa"
 
 #: export_profile_manager.cc:623
 msgid "Unable to rename export format %1 to %2: %3"
-msgstr ""
+msgstr "Esportazio-fitxategia %1-(e)tik %2-(e)ra berrizendatzeko ezgai: %3"
 
 #: export_profile_manager.cc:654
 msgid "Unable to remove export profile %1: %2"
-msgstr ""
+msgstr "%1 esportazio-profila ezabatzeko ezgai: %2"
 
 #: export_profile_manager.cc:689
 msgid "empty format"
@@ -863,11 +868,11 @@ msgstr ""
 #: file_source.cc:200 session_state.cc:3646
 msgid ""
 "there are already 1000 files with names like %1; versioning discontinued"
-msgstr ""
+msgstr "jada %1 izena duten 1000 fitxategi daude; bertsio-berritzea gelditu da"
 
 #: file_source.cc:209
 msgid "cannot rename file source from %1 to %2 (%3)"
-msgstr ""
+msgstr "ezin da fitxategi-iturburua %1-(e)tik %2-(e)ra berrizendatu (%3)"
 
 #: file_source.cc:250 file_source.cc:373
 msgid "FileSource: search path not set"
@@ -2090,9 +2095,8 @@ msgid "unknown plugin type \"%1\" - ignored"
 msgstr "“%1” plugin-mota ezezaguna - alde batera utzi da"
 
 #: plugin_manager.cc:1650
-#, fuzzy
 msgid "Loading plugin order file %1"
-msgstr "%1 pluginen ordenaren fitxategia kargatzen"
+msgstr "%1 plugin-ordena fitxategia kargatzen"
 
 #: plugin_manager.cc:1660
 msgid "Cannot parse Plugin Order info from %1"
@@ -2861,11 +2865,11 @@ msgstr "Errorea %1 saio txantiloi-fitxategia idazterakoan (%2)"
 
 #: session_state.cc:645
 msgid "Could not open %1 for writing session template"
-msgstr ""
+msgstr "Ezin izan da %1 ireki saio-txantiloia idazteko"
 
 #: session_state.cc:652
 msgid "Could not open session template %1 for reading"
-msgstr "Ezin izan da %1 saio-txantiloia irakurtzeko ireki"
+msgstr "Ezin izan da %1 ireki saio-txantiloia irakurtzeko"
 
 #: session_state.cc:702
 msgid "Could not remove pending capture state at path \"%1\" (%2)"
@@ -3081,7 +3085,7 @@ msgstr ""
 
 #: session_state.cc:2540
 msgid "Could not create templates directory \"%1\" (%2)"
-msgstr ""
+msgstr "Ezin izan da “%1” txantiloi-direktoriorik sortu (%2)"
 
 #: session_state.cc:2551
 msgid "Template \"%1\" already exists - new version not created"
@@ -3089,7 +3093,7 @@ msgstr "“%1” txantiloia jada badago - bertsio berririk ez da sortuko"
 
 #: session_state.cc:2557
 msgid "Could not create directory for Session template\"%1\" (%2)"
-msgstr ""
+msgstr "Ezin izan da “%1” saio-txantiloierako direktoriorik sortu (%2)"
 
 #: session_state.cc:2593
 msgid "template not saved"

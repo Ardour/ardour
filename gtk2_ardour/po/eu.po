@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-02 13:17+0200\n"
-"PO-Revision-Date: 2020-04-10 13:46+0200\n"
+"PO-Revision-Date: 2020-04-15 11:57+0200\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1003,6 +1003,7 @@ msgstr "Neurgailua 'o'-n"
 msgid "Plugin DSP Load"
 msgstr "DSP plugina kargatzea"
 
+# Garraio-masterrak edo Garraiatu masterrak???
 #: ardour_ui.cc:336 rc_option_editor.cc:3221 transport_masters_dialog.cc:667
 #, fuzzy
 msgid "Transport Masters"
@@ -1569,7 +1570,6 @@ msgstr ""
 # loop = begizta
 # Hitz horrek ez dirudi oso ezaguna. Agian gabe hobeto izango da?
 #: ardour_ui2.cc:92
-#, fuzzy
 msgid "When active, there is a feedback loop."
 msgstr "Piztuta badago, berrelikadura dago."
 
@@ -1634,7 +1634,7 @@ msgstr "[INFO]: "
 
 #: ardour_ui2.cc:287
 msgid "LogestSync|M-Clk"
-msgstr ""
+msgstr "M-Clk"
 
 #: ardour_ui2.cc:380 ardour_ui_ed.cc:481
 msgid "Auto Return"
@@ -1833,10 +1833,9 @@ msgstr "Editorea"
 
 #: ardour_ui_dependents.cc:443 editor_actions.cc:489
 msgid "Unset #%1"
-msgstr ""
+msgstr "Kendu #%1"
 
 #: ardour_ui_dependents.cc:444
-#, fuzzy
 msgid ""
 "No action bound\n"
 "Right-click to assign"
@@ -1852,6 +1851,11 @@ msgid ""
 "Right-click to re-assign\n"
 "Shift+right-click to unassign"
 msgstr ""
+"%1\n"
+"\n"
+"Egin klik abiarazteko\n"
+"Eskuin-klik egin berregokitzeko\n"
+"Maius+Eskuin-klik kentzeko"
 
 #: ardour_ui_dialogs.cc:306
 msgid "Don't close"
@@ -4758,7 +4762,7 @@ msgstr "Jaitsi pistak"
 
 #: editor_actions.cc:321
 msgid "Select Topmost Track"
-msgstr "Hautatu goi-goiko pista "
+msgstr "Hautatu goi-goiko pista"
 
 #: editor_actions.cc:323
 msgid "Scroll Backward"
@@ -5257,7 +5261,7 @@ msgstr "Itxi tarteak"
 
 #: editor_actions.cc:1490
 msgid "Rhythm Ferret..."
-msgstr "Erritmo-kuxkuxeroa..."
+msgstr "Erritmo-Kuxkuxeroa..."
 
 #: editor_actions.cc:1493
 msgid "Export..."
@@ -5666,8 +5670,9 @@ msgid "Name of Group"
 msgstr "Taldearen izena"
 
 #: editor_route_groups.cc:104 editor_routes.cc:248
+#, fuzzy
 msgid "Visible|V"
-msgstr ""
+msgstr "Iksg"
 
 #: editor_route_groups.cc:104
 msgid "Group is visible?"
@@ -6183,7 +6188,6 @@ msgstr ""
 
 # Insert = intserto/txertaketa/txertatze... ???
 #: editor_ops.cc:4015
-#, fuzzy
 msgid ""
 "<b>%1</b>\n"
 "\n"
@@ -6224,6 +6228,11 @@ msgid ""
 "\n"
 "You can do this without processing, which is a different operation."
 msgstr ""
+"Ezin da eragiketa hau egin, seinalea prozesatuz gero, pista bat edo gehiagok "
+"pista honek dituen sarrera kopurua baino irteera gehiago dituen eremuak "
+"sortuko dituelako.\n"
+"\n"
+"Hau prozesatu gabe egin dezakezu, eragiketa ezberdin bat dena."
 
 #: editor_ops.cc:4071
 msgid "Cannot bounce"
@@ -6235,91 +6244,93 @@ msgstr ""
 
 #: editor_ops.cc:4189
 msgid "delete"
-msgstr ""
+msgstr "ezabatu"
 
 #: editor_ops.cc:4192
 msgid "cut"
-msgstr ""
+msgstr "ebaki"
 
 #: editor_ops.cc:4195
 msgid "copy"
-msgstr ""
+msgstr "kopiatu"
 
 #: editor_ops.cc:4198
 msgid "clear"
-msgstr ""
+msgstr "garbitu"
 
 #: editor_ops.cc:4248
 msgid "objects"
-msgstr ""
+msgstr "objektuak"
 
 #: editor_ops.cc:4482 editor_ops.cc:4596
 msgid "remove region"
-msgstr ""
+msgstr "ezabatu eremua"
 
 #: editor_ops.cc:4511
 msgid "recover regions"
-msgstr ""
+msgstr "berreskuratu eremuak"
 
 #: editor_ops.cc:5053
 msgid "duplicate range selection"
-msgstr ""
+msgstr "bikoiztu barruti-hautapena"
 
 #: editor_ops.cc:5148
 msgid "nudge track"
-msgstr ""
+msgstr "mugitu pista"
 
 #: editor_ops.cc:5175
 msgid ""
 "Do you really want to destroy the last capture?\n"
 "(This is destructive and cannot be undone)"
 msgstr ""
+"Azken saio-argazkia suntsitu nahi duzu benetan?\n"
+"(Hau suntsitzailea da eta ezin da desegin)"
 
 #: editor_ops.cc:5178 editor_ops.cc:7725 editor_regions.cc:410
 #: editor_snapshots.cc:176 editor_sources.cc:641 vca_master_strip.cc:513
 msgid "No, do nothing."
-msgstr ""
+msgstr "Ez, ez egin ezer."
 
 #: editor_ops.cc:5179
 msgid "Yes, destroy it."
-msgstr ""
+msgstr "Bai, suntsitu."
 
 #: editor_ops.cc:5181
 msgid "Destroy last capture"
-msgstr ""
+msgstr "Suntsitu azken saio-argazkia"
 
 #: editor_ops.cc:5199
 msgid "Tag:"
-msgstr ""
+msgstr "Etiketa:"
 
 #: editor_ops.cc:5214 session_archive_dialog.cc:53 session_archive_dialog.cc:54
 #: session_archive_dialog.cc:227 sfdb_ui.cc:1859 sfdb_ui.cc:1966
 msgid "Good"
-msgstr ""
+msgstr "Ona"
 
 #: editor_ops.cc:5369
 msgid "normalize"
-msgstr ""
+msgstr "normalizatu"
 
 #: editor_ops.cc:5500
 msgid "reverse regions"
-msgstr ""
+msgstr "aldrebestu eremuak"
 
 #: editor_ops.cc:5537
 msgid "strip silence"
-msgstr ""
+msgstr "kendu isiltasunak"
 
 #: editor_ops.cc:5618
 msgid "Fork Region(s)"
-msgstr ""
+msgstr "Adarkatu eremua(k)"
 
 #: editor_ops.cc:5625
 msgid "Could not unlink %1"
-msgstr ""
+msgstr "Ezin izan da %1 deslotu"
 
 #: editor_ops.cc:5895
 msgid "reset region gain"
-msgstr ""
+msgstr "berrezarri eremuaren irabazia"
 
 #: editor_ops.cc:5953
 msgid "region gain envelope active"
@@ -6327,119 +6338,119 @@ msgstr ""
 
 #: editor_ops.cc:5978
 msgid "toggle region lock"
-msgstr ""
+msgstr "kommutatu eremua blokeatzea"
 
 #: editor_ops.cc:6002
 msgid "Toggle Video Lock"
-msgstr ""
+msgstr "Kommutatu bideoa blokeatzea"
 
 #: editor_ops.cc:6032
 msgid "toggle region lock style"
-msgstr ""
+msgstr "kommutatu eremuaren blokeo-modua"
 
 #: editor_ops.cc:6057
 msgid "change region opacity"
-msgstr ""
+msgstr "aldatu eremuaren gardentasuna"
 
 #: editor_ops.cc:6200
 msgid "fade range"
-msgstr ""
+msgstr "lausotu barrutia"
 
 #: editor_ops.cc:6238
 msgid "set fade in length"
-msgstr ""
+msgstr "zehaztu sarrera-lausotzearen luzera"
 
 #: editor_ops.cc:6245
 msgid "set fade out length"
-msgstr ""
+msgstr "zehaztu irteera-lausotzearen luzera"
 
 #: editor_ops.cc:6310
 msgid "set fade in shape"
-msgstr ""
+msgstr "zehaztu sarrera-lausotzearen forma"
 
 #: editor_ops.cc:6345
 msgid "set fade out shape"
-msgstr ""
+msgstr "zehaztu irteera-lausotzearen forma"
 
 #: editor_ops.cc:6381
 msgid "set fade in active"
-msgstr ""
+msgstr "ezarri sarrera-lausotzea aktibo"
 
 #: editor_ops.cc:6415
 msgid "set fade out active"
-msgstr ""
+msgstr "ezarri irteera-lausotzea aktibo"
 
 #: editor_ops.cc:6475
 msgid "toggle fade active"
-msgstr ""
+msgstr "gaitu/desgaitu lausotzea"
 
 #: editor_ops.cc:6638
 msgid "set loop range from selection"
-msgstr ""
+msgstr "ezarri loop-barrutia hautapenetik"
 
 #: editor_ops.cc:6652
 msgid "set loop range from region"
-msgstr ""
+msgstr "ezarri loop-barrutia eremutik"
 
 #: editor_ops.cc:6671
 msgid "set punch range from selection"
-msgstr ""
+msgstr "ezarri grabazio-tartea hautapenetik"
 
 #: editor_ops.cc:6695
 msgid "Auto Punch In"
-msgstr ""
+msgstr "Grabazio-tarte hasiera automatikoa"
 
 #: editor_ops.cc:6702 editor_ops.cc:6706
 msgid "Auto Punch In/Out"
-msgstr ""
+msgstr "Grabazio-tarte hasiera/bukaera automatikoa"
 
 #: editor_ops.cc:6748
 msgid "set session start/end from selection"
-msgstr ""
+msgstr "zehaztu saioaren hasiera/amaiera hautapenetik"
 
 #: editor_ops.cc:6783
 msgid "set punch start from EP"
-msgstr ""
+msgstr "zehaztu grabazio-tartearen hasiera EPtik"
 
 #: editor_ops.cc:6808
 msgid "set punch end from EP"
-msgstr ""
+msgstr "zehaztu grabazio-tartearen amaiera EPtik"
 
 #: editor_ops.cc:6838
 msgid "set loop start from EP"
-msgstr ""
+msgstr "zehaztu loop-barrutiaren hasiera EPtik"
 
 #: editor_ops.cc:6863
 msgid "set loop end from EP"
-msgstr ""
+msgstr "zehaztu loop-barrutiaren amaiera EPtik"
 
 #: editor_ops.cc:6874
 msgid "set punch range from region"
-msgstr ""
+msgstr "zehaztu grabazio-tartea eremutik"
 
 #: editor_ops.cc:6961
 msgid "Add new marker"
-msgstr ""
+msgstr "Gehitu marka berria"
 
 #: editor_ops.cc:6962
 msgid "Set global tempo"
-msgstr ""
+msgstr "Ezarri tempo orokorra"
 
 #: editor_ops.cc:6965
 msgid "Define one bar"
-msgstr ""
+msgstr "Zehaztu konpas bat"
 
 #: editor_ops.cc:6966
 msgid "Do you want to set the global tempo or add a new tempo marker?"
-msgstr ""
+msgstr "Tempo orokorra ezarri edo tempo-marka berria gehitu nahi duzu?"
 
 #: editor_ops.cc:6992
 msgid "set tempo from region"
-msgstr ""
+msgstr "ezarri tempoa eremuaren arabera"
 
 #: editor_ops.cc:7022
 msgid "split regions"
-msgstr ""
+msgstr "banandu eremuak"
 
 #: editor_ops.cc:7064
 msgid ""
@@ -6448,56 +6459,62 @@ msgid ""
 "into %2 pieces.\n"
 "This could take a long time."
 msgstr ""
+"Zatitzear zaude\n"
+"%1\n"
+"%2 zatitan.\n"
+"Horrek denbora asko har lezake."
 
 #: editor_ops.cc:7071
 msgid "Call for the Ferret!"
-msgstr ""
+msgstr "Deitu Kuxkuxeroa!"
 
 #: editor_ops.cc:7072
 msgid ""
 "Press OK to continue with this split operation\n"
 "or ask the Ferret dialog to tune the analysis"
 msgstr ""
+"Sakatu Ados banantze-eragiketarekin jarraitzeko\n"
+"edo Kuxkuxeroaren leihoan moldatu analisia"
 
 #: editor_ops.cc:7074
 msgid "Press OK to continue with this split operation"
-msgstr ""
+msgstr "Sakatu Ados banantze-eragiketarekin jarraitzeko"
 
 #: editor_ops.cc:7077
 msgid "Excessive split?"
-msgstr ""
+msgstr "Gehiegizko banantzea?"
 
 #: editor_ops.cc:7229
 msgid "place transient"
-msgstr ""
+msgstr "jarri trantsitorioa"
 
 #: editor_ops.cc:7263
 msgid "snap regions to grid"
-msgstr ""
+msgstr "doitu eremuak saretara"
 
 #: editor_ops.cc:7304
 msgid "Close Region Gaps"
-msgstr ""
+msgstr "Itxi eremuen arteko tarteak"
 
 #: editor_ops.cc:7309
 msgid "Crossfade length"
-msgstr ""
+msgstr "Lausotze-gurutzatuaren luzera"
 
 #: editor_ops.cc:7320
 msgid "Pull-back length"
-msgstr ""
+msgstr "Korritu luzera"
 
 #: editor_ops.cc:7333 keyeditor.cc:77
 msgid "Ok"
-msgstr ""
+msgstr "Ados"
 
 #: editor_ops.cc:7352
 msgid "close region gaps"
-msgstr ""
+msgstr "itxi eremuen arteko tarteak"
 
 #: editor_ops.cc:7655
 msgid "That would be bad news ...."
-msgstr ""
+msgstr "Berri txarrak izango lirateke ..."
 
 #: editor_ops.cc:7659
 msgid ""
@@ -6508,433 +6525,450 @@ msgid ""
 "edit your ardour.rc file to set the\n"
 "\"allow-special-bus-removal\" option to be \"yes\""
 msgstr ""
+"Bus nagusia edo monitorizatzekoa kentzea hain da ideia txarra\n"
+"%1-(r)ek ez duela onartuko.\n"
+"\n"
+"Benetan halako zer edo zer egin nahi baduzu,\n"
+"editatu zure ardour.rc fitxategia\n"
+"\"allow-special-bus-removal\" aukera \"yes\" izateko"
 
 #: editor_ops.cc:7676
 msgid "track"
 msgid_plural "tracks"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "pista"
+msgstr[1] "pistak"
 
 #: editor_ops.cc:7677
 msgid "bus"
 msgid_plural "busses"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "busa"
+msgstr[1] "busak"
 
 #: editor_ops.cc:7678
 msgid "VCA"
 msgid_plural "VCAs"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "VCA"
+msgstr[1] "VCAk"
 
 #: editor_ops.cc:7681
 msgid "Remove various strips"
-msgstr ""
+msgstr "Ezabatu kanal anitz"
 
 #: editor_ops.cc:7682
 msgid "Do you really want to remove %1 %2, %3 %4 and %5 %6?"
-msgstr ""
+msgstr "Benetan nahi dituzu ezabatu %1 %2, %3 %4 eta %5 %6?"
 
 #: editor_ops.cc:7686 editor_ops.cc:7691 editor_ops.cc:7696
 msgid "Remove %1 and %2"
-msgstr ""
+msgstr "Ezabatu %1 eta %2"
 
 #: editor_ops.cc:7687 editor_ops.cc:7692 editor_ops.cc:7697
 msgid "Do you really want to remove %1 %2 and %3 %4?"
-msgstr ""
+msgstr "Benetan nahi dituzu ezabatu %1 %2 eta %3 %4?"
 
 #: editor_ops.cc:7701 editor_ops.cc:7706 editor_ops.cc:7711
 #: vca_master_strip.cc:508
 msgid "Remove %1"
-msgstr ""
+msgstr "Ezabatu %1"
 
 #: editor_ops.cc:7702 editor_ops.cc:7707 editor_ops.cc:7712
 msgid "Do you really want to remove %1 %2?"
-msgstr ""
+msgstr "Benetan nahi dituzu ezabatu %1 %2?"
 
 #: editor_ops.cc:7723
 msgid "This action cannot be undone, and the session file will be overwritten!"
-msgstr ""
+msgstr "Ekintza hau ezin da desegin, eta saio-fitxategia gainidatzi egingo da!"
 
 #: editor_ops.cc:7727
 msgid "Yes, remove them."
-msgstr ""
+msgstr "Bai, ezabatu."
 
 #: editor_ops.cc:7729 editor_snapshots.cc:177 vca_master_strip.cc:514
 msgid "Yes, remove it."
-msgstr ""
+msgstr "Bai, ezabatu."
 
 #: editor_ops.cc:7781
 msgid "You must first select some tracks to Insert Time."
-msgstr ""
+msgstr "Denbora txertatzeko aurretik pista batzuk hautatu behar dituzu."
 
 #: editor_ops.cc:7788
 msgid "You cannot insert time in Lock Edit mode."
-msgstr ""
+msgstr "Ezin duzu denbora txertatu blokeatutako edizio-moduan."
 
 #: editor_ops.cc:7863 editor_ops.cc:7885 editor_ops.cc:7926 editor_ops.cc:7936
 msgid "insert time"
-msgstr ""
+msgstr "txertatu denbora"
 
 #: editor_ops.cc:7954
 msgid "You must first select some tracks to Remove Time."
-msgstr ""
+msgstr "Denbora ezabatzeko aurretik pista batzuk hautatu behar dituzu."
 
 #: editor_ops.cc:7961
 msgid "You cannot remove time in Lock Edit mode."
-msgstr ""
+msgstr "Ezin duzu denbora ezabatu blokeatutako edizio-moduan."
 
 #: editor_ops.cc:7998
 msgid "Cannot insert or delete time when in Lock edit."
-msgstr ""
+msgstr "Ezin da denbora txertatu edo ezabatu blokeatutako edizioan."
 
 #: editor_ops.cc:8012 editor_ops.cc:8031 editor_ops.cc:8105 editor_ops.cc:8118
 msgid "remove time"
-msgstr ""
+msgstr "ezabatu denbora"
 
 #: editor_ops.cc:8191
 msgid "There are too many tracks to fit in the current window"
-msgstr ""
+msgstr "Pista gehiegi daude oraingo leihoan sartzeko"
 
 #: editor_ops.cc:8253
 msgid "Sel"
-msgstr ""
+msgstr "Hautap"
 
 #: editor_ops.cc:8292
 #, c-format
 msgid "Saved view %u"
-msgstr ""
+msgstr "%u pista gordeta"
 
 #: editor_ops.cc:8317
 msgid "mute regions"
-msgstr ""
+msgstr "mututu eremuak"
 
 #: editor_ops.cc:8319
 msgid "mute region"
-msgstr ""
+msgstr "mututu eremua"
 
 #: editor_ops.cc:8356
 msgid "combine regions"
-msgstr ""
+msgstr "konbinatu eremuak"
 
 #: editor_ops.cc:8394
 msgid "uncombine regions"
-msgstr ""
+msgstr "deskonbinatu eremuak"
 
 #: editor_ops.cc:8433
 msgid "%1: Locked"
-msgstr ""
+msgstr "%1: Blokeatuta"
 
 #: editor_ops.cc:8441
 msgid "Click to unlock"
-msgstr ""
+msgstr "Egin klik desblokeatzeko"
 
 #: editor_ops.cc:8492
 msgid "Moving embedded files into session folder"
-msgstr ""
+msgstr "Txertatutako fitxategiak saioaren karpetara mugitzen"
 
 #: editor_regions.cc:175
 msgid "Region name, with number of channels in []'s"
-msgstr ""
+msgstr "Eremuaren izena, kanal kopurua [] artean"
 
 #: editor_regions.cc:176 editor_sources.cc:142 plugin_selector.cc:99
 #: plugin_selector.cc:169
 msgid "Tags"
-msgstr ""
+msgstr "Etiketak"
 
 #: editor_regions.cc:177 editor_regions.cc:791 midi_list_editor.cc:106
 #: time_info_box.cc:86
 msgid "Start"
-msgstr ""
+msgstr "Hasiera"
 
 #: editor_regions.cc:177
 msgid "Position of start of region"
-msgstr ""
+msgstr "Eremu-hasieraren kokalekua"
 
 #: editor_regions.cc:178
 msgid "Length of the region"
-msgstr ""
+msgstr "Eremuaren luzera"
 
 #: editor_regions.cc:179
 msgid "Lock|L"
-msgstr ""
+msgstr "Blok"
 
 #: editor_regions.cc:179
 msgid "Region position locked?"
-msgstr ""
+msgstr "Eremuaren-kokalekua blokeatuta?"
 
 #: editor_regions.cc:180
 msgid "Glued|G"
-msgstr ""
+msgstr "Itsats"
 
 #: editor_regions.cc:180
 msgid "Region position glued to Bars|Beats time?"
-msgstr ""
+msgstr "Eremuaren kokalekua Konpasak|Pultsuak denborari itsatsita?"
 
 #: editor_regions.cc:181
 msgid "Region muted?"
-msgstr ""
+msgstr "Eremua mutututa?"
 
 #: editor_regions.cc:182
 msgid "Opaque|O"
-msgstr ""
+msgstr "Opak"
 
 #: editor_regions.cc:182
 msgid "Region opaque (blocks regions below it from being heard)?"
-msgstr ""
+msgstr "Eremu opakua (bere azpiko eremuak ez entzutea eragiten du)?"
 
 #: editor_regions.cc:184 editor_regions.cc:793 time_info_box.cc:93
 msgid "End"
-msgstr ""
+msgstr "Amaiera"
 
 #: editor_regions.cc:184
 msgid "Position of end of region"
-msgstr ""
+msgstr "Eremu-amaieraren kokalekua"
 
 #: editor_regions.cc:185
 msgid "Position of region sync point, relative to start of the region"
 msgstr ""
+"Eremuaren sinkronizazio-puntuaren kokalekua, eremu-hasierarekiko erlatiboa"
 
 #: editor_regions.cc:186
 msgid "Length of region fade-in (units: secondary clock), () if disabled"
 msgstr ""
+"Sarrera-lausotze eremuaren luzera (unitateak: erloju sekundarioa), () "
+"desgaituta badago"
 
 #: editor_regions.cc:187
 msgid "Length of region fade-out (units: secondary clock), () if disabled"
 msgstr ""
+"Irteera-lausotze eremuaren luzera (unitateak: erloju sekundarioa), () "
+"desgaituta badago"
 
 #: editor_regions.cc:407
 msgid ""
 "Do you really want to remove unused regions?\n"
 "(This is destructive and cannot be undone)"
 msgstr ""
+"Benetan nahi dituzu ezabatu erabiltzen ez diren eremuak?\n"
+"(Hau suntsitzailea da eta ezin da desegin)"
 
 #: editor_regions.cc:411
 msgid "Yes, remove."
-msgstr ""
+msgstr "Bai, ezabatu."
 
 #: editor_regions.cc:413
 msgid "Remove unused regions"
-msgstr ""
+msgstr "Ezabatu erabiltzen ez diren eremuak"
 
 #: editor_regions.cc:584
 msgid "EditorRegions::format_position: negative timecode position: %1"
-msgstr ""
+msgstr "EremuEditorea::formatu_kokalekua: denbora-kode kokaleku negatiboa: %1"
 
 #: editor_regions.cc:875
 msgid "MISSING "
-msgstr ""
+msgstr "EZ DAGO "
 
 #: editor_routes.cc:136
 msgid "RS"
-msgstr ""
+msgstr "GS"
 
 #: editor_routes.cc:218
 msgid "SS"
-msgstr ""
+msgstr "SS"
 
 #: editor_routes.cc:247
 msgid "Track/Bus Name"
-msgstr ""
+msgstr "Pista/Bus izena"
 
 #: editor_routes.cc:248
 msgid "Track/Bus visible ?"
-msgstr ""
+msgstr "Pista/Busa ikusgai ?"
 
 #: editor_routes.cc:249
 msgid "Track/Bus active ?"
-msgstr ""
+msgstr "Pista/Bus aktibo ?"
 
 #: editor_routes.cc:250
 msgid "MidiInput|I"
-msgstr ""
+msgstr "Sar"
 
 #: editor_routes.cc:250
 msgid "MIDI input enabled"
-msgstr ""
+msgstr "MIDI sarrera gaituta"
 
 #: editor_routes.cc:251
 msgid "Rec|R"
-msgstr ""
+msgstr "Grb"
 
 #: editor_routes.cc:251
 msgid "Record enabled"
-msgstr ""
+msgstr "Grabazioa gaituta"
 
 #: editor_routes.cc:252
 msgid "Rec|RS"
-msgstr ""
+msgstr "GS"
 
 #: editor_routes.cc:252
 msgid "Record Safe"
-msgstr ""
+msgstr "Grabaziotik seguru"
 
 #: editor_routes.cc:253
 msgid "Muted"
-msgstr ""
+msgstr "Mutu"
 
 #: editor_routes.cc:254
 msgid "Soloed"
-msgstr ""
+msgstr "Soloan"
 
 #: editor_routes.cc:255
 msgid "SoloIso|SI"
-msgstr ""
+msgstr "SI"
 
 #: editor_routes.cc:255
 msgid "Solo Isolated"
-msgstr ""
+msgstr "Solo Isolatua"
 
 #: editor_routes.cc:256
 msgid "SoloLock|SS"
-msgstr ""
+msgstr "SS"
 
 #: editor_routes.cc:256
 msgid "Solo Safe (Locked)"
-msgstr ""
+msgstr "Solotik Seguru (Blokeatuta)"
 
 #: editor_routes.cc:560 mixer_ui.cc:1830 mixer_ui.cc:2978 mixer_ui.cc:3065
 #: mixer_ui.cc:3071 plugin_selector.cc:214
 msgid "Show All"
-msgstr ""
+msgstr "Erakutsi guztia"
 
 #: editor_routes.cc:561 mixer_ui.cc:1831
 msgid "Hide All"
-msgstr ""
+msgstr "Ezkutatu guztia"
 
 #: editor_routes.cc:562 mixer_ui.cc:1832
 msgid "Show All Audio Tracks"
-msgstr ""
+msgstr "Erakutsi audio-pista guztiak"
 
 #: editor_routes.cc:563 mixer_ui.cc:1833
 msgid "Hide All Audio Tracks"
-msgstr ""
+msgstr "Ezkutatu audio-pista guztiak"
 
 #: editor_routes.cc:564 mixer_ui.cc:1834
 msgid "Show All Midi Tracks"
-msgstr ""
+msgstr "Erakutsi midi-pista guztiak"
 
 #: editor_routes.cc:565 mixer_ui.cc:1835
 msgid "Hide All Midi Tracks"
-msgstr ""
+msgstr "Ezkutatu midi-pista guztiak"
 
 #: editor_routes.cc:566 mixer_ui.cc:1836
 msgid "Show All Busses"
-msgstr ""
+msgstr "Erakutsi bus guztiak"
 
 #: editor_routes.cc:567 mixer_ui.cc:1837
 msgid "Hide All Busses"
-msgstr ""
+msgstr "Ezkutatu bus guztiak"
 
 #: editor_routes.cc:568
 msgid "Only Show Tracks with Regions Under Playhead"
 msgstr ""
+"Denbora-barra ukitzen ari den eremuak dituzten pistak bakarrik erakutsi"
 
 #: editor_rulers.cc:218
 msgid "New location marker"
-msgstr ""
+msgstr "Kokapen-marka berria"
 
 #: editor_rulers.cc:219
 msgid "Clear all locations"
-msgstr ""
+msgstr "Garbitu kokapen guztiak"
 
 #: editor_rulers.cc:220
 msgid "Unhide locations"
-msgstr ""
+msgstr "Ezkutatu kokapenak"
 
 #: editor_rulers.cc:224
 msgid "New range"
-msgstr ""
+msgstr "Barruti berria"
 
 #: editor_rulers.cc:225
 msgid "Clear all ranges"
-msgstr ""
+msgstr "Garbitu barruti guztiak"
 
 #: editor_rulers.cc:226
 msgid "Unhide ranges"
-msgstr ""
+msgstr "Ezkutatu barrutiak"
 
 #: editor_rulers.cc:230
 msgid "New Loop range"
-msgstr ""
+msgstr "Loop-barruti berria"
 
 #: editor_rulers.cc:231
 msgid "New Punch range"
-msgstr ""
+msgstr "Grabazio-tarte berria"
 
 #: editor_rulers.cc:236
 msgid "New CD track marker"
-msgstr ""
+msgstr "CD-pista marka berria"
 
 #: editor_rulers.cc:240 tempo_dialog.cc:45
 msgid "New Tempo"
-msgstr ""
+msgstr "Tempo berria"
 
 #: editor_rulers.cc:244 tempo_dialog.cc:488
 msgid "New Meter"
-msgstr ""
+msgstr "Metrika berria"
 
 #: editor_snapshots.cc:56
 msgid "Snapshot (click to load)"
-msgstr ""
+msgstr "Saio-argazkia (egin klik kargatzeko)"
 
 #: editor_snapshots.cc:57
 msgid "Modified Date"
-msgstr ""
+msgstr "Aldatze-data"
 
 #: editor_snapshots.cc:154
 msgid "Rename Snapshot"
-msgstr ""
+msgstr "Berrizendatu saio-argazkia"
 
 #: editor_snapshots.cc:156
 msgid "New name of snapshot"
-msgstr ""
+msgstr "Saio-argazki berria"
 
 #: editor_snapshots.cc:174
 msgid ""
 "Do you really want to remove snapshot \"%1\" ?\n"
 "(which cannot be undone)"
 msgstr ""
+"Benetan nahi duzu ezabatu \"%1\" saio-argazkia?\n"
+"(itzulezina da ekintza)"
 
 #: editor_snapshots.cc:179
 msgid "Remove snapshot"
-msgstr ""
+msgstr "Ezabatu saio-argazkia"
 
 #: editor_sources.cc:141
 msgid "Source name, with number of channels in []'s"
-msgstr ""
+msgstr "Iturburuaren izena, kanal kopurua [] artean"
 
 #: editor_sources.cc:143
 msgid "Take ID"
-msgstr ""
+msgstr "Hartu IDa"
 
 #: editor_sources.cc:144
 msgid "Orig Pos"
-msgstr ""
+msgstr "Kok Orig"
 
 #: editor_sources.cc:144
 msgid "Original Position of the file on timeline, when it was recorded"
-msgstr ""
+msgstr "Fitxategiaren kokaleku originala denbora-lerroan, grabatu zenean"
 
 #: editor_sources.cc:145
 msgid "Path (folder) of the file locationlosition of end of region"
-msgstr ""
+msgstr "Eremu bukaerako kokaleku-posizio fitxategiaren bidea (karpeta)"
 
 #: editor_sources.cc:371
 msgid "(MISSING) "
-msgstr ""
+msgstr "(EZ DAGO) "
 
 #: editor_sources.cc:531
 msgid "EditorSources::format_position: negative timecode position: %1"
 msgstr ""
+"IturburuEditorea::formatu_kokalekua: denbora-kode kokaleku negatiboa: %1"
 
 #: editor_sources.cc:600
 msgid "Recover the selected Sources to their original Track & Position"
-msgstr ""
+msgstr "Eraman hautatutako iturburuak euren pista eta kokaleku originalera"
 
 #: editor_sources.cc:603
 msgid "Remove the selected Sources"
-msgstr ""
+msgstr "Ezabatu hautatutako iturburuak"
 
 #: editor_sources.cc:637
 msgid ""
@@ -6943,107 +6977,112 @@ msgid ""
 "The source files will not actually be deleted until you execute Session-"
 ">Cleanup."
 msgstr ""
+"Hautatutako iturburuak ezabatu nahi dituzu?\n"
+"Ekintza hau itzulezina da.\n"
+"Iturburu-fitxategia ez dira ezabatuko Saioa->Garbitu sakatu arte."
 
 #: editor_sources.cc:642
 msgid "Only remove the Regions that use these Sources."
-msgstr ""
+msgstr "Iturburu hauek erabiltzen dituzten eremuak soilik ezabatu."
 
 #: editor_sources.cc:643
 msgid "Yes, remove the Regions and Sources (cannot be undone!"
-msgstr ""
+msgstr "Bai, ezabatu eremuak eta iturburuak (itzulezina da!)"
 
 #: editor_sources.cc:645
 msgid "Remove selected Sources"
-msgstr ""
+msgstr "Ezabatu hautatutako iturburuak"
 
 #: editor_summary.cc:479
 msgid "Reset Summary to Extents"
-msgstr ""
+msgstr "Berrezarri laburpena zabalerara"
 
 #: editor_tempodisplay.cc:411
 msgid "add tempo mark"
-msgstr ""
+msgstr "gehitu tempo-marka"
 
 #: editor_tempodisplay.cc:436
 msgid "add"
-msgstr ""
+msgstr "gehitu"
 
 #: editor_tempodisplay.cc:454
 msgid "add meter mark"
-msgstr ""
+msgstr "gehitu metrika-marka"
 
 #: editor_tempodisplay.cc:493 editor_tempodisplay.cc:526
 msgid "done"
-msgstr ""
+msgstr "eginda"
 
 #: editor_tempodisplay.cc:513
 msgid "replace meter mark"
-msgstr ""
+msgstr "ordezkatu metrika-marka"
 
 #: editor_tempodisplay.cc:544
 msgid "replace tempo mark"
-msgstr ""
+msgstr "ordezkatu tempo-marka"
 
 #: editor_tempodisplay.cc:575 editor_tempodisplay.cc:609
 msgid "remove tempo mark"
-msgstr ""
+msgstr "ezabatu tempo-marka"
 
 #: editor_tempodisplay.cc:592
 msgid ""
 "programming error: meter marker canvas item has no marker object pointer!"
 msgstr ""
+"programazio-akatsa: metrikaren oihal-marka elementuak ez du objektu-markaren "
+"erakuslerik!"
 
 #: editor_timefx.cc:74
 msgid "stretch/shrink"
-msgstr ""
+msgstr "luzatu/uzkurtu"
 
 #: editor_timefx.cc:145
 msgid "pitch shift"
-msgstr ""
+msgstr "tonu aldaketa"
 
 #: editor_timefx.cc:324
 msgid "timefx cannot be started - thread creation error"
-msgstr ""
+msgstr "timefx ezin da abiarazi - haria sortzean akatsa"
 
 #: engine_dialog.cc:97
 msgid "Device Control Panel"
-msgstr ""
+msgstr "Gailu-kontrol panela"
 
 #: engine_dialog.cc:98
 msgid "Midi Device Setup"
-msgstr ""
+msgstr "Midi-gailuaren konfigurazioa"
 
 #: engine_dialog.cc:100
 msgid "Refresh Devices"
-msgstr ""
+msgstr "Freskatu gailuak"
 
 #: engine_dialog.cc:101
 msgid "Use Buffered I/O"
-msgstr ""
+msgstr "Erabili bufferdun S/I"
 
 #: engine_dialog.cc:102
 msgid "Autostart"
-msgstr ""
+msgstr "Auto-hasi"
 
 #: engine_dialog.cc:103 engine_dialog.cc:3097
 msgid "Measure"
-msgstr ""
+msgstr "Neurtu"
 
 #: engine_dialog.cc:104
 msgid "Use results"
-msgstr ""
+msgstr "Erabili emaitzak"
 
 #: engine_dialog.cc:105
 msgid "Back to settings ... (ignore results)"
-msgstr ""
+msgstr "Itzuli ezarpenetara (ahaztu emaitzak)"
 
 #: engine_dialog.cc:106
 msgid "Calibrate Audio"
-msgstr ""
+msgstr "Kalibratu audioa"
 
 #: engine_dialog.cc:110
 msgid "Back to settings"
-msgstr ""
+msgstr "Itzuli ezarpenetara"
 
 #: engine_dialog.cc:132
 msgid ""
@@ -7051,111 +7090,119 @@ msgid ""
 "\n"
 "(This is a build/packaging/system error. It should never happen.)"
 msgstr ""
+"Ez da audio-/MIDI-motorrik aurkitu. %1 ezin da abiarazi\n"
+"\n"
+"(Hau eraikitze/paketatze/sistema akatsa da. Ez luke inoiz gertatu behar.)"
 
 #: engine_dialog.cc:157
 msgid "Latency Measurement Tool"
-msgstr ""
+msgstr "Latentzia neurtzeko tresna"
 
 #: engine_dialog.cc:169
 msgid ""
 "<span weight=\"bold\">Turn down the volume on your audio equipment to a very "
 "low level.</span>"
 msgstr ""
+"<span weight=\"bold\">Jaitsi zure audio-ekipoko bolumena maila oso txiki "
+"bateraino.</span>"
 
 #: engine_dialog.cc:178
 msgid "Select two channels below and connect them using a cable."
-msgstr ""
+msgstr "Hautatu bi kanal eta konekta itzazu kable bat erabiliz."
 
 #: engine_dialog.cc:183
 msgid "Output channel:"
-msgstr ""
+msgstr "Irteera-kanala:"
 
 #: engine_dialog.cc:195
 msgid "Input channel:"
-msgstr ""
+msgstr "Sarrera-kanala:"
 
 #: engine_dialog.cc:233
 msgid "Once the channels are connected, click the \"Measure\" button."
-msgstr ""
+msgstr "Kanalak konektatzean, sakatu \"Neurtu\" botoia."
 
 #: engine_dialog.cc:240
 msgid "When satisfied with the results, click the \"Use results\" button."
-msgstr ""
+msgstr "Emaitzekin gustura zaudenean, egin klik \"Emaitzak erabili\" botoian."
 
 #: engine_dialog.cc:255 engine_dialog.cc:3276 engine_dialog.cc:3286
 msgid "No measurement results yet"
-msgstr ""
+msgstr "Oraindik ez dago neurketaren emaitzarik"
 
 #: engine_dialog.cc:265
 msgid "Latency"
-msgstr ""
+msgstr "Latentzia"
 
 #: engine_dialog.cc:317
 msgid ""
 "Always try these settings when starting %1, if the same device is available"
 msgstr ""
+"Beti probatu ezarpen hauek %1 abiaraztean, gailu bera erabilgarri badago"
 
 #: engine_dialog.cc:509
 msgid "Audio System:"
-msgstr ""
+msgstr "Audio-sistema:"
 
 #: engine_dialog.cc:553
 msgid "Driver:"
-msgstr ""
+msgstr "Driverra:"
 
 #: engine_dialog.cc:560
 msgid "Input Device:"
-msgstr ""
+msgstr "Sarrera-gailua:"
 
 #: engine_dialog.cc:564
 msgid "Output Device:"
-msgstr ""
+msgstr "Irteera-gailua:"
 
 #: engine_dialog.cc:571
 msgid "Device:"
-msgstr ""
+msgstr "Gailua:"
 
 #: engine_dialog.cc:599 engine_dialog.cc:716 export_report.cc:165
 #: export_report.cc:337 sfdb_ui.cc:183 sfdb_ui.cc:412 sfdb_ui.cc:417
 msgid "Sample rate:"
-msgstr ""
+msgstr "Lagin-tasa:"
 
 #: engine_dialog.cc:604 engine_dialog.cc:723
 msgid "Buffer size:"
-msgstr ""
+msgstr "Buffer-tamaina:"
 
 #: engine_dialog.cc:613
 msgid "Periods:"
-msgstr ""
+msgstr "Periodoak:"
 
 #: engine_dialog.cc:630
 msgid "Input channels:"
-msgstr ""
+msgstr "Sarrera-kanalak:"
 
 #: engine_dialog.cc:643
 msgid "Output channels:"
-msgstr ""
+msgstr "Irteera-kanalak:"
 
 #: engine_dialog.cc:662
 msgid "Hardware input latency:"
-msgstr ""
+msgstr "Hardwarearen sarrera-latentzia:"
 
 #: engine_dialog.cc:665 engine_dialog.cc:678
 msgid "samples"
-msgstr ""
+msgstr "laginak"
 
 #: engine_dialog.cc:675
 msgid "Hardware output latency:"
-msgstr ""
+msgstr "Hardwarearen irteera-latentzia:"
 
 #: engine_dialog.cc:686
 msgid "MIDI System:"
-msgstr ""
+msgstr "MIDI sistema:"
 
 #: engine_dialog.cc:708
 msgid ""
 "%1 is already running. %2 will connect to it and use the existing settings."
 msgstr ""
+"%1 lanean ari da dagoeneko. %2 bertara konektatuko da eta lehendik dagoen "
+"konfigurazioa erabiliko du."
 
 #: engine_dialog.cc:760
 msgid ""
@@ -7163,6 +7210,9 @@ msgid ""
 "\n"
 "Latency calibration requires a working audio interface."
 msgstr ""
+"Ezin izan da audio-motorrarekin hasi edo konektatu.\n"
+"\n"
+"Latentzia kalibratzeko, badabilen audio-interfazea behar da."
 
 #: engine_dialog.cc:766
 msgid ""
@@ -7170,263 +7220,272 @@ msgid ""
 "\n"
 "Latency calibration requires playback and capture"
 msgstr ""
+"Hautatutako audio-konfigurazioa erreprodukzio- edo kaptura-hutsa da.\n"
+"\n"
+"Latentzia kalibratzeko, erreprodukzio eta kaptura behar da"
 
 #: engine_dialog.cc:999
 msgid "MIDI Devices"
-msgstr ""
+msgstr "MIDI gailuak"
 
 #: engine_dialog.cc:1005
 msgid "Device"
-msgstr ""
+msgstr "Gailua"
 
 #: engine_dialog.cc:1007
 msgid "Systemic Latency [samples]"
-msgstr ""
+msgstr "Sistemako latentzia [laginak]"
 
 #: engine_dialog.cc:1010 gain_meter.cc:803 mixer_strip.cc:191
 #: mixer_strip.cc:408 mixer_strip.cc:2532 plugin_eq_gui.cc:131
 #: rc_option_editor.cc:3808
 msgid "Input"
-msgstr ""
+msgstr "Sarrera"
 
 #: engine_dialog.cc:1012 foldback_strip.cc:387 gain_meter.cc:809
 #: mixer_strip.cc:195 mixer_strip.cc:412 mixer_strip.cc:2535
 #: monitor_section.cc:305 monitor_section.cc:309 plugin_eq_gui.cc:132
 #: rc_option_editor.cc:3812 vca_master_strip.cc:236
 msgid "Output"
-msgstr ""
+msgstr "Irteera"
 
 #: engine_dialog.cc:1048
 msgid "Calibrate"
-msgstr ""
+msgstr "Kalibratu"
 
 #: engine_dialog.cc:1158
 msgid "all available channels"
-msgstr ""
+msgstr "erabilgarri dauden kanal guztiak"
 
 #: engine_dialog.cc:1684
 msgid "%1 sample"
 msgid_plural "%1 samples"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Lagin %1"
+msgstr[1] "%1 lagin"
 
 #: engine_dialog.cc:1744
 #, c-format
 msgid "(%.1f ms)"
-msgstr ""
+msgstr "(%.1f ms)"
 
 #: engine_dialog.cc:2460
 msgid "Could not start backend engine %1"
-msgstr ""
+msgstr "Ezin izan da %1 audio-motorra abiarazi"
 
 #: engine_dialog.cc:2492
 msgid "Cannot set driver to %1"
-msgstr ""
+msgstr "Ezin da ezarri driverra %1-(e)ra"
 
 #: engine_dialog.cc:2497
 msgid "Cannot set input device name to %1"
-msgstr ""
+msgstr "Ezin da ezarri sarrera-gailuaren izena %1-(e)ra"
 
 #: engine_dialog.cc:2501
 msgid "Cannot set output device name to %1"
-msgstr ""
+msgstr "Ezin da ezarri irteera-gailuaren izena %1-(e)ra"
 
 #: engine_dialog.cc:2506
 msgid "Cannot set device name to %1"
-msgstr ""
+msgstr "Ezin da ezarri gailuaren izena %1-(e)ra"
 
 #: engine_dialog.cc:2511
 msgid "Cannot set sample rate to %1"
-msgstr ""
+msgstr "Ezin da ezarri lagin-tasa %1-(e)ra"
 
 #: engine_dialog.cc:2515
 msgid "Cannot set buffer size to %1"
-msgstr ""
+msgstr "Ezin da ezarri buffer-tamaina %1-(e)ra"
 
 #: engine_dialog.cc:2519
 msgid "Cannot set periods to %1"
-msgstr ""
+msgstr "Ezin dira ezarri periodoak %1-(e)ra"
 
 #: engine_dialog.cc:2525
 msgid "Cannot set input channels to %1"
-msgstr ""
+msgstr "Ezin dira ezarri sarrera-kanalak %1-(e)ra"
 
 #: engine_dialog.cc:2529
 msgid "Cannot set output channels to %1"
-msgstr ""
+msgstr "Ezin dira ezarri irteera-kanalak %1-(e)ra"
 
 #: engine_dialog.cc:2535
 msgid "Cannot set input latency to %1"
-msgstr ""
+msgstr "Ezin da ezarri sarrera-latentzia %1-(e)ra"
 
 #: engine_dialog.cc:2539
 msgid "Cannot set output latency to %1"
-msgstr ""
+msgstr "Ezin da ezarri irteera-latentzia %1-(e)ra"
 
 #: engine_dialog.cc:2948 engine_dialog.cc:3014
 msgid "No signal detected "
-msgstr ""
+msgstr "Ez da seinalerik detektatu "
 
 #: engine_dialog.cc:2955
 msgid ""
 "Input signal is > -3dBFS. Lower the signal level (output gain, input gain) "
 "on the audio-interface."
 msgstr ""
+"Sarrera-seinalea > -3dBFS da. Txikitu seinalearen indarra (irteera edo "
+"sarrera irabazia) audio-interfazean."
 
 #: engine_dialog.cc:2968 engine_dialog.cc:3022 port_insert_ui.cc:74
 #: port_insert_ui.cc:102
 msgid "Disconnected from audio engine"
-msgstr ""
+msgstr "Audio-motorretik deskonektatuta"
 
 #: engine_dialog.cc:2977 engine_dialog.cc:3030
 msgid "Detected roundtrip latency: "
-msgstr ""
+msgstr "Joan-etorriko latentzia detektatu da: "
 
 #: engine_dialog.cc:2979 engine_dialog.cc:3032
 msgid "Systemic latency: "
-msgstr ""
+msgstr "Sistemako latentzia: "
 
 #: engine_dialog.cc:2986
 msgid "(signal detection error)"
-msgstr ""
+msgstr "(seinale-detektatze akatsa)"
 
 #: engine_dialog.cc:2992
 msgid "(inverted - bad wiring)"
-msgstr ""
+msgstr "(alderantzikatua - gaizki kableatua)"
 
 #: engine_dialog.cc:3039
 msgid "(averaging)"
-msgstr ""
+msgstr "(batezbestekoa)"
 
 #: engine_dialog.cc:3045
 msgid "(too large jitter)"
-msgstr ""
+msgstr "(bibrazio handiegia)"
 
 #: engine_dialog.cc:3049
 msgid "(large jitter)"
-msgstr ""
+msgstr "(bibrazio handia)"
 
 #: engine_dialog.cc:3061
 msgid "Timeout - large MIDI jitter."
-msgstr ""
+msgstr "Denbora-muga - MIDI bibrazio handia."
 
 #: engine_dialog.cc:3077 port_insert_ui.cc:138
 msgid "Detecting ..."
-msgstr ""
+msgstr "Detektatzen ..."
 
 #: engine_dialog.cc:3200
 msgid "Disconnect from %1"
-msgstr ""
+msgstr "%1-(e)tik deskonektatuta"
 
 #: engine_dialog.cc:3205
 msgid "Running"
-msgstr ""
+msgstr "Lanean"
 
 #: engine_dialog.cc:3207
 msgid "Connected"
-msgstr ""
+msgstr "Konektatuta"
 
 #: engine_dialog.cc:3218
 msgid "Connect to %1"
-msgstr ""
+msgstr "%1-(e)ra konektatuta"
 
 #: engine_dialog.cc:3222
 msgid "Stopped"
-msgstr ""
+msgstr "Geldituta"
 
 #: export_channel_selector.cc:53 export_report.cc:160 export_report.cc:333
 #: sfdb_ui.cc:181
 msgid "Channels:"
-msgstr ""
+msgstr "Kanalak:"
 
 #: export_channel_selector.cc:54
 msgid "Split to mono files"
-msgstr ""
+msgstr "Banandu mono fitxategitara"
 
 #: export_channel_selector.cc:201
 msgid "Bus or Track"
-msgstr ""
+msgstr "Bus edo pista"
 
 #: export_channel_selector.cc:476
 msgid "Region contents without fades nor region gain (channels: %1)"
-msgstr ""
+msgstr "Eremuko edukiak lausotze edota eremu-irabazirik gabe (kanalak: %1)"
 
 #: export_channel_selector.cc:480
 msgid "Region contents with fades and region gain (channels: %1)"
-msgstr ""
+msgstr "Eremuko edukiak lausotze edota eremu-irabaziekin (kanalak: %1)"
 
 #: export_channel_selector.cc:544
 msgid "Apply track/bus processing"
-msgstr ""
+msgstr "Aplikatu pista/bus prozesamendua"
 
 #: export_channel_selector.cc:552
 msgid "Selection Actions"
-msgstr ""
+msgstr "Hautapen ekintzak"
 
 #: export_channel_selector.cc:555
 msgid "Select tracks"
-msgstr ""
+msgstr "Hautatutako pistak"
 
 #: export_channel_selector.cc:556
 msgid "Select busses"
-msgstr ""
+msgstr "Hautatutako busak"
 
 #: export_channel_selector.cc:557
 msgid "Deselect all"
-msgstr ""
+msgstr "Desautatu guztiak"
 
 #: export_channel_selector.cc:560
 msgid "Exclude Hidden"
-msgstr ""
+msgstr "Baztertu ezkutatutakoak"
 
 #: export_channel_selector.cc:565
 msgid "Exclude Muted"
-msgstr ""
+msgstr "Baztertu mutututakoak"
 
 #: export_channel_selector.cc:600
 msgid "Track name"
-msgstr ""
+msgstr "Pistaren izena"
 
 #: export_dialog.cc:62
 msgid ""
 "<span color=\"#ffa755\">Some already existing files will be overwritten.</"
 "span>"
 msgstr ""
+"<span color=\"#ffa755\">Jada badauden fitxategi batzuk gainidatziko dira.</"
+"span>"
 
 #: export_dialog.cc:63
 msgid "List files"
-msgstr ""
+msgstr "Zerrendatu fitxategiak"
 
 #: export_dialog.cc:188 export_format_dialog.cc:74
 msgid "File format"
-msgstr ""
+msgstr "Fitxategi-formatua"
 
 #: export_dialog.cc:189 export_timespan_selector.cc:408
 #: export_timespan_selector.cc:530
 msgid "Time Span"
-msgstr ""
+msgstr "Denbora-bitartea"
 
 #: export_dialog.cc:190
 msgid "Channels"
-msgstr ""
+msgstr "Kanalak"
 
 #: export_dialog.cc:212
 msgid ""
 "Export has been aborted due to an error!\n"
 "See the Log for details."
 msgstr ""
+"Esportazioa bertan behera geratu da akats baten ondorioz!\n"
+"Ikusi Erregistroa detaileentzako."
 
 #: export_dialog.cc:323
 msgid "Files that will be overwritten"
-msgstr ""
+msgstr "Gainidatziko diren fitxategiak"
 
 #: export_dialog.cc:368
 msgid "Export initialization failed: %1"
-msgstr ""
+msgstr "Esportazioa-hasteak huts egin du: %1"
 
 #: export_dialog.cc:378
 msgid "Stop Export"
-msgstr ""
+msgstr "Gelditu esportazioa"
 
 #: export_dialog.cc:415
 msgid "Writing Mixer Screenshot: %1."
