@@ -2583,7 +2583,8 @@ NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*ignored*/)
 	} else {
 		relative = true;
 	}
-	MidiRegionSelection& ms (_editor->get_selection().midi_regions);
+	MidiRegionSelection ms = _editor->get_selection().midi_regions();
+
 	if (ms.size() > 1) {
 		/* has to be relative, may make no sense otherwise */
 		relative = true;
@@ -2614,7 +2615,7 @@ NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*ignored*/)
 void
 NoteResizeDrag::motion (GdkEvent* event, bool first_move)
 {
-	MidiRegionSelection& ms (_editor->get_selection().midi_regions);
+	MidiRegionSelection ms  = _editor->get_selection().midi_regions();
 	if (first_move) {
 		_editor->begin_reversible_command (_("resize notes"));
 
@@ -2709,7 +2710,7 @@ NoteResizeDrag::finished (GdkEvent* event, bool movement_occurred)
 		return;
 	}
 
-	MidiRegionSelection& ms (_editor->get_selection().midi_regions);
+	MidiRegionSelection ms = _editor->get_selection().midi_regions();
 	for (MidiRegionSelection::iterator r = ms.begin(); r != ms.end(); ++r) {
 		NoteBase* nb = reinterpret_cast<NoteBase*> (_item->get_data ("notebase"));
 		assert (nb);
@@ -2746,7 +2747,7 @@ NoteResizeDrag::finished (GdkEvent* event, bool movement_occurred)
 void
 NoteResizeDrag::aborted (bool)
 {
-	MidiRegionSelection& ms (_editor->get_selection().midi_regions);
+	MidiRegionSelection ms = _editor->get_selection().midi_regions();
 	for (MidiRegionSelection::iterator r = ms.begin(); r != ms.end(); ++r) {
 		MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*r);
 		if (mrv) {
@@ -6844,7 +6845,7 @@ NoteCreateDrag::finished (GdkEvent* ev, bool had_movement)
 	Temporal::Beats qn_length_beats = max (Temporal::Beats::ticks(1), Temporal::Beats (qn_length));
 
 	_editor->begin_reversible_command (_("Create Note"));
-	_region_view->clear_editor_note_selection();
+	_region_view->clear_note_selection();
 	_region_view->create_note_at (start, _drag_rect->y0(), qn_length_beats, ev->button.state, false);
 	_editor->commit_reversible_command ();
 }
@@ -6899,7 +6900,7 @@ HitCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	Temporal::Beats length = Temporal::Beats(1.0 / 32.0); /* 1/32 beat = 1/128 note */
 
 	_editor->begin_reversible_command (_("Create Hit"));
-	_region_view->clear_editor_note_selection();
+	_region_view->clear_note_selection();
 	_region_view->create_note_at (start, _y, length, event->button.state, false);
 
 	_last_pos = start;
