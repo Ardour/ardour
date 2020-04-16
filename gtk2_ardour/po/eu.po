@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-02 13:17+0200\n"
-"PO-Revision-Date: 2020-04-16 18:58+0200\n"
+"PO-Revision-Date: 2020-04-16 19:43+0200\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -7489,11 +7489,11 @@ msgstr "Gelditu esportazioa"
 
 #: export_dialog.cc:415
 msgid "Writing Mixer Screenshot: %1."
-msgstr "Nahasgailuaren argazkia idazten: %1"
+msgstr "Nahasgailuaren argazkia idazten: %1."
 
 #: export_dialog.cc:421
 msgid "Copying Mixer Screenshot: %1."
-msgstr "Nahasgailuaren argazkia kopiatzen: %1"
+msgstr "Nahasgailuaren argazkia kopiatzen: %1."
 
 #: export_dialog.cc:439
 msgid "export"
@@ -7585,7 +7585,7 @@ msgstr "%1 formatua: %2"
 
 #: export_filename_selector.cc:39
 msgid "Label:"
-msgstr "Etiketa"
+msgstr "Etiketa:"
 
 #: export_filename_selector.cc:40
 msgid "Timespan Name"
@@ -7692,7 +7692,7 @@ msgstr "Moztu isiltasuna hasieran"
 
 #: export_format_dialog.cc:62
 msgid "Add silence at start:"
-msgstr "Gehitu isiltasuna hasieran"
+msgstr "Gehitu isiltasuna hasieran:"
 
 #: export_format_dialog.cc:65
 msgid "Trim silence at end"
@@ -7700,7 +7700,7 @@ msgstr "Moztu isiltasuna amaieran"
 
 #: export_format_dialog.cc:66
 msgid "Add silence at end:"
-msgstr "Gehitu isiltasuna amaieran"
+msgstr "Gehitu isiltasuna amaieran:"
 
 #: export_format_dialog.cc:69
 msgid ""
@@ -8015,7 +8015,7 @@ msgstr "10K"
 
 #: export_report.cc:853
 msgid "Writing Export Analysis Image: %1."
-msgstr "Esportazio-analisi irudia idazten: %1"
+msgstr "Esportazio-analisi irudia idazten: %1."
 
 #: export_report.cc:950 sfdb_ui.cc:330 sfdb_ui.cc:489
 msgid "Could not read file: %1 (%2)."
@@ -8122,7 +8122,7 @@ msgstr "Erakutsi bidalketak"
 #: foldback_strip.cc:349 route_ui.cc:209
 msgid "Show the strips that send to this bus, and control them from the faders"
 msgstr ""
-"Erakutsi bus honetara bidaltzen diren kanalak eta kontrolatu faderrekin "
+"Erakutsi bus honetara bidaltzen diren kanalak eta kontrolatu faderrekin"
 
 #: foldback_strip.cc:370 foldback_strip.cc:1456 foldback_strip.cc:1459
 msgid "Listen"
@@ -8130,7 +8130,7 @@ msgstr "Entzun"
 
 #: foldback_strip.cc:376
 msgid "Level: "
-msgstr "Maila:"
+msgstr "Maila: "
 
 #: foldback_strip.cc:702 global_port_matrix.cc:203 io_selector.cc:216
 #: mixer_strip.cc:884 mixer_strip.cc:1003 monitor_section.cc:1353
