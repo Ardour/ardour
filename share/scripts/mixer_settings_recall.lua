@@ -204,7 +204,16 @@ function factory ()
 				local rt_group = group_by_name(group_name)
 				if rt_group then rt_group:add(rt) end
 
-				well_known = {'PRE', 'Trim', 'EQ', 'Comp', 'Fader', 'POST'}
+				well_known = {
+					'PRE', 
+					'Trim', 
+					'EQ', 
+					'Comp', 
+					'Fader', 
+					'POST',
+					"Input Stage",
+					"Mixbus Limiter"
+				}
 				protected_instrument = false
 				for k, v in pairs(order) do
 					local proc = Session:processor_by_id(PBD.ID(1))
@@ -220,8 +229,10 @@ function factory ()
 								for _, control in pairs(well_known) do
 									if name == control then
 										proc = get_processor_by_name(rt, control)
-										invalidate[v] = proc:to_stateful():id():to_s()
-										goto nextproc
+										if proc and not(proc:isnil()) then
+											invalidate[v] = proc:to_stateful():id():to_s()
+											goto nextproc
+										end
 									end
 								end
 								if not(proc) then goto nextproc end
