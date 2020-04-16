@@ -97,7 +97,7 @@ This mode provides many different operations on both regions and control points,
 
 %midi Global Global MIDI commands
 
-%notes Canvas MIDI Note Editing
+%notes MIDI Note Editing
 
 ;; END GROUP DEFINITIONS
 
