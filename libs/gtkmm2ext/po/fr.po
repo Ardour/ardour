@@ -1,31 +1,33 @@
 # Header entry was created by Lokalize.
 #
+#
 # Romain Arnaud <roming22@gmail.com>, 2011.
 # Olivier Humbert <trebmuh@tuxfamily.org>, 2016.
+# stratojaune <fred_rech@laposte.net>, 2020.
 msgid ""
 msgstr ""
 "Project-Id-Version: gtkmm2ext\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-10-12 16:31-0600\n"
-"PO-Revision-Date: 2016-12-01 02:23+0100\n"
-"Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>\n"
-"Language-Team: \n"
-"Language: fr\n"
+"PO-Revision-Date: 2020-04-16 19:53+0200\n"
+"Last-Translator: Fred Rech <fred_rech@laposte.net>\n"
+"Language-Team: French <>\n"
+"Language: fr_FR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.7.4\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Generator: Poedit 2.3\n"
+"Plural-Forms: nplurals=2; plural=(n!= 1);\n"
 "X-Poedit-SourceCharset: UTF-8\n"
-"X-Poedit-Basepath: ../\n"
+"X-Poedit-Basepath: ..\n"
 
 #: actions.cc:215
 msgid "Unknown action name: %1/%2"
-msgstr ""
+msgstr "Nom d'action inconnu : %1/%2"
 
 #: action_model.cc:56 action_model.cc:171
 msgid "Disabled"
-msgstr ""
+msgstr "Désactivé"
 
 #: action_model.cc:83
 msgid "Main_menu"
@@ -53,19 +55,19 @@ msgstr ""
 
 #: bindings.cc:831 bindings.cc:833
 msgid "Window"
-msgstr ""
+msgstr "Fenêtre"
 
 #: bindings.cc:831
 msgid " (Categorized)"
-msgstr ""
+msgstr " (Catégorisé)"
 
 #: bindings.cc:833
 msgid " (Alphabetical)"
-msgstr ""
+msgstr " (Alphabétique)"
 
 #: bindings.cc:849
 msgid "Uncategorized"
-msgstr ""
+msgstr "Non-catégorisé"
 
 #: cursors.cc:81
 msgid "cursor hotspots info file %1 has an error on line %2"
@@ -73,7 +75,7 @@ msgstr ""
 
 #: emscale.cc:52
 msgid "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-msgstr "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+msgstr ""
 
 #: gtk_ui.cc:122
 msgid "Log"
@@ -87,11 +89,11 @@ msgid ""
 msgstr ""
 "\n"
 "\n"
-"Raccourci : "
+"Raccourci : "
 
 #: gtk_ui.cc:658
 msgid "Press To Exit"
-msgstr "Appuyer pour quitter"
+msgstr "Clic Pour Quitter"
 
 #: gtk_ui.cc:694
 msgid "I'm sorry %1, I can't do that"
@@ -107,7 +109,7 @@ msgstr "Contrôle"
 
 #: keyboard.cc:77 keyboard.cc:82 keyboard.cc:100 keyboard.cc:105
 msgid "Key|Shift"
-msgstr "Key|Maj."
+msgstr "Majuscule"
 
 #: keyboard.cc:78
 msgid "Option"
@@ -115,27 +117,27 @@ msgstr "Option"
 
 #: keyboard.cc:80
 msgid "Cmd"
-msgstr "Cmd"
+msgstr ""
 
 #: keyboard.cc:81 keyboard.cc:103
 msgid "Ctrl"
-msgstr "Ctrl"
+msgstr ""
 
 #: keyboard.cc:83
 msgid "Opt"
-msgstr "Opt"
+msgstr ""
 
 #: keyboard.cc:99 keyboard.cc:104
 msgid "Alt"
-msgstr "Alt"
+msgstr ""
 
 #: keyboard.cc:101
 msgid "Windows"
-msgstr "Windows"
+msgstr ""
 
 #: keyboard.cc:106
 msgid "Win"
-msgstr "Win"
+msgstr ""
 
 #: keyboard.cc:158 keyboard.cc:601
 msgid "Unknown"
@@ -144,16 +146,16 @@ msgstr "Inconnu"
 #: keyboard.cc:612
 msgid "key bindings file not found at \"%2\" or contains errors."
 msgstr ""
-"fichier de raccourcis-clavier introuvable dans \"%2\" ou contenant des "
-"erreurs."
+"fichier de raccourcis-clavier introuvable dans \"%2\"\n"
+"ou contenant des erreurs."
 
 #: keyboard.cc:638
 msgid "Keyboard binding found without a name"
-msgstr "raccourci-clavier trouvé sans nom"
+msgstr "Raccourci-clavier trouvé sans nom"
 
 #: keyboard.cc:668
 msgid "Cannot save key bindings to %1"
-msgstr "Impossible de sauvegarder les raccourcis-clavier dans %1"
+msgstr "Raccourcis-clavier insauvegardables dans %1"
 
 #: keyboard.cc:684
 msgid "Cannot rename your own keybinding file (%1)"
@@ -170,8 +172,7 @@ msgstr "Fermer"
 #~ msgstr "actionnez le contrôleur maintenant"
 
 #~ msgid "button cannot watch state of non-existing Controllable\n"
-#~ msgstr ""
-#~ "le bouton ne peut pas surveiller l'état d'un contrôleur inexistant\n"
+#~ msgstr "le bouton ne peut pas surveiller l'état d'un contrôleur inexistant\n"
 
 #~ msgid "Add"
 #~ msgstr "Ajouter"
@@ -198,15 +199,12 @@ msgstr "Fermer"
 #~ msgstr "Méta"
 
 #~ msgid "motionfeedback: failed to open a temporary file for writing: %1"
-#~ msgstr ""
-#~ "rétroaction de mouvement : impossible d'ouvrir un fichier temporaire en "
-#~ "écriture : %1"
+#~ msgstr "rétroaction de mouvement : impossible d'ouvrir un fichier temporaire en écriture : %1"
 
 # Or is it "image set"?
 #, fuzzy
 #~ msgid "motionfeedback: could not save image set to %1"
-#~ msgstr ""
-#~ "rétroaction de mouvement : impossible de sauvegarder l'image réglée à %1"
+#~ msgstr "rétroaction de mouvement : impossible de sauvegarder l'image réglée à %1"
 
 #~ msgid "motionfeedback: caught PixbufError: %1"
 #~ msgstr "rétroaction de mouvement : PixbufError attrapée : %1"

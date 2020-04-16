@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: libardour 5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-10-12 16:31-0600\n"
-"PO-Revision-Date: 2016-12-01 02:48+0100\n"
+"PO-Revision-Date: 2020-04-13 16:43+0200\n"
 "Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>\n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Poedit 1.8.8\n"
+"X-Generator: Poedit 2.3\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-Basepath: ..\n"
 
@@ -28,7 +28,7 @@ msgstr "La recherche des transitoires a échoué pour %1."
 
 #: analyser.cc:123
 msgid "Audio File Source"
-msgstr "le fichier source audio"
+msgstr "Fichier Audio Source"
 
 #: analysis_graph.cc:136
 msgid "%1 (%2..%3)"
@@ -36,7 +36,7 @@ msgstr "%1 (%2..%3)"
 
 #: audio_backend.cc:31
 msgid "No Error occurred"
-msgstr "Aucune erreur"
+msgstr "Fini sans erreur"
 
 #: audio_backend.cc:33
 msgid "Failed to initialize audio backend"
@@ -86,7 +86,7 @@ msgstr "L'ouverture du périphérique MIDI a échoué"
 
 #: audio_backend.cc:55
 msgid "Failed to close MIDI device"
-msgstr "La fermeture du périphérique MIDI a échoué."
+msgstr "Fermeture d'appareil MIDI : échec"
 
 #: audio_backend.cc:57
 msgid "MIDI device unavailable"
@@ -818,7 +818,7 @@ msgstr "Impossible d'enlever le profil d'export %1 : %2"
 
 #: export_profile_manager.cc:689
 msgid "empty format"
-msgstr "Format vide"
+msgstr "format vide"
 
 #: export_profile_manager.cc:770
 msgid "Cannot load export format from %1"
