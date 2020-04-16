@@ -390,6 +390,7 @@ public:
 	Glib::RefPtr<Gtk::ActionGroup> editor_actions;
 	Glib::RefPtr<Gtk::ActionGroup> editor_menu_actions;
 	Glib::RefPtr<Gtk::ActionGroup> _region_actions;
+	Glib::RefPtr<Gtk::ActionGroup> _midi_actions;
 
 	virtual bool canvas_scroll_event (GdkEventScroll* event, bool from_canvas) = 0;
 	virtual bool canvas_control_point_event (GdkEvent* event, ArdourCanvas::Item*, ControlPoint*) = 0;

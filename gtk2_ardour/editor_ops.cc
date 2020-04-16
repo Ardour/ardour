@@ -4437,17 +4437,21 @@ void
 Editor::cut_copy_midi (CutCopyOp op)
 {
 	Temporal::Beats earliest = std::numeric_limits<Temporal::Beats>::max();
-	for (MidiRegionSelection::iterator i = selection->midi_regions.begin(); i != selection->midi_regions.end(); ++i) {
-		MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*i);
-		if (mrv) {
-			if (!mrv->selection().empty()) {
-				earliest = std::min(earliest, (*mrv->selection().begin())->note()->time());
-			}
-			mrv->cut_copy_clear (op);
 
-			/* XXX: not ideal, as there may be more than one track involved in the selection */
-			_last_cut_copy_source_track = &mrv->get_time_axis_view();
+	MidiRegionSelection ms = selection->midi_regions ();
+	cerr << "CCM, mrv = " << ms.size() << endl;
+
+	for (MidiRegionSelection::iterator i = ms.begin(); i != ms.end(); ++i) {
+
+		MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (*i);
+
+		if (!mrv->selection().empty()) {
+			earliest = std::min(earliest, (*mrv->selection().begin())->note()->time());
 		}
+		mrv->cut_copy_clear (op);
+
+		/* XXX: not ideal, as there may be more than one track involved in the selection */
+		_last_cut_copy_source_track = &mrv->get_time_axis_view();
 	}
 
 	if (!selection->points.empty()) {
@@ -8561,4 +8565,23 @@ Editor::toggle_layer_display ()
 		tvl.foreach_route_time_axis (boost::bind (&RouteTimeAxisView::toggle_layer_display, _1));
 	}
 
+}
+
+void
+Editor::midi_action (void (MidiRegionView::*method)())
+{
+	MidiRegionSelection ms = selection->midi_regions();
+
+	cerr << "MIDI action with " << ms.size() << " midi regions\n";
+
+	for (MidiRegionSelection::iterator i = ms.begin(); i != ms.end(); ++i) {
+
+		MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (*i);
+
+		if (!mrv) {
+			continue;
+		}
+
+		(mrv->*method) ();
+	}
 }

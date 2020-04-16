@@ -1700,3 +1700,9 @@ MidiTimeAxisView::paste (samplepos_t pos, const Selection& selection, PasteConte
 
 	return midi_view()->paste(pos, selection, ctx, sub_num);
 }
+
+void
+MidiTimeAxisView::get_regions_with_selected_data (RegionSelection& rs)
+{
+	midi_view()->get_regions_with_selected_data (rs);
+}

@@ -63,8 +63,8 @@ public:
 	MidiStreamView (MidiTimeAxisView&);
 	~MidiStreamView ();
 
-	void set_selected_regionviews (RegionSelection&);
 	void get_inverted_selectables (Selection&, std::list<Selectable* >& results);
+	void get_regions_with_selected_data (RegionSelection&);
 
 	enum VisibleNoteRange {
 		FullRange,

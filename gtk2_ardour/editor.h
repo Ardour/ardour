@@ -1883,6 +1883,7 @@ private:
 	void update_time_selection_display ();
 	void presentation_info_changed (PBD::PropertyChange const &);
 	void region_selection_changed ();
+	void catch_up_on_midi_selection ();
 	sigc::connection editor_regions_selection_changed_connection;
 	void sensitize_all_region_actions (bool);
 	void sensitize_the_right_region_actions (bool because_canvas_crossing);

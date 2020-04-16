@@ -711,3 +711,20 @@ MidiStreamView::paste (ARDOUR::samplepos_t pos, const Selection& selection, Past
 	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (*prev);
 	return mrv ? mrv->paste(pos, selection, ctx, sub_num) : false;
 }
+
+void
+MidiStreamView::get_regions_with_selected_data (RegionSelection& rs)
+{
+	for (list<RegionView*>::const_iterator i = region_views.begin(); i != region_views.end(); ++i) {
+		MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (*i);
+
+		if (!mrv) {
+			continue;
+		}
+
+		if (!mrv->selection().empty()) {
+			rs.add (*i);
+			cerr << "added region " << mrv->get_item_name() << " to RwSD\n";
+		}
+	}
+}

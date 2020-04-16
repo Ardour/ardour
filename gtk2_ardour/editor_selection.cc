@@ -49,6 +49,7 @@
 #include "control_point.h"
 #include "editor_regions.h"
 #include "editor_cursors.h"
+#include "keyboard.h"
 #include "midi_region_view.h"
 #include "sfdb_ui.h"
 
@@ -1618,8 +1619,8 @@ Editor::region_selection_changed ()
 	//there are a few global Editor->Select actions which select regions even if you aren't in Object mode.
 	//if regions are selected, we must always force the mouse mode to Object...
 	//... otherwise the user is confusingly left with selected regions that can't be manipulated.
-	if (!selection->regions.empty()) {
-		set_mouse_mode( MouseObject, false );
+	if (!selection->regions.empty() && !internal_editing()) {
+		set_mouse_mode (MouseObject, false);
 	}
 }
 
@@ -1746,7 +1747,8 @@ Editor::invert_selection ()
 {
 
 	if (internal_editing()) {
-		for (MidiRegionSelection::iterator i = selection->midi_regions.begin(); i != selection->midi_regions.end(); ++i) {
+		MidiRegionSelection ms = selection->midi_regions();
+		for (MidiRegionSelection::iterator i = ms.begin(); i != ms.end(); ++i) {
 			MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*i);
 			if (mrv) {
 				mrv->invert_selection ();
@@ -2216,4 +2218,27 @@ Editor::select_range (samplepos_t s, samplepos_t e)
 	long ret = selection->set (s, e);
 	commit_reversible_selection_op ();
 	return ret;
+}
+
+void
+Editor::catch_up_on_midi_selection ()
+{
+	RegionSelection regions;
+
+	for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
+		if ((*iter)->hidden()) {
+			continue;
+		}
+
+		MidiTimeAxisView* matv = dynamic_cast<MidiTimeAxisView*> (*iter);
+		if (!matv) {
+			continue;
+		}
+
+		matv->get_regions_with_selected_data (regions);
+	}
+
+	if (!regions.empty()) {
+		selection->set (regions);
+	}
 }
