@@ -8,15 +8,15 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-02 13:17+0200\n"
-"PO-Revision-Date: 2020-04-15 11:57+0200\n"
+"PO-Revision-Date: 2020-04-16 18:58+0200\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 2.2.1\n"
-"Last-Translator: Porrumentzio <<porruren-grabatokia@riseup.net> "
-"<porrumentzio@riseup.net>>\n"
+"Last-Translator: Porrumentzio <porruren-grabatokia@riseup.net "
+"porrumentzio@riseup.net>\n"
 "Language: eu\n"
 
 #: about.cc:133
@@ -1693,7 +1693,7 @@ msgid ""
 msgstr ""
 "Arrastatu fitxa hau mahaigainerantz %1 bere leiho propioan erakusteko\n"
 "\n"
-"Leihoa birkokatzeko, erabili Leihoa > %1 > Erantsi"
+"Leihoa birkokatzeko, erabili Leihoa > %1 > Birkokatu"
 
 #: ardour_ui2.cc:410
 msgid "Start recording at auto-punch start"
@@ -6867,11 +6867,11 @@ msgstr "Kokapen-marka berria"
 
 #: editor_rulers.cc:219
 msgid "Clear all locations"
-msgstr "Garbitu kokapen guztiak"
+msgstr "Garbitu kokaleku guztiak"
 
 #: editor_rulers.cc:220
 msgid "Unhide locations"
-msgstr "Ezkutatu kokapenak"
+msgstr "Ezkutatu kokalekuak"
 
 #: editor_rulers.cc:224
 msgid "New range"
@@ -7050,7 +7050,7 @@ msgstr "Gailu-kontrol panela"
 
 #: engine_dialog.cc:98
 msgid "Midi Device Setup"
-msgstr "Midi-gailuaren konfigurazioa"
+msgstr "Midi-gailu konfigurazioa"
 
 #: engine_dialog.cc:100
 msgid "Refresh Devices"
@@ -7062,7 +7062,7 @@ msgstr "Erabili bufferdun S/I"
 
 #: engine_dialog.cc:102
 msgid "Autostart"
-msgstr "Auto-hasi"
+msgstr "Automatikoki hasi"
 
 #: engine_dialog.cc:103 engine_dialog.cc:3097
 msgid "Measure"
@@ -7124,7 +7124,7 @@ msgstr "Kanalak konektatzean, sakatu \"Neurtu\" botoia."
 
 #: engine_dialog.cc:240
 msgid "When satisfied with the results, click the \"Use results\" button."
-msgstr "Emaitzekin gustura zaudenean, egin klik \"Emaitzak erabili\" botoian."
+msgstr "Emaitzekin gustura zaudenean, egin klik \"Erabili emaitzak\" botoian."
 
 #: engine_dialog.cc:255 engine_dialog.cc:3276 engine_dialog.cc:3286
 msgid "No measurement results yet"
@@ -7138,7 +7138,7 @@ msgstr "Latentzia"
 msgid ""
 "Always try these settings when starting %1, if the same device is available"
 msgstr ""
-"Beti probatu ezarpen hauek %1 abiaraztean, gailu bera erabilgarri badago"
+"Beti erabili ezarpen hauek %1 abiaraztean, gailu bera erabilgarri badago"
 
 #: engine_dialog.cc:509
 msgid "Audio System:"
@@ -7255,7 +7255,7 @@ msgstr "Kalibratu"
 
 #: engine_dialog.cc:1158
 msgid "all available channels"
-msgstr "erabilgarri dauden kanal guztiak"
+msgstr "libre dagoen kanal oro"
 
 #: engine_dialog.cc:1684
 msgid "%1 sample"
@@ -7489,145 +7489,153 @@ msgstr "Gelditu esportazioa"
 
 #: export_dialog.cc:415
 msgid "Writing Mixer Screenshot: %1."
-msgstr ""
+msgstr "Nahasgailuaren argazkia idazten: %1"
 
 #: export_dialog.cc:421
 msgid "Copying Mixer Screenshot: %1."
-msgstr ""
+msgstr "Nahasgailuaren argazkia kopiatzen: %1"
 
 #: export_dialog.cc:439
 msgid "export"
-msgstr ""
+msgstr "esportatu"
 
 #: export_dialog.cc:458
+#, fuzzy
 msgid "Exporting '%3' (timespan %1 of %2)"
-msgstr ""
+msgstr "'%3' esportatzen (gelditzen da %1 %2tik)"
 
 #: export_dialog.cc:463
+#, fuzzy
 msgid "Normalizing '%3' (timespan %1 of %2)"
-msgstr ""
+msgstr "'%3' normalizatzen (gelditzen da %1 %2tik)"
 
 #: export_dialog.cc:468
+#, fuzzy
 msgid "Encoding '%3' (timespan %1 of %2)"
-msgstr ""
+msgstr "'%3' kodifikatzen (gelditzen da %1 %2tik)"
 
 #: export_dialog.cc:473
+#, fuzzy
 msgid "Tagging '%3' (timespan %1 of %2)"
-msgstr ""
+msgstr "'%3' etiketatzen (gelditzen da %1 %2tik)"
 
 #: export_dialog.cc:477
 msgid "Uploading '%3' (timespan %1 of %2)"
-msgstr ""
+msgstr "'%3' igotzen (%1 %2tik gelditzen da)"
 
 #: export_dialog.cc:481
 msgid "Running Post Export Command for '%1'"
-msgstr ""
+msgstr "Esportazio-ondorengo komandoa '%1'-(r)entzat burutzen"
 
 #: export_dialog.cc:509 export_dialog.cc:511
 msgid "<span color=\"#ffa755\">Error: "
-msgstr ""
+msgstr "<span color=\"#ffa755\">Errorea: "
 
 #: export_dialog.cc:521
 msgid "<span color=\"#ffa755\">Warning: "
-msgstr ""
+msgstr "<span color=\"#ffa755\">Abisua: "
 
 #: export_dialog.cc:523
 msgid ""
 "\n"
 "<span color=\"#ffa755\">Warning: "
 msgstr ""
+"\n"
+"<span color=\"#ffa755\">Abisua: "
 
 #: export_dialog.cc:547
 msgid "Export Selection"
-msgstr ""
+msgstr "Esportatu hautapena"
 
 #: export_dialog.cc:561
 msgid "Export Region"
-msgstr ""
+msgstr "Esportatu eremua"
 
 #: export_dialog.cc:586
 msgid "Stem Export"
-msgstr ""
+msgstr "Zatika esportatu"
 
 #: export_file_notebook.cc:42
 msgid "Add another format"
-msgstr ""
+msgstr "Gehitu beste formatu bat"
 
 #: export_file_notebook.cc:208 transport_masters_dialog.cc:76
 msgid "Format"
-msgstr ""
+msgstr "Formatua"
 
 #: export_file_notebook.cc:209
 msgid "Location"
-msgstr ""
+msgstr "Kokalekua"
 
 #: export_file_notebook.cc:210
 msgid "Upload to Soundcloud"
-msgstr ""
+msgstr "Igo Soundcloud-era"
 
 #: export_file_notebook.cc:211
 msgid "Analyze Exported Audio"
-msgstr ""
+msgstr "Analizatu esportatutako audioa"
 
 #: export_file_notebook.cc:301
 msgid "No format!"
-msgstr ""
+msgstr "Formaturik ez!"
 
 #: export_file_notebook.cc:334
 msgid "Format %1: %2"
-msgstr ""
+msgstr "%1 formatua: %2"
 
 #: export_filename_selector.cc:39
 msgid "Label:"
-msgstr ""
+msgstr "Etiketa"
 
 #: export_filename_selector.cc:40
 msgid "Timespan Name"
-msgstr ""
+msgstr "Denbora-tartearen izena"
 
 #: export_filename_selector.cc:41
 msgid "Revision:"
-msgstr ""
+msgstr "Berrikuspena:"
 
 #: export_filename_selector.cc:43
 msgid "Folder:"
-msgstr ""
+msgstr "Karpeta:"
 
 #: export_filename_selector.cc:44 session_import_dialog.cc:52
 #: transcode_video_dialog.cc:62 video_server_dialog.cc:59
 #: video_server_dialog.cc:61 export_video_dialog.cc:83
 #: export_video_dialog.cc:85
 msgid "Browse"
-msgstr ""
+msgstr "Arakatu"
 
 #: export_filename_selector.cc:45 export_report.cc:119
 msgid "Open Folder"
-msgstr ""
+msgstr "Ireki karpeta"
 
 #: export_filename_selector.cc:50
 msgid "Build filename(s) from these components:"
-msgstr ""
+msgstr "Eraiki fitxategi izena(k) elementu hauez:"
 
 #: export_filename_selector.cc:52
 msgid "No Name"
-msgstr ""
+msgstr "Izenik ez"
 
 #: export_filename_selector.cc:53 session_dialog.cc:347
 msgid "Session Name"
-msgstr ""
+msgstr "Saio-izena"
 
 #: export_filename_selector.cc:54
 msgid "Snapshot Name"
-msgstr ""
+msgstr "Saio-argazkiaren izena"
 
 #: export_filename_selector.cc:235
 msgid ""
 "<small><i>Sorry, no example filename can be shown at the moment</i></small>"
 msgstr ""
+"<small><i>Oraintxe bertan ezin da fitxategi izenaren eredurik erakutsi</i></"
+"small>"
 
 #: export_filename_selector.cc:237
 msgid "<i>Current (approximate) filename</i>: \"%1\""
-msgstr ""
+msgstr "<i>Oraingo fitxategiaren izena (ez zehatza)</i>: \"%1\""
 
 #: export_filename_selector.cc:273 export_filename_selector.cc:434
 msgid ""
@@ -7635,104 +7643,111 @@ msgid ""
 "The filename will be chosen from the information just above the folder "
 "selector."
 msgstr ""
+"%1: hau direktorio/karpetaren izena da, ez fitxategiarena.\n"
+"Fitxategiaren izena karpeta-hautagailuaren gaineko informazioaz sortuko da."
 
 #: export_filename_selector.cc:409
 msgid "%1: this is not a valid directory/folder."
-msgstr ""
+msgstr "%1: hau ez da baliozko direktorio/karpeta bat."
 
 #: export_filename_selector.cc:419
 msgid "Choose export folder"
-msgstr ""
+msgstr "Aukeratu esportazio-karpeta"
 
 #: export_format_dialog.cc:39
 msgid "New Export Format Profile"
-msgstr ""
+msgstr "Esportazio-formatu profil berria"
 
 #: export_format_dialog.cc:39
 msgid "Edit Export Format Profile"
-msgstr ""
+msgstr "Editatu esportazio-formatu profila"
 
 #: export_format_dialog.cc:46
 msgid "Label: "
-msgstr ""
+msgstr "Etiketa: "
 
 #: export_format_dialog.cc:49
 msgid "Normalize:"
-msgstr ""
+msgstr "Normalizatu:"
 
 #: export_format_dialog.cc:50
 msgid "Peak"
-msgstr ""
+msgstr "Gailurra"
 
 #: export_format_dialog.cc:51
 msgid "Loudness"
-msgstr ""
+msgstr "Bolumena"
 
 #: export_format_dialog.cc:57
 msgid "LUFS"
-msgstr ""
+msgstr "LUFS"
 
 #: export_format_dialog.cc:58
 msgid "dBTP"
-msgstr ""
+msgstr "dBTP"
 
 #: export_format_dialog.cc:61
 msgid "Trim silence at start"
-msgstr ""
+msgstr "Moztu isiltasuna hasieran"
 
 #: export_format_dialog.cc:62
 msgid "Add silence at start:"
-msgstr ""
+msgstr "Gehitu isiltasuna hasieran"
 
 #: export_format_dialog.cc:65
 msgid "Trim silence at end"
-msgstr ""
+msgstr "Moztu isiltasuna amaieran"
 
 #: export_format_dialog.cc:66
 msgid "Add silence at end:"
-msgstr ""
+msgstr "Gehitu isiltasuna amaieran"
 
 #: export_format_dialog.cc:69
 msgid ""
 "Command to run post-export\n"
 "(%f=file path, %d=directory, %b=basename, see tooltip for more):"
 msgstr ""
+"Esportazio-ondoren burutzeko komandoa\n"
+"(%f=fitxategi-bidea, %d=direktorioa, %b=base-izena, ikusi argibidea "
+"gehiagorako):"
 
 #: export_format_dialog.cc:72
 msgid "Compatibility"
-msgstr ""
+msgstr "Bateragarritasuna"
 
 #: export_format_dialog.cc:73
 msgid "Quality"
-msgstr ""
+msgstr "Kalitatea"
 
 #: export_format_dialog.cc:76
 msgid "Sample rate conversion quality:"
-msgstr ""
+msgstr "Lagin-tasaren konbertsio-kalitatea:"
 
+# Ez daukagu argi nola euskeratu termino hau
 #: export_format_dialog.cc:83
+#, fuzzy
 msgid "Dithering"
-msgstr ""
+msgstr "Errore-lausotzea"
 
 #: export_format_dialog.cc:85
 msgid "Create CUE file for disk-at-once CD/DVD creation"
-msgstr ""
+msgstr "Sortu CUE artxiboa disk-at-once CD/DVD sorkuntzarako"
 
 #: export_format_dialog.cc:86
 msgid "Create TOC file for disk-at-once CD/DVD creation"
-msgstr ""
+msgstr "Sortu TOC artxiboa disk-at-once CD/DVD sorkuntzarako"
 
 #: export_format_dialog.cc:87
 msgid "Create chapter mark file for MP4 chapter marks"
-msgstr ""
+msgstr "Sortu kapitulu-marka artxiboa MP4ko kapitulu-markentzat"
 
 #: export_format_dialog.cc:89
 msgid "Tag file with session's metadata"
-msgstr ""
+msgstr "Etiketa-artxiboa saioaren metadatuez"
 
 #: export_format_dialog.cc:126
 msgid "∧"
-msgstr ""
+msgstr "∧"
 
 #: export_format_dialog.cc:131
 msgid ""
@@ -7740,6 +7755,9 @@ msgid ""
 "peak limit. EBU-R128 normalization is only available for mono and stereo "
 "targets, true-peak works for any channel layout."
 msgstr ""
+"Normalizatu EBU-R128 LUFS jomugara erabakitako benetako-gailur muga gainditu "
+"gabe. EBU-R128 normalizazioa mono eta estereoetarako soilik erabil daiteke, "
+"benetako-gailurrak edozein kanal-formaturako balio du."
 
 #: export_format_dialog.cc:159
 msgid ""
@@ -7767,371 +7785,401 @@ msgid ""
 "%Y Year\n"
 "%Z Country"
 msgstr ""
+"%a Artistaren izena\n"
+"%b Fitxategiaren base-izena\n"
+"%c Copyrighta\n"
+"%d Fitxategiaren direktorioa\n"
+"%f Fitxategiaren bide osoa\n"
+"%l Hitzen sortzailea\n"
+"%n Saioaren izena\n"
+"%o Zuzendaria\n"
+"%t Izenburua\n"
+"%z Erakundea\n"
+"%A Albuma\n"
+"%C Iruzkinak\n"
+"%E Ingeniaria\n"
+"%G Generoa\n"
+"%L Guztirako pistak\n"
+"%M Nahaste-teknikoa\n"
+"%N Denbora-tartearen izena\n"
+"%O Konpositorea\n"
+"%P Ekoizlea\n"
+"%S Diskoaren azpititulua\n"
+"%T Pistaren zenbakia\n"
+"%Y Urtea\n"
+"%Z Herrialdea"
 
 #: export_format_dialog.cc:559
 msgid "Best (sinc)"
-msgstr ""
+msgstr "Hoberena (sinc)"
 
 #: export_format_dialog.cc:564
 msgid "Medium (sinc)"
-msgstr ""
+msgstr "Erdikoa (sinc)"
 
 #: export_format_dialog.cc:569
 msgid "Fast (sinc)"
-msgstr ""
+msgstr "Azkarra (sinc)"
 
 #: export_format_dialog.cc:579
 msgid "Zero order hold"
-msgstr ""
+msgstr "Zero-ordena eustea"
 
 #: export_format_dialog.cc:1020
 msgid "Linear encoding options"
-msgstr ""
+msgstr "Kodifikazio-lineal aukerak"
 
 #: export_format_dialog.cc:1036
 msgid "Ogg Vorbis options"
-msgstr ""
+msgstr "Ogg Vorbis aukerak"
 
 #: export_format_dialog.cc:1048
 msgid "FLAC options"
-msgstr ""
+msgstr "FLAC aukerak"
 
 #: export_format_dialog.cc:1065
 msgid "Broadcast Wave options"
-msgstr ""
+msgstr "Broadcast Wave aukerak"
 
 #: export_format_dialog.cc:1081
 msgid "FFMPEG/MP3 options"
-msgstr ""
+msgstr "FFMPEG/MP3 aukerak"
 
 #: export_format_selector.cc:133
 msgid "Do you really want to remove the format?"
-msgstr ""
+msgstr "Benetan nahi duzu ezabatu formatua?"
 
 #: export_preset_selector.cc:32 plugin_presets_ui.cc:69
 msgid "Preset"
-msgstr ""
+msgstr "Aurrezarpena"
 
 #: export_preset_selector.cc:103
 msgid ""
 "The selected preset did not load successfully!\n"
 "Perhaps it references a format that has been removed?"
 msgstr ""
+"Hautatutako aurrezarpena ez da behar bezala kargatu!\n"
+"Ezabatutako formatu bat bilatzen ari al da?"
 
 #: export_preset_selector.cc:155
 msgid "Do you really want to remove this preset?"
-msgstr ""
+msgstr "Benetan nahi duzu ezabatu aurrezarpen hau?"
 
 #: export_report.cc:57
 msgid "Export Report/Analysis"
-msgstr ""
+msgstr "Esportatu txostena/analisia"
 
 #: export_report.cc:109 export_report.cc:332 export_video_dialog.cc:82
 msgid "File:"
-msgstr ""
+msgstr "Fitxategia:"
 
 #: export_report.cc:148 export_report.cc:336 sfdb_ui.cc:179
 msgid "Format:"
-msgstr ""
+msgstr "Formatua:"
 
 #: export_report.cc:167 export_report.cc:337
 msgid "%1 Hz"
-msgstr ""
+msgstr "%1 Hz"
 
 #: export_report.cc:170 export_report.cc:345 transcode_video_dialog.cc:142
 msgid "Duration:"
-msgstr ""
+msgstr "Iraupena:"
 
 #: export_report.cc:178 export_report.cc:343
 msgid "Timecode:"
-msgstr ""
+msgstr "Denbora-kodea:"
 
 #: export_report.cc:189
 msgid "Error:"
-msgstr ""
+msgstr "Errorea:"
 
 #: export_report.cc:225 export_report.cc:449
 msgid "(too short integration time)"
-msgstr ""
+msgstr "(integrazio-denbora motzegia)"
 
 #: export_report.cc:227
 msgid "-888"
-msgstr ""
+msgstr "-888"
 
 #: export_report.cc:232 export_report.cc:362
 msgid "Peak:"
-msgstr ""
+msgstr "Gailurra:"
 
 #: export_report.cc:233 export_report.cc:369
 msgid "%1 dBFS"
-msgstr ""
+msgstr "%1 dBFS"
 
 #: export_report.cc:234 export_report.cc:378
 msgid "True Peak:"
-msgstr ""
+msgstr "Benetako-gailurra:"
 
 #: export_report.cc:235 export_report.cc:385
 msgid "%1 dBTP"
-msgstr ""
+msgstr "%1 dBTP"
 
 #: export_report.cc:236 export_report.cc:396
 msgid "Normalization Gain:"
-msgstr ""
+msgstr "Normalizazio-irabazia:"
 
 #: export_report.cc:237
 msgid "+888.88 dB"
-msgstr ""
+msgstr "+888.88 dB"
 
 #: export_report.cc:239 export_report.cc:457
 msgid "Integrated Loudness:"
-msgstr ""
+msgstr "Bolumen-integratua:"
 
 #: export_report.cc:240 export_report.cc:463
 msgid "%1 LUFS"
-msgstr ""
+msgstr "%1 LUFS"
 
 #: export_report.cc:241 export_report.cc:469
 msgid "Loudness Range:"
-msgstr ""
+msgstr "Bolumen-tartea:"
 
 #: export_report.cc:242 export_report.cc:475
 msgid "%1 LU"
-msgstr ""
+msgstr "%1 LU"
 
 #: export_report.cc:252 export_report.cc:763
 msgid "100"
-msgstr ""
+msgstr "100"
 
 #: export_report.cc:287 export_report.cc:659
 msgid "00:00:00.000"
-msgstr ""
+msgstr "00:00:00.000"
 
 #: export_report.cc:293
 msgid "0|A8"
-msgstr ""
+msgstr "A8"
 
 #: export_report.cc:403
 msgid "%1 dB"
-msgstr ""
+msgstr "%1 dB"
 
 #: export_report.cc:434 export_report.cc:442 export_report.cc:562
 msgid ""
 "Not\n"
 "Available"
 msgstr ""
+"Ez\n"
+"Erabilgarri"
 
 #: export_report.cc:502
 msgid ""
 "LUFS\n"
 "(short)"
 msgstr ""
+"LUFS\n"
+"(motza)"
 
 #: export_report.cc:512
 msgid "Multiplicity"
-msgstr ""
+msgstr "Anizkoitasuna"
 
 #: export_report.cc:612
 msgid "Logscale|Lg"
-msgstr ""
+msgstr "Lg"
 
 #: export_report.cc:613
 msgid "Rectified|Rf"
-msgstr ""
+msgstr "Zd"
 
 #: export_report.cc:614
 msgid "Logscale"
-msgstr ""
+msgstr "Eskala logaritmikoa"
 
 #: export_report.cc:615
 msgid "Rectified"
-msgstr ""
+msgstr "Zuzendua"
 
 #: export_report.cc:747
 msgid "Hz"
-msgstr ""
+msgstr "Hz"
 
 #: export_report.cc:764
 msgid "500"
-msgstr ""
+msgstr "500"
 
 #: export_report.cc:765
 msgid "1K"
-msgstr ""
+msgstr "1K"
 
 #: export_report.cc:766
 msgid "5K"
-msgstr ""
+msgstr "5K"
 
 #: export_report.cc:767
 msgid "10K"
-msgstr ""
+msgstr "10K"
 
 #: export_report.cc:853
 msgid "Writing Export Analysis Image: %1."
-msgstr ""
+msgstr "Esportazio-analisi irudia idazten: %1"
 
 #: export_report.cc:950 sfdb_ui.cc:330 sfdb_ui.cc:489
 msgid "Could not read file: %1 (%2)."
-msgstr ""
+msgstr "Ezin izan da irakurri fitxategia: %1 (%2)"
 
 #: export_report.cc:976 sfdb_ui.cc:538
 msgid "Could not access soundfile: "
-msgstr ""
+msgstr "Ezin izan da atzitu audio-fitxategia: "
 
 #: export_report.cc:1212
 msgid "-36"
-msgstr ""
+msgstr "-36"
 
 #: export_report.cc:1213 export_report.cc:1217 export_report.cc:1223
 #: export_report.cc:1226
 msgid "-18"
-msgstr ""
+msgstr "-18"
 
 #: export_report.cc:1214 export_report.cc:1218 export_report.cc:1224
 #: export_report.cc:1227 export_report.cc:1230 export_report.cc:1231
 msgid "-9"
-msgstr ""
+msgstr "-9"
 
 #: export_report.cc:1215 export_report.cc:1219 export_report.cc:1225
 #: export_report.cc:1228 export_report.cc:1232 export_report.cc:1233
 msgid "-3"
-msgstr ""
+msgstr "-3"
 
 #: export_timespan_selector.cc:49
 msgid "Show Times as:"
-msgstr ""
+msgstr "Erakutsi denbora honela:"
 
 #: export_timespan_selector.cc:50
 msgid "Realtime Export"
-msgstr ""
+msgstr "Denbora errealeko esportazioa"
 
 #: export_timespan_selector.cc:58 processor_box.cc:3848
 msgid "Select All"
-msgstr ""
+msgstr "Hautatu guztiak"
 
 #: export_timespan_selector.cc:255 transform_dialog.cc:91
 msgid " to "
-msgstr ""
+msgstr " - "
 
 #: export_timespan_selector.cc:396 export_timespan_selector.cc:516
 msgid "RT"
-msgstr ""
+msgstr "RT"
 
 #: export_timespan_selector.cc:397 export_timespan_selector.cc:517
 #: virtual_keyboard_window.cc:170
 msgid "Range"
-msgstr ""
+msgstr "Barrutia"
 
 #: export_timespan_selector.cc:413 export_timespan_selector.cc:535
 msgid "Creation Date"
-msgstr ""
+msgstr "Sortze-data"
 
 #: foldback_strip.cc:98
 msgid "Pan: "
-msgstr ""
+msgstr "Pan: "
 
 #: foldback_strip.cc:109
 msgid "Level"
-msgstr ""
+msgstr "Maila"
 
 #: foldback_strip.cc:251
 msgid "Copy track/bus gain to send"
-msgstr ""
+msgstr "Kopiatu pista/busaren irabazia bidalketara"
 
 #: foldback_strip.cc:254
 msgid "Set send gain to -inf"
-msgstr ""
+msgstr "Bidalketen irabazia -inf"
 
 #: foldback_strip.cc:257
 msgid "Set send gain to 0dB"
-msgstr ""
+msgstr "Bidalketen irabazia 0dB"
 
 #: foldback_strip.cc:259
 msgid "Remove This Send"
-msgstr ""
+msgstr "Ezabatu bidalketa hau"
 
 #: foldback_strip.cc:304 foldback_strip.cc:1093 foldback_strip.cc:1104
 #: mixer_strip.cc:119 mixer_strip.cc:152 mixer_strip.cc:413 mixer_strip.cc:1576
 #: mixer_strip.cc:1587 rc_option_editor.cc:3813 vca_master_strip.cc:237
 msgid "Comments"
-msgstr ""
+msgstr "Iruzkinak"
 
 #: foldback_strip.cc:323
 msgid "Previous foldback bus"
-msgstr ""
+msgstr "Aurreko foldback busa"
 
 #: foldback_strip.cc:329
 msgid "Next foldback bus"
-msgstr ""
+msgstr "Hurrengo foldback busa"
 
 #: foldback_strip.cc:335
 msgid "Hide Foldback strip"
-msgstr ""
+msgstr "Ezkutatu foldback kanala"
 
 #: foldback_strip.cc:348 mixer_strip.cc:800
 msgid "Show Sends"
-msgstr ""
+msgstr "Erakutsi bidalketak"
 
 #: foldback_strip.cc:349 route_ui.cc:209
 msgid "Show the strips that send to this bus, and control them from the faders"
 msgstr ""
+"Erakutsi bus honetara bidaltzen diren kanalak eta kontrolatu faderrekin "
 
 #: foldback_strip.cc:370 foldback_strip.cc:1456 foldback_strip.cc:1459
 msgid "Listen"
-msgstr ""
+msgstr "Entzun"
 
 #: foldback_strip.cc:376
 msgid "Level: "
-msgstr ""
+msgstr "Maila:"
 
 #: foldback_strip.cc:702 global_port_matrix.cc:203 io_selector.cc:216
 #: mixer_strip.cc:884 mixer_strip.cc:1003 monitor_section.cc:1353
 #: monitor_selector.cc:190 plugin_pin_dialog.cc:1812
 msgid "Disconnect"
-msgstr ""
+msgstr "Deskonektatu"
 
 #: foldback_strip.cc:733 mixer_strip.cc:949 mixer_strip.cc:1059
 #: monitor_section.cc:1389 plugin_pin_dialog.cc:1836
 msgid "Routing Grid"
-msgstr ""
+msgstr "Konexioen taula"
 
 #: foldback_strip.cc:882 mixer_strip.cc:1320 monitor_section.cc:1434
 msgid "<b>OUTPUT</b> from %1"
-msgstr ""
+msgstr "<b>IRTEERA</b> %1-(e)tik"
 
 #: foldback_strip.cc:920 mixer_strip.cc:1359 monitor_section.cc:1521
 #: transport_masters_dialog.cc:355
 msgid "Disconnected"
-msgstr ""
+msgstr "Deskonektatua"
 
 #: foldback_strip.cc:1089 mixer_strip.cc:1572
 msgid "Click to add/edit comments"
-msgstr ""
+msgstr "Egin klik iruzkinak gehitzeko/editatzeko"
 
 #: foldback_strip.cc:1137 mixer_strip.cc:1694 route_time_axis.cc:627
 msgid "Comments..."
-msgstr ""
+msgstr "Iruzkinak..."
 
 #: foldback_strip.cc:1139 mixer_strip.cc:1698 route_time_axis.cc:631
 msgid "Outputs..."
-msgstr ""
+msgstr "Irteerak..."
 
 #: foldback_strip.cc:1143 mixer_strip.cc:1712
 msgid "Save As Template..."
-msgstr ""
+msgstr "Gorde txantiloia honela..."
 
 #: foldback_strip.cc:1148 mixer_strip.cc:1730 route_group_dialog.cc:47
 #: route_time_axis.cc:866
 msgid "Active"
-msgstr ""
+msgstr "Aktibo"
 
 #: foldback_strip.cc:1155 mixer_strip.cc:1775
 msgid "Protect Against Denormals"
-msgstr ""
+msgstr "Babestu desnormaltzeetaz"
 
 #: foldback_strip.cc:1453
 msgid "Listen on monitor"
-msgstr ""
+msgstr "Entzun monitorea"
 
 #: foldback_strip.cc:1567 route_ui.cc:1063
 msgid "Assign selected tracks (prefader)"
