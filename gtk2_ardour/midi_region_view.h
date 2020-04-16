@@ -441,8 +441,6 @@ public:
 	 */
 	void clear_selection_internal ();
 
-	void clear_editor_note_selection ();
-
 	void clear_events ();
 
 	bool canvas_group_event(GdkEvent* ev);
@@ -577,7 +575,6 @@ public:
 
 	double    _last_event_x;
 	double    _last_event_y;
-	bool      _grabbed_keyboard;
 	bool      _entered;
 	NoteBase* _entered_note;
 

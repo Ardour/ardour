@@ -127,7 +127,6 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
 	, _last_display_zoom (0)
 	, _last_event_x (0)
 	, _last_event_y (0)
-	, _grabbed_keyboard (false)
 	, _entered (false)
 	, _entered_note (0)
 	, _mouse_changed_selection (false)
@@ -175,7 +174,6 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
 	, _last_display_zoom (0)
 	, _last_event_x (0)
 	, _last_event_y (0)
-	, _grabbed_keyboard (false)
 	, _entered (false)
 	, _entered_note (0)
 	, _mouse_changed_selection (false)
@@ -230,7 +228,6 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other)
 	, _last_display_zoom (0)
 	, _last_event_x (0)
 	, _last_event_y (0)
-	, _grabbed_keyboard (false)
 	, _entered (false)
 	, _entered_note (0)
 	, _mouse_changed_selection (false)
@@ -261,7 +258,6 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other, boost::shared_ptr<M
 	, _last_display_zoom (0)
 	, _last_event_x (0)
 	, _last_event_y (0)
-	, _grabbed_keyboard (false)
 	, _entered (false)
 	, _entered_note (0)
 	, _mouse_changed_selection (false)
@@ -466,12 +462,6 @@ MidiRegionView::enter_internal (uint32_t state)
 		create_ghost_note(_last_event_x, _last_event_y, state);
 	}
 
-	if (!_selection.empty()) {
-		// Grab keyboard for moving selected notes with arrow keys
-		Keyboard::magic_widget_grab_focus();
-		_grabbed_keyboard = true;
-	}
-
 	// Lower frame handles below notes so they don't steal events
 	if (frame_handle_start) {
 		frame_handle_start->lower_to_bottom();
@@ -487,11 +477,6 @@ MidiRegionView::leave_internal()
 	hide_verbose_cursor ();
 	remove_ghost_note ();
 	_entered_note = 0;
-
-	if (_grabbed_keyboard) {
-		Keyboard::magic_widget_drop_focus();
-		_grabbed_keyboard = false;
-	}
 
 	// Raise frame handles above notes so they catch events
 	if (frame_handle_start) {
@@ -569,18 +554,15 @@ MidiRegionView::button_release (GdkEventButton* ev)
 		switch (editor.current_mouse_mode()) {
 		case MouseRange:
 			/* no motion occurred - simple click */
-			clear_editor_note_selection ();
+			clear_selection_internal ();
 			_mouse_changed_selection = true;
 			break;
 
 		case MouseContent:
 		case MouseTimeFX:
-			{
-				_mouse_changed_selection = true;
-				clear_editor_note_selection ();
-
-				break;
-			}
+			_mouse_changed_selection = true;
+			clear_selection_internal ();
+			break;
 		case MouseDraw:
 			break;
 
@@ -667,7 +649,7 @@ MidiRegionView::motion (GdkEventMotion* ev)
 			if (m == MouseContent && !Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier())) {
 				editor.drags()->set (new MidiRubberbandSelectDrag (dynamic_cast<Editor *> (&editor), this), (GdkEvent *) ev);
 				if (!Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
-					clear_editor_note_selection ();
+					clear_selection_internal ();
 					_mouse_changed_selection = true;
 				}
 				_mouse_state = SelectRectDragging;
@@ -743,98 +725,13 @@ MidiRegionView::key_press (GdkEventKey* ev)
 	   detectable auto-repeat is the name of the game and only sends
 	   repeated presses, carry out key actions at key press, not release.
 	*/
-	bool unmodified = Keyboard::no_modifier_keys_pressed (ev);
 
-	if (unmodified && (ev->keyval == GDK_Alt_L || ev->keyval == GDK_Alt_R)) {
+	if (Keyboard::no_modifier_keys_pressed(ev) && (ev->keyval == GDK_Alt_L || ev->keyval == GDK_Alt_R)) {
 
 		if (_mouse_state != AddDragging) {
 			_mouse_state = SelectTouchDragging;
 		}
 
-		return true;
-
-	} else if (ev->keyval == GDK_Escape && unmodified) {
-		clear_editor_note_selection ();
-		_mouse_state = None;
-
-	} else if (ev->keyval == GDK_comma || ev->keyval == GDK_period) {
-
-		bool start = (ev->keyval == GDK_comma);
-		bool end = (ev->keyval == GDK_period);
-		bool shorter = Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier);
-		bool fine = Keyboard::modifier_state_contains (ev->state, Keyboard::SecondaryModifier);
-
-		change_note_lengths (fine, shorter, Temporal::Beats(), start, end);
-
-		return true;
-
-	} else if ((ev->keyval == GDK_BackSpace || ev->keyval == GDK_Delete) && unmodified) {
-
-		if (_selection.empty()) {
-			return false;
-		}
-
-		delete_selection();
-		return true;
-
-	} else if (ev->keyval == GDK_Tab || ev->keyval == GDK_ISO_Left_Tab) {
-
-		trackview.editor().begin_reversible_selection_op (X_("Select Adjacent Note"));
-
-		if (Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier)) {
-			goto_previous_note (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier));
-		} else {
-			goto_next_note (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier));
-		}
-
-		trackview.editor().commit_reversible_selection_op();
-
-		return true;
-
-	} else if (ev->keyval == GDK_Up) {
-
-		bool allow_smush = Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier);
-		bool fine = !Keyboard::modifier_state_contains (ev->state, Keyboard::SecondaryModifier);
-		bool together = Keyboard::modifier_state_contains (ev->state, Keyboard::Level4Modifier);
-
-		if (Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier)) {
-			change_velocities (true, fine, allow_smush, together);
-		} else {
-			transpose (true, fine, allow_smush);
-		}
-		return true;
-
-	} else if (ev->keyval == GDK_Down) {
-
-		bool allow_smush = Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier);
-		bool fine = !Keyboard::modifier_state_contains (ev->state, Keyboard::SecondaryModifier);
-		bool together = Keyboard::modifier_state_contains (ev->state, Keyboard::Level4Modifier);
-
-		if (Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier)) {
-			change_velocities (false, fine, allow_smush, together);
-		} else {
-			transpose (false, fine, allow_smush);
-		}
-		return true;
-
-	} else if (ev->keyval == GDK_Left) {
-
-		bool fine = !Keyboard::modifier_state_contains (ev->state, Keyboard::SecondaryModifier);
-		nudge_notes (false, fine);
-		return true;
-
-	} else if (ev->keyval == GDK_Right) {
-
-		bool fine = !Keyboard::modifier_state_contains (ev->state, Keyboard::SecondaryModifier);
-		nudge_notes (true, fine);
-		return true;
-
-	} else if (ev->keyval == GDK_c && unmodified) {
-		channel_edit ();
-		return true;
-
-	} else if (ev->keyval == GDK_v && unmodified) {
-		velocity_edit ();
 		return true;
 	}
 
@@ -982,8 +879,8 @@ MidiRegionView::create_note_at (samplepos_t t, double y, Temporal::Beats length,
 void
 MidiRegionView::clear_events ()
 {
-	// clear selection without signaling
-	clear_selection_internal ();
+	// clear selection without signaling or trying to change state of event objects
+	_selection.clear ();
 
 	MidiGhostRegion* gr;
 	for (std::vector<GhostRegion*>::iterator g = ghosts.begin(); g != ghosts.end(); ++g) {
@@ -1110,7 +1007,7 @@ MidiRegionView::abort_command()
 	delete _note_diff_command;
 	_note_diff_command = 0;
 	trackview.editor().abort_reversible_command();
-	clear_editor_note_selection();
+	clear_selection_internal ();
 }
 
 NoteBase*
@@ -1938,7 +1835,7 @@ MidiRegionView::step_add_note (uint8_t channel, uint8_t number, uint8_t velocity
 
 	start_note_diff_command (_("step add"));
 
-	clear_editor_note_selection ();
+	clear_selection_internal ();
 	note_diff_add_note (new_note, true, false);
 
 	apply_diff();
@@ -2214,19 +2111,12 @@ MidiRegionView::delete_note (boost::shared_ptr<NoteType> n)
 }
 
 void
-MidiRegionView::clear_editor_note_selection ()
-{
-	DEBUG_TRACE(DEBUG::Selection, "MRV::clear_editor_note_selection\n");
-	PublicEditor& editor(trackview.editor());
-	editor.get_selection().clear_midi_notes();
-}
-
-void
 MidiRegionView::clear_selection ()
 {
 	clear_selection_internal();
 	PublicEditor& editor(trackview.editor());
-	editor.get_selection().remove(this);
+	editor.get_selection().remove (this);
+	_mouse_state = None;
 }
 
 void
@@ -2239,26 +2129,18 @@ MidiRegionView::clear_selection_internal ()
 		(*i)->hide_velocity();
 	}
 	_selection.clear();
-
-	if (_entered) {
-		// Clearing selection entirely, ungrab keyboard
-		Keyboard::magic_widget_drop_focus();
-		_grabbed_keyboard = false;
-	}
 }
 
 void
 MidiRegionView::unique_select(NoteBase* ev)
 {
-	clear_editor_note_selection();
+	clear_selection ();
 	add_to_selection(ev);
 }
 
 void
 MidiRegionView::select_all_notes ()
 {
-	clear_editor_note_selection ();
-
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
 		add_to_selection (i->second);
 	}
@@ -2267,8 +2149,6 @@ MidiRegionView::select_all_notes ()
 void
 MidiRegionView::select_range (samplepos_t start, samplepos_t end)
 {
-	clear_editor_note_selection ();
-
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
 		samplepos_t t = source_beats_to_absolute_samples(i->first->time());
 		if (t >= start && t <= end) {
@@ -2332,7 +2212,6 @@ MidiRegionView::select_matching_notes (uint8_t notenum, uint16_t channel_mask, b
 	}
 
 	if (!add) {
-		clear_editor_note_selection ();
 
 		if (!extend && (low_note == high_note) && (high_note == notenum)) {
 			/* only note previously selected is the one we are
@@ -2407,7 +2286,7 @@ void
 MidiRegionView::note_selected (NoteBase* ev, bool add, bool extend)
 {
 	if (!add) {
-		clear_editor_note_selection();
+		clear_selection_internal ();
 		add_to_selection (ev);
 	}
 
@@ -2536,11 +2415,6 @@ MidiRegionView::remove_from_selection (NoteBase* ev)
 
 	if (i != _selection.end()) {
 		_selection.erase (i);
-		if (_selection.empty() && _grabbed_keyboard) {
-			// Ungrab keyboard
-			Keyboard::magic_widget_drop_focus();
-			_grabbed_keyboard = false;
-		}
 	}
 
 	ev->set_selected (false);
@@ -2548,7 +2422,10 @@ MidiRegionView::remove_from_selection (NoteBase* ev)
 
 	if (_selection.empty()) {
 		PublicEditor& editor (trackview.editor());
+		cerr << "Removing MRV from selection\n";
 		editor.get_selection().remove (this);
+	} else {
+		cerr << "note selection not empty\n";
 	}
 }
 
@@ -2560,11 +2437,6 @@ MidiRegionView::add_to_selection (NoteBase* ev)
 	if (_selection.insert (ev).second) {
 		ev->set_selected (true);
 		start_playing_midi_note ((ev)->note());
-		if (selection_was_empty && _entered) {
-			// Grab keyboard for moving notes with arrow keys
-			Keyboard::magic_widget_grab_focus();
-			_grabbed_keyboard = true;
-		}
 	}
 
 	if (selection_was_empty) {
@@ -2801,7 +2673,7 @@ MidiRegionView::note_dropped(NoteBase *, double d_qn, int8_t dnote, bool copy)
 		}
 	} else {
 
-		clear_editor_note_selection ();
+		clear_selection_internal ();
 
 		for (CopyDragEvents::iterator i = _copy_drag_events.begin(); i != _copy_drag_events.end(); ++i) {
 			uint8_t pitch = (*i)->note()->note();
@@ -3667,15 +3539,21 @@ MidiRegionView::note_mouse_position (float x_fraction, float /*y_fraction*/, boo
 uint32_t
 MidiRegionView::get_fill_color() const
 {
-	const std::string mod_name = (_dragging ? "dragging region" :
-	                              trackview.editor().internal_editing() ? "editable region" :
-	                              "midi frame base");
+	const std::string mod_name = (_dragging ? "dragging region" : "midi frame base");
+
 	if (_selected) {
-		return UIConfiguration::instance().color_mod ("selected region base", mod_name);
-	} else if ((!UIConfiguration::instance().get_show_name_highlight() || high_enough_for_name) &&
-	           !UIConfiguration::instance().get_color_regions_using_track_color()) {
+
+		if (!trackview.editor().internal_editing()) {
+			return UIConfiguration::instance().color_mod ("selected region base", mod_name);
+		}
+
+	}
+
+	if ((!UIConfiguration::instance().get_show_name_highlight() || high_enough_for_name) &&
+	    !UIConfiguration::instance().get_color_regions_using_track_color()) {
 		return UIConfiguration::instance().color_mod ("midi frame base", mod_name);
 	}
+
 	return UIConfiguration::instance().color_mod (fill_color, mod_name);
 }
 
@@ -3824,8 +3702,6 @@ MidiRegionView::paste_internal (samplepos_t pos, unsigned paste_count, float tim
 	                                               duration, pos, _region->position(),
 	                                               quarter_note));
 
-	clear_editor_note_selection ();
-
 	for (int n = 0; n < (int) times; ++n) {
 
 		for (Notes::const_iterator i = mcb.notes().begin(); i != mcb.notes().end(); ++i) {
@@ -3877,6 +3753,12 @@ MidiRegionView::goto_next_note (bool add_to_selection)
 	MidiModel::ReadLock lock(_model->read_lock());
 	MidiModel::Notes& notes (_model->notes());
 
+	if (notes.empty()) {
+		return;
+	}
+
+	trackview.editor().begin_reversible_selection_op (X_("Select Adjacent Note"));
+
 	for (MidiModel::Notes::iterator n = notes.begin(); n != notes.end(); ++n) {
 		NoteBase* cne = 0;
 		if ((cne = find_canvas_note (*n))) {
@@ -3907,6 +3789,9 @@ MidiRegionView::goto_next_note (bool add_to_selection)
 	if (!_events.empty() && first_note) {
 		unique_select (first_note);
 	}
+
+
+	trackview.editor().commit_reversible_selection_op();
 }
 
 void
@@ -3920,6 +3805,12 @@ MidiRegionView::goto_previous_note (bool add_to_selection)
 
 	MidiModel::ReadLock lock(_model->read_lock());
 	MidiModel::Notes& notes (_model->notes());
+
+	if (notes.empty()) {
+		return;
+	}
+
+	trackview.editor().begin_reversible_selection_op (X_("Select Adjacent Note"));
 
 	for (MidiModel::Notes::reverse_iterator n = notes.rbegin(); n != notes.rend(); ++n) {
 		NoteBase* cne = 0;
@@ -3952,6 +3843,8 @@ MidiRegionView::goto_previous_note (bool add_to_selection)
 	if (!_events.empty() && last_note) {
 		unique_select (last_note);
 	}
+
+	trackview.editor().commit_reversible_selection_op();
 }
 
 void
