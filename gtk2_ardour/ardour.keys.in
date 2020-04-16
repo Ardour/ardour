@@ -97,6 +97,8 @@ This mode provides many different operations on both regions and control points,
 
 %midi Global Global MIDI commands
 
+%notes Canvas MIDI Note Editing
+
 ;; END GROUP DEFINITIONS
 
 ;; punctuation
@@ -417,3 +419,39 @@ This mode provides many different operations on both regions and control points,
 @+mopsfader|foo|<@PRIMARY@><@SECONDARY@>left-drag|finest-drag control
 @+mopsfader|foo|<@PRIMARY@>left-drag|fine-drag control
 @+mopsfader|foo|left-drag|adjust
+
+;; MIDI Editing
+
+@notes|Notes/move-starts-earlier|comma|Move Note Starts Earlier
+@notes|Notes/move-starts-earlier-fine|<@SECONDARY@>comma|Move Note Starts Earlier (Fine)
+@notes|Notes/move-ends-later|period|Move Note Ends Later
+@notes|Notes/move-ends-later-fine|<@SECONDARY@>period|Move Note Ends Later (Fine)
+@notes|Notes/nudge-later|Right|Nudge Notes Later
+@notes|Notes/nudge-later-fine|<@SECONDARY@>Right|Nudge Notes Later (fine)
+@notes|Notes/nudge-earlier|Left|Nudge Notes Earlier
+@notes|Notes/nudge-earlier-fine|<@SECONDARY@>Left|Nudge Notes Earlier (fine)
+@notes|Notes/edit-channels|c|Edit Note Channels
+@notes|Notes/edit-velocities|v|Edit Note Velocities
+
+@notes|Notes/transpose-up-octave|Up|Transpose up (1 octave)
+@notes|Notes/transpose-down-octave|Down|Transpose down (1 octave)
+@notes|Notes/transpose-up-tone|<@SECONDARY@>Up|Transpose up (1 tone)
+@notes|Notes/transpose-down-tone|<@SECONDARY@>Down|Transpose down (1 tone)
+@notes|Notes/transpose-up-octave-smush|<@TERTIARY@>Up|Transpose up (1 octave) allow mushing
+@notes|Notes/transpose-down-octave-smush|<@TERTIARY@>Down|Transpose down (1 octave) allow mushing
+@notes|Notes/transpose-up-tone-smush|<@TERTIARY@><@SECONDARY@>Up|Transpose up (1 tone) allow mushing
+@notes|Notes/transpose-down-tone-smush|<@TERTIARY@><@SECONDARY>Down|Transpose down (1 tone) allow mushing
+
+@notes|Notes/increase-velocity|<@PRIMARY@>Up|Increase Note Velocity (+8)
+@notes|Notes/decrease-velocity|<@PRIMARY@>Down|Increase Note Velocity (+8)
+@notes|Notes/increase-velocity-smush|<@PRIMARY@><@TERTIARY@>Up|Increase Note Velocity (+8) allow mushing
+@notes|Notes/decrease-velocity-smush|<@PRIMARY@><@TERTIARY@>Down|Increase Note Velocity (+8) allow mushing
+@notes|Notes/increase-velocity-fine|<@PRIMARY@><@SECONDARY@>Up|Increase Note Velocity (+1)
+@notes|Notes/decrease-velocity-fine|<@PRIMARY@><@SECONDARY@>Down|Increase Note Velocity (+1)
+@notes|Notes/increase-velocity-fine-smush|<@PRIMARY@><@SECONDARY@><@TERTIARY@>Up|Increase Note Velocity (+1) allow mushing
+@notes|Notes/decrease-velocity-fine-smush|<@PRIMARY@><@SECONDARY@><@TERTIARY@>Down|Increase Note Velocity (+1) allow mushing
+
+@notes|Notes/delete|Backspace|Delete Note Selection
+@notes|Notes/alt-delete|Delete|Delete Note Selection
+
+
