@@ -2799,7 +2799,7 @@ VideoTimeLineDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 	}
 
 	if (_stuck) {
-		show_verbose_cursor_text (_("One or more Audio Regions\nare both Locked and\nLocked to Video.\nThe video cannot me moved."));
+		show_verbose_cursor_text (_("One or more Audio Regions\nare both Locked and\nLocked to Video.\nThe video cannot be moved."));
 		return;
 	}
 
@@ -2834,7 +2834,7 @@ VideoTimeLineDrag::motion (GdkEvent* event, bool first_move)
 		return;
 	}
 	if (_stuck) {
-		show_verbose_cursor_text (_("One or more Audio Regions\nare both Locked and\nLocked to Video.\nThe video cannot me moved."));
+		show_verbose_cursor_text (_("One or more Audio Regions\nare both Locked and\nLocked to Video.\nThe video cannot be moved."));
 		return;
 	}
 
