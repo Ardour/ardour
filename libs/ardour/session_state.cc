@@ -1032,7 +1032,7 @@ Session::load_state (string snapshot_name, bool from_template)
 
 	if ((Stateful::loading_state_version / 1000L) > (CURRENT_SESSION_FILE_VERSION / 1000L)) {
 		cerr << "Session-version: " << Stateful::loading_state_version << " is not supported. Current: " << CURRENT_SESSION_FILE_VERSION << "\n";
-		throw SessionException (string_compose (_("Incomatible Session Version. That session was created with a newer version of %1"), PROGRAM_NAME));
+		throw SessionException (string_compose (_("Incompatible Session Version. That session was created with a newer version of %1"), PROGRAM_NAME));
 	}
 
 	if (Stateful::loading_state_version < CURRENT_SESSION_FILE_VERSION && _writable && !from_template) {
@@ -1985,7 +1985,7 @@ Session::XMLRouteFactory_2X (const XMLNode& node, int version)
 		boost::shared_ptr<Playlist> pl = playlists()->by_name (playlist_name);
 
 		if (playlist_name.empty () || !pl) {
-			warning << string_compose (_("Could not find diskstream for diskream-id: '%1', playlist: '%2'"), ds_prop->value (), playlist_name) << endmsg;
+			warning << string_compose (_("Could not find diskstream for diskstream-id: '%1', playlist: '%2'"), ds_prop->value (), playlist_name) << endmsg;
 		}
 
 		boost::shared_ptr<Track> track;
