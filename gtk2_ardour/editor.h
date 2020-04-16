@@ -1209,6 +1209,7 @@ private:
 
 	void register_actions ();
 	void register_region_actions ();
+	void register_midi_actions (Gtkmm2ext::Bindings*);
 
 	void load_bindings ();
 
@@ -2324,6 +2325,9 @@ private:
 
 	QuantizeDialog* quantize_dialog;
 	MainMenuDisabler* _main_menu_disabler;
+
+	/* MIDI actions, proxied to selected MidiRegionView(s) */
+	void midi_action (void (MidiRegionView::*method)());
 
 	/* private helper functions to help with registering region actions */
 

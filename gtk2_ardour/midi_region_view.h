@@ -355,10 +355,9 @@ public:
 
 	void note_deleted (NoteBase*);
 
-	void show_verbose_cursor_for_new_note_value(boost::shared_ptr<NoteType> current_note,
-	                                            uint8_t new_note) const;
+	void show_verbose_cursor_for_new_note_value(boost::shared_ptr<NoteType> current_note, uint8_t new_note) const;
 
-protected:
+  protected:
 	void region_resized (const PBD::PropertyChange&);
 
 	void set_flags (XMLNode *);
