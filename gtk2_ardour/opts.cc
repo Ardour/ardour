@@ -79,7 +79,7 @@ print_help (const char *execname)
 		<< _("  -D, --debug <options>       Set debug flags. Use \"-D list\" to see available options\n")
 #endif
 		<< _("  -h, --help                  Print this message\n")
-		<< _("  -k, --keybindings <file>    Name of key bindings to load\n")
+		<< _("  -k, --keybindings <file>    Path to the key bindings file to load\n")
 		<< _("  -m, --menus file            Use \"file\" to define menus\n")
 		<< _("  -n, --no-splash             Do not show splash screen\n")
 		<< _("  -N, --new session-name      Create a new session from the command line\n")

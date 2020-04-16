@@ -2935,7 +2935,7 @@ RCOptionEditor::RCOptionEditor ()
 		add_option (_("Signal Flow"), bo);
 		Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
 			_("<b>When enabled</b> the main output bus is auto-connected to the first N physical ports. "
-				"If the session has a monitor-section, the monitor-bus output is connected the the hardware playback ports, "
+				"If the session has a monitor-section, the monitor-bus output is connected the hardware playback ports, "
 				"otherwise the master-bus output is directly used for playback."));
 
 		ComboOption<AutoConnectOption>* iac = new ComboOption<AutoConnectOption> (
