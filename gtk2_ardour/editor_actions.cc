@@ -711,7 +711,7 @@ Editor::register_midi_actions (Bindings* midi_bindings)
 	/* two versions to allow same action for Delete and Backspace */
 
 	ActionManager::register_action (_midi_actions, X_("delete"), _("Delete Selection"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::delete_selection));
-	ActionManager::register_action (_midi_actions, X_("alt-delete"), _("Delete Selection"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::delete_selection));
+	ActionManager::register_action (_midi_actions, X_("alt-delete"), _("Delete Selection (alternate)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::delete_selection));
 
 	ActionManager::register_action (_midi_actions, X_("clear-selection"), _("Clear Note Selection"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::clear_note_selection));
 	ActionManager::register_action (_midi_actions, X_("move-starts-earlier-fine"), _("Move Note Start Earlier (fine)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::move_note_starts_earlier_fine));
@@ -721,49 +721,50 @@ Editor::register_midi_actions (Bindings* midi_bindings)
 
 	/* Alt versions allow bindings for both Tab and ISO_Left_Tab, if desired */
 
-	ActionManager::register_action (_midi_actions, X_("select-next"), _(""), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::select_next_note));
-	ActionManager::register_action (_midi_actions, X_("alt-select-next"), _(""), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::select_next_note));
-	ActionManager::register_action (_midi_actions, X_("select-previous"), _(""), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::select_previous_note));
-	ActionManager::register_action (_midi_actions, X_("alt-select-previous"), _(""), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::select_previous_note));
-	ActionManager::register_action (_midi_actions, X_("add-select-next"), _(""), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::add_select_next_note));
-	ActionManager::register_action (_midi_actions, X_("alt-add-select-next"), _(""), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::add_select_next_note));
-	ActionManager::register_action (_midi_actions, X_("add-select-previous"), _(""), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::add_select_previous_note));
-	ActionManager::register_action (_midi_actions, X_("alt-select-previous"), _(""), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::add_select_previous_note));
+	ActionManager::register_action (_midi_actions, X_("select-next"), _("Select Next"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::select_next_note));
+	ActionManager::register_action (_midi_actions, X_("alt-select-next"), _("Select Next (alternate)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::select_next_note));
+	ActionManager::register_action (_midi_actions, X_("select-previous"), _("Select Previous"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::select_previous_note));
+	ActionManager::register_action (_midi_actions, X_("alt-select-previous"), _("Select Previous (alternate)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::select_previous_note));
+	ActionManager::register_action (_midi_actions, X_("add-select-next"), _("Add Next to Selection"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::add_select_next_note));
+	ActionManager::register_action (_midi_actions, X_("alt-add-select-next"), _("Add Next to Selection (alternate)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::add_select_next_note));
+	ActionManager::register_action (_midi_actions, X_("add-select-previous"), _("Add Previous to Selection"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::add_select_previous_note));
+	ActionManager::register_action (_midi_actions, X_("alt-select-previous"), _("Add Previous to Selection (alternate)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::add_select_previous_note));
 
-	ActionManager::register_action (_midi_actions, X_("increase-velocity"), _(""), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::increase_note_velocity));
-	ActionManager::register_action (_midi_actions, X_("increase-velocity-fine"), _(""), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::increase_note_velocity_fine));
-	ActionManager::register_action (_midi_actions, X_("increase-_velocity-smush"), _(""), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::increase_note_velocity_smush));
-	ActionManager::register_action (_midi_actions, X_("increase-_velocity-together"), _(""), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::increase_note_velocity_together));
-	ActionManager::register_action (_midi_actions, X_("increase-_velocity-fine-smush"), _(""), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::increase_note_velocity_fine_smush));
-	ActionManager::register_action (_midi_actions, X_("increase-_velocity-fine-together"), _(""), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::increase_note_velocity_fine_together));
-	ActionManager::register_action (_midi_actions, X_("increase-_velocity-smush-together"), _(""), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::increase_note_velocity_smush_together));
-	ActionManager::register_action (_midi_actions, X_("increase-_velocity-fine-smush-together"), _(""), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::increase_note_velocity_fine_smush_together));
-	ActionManager::register_action (_midi_actions, X_("decrease-velocity"), _(""), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::decrease_note_velocity));
-	ActionManager::register_action (_midi_actions, X_("decrease-velocity-fine"), _(""), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::decrease_note_velocity_fine));
-	ActionManager::register_action (_midi_actions, X_("decrease-velocity-smush"), _(""), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::decrease_note_velocity_smush));
-	ActionManager::register_action (_midi_actions, X_("decrease-velocity-together"), _(""), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::decrease_note_velocity_together));
-	ActionManager::register_action (_midi_actions, X_("decrease-velocity-fine-smush"), _(""), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::decrease_note_velocity_fine_smush));
-	ActionManager::register_action (_midi_actions, X_("decrease-velocity-fine-together"), _(""), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::decrease_note_velocity_fine_together));
-	ActionManager::register_action (_midi_actions, X_("decrease-velocity-smush-together"), _(""), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::decrease_note_velocity_smush_together));
-	ActionManager::register_action (_midi_actions, X_("decrease-velocity_fine-smush-together"), _(""), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::decrease_note_velocity_fine_smush_together));
+	ActionManager::register_action (_midi_actions, X_("increase-velocity"), _("Increase Velocity"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::increase_note_velocity));
+	ActionManager::register_action (_midi_actions, X_("increase-velocity-fine"), _("Increase Velocity (fine)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::increase_note_velocity_fine));
+	ActionManager::register_action (_midi_actions, X_("increase-velocity-smush"), _("Increase Velocity (allow mush)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::increase_note_velocity_smush));
+	ActionManager::register_action (_midi_actions, X_("increase-velocity-together"), _("Increase Velocity (non-relative)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::increase_note_velocity_together));
+	ActionManager::register_action (_midi_actions, X_("increase-velocity-fine-smush"), _("Increase Velocity (fine, allow mush)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::increase_note_velocity_fine_smush));
+	ActionManager::register_action (_midi_actions, X_("increase-velocity-fine-together"), _("Increase Velocity (fine, non-relative)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::increase_note_velocity_fine_together));
+	ActionManager::register_action (_midi_actions, X_("increase-velocity-smush-together"), _("Increase Velocity (maintain ratios, allow mush"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::increase_note_velocity_smush_together));
+	ActionManager::register_action (_midi_actions, X_("increase-velocity-fine-smush-together"), _("Increase Velocity (fine, allow mush, non-relative)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::increase_note_velocity_fine_smush_together));
 
-	ActionManager::register_action (_midi_actions, X_("transpose-up-octave"), _(""), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::transpose_up_octave));
-	ActionManager::register_action (_midi_actions, X_("transpose-up-octave-allow-collapse"), _(""), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::transpose_up_octave_smush));
-	ActionManager::register_action (_midi_actions, X_("transpose-up-tone"), _(""), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::transpose_up_tone));
-	ActionManager::register_action (_midi_actions, X_("transpose-up-octave-allow-collapse"), _(""), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::transpose_up_octave_smush));
+	ActionManager::register_action (_midi_actions, X_("decrease-velocity"), _("Decrease Velocity"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::decrease_note_velocity));
+	ActionManager::register_action (_midi_actions, X_("decrease-velocity-fine"), _("Decrease Velocity (fine)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::decrease_note_velocity_fine));
+	ActionManager::register_action (_midi_actions, X_("decrease-velocity-smush"), _("Decrease Velocity (allow mush)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::decrease_note_velocity_smush));
+	ActionManager::register_action (_midi_actions, X_("decrease-velocity-together"), _("Decrease Velocity (non-relative)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::decrease_note_velocity_together));
+	ActionManager::register_action (_midi_actions, X_("decrease-velocity-fine-smush"), _("Decrease Velocity (fine, allow mush)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::decrease_note_velocity_fine_smush));
+	ActionManager::register_action (_midi_actions, X_("decrease-velocity-fine-together"), _("Decrease Velocity (fine, non-relative)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::decrease_note_velocity_fine_together));
+	ActionManager::register_action (_midi_actions, X_("decrease-velocity-smush-together"), _("Decrease Velocity (maintain ratios, allow mush"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::decrease_note_velocity_smush_together));
+	ActionManager::register_action (_midi_actions, X_("decrease-velocity-fine-smush-together"), _("Decrease Velocity (fine, allow mush, non-relative)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::decrease_note_velocity_fine_smush_together));
 
-	ActionManager::register_action (_midi_actions, X_("transpose-down-octave"), _(""), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::transpose_down_octave));
-	ActionManager::register_action (_midi_actions, X_("transpose-down-octave-allow-collapse"), _(""), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::transpose_down_octave_smush));
-	ActionManager::register_action (_midi_actions, X_("transpose-down-tone"), _(""), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::transpose_down_tone));
-	ActionManager::register_action (_midi_actions, X_("transpose-down-octave-allow-collapse"), _(""), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::transpose_down_octave_smush));
+	ActionManager::register_action (_midi_actions, X_("transpose-up-octave"), _("Transpose Up (octave)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::transpose_up_octave));
+	ActionManager::register_action (_midi_actions, X_("transpose-up-octave-smush"), _("Transpose Up (octave, allow mush)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::transpose_up_octave_smush));
+	ActionManager::register_action (_midi_actions, X_("transpose-up-tone"), _("Transpose Up (tone)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::transpose_up_tone));
+	ActionManager::register_action (_midi_actions, X_("transpose-up-tone-smush"), _("Transpose Up (tone, allow mush)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::transpose_up_octave_smush));
 
-	ActionManager::register_action (_midi_actions, X_("nudge-notes-later"), _("Nudge Notes Later"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::nudge_notes_later));
-	ActionManager::register_action (_midi_actions, X_("nudge-notes-later-fine"), _("Nudge Notes Later (fine)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::nudge_notes_later_fine));
-	ActionManager::register_action (_midi_actions, X_("nudge-notes-earlier"), _("Nudge Notes Earlier"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::nudge_notes_earlier));
-	ActionManager::register_action (_midi_actions, X_("nudge-notes-earlier-fine"), _("Nudge Notes Earlier (fine)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::nudge_notes_earlier_fine));
+	ActionManager::register_action (_midi_actions, X_("transpose-down-octave"), _("Transpose Down (octave)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::transpose_down_octave));
+	ActionManager::register_action (_midi_actions, X_("transpose-down-octave-smush"), _("Transpose Down (octave, allow mush)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::transpose_down_octave_smush));
+	ActionManager::register_action (_midi_actions, X_("transpose-down-tone"), _("Transpose Down (tone)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::transpose_down_tone));
+	ActionManager::register_action (_midi_actions, X_("transpose-down-tone-smush"), _("Transpose Down (tone, allow mush)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::transpose_down_octave_smush));
 
-	ActionManager::register_action (_midi_actions, X_("edit-note-channels"), _("Edit Note Channels"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::channel_edit));
-	ActionManager::register_action (_midi_actions, X_("edit-note-velocities"), _("Edit Note Velocities"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::velocity_edit));
+	ActionManager::register_action (_midi_actions, X_("nudge-later"), _("Nudge Notes Later (grid)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::nudge_notes_later));
+	ActionManager::register_action (_midi_actions, X_("nudge-later-fine"), _("Nudge Notes Later (1/128th)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::nudge_notes_later_fine));
+	ActionManager::register_action (_midi_actions, X_("nudge-earlier"), _("Nudge Notes Earlier (grid)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::nudge_notes_earlier));
+	ActionManager::register_action (_midi_actions, X_("nudge-earlier-fine"), _("Nudge Notes Earlier (1/128th)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::nudge_notes_earlier_fine));
+
+	ActionManager::register_action (_midi_actions, X_("edit-channels"), _("Edit Note Channels"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::channel_edit));
+	ActionManager::register_action (_midi_actions, X_("edit-velocities"), _("Edit Note Velocities"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::velocity_edit));
 
 	ActionManager::set_sensitive (_midi_actions, false);
 }
