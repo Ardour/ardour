@@ -368,7 +368,59 @@ protected:
 
 	void parameter_changed (std::string const & p);
 
-private:
+  protected:
+	friend class Editor;
+
+	void clear_note_selection () { clear_selection_internal(); }
+
+	void move_note_starts_earlier_fine () { change_note_lengths (true, false, Temporal::Beats(), true, false); }
+	void move_note_starts_earlier () { change_note_lengths (false, false, Temporal::Beats(), true, false); }
+	void move_note_ends_later_fine () { change_note_lengths (true, false, Temporal::Beats(), false, true); }
+	void move_note_ends_later () { change_note_lengths (false, false, Temporal::Beats(), false, true); }
+	void move_note_starts_later_fine () { change_note_lengths (true, true, Temporal::Beats(), true, false); }
+	void move_note_starts_later () { change_note_lengths (false, true, Temporal::Beats(), true, false); }
+	void move_note_ends_earlier_fine () { change_note_lengths (true, true, Temporal::Beats(), false, true); }
+	void move_note_ends_earlier () { change_note_lengths (false, true, Temporal::Beats(), false, true); }
+
+	void select_next_note () { goto_next_note (false); }
+	void select_previous_note () { goto_previous_note (false); }
+	void add_select_next_note () { goto_next_note (true); }
+	void add_select_previous_note () { goto_previous_note (true); }
+
+	void increase_note_velocity ()                     { change_velocities (true, false, false, false); }
+	void increase_note_velocity_fine ()                { change_velocities (true, true, false, false); }
+	void increase_note_velocity_smush ()               { change_velocities (true, false, true, false); }
+	void increase_note_velocity_together ()            { change_velocities (true, false, false, true); }
+	void increase_note_velocity_fine_smush ()          { change_velocities (true, true, true, false); }
+	void increase_note_velocity_fine_together ()       { change_velocities (true, true, false, true); }
+	void increase_note_velocity_smush_together ()      { change_velocities (true, false, true, true); }
+	void increase_note_velocity_fine_smush_together () { change_velocities (true, true, true, true); }
+
+	void decrease_note_velocity ()                     { change_velocities (false, false, false, false); }
+	void decrease_note_velocity_fine ()                { change_velocities (false, true, false, false); }
+	void decrease_note_velocity_smush ()               { change_velocities (false, false, true, false); }
+	void decrease_note_velocity_together ()            { change_velocities (false, false, false, true); }
+	void decrease_note_velocity_fine_smush ()          { change_velocities (false, true, true, false); }
+	void decrease_note_velocity_fine_together ()       { change_velocities (false, true, false, true); }
+	void decrease_note_velocity_smush_together ()      { change_velocities (false, false, true, true); }
+	void decrease_note_velocity_fine_smush_together () { change_velocities (false, true, true, true); }
+
+	void transpose_up_octave () { transpose (true, false, false); }
+	void transpose_up_octave_smush () { transpose (true, false, true); }
+	void transpose_up_tone () { transpose (true, true, false); }
+	void transpose_up_tone_smush () { transpose (true, true, true); }
+
+	void transpose_down_octave () { transpose (false, false, false); }
+	void transpose_down_octave_smush () { transpose (false, false, true); }
+	void transpose_down_tone () { transpose (false, true, false); }
+	void transpose_down_tone_smush () { transpose (false, true, true); }
+
+	void nudge_notes_later () { nudge_notes (true, false); }
+	void nudge_notes_later_fine () { nudge_notes (true, true); }
+	void nudge_notes_earlier () { nudge_notes (false, false); }
+	void nudge_notes_earlier_fine () { nudge_notes (false, true); }
+
+  private:
 
 	friend class MidiRubberbandSelectDrag;
 	friend class MidiVerticalSelectDrag;
