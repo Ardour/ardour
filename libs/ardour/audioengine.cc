@@ -726,7 +726,7 @@ AudioEngine::set_session (Session *s)
 	SessionHandlePtr::set_session (s);
 
 	if (_session) {
-		_init_countdown = std::max (8, (int)(_backend->sample_rate () / _backend->buffer_size ()) / 4);
+		_init_countdown = std::max (4, (int)(_backend->sample_rate () / _backend->buffer_size ()) / 8);
 	}
 }
 

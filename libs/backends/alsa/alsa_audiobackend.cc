@@ -1733,8 +1733,8 @@ AlsaAudioBackend::main_process_thread ()
 
 	const double sr_norm = 1e-6 * (double) _samplerate / (double)_samples_per_period;
 
-	/* warm up */
-	int cnt = std::max (8, (int)(_samplerate / _samples_per_period) / 2);
+	/* warm up freewheel dry-run - see also AudioEngine _init_countdown */
+	int cnt = std::max (4, (int)(_samplerate / _samples_per_period) / 8);
 	for (int w = 0; w < cnt; ++w) {
 		for (std::vector<BackendPortPtr>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
 			memset ((*it)->get_buffer (_samples_per_period), 0, _samples_per_period * sizeof (Sample));
