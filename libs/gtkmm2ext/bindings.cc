@@ -494,8 +494,13 @@ Bindings::activate (KeyboardKey kb, Operation op)
 
 	if (action) {
 		/* lets do it ... */
-		DEBUG_TRACE (DEBUG::Bindings, string_compose ("binding for %1: %2\n", unshifted, k->second.action_name));
-		action->activate ();
+		if (action->get_sensitive()) {
+			DEBUG_TRACE (DEBUG::Bindings, string_compose ("binding for %1: %2\n", unshifted, k->second.action_name));
+			action->activate ();
+		} else {
+			DEBUG_TRACE (DEBUG::Bindings, string_compose ("binding for %1: %2 - insensitive, skipped\n", unshifted, k->second.action_name));
+			return false;
+		}
 	} else {
 		DEBUG_TRACE (DEBUG::Bindings, string_compose ("binding for %1 is known but has no action\n", unshifted));
 	}
