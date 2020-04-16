@@ -453,5 +453,11 @@ This mode provides many different operations on both regions and control points,
 
 @notes|Notes/delete|Backspace|Delete Note Selection
 @notes|Notes/alt-delete|Delete|Delete Note Selection
+@notes|Notes/clear-selection|Escape|Clear selection
+
+@notes|Notes/select-next|Tab|Select next note
+@notes|Notes/select-previous|<@PRIMARY@>Tab|Select previous note
+@notes|Notes/add-select-next|<@TERTIARY@>Tab|Select next note
+@notes|Notes/add-select-previous|<@PRIMARY@><@TERTIARY@>Tab|Select previous note
 
 
