@@ -90,10 +90,14 @@ public:
 	PlaylistSelection    playlists;
 	PointSelection       points;
 	MarkerSelection      markers;
-	MidiRegionSelection  midi_regions;
 
 	/** only used when this class is used as a cut buffer */
 	MidiNoteSelection    midi_notes;
+
+	/** we don't store MidiRegionViews in their own selection, we just pull
+	 * them from "regions" as a convenience for various operations.
+	 */
+	MidiRegionSelection midi_regions();
 
 	Selection (PublicEditor const * e, bool manage_libardour_selection);
 
@@ -107,7 +111,6 @@ public:
 	sigc::signal<void> PointsChanged;
 	sigc::signal<void> MarkersChanged;
 	sigc::signal<void> MidiNotesChanged;
-	sigc::signal<void> MidiRegionsChanged;
 
 	void clear ();
 
@@ -132,7 +135,6 @@ public:
 	void set (const TrackViewList&);
 	void set (const MidiNoteSelection&);
 	void set (RegionView*, bool also_clear_tracks = true);
-	void set (MidiRegionView*);
 	void set (std::vector<RegionView*>&);
 	long set (samplepos_t, samplepos_t);
 	void set_preserving_all_ranges (samplepos_t, samplepos_t);
@@ -147,7 +149,6 @@ public:
 	void toggle (const TrackViewList&);
 	void toggle (const MidiNoteSelection&);
 	void toggle (RegionView*);
-	void toggle (MidiRegionView*);
 	void toggle (MidiCutBuffer*);
 	void toggle (std::vector<RegionView*>&);
 	long toggle (samplepos_t, samplepos_t);
@@ -162,7 +163,6 @@ public:
 	void add (const TrackViewList&);
 	void add (const MidiNoteSelection&);
 	void add (RegionView*);
-	void add (MidiRegionView*);
 	void add (MidiCutBuffer*);
 	void add (std::vector<RegionView*>&);
 	long add (samplepos_t, samplepos_t);
@@ -179,7 +179,6 @@ public:
 	void remove (const TrackViewList&);
 	void remove (const MidiNoteSelection&);
 	void remove (RegionView*);
-	void remove (MidiRegionView*);
 	void remove (MidiCutBuffer*);
 	void remove (uint32_t selection_id);
 	void remove (samplepos_t, samplepos_t);
@@ -219,7 +218,6 @@ public:
 	void clear_points (bool with_signal = true);
 	void clear_markers (bool with_signal = true);
 	void clear_midi_notes (bool with_signal = true);
-	void clear_midi_regions (bool with_signal = true);
 
 	void foreach_region (void (ARDOUR::Region::*method)(void));
 	void foreach_regionview (void (RegionView::*method)(void));
