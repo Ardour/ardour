@@ -8572,8 +8572,6 @@ Editor::midi_action (void (MidiRegionView::*method)())
 {
 	MidiRegionSelection ms = selection->midi_regions();
 
-	cerr << "MIDI action with " << ms.size() << " midi regions\n";
-
 	for (MidiRegionSelection::iterator i = ms.begin(); i != ms.end(); ++i) {
 
 		MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (*i);

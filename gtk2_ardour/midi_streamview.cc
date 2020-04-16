@@ -724,7 +724,6 @@ MidiStreamView::get_regions_with_selected_data (RegionSelection& rs)
 
 		if (!mrv->selection().empty()) {
 			rs.add (*i);
-			cerr << "added region " << mrv->get_item_name() << " to RwSD\n";
 		}
 	}
 }
