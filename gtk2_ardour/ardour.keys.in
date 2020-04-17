@@ -433,10 +433,10 @@ This mode provides many different operations on both regions and control points,
 @notes|Notes/edit-channels|c|Edit Note Channels
 @notes|Notes/edit-velocities|v|Edit Note Velocities
 
-@notes|Notes/transpose-up-octave|Up|Transpose up (1 octave)
-@notes|Notes/transpose-down-octave|Down|Transpose down (1 octave)
-@notes|Notes/transpose-up-semitone|<@SECONDARY@>Up|Transpose up (1 semitone)
-@notes|Notes/transpose-down-semitone|<@SECONDARY@>Down|Transpose down (1 semitone)
+@notes|Notes/transpose-up-octave|<@SECONDARY@>Up|Transpose up (1 octave)
+@notes|Notes/transpose-down-octave|<@SECONDARY@>Down|Transpose down (1 octave)
+@notes|Notes/transpose-up-semitone|Up|Transpose up (1 semitone)
+@notes|Notes/transpose-down-semitone|Down|Transpose down (1 semitone)
 @notes|Notes/transpose-up-octave-smush|<@TERTIARY@>Up|Transpose up (1 octave) allow mushing
 @notes|Notes/transpose-down-octave-smush|<@TERTIARY@>Down|Transpose down (1 octave) allow mushing
 @notes|Notes/transpose-up-semitone-smush|<@TERTIARY@><@SECONDARY@>Up|Transpose up (1 semitone) allow mushing
