@@ -922,6 +922,15 @@ Editor::entered_track_canvas (GdkEventCrossing* ev)
 	reset_canvas_action_sensitivity (true);
 
 	if (!was_within) {
+
+		if (internal_editing()) {
+			/* ensure that key events go here because there are
+			   internal editing bindings associated only with the
+			   canvas. if the focus is elsewhere, we cannot find them.
+			*/
+			_track_canvas->grab_focus ();
+		}
+
 		if (ev->detail == GDK_NOTIFY_NONLINEAR ||
 		    ev->detail == GDK_NOTIFY_NONLINEAR_VIRTUAL) {
 			/* context menu or something similar */
