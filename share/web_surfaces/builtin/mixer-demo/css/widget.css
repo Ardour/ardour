@@ -8,7 +8,7 @@
 }
 
 .widget-switch:checked {
-    background: rgb(235,141,33);
+    background: rgb(72,89,118);
 }
 
 .widget-slider {
@@ -29,8 +29,9 @@
     height: 36px;
     width: 36px;
     margin-top: -16px;
+    border: 3.5px solid rgb(248,248,242);
     border-radius: 50%;
-    background: rgb(235,141,33);
+    background: rgb(72,89,118);
 }
 
 /* repeat slider style for firefox */
@@ -45,6 +46,7 @@
     height: 36px;
     width: 36px;
     margin-top: -16px;
+    border: 3.5px solid rgb(248,248,242);
     border-radius: 50%;
-    background: rgb(235,141,33);
+    background: rgb(72,89,118);
 }
