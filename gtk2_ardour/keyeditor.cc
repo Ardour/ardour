@@ -478,6 +478,10 @@ KeyEditor::Tab::tab_mapped ()
 {
 	data_model->set_sort_column (owner.sort_column,  owner.sort_type);
 	filter->refilter ();
+
+	if (data_model->children().size() == 1) {
+		view.expand_all ();
+	}
 }
 
 bool
