@@ -750,18 +750,18 @@ Editor::register_midi_actions (Bindings* midi_bindings)
 
 	ActionManager::register_action (_midi_actions, X_("transpose-up-octave"), _("Transpose Up (octave)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::transpose_up_octave));
 	ActionManager::register_action (_midi_actions, X_("transpose-up-octave-smush"), _("Transpose Up (octave, allow mush)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::transpose_up_octave_smush));
-	ActionManager::register_action (_midi_actions, X_("transpose-up-tone"), _("Transpose Up (tone)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::transpose_up_tone));
-	ActionManager::register_action (_midi_actions, X_("transpose-up-tone-smush"), _("Transpose Up (tone, allow mush)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::transpose_up_octave_smush));
+	ActionManager::register_action (_midi_actions, X_("transpose-up-semitone"), _("Transpose Up (semitone)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::transpose_up_tone));
+	ActionManager::register_action (_midi_actions, X_("transpose-up-semitone-smush"), _("Transpose Up (semitone, allow mush)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::transpose_up_octave_smush));
 
 	ActionManager::register_action (_midi_actions, X_("transpose-down-octave"), _("Transpose Down (octave)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::transpose_down_octave));
 	ActionManager::register_action (_midi_actions, X_("transpose-down-octave-smush"), _("Transpose Down (octave, allow mush)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::transpose_down_octave_smush));
-	ActionManager::register_action (_midi_actions, X_("transpose-down-tone"), _("Transpose Down (tone)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::transpose_down_tone));
-	ActionManager::register_action (_midi_actions, X_("transpose-down-tone-smush"), _("Transpose Down (tone, allow mush)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::transpose_down_octave_smush));
+	ActionManager::register_action (_midi_actions, X_("transpose-down-semitone"), _("Transpose Down (semitone)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::transpose_down_tone));
+	ActionManager::register_action (_midi_actions, X_("transpose-down-semitone-smush"), _("Transpose Down (semitone, allow mush)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::transpose_down_octave_smush));
 
 	ActionManager::register_action (_midi_actions, X_("nudge-later"), _("Nudge Notes Later (grid)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::nudge_notes_later));
-	ActionManager::register_action (_midi_actions, X_("nudge-later-fine"), _("Nudge Notes Later (1/128th)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::nudge_notes_later_fine));
+	ActionManager::register_action (_midi_actions, X_("nudge-later-fine"), _("Nudge Notes Later (1/4 grid)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::nudge_notes_later_fine));
 	ActionManager::register_action (_midi_actions, X_("nudge-earlier"), _("Nudge Notes Earlier (grid)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::nudge_notes_earlier));
-	ActionManager::register_action (_midi_actions, X_("nudge-earlier-fine"), _("Nudge Notes Earlier (1/128th)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::nudge_notes_earlier_fine));
+	ActionManager::register_action (_midi_actions, X_("nudge-earlier-fine"), _("Nudge Notes Earlier (1/4 grid)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::nudge_notes_earlier_fine));
 
 	ActionManager::register_action (_midi_actions, X_("edit-channels"), _("Edit Note Channels"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::channel_edit));
 	ActionManager::register_action (_midi_actions, X_("edit-velocities"), _("Edit Note Velocities"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::velocity_edit));

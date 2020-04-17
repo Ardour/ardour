@@ -435,12 +435,12 @@ This mode provides many different operations on both regions and control points,
 
 @notes|Notes/transpose-up-octave|Up|Transpose up (1 octave)
 @notes|Notes/transpose-down-octave|Down|Transpose down (1 octave)
-@notes|Notes/transpose-up-tone|<@SECONDARY@>Up|Transpose up (1 tone)
-@notes|Notes/transpose-down-tone|<@SECONDARY@>Down|Transpose down (1 tone)
+@notes|Notes/transpose-up-semitone|<@SECONDARY@>Up|Transpose up (1 semitone)
+@notes|Notes/transpose-down-semitone|<@SECONDARY@>Down|Transpose down (1 semitone)
 @notes|Notes/transpose-up-octave-smush|<@TERTIARY@>Up|Transpose up (1 octave) allow mushing
 @notes|Notes/transpose-down-octave-smush|<@TERTIARY@>Down|Transpose down (1 octave) allow mushing
-@notes|Notes/transpose-up-tone-smush|<@TERTIARY@><@SECONDARY@>Up|Transpose up (1 tone) allow mushing
-@notes|Notes/transpose-down-tone-smush|<@TERTIARY@><@SECONDARY>Down|Transpose down (1 tone) allow mushing
+@notes|Notes/transpose-up-semitone-smush|<@TERTIARY@><@SECONDARY@>Up|Transpose up (1 semitone) allow mushing
+@notes|Notes/transpose-down-semitone-smush|<@TERTIARY@><@SECONDARY>Down|Transpose down (1 tone) allow mushing
 
 @notes|Notes/increase-velocity|<@PRIMARY@>Up|Increase Note Velocity (+8)
 @notes|Notes/decrease-velocity|<@PRIMARY@>Down|Increase Note Velocity (+8)
