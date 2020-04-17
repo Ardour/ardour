@@ -384,7 +384,7 @@ Editor::do_import (vector<string>          paths,
 
 		bool replace = false;
 
-		for (vector<string>::iterator a = paths.begin(); a != paths.end(); ++a) {
+		for (vector<string>::iterator a = paths.begin(); a != paths.end() && !import_status.cancel; ++a) {
 
 			const int check = check_whether_and_how_to_import (*a, true);
 
@@ -552,9 +552,10 @@ Editor::import_sndfiles (vector<string>            paths,
                          bool                      replace,
                          ARDOUR::PluginInfoPtr     instrument)
 {
+	cerr << "Importing " << paths.size() << " at once\n";
+
 	import_status.paths = paths;
 	import_status.done = false;
-	import_status.cancel = false;
 	import_status.freeze = false;
 	import_status.quality = quality;
 	import_status.replace_existing_source = replace;
