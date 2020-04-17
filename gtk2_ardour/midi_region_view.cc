@@ -3364,7 +3364,10 @@ MidiRegionView::change_note_lengths (bool fine, bool shorter, Temporal::Beats de
 void
 MidiRegionView::nudge_notes (bool forward, bool fine)
 {
+	cerr << "nudge fwd " << forward << " fine " << fine << endl;
+
 	if (_selection.empty()) {
+		cerr << "not selection is empty\n";
 		return;
 	}
 
@@ -3376,12 +3379,7 @@ MidiRegionView::nudge_notes (bool forward, bool fine)
 	const samplepos_t ref_point = source_beats_to_absolute_samples ((*(_selection.begin()))->note()->time());
 	Temporal::Beats  delta;
 
-	if (!fine) {
-
-		/* non-fine, move by 1 bar regardless of snap */
-		delta = Temporal::Beats(trackview.session()->tempo_map().meter_at_sample (ref_point).divisions_per_bar());
-
-	} else if (trackview.editor().snap_mode() == Editing::SnapOff) {
+	if (trackview.editor().snap_mode() == Editing::SnapOff) {
 
 		/* grid is off - use nudge distance */
 
@@ -3389,29 +3387,27 @@ MidiRegionView::nudge_notes (bool forward, bool fine)
 		const samplecnt_t distance = trackview.editor().get_nudge_distance (ref_point, unused);
 		delta = region_samples_to_region_beats (fabs ((double)distance));
 
+		cerr << "used nudge\n";
+
 	} else {
 
 		/* use grid */
 
-		MusicSample next_pos (ref_point, 0);
-		if (forward) {
-			if (max_samplepos - 1 < next_pos.sample) {
-				next_pos.sample += 1;
-			}
-		} else {
-			if (next_pos.sample == 0) {
-				return;
-			}
-			next_pos.sample -= 1;
-		}
+		bool success;
 
-		trackview.editor().snap_to (next_pos, (forward ? RoundUpAlways : RoundDownAlways), SnapToGrid_Unscaled, false);
-		const samplecnt_t distance = ref_point - next_pos.sample;
-		delta = region_samples_to_region_beats (fabs ((double)distance));
+		delta = trackview.editor().get_grid_type_as_beats (success, ref_point);
+
+		if (!success) {
+			delta = Temporal::Beats (1, 0);
+		}
 	}
 
 	if (!delta) {
 		return;
+	}
+
+	if (fine) {
+		delta = delta / 4;
 	}
 
 	if (!forward) {
