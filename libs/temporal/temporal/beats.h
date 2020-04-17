@@ -228,7 +228,14 @@ public:
 	}
 
 	Beats operator-() const {
-		return Beats(-_beats, -_ticks);
+		/* must avoid normalization here, which will convert a negative
+		   value into a valid beat position before zero, which is not
+		   we want here.
+		*/
+		Beats b (_beats, _ticks);
+		b._beats = -b._beats;
+		b._ticks = -b._ticks;
+		return b;
 	}
 
 	template<typename Number>
