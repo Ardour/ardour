@@ -1056,10 +1056,11 @@ Editor::canvas_ruler_event (GdkEvent *event, ArdourCanvas::Item* item, ItemType 
 
 		switch (event->scroll.direction) {
 		case GDK_SCROLL_UP:
-			if (Keyboard::modifier_state_equals(event->scroll.state,
-			                                    Keyboard::ScrollHorizontalModifier)) {
+			if (Keyboard::modifier_state_equals (event->scroll.state, Keyboard::ScrollHorizontalModifier)) {
 				scroll_left_step ();
 			} else if (UIConfiguration::instance().get_use_mouse_position_as_zoom_focus_on_scroll()) {
+				temporal_zoom_step_mouse_focus (false);
+			} else if (Keyboard::modifier_state_equals (event->scroll.state, Keyboard::PrimaryModifier)) {
 				temporal_zoom_step_mouse_focus (false);
 			} else {
 				temporal_zoom_step (false);
@@ -1068,10 +1069,11 @@ Editor::canvas_ruler_event (GdkEvent *event, ArdourCanvas::Item* item, ItemType 
 			break;
 
 		case GDK_SCROLL_DOWN:
-			if (Keyboard::modifier_state_equals(event->scroll.state,
-			                                    Keyboard::ScrollHorizontalModifier)) {
+			if (Keyboard::modifier_state_equals (event->scroll.state, Keyboard::ScrollHorizontalModifier)) {
 				scroll_right_step ();
 			} else if (UIConfiguration::instance().get_use_mouse_position_as_zoom_focus_on_scroll()) {
+				temporal_zoom_step_mouse_focus (true);
+			} else if (Keyboard::modifier_state_equals (event->scroll.state, Keyboard::PrimaryModifier)) {
 				temporal_zoom_step_mouse_focus (true);
 			} else {
 				temporal_zoom_step (true);
