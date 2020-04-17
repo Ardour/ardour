@@ -246,7 +246,7 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 				label = _("Return");
 			}
 
-			Control* c = new Control (_processor->automation_control (*i), label);
+			Control* c = new Control (*this, _processor->automation_control (*i), label);
 
 			_controls.push_back (c);
 
@@ -834,8 +834,9 @@ ProcessorEntry::toggle_allow_feedback ()
 	}
 }
 
-ProcessorEntry::Control::Control (boost::shared_ptr<AutomationControl> c, string const & n)
-	: _control (c)
+ProcessorEntry::Control::Control (ProcessorEntry& e,boost::shared_ptr<AutomationControl> c, string const & n)
+	: _entry (e)
+	, _control (c)
 	, _adjustment (gain_to_slider_position_with_max (1.0, Config->get_max_gain()), 0, 1, 0.01, 0.1)
 	, _slider (&_adjustment, boost::shared_ptr<PBD::Controllable>(), 0, max(13.f, rintf(13.f * UIConfiguration::instance().get_ui_scale())))
 	, _slider_persistant_tooltip (&_slider)
@@ -862,6 +863,9 @@ ProcessorEntry::Control::Control (boost::shared_ptr<AutomationControl> c, string
 			control_automation_state_changed ();
 		}
 
+		_button.set_fallthrough_to_parent (true);
+		_button.signal_button_release_event().connect (sigc::mem_fun(*this, &Control::button_released));
+
 	} else {
 
 		_slider.set_name ("ProcessorControlSlider");
@@ -885,6 +889,8 @@ ProcessorEntry::Control::Control (boost::shared_ptr<AutomationControl> c, string
 
 		_slider.StartGesture.connect(sigc::mem_fun(*this, &Control::start_touch));
 		_slider.StopGesture.connect(sigc::mem_fun(*this, &Control::end_touch));
+
+		_slider.signal_button_release_event().connect (sigc::mem_fun(*this, &Control::button_released));
 
 		_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &Control::slider_adjusted));
 		c->Changed.connect (_connections, invalidator (*this), boost::bind (&Control::control_changed, this), gui_context ());
@@ -954,6 +960,16 @@ ProcessorEntry::Control::end_touch ()
 		return;
 	}
 	c->stop_touch (c->session().transport_sample());
+}
+
+bool
+ProcessorEntry::Control::button_released (GdkEventButton* ev)
+{
+	if (Keyboard::is_delete_event (ev)) {
+		_entry.toggle_control_visibility (this);
+		return true;
+	}
+	return false;
 }
 
 void

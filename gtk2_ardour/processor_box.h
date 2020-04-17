@@ -200,7 +200,7 @@ private:
 
 	class Control : public sigc::trackable {
 	public:
-		Control (boost::shared_ptr<ARDOUR::AutomationControl>, std::string const &);
+		Control (ProcessorEntry&, boost::shared_ptr<ARDOUR::AutomationControl>, std::string const &);
 		~Control ();
 
 		void set_visible (bool);
@@ -230,6 +230,9 @@ private:
 		void start_touch ();
 		void end_touch ();
 
+		bool button_released (GdkEventButton*);
+
+		ProcessorEntry& _entry;
 		boost::weak_ptr<ARDOUR::AutomationControl> _control;
 		/* things for a slider */
 		Gtk::Adjustment _adjustment;
@@ -245,7 +248,9 @@ private:
 
 	std::list<Control*> _controls;
 
+	friend class Control;
 	void toggle_control_visibility (Control *);
+
 	void toggle_panner_link ();
 	void toggle_allow_feedback ();
 
