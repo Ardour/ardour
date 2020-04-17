@@ -3364,10 +3364,7 @@ MidiRegionView::change_note_lengths (bool fine, bool shorter, Temporal::Beats de
 void
 MidiRegionView::nudge_notes (bool forward, bool fine)
 {
-	cerr << "nudge fwd " << forward << " fine " << fine << endl;
-
 	if (_selection.empty()) {
-		cerr << "not selection is empty\n";
 		return;
 	}
 
@@ -3386,8 +3383,6 @@ MidiRegionView::nudge_notes (bool forward, bool fine)
 		samplepos_t       unused;
 		const samplecnt_t distance = trackview.editor().get_nudge_distance (ref_point, unused);
 		delta = region_samples_to_region_beats (fabs ((double)distance));
-
-		cerr << "used nudge\n";
 
 	} else {
 
