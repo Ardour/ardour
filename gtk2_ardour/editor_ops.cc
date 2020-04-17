@@ -1719,10 +1719,8 @@ Editor::tav_zoom_smooth (bool coarser, bool force_all)
 void
 Editor::temporal_zoom_step_mouse_focus_scale (bool zoom_out, double scale)
 {
-	Editing::ZoomFocus temp_focus = zoom_focus;
-	zoom_focus = Editing::ZoomFocusMouse;
+	PBD::Unwinder<Editing::ZoomFocus> zf (zoom_focus, Editing::ZoomFocusMouse);
 	temporal_zoom_step_scale (zoom_out, scale);
-	zoom_focus = temp_focus;
 }
 
 void
