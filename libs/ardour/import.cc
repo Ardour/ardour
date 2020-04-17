@@ -503,10 +503,8 @@ Session::import_files (ImportStatus& status)
 
 	status.sources.clear ();
 
-	for (vector<string>::const_iterator p = status.paths.begin();
-	     p != status.paths.end() && !status.cancel;
-	     ++p)
-	{
+	for (vector<string>::const_iterator p = status.paths.begin(); p != status.paths.end() && !status.cancel; ++p) {
+
 		boost::shared_ptr<ImportableSource> source;
 
 		const DataType type = SMFSource::safe_midi_file_extension (*p) ? DataType::MIDI : DataType::AUDIO;
