@@ -728,7 +728,7 @@ Editor::register_midi_actions (Bindings* midi_bindings)
 	ActionManager::register_action (_midi_actions, X_("add-select-next"), _("Add Next to Selection"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::add_select_next_note));
 	ActionManager::register_action (_midi_actions, X_("alt-add-select-next"), _("Add Next to Selection (alternate)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::add_select_next_note));
 	ActionManager::register_action (_midi_actions, X_("add-select-previous"), _("Add Previous to Selection"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::add_select_previous_note));
-	ActionManager::register_action (_midi_actions, X_("alt-select-previous"), _("Add Previous to Selection (alternate)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::add_select_previous_note));
+	ActionManager::register_action (_midi_actions, X_("alt-add-select-previous"), _("Add Previous to Selection (alternate)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::add_select_previous_note));
 
 	ActionManager::register_action (_midi_actions, X_("increase-velocity"), _("Increase Velocity"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::increase_note_velocity));
 	ActionManager::register_action (_midi_actions, X_("increase-velocity-fine"), _("Increase Velocity (fine)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::increase_note_velocity_fine));
