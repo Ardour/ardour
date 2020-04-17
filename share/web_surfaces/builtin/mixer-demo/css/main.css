@@ -3,7 +3,7 @@ html {
 }
 
 body {
-    background: #282923;
+    background: rgb(62,61,61);
     color: rgb(248,248,242);
     font-family: Helvetica, Arial, sans-serif;
     height: 100%;
@@ -42,7 +42,6 @@ div {
 }
 
 #top > span {
-    opacity: 0.75;
     margin-left: 12px;
 }
 
@@ -70,7 +69,7 @@ div {
 }
 
 .message-in {
-    color: rgb(166,226,44);
+    color: rgb(248,248,242);
 }
 
 .message-out {
