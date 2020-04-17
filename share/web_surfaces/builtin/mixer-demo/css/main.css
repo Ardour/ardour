@@ -108,7 +108,7 @@ div {
 
 .plugin {
     margin: 40px 0;
-    padding: 20px 40px;
+    padding: 20px;
     background: rgba(0,0,0,0.05);
     border-radius: 5px;
 }
@@ -118,7 +118,7 @@ div {
 }
 
 .plugin-param {
-    margin: 40px;
+    margin: 40px 0;
 }
 
 .plugin-param.boolean {
