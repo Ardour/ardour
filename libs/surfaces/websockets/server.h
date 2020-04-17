@@ -66,7 +66,7 @@ private:
 	struct lws_protocol_vhost_options _lws_vhost_opt;
 #endif
 	struct lws_protocols              _lws_proto[2];
-	struct lws_http_mount             _lws_mnt_index;
+	struct lws_http_mount             _lws_mnt_root;
 	struct lws_http_mount             _lws_mnt_user;
 	struct lws_context_creation_info  _lws_info;
 	struct lws_context*               _lws_context;
