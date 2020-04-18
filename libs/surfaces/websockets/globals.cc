@@ -22,6 +22,30 @@
 
 using namespace ARDOUR;
 
+double
+ArdourGlobals::tempo () const
+{
+	Tempo tempo = session ().tempo_map ().tempo_at_sample (0);
+	return tempo.note_type () * tempo.pulses_per_minute ();
+}
+
+void
+ArdourGlobals::set_tempo (double bpm)
+{
+	bpm                 = max (0.01, bpm);
+	TempoMap& tempo_map = session ().tempo_map ();
+	Tempo     tempo (bpm, tempo_map.tempo_at_sample (0).note_type (), bpm);
+	tempo_map.add_tempo (tempo, 0.0, 0, AudioTime);
+}
+
+double
+ArdourGlobals::position_time () const
+{
+	samplepos_t t = session ().transport_sample ();
+	samplecnt_t f = session ().sample_rate ();
+	return static_cast<double>(t) / static_cast<double>(f);
+}
+
 bool
 ArdourGlobals::transport_roll () const
 {
@@ -49,20 +73,4 @@ ArdourGlobals::set_record_state (bool value)
 	if ((value && !record_state ()) || (!value && record_state ())) {
 		basic_ui ().rec_enable_toggle ();
 	}
-}
-
-double
-ArdourGlobals::tempo () const
-{
-	Tempo tempo = session ().tempo_map ().tempo_at_sample (0);
-	return tempo.note_type () * tempo.pulses_per_minute ();
-}
-
-void
-ArdourGlobals::set_tempo (double bpm)
-{
-	bpm                 = max (0.01, bpm);
-	TempoMap& tempo_map = session ().tempo_map ();
-	Tempo     tempo (bpm, tempo_map.tempo_at_sample (0).note_type (), bpm);
-	tempo_map.add_tempo (tempo, 0.0, 0, AudioTime);
 }

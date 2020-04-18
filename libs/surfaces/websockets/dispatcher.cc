@@ -31,6 +31,8 @@ using namespace ARDOUR;
 WebsocketsDispatcher::NodeMethodMap
 	WebsocketsDispatcher::_node_to_method = boost::assign::map_list_of
 		NODE_METHOD_PAIR (tempo)
+		NODE_METHOD_PAIR (transport_roll)
+		NODE_METHOD_PAIR (record_state)
 		NODE_METHOD_PAIR (strip_gain)
 		NODE_METHOD_PAIR (strip_pan)
 		NODE_METHOD_PAIR (strip_mute)
@@ -53,9 +55,10 @@ WebsocketsDispatcher::dispatch (Client client, const NodeStateMessage& msg)
 void
 WebsocketsDispatcher::update_all_nodes (Client client)
 {
+	update (client, Node::tempo, globals ().tempo ());
+	update (client, Node::position_time, globals ().position_time ());
 	update (client, Node::transport_roll, globals ().transport_roll ());
 	update (client, Node::record_state, globals ().record_state ());
-	update (client, Node::tempo, globals ().tempo ());
 
 	for (uint32_t strip_n = 0; strip_n < strips ().strip_count (); ++strip_n) {
 		boost::shared_ptr<Stripable> strip = strips ().nth_strip (strip_n);
@@ -132,6 +135,30 @@ WebsocketsDispatcher::tempo_handler (Client client, const NodeStateMessage& msg)
 		globals ().set_tempo (state.nth_val (0));
 	} else {
 		update (client, Node::tempo, globals ().tempo ());
+	}
+}
+
+void
+WebsocketsDispatcher::transport_roll_handler (Client client, const NodeStateMessage& msg)
+{
+	const NodeState& state = msg.state ();
+
+	if (msg.is_write () && (state.n_val () > 0)) {
+		globals ().set_transport_roll (state.nth_val (0));
+	} else {
+		update (client, Node::transport_roll, globals ().transport_roll ());
+	}
+}
+
+void
+WebsocketsDispatcher::record_state_handler (Client client, const NodeStateMessage& msg)
+{
+	const NodeState& state = msg.state ();
+
+	if (msg.is_write () && (state.n_val () > 0)) {
+		globals ().set_record_state (state.nth_val (0));
+	} else {
+		update (client, Node::record_state, globals ().record_state ());
 	}
 }
 
