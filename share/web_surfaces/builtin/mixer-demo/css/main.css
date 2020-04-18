@@ -118,7 +118,15 @@ div {
 }
 
 .plugin-param {
-    margin: 40px 0;
+    margin: 20px 0;
+}
+
+.plugin-param.boolean {
+    text-align: center;
+}
+
+.plugin-param > .widget-switch {
+    margin: 10px 40px;
 }
 
 .plugin-param.boolean {
