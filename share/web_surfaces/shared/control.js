@@ -25,6 +25,14 @@ export class ControlMixin {
 	async getTempo () {
 		return await this._sendRecvSingle(ANode.TEMPO);
 	}
+
+	async getTransportRoll () {
+		return await this._sendRecvSingle(ANode.TRANSPORT_ROLL);
+	}
+
+	async getRecordState () {
+		return await this._sendRecvSingle(ANode.RECORD_STATE);
+	}
 	
 	async getStripGain (stripId) {
 		return await this._sendRecvSingle(ANode.STRIP_GAIN, [stripId]);
@@ -48,6 +56,14 @@ export class ControlMixin {
 
 	setTempo (bpm) {
 		this._send(ANode.TEMPO, [], [bpm]);
+	}
+
+	setTransportRoll (value) {
+		this._send(ANode.TRANSPORT_ROLL, [], [value]);
+	}
+
+	setRecordState (value) {
+		this._send(ANode.RECORD_STATE, [], [value]);
 	}
 
 	setStripGain (stripId, db) {
