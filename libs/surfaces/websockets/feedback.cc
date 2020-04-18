@@ -162,6 +162,8 @@ ArdourFeedback::update_all (std::string node, uint32_t strip_n, uint32_t plugin_
 bool
 ArdourFeedback::poll () const
 {
+	update_all (Node::position_time, globals ().position_time ());
+
 	for (uint32_t strip_n = 0; strip_n < strips ().strip_count (); ++strip_n) {
 		// meters
 		boost::shared_ptr<Stripable> strip = strips ().nth_strip (strip_n);
