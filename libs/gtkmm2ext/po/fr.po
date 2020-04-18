@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtkmm2ext\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-10-12 16:31-0600\n"
+"POT-Creation-Date: 2020-04-18 10:29+0200\n"
 "PO-Revision-Date: 2020-04-16 19:53+0200\n"
 "Last-Translator: Fred Rech <fred_rech@laposte.net>\n"
 "Language-Team: French <>\n"
@@ -53,19 +53,19 @@ msgstr ""
 msgid "ProcessorMenu"
 msgstr ""
 
-#: bindings.cc:831 bindings.cc:833
+#: bindings.cc:840 bindings.cc:842
 msgid "Window"
 msgstr "Fenêtre"
 
-#: bindings.cc:831
+#: bindings.cc:840
 msgid " (Categorized)"
 msgstr " (Catégorisé)"
 
-#: bindings.cc:833
+#: bindings.cc:842
 msgid " (Alphabetical)"
 msgstr " (Alphabétique)"
 
-#: bindings.cc:849
+#: bindings.cc:858
 msgid "Uncategorized"
 msgstr "Non-catégorisé"
 
@@ -77,11 +77,11 @@ msgstr ""
 msgid "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 msgstr ""
 
-#: gtk_ui.cc:122
+#: gtk_ui.cc:123
 msgid "Log"
 msgstr "Journal"
 
-#: gtk_ui.cc:391
+#: gtk_ui.cc:392
 msgid ""
 "\n"
 "\n"
@@ -91,11 +91,11 @@ msgstr ""
 "\n"
 "Raccourci : "
 
-#: gtk_ui.cc:658
+#: gtk_ui.cc:691
 msgid "Press To Exit"
 msgstr "Clic Pour Quitter"
 
-#: gtk_ui.cc:694
+#: gtk_ui.cc:727
 msgid "I'm sorry %1, I can't do that"
 msgstr "Je suis désolé %1, je ne peux pas faire ça"
 
@@ -139,25 +139,25 @@ msgstr ""
 msgid "Win"
 msgstr ""
 
-#: keyboard.cc:158 keyboard.cc:601
+#: keyboard.cc:159 keyboard.cc:605
 msgid "Unknown"
 msgstr "Inconnu"
 
-#: keyboard.cc:612
+#: keyboard.cc:616
 msgid "key bindings file not found at \"%2\" or contains errors."
 msgstr ""
 "fichier de raccourcis-clavier introuvable dans \"%2\"\n"
 "ou contenant des erreurs."
 
-#: keyboard.cc:638
+#: keyboard.cc:642
 msgid "Keyboard binding found without a name"
 msgstr "Raccourci-clavier trouvé sans nom"
 
-#: keyboard.cc:668
+#: keyboard.cc:674
 msgid "Cannot save key bindings to %1"
 msgstr "Raccourcis-clavier insauvegardables dans %1"
 
-#: keyboard.cc:684
+#: keyboard.cc:690
 msgid "Cannot rename your own keybinding file (%1)"
 msgstr "Impossible de renommer votre propre fichier de raccourcis-clavier (%1)"
 
@@ -172,7 +172,8 @@ msgstr "Fermer"
 #~ msgstr "actionnez le contrôleur maintenant"
 
 #~ msgid "button cannot watch state of non-existing Controllable\n"
-#~ msgstr "le bouton ne peut pas surveiller l'état d'un contrôleur inexistant\n"
+#~ msgstr ""
+#~ "le bouton ne peut pas surveiller l'état d'un contrôleur inexistant\n"
 
 #~ msgid "Add"
 #~ msgstr "Ajouter"
@@ -199,12 +200,15 @@ msgstr "Fermer"
 #~ msgstr "Méta"
 
 #~ msgid "motionfeedback: failed to open a temporary file for writing: %1"
-#~ msgstr "rétroaction de mouvement : impossible d'ouvrir un fichier temporaire en écriture : %1"
+#~ msgstr ""
+#~ "rétroaction de mouvement : impossible d'ouvrir un fichier temporaire en "
+#~ "écriture : %1"
 
 # Or is it "image set"?
 #, fuzzy
 #~ msgid "motionfeedback: could not save image set to %1"
-#~ msgstr "rétroaction de mouvement : impossible de sauvegarder l'image réglée à %1"
+#~ msgstr ""
+#~ "rétroaction de mouvement : impossible de sauvegarder l'image réglée à %1"
 
 #~ msgid "motionfeedback: caught PixbufError: %1"
 #~ msgstr "rétroaction de mouvement : PixbufError attrapée : %1"
