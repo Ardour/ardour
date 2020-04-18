@@ -1,6 +1,6 @@
 ardour {
 	["type"]    = "dsp",
-	name        = "a-Amplifier",
+	name        = "Simple Amp IV",
 	category    = "Amplifier",
 	license     = "MIT",
 	author      = "Ardour Team",
@@ -58,6 +58,7 @@ function dsp_run (ins, outs, n_samples)
 		if siz > n_samples then siz = n_samples end -- process at most "remaining samples"
 		if changed then
 			-- smooth gain changes above 0.02 dB difference
+			-- XXX this interpolates dB, resulting in a double-exponential fade XXX
 			cur_gain = low_pass_filter_param (cur_gain, ctrl[1], 0.02)
 		end
 
@@ -75,45 +76,4 @@ function dsp_run (ins, outs, n_samples)
 		n_samples = n_samples - siz
 		off = off + siz
 	end
-
---[[
-	if changed then
-		self:queue_draw () -- notify display
-	end
---]]
 end
-
--------------------------------------------------------------------------------
---- inline display + text example
-
---[[
-local txt = nil -- cache pango context globally
-
-function render_inline (ctx, w, max_h)
-	local ctrl = CtrlPorts:array () -- get control ports
-
-	if not txt then
-		-- allocate PangoLayout and set font
-		--http://manual.ardour.org/lua-scripting/class_reference/#Cairo:PangoLayout
-		txt = Cairo.PangoLayout (ctx, "Mono 8px")
-	end
-
-	txt:set_text (string.format ("%+.2f dB", ctrl[1]));
-	tw, th = txt:get_pixel_size ()
-
-	local h = th + 4 -- use text-height with 4px padding
-	if (h > max_h) then h = max_h end -- but at most max-height
-
-	-- clear background
-	ctx:rectangle (0, 0, w, h)
-	ctx:set_source_rgba (.2, .2, .2, 1.0)
-	ctx:fill ()
-
-	-- center text
-	ctx:set_source_rgba (.8, .8, .8, 1.0)
-	ctx:move_to (.5 * (w - tw), .5 * (h - th))
-	txt:show_in_cairo_context (ctx)
-
-	return {w, h}
-end
---]]
