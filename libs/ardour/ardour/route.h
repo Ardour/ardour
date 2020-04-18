@@ -643,6 +643,7 @@ protected:
 
 	ProcessorList  _pending_processor_order;
 	gint           _pending_process_reorder; // atomic
+	gint           _pending_listen_change; // atomic
 	gint           _pending_signals; // atomic
 
 	MeterPoint     _meter_point;

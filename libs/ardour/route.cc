@@ -114,6 +114,7 @@ Route::Route (Session& sess, string name, PresentationInfo::Flag flag, DataType 
 	, _signal_latency (0)
 	, _disk_io_point (DiskIOPreFader)
 	, _pending_process_reorder (0)
+	, _pending_listen_change (0)
 	, _pending_signals (0)
 	, _meter_point (MeterPostFader)
 	, _pending_meter_point (MeterPostFader)
@@ -987,7 +988,7 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 	ProcessorList::iterator loc;
 	boost::shared_ptr <PluginInsert> fanout;
 
-	if (g_atomic_int_get (&_pending_process_reorder)) {
+	if (g_atomic_int_get (&_pending_process_reorder) || g_atomic_int_get (&_pending_listen_change)) {
 		/* we need to flush any pending re-order changes */
 		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		apply_processor_changes_rt ();
@@ -2065,7 +2066,7 @@ Route::apply_processor_order (const ProcessorList& new_order)
 	oiter = _processors.begin();
 	niter = new_order.begin();
 
-	while (niter !=  new_order.end()) {
+	while (niter != new_order.end ()) {
 
 		/* if the next processor in the old list is invisible (i.e. should not be in the new order)
 		 * then append it to the temp list.
@@ -2194,11 +2195,12 @@ Route::reorder_processors (const ProcessorList& new_order, ProcessorStreams* err
 			DEBUG_TRACE (DEBUG::Processors, "offline apply queued processor re-order.\n");
 			Glib::Threads::RWLock::WriterLock lm (_processor_lock);
 
+			g_atomic_int_set (&_pending_process_reorder, 0);
+			g_atomic_int_set (&_pending_listen_change, 0);
+
 			apply_processor_order(_pending_processor_order);
 			_pending_processor_order.clear ();
 			setup_invisible_processors ();
-
-			g_atomic_int_set (&_pending_process_reorder, 0);
 
 			processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
 			set_processor_positions ();
@@ -3968,14 +3970,26 @@ Route::apply_processor_changes_rt ()
 	if (g_atomic_int_get (&_pending_process_reorder)) {
 		Glib::Threads::RWLock::WriterLock pwl (_processor_lock, Glib::Threads::TRY_LOCK);
 		if (pwl.locked()) {
+			g_atomic_int_set (&_pending_process_reorder, 0);
+			g_atomic_int_set (&_pending_listen_change, 0);
 			apply_processor_order (_pending_processor_order);
 			_pending_processor_order.clear ();
 			setup_invisible_processors ();
 			changed = true;
-			g_atomic_int_set (&_pending_process_reorder, 0);
 			emissions |= EmitRtProcessorChange;
 		}
 	}
+
+	if (g_atomic_int_get (&_pending_listen_change)) {
+		Glib::Threads::RWLock::WriterLock pwl (_processor_lock, Glib::Threads::TRY_LOCK);
+		if (pwl.locked()) {
+			g_atomic_int_set (&_pending_listen_change, 0);
+			setup_invisible_processors ();
+			changed = true;
+			emissions |= EmitRtProcessorChange;
+		}
+	}
+
 	if (changed) {
 		set_processor_positions ();
 		/* update processor input/output latency
@@ -4159,20 +4173,9 @@ Route::listen_position_changed ()
 	}
 
 	if (c == _monitor_send->input_streams () && AudioEngine::instance()->running()) {
-		if (!g_atomic_int_get (&_pending_process_reorder)) {
-			Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
-			assert (_pending_processor_order.empty ());
-			// TODO optimize, Route::apply_processor_changes_rt() could
-			// be special-cased to only call setup_invisible_processors();
-			for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-				if (!(*i)->display_to_user()) {
-					continue;
-				}
-				_pending_processor_order.push_back (*i);
-			}
-			g_atomic_int_set (&_pending_process_reorder, 1);
-			return;
-		}
+		Glib::Threads::RWLock::ReaderLock lm (_processor_lock); // XXX is this needed?
+		g_atomic_int_set (&_pending_listen_change, 1);
+		return;
 	}
 
 	{
