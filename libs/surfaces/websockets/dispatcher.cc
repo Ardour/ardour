@@ -63,7 +63,7 @@ WebsocketsDispatcher::update_all_nodes (Client client)
 			continue;
 		}
 
-		update (client, Node::strip_desc, strip_n, strip->name ());
+		update (client, Node::strip_description, strip_n, strip->name ());
 		update (client, Node::strip_gain, strip_n, strips ().strip_gain (strip_n));
 		update (client, Node::strip_pan, strip_n, strips ().strip_pan (strip_n));
 		update (client, Node::strip_mute, strip_n, strips ().strip_mute (strip_n));
@@ -76,7 +76,7 @@ WebsocketsDispatcher::update_all_nodes (Client client)
 			}
 
 			boost::shared_ptr<Plugin> plugin = insert->plugin ();
-			update (client, Node::strip_plugin_desc, strip_n, plugin_n,
+			update (client, Node::strip_plugin_description, strip_n, plugin_n,
 			        static_cast<std::string> (plugin->name ()));
 
 			update (client, Node::strip_plugin_enable, strip_n, plugin_n,
@@ -113,7 +113,7 @@ WebsocketsDispatcher::update_all_nodes (Client client)
 					val.push_back (pd.logarithmic);
 				}
 
-				update (client, Node::strip_plugin_param_desc, addr, val);
+				update (client, Node::strip_plugin_param_description, addr, val);
 
 				TypedValue value = strips ().strip_plugin_param_value (strip_n, plugin_n, param_n);
 				update (client, Node::strip_plugin_param_value, strip_n, plugin_n, param_n, value);
