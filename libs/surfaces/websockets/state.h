@@ -31,18 +31,18 @@
 
 namespace Node
 {
-	const std::string tempo                    = "tempo";
-	const std::string transport_roll           = "transport_roll";
-	const std::string record_state             = "record_state";
-	const std::string strip_desc               = "strip_desc";
-	const std::string strip_meter              = "strip_meter";
-	const std::string strip_gain               = "strip_gain";
-	const std::string strip_pan                = "strip_pan";
-	const std::string strip_mute               = "strip_mute";
-	const std::string strip_plugin_desc        = "strip_plugin_desc";
-	const std::string strip_plugin_enable      = "strip_plugin_enable";
-	const std::string strip_plugin_param_desc  = "strip_plugin_param_desc";
-	const std::string strip_plugin_param_value = "strip_plugin_param_value";
+	const std::string tempo                          = "tempo";
+	const std::string transport_roll                 = "transport_roll";
+	const std::string record_state                   = "record_state";
+	const std::string strip_description              = "strip_description";
+	const std::string strip_meter                    = "strip_meter";
+	const std::string strip_gain                     = "strip_gain";
+	const std::string strip_pan                      = "strip_pan";
+	const std::string strip_mute                     = "strip_mute";
+	const std::string strip_plugin_description       = "strip_plugin_description";
+	const std::string strip_plugin_enable            = "strip_plugin_enable";
+	const std::string strip_plugin_param_description = "strip_plugin_param_description";
+	const std::string strip_plugin_param_value       = "strip_plugin_param_value";
 } // namespace Node
 
 typedef std::vector<uint32_t>   AddressVector;

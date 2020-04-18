@@ -44,9 +44,9 @@ import { Switch, DiscreteSlider, ContinuousSlider, LogarithmicSlider,
             onConnected: (error) => { log('Client connected', 'info'); },
             onDisconnected: (error) => { log('Client disconnected', 'error'); },
             onMessage: processMessage,
-            onStripDesc: createStrip,
-            onStripPluginDesc: createStripPlugin,
-            onStripPluginParamDesc: createStripPluginParam
+            onStripDescription: createStrip,
+            onStripPluginDescription: createStripPlugin,
+            onStripPluginParamDescription: createStripPluginParam
         });
         
         ardour.connect();
