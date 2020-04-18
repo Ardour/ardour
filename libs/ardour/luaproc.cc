@@ -192,8 +192,10 @@ LuaProc::route () const
 
 void
 LuaProc::lua_print (std::string s) {
-	std::cout <<"LuaProc: " << s << "\n";
-	PBD::error << "LuaProc: " << s << "\n";
+#ifndef NDEBUG
+	std::cout << "LuaProc: " << s << "\n";
+#endif
+	PBD::info << "LuaProc: " << s << "\n";
 }
 
 bool
@@ -258,6 +260,10 @@ LuaProc::load_script ()
 		try {
 			lua_dsp_init (_session.nominal_sample_rate ());
 		} catch (luabridge::LuaException const& e) {
+#ifndef NDEBUG
+			std::cerr << "LuaException:" << e.what () << std::endl;
+#endif
+			PBD::warning << "LuaException: " << e.what () << endmsg;
 			return true; // error
 		} catch (...) {
 			return true;
@@ -605,10 +611,10 @@ LuaProc::configure_io (ChanCount in, ChanCount out)
 				}
 				_configured = true;
 			} catch (luabridge::LuaException const& e) {
-				PBD::error << "LuaException: " << e.what () << "\n";
 #ifndef NDEBUG
 				std::cerr << "LuaException: " << e.what () << "\n";
 #endif
+				PBD::warning << "LuaException: " << e.what () << "\n";
 				return false;
 			} catch (...) {
 				return false;
@@ -756,10 +762,10 @@ LuaProc::connect_and_run (BufferSet& bufs,
 		}
 
 	} catch (luabridge::LuaException const& e) {
-		PBD::error << "LuaException: " << e.what () << "\n";
 #ifndef NDEBUG
 		std::cerr << "LuaException: " << e.what () << "\n";
 #endif
+		PBD::warning << "LuaException: " << e.what () << "\n";
 		return -1;
 	} catch (...) {
 		return -1;

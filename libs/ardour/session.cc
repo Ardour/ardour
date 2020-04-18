@@ -5103,11 +5103,12 @@ Session::registered_lua_functions ()
 	return rv;
 }
 
-#ifndef NDEBUG
 static void _lua_print (std::string s) {
-	std::cout << "SessionLua: " << s << "\n";
-}
+#ifndef NDEBUG
+	std::cout << "LuaSession: " << s << "\n";
 #endif
+	PBD::info << "LuaSession: " << s << endmsg;
+}
 
 void
 Session::try_run_lua (pframes_t nframes)
@@ -5123,9 +5124,7 @@ Session::try_run_lua (pframes_t nframes)
 void
 Session::setup_lua ()
 {
-#ifndef NDEBUG
 	lua.Print.connect (&_lua_print);
-#endif
 	lua.sandbox (true);
 	lua.do_command (
 			"function ArdourSession ()"

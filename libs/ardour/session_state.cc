@@ -1782,7 +1782,10 @@ Session::set_state (const XMLNode& node, int version)
 				Glib::Threads::Mutex::Lock lm (lua_lock);
 				(*_lua_load)(std::string ((const char*)buf, size));
 			} catch (luabridge::LuaException const& e) {
+#ifndef NDEBUG
 				cerr << "LuaException:" << e.what () << endl;
+#endif
+				warning << "LuaException: " << e.what () << endmsg;
 			} catch (...) { }
 			g_free (buf);
 		}

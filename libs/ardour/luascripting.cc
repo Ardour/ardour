@@ -220,12 +220,20 @@ LuaScripting::scan_script (const std::string &fn, const std::string &sc)
 #endif
 			return LuaScriptInfoPtr();
 		}
-	} catch (...) { // luabridge::LuaException
+	} catch (luabridge::LuaException const& e) {
 #ifndef NDEBUG
-		cerr << "failed to parse lua script\n";
+		cerr << "Exception: Failed to parse lua script fn: '"<< fn << "' " << e.what () << "\n";
 #endif
+		PBD::warning << "Exception: Failed to parse lua script fn: '"<< fn << "' " << e.what () << "\n";
+		return LuaScriptInfoPtr();
+	} catch (...) {
+#ifndef NDEBUG
+		cerr << "Exception: Failed to parse lua script fn: '"<< fn << "'\n";
+#endif
+		PBD::warning << "Exception: Failed to parse lua script fn: '"<< fn << "'\n";
 		return LuaScriptInfoPtr();
 	}
+
 	luabridge::LuaRef nfo = luabridge::getGlobal (L, "ardourluainfo");
 	if (nfo.type() != LUA_TTABLE) {
 #ifndef NDEBUG
