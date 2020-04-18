@@ -314,6 +314,7 @@ Session::Session (AudioEngine &eng,
 	, _suspend_timecode_transmission (0)
 	,  _speakers (new Speakers)
 	, _ignore_route_processor_changes (0)
+	, _ignored_a_processor_change (0)
 	, midi_clock (0)
 	, _scene_changer (0)
 	, _midi_ports (0)

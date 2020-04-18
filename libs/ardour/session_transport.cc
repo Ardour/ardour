@@ -1851,6 +1851,7 @@ void
 Session::route_processors_changed (RouteProcessorChange c)
 {
 	if (g_atomic_int_get (&_ignore_route_processor_changes) > 0) {
+		g_atomic_int_set (&_ignored_a_processor_change, 1);
 		return;
 	}
 

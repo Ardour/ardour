@@ -102,14 +102,17 @@ Session::process (pframes_t nframes)
 	 * Route::process_output_buffers() but various functions
 	 * callig it hold a _processor_lock reader-lock
 	 */
-	boost::shared_ptr<RouteList> r = routes.reader ();
 	bool one_or_more_routes_declicking = false;
-	for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
-		if ((*i)->apply_processor_changes_rt()) {
-			_rt_emit_pending = true;
-		}
-		if ((*i)->declick_in_progress()) {
-			one_or_more_routes_declicking = true;
+	{
+		ProcessorChangeBlocker pcb (this);
+		boost::shared_ptr<RouteList> r = routes.reader ();
+		for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
+			if ((*i)->apply_processor_changes_rt()) {
+				_rt_emit_pending = true;
+			}
+			if ((*i)->declick_in_progress()) {
+				one_or_more_routes_declicking = true;
+			}
 		}
 	}
 
@@ -1051,6 +1054,7 @@ Session::emit_route_signals ()
 {
 	// TODO use RAII to allow using these signals in other places
 	BatchUpdateStart(); /* EMIT SIGNAL */
+	ProcessorChangeBlocker pcb (this);
 	boost::shared_ptr<RouteList> r = routes.reader ();
 	for (RouteList::const_iterator ci = r->begin(); ci != r->end(); ++ci) {
 		(*ci)->emit_pending_signals ();
