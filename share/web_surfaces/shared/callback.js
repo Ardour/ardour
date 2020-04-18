@@ -30,6 +30,9 @@
 
 	// Globals
 	onTempo (bpm) {}
+	onPositionTime (seconds) {}
+	onTransportRoll (value) {}
+	onRecordState (value) {}
 
 	// Strips
 	onStripDescription (stripId, name) {}

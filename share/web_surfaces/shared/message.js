@@ -20,6 +20,9 @@ export const JSON_INF = 1.0e+128;
 
 export const ANode = Object.freeze({
 	TEMPO:                    'tempo',
+	POSITION_TIME:            'position_time',
+	TRANSPORT_ROLL:           'transport_roll',
+	RECORD_STATE:             'record_state',
 	STRIP_DESC:               'strip_desc',
 	STRIP_METER:              'strip_meter',
 	STRIP_GAIN:               'strip_gain',
