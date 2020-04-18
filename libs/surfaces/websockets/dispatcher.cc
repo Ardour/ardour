@@ -53,6 +53,7 @@ WebsocketsDispatcher::dispatch (Client client, const NodeStateMessage& msg)
 void
 WebsocketsDispatcher::update_all_nodes (Client client)
 {
+	update (client, Node::transport_roll, globals ().transport_roll ());
 	update (client, Node::tempo, globals ().tempo ());
 
 	for (uint32_t strip_n = 0; strip_n < strips ().strip_count (); ++strip_n) {

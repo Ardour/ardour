@@ -32,6 +32,8 @@
 namespace Node
 {
 	const std::string tempo                    = "tempo";
+	const std::string transport_roll           = "transport_roll";
+	const std::string record_state             = "record_state";
 	const std::string strip_desc               = "strip_desc";
 	const std::string strip_meter              = "strip_meter";
 	const std::string strip_gain               = "strip_gain";

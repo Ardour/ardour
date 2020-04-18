@@ -19,6 +19,12 @@
 #include "component.h"
 #include "ardour_websockets.h"
 
+BasicUI&
+SurfaceComponent::basic_ui () const
+{
+	return _surface;
+}
+
 PBD::EventLoop*
 SurfaceComponent::event_loop () const
 {
