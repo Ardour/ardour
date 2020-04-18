@@ -2186,14 +2186,16 @@ Route::move_instrument_down (bool postfader)
 int
 Route::reorder_processors (const ProcessorList& new_order, ProcessorStreams* err)
 {
-	// it a change is already queued, wait for it
-	// (unless engine is stopped. apply immediately and proceed
+	/* If a change is already queued, wait for it
+	 * (unless engine is stopped. apply immediately and proceed
+	 */
 	while (g_atomic_int_get (&_pending_process_reorder)) {
 		if (!AudioEngine::instance()->running()) {
 			DEBUG_TRACE (DEBUG::Processors, "offline apply queued processor re-order.\n");
 			Glib::Threads::RWLock::WriterLock lm (_processor_lock);
 
 			apply_processor_order(_pending_processor_order);
+			_pending_processor_order.clear ();
 			setup_invisible_processors ();
 
 			g_atomic_int_set (&_pending_process_reorder, 0);
@@ -3967,6 +3969,7 @@ Route::apply_processor_changes_rt ()
 		Glib::Threads::RWLock::WriterLock pwl (_processor_lock, Glib::Threads::TRY_LOCK);
 		if (pwl.locked()) {
 			apply_processor_order (_pending_processor_order);
+			_pending_processor_order.clear ();
 			setup_invisible_processors ();
 			changed = true;
 			g_atomic_int_set (&_pending_process_reorder, 0);
@@ -4126,6 +4129,52 @@ Route::set_meter_point_unlocked ()
 void
 Route::listen_position_changed ()
 {
+	if (!_monitor_send) {
+		return;
+	}
+	/* check if re-order can be done in realtime */
+	ChanCount c;
+
+	switch (Config->get_listen_position ()) {
+		case PreFaderListen:
+			switch (Config->get_pfl_position ()) {
+				case PFLFromBeforeProcessors:
+					c = input_streams ();
+					break;
+				case PFLFromAfterProcessors:
+					c = _amp->input_streams ();
+					break;
+			}
+			break;
+		case AfterFaderListen:
+			switch (Config->get_afl_position ()) {
+				case AFLFromBeforeProcessors:
+					c = _amp->output_streams ();
+					break;
+				case AFLFromAfterProcessors:
+					c = _main_outs->input_streams ();
+					break;
+			}
+			break;
+	}
+
+	if (c == _monitor_send->input_streams () && AudioEngine::instance()->running()) {
+		if (!g_atomic_int_get (&_pending_process_reorder)) {
+			Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+			assert (_pending_processor_order.empty ());
+			// TODO optimize, Route::apply_processor_changes_rt() could
+			// be special-cased to only call setup_invisible_processors();
+			for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+				if (!(*i)->display_to_user()) {
+					continue;
+				}
+				_pending_processor_order.push_back (*i);
+			}
+			g_atomic_int_set (&_pending_process_reorder, 1);
+			return;
+		}
+	}
+
 	{
 		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
