@@ -17,8 +17,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 6\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-18 11:21+0200\n"
-"PO-Revision-Date: 2020-04-16 19:47+0200\n"
+"POT-Creation-Date: 2020-04-18 11:22+0200\n"
+"PO-Revision-Date: 2020-04-18 11:19+0200\n"
 "Last-Translator: Fred Rech <fred_rech@laposte.net>\n"
 "Language-Team: French <>\n"
 "Language: fr\n"
@@ -236,7 +236,7 @@ msgstr "Johannes Mueller"
 
 #: about.cc:184
 msgid "Edward Tomasz Napierała"
-msgstr ""
+msgstr "Edward Tomasz Napierała"
 
 #: about.cc:185
 msgid "Todd Naugle"
@@ -679,9 +679,9 @@ msgid ""
 "to host a single \"heavy\" instrument plugin which is fed from multiple MIDI "
 "tracks."
 msgstr ""
-"Les bus MIDI peuvent accueillir la sortie de plusieurs pistes. Leurs entrées "
-"sont\n"
-"parfois connectées aux sorties d'un instrument alimenté par plusieurs pistes "
+"Les bus MIDI peuvent combiner la sortie de plusieurs pistes. Ils sont "
+"parfois utilisés\n"
+"pour accueillir un instrument \"exigeant\" alimenté par plusieurs pistes "
 "MIDI."
 
 #: add_route_dialog.cc:157 add_route_dialog.cc:571
@@ -720,7 +720,7 @@ msgid ""
 msgstr ""
 "Les bus de retours sont utilisés comme sorties d'écoute et sont alimentés "
 "par\n"
-"les départs d'écoute cachés."
+"des départs d'écoute cachés."
 
 #: add_route_dialog.cc:174 add_route_dialog.cc:1055
 #: duplicate_routes_dialog.cc:57 duplicate_routes_dialog.cc:224
@@ -854,7 +854,7 @@ msgstr "Perso"
 
 #: add_route_dialog.cc:941 session_dialog.cc:579 session_dialog.cc:580
 msgid "Factory Template"
-msgstr ""
+msgstr "Modèle de base"
 
 #: add_route_dialog.cc:1000 add_route_dialog.cc:1016 route_group_menu.cc:86
 msgid "New Group..."
@@ -866,7 +866,7 @@ msgstr "Aucun groupe"
 
 #: ambiguous_file_dialog.cc:30
 msgid "Ambiguous File"
-msgstr "Fichier Corrompu"
+msgstr "Ambigüité de fichier"
 
 #: ambiguous_file_dialog.cc:37
 msgid ""
@@ -1522,6 +1522,13 @@ msgid ""
 "you, or it can ignore it. Please decide\n"
 "what you would like to do.\n"
 msgstr ""
+"Cette session semble avoir gardé des modifications\n"
+"non sauvegardées, ou un enregistrement en cours,\n"
+"alors que l'ordinateur ou %1 ont été stoppés.\n"
+"\n"
+"%1 peut récupérer ces modifications pour vous,\n"
+"ou vous laisser les ignorer. Veuillez décider\n"
+"ce que vous voulez faire.\n"
 
 #: ardour_ui.cc:2871
 msgid "Ignore crash data"
@@ -1533,7 +1540,7 @@ msgstr "Récupérer les données"
 
 #: ardour_ui2.cc:87
 msgid "Return to last playback start when stopped"
-msgstr "Revenir au début de la lecture actuelle lors de l'arrêt du défilement"
+msgstr "Revenir au début de la lecture actuelle lors de son arrêt"
 
 #: ardour_ui2.cc:88
 msgid "Playhead follows Range tool clicks, and Range selections"
@@ -1605,6 +1612,9 @@ msgid ""
 "from live input to output, but any paths with delay-causing plugins will "
 "sound later than those without."
 msgstr ""
+"Désactive toute compensation de latence des plugin. Cela permet une latence "
+"minimale de l'entrée live à la sortie, mais vous entendrez les signaux "
+"traversant des plugins latents en retard sur les autres signaux."
 
 #: ardour_ui2.cc:130
 msgid "[ERROR]: "
@@ -1696,13 +1706,13 @@ msgstr "Stopper l'enregistrement au punch-out"
 msgid ""
 "Force all tracks to monitor Input, unless they are explicitly set to monitor "
 "Disk"
-msgstr "Écoute d'entrée pour toute piste non verrouillée en lecture du disque."
+msgstr "Écoute d'entrée pour toute piste non verrouillée en lecture du disque"
 
 #: ardour_ui2.cc:415
 msgid ""
 "Force all tracks to monitor Disk playback, unless they are explicitly set to "
 "Input"
-msgstr "Lecture du disque pour toute piste non verrouillée en écoute d'entrée."
+msgstr "Lecture du disque pour toute piste non verrouillée en écoute d'entrée"
 
 #: ardour_ui2.cc:865 rc_option_editor.cc:3781 rc_option_editor.cc:3794
 #: rc_option_editor.cc:3806 rc_option_editor.cc:3808 rc_option_editor.cc:3810
@@ -2047,7 +2057,7 @@ msgstr "Éditer les méta-données..."
 
 #: ardour_ui_ed.cc:246
 msgid "Import Metadata..."
-msgstr "Importer les méta-données"
+msgstr "Importer les méta-données..."
 
 #: ardour_ui_ed.cc:249 editor_export_audio.cc:70 export_channel_selector.cc:194
 #: export_channel_selector.cc:589 export_dialog.cc:161
@@ -2294,7 +2304,7 @@ msgstr "Punch-Out"
 
 #: ardour_ui_ed.cc:468
 msgid "Punch In/Out"
-msgstr "Punch "
+msgstr "Punch"
 
 #: ardour_ui_ed.cc:469
 msgid "In/Out"
@@ -2485,7 +2495,7 @@ msgstr "Termine l'Intervalle de Boucle"
 
 #: ardour_ui_ed.cc:650
 msgid "Select All Visible Lanes"
-msgstr ""
+msgstr "Sélectionner visible"
 
 #: ardour_ui_ed.cc:652
 msgid "Select All Tracks"
