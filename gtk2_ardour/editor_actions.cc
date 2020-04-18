@@ -811,7 +811,10 @@ Editor::trigger_script_by_name (const std::string script_name)
 					fn (args)();
 				}
 			} catch (luabridge::LuaException const& e) {
+#ifndef NDEBUG
 				cerr << "LuaException:" << e.what () << endl;
+#endif
+				PBD::warning << "LuaException: " << e.what () << endmsg;
 			} catch (...) {
 				cerr << "Lua script failed: " << script_path << endl;
 			}

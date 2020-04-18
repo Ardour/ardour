@@ -2237,9 +2237,9 @@ ARDOUR_UI::import_metadata ()
 
 static void _lua_print (std::string s) {
 #ifndef NDEBUG
-	std::cout << "LuaInstance: " << s << "\n";
+	std::cout << "LuaTemplate: " << s << "\n";
 #endif
-	PBD::info << "LuaInstance: " << s << endmsg;
+	PBD::info << "LuaTemplate: " << s << endmsg;
 }
 
 std::map<std::string, std::string>
@@ -2283,7 +2283,10 @@ ARDOUR_UI::route_setup_info (const std::string& script_path)
 			}
 		}
 	} catch (luabridge::LuaException const& e) {
+#ifndef NDEBUG
 		cerr << "LuaException:" << e.what () << endl;
+#endif
+		PBD::warning << "LuaException: " << e.what () << endmsg;
 	} catch (...) { }
 	return rv;
 }
@@ -2331,7 +2334,10 @@ ARDOUR_UI::meta_route_setup (const std::string& script_path)
 			fn (args)();
 		}
 	} catch (luabridge::LuaException const& e) {
+#ifndef NDEBUG
 		cerr << "LuaException:" << e.what () << endl;
+#endif
+		PBD::warning << "LuaException: " << e.what () << endmsg;
 	} catch (...) {
 		display_insufficient_ports_message ();
 	}
@@ -2363,7 +2369,10 @@ ARDOUR_UI::meta_session_setup (const std::string& script_path)
 			fn ()();
 		}
 	} catch (luabridge::LuaException const& e) {
+#ifndef NDEBUG
 		cerr << "LuaException:" << e.what () << endl;
+#endif
+		PBD::warning << "LuaException: " << e.what () << endmsg;
 	} catch (...) {
 		display_insufficient_ports_message ();
 	}

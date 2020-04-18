@@ -1461,7 +1461,10 @@ LuaInstance::set_state (const XMLNode& node)
 			try {
 				(*_lua_load)(std::string ((const char*)buf, size));
 			} catch (luabridge::LuaException const& e) {
+#ifndef NDEBUG
 				cerr << "LuaException:" << e.what () << endl;
+#endif
+				PBD::warning << "LuaException: " << e.what () << endmsg;
 			} catch (...) { }
 			for (int i = 0; i < MAX_LUA_ACTION_SCRIPTS; ++i) {
 				std::string name;
@@ -1482,7 +1485,10 @@ LuaInstance::set_state (const XMLNode& node)
 				p->drop_callback.connect (_slotcon, MISSING_INVALIDATOR, boost::bind (&LuaInstance::unregister_lua_slot, this, p->id()), gui_context());
 				SlotChanged (p->id(), p->name(), p->signals()); /* EMIT SIGNAL */
 			} catch (luabridge::LuaException const& e) {
+#ifndef NDEBUG
 				cerr << "LuaException:" << e.what () << endl;
+#endif
+				PBD::warning << "LuaException: " << e.what () << endmsg;
 			} catch (...) { }
 		}
 	}
@@ -1650,7 +1656,10 @@ LuaInstance::call_action (const int id)
 		(*_lua_call_action)(id + 1);
 		lua.collect_garbage_step ();
 	} catch (luabridge::LuaException const& e) {
+#ifndef NDEBUG
 		cerr << "LuaException:" << e.what () << endl;
+#endif
+		PBD::warning << "LuaException: " << e.what () << endmsg;
 	} catch (...) { }
 }
 
@@ -1667,7 +1676,10 @@ LuaInstance::render_icon (int i, cairo_t* cr, int w, int h, uint32_t clr)
 	 try {
 		 (*_lua_render_icon)(i + 1, (Cairo::Context *)&ctx, w, h, clr);
 	 } catch (luabridge::LuaException const& e) {
+#ifndef NDEBUG
 		 cerr << "LuaException:" << e.what () << endl;
+#endif
+		 PBD::warning << "LuaException: " << e.what () << endmsg;
 	 } catch (...) { }
 }
 
@@ -1692,7 +1704,10 @@ LuaInstance::set_lua_action (
 		(*_lua_add_action)(id + 1, name, script, bytecode, iconfunc, tbl_arg);
 		ActionChanged (id, name); /* EMIT SIGNAL */
 	} catch (luabridge::LuaException const& e) {
+#ifndef NDEBUG
 		cerr << "LuaException:" << e.what () << endl;
+#endif
+		PBD::warning << "LuaException: " << e.what () << endmsg;
 		return false;
 	} catch (...) {
 		return false;
@@ -1707,7 +1722,10 @@ LuaInstance::remove_lua_action (const int id)
 	try {
 		(*_lua_del_action)(id + 1);
 	} catch (luabridge::LuaException const& e) {
+#ifndef NDEBUG
 		cerr << "LuaException:" << e.what () << endl;
+#endif
+		PBD::warning << "LuaException: " << e.what () << endmsg;
 		return false;
 	} catch (...) {
 		return false;
@@ -1731,7 +1749,10 @@ LuaInstance::lua_action_name (const int id, std::string& rv)
 		}
 		return true;
 	} catch (luabridge::LuaException const& e) {
+#ifndef NDEBUG
 		cerr << "LuaException:" << e.what () << endl;
+#endif
+		PBD::warning << "LuaException: " << e.what () << endmsg;
 	} catch (...) { }
 	return false;
 }
@@ -1761,7 +1782,10 @@ LuaInstance::lua_action_has_icon (const int id)
 			return ref["icon"].cast<bool>();
 		}
 	} catch (luabridge::LuaException const& e) {
+#ifndef NDEBUG
 		cerr << "LuaException:" << e.what () << endl;
+#endif
+		PBD::warning << "LuaException: " << e.what () << endmsg;
 	} catch (...) { }
 	return false;
 }
@@ -1796,7 +1820,10 @@ LuaInstance::lua_action (const int id, std::string& name, std::string& script, L
 		LuaScriptParams::ref_to_params (args, &rargs);
 		return true;
 	} catch (luabridge::LuaException const& e) {
+#ifndef NDEBUG
 		cerr << "LuaException:" << e.what () << endl;
+#endif
+		PBD::warning << "LuaException: " << e.what () << endmsg;
 	} catch (...) { }
 	return false;
 }
@@ -1819,7 +1846,10 @@ LuaInstance::register_lua_slot (const std::string& name, const std::string& scri
 			ah = signals();
 		}
 	} catch (luabridge::LuaException const& e) {
+#ifndef NDEBUG
 		cerr << "LuaException:" << e.what () << endl;
+#endif
+		PBD::warning << "LuaException: " << e.what () << endmsg;
 	} catch (...) { }
 
 	if (ah.none ()) {
@@ -1837,7 +1867,10 @@ LuaInstance::register_lua_slot (const std::string& name, const std::string& scri
 		set_dirty ();
 		return true;
 	} catch (luabridge::LuaException const& e) {
+#ifndef NDEBUG
 		cerr << "LuaException:" << e.what () << endl;
+#endif
+		PBD::warning << "LuaException: " << e.what () << endmsg;
 	} catch (...) { }
 	return false;
 }
@@ -1926,7 +1959,10 @@ LuaCallback::LuaCallback (Session *s,
 		const std::string& bytecode = LuaScripting::get_factory_bytecode (script);
 		(*_lua_add)(name, script, bytecode, tbl_arg);
 	} catch (luabridge::LuaException const& e) {
+#ifndef NDEBUG
 		cerr << "LuaException:" << e.what () << endl;
+#endif
+		PBD::warning << "LuaException: " << e.what () << endmsg;
 		throw failed_constructor ();
 	} catch (...) {
 		throw failed_constructor ();
@@ -1967,7 +2003,10 @@ LuaCallback::LuaCallback (Session *s, XMLNode & node)
 	try {
 		(*_lua_load)(std::string ((const char*)buf, size));
 	} catch (luabridge::LuaException const& e) {
+#ifndef NDEBUG
 		cerr << "LuaException:" << e.what () << endl;
+#endif
+		PBD::warning << "LuaException: " << e.what () << endmsg;
 	} catch (...) { }
 	g_free (buf);
 
@@ -2179,7 +2218,10 @@ LuaCallback::lua_slot (std::string& name, std::string& script, ActionHook& ah, A
 		LuaScriptParams::ref_to_params (args, &rargs);
 		return true;
 	} catch (luabridge::LuaException const& e) {
+#ifndef NDEBUG
 		cerr << "LuaException:" << e.what () << endl;
+#endif
+		PBD::warning << "LuaException: " << e.what () << endmsg;
 		return false;
 	} catch (...) { }
 	return false;
