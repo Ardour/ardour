@@ -28,6 +28,9 @@ public:
 	    : SurfaceComponent (surface){};
 	virtual ~ArdourGlobals (){};
 
+	bool transport_roll () const;
+	void set_transport_roll (bool);
+
 	double tempo () const;
 	void   set_tempo (double);
 };

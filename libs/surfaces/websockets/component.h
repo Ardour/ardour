@@ -19,6 +19,8 @@
 #ifndef _ardour_surface_websockets_component_h_
 #define _ardour_surface_websockets_component_h_
 
+#include "control_protocol/basic_ui.h"
+
 #include <glibmm.h>
 
 #include "ardour/session.h"
@@ -51,6 +53,7 @@ public:
 		return 0;
 	}
 
+	BasicUI&                     basic_ui () const;
 	PBD::EventLoop*              event_loop () const;
 	Glib::RefPtr<Glib::MainLoop> main_loop () const;
 	ARDOUR::Session&             session () const;

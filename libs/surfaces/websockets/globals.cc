@@ -22,6 +22,21 @@
 
 using namespace ARDOUR;
 
+bool
+ArdourGlobals::transport_roll () const
+{
+	return static_cast<bool>(basic_ui ().transport_rolling ());
+}
+
+void
+ArdourGlobals::set_transport_roll (bool value)
+{
+	if ((value && !transport_roll ()) || (!value && transport_roll ())) {
+		// this call is equivalent to hitting the spacebar
+		basic_ui ().toggle_roll ();
+	}
+}
+
 double
 ArdourGlobals::tempo () const
 {

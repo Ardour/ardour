@@ -29,6 +29,20 @@
 
 using namespace ARDOUR;
 
+struct TransportObserver {
+	void operator() (ArdourFeedback* p)
+	{
+		p->update_all (Node::transport_roll, p->globals ().transport_roll ());
+	}
+};
+
+struct RecordStateObserver {
+	void operator() (ArdourFeedback* p)
+	{
+		// TO DO
+	}
+};
+
 struct TempoObserver {
 	void operator() (ArdourFeedback* p)
 	{
@@ -162,8 +176,13 @@ ArdourFeedback::poll () const
 void
 ArdourFeedback::observe_globals ()
 {
-	session ().tempo_map ().PropertyChanged.connect (_signal_connections, MISSING_INVALIDATOR,
-	                                                 boost::bind<void> (TempoObserver (), this), event_loop ());
+	ARDOUR::Session& sess = session ();
+	sess.TransportStateChange.connect (_signal_connections, MISSING_INVALIDATOR,
+	                                   boost::bind<void> (TransportObserver (), this), event_loop ());
+	sess.RecordStateChanged.connect (_signal_connections, MISSING_INVALIDATOR,
+	                                 boost::bind<void> (RecordStateObserver (), this), event_loop ());
+	sess.tempo_map ().PropertyChanged.connect (_signal_connections, MISSING_INVALIDATOR,
+	                                 boost::bind<void> (TempoObserver (), this), event_loop ());
 }
 
 void
