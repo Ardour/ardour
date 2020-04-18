@@ -39,7 +39,7 @@ struct TransportObserver {
 struct RecordStateObserver {
 	void operator() (ArdourFeedback* p)
 	{
-		// TO DO
+		p->update_all (Node::record_state, p->globals ().record_state ());
 	}
 };
 

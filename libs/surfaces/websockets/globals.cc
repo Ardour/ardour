@@ -37,6 +37,20 @@ ArdourGlobals::set_transport_roll (bool value)
 	}
 }
 
+bool
+ArdourGlobals::record_state () const
+{
+	return static_cast<bool>(session ().get_record_enabled ());
+}
+
+void
+ArdourGlobals::set_record_state (bool value)
+{
+	if ((value && !record_state ()) || (!value && record_state ())) {
+		basic_ui ().rec_enable_toggle ();
+	}
+}
+
 double
 ArdourGlobals::tempo () const
 {

@@ -31,6 +31,9 @@ public:
 	bool transport_roll () const;
 	void set_transport_roll (bool);
 
+	bool record_state () const;
+	void set_record_state (bool);
+
 	double tempo () const;
 	void   set_tempo (double);
 };

@@ -54,6 +54,7 @@ void
 WebsocketsDispatcher::update_all_nodes (Client client)
 {
 	update (client, Node::transport_roll, globals ().transport_roll ());
+	update (client, Node::record_state, globals ().record_state ());
 	update (client, Node::tempo, globals ().tempo ());
 
 	for (uint32_t strip_n = 0; strip_n < strips ().strip_count (); ++strip_n) {
