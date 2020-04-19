@@ -296,6 +296,7 @@ FoldbackStrip::FoldbackStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Rou
 	, RouteUI (sess)
 	, _mixer(mx)
 	, _mixer_owned (true)
+	, _showing_sends (false)
 	, _width (80)
 	, _pr_selection ()
 	, panners (sess)
