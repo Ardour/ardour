@@ -99,6 +99,7 @@ ArdourDropdown::set_active (std::string const& text)
 		}
 	}
 	set_text (text);
+	StateChanged (); /* EMIT SIGNAL */
 }
 
 bool
