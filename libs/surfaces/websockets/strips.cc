@@ -201,6 +201,9 @@ ArdourStrips::strip_plugin_insert (uint32_t strip_n, uint32_t plugin_n) const
 {
 	boost::shared_ptr<Stripable> strip     = nth_strip (strip_n);
 	boost::shared_ptr<Route>     route     = boost::dynamic_pointer_cast<Route> (strip);
+	if (!route) {
+		return boost::shared_ptr<PluginInsert> ();
+	}
 	boost::shared_ptr<Processor> processor = route->nth_plugin (plugin_n);
 
 	if (processor) {
