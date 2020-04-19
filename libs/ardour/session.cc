@@ -1140,12 +1140,7 @@ Session::add_monitor_section ()
 	ProcessorChangeBlocker  pcb (this, false /* XXX */);
 
 	for (RouteList::iterator x = rls->begin(); x != rls->end(); ++x) {
-
-		if ((*x)->is_monitor()) {
-			/* relax */
-		} else if ((*x)->is_master()) {
-			/* relax */
-		} else {
+		if ((*x)->can_solo ()) {
 			(*x)->enable_monitor_send ();
 		}
 	}
@@ -1265,12 +1260,7 @@ Session::reset_monitor_section ()
 	ProcessorChangeBlocker pcb (this, false);
 
 	for (RouteList::iterator x = rls->begin(); x != rls->end(); ++x) {
-
-		if ((*x)->is_monitor()) {
-			/* relax */
-		} else if ((*x)->is_master()) {
-			/* relax */
-		} else {
+		if ((*x)->can_solo ()) {
 			(*x)->enable_monitor_send ();
 		}
 	}
@@ -3284,11 +3274,7 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 		Glib::Threads::Mutex::Lock lm (_engine.process_lock());
 
 		for (RouteList::iterator x = new_routes.begin(); x != new_routes.end(); ++x) {
-			if ((*x)->is_monitor()) {
-				/* relax */
-			} else if ((*x)->is_master()) {
-				/* relax */
-			} else {
+			if ((*x)->can_solo ()) {
 				(*x)->enable_monitor_send ();
 			}
 		}
