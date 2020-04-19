@@ -180,7 +180,7 @@ public:
 	void push_solo_upstream (int32_t delta);
 	void push_solo_isolate_upstream (int32_t delta);
 	bool can_solo () const {
-		return !(is_master() || is_monitor() || is_auditioner());
+		return !(is_master() || is_monitor() || is_auditioner() || is_foldbackbus());
 	}
 	bool is_safe () const {
 		return _solo_safe_control->get_value();
