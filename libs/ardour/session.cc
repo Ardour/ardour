@@ -419,7 +419,9 @@ Session::Session (AudioEngine &eng,
 		}
 	}
 
-	store_recent_sessions (_name, _path);
+	if (!unnamed) {
+		store_recent_sessions (_name, _path);
+	}
 
 	bool was_dirty = dirty();
 	unset_dirty ();
