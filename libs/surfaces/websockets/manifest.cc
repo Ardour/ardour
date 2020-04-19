@@ -92,7 +92,7 @@ SurfaceManifest::exists_at_path (std::string path)
 	return Glib::file_test (xml_path, Glib::FILE_TEST_EXISTS);
 }
 
-/* adapted from https://stackoverflow.com/questions/10789740/passing-stdstring-by-value-or-reference
+/* adapted from https://stackoverflow.com/questions/7724448/simple-json-string-escape-for-c
    CC BY-SA 4.0 license */
 std::string
 SurfaceManifest::escape_json (const std::string &s) {
