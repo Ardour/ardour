@@ -76,6 +76,12 @@ h2 {
 	list-style-type: none;
 }
 
+@media screen and (max-width: 320px) {
+	.surface-list > ul {
+        padding: 0;
+    }
+}
+
 .surface-list > ul > li {
 	margin: 4ex 0;
 }
@@ -89,4 +95,5 @@ h2 {
 	font-family: Monaco, monospace;
 	font-size: 0.9em;
 	color: #444;
+    word-wrap: break-word;
 }
