@@ -356,9 +356,10 @@ PatchChangeWidget::refill_banks ()
 		std::string n = string_compose (_("Pgm-%1"), (int)(pgm +1));
 		_program_btn[pgm].set_text (n);
 		if (shade) {
-			_program_btn[pgm].set_name (X_("patch change dim button"));
+			_program_btn[pgm].set_name (X_("patch change button unnamed"));
 		} else {
 			_program_btn[pgm].set_name (X_("patch change button"));
+			continue;
 		}
 		set_tooltip (_program_btn[pgm], n);
 	}
