@@ -851,6 +851,11 @@ ARDOUR_UI::save_session_as ()
 		return;
 	}
 
+	if (_session->unnamed()) {
+		save_state ("", false);
+		return;
+	}
+
 	if (_session->dirty()) {
 		vector<string> actions;
 		actions.push_back (_("Abort save-as"));
