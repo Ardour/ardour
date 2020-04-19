@@ -14,6 +14,10 @@ button {
     background-position: center;
 }
 
+button::-moz-focus-inner {
+    border: 0;
+}
+
 #main {
     position: fixed;
     height: 100%;
