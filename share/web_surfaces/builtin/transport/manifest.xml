@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <WebSurface>
   <Name value="Transport"/>
-  <Description value="Provides basic transport control (under construction)"/>
+  <Description value="Provides basic transport control"/>
   <Version value="0.1.0"/>
 </WebSurface>

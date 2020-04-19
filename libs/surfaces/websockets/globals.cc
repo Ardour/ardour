@@ -49,7 +49,7 @@ ArdourGlobals::position_time () const
 bool
 ArdourGlobals::transport_roll () const
 {
-	return static_cast<bool>(basic_ui ().transport_rolling ());
+	return basic_ui ().transport_rolling ();
 }
 
 void
@@ -57,14 +57,14 @@ ArdourGlobals::set_transport_roll (bool value)
 {
 	if ((value && !transport_roll ()) || (!value && transport_roll ())) {
 		// this call is equivalent to hitting the spacebar
-		basic_ui ().toggle_roll ();
+		basic_ui ().toggle_roll (false);
 	}
 }
 
 bool
 ArdourGlobals::record_state () const
 {
-	return static_cast<bool>(session ().get_record_enabled ());
+	return session ().get_record_enabled ();
 }
 
 void

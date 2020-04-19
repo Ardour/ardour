@@ -1,0 +1,97 @@
+body {
+    margin: 0;
+    background: #000;
+    color: rgb(248,248,242);
+    font-family: Helvetica, Arial, sans-serif;
+}
+
+button {
+    outline: none;
+    border: none;
+    background: none;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+#main {
+    position: fixed;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgb(62,61,61);
+}
+
+#ui {
+    display: flex;
+    flex-direction: column;
+    width: 768px;
+    height: 384px;
+    max-width: 100%;
+    max-height: 100%;
+    background: rgba(0,0,0,0.1);
+    border-radius: 4px;
+    cursor: default;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
+}
+
+#time {
+    display: flex;
+    flex: 1;
+    justify-content: center;
+    align-items: center;
+    font-family: monospace;
+    font-size: 64px;
+}
+
+@media screen and (max-width: 320px) {
+    #time {
+        font-size: 32px;
+    }
+}
+
+#buttons {
+    display: flex;
+    flex: 2;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+#buttons > button {
+    height: 148px;
+    width: 148px;
+    max-height: 100%;
+    max-width: 100%;
+    border: solid 16px transparent;
+}
+
+#fullscreen {
+    position: fixed;
+    top: 16px;
+    right: 12px;
+    width: 24px;
+    height: 24px;
+    opacity: 0.5;
+    background-image: url('img/expand.svg');
+}
+
+.pulse {
+    animation: pulse 1s infinite ease-out;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
