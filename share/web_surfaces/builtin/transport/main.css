@@ -31,8 +31,8 @@ button::-moz-focus-inner {
 #ui {
     display: flex;
     flex-direction: column;
-    width: 768px;
-    height: 384px;
+    width: 800px;
+    height: 480px;
     max-width: 100%;
     max-height: 100%;
     background: rgba(0,0,0,0.1);
@@ -49,7 +49,7 @@ button::-moz-focus-inner {
     flex: 1;
     justify-content: center;
     align-items: center;
-    font-family: monospace;
+    font-family: Menlo, monospace;
     font-size: 64px;
 }
 
@@ -67,11 +67,11 @@ button::-moz-focus-inner {
 }
 
 #buttons > button {
-    height: 148px;
-    width: 148px;
+    height: 176px;
+    width: 176px;
     max-height: 100%;
     max-width: 100%;
-    border: solid 16px transparent;
+    border: solid 24px transparent;
 }
 
 #fullscreen {
