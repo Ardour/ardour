@@ -17,6 +17,8 @@
  */
 
 #include <bitset>
+#include <map>
+
 #include <gtkmm/frame.h>
 
 #include "pbd/unwind.h"
@@ -213,12 +215,27 @@ PatchChangeWidget::select_channel (uint8_t chn)
 	refill_banks ();
 }
 
+
+/* allow to sort bank-name by use-count */
+template <typename A, typename B>
+static std::multimap<B, A> flip_map (std::map<A, B> const& src)
+{
+	std::multimap<B,A> dst;
+
+	for (typename std::map<A, B>::const_iterator it = src.begin(); it != src.end(); ++it) {
+		dst.insert (std::pair<B, A> (it->second, it->first));
+	}
+
+	return dst;
+}
+
 void
 PatchChangeWidget::refill_banks ()
 {
 	cancel_audition ();
 	using namespace Menu_Helpers;
 	using namespace Gtkmm2ext;
+	using namespace MIDI::Name;
 
 	_current_patch_bank.reset ();
 	_bank_select.clear_items ();
@@ -231,35 +248,89 @@ PatchChangeWidget::refill_banks ()
 		_bank_lsb_spin.set_value (b & 127);
 	}
 
-	boost::shared_ptr<MIDI::Name::ChannelNameSet> cns = _info.get_patches (_channel);
+	typedef std::map<std::string, unsigned int> BankName;
+	typedef std::map<uint16_t, BankName> BankSet;
+
+	bool bank_set = false;
+	std::bitset<128> unset_notes;
+	BankSet generic_banks;
+
+	unset_notes.set ();
+
+	boost::shared_ptr<ChannelNameSet> cns = _info.get_patches (_channel);
 	if (cns) {
-		for (MIDI::Name::ChannelNameSet::PatchBanks::const_iterator i = cns->patch_banks().begin(); i != cns->patch_banks().end(); ++i) {
-			std::string n = (*i)->name ();
-			if ((*i)->number () == UINT16_MAX) {
+		const ChannelNameSet::PatchBanks& patch_banks = cns->patch_banks ();
+		for (ChannelNameSet::PatchBanks::const_iterator bank = patch_banks.begin (); bank != patch_banks.end (); ++bank) {
+			if ((*bank)->number () != UINT16_MAX) {
 				continue;
 			}
-			_bank_select.AddMenuElem (MenuElemNoMnemonic (n, sigc::bind (sigc::mem_fun (*this, &PatchChangeWidget::select_bank), (*i)->number ())));
-			if ((*i)->number () == b) {
-				_current_patch_bank = *i;
+			/* no shared MIDI bank for this PatchBanks,
+			 * iterate over all programs in the patchbank, collect  "<ControlChange>"
+			 */
+			const PatchNameList& patches = (*bank)->patch_name_list ();
+			for (PatchNameList::const_iterator patch = patches.begin (); patch != patches.end (); ++patch) {
+
+				BankName& bn (generic_banks[(*patch)->bank_number ()]);
+				++bn[(*bank)->name ()];
+
+				if ((*patch)->bank_number () != b) {
+					continue;
+				}
+				const std::string n = (*patch)->name ();
+				MIDI::Name::PatchPrimaryKey const& key = (*patch)->patch_primary_key ();
+
+				const uint8_t pgm = key.program();
+				_program_btn[pgm].set_text (n);
+				set_tooltip (_program_btn[pgm], string_compose (_("%1 (Pgm-%2)"),
+							Gtkmm2ext::markup_escape_text (n), (int)(pgm +1)));
+				unset_notes.reset (pgm);
+			}
+		}
+
+		for (ChannelNameSet::PatchBanks::const_iterator bank = patch_banks.begin (); bank != patch_banks.end (); ++bank) {
+			if ((*bank)->number () == UINT16_MAX) {
+				continue;
+			}
+			generic_banks.erase ((*bank)->number ());
+			std::string n = (*bank)->name ();
+			_bank_select.AddMenuElem (MenuElemNoMnemonic (n, sigc::bind (sigc::mem_fun (*this, &PatchChangeWidget::select_bank), (*bank)->number ())));
+			if ((*bank)->number () == b) {
+				_current_patch_bank = *bank;
 				_bank_select.set_text (n);
+			}
+		}
+
+		for (BankSet::const_iterator i = generic_banks.begin(); i != generic_banks.end(); ++i) {
+			std::string n = string_compose (_("Bank %1"), (i->first) + 1);
+#if 1
+			typedef std::multimap <unsigned int, std::string> BankByCnt;
+			BankByCnt bc (flip_map (i->second));
+			unsigned int cnt = 0; // pick top three
+			for (BankByCnt::reverse_iterator j = bc.rbegin(); j != bc.rend() && cnt < 3; ++j, ++cnt) {
+				n += " (" + j->second + ")";
+				if (n.size () > 64) {
+					break;
+				}
+			}
+			if (bc.size () > cnt) {
+				n += " (...)";
+			}
+#endif
+			_bank_select.AddMenuElem (MenuElemNoMnemonic (n, sigc::bind (sigc::mem_fun (*this, &PatchChangeWidget::select_bank), i->first)));
+			if (i->first == b) {
+				_bank_select.set_text (n);
+				bank_set = true;
 			}
 		}
 	}
 
-	if (!_current_patch_bank) {
-		std::string n = string_compose (_("Bank %1"), b);
+	if (!_current_patch_bank && !bank_set) {
+		std::string n = string_compose (_("Bank %1"), b + 1);
 		_bank_select.AddMenuElem (MenuElemNoMnemonic (n, sigc::bind (sigc::mem_fun (*this, &PatchChangeWidget::select_bank), b)));
 		_bank_select.set_text (n);
 	}
 
-	refill_program_list ();
-}
-
-void
-PatchChangeWidget::refill_program_list ()
-{
-	std::bitset<128> unset_notes;
-	unset_notes.set ();
+	/* refill_program_list */
 
 	if (_current_patch_bank) {
 		const MIDI::Name::PatchNameList& patches = _current_patch_bank->patch_name_list ();
@@ -275,6 +346,8 @@ PatchChangeWidget::refill_program_list ()
 		}
 	}
 
+	bool shade = unset_notes.count () != 128;
+
 	for (uint8_t pgm = 0; pgm < 128; ++pgm) {
 		if (!unset_notes.test (pgm)) {
 			_program_btn[pgm].set_name (X_("patch change button"));
@@ -282,7 +355,11 @@ PatchChangeWidget::refill_program_list ()
 		}
 		std::string n = string_compose (_("Pgm-%1"), (int)(pgm +1));
 		_program_btn[pgm].set_text (n);
-		_program_btn[pgm].set_name (X_("patch change dim button"));
+		if (shade) {
+			_program_btn[pgm].set_name (X_("patch change dim button"));
+		} else {
+			_program_btn[pgm].set_name (X_("patch change button"));
+		}
 		set_tooltip (_program_btn[pgm], n);
 	}
 

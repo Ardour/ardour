@@ -73,7 +73,6 @@ private:
 	void bankpatch_changed (uint8_t);
 
 	void refill_banks ();
-	void refill_program_list ();
 
 	void instrument_info_changed ();
 	void processors_changed ();
