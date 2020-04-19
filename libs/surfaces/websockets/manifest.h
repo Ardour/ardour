@@ -37,6 +37,7 @@ public:
 	std::string to_json ();
 
 	static bool exists_at_path (std::string);
+	static std::string escape_json (const std::string&);
 
 private:
 	bool _valid;
