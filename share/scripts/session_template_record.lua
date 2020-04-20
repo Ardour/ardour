@@ -48,7 +48,7 @@ function factory () return function ()
 	end
 
 	-- create tracks
-	local tl = Session:new_audio_track (1, 2, nil, rv['tracks'], "",  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
+	local tl = Session:new_audio_track (1, 2, nil, rv['tracks'], "",  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal, true)
 	-- and optionally record-arm them
 	if rv['recarm'] then
 		for track in tl:iter() do

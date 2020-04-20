@@ -23,7 +23,7 @@ function factory () return function ()
 		while names[i] do
 			local tl = Session:new_audio_track (1, 2, nil, 1, names[i],
 			                                    ARDOUR.PresentationInfo.max_order,
-			                                    ARDOUR.TrackMode.Normal)
+			                                    ARDOUR.TrackMode.Normal, true)
 
 			for track in tl:iter () do
 				track:presentation_info_ptr ():set_color (color)

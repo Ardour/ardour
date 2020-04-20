@@ -30,7 +30,7 @@ function factory (params) return function ()
 		if channels ~= 2 then goto next end
 
 		-- create 2 new tracks (using the name of the original track)(
-		local newtracks = Session:new_audio_track (2, 2, nil, 2, t:name(),  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
+		local newtracks = Session:new_audio_track (2, 2, nil, 2, t:name(),  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal, true)
 		assert (newtracks:size() == 2)
 
 		for r in playlist:region_list ():iter () do

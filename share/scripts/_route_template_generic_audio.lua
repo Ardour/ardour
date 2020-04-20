@@ -66,7 +66,7 @@ function factory (p)
 				chan_out = channels;
 			end
 
-			local tl = Session:new_audio_track (channels, chan_out, group, how_many, name, insert_at, mode)
+			local tl = Session:new_audio_track (channels, chan_out, group, how_many, name, insert_at, mode, true)
 
 			if strict_io then
 				for t in tl:iter() do
