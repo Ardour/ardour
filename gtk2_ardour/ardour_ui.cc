@@ -1971,57 +1971,49 @@ ARDOUR_UI::transport_rec_count_in ()
 }
 
 void
-ARDOUR_UI::transport_rewind (int option)
-{
-	float current_transport_speed;
-
-	if (_session) {
-		current_transport_speed = _session->transport_speed();
-
-		if (current_transport_speed >= 0.0f) {
-			switch (option) {
-			case 0:
-				_session->request_transport_speed (-1.0f);
-				break;
-			case 1:
-				_session->request_transport_speed (-4.0f);
-				break;
-			case -1:
-				_session->request_transport_speed (-0.5f);
-				break;
-			}
-		} else {
-			/* speed up */
-			_session->request_transport_speed (current_transport_speed * 1.5f);
-		}
-	}
-}
-
-void
-ARDOUR_UI::transport_forward (int option)
+ARDOUR_UI::transport_ffwd_rewind (int option, int dir)
 {
 	if (!_session) {
 		return;
 	}
 
-	float current_transport_speed = _session->transport_speed();
+	/* engine speed is always positive, so multiply by transport
+	 * (-1, 0, 1) to get directional value
+	 */
 
-	if (current_transport_speed <= 0.0f) {
+	const float current_transport_speed = _session->engine_speed () * _session->transport_speed();
+	float target_speed;
+
+	if ((dir < 0 && current_transport_speed >= 0.0f) || (dir > 0 && current_transport_speed <= 0.0f)) {
 		switch (option) {
 		case 0:
-			_session->request_transport_speed (1.0f);
+			target_speed = dir * 1.0f;
 			break;
 		case 1:
-			_session->request_transport_speed (4.0f);
+			target_speed = dir * 4.0f;
 			break;
 		case -1:
-			_session->request_transport_speed (0.5f);
+			target_speed = dir * 0.5f;
 			break;
 		}
 	} else {
 		/* speed up */
-		_session->request_transport_speed (current_transport_speed * 1.5f);
+		target_speed = current_transport_speed * 1.5f;
 	}
+
+	_session->request_transport_speed (target_speed);
+}
+
+void
+ARDOUR_UI::transport_rewind (int option)
+{
+	transport_ffwd_rewind (option, -1);
+}
+
+void
+ARDOUR_UI::transport_forward (int option)
+{
+	transport_ffwd_rewind (option, 1);
 }
 
 void
