@@ -420,8 +420,8 @@ for backend in jack alsa dummy wavesaudio pulseaudio; do
 done
 
 # VAMP plugins that we use
-cp $BUILD_ROOT/libs/vamp-plugins/libardourvampplugins.so* $Libraries
-cp $BUILD_ROOT/libs/vamp-pyin/libardourvamppyin.so* $Libraries
+cp $BUILD_ROOT/libs/vamp-plugins/libardourvampplugins.so $Libraries
+cp $BUILD_ROOT/libs/vamp-pyin/libardourvamppyin.so $Libraries
 
 # Suil modules (new dir 'build-stack')
 if test -d $GTKSTACK_ROOT/lib/suil-0/ ; then
