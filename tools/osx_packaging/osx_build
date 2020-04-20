@@ -145,6 +145,7 @@ ExportFormats=$Shared/export
 Templates=$Shared/templates
 PatchFiles=$Shared/patchfiles
 LuaScripts=$Shared/scripts
+WebSurfaces=$Shared/web_surfaces
 MackieControl=$Shared/mcp
 OSC=$Shared/osc
 Themes=$Shared/themes
@@ -376,6 +377,10 @@ for x in $BUILD_ROOT/../share/scripts/*.lua ; do
 	fi
 	cp "$x" $LuaScripts
 done
+
+# recusively copy web-surface html/js
+cp -a $BUILD_ROOT/../share/scripts/web_surfaces $WebSurfaces
+rm $WebSurfaces/wscript
 
 # MackieControl data
 # got to be careful with names here
