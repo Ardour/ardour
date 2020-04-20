@@ -68,8 +68,8 @@ button::-moz-focus-inner {
 }
 
 #buttons > button {
-    height: 160px;
-    width: 160px;
+    height: 128px;
+    width: 128px;
     max-height: 100%;
     max-width: 100%;
     border: solid 16px transparent;
@@ -110,10 +110,5 @@ button::-moz-focus-inner {
 
     #time {
         font-size: 7vw;
-    }
-
-    #buttons > button {
-        height: 128px;
-        width: 128px;
     }
 }
