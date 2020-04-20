@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: libardour 5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-18 10:29+0200\n"
-"PO-Revision-Date: 2020-04-13 16:43+0200\n"
+"PO-Revision-Date: 2020-04-20 04:38+0200\n"
 "Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>\n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -3684,7 +3684,7 @@ msgstr "Plusieurs définitions de Tempo trouvées à %1"
 
 #: tempo_map_importer.cc:52
 msgid "Tempo map"
-msgstr "Table de tempo"
+msgstr "Table de tempo "
 
 #: tempo_map_importer.cc:60
 msgid "Tempo Map"
@@ -3821,15 +3821,15 @@ msgstr ""
 
 #: utils.cc:421 utils.cc:438
 msgid "Slide"
-msgstr "Glisser"
+msgstr "Région Sélectionnée"
 
 #: utils.cc:423 utils.cc:444
 msgid "Ripple"
-msgstr ""
+msgstr "Région sélectionnée + les suivantes"
 
 #: utils.cc:425 utils.cc:441
 msgid "Lock"
-msgstr "Verrouiller"
+msgstr "Pas de déplacement horizontal"
 
 #: utils.cc:428
 msgid "programming error: unknown edit mode string \"%1\""
