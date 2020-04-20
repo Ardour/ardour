@@ -26,11 +26,11 @@ import { MessageChannel } from './channel.js';
 
 class BaseArdourClient {
 
-	constructor () {
+	constructor (host) {
 		this._callbacks = [];
 		this._connected = false;
 		this._pendingRequest = null;
-		this._channel = new MessageChannel(location.host);
+		this._channel = new MessageChannel(host || location.host);
 
 		this._channel.onError = (error) => {
 			this._fireCallbacks('error', error);
