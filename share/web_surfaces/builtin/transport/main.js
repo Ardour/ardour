@@ -28,13 +28,13 @@ import { ArdourClient } from '/shared/ardour.js';
         fullscreen: document.getElementById('fullscreen')
     };
 
-    const ardour = new ArdourClient(location.host);
+    const ardour = new ArdourClient();
 
     let _rolling = false;
     let _record = false;
 
     function main () {
-        addDomEventListeners ();
+        addDomEventListeners();
 
         ardour.addCallbacks({
             onError: console.log,
@@ -51,15 +51,15 @@ import { ArdourClient } from '/shared/ardour.js';
         const touchOrClick = ('ontouchstart' in document.documentElement) ? 'touchstart' : 'click';
 
         const roll = () => {
-            setRolling (!_rolling);
-            ardour.setTransportRoll (_rolling);
+            setRolling(!_rolling);
+            ardour.setTransportRoll(_rolling);
         };
 
         dom.roll.addEventListener(touchOrClick, roll);
 
         const record = () => {
-            setRecord (!_record);
-            ardour.setRecordState (_record);
+            setRecord(!_record);
+            ardour.setRecordState(_record);
         };
 
         dom.record.addEventListener(touchOrClick, record);
