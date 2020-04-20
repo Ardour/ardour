@@ -135,6 +135,7 @@ class LIBARDOUR_API Processor : public SessionObject, public Automatable, public
 	int set_state (const XMLNode&, int version);
 
 	virtual void set_pre_fader (bool);
+	virtual bool get_pre_fader () const { return _pre_fader; }
 
 	PBD::Signal0<void>                     ActiveChanged;
 	PBD::Signal0<void>                     BypassableChanged;

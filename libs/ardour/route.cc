@@ -4976,7 +4976,11 @@ Route::setup_invisible_processors ()
 	/* Foldback Sends */
 
 	for (ProcessorList::iterator i = foldback_sends.begin(); i != foldback_sends.end(); ++i) {
-		new_processors.insert (amp, (*i));
+		if ((*i)->get_pre_fader ()) {
+			new_processors.insert (amp, (*i));
+		} else {
+			new_processors.insert (main, (*i));
+		}
 	}
 
 	/* MONITOR SEND */
