@@ -357,8 +357,11 @@ float
 PeakMeter::meter_level (uint32_t n, MeterType type)
 {
 	if (g_atomic_int_get (&_reset_max)) {
-		/* max-peak implies DPM reset */
-		return minus_infinity ();
+		if (n < current_meters.n_midi () && type != MeterMaxPeak) {
+			return 0;
+		} else {
+			return minus_infinity ();
+		}
 	}
 
 	float mcptmp;
