@@ -69,21 +69,18 @@ WebsocketsServer::WebsocketsServer (ArdourSurface::ArdourWebsockets& surface)
 	memset (&_lws_mnt_root, 0, sizeof (lws_http_mount));
 	_lws_mnt_root.mountpoint       = "/";
 	_lws_mnt_root.mountpoint_len   = strlen (_lws_mnt_root.mountpoint);
-	_lws_mnt_root.origin_protocol  = LWSMPRO_FILE;
 	_lws_mnt_root.origin           = _resources.index_dir ().c_str ();
+	_lws_mnt_root.origin_protocol  = LWSMPRO_FILE;
+	_lws_mnt_root.def              = "index.html";
 	_lws_mnt_root.cache_max_age    = 3600;
 	_lws_mnt_root.cache_reusable   = 1;
 	_lws_mnt_root.cache_revalidate = 1;
 
 	/* user defined surfaces in the user config directory */
-	memset (&_lws_mnt_user, 0, sizeof (lws_http_mount));
+	memcpy (&_lws_mnt_user, &_lws_mnt_root, sizeof (lws_http_mount));
 	_lws_mnt_user.mountpoint       = "/user";
 	_lws_mnt_user.mountpoint_len   = strlen (_lws_mnt_user.mountpoint);
-	_lws_mnt_user.origin_protocol  = LWSMPRO_FILE;
 	_lws_mnt_user.origin           = _resources.user_dir ().c_str ();
-	_lws_mnt_user.cache_max_age    = 3600;
-	_lws_mnt_user.cache_reusable   = 1;
-	_lws_mnt_user.cache_revalidate = 1;
 
 	_lws_mnt_root.mount_next = &_lws_mnt_user;
 

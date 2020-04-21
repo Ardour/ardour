@@ -16,7 +16,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <iomanip>
 #include <iostream>
 #include <sstream>
 
@@ -26,6 +25,7 @@
 #include "pbd/xml++.h"
 
 #include "manifest.h"
+#include "resources.h"
 
 static const char* const manifest_filename = "manifest.xml";
 
@@ -77,9 +77,9 @@ SurfaceManifest::to_json ()
 
 	ss << "{"
 		<< "\"path\":\"" << Glib::path_get_basename (_path) << "\""
-		<< ",\"name\":\"" << escape_json (_name) << "\""
-		<< ",\"description\":\"" << escape_json (_description) << "\""
-		<< ",\"version\":\"" << escape_json (_version) << "\""
+		<< ",\"name\":\"" << ServerResources::escape_json (_name) << "\""
+		<< ",\"description\":\"" << ServerResources::escape_json (_description) << "\""
+		<< ",\"version\":\"" << ServerResources::escape_json (_version) << "\""
 		<< "}";
 
 	return ss.str ();
@@ -90,21 +90,4 @@ SurfaceManifest::exists_at_path (std::string path)
 {
 	std::string xml_path = Glib::build_filename (path, manifest_filename);
 	return Glib::file_test (xml_path, Glib::FILE_TEST_EXISTS);
-}
-
-/* adapted from https://stackoverflow.com/questions/7724448/simple-json-string-escape-for-c
-   CC BY-SA 4.0 license */
-std::string
-SurfaceManifest::escape_json (const std::string &s) {
-    std::ostringstream o;
-
-    for (std::string::const_iterator it = s.begin(); it != s.end(); ++it) {
-        if (*it == '"' || *it == '\\' || ('\x00' <= *it && *it <= '\x1f')) {
-            o << "\\u" << std::hex << std::setw (4) << std::setfill ('0') << static_cast<int>(*it);
-        } else {
-            o << *it;
-        }
-    }
-    
-    return o.str ();
 }

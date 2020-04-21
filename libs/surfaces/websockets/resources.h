@@ -30,6 +30,8 @@ class ServerResources
 {
 public:
 	ServerResources ();
+	
+	static std::string escape_json (const std::string&);
 
 	const std::string& index_dir ();
 	const std::string& builtin_dir ();

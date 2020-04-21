@@ -16,6 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 
@@ -43,6 +44,23 @@ ServerResources::ServerResources ()
     , _builtin_dir ("")
     , _user_dir ("")
 {
+}
+
+/* adapted from https://stackoverflow.com/questions/7724448/simple-json-string-escape-for-c
+   CC BY-SA 4.0 license */
+std::string
+ServerResources::escape_json (const std::string &s) {
+    std::ostringstream o;
+
+    for (std::string::const_iterator it = s.begin(); it != s.end(); ++it) {
+        if (*it == '"' || *it == '\\' || ('\x00' <= *it && *it <= '\x1f')) {
+            o << "\\u" << std::hex << std::setw (4) << std::setfill ('0') << static_cast<int>(*it);
+        } else {
+            o << *it;
+        }
+    }
+    
+    return o.str ();
 }
 
 const std::string&
@@ -84,8 +102,8 @@ ServerResources::scan ()
 	SurfaceManifestVector builtin = read_manifests (builtin_dir_str);
 
 	ss << "[{"
-		<< "\"filesystemPath\":\"" << builtin_dir_str << "\""
-		<< ",\"path\":\"" << builtin_dir_name << "\""
+		<< "\"filesystemPath\":\"" << escape_json (builtin_dir_str) << "\""
+		<< ",\"path\":\"" << escape_json (builtin_dir_name) << "\""
 		<< ",\"surfaces\":"
 		<< "[";
 
@@ -100,8 +118,8 @@ ServerResources::scan ()
 	SurfaceManifestVector user = read_manifests (user_dir_str);
 
 	ss << "]},{" 
-		<< "\"filesystemPath\":\"" << user_dir_str << "\""
-		<< ",\"path\":\"" << user_dir_name << "\"" 
+		<< "\"filesystemPath\":\"" << escape_json(user_dir_str) << "\""
+		<< ",\"path\":\"" << escape_json(user_dir_name) << "\"" 
 		<< ",\"surfaces\":" 
 		<< "[";
 
