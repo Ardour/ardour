@@ -62,15 +62,22 @@ WebsocketsDispatcher::update_all_nodes (Client client)
 
 	for (uint32_t strip_n = 0; strip_n < strips ().strip_count (); ++strip_n) {
 		boost::shared_ptr<Stripable> strip = strips ().nth_strip (strip_n);
-		boost::shared_ptr<Route>     route = boost::dynamic_pointer_cast<Route> (strip);
+
+		update (client, Node::strip_description, strip_n, strip->name ());
+		update (client, Node::strip_gain, strip_n, strips ().strip_gain (strip_n));
+		update (client, Node::strip_mute, strip_n, strips ().strip_mute (strip_n));
+
+		// Pan and plugins not available in VCAs
+		if ((strip->presentation_info ().flags () & ARDOUR::PresentationInfo::VCA)) {
+			continue;
+		}
+
+		boost::shared_ptr<Route> route = boost::dynamic_pointer_cast<Route> (strip);
 		if (!route) {
 			continue;
 		}
 
-		update (client, Node::strip_description, strip_n, strip->name ());
-		update (client, Node::strip_gain, strip_n, strips ().strip_gain (strip_n));
 		update (client, Node::strip_pan, strip_n, strips ().strip_pan (strip_n));
-		update (client, Node::strip_mute, strip_n, strips ().strip_mute (strip_n));
 
 		for (uint32_t plugin_n = 0;; ++plugin_n) {
 			boost::shared_ptr<PluginInsert> insert = strips ()

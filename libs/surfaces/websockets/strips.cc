@@ -199,19 +199,22 @@ ArdourStrips::plugin_param_value (boost::shared_ptr<ARDOUR::AutomationControl> c
 boost::shared_ptr<PluginInsert>
 ArdourStrips::strip_plugin_insert (uint32_t strip_n, uint32_t plugin_n) const
 {
-	boost::shared_ptr<Stripable> strip     = nth_strip (strip_n);
-	boost::shared_ptr<Route>     route     = boost::dynamic_pointer_cast<Route> (strip);
-	if (!route) {
-		return boost::shared_ptr<PluginInsert> ();
-	}
-	boost::shared_ptr<Processor> processor = route->nth_plugin (plugin_n);
+	boost::shared_ptr<Stripable> strip = nth_strip (strip_n);
 
-	if (processor) {
-		boost::shared_ptr<PluginInsert> insert =
-		    boost::static_pointer_cast<PluginInsert> (processor);
+	if ((strip->presentation_info ().flags () & ARDOUR::PresentationInfo::VCA) == 0) {
+		boost::shared_ptr<Route> route = boost::dynamic_pointer_cast<Route> (strip);
 
-		if (insert) {
-			return insert;
+		if (route) {
+			boost::shared_ptr<Processor> processor = route->nth_plugin (plugin_n);
+
+			if (processor) {
+				boost::shared_ptr<PluginInsert> insert =
+				    boost::static_pointer_cast<PluginInsert> (processor);
+
+				if (insert) {
+					return insert;
+				}
+			}
 		}
 	}
 
