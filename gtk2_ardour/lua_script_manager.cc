@@ -95,7 +95,7 @@ LuaScriptManager::LuaScriptManager ()
 	vbox->pack_end (*f, false, false);
 	vbox->show_all ();
 
-	pages.pages ().push_back (Notebook_Helpers::TabElem (*vbox, "Action Scripts"));
+	pages.pages ().push_back (Notebook_Helpers::TabElem (*vbox, _("Action Scripts")));
 
 	/* action hooks page */
 
@@ -136,7 +136,7 @@ LuaScriptManager::LuaScriptManager ()
 	vbox->pack_end (*f, false, false);
 	vbox->show_all ();
 
-	pages.pages ().push_back (Notebook_Helpers::TabElem (*vbox, "Action Hooks"));
+	pages.pages ().push_back (Notebook_Helpers::TabElem (*vbox, _("Action Hooks")));
 
 	/* session script page */
 
@@ -172,7 +172,7 @@ LuaScriptManager::LuaScriptManager ()
 	vbox->pack_end (*f, false, false);
 	vbox->show_all ();
 
-	pages.pages ().push_back (Notebook_Helpers::TabElem (*vbox, "Session Scripts"));
+	pages.pages ().push_back (Notebook_Helpers::TabElem (*vbox, _("Session Scripts")));
 
 	/* global layout */
 

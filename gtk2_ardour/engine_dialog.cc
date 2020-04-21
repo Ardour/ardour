@@ -907,11 +907,11 @@ EngineControl::update_sensitivity ()
 		start_stop_button.set_sensitive(true);
 		start_stop_button.show();
 		if (engine_running) {
-			start_stop_button.set_text("Stop");
+			start_stop_button.set_text(_("Engine|Stop"));
 			update_devices_button.set_sensitive(false);
 			use_buffered_io_button.set_sensitive(false);
 		} else {
-			start_stop_button.set_text("Start");
+			start_stop_button.set_text(_("Engine|Start"));
 			update_devices_button.set_sensitive (backend->can_request_update_devices ());
 			use_buffered_io_button.set_sensitive (backend->can_use_buffered_io ());
 		}
