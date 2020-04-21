@@ -202,6 +202,7 @@ CLASSKEYS(ARDOUR::ChanMapping);
 CLASSKEYS(ARDOUR::DSP::DspShm);
 CLASSKEYS(ARDOUR::DataType);
 CLASSKEYS(ARDOUR::FluidSynth);
+CLASSKEYS(ARDOUR::InternalSend);
 CLASSKEYS(ARDOUR::Latent);
 CLASSKEYS(ARDOUR::Location);
 CLASSKEYS(ARDOUR::LuaAPI::Vamp);
@@ -1085,6 +1086,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("nth_plugin", &Route::nth_plugin)
 		.addFunction ("nth_processor", &Route::nth_processor)
 		.addFunction ("nth_send", &Route::nth_send)
+		.addFunction ("add_foldback_send", &Route::add_foldback_send)
 		.addFunction ("add_processor_by_index", &Route::add_processor_by_index)
 		.addFunction ("remove_processor", &Route::remove_processor)
 		.addFunction ("remove_processors", &Route::remove_processors)
@@ -1419,6 +1421,7 @@ LuaBindings::common (lua_State* L)
 		.addCast<PeakMeter> ("to_peakmeter")
 		.addCast<MonitorProcessor> ("to_monitorprocessor")
 		.addCast<Send> ("to_send")
+		.addCast<InternalSend> ("to_internalsend")
 		.addCast<PolarityProcessor> ("to_polarityprocessor")
 		.addCast<DelayLine> ("to_delayline")
 #if 0 // those objects are not yet bound
@@ -1463,11 +1466,21 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.deriveWSPtrClass <Send, Delivery> ("Send")
+		.addCast<InternalSend> ("to_internalsend")
 		.addFunction ("get_delay_in", &Send::get_delay_in)
 		.addFunction ("get_delay_out", &Send::get_delay_out)
+		.addFunction ("gain_control", &Send::gain_control)
+		.addFunction ("is_foldback", &Send::is_foldback)
 		.endClass ()
 
 		.deriveWSPtrClass <InternalSend, Send> ("InternalSend")
+		.addFunction ("set_name", &InternalSend::set_name)
+		.addFunction ("display_name", &InternalSend::display_name)
+		.addFunction ("source_route", &InternalSend::source_route)
+		.addFunction ("target_route", &InternalSend::target_route)
+		.addFunction ("allow_feedback", &InternalSend::allow_feedback)
+		.addFunction ("set_allow_feedback", &InternalSend::set_allow_feedback)
+		.addFunction ("feeds", &InternalSend::feeds)
 		.endClass ()
 
 		.deriveWSPtrClass <Return, IOProcessor> ("Return")
@@ -2386,6 +2399,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("snap_name", &Session::snap_name)
 		.addFunction ("monitor_out", &Session::monitor_out)
 		.addFunction ("master_out", &Session::master_out)
+		.addFunction ("add_internal_send", (void (Session::*)(boost::shared_ptr<Route>, boost::shared_ptr<Processor>, boost::shared_ptr<Route>))&Session::add_internal_send)
 		.addFunction ("add_internal_sends", &Session::add_internal_sends)
 		.addFunction ("tempo_map", (TempoMap& (Session::*)())&Session::tempo_map)
 		.addFunction ("locations", &Session::locations)
