@@ -50,7 +50,7 @@ MissingFileSourceDialog::MissingFileSourceDialog (Session * s, list<string> cons
 	}
 
 	t << _("\nThe Regions and edits have been retained.\n"
-	       "If this is unexpected, manually loacate the files and restore them in the session folder.\n");
+	       "If this is unexpected, manually locate the files and restore them in the session folder.\n");
 
 	if (dt == DataType::MIDI) {
 		t << _("Editing the MIDI files by adding new content will re-create the file and disable this warning,\n"
