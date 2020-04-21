@@ -35,7 +35,7 @@
 	onRecordState (value) {}
 
 	// Strips
-	onStripDescription (stripId, name) {}
+	onStripDescription (stripId, name, isVca) {}
 	onStripMeter (stripId, db) {}
 	onStripGain (stripId, db) {}
 	onStripPan (stripId, value) {}

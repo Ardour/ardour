@@ -52,7 +52,7 @@ import { Switch, DiscreteSlider, ContinuousSlider, LogarithmicSlider,
         ardour.connect();
     }
 
-    function createStrip (stripId, name) {
+    function createStrip (stripId, name, isVca) {
         const domId = `strip-${stripId}`;
         if (document.getElementById(domId) != null) {
             return;
@@ -75,12 +75,14 @@ import { Switch, DiscreteSlider, ContinuousSlider, LogarithmicSlider,
         gain.appendTo(holder);
         connectWidget(gain, ANode.STRIP_GAIN, stripId);
 
-        // pan
-        holder = createElem(`<div class="strip-slider"></div>`, div); 
-        createElem(`<label>Pan</label>`, holder);
-        const pan = new StripPanSlider();
-        pan.appendTo(holder);
-        connectWidget(pan, ANode.STRIP_PAN, stripId);
+        if (!isVca) {
+            // pan
+            holder = createElem(`<div class="strip-slider"></div>`, div); 
+            createElem(`<label>Pan</label>`, holder);
+            const pan = new StripPanSlider();
+            pan.appendTo(holder);
+            connectWidget(pan, ANode.STRIP_PAN, stripId);
+        }
     }
 
     function createStripPlugin (stripId, pluginId, name) {

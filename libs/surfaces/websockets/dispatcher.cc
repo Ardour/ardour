@@ -63,12 +63,21 @@ WebsocketsDispatcher::update_all_nodes (Client client)
 	for (uint32_t strip_n = 0; strip_n < strips ().strip_count (); ++strip_n) {
 		boost::shared_ptr<Stripable> strip = strips ().nth_strip (strip_n);
 
-		update (client, Node::strip_description, strip_n, strip->name ());
+		bool is_vca = strip->presentation_info ().flags () & ARDOUR::PresentationInfo::VCA;
+
+		AddressVector strip_addr = AddressVector ();
+		strip_addr.push_back (strip_n);
+		ValueVector strip_desc = ValueVector ();
+		strip_desc.push_back (strip->name ());
+		strip_desc.push_back (is_vca);
+		
+		update (client, Node::strip_description, strip_addr, strip_desc);
+		
 		update (client, Node::strip_gain, strip_n, strips ().strip_gain (strip_n));
 		update (client, Node::strip_mute, strip_n, strips ().strip_mute (strip_n));
 
 		// Pan and plugins not available in VCAs
-		if ((strip->presentation_info ().flags () & ARDOUR::PresentationInfo::VCA)) {
+		if (is_vca) {
 			continue;
 		}
 
