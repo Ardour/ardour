@@ -87,8 +87,8 @@ class BaseArdourClient {
 
 	async _sendAndReceive (node, addr, val) {
 		return new Promise((resolve, reject) => {
-			const hash = this._send(node, addr, val).hash;
-			this._pendingRequest = {resolve: resolve, hash: hash};
+			const nodeAddrId = this._send(node, addr, val).nodeAddrId;
+			this._pendingRequest = {resolve: resolve, nodeAddrId: nodeAddrId};
 		});
 	}
 
@@ -97,7 +97,7 @@ class BaseArdourClient {
 	}
 
 	_onChannelMessage (msg) {
-		if (this._pendingRequest && (this._pendingRequest.hash == msg.hash)) {
+		if (this._pendingRequest && (this._pendingRequest.nodeAddrId == msg.nodeAddrId)) {
 			this._pendingRequest.resolve(msg.val);
 			this._pendingRequest = null;
 		} else {
