@@ -72,9 +72,11 @@ WebsocketsServer::WebsocketsServer (ArdourSurface::ArdourWebsockets& surface)
 	_lws_mnt_root.origin           = _resources.index_dir ().c_str ();
 	_lws_mnt_root.origin_protocol  = LWSMPRO_FILE;
 	_lws_mnt_root.def              = "index.html";
+#ifdef NDEBUG
 	_lws_mnt_root.cache_max_age    = 3600;
 	_lws_mnt_root.cache_reusable   = 1;
 	_lws_mnt_root.cache_revalidate = 1;
+#endif
 
 	/* user defined surfaces in the user config directory */
 	memcpy (&_lws_mnt_user, &_lws_mnt_root, sizeof (lws_http_mount));
