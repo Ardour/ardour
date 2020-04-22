@@ -768,9 +768,12 @@ Editor::build_region_boundary_cache ()
 		}
 	}
 
-	//allow regions to snap to the video start (if any) as if it were a "region"
+	/* allow regions to snap to the video start (if any) as if it were a "region" */
 	if (ARDOUR_UI::instance()->video_timeline) {
-		region_boundary_cache.push_back (ARDOUR_UI::instance()->video_timeline->get_video_start_offset());
+		ARDOUR::samplepos_t vo = ARDOUR_UI::instance()->video_timeline->get_video_start_offset();
+		if (std::find (region_boundary_cache.begin(), region_boundary_cache.end(), vo) == region_boundary_cache.end()) {
+			region_boundary_cache.push_back (ARDOUR_UI::instance()->video_timeline->get_video_start_offset());
+		}
 	}
 
 	std::pair<samplepos_t, samplepos_t> ext = session_gui_extents (false);

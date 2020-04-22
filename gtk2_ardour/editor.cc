@@ -2995,6 +2995,9 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, SnapPref pref
 				prev = next;
 				prev--;
 			}
+			if (next == region_boundary_cache.end ()) {
+				next--;
+			}
 
 			if ((direction == RoundUpMaybe || direction == RoundUpAlways)) {
 				test = *next;
