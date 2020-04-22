@@ -58,7 +58,7 @@ class BaseArdourClient {
 			}
 		};
 
-		this._connect();
+		await this._connect();
 	}
 
 	disconnect () {
@@ -93,7 +93,7 @@ class BaseArdourClient {
 	}
 
 	async _sendRecvSingle (node, addr, val) {
-		return await this._sendAndReceive (node, addr, val)[0];
+		return (await this._sendAndReceive (node, addr, val))[0];
 	}
 
 	_onChannelMessage (msg) {
