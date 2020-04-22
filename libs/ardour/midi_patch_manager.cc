@@ -105,6 +105,7 @@ MidiPatchManager::remove_custom_midnam (const std::string& id)
 bool
 MidiPatchManager::update_custom_midnam (const std::string& id, const std::string& midnam)
 {
+	Glib::Threads::Mutex::Lock lm (_lock);
 	remove_midi_name_document ("custom:" + id, false);
 	return add_custom_midnam (id, midnam);
 }
