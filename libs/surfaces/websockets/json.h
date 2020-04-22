@@ -16,8 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _ardour_surface_json_h_
-#define _ardour_surface_json_h_
+#ifndef _ardour_surface_websockets_json_h_
+#define _ardour_surface_websockets_json_h_
 
 class Json
 {
@@ -27,4 +27,4 @@ public:
 
 };
 
-#endif // _ardour_surface_json_h_
+#endif // _ardour_surface_websockets_json_h_
