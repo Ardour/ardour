@@ -40,6 +40,7 @@
 #include "state.h"
 #include "resources.h"
 
+// TO DO: make this configurable
 #define WEBSOCKET_LISTEN_PORT 3818
 
 struct LwsPollFdGlibSource {
