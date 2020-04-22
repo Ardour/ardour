@@ -26,6 +26,7 @@
 #include <sstream>
 
 #include "message.h"
+#include "json.h"
 
 // JSON does not support Infinity or NaN
 #define XSTR(s) STR (s)
@@ -166,7 +167,7 @@ NodeStateMessage::serialize (void* buf, size_t len) const
 					break;
 				}
 				case TypedValue::String:
-					ss << '"' << static_cast<std::string> (val) << '"';
+					ss << '"' << Json::escape (static_cast<std::string> (val)) << '"';
 					break;
 				default:
 					break;

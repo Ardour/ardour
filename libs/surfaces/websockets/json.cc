@@ -16,37 +16,24 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _ardour_surface_websockets_resources_h_
-#define _ardour_surface_websockets_resources_h_
+#include <iomanip>
+#include <sstream>
 
-#include <string>
-#include <vector>
+#include "json.h"
 
-#include "manifest.h"
+/* adapted from https://stackoverflow.com/questions/7724448/simple-json-string-escape-for-c
+   CC BY-SA 4.0 license */
+std::string
+Json::escape (const std::string &s) {
+    std::ostringstream o;
 
-typedef std::vector<SurfaceManifest> SurfaceManifestVector;
-
-class ServerResources
-{
-public:
-	ServerResources ();
-
-	const std::string& index_dir ();
-	const std::string& builtin_dir ();
-	const std::string& user_dir ();
-
-	std::string scan ();
-
-private:
-
-	std::string _index_dir;
-	std::string _builtin_dir;
-	std::string _user_dir;
-
-	std::string server_data_dir ();
-
-	SurfaceManifestVector read_manifests (std::string);
-
-};
-
-#endif // _ardour_surface_websockets_resources_h_
+    for (std::string::const_iterator it = s.begin(); it != s.end(); ++it) {
+        if (*it == '"' || *it == '\\' || ('\x00' <= *it && *it <= '\x1f')) {
+            o << "\\u" << std::hex << std::setw (4) << std::setfill ('0') << static_cast<int>(*it);
+        } else {
+            o << *it;
+        }
+    }
+    
+    return o.str ();
+}

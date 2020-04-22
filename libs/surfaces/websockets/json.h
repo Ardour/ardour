@@ -16,37 +16,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _ardour_surface_websockets_resources_h_
-#define _ardour_surface_websockets_resources_h_
+#ifndef _ardour_surface_json_h_
+#define _ardour_surface_json_h_
 
-#include <string>
-#include <vector>
-
-#include "manifest.h"
-
-typedef std::vector<SurfaceManifest> SurfaceManifestVector;
-
-class ServerResources
+class Json
 {
 public:
-	ServerResources ();
-
-	const std::string& index_dir ();
-	const std::string& builtin_dir ();
-	const std::string& user_dir ();
-
-	std::string scan ();
-
-private:
-
-	std::string _index_dir;
-	std::string _builtin_dir;
-	std::string _user_dir;
-
-	std::string server_data_dir ();
-
-	SurfaceManifestVector read_manifests (std::string);
+	
+	static std::string escape (const std::string&);
 
 };
 
-#endif // _ardour_surface_websockets_resources_h_
+#endif // _ardour_surface_json_h_
