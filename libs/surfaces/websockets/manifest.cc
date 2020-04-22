@@ -26,6 +26,7 @@
 
 #include "manifest.h"
 #include "resources.h"
+#include "json.h"
 
 static const char* const manifest_filename = "manifest.xml";
 
@@ -76,10 +77,10 @@ SurfaceManifest::to_json ()
 	std::stringstream ss;
 
 	ss << "{"
-		<< "\"path\":\"" << ServerResources::escape_json (Glib::path_get_basename (_path)) << "\""
-		<< ",\"name\":\"" << ServerResources::escape_json (_name) << "\""
-		<< ",\"description\":\"" << ServerResources::escape_json (_description) << "\""
-		<< ",\"version\":\"" << ServerResources::escape_json (_version) << "\""
+		<< "\"path\":\"" << Json::escape (Glib::path_get_basename (_path)) << "\""
+		<< ",\"name\":\"" << Json::escape (_name) << "\""
+		<< ",\"description\":\"" << Json::escape (_description) << "\""
+		<< ",\"version\":\"" << Json::escape (_version) << "\""
 		<< "}";
 
 	return ss.str ();
