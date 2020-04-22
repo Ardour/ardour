@@ -16,8 +16,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-import { Message } from '/shared/message.js';
-
 export class Widget {
 
     constructor (html) {
