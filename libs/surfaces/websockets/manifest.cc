@@ -76,7 +76,7 @@ SurfaceManifest::to_json ()
 	std::stringstream ss;
 
 	ss << "{"
-		<< "\"path\":\"" << Glib::path_get_basename (_path) << "\""
+		<< "\"path\":\"" << ServerResources::escape_json (Glib::path_get_basename (_path)) << "\""
 		<< ",\"name\":\"" << ServerResources::escape_json (_name) << "\""
 		<< ",\"description\":\"" << ServerResources::escape_json (_description) << "\""
 		<< ",\"version\":\"" << ServerResources::escape_json (_version) << "\""
