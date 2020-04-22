@@ -397,6 +397,18 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 	}
 
 	_disk_reader->seek (offset, true);
+
+	if (_midi_audition) {
+		/* Fill MIDI buffers.
+		 * This is safe to call from here. ::::audition_region()
+		 * is called by the butler thread. Also the session is not
+		 * yet auditioning. So Session::non_realtime_overwrite()
+		 * does call the auditioner's DR.
+		 */
+		set_pending_overwrite (PlaylistModified);
+		_disk_reader->overwrite_existing_buffers ();
+	}
+
 	current_sample = offset;
 
 	g_atomic_int_set (&_auditioning, 1);

@@ -1222,6 +1222,9 @@ void
 Session::non_realtime_overwrite (int on_entry, bool& finished)
 {
 	boost::shared_ptr<RouteList> rl = routes.reader();
+	if (is_auditioning ()) {
+		rl->push_back (auditioner);
+	}
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 		if (tr && tr->pending_overwrite ()) {
