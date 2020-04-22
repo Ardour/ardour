@@ -48,6 +48,16 @@
 #include "pbd/libpbd_visibility.h"
 #include "pbd/signals.h"
 
+#define PBD_RT_STACKSIZE_PROC 0x20000 // 128kB
+#define PBD_RT_STACKSIZE_HELP 0x08000 // 32kB
+
+/* these are relative to sched_get_priority_max()
+ * see pbd_absolute_rt_priority()
+ */
+#define PBD_RT_PRI_MAIN -20
+#define PBD_RT_PRI_MIDI -21
+#define PBD_RT_PRI_PROC -22
+
 LIBPBD_API int  pthread_create_and_store (std::string name, pthread_t  *thread, void * (*start_routine)(void *), void * arg);
 LIBPBD_API void pthread_cancel_one (pthread_t thread);
 LIBPBD_API void pthread_cancel_all ();

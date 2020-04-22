@@ -555,11 +555,10 @@ DummyAudioBackend::create_process_thread (boost::function<void()> func)
 {
 	pthread_t thread_id;
 	pthread_attr_t attr;
-	size_t stacksize = 100000;
 
 	pthread_attr_init (&attr);
-	pthread_attr_setstacksize (&attr, stacksize);
-	ThreadData* td = new ThreadData (this, func, stacksize);
+	pthread_attr_setstacksize (&attr, PBD_RT_STACKSIZE_PROC);
+	ThreadData* td = new ThreadData (this, func, PBD_RT_STACKSIZE_PROC);
 
 	if (pthread_create (&thread_id, &attr, dummy_process_thread, td)) {
 		PBD::error << _("AudioEngine: cannot create process thread.") << endmsg;

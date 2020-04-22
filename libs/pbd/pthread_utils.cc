@@ -132,7 +132,7 @@ pthread_create_and_store (string name, pthread_t  *thread, void * (*start_routin
 
 	// set default stack size to sensible default for memlocking
 	pthread_attr_init(&default_attr);
-	pthread_attr_setstacksize(&default_attr, 500000);
+	pthread_attr_setstacksize(&default_attr, 0x80000); // 512kB
 
 	ThreadStartWithName* ts = new ThreadStartWithName (start_routine, arg, name);
 

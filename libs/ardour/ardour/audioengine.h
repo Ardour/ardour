@@ -37,6 +37,7 @@
 #include <glibmm/threads.h>
 
 #include "pbd/signals.h"
+#include "pbd/pthread_utils.h"
 #include "pbd/stacktrace.h"
 
 #include "ardour/ardour.h"
@@ -117,7 +118,7 @@ class LIBARDOUR_API AudioEngine : public PortManager, public SessionHandlePtr
 	 * - pbd_realtime_pthread_create
 	 * - pbd_set_thread_priority
 	 */
-	virtual int    client_real_time_priority () { return -22; }
+	virtual int    client_real_time_priority () { return PBD_RT_PRI_PROC; }
 
 	int            backend_reset_requested();
 	void           request_backend_reset();

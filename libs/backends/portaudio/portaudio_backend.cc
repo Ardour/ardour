@@ -785,7 +785,7 @@ PortAudioBackend::process_callback(const float* input,
 bool
 PortAudioBackend::start_blocking_process_thread ()
 {
-	if (pbd_realtime_pthread_create (PBD_SCHED_FIFO, -20, 100000,
+	if (pbd_realtime_pthread_create (PBD_SCHED_FIFO, PBD_RT_PRI_MAIN, PBD_RT_STACKSIZE_PROC,
 				&_main_blocking_thread, blocking_thread_func, this))
 	{
 		if (pthread_create (&_main_blocking_thread, NULL, blocking_thread_func, this))
@@ -1110,14 +1110,13 @@ PortAudioBackend::create_process_thread (boost::function<void()> func)
 {
 	pthread_t thread_id;
 	pthread_attr_t attr;
-	size_t stacksize = 100000;
 
-	ThreadData* td = new ThreadData (this, func, stacksize);
+	ThreadData* td = new ThreadData (this, func, PBD_RT_STACKSIZE_PROC);
 
-	if (pbd_realtime_pthread_create (PBD_SCHED_FIFO, -22, stacksize,
+	if (pbd_realtime_pthread_create (PBD_SCHED_FIFO, PBD_RT_PRI_PROC, PBD_RT_STACKSIZE_PROC,
 				&thread_id, portaudio_process_thread, td)) {
 		pthread_attr_init (&attr);
-		pthread_attr_setstacksize (&attr, stacksize);
+		pthread_attr_setstacksize (&attr, PBD_RT_STACKSIZE_PROC);
 		if (pthread_create (&thread_id, &attr, portaudio_process_thread, td)) {
 			DEBUG_AUDIO("Cannot create process thread.");
 			pthread_attr_destroy (&attr);

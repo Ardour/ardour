@@ -228,11 +228,8 @@ WinMMEMidiOutputDevice::start_midi_output_thread ()
 {
 	m_thread_quit = false;
 
-	//pthread_attr_t attr;
-	size_t stacksize = 100000;
-
 	// TODO Use native threads
-	if (pbd_realtime_pthread_create (PBD_SCHED_FIFO, -21, stacksize,
+	if (pbd_realtime_pthread_create (PBD_SCHED_FIFO, PBD_RT_PRI_MIDI, PBD_RT_STACKSIZE_HELP,
 				&m_output_thread_handle, midi_output_thread, this)) {
 		return false;
 	}

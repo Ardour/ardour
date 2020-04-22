@@ -108,7 +108,7 @@ AlsaAudioSlave::start ()
 	}
 
 	_run = true;
-	if (pbd_realtime_pthread_create (PBD_SCHED_FIFO, -20, 100000,
+	if (pbd_realtime_pthread_create (PBD_SCHED_FIFO, PBD_RT_PRI_MAIN, PBD_RT_STACKSIZE_HELP,
 				&_thread, _process_thread, this))
 	{
 		if (pthread_create (&_thread, NULL, _process_thread, this)) {
