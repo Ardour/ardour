@@ -73,12 +73,13 @@ new_tempo(smf_t *smf, size_t pulses)
 		tempo->denominator = previous_tempo->denominator;
 		tempo->clocks_per_click = previous_tempo->clocks_per_click;
 		tempo->notes_per_note = previous_tempo->notes_per_note;
+		printf ("added actual tempo, cpc = %d\n", tempo->clocks_per_click);
 	} else {
 		tempo->microseconds_per_quarter_note = 500000; /* Initial tempo is 120 BPM. */
 		tempo->numerator = 4;
 		tempo->denominator = 4;
-		tempo->clocks_per_click = -1;
-		tempo->notes_per_note = -1;
+		tempo->clocks_per_click = 24;
+		tempo->notes_per_note = 8;
 	}
 
 	g_ptr_array_add(smf->tempo_array, tempo);
