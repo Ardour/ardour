@@ -519,7 +519,7 @@ WebsocketsServer::lws_callback (struct lws* wsi, enum lws_callback_reasons reaso
 			break;
 
 		/* will be called only if the requested url is not fulfilled
-		   by the any of the mount configurations (builtin, user) */
+		   by the any of the mount configurations (root, user) */
 		case LWS_CALLBACK_HTTP:
 			rc = server->send_availsurf_hdr (wsi);
 			break;
