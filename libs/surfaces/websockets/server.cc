@@ -72,6 +72,9 @@ WebsocketsServer::WebsocketsServer (ArdourSurface::ArdourWebsockets& surface)
 	_lws_mnt_root.origin           = _resources.index_dir ().c_str ();
 	_lws_mnt_root.origin_protocol  = LWSMPRO_FILE;
 	_lws_mnt_root.def              = "index.html";
+	/* do not send caching headers if NDEBUG is set, this is useful while
+	 * developing web surfaces. Ideally this would exist as a configurable
+	 * option in the TO DO surface settings UI */
 #ifdef NDEBUG
 	_lws_mnt_root.cache_max_age    = 3600;
 	_lws_mnt_root.cache_reusable   = 1;

@@ -27,6 +27,9 @@
 #include "state.h"
 #include "strips.h"
 
+// TO DO: make this configurable
+#define POLL_INTERVAL_MS 100
+
 using namespace ARDOUR;
 
 struct TransportObserver {
@@ -100,7 +103,7 @@ ArdourFeedback::start ()
 	observe_strips ();
 
 	// some things need polling like the strip meters
-	Glib::RefPtr<Glib::TimeoutSource> periodic_timeout = Glib::TimeoutSource::create (100); // ms
+	Glib::RefPtr<Glib::TimeoutSource> periodic_timeout = Glib::TimeoutSource::create (POLL_INTERVAL_MS);
 	_periodic_connection                               = periodic_timeout->connect (sigc::mem_fun (*this,
                                                                          &ArdourFeedback::poll));
 	periodic_timeout->attach (main_loop ()->get_context ());
