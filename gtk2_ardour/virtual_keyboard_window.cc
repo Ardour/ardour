@@ -151,7 +151,6 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 			sprintf (key, "%d", c);
 			_cc_key[i].append_text_item (key);
 		}
-		update_cc (i, default_cc[i]);
 
 		tbl->attach (*_cc_knob[i], col, col + 1, 0, 1, SHRINK, SHRINK, 4, 2);
 		tbl->attach (_cc_key[i],   col, col + 1, 1, 2, SHRINK, SHRINK, 4, 2);
@@ -159,6 +158,8 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 		_cc_key[i].StateChanged.connect (sigc::bind (sigc::mem_fun (*this, &VirtualKeyboardWindow::cc_key_changed), i));
 		_cc[i]->ValueChanged.connect_same_thread (_cc_connections,
 		                                          boost::bind (&VirtualKeyboardWindow::control_change_knob_event_handler, this, i, _1));
+
+		update_cc (i, default_cc[i]);
 	}
 
 	tbl->attach (*manage (new ArdourVSpacer),       col, col + 1, 0, 2, SHRINK, FILL, 4, 0);
@@ -431,8 +432,8 @@ VirtualKeyboardWindow::update_velocity_settings ()
 void
 VirtualKeyboardWindow::cc_key_changed (size_t i)
 {
-	int ctrl = PBD::atoi (_cc_key[i].get_text ());
-	update_cc (i, ctrl);
+	_cc_knob[i]->set_tooltip_prefix (string_compose (_("CC-%1: "), _cc_key[i].get_text ()));
+	// TODO update _cc[i]->normal
 }
 
 void
@@ -445,8 +446,6 @@ VirtualKeyboardWindow::update_cc (size_t i, int cc)
 	char buf[16];
 	sprintf (buf, "%d", cc);
 	_cc_key[i].set_active (buf);
-	_cc_knob[i]->set_tooltip_prefix (string_compose (_("CC-%1: "), cc));
-	// TODO update _cc[i]->normal
 }
 
 void
