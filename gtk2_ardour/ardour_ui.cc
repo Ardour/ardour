@@ -1981,23 +1981,24 @@ ARDOUR_UI::transport_ffwd_rewind (int option, int dir)
 	 * (-1, 0, 1) to get directional value
 	 */
 
-	const float current_transport_speed = _session->engine_speed () * _session->transport_speed();
-	float target_speed;
+	const float current_transport_speed = _session->engine_speed () * _session->transport_speed ();
+	float target_speed = current_transport_speed;
 
-	if ((dir < 0 && current_transport_speed >= 0.0f) || (dir > 0 && current_transport_speed <= 0.0f)) {
-		switch (option) {
-		case 0:
-			target_speed = dir * 1.0f;
-			break;
-		case 1:
-			target_speed = dir * 4.0f;
-			break;
-		case -1:
-			target_speed = dir * 0.5f;
-			break;
-		}
-	} else {
-		/* speed up */
+	switch (option) {
+	case 0:
+		target_speed = dir * 1.0f;
+		break;
+	case 1:
+		target_speed = dir * 4.0f;
+		break;
+	case -1:
+		target_speed = dir * 0.5f;
+		break;
+	}
+
+	bool speed_up = (dir > 0 && current_transport_speed >= target_speed);
+	speed_up = speed_up || (dir < 0 && current_transport_speed <= target_speed);
+	if (speed_up) {
 		target_speed = current_transport_speed * 1.5f;
 	}
 
