@@ -413,13 +413,13 @@ ProcessorEntry::setup_visuals ()
 			_button.set_name ("processor sidechain");
 			return;
 		}
-	}
 
-	boost::shared_ptr<InternalSend> aux;
-	if ((aux = boost::dynamic_pointer_cast<InternalSend> (_processor))) {
-		if (aux->allow_feedback ()) {
-			_button.set_name ("processor auxfeedback");
-			return;
+		boost::shared_ptr<InternalSend> aux;
+		if ((aux = boost::dynamic_pointer_cast<InternalSend> (_processor))) {
+			if (aux->allow_feedback ()) {
+				_button.set_name ("processor auxfeedback");
+				return;
+			}
 		}
 	}
 
@@ -439,7 +439,6 @@ ProcessorEntry::setup_visuals ()
 		break;
 	}
 }
-
 
 boost::shared_ptr<Processor>
 ProcessorEntry::processor () const
@@ -509,6 +508,11 @@ ProcessorEntry::processor_property_changed (const PropertyChange& what_changed)
 	if (what_changed.contains (ARDOUR::Properties::name)) {
 		_button.set_text (name (_width));
 		setup_tooltip ();
+	} else if (boost::dynamic_pointer_cast<Send> (_processor) != 0) {
+		/* Any property change for a send needs to trigger an update.
+		 * e.g. target-bus is updated, panner-link changes, etc */
+		_button.set_text (name (_width));
+		setup_tooltip ();
 	}
 }
 
@@ -554,12 +558,26 @@ ProcessorEntry::setup_tooltip ()
 			return;
 		}
 		boost::shared_ptr<Send> send;
-		if ((send = boost::dynamic_pointer_cast<Send> (_processor)) != 0 &&
-				!boost::dynamic_pointer_cast<InternalSend>(_processor)) {
-			if (send->remove_on_disconnect ()) {
-				set_tooltip (_button, string_compose ("<b>&gt; %1</b>\nThis (sidechain) send will be removed when disconnected.", _processor->name()));
+		if ((send = boost::dynamic_pointer_cast<Send> (_processor)) != 0) {
+			std::string pan_suffix;
+			if (send->has_panner ()) {
+				bool panlinked = send->panner_linked_to_route();
+				pan_suffix = panlinked ? "\n(Send panner is linked)" : "\n(Send has independent panner)";
+			}
+
+			boost::shared_ptr<InternalSend> aux;
+			if ((aux = boost::dynamic_pointer_cast<InternalSend> (_processor)) != 0) {
+				if (aux->target_route() && aux->target_route()->name() != aux->display_name())  {
+					set_tooltip (_button, string_compose ("<b>Aux: %1</b>\nsend to '%2'%3", aux->display_name(), aux->target_route()->name(), pan_suffix));
+				} else {
+					set_tooltip (_button, string_compose ("<b>Aux: %1</b>%2", aux->display_name(), pan_suffix));
+				}
 			} else {
-				set_tooltip (_button, string_compose ("<b>&gt; %1</b>", _processor->name()));
+				if (send->remove_on_disconnect ()) {
+					set_tooltip (_button, string_compose ("<b>&gt; %1</b>\nThis (sidechain) send will be removed when disconnected.%2", _processor->name(), pan_suffix));
+				} else {
+					set_tooltip (_button, string_compose ("<b>&gt; %1</b>%2", _processor->name(), pan_suffix));
+				}
 			}
 			return;
 		}
@@ -570,16 +588,37 @@ ProcessorEntry::setup_tooltip ()
 string
 ProcessorEntry::name (Width w) const
 {
-	boost::shared_ptr<Send> send;
-	string name_display;
-
 	if (!_processor) {
 		return string();
 	}
 
-	if ((send = boost::dynamic_pointer_cast<Send> (_processor)) != 0 &&
-	    !boost::dynamic_pointer_cast<InternalSend>(_processor)) {
+	string name_display;
 
+	boost::shared_ptr<Send> send;
+	boost::shared_ptr<InternalSend> aux;
+
+	if ((aux = boost::dynamic_pointer_cast<InternalSend> (_processor)) != 0) {
+
+		if (aux->has_panner () && !aux->panner_linked_to_route()) {
+			switch (w) {
+				case Wide:
+					name_display += "^ ";
+					break;
+				case Narrow:
+					name_display += "^";
+					break;
+			}
+		}
+		switch (w) {
+			case Wide:
+				name_display += aux->display_name();
+				break;
+			case Narrow:
+				name_display += PBD::short_version (aux->display_name(), 5);
+				break;
+		}
+
+	} else if ((send = boost::dynamic_pointer_cast<Send> (_processor)) != 0) {
 		name_display += '>';
 		std::string send_name;
 		bool pretty_ok = true;
@@ -802,7 +841,7 @@ ProcessorEntry::build_send_options_menu ()
 	if (send) {
 		items.push_back (CheckMenuElem (_("Link panner controls")));
 		Gtk::CheckMenuItem* c = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
-		c->set_active (send->panner_shell()->is_linked_to_route());
+		c->set_active (send->panner_linked_to_route ());
 		c->signal_toggled().connect (sigc::mem_fun (*this, &ProcessorEntry::toggle_panner_link));
 	}
 
@@ -821,7 +860,7 @@ ProcessorEntry::toggle_panner_link ()
 {
 	boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send> (_processor);
 	if (send) {
-		send->panner_shell()->set_linked_to_route(!send->panner_shell()->is_linked_to_route());
+		send->set_panner_linked_to_route (!send->panner_linked_to_route ());
 	}
 }
 
