@@ -135,7 +135,9 @@ Auditioner::load_synth (bool need_lock)
 	unload_synth(need_lock);
 	
 	boost::shared_ptr<Plugin> p = audition_synth_info->load (_session);
-	asynth = boost::shared_ptr<Processor> (new PluginInsert (_session, p));
+	if (p) {
+		asynth = boost::shared_ptr<Processor> (new PluginInsert (_session, p));
+	}
 }
 
 void
@@ -143,10 +145,9 @@ Auditioner::unload_synth (bool need_lock)
 {
 	if (asynth) {
 		asynth->drop_references ();
+		remove_processor (asynth, NULL, need_lock);
 	}
-	if (0 == remove_processor (asynth, NULL, need_lock)) {
-		asynth.reset ();
-	}
+	asynth.reset ();
 }
 
 int
