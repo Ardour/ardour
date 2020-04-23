@@ -695,6 +695,7 @@ Session::butler_completed_transport_work ()
 
 	if (ptw & PostTransportAudition) {
 		if (auditioner && auditioner->auditioning()) {
+			_remaining_latency_preroll = 0;
 			process_function = &Session::process_audition;
 		} else {
 			process_function = &Session::process_with_events;

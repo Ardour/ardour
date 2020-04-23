@@ -91,6 +91,8 @@ public:
 
 	void set_audition_synth_info(PluginInfoPtr in) { audition_synth_info = in; }
 
+	samplecnt_t output_latency () const { return 0; }
+
 private:
   
 	PluginInfoPtr audition_synth_info;  //we will use this to create a new synth on-the-fly each time an audition is requested

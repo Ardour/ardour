@@ -440,7 +440,12 @@ Auditioner::play_audition (samplecnt_t nframes)
 		_seek_complete = false;
 		_seeking = false;
 		_seek_sample = -1;
-		_disk_reader->reset_tracker();
+		if (_midi_audition) {
+			/* Force MIDI note tracker to resolve any notes that are
+			 * still playing -> set DR::run_must_resolve */
+			_disk_reader->set_pending_overwrite (PlaylistModified);
+			_disk_reader->overwrite_existing_buffers ();
+		}
 	}
 
 	if(!_seeking) {
