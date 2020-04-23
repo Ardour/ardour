@@ -434,6 +434,30 @@ Send::set_state_2X (const XMLNode& node, int /* version */)
 }
 
 bool
+Send::has_panner () const
+{
+	/* see InternalSend::run() and Delivery::run */
+	if (_panshell && role () != Listen && _panshell->panner()) {
+		return true; // !_panshell->bypassed ()
+	}
+	return false;
+}
+
+bool
+Send::panner_linked_to_route () const
+{
+	return _panshell ? _panshell->is_linked_to_route() : false;
+}
+
+void
+Send::set_panner_linked_to_route (bool onoff) {
+	if (_panshell) {
+		_panshell->set_linked_to_route (onoff);
+		PropertyChanged (PBD::PropertyChange ()); /* EMIT SIGNAL */
+	}
+}
+
+bool
 Send::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 {
 	/* sends have no impact at all on the channel configuration of the

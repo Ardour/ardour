@@ -84,6 +84,10 @@ public:
 	void set_remove_on_disconnect (bool b) { _remove_on_disconnect = b; }
 	bool remove_on_disconnect () const { return _remove_on_disconnect; }
 
+	bool has_panner () const;
+	bool panner_linked_to_route () const;
+	void set_panner_linked_to_route (bool);
+
 	uint32_t pans_required() const { return _configured_input.n_audio(); }
 
 	void run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool);
