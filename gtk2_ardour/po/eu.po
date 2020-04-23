@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-02 13:17+0200\n"
-"PO-Revision-Date: 2020-04-16 19:43+0200\n"
+"PO-Revision-Date: 2020-04-23 11:33+0200\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1005,7 +1005,6 @@ msgstr "DSP plugina kargatzea"
 
 # Garraio-masterrak edo Garraiatu masterrak???
 #: ardour_ui.cc:336 rc_option_editor.cc:3221 transport_masters_dialog.cc:667
-#, fuzzy
 msgid "Transport Masters"
 msgstr "Garraio-masterrak"
 
@@ -2167,17 +2166,14 @@ msgid "Play Selection"
 msgstr "Erreproduzitu hautapena"
 
 #: ardour_ui_ed.cc:331
-#, fuzzy
 msgid "Play w/Preroll"
 msgstr "Erreproduzitu Preroll-ekin"
 
 #: ardour_ui_ed.cc:336
-#, fuzzy
 msgid "Record w/Preroll"
 msgstr "Grabatu Preroll-ekin"
 
 #: ardour_ui_ed.cc:340
-#, fuzzy
 msgid "Record w/Count-In"
 msgstr "Grabatu atzera-kontuarekin"
 
@@ -2375,9 +2371,8 @@ msgid "Send MIDI Clock"
 msgstr "Bidali MIDI-erlojua"
 
 #: ardour_ui_ed.cc:527
-#, fuzzy
 msgid "Panic (Send MIDI all-notes-off)"
-msgstr "Ikara"
+msgstr "Ikara (MIDI nota guztiak ezikusi)"
 
 #: ardour_ui_ed.cc:553
 msgid "Transition to Roll"
@@ -3588,15 +3583,15 @@ msgstr "1/24 (64. hirukotxoa)"
 
 #: editor.cc:191 quantize_dialog.cc:51
 msgid "1/5 (8th quintuplet)"
-msgstr "1/5 (8. boskotxoa)"
+msgstr "1/5 (8. bostekotxoa)"
 
 #: editor.cc:192 quantize_dialog.cc:52
 msgid "1/10 (16th quintuplet)"
-msgstr "1/10 (16. boskotxoa)"
+msgstr "1/10 (16. bostekotxoa)"
 
 #: editor.cc:193 quantize_dialog.cc:53
 msgid "1/20 (32nd quintuplet)"
-msgstr "1/20 (32. boskotxoa)"
+msgstr "1/20 (32. bostekotxoa)"
 
 #: editor.cc:194 quantize_dialog.cc:55
 msgid "1/7 (8th septuplet)"
@@ -3888,11 +3883,11 @@ msgstr "Kontsolidatu barrutia prozesamenduarekin"
 
 #: editor.cc:1976
 msgid "Bounce Range to Source List"
-msgstr ""
+msgstr "Errebotatu barrutia iturburu-zerrendara"
 
 #: editor.cc:1977
 msgid "Bounce Range to Source List with Processing"
-msgstr ""
+msgstr "Errebotatu barrutia iturburu-zerrendara prozesamenduarekin"
 
 #: editor.cc:1978 editor_markers.cc:970
 msgid "Export Range..."
@@ -4041,7 +4036,7 @@ msgstr "Hirukotxoak"
 
 #: editor.cc:3310
 msgid "Quintuplets"
-msgstr "Boskotxoak"
+msgstr "Bostekotxoak"
 
 #: editor.cc:3320
 msgid "Septuplets"
@@ -4085,7 +4080,7 @@ msgid ""
 "Context-click for other operations"
 msgstr ""
 "Taldeak: egin klik (des)aktibatzeko\n"
-"Eskuin-klika egin beste aukerentzat"
+"Egin eskuin-klika beste aukerentzat"
 
 #: editor.cc:3340
 msgid "Nudge Region/Selection Later"
@@ -4337,7 +4332,7 @@ msgstr "Editatu..."
 
 #: editor.cc:6246 editor_actions.cc:1445
 msgid "Transpose..."
-msgstr "Garraiatu..."
+msgstr "Transposatu..."
 
 #: editor.cc:6250 editor_actions.cc:1530
 msgid "Legatize"
@@ -4746,11 +4741,11 @@ msgstr "Jaitsi hautatutako pistak"
 
 #: editor_actions.cc:317
 msgid "Scroll Tracks Up"
-msgstr "Korritu pistak gora"
+msgstr "Korritu pistetan gora"
 
 #: editor_actions.cc:318
 msgid "Scroll Tracks Down"
-msgstr "Korritu pistak behera"
+msgstr "Korritu pistetan behera"
 
 #: editor_actions.cc:319
 msgid "Step Tracks Up"
@@ -5305,11 +5300,11 @@ msgstr "Etiketatu hautatutako eremuak"
 
 #: editor_actions.cc:1516
 msgid "Bounce (with processing)"
-msgstr ""
+msgstr "Errebotatu (prozesamenduarekin)"
 
 #: editor_actions.cc:1517
 msgid "Bounce (without processing)"
-msgstr ""
+msgstr "Errebotatu (prozesamendu gabe)"
 
 #: editor_actions.cc:1518
 msgid "Combine"
@@ -5670,7 +5665,6 @@ msgid "Name of Group"
 msgstr "Taldearen izena"
 
 #: editor_route_groups.cc:104 editor_routes.cc:248
-#, fuzzy
 msgid "Visible|V"
 msgstr "Iksg"
 
@@ -6236,11 +6230,11 @@ msgstr ""
 
 #: editor_ops.cc:4071
 msgid "Cannot bounce"
-msgstr ""
+msgstr "Ezin da errebotatu"
 
 #: editor_ops.cc:4122
 msgid "bounce range"
-msgstr ""
+msgstr "errebotatu barrutia"
 
 #: editor_ops.cc:4189
 msgid "delete"
@@ -7500,24 +7494,20 @@ msgid "export"
 msgstr "esportatu"
 
 #: export_dialog.cc:458
-#, fuzzy
 msgid "Exporting '%3' (timespan %1 of %2)"
-msgstr "'%3' esportatzen (gelditzen da %1 %2tik)"
+msgstr "'%3' esportatzen (%1 %2tik gelditzen da)"
 
 #: export_dialog.cc:463
-#, fuzzy
 msgid "Normalizing '%3' (timespan %1 of %2)"
-msgstr "'%3' normalizatzen (gelditzen da %1 %2tik)"
+msgstr "'%3' normalizatzen (%1 %2tik gelditzen da)"
 
 #: export_dialog.cc:468
-#, fuzzy
 msgid "Encoding '%3' (timespan %1 of %2)"
-msgstr "'%3' kodifikatzen (gelditzen da %1 %2tik)"
+msgstr "'%3' kodifikatzen (%1 %2tik gelditzen da)"
 
 #: export_dialog.cc:473
-#, fuzzy
 msgid "Tagging '%3' (timespan %1 of %2)"
-msgstr "'%3' etiketatzen (gelditzen da %1 %2tik)"
+msgstr "'%3' etiketatzen (%1 %2tik gelditzen da)"
 
 #: export_dialog.cc:477
 msgid "Uploading '%3' (timespan %1 of %2)"
@@ -7725,7 +7715,6 @@ msgstr "Lagin-tasaren konbertsio-kalitatea:"
 
 # Ez daukagu argi nola euskeratu termino hau
 #: export_format_dialog.cc:83
-#, fuzzy
 msgid "Dithering"
 msgstr "Errore-lausotzea"
 
@@ -8083,7 +8072,7 @@ msgstr "Maila"
 
 #: foldback_strip.cc:251
 msgid "Copy track/bus gain to send"
-msgstr "Kopiatu pista/busaren irabazia bidalketara"
+msgstr "Kopiatu pistaren/busaren irabazia bidalketara"
 
 #: foldback_strip.cc:254
 msgid "Set send gain to -inf"
@@ -8183,566 +8172,585 @@ msgstr "Entzun monitorea"
 
 #: foldback_strip.cc:1567 route_ui.cc:1063
 msgid "Assign selected tracks (prefader)"
-msgstr ""
+msgstr "Esleitu hautatutako pistak (prefader)"
 
 #: foldback_strip.cc:1571
 msgid "Assign selected tracks and buses (prefader)"
-msgstr ""
+msgstr "Esleitu hautatutako pista eta busak (prefader"
 
 #: foldback_strip.cc:1573 route_ui.cc:1077
 msgid "Copy track/bus gains to sends"
-msgstr ""
+msgstr "Kopiatu pisten/busen irabaziak bidalketetara"
 
 #: foldback_strip.cc:1574 route_ui.cc:1078
 msgid "Set sends gain to -inf"
-msgstr ""
+msgstr "Bidalketen irabazia -inf"
 
 #: foldback_strip.cc:1575 route_ui.cc:1079
 msgid "Set sends gain to 0dB"
-msgstr ""
+msgstr "Bidalketen irabazia 0dB"
 
 #: sfdb_freesound_mootcher.cc:187 sfdb_freesound_mootcher.cc:322
 msgid "curl error %1 (%2)"
-msgstr ""
+msgstr "%1 uzkurtze-akatsa (%2)"
 
 #: sfdb_freesound_mootcher.cc:264
 msgid "getSoundResourceFile: There is no valid root in the xml file"
-msgstr ""
+msgstr "hartuSoinuBaliabFitxt: Ez dago baliozko errorik xml fitxategian"
 
 #: sfdb_freesound_mootcher.cc:269
 msgid "getSoundResourceFile: root = %1, != response"
-msgstr ""
+msgstr "hartuSoinuBaliabFitxt: erro = %1, ! = erantzuna"
 
 #: sfdb_freesound_mootcher.cc:408 rc_option_editor.cc:2720
 msgid "%1"
-msgstr ""
+msgstr "%1"
 
 #: gain_meter.cc:106
 msgid "pre"
-msgstr ""
+msgstr "pre"
 
 #: gain_meter.cc:150 gain_meter.cc:461 gain_meter.cc:560 gain_meter.cc:851
 msgid "-inf"
-msgstr ""
+msgstr "-inf"
 
 #: gain_meter.cc:164 gain_meter.cc:914
 msgid "Fader automation mode"
-msgstr ""
+msgstr "Fader-automatizazio modua"
 
 #: gain_meter.cc:165
 msgid "dBFS - Digital Peak Hold. Click to reset."
-msgstr ""
+msgstr "dBFS - Gailur digitala eustea. Egin klik berrezartzeko."
 
 #: gain_meter.cc:176
 msgid "Metering point"
-msgstr ""
+msgstr "Neurtze-puntua"
 
+# Eskuz
 #: gain_meter.cc:784
 msgid "Manual|M"
-msgstr ""
+msgstr "Es"
 
+# Jo
 #: gain_meter.cc:786
 msgid "Play|P"
-msgstr ""
+msgstr "Er"
 
+# Ukitu
 #: gain_meter.cc:788
 msgid "Touch|T"
-msgstr ""
+msgstr "Uk"
 
+# Giltzapetu
 #: gain_meter.cc:790
 msgid "Latch|L"
-msgstr ""
+msgstr "Gl"
 
+# Idatzi
 #: gain_meter.cc:792
 msgid "Write|W"
-msgstr ""
+msgstr "Id"
 
 #: gain_meter.cc:805 mixer_strip.cc:2533
 msgid "Pre Fader"
-msgstr ""
+msgstr "Prefader"
 
 #: gain_meter.cc:807 mixer_strip.cc:2534
 msgid "Post Fader"
-msgstr ""
+msgstr "Postfader"
 
 #: generic_pluginui.cc:89
 msgid "MIDI Keyboard"
-msgstr ""
+msgstr "MIDI teklatua"
 
 #: generic_pluginui.cc:104
 msgid "<span size=\"large\">Presets</span>"
-msgstr ""
+msgstr "<span size=\"large\">Aurrezarpenak</span>"
 
 #: generic_pluginui.cc:146 patch_change_widget.cc:65
 msgid "Channel:"
-msgstr ""
+msgstr "Kanala:"
 
 #: generic_pluginui.cc:148 patch_change_widget.cc:90
 msgid "Velocity:"
-msgstr ""
+msgstr "Indarra:"
 
 #: generic_pluginui.cc:179
 msgid "All Automation"
-msgstr ""
+msgstr "Automatizazio guztia"
 
 #: generic_pluginui.cc:369
 msgid "Plugin Editor: could not build control element for port %1"
-msgstr ""
+msgstr "Plugin editorea: ezin izan da eraiki kontrol elementua %1 atakarako"
 
 #: generic_pluginui.cc:402
 msgid "Plugin Editor: no control for property %1"
-msgstr ""
+msgstr "Plugin editorea: kontrolik ez %1 propietaterako"
 
 #: generic_pluginui.cc:408
 msgid "Plugin Editor: could not build control element for property %1"
 msgstr ""
+"Plugin editorea: ezin izan da eraiki kontrol elementua %1 propietaterako"
 
 #: generic_pluginui.cc:497
 msgid "Switches"
-msgstr ""
+msgstr "Kommutadoreak"
 
 #: generic_pluginui.cc:507 generic_pluginui.cc:613 processor_box.cc:3818
 msgid "Controls"
-msgstr ""
+msgstr "Kontrolak"
 
 #: generic_pluginui.cc:648
 msgid "Meters"
-msgstr ""
+msgstr "Neurgailuak"
 
 #: generic_pluginui.cc:698
 msgid "MIDI Programs (sent to track)"
-msgstr ""
+msgstr "MIDI programak (pistara bidalita)"
 
 #: generic_pluginui.cc:700
 msgid "MIDI Programs (volatile)"
-msgstr ""
+msgstr "MIDI programak (ezegonkorra)"
 
 #: generic_pluginui.cc:777
 msgid "--Unset--"
-msgstr ""
+msgstr "--Kendu--"
 
 #: generic_pluginui.cc:835
 msgid "Automation control"
-msgstr ""
+msgstr "Automatizazio kontrola"
 
 #: generic_pluginui.cc:1069
 msgid "This control cannot be automated"
-msgstr ""
+msgstr "Kontrol hau ezin da automatizatu"
 
 #: global_port_matrix.cc:160
 msgid "Audio Connection Manager"
-msgstr ""
+msgstr "Audio-konexio kudeatzailea"
 
 #: global_port_matrix.cc:163
 msgid "MIDI Connection Manager"
-msgstr ""
+msgstr "MIDI konexio kudeatzailea"
 
 #: global_port_matrix.cc:209 io_selector.cc:222 monitor_selector.cc:196
 msgid "port"
-msgstr ""
+msgstr "ataka"
 
 #: group_tabs.cc:322 group_tabs.cc:331
 msgid "Selection..."
-msgstr ""
+msgstr "Hautapena..."
 
 #: group_tabs.cc:323 group_tabs.cc:332
 msgid "Record Enabled..."
-msgstr ""
+msgstr "Grabatzeko gaituta..."
 
 #: group_tabs.cc:324 group_tabs.cc:333
 msgid "Soloed..."
-msgstr ""
+msgstr "Soloan..."
 
 #: group_tabs.cc:326
 msgid "Create New Group From..."
-msgstr ""
+msgstr "Sortu talde berria honela daudenekin..."
 
 #: group_tabs.cc:335
 msgid "Create New Group with Master From..."
-msgstr ""
+msgstr "Sortu masterdun talde berria honela daudenekin..."
 
 #: group_tabs.cc:362
 msgid "Edit Group..."
-msgstr ""
+msgstr "Editatu taldea..."
 
 #: group_tabs.cc:363
 msgid "Collect Group"
-msgstr ""
+msgstr "Jaso taldea"
 
 #: group_tabs.cc:364
 msgid "Remove Group"
-msgstr ""
+msgstr "Ezabatu taldea"
 
 #: group_tabs.cc:369
 msgid "Drop Group from VCA..."
-msgstr ""
+msgstr "Jaregin talde VCAtik..."
 
 #: group_tabs.cc:378
 msgid "Assign Group to VCA..."
-msgstr ""
+msgstr "Esleitu taldea VCAra..."
 
 #: group_tabs.cc:399
 msgid "Remove Subgroup Bus"
-msgstr ""
+msgstr "Ezabatu azpitalde busa"
 
 #: group_tabs.cc:401
 msgid "Add New Subgroup Bus"
-msgstr ""
+msgstr "Gehitu azpitalde bus berria"
 
+# Aux = aux / osagarri ???
 #: group_tabs.cc:405
 msgid "Add New Aux Bus (pre-fader)"
-msgstr ""
+msgstr "Gehitu bus osagarri berria (prefader)"
 
+# Aux = aux / osagarri ???
 #: group_tabs.cc:406
 msgid "Add New Aux Bus (post-fader)"
-msgstr ""
+msgstr "Gehitu bus osagarri berria (postfader)"
 
 #: group_tabs.cc:434
 msgid "Assign Selection to VCA..."
-msgstr ""
+msgstr "Esleitu hautapena VCAra..."
 
 #: group_tabs.cc:445
 msgid "Assign Record Enabled to VCA..."
-msgstr ""
+msgstr "Esleitu grabatzeko gaituak VCAra..."
 
 #: group_tabs.cc:456
 msgid "Assign Soloed to VCA..."
-msgstr ""
+msgstr "Esleitu soloan daudenak VCAra..."
 
 #: group_tabs.cc:459
 msgid "Enable All Groups"
-msgstr ""
+msgstr "Gaitu talde guztiak"
 
 #: group_tabs.cc:460
 msgid "Disable All Groups"
-msgstr ""
+msgstr "Desgaitu talde guztiak"
 
 #: idleometer.cc:42
 msgid "Idle O Meter"
-msgstr ""
+msgstr "Neurgailua O-n"
 
 #: idleometer.cc:45
 msgid "<b>GUI Idle Timing Statistics</b>"
-msgstr ""
+msgstr "<b>GUI inaktiboaren denbora-estatistikak</b>"
 
 #: idleometer.cc:52 latency_gui.cc:92 panner_ui.cc:413 plugin_pin_dialog.cc:116
 #: plugin_selector.cc:271 plugin_ui.cc:470 plugin_dspload_ui.cc:37
 #: rc_option_editor.cc:761
 msgid "Reset"
-msgstr ""
+msgstr "Berrezarri"
 
 #: idleometer.cc:67
 msgid "Current:"
-msgstr ""
+msgstr "Oraingoa:"
 
 #: idleometer.cc:70
 msgid "Min:"
-msgstr ""
+msgstr "Min:"
 
 #: idleometer.cc:73
 msgid "Max:"
-msgstr ""
+msgstr "Max:"
 
+# "Batez beste" laburtzeko ??
 #: idleometer.cc:76
 msgid "Mean:"
-msgstr ""
+msgstr "Bat-bes:"
 
 #: idleometer.cc:79
 msgid "σ:"
-msgstr ""
+msgstr "σ:"
 
 #: idleometer.cc:82
 msgid "Elapsed:"
-msgstr ""
+msgstr "Igarotakoa:"
 
 #: insert_remove_time_dialog.cc:61
 msgid "Remove Time starting at:"
-msgstr ""
+msgstr "Ezabatu denbora hemen hasita:"
 
 #: insert_remove_time_dialog.cc:61
 msgid "Insert Time starting at:"
-msgstr ""
+msgstr "Txertatu denbora hemen hasita:"
 
 #: insert_remove_time_dialog.cc:68
 msgid "Time to remove:"
-msgstr ""
+msgstr "Ezabatzeko denbora:"
 
 #: insert_remove_time_dialog.cc:68
 msgid "Time to insert:"
-msgstr ""
+msgstr "Txertatzeko denbora:"
 
 #: insert_remove_time_dialog.cc:88
 msgid "Intersected regions should:"
-msgstr ""
+msgstr "Gurutzatutako eremuek hau egingo dute:"
 
 #: insert_remove_time_dialog.cc:91
 msgid "stay in position"
-msgstr ""
+msgstr "tokian gelditu"
 
 #: insert_remove_time_dialog.cc:92
 msgid "move"
-msgstr ""
+msgstr "mugitu"
 
 #: insert_remove_time_dialog.cc:93
 msgid "be split"
-msgstr ""
+msgstr "zatitu"
 
 #: insert_remove_time_dialog.cc:100
 msgid "Apply to all playlists of the selected track(s)"
-msgstr ""
+msgstr "Aplikatu hautatutako pist(ar)en erreprodukzio-zerrendei"
 
 #: insert_remove_time_dialog.cc:103
 msgid "Move glued-to-musical-time regions (MIDI regions)"
-msgstr ""
+msgstr "Mugitu musika-denborari-itsatsitako eremuak (MIDI eremuak)"
 
 #: insert_remove_time_dialog.cc:106
 msgid "Move markers"
-msgstr ""
+msgstr "Mugitu markak"
 
 #: insert_remove_time_dialog.cc:109
 msgid "Move glued-to-musical-time markers"
-msgstr ""
+msgstr "Mugitu musika-denborari-itsatsitako markak"
 
 #: insert_remove_time_dialog.cc:115
 msgid "Move locked markers"
-msgstr ""
+msgstr "Mugitu blokeatutako markak"
 
 #: insert_remove_time_dialog.cc:120
 msgid ""
 "Move tempo and meter changes\n"
 "<i>(may cause oddities in the tempo map)</i>"
 msgstr ""
+"Mugitu tempo eta metrika aldaketak\n"
+"<i>(arazoak sor ditzake tempo-mapan)</i>"
 
 #: insert_remove_time_dialog.cc:128
 msgid "Remove time"
-msgstr ""
+msgstr "Ezabatu denbora"
 
 #: insert_remove_time_dialog.cc:128
 msgid "Insert time"
-msgstr ""
+msgstr "Txertatu denbora"
 
 #: insert_remove_time_dialog.cc:209
 msgid "Invalid or zero duration entered. Please enter a valid duration"
 msgstr ""
+"Balio ez duen edo iraupen hutsa sartu duzu. Idatzi baliozko iraupen bat"
 
 #: instrument_selector.cc:122
 msgid "-none-"
-msgstr ""
+msgstr "-bat ere ez-"
 
 #: instrument_selector.cc:135 instrument_selector.cc:145
 msgid "≤ %1 outs"
-msgstr ""
+msgstr "≤ %1 irteera"
 
 #: instrument_selector.cc:137 instrument_selector.cc:147
 msgid "%1 outs"
-msgstr ""
+msgstr "%1 irteera"
 
 #: instrument_selector.cc:150
 msgid "stereo"
-msgstr ""
+msgstr "estereo"
 
 #: interthread_progress_window.cc:115
 msgid "Importing file: %1 of %2"
-msgstr ""
+msgstr "Fitxategia inportatzen: %1 %2tik"
 
 #: io_selector.cc:226
 msgid "I/O selector"
-msgstr ""
+msgstr "S/I hautatzailea"
 
 #: io_selector.cc:271 monitor_selector.cc:245
 msgid "%1 input"
-msgstr ""
+msgstr "%1 sarrera"
 
 #: io_selector.cc:273 monitor_selector.cc:247
 msgid "%1 output"
-msgstr ""
+msgstr "%1 irteera"
 
 #: keyboard.cc:125
 msgid "your own"
-msgstr ""
+msgstr "zeurea"
 
 #: keyboard.cc:187 keyboard.cc:211
 msgid "Default keybindings not found - %1 will be hard to use!"
 msgstr ""
+"Ez dira laster-tekla lehenetsiak topatu - %1 erabiltzeko zaila izango da!"
 
 #: keyboard.cc:190
 msgid "Key bindings file \"%1\" not found. Default bindings used instead"
 msgstr ""
+"Ez da \"%1\" laster-teklen fitxategia topatu. Lehenetsitako laster-teklak "
+"erabiliko dira"
 
 #: keyeditor.cc:72
 msgid "Colliding keybindings"
-msgstr ""
+msgstr "Talka egiten duten laster-teklak"
 
 #: keyeditor.cc:74
 msgid ""
 "The key sequence is already bound to '%1'. Please remove the other binding "
 "first."
 msgstr ""
+"Laster-tekla jada '%1'-(e)ri lotuta dago. Ezabatu lehenik beste lasterbidea."
 
 #: keyeditor.cc:84
 msgid "Remove shortcut"
-msgstr ""
+msgstr "Ezabatu lasterbidea"
 
 #: keyeditor.cc:86
 msgid "Search..."
-msgstr ""
+msgstr "Bilatu..."
 
 #: keyeditor.cc:98
 msgid "Click to reset search string"
-msgstr ""
+msgstr "Egin klik bilaketa-katea berrezartzeko"
 
 #: keyeditor.cc:102
 msgid "To remove a shortcut, select an action then press this: "
 msgstr ""
+"Lasterbide bat ezabatzeko, hautatu ekintza bat eta ondoren sakatu hau: "
 
 #: keyeditor.cc:114
 msgid "Reset Bindings to Defaults"
-msgstr ""
+msgstr "Berrezarri lasterbide lehenetsiak"
 
 #: keyeditor.cc:117
 msgid "Print Bindings (to your web browser)"
-msgstr ""
+msgstr "Inprimatu lasterbideak (web-nabigatzailean)"
 
 #: keyeditor.cc:236 lua_script_manager.cc:54
 msgid "Action"
-msgstr ""
+msgstr "Ekintza"
 
 #: keyeditor.cc:237
 msgid "Shortcut"
-msgstr ""
+msgstr "Lasterbidea"
 
 #: keyeditor.cc:381 luainstance.cc:505
 msgid "RegionList"
-msgstr ""
+msgstr "EremuZerrenda"
 
 #: latency_gui.cc:47
 msgid "sample"
-msgstr ""
+msgstr "lagina"
 
 #: latency_gui.cc:48
 msgid "msec"
-msgstr ""
+msgstr "ms"
 
 #: latency_gui.cc:49
 msgid "period"
-msgstr ""
+msgstr "periodoa"
 
 #: latency_gui.cc:177 rhythm_ferret.cc:310 sfdb_ui.cc:2019
 msgid "programming error: %1 (%2)"
-msgstr ""
+msgstr "programazio-akatsa: %1 (%2)"
 
 #: location_ui.cc:61 location_ui.cc:64
 msgid "Use PH"
-msgstr ""
+msgstr "Erabili PHa"
 
 #: location_ui.cc:62 location_ui.cc:65
 msgid "Goto"
-msgstr ""
+msgstr "Joan hona"
 
 #: location_ui.cc:70
 msgid "Glue"
-msgstr ""
+msgstr "Itsatsi"
 
 #: location_ui.cc:97
 msgid "Performer:"
-msgstr ""
+msgstr "Interpretatzailea:"
 
 #: location_ui.cc:98
 msgid "Composer:"
-msgstr ""
+msgstr "Konpositorea:"
 
 #: location_ui.cc:100
 msgid "Pre-Emphasis"
-msgstr ""
+msgstr "Aurrenfasia"
 
 #: location_ui.cc:334
 msgid "Remove this range"
-msgstr ""
+msgstr "Ezabatu barruti hau"
 
 #: location_ui.cc:335
 msgid "Start time - middle click to locate here"
-msgstr ""
+msgstr "Hasi denbora - erdiko botoiarekin klik hemen kokatzeko"
 
 #: location_ui.cc:336
 msgid "End time - middle click to locate here"
-msgstr ""
+msgstr "Bukatu denbora - erdiko botoiarekin klik hemen kokatzeko"
 
 #: location_ui.cc:339
 msgid "Set range start from playhead location"
-msgstr ""
+msgstr "Ezarri barruti-hasiera denbora-barraren kokalekuan"
 
 #: location_ui.cc:340
 msgid "Set range end from playhead location"
-msgstr ""
+msgstr "Ezarri barruti-amaiera denbora-barraren kokalekuan"
 
 #: location_ui.cc:344
 msgid "Remove this marker"
-msgstr ""
+msgstr "Ezabatu marka hau"
 
 #: location_ui.cc:345
 msgid "Position - middle click to locate here"
-msgstr ""
+msgstr "Kokalekua - erdiko botoiarekin klik hemen kokatzeko"
 
 #: location_ui.cc:347
 msgid "Set marker time from playhead location"
-msgstr ""
+msgstr "Ezarri marka-denbora denbora-barraren kokalekuaz"
 
 #: location_ui.cc:543
 msgid "You cannot put a CD marker at the start of the session"
-msgstr ""
+msgstr "Ezin duzu CD markarik jarri saioaren hasieran"
 
 #: location_ui.cc:769
 msgid "New Marker"
-msgstr ""
+msgstr "Marka berria"
 
 #: location_ui.cc:786
 msgid "<b>Loop/Punch Ranges</b>"
-msgstr ""
+msgstr "<b>Loop-/Grabazio-tarteak</b>"
 
 #: location_ui.cc:812
 msgid "<b>Markers (Including CD Index)</b>"
-msgstr ""
+msgstr "<b>Markak (CD aurkibidea barne)</b>"
 
 #: location_ui.cc:847
 msgid "<b>Ranges (Including CD Track Ranges)</b>"
-msgstr ""
+msgstr "<b>Barrutiak (CD pista-barrutiak barne)</b>"
 
 #: location_ui.cc:1090
 msgid "add range marker"
-msgstr ""
+msgstr "gehitu barruti-marka"
 
 #: lua_script_manager.cc:42
 msgid "Add/Set"
-msgstr ""
+msgstr "Gehitu/Ezarri"
 
 #: lua_script_manager.cc:45
 msgid "Call"
-msgstr ""
+msgstr "Deitu"
 
 #: lua_script_manager.cc:46
 msgid "New Hook"
-msgstr ""
+msgstr "Amu berria"
 
 #: lua_script_manager.cc:48 plugin_presets_ui.cc:36
 msgid "Load"
-msgstr ""
+msgstr "Kargatu"
 
 #: lua_script_manager.cc:81 lua_script_manager.cc:122 lua_script_manager.cc:158
 #: plugin_presets_ui.cc:81 plugin_ui.cc:473 script_selector.cc:57
 #: session_metadata_dialog.cc:715 session_metadata_dialog.cc:720
 #: template_dialog.cc:273
 msgid "Description"
-msgstr ""
+msgstr "Deskripzioa"
 
 #: lua_script_manager.cc:83
 msgid ""
 "Action Scripts are user initiated actions (menu, shortcuts, toolbar-button) "
 "for batch processing or customized tasks."
 msgstr ""
+"Ekintza-scriptak erabiltzaileak sortutako prozesamendu edo ekintza "
+"pertsonalizatuak dira (menua, laster-teklak, tresna-barrako botoiak)."
 
 #: lua_script_manager.cc:105
 msgid "Signal(s)"
-msgstr ""
+msgstr "Seinalea(k)"
 
 #: lua_script_manager.cc:124
 msgid ""
@@ -8750,6 +8758,9 @@ msgid ""
 "Once a script is registered it is automatically triggered by events to "
 "perform some task."
 msgstr ""
+"Lua ekintza-gakoak ekitaldiek aktibatutako atzeradeiak dira, Editore/"
+"Nahasgailu interfazerako. Script bat erregistratu ondoren, automatikoki "
+"aktibatzen da lan bat egiteko."
 
 #: lua_script_manager.cc:160
 msgid ""
@@ -8757,176 +8768,185 @@ msgid ""
 "They are called periodically at the start of every audio cycle in the "
 "realtime process context before any processing takes place."
 msgstr ""
+"Lua saio-scriptak prozesatze-motorrean kargatu eta denbora errealean "
+"exekutatzen dira. Aldizka deitzen zaie audio-ziklo bakoitzaren hasieran, "
+"edozein prozesamendu gertatu baino lehen."
 
 #: lua_script_manager.cc:220
 msgid "Action %1"
-msgstr ""
+msgstr "%1 ekintza"
 
 #: lua_script_manager.cc:225 lua_script_manager.cc:307
 msgid "Unset"
-msgstr ""
+msgstr "Kendu"
 
 #: lua_script_manager.cc:446
 msgid "Session script '%1' removal failed: %2"
-msgstr ""
+msgstr "%1 saio-scripta ezabatzeak huts egin du: %2"
 
 #: luainstance.cc:499
 msgid "Main_menu"
-msgstr ""
+msgstr "Menu_nagusia"
 
 #: luainstance.cc:501
 msgid "JACK"
-msgstr ""
+msgstr "JACK"
 
 #: luainstance.cc:503
 msgid "redirectmenu"
-msgstr ""
+msgstr "birbideratzemenua"
 
 #: luainstance.cc:507
 msgid "ProcessorMenu"
-msgstr ""
+msgstr "ProzesadoreMenua"
 
 #: luainstance.cc:1351
 msgid "Loading user ui scripts file %1"
-msgstr ""
+msgstr "Erabiltzaile interfaze-script artxiboak kargatzen %1"
 
 #: luainstance.cc:1354
 msgid "cannot read ui scripts file \"%1\""
-msgstr ""
+msgstr "ezin dira irakurri interfaze-script artxiboak \"%1\""
 
 #: luainstance.cc:1359
 msgid "user ui scripts file \"%1\" not loaded successfully."
-msgstr ""
+msgstr "\"%1\" erabiltzaile interfaze-script artxiboa ez da ongi kargatu."
 
 #: luainstance.cc:1384
 msgid "UI script file %1 not saved"
-msgstr ""
+msgstr "%1 interfaze-script artxiboa ez da gorde"
 
 #: luainstance.cc:1521
 msgid "Add Shortcut or Lua Script"
-msgstr ""
+msgstr "Gehitu lasterbidea edo Lua scripta"
 
 #: luainstance.cc:1525
 msgid "Add Lua Callback Hook"
-msgstr ""
+msgstr "Gehitu Lua atzeradei-amua"
 
 #: luainstance.cc:1532
 msgid "Add Lua Session Script"
-msgstr ""
+msgstr "Gehtu Lua saio-scripta"
 
 #: luainstance.cc:1555
 msgid "Cannot read script '%1': %2"
-msgstr ""
+msgstr "Ezin da irakurri '%1' scripta: %2"
 
 #: luainstance.cc:1572
 msgid "Set Script Parameters"
-msgstr ""
+msgstr "Zehaztu script-parametroak"
 
 #: luainstance.cc:1597
 msgid "Session script '%1' instantiation failed: %2"
-msgstr ""
+msgstr "%1 saio-scripta adibidez adierazteak huts egin du: %2"
 
 #: luainstance.cc:1601 luainstance.cc:1605
 msgid "Loading Session script '%1' failed: %2"
-msgstr ""
+msgstr "%1 saio-scripta kargatzeak huts egin du: %2"
 
 #: luawindow.cc:98
 msgid "Run"
-msgstr ""
+msgstr "Exekutau"
 
 #: luawindow.cc:99
 msgid "Clear Output"
-msgstr ""
+msgstr "Garbitu irteera"
 
 #: luawindow.cc:103
 msgid "Revert"
-msgstr ""
+msgstr "Itzuli"
 
 #: luawindow.cc:178
 msgid "Select Editor Buffer"
-msgstr ""
+msgstr "Hautatu editore-bufferra"
 
 #: luawindow.cc:266 luawindow.cc:271
 msgid "Window|Lua"
-msgstr ""
+msgstr "Lua"
 
 #: luawindow.cc:299 luawindow.cc:323
 msgid "LuaException: %1"
-msgstr ""
+msgstr "LuaSalbuespena: %1"
 
 #: luawindow.cc:301 luawindow.cc:325
 msgid "Glib Exception: %1"
-msgstr ""
+msgstr "Glib salbuespena: %1"
 
 #: luawindow.cc:303 luawindow.cc:305 luawindow.cc:327 luawindow.cc:329
 msgid "C++ Exception: %1"
-msgstr ""
+msgstr "C++ salbuespena: %1"
 
 #: luawindow.cc:380
 msgid "Deleted %1"
-msgstr ""
+msgstr "%1 ezabatuta"
 
 #: luawindow.cc:383
 msgid "Failed to delete %1"
-msgstr ""
+msgstr "%1 ezabatzeak huts egin du"
 
 #: luawindow.cc:449
 msgid ""
 "Missing script header.\n"
 "The script requires an '{ardour}' info table and a 'factory' function."
 msgstr ""
+"Script-goiburua falta da.\n"
+"Scriptak '{ardour}' informazio-taula eta 'factory' funtzioa behar ditu"
 
 #: luawindow.cc:454
 msgid "Script fails to compile."
-msgstr ""
+msgstr "Scriptak ezin du konpilatu."
 
 #: luawindow.cc:461
 msgid "Invalid or missing script-name or script-type."
-msgstr ""
+msgstr "Script-izen edo -mota baliogabe edo ez aurkitua."
 
 #: luawindow.cc:466
 msgid ""
 "Invalid script-type.\n"
 "Valid types are 'EditorAction' and 'Snippet'."
 msgstr ""
+"Script-mota baliogabea.\n"
+"Baliozko motak 'EditoreEkintza' edo 'Kode zatia' dira."
 
 #: luawindow.cc:477 luawindow.cc:529
 msgid "Saved as %1"
-msgstr ""
+msgstr "%1 bezala gordeta"
 
 #: luawindow.cc:480 luawindow.cc:532
 msgid "Error saving file: %1"
-msgstr ""
+msgstr "Errorea artxiboa gordetzean: %1"
 
 #: luawindow.cc:490
 msgid ""
 "Script with given name '%1' already exists.\n"
 "Use a different name in the descriptor."
 msgstr ""
+"'%1' izendun scripta jada badago.\n"
+"Erabili beste izen bat."
 
 #: luawindow.cc:675
 msgid "Scratch Buffer %1"
-msgstr ""
+msgstr "%1 harramazka-bufferra"
 
 #: luawindow.cc:677
 msgid "Action: '%1'"
-msgstr ""
+msgstr "Ekintza: '%1'"
 
 #: luawindow.cc:679
 msgid "Snippet: %1"
-msgstr ""
+msgstr "Kode zatia: %1"
 
 #: luawindow.cc:691
 msgid "Save as"
-msgstr ""
+msgstr "Gorde honela"
 
 #: main.cc:100
 msgid "%1 could not connect to the audio backend."
-msgstr ""
+msgstr "%1 ezin izan da audio-motorrera konektatu."
 
 #: main.cc:147 main.cc:163
 msgid "The audio backend (%1) has failed, or terminated"
-msgstr ""
+msgstr "Audio-motorrak (%1) huts egin du, edo gelditu egin da"
 
 #: main.cc:150
 msgid ""
@@ -8936,108 +8956,120 @@ msgid ""
 "\n"
 "Click OK to exit %1."
 msgstr ""
+"%2 ustekabean atera da, %1 jakinarazi gabe.\n"
+"\n"
+"Hau konfigurazio txarraren edo %2(e)ko errore baten ondorioz gerta liteke.\n"
+"\n"
+"Egin klik Ados botoian %1-(e)tik irteteko."
 
 #: main.cc:164
 msgid "%2 exited unexpectedly, and without notifying %1."
-msgstr ""
+msgstr "%2 ustekabean atera da, %1 jakinarazi gabe."
 
 #: main.cc:259
 msgid ""
 "\n"
 "   %1 could not understand your command line      "
 msgstr ""
+"\n"
+"   %1-(e)k ezin izan du ulertu zure komando-lerroa      "
 
 #: main.cc:261
 msgid "An error was encountered while launching %1"
-msgstr ""
+msgstr "Errore bat aurkitu da %1 abiaraztean"
 
 #: main.cc:376
 msgid " (built using "
-msgstr ""
+msgstr " (honekin eraikia "
 
 #: main.cc:379
 msgid " and GCC version "
-msgstr ""
+msgstr " eta GCC bertsioa "
 
 #: main.cc:389
 msgid "Copyright (C) 1999-2020 Paul Davis"
-msgstr ""
+msgstr "Copyright (C) 1999-2020 Paul Davis"
 
 #: main.cc:390
 msgid ""
 "Some portions Copyright (C) Steve Harris, Ari Johnson, Brett Viren, Joel "
 "Baker, Robin Gareus"
 msgstr ""
+"Zati batzuen Copyright (C) Steve Harris, Ari Johnson, Brett Viren, Joel "
+"Baker, Robin Gareus"
 
 #: main.cc:392
 msgid "%1 comes with ABSOLUTELY NO WARRANTY"
-msgstr ""
+msgstr "%1 INOLAKO BERMERIK GABE dator"
 
 #: main.cc:393
 msgid "not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
-msgstr ""
+msgstr "ezta merkaturatzeko edo helburu jakin baterako gaitasunerako ere."
 
 #: main.cc:394
 msgid "This is free software, and you are welcome to redistribute it "
-msgstr ""
+msgstr "Hau software askea da eta birbanatu egin dezakezu "
 
 #: main.cc:395
 msgid "under certain conditions; see the source for copying conditions."
-msgstr ""
+msgstr "baldintza batzuen pean; ikusi iturburua kopia-baldintzetarako."
 
 #: main.cc:400
 msgid "could not initialize %1."
-msgstr ""
+msgstr "ezin izan da %1 abiarazi."
 
 #: main.cc:402
 msgid ""
 "Could not initialize %1 (likely due to corrupt config files).\n"
 "Run %1 from a commandline for more information."
 msgstr ""
+"Ezin izan da %1 abiarazi (seguru aski konfig-artxibo ustelengatik).\n"
+"Abiarazi %1 kontsolatik/terminaletik informazio gehiagorako."
 
 #: main.cc:411
+#, fuzzy
 msgid "Cannot xinstall SIGPIPE error handler"
-msgstr ""
+msgstr "Ezin da x-instalatu SIGPIPE errore-kontrolatzailea"
 
 #: main.cc:418
 msgid "Could not complete pre-GUI initialization"
-msgstr ""
+msgstr "Ezin izan da osatu aurre-interfaze abiarazketa"
 
 #: main.cc:425
 msgid "could not create %1 GUI"
-msgstr ""
+msgstr "ezin izan da sortu %1 interfazea"
 
 #: main_clock.cc:73
 msgid "Display absolute time"
-msgstr ""
+msgstr "Bistaratu denbora absolutua"
 
 #: main_clock.cc:78
 msgid "Display delta to edit cursor"
-msgstr ""
+msgstr "Bistaratu edizio-kurtsorerako diferentzia"
 
 #: main_clock.cc:83
 msgid "Display delta to origin marker"
-msgstr ""
+msgstr "Bistaratu jatorri-markarako diferentzia"
 
 #: main_clock.cc:91 tempo_dialog.cc:65
 msgid "Edit Tempo"
-msgstr ""
+msgstr "Editatu tempoa"
 
 #: main_clock.cc:92 tempo_dialog.cc:498
 msgid "Edit Meter"
-msgstr ""
+msgstr "Editatu metrika"
 
 #: main_clock.cc:93
 msgid "Insert Tempo Change"
-msgstr ""
+msgstr "Txertatu tempo aldaketa"
 
 #: main_clock.cc:94
 msgid "Insert Meter Change"
-msgstr ""
+msgstr "Txertatu metrika aldaketa"
 
 #: marker.cc:288 tempo_curve.cc:80 tempo_curve.cc:81
 msgid "MarkerText"
-msgstr ""
+msgstr "MarkaTestua"
 
 #: midi_channel_selector.cc:164 midi_channel_selector.cc:396
 #: midi_channel_selector.cc:435 rc_option_editor.cc:3691
@@ -9045,312 +9077,312 @@ msgstr ""
 #: session_archive_dialog.cc:199 session_archive_dialog.cc:210
 #: session_archive_dialog.cc:224 sfdb_ui.cc:750
 msgid "None"
-msgstr ""
+msgstr "Bat ere ez"
 
 #: midi_channel_selector.cc:168 midi_channel_selector.cc:401
 #: midi_channel_selector.cc:440
 msgid "Invert"
-msgstr ""
+msgstr "Alderantzikatu"
 
 #: midi_channel_selector.cc:172
 msgid "Force"
-msgstr ""
+msgstr "Derrigortu"
 
 #: midi_channel_selector.cc:331
 msgid "MIDI Channel Control"
-msgstr ""
+msgstr "MIDI kanal kontrola"
 
 #: midi_channel_selector.cc:333
 msgid "Playback all channels"
-msgstr ""
+msgstr "Erreproduzitu kanal guztiak"
 
 #: midi_channel_selector.cc:334
 msgid "Play only selected channels"
-msgstr ""
+msgstr "Erreproduzitu soilik hautatutako kanalak"
 
 #: midi_channel_selector.cc:335
 msgid "Use a single fixed channel for all playback"
-msgstr ""
+msgstr "Erabili kanal zehatz bat erreprodukziorako"
 
 #: midi_channel_selector.cc:336
 msgid "Record all channels"
-msgstr ""
+msgstr "Grabatu kanal guztiak"
 
 #: midi_channel_selector.cc:337
 msgid "Record only selected channels"
-msgstr ""
+msgstr "Grabatu soilik hautatutako kanalak"
 
 #: midi_channel_selector.cc:338
 msgid "Force all channels to 1 channel"
-msgstr ""
+msgstr "Derrigortu kanal guztiak kanal bakar batera"
 
 #: midi_channel_selector.cc:373
 msgid "Inbound"
-msgstr ""
+msgstr "Sarrera"
 
 #: midi_channel_selector.cc:392
 msgid "Click to enable recording all channels"
-msgstr ""
+msgstr "Egin klik kanal guztien grabazioa gaitzeko"
 
 #: midi_channel_selector.cc:397
 msgid "Click to disable recording all channels"
-msgstr ""
+msgstr "Egin klik kanal guztien grabazioa desgaitzeko"
 
 #: midi_channel_selector.cc:402
 msgid "Click to invert currently selected recording channels"
-msgstr ""
+msgstr "Egin klik hautatutako grabazio-kanalak alderantzikatzeko"
 
 #: midi_channel_selector.cc:412
 msgid "Playback"
-msgstr ""
+msgstr "Erreprodukzioa"
 
 #: midi_channel_selector.cc:431
 msgid "Click to enable playback of all channels"
-msgstr ""
+msgstr "Egin klik kanal guztien erreprodukzioa gaitzeko"
 
 #: midi_channel_selector.cc:436
 msgid "Click to disable playback of all channels"
-msgstr ""
+msgstr "Egin klik kanal guztien erreprodukzioa desgaitzeko"
 
 #: midi_channel_selector.cc:441
 msgid "Click to invert current selected playback channels"
-msgstr ""
+msgstr "Egin klik hautatutako erreprodukzio-kanalak alderantzikatzeko"
 
 #: midi_channel_selector.cc:619
 msgid "Click to toggle playback of channel %1"
-msgstr ""
+msgstr "Egin klik %1 kanalaren erreprodukzioa kommutatzeko"
 
 #: midi_channel_selector.cc:627
 msgid "Click to force all MIDI channel messages to channel %1"
-msgstr ""
+msgstr "Egin klik MIDI kanal guztietako mezuak %1 kanalera derrigortzeko"
 
 #: midi_channel_selector.cc:719
 msgid "Click to toggle recording of channel %1"
-msgstr ""
+msgstr "Egin klik %1 kanalaren grabazioa kommutatzeko"
 
 #: midi_channel_selector.cc:727
 msgid "Click to force all recorded channels to %1"
-msgstr ""
+msgstr "Egin klik grabazio-kanal guztiak %1-(e)ra derrigortzeko"
 
 #: midi_export_dialog.cc:37
 msgid "Export MIDI: %1"
-msgstr ""
+msgstr "Esportatu MIDIa: %1"
 
 #: midi_list_editor.cc:58
 msgid "Whole"
-msgstr ""
+msgstr "Borobila"
 
 #: midi_list_editor.cc:59
 msgid "Half"
-msgstr ""
+msgstr "Zuria"
 
 #: midi_list_editor.cc:60
 msgid "Triplet"
-msgstr ""
+msgstr "Hirukotxoa"
 
 #: midi_list_editor.cc:61
 msgid "Quarter"
-msgstr ""
+msgstr "Beltza"
 
 #: midi_list_editor.cc:62
 msgid "Eighth"
-msgstr ""
+msgstr "Kortxea"
 
 #: midi_list_editor.cc:63
 msgid "Sixteenth"
-msgstr ""
+msgstr "Kortxeaerdia"
 
 #: midi_list_editor.cc:64
 msgid "Thirty-second"
-msgstr ""
+msgstr "Fusa"
 
 #: midi_list_editor.cc:65
 msgid "Sixty-fourth"
-msgstr ""
+msgstr "Fusaerdia"
 
 #: midi_list_editor.cc:108
 msgid "Num"
-msgstr ""
+msgstr "Zenb"
 
 #: midi_list_editor.cc:110
 msgid "Vel"
-msgstr ""
+msgstr "Indar"
 
 #: midi_list_editor.cc:218
 msgid "edit note start"
-msgstr ""
+msgstr "editatu notaren hasiera"
 
 #: midi_list_editor.cc:227
 msgid "edit note channel"
-msgstr ""
+msgstr "editatu notaren kanala"
 
 #: midi_list_editor.cc:237
 msgid "edit note number"
-msgstr ""
+msgstr "editatu notaren zenbakia"
 
 #: midi_list_editor.cc:247
 msgid "edit note velocity"
-msgstr ""
+msgstr "editatu notaren indarra"
 
 #: midi_list_editor.cc:261
 msgid "edit note length"
-msgstr ""
+msgstr "editatu notaren iraupena"
 
 #: midi_list_editor.cc:465
 msgid "insert new note"
-msgstr ""
+msgstr "txertatu nota berria"
 
 #: midi_list_editor.cc:529
 msgid "delete notes (from list)"
-msgstr ""
+msgstr "ezabatu notak (zerrendatik)"
 
 #: midi_list_editor.cc:604
 msgid "change note channel"
-msgstr ""
+msgstr "aldatu notaren kanala"
 
 #: midi_list_editor.cc:612 midi_list_editor.cc:621
 msgid "change note number"
-msgstr ""
+msgstr "editatu notaren zenbakia"
 
 #: midi_list_editor.cc:629
 msgid "change note velocity"
-msgstr ""
+msgstr "editatu notaren indarra"
 
 #: midi_list_editor.cc:699
 msgid "change note length"
-msgstr ""
+msgstr "editatu notaren iraupena"
 
 #: midi_region_view.cc:878
 msgid "channel edit"
-msgstr ""
+msgstr "kanalaren edizioa"
 
 #: midi_region_view.cc:914
 msgid "velocity edit"
-msgstr ""
+msgstr "indarraren edizioa"
 
 #: midi_region_view.cc:973
 msgid "add note"
-msgstr ""
+msgstr "gehitu nota"
 
 #: midi_region_view.cc:1941
 msgid "step add"
-msgstr ""
+msgstr "gehitu"
 
 #: midi_region_view.cc:2049 midi_region_view.cc:2073
 msgid "alter patch change"
-msgstr ""
+msgstr "aldatu patch aldaketa"
 
 #: midi_region_view.cc:2114
 msgid "add patch change"
-msgstr ""
+msgstr "gehitu patch aldaketa"
 
 #: midi_region_view.cc:2135 midi_region_view.cc:2136
 msgid "move patch change"
-msgstr ""
+msgstr "mugitu patch aldaketa"
 
 #: midi_region_view.cc:2147 midi_region_view.cc:2149
 msgid "delete patch change"
-msgstr ""
+msgstr "ezabatu patch aldaketa"
 
 #: midi_region_view.cc:2195
 msgid "delete selection"
-msgstr ""
+msgstr "ezabatu hautapena"
 
 #: midi_region_view.cc:2213
 msgid "delete note"
-msgstr ""
+msgstr "ezabatu nota"
 
 #: midi_region_view.cc:2783
 msgid "move notes"
-msgstr ""
+msgstr "mugitu notak"
 
 #: midi_region_view.cc:2821
 msgid "copy notes"
-msgstr ""
+msgstr "kopiatu notak"
 
 #: midi_region_view.cc:3384
 msgid "change velocities"
-msgstr ""
+msgstr "aldatu indarrak"
 
 #: midi_region_view.cc:3450
 msgid "transpose"
-msgstr ""
+msgstr "transposatu"
 
 #: midi_region_view.cc:3478
 msgid "change note lengths"
-msgstr ""
+msgstr "aldatu noten iraupena"
 
 #: midi_region_view.cc:3553
 msgid "nudge"
-msgstr ""
+msgstr "mugitu"
 
 #: midi_region_view.cc:3568
 msgid "change channel"
-msgstr ""
+msgstr "aldatu kanala"
 
 #: midi_region_view.cc:3616
 msgid "Bank "
-msgstr ""
+msgstr "Bankua "
 
 #: midi_region_view.cc:3618
 msgid "Channel "
-msgstr ""
+msgstr "Kanala "
 
 #: midi_region_view.cc:3810
 msgid "paste"
-msgstr ""
+msgstr "itsatsi"
 
 #: midi_streamview.cc:191
 msgid "attempt to display MIDI region with no source"
-msgstr ""
+msgstr "iturburu gabeko MIDI eremuak erakusten saiatu"
 
 #: midi_streamview.cc:201
 msgid "attempt to display MIDI region with no model"
-msgstr ""
+msgstr "eredu gabeko MIDI eremuak erakusten saiatu"
 
 #: midi_streamview.cc:524
 msgid "failed to create MIDI region"
-msgstr ""
+msgstr "MIDI eremua sortzeak huts egin du"
 
 #: midi_time_axis.cc:258
 msgid "External MIDI Device"
-msgstr ""
+msgstr "Kanpoko MIDI gailua"
 
 #: midi_time_axis.cc:259
 msgid "External Device Mode"
-msgstr ""
+msgstr "Kanpoko gailuaren modua"
 
 #: midi_time_axis.cc:367 midi_time_axis.cc:429 midi_time_axis.cc:481
 msgid "Plugin Provided"
-msgstr ""
+msgstr "Emandako plugina"
 
 #: midi_time_axis.cc:597
 msgid "Show Full Range"
-msgstr ""
+msgstr "Erakutsi barruti osoa"
 
 #: midi_time_axis.cc:602
 msgid "Fit Contents"
-msgstr ""
+msgstr "Doitu edukiak"
 
 #: midi_time_axis.cc:606
 msgid "Note Range"
-msgstr ""
+msgstr "Noten barrutia"
 
 #: midi_time_axis.cc:607
 msgid "Note Mode"
-msgstr ""
+msgstr "Noten modua"
 
 #: midi_time_axis.cc:608
 msgid "Channel Selector..."
-msgstr ""
+msgstr "Kanal-hautatzailea..."
 
 #: midi_time_axis.cc:611 mixer_strip.cc:1764 route_time_axis.cc:821
 msgid "Patch Selector..."
-msgstr ""
+msgstr "Patch hautatzailea..."
 
 #: midi_time_axis.cc:614
 msgid "Color Mode"
-msgstr ""
+msgstr "Kolore modua"
 
 #: midi_time_axis.cc:672
 msgid "Bender"
@@ -9358,87 +9390,87 @@ msgstr ""
 
 #: midi_time_axis.cc:676
 msgid "Pressure"
-msgstr ""
+msgstr "Presioa"
 
 #: midi_time_axis.cc:688
 msgid "Controllers"
-msgstr ""
+msgstr "Kontrolagailuak"
 
 #: midi_time_axis.cc:694
 msgid "Polyphonic Pressure"
-msgstr ""
+msgstr "Presio polifonikoa"
 
 #: midi_time_axis.cc:700
 msgid "No MIDI Channels selected"
-msgstr ""
+msgstr "Ez da MIDI kanalik hautatu"
 
 #: midi_time_axis.cc:757 midi_time_axis.cc:886
 msgid "Hide all channels"
-msgstr ""
+msgstr "Ezkutatu kanal guztiak"
 
 #: midi_time_axis.cc:761 midi_time_axis.cc:890
 msgid "Show all channels"
-msgstr ""
+msgstr "Erakutsi kanal guztiak"
 
 #: midi_time_axis.cc:772 midi_time_axis.cc:901
 msgid "Channel %1"
-msgstr ""
+msgstr "%1 kanala"
 
 #: midi_time_axis.cc:1057 midi_time_axis.cc:1090 midi_time_axis.cc:1093
 msgid "Controllers %1-%2"
-msgstr ""
+msgstr "%1-%2 kontrolagailuak"
 
 #: midi_time_axis.cc:1078 midi_time_axis.cc:1081
 msgid "Controller %1"
-msgstr ""
+msgstr "%1 kontrolagailua"
 
 #: midi_time_axis.cc:1111
 msgid "Sustained"
-msgstr ""
+msgstr "Mantendua"
 
 #: midi_time_axis.cc:1118
 msgid "Percussive"
-msgstr ""
+msgstr "Perkusiozkoa"
 
 #: midi_time_axis.cc:1138
 msgid "Meter Colors"
-msgstr ""
+msgstr "Neurgailu-koloreak"
 
 #: midi_time_axis.cc:1145
 msgid "Channel Colors"
-msgstr ""
+msgstr "Kanalen koloreak"
 
 #: midi_time_axis.cc:1152
 msgid "Track Color"
-msgstr ""
+msgstr "Pisten kolorea"
 
 #: midi_tracer.cc:51
 msgid "Line history: "
-msgstr ""
+msgstr "Line history: "
 
 #: midi_tracer.cc:59
 msgid "Auto-Scroll"
-msgstr ""
+msgstr "Auto-korritu"
 
 #: midi_tracer.cc:60
 msgid "Decimal"
-msgstr ""
+msgstr "Hamartarra"
 
 #: midi_tracer.cc:61
 msgid "Enabled"
-msgstr ""
+msgstr "Gaitua"
 
 #: midi_tracer.cc:62
 msgid "Delta times"
-msgstr ""
+msgstr "Delta denborak"
 
 #: midi_tracer.cc:72
 msgid "Port:"
-msgstr ""
+msgstr "Ataka:"
 
 #: midi_velocity_dialog.cc:31
 msgid "New velocity"
-msgstr ""
+msgstr "Indar berria"
 
 #: mini_timeline.cc:74
 msgid ""
@@ -9447,59 +9479,63 @@ msgid ""
 "fine grained control. Right-click to set display range. The display unit is "
 "defined by the primary clock."
 msgstr ""
+"<b>Garraio denbora-lerroa</b>. Egin ezker-klika denbora-kokaleku edo markan "
+"kokatzeko; korritu gurpila salto egiteko, mantendu %1 tekla kontrol onerako "
+"eta %2+%3 are hoberako. Egin eskuin-klika bistaratze-tartea ezartzeko. "
+"Bistaratze-unitatea erloju nagusiak definitzen du."
 
 #: mini_timeline.cc:688 rc_option_editor.cc:1150
 msgid "30 sec"
-msgstr ""
+msgstr "30 s"
 
 #: mini_timeline.cc:689 rc_option_editor.cc:1151
 msgid "1 min"
-msgstr ""
+msgstr "1 min"
 
 #: mini_timeline.cc:690 rc_option_editor.cc:1152
 msgid "2 mins"
-msgstr ""
+msgstr "2 min"
 
 #: mini_timeline.cc:691 rc_option_editor.cc:1155
 msgid "5 mins"
-msgstr ""
+msgstr "5 min"
 
 #: mini_timeline.cc:692
 msgid "10 mins"
-msgstr ""
+msgstr "10 min"
 
 #: mini_timeline.cc:693
 msgid "20 mins"
-msgstr ""
+msgstr "20 min"
 
 #: missing_file_dialog.cc:40
 msgid "Missing File"
-msgstr ""
+msgstr "Falta den fitxategia"
 
 #: missing_file_dialog.cc:43
 msgid "Select a folder to search"
-msgstr ""
+msgstr "Hautatu karpeta bertan bilatzeko"
 
 #: missing_file_dialog.cc:44
 msgid "Add chosen folder to search path, and try again"
-msgstr ""
+msgstr "Gehitu hautatutako karpeta bilatze-bidera eta saiatu berriro"
 
 #: missing_file_dialog.cc:46
 msgid "Stop loading this session"
-msgstr ""
+msgstr "Utzi saio hau kargatzeari"
 
 #: missing_file_dialog.cc:47
 msgid "Skip all missing files"
-msgstr ""
+msgstr "Baztertu falta diren fitxategi guztiak"
 
 #: missing_file_dialog.cc:48
 msgid "Skip this file"
-msgstr ""
+msgstr "Baztertu fitxategi hau"
 
 #: missing_file_dialog.cc:62 tempo_dialog.cc:157 tempo_dialog.cc:158
 #: tempo_dialog.cc:553 tempo_dialog.cc:554
 msgid "audio"
-msgstr ""
+msgstr "audioa"
 
 #: missing_file_dialog.cc:79
 msgid ""
@@ -9512,19 +9548,27 @@ msgid ""
 "\t\t\t\t\t<tt>%4</tt>\n"
 "\n"
 msgstr ""
+"%1-(e)k ezin du aurkitu %2-(r)en\n"
+"\n"
+"<i>%3</i>\n"
+"\n"
+"fitxategia karpeta hauetan:\n"
+"\n"
+"\t\t\t\t\t<tt>%4</tt>\n"
+"\n"
 
 #: missing_file_dialog.cc:113
 msgid "Click to choose an additional folder"
-msgstr ""
+msgstr "Egin klik beste karpeta bat gehiago hautatzeko"
 
 #: missing_filesource_dialog.cc:33
 msgid "Missing Source Files"
-msgstr ""
+msgstr "Falta diren iturburu-fitxategiak"
 
 #: missing_filesource_dialog.cc:40 missing_plugin_dialog.cc:39
 #: transcode_video_dialog.cc:63
 msgid "OK"
-msgstr ""
+msgstr "Ados"
 
 #: missing_filesource_dialog.cc:46
 msgid ""
@@ -9532,6 +9576,8 @@ msgid ""
 "They have been replaced with silence:\n"
 "\n"
 msgstr ""
+"Saio honek huts egin du %1 fitxategiei jarraituz.\n"
+"Isiltasunekin ordezkatu dira:\n"
 
 #: missing_filesource_dialog.cc:52
 msgid ""
@@ -9540,6 +9586,10 @@ msgid ""
 "If this is unexpected, manually loacate the files and restore them in the "
 "session folder.\n"
 msgstr ""
+"\n"
+"Barruti eta edizioak gorde egin dira.\n"
+"Hau ez bazenuen espero, eskuz bilatu fitxategiak eta birkokatu saioaren "
+"karpetan.\n"
 
 #: missing_filesource_dialog.cc:56
 msgid ""
@@ -9547,10 +9597,14 @@ msgid ""
 "disable this warning,\n"
 "but also prevent future recovery of the original in the exising region(s).\n"
 msgstr ""
+"MIDI fitxategiak eduki berria gehituz editatzeak fitxategia birsortu eta "
+"abisu hau desgaituko du,\n"
+"baina era berean, originala jada badauden eremuetan berreskuratu ahal izatea "
+"eragotziko du.\n"
 
 #: missing_plugin_dialog.cc:32
 msgid "Missing Plugins"
-msgstr ""
+msgstr "Falta diren pluginak"
 
 #: missing_plugin_dialog.cc:45
 msgid ""
@@ -9558,8 +9612,11 @@ msgid ""
 "system:\n"
 "\n"
 msgstr ""
+"Saio honek sisteman aurkitu ezin diren plugin hauek ditu:\n"
+"\n"
 
 #: missing_plugin_dialog.cc:51
+#, fuzzy
 msgid ""
 "\n"
 "Those plugins will be replaced with inactive stubs.\n"
@@ -9567,6 +9624,11 @@ msgid ""
 "session.\n"
 "(also check the blacklist, Window > Log and Preferences > Plugins)"
 msgstr ""
+"\n"
+"Plugin horiek XXX inaktiboekin ordezkatuko dira.\n"
+"Hobe da falta diren pluginak instalatu eta saioa birkargatzea.\n"
+"(zerrenda beltza ere berrikusi, Leihoa > Erregistroa eta Hobespenak > "
+"Pluginak)"
 
 #: mixer_strip.cc:176
 msgid "Click to toggle the width of this mixer strip."
@@ -10723,7 +10785,7 @@ msgstr ""
 
 #: plugin_pin_dialog.cc:350
 msgid "Manual"
-msgstr ""
+msgstr "Eskuz"
 
 #: plugin_pin_dialog.cc:495 plugin_pin_dialog.cc:499 plugin_pin_dialog.cc:503
 #: plugin_setup_dialog.cc:122 plugin_setup_dialog.cc:215
