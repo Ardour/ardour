@@ -2,7 +2,7 @@
 
 function scripts (path)
 	local out = io.popen (
-		string.format ("find '%s' -maxdepth 1 -type f -iname \"[^_]*.lua\" | grep -ve s_", path)
+		string.format ("find '%s' -maxdepth 1 -type f -iname \"[^_]*.lua\" | grep -ve /s_", path)
 	)
 	return function()
 		for file in out:lines() do
