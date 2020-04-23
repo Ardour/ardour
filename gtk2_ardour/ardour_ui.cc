@@ -1996,8 +1996,12 @@ ARDOUR_UI::transport_ffwd_rewind (int option, int dir)
 		break;
 	}
 
-	bool speed_up = (dir > 0 && current_transport_speed >= target_speed);
-	speed_up = speed_up || (dir < 0 && current_transport_speed <= target_speed);
+	/* if wanting to move forward/backward and current speed is at or above current
+	   speed (i.e. same direction, and moving), then speed up.
+	*/
+
+	const bool speed_up = (dir > 0 && current_transport_speed >= target_speed) || (dir < 0 && current_transport_speed <= target_speed);
+
 	if (speed_up) {
 		target_speed = current_transport_speed * 1.5f;
 	}
