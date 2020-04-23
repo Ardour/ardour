@@ -5,6 +5,7 @@
  * Modified for Ardour and released under the same terms.
  */
 
+#include <string.h>
 #include <iostream>
 
 #include "pbd/stacktrace.h"
@@ -135,7 +136,7 @@ XMLTree::read_buffer (char const* buffer, bool to_tree_doc)
 
 	xmlKeepBlanksDefault(0);
 
-	doc = xmlParseMemory (buffer, strlen(buffer));
+	doc = xmlParseMemory (buffer, ::strlen(buffer));
 	if (!doc) {
 		return false;
 	}
