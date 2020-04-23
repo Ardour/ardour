@@ -133,6 +133,8 @@ XMLTree::read_buffer (char const* buffer, bool to_tree_doc)
 	delete _root;
 	_root = 0;
 
+	xmlKeepBlanksDefault(0);
+
 	doc = xmlParseMemory (buffer, strlen(buffer));
 	if (!doc) {
 		return false;
