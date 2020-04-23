@@ -383,7 +383,7 @@ Route::process_output_buffers (BufferSet& bufs,
 
 	const double speed = (is_auditioner() ? 1.0 : _session.transport_speed ());
 
-	const sampleoffset_t latency_offset = _signal_latency + _output->latency ();
+	const sampleoffset_t latency_offset = _signal_latency + output_latency ();
 	if (speed < 0) {
 		/* when rolling backwards this can become negative */
 		start_sample -= latency_offset;
@@ -4301,6 +4301,8 @@ Route::update_signal_latency (bool apply_to_delayline)
 		/* see also Session::post_playback_latency() */
 		apply_latency_compensation ();
 	}
+
+	_output_latency = _output->latency ();
 
 	return _signal_latency;
 }

@@ -355,6 +355,8 @@ public:
 	samplecnt_t signal_latency() const { return _signal_latency; }
 	samplecnt_t playback_latency (bool incl_downstream = false) const;
 
+	virtual samplecnt_t output_latency () const { return _output_latency; }
+
 	PBD::Signal0<void> active_changed;
 	PBD::Signal0<void> denormal_protection_changed;
 	PBD::Signal0<void> comment_changed;
@@ -615,6 +617,7 @@ protected:
 
 	bool           _active;
 	samplecnt_t    _signal_latency;
+	samplecnt_t    _output_latency;
 
 	ProcessorList  _processors;
 	mutable Glib::Threads::RWLock _processor_lock;
