@@ -116,6 +116,8 @@ class Panner2d : public Gtk::DrawingArea
 		uint32_t signal_fill;
 		uint32_t speaker_fill;
 		uint32_t text;
+		uint32_t send_bg;
+		uint32_t send_pan;
 	};
 
 	static ColorScheme colors;

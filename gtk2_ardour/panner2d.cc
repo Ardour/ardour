@@ -133,6 +133,9 @@ Panner2d::set_colors ()
 	colors.signal_fill =         0x4884a9bf; // 0.282, 0.517, 0.662, 0.75
 	colors.speaker_fill =        0x4884a9ff; // 0.282, 0.517, 0.662, 1.0
 	colors.text =                0x84c5e1e6; // 0.517, 0.772, 0.882, 0.9
+
+	colors.send_bg  = UIConfiguration::instance().color ("send bg");
+	colors.send_pan = UIConfiguration::instance().color ("send pan");
 }
 
 void
@@ -475,10 +478,7 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 
 	cairo_rectangle (cr, event->area.x, event->area.y, event->area.width, event->area.height);
 
-	uint32_t bg = colors.background;
-	if (_send_mode) {
-		bg = UIConfiguration::instance().color ("send bg");
-	}
+	uint32_t bg = _send_mode ? colors.send_bg : colors.background;
 
 	if (!panner_shell->bypassed()) {
 		CSSRGBA(bg);
@@ -598,7 +598,11 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 
 					cairo_new_path (cr);
 					cairo_arc (cr, c.x, c.y, arc_radius, 0, 2.0 * M_PI);
-					CSSRGBA(colors.signal_fill);
+					if (_send_mode && !panner_shell->is_linked_to_route()) {
+						CSSRGBA(colors.send_pan);
+					} else {
+						CSSRGBA(colors.signal_fill);
+					}
 					cairo_fill_preserve (cr);
 					CSSRGBA(colors.signal_outline);
 					cairo_stroke (cr);

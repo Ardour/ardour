@@ -106,6 +106,8 @@ private:
 	static bool have_font;
 
 	static ColorScheme colors[3];
+	static uint32_t colors_send_bg;
+	static uint32_t colors_send_pan;
 	static void set_colors ();
 	static bool have_colors;
 	void color_handler ();

@@ -84,6 +84,8 @@ private:
 		uint32_t background;
 		uint32_t pos_outline;
 		uint32_t pos_fill;
+		uint32_t send_bg;
+		uint32_t send_pan;
 	};
 
 	bool _dragging;

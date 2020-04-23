@@ -147,8 +147,8 @@ MonoPanner::on_expose_event (GdkEventExpose*)
 	o = colors.outline;
 	f = colors.fill;
 	t = colors.text;
-	b = colors.background;
-	pf = colors.pos_fill;
+	b = _send_mode ? colors.send_bg : colors.background;
+	pf = (_send_mode && !_panner_shell->is_linked_to_route()) ? colors.send_pan : colors.pos_fill;
 	po = colors.pos_outline;
 
 	if (_panner_shell->bypassed()) {
@@ -160,9 +160,6 @@ MonoPanner::on_expose_event (GdkEventExpose*)
 		t  = 0x606060ff;
 	}
 
-	if (_send_mode) {
-		b = UIConfiguration::instance().color ("send bg");
-	}
 	/* background */
 	context->set_source_rgba (UINT_RGBA_R_FLT(b), UINT_RGBA_G_FLT(b), UINT_RGBA_B_FLT(b), UINT_RGBA_A_FLT(b));
 	context->rectangle (0, 0, width, height);
@@ -488,12 +485,14 @@ MonoPanner::on_key_press_event (GdkEventKey* ev)
 void
 MonoPanner::set_colors ()
 {
-	colors.fill = UIConfiguration::instance().color_mod ("mono panner fill", "panner fill");
-	colors.outline = UIConfiguration::instance().color ("mono panner outline");
-	colors.text = UIConfiguration::instance().color ("mono panner text");
-	colors.background = UIConfiguration::instance().color ("mono panner bg");
+	colors.fill        = UIConfiguration::instance().color_mod ("mono panner fill", "panner fill");
+	colors.outline     = UIConfiguration::instance().color ("mono panner outline");
+	colors.text        = UIConfiguration::instance().color ("mono panner text");
+	colors.background  = UIConfiguration::instance().color ("mono panner bg");
 	colors.pos_outline = UIConfiguration::instance().color ("mono panner position outline");
-	colors.pos_fill = UIConfiguration::instance().color_mod ("mono panner position fill", "mono panner position fill");
+	colors.pos_fill    = UIConfiguration::instance().color_mod ("mono panner position fill", "mono panner position fill");
+	colors.send_bg     = UIConfiguration::instance().color ("send bg");
+	colors.send_pan    = UIConfiguration::instance().color ("send pan");
 }
 
 void
