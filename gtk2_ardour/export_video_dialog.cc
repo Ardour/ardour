@@ -672,7 +672,7 @@ ExportVideoDialog::launch_export ()
 	XMLTree tree;
 	std::string vtl_samplerate = audio_samplerate_combo.get_active_text();
 	std::string vtl_normalize = _normalize ? "true" : "false";
-	tree.read_buffer(std::string(
+	tree.read_buffer(std::string (
 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
 "<ExportFormatSpecification name=\"VTL-WAV-16\" id=\"3094591e-ccb9-4385-a93f-c9955ffeb1f0\">"
 "  <Encoding id=\"F_WAV\" type=\"T_Sndfile\" extension=\"wav\" name=\"WAV\" has-sample-format=\"true\" channel-limit=\"256\"/>"
@@ -703,7 +703,7 @@ ExportVideoDialog::launch_export ()
 "    </Silence>"
 "  </Processing>"
 "</ExportFormatSpecification>"
-));
+	).c_str());
 	boost::shared_ptr<ExportFormatSpecification> fmp = _session->get_export_handler()->add_format(*tree.root());
 
 	/* set up range */

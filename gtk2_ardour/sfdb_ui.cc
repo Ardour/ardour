@@ -1207,7 +1207,7 @@ SoundFileBrowser::freesound_search()
 void
 SoundFileBrowser::handle_freesound_results(std::string theString) {
 	XMLTree doc;
-	doc.read_buffer( theString );
+	doc.read_buffer (theString.c_str());
 	XMLNode *root = doc.root();
 
 	if (!root) {
