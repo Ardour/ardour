@@ -81,7 +81,7 @@ MidiPatchManager::add_search_path (const Searchpath& search_path)
 }
 
 bool
-MidiPatchManager::add_custom_midnam (const std::string& id, const std::string& midnam)
+MidiPatchManager::add_custom_midnam (const std::string& id, char const* midnam)
 {
 	boost::shared_ptr<MIDINameDocument> document;
 	document = boost::shared_ptr<MIDINameDocument>(new MIDINameDocument());
@@ -103,7 +103,7 @@ MidiPatchManager::remove_custom_midnam (const std::string& id)
 }
 
 bool
-MidiPatchManager::update_custom_midnam (const std::string& id, const std::string& midnam)
+MidiPatchManager::update_custom_midnam (const std::string& id, char const* midnam)
 {
 	Glib::Threads::Mutex::Lock lm (_lock);
 	remove_midi_name_document ("custom:" + id, false);

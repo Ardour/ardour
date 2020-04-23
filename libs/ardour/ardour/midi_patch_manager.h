@@ -64,8 +64,8 @@ public:
 
 	PBD::Signal0<void> PatchesChanged;
 
-	bool add_custom_midnam (const std::string& id, const std::string& midnam);
-	bool update_custom_midnam (const std::string& id, const std::string& midnam);
+	bool add_custom_midnam (const std::string& id, char const*);
+	bool update_custom_midnam (const std::string& id, char const*);
 	bool remove_custom_midnam (const std::string& id);
 	bool is_custom_model (const std::string& model) const;
 

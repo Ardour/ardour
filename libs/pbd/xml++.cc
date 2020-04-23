@@ -124,7 +124,7 @@ XMLTree::read_internal(bool validate)
 }
 
 bool
-XMLTree::read_buffer(const string& buffer, bool to_tree_doc)
+XMLTree::read_buffer (char const* buffer, bool to_tree_doc)
 {
 	xmlDocPtr doc;
 
@@ -133,7 +133,7 @@ XMLTree::read_buffer(const string& buffer, bool to_tree_doc)
 	delete _root;
 	_root = 0;
 
-	doc = xmlParseMemory(const_cast<char*>(buffer.c_str()), buffer.length());
+	doc = xmlParseMemory (buffer, strlen(buffer));
 	if (!doc) {
 		return false;
 	}
