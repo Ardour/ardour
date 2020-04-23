@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-02 13:17+0200\n"
-"PO-Revision-Date: 2020-04-16 16:21+0200\n"
+"PO-Revision-Date: 2020-04-21 16:05+0200\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -358,7 +358,7 @@ msgstr "Ezin izan da gailur-fitxategia ireki %1-(e)n irakurtzeko (%2)"
 
 #: audiosource.cc:445
 msgid "cannot read sample data for unscaled peak computation"
-msgstr ""
+msgstr "ezin dira lagin datuak irakurri eskalatu gabeko gailur konputaziorako"
 
 #: audiosource.cc:480 audiosource.cc:575
 msgid "map failed - could not create file mapping for peakfile %1."
@@ -1211,7 +1211,7 @@ msgstr "Ezezaguna"
 
 #: instrument_info.cc:286
 msgid "preset %1 (bank %2)"
-msgstr "%1 preseta (%2 bankua)"
+msgstr "%1 aurrezarpena (%2 bankua)"
 
 #: internal_send.cc:367 internal_send.cc:368
 msgid "%1 - cannot find any track/bus with the ID %2 to connect to"
@@ -1349,6 +1349,9 @@ msgid ""
 "illegal parameter number used with plugin \"%1\". This may indicate a change "
 "in the plugin design, and presets may be invalid"
 msgstr ""
+"“%1” pluginarekin erabilitako parametro-zenbaki baliogabea. Honek pluginaren "
+"diseinuan aldaketaren bat adierazi dezake, eta aurrezarpenak baliogabeak "
+"izan daitezke"
 
 #: ladspa_plugin.cc:383 ladspa_plugin.cc:427
 msgid "Bad node sent to LadspaPlugin::set_state"
@@ -1364,19 +1367,19 @@ msgstr "LADSPA: ladspa ataka-daturik ez"
 
 #: ladspa_plugin.cc:836
 msgid "Could not locate HOME.  Preset not removed."
-msgstr "Ezin izan da ETXEA aurkitu. Preseta ez da ezabatu."
+msgstr "Ezin izan da ETXEA aurkitu. Aurrezarpena ez da ezabatu."
 
 #: ladspa_plugin.cc:875 ladspa_plugin.cc:881
 msgid "Could not create %1.  Preset not saved. (%2)"
-msgstr "Ezin izan da %1 sortu. Preseta ez da gorde. (%2)"
+msgstr "Ezin izan da %1 sortu. Aurrezarpena ez da gorde. (%2)"
 
 #: ladspa_plugin.cc:888
 msgid "Error saving presets file %1."
-msgstr "Errorea %1 preset fitxategia gordetzerakoan."
+msgstr "Errorea %1 aurrezarpen-fitxategia gordetzerakoan."
 
 #: ladspa_plugin.cc:930
 msgid "Could not locate HOME.  Preset not saved."
-msgstr "Ezin izan da ETXEA aurkitu. Preseta ez da gorde."
+msgstr "Ezin izan da ETXEA aurkitu. Aurrezarpena ez da gorde."
 
 #: location.cc:477
 msgid "You cannot put a CD marker at this position"
@@ -1492,11 +1495,11 @@ msgstr "LTCFitxategiIrakurgailua: hautatutako audio-kanala baliogabea da"
 
 #: ltc_slave.cc:365
 msgid "Session framerate adjusted from %1 to LTC's %2."
-msgstr ""
+msgstr "Saioaren lagin-tasa %1-(e)tik LTC-ren %2-(e)ra doituta."
 
 #: ltc_slave.cc:379
 msgid "Session and LTC framerate mismatch: LTC:%1 Session:%2."
-msgstr ""
+msgstr "Saioaren eta LTC-ren lagin-tasek ez dute bat egiten: LTC:%1 Saioa:%2."
 
 #: ltc_slave.cc:665
 msgid "flywheel"
@@ -1536,7 +1539,7 @@ msgstr "LuaProc: atakak baliorik ez du, alde batera utzi da"
 
 #: luaproc.cc:1100
 msgid "Unable to create LuaProc presets directory"
-msgstr "LuaProc preset direktorioa sortzeko ezgai"
+msgstr "LuaProc aurrezarpen-direktorioa sortzeko ezgai"
 
 #: luascripting.cc:141
 msgid "Script '%1' has no valid descriptor."
@@ -1654,14 +1657,16 @@ msgid ""
 "Unknown rate/drop value %1 in incoming MTC stream, session values used "
 "instead"
 msgstr ""
+"%1-(e)ko tasa/jaitsiera ezezaguna MTC sarrerako korrontean, saio-balioak "
+"erabili dira horren ordez"
 
 #: mtc_slave.cc:386
 msgid "Session framerate adjusted from %1 TO: MTC's %2."
-msgstr ""
+msgstr "Saioaren lagin-tasa %1-(e)tik hona doituta: MTC-ren %2."
 
 #: mtc_slave.cc:400
 msgid "Session and MTC framerate mismatch: MTC:%1 %2:%3."
-msgstr ""
+msgstr "Saioaren eta MTC-ren lagin-tasek ez dute bat egiten: MTC:%1 %2:%3."
 
 #: operations.cc:41
 msgid "capture"
@@ -1717,7 +1722,7 @@ msgstr "denbora finkoaren eremuaren kopia"
 
 #: pannable.cc:207
 msgid "Pannable given XML data for %1 - ignored"
-msgstr ""
+msgstr "%1-(r)entzat paneatutako XML datuak - alde batera utzi da"
 
 #: panner_manager.cc:100
 msgid "looking for panners in %1\n"
@@ -1740,11 +1745,12 @@ msgid "no panner discovered for in/out = %1/%2"
 msgstr "panegailurik ez da aurkitu sarrerarako/irteerarako = %1/%2"
 
 #: panner_shell.cc:127
-#, fuzzy
 msgid ""
 "No panner found: check that panners are being discovered correctly during "
 "startup."
-msgstr "Panegailurik ez da aurkitu: "
+msgstr ""
+"Panegailurik ez da aurkitu: egiaztatu abiaraztean panelak zuzen deskubritzen "
+"ari direla."
 
 #: panner_shell.cc:134
 msgid "select panner: %1\n"
@@ -1848,15 +1854,15 @@ msgstr ""
 
 #: plugin.cc:132
 msgid "Trying to remove nonexistent preset."
-msgstr "Existitzen ez den preset-a ezabatzen saiatzen."
+msgstr "Existitzen ez den aurrezarpena ezabatzen saiatzen."
 
 #: plugin.cc:136
 msgid "Cannot remove plugin factory preset."
-msgstr "Ezin da plugin-aren jatorrizko preset-a ezabatu."
+msgstr "Ezin da plugin-aren jatorrizko aurrezarpena ezabatu."
 
 #: plugin.cc:154
 msgid "Preset with given name already exists."
-msgstr "Izen hori duen preseta jada badago."
+msgstr "Izen hori duen aurrezarpena jada badago."
 
 #: plugin.cc:280
 msgid "Audio"
@@ -1877,6 +1883,8 @@ msgstr "Plugina gaitzea"
 #: plugin_insert.cc:727
 msgid "PluginInsert: VST Bypass failed, falling back to host bypass."
 msgstr ""
+"PluginIntsertoa: VST saihesbideak huts egin du, ostalariaren saihesbidera "
+"erorita."
 
 #: plugin_insert.cc:1328
 msgid "programming error: "
@@ -2347,7 +2355,7 @@ msgstr "Nodo okerra hona bidali da: Route::set_state() [%1]"
 
 #: route.cc:2664
 msgid "Pannable state found for route (%1) without a panner!"
-msgstr ""
+msgstr "Egoera paneagarria aurkitu da panegailu gabeko bidearentzat (%1)!"
 
 #: route.cc:3663
 msgid "Invalid Solo-Isolate propagation: from:%1 new:%2 - old:%3 = delta:%4"
@@ -2433,7 +2441,7 @@ msgstr "Ezin da ZereginZerrendarako haria sortu!"
 
 #: send.cc:75
 msgid "aux %1"
-msgstr "%1 aux"
+msgstr "%1 osag"
 
 #: send.cc:80 send.cc:488
 msgid "send %1"
@@ -2792,15 +2800,16 @@ msgid "Export ended unexpectedly: %1"
 msgstr "Esportazioa ustekabean amaitu da: %1"
 
 #: session_ltc.cc:235
-#, fuzzy
 msgid ""
 "LTC encoder: invalid framerate - LTC encoding is disabled for the remainder "
 "of this session."
-msgstr "LTC kodeatzailea:"
+msgstr ""
+"LTC kodetzailea: fotograma baliogabea - LTC kodeketa desgaituta dago saio "
+"honen gainerakorako."
 
 #: session_midi.cc:562
 msgid "Session: cannot send quarter-frame MTC message (%1)"
-msgstr ""
+msgstr "Saioa: ezin da MTC laurdenaren mezua bidali (%1)"
 
 #: session_playlists.cc:132
 msgid "Session State: Unused playlist was listed as used."
@@ -2814,11 +2823,11 @@ msgstr "Saioa: ezin da erreprodukzio-zerrenda XML deskripziotik sortu."
 
 #: session_process.cc:200
 msgid "Session: error in no roll for %1"
-msgstr ""
+msgstr "Saioa: errorea %1 ez biltzerakoan"
 
 #: session_process.cc:989
 msgid "Programming error: illegal event type in process_event (%1)"
-msgstr "Programazio-errorea: gertaera mota baliogabea prozesu_egoera-n (%1)"
+msgstr "Programazio-errorea: gertaera mota baliogabea prozesu_egoeran (%1)"
 
 #: session_state.cc:204
 msgid "solo cut control (dB)"
@@ -2966,6 +2975,7 @@ msgid ""
 "Incomatible Session Version. That session was created with a newer version "
 "of %1"
 msgstr ""
+"Saio bertsio bateraezina. Saio hori %1-(r)en bertsio berriagoarekin sortu da"
 
 #: session_state.cc:1347
 msgid "Session-Save: Failed to copy MIDI Source '%1' for snapshot"
@@ -3157,7 +3167,7 @@ msgstr "“%s” nodo ezezaguna konexio-sorten saioaren fitxategian aurkitu da"
 
 #: session_state.cc:3327
 msgid "Cannot cleanup peak-files for read-only session."
-msgstr ""
+msgstr "Ezin dira gailur-fitxategiak garbitu irakurtzeko soilik saiorako."
 
 #: session_state.cc:3331
 msgid "Cannot cleanup peak-files while recording"
@@ -3173,7 +3183,7 @@ msgstr ""
 
 #: session_state.cc:3623
 msgid "Session: cannot create dead file folder \"%1\" (%2)"
-msgstr ""
+msgstr "Saioa: ezin da hildako “%1” fitxategi-karpeta sortu (%2)"
 
 #: session_state.cc:3656
 msgid "cannot rename unused file source from %1 to %2 (%3)"
@@ -3478,10 +3488,14 @@ msgstr "ezin izan da %1 fitxategia esleitu edukia husteko"
 msgid ""
 "attempt to store broadcast info in a non-writable audio file source (%1)"
 msgstr ""
+"BWF informazioa ezartzeko saiakera egin da idatzi ezin den audio-fitxategi "
+"baten iturburuan (%1)"
 
 #: sndfilesource.cc:663
 msgid "attempt to set BWF info for an un-opened audio file source (%1)"
 msgstr ""
+"ireki gabeko audio-fitxategi baten iturburuaren BWF informazioa ezartzeko "
+"saiakera egin da (%1)"
 
 #: sndfilesource.cc:710
 msgid "%1: cannot seek to %2 (libsndfile error: %3)"
@@ -3501,7 +3515,7 @@ msgstr "Goranzko soloa garbituta: %1 gora:%2\n"
 
 #: solo_control.cc:211
 msgid "Cleared downstream solo: %1 down:%2\n"
-msgstr ""
+msgstr "Beheranzko soloa garbituta: %1 behera:%2\n"
 
 #: soundcloud_upload.cc:128
 msgid ""
