@@ -900,7 +900,7 @@ private:
 	void close_current_dialog ();
 
 	bool bind_lua_action_script (GdkEventButton*, int);
-	void update_action_script_btn (int i, const std::string&);
+	void action_script_changed (int i, const std::string&);
 
 	void ask_about_scratch_deletion ();
 };

@@ -302,7 +302,7 @@ ARDOUR_UI::setup_windows ()
 	main_vpacker.pack_start (transport_frame, false, false);
 	main_vpacker.pack_start (_tabs, true, true);
 
-	LuaInstance::instance()->ActionChanged.connect (sigc::mem_fun (*this, &ARDOUR_UI::update_action_script_btn));
+	LuaInstance::instance()->ActionChanged.connect (sigc::mem_fun (*this, &ARDOUR_UI::action_script_changed));
 
 	for (int i = 0; i < MAX_LUA_ACTION_BUTTONS; ++i) {
 		std::string const a = string_compose (X_("script-action-%1"), i + 1);
@@ -424,16 +424,19 @@ ARDOUR_UI::bind_lua_action_script (GdkEventButton*ev, int i)
 }
 
 void
-ARDOUR_UI::update_action_script_btn (int i, const std::string& n)
+ARDOUR_UI::action_script_changed (int i, const std::string& n)
 {
-	if (i < 0 || i >= MAX_LUA_ACTION_BUTTONS) {
+	if (i < 0 || i >= MAX_LUA_ACTION_SCRIPTS) {
 		return;
 	}
-	if (LuaInstance::instance()->lua_action_has_icon (i)) {
-		uintptr_t ii = i;
-		action_script_call_btn[i].set_icon (&LuaInstance::render_action_icon, (void*)ii);
-	} else {
-		action_script_call_btn[i].set_icon (0, 0);
+
+	if (i < MAX_LUA_ACTION_BUTTONS) {
+		if (LuaInstance::instance()->lua_action_has_icon (i)) {
+			uintptr_t ii = i;
+			action_script_call_btn[i].set_icon (&LuaInstance::render_action_icon, (void*)ii);
+		} else {
+			action_script_call_btn[i].set_icon (0, 0);
+		}
 	}
 
 	std::string const a = string_compose (X_("script-action-%1"), i + 1);
