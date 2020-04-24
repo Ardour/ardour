@@ -282,6 +282,10 @@ TransportMastersWidget::idle_remove (TransportMastersWidget::Row* row)
 void
 TransportMastersWidget::update_ports ()
 {
+	if (!is_mapped()) {
+		return;
+	}
+
 	{
 		PBD::Unwinder<bool> uw (ignore_active_change, true);
 		vector<string> inputs;
@@ -509,6 +513,10 @@ TransportMastersWidget::Row::build_port_list (DataType type)
 	bool input_found = false;
 	int n;
 
+	if (input->children().empty()) {
+		return;
+	}
+
 	port_combo.set_model (input);
 
 	Gtk::TreeModel::Children children = input->children();
@@ -654,6 +662,7 @@ TransportMastersWidget::on_map ()
 {
 	update_connection = ARDOUR_UI::Clock.connect (sigc::mem_fun (*this, &TransportMastersWidget::update));
 	Gtk::VBox::on_map ();
+	update_ports ();
 }
 
 void
