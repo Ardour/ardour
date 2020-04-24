@@ -16,7 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
- // This example does not call the API methods in ardour.js,
+ // This example does not call the API methods in control.js,
  // instead it couples the widgets directly to the message stream
 
 import { ANode, Message } from '/shared/message.js';
