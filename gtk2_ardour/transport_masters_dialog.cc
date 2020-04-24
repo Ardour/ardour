@@ -480,7 +480,7 @@ TransportMastersWidget::Row::build_request_options ()
 	items.push_back (CheckMenuElem (_("Accept locate commands")));
 	i = dynamic_cast<Gtk::CheckMenuItem *> (&items.back ());
 	i->set_active (tm->request_mask() & TR_Locate);
-	i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &TransportMastersWidget::Row::mod_request_type), TR_Speed));
+	i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &TransportMastersWidget::Row::mod_request_type), TR_Locate));
 }
 
 void
