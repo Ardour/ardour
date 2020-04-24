@@ -342,8 +342,25 @@ TransportMastersWidget::Row::name_press (GdkEventButton* ev)
 		name_editor = new FloatingTextEntry (toplevel, tm->name());
 		name_editor->use_text.connect (sigc::mem_fun (*this, &TransportMastersWidget::Row::name_edited));
 		name_editor->show ();
+
+		/* Now move the floating text entry window to be perfectly
+		 * aligned with the upper left corner of the name/label box.
+		 */
+
+		Gtk::Widget* tl = label_box.get_toplevel();
+		Gtk::Window* top_level = dynamic_cast<Gtk::Window*>(tl);
+
+		if (top_level) {
+			Glib::RefPtr<Gdk::Window> win (top_level->get_window());
+			int rx, ry;
+			win->get_position (rx, ry);
+			Gtk::Allocation alloc = label_box.get_allocation();
+			name_editor->move (rx + alloc.get_x(), ry + alloc.get_y());
+		}
+
 		return true;
 	}
+
 	return false;
 }
 
