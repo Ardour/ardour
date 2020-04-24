@@ -17,7 +17,11 @@ end
 function list_script_types (h, t)
 	function ardour (v)
 		if v['type'] == t then
-			print ("<dt>" .. v['name'] .. "<dt><dd>" .. v['description'] .. "</dd>")
+			local desc = string.gsub (v['description'], "\n", " ")
+			desc = string.gsub (desc, "\t", " ")
+			desc = string.gsub (desc, "  *", " ")
+			desc = string.gsub (desc, " $", "")
+			print ("<dt>" .. v['name'] .. "<dt><dd>" .. desc .. "</dd>")
 		end
 	end
 
@@ -30,7 +34,7 @@ function list_script_types (h, t)
 end
 
 list_script_types ("DSP Plugins", "dsp")
-list_script_types ("Session Wide Realtime", "session")
 list_script_types ("Editor Actions", "EditorAction")
 list_script_types ("Editor Callbacks", "EditorHook")
+list_script_types ("Session Wide Realtime", "session")
 list_script_types ("Session Templates", "SessionInit")
