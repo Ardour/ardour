@@ -4,7 +4,7 @@ ardour {
 	category    = "Instrument",
 	license     = "MIT",
 	author      = "Ardour Team",
-	description = [[Sine Wave Generator (v1.2)]]
+	description = [[Simple sine wave generator with gain and frequency controls]]
 }
 
 local lpf = 0

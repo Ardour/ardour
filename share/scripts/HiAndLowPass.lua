@@ -4,7 +4,7 @@ ardour {
 	category    = "Filter",
 	license     = "GPLv2",
 	author      = "Ardour Team",
-	description = [[High and Low Pass Filter with de-zipped controls, written in Ardour-Lua]]
+	description = [[High and Low Pass Filter with de-zipped controls]]
 }
 
 function dsp_ioconfig ()

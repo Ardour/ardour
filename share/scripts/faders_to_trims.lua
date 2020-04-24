@@ -3,7 +3,7 @@ ardour {
 	name        = "Faders to Trims",
 	license     = "MIT",
 	author      = "PSmith",
-	description = [[Add 'Trim' plugins to all tracks.  Move the fader value into the trim.]]
+	description = [[Add 'Trim' plugins to all tracks. Move the fader value into the trim.]]
 }
 
 function action_params ()

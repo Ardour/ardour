@@ -3,7 +3,6 @@ ardour {
 	name        = "Store Mixer Settings",
 	author      = "Mixbus Team",
 	description = [[
-
 	Stores the current Mixer state as a file
 	that can be read and recalled arbitrarily
 	by it's companion script, Recall Mixer Settings.
@@ -11,7 +10,6 @@ ardour {
 	Supports: processor settings, grouping,
 	mute, solo, gain, trim, pan and processor ordering,
 	plus re-adding certain deleted plugins.
-
 	]]
 }
 

@@ -1,7 +1,7 @@
 ardour {
 	["type"]    = "SessionInit",
 	name        = "Advanced Session",
-	description = [[Allows to configure master-bus and autoconnect]],
+	description = [[Allow to configure master-bus and autoconnect settings]],
 	master_bus  = 0
 }
 

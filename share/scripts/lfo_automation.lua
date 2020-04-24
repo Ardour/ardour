@@ -4,7 +4,7 @@ ardour {
    version     = "0.1.1",
    license     = "MIT",
    author      = "Daniel Appelt",
-   description = [[Add LFO-like plugin automation to selected region]]
+   description = [[Add LFO-like plugin automation to any automatable parameter below a selected region]]
 }
 
 function factory (unused_params)

@@ -4,7 +4,7 @@ ardour {
 	category    = "Amplifier",
 	license     = "MIT",
 	author      = "Ardour Team",
-	description = [[Mute button with slow fade in/out]]
+	description = [[Mute button with slow fade in/out (approx. 1sec exponential)]]
 }
 
 function dsp_ioconfig ()

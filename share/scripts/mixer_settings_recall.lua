@@ -3,13 +3,11 @@ ardour {
 	name        = "Recall Mixer Settings",
 	author      = "Mixbus Team",
 	description = [[
-
 	Recalls mixer settings outined by files
 	created by Store Mixer Settings.
 
 	Allows for some room to change Source
 	and Destination.
-
 	]]
 }
 

@@ -3,7 +3,7 @@ ardour {
 	name        = "Region Select/2",
 	license     = "MIT",
 	author      = "Ardour Team",
-	description = [[select every 2nd region on all selected tracks]]
+	description = [[Select every 2nd region on all selected tracks]]
 }
 
 -- select every 2nd region on all selected tracks

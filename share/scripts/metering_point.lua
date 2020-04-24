@@ -1,8 +1,8 @@
 ardour {
     ["type"] = "EditorAction",
-    name = "Meter Tap",
+    name = "Meter Point",
     author = "Ardour Lua Taskforce",
-    description = [[Change Metering  Point for tracks in your session.]]
+    description = [[Batch change metering point for selected or tracks in the given session.]]
 }
 
 function factory () return function ()

@@ -4,7 +4,7 @@ ardour {
 	category    = "Instrument",
 	license     = "MIT",
 	author      = "Ardour Lua Task Force",
-	description = [[An Example Synth for Prototyping.]]
+	description = [[An Example synth for prototyping: Sine-wave with a basic attack/sustain/release envelope, variable number of output channels.]]
 }
 
 function dsp_ioconfig ()

@@ -1,7 +1,7 @@
-ardour { ["type"] = "EditorAction", name = "Jump to Marker",
+ardour { ["type"] = "EditorAction", name = "Search and Jump to Marker",
 	license     = "MIT",
 	author      = "Ardour Team",
-	description = [[Jump to the first marker matching a given pattern]]
+	description = [[Jump to the first marker that matches a given name pattern]]
 }
 
 function factory () return function ()

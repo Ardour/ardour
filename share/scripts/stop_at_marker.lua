@@ -3,7 +3,7 @@ ardour {
 	name        = "Stop at Marker",
 	license     = "MIT",
 	author      = "Ardour Lua Task Force",
-	description = [[An example session script which stops the transport on every location marker when rolling forward.]]
+	description = [[Stop the transport on every location marker when rolling forward.]]
 }
 
 function factory ()

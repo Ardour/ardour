@@ -4,7 +4,7 @@ ardour {
 	category    = "Utility",
 	author      = "Ardour Team",
 	license     = "MIT",
-	description = [[Linear Timecode Decoder with mixer strip inline display]]
+	description = [[Linear Timecode (LTC) Decoder with mixer strip inline display]]
 }
 
 function dsp_ioconfig ()

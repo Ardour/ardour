@@ -4,7 +4,7 @@ ardour {
     category    = "Utility",
     license     = "MIT",
     author      = "Alby Musaelian",
-    description = [[Map arbitrary MIDI notes to others. Affects Note On/Off and polyphonic key pressure. Note that if a single note is mapped multiple times, the last mapping wins -- MIDI events are never duplicated.]]
+    description = [[Map arbitrary MIDI notes to others. Affects Note On/Off and polyphonic key pressure. Note that if a single note is mapped multiple times, the last mapping wins (MIDI events are never duplicated).]]
 }
 
 -- The number of remapping pairs to allow. Increasing this (at least in theory)

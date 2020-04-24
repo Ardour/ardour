@@ -3,7 +3,7 @@ ardour {
 	name        = "Mute All Tracks",
 	license     = "MIT",
 	author      = "Ardour Team",
-	description = [[Mute All Tracks in the Session]]
+	description = [[Mute all tracks in the session]]
 }
 
 function factory () return function ()

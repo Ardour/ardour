@@ -4,7 +4,7 @@ ardour {
 	category    = "Utility",
 	license     = "MIT",
 	author      = "Ardour Team",
-	description = [[Noise Generator]]
+	description = [[Noise Generator featuring either white noise with uniform or gaussian distribution, or pink-noise. The signal level can be customized.]]
 }
 
 function dsp_ioconfig ()

@@ -3,7 +3,7 @@ ardour {
 	name        = "Reset Mixer",
 	license     = "MIT",
 	author      = "Ben Loftis, Nikolaus Gullotta, Maxime Lecoq",
-	description = [[Resets key Mixer settings after user-prompt (warning: this cannot be undone)]]
+	description = [[Resets key mixer settings after user-prompt (warning: this cannot be undone)]]
 }
 
 function factory() return function()

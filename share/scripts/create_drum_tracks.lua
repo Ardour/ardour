@@ -2,7 +2,7 @@ ardour {
 	["type"] = "EditorAction",
 	name = "Create Drum Tracks",
 	author = "PSmith",
-	description = [[Creates 8 new tracks with representative names and colors.]]
+	description = [[Creates eight new tracks with representative drum names and colors.]]
 }
 
 function factory () return function ()
