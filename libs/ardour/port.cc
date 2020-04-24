@@ -83,7 +83,7 @@ Port::Port (std::string const & n, DataType t, PortFlags f)
 	}
 	DEBUG_TRACE (DEBUG::Ports, string_compose ("registed port %1 handle %2\n", name(), _port_handle));
 
-	PortDrop.connect_same_thread (drop_connection, boost::bind (&Port::drop, this));
+	PortDrop.connect_same_thread (drop_connection, boost::bind (&Port::session_global_drop, this));
 	PortSignalDrop.connect_same_thread (drop_connection, boost::bind (&Port::signal_drop, this));
 	port_manager->PortConnectedOrDisconnected.connect_same_thread (engine_connection, boost::bind (&Port::port_connected_or_disconnected, this, _1, _3, _5));
 }
@@ -125,6 +125,16 @@ Port::set_pretty_name(const std::string& n)
 		}
 	}
 	return false;
+}
+
+void
+Port::session_global_drop()
+{
+	if (_flags & TransportMasterPort) {
+		return;
+	}
+
+	drop ();
 }
 
 void
