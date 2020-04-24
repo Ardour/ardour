@@ -16,7 +16,7 @@ msgstr ""
 "Project-Id-Version: Ardour 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-18 15:05+0200\n"
-"PO-Revision-Date: 2020-04-20 14:26+0200\n"
+"PO-Revision-Date: 2020-04-22 17:48+0200\n"
 "Last-Translator: Fred Rech <fred_rech@laposte.net>\n"
 "Language-Team: French <>\n"
 "Language: fr\n"
@@ -359,7 +359,7 @@ msgstr ""
 "\tMartin Blanchard\n"
 "\tRomain Arnaud <roming22@gmail.com>\n"
 "\tOlivier Humbert <trebmuh@tuxfamily.org>\n"
-"\tFred Rech <fred_rech@laposte.net>\n"
+"\tFrédéric Rech <fred_rech@laposte.net>\n"
 
 #: about.cc:217
 msgid ""
@@ -553,7 +553,7 @@ msgstr "%1 ne fonctionnera pas sans un fichier de définition de menu valide"
 
 #: add_route_dialog.cc:71
 msgid "Add Track/Bus/VCA"
-msgstr "Ajouter un(e) piste/bus/VCA"
+msgstr "Ajouter Piste/Bus/VCA"
 
 #: add_route_dialog.cc:74 add_route_dialog.cc:75
 msgid "Configuration:"
@@ -591,7 +591,7 @@ msgstr "Instrument :"
 
 #: add_route_dialog.cc:101 add_route_dialog.cc:569
 msgid "Audio Tracks"
-msgstr "Pistes audio"
+msgstr "Pistes Audio"
 
 #: add_route_dialog.cc:102
 msgid "Use these settings to create one or more audio tracks."
@@ -612,7 +612,7 @@ msgstr "Nom de la (des) piste(s)"
 
 #: add_route_dialog.cc:106
 msgid "Mono, stereo, or multi-channel operation for the track(s)"
-msgstr "Création de Piste(s) mono, stéréo ou multi-canaux"
+msgstr "Création de piste(s) mono, stéréo ou multi-canal"
 
 #: add_route_dialog.cc:107 add_route_dialog.cc:121
 msgid "A group which the track(s) will be assigned to"
@@ -621,7 +621,7 @@ msgstr "Un groupe auquel assigner la (les) piste(s)"
 #: add_route_dialog.cc:109 add_route_dialog.cc:123 add_route_dialog.cc:136
 #: add_route_dialog.cc:151
 msgid "The pin connections mode (see tooltip for details)"
-msgstr "La connectique (détails dans l'info-bulle)"
+msgstr "Le mode de connexions (détails dans l'info-bulle)"
 
 #: add_route_dialog.cc:111 add_route_dialog.cc:125
 msgid "The track(s) will be added at the location specified by \"Position\""
@@ -685,7 +685,7 @@ msgstr ""
 
 #: add_route_dialog.cc:157 add_route_dialog.cc:571
 msgid "VCA Masters"
-msgstr "Masters VCA"
+msgstr "Bus VCA"
 
 #: add_route_dialog.cc:158
 msgid "Use these settings to create one or more VCA masters."
@@ -693,7 +693,7 @@ msgstr "Réglages pour créer un ou plusieurs bus VCA."
 
 #: add_route_dialog.cc:160
 msgid "The number of VCAs to add"
-msgstr "Le nombre de VCA à ajouter"
+msgstr "Le nombre de bus VCA à ajouter"
 
 #: add_route_dialog.cc:161
 #, c-format
@@ -1015,7 +1015,7 @@ msgstr "Greffon : Charge DSP"
 
 #: ardour_ui.cc:338 rc_option_editor.cc:3418 transport_masters_dialog.cc:667
 msgid "Transport Masters"
-msgstr "Maîtres du Défilement"
+msgstr "Maîtres du Transport"
 
 #: ardour_ui.cc:339
 msgid "Properties"
@@ -1035,7 +1035,7 @@ msgstr "Grande horloge"
 
 #: ardour_ui.cc:343 big_transport_window.cc:31
 msgid "Transport Controls"
-msgstr "Boutons de Défilement"
+msgstr "Barre de Transport"
 
 #: ardour_ui.cc:344 port_group.cc:522 rc_option_editor.cc:3078
 msgid "Virtual Keyboard"
@@ -1559,7 +1559,7 @@ msgstr ""
 
 #: ardour_ui2.cc:89
 msgid "Track Input Monitoring automatically follows transport state"
-msgstr "L'Auto-Input suit automatiquement l'état du défilement"
+msgstr "L'Auto-Input suit automatiquement l'état du transport"
 
 #: ardour_ui2.cc:91 monitor_section.cc:135
 msgid ""
@@ -1743,7 +1743,7 @@ msgstr "Métronome"
 #: rc_option_editor.cc:3399 rc_option_editor.cc:3407 rc_option_editor.cc:3415
 #: rc_option_editor.cc:3418 rc_option_editor.cc:3420 rc_option_editor.cc:3436
 msgid "Transport"
-msgstr "Défilement"
+msgstr "Transport"
 
 #: ardour_ui_access_web.cc:53
 msgid ""
@@ -2284,11 +2284,11 @@ msgstr "Focus sur l'horloge"
 
 #: ardour_ui_ed.cc:433 ardour_ui_ed.cc:444 editor_actions.cc:614
 msgid "Bars & Beats"
-msgstr "Mesures & Temps"
+msgstr "Mesures et Temps"
 
 #: ardour_ui_ed.cc:435 ardour_ui_ed.cc:446
 msgid "Minutes & Seconds"
-msgstr "Minutes & Secondes"
+msgstr "Minutes et Secondes"
 
 #: ardour_ui_ed.cc:437 ardour_ui_ed.cc:448 audio_clock.cc:2159
 msgid "Seconds"
@@ -3187,7 +3187,7 @@ msgstr "Régler sur la Tête de Lecture"
 
 #: audio_clock.cc:2165
 msgid "Locate to This Time"
-msgstr "Se placer ici"
+msgstr "Placer à Cette Position"
 
 #: audio_clock.cc:2168
 msgid "Copy to clipboard"
@@ -4435,7 +4435,7 @@ msgstr "Lien"
 
 #: editor_actions.cc:149
 msgid "Locate to Markers"
-msgstr "Déplacer aux repères"
+msgstr "Placer aux repères"
 
 #: editor_actions.cc:150 editor_actions.cc:611 rc_option_editor.cc:2725
 msgid "Markers"
@@ -4489,7 +4489,7 @@ msgstr "Vues"
 
 #: editor_actions.cc:165
 msgid "Scroll"
-msgstr "Défilement"
+msgstr "Défiler"
 
 #: editor_actions.cc:166
 msgid "Secondary Clock"
@@ -4711,7 +4711,7 @@ msgstr "Charger la vue %1"
 
 #: editor_actions.cc:286
 msgid "Locate to Mark %1"
-msgstr "Se placer au repère %1"
+msgstr "Placer au repère %1"
 
 #: editor_actions.cc:294
 msgid "Zoom to Selection"
@@ -5066,7 +5066,7 @@ msgstr "Changer le mode d'édition"
 
 #: editor_actions.cc:560
 msgid "Snap & Grid"
-msgstr "Aimant & Grille"
+msgstr "Aimant et Grille"
 
 #: editor_actions.cc:564 rc_option_editor.cc:2757
 msgid "Grid"
@@ -5388,7 +5388,7 @@ msgstr "Verrouiller sur la vidéo"
 #: editor_actions.cc:1497 editor_markers.cc:928 editor_markers.cc:963
 #: session_option_editor.cc:372
 msgid "Glue to Bars and Beats"
-msgstr "Coller aux mesures & temps"
+msgstr "Coller aux Mesures et Temps"
 
 #: editor_actions.cc:1500
 msgid "Remove Sync"
@@ -6012,7 +6012,7 @@ msgstr "supprimer le repère"
 
 #: editor_markers.cc:909
 msgid "Locate to Here"
-msgstr "Se placer ici"
+msgstr "Placer Ici"
 
 #: editor_markers.cc:910
 msgid "Play from Here"
@@ -6032,7 +6032,7 @@ msgstr ""
 
 #: editor_markers.cc:953
 msgid "Locate to Marker"
-msgstr "Déplacer au repère"
+msgstr "Placer au Repère"
 
 #: editor_markers.cc:954
 msgid "Play from Marker"
@@ -6362,7 +6362,7 @@ msgid ""
 "Transport cannot be stopped, likely due to external timecode sync.\n"
 "Freezing a track requires the transport to be stopped."
 msgstr ""
-"Le défilement ne paut pas être stoppé, à priori à cause de la synchro "
+"Le défilement ne peut pas être stoppé, à priori à cause de la synchro "
 "externe.\n"
 "Geler une piste nécessite de stopper le défilement."
 
@@ -8868,11 +8868,11 @@ msgstr "Supprimer cet intervalle"
 
 #: location_ui.cc:334
 msgid "Start time - middle click to locate here"
-msgstr "Temps de début — clic du milieu pour se positionner ici"
+msgstr "Début - clic du milieu pour se placer ici"
 
 #: location_ui.cc:335
 msgid "End time - middle click to locate here"
-msgstr "Temps de fin — clic du milieu pour se positionner ici"
+msgstr "Fin - clic du milieu pour se placer ici"
 
 #: location_ui.cc:338
 msgid "Set range start from playhead location"
@@ -8888,7 +8888,7 @@ msgstr "Supprimer ce repère"
 
 #: location_ui.cc:344
 msgid "Position - middle click to locate here"
-msgstr "Position — clic du milieu pou se positionner ici"
+msgstr "Position - clic du milieu pour se placer ici"
 
 #: location_ui.cc:346
 msgid "Set marker time from playhead location"
@@ -9782,8 +9782,8 @@ msgid ""
 msgstr ""
 "\n"
 "Les Régions et montages ont été conservés.\n"
-"If this is unexpected, manually locate the files and restore them in the "
-"session folder.\n"
+"Si c'est inattendu, localiser manuellement les fichiers et les restaurer "
+"dans le dossier de session.\n"
 
 #: missing_filesource_dialog.cc:56
 msgid ""
@@ -10601,7 +10601,7 @@ msgstr "Écraser le pré-réglage avec ce nom"
 
 #: new_plugin_preset_dialog.cc:33
 msgid "Name of new preset"
-msgstr "Nom du nouveau pré-réglage :"
+msgstr "Nom du nouveau pré-réglage"
 
 #: new_plugin_preset_dialog.cc:43
 msgid "New Favorite Only"
@@ -10936,7 +10936,7 @@ msgstr "Mode d'automation du panoramique"
 
 #: panner_ui.cc:179
 msgid "Abs"
-msgstr "abs"
+msgstr "Abs"
 
 #: patch_change_widget.cc:55
 msgid "Audition on Change"
@@ -11103,7 +11103,6 @@ msgstr[0] "%1 canal"
 msgstr[1] "%1 canaux"
 
 #: plugin_pin_dialog.cc:658 processor_box.cc:244
-#, fuzzy
 msgid "Send"
 msgstr "Départ"
 
@@ -11210,7 +11209,7 @@ msgstr ""
 
 #: plugin_setup_dialog.cc:53
 msgid "An Instrument plugin is already present."
-msgstr "Un greffon d'instrument est déjà présent"
+msgstr "Un greffon d'instrument est déjà présent."
 
 #: plugin_setup_dialog.cc:63
 msgid "with"
@@ -11644,7 +11643,7 @@ msgstr "Inverser"
 
 #: port_matrix.cc:744
 msgid "It is not possible to add a port here."
-msgstr "Impossible d'ajouter un port ici"
+msgstr "Impossible d'ajouter un port ici."
 
 #: port_matrix.cc:745
 msgid "Cannot add port"
@@ -11656,7 +11655,7 @@ msgstr "Le dernier port ne peut pas être supprimé"
 
 #: port_matrix.cc:772
 msgid "This port cannot be removed."
-msgstr "Ce port ne peut pas être supprimé"
+msgstr "Ce port ne peut pas être supprimé."
 
 #: port_matrix.cc:777
 msgid "Port removal not allowed"
@@ -11685,7 +11684,6 @@ msgid "There are no %1 ports to connect."
 msgstr "Il n'y a aucun port %1 à connecter."
 
 #: processor_box.cc:246
-#, fuzzy
 msgid "Return"
 msgstr "Retour"
 
@@ -11761,7 +11759,7 @@ msgid ""
 "plugins,inserts,sends and more"
 msgstr ""
 "Clic-droit pour ajouter/supprimer/modifier\n"
-"greffons/départs/insertions etc."
+"greffons/départs/insertions etc..."
 
 #: processor_box.cc:1974
 msgid ""
@@ -11840,9 +11838,8 @@ msgstr ""
 "ne fonctionneraient pas correctement."
 
 #: processor_box.cc:3343
-#, fuzzy
 msgid "Rename Processor"
-msgstr "Renommer le traitement"
+msgstr "Renommer le Processeur"
 
 #: processor_box.cc:3374
 msgid "At least 100 IO objects exist with a name like %1 - name not changed"
@@ -11972,19 +11969,16 @@ msgid "%1 (by %2)"
 msgstr "%1 (par %2)"
 
 #: patch_change_dialog.cc:52
-#, fuzzy
 msgid "Patch Change"
-msgstr "Changer le patch"
+msgstr "Changer de Patch"
 
 #: patch_change_dialog.cc:80
-#, fuzzy
 msgid "Patch Bank"
-msgstr "Banque du patch"
+msgstr "Banque du Patch"
 
 #: patch_change_dialog.cc:87
-#, fuzzy
 msgid "Patch"
-msgstr "Patch"
+msgstr ""
 
 #: patch_change_dialog.cc:102 step_entry.cc:414
 msgid "Program"
@@ -12053,9 +12047,8 @@ msgid "Main Grid"
 msgstr "Grille Principale"
 
 #: quantize_dialog.cc:78
-#, fuzzy
 msgid "Strength"
-msgstr "Intensité"
+msgstr "Puissance"
 
 #: quantize_dialog.cc:81
 msgid "Swing"
@@ -12087,15 +12080,15 @@ msgstr "Utiliser les sons interne"
 
 #: rc_option_editor.cc:116
 msgid "Audio file:"
-msgstr "Fichier audio : "
+msgstr "Fichier audio :"
 
 #: rc_option_editor.cc:124
 msgid "Emphasis audio file:"
-msgstr "Fichier audio accentué : "
+msgstr "Fichier audio accentué :"
 
 #: rc_option_editor.cc:134
 msgid "Gain level"
-msgstr "Niveau de gain "
+msgstr "Niveau de gain"
 
 #: rc_option_editor.cc:181
 msgid "Choose Click"
@@ -13180,7 +13173,6 @@ msgid "Preferences|Metering"
 msgstr "Mesure"
 
 #: rc_option_editor.cc:3135
-#, fuzzy
 msgid "Peak hold time"
 msgstr "Durée de maintien du pic "
 
@@ -13197,7 +13189,6 @@ msgid "long"
 msgstr "long"
 
 #: rc_option_editor.cc:3149
-#, fuzzy
 msgid "DPM fall-off"
 msgstr "Chute du pic "
 
@@ -13363,10 +13354,9 @@ msgid ""
 "<b>When disabled</b> master record will be disabled when the transport "
 "transitions to stop."
 msgstr ""
-"<b>Si Actif</b> le rouge principal (master record) restera engagé en "
-"stoppant le défilement.\n"
-"<b>When disabled</b> le rouge principal sera désengagé en stoppant le "
-"défilement."
+"<b>Si Actif</b> le rouge (master record) restera engagé en stoppant le "
+"défilement.\n"
+"<b>Si inactif</b> le rouge sera désengagé en stoppant le défilement."
 
 #: rc_option_editor.cc:3321
 msgid "Disable per-track record disarm while rolling"
@@ -13484,7 +13474,7 @@ msgstr "fondu en fin de boucle"
 #: rc_option_editor.cc:3384
 msgid "Fade in at loop start & Fade out at loop end"
 msgstr ""
-"fondu d'ouverture en début de boucle & fondu de fermeture en fin de boucle"
+"fondu d'ouverture en début de boucle et fondu de fermeture en fin de boucle"
 
 #: rc_option_editor.cc:3385
 msgid "Cross-fade loop end and start"
@@ -13550,7 +13540,7 @@ msgstr ""
 #: rc_option_editor.cc:3438 rc_option_editor.cc:3440 rc_option_editor.cc:3457
 #: rc_option_editor.cc:3469 rc_option_editor.cc:3471
 msgid "Transport/LTC"
-msgstr "Défilement/LTC"
+msgstr "Transport/LTC"
 
 #: rc_option_editor.cc:3438
 msgid "Linear Timecode (LTC) Generator"
@@ -13571,7 +13561,7 @@ msgid ""
 "transport (playhead) is not moving"
 msgstr ""
 "<b>Si actif</b> %1 continuera à envoyer l'info LTC même quand le défilement "
-"(tête de lecture) est arrété."
+"(tête de lecture) est arrêté."
 
 #: rc_option_editor.cc:3459
 msgid "LTC generator level [dBFS]"
@@ -13590,7 +13580,7 @@ msgstr ""
 #: rc_option_editor.cc:3504 rc_option_editor.cc:3512 rc_option_editor.cc:3520
 #: rc_option_editor.cc:3529
 msgid "Transport/MIDI"
-msgstr "Défilement/MIDI"
+msgstr "Transport/MIDI"
 
 #: rc_option_editor.cc:3473
 msgid "MIDI Beat Clock (Mclk) Generator"
@@ -14089,7 +14079,7 @@ msgstr "Apparence/Barre d'Outils"
 
 #: rc_option_editor.cc:4047
 msgid "Main Transport Toolbar Items"
-msgstr "Éléments Principaux de la Barre d'Outils Défilement"
+msgstr "Éléments Principaux de la Barre d'Outils Transport"
 
 #: rc_option_editor.cc:4052
 msgid "Display Record/Punch Options"
@@ -15390,7 +15380,7 @@ msgstr ""
 
 #: session_option_editor.cc:114
 msgid "JACK Transport/Time Settings"
-msgstr "Réglages Défilement/Temps de JACK"
+msgstr "Réglages Transport/Temps de JACK"
 
 #: session_option_editor.cc:118
 msgid ""
@@ -15622,11 +15612,11 @@ msgstr "fusionner les notes"
 
 #: session_option_editor.cc:376
 msgid "Glue new markers to bars and beats"
-msgstr "Coller les nouveaux repères aux mesures & temps"
+msgstr "Coller les nouveaux repères aux mesures et temps"
 
 #: session_option_editor.cc:383
 msgid "Glue new regions to bars and beats"
-msgstr "Coller les nouvelles régions aux mesures & temps"
+msgstr "Coller les nouvelles régions aux mesures et temps"
 
 #: session_option_editor.cc:392
 msgid "Always count-in when recording"
@@ -16965,7 +16955,7 @@ msgstr ""
 
 #: transport_masters_dialog.cc:51
 msgid "Add a new Transport Master"
-msgstr "Ajouter un nouveau Maître du Défilement"
+msgstr "Ajouter un nouveau Maître du Transport"
 
 #: transport_masters_dialog.cc:52
 msgid "Keeping rolling if sync is lost"
@@ -17070,7 +17060,7 @@ msgstr ""
 
 #: transport_masters_dialog.cc:480
 msgid "Accept locate commands"
-msgstr ""
+msgstr "Accepter les commandes de position"
 
 #: transport_masters_dialog.cc:615 transport_masters_dialog.cc:631
 msgid ">4s ago"
@@ -17078,7 +17068,7 @@ msgstr ""
 
 #: transport_masters_dialog.cc:691
 msgid "Add Transport Master"
-msgstr "Ajouter un Maître du Défilement"
+msgstr "Ajouter un Maître du Transport"
 
 #: transpose_dialog.cc:28
 msgid "Transpose MIDI"
