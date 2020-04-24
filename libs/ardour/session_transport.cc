@@ -825,8 +825,8 @@ Session::should_ignore_transport_request (TransportRequestSource src, TransportR
 {
 	if (config.get_external_sync()) {
 		if (TransportMasterManager::instance().current()->allow_request (src, type)) {
-			return false;
-		} else {
+			/* accepting a command means dropping external sync first */
+			config.set_external_sync (false);
 			return true;
 		}
 	}
