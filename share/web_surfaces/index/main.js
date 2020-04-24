@@ -37,23 +37,30 @@ import { ArdourClient } from '/shared/ardour.js';
             
             const li = document.createElement('li');
             li.innerHTML = `<li>
-                <span>Filesystem location:</span>
-                &thinsp;
-                <span class="filesystem-path">${group.filesystemPath}</span>
-            </li>`;
+                    <span>Filesystem location:</span>
+                    &thinsp;
+                    <span class="filesystem-path">${group.filesystemPath}</span>
+                </li>`;
             ul.appendChild(li);
 
             if (group.surfaces.length > 0) {
                 group.surfaces.sort((a, b) => a.name.localeCompare(b.name));
 
                 for (const surface of group.surfaces) {
+                    let path = group.path + '/' + surface.path + '/';
+
+                    // see https://github.com/Ardour/ardour/pull/491
+                    if (navigator.userAgent.indexOf('Windows') != -1) {
+                        path += 'index.html';
+                    }
+
                     const li = document.createElement('li');
                     li.innerHTML = `<li>
-                        <a href="${group.path}/${surface.path}/">${surface.name}</a>
-                        &thinsp;
-                        <span class="surface-version">(${surface.version})</span>
-                        <p>${surface.description}</p>
-                    </li>`;
+                            <a href="${path}">${surface.name}</a>
+                            &thinsp;
+                            <span class="surface-version">(${surface.version})</span>
+                            <p>${surface.description}</p>
+                        </li>`;
                     ul.appendChild(li);
                 }
             } else {
