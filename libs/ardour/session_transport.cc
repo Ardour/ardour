@@ -821,7 +821,7 @@ Session::add_post_transport_work (PostTransportWork ptw)
 }
 
 bool
-Session::should_ignore_transport_request (TransportRequestSource src, TransportRequestType type) const
+Session::should_ignore_transport_request (TransportRequestSource src, TransportRequestType type)
 {
 	if (config.get_external_sync()) {
 		if (TransportMasterManager::instance().current()->allow_request (src, type)) {
