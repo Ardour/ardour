@@ -2039,7 +2039,7 @@ AUPlugin::add_state (XMLNode* root) const
 
 	XMLTree t;
 
-	if (t.read_buffer (string ((const char*) CFDataGetBytePtr (xmlData), CFDataGetLength (xmlData)))) {
+	if (t.read_buffer (string ((const char*) CFDataGetBytePtr (xmlData), CFDataGetLength (xmlData)).c_str())) {
 		if (t.root()) {
 			root->add_child_copy (*t.root());
 		}
