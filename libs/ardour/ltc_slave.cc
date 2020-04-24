@@ -81,7 +81,7 @@ LTC_TransportMaster::init ()
 void
 LTC_TransportMaster::create_port ()
 {
-	if ((_port = AudioEngine::instance()->register_input_port (DataType::AUDIO, string_compose ("%1 in", _name, false, TransportMasterPort))) == 0) {
+	if ((_port = AudioEngine::instance()->register_input_port (DataType::AUDIO, string_compose ("%1 in", _name), false, TransportMasterPort)) == 0) {
 		throw failed_constructor();
 	}
 }
