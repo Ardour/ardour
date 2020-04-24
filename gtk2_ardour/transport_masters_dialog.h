@@ -30,6 +30,8 @@
 #include <gtkmm/entry.h>
 #include <gtkmm/treestore.h>
 
+#include "widgets/ardour_button.h"
+
 #include "ardour_window.h"
 
 namespace Gtk {
@@ -87,9 +89,9 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 		Gtk::ComboBoxText port_combo;
 		Gtk::CheckButton sclock_synced_button;
 		Gtk::CheckButton fr2997_button;
-		Gtk::Button request_options;
+		ArdourWidgets::ArdourButton request_options;
 		Gtk::Menu* request_option_menu;
-		Gtk::Button remove_button;
+		ArdourWidgets::ArdourButton remove_button;
 		FloatingTextEntry* name_editor;
 		samplepos_t save_when;
 

@@ -30,6 +30,7 @@
 #include "ardour/transport_master_manager.h"
 
 #include "widgets/tooltips.h"
+#include "widgets/ardour_icon.h"
 
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/gui_thread.h"
@@ -235,7 +236,8 @@ TransportMastersWidget::rebuild ()
 		}
 
 		if (r->tm->removeable()) {
-			table.attach (r->remove_button, col, col+1, n, n+1); ++col;
+			table.attach (r->remove_button, col, col+1, n, n+1, SHRINK, EXPAND|FILL);
+			++col;
 		} else {
 			col++;
 		}
@@ -247,7 +249,7 @@ TransportMastersWidget::rebuild ()
 		r->use_button.signal_toggled().connect (sigc::mem_fun (*r, &TransportMastersWidget::Row::use_button_toggled));
 		r->collect_button.signal_toggled().connect (sigc::mem_fun (*r, &TransportMastersWidget::Row::collect_button_toggled));
 		r->request_options.signal_button_press_event().connect (sigc::mem_fun (*r, &TransportMastersWidget::Row::request_option_press), false);
-		r->remove_button.signal_clicked().connect (sigc::mem_fun (*r, &TransportMastersWidget::Row::remove_clicked));
+		r->remove_button.signal_clicked.connect (sigc::mem_fun (*r, &TransportMastersWidget::Row::remove_clicked));
 
 		if (ttm) {
 			r->sclock_synced_button.signal_toggled().connect (sigc::mem_fun (*r, &TransportMastersWidget::Row::sync_button_toggled));
@@ -320,10 +322,10 @@ TransportMastersWidget::update_usability ()
 TransportMastersWidget::Row::Row (TransportMastersWidget& p)
 	: parent (p)
 	, request_option_menu (0)
-	, remove_button (X_("x"))
 	, name_editor (0)
 	, save_when (0)
 {
+	remove_button.set_icon (ArdourIcon::CloseCross);
 }
 
 TransportMastersWidget::Row::~Row ()
@@ -436,7 +438,7 @@ TransportMastersWidget::Row::prop_change (PropertyChange what_changed)
 	}
 
 	if (what_changed.contains (Properties::allowed_transport_requests)) {
-		request_options.set_label (tm->allowed_request_string());
+		request_options.set_text (tm->allowed_request_string());
 	}
 }
 
