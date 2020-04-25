@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-02 13:17+0200\n"
-"PO-Revision-Date: 2020-04-23 11:33+0200\n"
+"PO-Revision-Date: 2020-04-25 17:47+0200\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -527,7 +527,7 @@ msgstr "Konfig"
 
 #: actions.cc:86
 msgid "Loading menus from %1"
-msgstr "Menuak %1-(e)tik kargatzen"
+msgstr "Menuak %1(e)tik kargatzen"
 
 #: actions.cc:89 actions.cc:90
 msgid "badly formatted menu definition file: %1"
@@ -539,7 +539,7 @@ msgstr "ez da aurkitu %1 menu-definizio fitxategia"
 
 #: actions.cc:96 actions.cc:97
 msgid "%1 will not work without a valid menu definition file"
-msgstr "%1-(e)k ez du funtzionatuko baliozko menu-definizio fitxategirik gabe"
+msgstr "%1(e)k ez du funtzionatuko baliozko menu-definizio fitxategirik gabe"
 
 #: add_route_dialog.cc:71
 msgid "Add Track/Bus/VCA"
@@ -863,7 +863,7 @@ msgid ""
 "%1 has found the file <i>%2</i> in the following places:\n"
 "\n"
 msgstr ""
-"%1-(r)ek <i>%2</i> fitxategia aurkitu du toki hauetan:\n"
+"%1(r)ek <i>%2</i> fitxategia aurkitu du toki hauetan:\n"
 "\n"
 
 #: ambiguous_file_dialog.cc:46
@@ -1082,7 +1082,7 @@ msgid ""
 "was not fast enough. Try to restart\n"
 "the audio backend and save the session."
 msgstr ""
-"Audio-motorra gelditu edo %1-(e)tik deskonektatu da\n"
+"Audio-motorra gelditu edo %1(e)tik deskonektatu da\n"
 "%1 ez delako behar bezain azkarra izan.\n"
 "Berrabiarazi audio-motorra eta gorde saioa."
 
@@ -1134,7 +1134,7 @@ msgid ""
 "\n"
 "\"Just quit\" option."
 msgstr ""
-"%1-(r)ek ezin izan du saioa gorde.\n"
+"%1(r)ek ezin izan du saioa gorde.\n"
 "\n"
 "Hala ere saioa itxi nahi baduzu, erabili\n"
 "\n"
@@ -1288,15 +1288,15 @@ msgstr ">24h"
 
 #: ardour_ui.cc:1371 ardour_ui.cc:1374
 msgid "hours|h"
-msgstr "hours|h"
+msgstr "h"
 
 #: ardour_ui.cc:1377
 msgid "minutes|m"
-msgstr "minutes|m"
+msgstr "min"
 
 #: ardour_ui.cc:1422
 msgid "Timecode|TC"
-msgstr "Timecode|TC"
+msgstr "DK"
 
 #: ardour_ui.cc:1441
 msgid "n/a"
@@ -1489,7 +1489,7 @@ msgid ""
 "quickly enough to keep up with recording.\n"
 msgstr ""
 "Zure ordenagailuko disko gogorrak\n"
-"ezin izan du %1-(r)en erritmoa jarraitu.\n"
+"ezin izan du %1(r)en erritmoa jarraitu.\n"
 "\n"
 "Zehazki, ezin izan ditu idatzi datuak\n"
 "grabazioarekin bat egoteko bezain azkar.\n"
@@ -1503,7 +1503,7 @@ msgid ""
 "quickly enough to keep up with playback.\n"
 msgstr ""
 "Zure ordenagailuko disko gogorrak\n"
-"ezin izan du %1-(r)en erritmoa jarraitu.\n"
+"ezin izan du %1(r)en erritmoa jarraitu.\n"
 "\n"
 "Zehazki, ezin izan ditu irakurri datuak\n"
 "grabazioarekin bat egoteko bezain azkar.\n"
@@ -1526,7 +1526,7 @@ msgstr ""
 "edo grabazioaren erdian %1 edo \n"
 "ordenagailua itzali egin dela.\n"
 "\n"
-"%1-(r)ek edozein aldaketa berreskura dezake\n"
+"%1(r)ek edozein aldaketa berreskura dezake\n"
 "edo alde batera utzi. Mesedez, erabaki\n"
 "zer egin nahi duzun.\n"
 
@@ -1584,7 +1584,7 @@ msgstr ""
 "editatzeko; aldatzeko, klik+arrastatu digitua edo sagua\n"
 "gainean jarrita+korritze-gurpila.\n"
 "Testu-ediziorako: eskuinetik-ezkerrera gainidatzi <tt>Esc</tt>: utzi; "
-"<tt>Sartu tekla</tt>: berretsi; moldatu aldaketa '+' edo '-'\n"
+"<tt>Sartu</tt> tekla: berretsi; moldatu aldaketa '+' edo '-'\n"
 "teklekin delta-denbora sartzeko.\n"
 
 #: ardour_ui2.cc:94
@@ -1598,7 +1598,7 @@ msgstr ""
 "editatzeko; aldatzeko, klik+arrastatu digitua edo sagua\n"
 "gainean jarrita+korritze-gurpila.\n"
 "Testu-ediziorako: eskuinetik-ezkerrera gainidatzi <tt>Esc</tt>: utzi; "
-"<tt>Sartu tekla</tt>: berretsi; moldatu aldaketa '+' edo '-'\n"
+"<tt>Sartu</tt> tekla: berretsi; moldatu aldaketa '+' edo '-'\n"
 "teklekin delta-denbora sartzeko.\n"
 
 #: ardour_ui2.cc:95
@@ -2227,47 +2227,47 @@ msgstr "Joan ordularira"
 
 #: ardour_ui_ed.cc:390 ardour_ui_ed.cc:393
 msgid "Numpad Decimal"
-msgstr ""
+msgstr "Zk-teklatuko hamartarra"
 
 #: ardour_ui_ed.cc:396
 msgid "Numpad 0"
-msgstr ""
+msgstr "Zk-teklatuko 0"
 
 #: ardour_ui_ed.cc:399
 msgid "Numpad 1"
-msgstr ""
+msgstr "Zk-teklatuko 1"
 
 #: ardour_ui_ed.cc:402
 msgid "Numpad 2"
-msgstr ""
+msgstr "Zk-teklatuko 2"
 
 #: ardour_ui_ed.cc:405
 msgid "Numpad 3"
-msgstr ""
+msgstr "Zk-teklatuko 3"
 
 #: ardour_ui_ed.cc:408
 msgid "Numpad 4"
-msgstr ""
+msgstr "Zk-teklatuko 4"
 
 #: ardour_ui_ed.cc:411
 msgid "Numpad 5"
-msgstr ""
+msgstr "Zk-teklatuko 5"
 
 #: ardour_ui_ed.cc:414
 msgid "Numpad 6"
-msgstr ""
+msgstr "Zk-teklatuko 6"
 
 #: ardour_ui_ed.cc:417
 msgid "Numpad 7"
-msgstr ""
+msgstr "Zk-teklatuko 7"
 
 #: ardour_ui_ed.cc:420
 msgid "Numpad 8"
-msgstr ""
+msgstr "Zk-teklatuko 8"
 
 #: ardour_ui_ed.cc:423
 msgid "Numpad 9"
-msgstr ""
+msgstr "Zk-teklatuko 9"
 
 #: ardour_ui_ed.cc:427
 msgid "Focus On Clock"
@@ -2596,7 +2596,7 @@ msgstr "Egin klik bikoitza audio/midi konfigurazioa erakusteko."
 #: ardour_ui_engine.cc:60
 msgid "This is a free/demo copy of %1. It has just switched to silent mode."
 msgstr ""
-"Hau %1-(r)en probazko/muxutrukeko bertsio bat da. Isilpean egotera aldatu da."
+"Hau %1(r)en probazko/muxutrukeko bertsio bat da. Isilpean egotera aldatu da."
 
 #: ardour_ui_engine.cc:66
 msgid "%1 is now silent"
@@ -2605,7 +2605,7 @@ msgstr "Orain %1 isilik dago"
 #: ardour_ui_engine.cc:68
 msgid ""
 "Please consider paying for a copy of %1 - you can pay whatever you want."
-msgstr "Pentsatu %1-(r)engatik ordaintzea - zuk nahi duzuna ordain dezakezu."
+msgstr "Pentsatu %1(r)engatik ordaintzea - zuk nahi duzuna ordain dezakezu."
 
 #: ardour_ui_engine.cc:69
 msgid "Better yet become a subscriber - subscriptions start at US$1 per month."
@@ -2699,7 +2699,7 @@ msgstr "Ez dago saiorik \"%1\" direktorioan"
 
 #: ardour_ui_session.cc:390
 msgid "Please wait while %1 loads your session"
-msgstr "Itxaron %1-(e)k saioa kargatu arte"
+msgstr "Itxaron %1(e)k saioa kargatu arte"
 
 #: ardour_ui_session.cc:405
 msgid "Port Registration Error"
@@ -2737,14 +2737,14 @@ msgid ""
 "If you need to continue using tape tracks/destructive recording\n"
 "please use an older version of %1 to work on this session"
 msgstr ""
-"Saio honek (%1-(r)en bertsio zaharragokoak) gutxienez \n"
+"Saio honek (%1(r)en bertsio zaharragokoak) gutxienez \n"
 "\"zinta-pista\" (grabaketa suntsikor) bat erabili zuen.\n"
 "\n"
 "Programak jada ez du hori onartzen. Zinta-pistak pista normaltzat "
 "birkonfiguratu dira.\n"
 "\n"
 "Zinta-pistak (grabaketa suntsikorrak) erabiltzen jarraitu nahi baduzu\n"
-"erabili %1-(r)en bertsio zaharrago bat saio honekin lan egiteko"
+"erabili %1(r)en bertsio zaharrago bat saio honekin lan egiteko"
 
 #: ardour_ui_session.cc:472
 msgid "Tape Tracks No Longer Supported"
@@ -2952,9 +2952,9 @@ msgid ""
 "\n"
 "From now on, use the backup copy with older versions of %3"
 msgstr ""
-"%4Hau %3%5-(r)en bertsio zaharrago bateko saioa da\n"
+"%4Hau %3%5(r)en bertsio zaharrago bateko saioa da\n"
 "\n"
-"%3-(e)k saio-fitxategi zahar hau kopiatu du:\n"
+"%3(e)k saio-fitxategi zahar hau kopiatu du:\n"
 "\n"
 "%6%1%7\n"
 "\n"
@@ -2962,7 +2962,7 @@ msgstr ""
 "\n"
 "%6%2%7\n"
 "\n"
-"Hemendik aurrera erabili babeskopia %3-(r)en bertsio zaharragoekin"
+"Hemendik aurrera erabili babeskopia %3(r)en bertsio zaharragoekin"
 
 #: ardour_ui_startup.cc:183
 msgid "Sample Rate Mismatch"
@@ -3042,7 +3042,7 @@ msgstr "Ez erakutsi leiho hau berriro"
 #: ardour_ui_video.cc:70
 msgid "Video-Server was not launched by %1. The request to stop it is ignored."
 msgstr ""
-"%1-(e)k ez du bideo-morroia abiarazi. Gelditzeko eskaera ez da kontuan hartu."
+"%1(e)k ez du bideo-morroia abiarazi. Gelditzeko eskaera ez da kontuan hartu."
 
 #: ardour_ui_video.cc:74
 msgid "Stop Video-Server"
@@ -3611,7 +3611,7 @@ msgstr "MinSeg"
 
 #: editor.cc:199
 msgid "CD Frames"
-msgstr "CD -markoa"
+msgstr "CD-markoak"
 
 #: editor.cc:204 editor.cc:222 editor_actions.cc:155 editor_actions.cc:542
 msgid "Playhead"
@@ -4323,7 +4323,7 @@ msgstr "garbitu erreprodukzio-zerrendak"
 
 #: editor.cc:5196
 msgid "Please wait while %1 loads visual data."
-msgstr "Itxaron %1-(r)ek ikuste-datuak kargatu arte."
+msgstr "Itxaron %1(r)ek ikuste-datuak kargatu arte."
 
 #: editor.cc:6205 editor.cc:6240 editor_markers.cc:1030 editor_markers.cc:1052
 #: panner_ui.cc:414 processor_box.cc:3874
@@ -4473,7 +4473,7 @@ msgstr "Erloju sekundarioa"
 
 #: editor_actions.cc:171
 msgid "Subframes"
-msgstr "Azpi-kuadroak"
+msgstr "Azpi-markoak"
 
 #: editor_actions.cc:174
 msgid "Timecode fps"
@@ -5085,7 +5085,7 @@ msgstr "Beti goian"
 
 #: editor_actions.cc:621
 msgid "Frame number"
-msgstr "Lagin-kopurua"
+msgstr "Marko-kopurua"
 
 #: editor_actions.cc:622
 msgid "Timecode Background"
@@ -5324,11 +5324,11 @@ msgstr "Espektro-analisia..."
 
 #: editor_actions.cc:1524
 msgid "Reset Envelope"
-msgstr ""
+msgstr "Berrezarri uhin-kurba"
 
 #: editor_actions.cc:1527
 msgid "Envelope Active"
-msgstr ""
+msgstr "Uhin-kurba aktiboa"
 
 #: editor_actions.cc:1533 editor_actions.cc:1534
 msgid "Insert Patch Change..."
@@ -5690,7 +5690,7 @@ msgstr "Irabazia partekatzea?"
 
 #: editor_route_groups.cc:107
 msgid "Relative|Rel"
-msgstr "Erl"
+msgstr "Erl."
 
 #: editor_route_groups.cc:107
 msgid "Relative Gain Changes?"
@@ -5722,7 +5722,7 @@ msgstr "Grabazio-gaitzea partekatzea?"
 
 #: editor_route_groups.cc:111
 msgid "Monitoring|Mon"
-msgstr "Mon"
+msgstr "Mon."
 
 #: editor_route_groups.cc:111
 msgid "Sharing Monitoring Choice?"
@@ -5730,7 +5730,7 @@ msgstr "Monitorizazio-aukera partekatzea?"
 
 #: editor_route_groups.cc:112
 msgid "Selection|Sel"
-msgstr "Hautap"
+msgstr "Hautap."
 
 #: editor_route_groups.cc:112
 msgid "Sharing Selected/Editing Status?"
@@ -5738,7 +5738,7 @@ msgstr "Hautatze/Edizio egoera partekatzea?"
 
 #: editor_route_groups.cc:113 editor_routes.cc:249
 msgid "Active|A"
-msgstr "A"
+msgstr "Ak."
 
 #: editor_route_groups.cc:113
 msgid "Sharing Active Status?"
@@ -6328,7 +6328,7 @@ msgstr "berrezarri eremuaren irabazia"
 
 #: editor_ops.cc:5953
 msgid "region gain envelope active"
-msgstr ""
+msgstr "eremu-irabazi uhin-kurba aktibo"
 
 #: editor_ops.cc:5978
 msgid "toggle region lock"
@@ -6520,7 +6520,7 @@ msgid ""
 "\"allow-special-bus-removal\" option to be \"yes\""
 msgstr ""
 "Bus nagusia edo monitorizatzekoa kentzea hain da ideia txarra\n"
-"%1-(r)ek ez duela onartuko.\n"
+"%1(r)ek ez duela onartuko.\n"
 "\n"
 "Benetan halako zer edo zer egin nahi baduzu,\n"
 "editatu zure ardour.rc fitxategia\n"
@@ -6674,7 +6674,7 @@ msgstr "Eremuaren luzera"
 
 #: editor_regions.cc:179
 msgid "Lock|L"
-msgstr "Blok"
+msgstr "Blok."
 
 #: editor_regions.cc:179
 msgid "Region position locked?"
@@ -6682,7 +6682,7 @@ msgstr "Eremuaren-kokalekua blokeatuta?"
 
 #: editor_regions.cc:180
 msgid "Glued|G"
-msgstr "Itsats"
+msgstr "Itsats."
 
 #: editor_regions.cc:180
 msgid "Region position glued to Bars|Beats time?"
@@ -6694,7 +6694,7 @@ msgstr "Eremua mutututa?"
 
 #: editor_regions.cc:182
 msgid "Opaque|O"
-msgstr "Opak"
+msgstr "Opak."
 
 #: editor_regions.cc:182
 msgid "Region opaque (blocks regions below it from being heard)?"
@@ -6771,7 +6771,7 @@ msgstr "Pista/Bus aktibo ?"
 
 #: editor_routes.cc:250
 msgid "MidiInput|I"
-msgstr "Sar"
+msgstr "Sar."
 
 #: editor_routes.cc:250
 msgid "MIDI input enabled"
@@ -7365,7 +7365,7 @@ msgstr "Detektatzen ..."
 
 #: engine_dialog.cc:3200
 msgid "Disconnect from %1"
-msgstr "%1-(e)tik deskonektatuta"
+msgstr "%1-(e)tik deskonektatu"
 
 #: engine_dialog.cc:3205
 msgid "Running"
@@ -7377,7 +7377,7 @@ msgstr "Konektatuta"
 
 #: engine_dialog.cc:3218
 msgid "Connect to %1"
-msgstr "%1-(e)ra konektatuta"
+msgstr "%1-(e)ra konektatu"
 
 #: engine_dialog.cc:3222
 msgid "Stopped"
@@ -7503,7 +7503,7 @@ msgstr "'%3' normalizatzen (%1 %2tik gelditzen da)"
 
 #: export_dialog.cc:468
 msgid "Encoding '%3' (timespan %1 of %2)"
-msgstr "'%3' kodifikatzen (%1 %2tik gelditzen da)"
+msgstr "'%3' kodetzen (%1 %2tik gelditzen da)"
 
 #: export_dialog.cc:473
 msgid "Tagging '%3' (timespan %1 of %2)"
@@ -7816,7 +7816,7 @@ msgstr "Zero-ordena eustea"
 
 #: export_format_dialog.cc:1020
 msgid "Linear encoding options"
-msgstr "Kodifikazio-lineal aukerak"
+msgstr "Kodeketa-lineal aukerak"
 
 #: export_format_dialog.cc:1036
 msgid "Ogg Vorbis options"
@@ -8229,27 +8229,27 @@ msgstr "Neurtze-puntua"
 # Eskuz
 #: gain_meter.cc:784
 msgid "Manual|M"
-msgstr "Es"
+msgstr "Es."
 
 # Jo
 #: gain_meter.cc:786
 msgid "Play|P"
-msgstr "Er"
+msgstr "Er."
 
 # Ukitu
 #: gain_meter.cc:788
 msgid "Touch|T"
-msgstr "Uk"
+msgstr "Uk."
 
 # Giltzapetu
 #: gain_meter.cc:790
 msgid "Latch|L"
-msgstr "Gl"
+msgstr "Gl."
 
 # Idatzi
 #: gain_meter.cc:792
 msgid "Write|W"
-msgstr "Id"
+msgstr "Id."
 
 #: gain_meter.cc:805 mixer_strip.cc:2533
 msgid "Pre Fader"
@@ -8890,7 +8890,7 @@ msgid ""
 "The script requires an '{ardour}' info table and a 'factory' function."
 msgstr ""
 "Script-goiburua falta da.\n"
-"Scriptak '{ardour}' informazio-taula eta 'factory' funtzioa behar ditu"
+"Scriptak '{ardour}' informazio-taula eta 'factory' funtzioa behar ditu."
 
 #: luawindow.cc:454
 msgid "Script fails to compile."
@@ -8960,7 +8960,7 @@ msgstr ""
 "\n"
 "Hau konfigurazio txarraren edo %2(e)ko errore baten ondorioz gerta liteke.\n"
 "\n"
-"Egin klik Ados botoian %1-(e)tik irteteko."
+"Egin klik Ados botoian %1(e)tik irteteko."
 
 #: main.cc:164
 msgid "%2 exited unexpectedly, and without notifying %1."
@@ -8972,7 +8972,7 @@ msgid ""
 "   %1 could not understand your command line      "
 msgstr ""
 "\n"
-"   %1-(e)k ezin izan du ulertu zure komando-lerroa      "
+"   %1(e)k ezin izan du ulertu zure komando-lerroa      "
 
 #: main.cc:261
 msgid "An error was encountered while launching %1"
@@ -9027,7 +9027,6 @@ msgstr ""
 "Abiarazi %1 kontsolatik/terminaletik informazio gehiagorako."
 
 #: main.cc:411
-#, fuzzy
 msgid "Cannot xinstall SIGPIPE error handler"
 msgstr "Ezin da x-instalatu SIGPIPE errore-kontrolatzailea"
 
@@ -9386,7 +9385,7 @@ msgstr "Kolore modua"
 
 #: midi_time_axis.cc:672
 msgid "Bender"
-msgstr ""
+msgstr "Benderra"
 
 #: midi_time_axis.cc:676
 msgid "Pressure"
@@ -9548,7 +9547,7 @@ msgid ""
 "\t\t\t\t\t<tt>%4</tt>\n"
 "\n"
 msgstr ""
-"%1-(e)k ezin du aurkitu %2-(r)en\n"
+"%1(e)k ezin du aurkitu %2(r)en\n"
 "\n"
 "<i>%3</i>\n"
 "\n"
@@ -9616,7 +9615,6 @@ msgstr ""
 "\n"
 
 #: missing_plugin_dialog.cc:51
-#, fuzzy
 msgid ""
 "\n"
 "Those plugins will be replaced with inactive stubs.\n"
@@ -9625,121 +9623,123 @@ msgid ""
 "(also check the blacklist, Window > Log and Preferences > Plugins)"
 msgstr ""
 "\n"
-"Plugin horiek XXX inaktiboekin ordezkatuko dira.\n"
+"Plugin horiek kutxa inaktiboekin ordezkatuko dira.\n"
 "Hobe da falta diren pluginak instalatu eta saioa birkargatzea.\n"
 "(zerrenda beltza ere berrikusi, Leihoa > Erregistroa eta Hobespenak > "
 "Pluginak)"
 
 #: mixer_strip.cc:176
 msgid "Click to toggle the width of this mixer strip."
-msgstr ""
+msgstr "Egin klik nahasketa-kanal honen zabalera kommutatzeko."
 
 #: mixer_strip.cc:178
 msgid ""
 "\n"
 "%1-%2-click to toggle the width of all strips."
 msgstr ""
+"\n"
+"%1-%2-klik kanal guztien zabalera kommutatzeko."
 
 #: mixer_strip.cc:187
 msgid "Hide this mixer strip"
-msgstr ""
+msgstr "Ezkutatu nahasketa-kanal hau"
 
 #: mixer_strip.cc:208
 msgid "Isolate Solo"
-msgstr ""
+msgstr "Solo isolatua"
 
 #: mixer_strip.cc:216
 msgid "Lock Solo Status"
-msgstr ""
+msgstr "Blokeatu solo egoera"
 
 #: mixer_strip.cc:218 mixer_strip.cc:2276
 msgid "SoloLock|Lock"
-msgstr ""
+msgstr "Blok."
 
 #: mixer_strip.cc:219 mixer_strip.cc:2275
 msgid "Iso"
-msgstr ""
+msgstr "Iso"
 
 #: mixer_strip.cc:268
 msgid "Mix group"
-msgstr ""
+msgstr "Nahasketa-taldea"
 
 #: mixer_strip.cc:280
 msgid "Trim: "
-msgstr ""
+msgstr "Mozketa: "
 
 #: mixer_strip.cc:409 rc_option_editor.cc:3809
 msgid "Phase Invert"
-msgstr ""
+msgstr "Fase inbertsioa"
 
 #: mixer_strip.cc:410 rc_option_editor.cc:3810
 msgid "Record & Monitor"
-msgstr ""
+msgstr "Grabatu eta monitorizatu"
 
 #: mixer_strip.cc:411 rc_option_editor.cc:3811
 msgid "Solo Iso / Lock"
-msgstr ""
+msgstr "Solo iso / blokeatu"
 
 #: mixer_strip.cc:414 rc_option_editor.cc:3814
 msgid "VCA Assigns"
-msgstr ""
+msgstr "VCA esleipenak"
 
 #: mixer_strip.cc:591
 msgid "Show/Hide Monitoring Section"
-msgstr ""
+msgstr "Erakutsi/Ezkutatu monitorizazio-eremuak"
 
 #: mixer_strip.cc:626
 msgid "Enable/Disable MIDI input"
-msgstr ""
+msgstr "Gaitu/Desgaitu MIDI sarrera"
 
 #: mixer_strip.cc:939 mixer_strip.cc:1050
 msgid "Add %1 port"
-msgstr ""
+msgstr "Gehitu %1 ataka"
 
 #: mixer_strip.cc:1317
 msgid "<b>INPUT</b> to %1"
-msgstr ""
+msgstr "<b>SARRERA</b> hona: %1"
 
 #: mixer_strip.cc:1576 mixer_strip.cc:1587
 msgid "Cmt"
-msgstr ""
+msgstr "Iruzk."
 
 #: mixer_strip.cc:1637
 msgid "Grp"
-msgstr ""
+msgstr "Tald."
 
 #: mixer_strip.cc:1640
 msgid "~G"
-msgstr ""
+msgstr "~T"
 
 #: mixer_strip.cc:1692 route_time_axis.cc:625 vca_master_strip.cc:464
 #: vca_time_axis.cc:453
 msgid "Color..."
-msgstr ""
+msgstr "Kolorea..."
 
 #: mixer_strip.cc:1696 route_time_axis.cc:629
 msgid "Inputs..."
-msgstr ""
+msgstr "Sarrerak..."
 
 #: mixer_strip.cc:1739 plugin_pin_dialog.cc:1028
 msgid "Strict I/O"
-msgstr ""
+msgstr "S/I zorrotza"
 
 #: mixer_strip.cc:1749
 msgid "Record Pre-Fader"
-msgstr ""
+msgstr "Grabatu prefader"
 
 #: mixer_strip.cc:1750
 msgid "Record Post-Fader"
-msgstr ""
+msgstr "Grabatu postfader"
 
 #: mixer_strip.cc:1751
 msgid "Custom Record+Playback Positions"
-msgstr ""
+msgstr "Grabazio+erreprodukzio posizio pertsonalizatuak"
 
 #: mixer_strip.cc:1753
 msgid "Disk I/O..."
-msgstr ""
+msgstr "Disko S/I..."
 
 #: mixer_strip.cc:1760 processor_box.cc:3863
 msgid "Pin Connections..."
@@ -9747,112 +9747,112 @@ msgstr ""
 
 #: mixer_strip.cc:1770
 msgid "Fan out to Busses"
-msgstr ""
+msgstr "Zabaldu busetara"
 
 #: mixer_strip.cc:1771
 msgid "Fan out to Tracks"
-msgstr ""
+msgstr "Zabaldu pistetara"
 
 #: mixer_strip.cc:1792 route_time_axis.cc:882
 msgid "Duplicate..."
-msgstr ""
+msgstr "Bikoiztu..."
 
 #: mixer_strip.cc:2063
 msgid "Pre"
-msgstr ""
+msgstr "Pre"
 
 #: mixer_strip.cc:2067
 msgid "Post"
-msgstr ""
+msgstr "Post"
 
 #: mixer_strip.cc:2083
 msgid "Meter|In"
-msgstr ""
+msgstr "Sar."
 
 #: mixer_strip.cc:2087
 msgid "Meter|Pr"
-msgstr ""
+msgstr "Pre"
 
 #: mixer_strip.cc:2091
 msgid "Meter|Po"
-msgstr ""
+msgstr "Pos"
 
 #: mixer_strip.cc:2095
 msgid "Meter|O"
-msgstr ""
+msgstr "Irt."
 
 #: mixer_strip.cc:2100
 msgid "Meter|C"
-msgstr ""
+msgstr "Per."
 
 #: mixer_strip.cc:2253 route_ui.cc:219
 msgid "Disk"
-msgstr ""
+msgstr "Disk"
 
 #: mixer_strip.cc:2255
 msgid "Mon"
-msgstr ""
+msgstr "Mon"
 
 #: mixer_strip.cc:2268 monitor_section.cc:91
 msgid "AFL"
-msgstr ""
+msgstr "AFL"
 
 #: mixer_strip.cc:2271 monitor_section.cc:92
 msgid "PFL"
-msgstr ""
+msgstr "PFL"
 
 #: mixer_strip.cc:2281 meter_strip.cc:392
 msgid "MonitorInput|I"
-msgstr ""
+msgstr "Sa."
 
 #: mixer_strip.cc:2282 meter_strip.cc:393
 msgid "MonitorDisk|D"
-msgstr ""
+msgstr "Di."
 
 #: mixer_strip.cc:2284
 msgid "Mon|O"
-msgstr ""
+msgstr "Ir."
 
 #: mixer_strip.cc:2297 meter_strip.cc:384 route_time_axis.cc:2540
 #: vca_master_strip.cc:217 vca_time_axis.cc:273
 msgid "AfterFader|A"
-msgstr ""
+msgstr "A"
 
 #: mixer_strip.cc:2300
 msgid "Prefader|P"
-msgstr ""
+msgstr "P"
 
 #: mixer_strip.cc:2305
 msgid "SoloIso|I"
-msgstr ""
+msgstr "Is."
 
 #: mixer_strip.cc:2306
 msgid "SoloLock|L"
-msgstr ""
+msgstr "Bl."
 
 #: mixer_strip.cc:2578 meter_strip.cc:868
 msgid "Change all in Group to %1"
-msgstr ""
+msgstr "Aldatu taldeko guztia %1-(e)ra"
 
 #: mixer_strip.cc:2580 meter_strip.cc:870
 msgid "Change all to %1"
-msgstr ""
+msgstr "Aldatu guztia %1-(e)ra"
 
 #: mixer_strip.cc:2582 meter_strip.cc:872
 msgid "Change same track-type to %1"
-msgstr ""
+msgstr "Aldatu pista-mota berberak %1-(e)ra"
 
 #: mixer_ui.cc:194 route_time_axis.cc:842
 msgid "Group"
-msgstr ""
+msgstr "Taldea"
 
 #: mixer_ui.cc:239
 msgid "Favorite Plugins"
-msgstr ""
+msgstr "Plugin gogokoenak"
 
 #: mixer_ui.cc:670
 msgid "Error adding GUI elements for new tracks/busses %1"
-msgstr ""
+msgstr "Errorea GUI elementuak gehitzean %1 pista/bus berrientzat"
 
 #: mixer_ui.cc:1879
 msgid "track display list item for renamed strip not found!"
@@ -9860,333 +9860,341 @@ msgstr ""
 
 #: mixer_ui.cc:1977
 msgid "-all-"
-msgstr ""
+msgstr "-guztiak-"
 
 #: mixer_ui.cc:2741
 msgid "Strips"
-msgstr ""
+msgstr "Kanalak"
 
 #: mixer_ui.cc:3133
 msgid "No Track/Bus is selected."
-msgstr ""
+msgstr "Ez dago pista/busik hautatuta."
 
 #: mixer_ui.cc:3135
 msgid "Add at the top"
-msgstr ""
+msgstr "Gehitu hasieran"
 
 #: mixer_ui.cc:3137
 msgid "Add Pre-Fader"
-msgstr ""
+msgstr "Gehitu prefader"
 
 #: mixer_ui.cc:3139
 msgid "Add Post-Fader"
-msgstr ""
+msgstr "Gehitu postfader"
 
 #: mixer_ui.cc:3141
 msgid "Add at the end"
-msgstr ""
+msgstr "Gehitu bukaeran"
 
 #: mixer_ui.cc:3147
 msgid "Remove from favorites"
-msgstr ""
+msgstr "Ezabatu gogokoenetatik"
 
 #: mixer_ui.cc:3153
 msgid "Delete Preset"
-msgstr ""
+msgstr "Ezabatu aurrezarpena"
 
 #: mixer_ui.cc:3393
 msgid "Toggle Solo on Mixer-Selected Tracks/Busses"
-msgstr ""
+msgstr "Gaitu/Desgaitu soloa Nahasgailuan hautatutako pistei/busei"
 
 #: mixer_ui.cc:3394
 msgid "Toggle Mute on Mixer-Selected Tracks/Busses"
-msgstr ""
+msgstr "Gaitu/Desgaitu mututzea Nahasgailuan hautatutako pistei/busei"
 
 #: mixer_ui.cc:3395
 msgid "Toggle Rec-enable on Mixer-Selected Tracks/Busses"
-msgstr ""
+msgstr "Gaitu/Desgaitu grabatzeko Nahasgailuan hautatutako pistak/busak"
 
 #: mixer_ui.cc:3396
 msgid "Decrease Gain on Mixer-Selected Tracks/Busses"
-msgstr ""
+msgstr "Txikitu irabazia Nahasgailuan hautatutako pistei/busei"
 
 #: mixer_ui.cc:3397
 msgid "Increase Gain on Mixer-Selected Tracks/Busses"
-msgstr ""
+msgstr "Handitu irabazia Nahasgailuan hautatutako pistei/busei"
 
 #: mixer_ui.cc:3398
 msgid "Set Gain to 0dB on Mixer-Selected Tracks/Busses"
-msgstr ""
+msgstr "Ezarri irabazia 0dBtan Nahasgailuan hautatutako pistei/busei"
 
 #: mixer_ui.cc:3401
 msgid "Copy Selected Processors"
-msgstr ""
+msgstr "Kopiatu hautatutako prozesadoreak"
 
 #: mixer_ui.cc:3402
 msgid "Cut Selected Processors"
-msgstr ""
+msgstr "Ebaki hautatutako prozesadoreak"
 
 #: mixer_ui.cc:3403
 msgid "Paste Selected Processors"
-msgstr ""
+msgstr "Itsatsi hautatutako prozesadoreak"
 
 #: mixer_ui.cc:3404
 msgid "Delete Selected Processors"
-msgstr ""
+msgstr "Ezabatu hautatutako prozesadoreak"
 
 #: mixer_ui.cc:3405
 msgid "Select All (visible) Processors"
-msgstr ""
+msgstr "Hautatu prozesadore (ikusgai) guztiak"
 
 #: mixer_ui.cc:3406
 msgid "Toggle Selected Processors"
-msgstr ""
+msgstr "Kommutatu hautatutako prozesadoreak"
 
 #: mixer_ui.cc:3407
 msgid "Toggle Selected Plugins"
-msgstr ""
+msgstr "Kommutatu hautatutako pluginak"
 
 #: mixer_ui.cc:3408
 msgid "Deselect all strips and processors"
-msgstr ""
+msgstr "Desautatu kanal eta prozesadore guztiak"
 
 #: mixer_ui.cc:3410
 msgid "Select Next Mixer Strip"
-msgstr ""
+msgstr "Hautatu hurrengo nahasketa-kanala"
 
 #: mixer_ui.cc:3411
 msgid "Scroll Previous Mixer Strip"
-msgstr ""
+msgstr "Korritu hurrengo nahasketa-kanala"
 
 #: mixer_ui.cc:3413
 msgid "Scroll Mixer Window to the left"
-msgstr ""
+msgstr "Korritu Nahasgailu leihoa ezkerretara"
 
 #: mixer_ui.cc:3414
 msgid "Scroll Mixer Window to the right"
-msgstr ""
+msgstr "Korritu Nahasgailu leihoa eskuinetara"
 
 #: mixer_ui.cc:3416
 msgid "Toggle MIDI Input Active for Mixer-Selected Tracks/Busses"
-msgstr ""
+msgstr "Gaitu/Desgaitu MIDI sarrera Nahasgailuan hautatutako pistei/busei"
 
 #: mixer_ui.cc:3419
 msgid "Mixer: Show Mixer List"
-msgstr ""
+msgstr "Nahasgailua: erakutsi nahasketa-zerrenda"
 
 #: mixer_ui.cc:3421
 msgid "Mixer: Show VCAs"
-msgstr ""
+msgstr "Nahasgailua: erakutsi VCAk"
 
 #: mixer_ui.cc:3424
 msgid "Mixer: Show Mixbusses"
-msgstr ""
+msgstr "Nahasgailua: erakutsi nahasketa-busak"
 
 #: mixer_ui.cc:3427
 msgid "Mixer: Show Monitor Section"
-msgstr ""
+msgstr "Nahasgailua: erakutsi monitorizatze-eremua"
 
 #: mixer_ui.cc:3429
 msgid "Mixer: Show Foldback Strip"
-msgstr ""
+msgstr "Nahasgailua: erakutsi foldback kanalak"
 
 #: mixer_ui.cc:3431
 msgid "Toggle Disk Monitoring"
-msgstr ""
+msgstr "Gaitu/Desgaitu disko-monitorizatzea"
 
 #: mixer_ui.cc:3432
 msgid "Toggle Input Monitoring"
-msgstr ""
+msgstr "Gaitu/Desgaitu sarrera-monitorizatzea"
 
 #: meter_strip.cc:167
 msgid "Reset Peak"
-msgstr ""
+msgstr "Berrezarri gailurra"
 
 #: meter_strip.cc:387 route_time_axis.cc:2544 vca_master_strip.cc:221
 #: vca_time_axis.cc:277
 msgid "PreFader|P"
-msgstr ""
+msgstr "P"
 
 #: meter_strip.cc:903
 msgid "Variable height"
-msgstr ""
+msgstr "Altuera aldakorra"
 
 #: meter_strip.cc:904
 msgid "Short"
-msgstr ""
+msgstr "Motza"
 
 #: meter_strip.cc:905
 msgid "Tall"
-msgstr ""
+msgstr "Altua"
 
 #: meter_strip.cc:906
 msgid "Grande"
-msgstr ""
+msgstr "Grande"
 
 #: meter_strip.cc:907
 msgid "Venti"
-msgstr ""
+msgstr "Venti"
 
 #: meter_patterns.cc:86
 msgid "Peak (+6dBFS)"
-msgstr ""
+msgstr "Gailurra (+6dBFS)"
 
 #: meter_patterns.cc:89
 msgid "Peak (0dBFS)"
-msgstr ""
+msgstr "Gailurra (0dBFS)"
 
 #: meter_patterns.cc:92
 msgid "RMS + Peak"
-msgstr ""
+msgstr "RMS + Gailurra"
 
 #: meter_patterns.cc:95
 msgid "IEC1/DIN"
-msgstr ""
+msgstr "IEC1/DIN"
 
 #: meter_patterns.cc:98
 msgid "IEC1/Nordic"
-msgstr ""
+msgstr "IEC1/Nordic"
 
 #: meter_patterns.cc:101
 msgid "IEC2/BBC"
-msgstr ""
+msgstr "IEC2/BBC"
 
 #: meter_patterns.cc:104
 msgid "IEC2/EBU"
-msgstr ""
+msgstr "IEC2/EBU"
 
 #: meter_patterns.cc:107
 msgid "K20/RMS"
-msgstr ""
+msgstr "K20/RMS"
 
 #: meter_patterns.cc:110
 msgid "K14/RMS"
-msgstr ""
+msgstr "K14/RMS"
 
 #: meter_patterns.cc:113
 msgid "K12/RMS"
-msgstr ""
+msgstr "K12/RMS"
 
 #: meter_patterns.cc:116
 msgid "VU"
-msgstr ""
+msgstr "VU"
 
 #: monitor_section.cc:90
 msgid "SiP"
-msgstr ""
+msgstr "SiP"
 
 #: monitor_section.cc:121 route_group_dialog.cc:51
 msgid "Soloing"
-msgstr ""
+msgstr "Soloak"
 
 #: monitor_section.cc:125
 msgid "Isolated"
-msgstr ""
+msgstr "Isolatuak"
 
 #: monitor_section.cc:129
 msgid "Auditioning"
-msgstr ""
+msgstr "Entzutea"
 
 #: monitor_section.cc:138
 msgid ""
 "When active, something is solo-isolated.\n"
 "Click to de-isolate everything"
 msgstr ""
+"Piztuta badago, zerbait solo-isolatu moduan dago.\n"
+"Egin klik solo-isolatu guztiak kentzeko"
 
 #: monitor_section.cc:141
 msgid ""
 "When active, auditioning is active.\n"
 "Click to stop the audition"
 msgstr ""
+"Piztuta badago, zerbait entzute moduan dago.\n"
+"Egin klik entzutea gelditzeko"
 
 #: monitor_section.cc:158
 msgid "Solo controls affect solo-in-place"
-msgstr ""
+msgstr "Solo kontrolak tokiko-soloei eragiten die"
 
 #: monitor_section.cc:164
 msgid "Solo controls toggle after-fader-listen"
-msgstr ""
+msgstr "Solo kontrolak postfader-entzutea kommutatzen du"
 
 #: monitor_section.cc:170
 msgid "Solo controls toggle pre-fader-listen"
-msgstr ""
+msgstr "Solo kontrolak prefader-entzutea kommutatzen du"
 
 #: monitor_section.cc:176
 msgid "Excl. Solo"
-msgstr ""
+msgstr "Solo esklus."
 
 #: monitor_section.cc:178
 msgid "Exclusive solo means that only 1 solo is active at a time"
-msgstr ""
+msgstr "Solo esklusiboak esan nahi du uneoro solo bakar bat dagoela aktibo"
 
 #: monitor_section.cc:185
 msgid "Solo » Mute"
-msgstr ""
+msgstr "Solo » Mutu"
 
 #: monitor_section.cc:187
 msgid ""
 "If enabled, solo will override mute\n"
 "(a soloed & muted track or bus will be audible)"
 msgstr ""
+"Piztuta badago, soloa mututzeari gainjarriko zaio\n"
+"(soloan eta mutu dagoen pista edo busa entzungai izango da)"
 
 #: monitor_section.cc:192
 msgid "Processors"
-msgstr ""
+msgstr "Prozesadoreak"
 
 #: monitor_section.cc:194
 msgid "Allow one to add monitor effect processors"
-msgstr ""
+msgstr "Utzi gehitzen monitore-efektuko prozesadoreak"
 
 #: monitor_section.cc:209 monitor_section.cc:212
 msgid "Gain increase for soloed signals (0dB is normal)"
-msgstr ""
+msgstr "Irabazi-handitzea solodun seinaleentzat (0dB da normala)"
 
 #: monitor_section.cc:215 monitor_section.cc:233 monitor_section.cc:252
 #: monitor_section.cc:298
 msgid "0 dB"
-msgstr ""
+msgstr "0 dB"
 
 #: monitor_section.cc:216
 msgid "3 dB"
-msgstr ""
+msgstr "3 dB"
 
 #: monitor_section.cc:217
 msgid "6 dB"
-msgstr ""
+msgstr "6 dB"
 
 #: monitor_section.cc:218
 msgid "10 dB"
-msgstr ""
+msgstr "10 dB"
 
 #: monitor_section.cc:220
 msgid "Solo Boost"
-msgstr ""
+msgstr "Soloa indartzea"
 
 #: monitor_section.cc:227 monitor_section.cc:230
 msgid ""
 "Gain reduction non-soloed signals\n"
 "A value above -inf dB causes \"solo-in-front\""
 msgstr ""
+"Irabazi-txikitzea solo gabeko seinaleentzat\n"
+"-inf dB baino balio handiagoa izateak \"solo-in-front\" eragiten du"
 
 #: monitor_section.cc:234 monitor_section.cc:254 monitor_section.cc:300
 msgid "-6 dB"
-msgstr ""
+msgstr "-6 dB"
 
 #: monitor_section.cc:235 monitor_section.cc:255 monitor_section.cc:301
 msgid "-12 dB"
-msgstr ""
+msgstr "-12 dB"
 
 #: monitor_section.cc:236 monitor_section.cc:256 monitor_section.cc:302
 msgid "-20 dB"
-msgstr ""
+msgstr "-20 dB"
 
 #: monitor_section.cc:237
 msgid "OFF"
-msgstr ""
+msgstr "DESAK."
 
 #: monitor_section.cc:239
 msgid "SiP Cut"
-msgstr ""
+msgstr "Moztu SiP"
 
 #: monitor_section.cc:246 monitor_section.cc:249
 msgid "Gain reduction to use when dimming monitor outputs"
@@ -16638,61 +16646,69 @@ msgstr ""
 
 #: add_video_dialog.cc:70
 msgid "Reload docroot"
-msgstr ""
+msgstr "Birkargatu docroot-a"
 
 #: add_video_dialog.cc:126
 msgid "Video files"
-msgstr ""
+msgstr "Bideo-fitxategiak"
 
 #: add_video_dialog.cc:155
 msgid "<b>Video Information</b>"
-msgstr ""
+msgstr "<b>Bideo-informazioa</b>"
 
 #: add_video_dialog.cc:158
 msgid "Start:"
-msgstr ""
+msgstr "Hasiera:"
 
 #: add_video_dialog.cc:164
 msgid "Frame rate:"
-msgstr ""
+msgstr "Marko-abiadura:"
 
 #: add_video_dialog.cc:167
 msgid "Aspect Ratio:"
-msgstr ""
+msgstr "Aspektu-erlazioa:"
 
 #: add_video_dialog.cc:253
 msgid "VideoServerIndex"
-msgstr ""
+msgstr "BideoMorroiIndizea"
 
 #: add_video_dialog.cc:690
 msgid " %1 fps"
-msgstr ""
+msgstr " %1 fps"
 
 #: vca_time_axis.cc:70
+#, fuzzy
 msgid "VCA|D"
-msgstr ""
+msgstr "D"
 
 #: vca_time_axis.cc:71
 msgid "Unassign all slaves"
-msgstr ""
+msgstr "Kendu morroi guztiak"
 
 #: video_timeline.cc:461
 msgid ""
 "Parsing video file info failed. Is the Video Server running? Is the file "
 "readable by the Video Server? Does the docroot match? Is it a video file?"
 msgstr ""
+"Bideoaren fitxategi-informazioa analizatzeak huts egin du. Bideo-morroia "
+"abian dago? Bideo-morroiak fitxategia irakur dezke? Docroot-a bat dator? "
+"Bideo-fitxategia da?"
 
 #: video_timeline.cc:499
 msgid ""
 "Failed to set session-framerate: '%1' does not have a corresponding option "
 "setting in %2."
 msgstr ""
+"Saioaren marko-abiadura ezartzeak huts egin du: ‘%1’-(e)k ez du dagokion "
+"aukera-ezarpenik %2-(e)n."
 
 #: video_timeline.cc:507
 msgid ""
 "Video file's framerate is not equal to %1 session timecode's framerate: '%2' "
 "vs '%3'"
 msgstr ""
+"Bideo-fitxategiaren marko-abiadura ez da %1 saioaren denbora-kodearen lagin-"
+"tasa berdina: ‘%2’ vs ‘%3’"
 
 #: video_timeline.cc:580
 msgid ""
@@ -16700,6 +16716,9 @@ msgid ""
 "means that the video server was not started by %1 and uses a different "
 "document-root."
 msgstr ""
+"Bideo-morroiaren docroot-a ez dator bat. %1: “%2”, bideo-morroia ‘%3’. "
+"Normalean honek esan nahi du %1-(e)k ez duela bideo-morroia hasi eta "
+"dokumentu-erro ezberdina erabiltzen duela."
 
 #: video_timeline.cc:717
 msgid ""
@@ -16710,20 +16729,28 @@ msgid ""
 "\n"
 "see also http://manual.ardour.org/video-timeline/setup/"
 msgstr ""
+"‘xjadeo’ bideo-monitorea ez da aurkitu. Instalatu http://xjadeo.sf.net/ "
+"(xjadeorako pertsonalizatutako bidea zehaztu daiteke XJREMOTE ingurune "
+"aldakorra ezarriz. Horrek xjadeoren ‘xjremote’ interfazearekin bateragarria "
+"den aplikazio batera zuzendu beharko lizuke).\n"
+"\n"
+"ikus halaber http://manual.ardour.org/video-timeline/setup/"
 
 #: video_timeline.cc:732
 msgid "Video-monitor 'xjadeo' cannot be launched."
-msgstr ""
+msgstr "‘xjadeo’ bideo-monitorea ezin da abiarazi."
 
 #: video_timeline.cc:764
 msgid ""
 "Video-monitor 'xjadeo' is too old. Please install xjadeo version 0.7.7 or "
 "later. http://xjadeo.sf.net/"
 msgstr ""
+"‘xjadeo’ bideo-monitorea zaharregia da. Instalatu xjadeo 0.7.7 bertsioa edo "
+"berriagoa. http://xjadeo.sf.net/"
 
 #: video_monitor.cc:294
 msgid "Video Monitor: File Not Found."
-msgstr ""
+msgstr "Bideo-monitorea: Fitxategia ez da aurkitu."
 
 #: transcode_ffmpeg.cc:58
 msgid ""
@@ -16742,146 +16769,168 @@ msgid ""
 "\n"
 "see also http://manual.ardour.org/video-timeline/setup/"
 msgstr ""
+"ffmpeg instalazioa ez da aurkitu sistema honetan.\n"
+"%1-(e)k ffmpeg.org-en ffmpeg eta ffprobe behar du- 1.1 bertsioa edo "
+"berriagoa.\n"
+"Ezin da bideorik inportatu edota esportatu tresnak instalatzen dituzun "
+"arte.\n"
+"\n"
+"Tresnak ardour.org-en %1 bertsioetan daude, baita bideo-morroiarekin hemen: "
+"http://x42.github.com/harvid/\n"
+"\n"
+"Garrantzitsua: fitxategiak $PATHen instalatu behar dira eta ffmpeg_harvid "
+"eta ffprobe_harvid izena jarri behar zaie.\n"
+"Jada ffmpeg instalazio egokia baldin baduzu zure sisteman, ffmpeg-etik "
+"ffmpeg_harvid-era eta ffprobe-tik ffprobe_harvid-era esteka sinbolikoak "
+"sortzea gomendatzen dizugu.\n"
+"\n"
+"ikus halaber http://manual.ardour.org/video-timeline/setup/"
 
 #: transcode_video_dialog.cc:59
 msgid "Transcode/Import Video File "
-msgstr ""
+msgstr "Transkodetu/Inportatu bideo-fitxategia "
 
 #: transcode_video_dialog.cc:61
 msgid "Output File:"
-msgstr ""
+msgstr "Irteera-fitxategia:"
 
 #: transcode_video_dialog.cc:64 export_video_dialog.cc:87
 msgid "Abort"
-msgstr ""
+msgstr "Utzi"
 
 #: transcode_video_dialog.cc:66
 msgid "Height = "
-msgstr ""
+msgstr "Altuera = "
 
 #: transcode_video_dialog.cc:69
 msgid "Extract LTC from audio and align video"
-msgstr ""
+msgstr "Atera LTC audiotik eta lerrokatu bideoa"
 
 #: transcode_video_dialog.cc:70
 msgid "Manual Override"
-msgstr ""
+msgstr "Eskuzko gainidazketa"
 
 #: transcode_video_dialog.cc:74 export_video_dialog.cc:105
 msgid "Debug Mode: Print ffmpeg command and output to stdout."
-msgstr ""
+msgstr "Arazketa modua: Inprimatu ffmpeg komandoa eta irteera std-irteerara."
 
 #: transcode_video_dialog.cc:110
 msgid "<b>File Information</b>"
-msgstr ""
+msgstr "<b>Fitxategi-informazioa</b>"
 
 #: transcode_video_dialog.cc:116
 msgid ""
 "ffmpeg installation was not found. Video Import is not possible. See the Log "
 "window for more information."
 msgstr ""
+"ffmpeg instalazioa ez da aurkitu. Bideo-inportazioa ezin da egin. Ikusi "
+"Erregistroa informazio gehiagorako."
 
 #: transcode_video_dialog.cc:123
 msgid ""
 "File-info can not be read. Most likely '%1' is not a valid video-file or an "
 "unsupported video codec or format."
 msgstr ""
+"Fitxategi-informazioa ezin da irakurri. Seguruenik ‘%1’ bideo-fitxategi "
+"baliogabea da edo onartzen ez den bideoaren kodek edo formatua du."
 
 #: transcode_video_dialog.cc:140
 msgid "FPS:"
-msgstr ""
+msgstr "FPS:"
 
 #: transcode_video_dialog.cc:144
 msgid "Codec:"
-msgstr ""
+msgstr "Kodeka:"
 
 #: transcode_video_dialog.cc:146
 msgid "Geometry:"
-msgstr ""
+msgstr "Geometria:"
 
 #: transcode_video_dialog.cc:161
 msgid "??"
-msgstr ""
+msgstr "??"
 
 #: transcode_video_dialog.cc:182
 msgid "<b>Import Settings</b>"
-msgstr ""
+msgstr "<b>Inportatu ezarpenak</b>"
 
 #: transcode_video_dialog.cc:187
 msgid "Reference from Current Location (Previously Transcoded Files Only)"
 msgstr ""
+"Erreferentzia uneko kokalekutik (Lehen transkodetutako fitxategiak soilik)"
 
 #: transcode_video_dialog.cc:188
 msgid "Import/Transcode Video to Session"
-msgstr ""
+msgstr "Inportatu/Transkodetu bideoa saiora"
 
 #: transcode_video_dialog.cc:191 transcode_video_dialog.cc:201
 msgid "Do Not Import Video (Audio Import Only)"
-msgstr ""
+msgstr "Ez inportatu bideorik (Audio-inportazioa soilik)"
 
 #: transcode_video_dialog.cc:211
 msgid "Do Not Import Video"
-msgstr ""
+msgstr "Ez inportatu bideorik"
 
 #: transcode_video_dialog.cc:227
 msgid "Scale Video: Width = "
-msgstr ""
+msgstr "Egokitu bideoa: Zabalera = "
 
 #: transcode_video_dialog.cc:233
 msgid "Original Width"
-msgstr ""
+msgstr "Zabalera originala"
 
 #: transcode_video_dialog.cc:248
 msgid "Bitrate (KBit/s):"
-msgstr ""
+msgstr "Bit-emaria (KBit/s):"
 
 #: transcode_video_dialog.cc:253
 msgid "Extract Audio:"
-msgstr ""
+msgstr "Audioa atera:"
 
 #: transcode_video_dialog.cc:258
 msgid "No Audio Track Present"
-msgstr ""
+msgstr "Audio-pistarik ez dago"
 
 #: transcode_video_dialog.cc:261
 msgid "Do Not Extract Audio"
-msgstr ""
+msgstr "Ez atera audiorik"
 
 #: transcode_video_dialog.cc:378
 msgid "Extracting Audio.."
-msgstr ""
+msgstr "Audioa ateratzen.."
 
 #: transcode_video_dialog.cc:381
 msgid "Audio Extraction Failed."
-msgstr ""
+msgstr "Audioa ateratzeak huts egin du."
 
 #: transcode_video_dialog.cc:407
 msgid "Transcoding Video.."
-msgstr ""
+msgstr "Bideoa transkodetzen.."
 
 #: transcode_video_dialog.cc:441
 msgid "Transcoding Failed."
-msgstr ""
+msgstr "Transkodeketak huts egin du."
 
 #: transcode_video_dialog.cc:545
 msgid "Save Transcoded Video File"
-msgstr ""
+msgstr "Gorde transkodetutako bideo-fitxategia"
 
 #: video_server_dialog.cc:57
 msgid "Launch Video Server"
-msgstr ""
+msgstr "Abiarazi bideo-morroia"
 
 #: video_server_dialog.cc:58
 msgid "Server Executable:"
-msgstr ""
+msgstr "Morroi exekutagarria:"
 
 #: video_server_dialog.cc:60
 msgid "Server Docroot:"
-msgstr ""
+msgstr "Morroiaren docroot-a:"
 
 #: video_server_dialog.cc:66
 msgid "Don't show this dialog again. (Reset in Edit->Preferences)."
 msgstr ""
+"Ez erakutsi elkarrizketa hau berriro (Berrezarri hemen: Editatu->Hobespenak)."
 
 #: video_server_dialog.cc:99
 msgid ""
@@ -16892,18 +16941,23 @@ msgid ""
 "\n"
 "see also http://manual.ardour.org/video-timeline/setup/"
 msgstr ""
+"Ezin da kanpoko bideo-morroiaren \"harvid\" aurkitu.\n"
+"Tresna ardour.org-en %1 bertsioetan dago. Bestela, http://x42.github.com/"
+"harvid/ webgunetik deskarga dezakezu edo zure banaketatik eskuratu.\n"
+"\n"
+"Ikus http://manual.ardour.org/video-timeline/setup/"
 
 #: video_server_dialog.cc:136
 msgid "Listen Address:"
-msgstr ""
+msgstr "Entzute-helbidea:"
 
 #: video_server_dialog.cc:141
 msgid "Listen Port:"
-msgstr ""
+msgstr "Entzute-ataka:"
 
 #: video_server_dialog.cc:146
 msgid "Cache Size:"
-msgstr ""
+msgstr "Cache tamaina:"
 
 #: video_server_dialog.cc:152
 msgid ""
@@ -16911,218 +16965,233 @@ msgid ""
 "The server configured in Edit -> Preferences -> Video is not reachable.\n"
 "Do you want %1 to launch 'harvid' on this machine?"
 msgstr ""
+"%1 kanpoko bideo-morroi batean oinarritzen da bideoaren denbora-"
+"lerroarentzako.\n"
+"Editatu -> Hobespenak -> Bideoan konfiguratutako zerbitzaria ezin da "
+"atzitu.\n"
+"%1 makina honetan 'harvid' abiaraztea nahi duzu?"
 
 #: video_server_dialog.cc:191
 msgid "Set Video Server Executable"
-msgstr ""
+msgstr "Ezarri bideo-morroi exekutagarria"
 
 #: video_server_dialog.cc:211
 msgid "Server docroot"
-msgstr ""
+msgstr "Morroiaren docroot-a"
 
 #: utils_videotl.cc:67
 msgid "Destination is outside Video Server's docroot. "
-msgstr ""
+msgstr "Helburuko fitxategi-bidea Bideo-morroiaren docroot-etik kanpo dago. "
 
 #: utils_videotl.cc:68
 msgid ""
 "The destination file path is outside of the Video Server's docroot. The file "
 "will not be readable by the Video Server. Do you still want to continue?"
 msgstr ""
+"Helburuko fitxategi-bidea Bideo-morroiaren docroot-etik kanpo dago. Bideo-"
+"zerbitzariak ezingo du fitxategia irakurri. Jarraitu nahi duzu?"
 
 #: utils_videotl.cc:83
 msgid "Confirm Overwrite"
-msgstr ""
+msgstr "Berretsi gainidazketa"
 
 #: utils_videotl.cc:93 utils_videotl.cc:109
 msgid "Cannot create video folder \"%1\" (%2)"
-msgstr ""
+msgstr "Ezin da “%1” bideo-karpeta sortu (%2)"
 
 #: export_video_dialog.cc:73
 msgid "Export Video File "
-msgstr ""
+msgstr "Esportatu bideo-fitxategia "
 
 #: export_video_dialog.cc:84
 msgid "Video:"
-msgstr ""
+msgstr "Bideoa:"
 
 #: export_video_dialog.cc:89
 msgid "Scale Video (W x H):"
-msgstr ""
+msgstr "Egokitu bideoa (Z x A):"
 
 #: export_video_dialog.cc:90
 msgid "Retain Aspect"
-msgstr ""
+msgstr "Mantendu aspektua"
 
 #: export_video_dialog.cc:95
 msgid "Set Aspect Ratio:"
-msgstr ""
+msgstr "Ezarri aspektu-erlazioa:"
 
 #: export_video_dialog.cc:96
 msgid "Normalize Audio"
-msgstr ""
+msgstr "Normalizatu audioa"
 
 #: export_video_dialog.cc:97
 msgid "2 Pass Encoding"
-msgstr ""
+msgstr "Bi pasuko kodeketa"
 
 #: export_video_dialog.cc:98
 msgid "Codec Optimizations:"
-msgstr ""
+msgstr "Kodek-optimizazioak:"
 
 #: export_video_dialog.cc:100
 msgid "Deinterlace"
-msgstr ""
+msgstr "Banandu"
 
 #: export_video_dialog.cc:101
 msgid "Use [2] B-frames (MPEG 2 or 4 only)"
-msgstr ""
+msgstr "Erabili [2] B-markoak (MPEG 2 edo 4 soilik)"
 
 #: export_video_dialog.cc:102
 msgid "Override FPS (Default is to retain FPS from the input video file):"
-msgstr ""
+msgstr "Gainidatzi FPS (sarrera-bideoaren FPS mantentzea lehenetsi da):"
 
 #: export_video_dialog.cc:103
 msgid "Include Session Metadata"
-msgstr ""
+msgstr "Gehitu saioaren metadatuak"
 
 #: export_video_dialog.cc:121
 msgid ""
 "ffmpeg installation was not found. Video Export is not possible. See the Log "
 "window for more information."
 msgstr ""
+"ffmpeg instalazioa ez da aurkitu. Bideo-esportazioa ezin da egin. Ikusi "
+"Erregistroa informazio gehiagorako."
 
 #: export_video_dialog.cc:132
 msgid "<b>Output:</b> (file extension defines format)"
-msgstr ""
+msgstr "<b>Irteera:</b> (fitxategi-luzapenak formatua definitzen du)"
 
 #: export_video_dialog.cc:142
 msgid "<b>Input Video:</b>"
-msgstr ""
+msgstr "<b>Sarrera-bideoa:</b>"
 
 #: export_video_dialog.cc:153
 msgid "Audio:"
-msgstr ""
+msgstr "Audio:"
 
 #: export_video_dialog.cc:155
 msgid "Master Bus"
-msgstr ""
+msgstr "Master busa"
 
 #: export_video_dialog.cc:161
 msgid "<b>Settings:</b>"
-msgstr ""
+msgstr "<b>Ezarpenak:</b>"
 
 #: export_video_dialog.cc:175
 msgid "Video Codec:"
-msgstr ""
+msgstr "Bideo-kodeka:"
 
 #: export_video_dialog.cc:178
 msgid "Video KBit/s:"
-msgstr ""
+msgstr "Bideo KBit/s:"
 
 #: export_video_dialog.cc:181
 msgid "Audio Codec:"
-msgstr ""
+msgstr "Audio-kodeka:"
 
 #: export_video_dialog.cc:184
 msgid "Audio KBit/s:"
-msgstr ""
+msgstr "Audio KBit/s:"
 
 #: export_video_dialog.cc:187
 msgid "Audio Samplerate:"
-msgstr ""
+msgstr "Audioaren lagin-tasa:"
 
 #: export_video_dialog.cc:220 export_video_dialog.cc:228
 #: export_video_dialog.cc:843 export_video_dialog.cc:846
 msgid "(default for format)"
-msgstr ""
+msgstr "(lehenetsitako formatua)"
 
 #: export_video_dialog.cc:238 export_video_dialog.cc:249
 #: export_video_dialog.cc:850 export_video_dialog.cc:859
 msgid "(default)"
-msgstr ""
+msgstr "(lehenetsita)"
 
 #: export_video_dialog.cc:250 export_video_dialog.cc:853
 msgid "(retain)"
-msgstr ""
+msgstr "(mantenduta)"
 
 #: export_video_dialog.cc:342
 msgid "from session start marker to session end marker"
-msgstr ""
+msgstr "saioaren hasiera-markatik saioaren amaiera-markaraino"
 
 #: export_video_dialog.cc:345
 msgid "from 00:00:00:00 to the video end"
-msgstr ""
+msgstr "00:00:00:00tik bideoaren amaieraraino"
 
 #: export_video_dialog.cc:347
 msgid "from video start to video end"
-msgstr ""
+msgstr "bideoaren hasieratik bideoaren amaieraraino"
 
 #: export_video_dialog.cc:350
 msgid "Selected range"
-msgstr ""
+msgstr "Hautatu barrutia"
 
 #: export_video_dialog.cc:589
 msgid "Normalizing audio"
-msgstr ""
+msgstr "Normalizatu audioa"
 
 #: export_video_dialog.cc:594 export_video_dialog.cc:599
 msgid "Exporting audio"
-msgstr ""
+msgstr "Audioa esportatzen"
 
 #: export_video_dialog.cc:660
 msgid "Exporting Audio..."
-msgstr ""
+msgstr "Audioa esportatzen.."
 
 #: export_video_dialog.cc:717
 msgid ""
 "Export Video: Cannot query duration of video-file, using duration from "
 "timeline instead."
 msgstr ""
+"Bideo-esportazioa: Ezin da bideo-fitxategiaren iraupena kontsultatu, horren "
+"ordez denbora-lerroko iraupena erabiltzen."
 
 #: export_video_dialog.cc:747
 msgid "Export Video: export-range does not include video."
-msgstr ""
+msgstr "Bideo-esportazioa: esportazio-barrutiak bideorik ez du."
 
 #: export_video_dialog.cc:760
 msgid "Export Video: No Master Out Ports to Connect for Audio Export"
 msgstr ""
+"Bideo-esportazioa: Masterraren sarrera-atakarik ez audio-esportaziora "
+"konektatzeko"
 
 #: export_video_dialog.cc:803
 msgid "Encoding Video..."
-msgstr ""
+msgstr "Bideoa kodetzen.."
 
 #: export_video_dialog.cc:823
 msgid "Export Video: Video input file cannot be read."
-msgstr ""
+msgstr "Bideo-esportazioa: Bideoaren sarrera-fitxategia ezin da irakurri."
 
 #: export_video_dialog.cc:929
 msgid "Encoding Video.. Pass 1/2"
-msgstr ""
+msgstr "Bideoa kodetzen… 1/2 pausoa"
 
 #: export_video_dialog.cc:941
 msgid "Encoding Video.. Pass 2/2"
-msgstr ""
+msgstr "Bideoa kodetzen… 2/2 pausoa"
 
 #: export_video_dialog.cc:1025
 msgid "Transcoding failed."
-msgstr ""
+msgstr "Transkodeketak huts egin du."
 
 #: export_video_dialog.cc:1261 export_video_dialog.cc:1282
 msgid "Save Exported Video File"
-msgstr ""
+msgstr "Gorde esportatutako bideo-fitxategia"
 
 #: export_video_infobox.cc:39
 msgid "Video Export Info"
-msgstr ""
+msgstr "Bideo-esportazioaren informazioa"
 
 #: export_video_infobox.cc:40
 msgid "Do Not Show This Dialog Again (Reset in Edit > Preferences > Video)."
 msgstr ""
+"Ez erakutsi elkarrizketa hau berriro (Berrezarri hemen: Editatu > Hobespenak "
+"> Bideoa)."
 
 #: export_video_infobox.cc:52
 msgid "<b>Video Export Info</b>"
-msgstr ""
+msgstr "<b>Bideo-esportazioaren informazioa</b>"
 
 #: export_video_infobox.cc:57
 msgid ""
@@ -17135,3 +17204,12 @@ msgid ""
 "\n"
 "Open Manual in Browser? "
 msgstr ""
+"%1(e)k ez du lizentzia komertzialik audio/bideorik kodetzeko. Bisitatu "
+"mpegla.com hainbat audio/bideoren kodeken lizentzien inguruko informazioa "
+"eskuratzeko.\n"
+"\n"
+"Bideo-kodetzea xehetasun ugari dituen zeregin esanguratsua da.\n"
+"\n"
+"Ikusi eskuliburua hemen: %2/video-timeline/operations/#export.\n"
+"\n"
+"Ireki eskuliburua nabigatzailean? "

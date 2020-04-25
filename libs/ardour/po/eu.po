@@ -8,14 +8,15 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-02 13:17+0200\n"
-"PO-Revision-Date: 2020-04-21 16:05+0200\n"
+"PO-Revision-Date: 2020-04-24 12:19+0200\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.3\n"
-"Last-Translator: \n"
+"X-Generator: Poedit 2.2.1\n"
+"Last-Translator: Porrumentzio <porruren-grabatokia@riseup.net "
+"porrumentzio@riseup.net>\n"
 "Language: eu\n"
 
 #: analyser.cc:127 audioregion.cc:1791
@@ -289,7 +290,7 @@ msgstr "AudioMotorra: “%1”en atzealdeak deskriptore funtziorik ez du."
 
 #: audioengine.cc:947
 msgid "Could not create backend for %1: %2"
-msgstr "Ezin izan da %1-(r)entzat atzealdea sortu: %2"
+msgstr "Ezin izan da %1(r)entzat atzealdea sortu: %2"
 
 #: audioengine.cc:1625
 msgid ""
@@ -320,7 +321,7 @@ msgstr ""
 "\n"
 "Erregularki aldi baterako datuak eskatzen dituen lana egiten ari bazara, "
 "“audioa-auto-analizatu” gaitu beharko zenuke hemen: Ezarpenak > Audio > "
-"Eremuak, ondoren %1-(e)tik irten eta berrabiarazi.\n"
+"Eremuak, ondoren %1(e)tik irten eta berrabiarazi.\n"
 "\n"
 "Elkarrizketa hau ez da berriro erakutsiko. Baina atzerapen txikia nabaritu "
 "dezakezu aldi baterako detekzio eragiketa honetan eta hurrengoetan.\n"
@@ -331,8 +332,7 @@ msgstr "Audio-eremua"
 
 #: audiosource.cc:231
 msgid "cannot rename peakfile for %1 from %2 to %3 (%4)"
-msgstr ""
-"ezin da berrizendatu %1-(e)n gailur-fitxategia, %2-(e)tik %3-(e)ra (%4)"
+msgstr "ezin da berrizendatu %1(e)n gailur-fitxategia, %2-(e)tik %3-(e)ra (%4)"
 
 #: audiosource.cc:265
 msgid "AudioSource: cannot stat peakfile \"%1\""
@@ -407,7 +407,7 @@ msgstr "ezin izan da %1 gailur-fitxategia %2-(e)ra moztu (errorea: %3)"
 
 #: auditioner.cc:120
 msgid "Falling back to Reasonable Synth for Midi Audition"
-msgstr ""
+msgstr "Zentzuzko Sintera itzultzen Midi Entzuterako"
 
 #: auditioner.cc:125
 msgid "No synth for midi-audition found."
@@ -415,11 +415,11 @@ msgstr "Sintetizadorerik ez midi entzuterako aurkitu."
 
 #: auditioner.cc:188
 msgid "no outputs available for auditioner - manual connection required"
-msgstr ""
+msgstr "ez dago irteerarik entzungailuarentzat - eskuzko konexioa behar da"
 
 #: auditioner.cc:321 auditioner.cc:358
 msgid "Cannot setup auditioner processing flow for %1 channels"
-msgstr ""
+msgstr "Ezin da %1 kanaletarako entzungailuaren prozesaketa-fluxua konfiguratu"
 
 #: auditioner.cc:350
 msgid "Failed to load synth for MIDI-Audition."
@@ -435,7 +435,7 @@ msgstr "Ezin da fitxategi hutsa entzun."
 
 #: automatable.cc:103
 msgid "Automation node has no path property"
-msgstr "Automatizazioaren nodoak ez du bide ezaugarririk"
+msgstr "Automatizazioaren nodoak ez du bide-ezaugarririk"
 
 #: automatable.cc:124
 msgid "cannot open %2 to load automation data (%3)"
@@ -522,7 +522,7 @@ msgstr "%1 kontrol-protokoloa jada abian zegoen."
 
 #: control_protocol_manager.cc:161
 msgid "Control protocol support for %1 failed to activate"
-msgstr "%1-(e)n kontrol-protokoloarentzako laguntza ezin izan da aktibatu"
+msgstr "%1(e)n kontrol-protokoloarentzako laguntza ezin izan da aktibatu"
 
 #: control_protocol_manager.cc:224
 msgid "control protocol name \"%1\" has no descriptor"
@@ -879,7 +879,7 @@ msgid ""
 "%1 supports only %2 channels, but you have %3 channels in your channel "
 "configuration"
 msgstr ""
-"%1-(e)k %2 kanal bakarrik onartzen ditu, baina zure kanal-konfigurazioan %3 "
+"%1(e)k %2 kanal bakarrik onartzen ditu, baina zure kanal-konfigurazioan %3 "
 "dituzu"
 
 #: file_source.cc:200 session_state.cc:3646
@@ -1018,7 +1018,7 @@ msgstr "‘%1’ helburua jada badago."
 
 #: find_session.cc:247
 msgid "Extracted session-archive to '%1'."
-msgstr "Saio-artxiboa ‘%1’-(e)ra atera da."
+msgstr "Saio-fitxategia ‘%1’-(e)ra atera da."
 
 #: find_session.cc:254 find_session.cc:277
 msgid "Error reading file-archive"
@@ -1176,6 +1176,8 @@ msgstr "%1 MIDI fitxategia kargatzen"
 #: import.cc:655
 msgid "Failed to remove some files after failed/cancelled import operation"
 msgstr ""
+"Fitxategi batzuk kentzeak huts egin du inportazio-eragiketa huts egin/"
+"ezeztatu ondoren"
 
 #: import_pt.cc:248
 msgid "PT Import : MISSING `%1`, inserting ref to missing source"
@@ -1567,18 +1569,18 @@ msgstr ""
 #: midi_patch_manager.cc:125
 msgid "Loading %1 MIDI patch from %2"
 msgid_plural "Loading %1 MIDI patches from %2"
-msgstr[0] "MIDI adabaki %1 %2-(e)tik kargatzen"
-msgstr[1] "%1 MIDI adabaki %2-(e)tik kargatzen"
+msgstr[0] "MIDI patch %1 %2-(e)tik kargatzen"
+msgstr[1] "%1 MIDI patch %2-(e)tik kargatzen"
 
 #: midi_patch_manager.cc:157
 msgid "Unloading %1 MIDI patch from %2"
 msgid_plural "Unloading %1 MIDI patches from %2"
-msgstr[0] "MIDI adabaki %1 %2-(e)tik deskargatzen"
-msgstr[1] "%1 MIDI adabaki %2-(e)tik deskargatzen"
+msgstr[0] "MIDI patch %1 %2-(e)tik deskargatzen"
+msgstr[1] "%1 MIDI patch %2-(e)tik deskargatzen"
 
 #: midi_patch_manager.cc:174
 msgid "Error parsing MIDI patch file %1"
-msgstr "%1 MIDI adabaki-fitxategia analizatzen"
+msgstr "%1 MIDI patch-fitxategia analizatzen"
 
 #: midi_patch_manager.cc:200
 msgid "Duplicate MIDI device `%1' in `%2' ignored"
@@ -1586,7 +1588,7 @@ msgstr "‘%1’ MIDI gailua ‘%2’-(e)n bikoiztea alde batera utzi da"
 
 #: midi_patch_manager.cc:241
 msgid "Removing MIDI patch file %1"
-msgstr "%1 MIDI adabaki-fitxategia kentzen"
+msgstr "%1 MIDI patch-fitxategia kentzen"
 
 #: midi_scene_changer.cc:312
 msgid "Scene "
@@ -1911,6 +1913,8 @@ msgid ""
 "Found a reference to a plugin (\"%1\") that is unknown.\n"
 "Perhaps it was removed or moved since it was last used."
 msgstr ""
+"Ezezaguna den plugin baten (“%1”) erreferentzia aurkitu da.\n"
+"Agian ezabatu edo mugitu da azkenekoz erabili zenetik."
 
 #: plugin_insert.cc:2901
 msgid "PluginInsert: Auto: no ladspa port number"
@@ -2161,11 +2165,11 @@ msgstr "Ezin da pluginaren etiketa-informazioa %1-(e)tik analizatu"
 
 #: plugin_manager.cc:1808
 msgid "PluginManager::sanitize_tag could not tokenize string: "
-msgstr ""
+msgstr "PluginKudeatzailea::sanitize_tag ezin izan da katea sinbolo bihurtu: "
 
 #: plugin_manager.cc:1858
 msgid "PluginManager: Could not tokenize string: "
-msgstr ""
+msgstr "PluginKudeatzailea: Ezin izan da katea sinbolo bihurtu: "
 
 #: port.cc:535
 msgid "could not reregister %1"
@@ -2183,6 +2187,7 @@ msgstr ""
 #: port_insert.cc:201
 msgid "non-port insert XML used for port plugin insert"
 msgstr ""
+"atakarik gabeko XML intsertoa erabili da atakadun plugin-intserto batentzat"
 
 #: port_manager.cc:377
 msgid ""
@@ -2239,7 +2244,7 @@ msgstr "%1 marka-ezaugarririk ez %2 elementuan"
 
 #: processor.cc:244
 msgid "No child node with active property"
-msgstr ""
+msgstr "Ezaugarri aktibodun menpeko nodorik ez"
 
 #: rc_configuration.cc:100
 msgid "Loading system configuration file %1"
@@ -2360,10 +2365,12 @@ msgstr "Egoera paneagarria aurkitu da panegailu gabeko bidearentzat (%1)!"
 #: route.cc:3663
 msgid "Invalid Solo-Isolate propagation: from:%1 new:%2 - old:%3 = delta:%4"
 msgstr ""
+"Balio ez duen solo-bakartuko zabalkundea: hemendik:%1 berria:%2 - zaharra:%3 "
+"= delta:%4"
 
 #: route.cc:4867
 msgid "Amp/Fader on Route '%1' went AWOL. Re-added."
-msgstr ""
+msgstr "Anp/Fader bideko ‘%1’-(e)k postua utzi du. Berriro gehitu da."
 
 #: route.cc:5716 route.cc:5727
 msgid "lo"
@@ -2430,6 +2437,8 @@ msgstr ""
 #: rb_effect.cc:234 rb_effect.cc:271
 msgid "tempoize: error reading data from %1 at %2 (wanted %3, got %4)"
 msgstr ""
+"tempo egitea: errorea %2-(e)n dagoen %1-(r)en datuak irakurtzerakoan (%3 "
+"nahi, %4 lortu)"
 
 #: rb_effect.cc:297 rb_effect.cc:326
 msgid "error writing tempo-adjusted data to %1"
@@ -2465,7 +2474,7 @@ msgstr "Txantiloia/argazkia kargatzeak huts egin du"
 
 #: session.cc:370
 msgid "Failed to parse template/snapshot state"
-msgstr ""
+msgstr "Txantiloia/argazkia analizatzeak huts egin du"
 
 #: session.cc:381
 msgid "Failed to load state"
@@ -2496,6 +2505,9 @@ msgid ""
 "Unexpected exception during session setup, possibly invalid audio/midi "
 "engine parameters. Please see stdout/stderr for details"
 msgstr ""
+"Saioaren konfigurazioan espero gabeko salbuespena gertatu da, audio/midi "
+"motorraren parametro baliogabeak izan litezke. Ikus stdout/stderr "
+"xehetasunentzat"
 
 #: session.cc:434
 msgid "Connect to engine"
@@ -2554,7 +2566,7 @@ msgstr "ezin da %1 kontrol-irteera %2-(e)ra konektatu"
 
 #: session.cc:1311
 msgid "cannot create Auditioner: no auditioning of regions possible"
-msgstr ""
+msgstr "ezin da Entzungailua sortu: eremu-entzute posiblerik ez"
 
 #: session.cc:1581
 msgid "Session: you can't use that location for auto punch (start <= end)"
@@ -2620,7 +2632,7 @@ msgstr "Saioa: ezin izan da audio-bideratze berria sortu."
 
 #: session.cc:2721 session.cc:2729 session.cc:2804 session.cc:2812
 msgid "cannot configure %1 in/%2 out configuration for new audio track"
-msgstr ""
+msgstr "ezin da %1 sarrera/%2 irteera konfiguratu audio-pista berrirako"
 
 #: session.cc:2745
 msgid "Session: could not create new audio track."
@@ -2648,7 +2660,7 @@ msgstr "Pista/bus berriak gehitzeak huts egin du"
 
 #: session.cc:4699
 msgid "Merging embedded file %1: name collision AND md5 hash collision!"
-msgstr ""
+msgstr "Kapsulatutako %1 fitxategia bateratzen: izen eta md5 hash talka!"
 
 #: session.cc:4823
 msgid "There are already %1 recordings for %2, which I consider too many."
@@ -2730,21 +2742,28 @@ msgstr "ezin dira klik audio-fitxategiaren datuak irakurri"
 #: session_command.cc:85
 msgid "Tried to reconstitute a MementoCommand with no contents, failing. id=%1"
 msgstr ""
+"Edukirik gabeko MementoKomandoa berreraikitzen saiatu da, huts eginez. id = "
+"%1"
 
 #: session_command.cc:147
 msgid ""
 "Could not reconstitute MementoCommand from XMLNode. object type = %1 id = %2"
 msgstr ""
+"Ezin izan da MementoKomandoa XMLNodotik berreraiki. objektu mota = %1 id = %2"
 
 #: session_command.cc:158
 msgid "Could get object ID and type name for StatefulDiffCommand from XMLNode."
 msgstr ""
+"Objektuaren ID eta motaren izena EgoeradunKomandoEzberd-erako lortu ahal "
+"izan da XMLNodotik."
 
 #: session_command.cc:181
 msgid ""
 "Could not reconstitute StatefulDiffCommand from XMLNode. object type = %1 id "
 "= %2"
 msgstr ""
+"Ezin izan da EgoeradunKomandozEberd XMLNodotik berreraiki. objektu mota = %1 "
+"id = %2"
 
 #: session_configuration.cc:152
 msgid "%1: cannot part default session options \"%2\""
@@ -2779,6 +2798,8 @@ msgid ""
 "session-dir and session-name mismatch. Please use 'Menu > Session > Rename' "
 "in the future to rename sessions."
 msgstr ""
+"saio-dir eta saio-izena ez datoz bat. Erabili ‘Menu > Saioa > Berrizendatu’ "
+"etorkizunean saioak berrizendatzeko."
 
 #: session_directory.cc:172
 msgid ""
@@ -2786,10 +2807,14 @@ msgid ""
 "There is more than one folder in '%1'.\n"
 "Please remove extra subdirs to reduce possible filename ambiguties."
 msgstr ""
+"Saioaren trukatze-direktorioa kontaminatuta dago.\n"
+"Karpeta bat baino gehiago dago ‘%1’-(e)n\n"
+"Ezabatu azpidirektorio estrak fitxategi-izenen anbiguotasun posiblea "
+"murrizteko."
 
 #: session_events.cc:233
 msgid "Session: cannot have two events of type %1 at the same sample (%2)."
-msgstr ""
+msgstr "Saioa: ezin dira %1 motako bi gertaera aldi berean eduki (%2)."
 
 #: session_export.cc:149
 msgid "%1: cannot seek to %2 for export"
@@ -2887,7 +2912,7 @@ msgstr "Saioa: ezin da saioaren “%1” midi direktorioa sortu (%2)"
 
 #: session_state.cc:529
 msgid "Session: cannot create session dead sounds folder \"%1\" (%2)"
-msgstr ""
+msgstr "Saioa: ezin da hildako saioaren “%1” audio-karpeta sortu (%2)"
 
 #: session_state.cc:536
 msgid "Session: cannot create session export folder \"%1\" (%2)"
@@ -2931,7 +2956,7 @@ msgstr "Ezin izan da %1 ireki saio-txantiloia irakurtzeko"
 
 #: session_state.cc:702
 msgid "Could not remove pending capture state at path \"%1\" (%2)"
-msgstr ""
+msgstr "Ezin izan da “%1” bidean zain dagoen kaptura-egoera ezabatu (%2)"
 
 #: session_state.cc:731
 msgid "could not rename snapshot %1 to %2 (%3)"
@@ -2975,11 +3000,13 @@ msgid ""
 "Incomatible Session Version. That session was created with a newer version "
 "of %1"
 msgstr ""
-"Saio bertsio bateraezina. Saio hori %1-(r)en bertsio berriagoarekin sortu da"
+"Saio bertsio bateraezina. Saio hori %1(r)en bertsio berriagoarekin sortu da"
 
 #: session_state.cc:1347
 msgid "Session-Save: Failed to copy MIDI Source '%1' for snapshot"
 msgstr ""
+"Saioa-gordetzea: ‘%1’ MIDI iturburua kopiatzeak huts egin du argazkia "
+"ateratzeko"
 
 #: session_state.cc:1556
 msgid "programming error: Session: incorrect XML node sent to set_state()"
@@ -3057,6 +3084,8 @@ msgstr "Pistak/busak gehitzea amaituta"
 #: session_state.cc:1988
 msgid "Could not find diskstream for diskream-id: '%1', playlist: '%2'"
 msgstr ""
+"Ezin izan da aurkitu diskoa diskoaren IDrako: ‘%1’, errprodukzio-zerrenda: "
+"‘%2’"
 
 #: session_state.cc:2045
 msgid "Session: cannot create Region from XML description."
@@ -3069,14 +3098,18 @@ msgstr "Ezin da ‘%1’ eremuaren egoera kargatu"
 #: session_state.cc:2085
 msgid "Regions in compound description not found (ID's %1 and %2): ignored"
 msgstr ""
+"Konposatutako deskripzioan dauden eremuak ez dira aurkitu (%1 eta %2 ID-ak): "
+"alde batera utzi da"
 
 #: session_state.cc:2113
 msgid "Nested source has no ID info in session file! (ignored)"
 msgstr ""
+"Habiaratutako iturburuak ID informaziorik ez du saio-fitxategian! (alde "
+"batera utzi da)"
 
 #: session_state.cc:2125
 msgid "Cannot reconstruct nested source for region %1"
-msgstr ""
+msgstr "Ezin da habiaratutako iturburua %1 eremuarentzat berreraiki"
 
 #: session_state.cc:2185
 msgid "Session: XMLNode describing a AudioRegion is incomplete (no source)"
@@ -3136,13 +3169,13 @@ msgid ""
 "An external MIDI file is missing. %1 cannot currently recover from missing "
 "external MIDI files"
 msgstr ""
-"Kanpoko MIDI fitxategi bat falta da. Momentu honetan %1-(e)k ezin du falta "
+"Kanpoko MIDI fitxategi bat falta da. Momentu honetan %1(e)k ezin du falta "
 "den MIDI fitxategia berreskuratu"
 
 #: session_state.cc:2519
 msgid "Found a sound file that cannot be used by %1. Talk to the programmers."
 msgstr ""
-"%1-(e)k erabili ezin duen soinu-fitxategi bat aurkitu da. Hitz egin "
+"%1(e)k erabili ezin duen soinu-fitxategi bat aurkitu da. Hitz egin "
 "programatzaileekin."
 
 #: session_state.cc:2540
@@ -3234,11 +3267,11 @@ msgstr ""
 msgid "Failed to downcast MidiSource for PatchChangeDiffCommand"
 msgstr ""
 "Ezin izan zaio downcast-a aplikatu MidiIturburuari "
-"AdabakiAldaketaEzberdKomandoarentzat"
+"PatchAldaketaEzberdKomandoarentzat"
 
 #: session_state.cc:3983
 msgid "Couldn't figure out how to make a Command out of a %1 XMLNode."
-msgstr ""
+msgstr "Ezin izan da zehaztu %1 XMLNodo batetik Komando bat nola sortu."
 
 #: session_state.cc:4333
 msgid "Cannot rename read-only session."
@@ -3276,7 +3309,7 @@ msgstr "arrazoi ezezaguna"
 
 #: session_time.cc:230
 msgid "Unknown transport state %1 in sync callback"
-msgstr ""
+msgstr "%1 garraio-egoera ezezaguna sinkronizatutako atzeradeian"
 
 #: session_transport.cc:173
 msgid "Locate called for negative sample position - ignored"
@@ -3287,6 +3320,8 @@ msgid ""
 "Global varispeed cannot be supported while %1 is connected to JACK transport "
 "control"
 msgstr ""
+"Aldaera orokorra ez da onartzen %1 JACK garraio-kontrolera konektatuta "
+"dagoen bitartean"
 
 #: session_transport.cc:1007
 msgid "Cannot loop - no loop range defined"
@@ -3297,6 +3332,8 @@ msgid ""
 "Looping cannot be supported while %1 is using JACK transport.\n"
 "Recommend changing the configured options"
 msgstr ""
+"Loop egitea da onartzen %1 JACK garraioa erabiltzen duen bitartean.\n"
+"Konfiguratutako aukerak aldatzea gomendatzen da"
 
 #: slavable.cc:124
 msgid "Master #%1 not found, assignment lost"
@@ -3308,24 +3345,26 @@ msgstr "Konbinatu VCA automatizazio %1-(r)ekin"
 
 #: smf_source.cc:361
 msgid "Unable to read event prefix, corrupt MIDI ring"
-msgstr ""
+msgstr "Ezin da gertaera-aurrizkia irakurri, hondatutako MIDI eraztuna"
 
 #: smf_source.cc:374
 msgid "Event has time and size but no body, corrupt MIDI ring"
 msgstr ""
+"Gertaerak denbora eta tamaina badu baina gorputzik ez, hondatutako MIDI "
+"eraztuna"
 
 #: smf_source.cc:380
 msgid "Event time is before MIDI source position"
-msgstr ""
+msgstr "Gertaera-denbora MIDI iturburu-posizioaren aurretik dago"
 
 #: smf_source.cc:428
 msgid ""
 "Skipping event with unordered beat time %1 < %2 (off by %3 beats, %4 ticks)"
-msgstr ""
+msgstr "Ordenik gabeko pultsu-denbora duen gertaera saltatzen %1 < %2"
 
 #: smf_source.cc:473
 msgid "Skipping event with unordered sample time %1 < %2"
-msgstr ""
+msgstr "Ordenik gabeko lagin-denbora duen gertaera saltatzen %1 < %2"
 
 #: smf_source.cc:539
 msgid "cannot open MIDI file %1 for write"
@@ -3447,6 +3486,8 @@ msgid ""
 "cannot set broadcast info for audio file %1 (%2); dropping broadcast info "
 "for this file"
 msgstr ""
+"ezin da igorpenaren informazioa %1 audio-fitxategirako ezarri (%2); "
+"igorpenaren informazioa uzten gitxategi honetan"
 
 #: sndfilesource.cc:486
 msgid "could not open file %1 for reading."
@@ -3461,7 +3502,7 @@ msgstr ""
 msgid ""
 "SndFileSource: @ %1 could not read %2 within %3 (%4) (len = %5, ret was %6)"
 msgstr ""
-"AudioIturburuFitxat.: @ %1-(e)k ezin izan du %2 irakurri tarte honetan: %3 "
+"AudioIturburuFitxat.: @ %1(e)k ezin izan du %2 irakurri tarte honetan: %3 "
 "(%4) (len = %5, ret was %6)"
 
 #: sndfilesource.cc:580
@@ -3526,7 +3567,7 @@ msgstr ""
 
 #: source_factory.cc:376
 msgid "Recovery attempted on a MIDI file - not implemented"
-msgstr ""
+msgstr "Berreskuratze saiakera MIDI fitxategi batean - inplementatu gabe"
 
 #: speakers.cc:275
 msgid "Speaker information is missing - speaker ignored"
@@ -3546,15 +3587,15 @@ msgstr "Deskripziorik ez"
 
 #: tempo.cc:143
 msgid "TempoSection XML node has no \"movable\" property"
-msgstr "TempoSekzioko XML nodoak ez du “mugikore” ezaugarririk"
+msgstr "TempoSekzioko XML nodoak ez du “mugikor” ezaugarririk"
 
 #: tempo.cc:178
 msgid "Legacy session detected. TempoSection XML node will be altered."
-msgstr ""
+msgstr "Legatu-saioa hauteman da. TempoSekzioaren XML nodoa aldatuko da."
 
 #: tempo.cc:187
 msgid "TempoSection XML node has an illegal \"beats_per_minute\" value"
-msgstr "TempoSekzioko XML nodoak baliogabeko “pultso_minutuko” balioa du"
+msgstr "TempoSekzioko XML nodoak baliogabeko “pultsu_minutuko” balioa du"
 
 #: tempo.cc:194
 msgid "TempoSection XML node has an illegal \"note-type\" value"
@@ -3571,7 +3612,7 @@ msgstr "TempoSekzioko XML nodoak ez du “aktibo” ezaugarririk"
 
 #: tempo.cc:567
 msgid "Legacy session detected - MeterSection XML node will be altered."
-msgstr ""
+msgstr "Legatu-saioa hauteman da. NeurriSekzioaren XML nodoa aldatuko da."
 
 #: tempo.cc:570
 msgid "MeterSection XML node has an illegal \"start\" value"
@@ -3590,10 +3631,12 @@ msgid ""
 "MeterSection XML node has no \"beats-per-bar\" or \"divisions-per-bar\" "
 "property"
 msgstr ""
+"NeurSekzioko XML nodoak baliogabeko “pultsuak konpaseko” edo “zatiak "
+"konpaseko” balioa du"
 
 #: tempo.cc:599
 msgid "MeterSection XML node has an illegal \"divisions-per-bar\" value"
-msgstr ""
+msgstr "NeurSekzioko XML nodoak baliogabeko “zatiak konpaseko” balioa du"
 
 #: tempo.cc:604
 msgid "MeterSection XML node has no \"note-type\" property"
@@ -3608,6 +3651,8 @@ msgid ""
 "Meter changes can only be positioned on the first beat of a bar. Moving from "
 "%1 to %2"
 msgstr ""
+"Neurrien aldaketak konpas baten lehenengo pultsuan jar daitezke. %1-(e)tik "
+"%2-(e)ra mugitzen"
 
 #: tempo.cc:1298
 msgid "no tempo sections defined in tempo map - cannot change tempo @ %1"
@@ -3667,6 +3712,8 @@ msgid ""
 "This will replace the current tempo map!\n"
 "Are you sure you want to do this?"
 msgstr ""
+"Honek uneko tempo-mapa ordeztuko du!\n"
+"Ziur hau egin nahi duzula?"
 
 #: track.cc:637
 msgid "DiskIOProcessor: \"%1\" isn't an playlist"
@@ -3696,7 +3743,7 @@ msgstr "DiskoAudioa: ezin izan da kapturatutako audiorako eremua sortu!"
 
 #: transport_master.cc:398 transport_master.cc:399
 msgid "Construction of transport master object of type %1 failed"
-msgstr ""
+msgstr "%1 motakoa den garraioaren master-objektuaren eraikuntzak huts egin du"
 
 #: transport_master.cc:423 transport_master.cc:456
 msgid "SyncSource|JACK"
@@ -3740,7 +3787,7 @@ msgstr "programazio-errorea:%1"
 
 #: transport_master_manager.cc:349
 msgid "There is already a transport master named \"%1\" - not duplicated"
-msgstr ""
+msgstr "Jada “%1” deituriko garraio-master bat dago - ez da bikoiztu"
 
 #: transport_master_manager.cc:664
 msgid "Cannot initialize transport master manager"
@@ -3748,15 +3795,17 @@ msgstr "Ezin da garraio-master kudeatzailea abiarazi"
 
 #: unknown_processor.cc:87
 msgid "Using plugin-stub with unknown i/o configuration for: "
-msgstr ""
+msgstr "Plugin-hutsa erabiltzen s/i konfigurazio ezezagun batekin honentzat: "
 
 #: unknown_processor.cc:108
 msgid "Using plugin-stub with mismatching i/o configuration for: "
 msgstr ""
+"Plugin-hutsa erabiltzen bat ez datorren s/i konfigurazio ezezagun batekin "
+"honentzat: "
 
 #: user_bundle.cc:48
 msgid "Node for Bundle has no \"name\" property"
-msgstr "Konexio-sortaren nodoak “izena” ezaugarria ez du"
+msgstr "Konexio-sortaren nodoak ez du “izena” ezaugarririk"
 
 #: user_bundle.cc:60 user_bundle.cc:81
 #, c-format
@@ -3765,15 +3814,15 @@ msgstr "“%s” nodo ezezaguna konexio-sortan dago"
 
 #: user_bundle.cc:65
 msgid "Node for Channel has no \"name\" property"
-msgstr "Kanalaren nodoak “izena” ezaugarria ez du"
+msgstr "Kanalaren nodoak ez du “izena” ezaugarririk"
 
 #: user_bundle.cc:71
 msgid "Node for Channel has no \"type\" property"
-msgstr "Kanalaren nodoak “mota” ezaugarria ez du"
+msgstr "Kanalaren nodoak ez du “mota” ezaugarririk"
 
 #: user_bundle.cc:86
 msgid "Node for Port has no \"name\" property"
-msgstr "Atakaren nodoak “izena” ezaugarria ez du"
+msgstr "Atakaren nodoak ez du “izena” ezaugarririk"
 
 #: utils.cc:419 utils.cc:448
 msgid "Splice"
