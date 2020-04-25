@@ -401,8 +401,6 @@ public:
 	PBD::Signal0<void> processor_latency_changed;
 	/** the metering point has changed */
 	PBD::Signal0<void> meter_change;
-	/** route has updated its latency compensation */
-	PBD::Signal0<void> signal_latency_updated;
 
 	/** Emitted with the process lock held */
 	PBD::Signal0<void>       io_changed;

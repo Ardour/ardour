@@ -4329,10 +4329,6 @@ Route::apply_latency_compensation ()
 #endif
 
 		_delayline->set_delay (latcomp > 0 ? latcomp : 0);
-
-		if (old !=  _delayline->delay ()) {
-			signal_latency_updated (); /* EMIT SIGNAL */
-		}
 	}
 }
 
