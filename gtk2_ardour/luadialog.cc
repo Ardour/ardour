@@ -799,7 +799,7 @@ Dialog::Dialog (std::string const& title, luabridge::LuaRef lr)
 				table->attach (*hb, col, cend, row, row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
 			}
 		} else {
-			table->attach (*((*i)->widget ()), col, cend, row, row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
+			table->attach (*((*i)->widget ()), col, cend, row, row + 1, Gtk::FILL | Gtk::EXPAND, (_widgets.size() == 1) ? (Gtk::FILL | Gtk::EXPAND) : Gtk::SHRINK);
 		}
 	}
 }
