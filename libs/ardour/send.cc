@@ -108,6 +108,7 @@ Send::Send (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMas
 
 	if (panner_shell()) {
 		panner_shell()->Changed.connect_same_thread (*this, boost::bind (&Send::panshell_changed, this));
+		panner_shell()->PannableChanged.connect_same_thread (*this, boost::bind (&Send::pannable_changed, this));
 	}
 	if (_output) {
 		_output->changed.connect_same_thread (*this, boost::bind (&Send::snd_output_changed, this, _1, _2));
@@ -453,7 +454,6 @@ void
 Send::set_panner_linked_to_route (bool onoff) {
 	if (_panshell) {
 		_panshell->set_linked_to_route (onoff);
-		PropertyChanged (PBD::PropertyChange ()); /* EMIT SIGNAL */
 	}
 }
 
@@ -501,6 +501,12 @@ void
 Send::panshell_changed ()
 {
 	_meter->configure_io (ChanCount (DataType::AUDIO, pan_outs()), ChanCount (DataType::AUDIO, pan_outs()));
+}
+
+void
+Send::pannable_changed ()
+{
+	PropertyChanged (PBD::PropertyChange ()); /* EMIT SIGNAL */
 }
 
 bool

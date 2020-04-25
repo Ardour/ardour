@@ -124,6 +124,7 @@ private:
 	Send (const Send&);
 
 	void panshell_changed ();
+	void pannable_changed ();
 	void snd_output_changed (IOChange, void*);
 
 	void update_delaylines ();
