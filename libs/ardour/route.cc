@@ -4313,23 +4313,23 @@ Route::update_signal_latency (bool apply_to_delayline)
 void
 Route::apply_latency_compensation ()
 {
-	if (_delayline) {
-		samplecnt_t old = _delayline->delay ();
+	if (!_delayline) {
+		return;
+	}
 
-		samplecnt_t play_lat_in = _input->connected_latency (true);
-		samplecnt_t play_lat_out = _output->connected_latency (true);
-		samplecnt_t latcomp = play_lat_in - play_lat_out - _signal_latency;
+	samplecnt_t play_lat_in = _input->connected_latency (true);
+	samplecnt_t play_lat_out = _output->connected_latency (true);
+	samplecnt_t latcomp = play_lat_in - play_lat_out - _signal_latency;
 
 #if 0 // DEBUG
-		samplecnt_t capt_lat_in = _input->connected_latency (false);
-		samplecnt_t capt_lat_out = _output->connected_latency (false);
-		samplecnt_t latcomp_capt = capt_lat_out - capt_lat_in - _signal_latency;
+	samplecnt_t capt_lat_in = _input->connected_latency (false);
+	samplecnt_t capt_lat_out = _output->connected_latency (false);
+	samplecnt_t latcomp_capt = capt_lat_out - capt_lat_in - _signal_latency;
 
-		cout << "ROUTE " << name() << " delay for " << latcomp << " (c: " << latcomp_capt << ")" << endl;
+	cout << "ROUTE " << name() << " delay for " << latcomp << " (c: " << latcomp_capt << ")" << endl;
 #endif
 
-		_delayline->set_delay (latcomp > 0 ? latcomp : 0);
-	}
+	_delayline->set_delay (latcomp > 0 ? latcomp : 0);
 }
 
 void
