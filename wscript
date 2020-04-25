@@ -222,9 +222,9 @@ VERSION = sanitize(V)
 PROGRAM_VERSION = sanitize(MAJOR)
 del sanitize
 
-if len (sys.argv) > 1 and sys.argv[1] == 'dist':
+if any(arg in ('dist', 'distcheck') for arg in sys.argv[1:]):
         if not 'APPNAME' in os.environ:
-                print ("You must define APPNAME in the environment when running ./waf dist")
+                print ("You must define APPNAME in the environment when running ./waf dist/distcheck")
                 sys.exit (1)
         APPNAME = os.environ['APPNAME'];
 
