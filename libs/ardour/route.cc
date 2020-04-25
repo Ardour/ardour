@@ -2202,6 +2202,8 @@ Route::reorder_processors (const ProcessorList& new_order, ProcessorStreams* err
 			_pending_processor_order.clear ();
 			setup_invisible_processors ();
 
+			update_signal_latency (true);
+
 			processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
 			set_processor_positions ();
 		} else {
@@ -2226,6 +2228,12 @@ Route::reorder_processors (const ProcessorList& new_order, ProcessorStreams* err
 		}
 
 		lm.release();
+
+		/* update processor input/output latency (total signal_latency does not change).
+		 * delaylines may changes, so the Engine Lock is required.
+		 */
+		update_signal_latency (true);
+
 		lx.release();
 
 		processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
@@ -2239,11 +2247,6 @@ Route::reorder_processors (const ProcessorList& new_order, ProcessorStreams* err
 		_pending_processor_order = new_order;
 		g_atomic_int_set (&_pending_process_reorder, 1);
 	}
-
-	/* update processor input/output latency
-	 * (total signal_latency does not change)
-	 */
-	update_signal_latency (true);
 
 	return 0;
 }
