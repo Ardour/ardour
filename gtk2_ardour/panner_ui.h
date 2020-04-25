@@ -135,9 +135,11 @@ private:
 
 	Gtk::Menu* pan_menu;
 	Gtk::CheckMenuItem* bypass_menu_item;
+	Gtk::CheckMenuItem* send_link_menu_item;
 	void build_pan_menu ();
 	void pan_reset ();
 	void pan_bypass_toggle ();
+	void pan_link_toggle ();
 	void pan_edit ();
 	void pan_set_custom_type (std::string type);
 

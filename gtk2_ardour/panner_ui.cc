@@ -414,6 +414,17 @@ PannerUI::build_pan_menu ()
 		items.push_back (MenuElem (_("Edit..."), sigc::mem_fun (*this, &PannerUI::pan_edit)));
 	}
 
+	if (_send_mode) {
+		items.push_back (SeparatorElem());
+		// XXX change string after string-freeze XXX -> "Link to route panner"
+		items.push_back (CheckMenuElem (_("Link panner controls"), sigc::mem_fun(*this, &PannerUI::pan_bypass_toggle)));
+		send_link_menu_item = static_cast<Gtk::CheckMenuItem*> (&items.back());
+		send_link_menu_item->set_active (_panshell->is_linked_to_route ());
+		send_link_menu_item->signal_toggled().connect (sigc::mem_fun(*this, &PannerUI::pan_link_toggle));
+	} else {
+		send_link_menu_item = NULL;
+	}
+
 	if (_panner_list.size() > 1 && !_panshell->bypassed()) {
 		RadioMenuItem::Group group;
 		items.push_back (SeparatorElem());
@@ -434,6 +445,14 @@ PannerUI::pan_bypass_toggle ()
 {
 	if (bypass_menu_item && (_panshell->bypassed() != bypass_menu_item->get_active())) {
 		_panshell->set_bypassed (!_panshell->bypassed());
+	}
+}
+
+void
+PannerUI::pan_link_toggle ()
+{
+	if (send_link_menu_item && (_panshell->is_linked_to_route() != send_link_menu_item->get_active())) {
+		_panshell->set_linked_to_route (!_panshell->is_linked_to_route());
 	}
 }
 
