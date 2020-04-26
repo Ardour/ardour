@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-02 13:17+0200\n"
-"PO-Revision-Date: 2020-04-26 13:18+0200\n"
+"PO-Revision-Date: 2020-04-26 18:14+0200\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -5666,7 +5666,7 @@ msgstr "Taldearen izena"
 
 #: editor_route_groups.cc:104 editor_routes.cc:248
 msgid "Visible|V"
-msgstr "Iksg"
+msgstr "Iksg."
 
 #: editor_route_groups.cc:104
 msgid "Group is visible?"
@@ -6771,7 +6771,7 @@ msgstr "Pista/Bus aktibo ?"
 
 #: editor_routes.cc:250
 msgid "MidiInput|I"
-msgstr "Sar."
+msgstr "S"
 
 #: editor_routes.cc:250
 msgid "MIDI input enabled"
@@ -6779,7 +6779,7 @@ msgstr "MIDI sarrera gaituta"
 
 #: editor_routes.cc:251
 msgid "Rec|R"
-msgstr "Grb"
+msgstr "G"
 
 #: editor_routes.cc:251
 msgid "Record enabled"
@@ -8623,7 +8623,7 @@ msgstr "EremuZerrenda"
 
 #: latency_gui.cc:47
 msgid "sample"
-msgstr "lagina"
+msgstr "lagin"
 
 #: latency_gui.cc:48
 msgid "msec"
@@ -8631,7 +8631,7 @@ msgstr "ms"
 
 #: latency_gui.cc:49
 msgid "period"
-msgstr "periodoa"
+msgstr "periodo"
 
 #: latency_gui.cc:177 rhythm_ferret.cc:310 sfdb_ui.cc:2019
 msgid "programming error: %1 (%2)"
@@ -9848,7 +9848,7 @@ msgstr "Taldea"
 
 #: mixer_ui.cc:239
 msgid "Favorite Plugins"
-msgstr "Plugin gogokoenak"
+msgstr "Plugin gogokoak"
 
 #: mixer_ui.cc:670
 msgid "Error adding GUI elements for new tracks/busses %1"
@@ -9890,7 +9890,7 @@ msgstr "Gehitu bukaeran"
 
 #: mixer_ui.cc:3147
 msgid "Remove from favorites"
-msgstr "Ezabatu gogokoenetatik"
+msgstr "Ezabatu gogokoetatik"
 
 #: mixer_ui.cc:3153
 msgid "Delete Preset"
@@ -10711,156 +10711,158 @@ msgstr "Abs"
 
 #: patch_change_widget.cc:55
 msgid "Audition on Change"
-msgstr ""
+msgstr "Entzutea aldaketan"
 
 #: patch_change_widget.cc:67
 msgid "Bank:"
-msgstr ""
+msgstr "Bankua:"
 
 #: patch_change_widget.cc:69
 msgid "MSB:"
-msgstr ""
+msgstr "MSB:"
 
 #: patch_change_widget.cc:71
 msgid "LSB:"
-msgstr ""
+msgstr "LSB:"
 
 #: patch_change_widget.cc:80
 msgid ""
 "Note: Patch Selection is volatile (only Midi-Tracks retain bank/patch "
 "selection)."
 msgstr ""
+"Oharra: patch-hautapena egongaitza da (midi pistak soilik mantentzen dute "
+"banku/patch hautapena)."
 
 #: patch_change_widget.cc:86
 msgid "Start Note:"
-msgstr ""
+msgstr "Hasiera nota:"
 
 #: patch_change_widget.cc:88
 msgid "End Note:"
-msgstr ""
+msgstr "Amaiera nota:"
 
 #: patch_change_widget.cc:250
 msgid "Bank %1"
-msgstr ""
+msgstr "%1 bankua"
 
 #: patch_change_widget.cc:272
 msgid "%1 (Pgm-%2)"
-msgstr ""
+msgstr "%1 (Pgm-%2)"
 
 #: patch_change_widget.cc:283
 msgid "Pgm-%1"
-msgstr ""
+msgstr "Pgm-%1"
 
 #: patch_change_widget.cc:557
 msgid "Select Patch for \"%1\""
-msgstr ""
+msgstr "Hautatu patcha \"%1\"-(r)entzat"
 
 #: patch_change_widget.cc:570
 msgid "Select Patch for \"%1\"'"
-msgstr ""
+msgstr "Hautatu patcha \"%1\"'-(r)entzat"
 
 #: playlist_selector.cc:45
 msgid "Playlists"
-msgstr ""
+msgstr "Erreprodukzio-zerrendak"
 
 #: playlist_selector.cc:56
 msgid "Playlists grouped by track"
-msgstr ""
+msgstr "Erreprodukzio-zerrendak pistaka taldekatuak"
 
 #: playlist_selector.cc:103
 msgid "Playlist for %1"
-msgstr ""
+msgstr "%1-(e)ko erreprodukzio-zerrendak"
 
 #: playlist_selector.cc:116
 msgid "Other tracks"
-msgstr ""
+msgstr "Beste pistak"
 
 #: playlist_selector.cc:129
 msgid "unassigned"
-msgstr ""
+msgstr "esleitu gabea"
 
 #: playlist_selector.cc:184
 msgid "Imported"
-msgstr ""
+msgstr "Inportatua"
 
 #: plugin_eq_gui.cc:122 export_video_dialog.cc:169
 msgid "Range:"
-msgstr ""
+msgstr "Barrutia:"
 
 #: plugin_eq_gui.cc:129
 msgid "Off"
-msgstr ""
+msgstr "Itzalita"
 
 #: plugin_eq_gui.cc:130
 msgid "Output / Input"
-msgstr ""
+msgstr "Irteera / Sarrera"
 
 #: plugin_eq_gui.cc:133
 msgid "Input +40dB"
-msgstr ""
+msgstr "Sarrera +40dB"
 
 #: plugin_eq_gui.cc:134
 msgid "Output +40dB"
-msgstr ""
+msgstr "Irteera +40dB"
 
 #: plugin_eq_gui.cc:137
 msgid "Live signal:"
-msgstr ""
+msgstr "Zuzeneko seinalea:"
 
 #: plugin_eq_gui.cc:144
 msgid "Show phase"
-msgstr ""
+msgstr "Erakutsi fasea"
 
 #: plugin_pin_dialog.cc:62
 msgid "Manual Config"
-msgstr ""
+msgstr "Eskuzko konfigurazioa"
 
 #: plugin_pin_dialog.cc:63
 msgid "Sidechain"
-msgstr ""
+msgstr "Sidechaina"
 
 #: plugin_pin_dialog.cc:64 plugin_pin_dialog.cc:66 plugin_pin_dialog.cc:68
 #: plugin_pin_dialog.cc:70 plugin_pin_dialog.cc:72 step_entry.cc:86
 #: step_entry.cc:89
 msgid "+"
-msgstr ""
+msgstr "+"
 
 #: plugin_pin_dialog.cc:65 plugin_pin_dialog.cc:67 plugin_pin_dialog.cc:69
 #: plugin_pin_dialog.cc:71 plugin_pin_dialog.cc:73
 msgid "-"
-msgstr ""
+msgstr "-"
 
 #: plugin_pin_dialog.cc:155
 msgid "Audio Input Pins"
-msgstr ""
+msgstr "Audio sarrera loturak"
 
 #: plugin_pin_dialog.cc:164
 msgid "MIDI Input Pins"
-msgstr ""
+msgstr "MIDI sarrera loturak"
 
 #: plugin_pin_dialog.cc:173
 msgid "Instances"
-msgstr ""
+msgstr "Instantziak"
 
 #: plugin_pin_dialog.cc:183
 msgid "Audio Out"
-msgstr ""
+msgstr "Audio irteera"
 
 #: plugin_pin_dialog.cc:192
 msgid "MIDI Out"
-msgstr ""
+msgstr "MIDI irteera"
 
 #: plugin_pin_dialog.cc:199
 msgid "Output Presets"
-msgstr ""
+msgstr "Irteera aurrezarpenak"
 
 #: plugin_pin_dialog.cc:215
 msgid "Add Sidechain Input"
-msgstr ""
+msgstr "Gehitu sidechain sarrera"
 
 #: plugin_pin_dialog.cc:313
 msgid "Cannot perform operation while actively recording."
-msgstr ""
+msgstr "Ezin da gauzatu ekintza grabatu bitartean."
 
 #: plugin_pin_dialog.cc:350
 msgid "Manual"
@@ -10869,247 +10871,251 @@ msgstr "Eskuz"
 #: plugin_pin_dialog.cc:495 plugin_pin_dialog.cc:499 plugin_pin_dialog.cc:503
 #: plugin_setup_dialog.cc:122 plugin_setup_dialog.cc:215
 msgid "Automatic"
-msgstr ""
+msgstr "Automatikoa"
 
 #: plugin_pin_dialog.cc:532 plugin_setup_dialog.cc:224
 msgid "%1 Channel"
 msgid_plural "%1 Channels"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Kanal %1"
+msgstr[1] "%1 kanal"
 
 #: plugin_pin_dialog.cc:658 processor_box.cc:244
 msgid "Send"
-msgstr ""
+msgstr "Bidalketa"
 
 #: plugin_pin_dialog.cc:1014
 msgid "Latency %1 spl%2 %3"
-msgstr ""
+msgstr "Latentzia %1 spl%2 %3"
 
 #: plugin_pin_dialog.cc:1014 plugin_pin_dialog.cc:1018
 msgid "no-inplace"
-msgstr ""
+msgstr "ez-tokian"
 
 #: plugin_pin_dialog.cc:1016
 msgid "Latency %1 spl"
-msgstr ""
+msgstr "Latentzia %1 spl"
 
 #: plugin_pin_dialog.cc:1072
 msgid "Instance #%1"
-msgstr ""
+msgstr "#%1 instantzia"
 
 #: plugin_pin_dialog.cc:1570
 msgid "Failed to toggle sidechain."
-msgstr ""
+msgstr "Sidechaina kommutatzeak huts egin du."
 
 #: plugin_pin_dialog.cc:1600
 msgid "Failed to reset plugin configuration."
-msgstr ""
+msgstr "Plugin-konfigurazioa berrezartzeak huts egin du."
 
 #: plugin_pin_dialog.cc:1615
 msgid "Failed to change channel preset."
-msgstr ""
+msgstr "Kanal-aurrezarpena aldatzeak huts egin du."
 
 #: plugin_pin_dialog.cc:1626
 msgid "Failed to change instance count"
-msgstr ""
+msgstr "Instantzia-kontatzea aldatzeak huts egin du."
 
 #: plugin_pin_dialog.cc:1638
 msgid "Failed to alter plugin output configuration."
-msgstr ""
+msgstr "Plugin-irteera konfigurazioa aldatzeak huts egin du."
 
 #: plugin_pin_dialog.cc:1650
 msgid "Failed to alter plugin input configuration."
-msgstr ""
+msgstr "Plugin-sarrera konfigurazioa aldatzeak huts egin du."
 
 #: plugin_pin_dialog.cc:1750 processor_box.cc:2663
 msgid "Cannot set up new send: %1"
-msgstr ""
+msgstr "Ezin da bidalketa berria konfiguratu: %1"
 
 #: plugin_pin_dialog.cc:1757
 msgid "SC %1 (%2)"
-msgstr ""
+msgstr "SC %1 (%2)"
 
 #: plugin_pin_dialog.cc:2003 plugin_pin_dialog.cc:2011
 msgid "Pin Configuration: %1"
-msgstr ""
+msgstr "Lotura-konfigurazioa: %1"
 
 #: plugin_presets_ui.cc:44
 msgid "Bank/Vendor"
-msgstr ""
+msgstr "Bankua/Saltzailea"
 
 #: plugin_presets_ui.cc:55
 msgid "Type/Category"
-msgstr ""
+msgstr "Mota/Kategoria"
 
 #: plugin_presets_ui.cc:122 plugin_presets_ui.cc:123 plugin_presets_ui.cc:158
 #: plugin_presets_ui.cc:182 plugin_presets_ui.cc:221 plugin_presets_ui.cc:234
 msgid "-All-"
-msgstr ""
+msgstr "-Guztiak-"
 
 #: plugin_presets_ui.cc:125 plugin_presets_ui.cc:126 plugin_presets_ui.cc:224
 msgid "-User-"
-msgstr ""
+msgstr "-Erabiltzailea-"
 
 #: plugin_presets_ui.cc:307
 msgid "(user preset)"
-msgstr ""
+msgstr "(erabiltzailearen aurrezarpena)"
 
 #: plugin_scan_dialog.cc:43
 msgid "Scanning for plugins"
-msgstr ""
+msgstr "Pluginak bilatzen"
 
 #: plugin_scan_dialog.cc:44
 msgid "Stop Timeout"
-msgstr ""
+msgstr "Gelditzearen denbora agortuta"
 
 #: plugin_scan_dialog.cc:45
 msgid "Cancel Plugin Scan"
-msgstr ""
+msgstr "Utzi pluginak bilatzeari"
 
 #: plugin_scan_dialog.cc:66
 msgid "Scan Timeout"
-msgstr ""
+msgstr "Bilatzearen denbora agortuta"
 
 #: plugin_setup_dialog.cc:32
 msgid "Plugin Setup"
-msgstr ""
+msgstr "Plugin-konfigurazioa"
 
 #: plugin_setup_dialog.cc:35
 msgid "Copy I/O Map"
-msgstr ""
+msgstr "Kopiatu S/I mapa"
 
 #: plugin_setup_dialog.cc:36
 msgid "Fan out"
-msgstr ""
+msgstr "Zabaldu"
 
 #: plugin_setup_dialog.cc:53
 msgid "An Instrument plugin is already present."
-msgstr ""
+msgstr "Instrumentu-plugin bat badago jada."
 
 #: plugin_setup_dialog.cc:57
 msgid "Replace"
-msgstr ""
+msgstr "Ordeztu"
 
 #: plugin_setup_dialog.cc:63
 msgid "with"
-msgstr ""
+msgstr "honekin"
 
 #: plugin_setup_dialog.cc:73
 msgid "I/O Pin Mapping"
-msgstr ""
+msgstr "S/I lotura mapatzea"
 
 #: plugin_setup_dialog.cc:82
 msgid "Configure Plugin '%1'"
-msgstr ""
+msgstr "Konfiguratu '%1' plugina"
 
 #: plugin_setup_dialog.cc:94
 msgid "Output Configuration"
-msgstr ""
+msgstr "Irteera-konfigurazioa"
 
 #: plugin_selector.cc:69
 msgid "Plugin Manager"
-msgstr ""
+msgstr "Plugin kudeatzailea"
 
 #: plugin_selector.cc:96
 msgid "Fav"
-msgstr ""
+msgstr "Gog"
 
 #: plugin_selector.cc:100
 msgid "Creator"
-msgstr ""
+msgstr "Sortzailea"
 
 #: plugin_selector.cc:101 transport_masters_dialog.cc:75
 #: transport_masters_dialog.cc:693
 msgid "Type"
-msgstr ""
+msgstr "Mota"
 
 #: plugin_selector.cc:102
 msgid "Audio I/O"
-msgstr ""
+msgstr "Audio S/I"
 
 #: plugin_selector.cc:103
 msgid "MIDI I/O"
-msgstr ""
+msgstr "MIDI S/I"
 
 #: plugin_selector.cc:134
 msgid "Plugins to be connected"
-msgstr ""
+msgstr "Konektatzeko pluginak"
 
 #: plugin_selector.cc:149
 msgid "Add a plugin to the effect list"
-msgstr ""
+msgstr "Gehitu plugin bat efektu-zerrendara"
 
 #: plugin_selector.cc:153
 msgid "Remove a plugin from the effect list"
-msgstr ""
+msgstr "Kendu plugin bat efektu-zerrendatik"
 
 #: plugin_selector.cc:173
 msgid "Ignore Filters when searching"
-msgstr ""
+msgstr "Ezikusi iragazkiak bilatzerakoan"
 
 #: plugin_selector.cc:178
 msgid "All search terms must be matched."
-msgstr ""
+msgstr "Bilaketa-termino guztiek bat egin behar dute."
 
 #: plugin_selector.cc:181
 msgid "Ex: \"ess dyn\" will find \"dynamic de-esser\" but not \"de-esser\"."
 msgstr ""
+"Adb.: \"ess dyn\" bilaketak \"dynamic de-esser\" aurkituko du, baina ez \"de-"
+"esser\"."
 
 #: plugin_selector.cc:197 sfdb_ui.cc:630 sfdb_ui.cc:632
 msgid "Search"
-msgstr ""
+msgstr "Bilatu"
 
 #: plugin_selector.cc:209
 msgid "Show Effects Only"
-msgstr ""
+msgstr "Erakutsi efektuak soilik"
 
 #: plugin_selector.cc:210
 msgid "Show Instruments Only"
-msgstr ""
+msgstr "Erakutsi instrumentuak soilik"
 
 #: plugin_selector.cc:211
 msgid "Show Utilities Only"
-msgstr ""
+msgstr "Erakutsi tresnak soilik"
 
 #: plugin_selector.cc:212
 msgid "Show Favorites Only"
-msgstr ""
+msgstr "Erakutsi gogokoak soilik"
 
 #: plugin_selector.cc:213
 msgid "Show Hidden Only"
-msgstr ""
+msgstr "Erakutsi ezkutukoak soilik"
 
 #: plugin_selector.cc:217 plugin_selector.cc:227
 msgid "Show All Formats"
-msgstr ""
+msgstr "Erakutsi formatu guztiak"
 
 #: plugin_selector.cc:248
 msgid "Filter"
-msgstr ""
+msgstr "Iragazkia"
 
 #: plugin_selector.cc:275
 msgid "Enter space-separated, one-word Tags for the selected plugin."
 msgstr ""
+"Sartu zuriunez bereizitako hitz bakarreko etiketak hautatutako "
+"pluginarentzat."
 
 #: plugin_selector.cc:278
 msgid "You can include dashes, colons or underscores in a Tag."
-msgstr ""
+msgstr "Marratxoak, marra-bertikalak eta azpimarrak gehitu ditzakezu etiketan."
 
 #: plugin_selector.cc:281
 msgid "Ex: \"dynamic de-esser vocal\" applies 3 Tags."
-msgstr ""
+msgstr "Adb.: \"ahots de-esser dinamikoa\" hiru etiketa dira."
 
 #: plugin_selector.cc:292
 msgid "Tags for Selected Plugin"
-msgstr ""
+msgstr "Hautatutako pluginarentzat etiketak"
 
 #: plugin_selector.cc:325
 msgid "Insert Plugin(s)"
-msgstr ""
+msgstr "Txertatu plugina(k)"
 
 #: plugin_selector.cc:468 plugin_selector.cc:1067 plugin_selector.cc:1068
 msgid "Show All Creators"
-msgstr ""
+msgstr "Erakutsi sortzaile guztiak"
 
 #: plugin_selector.cc:790
 msgid ""
@@ -11117,355 +11123,375 @@ msgid ""
 "\n"
 "See the Log window for more details (maybe)"
 msgstr ""
+"Ezin izan da kargatu \"%1\" plugina\n"
+"\n"
+"Ikusi erregistro-leihoa detailetarako (agian)"
 
 #: plugin_selector.cc:1000
 msgid "Favorites"
-msgstr ""
+msgstr "Gogokoak"
 
 #: plugin_selector.cc:1002
 msgid "Plugin Manager..."
-msgstr ""
+msgstr "Plugin kudeatzailea..."
 
 #: plugin_selector.cc:1006
 msgid "By Creator"
-msgstr ""
+msgstr "Sortzaileka"
 
 #: plugin_selector.cc:1009
 msgid "By Tags"
-msgstr ""
+msgstr "Etiketaka"
 
 #: plugin_ui.cc:132
 msgid "Eh? LADSPA plugins don't have editors!"
-msgstr ""
+msgstr "Zer? LADSPA pluginek ez dute editorerik!"
 
 #: plugin_ui.cc:141 plugin_ui.cc:247
 msgid ""
 "unknown type of editor-supplying plugin (note: no VST support in this "
 "version of %1)"
 msgstr ""
+"editoredun plugin mota ezezaguna (oharra: ez dago VST sostengurik %1 bertsio "
+"honetan)"
 
 #: plugin_ui.cc:144
 msgid "unknown type of editor-supplying plugin"
-msgstr ""
+msgstr "editoredun plugin mota ezezaguna"
 
 #: plugin_ui.cc:277
 msgid ""
 "unknown type of editor-supplying plugin (note: no linuxVST support in this "
 "version of %1)"
 msgstr ""
+"editoredun plugin mota ezezaguna (oharra: ez dago linuxVST sostengurik %1 "
+"bertsio honetan)"
 
 #: plugin_ui.cc:305
 msgid ""
 "unknown type of editor-supplying plugin (note: no MacVST support in this "
 "version of %1)"
 msgstr ""
+"editoredun plugin mota ezezaguna (oharra: ez dago MacVST sostengurik %1 "
+"bertsio honetan)"
 
+# Lehenengo hiru hitz lotuak komandua dira?
 #: plugin_ui.cc:378
 msgid "create_lv2_editor called on non-LV2 plugin"
 msgstr ""
 
 #: plugin_ui.cc:466 transport_masters_dialog.cc:716
 msgid "Add"
-msgstr ""
+msgstr "Gehitu"
 
 #: plugin_ui.cc:469
 msgid "Preset Browser"
-msgstr ""
+msgstr "Aurrezarpen arakatzailea"
 
 #: plugin_ui.cc:472
 msgid "Pinout"
-msgstr ""
+msgstr "Irteera-lotura"
 
 #: plugin_ui.cc:474
 msgid "Plugin analysis"
-msgstr ""
+msgstr "Plugin analisia"
 
 #: plugin_ui.cc:475
 msgid "CPU Profile"
-msgstr ""
+msgstr "PUZ profila"
 
 #: plugin_ui.cc:485
 msgid ""
 "Presets (if any) for this plugin\n"
 "(Both factory and user-created)"
 msgstr ""
+"Aurrezarpenak (egotekotan) plugin honentzat\n"
+"(Bai jatorrizkoak, bai erabiltzaileak sortuak)"
 
 #: plugin_ui.cc:486
 msgid "Save a new preset"
-msgstr ""
+msgstr "Gorde aurrezarpen berria"
 
 #: plugin_ui.cc:487
 msgid "Save the current preset"
-msgstr ""
+msgstr "Gorde aurrezarpen hau"
 
 #: plugin_ui.cc:488
 msgid "Delete the current preset"
-msgstr ""
+msgstr "Ezabatu aurrezarpen hau"
 
 #: plugin_ui.cc:489
 msgid "Show Preset Browser Dialog"
-msgstr ""
+msgstr "Erakutsi aurrezarpen-arakatzaile leihoa"
 
 #: plugin_ui.cc:490
 msgid ""
 "Reset parameters to default (if no parameters are in automation play mode)"
 msgstr ""
+"Berrezarri parametroak lehenetsitara (ez badago parametrorik automatizazio "
+"erreprodukzio-moduan)"
 
 #: plugin_ui.cc:491
 msgid "Show Plugin Pin Management Dialog"
-msgstr ""
+msgstr "Erakutsi plugin-loturak kudeatzeko leihoa"
 
 #: plugin_ui.cc:492
 msgid "Disable signal processing by the plugin"
-msgstr ""
+msgstr "Desgaitu pluginak seinalea prozesatzea"
 
 #: plugin_ui.cc:493
 msgid "Edit Plugin Delay/Latency Compensation"
-msgstr ""
+msgstr "Editatu pluginaren atzerapen/latentzia konpentsazioa"
 
 #: plugin_ui.cc:548 plugin_ui.cc:764
 msgid ""
 "Click to allow the plugin to receive keyboard events that %1 would normally "
 "use as a shortcut"
 msgstr ""
+"Egin klik pluginak teklatuko gertaerak jaso ahal izateko, bestela %1(e)k "
+"laster-teklatzat hartuko zituenak"
 
 #: plugin_ui.cc:549
 msgid "Click to enable/disable this plugin"
-msgstr ""
+msgstr "Egin klik plugin hau gaitzeko/desgaitzeko"
 
 #: plugin_ui.cc:606
 msgid "Edit Latency"
-msgstr ""
+msgstr "Editatu latentzia"
 
 #: plugin_ui.cc:650
 msgid "New Preset"
-msgstr ""
+msgstr "Aurrezarpen berria"
 
 #: plugin_ui.cc:721
 msgid "Select Preset"
-msgstr ""
+msgstr "Hautatu aurrezarpena"
 
 #: plugin_ui.cc:771
 msgid "Click to allow normal use of %1 keyboard shortcuts"
-msgstr ""
+msgstr "Egin klik %1(e)k teklatuko laster-teklak normaltzat erabiltzeko"
 
 #: plugin_ui.cc:907
 msgid "(none)"
-msgstr ""
+msgstr "(bat ere ez)"
 
 #: plugin_dspload_ui.cc:43 plugin_dspload_ui.cc:86 plugin_dspload_ui.cc:87
 #: plugin_dspload_ui.cc:88 plugin_dspload_ui.cc:89 plugin_dspload_ui.cc:90
 msgid "%1 [ms]"
-msgstr ""
+msgstr "%1 [ms]"
 
 #: plugin_dspload_ui.cc:46
 msgid "Minimum"
-msgstr ""
+msgstr "Gutxienekoa"
 
 #: plugin_dspload_ui.cc:48
 msgid "Maximum"
-msgstr ""
+msgstr "Gehienekoa"
 
 #: plugin_dspload_ui.cc:50
 msgid "Average"
-msgstr ""
+msgstr "Batezbestekoa"
 
 #: plugin_dspload_ui.cc:52
 msgid "Std.Dev"
-msgstr ""
+msgstr "Est.Gar"
 
 #: plugin_dspload_ui.cc:217
 msgid "[ms]"
-msgstr ""
+msgstr "[ms]"
 
 #: plugin_dspload_window.cc:35
 msgid "Reset All Stats"
-msgstr ""
+msgstr "Berrezarri estatistika guztiak"
 
 #: plugin_dspload_window.cc:36
 msgid "Sort by Average Load"
-msgstr ""
+msgstr "Antolatu batezbesteko kargaren arabera"
 
 #: plugin_dspload_window.cc:37
 msgid "Sort by Worst-Case Load"
-msgstr ""
+msgstr "Antolatu karga okerrenekoaren arabera"
 
 #: plugin_dspload_window.cc:187
 msgid "No Plugins"
-msgstr ""
+msgstr "Pluginik ez"
 
 #: port_group.cc:344
 msgid "%1 Busses"
-msgstr ""
+msgstr "%1 busak"
 
 #: port_group.cc:345
 msgid "%1 Tracks"
-msgstr ""
+msgstr "%1 pistak"
 
 #: port_group.cc:346
 msgid "%1 Sidechains"
-msgstr ""
+msgstr "%1 sidechainak"
 
 #: port_group.cc:347
 msgid "Hardware"
-msgstr ""
+msgstr "Hardwarea"
 
 #: port_group.cc:348
 msgid "%1 Misc"
-msgstr ""
+msgstr "%1 bestelakoak"
 
 #: port_group.cc:349
 msgid "Other"
-msgstr ""
+msgstr "Besteak"
 
 #: port_group.cc:461 port_group.cc:462
 msgid "LTC Out"
-msgstr ""
+msgstr "LTC irteera"
 
 #: port_group.cc:497
 msgid "Virtual MIDI"
-msgstr ""
+msgstr "MIDI birtuala"
 
 #: port_group.cc:517
 msgid "MMC in"
-msgstr ""
+msgstr "MMC sarrera"
 
 #: port_group.cc:521
 msgid "MTC out"
-msgstr ""
+msgstr "MTC irteera"
 
 #: port_group.cc:524
 msgid "MIDI clock out"
-msgstr ""
+msgstr "MIDI erloju-irteera"
 
 #: port_group.cc:527
 msgid "MMC out"
-msgstr ""
+msgstr "MMC irteera"
 
 #: port_group.cc:619
 msgid "Scene "
-msgstr ""
+msgstr "Eszena "
 
 #: port_insert_ui.cc:43
 msgid "Measure Latency"
-msgstr ""
+msgstr "Neurtu latentzia"
 
 #: port_insert_ui.cc:54
 msgid "Send/Output"
-msgstr ""
+msgstr "Bidalketa/Irteera"
 
 #: port_insert_ui.cc:55
 msgid "Return/Input"
-msgstr ""
+msgstr "Itzulera/Sarrera"
 
 #: port_insert_ui.cc:89
 msgid "No signal detected"
-msgstr ""
+msgstr "Ez da seinalerik antzeman"
 
 #: port_insert_ui.cc:169
 msgid "Port Insert "
-msgstr ""
+msgstr "Ataka intsertoa "
 
 #: port_matrix.cc:353 port_matrix.cc:379
 msgid "<b>Sources</b>"
-msgstr ""
+msgstr "<b>Iturburuak</b>"
 
 #: port_matrix.cc:354 port_matrix.cc:380
 msgid "<b>Destinations</b>"
-msgstr ""
+msgstr "<b>Helmugak</b>"
 
 #: port_matrix.cc:462 port_matrix.cc:470
 #, c-format
 msgid "Add %s %s"
-msgstr ""
+msgstr "Gehitu %s %s"
 
 #: port_matrix.cc:478
 #, c-format
 msgid "Rename '%s'..."
-msgstr ""
+msgstr "Berrizendatu '%s'..."
 
 #: port_matrix.cc:494
 msgid "Remove all"
-msgstr ""
+msgstr "Ezabatu guztiak"
 
 #: port_matrix.cc:514 port_matrix.cc:526
 #, c-format
 msgid "%s all"
-msgstr ""
+msgstr "%s guztiak"
 
 #: port_matrix.cc:549
 msgid "Rescan"
-msgstr ""
+msgstr "Birbilatu"
 
 #: port_matrix.cc:551
 msgid "Show individual ports"
-msgstr ""
+msgstr "Erakutsi ataka indibidualak"
 
 #: port_matrix.cc:557
 msgid "Flip"
-msgstr ""
+msgstr "Biratu"
 
 #: port_matrix.cc:744
 msgid "It is not possible to add a port here."
-msgstr ""
+msgstr "Ez da posible ataka gehitzea hemen."
 
 #: port_matrix.cc:745
 msgid "Cannot add port"
-msgstr ""
+msgstr "Ezin da gehitu ataka"
 
 #: port_matrix.cc:769
 msgid "The last port cannot be removed"
-msgstr ""
+msgstr "Ezin da kendu azken ataka"
 
 #: port_matrix.cc:772
 msgid "This port cannot be removed."
-msgstr ""
+msgstr "Ataka hau ezin da kendu"
 
 #: port_matrix.cc:777
 msgid "Port removal not allowed"
-msgstr ""
+msgstr "Ez duzu ataka kentzeko baimenik"
 
 #: port_matrix.cc:1004
 #, c-format
 msgid "Remove '%s'"
-msgstr ""
+msgstr "Ezabatu '%s'"
 
 #: port_matrix.cc:1019
 #, c-format
 msgid "%s all from '%s'"
-msgstr ""
+msgstr "%s guztia hemendik: '%s'"
 
 #: port_matrix.cc:1085 transform_dialog.cc:60
 msgid "channel"
-msgstr ""
+msgstr "kanala"
 
 #: port_matrix_body.cc:85
 msgid "There are no ports to connect."
-msgstr ""
+msgstr "Ez dago konektatzeko atakarik"
 
 #: port_matrix_body.cc:87
 msgid "There are no %1 ports to connect."
-msgstr ""
+msgstr "Ez daude %1 ataka konektatzeko"
 
 #: processor_box.cc:246
 msgid "Return"
-msgstr ""
+msgstr "Itzuli"
 
 #: processor_box.cc:347
 msgid "New Favorite Preset for \"%1\""
-msgstr ""
+msgstr "\"%1\"-(r)entzat aurrezarpen gogoko berria"
 
 #: processor_box.cc:535 processor_box.cc:1605
 msgid ""
 "\n"
 "%1+double-click to toggle inline-display"
 msgstr ""
+"\n"
+"%1+klik-bikoitza txertatutako-bista kommutatzeko"
 
 #: processor_box.cc:539
 msgid ""
 "\n"
 "This plugin has been replicated %1 times."
 msgstr ""
+"\n"
+"Plugin hau %1 aldiz errepikatu da."
 
 #: processor_box.cc:544 processor_box.cc:1609
 msgid ""
