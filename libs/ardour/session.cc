@@ -6549,6 +6549,18 @@ Session::update_latency (bool playback)
 		reverse (r->begin(), r->end());
 	}
 
+	/* Session::new_midi_track -> Route::add_processors -> Delivery::configure_io
+	 * -> IO::ensure_ports -> PortManager::register_output_port
+	 *  may run currently (adding many ports) while the backend
+	 *  already emits AudioEngine::latency_callback() for previously
+	 *  added ports.
+	 *
+	 *  Route::set_public_port_latencies() -> IO::latency may try
+	 *  to lookup ports that don't yet exist.
+	 *  IO::* uses  BLOCK_PROCESS_CALLBACK to prevent concurrency,
+	 *  so the same has to be done here to prevent a race.
+	 */
+	Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		samplecnt_t latency = (*i)->set_private_port_latencies (playback);
 		(*i)->set_public_port_latencies (latency, playback);
@@ -6560,15 +6572,20 @@ Session::update_latency (bool playback)
 		 * With internal backends, AudioEngine::latency_callback () -> this method
 		 * is called from the main_process_thread (so the lock is not contended).
 		 * However jack2 can concurrently process and reconfigure port latencies.
+		 * -> keep the process-lock.
 		 */
-		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 
 		/* prevent any concurrent latency updates */
 		Glib::Threads::Mutex::Lock lx (_update_latency_lock);
 		set_worst_output_latency ();
 		update_route_latency (true, /*apply_to_delayline*/ true);
 
+		/* relese before emiting signals */
+		lm.release ();
+
 	} else {
+		/* process lock is not needed to update worst-case latency */
+		lm.release ();
 		Glib::Threads::Mutex::Lock lx (_update_latency_lock);
 		set_worst_input_latency ();
 		update_route_latency (false, false);
