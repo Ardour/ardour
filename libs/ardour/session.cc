@@ -6459,7 +6459,8 @@ Session::initialize_latencies ()
 void
 Session::set_worst_io_latencies_x (IOChange, void *)
 {
-		set_worst_io_latencies ();
+	DEBUG_TRACE (DEBUG::LatencyCompensation, "Session::set_worst_io_latencies_x\n");
+	set_worst_io_latencies ();
 }
 
 void
@@ -6486,6 +6487,8 @@ Session::update_route_latency (bool playback, bool apply_to_delayline)
 	/* apply_to_delayline can no be called concurrently with processing
 	 * caller must hold process lock when apply_to_delayline == true */
 	assert (!apply_to_delayline || !AudioEngine::instance()->process_lock().trylock());
+
+	DEBUG_TRACE (DEBUG::LatencyCompensation , string_compose ("update_route_latency: %1 apply_to_delayline? %2)\n", (playback ? "PLAYBACK" : "CAPTURE"), (apply_to_delayline ? "yes" : "no")));
 
 	/* Note: RouteList is process-graph sorted */
 	boost::shared_ptr<RouteList> r = routes.reader ();
@@ -6515,15 +6518,16 @@ restart:
 	}
 
 	if (_send_latency_changes > 0) {
-		// only 1 extra iteration is needed (we allow only 1 level of aux-sends)
-		// BUT..  jack'n'sends'n'bugs
+		/* One extra iteration might be needed since we allow u level of aux-sends.
+		 * Except mixbus that allows up to 3 (aux-sends, sends to mixbusses 1-8, sends to mixbusses 9-12,
+		 * and then there's JACK */
 		if (++bailout < 5) {
 			cerr << "restarting Session::update_latency. # of send changes: " << _send_latency_changes << " iteration: " << bailout << endl;
 			goto restart;
 		}
 	}
 
-	DEBUG_TRACE (DEBUG::Latency, string_compose ("worst signal processing latency: %1 (changed ? %2)\n", _worst_route_latency, (changed ? "yes" : "no")));
+	DEBUG_TRACE (DEBUG::LatencyCompensation , string_compose ("update_route_latency: worst proc latency: %1 (changed? %2) recursions: %3\n", _worst_route_latency, (changed ? "yes" : "no"), bailout));
 
 	return changed;
 }
@@ -6662,7 +6666,7 @@ Session::update_latency_compensation (bool force_whole_graph, bool called_from_b
 		return;
 	}
 
-	DEBUG_TRACE (DEBUG::LatencyCompensation, string_compose ("update_latency_compensation %1\n", (force_whole_graph ? "of whole graph" : "")));
+	DEBUG_TRACE (DEBUG::LatencyCompensation, string_compose ("update_latency_compensation%1.\n", (force_whole_graph ? " of whole graph" : "")));
 
 	bool some_track_latency_changed = update_route_latency (false, false);
 
@@ -6698,18 +6702,18 @@ Session::update_latency_compensation (bool force_whole_graph, bool called_from_b
 			DEBUG_TRACE (DEBUG::LatencyCompensation, "update_latency_compensation called from engine, don't call back into engine\n");
 		}
 	} else {
+		DEBUG_TRACE (DEBUG::LatencyCompensation, "update_latency_compensation: directly apply to routes\n");
 #ifndef MIXBUS
 		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock (), Glib::Threads::NOT_LOCK);
 #endif
 		lm.acquire ();
 
-		DEBUG_TRACE (DEBUG::LatencyCompensation, "update_latency_compensation: directly apply to routes\n");
 		boost::shared_ptr<RouteList> r = routes.reader ();
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			(*i)->apply_latency_compensation ();
 		}
 	}
-	DEBUG_TRACE (DEBUG::LatencyCompensation, "update_latency_compensation: DONE\n");
+	DEBUG_TRACE (DEBUG::LatencyCompensation, "update_latency_compensation: complete\n");
 }
 
 char

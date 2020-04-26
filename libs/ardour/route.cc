@@ -4263,7 +4263,7 @@ Route::update_signal_latency (bool apply_to_delayline)
 		}
 	}
 
-	DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: internal signal latency = %2\n", _name, l_out));
+	DEBUG_TRACE (DEBUG::LatencyRoute, string_compose ("%1: internal signal latency = %2\n", _name, l_out));
 
 	_signal_latency = l_out;
 

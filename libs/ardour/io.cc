@@ -1269,17 +1269,17 @@ IO::latency () const
 	for (PortSet::const_iterator i = _ports.begin(); i != _ports.end(); ++i) {
 		samplecnt_t latency;
 		if ((latency = i->private_latency_range (_direction == Output).max) > max_latency) {
-			DEBUG_TRACE (DEBUG::Latency, string_compose ("port %1 has %2 latency of %3 - use\n",
-			                                             name(),
-			                                             ((_direction == Output) ? "PLAYBACK" : "CAPTURE"),
-			                                             latency));
+			DEBUG_TRACE (DEBUG::LatencyIO, string_compose ("port %1 has %2 latency of %3 - use\n",
+			                                               name(),
+			                                               ((_direction == Output) ? "PLAYBACK" : "CAPTURE"),
+			                                               latency));
 			max_latency = latency;
 		}
 	}
 
-	DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: max %4 latency from %2 ports = %3\n",
-	                                             name(), _ports.num_ports(), max_latency,
-	                                             ((_direction == Output) ? "PLAYBACK" : "CAPTURE")));
+	DEBUG_TRACE (DEBUG::LatencyIO, string_compose ("%1: max %4 latency from %2 ports = %3\n",
+	                                               name(), _ports.num_ports(), max_latency,
+	                                               ((_direction == Output) ? "PLAYBACK" : "CAPTURE")));
 	return max_latency;
 }
 
@@ -1293,17 +1293,17 @@ IO::public_latency () const
 	for (PortSet::const_iterator i = _ports.begin(); i != _ports.end(); ++i) {
 		samplecnt_t latency;
 		if ((latency = i->public_latency_range (_direction == Output).max) > max_latency) {
-			DEBUG_TRACE (DEBUG::Latency, string_compose ("port %1 has %2 latency of %3 - use\n",
-			                                             name(),
-			                                             ((_direction == Output) ? "PLAYBACK" : "CAPTURE"),
-			                                             latency));
+			DEBUG_TRACE (DEBUG::LatencyIO, string_compose ("port %1 has %2 latency of %3 - use\n",
+			                                               name(),
+			                                               ((_direction == Output) ? "PLAYBACK" : "CAPTURE"),
+			                                               latency));
 			max_latency = latency;
 		}
 	}
 
-	DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: max %4 public latency from %2 ports = %3\n",
-	                                             name(), _ports.num_ports(), max_latency,
-	                                             ((_direction == Output) ? "PLAYBACK" : "CAPTURE")));
+	DEBUG_TRACE (DEBUG::LatencyIO, string_compose ("%1: max %4 public latency from %2 ports = %3\n",
+	                                               name(), _ports.num_ports(), max_latency,
+	                                               ((_direction == Output) ? "PLAYBACK" : "CAPTURE")));
 	return max_latency;
 }
 

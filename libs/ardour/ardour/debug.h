@@ -58,8 +58,10 @@ namespace PBD {
 		LIBARDOUR_API extern DebugBits LTC;
 		LIBARDOUR_API extern DebugBits LV2;
 		LIBARDOUR_API extern DebugBits LV2Automate;
-		LIBARDOUR_API extern DebugBits Latency;
 		LIBARDOUR_API extern DebugBits LatencyCompensation;
+		LIBARDOUR_API extern DebugBits LatencyDelayLine;
+		LIBARDOUR_API extern DebugBits LatencyIO;
+		LIBARDOUR_API extern DebugBits LatencyRoute;
 		LIBARDOUR_API extern DebugBits LaunchControlXL;
 		LIBARDOUR_API extern DebugBits Layering;
 		LIBARDOUR_API extern DebugBits MTC;

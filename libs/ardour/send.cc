@@ -191,7 +191,7 @@ Send::set_delay_in (samplecnt_t delay)
 	}
 	_delay_in = delay;
 
-	DEBUG_TRACE (DEBUG::LatencyCompensation,
+	DEBUG_TRACE (DEBUG::LatencyDelayLine,
 			string_compose ("Send::set_delay_in %1: (%2) - %3 = %4\n",
 				name (), _delay_in, _delay_out, _delay_in - _delay_out));
 
@@ -205,7 +205,7 @@ Send::set_delay_out (samplecnt_t delay, size_t /*bus*/)
 		return;
 	}
 	_delay_out = delay;
-	DEBUG_TRACE (DEBUG::LatencyCompensation,
+	DEBUG_TRACE (DEBUG::LatencyDelayLine,
 			string_compose ("Send::set_delay_out %1: %2 - (%3) = %4\n",
 				name (), _delay_in, _delay_out, _delay_in - _delay_out));
 

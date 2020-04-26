@@ -363,7 +363,7 @@ Port::set_public_latency_range (LatencyRange const& range, bool playback) const
 	   port latency values are identical.
 	*/
 
-	DEBUG_TRACE (DEBUG::Latency,
+	DEBUG_TRACE (DEBUG::LatencyIO,
 	             string_compose ("SET PORT %1 %4 PUBLIC latency now [%2 - %3]\n",
 	                             name(), range.min, range.max,
 	                             (playback ? "PLAYBACK" : "CAPTURE")));;
@@ -389,14 +389,14 @@ Port::set_private_latency_range (LatencyRange& range, bool playback)
 {
 	if (playback) {
 		_private_playback_latency = range;
-		DEBUG_TRACE (DEBUG::Latency, string_compose (
+		DEBUG_TRACE (DEBUG::LatencyIO, string_compose (
 			             "SET PORT %1 playback PRIVATE latency now [%2 - %3]\n",
 			             name(),
 			             _private_playback_latency.min,
 			             _private_playback_latency.max));
 	} else {
 		_private_capture_latency = range;
-		DEBUG_TRACE (DEBUG::Latency, string_compose (
+		DEBUG_TRACE (DEBUG::LatencyIO, string_compose (
 			             "SET PORT %1 capture PRIVATE latency now [%2 - %3]\n",
 			             name(),
 			             _private_capture_latency.min,
@@ -412,14 +412,14 @@ const LatencyRange&
 Port::private_latency_range (bool playback) const
 {
 	if (playback) {
-		DEBUG_TRACE (DEBUG::Latency, string_compose (
+		DEBUG_TRACE (DEBUG::LatencyIO, string_compose (
 			             "GET PORT %1 playback PRIVATE latency now [%2 - %3]\n",
 			             name(),
 			             _private_playback_latency.min,
 			             _private_playback_latency.max));
 		return _private_playback_latency;
 	} else {
-		DEBUG_TRACE (DEBUG::Latency, string_compose (
+		DEBUG_TRACE (DEBUG::LatencyIO, string_compose (
 			             "GET PORT %1 capture PRIVATE latency now [%2 - %3]\n",
 			             name(),
 			             _private_playback_latency.min,
@@ -447,7 +447,7 @@ Port::public_latency_range (bool /*playback*/) const
 			}
 		}
 
-		DEBUG_TRACE (DEBUG::Latency, string_compose (
+		DEBUG_TRACE (DEBUG::LatencyIO, string_compose (
 				     "GET PORT %1: %4 PUBLIC latency range %2 .. %3\n",
 				     name(), r.min, r.max,
 				     sends_output() ? "PLAYBACK" : "CAPTURE"));
@@ -468,7 +468,7 @@ Port::get_connected_latency_range (LatencyRange& range, bool playback) const
 		range.min = ~((pframes_t) 0);
 		range.max = 0;
 
-		DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: %2 connections to check for latency range\n", name(), connections.size()));
+		DEBUG_TRACE (DEBUG::LatencyIO, string_compose ("%1: %2 connections to check for latency range\n", name(), connections.size()));
 
 		for (vector<string>::const_iterator c = connections.begin();
 				c != connections.end(); ++c) {
@@ -496,7 +496,7 @@ Port::get_connected_latency_range (LatencyRange& range, bool playback) const
 						}
 					}
 
-					DEBUG_TRACE (DEBUG::Latency, string_compose (
+					DEBUG_TRACE (DEBUG::LatencyIO, string_compose (
 								"\t%1 <-> %2 : latter has latency range %3 .. %4\n",
 								name(), *c, lr.min, lr.max));
 
@@ -516,7 +516,7 @@ Port::get_connected_latency_range (LatencyRange& range, bool playback) const
 				boost::shared_ptr<Port> remote_port = AudioEngine::instance()->get_port_by_name (*c);
 				if (remote_port) {
 					lr = remote_port->private_latency_range ((playback ? true : false));
-					DEBUG_TRACE (DEBUG::Latency, string_compose (
+					DEBUG_TRACE (DEBUG::LatencyIO, string_compose (
 								"\t%1 <-LOCAL-> %2 : latter has latency range %3 .. %4\n",
 								name(), *c, lr.min, lr.max));
 
@@ -527,12 +527,12 @@ Port::get_connected_latency_range (LatencyRange& range, bool playback) const
 		}
 
 	} else {
-		DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: not connected to anything\n", name()));
+		DEBUG_TRACE (DEBUG::LatencyIO, string_compose ("%1: not connected to anything\n", name()));
 		range.min = 0;
 		range.max = 0;
 	}
 
-	DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: final connected latency range [ %2 .. %3 ] \n", name(), range.min, range.max));
+	DEBUG_TRACE (DEBUG::LatencyIO, string_compose ("%1: final connected latency range [ %2 .. %3 ] \n", name(), range.min, range.max));
 }
 
 int

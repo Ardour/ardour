@@ -298,13 +298,13 @@ DelayLine::set_delay (samplecnt_t signal_delay)
 	}
 
 	if (signal_delay == _pending_delay) {
-		DEBUG_TRACE (DEBUG::LatencyCompensation,
+		DEBUG_TRACE (DEBUG::LatencyDelayLine,
 				string_compose ("%1 set_delay - no change: %2 samples for %3 channels\n",
 					name (), signal_delay, _configured_output.n_audio ()));
 		return false;
 	}
 
-	DEBUG_TRACE (DEBUG::LatencyCompensation,
+	DEBUG_TRACE (DEBUG::LatencyDelayLine,
 			string_compose ("%1 set_delay to %2 samples for %3 channels\n",
 				name (), signal_delay, _configured_output.n_audio ()));
 
@@ -409,7 +409,7 @@ DelayLine::configure_io (ChanCount in, ChanCount out)
 		allocate_pending_buffers (_pending_delay, out);
 	}
 
-	DEBUG_TRACE (DEBUG::LatencyCompensation,
+	DEBUG_TRACE (DEBUG::LatencyDelayLine,
 			string_compose ("configure IO: %1 Ain: %2 Aout: %3 Min: %4 Mout: %5\n",
 				name (), in.n_audio (), out.n_audio (), in.n_midi (), out.n_midi ()));
 
