@@ -6483,14 +6483,9 @@ Session::send_latency_compensation_change ()
 bool
 Session::update_route_latency (bool playback, bool apply_to_delayline)
 {
-#ifndef NDEBUG
-	if (apply_to_delayline) {
-		/* apply_to_delayline can no be called concurrently with processing */
-		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock (), Glib::Threads::TRY_LOCK);
-		/* Caller must hold process lock already */
-		assert (!lm.locked ());
-	}
-#endif
+	/* apply_to_delayline can no be called concurrently with processing
+	 * caller must hold process lock when apply_to_delayline == true */
+	assert (!apply_to_delayline || !AudioEngine::instance()->process_lock().trylock());
 
 	/* Note: RouteList is process-graph sorted */
 	boost::shared_ptr<RouteList> r = routes.reader ();
@@ -6654,10 +6649,6 @@ Session::update_latency_compensation (bool force_whole_graph, bool called_from_b
 		return;
 	}
 
-	if (_engine.in_process_thread ()) {
-		called_from_backend = true;
-	}
-
 	/* this lock is not usually contended, but under certain conditions,
 	 * update_latency_compensation may be called concurrently.
 	 * e.g. drag/drop copy a latent plugin while rolling.
@@ -6706,13 +6697,10 @@ Session::update_latency_compensation (bool force_whole_graph, bool called_from_b
 			DEBUG_TRACE (DEBUG::LatencyCompensation, "update_latency_compensation called from engine, don't call back into engine\n");
 		}
 	} else {
-
-#ifndef MIXBUS /* mixbus already has the process-locked */
+#ifndef MIXBUS
 		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock (), Glib::Threads::NOT_LOCK);
-		if (!called_from_backend) {
-			lm.acquire ();
-		}
 #endif
+		lm.acquire ();
 
 		DEBUG_TRACE (DEBUG::LatencyCompensation, "update_latency_compensation: directly apply to routes\n");
 		boost::shared_ptr<RouteList> r = routes.reader ();
