@@ -736,7 +736,7 @@ Editor::register_midi_actions (Bindings* midi_bindings)
 	ActionManager::register_action (_midi_actions, X_("increase-velocity-together"), _("Increase Velocity (non-relative)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::increase_note_velocity_together));
 	ActionManager::register_action (_midi_actions, X_("increase-velocity-fine-smush"), _("Increase Velocity (fine, allow mush)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::increase_note_velocity_fine_smush));
 	ActionManager::register_action (_midi_actions, X_("increase-velocity-fine-together"), _("Increase Velocity (fine, non-relative)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::increase_note_velocity_fine_together));
-	ActionManager::register_action (_midi_actions, X_("increase-velocity-smush-together"), _("Increase Velocity (maintain ratios, allow mush"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::increase_note_velocity_smush_together));
+	ActionManager::register_action (_midi_actions, X_("increase-velocity-smush-together"), _("Increase Velocity (maintain ratios, allow mush)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::increase_note_velocity_smush_together));
 	ActionManager::register_action (_midi_actions, X_("increase-velocity-fine-smush-together"), _("Increase Velocity (fine, allow mush, non-relative)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::increase_note_velocity_fine_smush_together));
 
 	ActionManager::register_action (_midi_actions, X_("decrease-velocity"), _("Decrease Velocity"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::decrease_note_velocity));
@@ -745,7 +745,7 @@ Editor::register_midi_actions (Bindings* midi_bindings)
 	ActionManager::register_action (_midi_actions, X_("decrease-velocity-together"), _("Decrease Velocity (non-relative)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::decrease_note_velocity_together));
 	ActionManager::register_action (_midi_actions, X_("decrease-velocity-fine-smush"), _("Decrease Velocity (fine, allow mush)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::decrease_note_velocity_fine_smush));
 	ActionManager::register_action (_midi_actions, X_("decrease-velocity-fine-together"), _("Decrease Velocity (fine, non-relative)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::decrease_note_velocity_fine_together));
-	ActionManager::register_action (_midi_actions, X_("decrease-velocity-smush-together"), _("Decrease Velocity (maintain ratios, allow mush"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::decrease_note_velocity_smush_together));
+	ActionManager::register_action (_midi_actions, X_("decrease-velocity-smush-together"), _("Decrease Velocity (maintain ratios, allow mush)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::decrease_note_velocity_smush_together));
 	ActionManager::register_action (_midi_actions, X_("decrease-velocity-fine-smush-together"), _("Decrease Velocity (fine, allow mush, non-relative)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::decrease_note_velocity_fine_smush_together));
 
 	ActionManager::register_action (_midi_actions, X_("transpose-up-octave"), _("Transpose Up (octave)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::transpose_up_octave));

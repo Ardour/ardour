@@ -61,7 +61,7 @@ ARDOUR_UI::toggle_external_sync()
 {
 	if (_session) {
 		if (_session->config.get_video_pullup() != 0.0f && (TransportMasterManager::instance().current()->type() == Engine)) {
-			ArdourMessageDialog msg (_("It is not possible to use JACK as the the sync source\n when the pull up/down setting is non-zero."));
+			ArdourMessageDialog msg (_("It is not possible to use JACK as the sync source\n when the pull up/down setting is non-zero."));
 			msg.run ();
 			return;
 		}

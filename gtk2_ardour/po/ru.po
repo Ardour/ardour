@@ -2629,7 +2629,7 @@ msgstr ""
 
 #: ardour_ui_options.cc:64
 msgid ""
-"It is not possible to use JACK as the the sync source\n"
+"It is not possible to use JACK as the sync source\n"
 " when the pull up/down setting is non-zero."
 msgstr ""
 
@@ -5203,7 +5203,7 @@ msgid "Increase Velocity (fine, non-relative)"
 msgstr ""
 
 #: editor_actions.cc:739
-msgid "Increase Velocity (maintain ratios, allow mush"
+msgid "Increase Velocity (maintain ratios, allow mush)"
 msgstr ""
 
 #: editor_actions.cc:740
@@ -5235,7 +5235,7 @@ msgid "Decrease Velocity (fine, non-relative)"
 msgstr ""
 
 #: editor_actions.cc:748
-msgid "Decrease Velocity (maintain ratios, allow mush"
+msgid "Decrease Velocity (maintain ratios, allow mush)"
 msgstr ""
 
 #: editor_actions.cc:749
@@ -12840,7 +12840,7 @@ msgstr ""
 msgid ""
 "<b>When enabled</b> the main output bus is auto-connected to the first N "
 "physical ports. If the session has a monitor-section, the monitor-bus output "
-"is connected the hardware playback ports, otherwise the master-bus output is "
+"is connected to the hardware playback ports, otherwise the master-bus output is "
 "directly used for playback."
 msgstr ""
 
@@ -17779,7 +17779,7 @@ msgstr ""
 #~ msgstr "Буферы"
 
 #~ msgid ""
-#~ "It is not possible to use JACK as the the sync source\n"
+#~ "It is not possible to use JACK as the sync source\n"
 #~ "when the pull up/down setting is non-zero."
 #~ msgstr ""
 #~ "Невозможно использовать JACK, как синхронизатор источника,\n"
