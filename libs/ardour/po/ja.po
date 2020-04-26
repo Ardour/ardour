@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-10-12 16:31-0600\n"
-"PO-Revision-Date: 2018-01-20 20:07+0100\n"
+"PO-Revision-Date: 2020-04-26 22:25+0100\n"
 "Last-Translator: Hiroki Inagaki <hiroki.ingk@gmail.com>\n"
 "Language-Team: Japanese <ardour-dev@lists.ardour.org>\n"
 "Language: ja\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Poedit 2.0.4\n"
+"X-Generator: Poedit 2.3\n"
 
 #: analyser.cc:123 audioregion.cc:1826
 msgid "Transient Analysis failed for %1."
@@ -50,6 +50,8 @@ msgid ""
 "Failed to open audio device\n"
 "(Typically caused by hardware parameter settings)"
 msgstr ""
+"オーディオデバイスを開くのに失敗しました\n"
+"（通常、ハードウェアパラメータ設定により発生します）"
 
 #: audio_backend.cc:41
 msgid "Failed to close audio device"
@@ -501,7 +503,7 @@ msgstr "dstream %1 での butler write-behind 失敗"
 
 #: control_protocol_manager.cc:133
 msgid "Control protocol %1 was already active."
-msgstr ""
+msgstr "コントロールプロトコル %1 はすでに有効です。"
 
 #: control_protocol_manager.cc:161
 msgid "Control protocol support for %1 failed to activate"
@@ -546,19 +548,20 @@ msgstr "コントロールプロトコル \"%1\" には descriptor がありま�
 
 #: convolver.cc:55
 msgid "Convolver: cannot open IR \"%1\": %2"
-msgstr ""
+msgstr "Convolver:  IR \"%1\" を開けません: %2"
 
 #: convolver.cc:60
 msgid "Convolver: IR \"%1\" file too long."
-msgstr ""
+msgstr "Convolver: IR \"%1\" ファイルが長すぎます。"
 
 #: convolver.cc:79
 msgid "Convolver: Could not open IR \"%1\"."
-msgstr ""
+msgstr "Convolver: IR \"%1\" を開けません。"
 
 #: convolver.cc:85
 msgid "Convolver: IR \"%1\" no usable audio-channels sound."
 msgstr ""
+"Convolver: IR \"%1\" に利用可能なオーディオチャンネル・サウンドがありません。"
 
 #: cycle_timer.cc:41
 msgid "CycleTimer::get_mhz(): can't open /proc/cpuinfo"
@@ -831,7 +834,7 @@ msgstr "%1 から読み込まれたフォーマットをエクスポートでき
 
 #: export_profile_manager.cc:785
 msgid "Ignored format '%1': encoder is not avilable"
-msgstr ""
+msgstr "フォーマット '%1' を無視しました: エンコーダーが利用できません"
 
 #: export_profile_manager.cc:877
 msgid "No timespan has been selected!"
@@ -847,7 +850,7 @@ msgstr "空のチャンネルがあります"
 
 #: export_profile_manager.cc:909
 msgid "Destination folder does not exist."
-msgstr ""
+msgstr "宛先フォルダが存在しません。"
 
 #: export_profile_manager.cc:928
 msgid "No format selected!"
@@ -1043,6 +1046,8 @@ msgstr "システムのオープン・ファイル上限を %1 に設定でき�
 #: globals.cc:286 globals.cc:303
 msgid "Your system is configured to limit %1 to %2 open files"
 msgstr ""
+"お使いのシステムは %1 を %2 ファイルのオープンに制限するように設定されていま"
+"す"
 
 #: globals.cc:290
 msgid "Could not get system open files limit (%1)"
@@ -1084,11 +1089,11 @@ msgstr "FaderPort Send"
 
 #: globals.cc:603
 msgid "FaderPort2 Recv"
-msgstr ""
+msgstr "FaderPort2 Recv"
 
 #: globals.cc:604
 msgid "FaderPort2 Send"
-msgstr ""
+msgstr "FaderPort2 Send"
 
 #: globals.cc:605
 msgid "FaderPort8 Recv"
@@ -1108,7 +1113,7 @@ msgstr "FaderPort16 Send"
 
 #: graph.cc:599
 msgid "Could not graph to file (%1)"
-msgstr ""
+msgstr "ファイル (%1) にグラフを作成できませんでした"
 
 #: import.cc:157
 msgid "Cannot find new filename for imported file %1"
@@ -1161,28 +1166,30 @@ msgstr ""
 
 #: import_pt.cc:250
 msgid "PT Import : MISSING `%1`, inserting ref to missing source"
-msgstr ""
+msgstr "PT Import : MISSING `%1`, 見つからないソースに参照を挿入します"
 
 #: import_pt.cc:252
 msgid "PT Import : MISSING `%1`, please check Audio Files"
-msgstr ""
+msgstr "PT Import : MISSING `%1`, オーディオファイルを確認してください"
 
 #: import_pt.cc:266
 msgid "Failed to find any audio for PT import"
-msgstr ""
+msgstr "PT インポートするオーディオが1つも見つかりません"
 
 #: import_pt.cc:269
 msgid ""
 "Failed to load one or more of the audio files for PT import, see above list"
 msgstr ""
+"PT インポートで読み込みに失敗したオーディオファイルがあります。上記のリストを"
+"参照してください。"
 
 #: import_pt.cc:271
 msgid "All audio files found for PT import!"
-msgstr ""
+msgstr "PT インポートのすべてのオーディオファイルが見つかりました。"
 
 #: import_pt.cc:363
 msgid "PTImport: UINT_MAX routes? impossible!"
-msgstr ""
+msgstr "PTImport: UINT_MAX ルート? 不可能!"
 
 #: instrument_info.cc:43 instrument_info.cc:87 instrument_info.cc:89
 msgid "Unknown"
@@ -2088,39 +2095,39 @@ msgstr "不明なプラグインタイプ \"%1\" - 無視します"
 
 #: plugin_manager.cc:1531
 msgid "Loading plugin order file %1"
-msgstr ""
+msgstr "プラグイン順序ファイル %1 を読み込み中"
 
 #: plugin_manager.cc:1541
 msgid "Cannot parse Plugin Order info from %1"
-msgstr ""
+msgstr "%1 からプラグイン順序情報を解析できません"
 
 #: plugin_manager.cc:1552
 msgid "Saving plugin order file %1"
-msgstr ""
+msgstr "プラグイン順序ファイル %1 を保存中"
 
 #: plugin_manager.cc:1557
 msgid "Could not save Plugin Order info to %1"
-msgstr ""
+msgstr "%1 にプラグイン順序情報を保存できませんでした"
 
 #: plugin_manager.cc:1594
 msgid "Could not save Plugin Tags info to %1"
-msgstr ""
+msgstr "%1 にプラグインタグ情報を保存できませんでした"
 
 #: plugin_manager.cc:1607
 msgid "Loading plugin meta data file %1"
-msgstr ""
+msgstr "プラグインメタデータファイル %1 を読み込み中"
 
 #: plugin_manager.cc:1614
 msgid "Cannot parse plugin tag info from %1"
-msgstr ""
+msgstr "%1 からプラグインタグ情報を解析できません"
 
 #: plugin_manager.cc:1691
 msgid "PluginManager::sanitize_tag could not tokenize string: "
-msgstr ""
+msgstr "PluginManager::sanitize_tag は文字列をトークナイズできませんした: "
 
 #: plugin_manager.cc:1741
 msgid "PluginManager: Could not tokenize string: "
-msgstr ""
+msgstr "PluginManager: 文字列をトークナイズできませんでした: "
 
 #: port.cc:529
 msgid "could not reregister %1"
@@ -2163,11 +2170,11 @@ msgstr "AudioEngine: ポート ”%1” を登録できません: %2"
 
 #: port_manager.cc:420
 msgid "(unknown type)"
-msgstr ""
+msgstr "(不明なタイプ)"
 
 #: port_manager.cc:437
 msgid "(unknown error)"
-msgstr ""
+msgstr "(不明なエラー)"
 
 #: port_manager.cc:563
 msgid "AudioEngine: cannot connect %1 (%2) to %3 (%4)"
@@ -2188,6 +2195,8 @@ msgstr "MIDI ポート情報を %1 から読み込みできません"
 #: port_manager.cc:1221
 msgid "MIDI port info file %1 contains invalid information - please remove it."
 msgstr ""
+"MIDI ポート情報ファイル %1 には不正な情報が含まれています。不正な情報を削除し"
+"てください。"
 
 #: processor.cc:235
 msgid "No %1 property flag in element %2"
@@ -2327,11 +2336,11 @@ msgstr "ハイ"
 
 #: route.cc:5633
 msgid "lm"
-msgstr ""
+msgstr "lm"
 
 #: route.cc:5634
 msgid "hm"
-msgstr ""
+msgstr "hm"
 
 #: route.cc:5709
 msgid "Leveler"
@@ -2396,7 +2405,7 @@ msgstr "センド %1"
 
 #: send.cc:80
 msgid "foldback %1"
-msgstr ""
+msgstr "フォルドバック %1"
 
 #: send.cc:82
 msgid "programming error: send created using role %1"
@@ -2476,11 +2485,11 @@ msgstr "マスターアウトプット %1 から %2 に接続できません"
 
 #: session.cc:934
 msgid "Cannot remove monitor section while the engine is offline."
-msgstr ""
+msgstr "エンジンがオフラインの間はモニタセクションを削除できません"
 
 #: session.cc:995
 msgid "Cannot create monitor section while the engine is offline."
-msgstr ""
+msgstr "エンジンがオフラインの間はモニタセクションを作成できません"
 
 #: session.cc:1016
 msgid "Cannot create monitor section. 'Monitor' Port name is not unique."
@@ -2775,6 +2784,8 @@ msgstr "Session: クオーターフレーム MTC メッセージを送信でき�
 #: session_playlists.cc:132
 msgid "Session State: Unused playlist was listed as used."
 msgstr ""
+"Session State: 利用されていないプレイリストが使用中としてリスト化されていま"
+"す。."
 
 #: session_playlists.cc:468 session_playlists.cc:487
 msgid "Session: cannot create Playlist from XML description."
@@ -2831,7 +2842,7 @@ msgstr "リモートコントロールをリセット"
 
 #: session_state.cc:397
 msgid "Loading MIDNAM Patch files"
-msgstr ""
+msgstr "MIDNAM パッチファイルを読み込み中"
 
 #: session_state.cc:410 session_state.cc:441
 msgid "Filling playback buffers"
@@ -2860,7 +2871,7 @@ msgstr "Session: セッションの export フォルダ \"%1\" を作成でき�
 
 #: session_state.cc:543
 msgid "Session: cannot create session backup folder \"%1\" (%2)"
-msgstr ""
+msgstr "Session: セッションの backup フォルダ \"%1\" を作成できません (%2)"
 
 #: session_state.cc:551
 msgid "Session: cannot create session analysis folder \"%1\" (%2)"
@@ -2921,7 +2932,7 @@ msgstr "一時セッションファイル %1 を %2 へ名前変更できませ�
 
 #: session_state.cc:901
 msgid "Could not save backup file at path \"%1\" (%2)"
-msgstr ""
+msgstr "パス \"%1\" にバックアップファイルを保存できませんでした (%2)"
 
 #: session_state.cc:977
 msgid "%1: session file \"%2\" doesn't exist!"
@@ -3307,6 +3318,7 @@ msgstr "MIDI ファイル %1 が開けないため書き込みできません"
 #: smf_source.cc:567
 msgid "Exception while writing %1, file may be corrupt/unusable"
 msgstr ""
+"%1 を書き込み中に例外が発生しました。ファイルが破損している可能性があります"
 
 #: sndfile_helpers.cc:35
 msgid "WAV"
@@ -3702,7 +3714,7 @@ msgstr ""
 
 #: transport_master.cc:398 transport_master.cc:399
 msgid "Construction of transport master object of type %1 failed"
-msgstr ""
+msgstr "タイプ %1 のトランスポートマスタ・オブジェクトの構築に失敗しました"
 
 #: transport_master.cc:420 transport_master.cc:453
 msgid "SyncSource|JACK"
@@ -3722,15 +3734,16 @@ msgstr "LTC"
 
 #: transport_master_manager.cc:135
 msgid "programming error:%1"
-msgstr ""
+msgstr "プログラミングエラー:%1"
 
 #: transport_master_manager.cc:345
 msgid "There is already a transport master named \"%1\" - not duplicated"
 msgstr ""
+"すでに \"%1\" という名前のトランスポートマスタが存在します。複製しません。"
 
 #: transport_master_manager.cc:639
 msgid "Cannot initialize transport master manager"
-msgstr ""
+msgstr "トランスポートマスタ・マネージャを初期化できません"
 
 #: unknown_processor.cc:87
 msgid "Using plugin-stub with unknown i/o configuration for: "
