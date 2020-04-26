@@ -278,9 +278,9 @@ MidiPatchManager::load_midnams ()
 	pthread_set_name ("MIDNAMLoader");
 
 	{
-		Glib::Threads::Mutex::Lock lm (_lock);
 		PBD::Unwinder<bool> npc (no_patch_changed_messages, true);
 		for (Searchpath::const_iterator i = _search_path.begin(); i != _search_path.end(); ++i) {
+			Glib::Threads::Mutex::Lock lm (_lock);
 			add_midnam_files_from_directory (*i);
 		}
 	}
