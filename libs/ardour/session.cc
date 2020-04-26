@@ -2082,32 +2082,33 @@ void
 Session::set_block_size (pframes_t nframes)
 {
 	/* the AudioEngine guarantees
-	   that it will not be called while we are also in
-	   ::process(). It is therefore fine to do things that block
-	   here.
-	*/
+	 * that it will not be called while we are also in
+	 * ::process(). It is therefore fine to do things that block
+	 * here.
+	 */
+	current_block_size = nframes;
 
-	{
-		current_block_size = nframes;
+	ensure_buffers ();
 
-		ensure_buffers ();
+	boost::shared_ptr<RouteList> r = routes.reader ();
 
-		boost::shared_ptr<RouteList> r = routes.reader ();
-
-		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-			(*i)->set_block_size (nframes);
-		}
-
-		boost::shared_ptr<RouteList> rl = routes.reader ();
-		for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-			if (tr) {
-				tr->set_block_size (nframes);
-			}
-		}
-
-		set_worst_io_latencies ();
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		(*i)->set_block_size (nframes);
 	}
+
+	boost::shared_ptr<RouteList> rl = routes.reader ();
+	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+		if (tr) {
+			tr->set_block_size (nframes);
+		}
+	}
+
+	DEBUG_TRACE (DEBUG::LatencyCompensation, "Session::set_block_size -> update worst i/o latency\n");
+	/* when this is called from the auto-connect thread, the process-lock is held */
+	Glib::Threads::Mutex::Lock lx (_update_latency_lock);
+	set_worst_output_latency ();
+	set_worst_input_latency ();
 }
 
 
@@ -3201,7 +3202,6 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 			r->solo_isolate_control()->Changed.connect_same_thread (*this, boost::bind (&Session::route_solo_isolated_changed, this, wpr));
 			r->mute_control()->Changed.connect_same_thread (*this, boost::bind (&Session::route_mute_changed, this));
 
-			r->output()->changed.connect_same_thread (*this, boost::bind (&Session::set_worst_io_latencies_x, this, _1, _2));
 			r->processors_changed.connect_same_thread (*this, boost::bind (&Session::route_processors_changed, this, _1));
 			r->processor_latency_changed.connect_same_thread (*this, boost::bind (&Session::queue_latency_recompute, this));
 
@@ -6452,15 +6452,6 @@ Session::initialize_latencies ()
 {
 	update_latency (false);
 	update_latency (true);
-
-	set_worst_io_latencies ();
-}
-
-void
-Session::set_worst_io_latencies_x (IOChange, void *)
-{
-	DEBUG_TRACE (DEBUG::LatencyCompensation, "Session::set_worst_io_latencies_x\n");
-	set_worst_io_latencies ();
 }
 
 void
@@ -6585,16 +6576,6 @@ Session::update_latency (bool playback)
 
 	DEBUG_TRACE (DEBUG::LatencyCompensation, "Engine latency callback: DONE\n");
 	LatencyUpdated (playback); /* EMIT SIGNAL */
-}
-
-void
-Session::set_worst_io_latencies ()
-{
-	DEBUG_TRACE (DEBUG::LatencyCompensation, "Session::set_worst_io_latencies\n");
-	/* when this is called from the auto-connect thread, the process-lock is held */
-	Glib::Threads::Mutex::Lock lx (_update_latency_lock);
-	set_worst_output_latency ();
-	set_worst_input_latency ();
 }
 
 void
