@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-02 13:17+0200\n"
-"PO-Revision-Date: 2020-04-25 17:47+0200\n"
+"PO-Revision-Date: 2020-04-26 13:18+0200\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -840,7 +840,7 @@ msgstr "12 kanal"
 #: add_route_dialog.cc:900 gain_meter.cc:811 mixer_strip.cc:2076
 #: mixer_strip.cc:2536 processor_box.cc:3870
 msgid "Custom"
-msgstr "Pertsonalizatua"
+msgstr "Perts."
 
 #: add_route_dialog.cc:941 session_dialog.cc:579 session_dialog.cc:580
 msgid "{Factory Template}"
@@ -9743,7 +9743,7 @@ msgstr "Disko S/I..."
 
 #: mixer_strip.cc:1760 processor_box.cc:3863
 msgid "Pin Connections..."
-msgstr ""
+msgstr "Konexio-loturak..."
 
 #: mixer_strip.cc:1770
 msgid "Fan out to Busses"
@@ -9857,6 +9857,8 @@ msgstr "Errorea GUI elementuak gehitzean %1 pista/bus berrientzat"
 #: mixer_ui.cc:1879
 msgid "track display list item for renamed strip not found!"
 msgstr ""
+"pistaren bistaratze-zerrendaren elementua ez da aurkitu berrizendatutako "
+"kanalarentzat!"
 
 #: mixer_ui.cc:1977
 msgid "-all-"
@@ -10198,130 +10200,131 @@ msgstr "Moztu SiP"
 
 #: monitor_section.cc:246 monitor_section.cc:249
 msgid "Gain reduction to use when dimming monitor outputs"
-msgstr ""
+msgstr "Monitore-irteerak ahultzeko erabiliko den irabazi-txikitzea"
 
 #: monitor_section.cc:253 monitor_section.cc:299
 msgid "-3 dB"
-msgstr ""
+msgstr "-3 dB"
 
 #: monitor_section.cc:258 monitor_section.cc:272 monitor_section.cc:331
 #: monitor_section.cc:960
 msgid "Dim"
-msgstr ""
+msgstr "Ahul."
 
 #: monitor_section.cc:303
 msgid "-30 dB"
-msgstr ""
+msgstr "-30 dB"
 
 #: monitor_section.cc:339
 msgid "Inv"
-msgstr ""
+msgstr "Inb."
 
 #: monitor_section.cc:403 port_group.cc:585
 msgid "Monitor"
-msgstr ""
+msgstr "Monitore"
 
 #: monitor_section.cc:948
 msgid "Use Monitor Section"
-msgstr ""
+msgstr "Erabili monitore-eremua"
 
 #: monitor_section.cc:962
 msgid "Toggle Monitor Section Processor Box"
-msgstr ""
+msgstr "Gaitu/Desgaitu monitore-eremuko prozesadore-kutxa"
 
 #: monitor_section.cc:969
 msgid "Cut monitor channel %1"
-msgstr ""
+msgstr "Moztu %1 monitorizazio-kanala"
 
 #: monitor_section.cc:974
 msgid "Dim monitor channel %1"
-msgstr ""
+msgstr "Ahuldu %1 monitorizazio-kanala"
 
 #: monitor_section.cc:979
 msgid "Solo monitor channel %1"
-msgstr ""
+msgstr "Jarri soloan %1 monitorizazio-kanala"
 
 #: monitor_section.cc:984
 msgid "Invert monitor channel %1"
-msgstr ""
+msgstr "Inbertitu %1 monitorizazio-kanala"
 
 #: monitor_section.cc:993
 msgid "In-place solo"
-msgstr ""
+msgstr "Tokiko soloa"
 
 #: monitor_section.cc:995
 msgid "After Fade Listen (AFL) solo"
-msgstr ""
+msgstr "Fader Ondorengo Entzute (AFL) soloa"
 
 #: monitor_section.cc:997
 msgid "Pre Fade Listen (PFL) solo"
-msgstr ""
+msgstr "Fader Aurreko Entzute (PFL) soloa"
 
 #: monitor_section.cc:1000
 msgid "Toggle exclusive solo mode"
-msgstr ""
+msgstr "Gaitu/Desgaitu solo-esklusibo modua"
 
 #: monitor_section.cc:1002
 msgid "Toggle mute overrides solo mode"
-msgstr ""
+msgstr "Gaitu/Desgaitu mututzea gainjarri soloari"
 
 #: monitor_section.cc:1336
 msgid "No session - no I/O changes are possible"
-msgstr ""
+msgstr "Saiorik ez - ez da posible S/I aldaketarik"
 
 #: monitor_selector.cc:200
 msgid "Monitor output selector"
-msgstr ""
+msgstr "Monitore-irteera hautatzailea"
 
+# bypass = saihespen edo salbuespen?
 #: mono_panner.cc:107 stereo_panner.cc:117
 msgid "bypassed"
-msgstr ""
+msgstr "saihestua"
 
 #: mono_panner.cc:121
 #, c-format
 msgid "L:%3d R:%3d"
-msgstr ""
+msgstr "L:%3d R:%3d"
 
 #: mono_panner.cc:205 panner2d.cc:283 stereo_panner.cc:254 stereo_panner.cc:277
 msgid "Panner|L"
-msgstr ""
+msgstr "L"
 
 #: mono_panner.cc:222 panner2d.cc:284 stereo_panner.cc:252 stereo_panner.cc:279
 msgid "Panner|R"
-msgstr ""
+msgstr "R"
 
 #: mono_panner_editor.cc:36
 msgid "Mono Panner"
-msgstr ""
+msgstr "Mono paneagailua"
 
 #: mono_panner_editor.cc:47 mono_panner_editor.cc:52 stereo_panner_editor.cc:47
 #: stereo_panner_editor.cc:52
 msgid "%"
-msgstr ""
+msgstr "%"
 
 #: nag.cc:41
 msgid "Support %1 Development"
-msgstr ""
+msgstr "Babestu %1(r)en garapena"
 
 #: nag.cc:42
 msgid "I'd like to make a one-time donation"
-msgstr ""
+msgstr "Dohaintza bakarra egin nahi nuke"
 
 #: nag.cc:43
 msgid "Tell me more about becoming a subscriber"
-msgstr ""
+msgstr "Kontatu gehiago harpidedun bihurtzeari buruz"
 
 #: nag.cc:44
 msgid "I'm already a subscriber!"
-msgstr ""
+msgstr "Jada harpidedun naiz!"
 
 #: nag.cc:45
 msgid "Ask about this the next time I export"
-msgstr ""
+msgstr "Galdetu honetaz esportatzen dudan hurrengo aldian"
 
 #: nag.cc:46
 msgid "Never ever ask me about this again"
-msgstr ""
+msgstr "Inoiz ez galdetu honetaz berriro"
 
 #: nag.cc:49
 msgid ""
@@ -10337,6 +10340,18 @@ msgid ""
 "happen if you choose not to do so. However Ardour's continuing development\n"
 "relies on a stable, sustainable income stream. Thanks for using Ardour!"
 msgstr ""
+"Zorionak zure saioaren esportazioagatik.\n"
+"\n"
+"Badirudi jada harpidedun zarela. Hala bada, esker anitz, eta barkatu\n"
+"honekin berriro ere molestatzeagatik - gure harpidetza-sistema hobetzeko "
+"lanean ari naiz\n"
+"honela zu mezu honekin gogaitzen ez ibili behar izateko.\n"
+"\n"
+"Ez bazara harpidedun, nire Ardourreko lana babestea birpentsatu dezakezu,\n"
+"izan dohaintza bakarra edo harpidetzarekin. Ezer ez da gertaturen ezezkoa\n"
+"hautatzen baduzu. Halere Ardourren etengabeko garapena sarrera-fluxu\n"
+"egonkor eta jasankor batean oinarritzen da. Esker mila Ardour "
+"erabiltzeagatik!"
 
 #: nag.cc:58
 msgid ""
@@ -10349,28 +10364,39 @@ msgid ""
 "development\n"
 "relies on a stable, sustainable income stream. Thanks for using Ardour!"
 msgstr ""
+"Zorionak zure saioaren esportazioagatik.\n"
+"\n"
+"Espero dut Ardour tresna erabilgarria izatea. Gustaturen litzaidake zuk "
+"bere\n"
+"garapena babestea birpentsatzea, izan dohaintza bakarra edo "
+"harpidetzarekin.\n"
+"Ezer ez da gertaturen ezezkoa hautatzen baduzu. Halere Ardourren etengabeko\n"
+"garapena sarrera-fluxu egonkor eta jasankor batean oinarritzen da. \n"
+"Esker mila Ardour erabiltzeagatik!"
 
 #: new_plugin_preset_dialog.cc:29
 msgid "Replace existing preset with this name"
-msgstr ""
+msgstr "Ordezkatu jada badagoen aurrezarpena izen honekin"
 
 #: new_plugin_preset_dialog.cc:33
 msgid "Name of new preset"
-msgstr ""
+msgstr "Aurrezarpenaren izen berria"
 
 #: new_plugin_preset_dialog.cc:43
 msgid "New Favorite Only"
-msgstr ""
+msgstr "Gogokoa-soilik berria"
 
 #: new_user_wizard.cc:76
 msgid ""
 "Use an external mixer or the hardware mixer of your audio interface.\n"
 "%1 will play NO role in monitoring"
 msgstr ""
+"Erabili kanpoko nahasgailu bat edo zure audio-interfazearen nahasgailua.\n"
+"%1(e)k EZ du parte hartuko monitorizazioan"
 
 #: new_user_wizard.cc:78
 msgid "Ask %1 to play back material as it is being recorded"
-msgstr ""
+msgstr "Eskatu %1(r)i materiala erreproduzitzea grabatu bitartean"
 
 #: new_user_wizard.cc:137
 msgid ""
@@ -10381,41 +10407,50 @@ msgid ""
 "There are a few things that need to be configured before you start using the "
 "program.</span> "
 msgstr ""
+"<span size=\"larger\">%1 audio digitaleko lan-estazio bat da. Pista anitzeko "
+"audioa grabatzeko, editatzeko eta nahasteko erabil dezakezu. Zure CDak "
+"ekoitz ditzakezu, bideo-soinu-bandak nahasi edo musikari eta soinuari "
+"buruzko ideia berriekin esperimentatu.\n"
+"\n"
+"Gauza batzuk konfiguratu egin behar dira programa erabiltzen hasi aurretik.</"
+"span> "
 
 #: new_user_wizard.cc:155
 msgid "GUI and Font scaling:"
-msgstr ""
+msgstr "Interfaze eta tipografiaren eskalatzea:"
 
 #: new_user_wizard.cc:158
 msgid ""
 "<small><i>This can later be changed in Preferences &gt; Appearance.</i></"
 "small>"
 msgstr ""
+"<small><i>Hori aurrerago alda daiteke Hobespenak &gt; Itxura aukeran.</i></"
+"small>"
 
 #: new_user_wizard.cc:160 new_user_wizard.cc:164 rc_option_editor.cc:1109
 #: rc_option_editor.cc:2322
 msgid "100%"
-msgstr ""
+msgstr "100%"
 
 #: new_user_wizard.cc:161
 msgid "150%"
-msgstr ""
+msgstr "150%"
 
 #: new_user_wizard.cc:162
 msgid "200%"
-msgstr ""
+msgstr "200%"
 
 #: new_user_wizard.cc:163
 msgid "250%"
-msgstr ""
+msgstr "250%"
 
 #: new_user_wizard.cc:191
 msgid "Welcome to %1"
-msgstr ""
+msgstr "Ongi etorri %1(e)ra"
 
 #: new_user_wizard.cc:261
 msgid "Default folder for %1 sessions"
-msgstr ""
+msgstr "Lehenetsitako karpeta %1 saioentzat"
 
 #: new_user_wizard.cc:267
 msgid ""
@@ -10426,10 +10461,16 @@ msgid ""
 "\n"
 "<i>(You can put new sessions anywhere, this is just a default)</i>"
 msgstr ""
+"%1ekin lan egiten duzun proiektu bakoitzak bere karpeta du.\n"
+"Audioa grabatzen ari bazara, diskoan leku asko beharko duzu.\n"
+"\n"
+"Non nahi duzu biltegiratzea %1 saio berriak lehenespenez?\n"
+"\n"
+"<i>(Saio berriak edonon jarri ditzakezu, hau lehenespena besterik ez da)</i>"
 
 #: new_user_wizard.cc:291
 msgid "Default folder for new sessions"
-msgstr ""
+msgstr "Lehenetsitako karpetak saio berrientzat"
 
 #: new_user_wizard.cc:312
 msgid ""
@@ -10444,30 +10485,43 @@ msgid ""
 "\n"
 "<i>If you do not understand what this is about, just accept the default.</i>"
 msgstr ""
+"Musika-instrumentu eta ahotsak grabatu bitartean, seinalea entzun nahiko "
+"duzu.\n"
+"Hau \"monitorizazioa\" deitzen da. Hau egiteko modu ezberdinak daude, duzun\n"
+"ekipamenduaren eta honen konfigurazioaren arabera. Hona hemen bi ohikoenak.\n"
+"Hautatu zure konfiguraziorako egokiena.\n"
+"\n"
+"<i>(Hobespen hau edonoiz alda dezakezu, Hobespenak leihoan)</i>\n"
+"\n"
+"<i>Ez baduzu hau zer den ulertzen, lehenetsia besterik ez hautatu.</i>"
 
 #: new_user_wizard.cc:333
 msgid "Monitoring Choices"
-msgstr ""
+msgstr "Monitorizazio aukerak"
 
 #: new_user_wizard.cc:359
 msgid "Use a Master bus directly"
-msgstr ""
+msgstr "Erabili zuzenean Master busa"
 
 #: new_user_wizard.cc:361
 msgid ""
 "Connect the Master bus directly to your hardware outputs. This is preferable "
 "for simple usage."
 msgstr ""
+"Konektatu zuzenean Master busa zure hardware-irteeretara. Erabilera "
+"sinplerako egokia."
 
 #: new_user_wizard.cc:370
 msgid "Use an additional Monitor bus"
-msgstr ""
+msgstr "Erabili monitorizazio-bus gehigarri bat"
 
 #: new_user_wizard.cc:373
 msgid ""
 "Use a Monitor bus between Master bus and hardware outputs for \n"
 "greater control in monitoring without affecting the mix."
 msgstr ""
+"Erabili monitorizazio-bus bat Master busa eta hardware-irteeren artean,\n"
+"nahasketari eragin gabe, monitorizazioaren kontrol hoberako."
 
 #: new_user_wizard.cc:395
 msgid ""
@@ -10476,167 +10530,184 @@ msgid ""
 "\n"
 "<i>If you do not understand what this is about, just accept the default.</i>"
 msgstr ""
+"<i>Hobespen hau edonoiz alda dezakezu, Hobespenak leihoan.\n"
+"Era berean, monitorizazio-eremua edozein saiotik gehitu edo ken dezakezu.</"
+"i>\n"
+"\n"
+"<i>Ez baduzu hau zer den ulertzen, lehenetsia besterik ez hautatu.</i>"
 
 #: new_user_wizard.cc:515 startup_fsm.cc:839
 msgid "Copied Demo Session %1."
-msgstr ""
+msgstr "%1 kopiatutako demo-saioa."
 
 #: normalize_dialog.cc:38
 msgid "Normalize regions"
-msgstr ""
+msgstr "Normalizatu eremuak"
 
 #: normalize_dialog.cc:38
 msgid "Normalize region"
-msgstr ""
+msgstr "Normalizatu eremua"
 
 #: normalize_dialog.cc:53
 msgid "Constrain RMS to:"
-msgstr ""
+msgstr "Mugatu RMS hona:"
 
 #: normalize_dialog.cc:60
 msgid "Normalize to:"
-msgstr ""
+msgstr "Normalizatu hona:"
 
 #: normalize_dialog.cc:74
 msgid "Normalize each region using its own peak value"
-msgstr ""
+msgstr "Normalizatu eremu bakoitza bere gailur-balio propioa erabiliz"
 
 #: normalize_dialog.cc:76
 msgid "Normalize each region using the peak value of all regions"
-msgstr ""
+msgstr "Normalizatu eremu bakoitza eremu guztien gailur-balioa erabiliz"
 
 #: normalize_dialog.cc:93
 msgid "Normalize"
-msgstr ""
+msgstr "Normalizatu"
 
 #: note_select_dialog.cc:27
 msgid "Select Note"
-msgstr ""
+msgstr "Hautatu nota"
 
 #: opts.cc:67
 msgid "Usage: "
-msgstr ""
+msgstr "Erabilera: "
 
 #: opts.cc:67
 msgid " [ OPTIONS ] [ SESSION-NAME ]"
-msgstr ""
+msgstr " [ AUKERAK ] [ SAIO-IZENA ]"
 
 #: opts.cc:69
 msgid ""
 "Ardour is a multichannel hard disk recorder (HDR) and digital audio "
 "workstation (DAW)."
 msgstr ""
+"Ardour kanal anitzeko disko gogorreko grabagailua (HDR) eta audio digitaleko "
+"lan-estazio bat (DAW) da."
 
 #: opts.cc:71
 msgid "Options:\n"
-msgstr ""
+msgstr "Aukerak:\n"
 
 #: opts.cc:72
 msgid ""
 "  -a, --no-announcements      Do not contact website for announcements\n"
 msgstr ""
+"  -a, --no-announcements      Ez jarri harremanetan webgunearekin iragarkiak "
+"jartzeko\n"
 
 #: opts.cc:73
 msgid "  -A, --actions               Print all possible menu action names\n"
 msgstr ""
+"  -A, --actions               Erakutsi ahal den menu-ekintzen izen gehien\n"
 
 #: opts.cc:74
 msgid "  -b, --bindings              Display all current key bindings\n"
-msgstr ""
+msgstr "  -b, --bindings              Erakutsi lotura guztiak\n"
 
 #: opts.cc:75
 msgid ""
 "  -B, --bypass-plugins        Bypass all plugins in an existing session\n"
 msgstr ""
+"  -B, --bypass-plugins        Saihestu plugin guztiak existitzen den saio "
+"batean\n"
 
 #: opts.cc:76
 msgid ""
 "  -c, --name <name>           Use a specific backend client name, default is "
 "ardour\n"
 msgstr ""
+"  -c, --name <name>           Erabili motor-izen zehatz bat, lehenetsia "
+"ardour da\n"
 
 #: opts.cc:77
 msgid "  -d, --disable-plugins       Disable all plugins (safe mode)\n"
-msgstr ""
+msgstr "  -d, --disable-plugins      Desgaitu plugin guztiak (modu segurua)\n"
 
 #: opts.cc:79
 msgid ""
 "  -D, --debug <options>       Set debug flags. Use \"-D list\" to see "
 "available options\n"
 msgstr ""
+"  -D, --debug <options>       Arazketa-banderak ezarri. Erabili \"-D list\" "
+"erabilgarri dauden aukerak ikusteko\n"
 
 #: opts.cc:81
 msgid "  -h, --help                  Print this message\n"
-msgstr ""
+msgstr "  -h, --help                  Erakutsi mezu hau\n"
 
 #: opts.cc:82
 msgid "  -k, --keybindings <file>    Name of key bindings to load\n"
-msgstr ""
+msgstr "  -k, --keybindings <file>    Kargatzeko laster-teklen izena\n"
 
 #: opts.cc:83
 msgid "  -m, --menus file            Use \"file\" to define menus\n"
-msgstr ""
+msgstr "  -m, --menus file            Erabili \"file\" menuak zehazteko\n"
 
 #: opts.cc:84
 msgid "  -n, --no-splash             Do not show splash screen\n"
-msgstr ""
+msgstr "  -n, --no-splash             Ez erakutsi hasierako pantaila\n"
 
 #: opts.cc:85
 msgid ""
 "  -N, --new session-name      Create a new session from the command line\n"
-msgstr ""
+msgstr "  -N, --new session-name      Sortu saio berria komando-lineatik\n"
 
 #: opts.cc:86
 msgid "  -O, --no-hw-optimizations   Disable h/w specific optimizations\n"
-msgstr ""
+msgstr "  -O, --no-hw-optimizations   Desgaitu hardware-optimizazioak\n"
 
 #: opts.cc:87
 msgid "  -P, --no-connect-ports      Do not connect any ports at startup\n"
-msgstr ""
+msgstr "  -P, --no-connect-ports      Ez konektatu atakarik hasieran\n"
 
 #: opts.cc:88
 msgid "  -S, --sync                  Draw the GUI synchronously\n"
-msgstr ""
+msgstr "  -S, --sync                  Marraztu interfazea sinkroniaz\n"
 
 #: opts.cc:89
 msgid "  -T, --template <name>       Use given template for new session\n"
 msgstr ""
+"  -T, --template <name>       Erabili hautatutako txantiloia saio berrirako\n"
 
 #: opts.cc:90
 msgid "  -v, --version               Print version and exit\n"
-msgstr ""
+msgstr "  -v, --version               Erakutsi bertsioa eta atera\n"
 
 #: opts.cc:92
 msgid "  -V, --novst                 Disable WindowsVST support\n"
-msgstr ""
+msgstr "  -V, --novst                 Desgaitu WindowsVST sostengua\n"
 
 #: opts.cc:95
 msgid "Report bugs to http://tracker.ardour.org\n"
-msgstr ""
+msgstr "Salatu akatsak hemen: http://tracker.ardour.org\n"
 
 #: opts.cc:96
 msgid "Website http://ardour.org\n"
-msgstr ""
+msgstr "Web-orria http://ardour.org\n"
 
 #: panner2d.cc:903
 msgid "Panner (2D)"
-msgstr ""
+msgstr "Paneagailua (2D)"
 
 #: panner2d.cc:905 panner_ui.cc:404 plugin_ui.cc:532
 msgid "Bypass"
-msgstr ""
+msgstr "Saihestu"
 
 #: panner2d.cc:911
 msgid "Panner"
-msgstr ""
+msgstr "Paneagailua"
 
 #: panner_ui.cc:79
 msgid "Pan automation mode"
-msgstr ""
+msgstr "Panoramika-automatizazio modua"
 
 #: panner_ui.cc:179
 msgid "Abs"
-msgstr ""
+msgstr "Abs"
 
 #: patch_change_widget.cc:55
 msgid "Audition on Change"
