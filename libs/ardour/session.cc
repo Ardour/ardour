@@ -6560,17 +6560,17 @@ Session::update_latency (bool playback)
 	}
 
 	if (playback) {
-		Glib::Threads::Mutex::Lock lx (_update_latency_lock);
-		set_worst_output_latency ();
-
-		/* With internal backends, AudioEngine::latency_callback () -> this method
-		 * is called from the main_process_thread.
+		/* Processing needs to be blocked while re-configuring delaylines.
 		 *
+		 * With internal backends, AudioEngine::latency_callback () -> this method
+		 * is called from the main_process_thread (so the lock is not contended).
 		 * However jack2 can concurrently process and reconfigure port latencies.
-		 * Processing needs to be blocked while re-configuring delaylines.
 		 */
 		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 
+		/* prevent any concurrent latency updates */
+		Glib::Threads::Mutex::Lock lx (_update_latency_lock);
+		set_worst_output_latency ();
 		update_route_latency (true, /*apply_to_delayline*/ true);
 
 	} else {
@@ -6587,6 +6587,7 @@ void
 Session::set_worst_io_latencies ()
 {
 	DEBUG_TRACE (DEBUG::LatencyCompensation, "Session::set_worst_io_latencies\n");
+	/* when this is called from the auto-connect thread, the process-lock is held */
 	Glib::Threads::Mutex::Lock lx (_update_latency_lock);
 	set_worst_output_latency ();
 	set_worst_input_latency ();
@@ -6962,11 +6963,13 @@ Session::auto_connect_thread_run ()
 	while (g_atomic_int_get (&_ac_thread_active)) {
 
 		if (!_auto_connect_queue.empty ()) {
-			// Why would we need the process lock ??
-			// A: if ports are added while we're connecting, the backend's iterator may be invalidated:
-			//   graph_order_callback() -> resort_routes() -> direct_feeds_according_to_reality () -> backend::connected_to()
-			//   All ardour-internal backends use a std::vector   xxxAudioBackend::find_port()
-			//   We have control over those, but what does jack do?
+			/* Why would we need the process lock?
+			 *
+			 * A: if ports are added while connections change,
+			 * the backend's iterator may be invalidated:
+			 *   graph_order_callback() -> resort_routes() -> direct_feeds_according_to_reality () -> backend::connected_to()
+			 * Ardour::IO uses the process-lock to avoid concurrency, too
+			 */
 			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 
 			Glib::Threads::Mutex::Lock lx (_auto_connect_queue_lock);
