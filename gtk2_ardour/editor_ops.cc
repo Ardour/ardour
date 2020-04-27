@@ -1462,8 +1462,6 @@ Editor::select_topmost_track ()
 bool
 Editor::scroll_down_one_track (bool skip_child_views)
 {
-	uint32_t needed_height = 0;
-
 	TrackViewList::reverse_iterator next = track_views.rend();
 	const double top_of_trackviews = vertical_adjustment.get_value();
 
@@ -1471,8 +1469,6 @@ Editor::scroll_down_one_track (bool skip_child_views)
 		if ((*t)->hidden()) {
 			continue;
 		}
-
-		needed_height += (*t)->effective_height();
 
 		/* If this is the upper-most visible trackview, we want to display
 		 * the one above it (next)
@@ -1495,13 +1491,10 @@ Editor::scroll_down_one_track (bool skip_child_views)
 			TimeAxisView::Children kids = (*t)->get_child_list();
 			TimeAxisView::Children::reverse_iterator nkid = kids.rend();
 
-			uint32_t needed_for_kids = 0;
-
 			for (TimeAxisView::Children::reverse_iterator ci = kids.rbegin(); ci != kids.rend(); ++ci) {
 				if ((*ci)->hidden()) {
 					continue;
 				}
-				needed_for_kids += (*ci)->current_height();
 
 				std::pair<TimeAxisView*,double> dev;
 				dev = (*ci)->covers_y_position (top_of_trackviews);
@@ -1513,15 +1506,12 @@ Editor::scroll_down_one_track (bool skip_child_views)
 						 */
 						nkid = kids.rend();
 					}
-					needed_height -= (*t)->effective_height();
-					needed_height += needed_for_kids;
-
 					break;
 				}
 				nkid = ci;
 			}
 
-			if (nkid != kids.rend() && needed_height > trackviews_height()) {
+			if (nkid != kids.rend()) {
 				ensure_time_axis_view_is_visible (**nkid, true);
 				return true;
 			}
@@ -1532,7 +1522,7 @@ Editor::scroll_down_one_track (bool skip_child_views)
 
 	/* move to the track below the first one that covers the */
 
-	if (next != track_views.rend() && needed_height > trackviews_height()) {
+	if (next != track_views.rend()) {
 		ensure_time_axis_view_is_visible (**next, true);
 		return true;
 	}
