@@ -4794,17 +4794,25 @@ Route::update_port_latencies (PortSet& from, PortSet& to, bool playback, samplec
 		all_connections.max = 0;
 
 		/* iterate over all "from" ports and determine the latency range for all of their
-		   connections to the "outside" (outside of this Route).
-		*/
+		 * connections to the "outside" (outside of this Route).
+		 */
 
 		for (PortSet::iterator p = from.begin(); p != from.end(); ++p) {
 
-			LatencyRange range;
+			if (!p->connected ()) {
+				/* ignore latency of unconnected ports, not not assume "0", they can float freely */
+				continue;
+			}
 
+			LatencyRange range;
 			p->get_connected_latency_range (range, playback);
 
 			all_connections.min = min (all_connections.min, range.min);
 			all_connections.max = max (all_connections.max, range.max);
+		}
+
+		if (all_connections.min == ~((pframes_t) 0)) {
+			all_connections.min = 0;
 		}
 	}
 
