@@ -6539,16 +6539,6 @@ Session::update_latency (bool playback)
 		return;
 	}
 
-	/* Note; RouteList is sorted as process-graph */
-	boost::shared_ptr<RouteList> r = routes.reader ();
-
-	if (playback) {
-		/* reverse the list so that we work backwards from the last route to run to the first */
-		RouteList* rl = routes.reader().get();
-		r.reset (new RouteList (*rl));
-		reverse (r->begin(), r->end());
-	}
-
 	/* Session::new_midi_track -> Route::add_processors -> Delivery::configure_io
 	 * -> IO::ensure_ports -> PortManager::register_output_port
 	 *  may run currently (adding many ports) while the backend
@@ -6560,7 +6550,42 @@ Session::update_latency (bool playback)
 	 *  IO::* uses  BLOCK_PROCESS_CALLBACK to prevent concurrency,
 	 *  so the same has to be done here to prevent a race.
 	 */
-	Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+	Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock (), Glib::Threads::TRY_LOCK);
+	if (!lm.locked()) {
+		/* IO::ensure_ports() calls jack_port_register() while holding the process-lock,
+		 * JACK2 may block and call JACKAudioBackend::_latency_callback() which
+		 * ends up here. https://pastebin.com/mitGBwpq
+		 *
+		 * This is a stopgap to be able to use 6.0 with JACK2's insane threading.
+		 * Yes JACK can also concurrently process (using the old graph) yet emit
+		 * a latency-callback (for which we do need the lock).
+		 *
+		 * One alternative is to use _adding_routes_in_progress and
+		 * call graph_reordered (false); however various entry-points
+		 * to ensure_io don't originate from Session.
+		 *
+		 * Eventually Ardour will probably need to be changed to
+		 * register ports lock-free, and mark those ports as "pending",
+		 * and skip them during process and all other callbacks.
+		 *
+		 * Then clear the pending flags in the rt-process context after
+		 * a port-registraion callback.
+		 */
+		cerr << "Session::update_latency called with process-lock held\n";
+		DEBUG_TRACE (DEBUG::LatencyCompensation, "Engine latency callback: called with process-lock held. queue for later.\n");
+		queue_latency_recompute ();
+		return;
+	}
+
+	/* Note; RouteList is sorted as process-graph */
+	boost::shared_ptr<RouteList> r = routes.reader ();
+
+	if (playback) {
+		/* reverse the list so that we work backwards from the last route to run to the first */
+		RouteList* rl = routes.reader().get();
+		r.reset (new RouteList (*rl));
+		reverse (r->begin(), r->end());
+	}
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		samplecnt_t latency = (*i)->set_private_port_latencies (playback);
 		(*i)->set_public_port_latencies (latency, playback);
@@ -6993,7 +7018,7 @@ Session::auto_connect_thread_run ()
 			 * modifies the capture-offset, which can be a problem.
 			 */
 			while (g_atomic_int_and (&_latency_recompute_pending, 0)) {
-				update_latency_compensation (false, false);
+				update_latency_compensation (true, false);
 			}
 		}
 
