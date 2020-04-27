@@ -6571,7 +6571,6 @@ Session::update_latency (bool playback)
 		 * Then clear the pending flags in the rt-process context after
 		 * a port-registraion callback.
 		 */
-		cerr << "Session::update_latency called with process-lock held\n";
 		DEBUG_TRACE (DEBUG::LatencyCompensation, "Engine latency callback: called with process-lock held. queue for later.\n");
 		queue_latency_recompute ();
 		return;
