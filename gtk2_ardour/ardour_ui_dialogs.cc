@@ -163,6 +163,14 @@ ARDOUR_UI::set_session (Session *s)
 	transport_masters_window->set_session (s);
 	rc_option_editor->set_session (s);
 
+	roll_controllable->set_session (s);
+	stop_controllable->set_session (s);
+	goto_start_controllable->set_session (s);
+	goto_end_controllable->set_session (s);
+	auto_loop_controllable->set_session (s);
+	play_selection_controllable->set_session (s);
+	rec_controllable->set_session (s);
+
 	/* allow wastebasket flush again */
 
 	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Main"), X_("FlushWastebasket"));

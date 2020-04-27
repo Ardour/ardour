@@ -22,6 +22,8 @@
 #include <gtkmm/widget.h>
 #include "pbd/controllable.h"
 
+#include "ardour/session_handle.h"
+
 /* This is an API implemenetd by AROUR_UI,
  * and made available to transport-control-UIs
  */
@@ -34,7 +36,7 @@ public:
 	/* show metronome preferences */
 	virtual bool click_button_clicked (GdkEventButton *) = 0;
 
-	struct TransportControllable : public PBD::Controllable {
+	struct TransportControllable : public PBD::Controllable, public ARDOUR::SessionHandlePtr {
 		enum ToggleType {
 			Roll = 0,
 			Stop,
@@ -47,7 +49,7 @@ public:
 
 		TransportControllable (std::string name, ToggleType);
 		void set_value (double, PBD::Controllable::GroupControlDisposition group_override);
-		double get_value (void) const { return 0; }
+		double get_value (void) const;
 
 		ToggleType type;
 	};

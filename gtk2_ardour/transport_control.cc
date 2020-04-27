@@ -16,11 +16,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "pbd/i18n.h"
+
+#include "ardour/location.h"
+#include "ardour/session.h"
+
 #include "actions.h"
 #include "ardour_ui.h"
 #include "transport_control.h"
-
-#include "pbd/i18n.h"
 
 using namespace Gtk;
 
@@ -43,7 +46,7 @@ TransportControlProvider::TransportControllable::TransportControllable (std::str
 void
 TransportControlProvider::TransportControllable::set_value (double val, PBD::Controllable::GroupControlDisposition /*group_override*/)
 {
-	if (val < 0.5) {
+	if (val == 0.0) {
 		/* do nothing: these are radio-style actions */
 		return;
 	}
@@ -85,4 +88,41 @@ TransportControlProvider::TransportControllable::set_value (double val, PBD::Con
 	if (act) {
 		act->activate ();
 	}
+}
+
+double
+TransportControlProvider::TransportControllable::get_value () const
+{
+	if (!_session) {
+		return 0.0;
+	}
+
+	ARDOUR::Location* rloc;
+
+	switch (type) {
+	case Roll:
+		return (_session->transport_rolling() ? 1.0 : 0.0);
+	case Stop:
+		return (!_session->transport_rolling() ? 1.0 : 0.0);
+	case GotoStart:
+		if ((rloc = _session->locations()->session_range_location()) != 0) {
+			return (_session->transport_sample() == rloc->start() ? 1.0 : 0.0);
+		}
+		return 0.0;
+	case GotoEnd:
+		if ((rloc = _session->locations()->session_range_location()) != 0) {
+			return (_session->transport_sample() == rloc->end() ? 1.0 : 0.0);
+		}
+		return 0.0;
+	case AutoLoop:
+		return ((_session->get_play_loop() && _session->transport_rolling())? 1.0 : 0.0);
+	case PlaySelection:
+		return ((_session->transport_rolling() && _session->get_play_range()) ? 1.0 : 0.0);
+	case RecordEnable:
+		return (_session->actively_recording() ? 1.0 : 0.0);
+	default:
+		break;
+	}
+
+	return 0.0;
 }
