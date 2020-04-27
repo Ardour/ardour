@@ -6473,7 +6473,7 @@ Session::send_latency_compensation_change ()
 }
 
 bool
-Session::update_route_latency (bool playback, bool apply_to_delayline)
+Session::update_route_latency (bool playback, bool apply_to_delayline, bool* delayline_update_needed)
 {
 	/* apply_to_delayline can no be called concurrently with processing
 	 * caller must hold process lock when apply_to_delayline == true */
@@ -6502,7 +6502,7 @@ restart:
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		// if (!(*i)->active()) { continue ; } // TODO
 		samplecnt_t l;
-		if ((*i)->signal_latency () != (l = (*i)->update_signal_latency (apply_to_delayline))) {
+		if ((*i)->signal_latency () != (l = (*i)->update_signal_latency (apply_to_delayline, delayline_update_needed))) {
 			changed = true;
 		}
 		_worst_route_latency = std::max (l, _worst_route_latency);
@@ -6603,7 +6603,7 @@ Session::update_latency (bool playback)
 		/* prevent any concurrent latency updates */
 		Glib::Threads::Mutex::Lock lx (_update_latency_lock);
 		set_worst_output_latency ();
-		update_route_latency (true, /*apply_to_delayline*/ true);
+		update_route_latency (true, /*apply_to_delayline*/ true, NULL);
 
 		/* relese before emiting signals */
 		lm.release ();
@@ -6613,7 +6613,7 @@ Session::update_latency (bool playback)
 		lm.release ();
 		Glib::Threads::Mutex::Lock lx (_update_latency_lock);
 		set_worst_input_latency ();
-		update_route_latency (false, false);
+		update_route_latency (false, false, NULL);
 	}
 
 	DEBUG_TRACE (DEBUG::LatencyCompensation, "Engine latency callback: DONE\n");
@@ -6691,7 +6691,8 @@ Session::update_latency_compensation (bool force_whole_graph, bool called_from_b
 
 	DEBUG_TRACE (DEBUG::LatencyCompensation, string_compose ("update_latency_compensation%1.\n", (force_whole_graph ? " of whole graph" : "")));
 
-	bool some_track_latency_changed = update_route_latency (false, false);
+	bool delayline_update_needed = false;
+	bool some_track_latency_changed = update_route_latency (false, false, &delayline_update_needed);
 
 	if (some_track_latency_changed || force_whole_graph)  {
 
@@ -6724,8 +6725,9 @@ Session::update_latency_compensation (bool force_whole_graph, bool called_from_b
 		} else {
 			DEBUG_TRACE (DEBUG::LatencyCompensation, "update_latency_compensation called from engine, don't call back into engine\n");
 		}
-	} else {
+	} else if (delayline_update_needed) {
 		DEBUG_TRACE (DEBUG::LatencyCompensation, "update_latency_compensation: directly apply to routes\n");
+		lx.release (); // XXX cannot hold this lock when acquiring process_lock ?!
 #ifndef MIXBUS
 		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock (), Glib::Threads::NOT_LOCK);
 #endif

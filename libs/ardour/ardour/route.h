@@ -346,7 +346,7 @@ public:
 	 */
 	bool remove_sidechain (boost::shared_ptr<Processor> proc) { return add_remove_sidechain (proc, false); }
 
-	samplecnt_t  update_signal_latency (bool apply_to_delayline = false);
+	samplecnt_t  update_signal_latency (bool apply_to_delayline = false, bool* delayline_update_needed = NULL);
 	virtual void apply_latency_compensation ();
 
 	samplecnt_t  set_private_port_latencies (bool playback) const;

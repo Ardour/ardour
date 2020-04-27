@@ -4221,7 +4221,7 @@ Route::add_export_point()
 }
 
 samplecnt_t
-Route::update_signal_latency (bool apply_to_delayline)
+Route::update_signal_latency (bool apply_to_delayline, bool* delayline_update_needed)
 {
 	if (!active()) {
 		_signal_latency = 0;
@@ -4303,6 +4303,15 @@ Route::update_signal_latency (bool apply_to_delayline)
 	if (apply_to_delayline) {
 		/* see also Session::post_playback_latency() */
 		apply_latency_compensation ();
+	} else if (delayline_update_needed && _delayline) {
+		samplecnt_t play_lat_in = _input->connected_latency (true);
+		samplecnt_t latcomp = play_lat_in - play_lat_out - _signal_latency;
+		if (latcomp < 0) {
+			latcomp = 0;
+		}
+		if (_delayline->delay () != latcomp) {
+			*delayline_update_needed = true;
+		}
 	}
 
 	_output_latency = _output->latency ();

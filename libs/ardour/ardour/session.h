@@ -1342,7 +1342,7 @@ private:
 	void remove_monitor_section ();
 
 	void update_latency (bool playback);
-	bool update_route_latency (bool reverse, bool apply_to_delayline);
+	bool update_route_latency (bool reverse, bool apply_to_delayline, bool* delayline_update_needed);
 	void initialize_latencies ();
 	void set_worst_output_latency ();
 	void set_worst_input_latency ();
