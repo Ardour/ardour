@@ -53,7 +53,7 @@ public:
 	typedef std::map<std::string, boost::shared_ptr<MIDINameDocument> >    MidiNameDocuments;
 	typedef std::map<std::string, MIDINameDocument::MasterDeviceNamesList> DeviceNamesByMaker;
 
-        ~MidiPatchManager();
+	~MidiPatchManager();
 
 	static MidiPatchManager& instance() {
 		if (_manager == 0) {
