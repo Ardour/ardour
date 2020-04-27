@@ -7019,7 +7019,7 @@ Session::auto_connect_thread_run ()
 			 * modifies the capture-offset, which can be a problem.
 			 */
 			while (g_atomic_int_and (&_latency_recompute_pending, 0)) {
-				update_latency_compensation (true, false);
+				update_latency_compensation (false, false);
 				if (g_atomic_int_get (&_latency_recompute_pending)) {
 					Glib::usleep (1000);
 				}
