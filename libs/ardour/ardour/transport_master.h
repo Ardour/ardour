@@ -501,6 +501,9 @@ class LIBARDOUR_API MTC_TransportMaster : public TimecodeTransportMaster, public
 	void init_mtc_dll(samplepos_t, double);
 	void parse_timecode_offset();
 	void parameter_changed(std::string const & p);
+
+	void resync_latency();
+        LatencyRange  mtc_slave_latency;
 };
 
 class LIBARDOUR_API LTC_TransportMaster : public TimecodeTransportMaster {

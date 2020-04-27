@@ -70,6 +70,10 @@ MTC_TransportMaster::MTC_TransportMaster (std::string const & name)
 	, printed_timecode_warning (false)
 {
 	init ();
+
+	resync_latency();
+
+	AudioEngine::instance()->GraphReordered.connect_same_thread (port_connections, boost::bind (&MTC_TransportMaster::resync_latency, this));
 }
 
 MTC_TransportMaster::~MTC_TransportMaster()
@@ -86,6 +90,16 @@ void
 MTC_TransportMaster::init ()
 {
 	reset (true);
+}
+
+void
+MTC_TransportMaster::resync_latency()
+{
+	DEBUG_TRACE (DEBUG::MTC, "MTC resync_latency()\n");
+
+	if (_port) {
+		_port->get_connected_latency_range (mtc_slave_latency, false);
+	}
 }
 
 void
@@ -128,6 +142,8 @@ MTC_TransportMaster::pre_process (MIDI::pframes_t nframes, samplepos_t now, boos
 	/* Read and parse incoming MIDI */
 
 	maybe_reset ();
+
+	now -= mtc_slave_latency.max;
 
 	_midi_port->read_and_parse_entire_midi_buffer_with_no_speed_adjustment (nframes, parser, now);
 
