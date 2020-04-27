@@ -7020,6 +7020,9 @@ Session::auto_connect_thread_run ()
 			 */
 			while (g_atomic_int_and (&_latency_recompute_pending, 0)) {
 				update_latency_compensation (true, false);
+				if (g_atomic_int_get (&_latency_recompute_pending)) {
+					Glib::usleep (1000);
+				}
 			}
 		}
 
