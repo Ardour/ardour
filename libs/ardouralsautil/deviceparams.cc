@@ -103,6 +103,9 @@ ARDOUR::get_alsa_device_parameters (const char* device_name, const bool play, AL
 
 	snd_pcm_close (pcm);
 
+	nfo->min_size = std::max (min_psiz, min_bufz / nfo->max_nper);
+	nfo->max_size = std::min (max_psiz, max_bufz / nfo->min_nper);
+
 	/* see also libs/backends/alsa/zita-alsa-pcmi.cc
 	 * If any debug parameter is set, print device info.
 	 */
@@ -121,8 +124,6 @@ ARDOUR::get_alsa_device_parameters (const char* device_name, const bool play, AL
 		fprintf (stdout, "  possible : %lu .. %lu\n", nfo->min_size, nfo->max_size);
 	}
 
-	nfo->min_size = std::max (min_psiz, min_bufz / nfo->max_nper);
-	nfo->max_size = std::min (max_psiz, max_bufz / nfo->min_nper);
 	nfo->valid = true;
 	return 0;
 
