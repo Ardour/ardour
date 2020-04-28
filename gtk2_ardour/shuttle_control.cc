@@ -99,8 +99,6 @@ ShuttleControl::ShuttleControl ()
 	Config->ParameterChanged.connect (parameter_connection, MISSING_INVALIDATOR, boost::bind (&ShuttleControl::parameter_changed, this, _1), gui_context());
 	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &ShuttleControl::set_colors));
 
-	set_colors ();
-
 	/* gtkmm 2.4: the C++ wrapper doesn't work */
 	g_signal_connect ((GObject*) gobj(), "query-tooltip", G_CALLBACK (qt), NULL);
 	// signal_query_tooltip().connect (sigc::mem_fun (*this, &ShuttleControl::on_query_tooltip));
