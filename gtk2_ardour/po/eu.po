@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-02 13:17+0200\n"
-"PO-Revision-Date: 2020-04-26 18:14+0200\n"
+"PO-Revision-Date: 2020-04-28 18:11+0200\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -611,7 +611,7 @@ msgstr "Pista(k) talde honetara esleituko d(ir)a"
 #: add_route_dialog.cc:109 add_route_dialog.cc:123 add_route_dialog.cc:136
 #: add_route_dialog.cc:151
 msgid "The pin connections mode (see tooltip for details)"
-msgstr "Konexio-modua (ikusi argibidea zehaztapenentzat)"
+msgstr "Konexio-modua (ikusi argibidea xehetasunak ikusteko)"
 
 #: add_route_dialog.cc:111 add_route_dialog.cc:125
 msgid "The track(s) will be added at the location specified by \"Position\""
@@ -7467,7 +7467,7 @@ msgid ""
 "See the Log for details."
 msgstr ""
 "Esportazioa bertan behera geratu da akats baten ondorioz!\n"
-"Ikusi Erregistroa detaileentzako."
+"Ikusi Erregistroa xehetasunak ikusteko."
 
 #: export_dialog.cc:323
 msgid "Files that will be overwritten"
@@ -11125,7 +11125,7 @@ msgid ""
 msgstr ""
 "Ezin izan da kargatu \"%1\" plugina\n"
 "\n"
-"Ikusi erregistro-leihoa detailetarako (agian)"
+"Ikusi erregistro-leihoa xehetasun gehiagorako (agian)"
 
 #: plugin_selector.cc:1000
 msgid "Favorites"
@@ -11178,7 +11178,7 @@ msgstr ""
 # Lehenengo hiru hitz lotuak komandua dira?
 #: plugin_ui.cc:378
 msgid "create_lv2_editor called on non-LV2 plugin"
-msgstr ""
+msgstr "create_lv2_editor deituta LV2 ez den pluginean"
 
 #: plugin_ui.cc:466 transport_masters_dialog.cc:716
 msgid "Add"
@@ -11499,12 +11499,17 @@ msgid ""
 "Double-click to show GUI.\n"
 "%2+double-click to show generic GUI.%3"
 msgstr ""
+"<b>%1</b>\n"
+"Egin klik bikoitza interfazea erakusteko.\n"
+"%2+klik-bikoitza interfaze generikoa erakusteko.%3"
 
 #: processor_box.cc:547 processor_box.cc:1612
 msgid ""
 "<b>%1</b>\n"
 "Double-click to show generic GUI.%2"
 msgstr ""
+"<b>%1</b>\n"
+"Egin klik bikoitza interfaze generikoa erakusteko.%2"
 
 #: processor_box.cc:553
 msgid ""
@@ -11512,32 +11517,37 @@ msgid ""
 "The Plugin is not available on this system\n"
 "and has been replaced by a stub."
 msgstr ""
+"<b>%1</b>\n"
+"Plugina ez dago erabilgarri sistema honetan\n"
+"eta kutxa-huts batekin ordezkatu da."
 
 #: processor_box.cc:744
 msgid "Inline Display"
-msgstr ""
+msgstr "Txertatutako bista"
 
 #: processor_box.cc:757
 msgid "Show All Controls"
-msgstr ""
+msgstr "Erakutsi kontrol guztiak"
 
 #: processor_box.cc:761
 msgid "Hide All Controls"
-msgstr ""
+msgstr "Ezkutatu kontrol guztiak"
 
 #: processor_box.cc:803
 msgid "Link panner controls"
-msgstr ""
+msgstr "Lotu paneagailu-kontrolak"
 
 #: processor_box.cc:811
 msgid "Allow Feedback Loop"
-msgstr ""
+msgstr "Baimendu atzeraelikadura"
 
 #: processor_box.cc:1809
 msgid ""
 "Right-click to add/remove/edit\n"
 "plugins,inserts,sends and more"
 msgstr ""
+"Eskuin-klika plug., intser., bidal. ...\n"
+"gehitzeko/ezabatzeko/editatzeko"
 
 #: processor_box.cc:1958
 msgid ""
@@ -11545,56 +11555,65 @@ msgid ""
 "the I/O configuration of the plugins could\n"
 "not match the configuration of this track."
 msgstr ""
+"Arrastatu/askatu prozesadoreak huts egin du.\n"
+"Segur aski pluginen S/I konfigurazioa ez\n"
+"datorrelako bat pista honen konfigurazioarekin."
 
 #: processor_box.cc:2598 processor_box.cc:3124
 msgid "Plugin Incompatibility"
-msgstr ""
+msgstr "Plugin-bateraezintasuna"
 
 #: processor_box.cc:2601
 msgid "You attempted to add the plugin \"%1\" in slot %2.\n"
-msgstr ""
+msgstr "\"%1\" plugina \"%2\" tartean gehitzen saiatu zara.\n"
 
 #: processor_box.cc:2607
 msgid ""
 "\n"
 "This plugin has:\n"
 msgstr ""
+"\n"
+"Plugin honek dau(z)ka:\n"
 
 #: processor_box.cc:2610
 msgid "\t%1 MIDI input\n"
 msgid_plural "\t%1 MIDI inputs\n"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "\tMIDI sarrera %1 \n"
+msgstr[1] "\t%1 MIDI sarrera\n"
 
 #: processor_box.cc:2614
 msgid "\t%1 audio input\n"
 msgid_plural "\t%1 audio inputs\n"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "\taudio sarrera %1\n"
+msgstr[1] "\t%1 audio sarrera\n"
 
 #: processor_box.cc:2617
 msgid ""
 "\n"
 "but at the insertion point, there are:\n"
 msgstr ""
+"\n"
+"baina txertatze lekuan, hauek daude:\n"
 
 #: processor_box.cc:2620
 msgid "\t%1 MIDI channel\n"
 msgid_plural "\t%1 MIDI channels\n"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "\tMIDI kanal %1 \n"
+msgstr[1] "\t%1 MIDI kanal\n"
 
 #: processor_box.cc:2624
 msgid "\t%1 audio channel\n"
 msgid_plural "\t%1 audio channels\n"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "\taudio kanal %1\n"
+msgstr[1] "\t%1 audio kanal\n"
 
 #: processor_box.cc:2627
 msgid ""
 "\n"
 "%1 is unable to insert this plugin here.\n"
 msgstr ""
+"\n"
+"%1 ez da gai plugin hau hemen txertatzeko.\n"
 
 #: processor_box.cc:3127
 msgid ""
@@ -11602,18 +11621,23 @@ msgid ""
 "in that way because the inputs and\n"
 "outputs will not work correctly."
 msgstr ""
+"Ezin dituzu berrantolatu plugin/bidalketa/intserto\n"
+"hauek honela sarrera-irteerek ez dutelako\n"
+"egoki lan egingo."
 
 #: processor_box.cc:3327
 msgid "Rename Processor"
-msgstr ""
+msgstr "Berrizendatu prozesadorea"
 
 #: processor_box.cc:3358
 msgid "At least 100 IO objects exist with a name like %1 - name not changed"
 msgstr ""
+"Gutxienez 100 S/I objektu existitzen dira %1 bezalako izenarekin - ez da "
+"aldatu izena"
 
 #: processor_box.cc:3522
 msgid "plugin insert constructor failed"
-msgstr ""
+msgstr "plugin-txertatze eraikitzaileak huts egin du"
 
 #: processor_box.cc:3533
 msgid ""
@@ -11621,140 +11645,149 @@ msgid ""
 "probably because the I/O configuration of the plugins\n"
 "could not match the configuration of this track."
 msgstr ""
+"Prozesadore-sorta arbelera kopiatzeak huts egin du.\n"
+"Segur aski pluginen S/I konfigurazioa ez\n"
+"datorrelako bat pista honen konfigurazioarekin."
 
 #: processor_box.cc:3587
 msgid ""
 "Do you really want to remove all processors from %1?\n"
 "(this cannot be undone)"
 msgstr ""
+"Benetan nahi dituzu ezabatu %1-(e)ko prozesadore guztiak?\n"
+"(hau itzulezina da)"
 
 #: processor_box.cc:3591 processor_box.cc:3616
 msgid "Yes, remove them all"
-msgstr ""
+msgstr "Bai, ezabatu guztiak"
 
 #: processor_box.cc:3593 processor_box.cc:3618
 msgid "Remove processors"
-msgstr ""
+msgstr "Ezabatu prozesadoreak"
 
 #: processor_box.cc:3608
 msgid ""
 "Do you really want to remove all pre-fader processors from %1?\n"
 "(this cannot be undone)"
 msgstr ""
+"Benetan nahi dituzu ezabatu %1-(e)ko prefader prozesadore guztiak?\n"
+"(hau itzulezina da)"
 
 #: processor_box.cc:3611
 msgid ""
 "Do you really want to remove all post-fader processors from %1?\n"
 "(this cannot be undone)"
 msgstr ""
+"Benetan nahi dituzu ezabatu %1-(e)ko postfader prozesadore guztiak?\n"
+"(hau itzulezina da)"
 
 #: processor_box.cc:3804
 msgid "New Plugin"
-msgstr ""
+msgstr "Plugin berria"
 
 #: processor_box.cc:3807
 msgid "New Insert"
-msgstr ""
+msgstr "Intserto berria"
 
 #: processor_box.cc:3810
 msgid "New External Send ..."
-msgstr ""
+msgstr "Kanpo-bidalketa berria ..."
 
 #: processor_box.cc:3814
 msgid "New Aux Send ..."
-msgstr ""
+msgstr "Bidalketa-osagarri berria ..."
 
 #: processor_box.cc:3815
 msgid "New Monitor Send ..."
-msgstr ""
+msgstr "Monitore-bidalketa berria ..."
 
 #: processor_box.cc:3816
 msgid "Remove Monitor Send ..."
-msgstr ""
+msgstr "Ezabatu monitore-bidalketa ..."
 
 #: processor_box.cc:3819
 msgid "Send Options"
-msgstr ""
+msgstr "Bidalketa aukerak"
 
 #: processor_box.cc:3821
 msgid "Clear (all)"
-msgstr ""
+msgstr "Garbitu (guztiak)"
 
 #: processor_box.cc:3823
 msgid "Clear (pre-fader)"
-msgstr ""
+msgstr "Garbitu (prefader)"
 
 #: processor_box.cc:3825
 msgid "Clear (post-fader)"
-msgstr ""
+msgstr "Garbitu (postfader)"
 
 #: processor_box.cc:3855
 msgid "Activate All"
-msgstr ""
+msgstr "Gai guztiak"
 
 #: processor_box.cc:3857
 msgid "Deactivate All"
-msgstr ""
+msgstr "Desaktibatu guztiak"
 
 #: processor_box.cc:3859
 msgid "A/B Plugins"
-msgstr ""
+msgstr "A/B pluginak"
 
 #: processor_box.cc:3867
 msgid "Disk I/O ..."
-msgstr ""
+msgstr "Disko S/I ..."
 
 #: processor_box.cc:3868
 msgid "Pre-Fader"
-msgstr ""
+msgstr "Prefader"
 
 #: processor_box.cc:3869
 msgid "Post-Fader"
-msgstr ""
+msgstr "Postfader"
 
 #: processor_box.cc:3878
 msgid "Edit with generic controls..."
-msgstr ""
+msgstr "Editatu kontrol generikoekin..."
 
 #: processor_box.cc:4232
 msgid "%1: %2 (by %3)"
-msgstr ""
+msgstr "%1: %2 (honek: %3)"
 
 #: processor_box.cc:4234
 msgid "%1 (by %2)"
-msgstr ""
+msgstr "%1 (honek: %2)"
 
 #: patch_change_dialog.cc:52
 msgid "Patch Change"
-msgstr ""
+msgstr "Patch aldaketa"
 
 #: patch_change_dialog.cc:80
 msgid "Patch Bank"
-msgstr ""
+msgstr "Patch bankua"
 
 #: patch_change_dialog.cc:87
 msgid "Patch"
-msgstr ""
+msgstr "Patch-a"
 
 #: patch_change_dialog.cc:102 step_entry.cc:414
 msgid "Program"
-msgstr ""
+msgstr "Programa"
 
 #: patch_change_dialog.cc:110
 msgid "Bank MSB"
-msgstr ""
+msgstr "MSB bankua"
 
 #: patch_change_dialog.cc:115
 msgid "Bank LSB"
-msgstr ""
+msgstr "LSB bankua"
 
 #: pt_import_selector.cc:41
 msgid "Import PT Session"
-msgstr ""
+msgstr "Inportatu PT saioa"
 
 #: pt_import_selector.cc:69
 msgid "All PT sessions"
-msgstr ""
+msgstr "PT saio guztiak"
 
 #: pt_import_selector.cc:131
 msgid ""
@@ -11772,6 +11805,19 @@ msgid ""
 "%7 active midi regions\n"
 "\n"
 msgstr ""
+"PT saioa [ BALIOZKOA ]\n"
+"\n"
+"Saio-informazioa:\n"
+"\n"
+"\n"
+"PT v%1 saioa @ %2Hz\n"
+"\n"
+"%3 audio fitxategi\n"
+"%4 audio-eremu\n"
+"%5 audio-eremu aktibo\n"
+"%6 midi-eremu\n"
+"%7 midi-eremu aktibo\n"
+"\n"
 
 #: pt_import_selector.cc:141
 msgid ""
@@ -11780,213 +11826,223 @@ msgid ""
 "Sample rate mismatch,\n"
 "will be resampling\n"
 msgstr ""
+"%1ABISUA:\n"
+"\n"
+"Lagin-tasak ez datoz bat\n"
+"ondorioz birlagintzen\n"
 
 #: quantize_dialog.cc:39
 msgid "Main Grid"
-msgstr ""
+msgstr "Sareta nagusia"
 
 #: quantize_dialog.cc:78
 msgid "Strength"
-msgstr ""
+msgstr "Indarra"
 
 #: quantize_dialog.cc:81
 msgid "Swing"
-msgstr ""
+msgstr "Swinga"
 
 #: quantize_dialog.cc:84
 msgid "Threshold (ticks)"
-msgstr ""
+msgstr "Atalasea (ticks)"
 
 #: quantize_dialog.cc:85
 msgid "Snap note start"
-msgstr ""
+msgstr "Doitu nota-hasiera"
 
 #: quantize_dialog.cc:86
 msgid "Snap note end"
-msgstr ""
+msgstr "Doitu nota-amaiera"
 
 #: rc_option_editor.cc:93 rc_option_editor.cc:94 rc_option_editor.cc:1506
 msgid "Browse..."
-msgstr ""
+msgstr "Arakatu..."
 
 #: rc_option_editor.cc:101
 msgid "Emphasis on first beat"
-msgstr ""
+msgstr "Enfasia lehen pultsuan"
 
 #: rc_option_editor.cc:108
 msgid "Use built-in default sounds"
-msgstr ""
+msgstr "Erabili integratutako soinu lehenetsiak"
 
 #: rc_option_editor.cc:115
 msgid "Audio file:"
-msgstr ""
+msgstr "Audio-fitxategia:"
 
 #: rc_option_editor.cc:123
 msgid "Emphasis audio file:"
-msgstr ""
+msgstr "Enfasirako audio-fitxategia:"
 
 #: rc_option_editor.cc:133
 msgid "Gain level"
-msgstr ""
+msgstr "Irabazi-maila"
 
 #: rc_option_editor.cc:180
 msgid "Choose Click"
-msgstr ""
+msgstr "Hautatu soinua"
 
 #: rc_option_editor.cc:203
 msgid "Choose Click Emphasis"
-msgstr ""
+msgstr "Hautatu soinuaren enfasia"
 
 #: rc_option_editor.cc:265
 msgid "Limit undo history to"
-msgstr ""
+msgstr "Mugatu desegin-historia hona:"
 
 #: rc_option_editor.cc:266
 msgid "Save undo history of"
-msgstr ""
+msgstr "Gorde honen desegin-historia:"
 
 #: rc_option_editor.cc:336 rc_option_editor.cc:344
 msgid "commands"
-msgstr ""
+msgstr "komandoak"
 
 #: rc_option_editor.cc:424
 msgid ""
 "\n"
 "Changes to this setting will only persist after your project has been saved."
 msgstr ""
+"\n"
+"Ezarpen honen aldaketak behin proiektua gordetzean mantenduko dira."
 
 #: rc_option_editor.cc:435 rc_option_editor.cc:490
 msgid "<b>Recommended Setting: %1 + button 3 (right mouse button)</b>%2"
 msgstr ""
+"<b>Gomendatutako ezarpena: %1 + 3 botoia (saguaren eskuin-botoia)</b>%2"
 
 #: rc_option_editor.cc:442
 msgid "Select Keyboard layout:"
-msgstr ""
+msgstr "Hautatu teklatuaren diseinua:"
 
 #: rc_option_editor.cc:461
 msgid "When Clicking:"
-msgstr ""
+msgstr "Klik egitean:"
 
 #: rc_option_editor.cc:469
 msgid "Edit using:"
-msgstr ""
+msgstr "Editatu hau erabiliz:"
 
 #: rc_option_editor.cc:475 rc_option_editor.cc:498 rc_option_editor.cc:521
 msgid "+ button"
-msgstr ""
+msgstr "+ botoia"
 
 #: rc_option_editor.cc:492
 msgid "Delete using:"
-msgstr ""
+msgstr "Ezabatu hau erabiliz:"
 
 #: rc_option_editor.cc:513
 msgid "<b>Recommended Setting: %1 + button 1 (left mouse button)</b>%2"
-msgstr ""
+msgstr "<b>Gomendatutako ezarpena: %1 + 1 botoia (saguaren ezker-botoia)</b>%2"
 
 #: rc_option_editor.cc:515
 msgid "Insert note using:"
-msgstr ""
+msgstr "Txertatu nota hau erabiliz:"
 
 #: rc_option_editor.cc:532
 msgid "When Beginning a Drag:"
-msgstr ""
+msgstr "Arrastatzen hastean:"
 
 #: rc_option_editor.cc:544 rc_option_editor.cc:565 rc_option_editor.cc:588
 #: rc_option_editor.cc:610 rc_option_editor.cc:627 rc_option_editor.cc:658
 #: rc_option_editor.cc:686 rc_option_editor.cc:706 rc_option_editor.cc:729
 #: rc_option_editor.cc:753
 msgid "<b>Recommended Setting: %1</b>%2"
-msgstr ""
+msgstr "<b>Gomendatutako ezarpena: %1</b>%2"
 
 #: rc_option_editor.cc:552
 msgid "Copy items using:"
-msgstr ""
+msgstr "Kopiatu elementuak hau erabiliz:"
 
 #: rc_option_editor.cc:573
 msgid "Constrain drag using:"
-msgstr ""
+msgstr "Mugatu arrastatzea hau erabiliz:"
 
 #: rc_option_editor.cc:590
 msgid "Push points using:"
-msgstr ""
+msgstr "Bultzatu puntuak hau erabiliz:"
 
 #: rc_option_editor.cc:598
 msgid "When Beginning a Trim:"
-msgstr ""
+msgstr "Mozketa hastean:"
 
 #: rc_option_editor.cc:612
 msgid "Trim contents using:"
-msgstr ""
+msgstr "Moztu edukiak hau erabiliz:"
 
 #: rc_option_editor.cc:629
 msgid "Anchored trim using:"
-msgstr ""
+msgstr "Ainguratutako mozketa hau erabiliz:"
 
 #: rc_option_editor.cc:660
 msgid "Resize notes relatively using:"
-msgstr ""
+msgstr "Aldatu noten tamaina erlatiboki hau erabiliz:"
 
 #: rc_option_editor.cc:669
 msgid "While Dragging:"
-msgstr ""
+msgstr "Arrastatu bitartean:"
 
 #: rc_option_editor.cc:688
 msgid "Ignore snap using:"
-msgstr ""
+msgstr "Ezikusi doitzea hau erabiliz:"
 
 #: rc_option_editor.cc:708
 msgid "Snap relatively using:"
-msgstr ""
+msgstr "Doitu erlatiboki hau erabiliz:"
 
 #: rc_option_editor.cc:716
 msgid "While Trimming:"
-msgstr ""
+msgstr "Moztu bitartean:"
 
 #: rc_option_editor.cc:731
 msgid "Resize overlapped regions using:"
-msgstr ""
+msgstr "Aldatu eremu gainjarrien tamaina hau erabiliz:"
 
 #: rc_option_editor.cc:739
 msgid "While Dragging Control Points:"
-msgstr ""
+msgstr "Kontrol-puntuak arrastatu bitartean:"
 
 #: rc_option_editor.cc:755
 msgid "Fine adjust using:"
-msgstr ""
+msgstr "Moldatze zehatza hau erabiliz:"
 
 #: rc_option_editor.cc:764
 msgid "Reset to recommended defaults"
-msgstr ""
+msgstr "Berrezarri gomendatutako lehenetsiak"
 
 #: rc_option_editor.cc:1103
 msgid "GUI and Font scaling"
-msgstr ""
+msgstr "Interfaze eta tipografiaren eskalatzea"
 
 #: rc_option_editor.cc:1126
 msgid "Adjusting the scale requires an application restart to re-layout."
-msgstr ""
+msgstr "Eskala aldatzeko aplikazioa berrabiarazi behar da."
 
 #: rc_option_editor.cc:1141
 msgid "Scan Time Out"
-msgstr ""
+msgstr "Bilatzearen denbora agortuta"
 
 #: rc_option_editor.cc:1149
 msgid "∞"
-msgstr ""
+msgstr "∞"
 
 #: rc_option_editor.cc:1153
 msgid "3 mins"
-msgstr ""
+msgstr "3 min"
 
 #: rc_option_editor.cc:1154
 msgid "4 mins"
-msgstr ""
+msgstr "4 min"
 
 #: rc_option_editor.cc:1158
 msgid ""
 "Specify the default timeout for plugin instantiation. Plugins that require "
 "more time to load will be blacklisted. A value of 0 disables the timeout."
 msgstr ""
+"Zehaztu lehenetsitako denbora-muga pluginak adibidez adierazteko. Kargatzeko "
+"denbora gehiago behar duten pluginak zerrenda-beltzean jarriko dira. 0 "
+"balioak denbora-muga desgaitzen du."
 
 #: rc_option_editor.cc:1167
 msgid "Waveform Clip Level (dBFS):"
@@ -16445,11 +16501,13 @@ msgid ""
 "Synced"
 msgstr ""
 
-#: transport_masters_dialog.cc:85
+#: #: transport_masters_dialog.cc:85
 msgid ""
 "29.97/\n"
 "30"
 msgstr ""
+"29.97/\n"
+"30"
 
 #: transport_masters_dialog.cc:88
 msgid ""
@@ -16483,238 +16541,257 @@ msgid ""
 "clock synced to the audio interface\n"
 "being used by %1."
 msgstr ""
+"<b>Gaituta badago</b>, kanpoko denbora-kode iturburua %1 erabiltzen ari den "
+"audio-interfazearekin sinkronizatuko da,\n"
+"lagin-erlojua erabiliz."
 
 #: transport_masters_dialog.cc:163
 msgid "New transport master not added - check error log for details"
 msgstr ""
+"Garraio-master berria ez da gehitu - egiaztatu errore-erregistroa xehetasun "
+"gehiagorako"
 
 #: transport_masters_dialog.cc:470
 msgid "Accept start/stop commands"
-msgstr ""
+msgstr "Onartu hasi/gelditu komandoak"
 
 #: transport_masters_dialog.cc:475
 msgid "Accept speed-changing commands"
-msgstr ""
+msgstr "Onartu abiadura aldatzen duten komandoak"
 
 #: transport_masters_dialog.cc:480
 msgid "Accept locate commands"
-msgstr ""
+msgstr "Onartu kokapen-komandoak"
 
 #: transport_masters_dialog.cc:615 transport_masters_dialog.cc:631
 msgid ">4s ago"
-msgstr ""
+msgstr "Duela >4s"
 
 #: transport_masters_dialog.cc:691
 msgid "Add Transport Master"
-msgstr ""
+msgstr "Gehitu garraio-masterra"
 
 #: transpose_dialog.cc:28
 msgid "Transpose MIDI"
-msgstr ""
+msgstr "Transposatu MIDIa"
 
 #: transpose_dialog.cc:53 virtual_keyboard_window.cc:182
 msgid "Transpose"
-msgstr ""
+msgstr "Transposatu"
 
 #: ui_config.cc:227 ui_config.cc:417
 msgid "Loading default ui configuration file %1"
-msgstr ""
+msgstr "Interfazearen lehenetsitako konfigurazio-fitxategia kargatzen: %1"
 
 #: ui_config.cc:230 ui_config.cc:420
 msgid "cannot read default ui configuration file \"%1\""
 msgstr ""
+"ezin da interfazearen lehenetsitako “%1” konfigurazio-fitxategia irakurri"
 
 #: ui_config.cc:233 ui_config.cc:425
 msgid "default ui configuration file \"%1\" not loaded successfully."
 msgstr ""
+"interfazearen lehenetsitako “%1” konfigurazio-fitxategia ez da ondo kargatu."
 
 #: ui_config.cc:241
 msgid "Could not find default UI configuration file %1"
 msgstr ""
+"Ezin izan da interfazearen lehenetsitako konfigurazio-fitxategia aurkitu: %1"
 
 #: ui_config.cc:288
 msgid "Loading color file %1"
-msgstr ""
+msgstr "%1 kolore-fitxategia kargatzen"
 
 #: ui_config.cc:291
 msgid "cannot read color file \"%1\""
-msgstr ""
+msgstr "ezin da “%1” kolore-fitxategia irakurri"
 
 #: ui_config.cc:296
 msgid "color file \"%1\" not loaded successfully."
-msgstr ""
+msgstr "“%1” kolore-fitxategia ez da ondo kargatu."
 
 #: ui_config.cc:324
 msgid "Color file for %1 not found along %2"
-msgstr ""
+msgstr "%1 kolore-fitxategia ez da %2-(e)n aurkitu"
 
 #: ui_config.cc:399 ui_config.cc:481
 msgid "Color file %1 not saved"
-msgstr ""
+msgstr "%1 kolore-fitxategia ez da gorde"
 
 #: ui_config.cc:434
 msgid "Loading user ui configuration file %1"
-msgstr ""
+msgstr "Interfazearen konfigurazio-fitxategia kargatzen: %1"
 
 #: ui_config.cc:437
 msgid "cannot read ui configuration file \"%1\""
-msgstr ""
+msgstr "ezin da interfazearen “%1” konfigurazio-fitxategia irakurri"
 
 #: ui_config.cc:442
 msgid "user ui configuration file \"%1\" not loaded successfully."
-msgstr ""
+msgstr "interfazearen “%1” konfigurazio-fitxategia ez da ondo kargatu."
 
 #: ui_config.cc:450
 msgid "could not find any ui configuration file, canvas will look broken."
-msgstr ""
+msgstr "ezin izan da interfazearen konfigurazio-fitxategirik aurkitu, "
 
 #: ui_config.cc:471
 msgid "Config file %1 not saved"
-msgstr ""
+msgstr "%1 konfigurazio-fitxategia ez da gorde"
 
 #: ui_config.cc:711
 msgid "Color %1 not found"
-msgstr ""
+msgstr "%1 kolorea ez da aurkitu"
 
 #: ui_config.cc:781
 msgid "Unable to find UI style file %1 in search path %2. %3 will look strange"
 msgstr ""
+"%1 interfazearen estilo-fitxategia aurkitzeko ezgai %2 bilatze-bidean. %3 "
+"arraro sumatuko da"
 
 #: ui_config.cc:787
 msgid "Loading ui configuration file %1"
-msgstr ""
+msgstr "Interfazearen konfigurazio-fitxategia kargatzen: %1"
 
 #: utils.cc:121
 msgid ""
 "The current operation is not possible because of an error communicating with "
 "the audio hardware."
 msgstr ""
+"Uneko eragiketa ezin da egin audio-hardwarearekin komunikatzen den akats "
+"baten ondorioz."
 
 #: utils.cc:127
 msgid "Configure Hardware"
-msgstr ""
+msgstr "Konfiguratu hardwarea"
 
 #: utils.cc:166 utils.cc:209
 msgid "bad XPM header %1"
-msgstr ""
+msgstr "%1 XPM goiburu okerra"
 
 #: utils.cc:414
 msgid "cannot find XPM file for %1"
-msgstr ""
+msgstr "ezin da %1-(e)rako XPM fitxategia aurkitu"
 
 #: utils.cc:472 utils.cc:502 utils.cc:522
 msgid "default"
-msgstr ""
+msgstr "lehenetsia"
 
 #: utils.cc:523
 msgid "icon \"%1\" not found for icon set \"%2\", fallback to default"
-msgstr ""
+msgstr "“%1” ikonoa ez da “%2” ikono-sortan aurkitu, lehenetsitakora itzultzen"
 
 #: utils.cc:530
 msgid "cannot find icon image for %1 using %2"
-msgstr ""
+msgstr "ezin da %1-(r)en ikono-irudia aurkitu %2 erabiliz"
 
 #: utils.cc:547 utils.cc:563
 msgid "Caught exception while loading icon named %1"
-msgstr ""
+msgstr "Identifikatutako salbuespena %1 deituriko ikonoa kargatu bitartean"
 
 #: vca_master_strip.cc:76 vca_time_axis.cc:59
 msgid "Solo slaves"
-msgstr ""
+msgstr "Solo morroiak"
 
 #: vca_master_strip.cc:80
 msgid "M"
-msgstr ""
+msgstr "M"
 
 #: vca_master_strip.cc:81 vca_time_axis.cc:65
 msgid "Mute slaves"
-msgstr ""
+msgstr "Mututu morroiak"
 
 #: vca_master_strip.cc:85
 msgid "Hide this VCA strip"
-msgstr ""
+msgstr "Ezkutatu VCA kanal hau"
 
 #: vca_master_strip.cc:115 vca_master_strip.cc:489
 msgid "Click to show slaves only"
-msgstr ""
+msgstr "Egin klik morroiak soilik erakusteko"
 
 #: vca_master_strip.cc:347
 msgid "A"
-msgstr ""
+msgstr "A"
 
 #: vca_master_strip.cc:350
 msgid "P"
-msgstr ""
+msgstr "P"
 
 #: vca_master_strip.cc:354
 msgid "S"
-msgstr ""
+msgstr "S"
 
 #: vca_master_strip.cc:466
 msgid "Assign Selected Channels"
-msgstr ""
+msgstr "Esleitu hautatutako kanalak"
 
 #: vca_master_strip.cc:467
 msgid "Drop Selected Channels"
-msgstr ""
+msgstr "Jaregin hautatutako kanalak"
 
 #: vca_master_strip.cc:469 vca_time_axis.cc:465
 msgid "Drop All Slaves"
-msgstr ""
+msgstr "Jaregin morroi guztiak"
 
 #: vca_master_strip.cc:492
 msgid "Click to show normal mixer"
-msgstr ""
+msgstr "Egin klik nahasgailu normala erakusteko"
 
 #: vca_master_strip.cc:503
 msgid "Do you really want to remove this VCA?"
-msgstr ""
+msgstr "Benetan ezabatu nahi duzu VCA hau?"
 
 #: vca_master_strip.cc:511
 msgid "This action cannot be undone."
-msgstr ""
+msgstr "Ekintza hau ezin da desegin."
 
 #: virtual_keyboard_window.cc:45
 msgid "Virtual MIDI Keyboard"
-msgstr ""
+msgstr "MIDI teklatu birtuala"
 
 #: virtual_keyboard_window.cc:46
 msgid "Panic"
-msgstr ""
+msgstr "Ikara"
 
 #: virtual_keyboard_window.cc:112
 msgid "Set the MIDI Channel of the produced MIDI events"
-msgstr ""
+msgstr "Ezarri sortutako MIDI gertaeren MIDI kanala"
 
 #: virtual_keyboard_window.cc:113
 msgid ""
 "The center octave, and lowest octave for keyboard control. Change with Arrow "
 "left/right."
 msgstr ""
+"Teklatua kontrolatzeko zortzidun zentrala eta zortzidun baxuena. Aldatu "
+"ezkerreko/eskuineko geziarekin."
 
 #: virtual_keyboard_window.cc:114
 msgid "Available octave range, centered around the key-octave."
 msgstr ""
+"Zortzidun-barruti erabilgarria, oinarri-zortzidunaren inguruan zentratua."
 
 #: virtual_keyboard_window.cc:115
 msgid ""
 "The velocity to use with keyboard control. Use mouse-scroll for fine-grained "
 "control"
 msgstr ""
+"Teklatuaren kontrolerako erabilitako abiadura. Erabili gurpil-korritzea "
+"zehaztasunez kontrolatzeko"
 
 #: virtual_keyboard_window.cc:116
 msgid ""
 "Chromatic transpose note events. Notes transposed outside the range of "
 "0,,127 are discarded."
 msgstr ""
+"Transposizio-kromatikoko noten gertakariak. 0,,127 barrutitik kanpo "
+"geratutako nota baztertzen dira."
 
 #: virtual_keyboard_window.cc:118
 msgid "Send MIDI Panic message for current channel"
-msgstr ""
+msgstr "Bidali MIDI ikara mezua uneko kanalerako"
 
 #: virtual_keyboard_window.cc:459
 msgid "CC-%1: "
-msgstr ""
+msgstr "%1-CC: "
 
 #: virtual_keyboard_window.cc:522
 msgid ""
@@ -16724,22 +16801,27 @@ msgid ""
 "F1-F4 and arrow-up/down keys jump\n"
 "to select values."
 msgstr ""
+"Tonu aldaketa: %1\n"
+"Egin klik eta arrastatu buelta-moduarentzako,\n"
+"gurpil-korritzea aldaketa iraunkorrentzako.\n"
+"F1-F4 + gezi-gora/behera teklak hautatutako\n"
+"baliotara salto egiteko."
 
 #: virtual_keyboard_window.cc:539
 msgid "Modulation: %1"
-msgstr ""
+msgstr "Modulazioa: %1"
 
 #: add_video_dialog.cc:59
 msgid "Set Video Track"
-msgstr ""
+msgstr "Ezarri bideo-pista"
 
 #: add_video_dialog.cc:67
 msgid "Open Video Monitor Window"
-msgstr ""
+msgstr "Ireki bideo-monitorearen leihoa"
 
 #: add_video_dialog.cc:68
 msgid "Adjust Session Framerate to Match Video Framerate"
-msgstr ""
+msgstr "Doitu saioaren marko-tasa bideoaren marko-tasarekin bat egiteko"
 
 #: add_video_dialog.cc:70
 msgid "Reload docroot"
@@ -16774,7 +16856,6 @@ msgid " %1 fps"
 msgstr " %1 fps"
 
 #: vca_time_axis.cc:70
-#, fuzzy
 msgid "VCA|D"
 msgstr "D"
 
@@ -17200,11 +17281,11 @@ msgstr "(lehenetsitako formatua)"
 #: export_video_dialog.cc:238 export_video_dialog.cc:249
 #: export_video_dialog.cc:850 export_video_dialog.cc:859
 msgid "(default)"
-msgstr "(lehenetsita)"
+msgstr "(lehenetsia)"
 
 #: export_video_dialog.cc:250 export_video_dialog.cc:853
 msgid "(retain)"
-msgstr "(mantenduta)"
+msgstr "(mantendu)"
 
 #: export_video_dialog.cc:342
 msgid "from session start marker to session end marker"
