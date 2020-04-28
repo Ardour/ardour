@@ -305,7 +305,7 @@ ARDOUR_UI::setup_windows ()
 	LuaInstance::instance()->ActionChanged.connect (sigc::mem_fun (*this, &ARDOUR_UI::action_script_changed));
 
 	for (int i = 0; i < MAX_LUA_ACTION_BUTTONS; ++i) {
-		std::string const a = string_compose (X_("script-action-%1"), i + 1);
+		std::string const a = string_compose (X_("script-%1"), i + 1);
 		Glib::RefPtr<Action> act = ActionManager::get_action(X_("LuaAction"), a.c_str());
 		assert (act);
 		action_script_call_btn[i].set_name ("lua action button");
@@ -439,7 +439,7 @@ ARDOUR_UI::action_script_changed (int i, const std::string& n)
 		}
 	}
 
-	std::string const a = string_compose (X_("script-action-%1"), i + 1);
+	std::string const a = string_compose (X_("script-%1"), i + 1);
 	Glib::RefPtr<Action> act = ActionManager::get_action(X_("LuaAction"), a.c_str());
 	assert (act);
 	if (n.empty ()) {

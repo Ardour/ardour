@@ -490,7 +490,7 @@ Editor::register_actions ()
 	Glib::RefPtr<ActionGroup> lua_script_actions = ActionManager::create_action_group (bindings, X_("LuaAction"));
 
 	for (int i = 1; i <= MAX_LUA_ACTION_SCRIPTS; ++i) {
-		string const a = string_compose (X_("script-action-%1"), i);
+		string const a = string_compose (X_("script-%1"), i);
 		string const n = string_compose (_("Unset #%1"), i);
 		act = ActionManager::register_action (lua_script_actions, a.c_str(), n.c_str(), sigc::bind (sigc::mem_fun (*this, &Editor::trigger_script), i - 1));
 		act->set_tooltip (_("no action bound"));
