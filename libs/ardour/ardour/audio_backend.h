@@ -280,7 +280,7 @@ public:
 	}
 
 	/** Returns a vector of supported period-sizes for the given driver */
-	virtual std::vector<uint32_t> available_period_sizes (const std::string& driver) const
+	virtual std::vector<uint32_t> available_period_sizes (const std::string& driver, const std::string& device) const
 	{
 		return std::vector<uint32_t> ();
 	}

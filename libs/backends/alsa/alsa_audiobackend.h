@@ -140,7 +140,7 @@ class AlsaAudioBackend : public AudioBackend, public PortEngineSharedImpl
 		std::vector<float> available_sample_rates2 (const std::string&, const std::string&) const;
 		std::vector<uint32_t> available_buffer_sizes (const std::string& device) const;
 		std::vector<uint32_t> available_buffer_sizes2 (const std::string&, const std::string&) const;
-		std::vector<uint32_t> available_period_sizes (const std::string& driver) const;
+		std::vector<uint32_t> available_period_sizes (const std::string& driver, const std::string& device) const;
 		uint32_t available_input_channel_count (const std::string& device) const;
 		uint32_t available_output_channel_count (const std::string& device) const;
 

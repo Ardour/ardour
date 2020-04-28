@@ -215,7 +215,7 @@ JACKAudioBackend::available_buffer_sizes (const string& device) const
 }
 
 std::vector<uint32_t>
-JACKAudioBackend::available_period_sizes (const std::string& driver) const
+JACKAudioBackend::available_period_sizes (const std::string& driver, const std::string&) const
 {
 	vector<uint32_t> s;
 	if (ARDOUR::get_jack_audio_driver_supports_setting_period_count (driver)) {

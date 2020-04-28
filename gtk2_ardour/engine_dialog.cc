@@ -1552,7 +1552,11 @@ EngineControl::set_nperiods_popdown_strings ()
 	vector<string> s;
 
 	if (backend->can_set_period_size()) {
-		np = backend->available_period_sizes (get_driver());
+		if (backend->use_separate_input_and_output_devices ()) {
+			np = backend->available_period_sizes (get_driver(), get_output_device_name ());
+		} else {
+			np = backend->available_period_sizes (get_driver(), get_device_name ());
+		}
 	}
 
 	for (vector<uint32_t>::const_iterator x = np.begin(); x != np.end(); ++x) {

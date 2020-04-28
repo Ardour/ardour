@@ -267,11 +267,11 @@ AlsaAudioBackend::available_output_channel_count (const std::string& device) con
 }
 
 std::vector<uint32_t>
-AlsaAudioBackend::available_period_sizes (const std::string& driver) const
+AlsaAudioBackend::available_period_sizes (const std::string& driver, const std::string& device) const
 {
 	std::vector<uint32_t> ps;
 
-	ALSADeviceInfo *nfo = NULL;
+	ALSADeviceInfo* nfo = NULL;
 	if (device == get_standard_device_name(DeviceNone)) {
 		return ps;
 	}
