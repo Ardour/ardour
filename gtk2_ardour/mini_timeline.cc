@@ -60,8 +60,7 @@ MiniTimeline::MiniTimeline ()
 	_layout = Pango::Layout::create (get_pango_context());
 
 	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &MiniTimeline::set_colors));
-	UIConfiguration::instance().DPIReset.connect (sigc::mem_fun (*this, &MiniTimeline::on_name_changed));
-	UIConfiguration::instance().DPIReset.connect (sigc::mem_fun (*this, &MiniTimeline::on_name_changed));
+	UIConfiguration::instance().DPIReset.connect (sigc::mem_fun (*this, &MiniTimeline::dpi_changed));
 
 	set_name ("minitimeline");
 
@@ -130,17 +129,8 @@ MiniTimeline::set_session (Session* s)
 }
 
 void
-MiniTimeline::on_style_changed (const Glib::RefPtr<Gtk::Style>& old_style)
+MiniTimeline::dpi_changed ()
 {
-	CairoWidget::on_style_changed (old_style);
-	set_colors ();
-	calculate_time_width ();
-}
-
-void
-MiniTimeline::on_name_changed ()
-{
-	set_colors ();
 	calculate_time_width ();
 
 	if (is_realized()) {

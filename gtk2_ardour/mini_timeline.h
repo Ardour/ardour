@@ -57,8 +57,7 @@ private:
 
 	void on_size_request (Gtk::Requisition*);
 	void on_size_allocate (Gtk::Allocation&);
-	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);
-	void on_name_changed ();
+	void dpi_changed ();
 	void set_colors ();
 	void parameter_changed (std::string const &);
 
