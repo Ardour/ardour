@@ -270,8 +270,27 @@ std::vector<uint32_t>
 AlsaAudioBackend::available_period_sizes (const std::string& driver) const
 {
 	std::vector<uint32_t> ps;
-	ps.push_back (2);
-	ps.push_back (3);
+
+	ALSADeviceInfo *nfo = NULL;
+	if (device == get_standard_device_name(DeviceNone)) {
+		return ps;
+	}
+	if (device == _output_audio_device && _output_audio_device_info.valid) {
+		nfo = &_output_audio_device_info;
+	} else {
+		ps.push_back (2);
+		return ps;
+	}
+
+	if (nfo->min_nper == 2) {
+		ps.push_back (2);
+		if (nfo->max_nper >= 3) {
+			ps.push_back (3);
+		}
+	} else {
+		ps.push_back (nfo->min_nper);
+	}
+
 	return ps;
 }
 
@@ -370,7 +389,7 @@ AlsaAudioBackend::set_sample_rate (float sr)
 int
 AlsaAudioBackend::set_peridod_size (uint32_t n)
 {
-	if (n == 0 || n > 3) {
+	if (n == 0) {
 		return -1;
 	}
 	if (_run) {
@@ -830,7 +849,7 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 			(duplex & 1) ? alsa_device.c_str() : NULL,
 			/* ctrl name */ 0,
 			_samplerate, _samples_per_period,
-			_periods_per_cycle, /* _periods_per_cycle */ 2,
+			_periods_per_cycle, /* capture p/c */ 2,
 			/* debug */ 0);
 
 	AudioBackend::ErrorCode error_code = NoError;

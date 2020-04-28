@@ -24,6 +24,7 @@ namespace ARDOUR {
 	struct ALSADeviceInfo {
 		unsigned int max_channels;
 		unsigned int min_rate, max_rate;
+		unsigned int min_nper, min_nper;
 		unsigned long min_size, max_size;
 		bool valid;
 	};

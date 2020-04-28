@@ -34,7 +34,6 @@ ARDOUR::get_alsa_device_parameters (const char* device_name, const bool play, AL
 
 	unsigned long min_psiz, max_psiz;
 	unsigned long min_bufz, max_bufz;
-	unsigned int min_nper, max_nper;
 
 	err = snd_pcm_open (&pcm, device_name,
 			play ? SND_PCM_STREAM_PLAYBACK : SND_PCM_STREAM_CAPTURE,
@@ -91,12 +90,12 @@ ARDOUR::get_alsa_device_parameters (const char* device_name, const bool play, AL
 		goto error_out;
 	}
 
-	err = snd_pcm_hw_params_get_periods_min (hw_params, &min_nper, 0);
+	err = snd_pcm_hw_params_get_periods_min (hw_params, &nfo->min_nper, 0);
 	if (err < 0) {
 		errmsg = "Cannot get minimum period count";
 		goto error_out;
 	}
-	err = snd_pcm_hw_params_get_periods_max (hw_params, &max_nper, 0);
+	err = snd_pcm_hw_params_get_periods_max (hw_params, &nfo->max_nper, 0);
 	if (err < 0) {
 		errmsg = "Cannot get maximum period count";
 		goto error_out;
@@ -117,19 +116,13 @@ ARDOUR::get_alsa_device_parameters (const char* device_name, const bool play, AL
 		fprintf (stdout, "  max_psiz : %lu\n", nfo->max_size);
 		fprintf (stdout, "  min_bufz : %lu\n", min_bufz);
 		fprintf (stdout, "  max_bufz : %lu\n", max_bufz);
-		fprintf (stdout, "  min_nper : %d\n", min_nper);
-		fprintf (stdout, "  max_nper : %d\n", max_nper);
+		fprintf (stdout, "  min_nper : %d\n", nfo->min_nper);
+		fprintf (stdout, "  max_nper : %d\n", nfo->max_nper);
 		fprintf (stdout, "  possible : %lu .. %lu\n", nfo->min_size, nfo->max_size);
 	}
 
-	/* AlsaAudioBackend supports n-periods 2, 3 */
-	if (min_nper > 2 || max_nper < 3) {
-		errmsg = "Unsupported period count";
-		return 1;
-	}
-
-	nfo->min_size = std::max (min_psiz, min_bufz / 3);
-	nfo->max_size = std::min (max_psiz, max_bufz / 2);
+	nfo->min_size = std::max (min_psiz, min_bufz / nfo->max_nper);
+	nfo->max_size = std::min (max_psiz, max_bufz / nfo->min_nper);
 	nfo->valid = true;
 	return 0;
 
