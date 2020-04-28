@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: libardour 5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-18 10:29+0200\n"
-"PO-Revision-Date: 2020-04-27 02:05+0200\n"
+"PO-Revision-Date: 2020-04-28 16:06+0200\n"
 "Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>\n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Poedit 2.3\n"
+"X-Generator: Poedit 2.2.1\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-Basepath: ..\n"
 
@@ -55,6 +55,8 @@ msgid ""
 "Failed to open audio device\n"
 "(Typically caused by hardware parameter settings)"
 msgstr ""
+"Échec d'ouverture de l'appareil audio\n"
+"(Généralement dû aux réglages du matériel)"
 
 #: audio_backend.cc:41
 msgid "Failed to close audio device"
@@ -142,7 +144,7 @@ msgstr "Ce nombre de canaux n'est pas supporté en sortie"
 
 #: audio_backend.cc:83
 msgid "Unable to acquire realtime permissions"
-msgstr ""
+msgstr "Permissions temps réel impossibles à obtenir"
 
 #: audio_backend.cc:85
 msgid "Setting audio device thread priorities failed"
@@ -433,7 +435,7 @@ msgstr "L'audition de régions autres qu'Audio ou MIDI est impossible."
 
 #: auditioner.cc:388
 msgid "Cannot audition empty file."
-msgstr ""
+msgstr "Écouter un fichier vide est impossible."
 
 #: automatable.cc:103
 msgid "Automation node has no path property"
@@ -453,7 +455,7 @@ msgstr "Chariot"
 
 #: automatable.cc:196
 msgid "Send"
-msgstr ""
+msgstr "Départ"
 
 #: automatable.cc:198
 msgid "Trim"
@@ -470,7 +472,7 @@ msgstr ""
 
 #: automatable.cc:204
 msgid "Width"
-msgstr ""
+msgstr "Largeur"
 
 #: automatable.cc:206
 msgid "Elevation"
@@ -698,7 +700,7 @@ msgstr "Autre chose"
 
 #: export_format_manager.cc:113
 msgid "Any"
-msgstr "tous"
+msgstr "Tous"
 
 #: export_format_manager.cc:114
 msgid "Lossless (linear PCM)"
@@ -857,7 +859,7 @@ msgstr "Certains canaux sont vides !"
 
 #: export_profile_manager.cc:909
 msgid "Destination folder does not exist."
-msgstr ""
+msgstr "Le dossier cible n'existe pas."
 
 #: export_profile_manager.cc:928
 msgid "No format selected!"
@@ -995,47 +997,47 @@ msgstr "Type de fichier inconnu pour la session %1"
 
 #: find_session.cc:210 find_session.cc:269
 msgid "Archive is empty"
-msgstr ""
+msgstr "L'Archive est vide"
 
 #: find_session.cc:217 find_session.cc:271
 msgid "Archive does not contain a session folder"
-msgstr ""
+msgstr "L'Archive ne contient pas un dossier de session"
 
 #: find_session.cc:228 find_session.cc:273
 msgid "Archive does not contain a valid session structure"
-msgstr ""
+msgstr "L'Archive ne contient pas une structure de session valide"
 
 #: find_session.cc:235 find_session.cc:275
 msgid "Archive does not contain a session file"
-msgstr ""
+msgstr "L'Archive ne contient pas un fichier de session"
 
 #: find_session.cc:242
 msgid "Destination '%1' already exists."
-msgstr ""
+msgstr "La cible \"%1\" existe déjà."
 
 #: find_session.cc:247
 msgid "Extracted session-archive to '%1'."
-msgstr ""
+msgstr "Archive de session extraite vers \"%1\"."
 
 #: find_session.cc:254 find_session.cc:277
 msgid "Error reading file-archive"
-msgstr ""
+msgstr "Erreur de lecture du fichier-Archive"
 
 #: find_session.cc:258 find_session.cc:281
 msgid "Error extracting file-archive"
-msgstr ""
+msgstr "Erreur d'extraction du fichier-Archive"
 
 #: find_session.cc:265
 msgid "No Error"
-msgstr ""
+msgstr "Sans Erreur"
 
 #: find_session.cc:267
 msgid "File extension is not %1"
-msgstr ""
+msgstr "L'extension du fichier n'est pas %1"
 
 #: find_session.cc:279
 msgid "Destination folder already exists."
-msgstr ""
+msgstr "Le dossier cible existe déjà."
 
 #: find_session.cc:286
 msgid "Unknown Error"
@@ -1051,7 +1053,7 @@ msgstr "Impossible de passer le nombre de fichiers ouverts à %1"
 
 #: globals.cc:288 globals.cc:305
 msgid "Your system is configured to limit %1 to %2 open files"
-msgstr ""
+msgstr "Votre système est configuré pour limiter %1 à %2 fichiers ouverts"
 
 #: globals.cc:292
 msgid "Could not get system open files limit (%1)"
@@ -1079,7 +1081,7 @@ msgstr "Bus Master"
 #: globals.cc:600 midiport_manager.cc:71 port_manager.cc:1273
 #: port_manager.cc:1283
 msgid "Virtual Keyboard"
-msgstr ""
+msgstr "Clavier Virtuel"
 
 #: globals.cc:604
 msgid "Control"
@@ -1309,7 +1311,7 @@ msgstr "D"
 
 #: io_processor.cc:279
 msgid "send "
-msgstr ""
+msgstr "départ "
 
 #: io_processor.cc:279
 msgid "insert "
@@ -1317,7 +1319,7 @@ msgstr ""
 
 #: io_processor.cc:279
 msgid "return "
-msgstr ""
+msgstr "retour "
 
 #: ladspa_plugin.cc:100
 msgid "LADSPA: Unable to open module: "
@@ -1603,23 +1605,23 @@ msgstr ""
 
 #: monitor_processor.cc:55
 msgid "monitor dim"
-msgstr "Dim monitoring"
+msgstr "Dim d'écoute"
 
 #: monitor_processor.cc:56
 msgid "monitor cut"
-msgstr "Monitoring coupé"
+msgstr "Écoute coupée"
 
 #: monitor_processor.cc:57
 msgid "monitor mono"
-msgstr "Monitoring Mono"
+msgstr "Écoute Mono"
 
 #: monitor_processor.cc:60
 msgid "monitor dim level"
-msgstr "Niveau de Dim du Monitoring"
+msgstr "Niveau de Dim d'Écoute"
 
 #: monitor_processor.cc:64
 msgid "monitor solo boost level"
-msgstr "Niveau de gain solos du Monitoring"
+msgstr "Niveau de gain d'Écoute solo"
 
 #: monitor_processor.cc:538
 msgid "cut control %1"
@@ -1757,7 +1759,7 @@ msgstr ""
 
 #: parameter_descriptor.cc:120
 msgid "Invert"
-msgstr ""
+msgstr "Inverser"
 
 #: parameter_descriptor.cc:128
 msgid "Auto"
@@ -1765,11 +1767,11 @@ msgstr ""
 
 #: parameter_descriptor.cc:129
 msgid "Input"
-msgstr ""
+msgstr "Entrée"
 
 #: parameter_descriptor.cc:130
 msgid "Disk"
-msgstr ""
+msgstr "Disque"
 
 #: parameter_descriptor.cc:259
 msgid "Note|C"
@@ -1864,7 +1866,7 @@ msgstr "?"
 
 #: plugin_insert.cc:525
 msgid "Plugin Enable"
-msgstr ""
+msgstr "Activer le Greffon"
 
 #: plugin_insert.cc:728
 msgid "PluginInsert: VST Bypass failed, falling back to host bypass."
@@ -1972,7 +1974,7 @@ msgstr "Scan des greffons complet"
 
 #: plugin_manager.cc:449
 msgid "Indexing Plugins..."
-msgstr ""
+msgstr "Indexage des Greffons..."
 
 #: plugin_manager.cc:685
 msgid "LADSPA"
@@ -1992,11 +1994,11 @@ msgstr ""
 
 #: plugin_manager.cc:1020
 msgid "Disabled WindowsVST scan (safe mode)"
-msgstr ""
+msgstr "Scan des VST Windows désactivé (mode sans échec)"
 
 #: plugin_manager.cc:1025
 msgid "--- Windows VST plugins Scan: %1"
-msgstr ""
+msgstr "--- Scan des greffons VST Windows : %1"
 
 #: plugin_manager.cc:1031
 msgid "VST"
@@ -2004,7 +2006,7 @@ msgstr "VST"
 
 #: plugin_manager.cc:1036
 msgid "--- Windows VST plugins Scan Done"
-msgstr ""
+msgstr "--- Scan des greffons VST Windows Terminé"
 
 #: plugin_manager.cc:1051
 msgid "cannot open dll"
@@ -2060,7 +2062,7 @@ msgstr ""
 
 #: plugin_manager.cc:1125
 msgid " -> Cannot get Windows VST information, plugin ignored."
-msgstr ""
+msgstr " -> Information sur le VST Windows introuvable, greffon ignoré."
 
 #: plugin_manager.cc:1135
 msgid ""
@@ -2074,11 +2076,11 @@ msgstr ""
 
 #: plugin_manager.cc:1170
 msgid " -> OK (VST Plugin \"%1\" was added)."
-msgstr ""
+msgstr " -> OK (Greffon VST \"%1\" ajouté)."
 
 #: plugin_manager.cc:1211
 msgid "Disabled MacVST scan (safe mode)"
-msgstr ""
+msgstr "Scan de VST Mac désactivé (mode sans échec)"
 
 #: plugin_manager.cc:1231
 msgid "MacVST"
@@ -2092,7 +2094,7 @@ msgstr ""
 
 #: plugin_manager.cc:1338
 msgid "Disabled LinuxVST scan (safe mode)"
-msgstr ""
+msgstr "Scan de VST Linux désactivé (mode sans échec)"
 
 #: plugin_manager.cc:1351
 msgid "LXVST"
@@ -2617,10 +2619,12 @@ msgstr "Connection de sortie Master %1 à %2 impossible"
 #: session.cc:945
 msgid "Cannot remove monitor section while the engine is offline."
 msgstr ""
+"Impossible de supprimer la section d'Écoute quand le moteur audio est éteint."
 
 #: session.cc:1006
 msgid "Cannot create monitor section while the engine is offline."
 msgstr ""
+"Impossible d'ajouter une section d'Écoute quand le moteur audio est éteint."
 
 #: session.cc:1027
 msgid "Cannot create monitor section. 'Monitor' Port name is not unique."
@@ -2632,7 +2636,7 @@ msgstr "Impossible de connecter l'entrée de contrôle %1 à %2"
 
 #: session.cc:1081 session.cc:1212
 msgid "The preferred I/O for the monitor bus (%1) cannot be found"
-msgstr "Préférences d'E/S du bus de Monitoring introuvables"
+msgstr "Préférences d'E/S du bus d'Écoute introuvables"
 
 #: session.cc:1112 session.cc:1243
 msgid "cannot connect control output %1 to %2"

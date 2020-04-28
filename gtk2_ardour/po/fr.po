@@ -16,7 +16,7 @@ msgstr ""
 "Project-Id-Version: Ardour 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-18 15:05+0200\n"
-"PO-Revision-Date: 2020-04-27 02:26+0200\n"
+"PO-Revision-Date: 2020-04-28 15:34+0200\n"
 "Last-Translator: Fred Rech <fred_rech@laposte.net>\n"
 "Language-Team: French <>\n"
 "Language: fr\n"
@@ -24,7 +24,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Poedit 2.3\n"
+"X-Generator: Poedit 2.2.1\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-Basepath: ..\n"
 
@@ -352,6 +352,7 @@ msgid ""
 "\tMartin Blanchard\n"
 "\tRomain Arnaud <roming22@gmail.com>\n"
 "\tOlivier Humbert <trebmuh@tuxfamily.org>\n"
+"\tFrédéric Rech <fred_rech@laposte.net>\n"
 msgstr ""
 "Français :\n"
 "\tAlain Fréhel <alain.frehel@free.fr>\n"
@@ -1554,8 +1555,7 @@ msgstr "Revenir au début de la lecture actuelle lors de son arrêt"
 #: ardour_ui2.cc:88
 msgid "Playhead follows Range tool clicks, and Range selections"
 msgstr ""
-"La Cellule suit les clics de l'outil Intervalle, et les sélections "
-"d'Intervalle"
+"La Tête suit les clics de l'outil Intervalle, et les sélections d'Intervalle"
 
 #: ardour_ui2.cc:89
 msgid "Track Input Monitoring automatically follows transport state"
@@ -2428,23 +2428,23 @@ msgstr ""
 
 #: ardour_ui_ed.cc:598
 msgid "Set Session Start from Playhead"
-msgstr "Placer le début de session à la Cellule"
+msgstr "Placer le début de session à la Tête"
 
 #: ardour_ui_ed.cc:600
 msgid "Set Session End from Playhead"
-msgstr "Placer la fin de session à la Cellule"
+msgstr "Placer la fin de session à la Tête"
 
 #: ardour_ui_ed.cc:603
 msgid "Toggle Mark at Playhead"
-msgstr "Basculer le repère sous la Cellule"
+msgstr "Basculer le repère sous la Tête"
 
 #: ardour_ui_ed.cc:605 ardour_ui_ed.cc:607
 msgid "Add Mark from Playhead"
-msgstr "Créer un Repère à la Cellule"
+msgstr "Créer un Repère à la Tête"
 
 #: ardour_ui_ed.cc:610 ardour_ui_ed.cc:612
 msgid "Remove Mark at Playhead"
-msgstr "Supprimer le Repère à la Cellule"
+msgstr "Supprimer le Repère à la Tête"
 
 #: ardour_ui_ed.cc:615
 msgid "Nudge Next Later"
@@ -2456,27 +2456,27 @@ msgstr "Décaler le suivant vers la gauche"
 
 #: ardour_ui_ed.cc:620
 msgid "Nudge Playhead Forward"
-msgstr "Décaler la Cellule vers la droite"
+msgstr "Décaler la Tête vers la droite"
 
 #: ardour_ui_ed.cc:622
 msgid "Nudge Playhead Backward"
-msgstr "Décaler la Cellule vers la gauche"
+msgstr "Décaler la Tête vers la gauche"
 
 #: ardour_ui_ed.cc:624
 msgid "Playhead to Next Grid"
-msgstr "Cellule sur la grille suivante"
+msgstr "Tête sur la grille suivante"
 
 #: ardour_ui_ed.cc:626
 msgid "Playhead to Previous Grid"
-msgstr "Cellule sur la grille précédente"
+msgstr "Tête sur la grille précédente"
 
 #: ardour_ui_ed.cc:629
 msgid "Start Range from Playhead"
-msgstr "Début d'Intervalle à la Cellule"
+msgstr "Début d'Intervalle à la Tête"
 
 #: ardour_ui_ed.cc:631
 msgid "Finish Range from Playhead"
-msgstr "Fin d'Intervalle à la Cellule"
+msgstr "Fin d'Intervalle à la Tête"
 
 #: ardour_ui_ed.cc:633 ardour_ui_ed.cc:645
 msgid "Start Range"
@@ -3184,7 +3184,7 @@ msgstr "Minutes:secondes"
 
 #: audio_clock.cc:2164
 msgid "Set from Playhead"
-msgstr "Régler sur la Cellule"
+msgstr "Régler sur la Tête"
 
 #: audio_clock.cc:2165
 msgid "Locate to This Time"
@@ -3630,7 +3630,7 @@ msgstr "Trames de CD"
 
 #: editor.cc:204 editor.cc:222 editor_actions.cc:157 editor_actions.cc:547
 msgid "Playhead"
-msgstr "Cellule"
+msgstr "Tête"
 
 #: editor.cc:205 editor_actions.cc:549
 msgid "Marker"
@@ -3967,23 +3967,23 @@ msgstr "Tout avant le point d'édition"
 
 #: editor.cc:2020 editor.cc:2094
 msgid "Select All After Playhead"
-msgstr "Tout après la Cellule"
+msgstr "Sélectionner Tout après la Tête"
 
 #: editor.cc:2021 editor.cc:2095
 msgid "Select All Before Playhead"
-msgstr "Tout avant la Cellule"
+msgstr "Sélectionner Tout avant la Tête"
 
 #: editor.cc:2022
 msgid "Select All Between Playhead and Edit Point"
-msgstr "Sélectionner tout entre la Cellule et le point d'édition"
+msgstr "Sélectionner tout entre la Tête et le point d'édition"
 
 #: editor.cc:2023
 msgid "Select All Within Playhead and Edit Point"
-msgstr "Tout sélectionner entre la Cellule et le point d'édition"
+msgstr "Tout sélectionner entre la Tête et le point d'édition"
 
 #: editor.cc:2024
 msgid "Select Range Between Playhead and Edit Point"
-msgstr "Sélectionner l'intervalle entre la tête et le point d'édition"
+msgstr "Sélectionner l'Intervalle entre la Tête et le Point d'Édition"
 
 #: editor.cc:2026 editor.cc:2097 editor_actions.cc:167 editor_actions.cc:168
 #: transport_masters_dialog.cc:73
@@ -4041,7 +4041,8 @@ msgstr "Décaler"
 #: editor.cc:2378
 msgid ""
 "Playhead position stored with a negative value - ignored (use zero instead)"
-msgstr "Valeur de position de Cellule négative - ignorée (placée à zéro)"
+msgstr ""
+"Valeur conservée de la position de Tête négative - ignorée (placée à zéro)"
 
 #: editor.cc:3163 editor.cc:3828 editor.cc:3910 midi_channel_selector.cc:160
 #: midi_channel_selector.cc:391 midi_channel_selector.cc:430
@@ -4162,7 +4163,11 @@ msgstr "Point d'édition"
 
 #: editor.cc:3347
 msgid "Edit Mode"
-msgstr "Mode de déplacement horizontal des régions dans le mode Édition"
+msgstr ""
+"Mode de déplacement horizontal des régions dans le mode Édition\n"
+"Glisse = région sélectionnée\n"
+"Vague = Glisse + régions suivantes\n"
+"Verrou = pas de déplacement horizontal"
 
 #: editor.cc:3348
 msgid ""
@@ -4537,43 +4542,43 @@ msgstr "Afficher les listes d'édition"
 
 #: editor_actions.cc:200
 msgid "Playhead to Next Region Boundary"
-msgstr "Cellule à la bordure de région suivante"
+msgstr "Tête à la bordure de région suivante"
 
 #: editor_actions.cc:201
 msgid "Playhead to Next Region Boundary (No Track Selection)"
-msgstr "Cellule à la bordure de région suivante (Pas de sélection de piste)"
+msgstr "Tête à la bordure de région suivante (Pas de sélection de piste)"
 
 #: editor_actions.cc:202
 msgid "Playhead to Previous Region Boundary"
-msgstr "Cellule à la bordure de région précédente"
+msgstr "Tête à la bordure de région précédente"
 
 #: editor_actions.cc:203
 msgid "Playhead to Previous Region Boundary (No Track Selection)"
-msgstr "Cellule à la bordure de région précédente (Pas de sélection de piste)"
+msgstr "Tête à la bordure de région précédente (Pas de sélection de piste)"
 
 #: editor_actions.cc:205
 msgid "Playhead to Next Region Start"
-msgstr "Cellule au début de la région suivante"
+msgstr "Tête au début de la région suivante"
 
 #: editor_actions.cc:206
 msgid "Playhead to Next Region End"
-msgstr "Cellule à la fin de la région suivante"
+msgstr "Tête à la fin de la région suivante"
 
 #: editor_actions.cc:207
 msgid "Playhead to Next Region Sync"
-msgstr "Cellule au point de synchronisation de la région suivante"
+msgstr "Tête au point de synchronisation de la région suivante"
 
 #: editor_actions.cc:209
 msgid "Playhead to Previous Region Start"
-msgstr "Cellule au début de la région précédente"
+msgstr "Tête au début de la région précédente"
 
 #: editor_actions.cc:210
 msgid "Playhead to Previous Region End"
-msgstr "Cellule à la fin de la région précédente"
+msgstr "Tête à la fin de la région précédente"
 
 #: editor_actions.cc:211
 msgid "Playhead to Previous Region Sync"
-msgstr "Cellule au point de synchronisation de la région précédente"
+msgstr "Tête au point de synchronisation de la région précédente"
 
 #: editor_actions.cc:213
 msgid "To Next Region Boundary"
@@ -4625,11 +4630,11 @@ msgstr "À la fin de l'intervalle"
 
 #: editor_actions.cc:229
 msgid "Playhead to Range Start"
-msgstr "De la Cellule au début de l'Intervalle"
+msgstr "De la Tête au début de l'Intervalle"
 
 #: editor_actions.cc:230
 msgid "Playhead to Range End"
-msgstr "De la Cellule à la fin de l'Intervalle"
+msgstr "De la Tête à la fin de l'Intervalle"
 
 #: editor_actions.cc:238
 msgid "Edit Current Tempo"
@@ -4801,7 +4806,7 @@ msgstr "Défiler en avant"
 
 #: editor_actions.cc:330
 msgid "Center Playhead"
-msgstr "Centrer sur la Cellule"
+msgstr "Centrer sur la Tête"
 
 #: editor_actions.cc:331
 msgid "Center Edit Point"
@@ -4809,19 +4814,19 @@ msgstr "Centrer le point d'édition"
 
 #: editor_actions.cc:333
 msgid "Playhead Forward"
-msgstr "Suivre la Cellule"
+msgstr "Suivre la Tête"
 
 #: editor_actions.cc:334
 msgid "Playhead Backward"
-msgstr "Cellule en arrière"
+msgstr "Tête en arrière"
 
 #: editor_actions.cc:336
 msgid "Playhead to Active Mark"
-msgstr "Placer la Cellule au Repère Actif"
+msgstr "Placer la Tête au Repère Actif"
 
 #: editor_actions.cc:337
 msgid "Active Mark to Playhead"
-msgstr "Placer le Repère Actif à la Cellule"
+msgstr "Placer le Repère Actif à la Tête"
 
 #: editor_actions.cc:339
 msgid "Use Skip Ranges"
@@ -4853,7 +4858,7 @@ msgstr "Placer le Repère Actif à la Souris"
 
 #: editor_actions.cc:356
 msgid "Set Auto Punch In/Out from Playhead"
-msgstr "Placer le point de punch-in/out à la Cellule"
+msgstr "Placer le point de punch-in/out à la Tête"
 
 #: editor_actions.cc:361 editor_actions.cc:1545
 msgid "Multi-Duplicate..."
@@ -4913,7 +4918,7 @@ msgstr "Aller à la transitoire précédente"
 
 #: editor_actions.cc:439
 msgid "Follow Playhead"
-msgstr "Suivre la Cellule"
+msgstr "Suivre la Tête"
 
 #: editor_actions.cc:440
 msgid "Remove Last Capture"
@@ -4925,7 +4930,7 @@ msgstr "Marquer la Dernière Capture"
 
 #: editor_actions.cc:443
 msgid "Stationary Playhead"
-msgstr "Cellule Fixe"
+msgstr "Tête Fixe"
 
 #: editor_actions.cc:445 insert_remove_time_dialog.cc:36
 msgid "Insert Time"
@@ -4988,7 +4993,7 @@ msgstr "Zoomer au centre"
 
 #: editor_actions.cc:484
 msgid "Zoom Focus Playhead"
-msgstr "Zoomer sur la Cellule"
+msgstr "Zoomer sur la Tête"
 
 #: editor_actions.cc:485
 msgid "Zoom Focus Mouse"
@@ -6022,7 +6027,7 @@ msgstr "Lire à partir d'ici"
 
 #: editor_markers.cc:911
 msgid "Move Mark to Playhead"
-msgstr "Déplacer le Repère à la Cellule"
+msgstr "Déplacer le Repère à la Tête"
 
 #: editor_markers.cc:915
 msgid "Create Range to Next Marker"
@@ -6042,7 +6047,7 @@ msgstr "Lire depuis le repère"
 
 #: editor_markers.cc:957
 msgid "Set Marker from Playhead"
-msgstr "Placer le Repère sur la Cellule"
+msgstr "Placer le Repère sur la Tête"
 
 #: editor_markers.cc:958
 msgid "Set Range from Selection"
@@ -6458,7 +6463,7 @@ msgstr "supprimer la région"
 
 #: editor_ops.cc:4513
 msgid "recover regions"
-msgstr ""
+msgstr "recouvrir les régions"
 
 #: editor_ops.cc:5055
 msgid "duplicate range selection"
@@ -6536,7 +6541,7 @@ msgstr "Basculer le verrou de la vidéo"
 
 #: editor_ops.cc:6034
 msgid "toggle region lock style"
-msgstr ""
+msgstr "basculer le mode de verrou de région"
 
 #: editor_ops.cc:6059
 msgid "change region opacity"
@@ -6572,7 +6577,7 @@ msgstr "activer le fondu de début"
 
 #: editor_ops.cc:6477
 msgid "toggle fade active"
-msgstr ""
+msgstr "basculer l'activation de fondu"
 
 #: editor_ops.cc:6640
 msgid "set loop range from selection"
@@ -6600,19 +6605,19 @@ msgstr "définir début/fin de session avec la sélection "
 
 #: editor_ops.cc:6785
 msgid "set punch start from EP"
-msgstr "entrée d'enregistrement à la Cellule"
+msgstr "entrée d'enregistrement au point d'édition"
 
 #: editor_ops.cc:6810
 msgid "set punch end from EP"
-msgstr "sortie d'enregistrement à la Cellule"
+msgstr "sortie d'enregistrement au point d'édition"
 
 #: editor_ops.cc:6840
 msgid "set loop start from EP"
-msgstr "début de boucle à la Cellule"
+msgstr "début de boucle au point d'édition"
 
 #: editor_ops.cc:6865
 msgid "set loop end from EP"
-msgstr "fin de boucle à la Cellule"
+msgstr "fin de boucle au point d'édition"
 
 #: editor_ops.cc:6876
 msgid "set punch range from region"
@@ -6744,7 +6749,7 @@ msgstr[1] "VCA"
 
 #: editor_ops.cc:7683
 msgid "Remove various strips"
-msgstr ""
+msgstr "Supprimer plusieurs voies"
 
 #: editor_ops.cc:7684
 msgid "Do you really want to remove %1 %2, %3 %4 and %5 %6?"
@@ -6878,15 +6883,15 @@ msgstr "V"
 
 #: editor_regions.cc:179
 msgid "Region position locked?"
-msgstr "Position de la région verrouillée ?"
+msgstr "Position de région verrouillée ?"
 
 #: editor_regions.cc:180
 msgid "Glued|G"
-msgstr ""
+msgstr "C"
 
 #: editor_regions.cc:180
 msgid "Region position glued to Bars|Beats time?"
-msgstr "Temps ?"
+msgstr "Position de région collée aux Mesures/Temps ?"
 
 #: editor_regions.cc:181
 msgid "Region muted?"
@@ -7054,7 +7059,7 @@ msgstr "Cacher tous les Bus"
 
 #: editor_routes.cc:568
 msgid "Only Show Tracks with Regions Under Playhead"
-msgstr "Ne montrer que les pistes avec des régions sous la Cellule"
+msgstr "Ne montrer que les pistes avec des régions sous la Tête"
 
 #: editor_rulers.cc:218
 msgid "New location marker"
@@ -7432,7 +7437,7 @@ msgstr "Appareil"
 
 #: engine_dialog.cc:1008
 msgid "Systemic Latency [samples]"
-msgstr ""
+msgstr "Latence Héritée [échantillons]"
 
 #: engine_dialog.cc:1011 gain_meter.cc:802 mixer_strip.cc:191
 #: mixer_strip.cc:408 mixer_strip.cc:2532 plugin_eq_gui.cc:131
@@ -7614,7 +7619,7 @@ msgstr "Appliquer un traitement de piste/bus"
 
 #: export_channel_selector.cc:552
 msgid "Selection Actions"
-msgstr ""
+msgstr "Actions de Sélection"
 
 #: export_channel_selector.cc:555
 msgid "Select tracks"
@@ -7690,7 +7695,7 @@ msgstr "Écriture de l'Image de Console : %1."
 
 #: export_dialog.cc:421
 msgid "Copying Mixer Screenshot: %1."
-msgstr ""
+msgstr "Copier la capture d’écran de la Console : %1."
 
 # This one is currently unused (passed to the nag screen which drops it)
 #: export_dialog.cc:439
@@ -8443,7 +8448,7 @@ msgstr "T"
 
 #: gain_meter.cc:789
 msgid "Latch|L"
-msgstr ""
+msgstr "V"
 
 #: gain_meter.cc:791
 msgid "Write|W"
@@ -8471,7 +8476,7 @@ msgstr "Canal :"
 
 #: generic_pluginui.cc:148 patch_change_widget.cc:90
 msgid "Velocity:"
-msgstr "Vélocité"
+msgstr "Vélocité :"
 
 #: generic_pluginui.cc:179
 msgid "All Automation"
@@ -8619,7 +8624,7 @@ msgstr ""
 
 #: idleometer.cc:45
 msgid "<b>GUI Idle Timing Statistics</b>"
-msgstr ""
+msgstr "<b>Statistiques d’inactivité de l’interface graphique</b>"
 
 #: idleometer.cc:52 latency_gui.cc:92 panner_ui.cc:413 plugin_pin_dialog.cc:116
 #: plugin_selector.cc:271 plugin_ui.cc:470 plugin_dspload_ui.cc:37
@@ -8641,7 +8646,7 @@ msgstr "Max :"
 
 #: idleometer.cc:76
 msgid "Mean:"
-msgstr ""
+msgstr "Moyenne :"
 
 #: idleometer.cc:79
 msgid "σ:"
@@ -8649,7 +8654,7 @@ msgstr ""
 
 #: idleometer.cc:82
 msgid "Elapsed:"
-msgstr ""
+msgstr "Écoulé :"
 
 #: insert_remove_time_dialog.cc:61
 msgid "Remove Time starting at:"
@@ -8685,7 +8690,7 @@ msgstr "être séparées"
 
 #: insert_remove_time_dialog.cc:100
 msgid "Apply to all playlists of the selected track(s)"
-msgstr ""
+msgstr "Appliquer à toutes les listes de lecture des pistes sélectionnées"
 
 #: insert_remove_time_dialog.cc:103
 msgid "Move glued-to-musical-time regions (MIDI regions)"
@@ -8774,7 +8779,7 @@ msgstr ""
 
 #: keyeditor.cc:73
 msgid "Colliding keybindings"
-msgstr ""
+msgstr "Doublons de raccourcis clavier"
 
 #: keyeditor.cc:75
 msgid ""
@@ -8782,6 +8787,9 @@ msgid ""
 "\n"
 "You can replace the existing binding or cancel this action."
 msgstr ""
+"La combinaison de touches est déjà affectée à \"%1\".\n"
+"\n"
+"Vous pouvez remplacer le raccourci existant, ou annuler cette action."
 
 #: keyeditor.cc:81 plugin_setup_dialog.cc:57
 msgid "Replace"
@@ -8878,11 +8886,11 @@ msgstr "Fin - clic du milieu pour se placer ici"
 
 #: location_ui.cc:338
 msgid "Set range start from playhead location"
-msgstr "Régler le début de l'intervalle à la position de la Cellule"
+msgstr "Régler le début de l'intervalle à la position de la Tête"
 
 #: location_ui.cc:339
 msgid "Set range end from playhead location"
-msgstr "Régler la fin de l'intervalle à la position de la Cellule"
+msgstr "Régler la fin de l'intervalle à la position de la Tête"
 
 #: location_ui.cc:343
 msgid "Remove this marker"
@@ -8894,7 +8902,7 @@ msgstr "Position - clic du milieu pour se placer ici"
 
 #: location_ui.cc:346
 msgid "Set marker time from playhead location"
-msgstr "Placer le repère en fonction de la position de la Cellule"
+msgstr "Placer le repère en fonction de la position de la Tête"
 
 #: location_ui.cc:542
 msgid "You cannot put a CD marker at the start of the session"
@@ -8948,6 +8956,8 @@ msgid ""
 "Action Scripts are user initiated actions (menu, shortcuts, toolbar-button) "
 "for batch processing or customized tasks."
 msgstr ""
+"Les Scripts d'Action sont initiés par l'utilisateur (menu, raccourci, bouton "
+"de barre d'outils) pour lancer un batch ou une tâche personnalisée."
 
 #: lua_script_manager.cc:105
 #, fuzzy
@@ -9515,11 +9525,11 @@ msgstr "changer le canal"
 
 #: midi_region_view.cc:3475
 msgid "Bank "
-msgstr "Banque"
+msgstr "Banque "
 
 #: midi_region_view.cc:3477
 msgid "Channel "
-msgstr "Canal"
+msgstr "Canal "
 
 #: midi_region_view.cc:3679
 msgid "paste"
@@ -9527,11 +9537,11 @@ msgstr "coller"
 
 #: midi_streamview.cc:191
 msgid "attempt to display MIDI region with no source"
-msgstr "Tentative de création de région MIDI sans source"
+msgstr "tentative de création de région MIDI sans source"
 
 #: midi_streamview.cc:201
 msgid "attempt to display MIDI region with no model"
-msgstr "Tentative de création de région MIDI sans modèle"
+msgstr "tentative de création de région MIDI sans modèle"
 
 #: midi_streamview.cc:524
 msgid "failed to create MIDI region"
@@ -9939,7 +9949,7 @@ msgstr ""
 
 #: mixer_strip.cc:1760 processor_box.cc:3879
 msgid "Pin Connections..."
-msgstr "Ajuster les connexions"
+msgstr "Ajuster les connexions..."
 
 #: mixer_strip.cc:1770
 msgid "Fan out to Busses"
@@ -12913,12 +12923,10 @@ msgid "Soloing overrides muting"
 msgstr "Solo surplante Muet"
 
 #: rc_option_editor.cc:2807
-#, fuzzy
 msgid "Solo-in-place mute cut (dB)"
 msgstr "Diminution (en dB) des pistes NON solo-en-place "
 
 #: rc_option_editor.cc:2814
-#, fuzzy
 msgid "Listen Position"
 msgstr "Position d'écoute "
 
@@ -13112,7 +13120,6 @@ msgid "Replicate missing region channels"
 msgstr "Dupliquer les canaux manquants dans la région"
 
 #: rc_option_editor.cc:3062
-#, fuzzy
 msgid "Initial program change"
 msgstr "Modifier le programme initial (IPC) "
 
@@ -13220,7 +13227,6 @@ msgid "very fast [32dB/sec]"
 msgstr "très rapide [32dB/sec]"
 
 #: rc_option_editor.cc:3166
-#, fuzzy
 msgid "Meter line-up level; 0dBu"
 msgstr "Niveau ligne, 0 dBu "
 
@@ -13250,7 +13256,6 @@ msgstr ""
 "et VU-mètre."
 
 #: rc_option_editor.cc:3182
-#, fuzzy
 msgid "IEC1/DIN Meter line-up level; 0dBu"
 msgstr "Niveau ligne IEC1/DIN, 0 dBu "
 
@@ -13260,7 +13265,6 @@ msgid "Reference level for IEC1/DIN meter."
 msgstr "Niveau de référence des bargraphes IEC1/DIN."
 
 #: rc_option_editor.cc:3198
-#, fuzzy
 msgid "VU Meter standard"
 msgstr "VU-Mètre standard "
 
@@ -13402,7 +13406,7 @@ msgstr ""
 "<b>Enregistrer avec Pré-roll</b>est lancé.\n"
 "\n"
 "Si <b>Suivre</b> est allumé, le pré-roll est appliqué à la position de la "
-"Cellule lorsqu’une région est sélectionnée ou réduite."
+"Tête lorsqu’une région est sélectionnée ou réduite."
 
 #: rc_option_editor.cc:3348
 msgid "4 Bars"
@@ -13564,7 +13568,7 @@ msgid ""
 "transport (playhead) is not moving"
 msgstr ""
 "<b>Si Coché</b> %1 continuera à envoyer l'info LTC même quand le transport "
-"(Cellule) est immobile."
+"(Tête) est immobile."
 
 #: rc_option_editor.cc:3459
 msgid "LTC generator level [dBFS]"
@@ -15912,7 +15916,7 @@ msgstr "au point d'édition"
 
 #: sfdb_ui.cc:1776 sfdb_ui.cc:1933
 msgid "playhead"
-msgstr "cellule"
+msgstr "Tête"
 
 #: sfdb_ui.cc:1777
 msgid "session start"
@@ -16906,7 +16910,7 @@ msgstr "Paramétrer "
 
 #: transport_control_ui.cc:70
 msgid "Play from playhead"
-msgstr "Lire depuis la Cellule"
+msgstr "Lire depuis la Tête"
 
 #: transport_control_ui.cc:71
 msgid "Stop playback"
@@ -17170,6 +17174,8 @@ msgid ""
 "The current operation is not possible because of an error communicating with "
 "the audio hardware."
 msgstr ""
+"L'opération actuelle est empêchée par une erreur de communication avec le "
+"matériel audio."
 
 #: utils.cc:127
 msgid "Configure Hardware"
@@ -17177,7 +17183,7 @@ msgstr "Configurer le Matériel"
 
 #: utils.cc:166 utils.cc:209
 msgid "bad XPM header %1"
-msgstr "mauvais entête XPM %1"
+msgstr "mauvais en-tête XPM %1"
 
 #: utils.cc:414
 msgid "cannot find XPM file for %1"
@@ -17267,7 +17273,7 @@ msgstr "Panique"
 
 #: virtual_keyboard_window.cc:112
 msgid "Set the MIDI Channel of the produced MIDI events"
-msgstr ""
+msgstr "Régler le canal MIDI des évènements MIDI produits"
 
 #: virtual_keyboard_window.cc:113
 msgid ""
@@ -17290,10 +17296,12 @@ msgid ""
 "Chromatic transpose note events. Notes transposed outside the range of "
 "0,,127 are discarded."
 msgstr ""
+"Transposition des notes. Les notes transposées en dehors de l'intervalle "
+"0>127 ne sont pas conservées."
 
 #: virtual_keyboard_window.cc:118
 msgid "Send MIDI Panic message for current channel"
-msgstr ""
+msgstr "Envoyer un message Panique MIDI au canal actuel"
 
 #: virtual_keyboard_window.cc:448
 msgid "CC-%1: "
@@ -17449,6 +17457,20 @@ msgid ""
 "\n"
 "see also http://manual.ardour.org/video-timeline/setup/"
 msgstr ""
+"Aucune installation de ffmpeg n'a été trouvée sur ce système.\n"
+"%1 requiert ffmpeg et ffprobe de ffmpeg.org - version 1.1 au minimum.\n"
+"L'import et export Vidéo sont impossibles sans installer ces outils.\n"
+"\n"
+"Les outils sont inclus dans les versions %1 d'ardour.org et sont aussi "
+"disponibles à http://x42.github.com/harvid/\n"
+"\n"
+"Important : les fichiers doivent être installées dans $PATH et nommés "
+"ffmpeg_harvid et ffprobe_harvid.\n"
+"Si vous avez déjà une installation appropriée de ffmpeg sur votre système, "
+"nous vous recommandons de créer des liens symboliques de ffmpeg à "
+"ffmpeg_harvid et de ffprobe à ffprobe_harvid.\n"
+"\n"
+"Voir aussi (anglais) http://manual.ardour.org/video-timeline/setup/"
 
 #: transcode_video_dialog.cc:59
 msgid "Transcode/Import Video File "
@@ -17488,6 +17510,8 @@ msgid ""
 "ffmpeg installation was not found. Video Import is not possible. See the Log "
 "window for more information."
 msgstr ""
+"ffmpeg n'a pas été trouvé. Import Vidéo impossible. Voir la fenêtre Journal "
+"pour plus d'information."
 
 #: transcode_video_dialog.cc:123
 #, fuzzy
@@ -17723,6 +17747,8 @@ msgid ""
 "ffmpeg installation was not found. Video Export is not possible. See the Log "
 "window for more information."
 msgstr ""
+"ffmpeg n'a pas été trouvé. Export Vidéo impossible. Voir la fenêtre Journal "
+"pour plus d'information."
 
 #: export_video_dialog.cc:132
 msgid "<b>Output:</b> (file extension defines format)"
