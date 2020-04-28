@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: libardour 5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-18 10:29+0200\n"
-"PO-Revision-Date: 2020-04-20 04:38+0200\n"
+"PO-Revision-Date: 2020-04-27 02:05+0200\n"
 "Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>\n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -1773,51 +1773,51 @@ msgstr ""
 
 #: parameter_descriptor.cc:259
 msgid "Note|C"
-msgstr "Note|Do"
+msgstr "Do"
 
 #: parameter_descriptor.cc:260
 msgid "Note|C#"
-msgstr "Note|Do ♯"
+msgstr "Do ♯"
 
 #: parameter_descriptor.cc:261
 msgid "Note|D"
-msgstr "Note|Ré"
+msgstr "Ré"
 
 #: parameter_descriptor.cc:262
 msgid "Note|D#"
-msgstr "Note|Ré ♯"
+msgstr "Ré ♯"
 
 #: parameter_descriptor.cc:263
 msgid "Note|E"
-msgstr "Note|Mi"
+msgstr "Mi"
 
 #: parameter_descriptor.cc:264
 msgid "Note|F"
-msgstr "Note|Fa"
+msgstr "Fa"
 
 #: parameter_descriptor.cc:265
 msgid "Note|F#"
-msgstr "Note|Fa ♯"
+msgstr "Fa ♯"
 
 #: parameter_descriptor.cc:266
 msgid "Note|G"
-msgstr "Note|Sol"
+msgstr "Sol"
 
 #: parameter_descriptor.cc:267
 msgid "Note|G#"
-msgstr "Note|Sol ♯"
+msgstr "Sol ♯"
 
 #: parameter_descriptor.cc:268
 msgid "Note|A"
-msgstr "Note|La"
+msgstr "La"
 
 #: parameter_descriptor.cc:269
 msgid "Note|A#"
-msgstr "Note|Si ♭"
+msgstr "Si ♭"
 
 #: parameter_descriptor.cc:270
 msgid "Note|B"
-msgstr "Note|Si"
+msgstr "Si"
 
 #: playlist.cc:2327
 msgid "region state node has no ID, ignored"
@@ -2952,7 +2952,7 @@ msgstr ""
 
 #: session_state.cc:398
 msgid "Reset Remote Controls"
-msgstr "RàZ des Controleurs Distants..."
+msgstr "RàZ des Controleurs Distants"
 
 #: session_state.cc:411 session_state.cc:441
 msgid "Filling playback buffers"
@@ -3700,7 +3700,7 @@ msgid ""
 "Meter marks: "
 msgstr ""
 "\n"
-"Repères de Rythme : "
+"Repères de Chiffrage : "
 
 #: tempo_map_importer.cc:89
 msgid ""
@@ -3821,15 +3821,15 @@ msgstr ""
 
 #: utils.cc:421 utils.cc:438
 msgid "Slide"
-msgstr "Région Sélectionnée"
+msgstr "Glisse"
 
 #: utils.cc:423 utils.cc:444
 msgid "Ripple"
-msgstr "Région sélectionnée + les suivantes"
+msgstr "Vague"
 
 #: utils.cc:425 utils.cc:441
 msgid "Lock"
-msgstr "Pas de déplacement horizontal"
+msgstr "Verrou"
 
 #: utils.cc:428
 msgid "programming error: unknown edit mode string \"%1\""
