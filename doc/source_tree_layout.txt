@@ -1,4 +1,4 @@
-rdour Source-Tree layout (April 2020)
+Ardour Source-Tree layout (April 2020)
 
 ===== Front Ends =====
 
@@ -105,8 +105,8 @@ libs/
    Control events, control lists, automation evaluation,
    parameter descriptions, incl MIDI event abstraction
 
-           - libsmf (contains several non-upstreamed fixes)
-	     Handling Standard MIDI File format. Abstracted to C++ in SMF.{cc,h}
+ - libsmf (contains several non-upstreamed fixes)
+   Handling Standard MIDI File format. Abstracted to C++ in SMF.{cc,h}
  
  - backends
    (uses libpdb, ardouralsautil | appleutility, implements libardour interface)
