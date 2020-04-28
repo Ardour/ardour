@@ -35,7 +35,6 @@
 #include <stdint.h>
 
 #include "midi++/libmidi_visibility.h"
-#include "midi++/event.h"
 #include "pbd/xml++.h"
 
 namespace MIDI
