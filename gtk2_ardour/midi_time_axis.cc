@@ -440,7 +440,7 @@ MidiTimeAxisView::setup_midnam_patches ()
 		model_changed ("");
 	} else if (model.empty() || ! MIDI::Name::MidiPatchManager::instance ().master_device_by_model (model)) {
 		/* invalid model, switch to use default */
-		model_changed ("");
+		model_changed (DEFAULT_MIDNAM_MODEL);
 	} else {
 		model_changed (model);
 	}
