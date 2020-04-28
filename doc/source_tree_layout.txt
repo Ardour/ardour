@@ -1,4 +1,4 @@
-Ardour Source-Tree layout (April 2020)
+rdour Source-Tree layout (April 2020)
 
 ===== Front Ends =====
 
@@ -55,8 +55,8 @@ libs/
      https://github.com/vinniefalco/LuaBridge (C++ bindings)
 
  - midi++2
-   (uses libpdb, libevoral)
-   Standard MIDI Files I/O
+   (uses libpdb)
+   MIDI parsing, MIDNAM handling, Port abstraction for I/O
 
  - ptformat
    Unmodified https://github.com/zamaudio/ptformat for loading ProTools sessions
@@ -95,14 +95,19 @@ libs/
  **** PBD dependent libs ****
 
  - pbd
-   Paul B. Davis' utility classes. This is the basis for all Ardour specifics.
-   It provides basic concepts and OS abstractions.
+   Generic non-Ardour-specific utility classes. This is the basis for all Ardour specifics.
+   It provides basic concepts and OS abstractions. The name comes from "Paul
+   Barton-Davis", Paul's full name at the time he started working on working on
+   audio software.
 
  - evoral
    (uses libpbd)
    Control events, control lists, automation evaluation,
    parameter descriptions, incl MIDI event abstraction
 
+           - libsmf (contains several non-upstreamed fixes)
+	     Handling Standard MIDI File format. Abstracted to C++ in SMF.{cc,h}
+ 
  - backends
    (uses libpdb, ardouralsautil | appleutility, implements libardour interface)
    Interaction with Operating System's Audio/MIDI API:
