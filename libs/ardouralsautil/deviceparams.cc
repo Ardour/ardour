@@ -115,8 +115,8 @@ ARDOUR::get_alsa_device_parameters (const char* device_name, const bool play, AL
 		fprintf (stdout, "  channels : %u\n", nfo->max_channels);
 		fprintf (stdout, "  min_rate : %u\n", nfo->min_rate);
 		fprintf (stdout, "  max_rate : %u\n", nfo->max_rate);
-		fprintf (stdout, "  min_psiz : %lu\n", nfo->min_size);
-		fprintf (stdout, "  max_psiz : %lu\n", nfo->max_size);
+		fprintf (stdout, "  min_psiz : %lu\n", min_psiz);
+		fprintf (stdout, "  max_psiz : %lu\n", max_psiz);
 		fprintf (stdout, "  min_bufz : %lu\n", min_bufz);
 		fprintf (stdout, "  max_bufz : %lu\n", max_bufz);
 		fprintf (stdout, "  min_nper : %d\n", nfo->min_nper);

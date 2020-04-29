@@ -486,11 +486,7 @@ void Alsa_pcmi::initialise (const char *play_name, const char *capt_name, const 
 		}
 		if (snd_pcm_hw_params_get_periods (_play_hwpar, &nfrag, &dir) || (nfrag != _play_nfrag) || dir)
 		{
-			if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi: can't get requested number of periods for playback.\n");
-			if ((_debug & FRAG_NEAR) == 0) {
-				_state = -5;
-				return;
-			}
+			if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi warning: requested %u periods for playback, using %u.\n", _play_nfrag, nfrag);
 		}
 
 		snd_pcm_hw_params_get_format (_play_hwpar, &_play_format);
@@ -776,29 +772,24 @@ int Alsa_pcmi::set_hwpar (snd_pcm_t *handle,  snd_pcm_hw_params_t *hwpar, const 
 				sname, _fsize);
 		return -4;
 	}
-	if ((_debug & FRAG_NEAR)) {
-		unsigned int nf = nfrag;
-		snd_pcm_hw_params_set_periods_min (handle, hwpar, &nf, NULL);
-		if (nf > nfrag) {
-			nfrag = nf;
-		}
-		if (snd_pcm_hw_params_set_periods_near (handle, hwpar, &nfrag, NULL) < 0) {
-			if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi: can't set %s periods to %u.\n",
-					sname, nfrag);
-			return -5;
-		}
-	} else {
-		if (snd_pcm_hw_params_set_periods (handle, hwpar, nfrag, 0) < 0)
-		{
-			if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi: can't set %s periods to %u.\n",
-					sname, nfrag);
-			return -5;
-		}
+
+	unsigned int nf = nfrag;
+	snd_pcm_hw_params_set_periods_min (handle, hwpar, &nf, NULL);
+	if (nf < nfrag) {
+		nf = nfrag;
 	}
-	if (snd_pcm_hw_params_set_buffer_size (handle, hwpar, _fsize * nfrag) < 0)
+	if (snd_pcm_hw_params_set_periods_near (handle, hwpar, &nf, NULL) < 0) {
+		if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi: can't set %s periods to %u (requested %u).\n",
+				sname, nf, nfrag);
+		return -5;
+	}
+
+	if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi: use %d periods for %s ((requested %u).\n", nf, sname, nfrag);
+
+	if (snd_pcm_hw_params_set_buffer_size (handle, hwpar, _fsize * nf) < 0)
 	{
 		if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi: can't set %s buffer length to %lu.\n",
-				sname, _fsize * nfrag);
+				sname, _fsize * nf);
 		return -4;
 	}
 	if (snd_pcm_hw_params (handle, hwpar) < 0)

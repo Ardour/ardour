@@ -60,8 +60,7 @@ public:
 		DEBUG_DATA = 8,
 		DEBUG_ALL  = 15,
 		FORCE_16B  = 256,
-		FORCE_2CH  = 512,
-		FRAG_NEAR  = 1024
+		FORCE_2CH  = 512
 	};
 
 	void printinfo (void);

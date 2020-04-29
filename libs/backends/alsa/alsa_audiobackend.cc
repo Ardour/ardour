@@ -270,25 +270,23 @@ std::vector<uint32_t>
 AlsaAudioBackend::available_period_sizes (const std::string& driver, const std::string& device) const
 {
 	std::vector<uint32_t> ps;
+	ps.push_back (2);
 
 	ALSADeviceInfo* nfo = NULL;
 	if (device == get_standard_device_name(DeviceNone)) {
 		return ps;
 	}
+
 	if (device == _output_audio_device && _output_audio_device_info.valid) {
 		nfo = &_output_audio_device_info;
-	} else {
-		ps.push_back (2);
-		return ps;
-	}
-
-	if (nfo->min_nper == 2) {
-		ps.push_back (2);
-		if (nfo->max_nper >= 3) {
+		if (nfo->max_nper > 2) {
 			ps.push_back (3);
 		}
+		if (nfo->max_nper > 3) {
+			ps.push_back (nfo->min_nper);
+		}
 	} else {
-		ps.push_back (nfo->min_nper);
+		ps.push_back (3);
 	}
 
 	return ps;
