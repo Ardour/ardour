@@ -278,15 +278,15 @@
       <menu action="LuaScripts">
         <menuitem action='toggle-script-manager'/>
         <separator/>
-        <menuitem action='script-action-1'/>
-        <menuitem action='script-action-2'/>
-        <menuitem action='script-action-3'/>
-        <menuitem action='script-action-4'/>
-        <menuitem action='script-action-5'/>
-        <menuitem action='script-action-6'/>
-        <menuitem action='script-action-7'/>
-        <menuitem action='script-action-8'/>
-        <menuitem action='script-action-9'/>
+        <menuitem action='script-1'/>
+        <menuitem action='script-2'/>
+        <menuitem action='script-3'/>
+        <menuitem action='script-4'/>
+        <menuitem action='script-5'/>
+        <menuitem action='script-6'/>
+        <menuitem action='script-7'/>
+        <menuitem action='script-8'/>
+        <menuitem action='script-9'/>
       </menu>
 #ifndef __APPLE__
       <separator/>
