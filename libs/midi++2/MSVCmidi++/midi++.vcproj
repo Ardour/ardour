@@ -308,10 +308,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\midi++\event.h"
-				>
-			</File>
-			<File
 				RelativePath="..\midi++\events.h"
 				>
 			</File>
