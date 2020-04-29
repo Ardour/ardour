@@ -347,7 +347,7 @@ Editor::mouse_mode_toggled (MouseMode m)
 
 	update_time_selection_display ();
 
-	if (internal_editing()) {
+	if (mouse_mode == Editing::MouseContent) {
 
 		/* reinstate any existing MIDI note (and by extension, MIDI
 		 * region) selection for internal edit mode. This allows a user
