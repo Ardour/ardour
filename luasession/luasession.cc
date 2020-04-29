@@ -50,7 +50,9 @@ static PBD::ScopedConnectionList engine_connections;
 static PBD::ScopedConnectionList session_connections;
 static Session*                  session = NULL;
 static LuaState*                 lua;
-static bool                      keep_running = true;
+
+static bool keep_running          = true;
+static bool terminate_when_halted = false;
 
 /* extern VST functions */
 int vstfx_init (void*) { return 0; }
@@ -83,9 +85,7 @@ protected:
 		}
 
 		/* note: iostreams are already thread-safe: no external
-				 lock required.
-				 */
-
+		 * lock required. */
 		std::cout << prefix << str << std::endl;
 
 		if (chn == Transmitter::Fatal) {
@@ -139,8 +139,7 @@ static void
 init ()
 {
 	if (!ARDOUR::init (false, true, localedir)) {
-		cerr << "Ardour failed to initialize\n"
-		     << endl;
+		cerr << "Ardour failed to initialize\n" << endl;
 		::exit (EXIT_FAILURE);
 	}
 
@@ -380,6 +379,15 @@ do_quit (lua_State* L)
 	return 0;
 }
 
+static void
+engine_halted (const char* err)
+{
+	if (terminate_when_halted) {
+		cerr << "Engine halted: " << err << "\n";
+		::exit (EXIT_FAILURE);
+	}
+}
+
 /* ****************************************************************************/
 
 static void
@@ -425,6 +433,8 @@ setup_lua ()
 	lua_setglobal (L, "AudioEngine");
 
 	AudioEngine::instance ()->stop ();
+
+	AudioEngine::instance()->Halted.connect_same_thread (engine_connections, boost::bind (&engine_halted, _1));
 }
 
 static int
@@ -523,6 +533,8 @@ usage ()
   -h, --help                 display this help and exit\n\
 	-i, --interactive          enter interactive mode after executing 'script',\n\
 	                           force the interpreter to run interactively\n\
+	-X, --exit-when-halted     terminate when the audio-engine halts\n\
+	                           unexpectedly.\n\
   -V, --version              print version information and exit\n\
 \n");
 	printf ("\n\
@@ -536,12 +548,13 @@ Ardour at your finger tips...\n\
 int
 main (int argc, char** argv)
 {
-	const char* optstring = "hiV";
+	const char* optstring = "hiVX";
 
 	const struct option longopts[] = {
-		{ "help",        0, 0, 'h' },
-		{ "interactive", 0, 0, 'i' },
-		{ "version",     0, 0, 'V' },
+		{ "help",             0, 0, 'h' },
+		{ "interactive",      0, 0, 'i' },
+		{ "version",          0, 0, 'V' },
+		{ "exit-when-halted", 0, 0, 'X' },
 	};
 
 	bool interactive = false;
@@ -562,6 +575,10 @@ main (int argc, char** argv)
 				printf ("ardour-lua version %s\n\n", VERSIONSTRING);
 				printf ("Copyright (C) GPL 2015-2020 Robin Gareus <robin@gareus.org>\n");
 				exit (EXIT_SUCCESS);
+				break;
+
+			case 'X':
+				terminate_when_halted = true;
 				break;
 
 			default:
