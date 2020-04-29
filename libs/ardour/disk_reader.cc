@@ -266,6 +266,7 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	ChannelList::iterator          chan;
 	sampleoffset_t                 disk_samples_to_consume;
 	MonitorState                   ms = _track->monitoring_state ();
+	const bool                     midi_only = (c->empty() || _playlists[DataType::AUDIO]);
 
 	if (_active) {
 		if (!_pending_active) {
@@ -286,8 +287,10 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	if (!_session.cfg ()->get_use_transport_fades () || (_session.exporting () && !_session.realtime_export ())) {
 		/* no transport fades or exporting - no declick out logic */
 
-		_declick_amp.set_gain (target_gain);
-		declick_out = false;
+		if (!midi_only) {
+			_declick_amp.set_gain (target_gain);
+			declick_out = false;
+		}
 
 	} else {
 		/* using transport fades and not exporting - declick login in effect */
@@ -317,7 +320,7 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		disk_samples_to_consume = nframes;
 	}
 
-	if (c->empty () || !_playlists[DataType::AUDIO]) {
+	if (midi_only) {
 		/* do nothing with audio */
 		goto midi;
 	}
