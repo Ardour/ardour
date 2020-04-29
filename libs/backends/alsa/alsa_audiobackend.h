@@ -149,6 +149,9 @@ class AlsaAudioBackend : public AudioBackend, public PortEngineSharedImpl
 
 		bool can_change_systemic_latency_when_running () const { return true; }
 
+		bool can_request_update_devices () { return true; }
+		bool update_devices () { return true; }
+
 		int set_device_name (const std::string&);
 		int set_input_device_name (const std::string&);
 		int set_output_device_name (const std::string&);
