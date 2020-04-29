@@ -529,12 +529,12 @@ usage ()
 	printf ("Usage: ardour-lua [ OPTIONS ] [ file [args] ]\n\n");
 /*        1         2         3         4         5         6         7         8
  *2345678901234567890123456789012345678901234567890123456789012345678901234567890*/
-	printf ("Options:\n\
+  printf ("Options:\n\
   -h, --help                 display this help and exit\n\
-	-i, --interactive          enter interactive mode after executing 'script',\n\
-	                           force the interpreter to run interactively\n\
-	-X, --exit-when-halted     terminate when the audio-engine halts\n\
-	                           unexpectedly.\n\
+  -i, --interactive          enter interactive mode after executing 'script',\n\
+                             force the interpreter to run interactively\n\
+  -X, --exit-when-halted     terminate when the audio-engine halts\n\
+                             unexpectedly (disconnect, or too many x-runs)\n\
   -V, --version              print version information and exit\n\
 \n");
 	printf ("\n\
