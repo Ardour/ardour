@@ -35,21 +35,21 @@
 #include <cstdio> // Needed so that libraptor (included in lrdf) won't complain
 #include <cstdlib>
 #include <sys/stat.h>
-#include <sys/types.h>
 #include <sys/time.h>
+#include <sys/types.h>
 #ifndef PLATFORM_WINDOWS
 #include <sys/resource.h>
 #endif
-#include <unistd.h>
-#include <fcntl.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <time.h>
+#include <unistd.h>
 
 #include <glib.h>
 #include "pbd/gstdio_compat.h"
 
 #ifdef PLATFORM_WINDOWS
-#include <stdio.h> // for _setmaxstdio
+#include <stdio.h>   // for _setmaxstdio
 #include <windows.h> // for LARGE_INTEGER
 #endif
 
@@ -85,22 +85,22 @@
 #endif
 
 #include "pbd/cpus.h"
+#include "pbd/enumwriter.h"
 #include "pbd/error.h"
+#include "pbd/file_utils.h"
+#include "pbd/fpu.h"
 #include "pbd/id.h"
 #include "pbd/pbd.h"
 #include "pbd/strsplit.h"
-#include "pbd/fpu.h"
-#include "pbd/file_utils.h"
-#include "pbd/enumwriter.h"
 
-#include "midi++/port.h"
 #include "midi++/mmc.h"
+#include "midi++/port.h"
 
 #include "LuaBridge/LuaBridge.h"
 
 #include "ardour/analyser.h"
-#include "ardour/audio_library.h"
 #include "ardour/audio_backend.h"
+#include "ardour/audio_library.h"
 #include "ardour/audioengine.h"
 #include "ardour/audioplaylist.h"
 #include "ardour/audioregion.h"
@@ -109,9 +109,9 @@
 #include "ardour/directory_names.h"
 #include "ardour/event_type_map.h"
 #include "ardour/filesystem_paths.h"
+#include "ardour/midi_patch_manager.h"
 #include "ardour/midi_region.h"
 #include "ardour/midi_ui.h"
-#include "ardour/midi_patch_manager.h"
 #include "ardour/midiport_manager.h"
 #include "ardour/mix.h"
 #include "ardour/operations.h"
@@ -131,17 +131,18 @@
 #ifdef LV2_SUPPORT
 #include "ardour/uri_map.h"
 #endif
+
 #include "audiographer/routines.h"
 
-#if defined (__APPLE__)
+#if defined(__APPLE__)
 #include <CoreFoundation/CoreFoundation.h>
 #endif
 
 #include "pbd/i18n.h"
 
-ARDOUR::RCConfiguration* ARDOUR::Config = 0;
-ARDOUR::RuntimeProfile* ARDOUR::Profile = 0;
-ARDOUR::AudioLibrary* ARDOUR::Library = 0;
+ARDOUR::RCConfiguration* ARDOUR::Config  = 0;
+ARDOUR::RuntimeProfile*  ARDOUR::Profile = 0;
+ARDOUR::AudioLibrary*    ARDOUR::Library = 0;
 
 using namespace ARDOUR;
 using namespace std;
@@ -149,23 +150,23 @@ using namespace PBD;
 
 bool libardour_initialized = false;
 
-compute_peak_t          ARDOUR::compute_peak = 0;
-find_peaks_t            ARDOUR::find_peaks = 0;
-apply_gain_to_buffer_t  ARDOUR::apply_gain_to_buffer = 0;
+compute_peak_t          ARDOUR::compute_peak          = 0;
+find_peaks_t            ARDOUR::find_peaks            = 0;
+apply_gain_to_buffer_t  ARDOUR::apply_gain_to_buffer  = 0;
 mix_buffers_with_gain_t ARDOUR::mix_buffers_with_gain = 0;
-mix_buffers_no_gain_t   ARDOUR::mix_buffers_no_gain = 0;
-copy_vector_t           ARDOUR::copy_vector = 0;
+mix_buffers_no_gain_t   ARDOUR::mix_buffers_no_gain   = 0;
+copy_vector_t           ARDOUR::copy_vector           = 0;
 
-PBD::Signal1<void,std::string> ARDOUR::BootMessage;
-PBD::Signal3<void,std::string,std::string,bool> ARDOUR::PluginScanMessage;
-PBD::Signal1<void,int> ARDOUR::PluginScanTimeout;
-PBD::Signal0<void> ARDOUR::GUIIdle;
-PBD::Signal3<bool,std::string,std::string,int> ARDOUR::CopyConfigurationFiles;
+PBD::Signal1<void, std::string>                    ARDOUR::BootMessage;
+PBD::Signal3<void, std::string, std::string, bool> ARDOUR::PluginScanMessage;
+PBD::Signal1<void, int>                            ARDOUR::PluginScanTimeout;
+PBD::Signal0<void>                                 ARDOUR::GUIIdle;
+PBD::Signal3<bool, std::string, std::string, int>  ARDOUR::CopyConfigurationFiles;
 
 std::map<std::string, bool> ARDOUR::reserved_io_names;
 
 static bool have_old_configuration_files = false;
-static bool running_from_gui = false;
+static bool running_from_gui             = false;
 
 namespace ARDOUR {
 extern void setup_enum_writer ();
@@ -184,14 +185,13 @@ setup_hardware_optimization (bool try_optimization)
 	bool generic_mix_functions = true;
 
 	if (try_optimization) {
+		FPU* fpu = FPU::instance ();
 
-		FPU* fpu = FPU::instance();
-
-#if defined (ARCH_X86) && defined (BUILD_SSE_OPTIMIZATIONS)
+#if defined(ARCH_X86) && defined(BUILD_SSE_OPTIMIZATIONS)
 
 #ifdef PLATFORM_WINDOWS
 		/* We have AVX-optimized code for Windows */
-		if (fpu->has_avx())
+		if (fpu->has_avx ())
 #else
 		/* AVX code doesn't compile on Linux yet */
 		if (false)
@@ -209,8 +209,7 @@ setup_hardware_optimization (bool try_optimization)
 
 			generic_mix_functions = false;
 
-		} else if (fpu->has_sse()) {
-
+		} else if (fpu->has_sse ()) {
 			info << "Using SSE optimized routines" << endmsg;
 
 			// SSE SET
@@ -222,18 +221,17 @@ setup_hardware_optimization (bool try_optimization)
 			copy_vector           = default_copy_vector;
 
 			generic_mix_functions = false;
-
 		}
 
-#elif defined (__APPLE__) && defined (BUILD_VECLIB_OPTIMIZATIONS)
+#elif defined(__APPLE__) && defined(BUILD_VECLIB_OPTIMIZATIONS)
 
 		if (floor (kCFCoreFoundationVersionNumber) > kCFCoreFoundationVersionNumber10_4) { /* at least Tiger */
-			compute_peak           = veclib_compute_peak;
-			find_peaks             = veclib_find_peaks;
-			apply_gain_to_buffer   = veclib_apply_gain_to_buffer;
-			mix_buffers_with_gain  = veclib_mix_buffers_with_gain;
-			mix_buffers_no_gain    = veclib_mix_buffers_no_gain;
-			copy_vector            = default_copy_vector;
+			compute_peak          = veclib_compute_peak;
+			find_peaks            = veclib_find_peaks;
+			apply_gain_to_buffer  = veclib_apply_gain_to_buffer;
+			mix_buffers_with_gain = veclib_mix_buffers_with_gain;
+			mix_buffers_no_gain   = veclib_mix_buffers_no_gain;
+			copy_vector           = default_copy_vector;
 
 			generic_mix_functions = false;
 
@@ -247,7 +245,6 @@ setup_hardware_optimization (bool try_optimization)
 	}
 
 	if (generic_mix_functions) {
-
 		compute_peak          = default_compute_peak;
 		find_peaks            = default_find_peaks;
 		apply_gain_to_buffer  = default_apply_gain_to_buffer;
@@ -269,10 +266,9 @@ lotsa_files_please ()
 	struct rlimit rl;
 
 	if (getrlimit (RLIMIT_NOFILE, &rl) == 0) {
-
 #ifdef __APPLE__
-                /* See the COMPATIBILITY note on the Apple setrlimit() man page */
-		rl.rlim_cur = min ((rlim_t) OPEN_MAX, rl.rlim_max);
+		/* See the COMPATIBILITY note on the Apple setrlimit() man page */
+		rl.rlim_cur = min ((rlim_t)OPEN_MAX, rl.rlim_max);
 #else
 		rl.rlim_cur = rl.rlim_max;
 #endif
@@ -304,25 +300,24 @@ lotsa_files_please ()
 	if (newmax > 0) {
 		info << string_compose (_("Your system is configured to limit %1 to %2 open files"), PROGRAM_NAME, newmax) << endmsg;
 	} else {
-		error << string_compose (_("Could not set system open files limit. Current limit is %1 open files"), _getmaxstdio())  << endmsg;
+		error << string_compose (_("Could not set system open files limit. Current limit is %1 open files"), _getmaxstdio ()) << endmsg;
 	}
 #endif
 }
 
 static int
-copy_configuration_files (string const & old_dir, string const & new_dir, int old_version)
+copy_configuration_files (string const& old_dir, string const& new_dir, int old_version)
 {
 	string old_name;
 	string new_name;
 
 	/* ensure target directory exists */
 
-	if (g_mkdir_with_parents (new_dir.c_str(), 0755)) {
+	if (g_mkdir_with_parents (new_dir.c_str (), 0755)) {
 		return -1;
 	}
 
 	if (old_version >= 3) {
-
 		old_name = Glib::build_filename (old_dir, X_("recent"));
 		new_name = Glib::build_filename (new_dir, X_("recent"));
 
@@ -371,7 +366,7 @@ copy_configuration_files (string const & old_dir, string const & new_dir, int ol
 		copy_recurse (old_name, new_name);
 
 		/* plugin status */
-		g_mkdir_with_parents (Glib::build_filename (new_dir, plugin_metadata_dir_name).c_str(), 0755);
+		g_mkdir_with_parents (Glib::build_filename (new_dir, plugin_metadata_dir_name).c_str (), 0755);
 
 		old_name = Glib::build_filename (old_dir, X_("plugin_statuses")); /* until 6.0 */
 		new_name = Glib::build_filename (new_dir, plugin_metadata_dir_name, X_("plugin_statuses"));
@@ -393,11 +388,11 @@ copy_configuration_files (string const & old_dir, string const & new_dir, int ol
 		new_name = Glib::build_filename (new_dir, export_formats_dir_name);
 
 		vector<string> export_formats;
-		g_mkdir_with_parents (Glib::build_filename (new_dir, export_formats_dir_name).c_str(), 0755);
+		g_mkdir_with_parents (Glib::build_filename (new_dir, export_formats_dir_name).c_str (), 0755);
 		find_files_matching_pattern (export_formats, old_name, X_("*.format"));
-		for (vector<string>::iterator i = export_formats.begin(); i != export_formats.end(); ++i) {
+		for (vector<string>::iterator i = export_formats.begin (); i != export_formats.end (); ++i) {
 			std::string from = *i;
-			std::string to = Glib::build_filename (new_name, Glib::path_get_basename (*i));
+			std::string to   = Glib::build_filename (new_name, Glib::path_get_basename (*i));
 			copy_file (from, to);
 		}
 	}
@@ -428,13 +423,13 @@ ARDOUR::check_for_old_configuration_files ()
 }
 
 int
-ARDOUR::handle_old_configuration_files (boost::function<bool (std::string const&, std::string const&, int)> ui_handler)
+ARDOUR::handle_old_configuration_files (boost::function<bool(std::string const&, std::string const&, int)> ui_handler)
 {
 	if (have_old_configuration_files) {
 		int current_version = atoi (X_(PROGRAM_VERSION));
 		assert (current_version > 1); // established in check_for_old_configuration_files ()
-		int old_version = current_version - 1;
-		string old_config_dir = user_config_directory (old_version);
+		int    old_version        = current_version - 1;
+		string old_config_dir     = user_config_directory (old_version);
 		string current_config_dir = user_config_directory (current_version);
 
 		if (ui_handler (old_config_dir, current_config_dir, old_version)) {
@@ -455,7 +450,7 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	running_from_gui = with_gui;
 
 #ifndef NDEBUG
-	if (getenv("ARDOUR_LUA_METATABLES")) {
+	if (getenv ("ARDOUR_LUA_METATABLES")) {
 		luabridge::Security::setHideMetatables (false);
 	}
 #endif
@@ -464,11 +459,12 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	fftwf_make_planner_thread_safe ();
 #endif
 
-	if (!PBD::init()) return false;
+	if (!PBD::init ())
+		return false;
 
 #if ENABLE_NLS
-	(void) bindtextdomain(PACKAGE, localedir);
-	(void) bind_textdomain_codeset (PACKAGE, "UTF-8");
+	(void)bindtextdomain (PACKAGE, localedir);
+	(void)bind_textdomain_codeset (PACKAGE, "UTF-8");
 #endif
 
 	SessionEvent::init_event_pool ();
@@ -480,10 +476,10 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	MidiRegion::make_property_quarks ();
 	AudioRegion::make_property_quarks ();
 	RouteGroup::make_property_quarks ();
-        Playlist::make_property_quarks ();
-        AudioPlaylist::make_property_quarks ();
-        PresentationInfo::make_property_quarks ();
-        TransportMaster::make_property_quarks ();
+	Playlist::make_property_quarks ();
+	AudioPlaylist::make_property_quarks ();
+	PresentationInfo::make_property_quarks ();
+	TransportMaster::make_property_quarks ();
 
 	/* this is a useful ready to use PropertyChange that many
 	   things need to check. This avoids having to compose
@@ -507,7 +503,7 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	lotsa_files_please ();
 
 #ifdef HAVE_LRDF
-	lrdf_init();
+	lrdf_init ();
 #endif
 	Library = new AudioLibrary;
 
@@ -521,20 +517,19 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 
 	Config->set_use_windows_vst (use_windows_vst);
 #ifdef LXVST_SUPPORT
-	Config->set_use_lxvst(true);
+	Config->set_use_lxvst (true);
 #endif
 
 	Profile = new RuntimeProfile;
 
-
 #ifdef WINDOWS_VST_SUPPORT
-	if (Config->get_use_windows_vst() && fst_init (0)) {
+	if (Config->get_use_windows_vst () && fst_init (0)) {
 		return false;
 	}
 #endif
 
 #ifdef LXVST_SUPPORT
-	if (Config->get_use_lxvst() && vstfx_init (0)) {
+	if (Config->get_use_lxvst () && vstfx_init (0)) {
 		return false;
 	}
 #endif
@@ -549,13 +544,13 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	Analyser::init ();
 
 	/* singletons - first object is "it" */
-	(void) PluginManager::instance();
+	(void)PluginManager::instance ();
 #ifdef LV2_SUPPORT
-	(void) URIMap::instance();
+	(void)URIMap::instance ();
 #endif
-	(void) EventTypeMap::instance();
+	(void)EventTypeMap::instance ();
 
-	ControlProtocolManager::instance().discover_control_protocols ();
+	ControlProtocolManager::instance ().discover_control_protocols ();
 
 	/* for each control protocol, check for a request buffer factory method
 	   and if it exists, store it in the EventLoop list of such
@@ -563,7 +558,7 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	   with EventLoops so that signal emission can be RT-safe.
 	*/
 
-	ControlProtocolManager::instance().register_request_buffer_factories ();
+	ControlProtocolManager::instance ().register_request_buffer_factories ();
 	/* it would be nice if this could auto-register itself in the
 	   constructor, since MidiControlUI is a singleton, but it can't be
 	   created until after the engine is running. Therefore we have to
@@ -575,9 +570,9 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	   how many more per-thread buffer sets we need above
 	   the h/w concurrency, but its definitely > 1 more.
 	*/
-        BufferManager::init (hardware_concurrency() + 4);
+	BufferManager::init (hardware_concurrency () + 4);
 
-        PannerManager::instance().discover_panners();
+	PannerManager::instance ().discover_panners ();
 
 	ARDOUR::AudioEngine::create ();
 	TransportMasterManager::create ();
@@ -594,25 +589,25 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	   while for pure I/O (e.g. "Click") track/bus creation must always fail.
 	*/
 
-	reserved_io_names[_("Monitor")] = true;
-	reserved_io_names[_("Master")] = true;
-	reserved_io_names["auditioner"] = true; // auditioner.cc  Track (s, "auditioner",...)
+	reserved_io_names[_("Monitor")]          = true;
+	reserved_io_names[_("Master")]           = true;
+	reserved_io_names[X_("auditioner")]      = true; // auditioner.cc  Track (s, "auditioner",...)
 	reserved_io_names[_("Virtual Keyboard")] = false;
 
 	/* pure I/O */
-	reserved_io_names[X_("Click")] = false; // session.cc ClickIO (*this, X_("Click")
-	reserved_io_names[_("Control")] = false;
-	reserved_io_names[_("Mackie")] = false;
-	reserved_io_names[_("FaderPort Recv")] = false;
-	reserved_io_names[_("FaderPort Send")] = false;
-	reserved_io_names[_("FaderPort2 Recv")] = false;
-	reserved_io_names[_("FaderPort2 Send")] = false;
-	reserved_io_names[_("FaderPort8 Recv")] = false;
-	reserved_io_names[_("FaderPort8 Send")] = false;
+	reserved_io_names[X_("Click")]           = false; // session.cc ClickIO (*this, X_("Click")
+	reserved_io_names[_("Control")]          = false;
+	reserved_io_names[_("Mackie")]           = false;
+	reserved_io_names[_("FaderPort Recv")]   = false;
+	reserved_io_names[_("FaderPort Send")]   = false;
+	reserved_io_names[_("FaderPort2 Recv")]  = false;
+	reserved_io_names[_("FaderPort2 Send")]  = false;
+	reserved_io_names[_("FaderPort8 Recv")]  = false;
+	reserved_io_names[_("FaderPort8 Send")]  = false;
 	reserved_io_names[_("FaderPort16 Recv")] = false;
 	reserved_io_names[_("FaderPort16 Send")] = false;
 
-	MIDI::Name::MidiPatchManager::instance().load_midnams_in_thread ();
+	MIDI::Name::MidiPatchManager::instance ().load_midnams_in_thread ();
 
 	libardour_initialized = true;
 
@@ -625,24 +620,22 @@ ARDOUR::init_post_engine (uint32_t start_cnt)
 	XMLNode* node;
 
 	if (start_cnt == 0) {
-
 		if (!running_from_gui) {
-
 			/* find plugins, but only using the existing cache (i.e. do
 			 * not discover new ones. GUIs are responsible for
 			 * invoking this themselves after the engine is
 			 * started, with whatever options they want.
 			 */
 
-			ARDOUR::PluginManager::instance().refresh (true);
+			ARDOUR::PluginManager::instance ().refresh (true);
 		}
 
-		if ((node = Config->control_protocol_state()) != 0) {
-			ControlProtocolManager::instance().set_state (*node, 0 /* here: global-config state */);
+		if ((node = Config->control_protocol_state ()) != 0) {
+			ControlProtocolManager::instance ().set_state (*node, 0 /* here: global-config state */);
 		}
 	}
 
-	TransportMasterManager::instance().restart ();
+	TransportMasterManager::instance ().restart ();
 }
 
 void
@@ -654,7 +647,7 @@ ARDOUR::cleanup ()
 
 	engine_startup_connection.disconnect ();
 
-	delete &ControlProtocolManager::instance();
+	delete &ControlProtocolManager::instance ();
 	ARDOUR::AudioEngine::destroy ();
 
 	delete Library;
@@ -666,9 +659,9 @@ ARDOUR::cleanup ()
 #endif
 
 #ifdef LXVST_SUPPORT
-	vstfx_exit();
+	vstfx_exit ();
 #endif
-	delete &PluginManager::instance();
+	delete &PluginManager::instance ();
 	delete Config;
 	PBD::cleanup ();
 
@@ -676,7 +669,7 @@ ARDOUR::cleanup ()
 }
 
 bool
-ARDOUR::no_auto_connect()
+ARDOUR::no_auto_connect ()
 {
 	return getenv ("ARDOUR_NO_AUTOCONNECT") != 0;
 }
@@ -697,44 +690,44 @@ ARDOUR::setup_fpu ()
 
 	unsigned int MXCSR;
 
-	if (!fpu->has_flush_to_zero() && !fpu->has_denormals_are_zero()) {
+	if (!fpu->has_flush_to_zero () && !fpu->has_denormals_are_zero ()) {
 		return;
 	}
 
-	MXCSR  = _mm_getcsr();
+	MXCSR = _mm_getcsr ();
 
 #ifdef DEBUG_DENORMAL_EXCEPTION
 	/* This will raise a FP exception if a denormal is detected */
 	MXCSR &= ~_MM_MASK_DENORM;
 #endif
 
-	switch (Config->get_denormal_model()) {
-	case DenormalNone:
-		MXCSR &= ~(_MM_FLUSH_ZERO_ON | 0x40);
-		break;
+	switch (Config->get_denormal_model ()) {
+		case DenormalNone:
+			MXCSR &= ~(_MM_FLUSH_ZERO_ON | 0x40);
+			break;
 
-	case DenormalFTZ:
-		if (fpu->has_flush_to_zero()) {
-			MXCSR |= _MM_FLUSH_ZERO_ON;
-		}
-		break;
-
-	case DenormalDAZ:
-		MXCSR &= ~_MM_FLUSH_ZERO_ON;
-		if (fpu->has_denormals_are_zero()) {
-			MXCSR |= 0x40;
-		}
-		break;
-
-	case DenormalFTZDAZ:
-		if (fpu->has_flush_to_zero()) {
-			if (fpu->has_denormals_are_zero()) {
-				MXCSR |= _MM_FLUSH_ZERO_ON | 0x40;
-			} else {
+		case DenormalFTZ:
+			if (fpu->has_flush_to_zero ()) {
 				MXCSR |= _MM_FLUSH_ZERO_ON;
 			}
-		}
-		break;
+			break;
+
+		case DenormalDAZ:
+			MXCSR &= ~_MM_FLUSH_ZERO_ON;
+			if (fpu->has_denormals_are_zero ()) {
+				MXCSR |= 0x40;
+			}
+			break;
+
+		case DenormalFTZDAZ:
+			if (fpu->has_flush_to_zero ()) {
+				if (fpu->has_denormals_are_zero ()) {
+					MXCSR |= _MM_FLUSH_ZERO_ON | 0x40;
+				} else {
+					MXCSR |= _MM_FLUSH_ZERO_ON;
+				}
+			}
+			break;
 	}
 
 	_mm_setcsr (MXCSR);
@@ -742,26 +735,26 @@ ARDOUR::setup_fpu ()
 #elif defined(__aarch64__)
 	/* http://infocenter.arm.com/help/topic/com.arm.doc.ddi0488d/CIHCACFF.html
 	 * bit 24: flush-to-zero */
-	if (Config->get_denormal_model() != DenormalNone) {
+	if (Config->get_denormal_model () != DenormalNone) {
 		uint64_t cw;
-		__asm__ __volatile__ (
-				"mrs    %0, fpcr           \n"
-				"orr    %0, %0, #0x1000000 \n"
-				"msr    fpcr, %0           \n"
-				"isb                       \n"
-				: "=r"(cw) :: "memory");
+		__asm__ __volatile__(
+		    "mrs    %0, fpcr           \n"
+		    "orr    %0, %0, #0x1000000 \n"
+		    "msr    fpcr, %0           \n"
+		    "isb                       \n"
+		    : "=r"(cw)::"memory");
 	}
 
 #elif defined(__arm__)
 	/* http://infocenter.arm.com/help/topic/com.arm.doc.dui0068b/BCFHFBGA.html
 	 * bit 24: flush-to-zero */
-	if (Config->get_denormal_model() != DenormalNone) {
+	if (Config->get_denormal_model () != DenormalNone) {
 		uint32_t cw;
-		__asm__ __volatile__ (
-				"vmrs   %0, fpscr          \n"
-				"orr    %0, %0, #0x1000000 \n"
-				"vmsr   fpscr, %0          \n"
-				: "=r"(cw) :: "memory");
+		__asm__ __volatile__(
+		    "vmrs   %0, fpscr          \n"
+		    "orr    %0, %0, #0x1000000 \n"
+		    "vmsr   fpscr, %0          \n"
+		    : "=r"(cw)::"memory");
 	}
 
 #endif
@@ -775,13 +768,13 @@ static const bool translate_by_default = true;
 string
 ARDOUR::translation_enable_path ()
 {
-        return Glib::build_filename (user_config_directory(), ".translate");
+	return Glib::build_filename (user_config_directory (), ".translate");
 }
 
 bool
 ARDOUR::translations_are_enabled ()
 {
-	int fd = g_open (ARDOUR::translation_enable_path().c_str(), O_RDONLY, 0444);
+	int fd = g_open (ARDOUR::translation_enable_path ().c_str (), O_RDONLY, 0444);
 
 	if (fd < 0) {
 		return translate_by_default;
@@ -802,8 +795,8 @@ ARDOUR::translations_are_enabled ()
 bool
 ARDOUR::set_translations_enabled (bool yn)
 {
-	string i18n_enabler = ARDOUR::translation_enable_path();
-	int fd = g_open (i18n_enabler.c_str(), O_WRONLY|O_CREAT|O_TRUNC, 0644);
+	string i18n_enabler = ARDOUR::translation_enable_path ();
+	int    fd           = g_open (i18n_enabler.c_str (), O_WRONLY | O_CREAT | O_TRUNC, 0644);
 
 	if (fd < 0) {
 		return false;
@@ -817,21 +810,20 @@ ARDOUR::set_translations_enabled (bool yn)
 		c = '0';
 	}
 
-	(void) ::write (fd, &c, 1);
-	(void) ::close (fd);
+	(void)::write (fd, &c, 1);
+	(void)::close (fd);
 
 	Config->ParameterChanged ("enable-translation");
 	return true;
 }
-
 
 vector<SyncSource>
 ARDOUR::get_available_sync_options ()
 {
 	vector<SyncSource> ret;
 
-	boost::shared_ptr<AudioBackend> backend = AudioEngine::instance()->current_backend();
-	if (backend && backend->name() == "JACK") {
+	boost::shared_ptr<AudioBackend> backend = AudioEngine::instance ()->current_backend ();
+	if (backend && backend->name () == "JACK") {
 		ret.push_back (Engine);
 	}
 
@@ -853,21 +845,21 @@ ARDOUR::get_available_sync_options ()
 #define CLOCK_REALTIME 0
 #define CLOCK_MONOTONIC 0
 int
-clock_gettime (int /*clk_id*/, struct timespec *t)
+clock_gettime (int /*clk_id*/, struct timespec* t)
 {
-        static bool initialized = false;
-        static mach_timebase_info_data_t timebase;
-        if (!initialized) {
-                mach_timebase_info(&timebase);
-                initialized = true;
-        }
-        uint64_t time;
-        time = mach_absolute_time();
-        double nseconds = ((double)time * (double)timebase.numer)/((double)timebase.denom);
-        double seconds = ((double)time * (double)timebase.numer)/((double)timebase.denom * 1e9);
-        t->tv_sec = seconds;
-        t->tv_nsec = nseconds;
-        return 0;
+	static bool                      initialized = false;
+	static mach_timebase_info_data_t timebase;
+	if (!initialized) {
+		mach_timebase_info (&timebase);
+		initialized = true;
+	}
+	uint64_t time;
+	time            = mach_absolute_time ();
+	double nseconds = ((double)time * (double)timebase.numer) / ((double)timebase.denom);
+	double seconds  = ((double)time * (double)timebase.numer) / ((double)timebase.denom * 1e9);
+	t->tv_sec       = seconds;
+	t->tv_nsec      = nseconds;
+	return 0;
 }
 #endif
 
@@ -876,11 +868,11 @@ ARDOUR::get_microseconds ()
 {
 #ifdef PLATFORM_WINDOWS
 	microseconds_t ret = 0;
-	LARGE_INTEGER freq, time;
+	LARGE_INTEGER  freq, time;
 
-	if (QueryPerformanceFrequency(&freq))
-		if (QueryPerformanceCounter(&time))
-			ret = (microseconds_t)((time.QuadPart * 1000000) / freq.QuadPart);
+	if (QueryPerformanceFrequency (&freq))
+		if (QueryPerformanceCounter (&time))
+			ret = (microseconds_t) ((time.QuadPart * 1000000) / freq.QuadPart);
 
 	return ret;
 #else
@@ -889,7 +881,7 @@ ARDOUR::get_microseconds ()
 		/* EEEK! */
 		return 0;
 	}
-	return (microseconds_t) ts.tv_sec * 1000000 + (ts.tv_nsec/1000);
+	return (microseconds_t)ts.tv_sec * 1000000 + (ts.tv_nsec / 1000);
 #endif
 }
 
@@ -903,15 +895,12 @@ ARDOUR::get_microseconds ()
 int
 ARDOUR::format_data_width (ARDOUR::SampleFormat format)
 {
-
-
-
 	switch (format) {
-	case ARDOUR::FormatInt16:
-		return 16;
-	case ARDOUR::FormatInt24:
-		return 24;
-	default:
-		return 32;
+		case ARDOUR::FormatInt16:
+			return 16;
+		case ARDOUR::FormatInt24:
+			return 24;
+		default:
+			return 32;
 	}
 }
