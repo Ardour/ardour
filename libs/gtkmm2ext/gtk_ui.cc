@@ -81,7 +81,10 @@ UI::UI (string application_name, string thread_name, int *argc, char ***argv)
 {
 	theMain = new Main (argc, argv);
 
-	pthread_set_name ("ArdourGUI");
+	char buf[18];
+	/* pthread public name has a 16 char limit */
+	snprintf (buf, sizeof (buf), "%.11sGUI", PROGRAM_NAME);
+	pthread_set_name (buf);
 
 	_active = false;
 
