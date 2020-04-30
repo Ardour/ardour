@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-15 19:29+0200\n"
+"POT-Creation-Date: 2020-04-30 12:44-0600\n"
 "PO-Revision-Date: 2020-04-18 13:37+0200\n"
 "Last-Translator: Nils Philippsen <nils@tiptoe.de>\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
@@ -49,19 +49,19 @@ msgstr "RegionList"
 msgid "ProcessorMenu"
 msgstr "ProcessorMenu"
 
-#: bindings.cc:835 bindings.cc:837
+#: bindings.cc:840 bindings.cc:842
 msgid "Window"
 msgstr "Fenster"
 
-#: bindings.cc:835
+#: bindings.cc:840
 msgid " (Categorized)"
 msgstr " (Kategorisiert)"
 
-#: bindings.cc:837
+#: bindings.cc:842
 msgid " (Alphabetical)"
 msgstr "(Alphabetisch)"
 
-#: bindings.cc:853
+#: bindings.cc:858
 msgid "Uncategorized"
 msgstr "Unkategorisiert"
 
@@ -73,11 +73,11 @@ msgstr "Die Datei mit den Cursor-Hotspot-Infos %1 hat einen Fehler in Zeile %2"
 msgid "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 msgstr "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 
-#: gtk_ui.cc:123
+#: gtk_ui.cc:126
 msgid "Log"
 msgstr "Log"
 
-#: gtk_ui.cc:392
+#: gtk_ui.cc:395
 msgid ""
 "\n"
 "\n"
@@ -87,11 +87,11 @@ msgstr ""
 "\n"
 "Kurzbefehl: "
 
-#: gtk_ui.cc:691
+#: gtk_ui.cc:694
 msgid "Press To Exit"
 msgstr "Zum Beenden drücken"
 
-#: gtk_ui.cc:727
+#: gtk_ui.cc:730
 msgid "I'm sorry %1, I can't do that"
 msgstr "Leider kann ich das nicht tun, %1"
 

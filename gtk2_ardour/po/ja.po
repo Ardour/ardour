@@ -3,11 +3,13 @@
 # This file is distributed under the same license as the gtk-ardour package.
 #
 # Hiroki Inagaki <hiroki.ingk@gmail.com>, 2017.
+#: audio_clock.cc:941 audio_clock.cc:942 session_dialog.cc:604
+#: session_dialog.cc:605
 msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-18 08:49+0100\n"
+"POT-Creation-Date: 2020-04-30 12:44-0600\n"
 "PO-Revision-Date: 2020-04-25 22:39+0100\n"
 "Last-Translator: Hiroki Inagaki <hiroki.ingk@gmail.com>\n"
 "Language-Team: Japanese <ardour-dev@lists.ardour.org>\n"
@@ -344,13 +346,8 @@ msgid ""
 "\tMartin Blanchard\n"
 "\tRomain Arnaud <roming22@gmail.com>\n"
 "\tOlivier Humbert <trebmuh@tuxfamily.org>\n"
+"\tFrédéric Rech <fred_rech@laposte.net>\n"
 msgstr ""
-"フランス語:\n"
-"\tAlain Fréhel <alain.frehel@free.fr>\n"
-"\tChristophe Combelles <ccomb@free.fr>\n"
-"\tMartin Blanchard\n"
-"\tRomain Arnaud <roming22@gmail.com>\n"
-"\tOlivier Humbert <trebmuh@tuxfamily.org>\n"
 
 #: about.cc:217
 msgid ""
@@ -728,7 +725,7 @@ msgid "After Selection"
 msgstr "選択項目の後"
 
 #: add_route_dialog.cc:177 duplicate_routes_dialog.cc:60
-#: transport_masters_dialog.cc:78
+#: transport_masters_dialog.cc:79
 msgid "Last"
 msgstr "最後"
 
@@ -744,7 +741,7 @@ msgstr "ストリクト I/O"
 msgid "Template/Type"
 msgstr "テンプレート/タイプ"
 
-#: add_route_dialog.cc:215 session_dialog.cc:350 session_dialog.cc:691
+#: add_route_dialog.cc:215 session_dialog.cc:353 session_dialog.cc:694
 msgid "Modified With"
 msgstr "次から修正"
 
@@ -838,11 +835,11 @@ msgid "12 Channel"
 msgstr "12チャンネル"
 
 #: add_route_dialog.cc:900 gain_meter.cc:810 mixer_strip.cc:2076
-#: mixer_strip.cc:2536 processor_box.cc:3886
+#: mixer_strip.cc:2536 processor_box.cc:3926
 msgid "Custom"
 msgstr "Custom"
 
-#: add_route_dialog.cc:941 session_dialog.cc:579 session_dialog.cc:580
+#: add_route_dialog.cc:941 session_dialog.cc:582 session_dialog.cc:583
 msgid "Factory Template"
 msgstr "ファクトリ・テンプレート"
 
@@ -1002,7 +999,7 @@ msgstr "Idle'o'Meter"
 msgid "Plugin DSP Load"
 msgstr "プラグイン DSP ロード"
 
-#: ardour_ui.cc:338 rc_option_editor.cc:3418 transport_masters_dialog.cc:667
+#: ardour_ui.cc:338 rc_option_editor.cc:3418 transport_masters_dialog.cc:695
 msgid "Transport Masters"
 msgstr "トランスポート・マスタ"
 
@@ -1180,7 +1177,7 @@ msgstr "なし"
 msgid "kHz"
 msgstr "kHz"
 
-#: ardour_ui.cc:1217 ardour_ui.cc:1221 editor_ops.cc:7320 editor_ops.cc:7331
+#: ardour_ui.cc:1217 ardour_ui.cc:1221 editor_ops.cc:7323 editor_ops.cc:7334
 #: rhythm_ferret.cc:131 rhythm_ferret.cc:146
 msgid "ms"
 msgstr "ms"
@@ -1348,24 +1345,24 @@ msgstr ""
 "セッションメニューから \"トラックやバスの追加\" を選択することで作成できま"
 "す。"
 
-#: ardour_ui.cc:2187 route_ui.cc:1932
+#: ardour_ui.cc:2184 route_ui.cc:1932
 msgid "Confirm Template Overwrite"
 msgstr "テンプレートの上書きを確認"
 
-#: ardour_ui.cc:2188 route_ui.cc:1933
+#: ardour_ui.cc:2185 route_ui.cc:1933
 msgid "A template already exists with that name. Do you want to overwrite it?"
 msgstr "その名前のテンプレートは既に存在します。上書きしますか？"
 
-#: ardour_ui.cc:2381
+#: ardour_ui.cc:2387
 msgid "No files were ready for clean-up"
 msgstr "クリーンアップできるファイルはありません"
 
-#: ardour_ui.cc:2385 ardour_ui.cc:2395 ardour_ui.cc:2528 ardour_ui.cc:2535
+#: ardour_ui.cc:2391 ardour_ui.cc:2401 ardour_ui.cc:2534 ardour_ui.cc:2541
 #: ardour_ui_ed.cc:153
 msgid "Clean-up"
 msgstr "クリーンアップ"
 
-#: ardour_ui.cc:2386
+#: ardour_ui.cc:2392
 msgid ""
 "If this seems surprising, \n"
 "check for any existing snapshots.\n"
@@ -1377,19 +1374,19 @@ msgstr ""
 "まだリージョンに利用していないファイルが\n"
 "残っている可能性があります。"
 
-#: ardour_ui.cc:2445
+#: ardour_ui.cc:2451
 msgid "kilo"
 msgstr "キロ"
 
-#: ardour_ui.cc:2448
+#: ardour_ui.cc:2454
 msgid "mega"
 msgstr "メガ"
 
-#: ardour_ui.cc:2451
+#: ardour_ui.cc:2457
 msgid "giga"
 msgstr "ギガ"
 
-#: ardour_ui.cc:2456
+#: ardour_ui.cc:2462
 msgid ""
 "The following file was deleted from %2,\n"
 "releasing %3 %4bytes of disk space"
@@ -1400,7 +1397,7 @@ msgstr[0] ""
 "以下のファイルが %2 から削除され、\n"
 "%3 %4バイトのディスクスペースを解放しました"
 
-#: ardour_ui.cc:2463
+#: ardour_ui.cc:2469
 msgid ""
 "The following file was not in use and \n"
 "has been moved to: %2\n"
@@ -1429,11 +1426,11 @@ msgstr[0] ""
 "\n"
 "することで追加で %3 %4バイトのディスクスペースが解放されます。\n"
 
-#: ardour_ui.cc:2523
+#: ardour_ui.cc:2529
 msgid "Are you sure you want to clean-up?"
 msgstr "本当にクリーンアップしますか？"
 
-#: ardour_ui.cc:2530
+#: ardour_ui.cc:2536
 msgid ""
 "Clean-up is a destructive operation.\n"
 "ALL undo/redo information will be lost if you clean-up.\n"
@@ -1444,23 +1441,23 @@ msgstr ""
 "クリーンアップはすべての使用されていないファイルを \"dead\" フォルダに移動し"
 "ます。"
 
-#: ardour_ui.cc:2538
+#: ardour_ui.cc:2544
 msgid "CleanupDialog"
 msgstr "クリーンアップダイアログ"
 
-#: ardour_ui.cc:2564
+#: ardour_ui.cc:2570
 msgid "Cleaned Files"
 msgstr "クリーン済みファイル"
 
-#: ardour_ui.cc:2581
+#: ardour_ui.cc:2587
 msgid "deleted file"
 msgstr "削除済みファイル"
 
-#: ardour_ui.cc:2697
+#: ardour_ui.cc:2703
 msgid "You cannot add tracks or busses without a session already loaded."
 msgstr "セッションを読み込んでいないため、トラックやバスを追加できません。"
 
-#: ardour_ui.cc:2799
+#: ardour_ui.cc:2805
 msgid ""
 "The disk system on your computer\n"
 "was not able to keep up with %1.\n"
@@ -1474,7 +1471,7 @@ msgstr ""
 "つまり、ディスクへのデータの書き込み速度が\n"
 "録音に追いついていないということです。\n"
 
-#: ardour_ui.cc:2828
+#: ardour_ui.cc:2834
 msgid ""
 "The disk system on your computer\n"
 "was not able to keep up with %1.\n"
@@ -1488,11 +1485,11 @@ msgstr ""
 "つまり、ディスクからのデータの読み込み速度が\n"
 "プレイバックに追いついていないということです。\n"
 
-#: ardour_ui.cc:2858
+#: ardour_ui.cc:2864
 msgid "Crash Recovery"
 msgstr "修復を破棄"
 
-#: ardour_ui.cc:2859
+#: ardour_ui.cc:2865
 msgid ""
 "This session appears to have been modified\n"
 "without save, or in middle of recording when\n"
@@ -1509,11 +1506,11 @@ msgstr ""
 "%1 は変更を修復または破棄することができます。\n"
 "どちらかを選択してください。\n"
 
-#: ardour_ui.cc:2871
+#: ardour_ui.cc:2877
 msgid "Ignore crash data"
 msgstr "クラッシュしたデータを無視"
 
-#: ardour_ui.cc:2872
+#: ardour_ui.cc:2878
 msgid "Recover from crash"
 msgstr "クラッシュから復旧"
 
@@ -1795,8 +1792,8 @@ msgstr "環境設定"
 msgid "Mixer"
 msgstr "ミキサー"
 
-#: ardour_ui_dependents.cc:289 ardour_ui_ed.cc:159 editor.cc:6060
-#: editor.cc:6307 public_editor.cc:35 rc_option_editor.cc:2489
+#: ardour_ui_dependents.cc:289 ardour_ui_ed.cc:159 editor.cc:6063
+#: editor.cc:6310 public_editor.cc:35 rc_option_editor.cc:2489
 #: rc_option_editor.cc:2497 rc_option_editor.cc:2512 rc_option_editor.cc:2526
 #: rc_option_editor.cc:2530 rc_option_editor.cc:2539 rc_option_editor.cc:2547
 #: rc_option_editor.cc:2555 rc_option_editor.cc:2563 rc_option_editor.cc:2571
@@ -1806,11 +1803,11 @@ msgstr "ミキサー"
 msgid "Editor"
 msgstr "エディター"
 
-#: ardour_ui_dependents.cc:443 editor_actions.cc:494
+#: ardour_ui_dependents.cc:446 editor_actions.cc:494
 msgid "Unset #%1"
 msgstr "#%1 を解除"
 
-#: ardour_ui_dependents.cc:444
+#: ardour_ui_dependents.cc:447
 msgid ""
 "No action bound\n"
 "Right-click to assign"
@@ -1818,7 +1815,7 @@ msgstr ""
 "動作がバインドされていません\n"
 "右クリックでアサインします"
 
-#: ardour_ui_dependents.cc:448
+#: ardour_ui_dependents.cc:451
 msgid ""
 "%1\n"
 "\n"
@@ -1832,19 +1829,19 @@ msgstr ""
 "右クリックで再アサイン\n"
 "Shift+右クリックでアサイン解除"
 
-#: ardour_ui_dialogs.cc:306
+#: ardour_ui_dialogs.cc:314
 msgid "Don't close"
 msgstr "閉じない"
 
-#: ardour_ui_dialogs.cc:307
+#: ardour_ui_dialogs.cc:315
 msgid "Just close"
 msgstr "保存せずに閉じる"
 
-#: ardour_ui_dialogs.cc:308
+#: ardour_ui_dialogs.cc:316
 msgid "Save and close"
 msgstr "保存して閉じる"
 
-#: ardour_ui_dialogs.cc:1004 ardour_ui_ed.cc:431 ardour_ui_ed.cc:442
+#: ardour_ui_dialogs.cc:1012 ardour_ui_ed.cc:431 ardour_ui_ed.cc:442
 #: audio_clock.cc:2156 editor.cc:197 editor.cc:327 editor_actions.cc:616
 #: editor_actions.cc:625 export_timespan_selector.cc:100
 #: session_option_editor.cc:46 session_option_editor.cc:66
@@ -1855,7 +1852,7 @@ msgstr "保存して閉じる"
 msgid "Timecode"
 msgstr "タイムコード"
 
-#: ardour_ui_dialogs.cc:1017 session_option_editor.cc:176
+#: ardour_ui_dialogs.cc:1025 session_option_editor.cc:176
 #: session_option_editor.cc:184 session_option_editor.cc:208
 msgid "Media"
 msgstr "メディア"
@@ -2009,8 +2006,8 @@ msgstr "名前を付けて保存..."
 msgid "Archive..."
 msgstr "アーカイブ..."
 
-#: ardour_ui_ed.cc:230 editor_actions.cc:1477 editor_markers.cc:919
-#: editor_snapshots.cc:141 foldback_strip.cc:1165 mixer_strip.cc:1716
+#: ardour_ui_ed.cc:230 editor_actions.cc:1480 editor_markers.cc:919
+#: editor_snapshots.cc:141 foldback_strip.cc:1166 mixer_strip.cc:1716
 #: route_time_axis.cc:1575
 msgid "Rename..."
 msgstr "名前を変更..."
@@ -2112,7 +2109,7 @@ msgstr "バグの報告方法"
 msgid "Save"
 msgstr "保存"
 
-#: ardour_ui_ed.cc:305 engine_dialog.cc:99 shuttle_control.cc:662
+#: ardour_ui_ed.cc:305 engine_dialog.cc:99 shuttle_control.cc:660
 msgid "Stop"
 msgstr "停止"
 
@@ -2325,7 +2322,7 @@ msgstr "録音可能トラック %1 を切り替え"
 msgid "Percentage"
 msgstr "パーセント"
 
-#: ardour_ui_ed.cc:511 shuttle_control.cc:211
+#: ardour_ui_ed.cc:511 shuttle_control.cc:209
 msgid "Semitones"
 msgstr "半音"
 
@@ -2476,7 +2473,7 @@ msgstr "すべての表示されているレーンを選択"
 msgid "Select All Tracks"
 msgstr "すべてのトラックを選択"
 
-#: ardour_ui_ed.cc:654 export_timespan_selector.cc:66 processor_box.cc:3866
+#: ardour_ui_ed.cc:654 export_timespan_selector.cc:66 processor_box.cc:3906
 msgid "Deselect All"
 msgstr "すべて選択解除"
 
@@ -2618,11 +2615,9 @@ msgstr ""
 
 #: ardour_ui_options.cc:64
 msgid ""
-"It is not possible to use JACK as the the sync source\n"
+"It is not possible to use JACK as the sync source\n"
 " when the pull up/down setting is non-zero."
 msgstr ""
-"プルアップ/ダウン設定がゼロでない場合には\n"
-"JACK を同期ソースとして使用することはできません。"
 
 #: ardour_ui_options.cc:307 ardour_ui_options.cc:327
 msgid "SyncSource|Int."
@@ -2651,7 +2646,7 @@ msgstr ""
 msgid "Open Existing Session"
 msgstr "既存セッションを開く"
 
-#: ardour_ui_session.cc:186 ardour_ui_session.cc:1100 startup_fsm.cc:673
+#: ardour_ui_session.cc:186 ardour_ui_session.cc:1105 startup_fsm.cc:673
 msgid "Extracting session-archive failed: %1"
 msgstr "セッションアーカイブの抽出に失敗しました: %1"
 
@@ -2752,11 +2747,11 @@ msgstr "スナップショットの保存を中止"
 msgid "Don't save now, just snapshot"
 msgstr "今すぐ保存せず、スナップショットのみ行う"
 
-#: ardour_ui_session.cc:706 ardour_ui_session.cc:858
+#: ardour_ui_session.cc:706 ardour_ui_session.cc:863
 msgid "Save it first"
 msgstr "まず保存する"
 
-#: ardour_ui_session.cc:714 ardour_ui_session.cc:866
+#: ardour_ui_session.cc:714 ardour_ui_session.cc:871
 msgid ""
 "%1 was unable to save your session.\n"
 "\n"
@@ -2818,27 +2813,27 @@ msgstr ""
 msgid "Copied %<PRId64> of %<PRId64>"
 msgstr "%<PRId64>/%<PRId64>コピー済み"
 
-#: ardour_ui_session.cc:856
+#: ardour_ui_session.cc:861
 msgid "Abort save-as"
 msgstr "別名で保存を中止"
 
-#: ardour_ui_session.cc:857
+#: ardour_ui_session.cc:862
 msgid "Don't save now, just save-as"
 msgstr "今すぐ保存せず、別名で保存のみ行う"
 
-#: ardour_ui_session.cc:913 save_as_dialog.cc:35
+#: ardour_ui_session.cc:918 save_as_dialog.cc:35
 msgid "Save As"
 msgstr "名前を付けて保存"
 
-#: ardour_ui_session.cc:940
+#: ardour_ui_session.cc:945
 msgid "Save As failed: %1"
 msgstr "名前を付けて保存に失敗しました: %1"
 
-#: ardour_ui_session.cc:977
+#: ardour_ui_session.cc:982
 msgid "Session Archiving failed."
 msgstr "セッションのアーカイブ化に失敗しました。"
 
-#: ardour_ui_session.cc:1005
+#: ardour_ui_session.cc:1010
 msgid ""
 "To ensure compatibility with various systems\n"
 "snapshot names may not contain a '%1' character"
@@ -2846,32 +2841,32 @@ msgstr ""
 "各種システムとの互換性を確保するため、\n"
 "スナップショット名には '%1' 文字は含まれない可能性があります。"
 
-#: ardour_ui_session.cc:1019
+#: ardour_ui_session.cc:1024
 msgid "Confirm Snapshot Overwrite"
 msgstr "スナップショットの上書きを確認"
 
-#: ardour_ui_session.cc:1020
+#: ardour_ui_session.cc:1025
 msgid "A snapshot already exists with that name. Do you want to overwrite it?"
 msgstr "その名前のスナップショットは既に存在します。上書きしますか？"
 
-#: ardour_ui_session.cc:1042
+#: ardour_ui_session.cc:1047
 msgid "Open Session"
 msgstr "セッションを開く"
 
-#: ardour_ui_session.cc:1066 session_dialog.cc:452 session_import_dialog.cc:179
+#: ardour_ui_session.cc:1071 session_dialog.cc:455 session_import_dialog.cc:179
 #: session_metadata_dialog.cc:921
 msgid "%1 sessions"
 msgstr "%1 セッション"
 
-#: ardour_ui_session.cc:1071 session_dialog.cc:457
+#: ardour_ui_session.cc:1076 session_dialog.cc:460
 msgid "Session Archives"
 msgstr "セッションアーカイブ"
 
-#: ardour_ui_session.cc:1157
+#: ardour_ui_session.cc:1162
 msgid "Unsaved Session"
 msgstr "保存していないセッション"
 
-#: ardour_ui_session.cc:1178
+#: ardour_ui_session.cc:1183
 msgid ""
 "The session \"%1\"\n"
 "has not been saved.\n"
@@ -2889,7 +2884,7 @@ msgstr ""
 "\n"
 "どうしますか？"
 
-#: ardour_ui_session.cc:1181
+#: ardour_ui_session.cc:1186
 msgid ""
 "The snapshot \"%1\"\n"
 "has not been saved.\n"
@@ -2907,7 +2902,7 @@ msgstr ""
 "\n"
 "どのようにしますか？"
 
-#: ardour_ui_session.cc:1195
+#: ardour_ui_session.cc:1200
 msgid "Prompter"
 msgstr "プロンプター"
 
@@ -3122,9 +3117,9 @@ msgstr "テンポ"
 msgid "TimeSignature|TS"
 msgstr "拍子"
 
-#: audio_clock.cc:1901 audio_streamview.cc:118 editor_actions.cc:1101
-#: luainstance.cc:1323 luainstance.cc:1328 luainstance.cc:2131
-#: luainstance.cc:2136 plugin_pin_dialog.cc:876 session_metadata_dialog.cc:499
+#: audio_clock.cc:1901 audio_streamview.cc:118 editor_actions.cc:1104
+#: luainstance.cc:1323 luainstance.cc:1328 luainstance.cc:2170
+#: luainstance.cc:2175 plugin_pin_dialog.cc:876 session_metadata_dialog.cc:499
 #: session_metadata_dialog.cc:547 session_metadata_dialog.cc:603
 #: session_metadata_dialog.cc:907 streamview.cc:475
 msgid "programming error: %1"
@@ -3220,7 +3215,7 @@ msgstr ""
 
 #: automation_time_axis.cc:178 automation_time_axis.cc:402
 #: automation_time_axis.cc:657 editor.cc:2001 editor.cc:2079
-#: editor_actions.cc:158 gain_meter.cc:785 shuttle_control.cc:644
+#: editor_actions.cc:158 gain_meter.cc:785 shuttle_control.cc:642
 msgid "Play"
 msgstr "再生"
 
@@ -3285,7 +3280,7 @@ msgstr "ディスクリート"
 msgid "Linear"
 msgstr "リニア"
 
-#: automation_time_axis.cc:704 rhythm_ferret.cc:121 shuttle_control.cc:230
+#: automation_time_axis.cc:704 rhythm_ferret.cc:121 shuttle_control.cc:228
 msgid "Mode"
 msgstr "モード"
 
@@ -3318,7 +3313,7 @@ msgid "Destination"
 msgstr "宛先"
 
 #: bundle_manager.cc:209 bundle_manager.cc:212 bundle_manager.cc:247
-#: editor_sources.cc:141 export_dialog.cc:570 transport_masters_dialog.cc:82
+#: editor_sources.cc:141 export_dialog.cc:570 transport_masters_dialog.cc:83
 msgid "Source"
 msgstr "ソース"
 
@@ -3328,9 +3323,9 @@ msgstr "ソース"
 msgid "Edit"
 msgstr "編集"
 
-#: bundle_manager.cc:267 editor.cc:6202 editor.cc:6232 editor_actions.cc:386
+#: bundle_manager.cc:267 editor.cc:6205 editor.cc:6235 editor_actions.cc:386
 #: editor_actions.cc:387 luawindow.cc:102 plugin_ui.cc:468
-#: processor_box.cc:3850 processor_box.cc:3852
+#: processor_box.cc:3890 processor_box.cc:3892
 msgid "Delete"
 msgstr "削除"
 
@@ -3338,7 +3333,7 @@ msgstr "削除"
 #: editor_routes.cc:247 lua_script_manager.cc:55 lua_script_manager.cc:104
 #: lua_script_manager.cc:145 midi_list_editor.cc:109 plugin_selector.cc:98
 #: plugin_selector.cc:165 session_metadata_dialog.cc:694
-#: transport_masters_dialog.cc:74 transport_masters_dialog.cc:692
+#: transport_masters_dialog.cc:75 transport_masters_dialog.cc:720
 msgid "Name"
 msgstr "名前"
 
@@ -3487,7 +3482,7 @@ msgstr "チャンネル"
 msgid "Pitch"
 msgstr "ピッチ"
 
-#: edit_note_dialog.cc:80 step_entry.cc:392 virtual_keyboard_window.cc:176
+#: edit_note_dialog.cc:80 step_entry.cc:392 virtual_keyboard_window.cc:177
 msgid "Velocity"
 msgstr "ベロシティ"
 
@@ -3610,7 +3605,7 @@ msgstr "連結"
 msgid "Ripple"
 msgstr "波形"
 
-#: editor.cc:214 editor_actions.cc:1495 editor_markers.cc:921
+#: editor.cc:214 editor_actions.cc:1498 editor_markers.cc:921
 #: editor_rulers.cc:265 location_ui.cc:69
 msgid "Lock"
 msgstr "ロック"
@@ -3720,11 +3715,11 @@ msgstr "トラック＆バスグループ"
 msgid "Ranges & Marks"
 msgstr "レンジ＆マーカー"
 
-#: editor.cc:1368 editor.cc:4849 editor_actions.cc:170 editor_actions.cc:1554
+#: editor.cc:1368 editor.cc:4852 editor_actions.cc:170 editor_actions.cc:1557
 msgid "Loop"
 msgstr "ループ"
 
-#: editor.cc:1374 editor.cc:4876 editor_actions.cc:171 time_info_box.cc:113
+#: editor.cc:1374 editor.cc:4879 editor_actions.cc:171 time_info_box.cc:113
 msgid "Punch"
 msgstr "パンチ"
 
@@ -3758,7 +3753,7 @@ msgstr "停止中"
 msgid "Activate"
 msgstr "動作中"
 
-#: editor.cc:1643 editor.cc:1651 editor_ops.cc:4034
+#: editor.cc:1643 editor.cc:1651 editor_ops.cc:4037
 msgid "Freeze"
 msgstr "フリーズ"
 
@@ -3939,19 +3934,19 @@ msgid "Select Range Between Playhead and Edit Point"
 msgstr "再生ヘッドと編集ポイントの間のレンジを選択"
 
 #: editor.cc:2026 editor.cc:2097 editor_actions.cc:167 editor_actions.cc:168
-#: transport_masters_dialog.cc:73
+#: transport_masters_dialog.cc:74
 msgid "Select"
 msgstr "選択"
 
-#: editor.cc:2034 editor.cc:2105 editor_actions.cc:385 processor_box.cc:3846
+#: editor.cc:2034 editor.cc:2105 editor_actions.cc:385 processor_box.cc:3886
 msgid "Cut"
 msgstr "カット"
 
-#: editor.cc:2035 editor.cc:2106 editor_actions.cc:391 processor_box.cc:3848
+#: editor.cc:2035 editor.cc:2106 editor_actions.cc:391 processor_box.cc:3888
 msgid "Copy"
 msgstr "コピー"
 
-#: editor.cc:2036 editor.cc:2107 editor_actions.cc:392 processor_box.cc:3860
+#: editor.cc:2036 editor.cc:2107 editor_actions.cc:392 processor_box.cc:3900
 msgid "Paste"
 msgstr "ペースト"
 
@@ -3997,58 +3992,58 @@ msgid ""
 msgstr ""
 "再生ヘッド位置がマイナスの値に設定されています- 無視 (代わりに0を使用します)"
 
-#: editor.cc:3163 editor.cc:3828 editor.cc:3910 midi_channel_selector.cc:160
+#: editor.cc:3166 editor.cc:3831 editor.cc:3913 midi_channel_selector.cc:160
 #: midi_channel_selector.cc:391 midi_channel_selector.cc:430
 msgid "All"
 msgstr "すべて"
 
-#: editor.cc:3294
+#: editor.cc:3297
 msgid "Triplets"
 msgstr "3連符"
 
-#: editor.cc:3304
+#: editor.cc:3307
 msgid "Quintuplets"
 msgstr "5連府"
 
-#: editor.cc:3314
+#: editor.cc:3317
 msgid "Septuplets"
 msgstr "7連符"
 
-#: editor.cc:3325
+#: editor.cc:3328
 msgid "Smart Mode (add range functions to Grab Mode)"
 msgstr "スマートモード (グラブモードにレンジ機能を追加)"
 
-#: editor.cc:3326
+#: editor.cc:3329
 msgid "Grab Mode (select/move objects)"
 msgstr "グラブモード (オブジェクトを選択/移動)"
 
-#: editor.cc:3327
+#: editor.cc:3330
 msgid "Cut Mode (split regions)"
 msgstr "切り取りモード(リージョンを分割)"
 
-#: editor.cc:3328
+#: editor.cc:3331
 msgid "Range Mode (select time ranges)"
 msgstr "レンジモード (タイムレンジを選択)"
 
-#: editor.cc:3329
+#: editor.cc:3332
 msgid "Draw Mode (draw and edit gain/notes/automation)"
 msgstr "ドローモード (ゲイン/ノート/オートメッションを描く＆編集)"
 
-#: editor.cc:3330
+#: editor.cc:3333
 msgid "Stretch Mode (time-stretch audio and midi regions, preserving pitch)"
 msgstr ""
 "ストレッチモード (オーディオ＆MIDI リージョンをピッチを保ちながらタイムスト"
 "レッチ)"
 
-#: editor.cc:3331
+#: editor.cc:3334
 msgid "Audition Mode (listen to regions)"
 msgstr "オーディションモード (リージョンをリッスン)"
 
-#: editor.cc:3332
+#: editor.cc:3335
 msgid "Internal Edit Mode (edit notes and automation points)"
 msgstr "内部編集モード (ノート＆オートメーションポイントを編集)"
 
-#: editor.cc:3333
+#: editor.cc:3336
 msgid ""
 "Groups: click to (de)activate\n"
 "Context-click for other operations"
@@ -4056,51 +4051,51 @@ msgstr ""
 "グループ: クリックして作動/停止\n"
 "コンテキストクリックしてその他の動作を使用"
 
-#: editor.cc:3334
+#: editor.cc:3337
 msgid "Nudge Region/Selection Later"
 msgstr "リージョン/選択範囲を先に動かす"
 
-#: editor.cc:3335
+#: editor.cc:3338
 msgid "Nudge Region/Selection Earlier"
 msgstr "リージョン/選択範囲を後ろに動かす"
 
-#: editor.cc:3336 editor_actions.cc:291
+#: editor.cc:3339 editor_actions.cc:291
 msgid "Zoom In"
 msgstr "ズームイン"
 
-#: editor.cc:3337 editor_actions.cc:290
+#: editor.cc:3340 editor_actions.cc:290
 msgid "Zoom Out"
 msgstr "ズームアウト"
 
-#: editor.cc:3338
+#: editor.cc:3341
 msgid "Zoom to Time Scale"
 msgstr "タイムスケールにズーム"
 
-#: editor.cc:3339 editor.cc:3850 editor_actions.cc:292
+#: editor.cc:3342 editor.cc:3853 editor_actions.cc:292
 msgid "Zoom to Session"
 msgstr "セッションにズーム"
 
-#: editor.cc:3340 editor_actions.cc:148 editor_actions.cc:184
+#: editor.cc:3343 editor_actions.cc:148 editor_actions.cc:184
 msgid "Zoom Focus"
 msgstr "ズームフォーカス"
 
-#: editor.cc:3341
+#: editor.cc:3344
 msgid "Expand Tracks"
 msgstr "トラックを広げる"
 
-#: editor.cc:3342
+#: editor.cc:3345
 msgid "Shrink Tracks"
 msgstr "トラックを縮める"
 
-#: editor.cc:3343
+#: editor.cc:3346
 msgid "Number of visible tracks"
 msgstr "表示するトラック数"
 
-#: editor.cc:3344
+#: editor.cc:3347
 msgid "Grid Mode"
 msgstr "グリッドモード"
 
-#: editor.cc:3345
+#: editor.cc:3348
 msgid ""
 "Snap Mode\n"
 "\n"
@@ -4110,15 +4105,15 @@ msgstr ""
 "\n"
 "右クリックでスナップ環境設定を開く"
 
-#: editor.cc:3346 editor_actions.cc:134
+#: editor.cc:3349 editor_actions.cc:134
 msgid "Edit Point"
 msgstr "編集ポイント"
 
-#: editor.cc:3347
+#: editor.cc:3350
 msgid "Edit Mode"
 msgstr "編集モード"
 
-#: editor.cc:3348
+#: editor.cc:3351
 msgid ""
 "Nudge Clock\n"
 "(controls distance used to nudge regions and selections)"
@@ -4126,130 +4121,130 @@ msgstr ""
 "Nudge Clock\n"
 "(リージョンや選択範囲を動かす距離をコントロール)"
 
-#: editor.cc:3624 editor_actions.cc:364
+#: editor.cc:3627 editor_actions.cc:364
 msgid "Command|Undo"
 msgstr "取り消し"
 
-#: editor.cc:3626
+#: editor.cc:3629
 msgid "Command|Undo (%1)"
 msgstr "取り消し (%1)"
 
-#: editor.cc:3633 editor_actions.cc:366 editor_actions.cc:367
+#: editor.cc:3636 editor_actions.cc:366 editor_actions.cc:367
 #: editor_actions.cc:368
 msgid "Redo"
 msgstr "やり直し"
 
-#: editor.cc:3636
+#: editor.cc:3639
 msgid "Redo (%1)"
 msgstr "やり直し (%1)"
 
-#: editor.cc:3656 editor.cc:3680 editor_actions.cc:146 editor_actions.cc:358
-#: editor_actions.cc:1542
+#: editor.cc:3659 editor.cc:3683 editor_actions.cc:146 editor_actions.cc:358
+#: editor_actions.cc:1545
 msgid "Duplicate"
 msgstr "複製"
 
-#: editor.cc:3657
+#: editor.cc:3660
 msgid "Number of duplications:"
 msgstr "複製する数:"
 
-#: editor.cc:3827 group_tabs.cc:605 route_group_dialog.cc:53
+#: editor.cc:3830 group_tabs.cc:605 route_group_dialog.cc:53
 #: time_info_box.cc:66
 msgid "Selection"
 msgstr "選択範囲"
 
-#: editor.cc:3830
+#: editor.cc:3833
 msgid "Fit 1 track"
 msgstr "1トラックに合わせる"
 
-#: editor.cc:3831
+#: editor.cc:3834
 msgid "Fit 2 tracks"
 msgstr "2トラックに合わせる"
 
-#: editor.cc:3832
+#: editor.cc:3835
 msgid "Fit 4 tracks"
 msgstr "4トラックに合わせる"
 
-#: editor.cc:3833
+#: editor.cc:3836
 msgid "Fit 8 tracks"
 msgstr "8トラックに合わせる"
 
-#: editor.cc:3834
+#: editor.cc:3837
 msgid "Fit 16 tracks"
 msgstr "16トラックに合わせる"
 
-#: editor.cc:3835
+#: editor.cc:3838
 msgid "Fit 24 tracks"
 msgstr "24トラックに合わせる"
 
-#: editor.cc:3836
+#: editor.cc:3839
 msgid "Fit 32 tracks"
 msgstr "32トラックに合わせる"
 
-#: editor.cc:3837
+#: editor.cc:3840
 msgid "Fit 48 tracks"
 msgstr "48トラックに合わせる"
 
-#: editor.cc:3838
+#: editor.cc:3841
 msgid "Fit All tracks"
 msgstr "すべてのトラックに合わせる"
 
-#: editor.cc:3839
+#: editor.cc:3842
 msgid "Fit Selection"
 msgstr "選択範囲に合わせる"
 
-#: editor.cc:3841 editor_actions.cc:309
+#: editor.cc:3844 editor_actions.cc:309
 msgid "Zoom to 10 ms"
 msgstr "10ミリ秒にズーム"
 
-#: editor.cc:3842 editor_actions.cc:310
+#: editor.cc:3845 editor_actions.cc:310
 msgid "Zoom to 100 ms"
 msgstr "100ミリ秒にズーム"
 
-#: editor.cc:3843 editor_actions.cc:311
+#: editor.cc:3846 editor_actions.cc:311
 msgid "Zoom to 1 sec"
 msgstr "1秒にズーム"
 
-#: editor.cc:3844 editor_actions.cc:312
+#: editor.cc:3847 editor_actions.cc:312
 msgid "Zoom to 10 sec"
 msgstr "10秒にズーム"
 
-#: editor.cc:3845 editor_actions.cc:313
+#: editor.cc:3848 editor_actions.cc:313
 msgid "Zoom to 1 min"
 msgstr "1分にズーム"
 
-#: editor.cc:3846 editor_actions.cc:315
+#: editor.cc:3849 editor_actions.cc:315
 msgid "Zoom to 10 min"
 msgstr "10分にズーム"
 
-#: editor.cc:3847
+#: editor.cc:3850
 msgid "Zoom to 1 hour"
 msgstr "1時間にズーム"
 
-#: editor.cc:3848
+#: editor.cc:3851
 msgid "Zoom to 8 hours"
 msgstr "8時間にズーム"
 
-#: editor.cc:3849
+#: editor.cc:3852
 msgid "Zoom to 24 hours"
 msgstr "24時間にズーム"
 
-#: editor.cc:3851 editor_actions.cc:293
+#: editor.cc:3854 editor_actions.cc:293
 msgid "Zoom to Extents"
 msgstr "範囲にズーム"
 
-#: editor.cc:3852
+#: editor.cc:3855
 msgid "Zoom to Range/Region Selection"
 msgstr "レンジ/リージョン選択範囲にズーム"
 
-#: editor.cc:3932
+#: editor.cc:3935
 msgid "*"
 msgstr "*"
 
-#: editor.cc:4196
+#: editor.cc:4199
 msgid "Playlist Deletion"
 msgstr "プレイリスト削除"
 
-#: editor.cc:4197
+#: editor.cc:4200
 msgid ""
 "Playlist %1 is currently unused.\n"
 "If it is kept, its audio files will not be cleaned.\n"
@@ -4260,67 +4255,67 @@ msgstr ""
 "削除する場合、そのプレイリストに使用されているオーディオファイルはクリーンさ"
 "れます。"
 
-#: editor.cc:4207
+#: editor.cc:4210
 msgid "Delete All Unused"
 msgstr "すべての未使用を削除"
 
-#: editor.cc:4208
+#: editor.cc:4211
 msgid "Delete Playlist"
 msgstr "プレイリストを削除"
 
-#: editor.cc:4209
+#: editor.cc:4212
 msgid "Keep Playlist"
 msgstr "プレイリストを保持"
 
-#: editor.cc:4210
+#: editor.cc:4213
 msgid "Keep Remaining"
 msgstr "残りを保持"
 
-#: editor.cc:4211 editor_audio_import.cc:682 editor_ops.cc:6962
-#: engine_dialog.cc:3098 sfdb_freesound_mootcher.cc:69 keyeditor.cc:80
-#: processor_box.cc:3606 processor_box.cc:3631 pt_import_selector.cc:44
-#: template_dialog.cc:525 transport_masters_dialog.cc:715 utils.cc:124
+#: editor.cc:4214 editor_audio_import.cc:682 editor_ops.cc:6965
+#: engine_dialog.cc:3102 sfdb_freesound_mootcher.cc:69 keyeditor.cc:80
+#: processor_box.cc:3646 processor_box.cc:3671 pt_import_selector.cc:44
+#: template_dialog.cc:525 transport_masters_dialog.cc:743 utils.cc:124
 msgid "Cancel"
 msgstr "キャンセル"
 
-#: editor.cc:4360
+#: editor.cc:4363
 msgid "new playlists"
 msgstr "新規プレイリスト"
 
-#: editor.cc:4376
+#: editor.cc:4379
 msgid "copy playlists"
 msgstr "プレイリストをコピー"
 
-#: editor.cc:4391
+#: editor.cc:4394
 msgid "clear playlists"
 msgstr "プレイリストをクリア"
 
-#: editor.cc:5190
+#: editor.cc:5193
 msgid "Please wait while %1 loads visual data."
 msgstr "%1 がビジュアルデータを読み込むまでお待ち下さい"
 
-#: editor.cc:6201 editor.cc:6236 editor_markers.cc:1030 editor_markers.cc:1052
-#: panner_ui.cc:414 processor_box.cc:3890
+#: editor.cc:6204 editor.cc:6239 editor_markers.cc:1030 editor_markers.cc:1052
+#: panner_ui.cc:414 processor_box.cc:3930
 msgid "Edit..."
 msgstr "編集..."
 
-#: editor.cc:6242 editor_actions.cc:1527
+#: editor.cc:6245 editor_actions.cc:1530
 msgid "Transpose..."
 msgstr "移調..."
 
-#: editor.cc:6246 editor_actions.cc:1612
+#: editor.cc:6249 editor_actions.cc:1615
 msgid "Legatize"
 msgstr "レガート"
 
-#: editor.cc:6252 editor_actions.cc:1611
+#: editor.cc:6255 editor_actions.cc:1614
 msgid "Quantize..."
 msgstr "クオンタイズ.."
 
-#: editor.cc:6255 editor_actions.cc:1614
+#: editor.cc:6258 editor_actions.cc:1617
 msgid "Remove Overlap"
 msgstr "オーバーラップを削除"
 
-#: editor.cc:6261 editor_actions.cc:1613
+#: editor.cc:6264 editor_actions.cc:1616
 msgid "Transform..."
 msgstr "変形..."
 
@@ -4378,7 +4373,7 @@ msgstr "ゲイン"
 msgid "Ranges"
 msgstr "レンジ"
 
-#: editor_actions.cc:144 editor_actions.cc:1539 session_option_editor.cc:144
+#: editor_actions.cc:144 editor_actions.cc:1542 session_option_editor.cc:144
 #: session_option_editor.cc:146 session_option_editor.cc:153
 #: session_option_editor.cc:160 session_option_editor.cc:167
 msgid "Fades"
@@ -4782,11 +4777,11 @@ msgstr "アクティブなマークを再生ヘッドへ"
 msgid "Use Skip Ranges"
 msgstr "スキップレンジを使用"
 
-#: editor_actions.cc:346 editor_actions.cc:1595
+#: editor_actions.cc:346 editor_actions.cc:1598
 msgid "Play Selected Regions"
 msgstr "選択したリージョンを再生"
 
-#: editor_actions.cc:347 editor_actions.cc:1596
+#: editor_actions.cc:347 editor_actions.cc:1599
 msgid "Tag Selected Regions"
 msgstr "選択したリージョンにタグを付ける"
 
@@ -4810,7 +4805,7 @@ msgstr "アクティブなマーカーをマウスへ"
 msgid "Set Auto Punch In/Out from Playhead"
 msgstr "再生ヘッドから自動パンチイン/パンチアウトを設定"
 
-#: editor_actions.cc:361 editor_actions.cc:1545
+#: editor_actions.cc:361 editor_actions.cc:1548
 msgid "Multi-Duplicate..."
 msgstr "複数の複製..."
 
@@ -4874,7 +4869,7 @@ msgstr "再生ヘッドに追随"
 msgid "Remove Last Capture"
 msgstr "最後のキャプチャーを削除"
 
-#: editor_actions.cc:441 editor_ops.cc:5199
+#: editor_actions.cc:441 editor_ops.cc:5202
 msgid "Tag Last Capture"
 msgstr "最後のキャプチャーにタグを付ける"
 
@@ -4894,11 +4889,11 @@ msgstr "時間を削除"
 msgid "Toggle Active"
 msgstr "アクティブ状態を切り替え"
 
-#: editor_actions.cc:454 editor_actions.cc:1474 editor_markers.cc:936
+#: editor_actions.cc:454 editor_actions.cc:1477 editor_markers.cc:936
 #: editor_markers.cc:1031 editor_markers.cc:1053 editor_snapshots.cc:139
-#: foldback_strip.cc:1180 lua_script_manager.cc:43 lua_script_manager.cc:47
+#: foldback_strip.cc:1181 lua_script_manager.cc:43 lua_script_manager.cc:47
 #: lua_script_manager.cc:49 mixer_strip.cc:1794 route_time_axis.cc:852
-#: template_dialog.cc:225 transport_masters_dialog.cc:86
+#: template_dialog.cc:225 transport_masters_dialog.cc:87
 #: vca_master_strip.cc:471 vca_time_axis.cc:467
 msgid "Remove"
 msgstr "削除"
@@ -5213,8 +5208,8 @@ msgid "Increase Velocity (fine, non-relative)"
 msgstr "ノートベロシティを増やす（細かく、相対でない）"
 
 #: editor_actions.cc:739
-msgid "Increase Velocity (maintain ratios, allow mush"
-msgstr "ノートベロシティを増やす（割合を保持、マッシュを許可）"
+msgid "Increase Velocity (maintain ratios, allow mush)"
+msgstr ""
 
 #: editor_actions.cc:740
 msgid "Increase Velocity (fine, allow mush, non-relative)"
@@ -5245,8 +5240,8 @@ msgid "Decrease Velocity (fine, non-relative)"
 msgstr "ノートベロシティを減らす（細かく、相対でない）"
 
 #: editor_actions.cc:748
-msgid "Decrease Velocity (maintain ratios, allow mush"
-msgstr "ノートベロシティを減らす（割合を保持、マッシュを許可）"
+msgid "Decrease Velocity (maintain ratios, allow mush)"
+msgstr ""
 
 #: editor_actions.cc:749
 msgid "Decrease Velocity (fine, allow mush, non-relative)"
@@ -5308,284 +5303,284 @@ msgstr "ノートチャンネルを編集"
 msgid "Edit Note Velocities"
 msgstr "ノートベロシティを編集"
 
-#: editor_actions.cc:1090 editor_actions.cc:1228 editor_actions.cc:1239
-#: editor_actions.cc:1294 editor_actions.cc:1305 editor_actions.cc:1352
-#: luainstance.cc:368 luainstance.cc:2254
+#: editor_actions.cc:1093 editor_actions.cc:1231 editor_actions.cc:1242
+#: editor_actions.cc:1297 editor_actions.cc:1308 editor_actions.cc:1355
+#: luainstance.cc:368 luainstance.cc:2296
 msgid "programming error: %1: %2"
 msgstr "プログラミングエラー: %1: %2"
 
-#: editor_actions.cc:1480
+#: editor_actions.cc:1483
 msgid "Raise"
 msgstr "上げる"
 
-#: editor_actions.cc:1483
+#: editor_actions.cc:1486
 msgid "Raise to Top"
 msgstr "一番上へ"
 
-#: editor_actions.cc:1486
+#: editor_actions.cc:1489
 msgid "Lower"
 msgstr "下げる"
 
-#: editor_actions.cc:1489
+#: editor_actions.cc:1492
 msgid "Lower to Bottom"
 msgstr "一番下へ"
 
-#: editor_actions.cc:1492
+#: editor_actions.cc:1495
 msgid "Move to Original Position"
 msgstr "元のポジションへ移動"
 
-#: editor_actions.cc:1496
+#: editor_actions.cc:1499
 msgid "Lock to Video"
 msgstr "ビデオにロック"
 
-#: editor_actions.cc:1497 editor_markers.cc:928 editor_markers.cc:963
+#: editor_actions.cc:1500 editor_markers.cc:928 editor_markers.cc:963
 #: session_option_editor.cc:372
 msgid "Glue to Bars and Beats"
 msgstr "小節と拍子に沿わせる"
 
-#: editor_actions.cc:1500
+#: editor_actions.cc:1503
 msgid "Remove Sync"
 msgstr "同期を削除"
 
-#: editor_actions.cc:1503 mixer_strip.cc:2251 monitor_section.cc:261
+#: editor_actions.cc:1506 mixer_strip.cc:2251 monitor_section.cc:261
 #: monitor_section.cc:327 monitor_section.cc:959 route_time_axis.cc:276
 #: route_time_axis.cc:594 vca_time_axis.cc:509
 msgid "Mute"
 msgstr "Mute"
 
-#: editor_actions.cc:1506
+#: editor_actions.cc:1509
 msgid "Normalize..."
 msgstr "ノーマライズ..."
 
-#: editor_actions.cc:1509
+#: editor_actions.cc:1512
 msgid "Reverse"
 msgstr "反転"
 
-#: editor_actions.cc:1512
+#: editor_actions.cc:1515
 msgid "Make Mono Regions"
 msgstr "モノラルリージョンを作成"
 
-#: editor_actions.cc:1515
+#: editor_actions.cc:1518
 msgid "Boost Gain"
 msgstr "ゲインをブースト"
 
-#: editor_actions.cc:1518
+#: editor_actions.cc:1521
 msgid "Cut Gain"
 msgstr "ゲインをカット"
 
-#: editor_actions.cc:1521 editor_actions.cc:1607
+#: editor_actions.cc:1524 editor_actions.cc:1610
 msgid "Reset Gain"
 msgstr "ゲインをリセット"
 
-#: editor_actions.cc:1524
+#: editor_actions.cc:1527
 msgid "Pitch Shift..."
 msgstr "ピッチシフト..."
 
-#: editor_actions.cc:1530
+#: editor_actions.cc:1533
 msgid "Opaque"
 msgstr "不透明"
 
-#: editor_actions.cc:1533 editor_regions.cc:186
+#: editor_actions.cc:1536 editor_regions.cc:186
 msgid "Fade In"
 msgstr "フェードイン"
 
-#: editor_actions.cc:1536 editor_regions.cc:187
+#: editor_actions.cc:1539 editor_regions.cc:187
 msgid "Fade Out"
 msgstr "フェードアウト"
 
-#: editor_actions.cc:1548
+#: editor_actions.cc:1551
 msgid "Fill Track"
 msgstr "トラックを埋める"
 
-#: editor_actions.cc:1551 editor_markers.cc:1068
+#: editor_actions.cc:1554 editor_markers.cc:1068
 msgid "Set Loop Range"
 msgstr "ループレンジを設定"
 
-#: editor_actions.cc:1557
+#: editor_actions.cc:1560
 msgid "Set Punch"
 msgstr "パンチレンジを設定"
 
-#: editor_actions.cc:1560
+#: editor_actions.cc:1563
 msgid "Add Single Range Marker"
 msgstr "レンジマーカーを追加"
 
-#: editor_actions.cc:1563
+#: editor_actions.cc:1566
 msgid "Add Range Marker Per Region"
 msgstr "リージョンごとにレンジマーカーを追加"
 
-#: editor_actions.cc:1566
+#: editor_actions.cc:1569
 msgid "Snap Position to Grid"
 msgstr "ポジションをグリッドにスナップ"
 
-#: editor_actions.cc:1569
+#: editor_actions.cc:1572
 msgid "Close Gaps"
 msgstr "ギャップをならす"
 
-#: editor_actions.cc:1572
+#: editor_actions.cc:1575
 msgid "Rhythm Ferret..."
 msgstr "Rhythm Ferret..."
 
-#: editor_actions.cc:1575
+#: editor_actions.cc:1578
 msgid "Export..."
 msgstr "エクスポート..."
 
-#: editor_actions.cc:1578
+#: editor_actions.cc:1581
 msgid "Separate Under"
 msgstr "下に分離"
 
-#: editor_actions.cc:1580 editor_actions.cc:1581
+#: editor_actions.cc:1583 editor_actions.cc:1584
 msgid "Set Fade In Length"
 msgstr "フェードインの長さを設定"
 
-#: editor_actions.cc:1582 editor_actions.cc:1583
+#: editor_actions.cc:1585 editor_actions.cc:1586
 msgid "Set Fade Out Length"
 msgstr "フェードアウトの長さを設定"
 
-#: editor_actions.cc:1585
+#: editor_actions.cc:1588
 msgid "Set Tempo from Region = Bar"
 msgstr "リージョンを1小節としてテンポを設定"
 
-#: editor_actions.cc:1587
+#: editor_actions.cc:1590
 msgid "Split at Percussion Onsets"
 msgstr "パーカッション・オンセットで分割"
 
-#: editor_actions.cc:1590
+#: editor_actions.cc:1593
 msgid "List Editor..."
 msgstr "エディターのリスト..."
 
-#: editor_actions.cc:1593
+#: editor_actions.cc:1596
 msgid "Properties..."
 msgstr "プロパティ..."
 
-#: editor_actions.cc:1598
+#: editor_actions.cc:1601
 msgid "Bounce (with processing)"
 msgstr "バウンス (プロセスあり)"
 
-#: editor_actions.cc:1599
+#: editor_actions.cc:1602
 msgid "Bounce (without processing)"
 msgstr "バウンス (プロセスなし)"
 
-#: editor_actions.cc:1600
+#: editor_actions.cc:1603
 msgid "Combine"
 msgstr "結合"
 
-#: editor_actions.cc:1601
+#: editor_actions.cc:1604
 msgid "Uncombine"
 msgstr "結合を解除"
 
-#: editor_actions.cc:1603
+#: editor_actions.cc:1606
 msgid "Loudness Analysis..."
 msgstr "音量分析..."
 
-#: editor_actions.cc:1604
+#: editor_actions.cc:1607
 msgid "Spectral Analysis..."
 msgstr "スペクトル分析..."
 
-#: editor_actions.cc:1606
+#: editor_actions.cc:1609
 msgid "Reset Envelope"
 msgstr "エンベロープをリセット"
 
-#: editor_actions.cc:1609
+#: editor_actions.cc:1612
 msgid "Envelope Active"
 msgstr "エンベロープをアクティブ"
 
-#: editor_actions.cc:1615 editor_actions.cc:1616
+#: editor_actions.cc:1618 editor_actions.cc:1619
 msgid "Insert Patch Change..."
 msgstr "パッチ変更を挿入..."
 
-#: editor_actions.cc:1617
+#: editor_actions.cc:1620
 msgid "Unlink from other copies"
 msgstr "その他のコピーのリンクを解除"
 
-#: editor_actions.cc:1618
+#: editor_actions.cc:1621
 msgid "Strip Silence..."
 msgstr "無音部分を取り除く..."
 
-#: editor_actions.cc:1619
+#: editor_actions.cc:1622
 msgid "Set Range Selection"
 msgstr "選択範囲を設定"
 
-#: editor_actions.cc:1621 editor_actions.cc:1622
+#: editor_actions.cc:1624 editor_actions.cc:1625
 msgid "Nudge Later"
 msgstr "先に動かす"
 
-#: editor_actions.cc:1623 editor_actions.cc:1624
+#: editor_actions.cc:1626 editor_actions.cc:1627
 msgid "Nudge Earlier"
 msgstr "前に動かす"
 
-#: editor_actions.cc:1626
+#: editor_actions.cc:1629
 msgid "Sequence Regions"
 msgstr "リージョンを順番に配列"
 
-#: editor_actions.cc:1628
+#: editor_actions.cc:1631
 msgid "Nudge Later by Capture Offset"
 msgstr "キャプチャーオフセットによって先に動かす"
 
-#: editor_actions.cc:1630
+#: editor_actions.cc:1633
 msgid "Nudge Earlier by Capture Offset"
 msgstr "キャプチャーオフセットによって前に動かす"
 
-#: editor_actions.cc:1632
+#: editor_actions.cc:1635
 msgid "Trim to Loop"
 msgstr "ループレンジにトリム"
 
-#: editor_actions.cc:1633
+#: editor_actions.cc:1636
 msgid "Trim to Punch"
 msgstr "パンチレンジにトリム"
 
-#: editor_actions.cc:1635
+#: editor_actions.cc:1638
 msgid "Trim to Previous"
 msgstr "前にトリム"
 
-#: editor_actions.cc:1636
+#: editor_actions.cc:1639
 msgid "Trim to Next"
 msgstr "次にトリム"
 
-#: editor_actions.cc:1640
+#: editor_actions.cc:1643
 msgid "Insert Region from Source List"
 msgstr "ソースリストからリージョンを挿入"
 
-#: editor_actions.cc:1644
+#: editor_actions.cc:1647
 msgid "Set Sync Position"
 msgstr "同期ポジションを設定"
 
-#: editor_actions.cc:1645
+#: editor_actions.cc:1648
 msgid "Place Transient"
 msgstr "トランジェントを設置"
 
-#: editor_actions.cc:1646
+#: editor_actions.cc:1649
 msgid "Trim Start at Edit Point"
 msgstr "編集ポイントの開始をトリム"
 
-#: editor_actions.cc:1647
+#: editor_actions.cc:1650
 msgid "Trim End at Edit Point"
 msgstr "編集ポイントの終了をトリム"
 
-#: editor_actions.cc:1648
+#: editor_actions.cc:1651
 msgid "Align Start"
 msgstr "開始位置を再生ヘッドに合わせる"
 
-#: editor_actions.cc:1649
+#: editor_actions.cc:1652
 msgid "Align Start Relative"
 msgstr "開始位置を相対的に再生ヘッドに合わせる"
 
-#: editor_actions.cc:1650
+#: editor_actions.cc:1653
 msgid "Align End"
 msgstr "終了位置を再生ヘッドに合わせる"
 
-#: editor_actions.cc:1651
+#: editor_actions.cc:1654
 msgid "Align End Relative"
 msgstr "終了位置を相対的に再生ヘッドに合わせる"
 
-#: editor_actions.cc:1652
+#: editor_actions.cc:1655
 msgid "Align Sync"
 msgstr "同期位置を再生ヘッドに合わせる"
 
-#: editor_actions.cc:1653
+#: editor_actions.cc:1656
 msgid "Align Sync Relative"
 msgstr "同期位置を相対的に再生ヘッドに合わせる"
 
-#: editor_actions.cc:1654 editor_actions.cc:1655
+#: editor_actions.cc:1657 editor_actions.cc:1658
 msgid "Choose Top..."
 msgstr "最上位を選択..."
 
@@ -5929,11 +5924,11 @@ msgstr "同じ名前のファイルが既に存在します。上書きします
 msgid "Fit to Window"
 msgstr "ウインドウに合わせる"
 
-#: editor_markers.cc:148 mini_timeline.cc:578
+#: editor_markers.cc:148 mini_timeline.cc:568
 msgid "start"
 msgstr "開始"
 
-#: editor_markers.cc:149 mini_timeline.cc:579
+#: editor_markers.cc:149 mini_timeline.cc:569
 msgid "end"
 msgstr "終了"
 
@@ -5941,8 +5936,8 @@ msgstr "終了"
 msgid "mark"
 msgstr "マーク"
 
-#: editor_markers.cc:665 editor_ops.cc:2230 editor_ops.cc:2252
-#: editor_ops.cc:2389 editor_ops.cc:2426 location_ui.cc:1073
+#: editor_markers.cc:665 editor_ops.cc:2233 editor_ops.cc:2255
+#: editor_ops.cc:2392 editor_ops.cc:2429 location_ui.cc:1073
 msgid "add marker"
 msgstr "マーカーを追加"
 
@@ -5954,7 +5949,7 @@ msgstr "ループレンジを設定"
 msgid "set punch range"
 msgstr "パンチレンジを設定"
 
-#: editor_markers.cc:730 editor_ops.cc:4273
+#: editor_markers.cc:730 editor_ops.cc:4276
 msgid "range"
 msgstr "レンジ"
 
@@ -5962,7 +5957,7 @@ msgstr "レンジ"
 msgid "new range marker"
 msgstr "新規レンジメーカー"
 
-#: editor_markers.cc:766 editor_ops.cc:2350 location_ui.cc:906
+#: editor_markers.cc:766 editor_ops.cc:2353 location_ui.cc:906
 msgid "remove marker"
 msgstr "マーカーを削除"
 
@@ -6074,7 +6069,7 @@ msgstr "テンポを固定"
 msgid "ramp to next tempo"
 msgstr "次のテンポに傾斜"
 
-#: editor_markers.cc:1616 editor_ops.cc:2178
+#: editor_markers.cc:1616 editor_ops.cc:2181
 msgid "New Name:"
 msgstr "新規名前..."
 
@@ -6086,8 +6081,8 @@ msgstr "マークを名前変更"
 msgid "Rename Range"
 msgstr "レンジを名前変更"
 
-#: editor_markers.cc:1628 editor_mouse.cc:2484 processor_box.cc:3346
-#: processor_box.cc:3862 route_time_axis.cc:1071 route_ui.cc:1714
+#: editor_markers.cc:1628 editor_mouse.cc:2484 processor_box.cc:3386
+#: processor_box.cc:3902 route_time_axis.cc:1071 route_ui.cc:1714
 #: template_dialog.cc:226 vca_master_strip.cc:463
 msgid "Rename"
 msgstr "名前変更"
@@ -6180,143 +6175,143 @@ msgstr "後ろに動かす"
 msgid "sequence regions"
 msgstr "リージョンを順番に配列"
 
-#: editor_ops.cc:2181 location_ui.cc:769
+#: editor_ops.cc:2184 location_ui.cc:769
 msgid "New Range"
 msgstr "新規レンジ"
 
-#: editor_ops.cc:2183
+#: editor_ops.cc:2186
 msgid "New Location Marker"
 msgstr "新規ロケーションマーカー"
 
-#: editor_ops.cc:2278 editor_ops.cc:2304
+#: editor_ops.cc:2281 editor_ops.cc:2307
 msgid "Set session start"
 msgstr "セッション開始を設定"
 
-#: editor_ops.cc:2389
+#: editor_ops.cc:2392
 msgid "add markers"
 msgstr "マーカーを追加"
 
-#: editor_ops.cc:2493
+#: editor_ops.cc:2496
 msgid "clear markers"
 msgstr "マーカーをクリア"
 
-#: editor_ops.cc:2508
+#: editor_ops.cc:2511
 msgid "clear ranges"
 msgstr "レンジをクリア"
 
-#: editor_ops.cc:2524
+#: editor_ops.cc:2527
 msgid "clear locations"
 msgstr "ロケーションをクリア"
 
-#: editor_ops.cc:2587
+#: editor_ops.cc:2590
 msgid "insert region"
 msgstr "リージョンを挿入"
 
-#: editor_ops.cc:2799
+#: editor_ops.cc:2802
 msgid "raise regions"
 msgstr "リージョンを上げる"
 
-#: editor_ops.cc:2801
+#: editor_ops.cc:2804
 msgid "raise region"
 msgstr "リージョンを上げる"
 
-#: editor_ops.cc:2807
+#: editor_ops.cc:2810
 msgid "raise regions to top"
 msgstr "リージョンを一番上へ"
 
-#: editor_ops.cc:2809
+#: editor_ops.cc:2812
 msgid "raise region to top"
 msgstr "リージョンを一番上へ"
 
-#: editor_ops.cc:2815
+#: editor_ops.cc:2818
 msgid "lower regions"
 msgstr "リージョンを下げる"
 
-#: editor_ops.cc:2817 editor_ops.cc:2825
+#: editor_ops.cc:2820 editor_ops.cc:2828
 msgid "lower region"
 msgstr "リージョンを下げる"
 
-#: editor_ops.cc:2823
+#: editor_ops.cc:2826
 msgid "lower regions to bottom"
 msgstr "リージョンを一番下へ"
 
-#: editor_ops.cc:2908
+#: editor_ops.cc:2911
 msgid "Rename Region"
 msgstr "リージョンを名前変更"
 
-#: editor_ops.cc:2910 processor_box.cc:3344 route_ui.cc:1712
+#: editor_ops.cc:2913 processor_box.cc:3384 route_ui.cc:1712
 msgid "New name:"
 msgstr "新しい名前:"
 
-#: editor_ops.cc:2946
+#: editor_ops.cc:2949
 msgid "Rename failed. Check for characters such as '/' or ':'"
 msgstr "名前変更に失敗しました。'/' や ':' が使われていないか確認してください"
 
-#: editor_ops.cc:3206
+#: editor_ops.cc:3209
 msgid "separate"
 msgstr "分離"
 
-#: editor_ops.cc:3326
+#: editor_ops.cc:3329
 msgid "separate region under"
 msgstr "リージョンを下に分離"
 
-#: editor_ops.cc:3393
+#: editor_ops.cc:3396
 msgid "Crop Regions to Time Selection"
 msgstr "タイム選択にリージョンを切り抜き"
 
-#: editor_ops.cc:3404
+#: editor_ops.cc:3407
 msgid "Crop Regions to Edit Range"
 msgstr "編集レンジにリージョンを切り抜き"
 
-#: editor_ops.cc:3558
+#: editor_ops.cc:3561
 msgid "set sync point"
 msgstr "同期ポイントを設定"
 
-#: editor_ops.cc:3582
+#: editor_ops.cc:3585
 msgid "remove region sync"
 msgstr "リージョン同期を削除"
 
-#: editor_ops.cc:3604
+#: editor_ops.cc:3607
 msgid "move regions to original position"
 msgstr "リージョンを元のポジションに移動"
 
-#: editor_ops.cc:3606
+#: editor_ops.cc:3609
 msgid "move region to original position"
 msgstr "リージョンを元のポジションに移動"
 
-#: editor_ops.cc:3627
+#: editor_ops.cc:3630
 msgid "align selection"
 msgstr "選択範囲を整列"
 
-#: editor_ops.cc:3701
+#: editor_ops.cc:3704
 msgid "align selection (relative)"
 msgstr "選択範囲を整列 (相対)"
 
-#: editor_ops.cc:3735
+#: editor_ops.cc:3738
 msgid "align region"
 msgstr "リージョンを整列"
 
-#: editor_ops.cc:3786
+#: editor_ops.cc:3789
 msgid "trim front"
 msgstr "前をトリム"
 
-#: editor_ops.cc:3786
+#: editor_ops.cc:3789
 msgid "trim back"
 msgstr "後ろをトリム"
 
-#: editor_ops.cc:3814
+#: editor_ops.cc:3817
 msgid "trim to loop"
 msgstr "ループレンジにトリム"
 
-#: editor_ops.cc:3824
+#: editor_ops.cc:3827
 msgid "trim to punch"
 msgstr "パンチレンジにトリム"
 
-#: editor_ops.cc:3933
+#: editor_ops.cc:3936
 msgid "trim to region"
 msgstr "リージョンにトリム"
 
-#: editor_ops.cc:3989
+#: editor_ops.cc:3992
 msgid ""
 "Transport cannot be stopped, likely due to external timecode sync.\n"
 "Freezing a track requires the transport to be stopped."
@@ -6324,11 +6319,11 @@ msgstr ""
 "トランスポートを停止できません。外部タイムコード同期のためと思われます。\n"
 "トランスポートを停止するには、トラックをフリーズさせる必要があります。"
 
-#: editor_ops.cc:3992 editor_ops.cc:4007
+#: editor_ops.cc:3995 editor_ops.cc:4010
 msgid "Cannot freeze"
 msgstr "フリーズ不可"
 
-#: editor_ops.cc:4004
+#: editor_ops.cc:4007
 msgid ""
 "This track/bus cannot be frozen because the signal adds or loses channels "
 "before reaching the outputs.\n"
@@ -6340,7 +6335,7 @@ msgstr ""
 "これは通常、モノラルインプットからステレオアウトプットを生成する (またはその"
 "逆) プラグインが原因となります。"
 
-#: editor_ops.cc:4013
+#: editor_ops.cc:4016
 msgid ""
 "<b>%1</b>\n"
 "\n"
@@ -6357,23 +6352,23 @@ msgstr ""
 "\n"
 "フリーズは最初の send/insert/return/sidechain までのみシグナルを処理します、"
 
-#: editor_ops.cc:4017
+#: editor_ops.cc:4020
 msgid "Freeze anyway"
 msgstr "そのままフリーズ"
 
-#: editor_ops.cc:4018
+#: editor_ops.cc:4021
 msgid "Don't freeze"
 msgstr "フリーズしない"
 
-#: editor_ops.cc:4019
+#: editor_ops.cc:4022
 msgid "Freeze Limits"
 msgstr "フリーズリミット"
 
-#: editor_ops.cc:4034
+#: editor_ops.cc:4037
 msgid "Cancel Freeze"
 msgstr "フリーズをキャンセル"
 
-#: editor_ops.cc:4065
+#: editor_ops.cc:4068
 msgid ""
 "You can't perform this operation because the processing of the signal will "
 "cause one or more of the tracks to end up with a region with more channels "
@@ -6386,51 +6381,51 @@ msgstr ""
 "\n"
 "別の実行として、プロセスなしで行うことができます。"
 
-#: editor_ops.cc:4069
+#: editor_ops.cc:4072
 msgid "Cannot bounce"
 msgstr "バウンス不可"
 
-#: editor_ops.cc:4120
+#: editor_ops.cc:4123
 msgid "bounce range"
 msgstr "レンジをバウンス"
 
-#: editor_ops.cc:4187
+#: editor_ops.cc:4190
 msgid "delete"
 msgstr "削除"
 
-#: editor_ops.cc:4190
+#: editor_ops.cc:4193
 msgid "cut"
 msgstr "カット"
 
-#: editor_ops.cc:4193
+#: editor_ops.cc:4196
 msgid "copy"
 msgstr "コピー"
 
-#: editor_ops.cc:4196
+#: editor_ops.cc:4199
 msgid "clear"
 msgstr "クリア"
 
-#: editor_ops.cc:4246
+#: editor_ops.cc:4249
 msgid "objects"
 msgstr "オブジェクト"
 
-#: editor_ops.cc:4484 editor_ops.cc:4598
+#: editor_ops.cc:4487 editor_ops.cc:4601
 msgid "remove region"
 msgstr "リージョンを削除"
 
-#: editor_ops.cc:4513
+#: editor_ops.cc:4516
 msgid "recover regions"
 msgstr "リージョンを復旧"
 
-#: editor_ops.cc:5055
+#: editor_ops.cc:5058
 msgid "duplicate range selection"
 msgstr "レンジ選択範囲を複製"
 
-#: editor_ops.cc:5150
+#: editor_ops.cc:5153
 msgid "nudge track"
 msgstr "トラックを動かす"
 
-#: editor_ops.cc:5177
+#: editor_ops.cc:5180
 msgid ""
 "Do you really want to destroy the last capture?\n"
 "(This is destructive and cannot be undone)"
@@ -6438,173 +6433,173 @@ msgstr ""
 "本当に最後のキャプチャーを削除しますか？\n"
 "(実行すると元に戻せません)"
 
-#: editor_ops.cc:5180 editor_ops.cc:7727 editor_regions.cc:410
+#: editor_ops.cc:5183 editor_ops.cc:7730 editor_regions.cc:410
 #: editor_snapshots.cc:176 editor_sources.cc:641 vca_master_strip.cc:513
 msgid "No, do nothing."
 msgstr "いいえ、何もしません。"
 
-#: editor_ops.cc:5181
+#: editor_ops.cc:5184
 msgid "Yes, destroy it."
 msgstr "はい、削除します。"
 
-#: editor_ops.cc:5183
+#: editor_ops.cc:5186
 msgid "Destroy last capture"
 msgstr "最後のキャプチャーを削除"
 
-#: editor_ops.cc:5201
+#: editor_ops.cc:5204
 msgid "Tag:"
 msgstr "タグ:"
 
-#: editor_ops.cc:5216 session_archive_dialog.cc:53 session_archive_dialog.cc:54
+#: editor_ops.cc:5219 session_archive_dialog.cc:53 session_archive_dialog.cc:54
 #: session_archive_dialog.cc:227 sfdb_ui.cc:1840 sfdb_ui.cc:1947
 msgid "Good"
 msgstr "良い"
 
-#: editor_ops.cc:5371
+#: editor_ops.cc:5374
 msgid "normalize"
 msgstr "ノーマライズ"
 
-#: editor_ops.cc:5502
+#: editor_ops.cc:5505
 msgid "reverse regions"
 msgstr "リージョンを反転"
 
-#: editor_ops.cc:5539
+#: editor_ops.cc:5542
 msgid "strip silence"
 msgstr "無音部分を取り除く"
 
-#: editor_ops.cc:5620
+#: editor_ops.cc:5623
 msgid "Fork Region(s)"
 msgstr "リージョンをフォーク"
 
-#: editor_ops.cc:5627
+#: editor_ops.cc:5630
 msgid "Could not unlink %1"
 msgstr "%1 のリンクを解除できません"
 
-#: editor_ops.cc:5897
+#: editor_ops.cc:5900
 msgid "reset region gain"
 msgstr "リージョンゲインをリセット"
 
-#: editor_ops.cc:5955
+#: editor_ops.cc:5958
 msgid "region gain envelope active"
 msgstr "リージョンゲインエンベロープがアクティブ"
 
-#: editor_ops.cc:5980
+#: editor_ops.cc:5983
 msgid "toggle region lock"
 msgstr "リージョンロックを切り替え"
 
-#: editor_ops.cc:6004
+#: editor_ops.cc:6007
 msgid "Toggle Video Lock"
 msgstr "ビデオロックを切り替え"
 
-#: editor_ops.cc:6034
+#: editor_ops.cc:6037
 msgid "toggle region lock style"
 msgstr "リージョンロックスタイルを切り替え"
 
-#: editor_ops.cc:6059
+#: editor_ops.cc:6062
 msgid "change region opacity"
 msgstr "リージョン不透明度を変更"
 
-#: editor_ops.cc:6202
+#: editor_ops.cc:6205
 msgid "fade range"
 msgstr "レンジをフェード"
 
-#: editor_ops.cc:6240
+#: editor_ops.cc:6243
 msgid "set fade in length"
 msgstr "フェードインの長さを設定"
 
-#: editor_ops.cc:6247
+#: editor_ops.cc:6250
 msgid "set fade out length"
 msgstr "フェードアウトの長さを設定"
 
-#: editor_ops.cc:6312
+#: editor_ops.cc:6315
 msgid "set fade in shape"
 msgstr "フェードインのシェイプを設定"
 
-#: editor_ops.cc:6347
+#: editor_ops.cc:6350
 msgid "set fade out shape"
 msgstr "フェードアウトのシェイプを設定"
 
-#: editor_ops.cc:6383
+#: editor_ops.cc:6386
 msgid "set fade in active"
 msgstr "フェードインをアクティブに設定"
 
-#: editor_ops.cc:6417
+#: editor_ops.cc:6420
 msgid "set fade out active"
 msgstr "フェードアウトのアクティブを設定"
 
-#: editor_ops.cc:6477
+#: editor_ops.cc:6480
 msgid "toggle fade active"
 msgstr "フェードのアクティブを切り替え"
 
-#: editor_ops.cc:6640
+#: editor_ops.cc:6643
 msgid "set loop range from selection"
 msgstr "選択範囲からループレンジを設定"
 
-#: editor_ops.cc:6654
+#: editor_ops.cc:6657
 msgid "set loop range from region"
 msgstr "リージョンからループレンジを設定"
 
-#: editor_ops.cc:6673
+#: editor_ops.cc:6676
 msgid "set punch range from selection"
 msgstr "選択範囲からパンチレンジを設定"
 
-#: editor_ops.cc:6697
+#: editor_ops.cc:6700
 msgid "Auto Punch In"
 msgstr "オートパンチイン"
 
-#: editor_ops.cc:6704 editor_ops.cc:6708
+#: editor_ops.cc:6707 editor_ops.cc:6711
 msgid "Auto Punch In/Out"
 msgstr "オートパンチイン/アウト"
 
-#: editor_ops.cc:6750
+#: editor_ops.cc:6753
 msgid "set session start/end from selection"
 msgstr "選択範囲からセッション開始/終了を設定"
 
-#: editor_ops.cc:6785
+#: editor_ops.cc:6788
 msgid "set punch start from EP"
 msgstr "EP からパンチ開始を設定"
 
-#: editor_ops.cc:6810
+#: editor_ops.cc:6813
 msgid "set punch end from EP"
 msgstr "EP からパンチ終了を設定"
 
-#: editor_ops.cc:6840
+#: editor_ops.cc:6843
 msgid "set loop start from EP"
 msgstr "EP からループ開始を設定"
 
-#: editor_ops.cc:6865
+#: editor_ops.cc:6868
 msgid "set loop end from EP"
 msgstr "EP からループ終了を設定"
 
-#: editor_ops.cc:6876
+#: editor_ops.cc:6879
 msgid "set punch range from region"
 msgstr "リージョンからパンチレンジを設定"
 
-#: editor_ops.cc:6963
+#: editor_ops.cc:6966
 msgid "Add new marker"
 msgstr "新規マーカーを追加"
 
-#: editor_ops.cc:6964
+#: editor_ops.cc:6967
 msgid "Set global tempo"
 msgstr "グローバルテンポを設定"
 
-#: editor_ops.cc:6967
+#: editor_ops.cc:6970
 msgid "Define one bar"
 msgstr "1小節を定義"
 
-#: editor_ops.cc:6968
+#: editor_ops.cc:6971
 msgid "Do you want to set the global tempo or add a new tempo marker?"
 msgstr "グローバルテンポを設定するか、新規テンポマーカーを追加しますか？"
 
-#: editor_ops.cc:6994
+#: editor_ops.cc:6997
 msgid "set tempo from region"
 msgstr "リージョンからテンポを設定"
 
-#: editor_ops.cc:7024
+#: editor_ops.cc:7027
 msgid "split regions"
 msgstr "リージョンをスプリット"
 
-#: editor_ops.cc:7066
+#: editor_ops.cc:7069
 msgid ""
 "You are about to split\n"
 "%1\n"
@@ -6615,11 +6610,11 @@ msgstr ""
 "を%2個にスプリットしようとしています。\n"
 "これには時間がかかることがあります。"
 
-#: editor_ops.cc:7073
+#: editor_ops.cc:7076
 msgid "Call for the Ferret!"
 msgstr "Ferret を呼ぶ！"
 
-#: editor_ops.cc:7074
+#: editor_ops.cc:7077
 msgid ""
 "Press OK to continue with this split operation\n"
 "or ask the Ferret dialog to tune the analysis"
@@ -6627,47 +6622,47 @@ msgstr ""
 "スプリット実行を続行するにはOKを押してください\n"
 "または、Ferret ダイアログを呼び出して分析を調整してください。"
 
-#: editor_ops.cc:7076
+#: editor_ops.cc:7079
 msgid "Press OK to continue with this split operation"
 msgstr "スプリット実行を続行するにはOKを押してください"
 
-#: editor_ops.cc:7079
+#: editor_ops.cc:7082
 msgid "Excessive split?"
 msgstr "過剰なスプリット？"
 
-#: editor_ops.cc:7231
+#: editor_ops.cc:7234
 msgid "place transient"
 msgstr "トランジェントを設置"
 
-#: editor_ops.cc:7265
+#: editor_ops.cc:7268
 msgid "snap regions to grid"
 msgstr "リージョンをグリッドにスナップ"
 
-#: editor_ops.cc:7306
+#: editor_ops.cc:7309
 msgid "Close Region Gaps"
 msgstr "リージョンギャップをならす"
 
-#: editor_ops.cc:7311
+#: editor_ops.cc:7314
 msgid "Crossfade length"
 msgstr "クロスフェードの長さ"
 
-#: editor_ops.cc:7322
+#: editor_ops.cc:7325
 msgid "Pull-back length"
 msgstr "プルバックの長さ"
 
-#: editor_ops.cc:7335
+#: editor_ops.cc:7338
 msgid "Ok"
 msgstr "Ok"
 
-#: editor_ops.cc:7354
+#: editor_ops.cc:7357
 msgid "close region gaps"
 msgstr "リージョンギャップをならす"
 
-#: editor_ops.cc:7657
+#: editor_ops.cc:7660
 msgid "That would be bad news ...."
 msgstr "それは悪い知らせです...."
 
-#: editor_ops.cc:7661
+#: editor_ops.cc:7664
 msgid ""
 "Removing the master or monitor bus is such a bad idea\n"
 "that %1 is not going to allow it.\n"
@@ -6683,124 +6678,124 @@ msgstr ""
 "\"allow-special-bus-removal\" オプションを \"yes\" に\n"
 "設定してください。"
 
-#: editor_ops.cc:7678
+#: editor_ops.cc:7681
 msgid "track"
 msgid_plural "tracks"
 msgstr[0] "トラック"
 
-#: editor_ops.cc:7679
+#: editor_ops.cc:7682
 msgid "bus"
 msgid_plural "busses"
 msgstr[0] "バス"
 
-#: editor_ops.cc:7680
+#: editor_ops.cc:7683
 msgid "VCA"
 msgid_plural "VCAs"
 msgstr[0] "VCA"
 
-#: editor_ops.cc:7683
+#: editor_ops.cc:7686
 msgid "Remove various strips"
 msgstr "種々のストリップを削除"
 
-#: editor_ops.cc:7684
+#: editor_ops.cc:7687
 msgid "Do you really want to remove %1 %2, %3 %4 and %5 %6?"
 msgstr "本当に %1 %2、 %3 %4 および %5 %6 を削除しますか？"
 
-#: editor_ops.cc:7688 editor_ops.cc:7693 editor_ops.cc:7698
+#: editor_ops.cc:7691 editor_ops.cc:7696 editor_ops.cc:7701
 msgid "Remove %1 and %2"
 msgstr "%1 および %2 を削除"
 
-#: editor_ops.cc:7689 editor_ops.cc:7694 editor_ops.cc:7699
+#: editor_ops.cc:7692 editor_ops.cc:7697 editor_ops.cc:7702
 msgid "Do you really want to remove %1 %2 and %3 %4?"
 msgstr "本当に %1 %2 および %3 %4 を削除しますか？"
 
-#: editor_ops.cc:7703 editor_ops.cc:7708 editor_ops.cc:7713
+#: editor_ops.cc:7706 editor_ops.cc:7711 editor_ops.cc:7716
 #: vca_master_strip.cc:508
 msgid "Remove %1"
 msgstr "%1 を削除"
 
-#: editor_ops.cc:7704 editor_ops.cc:7709 editor_ops.cc:7714
+#: editor_ops.cc:7707 editor_ops.cc:7712 editor_ops.cc:7717
 msgid "Do you really want to remove %1 %2?"
 msgstr "本当に %1 %2 を削除しますか？"
 
-#: editor_ops.cc:7725
+#: editor_ops.cc:7728
 msgid "This action cannot be undone, and the session file will be overwritten!"
 msgstr "この動作は取り消しできません。セッションは上書きされます。"
 
-#: editor_ops.cc:7729
+#: editor_ops.cc:7732
 msgid "Yes, remove them."
 msgstr "はい、削除します。"
 
-#: editor_ops.cc:7731 editor_snapshots.cc:177 vca_master_strip.cc:514
+#: editor_ops.cc:7734 editor_snapshots.cc:177 vca_master_strip.cc:514
 msgid "Yes, remove it."
 msgstr "はい、削除します。"
 
-#: editor_ops.cc:7783
+#: editor_ops.cc:7786
 msgid "You must first select some tracks to Insert Time."
 msgstr "まず時間を挿入するトラックを選択してください。"
 
-#: editor_ops.cc:7790
+#: editor_ops.cc:7793
 msgid "You cannot insert time in Lock Edit mode."
 msgstr "ロック編集モードでは時間を挿入することはできません。"
 
-#: editor_ops.cc:7865 editor_ops.cc:7887 editor_ops.cc:7928 editor_ops.cc:7938
+#: editor_ops.cc:7868 editor_ops.cc:7890 editor_ops.cc:7931 editor_ops.cc:7941
 msgid "insert time"
 msgstr "時間を挿入"
 
-#: editor_ops.cc:7956
+#: editor_ops.cc:7959
 msgid "You must first select some tracks to Remove Time."
 msgstr "まず時間を削除するトラックを選択してください。"
 
-#: editor_ops.cc:7963
+#: editor_ops.cc:7966
 msgid "You cannot remove time in Lock Edit mode."
 msgstr "ロック編集モードでは時間を削除することはできません。"
 
-#: editor_ops.cc:8000
+#: editor_ops.cc:8003
 msgid "Cannot insert or delete time when in Lock edit."
 msgstr "編集がロックされているため時間の挿入もしくは削除ができません。"
 
-#: editor_ops.cc:8014 editor_ops.cc:8033 editor_ops.cc:8107 editor_ops.cc:8120
+#: editor_ops.cc:8017 editor_ops.cc:8036 editor_ops.cc:8110 editor_ops.cc:8123
 msgid "remove time"
 msgstr "時間を削除"
 
-#: editor_ops.cc:8193
+#: editor_ops.cc:8196
 msgid "There are too many tracks to fit in the current window"
 msgstr "現在のウインドウに合わせるトラック数が多すぎます"
 
-#: editor_ops.cc:8255
+#: editor_ops.cc:8258
 msgid "Sel"
 msgstr "Sel"
 
-#: editor_ops.cc:8294
+#: editor_ops.cc:8297
 #, c-format
 msgid "Saved view %u"
 msgstr "%u ビューを保存しました"
 
-#: editor_ops.cc:8319
+#: editor_ops.cc:8322
 msgid "mute regions"
 msgstr "リージョンをミュート"
 
-#: editor_ops.cc:8321
+#: editor_ops.cc:8324
 msgid "mute region"
 msgstr "リージョンをミュート"
 
-#: editor_ops.cc:8358
+#: editor_ops.cc:8361
 msgid "combine regions"
 msgstr "リージョンを結合"
 
-#: editor_ops.cc:8396
+#: editor_ops.cc:8399
 msgid "uncombine regions"
 msgstr "リージョンの結合を解除"
 
-#: editor_ops.cc:8435
+#: editor_ops.cc:8438
 msgid "%1: Locked"
 msgstr "%1: ロックされています"
 
-#: editor_ops.cc:8443
+#: editor_ops.cc:8446
 msgid "Click to unlock"
 msgstr "クリックしてロック解除"
 
-#: editor_ops.cc:8494
+#: editor_ops.cc:8497
 msgid "Moving embedded files into session folder"
 msgstr "埋め込みファイルをセッションフォルダに移動中"
 
@@ -7208,7 +7203,7 @@ msgstr "バッファー IO を使用"
 msgid "Autostart"
 msgstr "オートスタート"
 
-#: engine_dialog.cc:103 engine_dialog.cc:3112
+#: engine_dialog.cc:103 engine_dialog.cc:3116
 msgid "Measure"
 msgstr "測定"
 
@@ -7271,7 +7266,7 @@ msgstr "チャンネルが接続されたら \"測定\" ボタンを押してく
 msgid "When satisfied with the results, click the \"Use results\" button."
 msgstr "測定結果がよろしければ、 \"結果を使用\" ボタンをクリックしてください。"
 
-#: engine_dialog.cc:256 engine_dialog.cc:3300 engine_dialog.cc:3310
+#: engine_dialog.cc:256 engine_dialog.cc:3304 engine_dialog.cc:3314
 msgid "No measurement results yet"
 msgstr "まだ測定結果はありません。"
 
@@ -7369,6 +7364,14 @@ msgstr ""
 "\n"
 "レイテンシーキャリブレーションにはプレイバックとキャプチャ両方が必要です。"
 
+#: engine_dialog.cc:910
+msgid "Engine|Stop"
+msgstr ""
+
+#: engine_dialog.cc:914
+msgid "Engine|Start"
+msgstr ""
+
 #: engine_dialog.cc:1000
 msgid "MIDI Devices"
 msgstr "MIDI デバイス"
@@ -7387,7 +7390,7 @@ msgstr "システムレイテンシ [samples]"
 msgid "Input"
 msgstr "インプット"
 
-#: engine_dialog.cc:1013 foldback_strip.cc:387 gain_meter.cc:808
+#: engine_dialog.cc:1013 foldback_strip.cc:388 gain_meter.cc:808
 #: mixer_strip.cc:195 mixer_strip.cc:412 mixer_strip.cc:2535
 #: monitor_section.cc:305 monitor_section.cc:309 plugin_eq_gui.cc:132
 #: rc_option_editor.cc:4011 vca_master_strip.cc:236
@@ -7402,69 +7405,69 @@ msgstr "キャリブレーション"
 msgid "all available channels"
 msgstr "利用可能なすべてのチャンネル"
 
-#: engine_dialog.cc:1685
+#: engine_dialog.cc:1689
 msgid "%1 sample"
 msgid_plural "%1 samples"
 msgstr[0] "%1サンプル"
 
-#: engine_dialog.cc:1745
+#: engine_dialog.cc:1749
 #, c-format
 msgid "(%.1f ms)"
 msgstr "(%.1f ms)"
 
-#: engine_dialog.cc:2461
+#: engine_dialog.cc:2465
 msgid "Could not start backend engine %1"
 msgstr "バックエンドエンジン %1 を開始できません。"
 
-#: engine_dialog.cc:2493
+#: engine_dialog.cc:2497
 msgid "Cannot set driver to %1"
 msgstr "ドライバーを %1 に設定できません"
 
-#: engine_dialog.cc:2498
+#: engine_dialog.cc:2502
 msgid "Cannot set input device name to %1"
 msgstr "インプットデバイス名を %1 に設定できません"
 
-#: engine_dialog.cc:2502
+#: engine_dialog.cc:2506
 msgid "Cannot set output device name to %1"
 msgstr "アウトプットデバイス名を %1 に設定できません"
 
-#: engine_dialog.cc:2507
+#: engine_dialog.cc:2511
 msgid "Cannot set device name to %1"
 msgstr "デバイス名を %1 に設定できません"
 
-#: engine_dialog.cc:2512
+#: engine_dialog.cc:2516
 msgid "Cannot set sample rate to %1"
 msgstr "サンプルレートを %1 に設定できません"
 
-#: engine_dialog.cc:2516
+#: engine_dialog.cc:2520
 msgid "Cannot set buffer size to %1"
 msgstr "バッファーサイズを %1 に設定できません"
 
-#: engine_dialog.cc:2520
+#: engine_dialog.cc:2524
 msgid "Cannot set periods to %1"
 msgstr "期間をを %1 に設定できません"
 
-#: engine_dialog.cc:2526
+#: engine_dialog.cc:2530
 msgid "Cannot set input channels to %1"
 msgstr "インプットチャンネルを %1 に設定できません"
 
-#: engine_dialog.cc:2530
+#: engine_dialog.cc:2534
 msgid "Cannot set output channels to %1"
 msgstr "アウトプットチャンネルを %1 に設定できません"
 
-#: engine_dialog.cc:2536
+#: engine_dialog.cc:2540
 msgid "Cannot set input latency to %1"
 msgstr "インプットレイテンシを %1 に設定できません"
 
-#: engine_dialog.cc:2540
+#: engine_dialog.cc:2544
 msgid "Cannot set output latency to %1"
 msgstr "アウトプットレイテンシを %1 に設定できません"
 
-#: engine_dialog.cc:2963 engine_dialog.cc:3029
+#: engine_dialog.cc:2967 engine_dialog.cc:3033
 msgid "No signal detected "
 msgstr "シグナルを検出できません "
 
-#: engine_dialog.cc:2970
+#: engine_dialog.cc:2974
 msgid ""
 "Input signal is > -3dBFS. Lower the signal level (output gain, input gain) "
 "on the audio-interface."
@@ -7472,64 +7475,64 @@ msgstr ""
 "インプットシグナルが -3dBFS を超えています。オーディオインタフェースのシグナ"
 "ルレベル (アウトプットゲイン、インプットゲイン) を下げてください。"
 
-#: engine_dialog.cc:2983 engine_dialog.cc:3037 port_insert_ui.cc:74
+#: engine_dialog.cc:2987 engine_dialog.cc:3041 port_insert_ui.cc:74
 #: port_insert_ui.cc:102
 msgid "Disconnected from audio engine"
 msgstr "オーディオエンジンの接続が解除されました"
 
-#: engine_dialog.cc:2992 engine_dialog.cc:3045
+#: engine_dialog.cc:2996 engine_dialog.cc:3049
 msgid "Detected roundtrip latency: "
 msgstr "検出されたラウンドトリップレイテンシ:"
 
-#: engine_dialog.cc:2994 engine_dialog.cc:3047
+#: engine_dialog.cc:2998 engine_dialog.cc:3051
 msgid "Systemic latency: "
 msgstr "システムレイテンシ: "
 
-#: engine_dialog.cc:3001
+#: engine_dialog.cc:3005
 msgid "(signal detection error)"
 msgstr "(シグナル検出エラー)"
 
-#: engine_dialog.cc:3007
+#: engine_dialog.cc:3011
 msgid "(inverted - bad wiring)"
 msgstr "(逆転 - 配線ミス)"
 
-#: engine_dialog.cc:3054
+#: engine_dialog.cc:3058
 msgid "(averaging)"
 msgstr "(平均化中)"
 
-#: engine_dialog.cc:3060
+#: engine_dialog.cc:3064
 msgid "(too large jitter)"
 msgstr "(ジッター過大)"
 
-#: engine_dialog.cc:3064
+#: engine_dialog.cc:3068
 msgid "(large jitter)"
 msgstr "(深刻なジッター)"
 
-#: engine_dialog.cc:3076
+#: engine_dialog.cc:3080
 msgid "Timeout - large MIDI jitter."
 msgstr "タイムアウト - 深刻なMIDIジッター。"
 
-#: engine_dialog.cc:3092 port_insert_ui.cc:138
+#: engine_dialog.cc:3096 port_insert_ui.cc:138
 msgid "Detecting ..."
 msgstr "検出中..."
 
-#: engine_dialog.cc:3224
+#: engine_dialog.cc:3228
 msgid "Disconnect from %1"
 msgstr "%1 から接続解除"
 
-#: engine_dialog.cc:3229
+#: engine_dialog.cc:3233
 msgid "Running"
 msgstr "実行中"
 
-#: engine_dialog.cc:3231
+#: engine_dialog.cc:3235
 msgid "Connected"
 msgstr "接続完了"
 
-#: engine_dialog.cc:3242
+#: engine_dialog.cc:3246
 msgid "Connect to %1"
 msgstr "%1 に接続"
 
-#: engine_dialog.cc:3246
+#: engine_dialog.cc:3250
 msgid "Stopped"
 msgstr "停止"
 
@@ -7698,7 +7701,7 @@ msgstr "系統エクスポート"
 msgid "Add another format"
 msgstr "他のフォーマットを追加"
 
-#: export_file_notebook.cc:208 transport_masters_dialog.cc:76
+#: export_file_notebook.cc:208 transport_masters_dialog.cc:77
 msgid "Format"
 msgstr "フォーマット"
 
@@ -7757,7 +7760,7 @@ msgstr "次の構成要素からファイル名をビルド:"
 msgid "No Name"
 msgstr "名前なし"
 
-#: export_filename_selector.cc:53 session_dialog.cc:347
+#: export_filename_selector.cc:53 session_dialog.cc:350
 msgid "Session Name"
 msgstr "セッション名"
 
@@ -8187,7 +8190,7 @@ msgstr "時間を次のように表示する:"
 msgid "Realtime Export"
 msgstr "リアルタイムエクスポート"
 
-#: export_timespan_selector.cc:58 processor_box.cc:3864
+#: export_timespan_selector.cc:58 processor_box.cc:3904
 msgid "Select All"
 msgstr "すべてを選択"
 
@@ -8200,7 +8203,7 @@ msgid "RT"
 msgstr "RT"
 
 #: export_timespan_selector.cc:397 export_timespan_selector.cc:517
-#: virtual_keyboard_window.cc:170
+#: virtual_keyboard_window.cc:171
 msgid "Range"
 msgstr "レンジ"
 
@@ -8232,106 +8235,106 @@ msgstr "センドのゲインを 0dB に設定"
 msgid "Remove This Send"
 msgstr "このセンドを削除"
 
-#: foldback_strip.cc:304 foldback_strip.cc:1113 foldback_strip.cc:1124
+#: foldback_strip.cc:305 foldback_strip.cc:1114 foldback_strip.cc:1125
 #: mixer_strip.cc:119 mixer_strip.cc:152 mixer_strip.cc:413 mixer_strip.cc:1576
 #: mixer_strip.cc:1587 rc_option_editor.cc:4012 vca_master_strip.cc:237
 msgid "Comments"
 msgstr "Comments"
 
-#: foldback_strip.cc:323
+#: foldback_strip.cc:324
 msgid "Previous foldback bus"
 msgstr "前のフォールバックバス"
 
-#: foldback_strip.cc:329
+#: foldback_strip.cc:330
 msgid "Next foldback bus"
 msgstr "次のフォールバックバス"
 
-#: foldback_strip.cc:335
+#: foldback_strip.cc:336
 msgid "Hide Foldback strip"
 msgstr "フォールバックストリップを隠す"
 
-#: foldback_strip.cc:348 mixer_strip.cc:800
+#: foldback_strip.cc:349 mixer_strip.cc:800
 msgid "Show Sends"
 msgstr "センドを表示"
 
-#: foldback_strip.cc:349 route_ui.cc:209
+#: foldback_strip.cc:350 route_ui.cc:209
 msgid "Show the strips that send to this bus, and control them from the faders"
 msgstr "このバスに送るストリップを表示し、フェーダーからコントロール"
 
-#: foldback_strip.cc:370 foldback_strip.cc:1476 foldback_strip.cc:1479
+#: foldback_strip.cc:371 foldback_strip.cc:1477 foldback_strip.cc:1480
 msgid "Listen"
 msgstr "リッスン"
 
-#: foldback_strip.cc:376
+#: foldback_strip.cc:377
 msgid "Level: "
 msgstr "レベル:"
 
-#: foldback_strip.cc:722 global_port_matrix.cc:203 io_selector.cc:216
+#: foldback_strip.cc:723 global_port_matrix.cc:203 io_selector.cc:216
 #: mixer_strip.cc:884 mixer_strip.cc:1003 monitor_section.cc:1353
 #: monitor_selector.cc:190 plugin_pin_dialog.cc:1812
 msgid "Disconnect"
 msgstr "接続解除"
 
-#: foldback_strip.cc:753 mixer_strip.cc:949 mixer_strip.cc:1059
+#: foldback_strip.cc:754 mixer_strip.cc:949 mixer_strip.cc:1059
 #: monitor_section.cc:1389 plugin_pin_dialog.cc:1836
 msgid "Routing Grid"
 msgstr "ルーティング・グリッド"
 
-#: foldback_strip.cc:902 mixer_strip.cc:1320 monitor_section.cc:1434
+#: foldback_strip.cc:903 mixer_strip.cc:1320 monitor_section.cc:1434
 msgid "<b>OUTPUT</b> from %1"
 msgstr "%1 からの <b>アウトプット</b>"
 
-#: foldback_strip.cc:940 mixer_strip.cc:1359 monitor_section.cc:1521
-#: rc_option_editor.cc:1425 transport_masters_dialog.cc:355
+#: foldback_strip.cc:941 mixer_strip.cc:1359 monitor_section.cc:1521
+#: rc_option_editor.cc:1425 transport_masters_dialog.cc:378
 msgid "Disconnected"
 msgstr "切断済み"
 
-#: foldback_strip.cc:1109 mixer_strip.cc:1572
+#: foldback_strip.cc:1110 mixer_strip.cc:1572
 msgid "Click to add/edit comments"
 msgstr "クリックしてコメント追加/編集"
 
-#: foldback_strip.cc:1157 mixer_strip.cc:1694 route_time_axis.cc:631
+#: foldback_strip.cc:1158 mixer_strip.cc:1694 route_time_axis.cc:631
 msgid "Comments..."
 msgstr "コメント..."
 
-#: foldback_strip.cc:1159 mixer_strip.cc:1698 route_time_axis.cc:635
+#: foldback_strip.cc:1160 mixer_strip.cc:1698 route_time_axis.cc:635
 msgid "Outputs..."
 msgstr "アウトプット..."
 
-#: foldback_strip.cc:1163 mixer_strip.cc:1712
+#: foldback_strip.cc:1164 mixer_strip.cc:1712
 msgid "Save As Template..."
 msgstr "テンプレートとして保存..."
 
-#: foldback_strip.cc:1168 mixer_strip.cc:1730 route_group_dialog.cc:47
+#: foldback_strip.cc:1169 mixer_strip.cc:1730 route_group_dialog.cc:47
 #: route_time_axis.cc:833
 msgid "Active"
 msgstr "アクティブ"
 
-#: foldback_strip.cc:1175 mixer_strip.cc:1775
+#: foldback_strip.cc:1176 mixer_strip.cc:1775
 msgid "Protect Against Denormals"
 msgstr "非ノーマライズに対して保護"
 
-#: foldback_strip.cc:1473
+#: foldback_strip.cc:1474
 msgid "Listen on monitor"
 msgstr "モニタをリッスン"
 
-#: foldback_strip.cc:1587 route_ui.cc:1062
+#: foldback_strip.cc:1588 route_ui.cc:1062
 msgid "Assign selected tracks (prefader)"
 msgstr "選択したトラックを割り当て (プリ・フェーダー)"
 
-#: foldback_strip.cc:1591
+#: foldback_strip.cc:1592
 msgid "Assign selected tracks and buses (prefader)"
 msgstr "選択したトラックとバスを割り当て (プリ・フェーダー)"
 
-#: foldback_strip.cc:1593 route_ui.cc:1076
+#: foldback_strip.cc:1594 route_ui.cc:1076
 msgid "Copy track/bus gains to sends"
 msgstr "トラック/バス・ゲインをセンドにコピー"
 
-#: foldback_strip.cc:1594 route_ui.cc:1077
+#: foldback_strip.cc:1595 route_ui.cc:1077
 msgid "Set sends gain to -inf"
 msgstr "センド・ゲインを -inf に設定"
 
-#: foldback_strip.cc:1595 route_ui.cc:1078
+#: foldback_strip.cc:1596 route_ui.cc:1078
 msgid "Set sends gain to 0dB"
 msgstr "センド・ゲインを 0dB に設定"
 
@@ -8407,11 +8410,11 @@ msgstr "MIDI キーボード"
 msgid "<span size=\"large\">Presets</span>"
 msgstr "<span size=\"large\">プリセット</span>"
 
-#: generic_pluginui.cc:146 patch_change_widget.cc:65
+#: generic_pluginui.cc:146 patch_change_widget.cc:67
 msgid "Channel:"
 msgstr "チャンネル:"
 
-#: generic_pluginui.cc:148 patch_change_widget.cc:90
+#: generic_pluginui.cc:148 patch_change_widget.cc:92
 msgid "Velocity:"
 msgstr "ベロシティ:"
 
@@ -8438,7 +8441,7 @@ msgstr ""
 msgid "Switches"
 msgstr "スイッチ"
 
-#: generic_pluginui.cc:507 generic_pluginui.cc:613 processor_box.cc:3834
+#: generic_pluginui.cc:507 generic_pluginui.cc:613 processor_box.cc:3874
 msgid "Controls"
 msgstr "コントロール"
 
@@ -8891,6 +8894,10 @@ msgstr ""
 "Action Scripts　はバッチプロセスやカスタマイズしたタスクとして、ユーザが（メ"
 "ニュー・ショートカット・ツールバーボタンから）実行する動作です。"
 
+#: lua_script_manager.cc:98
+msgid "Action Scripts"
+msgstr ""
+
 #: lua_script_manager.cc:105
 msgid "Signal(s)"
 msgstr "シグナル"
@@ -8905,6 +8912,10 @@ msgstr ""
 "をフックします。スクリプトが登録されると自動的にイベントがトリガーとなりタス"
 "クが実行されます。"
 
+#: lua_script_manager.cc:139
+msgid "Action Hooks"
+msgstr ""
+
 #: lua_script_manager.cc:160
 msgid ""
 "Lua session scripts are loaded into processing engine and run in realtime. "
@@ -8914,6 +8925,10 @@ msgstr ""
 "Lua セッションスクリプトはプロセスエンジンにロードされリアルタイムで実行され"
 "ます。いずれかのプロセスが実行される前に、リアルタイムプロセスコンテキストの"
 "毎オーディオサイクルの開始時に定期的にコールされます。"
+
+#: lua_script_manager.cc:175
+msgid "Session Scripts"
+msgstr ""
 
 #: lua_script_manager.cc:220
 msgid "Action %1"
@@ -8959,31 +8974,31 @@ msgstr "ユーザ UI スクリプトファイル \"%1\" を正常に読み込め
 msgid "UI script file %1 not saved"
 msgstr "UI スクリプトファイル %1 は保存されていません"
 
-#: luainstance.cc:1521
+#: luainstance.cc:1527
 msgid "Add Shortcut or Lua Script"
 msgstr "ショートカットや Lua スクリプトを追加"
 
-#: luainstance.cc:1525
+#: luainstance.cc:1531
 msgid "Add Lua Callback Hook"
 msgstr "Lua コールバック・フックを追加"
 
-#: luainstance.cc:1532
+#: luainstance.cc:1538
 msgid "Add Lua Session Script"
 msgstr "Lua セッションスクリプトを追加"
 
-#: luainstance.cc:1555
+#: luainstance.cc:1561
 msgid "Cannot read script '%1': %2"
 msgstr "スクリプト '%1' を呼び込みできません: %2"
 
-#: luainstance.cc:1572
+#: luainstance.cc:1578
 msgid "Set Script Parameters"
 msgstr "スクリプトパラメータを設定"
 
-#: luainstance.cc:1597
+#: luainstance.cc:1603
 msgid "Session script '%1' instantiation failed: %2"
 msgstr "セッションスクリプト \"%1\" のインストールに失敗しました: %2"
 
-#: luainstance.cc:1601 luainstance.cc:1605
+#: luainstance.cc:1607 luainstance.cc:1611
 msgid "Loading Session script '%1' failed: %2"
 msgstr "セッションスクリプト \"%1\" の読み込みに失敗しました: %2"
 
@@ -9350,47 +9365,47 @@ msgstr "Num"
 msgid "Vel"
 msgstr "Vel"
 
-#: midi_list_editor.cc:218
+#: midi_list_editor.cc:220
 msgid "edit note start"
 msgstr "ノート開始位置を編集"
 
-#: midi_list_editor.cc:227
+#: midi_list_editor.cc:229
 msgid "edit note channel"
 msgstr "ノート・チャンネルを編集"
 
-#: midi_list_editor.cc:237
+#: midi_list_editor.cc:239
 msgid "edit note number"
 msgstr "ノート・ナンバーを編集"
 
-#: midi_list_editor.cc:247
+#: midi_list_editor.cc:249
 msgid "edit note velocity"
 msgstr "ノート・ベロシティを編集"
 
-#: midi_list_editor.cc:261
+#: midi_list_editor.cc:263
 msgid "edit note length"
 msgstr "ノートの長さを編集"
 
-#: midi_list_editor.cc:465
+#: midi_list_editor.cc:467
 msgid "insert new note"
 msgstr "新規ノートを挿入"
 
-#: midi_list_editor.cc:529
+#: midi_list_editor.cc:531
 msgid "delete notes (from list)"
 msgstr "ノートを (リストから) 削除"
 
-#: midi_list_editor.cc:604
+#: midi_list_editor.cc:606
 msgid "change note channel"
 msgstr "ノート・チャンネルを変更"
 
-#: midi_list_editor.cc:612 midi_list_editor.cc:621
+#: midi_list_editor.cc:614 midi_list_editor.cc:623
 msgid "change note number"
 msgstr "ノート・ナンバーを変更"
 
-#: midi_list_editor.cc:629
+#: midi_list_editor.cc:631
 msgid "change note velocity"
 msgstr "ノート・ベロシティを変更"
 
-#: midi_list_editor.cc:699
+#: midi_list_editor.cc:701
 msgid "change note length"
 msgstr "ノートの長さを変更"
 
@@ -9615,7 +9630,7 @@ msgstr "ポート:"
 msgid "New velocity"
 msgstr "新規ベロシティ"
 
-#: mini_timeline.cc:74
+#: mini_timeline.cc:73
 msgid ""
 "<b>Navigation Timeline</b>. Use left-click to locate to time position or "
 "marker; scroll-wheel to jump, hold %1 for fine grained and %2 + %3 for extra-"
@@ -9627,27 +9642,27 @@ msgstr ""
 "さらに詳細化します。右クリックで表示範囲を設定します。表示単位はプライマリク"
 "ロックにより定義されます。"
 
-#: mini_timeline.cc:688 rc_option_editor.cc:1151
+#: mini_timeline.cc:678 rc_option_editor.cc:1151
 msgid "30 sec"
 msgstr "30 秒"
 
-#: mini_timeline.cc:689 rc_option_editor.cc:1152
+#: mini_timeline.cc:679 rc_option_editor.cc:1152
 msgid "1 min"
 msgstr "1 分"
 
-#: mini_timeline.cc:690 rc_option_editor.cc:1153
+#: mini_timeline.cc:680 rc_option_editor.cc:1153
 msgid "2 mins"
 msgstr "2 分"
 
-#: mini_timeline.cc:691 rc_option_editor.cc:1156
+#: mini_timeline.cc:681 rc_option_editor.cc:1156
 msgid "5 mins"
 msgstr "5 分"
 
-#: mini_timeline.cc:692
+#: mini_timeline.cc:682
 msgid "10 mins"
 msgstr "10 分"
 
-#: mini_timeline.cc:693
+#: mini_timeline.cc:683
 msgid "20 mins"
 msgstr "20 分"
 
@@ -9727,13 +9742,9 @@ msgstr ""
 msgid ""
 "\n"
 "The Regions and edits have been retained.\n"
-"If this is unexpected, manually loacate the files and restore them in the "
+"If this is unexpected, manually locate the files and restore them in the "
 "session folder.\n"
 msgstr ""
-"\n"
-"リージョンと編集は保持されています。\n"
-"もしこれが想定していない動作の場合は、手動でファイルの位置を特定しセッション"
-"フォルダに置き直してください。\n"
 
 #: missing_filesource_dialog.cc:56
 msgid ""
@@ -9887,7 +9898,7 @@ msgstr "カスタムの録音+プレイバック位置"
 msgid "Disk I/O..."
 msgstr "ディスク I/O..."
 
-#: mixer_strip.cc:1760 processor_box.cc:3879
+#: mixer_strip.cc:1760 processor_box.cc:3919
 msgid "Pin Connections..."
 msgstr "ピン・コネクション..."
 
@@ -10435,7 +10446,7 @@ msgstr "セッションがありません - I/O を変更することはでき�
 msgid "Monitor output selector"
 msgstr "モニター・アウトプット・セレクター"
 
-#: mono_panner.cc:107 stereo_panner.cc:117
+#: mono_panner.cc:107 stereo_panner.cc:120
 msgid "bypassed"
 msgstr "バイパス"
 
@@ -10444,11 +10455,11 @@ msgstr "バイパス"
 msgid "L:%3d R:%3d"
 msgstr "L:%3d R:%3d"
 
-#: mono_panner.cc:205 panner2d.cc:283 stereo_panner.cc:254 stereo_panner.cc:277
+#: mono_panner.cc:202 panner2d.cc:286 stereo_panner.cc:255 stereo_panner.cc:278
 msgid "Panner|L"
 msgstr "L"
 
-#: mono_panner.cc:222 panner2d.cc:284 stereo_panner.cc:252 stereo_panner.cc:279
+#: mono_panner.cc:219 panner2d.cc:287 stereo_panner.cc:253 stereo_panner.cc:280
 msgid "Panner|R"
 msgstr "R"
 
@@ -10851,15 +10862,15 @@ msgstr "バグを http://tracker.ardour.org　にレポート\n"
 msgid "Website http://ardour.org\n"
 msgstr "ウェブサイト http://ardour.org\n"
 
-#: panner2d.cc:903
+#: panner2d.cc:907
 msgid "Panner (2D)"
 msgstr "パンナー (2D)"
 
-#: panner2d.cc:905 panner_ui.cc:404 plugin_ui.cc:532
+#: panner2d.cc:909 panner_ui.cc:404 plugin_ui.cc:532
 msgid "Bypass"
 msgstr "バイパス"
 
-#: panner2d.cc:911
+#: panner2d.cc:915
 msgid "Panner"
 msgstr "パンナー"
 
@@ -10871,23 +10882,27 @@ msgstr "パン自動モード"
 msgid "Abs"
 msgstr "Abs"
 
-#: patch_change_widget.cc:55
+#: panner_ui.cc:420 processor_box.cc:842
+msgid "Link panner controls"
+msgstr "パンナー・コントロールをリンク"
+
+#: patch_change_widget.cc:57
 msgid "Audition on Change"
 msgstr "チェンジのオーディション"
 
-#: patch_change_widget.cc:67
+#: patch_change_widget.cc:69
 msgid "Bank:"
 msgstr "バンク:"
 
-#: patch_change_widget.cc:69
+#: patch_change_widget.cc:71
 msgid "MSB:"
 msgstr "MSB:"
 
-#: patch_change_widget.cc:71
+#: patch_change_widget.cc:73
 msgid "LSB:"
 msgstr "LSB:"
 
-#: patch_change_widget.cc:80
+#: patch_change_widget.cc:82
 msgid ""
 "Note: Patch Selection is volatile (only Midi-Tracks retain bank/patch "
 "selection)."
@@ -10895,27 +10910,27 @@ msgstr ""
 "注: パッチ選択は揮発性です（MIDI トラックのみがバンク/パッチ選択を保持しま"
 "す）。"
 
-#: patch_change_widget.cc:86
+#: patch_change_widget.cc:88
 msgid "Start Note:"
 msgstr "開始ノート:"
 
-#: patch_change_widget.cc:88
+#: patch_change_widget.cc:90
 msgid "End Note:"
 msgstr "終了ノート:"
 
-#: patch_change_widget.cc:250
-msgid "Bank %1"
-msgstr "バンク %1"
-
-#: patch_change_widget.cc:272
+#: patch_change_widget.cc:284 patch_change_widget.cc:343
 msgid "%1 (Pgm-%2)"
 msgstr "%1 (Pgm-%2)"
 
-#: patch_change_widget.cc:283
+#: patch_change_widget.cc:304 patch_change_widget.cc:328
+msgid "Bank %1"
+msgstr "バンク %1"
+
+#: patch_change_widget.cc:356
 msgid "Pgm-%1"
 msgstr "Pgm-%1"
 
-#: patch_change_widget.cc:557 patch_change_widget.cc:570
+#: patch_change_widget.cc:635 patch_change_widget.cc:648
 msgid "Select Patch for \"%1\""
 msgstr "\"%1\" へのパッチを選択"
 
@@ -11080,7 +11095,7 @@ msgstr "プラグインアウトプット設定の変更に失敗しました。
 msgid "Failed to alter plugin input configuration."
 msgstr "プラグインインプット設定の変更に失敗しました。"
 
-#: plugin_pin_dialog.cc:1750 processor_box.cc:2679
+#: plugin_pin_dialog.cc:1750 processor_box.cc:2719
 msgid "Cannot set up new send: %1"
 msgstr "新規センドをセットアップできません: %1"
 
@@ -11173,8 +11188,8 @@ msgstr "お気に入り"
 msgid "Creator"
 msgstr "作者"
 
-#: plugin_selector.cc:101 transport_masters_dialog.cc:75
-#: transport_masters_dialog.cc:693
+#: plugin_selector.cc:101 transport_masters_dialog.cc:76
+#: transport_masters_dialog.cc:721
 msgid "Type"
 msgstr "タイプ"
 
@@ -11331,7 +11346,7 @@ msgstr ""
 msgid "create_lv2_editor called on non-LV2 plugin"
 msgstr "create_lv2_editor が LV2 でないプラグインで呼ばれました"
 
-#: plugin_ui.cc:466 transport_masters_dialog.cc:716
+#: plugin_ui.cc:466 transport_masters_dialog.cc:744
 msgid "Add"
 msgstr "追加"
 
@@ -11628,7 +11643,7 @@ msgstr "リターン"
 msgid "New Favorite Preset for \"%1\""
 msgstr "\"%1\" の新規お気に入りプリセット"
 
-#: processor_box.cc:535 processor_box.cc:1621
+#: processor_box.cc:539 processor_box.cc:1660
 msgid ""
 "\n"
 "%1+double-click to toggle inline-display"
@@ -11636,7 +11651,7 @@ msgstr ""
 "\n"
 "%1+ダブルクリックでインライン・ディスプレイを切り替え"
 
-#: processor_box.cc:539
+#: processor_box.cc:543
 msgid ""
 "\n"
 "This plugin has been replicated %1 times."
@@ -11644,7 +11659,7 @@ msgstr ""
 "\n"
 "このプラグインは %1 複製されています。"
 
-#: processor_box.cc:544 processor_box.cc:1625
+#: processor_box.cc:548 processor_box.cc:1664
 msgid ""
 "<b>%1</b>\n"
 "Double-click to show GUI.\n"
@@ -11654,7 +11669,7 @@ msgstr ""
 "ダブルクリックして GUI を表示します。\n"
 "%2+ダブルクリックでジェネリック GUI を表示します。%3"
 
-#: processor_box.cc:547 processor_box.cc:1628
+#: processor_box.cc:551 processor_box.cc:1667
 msgid ""
 "<b>%1</b>\n"
 "Double-click to show generic GUI.%2"
@@ -11662,7 +11677,7 @@ msgstr ""
 "<b>%1</b>\n"
 "ダブルクリックしてジェネリック GUI を表示します。 %2"
 
-#: processor_box.cc:553
+#: processor_box.cc:557
 msgid ""
 "<b>%1</b>\n"
 "The Plugin is not available on this system\n"
@@ -11672,27 +11687,23 @@ msgstr ""
 "プラグインはこのシステム上で利用できません。\n"
 "また、スタブで置き換えることはできません。"
 
-#: processor_box.cc:744
+#: processor_box.cc:783
 msgid "Inline Display"
 msgstr "インライン・ディスプレイ"
 
-#: processor_box.cc:757
+#: processor_box.cc:796
 msgid "Show All Controls"
 msgstr "すべてのコントロールを表示"
 
-#: processor_box.cc:761
+#: processor_box.cc:800
 msgid "Hide All Controls"
 msgstr "すべてのコントロールを隠す"
 
-#: processor_box.cc:803
-msgid "Link panner controls"
-msgstr "パンナー・コントロールをリンク"
-
-#: processor_box.cc:811
+#: processor_box.cc:850
 msgid "Allow Feedback Loop"
 msgstr "フィードバック・ループを許可"
 
-#: processor_box.cc:1825
+#: processor_box.cc:1865
 msgid ""
 "Right-click to add/remove/edit\n"
 "plugins,inserts,sends and more"
@@ -11700,7 +11711,7 @@ msgstr ""
 "右クリックしてプラグイン/インサート/\n"
 "センド/その他を追加/削除/編集"
 
-#: processor_box.cc:1974
+#: processor_box.cc:2014
 msgid ""
 "Processor Drag/Drop failed. Probably because\n"
 "the I/O configuration of the plugins could\n"
@@ -11710,15 +11721,15 @@ msgstr ""
 "おそらくプラグインの I/O 設定がこのトラックの\n"
 "設定と合っていないのが原因です。"
 
-#: processor_box.cc:2614 processor_box.cc:3140
+#: processor_box.cc:2654 processor_box.cc:3180
 msgid "Plugin Incompatibility"
 msgstr "プラグイン不適合"
 
-#: processor_box.cc:2617
+#: processor_box.cc:2657
 msgid "You attempted to add the plugin \"%1\" in slot %2.\n"
 msgstr "プラグイン \"%1\" をスロット %2 に追加しようとしました。\n"
 
-#: processor_box.cc:2623
+#: processor_box.cc:2663
 msgid ""
 "\n"
 "This plugin has:\n"
@@ -11726,17 +11737,17 @@ msgstr ""
 "\n"
 "このプラグインには次のものがあります:\n"
 
-#: processor_box.cc:2626
+#: processor_box.cc:2666
 msgid "\t%1 MIDI input\n"
 msgid_plural "\t%1 MIDI inputs\n"
 msgstr[0] "\t%1 MIDI インプット\n"
 
-#: processor_box.cc:2630
+#: processor_box.cc:2670
 msgid "\t%1 audio input\n"
 msgid_plural "\t%1 audio inputs\n"
 msgstr[0] "\t%1 Audio インプット\n"
 
-#: processor_box.cc:2633
+#: processor_box.cc:2673
 msgid ""
 "\n"
 "but at the insertion point, there are:\n"
@@ -11744,17 +11755,17 @@ msgstr ""
 "\n"
 "しかし、インサートポイントには次のものがあります:\n"
 
-#: processor_box.cc:2636
+#: processor_box.cc:2676
 msgid "\t%1 MIDI channel\n"
 msgid_plural "\t%1 MIDI channels\n"
 msgstr[0] "\t%1 MIDI チャンネル\n"
 
-#: processor_box.cc:2640
+#: processor_box.cc:2680
 msgid "\t%1 audio channel\n"
 msgid_plural "\t%1 audio channels\n"
 msgstr[0] "\t%1 Audio チャンネル\n"
 
-#: processor_box.cc:2643
+#: processor_box.cc:2683
 msgid ""
 "\n"
 "%1 is unable to insert this plugin here.\n"
@@ -11762,7 +11773,7 @@ msgstr ""
 "\n"
 "%1 はこのプラグインをここにインサートできませんでした。\n"
 
-#: processor_box.cc:3143
+#: processor_box.cc:3183
 msgid ""
 "You cannot reorder these plugins/sends/inserts\n"
 "in that way because the inputs and\n"
@@ -11772,21 +11783,21 @@ msgstr ""
 "そのような順序にプラグイン/センド/インサートを\n"
 "並び変えることはできません。"
 
-#: processor_box.cc:3343
+#: processor_box.cc:3383
 msgid "Rename Processor"
 msgstr "プロセッサを名前変更"
 
-#: processor_box.cc:3374
+#: processor_box.cc:3414
 msgid "At least 100 IO objects exist with a name like %1 - name not changed"
 msgstr ""
 "少なくとも100の IO オブジェクトが %1 のような名前で存在します - 名前は変更さ"
 "れません"
 
-#: processor_box.cc:3538
+#: processor_box.cc:3578
 msgid "plugin insert constructor failed"
 msgstr "プラグイン・インサート・コンストラクタが失敗しました"
 
-#: processor_box.cc:3549
+#: processor_box.cc:3589
 msgid ""
 "Copying the set of processors on the clipboard failed,\n"
 "probably because the I/O configuration of the plugins\n"
@@ -11796,7 +11807,7 @@ msgstr ""
 "おそらくプラグインの I/O 設定がこのトラックの\n"
 "設定と合っていないのが原因です。"
 
-#: processor_box.cc:3603
+#: processor_box.cc:3643
 msgid ""
 "Do you really want to remove all processors from %1?\n"
 "(this cannot be undone)"
@@ -11804,15 +11815,15 @@ msgstr ""
 "本当に %1 からすべてのプロセッサを削除しますか？\n"
 "（この操作は元に戻せません）"
 
-#: processor_box.cc:3607 processor_box.cc:3632
+#: processor_box.cc:3647 processor_box.cc:3672
 msgid "Yes, remove them all"
 msgstr "はい、すべてを削除します"
 
-#: processor_box.cc:3609 processor_box.cc:3634
+#: processor_box.cc:3649 processor_box.cc:3674
 msgid "Remove processors"
 msgstr "プロセッサを削除"
 
-#: processor_box.cc:3624
+#: processor_box.cc:3664
 msgid ""
 "Do you really want to remove all pre-fader processors from %1?\n"
 "(this cannot be undone)"
@@ -11820,7 +11831,7 @@ msgstr ""
 "本当に %1 からすべてのプリ・フェーダー・プロセッサを削除しますか？\n"
 "（この操作は元に戻せません）"
 
-#: processor_box.cc:3627
+#: processor_box.cc:3667
 msgid ""
 "Do you really want to remove all post-fader processors from %1?\n"
 "(this cannot be undone)"
@@ -11828,79 +11839,79 @@ msgstr ""
 "本当に %1 からすべてのポスト・フェーダー・プロセッサを削除しますか？\n"
 "（この操作は元に戻せません）"
 
-#: processor_box.cc:3820
+#: processor_box.cc:3860
 msgid "New Plugin"
 msgstr "新規プラグイン"
 
-#: processor_box.cc:3823
+#: processor_box.cc:3863
 msgid "New Insert"
 msgstr "新規インサート"
 
-#: processor_box.cc:3826
+#: processor_box.cc:3866
 msgid "New External Send ..."
 msgstr "新規外部センド..."
 
-#: processor_box.cc:3830
+#: processor_box.cc:3870
 msgid "New Aux Send ..."
 msgstr "新規 Aux センド..."
 
-#: processor_box.cc:3831
+#: processor_box.cc:3871
 msgid "New Foldback Send ..."
 msgstr "新規フォールバックセンド..."
 
-#: processor_box.cc:3832
+#: processor_box.cc:3872
 msgid "Remove Foldback Send ..."
 msgstr "フォールバックセンドを削除"
 
-#: processor_box.cc:3835
+#: processor_box.cc:3875
 msgid "Send Options"
 msgstr "センドオプション"
 
-#: processor_box.cc:3837
+#: processor_box.cc:3877
 msgid "Clear (all)"
 msgstr "クリア (すべて)"
 
-#: processor_box.cc:3839
+#: processor_box.cc:3879
 msgid "Clear (pre-fader)"
 msgstr "クリア (プリ・フェーダー)"
 
-#: processor_box.cc:3841
+#: processor_box.cc:3881
 msgid "Clear (post-fader)"
 msgstr "クリア (ポスト・フェーダー)"
 
-#: processor_box.cc:3871
+#: processor_box.cc:3911
 msgid "Activate All"
 msgstr "すべてを有効にする"
 
-#: processor_box.cc:3873
+#: processor_box.cc:3913
 msgid "Deactivate All"
 msgstr "すべてを無効にする"
 
-#: processor_box.cc:3875
+#: processor_box.cc:3915
 msgid "A/B Plugins"
 msgstr "A/B プラグイン"
 
-#: processor_box.cc:3883
+#: processor_box.cc:3923
 msgid "Disk I/O ..."
 msgstr "ディスク I/O..."
 
-#: processor_box.cc:3884
+#: processor_box.cc:3924
 msgid "Pre-Fader"
 msgstr "プリ・フェーダー"
 
-#: processor_box.cc:3885
+#: processor_box.cc:3925
 msgid "Post-Fader"
 msgstr "ポスト・フェーダー"
 
-#: processor_box.cc:3894
+#: processor_box.cc:3934
 msgid "Edit with generic controls..."
 msgstr "ジェネリック・コントロールで編集..."
 
-#: processor_box.cc:4248
+#: processor_box.cc:4288
 msgid "%1: %2 (by %3)"
 msgstr "%1: %2 (作成者: %3)"
 
-#: processor_box.cc:4250
+#: processor_box.cc:4290
 msgid "%1 (by %2)"
 msgstr "%1 (作成者: %2)"
 
@@ -12939,13 +12950,9 @@ msgstr "メインアウトプット (マスタまたはモニタ) バスを物�
 msgid ""
 "<b>When enabled</b> the main output bus is auto-connected to the first N "
 "physical ports. If the session has a monitor-section, the monitor-bus output "
-"is connected the hardware playback ports, otherwise the master-bus output is "
-"directly used for playback."
+"is connected to the hardware playback ports, otherwise the master-bus output "
+"is directly used for playback."
 msgstr ""
-"<b>有効の場合</b>メインアウトプットバスは最初の N 物理ポートに自動接続されま"
-"す。モニタセクションがセッションにある場合にはモニタバスアウトプットがハード"
-"ウェアのプレイバックポートに接続され、ない場合にはマスタバスが直接プレイバッ"
-"クとして利用されます。"
 
 #: rc_option_editor.cc:2943
 msgid "Connect track inputs"
@@ -14821,59 +14828,59 @@ msgstr "オーディオをエンコード中"
 msgid "Session Setup"
 msgstr "セッション設定"
 
-#: session_dialog.cc:152 session_dialog.cc:439
+#: session_dialog.cc:152 session_dialog.cc:442
 msgid "Recent Sessions"
 msgstr "最近開いたセッション"
 
-#: session_dialog.cc:348
+#: session_dialog.cc:351
 msgid "Sample Rate"
 msgstr "サンプルレート"
 
-#: session_dialog.cc:352
+#: session_dialog.cc:355
 msgid "File Resolution"
 msgstr "ファイル解像度"
 
-#: session_dialog.cc:354
+#: session_dialog.cc:357
 msgid "Last Modified"
 msgstr "最終変更"
 
-#: session_dialog.cc:380
+#: session_dialog.cc:383
 msgid "New Session"
 msgstr "新規セッション"
 
-#: session_dialog.cc:421
+#: session_dialog.cc:424
 msgid "Check the website for more..."
 msgstr "さらに詳細をウェブサイトで確認..."
 
-#: session_dialog.cc:424
+#: session_dialog.cc:427
 msgid "Click to open the program website in your web browser"
 msgstr "クリックしてウェブブラウザでプログラムウェブサイトを開く"
 
-#: session_dialog.cc:446
+#: session_dialog.cc:449
 msgid "Select session file"
 msgstr "セッションファイルを選択"
 
-#: session_dialog.cc:465
+#: session_dialog.cc:468
 msgid "Other Sessions"
 msgstr "その他のセッション"
 
-#: session_dialog.cc:472
+#: session_dialog.cc:475
 msgid "Safe Mode: Disable all Plugins"
 msgstr "セーフモード: すべてのプラグインを無効にする"
 
-#: session_dialog.cc:502
+#: session_dialog.cc:505
 msgid "Open"
 msgstr "開く"
 
-#: session_dialog.cc:544
+#: session_dialog.cc:547
 msgid "Untitled-%1"
 msgstr "名称未設定-%1"
 
-#: session_dialog.cc:598
+#: session_dialog.cc:601
 msgid "Empty Template"
 msgstr "空のテンプレート"
 
-#: session_dialog.cc:600
+#: session_dialog.cc:603
 msgid ""
 "An empty session with factory default settings.\n"
 "\n"
@@ -14883,39 +14890,39 @@ msgstr ""
 "\n"
 "ミックスするファイルをインポートする場合はこのオプションを選択してください。"
 
-#: session_dialog.cc:618
+#: session_dialog.cc:621
 msgid "Session name:"
 msgstr "セッション名:"
 
-#: session_dialog.cc:631
+#: session_dialog.cc:634
 msgid "Create session folder in:"
 msgstr "セッションフォルダを次に作成:"
 
-#: session_dialog.cc:654
+#: session_dialog.cc:657
 msgid "Select folder for session"
 msgstr "セッションのフォルダを選択"
 
-#: session_dialog.cc:689
+#: session_dialog.cc:692
 msgid "Template"
 msgstr "テンプレート"
 
-#: session_dialog.cc:841 session_dialog.cc:899
+#: session_dialog.cc:844 session_dialog.cc:902
 msgid "32-bit float"
 msgstr "32-bit float"
 
-#: session_dialog.cc:844 session_dialog.cc:902
+#: session_dialog.cc:847 session_dialog.cc:905
 msgid "24-bit"
 msgstr "24-bit"
 
-#: session_dialog.cc:847 session_dialog.cc:905
+#: session_dialog.cc:850 session_dialog.cc:908
 msgid "16-bit"
 msgstr "16-bit"
 
-#: session_dialog.cc:858 session_dialog.cc:917
+#: session_dialog.cc:861 session_dialog.cc:920
 msgid "Last modified with: %1"
 msgstr "最終更新: %1"
 
-#: session_dialog.cc:1052
+#: session_dialog.cc:1055
 msgid "Remove session from recent list"
 msgstr "最近使ったセッションリストからセッションを削除"
 
@@ -15830,36 +15837,36 @@ msgstr "< +00 st"
 msgid "Shuttle speed control (Context-click for options)"
 msgstr "スピードコントロールを動かす (コンテキストクリックでオプション)"
 
-#: shuttle_control.cc:207 time_fx_dialog.cc:167
+#: shuttle_control.cc:205 time_fx_dialog.cc:167
 msgid "Percent"
 msgstr "パーセント"
 
-#: shuttle_control.cc:215
+#: shuttle_control.cc:213
 msgid "Units"
 msgstr "ユニット"
 
-#: shuttle_control.cc:221
+#: shuttle_control.cc:219
 msgid "Sprung"
 msgstr "スプリング"
 
-#: shuttle_control.cc:225
+#: shuttle_control.cc:223
 msgid "Wheel"
 msgstr "ホイール"
 
-#: shuttle_control.cc:261
+#: shuttle_control.cc:259
 msgid "Maximum speed"
 msgstr "最大スピード"
 
-#: shuttle_control.cc:264
+#: shuttle_control.cc:262
 msgid "Reset to 100%"
 msgstr "100% にリセット"
 
-#: shuttle_control.cc:656
+#: shuttle_control.cc:654
 #, c-format
 msgid "< %+2d st"
 msgstr "< %+2d st"
 
-#: shuttle_control.cc:658
+#: shuttle_control.cc:656
 #, c-format
 msgid "> %+2d st"
 msgstr "> %+2d st"
@@ -16126,7 +16133,7 @@ msgstr "挿入ポジションを編集ポイントに移動"
 msgid "1/Note"
 msgstr "1/ノート"
 
-#: step_entry.cc:399 virtual_keyboard_window.cc:167
+#: step_entry.cc:399 virtual_keyboard_window.cc:168
 msgid "Octave"
 msgstr "オクターブ"
 
@@ -16362,12 +16369,12 @@ msgstr "複付点付きノートを切り替え"
 msgid "Toggled Triple-Dotted Notes"
 msgstr "複々付点付きノートを切り替え"
 
-#: stereo_panner.cc:131
+#: stereo_panner.cc:134
 #, c-format
 msgid "L:%3d R:%3d Width:%d%%"
 msgstr "L:%3d R:%3d 幅:%d%%"
 
-#: stereo_panner.cc:274
+#: stereo_panner.cc:275
 msgid "Panner|M"
 msgstr "M"
 
@@ -16823,15 +16830,15 @@ msgstr ""
 "マウスホイールでレベルを変更\n"
 "シグナルレベル: %1 dBFS"
 
-#: transport_masters_dialog.cc:51
+#: transport_masters_dialog.cc:52
 msgid "Add a new Transport Master"
 msgstr "新規トランスポートマスタを追加"
 
-#: transport_masters_dialog.cc:52
+#: transport_masters_dialog.cc:53
 msgid "Keeping rolling if sync is lost"
 msgstr "同期が失われた際にロールを保持"
 
-#: transport_masters_dialog.cc:68
+#: transport_masters_dialog.cc:69
 msgid ""
 "<b>When enabled</b>, if the signal from a transport master is lost, %1 will "
 "keep rolling at its current speed.\n"
@@ -16841,23 +16848,23 @@ msgstr ""
 "のスピードでロールし続けます。\n"
 "<b>無効の場合</b>、トランスポートマスタの同期が失われると %1 は停止します"
 
-#: transport_masters_dialog.cc:77
+#: transport_masters_dialog.cc:78
 msgid "Current"
 msgstr "現在"
 
-#: transport_masters_dialog.cc:79
+#: transport_masters_dialog.cc:80
 msgid "Age"
 msgstr "年"
 
-#: transport_masters_dialog.cc:80
+#: transport_masters_dialog.cc:81
 msgid "Delta"
 msgstr "デルタ"
 
-#: transport_masters_dialog.cc:81
+#: transport_masters_dialog.cc:82
 msgid "Collect"
 msgstr "収集"
 
-#: transport_masters_dialog.cc:83
+#: transport_masters_dialog.cc:84
 msgid ""
 "Active\n"
 "Commands"
@@ -16865,7 +16872,7 @@ msgstr ""
 "有効な\n"
 "コマンド"
 
-#: transport_masters_dialog.cc:84
+#: transport_masters_dialog.cc:85
 msgid ""
 "Clock\n"
 "Synced"
@@ -16873,7 +16880,7 @@ msgstr ""
 "クロック\n"
 "同期中"
 
-#: transport_masters_dialog.cc:85
+#: transport_masters_dialog.cc:86
 msgid ""
 "29.97/\n"
 "30"
@@ -16881,7 +16888,7 @@ msgstr ""
 "29.97/\n"
 "30"
 
-#: transport_masters_dialog.cc:88
+#: transport_masters_dialog.cc:89
 msgid ""
 "Controls whether or not certain transport-related commands can be sent from "
 "the GUI or control surfaces when this transport master is in use. The "
@@ -16891,7 +16898,7 @@ msgstr ""
 "いる場合に、GUIやコントロールサーフェスから送られるかどうかに関する制御。デ"
 "フォルトではマスタが使用中の場合にはいかなるコマンドも許可しません。"
 
-#: transport_masters_dialog.cc:92
+#: transport_masters_dialog.cc:93
 msgid ""
 "<b>When enabled</b> the external timecode source is assumed to use 29.97 fps "
 "instead of 30000/1001.\n"
@@ -16914,14 +16921,14 @@ msgstr ""
 "しています。厳密に 29.97 fps を使用するバリアントはタイムコード・ドリフトがゼ"
 "ロとなるためです。\n"
 
-#: transport_masters_dialog.cc:99
+#: transport_masters_dialog.cc:100
 msgid ""
 "How long since the last full timestamp was received from this transport "
 "master"
 msgstr ""
 "最後のフル・タイムスタンプがこのトランスポートマスタから受信されてからの時間"
 
-#: transport_masters_dialog.cc:101
+#: transport_masters_dialog.cc:102
 msgid ""
 "<b>When enabled</b> the external timecode source is assumed to be sample-"
 "clock synced to the audio interface\n"
@@ -16931,28 +16938,28 @@ msgstr ""
 "フェースに\n"
 "同期されたサンプルクロックとみなします。"
 
-#: transport_masters_dialog.cc:163
+#: transport_masters_dialog.cc:164
 msgid "New transport master not added - check error log for details"
 msgstr ""
 "新規トランスポートマスタが追加されません。詳細はエラーログをご確認ください"
 
-#: transport_masters_dialog.cc:470
+#: transport_masters_dialog.cc:493
 msgid "Accept start/stop commands"
 msgstr "スタート/ストップコマンドを許可"
 
-#: transport_masters_dialog.cc:475
+#: transport_masters_dialog.cc:498
 msgid "Accept speed-changing commands"
 msgstr "スピード変更コマンドを許可"
 
-#: transport_masters_dialog.cc:480
+#: transport_masters_dialog.cc:503
 msgid "Accept locate commands"
 msgstr "ロケートコマンドを許可"
 
-#: transport_masters_dialog.cc:615 transport_masters_dialog.cc:631
+#: transport_masters_dialog.cc:642 transport_masters_dialog.cc:658
 msgid ">4s ago"
 msgstr ">4秒前"
 
-#: transport_masters_dialog.cc:691
+#: transport_masters_dialog.cc:719
 msgid "Add Transport Master"
 msgstr "トランスポートマスタを追加"
 
@@ -16960,7 +16967,7 @@ msgstr "トランスポートマスタを追加"
 msgid "Transpose MIDI"
 msgstr "MIDI を移調"
 
-#: transpose_dialog.cc:53 virtual_keyboard_window.cc:182
+#: transpose_dialog.cc:53 virtual_keyboard_window.cc:183
 msgid "Transpose"
 msgstr "移調"
 
@@ -17170,11 +17177,11 @@ msgstr ""
 msgid "Send MIDI Panic message for current channel"
 msgstr "現在のチャンネルに MIDI Panic メッセージを送信"
 
-#: virtual_keyboard_window.cc:448
+#: virtual_keyboard_window.cc:435
 msgid "CC-%1: "
 msgstr "CC-%1: "
 
-#: virtual_keyboard_window.cc:511
+#: virtual_keyboard_window.cc:510
 msgid ""
 "Pitchbend: %1\n"
 "Use mouse-drag for sprung mode,\n"
@@ -17187,7 +17194,7 @@ msgstr ""
 "マウスホイールで精密なベンド、\n"
 "F1-F4と矢印上/下キーで値を選択"
 
-#: virtual_keyboard_window.cc:528
+#: virtual_keyboard_window.cc:527
 msgid "Modulation: %1"
 msgstr "Modulation: %1"
 
@@ -17771,6 +17778,56 @@ msgstr ""
 "\n"
 "マニュアルをブラウザで開きますか？ "
 
+#~ msgid ""
+#~ "French:\n"
+#~ "\tAlain Fréhel <alain.frehel@free.fr>\n"
+#~ "\tChristophe Combelles <ccomb@free.fr>\n"
+#~ "\tMartin Blanchard\n"
+#~ "\tRomain Arnaud <roming22@gmail.com>\n"
+#~ "\tOlivier Humbert <trebmuh@tuxfamily.org>\n"
+#~ msgstr ""
+#~ "フランス語:\n"
+#~ "\tAlain Fréhel <alain.frehel@free.fr>\n"
+#~ "\tChristophe Combelles <ccomb@free.fr>\n"
+#~ "\tMartin Blanchard\n"
+#~ "\tRomain Arnaud <roming22@gmail.com>\n"
+#~ "\tOlivier Humbert <trebmuh@tuxfamily.org>\n"
+
+#~ msgid ""
+#~ "It is not possible to use JACK as the the sync source\n"
+#~ " when the pull up/down setting is non-zero."
+#~ msgstr ""
+#~ "プルアップ/ダウン設定がゼロでない場合には\n"
+#~ "JACK を同期ソースとして使用することはできません。"
+
+#~ msgid "Increase Velocity (maintain ratios, allow mush"
+#~ msgstr "ノートベロシティを増やす（割合を保持、マッシュを許可）"
+
+#~ msgid "Decrease Velocity (maintain ratios, allow mush"
+#~ msgstr "ノートベロシティを減らす（割合を保持、マッシュを許可）"
+
+#~ msgid ""
+#~ "\n"
+#~ "The Regions and edits have been retained.\n"
+#~ "If this is unexpected, manually loacate the files and restore them in the "
+#~ "session folder.\n"
+#~ msgstr ""
+#~ "\n"
+#~ "リージョンと編集は保持されています。\n"
+#~ "もしこれが想定していない動作の場合は、手動でファイルの位置を特定しセッショ"
+#~ "ンフォルダに置き直してください。\n"
+
+#~ msgid ""
+#~ "<b>When enabled</b> the main output bus is auto-connected to the first N "
+#~ "physical ports. If the session has a monitor-section, the monitor-bus "
+#~ "output is connected the hardware playback ports, otherwise the master-bus "
+#~ "output is directly used for playback."
+#~ msgstr ""
+#~ "<b>有効の場合</b>メインアウトプットバスは最初の N 物理ポートに自動接続され"
+#~ "ます。モニタセクションがセッションにある場合にはモニタバスアウトプットが"
+#~ "ハードウェアのプレイバックポートに接続され、ない場合にはマスタバスが直接プ"
+#~ "レイバックとして利用されます。"
+
 #~ msgid "Audio+MIDI Tracks"
 #~ msgstr "オーディオ+MIDI トラック"
 
@@ -17786,21 +17843,17 @@ msgstr ""
 #~ msgid "Audio: <span foreground=\"red\">none</span>"
 #~ msgstr "オーディオ: <span foreground=\"red\">なし</span>"
 
-#, c-format
 #~ msgid "Audio: <span foreground=\"green\">%.1f kHz / %4.1f ms</span>"
 #~ msgstr ""
 #~ "オーディオ: <span foreground=\"green\">%.1f kHz / %4.1f ミリ秒</span>"
 
-#, c-format
 #~ msgid "Audio: <span foreground=\"green\">%<PRId64> kHz / %4.1f ms</span>"
 #~ msgstr ""
 #~ "オーディオ: <span foreground=\"green\">%<PRId64> kHz / %4.1f ミリ秒</span>"
 
-#, c-format
 #~ msgid "PkBld: <span foreground=\"%s\">%d</span>"
 #~ msgstr "PkBld: <span foreground=\"%s\">%d</span>"
 
-#, c-format
 #~ msgid "Timecode|TC: <span foreground=\"%s\">%s</span>"
 #~ msgstr "TC: <span foreground=\"%s\">%s</span>"
 

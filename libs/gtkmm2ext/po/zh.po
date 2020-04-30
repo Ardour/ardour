@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-10-12 16:31-0600\n"
+"POT-Creation-Date: 2020-04-30 12:44-0600\n"
 "PO-Revision-Date: 2016-03-27 10:27+0800\n"
 "Last-Translator: 一善鱼 <YQ-YSY@163.com>\n"
 "Language-Team: 一善鱼 YQ-YSY@163.com\n"
@@ -49,19 +49,19 @@ msgstr ""
 msgid "ProcessorMenu"
 msgstr ""
 
-#: bindings.cc:831 bindings.cc:833
+#: bindings.cc:840 bindings.cc:842
 msgid "Window"
 msgstr ""
 
-#: bindings.cc:831
+#: bindings.cc:840
 msgid " (Categorized)"
 msgstr ""
 
-#: bindings.cc:833
+#: bindings.cc:842
 msgid " (Alphabetical)"
 msgstr ""
 
-#: bindings.cc:849
+#: bindings.cc:858
 msgid "Uncategorized"
 msgstr ""
 
@@ -73,11 +73,11 @@ msgstr "游标热点信息文件 %1 在线路 %2 上有一个错误"
 msgid "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 msgstr ""
 
-#: gtk_ui.cc:122
+#: gtk_ui.cc:126
 msgid "Log"
 msgstr "日志"
 
-#: gtk_ui.cc:391
+#: gtk_ui.cc:395
 msgid ""
 "\n"
 "\n"
@@ -87,11 +87,11 @@ msgstr ""
 "\n"
 "快捷键："
 
-#: gtk_ui.cc:658
+#: gtk_ui.cc:694
 msgid "Press To Exit"
 msgstr "按下退出"
 
-#: gtk_ui.cc:694
+#: gtk_ui.cc:730
 msgid "I'm sorry %1, I can't do that"
 msgstr "对不起 %1，我不能那样做"
 
@@ -135,23 +135,23 @@ msgstr ""
 msgid "Win"
 msgstr ""
 
-#: keyboard.cc:158 keyboard.cc:601
+#: keyboard.cc:159 keyboard.cc:605
 msgid "Unknown"
 msgstr "未知"
 
-#: keyboard.cc:612
+#: keyboard.cc:616
 msgid "key bindings file not found at \"%2\" or contains errors."
 msgstr "在 \"%2\" 找不到按键绑定文件或者包含有错误。"
 
-#: keyboard.cc:638
+#: keyboard.cc:642
 msgid "Keyboard binding found without a name"
 msgstr "键盘绑定未发现一个名称"
 
-#: keyboard.cc:668
+#: keyboard.cc:674
 msgid "Cannot save key bindings to %1"
 msgstr "无法保存按键绑定到 %1"
 
-#: keyboard.cc:684
+#: keyboard.cc:690
 msgid "Cannot rename your own keybinding file (%1)"
 msgstr "无法重命名您自己的按键绑定文件（%1）"
 

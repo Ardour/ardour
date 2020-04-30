@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libardour\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-10-12 16:31-0600\n"
+"POT-Creation-Date: 2020-04-30 12:44-0600\n"
 "PO-Revision-Date: 2013-01-01 20:30+0100\n"
 "Last-Translator: Eivind Ødegård <meinmycell-lists@yahoo.no>\n"
 "Language-Team: Nynorsk <i18n-nn@lister.ping.uio.no>\n"
@@ -52,19 +52,19 @@ msgstr ""
 msgid "ProcessorMenu"
 msgstr ""
 
-#: bindings.cc:831 bindings.cc:833
+#: bindings.cc:840 bindings.cc:842
 msgid "Window"
 msgstr ""
 
-#: bindings.cc:831
+#: bindings.cc:840
 msgid " (Categorized)"
 msgstr ""
 
-#: bindings.cc:833
+#: bindings.cc:842
 msgid " (Alphabetical)"
 msgstr ""
 
-#: bindings.cc:849
+#: bindings.cc:858
 msgid "Uncategorized"
 msgstr ""
 
@@ -76,22 +76,22 @@ msgstr ""
 msgid "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 msgstr ""
 
-#: gtk_ui.cc:122
+#: gtk_ui.cc:126
 msgid "Log"
 msgstr ""
 
-#: gtk_ui.cc:391
+#: gtk_ui.cc:395
 msgid ""
 "\n"
 "\n"
 "Shortcut: "
 msgstr ""
 
-#: gtk_ui.cc:658
+#: gtk_ui.cc:694
 msgid "Press To Exit"
 msgstr ""
 
-#: gtk_ui.cc:694
+#: gtk_ui.cc:730
 msgid "I'm sorry %1, I can't do that"
 msgstr ""
 
@@ -135,23 +135,23 @@ msgstr ""
 msgid "Win"
 msgstr ""
 
-#: keyboard.cc:158 keyboard.cc:601
+#: keyboard.cc:159 keyboard.cc:605
 msgid "Unknown"
 msgstr "Ukjend"
 
-#: keyboard.cc:612
+#: keyboard.cc:616
 msgid "key bindings file not found at \"%2\" or contains errors."
 msgstr ""
 
-#: keyboard.cc:638
+#: keyboard.cc:642
 msgid "Keyboard binding found without a name"
 msgstr ""
 
-#: keyboard.cc:668
+#: keyboard.cc:674
 msgid "Cannot save key bindings to %1"
 msgstr ""
 
-#: keyboard.cc:684
+#: keyboard.cc:690
 msgid "Cannot rename your own keybinding file (%1)"
 msgstr ""
 

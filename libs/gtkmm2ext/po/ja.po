@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-10-12 16:31-0600\n"
+"POT-Creation-Date: 2020-04-30 12:44-0600\n"
 "PO-Revision-Date: 2017-10-22 06:13-0700\n"
 "Last-Translator: Hiroki Inagaki <hiroki.ingk@gmail.com>\n"
 "Language-Team: Japanese <ardour-dev@lists.ardour.org>\n"
@@ -49,19 +49,19 @@ msgstr ""
 msgid "ProcessorMenu"
 msgstr ""
 
-#: bindings.cc:831 bindings.cc:833
+#: bindings.cc:840 bindings.cc:842
 msgid "Window"
 msgstr "ウインドウ"
 
-#: bindings.cc:831
+#: bindings.cc:840
 msgid " (Categorized)"
 msgstr "(カテゴリ化済み)"
 
-#: bindings.cc:833
+#: bindings.cc:842
 msgid " (Alphabetical)"
 msgstr "(アルファベット順)"
 
-#: bindings.cc:849
+#: bindings.cc:858
 msgid "Uncategorized"
 msgstr "カテゴリなし"
 
@@ -73,11 +73,11 @@ msgstr "カーソル・ホットスポット情報ファイル %1 は %2 行目�
 msgid "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 msgstr "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 
-#: gtk_ui.cc:122
+#: gtk_ui.cc:126
 msgid "Log"
 msgstr "ログ"
 
-#: gtk_ui.cc:391
+#: gtk_ui.cc:395
 msgid ""
 "\n"
 "\n"
@@ -87,11 +87,11 @@ msgstr ""
 "\n"
 "ショートカット: "
 
-#: gtk_ui.cc:658
+#: gtk_ui.cc:694
 msgid "Press To Exit"
 msgstr "押して終了"
 
-#: gtk_ui.cc:694
+#: gtk_ui.cc:730
 msgid "I'm sorry %1, I can't do that"
 msgstr "すみません %1、それはできません"
 
@@ -135,23 +135,23 @@ msgstr "Windows"
 msgid "Win"
 msgstr "Win"
 
-#: keyboard.cc:158 keyboard.cc:601
+#: keyboard.cc:159 keyboard.cc:605
 msgid "Unknown"
 msgstr "不明"
 
-#: keyboard.cc:612
+#: keyboard.cc:616
 msgid "key bindings file not found at \"%2\" or contains errors."
 msgstr "“%2” にキーバインドファイルが見つからなか、エラーが含まれています。"
 
-#: keyboard.cc:638
+#: keyboard.cc:642
 msgid "Keyboard binding found without a name"
 msgstr "名前のないキーボードバインドが見つかりました"
 
-#: keyboard.cc:668
+#: keyboard.cc:674
 msgid "Cannot save key bindings to %1"
 msgstr "キーバインドを %1 に保存できません"
 
-#: keyboard.cc:684
+#: keyboard.cc:690
 msgid "Cannot rename your own keybinding file (%1)"
 msgstr "利用中のキーバインドファイルを名前変更できません (%1)"
 

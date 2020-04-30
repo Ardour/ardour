@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libardour 4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-22 19:30+0300\n"
+"POT-Creation-Date: 2020-04-30 12:44-0600\n"
 "PO-Revision-Date: 2020-04-22 19:41+0300\n"
 "Last-Translator: Alexandre Prokoudine <alexandre.prokoudine@gmail.com>\n"
 "Language-Team: русский <gnome-cyr@lists.gnome.org>\n"
@@ -175,7 +175,7 @@ msgstr "Ошибка: закончилась свободная память"
 msgid "Could not reconnect to Audio/MIDI engine"
 msgstr ""
 
-#: audio_backend.cc:107 export_formats.cc:60 session.cc:6743
+#: audio_backend.cc:107 export_formats.cc:60 session.cc:6788
 #: transport_master.cc:495
 msgid "None"
 msgstr "Нет"
@@ -400,25 +400,25 @@ msgstr "Возврат к Reasonable Synth для прослушивания MID
 msgid "No synth for midi-audition found."
 msgstr "Синтезатора для прослушивания MIDI не найдено."
 
-#: auditioner.cc:188
+#: auditioner.cc:189
 msgid "no outputs available for auditioner - manual connection required"
 msgstr ""
 "Нет доступных выходов для движка прослушивания. Требуется ручное подключение"
 
-#: auditioner.cc:321 auditioner.cc:358
+#: auditioner.cc:322 auditioner.cc:359
 msgid "Cannot setup auditioner processing flow for %1 channels"
 msgstr "Не удалось установить процесс обработки потока для %1 каналов"
 
-#: auditioner.cc:350
+#: auditioner.cc:351
 msgid "Failed to load synth for MIDI-Audition."
 msgstr "Не удалось загрузить синтезатор MIDI-прослушивания."
 
-#: auditioner.cc:366
+#: auditioner.cc:367
 msgid "Auditioning of regions other than Audio or Midi is not supported."
 msgstr ""
 "Прослушивание в других областях, чем это аудио или MIDI не поддерживается."
 
-#: auditioner.cc:388
+#: auditioner.cc:389
 msgid "Cannot audition empty file."
 msgstr ""
 
@@ -573,7 +573,7 @@ msgstr "Не удалось найти частоту CPU в /proc/cpuinfo"
 msgid "audio"
 msgstr "аудио"
 
-#: data_type.cc:28 session.cc:2416
+#: data_type.cc:28 session.cc:2417
 msgid "MIDI"
 msgstr "MIDI"
 
@@ -589,26 +589,26 @@ msgstr "Главные выходы"
 msgid "listen"
 msgstr "Слушать"
 
-#: disk_reader.cc:699
+#: disk_reader.cc:702
 msgid ""
 "DiskReader %1: when overwriting(1), cannot read %2 from playlist at sample %3"
 msgstr ""
 
-#: disk_reader.cc:707
+#: disk_reader.cc:710
 msgid ""
 "DiskReader %1: when overwriting(2), cannot read %2 from playlist at sample %3"
 msgstr ""
 
-#: disk_reader.cc:1012
+#: disk_reader.cc:1015
 msgid "DiskReader %1: cannot read %2 from playlist at sample %3"
 msgstr ""
 
-#: disk_reader.cc:1266
+#: disk_reader.cc:1269
 msgid ""
 "DiskReader %1: when refilling, cannot read %2 from playlist at sample %3"
 msgstr ""
 
-#: disk_reader.cc:1272
+#: disk_reader.cc:1275
 msgid "DiskReader %1: when refilling, cannot write %2 into buffer"
 msgstr ""
 
@@ -1023,80 +1023,80 @@ msgstr ""
 msgid "Unknown Error"
 msgstr ""
 
-#: globals.cc:282
+#: globals.cc:278
 msgid "Could not set system open files limit to \"unlimited\""
 msgstr "Не удалось установить системный лимит открытых файлов в \"unlimited\""
 
-#: globals.cc:284
+#: globals.cc:280
 msgid "Could not set system open files limit to %1"
 msgstr "Не удалось установить системный лимит открытых файлов в %1"
 
-#: globals.cc:288 globals.cc:305
+#: globals.cc:284 globals.cc:301
 msgid "Your system is configured to limit %1 to %2 open files"
 msgstr ""
 
-#: globals.cc:292
+#: globals.cc:288
 msgid "Could not get system open files limit (%1)"
 msgstr "Не удалось получить системный лимит открытых файлов (%1)"
 
-#: globals.cc:307
+#: globals.cc:303
 msgid "Could not set system open files limit. Current limit is %1 open files"
 msgstr ""
 
-#: globals.cc:514
+#: globals.cc:510
 msgid "Loading configuration"
 msgstr "Загрузка конфигурации"
 
-#: globals.cc:597 route.cc:207 session.cc:1017
+#: globals.cc:592 route.cc:207 session.cc:1017
 msgid "Monitor"
 msgstr "Монитор"
 
-#: globals.cc:598 session.cc:1278
+#: globals.cc:593 session.cc:1278
 msgid "Master"
 msgstr "Мастер"
 
-#: globals.cc:600 midiport_manager.cc:71 port_manager.cc:1273
+#: globals.cc:595 midiport_manager.cc:71 port_manager.cc:1273
 #: port_manager.cc:1283
 msgid "Virtual Keyboard"
 msgstr "Виртуальная MIDI-клавиатура"
 
-#: globals.cc:604
+#: globals.cc:599
 msgid "Control"
 msgstr ""
 
-#: globals.cc:605
+#: globals.cc:600
 msgid "Mackie"
 msgstr "Mackie"
 
-#: globals.cc:606
+#: globals.cc:601
 msgid "FaderPort Recv"
 msgstr ""
 
-#: globals.cc:607
+#: globals.cc:602
 msgid "FaderPort Send"
 msgstr ""
 
-#: globals.cc:608
+#: globals.cc:603
 msgid "FaderPort2 Recv"
 msgstr ""
 
-#: globals.cc:609
+#: globals.cc:604
 msgid "FaderPort2 Send"
 msgstr ""
 
-#: globals.cc:610
+#: globals.cc:605
 msgid "FaderPort8 Recv"
 msgstr ""
 
-#: globals.cc:611
+#: globals.cc:606
 msgid "FaderPort8 Send"
 msgstr ""
 
-#: globals.cc:612
+#: globals.cc:607
 msgid "FaderPort16 Recv"
 msgstr ""
 
-#: globals.cc:613
+#: globals.cc:608
 msgid "FaderPort16 Send"
 msgstr ""
 
@@ -1623,7 +1623,7 @@ msgstr "Контроль соло"
 msgid "MPEG Layer %1 (%2 kbps)"
 msgstr ""
 
-#: mtc_slave.cc:366
+#: mtc_slave.cc:383
 msgid ""
 "Unknown rate/drop value %1 in incoming MTC stream, session values used "
 "instead"
@@ -1631,11 +1631,11 @@ msgstr ""
 "Неизвестное значение величины частоты кадров/выпадения %1 во входящем  MTC-"
 "потоке. Значения сессии использованы вместо него"
 
-#: mtc_slave.cc:386
+#: mtc_slave.cc:403
 msgid "Session framerate adjusted from %1 TO: MTC's %2."
 msgstr "Частота кадров сессии в диапазоне от %1 ДО: MTC'ов %2."
 
-#: mtc_slave.cc:400
+#: mtc_slave.cc:417
 msgid "Session and MTC framerate mismatch: MTC:%1 %2:%3."
 msgstr "Сессия и частота кадров МТС несоответствуют: MTC:%1 %2:%3."
 
@@ -2134,7 +2134,7 @@ msgstr ""
 msgid "PluginManager: Could not tokenize string: "
 msgstr ""
 
-#: port.cc:535
+#: port.cc:545
 msgid "could not reregister %1"
 msgstr "Не удалось перерегистрировать %1"
 
@@ -2424,7 +2424,7 @@ msgstr "Импорт: src_new() не удался: %1"
 msgid "return %1"
 msgstr "Возврат %1"
 
-#: route.cc:949 route.cc:3171 track.cc:887
+#: route.cc:949 route.cc:3174 track.cc:887
 msgid "unknown Processor type \"%1\"; ignored"
 msgstr "Неизвестный тип процессора \"%1\". Игнорирован"
 
@@ -2432,71 +2432,71 @@ msgstr "Неизвестный тип процессора \"%1\". Игнори�
 msgid "processor could not be created. Ignored."
 msgstr "Процессор не может быть создан. Игнорирован"
 
-#: route.cc:2599 route.cc:2805
+#: route.cc:2602 route.cc:2808
 msgid "Bad node sent to Route::set_state() [%1]"
 msgstr "Отправлен плохой узел в Route::set_state() [%1]"
 
-#: route.cc:2670
+#: route.cc:2673
 msgid "Pannable state found for route (%1) without a panner!"
 msgstr "Статус панаромирования найден для маршрута (%1) без паннера!"
 
-#: route.cc:3670
+#: route.cc:3673
 msgid "Invalid Solo-Isolate propagation: from:%1 new:%2 - old:%3 = delta:%4"
 msgstr ""
 
-#: route.cc:4922
+#: route.cc:4940
 msgid "Amp/Fader on Route '%1' went AWOL. Re-added."
 msgstr ""
 
-#: route.cc:5771 route.cc:5782
+#: route.cc:5789 route.cc:5800
 msgid "lo"
 msgstr ""
 
-#: route.cc:5772
+#: route.cc:5790
 msgid "mid"
 msgstr ""
 
-#: route.cc:5773 route.cc:5785
+#: route.cc:5791 route.cc:5803
 msgid "hi"
 msgstr ""
 
-#: route.cc:5783
+#: route.cc:5801
 msgid "lm"
 msgstr ""
 
-#: route.cc:5784
+#: route.cc:5802
 msgid "hm"
 msgstr ""
 
-#: route.cc:5859
+#: route.cc:5877
 msgid "Leveler"
 msgstr "Выравниватель"
 
-#: route.cc:5861
+#: route.cc:5879
 msgid "Compressor"
 msgstr "Компрессор"
 
-#: route.cc:5863 route.cc:5865
+#: route.cc:5881 route.cc:5883
 msgid "Limiter"
 msgstr "Ограничитель"
 
-#: route.cc:5865
+#: route.cc:5883
 msgid "Sidechain"
 msgstr "Боковая цепь"
 
-#: route.cc:5868 route.cc:5870 route.cc:5887 route.cc:5889
+#: route.cc:5886 route.cc:5888 route.cc:5905 route.cc:5907
 msgid "???"
 msgstr "???"
 
-#: route.cc:5880
+#: route.cc:5898
 msgid "Attk"
 msgstr ""
 
-#: route.cc:5882
+#: route.cc:5900
 msgid "Ratio"
 msgstr ""
 
-#: route.cc:5885
+#: route.cc:5903
 msgid "Rels"
 msgstr ""
 
@@ -2517,7 +2517,7 @@ msgstr "tempoize: Ошибка чтения данных из %1 на %2 (ожи
 msgid "error writing tempo-adjusted data to %1"
 msgstr "Ошибка записи темпа с поправкой на данные в %1"
 
-#: rt_tasklist.cc:95
+#: rt_tasklist.cc:94
 msgid "Cannot create thread for TaskList!"
 msgstr ""
 
@@ -2525,7 +2525,7 @@ msgstr ""
 msgid "aux %1"
 msgstr "aux %1"
 
-#: send.cc:80 send.cc:488
+#: send.cc:80 send.cc:518
 msgid "send %1"
 msgstr "Отправить %1"
 
@@ -2658,23 +2658,23 @@ msgstr ""
 msgid "programming error: session range removed!"
 msgstr "Ошибка в программе: диапазон сессии удалён!"
 
-#: session.cc:2120
+#: session.cc:2121
 msgid "feedback loop setup between %1 and %2"
 msgstr "Настройка петли обратной связи между %1 и %2"
 
-#: session.cc:2385
+#: session.cc:2386
 msgid "Audio "
 msgstr "Аудио"
 
-#: session.cc:2389
+#: session.cc:2390
 msgid "MIDI "
 msgstr "MIDI "
 
-#: session.cc:2458
+#: session.cc:2459
 msgid "Session: could not create new midi track."
 msgstr "Сессия: не удалось создать новую MIDI-дорожку"
 
-#: session.cc:2464
+#: session.cc:2465
 msgid ""
 "No more JACK ports are available. You will need to stop %1 and restart JACK "
 "with more ports if you need this many tracks."
@@ -2682,48 +2682,48 @@ msgstr ""
 "Доступных портов JACK больше нет. Вам нужно остановить %1 и перезапустить "
 "JACK с большим количеством портов, если вам нужно больше дорожек."
 
-#: session.cc:2513 session.cc:2516
+#: session.cc:2514 session.cc:2517
 msgid "Midi Bus"
 msgstr "MIDI-шина"
 
-#: session.cc:2538
+#: session.cc:2539
 msgid "cannot configure new midi bus input"
 msgstr ""
 
-#: session.cc:2544
+#: session.cc:2545
 msgid "cannot configure new midi bus output"
 msgstr ""
 
-#: session.cc:2558 session.cc:2840
+#: session.cc:2559 session.cc:2841
 msgid "Session: could not create new audio route."
 msgstr "Сессия: не удалось создать новый маршрут."
 
-#: session.cc:2733 session.cc:2741 session.cc:2816 session.cc:2824
+#: session.cc:2734 session.cc:2742 session.cc:2817 session.cc:2825
 msgid "cannot configure %1 in/%2 out configuration for new audio track"
 msgstr ""
 "Не удалось настроить %1 в/%2 из конфигурации для новой звуковой дорожки"
 
-#: session.cc:2757
+#: session.cc:2758
 msgid "Session: could not create new audio track."
 msgstr "Сессия: не удалось создать новую звуковую дорожку."
 
-#: session.cc:2791 session.cc:2794
+#: session.cc:2792 session.cc:2795
 msgid "Bus"
 msgstr "Шина"
 
-#: session.cc:2921 session.cc:2931
+#: session.cc:2922 session.cc:2932
 msgid "Session: UINT_MAX routes? impossible!"
 msgstr "Сессия: UINT_MAX маршруты? Невозможно!"
 
-#: session.cc:3066
+#: session.cc:3067
 msgid "Session: cannot create track/bus from template description"
 msgstr "Сессия: нельзя создать дорожку/шину из  шаблоннного описания"
 
-#: session.cc:3095
+#: session.cc:3096
 msgid "Session: could not create new route from template"
 msgstr "Сессия: не удалось создать новый маршрут из шаблона"
 
-#: session.cc:3132
+#: session.cc:3133
 msgid "Adding new tracks/busses failed"
 msgstr "Не удалось добавить новые дорожки/шины"
 
@@ -3360,11 +3360,11 @@ msgstr ""
 "Глобальная переменная скорость не поддерживается в то время как %1 подключен "
 "к JACK транспортуконтроль"
 
-#: session_transport.cc:1006
+#: session_transport.cc:1007
 msgid "Cannot loop - no loop range defined"
 msgstr "Не удалось запустить цикл - диапазон цикла не определен"
 
-#: session_transport.cc:1593
+#: session_transport.cc:1591
 msgid ""
 "Looping cannot be supported while %1 is using JACK transport.\n"
 "Recommend changing the configured options"

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtkmm2ext\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-18 10:29+0200\n"
+"POT-Creation-Date: 2020-04-30 12:44-0600\n"
 "PO-Revision-Date: 2020-04-16 19:53+0200\n"
 "Last-Translator: Fred Rech <fred_rech@laposte.net>\n"
 "Language-Team: French <>\n"
@@ -77,11 +77,11 @@ msgstr ""
 msgid "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 msgstr ""
 
-#: gtk_ui.cc:123
+#: gtk_ui.cc:126
 msgid "Log"
 msgstr "Journal"
 
-#: gtk_ui.cc:392
+#: gtk_ui.cc:395
 msgid ""
 "\n"
 "\n"
@@ -91,11 +91,11 @@ msgstr ""
 "\n"
 "Raccourci : "
 
-#: gtk_ui.cc:691
+#: gtk_ui.cc:694
 msgid "Press To Exit"
 msgstr "Clic Pour Quitter"
 
-#: gtk_ui.cc:727
+#: gtk_ui.cc:730
 msgid "I'm sorry %1, I can't do that"
 msgstr "Je suis désolé %1, je ne peux pas faire ça"
 
