@@ -3,16 +3,16 @@
 # This file is distributed under the same license as the gtk-ardour package.
 #
 #
-#: audio_clock.cc:941 audio_clock.cc:942 session_dialog.cc:604
-#: session_dialog.cc:605
 # Karsten Petersen <kapet@kapet.de>, 2003.
 # Edgar Aichinger <edgar.aichinger@aon.at>, 2008, 2012, 2013, 2014, 2015, 2016, 2017, 2020.
 # Benjamin Scherrer <benjamin@wagnerbrutal.de>, 2015.
+#: audio_clock.cc:941 audio_clock.cc:942 session_dialog.cc:604
+#: session_dialog.cc:605
 msgid ""
 msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-26 11:40+0200\n"
+"POT-Creation-Date: 2020-04-30 12:44-0600\n"
 "PO-Revision-Date: 2020-04-26 11:57+0200\n"
 "Last-Translator: Edgar Aichinger <edgar.aichinger@aon.at>\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
@@ -349,13 +349,8 @@ msgid ""
 "\tMartin Blanchard\n"
 "\tRomain Arnaud <roming22@gmail.com>\n"
 "\tOlivier Humbert <trebmuh@tuxfamily.org>\n"
+"\tFrédéric Rech <fred_rech@laposte.net>\n"
 msgstr ""
-"Französisch:\n"
-"\tAlain Fréhel <alain.frehel@free.fr>\n"
-"\tChristophe Combelles <ccomb@free.fr>\n"
-"\tMartin Blanchard\n"
-"\tRomain Arnaud <roming22@gmail.com>\n"
-"\tOlivier Humbert <trebmuh@tuxfamily.org>\n"
 
 #: about.cc:217
 msgid ""
@@ -1307,15 +1302,15 @@ msgstr ">24h"
 
 #: ardour_ui.cc:1382 ardour_ui.cc:1385
 msgid "hours|h"
-msgstr "Stunden|h"
+msgstr "h"
 
 #: ardour_ui.cc:1388
 msgid "minutes|m"
-msgstr "Minuten|m"
+msgstr "m"
 
 #: ardour_ui.cc:1433
 msgid "Timecode|TC"
-msgstr "Timecode|TC"
+msgstr "TC"
 
 #: ardour_ui.cc:1452
 msgid "n/a"
@@ -1882,19 +1877,19 @@ msgstr ""
 "Rechtsklick für Neuzuweisung\n"
 "Shift+Rechtsklick, um Zuweisung aufzuheben"
 
-#: ardour_ui_dialogs.cc:306
+#: ardour_ui_dialogs.cc:314
 msgid "Don't close"
 msgstr "Abbrechen"
 
-#: ardour_ui_dialogs.cc:307
+#: ardour_ui_dialogs.cc:315
 msgid "Just close"
 msgstr "Ohne speichern schließen"
 
-#: ardour_ui_dialogs.cc:308
+#: ardour_ui_dialogs.cc:316
 msgid "Save and close"
 msgstr "Speichern und schließen"
 
-#: ardour_ui_dialogs.cc:1004 ardour_ui_ed.cc:431 ardour_ui_ed.cc:442
+#: ardour_ui_dialogs.cc:1012 ardour_ui_ed.cc:431 ardour_ui_ed.cc:442
 #: audio_clock.cc:2156 editor.cc:197 editor.cc:327 editor_actions.cc:616
 #: editor_actions.cc:625 export_timespan_selector.cc:100
 #: session_option_editor.cc:46 session_option_editor.cc:66
@@ -1905,7 +1900,7 @@ msgstr "Speichern und schließen"
 msgid "Timecode"
 msgstr "Timecode"
 
-#: ardour_ui_dialogs.cc:1017 session_option_editor.cc:176
+#: ardour_ui_dialogs.cc:1025 session_option_editor.cc:176
 #: session_option_editor.cc:184 session_option_editor.cc:208
 msgid "Media"
 msgstr "Medien"
@@ -2021,7 +2016,7 @@ msgstr "Solo abbrechen"
 
 #: ardour_ui_ed.cc:198
 msgid "Session|Scripting"
-msgstr "Session|Skripting"
+msgstr "Skripting"
 
 #: ardour_ui_ed.cc:201
 msgid "Open Video..."
@@ -2131,7 +2126,7 @@ msgstr "Handbuch"
 
 #: ardour_ui_ed.cc:276
 msgid "Manual|Reference"
-msgstr "Handbuch|Referenz"
+msgstr "Referenz"
 
 #: ardour_ui_ed.cc:277
 msgid "Report a Bug"
@@ -2162,7 +2157,7 @@ msgstr "Wie man einen Fehler meldet"
 msgid "Save"
 msgstr "Speichern"
 
-#: ardour_ui_ed.cc:305 engine_dialog.cc:99 shuttle_control.cc:662
+#: ardour_ui_ed.cc:305 engine_dialog.cc:99 shuttle_control.cc:660
 msgid "Stop"
 msgstr "Stopp"
 
@@ -2375,7 +2370,7 @@ msgstr "Aufnahmebereitschaft auf Spur %1 umschalten"
 msgid "Percentage"
 msgstr "Prozent"
 
-#: ardour_ui_ed.cc:511 shuttle_control.cc:211
+#: ardour_ui_ed.cc:511 shuttle_control.cc:209
 msgid "Semitones"
 msgstr "Halbtöne"
 
@@ -3280,7 +3275,7 @@ msgstr ""
 
 #: automation_time_axis.cc:178 automation_time_axis.cc:402
 #: automation_time_axis.cc:657 editor.cc:2001 editor.cc:2079
-#: editor_actions.cc:158 gain_meter.cc:785 shuttle_control.cc:644
+#: editor_actions.cc:158 gain_meter.cc:785 shuttle_control.cc:642
 msgid "Play"
 msgstr "Wiedergabe"
 
@@ -3321,7 +3316,7 @@ msgstr "Automation zurücksetzen"
 
 #: automation_time_axis.cc:622
 msgid "Automation|Off"
-msgstr "Automation|Aus"
+msgstr "Aus"
 
 #: automation_time_axis.cc:625 gain_meter.cc:783
 msgid "Automation|Manual"
@@ -3345,7 +3340,7 @@ msgstr "Diskret"
 msgid "Linear"
 msgstr "Linear"
 
-#: automation_time_axis.cc:704 rhythm_ferret.cc:121 shuttle_control.cc:230
+#: automation_time_axis.cc:704 rhythm_ferret.cc:121 shuttle_control.cc:228
 msgid "Mode"
 msgstr "Modus"
 
@@ -4341,7 +4336,7 @@ msgid "Keep Remaining"
 msgstr "Übrige behalten"
 
 #: editor.cc:4214 editor_audio_import.cc:682 editor_ops.cc:6965
-#: engine_dialog.cc:3098 sfdb_freesound_mootcher.cc:69 keyeditor.cc:80
+#: engine_dialog.cc:3102 sfdb_freesound_mootcher.cc:69 keyeditor.cc:80
 #: processor_box.cc:3646 processor_box.cc:3671 pt_import_selector.cc:44
 #: template_dialog.cc:525 transport_masters_dialog.cc:743 utils.cc:124
 msgid "Cancel"
@@ -5371,8 +5366,8 @@ msgstr "Bearbeite Noten-Kanäle"
 msgid "Edit Note Velocities"
 msgstr "Bearbeite Noten-Velocities"
 
-#: editor_actions.cc:1090 editor_actions.cc:1228 editor_actions.cc:1239
-#: editor_actions.cc:1294 editor_actions.cc:1305 editor_actions.cc:1352
+#: editor_actions.cc:1093 editor_actions.cc:1231 editor_actions.cc:1242
+#: editor_actions.cc:1297 editor_actions.cc:1308 editor_actions.cc:1355
 #: luainstance.cc:368 luainstance.cc:2296
 msgid "programming error: %1: %2"
 msgstr "Programmierfehler: %1: %2"
@@ -5991,11 +5986,11 @@ msgstr ""
 msgid "Fit to Window"
 msgstr "An Fenster anpassen"
 
-#: editor_markers.cc:148 mini_timeline.cc:578
+#: editor_markers.cc:148 mini_timeline.cc:568
 msgid "start"
 msgstr "Start"
 
-#: editor_markers.cc:149 mini_timeline.cc:579
+#: editor_markers.cc:149 mini_timeline.cc:569
 msgid "end"
 msgstr "Ende"
 
@@ -6906,7 +6901,7 @@ msgstr "Position der Region gesperrt?"
 
 #: editor_regions.cc:180
 msgid "Glued|G"
-msgstr "Gebunden|G"
+msgstr "G"
 
 #: editor_regions.cc:180
 msgid "Region position glued to Bars|Beats time?"
@@ -7282,7 +7277,7 @@ msgstr "Gepuffertes E/A benutzen"
 msgid "Autostart"
 msgstr "Autostart"
 
-#: engine_dialog.cc:103 engine_dialog.cc:3112
+#: engine_dialog.cc:103 engine_dialog.cc:3116
 msgid "Measure"
 msgstr "Messen"
 
@@ -7346,7 +7341,7 @@ msgstr ""
 "Wenn Sie mit dem Resultat zufrieden sind, klicken Sie den Knopf \"Benutze "
 "Ergebnisse\"."
 
-#: engine_dialog.cc:256 engine_dialog.cc:3300 engine_dialog.cc:3310
+#: engine_dialog.cc:256 engine_dialog.cc:3304 engine_dialog.cc:3314
 msgid "No measurement results yet"
 msgstr "Noch keine Messergebnisse"
 
@@ -7488,70 +7483,70 @@ msgstr "Kalibrieren"
 msgid "all available channels"
 msgstr "alle verfügbaren Kanäle"
 
-#: engine_dialog.cc:1685
+#: engine_dialog.cc:1689
 msgid "%1 sample"
 msgid_plural "%1 samples"
 msgstr[0] "%1 Sample"
 msgstr[1] "%1 Samples"
 
-#: engine_dialog.cc:1745
+#: engine_dialog.cc:1749
 #, c-format
 msgid "(%.1f ms)"
 msgstr "(%.1f ms)"
 
-#: engine_dialog.cc:2461
+#: engine_dialog.cc:2465
 msgid "Could not start backend engine %1"
 msgstr "Konnte Backend-Engine %1 nicht starten"
 
-#: engine_dialog.cc:2493
+#: engine_dialog.cc:2497
 msgid "Cannot set driver to %1"
 msgstr "Kann Treiber nicht auf %1 setzen"
 
-#: engine_dialog.cc:2498
+#: engine_dialog.cc:2502
 msgid "Cannot set input device name to %1"
 msgstr "Kann Namen des Eingangsgeräts nicht auf %1 setzen"
 
-#: engine_dialog.cc:2502
+#: engine_dialog.cc:2506
 msgid "Cannot set output device name to %1"
 msgstr "Kann Namen des Ausgangsgeräts nicht auf %1 setzen"
 
-#: engine_dialog.cc:2507
+#: engine_dialog.cc:2511
 msgid "Cannot set device name to %1"
 msgstr "Kann Gerät nicht auf %1 setzen"
 
-#: engine_dialog.cc:2512
+#: engine_dialog.cc:2516
 msgid "Cannot set sample rate to %1"
 msgstr "Kann Samplerate nicht auf %1 setzen"
 
-#: engine_dialog.cc:2516
+#: engine_dialog.cc:2520
 msgid "Cannot set buffer size to %1"
 msgstr "Kann Buffergröße nicht auf %1 setzen"
 
-#: engine_dialog.cc:2520
+#: engine_dialog.cc:2524
 msgid "Cannot set periods to %1"
 msgstr "Kann Perioden nicht auf %1 setzen"
 
-#: engine_dialog.cc:2526
+#: engine_dialog.cc:2530
 msgid "Cannot set input channels to %1"
 msgstr "Kann Eingangskanäle nicht auf %1 setzen"
 
-#: engine_dialog.cc:2530
+#: engine_dialog.cc:2534
 msgid "Cannot set output channels to %1"
 msgstr "Kann Ausgangskanäle nicht auf %1 setzen"
 
-#: engine_dialog.cc:2536
+#: engine_dialog.cc:2540
 msgid "Cannot set input latency to %1"
 msgstr "Kann Eingangslatenz nicht auf %1 setzen"
 
-#: engine_dialog.cc:2540
+#: engine_dialog.cc:2544
 msgid "Cannot set output latency to %1"
 msgstr "Kann Ausgangslatenz nicht auf %1 setzen"
 
-#: engine_dialog.cc:2963 engine_dialog.cc:3029
+#: engine_dialog.cc:2967 engine_dialog.cc:3033
 msgid "No signal detected "
 msgstr "Kein Signal erkannt "
 
-#: engine_dialog.cc:2970
+#: engine_dialog.cc:2974
 msgid ""
 "Input signal is > -3dBFS. Lower the signal level (output gain, input gain) "
 "on the audio-interface."
@@ -7559,64 +7554,64 @@ msgstr ""
 "Eingangssignal is > -3dBFS. Verringern Sie den Signalpegel (E/A-Lautstärken) "
 "am Audio Interface."
 
-#: engine_dialog.cc:2983 engine_dialog.cc:3037 port_insert_ui.cc:74
+#: engine_dialog.cc:2987 engine_dialog.cc:3041 port_insert_ui.cc:74
 #: port_insert_ui.cc:102
 msgid "Disconnected from audio engine"
 msgstr "Von Audioengine getrennt"
 
-#: engine_dialog.cc:2992 engine_dialog.cc:3045
+#: engine_dialog.cc:2996 engine_dialog.cc:3049
 msgid "Detected roundtrip latency: "
 msgstr "Entdeckte Roundtrip-Latenz: "
 
-#: engine_dialog.cc:2994 engine_dialog.cc:3047
+#: engine_dialog.cc:2998 engine_dialog.cc:3051
 msgid "Systemic latency: "
 msgstr "Systemische Latenz: "
 
-#: engine_dialog.cc:3001
+#: engine_dialog.cc:3005
 msgid "(signal detection error)"
 msgstr "(Fehler bei der Signalerkennung)"
 
-#: engine_dialog.cc:3007
+#: engine_dialog.cc:3011
 msgid "(inverted - bad wiring)"
 msgstr "(invertiert - schlechte Verkabelung)"
 
-#: engine_dialog.cc:3054
+#: engine_dialog.cc:3058
 msgid "(averaging)"
 msgstr "(durchschnittlich)"
 
-#: engine_dialog.cc:3060
+#: engine_dialog.cc:3064
 msgid "(too large jitter)"
 msgstr "(zu viel Jitter)"
 
-#: engine_dialog.cc:3064
+#: engine_dialog.cc:3068
 msgid "(large jitter)"
 msgstr "(viel Jitter)"
 
-#: engine_dialog.cc:3076
+#: engine_dialog.cc:3080
 msgid "Timeout - large MIDI jitter."
 msgstr "Timeout - viel MIDI Jitter."
 
-#: engine_dialog.cc:3092 port_insert_ui.cc:138
+#: engine_dialog.cc:3096 port_insert_ui.cc:138
 msgid "Detecting ..."
 msgstr "Messe..."
 
-#: engine_dialog.cc:3224
+#: engine_dialog.cc:3228
 msgid "Disconnect from %1"
 msgstr "Trenne von %1"
 
-#: engine_dialog.cc:3229
+#: engine_dialog.cc:3233
 msgid "Running"
 msgstr "Läuft"
 
-#: engine_dialog.cc:3231
+#: engine_dialog.cc:3235
 msgid "Connected"
 msgstr "Verbunden"
 
-#: engine_dialog.cc:3242
+#: engine_dialog.cc:3246
 msgid "Connect to %1"
 msgstr "Verbinde zu %1"
 
-#: engine_dialog.cc:3246
+#: engine_dialog.cc:3250
 msgid "Stopped"
 msgstr "Gestoppt"
 
@@ -8205,11 +8200,11 @@ msgstr "Multiplizität"
 
 #: export_report.cc:612
 msgid "Logscale|Lg"
-msgstr "Logarithmisch|Lg"
+msgstr "Lg"
 
 #: export_report.cc:613
 msgid "Rectified|Rf"
-msgstr "Rektifiziert|Rf"
+msgstr "Rf"
 
 #: export_report.cc:614
 msgid "Logscale"
@@ -8478,7 +8473,7 @@ msgstr "T"
 
 #: gain_meter.cc:789
 msgid "Latch|L"
-msgstr "Latch|L"
+msgstr "L"
 
 #: gain_meter.cc:791
 msgid "Write|W"
@@ -9733,7 +9728,7 @@ msgstr "Port:"
 msgid "New velocity"
 msgstr "Neue Velocity"
 
-#: mini_timeline.cc:74
+#: mini_timeline.cc:73
 msgid ""
 "<b>Navigation Timeline</b>. Use left-click to locate to time position or "
 "marker; scroll-wheel to jump, hold %1 for fine grained and %2 + %3 for extra-"
@@ -9746,27 +9741,27 @@ msgstr ""
 "Anzeigebereich zu setzen. Die Einheit für die Anzeige wird durch die erste "
 "Uhr definiert."
 
-#: mini_timeline.cc:688 rc_option_editor.cc:1151
+#: mini_timeline.cc:678 rc_option_editor.cc:1151
 msgid "30 sec"
 msgstr "30 sec"
 
-#: mini_timeline.cc:689 rc_option_editor.cc:1152
+#: mini_timeline.cc:679 rc_option_editor.cc:1152
 msgid "1 min"
 msgstr "1 min"
 
-#: mini_timeline.cc:690 rc_option_editor.cc:1153
+#: mini_timeline.cc:680 rc_option_editor.cc:1153
 msgid "2 mins"
 msgstr "2 mins"
 
-#: mini_timeline.cc:691 rc_option_editor.cc:1156
+#: mini_timeline.cc:681 rc_option_editor.cc:1156
 msgid "5 mins"
 msgstr "5 mins"
 
-#: mini_timeline.cc:692
+#: mini_timeline.cc:682
 msgid "10 mins"
 msgstr "10 Minuten"
 
-#: mini_timeline.cc:693
+#: mini_timeline.cc:683
 msgid "20 mins"
 msgstr "20 Minuten"
 
@@ -15990,42 +15985,42 @@ msgstr "Schnellstmöglich"
 
 #: shuttle_control.cc:65
 msgid "LogestShuttle|< +00 st"
-msgstr "LogestShuttle|< +00 st"
+msgstr "< +00 st"
 
 #: shuttle_control.cc:71
 msgid "Shuttle speed control (Context-click for options)"
 msgstr "Abspielgeschwindigkeit (Rechtsklick für Optionen)"
 
-#: shuttle_control.cc:207 time_fx_dialog.cc:167
+#: shuttle_control.cc:205 time_fx_dialog.cc:167
 msgid "Percent"
 msgstr "Prozent"
 
-#: shuttle_control.cc:215
+#: shuttle_control.cc:213
 msgid "Units"
 msgstr "Einheiten"
 
-#: shuttle_control.cc:221
+#: shuttle_control.cc:219
 msgid "Sprung"
 msgstr "Feder"
 
-#: shuttle_control.cc:225
+#: shuttle_control.cc:223
 msgid "Wheel"
 msgstr "Drehrad"
 
-#: shuttle_control.cc:261
+#: shuttle_control.cc:259
 msgid "Maximum speed"
 msgstr "Max. Geschwindigkeit"
 
-#: shuttle_control.cc:264
+#: shuttle_control.cc:262
 msgid "Reset to 100%"
 msgstr "Auf 100% zurücksetzen"
 
-#: shuttle_control.cc:656
+#: shuttle_control.cc:654
 #, c-format
 msgid "< %+2d st"
 msgstr "< %+2d st"
 
-#: shuttle_control.cc:658
+#: shuttle_control.cc:656
 #, c-format
 msgid "> %+2d st"
 msgstr "> %+2d st"
@@ -17422,7 +17417,7 @@ msgstr " %1 fps"
 
 #: vca_time_axis.cc:70
 msgid "VCA|D"
-msgstr "VCA|D"
+msgstr "D"
 
 #: vca_time_axis.cc:71
 msgid "Unassign all slaves"
@@ -17959,3 +17954,18 @@ msgstr ""
 "Sehen Sie bitte im Handbuch unter %2/Video-Zeitleiste/Bearbeitung/#Export.\n"
 "\n"
 "Handbuch im Browser öffnen? "
+
+#~ msgid ""
+#~ "French:\n"
+#~ "\tAlain Fréhel <alain.frehel@free.fr>\n"
+#~ "\tChristophe Combelles <ccomb@free.fr>\n"
+#~ "\tMartin Blanchard\n"
+#~ "\tRomain Arnaud <roming22@gmail.com>\n"
+#~ "\tOlivier Humbert <trebmuh@tuxfamily.org>\n"
+#~ msgstr ""
+#~ "Französisch:\n"
+#~ "\tAlain Fréhel <alain.frehel@free.fr>\n"
+#~ "\tChristophe Combelles <ccomb@free.fr>\n"
+#~ "\tMartin Blanchard\n"
+#~ "\tRomain Arnaud <roming22@gmail.com>\n"
+#~ "\tOlivier Humbert <trebmuh@tuxfamily.org>\n"
