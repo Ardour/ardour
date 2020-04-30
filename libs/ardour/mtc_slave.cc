@@ -99,7 +99,6 @@ MTC_TransportMaster::resync_latency()
 
 	if (_port) {
 		_port->get_connected_latency_range (mtc_slave_latency, false);
-		cerr << "MTC slave latency computed as " << mtc_slave_latency.min << " .. " << mtc_slave_latency.max << endl;
 	}
 }
 
