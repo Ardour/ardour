@@ -266,7 +266,7 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	ChannelList::iterator          chan;
 	sampleoffset_t                 disk_samples_to_consume;
 	MonitorState                   ms = _track->monitoring_state ();
-	const bool                     midi_only = (c->empty() || _playlists[DataType::AUDIO]);
+	const bool                     midi_only = (c->empty() || !_playlists[DataType::AUDIO]);
 
 	if (_active) {
 		if (!_pending_active) {
