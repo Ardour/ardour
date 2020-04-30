@@ -81,7 +81,7 @@ UI::UI (string application_name, string thread_name, int *argc, char ***argv)
 {
 	theMain = new Main (argc, argv);
 
-	pthread_set_name ("gui");
+	pthread_set_name ("ArdourGUI");
 
 	_active = false;
 
