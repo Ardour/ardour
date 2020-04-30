@@ -820,6 +820,12 @@ int Alsa_pcmi::set_swpar (snd_pcm_t *handle, snd_pcm_sw_params_t *swpar, const c
 				sname, _fsize);
 		return -1;
 	}
+
+	if (handle == _play_handle && snd_pcm_sw_params_set_start_threshold (_play_handle, _play_swpar, 0U) < 0) {
+		if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi: can't set %s start-threshold.\n", sname);
+		return -1;
+	}
+
 	if ((err = snd_pcm_sw_params (handle, swpar)) < 0)
 	{
 		if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi: can't set %s software parameters.\n",
