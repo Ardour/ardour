@@ -487,6 +487,7 @@ void Alsa_pcmi::initialise (const char *play_name, const char *capt_name, const 
 		if (snd_pcm_hw_params_get_periods (_play_hwpar, &nfrag, &dir) || (nfrag != _play_nfrag) || dir)
 		{
 			if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi warning: requested %u periods for playback, using %u.\n", _play_nfrag, nfrag);
+			_play_nfrag = nfrag; // this is later used during pcm_start
 		}
 
 		snd_pcm_hw_params_get_format (_play_hwpar, &_play_format);
@@ -596,9 +597,7 @@ void Alsa_pcmi::initialise (const char *play_name, const char *capt_name, const 
 		}
 		if (snd_pcm_hw_params_get_periods (_capt_hwpar, &nfrag, &dir) || (nfrag != _capt_nfrag) || dir)
 		{
-			if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi: can't get requested number of periods for capture.\n");
-			_state = -5;
-			return;
+			if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi warning: requested %u periods for playback, using %u.\n", _capt_nfrag, nfrag);
 		}
 
 		if (_play_handle) _synced = ! snd_pcm_link (_play_handle, _capt_handle);
@@ -784,7 +783,7 @@ int Alsa_pcmi::set_hwpar (snd_pcm_t *handle,  snd_pcm_hw_params_t *hwpar, const 
 		return -5;
 	}
 
-	if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi: use %d periods for %s ((requested %u).\n", nf, sname, nfrag);
+	if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi: use %d periods for %s (requested %u).\n", nf, sname, nfrag);
 
 	if (snd_pcm_hw_params_set_buffer_size (handle, hwpar, _fsize * nf) < 0)
 	{
