@@ -315,7 +315,9 @@ int main (int argc, char *argv[])
 #if ENABLE_NLS
 	/* initialize C locale to user preference */
 	if (ARDOUR::translations_are_enabled ()) {
-		setlocale (LC_ALL, "");
+		if (!setlocale (LC_ALL, "")) {
+			std::cerr << "localization call failed, " << PROGRAM_NAME << " will not be translated\n";
+		}
 	}
 #endif
 
