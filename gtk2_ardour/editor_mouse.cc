@@ -379,6 +379,15 @@ Editor::mouse_mode_toggled (MouseMode m)
 		Keyboard::magic_widget_drop_focus ();
 	}
 
+	if (was_internal && !internal_editing()) {
+		/* drop any selected regions so that they in turn
+		 * redraw any selected notes. This essentially the
+		 * opposite of ::catch_up_on_midi_selection() called
+		 * above.
+		 */
+		get_selection().clear_regions ();
+	}
+
 	update_all_enter_cursors ();
 
 	MouseModeChanged (); /* EMIT SIGNAL */

@@ -917,6 +917,14 @@ out:
 }
 
 void
+Editor::set_selected_midi_region_view (MidiRegionView& mrv)
+{
+	/* clear note selection in all currently selected MidiRegionViews */
+	midi_action (&MidiRegionView::clear_note_selection);
+	get_selection().set (&mrv);
+}
+
+void
 Editor::set_selection (std::list<Selectable*> s, Selection::Operation op)
 {
 	if (s.empty()) {
