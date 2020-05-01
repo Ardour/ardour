@@ -122,16 +122,19 @@ set_language_preference ()
 		}
 	}
 
-	/* now get AppleLocale value and use that for LANG */
+	/* now get AppleLocale value and use that to set LC_ALL because Launchd-started processes (i.e. GUI apps)
+	   do not have this environment variable set, and without it, setlocale (LC_ALL, "") will fail.
+
+	   Note that it doesn't matter much what we set LC_ALL to for gettext's purposes, but other aspects of the
+	   locale system do need a value that mostly/sort-of/kind-of represents the user's own preferences. So, get
+	   that from CoreFoundation APIs.
+	 */
 
 	CFLocaleRef cflocale = CFLocaleCopyCurrent();
 	NSString* nslocale = (NSString*) CFLocaleGetValue (cflocale, kCFLocaleIdentifier);
 
-	/* the full POSIX locale specification allows for lots of things. that could be an issue. Silly Apple.
-	 */
-
-	cout << "LANG set to " << [nslocale UTF8String] << endl;
-        setenv ("LANG", [nslocale UTF8String], 0);
+	cout << "Apple's CoreFoundation API says that this user's locale is " << [nslocale UTF8String] << endl;
+	setenv ("LC_ALL", [nslocale UTF8String], 0);
 	CFRelease (cflocale);
 }
 
