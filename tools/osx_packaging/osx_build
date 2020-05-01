@@ -22,7 +22,7 @@ WITH_HARRISON_LV2=
 WITH_X42_LV2=
 STRIP=1
 PRINT_SYSDEPS=
-WITH_NLS=
+WITH_NLS=1
 
 : ${HARRISONCHANNELSTRIP=harrison_channelstrip}
 : ${HARRISONLV2=harrison_lv2s-n}
@@ -49,7 +49,6 @@ while [ $# -gt 0 ] ; do
 	--mixbus) MIXBUS=1;
 		WITH_HARRISON_LV2=1 ;
 		WITH_X42_LV2=1 ;
-		WITH_NLS=1 ;
 		SAE= ;
 		STRIP= ;
 		PRODUCT_PKG_DIR=Mixbus;
@@ -61,7 +60,6 @@ while [ $# -gt 0 ] ; do
 		MIXBUS32C=1;
 		WITH_HARRISON_LV2=1 ;
 		WITH_X42_LV2=1 ;
-		WITH_NLS=1 ;
 		SAE= ;
 		STRIP= ;
 		PRODUCT_PKG_DIR=Mixbus32C;
@@ -91,6 +89,7 @@ while [ $# -gt 0 ] ; do
 	--noharvid) WITH_HARVID= ; shift ;;
 	--nostrip) STRIP= ; shift ;;
 	--sysdeps) PRINT_SYSDEPS=1; shift ;;
+	--no-nls) WITH_NLS= ; shift ;;
 	--nls) WITH_NLS=1 ; shift ;;
 	--chanstrip) HARRISONCHANNELSTRIP=$2 ; shift; shift ;;
 	esac
