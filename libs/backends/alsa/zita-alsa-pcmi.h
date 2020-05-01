@@ -154,6 +154,7 @@ private:
 	unsigned int           _fsamp;
 	snd_pcm_uframes_t      _fsize;
 	unsigned int           _play_nfrag;
+	unsigned int           _real_nfrag;
 	unsigned int           _capt_nfrag;
 	unsigned int           _debug;
 	int                    _state;

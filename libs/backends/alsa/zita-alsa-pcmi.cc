@@ -53,6 +53,7 @@ Alsa_pcmi::Alsa_pcmi (
 	: _fsamp (fsamp)
 	, _fsize (fsize)
 	, _play_nfrag (play_nfrag)
+	, _real_nfrag (play_nfrag)
 	, _capt_nfrag (capt_nfrag)
 	, _debug (debug)
 	, _state (-1)
@@ -367,7 +368,7 @@ void Alsa_pcmi::printinfo (void)
 		fprintf (stdout, "\n  nchan  : %d\n", _play_nchan);
 		fprintf (stdout, "  fsamp  : %d\n", _fsamp);
 		fprintf (stdout, "  fsize  : %ld\n", _fsize);
-		fprintf (stdout, "  nfrag  : %d\n", _play_nfrag);
+		fprintf (stdout, "  nfrag  : %d\n", _real_nfrag);
 		fprintf (stdout, "  format : %s\n", snd_pcm_format_name (_play_format));
 	}
 	else fprintf (stdout, " not enabled\n");
@@ -484,10 +485,9 @@ void Alsa_pcmi::initialise (const char *play_name, const char *capt_name, const 
 			_state = -4;
 			return;
 		}
-		if (snd_pcm_hw_params_get_periods (_play_hwpar, &nfrag, &dir) || (nfrag != _play_nfrag) || dir)
+		if (snd_pcm_hw_params_get_periods (_play_hwpar, &_real_nfrag, &dir) || (_real_nfrag != _play_nfrag) || dir)
 		{
-			if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi warning: requested %u periods for playback, using %u.\n", _play_nfrag, nfrag);
-			_play_nfrag = nfrag; // this is later used during pcm_start
+			if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi warning: requested %u periods for playback, using %u.\n", _play_nfrag, _real_nfrag);
 		}
 
 		snd_pcm_hw_params_get_format (_play_hwpar, &_play_format);
