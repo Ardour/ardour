@@ -469,11 +469,19 @@ MidiRegionView::enter_internal (uint32_t state)
 	if (frame_handle_end) {
 		frame_handle_end->lower_to_bottom();
 	}
+
+	for (Events::iterator it = _events.begin(); it != _events.end(); ++it) {
+		it->second->set_hide_selection (false);
+	}
 }
 
 void
 MidiRegionView::leave_internal()
 {
+	for (Events::iterator it = _events.begin(); it != _events.end(); ++it) {
+		it->second->set_hide_selection (true);
+	}
+
 	hide_verbose_cursor ();
 	remove_ghost_note ();
 	_entered_note = 0;
@@ -2440,8 +2448,12 @@ MidiRegionView::add_to_selection (NoteBase* ev)
 	}
 
 	if (selection_was_empty) {
-		PublicEditor& editor (trackview.editor());
-		editor.get_selection().add (this);
+
+		/* first note selected in this region, force Editor region
+		 * selection to this region.
+		 */
+
+		trackview.editor().set_selected_midi_region_view (*this);
 	}
 }
 

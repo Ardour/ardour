@@ -55,7 +55,13 @@ namespace ArdourCanvas {
  */
 class NoteBase : public sigc::trackable
 {
-public:
+  private:
+	enum Flags {
+		Selected = 0x1,
+		HideSelection = 0x2,
+	};
+
+  public:
 	typedef Evoral::Note<Temporal::Beats> NoteType;
 
 	NoteBase (MidiRegionView& region, bool, const boost::shared_ptr<NoteType> note = boost::shared_ptr<NoteType>());
@@ -71,8 +77,9 @@ public:
 	void invalidate ();
 	void validate ();
 
-	bool selected() const { return _selected; }
+	bool selected() const { return _flags & Selected; }
 	void set_selected(bool yn);
+	void set_hide_selection (bool yn);
 
 	virtual void move_event(double dx, double dy) = 0;
 
@@ -108,8 +115,8 @@ public:
 	static Gtkmm2ext::Color meter_style_fill_color(uint8_t vel, bool selected);
 
 	/// calculate outline colors from fill colors of notes
-	inline static uint32_t calculate_outline(uint32_t color, bool selected=false) {
-		if (selected) {
+	inline static uint32_t calculate_outline(uint32_t color, bool showing_selection = false) {
+		if (showing_selection) {
 			return _selected_col;
 		} else {
 			return UINT_INTERPOLATE(color, 0x000000ff, 0.5);
@@ -132,7 +139,7 @@ protected:
 	const boost::shared_ptr<NoteType> _note;
 	bool                              _with_events;
 	bool                              _own_note;
-	bool                              _selected;
+	Flags                             _flags;
 	bool                              _valid;
 	float                             _mouse_x_fraction;
 	float                             _mouse_y_fraction;
