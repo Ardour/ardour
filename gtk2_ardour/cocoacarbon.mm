@@ -84,10 +84,15 @@ set_language_preference ()
 	if (languages && [languages count] > 0) {
 
 		int i, count = [languages count];
+		bool have_translatable_languages = true;
+
 		for (i = 0; i < count; ++i) {
-			if ([[languages objectAtIndex:i]
-			     isEqualToString:@"en"]) {
-				count = i+1;
+			if (i == 0 && [[languages objectAtIndex:i] isEqualToString:@"en-US"]) {
+				/* primary language choice is english (US). Stop looking, and do not set
+				   LANGUAGE. gettext needs to just skip translation entirely.
+				*/
+				have_translatable_languages = false;
+				cout << "User has en_US as primary language choice. " << PROGRAM_NAME << " will not be translated\n";
 				break;
 			}
 		}
