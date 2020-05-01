@@ -72,10 +72,6 @@ set_language_preference ()
 	   dialect (e.g. "it_IT"). But in reality, it doesn't bother looking for
 	   locale dirs with the full name, only the short code (it doesn't
 	   know any better).
-	   
-	   Since Apple's preferred language list only consists of short language codes,
-	   if we set LANGUAGE then gettext will not look for the relevant long-form
-	   variants.
 	*/
 
 	/* how to get language preferences with CoreFoundation
