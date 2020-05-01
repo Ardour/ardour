@@ -66,10 +66,7 @@ public:
 
 	~RegionView ();
 
-	virtual void set_selected (bool yn) {
-		_region->set_selected_for_solo(yn);
-		TimeAxisViewItem::set_selected(yn);
-	}
+	void set_selected (bool yn);
 
 	virtual void init (bool wait_for_data);
 
