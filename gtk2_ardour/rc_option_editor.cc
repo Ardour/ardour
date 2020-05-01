@@ -2294,7 +2294,7 @@ MidiPortOptions::pretty_name_edit (std::string const & path, string const & new_
 RCOptionEditor::RCOptionEditor ()
 	: OptionEditorContainer (Config, string_compose (_("%1 Preferences"), PROGRAM_NAME))
 	  /* pack self-as-vbox into tabbable */
-	, Tabbable (*this, _("Preferences"), /* detached by default */ false)
+	, Tabbable (*this, _("Preferences"), _("preferences"), /* detached by default */ false)
 	, _rc_config (Config)
 	, _mixer_strip_visibility ("mixer-element-visibility")
 {

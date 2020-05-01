@@ -37,8 +37,8 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ArdourWidgets;
 
-Tabbable::Tabbable (Widget& w, const string& name, bool tabbed_by_default)
-	: WindowProxy (name)
+Tabbable::Tabbable (Widget& w, const string& visible_name, string const & nontranslatable_name, bool tabbed_by_default)
+	: WindowProxy (visible_name, nontranslatable_name)
 	, _contents (w)
 	, _parent_notebook (0)
 	, tab_requested_by_state (tabbed_by_default)

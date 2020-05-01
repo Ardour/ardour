@@ -32,7 +32,7 @@ const int PublicEditor::horizontal_spacing = 6;
 sigc::signal<void> PublicEditor::DropDownKeys;
 
 PublicEditor::PublicEditor (Gtk::Widget& content)
-	: Tabbable (content, _("Editor"))
+	: Tabbable (content, _("Editor"), X_("editor"))
 	, _suspend_route_redisplay_counter (0)
 {
 }

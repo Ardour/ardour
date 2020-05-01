@@ -698,7 +698,7 @@ ARDOUR_UI::tabbable_state_change (Tabbable& t)
 	std::vector<std::string> active_action_names;
 	std::vector<std::string> inactive_action_names;
 	Glib::RefPtr<Action> action;
-	std::string downcased_name = downcase (t.name());
+
 	enum ViewState {
 		Tabbed,
 		Windowed,
@@ -708,31 +708,31 @@ ARDOUR_UI::tabbable_state_change (Tabbable& t)
 
 	if (t.tabbed()) {
 
-		insensitive_action_names.push_back (string_compose ("attach-%1", downcased_name));
-		sensitive_action_names.push_back (string_compose ("show-%1", downcased_name));
-		sensitive_action_names.push_back (string_compose ("detach-%1", downcased_name));
-		sensitive_action_names.push_back (string_compose ("hide-%1", downcased_name));
+		insensitive_action_names.push_back (string_compose ("attach-%1", t.menu_name()));
+		sensitive_action_names.push_back (string_compose ("show-%1", t.menu_name()));
+		sensitive_action_names.push_back (string_compose ("detach-%1", t.menu_name()));
+		sensitive_action_names.push_back (string_compose ("hide-%1", t.menu_name()));
 
 		vs = Tabbed;
 
 	} else if (t.tabbed_by_default ()) {
 
-		insensitive_action_names.push_back (string_compose ("attach-%1", downcased_name));
-		insensitive_action_names.push_back (string_compose ("hide-%1", downcased_name));
-		sensitive_action_names.push_back (string_compose ("show-%1", downcased_name));
-		sensitive_action_names.push_back (string_compose ("detach-%1", downcased_name));
+		insensitive_action_names.push_back (string_compose ("attach-%1", t.menu_name()));
+		insensitive_action_names.push_back (string_compose ("hide-%1", t.menu_name()));
+		sensitive_action_names.push_back (string_compose ("show-%1", t.menu_name()));
+		sensitive_action_names.push_back (string_compose ("detach-%1", t.menu_name()));
 
 		vs = Hidden;
 
 	} else if (t.window_visible()) {
 
-		insensitive_action_names.push_back (string_compose ("detach-%1", downcased_name));
-		sensitive_action_names.push_back (string_compose ("show-%1", downcased_name));
-		sensitive_action_names.push_back (string_compose ("attach-%1", downcased_name));
-		sensitive_action_names.push_back (string_compose ("hide-%1", downcased_name));
+		insensitive_action_names.push_back (string_compose ("detach-%1", t.menu_name()));
+		sensitive_action_names.push_back (string_compose ("show-%1", t.menu_name()));
+		sensitive_action_names.push_back (string_compose ("attach-%1", t.menu_name()));
+		sensitive_action_names.push_back (string_compose ("hide-%1", t.menu_name()));
 
-		active_action_names.push_back (string_compose ("show-%1", downcased_name));
-		inactive_action_names.push_back (string_compose ("hide-%1", downcased_name));
+		active_action_names.push_back (string_compose ("show-%1", t.menu_name()));
+		inactive_action_names.push_back (string_compose ("hide-%1", t.menu_name()));
 
 		vs = Windowed;
 
@@ -742,13 +742,13 @@ ARDOUR_UI::tabbable_state_change (Tabbable& t)
 		 * it visible.
 		 */
 
-		insensitive_action_names.push_back (string_compose ("detach-%1", downcased_name));
-		insensitive_action_names.push_back (string_compose ("hide-%1", downcased_name));
-		sensitive_action_names.push_back (string_compose ("show-%1", downcased_name));
-		sensitive_action_names.push_back (string_compose ("attach-%1", downcased_name));
+		insensitive_action_names.push_back (string_compose ("detach-%1", t.menu_name()));
+		insensitive_action_names.push_back (string_compose ("hide-%1", t.menu_name()));
+		sensitive_action_names.push_back (string_compose ("show-%1", t.menu_name()));
+		sensitive_action_names.push_back (string_compose ("attach-%1", t.menu_name()));
 
-		active_action_names.push_back (string_compose ("hide-%1", downcased_name));
-		inactive_action_names.push_back (string_compose ("show-%1", downcased_name));
+		active_action_names.push_back (string_compose ("hide-%1", t.menu_name()));
+		inactive_action_names.push_back (string_compose ("show-%1", t.menu_name()));
 
 		vs = Hidden;
 	}

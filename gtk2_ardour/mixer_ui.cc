@@ -112,7 +112,7 @@ Mixer_UI::instance ()
 }
 
 Mixer_UI::Mixer_UI ()
-	: Tabbable (_content, _("Mixer"))
+	: Tabbable (_content, _("Mixer"), X_("mixer"))
 	, no_track_list_redisplay (false)
 	, in_group_row_change (false)
 	, track_menu (0)

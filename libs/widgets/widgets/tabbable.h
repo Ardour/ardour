@@ -44,7 +44,7 @@ namespace ArdourWidgets {
 class LIBWIDGETS_API Tabbable : public Gtkmm2ext::WindowProxy
 {
 public:
-	Tabbable (Gtk::Widget&, const std::string&, bool tabbed_by_default = true);
+	Tabbable (Gtk::Widget&, const std::string& user_visible_name, std::string const & untranslated_name, bool tabbed_by_default = true);
 	~Tabbable ();
 
 	void add_to_notebook (Gtk::Notebook& notebook, const std::string& tab_title);

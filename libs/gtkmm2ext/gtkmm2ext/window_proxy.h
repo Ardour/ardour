@@ -40,7 +40,6 @@ class VisibilityTracker;
 class LIBGTKMM2EXT_API WindowProxy : public PBD::StatefulDestructible, public virtual sigc::trackable
 {
 public:
-	WindowProxy (const std::string& name);
 	WindowProxy (const std::string& name, const std::string& menu_name);
 	WindowProxy (const std::string& name, const std::string& menu_name, const XMLNode&);
 	virtual ~WindowProxy();
