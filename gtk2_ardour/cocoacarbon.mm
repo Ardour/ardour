@@ -96,9 +96,30 @@ set_language_preference ()
 				break;
 			}
 		}
-		NSRange r = { 0, static_cast<NSUInteger> (count) };
-		setenv ("LANGUAGE", [[[languages subarrayWithRange:r] componentsJoinedByString:@":"] UTF8String], 0);
-		cout << "LANGUAGE set to " << getenv ("LANGUAGE") << endl;
+
+		if (have_translatable_languages) {
+
+			NSRange r = { 0, static_cast<NSUInteger> (count) };
+
+			std::string stupid_apple_string = [[[languages subarrayWithRange:r] componentsJoinedByString:@":"] UTF8String];
+
+			/* Apple's language preference tokens use "-" to separate the two letter ISO language code from the two-letter
+			   ISO region code. So for a German speaker in Germany whose macOS system settings reflect these realities the user
+			   language preference will be "de-DE".
+
+			   Why Apple did this when the standard everywhere else is to use an underscore is unclear. However, we do know that
+			   neither gettext not setlocale(2) will work with these hyphen separated tokens, so fix them.
+			*/
+
+			for (std::string::iterator s = stupid_apple_string.begin(); s != stupid_apple_string.end(); ++s) {
+				if (*s == '-') {
+					*s = '_';
+				}
+			}
+
+			setenv ("LANGUAGE", stupid_apple_string.c_str(), 0);
+			cout << "LANGUAGE set to " << getenv ("LANGUAGE") << endl;
+		}
 	}
 
 	/* now get AppleLocale value and use that for LANG */
