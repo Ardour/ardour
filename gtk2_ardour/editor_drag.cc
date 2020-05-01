@@ -2990,7 +2990,7 @@ TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 		show_verbose_cursor_duration (region_start, region_end);
 		break;
 	case ContentsTrim:
-		show_verbose_cursor_time (pf);
+		show_verbose_cursor_time (_primary->region()->start ());
 		break;
 	}
 	show_view_preview (_operation == StartTrim ? region_start : region_end);
@@ -3149,7 +3149,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 
 	case ContentsTrim:
 		{
-			sample_delta = (last_pointer_sample() - adjusted_current_sample(event));
+			sample_delta = (last_pointer_sample() - adjusted_current_sample(event, false));
 
 			for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
 				i->view->move_contents (sample_delta);
@@ -3166,7 +3166,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 		show_verbose_cursor_duration (rv->region()->position(), rv->region()->last_sample());
 		break;
 	case ContentsTrim:
-		// show_verbose_cursor_time (sample_delta);
+		show_verbose_cursor_time (rv->region()->start ());
 		break;
 	}
 	show_view_preview ((_operation == StartTrim ? rv->region()->position() : rv->region()->last_sample()));
@@ -3295,6 +3295,7 @@ TrimDrag::setup_pointer_sample_offset ()
 		_pointer_sample_offset = raw_grab_sample() - i->initial_end;
 		break;
 	case ContentsTrim:
+		_pointer_sample_offset = 0;
 		break;
 	}
 }
