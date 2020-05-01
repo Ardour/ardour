@@ -14,7 +14,6 @@ if test -z "$CACHEDIR" -o ! -d "$CACHEDIR"; then
 fi
 mkdir -p "$CACHEDIR"
 
-SAE=
 MIXBUS=
 MIXBUS32C=
 WITH_HARVID=1
@@ -38,18 +37,9 @@ while [ $# -gt 0 ] ; do
 	# top level build targets
 	#
 
-	--sae)
-		SAE=1 ;
-		STRIP= ;
-		PRODUCT_PKG_DIR=ArdourSAE ;
-		APPNAME=Ardour ;
-		BUNDLENAME=Ardour${major_version} ;
-		lower_case_appname=ardour;
-		shift ;;
 	--mixbus) MIXBUS=1;
 		WITH_HARRISON_LV2=1 ;
 		WITH_X42_LV2=1 ;
-		SAE= ;
 		STRIP= ;
 		PRODUCT_PKG_DIR=Mixbus;
 		APPNAME=Mixbus ;
@@ -60,7 +50,6 @@ while [ $# -gt 0 ] ; do
 		MIXBUS32C=1;
 		WITH_HARRISON_LV2=1 ;
 		WITH_X42_LV2=1 ;
-		SAE= ;
 		STRIP= ;
 		PRODUCT_PKG_DIR=Mixbus32C;
 		lower_case_appname=mixbus32c;
@@ -68,7 +57,6 @@ while [ $# -gt 0 ] ; do
 		BUNDLENAME=Mixbus32C-${major_version} ;
 		shift ;;
 	--public)
-		SAE= ;
 		WITH_HARRISON_LV2=1 ;
 		WITH_X42_LV2=1 ;
 		PRODUCT_PKG_DIR=Ardour;
@@ -76,11 +64,6 @@ while [ $# -gt 0 ] ; do
 		BUNDLENAME=Ardour${major_version} ;
 		lower_case_appname=ardour;
 		shift ;;
-	--allinone) SAE= ;
-		STRIP= ;
-		PRODUCT_PKG_DIR=Ardour ;
-		shift ;;
-	--test) SAE= ; STRIP= ; shift ;;
 
 	#
 	# specific build flags
@@ -242,10 +225,7 @@ MAIN_EXECUTABLE=$EXECUTABLE
 
 echo "Copying ardour executable ...."
 cp $BUILD_ROOT/gtk2_ardour/ardour-$release_version $APPROOT/MacOS/$MAIN_EXECUTABLE
-if test x$SAE != x ; then
-	# cp $BUILD_ROOT/gtk2_ardour/evtest $APPROOT/MacOS/gtkevents
-	cp  Ardour3-SAE.icns $Resources/appIcon.icns
-elif test x$MIXBUS32C != x ; then
+if test x$MIXBUS32C != x ; then
 	cp  Mixbus32C.icns $Resources/appIcon.icns
 elif test x$MIXBUS != x ; then
 	cp  Mixbus.icns $Resources/appIcon.icns
@@ -557,9 +537,6 @@ fi
 # now fix up the executables
 echo "Fixing up executable dependency names ..."
 executables=$MAIN_EXECUTABLE
-if test x$SAE != x ; then
-	executables="$executables"
-fi
 if test "$HAVE_SESSION_UTILS" = true ; then
 	for file in  $Frameworks/${lower_case_appname}${major_version}-*; do
 		BN=$(basename $file)
@@ -635,17 +612,7 @@ mkdir $PRODUCT_PKG_DIR
 DMGWINBOTTOM=440
 DMGBACKGROUND=dmgbg
 
-if [ x$SAE != x ] ; then
-
-	# SAE packaging
-
-	echo "Creating SAE packaging directory"
-	mv $APPDIR $PRODUCT_PKG_DIR/Ardour3-SAE.app
-	cp HowToInstallArdourSAE.pdf "$PRODUCT_PKG_DIR/How To Install Ardour SAE.pdf"
-	cp SAE-de-keypad.pdf "$PRODUCT_PKG_DIR/Ardour SAE Shortcuts (keypad).pdf"
-	cp SAE-de-nokeypad.pdf "$PRODUCT_PKG_DIR/Ardour SAE Shortcuts.pdf"
-
-elif [ x$MIXBUS != x ] ; then
+if [ x$MIXBUS != x ] ; then
 
 	# Mixbus packaging
 
