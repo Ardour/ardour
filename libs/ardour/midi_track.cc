@@ -499,9 +499,8 @@ MidiTrack::export_stuff (BufferSet&                   buffers,
 	buffers.get_midi(0).clear();
 	MidiStateTracker ignored;
 
-	if (mpl->rendered()->read(buffers.get_midi(0), start, nframes, ignored, 0) != nframes) {
-		return -1;
-	}
+	/* XXX thsi doesn't fail, other than if the lock cannot be obtained */
+	uint32_t cnt = mpl->rendered()->read(buffers.get_midi(0), start, start+nframes, ignored, start);
 
 	if (endpoint && !for_export) {
 		MidiBuffer& buf = buffers.get_midi(0);
