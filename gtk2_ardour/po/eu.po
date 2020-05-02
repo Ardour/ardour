@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-02 13:17+0200\n"
-"PO-Revision-Date: 2020-04-28 18:11+0200\n"
+"PO-Revision-Date: 2020-05-02 12:30+0200\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1964,7 +1964,7 @@ msgstr "Mantentze-denbora"
 
 #: ardour_ui_ed.cc:172
 msgid "Denormal Handling"
-msgstr "Desnormaltze aukerak"
+msgstr "Desnormaltze kontrolak"
 
 #: ardour_ui_ed.cc:176 route_time_axis.cc:1596
 msgid "New..."
@@ -5949,7 +5949,7 @@ msgstr "Pantaila hau ez da editorean nahasgailua erakusteko bezain altua"
 #: rc_option_editor.cc:2541 rc_option_editor.cc:2549 rc_option_editor.cc:2557
 #: rc_option_editor.cc:2565
 msgid "Editor/Snap"
-msgstr "Editorea/Doitzea"
+msgstr "Editorea/Doitu"
 
 #: editor_mouse.cc:1466 editor_mouse.cc:1484 editor_tempodisplay.cc:476
 msgid ""
@@ -8338,7 +8338,7 @@ msgstr "ataka"
 
 #: group_tabs.cc:322 group_tabs.cc:331
 msgid "Selection..."
-msgstr "Hautapena..."
+msgstr "Hautatuta..."
 
 #: group_tabs.cc:323 group_tabs.cc:332
 msgid "Record Enabled..."
@@ -9169,7 +9169,7 @@ msgstr "Esportatu MIDIa: %1"
 
 #: midi_list_editor.cc:58
 msgid "Whole"
-msgstr "Borobila"
+msgstr "Biribila"
 
 #: midi_list_editor.cc:59
 msgid "Half"
@@ -10913,7 +10913,7 @@ msgstr "Kanal-aurrezarpena aldatzeak huts egin du."
 
 #: plugin_pin_dialog.cc:1626
 msgid "Failed to change instance count"
-msgstr "Instantzia-kontatzea aldatzeak huts egin du."
+msgstr "Instantzia-kontatzea aldatzeak huts egin du"
 
 #: plugin_pin_dialog.cc:1638
 msgid "Failed to alter plugin output configuration."
@@ -11441,7 +11441,7 @@ msgstr "Ezin da kendu azken ataka"
 
 #: port_matrix.cc:772
 msgid "This port cannot be removed."
-msgstr "Ataka hau ezin da kendu"
+msgstr "Ataka hau ezin da kendu."
 
 #: port_matrix.cc:777
 msgid "Port removal not allowed"
@@ -11463,11 +11463,11 @@ msgstr "kanala"
 
 #: port_matrix_body.cc:85
 msgid "There are no ports to connect."
-msgstr "Ez dago konektatzeko atakarik"
+msgstr "Ez dago konektatzeko atakarik."
 
 #: port_matrix_body.cc:87
 msgid "There are no %1 ports to connect."
-msgstr "Ez daude %1 ataka konektatzeko"
+msgstr "Ez daude %1 ataka konektatzeko."
 
 #: processor_box.cc:246
 msgid "Return"
@@ -11723,11 +11723,11 @@ msgstr "Garbitu (postfader)"
 
 #: processor_box.cc:3855
 msgid "Activate All"
-msgstr "Gai guztiak"
+msgstr "Gaitu guztiak"
 
 #: processor_box.cc:3857
 msgid "Deactivate All"
-msgstr "Desaktibatu guztiak"
+msgstr "Desgaitu guztiak"
 
 #: processor_box.cc:3859
 msgid "A/B Plugins"
@@ -12046,97 +12046,104 @@ msgstr ""
 
 #: rc_option_editor.cc:1167
 msgid "Waveform Clip Level (dBFS):"
-msgstr ""
+msgstr "Uhin-formaren gailur maila (dBFS):"
 
 #: rc_option_editor.cc:1198 export_video_dialog.cc:172
 msgid "Preset:"
-msgstr ""
+msgstr "Aurrezarpena:"
 
 #: rc_option_editor.cc:1199
 msgid "Playback (seconds of buffering)"
-msgstr ""
+msgstr "Erreprodukzioa (buffer-segundoak)"
 
 #: rc_option_editor.cc:1203
 msgid "Recording (seconds of buffering)"
-msgstr ""
+msgstr "Grabazioa (buffer-segundoak)"
 
 #: rc_option_editor.cc:1212
 msgid "Small sessions (4-16 tracks)"
-msgstr ""
+msgstr "Saio txikiak (4-16 pista)"
 
 #: rc_option_editor.cc:1213
 msgid "Medium sessions (16-64 tracks)"
-msgstr ""
+msgstr "Saio ertainak (16-64 pista)"
 
 #: rc_option_editor.cc:1214
 msgid "Large sessions (64+ tracks)"
-msgstr ""
+msgstr "Saio handiak (64 pista baino gehiago)"
 
 #: rc_option_editor.cc:1215
 msgid "Custom (set by sliders below)"
-msgstr ""
+msgstr "Pertsonalizatua (beheko zehaztagailuen bidez ezarria)"
 
 #: rc_option_editor.cc:1293
 msgid "programming error: unknown buffering preset string, index = %1"
-msgstr ""
+msgstr "programazio-akatsa: buffer-kate aurrezarpen ezezaguna, indizea = %1"
 
 #: rc_option_editor.cc:1313
 msgid "Enable"
-msgstr ""
+msgstr "Gaitu"
 
 #: rc_option_editor.cc:1314
 msgid "Control Surface Protocol"
-msgstr ""
+msgstr "Kontrol gainazal-protokoloa"
 
 #: rc_option_editor.cc:1323
 msgid "Edit the settings for selected protocol (it must be ENABLED first):"
 msgstr ""
+"Editatu hautatutako protokolorako ezarpenak (gaituta egon behar du lehenik):"
 
 #: rc_option_editor.cc:1327
 msgid "Show Protocol Settings"
-msgstr ""
+msgstr "Erakutsi protokoloaren ezarpenak"
 
 #: rc_option_editor.cc:1452
 msgid "Configuration"
-msgstr ""
+msgstr "Konfigurazioa"
 
 #: rc_option_editor.cc:1459
 msgid "Control Protocol Settings"
-msgstr ""
+msgstr "Protokolo-kontrol ezarpenak"
 
 #: rc_option_editor.cc:1503
 msgid "Show Video Export Info before export"
-msgstr ""
+msgstr "Erakutsi bideo-esportazioaren informazioa esportatu aurretik"
 
 #: rc_option_editor.cc:1504
 msgid "Show Video Server Startup Dialog"
-msgstr ""
+msgstr "Erakutsi bideo-morroiaren abiarazte leihoa"
 
 #: rc_option_editor.cc:1505
 msgid "Advanced Setup (remote video server)"
-msgstr ""
+msgstr "Konfigurazio aurreratua (urruneko bideo-morroia)"
 
 #: rc_option_editor.cc:1514
 msgid ""
 "<b>When enabled</b> an information window with details is displayed before "
 "the video-export dialog."
 msgstr ""
+"<b>Gaituta badago</b>, xehetasunak dituen informazio-leiho bat erakutsiko da "
+"bideoa esportatu aurretik."
 
 #: rc_option_editor.cc:1520
 msgid ""
 "<b>When enabled</b> the video server is never launched automatically without "
 "confirmation"
 msgstr ""
+"<b>Gaituta badago</b>, bideo-morroia ez da inoiz automatikoki abiarazten "
+"baimenik eman gabe"
 
 #: rc_option_editor.cc:1526
 msgid ""
 "<b>When enabled</b> you can specify a custom video-server URL and docroot. - "
 "Do not enable this option unless you know what you are doing."
 msgstr ""
+"<b>Gaituta badago</b>, bideo-morroiaren URL eta docroot-a zehaztu ditzakezu. "
+"- Ez gaitu aukera hau zer egiten ari zaren ez badakizu."
 
 #: rc_option_editor.cc:1529
 msgid "Video Server URL:"
-msgstr ""
+msgstr "Bideo-morroiaren URLa:"
 
 #: rc_option_editor.cc:1534
 msgid ""
@@ -12144,10 +12151,13 @@ msgid ""
 "hostname.example.org:1554/' and defaults to 'http://localhost:1554/' when "
 "the video-server is running locally"
 msgstr ""
+"Bideo-zerbitzariaren URL oinarriak http aurrizkia dauka. Hau 'http://"
+"ostalarizen.adibidea.org:1554/' izan ohi da, eta, lehenespenez, 'http://"
+"ostalarilokala:1554/' da, bideo-zerbitzaria lokalki exekutatzen denean"
 
 #: rc_option_editor.cc:1537
 msgid "Video Folder:"
-msgstr ""
+msgstr "Bideoen karpeta:"
 
 #: rc_option_editor.cc:1542
 msgid ""
@@ -12157,68 +12167,82 @@ msgid ""
 "docroot or be left empty if it is unavailable. It is used for the local "
 "video-monitor and file-browsing when opening/adding a video file."
 msgstr ""
+"Bideo-morroiaren root-dokumentuaren bide lokala. Bideo-morroia direktorio "
+"honen azpian dauden fitxategietara bakarrik ahalko da sartu. Morroia "
+"urruneko ostalari batean exekutatzen bada, zerbitzariaren docrootaren sarean "
+"muntatutako karpeta batera apuntatu beharko du, edo hutsik utzi, erabilgarri "
+"ez badago. Bideo-monitore lokalerako eta bideo-fitxategi bat irekitzean/"
+"gehitzean fitxategiak bilatzeko erabiltzen da."
 
 #: rc_option_editor.cc:1555
 msgid "Custom Path to Video Monitor (%1) - leave empty for default:"
 msgstr ""
+"Bideo-monitorearentzako bide pertsonalizatua (%1) - utzi hutsik "
+"lehenetsirako:"
 
 #: rc_option_editor.cc:1569
 msgid ""
 "Set a custom path to the Video Monitor Executable, changing this requires a "
 "restart."
 msgstr ""
+"Zehaztu bide pertsonalizatu bat bideo-monitore exekutagarriari. Hau "
+"aldatzeko berrabiarazi egin behar da."
 
 #: rc_option_editor.cc:1615
 msgid "Set Video Monitor Executable"
-msgstr ""
+msgstr "Ezarri bideo-monitore exekutagarria"
 
 #: rc_option_editor.cc:1688
 msgid "Column %1 (Actions %2 + %3)"
-msgstr ""
+msgstr "%1 zutabea (%2 + %3 ekintzak)"
 
 #: rc_option_editor.cc:1812
 msgid "MIDI Inputs"
-msgstr ""
+msgstr "MIDI sarrerak"
 
 #: rc_option_editor.cc:1823
 msgid "MIDI Outputs"
-msgstr ""
+msgstr "MIDI irteerak"
 
 #: rc_option_editor.cc:1932
 msgid "Name (click twice to edit)"
-msgstr ""
+msgstr "Izena (egin klik bikoitza editatzeko)"
 
 #: rc_option_editor.cc:1936
 msgid "Music Data"
-msgstr ""
+msgstr "Musikaren datuak"
 
 #: rc_option_editor.cc:1937
 msgid ""
 "If ticked, %1 will consider this port to be a source of music performance "
 "data."
-msgstr ""
+msgstr "Markatuta badago, %1(e)k ataka hau musika-iturburutzat joko du."
 
 #: rc_option_editor.cc:1944
 msgid "Control Data"
-msgstr ""
+msgstr "Kontrolen datuak"
 
 #: rc_option_editor.cc:1945
 msgid "If ticked, %1 will consider this port to be a source of control data."
-msgstr ""
+msgstr "Markatuta badago, %1(e)k ataka hau kontrol-datu-iturburutzat joko du."
 
 #: rc_option_editor.cc:1951 rc_option_editor.cc:1953
 msgid "Follow Selection"
-msgstr ""
+msgstr "Jarraitu hautapena"
 
 #: rc_option_editor.cc:1954
 msgid ""
 "If ticked, and \"MIDI input follows selection\" is enabled,\n"
 "%1 will automatically connect the first selected MIDI track to this port.\n"
 msgstr ""
+"Markatuta badago, eta \"MIDI sarrerak hautapena jarraitzen du\" gaituta "
+"badago,\n"
+"%1(e)k automatikoki konektatuko du lehenengo hautatutako MIDI pista ataka "
+"honetara.\n"
 
 #: rc_option_editor.cc:2106
 msgid "%1 Preferences"
-msgstr ""
+msgstr "%1(r)en hobespenak"
 
 #: rc_option_editor.cc:2120 rc_option_editor.cc:2138 rc_option_editor.cc:2142
 #: rc_option_editor.cc:2154 rc_option_editor.cc:2156 rc_option_editor.cc:2158
@@ -12228,72 +12252,74 @@ msgstr ""
 #: rc_option_editor.cc:3105 rc_option_editor.cc:3356 rc_option_editor.cc:3660
 #: rc_option_editor.cc:4058
 msgid "General"
-msgstr ""
+msgstr "Orokorra"
 
 #: rc_option_editor.cc:2120
 msgid "DSP CPU Utilization"
-msgstr ""
+msgstr "PUZ DSP erabilera"
 
 #: rc_option_editor.cc:2124
 msgid "Signal processing uses"
-msgstr ""
+msgstr "Seinale-prozesamenduak erabiltzen ditu:"
 
 #: rc_option_editor.cc:2129
 msgid "all but one processor"
-msgstr ""
+msgstr "prozesadore guztiak bat izan ez ezik"
 
 #: rc_option_editor.cc:2130
 msgid "all available processors"
-msgstr ""
+msgstr "dauden prozesadore guztiak"
 
 #: rc_option_editor.cc:2133
 msgid "%1 processor"
 msgid_plural "%1 processors"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Prozesadore %1"
+msgstr[1] "%1 prozesadore"
 
 #: rc_option_editor.cc:2136
 msgid "This setting will only take effect when %1 is restarted."
-msgstr ""
+msgstr "Konfigurazio honek %1 berrabiarazi ondoren bakarrik izango du eragina."
 
 #: rc_option_editor.cc:2142
 msgid "Memory Usage"
-msgstr ""
+msgstr "Memoria-erabilera"
 
 #: rc_option_editor.cc:2145
 msgid "Waveform image cache size (megabytes)"
-msgstr ""
+msgstr "Uhin-irudikapenaren cache-tamaina (megabytak)"
 
 #: rc_option_editor.cc:2153
 msgid ""
 "Increasing the cache size uses more memory to store waveform images, which "
 "can improve graphical performance."
 msgstr ""
+"Cachearen tamaina handitzeak memoria gehiago erabiltzen du uhin-irudiak "
+"gordetzeko, eta honek errendimendu grafikoa hobetu dezakete."
 
 #: rc_option_editor.cc:2156
 msgid "Engine"
-msgstr ""
+msgstr "Motorra"
 
 #: rc_option_editor.cc:2161
 msgid "Try to auto-launch audio/midi engine"
-msgstr ""
+msgstr "Saiatu automatikoki abiarazten audio/midi motorra"
 
 #: rc_option_editor.cc:2166 route_time_axis.cc:287 route_time_axis.cc:846
 #: vca_time_axis.cc:77 vca_time_axis.cc:462
 msgid "Automation"
-msgstr ""
+msgstr "Automatizazioa"
 
 #: rc_option_editor.cc:2171
 msgid "Thinning factor (larger value => less data)"
-msgstr ""
+msgstr "Argaltzeko faktorea (balio handiagoa => datu gutxiago)"
 
 #: rc_option_editor.cc:2180
 msgid "Automation sampling interval (milliseconds)"
-msgstr ""
+msgstr "Automatizazioaren lagintze-interbaloa (milisegundoak)"
 
 #: rc_option_editor.cc:2190
 msgid "Allow non quarter-note pulse"
-msgstr ""
+msgstr "Baimendu beltzaz aparteko pultsuak"
 
 #: rc_option_editor.cc:2195
 msgid ""
@@ -12302,90 +12328,97 @@ msgid ""
 "<b>When disabled</b> %1 will only allow tempo to be expressed in quarter "
 "notes per minute"
 msgstr ""
+"<b>Gaituta badago</b>, %1(e)k tempoa minutuko-zatiketak parametroaren "
+"arabera adieraztea baimenduko du\n"
+"<b>Desgaituta badago</b>, %1(e)k tempoa soilik beltzak-minutuko "
+"parametroaren arabera adieraztea baimenduko du"
 
 #: rc_option_editor.cc:2201
 msgid "GUI Lock"
-msgstr ""
+msgstr "Interfazea bloketazea"
 
 #: rc_option_editor.cc:2205
 msgid "Lock timeout (seconds)"
-msgstr ""
+msgstr "Blokeoaren itxaron-denbora (segundoak)"
 
 #: rc_option_editor.cc:2213
 msgid "Lock GUI after this many idle seconds (zero to never lock)"
 msgstr ""
+"Blokeatu interfazea hainbeste segundoren ondoren (zero, inoiz ez blokeatzeko)"
 
 #: rc_option_editor.cc:2218
 msgid "System Screensaver Mode"
-msgstr ""
+msgstr "Sistemaren pantaila-babeslearen modua"
 
 #: rc_option_editor.cc:2223
 msgid "Never Inhibit"
-msgstr ""
+msgstr "Inoiz ez eragotzi"
 
 #: rc_option_editor.cc:2224
 msgid "Inhibit while Recording"
-msgstr ""
+msgstr "Eragotzi grabatu bitartean"
 
 #: rc_option_editor.cc:2225
 msgid "Inhibit while %1 is running"
-msgstr ""
+msgstr "Eragotzi %1 lanean ari den bitartean"
 
 #: rc_option_editor.cc:2232 rc_option_editor.cc:2234 rc_option_editor.cc:2236
 #: rc_option_editor.cc:2244 rc_option_editor.cc:2246 rc_option_editor.cc:2254
 #: rc_option_editor.cc:2262 rc_option_editor.cc:2269
 msgid "General/Session"
-msgstr ""
+msgstr "Orokorra/Saioa"
 
 #: rc_option_editor.cc:2232
 msgid "Options|Undo"
-msgstr ""
+msgstr "Desegin"
 
 #: rc_option_editor.cc:2239
 msgid "Verify removal of last capture"
-msgstr ""
+msgstr "Egiaztatu azken saio-argazkiaren ezabatzea"
 
 #: rc_option_editor.cc:2244
 msgid "Session Management"
-msgstr ""
+msgstr "Saio-kudeaketa"
 
 #: rc_option_editor.cc:2249
 msgid "Make periodic backups of the session file"
-msgstr ""
+msgstr "Egin saio-fitxategiaren babeskopia periodikoak"
 
 #: rc_option_editor.cc:2257
 msgid "Always copy imported files"
-msgstr ""
+msgstr "Beti kopiatu artxibo inportatuak"
 
 #: rc_option_editor.cc:2264
 msgid "Default folder for new sessions:"
-msgstr ""
+msgstr "Lehenetsitako karpeta saio berrientzat:"
 
 #: rc_option_editor.cc:2272
 msgid "Maximum number of recent sessions"
-msgstr ""
+msgstr "Azkenaldiko saioen gehieneko kopurua"
 
 #: rc_option_editor.cc:2281 rc_option_editor.cc:2292
 msgid "General/Translation"
-msgstr ""
+msgstr "Orokorra/Itzulpena"
 
 #: rc_option_editor.cc:2281
 msgid "Internationalization"
-msgstr ""
+msgstr "Internazionalizazioa"
 
 #: rc_option_editor.cc:2285
 msgid "Use translations"
-msgstr ""
+msgstr "Erabili itzulpenak"
 
 #: rc_option_editor.cc:2290
 msgid ""
 "These settings will only take effect after %1 is restarted (if available for "
 "your language preferences)."
 msgstr ""
+"Ezarpen hauek %1 berrabiarazi ostean bakarrik izango dute eragina (zure "
+"hizkuntza-hobespenetarako eskuragarri badaude)"
 
 #: rc_option_editor.cc:2304
 msgid "Prompt for new marker names"
-msgstr ""
+msgstr "Galdetu marka berrien izenentzat"
 
 #: rc_option_editor.cc:2309
 msgid ""
@@ -12394,349 +12427,368 @@ msgid ""
 "\n"
 "You can always rename markers by right-clicking on them"
 msgstr ""
+"Gaituta badago, marka berri bat sortzean leihotxo bat agertuko da marka "
+"izendatzeko.\n"
+"\n"
+"Beti ere berrizendatu ditzakezu markak eskuin-klika eginaz"
 
 #: rc_option_editor.cc:2314
 msgid "Auto-scroll speed when dragging playhead (%)"
-msgstr ""
+msgstr "Denbora-marka arrastatzean korritze-automatikoaren abiadura (%)"
 
 #: rc_option_editor.cc:2318
 msgid "5%"
-msgstr ""
+msgstr "%5"
 
 #: rc_option_editor.cc:2319
 msgid "10%"
-msgstr ""
+msgstr "%10"
 
 #: rc_option_editor.cc:2320
 msgid "25%"
-msgstr ""
+msgstr "%25"
 
 #: rc_option_editor.cc:2321
 msgid "50%"
-msgstr ""
+msgstr "%50"
 
 #: rc_option_editor.cc:2327
 msgid "Limit zooming & summary view to X minutes beyond session extents"
 msgstr ""
+"Mugatu zooma eta laburpen-bista denbora honetara saio-mugetatik haratago"
 
 #: rc_option_editor.cc:2331
 msgid "1 minute"
-msgstr ""
+msgstr "Minutu 1"
 
 #: rc_option_editor.cc:2332
 msgid "2 minutes"
-msgstr ""
+msgstr "2 minutu"
 
 #: rc_option_editor.cc:2333
 msgid "20 minutes"
-msgstr ""
+msgstr "20 minutu"
 
 #: rc_option_editor.cc:2334
 msgid "1 hour"
-msgstr ""
+msgstr "Ordubete"
 
 #: rc_option_editor.cc:2335
 msgid "2 hours"
-msgstr ""
+msgstr "2 ordu"
 
 #: rc_option_editor.cc:2336
 msgid "24 hours"
-msgstr ""
+msgstr "24 ordu"
 
 #: rc_option_editor.cc:2344
 msgid "Zoom to mouse position when zooming with scroll wheel"
-msgstr ""
+msgstr "Egin zooma saguaren posiziora korritze-gurpilarekin egitean"
 
 #: rc_option_editor.cc:2353
 msgid "Zoom with vertical drag in rulers"
-msgstr ""
+msgstr "Egin zooma erregeletan bertikalki arrastatuz"
 
 #: rc_option_editor.cc:2361
 msgid "Double click zooms to selection"
-msgstr ""
+msgstr "Klik-bikoitzak hautapenera egiten du zooma"
 
 #: rc_option_editor.cc:2369
 msgid "Update editor window during drags of the summary"
-msgstr ""
+msgstr "Eguneratu editore-leihoa laburpena arrastatu bitartean"
 
 #: rc_option_editor.cc:2377
 msgid "Auto-scroll editor window when dragging near its edges"
-msgstr ""
+msgstr "Korritu automatikoki editore-leihoa bere ertzetatik gertu arrastatzean"
 
 #: rc_option_editor.cc:2385
 msgid "Show gain envelopes in audio regions"
-msgstr ""
+msgstr "Erakutsi irabazien uhin-kurbak audio-eremuetan"
 
 #: rc_option_editor.cc:2386
 msgid "in all modes"
-msgstr ""
+msgstr "modu guztietan"
 
 #: rc_option_editor.cc:2387
 msgid "only in Draw and Internal Edit modes"
-msgstr ""
+msgstr "bakarrik Marrazte eta Barruko-edizio moduetan"
 
 #: rc_option_editor.cc:2392
 msgid "Editor Behavior"
-msgstr ""
+msgstr "Editorearen portaera"
 
 #: rc_option_editor.cc:2397
 msgid "Move relevant automation when audio regions are moved"
-msgstr ""
+msgstr "Audio-eremuak mugitzean, mugitu ere bere automatizazioak"
 
 #: rc_option_editor.cc:2404
 msgid "Ignore Y-axis click position when adding new automation-points"
 msgstr ""
+"Y ardatzaren klik posizioari kasurik ez egin automatizazio-puntu berriak "
+"gehitzean"
 
 #: rc_option_editor.cc:2410
 msgid ""
 "<b>When enabled</b> The new points drawn in any automation lane will be "
 "placed on the existing line, regardless of mouse y-axis position."
 msgstr ""
+"<b>Gaituta badago</b>, automatizazio-pistan marraztutako puntu berriak jada "
+"badagoen lerroan kokatuko dira, saguaren Y ardatzeko posizioari kasurik egin "
+"gabe."
 
 #: rc_option_editor.cc:2414
 msgid "Default fade shape"
-msgstr ""
+msgstr "Lausotze-forma lehenetsia"
 
 #: rc_option_editor.cc:2432
 msgid "Regions in active edit groups are edited together"
-msgstr ""
+msgstr "Edizio-talde aktiboetako barrutiak aldi berean editatzen dira"
 
 #: rc_option_editor.cc:2437
 msgid "whenever they overlap in time"
-msgstr ""
+msgstr "denboran zehar gainjartzen direnean"
 
 #: rc_option_editor.cc:2438
 msgid "if either encloses the other"
-msgstr ""
+msgstr "batak bestea badu barruan"
 
 #: rc_option_editor.cc:2439
 msgid "only if they have identical length, position and origin"
-msgstr ""
+msgstr "soilik iraupen, kokaleku eta jatorri berdina badute"
 
 #: rc_option_editor.cc:2440
 msgid "only if they have identical length, position and layer"
-msgstr ""
+msgstr "soilik iraupen, kokaleku eta geruza berdinak badituzte"
 
 #: rc_option_editor.cc:2446
 msgid "Layering model"
-msgstr ""
+msgstr "Geruzen modua"
 
 #: rc_option_editor.cc:2451
 msgid "later is higher"
-msgstr ""
+msgstr "azkenengoa gainean"
 
 #: rc_option_editor.cc:2452
 msgid "manual layering"
-msgstr ""
+msgstr "eskuzko gainjartzea"
 
 #: rc_option_editor.cc:2459
 msgid "After a Separate operation, in Range mode"
-msgstr ""
+msgstr "Banantze-operazio baten ostean, Barruti moduan"
 
 #: rc_option_editor.cc:2463
 msgid "Clear the Range Selection"
-msgstr ""
+msgstr "Ezabatu barruti-hautapena"
 
 #: rc_option_editor.cc:2464
 msgid "Preserve the Range Selection"
-msgstr ""
+msgstr "Mantendu barruti-hautapena"
 
 #: rc_option_editor.cc:2465
 msgid ""
 "Force-Select the regions under the range. (this might cause a tool change)"
 msgstr ""
+"Behartu barruti azpiko eremuen hautapena (honek tresna aldatzea ekar dezake)"
 
 #: rc_option_editor.cc:2470
 msgid "After a Split operation, in Object mode"
-msgstr ""
+msgstr "Zatitze-operazio baten ostean, Objektu moduan"
 
 #: rc_option_editor.cc:2475
 msgid "Clear the Selected Regions"
-msgstr ""
+msgstr "Ezabatu hautatutako eremuak"
 
 #: rc_option_editor.cc:2476
 msgid "Select only the newly-created regions BEFORE the split point"
-msgstr ""
+msgstr "Hautatu zatitze puntuaren aurretik dauden berriki sortutako eremuak"
 
 #: rc_option_editor.cc:2477
 msgid "Select only the newly-created regions AFTER the split point"
-msgstr ""
+msgstr "Hautatu zatitze puntuaren ondoren dauden berriki sortutako eremuak"
 
 #: rc_option_editor.cc:2478
 msgid "Select the newly-created regions"
-msgstr ""
+msgstr "Hautatu berriki sortutako eremuak"
 
 #: rc_option_editor.cc:2482
 msgid "Preserve the existing selection, AND select all newly-created regions"
-msgstr ""
+msgstr "Mantendu hautapena eta hautatu berriki sortutako eremu guztiak"
 
 #: rc_option_editor.cc:2486
 msgid "General Snap options:"
-msgstr ""
+msgstr "Doitze-aukera orokorrak:"
 
 #: rc_option_editor.cc:2491
 msgid "Snap Threshold (pixels)"
-msgstr ""
+msgstr "Doitzearen atalasea (pixelak)"
 
 #: rc_option_editor.cc:2501
 msgid "Show \"snapped cursor\""
-msgstr ""
+msgstr "Erakutsi \"doitutako kurtsorea\""
 
 #: rc_option_editor.cc:2509
 msgid "Snap rubberband selection to grid"
-msgstr ""
+msgstr "Doitu hautapen-moldakorra (laukizuzena) saretara"
 
 #: rc_option_editor.cc:2517
 msgid "Grid switches to alternate selection for Internal Edit tools"
-msgstr ""
+msgstr "Sareta hautapen alternatibotara aldatzen da Barruko-edizio tresnekin"
 
 #: rc_option_editor.cc:2525
 msgid "Rulers automatically change to follow the Grid mode selection"
 msgstr ""
+"Erregelak automatikoki aldatzen dira sareta-moduko hautapena jarraitzeko"
 
 #: rc_option_editor.cc:2530
 msgid "When \"Snap\" is enabled, snap to:"
-msgstr ""
+msgstr "\"Doitu\" gaituta dagoenean, doitu hona:"
 
 #: rc_option_editor.cc:2544
 msgid "Region Sync Points"
-msgstr ""
+msgstr "Eremu-sinkronia puntuak"
 
 #: rc_option_editor.cc:2552
 msgid "Region Starts"
-msgstr ""
+msgstr "Eremu-hasierak"
 
 #: rc_option_editor.cc:2560
 msgid "Region Ends"
-msgstr ""
+msgstr "Eremu-amaierak"
 
 #: rc_option_editor.cc:2573 rc_option_editor.cc:2574 rc_option_editor.cc:2575
 msgid "Editor/Modifiers"
-msgstr ""
+msgstr "Editoreak/Moldatzaileak"
 
 #: rc_option_editor.cc:2573
 msgid "Keyboard Modifiers"
-msgstr ""
+msgstr "Teklatu-moldatzaileak"
 
 #: rc_option_editor.cc:2584
 msgid "Solo controls are Listen controls"
-msgstr ""
+msgstr "Solo-kontrolak entzute-kontrolak dira"
 
 #: rc_option_editor.cc:2594
 msgid "Exclusive solo"
-msgstr ""
+msgstr "Solo esklusiboa"
 
 #: rc_option_editor.cc:2602
 msgid "Show solo muting"
-msgstr ""
+msgstr "Erakutsi soloen mututzeak"
 
 #: rc_option_editor.cc:2610
 msgid "Soloing overrides muting"
-msgstr ""
+msgstr "Soloa mututzeei gainjartzen zaie"
 
 #: rc_option_editor.cc:2618
 msgid "Solo-in-place mute cut (dB)"
-msgstr ""
+msgstr "Tokiko-solo / mututze mozketa (dB)"
 
 #: rc_option_editor.cc:2625
 msgid "Listen Position"
-msgstr ""
+msgstr "Entzutearen posizioa"
 
 #: rc_option_editor.cc:2630
 msgid "after-fader (AFL)"
-msgstr ""
+msgstr "potsfader (AFL)"
 
 #: rc_option_editor.cc:2631
 msgid "pre-fader (PFL)"
-msgstr ""
+msgstr "prefader (PFL)"
 
 #: rc_option_editor.cc:2637
 msgid "PFL signals come from"
-msgstr ""
+msgstr "PFL seinaleak hemendik datoz:"
 
 #: rc_option_editor.cc:2642
 msgid "before pre-fader processors"
-msgstr ""
+msgstr "prefader prozesadoreen aurretik"
 
 #: rc_option_editor.cc:2643
 msgid "pre-fader but after pre-fader processors"
-msgstr ""
+msgstr "prefader, baina prozesadoreen ondoren"
 
 #: rc_option_editor.cc:2649
 msgid "AFL signals come from"
-msgstr ""
+msgstr "AFL seinalean hemendik datoz:"
 
 #: rc_option_editor.cc:2654
 msgid "immediately post-fader"
-msgstr ""
+msgstr "faderra igaro eta segidan"
 
 #: rc_option_editor.cc:2655
 msgid "after post-fader processors (before pan)"
-msgstr ""
+msgstr "postfader prozesadoreen ondoren (pan aurretik)"
 
 #: rc_option_editor.cc:2659
 msgid "Default Track / Bus Muting Options"
-msgstr ""
+msgstr "Pisten / Busen lehenetsitako mututze aukerak"
 
 #: rc_option_editor.cc:2664
 msgid "Mute affects pre-fader sends"
-msgstr ""
+msgstr "Mututzeak prefader bidalketei eragiten die"
 
 #: rc_option_editor.cc:2672
 msgid "Mute affects post-fader sends"
-msgstr ""
+msgstr "Mututzeak postfader bidalketei eragiten die"
 
 #: rc_option_editor.cc:2680
 msgid "Mute affects control outputs"
-msgstr ""
+msgstr "Mututzeak kontrol-irteerei eragiten die"
 
 #: rc_option_editor.cc:2688
 msgid "Mute affects main outputs"
-msgstr ""
+msgstr "Mututzeak irteera nagusiei eragiten die"
 
 #: rc_option_editor.cc:2694
 msgid "Send Routing"
-msgstr ""
+msgstr "Bidalketen loturak"
 
 #: rc_option_editor.cc:2698
 msgid "Link panners of Aux and External Sends with main panner by default"
 msgstr ""
+"Parekatu kanpo- eta bidalketa-osagarrien paneagailuak paneagailu "
+"nagusiarekin modu lehenetsian"
 
 #: rc_option_editor.cc:2705 rc_option_editor.cc:2723 rc_option_editor.cc:2731
 #: rc_option_editor.cc:2738 rc_option_editor.cc:2746 rc_option_editor.cc:2762
 #: rc_option_editor.cc:2775 rc_option_editor.cc:2784
 msgid "Signal Flow"
-msgstr ""
+msgstr "Seinale-fluxua"
 
 #: rc_option_editor.cc:2709
 msgid "Record monitoring handled by"
-msgstr ""
+msgstr "Grabazioaren monitorizazioa honek kontrolatzen du:"
 
 #: rc_option_editor.cc:2715
 msgid "via Audio Driver"
-msgstr ""
+msgstr "audio driverrak"
 
 #: rc_option_editor.cc:2721
 msgid "audio hardware"
-msgstr ""
+msgstr "audio hardwarea"
 
 #: rc_option_editor.cc:2727
 msgid "Auto Input does 'talkback'"
-msgstr ""
+msgstr "Audio-sarrerak talkback gisa lan egiten du"
 
 #: rc_option_editor.cc:2733
 msgid ""
 "<b>When enabled,</b> and Transport->Auto-Input is enabled, %1 will always "
 "monitor audio inputs when transport is stopped, even if tracks aren't armed."
 msgstr ""
+"<b>Gaituta badago</b>, eta Garraioa->Auto-sarrera gaituta badago, %1(e)k "
+"beti monitorizatuko ditu audio-sarrerak garraioa geldirik dagoenean, pistak "
+"grabatzeko gaituta ez badaude ere."
 
 #: rc_option_editor.cc:2738
 msgid "Track and Bus Connections"
-msgstr ""
+msgstr "Pista- eta bus-loturak"
 
 #: rc_option_editor.cc:2742
 msgid "Auto-connect main output (master or monitor) bus to physical ports"
 msgstr ""
+"Automatikoki konektatu irteera-nagusi busak (masterra edo monitorizaziokoa) "
+"ataka fisikoetara"
 
 #: rc_option_editor.cc:2748
 msgid ""
@@ -12745,132 +12797,141 @@ msgid ""
 "is conneced the the hardware playback ports, otherwise the master-bus output "
 "is directly used for playback."
 msgstr ""
+"<b>Gaituta badago</b>, irteera-nagusi busa automatikoki konektatuko da "
+"lehenengo ataka fisikoetara. Saioak monitore-sekzioa badu, monitore-busaren "
+"irteera hardware erreprodukzio-ataketara lotuko da. Bestela, master-busaren "
+"irteera erabiliko da erreprodukziorako."
 
 #: rc_option_editor.cc:2754
 msgid "Connect track inputs"
-msgstr ""
+msgstr "Konektatu pisten sarrerak"
 
 #: rc_option_editor.cc:2759
 msgid "automatically to physical inputs"
-msgstr ""
+msgstr "automatikoki sarrera fisikoetara"
 
 #: rc_option_editor.cc:2760 rc_option_editor.cc:2773
 msgid "manually"
-msgstr ""
+msgstr "eskuz"
 
 #: rc_option_editor.cc:2766
 msgid "Connect track and bus outputs"
-msgstr ""
+msgstr "Konektatu pisten eta busen irteerak"
 
 #: rc_option_editor.cc:2771
 msgid "automatically to physical outputs"
-msgstr ""
+msgstr "automatikoki irteera fisikoetara"
 
 #: rc_option_editor.cc:2772
 msgid "automatically to master bus"
-msgstr ""
+msgstr "automatikoki master-busera"
 
 #: rc_option_editor.cc:2779
 msgid "Use 'Strict-I/O' for new tracks or busses"
-msgstr ""
+msgstr "Erabili 'S/I zorrotza' pista edo bus berrientzat"
 
 #: rc_option_editor.cc:2793
 msgid "Buffering"
-msgstr ""
+msgstr "Bufferra"
 
 #: rc_option_editor.cc:2797
 msgid "Denormals"
-msgstr ""
+msgstr "Desnormaltzeak"
 
 #: rc_option_editor.cc:2802
 msgid "Use DC bias to protect against denormals"
-msgstr ""
+msgstr "Erabili DC alborapena denormaltzeen aurrean babesteko"
 
 #: rc_option_editor.cc:2809
 msgid "Processor handling"
-msgstr ""
+msgstr "Prozesadoreen kontrolak"
 
 #: rc_option_editor.cc:2815
 msgid "no processor handling"
-msgstr ""
+msgstr "prozesadoreen kontrolik ez"
 
 #: rc_option_editor.cc:2821
+#, fuzzy
 msgid "use FlushToZero"
-msgstr ""
+msgstr "erabili HustuZerora"
 
 #: rc_option_editor.cc:2828
+#, fuzzy
 msgid "use DenormalsAreZero"
-msgstr ""
+msgstr "erabili DesnormaltzeakZeroDira"
 
 #: rc_option_editor.cc:2835
+#, fuzzy
 msgid "use FlushToZero and DenormalsAreZero"
-msgstr ""
+msgstr "erabili HustuZerora eta DesnormaltzeakZeroDira"
 
 #: rc_option_editor.cc:2844
 msgid "Changes may not be effective until audio-engine restart."
-msgstr ""
+msgstr "Aldaketak ez dira eraginkorrak izango audio-motorra berrabiarazi arte."
 
 #: rc_option_editor.cc:2853
 msgid "Enable automatic analysis of audio"
-msgstr ""
+msgstr "Gaitu audioaren analisi automatikoa"
 
 #: rc_option_editor.cc:2861
 msgid "Replicate missing region channels"
-msgstr ""
+msgstr "Bikoiztu ez dauden eremuen kanalak"
 
 #: rc_option_editor.cc:2873
 msgid "Initial program change"
-msgstr ""
+msgstr "Hasierako programaren aldaketa"
 
 #: rc_option_editor.cc:2884
 msgid "Sound MIDI notes as they are selected in the editor"
-msgstr ""
+msgstr "MIDI notek editorean hautatuak izatean soinu egiten dute"
 
 #: rc_option_editor.cc:2893
 msgid "Virtual Keyboard Layout"
-msgstr ""
+msgstr "Teklatu birtualaren diseinua"
 
 #: rc_option_editor.cc:2898
 msgid "QWERTY"
-msgstr ""
+msgstr "QWERTY"
 
 #: rc_option_editor.cc:2899
 msgid "QWERTZ"
-msgstr ""
+msgstr "QWERTZ"
 
 #: rc_option_editor.cc:2900
 msgid "AZERTY"
-msgstr ""
+msgstr "AZERTY"
 
 #: rc_option_editor.cc:2901
 msgid "DVORAK"
-msgstr ""
+msgstr "DVORAK"
 
 #: rc_option_editor.cc:2902
 msgid "QWERTY Single"
-msgstr ""
+msgstr "QWERTY Single"
 
 #: rc_option_editor.cc:2903
 msgid "QWERTZ Single"
-msgstr ""
+msgstr "QWERTZ Single"
 
 #: rc_option_editor.cc:2908
 msgid "MIDI Port Options"
-msgstr ""
+msgstr "MIDI ataken aukerak"
 
 #: rc_option_editor.cc:2913
 msgid "MIDI input follows MIDI track selection"
-msgstr ""
+msgstr "MIDI sarrerak MIDI pistaren hautapenari jarraitzen dio"
 
 #: rc_option_editor.cc:2929
 msgid "Enable metronome only while recording"
-msgstr ""
+msgstr "Gaitu metronomoa soilik grabatu bitartean"
 
 #: rc_option_editor.cc:2935
 msgid ""
 "<b>When enabled</b> the metronome will remain silent if %1 is <b>not "
 "recording</b>."
 msgstr ""
+"<b>Gaituta badago</b>, metronomoa isilik egongo da %1 <b>grabatzen ez</b> "
+"badago."
 
 #: rc_option_editor.cc:2942 rc_option_editor.cc:2956 rc_option_editor.cc:2973
 #: rc_option_editor.cc:2989 rc_option_editor.cc:3005 rc_option_editor.cc:3019
@@ -12878,119 +12939,123 @@ msgstr ""
 #: rc_option_editor.cc:3072 rc_option_editor.cc:3083 rc_option_editor.cc:3085
 #: rc_option_editor.cc:3087 rc_option_editor.cc:3095
 msgid "Preferences|Metering"
-msgstr ""
+msgstr "Neurgailuak"
 
 #: rc_option_editor.cc:2946
 msgid "Peak hold time"
-msgstr ""
+msgstr "Gailurraren mantentze-denbora"
 
 #: rc_option_editor.cc:2952
 msgid "short"
-msgstr ""
+msgstr "motza"
 
 #: rc_option_editor.cc:2953
 msgid "medium"
-msgstr ""
+msgstr "erdikoa"
 
 #: rc_option_editor.cc:2954
 msgid "long"
-msgstr ""
+msgstr "luzea"
 
 #: rc_option_editor.cc:2960
 msgid "DPM fall-off"
-msgstr ""
+msgstr "DPM erortze-tasa"
 
 #: rc_option_editor.cc:2966
 msgid "slowest [6.6dB/sec]"
-msgstr ""
+msgstr "mantsoetan [6.6dB/s]"
 
 #: rc_option_editor.cc:2967
 msgid "slow [8.6dB/sec] (BBC PPM, EBU PPM)"
-msgstr ""
+msgstr "mantsoa [8.6dB/s] (BBC PPM, EBU PPM)"
 
 #: rc_option_editor.cc:2968
 msgid "moderate [12.0dB/sec] (DIN)"
-msgstr ""
+msgstr "neurrizkoa [12.0dB/s] (DIN)"
 
 #: rc_option_editor.cc:2969
 msgid "medium [13.3dB/sec] (EBU Digi PPM, IRT Digi PPM)"
-msgstr ""
+msgstr "ertaina [13.3dB/s] (EBU Digi PPM, IRT Digi PPM)"
 
 #: rc_option_editor.cc:2970
 msgid "fast [20dB/sec]"
-msgstr ""
+msgstr "azkarra [20dB/s]"
 
 #: rc_option_editor.cc:2971
 msgid "very fast [32dB/sec]"
-msgstr ""
+msgstr "biziki azkarra [32dB/s]"
 
 #: rc_option_editor.cc:2977
 msgid "Meter line-up level; 0dBu"
-msgstr ""
+msgstr "Neurgailuaren muga maila; 0dBu"
 
 #: rc_option_editor.cc:2982 rc_option_editor.cc:2998
 msgid "-24dBFS (SMPTE US: 4dBu = -20dBFS)"
-msgstr ""
+msgstr "-24dBFS (SMPTE US: 4dBu = -20dBFS)"
 
 #: rc_option_editor.cc:2983 rc_option_editor.cc:2999
 msgid "-20dBFS (SMPTE RP.0155)"
-msgstr ""
+msgstr "-20dBFS (SMPTE RP.0155)"
 
 #: rc_option_editor.cc:2984 rc_option_editor.cc:3000
 msgid "-18dBFS (EBU, BBC)"
-msgstr ""
+msgstr "-18dBFS (EBU, BBC)"
 
 #: rc_option_editor.cc:2985 rc_option_editor.cc:3001
 msgid "-15dBFS (DIN)"
-msgstr ""
+msgstr "-15dBFS (DIN)"
 
 #: rc_option_editor.cc:2987
 msgid ""
 "Configure meter-marks and color-knee point for dBFS scale DPM, set reference "
 "level for IEC1/Nordic, IEC2 PPM and VU meter."
 msgstr ""
+"Konfiguratu neur-markak eta koloretako-belaun puntua dBFS DPM eskalarako, "
+"ezarri erreferentzia-maila IEC1/Nordic, IEC2 PPM eta VU neurgailuentzat."
 
 #: rc_option_editor.cc:2993
 msgid "IEC1/DIN Meter line-up level; 0dBu"
-msgstr ""
+msgstr "IEC1/DIN neurgailuaren muga maila; 0dBu"
 
 #: rc_option_editor.cc:3003
 msgid "Reference level for IEC1/DIN meter."
-msgstr ""
+msgstr "IEC1/DIN neurgailurako erreferentzia-maila."
 
 #: rc_option_editor.cc:3009
 msgid "VU Meter standard"
-msgstr ""
+msgstr "VU neurgailuaren estandarra"
 
 #: rc_option_editor.cc:3014
 msgid "0VU = -2dBu (France)"
-msgstr ""
+msgstr "0VU = -2dBu (Frantzia)"
 
 #: rc_option_editor.cc:3015
 msgid "0VU = 0dBu (North America, Australia)"
-msgstr ""
+msgstr "0VU = 0dBu (Ipar Amerika, Australia)"
 
 #: rc_option_editor.cc:3016
 msgid "0VU = +4dBu (standard)"
-msgstr ""
+msgstr "0VU = +4dBu (estandarra)"
 
 #: rc_option_editor.cc:3017
 msgid "0VU = +8dBu"
-msgstr ""
+msgstr "0VU = +8dBu"
 
 #: rc_option_editor.cc:3022
 msgid "Peak indicator threshold [dBFS]"
-msgstr ""
+msgstr "Gailur-adierazlearen atalasea [dBFS]"
 
 #: rc_option_editor.cc:3030
 msgid ""
 "Specify the audio signal level in dBFS at and above which the meter-peak "
 "indicator will flash red."
 msgstr ""
+"Zehaztu audio-seinalearen maila dBFSn; hortik aurrera, neurgailuaren gailur-"
+"adierazleak gorriz egingo du dir-dir."
 
 #: rc_option_editor.cc:3034
 msgid "Default Meter Types"
-msgstr ""
+msgstr "Lehenetsitako neurgailu motak"
 
 #: rc_option_editor.cc:3035
 msgid ""
@@ -16010,67 +16075,67 @@ msgstr ""
 #: stereo_panner.cc:131
 #, c-format
 msgid "L:%3d R:%3d Width:%d%%"
-msgstr ""
+msgstr "L:%3d R:%3d Zabalera:%d%%"
 
 #: stereo_panner.cc:274
 msgid "Panner|M"
-msgstr ""
+msgstr "M"
 
 #: stereo_panner_editor.cc:36
 msgid "Stereo Panner"
-msgstr ""
+msgstr "Paneagailu estereoa"
 
 #: stereo_panner_editor.cc:50
 msgid "Width"
-msgstr ""
+msgstr "Zabalera"
 
 #: strip_silence_dialog.cc:49
 msgid "Strip Silence"
-msgstr ""
+msgstr "Kendu isiltasunak"
 
 #: strip_silence_dialog.cc:81
 msgid "Threshold"
-msgstr ""
+msgstr "Atalasea"
 
 #: strip_silence_dialog.cc:92
 msgid "Minimum length"
-msgstr ""
+msgstr "Gutxieneko iraupena"
 
 #: strip_silence_dialog.cc:100
 msgid "Fade length"
-msgstr ""
+msgstr "Lausotze-luzera"
 
 #: strip_silence_dialog.cc:127 strip_silence_dialog.cc:317
 msgid "Analyzing"
-msgstr ""
+msgstr "Analizatzen"
 
 #: stripable_colorpicker.cc:110
 msgid "Color Selection: %1"
-msgstr ""
+msgstr "Kolore-hautapena: %1"
 
 #: template_dialog.cc:195
 msgid "Session Templates"
-msgstr ""
+msgstr "Saio-txantiloiak"
 
 #: template_dialog.cc:198
 msgid "Track Templates"
-msgstr ""
+msgstr "Pista-txantiloiak"
 
 #: template_dialog.cc:220
 msgid "Save Description"
-msgstr ""
+msgstr "Gorde deskripzioa"
 
 #: template_dialog.cc:224
 msgid "Export all"
-msgstr ""
+msgstr "Esportatu guztiak"
 
 #: template_dialog.cc:230
 msgid "Template Name"
-msgstr ""
+msgstr "Txantiloiaren izena"
 
 #: template_dialog.cc:315
 msgid "Description not saved"
-msgstr ""
+msgstr "Deskripzioa ez da gorde"
 
 #: template_dialog.cc:317
 msgid ""
@@ -16078,376 +16143,381 @@ msgid ""
 "yet.\n"
 "Do you want to save it?"
 msgstr ""
+"\"%1\" txantiloiaren deskripzioa aldatu da baina oraindik ez da gorde.\n"
+"Gorde nahi duzu?"
 
 #: template_dialog.cc:322
 msgid "Discard"
-msgstr ""
+msgstr "Baztertu"
 
 #: template_dialog.cc:387
 msgid "Template of name \"%1\" already exists"
-msgstr ""
+msgstr "\"%1\" izena duen txantiloia jada badago"
 
 #: template_dialog.cc:429 template_dialog.cc:721 template_dialog.cc:826
 msgid "Could not parse template file \"%1\"."
-msgstr ""
+msgstr "Ezin izan da \"%1\" txantiloi-fitxategia analizatu."
 
 #: template_dialog.cc:486
 msgid "Could not make tmpdir: %1"
-msgstr ""
+msgstr "Ezin izan da tmpdir egin: %1"
 
 #: template_dialog.cc:493
 msgid "Save Exported Template Archive"
-msgstr ""
+msgstr "Gorde esportatutako txantiloi-artxiboa"
 
 #: template_dialog.cc:502 template_dialog.cc:578
 msgid "Template archives"
-msgstr ""
+msgstr "Txantiloi-artxiboak"
 
 #: template_dialog.cc:516
 msgid "File exists"
-msgstr ""
+msgstr "Fitxategia existitzen da"
 
 #: template_dialog.cc:517
 msgid "The file %1 already exists."
-msgstr ""
+msgstr "%1 fitxategia jada existitzen da."
 
 #: template_dialog.cc:520 utils.cc:850
 msgid "Overwrite"
-msgstr ""
+msgstr "Gainidatzi"
 
 #: template_dialog.cc:559
 msgid "Exporting templates"
-msgstr ""
+msgstr "Txantiloiak esportatzen"
 
 #: template_dialog.cc:572
 msgid "Import template archives"
-msgstr ""
+msgstr "Inportatu txantiloi-artxiboak"
 
 #: template_dialog.cc:587
 msgid "Importing templates"
-msgstr ""
+msgstr "Txantiloiak inportatzen"
 
 #: template_dialog.cc:740
 msgid "Could not write to new template file \"%1\"."
-msgstr ""
+msgstr "Ezin izan da \"%1\" txantiloi-fitxategi berrian idatzi."
 
 #: template_dialog.cc:747
 msgid "Could not rename template directory from \"%1\" to \"%2\": %3"
 msgstr ""
+"Ezin izan da \"%1\" txantiloi-direktorioa \"%2\" bezala berrizendatu: %3"
 
 #: template_dialog.cc:840
 msgid "Could not rename state dir \"%1\" to \"%22\": %3"
-msgstr ""
+msgstr "Ezin izan da \"%1\" egoera-direktorioa \"%22\" bezala berrizendatu: %3"
 
 #: template_dialog.cc:849
 msgid "Could not write new template file \"%1\"."
-msgstr ""
+msgstr "Ezin izan da \"%1\" txantiloi-fitxategi berria idatzi."
 
 #: template_dialog.cc:857
 msgid "Could not remove old template file \"%1\": %2"
-msgstr ""
+msgstr "Ezin izan da \"%1\" txantiloi-fitxategi zaharra kendu: %2"
 
 #: template_dialog.cc:874
 msgid "Could not delete template file \"%1\": %2"
-msgstr ""
+msgstr "Ezin izan da \"%1\" txantiloi-fitxategia ezabatu: %2"
 
 #: tempo_dialog.cc:52 tempo_dialog.cc:72
 msgid "End Beats per Minute:"
-msgstr ""
+msgstr "Guztizko pultsuak minutuko:"
 
 #: tempo_dialog.cc:53 tempo_dialog.cc:73
 msgid "bar:"
-msgstr ""
+msgstr "konpasa:"
 
 #: tempo_dialog.cc:54 tempo_dialog.cc:74
 msgid "beat:"
-msgstr ""
+msgstr "pultsua:"
 
 #: tempo_dialog.cc:55 tempo_dialog.cc:75
 msgid "Pulse:"
-msgstr ""
+msgstr "Pultsua:"
 
 #: tempo_dialog.cc:56 tempo_dialog.cc:76
 msgid "Tap tempo"
-msgstr ""
+msgstr "Jo tempoa"
 
 #: tempo_dialog.cc:101 tempo_dialog.cc:119 tempo_dialog.cc:120
 #: tempo_dialog.cc:533 tempo_dialog.cc:534
 msgid "one-hundred-twenty-eighth"
-msgstr ""
+msgstr "garrapatea"
 
 #: tempo_dialog.cc:103 tempo_dialog.cc:104 tempo_dialog.cc:517
 #: tempo_dialog.cc:518
 msgid "whole"
-msgstr ""
+msgstr "biribila"
 
 #: tempo_dialog.cc:105 tempo_dialog.cc:106 tempo_dialog.cc:519
 #: tempo_dialog.cc:520
 msgid "second"
-msgstr ""
+msgstr "zuria"
 
 #: tempo_dialog.cc:107 tempo_dialog.cc:108 tempo_dialog.cc:521
 #: tempo_dialog.cc:522
 msgid "third"
-msgstr ""
+msgstr "beltz t'erdi"
 
 #: tempo_dialog.cc:109 tempo_dialog.cc:110 tempo_dialog.cc:523
 #: tempo_dialog.cc:524
 msgid "quarter"
-msgstr ""
+msgstr "beltza"
 
 #: tempo_dialog.cc:111 tempo_dialog.cc:112 tempo_dialog.cc:525
 #: tempo_dialog.cc:526
 msgid "eighth"
-msgstr ""
+msgstr "kortxea"
 
 #: tempo_dialog.cc:113 tempo_dialog.cc:114 tempo_dialog.cc:527
 #: tempo_dialog.cc:528
 msgid "sixteenth"
-msgstr ""
+msgstr "kortxeaerdia"
 
 #: tempo_dialog.cc:115 tempo_dialog.cc:116 tempo_dialog.cc:529
 #: tempo_dialog.cc:530
 msgid "thirty-second"
-msgstr ""
+msgstr "fusa"
 
 #: tempo_dialog.cc:117 tempo_dialog.cc:118 tempo_dialog.cc:531
 #: tempo_dialog.cc:532
 msgid "sixty-fourth"
-msgstr ""
+msgstr "fusaerdia"
 
 #: tempo_dialog.cc:137 tempo_dialog.cc:138
 msgid "ramped"
-msgstr ""
+msgstr "aldapatsua"
 
 #: tempo_dialog.cc:139 tempo_dialog.cc:140
 msgid "constant"
-msgstr ""
+msgstr "konstantea"
 
 #: tempo_dialog.cc:155 tempo_dialog.cc:156 tempo_dialog.cc:551
 #: tempo_dialog.cc:552
 msgid "music"
-msgstr ""
+msgstr "musika"
 
 #: tempo_dialog.cc:191
 msgid "Start Beats per Minute:"
-msgstr ""
+msgstr "Hasi pultsuak minutuko:"
 
 #: tempo_dialog.cc:200
 msgid "Tempo Type:"
-msgstr ""
+msgstr "Tempo-mota:"
 
 #: tempo_dialog.cc:228
 msgid "Tempo begins at"
-msgstr ""
+msgstr "Tempoa hasten da:"
 
 #: tempo_dialog.cc:234
 msgid "Lock Style:"
-msgstr ""
+msgstr "Blokeo-modua:"
 
 #: tempo_dialog.cc:364
 msgid "incomprehensible pulse note type (%1)"
-msgstr ""
+msgstr "pultsuaren nota-mota ulertezina (%1)"
 
 #: tempo_dialog.cc:377
 msgid "incomprehensible tempo type (%1)"
-msgstr ""
+msgstr "tempo-mota ulertezina (%1)"
 
 #: tempo_dialog.cc:390
 msgid "incomprehensible lock style (%1)"
-msgstr ""
+msgstr "blokeo-modu ulertezina (%1)"
 
 #: tempo_dialog.cc:567
 msgid "Note value:"
-msgstr ""
+msgstr "Nota-balioa:"
 
 #: tempo_dialog.cc:568
 msgid "Lock style:"
-msgstr ""
+msgstr "Blokeo-modua:"
 
 #: tempo_dialog.cc:569
 msgid "Beats per bar:"
-msgstr ""
+msgstr "Pultsuak konpaseko:"
 
 #: tempo_dialog.cc:583
 msgid "Meter begins at bar:"
-msgstr ""
+msgstr "Neurgailua konpas honetan hasten da:"
 
 #: tempo_dialog.cc:707
 msgid "incomprehensible meter note type (%1)"
-msgstr ""
+msgstr "neurgailuaren nota-mota ulertezina (%1)"
 
 #: tempo_dialog.cc:720
 msgid "incomprehensible meter lock style (%1)"
-msgstr ""
+msgstr "neurgailuaren blokeo-modu ulertezina (%1)"
 
 #: time_axis_view.cc:159
 msgid "Track/Bus name (double click to edit)"
-msgstr ""
+msgstr "Pista/Busaren izena (klik bikoitza aldatzeko)"
 
 #: time_axis_view.cc:163
 msgid "This track is inactive. (right-click to activate)"
-msgstr ""
+msgstr "Pista hau ez dago aktiboa. (eskuin-klik aktibatzeko)"
 
 #: time_axis_view_item.cc:334
 msgid "new duration %1 frame is out of bounds for %2"
 msgid_plural "new duration of %1 samples is out of bounds for %2"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%1 markoaren iraupen berria %2-(r)en mugen kanpo dago"
+msgstr[1] "%1 laginen iraupen berria %2-(r)en mugen kanpo dago"
 
 #: time_fx_dialog.cc:63
 msgid "Quick but Ugly"
-msgstr ""
+msgstr "Azkar baina itsusi"
 
 #: time_fx_dialog.cc:64
 msgid "Skip Anti-aliasing"
-msgstr ""
+msgstr "Saltatu antialiasing-a"
 
 #: time_fx_dialog.cc:65
 msgid "Contents"
-msgstr ""
+msgstr "Edukiak"
 
 #: time_fx_dialog.cc:66
 msgid "Minimize time distortion"
-msgstr ""
+msgstr "Txikiagotu denbora-distorsioa"
 
 #: time_fx_dialog.cc:67
 msgid "Preserve Formants"
-msgstr ""
+msgstr "Mantendu formanteak"
 
 #: time_fx_dialog.cc:84
 msgid "TimeFXDialog"
-msgstr ""
+msgstr "DenboraEfkLeihoa"
 
 #: time_fx_dialog.cc:87
 msgid "Pitch Shift Audio"
-msgstr ""
+msgstr "Aldatu audioaren tonua"
 
 #: time_fx_dialog.cc:89
 msgid "Time Stretch Audio"
-msgstr ""
+msgstr "Aldatu tonuaren luzera"
 
 #: time_fx_dialog.cc:104 add_video_dialog.cc:141 video_server_dialog.cc:128
 msgid "<b>Options</b>"
-msgstr ""
+msgstr "<b>Aukerak</b>"
 
 #: time_fx_dialog.cc:117 transpose_dialog.cc:39
 msgid "Octaves:"
-msgstr ""
+msgstr "Zortzidunak:"
 
 #: time_fx_dialog.cc:122 transpose_dialog.cc:44
 msgid "Semitones:"
-msgstr ""
+msgstr "Tonuerdiak:"
 
 #: time_fx_dialog.cc:127
 msgid "Cents:"
-msgstr ""
+msgstr "Ehunekoak:"
 
 #: time_fx_dialog.cc:135
 msgid "Time|Shift"
-msgstr ""
+msgstr "Korritu"
 
 #: time_fx_dialog.cc:187 time_fx_dialog.cc:191
 msgid "TimeFXButton"
-msgstr ""
+msgstr "DenbEfkBotoia"
 
 #: time_fx_dialog.cc:196
 msgid "Stretch/Shrink"
-msgstr ""
+msgstr "Luzatu/Uzkurtu"
 
 #: time_fx_dialog.cc:206
 msgid "<b>Progress</b>"
-msgstr ""
+msgstr "<b>Egoera</b>"
 
 #: time_selection.cc:41
 msgid "programming error: request for non-existent audio range (%1)!"
-msgstr ""
+msgstr "programazio-errorea: ez dagoen audio-barrutiaren eskaera (%1)!"
 
 #: transform_dialog.cc:37
 msgid "this note's"
-msgstr ""
+msgstr "nota honena"
 
 #: transform_dialog.cc:38
 msgid "the previous note's"
-msgstr ""
+msgstr "aurreko notena"
 
 #: transform_dialog.cc:39
 msgid "this note's index"
-msgstr ""
+msgstr "nota honen indizea"
 
 #: transform_dialog.cc:40
 msgid "the number of notes"
-msgstr ""
+msgstr "noten zenbakia"
 
 #: transform_dialog.cc:41
 msgid "exactly"
-msgstr ""
+msgstr "zehazki"
 
 #: transform_dialog.cc:42
 msgid "a random number from"
-msgstr ""
+msgstr "hauetatik ausazko zenbaki bat"
 
 #: transform_dialog.cc:53
 msgid "equal steps from"
-msgstr ""
+msgstr "hauetatik tamaina berdineko tarteak"
 
 #: transform_dialog.cc:56
 msgid "note number"
-msgstr ""
+msgstr "nota-zenbakia"
 
 #: transform_dialog.cc:57
 msgid "velocity"
-msgstr ""
+msgstr "abiadura"
 
 #: transform_dialog.cc:58
 msgid "start time"
-msgstr ""
+msgstr "hasiera denbora"
 
 #: transform_dialog.cc:59
 msgid "length"
-msgstr ""
+msgstr "iraupena"
 
 #: transform_dialog.cc:80 transform_dialog.cc:111
 msgid "Transform"
-msgstr ""
+msgstr "Eraldatu"
 
 #: transform_dialog.cc:89
 msgid "Set "
-msgstr ""
+msgstr "Ezarri "
 
 #: transport_control_ui.cc:70
 msgid "Play from playhead"
-msgstr ""
+msgstr "Erreproduzitu denbora-barratik"
 
 #: transport_control_ui.cc:71
 msgid "Stop playback"
-msgstr ""
+msgstr "Gelditu erreprodukzioa"
 
 #: transport_control_ui.cc:72
 msgid "Toggle record"
-msgstr ""
+msgstr "Gaitu/Desgaitu grabazioa"
 
 #: transport_control_ui.cc:73
 msgid "Play range/selection"
-msgstr ""
+msgstr "Erreproduzitu barrutia/hautapena"
 
 #: transport_control_ui.cc:74
 msgid "Go to start of session"
-msgstr ""
+msgstr "Joan saioaren hasierara"
 
 #: transport_control_ui.cc:75
 msgid "Go to end of session"
-msgstr ""
+msgstr "Joan saioaren amaierara"
 
 #: transport_control_ui.cc:76
 msgid "Play loop range"
-msgstr ""
+msgstr "Erreproduzitu loop barrutia"
 
 #: transport_control_ui.cc:77
 msgid ""
 "MIDI Panic\n"
 "Send note off and reset controller messages on all MIDI channels"
 msgstr ""
+"MIDI ikara\n"
+"Bidali oharra eta berrezarri kontrolatzaile-mezuak MIDI kanal guztietan"
 
 #: transport_control_ui.cc:203
 msgid ""
@@ -16457,14 +16527,19 @@ msgid ""
 "Mouse-wheel to modify level\n"
 "Signal Level: %1 dBFS"
 msgstr ""
+"Gaitu/Desgaitu metronomoa\n"
+"\n"
+"Eskuin-klik hobespenetara joateko\n"
+"Gurpil-korritzea maila aldatzeko\n"
+"Seinale-maila: %1 dBFS"
 
 #: transport_masters_dialog.cc:51
 msgid "Add a new Transport Master"
-msgstr ""
+msgstr "Gehitu garraio-master berria"
 
 #: transport_masters_dialog.cc:52
 msgid "Keeping rolling if sync is lost"
-msgstr ""
+msgstr "Jarraitu martxan sinkronizazioa galtzen bada"
 
 #: transport_masters_dialog.cc:68
 msgid ""
@@ -16472,34 +16547,40 @@ msgid ""
 "keep rolling at its current speed.\n"
 "<b>When disabled</b>, loss of transport master sync causes %1 to stop"
 msgstr ""
+"<b>Gaituta dagoenean</b>, garraio-masterraren seinalea galtzen bada, %1-(e)k "
+"martxan jarraituko du uneko abiaduran.\n"
+"<b>Desgaituta dagoenean</b>, garraio-masterraren sinkronizazioaren galerak "
+"%1geldiaraziko du"
 
 #: transport_masters_dialog.cc:77
 msgid "Current"
-msgstr ""
+msgstr "Unekoa"
 
 #: transport_masters_dialog.cc:79
 msgid "Age"
-msgstr ""
+msgstr "Adina"
 
 #: transport_masters_dialog.cc:80
 msgid "Delta"
-msgstr ""
+msgstr "Delta"
 
 #: transport_masters_dialog.cc:81
 msgid "Collect"
-msgstr ""
+msgstr "Bildu"
 
 #: transport_masters_dialog.cc:83
 msgid ""
 "Active\n"
 "Commands"
 msgstr ""
+"Komando\n"
+"aktiboak"
 
 #: transport_masters_dialog.cc:84
 msgid ""
 "Clock\n"
 "Synced"
-msgstr ""
+msgstr "Erlojua sinkronizatuta"
 
 #: #: transport_masters_dialog.cc:85
 msgid ""
@@ -16515,6 +16596,10 @@ msgid ""
 "the GUI or control surfaces when this transport master is in use. The "
 "default is not to allow any such commands when the master is in use."
 msgstr ""
+"Garraioarekin lotutako zenbait komando GUItik edo kontrol-gainazaletatik "
+"bidal daitezkeen kontrolatzen du, garraio-masterra erabiltzen ari denean. "
+"Lehenetsitako balioa: komando horiek ez onartzea masterra erabiltzen ari "
+"denean."
 
 #: transport_masters_dialog.cc:92
 msgid ""
@@ -16528,12 +16613,24 @@ msgid ""
 "vendors use that rate - despite it being against the specs - because the "
 "variant of using exactly 29.97 fps has zero timecode drift.\n"
 msgstr ""
+"<b>Gaituta badago</b>, kanpoko denbora-kodeak 29,97 fps erabiliko ditu "
+"30000/1001 ordez.\n"
+"SMPTE 12M-1999-ek 29,97df 30000/1001 bezala zehazten du. Are gehiago, "
+"zehaztapenek argitzen dute jaurtitako-lagin denbora-kodeak -86ms-ko errore "
+"pilatu bat duela 24 orduko tarte batean.\n"
+"Jaurtitako-lagin denbora-kodeak zehatz-mehatz NTSC 30 * 0,9990 (adb. "
+"29.970000) balioko kolore lagin-tasa konpentsatuko luke. Hori ez da benetako "
+"tasa. Edonola ere, marka batzuek tasa hori darabilte - nahiz eta "
+"zehaztapenekin talka egin -, alternatibak, zehazki 29,97 fps erabiltzeak, ez "
+"duelako denbora-kode mugimendurik.\n"
 
 #: transport_masters_dialog.cc:99
 msgid ""
 "How long since the last full timestamp was received from this transport "
 "master"
 msgstr ""
+"Zenbat denbora igaro da azken denbora-zigilu osoa garraio-master honetatik "
+"jaso zenetik"
 
 #: transport_masters_dialog.cc:101
 msgid ""
@@ -16632,7 +16729,9 @@ msgstr "interfazearen “%1” konfigurazio-fitxategia ez da ondo kargatu."
 
 #: ui_config.cc:450
 msgid "could not find any ui configuration file, canvas will look broken."
-msgstr "ezin izan da interfazearen konfigurazio-fitxategirik aurkitu, "
+msgstr ""
+"ezin izan da interfazearen konfigurazio-fitxategirik aurkitu, oihala "
+"hautsita sumatuko da."
 
 #: ui_config.cc:471
 msgid "Config file %1 not saved"
