@@ -101,7 +101,7 @@ int Alsa_pcmi::pcm_start (void)
 	if (_play_handle)
 	{
 		n = snd_pcm_avail_update (_play_handle);
-		if (n != _fsize * _play_nfrag)
+		if (n < _fsize * _play_nfrag)
 		{
 			if (_debug & DEBUG_STAT) fprintf  (stderr, "Alsa_pcmi: full buffer not available at start.\n");
 			return -1;
