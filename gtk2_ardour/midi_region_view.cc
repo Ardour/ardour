@@ -418,7 +418,7 @@ MidiRegionView::enter_notify (GdkEventCrossing* ev)
 bool
 MidiRegionView::leave_notify (GdkEventCrossing*)
 {
-	leave_internal();
+	leave_internal ();
 
 	_entered = false;
 	return false;
@@ -430,26 +430,39 @@ MidiRegionView::mouse_mode_changed ()
 	// Adjust frame colour (become more transparent for internal tools)
 	set_frame_color();
 
-	if (_entered) {
-		if (!trackview.editor().internal_editing()) {
-			/* Switched out of internal editing mode while entered.
-			Only necessary for leave as a mouse_mode_change over a region
-			automatically triggers an enter event. */
-			leave_internal();
-		}
-		else if (trackview.editor().current_mouse_mode() == MouseContent) {
-			// hide cursor and ghost note after changing to internal edit mode
-			remove_ghost_note ();
+	if (!trackview.editor().internal_editing()) {
 
-			/* XXX This is problematic as the function is executed for every region
-			and only for one region _entered_note can be true. Still it's
-			necessary as to hide the verbose cursor when we're changing from
-			draw mode to internal edit mode. These lines are the reason why
-			in some situations no verbose cursor is shown when we enter internal
-			edit mode over a note. */
-			if (!_entered_note) {
-				hide_verbose_cursor ();
-			}
+		/* Switched out of internal editing mode while entered.
+		   Only necessary for leave as a mouse_mode_change over a region
+		   automatically triggers an enter event.
+		*/
+
+		leave_internal ();
+
+		for (Events::iterator it = _events.begin(); it != _events.end(); ++it) {
+			it->second->set_hide_selection (true);
+		}
+
+	} else if (trackview.editor().current_mouse_mode() == MouseContent) {
+
+		// hide cursor and ghost note after changing to internal edit mode
+
+		remove_ghost_note ();
+
+		/* XXX This is problematic as the function is executed for every region
+		   and only for one region _entered_note can be true. Still it's
+		   necessary as to hide the verbose cursor when we're changing from
+		   draw mode to internal edit mode. These lines are the reason why
+		   in some situations no verbose cursor is shown when we enter internal
+		   edit mode over a note.
+		*/
+
+		if (!_entered_note) {
+			hide_verbose_cursor ();
+		}
+
+		for (Events::iterator it = _events.begin(); it != _events.end(); ++it) {
+			it->second->set_hide_selection (false);
 		}
 	}
 }
@@ -469,19 +482,11 @@ MidiRegionView::enter_internal (uint32_t state)
 	if (frame_handle_end) {
 		frame_handle_end->lower_to_bottom();
 	}
-
-	for (Events::iterator it = _events.begin(); it != _events.end(); ++it) {
-		it->second->set_hide_selection (false);
-	}
 }
 
 void
 MidiRegionView::leave_internal()
 {
-	for (Events::iterator it = _events.begin(); it != _events.end(); ++it) {
-		it->second->set_hide_selection (true);
-	}
-
 	hide_verbose_cursor ();
 	remove_ghost_note ();
 	_entered_note = 0;
