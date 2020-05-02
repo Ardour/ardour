@@ -2440,14 +2440,14 @@ MidiRegionView::remove_from_selection (NoteBase* ev)
 void
 MidiRegionView::add_to_selection (NoteBase* ev)
 {
-	const bool selection_was_empty = _selection.empty();
+	Selection::iterator n = _selection.find (ev);
 
-	if (_selection.insert (ev).second) {
-		ev->set_selected (true);
-		start_playing_midi_note ((ev)->note());
+	if (n != _selection.end()) {
+		/* already selected */
+		return;
 	}
 
-	if (selection_was_empty) {
+	if (_selection.empty()) {
 
 		/* first note selected in this region, force Editor region
 		 * selection to this region.
@@ -2455,6 +2455,10 @@ MidiRegionView::add_to_selection (NoteBase* ev)
 
 		trackview.editor().set_selected_midi_region_view (*this);
 	}
+
+	_selection.insert (n, ev);
+	ev->set_selected (true);
+	start_playing_midi_note ((ev)->note());
 }
 
 Temporal::Beats
