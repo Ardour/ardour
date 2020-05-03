@@ -313,8 +313,11 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	to_be_inserted_vbox->pack_start (*add_remove, false, false);
 	to_be_inserted_vbox->set_size_request (200, -1);
 
+	int min_height = std::max (600.f, rintf(600.f * UIConfiguration::instance().get_ui_scale()));
+
 	Gtk::Table* table = manage(new Gtk::Table(3, 3));
-	table->set_size_request(-1, 600);
+	table->set_size_request(-1, min_height);
+
 	table->attach (scroller,               0, 3, 0, 5); /* this is the main plugin list */
 	table->attach (*search_frame,          0, 1, 6, 7, FILL, FILL, 5, 5);
 	table->attach (*tag_frame,             0, 1, 7, 8, FILL, FILL, 5, 5);
