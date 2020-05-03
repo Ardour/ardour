@@ -481,7 +481,6 @@ MidiTimeAxisView::model_changed (const std::string& m)
 		set_gui_property (X_("midnam-model-name"), model);
 	} else {
 		remove_gui_property (X_("midnam-model-name"));
-		model = "";
 	}
 
 	/* set new mode */
@@ -490,7 +489,9 @@ MidiTimeAxisView::model_changed (const std::string& m)
 	if (find (device_modes.begin(), device_modes.end(), current_mode) == device_modes.end()) {
 		if (device_modes.size() > 0) {
 			mode = device_modes.front();
-			custom_device_mode_changed (device_modes.front());
+			if (save_model) {
+				custom_device_mode_changed (device_modes.front());
+			}
 		} else {
 			mode = "";
 		}
@@ -542,6 +543,11 @@ MidiTimeAxisView::custom_device_mode_changed(const std::string& mode)
 	const std::string model = gui_property (X_("midnam-model-name"));
 	set_gui_property (X_("midnam-custom-device-mode"), mode);
 	_midnam_custom_device_mode_selector.set_text (mode);
+	if (model.empty () && !mode.empty ()) {
+		/* model.empty () && model.empty () -> plugin provided
+		 * otherwise at least a model must be set. */
+		return;
+	}
 	/* inform the backend, route owned instrument info */
 	_route->instrument_info().set_external_instrument (model, mode);
 }
