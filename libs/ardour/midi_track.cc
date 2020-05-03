@@ -497,6 +497,12 @@ MidiTrack::export_stuff (BufferSet&                   buffers,
 	mpl->reset_note_trackers (); // TODO once at start and end ?
 
 	buffers.get_midi(0).clear();
+
+
+	/* Can't use a note tracker here, because the note off's might be in a
+	 * subsequent call
+	 */
+
 	MidiStateTracker ignored;
 
 	/* XXX thsi doesn't fail, other than if the lock cannot be obtained */
