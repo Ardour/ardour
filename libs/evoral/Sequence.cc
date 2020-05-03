@@ -669,7 +669,7 @@ Sequence<Time>::end_write (StuckNoteOption option, Time when)
 			case Relax:
 				break;
 			case DeleteStuckNotes:
-				cerr << "WARNING: Stuck note lost: " << (*n)->note() << endl;
+				cerr << "WARNING: Stuck note lost (end was " << when << "): " << (**n) << endl;
 				_notes.erase(n);
 				break;
 			case ResolveStuckNotes:
