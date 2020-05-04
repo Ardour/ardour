@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-02 13:17+0200\n"
-"PO-Revision-Date: 2020-04-30 16:27+0200\n"
+"PO-Revision-Date: 2020-05-02 18:26+0200\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1728,45 +1728,45 @@ msgstr "%1-(r)entzat paneatutako XML datuak - alde batera utzi da"
 
 #: panner_manager.cc:100
 msgid "looking for panners in %1\n"
-msgstr "panegailuak %1-(e)n bilatzen\n"
+msgstr "paneagailuak %1-(e)n bilatzen\n"
 
 #: panner_manager.cc:126
 msgid "Panner discovered: \"%1\" in %2\n"
-msgstr "Panegailua aurkitu da: “%1” %2-(e)n\n"
+msgstr "Paneagailua aurkitu da: “%1” %2-(e)n\n"
 
 #: panner_manager.cc:145
 msgid "PannerManager: cannot load module \"%1\" (%2)"
-msgstr "PanegailuKudeatzailea: ezin da “%1” modulua kargatu (%2)"
+msgstr "PaneagailuKudeatzailea: ezin da “%1” modulua kargatu (%2)"
 
 #: panner_manager.cc:152
 msgid "PannerManager: module \"%1\" has no descriptor function."
-msgstr "PanegailuKudeatzailea: “%1” moduluak deskriptore funtziorik ez du."
+msgstr "PaneagailuKudeatzailea: “%1” moduluak deskriptore funtziorik ez du."
 
 #: panner_manager.cc:253
 msgid "no panner discovered for in/out = %1/%2"
-msgstr "panegailurik ez da aurkitu sarrerarako/irteerarako = %1/%2"
+msgstr "paneagailurik ez da aurkitu sarrerarako/irteerarako = %1/%2"
 
 #: panner_shell.cc:127
 msgid ""
 "No panner found: check that panners are being discovered correctly during "
 "startup."
 msgstr ""
-"Panegailurik ez da aurkitu: egiaztatu abiaraztean panelak zuzen deskubritzen "
-"ari direla."
+"Paneagailurik ez da aurkitu: egiaztatu abiaraztean panelak zuzen "
+"deskubritzen ari direla."
 
 #: panner_shell.cc:134
 msgid "select panner: %1\n"
-msgstr "hautatu panegailua: %1\n"
+msgstr "hautatu paneagailua: %1\n"
 
 #: panner_shell.cc:260
 msgid "Unknown panner plugin \"%1\" found in pan state - ignored"
 msgstr ""
-"“%1” panegailuaren plugin ezezaguna aurkitu da pan-egoeran - alde batera "
+"“%1” paneagailuaren plugin ezezaguna aurkitu da pan-egoeran - alde batera "
 "utzi da"
 
 #: panner_shell.cc:266
 msgid "panner plugin node has no type information!"
-msgstr "panegailuaren plugin nodoak ez dauka informazio motarik!"
+msgstr "paneagailuaren plugin nodoak ez dauka informazio motarik!"
 
 #: parameter_descriptor.cc:119
 msgid "Normal"
@@ -2360,7 +2360,7 @@ msgstr "Nodo okerra hona bidali da: Route::set_state() [%1]"
 
 #: route.cc:2664
 msgid "Pannable state found for route (%1) without a panner!"
-msgstr "Egoera paneagarria aurkitu da panegailu gabeko bidearentzat (%1)!"
+msgstr "Egoera paneagarria aurkitu da paneagailu gabeko bidearentzat (%1)!"
 
 #: route.cc:3663
 msgid "Invalid Solo-Isolate propagation: from:%1 new:%2 - old:%3 = delta:%4"
