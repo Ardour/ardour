@@ -311,9 +311,11 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	VBox* to_be_inserted_vbox = manage (new VBox);
 	to_be_inserted_vbox->pack_start (ascroller);
 	to_be_inserted_vbox->pack_start (*add_remove, false, false);
-	to_be_inserted_vbox->set_size_request (200, -1);
 
+	int min_width  = std::max (200.f, rintf(200.f * UIConfiguration::instance().get_ui_scale()));
 	int min_height = std::max (600.f, rintf(600.f * UIConfiguration::instance().get_ui_scale()));
+
+	to_be_inserted_vbox->set_size_request (min_width, -1);
 
 	Gtk::Table* table = manage(new Gtk::Table(3, 3));
 	table->set_size_request(-1, min_height);
