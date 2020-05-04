@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-02 13:17+0200\n"
-"PO-Revision-Date: 2020-05-02 12:30+0200\n"
+"PO-Revision-Date: 2020-05-04 14:31+0200\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -3799,7 +3799,7 @@ msgstr "Eremuaren bolumen-analisia"
 
 #: editor.cc:1764 editor.cc:1813
 msgid "Audio Report/Analysis"
-msgstr "Audio txostena/analisia"
+msgstr "Audioaren txostena/analisia"
 
 #: editor.cc:1794
 msgid "Range Loudness Analysis"
@@ -5044,7 +5044,7 @@ msgstr "Itsaskorra"
 
 #: editor_actions.cc:562
 msgid "Snap"
-msgstr "Doitzea"
+msgstr "Doitu"
 
 #: editor_actions.cc:566
 msgid "Toggle Snap"
@@ -6933,7 +6933,7 @@ msgstr "Iturburuaren izena, kanal kopurua [] artean"
 
 #: editor_sources.cc:143
 msgid "Take ID"
-msgstr "Hartu IDa"
+msgstr "Hartze IDa"
 
 #: editor_sources.cc:144
 msgid "Orig Pos"
@@ -10412,7 +10412,7 @@ msgstr ""
 "ekoitz ditzakezu, bideo-soinu-bandak nahasi edo musikari eta soinuari "
 "buruzko ideia berriekin esperimentatu.\n"
 "\n"
-"Gauza batzuk konfiguratu egin behar dira programa erabiltzen hasi aurretik.</"
+"Gauza batzuk konfiguratu behar dira programa erabiltzen hasi aurretik.</"
 "span> "
 
 #: new_user_wizard.cc:155
@@ -11893,11 +11893,11 @@ msgstr "Mugatu desegin-historia hona:"
 
 #: rc_option_editor.cc:266
 msgid "Save undo history of"
-msgstr "Gorde honen desegin-historia:"
+msgstr "Gorde hauen desegin-historia:"
 
 #: rc_option_editor.cc:336 rc_option_editor.cc:344
 msgid "commands"
-msgstr "komandoak"
+msgstr "komando"
 
 #: rc_option_editor.cc:424
 msgid ""
@@ -12260,7 +12260,7 @@ msgstr "PUZ DSP erabilera"
 
 #: rc_option_editor.cc:2124
 msgid "Signal processing uses"
-msgstr "Seinale-prozesamenduak erabiltzen ditu:"
+msgstr "Seinale-prozesamenduak erabiltzen ditu"
 
 #: rc_option_editor.cc:2129
 msgid "all but one processor"
@@ -12370,7 +12370,7 @@ msgstr "Orokorra/Saioa"
 
 #: rc_option_editor.cc:2232
 msgid "Options|Undo"
-msgstr "Desegin"
+msgstr "Desegin-ekintza"
 
 #: rc_option_editor.cc:2239
 msgid "Verify removal of last capture"
@@ -12657,7 +12657,7 @@ msgstr "Eremu-amaierak"
 
 #: rc_option_editor.cc:2573 rc_option_editor.cc:2574 rc_option_editor.cc:2575
 msgid "Editor/Modifiers"
-msgstr "Editoreak/Moldatzaileak"
+msgstr "Editorea/Moldatzaileak"
 
 #: rc_option_editor.cc:2573
 msgid "Keyboard Modifiers"
@@ -13062,34 +13062,36 @@ msgid ""
 "These settings apply to newly created tracks and busses. For the Master bus, "
 "this will be when a new session is created."
 msgstr ""
+"Ezarpen hauek pista eta bus sortu berriei aplikatzen zaizkie. Master "
+"busarentzat, saio berri bat sortzen denean egingo da."
 
 #: rc_option_editor.cc:3041
 msgid "Default Meter Type for Master Bus"
-msgstr ""
+msgstr "Master busarentzat lehenetsitako neurgailu mota"
 
 #: rc_option_editor.cc:3059
 msgid "Default meter type for busses"
-msgstr ""
+msgstr "Busentzat lehenetsitako neurgailu mota"
 
 #: rc_option_editor.cc:3076
 msgid "Default meter type for tracks"
-msgstr ""
+msgstr "Pistentzat lehenetsitako neurgailu mota"
 
 #: rc_option_editor.cc:3085
 msgid "Post Export Analysis"
-msgstr ""
+msgstr "Esportatu ondorengo analisia"
 
 #: rc_option_editor.cc:3090
 msgid "Save loudness analysis as image file after export"
-msgstr ""
+msgstr "Gorde bolumen-analisia irudi gisa esportatu ostean"
 
 #: rc_option_editor.cc:3098
 msgid "Save Mixer screenshot after export"
-msgstr ""
+msgstr "Gorde Nahasgailuaren argazkia esportatu ostean"
 
 #: rc_option_editor.cc:3109
 msgid "Stop at the end of the session"
-msgstr ""
+msgstr "Gelditu saioaren amaieran"
 
 #: rc_option_editor.cc:3114
 msgid ""
@@ -13099,10 +13101,15 @@ msgid ""
 "<b>When disabled</b> %1 will continue to roll past the session end marker at "
 "all times"
 msgstr ""
+"<b>Gaituta badago</b> eta %1 <b>grabatzen ez</b> badago, garraioa geldituko "
+"du saio honen amaiera-markara iristean\n"
+"\n"
+"<b>Desgaituta badagi</b> %1(e)k ez du inoiz garraioa geldituko, amaiera-"
+"markara iristen bada ere"
 
 #: rc_option_editor.cc:3122
 msgid "Keep record-enable engaged on stop"
-msgstr ""
+msgstr "Mantendu grabatzeko-gaituta gelditzean"
 
 #: rc_option_editor.cc:3128
 msgid ""
@@ -13111,20 +13118,26 @@ msgid ""
 "<b>When disabled</b> master record will be disabled when the transport "
 "transitions to stop."
 msgstr ""
+"<b>Gaituta badago</b>, grabatze-orokorra gaituta mantenduko garraioa "
+"gelditzean.\n"
+"<b>Desgaituta badago</b>, grabatze-orokorra desgaitu egingo da garraioa "
+"gelditzean."
 
 #: rc_option_editor.cc:3132
 msgid "Disable per-track record disarm while rolling"
-msgstr ""
+msgstr "Desgaitu pistakako grabazio-desgaitzea garraiatu bitartean"
 
 #: rc_option_editor.cc:3136
 msgid ""
 "<b>When enabled</b> this will prevent you from accidentally stopping "
 "specific tracks recording during a take."
 msgstr ""
+"<b>Gaituta badago</b>, pista espezifikoen grabazioa ustekabean gelditzea "
+"saihestuko dizu."
 
 #: rc_option_editor.cc:3141
 msgid "12dB gain reduction during fast-forward and fast-rewind"
-msgstr ""
+msgstr "12dBko irabazi-murriztea aurrerapen azkarrean eta birbobinatzean"
 
 #: rc_option_editor.cc:3146
 msgid ""
@@ -13132,10 +13145,12 @@ msgid ""
 "volume that occurs when fast-forwarding or rewinding through some kinds of "
 "audio"
 msgstr ""
+"<b>Gaituta badago</b>, audio mota batzuk azkar jotzean gertatzen den bolumen-"
+"handitzea txikituko dizu."
 
 #: rc_option_editor.cc:3152
 msgid "Preroll"
-msgstr ""
+msgstr "Prerolla"
 
 #: rc_option_editor.cc:3157
 msgid ""
@@ -13145,50 +13160,52 @@ msgid ""
 "If <b>Follow Edits</b> is enabled, the preroll is applied to the playhead "
 "position when a region is selected or trimmed."
 msgstr ""
+"<b>Erreproduzitu Prerollarekin</b> edo <b>Grabatu Prerollarekin</b> hastean "
+"egongo den aurrejotze denbora."
 
 #: rc_option_editor.cc:3159
 msgid "4 Bars"
-msgstr ""
+msgstr "4 konpas"
 
 #: rc_option_editor.cc:3160
 msgid "2 Bars"
-msgstr ""
+msgstr "2 konpas"
 
 #: rc_option_editor.cc:3161
 msgid "1 Bar"
-msgstr ""
+msgstr "Konpas bakarra"
 
 #: rc_option_editor.cc:3162
 msgid "0 (no pre-roll)"
-msgstr ""
+msgstr "0 (prerollik ez)"
 
 #: rc_option_editor.cc:3163
 msgid "0.1 second"
-msgstr ""
+msgstr "0,1 segundo"
 
 #: rc_option_editor.cc:3164
 msgid "0.25 second"
-msgstr ""
+msgstr "0,25 segundo"
 
 #: rc_option_editor.cc:3165
 msgid "0.5 second"
-msgstr ""
+msgstr "0,5 segundo"
 
 #: rc_option_editor.cc:3166
 msgid "1.0 second"
-msgstr ""
+msgstr "segundo 1"
 
 #: rc_option_editor.cc:3167
 msgid "2.0 seconds"
-msgstr ""
+msgstr "2 segundo"
 
 #: rc_option_editor.cc:3171
 msgid "Looping"
-msgstr ""
+msgstr "Loopa"
 
 #: rc_option_editor.cc:3175
 msgid "Play loop is a transport mode"
-msgstr ""
+msgstr "Erreproduzitu loopa garraio modu bat da"
 
 #: rc_option_editor.cc:3180
 msgid ""
@@ -13198,52 +13215,59 @@ msgid ""
 "<b>When disabled</b> the loop button starts playing the loop, but stop then "
 "cancels loop playback"
 msgstr ""
+"<b>Gaituta badago</b>, loop-botoiak ez du erreprodukzioa hasten baina "
+"erreprodukzioak beti loopa jo dezan behartzen du\n"
+"\n"
+"<b>Desgaituta badago</b>, loop-botoiak loop-barrutia erreproduzitzen du, "
+"baina gelditzean, erreprodukzioa gelditzen da."
 
 #: rc_option_editor.cc:3189
 msgid "Loop Fades"
-msgstr ""
+msgstr "Loop lausotzeak"
 
 #: rc_option_editor.cc:3193
 msgid "No fades at loop boundaries"
-msgstr ""
+msgstr "Lausotzerik ez loopen ertzetan"
 
 #: rc_option_editor.cc:3194
 msgid "Fade out at loop end"
-msgstr ""
+msgstr "Irteera-lausotzea loop-amaieran"
 
 #: rc_option_editor.cc:3195
 msgid "Fade in at loop start & Fade out at loop end"
-msgstr ""
+msgstr "Lausotzeak loop-hasiera eta -amaieretan"
 
 #: rc_option_editor.cc:3196
 msgid "Cross-fade loop end and start"
-msgstr ""
+msgstr "Gurutze-lausotzea loop-amaiera eta -hasieretan"
 
 #: rc_option_editor.cc:3198
 msgid "Options for fades/crossfades at loop boundaries"
-msgstr ""
+msgstr "Loopen ertzetako lausotzeen/gurutze-lausotzeen aukerak"
 
 #: rc_option_editor.cc:3200
 msgid "Dropout (xrun) Handling"
-msgstr ""
+msgstr "Uzteen (xrun) kontrolak"
 
 #: rc_option_editor.cc:3203
 msgid "Stop recording when an xrun occurs"
-msgstr ""
+msgstr "Gelditu grabatzeaz xrun bat gertatzean"
 
 #: rc_option_editor.cc:3208
 msgid ""
 "<b>When enabled</b> %1 will stop recording if an over- or underrun is "
 "detected by the audio engine"
 msgstr ""
+"<b>Gaituta badago</b>, %1(e)k grabatzeari utziko dio audio-motorrak erritmo "
+"aldaketa bat nabaritzen badu"
 
 #: rc_option_editor.cc:3214
 msgid "Create markers where xruns occur"
-msgstr ""
+msgstr "Sortu markak xrunak gertatzen diren tokian"
 
 #: rc_option_editor.cc:3227
 msgid "Match session video frame rate to external timecode"
-msgstr ""
+msgstr "Lotu saioko bideoaren marko-abiadura kanpoko denbora-kodeari"
 
 #: rc_option_editor.cc:3233
 msgid ""
@@ -13258,108 +13282,127 @@ msgid ""
 "indication in the main clock will flash red and %1 will convert between the "
 "external timecode standard and the session standard."
 msgstr ""
+"Aukera honek kanpoko denbora-kode iturri bat <i>bilatu bitartean</i> marko-"
+"abiaduraren balioa kontrolatzen du .\n"
+"\n"
+"<b>Gaituta badago</b>, saioko marko-abiadura aldatu egingo da, hautatutako "
+"kanpoko denbora-kode iturriarekin bat etor dadin.\n"
+"\n"
+"<b>Desgaituta badago</b>, saioko marko-abiadura ez da aldatuko hautatutako "
+"kanpoko denbora-kode iturriarekin bat etortzeko. Horren ordez, erloju "
+"nagusiko fotogramen abiadura-adierazleak gorri egingo du dir-dir, eta %1 "
+"kanpoko denbora-kode estandarraren eta saio-estandarraren artean bihurtuko "
+"da."
 
 #: rc_option_editor.cc:3241 rc_option_editor.cc:3243 rc_option_editor.cc:3260
 #: rc_option_editor.cc:3272
 msgid "Transport/LTC"
-msgstr ""
+msgstr "LTC"
 
 #: rc_option_editor.cc:3241
 msgid "Linear Timecode (LTC) Generator"
-msgstr ""
+msgstr "Denbora-kode lineal (LTC) sorgailua"
 
 #: rc_option_editor.cc:3246
 msgid "Enable LTC generator"
-msgstr ""
+msgstr "Gaitu LTC sorgailua"
 
 #: rc_option_editor.cc:3253
 msgid "Send LTC while stopped"
-msgstr ""
+msgstr "Bidali LTC gelditu bitartean"
 
 #: rc_option_editor.cc:3259
 msgid ""
 "<b>When enabled</b> %1 will continue to send LTC information even when the "
 "transport (playhead) is not moving"
 msgstr ""
+"<b>Gaituta badago</b>, %1(e)k LTC informazioa bidaltzen jarraituko du "
+"garraioa (denbora-barra) mugitzen ari ez bada ere"
 
 #: rc_option_editor.cc:3262
 msgid "LTC generator level [dBFS]"
-msgstr ""
+msgstr "LTC sorgailu maila [dBFS]"
 
 #: rc_option_editor.cc:3270
 msgid ""
 "Specify the Peak Volume of the generated LTC signal in dBFS. A good value "
 "is  0dBu ^= -18dBFS in an EBU calibrated system"
 msgstr ""
+"Zehaztu sortutako LTC seinalearen gailur-bolumena dBFStan. Balio onargarri "
+"bat 0dBu^= -18dBFS da, EBU kalibrazio sistema batean"
 
 #: rc_option_editor.cc:3274 rc_option_editor.cc:3276 rc_option_editor.cc:3284
 #: rc_option_editor.cc:3286 rc_option_editor.cc:3294 rc_option_editor.cc:3303
 #: rc_option_editor.cc:3305 rc_option_editor.cc:3313 rc_option_editor.cc:3321
 #: rc_option_editor.cc:3330
 msgid "Transport/MIDI"
-msgstr ""
+msgstr "MIDI"
 
 #: rc_option_editor.cc:3274
 msgid "MIDI Beat Clock (Mclk) Generator"
-msgstr ""
+msgstr "MIDI pultsu-erloju (Mclk) sorgailua"
 
 #: rc_option_editor.cc:3279
 msgid "Enable Mclk generator"
-msgstr ""
+msgstr "Gaitu Mclk sorgailua"
 
 #: rc_option_editor.cc:3284
 msgid "MIDI Time Code (MTC) Generator"
-msgstr ""
+msgstr "MIDI denbora-kode (MTC) sorgailua"
 
 #: rc_option_editor.cc:3289
 msgid "Enable MTC Generator"
-msgstr ""
+msgstr "Gaitu MTC sorgailua"
 
 #: rc_option_editor.cc:3297
 msgid "Percentage either side of normal transport speed to transmit MTC"
 msgstr ""
+"MTC helarazteko garraio normalaren abiaduraren alde bakoitzeko portzentaia"
 
 #: rc_option_editor.cc:3303
 msgid "MIDI Machine Control (MMC)"
-msgstr ""
+msgstr "MIDI kontrol gailua (MMC)"
 
 #: rc_option_editor.cc:3308
 msgid "Respond to MMC commands"
-msgstr ""
+msgstr "Erantzun MMC komandoei"
 
 #: rc_option_editor.cc:3316
 msgid "Send MMC commands"
-msgstr ""
+msgstr "Bidali MMC komandoak"
 
 #: rc_option_editor.cc:3324
 msgid "Inbound MMC device ID"
-msgstr ""
+msgstr "MMC-sarrera gailuarean IDa"
 
 #: rc_option_editor.cc:3333
 msgid "Outbound MMC device ID"
-msgstr ""
+msgstr "MMC-irteera gailuaren IDa"
 
 #: rc_option_editor.cc:3349
 msgid "Scan/Discover"
-msgstr ""
+msgstr "Bilatu"
 
 #: rc_option_editor.cc:3351 rc_option_editor.cc:3411 rc_option_editor.cc:3493
 msgid "Scan for Plugins"
-msgstr ""
+msgstr "Bilatu pluginak"
 
 #: rc_option_editor.cc:3361
 msgid "Always Display Plugin Scan Progress"
-msgstr ""
+msgstr "Beti erakutsi plugin-bilaketaren aurrerapenak"
 
 #: rc_option_editor.cc:3367
 msgid ""
 "<b>When enabled</b> a popup window showing plugin scan progress is displayed "
 "for indexing (cache load) and discovery (detect new plugins)"
 msgstr ""
+"<b>Gaituta badago</b>, plugin-bilaketaren leihotxo bat agertuko da, "
+"indexatzea (cache karga) eta aurkikuntzak (aurkitutako plugin berriak) "
+"erakutsiko dituena."
 
 #: rc_option_editor.cc:3372
 msgid "Silence plugins when the transport is stopped"
-msgstr ""
+msgstr "Isilarazi pluginak garraioa gelditzean"
 
 #: rc_option_editor.cc:3378
 msgid ""
@@ -13368,10 +13411,14 @@ msgid ""
 "\n"
 "This mostly affects plugins with a \"tail\" like Reverbs."
 msgstr ""
+"<b>Gaituta badago</b>, pluginak berrabiarazi egingo dira garraioa "
+"gelditzean. Desgaitutako pluginek aldiz, ez dute aldaketarik jasango.\n"
+"\n"
+"Honek Reverbak bezelako \"isatsdun\" pluginei eragiten die gehienbat."
 
 #: rc_option_editor.cc:3382
 msgid "Make new plugins active"
-msgstr ""
+msgstr "Plugin berriak aktibo"
 
 #: rc_option_editor.cc:3388
 msgid ""
@@ -13379,34 +13426,37 @@ msgid ""
 "busses. When disabled plugins will be left inactive when they are added to "
 "tracks/busses"
 msgstr ""
+"<b>Gaituta badago</b>, pluginak aktibatu egingo dira pista edo busetan "
+"gehitzean. Desgaitutako pluginak aldiz, ez-aktibo jarraituko dute pista edo "
+"busetan gehitzean"
 
 #: rc_option_editor.cc:3392
 msgid "Limit automatable parameters per plugin"
-msgstr ""
+msgstr "Mugatu plugineko automatizatu daitezken parametroak"
 
 #: rc_option_editor.cc:3396 rc_option_editor.cc:3839
 msgid "Unlimited"
-msgstr ""
+msgstr "Mugagabeak"
 
 #: rc_option_editor.cc:3397 rc_option_editor.cc:3842
 msgid "64 parameters"
-msgstr ""
+msgstr "64 parametro"
 
 #: rc_option_editor.cc:3398 rc_option_editor.cc:3843
 msgid "128 parameters"
-msgstr ""
+msgstr "128 parametro"
 
 #: rc_option_editor.cc:3399
 msgid "256 parameters"
-msgstr ""
+msgstr "256 parametro"
 
 #: rc_option_editor.cc:3400
 msgid "512 parameters"
-msgstr ""
+msgstr "512 parametro"
 
 #: rc_option_editor.cc:3401
 msgid "999 parameters"
-msgstr ""
+msgstr "999 parametro"
 
 #: rc_option_editor.cc:3404
 msgid ""
@@ -13420,25 +13470,35 @@ msgid ""
 "Note: This only affects newly added plugins and is applied to plugin on "
 "session-reload. Already automated parameters are retained."
 msgstr ""
+"Plugin batzuek kontrol-sarrera kopuru zentzugabea dute. Aukera honek "
+"automatizagarri gisa zerrendatu daitezkeen parametroen kopurua mugatzen du, "
+"kontrol guztien kopurua murriztu gabe.\n"
+"\n"
+"Honek interfazearen atzerapena murrizten du, eta kontrol-ataka ugari "
+"dituzten pluginetarako zerrenda lar luzeak laburtzen ditu.\n"
+"\n"
+"Oharra: honek gehitu berri diren pluginei bakarrik eragiten die, eta "
+"pluginari saioa birkargatzean aplikatzen zaio. Jada automatizatutako "
+"parametroak kontserbatzen dira."
 
 #: rc_option_editor.cc:3408 rc_option_editor.cc:3410 rc_option_editor.cc:3422
 #: rc_option_editor.cc:3431 rc_option_editor.cc:3443 rc_option_editor.cc:3448
 #: rc_option_editor.cc:3450 rc_option_editor.cc:3455 rc_option_editor.cc:3462
 #: rc_option_editor.cc:3467 rc_option_editor.cc:3476 rc_option_editor.cc:3480
 msgid "Plugins/VST"
-msgstr ""
+msgstr "Pluginak/VSTak"
 
 #: rc_option_editor.cc:3408
 msgid "VST"
-msgstr ""
+msgstr "VSTak"
 
 #: rc_option_editor.cc:3418
 msgid "Enable Mac VST support (requires restart or re-scan)"
-msgstr ""
+msgstr "Gaitu Mac-VST sostengua (berrabiarazi edo birbilatu behar da)"
 
 #: rc_option_editor.cc:3427
 msgid "Scan for [new] VST Plugins on Application Start"
-msgstr ""
+msgstr "Bilatu VST plugin berriak aplikazioa abiaraztean"
 
 #: rc_option_editor.cc:3433
 msgid ""
@@ -13446,49 +13506,54 @@ msgid ""
 "cache index on application start. When disabled new plugins will only be "
 "available after triggering a 'Scan' manually"
 msgstr ""
+"<b>Gaituta badago</b>, VST plugin berriak bilatu eta probatuko dira, eta "
+"aplikazioa abiarazteko cache-indexatzean gehitu. Desgaitutako pluginak "
+"aldiz, \"Bilatu\" eskuz sakatzean soilik izango dira eskuragarri"
 
 #: rc_option_editor.cc:3439
 msgid "Verbose Plugin Scan"
-msgstr ""
+msgstr "Plugin-bilatze tematua"
 
 #: rc_option_editor.cc:3445
 msgid ""
 "<b>When enabled</b> additional information for every plugin is added to the "
 "Log Window."
 msgstr ""
+"<b>Gaituta badago</b>, plugin bakoitzaren informazio gehigarria erakutsiko "
+"da Erregistro leihoan."
 
 #: rc_option_editor.cc:3453
 msgid "VST Cache:"
-msgstr ""
+msgstr "VST Cachea:"
 
 #: rc_option_editor.cc:3458
 msgid "VST Blacklist:"
-msgstr ""
+msgstr "VST zerrenda beltza:"
 
 #: rc_option_editor.cc:3465
 msgid "Linux VST Path:"
-msgstr ""
+msgstr "Linux-VSTen bidea:"
 
 #: rc_option_editor.cc:3470 rc_option_editor.cc:3483
 msgid "Path:"
-msgstr ""
+msgstr "Bidea:"
 
 #: rc_option_editor.cc:3479
 msgid "Windows VST Path:"
-msgstr ""
+msgstr "Windows-VSTen bidea:"
 
 #: rc_option_editor.cc:3490 rc_option_editor.cc:3492 rc_option_editor.cc:3503
 #: rc_option_editor.cc:3507 rc_option_editor.cc:3512
 msgid "Plugins/Audio Unit"
-msgstr ""
+msgstr "Pluginak/Audio Unit-ak"
 
 #: rc_option_editor.cc:3490
 msgid "Audio Unit"
-msgstr ""
+msgstr "Audio Unit-ak"
 
 #: rc_option_editor.cc:3499
 msgid "Scan for [new] AudioUnit Plugins on Application Start"
-msgstr ""
+msgstr "Bilatu AudioUnit plugin berriak aplikazioa abiaraztean"
 
 #: rc_option_editor.cc:3505
 msgid ""
@@ -13497,66 +13562,76 @@ msgid ""
 "manually. The first successful scan will enable AU auto-scan, Any crash "
 "during plugin discovery will disable it."
 msgstr ""
+"<b>Gaituta badago</b>, Audio Unit pluginak bilatuko dira aplikazioa "
+"abiaraztean. Desgaitutako AU pluginak aldiz, \"Bilatu\" eskuz sakatzean "
+"soilik izango dira eskuragarri. Lehenengo bilaketa arrakastatsua AU auto-"
+"bilaketa izango da. Plugin-bilaketa bitartean gertatuko edozein akatsek "
+"desgaitu egingo du."
 
 #: rc_option_editor.cc:3510
 msgid "AU Cache:"
-msgstr ""
+msgstr "AU Cachea:"
 
 #: rc_option_editor.cc:3515
 msgid "AU Blacklist:"
-msgstr ""
+msgstr "Au zerrenda beltza:"
 
 #: rc_option_editor.cc:3519
 msgid "LV1/LV2"
-msgstr ""
+msgstr "LV1/LV2"
 
 #: rc_option_editor.cc:3523
 msgid "Conceal LADSPA (LV1) Plugins if matching LV2 exists"
-msgstr ""
+msgstr "Ezkutatu LADSPA (LV1) pluginak izen bereko LV2ak baldin badaude"
 
 #: rc_option_editor.cc:3530
 msgid "Plugin GUI"
-msgstr ""
+msgstr "Pluginen interfazea (GUIa)"
 
 #: rc_option_editor.cc:3534
 msgid "Automatically open the plugin GUI when adding a new plugin"
-msgstr ""
+msgstr "Ireki automatiko pluginen interfazea plugin berri bat gehitzean"
 
 #: rc_option_editor.cc:3543
 msgid "Show Plugin Inline Display on Mixerstrip by default"
 msgstr ""
+"Erakutsi pluginen txertatutako bista nahasketa-kanalean modu lehenetsian"
 
 #: rc_option_editor.cc:3550
 msgid ""
 "Don't automatically open the plugin GUI when the plugin has an inline "
 "display mode"
 msgstr ""
+"Ez ireki automatikoki pluginen interfazea pluginak txertatutako bista modua "
+"badu"
 
 #: rc_option_editor.cc:3557
 msgid "Instrument"
-msgstr ""
+msgstr "Instrumentua"
 
 #: rc_option_editor.cc:3561
 msgid "Ask to replace existing instrument plugin"
-msgstr ""
+msgstr "Galdetu jada badagoen instrumentu-plugin bat ordezkatzeko"
 
 #: rc_option_editor.cc:3569
 msgid "Interactively configure instrument plugins on insert"
-msgstr ""
+msgstr "Konfiguratu interaktiboki instrumentu-pluginak hauek txertatzean"
 
 #: rc_option_editor.cc:3575
 msgid ""
 "<b>When enabled</b> show a dialog to select instrument channel configuration "
 "before adding a multichannel plugin."
 msgstr ""
+"<b>Gaituta badago</b>, erakutsi instrumentuaren kanal-konfigurazioa "
+"hautatzeko leihotxo bat kanal-aniztun plugin bat gehitu aurretik."
 
 #: rc_option_editor.cc:3582
 msgid "Graphics Acceleration"
-msgstr ""
+msgstr "Grafikoen azelerazioa"
 
 #: rc_option_editor.cc:3588
 msgid "Disable Graphics Hardware Acceleration (requires restart)"
-msgstr ""
+msgstr "Desgaitu hardware-grafikoen azelerazioa (berrabiarazi behar da)"
 
 #: rc_option_editor.cc:3594
 msgid ""
@@ -13564,10 +13639,14 @@ msgid ""
 "using 2D-graphics acceleration.\n"
 "This requires restarting %1 before having an effect"
 msgstr ""
+"Errendatu softwarean aplikazioaren erabiltzaile-interfazearen zati handiak "
+"2D-grafikoen azelerazioa erabili ordez.\n"
+"Honek eragina izateko %1 berrabiarazi behar da"
 
 #: rc_option_editor.cc:3601
 msgid "Possibly improve slow graphical performance (requires restart)"
 msgstr ""
+"Hobetu, ahal bada, grafiko-motelen errendimendua (berrabiarazi behar da)"
 
 #: rc_option_editor.cc:3606
 msgid ""
@@ -13575,22 +13654,25 @@ msgid ""
 "gradients patch\").\n"
 "This requires restarting %1 before having an effect"
 msgstr ""
+"Akastun bideo-driverretan hardware-gradienteen errendatzea desgaitzen du "
+"(\"akastun gradienteen patcha\"). \n"
+"Honek eragina izateko %1 berrabiarazi behar da"
 
 #: rc_option_editor.cc:3609
 msgid "Graphical User Interface"
-msgstr ""
+msgstr "Erabiltzailearen interfaze-grafikoa (GUI)"
 
 #: rc_option_editor.cc:3614
 msgid "Highlight widgets on mouseover"
-msgstr ""
+msgstr "Nabarmendu widgetak kurtsorea gainean jartzean"
 
 #: rc_option_editor.cc:3622
 msgid "Show tooltips if mouse hovers over a control"
-msgstr ""
+msgstr "Erakutsi argibideak kurtsorea kontrol baten gainean mantentzean"
 
 #: rc_option_editor.cc:3629
 msgid "Update clocks at TC Frame rate"
-msgstr ""
+msgstr "Eguneratu erlojuak DK marko-abiaduran"
 
 #: rc_option_editor.cc:3634
 msgid ""
@@ -13598,14 +13680,18 @@ msgid ""
 "\n"
 "<b>When disabled</b> clock displays are updated only every 100ms."
 msgstr ""
+"<b>Gaituta badago</b>, erlojuak denbora-kodeko markoro (fps-ro) eguneratuko "
+"dira.\n"
+"\n"
+"<b>Desgaituta badago</b>, erlojuak soilik 100ms-ro eguneratuko dira."
 
 #: rc_option_editor.cc:3642
 msgid "Blink Rec-Arm buttons"
-msgstr ""
+msgstr "Grabazio-gaitze botoiek dir-dir"
 
 #: rc_option_editor.cc:3650
 msgid "Blink Alert Indicators"
-msgstr ""
+msgstr "Alerta-adierazleek dir-dir"
 
 #: rc_option_editor.cc:3660 rc_option_editor.cc:3661 rc_option_editor.cc:3669
 #: rc_option_editor.cc:3677 rc_option_editor.cc:3694 rc_option_editor.cc:3696
@@ -13615,209 +13701,211 @@ msgstr ""
 #: rc_option_editor.cc:3768 rc_option_editor.cc:3770 rc_option_editor.cc:3778
 #: rc_option_editor.cc:3787 rc_option_editor.cc:3795 rc_option_editor.cc:3803
 msgid "Appearance/Editor"
-msgstr ""
+msgstr "Itxura/Editorea"
 
 #: rc_option_editor.cc:3664
 msgid "Use name highlight bars in region displays (requires a restart)"
 msgstr ""
+"Erabili izen-nabarmentze barrak eremuen bistaratzean (berrabiarazi behar da)"
 
 #: rc_option_editor.cc:3672
 msgid "Region color follows track color"
-msgstr ""
+msgstr "Eremuen koloreak pisten kolore berdinekoak dira"
 
 #: rc_option_editor.cc:3680
 msgid "Show Region Names"
-msgstr ""
+msgstr "Erakutsi eremuen izenak"
 
 #: rc_option_editor.cc:3687
 msgid "Add a visual gap below Audio Regions"
-msgstr ""
+msgstr "Gehitu hutsune ikusgai bat audio eremuen azpian"
 
 #: rc_option_editor.cc:3696
 msgid "Waveforms"
-msgstr ""
+msgstr "Uhin-formak"
 
 #: rc_option_editor.cc:3702
 msgid "Show waveforms in regions"
-msgstr ""
+msgstr "Erakutsi uhin-formak eremuetan"
 
 #: rc_option_editor.cc:3711
 msgid "Show waveforms while recording"
-msgstr ""
+msgstr "Erakutsi uhin-formak grabatu bitartean"
 
 #: rc_option_editor.cc:3719
 msgid "Show waveform clipping"
-msgstr ""
+msgstr "Erakutsi uhin-formen klipatzea"
 
 #: rc_option_editor.cc:3728
 msgid "Waveform scale"
-msgstr ""
+msgstr "Uhin-formen eskala"
 
 #: rc_option_editor.cc:3733
 msgid "linear"
-msgstr ""
+msgstr "lineala"
 
 #: rc_option_editor.cc:3734
 msgid "logarithmic"
-msgstr ""
+msgstr "logaritmikoa"
 
 #: rc_option_editor.cc:3740
 msgid "Waveform shape"
-msgstr ""
+msgstr "Uhin-forma"
 
 #: rc_option_editor.cc:3745
 msgid "traditional"
-msgstr ""
+msgstr "tradizionala"
 
 #: rc_option_editor.cc:3746
 msgid "rectified"
-msgstr ""
+msgstr "zuzendua"
 
 #: rc_option_editor.cc:3750
 msgid "Editor Meters"
-msgstr ""
+msgstr "Editoreko neurgailuak"
 
 #: rc_option_editor.cc:3755
 msgid "Show meters in track headers"
-msgstr ""
+msgstr "Erakutsi neurgailuak pisten goiburuetan"
 
 #: rc_option_editor.cc:3763
 msgid "Limit track header meters to stereo"
-msgstr ""
+msgstr "Mugatu pisten goiburuetako neurgailuak estereora"
 
 #: rc_option_editor.cc:3768
 msgid "MIDI Regions"
-msgstr ""
+msgstr "MIDI eremuak"
 
 #: rc_option_editor.cc:3773
 msgid "Display first MIDI bank/program as 0"
-msgstr ""
+msgstr "Erakutsi lehen MIDI banku/programa 0 gisa"
 
 #: rc_option_editor.cc:3781
 msgid "Don't display periodic (MTC, MMC) SysEx messages in MIDI Regions"
-msgstr ""
+msgstr "Ez erakutsi SisAdb (MTC, MMC) mezuak MIDI eremuetan"
 
 #: rc_option_editor.cc:3790
 msgid "Show velocity horizontally inside notes"
-msgstr ""
+msgstr "Erakutsi indarra horizontalki noten barruan"
 
 #: rc_option_editor.cc:3798
 msgid "Use colors to show note velocity"
-msgstr ""
+msgstr "Erabili koloreak noten indarra adierazteko"
 
 #: rc_option_editor.cc:3816 rc_option_editor.cc:3825 rc_option_editor.cc:3844
 #: rc_option_editor.cc:3846
 msgid "Appearance/Mixer"
-msgstr ""
+msgstr "Itxura/Nahasgailua"
 
 #: rc_option_editor.cc:3818
 msgid "Mixer Strip"
-msgstr ""
+msgstr "Nahasgailuko kanala"
 
 #: rc_option_editor.cc:3828
 msgid "Use narrow strips in the mixer for new strips by default"
 msgstr ""
+"Nahasgailuan gehitutako kanal berriak estu ikusiko dira modu lehenetsian"
 
 #: rc_option_editor.cc:3835
 msgid "Limit inline-mixer-strip controls per plugin"
-msgstr ""
+msgstr "Mugatu txertatutako-nahasgailu-kanaletako kontrolak plugineko"
 
 #: rc_option_editor.cc:3840
 msgid "16 parameters"
-msgstr ""
+msgstr "16 parametro"
 
 #: rc_option_editor.cc:3841
 msgid "32 parameters"
-msgstr ""
+msgstr "32 parametro"
 
 #: rc_option_editor.cc:3848 rc_option_editor.cc:3850 rc_option_editor.cc:3858
 #: rc_option_editor.cc:3866 rc_option_editor.cc:3874 rc_option_editor.cc:3883
 #: rc_option_editor.cc:3892 rc_option_editor.cc:3900 rc_option_editor.cc:3908
 #: rc_option_editor.cc:3915
 msgid "Appearance/Toolbar"
-msgstr ""
+msgstr "Itxura/Tresna-barra"
 
 #: rc_option_editor.cc:3848
 msgid "Main Transport Toolbar Items"
-msgstr ""
+msgstr "Garraioko elementu nagusiak tresna-barran"
 
 #: rc_option_editor.cc:3853
 msgid "Display Record/Punch Options"
-msgstr ""
+msgstr "Erakutsi grabazio-tartea/grabazioa aukerak"
 
 #: rc_option_editor.cc:3861
 msgid "Display Monitor Options"
-msgstr ""
+msgstr "Erakutsi monitorizazio aukerak"
 
 #: rc_option_editor.cc:3869
 msgid "Display Latency Compensation Info"
-msgstr ""
+msgstr "Erakutsi latentzia-konpentsaziorako informazioa"
 
 #: rc_option_editor.cc:3877
 msgid "Display Selection Clock"
-msgstr ""
+msgstr "Erakutsi hautapen-erlojua"
 
 #: rc_option_editor.cc:3886
 msgid "Display Secondary Clock"
-msgstr ""
+msgstr "Erakutsi erloju sekundarioa"
 
 #: rc_option_editor.cc:3895
 msgid "Display Navigation Timeline"
-msgstr ""
+msgstr "Erakutsi nabigazio-denbora-lerroa"
 
 #: rc_option_editor.cc:3903
 msgid "Display Master Level Meter"
-msgstr ""
+msgstr "Erakutsi Masterraren bolumen-neurgailua"
 
 #: rc_option_editor.cc:3910
 msgid "Display Action-Buttons"
-msgstr ""
+msgstr "Erakutsi ekintza-botoiak"
 
 #: rc_option_editor.cc:3920 rc_option_editor.cc:3922 rc_option_editor.cc:3929
 #: rc_option_editor.cc:3936 rc_option_editor.cc:3952 rc_option_editor.cc:3962
 #: rc_option_editor.cc:3974
 msgid "Appearance/Theme"
-msgstr ""
+msgstr "Itxura/Gaia"
 
 #: rc_option_editor.cc:3920
 msgid "Theme"
-msgstr ""
+msgstr "Gaia"
 
 #: rc_option_editor.cc:3924
 msgid "Draw \"flat\" buttons"
-msgstr ""
+msgstr "Erakutsi botoi \"lauak\""
 
 #: rc_option_editor.cc:3931
 msgid "Draw \"boxy\" buttons"
-msgstr ""
+msgstr "Erakutsi \"kutxa itxurako\" botoiak"
 
 #: rc_option_editor.cc:3938
 msgid "LED meter style"
-msgstr ""
+msgstr "LED neurgailu itxura"
 
 #: rc_option_editor.cc:3946
 msgid "Waveforms color gradient depth"
-msgstr ""
+msgstr "Uhin-formen kolore-gradientearen sakonera"
 
 #: rc_option_editor.cc:3956
 msgid "Timeline item gradient depth"
-msgstr ""
+msgstr "Denbora-lerroko elementuen gradientearen sakonera"
 
 #: rc_option_editor.cc:3967
 msgid "Icon Set"
-msgstr ""
+msgstr "Ikono-bilduma"
 
 #: rc_option_editor.cc:3977 rc_option_editor.cc:3978 rc_option_editor.cc:3979
 msgid "Appearance/Colors"
-msgstr ""
+msgstr "Itxura/Koloreak"
 
 #: rc_option_editor.cc:3977
 msgid "Colors"
-msgstr ""
+msgstr "Koloreak"
 
 #: rc_option_editor.cc:3983
 msgid "Various Workarounds for Windowing Systems"
-msgstr ""
+msgstr "Leihokatze-sistemetarako hainbat konponbide"
 
 #: rc_option_editor.cc:3985
 msgid ""
@@ -13830,25 +13918,37 @@ msgid ""
 "These settings will only take effect after %1 is restarted.\n"
 "\t"
 msgstr ""
+"Ixteko, minimizatzeko, maximizatzeko eta gainean egoteko arauak aldatu egin "
+"daitezke sistema eragilearen bertsio bakoitzarekin, eta baita sistema "
+"eragilean ezarritako hobespenekin ere.\n"
+"\n"
+"Hemen %1(r)en leihoek eta elkarrizketek nola jokatzen duten zehazteko "
+"aukerak alda ditzakezu.\n"
+"\n"
+"Doikuntza horiek %1 berrabiarazi ondoren izango dute eragina."
 
 #: rc_option_editor.cc:3991 rc_option_editor.cc:4001 rc_option_editor.cc:4012
 #: rc_option_editor.cc:4022 rc_option_editor.cc:4034 rc_option_editor.cc:4037
 msgid "Appearance/Quirks"
-msgstr ""
+msgstr "Itxura/Bitxikeriak"
 
 #: rc_option_editor.cc:3995
 msgid "Use visibility information provided by your Window Manager/Desktop"
 msgstr ""
+"Erabili zure leiho-kudeatzaileak/mahaigainak eskainitako ikusgarritasun-"
+"informazioa"
 
 #: rc_option_editor.cc:4000
 msgid ""
 "If you have trouble toggling between hidden Editor and Mixer windows, try "
 "changing this setting."
 msgstr ""
+"Arazoak badituzu ezkutatutako Editorea eta Nahasgailu leihoen artean "
+"aldatzen, aldatu ezarpen hau."
 
 #: rc_option_editor.cc:4006
 msgid "All floating windows are dialogs"
-msgstr ""
+msgstr "Leihotxo guztiak benetako leihoak (elkarrizketa-koadroak) dira"
 
 #: rc_option_editor.cc:4011
 msgid ""
@@ -13856,222 +13956,231 @@ msgid ""
 "\" for some.\n"
 "This may help with some window managers."
 msgstr ""
+"Markatu leihotxo guztiak \"Elkarrizketa\" gisa, batzuentzat "
+"\"Erabilgarritasuna\" erabili beharrean.\n"
+"Honek leiho-kudeatzaile batzuekin lagungarria izan daiteke."
 
 #: rc_option_editor.cc:4016
 msgid "Transient windows follow front window."
-msgstr ""
+msgstr "Leiho iragankorrek aurreko leihoari jarraitzen diote."
 
 #: rc_option_editor.cc:4021
 msgid ""
 "Make transient windows follow the front window when toggling between the "
 "editor and mixer."
 msgstr ""
+"Leiho iragankorrek aurreko leihoari jarraitzen dio Editore eta Nahasgailu "
+"artean aldatzean."
 
 #: rc_option_editor.cc:4028
 msgid "Float detached monitor-section window"
-msgstr ""
+msgstr "Azalerarazi banandutako monitorizazio-sekzio-leihoa"
 
 #: rc_option_editor.cc:4033
 msgid ""
 "When detaching the monitoring section, mark it as \"Utility\" window to stay "
 "in front."
 msgstr ""
+"Monitorizazio-sekzioa banandutakoan, \"Erabilgarritasun\" gisa markatuko du "
+"aurrean egon dadin."
 
 #: rc_option_editor.cc:4040
 msgid "Video Server"
-msgstr ""
+msgstr "Bideo-morroia"
 
 #: rc_option_editor.cc:4126
 msgid "Set Linux VST Search Path"
-msgstr ""
+msgstr "Zehaztu Linux-VSTentzako bilaketa-bidea"
 
 #: rc_option_editor.cc:4135 rc_option_editor.cc:4156
 msgid "Re-scan Plugins now?"
-msgstr ""
+msgstr "Birbilatu pluginak orain?"
 
 #: rc_option_editor.cc:4148
 msgid "Set Windows VST Search Path"
-msgstr ""
+msgstr "Zehaztu Windows-VSTentzako bilaketa-bidea"
 
 #: region_editor.cc:88
 msgid "audition this region"
-msgstr ""
+msgstr "entzun eremu hau"
 
 #: region_editor.cc:99 add_video_dialog.cc:161
 msgid "End:"
-msgstr ""
+msgstr "Amaiera:"
 
 #: region_editor.cc:101 sfdb_ui.cc:175
 msgid "Length:"
-msgstr ""
+msgstr "Iraupena:"
 
 #: region_editor.cc:103
 msgid "Sync point (relative to region):"
-msgstr ""
+msgstr "Sinkronia-puntua (eremuari erlatiboa):"
 
 #: region_editor.cc:105
 msgid "Sync point (absolute):"
-msgstr ""
+msgstr "Sinkronia-puntua (absolutua):"
 
 #: region_editor.cc:107
 msgid "File start:"
-msgstr ""
+msgstr "Fitxategi-hasiera:"
 
 #: region_editor.cc:111
 msgid "Sources:"
-msgstr ""
+msgstr "Iturburuak:"
 
 #: region_editor.cc:113
 msgid "Source:"
-msgstr ""
+msgstr "Iturburua:"
 
 #: region_editor.cc:175
 msgid "Region '%1'"
-msgstr ""
+msgstr "'%1' eremua"
 
 #: region_editor.cc:292
 msgid "change region start position"
-msgstr ""
+msgstr "aldatu eremu-hasieraren kokalekua"
 
 #: region_editor.cc:312
 msgid "change region end position"
-msgstr ""
+msgstr "aldatu eremu-amaieraren kokalekua"
 
 #: region_editor.cc:335
 msgid "change region length"
-msgstr ""
+msgstr "aldatu eremuaren iraupena"
 
 #: region_editor.cc:429 region_editor.cc:441
 msgid "change region sync point"
-msgstr ""
+msgstr "aldatu eremuaren sinkronia-puntua"
 
 #: region_layering_order_editor.cc:44
 msgid "RegionLayeringOrderEditor"
-msgstr ""
+msgstr "EremuGeruzenOrdenEditorea"
 
 #: region_layering_order_editor.cc:57
 msgid "Region Name"
-msgstr ""
+msgstr "Eremuaren izena"
 
 #: region_layering_order_editor.cc:74
 msgid "Track:"
-msgstr ""
+msgstr "Pista:"
 
 #: region_layering_order_editor.cc:106
 msgid "Choose Top Region"
-msgstr ""
+msgstr "Hautatu gaineko eremua"
 
 #: region_view.cc:278
 msgid "SilenceText"
-msgstr ""
+msgstr "IsiltasunTestua"
 
 #: region_view.cc:293 region_view.cc:312
 msgid "minutes"
-msgstr ""
+msgstr "minutuak"
 
 #: region_view.cc:296 region_view.cc:315
 msgid "msecs"
-msgstr ""
+msgstr "milisegundoak"
 
 #: region_view.cc:299 region_view.cc:318
 msgid "secs"
-msgstr ""
+msgstr "segundoak"
 
 #: region_view.cc:302
 msgid "%1 silent segment"
 msgid_plural "%1 silent segments"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "isilarazitako segmentu %1"
+msgstr[1] "isilarazitako %1 segmentu"
 
 #: region_view.cc:304
 msgid "shortest = %1 %2"
-msgstr ""
+msgstr "motzena = %1 %2"
 
 #: region_view.cc:321
 msgid ""
 "\n"
 "  (shortest audible segment = %1 %2)"
 msgstr ""
+"\n"
+"  (entzun daiteken segmentu motzena = %1 %2)"
 
 #: return_ui.cc:104
 msgid "Return "
-msgstr ""
+msgstr "Itzuli "
 
 #: rhythm_ferret.cc:51
 msgid "Percussive Onset"
-msgstr ""
+msgstr "Perkusio-hasiera"
 
 #: rhythm_ferret.cc:52
 msgid "Note Onset"
-msgstr ""
+msgstr "Nota-hasiera"
 
 #: rhythm_ferret.cc:57
 msgid "Energy Based"
-msgstr ""
+msgstr "Energian oinarritua"
 
 #: rhythm_ferret.cc:58
 msgid "Spectral Difference"
-msgstr ""
+msgstr "Espektro-ezberdintasuna"
 
 #: rhythm_ferret.cc:59
 msgid "High-Frequency Content"
-msgstr ""
+msgstr "Frekuentzia altuen edukia"
 
 #: rhythm_ferret.cc:60
 msgid "Complex Domain"
-msgstr ""
+msgstr "Afera konplexua"
 
 #: rhythm_ferret.cc:61
 msgid "Phase Deviation"
-msgstr ""
+msgstr "Fase-desbideratzea"
 
 #: rhythm_ferret.cc:62
 msgid "Kullback-Liebler"
-msgstr ""
+msgstr "Kullback-Liebler"
 
 #: rhythm_ferret.cc:63
 msgid "Modified Kullback-Liebler"
-msgstr ""
+msgstr "Kullback-Liebler moldatua"
 
 #: rhythm_ferret.cc:65
 msgid "Spectral Flux"
-msgstr ""
+msgstr "Espektro-fluxua"
 
 #: rhythm_ferret.cc:71
 msgid "Split region"
-msgstr ""
+msgstr "Banandu eremua"
 
 #: rhythm_ferret.cc:73
 msgid "Snap regions"
-msgstr ""
+msgstr "Doitu eremuak"
 
 #: rhythm_ferret.cc:74
 msgid "Conform regions"
-msgstr ""
+msgstr "Egokitu eremuak"
 
 #: rhythm_ferret.cc:80
 msgid "Rhythm Ferret"
-msgstr ""
+msgstr "Erritmo-Kuxkuxeroa"
 
 #: rhythm_ferret.cc:86
 msgid "Analyze"
-msgstr ""
+msgstr "Analizatu"
 
 #: rhythm_ferret.cc:125
 msgid "Detection function"
-msgstr ""
+msgstr "Hautemate-funtzioa"
 
 #: rhythm_ferret.cc:129
 msgid "Trigger gap (postproc)"
-msgstr ""
+msgstr "Sortu tartea (prozed. oste)"
 
 #: rhythm_ferret.cc:134
 msgid "Peak threshold"
-msgstr ""
+msgstr "Gailur-atalasea"
 
 #: rhythm_ferret.cc:138
 msgid "Silence threshold"
-msgstr ""
+msgstr "Isiltasun-atalasea"
 
 #: rhythm_ferret.cc:144
 msgid "Min Inter-Onset Time"
