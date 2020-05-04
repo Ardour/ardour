@@ -288,6 +288,7 @@ RTMidiBuffer::read (MidiBuffer& dst, samplepos_t start, samplepos_t end, MidiSta
 #endif
 
 	DEBUG_TRACE (DEBUG::MidiRingBuffer, string_compose ("read from %1 .. %2 .. initial index = %3 (time = %4) (range in list of  %7 %5..%6)\n", start, end, item - _data, item->timestamp, _data->timestamp, last->timestamp, _size));
+	// dump (999);
 
 	while ((item != iend) && ((reverse && (item->timestamp > end)) || (!reverse && (item->timestamp < end)))) {
 
@@ -334,6 +335,16 @@ RTMidiBuffer::read (MidiBuffer& dst, samplepos_t start, samplepos_t end, MidiSta
 		}
 
 		DEBUG_TRACE (DEBUG::MidiRingBuffer, string_compose ("read event sz %1 @ %2 (=> %3 via -%4 +%5\n", size, unadjusted_time, evtime, start, offset));
+
+#if 0
+		cerr << "\tevent @ " << unadjusted_time << " evtime " << evtime << " off " << offset << " sz=" << size << '\t';
+		cerr << "\t0x" << hex << (int)addr[0] << dec << ' ';
+		for (size_t j = 1 ; j < size; ++j) {
+			cerr << "0x" << hex << (int)addr[j] << dec << '/' << (int)addr[j] << ' ';
+		}
+		cerr << '\n';
+#endif
+
 		tracker.track (addr);
 
 		if (reverse) {
