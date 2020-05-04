@@ -333,6 +333,7 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		ms = MonitorState (ms | MonitoringDisk);
 		assert (result_required);
 		result_required = true;
+		disk_samples_to_consume = 0; // non-committing read
 	} else {
 		_declick_offs = 0;
 	}
