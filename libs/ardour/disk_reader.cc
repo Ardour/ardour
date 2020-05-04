@@ -63,6 +63,7 @@ DiskReader::DiskReader (Session& s, string const& str, DiskIOProcessor::Flag f)
 	, run_must_resolve (false)
 	, _declick_amp (s.nominal_sample_rate ())
 	, _declick_offs (0)
+	, _declick_enabled (false)
 {
 	file_sample[DataType::AUDIO] = 0;
 	file_sample[DataType::MIDI]  = 0;
@@ -284,7 +285,16 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	const gain_t target_gain = ((speed == 0.0) || ((ms & MonitoringDisk) == 0)) ? 0.0 : 1.0;
 	bool         declick_out = (_declick_amp.gain () != target_gain) && target_gain == 0.0;
 
-	if (!_session.cfg ()->get_use_transport_fades () || (_session.exporting () && !_session.realtime_export ())) {
+	if (declick_out && _declick_amp.gain () == GAIN_COEFF_UNITY) {
+		/* beginning a de-click, set de-click reason */
+		if (speed == 0) {
+			_declick_enabled = _session.cfg ()->get_use_transport_fades ();
+		} else {
+			_declick_enabled = _session.cfg ()->get_use_monitor_fades ();
+		}
+	}
+
+	if (!_declick_enabled || (_session.exporting () && !_session.realtime_export ())) {
 		/* no transport fades or exporting - no declick out logic */
 
 		if (!midi_only) {
@@ -505,10 +515,10 @@ midi:
 bool
 DiskReader::declick_in_progress () const
 {
-	if (!_session.cfg ()->get_use_transport_fades () || (_session.exporting () && !_session.realtime_export ())) {
+	if (!_declick_enabled || (_session.exporting () && !_session.realtime_export ())) {
 		return false;
 	}
-	return (_declick_amp.gain () != 0); // declick-out
+	return _declick_amp.gain () != 0; // declick-out
 }
 
 void

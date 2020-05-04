@@ -210,6 +210,7 @@ private:
 
 	DeclickAmp            _declick_amp;
 	sampleoffset_t        _declick_offs;
+	bool                  _declick_enabled;
 	MidiStateTracker      _tracker;
 	boost::optional<bool> _last_read_reversed;
 	boost::optional<bool> _last_read_loop;
