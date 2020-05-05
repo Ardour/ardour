@@ -1198,10 +1198,15 @@ gboolean
 FoldbackStrip::name_button_button_press (GdkEventButton* ev)
 {
 	if (ev->button == 1) {
-		Menu* menu = build_route_select_menu ();
+		StripableList slist;
+		boost::shared_ptr<Route> previous = boost::shared_ptr<Route> ();
+		_session->get_stripables (slist, PresentationInfo::FoldbackBus);
+		if (slist.size () > 1) {
+			Menu* menu = build_route_select_menu ();
 
-		Gtkmm2ext::anchored_menu_popup(menu, &name_button, "",
+			Gtkmm2ext::anchored_menu_popup(menu, &name_button, "",
 			                               1, ev->time);
+		}
 		return true;
 	} else if (ev->button == 3) {
 		Menu* r_menu = build_route_ops_menu ();
