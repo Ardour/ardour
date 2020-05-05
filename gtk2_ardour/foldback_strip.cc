@@ -300,7 +300,6 @@ FoldbackStrip::FoldbackStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Rou
 	, _width (80)
 	, _pr_selection ()
 	, panners (sess)
-	, mute_solo_table (1, 2)
 	, _plugin_insert_cnt (0)
 	, _comment_button (_("Comments"))
 	, fb_level_control (0)
@@ -366,12 +365,6 @@ FoldbackStrip::init ()
 	insert_box->set_width (Wide);
 	insert_box->set_size_request (PX_SCALE(_width + 34), PX_SCALE(160));
 
-	mute_solo_table.set_homogeneous (true);
-	mute_solo_table.set_spacings (2);
-	solo_button->set_text (_("Listen"));
-	mute_solo_table.attach (*solo_button, 0, 2, 0, 1);
-	mute_solo_table.set_size_request (PX_SCALE(_width + 34), PX_SCALE(20));
-
 	fb_level_control = new ArdourKnob (ArdourKnob::default_elements, ArdourKnob::Detent);
 	fb_level_control->set_size_request (PX_SCALE(50), PX_SCALE(50));
 	fb_level_control->set_tooltip_prefix (_("Level: "));
@@ -428,7 +421,6 @@ FoldbackStrip::init ()
 	global_vpacker.pack_end (_comment_button, Gtk::PACK_SHRINK);
 	global_vpacker.pack_end (output_button, Gtk::PACK_SHRINK);
 	global_vpacker.pack_end (master_box, Gtk::PACK_SHRINK);
-	global_vpacker.pack_end (mute_solo_table, Gtk::PACK_SHRINK);
 	global_vpacker.pack_end (*insert_box, Gtk::PACK_SHRINK);
 	global_vpacker.pack_end (panners, Gtk::PACK_SHRINK);
 
@@ -597,8 +589,6 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 	send_scroller.show ();
 	_show_sends_button.show();
 	insert_box->show ();
-	solo_button->show ();
-	mute_solo_table.show();
 	master_box.show();
 	output_button.show();
 	_comment_button.show();
@@ -609,7 +599,6 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 	map_frozen();
 
 	show ();
-	set_button_names ();
 
 	if (sh_snd) {
 		// if last route had shows sends let it remain active
@@ -1428,10 +1417,8 @@ FoldbackStrip::drop_send ()
 	send_gone_connection.disconnect ();
 	output_button.set_sensitive (true);
 	set_invert_sensitive (true);
-	solo_button->set_sensitive (true);
 	_comment_button.set_sensitive (true);
 	fb_level_control->set_sensitive (true);
-	set_button_names (); // update solo button visual state
 }
 
 void
@@ -1465,22 +1452,8 @@ FoldbackStrip::revert_to_default_display ()
 void
 FoldbackStrip::set_button_names ()
 {
-
-	if (!Config->get_solo_control_is_listen_control()) {
-		solo_button->hide ();
-	} else {
-		solo_button->set_sensitive (true);
-		solo_button->show ();
-		UI::instance()->set_tip (solo_button, _("Listen on monitor"), "");
-		switch (Config->get_listen_position()) {
-		case AfterFaderListen:
-			solo_button->set_text (_("Listen"));
-			break;
-		case PreFaderListen:
-			solo_button->set_text (_("Listen"));
-			break;
-		}
-	}
+	// This is called by various places, so it has to be here even if we don't need it
+	return;
 }
 
 PluginSelector*

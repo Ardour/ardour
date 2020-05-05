@@ -188,7 +188,6 @@ private:
 	ProcessorSelection _pr_selection;
 	PannerUI     panners;
 
-	Gtk::Table mute_solo_table;
 	Gtk::HBox master_box;
 
 	ArdourWidgets::ArdourButton output_button;
