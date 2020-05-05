@@ -80,7 +80,9 @@ AlsaAudioSlave::AlsaAudioSlave (
 		_play_buff = (float*) malloc (sizeof(float) * _pcmi.nplay () * _samples_per_period);
 	}
 
-	_src_buff  = (float*) malloc (sizeof(float) * std::max (_pcmi.nplay (), _pcmi.ncapt ()));
+	if (_pcmi.nplay () > 0 || _pcmi.ncapt () > 0) {
+		_src_buff  = (float*) malloc (sizeof(float) * std::max (_pcmi.nplay (), _pcmi.ncapt ()));
+	}
 }
 
 AlsaAudioSlave::~AlsaAudioSlave ()
