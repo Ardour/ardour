@@ -495,7 +495,6 @@ MidiTrack::export_stuff (BufferSet&                   buffers,
 	if (!mpl) {
 		return -2;
 	}
-	mpl->reset_note_trackers (); // TODO once at start and end ?
 
 	buffers.get_midi(0).clear();
 
@@ -517,7 +516,6 @@ MidiTrack::export_stuff (BufferSet&                   buffers,
 		}
 		bounce_process (buffers, start, nframes, endpoint, include_endpoint, for_export, for_freeze);
 	}
-	mpl->reset_note_trackers ();
 
 	/* Add to tracker so that we can resolve at the end of the export (in Session::write_one_track()) */
 

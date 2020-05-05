@@ -112,16 +112,6 @@ struct EventsSortByTimeAndType {
 };
 
 void
-MidiPlaylist::reset_note_trackers ()
-{
-}
-
-void
-MidiPlaylist::resolve_note_trackers (Evoral::EventSink<samplepos_t>& dst, samplepos_t time)
-{
-}
-
-void
 MidiPlaylist::remove_dependents (boost::shared_ptr<Region> region)
 {
 }

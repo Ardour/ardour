@@ -83,21 +83,11 @@ public:
 
 	std::set<Evoral::Parameter> contained_automation();
 
-	/** Clear all note trackers. */
-	void reset_note_trackers ();
-
-	/** Resolve all pending notes and clear all note trackers.
-	 *
-	 * @param dst Sink to write note offs to.
-	 * @param time Time stamp of all written note offs.
-	 */
-	void resolve_note_trackers (Evoral::EventSink<samplepos_t>& dst, samplepos_t time);
-
-protected:
+  protected:
 	void remove_dependents (boost::shared_ptr<Region> region);
 	void region_going_away (boost::weak_ptr<Region> region);
 
-private:
+  private:
 	void dump () const;
 
 	NoteMode     _note_mode;
