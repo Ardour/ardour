@@ -42,6 +42,7 @@ class DiskWriter;
 class IO;
 class RecordEnableControl;
 class RecordSafeControl;
+class MidiStateTracker;
 
 /** A track is an route (bus) with a recordable diskstream and
  * related objects relevant to recording, playback and editing.
@@ -110,7 +111,8 @@ public:
 	virtual boost::shared_ptr<Region> bounce_range (samplepos_t start, samplepos_t end, InterThreadInfo& itt,
 							boost::shared_ptr<Processor> endpoint, bool include_endpoint) = 0;
 	virtual int export_stuff (BufferSet& bufs, samplepos_t start_sample, samplecnt_t nframes,
-				  boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze) = 0;
+	                          boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze,
+	                          MidiStateTracker&) = 0;
 
 	virtual int set_state (const XMLNode&, int version);
 	static void zero_diskstream_id_in_xml (XMLNode&);

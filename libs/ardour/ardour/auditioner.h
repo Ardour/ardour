@@ -87,16 +87,16 @@ public:
 		return boost::shared_ptr<Region> ();
 	}
 
-	int export_stuff (BufferSet&, samplepos_t, samplecnt_t, boost::shared_ptr<Processor>, bool, bool, bool) { return -1; }
+	int export_stuff (BufferSet&, samplepos_t, samplecnt_t, boost::shared_ptr<Processor>, bool, bool, bool, MidiStateTracker&) { return -1; }
 
 	void set_audition_synth_info(PluginInfoPtr in) { audition_synth_info = in; }
 
 	samplecnt_t output_latency () const { return 0; }
 
 private:
-  
+
 	PluginInfoPtr audition_synth_info;  //we will use this to create a new synth on-the-fly each time an audition is requested
-  
+
 	boost::shared_ptr<AudioRegion> the_region;
 	boost::shared_ptr<MidiRegion> midi_region;
 	samplepos_t current_sample;

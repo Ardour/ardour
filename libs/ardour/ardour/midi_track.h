@@ -66,7 +66,8 @@ public:
 	                  boost::shared_ptr<Processor> endpoint,
 	                  bool                         include_endpoint,
 	                  bool                         for_export,
-	                  bool                         for_freeze);
+	                  bool                         for_freeze,
+	                  MidiStateTracker&            tracker);
 
 	int set_state (const XMLNode&, int version);
 

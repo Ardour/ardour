@@ -5655,6 +5655,14 @@ Session::freeze_all (InterThreadInfo& itt)
 	return 0;
 }
 
+struct MidiSourceLockMap
+{
+	boost::shared_ptr<MidiSource> src;
+	Source::Lock lock;
+
+	MidiSourceLockMap (boost::shared_ptr<MidiSource> midi_source) : src (midi_source), lock (src->mutex()) {}
+};
+
 boost::shared_ptr<Region>
 Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 			  bool /*overwrite*/, vector<boost::shared_ptr<Source> >& srcs,
@@ -5676,8 +5684,10 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 	ChanCount const max_proc = track.max_processor_streams ();
 	string legal_playlist_name;
 	string possible_path;
-
+	MidiBuffer resolved (256);
+	MidiStateTracker tracker;
 	DataType data_type = track.data_type();
+	std::vector<MidiSourceLockMap*> midi_source_locks;
 
 	if (end <= start) {
 		error << string_compose (_("Cannot write a range where end <= start (e.g. %1 <= %2)"),
@@ -5761,14 +5771,25 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 	}
 	buffers.set_count (max_proc);
 
+
+	/* prepare MIDI files */
+
+	for (vector<boost::shared_ptr<Source> >::iterator src = srcs.begin(); src != srcs.end(); ++src) {
+
+		boost::shared_ptr<MidiSource> ms = boost::dynamic_pointer_cast<MidiSource>(*src);
+
+		if (ms) {
+			midi_source_locks.push_back (new MidiSourceLockMap (ms));
+			ms->mark_streaming_write_started (midi_source_locks.back()->lock);
+		}
+	}
+
+	/* prepare audio files */
+
 	for (vector<boost::shared_ptr<Source> >::iterator src = srcs.begin(); src != srcs.end(); ++src) {
 		boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(*src);
-		boost::shared_ptr<MidiSource> ms;
 		if (afs) {
 			afs->prepare_for_peakfile_writes ();
-		} else if ((ms = boost::dynamic_pointer_cast<MidiSource>(*src))) {
-			Source::Lock lock(ms->mutex());
-			ms->mark_streaming_write_started(lock);
 		}
 	}
 
@@ -5776,7 +5797,7 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 
 		this_chunk = min (to_do, bounce_chunk_size);
 
-		if (track.export_stuff (buffers, start, this_chunk, endpoint, include_endpoint, for_export, for_freeze)) {
+		if (track.export_stuff (buffers, start, this_chunk, endpoint, include_endpoint, for_export, for_freeze, tracker)) {
 			goto out;
 		}
 
@@ -5800,21 +5821,44 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 				if (afs->write (buffers.get_audio(n).data(latency_skip), current_chunk) != current_chunk) {
 					goto out;
 				}
-			} else if ((ms = boost::dynamic_pointer_cast<MidiSource>(*src))) {
-				Source::Lock lock(ms->mutex());
+			}
+		}
 
+		for (vector<MidiSourceLockMap*>::iterator m = midi_source_locks.begin(); m != midi_source_locks.end(); ++m) {
 				const MidiBuffer& buf = buffers.get_midi(0);
 				for (MidiBuffer::const_iterator i = buf.begin(); i != buf.end(); ++i) {
 					Evoral::Event<samplepos_t> ev = *i;
 					if (!endpoint || for_export) {
 						ev.set_time(ev.time() - position);
 					}
-					ms->append_event_samples(lock, ev, ms->natural_position());
+					(*m)->src->append_event_samples ((*m)->lock, ev, (*m)->src->natural_position());
 				}
-			}
 		}
 		latency_skip = 0;
 	}
+
+	tracker.resolve_notes (resolved, end-1);
+
+	if (!resolved.empty()) {
+
+		for (vector<MidiSourceLockMap*>::iterator m = midi_source_locks.begin(); m != midi_source_locks.end(); ++m) {
+
+			for (MidiBuffer::iterator i = resolved.begin(); i != resolved.end(); ++i) {
+				Evoral::Event<samplepos_t> ev = *i;
+				if (!endpoint || for_export) {
+					ev.set_time(ev.time() - position);
+				}
+				(*m)->src->append_event_samples ((*m)->lock, ev, (*m)->src->natural_position());
+			}
+		}
+	}
+
+	for (vector<MidiSourceLockMap*>::iterator m = midi_source_locks.begin(); m != midi_source_locks.end(); ++m) {
+		delete *m;
+	}
+
+	midi_source_locks.clear ();
+
 
 	/* post-roll, pick up delayed processor output */
 	latency_skip = track.bounce_get_latency (endpoint, include_endpoint, for_export, for_freeze);

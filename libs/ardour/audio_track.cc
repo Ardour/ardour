@@ -251,7 +251,8 @@ AudioTrack::set_state_part_two ()
 
 int
 AudioTrack::export_stuff (BufferSet& buffers, samplepos_t start, samplecnt_t nframes,
-			  boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze)
+                          boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze,
+                          MidiStateTracker& /* ignored, this is audio */)
 {
 	boost::scoped_array<gain_t> gain_buffer (new gain_t[nframes]);
 	boost::scoped_array<Sample> mix_buffer (new Sample[nframes]);

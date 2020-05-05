@@ -48,7 +48,8 @@ class LIBARDOUR_API AudioTrack : public Track
 	boost::shared_ptr<Region> bounce_range (samplepos_t start, samplepos_t end, InterThreadInfo&,
 						boost::shared_ptr<Processor> endpoint, bool include_endpoint);
 	int export_stuff (BufferSet& bufs, samplepos_t start_sample, samplecnt_t nframes,
-			  boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze);
+	                  boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze,
+	                  MidiStateTracker&);
 
 	int set_state (const XMLNode&, int version);
 

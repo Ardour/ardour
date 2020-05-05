@@ -482,7 +482,8 @@ MidiTrack::export_stuff (BufferSet&                   buffers,
                          boost::shared_ptr<Processor> endpoint,
                          bool                         include_endpoint,
                          bool                         for_export,
-                         bool                         for_freeze)
+                         bool                         for_freeze,
+                         MidiStateTracker&            tracker)
 {
 	if (buffers.count().n_midi() == 0) {
 		return -1;
@@ -498,18 +499,18 @@ MidiTrack::export_stuff (BufferSet&                   buffers,
 
 	buffers.get_midi(0).clear();
 
-
 	/* Can't use a note tracker here, because the note off's might be in a
 	 * subsequent call
 	 */
 
 	MidiStateTracker ignored;
 
-	/* XXX thsi doesn't fail, other than if the lock cannot be obtained */
-	mpl->rendered()->read(buffers.get_midi(0), start, start+nframes, ignored, start);
+	/* XXX this doesn't fail, other than if the lock cannot be obtained */
+	mpl->rendered()->read (buffers.get_midi(0), start, start+nframes, ignored, start);
+
+	MidiBuffer& buf = buffers.get_midi(0);
 
 	if (endpoint && !for_export) {
-		MidiBuffer& buf = buffers.get_midi(0);
 		for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
 			MidiBuffer::TimeType *t = i.timeptr ();
 			*t -= start;
@@ -517,6 +518,12 @@ MidiTrack::export_stuff (BufferSet&                   buffers,
 		bounce_process (buffers, start, nframes, endpoint, include_endpoint, for_export, for_freeze);
 	}
 	mpl->reset_note_trackers ();
+
+	/* Add to tracker so that we can resolve at the end of the export (in Session::write_one_track()) */
+
+	for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
+		tracker.track (*i);
+	}
 
 	return 0;
 }
