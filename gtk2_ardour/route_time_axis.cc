@@ -431,6 +431,7 @@ RouteTimeAxisView::label_view ()
 	}
 
 	inactive_label.set_text (string_compose("(%1)", x));
+	inactive_label.show ();
 
 	const int64_t track_number = _route->track_number ();
 	if (track_number == 0) {
