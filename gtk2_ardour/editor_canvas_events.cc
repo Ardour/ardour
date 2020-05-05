@@ -167,7 +167,7 @@ bool
 Editor::track_canvas_button_press_event (GdkEventButton *event)
 {
 	_track_canvas->grab_focus();
-	if (!Keyboard::is_context_menu_event (event)) {
+	if (!internal_editing() && !Keyboard::is_context_menu_event (event)) {
 		begin_reversible_selection_op (X_("Clear Selection Click (track canvas)"));
 		selection->clear ();
 		commit_reversible_selection_op();
