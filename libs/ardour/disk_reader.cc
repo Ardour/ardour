@@ -628,7 +628,7 @@ DiskReader::overwrite_existing_audio ()
 	 * offset that existed when we requested an overwrite. That is, if the
 	 * Nth position in the buffer contained the sample corresponding to
 	 * timeline position T, then once this is complete that condition
-	 * should still hold. The actual value of the sample (and even when it
+	 * should still hold. The actual value of the sample (and even whether it
 	 * corresponds to any actual material on disk - it may just be silence)
 	 * may change, but this buffer_offset<->timeline_position mapping must
 	 * remain constant.
