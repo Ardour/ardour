@@ -920,6 +920,12 @@ void
 Editor::set_selected_midi_region_view (MidiRegionView& mrv)
 {
 	/* clear note selection in all currently selected MidiRegionViews */
+
+	if (get_selection().regions.contains (&mrv) && get_selection().regions.size() == 1) {
+		/* Nothing to do */
+		return;
+	}
+
 	midi_action (&MidiRegionView::clear_note_selection);
 	get_selection().set (&mrv);
 }
