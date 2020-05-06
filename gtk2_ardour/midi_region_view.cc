@@ -2440,10 +2440,7 @@ MidiRegionView::remove_from_selection (NoteBase* ev)
 
 	if (_selection.empty()) {
 		PublicEditor& editor (trackview.editor());
-		cerr << "Removing MRV from selection\n";
 		editor.get_selection().remove (this);
-	} else {
-		cerr << "note selection not empty\n";
 	}
 }
 
