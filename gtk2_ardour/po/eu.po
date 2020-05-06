@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-02 13:17+0200\n"
-"PO-Revision-Date: 2020-05-04 14:31+0200\n"
+"PO-Revision-Date: 2020-05-06 20:14+0200\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1900,7 +1900,7 @@ msgstr "Saioa"
 #: port_group.cc:505 session_option_editor.cc:125 session_option_editor.cc:126
 #: session_option_editor.cc:133 session_option_editor.cc:140
 msgid "Sync"
-msgstr "Sink"
+msgstr "Sinkronizazioa"
 
 #: ardour_ui_ed.cc:156 rc_option_editor.cc:2925
 msgid "Options"
@@ -1927,7 +1927,7 @@ msgstr "Beste laster-teklak"
 
 #: ardour_ui_ed.cc:164 session_option_editor.cc:176
 msgid "Audio File Format"
-msgstr "Audio-fitxategia formatua"
+msgstr "Audio-fitxategi formatua"
 
 #: ardour_ui_ed.cc:165
 msgid "File Type"
@@ -2090,7 +2090,7 @@ msgstr "Scriptak"
 
 #: ardour_ui_ed.cc:268 meterbridge.cc:226 meterbridge.cc:232
 msgid "Window|Meterbridge"
-msgstr "Neurgailua"
+msgstr "Neurgailuak"
 
 #: ardour_ui_ed.cc:270 midi_tracer.cc:48
 msgid "MIDI Tracer"
@@ -4437,7 +4437,7 @@ msgstr "Beste aukerak"
 #: session_option_editor.cc:264 session_option_editor.cc:265
 #: session_option_editor.cc:272 session_option_editor.cc:278
 msgid "Monitoring"
-msgstr "Monitorizatzea"
+msgstr "Monitorizazioa"
 
 #: editor_actions.cc:154
 msgid "Active Mark"
@@ -9787,7 +9787,7 @@ msgstr "Per."
 
 #: mixer_strip.cc:2253 route_ui.cc:219
 msgid "Disk"
-msgstr "Disk"
+msgstr "Diskoa"
 
 #: mixer_strip.cc:2255
 msgid "Mon"
@@ -9848,7 +9848,7 @@ msgstr "Taldea"
 
 #: mixer_ui.cc:239
 msgid "Favorite Plugins"
-msgstr "Plugin gogokoak"
+msgstr "Gogoko pluginak"
 
 #: mixer_ui.cc:670
 msgid "Error adding GUI elements for new tracks/busses %1"
@@ -9994,11 +9994,11 @@ msgstr "Nahasgailua: erakutsi foldback kanalak"
 
 #: mixer_ui.cc:3431
 msgid "Toggle Disk Monitoring"
-msgstr "Gaitu/Desgaitu disko-monitorizatzea"
+msgstr "Gaitu/Desgaitu disko-monitorizazioa"
 
 #: mixer_ui.cc:3432
 msgid "Toggle Input Monitoring"
-msgstr "Gaitu/Desgaitu sarrera-monitorizatzea"
+msgstr "Gaitu/Desgaitu sarrera-monitorizazioa"
 
 #: meter_strip.cc:167
 msgid "Reset Peak"
@@ -11845,7 +11845,7 @@ msgstr "Swinga"
 
 #: quantize_dialog.cc:84
 msgid "Threshold (ticks)"
-msgstr "Atalasea (ticks)"
+msgstr "Atalasea (azpipultsuak)"
 
 #: quantize_dialog.cc:85
 msgid "Snap note start"
@@ -12851,17 +12851,14 @@ msgid "no processor handling"
 msgstr "prozesadoreen kontrolik ez"
 
 #: rc_option_editor.cc:2821
-#, fuzzy
 msgid "use FlushToZero"
 msgstr "erabili HustuZerora"
 
 #: rc_option_editor.cc:2828
-#, fuzzy
 msgid "use DenormalsAreZero"
 msgstr "erabili DesnormaltzeakZeroDira"
 
 #: rc_option_editor.cc:2835
-#, fuzzy
 msgid "use FlushToZero and DenormalsAreZero"
 msgstr "erabili HustuZerora eta DesnormaltzeakZeroDira"
 
@@ -13146,7 +13143,7 @@ msgid ""
 "audio"
 msgstr ""
 "<b>Gaituta badago</b>, audio mota batzuk azkar jotzean gertatzen den bolumen-"
-"handitzea txikituko dizu."
+"handitzea txikituko dizu"
 
 #: rc_option_editor.cc:3152
 msgid "Preroll"
@@ -13219,7 +13216,7 @@ msgstr ""
 "erreprodukzioak beti loopa jo dezan behartzen du\n"
 "\n"
 "<b>Desgaituta badago</b>, loop-botoiak loop-barrutia erreproduzitzen du, "
-"baina gelditzean, erreprodukzioa gelditzen da."
+"baina gelditzean, erreprodukzioa gelditzen da"
 
 #: rc_option_editor.cc:3189
 msgid "Loop Fades"
@@ -13925,7 +13922,7 @@ msgstr ""
 "Hemen %1(r)en leihoek eta elkarrizketek nola jokatzen duten zehazteko "
 "aukerak alda ditzakezu.\n"
 "\n"
-"Doikuntza horiek %1 berrabiarazi ondoren izango dute eragina."
+"Doikuntza horiek %1 berrabiarazi ondoren izango dute eragina"
 
 #: rc_option_editor.cc:3991 rc_option_editor.cc:4001 rc_option_editor.cc:4012
 #: rc_option_editor.cc:4022 rc_option_editor.cc:4034 rc_option_editor.cc:4037
@@ -14108,11 +14105,11 @@ msgstr "Itzuli "
 
 #: rhythm_ferret.cc:51
 msgid "Percussive Onset"
-msgstr "Perkusio-hasiera"
+msgstr "Perkusio-ekitea"
 
 #: rhythm_ferret.cc:52
 msgid "Note Onset"
-msgstr "Nota-hasiera"
+msgstr "Nota-ekitea"
 
 #: rhythm_ferret.cc:57
 msgid "Energy Based"
@@ -14184,557 +14181,567 @@ msgstr "Isiltasun-atalasea"
 
 #: rhythm_ferret.cc:144
 msgid "Min Inter-Onset Time"
-msgstr ""
+msgstr "Ekite-tarte laburrena"
 
 #: rhythm_ferret.cc:151
 msgid "Sensitivity"
-msgstr ""
+msgstr "Sentikortasuna"
 
 #: rhythm_ferret.cc:155
 msgid "Cut Pos Threshold"
-msgstr ""
+msgstr "Mozte kok. atalasea"
 
 #: rhythm_ferret.cc:160
 msgid "Operation"
-msgstr ""
+msgstr "Ekintza"
 
 #: rhythm_ferret.cc:397
 msgid "split regions (rhythm ferret)"
-msgstr ""
+msgstr "banandu eremuak (erritmo Kuxkuxeroa)"
 
 #: route_group_dialog.cc:44
 msgid "Track/bus Group"
-msgstr ""
+msgstr "Pista/Bus taldea"
 
 #: route_group_dialog.cc:49
 msgid "Relative"
-msgstr ""
+msgstr "Erlatiboa"
 
 #: route_group_dialog.cc:50
 msgid "Muting"
-msgstr ""
+msgstr "Mututzea"
 
 #: route_group_dialog.cc:52
 msgid "Record enable"
-msgstr ""
+msgstr "Grabatzeko-gaituta"
 
 #: route_group_dialog.cc:54
 msgid "Active state"
-msgstr ""
+msgstr "Egoera aktiboa"
 
 #: route_group_dialog.cc:60
 msgid "RouteGroupDialog"
-msgstr ""
+msgstr "TaldeBideratzeLeihoa"
 
 #: route_group_dialog.cc:101
 msgid "<b>Sharing</b>"
-msgstr ""
+msgstr "<b>Partekatzea</b>"
 
 #: route_group_dialog.cc:191
 msgid "The group name is not unique. Please use a different name."
-msgstr ""
+msgstr "Talde-izen hau jada badago. Erabili beste izen bat."
 
 #: route_params_ui.cc:87
 msgid "Tracks/Busses"
-msgstr ""
+msgstr "Pistak/Busak"
 
 #: route_params_ui.cc:106
 msgid "Inputs"
-msgstr ""
+msgstr "Sarrerak"
 
 #: route_params_ui.cc:107
 msgid "Outputs"
-msgstr ""
+msgstr "Irteerak"
 
 #: route_params_ui.cc:108
 msgid "Plugins, Inserts & Sends"
-msgstr ""
+msgstr "Pluginak, intsertoak eta bidalketak"
 
 #: route_params_ui.cc:198
 msgid "route display list item for renamed route not found!"
-msgstr ""
+msgstr "ez da aurkitu berrizendatutako bideratzearentzat elementu-zerrenda!"
 
 #: route_params_ui.cc:438
 msgid "NO TRACK"
-msgstr ""
+msgstr "PISTARIK EZ"
 
 #: route_params_ui.cc:462
 msgid "Add Track or Bus"
-msgstr ""
+msgstr "Gehitu pista edo busa"
 
 #: route_params_ui.cc:574 route_params_ui.cc:575
 msgid "No Track or Bus Selected"
-msgstr ""
+msgstr "Ez da pista edo busik hautatu"
 
 #: route_time_axis.cc:115
 msgid "RTAV|G"
-msgstr ""
+msgstr "T"
 
 #: route_time_axis.cc:116
 msgid "RTAV|P"
-msgstr ""
+msgstr "P"
 
 #: route_time_axis.cc:117 vca_time_axis.cc:76
 msgid "RTAV|A"
-msgstr ""
+msgstr "A"
 
 #: route_time_axis.cc:201
 msgid "Record (Right-click for Step Edit)"
-msgstr ""
+msgstr "Grabatu (eskuin-klika pausoz pausoko ediziorako)"
 
 #: route_time_axis.cc:204
 msgid "Record"
-msgstr ""
+msgstr "Grabatu"
 
 #: route_time_axis.cc:275
 msgid "Route Group"
-msgstr ""
+msgstr "Bideratze taldea"
 
 #: route_time_axis.cc:285
 msgid "MIDI Controllers and Automation"
-msgstr ""
+msgstr "MIDI kontrolagailuak eta automatizazioa"
 
 #: route_time_axis.cc:548 vca_time_axis.cc:483
 msgid "Show All Automation"
-msgstr ""
+msgstr "Erakutsi automatizazio guztiak"
 
 #: route_time_axis.cc:551 vca_time_axis.cc:486
 msgid "Show Existing Automation"
-msgstr ""
+msgstr "Erakutsi existitzen den automatizazioa"
 
 #: route_time_axis.cc:554 vca_time_axis.cc:489
 msgid "Hide All Automation"
-msgstr ""
+msgstr "Ezkutatu automatizazio guztiak"
 
 #: route_time_axis.cc:565
 msgid "Processor automation"
-msgstr ""
+msgstr "Prozesadoreen automatizazioa"
 
 #: route_time_axis.cc:572 vca_time_axis.cc:493
 msgid "Fader"
-msgstr ""
+msgstr "Fader"
 
 #: route_time_axis.cc:599
 msgid "Pan"
-msgstr ""
+msgstr "Pan"
 
 #: route_time_axis.cc:689
 msgid "Overlaid"
-msgstr ""
+msgstr "Gainjarrita"
 
 #: route_time_axis.cc:699
 msgid "Stacked"
-msgstr ""
+msgstr "Pilatuta"
 
 #: route_time_axis.cc:711
 msgid "Layers"
-msgstr ""
+msgstr "Geruzak"
 
 #: route_time_axis.cc:775
 msgid "Automatic (based on I/O connections)"
-msgstr ""
+msgstr "Automatikoa (S/I konexioetan oinarrituta)"
 
 #: route_time_axis.cc:784
 msgid "(Currently: Existing Material)"
-msgstr ""
+msgstr "(Oraingoa: badagoen materiala)"
 
 #: route_time_axis.cc:787
 msgid "(Currently: Capture Time)"
-msgstr ""
+msgstr "(Oraingoa: hartze-denbora)"
 
 #: route_time_axis.cc:795
 msgid "Align With Existing Material"
-msgstr ""
+msgstr "Lerrokatu badagoen materialarekin"
 
 #: route_time_axis.cc:800
 msgid "Align With Capture Time"
-msgstr ""
+msgstr "Lerrokatu hartze-denborarekin"
 
 #: route_time_axis.cc:805
 msgid "Alignment"
-msgstr ""
+msgstr "Lerrokatzea"
 
 #: route_time_axis.cc:815 route_time_axis.cc:1708
 msgid "Playlist"
-msgstr ""
+msgstr "Erreprod.-zerrenda"
 
 #: route_time_axis.cc:1086
 msgid "Rename Playlist"
-msgstr ""
+msgstr "Berrizendatu erreprod.-zerrenda"
 
 #: route_time_axis.cc:1087
 msgid "New name for playlist:"
-msgstr ""
+msgstr "Erreprod.-zerrendarentzat izen berria:"
 
 #: route_time_axis.cc:1099 route_time_axis.cc:1195
 msgid "Given playlist name is not unique."
-msgstr ""
+msgstr "Erreprod.-zerrenda izen hau jada badago."
 
 #: route_time_axis.cc:1177
 msgid "New Copy Playlist"
-msgstr ""
+msgstr "Erreprod.-zerrendaren kopia berria"
 
 #: route_time_axis.cc:1178
 msgid "Name for playlist copy:"
-msgstr ""
+msgstr "Izena erreprod.-zerrendaren kopiarentzat:"
 
 #: route_time_axis.cc:1180
 msgid "New Playlist"
-msgstr ""
+msgstr "Erreprod.-zerrenda berria"
 
 #: route_time_axis.cc:1181
 msgid "Name for new playlist:"
-msgstr ""
+msgstr "Izena erreprod.-zerrenda berriarentzat:"
 
 #: route_time_axis.cc:1371
 msgid "The name \"%1\" is reserved for %2"
-msgstr ""
+msgstr "\"%1\" izena %2-(r)entzat gordeta dago"
 
 #: route_time_axis.cc:1597
 msgid "New Copy..."
-msgstr ""
+msgstr "Kopia berria..."
 
 #: route_time_axis.cc:1601
 msgid "New Take"
-msgstr ""
+msgstr "Hartze berria"
 
 #: route_time_axis.cc:1602
 msgid "Copy Take"
-msgstr ""
+msgstr "Bikoiztu hartzea"
 
 #: route_time_axis.cc:1607
 msgid "Clear Current"
-msgstr ""
+msgstr "Ezabatu oraingoa"
 
 #: route_time_axis.cc:1610
 msgid "Select from All..."
-msgstr ""
+msgstr "Hautatu guztietatik..."
 
 #: route_time_axis.cc:1698
 msgid "Take: %1.%2"
-msgstr ""
+msgstr "Hartzea: %1.%2"
 
 #: route_time_axis.cc:1996 selection.cc:935 selection.cc:989
 msgid "programming error: "
-msgstr ""
+msgstr "programazio-errorea: "
 
 #: route_time_axis.cc:2424
 msgid "Underlays"
-msgstr ""
+msgstr "Azpigeruzak"
 
 #: route_time_axis.cc:2427
 msgid "Remove \"%1\""
-msgstr ""
+msgstr "Ezabatu \"%1\""
 
 #: route_time_axis.cc:2477 route_time_axis.cc:2514
 msgid "programming error: underlay reference pointer pairs are inconsistent!"
 msgstr ""
+"programazio-errorea: azpigeruzen erreferentzia erakusle-pareak ez dira "
+"koherenteak!"
 
 #: route_time_axis.cc:2541 vca_master_strip.cc:218 vca_time_axis.cc:274
 msgid "After-fade listen (AFL)"
-msgstr ""
+msgstr "Fader Ondorengo Entzutea (AFL) soloa"
 
 #: route_time_axis.cc:2545 vca_master_strip.cc:222 vca_time_axis.cc:278
 msgid "Pre-fade listen (PFL)"
-msgstr ""
+msgstr "Fader Aurreko Entzutea (PFL)"
 
 #: route_ui.cc:191
 msgid "Mute this track"
-msgstr ""
+msgstr "Mututu pista hau"
 
 #: route_ui.cc:195
 msgid "Mute other (non-soloed) tracks"
-msgstr ""
+msgstr "Mututu beste (solo gabeko) pistak"
 
 #: route_ui.cc:201
 msgid "Enable recording on this track"
-msgstr ""
+msgstr "Gaitu grabazioa pista honetan"
 
 #: route_ui.cc:214
 msgid "Monitor input"
-msgstr ""
+msgstr "Monitorizatu sarrera"
 
 #: route_ui.cc:220
 msgid "Monitor playback"
-msgstr ""
+msgstr "Monitorizatu erreprodukzioa"
 
 #: route_ui.cc:943
 msgid "Rec-Safe"
-msgstr ""
+msgstr "Grabatzeaz seguru"
 
 #: route_ui.cc:948
 msgid "Step Entry"
-msgstr ""
+msgstr "Pusoz pausoko sarrera"
 
 #: route_ui.cc:1047
 msgid "Assign all tracks (prefader)"
-msgstr ""
+msgstr "Esleitu pista guztiak (prefader)"
 
 #: route_ui.cc:1051
 msgid "Assign all tracks and busses (prefader)"
-msgstr ""
+msgstr "Esleitu pista eta bus guztiak (prefader)"
 
 #: route_ui.cc:1055
 msgid "Assign all tracks (postfader)"
-msgstr ""
+msgstr "Esleitu pista guztiak (postfader)"
 
 #: route_ui.cc:1059
 msgid "Assign all tracks and busses (postfader)"
-msgstr ""
+msgstr "Esleitu pista eta bus guztiak (postfader)"
 
 #: route_ui.cc:1067
 msgid "Assign selected tracks and busses (prefader)"
-msgstr ""
+msgstr "Esleitu hautatutako pistak eta busak (prefader)"
 
 #: route_ui.cc:1070
 msgid "Assign selected tracks (postfader)"
-msgstr ""
+msgstr "Esleitu hautatutako pistak (postfader)"
 
 #: route_ui.cc:1074
 msgid "Assign selected tracks and busses (postfader)"
-msgstr ""
+msgstr "Esleitu hautatutako pistak eta busak (postfader)"
 
 #: route_ui.cc:1419
 msgid "Solo Isolate"
-msgstr ""
+msgstr "Solo isolatua"
 
 #: route_ui.cc:1426
 msgid "Solo Safe"
-msgstr ""
+msgstr "Solotik seguru"
 
 #: route_ui.cc:1444
 msgid "Pre Fader Sends"
-msgstr ""
+msgstr "Fader aurreko bidalketak"
 
 #: route_ui.cc:1450
 msgid "Post Fader Sends"
-msgstr ""
+msgstr "Fader ondorengo bidalketak"
 
 #: route_ui.cc:1456
 msgid "Control Outs"
-msgstr ""
+msgstr "Kontrol-irteerak"
 
 #: route_ui.cc:1462
 msgid "Main Outs"
-msgstr ""
+msgstr "Irteera nagusiak"
 
 #: route_ui.cc:1691
 msgid ""
 "The use of colons (':') is discouraged in track and bus names.\n"
 "Do you want to use this new name?"
 msgstr ""
+"Ez da gomendatzen bi puntuak (':') erabiltzea pista eta busen izenetan.\n"
+"Izen berri hau erabili nahi duzu?"
 
 #: route_ui.cc:1695
 msgid "Use the new name"
-msgstr ""
+msgstr "Erabili izen berria"
 
 #: route_ui.cc:1696
 msgid "Re-edit the name"
-msgstr ""
+msgstr "Berreditatu izena"
 
 #: route_ui.cc:1709
 msgid "Rename Track"
-msgstr ""
+msgstr "Berrizendatu pista"
 
 #: route_ui.cc:1711
 msgid "Rename Bus"
-msgstr ""
+msgstr "Berrizendatu busa"
 
 #: route_ui.cc:1771
 msgid ": comment editor"
-msgstr ""
+msgstr ": iruzkin editorea"
 
 #: route_ui.cc:1953
 msgid "Cannot create route template directory %1"
-msgstr ""
+msgstr "Ezin da sortu %1 bideratze-txantiloien direktorioa"
 
 #: route_ui.cc:2053
 msgid ""
 "Left-click to invert polarity of channel %1 of this track. Right-click to "
 "show menu."
 msgstr ""
+"Egin ezker-klika pista honetako %1 kanalaren polaritatea alderantzikatzeko. "
+"Egin eskuin-klika menua erakusteko."
 
 #: route_ui.cc:2055
 msgid "Click to show a menu of channels to invert polarity"
-msgstr ""
+msgstr "Egin klik polaritatea alderantzikatzeko kanalen menua bistaratzeko"
 
 #: route_ui.cc:2331
 msgid ""
 "The Plugin's number of audio outputs ports (%1) does not match the Tracks's "
 "number of audio outputs (%2). Cannot fan out."
 msgstr ""
+"Pluginaren audio-irteeren kopurua (%1) ez dator bat pistaren audio-irteeren "
+"kopuruarekin (%2). Ezin da erakutsi."
 
 #: route_ui.cc:2349
 msgid "Instrument has only 1 output bus. Nothing to fan out."
-msgstr ""
+msgstr "Instrumentuak irteera-bus bakarra du. Ez dago zer erakutsi."
 
 #: save_as_dialog.cc:36
 msgid "Switch to newly-saved version"
-msgstr ""
+msgstr "Aldatu gordetako azken bertsiora"
 
 #: save_as_dialog.cc:37
 msgid "Copy media to new session"
-msgstr ""
+msgstr "Kopiatu multimedia saio berrira"
 
 #: save_as_dialog.cc:38
 msgid "Copy external media into new session"
-msgstr ""
+msgstr "Kopiatu kanpoko multimedia saio berrian"
 
 #: save_as_dialog.cc:39
 msgid "Newly-saved session should be empty"
-msgstr ""
+msgstr "Gorde berri den saioak hutsik egon behar du"
 
 #: save_as_dialog.cc:50
 msgid "Save as session name"
-msgstr ""
+msgstr "Gorde saio-izen gisa"
 
 #: save_as_dialog.cc:57
 msgid "Parent directory/folder"
-msgstr ""
+msgstr "Direktorio/Karpeta nagusia"
 
 #: save_template_dialog.cc:35
 msgid "Save as template"
-msgstr ""
+msgstr "Gorde txantiloi gisa"
 
 #: save_template_dialog.cc:44
 msgid "Template name:"
-msgstr ""
+msgstr "Txantiloiaren izena:"
 
 #: save_template_dialog.cc:48
 msgid "Description:"
-msgstr ""
+msgstr "Deskripzioa:"
 
 #: search_path_option.cc:42
 msgid "Select folder to search for media"
-msgstr ""
+msgstr "Hautatu karpeta bertan multimedia bilatzeko"
 
 #: search_path_option.cc:52
 msgid "Click to add a new location"
-msgstr ""
+msgstr "Egin klik kokaleku berria gehitzeko"
 
 #: search_path_option.cc:59
 msgid "the session folder"
-msgstr ""
+msgstr "saioaren karpeta"
 
 #: script_selector.cc:177
 msgid "Select Script to unload"
-msgstr ""
+msgstr "Hautatu deskargatzeko scripta"
 
 #: script_selector.cc:218
 msgid "<b>Name:</b>"
-msgstr ""
+msgstr "<b>Izena:</b>"
 
 #: script_selector.cc:225
 msgid "<b>Instance Parameters</b>"
-msgstr ""
+msgstr "<b>Instantzia-parametroak</b>"
 
 #: send_ui.cc:128
 msgid "Send "
-msgstr ""
+msgstr "Bidali "
 
 #: session_archive_dialog.cc:35
 msgid "Zip/Archive Current Session"
-msgstr ""
+msgstr "Konprimatu/Artxibatu oraingo saioa"
 
 #: session_archive_dialog.cc:37
 msgid "Exclude unused audio sources"
-msgstr ""
+msgstr "Baztertu erabiltzen ez diren audio-iturburuak"
 
 #: session_archive_dialog.cc:47 session_archive_dialog.cc:49
 #: session_archive_dialog.cc:179 session_archive_dialog.cc:193
 msgid "FLAC 16bit"
-msgstr ""
+msgstr "FLAC 16bit"
 
 #: session_archive_dialog.cc:48 session_archive_dialog.cc:182
 #: session_archive_dialog.cc:196
 msgid "FLAC 24bit"
-msgstr ""
+msgstr "FLAC 24bit"
 
 #: session_archive_dialog.cc:63
 msgid "Archive Name:"
-msgstr ""
+msgstr "Artxiboaren izena:"
 
 #: session_archive_dialog.cc:74
 msgid "Target directory/folder:"
-msgstr ""
+msgstr "Helburuko direktorioa/karpeta:"
 
 #: session_archive_dialog.cc:80
 msgid "Audio Compression:"
-msgstr ""
+msgstr "Audio-konpresioa:"
 
 #: session_archive_dialog.cc:86
 msgid "Archive Compression:"
-msgstr ""
+msgstr "Artxibo-konpresioa:"
 
 #: session_archive_dialog.cc:96
 msgid ""
 "Note: This archives only the current session state, snapshots are not "
 "included."
 msgstr ""
+"Oharra: honek oraingo saioaren egoera besterik ez du artxibatuko; saio-"
+"argazkiak ez dira sartuko."
 
 #: session_archive_dialog.cc:239
 msgid "Archiving Session"
-msgstr ""
+msgstr "Saioa artxibatzen"
 
 #: session_archive_dialog.cc:243
 msgid "Encoding Audio"
-msgstr ""
+msgstr "Audioa kodetzen"
 
 #: session_dialog.cc:80
 msgid "Session Setup"
-msgstr ""
+msgstr "Saioaren konfigurazioa"
 
 #: session_dialog.cc:152 session_dialog.cc:439
 msgid "Recent Sessions"
-msgstr ""
+msgstr "Azkenaldiko saioak"
 
 #: session_dialog.cc:348
 msgid "Sample Rate"
-msgstr ""
+msgstr "Lagin-tasa"
 
 #: session_dialog.cc:352
 msgid "File Resolution"
-msgstr ""
+msgstr "Fitxategiaren bereizmena"
 
 #: session_dialog.cc:354
 msgid "Last Modified"
-msgstr ""
+msgstr "Azkenengoz aldatuta"
 
 #: session_dialog.cc:380
 msgid "New Session"
-msgstr ""
+msgstr "Saio berria"
 
 #: session_dialog.cc:421
 msgid "Check the website for more..."
-msgstr ""
+msgstr "Egiaztatu webgunea gehiagorako…"
 
 #: session_dialog.cc:424
 msgid "Click to open the program website in your web browser"
-msgstr ""
+msgstr "Egin klik programaren webgunea zure nabigatzailean irekitzeko"
 
 #: session_dialog.cc:446
 msgid "Select session file"
-msgstr ""
+msgstr "Hautatu saio-fitxategia"
 
 #: session_dialog.cc:465
 msgid "Other Sessions"
-msgstr ""
+msgstr "Beste saioak"
 
 #: session_dialog.cc:472
 msgid "Safe Mode: Disable all Plugins"
-msgstr ""
+msgstr "Modu segurua: desgaitu plugin guztiak"
 
 #: session_dialog.cc:502
 msgid "Open"
-msgstr ""
+msgstr "Ireki"
 
 #: session_dialog.cc:544
 msgid "Untitled-%1"
-msgstr ""
+msgstr "Izengabea-%1"
 
 #: session_dialog.cc:598
 msgid "Empty Template"
-msgstr ""
+msgstr "Txantiloi hutsa"
 
 #: session_dialog.cc:600
 msgid ""
@@ -14742,494 +14749,515 @@ msgid ""
 "\n"
 "Select this option if you are importing files to mix."
 msgstr ""
+"Saio hutsa jatorrizko ezarpenekin.\n"
+"\n"
+"Hautatu aukera hau fitxategiak nahasteko inportatzen ari bazara."
 
 #: session_dialog.cc:618
 msgid "Session name:"
-msgstr ""
+msgstr "Saio-izena:"
 
 #: session_dialog.cc:631
 msgid "Create session folder in:"
-msgstr ""
+msgstr "Sortu saio-karpeta hemen:"
 
 #: session_dialog.cc:654
 msgid "Select folder for session"
-msgstr ""
+msgstr "Hautatu saiorako karpeta"
 
 #: session_dialog.cc:689
 msgid "Template"
-msgstr ""
+msgstr "Txantiloia"
 
 #: session_dialog.cc:841 session_dialog.cc:899
 msgid "32-bit float"
-msgstr ""
+msgstr "32-bit aldakorra"
 
 #: session_dialog.cc:844 session_dialog.cc:902
 msgid "24-bit"
-msgstr ""
+msgstr "24-bit"
 
 #: session_dialog.cc:847 session_dialog.cc:905
 msgid "16-bit"
-msgstr ""
+msgstr "16-bit"
 
 #: session_dialog.cc:858 session_dialog.cc:917
 msgid "Last modified with: %1"
-msgstr ""
+msgstr "Azkenengoz aldatuta honekin: %1"
 
 #: session_dialog.cc:1052
 msgid "Remove session from recent list"
-msgstr ""
+msgstr "Kendu saioa aken elementuen zerrendatik"
 
 #: session_import_dialog.cc:81
 msgid "Elements"
-msgstr ""
+msgstr "Elementuak"
 
 #: session_import_dialog.cc:120
 msgid "Cannot load XML for session from %1"
-msgstr ""
+msgstr "Ezin da XML kargatu %1-(e)tik"
 
 #: session_import_dialog.cc:137 session_import_dialog.cc:221
 msgid "Some elements had errors in them. Please see the log for details"
 msgstr ""
+"Elementu batzuek erroreak zituzten. Ikusi erregistroa xehetasun gehiagorako"
 
 #: session_import_dialog.cc:173
 msgid "Import from session"
-msgstr ""
+msgstr "Inportatu saiotik"
 
 #: session_import_dialog.cc:237
 msgid "This will select all elements of this type!"
-msgstr ""
+msgstr "Honek mota honetako elementu guztiak hautatuko ditu!"
 
 #: session_metadata_dialog.cc:332
 msgid "EAN Check digit OK"
-msgstr ""
+msgstr "EAN egiaztatzearen digitua ondo"
 
 #: session_metadata_dialog.cc:336
 msgid "EAN Check digit error"
-msgstr ""
+msgstr "EAN egiaztatzearen digitu errorea"
 
 #: session_metadata_dialog.cc:336
 msgid "expected"
-msgstr ""
+msgstr "aurreikusita"
 
 #: session_metadata_dialog.cc:341
 msgid "EAN Length error"
-msgstr ""
+msgstr "EAN luzaeraren errorea"
 
 #: session_metadata_dialog.cc:470
 msgid "Field"
-msgstr ""
+msgstr "Eremua"
 
 #: session_metadata_dialog.cc:474
 msgid "Values (current value on top)"
-msgstr ""
+msgstr "Balioak (uneko balioa goian)"
 
 #: session_metadata_dialog.cc:689
 msgid "User"
-msgstr ""
+msgstr "Erabiltzailea"
 
 #: session_metadata_dialog.cc:697
 msgid "Email"
-msgstr ""
+msgstr "E-posta"
 
 #: session_metadata_dialog.cc:700
 msgid "Web"
-msgstr ""
+msgstr "Webgunea"
 
 #: session_metadata_dialog.cc:703
 msgid "Organization"
-msgstr ""
+msgstr "Erakundea"
 
 #: session_metadata_dialog.cc:706
 msgid "Country"
-msgstr ""
+msgstr "Herrialdea"
 
 #: session_metadata_dialog.cc:734
 msgid "Title"
-msgstr ""
+msgstr "Izenburua"
 
 #: session_metadata_dialog.cc:737
 msgid "Track Number"
-msgstr ""
+msgstr "Pistaren zenbakia"
 
 #: session_metadata_dialog.cc:740
 msgid "Subtitle"
-msgstr ""
+msgstr "Azpititulua"
 
 #: session_metadata_dialog.cc:743
 msgid "Grouping"
-msgstr ""
+msgstr "Taldekatzea"
 
 #: session_metadata_dialog.cc:746
 msgid "Artist"
-msgstr ""
+msgstr "Artista"
 
 #: session_metadata_dialog.cc:749
 msgid "Genre"
-msgstr ""
+msgstr "Generoa"
 
 #: session_metadata_dialog.cc:752
 msgid "Comment"
-msgstr ""
+msgstr "Iruzkina"
 
 #: session_metadata_dialog.cc:755
 msgid "Copyright"
-msgstr ""
+msgstr "Copyright"
 
 #: session_metadata_dialog.cc:763 session_metadata_dialog.cc:768
 msgid "Album"
-msgstr ""
+msgstr "Albuma"
 
 #: session_metadata_dialog.cc:771
 msgid "Year"
-msgstr ""
+msgstr "Urtea"
 
 #: session_metadata_dialog.cc:774
 msgid "Album Artist"
-msgstr ""
+msgstr "Albumaren artista"
 
 #: session_metadata_dialog.cc:777
 msgid "Total Tracks"
-msgstr ""
+msgstr "Pistak guztira"
 
 #: session_metadata_dialog.cc:780
 msgid "Disc Subtitle"
-msgstr ""
+msgstr "Diskoaren azpititulua"
 
 #: session_metadata_dialog.cc:783
 msgid "Disc Number"
-msgstr ""
+msgstr "Diskoaren zenbakia"
 
 #: session_metadata_dialog.cc:786
 msgid "Total Discs"
-msgstr ""
+msgstr "Diskoak guztira"
 
 #: session_metadata_dialog.cc:789
 msgid "Compilation"
-msgstr ""
+msgstr "Bilduma"
 
 #: session_metadata_dialog.cc:792
 msgid "ISRC"
-msgstr ""
+msgstr "ISRC"
 
 #: session_metadata_dialog.cc:795
 msgid "EAN barcode"
-msgstr ""
+msgstr "EAN barra-kodea"
 
 #: session_metadata_dialog.cc:808
 msgid "People"
-msgstr ""
+msgstr "Jendea"
 
 #: session_metadata_dialog.cc:813
 msgid "Lyricist"
-msgstr ""
+msgstr "Hitzen sortzailea"
 
 #: session_metadata_dialog.cc:816
 msgid "Composer"
-msgstr ""
+msgstr "Konpositorea"
 
 #: session_metadata_dialog.cc:819
 msgid "Conductor"
-msgstr ""
+msgstr "Zuzendaria"
 
 #: session_metadata_dialog.cc:822
 msgid "Remixer"
-msgstr ""
+msgstr "Birnahaste-teknikoa"
 
 #: session_metadata_dialog.cc:825
 msgid "Arranger"
-msgstr ""
+msgstr "Moldatzailea"
 
 #: session_metadata_dialog.cc:828
 msgid "Engineer"
-msgstr ""
+msgstr "Ingeniaria"
 
 #: session_metadata_dialog.cc:831
 msgid "Producer"
-msgstr ""
+msgstr "Ekoizlea"
 
 #: session_metadata_dialog.cc:834
 msgid "DJ Mixer"
-msgstr ""
+msgstr "DJ nahaste-teknikoa"
 
 #: session_metadata_dialog.cc:837
 msgid "Metadata|Mixer"
-msgstr ""
+msgstr "Nahaste-teknikoa"
 
 #: session_metadata_dialog.cc:845
 msgid "School"
-msgstr ""
+msgstr "Eskola"
 
 #: session_metadata_dialog.cc:850
 msgid "Instructor"
-msgstr ""
+msgstr "Irakaslea"
 
 #: session_metadata_dialog.cc:853
 msgid "Course"
-msgstr ""
+msgstr "Kurtsoa"
 
 #: session_metadata_dialog.cc:861
 msgid "Edit Session Metadata"
-msgstr ""
+msgstr "Editatu saioaren metadatuak"
 
 #: session_metadata_dialog.cc:892
 msgid "Import session metadata"
-msgstr ""
+msgstr "Inportatu saioaren metadatuak"
 
 #: session_metadata_dialog.cc:913
 msgid "Choose session to import metadata from"
-msgstr ""
+msgstr "Aukeratu metadatuak inportatzeko saioa"
 
 #: session_metadata_dialog.cc:952
 msgid "This session file could not be read!"
-msgstr ""
+msgstr "Saio-fitxategi hau ezin izan da irakurri!"
 
 #: session_metadata_dialog.cc:962
 msgid ""
 "The session file didn't contain metadata!\n"
 "Maybe this is an old session format?"
 msgstr ""
+"Saio-fitxategiak metadaturik ez zuen! Agian hau saio-formatu zaharra izan "
+"daiteke?"
 
 #: session_metadata_dialog.cc:981
 msgid "Import all from:"
-msgstr ""
+msgstr "Inportatu guztiak hemendik:"
 
 #: session_option_editor.cc:37
 msgid "Session Properties"
-msgstr ""
+msgstr "Saioaren propietateak"
 
 #: session_option_editor.cc:46
 msgid "Timecode Settings"
-msgstr ""
+msgstr "Denbora-kodearen ezarpenak"
 
 #: session_option_editor.cc:50
 msgid "Timecode frames-per-second"
-msgstr ""
+msgstr "Denbora-kodearen fps-ak"
 
 #: session_option_editor.cc:55
 msgid "23.976"
-msgstr ""
+msgstr "23.976"
 
 #: session_option_editor.cc:56
 msgid "24"
-msgstr ""
+msgstr "24"
 
 #: session_option_editor.cc:57
 msgid "24.975"
-msgstr ""
+msgstr "24.975"
 
 #: session_option_editor.cc:58
 msgid "25"
-msgstr ""
+msgstr "25"
 
 #: session_option_editor.cc:59
 msgid "29.97"
-msgstr ""
+msgstr "29.97"
 
 #: session_option_editor.cc:60
 msgid "29.97 drop"
-msgstr ""
+msgstr "29.97 drop"
 
 #: session_option_editor.cc:61
 msgid "30"
-msgstr ""
+msgstr "30"
 
 #: session_option_editor.cc:62
 msgid "30 drop"
-msgstr ""
+msgstr "30 drop"
 
 #: session_option_editor.cc:63
 msgid "59.94"
-msgstr ""
+msgstr "59.94"
 
 #: session_option_editor.cc:64
 msgid "60"
-msgstr ""
+msgstr "60"
 
+# Tirante / zabalgarri ???
 #: session_option_editor.cc:70
 msgid "Pull-up / pull-down"
-msgstr ""
+msgstr "Igoera / jaitsiera"
 
 #: session_option_editor.cc:75
 msgid "4.1667 + 0.1%"
-msgstr ""
+msgstr "4.1667 + 0.1%"
 
 #: session_option_editor.cc:76
 msgid "4.1667"
-msgstr ""
+msgstr "4.1667"
 
 #: session_option_editor.cc:77
 msgid "4.1667 - 0.1%"
-msgstr ""
+msgstr "4.1667 - 0.1%"
 
 #: session_option_editor.cc:78
 msgid "0.1"
-msgstr ""
+msgstr "0.1"
 
 #: session_option_editor.cc:80
 msgid "-0.1"
-msgstr ""
+msgstr "-0.1"
 
 #: session_option_editor.cc:81
 msgid "-4.1667 + 0.1%"
-msgstr ""
+msgstr "-4.1667 + 0.1%"
 
 #: session_option_editor.cc:82
 msgid "-4.1667"
-msgstr ""
+msgstr "-4.1667"
 
 #: session_option_editor.cc:83
 msgid "-4.1667 - 0.1%"
-msgstr ""
+msgstr "-4.1667 - 0.1%"
 
 #: session_option_editor.cc:86
 msgid "Ext Timecode Offsets"
-msgstr ""
+msgstr "Kanpoko denbora-kodearen desplazamenduak"
 
 #: session_option_editor.cc:90
 msgid "Slave Timecode offset"
-msgstr ""
+msgstr "Morroiaren denbora-kodearen desplazamendua"
 
 #: session_option_editor.cc:97
 msgid "The specified offset is added to the received timecode (MTC or LTC)."
 msgstr ""
+"Zehaztutako desplazamendua jasotako denbora-kodera gehituko da (MTC edo LTC)."
 
 #: session_option_editor.cc:103
 msgid "Timecode Generator offset"
-msgstr ""
+msgstr "Denbora-kodearen sorgailuaren desplazamendua"
 
 #: session_option_editor.cc:110
 msgid ""
 "Specify an offset which is added to the generated timecode (so far only LTC)."
 msgstr ""
+"Zehaztu sortutako denbora-kodera gehituta dagoen desplazamendua (oraingoz "
+"LTC soilik)."
 
 #: session_option_editor.cc:114
 msgid "JACK Transport/Time Settings"
-msgstr ""
+msgstr "JACK Garraio-/Denbora-ezarpenak"
 
 #: session_option_editor.cc:118
 msgid ""
 "%1 is JACK Time Master (provides Bar|Beat|Tick and other information to JACK)"
 msgstr ""
+"%1 da JACKentzako denbora-masterra (Konpas|Pultsu|Azpipultsuak eta bestelako "
+"informazioa JACKi ematen dio)"
 
 #: session_option_editor.cc:125
 msgid "A/V Synchronization"
-msgstr ""
+msgstr "A/V sinkronizazioa"
 
 #: session_option_editor.cc:128
 msgid ""
 "Use Video File's FPS Instead of Timecode Value for Timeline and Video "
 "Monitor."
 msgstr ""
+"Erabili bideo-fitxategiaren FPS-ak denbora-kodearen balioaren ordez, denbora-"
+"lerro eta bideo-monitorean."
 
 #: session_option_editor.cc:135
 msgid ""
 "Apply Pull-Up/Down to Video Timeline and Video Monitor (Unless using JACK-"
 "sync)."
 msgstr ""
+"Aplikatu igoera/jaitsiera bideoaren denbora-lerro eta monitoreari (JACK-sync "
+"erabili ezean)."
 
 #: session_option_editor.cc:144
 msgid "Audio Fades"
-msgstr ""
+msgstr "Audio-lausotzeak"
 
 #: session_option_editor.cc:148
 msgid "Declick when transport starts and stops"
-msgstr ""
+msgstr "Desklikatu garraioa hasi eta bukatzen denean"
 
 #: session_option_editor.cc:155
 msgid "Declick when monitor state changes"
-msgstr ""
+msgstr "Desklikatu monitore-egoera aldatzen denean"
 
 #: session_option_editor.cc:162
 msgid "Region fades active"
-msgstr ""
+msgstr "Eremu-lausotzeak aktibo"
 
 #: session_option_editor.cc:169
 msgid "Region fades visible"
-msgstr ""
+msgstr "Eremu-lausotzeak ikusgai"
 
 #: session_option_editor.cc:180
 msgid "Sample format"
-msgstr ""
+msgstr "Lagin-formatua"
 
 #: session_option_editor.cc:190
 msgid "File type"
-msgstr ""
+msgstr "Fitxategi mota"
 
 #: session_option_editor.cc:195
 msgid "Broadcast WAVE (4GB size limit)"
-msgstr ""
+msgstr "Broadcast WAVE (4GB gehienezko tamaina)"
 
 #: session_option_editor.cc:197
 msgid "Broadcast RF64"
-msgstr ""
+msgstr "Broadcast RF64"
 
 #: session_option_editor.cc:199
 msgid "WAVE (4GB size limit)"
-msgstr ""
+msgstr "WAVE (4GB gehienezko tamaina)"
 
 #: session_option_editor.cc:200
 msgid "WAVE-64"
-msgstr ""
+msgstr "WAVE-64"
 
 #: session_option_editor.cc:204
 msgid "RF64 (WAV compatible)"
-msgstr ""
+msgstr "RF64 (WAVekin bateragarri)"
 
 #: session_option_editor.cc:210 session_option_editor.cc:216
 #: session_option_editor.cc:223
 msgid "Files|Locations"
-msgstr ""
+msgstr "Kokalekuak"
 
 #: session_option_editor.cc:210
 msgid "File Locations"
-msgstr ""
+msgstr "Fitxategien kokalekuak"
 
 #: session_option_editor.cc:212
 msgid "Search for audio files in:"
-msgstr ""
+msgstr "Bilatu audio-fitxategiak hemen:"
 
 #: session_option_editor.cc:218
 msgid "Search for MIDI files in:"
-msgstr ""
+msgstr "Bilatu MIDI fitxategiak hemen:"
 
 #: session_option_editor.cc:227 session_option_editor.cc:239
 #: session_option_editor.cc:249 session_option_editor.cc:260
 msgid "Filenames"
-msgstr ""
+msgstr "Fitxategi-izenak"
 
 #: session_option_editor.cc:227
 msgid "File Naming"
-msgstr ""
+msgstr "Fitxategien izendatzea"
 
 #: session_option_editor.cc:233
 msgid "Prefix Track number"
-msgstr ""
+msgstr "Aurrizkiaren pistaren zenbakia"
 
 #: session_option_editor.cc:238
 msgid ""
 "Adds the current track number to the beginning of the recorded file name."
 msgstr ""
+"Uneko pistaren zenbakia gehitzen du grabatutako fitxategi-izenaren hasieran."
 
 #: session_option_editor.cc:243
 msgid "Prefix Take Name"
-msgstr ""
+msgstr "Jarri aurrizkia hartze-izenari"
 
 #: session_option_editor.cc:248
 msgid "Adds the Take Name to the beginning of the recorded file name."
 msgstr ""
+"Hartzearen izena gehitzen du grabatutako fitxategiaren izenaren hasieran."
 
+# “take” izenondoa ala aditza?
 #: session_option_editor.cc:253
 msgid "Take Name"
-msgstr ""
+msgstr "Hartzearen izena"
 
 #: session_option_editor.cc:267
 msgid ""
 "Track Input Monitoring automatically follows transport state (\"auto-input\")"
 msgstr ""
+"Pistaren sarrera-monitorizazioak automatikoki garraioaren egoerari "
+"jarraitzen dio (“audio-sarrera”)"
 
 #: session_option_editor.cc:274
 msgid "Use monitor section in this session"
-msgstr ""
+msgstr "Erabili monitore-eremua saio honetan"
 
 #: session_option_editor.cc:281 session_option_editor.cc:283
 #: session_option_editor.cc:290 session_option_editor.cc:297
@@ -15238,51 +15266,51 @@ msgstr ""
 #: session_option_editor.cc:327 session_option_editor.cc:334
 #: session_option_editor.cc:336 session_option_editor.cc:343
 msgid "Meterbridge"
-msgstr ""
+msgstr "Neurgailu-leihoa"
 
 #: session_option_editor.cc:281
 msgid "Route Display"
-msgstr ""
+msgstr "Bideratze-bistaratzea"
 
 #: session_option_editor.cc:285
 msgid "Show Midi Tracks"
-msgstr ""
+msgstr "Erakutsi midi-pistak"
 
 #: session_option_editor.cc:292
 msgid "Show Busses"
-msgstr ""
+msgstr "Erakutsi busak"
 
 #: session_option_editor.cc:299
 msgid "Include Master Bus"
-msgstr ""
+msgstr "Gehitu master busa"
 
 #: session_option_editor.cc:304
 msgid "Button Area"
-msgstr ""
+msgstr "Botoien eremua"
 
 #: session_option_editor.cc:308
 msgid "Rec-enable Button"
-msgstr ""
+msgstr "Grabatzeko-gaitu botoia"
 
 #: session_option_editor.cc:315
 msgid "Mute Button"
-msgstr ""
+msgstr "Mututu-botoia"
 
 #: session_option_editor.cc:322
 msgid "Solo Button"
-msgstr ""
+msgstr "Solo-botoia"
 
 #: session_option_editor.cc:329
 msgid "Monitor Buttons"
-msgstr ""
+msgstr "Monitorizazio-botoiak"
 
 #: session_option_editor.cc:334
 msgid "Name Labels"
-msgstr ""
+msgstr "Izenaren etiketak"
 
 #: session_option_editor.cc:338
 msgid "Track Name"
-msgstr ""
+msgstr "Pistaren izena"
 
 #: session_option_editor.cc:347 session_option_editor.cc:349
 #: session_option_editor.cc:370 session_option_editor.cc:372
@@ -15290,481 +15318,487 @@ msgstr ""
 #: session_option_editor.cc:388 session_option_editor.cc:390
 #: session_option_editor.cc:397 session_option_editor.cc:401
 msgid "Misc"
-msgstr ""
+msgstr "Bestelakoak"
 
 #: session_option_editor.cc:351
 msgid "MIDI region copies are independent"
-msgstr ""
+msgstr "MIDI eremuen kopiak independenteak dira"
 
 #: session_option_editor.cc:358
 msgid ""
 "Policy for handling overlapping notes\n"
 " on the same MIDI channel"
 msgstr ""
+"Gainjarritako notak kudeatzeko gidalerroak\n"
+"MIDI kanal berean"
 
 #: session_option_editor.cc:363
 msgid "never allow them"
-msgstr ""
+msgstr "ez baimendu inoiz"
 
 #: session_option_editor.cc:364
 msgid "don't do anything in particular"
-msgstr ""
+msgstr "ez egin ezer zehazki"
 
 #: session_option_editor.cc:365
 msgid "replace any overlapped existing note"
-msgstr ""
+msgstr "ordeztu gainjarrita dagoen edozein nota"
 
 #: session_option_editor.cc:366
 msgid "shorten the overlapped existing note"
-msgstr ""
+msgstr "laburtu gainjarrita dagoen nota"
 
 #: session_option_editor.cc:367
 msgid "shorten the overlapping new note"
-msgstr ""
+msgstr "laburtu gainjarrita dagoen nota berria"
 
 #: session_option_editor.cc:368
 msgid "replace both overlapping notes with a single note"
-msgstr ""
+msgstr "ordeztu gainjarritako bi notak nota bakar batekin"
 
 #: session_option_editor.cc:376
 msgid "Glue new markers to bars and beats"
-msgstr ""
+msgstr "Itsatsi marka berriak konpas eta pultsuetara"
 
 #: session_option_editor.cc:383
 msgid "Glue new regions to bars and beats"
-msgstr ""
+msgstr "Itsatsi eremu berriak konpas eta pultsuetara"
 
 #: session_option_editor.cc:392
 msgid "Always count-in when recording"
-msgstr ""
+msgstr "Egin beti atzera-kontua grabatzerakoan"
 
 #: session_option_editor.cc:397
 msgid "Defaults"
-msgstr ""
+msgstr "Lehenetsitakoak"
 
 #: session_option_editor.cc:399
 msgid "Use these settings as defaults"
-msgstr ""
+msgstr "Erabili ezarpen hauek lehenespen gisa"
 
 #: session_option_editor.cc:429 session_option_editor.cc:437
 msgid "24-bit integer"
-msgstr ""
+msgstr "24-bit osoa"
 
 #: session_option_editor.cc:430 session_option_editor.cc:438
 msgid "16-bit integer"
-msgstr ""
+msgstr "16-bit osoa"
 
 #: session_option_editor.cc:436
 msgid "32-bit floating point"
-msgstr ""
+msgstr "32-bit aldakorra"
 
 #: sfdb_ui.cc:106 sfdb_ui.cc:1845
 msgid "by track number"
-msgstr ""
+msgstr "pistaren zenbakiaren arabera"
 
 #: sfdb_ui.cc:108 sfdb_ui.cc:1846
 msgid "by track name"
-msgstr ""
+msgstr "pistaren izenaren arabera"
 
 #: sfdb_ui.cc:110 sfdb_ui.cc:1847
 msgid "by instrument name"
-msgstr ""
+msgstr "instrumentuaren izenaren arabera"
 
 #: sfdb_ui.cc:114
 msgid "programming error: unknown midi track name source string %1"
-msgstr ""
+msgstr "programazio-errorea: midi pista-izenaren %1 iturburu-kate ezezaguna"
 
 #: sfdb_ui.cc:122 sfdb_ui.cc:140 sfdb_ui.cc:147
 msgid "as new tracks"
-msgstr ""
+msgstr "pista berri gisa"
 
 #: sfdb_ui.cc:124 sfdb_ui.cc:142
 msgid "to selected tracks"
-msgstr ""
+msgstr "hautatutako pistetara"
 
 #: sfdb_ui.cc:126 sfdb_ui.cc:144
 msgid "to source list"
-msgstr ""
+msgstr "iturburu-zerrendara"
 
 #: sfdb_ui.cc:130
 msgid "programming error: unknown import mode string %1"
-msgstr ""
+msgstr "programazio-errorea: inportazio-motaren %1 kate ezezaguna"
 
 #: sfdb_ui.cc:155
 msgid "Auto-play"
-msgstr ""
+msgstr "Auto-erreproduzitzea"
 
 #: sfdb_ui.cc:165 sfdb_ui.cc:388
 msgid "<b>Sound File Information</b>"
-msgstr ""
+msgstr "<b>Soinu-fitxategiaren informazioa</b>"
 
 #: sfdb_ui.cc:177
 msgid "Timestamp:"
-msgstr ""
+msgstr "Denbora-zigilua:"
 
 #: sfdb_ui.cc:185
 msgid "Tempo Map:"
-msgstr ""
+msgstr "Tempo-mapa:"
 
 #: sfdb_ui.cc:222 sfdb_ui.cc:738
 msgid "Tags:"
-msgstr ""
+msgstr "Etiketak:"
 
 #: sfdb_ui.cc:334
 msgid "<b>Midi File Information</b>"
-msgstr ""
+msgstr "<b>Midi fitxategiaren informazioa</b>"
 
 #: sfdb_ui.cc:347
 msgid "(Tracks)"
-msgstr ""
+msgstr "(Pistak)"
 
 #: sfdb_ui.cc:355 sfdb_ui.cc:374
 msgid "No tempo data"
-msgstr ""
+msgstr "Tempo daturik ez"
 
 #: sfdb_ui.cc:360
 msgid "%1/%2 ♩ = %3"
-msgstr ""
+msgstr "%1/%2 ♩ = %3"
 
 #: sfdb_ui.cc:367
 msgid "map with %1 sections"
-msgstr ""
+msgstr "%1 sekzio dituen mapa"
 
 #: sfdb_ui.cc:610
 msgid "SoundFileBox: Could not tokenize string: "
-msgstr ""
+msgstr "AudioFitxategiKutxa: Ezin izan da katea sinbolo bihurtu: "
 
 #: sfdb_ui.cc:660
 msgid "Audio and MIDI files"
-msgstr ""
+msgstr "Audio- eta MIDI fitxategiak"
 
 #: sfdb_ui.cc:663
 msgid "Audio files"
-msgstr ""
+msgstr "Audio-fitxategiak"
 
 #: sfdb_ui.cc:666
 msgid "MIDI files"
-msgstr ""
+msgstr "MIDI fitxategiak"
 
 #: sfdb_ui.cc:669 add_video_dialog.cc:129
 msgid "All files"
-msgstr ""
+msgstr "Fitxategi guztiak"
 
 #: sfdb_ui.cc:688 add_video_dialog.cc:255
 msgid "Browse Files"
-msgstr ""
+msgstr "Arakatu fitxategiak"
 
 #: sfdb_ui.cc:717
 msgid "Paths"
-msgstr ""
+msgstr "Bideak"
 
 #: sfdb_ui.cc:726
 msgid "Search Tags"
-msgstr ""
+msgstr "Bilatu etiketak"
 
 #: sfdb_ui.cc:743
 msgid "Sort:"
-msgstr ""
+msgstr "Antolatu:"
 
 #: sfdb_ui.cc:751
 msgid "Longest"
-msgstr ""
+msgstr "Luzeenak"
 
 #: sfdb_ui.cc:752
 msgid "Shortest"
-msgstr ""
+msgstr "Motzenak"
 
 #: sfdb_ui.cc:753
 msgid "Newest"
-msgstr ""
+msgstr "Berrienak"
 
 #: sfdb_ui.cc:754
 msgid "Oldest"
-msgstr ""
+msgstr "Zaharrenak"
 
 #: sfdb_ui.cc:755
 msgid "Most downloaded"
-msgstr ""
+msgstr "Gehien deskargatutakoak"
 
 #: sfdb_ui.cc:756
 msgid "Least downloaded"
-msgstr ""
+msgstr "Gutxien deskargatutakoak"
 
 #: sfdb_ui.cc:757
 msgid "Highest rated"
-msgstr ""
+msgstr "Balorazio onenekoak"
 
 #: sfdb_ui.cc:758
 msgid "Lowest rated"
-msgstr ""
+msgstr "Balorazio okerrenekoak"
 
 #: sfdb_ui.cc:763
 msgid "More"
-msgstr ""
+msgstr "Gehiago"
 
 #: sfdb_ui.cc:767
 msgid "Similar"
-msgstr ""
+msgstr "Antzekoa"
 
 #: sfdb_ui.cc:779
 msgid "ID"
-msgstr ""
+msgstr "IDa"
 
 #: sfdb_ui.cc:780 add_video_dialog.cc:88
 msgid "Filename"
-msgstr ""
+msgstr "Fitxategi-izena"
 
 #: sfdb_ui.cc:782 time_fx_dialog.cc:157
 msgid "Duration"
-msgstr ""
+msgstr "Iraupena"
 
 #: sfdb_ui.cc:783
 msgid "Size"
-msgstr ""
+msgstr "Tamaina"
 
 #: sfdb_ui.cc:784
 msgid "Samplerate"
-msgstr ""
+msgstr "Lagin-tasa"
 
 #: sfdb_ui.cc:785
 msgid "License"
-msgstr ""
+msgstr "Lizentzia"
 
 #: sfdb_ui.cc:803
 msgid "Search Freesound"
-msgstr ""
+msgstr "Bilatu Freesound-en"
 
 #: sfdb_ui.cc:818
 msgid "Press to import selected files"
-msgstr ""
+msgstr "Sakatu hautatutako fitxategiak inportatzeko"
 
 #: sfdb_ui.cc:1036
 msgid "SoundFileBrowser: Could not tokenize string: "
-msgstr ""
+msgstr "AudioFitxategiNabigatzailea: Ezin izan da katea sinbolo bihurtu: "
 
 #: sfdb_ui.cc:1236
 msgid "%1 more page of 100 results available"
 msgid_plural "%1 more pages of 100 results available"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Orrialde %1 gehiago 100 emaitza erabilgarrietatik"
+msgstr[1] "%1 orrialde gehiago 100 emaitza erabilgarrietatik"
 
 #: sfdb_ui.cc:1241
 msgid "No more results available"
-msgstr ""
+msgstr "Ez dago emaitza gehiagorik"
 
 #: sfdb_ui.cc:1305
 msgid "B"
-msgstr ""
+msgstr "B"
 
 #: sfdb_ui.cc:1307
 msgid "kB"
-msgstr ""
+msgstr "kB"
 
 #: sfdb_ui.cc:1309 sfdb_ui.cc:1311
 msgid "MB"
-msgstr ""
+msgstr "MB"
 
 #: sfdb_ui.cc:1313
 msgid "GB"
-msgstr ""
+msgstr "GB"
 
 #: sfdb_ui.cc:1537 sfdb_ui.cc:1852 sfdb_ui.cc:1888 sfdb_ui.cc:1906
 msgid "one track per file"
-msgstr ""
+msgstr "pista bakarra fitxategiko"
 
 #: sfdb_ui.cc:1540 sfdb_ui.cc:1889 sfdb_ui.cc:1907
 msgid "one track per channel"
-msgstr ""
+msgstr "pista bakarra kanaleko"
 
 #: sfdb_ui.cc:1547 sfdb_ui.cc:1891 sfdb_ui.cc:1908
 msgid "sequence files"
-msgstr ""
+msgstr "sekuentziatu fitxategiak"
 
 #: sfdb_ui.cc:1549 sfdb_ui.cc:1896
 msgid "all files in one track"
-msgstr ""
+msgstr "fitxategi guztiak pista batean"
 
 #: sfdb_ui.cc:1550 sfdb_ui.cc:1890
 msgid "merge files"
-msgstr ""
+msgstr "elkartu fitxategiak"
 
 #: sfdb_ui.cc:1556 sfdb_ui.cc:1893
 msgid "one region per file"
-msgstr ""
+msgstr "eremu bakarra fitxategiko"
 
 #: sfdb_ui.cc:1559 sfdb_ui.cc:1894
 msgid "one region per channel"
-msgstr ""
+msgstr "eremu bakarra kanaleko"
 
 #: sfdb_ui.cc:1564 sfdb_ui.cc:1895 sfdb_ui.cc:1909
 msgid "all files in one region"
-msgstr ""
+msgstr "fitxategi guztiak eremu bakarrean"
 
 #: sfdb_ui.cc:1631
 msgid ""
 "One or more of the selected files\n"
 "cannot be used by %1"
 msgstr ""
+"%1-(e)k ezin du hautatutako fitxategi bat\n"
+"edo gehiago erabili"
 
 #: sfdb_ui.cc:1777
 msgid "Copy files to session"
-msgstr ""
+msgstr "Kopiatu fitxategiak saiora"
 
 #: sfdb_ui.cc:1778
 msgid "Use MIDI Tempo Map (if defined)"
-msgstr ""
+msgstr "Erabili MIDI tempo-mapa (definituta badago)"
 
 #: sfdb_ui.cc:1793 sfdb_ui.cc:1948
 msgid "file timestamp"
-msgstr ""
+msgstr "fitxategiaren denbora-zigilua"
 
 #: sfdb_ui.cc:1794 sfdb_ui.cc:1950
 msgid "edit point"
-msgstr ""
+msgstr "edizio-puntua"
 
 #: sfdb_ui.cc:1795 sfdb_ui.cc:1952
 msgid "playhead"
-msgstr ""
+msgstr "denbora-barra"
 
 #: sfdb_ui.cc:1796
 msgid "session start"
-msgstr ""
+msgstr "saio-hasiera"
 
 #: sfdb_ui.cc:1805
 msgid "<b>Add files ...</b>"
-msgstr ""
+msgstr "<b>Gehitu fitxategiak ...</b>"
 
 #: sfdb_ui.cc:1810
 msgid "<b>Insert at</b>"
-msgstr ""
+msgstr "<b>Txertatu hemen:</b>"
 
 #: sfdb_ui.cc:1815
 msgid "<b>Mapping</b>"
-msgstr ""
+msgstr "<b>Esleipena</b>"
 
 #: sfdb_ui.cc:1820
 msgid "<b>Conversion quality</b>"
-msgstr ""
+msgstr "<b>Konbertsio-kalitatea</b>"
 
 #: sfdb_ui.cc:1825
 msgid "<b>MIDI Track Names</b>"
-msgstr ""
+msgstr "<b>MIDI pista-izenak</b>"
 
 #: sfdb_ui.cc:1832
 msgid "<b>Instrument</b>"
-msgstr ""
+msgstr "<b>Instrumentua</b>"
 
 #: sfdb_ui.cc:1858 sfdb_ui.cc:1964
 msgid "Best"
-msgstr ""
+msgstr "Onena"
 
 #: sfdb_ui.cc:1860 sfdb_ui.cc:1968
 msgid "Quick"
-msgstr ""
+msgstr "Azkarra"
 
 #: sfdb_ui.cc:1862
 msgid "Fastest"
-msgstr ""
+msgstr "Azkarrena"
 
 #: shuttle_control.cc:65
 msgid "LogestShuttle|< +00 st"
-msgstr ""
+msgstr "< +00."
 
 #: shuttle_control.cc:71
 msgid "Shuttle speed control (Context-click for options)"
-msgstr ""
+msgstr "Anezka-abiaduraren kontrola (Testuinguru-klik aukeretarako)"
 
 #: shuttle_control.cc:207 time_fx_dialog.cc:167
 msgid "Percent"
-msgstr ""
+msgstr "Ehunekoa"
 
 #: shuttle_control.cc:215
 msgid "Units"
-msgstr ""
+msgstr "Unitateak"
 
 #: shuttle_control.cc:221
 msgid "Sprung"
-msgstr ""
+msgstr "Buelta"
 
 #: shuttle_control.cc:225
 msgid "Wheel"
-msgstr ""
+msgstr "Gurpila"
 
 #: shuttle_control.cc:261
 msgid "Maximum speed"
-msgstr ""
+msgstr "Gehienezko abiadura"
 
 #: shuttle_control.cc:264
 msgid "Reset to 100%"
-msgstr ""
+msgstr "%100era berrezarri"
 
 #: shuttle_control.cc:656
 #, c-format
 msgid "< %+2d st"
-msgstr ""
+msgstr "< %+2d."
 
 #: shuttle_control.cc:658
 #, c-format
 msgid "> %+2d st"
-msgstr ""
+msgstr "> %+2d."
 
 #: soundcloud_export_selector.cc:43
 msgid "User Email"
-msgstr ""
+msgstr "Erabiltzailearen eposta"
 
 #: soundcloud_export_selector.cc:44
 msgid "Password"
-msgstr ""
+msgstr "Pasahitza"
 
 #: soundcloud_export_selector.cc:45
 msgid "Make files public"
-msgstr ""
+msgstr "Egin fitxategiak publikoak"
 
 #: soundcloud_export_selector.cc:46
 msgid "Open uploaded files in browser"
-msgstr ""
+msgstr "Ireki igotako fitxategiak nabigatzailean"
 
 #: soundcloud_export_selector.cc:47
 msgid "Make files downloadable"
-msgstr ""
+msgstr "Egin fitxategiak deskargagarriak"
 
 #: soundcloud_export_selector.cc:106
 msgid "%1: %2 of %3 bytes uploaded"
-msgstr ""
+msgstr "%1: %2/%3 bytes igo dira"
 
 #: splash.cc:104
 msgid "%1 loading ..."
-msgstr ""
+msgstr "%1 kargatzen ..."
 
 #: speaker_dialog.cc:41
 msgid "Add Speaker"
-msgstr ""
+msgstr "Gehitu bozgorailua"
 
 #: speaker_dialog.cc:42
 msgid "Remove Speaker"
-msgstr ""
+msgstr "Kendu bozgorailua"
 
 #: speaker_dialog.cc:64
 msgid "Azimuth:"
-msgstr ""
+msgstr "Azimuth:"
 
 #: startup_fsm.cc:148 startup_fsm.cc:149
 msgid "Programming error: %1"
-msgstr ""
+msgstr "Programazio-errorea: %1"
 
 #: startup_fsm.cc:327
 msgid ""
 "Ardour's audioengine has stopped running unexpectedly.\n"
 "Something is probably wrong with your audio/MIDI device settings."
 msgstr ""
+"Ardourren audio-motorra ustekabean gelditu da.\n"
+"Zerbait oker egon daiteke zure audio/MIDI gailuaren ezapenetan."
 
 #: startup_fsm.cc:558
 msgid "Cannot get existing session information from %1"
-msgstr ""
+msgstr "Ezin da existitzen den saioaren informazioa %1-(e)tik eskuratu"
 
 #: startup_fsm.cc:876
 msgid "Pre-Release Warning"
-msgstr ""
+msgstr "Argitaratu aurreko abisua"
 
 #: startup_fsm.cc:880
 msgid ""
@@ -15796,390 +15830,416 @@ msgid ""
 "\n"
 "                http://ardour.org/support</span>\n"
 msgstr ""
+"<span size=\"x-large\" weight=\"bold\">Ongi etorri %1 %2-(r)en argitaratu "
+"gabeko konpilaziora</span>\n"
+"\n"
+"<span size=\"large\">Oraindik hainbat arazo eta akats lantzeke daude,\n"
+"baita lan-fluxu hobekuntza orokorrak ere, hau argitaratutako softwaretzat\n"
+"jo baino lehen. Beraz, gidalerro batzuk:\n"
+"\n"
+"1) Mesedez <b>EZ</b> erabili software hau egonkorra edo fidagarria delaren "
+"itxaropenarekin\n"
+"   hala izan daitekeen arren, zure lan-fluxuaren arabera.\n"
+"2) Please wait for a helpful writeup of new features.\n"
+"3) <b>Please do NOT use the forums at ardour.org to report issues</b>.\n"
+"4) <b>Please do NOT file bugs for this alpha-development versions at this "
+"point in time</b>.\n"
+"   There is no bug triaging before the initial development concludes and\n"
+"   reporting issue for incomplete, ongoing work-in-progress is mostly "
+"useless.\n"
+"5) Please <b>DO</b> join us on IRC for real time discussions about %1 %2. "
+"You\n"
+"   can get there directly from within the program via the Help->Chat menu "
+"option.\n"
+"6) Please <b>DO</b> submit patches for issues after discussing them on IRC.\n"
+"\n"
+"Full information on all the above can be found on the support page at\n"
+"\n"
+"                http://ardour.org/support</span>\n"
 
 #: step_entry.cc:69
 msgid ">beat"
-msgstr ""
+msgstr ">pultsua"
 
 #: step_entry.cc:70
 msgid ">bar"
-msgstr ""
+msgstr ">konpasa"
 
 #: step_entry.cc:71
 msgid ">EP"
-msgstr ""
+msgstr ">EP"
 
 #: step_entry.cc:72
 msgid "sustain"
-msgstr ""
+msgstr "mantendu"
 
 #: step_entry.cc:73
 msgid "rest"
-msgstr ""
+msgstr "atsedena"
 
 #: step_entry.cc:74
 msgid "g-rest"
-msgstr ""
+msgstr "g-atsedena"
 
 #: step_entry.cc:75
 msgid "back"
-msgstr ""
+msgstr "atzera"
 
 #: step_entry.cc:175
 msgid "Set note length to a whole note"
-msgstr ""
+msgstr "Ezarri notaren iraupena nota biribilera"
 
 #: step_entry.cc:176
 msgid "Set note length to a half note"
-msgstr ""
+msgstr "Ezarri notaren iraupena nota zurira"
 
 #: step_entry.cc:177
 msgid "Set note length to a quarter note"
-msgstr ""
+msgstr "Ezarri notaren iraupena nota beltzera"
 
 #: step_entry.cc:178
 msgid "Set note length to a eighth note"
-msgstr ""
+msgstr "Ezarri notaren iraupena nota kortxeara"
 
 #: step_entry.cc:179
 msgid "Set note length to a sixteenth note"
-msgstr ""
+msgstr "Ezarri notaren iraupena nota kortxeaerdira"
 
 #: step_entry.cc:180
 msgid "Set note length to a thirty-second note"
-msgstr ""
+msgstr "Ezarri notaren iraupena nota fusara"
 
 #: step_entry.cc:181
 msgid "Set note length to a sixty-fourth note"
-msgstr ""
+msgstr "Ezarri notaren iraupena nota fusaerdira"
 
 #: step_entry.cc:260
 msgid "Set volume (velocity) to pianississimo"
-msgstr ""
+msgstr "Ezarri bolumen (indar) honetan: pianississimo"
 
 #: step_entry.cc:261
 msgid "Set volume (velocity) to pianissimo"
-msgstr ""
+msgstr "Ezarri bolumen (indar) honetan: pianissimo"
 
 #: step_entry.cc:262
 msgid "Set volume (velocity) to piano"
-msgstr ""
+msgstr "Ezarri bolumen (indar) honetan: piano"
 
 #: step_entry.cc:263
 msgid "Set volume (velocity) to mezzo-piano"
-msgstr ""
+msgstr "Ezarri bolumen (indar) honetan: mezzo-piano"
 
 #: step_entry.cc:264
 msgid "Set volume (velocity) to mezzo-forte"
-msgstr ""
+msgstr "Ezarri bolumen (indar) honetan: mezzo-forte"
 
 #: step_entry.cc:265
 msgid "Set volume (velocity) to forte"
-msgstr ""
+msgstr "Ezarri bolumen (indar) honetan: forte"
 
 #: step_entry.cc:266
 msgid "Set volume (velocity) to fortissimo"
-msgstr ""
+msgstr "Ezarri bolumen (indar) honetan: fortissimo"
 
 #: step_entry.cc:267
 msgid "Set volume (velocity) to fortississimo"
-msgstr ""
+msgstr "Ezarri bolumen (indar) honetan: fortississimo"
 
 #: step_entry.cc:315
 msgid "Stack inserted notes to form a chord"
-msgstr ""
+msgstr "Pilatu txertatutako notak akorde bat egiteko"
 
 #: step_entry.cc:316
 msgid "Extend selected notes by note length"
-msgstr ""
+msgstr "Hedatu hautatutako notak nota-iraupenaren arabera"
 
 #: step_entry.cc:317
 msgid "Use undotted note lengths"
-msgstr ""
+msgstr "Erabili punturik gabeko nota-iraupenak"
 
 #: step_entry.cc:318
 msgid "Use dotted (* 1.5) note lengths"
-msgstr ""
+msgstr "Erabili puntudun (* 1,5) nota-iraupenak"
 
 #: step_entry.cc:319
 msgid "Use double-dotted (* 1.75) note lengths"
-msgstr ""
+msgstr "Erabili puntu-bikoiztun (* 1,75) nota-iraupenak"
 
 #: step_entry.cc:320
 msgid "Use triple-dotted (* 1.875) note lengths"
-msgstr ""
+msgstr "Erabili puntu-hirukoiztun (* 1,875) nota-iraupenak"
 
 #: step_entry.cc:321
 msgid "Insert a note-length's rest"
-msgstr ""
+msgstr "Txertatu notaren iraupenaren atsedena"
 
 #: step_entry.cc:322
 msgid "Insert a grid-unit's rest"
-msgstr ""
+msgstr "Txertatu sareta-unitatearen atsedena"
 
 #: step_entry.cc:323
 msgid "Insert a rest until the next beat"
-msgstr ""
+msgstr "Txertatu atsedena hurrengo pultsura arte"
 
 #: step_entry.cc:324
 msgid "Insert a rest until the next bar"
-msgstr ""
+msgstr "Txertatu atsedena hurrengo konpasera arte"
 
 #: step_entry.cc:325
 msgid "Insert a bank change message"
-msgstr ""
+msgstr "Txertatu banku-aldaketaren mezua"
 
 #: step_entry.cc:326
 msgid "Insert a program change message"
-msgstr ""
+msgstr "Txertatu programa-aldaketaren mezua"
 
 #: step_entry.cc:327 step_entry.cc:653
 msgid "Move Insert Position Back by Note Length"
-msgstr ""
+msgstr "Eraman atzera intsertoa notaren iraupenaren arabera"
 
 #: step_entry.cc:328 step_entry.cc:652
 msgid "Move Insert Position to Edit Point"
-msgstr ""
+msgstr "Mugitu instsertoa edizio-puntura"
 
 #: step_entry.cc:385
 msgid "1/Note"
-msgstr ""
+msgstr "1/Nota"
 
 #: step_entry.cc:399 virtual_keyboard_window.cc:167
 msgid "Octave"
-msgstr ""
+msgstr "Zortziduna"
 
 #: step_entry.cc:406
 msgid "Bank"
-msgstr ""
+msgstr "Bankua"
 
 #: step_entry.cc:464
 msgid "Step Entry: %1"
-msgstr ""
+msgstr "Pusoz pausoko sarrera: %1"
 
 #: step_entry.cc:604
 msgid "Insert Note A"
-msgstr ""
+msgstr "Txertatu A nota"
 
 #: step_entry.cc:605
 msgid "Insert Note A-sharp"
-msgstr ""
+msgstr "Txertatu A sostenitua nota"
 
 #: step_entry.cc:606
 msgid "Insert Note B"
-msgstr ""
+msgstr "Txertatu B nota"
 
 #: step_entry.cc:607
 msgid "Insert Note C"
-msgstr ""
+msgstr "Txertatu C nota"
 
 #: step_entry.cc:608
 msgid "Insert Note C-sharp"
-msgstr ""
+msgstr "Txertatu C sostenitua nota"
 
 #: step_entry.cc:609
 msgid "Insert Note D"
-msgstr ""
+msgstr "Txertatu D nota"
 
 #: step_entry.cc:610
 msgid "Insert Note D-sharp"
-msgstr ""
+msgstr "Txertatu D sostenitua nota"
 
 #: step_entry.cc:611
 msgid "Insert Note E"
-msgstr ""
+msgstr "Txertatu E nota"
 
 #: step_entry.cc:612
 msgid "Insert Note F"
-msgstr ""
+msgstr "Txertatu F nota"
 
 #: step_entry.cc:613
 msgid "Insert Note F-sharp"
-msgstr ""
+msgstr "Txertatu F sostenitua nota"
 
 #: step_entry.cc:614
 msgid "Insert Note G"
-msgstr ""
+msgstr "Txertatu G nota"
 
 #: step_entry.cc:615
 msgid "Insert Note G-sharp"
-msgstr ""
+msgstr "Txertatu G sostenitua nota"
 
 #: step_entry.cc:617
 msgid "Insert a Note-length Rest"
-msgstr ""
+msgstr "Txertatu notaren iraupenaren atsedena"
 
 #: step_entry.cc:618
 msgid "Insert a Snap-length Rest"
-msgstr ""
+msgstr "Txertatu doitze-iraupenaren atsedena"
 
 #: step_entry.cc:620 step_entry.cc:621
 msgid "Move to next octave"
-msgstr ""
+msgstr "Mugitu hurrengo zortzidunera"
 
 #: step_entry.cc:623
 msgid "Move to Next Note Length"
-msgstr ""
+msgstr "Mugitu hurrengo notaren iraupenera"
 
 #: step_entry.cc:624
 msgid "Move to Previous Note Length"
-msgstr ""
+msgstr "Mugitu aurreko notaren iraupenera"
 
 #: step_entry.cc:626
 msgid "Increase Note Length"
-msgstr ""
+msgstr "Handitu notaren iraupena"
 
 #: step_entry.cc:627
 msgid "Decrease Note Length"
-msgstr ""
+msgstr "Murriztu notaren iraupena"
 
 #: step_entry.cc:629
 msgid "Move to Next Note Velocity"
-msgstr ""
+msgstr "Mugitu hurrengo notaren indarrera"
 
 #: step_entry.cc:630
 msgid "Move to Previous Note Velocity"
-msgstr ""
+msgstr "Mugitu aurreko notaren indarrera"
 
 #: step_entry.cc:632
 msgid "Increase Note Velocity"
-msgstr ""
+msgstr "Handitu notaren indarra"
 
 #: step_entry.cc:633
 msgid "Decrease Note Velocity"
-msgstr ""
+msgstr "Murriztu notaren indarra"
 
 #: step_entry.cc:635
 msgid "Switch to the 1st octave"
-msgstr ""
+msgstr "Aldatu 1. zortzidunera"
 
 #: step_entry.cc:636
 msgid "Switch to the 2nd octave"
-msgstr ""
+msgstr "Aldatu 2. zortzidunera"
 
 #: step_entry.cc:637
 msgid "Switch to the 3rd octave"
-msgstr ""
+msgstr "Aldatu 3. zortzidunera"
 
 #: step_entry.cc:638
 msgid "Switch to the 4th octave"
-msgstr ""
+msgstr "Aldatu 4. zortzidunera"
 
 #: step_entry.cc:639
 msgid "Switch to the 5th octave"
-msgstr ""
+msgstr "Aldatu 5. zortzidunera"
 
 #: step_entry.cc:640
 msgid "Switch to the 6th octave"
-msgstr ""
+msgstr "Aldatu 6. zortzidunera"
 
 #: step_entry.cc:641
 msgid "Switch to the 7th octave"
-msgstr ""
+msgstr "Aldatu 7. zortzidunera"
 
 #: step_entry.cc:642
 msgid "Switch to the 8th octave"
-msgstr ""
+msgstr "Aldatu 8. zortzidunera"
 
 #: step_entry.cc:643
 msgid "Switch to the 9th octave"
-msgstr ""
+msgstr "Aldatu 9. zortzidunera"
 
 #: step_entry.cc:644
 msgid "Switch to the 10th octave"
-msgstr ""
+msgstr "Aldatu 10. zortzidunera"
 
 #: step_entry.cc:645
 msgid "Switch to the 11th octave"
-msgstr ""
+msgstr "Aldatu 11. zortzidunera"
 
 #: step_entry.cc:647
 msgid "Toggle Triple Notes"
-msgstr ""
+msgstr "Komutatu nota hirukoitzak"
 
 #: step_entry.cc:649
 msgid "Toggle Chord Entry"
-msgstr ""
+msgstr "Komutatu akorde-sarrera"
 
 #: step_entry.cc:650
 msgid "Sustain Selected Notes by Note Length"
-msgstr ""
+msgstr "Mantendu hautatutako notak nota-iraupenaren arabera"
 
 #: step_entry.cc:658
 msgid "Set Note Length to Whole"
-msgstr ""
+msgstr "Ezarri notaren iraupena: biribila"
 
 #: step_entry.cc:660
 msgid "Set Note Length to 1/2"
-msgstr ""
+msgstr "Ezarri notaren iraupena: 1/2"
 
 #: step_entry.cc:662
 msgid "Set Note Length to 1/3"
-msgstr ""
+msgstr "Ezarri notaren iraupena: 1/3"
 
 #: step_entry.cc:664
 msgid "Set Note Length to 1/4"
-msgstr ""
+msgstr "Ezarri notaren iraupena: 1/4"
 
 #: step_entry.cc:666
 msgid "Set Note Length to 1/8"
-msgstr ""
+msgstr "Ezarri notaren iraupena: 1/8"
 
 #: step_entry.cc:668
 msgid "Set Note Length to 1/16"
-msgstr ""
+msgstr "Ezarri notaren iraupena: 1/16"
 
 #: step_entry.cc:670
 msgid "Set Note Length to 1/32"
-msgstr ""
+msgstr "Ezarri notaren iraupena: 1/32"
 
 #: step_entry.cc:672
 msgid "Set Note Length to 1/64"
-msgstr ""
+msgstr "Ezarri notaren iraupena: 1/64"
 
 #: step_entry.cc:677
 msgid "Set Note Velocity to Pianississimo"
-msgstr ""
+msgstr "Ezarri notaren indarra: pianississimo"
 
 #: step_entry.cc:679
 msgid "Set Note Velocity to Pianissimo"
-msgstr ""
+msgstr "Ezarri notaren indarra: pianissimo"
 
 #: step_entry.cc:681
 msgid "Set Note Velocity to Piano"
-msgstr ""
+msgstr "Ezarri notaren indarra: piano"
 
 #: step_entry.cc:683
 msgid "Set Note Velocity to Mezzo-Piano"
-msgstr ""
+msgstr "Ezarri notaren indarra: mezzo-piano"
 
 #: step_entry.cc:685
 msgid "Set Note Velocity to Mezzo-Forte"
-msgstr ""
+msgstr "Ezarri notaren indarra: mezzo-forte"
 
 #: step_entry.cc:687
 msgid "Set Note Velocity to Forte"
-msgstr ""
+msgstr "Ezarri notaren indarra: forte"
 
 #: step_entry.cc:689 step_entry.cc:691
 msgid "Set Note Velocity to Fortississimo"
-msgstr ""
+msgstr "Ezarri notaren indarra: fortississimo"
 
 #: step_entry.cc:696
 msgid "No Dotted Notes"
-msgstr ""
+msgstr "Puntudun notarik ez"
 
 #: step_entry.cc:697
 msgid "Toggled Dotted Notes"
-msgstr ""
+msgstr "Komutatutako puntudun notak"
 
 #: step_entry.cc:698
 msgid "Toggled Double-Dotted Notes"
-msgstr ""
+msgstr "Komutatutako puntu-bikoiztun notak"
 
 #: step_entry.cc:699
 msgid "Toggled Triple-Dotted Notes"
-msgstr ""
+msgstr "Komutatutako puntu-hitukoiztun notak"
 
 #: stereo_panner.cc:131
 #, c-format
