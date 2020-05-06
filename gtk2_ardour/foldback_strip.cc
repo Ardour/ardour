@@ -1180,11 +1180,12 @@ FoldbackStrip::build_route_select_menu ()
 	MenuList& items = menu->items ();
 	menu->set_name ("ArdourContextMenu");
 
-	StripableList fb_list;
-	_session->get_stripables (fb_list, PresentationInfo::FoldbackBus);
-	for (StripableList::iterator s = fb_list.begin(); s != fb_list.end(); ++s) {
+	RouteList fb_list;
+	fb_list = _session->get_routelist (true, PresentationInfo::FoldbackBus);
 
-		boost::shared_ptr<Route> route = boost::dynamic_pointer_cast<Route> ((*s));
+	for (RouteList::iterator s = fb_list.begin(); s != fb_list.end(); ++s) {
+
+		boost::shared_ptr<Route> route = (*s);
 		if (route == _route) {
 			continue;
 		}
@@ -1220,11 +1221,12 @@ void
 FoldbackStrip::previous_button_clicked ()
 {
 	bool past_current = false;
-	StripableList slist;
 	boost::shared_ptr<Route> previous = boost::shared_ptr<Route> ();
-	_session->get_stripables (slist, PresentationInfo::FoldbackBus);
-	if (slist.size () > 1) {
-		for (StripableList::iterator s = slist.begin(); s != slist.end(); ++s) {
+	RouteList fb_list;
+	fb_list = _session->get_routelist (true, PresentationInfo::FoldbackBus);
+
+	if (fb_list.size () > 1) {
+		for (RouteList::iterator s = fb_list.begin(); s != fb_list.end(); ++s) {
 			if ((*s) == _route) {
 				past_current = true;
 			}
@@ -1246,11 +1248,12 @@ void
 FoldbackStrip::next_button_clicked ()
 {
 	bool past_current = false;
-	StripableList slist;
 	boost::shared_ptr<Route> next = boost::shared_ptr<Route> ();
-	_session->get_stripables (slist, PresentationInfo::FoldbackBus);
-	if (slist.size () > 1) {
-		for (StripableList::iterator s = slist.begin(); s != slist.end(); ++s) {
+	RouteList fb_list;
+	fb_list = _session->get_routelist (true, PresentationInfo::FoldbackBus);
+
+	if (fb_list.size () > 1) {
+		for (RouteList::iterator s = fb_list.begin(); s != fb_list.end(); ++s) {
 			if (past_current) {
 				next = boost::dynamic_pointer_cast<Route> (*s);
 				break;
@@ -1272,14 +1275,15 @@ FoldbackStrip::next_button_clicked ()
 void
 FoldbackStrip::prev_next_changed ()
 {
-	StripableList slist;
-	_session->get_stripables (slist, PresentationInfo::FoldbackBus);
-	if ((slist.size() < 2) || (boost::dynamic_pointer_cast<Stripable> (_route) == *(slist.begin()))) {
+	RouteList fb_list;
+	fb_list = _session->get_routelist (true, PresentationInfo::FoldbackBus);
+
+	if ((fb_list.size() < 2) || (_route == *(fb_list.begin()))) {
 		_previous_button.set_sensitive (false);
 	} else {
 		_previous_button.set_sensitive (true);
 	}
-	if ((slist.size () < 2) || boost::dynamic_pointer_cast<Stripable> (_route) == *(--slist.end())) {
+	if ((fb_list.size () < 2) || _route == *(--fb_list.end())) {
 		_next_button.set_sensitive (false);
 	} else {
 		_next_button.set_sensitive (true);
