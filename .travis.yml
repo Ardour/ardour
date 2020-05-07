@@ -7,10 +7,9 @@ jobs:
       os:
         - linux
       install: 
-        - apt-get update
-        - apt-get upgrade
-        - apt-get install \
-            clang \
+        - sudp apt-get update
+        - sudo apt-get upgrade
+        - sudo apt-get install \
             fftw3-dev \
             libarchive-dev \
             libaubio-dev \
@@ -36,6 +35,6 @@ jobs:
             vamp-plugin-sdk
         - ./waf configure
         - ./waf
-        - ./waf install
+        - sudo ./waf install
 notifications:
   email: false
