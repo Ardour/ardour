@@ -148,7 +148,6 @@ Session::realtime_stop (bool abort, bool clear_state)
 	reset_punch_loop_constraint ();
 
 	_transport_speed = 0;
-	_target_transport_speed = 0;
 	_engine_speed = 1.0;
 
 	g_atomic_int_set (&_playback_load, 100);
@@ -428,7 +427,6 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state, bool a
 	}
 #endif
 
-	_target_transport_speed = fabs(speed);
 	_engine_speed = new_engine_speed;
 
 	if (transport_rolling() && speed == 0.0) {
@@ -611,7 +609,6 @@ Session::start_transport ()
 	maybe_allow_only_punch ();
 
 	_transport_speed = _default_transport_speed;
-	_target_transport_speed = _transport_speed;
 
 	if (!_engine.freewheeling()) {
 		Timecode::Time time;

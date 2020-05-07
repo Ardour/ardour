@@ -1317,7 +1317,6 @@ private:
 	double                  _default_transport_speed;
 	double                  _last_transport_speed;
 	double                  _signalled_varispeed;
-	double                  _target_transport_speed;
 
 	bool                     auto_play_legal;
 	samplepos_t             _requested_return_sample;
