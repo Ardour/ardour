@@ -348,6 +348,7 @@ void
 Port::reset ()
 {
 	_last_monitor = false;
+	_externally_connected = 0;
 }
 
 void
