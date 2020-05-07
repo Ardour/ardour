@@ -29,6 +29,7 @@
 #include "ardour/route.h"
 #include "ardour/session.h"
 #include "ardour/session_event.h"
+#include "ardour/session_route.h"
 #include "ardour/track.h"
 #include "ardour/types.h"
 
