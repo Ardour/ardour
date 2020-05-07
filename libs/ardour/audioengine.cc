@@ -469,6 +469,8 @@ AudioEngine::process_callback (pframes_t nframes)
 	if (_freewheeling && !Freewheel.empty()) {
 		Freewheel (nframes);
 	} else {
+		samplepos_t start_sample = _session->transport_sample ();
+
 		if (Port::cycle_nframes () <= nframes) {
 			_session->process (Port::cycle_nframes ());
 		} else {
@@ -489,6 +491,10 @@ AudioEngine::process_callback (pframes_t nframes)
 				}
 			}
 		}
+
+		/* send timecode for current cycle */
+		samplepos_t end_sample = _session->transport_sample ();
+		_session->send_ltc_for_cycle (start_sample, end_sample, nframes);
 	}
 
 	if (_freewheeling) {

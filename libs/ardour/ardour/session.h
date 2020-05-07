@@ -288,6 +288,8 @@ public:
 
 	void process (pframes_t nframes);
 
+	void send_ltc_for_cycle (samplepos_t, samplepos_t, pframes_t);
+
 	BufferSet& get_silent_buffers (ChanCount count = ChanCount::ZERO);
 	BufferSet& get_noinplace_buffers (ChanCount count = ChanCount::ZERO);
 	BufferSet& get_scratch_buffers (ChanCount count = ChanCount::ZERO, bool silence = true);
@@ -1713,9 +1715,7 @@ private:
 	void ltc_tx_resync_latency();
 	void ltc_tx_recalculate_position();
 	void ltc_tx_parse_offset();
-	void ltc_tx_send_time_code_for_cycle (samplepos_t, samplepos_t, double, double, pframes_t nframes);
 	PBD::ScopedConnectionList ltc_tx_connections;
-
 
 	void reset_record_status ();
 

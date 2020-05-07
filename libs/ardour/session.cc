@@ -193,7 +193,6 @@ Session::Session (AudioEngine &eng,
 	, _transport_speed (0)
 	, _default_transport_speed (1.0)
 	, _signalled_varispeed (0)
-	, _target_transport_speed (0.0)
 	, auto_play_legal (false)
 	, _requested_return_sample (-1)
 	, current_block_size (0)

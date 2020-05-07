@@ -161,13 +161,10 @@ Session::ltc_tx_recalculate_position()
 }
 
 void
-Session::ltc_tx_send_time_code_for_cycle (samplepos_t start_sample, samplepos_t end_sample,
-					  double target_speed, double current_speed,
-					  pframes_t nframes)
+Session::send_ltc_for_cycle (samplepos_t start_sample, samplepos_t end_sample, pframes_t n_samples)
 {
-	assert (nframes > 0);
+	assert (n_samples > 0);
 
-	Sample *out;
 	pframes_t txf = 0;
 	boost::shared_ptr<Port> ltcport = ltc_output_port();
 
@@ -176,8 +173,8 @@ Session::ltc_tx_send_time_code_for_cycle (samplepos_t start_sample, samplepos_t 
 		return;
 	}
 
-	/* marks buffer as not written */
-	Buffer& buf (ltcport->get_buffer (nframes));
+	Buffer& buf (ltcport->get_buffer (n_samples));
+	buf.silence (n_samples);
 
 	if (!ltc_encoder || !ltc_enc_buf) {
 		return;
@@ -203,12 +200,12 @@ Session::ltc_tx_send_time_code_for_cycle (samplepos_t start_sample, samplepos_t 
 		return;
 	}
 
-	out = dynamic_cast<AudioBuffer*>(&buf)->data ();
+	Sample* out = dynamic_cast<AudioBuffer*>(&buf)->data ();
 
 	/* range from libltc (38..218) || - 128.0  -> (-90..90) */
 	const float ltcvol = Config->get_ltc_output_volume()/(90.0); // pow(10, db/20.0)/(90.0);
 
-	DEBUG_TRACE (DEBUG::TXLTC, string_compose("LTC TX %1 to %2 / %3 | lat: %4\n", start_sample, end_sample, nframes, ltc_out_latency.max));
+	DEBUG_TRACE (DEBUG::TXLTC, string_compose("LTC TX %1 to %2 / %3 | lat: %4\n", start_sample, end_sample, n_samples, ltc_out_latency.max));
 
 	/* all systems go. Now here's the plan:
 	 *
@@ -218,7 +215,7 @@ Session::ltc_tx_send_time_code_for_cycle (samplepos_t start_sample, samplepos_t 
 	 *  4) check if it's the sample/byte that is already in the queue
 	 *  5) if (4) mismatch, re-calculate offset of LTC sample relative to period size
 	 *  6) actual LTC audio output
-	 *  6a) send remaining part of already queued sample; break on nframes
+	 *  6a) send remaining part of already queued sample; break on n_samples
 	 *  6b) encode new LTC-sample byte
 	 *  6c) goto 6a
 	 *  7) done
@@ -253,7 +250,9 @@ Session::ltc_tx_send_time_code_for_cycle (samplepos_t start_sample, samplepos_t 
 	 * keep repeating current sample
 	 */
 #define SIGNUM(a) ( (a) < 0 ? -1 : 1)
+
 	bool speed_changed = false;
+	double new_ltc_speed = (end_sample - start_sample) / (double)n_samples;
 
 	/* port latency compensation:
 	 * The _generated timecode_ is offset by the port-latency,
@@ -273,9 +272,9 @@ Session::ltc_tx_send_time_code_for_cycle (samplepos_t start_sample, samplepos_t 
 	 */
 	samplepos_t cycle_start_sample;
 
-	if (current_speed < 0) {
+	if (new_ltc_speed < 0) {
 		cycle_start_sample = (start_sample + ltc_out_latency.max);
-	} else if (current_speed > 0) {
+	} else if (new_ltc_speed > 0) {
 		cycle_start_sample = (start_sample - ltc_out_latency.max);
 	} else {
 		/* There is no need to compensate for latency when not rolling
@@ -286,7 +285,7 @@ Session::ltc_tx_send_time_code_for_cycle (samplepos_t start_sample, samplepos_t 
 	}
 
 	/* LTC TV standard offset */
-	if (current_speed != 0) {
+	if (new_ltc_speed != 0) {
 		/* ditto - send "NOW" if not rolling */
 		cycle_start_sample -= ltc_frame_alignment(samples_per_timecode_frame(), TV_STANDARD(cur_timecode));
 	}
@@ -294,7 +293,6 @@ Session::ltc_tx_send_time_code_for_cycle (samplepos_t start_sample, samplepos_t 
 	/* cycle-start may become negative due to latency compensation */
 	if (cycle_start_sample < 0) { cycle_start_sample = 0; }
 
-	double new_ltc_speed = (double)(labs(end_sample - start_sample) * SIGNUM(current_speed)) / (double)nframes;
 	if (nominal_sample_rate() != sample_rate()) {
 		new_ltc_speed *= (double)nominal_sample_rate() / (double)sample_rate();
 	}
@@ -309,24 +307,15 @@ Session::ltc_tx_send_time_code_for_cycle (samplepos_t start_sample, samplepos_t 
 			 * new_ltc_speed is > 0 because (end_sample - start_sample) == jack-period for no-roll
 			 * but ltc_speed will still be 0
 			 */
-			&& (current_speed != 0 || ltc_speed != current_speed)
+			//&& (current_speed != 0 || ltc_speed != current_speed)
 			) {
-		/* check ./libs/ardour/interpolation.cc  CubicInterpolation::interpolate
-		 * if target_speed != current_speed we should interpolate, too.
-		 *
-		 * However, currency in A3 target_speed == current_speed for each process cycle
-		 * (except for the sign and if target_speed > 8.0).
-		 * Besides, above speed calculation uses the difference (end_sample - start_sample).
-		 * end_sample is calculated from 'samples_moved' which includes the interpolation.
-		 * so we're good.
-		 */
-		DEBUG_TRACE (DEBUG::TXLTC, string_compose("2: speed change old: %1 cur: %2 tgt: %3 ctd: %4\n", ltc_speed, current_speed, target_speed, fabs(current_speed) - target_speed, new_ltc_speed));
+		DEBUG_TRACE (DEBUG::TXLTC, string_compose("2: speed change from: %1 to %2\n", ltc_speed, new_ltc_speed));
 		speed_changed = true;
 		ltc_encoder_set_filter(ltc_encoder, LTC_RISE_TIME(new_ltc_speed));
 	}
 
-	if (end_sample == start_sample || fabs(current_speed) < 0.1 ) {
-		DEBUG_TRACE (DEBUG::TXLTC, "transport is not rolling or absolute-speed < 0.1\n");
+	if (end_sample == start_sample || fabs(new_ltc_speed) < 0.1) {
+		DEBUG_TRACE (DEBUG::TXLTC, "transport is not rolling or speed < 0.1\n");
 		/* keep repeating current sample
 		 *
 		 * an LTC generator must be able to continue generating LTC when Ardours transport is in stop
@@ -453,7 +442,7 @@ Session::ltc_tx_send_time_code_for_cycle (samplepos_t start_sample, samplepos_t 
 
 	/* difference between current sample and TC sample in samples */
 	sampleoffset_t soff = cycle_start_sample - tc_sample_start;
-	if (current_speed == 0) {
+	if (new_ltc_speed == 0) {
 		soff = 0;
 	}
 	DEBUG_TRACE (DEBUG::TXLTC, string_compose("3: A3cycle: %1 = A3tc: %2 +off: %3\n",
@@ -558,13 +547,12 @@ Session::ltc_tx_send_time_code_for_cycle (samplepos_t start_sample, samplepos_t 
 			restarting = true;
 		}
 
-		if (cyc_off >= 0 && cyc_off <= (int32_t) nframes) {
+		if (cyc_off >= 0 && cyc_off <= (int32_t) n_samples) {
 			/* offset in this cycle */
 			txf= rint(cyc_off / fabs(ltc_speed));
-			memset(out, 0, cyc_off * sizeof(Sample));
+			memset (out, 0, cyc_off * sizeof(Sample));
 		} else {
 			/* resync next cycle */
-			memset(out, 0, nframes * sizeof(Sample));
 			return;
 		}
 
@@ -601,7 +589,7 @@ Session::ltc_tx_send_time_code_for_cycle (samplepos_t start_sample, samplepos_t 
 		DEBUG_TRACE (DEBUG::TXLTC, string_compose("6.1 @%1  [ %2 / %3 ]\n", txf, ltc_buf_off, ltc_buf_len));
 #endif
 		// (6a) send remaining buffer
-		while ((ltc_buf_off < ltc_buf_len) && (txf < nframes)) {
+		while ((ltc_buf_off < ltc_buf_len) && (txf < n_samples)) {
 			const float v1 = ltc_enc_buf[ltc_buf_off++] - 128.0;
 			const Sample val = (Sample) (v1*ltcvol);
 			out[txf++] = val;
@@ -610,9 +598,9 @@ Session::ltc_tx_send_time_code_for_cycle (samplepos_t start_sample, samplepos_t 
 		DEBUG_TRACE (DEBUG::TXLTC, string_compose("6.2 @%1  [ %2 / %3 ]\n", txf, ltc_buf_off, ltc_buf_len));
 #endif
 
-		if (txf >= nframes) {
+		if (txf >= n_samples) {
 			DEBUG_TRACE (DEBUG::TXLTC, string_compose("7 enc: %1 [ %2 / %3 ] byte: %4 spd %5 fpp %6 || nf: %7\n",
-						ltc_enc_pos, ltc_buf_off, ltc_buf_len, ltc_enc_byte, ltc_speed, nframes, txf));
+						ltc_enc_pos, ltc_buf_off, ltc_buf_len, ltc_enc_byte, ltc_speed, n_samples, txf));
 			break;
 		}
 
@@ -685,7 +673,4 @@ Session::ltc_tx_send_time_code_for_cycle (samplepos_t start_sample, samplepos_t 
 		DEBUG_TRACE (DEBUG::TXLTC, string_compose("6.4 enc-pos: %1 + %2 [ %4 / %5 ] spd %6\n", ltc_enc_pos, ltc_enc_cnt, ltc_buf_off, ltc_buf_len, ltc_speed));
 #endif
 	}
-
-	dynamic_cast<AudioBuffer*>(&buf)->set_written (true);
-	return;
 }

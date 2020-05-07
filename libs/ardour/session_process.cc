@@ -179,8 +179,6 @@ Session::no_roll (pframes_t nframes)
 		_click_io->silence (nframes);
 	}
 
-	ltc_tx_send_time_code_for_cycle (_transport_sample, end_sample, _target_transport_speed, _transport_speed, nframes);
-
 	VCAList v = _vca_manager->vcas ();
 	for (VCAList::const_iterator i = v.begin(); i != v.end(); ++i) {
 		(*i)->automation_run (_transport_sample, nframes);
@@ -509,7 +507,6 @@ Session::process_with_events (pframes_t nframes)
 		if (!_exporting && config.get_external_sync()) {
 			if (!implement_master_strategy ()) {
 				no_roll (nframes);
-				ltc_tx_send_time_code_for_cycle (_transport_sample, end_sample, _target_transport_speed, _transport_speed, nframes);
 				return;
 			}
 		}
@@ -526,7 +523,6 @@ Session::process_with_events (pframes_t nframes)
 			if (!_exporting && !timecode_transmission_suspended()) {
 				send_midi_time_code_for_cycle (_transport_sample, end_sample, nframes);
 			}
-			ltc_tx_send_time_code_for_cycle (_transport_sample, end_sample, _target_transport_speed, _transport_speed, nframes);
 
 			no_roll (nframes);
 			return;
@@ -561,8 +557,6 @@ Session::process_with_events (pframes_t nframes)
 				if (!_exporting && !timecode_transmission_suspended()) {
 					send_midi_time_code_for_cycle (_transport_sample, _transport_sample + samples_moved, this_nframes);
 				}
-
-				ltc_tx_send_time_code_for_cycle (_transport_sample,  _transport_sample + samples_moved, _target_transport_speed, _transport_speed, this_nframes);
 
 				click (_transport_sample, this_nframes);
 
@@ -648,7 +642,6 @@ Session::process_without_events (pframes_t nframes)
 	if (!_exporting && config.get_external_sync()) {
 		if (!implement_master_strategy ()) {
 			no_roll (nframes);
-			ltc_tx_send_time_code_for_cycle (_transport_sample, _transport_sample, 0, 0 , nframes);
 			return;
 		}
 	}
@@ -667,8 +660,6 @@ Session::process_without_events (pframes_t nframes)
 	if (!_exporting && !timecode_transmission_suspended()) {
 		send_midi_time_code_for_cycle (_transport_sample, _transport_sample + samples_moved, nframes);
 	}
-
-	ltc_tx_send_time_code_for_cycle (_transport_sample, _transport_sample + samples_moved, _target_transport_speed, _transport_speed, nframes);
 
 	samplepos_t const stop_limit = compute_stop_limit ();
 
