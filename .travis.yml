@@ -7,7 +7,7 @@ jobs:
       os:
         - linux
       install: 
-        - sudp apt-get update
+        - sudo apt-get update
         - sudo apt-get upgrade
         - sudo apt-get install \
             fftw3-dev \
