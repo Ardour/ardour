@@ -16,6 +16,5 @@ jobs:
         - sudo apt-get install libsndfile-dev
         - ./waf configure
         - ./waf
-        - sudo ./waf install
 notifications:
   email: false
