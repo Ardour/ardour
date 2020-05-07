@@ -758,28 +758,22 @@ Track::set_align_choice_from_io ()
 
 	if (_input) {
 		uint32_t n = 0;
-		vector<string> connections;
 		boost::shared_ptr<Port> p;
 
-		while (true) {
-
-			p = _input->nth (n++);
-
-			if (!p) {
+		while (0 != (p = _input->nth (n++))) {
+			/* In case of JACK all ports not owned by Ardour may be re-sampled,
+			 * and latency is added. external JACK ports need to be treated
+			 * like physical ports: I/O latency needs to be taken into account.
+			 *
+			 * When not using JACK, all external ports are physical ports.
+			 */
+			if (p->externally_connected ()) {
+				have_physical = true;
 				break;
 			}
-
-			if (p->get_connections (connections) != 0) {
-				if (AudioEngine::instance()->port_is_physical (connections[0])) {
-					have_physical = true;
-					break;
-				}
-			}
-
-			connections.clear ();
 		}
 
-		/* Special case bounding the Metronome.
+		/* Special case bouncing the Metronome.
 		 * Click-out is aligned to output and hence
 		 * equivalent to a physical round-trip alike
 		 * ExistingMaterial.
