@@ -85,7 +85,7 @@ Session::foreach_track (void (Track::*method)(A), A arg)
 	for (RouteList::iterator i = r->begin(); i != r->end(); i++) {
 		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 		if (tr) {
-			(tr->*method) (arg);
+			(tr.get()->*method) (arg);
 		}
 	}
 }
@@ -98,7 +98,7 @@ Session::foreach_track (void (Track::*method)(A1, A2), A1 arg1, A2 arg2)
 	for (RouteList::iterator i = r->begin(); i != r->end(); i++) {
 		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 		if (tr) {
-			(tr->*method) (arg1, arg2);
+			(tr.get()->*method) (arg1, arg2);
 		}
 	}
 }
