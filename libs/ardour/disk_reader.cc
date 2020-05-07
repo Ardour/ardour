@@ -292,6 +292,9 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		} else {
 			_declick_enabled = _session.cfg ()->get_use_monitor_fades ();
 		}
+	} else if (_declick_amp.gain () == GAIN_COEFF_ZERO && speed == 0) {
+		/* fade in */
+		_declick_enabled = _session.cfg ()->get_use_transport_fades ();
 	}
 
 	if (!_declick_enabled || (_session.exporting () && !_session.realtime_export ())) {
