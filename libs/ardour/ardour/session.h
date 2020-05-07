@@ -350,6 +350,12 @@ public:
 	template<class T> void foreach_route (T *obj, void (T::*func)(boost::shared_ptr<Route>), bool sort = true);
 	template<class T, class A> void foreach_route (T *obj, void (T::*func)(Route&, A), A arg, bool sort = true);
 
+	template<class A>            void foreach_track (void (Track::*method)(A), A arg);
+	template<class A1, class A2> void foreach_track (void (Track::*method)(A1, A2), A1 arg1, A2 arg2);
+
+	template<class A>            void foreach_route (void (Route::*method)(A), A arg);
+	template<class A1, class A2> void foreach_route (void (Route::*method)(A1, A2), A1 arg1, A2 arg2);
+
 	static char session_name_is_legal (const std::string&);
 	bool io_name_is_legal (const std::string&) const;
 	boost::shared_ptr<Route> route_by_name (std::string) const;

@@ -107,13 +107,7 @@ Session::overwrite_some_buffers (boost::shared_ptr<Route> r, OverwriteReason why
 
 	} else {
 
-		boost::shared_ptr<RouteList> rl = routes.reader();
-		for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-			if (tr) {
-				tr->set_pending_overwrite (why);
-			}
-		}
+		foreach_track (&Track::set_pending_overwrite, why);
 	}
 
 	add_post_transport_work (PostTransportOverWrite);

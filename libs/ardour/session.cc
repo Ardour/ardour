@@ -109,6 +109,7 @@
 #include "ardour/session.h"
 #include "ardour/session_directory.h"
 #include "ardour/session_playlists.h"
+#include "ardour/session_route.h"
 #include "ardour/smf_source.h"
 #include "ardour/solo_isolate_control.h"
 #include "ardour/source_factory.h"
@@ -2080,19 +2081,7 @@ Session::set_block_size (pframes_t nframes)
 
 	ensure_buffers ();
 
-	boost::shared_ptr<RouteList> r = routes.reader ();
-
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		(*i)->set_block_size (nframes);
-	}
-
-	boost::shared_ptr<RouteList> rl = routes.reader ();
-	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-		if (tr) {
-			tr->set_block_size (nframes);
-		}
-	}
+	foreach_route (&Route::set_block_size, nframes);
 
 	DEBUG_TRACE (DEBUG::LatencyCompensation, "Session::set_block_size -> update worst i/o latency\n");
 	/* when this is called from the auto-connect thread, the process-lock is held */

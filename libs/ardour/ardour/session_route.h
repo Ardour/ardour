@@ -76,6 +76,53 @@ Session::foreach_route (T *obj, void (T::*func)(Route&, A), A arg1, bool sort)
 	}
 }
 
+
+template<class A> void
+Session::foreach_track (void (Track::*method)(A), A arg)
+{
+	boost::shared_ptr<RouteList> r = routes.reader();
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); i++) {
+		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+		if (tr) {
+			(tr->*method) (arg);
+		}
+	}
+}
+
+template<class A1, class A2> void
+Session::foreach_track (void (Track::*method)(A1, A2), A1 arg1, A2 arg2)
+{
+	boost::shared_ptr<RouteList> r = routes.reader();
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); i++) {
+		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+		if (tr) {
+			(tr->*method) (arg1, arg2);
+		}
+	}
+}
+
+template<class A> void
+Session::foreach_route (void (Route::*method)(A), A arg)
+{
+	boost::shared_ptr<RouteList> r = routes.reader();
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); i++) {
+		((*i).get()->*method) (arg);
+	}
+}
+
+template<class A1, class A2> void
+Session::foreach_route (void (Route::*method)(A1, A2), A1 arg1, A2 arg2)
+{
+	boost::shared_ptr<RouteList> r = routes.reader();
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); i++) {
+		((*i).get()->*method) (arg1, arg2);
+	}
+}
+
 } /* namespace */
 
 #endif /* __ardour_session_route_h__ */
