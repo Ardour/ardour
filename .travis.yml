@@ -6,8 +6,9 @@ jobs:
         - clang
       os:
         - linux
+      git:
+        depth: false
       install:
-        - python3 -V
         - sudo apt-get update
         - sudo apt-get upgrade
         - sudo apt-get install fftw3-dev libarchive-dev libaubio-dev libboost-all-dev libcppunit-dev libcwiid-dev libglibmm-2.4-dev libgtkmm-2.4-dev libjack-dev liblilv-dev liblo-dev liblrdf-dev libpangomm-1.4-dev librubberband-dev libsamplerate0-dev libserd-dev libsord-dev libsratom-dev libtag1-dev libudev-dev libusb-1.0-0-dev libxml2-dev vamp-plugin-sdk
