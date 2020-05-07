@@ -735,7 +735,10 @@ enum PortFlags {
 	/* non-JACK related flags */
 	Hidden = 0x20,
 	Shadow = 0x40,
-	TransportMasterPort = 0x80
+
+	TransportMasterPort = 0x80,  // incoming data, used by slaves
+	TransportGenerator  = 0x100, // outgoing, timecode/clock generators
+	TransportSyncPort   = 0x180  // = TransportMasterPort | TransportGenerator
 };
 
 enum MidiPortFlags {
