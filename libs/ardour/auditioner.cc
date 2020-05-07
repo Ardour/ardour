@@ -528,46 +528,54 @@ Auditioner::seek_response (sampleoffset_t pos) {
 void
 Auditioner::output_changed (IOChange change, void* /*src*/)
 {
-	if (change.type & IOChange::ConnectionsChanged) {
-		string phys;
-		vector<string> connections;
-		vector<string> outputs;
-		_session.engine().get_physical_outputs (DataType::AUDIO, outputs);
+	if (0 == (change.type & IOChange::ConnectionsChanged)) {
+		return;
+	}
+	if (_session.inital_connect_or_deletion_in_progress ()) {
+		return;
+	}
+	if (_session.reconnection_in_progress ()) {
+		return;
+	}
 
-		if (_session.monitor_out () && _output->connected_to (_session.monitor_out ()->input ())) {
+	string phys;
+	vector<string> connections;
+	vector<string> outputs;
+	_session.engine().get_physical_outputs (DataType::AUDIO, outputs);
+
+	if (_session.monitor_out () && _output->connected_to (_session.monitor_out ()->input ())) {
+		Config->set_auditioner_output_left ("default");
+		Config->set_auditioner_output_right ("default");
+		via_monitor = true;
+		return;
+	}
+
+	if (_output->nth (0)->get_connections (connections)) {
+		if (outputs.size() > 0) {
+			phys = outputs[0];
+		}
+		if (phys != connections[0]) {
+			Config->set_auditioner_output_left (connections[0]);
+		} else {
 			Config->set_auditioner_output_left ("default");
+		}
+	} else {
+		Config->set_auditioner_output_left ("");
+	}
+
+	connections.clear ();
+
+	if (_output->nth (1)->get_connections (connections)) {
+		if (outputs.size() > 1) {
+			phys = outputs[1];
+		}
+		if (phys != connections[0]) {
+			Config->set_auditioner_output_right (connections[0]);
+		} else {
 			Config->set_auditioner_output_right ("default");
-			via_monitor = true;
-			return;
 		}
-
-		if (_output->nth (0)->get_connections (connections)) {
-			if (outputs.size() > 0) {
-				phys = outputs[0];
-			}
-			if (phys != connections[0]) {
-				Config->set_auditioner_output_left (connections[0]);
-			} else {
-				Config->set_auditioner_output_left ("default");
-			}
-		} else {
-			Config->set_auditioner_output_left ("");
-		}
-
-		connections.clear ();
-
-		if (_output->nth (1)->get_connections (connections)) {
-			if (outputs.size() > 1) {
-				phys = outputs[1];
-			}
-			if (phys != connections[0]) {
-				Config->set_auditioner_output_right (connections[0]);
-			} else {
-				Config->set_auditioner_output_right ("default");
-			}
-		} else {
-			Config->set_auditioner_output_right ("");
-		}
+	} else {
+		Config->set_auditioner_output_right ("");
 	}
 }
 
