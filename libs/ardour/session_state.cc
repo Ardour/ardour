@@ -1500,11 +1500,6 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool only_used_ass
 		gain_child->add_child_nocopy (_click_gain->get_state ());
 	}
 
-	if (_ltc_output) {
-		XMLNode* ltc_output_child = node->add_child ("LTC-Out");
-		ltc_output_child->add_child_nocopy (_ltc_output->get_state ());
-	}
-
 	node->add_child_nocopy (_speakers->get_state());
 	node->add_child_nocopy (_tempo_map->get_state());
 	node->add_child_nocopy (get_control_protocol_state());

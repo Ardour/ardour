@@ -569,6 +569,9 @@ Session::destroy ()
 	{
 		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 		ltc_tx_cleanup();
+		if (_ltc_output_port) {
+			AudioEngine::instance()->unregister_port (_ltc_output_port);
+		}
 	}
 
 	/* disconnect from any and all signals that we are connected to */
@@ -594,7 +597,6 @@ Session::destroy ()
 
 	/* remove I/O objects that we (the session) own */
 	_click_io.reset ();
-	_ltc_output.reset ();
 
 	{
 		Glib::Threads::Mutex::Lock lm (controllables_lock);
@@ -801,24 +803,13 @@ Session::setup_ltc ()
 {
 	XMLNode* child = 0;
 
-	_ltc_output.reset (new IO (*this, X_("LTC Out"), IO::Output));
+	_ltc_output_port = AudioEngine::instance()->register_output_port (DataType::AUDIO, X_("LTC-Out"), false, TransportGenerator);
 
-	if (state_tree && (child = find_named_node (*state_tree->root(), X_("LTC Out"))) != 0) {
-		_ltc_output->set_state (*(child->children().front()), Stateful::loading_state_version);
-	} else {
-		{
-			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-			_ltc_output->ensure_io (ChanCount (DataType::AUDIO, 1), true, this);
-			// TODO use auto-connect thread
-			reconnect_ltc_output ();
-		}
+	{
+		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		/* TODO use auto-connect thread */
+		reconnect_ltc_output ();
 	}
-
-	/* fix up names of LTC ports because we don't want the normal
-	 * IO style of NAME/TYPE-{in,out}N
-	 */
-
-	_ltc_output->nth (0)->set_name (X_("LTC-out"));
 }
 
 void
@@ -6814,23 +6805,16 @@ Session::operation_in_progress (GQuark op) const
 	return (find (_current_trans_quarks.begin(), _current_trans_quarks.end(), op) != _current_trans_quarks.end());
 }
 
-boost::shared_ptr<Port>
-Session::ltc_output_port () const
-{
-	return _ltc_output ? _ltc_output->nth (0) : boost::shared_ptr<Port> ();
-}
-
 void
 Session::reconnect_ltc_output ()
 {
-	if (_ltc_output) {
-
+	if (_ltc_output_port) {
 		string src = Config->get_ltc_output_port();
 
-		_ltc_output->disconnect (this);
+		_ltc_output_port->disconnect_all ();
 
 		if (src != _("None") && !src.empty())  {
-			_ltc_output->nth (0)->connect (src);
+			_ltc_output_port->connect (src);
 		}
 	}
 }

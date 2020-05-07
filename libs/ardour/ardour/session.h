@@ -1233,9 +1233,7 @@ public:
 
 	boost::shared_ptr<MidiPort> midi_clock_output_port () const;
 	boost::shared_ptr<MidiPort> mtc_output_port () const;
-	boost::shared_ptr<Port> ltc_output_port() const;
-
-	boost::shared_ptr<IO> ltc_output_io() { return _ltc_output; }
+	boost::shared_ptr<Port> ltc_output_port() const { return _ltc_output_port; }
 
 	MIDI::MachineControl& mmc() { return *_mmc; }
 
@@ -2133,7 +2131,7 @@ private:
 
 	MidiClockTicker* midi_clock;
 
-	boost::shared_ptr<IO>   _ltc_output;
+	boost::shared_ptr<Port>  _ltc_output_port;
 
 	boost::shared_ptr<RTTaskList> _rt_tasklist;
 
