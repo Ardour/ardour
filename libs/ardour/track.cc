@@ -762,10 +762,11 @@ Track::set_align_choice_from_io ()
 
 		while (0 != (p = _input->nth (n++))) {
 			/* In case of JACK all ports not owned by Ardour may be re-sampled,
-			 * and latency is added. external JACK ports need to be treated
+			 * and latency is added. External JACK ports need to be treated
 			 * like physical ports: I/O latency needs to be taken into account.
 			 *
-			 * When not using JACK, all external ports are physical ports.
+			 * When not using JACK, all external ports are physical ports
+			 * so this is a NO-OP for other backends.
 			 */
 			if (p->externally_connected ()) {
 				have_physical = true;
