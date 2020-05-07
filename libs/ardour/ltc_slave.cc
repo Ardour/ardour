@@ -126,13 +126,16 @@ LTC_TransportMaster::~LTC_TransportMaster()
 }
 
 void
-LTC_TransportMaster::parse_timecode_offset() {
-	Timecode::Time offset_tc;
-	Timecode::parse_timecode_format(_session->config.get_slave_timecode_offset(), offset_tc);
-	offset_tc.rate = _session->timecode_frames_per_second();
-	offset_tc.drop = _session->timecode_drop_frames();
-	_session->timecode_to_sample(offset_tc, timecode_offset, false, false);
-	timecode_negative_offset = offset_tc.negative;
+LTC_TransportMaster::parse_timecode_offset()
+{
+	if (_session) {
+		Timecode::Time offset_tc;
+		Timecode::parse_timecode_format(_session->config.get_slave_timecode_offset(), offset_tc);
+		offset_tc.rate = _session->timecode_frames_per_second();
+		offset_tc.drop = _session->timecode_drop_frames();
+		_session->timecode_to_sample(offset_tc, timecode_offset, false, false);
+		timecode_negative_offset = offset_tc.negative;
+	}
 }
 
 void
@@ -249,7 +252,7 @@ LTC_TransportMaster::equal_ltc_sample_time(LTCFrame *a, LTCFrame *b) {
 }
 static ostream& operator<< (ostream& ostr, LTCFrame& a)
 {
-	ostr 
+	ostr
 		<< a.hours_tens
 		<< a.hours_units << ':'
 		<< a.mins_tens
@@ -344,48 +347,55 @@ LTC_TransportMaster::detect_ltc_fps(int frameno, bool df)
 	if (detected_fps != 0 && (detected_fps != timecode.rate || df != timecode.drop)) {
 		timecode.rate = detected_fps;
 		timecode.drop = df;
-		samples_per_ltc_frame = double(_session->sample_rate()) / timecode.rate;
+		samples_per_ltc_frame = double(ENGINE->sample_rate()) / timecode.rate;
 		DEBUG_TRACE (DEBUG::LTC, string_compose ("LTC reset to FPS: %1%2 ; audio-samples per LTC: %3\n",
 				detected_fps, df?"df":"ndf", samples_per_ltc_frame));
 		fps_changed=true;
 	}
 
-	/* poll and check session TC */
 	TimecodeFormat tc_format = apparent_timecode_format();
-	TimecodeFormat cur_timecode = _session->config.get_timecode_format();
 
-	if (Config->get_timecode_sync_frame_rate()) {
-		/* enforce time-code */
-		if (!did_reset_tc_format) {
-			saved_tc_format = cur_timecode;
-			did_reset_tc_format = true;
-		}
-		if (cur_timecode != tc_format) {
-			if (ceil(Timecode::timecode_to_frames_per_second(cur_timecode)) != ceil(Timecode::timecode_to_frames_per_second(tc_format))) {
-				warning << string_compose(_("Session framerate adjusted from %1 to LTC's %2."),
-						Timecode::timecode_format_name(cur_timecode),
-						Timecode::timecode_format_name(tc_format))
-					<< endmsg;
-			}
-			_session->config.set_timecode_format (tc_format);
-		}
-	} else {
-		/* only warn about TC mismatch */
-		if (ltc_timecode != tc_format) printed_timecode_warning = false;
-		if (a3e_timecode != cur_timecode) printed_timecode_warning = false;
+	if (_session) {
 
-		if (cur_timecode != tc_format && ! printed_timecode_warning) {
-			if (ceil(Timecode::timecode_to_frames_per_second(cur_timecode)) != ceil(Timecode::timecode_to_frames_per_second(tc_format))) {
-				warning << string_compose(_("Session and LTC framerate mismatch: LTC:%1 Session:%2."),
-						Timecode::timecode_format_name(tc_format),
-						Timecode::timecode_format_name(cur_timecode))
-					<< endmsg;
+		/* poll and check session TC */
+
+		TimecodeFormat cur_timecode = _session->config.get_timecode_format();
+
+		if (Config->get_timecode_sync_frame_rate()) {
+			/* enforce time-code */
+			if (!did_reset_tc_format) {
+				saved_tc_format = cur_timecode;
+				did_reset_tc_format = true;
 			}
-			printed_timecode_warning = true;
+			if (cur_timecode != tc_format) {
+				if (ceil(Timecode::timecode_to_frames_per_second(cur_timecode)) != ceil(Timecode::timecode_to_frames_per_second(tc_format))) {
+					warning << string_compose(_("Session framerate adjusted from %1 to LTC's %2."),
+					                          Timecode::timecode_format_name(cur_timecode),
+					                          Timecode::timecode_format_name(tc_format))
+					        << endmsg;
+				}
+				_session->config.set_timecode_format (tc_format);
+			}
+		} else {
+			/* only warn about TC mismatch */
+			if (ltc_timecode != tc_format) printed_timecode_warning = false;
+			if (a3e_timecode != cur_timecode) printed_timecode_warning = false;
+
+			if (cur_timecode != tc_format && ! printed_timecode_warning) {
+				if (ceil(Timecode::timecode_to_frames_per_second(cur_timecode)) != ceil(Timecode::timecode_to_frames_per_second(tc_format))) {
+					warning << string_compose(_("Session and LTC framerate mismatch: LTC:%1 Session:%2."),
+					                          Timecode::timecode_format_name(tc_format),
+					                          Timecode::timecode_format_name(cur_timecode))
+					        << endmsg;
+				}
+				printed_timecode_warning = true;
+			}
 		}
+
+		a3e_timecode = cur_timecode;
 	}
+
 	ltc_timecode = tc_format;
-	a3e_timecode = cur_timecode;
 
 	samples_per_timecode_frame = ENGINE->sample_rate() / Timecode::timecode_to_frames_per_second (ltc_timecode);
 
@@ -642,7 +652,12 @@ LTC_TransportMaster::apparent_timecode_format () const
 		return timecode_30;
 
 	/* XXX - unknown timecode format */
-	return _session->config.get_timecode_format();
+
+	if (_session) {
+		return _session->config.get_timecode_format();
+	} else {
+		return timecode_30;
+	}
 }
 
 std::string
@@ -664,8 +679,8 @@ LTC_TransportMaster::delta_string() const
 	} else if ((monotonic_cnt - current.timestamp) > 2 * samples_per_ltc_frame) {
 		snprintf (delta, sizeof(delta), "%s", _("flywheel"));
 	} else {
-		if (abs (_current_delta) > _session->sample_rate()) {
-			int secs = rint ((double) _current_delta / _session->sample_rate());
+		if (abs (_current_delta) > ENGINE->sample_rate()) {
+			int secs = rint ((double) _current_delta / ENGINE->sample_rate());
 			snprintf(delta, sizeof(delta), "\u0394<span foreground=\"green\" face=\"monospace\" >%s%s%d</span><span face=\"monospace\"> s</span>",
 			         LEADINGZERO(abs(secs)), PLUSMINUS(-secs), abs(secs));
 		} else {
@@ -677,4 +692,3 @@ LTC_TransportMaster::delta_string() const
 
 	return delta;
 }
-
