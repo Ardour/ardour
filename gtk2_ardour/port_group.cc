@@ -459,11 +459,6 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 			program->add_bundle (session->the_auditioner()->output()->bundle());
 			program->add_bundle (session->click_io()->bundle());
 
-			/* Note: the LTC ports do not have the usual ":audio_out 1" postfix, so
-			 *  program->add_bundle (session->ltc_output_io()->bundle());
-			 *  won't work
-			 */
-
 			boost::shared_ptr<Bundle> ltc (new Bundle (_("LTC Out"), inputs));
 			ltc->add_channel (_("LTC Out"), DataType::AUDIO, session->engine().make_port_name_non_relative (session->ltc_output_port()->name()));
 			program->add_bundle (ltc);

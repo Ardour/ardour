@@ -1393,11 +1393,7 @@ private:
 		if (!_shp->session()) {
 			return;
 		}
-		boost::shared_ptr<IO> ltc_io = _shp->session()->ltc_output_io();
-		if (!ltc_io) {
-			return;
-		}
-		boost::shared_ptr<Port> ltc_port = ltc_io->nth (0);
+		boost::shared_ptr<Port> ltc_port = _shp->session()->ltc_output_port ();
 		if (!ltc_port) {
 			return;
 		}
@@ -1405,7 +1401,7 @@ private:
 			return;
 		}
 
-		ltc_io->disconnect (this);
+		ltc_port->disconnect_all ();
 		if (!new_port.empty()) {
 			ltc_port->connect (new_port);
 		}
@@ -1447,10 +1443,7 @@ private:
 		std::string const& pn = _rc_config->get_ltc_output_port ();
 		boost::shared_ptr<Port> ltc_port;
 		if (_shp->session()) {
-			boost::shared_ptr<IO> ltc_io = _shp->session()->ltc_output_io();
-			if (ltc_io) {
-				ltc_port = ltc_io->nth (0);
-			}
+			ltc_port = _shp->session()->ltc_output_port ();
 		}
 
 		PBD::Unwinder<bool> uw (_ignore_change, true);
