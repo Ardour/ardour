@@ -610,7 +610,7 @@ private:
 	bool detect_ltc_fps (int, bool);
 	bool equal_ltc_sample_time (LTCFrame* a, LTCFrame* b);
 	void resync_xrun ();
-	void resync_latency ();
+	void resync_latency (bool);
 	void parse_timecode_offset ();
 	void parameter_changed (std::string const& p);
 
@@ -635,8 +635,8 @@ private:
 	Timecode::TimecodeFormat a3e_timecode;
 	double                   samples_per_timecode_frame;
 
-	PBD::ScopedConnectionList port_connections;
-	PBD::ScopedConnection     config_connection;
+	PBD::ScopedConnection     port_connection;
+	PBD::ScopedConnectionList session_connections;
 	LatencyRange              ltc_slave_latency;
 };
 

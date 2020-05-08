@@ -66,10 +66,9 @@ LTC_TransportMaster::LTC_TransportMaster (std::string const & name)
 {
 	memset (&prev_frame, 0, sizeof(LTCFrameExt));
 
-	resync_latency();
+	resync_latency (false);
 
-	AudioEngine::instance()->Xrun.connect_same_thread (port_connections, boost::bind (&LTC_TransportMaster::resync_xrun, this));
-	AudioEngine::instance()->GraphReordered.connect_same_thread (port_connections, boost::bind (&LTC_TransportMaster::resync_latency, this));
+	AudioEngine::instance()->Xrun.connect_same_thread (port_connection, boost::bind (&LTC_TransportMaster::resync_xrun, this));
 }
 
 void
@@ -89,7 +88,7 @@ LTC_TransportMaster::create_port ()
 void
 LTC_TransportMaster::set_session (Session *s)
 {
-	config_connection.disconnect ();
+	session_connections.drop_connections();
 	_session = s;
 
 	if (_session) {
@@ -109,14 +108,15 @@ LTC_TransportMaster::set_session (Session *s)
 		parse_timecode_offset();
 		reset (true);
 
-		_session->config.ParameterChanged.connect_same_thread (config_connection, boost::bind (&LTC_TransportMaster::parameter_changed, this, _1));
+		_session->config.ParameterChanged.connect_same_thread (session_connections, boost::bind (&LTC_TransportMaster::parameter_changed, this, _1));
+		_session->LatencyUpdated.connect_same_thread (session_connections, boost::bind (&LTC_TransportMaster::resync_latency, this, _1));
 	}
 }
 
 LTC_TransportMaster::~LTC_TransportMaster()
 {
-	port_connections.drop_connections();
-	config_connection.disconnect();
+	port_connection.disconnect();
+	session_connections.drop_connections();
 
 	if (did_reset_tc_format) {
 		_session->config.set_timecode_format (saved_tc_format);
@@ -185,13 +185,19 @@ LTC_TransportMaster::resync_xrun()
 }
 
 void
-LTC_TransportMaster::resync_latency()
+LTC_TransportMaster::resync_latency (bool playback)
 {
+	if (playback) {
+		return;
+	}
 	DEBUG_TRACE (DEBUG::LTC, "LTC resync_latency()\n");
-	sync_lock_broken = false;
 
+	uint32_t old = ltc_slave_latency.max;
 	if (_port) {
 		_port->get_connected_latency_range (ltc_slave_latency, false);
+	}
+	if (old != ltc_slave_latency.max) {
+		sync_lock_broken = false;
 	}
 }
 
