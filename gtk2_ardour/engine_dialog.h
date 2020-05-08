@@ -248,6 +248,8 @@ private:
 		bool use_buffered_io;
 		std::string midi_option;
 		std::vector<MidiDeviceSettings> midi_devices;
+		std::string lm_input;
+		std::string lm_output;
 		time_t lru;
 
 		StateStruct()

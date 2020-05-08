@@ -750,6 +750,8 @@ EngineControl::disable_latency_tab ()
 void
 EngineControl::enable_latency_tab ()
 {
+	State state = get_saved_state_for_currently_displayed_backend_and_device ();
+
 	vector<string> outputs;
 	vector<string> inputs;
 
@@ -780,32 +782,41 @@ EngineControl::enable_latency_tab ()
 		lm_preamble.show ();
 	}
 
+	unsigned int j = 0;
+	unsigned int n = 0;
 	lm_output_channel_list->clear ();
-	for (vector<string>::const_iterator i = outputs.begin(); i != outputs.end(); ++i) {
+	for (vector<string>::const_iterator i = outputs.begin(); i != outputs.end(); ++i, ++j) {
 		Gtk::TreeModel::iterator iter = lm_output_channel_list->append ();
 		Gtk::TreeModel::Row row = *iter;
-		 row[lm_output_channel_cols.port_name] = *i;
-		 std::string pn = ARDOUR::AudioEngine::instance()->get_pretty_name_by_name (*i);
-		 if (pn.empty()) {
-			 pn = (*i).substr ((*i).find (':') + 1);
-		 }
-		 row[lm_output_channel_cols.pretty_name] = pn;
+		row[lm_output_channel_cols.port_name] = *i;
+		std::string pn = ARDOUR::AudioEngine::instance()->get_pretty_name_by_name (*i);
+		if (pn.empty()) {
+			pn = (*i).substr ((*i).find (':') + 1);
+		}
+		row[lm_output_channel_cols.pretty_name] = pn;
+		if (state && state->lm_output == *i) {
+			n = j;
+		}
 	}
-	lm_output_channel_combo.set_active (0);
+	lm_output_channel_combo.set_active (n);
 	lm_output_channel_combo.set_sensitive (true);
 
+	j = n = 0;
 	lm_input_channel_list->clear ();
-	for (vector<string>::const_iterator i = inputs.begin(); i != inputs.end(); ++i) {
+	for (vector<string>::const_iterator i = inputs.begin(); i != inputs.end(); ++i, ++j) {
 		Gtk::TreeModel::iterator iter = lm_input_channel_list->append ();
 		Gtk::TreeModel::Row row = *iter;
-		 row[lm_input_channel_cols.port_name] = *i;
-		 std::string pn = ARDOUR::AudioEngine::instance()->get_pretty_name_by_name (*i);
-		 if (pn.empty()) {
-			 pn = (*i).substr ((*i).find (':') + 1);
-		 }
-		 row[lm_input_channel_cols.pretty_name] = pn;
+		row[lm_input_channel_cols.port_name] = *i;
+		std::string pn = ARDOUR::AudioEngine::instance()->get_pretty_name_by_name (*i);
+		if (pn.empty()) {
+			pn = (*i).substr ((*i).find (':') + 1);
+		}
+		row[lm_input_channel_cols.pretty_name] = pn;
+		if (state && state->lm_input == *i) {
+			n = j;
+		}
 	}
-	lm_input_channel_combo.set_active (0);
+	lm_input_channel_combo.set_active (n);
 	lm_input_channel_combo.set_sensitive (true);
 
 	lm_measure_button.set_sensitive (true);
@@ -2013,6 +2024,8 @@ EngineControl::get_state ()
 			node->set_property ("output-latency", (*i)->output_latency);
 			node->set_property ("input-channels", (*i)->input_channels);
 			node->set_property ("output-channels", (*i)->output_channels);
+			node->set_property ("lm-input", (*i)->lm_input);
+			node->set_property ("lm-output", (*i)->lm_output);
 			node->set_property ("active", (*i)->active);
 			node->set_property ("use-buffered-io", (*i)->use_buffered_io);
 			node->set_property ("midi-option", (*i)->midi_option);
@@ -2115,6 +2128,12 @@ EngineControl::set_state (const XMLNode& root)
 			if (!grandchild->get_property ("n-periods", state->n_periods)) {
 				// optional (new value in 4.5)
 				state->n_periods = 0;
+			}
+
+			if (!grandchild->get_property ("lm-input", state->lm_input) ||
+			    !grandchild->get_property ("lm-output", state->lm_output)) {
+				state->lm_input = "";
+				state->lm_output = "";
 			}
 
 			state->midi_devices.clear();
@@ -3183,6 +3202,14 @@ EngineControl::use_latency_button_clicked ()
 
 		input_latency_adjustment.set_value (one_way);
 		output_latency_adjustment.set_value (one_way);
+
+		State state = get_saved_state_for_currently_displayed_backend_and_device ();
+		if (state) {
+			state->lm_input = lm_input_channel_combo.get_active ()->get_value (lm_input_channel_cols.port_name);
+			state->lm_output = lm_output_channel_combo.get_active ()->get_value (lm_output_channel_cols.port_name);
+			post_push ();
+		}
+
 		if (backend->can_change_systemic_latency_when_running ()) {
 			backend->set_systemic_input_latency (one_way);
 			backend->set_systemic_output_latency (one_way);
