@@ -5,16 +5,16 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: \n"
+"Project-Id-Version: Ardour 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-02 13:17+0200\n"
 "PO-Revision-Date: 2020-04-02 17:51+0200\n"
-"Language-Team: \n"
+"Language-Team: Euskera <porrumentzio@riseup.net>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 2.2.1\n"
-"Last-Translator: Porrumentzio <<porruren-grabatokia@riseup.net> <porrumentzio@riseup.net>>\n"
+"Last-Translator: Enara Larraitz & Porrumentzio <porruren-grabatokia@riseup.net>>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "Language: eu\n"
 "X-Poedit-Bookmarks: 0,-1,-1,-1,-1,-1,-1,-1,-1,-1\n"
@@ -143,7 +143,7 @@ msgstr "Ezezaguna"
 
 #: keyboard.cc:616
 msgid "key bindings file not found at \"%2\" or contains errors."
-msgstr "laster-teklen fitxategia ez dago %2-(e)n edo akatsak ditu."
+msgstr "laster-teklen fitxategia ez dago "%2"-(e)n edo akatsak ditu."
 
 #: keyboard.cc:642
 msgid "Keyboard binding found without a name"
