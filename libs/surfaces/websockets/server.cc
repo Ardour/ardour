@@ -110,6 +110,10 @@ WebsocketsServer::WebsocketsServer (ArdourSurface::ArdourWebsockets& surface)
 int
 WebsocketsServer::start ()
 {
+	if (_lws_context) {
+		stop ();
+	}
+
 	_lws_context = lws_create_context (&_lws_info);
 
 	if (!_lws_context) {
