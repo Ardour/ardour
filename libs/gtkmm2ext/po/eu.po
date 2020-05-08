@@ -143,7 +143,7 @@ msgstr "Ezezaguna"
 
 #: keyboard.cc:616
 msgid "key bindings file not found at \"%2\" or contains errors."
-msgstr "laster-teklen fitxategia ez dago "%2"-(e)n edo akatsak ditu."
+msgstr "laster-teklen fitxategia ez dago %2-(e)n edo akatsak ditu."
 
 #: keyboard.cc:642
 msgid "Keyboard binding found without a name"
