@@ -435,6 +435,9 @@ AlsaAudioBackend::set_output_channels (uint32_t cc)
 int
 AlsaAudioBackend::set_systemic_input_latency (uint32_t sl)
 {
+	if (_systemic_audio_input_latency == sl) {
+		return 0;
+	}
 	_systemic_audio_input_latency = sl;
 	if (_run) {
 		update_systemic_audio_latencies();
@@ -445,6 +448,9 @@ AlsaAudioBackend::set_systemic_input_latency (uint32_t sl)
 int
 AlsaAudioBackend::set_systemic_output_latency (uint32_t sl)
 {
+	if (_systemic_audio_output_latency == sl) {
+		return 0;
+	}
 	_systemic_audio_output_latency = sl;
 	if (_run) {
 		update_systemic_audio_latencies();
