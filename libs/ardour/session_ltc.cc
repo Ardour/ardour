@@ -273,9 +273,9 @@ Session::send_ltc_for_cycle (samplepos_t start_sample, samplepos_t end_sample, p
 	samplepos_t cycle_start_sample;
 
 	if (new_ltc_speed < 0) {
-		cycle_start_sample = (start_sample + ltc_out_latency.max);
-	} else if (new_ltc_speed > 0) {
 		cycle_start_sample = (start_sample - ltc_out_latency.max);
+	} else if (new_ltc_speed > 0) {
+		cycle_start_sample = (start_sample + ltc_out_latency.max);
 	} else {
 		/* There is no need to compensate for latency when not rolling
 		 * rather send the accurate NOW timecode
