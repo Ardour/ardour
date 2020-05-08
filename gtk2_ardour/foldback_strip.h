@@ -1,19 +1,19 @@
 /*
-    Copyright (C) 2018-2019 Len Ovens
+	Copyright (C) 2018-2019 Len Ovens
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; either version 2 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 #ifndef __ardour_foldback_strip__
@@ -40,11 +40,13 @@
 #include "ardour/types.h"
 #include "ardour/ardour.h"
 #include "ardour/processor.h"
+#include "ardour/meter.h"
 
 #include "pbd/fastlog.h"
 
 #include "widgets/ardour_button.h"
 #include "widgets/ardour_knob.h"
+#include "widgets/fastmeter.h"
 
 #include "route_ui.h"
 #include "panner_ui.h"
@@ -60,6 +62,7 @@ namespace ARDOUR {
 	class PortInsert;
 	class Bundle;
 	class Plugin;
+	class PeakMeter;
 }
 namespace Gtk {
 	class Window;
@@ -126,6 +129,8 @@ public:
 
 	void set_embedded (bool);
 
+	void fast_update ();
+
 	void set_route (boost::shared_ptr<ARDOUR::Route>);
 	void set_button_names ();
 	void revert_to_default_display ();
@@ -176,6 +181,7 @@ private:
 	ARDOUR::Session* _session;
 	bool _showing_sends;
 	uint32_t _width;
+	ARDOUR::PeakMeter* _peak_meter;
 
 	Gtk::EventBox		spacer;
 	Gtk::VBox			send_display;
@@ -204,6 +210,7 @@ private:
 	ArdourWidgets::ArdourButton _hide_button;
 	ArdourWidgets::ArdourButton _comment_button;
 	ArdourWidgets::ArdourKnob*   fb_level_control;
+	ArdourWidgets::FastMeter*   _meter;
 
 	void setup_comment_button ();
 	void hide_clicked();
@@ -214,7 +221,7 @@ private:
 	Gtk::Menu output_menu;
 	std::list<boost::shared_ptr<ARDOUR::Bundle> > output_menu_bundles;
 	void maybe_add_bundle_to_output_menu (boost::shared_ptr<ARDOUR::Bundle>, ARDOUR::BundleList const &,
-	                                      ARDOUR::DataType type = ARDOUR::DataType::NIL);
+										  ARDOUR::DataType type = ARDOUR::DataType::NIL);
 
 	void bundle_output_chosen (boost::shared_ptr<ARDOUR::Bundle>);
 

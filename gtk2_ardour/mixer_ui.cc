@@ -1388,6 +1388,9 @@ Mixer_UI::fast_update_strips ()
 		for (list<MixerStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
 			(*i)->fast_update ();
 		}
+		if (foldback_strip) {
+			foldback_strip->fast_update ();
+		}
 	}
 }
 

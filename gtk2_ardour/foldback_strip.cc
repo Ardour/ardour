@@ -1,19 +1,19 @@
 /*
-    Copyright (C) 2018-2019 Len Ovens
+	Copyright (C) 2018-2019 Len Ovens
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; either version 2 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 #include "ardour/audioengine.h"
@@ -26,11 +26,14 @@
 #include "ardour/session.h"
 #include "ardour/user_bundle.h"
 #include "ardour/value_as_string.h"
+#include "ardour/meter.h"
+#include "ardour/logmeter.h"
 
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/menu_elems.h"
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/doi.h"
+#include "pbd/fastlog.h"
 
 #include "widgets/tooltips.h"
 
@@ -298,11 +301,13 @@ FoldbackStrip::FoldbackStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Rou
 	, _mixer_owned (true)
 	, _showing_sends (false)
 	, _width (80)
+	, _peak_meter (0)
 	, _pr_selection ()
 	, panners (sess)
 	, _plugin_insert_cnt (0)
 	, _comment_button (_("Comments"))
 	, fb_level_control (0)
+	, _meter (0)
 {
 	_session = sess;
 	init ();
@@ -365,6 +370,27 @@ FoldbackStrip::init ()
 	insert_box->set_width (Wide);
 	insert_box->set_size_request (PX_SCALE(_width + 34), PX_SCALE(160));
 
+	_meter = new FastMeter ((uint32_t) floor (UIConfiguration::instance().get_meter_hold()),
+		8, FastMeter::Horizontal, PX_SCALE(100),
+		UIConfiguration::instance().color ("meter color0"),
+		UIConfiguration::instance().color ("meter color1"),
+		UIConfiguration::instance().color ("meter color2"),
+		UIConfiguration::instance().color ("meter color3"),
+		UIConfiguration::instance().color ("meter color4"),
+		UIConfiguration::instance().color ("meter color5"),
+		UIConfiguration::instance().color ("meter color6"),
+		UIConfiguration::instance().color ("meter color7"),
+		UIConfiguration::instance().color ("meter color8"),
+		UIConfiguration::instance().color ("meter color9"),
+		UIConfiguration::instance().color ("meter background bottom"),
+		UIConfiguration::instance().color ("meter background top"),
+		0x991122ff, 0x551111ff,
+		(115.0 * log_meter0dB(-15)),
+		89.125,
+		106.375,
+		115.0,
+		(UIConfiguration::instance().get_meter_style_led() ? 3 : 1));
+
 	fb_level_control = new ArdourKnob (ArdourKnob::default_elements, ArdourKnob::Detent);
 	fb_level_control->set_size_request (PX_SCALE(50), PX_SCALE(50));
 	fb_level_control->set_tooltip_prefix (_("Level: "));
@@ -421,6 +447,7 @@ FoldbackStrip::init ()
 	global_vpacker.pack_end (_comment_button, Gtk::PACK_SHRINK);
 	global_vpacker.pack_end (output_button, Gtk::PACK_SHRINK);
 	global_vpacker.pack_end (master_box, Gtk::PACK_SHRINK);
+	global_vpacker.pack_end (*_meter, false, false);
 	global_vpacker.pack_end (*insert_box, Gtk::PACK_SHRINK);
 	global_vpacker.pack_end (panners, Gtk::PACK_SHRINK);
 
@@ -452,10 +479,10 @@ FoldbackStrip::init ()
 	_comment_button.signal_clicked.connect (sigc::mem_fun (*this, &RouteUI::toggle_comment_editor));
 
 	add_events (Gdk::BUTTON_RELEASE_MASK|
-		    Gdk::ENTER_NOTIFY_MASK|
-		    Gdk::LEAVE_NOTIFY_MASK|
-		    Gdk::KEY_PRESS_MASK|
-		    Gdk::KEY_RELEASE_MASK);
+			Gdk::ENTER_NOTIFY_MASK|
+			Gdk::LEAVE_NOTIFY_MASK|
+			Gdk::KEY_PRESS_MASK|
+			Gdk::KEY_RELEASE_MASK);
 
 	set_flags (get_flags() | Gtk::CAN_FOCUS);
 
@@ -543,6 +570,7 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 		return;
 	}
 	if (_route) {
+		// just in case
 		_route->solo_control()->set_value (0.0, Controllable::NoGroup);
 	}
 
@@ -561,6 +589,12 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 		update_panner_choices();
 		_route->panner_shell()->Changed.connect (route_connections, invalidator (*this), boost::bind (&FoldbackStrip::connect_to_pan, this), gui_context());
 	}
+
+	// set up metering
+	_peak_meter = _route->shared_peak_meter().get();
+	_route->set_meter_point (MeterPostFader);
+	// _route->set_meter_point (MeterPreFader);
+	_route->set_meter_type (MeterPeak0dB);
 
 	_route->output()->changed.connect (*this, invalidator (*this), boost::bind (&FoldbackStrip::update_output_display, this), gui_context());
 	_route->io_changed.connect (route_connections, invalidator (*this), boost::bind (&FoldbackStrip::io_changed_proxy, this), gui_context ());
@@ -589,6 +623,7 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 	send_scroller.show ();
 	_show_sends_button.show();
 	insert_box->show ();
+	_meter->show ();
 	master_box.show();
 	output_button.show();
 	_comment_button.show();
@@ -743,7 +778,7 @@ FoldbackStrip::output_press (GdkEventButton *ev)
 		citems.push_back (MenuElem (_("Routing Grid"), sigc::mem_fun (*(static_cast<RouteUI*>(this)), &RouteUI::edit_output_configuration)));
 
 		Gtkmm2ext::anchored_menu_popup(&output_menu, &output_button, "",
-		                               1, ev->time);
+									   1, ev->time);
 
 		break;
 	}
@@ -766,7 +801,7 @@ FoldbackStrip::bundle_output_chosen (boost::shared_ptr<ARDOUR::Bundle> c)
 
 void
 FoldbackStrip::maybe_add_bundle_to_output_menu (boost::shared_ptr<Bundle> b, ARDOUR::BundleList const& /*current*/,
-                                             DataType type)
+											 DataType type)
 {
 	using namespace Menu_Helpers;
 
@@ -895,16 +930,16 @@ FoldbackStrip::update_io_button ()
 	string arrow = Gtkmm2ext::markup_escape_text(" -> ");
 	vector<string> port_connections;
 	for (PortSet::iterator port = io->ports().begin();
-	                       port != io->ports().end();
-	                       ++port) {
+						   port != io->ports().end();
+						   ++port) {
 		port_connections.clear();
 		port->get_connections(port_connections);
 
 		uint32_t port_connection_count = 0;
 
 		for (vector<string>::iterator i = port_connections.begin();
-		                              i != port_connections.end();
-		                              ++i) {
+									  i != port_connections.end();
+									  ++i) {
 			++port_connection_count;
 
 			if (port_connection_count == 1) {
@@ -939,12 +974,12 @@ FoldbackStrip::update_io_button ()
 	if (!have_label) {
 		boost::shared_ptr<ARDOUR::RouteList> routes = _session->get_routes ();
 		for (ARDOUR::RouteList::const_iterator route = routes->begin();
-		                                       route != routes->end();
-		                                       ++route) {
+											   route != routes->end();
+											   ++route) {
 			boost::shared_ptr<IO> dest_io = (*route)->output();
 			if (io->bundle()->connected_to(dest_io->bundle(),
-			                               _session->engine(),
-			                               dt, true)) {
+										   _session->engine(),
+										   dt, true)) {
 				label << Gtkmm2ext::markup_escape_text ((*route)->name());
 				have_label = true;
 				break;
@@ -956,12 +991,12 @@ FoldbackStrip::update_io_button ()
 	if (!have_label) {
 		boost::shared_ptr<ARDOUR::BundleList> bundles = _session->bundles ();
 		for (ARDOUR::BundleList::iterator bundle = bundles->begin();
-		                                  bundle != bundles->end();
-		                                  ++bundle) {
+										  bundle != bundles->end();
+										  ++bundle) {
 			if (boost::dynamic_pointer_cast<UserBundle> (*bundle) == 0)
 				continue;
 			if (io->bundle()->connected_to(*bundle, _session->engine(),
-			                               dt, true)) {
+										   dt, true)) {
 				label << Gtkmm2ext::markup_escape_text ((*bundle)->name());
 				have_label = true;
 				break;
@@ -978,12 +1013,12 @@ FoldbackStrip::update_io_button ()
 		_session->engine().get_physical_outputs(dt, phys);
 		playorcapture = "playback_";
 		for (PortSet::iterator port = io->ports().begin(dt);
-		                       port != io->ports().end(dt);
-		                       ++port) {
+							   port != io->ports().end(dt);
+							   ++port) {
 			string pn = "";
 			for (vector<string>::iterator s = phys.begin();
-			                              s != phys.end();
-			                              ++s) {
+										  s != phys.end();
+										  ++s) {
 				if (!port->connected_to(*s))
 					continue;
 				pn = AudioEngine::instance()->get_pretty_name_by_name(*s);
@@ -1016,8 +1051,8 @@ FoldbackStrip::update_io_button ()
 		string maybe_client = "";
 		vector<string> connections;
 		for (PortSet::iterator port = io->ports().begin(dt);
-		                       port != io->ports().end(dt);
-		                       ++port) {
+							   port != io->ports().end(dt);
+							   ++port) {
 			port_connections.clear();
 			port->get_connections(port_connections);
 			string connection = port_connections.front();
@@ -1206,7 +1241,7 @@ FoldbackStrip::name_button_button_press (GdkEventButton* ev)
 			Menu* menu = build_route_select_menu ();
 
 			Gtkmm2ext::anchored_menu_popup(menu, &name_button, "",
-			                               1, ev->time);
+										   1, ev->time);
 		}
 		return true;
 	} else if (ev->button == 3) {
@@ -1314,6 +1349,29 @@ FoldbackStrip::show_sends_clicked ()
 		_show_sends_button.set_active (true);
 		send_blink_connection = Timers::blink_connect (sigc::mem_fun (*this, &FoldbackStrip::send_blink));
 	}
+}
+
+void
+FoldbackStrip::fast_update ()
+{
+	/*
+	 * As this is the output level to a DAC, peak level is what is important
+	 * So, much like the mackie control, we just want the highest peak from
+	 * all channels in the route.
+	 */
+
+	float meter_level = -199.0;
+	uint32_t mn = _peak_meter->input_streams().n_audio();
+
+	for (uint32_t n = 0; n != mn; ++n) {
+		const float peak = _peak_meter->meter_level(n, MeterPeak0dB);
+		if (peak > meter_level) {
+			meter_level = peak;
+		}
+	}
+
+	_meter->set (log_meter0dB (meter_level));
+
 }
 
 void
