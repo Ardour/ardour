@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2029 Len Ovens
+ * Copyright (C) 2018-2020 Len Ovens
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
