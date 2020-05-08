@@ -153,7 +153,8 @@ private:
 	void sample_rate_changed ();
 	void buffer_size_changed ();
 	void nperiods_changed ();
-	void parameter_changed ();
+	void channels_changed ();
+	void latency_changed ();
 	void midi_option_changed ();
 
 	void setup_midi_tab_for_backend ();

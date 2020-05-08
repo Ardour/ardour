@@ -371,13 +371,13 @@ EngineControl::connect_changed_signals ()
 	    sigc::mem_fun (*this, &EngineControl::output_device_changed));
 
 	input_latency_connection = input_latency.signal_changed ().connect (
-	    sigc::mem_fun (*this, &EngineControl::parameter_changed));
+	    sigc::mem_fun (*this, &EngineControl::latency_changed));
 	output_latency_connection = output_latency.signal_changed ().connect (
-	    sigc::mem_fun (*this, &EngineControl::parameter_changed));
+	    sigc::mem_fun (*this, &EngineControl::latency_changed));
 	input_channels_connection = input_channels.signal_changed ().connect (
-	    sigc::mem_fun (*this, &EngineControl::parameter_changed));
+	    sigc::mem_fun (*this, &EngineControl::channels_changed));
 	output_channels_connection = output_channels.signal_changed ().connect (
-	    sigc::mem_fun (*this, &EngineControl::parameter_changed));
+	    sigc::mem_fun (*this, &EngineControl::channels_changed));
 }
 
 void
@@ -885,6 +885,14 @@ EngineControl::update_sensitivity ()
 	} else {
 		buffer_size_combo.set_sensitive (false);
 		valid = false;
+	}
+
+	if (!engine_running || backend->can_change_systemic_latency_when_running ()) {
+		input_latency.set_sensitive (true);
+		output_latency.set_sensitive (true);
+	} else {
+		input_latency.set_sensitive (false);
+		output_latency.set_sensitive (false);
 	}
 
 	if (get_popdown_string_count (sample_rate_combo) > 0) {
@@ -1801,7 +1809,22 @@ EngineControl::midi_option_changed ()
 }
 
 void
-EngineControl::parameter_changed ()
+EngineControl::latency_changed ()
+{
+	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
+	if (!backend || !_have_control || !ARDOUR::AudioEngine::instance()->running ()) {
+		return;
+	}
+	if (!backend->can_change_systemic_latency_when_running ()) {
+		return;
+	}
+	backend->set_systemic_input_latency (get_input_latency ());
+	backend->set_systemic_output_latency (get_output_latency ());
+	post_push ();
+}
+
+void
+EngineControl::channels_changed ()
 {
 }
 
@@ -3200,20 +3223,19 @@ EngineControl::use_latency_button_clicked ()
 		double one_way = rint ((mtdm->del() - ARDOUR::AudioEngine::instance()->latency_signal_delay()) / 2.0);
 		one_way = std::max (0., one_way);
 
-		input_latency_adjustment.set_value (one_way);
-		output_latency_adjustment.set_value (one_way);
-
 		State state = get_saved_state_for_currently_displayed_backend_and_device ();
 		if (state) {
 			state->lm_input = lm_input_channel_combo.get_active ()->get_value (lm_input_channel_cols.port_name);
 			state->lm_output = lm_output_channel_combo.get_active ()->get_value (lm_output_channel_cols.port_name);
-			post_push ();
+			post_push (); /* save */
 		}
 
-		if (backend->can_change_systemic_latency_when_running ()) {
-			backend->set_systemic_input_latency (one_way);
-			backend->set_systemic_output_latency (one_way);
+		/* these trigger EngineControl::latency_changed, and a post_push()
+		 * when the latency can be changed while running */
+		input_latency_adjustment.set_value (one_way);
+		output_latency_adjustment.set_value (one_way);
 
+		if (backend->can_change_systemic_latency_when_running ()) {
 			/* engine is running, continue to load session.
 			 * RESPONSE_OK is a NO-OP when the dialog is displayed as Window
 			 * from a running instance.
