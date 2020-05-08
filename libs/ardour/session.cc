@@ -3702,7 +3702,7 @@ Session::route_solo_changed (bool self_solo_changed, Controllable::GroupControlD
 
 		if ((*i)->feeds (route, &via_sends_only)) {
 			DEBUG_TRACE (DEBUG::Solo, string_compose ("\tthere is a feed from %1\n", (*i)->name()));
-			if (!via_sends_only) {
+			if (true /*!via_sends_only*/) {
 				if (!route->soloed_by_others_upstream()) {
 					(*i)->solo_control()->mod_solo_by_others_downstream (delta);
 				} else {
@@ -3730,7 +3730,7 @@ Session::route_solo_changed (bool self_solo_changed, Controllable::GroupControlD
 			                                          via_sends_only,
 			                                          route->soloed_by_others_downstream(),
 			                                          route->soloed_by_others_upstream()));
-			if (!via_sends_only) {
+			if (true /*!via_sends_only*/) {
 				//NB. Triggers Invert Push, which handles soloed by downstream
 				DEBUG_TRACE (DEBUG::Solo, string_compose ("\tmod %1 by %2\n", (*i)->name(), delta));
 				(*i)->solo_control()->mod_solo_by_others_upstream (delta);

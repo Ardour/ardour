@@ -747,7 +747,7 @@ Route::push_solo_isolate_upstream (int32_t delta)
 		bool sends_only;
 		bool does_feed = feeds (*i, &sends_only);
 
-		if (does_feed && !sends_only) {
+		if (does_feed /*&& !sends_only*/) {
 			(*i)->solo_isolate_control()->mod_solo_isolated_by_upstream (delta);
 		}
 	}
@@ -759,7 +759,7 @@ Route::push_solo_upstream (int delta)
 	DEBUG_TRACE (DEBUG::Solo, string_compose("\t ... INVERT push from %1\n", _name));
 	for (FedBy::iterator i = _fed_by.begin(); i != _fed_by.end(); ++i) {
 		if (i->sends_only) {
-			continue;
+			/* continue; */
 		}
 		boost::shared_ptr<Route> sr (i->r.lock());
 		if (sr) {
@@ -3654,7 +3654,7 @@ Route::input_change_handler (IOChange change, void * /*src*/)
 				}
 				bool sends_only;
 				bool does_feed = (*i)->direct_feeds_according_to_reality (boost::dynamic_pointer_cast<Route> (shared_from_this()), &sends_only);
-				if (does_feed && !sends_only) {
+				if (does_feed /*&& !sends_only*/) {
 					if ((*i)->soloed()) {
 						++sbou;
 					}
@@ -3699,11 +3699,11 @@ Route::input_change_handler (IOChange change, void * /*src*/)
 			}
 			bool sends_only;
 			bool does_feed = feeds (*i, &sends_only);
-			if (delta <= 0 && does_feed && !sends_only) {
+			if (delta <= 0 && does_feed /*&& !sends_only*/) {
 				(*i)->solo_control()->mod_solo_by_others_upstream (delta);
 			}
 
-			if (idelta < 0 && does_feed && !sends_only) {
+			if (idelta < 0 && does_feed /*&& !sends_only*/) {
 				(*i)->solo_isolate_control()->mod_solo_isolated_by_upstream (-1);
 			}
 		}
@@ -3752,7 +3752,7 @@ Route::output_change_handler (IOChange change, void * /*src*/)
 					}
 					bool sends_only;
 					bool does_feed = direct_feeds_according_to_reality (*i, &sends_only);
-					if (does_feed && !sends_only) {
+					if (does_feed /*&& !sends_only*/) {
 						if ((*i)->soloed()) {
 							++sbod;
 							break;
@@ -3774,7 +3774,7 @@ Route::output_change_handler (IOChange change, void * /*src*/)
 					}
 					bool sends_only;
 					bool does_feed = (*i)->feeds (shared_this, &sends_only);
-					if (delta != 0 && does_feed && !sends_only) {
+					if (delta != 0 && does_feed /*&& !sends_only*/) {
 						(*i)->solo_control()->mod_solo_by_others_downstream (delta);
 					}
 				}

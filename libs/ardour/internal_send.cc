@@ -73,8 +73,37 @@ InternalSend::InternalSend (Session&                      s,
 
 InternalSend::~InternalSend ()
 {
+	propagate_solo (false);
 	if (_send_to) {
 		_send_to->remove_send_from_internal_return (this);
+	}
+}
+
+void
+InternalSend::propagate_solo (bool enable)
+{
+	if (!_send_to || !_send_from) {
+		return;
+	}
+	bool from_soloed = _send_from->soloed();
+	bool to_soloed   = _send_to->soloed();
+
+	if (enable) {
+		if (from_soloed) {
+			_send_to->solo_control()->mod_solo_by_others_upstream (1);
+		}
+		if (to_soloed) {
+			_send_from->solo_control()->mod_solo_by_others_downstream (1);
+		}
+	} else {
+		if (from_soloed && _send_to->solo_control()->soloed_by_others_upstream())
+		{
+			_send_to->solo_control()->mod_solo_by_others_upstream (-1);
+		}
+		if (to_soloed && _send_from->solo_control()->soloed_by_others_downstream())
+		{
+			_send_from->solo_control()->mod_solo_by_others_downstream (-1);
+		}
 	}
 }
 
@@ -94,12 +123,15 @@ int
 InternalSend::use_target (boost::shared_ptr<Route> sendto, bool update_name)
 {
 	if (_send_to) {
+		propagate_solo (false);
 		_send_to->remove_send_from_internal_return (this);
 	}
 
 	_send_to = sendto;
 
 	_send_to->add_send_to_internal_return (this);
+
+	propagate_solo (true);
 
 	mixbufs.ensure_buffers (_send_to->internal_return ()->input_streams (), _session.get_block_size ());
 	mixbufs.set_count (_send_to->internal_return ()->input_streams ());
@@ -136,6 +168,9 @@ InternalSend::target_io_changed ()
 void
 InternalSend::send_from_going_away ()
 {
+	/* notify route while source-route is still available,
+	 * signal emission in the d'tor is too late */
+	propagate_solo (false);
 	_send_from.reset ();
 }
 
