@@ -768,7 +768,7 @@ Track::set_align_choice_from_io ()
 			 * When not using JACK, all external ports are physical ports
 			 * so this is a NO-OP for other backends.
 			 */
-			if (p->externally_connected ()) {
+			if (p->externally_connected () || p->physically_connected ()) {
 				have_physical = true;
 				break;
 			}
