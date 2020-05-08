@@ -84,7 +84,7 @@ private:
 	int  use_target (boost::shared_ptr<Route>, bool update_name = true);
 	void target_io_changed ();
 
-	void propagate_solo (bool);
+	void propagate_solo ();
 };
 
 } // namespace ARDOUR

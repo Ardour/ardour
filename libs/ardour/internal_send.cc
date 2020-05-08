@@ -34,6 +34,7 @@
 #include "ardour/panner_shell.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
+#include "ardour/solo_isolate_control.h"
 
 #include "pbd/i18n.h"
 
@@ -73,36 +74,63 @@ InternalSend::InternalSend (Session&                      s,
 
 InternalSend::~InternalSend ()
 {
-	propagate_solo (false);
+	propagate_solo ();
 	if (_send_to) {
 		_send_to->remove_send_from_internal_return (this);
 	}
 }
 
 void
-InternalSend::propagate_solo (bool enable)
+InternalSend::propagate_solo ()
 {
 	if (!_send_to || !_send_from) {
 		return;
 	}
-	bool from_soloed = _send_from->soloed();
-	bool to_soloed   = _send_to->soloed();
 
-	if (enable) {
-		if (from_soloed) {
-			_send_to->solo_control()->mod_solo_by_others_upstream (1);
-		}
-		if (to_soloed) {
-			_send_from->solo_control()->mod_solo_by_others_downstream (1);
-		}
-	} else {
-		if (from_soloed && _send_to->solo_control()->soloed_by_others_upstream())
-		{
+	/* cache state before modification */
+	bool from_soloed            = _send_from->soloed();
+	bool to_soloed              = _send_to->soloed();
+	bool from_soloed_downstream = _send_from->solo_control()->soloed_by_others_downstream();
+	bool to_soloed_upstream     = _send_to->solo_control()->soloed_by_others_upstream();
+	bool to_isolated_upstream   = _send_to->solo_isolate_control()->solo_isolated_by_upstream();
+
+	if (from_soloed && (to_soloed_upstream | to_isolated_upstream)) {
+		if (to_soloed_upstream) {
 			_send_to->solo_control()->mod_solo_by_others_upstream (-1);
 		}
-		if (to_soloed && _send_from->solo_control()->soloed_by_others_downstream())
-		{
-			_send_from->solo_control()->mod_solo_by_others_downstream (-1);
+		if (to_isolated_upstream) {
+			_send_to->solo_isolate_control()->mod_solo_isolated_by_upstream (-1);
+		}
+		/* propagate further downstream alike Route::input_change_handler() */
+		boost::shared_ptr<RouteList> routes = _session.get_routes ();
+		for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
+			if ((*i) == _send_to || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_auditioner()) {
+				continue;
+			}
+			bool sends_only;
+			bool does_feed = _send_to->feeds (*i, &sends_only);
+			if (does_feed && to_soloed_upstream) {
+				(*i)->solo_control()->mod_solo_by_others_upstream (-1);
+			}
+			if (does_feed && to_isolated_upstream) {
+				(*i)->solo_isolate_control()->mod_solo_isolated_by_upstream (-1);
+			}
+		}
+	}
+	if (to_soloed && from_soloed_downstream) {
+		_send_from->solo_control()->mod_solo_by_others_downstream (-1);
+
+		/* propagate further upstream alike Route::output_change_handler() */
+		boost::shared_ptr<RouteList> routes = _session.get_routes ();
+		for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
+			if (*i == _send_from || !(*i)->can_solo()) {
+				continue;
+			}
+			bool sends_only;
+			bool does_feed = (*i)->feeds (_send_from, &sends_only);
+			if (does_feed) {
+				(*i)->solo_control()->mod_solo_by_others_downstream (-1);
+			}
 		}
 	}
 }
@@ -123,15 +151,13 @@ int
 InternalSend::use_target (boost::shared_ptr<Route> sendto, bool update_name)
 {
 	if (_send_to) {
-		propagate_solo (false);
+		propagate_solo ();
 		_send_to->remove_send_from_internal_return (this);
 	}
 
 	_send_to = sendto;
 
 	_send_to->add_send_to_internal_return (this);
-
-	propagate_solo (true);
 
 	mixbufs.ensure_buffers (_send_to->internal_return ()->input_streams (), _session.get_block_size ());
 	mixbufs.set_count (_send_to->internal_return ()->input_streams ());
@@ -170,7 +196,7 @@ InternalSend::send_from_going_away ()
 {
 	/* notify route while source-route is still available,
 	 * signal emission in the d'tor is too late */
-	propagate_solo (false);
+	propagate_solo ();
 	_send_from.reset ();
 }
 
