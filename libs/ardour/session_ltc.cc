@@ -84,9 +84,9 @@ Session::ltc_tx_initialize()
 	ltc_speed = 0;
 	ltc_prev_cycle = -1;
 	ltc_tx_reset();
-	ltc_tx_resync_latency();
+	ltc_tx_resync_latency (true);
 	Xrun.connect_same_thread (ltc_tx_connections, boost::bind (&Session::ltc_tx_reset, this));
-	engine().GraphReordered.connect_same_thread (ltc_tx_connections, boost::bind (&Session::ltc_tx_resync_latency, this));
+	LatencyUpdated.connect_same_thread (ltc_tx_connections, boost::bind (&Session::ltc_tx_resync_latency, this, _1));
 	restarting = false;
 }
 
@@ -102,14 +102,15 @@ Session::ltc_tx_cleanup()
 }
 
 void
-Session::ltc_tx_resync_latency()
+Session::ltc_tx_resync_latency (bool playback)
 {
+	if (deletion_in_progress() || !playback) {
+		return;
+	}
 	DEBUG_TRACE (DEBUG::TXLTC, "resync latency\n");
-	if (!deletion_in_progress()) {
-		boost::shared_ptr<Port> ltcport = ltc_output_port();
-		if (ltcport) {
-			ltcport->get_connected_latency_range(ltc_out_latency, true);
-		}
+	boost::shared_ptr<Port> ltcport = ltc_output_port();
+	if (ltcport) {
+		ltcport->get_connected_latency_range(ltc_out_latency, true);
 	}
 }
 

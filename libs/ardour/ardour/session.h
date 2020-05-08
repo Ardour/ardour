@@ -1717,7 +1717,7 @@ private:
 	void ltc_tx_initialize();
 	void ltc_tx_cleanup();
 	void ltc_tx_reset();
-	void ltc_tx_resync_latency();
+	void ltc_tx_resync_latency (bool);
 	void ltc_tx_recalculate_position();
 	void ltc_tx_parse_offset();
 	PBD::ScopedConnectionList ltc_tx_connections;
