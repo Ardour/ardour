@@ -1227,6 +1227,16 @@ Session::plan_master_strategy (pframes_t nframes, double master_speed, samplepos
 		return actual_speed ();
 	}
 
+	/* When calling TransportMasterStart, sould aim for
+	 *   delta >= _remaining_latency_preroll
+	 * This way there can be silent pre-roll of exactly the delta time.
+	 *
+	 * In order to meet this condition, TransportMasterStart needs be set
+	 * if the *end* of the current cycle can reach _remaining_latency_preroll.
+	 * So current_block_size needs to be added here.
+	 */
+	const samplecnt_t wlp = worst_latency_preroll_buffer_size_ceil () + current_block_size;
+
 	TransportMasterManager& tmm (TransportMasterManager::instance());
 	const samplecnt_t locate_threshold = 5 * current_block_size;
 
@@ -1279,7 +1289,6 @@ Session::plan_master_strategy (pframes_t nframes, double master_speed, samplepos
 			return 1.0;
 		}
 
-		const samplecnt_t wlp = worst_latency_preroll_buffer_size_ceil ();
 		bool should_locate;
 
 		if (transport_master_strategy.action == TransportMasterNoRoll) {
@@ -1366,6 +1375,12 @@ Session::plan_master_strategy (pframes_t nframes, double master_speed, samplepos
 
 		DEBUG_TRACE (DEBUG::Slave, string_compose ("master @ %1 is WITHIN %2 of our position %3 (delta is %4), so start\n", master_transport_sample, wlp, _transport_sample, delta));
 
+		if (delta > _remaining_latency_preroll) {
+			/* increase pre-roll to match delta. this allows
+			 * to directly catch the transport w/o vari-speed */
+			_remaining_latency_preroll = delta;
+		}
+
 		transport_master_strategy.action = TransportMasterStart;
 		transport_master_strategy.catch_speed = catch_speed;
 		return catch_speed;
@@ -1392,7 +1407,7 @@ Session::plan_master_strategy (pframes_t nframes, double master_speed, samplepos
 
 		samplepos_t locate_target = master_transport_sample;
 
-		locate_target += lrintf (ntracks() * sample_rate() * 0.05);
+		locate_target += wlp + lrintf (ntracks() * sample_rate() * (1.5 * (current_usecs_per_track / 1000000.0)));
 
 		DEBUG_TRACE (DEBUG::Slave, string_compose ("request locate to master position %1\n", locate_target));
 

@@ -231,10 +231,9 @@ TransportMasterManager::pre_process_transport_masters (pframes_t nframes, sample
 			if (master_dll_initstate == 0) {
 
 				init_transport_master_dll (_master_speed, _master_position);
-				_master_invalid_this_cycle = true;
 				DEBUG_TRACE (DEBUG::Slave, string_compose ("no roll3 - still initializing master DLL, will be %1 next process cycle\n", master_dll_initstate));
 
-				return 1.0;
+				return _master_speed;
 			}
 
 			/* compute delta or "error" between the computed master_position for
