@@ -163,11 +163,11 @@ TransportMaster::set_name (std::string const & str)
 	}
 }
 
-bool
+void
 TransportMaster::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boost::weak_ptr<ARDOUR::Port>, std::string name2, bool yn)
 {
 	if (!_port) {
-		return false;
+		return;
 	}
 
 	const std::string fqn = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (_port->name());
@@ -188,11 +188,7 @@ TransportMaster::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string 
 		}
 
 		PropertyChanged (Properties::connected);
-
-		return true;
 	}
-
-	return false;
 }
 
 bool

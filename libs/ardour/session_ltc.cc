@@ -107,10 +107,10 @@ Session::ltc_tx_resync_latency (bool playback)
 	if (deletion_in_progress() || !playback) {
 		return;
 	}
-	DEBUG_TRACE (DEBUG::TXLTC, "resync latency\n");
 	boost::shared_ptr<Port> ltcport = ltc_output_port();
 	if (ltcport) {
 		ltcport->get_connected_latency_range(ltc_out_latency, true);
+		DEBUG_TRACE (DEBUG::TXLTC, string_compose ("resync latency: %1\n", ltc_out_latency.max));
 	}
 }
 

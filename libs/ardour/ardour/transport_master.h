@@ -443,9 +443,9 @@ protected:
 
 	XMLNode port_node;
 
-	PBD::ScopedConnection port_connection;
-	bool                  connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boost::weak_ptr<ARDOUR::Port>, std::string name2, bool yn);
+	virtual void connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boost::weak_ptr<ARDOUR::Port>, std::string name2, bool yn);
 
+	PBD::ScopedConnection port_connection;
 	PBD::ScopedConnection backend_connection;
 
 	virtual void register_properties ();
@@ -613,6 +613,7 @@ private:
 	void resync_latency (bool);
 	void parse_timecode_offset ();
 	void parameter_changed (std::string const& p);
+	void connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string, boost::weak_ptr<ARDOUR::Port>, std::string, bool);
 
 	bool                     did_reset_tc_format;
 	Timecode::TimecodeFormat saved_tc_format;
