@@ -537,7 +537,7 @@ WebsocketsServer::lws_callback (struct lws* wsi, enum lws_callback_reasons reaso
 			rc = server->send_availsurf_body (wsi);
 			break;
 
-		case LWS_CALLBACK_CLOSED_HTTP:
+		//case LWS_CALLBACK_CLOSED_HTTP:
 		case LWS_CALLBACK_FILTER_NETWORK_CONNECTION:
 		case LWS_CALLBACK_FILTER_PROTOCOL_CONNECTION:
 		case LWS_CALLBACK_SERVER_NEW_CLIENT_INSTANTIATED:
@@ -555,6 +555,7 @@ WebsocketsServer::lws_callback (struct lws* wsi, enum lws_callback_reasons reaso
 #endif
 #if LWS_LIBRARY_VERSION_MAJOR >= 4
 		case LWS_CALLBACK_HTTP_FILE_COMPLETION:
+		case LWS_CALLBACK_HTTP_DROP_PROTOCOL:
 #endif
 #if (LWS_LIBRARY_VERSION_MAJOR >= 4) || (LWS_LIBRARY_VERSION_MAJOR >= 3 && LWS_LIBRARY_VERSION_MINOR >= 1)
 		case LWS_CALLBACK_HTTP_CONFIRM_UPGRADE:
