@@ -161,7 +161,7 @@ public:
 	bool delete_processors ();  //note: returns false if nothing was deleted
 	void toggle_processors ();
 	void ab_plugins ();
-
+	void duplicate_current_fb ();
 	void set_selected (bool yn);
 
 	static FoldbackStrip* entered_foldback_strip() { return _entered_foldback_strip; }

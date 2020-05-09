@@ -1189,6 +1189,8 @@ FoldbackStrip::build_route_ops_menu ()
 
 	items.push_back (MenuElem (_("Rename..."), sigc::mem_fun(*this, &RouteUI::route_rename)));
 
+	items.push_back (MenuElem (_("Duplicate Foldback Bus"), sigc::mem_fun(*this, &FoldbackStrip::duplicate_current_fb)));
+
 	items.push_back (SeparatorElem());
 	items.push_back (CheckMenuElem (_("Active")));
 	Gtk::CheckMenuItem* i = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
@@ -1636,6 +1638,45 @@ FoldbackStrip::build_sends_menu ()
 	items.push_back (MenuElem(_("Set sends gain to 0dB"), sigc::mem_fun (*this, &RouteUI::set_sends_gain_to_unity)));
 
 	return menu;
+}
+
+void
+FoldbackStrip::duplicate_current_fb ()
+{
+	RouteList new_rt_lst;
+	boost::shared_ptr<Route> new_fb;
+	boost::shared_ptr<Route> old_fb = _route;
+	string new_name_tp = "Foldback";
+	// get number of io so long as it is 1 or 2
+	uint32_t io = 1;
+	if (old_fb->n_outputs().n_audio() && (old_fb->n_outputs().n_audio() > 1)) {
+		io = 2;
+	}
+
+	new_rt_lst = _session->new_audio_route (io, io, 0, 1, new_name_tp, PresentationInfo::FoldbackBus, (uint32_t) -1);
+	new_fb = *(new_rt_lst.begin());
+	if (new_fb) {
+		double oldgain = old_fb->gain_control()->get_value();
+		new_fb->gain_control()->set_value (oldgain * 0.25,  PBD::Controllable::NoGroup);
+
+		Route::FedBy fed_by = old_fb->fed_by();
+		for (Route::FedBy::iterator i = fed_by.begin(); i != fed_by.end(); ++i) {
+			if (i->sends_only) {
+				boost::shared_ptr<Route> rt (i->r.lock());
+				boost::shared_ptr<Send> old_snd = rt->internal_send_for (old_fb);
+				rt->add_foldback_send (new_fb);
+				if (old_snd) {
+					float old_gain = old_snd->gain_control()->get_value ();
+					boost::shared_ptr<Send> new_snd = rt->internal_send_for (new_fb);
+					new_snd->gain_control()->set_value (old_gain, PBD::Controllable::NoGroup);
+				}
+			}
+		}
+		set_route (new_fb);
+		route_rename ();
+	} else {
+		PBD::error << "Unable to create new FoldbackBus." << endmsg;
+	}
 }
 
 void
