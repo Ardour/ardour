@@ -3,7 +3,7 @@ ardour {
 	name        = "Send Raw MIDI from File",
 	license     = "MIT",
 	author      = "Ardour Team",
-	description = [[Read raw binary midi (.syx) from file and send it to a control port]]
+	description = [[Read raw binary midi (.syx) from a file and send it to a MIDI port]]
 }
 
 function factory () return function ()
@@ -40,8 +40,9 @@ function factory () return function ()
 		goto out
 	end
 
+	local size
 	do  -- scope for 'local'
-		local size = f:seek("end") -- determine file size
+		size = f:seek("end") -- determine file size
 		f:seek("set", 0)
 
 		if size > 1048576 then
@@ -61,10 +62,15 @@ function factory () return function ()
 		local message_count = 0
 		local long_message = false
 
+		-- prepare progress dialog
+		local pdialog = LuaDialog.ProgressWindow ("Tx MIDI", true)
+		pdialog:progress (0, "Transmitting");
+
 		local async_midi_port = rv["port"] -- reference to port
 		local parser = ARDOUR.RawMidiParser () -- construct a MIDI parser
 
 		while true do
+			if pdialog:canceled () then break end
 			-- read file in 64byte chunks
 			local bytes = f:read (64)
 			if not bytes then break end
@@ -88,16 +94,18 @@ function factory () return function ()
 					-- count msgs and valid bytes sent
 					midi_byte_count = midi_byte_count + parser:buffer_size ()
 					message_count = message_count + 1
-					if 0 == message_count % 50 then
-						-- print() wakes up the GUI, prevent stalling the event loop
-						print ("Sent", message_count, "messages, bytes so far: ", midi_byte_count)
+					if 0 == message_count % 10 then
+						pdialog:progress (total_read / size, string.format ("Transmitting %.1f kB", midi_byte_count / 1024))
 					end
+					if pdialog:canceled () then break end
 				end
 			end
 		end
 
 		f:close ()
-		print ("Sent", message_count, "messages, total bytes: ", midi_byte_count, "/", total_read)
+		-- hide modal progress dialog and destroy it
+		pdialog:done ();
+		print ("Sent", message_count, "messages,  bytes: ", midi_byte_count, " read:", total_read, "/", size)
 
 		if long_message then
 			LuaDialog.Message ("Raw MIDI Tx", "Dataset contained messages longer than 127 bytes. Which may or may not have been transmitted successfully.", LuaDialog.MessageType.Warning, LuaDialog.ButtonType.Close):run ()
