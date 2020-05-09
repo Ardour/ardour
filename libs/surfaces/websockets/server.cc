@@ -552,9 +552,12 @@ WebsocketsServer::lws_callback (struct lws* wsi, enum lws_callback_reasons reaso
 #if LWS_LIBRARY_VERSION_MAJOR >= 3
 		case LWS_CALLBACK_HTTP_BIND_PROTOCOL:
 		case LWS_CALLBACK_ADD_HEADERS:
-#if LWS_LIBRARY_VERSION_MINOR >= 1
-		case LWS_CALLBACK_HTTP_CONFIRM_UPGRADE:
 #endif
+#if LWS_LIBRARY_VERSION_MAJOR >= 4
+		case LWS_CALLBACK_HTTP_FILE_COMPLETION:
+#endif
+#if (LWS_LIBRARY_VERSION_MAJOR >= 4) || (LWS_LIBRARY_VERSION_MAJOR >= 3 && LWS_LIBRARY_VERSION_MINOR >= 1)
+		case LWS_CALLBACK_HTTP_CONFIRM_UPGRADE:
 #endif
 			/* do nothing but keep connection alive */
 			rc = 0;
