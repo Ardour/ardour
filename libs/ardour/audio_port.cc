@@ -136,7 +136,7 @@ AudioPort::get_audio_buffer (pframes_t nframes)
 
 	Sample* addr;
 
-	if (!externally_connected () || 0 != (flags() & TransportSyncPort)) {
+	if (!externally_connected () || (0 != (flags() & TransportSyncPort))) {
 		addr = (Sample *) port_engine.get_buffer (_port_handle, nframes);
 	} else {
 		/* _data was read and resampled as necessary in ::cycle_start */
