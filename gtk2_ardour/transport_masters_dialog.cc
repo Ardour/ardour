@@ -50,7 +50,7 @@ using namespace ArdourWidgets;
 TransportMastersWidget::TransportMastersWidget ()
 	: table (4, 13)
 	, add_button (_("Add a new Transport Master"))
-	, lost_sync_button (_("Keeping rolling if sync is lost"))
+	, lost_sync_button (_("Keep rolling if sync is lost"))
 	, ignore_active_change (false)
 {
 	midi_port_store = ListStore::create (port_columns);
