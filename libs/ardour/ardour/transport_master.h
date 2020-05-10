@@ -595,6 +595,7 @@ public:
 		return 0;
 	}
 	void init ();
+	void set_sample_clock_synced (bool);
 
 	Timecode::TimecodeFormat apparent_timecode_format () const;
 	std::string              position_string () const;

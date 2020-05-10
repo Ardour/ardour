@@ -196,6 +196,13 @@ LTC_TransportMaster::resync_xrun()
 }
 
 void
+LTC_TransportMaster::set_sample_clock_synced (bool yn)
+{
+	sync_lock_broken = false;
+	TransportMaster::set_sample_clock_synced (yn);
+}
+
+void
 LTC_TransportMaster::resync_latency (bool playback)
 {
 	if (playback) {
@@ -224,6 +231,7 @@ LTC_TransportMaster::reset (bool with_position)
 	}
 	transport_direction = 0;
 	sync_lock_broken = false;
+	delayedlocked = 10;
 	monotonic_cnt = 0;
 	memset (&prev_frame, 0, sizeof(LTCFrameExt));
 	frames_since_reset = 0;
@@ -702,7 +710,7 @@ LTC_TransportMaster::delta_string() const
 			         LEADINGZERO(abs(secs)), PLUSMINUS(-secs), abs(secs));
 		} else {
 			snprintf (delta, sizeof(delta), "<span foreground=\"%s\" face=\"monospace\" >%s%s%lld</span><span face=\"monospace\">sm</span>",
-			          sync_lock_broken ? "red" : "white",
+			          _sclock_synced && sync_lock_broken ? "red" : "white",
 			          LEADINGZERO(::llabs(_current_delta)), PLUSMINUS(-_current_delta), ::llabs(_current_delta));
 		}
 	}
