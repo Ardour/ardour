@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: Ardour 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-02 13:17+0200\n"
-"PO-Revision-Date: 2020-05-06 20:14+0200\n"
+"PO-Revision-Date: 2020-05-10 12:56+0200\n"
 "Language-Team: Euskera <porrumentzio@riseup.net>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 2.2.1\n"
-"Last-Translator: Enara Larraitz & Porrumentzio <porruren-grabatokia@riseup.net>\n"
+"Last-Translator: Enara Larraitz & Porrumentzio <porruren-grabatokia@riseup.net\n"
 "Language: eu\n"
 
 #: about.cc:133
@@ -14268,7 +14268,7 @@ msgstr "T"
 
 #: route_time_axis.cc:116
 msgid "RTAV|P"
-msgstr "P"
+msgstr "Z"
 
 #: route_time_axis.cc:117 vca_time_axis.cc:76
 msgid "RTAV|A"
@@ -14454,7 +14454,7 @@ msgstr "Monitorizatu sarrera"
 
 #: route_ui.cc:220
 msgid "Monitor playback"
-msgstr "Monitorizatu erreprodukzioa"
+msgstr "Monitorizatu diskoan gordetakoa"
 
 #: route_ui.cc:943
 msgid "Rec-Safe"
