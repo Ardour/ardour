@@ -526,7 +526,7 @@ public:
 
 private:
 	PBD::ScopedConnectionList port_connections;
-	PBD::ScopedConnection     config_connection;
+	PBD::ScopedConnectionList session_connections;
 	bool                      can_notify_on_unknown_rate;
 
 	static const int sample_tolerance;
@@ -566,7 +566,9 @@ private:
 	void parse_timecode_offset ();
 	void parameter_changed (std::string const& p);
 
-	void         resync_latency ();
+	void connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string, boost::weak_ptr<ARDOUR::Port>, std::string, bool);
+	void resync_latency (bool);
+
 	LatencyRange mtc_slave_latency;
 };
 

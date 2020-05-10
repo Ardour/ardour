@@ -70,16 +70,12 @@ MTC_TransportMaster::MTC_TransportMaster (std::string const & name)
 	, printed_timecode_warning (false)
 {
 	init ();
-
-	resync_latency();
-
-	AudioEngine::instance()->GraphReordered.connect_same_thread (port_connections, boost::bind (&MTC_TransportMaster::resync_latency, this));
 }
 
 MTC_TransportMaster::~MTC_TransportMaster()
 {
 	port_connections.drop_connections();
-	config_connection.disconnect();
+	session_connections.drop_connections();
 
 	if (_session && did_reset_tc_format) {
 		_session->config.set_timecode_format (saved_tc_format);
@@ -90,11 +86,28 @@ void
 MTC_TransportMaster::init ()
 {
 	reset (true);
+	resync_latency (false);
 }
 
 void
-MTC_TransportMaster::resync_latency()
+MTC_TransportMaster::connection_handler (boost::weak_ptr<ARDOUR::Port> w0, std::string n0, boost::weak_ptr<ARDOUR::Port> w1, std::string n1, bool con) 
 {
+	TransportMaster::connection_handler(w0, n0, w1, n1, con);
+
+	boost::shared_ptr<Port> p0 = w0.lock ();
+	boost::shared_ptr<Port> p1 = w1.lock ();
+	if (p0 == _port || p1 == _port) {
+		resync_latency (false);
+	}
+}
+
+void
+MTC_TransportMaster::resync_latency (bool playback)
+{
+	if (playback) {
+		return;
+	}
+
 	DEBUG_TRACE (DEBUG::MTC, "MTC resync_latency()\n");
 
 	if (_port) {
@@ -113,8 +126,8 @@ MTC_TransportMaster::create_port ()
 void
 MTC_TransportMaster::set_session (Session *s)
 {
-	config_connection.disconnect ();
 	port_connections.drop_connections();
+	session_connections.drop_connections();
 
 	_session = s;
 
@@ -132,7 +145,8 @@ MTC_TransportMaster::set_session (Session *s)
 		parser.mtc_qtr.connect_same_thread (port_connections, boost::bind (&MTC_TransportMaster::update_mtc_qtr, this, _1, _2, _3));
 		parser.mtc_status.connect_same_thread (port_connections, boost::bind (&MTC_TransportMaster::update_mtc_status, this, _1));
 
-		_session->config.ParameterChanged.connect_same_thread (config_connection, boost::bind (&MTC_TransportMaster::parameter_changed, this, _1));
+		_session->config.ParameterChanged.connect_same_thread (session_connections, boost::bind (&MTC_TransportMaster::parameter_changed, this, _1));
+		_session->LatencyUpdated.connect_same_thread (session_connections, boost::bind (&MTC_TransportMaster::resync_latency, this, _1));
 	}
 }
 
@@ -143,7 +157,7 @@ MTC_TransportMaster::pre_process (MIDI::pframes_t nframes, samplepos_t now, boos
 
 	maybe_reset ();
 
-	now -= mtc_slave_latency.max;
+	now += mtc_slave_latency.max;
 
 	_midi_port->read_and_parse_entire_midi_buffer_with_no_speed_adjustment (nframes, parser, now);
 
