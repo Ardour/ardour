@@ -24,14 +24,10 @@
 #include <libwebsockets.h>
 
 #if LWS_LIBRARY_VERSION_MAJOR < 3
-// <libwebsockets.h> includes <uv.h> which in turn includes
+// older <libwebsockets.h> includes <uv.h> which in turn includes
 // /usr/include/asm-generic/param.h on linux which defines HZ
 // and conflicts with libs/ardour/ardour/parameter_descriptor.h
 #undef HZ
-#else
-// also libwebsockets >=3 already includes integration with the glib event loop
-// but ubuntu default repositories are stuck at version 2, hold until requiring
-// version 3 in order to keep things simpler for the end user
 #endif
 
 #include "client.h"
@@ -43,12 +39,15 @@
 // TO DO: make this configurable
 #define WEBSOCKET_LISTEN_PORT 3818
 
+// lws includes integration with the glib event loop starting from v4
+#ifndef LWS_WITH_GLIB
 struct LwsPollFdGlibSource {
 	struct lws_pollfd             lws_pfd;
 	Glib::RefPtr<Glib::IOChannel> g_channel;
 	Glib::RefPtr<Glib::IOSource>  rg_iosrc;
 	Glib::RefPtr<Glib::IOSource>  wg_iosrc;
 };
+#endif
 
 class WebsocketsServer : public SurfaceComponent
 {
@@ -72,19 +71,10 @@ private:
 	struct lws_context_creation_info  _lws_info;
 	struct lws_context*               _lws_context;
 
-	Glib::RefPtr<Glib::IOChannel> _channel;
-
-	typedef boost::unordered_map<lws_sockfd_type, LwsPollFdGlibSource> LwsPollFdGlibSourceMap;
-	LwsPollFdGlibSourceMap                                             _fd_ctx;
-
 	typedef boost::unordered_map<Client, ClientContext> ClientContextMap;
 	ClientContextMap                                    _client_ctx;
 
 	ServerResources _resources;
-
-	int add_poll_fd (struct lws_pollargs*);
-	int mod_poll_fd (struct lws_pollargs*);
-	int del_poll_fd (struct lws_pollargs*);
 
 	int add_client (Client);
 	int del_client (Client);
@@ -93,12 +83,23 @@ private:
 	int send_availsurf_hdr (Client);
 	int send_availsurf_body (Client);
 
+	static int lws_callback (struct lws*, enum lws_callback_reasons, void*, void*, size_t);
+
+#ifndef LWS_WITH_GLIB
+	Glib::RefPtr<Glib::IOChannel> _channel;
+
+	typedef boost::unordered_map<lws_sockfd_type, LwsPollFdGlibSource> LwsPollFdGlibSourceMap;
+	LwsPollFdGlibSourceMap                                             _fd_ctx;
+
+	int add_poll_fd (struct lws_pollargs*);
+	int mod_poll_fd (struct lws_pollargs*);
+	int del_poll_fd (struct lws_pollargs*);
+
 	bool io_handler (Glib::IOCondition, lws_sockfd_type);
 
 	Glib::IOCondition events_to_ioc (int);
 	int               ioc_to_events (Glib::IOCondition);
-
-	static int lws_callback (struct lws*, enum lws_callback_reasons, void*, void*, size_t);
+#endif
 };
 
 #endif // _ardour_surface_websockets_server_h_
