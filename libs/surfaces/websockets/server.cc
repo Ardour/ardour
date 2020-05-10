@@ -110,30 +110,32 @@ WebsocketsServer::WebsocketsServer (ArdourSurface::ArdourWebsockets& surface)
 int
 WebsocketsServer::start ()
 {
+#if !defined(LWS_WITH_GLIB) && !defined(LWS_WITH_EXTERNAL_POLL)
+	PBD::error << "ArdourWebsockets: check your libwebsockets was compiled"
+	              " with LWS_WITH_GLIB or LWS_WITH_EXTERNAL_POLL enabled"
+	           << endmsg;
+	return -1;
+#endif
+
+#ifndef NDEBUG
+	lws_set_log_level (LLL_USER | LLL_ERR | LLL_WARN | LLL_DEBUG, 0);
+#endif
+
 	if (_lws_context) {
 		stop ();
 	}
 
+#ifdef LWS_WITH_GLIB
+	void *foreign_loops[1];
+	foreign_loops[0] = main_loop ()->gobj ();
+	_lws_info.foreign_loops = foreign_loops;
+	_lws_info.options = LWS_SERVER_OPTION_GLIB;
+#endif
+
 	_lws_context = lws_create_context (&_lws_info);
 
 	if (!_lws_context) {
-		PBD::error << "ArdourWebsockets: could not create libwebsockets context" << endmsg;
-		return -1;
-	}
-
-	/* add_poll_fd() should have been called once during lws_create_context()
-	 * if _fd_ctx is empty then LWS_CALLBACK_ADD_POLL_FD was not called
-	 * this means libwesockets was not compiled with LWS_WITH_EXTERNAL_POLL
-	 * - macos homebrew libwebsockets: disabled (3.2.2 as of Feb 2020)
-	 * - linux ubuntu libwebsockets-dev: enabled (2.0.3 as of Feb 2020) but
-	 *   #if defined(LWS_WITH_EXTERNAL_POLL) check is not reliable -- constant
-	 *   missing from /usr/include/lws_config.h
-	 */
-
-	if (_fd_ctx.empty ()) {
-		PBD::error << "ArdourWebsockets: check your libwebsockets was compiled"
-		              " with LWS_WITH_EXTERNAL_POLL enabled"
-		           << endmsg;
+		PBD::error << "ArdourWebsockets: could not create the libwebsockets context" << endmsg;
 		return -1;
 	}
 
@@ -143,6 +145,7 @@ WebsocketsServer::start ()
 int
 WebsocketsServer::stop ()
 {
+#ifndef LWS_WITH_GLIB
 	for (LwsPollFdGlibSourceMap::iterator it = _fd_ctx.begin (); it != _fd_ctx.end (); ++it) {
 		it->second.rg_iosrc->destroy ();
 
@@ -152,6 +155,7 @@ WebsocketsServer::stop ()
 	}
 
 	_fd_ctx.clear ();
+#endif
 
 	if (_lws_context) {
 		lws_context_destroy (_lws_context);
@@ -183,92 +187,6 @@ WebsocketsServer::update_all_clients (const NodeState& state, bool force)
 	for (ClientContextMap::iterator it = _client_ctx.begin (); it != _client_ctx.end (); ++it) {
 		update_client (it->second.wsi (), state, force);
 	}
-}
-
-int
-WebsocketsServer::add_poll_fd (struct lws_pollargs* pa)
-{
-	/* fd can be SOCKET or int depending platform */
-	lws_sockfd_type fd = pa->fd;
-
-#ifdef PLATFORM_WINDOWS
-	RefPtr<IOChannel> g_channel = IOChannel::create_from_win32_socket (fd);
-#else
-	RefPtr<IOChannel> g_channel = IOChannel::create_from_fd (fd);
-#endif
-	RefPtr<IOSource> rg_iosrc (IOSource::create (g_channel, events_to_ioc (pa->events)));
-	rg_iosrc->connect (sigc::bind (sigc::mem_fun (*this, &WebsocketsServer::io_handler), fd));
-	rg_iosrc->attach (main_loop ()->get_context ());
-
-	struct lws_pollfd lws_pfd;
-	lws_pfd.fd      = pa->fd;
-	lws_pfd.events  = pa->events;
-	lws_pfd.revents = 0;
-
-	LwsPollFdGlibSource ctx;
-	ctx.lws_pfd   = lws_pfd;
-	ctx.g_channel = g_channel;
-	ctx.rg_iosrc  = rg_iosrc;
-	ctx.wg_iosrc  = Glib::RefPtr<Glib::IOSource> (0);
-
-	_fd_ctx[fd] = ctx;
-
-	return 0;
-}
-
-int
-WebsocketsServer::mod_poll_fd (struct lws_pollargs* pa)
-{
-	LwsPollFdGlibSourceMap::iterator it = _fd_ctx.find (pa->fd);
-	if (it == _fd_ctx.end ()) {
-		return 1;
-	}
-
-	it->second.lws_pfd.events = pa->events;
-
-	if (pa->events & LWS_POLLOUT) {
-		/* libwebsockets wants to write but cannot find a way to update
-		 * an existing glib::iosource event flags using glibmm,
-		 * create another iosource and set to IO_OUT, it will be destroyed
-		 * after clearing POLLOUT (see 'else' body below)
-		 */
-
-		if (it->second.wg_iosrc) {
-			/* already polling for write */
-			return 0;
-		}
-
-		RefPtr<IOSource> wg_iosrc = it->second.g_channel->create_watch (Glib::IO_OUT);
-		wg_iosrc->connect (sigc::bind (sigc::mem_fun (*this, &WebsocketsServer::io_handler), pa->fd));
-		wg_iosrc->attach (main_loop ()->get_context ());
-		it->second.wg_iosrc = wg_iosrc;
-	} else {
-		if (it->second.wg_iosrc) {
-			it->second.wg_iosrc->destroy ();
-			it->second.wg_iosrc = Glib::RefPtr<Glib::IOSource> (0);
-		}
-	}
-
-	return 0;
-}
-
-int
-WebsocketsServer::del_poll_fd (struct lws_pollargs* pa)
-{
-	LwsPollFdGlibSourceMap::iterator it = _fd_ctx.find (pa->fd);
-	if (it == _fd_ctx.end ()) {
-		return 1;
-	}
-
-	it->second.rg_iosrc->destroy ();
-
-	if (it->second.wg_iosrc) {
-		it->second.wg_iosrc->destroy ();
-	}
-
-	_fd_ctx.erase (it);
-
-	return 0;
 }
 
 int
@@ -434,62 +352,6 @@ WebsocketsServer::send_availsurf_body (Client wsi)
 	return -1;	// end connection
 }
 
-bool
-WebsocketsServer::io_handler (Glib::IOCondition ioc, lws_sockfd_type fd)
-{
-	/* IO_IN=1, IO_PRI=2, IO_OUT=4, IO_ERR=8, IO_HUP=16 */
-
-	LwsPollFdGlibSourceMap::iterator it = _fd_ctx.find (fd);
-	if (it == _fd_ctx.end ()) {
-		return false;
-	}
-
-	struct lws_pollfd* lws_pfd = &it->second.lws_pfd;
-	lws_pfd->revents           = ioc_to_events (ioc);
-
-	lws_service_fd (_lws_context, lws_pfd);
-
-	return ioc & (Glib::IO_IN | Glib::IO_OUT);
-}
-
-IOCondition
-WebsocketsServer::events_to_ioc (int events)
-{
-	IOCondition ioc = Glib::IOCondition (0);
-
-	if (events & LWS_POLLIN) {
-		ioc |= Glib::IO_IN;
-	}
-	if (events & LWS_POLLOUT) {
-		ioc |= Glib::IO_OUT;
-	}
-	if (events & LWS_POLLHUP) {
-		ioc |= Glib::IO_HUP;
-	}
-
-	return ioc;
-}
-
-int
-WebsocketsServer::ioc_to_events (IOCondition ioc)
-{
-	int events = 0;
-
-	if (ioc & Glib::IO_IN) {
-		events |= LWS_POLLIN;
-	}
-
-	if (ioc & Glib::IO_OUT) {
-		events |= LWS_POLLOUT;
-	}
-
-	if (ioc & (Glib::IO_HUP | Glib::IO_ERR)) {
-		events |= LWS_POLLHUP;
-	}
-
-	return events;
-}
-
 int
 WebsocketsServer::lws_callback (struct lws* wsi, enum lws_callback_reasons reason,
                                 void* user, void* in, size_t len)
@@ -499,18 +361,6 @@ WebsocketsServer::lws_callback (struct lws* wsi, enum lws_callback_reasons reaso
 	int rc;
 
 	switch (reason) {
-		case LWS_CALLBACK_ADD_POLL_FD:
-			rc = server->add_poll_fd (static_cast<struct lws_pollargs*> (in));
-			break;
-
-		case LWS_CALLBACK_CHANGE_MODE_POLL_FD:
-			rc = server->mod_poll_fd (static_cast<struct lws_pollargs*> (in));
-			break;
-
-		case LWS_CALLBACK_DEL_POLL_FD:
-			rc = server->del_poll_fd (static_cast<struct lws_pollargs*> (in));
-			break;
-
 		case LWS_CALLBACK_ESTABLISHED:
 			rc = server->add_client (wsi);
 			break;
@@ -537,41 +387,169 @@ WebsocketsServer::lws_callback (struct lws* wsi, enum lws_callback_reasons reaso
 			rc = server->send_availsurf_body (wsi);
 			break;
 
-		//case LWS_CALLBACK_CLOSED_HTTP:
-		case LWS_CALLBACK_FILTER_NETWORK_CONNECTION:
-		case LWS_CALLBACK_FILTER_PROTOCOL_CONNECTION:
-		case LWS_CALLBACK_SERVER_NEW_CLIENT_INSTANTIATED:
-		case LWS_CALLBACK_PROTOCOL_INIT:
-		case LWS_CALLBACK_PROTOCOL_DESTROY:
-		case LWS_CALLBACK_WSI_CREATE:
-		case LWS_CALLBACK_WSI_DESTROY:
-		case LWS_CALLBACK_LOCK_POLL:
-		case LWS_CALLBACK_UNLOCK_POLL:
-		case LWS_CALLBACK_WS_PEER_INITIATED_CLOSE:
-		case LWS_CALLBACK_FILTER_HTTP_CONNECTION:
-#if LWS_LIBRARY_VERSION_MAJOR >= 3
-		case LWS_CALLBACK_HTTP_BIND_PROTOCOL:
-		case LWS_CALLBACK_ADD_HEADERS:
-#endif
-#if LWS_LIBRARY_VERSION_MAJOR >= 4
-		case LWS_CALLBACK_HTTP_FILE_COMPLETION:
-		case LWS_CALLBACK_HTTP_DROP_PROTOCOL:
-#endif
-#if (LWS_LIBRARY_VERSION_MAJOR >= 4) || (LWS_LIBRARY_VERSION_MAJOR >= 3 && LWS_LIBRARY_VERSION_MINOR >= 1)
-		case LWS_CALLBACK_HTTP_CONFIRM_UPGRADE:
-#endif
-			/* do nothing but keep connection alive */
-			rc = 0;
+#ifndef LWS_WITH_GLIB
+		case LWS_CALLBACK_ADD_POLL_FD:
+			rc = server->add_poll_fd (static_cast<struct lws_pollargs*> (in));
 			break;
 
-		default:
-#ifndef NDEBUG
-			/* see libwebsockets.h lws_callback_reasons */
-			std::cerr << "LWS: unhandled callback " << reason << std::endl;
+		case LWS_CALLBACK_CHANGE_MODE_POLL_FD:
+			rc = server->mod_poll_fd (static_cast<struct lws_pollargs*> (in));
+			break;
+
+		case LWS_CALLBACK_DEL_POLL_FD:
+			rc = server->del_poll_fd (static_cast<struct lws_pollargs*> (in));
+			break;
 #endif
-			rc = -1;
+		default:
+			rc = lws_callback_http_dummy (wsi, reason, user, in, len);
 			break;
 	}
 
 	return rc;
 }
+
+#ifndef LWS_WITH_GLIB
+int
+WebsocketsServer::add_poll_fd (struct lws_pollargs* pa)
+{
+	/* fd can be SOCKET or int depending platform */
+	lws_sockfd_type fd = pa->fd;
+
+#ifdef PLATFORM_WINDOWS
+	RefPtr<IOChannel> g_channel = IOChannel::create_from_win32_socket (fd);
+#else
+	RefPtr<IOChannel> g_channel = IOChannel::create_from_fd (fd);
+#endif
+	RefPtr<IOSource> rg_iosrc (IOSource::create (g_channel, events_to_ioc (pa->events)));
+	rg_iosrc->connect (sigc::bind (sigc::mem_fun (*this, &WebsocketsServer::io_handler), fd));
+	rg_iosrc->attach (main_loop ()->get_context ());
+
+	struct lws_pollfd lws_pfd;
+	lws_pfd.fd      = pa->fd;
+	lws_pfd.events  = pa->events;
+	lws_pfd.revents = 0;
+
+	LwsPollFdGlibSource ctx;
+	ctx.lws_pfd   = lws_pfd;
+	ctx.g_channel = g_channel;
+	ctx.rg_iosrc  = rg_iosrc;
+	ctx.wg_iosrc  = Glib::RefPtr<Glib::IOSource> (0);
+
+	_fd_ctx[fd] = ctx;
+
+	return 0;
+}
+
+int
+WebsocketsServer::mod_poll_fd (struct lws_pollargs* pa)
+{
+	LwsPollFdGlibSourceMap::iterator it = _fd_ctx.find (pa->fd);
+	if (it == _fd_ctx.end ()) {
+		return 1;
+	}
+
+	it->second.lws_pfd.events = pa->events;
+
+	if (pa->events & LWS_POLLOUT) {
+		/* libwebsockets wants to write but cannot find a way to update
+		 * an existing glib::iosource event flags using glibmm alone,
+		 * create another iosource and set to IO_OUT, it will be destroyed
+		 * after clearing POLLOUT (see 'else' body below)
+		 */
+
+		if (it->second.wg_iosrc) {
+			/* already polling for write */
+			return 0;
+		}
+
+		RefPtr<IOSource> wg_iosrc = it->second.g_channel->create_watch (Glib::IO_OUT);
+		wg_iosrc->connect (sigc::bind (sigc::mem_fun (*this, &WebsocketsServer::io_handler), pa->fd));
+		wg_iosrc->attach (main_loop ()->get_context ());
+		it->second.wg_iosrc = wg_iosrc;
+	} else {
+		if (it->second.wg_iosrc) {
+			it->second.wg_iosrc->destroy ();
+			it->second.wg_iosrc = Glib::RefPtr<Glib::IOSource> (0);
+		}
+	}
+
+	return 0;
+}
+
+int
+WebsocketsServer::del_poll_fd (struct lws_pollargs* pa)
+{
+	LwsPollFdGlibSourceMap::iterator it = _fd_ctx.find (pa->fd);
+	if (it == _fd_ctx.end ()) {
+		return 1;
+	}
+
+	it->second.rg_iosrc->destroy ();
+
+	if (it->second.wg_iosrc) {
+		it->second.wg_iosrc->destroy ();
+	}
+
+	_fd_ctx.erase (it);
+
+	return 0;
+}
+
+bool
+WebsocketsServer::io_handler (Glib::IOCondition ioc, lws_sockfd_type fd)
+{
+	/* IO_IN=1, IO_PRI=2, IO_OUT=4, IO_ERR=8, IO_HUP=16 */
+
+	LwsPollFdGlibSourceMap::iterator it = _fd_ctx.find (fd);
+	if (it == _fd_ctx.end ()) {
+		return false;
+	}
+
+	struct lws_pollfd* lws_pfd = &it->second.lws_pfd;
+	lws_pfd->revents           = ioc_to_events (ioc);
+
+	lws_service_fd (_lws_context, lws_pfd);
+
+	return ioc & (Glib::IO_IN | Glib::IO_OUT);
+}
+
+IOCondition
+WebsocketsServer::events_to_ioc (int events)
+{
+	IOCondition ioc = Glib::IOCondition (0);
+
+	if (events & LWS_POLLIN) {
+		ioc |= Glib::IO_IN;
+	}
+
+	if (events & LWS_POLLOUT) {
+		ioc |= Glib::IO_OUT;
+	}
+
+	if (events & LWS_POLLHUP) {
+		ioc |= Glib::IO_HUP;
+	}
+
+	return ioc;
+}
+
+int
+WebsocketsServer::ioc_to_events (IOCondition ioc)
+{
+	int events = 0;
+
+	if (ioc & Glib::IO_IN) {
+		events |= LWS_POLLIN;
+	}
+
+	if (ioc & Glib::IO_OUT) {
+		events |= LWS_POLLOUT;
+	}
+
+	if (ioc & (Glib::IO_HUP | Glib::IO_ERR)) {
+		events |= LWS_POLLHUP;
+	}
+
+	return events;
+}
+#endif // LWS_WITH_GLIB
