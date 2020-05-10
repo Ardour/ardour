@@ -282,7 +282,7 @@ AlsaAudioBackend::available_period_sizes (const std::string& driver, const std::
 		if (nfo->max_nper > 2) {
 			ps.push_back (3);
 		}
-		if (nfo->max_nper > 3) {
+		if (nfo->min_nper > 3) {
 			ps.push_back (nfo->min_nper);
 		}
 	} else {
@@ -853,7 +853,7 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 			(duplex & 1) ? alsa_device.c_str() : NULL,
 			/* ctrl name */ 0,
 			_samplerate, _samples_per_period,
-			_periods_per_cycle, /* capture p/c */ 2,
+			_periods_per_cycle, _periods_per_cycle,
 			/* debug */ 0);
 
 	AudioBackend::ErrorCode error_code = NoError;
