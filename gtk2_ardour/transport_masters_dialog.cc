@@ -601,7 +601,7 @@ TransportMastersWidget::Row::update (Session* s, samplepos_t now)
 	string last_str(" --:--:--:--");
 	string current_str(" --:--:--:--");
 	string delta_str("\u0394 0");
-	char gap[32];
+	string gap_str;
 
 	if (s) {
 
@@ -623,6 +623,7 @@ TransportMastersWidget::Row::update (Session* s, samplepos_t now)
 
 			delta_str = tm->delta_string ();
 
+			char gap[32];
 			float seconds = (when - now) / (float) AudioEngine::instance()->sample_rate();
 			if (seconds < 0.) {
 				seconds = 0.;
@@ -637,11 +638,13 @@ TransportMastersWidget::Row::update (Session* s, samplepos_t now)
 				snprintf (gap, sizeof (gap), "%-3dh", (int) floor (seconds/60/60));
 			}
 			save_when = when;
+			gap_str = gap;
 
 		} else {
 
 			if (save_when) {
 
+				char gap[32];
 				const float seconds = (when - now) / (float) AudioEngine::instance()->sample_rate();
 				if (abs (seconds) < 1.0) {
 					snprintf (gap, sizeof (gap), "%-.03fs", seconds);
@@ -653,11 +656,11 @@ TransportMastersWidget::Row::update (Session* s, samplepos_t now)
 					snprintf (gap, sizeof (gap), "%-3dh", (int) floor (seconds/60/60));
 				}
 				save_when = when;
+				gap_str = gap;
 			}
 		}
 
 		//pad the gap to 9 chars
-		string gap_str(gap);
 		int len = gap_str.length();
 		for (int i = len; i<9; i++)
 			gap_str = " " + gap_str;
