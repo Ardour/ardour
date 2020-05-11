@@ -164,16 +164,14 @@ TransportMaster::set_name (std::string const & str)
 }
 
 void
-TransportMaster::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boost::weak_ptr<ARDOUR::Port>, std::string name2, bool yn)
+TransportMaster::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string, boost::weak_ptr<ARDOUR::Port> w1, std::string, bool yn)
 {
 	if (!_port) {
 		return;
 	}
 
-	const std::string fqn = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (_port->name());
-
-	if (fqn == name1 || fqn == name2) {
-
+	boost::shared_ptr<Port> p = w1.lock ();
+	if (p == _port) {
 		/* it's about us */
 
 		/* XXX technically .. if the user makes an N->1 connection to

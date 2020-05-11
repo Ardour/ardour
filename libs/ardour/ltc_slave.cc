@@ -129,9 +129,8 @@ LTC_TransportMaster::connection_handler (boost::weak_ptr<ARDOUR::Port> w0, std::
 {
 	TransportMaster::connection_handler(w0, n0, w1, n1, con);
 
-	boost::shared_ptr<Port> p0 = w0.lock ();
-	boost::shared_ptr<Port> p1 = w1.lock ();
-	if (p0 == _port || p1 == _port) {
+	boost::shared_ptr<Port> p = w1.lock ();
+	if (p == _port) {
 		resync_latency (false);
 	}
 }
