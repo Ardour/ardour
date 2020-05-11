@@ -623,11 +623,7 @@ TransportMastersWidget::Row::update (Session* s, samplepos_t now)
 
 			current.set_text (Timecode::timecode_format_time (t));
 
-			if (TransportMasterManager::instance().current() == tm) {
-				delta.set_markup (tm->delta_string ());
-			} else {
-				delta.set_markup ("");
-			}
+			delta.set_markup (tm->delta_string ());
 
 			char gap[32];
 			float seconds = (when - now) / (float) AudioEngine::instance()->sample_rate();
