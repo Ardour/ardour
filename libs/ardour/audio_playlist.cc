@@ -217,7 +217,7 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, sa
 		}
 
 		/* check for the case of solo_selection */
-		bool force_transparent = ( _session.solo_selection_active() && SoloSelectedActive() && !SoloSelectedListIncludes( (const Region*) &(**i) ) );
+		const bool force_transparent = (_session.solo_selection_active() && SoloSelectedActive() && !SoloSelectedListIncludes( (const Region*) &(**i)));
 		if (force_transparent) {
 			continue;
 		}
