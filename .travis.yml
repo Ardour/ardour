@@ -15,6 +15,16 @@ jobs:
         - sudo apt-get install libasound2-dev
         - sudo apt-get install libsndfile-dev
         - ./waf configure
+      script:
         - ./waf
+      before_deploy:
+      - tar -czvf gtk2_ardour.tar.gz gtk2_ardour
+      deploy:
+        provider: releases
+        token: $GITHUB_AUTH_TOKEN
+        skip_cleanup: true
+        file: gtk2_ardour.tar.gz
+        on:
+          tags: true
 notifications:
   email: false
