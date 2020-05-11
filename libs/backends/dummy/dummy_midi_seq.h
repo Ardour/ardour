@@ -1239,11 +1239,14 @@ static const MIDISequence s8[] = { // sysex
 	{ 8.98,  2, {0xf1, 0x72} },
 
 	/* 1 sec pause */
-	{11.00,  3, {0xff,  255, 0xff} }, // sentinel
+};
+
+static const MIDISequence s9[] = {
+	{-1.0, 0, {0} }, // MTC Generator
 };
 
 static const MIDISequence *sequences[] = {
-	s0, s1, s2, s3, s4, s5, s6, s7, s8
+	s0, s1, s2, s3, s4, s5, s6, s7, s8, s9
 };
 
 static const char *sequence_names[] = {
@@ -1255,7 +1258,8 @@ static const char *sequence_names[] = {
 	"CCs only",
 	"Aftertouch",
 	"Nonsense, Dups",
-	"MTC (4sec)"
+	"MTC (4sec)",
+	"MTC (gen)"
 };
 
 }} // namespace

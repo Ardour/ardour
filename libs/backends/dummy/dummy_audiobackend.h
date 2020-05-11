@@ -181,7 +181,7 @@ class DummyMidiPort : public DummyPort {
 		// midi event generator ('fake' physical inputs)
 		void midi_generate (const pframes_t n_samples);
 		float   _midi_seq_spb; // samples per beat
-		int32_t _midi_seq_time;
+		int64_t _midi_seq_time;
 		uint32_t _midi_seq_pos;
 		DummyMidiData::MIDISequence const * _midi_seq_dat;
 }; // class DummyMidiPort

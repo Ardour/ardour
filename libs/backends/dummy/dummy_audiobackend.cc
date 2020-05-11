@@ -896,6 +896,7 @@ DummyAudioBackend::get_latency_range (PortEngine::PortHandle port_handle, bool f
 	}
 
 	r = port->latency_range (for_playback);
+#ifndef ZERO_LATENCY
 	if (port->is_physical() && port->is_terminal()) {
 		if (port->is_input() && for_playback) {
 			const size_t l_in = _samples_per_period * .25;
@@ -910,6 +911,7 @@ DummyAudioBackend::get_latency_range (PortEngine::PortHandle port_handle, bool f
 			r.max += l_out;
 		}
 	}
+#endif
 	return r;
 }
 
@@ -1695,6 +1697,10 @@ DummyMidiPort::setup_generator (int seq_id, const float sr)
 	_midi_seq_spb = sr * .5f; // 120 BPM, beat_time 1.0 per beat.
 	_midi_seq_pos = 0;
 	_midi_seq_time = 0;
+
+	if (_midi_seq_dat && _midi_seq_dat[0].beat_time < 0) {
+	_midi_seq_spb = sr / 25; // 25fps MTC
+	}
 	return DummyMidiData::sequence_names[seq_id];
 }
 
@@ -1724,6 +1730,50 @@ void DummyMidiPort::midi_generate (const pframes_t n_samples)
 	if (_midi_seq_spb == 0 || !_midi_seq_dat) {
 		for (DummyMidiBuffer::const_iterator it = _loopback.begin (); it != _loopback.end (); ++it) {
 			_buffer.push_back (boost::shared_ptr<DummyMidiEvent>(new DummyMidiEvent (**it)));
+		}
+		return;
+	}
+
+	if (_midi_seq_dat[0].beat_time < 0) {
+		/* MTC generator */
+		const int audio_samples_per_video_frame = _midi_seq_spb; // sample-rate / 25
+		const int audio_samples_per_qf =  audio_samples_per_video_frame / 4;
+
+		samplepos_t tc_frame = _midi_seq_time / audio_samples_per_video_frame;
+		samplepos_t tc_sample = tc_frame * audio_samples_per_video_frame;
+		int qf = (tc_frame & 1) ? 4 : 0;
+		while (tc_sample < _midi_seq_time + n_samples) {
+			if (tc_sample >= _midi_seq_time) {
+				uint8_t buf[2];
+				buf[0] = 0xf1;
+
+				int frame  =    tc_frame % 25;
+				int second =   (tc_frame / 25) % 60;
+				int minute =  ((tc_frame / 25) / 60) % 60;
+				int hour   = (((tc_frame / 25) / 60) / 60);
+
+				switch(qf & 7) {
+					case 0: buf[1] =  0x00 |  (frame  & 0x0f); break;
+					case 1: buf[1] =  0x10 | ((frame  & 0xf0) >> 4); break;
+					case 2: buf[1] =  0x20 |  (second & 0x0f); break;
+					case 3: buf[1] =  0x30 | ((second & 0xf0) >> 4); break;
+					case 4: buf[1] =  0x40 |  (minute & 0x0f); break;
+					case 5: buf[1] =  0x50 | ((minute & 0xf0) >> 4); break;
+					case 6: buf[1] =  0x60 |  ((/* 25fps*/ 0x20 | hour) & 0x0f); break;
+					case 7: buf[1] =  0x70 | (((/* 25fps*/ 0x20 | hour) & 0xf0)>>4); break;
+				}
+				_buffer.push_back (boost::shared_ptr<DummyMidiEvent>(new DummyMidiEvent (tc_sample - _midi_seq_time, buf, 2)));
+			}
+			tc_sample += audio_samples_per_qf;
+			if (++qf == 8) {
+				++tc_frame;
+				qf = 0;
+			}
+		}
+
+		_midi_seq_time += n_samples;
+		if (_midi_seq_time >= /* 24 * 3600 * 25 */ 2160000LL * audio_samples_per_video_frame) {
+			_midi_seq_time -= 2160000LL * audio_samples_per_video_frame; // 24h @ 25fps
 		}
 		return;
 	}
