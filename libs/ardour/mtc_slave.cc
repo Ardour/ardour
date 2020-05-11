@@ -157,8 +157,6 @@ MTC_TransportMaster::pre_process (MIDI::pframes_t nframes, samplepos_t now, boos
 
 	maybe_reset ();
 
-	now += mtc_slave_latency.max;
-
 	_midi_port->read_and_parse_entire_midi_buffer_with_no_speed_adjustment (nframes, parser, now);
 
 	if (session_pos) {
@@ -321,7 +319,7 @@ MTC_TransportMaster::update_mtc_qtr (Parser& p, int which_qtr, samplepos_t now)
 		mtc_speed = (t1 - t0) / qtr_d;
 		DEBUG_TRACE (DEBUG::MTC, string_compose ("qtr sample DLL t0:%1 t1:%2 err:%3 spd:%4 ddt:%5\n", t0, t1, e, mtc_speed, e2 - qtr_d));
 
-		current.update (mtc_frame, now, mtc_speed);
+		current.update (mtc_frame + mtc_slave_latency.max, now, mtc_speed);
 
 		last_inbound_frame = now;
 	}
