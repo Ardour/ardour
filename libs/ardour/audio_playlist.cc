@@ -212,13 +212,15 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, sa
 		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (*i);
 
 		/* muted regions don't figure into it at all */
-		if ( ar->muted() )
+		if (ar->muted()) {
 			continue;
+		}
 
 		/* check for the case of solo_selection */
 		bool force_transparent = ( _session.solo_selection_active() && SoloSelectedActive() && !SoloSelectedListIncludes( (const Region*) &(**i) ) );
-		if ( force_transparent )
+		if (force_transparent) {
 			continue;
+		}
 
 		/* Work out which bits of this region need to be read;
 		   first, trim to the range we are reading...
