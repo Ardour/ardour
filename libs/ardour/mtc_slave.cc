@@ -318,7 +318,7 @@ MTC_TransportMaster::update_mtc_qtr (Parser& p, int which_qtr, samplepos_t now)
 		mtc_speed = (t1 - t0) / qtr_d;
 		DEBUG_TRACE (DEBUG::MTC, string_compose ("qtr sample DLL t0:%1 t1:%2 err:%3 spd:%4 ddt:%5\n", t0, t1, e, mtc_speed, e2 - qtr_d));
 
-		current.update (mtc_frame + mtc_slave_latency.max, now, mtc_speed);
+		current.update (mtc_frame, now, mtc_speed);
 
 		last_inbound_frame = now;
 	}
@@ -502,9 +502,9 @@ MTC_TransportMaster::update_mtc_time (const MIDI::byte *msg, bool was_full, samp
 			if (first_mtc_timestamp == 0 || current.timestamp == 0) {
 				first_mtc_timestamp = now;
 				init_mtc_dll(mtc_frame, qtr);
-				mtc_frame_dll = mtc_frame;
+				mtc_frame_dll = mtc_frame + mtc_slave_latency.max;
 			}
-			current.update (mtc_frame, now, current.speed);
+			current.update (mtc_frame + mtc_slave_latency.max, now, current.speed);
 			reset_window (mtc_frame);
 		}
 	}
