@@ -705,12 +705,12 @@ LTC_TransportMaster::delta_string() const
 	} else {
 		if (abs (_current_delta) > ENGINE->sample_rate()) {
 			int secs = rint ((double) _current_delta / ENGINE->sample_rate());
-			snprintf(delta, sizeof(delta), "\u0394<span foreground=\"green\" face=\"monospace\" >%s%s%d</span><span face=\"monospace\"> s</span>",
+			snprintf(delta, sizeof(delta), "\u0394<span face=\"monospace\" >%s%s%d</span><span face=\"monospace\"> s</span>",
 			         LEADINGZERO(abs(secs)), PLUSMINUS(-secs), abs(secs));
 		} else {
-			snprintf (delta, sizeof(delta), "<span foreground=\"%s\" face=\"monospace\" >%s%s%lld</span><span face=\"monospace\">sm</span>",
-			          _sclock_synced && sync_lock_broken ? "red" : "white",
-			          LEADINGZERO(::llabs(_current_delta)), PLUSMINUS(-_current_delta), ::llabs(_current_delta));
+			snprintf (delta, sizeof(delta), "\u0394<span %s face=\"monospace\" >%s%s%lld</span><span face=\"monospace\">sm</span>",
+			          _sclock_synced && sync_lock_broken ? "foreground=\"red\"" : "",
+			          PLUSMINUS(-_current_delta), LEADINGZERO(::llabs(_current_delta)), ::llabs(_current_delta));
 		}
 	}
 

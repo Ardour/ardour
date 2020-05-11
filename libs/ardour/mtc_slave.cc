@@ -609,11 +609,11 @@ MTC_TransportMaster::delta_string () const
 	} else {
 		if (abs (_current_delta) > _session->sample_rate()) {
 			int secs = rint ((double) _current_delta / _session->sample_rate());
-			snprintf(delta, sizeof(delta), "\u0394<span foreground=\"green\" face=\"monospace\" >%s%s%d</span><span face=\"monospace\"> s</span>",
+			snprintf(delta, sizeof(delta), "\u0394<span face=\"monospace\" >%s%s%d</span><span face=\"monospace\"> s</span>",
 			         LEADINGZERO(abs(secs)), PLUSMINUS(-secs), abs(secs));
 		} else {
-			snprintf(delta, sizeof(delta), "\u0394<span foreground=\"green\" face=\"monospace\" >%s%s%" PRIi64 "</span><span face=\"monospace\">sm</span>",
-			         LEADINGZERO(abs(_current_delta)), PLUSMINUS(-_current_delta), abs(_current_delta));
+			snprintf(delta, sizeof(delta), "\u0394<span face=\"monospace\" >%s%s%" PRIi64 "</span><span face=\"monospace\">sm</span>",
+			         PLUSMINUS(-_current_delta), LEADINGZERO(abs(_current_delta)), abs(_current_delta));
 		}
 	}
 	return std::string(delta);
