@@ -16,7 +16,7 @@ jobs:
       script:
         - ./waf
       before_deploy:
-      - tar -czvf gtk2_ardour.tar.gz gtk2_ardour
+        - tar -czvf gtk2_ardour.tar.gz gtk2_ardour
       deploy:
         provider: releases
         token: $GITHUB_AUTH_TOKEN
