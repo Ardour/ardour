@@ -59,8 +59,11 @@ TransportMastersWidget::TransportMastersWidget ()
 	AudioEngine::instance()->PortRegisteredOrUnregistered.connect (port_reg_connection, invalidator (*this),  boost::bind (&TransportMastersWidget::update_ports, this), gui_context());
 	update_ports ();
 
+	Gtk::Table *add_table = manage(new Gtk::Table(1,2));
+	add_table->attach(add_button, 0,1, 0,1, Gtk::SHRINK);
+
 	pack_start (table, PACK_EXPAND_WIDGET, 12);
-	pack_start (add_button, FALSE, FALSE);
+	pack_start (*add_table, FALSE, FALSE);
 	pack_start (lost_sync_button, FALSE, FALSE, 12);
 
 	Config->ParameterChanged.connect (config_connection, invalidator (*this), boost::bind (&TransportMastersWidget::param_changed, this, _1), gui_context());
@@ -69,40 +72,37 @@ TransportMastersWidget::TransportMastersWidget ()
 	set_tooltip (lost_sync_button, string_compose (_("<b>When enabled</b>, if the signal from a transport master is lost, %1 will keep rolling at its current speed.\n"
 	                                                 "<b>When disabled</b>, loss of transport master sync causes %1 to stop"), PROGRAM_NAME));
 
-	add_button.signal_clicked ().connect (sigc::mem_fun (*this, &TransportMastersWidget::add_master));
+	add_button.signal_button_press_event().connect (sigc::mem_fun (*this, &TransportMastersWidget::add_master));
 
-	col_title[0].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Select")));
-	col_title[1].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Name")));
-	col_title[2].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Type")));
-	col_title[3].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Format")));
-	col_title[4].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Current")));
-	col_title[5].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Last")));
-	col_title[6].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Age")));
-	col_title[7].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Delta")));
-	col_title[8].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Collect")));
-	col_title[9].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Source")));
-	col_title[10].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Active\nCommands")));
-	col_title[11].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Clock\nSynced")));
-	col_title[12].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("29.97/\n30")));
-	col_title[13].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Remove")));
+	col_title[0].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Select")));               align[0]=0.0;
+	col_title[1].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Name")));                 align[1]=0.5;
+	col_title[2].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Type")));                 align[2]=0.5;
+	col_title[3].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Source")));               align[3]=0.5;
+	col_title[4].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Format")));               align[4]=0.5;
+	col_title[5].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Sync Position + Delta")));align[5]=0.5;
+	col_title[6].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Last Message + Age")));   align[6]=0.5;
+	col_title[7].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Active\nCommands")));     align[7]=0.5;
+	col_title[8].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Clock\nSynced")));        align[9]=0.0;
+	col_title[9].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("29.97/\n30")));          align[10]=0.0;
+	col_title[10].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Remove")));              align[11]=0.5;
 
-	set_tooltip (col_title[10], _("Controls whether or not certain transport-related commands can be sent from the GUI or control "
+	set_tooltip (col_title[7], _("Controls whether or not certain transport-related commands can be sent from the GUI or control "
 	                              "surfaces when this transport master is in use. The default is not to allow any such commands "
 	                              "when the master is in use."));
 
-	set_tooltip (col_title[12], _("<b>When enabled</b> the external timecode source is assumed to use 29.97 fps instead of 30000/1001.\n"
+	set_tooltip (col_title[9], _("<b>When enabled</b> the external timecode source is assumed to use 29.97 fps instead of 30000/1001.\n"
 	                              "SMPTE 12M-1999 specifies 29.97df as 30000/1001. The spec further mentions that "
 	                              "drop-sample timecode has an accumulated error of -86ms over a 24-hour period.\n"
 	                              "Drop-sample timecode would compensate exactly for a NTSC color frame rate of 30 * 0.9990 (ie 29.970000). "
 	                              "That is not the actual rate. However, some vendors use that rate - despite it being against the specs - "
 	                              "because the variant of using exactly 29.97 fps has zero timecode drift.\n"
 		             ));
-	set_tooltip (col_title[6], _("How long since the last full timestamp was received from this transport master"));
 
-	set_tooltip (col_title[11], string_compose (_("<b>When enabled</b> the external timecode source is assumed to be sample-clock synced to the audio interface\n"
+	set_tooltip (col_title[8], string_compose (_("<b>When enabled</b> the external timecode source is assumed to be sample-clock synced to the audio interface\n"
 	                                              "being used by %1."), PROGRAM_NAME));
 
-	table.set_spacings (6);
+	table.set_col_spacings (12);
+	table.set_row_spacings (6);
 
 	TransportMasterManager::instance().CurrentChanged.connect (current_connection, invalidator (*this), boost::bind (&TransportMastersWidget::current_changed, this, _1, _2), gui_context());
 	TransportMasterManager::instance().Added.connect (add_connection, invalidator (*this), boost::bind (&TransportMastersWidget::rebuild, this), gui_context());
@@ -137,8 +137,8 @@ TransportMastersWidget::current_changed (boost::shared_ptr<TransportMaster> old_
 	}
 }
 
-void
-TransportMastersWidget::add_master ()
+bool
+TransportMastersWidget::add_master (GdkEventButton* ev)
 {
 	AddTransportMasterDialog d;
 
@@ -154,7 +154,7 @@ TransportMastersWidget::add_master ()
 			name = d.get_name();
 			break;
 		default:
-			return;
+			return true;
 		}
 	}
 
@@ -164,6 +164,8 @@ TransportMastersWidget::add_master ()
 		MessageDialog msg (_("New transport master not added - check error log for details"));
 		msg.run ();
 	}
+
+	return true;
 }
 
 void
@@ -188,6 +190,7 @@ TransportMastersWidget::rebuild ()
 
 	for (size_t col = 0; col < sizeof (col_title) / sizeof (col_title[0]); ++col) {
 		table.attach (col_title[col], col, col+1, 0, 1);
+		col_title[col].set_alignment( align[col], 0.5);
 	}
 
 	uint32_t n = 1;
@@ -216,13 +219,10 @@ TransportMastersWidget::rebuild ()
 		table.attach (r->use_button, col, col+1, n, n+1); ++col;
 		table.attach (r->label_box, col, col+1, n, n+1); ++col;
 		table.attach (r->type, col, col+1, n, n+1); ++col;
+		table.attach (r->port_combo, col, col+1, n, n+1); ++col;
 		table.attach (r->format, col, col+1, n, n+1); ++col;
 		table.attach (r->current, col, col+1, n, n+1); ++col;
 		table.attach (r->last, col, col+1, n, n+1); ++col;
-		table.attach (r->timestamp, col, col+1, n, n+1); ++col;
-		table.attach (r->delta, col, col+1, n, n+1); ++col;
-		table.attach (r->collect_button, col, col+1, n, n+1); ++col;
-		table.attach (r->port_combo, col, col+1, n, n+1); ++col;
 		table.attach (r->request_options, col, col+1, n, n+1); ++col;
 
 		boost::shared_ptr<TimecodeTransportMaster> ttm (boost::dynamic_pointer_cast<TimecodeTransportMaster> (r->tm));
@@ -247,7 +247,6 @@ TransportMastersWidget::rebuild ()
 		r->label_box.signal_button_press_event().connect (sigc::mem_fun (*r, &TransportMastersWidget::Row::name_press));
 		r->port_combo.signal_changed().connect (sigc::mem_fun (*r, &TransportMastersWidget::Row::port_choice_changed));
 		r->use_button.signal_toggled().connect (sigc::mem_fun (*r, &TransportMastersWidget::Row::use_button_toggled));
-		r->collect_button.signal_toggled().connect (sigc::mem_fun (*r, &TransportMastersWidget::Row::collect_button_toggled));
 		r->request_options.signal_button_press_event().connect (sigc::mem_fun (*r, &TransportMastersWidget::Row::request_option_press), false);
 		r->remove_button.signal_clicked.connect (sigc::mem_fun (*r, &TransportMastersWidget::Row::remove_clicked));
 
@@ -314,7 +313,6 @@ TransportMastersWidget::update_usability ()
 	for (vector<Row*>::iterator r= rows.begin(); r != rows.end(); ++r) {
 		const bool usable = (*r)->tm->usable();
 		(*r)->use_button.set_sensitive (usable);
-		(*r)->collect_button.set_sensitive (usable);
 		(*r)->request_options.set_sensitive (usable);
 	}
 }
@@ -426,7 +424,6 @@ TransportMastersWidget::Row::prop_change (PropertyChange what_changed)
 	}
 
 	if (what_changed.contains (Properties::collect)) {
-		collect_button.set_active (tm->collect());
 	}
 
 	if (what_changed.contains (Properties::connected)) {
@@ -454,12 +451,6 @@ void
 TransportMastersWidget::Row::fr2997_button_toggled ()
 {
 	boost::dynamic_pointer_cast<TimecodeTransportMaster>(tm)->set_fr2997 (fr2997_button.get_active());
-}
-
-void
-TransportMastersWidget::Row::collect_button_toggled ()
-{
-	tm->set_collect (collect_button.get_active());
 }
 
 void
@@ -601,6 +592,17 @@ TransportMastersWidget::Row::update (Session* s, samplepos_t now)
 		return;
 	}
 
+	static const char *clock_fmt = "<span font_family=\"monospace\" foreground=\"gray\" background=\"black\" size=\"medium\" ><span foreground=\"white\" size=\"larger\">%1 </span>%2 </span>";
+	static const char *last_fmt =  "<span font_family=\"monospace\" foreground=\"gray\" background=\"black\" size=\"larger\" >%1 %2 ago </span>";
+	static const char *disp_fmt =  "<span font_family=\"monospace\" foreground=\"gray\" background=\"black\" size=\"larger\" > %1 </span>";
+
+	format.set_markup (string_compose (disp_fmt, "   ?   "));
+
+	string last_str(" --:--:--:--");
+	string current_str(" --:--:--:--");
+	string delta_str("\u0394 0");
+	char gap[32];
+
 	if (s) {
 
 		if (tm->speed_and_position (speed, pos, most_recent, when, now)) {
@@ -608,57 +610,65 @@ TransportMastersWidget::Row::update (Session* s, samplepos_t now)
 			sample_to_timecode (pos, t, false, false, 25, false, AudioEngine::instance()->sample_rate(), 100, false, 0);
 			sample_to_timecode (most_recent, l, false, false, 25, false, AudioEngine::instance()->sample_rate(), 100, false, 0);
 
+			current_str = Timecode::timecode_format_time (t);
+
 			if ((ttm = boost::dynamic_pointer_cast<TimecodeTransportMaster> (tm))) {
-				format.set_text (timecode_format_name (ttm->apparent_timecode_format()));
-				last.set_text (Timecode::timecode_format_time (l));
+				format.set_markup (string_compose (disp_fmt, timecode_format_name (ttm->apparent_timecode_format())));
+				last_str = Timecode::timecode_format_time (l);
 			} else if ((mtm = boost::dynamic_pointer_cast<MIDIClock_TransportMaster> (tm))) {
 				char buf[8];
 				snprintf (buf, sizeof (buf), "%.1fBPM", mtm->bpm());
-				format.set_text (buf);
-				last.set_text ("");
-			} else {
-				format.set_text ("");
-				last.set_text ("");
+				format.set_markup (string_compose (disp_fmt, buf));
 			}
 
-			current.set_text (Timecode::timecode_format_time (t));
+			delta_str = tm->delta_string ();
 
-			delta.set_markup (tm->delta_string ());
-
-			char gap[32];
 			float seconds = (when - now) / (float) AudioEngine::instance()->sample_rate();
 			if (seconds < 0.) {
 				seconds = 0.;
 			}
 			if (abs (seconds) < 1.0) {
 				snprintf (gap, sizeof (gap), "%-.03fs", seconds);
-			} else if (abs (seconds) < 4.0) {
+			} else if (abs (seconds) < 60.0) {
 				snprintf (gap, sizeof (gap), "%-3ds", (int) floor (seconds));
+			} else if (abs (seconds) < 60.0 * 60.0) {
+				snprintf (gap, sizeof (gap), "%-3dm", (int) floor (seconds/60));
 			} else {
-				snprintf (gap, sizeof (gap), "%s", _(">4s ago"));
+				snprintf (gap, sizeof (gap), "%-3dh", (int) floor (seconds/60/60));
 			}
-			timestamp.set_text (gap);
 			save_when = when;
 
 		} else {
 
 			if (save_when) {
-				char gap[32];
 
 				const float seconds = (when - now) / (float) AudioEngine::instance()->sample_rate();
 				if (abs (seconds) < 1.0) {
-					snprintf (gap, sizeof (gap), "%-.3fs", seconds);
-				} else if (abs (seconds) < 4.0) {
-					snprintf (gap, sizeof (gap), "%-2ds", (int) floor (seconds));
+					snprintf (gap, sizeof (gap), "%-.03fs", seconds);
+				} else if (abs (seconds) < 60.0) {
+					snprintf (gap, sizeof (gap), "%-3ds", (int) floor (seconds));
+				} else if (abs (seconds) < 60.0 * 60.0) {
+					snprintf (gap, sizeof (gap), "%-3dm", (int) floor (seconds/60));
 				} else {
-					snprintf (gap, sizeof (gap), "%s", _(">4s ago"));
+					snprintf (gap, sizeof (gap), "%-3dh", (int) floor (seconds/60/60));
 				}
-				timestamp.set_text (gap);
 				save_when = when;
 			}
-			delta.set_text ("");
-			current.set_text ("");
 		}
+
+		//pad the gap to 9 chars
+		string gap_str(gap);
+		int len = gap_str.length();
+		for (int i = len; i<9; i++)
+			gap_str = " " + gap_str;
+
+		//pad the delta to 12 chars
+		len = delta_str.length();
+		for (int i = len; i<12; i++)
+			delta_str = " " + delta_str;
+
+		last.set_markup (string_compose (last_fmt, last_str, gap_str));
+		current.set_markup (string_compose (clock_fmt, current_str, delta_str));
 	}
 }
 

@@ -82,9 +82,6 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 		Gtk::Label format;
 		Gtk::Label current;
 		Gtk::Label last;
-		Gtk::Label timestamp;
-		Gtk::Label delta;
-		Gtk::CheckButton collect_button;
 		Gtk::RadioButton use_button;
 		Gtk::ComboBoxText port_combo;
 		Gtk::CheckButton sclock_synced_button;
@@ -131,7 +128,8 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 
 	Gtk::Table table;
 	Gtk::Label col_title[14];
-	Gtk::Button add_button;
+	float align[14];
+	ArdourWidgets::ArdourButton add_button;
 	Gtk::CheckButton lost_sync_button;
 
 	sigc::connection update_connection;
@@ -163,7 +161,7 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	void rebuild ();
 	void clear ();
 	void current_changed (boost::shared_ptr<ARDOUR::TransportMaster> old_master, boost::shared_ptr<ARDOUR::TransportMaster> new_master);
-	void add_master ();
+	bool add_master (GdkEventButton* ev);
 	void update_usability ();
 
 	void lost_sync_changed ();
