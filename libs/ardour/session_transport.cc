@@ -186,7 +186,7 @@ Session::locate (samplepos_t target_sample, bool with_roll, bool with_flush, boo
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("rt-locate to %1 ts = %7, roll %2 flush %3 for loop end %4 force %5 mmc %6\n",
 	                                               target_sample, with_roll, with_flush, for_loop_end, force, with_mmc, _transport_sample));
 
-	if (!force && _transport_sample == target_sample && !loop_changing && !for_loop_end) {
+	if (!force && (_transport_sample == target_sample) && !loop_changing && !for_loop_end) {
 
 		/* already at the desired position. Not forced to locate,
 		   the loop isn't changing, so unless we're told to
