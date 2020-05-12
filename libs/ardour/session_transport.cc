@@ -186,18 +186,16 @@ Session::locate (samplepos_t target_sample, bool with_roll, bool with_flush, boo
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("rt-locate to %1 ts = %7, roll %2 flush %3 for loop end %4 force %5 mmc %6\n",
 	                                               target_sample, with_roll, with_flush, for_loop_end, force, with_mmc, _transport_sample));
 
-	if (!force && (_transport_sample == target_sample) && !loop_changing && !for_loop_end) {
+	if (!force && (_transport_sample == target_sample) && !for_loop_end) {
 
-		/* already at the desired position. Not forced to locate,
-		   the loop isn't changing, so unless we're told to
-		   start rolling also, there's nothing to do but
-		   tell the world where we are (again).
+		/* already at the desired position. Not forced to locate, so
+		   unless we're told to start rolling also, there's nothing to
+		   do but tell the world where we are (again).
 		*/
 
 		if (with_roll) {
 			set_transport_speed (1.0, false, false, false);
 		}
-		loop_changing = false;
 		TFSM_EVENT (TransportFSM::LocateDone);
 		Located (); /* EMIT SIGNAL */
 		return;
@@ -338,7 +336,6 @@ Session::locate (samplepos_t target_sample, bool with_roll, bool with_flush, boo
 		TFSM_EVENT (TransportFSM::ButlerRequired);
 	} else {
 		TFSM_EVENT (TransportFSM::LocateDone);
-		loop_changing = false;
 	}
 
 	_send_timecode_update = true;
@@ -692,7 +689,6 @@ Session::butler_completed_transport_work ()
 		post_locate ();
 		ptw = PostTransportWork (ptw & ~PostTransportLocate);
 		set_post_transport_work (ptw);
-		loop_changing = false;
 		TFSM_EVENT (TransportFSM::LocateDone);
 	}
 
@@ -1478,7 +1474,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 
 	if (ptw & (PostTransportClearSubstate|PostTransportStop)) {
 		unset_play_range ();
-		if (!loop_changing && !Config->get_loop_is_mode()) {
+		if (!Config->get_loop_is_mode()) {
 			unset_play_loop ();
 		}
 	}
@@ -1598,7 +1594,6 @@ Session::set_play_loop (bool yn, bool change_transport_state)
 				 we do not call unset_play_loop(). This is a
 				 crude mechanism. Got a better idea?
 				 */
-			loop_changing = true;
 			TFSM_LOCATE (loc->start(), MustRoll, true, false, true);
 		} else if (!transport_rolling()) {
 			/* loop-is-mode: not rolling, just locate to loop start */

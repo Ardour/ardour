@@ -1452,7 +1452,6 @@ private:
 	 */
 	pframes_t               _pframes_since_last_mtc;
 	bool                     play_loop;
-	bool                     loop_changing;
 	samplepos_t              last_loopend;
 
 	boost::scoped_ptr<SessionDirectory> _session_dir;
