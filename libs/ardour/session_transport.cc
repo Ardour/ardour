@@ -315,22 +315,6 @@ Session::locate (samplepos_t target_sample, bool with_roll, bool with_flush, boo
 
 				// located to start of loop - this is looping, basically
 
-#if 0
-				if (!have_looped) {
-					/* first time */
-					if (_last_roll_location != al->start()) {
-						/* didn't start at loop start - playback must have
-						 * started before loop since we've now hit the loop
-						 * end.
-						 */
-						//cerr << "need locate\n";
-						//add_post_transport_work (PostTransportLocate);
-						//need_butler = true;
-					}
-
-				}
-#endif
-
 				boost::shared_ptr<RouteList> rl = routes.reader();
 
 				for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
