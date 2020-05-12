@@ -250,7 +250,7 @@ Session::locate (samplepos_t target_sample, bool with_roll, bool with_flush, boo
 		}
 	}
 
-	if (force) {
+	if (force || !for_loop_end) {
 
 		PostTransportWork todo = PostTransportLocate;
 
