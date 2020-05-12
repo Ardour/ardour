@@ -1284,7 +1284,6 @@ Session::non_realtime_locate ()
 		for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i, ++nt) {
 			(*i)->non_realtime_locate (tf);
 			if (sc != g_atomic_int_get (&_seek_counter)) {
-				std::cerr << "\n\nLOCATE INTERRUPTED BY LOCATE!!!\n\n";
 				goto restart;
 			}
 		}
