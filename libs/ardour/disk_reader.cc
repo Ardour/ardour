@@ -576,19 +576,18 @@ DiskReader::set_pending_overwrite (OverwriteReason why)
 		const samplecnt_t reserved_size = c->front ()->rbuf->reserved_size ();
 		const samplecnt_t bufsize       = c->front ()->rbuf->bufsize ();
 
-		overwrite_sample = playback_sample - reserved_size;
-
 		overwrite_offset = c->front ()->rbuf->read_ptr ();
+		overwrite_sample = playback_sample - reserved_size;
 
 		if (overwrite_offset > reserved_size) {
 			/*
 			 * |----------------------------------------------------------------------|
-	     *                         ^               ^
-	     *                         RRRRRRRRRRRRRRRRoverwrite_offset  (old read_ptr)
-	     * |<- second ->|<------------------ first chunk ------------------------>|
+			 *                         ^               ^
+			 *                         RRRRRRRRRRRRRRRRoverwrite_offset  (old read_ptr)
+			 * |<- second ->|<------------------ first chunk ------------------------>|
 			 *
 			 * Fill the the end of the buffer ("first chunk"), above
-			*/
+			 */
 
 			overwrite_offset -= reserved_size;
 
