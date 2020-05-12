@@ -404,17 +404,14 @@ MIDIClock_TransportMaster::position_string () const
 std::string
 MIDIClock_TransportMaster::delta_string() const
 {
-	char delta[80];
 	SafeTime last;
 	current.safe_read (last);
 
 	if (last.timestamp == 0 || starting()) {
-		snprintf(delta, sizeof(delta), "\u2012\u2012\u2012\u2012");
+		return X_("\u2012\u2012\u2012\u2012");
 	} else {
-		snprintf(delta, sizeof(delta), "\u0394<span foreground=\"green\" face=\"monospace\" >%s%s%" PRIi64 "</span>sm",
-				LEADINGZERO(abs(_current_delta)), PLUSMINUS(-_current_delta), abs(_current_delta));
+		return format_delta_time (_current_delta);
 	}
-	return std::string(delta);
 }
 
 void

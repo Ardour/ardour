@@ -696,23 +696,11 @@ LTC_TransportMaster::position_string() const
 std::string
 LTC_TransportMaster::delta_string() const
 {
-	char delta[128];
-
 	if (!_collect || current.timestamp == 0) {
-		snprintf (delta, sizeof(delta), "\u2012\u2012\u2012\u2012");
+		return X_("\u2012\u2012\u2012\u2012");
 	} else if ((monotonic_cnt - current.timestamp) > 2 * samples_per_ltc_frame) {
-		snprintf (delta, sizeof(delta), "%s", _("flywheel"));
+		return _("flywheel");
 	} else {
-		if (abs (_current_delta) > ENGINE->sample_rate()) {
-			int secs = rint ((double) _current_delta / ENGINE->sample_rate());
-			snprintf(delta, sizeof(delta), "\u0394<span face=\"monospace\" >%s%s%d</span><span face=\"monospace\"> s</span>",
-			         LEADINGZERO(abs(secs)), PLUSMINUS(-secs), abs(secs));
-		} else {
-			snprintf (delta, sizeof(delta), "\u0394<span %s face=\"monospace\" >%s%s%lld</span><span face=\"monospace\">sm</span>",
-			          _sclock_synced && sync_lock_broken ? "foreground=\"red\"" : "",
-			          PLUSMINUS(-_current_delta), LEADINGZERO(::llabs(_current_delta)), ::llabs(_current_delta));
-		}
+		return format_delta_time (_current_delta);
 	}
-
-	return delta;
 }

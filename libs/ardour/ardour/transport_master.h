@@ -43,10 +43,6 @@
 #include "midi++/parser.h"
 #include "midi++/types.h"
 
-/* used for delta_string(): (note: \u00B1 is the plus-or-minus sign) */
-#define PLUSMINUS(A) (((A) < 0) ? "-" : (((A) > 0) ? "+" : "\u00B1"))
-#define LEADINGZERO(A) ((A) < 10 ? "    " : (A) < 100 ? "   " : (A) < 1000 ? "  " : (A) < 10000 ? " " : "")
-
 namespace ARDOUR {
 
 class TempoMap;
@@ -449,6 +445,8 @@ protected:
 	PBD::ScopedConnection backend_connection;
 
 	virtual void register_properties ();
+
+	virtual std::string format_delta_time (sampleoffset_t) const;
 };
 
 /** a helper class for any TransportMaster that receives its input via a MIDI

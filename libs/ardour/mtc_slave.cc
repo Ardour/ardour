@@ -598,25 +598,14 @@ MTC_TransportMaster::position_string() const
 std::string
 MTC_TransportMaster::delta_string () const
 {
-	char delta[128];
 	SafeTime last;
 	current.safe_read (last);
 
-	delta[0] = '\0';
-
 	if (last.timestamp == 0 || reset_pending) {
-		snprintf(delta, sizeof(delta), "\u2012\u2012\u2012\u2012");
+		return X_("\u2012\u2012\u2012\u2012");
 	} else {
-		if (abs (_current_delta) > _session->sample_rate()) {
-			int secs = rint ((double) _current_delta / _session->sample_rate());
-			snprintf(delta, sizeof(delta), "\u0394<span face=\"monospace\" >%s%s%d</span><span face=\"monospace\"> s</span>",
-			         LEADINGZERO(abs(secs)), PLUSMINUS(-secs), abs(secs));
-		} else {
-			snprintf(delta, sizeof(delta), "\u0394<span face=\"monospace\" >%s%s%" PRIi64 "</span><span face=\"monospace\">sm</span>",
-			         PLUSMINUS(-_current_delta), LEADINGZERO(abs(_current_delta)), abs(_current_delta));
-		}
+		return format_delta_time (_current_delta);
 	}
-	return std::string(delta);
 }
 
 void
