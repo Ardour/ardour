@@ -108,7 +108,7 @@ Worker::verify_message_completeness(PBD::RingBuffer<uint8_t>* rb)
 		memcpy (&size, vec.buf[0], sizeof (size));
 	} else {
 		memcpy (&size, vec.buf[0], vec.len[0]);
-		memcpy (&size + vec.len[0], vec.buf[1], sizeof(size) - vec.len[0]);
+		memcpy (& reinterpret_cast<uint8_t*>(&size)[vec.len[0]], vec.buf[1], sizeof(size) - vec.len[0]);
 	}
 	if (read_space < size+sizeof(size)) {
 		/* message from writer is yet incomplete. respond next cycle */
