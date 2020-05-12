@@ -59,7 +59,7 @@ compiler_flags_dictionaries= {
         # Flags to use posix pipes between compiler stages
         'pipe' : '-pipe',
         # Flags for maximally optimized build
-        'full-optimization' : [ '-O3', '-fomit-frame-pointer', '-ffast-math', '-fstrength-reduce', '-fno-finite-math-only' ],
+        'full-optimization' : [ '-O3', '-fomit-frame-pointer', '-ffast-math', '-fstrength-reduce' ],
         # Flag to ensure that compiler error output includes column/line numbers
         'show-column' : '-fshow-column',
         # Flags required to build for x86 only (OS X feature)
@@ -1331,6 +1331,11 @@ int main () { return 0; }
     elif Options.options.dist_target != 'mingw':
         sub_config_and_use(conf, 'tools/sanity_check')
         sub_config_and_use(conf, 'tools/gccabicheck')
+
+    # explicitly link against libm. This is possible on all POSIX systems
+    # and required on Linux for symbol versioning and ABI compatibility
+    if not (Options.options.dist_target == 'mingw' or Options.options.dist_target == 'msvc'):
+        conf.env.append_value('LIB', 'm')
 
     sub_config_and_use(conf, 'libs/clearlooks-newer')
 
