@@ -687,31 +687,34 @@ DiskReader::overwrite_existing_audio ()
 	samplecnt_t    chunk1_cnt;
 	samplecnt_t    chunk2_cnt;
 
-	const samplecnt_t bufsize = c->front ()->rbuf->bufsize ();
+	const samplecnt_t to_overwrite = c->front()->rbuf->overwritable_at (overwrite_offset);
 
 	chunk1_offset = overwrite_offset;
-	chunk1_cnt    = bufsize - overwrite_offset;
+	chunk1_cnt    = min (c->front()->rbuf->bufsize() - overwrite_offset, to_overwrite);
 
-	if (chunk1_cnt == bufsize) {
+	if (chunk1_cnt == to_overwrite) {
 		chunk1_cnt--;
 		chunk2_cnt = 0;
 	} else {
-		chunk2_cnt = bufsize - 1 - chunk1_cnt;
+		chunk2_cnt = to_overwrite - chunk1_cnt;
 	}
 
-	/* this is a complete buffer fill */
-	assert (chunk1_cnt + chunk2_cnt == bufsize - 1);
-
-	boost::scoped_array<Sample> mixdown_buffer (new Sample[bufsize]);
-	boost::scoped_array<float>  gain_buffer (new float[bufsize]);
+	boost::scoped_array<Sample> mixdown_buffer (new Sample[to_overwrite]);
+	boost::scoped_array<float>  gain_buffer (new float[to_overwrite]);
 	uint32_t                    n   = 0;
 	bool                        ret = true;
+	samplepos_t                 start;
 
 	for (ChannelList::iterator chan = c->begin (); chan != c->end (); ++chan, ++n) {
-		samplepos_t start = overwrite_sample;
 
 		Sample*            buf = (*chan)->rbuf->buffer ();
 		ReaderChannelInfo* rci = dynamic_cast<ReaderChannelInfo*> (*chan);
+
+		/* Note that @param start is passed by reference and will be
+		 * updated by the ::audio_read() call
+		 */
+
+		start = overwrite_sample;
 
 		if (chunk1_cnt) {
 			if (audio_read (buf + chunk1_offset, mixdown_buffer.get (), gain_buffer.get (), start, chunk1_cnt, rci, n, reversed) != chunk1_cnt) {
@@ -719,6 +722,7 @@ DiskReader::overwrite_existing_audio ()
 				ret = false;
 				continue;
 			}
+
 		}
 
 		if (chunk2_cnt) {
