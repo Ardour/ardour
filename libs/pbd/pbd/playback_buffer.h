@@ -122,6 +122,18 @@ public:
 		}
 	}
 
+	/* write thread */
+	guint overwritable_at (guint r) const {
+		guint w;
+
+		w = g_atomic_int_get (&write_idx);
+
+		if (w > r) {
+			return w - r;
+		}
+		return (w - r + size) & size_mask;
+	}
+
 	/* read-thead */
 	guint read (T *dest, guint cnt, bool commit = true, guint offset = 0);
 
