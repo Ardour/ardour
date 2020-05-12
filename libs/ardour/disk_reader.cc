@@ -397,10 +397,12 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 					Evoral::Range<samplepos_t> loop_range (loc->start (), loc->end () - 1);
 					ss = loop_range.squish (playback_sample);
 				}
-				if (can_internal_playback_seek (ss - playback_sample)) {
-					internal_playback_seek (ss - playback_sample);
-				} else {
-					disk_samples_to_consume = 0; /* will force an underrun below */
+				if (ss != playback_sample) {
+					if (can_internal_playback_seek (ss - playback_sample)) {
+						internal_playback_seek (ss - playback_sample);
+					} else {
+						disk_samples_to_consume = 0; /* will force an underrun below */
+					}
 				}
 			}
 
