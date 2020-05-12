@@ -1634,7 +1634,14 @@ Editor::region_selection_changed ()
 	//if regions are selected, we must always force the mouse mode to Object...
 	//... otherwise the user is confusingly left with selected regions that can't be manipulated.
 	if (!selection->regions.empty() && !internal_editing()) {
-		set_mouse_mode (MouseObject, false);
+
+		/* if in MouseAudition and there's just 1 region selected
+		 * (i.e. we just clicked on it), leave things as they are
+		 */
+
+		if (selection->regions.size() > 1 || mouse_mode != Editing::MouseAudition) {
+			set_mouse_mode (MouseObject, false);
+		}
 	}
 }
 
