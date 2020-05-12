@@ -951,12 +951,18 @@ swap_by_ptr (Sample* first, Sample* last)
 }
 
 /** Read some data for 1 channel from our playlist into a buffer.
- *  @param buf Buffer to write to.
+ *
+ *  @param sum_buf sample-containing buffer to write to. Must be contiguous.
+ *  @param mixdown_buffer sample-containing buffer that will be used to mix layers
+ *  @param gain_buffer ptr to a buffer used to hold any necessary gain (automation) data
  *  @param start Session sample to start reading from; updated to where we end up
- *         after the read.
+ *         after the read. Global timeline position.
  *  @param cnt Count of samples to read.
+ *  @param rci ptr to ReaderChannelInfo for the channel we're reading
+ *  @param channel the number of the channel we're reading (0..N)
  *  @param reversed true if we are running backwards, otherwise false.
  */
+
 samplecnt_t
 DiskReader::audio_read (Sample*            sum_buffer,
                         Sample*            mixdown_buffer,
