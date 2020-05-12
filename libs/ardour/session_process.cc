@@ -882,7 +882,7 @@ Session::process_event (SessionEvent* ev)
 
 	case SessionEvent::LocateRoll:
 		/* args: roll after locate, clear state if not looping, not for loop, force */
-		TFSM_LOCATE (ev->target_sample, ev->locate_transport_disposition, !play_loop, false, ev->yes_or_no);
+		TFSM_LOCATE (ev->target_sample, MustRoll, !play_loop, false, ev->yes_or_no);
 		_send_timecode_update = true;
 		break;
 
