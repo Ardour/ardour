@@ -1475,7 +1475,15 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	if (ptw & (PostTransportClearSubstate|PostTransportStop)) {
 		unset_play_range ();
 		if (!Config->get_loop_is_mode()) {
-			unset_play_loop ();
+			if (get_play_loop()) {
+				/* do not unset loop playback if we've just
+				   located back to the start of the loop (i.e. to
+				   prepare to play the loop.
+				*/
+				if (_transport_sample != _locations->auto_loop_location()->start()) {
+					unset_play_loop ();
+				}
+			}
 		}
 	}
 
@@ -1589,11 +1597,7 @@ Session::set_play_loop (bool yn, bool change_transport_state)
 		merge_event (new SessionEvent (SessionEvent::AutoLoop, SessionEvent::Replace, loc->end(), loc->start(), 0.0f));
 
 		if (!Config->get_loop_is_mode()) {
-			/* args: positition, roll=true, flush=true, for_loop_end=false, force buffer, refill  looping */
-			/* set this so that when/if we stop for locate,
-				 we do not call unset_play_loop(). This is a
-				 crude mechanism. Got a better idea?
-				 */
+			/* args: positition, disposition, flush=true, for_loop_end=false, force=true */
 			TFSM_LOCATE (loc->start(), MustRoll, true, false, true);
 		} else if (!transport_rolling()) {
 			/* loop-is-mode: not rolling, just locate to loop start */
