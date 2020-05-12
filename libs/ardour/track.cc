@@ -584,12 +584,6 @@ Track::set_slaved (bool s)
 	_disk_writer->set_slaved (s);
 }
 
-void
-Track::reload_loop ()
-{
-	_disk_reader->reload_loop ();
-}
-
 ChanCount
 Track::n_channels ()
 {

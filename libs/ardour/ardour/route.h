@@ -361,8 +361,6 @@ public:
 	PBD::Signal0<void> denormal_protection_changed;
 	PBD::Signal0<void> comment_changed;
 
-	virtual void reload_loop();
-
 	bool is_track();
 
 	/** track numbers - assigned by session

@@ -6170,7 +6170,3 @@ Route::monitoring_state () const
 	return get_auto_monitoring_state();
 }
 
-void
-Route::reload_loop ()
-{
-}

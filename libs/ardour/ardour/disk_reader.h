@@ -105,7 +105,6 @@ public:
 	void reset_tracker ();
 
 	bool declick_in_progress () const;
-	void reload_loop ();
 
 	/* inc/dec variants MUST be called as part of the process call tree, before any
 	 * disk readers are invoked. We use it when the session needs the

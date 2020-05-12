@@ -167,7 +167,6 @@ public:
 	}
 	void adjust_playback_buffering ();
 	void adjust_capture_buffering ();
-	void reload_loop ();
 
 	PBD::Signal0<void> FreezeChange;
 	PBD::Signal0<void> PlaylistChanged;

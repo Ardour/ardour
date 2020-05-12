@@ -1504,13 +1504,6 @@ Session::auto_loop_changed (Location* location)
 
 	replace_event (SessionEvent::AutoLoop, location->end(), location->start());
 
-	const bool rolling = transport_rolling ();
-
-	boost::shared_ptr<RouteList> r = routes.reader ();
-
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		(*i)->reload_loop ();
-	}
 
 
 	if (rolling) {

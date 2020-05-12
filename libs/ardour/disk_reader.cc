@@ -1879,12 +1879,10 @@ DiskReader::set_loop (Location* loc)
 	if (!loc) {
 		return;
 	}
-
-	reload_loop ();
 }
 
 void
-DiskReader::reload_loop ()
+DiskReader::setup_preloop_buffer ()
 {
 	if (!_loop_location) {
 		return;
