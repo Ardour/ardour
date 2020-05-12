@@ -1502,9 +1502,7 @@ Session::auto_loop_changed (Location* location)
 
 	replace_event (SessionEvent::AutoLoop, location->end(), location->start());
 
-
-
-	if (rolling) {
+	if (transport_rolling()) {
 
 		if (get_play_loop ()) {
 
