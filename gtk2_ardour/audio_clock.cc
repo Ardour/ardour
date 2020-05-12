@@ -130,10 +130,10 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	_right_btn.set_name ("transport option button");
 
 	_left_btn.set_sizing_text (_("0000000000000"));
-	// NB right_btn is in a size-group
+	_right_btn.set_sizing_text (_("0000000000000"));
 
-	_left_btn.set_layout_font (UIConfiguration::instance().get_SmallFont());
-	_right_btn.set_layout_font (UIConfiguration::instance().get_SmallFont());
+	_left_btn.set_layout_font (UIConfiguration::instance().get_SmallMonospaceFont());
+	_right_btn.set_layout_font (UIConfiguration::instance().get_SmallMonospaceFont());
 
 	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &AudioClock::set_colors));
 	UIConfiguration::instance().DPIReset.connect (sigc::mem_fun (*this, &AudioClock::dpi_reset));
@@ -975,26 +975,21 @@ AudioClock::set_slave_info ()
 		case LTC:
 		case MTC:
 			if (tm) {
-				bool matching;
 				boost::shared_ptr<TimecodeTransportMaster> tcmaster;
 				if ((tcmaster = boost::dynamic_pointer_cast<TimecodeTransportMaster>(tm)) != 0) {
-					matching = (tcmaster->apparent_timecode_format() == _session->config.get_timecode_format());
-					_left_btn.set_text (string_compose ("%1<span face=\"monospace\" foreground=\"%3\">%2</span>",
-					                                    tm->display_name()[0],
-					                                    tcmaster->position_string (),
-					                                    matching ? "#66ff66" : "#ff3333"
-								), true);
-					_right_btn.set_text (tm->delta_string (), true);
+					//TODO: _left_btn.set_name () //  tcmaster->apparent_timecode_format() != _session->config.get_timecode_format();
+					_left_btn.set_text (string_compose ("%1%2", tm->display_name()[0], tcmaster->position_string ()), false);
+					_right_btn.set_text (tm->delta_string (), false);
 				}
 			} else {
-				_left_btn.set_text (_("--pending--"), true);
-				_right_btn.set_text ("", true);
+				_left_btn.set_text (_("--pending--"), false);
+				_right_btn.set_text ("", false);
 			}
 			break;
 		}
 	} else {
-		_left_btn.set_text (string_compose ("%1/%2", _("INT"), tm->display_name()), true);
-		_right_btn.set_text ("", true);
+		_left_btn.set_text (string_compose ("%1/%2", _("INT"), tm->display_name()), false);
+		_right_btn.set_text ("", false);
 	}
 }
 
@@ -1024,8 +1019,8 @@ AudioClock::set_samples (samplepos_t when, bool /*force*/)
 
 	if (_off) {
 		_layout->set_text (" ----------");
-		_left_btn.set_text ("", true);
-		_right_btn.set_text ("", true);
+		_left_btn.set_text ("", false);
+		_right_btn.set_text ("", false);
 		return;
 	}
 
@@ -1053,15 +1048,15 @@ AudioClock::set_samples (samplepos_t when, bool /*force*/)
 			sprintf (buf, "%" PRId64 "Hz", rate);
 		}
 
-		_left_btn.set_text (string_compose ("%1 %2", _("SR"), buf), true);
+		_left_btn.set_text (string_compose ("%1 %2", _("SR"), buf), false);
 
 		float vid_pullup = _session->config.get_video_pullup();
 
 		if (vid_pullup == 0.0) {
-			_right_btn.set_text ("", true);
+			_right_btn.set_text ("", false);
 		} else {
 			sprintf (buf, _("%+.4f%%"), vid_pullup);
-			_right_btn.set_text (string_compose ("%1 %2", _("Pull"), buf), true);
+			_right_btn.set_text (string_compose ("%1 %2", _("Pull"), buf), false);
 		}
 	}
 }
@@ -1073,8 +1068,8 @@ AudioClock::set_seconds (samplepos_t when, bool /*force*/)
 
 	if (_off) {
 		_layout->set_text (" ----------");
-		_left_btn.set_text ("", true);
-		_right_btn.set_text ("", true);
+		_left_btn.set_text ("", false);
+		_right_btn.set_text ("", false);
 		return;
 	}
 
@@ -1133,8 +1128,8 @@ AudioClock::set_minsec (samplepos_t when, bool /*force*/)
 
 	if (_off) {
 		_layout->set_text (" --:--:--.---");
-		_left_btn.set_text ("", true);
-		_right_btn.set_text ("", true);
+		_left_btn.set_text ("", false);
+		_right_btn.set_text ("", false);
 
 		return;
 	}
@@ -1157,8 +1152,8 @@ AudioClock::set_timecode (samplepos_t when, bool /*force*/)
 
 	if (_off) {
 		_layout->set_text (" --:--:--:--");
-		_left_btn.set_text ("", true);
-		_right_btn.set_text ("", true);
+		_left_btn.set_text ("", false);
+		_right_btn.set_text ("", false);
 		return;
 	}
 
@@ -1194,8 +1189,8 @@ AudioClock::set_bbt (samplepos_t when, samplecnt_t offset, bool /*force*/)
 
 	if (_off || when >= _limit_pos || when < -_limit_pos) {
 		_layout->set_text (" ---|--|----");
-		_left_btn.set_text ("", true);
-		_right_btn.set_text ("", true);
+		_left_btn.set_text ("", false);
+		_right_btn.set_text ("", false);
 		return;
 	}
 
@@ -1276,17 +1271,17 @@ AudioClock::set_bbt (samplepos_t when, samplecnt_t offset, bool /*force*/)
 
 		if (m.tempo().note_type() == 4) {
 			snprintf (buf, sizeof(buf), "\u2669 = %.3f", _session->tempo_map().tempo_at_sample (pos).note_types_per_minute());
-			_left_btn.set_text (string_compose ("%1", buf), true);
+			_left_btn.set_text (string_compose ("%1", buf), false);
 		} else if (m.tempo().note_type() == 8) {
 			snprintf (buf, sizeof(buf), "\u266a = %.3f", _session->tempo_map().tempo_at_sample (pos).note_types_per_minute());
-			_left_btn.set_text (string_compose ("%1", buf), true);
+			_left_btn.set_text (string_compose ("%1", buf), false);
 		} else {
 			snprintf (buf, sizeof(buf), "%.1f = %.3f", m.tempo().note_type(), _session->tempo_map().tempo_at_sample (pos).note_types_per_minute());
-			_left_btn.set_text (string_compose ("%1: %2", S_("Tempo|T"), buf), true);
+			_left_btn.set_text (string_compose ("%1: %2", S_("Tempo|T"), buf), false);
 		}
 
 		snprintf (buf, sizeof(buf), "%g/%g", m.meter().divisions_per_bar(), m.meter().note_divisor());
-		_right_btn.set_text (string_compose ("%1: %2", S_("TimeSignature|TS"), buf), true);
+		_right_btn.set_text (string_compose ("%1: %2", S_("TimeSignature|TS"), buf), false);
 	}
 }
 
