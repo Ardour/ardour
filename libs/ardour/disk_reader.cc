@@ -854,8 +854,6 @@ DiskReader::seek (samplepos_t sample, bool complete_refill)
 
 	samplecnt_t shift = sample > c->front ()->rbuf->reservation_size () ? c->front ()->rbuf->reservation_size () : sample;
 
-	// shift = 0;
-
 	if (read_reversed) {
 		/* reading in reverse, so start at a later sample, and read
 		 * "backwards" from there. */
