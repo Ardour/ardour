@@ -801,8 +801,6 @@ Session::destroy ()
 void
 Session::setup_ltc ()
 {
-	XMLNode* child = 0;
-
 	_ltc_output_port = AudioEngine::instance()->register_output_port (DataType::AUDIO, X_("LTC-Out"), false, TransportGenerator);
 
 	{
