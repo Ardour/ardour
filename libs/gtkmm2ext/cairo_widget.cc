@@ -55,8 +55,9 @@ CairoWidget::CairoWidget ()
 	, _current_parent (0)
 	, _canvas_widget (false)
 	, _nsglview (0)
+	, _widget_name ("")
 {
-	_name_proxy.connect (sigc::mem_fun (*this, &CairoWidget::on_name_changed));
+	_name_proxy.connect (sigc::mem_fun (*this, &CairoWidget::on_widget_name_changed));
 #ifdef USE_CAIRO_IMAGE_SURFACE
 	_use_image_surface = true;
 #else
@@ -460,4 +461,15 @@ void
 CairoWidget::set_focus_handler (sigc::slot<void,Gtk::Widget*> s)
 {
 	focus_handler = s;
+}
+
+void
+CairoWidget::on_widget_name_changed ()
+{
+	Glib::ustring name = get_name();
+	if (_widget_name == name) {
+		return;
+	}
+	_widget_name = name;
+	on_name_changed ();
 }

@@ -143,6 +143,8 @@ protected:
 	static sigc::slot<void,Gtk::Widget*> focus_handler;
 
 private:
+	void on_widget_name_changed ();
+
 	Cairo::RefPtr<Cairo::Surface> image_surface;
 	Glib::SignalProxyProperty _name_proxy;
 	sigc::connection _parent_style_change;
@@ -151,6 +153,7 @@ private:
 	void* _nsglview;
 	bool _use_image_surface;
 	Gdk::Rectangle _allocation;
+	Glib::ustring _widget_name;
 
 };
 
