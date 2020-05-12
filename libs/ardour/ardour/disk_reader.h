@@ -247,6 +247,9 @@ private:
 
 	bool overwrite_existing_audio ();
 	bool overwrite_existing_midi ();
+
+	samplepos_t last_refill_loop_start;
+	void setup_preloop_buffer ();
 };
 
 } // namespace ARDOUR

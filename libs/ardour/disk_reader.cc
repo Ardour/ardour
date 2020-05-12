@@ -64,6 +64,7 @@ DiskReader::DiskReader (Session& s, string const& str, DiskIOProcessor::Flag f)
 	, _declick_amp (s.nominal_sample_rate ())
 	, _declick_offs (0)
 	, _declick_enabled (false)
+	, last_refill_loop_start (0)
 {
 	file_sample[DataType::AUDIO] = 0;
 	file_sample[DataType::MIDI]  = 0;
@@ -1044,6 +1045,10 @@ DiskReader::audio_read (Sample*            sum_buffer,
 					loop_declick_out.run (sum_buffer, start, start + this_read);
 					break;
 				case XFadeLoop:
+					if (last_refill_loop_start != loc->start()) {
+						setup_preloop_buffer ();
+						last_refill_loop_start = loc->start();
+					}
 					maybe_xfade_loop (sum_buffer, start, start + this_read, rci);
 					break;
 			}
