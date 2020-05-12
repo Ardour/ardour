@@ -1599,9 +1599,11 @@ Session::set_play_loop (bool yn, bool change_transport_state)
 		if (!Config->get_loop_is_mode()) {
 			/* args: positition, disposition, flush=true, for_loop_end=false, force=true */
 			TFSM_LOCATE (loc->start(), MustRoll, true, false, true);
-		} else if (!transport_rolling()) {
-			/* loop-is-mode: not rolling, just locate to loop start */
-			TFSM_LOCATE (loc->start(), MustStop, true, false, true);
+		} else {
+			if (!transport_rolling()) {
+				/* loop-is-mode: not rolling, just locate to loop start */
+				TFSM_LOCATE (loc->start(), MustStop, true, false, true);
+			}
 		}
 		TransportStateChange (); /* EMIT SIGNAL */
 	} else {
