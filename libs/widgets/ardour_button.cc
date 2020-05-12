@@ -212,7 +212,12 @@ ArdourButton::set_text (const std::string& str, bool markup)
 		set_text_internal ();
 		/* on_size_request() will fill in _text_width/height
 		 * so queue it even if _sizing_text != "" */
-		queue_resize ();
+		if (_sizing_text.empty ()) {
+			queue_resize ();
+		} else {
+			_layout->get_pixel_size (_text_width, _text_height);
+			CairoWidget::set_dirty ();
+		}
 	}
 }
 
