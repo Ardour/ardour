@@ -972,7 +972,6 @@ DiskReader::audio_read (Sample*            sum_buffer,
 	/* XXX we don't currently play loops in reverse. not sure why */
 
 	if (!reversed) {
-		samplecnt_t loop_length = 0;
 
 		/* Make the use of a Location atomic for this read operation.
 
@@ -985,15 +984,10 @@ DiskReader::audio_read (Sample*            sum_buffer,
 		if ((loc = _loop_location) != 0) {
 			loop_start  = loc->start ();
 			loop_end    = loc->end ();
-			loop_length = loop_end - loop_start;
-		}
 
-		/* if we are looping, ensure that the first sample we read is at the
-		 * correct position within the loop.
-		*/
-
-		if (loc && start >= loop_end) {
-			start = loop_start + ((start - loop_start) % loop_length);
+			/* Evoral::Range has inclusive range semantics. Ugh. Hence the -1 */
+			const Evoral::Range<samplepos_t> loop_range (loop_start, loop_end - 1);
+			start = loop_range.squish (start);
 		}
 	}
 
