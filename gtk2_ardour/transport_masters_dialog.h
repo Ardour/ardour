@@ -77,6 +77,8 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	struct Row : sigc::trackable, PBD::ScopedConnectionList {
 		TransportMastersWidget& parent;
 		Gtk::EventBox label_box;
+		Gtk::EventBox current_box;
+		Gtk::EventBox last_box;
 		Gtk::Label label;
 		Gtk::Label type;
 		Gtk::Label format;

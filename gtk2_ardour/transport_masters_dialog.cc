@@ -16,10 +16,8 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include <gtkmm/stock.h>
 
 #include "pbd/enumwriter.h"
-#include "pbd/i18n.h"
 #include "pbd/unwind.h"
 
 #include "temporal/time.h"
@@ -38,7 +36,10 @@
 #include "ardour_ui.h"
 #include "floating_text_entry.h"
 #include "transport_masters_dialog.h"
+#include "ui_config.h"
+#include "utils.h"
 
+#include "pbd/i18n.h"
 
 using namespace std;
 using namespace Gtk;
@@ -62,7 +63,7 @@ TransportMastersWidget::TransportMastersWidget ()
 	Gtk::Table *add_table = manage(new Gtk::Table(1,2));
 	add_table->attach(add_button, 0,1, 0,1, Gtk::SHRINK);
 
-	pack_start (table, PACK_EXPAND_WIDGET, 12);
+	pack_start (table, FALSE, FALSE, 12);
 	pack_start (*add_table, FALSE, FALSE);
 	pack_start (lost_sync_button, FALSE, FALSE, 12);
 
@@ -215,21 +216,23 @@ TransportMastersWidget::rebuild ()
 		int col = 0;
 
 		r->label_box.add (r->label);
+		r->current_box.add (r->current);
+		r->last_box.add (r->last);
 
-		table.attach (r->use_button, col, col+1, n, n+1); ++col;
-		table.attach (r->label_box, col, col+1, n, n+1); ++col;
-		table.attach (r->type, col, col+1, n, n+1); ++col;
-		table.attach (r->port_combo, col, col+1, n, n+1); ++col;
-		table.attach (r->format, col, col+1, n, n+1); ++col;
-		table.attach (r->current, col, col+1, n, n+1); ++col;
-		table.attach (r->last, col, col+1, n, n+1); ++col;
-		table.attach (r->request_options, col, col+1, n, n+1); ++col;
+		table.attach (r->use_button,      col, col+1, n, n+1, FILL, SHRINK); ++col;
+		table.attach (r->label_box,       col, col+1, n, n+1, FILL, SHRINK); ++col;
+		table.attach (r->type,            col, col+1, n, n+1, FILL, SHRINK); ++col;
+		table.attach (r->port_combo,      col, col+1, n, n+1, FILL, SHRINK); ++col;
+		table.attach (r->format,          col, col+1, n, n+1, FILL, SHRINK); ++col;
+		table.attach (r->current_box,     col, col+1, n, n+1, FILL, SHRINK); ++col;
+		table.attach (r->last_box,        col, col+1, n, n+1, FILL, SHRINK); ++col;
+		table.attach (r->request_options, col, col+1, n, n+1, FILL, SHRINK); ++col;
 
 		boost::shared_ptr<TimecodeTransportMaster> ttm (boost::dynamic_pointer_cast<TimecodeTransportMaster> (r->tm));
 
 		if (ttm) {
-			table.attach (r->sclock_synced_button, col, col+1, n, n+1); ++col;
-			table.attach (r->fr2997_button, col, col+1, n, n+1); ++col;
+			table.attach (r->sclock_synced_button, col, col+1, n, n+1, FILL, SHRINK); ++col;
+			table.attach (r->fr2997_button,        col, col+1, n, n+1, FILL, SHRINK); ++col;
 			r->fr2997_button.signal_toggled().connect (sigc::mem_fun (*r, &TransportMastersWidget::Row::fr2997_button_toggled));
 		} else {
 			col += 2;
@@ -237,9 +240,6 @@ TransportMastersWidget::rebuild ()
 
 		if (r->tm->removeable()) {
 			table.attach (r->remove_button, col, col+1, n, n+1, SHRINK, EXPAND|FILL);
-			++col;
-		} else {
-			col++;
 		}
 
 		table.show_all ();
@@ -324,6 +324,20 @@ TransportMastersWidget::Row::Row (TransportMastersWidget& p)
 	, save_when (0)
 {
 	remove_button.set_icon (ArdourIcon::CloseCross);
+	format.modify_font (UIConfiguration::instance().get_BigMonospaceFont());
+	last.modify_font (UIConfiguration::instance().get_BigMonospaceFont());
+	current.modify_font (UIConfiguration::instance().get_BigMonospaceFont());
+
+	uint32_t bg = UIConfigurationBase::instance().color ("clock: background");
+	uint32_t fg = UIConfigurationBase::instance().color ("clock: text");
+	Gdk::Color bg_color = ARDOUR_UI_UTILS::gdk_color_from_rgba (bg);
+	Gdk::Color fg_color = ARDOUR_UI_UTILS::gdk_color_from_rgba (fg);
+
+	current_box.modify_bg (Gtk::STATE_NORMAL, bg_color);
+	current.modify_fg (Gtk::STATE_NORMAL, fg_color);
+
+	last_box.modify_bg (Gtk::STATE_NORMAL, bg_color);
+	last.modify_fg (Gtk::STATE_NORMAL, fg_color);
 }
 
 TransportMastersWidget::Row::~Row ()
@@ -588,91 +602,60 @@ TransportMastersWidget::Row::update (Session* s, samplepos_t now)
 	boost::shared_ptr<TimecodeTransportMaster> ttm;
 	boost::shared_ptr<MIDIClock_TransportMaster> mtm;
 
-	if (!AudioEngine::instance()->running()) {
+	if (!AudioEngine::instance()->running() || !s) {
 		return;
 	}
 
-	static const char *clock_fmt = "<span font_family=\"monospace\" foreground=\"gray\" background=\"black\" size=\"medium\" ><span foreground=\"white\" size=\"larger\">%1 </span>%2 </span>";
-	static const char *last_fmt =  "<span font_family=\"monospace\" foreground=\"gray\" background=\"black\" size=\"larger\" >%1 %2 ago </span>";
 	static const char *disp_fmt =  "<span font_family=\"monospace\" foreground=\"gray\" background=\"black\" size=\"larger\" > %1 </span>";
 
-	format.set_markup (string_compose (disp_fmt, "   ?   "));
+	string last_str (" --:--:--:--");
+	string current_str (" --:--:--:--");
+	string delta_str ("\u0394  ----  ");
+	string gap_str ("         ");
 
-	string last_str(" --:--:--:--");
-	string current_str(" --:--:--:--");
-	string delta_str("\u0394 0");
-	string gap_str;
+	if (tm->speed_and_position (speed, pos, most_recent, when, now)) {
 
-	if (s) {
+		sample_to_timecode (pos, t, false, false, 25, false, AudioEngine::instance()->sample_rate(), 100, false, 0);
+		sample_to_timecode (most_recent, l, false, false, 25, false, AudioEngine::instance()->sample_rate(), 100, false, 0);
 
-		if (tm->speed_and_position (speed, pos, most_recent, when, now)) {
+		current_str = Timecode::timecode_format_time (t);
 
-			sample_to_timecode (pos, t, false, false, 25, false, AudioEngine::instance()->sample_rate(), 100, false, 0);
-			sample_to_timecode (most_recent, l, false, false, 25, false, AudioEngine::instance()->sample_rate(), 100, false, 0);
-
-			current_str = Timecode::timecode_format_time (t);
-
-			if ((ttm = boost::dynamic_pointer_cast<TimecodeTransportMaster> (tm))) {
-				format.set_markup (string_compose (disp_fmt, timecode_format_name (ttm->apparent_timecode_format())));
-				last_str = Timecode::timecode_format_time (l);
-			} else if ((mtm = boost::dynamic_pointer_cast<MIDIClock_TransportMaster> (tm))) {
-				char buf[8];
-				snprintf (buf, sizeof (buf), "%.1fBPM", mtm->bpm());
-				format.set_markup (string_compose (disp_fmt, buf));
-			}
-
-			delta_str = tm->delta_string ();
-
-			char gap[32];
-			float seconds = (when - now) / (float) AudioEngine::instance()->sample_rate();
-			if (seconds < 0.) {
-				seconds = 0.;
-			}
-			if (abs (seconds) < 1.0) {
-				snprintf (gap, sizeof (gap), "%-.03fs", seconds);
-			} else if (abs (seconds) < 60.0) {
-				snprintf (gap, sizeof (gap), "%-3ds", (int) floor (seconds));
-			} else if (abs (seconds) < 60.0 * 60.0) {
-				snprintf (gap, sizeof (gap), "%-3dm", (int) floor (seconds/60));
-			} else {
-				snprintf (gap, sizeof (gap), "%-3dh", (int) floor (seconds/60/60));
-			}
-			save_when = when;
-			gap_str = gap;
-
-		} else {
-
-			if (save_when) {
-
-				char gap[32];
-				const float seconds = (when - now) / (float) AudioEngine::instance()->sample_rate();
-				if (abs (seconds) < 1.0) {
-					snprintf (gap, sizeof (gap), "%-.03fs", seconds);
-				} else if (abs (seconds) < 60.0) {
-					snprintf (gap, sizeof (gap), "%-3ds", (int) floor (seconds));
-				} else if (abs (seconds) < 60.0 * 60.0) {
-					snprintf (gap, sizeof (gap), "%-3dm", (int) floor (seconds/60));
-				} else {
-					snprintf (gap, sizeof (gap), "%-3dh", (int) floor (seconds/60/60));
-				}
-				save_when = when;
-				gap_str = gap;
-			}
+		if ((ttm = boost::dynamic_pointer_cast<TimecodeTransportMaster> (tm))) {
+			format.set_text (timecode_format_name (ttm->apparent_timecode_format()));
+			last_str = Timecode::timecode_format_time (l);
+		} else if ((mtm = boost::dynamic_pointer_cast<MIDIClock_TransportMaster> (tm))) {
+			char buf[8];
+			snprintf (buf, sizeof (buf), "%.1fBPM", mtm->bpm());
+			format.set_text (string_compose (disp_fmt, buf));
 		}
 
-		//pad the gap to 9 chars
-		int len = gap_str.length();
-		for (int i = len; i<9; i++)
-			gap_str = " " + gap_str;
-
-		//pad the delta to 12 chars
-		len = delta_str.length();
-		for (int i = len; i<12; i++)
-			delta_str = " " + delta_str;
-
-		last.set_markup (string_compose (last_fmt, last_str, gap_str));
-		current.set_markup (string_compose (clock_fmt, current_str, delta_str));
+		delta_str = tm->delta_string ();
+		save_when = when;
+	} else {
+		format.set_text ("   ?   ");
 	}
+
+	if (save_when) {
+		char gap[32];
+		float seconds = (now - when) / (float) AudioEngine::instance()->sample_rate();
+		if (seconds < 0) {
+			seconds = 0;
+		}
+		if (seconds < 1.f) {
+			snprintf (gap, sizeof (gap), "%3.02fs ago", seconds);
+		} else if (seconds < 60.f) {
+			snprintf (gap, sizeof (gap), "%3.0fs ago", seconds);
+		} else if (seconds < 3600.f) {
+			snprintf (gap, sizeof (gap), "%3.0fm ago", seconds / 60.f);
+		} else {
+			snprintf (gap, sizeof (gap), "%3.0fh ago", seconds/3600.f);
+		}
+		gap[31] = '\0';
+		gap_str = gap;
+	}
+
+	last.set_text (string_compose (_("%1 %2"), last_str, gap_str));
+	current.set_text (string_compose ("%1  %2", current_str, delta_str));
 }
 
 void
