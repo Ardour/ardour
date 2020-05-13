@@ -83,6 +83,9 @@ InternalSend::~InternalSend ()
 void
 InternalSend::propagate_solo ()
 {
+	if (_session.inital_connect_or_deletion_in_progress ()) {
+		return;
+	}
 	if (!_send_to || !_send_from) {
 		return;
 	}
