@@ -93,6 +93,7 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 		ArdourWidgets::ArdourButton remove_button;
 		FloatingTextEntry* name_editor;
 		samplepos_t save_when;
+		std::string save_last;
 
 		void build_request_options();
 		void mod_request_type (ARDOUR::TransportRequestType);

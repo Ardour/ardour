@@ -322,6 +322,7 @@ TransportMastersWidget::Row::Row (TransportMastersWidget& p)
 	, request_option_menu (0)
 	, name_editor (0)
 	, save_when (0)
+	, save_last (" --:--:--:--")
 {
 	remove_button.set_icon (ArdourIcon::CloseCross);
 	format.modify_font (UIConfiguration::instance().get_BigMonospaceFont());
@@ -338,6 +339,7 @@ TransportMastersWidget::Row::Row (TransportMastersWidget& p)
 
 	last_box.modify_bg (Gtk::STATE_NORMAL, bg_color);
 	last.modify_fg (Gtk::STATE_NORMAL, fg_color);
+
 }
 
 TransportMastersWidget::Row::~Row ()
@@ -608,10 +610,9 @@ TransportMastersWidget::Row::update (Session* s, samplepos_t now)
 
 	static const char *disp_fmt =  "<span font_family=\"monospace\" foreground=\"gray\" background=\"black\" size=\"larger\" > %1 </span>";
 
-	string last_str (" --:--:--:--");
 	string current_str (" --:--:--:--");
 	string delta_str ("\u0394  ----  ");
-	string gap_str ("         ");
+	string age_str ("         ");
 
 	if (tm->speed_and_position (speed, pos, most_recent, when, now)) {
 
@@ -622,7 +623,6 @@ TransportMastersWidget::Row::update (Session* s, samplepos_t now)
 
 		if ((ttm = boost::dynamic_pointer_cast<TimecodeTransportMaster> (tm))) {
 			format.set_text (timecode_format_name (ttm->apparent_timecode_format()));
-			last_str = Timecode::timecode_format_time (l);
 		} else if ((mtm = boost::dynamic_pointer_cast<MIDIClock_TransportMaster> (tm))) {
 			char buf[8];
 			snprintf (buf, sizeof (buf), "%.1fBPM", mtm->bpm());
@@ -631,13 +631,14 @@ TransportMastersWidget::Row::update (Session* s, samplepos_t now)
 
 		delta_str = tm->delta_string ();
 		save_when = when;
+		save_last = current_str;
 	} else {
 		format.set_text ("   ?   ");
 	}
 
 	if (save_when) {
 		char gap[32];
-		float seconds = (now - when) / (float) AudioEngine::instance()->sample_rate();
+		float seconds = (now - save_when) / (float) AudioEngine::instance()->sample_rate();
 		if (seconds < 0) {
 			seconds = 0;
 		}
@@ -651,10 +652,10 @@ TransportMastersWidget::Row::update (Session* s, samplepos_t now)
 			snprintf (gap, sizeof (gap), "%3.0fh ago", seconds/3600.f);
 		}
 		gap[31] = '\0';
-		gap_str = gap;
+		age_str = gap;
 	}
 
-	last.set_text (string_compose (_("%1 %2"), last_str, gap_str));
+	last.set_text (string_compose (_("%1 %2"), save_last, age_str));
 	current.set_text (string_compose ("%1  %2", current_str, delta_str));
 }
 
