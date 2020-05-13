@@ -1582,7 +1582,7 @@ AudioRegionView::set_some_waveform_colors (vector<ArdourWaveView::WaveView*>& wa
 	fill = UINT_INTERPOLATE (fill, UIConfiguration::instance().color ("waveform fill"), 0.5);
 
 	/* set outline */
-	outline = fill;
+	outline = UIConfiguration::instance().color ("waveform outline");
 
 	if (_selected) {
 		outline = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("selected waveform outline"), 0xC0);
@@ -1591,10 +1591,10 @@ AudioRegionView::set_some_waveform_colors (vector<ArdourWaveView::WaveView*>& wa
 		outline = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("waveform outline"), 0xC0);
 		fill = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("waveform fill"), 0xC0);
 	} else if (_region->muted()) {
-		outline = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("waveform fill"), 80);
+		outline = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("waveform outline"), 80);
 		fill = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("waveform fill"), 0);
 	} else if (!_region->opaque()) {
-		outline = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("waveform fill"), 70);
+		outline = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("waveform outline"), 70);
 		fill = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("waveform fill"), 70);
 	}
 
