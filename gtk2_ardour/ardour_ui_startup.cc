@@ -403,8 +403,14 @@ ARDOUR_UI::nsm_init ()
 		}
 	}
 	if (i == 5000) {
+#if 0 // USE AFTER STRINGFREEZE 6.0
+		error << _("NSM server did not announce itself. Continuing without NSM.") << endmsg;
+#else
 		error << _("NSM server did not announce itself") << endmsg;
-		return -1;
+#endif
+		delete nsm;
+		nsm = 0;
+		return 0;
 	}
 	// wait for open command from nsm server
 	for ( i = 0; i < 5000; ++i) {
@@ -417,6 +423,8 @@ ARDOUR_UI::nsm_init ()
 
 	if (i == 5000) {
 		error << _("NSM: no client ID provided") << endmsg;
+		delete nsm;
+		nsm = 0;
 		return -1;
 	}
 
@@ -424,6 +432,8 @@ ARDOUR_UI::nsm_init ()
 		_session->set_nsm_state( nsm->is_active() );
 	} else {
 		error << _("NSM: no session created") << endmsg;
+		delete nsm;
+		nsm = 0;
 		return -1;
 	}
 
