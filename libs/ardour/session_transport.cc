@@ -1474,16 +1474,8 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 
 	if (ptw & (PostTransportClearSubstate|PostTransportStop)) {
 		unset_play_range ();
-		if (!Config->get_loop_is_mode()) {
-			if (get_play_loop()) {
-				/* do not unset loop playback if we've just
-				   located back to the start of the loop (i.e. to
-				   prepare to play the loop.
-				*/
-				if (_transport_sample != _locations->auto_loop_location()->start()) {
-					unset_play_loop ();
-				}
-			}
+		if (!Config->get_loop_is_mode() && get_play_loop() && !loop_changing) {
+			unset_play_loop ();
 		}
 	}
 

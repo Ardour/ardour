@@ -223,6 +223,7 @@ Session::Session (AudioEngine &eng,
 	, _send_qf_mtc (false)
 	, _pframes_since_last_mtc (0)
 	, play_loop (false)
+	, loop_changing (false)
 	, last_loopend (0)
 	, _session_dir (new SessionDirectory (fullpath))
 	, _current_snapshot_name (snapshot_name)
@@ -1516,6 +1517,7 @@ Session::auto_loop_changed (Location* location)
 				 * by loop-changing, and we do not cancel play loop
 				 */
 
+				loop_changing = true;
 				request_locate (location->start(), MustRoll);
 
 			} else {
