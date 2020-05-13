@@ -113,6 +113,9 @@ PannerUI::set_panner (boost::shared_ptr<PannerShell> ps, boost::shared_ptr<Panne
 	delete twod_panner;
 	twod_panner = 0;
 
+	delete big_window;
+	big_window = 0;
+
 	delete _stereo_panner;
 	_stereo_panner = 0;
 
