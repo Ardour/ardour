@@ -511,6 +511,9 @@ TransportMaster::set_request_mask (TransportRequestType t)
 
 TimecodeTransportMaster::TimecodeTransportMaster (std::string const & name, SyncSource type)
 	: TransportMaster (type, name)
+	, timecode_offset (0)
+	, timecode_negative_offset (false)
+	, timecode_format_valid (false)
 	, _fr2997 (Properties::fr2997, false)
 {
 	register_properties ();

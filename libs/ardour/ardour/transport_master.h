@@ -474,8 +474,10 @@ public:
 	TimecodeTransportMaster (std::string const& name, SyncSource type);
 
 	virtual Timecode::TimecodeFormat apparent_timecode_format () const = 0;
-	samplepos_t                      timecode_offset;
-	bool                             timecode_negative_offset;
+
+	bool apparent_timecode_format_valid () const {
+		return timecode_format_valid;
+	}
 
 	bool fr2997 () const
 	{
@@ -485,6 +487,10 @@ public:
 
 protected:
 	void register_properties ();
+
+	samplepos_t timecode_offset;
+	bool        timecode_negative_offset;
+	bool        timecode_format_valid;
 
 private:
 	PBD::Property<bool> _fr2997;
@@ -536,8 +542,7 @@ private:
 	samplepos_t              window_begin;
 	samplepos_t              window_end;
 	samplepos_t              first_mtc_timestamp;
-	bool                     did_reset_tc_format;
-	Timecode::TimecodeFormat saved_tc_format;
+
 	Glib::Threads::Mutex     reset_lock;
 	uint32_t                 reset_pending;
 	bool                     reset_position;
@@ -545,12 +550,9 @@ private:
 	int                      busy_guard1;
 	int                      busy_guard2;
 
-	double                   speedup_due_to_tc_mismatch;
 	double                   quarter_frame_duration;
 	Timecode::TimecodeFormat mtc_timecode;
-	Timecode::TimecodeFormat a3e_timecode;
 	Timecode::Time           timecode;
-	bool                     printed_timecode_warning;
 
 	void queue_reset (bool with_pos);
 	void maybe_reset ();
@@ -616,26 +618,20 @@ private:
 	void parameter_changed (std::string const& p);
 	void connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string, boost::weak_ptr<ARDOUR::Port>, std::string, bool);
 
-	bool                     did_reset_tc_format;
-	Timecode::TimecodeFormat saved_tc_format;
-
 	LTCDecoder*    decoder;
 	double         samples_per_ltc_frame;
 	Timecode::Time timecode;
 	LTCFrameExt    prev_frame;
 	bool           fps_detected;
 
-	samplecnt_t monotonic_cnt;
-	uint64_t    frames_since_reset;
-	int         delayedlocked;
+	samplecnt_t    monotonic_cnt;
+	uint64_t       frames_since_reset;
+	int            delayedlocked;
 
-	int                      ltc_detect_fps_cnt;
-	int                      ltc_detect_fps_max;
-	bool                     printed_timecode_warning;
-	bool                     sync_lock_broken;
-	Timecode::TimecodeFormat ltc_timecode;
-	Timecode::TimecodeFormat a3e_timecode;
-	double                   samples_per_timecode_frame;
+	int            ltc_detect_fps_cnt;
+	int            ltc_detect_fps_max;
+	bool           sync_lock_broken;
+	double         samples_per_timecode_frame;
 
 	PBD::ScopedConnection     port_connection;
 	PBD::ScopedConnectionList session_connections;

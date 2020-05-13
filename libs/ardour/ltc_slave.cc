@@ -48,8 +48,6 @@ using namespace Timecode;
 
 LTC_TransportMaster::LTC_TransportMaster (std::string const & name)
 	: TimecodeTransportMaster (name, LTC)
-	, did_reset_tc_format (false)
-	, saved_tc_format (timecode_24) // whatever ....
 	, decoder (0)
 	, samples_per_ltc_frame (0)
 	, fps_detected (false)
@@ -58,10 +56,7 @@ LTC_TransportMaster::LTC_TransportMaster (std::string const & name)
 	, delayedlocked (10)
 	, ltc_detect_fps_cnt (0)
 	, ltc_detect_fps_max (0)
-	, printed_timecode_warning (false)
 	, sync_lock_broken (false)
-	, ltc_timecode (Timecode::timecode_24)
-	, a3e_timecode (Timecode::timecode_24)
 	, samples_per_timecode_frame (0)
 {
 	memset (&prev_frame, 0, sizeof(LTCFrameExt));
@@ -94,9 +89,6 @@ LTC_TransportMaster::set_session (Session *s)
 
 		samples_per_ltc_frame = _session->samples_per_timecode_frame();
 		timecode.drop  = _session->timecode_drop_frames();
-		printed_timecode_warning = false;
-		ltc_timecode = _session->config.get_timecode_format();
-		a3e_timecode = _session->config.get_timecode_format();
 
 		if (decoder) {
 			ltc_decoder_free (decoder);
@@ -116,10 +108,6 @@ LTC_TransportMaster::~LTC_TransportMaster()
 {
 	port_connection.disconnect();
 	session_connections.drop_connections();
-
-	if (did_reset_tc_format) {
-		_session->config.set_timecode_format (saved_tc_format);
-	}
 
 	ltc_decoder_free(decoder);
 }
@@ -234,6 +222,7 @@ LTC_TransportMaster::reset (bool with_position)
 	monotonic_cnt = 0;
 	memset (&prev_frame, 0, sizeof(LTCFrameExt));
 	frames_since_reset = 0;
+	timecode_format_valid = false;
 }
 
 void
@@ -358,6 +347,8 @@ LTC_TransportMaster::detect_ltc_fps(int frameno, bool df)
 				}
 			}
 
+			timecode_format_valid = true; /* SET FLAG */
+
 			if (timecode.rate != detected_fps || timecode.drop != df) {
 				DEBUG_TRACE (DEBUG::LTC, string_compose ("detected FPS: %1%2\n", detected_fps, df?"df":"ndf"));
 			} else {
@@ -378,50 +369,7 @@ LTC_TransportMaster::detect_ltc_fps(int frameno, bool df)
 	}
 
 	TimecodeFormat tc_format = apparent_timecode_format();
-
-	if (_session) {
-
-		/* poll and check session TC */
-
-		TimecodeFormat cur_timecode = _session->config.get_timecode_format();
-
-		if (Config->get_timecode_sync_frame_rate()) {
-			/* enforce time-code */
-			if (!did_reset_tc_format) {
-				saved_tc_format = cur_timecode;
-				did_reset_tc_format = true;
-			}
-			if (cur_timecode != tc_format) {
-				if (ceil(Timecode::timecode_to_frames_per_second(cur_timecode)) != ceil(Timecode::timecode_to_frames_per_second(tc_format))) {
-					warning << string_compose(_("Session framerate adjusted from %1 to LTC's %2."),
-					                          Timecode::timecode_format_name(cur_timecode),
-					                          Timecode::timecode_format_name(tc_format))
-					        << endmsg;
-				}
-				_session->config.set_timecode_format (tc_format);
-			}
-		} else {
-			/* only warn about TC mismatch */
-			if (ltc_timecode != tc_format) printed_timecode_warning = false;
-			if (a3e_timecode != cur_timecode) printed_timecode_warning = false;
-
-			if (cur_timecode != tc_format && ! printed_timecode_warning) {
-				if (ceil(Timecode::timecode_to_frames_per_second(cur_timecode)) != ceil(Timecode::timecode_to_frames_per_second(tc_format))) {
-					warning << string_compose(_("Session and LTC framerate mismatch: LTC:%1 Session:%2."),
-					                          Timecode::timecode_format_name(tc_format),
-					                          Timecode::timecode_format_name(cur_timecode))
-					        << endmsg;
-				}
-				printed_timecode_warning = true;
-			}
-		}
-
-		a3e_timecode = cur_timecode;
-	}
-
-	ltc_timecode = tc_format;
-
-	samples_per_timecode_frame = ENGINE->sample_rate() / Timecode::timecode_to_frames_per_second (ltc_timecode);
+	samples_per_timecode_frame = ENGINE->sample_rate() / Timecode::timecode_to_frames_per_second (tc_format);
 
 	return fps_changed;
 }

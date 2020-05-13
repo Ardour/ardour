@@ -61,13 +61,11 @@ MTC_TransportMaster::MTC_TransportMaster (std::string const & name)
 	, window_begin (0)
 	, window_end (0)
 	, first_mtc_timestamp (0)
-	, did_reset_tc_format (false)
 	, reset_pending (0)
 	, reset_position (false)
 	, transport_direction (1)
 	, busy_guard1 (0)
 	, busy_guard2 (0)
-	, printed_timecode_warning (false)
 {
 	init ();
 }
@@ -76,10 +74,6 @@ MTC_TransportMaster::~MTC_TransportMaster()
 {
 	port_connections.drop_connections();
 	session_connections.drop_connections();
-
-	if (_session && did_reset_tc_format) {
-		_session->config.set_timecode_format (saved_tc_format);
-	}
 }
 
 void
@@ -135,7 +129,6 @@ MTC_TransportMaster::set_session (Session *s)
 		last_mtc_fps_byte = _session->get_mtc_timecode_bits ();
 		quarter_frame_duration = (double) (_session->samples_per_timecode_frame() / 4.0);
 		mtc_timecode = _session->config.get_timecode_format();
-		a3e_timecode = _session->config.get_timecode_format();
 
 		parse_timecode_offset ();
 		reset (true);
@@ -265,6 +258,7 @@ MTC_TransportMaster::reset (bool with_position)
 	window_end = 0;
 	transport_direction = 1;
 	_current_delta = 0;
+	timecode_format_valid = false;
 }
 
 void
@@ -342,7 +336,7 @@ MTC_TransportMaster::update_mtc_time (const MIDI::byte *msg, bool was_full, samp
 	*/
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("MTC::update_mtc_time - TID:%1\n", pthread_name()));
 	TimecodeFormat tc_format;
-	bool reset_tc = true;
+	bool have_tc = true;
 
 	timecode.hours = msg[3];
 	timecode.minutes = msg[2];
@@ -397,46 +391,12 @@ MTC_TransportMaster::update_mtc_time (const MIDI::byte *msg, bool was_full, samp
 		}
 		timecode.rate = _session->timecode_frames_per_second();
 		timecode.drop = _session->timecode_drop_frames();
-		reset_tc = false;
+		have_tc = false;
 	}
 
-	if (reset_tc) {
-		TimecodeFormat cur_timecode = _session->config.get_timecode_format();
-		if (Config->get_timecode_sync_frame_rate()) {
-			/* enforce time-code */
-			if (!did_reset_tc_format) {
-				saved_tc_format = cur_timecode;
-				did_reset_tc_format = true;
-			}
-			if (cur_timecode != tc_format) {
-				if (ceil(Timecode::timecode_to_frames_per_second(cur_timecode)) != ceil(Timecode::timecode_to_frames_per_second(tc_format))) {
-					warning << string_compose(_("Session framerate adjusted from %1 TO: MTC's %2."),
-							Timecode::timecode_format_name(cur_timecode),
-							Timecode::timecode_format_name(tc_format))
-						<< endmsg;
-				}
-			}
-			_session->config.set_timecode_format (tc_format);
-		} else {
-			/* only warn about TC mismatch */
-			if (mtc_timecode != tc_format) printed_timecode_warning = false;
-			if (a3e_timecode != cur_timecode) printed_timecode_warning = false;
-
-			if (cur_timecode != tc_format && ! printed_timecode_warning) {
-				if (ceil(Timecode::timecode_to_frames_per_second(cur_timecode)) != ceil(Timecode::timecode_to_frames_per_second(tc_format))) {
-					warning << string_compose(_("Session and MTC framerate mismatch: MTC:%1 %2:%3."),
-								  Timecode::timecode_format_name(tc_format),
-								  PROGRAM_NAME,
-								  Timecode::timecode_format_name(cur_timecode))
-						<< endmsg;
-				}
-				printed_timecode_warning = true;
-			}
-		}
+	if (have_tc) {
 		mtc_timecode = tc_format;
-		a3e_timecode = cur_timecode;
-
-		speedup_due_to_tc_mismatch = timecode.rate / Timecode::timecode_to_frames_per_second(a3e_timecode);
+		timecode_format_valid = true; /* SET FLAG */
 	}
 
 	/* do a careful conversion of the timecode value to a position
@@ -452,8 +412,7 @@ MTC_TransportMaster::update_mtc_time (const MIDI::byte *msg, bool was_full, samp
 		timecode_negative_offset, timecode_offset
 		);
 
-	DEBUG_TRACE (DEBUG::MTC, string_compose ("MTC at %1 TC %2 = mtc_frame %3 (from full message ? %4) tc-ratio %5\n",
-						 now, timecode, mtc_frame, was_full, speedup_due_to_tc_mismatch));
+	DEBUG_TRACE (DEBUG::MTC, string_compose ("MTC at %1 TC %2 = mtc_frame %3 (from full message ? %4)\n", now, timecode, mtc_frame, was_full));
 
 	if (was_full || outside_window (mtc_frame)) {
 		DEBUG_TRACE (DEBUG::MTC, string_compose ("update_mtc_time: full TC %1 or outside window %2 MTC %3\n", was_full, outside_window (mtc_frame), mtc_frame));

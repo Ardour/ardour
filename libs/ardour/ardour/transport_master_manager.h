@@ -96,25 +96,31 @@ class LIBARDOUR_API TransportMasterManager : public boost::noncopyable
 	mutable Glib::Threads::RWLock  lock;
 	double                _master_speed;
 	samplepos_t           _master_position;
-	boost::shared_ptr<TransportMaster>    _current_master;
+
+	boost::shared_ptr<TransportMaster> _current_master;
 	Session* _session;
 
 	bool _master_invalid_this_cycle;
 	bool disk_output_blocked;
 
-	// a DLL to chase the transport master
-
-	int    transport_dll_initstate;
-	double t0; /// time at the beginning of ???
-	double t1; /// calculated end of the ???
-	double e2; /// second order loop error
-	double bandwidth; /// DLL filter bandwidth
-	double b, c, omega; /// DLL filter coefficients
+	/* a DLL to chase the transport master, calculate playback speed
+	 * by matching Ardour's current playhead position against
+	 * the position of the transport-master */
+	double t0; // PH position at the beginning of this cycle
+	double t1; // expected PH position if next cycle
+	double e2; // second order loop error
+	double bandwidth; // DLL filter bandwidth
+	double b, c, omega; // DLL filter coefficients
 
 	void init_transport_master_dll (double speed, samplepos_t pos);
-	int master_dll_initstate;
+	int master_dll_initstate; // play-direction -1, +1, or 0: not initialized
 
 	static TransportMasterManager* _instance;
+
+	/* original TC format in case the slave changed it */
+	boost::optional<Timecode::TimecodeFormat> _session_tc_format;
+	void maybe_restore_tc_format ();
+	void maybe_set_tc_format ();
 
 	int add_locked (boost::shared_ptr<TransportMaster>);
 	double compute_matching_master_speed (pframes_t nframes, samplepos_t, bool& locate_required);

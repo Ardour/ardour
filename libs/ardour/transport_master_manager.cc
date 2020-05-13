@@ -102,6 +102,8 @@ TransportMasterManager::set_session (Session* s)
 
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 
+	maybe_restore_tc_format ();
+
 	config_connection.disconnect ();
 
 	_session = s;
@@ -177,6 +179,7 @@ TransportMasterManager::pre_process_transport_masters (pframes_t nframes, sample
 	}
 
 	if (!_session->config.get_external_sync()) {
+		maybe_restore_tc_format ();
 		DEBUG_TRACE (DEBUG::Slave, string_compose ("no external sync, use session actual speed of %1\n", _session->actual_speed() ? _session->actual_speed() : 1.0));
 		return _session->actual_speed () ? _session->actual_speed() : 1.0;
 	}
@@ -231,7 +234,7 @@ TransportMasterManager::pre_process_transport_masters (pframes_t nframes, sample
 			if (master_dll_initstate == 0) {
 
 				init_transport_master_dll (_master_speed, _master_position);
-				DEBUG_TRACE (DEBUG::Slave, string_compose ("no roll3 - still initializing master DLL, will be %1 next process cycle\n", master_dll_initstate));
+				DEBUG_TRACE (DEBUG::Slave, string_compose ("initializing master DLL, will be %1 next process cycle\n", master_dll_initstate));
 
 				return _master_speed;
 			}
@@ -298,11 +301,56 @@ TransportMasterManager::pre_process_transport_masters (pframes_t nframes, sample
 
 	_master_invalid_this_cycle = false;
 
+	maybe_set_tc_format ();
+
 	DEBUG_TRACE (DEBUG::Slave, string_compose ("computed resampling ratio as %1 with position = %2 and speed = %3\n", engine_speed, _master_position, _master_speed));
 
 	return engine_speed;
 }
 
+void
+TransportMasterManager::maybe_restore_tc_format ()
+{
+	if (_session && _session_tc_format) {
+		_session->config.set_timecode_format (*_session_tc_format);
+	}
+	_session_tc_format.reset ();
+}
+
+void
+TransportMasterManager::maybe_set_tc_format ()
+{
+	if (!Config->get_timecode_sync_frame_rate() || !_session) {
+		return;
+	}
+	boost::shared_ptr<TimecodeTransportMaster> tcm;
+	if ((tcm = boost::dynamic_pointer_cast<TimecodeTransportMaster>(_current_master)) == 0) {
+		return;
+	}
+
+	if (!tcm->apparent_timecode_format_valid ()) {
+		return;
+	}
+
+	Timecode::TimecodeFormat stf = _session->config.get_timecode_format();
+	Timecode::TimecodeFormat mtf = tcm->apparent_timecode_format ();
+
+	if (stf == mtf) {
+		return;
+	}
+
+	/* save session's original TC */
+	if (!_session_tc_format) {
+		_session_tc_format = stf;
+	}
+
+	warning << string_compose(_("Transport master adjusted framerate from %1 to %2."),
+			Timecode::timecode_format_name(stf),
+			Timecode::timecode_format_name(mtf))
+		<< endmsg;
+
+	_session->config.set_timecode_format (mtf);
+}
 
 void
 TransportMasterManager::init_transport_master_dll (double speed, samplepos_t pos)
@@ -422,6 +470,8 @@ TransportMasterManager::set_current_locked (boost::shared_ptr<TransportMaster> c
 			return -1;
 		}
 	}
+
+	maybe_restore_tc_format ();
 
 	if (!c->usable()) {
 		return -1;
