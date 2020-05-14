@@ -191,6 +191,7 @@ public:
 	}
 
 	guint read_ptr() const { return read_idx; }
+	guint write_ptr() const { return write_idx; }
 	guint reserved_size() const { return reserved; }
 	guint reservation_size() const { return reservation; }
 
