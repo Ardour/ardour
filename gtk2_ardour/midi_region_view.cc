@@ -1804,7 +1804,7 @@ MidiRegionView::add_note(const boost::shared_ptr<NoteType> note, bool visible)
 		}
 
 		if (_marked_for_selection.find(note) != _marked_for_selection.end()) {
-			note_selected(event, true);
+			note_selected (event, false);
 		}
 
 		if (_marked_for_velocity.find(note) != _marked_for_velocity.end()) {
