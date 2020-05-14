@@ -693,8 +693,8 @@ DiskReader::overwrite_existing_audio ()
 	chunk1_cnt    = min (c->front()->rbuf->bufsize() - overwrite_offset, to_overwrite);
 
 	/* note: because we are overwriting buffer contents but not moving the
-	 * write/read pointers, we do actually want to fill all the way to the
-	 * write pointer (the value given by PlaybackBuffer::overwritable_at().
+	 * write/read pointers, we actually want to fill all the way to the
+	 * write pointer (the value returned by PlaybackBuffer::overwritable_at().
 	 *
 	 * This differs from what happens during ::refill_audio() where we are
 	 * careful not to allow the read pointer to catch the write pointer
