@@ -600,7 +600,6 @@ TransportMastersWidget::Row::update (Session* s, samplepos_t now)
 	samplepos_t when;
 	stringstream ss;
 	Time t;
-	Time l;
 	boost::shared_ptr<TimecodeTransportMaster> ttm;
 	boost::shared_ptr<MIDIClock_TransportMaster> mtm;
 
@@ -616,18 +615,26 @@ TransportMastersWidget::Row::update (Session* s, samplepos_t now)
 
 	if (tm->speed_and_position (speed, pos, most_recent, when, now)) {
 
-		sample_to_timecode (pos, t, false, false, 25, false, AudioEngine::instance()->sample_rate(), 100, false, 0);
-		sample_to_timecode (most_recent, l, false, false, 25, false, AudioEngine::instance()->sample_rate(), 100, false, 0);
-
-		current_str = Timecode::timecode_format_time (t);
-
 		if ((ttm = boost::dynamic_pointer_cast<TimecodeTransportMaster> (tm))) {
-			format.set_text (timecode_format_name (ttm->apparent_timecode_format()));
+			Timecode::TimecodeFormat fmt = ttm->apparent_timecode_format();
+			format.set_text (timecode_format_name (fmt));
+
+			sample_to_timecode (pos, t, false, false,
+					Timecode::timecode_to_frames_per_second (fmt),
+					Timecode::timecode_has_drop_frames (fmt),
+					AudioEngine::instance()->sample_rate(), 0, false, 0);
+
 		} else if ((mtm = boost::dynamic_pointer_cast<MIDIClock_TransportMaster> (tm))) {
 			char buf[8];
 			snprintf (buf, sizeof (buf), "%.1fBPM", mtm->bpm());
 			format.set_text (string_compose (disp_fmt, buf));
+			s->sample_to_timecode (pos, t, false, false);
+		} else {
+			format.set_text (" - ");
+			s->sample_to_timecode (pos, t, false, false);
 		}
+
+		current_str = Timecode::timecode_format_time (t);
 
 		delta_str = tm->delta_string ();
 		save_when = when;
