@@ -748,9 +748,7 @@ DiskReader::overwrite_existing_audio ()
 		}
 	}
 
-	if (_loop_location) {
-		file_sample[DataType::AUDIO] = start;
-	}
+	file_sample[DataType::AUDIO] = start;
 
 	return ret;
 }
