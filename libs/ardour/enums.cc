@@ -482,6 +482,7 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Session, PostTransportClearSubstate);
 	REGISTER_CLASS_ENUM (Session, PostTransportAdjustPlaybackBuffering);
 	REGISTER_CLASS_ENUM (Session, PostTransportAdjustCaptureBuffering);
+	REGISTER_CLASS_ENUM (Session, PostTransportLoopChanged);
 	REGISTER_BITS (_Session_PostTransportWork);
 
 	REGISTER_CLASS_ENUM (Session, Clean);

@@ -1183,7 +1183,7 @@ Session::butler_transport_work ()
 	}
 
 	if (ptw & PostTransportOverWrite) {
-		non_realtime_overwrite (on_entry, finished);
+		non_realtime_overwrite (on_entry, finished, (ptw & PostTransportLoopChanged));
 		if (!finished) {
 			g_atomic_int_dec_and_test (&_butler->should_do_transport_work);
 			goto restart;
@@ -1200,8 +1200,12 @@ Session::butler_transport_work ()
 }
 
 void
-Session::non_realtime_overwrite (int on_entry, bool& finished)
+Session::non_realtime_overwrite (int on_entry, bool& finished, bool update_loop_declicks)
 {
+	if (update_loop_declicks) {
+		DiskReader::reset_loop_declick (_locations->auto_loop_location(), sample_rate());
+	}
+
 	boost::shared_ptr<RouteList> rl = routes.reader();
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);

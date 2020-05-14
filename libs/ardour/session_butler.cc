@@ -111,7 +111,11 @@ Session::overwrite_some_buffers (boost::shared_ptr<Route> r, OverwriteReason why
 		foreach_track (&Track::set_pending_overwrite, why);
 	}
 
-	add_post_transport_work (PostTransportOverWrite);
+	if (why == LoopChanged) {
+		add_post_transport_work (PostTransportWork (PostTransportOverWrite|PostTransportLoopChanged));
+	} else {
+		add_post_transport_work (PostTransportOverWrite);
+	}
 
 	_butler->schedule_transport_work ();
 }
