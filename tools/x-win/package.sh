@@ -437,6 +437,7 @@ if test -z "$NOVIDEOTOOLS"; then
 	cat >> $NSISFILE << EOF
 Section "Videotimeline Tools" SecVideo
   WriteRegStr HKLM "Software\\${PROGRAM_KEY}\\v${major_version}\\video" "Install_Dir" "\$INSTDIR\\video"
+  SectionIn RO
   SetOutPath \$INSTDIR
   File /r video
 SectionEnd
