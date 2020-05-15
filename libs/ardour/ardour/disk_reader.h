@@ -134,7 +134,6 @@ protected:
 			, initialized (false)
 		{
 			resize (buffer_size);
-			resize_preloop (preloop_size);
 		}
 
 		~ReaderChannelInfo ()
