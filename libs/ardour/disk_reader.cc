@@ -1058,7 +1058,7 @@ DiskReader::audio_read (Sample*            sum_buffer,
 					loop_declick_out.run (sum_buffer, start, start + this_read);
 					break;
 				case XFadeLoop:
-					if (last_refill_loop_start != loc->start()) {
+					if (last_refill_loop_start != loc->start() || rci->pre_loop_buffer == 0) {
 						setup_preloop_buffer ();
 						last_refill_loop_start = loc->start();
 					}
