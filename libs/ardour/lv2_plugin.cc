@@ -3578,11 +3578,11 @@ LV2PluginInfo::discover()
 				}
 		}
 
+		lilv_nodes_free (required_features);
+
 		if (err) {
 			continue;
 		}
-
-		lilv_nodes_free (required_features);
 
 		LilvNodes* required_options = lilv_world_find_nodes (world.world, lilv_plugin_get_uri (p), world.opts_requiredOptions, NULL);
 		if (required_options) {
