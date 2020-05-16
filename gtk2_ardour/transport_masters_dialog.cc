@@ -340,6 +340,8 @@ TransportMastersWidget::Row::Row (TransportMastersWidget& p)
 	last_box.modify_bg (Gtk::STATE_NORMAL, bg_color);
 	last.modify_fg (Gtk::STATE_NORMAL, fg_color);
 
+	set_size_request_to_display_given_text (format, "999.9 BPM", 0, 0);
+
 }
 
 TransportMastersWidget::Row::~Row ()
@@ -607,8 +609,6 @@ TransportMastersWidget::Row::update (Session* s, samplepos_t now)
 		return;
 	}
 
-	static const char *disp_fmt =  "<span font_family=\"monospace\" foreground=\"gray\" background=\"black\" size=\"larger\" > %1 </span>";
-
 	string current_str (" --:--:--:--");
 	string delta_str ("\u0394  ----  ");
 	string age_str ("         ");
@@ -625,9 +625,10 @@ TransportMastersWidget::Row::update (Session* s, samplepos_t now)
 					AudioEngine::instance()->sample_rate(), 0, false, 0);
 
 		} else if ((mtm = boost::dynamic_pointer_cast<MIDIClock_TransportMaster> (tm))) {
-			char buf[8];
-			snprintf (buf, sizeof (buf), "%.1fBPM", mtm->bpm());
-			format.set_text (string_compose (disp_fmt, buf));
+			char buf[16];
+			snprintf (buf, sizeof (buf), "%.1f BPM", mtm->bpm());
+			buf[15] = '\0';
+			format.set_text (buf);
 			s->sample_to_timecode (pos, t, false, false);
 		} else {
 			format.set_text (" - ");
@@ -705,7 +706,6 @@ TransportMastersWindow::on_realize ()
 	/* (try to) ensure that resizing is possible and the window can be moved (and closed) */
 	get_window()->set_decorations (Gdk::DECOR_BORDER | Gdk::DECOR_RESIZEH | Gdk::DECOR_TITLE | Gdk::DECOR_MENU);
 }
-
 
 
 void
