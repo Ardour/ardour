@@ -715,6 +715,19 @@ TransportMastersWindow::set_session (ARDOUR::Session* s)
 	w.set_session (s);
 }
 
+void
+TransportMastersWidget::set_session (ARDOUR::Session* s)
+{
+	session_config_connection.disconnect ();
+
+	SessionHandlePtr::set_session (s);
+
+	if (_session) {
+		_session->config.ParameterChanged.connect (session_config_connection, invalidator (*this), boost::bind (&TransportMastersWidget::param_changed, this, _1), gui_context());
+		allow_master_select (!_session->config.get_external_sync());
+	}
+}
+
 TransportMastersWidget::AddTransportMasterDialog::AddTransportMasterDialog ()
 	: ArdourDialog (_("Add Transport Master"), true, false)
 	, name_label (_("Name"))
@@ -791,5 +804,17 @@ TransportMastersWidget::param_changed (string const & p)
 {
 	if (p == "transport-masters-just_roll-when-sync-lost") {
 		lost_sync_changed ();
+	} else if (p == "external-sync") {
+		if (_session) {
+			allow_master_select (!_session->config.get_external_sync());
+		}
+	}
+}
+
+void
+TransportMastersWidget::allow_master_select (bool yn)
+{
+	for (vector<Row*>::iterator r = rows.begin(); r != rows.end(); ++r) {
+		(*r)->use_button.set_sensitive (yn);
 	}
 }

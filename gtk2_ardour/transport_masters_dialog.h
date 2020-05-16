@@ -53,6 +53,8 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	void update (ARDOUR::samplepos_t);
 	void set_transport_master (boost::shared_ptr<ARDOUR::TransportMaster>);
 
+	void set_session (ARDOUR::Session*);
+
   protected:
 	void on_map ();
 	void on_unmap ();
@@ -166,11 +168,13 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	void current_changed (boost::shared_ptr<ARDOUR::TransportMaster> old_master, boost::shared_ptr<ARDOUR::TransportMaster> new_master);
 	bool add_master (GdkEventButton* ev);
 	void update_usability ();
+	void allow_master_select (bool);
 
 	void lost_sync_changed ();
 	void lost_sync_button_toggled ();
 	void param_changed (std::string const &);
 	PBD::ScopedConnection config_connection;
+	PBD::ScopedConnection session_config_connection;
 
   public:
 	bool idle_remove (Row*);
