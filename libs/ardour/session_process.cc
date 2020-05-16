@@ -908,7 +908,12 @@ Session::process_event (SessionEvent* ev)
 		break;
 
 	case SessionEvent::SetTransportMaster:
-		TransportMasterManager::instance().set_current (ev->transport_master);
+		/* do not allow changing the transport master if we're already
+		   using one.
+		*/
+		if (!config.get_external_sync()) {
+			TransportMasterManager::instance().set_current (ev->transport_master);
+		}
 		break;
 
 	case SessionEvent::PunchIn:
