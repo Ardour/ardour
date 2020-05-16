@@ -1,7 +1,7 @@
 ardour {
    ["type"]    = "EditorAction",
    name        = "Add LFO automation to region",
-   version     = "0.1.1",
+   version     = "0.2.0",
    license     = "MIT",
    author      = "Daniel Appelt",
    description = [[Add LFO-like plugin automation to any automatable parameter below a selected region]]
@@ -133,7 +133,12 @@ function factory (unused_params)
       -- Initialize undo
       Session:begin_reversible_command("Add LFO automation to region")
       local before = al:get_state() -- save previous state (for undo)
-      al:clear_list() -- clear target automation-list
+      -- Clear events in target automation-list for the selected region.
+      -- al:clear(region:position() - region:start(), region:position() - region:start() + region:length())
+      -- TODO: Clearing automation events only for the region generally leads to strange
+      -- extranous automation events (see https://tracker.ardour.org/view.php?id=8115).
+      -- For now, we just truncate the automation-list in order to avoid this problem.
+      al:truncate_end(region:position() - region:start())
 
       local values = lut[wave]
       local last = nil
@@ -164,7 +169,6 @@ function factory (unused_params)
       -- TODO: display the modified automation lane in the time line in order to make the change visible!
 
       -- Save undo
-      -- TODO: in Ardour 5.12 this does not lead to an actual entry in the undo list?!
       Session:add_command(al:memento_command(before, al:get_state()))
       Session:commit_reversible_command(nil)
 
