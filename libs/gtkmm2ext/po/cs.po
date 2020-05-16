@@ -1,83 +1,83 @@
 # Copyright (C) YEAR "Paul Davis"
 # This file is distributed under the same license as the PACKAGE package.
 #
-# Pavel Fric <pavelfric@seznam.cz>, 2013.
+# Pavel Fric <pavelfric@seznam.cz>, 2013, 2020.
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-30 12:44-0600\n"
-"PO-Revision-Date: 2013-06-13 22:33+0200\n"
+"POT-Creation-Date: 2019-10-12 16:31-0600\n"
+"PO-Revision-Date: 2020-05-09 14:07+0200\n"
 "Last-Translator: Pavel Fric <pavelfric@seznam.cz>\n"
-"Language-Team: Czech <kde-i18n-doc@kde.org>\n"
+"Language-Team: Czech <translation-team-cs@lists.sourceforge.net>\n"
 "Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 1.5\n"
+"X-Generator: Lokalize 19.04.0\n"
 
 #: actions.cc:215
 msgid "Unknown action name: %1/%2"
-msgstr ""
+msgstr "Neznámý název činnosti: %1/%2"
 
 #: action_model.cc:56 action_model.cc:171
 msgid "Disabled"
-msgstr ""
+msgstr "Zakázáno"
 
 #: action_model.cc:83
 msgid "Main_menu"
-msgstr ""
+msgstr "Hlavní_nabídka"
 
 #: action_model.cc:85
 msgid "JACK"
-msgstr ""
+msgstr "JACK"
 
 #: action_model.cc:87
 msgid "redirectmenu"
-msgstr ""
+msgstr "přesměrovacínabídka"
 
 #: action_model.cc:89
 msgid "Editor_menus"
-msgstr ""
+msgstr "Nabídky_úprav"
 
 #: action_model.cc:91
 msgid "RegionList"
-msgstr ""
+msgstr "SeznamOblastí"
 
 #: action_model.cc:93
 msgid "ProcessorMenu"
-msgstr ""
+msgstr "NabídkaZpracování"
 
-#: bindings.cc:840 bindings.cc:842
+#: bindings.cc:831 bindings.cc:833
 msgid "Window"
-msgstr ""
+msgstr "Okno"
 
-#: bindings.cc:840
+#: bindings.cc:831
 msgid " (Categorized)"
-msgstr ""
+msgstr "(Zařazeno)"
 
-#: bindings.cc:842
+#: bindings.cc:833
 msgid " (Alphabetical)"
-msgstr ""
+msgstr "(abecedně)"
 
-#: bindings.cc:858
+#: bindings.cc:849
 msgid "Uncategorized"
-msgstr ""
+msgstr "Nezařazeno"
 
 #: cursors.cc:81
 msgid "cursor hotspots info file %1 has an error on line %2"
-msgstr ""
+msgstr "Soubor s údaji o kontrolním bodu ukazatele %1 má chybu na řádku %2"
 
 #: emscale.cc:52
 msgid "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-msgstr ""
+msgstr "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 
-#: gtk_ui.cc:126
+#: gtk_ui.cc:122
 msgid "Log"
 msgstr "Zápis"
 
-#: gtk_ui.cc:395
+#: gtk_ui.cc:391
 msgid ""
 "\n"
 "\n"
@@ -85,13 +85,13 @@ msgid ""
 msgstr ""
 "\n"
 "\n"
-"Kurzbefehl: "
+"Klávesová zkratka: "
 
-#: gtk_ui.cc:694
+#: gtk_ui.cc:658
 msgid "Press To Exit"
 msgstr "Stisknout pro ukončení"
 
-#: gtk_ui.cc:730
+#: gtk_ui.cc:694
 msgid "I'm sorry %1, I can't do that"
 msgstr "Bohužel to nelze udělat, %1"
 
@@ -113,15 +113,15 @@ msgstr "Volba"
 
 #: keyboard.cc:80
 msgid "Cmd"
-msgstr ""
+msgstr "Cmd"
 
 #: keyboard.cc:81 keyboard.cc:103
 msgid "Ctrl"
-msgstr ""
+msgstr "Ctrl"
 
 #: keyboard.cc:83
 msgid "Opt"
-msgstr ""
+msgstr "Alt"
 
 #: keyboard.cc:99 keyboard.cc:104
 msgid "Alt"
@@ -129,32 +129,32 @@ msgstr "Alt"
 
 #: keyboard.cc:101
 msgid "Windows"
-msgstr ""
+msgstr "Okna"
 
 #: keyboard.cc:106
 msgid "Win"
-msgstr ""
+msgstr "Win"
 
-#: keyboard.cc:159 keyboard.cc:605
+#: keyboard.cc:158 keyboard.cc:601
 msgid "Unknown"
 msgstr "Neznámý"
 
-#: keyboard.cc:616
+#: keyboard.cc:612
 msgid "key bindings file not found at \"%2\" or contains errors."
 msgstr ""
 "Soubor s přiřazením kláves \"%2\"se nepodařilo najít, nebo obsahuje chyby."
 
-#: keyboard.cc:642
+#: keyboard.cc:638
 msgid "Keyboard binding found without a name"
-msgstr ""
+msgstr "Přiřazení kláves nalezeno bez názvu"
 
-#: keyboard.cc:674
+#: keyboard.cc:668
 msgid "Cannot save key bindings to %1"
-msgstr ""
+msgstr "Přiřazení kláves nelze uložit do %1"
 
-#: keyboard.cc:690
+#: keyboard.cc:684
 msgid "Cannot rename your own keybinding file (%1)"
-msgstr ""
+msgstr "Nelze přejmenovat váš vlastní soubor s přiřazením kláves (%1)"
 
 #: textviewer.cc:32
 msgid "Close"
