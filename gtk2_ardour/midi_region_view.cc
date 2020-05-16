@@ -3547,14 +3547,13 @@ MidiRegionView::note_mouse_position (float x_fraction, float /*y_fraction*/, boo
 uint32_t
 MidiRegionView::get_fill_color() const
 {
-	const std::string mod_name = (_dragging ? "dragging region" : "midi frame base");
+	const std::string mod_name = (_dragging ? "dragging region" :
+	                              trackview.editor().internal_editing() ? "editable region" :
+	                              "midi frame base");
+
 
 	if (_selected) {
-
-		if (!trackview.editor().internal_editing()) {
-			return UIConfiguration::instance().color_mod ("selected region base", mod_name);
-		}
-
+		return UIConfiguration::instance().color_mod ("selected region base", mod_name);
 	}
 
 	if ((!UIConfiguration::instance().get_show_name_highlight() || high_enough_for_name) &&
