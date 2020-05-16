@@ -228,6 +228,7 @@ public:
 	virtual void trigger_script (int nth) = 0;
 	virtual void add_location_from_playhead_cursor () = 0;
 	virtual void remove_location_at_playhead_cursor () = 0;
+	virtual void add_location_mark (samplepos_t where) = 0;
 	virtual void update_grid () = 0;
 	virtual void remove_tracks () = 0;
 	virtual void set_loop_range (samplepos_t start, samplepos_t end, std::string cmd) = 0;
