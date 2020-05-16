@@ -867,7 +867,7 @@ Session::process_event (SessionEvent* ev)
 		break;
 
 	case SessionEvent::AutoLoop:
-		/* this is the event event created by the Session that marks
+		/* this is the event created by the Session that marks
 		   the end of the loop range and if we're loop playing,
 		   triggers a special kind of locate back to the start of the
 		   loop range.
