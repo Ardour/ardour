@@ -28,36 +28,47 @@
 class LIBARDOUR_API MTDM
 {
 public:
+	MTDM (int fsamp);
+	int  process (size_t len, float* inp, float* out);
+	int  resolve (void);
 
-    MTDM (int fsamp);
-    int process (size_t len, float *inp, float *out);
-    int resolve (void);
-    void invert (void) { _inv ^= 1; }
-    int    inv (void) { return _inv; }
-    double del (void) { return _del; }
-    double err (void) { return _err; }
-    float get_peak () { const float rv = _peak; _peak = 0; return rv; }
+	int inv (void)    const { return _inv; }
+	double del (void) const { return _del; }
+	double err (void) const { return _err; }
+
+	void invert (void)
+	{
+		_inv ^= 1;
+	}
+
+	float get_peak ()
+	{
+		const float rv = _peak;
+		_peak          = 0;
+		return rv;
+	}
 
 private:
-    class Freq {
-      public:
-	int   p;
-	int   f;
-	float xa;
-	float ya;
-	float x1;
-	float y1;
-	float x2;
-	float y2;
-    };
+	class Freq
+	{
+		public:
+			int   p;
+			int   f;
+			float xa;
+			float ya;
+			float x1;
+			float y1;
+			float x2;
+			float y2;
+	};
 
-    double  _del;
-    double  _err;
-    float   _wlp;
-    int     _cnt;
-    int     _inv;
-    Freq    _freq [13];
-    float   _peak;
+	double _del;
+	double _err;
+	float  _wlp;
+	int    _cnt;
+	int    _inv;
+	Freq   _freq[13];
+	float  _peak;
 };
 
 #endif /* __libardour_mtdm_h__ */
