@@ -6657,7 +6657,6 @@ Editor::set_loop_from_region (bool play)
 	set_loop_range (start, end, _("set loop range from region"));
 
 	if (play) {
-		_session->request_locate (start, MustRoll);
 		_session->request_play_loop (true);
 	}
 }
