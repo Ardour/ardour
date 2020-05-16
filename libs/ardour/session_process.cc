@@ -860,10 +860,18 @@ Session::process_event (SessionEvent* ev)
 
 	switch (ev->type) {
 	case SessionEvent::SetLoop:
+		/* this is the event sent by a UI to define whether or not we
+		   use loop range playback or not.
+		*/
 		set_play_loop (ev->yes_or_no, true);
 		break;
 
 	case SessionEvent::AutoLoop:
+		/* this is the event event created by the Session that marks
+		   the end of the loop range and if we're loop playing,
+		   triggers a special kind of locate back to the start of the
+		   loop range.
+		*/
 		if (play_loop) {
 			/* roll after locate, do not flush, set "for loop end" true
 			*/
