@@ -1483,6 +1483,9 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		}
 	}
 
+	/* reset loop_changing so it does not affect next transport action */
+	loop_changing = false;
+
 	if (!_transport_fsm->declicking_for_locate()) {
 
 		DEBUG_TRACE (DEBUG::Transport, X_("Butler PTW: locate\n"));
@@ -1593,7 +1596,11 @@ Session::set_play_loop (bool yn, bool change_transport_state)
 		merge_event (new SessionEvent (SessionEvent::AutoLoop, SessionEvent::Replace, loc->end(), loc->start(), 0.0f));
 
 		if (!Config->get_loop_is_mode()) {
-			/* args: positition, disposition, flush=true, for_loop_end=false, force=true */
+			if (transport_rolling()) {
+				/* set loop_changing to ensure that non_realtime_stop does not unset_play_loop */
+				loop_changing = true;
+			}
+			/* args: position, disposition, flush=true, for_loop_end=false, force=true */
 			TFSM_LOCATE (loc->start(), MustRoll, true, false, true);
 		} else {
 			if (!transport_rolling()) {
