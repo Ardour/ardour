@@ -5,10 +5,10 @@
 # 一善鱼 <YQ-YSY@163.com> 翻译于 2016-02-06
 msgid ""
 msgstr ""
-"Project-Id-Version: Ardour 4\n"
+"Project-Id-Version: Ardour 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-30 12:44-0600\n"
-"PO-Revision-Date: 2016-03-27 10:49+0800\n"
+"PO-Revision-Date: 2020-05-17 12:05+0800\n"
 "Last-Translator: \n"
 "Language-Team: 一善鱼 YQ-YSY@163.com\n"
 "Language: zh\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Poedit 1.8.4\n"
+"X-Generator: Poedit 2.3\n"
 
 #: analyser.cc:127 audioregion.cc:1791
 msgid "Transient Analysis failed for %1."
@@ -51,6 +51,8 @@ msgid ""
 "Failed to open audio device\n"
 "(Typically caused by hardware parameter settings)"
 msgstr ""
+"无法打开音频设备\n"
+"（通常由硬件参数设置引起）"
 
 #: audio_backend.cc:41
 msgid "Failed to close audio device"
@@ -138,7 +140,7 @@ msgstr "输出声道计数配置不受支持"
 
 #: audio_backend.cc:83
 msgid "Unable to acquire realtime permissions"
-msgstr ""
+msgstr "无法获取实时权限"
 
 #: audio_backend.cc:85
 msgid "Setting audio device thread priorities failed"
@@ -231,7 +233,7 @@ msgstr "音频播放列表（未使用的）"
 #: session.cc:5241 session.cc:5270 session.cc:5275 session.cc:5370
 #: session_handle.cc:87 sndfilesource.cc:172
 msgid "programming error: %1"
-msgstr "程序错误：%1"
+msgstr "程序设计错误：%1"
 
 #: audio_region_importer.cc:77
 msgid "Audio Regions"
@@ -293,7 +295,7 @@ msgstr "无法为 %1 创建后端：%2"
 msgid ""
 "programming error: port %1 could not be placed on the pending deletion "
 "queue\n"
-msgstr ""
+msgstr "程序设计错误：端口 ％1 无法放置在挂起的删除队列上\n"
 
 #: audioregion.cc:1759
 msgid ""
@@ -309,6 +311,15 @@ msgid ""
 "This dialog will not display again.  But you may notice a slight delay in "
 "this and future transient-detection operations.\n"
 msgstr ""
+"您已请求一项需要音频分析的操作。\n"
+"\n"
+"当前您已禁用“自动分析音频”，这意味着必须在每次需要时都生成瞬态数据。\n"
+"\n"
+"如果您要进行的工作需要定期提供瞬态数据，那么您应该在“首选项 > 音频 > 区域”中"
+"启用“自动分析音频”，然后退出 ％1 并重新启动。\n"
+"\n"
+"本对话框将不再显示。 但是您可能会注意到，此时以及将来的瞬态检测操作中会稍有延"
+"迟。\n"
 
 #: audioregion.cc:1791
 msgid "Audio Region"
@@ -409,7 +420,7 @@ msgstr "不同于音频或MIDI的区域监听不受支持。"
 
 #: auditioner.cc:389
 msgid "Cannot audition empty file."
-msgstr ""
+msgstr "无法试听空文件。"
 
 #: automatable.cc:103
 msgid "Automation node has no path property"
@@ -429,7 +440,7 @@ msgstr "淡化器"
 
 #: automatable.cc:196
 msgid "Send"
-msgstr ""
+msgstr "发送"
 
 #: automatable.cc:198
 msgid "Trim"
@@ -441,15 +452,15 @@ msgstr "静音"
 
 #: automatable.cc:202
 msgid "Azimuth"
-msgstr ""
+msgstr "方位角"
 
 #: automatable.cc:204
 msgid "Width"
-msgstr ""
+msgstr "宽度"
 
 #: automatable.cc:206
 msgid "Elevation"
-msgstr ""
+msgstr "仰角"
 
 #: automation_control.cc:326
 msgid "record %1 automation"
@@ -488,11 +499,11 @@ msgstr "管家在数据流聚类算法  %1 滞后写入失败"
 
 #: control_protocol_manager.cc:133
 msgid "Control protocol %1 was already active."
-msgstr ""
+msgstr "控制协议 ％1 已处于活动状态。"
 
 #: control_protocol_manager.cc:161
 msgid "Control protocol support for %1 failed to activate"
-msgstr ""
+msgstr "支持 ％1 的控制协议未能激活"
 
 #: control_protocol_manager.cc:224
 msgid "control protocol name \"%1\" has no descriptor"
@@ -532,19 +543,22 @@ msgstr "控制面协议 \"%1\" 没有描述符"
 
 #: convolver.cc:232
 msgid "Convolver: IR \"%1\" no usable audio-channels sound."
-msgstr ""
+msgstr "卷积器：IR“％1”没有可用的音频通道声音。"
 
 #: convolver.cc:237
 msgid "Convolver: IR \"%1\" file too long."
-msgstr ""
+msgstr "卷积器：IR“％1”文件太长。"
 
 #: cycle_timer.cc:41
 msgid "CycleTimer::get_mhz(): can't open /proc/cpuinfo"
-msgstr "CycleTimer::get_mhz()：无法打开 /proc/cpuinfo"
+msgstr ""
+"CycleTimer::get_mhz()（ 循环计时器 :: 获取_mhz() ）：无法打开 /proc/cpuinfo"
 
 #: cycle_timer.cc:53
 msgid "CycleTimer::get_mhz(): cannot locate cpu MHz in /proc/cpuinfo"
-msgstr "CycleTimer::get_mhz()：在 /proc/cpuinfo 里无法定位 cpu MHz"
+msgstr ""
+"CycleTimer::get_mhz()（ 循环计时器 :: 获取_mhz() ）：在 /proc/cpuinfo 里无法"
+"定位 cpu MHz"
 
 #: cycle_timer.cc:76
 msgid "cannot locate cpu MHz in /proc/cpuinfo"
@@ -556,7 +570,7 @@ msgstr "音频"
 
 #: data_type.cc:28 session.cc:2417
 msgid "MIDI"
-msgstr ""
+msgstr "MIDI（乐器数字接口 Musical Instrument Digital Interface ）"
 
 #: data_type.cc:29
 msgid "unknown"
@@ -573,25 +587,25 @@ msgstr "听"
 #: disk_reader.cc:702
 msgid ""
 "DiskReader %1: when overwriting(1), cannot read %2 from playlist at sample %3"
-msgstr ""
+msgstr "硬盘读取器 ％1 ：覆盖（1）时，无法从样本 ％3 的播放列表中读 取％2"
 
 #: disk_reader.cc:710
 msgid ""
 "DiskReader %1: when overwriting(2), cannot read %2 from playlist at sample %3"
-msgstr ""
+msgstr "硬盘读取器 ％1 ：覆盖（2）时，无法从样本 ％3 的播放列表中读取 ％2"
 
 #: disk_reader.cc:1015
 msgid "DiskReader %1: cannot read %2 from playlist at sample %3"
-msgstr ""
+msgstr "硬盘读取器 ％1 ：无法从样本 ％3 的播放列表中读取 ％2"
 
 #: disk_reader.cc:1269
 msgid ""
 "DiskReader %1: when refilling, cannot read %2 from playlist at sample %3"
-msgstr ""
+msgstr "硬盘读取器 ％1 ：重新填充时，无法从样本 ％3 的播放列表中读取 ％2"
 
 #: disk_reader.cc:1275
 msgid "DiskReader %1: when refilling, cannot write %2 into buffer"
-msgstr ""
+msgstr "硬盘读取器 ％1 ：重新填充时，无法将 ％2 写入缓冲区"
 
 #: disk_writer.cc:869 disk_writer.cc:888
 msgid "AudioDiskstream %1: cannot write to disk"
@@ -643,7 +657,7 @@ msgstr "无效的日期格式"
 
 #: export_format_manager.cc:60
 msgid "CD"
-msgstr ""
+msgstr "CD 光盘"
 
 #: export_format_manager.cc:69
 msgid "DVD-A"
@@ -679,11 +693,11 @@ msgstr "会话速率"
 
 #: export_format_specification.cc:598
 msgid "normalize loudness"
-msgstr ""
+msgstr "规范化响度"
 
 #: export_format_specification.cc:600
 msgid "normalize peak"
-msgstr ""
+msgstr "规范化峰值"
 
 #: export_format_specification.cc:605
 msgid "trim"
@@ -800,7 +814,7 @@ msgstr "无法从 %1 读取导出格式"
 
 #: export_profile_manager.cc:785
 msgid "Ignored format '%1': encoder is not available"
-msgstr ""
+msgstr "忽略格式 '％1' ：编码器不可用"
 
 #: export_profile_manager.cc:877
 msgid "No timespan has been selected!"
@@ -816,7 +830,7 @@ msgstr "有些声道是空白的"
 
 #: export_profile_manager.cc:909
 msgid "Destination folder does not exist."
-msgstr ""
+msgstr "目标文件夹不存在。"
 
 #: export_profile_manager.cc:928
 msgid "No format selected!"
@@ -854,6 +868,8 @@ msgid ""
 "FileSource: \"%1\" is ambiguous when searching\n"
 "\t"
 msgstr ""
+"文件源：搜索时“％1”不明确\n"
+"\t"
 
 #: file_source.cc:440
 msgid "Filesource: cannot find required file (%1)"
@@ -944,51 +960,51 @@ msgstr "关于会话 %1 未知的文件类型"
 
 #: find_session.cc:210 find_session.cc:269
 msgid "Archive is empty"
-msgstr ""
+msgstr "存档为空"
 
 #: find_session.cc:217 find_session.cc:271
 msgid "Archive does not contain a session folder"
-msgstr ""
+msgstr "存档不包含会话文件夹"
 
 #: find_session.cc:228 find_session.cc:273
 msgid "Archive does not contain a valid session structure"
-msgstr ""
+msgstr "存档不包含有效的会话结构"
 
 #: find_session.cc:235 find_session.cc:275
 msgid "Archive does not contain a session file"
-msgstr ""
+msgstr "存档不包含会话文件"
 
 #: find_session.cc:242
 msgid "Destination '%1' already exists."
-msgstr ""
+msgstr "目标 '％1' 已经存在。"
 
 #: find_session.cc:247
 msgid "Extracted session-archive to '%1'."
-msgstr ""
+msgstr "将会话存档提取到 '％1' 。"
 
 #: find_session.cc:254 find_session.cc:277
 msgid "Error reading file-archive"
-msgstr ""
+msgstr "读取文件档案时发生错误"
 
 #: find_session.cc:258 find_session.cc:281
 msgid "Error extracting file-archive"
-msgstr ""
+msgstr "提取文件存档时出错"
 
 #: find_session.cc:265
 msgid "No Error"
-msgstr ""
+msgstr "无错误"
 
 #: find_session.cc:267
 msgid "File extension is not %1"
-msgstr ""
+msgstr "文件扩展名不是 ％1"
 
 #: find_session.cc:279
 msgid "Destination folder already exists."
-msgstr ""
+msgstr "目标文件夹已存在。"
 
 #: find_session.cc:286
 msgid "Unknown Error"
-msgstr ""
+msgstr "未知错误"
 
 #: globals.cc:278
 msgid "Could not set system open files limit to \"unlimited\""
@@ -1000,7 +1016,7 @@ msgstr "无法设置系统打开文件限制为 %1"
 
 #: globals.cc:284 globals.cc:301
 msgid "Your system is configured to limit %1 to %2 open files"
-msgstr ""
+msgstr "您的系统被配置为限制 ％1 到 ％2 个打开的文件"
 
 #: globals.cc:288
 msgid "Could not get system open files limit (%1)"
@@ -1025,7 +1041,7 @@ msgstr "主控"
 #: globals.cc:595 midiport_manager.cc:71 port_manager.cc:1273
 #: port_manager.cc:1283
 msgid "Virtual Keyboard"
-msgstr ""
+msgstr "虚拟键盘"
 
 #: globals.cc:599
 msgid "Control"
@@ -1033,43 +1049,43 @@ msgstr "控制"
 
 #: globals.cc:600
 msgid "Mackie"
-msgstr ""
+msgstr "Mackie（品牌监听音箱）"
 
 #: globals.cc:601
 msgid "FaderPort Recv"
-msgstr ""
+msgstr "淡化端口接收"
 
 #: globals.cc:602
 msgid "FaderPort Send"
-msgstr ""
+msgstr "淡化端口发送"
 
 #: globals.cc:603
 msgid "FaderPort2 Recv"
-msgstr ""
+msgstr "淡化端口 2 接收"
 
 #: globals.cc:604
 msgid "FaderPort2 Send"
-msgstr ""
+msgstr "淡化端口 2 发送"
 
 #: globals.cc:605
 msgid "FaderPort8 Recv"
-msgstr ""
+msgstr "淡化端口 8 接收"
 
 #: globals.cc:606
 msgid "FaderPort8 Send"
-msgstr ""
+msgstr "淡化端口 8 发送"
 
 #: globals.cc:607
 msgid "FaderPort16 Recv"
-msgstr ""
+msgstr "淡化端口 16 接收"
 
 #: globals.cc:608
 msgid "FaderPort16 Send"
-msgstr ""
+msgstr "淡化端口 16 发送"
 
 #: graph.cc:599
 msgid "Could not graph to file (%1)"
-msgstr ""
+msgstr "无法图形化到文件（％1）"
 
 #: import.cc:163
 msgid "Cannot find new filename for imported file %1"
@@ -1121,28 +1137,30 @@ msgstr "在导入操作失败/取消后移除一些文件失败"
 
 #: import_pt.cc:248
 msgid "PT Import : MISSING `%1`, inserting ref to missing source"
-msgstr ""
+msgstr "PT导入：缺失 `％1`，将插入引用到缺失的来源"
 
 #: import_pt.cc:250
 msgid "PT Import : MISSING `%1`, please check Audio Files"
-msgstr ""
+msgstr "PT导入：缺失 `％1`，请检查音频文件"
 
 #: import_pt.cc:264
 msgid "Failed to find any audio for PT import"
-msgstr ""
+msgstr "找不到用于 PT 导入的任何音频"
 
 #: import_pt.cc:267
 msgid ""
 "Failed to load one or more of the audio files for PT import, see above list"
 msgstr ""
+"75/5000\n"
+"无法加载一个或多个音频文件以进行 PT 导入，请参阅上面的列表"
 
 #: import_pt.cc:269
 msgid "All audio files found for PT import!"
-msgstr ""
+msgstr "找到所有要导入 PT 的音频文件！"
 
 #: import_pt.cc:356
 msgid "PTImport: UINT_MAX routes? impossible!"
-msgstr ""
+msgstr "PT导入：UINT_MAX 路由？不可能！"
 
 #: instrument_info.cc:41 instrument_info.cc:74
 msgid "Unknown"
@@ -1218,11 +1236,11 @@ msgstr "输入输出：在 XML 节点 \"%1\" 里错误输出的字符串"
 
 #: io.cc:1237 plugin.cc:292
 msgid "Out"
-msgstr ""
+msgstr "出"
 
 #: io.cc:1237 plugin.cc:290
 msgid "In"
-msgstr ""
+msgstr "入"
 
 #: io.cc:1483
 #, c-format
@@ -1253,15 +1271,15 @@ msgstr "右"
 
 #: io_processor.cc:279
 msgid "send "
-msgstr ""
+msgstr "发送 "
 
 #: io_processor.cc:279
 msgid "insert "
-msgstr ""
+msgstr "插入 "
 
 #: io_processor.cc:279
 msgid "return "
-msgstr ""
+msgstr "返回 "
 
 #: ladspa_plugin.cc:100
 msgid "LADSPA: Unable to open module: "
@@ -1289,7 +1307,7 @@ msgstr ""
 
 #: ladspa_plugin.cc:383 ladspa_plugin.cc:427
 msgid "Bad node sent to LadspaPlugin::set_state"
-msgstr "错误节点发送到 LadspaPlugin::set_state"
+msgstr "错误节点发送到 LadspaPlugin::set_state（ Ladspa 插件 :: 设置状态）"
 
 #: ladspa_plugin.cc:397 ladspa_plugin.cc:440
 msgid "LADSPA: no ladspa port number"
@@ -1321,7 +1339,7 @@ msgstr "您不能安放一个 CD 标记在这个位置"
 
 #: location.cc:636
 msgid "incorrect XML node passed to Location::set_state"
-msgstr "不正确的 XML节点传递给 Location::set_state"
+msgstr "不正确的 XML节点传递给 Location::set_state（位置 :: 设置状态）"
 
 #: location.cc:641
 msgid "XML node for Location has no ID information"
@@ -1349,7 +1367,7 @@ msgstr "位置：尝试使用未知的位置作为已选择的位置"
 
 #: location.cc:1101
 msgid "incorrect XML mode passed to Locations::set_state"
-msgstr "不正确的 XML模式传递给 Location::set_state"
+msgstr "不正确的 XML模式传递给 Location::set_state（位置 :: 设置状态）"
 
 #: location.cc:1114 session.cc:1618 session_state.cc:1441
 msgid "session"
@@ -1458,7 +1476,7 @@ msgstr "发现用于 LuaProcessor 的无效的/不兼容的 Lua 脚本。"
 
 #: luaproc.cc:871
 msgid "Bad node sent to LuaProc::set_state"
-msgstr "坏节点发送到 LuaProc::set_state"
+msgstr "坏节点发送到 LuaProc::set_state（LuaProc:: 设置状态）"
 
 #: luaproc.cc:883
 msgid "LuaProc: port has no symbol, ignored"
@@ -1470,7 +1488,7 @@ msgstr "LuaProc：端口没有数值，已忽略"
 
 #: luaproc.cc:1106
 msgid "Unable to create LuaProc presets directory"
-msgstr ""
+msgstr "无法创建 LuaProc 预设目录"
 
 #: luascripting.cc:141
 msgid "Script '%1' has no valid descriptor."
@@ -1478,7 +1496,7 @@ msgstr "脚本 '%1' 没有有效的描述符。"
 
 #: meter.cc:82
 msgid "Meter"
-msgstr ""
+msgstr "节拍"
 
 #: midi_model.cc:518
 msgid "Change has no note, using note ID"
@@ -1524,23 +1542,23 @@ msgstr "场景"
 
 #: midi_source.cc:127
 msgid "Missing parameter property on InterpolationStyle"
-msgstr "在 InterpolationStyle（插值类型）上缺少参数属性"
+msgstr "在插值类型上缺少参数属性"
 
 #: midi_source.cc:147
 msgid "Missing style property on InterpolationStyle"
-msgstr "在 InterpolationStyle（插值类型）上缺少类型属性"
+msgstr "在插值类型上缺少类型属性"
 
 #: midi_source.cc:156
 msgid "Missing parameter property on AutomationState"
-msgstr "在 AutomationState（自动化状态）上缺少参数属性"
+msgstr "在自动化状态上缺少参数属性"
 
 #: midi_source.cc:162
 msgid "Missing state property on AutomationState"
-msgstr "在 AutomationState（自动化状态）上缺少状态属性"
+msgstr "在自动化状态上缺少状态属性"
 
 #: midi_stretch.cc:100
 msgid "MIDI stretch created non-MIDI source"
-msgstr "MIDI 延伸已创建 non-MIDI 来源"
+msgstr "MIDI 延伸已创建非 MIDI 来源"
 
 #: monitor_processor.cc:55
 msgid "monitor dim"
@@ -1580,7 +1598,7 @@ msgstr "独奏控制"
 
 #: mp3filesource.cc:71
 msgid "MPEG Layer %1 (%2 kbps)"
-msgstr ""
+msgstr "MPEG 分层 %1 (%2 kbps)"
 
 #: mtc_slave.cc:383
 msgid ""
@@ -1693,23 +1711,23 @@ msgstr "声相器插件节点没有类型信息！"
 
 #: parameter_descriptor.cc:119
 msgid "Normal"
-msgstr ""
+msgstr "通用"
 
 #: parameter_descriptor.cc:120
 msgid "Invert"
-msgstr ""
+msgstr "反转"
 
 #: parameter_descriptor.cc:128
 msgid "Auto"
-msgstr ""
+msgstr "自动"
 
 #: parameter_descriptor.cc:129
 msgid "Input"
-msgstr ""
+msgstr "输入"
 
 #: parameter_descriptor.cc:130
 msgid "Disk"
-msgstr ""
+msgstr "硬盘"
 
 #: parameter_descriptor.cc:259
 msgid "Note|C"
@@ -1769,15 +1787,15 @@ msgstr "播放列表：无法从 XML 创建区域"
 
 #: playlist_source.cc:111
 msgid "No playlist ID in PlaylistSource XML!"
-msgstr "在 PlaylistSource 播放列表来源 XML 里没有播放列表 ID！"
+msgstr "在播放列表来源 XML 里没有播放列表 ID 号！"
 
 #: playlist_source.cc:130
 msgid "Could not construct playlist for PlaylistSource from session data!"
-msgstr "无法从会话数据为 PlaylistSource 构造播放列表！"
+msgstr "无法从会话数据为播放列表来源构造播放列表！"
 
 #: plugin.cc:132
 msgid "Trying to remove nonexistent preset."
-msgstr ""
+msgstr "尝试删除不存在的预设。"
 
 #: plugin.cc:136
 msgid "Cannot remove plugin factory preset."
@@ -1789,11 +1807,11 @@ msgstr "指定的预设名称已存在。"
 
 #: plugin.cc:280
 msgid "Audio"
-msgstr ""
+msgstr "音频"
 
 #: plugin.cc:283
 msgid "Midi"
-msgstr ""
+msgstr "MiDi（乐器数字接口 Musical Instrument Digital Interface ）"
 
 #: plugin.cc:286
 msgid "?"
@@ -1801,15 +1819,15 @@ msgstr ""
 
 #: plugin_insert.cc:525
 msgid "Plugin Enable"
-msgstr ""
+msgstr "启用插件"
 
 #: plugin_insert.cc:728
 msgid "PluginInsert: VST Bypass failed, falling back to host bypass."
-msgstr ""
+msgstr "插件插入：VST（虚拟工作室技术）旁路失败，回退到主机旁路。"
 
 #: plugin_insert.cc:1329
 msgid "programming error: "
-msgstr "程序错误："
+msgstr "程序设计错误："
 
 #: plugin_insert.cc:1890
 msgid "SC %1"
@@ -1857,7 +1875,7 @@ msgstr "正在扫描 LADSPA 插件"
 
 #: plugin_manager.cc:354
 msgid "Scanning Lua DSP Processors"
-msgstr ""
+msgstr "扫描 Lua DSP（数字信号处理）处理器"
 
 #: plugin_manager.cc:357
 msgid "Scanning LV2 Plugins"
@@ -1865,35 +1883,35 @@ msgstr "正在扫描 LV2 插件"
 
 #: plugin_manager.cc:384
 msgid "Scanning Windows VST Plugins"
-msgstr "正在扫描 Windows VST 插件"
+msgstr "正在扫描 Windows VST（虚拟工作室技术）插件"
 
 #: plugin_manager.cc:386
 msgid "Discovering Windows VST Plugins"
-msgstr "正在查找 Windows VST 插件"
+msgstr "正在查找 Windows VST（虚拟工作室技术）插件"
 
 #: plugin_manager.cc:395
 msgid "Scanning Linux VST Plugins"
-msgstr "正在扫描 Linux VST 插件"
+msgstr "正在扫描 Linux VST（虚拟工作室技术）插件"
 
 #: plugin_manager.cc:397
 msgid "Discovering Linux VST Plugins"
-msgstr "正在查找 Linux VST 插件"
+msgstr "正在查找 Linux VST（虚拟工作室技术）插件"
 
 #: plugin_manager.cc:406
 msgid "Scanning Mac VST Plugins"
-msgstr ""
+msgstr "正在扫描 Mac VST（虚拟工作室技术）插件"
 
 #: plugin_manager.cc:408
 msgid "Discovering Mac VST Plugins"
-msgstr ""
+msgstr "正在查找 Mac VST（虚拟工作室技术）插件"
 
 #: plugin_manager.cc:425
 msgid "VST Blacklist: "
-msgstr "VST 黑名单："
+msgstr "VST（虚拟工作室技术）黑名单："
 
 #: plugin_manager.cc:427
 msgid "VST Blacklist:"
-msgstr "VST 黑名单："
+msgstr "VST（虚拟工作室技术）黑名单："
 
 #: plugin_manager.cc:437
 msgid "Scanning AU Plugins"
@@ -1909,7 +1927,7 @@ msgstr "插件扫描完成…"
 
 #: plugin_manager.cc:449
 msgid "Indexing Plugins..."
-msgstr ""
+msgstr "索引插件…"
 
 #: plugin_manager.cc:685
 msgid "LADSPA"
@@ -1929,19 +1947,19 @@ msgstr "LADSPA：模块 \"%1\" 没有描述符函数。"
 
 #: plugin_manager.cc:1020
 msgid "Disabled WindowsVST scan (safe mode)"
-msgstr ""
+msgstr "禁用 WindowsVST（虚拟工作室技术）扫描（安全模式）"
 
 #: plugin_manager.cc:1025
 msgid "--- Windows VST plugins Scan: %1"
-msgstr "--- Windows VST 插件扫描：%1"
+msgstr "--- Windows VST（虚拟工作室技术）插件扫描：%1"
 
 #: plugin_manager.cc:1031
 msgid "VST"
-msgstr ""
+msgstr "VST（虚拟工作室技术）"
 
 #: plugin_manager.cc:1036
 msgid "--- Windows VST plugins Scan Done"
-msgstr "--- Windows VST 插件扫描完毕"
+msgstr "--- Windows VST（虚拟工作室技术）插件扫描完毕"
 
 #: plugin_manager.cc:1051
 msgid "cannot open dll"
@@ -1973,7 +1991,7 @@ msgstr "i386（32位）"
 
 #: plugin_manager.cc:1084
 msgid "Itanium"
-msgstr ""
+msgstr "Itanium（安腾处理器品牌）"
 
 #: plugin_manager.cc:1087
 msgid "x64 (64-bit)"
@@ -1997,49 +2015,51 @@ msgstr ""
 
 #: plugin_manager.cc:1125
 msgid " -> Cannot get Windows VST information, plugin ignored."
-msgstr " -> 无法获取 Windows VST 信息，插件已忽略。"
+msgstr " -> 无法获取 Windows VST（虚拟工作室技术）信息，插件已忽略。"
 
 #: plugin_manager.cc:1135
 msgid ""
 "VST plugin %1 does not support processReplacing, and cannot be used in %2 at "
 "this time"
-msgstr "VST 插件 %1 不支持 processReplacing，且此时无法在 %2 中使用"
+msgstr "VST（虚拟工作室技术）插件 %1 不支持进程替换，且此时无法在 %2 中使用"
 
 #: plugin_manager.cc:1158
 msgid "Ignoring duplicate Windows VST plugin \"%1\""
-msgstr "正在忽略复制 Windows VST 插件 \"%1\""
+msgstr "正在忽略复制 Windows VST（虚拟工作室技术）插件 \"%1\""
 
 #: plugin_manager.cc:1170
 msgid " -> OK (VST Plugin \"%1\" was added)."
-msgstr " -> OK（VST 插件 \"%1\" 已添加）。"
+msgstr " -> OK（ VST 虚拟工作室技术插件 \"%1\" 已添加）。"
 
 #: plugin_manager.cc:1211
 msgid "Disabled MacVST scan (safe mode)"
-msgstr ""
+msgstr "禁用 MacVST（虚拟工作室技术）扫描（安全模式）"
 
 #: plugin_manager.cc:1231
 msgid "MacVST"
-msgstr ""
+msgstr "MacVST（苹果虚拟工作室技术）"
 
 #: plugin_manager.cc:1270
 msgid ""
 "Mac VST plugin %1 does not support processReplacing, and so cannot be used "
 "in %2 at this time"
 msgstr ""
+"Mac VST（虚拟工作室技术）插件 ％1 不支持进程替换，因此目前无法在％2中使用"
 
 #: plugin_manager.cc:1338
 msgid "Disabled LinuxVST scan (safe mode)"
-msgstr ""
+msgstr "禁用 LinuxVST（虚拟工作室技术）扫描（安全模式）"
 
 #: plugin_manager.cc:1351
 msgid "LXVST"
-msgstr ""
+msgstr "LXVST（Linux虚拟工作室技术）"
 
 #: plugin_manager.cc:1377
 msgid ""
 "linuxVST plugin %1 does not support processReplacing, and so cannot be used "
 "in %2 at this time"
-msgstr "linuxVST 插件 %1 不支持 processReplacing，且此时无法在 %2 中使用"
+msgstr ""
+"linuxVST（虚拟工作室技术）插件 %1 不支持进程替换，且此时无法在 %2 中使用"
 
 #: plugin_manager.cc:1542
 msgid "unknown plugin status type \"%1\" - all entries ignored"
@@ -2051,35 +2071,36 @@ msgstr "未知的插件类型 \"%1\" ——已忽略"
 
 #: plugin_manager.cc:1650
 msgid "Loading plugin order file %1"
-msgstr ""
+msgstr "加载插件排序文件 ％1"
 
 #: plugin_manager.cc:1660
 msgid "Cannot parse Plugin Order info from %1"
-msgstr ""
+msgstr "无法解析 ％1 中的插件排序信息"
 
 #: plugin_manager.cc:1674
 msgid "Could not save Plugin Order info to %1"
-msgstr ""
+msgstr "无法将插件排序信息保存到 ％1"
 
 #: plugin_manager.cc:1711
 msgid "Could not save Plugin Tags info to %1"
-msgstr ""
+msgstr "无法将插件标签信息保存到 ％1"
 
 #: plugin_manager.cc:1724
 msgid "Loading plugin meta data file %1"
-msgstr ""
+msgstr "加载插件元数据文件 ％1"
 
 #: plugin_manager.cc:1731
 msgid "Cannot parse plugin tag info from %1"
-msgstr ""
+msgstr "无法解析 ％1 中的插件标签信息"
 
 #: plugin_manager.cc:1808
 msgid "PluginManager::sanitize_tag could not tokenize string: "
 msgstr ""
+"PluginManager::sanitize_tag（插件管理器 :: 无害化标签）无法标记字符串： "
 
 #: plugin_manager.cc:1858
 msgid "PluginManager: Could not tokenize string: "
-msgstr ""
+msgstr "插件管理器：无法标记字符串： "
 
 #: port.cc:545
 msgid "could not reregister %1"
@@ -2087,117 +2108,118 @@ msgstr "无法重新注册 %1"
 
 #: port_engine_shared.cc:50
 msgid "BackendPort::connect (): invalid (null) port"
-msgstr ""
+msgstr "BackendPort::connect ()（后端端口 :: 连接 ()）：无效（空）端口"
 
 #: port_engine_shared.cc:55
 msgid "BackendPort::connect (): wrong port-type"
-msgstr ""
+msgstr "BackendPort::connect ()（后端端口 :: 连接 ()）：端口类型错误"
 
 #: port_engine_shared.cc:60
 msgid "BackendPort::connect (): cannot inter-connect output ports."
-msgstr ""
+msgstr "BackendPort::connect ()（后端端口 :: 连接 ()）：无法互连输出端口。"
 
 #: port_engine_shared.cc:65
 msgid "BackendPort::connect (): cannot inter-connect input ports."
-msgstr ""
+msgstr "BackendPort::connect ()（后端端口 :: 连接 ()）：无法互连输入端口。"
 
 #: port_engine_shared.cc:70
 msgid "BackendPort::connect (): cannot self-connect ports."
-msgstr ""
+msgstr "BackendPort::connect ()（后端端口 :: 连接 ()）：无法自我连接端口。"
 
 #: port_engine_shared.cc:76
 msgid "BackendPort::connect (): ports are already connected:"
-msgstr ""
+msgstr "BackendPort::connect ()（后端端口 :: 连接 ()）：端口已连接："
 
 #: port_engine_shared.cc:101
 msgid "BackendPort::disconnect (): invalid (null) port"
-msgstr ""
+msgstr "BackendPort::disconnect ()（后端端口 :: 断开连接 ()）：无效（空）端口"
 
 #: port_engine_shared.cc:106
 msgid "BackendPort::disconnect (): ports are not connected:"
-msgstr ""
+msgstr "BackendPort::disconnect ()（后端端口 :: 断开连接 ()）：端口尚未连接："
 
 #: port_engine_shared.cc:234
 msgid "BackendPort::port_is_physical (): invalid port."
 msgstr ""
+"BackendPort::port_is_physical ()（后端端口 :: 端口是物理的 ()）：无效端口。"
 
 #: port_engine_shared.cc:320
 msgid "%1::register_port: Port already exists: (%2)"
-msgstr ""
+msgstr "%1::register_port（注册端口）：端口已存在：（％2）"
 
 #: port_engine_shared.cc:359
 msgid "%1::unregister_port: Failed to find port"
-msgstr ""
+msgstr "%1::unregister_port（未注册端口）：找不到端口"
 
 #: port_engine_shared.cc:416
 msgid ""
 "PortEngineSharedImpl: recovering from unclean shutdown, port registry is not "
 "empty."
-msgstr ""
+msgstr "端口引擎共享数字：从不正常关机中恢复，端口注册表不为空。"
 
 #: port_engine_shared.cc:444
 msgid "%1::set_port_name: Invalid Port"
-msgstr ""
+msgstr "%1::set_port_name（设罝端口名称）：无效的端口"
 
 #: port_engine_shared.cc:449
 msgid "%1::set_port_name: Port with given name already exists"
-msgstr ""
+msgstr "%1::set_port_name（设罝端口名称）：指定名称的端口已存在"
 
 #: port_engine_shared.cc:474
 msgid "%1::get_port_name: invalid port"
-msgstr ""
+msgstr "%1::get_port_name（获取端口名称）：无效的端口"
 
 #: port_engine_shared.cc:485
 msgid "%1::get_port_flags: invalid port"
-msgstr ""
+msgstr "%1::get_port_flags（获取端口标志）：无效的端口"
 
 #: port_engine_shared.cc:495
 msgid "%1::get_port_property: invalid port"
-msgstr ""
+msgstr "%1::get_port_property（获取端口属性）：无效的端口"
 
 #: port_engine_shared.cc:512
 msgid "%1::set_port_property: invalid port"
-msgstr ""
+msgstr "%1::set_port_property（设罝端口属性）：无效的端口"
 
 #: port_engine_shared.cc:558
 msgid "%1::connect: Invalid Source port: (%2)"
-msgstr ""
+msgstr "%1::connect（连接）：无效的来源端口：（％2）"
 
 #: port_engine_shared.cc:562
 msgid "%1::connect: Invalid Destination port: (%2)"
-msgstr ""
+msgstr "%1::connect（连接）：无效的目标端口：（％2）"
 
 #: port_engine_shared.cc:578 port_engine_shared.cc:613
 msgid "%1::disconnect: invalid port"
-msgstr ""
+msgstr "%1::disconnect（断开）：无效的端口"
 
 #: port_engine_shared.cc:590
 msgid "%1::connect: Invalid Source Port Handle"
-msgstr ""
+msgstr "%1::connect（连接）：无效的来源处理"
 
 #: port_engine_shared.cc:597
 msgid "%1::connect: Invalid Destination Port: (%2)"
-msgstr ""
+msgstr "%1::connect（连接）：无效的目标端口：（％2）"
 
 #: port_engine_shared.cc:625
 msgid "%1::disconnect_all: invalid port"
-msgstr ""
+msgstr "%1::disconnect_all（全部断开）：无效的端口"
 
 #: port_engine_shared.cc:640
 msgid "%1::disconnect_all: Invalid Port"
-msgstr ""
+msgstr "%1::disconnect_all（全部断开）：无效的端口"
 
 #: port_engine_shared.cc:653
 msgid "%1::connected_to: Invalid Port"
-msgstr ""
+msgstr "%1::connected_to（连接到）：无效的端口"
 
 #: port_engine_shared.cc:666
 msgid "%1::physically_connected: Invalid Port"
-msgstr ""
+msgstr "%1::physically_connected（物理连接）：无效的端口"
 
 #: port_engine_shared.cc:678
 msgid "%1::get_connections: Invalid Port"
-msgstr ""
+msgstr "%1::get_connections（获取连接）：无效的端口"
 
 #: port_insert.cc:45 port_insert.cc:277
 msgid "insert %1"
@@ -2231,11 +2253,11 @@ msgstr "音频引擎：无法注册端口 \"%1\": %2"
 
 #: port_manager.cc:419
 msgid "(unknown type)"
-msgstr ""
+msgstr "（未知类型）"
 
 #: port_manager.cc:436
 msgid "(unknown error)"
-msgstr ""
+msgstr "（未知错误）"
 
 #: port_manager.cc:562
 msgid "AudioEngine: cannot connect %1 (%2) to %3 (%4)"
@@ -2247,19 +2269,19 @@ msgstr "重新确立端口 %1 失败"
 
 #: port_manager.cc:1193
 msgid "Could not save MIDI port info to %1"
-msgstr ""
+msgstr "无法将 MIDI 端口信息保存到％1"
 
 #: port_manager.cc:1208
 msgid "Cannot load MIDI port info from %1"
-msgstr ""
+msgstr "无法从 ％1 加载MIDI端口信息"
 
 #: port_manager.cc:1228
 msgid "MIDI port info file %1 contains invalid information - please remove it."
-msgstr ""
+msgstr "MIDI 端口信息文件 ％1 包含无效信息——请移除它。"
 
 #: port_manager.cc:1396
 msgid "Ambiguous latency for port '%1' (%2, %3)"
-msgstr ""
+msgstr "端口 '%1' (%2, %3) 的延迟时间不明确"
 
 #: processor.cc:235
 msgid "No %1 property flag in element %2"
@@ -2309,11 +2331,11 @@ msgstr "配置文件 %1 未保存"
 
 #: readable.cc:42
 msgid "Cannot open File \"%1\": %2"
-msgstr ""
+msgstr "无法打开文件 \"%1\": %2"
 
 #: readable.cc:61
 msgid "Could not read file \"%1\"."
-msgstr ""
+msgstr "无法读取文件“％1”。"
 
 #: recent_sessions.cc:59
 msgid "cannot open recent session file %1 (%2)"
@@ -2339,7 +2361,9 @@ msgstr "写入已保存的模板文件 %1（%2）出错"
 #: region_factory.cc:201
 msgid ""
 "programming error: RegionFactory::create() called with unknown Region type"
-msgstr "程序错误：RegionFactory::create() 被未知的区域类型调用"
+msgstr ""
+"程序设计错误：RegionFactory::create() （区域工厂 :: 创建）被未知的区域类型调"
+"用"
 
 #: region_factory.cc:557
 msgid "%1 compound-%2 (%3)"
@@ -2375,7 +2399,7 @@ msgstr "无法创建处理器。已忽略。"
 
 #: route.cc:2602 route.cc:2808
 msgid "Bad node sent to Route::set_state() [%1]"
-msgstr "坏的节点发送到 Route::set_state() [%1]"
+msgstr "坏的节点发送到 Route::set_state() （路由 :: 设置状态() ）[%1]"
 
 #: route.cc:2673
 msgid "Pannable state found for route (%1) without a panner!"
@@ -2460,7 +2484,7 @@ msgstr "写入节奏已调整数据到 %1 时出错"
 
 #: rt_tasklist.cc:94
 msgid "Cannot create thread for TaskList!"
-msgstr ""
+msgstr "无法为任务列表创建线程！"
 
 #: send.cc:75
 msgid "aux %1"
@@ -2472,11 +2496,11 @@ msgstr "发送端 %1"
 
 #: send.cc:82
 msgid "foldback %1"
-msgstr ""
+msgstr "监听 %1"
 
 #: send.cc:84
 msgid "programming error: send created using role %1"
-msgstr "程序错误：使用角色 %1 已创建发送端"
+msgstr "程序设计错误：使用角色 %1 已创建发送端"
 
 #: session.cc:354
 msgid "Session initialization failed"
@@ -2488,7 +2512,7 @@ msgstr "载入模板/快照状态失败"
 
 #: session.cc:374
 msgid "Failed to parse template/snapshot state"
-msgstr ""
+msgstr "解析模板/快照状态失败"
 
 #: session.cc:394
 msgid "Failed to load state"
@@ -2496,29 +2520,31 @@ msgstr "载入状态失败"
 
 #: session.cc:404 session.cc:408 session.cc:411 session.cc:414 session.cc:417
 msgid "Cannot initialize session/engine: %1"
-msgstr ""
+msgstr "无法初始化会话/引擎：％1"
 
 #: session.cc:404
 msgid "Failed to create background threads."
-msgstr ""
+msgstr "创建后台线程失败。"
 
 #: session.cc:408
 msgid "Invalid TempoMap in session-file."
-msgstr ""
+msgstr "会话文件中的无效节奏映射。"
 
 #: session.cc:411
 msgid "Invalid or corrupt session state."
-msgstr ""
+msgstr "无效或损坏的会话状态。"
 
 #: session.cc:414
 msgid "Port registration failed."
-msgstr ""
+msgstr "端口注册失败。"
 
 #: session.cc:417
 msgid ""
 "Unexpected exception during session setup, possibly invalid audio/midi "
 "engine parameters. Please see stdout/stderr for details"
 msgstr ""
+"会话设置期间发生意外的异常情况，可能是无效的音频/MIDI 引擎参数。 有关详细信"
+"息，请参阅标准输出/标准错误"
 
 #: session.cc:449
 msgid "Connect to engine"
@@ -2550,11 +2576,11 @@ msgstr "无法连接主控输出 %1 到 %2"
 
 #: session.cc:948
 msgid "Cannot remove monitor section while the engine is offline."
-msgstr ""
+msgstr "引擎离线时无法移除监控部分。"
 
 #: session.cc:1009
 msgid "Cannot create monitor section while the engine is offline."
-msgstr ""
+msgstr "引擎离线时无法创建监控部分。"
 
 #: session.cc:1030
 msgid "Cannot create monitor section. 'Monitor' Port name is not unique."
@@ -2592,7 +2618,7 @@ msgstr "您不能为自动循环使用该位置，因为它的长度是零或者
 
 #: session.cc:1838
 msgid "programming error: session range removed!"
-msgstr "程序错误：会话范围已移除！"
+msgstr "程序设计错误：会话范围已移除！"
 
 #: session.cc:2121
 msgid "feedback loop setup between %1 and %2"
@@ -2604,7 +2630,7 @@ msgstr "音频"
 
 #: session.cc:2390
 msgid "MIDI "
-msgstr ""
+msgstr "MIDI（乐器数字接口 Musical Instrument Digital Interface ）"
 
 #: session.cc:2459
 msgid "Session: could not create new midi track."
@@ -2674,7 +2700,7 @@ msgstr "在此 %1 已经为 %2 录制中，我考虑太多。"
 msgid ""
 "There are already many recordings for %1, resulting in a too long file-path "
 "%2."
-msgstr ""
+msgstr "％1 的录音已经很多，导致文件路径 ％2 太长。"
 
 #: session.cc:5509
 msgid "send ID %1 appears to be in use already"
@@ -2749,17 +2775,17 @@ msgstr "试图以无内容来重新组成一个 MementoCommand，失败。id=%1"
 #: session_command.cc:147
 msgid ""
 "Could not reconstitute MementoCommand from XMLNode. object type = %1 id = %2"
-msgstr ""
+msgstr "无法从XML节点重新构造回顾命令。 对象类型 = %1 id 号 = %2"
 
 #: session_command.cc:158
 msgid "Could get object ID and type name for StatefulDiffCommand from XMLNode."
-msgstr ""
+msgstr "可以从XML节点获取状态差异命令的对象 ID 号和类型名称。"
 
 #: session_command.cc:181
 msgid ""
 "Could not reconstitute StatefulDiffCommand from XMLNode. object type = %1 id "
 "= %2"
-msgstr ""
+msgstr "无法从XML节点重构状态差异命令。对象类型 = ％1 id 号 = ％2"
 
 #: session_configuration.cc:152
 msgid "%1: cannot part default session options \"%2\""
@@ -2808,11 +2834,11 @@ msgstr ""
 
 #: session_events.cc:233
 msgid "Session: cannot have two events of type %1 at the same sample (%2)."
-msgstr ""
+msgstr "会话：在同一样本（％2）上不能有两个类型为 ％1 的事件。"
 
 #: session_export.cc:149
 msgid "Cannot prepare transport for export"
-msgstr ""
+msgstr "无法为导出准备播送"
 
 #: session_export.cc:168
 msgid "%1: cannot seek to %2 for export"
@@ -2836,7 +2862,7 @@ msgstr "会话：无法发送四分之一帧MTC（MIDI 时间码）信息（%1�
 
 #: session_playlists.cc:132
 msgid "Session State: Unused playlist was listed as used."
-msgstr ""
+msgstr "会话状态：未使用的播放列表被列为已使用。"
 
 #: session_playlists.cc:486 session_playlists.cc:506
 msgid "Session: cannot create Playlist from XML description."
@@ -2848,11 +2874,11 @@ msgstr "会话：在为 %1 无滚动中出错"
 
 #: session_process.cc:996
 msgid "Programming error: illegal event type in process_event (%1)"
-msgstr "程序错误：非法事件类型位于 process_event (%1)"
+msgstr "程序设计错误：非法事件类型位于 process_event（进程事件）(%1)"
 
 #: session_state.cc:204
 msgid "solo cut control (dB)"
-msgstr "独奏剪切控制（dB）"
+msgstr "独奏剪切控制（dB 分贝）"
 
 #: session_state.cc:225
 msgid "Set block size and sample rate"
@@ -2864,27 +2890,27 @@ msgstr "正在使用配置"
 
 #: session_state.cc:246
 msgid "Butler did not start"
-msgstr ""
+msgstr "Butler 没有开始"
 
 #: session_state.cc:251
 msgid "MIDI I/O thread did not start"
-msgstr ""
+msgstr "MIDI 输入/输出线程尚未启动"
 
 #: session_state.cc:269 session_state.cc:391
 msgid "Unexpected exception during session setup: "
-msgstr ""
+msgstr "会话设置期间发生意外的异常："
 
 #: session_state.cc:272 session_state.cc:394
 msgid "Unknown exception during session setup"
-msgstr ""
+msgstr "会话设置期间出现未知异常"
 
 #: session_state.cc:298
 msgid "Could not set session state from XML"
-msgstr ""
+msgstr "无法通过 XML 设置会话状态"
 
 #: session_state.cc:302
 msgid "Session state: "
-msgstr ""
+msgstr "会话状态："
 
 #: session_state.cc:398
 msgid "Reset Remote Controls"
@@ -2916,7 +2942,7 @@ msgstr "会话：无法创建会话导出文件夹 \"%1\" (%2)"
 
 #: session_state.cc:544
 msgid "Session: cannot create session backup folder \"%1\" (%2)"
-msgstr ""
+msgstr "会话：无法创建会话备份文件夹 \"%1\" (%2)"
 
 #: session_state.cc:552
 msgid "Session: cannot create session analysis folder \"%1\" (%2)"
@@ -2976,7 +3002,7 @@ msgstr "无法重命名在路径 \"%1\" (%2) 上的临时会话文件"
 
 #: session_state.cc:926
 msgid "Could not save backup file at path \"%1\" (%2)"
-msgstr ""
+msgstr "无法将备份文件保存在路径 \"%1\" (%2)"
 
 #: session_state.cc:1002
 msgid "%1: session file \"%2\" doesn't exist!"
@@ -2994,15 +3020,15 @@ msgstr "会话文件 %1不是一个会话"
 msgid ""
 "Incompatible Session Version. That session was created with a newer version "
 "of %1"
-msgstr ""
+msgstr "不兼容的会话版本。该会话是使用 ％1 的较新版本创建的"
 
 #: session_state.cc:1347
 msgid "Session-Save: Failed to copy MIDI Source '%1' for snapshot"
-msgstr ""
+msgstr "会话保存：无法复制 MIDI 来源 '％1' 作为快照"
 
 #: session_state.cc:1556
 msgid "programming error: Session: incorrect XML node sent to set_state()"
-msgstr "程序错误：会话：不正确的 XML 节点发送到 set_state()"
+msgstr "程序设计错误：会话：不正确的 XML 节点发送到 set_state() （设罝状态）"
 
 #: session_state.cc:1626
 msgid "Session: XML state has no options section"
@@ -3074,7 +3100,7 @@ msgstr "添加音轨/总线已结束"
 
 #: session_state.cc:1991
 msgid "Could not find diskstream for diskstream-id: '%1', playlist: '%2'"
-msgstr ""
+msgstr "找不到硬盘流 ID 号为 '％1'，播放列表为 '％2' 的硬盘流"
 
 #: session_state.cc:2048
 msgid "Session: cannot create Region from XML description."
@@ -3086,11 +3112,11 @@ msgstr "无法为区域 '%1' 载入状态"
 
 #: session_state.cc:2088
 msgid "Regions in compound description not found (ID's %1 and %2): ignored"
-msgstr "在合成描述中找不到区域（ID的 %1 和 %2）：已忽略"
+msgstr "在合成描述中找不到区域（ ID 号的 %1 和 %2）：已忽略"
 
 #: session_state.cc:2116
 msgid "Nested source has no ID info in session file! (ignored)"
-msgstr "在会话文件里嵌入的来源没有 ID 信息！（已忽略）"
+msgstr "在会话文件里嵌入的来源没有 ID 号信息！（已忽略）"
 
 #: session_state.cc:2128
 msgid "Cannot reconstruct nested source for region %1"
@@ -3139,7 +3165,7 @@ msgstr "会话：无法从 XML 描述创建来源。"
 msgid ""
 "An external MIDI file is missing. %1 cannot currently recover from missing "
 "external MIDI files"
-msgstr ""
+msgstr "缺失外部 MIDI 文件。％1 当前无法从缺失的外部 MIDI 文件中恢复"
 
 #: session_state.cc:2522
 msgid "Found a sound file that cannot be used by %1. Talk to the programmers."
@@ -3217,15 +3243,15 @@ msgstr "无法理解会话历史文件 \"%1\""
 
 #: session_state.cc:3956
 msgid "Failed to downcast MidiSource for NoteDiffCommand"
-msgstr "向下转换 MidiSource 为 NoteDiffCommand 失败"
+msgstr "向下转换 Midi 来源为音符差异命令失败"
 
 #: session_state.cc:3967
 msgid "Failed to downcast MidiSource for SysExDiffCommand"
-msgstr "向下转换 MidiSource 为 SysExDiffCommand 失败"
+msgstr "向下转换 Midi 来源为系统扩展差异命令失败"
 
 #: session_state.cc:3978
 msgid "Failed to downcast MidiSource for PatchChangeDiffCommand"
-msgstr "向下转换 MidiSource 为 PatchChangeDiffCommand 失败"
+msgstr "向下转换 Midi 来源为切变音色差异命令失败"
 
 #: session_state.cc:3986
 msgid "Couldn't figure out how to make a Command out of a %1 XMLNode."
@@ -3288,14 +3314,16 @@ msgid ""
 "Looping cannot be supported while %1 is using JACK transport.\n"
 "Recommend changing the configured options"
 msgstr ""
+"％1 使用JACK播送时，不支持循环。\n"
+"建议更改已配置的选项"
 
 #: slavable.cc:124
 msgid "Master #%1 not found, assignment lost"
-msgstr ""
+msgstr "找不到主控 #%1 ，指定丢失"
 
 #: slavable_automation_control.cc:387 slavable_automation_control.cc:460
 msgid "Merge VCA automation into %1"
-msgstr ""
+msgstr "将 VCA（电压控制放大器）自动化合并到 ％1"
 
 #: smf_source.cc:361
 msgid "Unable to read event prefix, corrupt MIDI ring"
@@ -3316,7 +3344,7 @@ msgstr "跳过带有无序拍子时间的事件 %1 < %2 （脱离于 %3 拍子�
 
 #: smf_source.cc:473
 msgid "Skipping event with unordered sample time %1 < %2"
-msgstr ""
+msgstr "无序采样时间为 %1 < %2 的跳跃事件"
 
 #: smf_source.cc:539
 msgid "cannot open MIDI file %1 for write"
@@ -3324,7 +3352,7 @@ msgstr "无法打开 MIDI 文件 %1 用于写入"
 
 #: smf_source.cc:573
 msgid "Exception while writing %1, file may be corrupt/unusable"
-msgstr ""
+msgstr "写入 ％1 时发生异常，文件可能已损坏/无法使用"
 
 #: sndfile_helpers.cc:35
 msgid "WAV"
@@ -3340,7 +3368,7 @@ msgstr ""
 
 #: sndfile_helpers.cc:38
 msgid "W64 (64-bit WAV)"
-msgstr "W64（64位 WAV）"
+msgstr "W64（ 64 位 WAV）"
 
 #: sndfile_helpers.cc:39
 msgid "FLAC"
@@ -3412,7 +3440,7 @@ msgstr "大端存储（PowerPC 强力电脑）"
 
 #: sndfilesource.cc:274
 msgid "Cannot set flac compression level: %1"
-msgstr ""
+msgstr "无法设置 flac 压缩级别：％1"
 
 #: sndfilesource.cc:359
 msgid "SndFileSource: cannot open file \"%1\" for %2"
@@ -3440,7 +3468,7 @@ msgstr "无法打开 %1 文件用于读取。"
 
 #: sndfilesource.cc:521
 msgid "SndFileSource: could not seek to sample %1 within %2 (%3)"
-msgstr ""
+msgstr "第二文件来源：无法在 ％2（％3）内尝试采样 ％1"
 
 #: sndfilesource.cc:530
 msgid ""
@@ -3454,7 +3482,7 @@ msgstr "尝试写入一个非可写音频文件来源（%1）"
 
 #: sndfilesource.cc:585 utils.cc:517 utils.cc:545
 msgid "programming error: %1 %2"
-msgstr "程序错误：%1 %2"
+msgstr "程序设计错误：%1 %2"
 
 #: sndfilesource.cc:623 sndfilesource.cc:641
 msgid "attempt to flush a non-writable audio file source (%1)"
@@ -3491,11 +3519,11 @@ msgstr "已清除明确的单声道：%1\n"
 
 #: solo_control.cc:204
 msgid "Cleared upstream solo: %1 up:%2\n"
-msgstr ""
+msgstr "已清除上游独奏：％1 向上：％2\n"
 
 #: solo_control.cc:211
 msgid "Cleared downstream solo: %1 down:%2\n"
-msgstr ""
+msgstr "已清除上游独奏：％1 向下：％2\n"
 
 #: soundcloud_upload.cc:128
 msgid ""
@@ -3508,7 +3536,7 @@ msgstr "在一个 MIDI 文件上恢复未遂——未实施"
 
 #: speakers.cc:275
 msgid "Speaker information is missing - speaker ignored"
-msgstr ""
+msgstr "扬声器信息缺失——扬声器被忽略"
 
 #: srcfilesource.cc:141
 msgid "SrcFileSource: %1"
@@ -3516,11 +3544,11 @@ msgstr "同步遥控文件来源：%1"
 
 #: template_utils.cc:117 template_utils.cc:172
 msgid "(unknown)"
-msgstr ""
+msgstr "（未知）"
 
 #: template_utils.cc:127 template_utils.cc:182
 msgid "No Description"
-msgstr ""
+msgstr "（无描述说明）"
 
 #: tempo.cc:143
 msgid "TempoSection XML node has no \"movable\" property"
@@ -3528,7 +3556,7 @@ msgstr "节奏部分 XML 节点没有“可移动”属性"
 
 #: tempo.cc:178
 msgid "Legacy session detected. TempoSection XML node will be altered."
-msgstr ""
+msgstr "检测到旧版会话。节奏部分 XML节点将被更改。"
 
 #: tempo.cc:187
 msgid "TempoSection XML node has an illegal \"beats_per_minute\" value"
@@ -3540,15 +3568,15 @@ msgstr "节奏部分 XML 节点有一个非法的“音符类型”数值"
 
 #: tempo.cc:208
 msgid "TempoSection XML node has an illegal \"end-beats-per-minute\" value"
-msgstr ""
+msgstr "节奏部分 XML 节点有一个非法的“结束每分钟拍子数”数值"
 
 #: tempo.cc:228
 msgid "TempoSection XML node has no \"active\" property"
-msgstr ""
+msgstr "节奏部分 XML 节点没有“激活”属性"
 
 #: tempo.cc:567
 msgid "Legacy session detected - MeterSection XML node will be altered."
-msgstr ""
+msgstr "检测到旧版会话——节奏部分 XML节点将被更改。"
 
 #: tempo.cc:570
 msgid "MeterSection XML node has an illegal \"start\" value"
@@ -3556,11 +3584,11 @@ msgstr "节拍部分 XML 节点有一个非法的“起点”数值"
 
 #: tempo.cc:580
 msgid "MeterSection XML node has an illegal \"bbt\" value"
-msgstr ""
+msgstr "计量部分 XML 节点具有非法的“ bbt”值"
 
 #: tempo.cc:584
 msgid "MeterSection XML node has no \"bbt\" property"
-msgstr ""
+msgstr "计量部分 XML 节点没有“ bbt”属性"
 
 #: tempo.cc:593
 msgid ""
@@ -3570,7 +3598,7 @@ msgstr "节奏部分 XML 节点没有“每分钟拍子数”或者“每小节�
 
 #: tempo.cc:599
 msgid "MeterSection XML node has an illegal \"divisions-per-bar\" value"
-msgstr ""
+msgstr "节奏部分 XML 节点有一个非法的“每小节细分”数值"
 
 #: tempo.cc:604
 msgid "MeterSection XML node has no \"note-type\" property"
@@ -3592,19 +3620,19 @@ msgstr "在节奏映射中没有定义节奏部分——无法改变节奏 @ %1"
 
 #: tempo.cc:1328
 msgid "programming error: no meter section in tempo map!"
-msgstr ""
+msgstr "编程设计错误：速度图中没有仪表部分！"
 
 #: tempo.cc:1346 tempo.cc:1369 tempo.cc:1390
 msgid "programming error: no tempo section in tempo map!"
-msgstr "程序错误：在节奏映射中无节奏部分！"
+msgstr "程序设计错误：在节奏映射中无节奏部分！"
 
 #: tempo.cc:2260
 msgid "tempo map was asked for BBT time at sample %1\n"
-msgstr ""
+msgstr "节奏映射被要求采样 ％1 的 BBT 时间\n"
 
 #: tempo.cc:2368
 msgid "tempo map asked for sample time at bar < 1  (%1)\n"
-msgstr ""
+msgstr "节奏映射被要求在拍子 < 1  (%1) 处的采样时间\n"
 
 #: tempo.cc:4639 tempo.cc:4653
 msgid "Tempo map: could not set new state, restoring old one."
@@ -3648,11 +3676,11 @@ msgstr ""
 
 #: track.cc:645
 msgid "DiskIOProcessor: \"%1\" isn't an playlist"
-msgstr ""
+msgstr "硬盘盘输入输出处理器：“％1”不是播放列表"
 
 #: track.cc:692
 msgid "DiskIOProcessor %1: there is no existing playlist to make a copy of!"
-msgstr ""
+msgstr "硬盘盘输入输出处理器 ％1 ：没有现有的播放列表可以复制！"
 
 #: track.cc:966
 msgid "%1: could not create region for complete midi file"
@@ -3672,7 +3700,7 @@ msgstr "音频硬盘流：无法为捕获的音频创建区域！"
 
 #: transport_master.cc:398 transport_master.cc:399
 msgid "Construction of transport master object of type %1 failed"
-msgstr ""
+msgstr "类型 ％1 的传输主对象的构造失败"
 
 #: transport_master.cc:423 transport_master.cc:456
 msgid "SyncSource|JACK"
@@ -3692,35 +3720,35 @@ msgstr ""
 
 #: transport_master.cc:493
 msgid "All"
-msgstr ""
+msgstr "全部"
 
 #: transport_master.cc:497
 msgid "Start/Stop"
-msgstr ""
+msgstr "开始/停止"
 
 #: transport_master.cc:499
 msgid "Speed"
-msgstr ""
+msgstr "速度"
 
 #: transport_master.cc:501
 msgid "Locate"
-msgstr ""
+msgstr "定位"
 
 #: transport_master.cc:503
 msgid "Complex"
-msgstr ""
+msgstr " 复合"
 
 #: transport_master_manager.cc:134
 msgid "programming error:%1"
-msgstr ""
+msgstr "程序设计错误：%1"
 
 #: transport_master_manager.cc:349
 msgid "There is already a transport master named \"%1\" - not duplicated"
-msgstr ""
+msgstr "已有一个名为“％1”的播送主控——不可重复"
 
 #: transport_master_manager.cc:664
 msgid "Cannot initialize transport master manager"
-msgstr ""
+msgstr "无法初始化播送主控"
 
 #: unknown_processor.cc:87
 msgid "Using plugin-stub with unknown i/o configuration for: "
@@ -3728,7 +3756,7 @@ msgstr "正在使用带有未知输入/输出配置的插件存根用于："
 
 #: unknown_processor.cc:108
 msgid "Using plugin-stub with mismatching i/o configuration for: "
-msgstr ""
+msgstr "使用具有不匹配的输入/输出配置的插件存根用于："
 
 #: user_bundle.cc:48
 msgid "Node for Bundle has no \"name\" property"
@@ -3769,11 +3797,11 @@ msgstr "锁定"
 
 #: utils.cc:428
 msgid "programming error: unknown edit mode string \"%1\""
-msgstr "程序错误：未知的编辑模式字符串 \"%1\""
+msgstr "程序设计错误：未知的编辑模式字符串 \"%1\""
 
 #: utils.cc:584
 msgid "programming error: unknown native header format: %1"
-msgstr "程序错误：未知的本地文件头字符串 \"%1\""
+msgstr "程序设计错误：未知的本地文件头字符串 \"%1\""
 
 #: utils.cc:599
 msgid "cannot open directory %1 (%2)"
@@ -3782,19 +3810,19 @@ msgstr "无法打开目录 %1 (%2)"
 #: vca.cc:44
 #, c-format
 msgid "VCA %n"
-msgstr ""
+msgstr "VCA（电压控制放大器）%n"
 
 #: vca.cc:116
 msgid "VCA %1 : %2"
-msgstr ""
+msgstr "VCA（电压控制放大器）%1 : %2"
 
 #: vca.cc:217
 msgid "Master assignment ignored to prevent recursion"
-msgstr ""
+msgstr "主控指定被忽略以防止递归"
 
 #: vca_manager.cc:206
 msgid "Cannot set state of a VCA"
-msgstr ""
+msgstr "无法设置 VCA（电压控制放大器）的状态"
 
 #~ msgid "programmer error: %1"
 #~ msgstr "程序错误：%1"
