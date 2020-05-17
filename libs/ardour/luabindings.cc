@@ -2111,6 +2111,13 @@ LuaBindings::common (lua_State* L)
 		.addConst ("FadeSymmetric", ARDOUR::FadeShape(FadeSymmetric))
 		.endNamespace ()
 
+		.beginNamespace ("LoopFadeChoice")
+		.addConst ("NoLoopFade", ARDOUR::LoopFadeChoice(NoLoopFade))
+		.addConst ("EndLoopFade", ARDOUR::LoopFadeChoice(EndLoopFade))
+		.addConst ("BothLoopFade", ARDOUR::LoopFadeChoice(BothLoopFade))
+		.addConst ("XFadeLoop", ARDOUR::LoopFadeChoice(XFadeLoop))
+		.endNamespace ()
+
 		.beginNamespace ("DenormalModel")
 		.addConst ("DenormalNone", ARDOUR::DenormalModel(DenormalNone))
 		.addConst ("DenormalFTZ", ARDOUR::DenormalModel(DenormalFTZ))
