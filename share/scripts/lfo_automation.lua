@@ -1,7 +1,7 @@
 ardour {
    ["type"]    = "EditorAction",
    name        = "Add LFO automation to region",
-   version     = "0.2.0",
+   version     = "0.2.1",
    license     = "MIT",
    author      = "Daniel Appelt",
    description = [[Add LFO-like plugin automation to any automatable parameter below a selected region]]
@@ -134,11 +134,7 @@ function factory (unused_params)
       Session:begin_reversible_command("Add LFO automation to region")
       local before = al:get_state() -- save previous state (for undo)
       -- Clear events in target automation-list for the selected region.
-      -- al:clear(region:position() - region:start(), region:position() - region:start() + region:length())
-      -- TODO: Clearing automation events only for the region generally leads to strange
-      -- extranous automation events (see https://tracker.ardour.org/view.php?id=8115).
-      -- For now, we just truncate the automation-list in order to avoid this problem.
-      al:truncate_end(region:position() - region:start())
+      al:clear(region:position() - region:start(), region:position() - region:start() + region:length())
 
       local values = lut[wave]
       local last = nil
@@ -156,8 +152,9 @@ function factory (unused_params)
 
             if k > 1 or v ~= last then
                -- Create automation point re-scaled to parameter target range. Do not create a new point
-               -- at cycle start if the last cycle ended on the same value.
-               al:add(pos, lower + v * (upper - lower), false, true)
+               -- at cycle start if the last cycle ended on the same value. Using al:add seems to lead
+               -- to unwanted extranous events. al:editor_add does not exhibit these side effects.
+               al:editor_add(pos, lower + v * (upper - lower), false)
             end
             last = v
          end
