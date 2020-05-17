@@ -38,6 +38,12 @@
 #endif
 #endif
 
+/* libwebsockets version of LWS_LIBRARY_VERSION_NUMBER also appends
+   LWS_LIBRARY_VERSION_PATCH which can contain non-numeric characters
+   rendering it unsuitable for numeric version checks  */
+#define LWS_LIBRARY_VERSION_NUM (LWS_LIBRARY_VERSION_MAJOR * 1000000) + \
+								(LWS_LIBRARY_VERSION_MINOR * 1000)
+
 #define MAX_INDEX_SIZE	65536
 
 using namespace Glib;
@@ -399,10 +405,37 @@ WebsocketsServer::lws_callback (struct lws* wsi, enum lws_callback_reasons reaso
 		case LWS_CALLBACK_DEL_POLL_FD:
 			rc = server->del_poll_fd (static_cast<struct lws_pollargs*> (in));
 			break;
-#endif
+#endif // LWS_WITH_GLIB
+
+#if LWS_LIBRARY_VERSION_NUM >= 2001000
+		// lws_callback_http_dummy is not available on lws < 2.1.0
 		default:
 			rc = lws_callback_http_dummy (wsi, reason, user, in, len);
 			break;
+#else
+		case LWS_CALLBACK_FILTER_NETWORK_CONNECTION:
+		case LWS_CALLBACK_FILTER_PROTOCOL_CONNECTION:
+		case LWS_CALLBACK_SERVER_NEW_CLIENT_INSTANTIATED:
+		case LWS_CALLBACK_PROTOCOL_INIT:
+		case LWS_CALLBACK_PROTOCOL_DESTROY:
+		case LWS_CALLBACK_WSI_CREATE:
+		case LWS_CALLBACK_WSI_DESTROY:
+		case LWS_CALLBACK_LOCK_POLL:
+		case LWS_CALLBACK_UNLOCK_POLL:
+		case LWS_CALLBACK_WS_PEER_INITIATED_CLOSE:
+		case LWS_CALLBACK_FILTER_HTTP_CONNECTION:
+			/* do nothing but keep connection alive */
+			rc = 0;
+			break;
+
+		default:
+#ifndef NDEBUG
+			/* see libwebsockets.h lws_callback_reasons */
+			std::cerr << "LWS: unhandled callback " << reason << std::endl;
+#endif
+			rc = -1;
+			break;
+#endif // LWS_LIBRARY_VERSION_NUM >= 2001000
 	}
 
 	return rc;
