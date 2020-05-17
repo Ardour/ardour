@@ -118,7 +118,7 @@ WebsocketsServer::start ()
 #endif
 
 #ifndef NDEBUG
-	lws_set_log_level (LLL_USER | LLL_ERR | LLL_WARN | LLL_DEBUG, 0);
+	lws_set_log_level (LLL_ERR | LLL_WARN | LLL_DEBUG, 0);
 #endif
 
 	if (_lws_context) {
