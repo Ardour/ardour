@@ -1033,6 +1033,11 @@ EngineControl::refresh_midi_display (std::string focus)
 	midi_device_table.attach (*l, 2, 3, row, row + 1, xopt, AttachOptions (0));
 	row++;
 
+	/* Don't autostart engine for MIDI latency compensation, only allow to configure when running
+	 * or when the engine is stopped after calibration (otherwise ardour proceeds to load session).
+	 */
+	bool allow_calibration = ARDOUR::AudioEngine::instance()->running() || !backend->can_change_systemic_latency_when_running ();
+
 	for (vector<MidiDeviceSettings>::const_iterator p = _midi_devices.begin(); p != _midi_devices.end(); ++p) {
 		ArdourButton *m;
 		Gtk::Button* b;
@@ -1067,13 +1072,8 @@ EngineControl::refresh_midi_display (std::string focus)
 
 		b = manage (new Button (_("Calibrate")));
 		b->signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &EngineControl::calibrate_midi_latency), *p));
-		b->set_sensitive (_can_set_midi_latencies && enabled);
+		b->set_sensitive (_can_set_midi_latencies && enabled && allow_calibration);
 		midi_device_table.attach (*b, 3, 4, row, row + 1, xopt, AttachOptions (0)); b->show ();
-
-		/* Don't autostart engine for MIDI latency compensation, only allow to configure when running
-		 * or when the engine is stopped after calibration (otherwise ardour proceeds to load session).
-		 */
-		b->set_sensitive (ARDOUR::AudioEngine::instance()->running() || !backend->can_change_systemic_latency_when_running ());
 
 		row++;
 	}
