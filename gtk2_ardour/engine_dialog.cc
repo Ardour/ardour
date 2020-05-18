@@ -1070,6 +1070,11 @@ EngineControl::refresh_midi_display (std::string focus)
 		b->set_sensitive (_can_set_midi_latencies && enabled);
 		midi_device_table.attach (*b, 3, 4, row, row + 1, xopt, AttachOptions (0)); b->show ();
 
+		/* Don't autostart engine for MIDI latency compensation, only allow to configure when running
+		 * or when the engine is stopped after calibration (otherwise ardour proceeds to load session).
+		 */
+		b->set_sensitive (ARDOUR::AudioEngine::instance()->running() || !backend->can_change_systemic_latency_when_running ());
+
 		row++;
 	}
 }
