@@ -52,7 +52,7 @@ class LIBGTKMM2EXT_API KeyboardKey
 	static KeyboardKey null_key() { return KeyboardKey (0, 0); }
 
 	uint32_t state() const { return _val >> 32; }
-	uint32_t key() const { return _val & 0xffff; }
+	uint32_t key() const { return _val & 0xffffffff; }
 
 	bool operator<(const KeyboardKey& other) const {
 		return _val < other._val;
