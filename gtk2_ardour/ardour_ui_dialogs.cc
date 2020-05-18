@@ -319,10 +319,14 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 			// cancel
 			return 1;
 		case 1:
+			// save and continue (and handle unnamed sessions)
 			if (_session->unnamed()) {
 				rename_session (true);
 			}
 			_session->save_state ("");
+			break;
+		case 0:
+			// discard/don't save
 			break;
 		}
 	}
