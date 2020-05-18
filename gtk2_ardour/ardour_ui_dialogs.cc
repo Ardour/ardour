@@ -318,6 +318,7 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 			actions.push_back (_("Just close"));
 		}
 		actions.push_back (_("Save and close"));
+
 		switch (ask_about_saving_session (actions)) {
 		case -1:
 			// cancel
