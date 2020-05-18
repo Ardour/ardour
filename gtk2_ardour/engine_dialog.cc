@@ -1127,15 +1127,10 @@ EngineControl::backend_changed ()
 	}
 
 	if (_have_control && !ignore_changes) {
-		// set driver & devices
-		State state = get_matching_state (backend_combo.get_active_text());
-		if (state) {
-			DEBUG_ECONTROL ("backend-changed(): found prior state for backend");
-			PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
-			set_current_state (state);
-		} else {
+		if (!set_state_for_backend (backend_combo.get_active_text ())) {
 			DEBUG_ECONTROL ("backend-changed(): no prior state for backend");
 		}
+
 	} else {
 		DEBUG_ECONTROL (string_compose ("backend-changed(): _have_control=%1 ignore_changes=%2", _have_control, ignore_changes));
 	}
@@ -1828,15 +1823,20 @@ EngineControl::channels_changed ()
 {
 }
 
-EngineControl::State
-EngineControl::get_matching_state (const string& backend)
+bool
+EngineControl::set_state_for_backend (const string& backend)
 {
-	for (StateList::iterator i = states.begin(); i != states.end(); ++i) {
-		if ((*i)->backend == backend) {
-			return (*i);
+	for (StateList::const_iterator i = states.begin(); i != states.end(); ++i) {
+		if ((*i)->backend != backend) {
+			continue;
+		}
+		PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
+		if (set_current_state (*i)) {
+			//push_state_to_backend (false);
+			return true;
 		}
 	}
-	return State();
+	return false;
 }
 
 EngineControl::State
@@ -1973,7 +1973,6 @@ EngineControl::store_state (State state)
 	state->midi_option = get_midi_option ();
 	state->midi_devices = _midi_devices;
 	state->use_buffered_io = get_use_buffered_io ();
-	state->lru = time (NULL) ;
 }
 
 void
@@ -2218,24 +2217,35 @@ EngineControl::set_state (const XMLNode& root)
 			if ((*i)->backend != *bi) {
 				++i; continue;
 			}
-			// keep at latest one for every audio-system
+			/* keep at latest one for every audio-system */
 			if (first) {
 				first = false;
 				++i; continue;
 			}
-			// also keep states used in the last 90 days.
-			if ((now - (*i)->lru) < 86400 * 90) {
+
+			/* keep states used in the last 2 weeks */
+			if ((now - (*i)->lru) < 86400 * 14) {
 				++i; continue;
 			}
+
+			/* also keep state if it was used in the last 90 days
+			 * and latency was calibrated */
+			if ((now - (*i)->lru) < 86400 * 90) {
+				if ((*i)->input_latency != 0 || (*i)->output_latency != 0) {
+					++i; continue;
+				}
+			}
+
 			assert (!(*i)->active);
 			i = states.erase(i);
 		}
 	}
 
+	/* active was sorted first */
 	for (StateList::const_iterator i = states.begin(); i != states.end(); ++i) {
-
-		if ((*i)->active) {
-			return set_current_state (*i) && 0 == push_state_to_backend (false);
+		/* test if the backend & device is available */
+		if (set_current_state (*i)) {
+			return 0 == push_state_to_backend (false);
 		}
 	}
 	return false;
@@ -2643,19 +2653,18 @@ EngineControl::post_push ()
 		store_state(state);
 	}
 
-	states.sort (state_sort_cmp);
+	if (ARDOUR::AudioEngine::instance()->running()) {
+		/* all off */
+		for (StateList::iterator i = states.begin(); i != states.end(); ++i) {
+			(*i)->active = false;
+		}
 
-	/* all off */
-
-	for (StateList::iterator i = states.begin(); i != states.end(); ++i) {
-		(*i)->active = false;
+		/* mark this one active (to be used next time the dialog is shown) */
+		state->active = true;
+		state->lru = time (NULL) ;
 	}
 
-	/* mark this one active (to be used next time the dialog is
-	 * shown)
-	 */
-
-	state->active = true;
+	states.sort (state_sort_cmp);
 
 	if (_have_control) { // XXX
 		manage_control_app_sensitivity ();
@@ -2848,9 +2857,13 @@ EngineControl::update_devices_button_clicked ()
 	if (!backend) {
 		return;
 	}
+	assert (!ARDOUR::AudioEngine::instance()->running());
 
 	if (backend->update_devices()) {
 		device_list_changed ();
+		if (set_state_for_backend (backend_combo.get_active_text ())) {
+			maybe_display_saved_state ();
+		}
 	}
 }
 

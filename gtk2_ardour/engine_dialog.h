@@ -272,7 +272,8 @@ private:
 
 	StateList states;
 
-	State get_matching_state (const std::string& backend);
+	bool set_state_for_backend (const std::string& backend);
+
 	State get_matching_state (const std::string& backend,
 	                          const std::string& driver,
 	                          const std::string& device);
