@@ -312,7 +312,11 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 	if (_session && _session->dirty()) {
 		std::vector<std::string> actions;
 		actions.push_back (_("Don't close"));
-		actions.push_back (_("Just close"));
+		if (_session->unnamed()) {
+			actions.push_back (_("Discard"));
+		} else {
+			actions.push_back (_("Just close"));
+		}
 		actions.push_back (_("Save and close"));
 		switch (ask_about_saving_session (actions)) {
 		case -1:
