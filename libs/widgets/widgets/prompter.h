@@ -38,8 +38,8 @@ namespace ArdourWidgets {
 class LIBWIDGETS_API Prompter : public Gtk::Dialog
 {
 public:
-	Prompter (bool modal = false);
-	Prompter (Gtk::Window& parent, bool modal = false);
+	Prompter (bool modal = false, bool with_cancel_button = true);
+	Prompter (Gtk::Window& parent, bool modal = false, bool with_cancel_button = true);
 	~Prompter () {};
 
 	void set_prompt (std::string prompt) {
@@ -68,7 +68,7 @@ private:
 	bool first_show;
 	bool can_accept_from_entry;
 
-	void init ();
+	void init (bool with_cancel);
 	void entry_activated ();
 };
 

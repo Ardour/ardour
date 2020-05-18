@@ -28,30 +28,33 @@
 using namespace std;
 using namespace ArdourWidgets;
 
-Prompter::Prompter (Gtk::Window& parent, bool modal)
+Prompter::Prompter (Gtk::Window& parent, bool modal, bool with_cancel)
 	: Gtk::Dialog ("", parent, modal)
 	, first_show (true)
 	, can_accept_from_entry (false)
 {
-	init ();
+	init (with_cancel);
 }
 
-Prompter::Prompter (bool modal)
+Prompter::Prompter (bool modal, bool with_cancel)
 	: Gtk::Dialog ("", modal)
 	, first_show (true)
 	, can_accept_from_entry (false)
 {
-	init ();
+	init (with_cancel);
 }
 
 void
-Prompter::init ()
+Prompter::init (bool with_cancel)
 {
 	set_type_hint (Gdk::WINDOW_TYPE_HINT_DIALOG);
 	set_position (Gtk::WIN_POS_MOUSE);
 	set_name ("Prompter");
 
-	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+	if (with_cancel) {
+		/* some callers need to name this button more sensibly */
+		add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+	}
 
 	/*
 	   Alas a generic 'affirmative' button seems a bit useless sometimes.
