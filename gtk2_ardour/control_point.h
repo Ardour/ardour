@@ -79,6 +79,9 @@ public:
 
 	ArdourCanvas::Item& item() const;
 
+	/* used from ~AutomationLine */
+	void unset_item () { _item = 0 ; }
+
 	ARDOUR::AutomationList::iterator model() const { return _model; }
 	AutomationLine&                  line()  const { return _line; }
 

@@ -131,8 +131,13 @@ AutomationLine::AutomationLine (const string&                              name,
 
 AutomationLine::~AutomationLine ()
 {
-	vector_delete (&control_points);
-	delete group;
+	delete group; // deletes child items
+
+	for (std::vector<ControlPoint *>::iterator i = control_points.begin(); i != control_points.end(); i++) {
+		(*i)->unset_item ();
+		delete *i;
+	}
+	control_points.clear ();
 
 	if (_our_time_converter) {
 		delete _time_converter;
