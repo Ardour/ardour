@@ -35,6 +35,7 @@
 #include "ardour/disk_reader.h"
 #include "ardour/disk_writer.h"
 #include "ardour/control_protocol_manager.h"
+#include "ardour/filename_extensions.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/port.h"
 #include "ardour/rc_configuration.h"
@@ -149,15 +150,24 @@ int
 RCConfiguration::save_state()
 {
 	const std::string rcfile = Glib::build_filename (user_config_directory(), user_config_file_name);
+	const std::string tmpfile = rcfile + temp_suffix;
 
-	// this test seems bogus?
-	if (!rcfile.empty()) {
-		XMLTree tree;
-		tree.set_root (&get_state());
-		if (!tree.write (rcfile.c_str())){
-			error << string_compose (_("Config file %1 not saved"), rcfile) << endmsg;
-			return -1;
+	XMLTree tree;
+	tree.set_root (&get_state());
+	if (!tree.write (tmpfile.c_str())){
+		error << string_compose (_("Config file %1 not saved"), rcfile) << endmsg;
+		if (g_remove (tmpfile.c_str()) != 0) {
+			error << string_compose(_("Could not remove temporary config file at path \"%1\" (%2)"), tmpfile, g_strerror (errno)) << endmsg;
 		}
+		return -1;
+	}
+
+	if (::g_rename (tmpfile.c_str(), rcfile.c_str()) != 0) {
+		error << string_compose (_("Could not rename temporary config file %1 to %2 (%3)"), tmpfile, rcfile, g_strerror(errno)) << endmsg;
+		if (g_remove (tmpfile.c_str()) != 0) {
+			error << string_compose(_("Could not remove temporary config file at path \"%1\" (%2)"), tmpfile, g_strerror (errno)) << endmsg;
+		}
+		return -1;
 	}
 
 	return 0;
