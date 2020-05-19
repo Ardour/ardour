@@ -369,8 +369,6 @@ Track::resync_track_name ()
 bool
 Track::set_name (const string& str)
 {
-	bool ret;
-
 	if (str.empty ()) {
 		return false;
 	}
@@ -423,8 +421,7 @@ Track::set_name (const string& str)
 		}
 	}
 
-	/* When creating a track during session-load,
-	 * do not change playlist's name, nor try to save the session.
+	/* When creating a track during session-load, do not change playlist's name.
 	 *
 	 * Changing the playlist name from 'toBeResetFroXML' breaks loading
 	 * Ardour v2..5 sessions. Older versions of Arodur identified playlist
@@ -441,13 +438,7 @@ Track::set_name (const string& str)
 		}
 	}
 
-	/* save state so that the statefile fully reflects any filename changes */
-
-	if ((ret = Route::set_name (str)) == 0) {
-		_session.save_state ();
-	}
-
-	return ret;
+	return Route::set_name (str);
 }
 
 boost::shared_ptr<Playlist>
