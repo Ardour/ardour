@@ -355,8 +355,6 @@ Editor::do_import (vector<string>          paths,
 
 	ImportProgressWindow ipw (&import_status, _("Import"), _("Cancel Import"));
 
-	bool ok = true;
-
 	if (disposition == Editing::ImportMergeFiles) {
 
 		/* create 1 region from all paths, add to 1 track,
@@ -372,11 +370,9 @@ Editor::do_import (vector<string>          paths,
 			}
 		}
 
-		if (cancel) {
-			ok = false;
-		} else {
+		if (!cancel) {
 			ipw.show ();
-			ok = (import_sndfiles (paths, disposition, mode, quality, pos, 1, 1, track, false, instrument) == 0);
+			import_sndfiles (paths, disposition, mode, quality, pos, 1, 1, track, false, instrument);
 			import_status.clear();
 		}
 
@@ -422,7 +418,7 @@ Editor::do_import (vector<string>          paths,
 					track = get_nth_selected_audio_track (nth++);
 				}
 
-				ok = (import_sndfiles (to_import, disposition, mode, quality, pos, 1, -1, track, replace, instrument) == 0);
+				import_sndfiles (to_import, disposition, mode, quality, pos, 1, -1, track, replace, instrument);
 				import_status.clear();
 				break;
 
@@ -431,7 +427,7 @@ Editor::do_import (vector<string>          paths,
 				to_import.clear ();
 				to_import.push_back (*a);
 
-				ok = (import_sndfiles (to_import, disposition, mode, quality, pos, -1, -1, track, replace, instrument) == 0);
+				import_sndfiles (to_import, disposition, mode, quality, pos, -1, -1, track, replace, instrument);
 				import_status.clear();
 				break;
 
@@ -440,7 +436,7 @@ Editor::do_import (vector<string>          paths,
 				to_import.clear ();
 				to_import.push_back (*a);
 
-				ok = (import_sndfiles (to_import, disposition, mode, quality, pos, 1, 1, track, replace, instrument) == 0);
+				import_sndfiles (to_import, disposition, mode, quality, pos, 1, 1, track, replace, instrument);
 				import_status.clear();
 				break;
 
@@ -451,10 +447,6 @@ Editor::do_import (vector<string>          paths,
 		}
 	}
 
-	if (ok) {
-		_session->save_state ("");
-	}
-
 	import_status.all_done = true;
 }
 
@@ -463,7 +455,6 @@ Editor::do_embed (vector<string> paths, ImportDisposition import_as, ImportMode 
 {
 	boost::shared_ptr<Track> track;
 	bool check_sample_rate = true;
-	bool ok = false;
 	vector<string> to_embed;
 	bool multi = paths.size() > 1;
 	int nth = 0;
@@ -486,7 +477,8 @@ Editor::do_embed (vector<string> paths, ImportDisposition import_as, ImportMode 
 			}
 
 			if (embed_sndfiles (to_embed, multi, check_sample_rate, import_as, mode, pos, 1, -1, track, instrument) < -1) {
-				goto out;
+				/* error, bail out */
+				return;
 			}
 		}
 		break;
@@ -503,14 +495,16 @@ Editor::do_embed (vector<string> paths, ImportDisposition import_as, ImportMode 
 			to_embed.push_back (*a);
 
 			if (embed_sndfiles (to_embed, multi, check_sample_rate, import_as, mode, pos, -1, -1, track, instrument) < -1) {
-				goto out;
+				/* error, bail out */
+				return;
 			}
 		}
 		break;
 
 	case Editing::ImportMergeFiles:
 		if (embed_sndfiles (paths, multi, check_sample_rate, import_as, mode, pos, 1, 1, track, instrument) < -1) {
-			goto out;
+			/* error, bail out */
+			return;
 		}
 		break;
 
@@ -526,17 +520,11 @@ Editor::do_embed (vector<string> paths, ImportDisposition import_as, ImportMode 
 			to_embed.push_back (*a);
 
 			if (embed_sndfiles (to_embed, multi, check_sample_rate, import_as, mode, pos, 1, 1, track, instrument) < -1) {
-				goto out;
+				/* error, bail out */
+				return;
 			}
 		}
 		break;
-	}
-
-	ok = true;
-
-  out:
-	if (ok) {
-		_session->save_state ("");
 	}
 }
 
