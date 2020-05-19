@@ -269,8 +269,6 @@ Session::import_pt (PTFFormat& ptf, ImportStatus& status)
 		info << _("All audio files found for PT import!") << endmsg;
 	}
 
-	save_state("");
-
 	for (vector<PTFFormat::region_t>::const_iterator a = ptf.regions ().begin ();
 			a != ptf.regions ().end (); ++a) {
 		for (vector<ptflookup_t>::iterator p = ptfwavpair.begin ();
@@ -370,7 +368,6 @@ Session::import_pt (PTFFormat& ptf, ImportStatus& status)
 	}
 
 trymidi:
-	save_state("");
 	status.paths.clear();
 	status.paths.push_back(ptf.path ());
 	status.current = 1;
@@ -456,7 +453,6 @@ trymidi:
 
 	status.progress = 1.0;
 	status.done = true;
-	save_state("");
 	status.sources.clear ();
 	status.all_done = true;
 }

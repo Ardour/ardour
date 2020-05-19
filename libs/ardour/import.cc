@@ -641,10 +641,6 @@ Session::import_files (ImportStatus& status)
 			}
 		}
 
-		/* save state so that we don't lose these new Sources */
-
-		save_state (_name);
-
 		std::copy (all_new_sources.begin(), all_new_sources.end(), std::back_inserter(status.sources));
 	} else {
 		try {
@@ -657,4 +653,3 @@ Session::import_files (ImportStatus& status)
 
 	status.done = true;
 }
-
