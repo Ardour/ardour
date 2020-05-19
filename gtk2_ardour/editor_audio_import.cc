@@ -540,7 +540,8 @@ Editor::import_sndfiles (vector<string>            paths,
                          bool                      replace,
                          ARDOUR::PluginInfoPtr     instrument)
 {
-	cerr << "Importing " << paths.size() << " at once\n";
+	/* skip periodic saves while importing */
+	Session::StateProtector sp (_session);
 
 	import_status.paths = paths;
 	import_status.done = false;
@@ -614,6 +615,9 @@ Editor::embed_sndfiles (vector<string>            paths,
 	SourceList sources;
 	string linked_path;
 	SoundFileInfo finfo;
+
+	/* skip periodic saves while importing */
+	Session::StateProtector sp (_session);
 
 	CursorContext::Handle cursor_ctx = CursorContext::create(*this, _cursors->wait);
 	gdk_flush ();
