@@ -3308,11 +3308,6 @@ Session::cleanup_regions ()
 			}
 		}
 	}
-
-	/* dump the history list */
-	_history.clear ();
-
-	save_state ("");
 }
 
 bool
