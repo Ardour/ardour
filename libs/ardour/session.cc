@@ -3475,12 +3475,6 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 	pc.add (Properties::order);
 	PresentationInfo::Change (pc);
 
-	/* save the new state of the world */
-
-	if (save_state (_current_snapshot_name)) {
-		save_history (_current_snapshot_name);
-	}
-
 	update_route_record_state ();
 }
 
