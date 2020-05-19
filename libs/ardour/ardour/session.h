@@ -563,7 +563,7 @@ public:
 	 * @param only_used_assets skip Sources that are not used, mainly useful with \p for_archive
 	 * @return zero on success
 	 */
-	int save_state (std::string snapshot_name,
+	int save_state (std::string snapshot_name = "",
 	                bool pending = false,
 	                bool switch_to_snapshot = false,
 	                bool template_only = false,

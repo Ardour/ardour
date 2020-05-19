@@ -3690,7 +3690,7 @@ Session::cleanup_sources (CleanupReport& rep)
 	 * referring to non-existent sources.
 	 */
 
-	save_state ("");
+	save_state ();
 	ret = 0;
 
 out:
@@ -4764,7 +4764,7 @@ Session::bring_all_sources_into_session (boost::function<void(uint32_t,uint32_t,
 		}
 	}
 
-	save_state ("", false, false);
+	save_state ();
 
 	return ret;
 }

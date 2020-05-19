@@ -3119,7 +3119,7 @@ Session::add_routes (RouteList& new_routes, bool input_auto_connect, bool output
 	set_dirty();
 
 	if (save) {
-		save_state (_current_snapshot_name);
+		save_state ();
 	}
 
 	update_route_record_state ();
@@ -4375,7 +4375,11 @@ Session::remove_last_capture ()
 
 	destroy_sources (srcs);
 
-	save_state (_current_snapshot_name);
+	/* save state so we don't end up with a session file
+	 * referring to non-existent sources.
+	 */
+
+	save_state ();
 
 	return 0;
 }
@@ -4472,7 +4476,7 @@ Session::remove_source (boost::weak_ptr<Source> src)
 		 * referring to non-existent sources.
 		 */
 
-		save_state (_current_snapshot_name);
+		save_state ();
 	}
 }
 

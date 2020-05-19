@@ -444,7 +444,7 @@ Track::set_name (const string& str)
 	/* save state so that the statefile fully reflects any filename changes */
 
 	if ((ret = Route::set_name (str)) == 0) {
-		_session.save_state ("");
+		_session.save_state ();
 	}
 
 	return ret;
