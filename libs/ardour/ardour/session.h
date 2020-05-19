@@ -1796,7 +1796,7 @@ private:
 
 	SerializedRCUManager<RouteList>  routes;
 
-	void add_routes (RouteList&, bool input_auto_connect, bool output_auto_connect, bool save, PresentationInfo::order_t);
+	void add_routes (RouteList&, bool input_auto_connect, bool output_auto_connect, PresentationInfo::order_t);
 	void add_routes_inner (RouteList&, bool input_auto_connect, bool output_auto_connect, PresentationInfo::order_t);
 	bool _adding_routes_in_progress;
 	bool _reconnecting_routes_in_progress;

@@ -1842,7 +1842,7 @@ Session::load_routes (const XMLNode& node, int version)
 
 	BootMessage (_("Tracks/busses loaded;  Adding to Session"));
 
-	add_routes (new_routes, false, false, false, PresentationInfo::max_order);
+	add_routes (new_routes, false, false, PresentationInfo::max_order);
 
 	BootMessage (_("Finished adding tracks/busses"));
 

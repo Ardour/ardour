@@ -1021,7 +1021,7 @@ Session::add_monitor_section ()
 	}
 
 	rl.push_back (r);
-	add_routes (rl, false, false, false, 0);
+	add_routes (rl, false, false, 0);
 
 	assert (_monitor_out);
 
@@ -1278,7 +1278,7 @@ Session::add_master_bus (ChanCount const& count)
 	}
 
 	rl.push_back (r);
-	add_routes (rl, false, false, false, PresentationInfo::max_order);
+	add_routes (rl, false, false, PresentationInfo::max_order);
 	return 0;
 }
 
@@ -2442,8 +2442,7 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, bool s
 
 	failed:
 	if (!new_routes.empty()) {
-		StateProtector sp (this);
-		add_routes (new_routes, true, true, false, order);
+		add_routes (new_routes, true, true, order);
 
 		if (instrument) {
 			for (RouteList::iterator r = new_routes.begin(); r != new_routes.end(); ++r) {
@@ -2542,8 +2541,7 @@ Session::new_midi_route (RouteGroup* route_group, uint32_t how_many, string name
 
 	failure:
 	if (!ret.empty()) {
-		StateProtector sp (this);
-		add_routes (ret, false, false, false, order);
+		add_routes (ret, false, false, order);
 
 		if (instrument) {
 			for (RouteList::iterator r = ret.begin(); r != ret.end(); ++r) {
@@ -2741,8 +2739,7 @@ Session::new_audio_track (int input_channels, int output_channels, RouteGroup* r
 
 	failed:
 	if (!new_routes.empty()) {
-		StateProtector sp (this);
-		add_routes (new_routes, input_auto_connect, true, false, order);
+		add_routes (new_routes, input_auto_connect, true, order);
 	}
 
 	return ret;
@@ -2824,12 +2821,10 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 
 	failure:
 	if (!ret.empty()) {
-		StateProtector sp (this);
-
 		if (flags == PresentationInfo::FoldbackBus) {
-			add_routes (ret, false, false, true, order); // no autoconnect
+			add_routes (ret, false, false, order); // no autoconnect
 		} else {
-			add_routes (ret, false, true, true, order); // autoconnect // outputs only
+			add_routes (ret, false, true, order); // autoconnect // outputs only
 		}
 	}
 
@@ -3083,9 +3078,7 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 
 	out:
 	if (!ret.empty()) {
-		StateProtector sp (this);
-
-		add_routes (ret, true, true, false, insert_at);
+		add_routes (ret, true, true, insert_at);
 	}
 
 	IO::enable_connecting ();
@@ -3094,7 +3087,7 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 }
 
 void
-Session::add_routes (RouteList& new_routes, bool input_auto_connect, bool output_auto_connect, bool save, PresentationInfo::order_t order)
+Session::add_routes (RouteList& new_routes, bool input_auto_connect, bool output_auto_connect, PresentationInfo::order_t order)
 {
 	try {
 		PBD::Unwinder<bool> aip (_adding_routes_in_progress, true);
@@ -3117,10 +3110,6 @@ Session::add_routes (RouteList& new_routes, bool input_auto_connect, bool output
 	graph_reordered (false);
 
 	set_dirty();
-
-	if (save) {
-		save_state ();
-	}
 
 	update_route_record_state ();
 
