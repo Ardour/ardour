@@ -4456,15 +4456,23 @@ Session::remove_source (boost::weak_ptr<Source> src)
 		if ((i = sources.find (source->id())) != sources.end()) {
 			sources.erase (i);
 			SourceRemoved (src); /* EMIT SIGNAL */
+		} else {
+			return;
 		}
 	}
 
-	if (!in_cleanup () && !loading ()) {
+	if (source->empty ()) {
+		/* No need to save when empty sources are removed.
+		 * This is likely due to disk-writer initial dummies
+		 * where files don't even exist on disk.
+		 */
+		return;
+	}
 
+	if (!in_cleanup () && !loading ()) {
 		/* save state so we don't end up with a session file
 		 * referring to non-existent sources.
 		 */
-
 		save_state ();
 	}
 }
