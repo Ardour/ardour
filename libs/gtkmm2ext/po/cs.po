@@ -105,7 +105,7 @@ msgstr "Ctrl"
 
 #: keyboard.cc:77 keyboard.cc:82 keyboard.cc:100 keyboard.cc:105
 msgid "Key|Shift"
-msgstr "Key|Shift"
+msgstr "Shift"
 
 #: keyboard.cc:78
 msgid "Option"
