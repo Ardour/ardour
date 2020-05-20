@@ -9793,7 +9793,7 @@ msgstr ""
 
 #: mixer_strip.cc:2284
 msgid "Mon|O"
-msgstr "Mon|O"
+msgstr "O"
 
 #: mixer_strip.cc:2297 meter_strip.cc:387 route_time_axis.cc:2553
 #: vca_master_strip.cc:217 vca_time_axis.cc:273
@@ -14982,7 +14982,7 @@ msgstr ""
 #: session_option_editor.cc:210 session_option_editor.cc:216
 #: session_option_editor.cc:223
 msgid "Files|Locations"
-msgstr "Archivos|Localizaciones"
+msgstr "Localizaciones"
 
 #: session_option_editor.cc:210
 msgid "File Locations"
@@ -16004,7 +16004,7 @@ msgstr ""
 # Aquí estaba panorámica, pero pan se entiende perfectamente y es mucho más corto
 #: stereo_panner.cc:275
 msgid "Panner|M"
-msgstr "Paner|M"
+msgstr "M"
 
 #: stereo_panner_editor.cc:36
 msgid "Stereo Panner"
@@ -16338,7 +16338,7 @@ msgstr "Cents:"
 
 #: time_fx_dialog.cc:135
 msgid "Time|Shift"
-msgstr "Tiempo|Shift"
+msgstr "Shift"
 
 #: time_fx_dialog.cc:187 time_fx_dialog.cc:191
 msgid "TimeFXButton"

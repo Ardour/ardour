@@ -8172,7 +8172,7 @@ msgstr "00:00:00.000"
 
 #: export_report.cc:293
 msgid "0|A8"
-msgstr "0|A8"
+msgstr "A8"
 
 #: export_report.cc:403
 msgid "%1 dB"

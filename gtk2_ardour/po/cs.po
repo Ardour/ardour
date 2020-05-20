@@ -1284,7 +1284,7 @@ msgstr "Nahrávání: >24h"
 #: ardour_ui.cc:1366
 #, c-format
 msgid "Timecode|TC: <span foreground=\"%s\">%s</span>"
-msgstr "Časový kód|ČK: <span foreground=\"%s\">%s</span>"
+msgstr "ČK: <span foreground=\"%s\">%s</span>"
 
 #: ardour_ui.cc:1418
 msgid "could not create %1 new mixed track"
@@ -3084,7 +3084,7 @@ msgstr "Táhnout"
 
 #: audio_clock.cc:1280
 msgid "Tempo|T"
-msgstr "Tempo|T"
+msgstr "T"
 
 #: audio_clock.cc:1284
 msgid "TimeSignature|TS"
@@ -3236,7 +3236,7 @@ msgstr "Vyprázdnit automatizaci"
 
 #: automation_time_axis.cc:606
 msgid "Automation|Off"
-msgstr "Automation|Vypnuto"
+msgstr "Vypnuto"
 
 #: automation_time_axis.cc:609 gain_meter.cc:266 generic_pluginui.cc:889
 #: generic_pluginui.cc:1221 panner_ui.cc:153
@@ -6609,11 +6609,11 @@ msgstr "Poloha oblasti zamknuta?"
 
 #: editor_regions.cc:180
 msgid "Glued|G"
-msgstr "Glued|Př"
+msgstr "Př"
 
 #: editor_regions.cc:180
 msgid "Region position glued to Bars|Beats time?"
-msgstr "Poloha oblasti přilepena k taktům|dobám?"
+msgstr "dobám?"
 
 #: editor_regions.cc:181
 msgid "Region muted?"
@@ -6705,7 +6705,7 @@ msgstr "Vstup MIDI povolen"
 
 #: editor_routes.cc:244
 msgid "Rec|R"
-msgstr "Rec|N"
+msgstr "N"
 
 #: editor_routes.cc:244
 msgid "Record enabled"
@@ -6729,7 +6729,7 @@ msgstr "Sólo"
 
 #: editor_routes.cc:248
 msgid "SoloIso|SI"
-msgstr "SoloIso|OS"
+msgstr "OS"
 
 #: editor_routes.cc:248
 msgid "Solo Isolated"
@@ -6737,7 +6737,7 @@ msgstr "Oddělené sólo"
 
 #: editor_routes.cc:249
 msgid "SoloLock|SS"
-msgstr "SoloLock|ZS"
+msgstr "ZS"
 
 #: editor_routes.cc:249
 msgid "Solo Safe (Locked)"
@@ -7898,11 +7898,11 @@ msgstr "Spousta"
 
 #: export_report.cc:612
 msgid "Logscale|Lg"
-msgstr "Logaritmicky|Lg"
+msgstr "Lg"
 
 #: export_report.cc:613
 msgid "Rectified|Rf"
-msgstr "Napraveno|Npv"
+msgstr "Npv"
 
 #: export_report.cc:614
 msgid "Logscale"
@@ -8160,11 +8160,11 @@ msgstr "Po-prolínač"
 
 #: gain_meter.cc:784 panner_ui.cc:569
 msgid "Manual|M"
-msgstr "Ruční|Ruč"
+msgstr "Ruč"
 
 #: gain_meter.cc:787 panner_ui.cc:572
 msgid "Play|P"
-msgstr "Přehrát|Přehr"
+msgstr "Přehr"
 
 #: gain_meter.cc:790
 msgid "Trim|T"
@@ -8172,11 +8172,11 @@ msgstr "Zastřihnout/Zas"
 
 #: gain_meter.cc:793 panner_ui.cc:578
 msgid "Latch|L"
-msgstr "Zaklapnout|Zak"
+msgstr "Zak"
 
 #: gain_meter.cc:796 panner_ui.cc:581
 msgid "Write|W"
-msgstr "Zapsat|Zaps"
+msgstr "Zaps"
 
 #: generic_pluginui.cc:89
 msgid "MIDI Keyboard"
@@ -12236,7 +12236,7 @@ msgstr "Obecné/Sezení"
 
 #: rc_option_editor.cc:2243
 msgid "Options|Undo"
-msgstr "Volby|Zpět"
+msgstr "Zpět"
 
 #: rc_option_editor.cc:2250
 msgid "Verify removal of last capture"
@@ -12770,7 +12770,7 @@ msgstr ""
 #: rc_option_editor.cc:3072 rc_option_editor.cc:3083 rc_option_editor.cc:3085
 #: rc_option_editor.cc:3087 rc_option_editor.cc:3095
 msgid "Preferences|Metering"
-msgstr "Nastavení|Ukazatel hladiny"
+msgstr "Ukazatel hladiny"
 
 #: rc_option_editor.cc:2946
 msgid "Peak hold time"
@@ -14815,7 +14815,7 @@ msgstr "Směšovač DJ"
 
 #: session_metadata_dialog.cc:837
 msgid "Metadata|Mixer"
-msgstr "Popisná data|Směšovač"
+msgstr "Směšovač"
 
 #: session_metadata_dialog.cc:845
 msgid "School"
@@ -15565,7 +15565,7 @@ msgstr "Co nejrychleji"
 
 #: shuttle_control.cc:65
 msgid "LogestShuttle|< +00 st"
-msgstr "LogestShuttle|< +00 st"
+msgstr "< +00 st"
 
 #: shuttle_control.cc:71
 msgid "Shuttle speed control (Context-click for options)"
@@ -16432,7 +16432,7 @@ msgstr "Centy:"
 
 #: time_fx_dialog.cc:135
 msgid "Time|Shift"
-msgstr "Čas|Posun"
+msgstr "Posun"
 
 #: time_fx_dialog.cc:187 time_fx_dialog.cc:191
 msgid "TimeFXButton"
@@ -16874,7 +16874,7 @@ msgstr " %1 FPS"
 
 #: vca_time_axis.cc:70
 msgid "VCA|D"
-msgstr "VCA|D"
+msgstr "D"
 
 #: vca_time_axis.cc:71
 msgid "Unassign all slaves"
@@ -19031,25 +19031,25 @@ msgstr ""
 #~ msgstr "Vložit oblast ze seznamu oblastí"
 
 #~ msgid "group|G"
-#~ msgstr "Skupina|Sk"
+#~ msgstr "Sk"
 
 #~ msgid "relative|Rel"
-#~ msgstr "Poměrně|Pom"
+#~ msgstr "Pom"
 
 #~ msgid "mute|M"
-#~ msgstr "Ztlumit|Z"
+#~ msgstr "Z"
 
 #~ msgid "solo|S"
-#~ msgstr "Sólo|S"
+#~ msgstr "S"
 
 #~ msgid "monitoring|Mon"
-#~ msgstr "Sledování|Sl"
+#~ msgstr "Sl"
 
 #~ msgid "selection|Sel"
-#~ msgstr "Výběr|V"
+#~ msgstr "V"
 
 #~ msgid "active|A"
-#~ msgstr "Činný|Č"
+#~ msgstr "Č"
 
 #~ msgid "File Exists!"
 #~ msgstr "Soubor existuje!"

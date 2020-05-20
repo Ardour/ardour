@@ -913,7 +913,7 @@ msgstr "Sobre"
 
 #: ardour_ui.cc:331 location_ui.cc:1215
 msgid "Ranges|Locations"
-msgstr "Intervalos|Localizações"
+msgstr "Localizações"
 
 #: ardour_ui.cc:332 route_params_ui.cc:65 route_params_ui.cc:567
 msgid "Tracks and Busses"
@@ -5566,7 +5566,7 @@ msgstr "Nome do Grupo"
 
 #: editor_route_groups.cc:104 editor_routes.cc:248
 msgid "Visible|V"
-msgstr "Visível|V"
+msgstr "V"
 
 #: editor_route_groups.cc:104
 msgid "Group is visible?"
@@ -5582,7 +5582,7 @@ msgstr "Grupo está ativado?"
 
 #: editor_route_groups.cc:106
 msgid "Group|G"
-msgstr "Grupo|G"
+msgstr "G"
 
 #: editor_route_groups.cc:106
 msgid "Sharing Gain?"
@@ -5630,7 +5630,7 @@ msgstr ""
 
 #: editor_route_groups.cc:112
 msgid "Selection|Sel"
-msgstr "Seleção|Sel"
+msgstr "Sel"
 
 #: editor_route_groups.cc:112
 msgid "Sharing Selected/Editing Status?"
@@ -11928,7 +11928,7 @@ msgstr ""
 
 #: rc_option_editor.cc:2421
 msgid "Options|Undo"
-msgstr "Opções|Desfazer"
+msgstr "Desfazer"
 
 #: rc_option_editor.cc:2428
 msgid "Verify removal of last capture"
@@ -16896,7 +16896,7 @@ msgstr ""
 #~ msgstr "Áudio: <span foreground=\"green\">%<PRId64> kHz / %4.1f ms</span>"
 
 #~ msgid "Timecode|TC: <span foreground=\"%s\">%s</span>"
-#~ msgstr "Tempo|TC: <span foreground=\"%s\">%s</span>"
+#~ msgstr "TC: <span foreground=\"%s\">%s</span>"
 
 #~ msgid "Duplicate Tracks & Busses"
 #~ msgstr "Duplicar Trilhas e Bus"

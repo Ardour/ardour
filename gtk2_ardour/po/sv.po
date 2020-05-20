@@ -983,7 +983,7 @@ msgstr ""
 
 #: ardour_ui.cc:357 editor.cc:1316
 msgid "Window|Editor"
-msgstr "Fönster|Redigerare"
+msgstr "Redigerare"
 
 #: ardour_ui.cc:358 mixer_ui.cc:2916 mixer_ui.cc:2922
 msgid "Window|Mixer"
@@ -991,7 +991,7 @@ msgstr "Fönster|Mixer"
 
 #: ardour_ui.cc:359
 msgid "Window|Preferences"
-msgstr "Fönster|Egenskaper"
+msgstr "Egenskaper"
 
 #: ardour_ui.cc:370
 msgid "Your configuration files were copied. You can now restart %1."
@@ -16916,7 +16916,7 @@ msgstr ""
 #~ msgstr "PkBld: <span foreground=\"%s\">%d</span>"
 
 #~ msgid "Timecode|TC: <span foreground=\"%s\">%s</span>"
-#~ msgstr "Tidskod|TC: <span foreground=\"%s\">%s</span>"
+#~ msgstr "TC: <span foreground=\"%s\">%s</span>"
 
 #~ msgid "Always copy imported files"
 #~ msgstr "Kopiera alltid importerade filer"

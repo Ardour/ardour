@@ -1013,7 +1013,7 @@ msgstr ""
 
 #: ardour_ui.cc:358 mixer_ui.cc:2916 mixer_ui.cc:2922
 msgid "Window|Mixer"
-msgstr "Vindauga|miksar"
+msgstr "miksar"
 
 #: ardour_ui.cc:359
 msgid "Window|Preferences"
@@ -1969,7 +1969,7 @@ msgstr "Prat"
 
 #: ardour_ui_ed.cc:275
 msgid "Help|Manual"
-msgstr "Hjelp|Rettleiing"
+msgstr "Rettleiing"
 
 #: ardour_ui_ed.cc:276
 msgid "Manual|Reference"
@@ -3107,7 +3107,7 @@ msgstr ""
 
 #: automation_time_axis.cc:625 gain_meter.cc:783
 msgid "Automation|Manual"
-msgstr "Automasjon|Manuell"
+msgstr "Manuell"
 
 #: automation_time_axis.cc:643 rc_option_editor.cc:3650
 #: rc_option_editor.cc:3655 rc_option_editor.cc:3707 rc_option_editor.cc:3712
@@ -3964,11 +3964,11 @@ msgstr ""
 
 #: editor.cc:3627 editor_actions.cc:364
 msgid "Command|Undo"
-msgstr "Kommando|Angra"
+msgstr "Angra"
 
 #: editor.cc:3629
 msgid "Command|Undo (%1)"
-msgstr "Kommando|Angra (%1)"
+msgstr "Angra (%1)"
 
 #: editor.cc:3636 editor_actions.cc:366 editor_actions.cc:367
 #: editor_actions.cc:368
@@ -16164,7 +16164,7 @@ msgstr "Cent:"
 
 #: time_fx_dialog.cc:135
 msgid "Time|Shift"
-msgstr "Tid|Forskyv"
+msgstr "Forskyv"
 
 #: time_fx_dialog.cc:187 time_fx_dialog.cc:191
 msgid "TimeFXButton"
@@ -17127,7 +17127,7 @@ msgstr ""
 #~ msgstr "Lyd+MIDI"
 
 #~ msgid "Timecode|TC: <span foreground=\"%s\">%s</span>"
-#~ msgstr "Tidskode|TC: <span foreground=\"%s\">%s</span>"
+#~ msgstr "TC: <span foreground=\"%s\">%s</span>"
 
 #~ msgid "Could not create session in \"%1\""
 #~ msgstr "Greidde ikkje laga økt i \"%1\""
@@ -18063,25 +18063,25 @@ msgstr ""
 #~ msgstr "Set inn bolk frå lista"
 
 #~ msgid "group|G"
-#~ msgstr "Gruppe|G"
+#~ msgstr "G"
 
 #~ msgid "relative|Rel"
-#~ msgstr "Relativt|Rel"
+#~ msgstr "Rel"
 
 #~ msgid "mute|M"
-#~ msgstr "Demp|D"
+#~ msgstr "D"
 
 #~ msgid "solo|S"
-#~ msgstr "Solo|S"
+#~ msgstr "S"
 
 #~ msgid "monitoring|Mon"
-#~ msgstr "Lytting|Mon"
+#~ msgstr "Mon"
 
 #~ msgid "selection|Sel"
-#~ msgstr "Utval|Val"
+#~ msgstr "Val"
 
 #~ msgid "active|A"
-#~ msgstr "aktiv|A"
+#~ msgstr "A"
 
 #~ msgid "File Exists!"
 #~ msgstr "Fila eksisterer!"
