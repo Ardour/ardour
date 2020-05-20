@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libardour 4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-30 12:44-0600\n"
+"POT-Creation-Date: 2020-05-20 14:36-0600\n"
 "PO-Revision-Date: 2020-04-22 19:41+0300\n"
 "Last-Translator: Alexandre Prokoudine <alexandre.prokoudine@gmail.com>\n"
 "Language-Team: русский <gnome-cyr@lists.gnome.org>\n"
@@ -175,8 +175,8 @@ msgstr "Ошибка: закончилась свободная память"
 msgid "Could not reconnect to Audio/MIDI engine"
 msgstr ""
 
-#: audio_backend.cc:107 export_formats.cc:60 session.cc:6788
-#: transport_master.cc:495
+#: audio_backend.cc:107 export_formats.cc:60 session.cc:6791
+#: transport_master.cc:489
 msgid "None"
 msgstr "Нет"
 
@@ -188,7 +188,7 @@ msgstr "По умолчанию"
 msgid "Could not open %1.  Audio Library not saved"
 msgstr "Не удалось открыть %1. Аудио библиотека не сохранена"
 
-#: audio_playlist.cc:518
+#: audio_playlist.cc:519
 msgid ""
 "Legacy crossfade involved an incoming region not present in playlist \"%1\" "
 "- crossfade discarded"
@@ -196,7 +196,7 @@ msgstr ""
 "Плавный переход участвующией входящей области отсутствует плейлисте \"%1\" - "
 "Склейка отменяется"
 
-#: audio_playlist.cc:534
+#: audio_playlist.cc:535
 msgid ""
 "Legacy crossfade involved an outgoing region not present in playlist \"%1\" "
 "- crossfade discarded"
@@ -231,8 +231,8 @@ msgstr "Плейлисты аудио (неиспользованные)"
 
 #: audio_playlist_source.cc:169 audiosource.cc:1054 midi_playlist_source.cc:163
 #: midi_playlist_source.cc:171 midi_playlist_source.cc:178 midi_source.cc:410
-#: midi_source.cc:437 plugin_insert.cc:1447 rb_effect.cc:333 session.cc:5236
-#: session.cc:5241 session.cc:5270 session.cc:5275 session.cc:5370
+#: midi_source.cc:437 plugin_insert.cc:1447 rb_effect.cc:333 session.cc:5202
+#: session.cc:5207 session.cc:5236 session.cc:5241 session.cc:5336
 #: session_handle.cc:87 sndfilesource.cc:172
 msgid "programming error: %1"
 msgstr "Ошибка в программе: %1"
@@ -281,19 +281,19 @@ msgstr "Не удалось загрузить модуль VAMP под назв
 msgid "VAMP Plugin \"%1\" could not be loaded"
 msgstr "Не удалось загрузить модуль VAMP под названием \"%1\""
 
-#: audioengine.cc:846
+#: audioengine.cc:852
 msgid "AudioEngine: cannot load module \"%1\" (%2)"
 msgstr "AudioEngine: невозможно загрузить модуль \"%1\" (%2)"
 
-#: audioengine.cc:852
+#: audioengine.cc:858
 msgid "AudioEngine: backend at \"%1\" has no descriptor function."
 msgstr "AudioEngine: бэкэнд на \"%1\" не имеет функции дескрипторов."
 
-#: audioengine.cc:945
+#: audioengine.cc:951
 msgid "Could not create backend for %1: %2"
 msgstr "Не удалось создать движок для %1: %2"
 
-#: audioengine.cc:1623
+#: audioengine.cc:1629
 msgid ""
 "programming error: port %1 could not be placed on the pending deletion "
 "queue\n"
@@ -434,7 +434,7 @@ msgstr "Не удалось открыть %2 для загрузки данны
 msgid "cannot load automation data from %2"
 msgstr "Не удалось загрузить данные автоматизации из %2"
 
-#: automatable.cc:194 send.cc:103 session.cc:833
+#: automatable.cc:194 send.cc:103 session.cc:822
 msgid "Fader"
 msgstr "Фейдер"
 
@@ -573,7 +573,7 @@ msgstr "Не удалось найти частоту CPU в /proc/cpuinfo"
 msgid "audio"
 msgstr "аудио"
 
-#: data_type.cc:28 session.cc:2417
+#: data_type.cc:28 session.cc:2388
 msgid "MIDI"
 msgstr "MIDI"
 
@@ -589,26 +589,26 @@ msgstr "Главные выходы"
 msgid "listen"
 msgstr "Слушать"
 
-#: disk_reader.cc:702
+#: disk_reader.cc:729
 msgid ""
 "DiskReader %1: when overwriting(1), cannot read %2 from playlist at sample %3"
 msgstr ""
 
-#: disk_reader.cc:710
+#: disk_reader.cc:738
 msgid ""
 "DiskReader %1: when overwriting(2), cannot read %2 from playlist at sample %3"
 msgstr ""
 
-#: disk_reader.cc:1015
+#: disk_reader.cc:1043
 msgid "DiskReader %1: cannot read %2 from playlist at sample %3"
 msgstr ""
 
-#: disk_reader.cc:1269
+#: disk_reader.cc:1301
 msgid ""
 "DiskReader %1: when refilling, cannot read %2 from playlist at sample %3"
 msgstr ""
 
-#: disk_reader.cc:1275
+#: disk_reader.cc:1307
 msgid "DiskReader %1: when refilling, cannot write %2 into buffer"
 msgstr ""
 
@@ -863,7 +863,7 @@ msgstr ""
 "%1 поддерживает только %2 каналов, но вы должны иметь %3 каналов в вашей "
 "Конфигурации каналов"
 
-#: file_source.cc:200 session_state.cc:3649
+#: file_source.cc:200 session_state.cc:3639
 msgid ""
 "there are already 1000 files with names like %1; versioning discontinued"
 msgstr ""
@@ -1047,11 +1047,11 @@ msgstr ""
 msgid "Loading configuration"
 msgstr "Загрузка конфигурации"
 
-#: globals.cc:592 route.cc:207 session.cc:1017
+#: globals.cc:592 route.cc:207 session.cc:1006
 msgid "Monitor"
 msgstr "Монитор"
 
-#: globals.cc:593 session.cc:1278
+#: globals.cc:593 session.cc:1267
 msgid "Master"
 msgstr "Мастер"
 
@@ -1148,7 +1148,7 @@ msgstr "Импорт: файл не содержит ни одного кана�
 msgid "Loading MIDI file %1"
 msgstr "Загружается MIDI-файл %1"
 
-#: import.cc:653
+#: import.cc:649
 msgid "Failed to remove some files after failed/cancelled import operation"
 msgstr ""
 "Не удалось удалить некоторые файлы после неудачной/отмененной операции "
@@ -1175,7 +1175,7 @@ msgstr ""
 msgid "All audio files found for PT import!"
 msgstr ""
 
-#: import_pt.cc:356
+#: import_pt.cc:354
 msgid "PTImport: UINT_MAX routes? impossible!"
 msgstr ""
 
@@ -1183,7 +1183,7 @@ msgstr ""
 msgid "Unknown"
 msgstr "Неизвестный"
 
-#: internal_send.cc:367 internal_send.cc:368
+#: internal_send.cc:431 internal_send.cc:432
 msgid "%1 - cannot find any track/bus with the ID %2 to connect to"
 msgstr "%1 - не удалось найти любую дорожку/шину с ID %2 для подключения к"
 
@@ -1388,7 +1388,7 @@ msgstr "Позиции: попытка использовать неизвест
 msgid "incorrect XML mode passed to Locations::set_state"
 msgstr "Неверный режим XML одобрен для Locations::set_state"
 
-#: location.cc:1114 session.cc:1618 session_state.cc:1441
+#: location.cc:1114 session.cc:1601 session_state.cc:1441
 msgid "session"
 msgstr "Сесссия"
 
@@ -1461,15 +1461,7 @@ msgstr ""
 msgid "LTCFileReader:: invalid audio channel selected"
 msgstr ""
 
-#: ltc_slave.cc:365
-msgid "Session framerate adjusted from %1 to LTC's %2."
-msgstr "Частота кадров сессии в диапазоне от %1 до LTC'ов %2."
-
-#: ltc_slave.cc:379
-msgid "Session and LTC framerate mismatch: LTC:%1 Session:%2."
-msgstr "Частота кадров сессии и LTC не соответствует: LTC:%1 Сессия:%2."
-
-#: ltc_slave.cc:665
+#: ltc_slave.cc:650
 msgid "flywheel"
 msgstr "Маховик"
 
@@ -1623,21 +1615,13 @@ msgstr "Контроль соло"
 msgid "MPEG Layer %1 (%2 kbps)"
 msgstr ""
 
-#: mtc_slave.cc:383
+#: mtc_slave.cc:387
 msgid ""
 "Unknown rate/drop value %1 in incoming MTC stream, session values used "
 "instead"
 msgstr ""
 "Неизвестное значение величины частоты кадров/выпадения %1 во входящем  MTC-"
 "потоке. Значения сессии использованы вместо него"
-
-#: mtc_slave.cc:403
-msgid "Session framerate adjusted from %1 TO: MTC's %2."
-msgstr "Частота кадров сессии в диапазоне от %1 ДО: MTC'ов %2."
-
-#: mtc_slave.cc:417
-msgid "Session and MTC framerate mismatch: MTC:%1 %2:%3."
-msgstr "Сессия и частота кадров МТС несоответствуют: MTC:%1 %2:%3."
 
 #: operations.cc:41
 msgid "capture"
@@ -2134,7 +2118,7 @@ msgstr ""
 msgid "PluginManager: Could not tokenize string: "
 msgstr ""
 
-#: port.cc:545
+#: port.cc:546
 msgid "could not reregister %1"
 msgstr "Не удалось перерегистрировать %1"
 
@@ -2324,19 +2308,19 @@ msgstr "Нет %1 флага свойств в элементе %2"
 msgid "No child node with active property"
 msgstr "Нет дочернего  узла с активными свойствами"
 
-#: rc_configuration.cc:100
+#: rc_configuration.cc:101
 msgid "Loading system configuration file %1"
 msgstr "Загрузка файла конфигурации %1"
 
-#: rc_configuration.cc:104
+#: rc_configuration.cc:105
 msgid "%1: cannot read system configuration file \"%2\""
 msgstr "%1: не удалось прочитать файл системной конфигурации \"%2\""
 
-#: rc_configuration.cc:109
+#: rc_configuration.cc:110
 msgid "%1: system configuration file \"%2\" not loaded successfully."
 msgstr "%1: файл системной конфигурации \"%2\" не загружен успешно."
 
-#: rc_configuration.cc:113
+#: rc_configuration.cc:114
 msgid ""
 "Your system %1 configuration file is empty. This probably means that there "
 "was an error installing %1"
@@ -2344,25 +2328,33 @@ msgstr ""
 "Ваша файл системной конфигурации %1 пуст. Вероятно, это значит, что "
 "произошла ошибка установки %1"
 
-#: rc_configuration.cc:128
+#: rc_configuration.cc:129
 msgid "Loading user configuration file %1"
 msgstr "Загрузка файла пользовательской конфигурации %1"
 
-#: rc_configuration.cc:132
+#: rc_configuration.cc:133
 msgid "%1: cannot read configuration file \"%2\""
 msgstr "%1: не удалось прочитать файл конфигурации \"%2\""
 
-#: rc_configuration.cc:137
+#: rc_configuration.cc:138
 msgid "%1: user configuration file \"%2\" not loaded successfully."
 msgstr "%1: файл пользовательской конфигурации \"%2\" не загружен полностью."
 
-#: rc_configuration.cc:141
+#: rc_configuration.cc:142
 msgid "your %1 configuration file is empty. This is not normal."
 msgstr "Ваш %1 файл конфигурации пуст. Это ненормально."
 
 #: rc_configuration.cc:158
 msgid "Config file %1 not saved"
 msgstr "Файл конфигурации %1 не сохранён"
+
+#: rc_configuration.cc:160 rc_configuration.cc:168
+msgid "Could not remove temporary config file at path \"%1\" (%2)"
+msgstr ""
+
+#: rc_configuration.cc:166
+msgid "Could not rename temporary config file %1 to %2 (%3)"
+msgstr ""
 
 #: readable.cc:42
 msgid "Cannot open File \"%1\": %2"
@@ -2424,7 +2416,7 @@ msgstr "Импорт: src_new() не удался: %1"
 msgid "return %1"
 msgstr "Возврат %1"
 
-#: route.cc:949 route.cc:3174 track.cc:887
+#: route.cc:949 route.cc:3174 track.cc:867
 msgid "unknown Processor type \"%1\"; ignored"
 msgstr "Неизвестный тип процессора \"%1\". Игнорирован"
 
@@ -2599,54 +2591,54 @@ msgstr "Настройка Click"
 msgid "Set up standard connections"
 msgstr "Настройка обычных соединений"
 
-#: session.cc:870
+#: session.cc:859
 msgid "could not setup Click I/O"
 msgstr "не удалость настроить Click I/O"
 
-#: session.cc:931
+#: session.cc:920
 msgid "cannot connect master output %1 to %2"
 msgstr "Не удалось подключить выход master %1 к %2"
 
-#: session.cc:948
+#: session.cc:937
 msgid "Cannot remove monitor section while the engine is offline."
 msgstr ""
 
-#: session.cc:1009
+#: session.cc:998
 msgid "Cannot create monitor section while the engine is offline."
 msgstr ""
 
-#: session.cc:1030
+#: session.cc:1019
 msgid "Cannot create monitor section. 'Monitor' Port name is not unique."
 msgstr ""
 
-#: session.cc:1064 session.cc:1191
+#: session.cc:1053 session.cc:1180
 msgid "cannot connect control input %1 to %2"
 msgstr "Не удалось подключить управление входа %1 к %2"
 
-#: session.cc:1084 session.cc:1210
+#: session.cc:1073 session.cc:1199
 msgid "The preferred I/O for the monitor bus (%1) cannot be found"
 msgstr "Предпочитаемый I/O для шины монитора (%1) не может быть найден"
 
-#: session.cc:1115 session.cc:1241
+#: session.cc:1104 session.cc:1230
 msgid "cannot connect control output %1 to %2"
 msgstr "Не удалось подключить управления выходом %1 к %2"
 
-#: session.cc:1320
+#: session.cc:1309
 msgid "cannot create Auditioner: no auditioning of regions possible"
 msgstr "Невозможно создать Auditioner: прослушивание областей невозможно"
 
-#: session.cc:1591
+#: session.cc:1574
 msgid "Session: you can't use that location for auto punch (start <= end)"
 msgstr ""
 "Сессия: вы не можете использовать эту позицию для автоврезки (начало <= "
 "конец)"
 
-#: session.cc:1612
+#: session.cc:1595
 msgid "Session: you can't use that location for session start/end)"
 msgstr ""
 "Сессия: вы не можете использовать эту позицию в качестве начала/конца сессии"
 
-#: session.cc:1646
+#: session.cc:1629
 msgid ""
 "You cannot use this location for auto-loop because it has zero or negative "
 "length"
@@ -2654,27 +2646,27 @@ msgstr ""
 "Вы не можете использовать эту позицию для автоцикла, поскольку у неё нулевая "
 "или отрицательная длительность"
 
-#: session.cc:1838
+#: session.cc:1821
 msgid "programming error: session range removed!"
 msgstr "Ошибка в программе: диапазон сессии удалён!"
 
-#: session.cc:2121
+#: session.cc:2092
 msgid "feedback loop setup between %1 and %2"
 msgstr "Настройка петли обратной связи между %1 и %2"
 
-#: session.cc:2386
+#: session.cc:2357
 msgid "Audio "
 msgstr "Аудио"
 
-#: session.cc:2390
+#: session.cc:2361
 msgid "MIDI "
 msgstr "MIDI "
 
-#: session.cc:2459
+#: session.cc:2430
 msgid "Session: could not create new midi track."
 msgstr "Сессия: не удалось создать новую MIDI-дорожку"
 
-#: session.cc:2465
+#: session.cc:2436
 msgid ""
 "No more JACK ports are available. You will need to stop %1 and restart JACK "
 "with more ports if you need this many tracks."
@@ -2682,90 +2674,90 @@ msgstr ""
 "Доступных портов JACK больше нет. Вам нужно остановить %1 и перезапустить "
 "JACK с большим количеством портов, если вам нужно больше дорожек."
 
-#: session.cc:2514 session.cc:2517
+#: session.cc:2484 session.cc:2487
 msgid "Midi Bus"
 msgstr "MIDI-шина"
 
-#: session.cc:2539
+#: session.cc:2509
 msgid "cannot configure new midi bus input"
 msgstr ""
 
-#: session.cc:2545
+#: session.cc:2515
 msgid "cannot configure new midi bus output"
 msgstr ""
 
-#: session.cc:2559 session.cc:2841
+#: session.cc:2529 session.cc:2809
 msgid "Session: could not create new audio route."
 msgstr "Сессия: не удалось создать новый маршрут."
 
-#: session.cc:2734 session.cc:2742 session.cc:2817 session.cc:2825
+#: session.cc:2703 session.cc:2711 session.cc:2785 session.cc:2793
 msgid "cannot configure %1 in/%2 out configuration for new audio track"
 msgstr ""
 "Не удалось настроить %1 в/%2 из конфигурации для новой звуковой дорожки"
 
-#: session.cc:2758
+#: session.cc:2727
 msgid "Session: could not create new audio track."
 msgstr "Сессия: не удалось создать новую звуковую дорожку."
 
-#: session.cc:2792 session.cc:2795
+#: session.cc:2760 session.cc:2763
 msgid "Bus"
 msgstr "Шина"
 
-#: session.cc:2922 session.cc:2932
+#: session.cc:2888 session.cc:2898
 msgid "Session: UINT_MAX routes? impossible!"
 msgstr "Сессия: UINT_MAX маршруты? Невозможно!"
 
-#: session.cc:3067
+#: session.cc:3033
 msgid "Session: cannot create track/bus from template description"
 msgstr "Сессия: нельзя создать дорожку/шину из  шаблоннного описания"
 
-#: session.cc:3096
+#: session.cc:3062
 msgid "Session: could not create new route from template"
 msgstr "Сессия: не удалось создать новый маршрут из шаблона"
 
-#: session.cc:3133
+#: session.cc:3097
 msgid "Adding new tracks/busses failed"
 msgstr "Не удалось добавить новые дорожки/шины"
 
-#: session.cc:4709
+#: session.cc:4675
 msgid "Merging embedded file %1: name collision AND md5 hash collision!"
 msgstr "Слияние встроенного файла %1: противоречие названия и MD5 хеша!"
 
-#: session.cc:4833
+#: session.cc:4799
 msgid "There are already %1 recordings for %2, which I consider too many."
 msgstr "Уже есть %1 записей для %2, которых, считается, слишком много."
 
-#: session.cc:4895
+#: session.cc:4861
 msgid ""
 "There are already many recordings for %1, resulting in a too long file-path "
 "%2."
 msgstr ""
 
-#: session.cc:5509
+#: session.cc:5475
 msgid "send ID %1 appears to be in use already"
 msgstr "Отправленное ID %1, кажется, уже используется"
 
-#: session.cc:5521
+#: session.cc:5487
 msgid "aux send ID %1 appears to be in use already"
 msgstr "По-видимому, aux посыл ID %1 уже используется"
 
-#: session.cc:5533
+#: session.cc:5499
 msgid "return ID %1 appears to be in use already"
 msgstr "Возврат ID% 1, по-видимому, уже используется"
 
-#: session.cc:5545
+#: session.cc:5511
 msgid "insert ID %1 appears to be in use already"
 msgstr "По-видимому, вставка ID %1 уже используется"
 
-#: session.cc:5683
+#: session.cc:5659
 msgid "Cannot write a range where end <= start (e.g. %1 <= %2)"
 msgstr "Невозможно записать ряд, где конец <= пуска (например, %1 <= %2)"
 
-#: session.cc:5696
+#: session.cc:5672
 msgid "Cannot write a range with no data."
 msgstr "Невозможно записать область без данных."
 
-#: session.cc:5738
+#: session.cc:5714
 msgid "cannot create new file \"%1\" for %2"
 msgstr "невозможно создать новый файл \"%1\" для %2"
 
@@ -2884,7 +2876,7 @@ msgstr "% 1: невозможно искать на %2 для экспорта"
 msgid "Export ended unexpectedly: %1"
 msgstr "Экспорт закончился неожиданно: %1"
 
-#: session_ltc.cc:235
+#: session_ltc.cc:233
 msgid ""
 "LTC encoder: invalid framerate - LTC encoding is disabled for the remainder "
 "of this session."
@@ -2904,11 +2896,11 @@ msgstr ""
 msgid "Session: cannot create Playlist from XML description."
 msgstr "Сессия: невозможно создать список воспроизведения из описания XML."
 
-#: session_process.cc:203
+#: session_process.cc:201
 msgid "Session: error in no roll for %1"
 msgstr "Сессия: ошибка непрокрутки для %1"
 
-#: session_process.cc:996
+#: session_process.cc:1000
 msgid "Programming error: illegal event type in process_event (%1)"
 msgstr "Ошибка в программе: некорректный тип события в process_event (%1)"
 
@@ -3066,115 +3058,115 @@ msgstr ""
 msgid "Session-Save: Failed to copy MIDI Source '%1' for snapshot"
 msgstr ""
 
-#: session_state.cc:1556
+#: session_state.cc:1551
 msgid "programming error: Session: incorrect XML node sent to set_state()"
 msgstr ""
 "Ошибка в программе: Сессия: некорректный узел XML отправил в set_state ()"
 
-#: session_state.cc:1626
+#: session_state.cc:1621
 msgid "Session: XML state has no options section"
 msgstr "Сессия: состояние XML не имеет раздел опций"
 
-#: session_state.cc:1631
+#: session_state.cc:1626
 msgid "Session: XML state has no metadata section"
 msgstr "Сессия: состояние XML не имеет раздел метаданных"
 
-#: session_state.cc:1642
+#: session_state.cc:1637
 msgid "Session: XML state has no sources section"
 msgstr "Сессия: состояние XML не имеет раздел источников"
 
-#: session_state.cc:1649
+#: session_state.cc:1644
 msgid "Session: XML state has no Tempo Map section"
 msgstr "Сессия: состояние XML не имеет раздела тeмpoкарты"
 
-#: session_state.cc:1656
+#: session_state.cc:1651
 msgid "Session: XML state has no locations section"
 msgstr "Сессия: состояние XML не имеет раздел расположения"
 
-#: session_state.cc:1669
+#: session_state.cc:1664
 msgid "Session: XML state has no Regions section"
 msgstr "Сессия: состояние XML не имеет раздел областей"
 
-#: session_state.cc:1676
+#: session_state.cc:1671
 msgid "Session: XML state has no playlists section"
 msgstr "Сессия: состояние XML не имеет раздел плейлистов"
 
-#: session_state.cc:1696
+#: session_state.cc:1691
 msgid "Session: XML state has no bundles section"
 msgstr "Сессия: состояние XML не имеет раздел слоёв"
 
-#: session_state.cc:1725
+#: session_state.cc:1720
 msgid "Session: XML state has no routes section"
 msgstr "Сессия: состояние XML не имеет раздел маршрутов"
 
-#: session_state.cc:1743
+#: session_state.cc:1738
 msgid "Session: XML state has no route groups section"
 msgstr "Сессия: состояние XML не имеет раздел маршрут групп"
 
-#: session_state.cc:1752
+#: session_state.cc:1747
 msgid "Session: XML state has no edit groups section"
 msgstr "Сессия: состояние XML не имеет раздел редактирования групп"
 
-#: session_state.cc:1759
+#: session_state.cc:1754
 msgid "Session: XML state has no mix groups section"
 msgstr "Сессия: состояние XML не имеет раздел микс-групп"
 
-#: session_state.cc:1767
+#: session_state.cc:1762
 msgid "Session: XML state has no click section"
 msgstr "Сессия: состояние XML не имеет click-раздела"
 
-#: session_state.cc:1839
+#: session_state.cc:1834
 msgid "Session: cannot create Route from XML description."
 msgstr "Сессия: невозможно создать маршрут из описания XML."
 
-#: session_state.cc:1843
+#: session_state.cc:1838
 msgid "Loaded track/bus %1"
 msgstr "Загружена дорожка/шина %1"
 
-#: session_state.cc:1848
+#: session_state.cc:1843
 msgid "Tracks/busses loaded;  Adding to Session"
 msgstr "Дорожки и шины загружены, добавляются в сессию"
 
-#: session_state.cc:1852
+#: session_state.cc:1847
 msgid "Finished adding tracks/busses"
 msgstr "Добавление дорожек/шин завершено"
 
-#: session_state.cc:1991
+#: session_state.cc:1986
 msgid "Could not find diskstream for diskstream-id: '%1', playlist: '%2'"
 msgstr ""
 
-#: session_state.cc:2048
+#: session_state.cc:2043
 msgid "Session: cannot create Region from XML description."
 msgstr "Сессия: невозможно создать область из описания XML."
 
-#: session_state.cc:2052
+#: session_state.cc:2047
 msgid "Can not load state for region '%1'"
 msgstr "Не удается загрузить состояние для области '%1'"
 
-#: session_state.cc:2088
+#: session_state.cc:2083
 msgid "Regions in compound description not found (ID's %1 and %2): ignored"
 msgstr "Областей в описании соединения не найдено (ID's %1 и %2): игнорировано"
 
-#: session_state.cc:2116
+#: session_state.cc:2111
 msgid "Nested source has no ID info in session file! (ignored)"
 msgstr "Вложенный источник не имеет ID-данных в файле сессии! (Игнорировано)"
 
-#: session_state.cc:2128
+#: session_state.cc:2123
 msgid "Cannot reconstruct nested source for region %1"
 msgstr "Невозможно восстановить вложенный источник для области %1"
 
-#: session_state.cc:2188
+#: session_state.cc:2183
 msgid "Session: XMLNode describing a AudioRegion is incomplete (no source)"
 msgstr "Сессия: XMLNode описание AudioRegion является неполным (без источника)"
 
-#: session_state.cc:2196 session_state.cc:2217 session_state.cc:2237
+#: session_state.cc:2191 session_state.cc:2212 session_state.cc:2232
 msgid ""
 "Session: XMLNode describing a AudioRegion references an unknown source id =%1"
 msgstr ""
 "Сессия: XMLNode описание AudioRegion ссылается на неизвестный идентификатор "
 "источника = %1"
 
-#: session_state.cc:2202 session_state.cc:2223 session_state.cc:2243
+#: session_state.cc:2197 session_state.cc:2218 session_state.cc:2238
 msgid ""
 "Session: XMLNode describing a AudioRegion references a non-audio source id ="
 "%1"
@@ -3182,7 +3174,7 @@ msgstr ""
 "Сессия: XMLNode описание AudioRegion ссылается на неисходный "
 "аудиоидентификатор = %1"
 
-#: session_state.cc:2266
+#: session_state.cc:2261
 msgid ""
 "Session: XMLNode describing an AudioRegion is missing some master sources; "
 "ignored"
@@ -3190,157 +3182,157 @@ msgstr ""
 "Сессия: XMLNode в описании AudioRegion отсутствуют некоторые мастер-"
 "источники; Игнорировано"
 
-#: session_state.cc:2300
+#: session_state.cc:2295
 msgid "Session: XMLNode describing a MidiRegion is incomplete (no source)"
 msgstr "Сессия: XMLNode описание MidiRegion является неполным (без источника)"
 
-#: session_state.cc:2308
+#: session_state.cc:2303
 msgid ""
 "Session: XMLNode describing a MidiRegion references an unknown source id =%1"
 msgstr ""
 "Сессия: XMLNode описание MidiRegion ссылается на неизвестный идентификатор "
 "источника id = %1"
 
-#: session_state.cc:2314
+#: session_state.cc:2309
 msgid ""
 "Session: XMLNode describing a MidiRegion references a non-midi source id =%1"
 msgstr ""
 "Сессия: XMLNode описание MidiRegion ссылается на неисходный MIDI-"
 "идентификатор id= %1"
 
-#: session_state.cc:2400
+#: session_state.cc:2395
 msgid "Session: cannot create Source from XML description."
 msgstr "Сессия: невозможно создать источник из описания XML."
 
-#: session_state.cc:2429
+#: session_state.cc:2424
 msgid ""
 "An external MIDI file is missing. %1 cannot currently recover from missing "
 "external MIDI files"
 msgstr ""
 
-#: session_state.cc:2522
+#: session_state.cc:2517
 msgid "Found a sound file that cannot be used by %1. Talk to the programmers."
 msgstr ""
 "Найден звуковой файл, который не может быть использован %1. Обратитесь к "
 "программистам."
 
-#: session_state.cc:2543
+#: session_state.cc:2538
 msgid "Could not create templates directory \"%1\" (%2)"
 msgstr "Не удалось создать шаблоны каталогоа \"%1\" (%2)"
 
-#: session_state.cc:2554
+#: session_state.cc:2549
 msgid "Template \"%1\" already exists - new version not created"
 msgstr "Шаблон \"%1\" уже существует. Новая версия не создана"
 
-#: session_state.cc:2560
+#: session_state.cc:2555
 msgid "Could not create directory for Session template\"%1\" (%2)"
 msgstr "Не удалось создать каталог для шаблона сессии \"%1\" (%2)"
 
-#: session_state.cc:2596
+#: session_state.cc:2591
 msgid "template not saved"
 msgstr "Шаблон не сохранён"
 
-#: session_state.cc:2843
+#: session_state.cc:2838
 msgid "Unknown node \"%1\" found in Bundles list from session file"
 msgstr "Неизвестный узел \"%1\" найден в списке пакетов файла сессии"
 
-#: session_state.cc:3330
+#: session_state.cc:3320
 msgid "Cannot cleanup peak-files for read-only session."
 msgstr ""
 
-#: session_state.cc:3334
+#: session_state.cc:3324
 msgid "Cannot cleanup peak-files while recording"
 msgstr ""
 
-#: session_state.cc:3357
+#: session_state.cc:3347
 msgid ""
 "Timeout waiting for peak-file creation to terminate before cleanup, please "
 "try again later."
 msgstr ""
 
-#: session_state.cc:3626
+#: session_state.cc:3616
 msgid "Session: cannot create dead file folder \"%1\" (%2)"
 msgstr "Сессия: невозможно создать папку утерянных файлов \"%1\" (%2)"
 
-#: session_state.cc:3659
+#: session_state.cc:3649
 msgid "cannot rename unused file source from %1 to %2 (%3)"
 msgstr ""
 "Невозможно переименовать неиспользованный файл источника из %1 в %2 (%3)"
 
-#: session_state.cc:3675
+#: session_state.cc:3665
 msgid "cannot remove peakfile %1 for %2 (%3)"
 msgstr "Не удалось удалить пик-файл %1 для %2 (%3)"
 
-#: session_state.cc:3854
+#: session_state.cc:3844
 msgid "could not backup old history file, current history not saved"
 msgstr ""
 "Невозможно сделать копию старого файла истории. Текущая история не сохранена"
 
-#: session_state.cc:3868
+#: session_state.cc:3858
 msgid "history could not be saved to %1"
 msgstr "История не может быть сохраненв в %1"
 
-#: session_state.cc:3871
+#: session_state.cc:3861
 msgid "Could not remove history file at path \"%1\" (%2)"
 msgstr "Не удалось удалить файл истории по пути \"%1\" (%2)"
 
-#: session_state.cc:3875
+#: session_state.cc:3865
 msgid "could not restore history file from backup %1 (%2)"
 msgstr "Не удалось восстановить файл истории из резервной %1 (% 2)"
 
-#: session_state.cc:3900
+#: session_state.cc:3890
 msgid "%1: no history file \"%2\" for this session."
 msgstr "%1: нет файла истории \"%2\" для этой сессии."
 
-#: session_state.cc:3906
+#: session_state.cc:3896
 msgid "Could not understand session history file \"%1\""
 msgstr "Не удалось понять файл истории сессии \"%1\""
 
-#: session_state.cc:3956
+#: session_state.cc:3946
 msgid "Failed to downcast MidiSource for NoteDiffCommand"
 msgstr "Не удалось обратное приведение MidiSource для NoteDiffCommand"
 
-#: session_state.cc:3967
+#: session_state.cc:3957
 msgid "Failed to downcast MidiSource for SysExDiffCommand"
 msgstr "Не удалось обратное приведение MidiSource для SysExDiffCommand"
 
-#: session_state.cc:3978
+#: session_state.cc:3968
 msgid "Failed to downcast MidiSource for PatchChangeDiffCommand"
 msgstr "Не удалось обратное приведение MidiSource для PatchChangeDiffCommand"
 
-#: session_state.cc:3986
+#: session_state.cc:3976
 msgid "Couldn't figure out how to make a Command out of a %1 XMLNode."
 msgstr "Не удалось выяснить, как сделать команду из %1 XMLNode."
 
-#: session_state.cc:4336
+#: session_state.cc:4326
 msgid "Cannot rename read-only session."
 msgstr "Невозможно переименовать сеанс, доступный только для чтения."
 
-#: session_state.cc:4340
+#: session_state.cc:4330
 msgid "Cannot rename session while recording"
 msgstr "Невозможно переименовать сеанс во время записи."
 
-#: session_state.cc:4425 session_state.cc:4426 session_state.cc:4468
-#: session_state.cc:4472
+#: session_state.cc:4415 session_state.cc:4416 session_state.cc:4458
+#: session_state.cc:4462
 msgid "renaming %s as %2 failed (%3)"
 msgstr "Переименование %s в %2 не удалось (%3)"
 
-#: session_state.cc:4488 session_state.cc:4489 session_state.cc:4503
-#: session_state.cc:4504
+#: session_state.cc:4478 session_state.cc:4479 session_state.cc:4493
+#: session_state.cc:4494
 msgid "renaming %1 as %2 failed (%3)"
 msgstr "Не удалось переименовать %1 в %2 (%3)"
 
-#: session_state.cc:4880
+#: session_state.cc:4870
 msgid "Cannot create new session folder %1"
 msgstr ""
 
-#: session_state.cc:4942 session_state.cc:5017
+#: session_state.cc:4932 session_state.cc:5007
 msgid ""
 "\n"
 "copying \"%1\" failed !"
 msgstr ""
 
-#: session_state.cc:5232
+#: session_state.cc:5222
 msgid "unknown reason"
 msgstr ""
 
@@ -3348,11 +3340,11 @@ msgstr ""
 msgid "Unknown transport state %1 in sync callback"
 msgstr "Неизвестное состояние транспорта %1 в обратном вызове синхронизации"
 
-#: session_transport.cc:173
+#: session_transport.cc:172
 msgid "Locate called for negative sample position - ignored"
 msgstr "Размещение, вызываемое для негативной позиции образца,  игнорировано"
 
-#: session_transport.cc:496
+#: session_transport.cc:478
 msgid ""
 "Global varispeed cannot be supported while %1 is connected to JACK transport "
 "control"
@@ -3360,11 +3352,11 @@ msgstr ""
 "Глобальная переменная скорость не поддерживается в то время как %1 подключен "
 "к JACK транспортуконтроль"
 
-#: session_transport.cc:1007
+#: session_transport.cc:987
 msgid "Cannot loop - no loop range defined"
 msgstr "Не удалось запустить цикл - диапазон цикла не определен"
 
-#: session_transport.cc:1591
+#: session_transport.cc:1577
 msgid ""
 "Looping cannot be supported while %1 is using JACK transport.\n"
 "Recommend changing the configured options"
@@ -3744,79 +3736,83 @@ msgstr ""
 "Это приведет к замене текущей карты темпа!\n"
 "Вы уверены, что хотите это сделать?"
 
-#: track.cc:645
+#: track.cc:630
 msgid "DiskIOProcessor: \"%1\" isn't an playlist"
 msgstr ""
 
-#: track.cc:692
+#: track.cc:677
 msgid "DiskIOProcessor %1: there is no existing playlist to make a copy of!"
 msgstr ""
 
-#: track.cc:966
+#: track.cc:946
 msgid "%1: could not create region for complete midi file"
 msgstr "%1: не удалось создать область для полного MIDI-файла"
 
-#: track.cc:1013
+#: track.cc:993
 msgid "MidiDiskstream: could not create region for captured midi!"
 msgstr "MidiDiskstream: не удалось создать область для захваченного миди!"
 
-#: track.cc:1066
+#: track.cc:1046
 msgid "%1: could not create region for complete audio file"
 msgstr "%1: Невозможно создать область для полного звукового файла"
 
-#: track.cc:1103
+#: track.cc:1083
 msgid "AudioDiskstream: could not create region for captured audio!"
 msgstr "AudioDiskstream: Не удалось создать область для захваченного аудио!"
 
-#: transport_master.cc:398 transport_master.cc:399
+#: transport_master.cc:392 transport_master.cc:393
 msgid "Construction of transport master object of type %1 failed"
 msgstr ""
 
-#: transport_master.cc:423 transport_master.cc:456
+#: transport_master.cc:417 transport_master.cc:450
 msgid "SyncSource|JACK"
 msgstr "JACK"
 
-#: transport_master.cc:430
+#: transport_master.cc:424
 msgid "SyncSource|MTC"
 msgstr "MTC"
 
-#: transport_master.cc:440
+#: transport_master.cc:434
 msgid "SyncSource|M-Clk"
 msgstr ""
 
-#: transport_master.cc:450
+#: transport_master.cc:444
 msgid "SyncSource|LTC"
 msgstr "LTC"
 
-#: transport_master.cc:493
+#: transport_master.cc:487
 msgid "All"
 msgstr "Все"
 
-#: transport_master.cc:497
+#: transport_master.cc:491
 msgid "Start/Stop"
 msgstr "Старт/Стоп"
 
-#: transport_master.cc:499
+#: transport_master.cc:493
 msgid "Speed"
 msgstr "Скорость"
 
-#: transport_master.cc:501
+#: transport_master.cc:495
 msgid "Locate"
 msgstr ""
 
-#: transport_master.cc:503
+#: transport_master.cc:497
 msgid "Complex"
 msgstr ""
 
-#: transport_master_manager.cc:134
+#: transport_master_manager.cc:136
 msgid "programming error:%1"
 msgstr "ошибка в программе: %1"
 
-#: transport_master_manager.cc:349
+#: transport_master_manager.cc:347
+msgid "Transport master adjusted framerate from %1 to %2."
+msgstr ""
+
+#: transport_master_manager.cc:396
 msgid "There is already a transport master named \"%1\" - not duplicated"
 msgstr ""
 
-#: transport_master_manager.cc:664
+#: transport_master_manager.cc:713
 msgid "Cannot initialize transport master manager"
 msgstr ""
 
@@ -3893,6 +3889,18 @@ msgstr ""
 #: vca_manager.cc:206
 msgid "Cannot set state of a VCA"
 msgstr ""
+
+#~ msgid "Session framerate adjusted from %1 to LTC's %2."
+#~ msgstr "Частота кадров сессии в диапазоне от %1 до LTC'ов %2."
+
+#~ msgid "Session and LTC framerate mismatch: LTC:%1 Session:%2."
+#~ msgstr "Частота кадров сессии и LTC не соответствует: LTC:%1 Сессия:%2."
+
+#~ msgid "Session framerate adjusted from %1 TO: MTC's %2."
+#~ msgstr "Частота кадров сессии в диапазоне от %1 ДО: MTC'ов %2."
+
+#~ msgid "Session and MTC framerate mismatch: MTC:%1 %2:%3."
+#~ msgstr "Сессия и частота кадров МТС несоответствуют: MTC:%1 %2:%3."
 
 #~ msgid "programmer error: %1"
 #~ msgstr "Ошибка программиста: %1"

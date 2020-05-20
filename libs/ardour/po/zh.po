@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 6\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-30 12:44-0600\n"
+"POT-Creation-Date: 2020-05-20 14:36-0600\n"
 "PO-Revision-Date: 2020-05-17 12:05+0800\n"
 "Last-Translator: \n"
 "Language-Team: 一善鱼 YQ-YSY@163.com\n"
@@ -174,8 +174,8 @@ msgstr "内存溢出错误"
 msgid "Could not reconnect to Audio/MIDI engine"
 msgstr "无法连接音频/MIDI引擎"
 
-#: audio_backend.cc:107 export_formats.cc:60 session.cc:6788
-#: transport_master.cc:495
+#: audio_backend.cc:107 export_formats.cc:60 session.cc:6791
+#: transport_master.cc:489
 msgid "None"
 msgstr "无"
 
@@ -187,7 +187,7 @@ msgstr "默认"
 msgid "Could not open %1.  Audio Library not saved"
 msgstr "无法打开 %1。音频库尚未保存"
 
-#: audio_playlist.cc:518
+#: audio_playlist.cc:519
 msgid ""
 "Legacy crossfade involved an incoming region not present in playlist \"%1\" "
 "- crossfade discarded"
@@ -195,7 +195,7 @@ msgstr ""
 "所遗留的交叉淡化（淡入淡出）涉及一个在播放列表 \"%1\" 里并不存在的导入区域——"
 "交叉淡化（淡入淡出）被弃用"
 
-#: audio_playlist.cc:534
+#: audio_playlist.cc:535
 msgid ""
 "Legacy crossfade involved an outgoing region not present in playlist \"%1\" "
 "- crossfade discarded"
@@ -229,8 +229,8 @@ msgstr "音频播放列表（未使用的）"
 
 #: audio_playlist_source.cc:169 audiosource.cc:1054 midi_playlist_source.cc:163
 #: midi_playlist_source.cc:171 midi_playlist_source.cc:178 midi_source.cc:410
-#: midi_source.cc:437 plugin_insert.cc:1447 rb_effect.cc:333 session.cc:5236
-#: session.cc:5241 session.cc:5270 session.cc:5275 session.cc:5370
+#: midi_source.cc:437 plugin_insert.cc:1447 rb_effect.cc:333 session.cc:5202
+#: session.cc:5207 session.cc:5236 session.cc:5241 session.cc:5336
 #: session_handle.cc:87 sndfilesource.cc:172
 msgid "programming error: %1"
 msgstr "程序设计错误：%1"
@@ -279,19 +279,19 @@ msgstr "无法载入 VAMP 插件 \"%1\""
 msgid "VAMP Plugin \"%1\" could not be loaded"
 msgstr " VAMP 插件 \"%1\" 无法被加载"
 
-#: audioengine.cc:846
+#: audioengine.cc:852
 msgid "AudioEngine: cannot load module \"%1\" (%2)"
 msgstr "音频引擎：无法载入模式 \"%1\" （%2）"
 
-#: audioengine.cc:852
+#: audioengine.cc:858
 msgid "AudioEngine: backend at \"%1\" has no descriptor function."
 msgstr "音频引擎：在 \"%1\" 的后端没有描述符函数。"
 
-#: audioengine.cc:945
+#: audioengine.cc:951
 msgid "Could not create backend for %1: %2"
 msgstr "无法为 %1 创建后端：%2"
 
-#: audioengine.cc:1623
+#: audioengine.cc:1629
 msgid ""
 "programming error: port %1 could not be placed on the pending deletion "
 "queue\n"
@@ -434,7 +434,7 @@ msgstr "无法打开 %2 来载入自动化数据（%3）"
 msgid "cannot load automation data from %2"
 msgstr "无法从 %2 载入自动化数据"
 
-#: automatable.cc:194 send.cc:103 session.cc:833
+#: automatable.cc:194 send.cc:103 session.cc:822
 msgid "Fader"
 msgstr "淡化器"
 
@@ -568,7 +568,7 @@ msgstr "在 /proc/cpuinfo 里无法定位 cpu MHz"
 msgid "audio"
 msgstr "音频"
 
-#: data_type.cc:28 session.cc:2417
+#: data_type.cc:28 session.cc:2388
 msgid "MIDI"
 msgstr "MIDI（乐器数字接口 Musical Instrument Digital Interface ）"
 
@@ -584,26 +584,26 @@ msgstr "主输出"
 msgid "listen"
 msgstr "听"
 
-#: disk_reader.cc:702
+#: disk_reader.cc:729
 msgid ""
 "DiskReader %1: when overwriting(1), cannot read %2 from playlist at sample %3"
 msgstr "硬盘读取器 ％1 ：覆盖（1）时，无法从样本 ％3 的播放列表中读 取％2"
 
-#: disk_reader.cc:710
+#: disk_reader.cc:738
 msgid ""
 "DiskReader %1: when overwriting(2), cannot read %2 from playlist at sample %3"
 msgstr "硬盘读取器 ％1 ：覆盖（2）时，无法从样本 ％3 的播放列表中读取 ％2"
 
-#: disk_reader.cc:1015
+#: disk_reader.cc:1043
 msgid "DiskReader %1: cannot read %2 from playlist at sample %3"
 msgstr "硬盘读取器 ％1 ：无法从样本 ％3 的播放列表中读取 ％2"
 
-#: disk_reader.cc:1269
+#: disk_reader.cc:1301
 msgid ""
 "DiskReader %1: when refilling, cannot read %2 from playlist at sample %3"
 msgstr "硬盘读取器 ％1 ：重新填充时，无法从样本 ％3 的播放列表中读取 ％2"
 
-#: disk_reader.cc:1275
+#: disk_reader.cc:1307
 msgid "DiskReader %1: when refilling, cannot write %2 into buffer"
 msgstr "硬盘读取器 ％1 ：重新填充时，无法将 ％2 写入缓冲区"
 
@@ -850,7 +850,7 @@ msgid ""
 "configuration"
 msgstr "%1 仅支持 %2 声道，但在您的声道配置中您有 %3 声道"
 
-#: file_source.cc:200 session_state.cc:3649
+#: file_source.cc:200 session_state.cc:3639
 msgid ""
 "there are already 1000 files with names like %1; versioning discontinued"
 msgstr "已经有 1000 个文件的名称类似 %1；版本控制中断"
@@ -1030,11 +1030,11 @@ msgstr "无法设置系统打开文件限制。当前限制是 %1 打开文件"
 msgid "Loading configuration"
 msgstr "正在载入配置中"
 
-#: globals.cc:592 route.cc:207 session.cc:1017
+#: globals.cc:592 route.cc:207 session.cc:1006
 msgid "Monitor"
 msgstr "监控"
 
-#: globals.cc:593 session.cc:1278
+#: globals.cc:593 session.cc:1267
 msgid "Master"
 msgstr "主控"
 
@@ -1131,7 +1131,7 @@ msgstr "导入：文件不包含声道"
 msgid "Loading MIDI file %1"
 msgstr "正在载入 MIDI 文件 %1 中"
 
-#: import.cc:653
+#: import.cc:649
 msgid "Failed to remove some files after failed/cancelled import operation"
 msgstr "在导入操作失败/取消后移除一些文件失败"
 
@@ -1158,7 +1158,7 @@ msgstr ""
 msgid "All audio files found for PT import!"
 msgstr "找到所有要导入 PT 的音频文件！"
 
-#: import_pt.cc:356
+#: import_pt.cc:354
 msgid "PTImport: UINT_MAX routes? impossible!"
 msgstr "PT导入：UINT_MAX 路由？不可能！"
 
@@ -1166,7 +1166,7 @@ msgstr "PT导入：UINT_MAX 路由？不可能！"
 msgid "Unknown"
 msgstr "未知的"
 
-#: internal_send.cc:367 internal_send.cc:368
+#: internal_send.cc:431 internal_send.cc:432
 msgid "%1 - cannot find any track/bus with the ID %2 to connect to"
 msgstr "%1 ——无法找到任何带有 %2 的 ID 号的音轨/总线来连接"
 
@@ -1369,7 +1369,7 @@ msgstr "位置：尝试使用未知的位置作为已选择的位置"
 msgid "incorrect XML mode passed to Locations::set_state"
 msgstr "不正确的 XML模式传递给 Location::set_state（位置 :: 设置状态）"
 
-#: location.cc:1114 session.cc:1618 session_state.cc:1441
+#: location.cc:1114 session.cc:1601 session_state.cc:1441
 msgid "session"
 msgstr "会话"
 
@@ -1441,16 +1441,7 @@ msgstr "LTC（纵向时间码）文件阅读器： \"%1\" 是一个空白音频�
 msgid "LTCFileReader:: invalid audio channel selected"
 msgstr "LTC（纵向时间码）文件阅读器 :: 无效的音频声道已选择"
 
-#: ltc_slave.cc:365
-msgid "Session framerate adjusted from %1 to LTC's %2."
-msgstr "会话帧率从 %1 已调整为 LTC（纵向时间码）的 %2。"
-
-#: ltc_slave.cc:379
-msgid "Session and LTC framerate mismatch: LTC:%1 Session:%2."
-msgstr ""
-"会话与LTC（纵向时间码）的帧率不匹配： LTC（纵向时间码）：%1 会话： %2。"
-
-#: ltc_slave.cc:665
+#: ltc_slave.cc:650
 msgid "flywheel"
 msgstr "飞轮"
 
@@ -1600,20 +1591,12 @@ msgstr "独奏控制"
 msgid "MPEG Layer %1 (%2 kbps)"
 msgstr "MPEG 分层 %1 (%2 kbps)"
 
-#: mtc_slave.cc:383
+#: mtc_slave.cc:387
 msgid ""
 "Unknown rate/drop value %1 in incoming MTC stream, session values used "
 "instead"
 msgstr ""
 "在引入的 MTC（MIDI 时间码）流里有未知的比率/沉降数值 %1 ，使用会话数值代替"
-
-#: mtc_slave.cc:403
-msgid "Session framerate adjusted from %1 TO: MTC's %2."
-msgstr "会话帧率从 %1 调整为：MTC（MIDI 时间码）的 %2。"
-
-#: mtc_slave.cc:417
-msgid "Session and MTC framerate mismatch: MTC:%1 %2:%3."
-msgstr "会话与MTC（MIDI 时间码）帧率不匹配：MTC（MIDI 时间码）：%1 %2:%3。"
 
 #: operations.cc:41
 msgid "capture"
@@ -2102,7 +2085,7 @@ msgstr ""
 msgid "PluginManager: Could not tokenize string: "
 msgstr "插件管理器：无法标记字符串： "
 
-#: port.cc:545
+#: port.cc:546
 msgid "could not reregister %1"
 msgstr "无法重新注册 %1"
 
@@ -2291,43 +2274,51 @@ msgstr "在元素 %2 中无 %1 属性标志"
 msgid "No child node with active property"
 msgstr "无带激活属性的子节点"
 
-#: rc_configuration.cc:100
+#: rc_configuration.cc:101
 msgid "Loading system configuration file %1"
 msgstr "正在载入系统配置文件 %1"
 
-#: rc_configuration.cc:104
+#: rc_configuration.cc:105
 msgid "%1: cannot read system configuration file \"%2\""
 msgstr "%1： 无法读取系统配置文件 \"%2\""
 
-#: rc_configuration.cc:109
+#: rc_configuration.cc:110
 msgid "%1: system configuration file \"%2\" not loaded successfully."
 msgstr "%1： 系统配置文件 \"%2\" 没有成功载入。"
 
-#: rc_configuration.cc:113
+#: rc_configuration.cc:114
 msgid ""
 "Your system %1 configuration file is empty. This probably means that there "
 "was an error installing %1"
 msgstr "您的系统配置文件 %1 是空白的。这可能意味着安装 %1 时有一个错误。"
 
-#: rc_configuration.cc:128
+#: rc_configuration.cc:129
 msgid "Loading user configuration file %1"
 msgstr "正在载入用户配置文件 %1"
 
-#: rc_configuration.cc:132
+#: rc_configuration.cc:133
 msgid "%1: cannot read configuration file \"%2\""
 msgstr "%1： 无法读取配置文件 \"%2\""
 
-#: rc_configuration.cc:137
+#: rc_configuration.cc:138
 msgid "%1: user configuration file \"%2\" not loaded successfully."
 msgstr "%1： 用户配置文件 \"%2\" 没有成功载入。"
 
-#: rc_configuration.cc:141
+#: rc_configuration.cc:142
 msgid "your %1 configuration file is empty. This is not normal."
 msgstr "您的配置文件 %1 是空白的。这不正常。"
 
 #: rc_configuration.cc:158
 msgid "Config file %1 not saved"
 msgstr "配置文件 %1 未保存"
+
+#: rc_configuration.cc:160 rc_configuration.cc:168
+msgid "Could not remove temporary config file at path \"%1\" (%2)"
+msgstr ""
+
+#: rc_configuration.cc:166
+msgid "Could not rename temporary config file %1 to %2 (%3)"
+msgstr ""
 
 #: readable.cc:42
 msgid "Cannot open File \"%1\": %2"
@@ -2389,7 +2380,7 @@ msgstr "导入：src_new() 失败：%1"
 msgid "return %1"
 msgstr "返回 %1"
 
-#: route.cc:949 route.cc:3174 track.cc:887
+#: route.cc:949 route.cc:3174 track.cc:867
 msgid "unknown Processor type \"%1\"; ignored"
 msgstr "未知的处理器类型 \"%1\"，已忽略"
 
@@ -2566,77 +2557,77 @@ msgstr "建立音频识别声（节拍器）"
 msgid "Set up standard connections"
 msgstr "建立标准连接"
 
-#: session.cc:870
+#: session.cc:859
 msgid "could not setup Click I/O"
 msgstr "无法设置音频识别声（节拍器）输入/输出"
 
-#: session.cc:931
+#: session.cc:920
 msgid "cannot connect master output %1 to %2"
 msgstr "无法连接主控输出 %1 到 %2"
 
-#: session.cc:948
+#: session.cc:937
 msgid "Cannot remove monitor section while the engine is offline."
 msgstr "引擎离线时无法移除监控部分。"
 
-#: session.cc:1009
+#: session.cc:998
 msgid "Cannot create monitor section while the engine is offline."
 msgstr "引擎离线时无法创建监控部分。"
 
-#: session.cc:1030
+#: session.cc:1019
 msgid "Cannot create monitor section. 'Monitor' Port name is not unique."
 msgstr "无法创建监控部分。”监控“端口名称不是唯一的。"
 
-#: session.cc:1064 session.cc:1191
+#: session.cc:1053 session.cc:1180
 msgid "cannot connect control input %1 to %2"
 msgstr "无法连接控制输入 %1 到 %2"
 
-#: session.cc:1084 session.cc:1210
+#: session.cc:1073 session.cc:1199
 msgid "The preferred I/O for the monitor bus (%1) cannot be found"
 msgstr "找不到用于监控总线（%1）的优先输入/输出"
 
-#: session.cc:1115 session.cc:1241
+#: session.cc:1104 session.cc:1230
 msgid "cannot connect control output %1 to %2"
 msgstr "无法连接控制输出 %1 到 %2"
 
-#: session.cc:1320
+#: session.cc:1309
 msgid "cannot create Auditioner: no auditioning of regions possible"
 msgstr "无法创建监听器：不可能监听区域"
 
-#: session.cc:1591
+#: session.cc:1574
 msgid "Session: you can't use that location for auto punch (start <= end)"
 msgstr "会话：您不能为自动切换使用该位置（起点 <= 终点）"
 
-#: session.cc:1612
+#: session.cc:1595
 msgid "Session: you can't use that location for session start/end)"
 msgstr "会话：您不能为会话使用该位置（起点/终点）"
 
-#: session.cc:1646
+#: session.cc:1629
 msgid ""
 "You cannot use this location for auto-loop because it has zero or negative "
 "length"
 msgstr "您不能为自动循环使用该位置，因为它的长度是零或者负值"
 
-#: session.cc:1838
+#: session.cc:1821
 msgid "programming error: session range removed!"
 msgstr "程序设计错误：会话范围已移除！"
 
-#: session.cc:2121
+#: session.cc:2092
 msgid "feedback loop setup between %1 and %2"
 msgstr "反馈环路设置在 %1 和 %2 之间"
 
-#: session.cc:2386
+#: session.cc:2357
 msgid "Audio "
 msgstr "音频"
 
-#: session.cc:2390
+#: session.cc:2361
 msgid "MIDI "
 msgstr "MIDI（乐器数字接口 Musical Instrument Digital Interface ）"
 
-#: session.cc:2459
+#: session.cc:2430
 msgid "Session: could not create new midi track."
 msgstr "会话：无法创建新的 MIDI 音轨。"
 
-#: session.cc:2465
+#: session.cc:2436
 msgid ""
 "No more JACK ports are available. You will need to stop %1 and restart JACK "
 "with more ports if you need this many tracks."
@@ -2644,89 +2635,89 @@ msgstr ""
 "无更多的 JACK 端口可用。如果您需要这么多音轨，您将必须停止 %1 ，然后带着更多"
 "的端口重启 JACK。"
 
-#: session.cc:2514 session.cc:2517
+#: session.cc:2484 session.cc:2487
 msgid "Midi Bus"
 msgstr "MIDI 总线"
 
-#: session.cc:2539
+#: session.cc:2509
 msgid "cannot configure new midi bus input"
 msgstr "无法配置新的 MIDI 总线输入"
 
-#: session.cc:2545
+#: session.cc:2515
 msgid "cannot configure new midi bus output"
 msgstr "无法配置新的 MIDI 总线输出"
 
-#: session.cc:2559 session.cc:2841
+#: session.cc:2529 session.cc:2809
 msgid "Session: could not create new audio route."
 msgstr "会话：无法创建新的音频路由。"
 
-#: session.cc:2734 session.cc:2742 session.cc:2817 session.cc:2825
+#: session.cc:2703 session.cc:2711 session.cc:2785 session.cc:2793
 msgid "cannot configure %1 in/%2 out configuration for new audio track"
 msgstr "无法为新的音频轨道配置 %1 入/ %2 出的配位"
 
-#: session.cc:2758
+#: session.cc:2727
 msgid "Session: could not create new audio track."
 msgstr "会话：无法创建新的音频轨道。"
 
-#: session.cc:2792 session.cc:2795
+#: session.cc:2760 session.cc:2763
 msgid "Bus"
 msgstr "总线"
 
-#: session.cc:2922 session.cc:2932
+#: session.cc:2888 session.cc:2898
 msgid "Session: UINT_MAX routes? impossible!"
 msgstr "会话：UINT_MAX 路由？不可能！"
 
-#: session.cc:3067
+#: session.cc:3033
 msgid "Session: cannot create track/bus from template description"
 msgstr "会话：无法从模板描述创建新的音轨/总线"
 
-#: session.cc:3096
+#: session.cc:3062
 msgid "Session: could not create new route from template"
 msgstr "会话：无法从模板创建新的音频路由"
 
-#: session.cc:3133
+#: session.cc:3097
 msgid "Adding new tracks/busses failed"
 msgstr "添加新的音轨/总线失败"
 
-#: session.cc:4709
+#: session.cc:4675
 msgid "Merging embedded file %1: name collision AND md5 hash collision!"
 msgstr "合并嵌入的文件 %1：名称冲突并且 md5 哈希冲突！"
 
-#: session.cc:4833
+#: session.cc:4799
 msgid "There are already %1 recordings for %2, which I consider too many."
 msgstr "在此 %1 已经为 %2 录制中，我考虑太多。"
 
-#: session.cc:4895
+#: session.cc:4861
 msgid ""
 "There are already many recordings for %1, resulting in a too long file-path "
 "%2."
 msgstr "％1 的录音已经很多，导致文件路径 ％2 太长。"
 
-#: session.cc:5509
+#: session.cc:5475
 msgid "send ID %1 appears to be in use already"
 msgstr "发送端 ID 似乎已经在使用中"
 
-#: session.cc:5521
+#: session.cc:5487
 msgid "aux send ID %1 appears to be in use already"
 msgstr "辅助发送端 ID 似乎已经在使用中"
 
-#: session.cc:5533
+#: session.cc:5499
 msgid "return ID %1 appears to be in use already"
 msgstr "返回 ID 似乎已经在使用中"
 
-#: session.cc:5545
+#: session.cc:5511
 msgid "insert ID %1 appears to be in use already"
 msgstr "插入 ID 似乎已经在使用中"
 
-#: session.cc:5683
+#: session.cc:5659
 msgid "Cannot write a range where end <= start (e.g. %1 <= %2)"
 msgstr "无法写入一个位于终点 <= 起点的范围（例如 %1 <= %2）"
 
-#: session.cc:5696
+#: session.cc:5672
 msgid "Cannot write a range with no data."
 msgstr "没有数据无法写入一个范围。"
 
-#: session.cc:5738
+#: session.cc:5714
 msgid "cannot create new file \"%1\" for %2"
 msgstr "无法为 %2 创建新的文件 \"%1\""
 
@@ -2848,7 +2839,7 @@ msgstr "%1：无法搜寻到 %2 用于导出"
 msgid "Export ended unexpectedly: %1"
 msgstr "导出意外结束：%1"
 
-#: session_ltc.cc:235
+#: session_ltc.cc:233
 msgid ""
 "LTC encoder: invalid framerate - LTC encoding is disabled for the remainder "
 "of this session."
@@ -2868,11 +2859,11 @@ msgstr "会话状态：未使用的播放列表被列为已使用。"
 msgid "Session: cannot create Playlist from XML description."
 msgstr "会话：无法从 XML 描述创建播放列表。"
 
-#: session_process.cc:203
+#: session_process.cc:201
 msgid "Session: error in no roll for %1"
 msgstr "会话：在为 %1 无滚动中出错"
 
-#: session_process.cc:996
+#: session_process.cc:1000
 msgid "Programming error: illegal event type in process_event (%1)"
 msgstr "程序设计错误：非法事件类型位于 process_event（进程事件）(%1)"
 
@@ -3026,260 +3017,260 @@ msgstr "不兼容的会话版本。该会话是使用 ％1 的较新版本创建
 msgid "Session-Save: Failed to copy MIDI Source '%1' for snapshot"
 msgstr "会话保存：无法复制 MIDI 来源 '％1' 作为快照"
 
-#: session_state.cc:1556
+#: session_state.cc:1551
 msgid "programming error: Session: incorrect XML node sent to set_state()"
 msgstr "程序设计错误：会话：不正确的 XML 节点发送到 set_state() （设罝状态）"
 
-#: session_state.cc:1626
+#: session_state.cc:1621
 msgid "Session: XML state has no options section"
 msgstr "会话：XML 状态没有选项部分"
 
-#: session_state.cc:1631
+#: session_state.cc:1626
 msgid "Session: XML state has no metadata section"
 msgstr "会话：XML 状态没有元数据部分"
 
-#: session_state.cc:1642
+#: session_state.cc:1637
 msgid "Session: XML state has no sources section"
 msgstr "会话：XML 状态没有来源部分"
 
-#: session_state.cc:1649
+#: session_state.cc:1644
 msgid "Session: XML state has no Tempo Map section"
 msgstr "会话：XML 状态没有节奏映射部分"
 
-#: session_state.cc:1656
+#: session_state.cc:1651
 msgid "Session: XML state has no locations section"
 msgstr "会话：XML 状态没有位置部分"
 
-#: session_state.cc:1669
+#: session_state.cc:1664
 msgid "Session: XML state has no Regions section"
 msgstr "会话：XML 状态没有区域部分"
 
-#: session_state.cc:1676
+#: session_state.cc:1671
 msgid "Session: XML state has no playlists section"
 msgstr "会话：XML 状态没有播放列表部分"
 
-#: session_state.cc:1696
+#: session_state.cc:1691
 msgid "Session: XML state has no bundles section"
 msgstr "会话：XML 状态没有包裹部分"
 
-#: session_state.cc:1725
+#: session_state.cc:1720
 msgid "Session: XML state has no routes section"
 msgstr "会话：XML 状态没有路由部分"
 
-#: session_state.cc:1743
+#: session_state.cc:1738
 msgid "Session: XML state has no route groups section"
 msgstr "会话：XML 状态没有路由群组部分"
 
-#: session_state.cc:1752
+#: session_state.cc:1747
 msgid "Session: XML state has no edit groups section"
 msgstr "会话：XML 状态没有编辑群组部分"
 
-#: session_state.cc:1759
+#: session_state.cc:1754
 msgid "Session: XML state has no mix groups section"
 msgstr "会话：XML 状态没有混音群组部分"
 
-#: session_state.cc:1767
+#: session_state.cc:1762
 msgid "Session: XML state has no click section"
 msgstr "会话：XML 状态没有音频识别声（节拍器）部分"
 
-#: session_state.cc:1839
+#: session_state.cc:1834
 msgid "Session: cannot create Route from XML description."
 msgstr "会话：无法从 XML 描述创建路由。"
 
-#: session_state.cc:1843
+#: session_state.cc:1838
 msgid "Loaded track/bus %1"
 msgstr "已载入音轨/总线 %1"
 
-#: session_state.cc:1848
+#: session_state.cc:1843
 msgid "Tracks/busses loaded;  Adding to Session"
 msgstr "音轨/总线已载入；正在添加到会话"
 
-#: session_state.cc:1852
+#: session_state.cc:1847
 msgid "Finished adding tracks/busses"
 msgstr "添加音轨/总线已结束"
 
-#: session_state.cc:1991
+#: session_state.cc:1986
 msgid "Could not find diskstream for diskstream-id: '%1', playlist: '%2'"
 msgstr "找不到硬盘流 ID 号为 '％1'，播放列表为 '％2' 的硬盘流"
 
-#: session_state.cc:2048
+#: session_state.cc:2043
 msgid "Session: cannot create Region from XML description."
 msgstr "会话：无法从 XML 描述创建区域。"
 
-#: session_state.cc:2052
+#: session_state.cc:2047
 msgid "Can not load state for region '%1'"
 msgstr "无法为区域 '%1' 载入状态"
 
-#: session_state.cc:2088
+#: session_state.cc:2083
 msgid "Regions in compound description not found (ID's %1 and %2): ignored"
 msgstr "在合成描述中找不到区域（ ID 号的 %1 和 %2）：已忽略"
 
-#: session_state.cc:2116
+#: session_state.cc:2111
 msgid "Nested source has no ID info in session file! (ignored)"
 msgstr "在会话文件里嵌入的来源没有 ID 号信息！（已忽略）"
 
-#: session_state.cc:2128
+#: session_state.cc:2123
 msgid "Cannot reconstruct nested source for region %1"
 msgstr "无法为区域 %1 重建嵌入的来源"
 
-#: session_state.cc:2188
+#: session_state.cc:2183
 msgid "Session: XMLNode describing a AudioRegion is incomplete (no source)"
 msgstr "会话：XML 节点描述的一个音频区域是不完整的（无来源）"
 
-#: session_state.cc:2196 session_state.cc:2217 session_state.cc:2237
+#: session_state.cc:2191 session_state.cc:2212 session_state.cc:2232
 msgid ""
 "Session: XMLNode describing a AudioRegion references an unknown source id =%1"
 msgstr "会话：XML 节点描述的一个音频区域引用一个未知来源 id =%1"
 
-#: session_state.cc:2202 session_state.cc:2223 session_state.cc:2243
+#: session_state.cc:2197 session_state.cc:2218 session_state.cc:2238
 msgid ""
 "Session: XMLNode describing a AudioRegion references a non-audio source id ="
 "%1"
 msgstr "会话：XML 节点描述的一个音频区域引用一个非音频来源 id =%1"
 
-#: session_state.cc:2266
+#: session_state.cc:2261
 msgid ""
 "Session: XMLNode describing an AudioRegion is missing some master sources; "
 "ignored"
 msgstr "会话：XML 节点描述的一个音频区域缺失一些主控来源；已忽略"
 
-#: session_state.cc:2300
+#: session_state.cc:2295
 msgid "Session: XMLNode describing a MidiRegion is incomplete (no source)"
 msgstr "会话：XML 节点描述的一个 MIDI 区域是不完整的（无来源）"
 
-#: session_state.cc:2308
+#: session_state.cc:2303
 msgid ""
 "Session: XMLNode describing a MidiRegion references an unknown source id =%1"
 msgstr "会话：XML 节点描述的一个 MIDI 区域引用一个未知来源 id =%1"
 
-#: session_state.cc:2314
+#: session_state.cc:2309
 msgid ""
 "Session: XMLNode describing a MidiRegion references a non-midi source id =%1"
 msgstr "会话：XML 节点描述的一个音频区域引用一个非 MIDI 来源 id =%1"
 
-#: session_state.cc:2400
+#: session_state.cc:2395
 msgid "Session: cannot create Source from XML description."
 msgstr "会话：无法从 XML 描述创建来源。"
 
-#: session_state.cc:2429
+#: session_state.cc:2424
 msgid ""
 "An external MIDI file is missing. %1 cannot currently recover from missing "
 "external MIDI files"
 msgstr "缺失外部 MIDI 文件。％1 当前无法从缺失的外部 MIDI 文件中恢复"
 
-#: session_state.cc:2522
+#: session_state.cc:2517
 msgid "Found a sound file that cannot be used by %1. Talk to the programmers."
 msgstr "发现一个无法被 %1 使用的声音文件。请转告程序员。"
 
-#: session_state.cc:2543
+#: session_state.cc:2538
 msgid "Could not create templates directory \"%1\" (%2)"
 msgstr "无法创建模板目录 \"%1\" (%2)"
 
-#: session_state.cc:2554
+#: session_state.cc:2549
 msgid "Template \"%1\" already exists - new version not created"
 msgstr "模板 \"%1\" 已存在——新版本未创建"
 
-#: session_state.cc:2560
+#: session_state.cc:2555
 msgid "Could not create directory for Session template\"%1\" (%2)"
 msgstr "无法为会话模板 \"%1\" (%2) 创建目录"
 
-#: session_state.cc:2596
+#: session_state.cc:2591
 msgid "template not saved"
 msgstr "模板未保存"
 
-#: session_state.cc:2843
+#: session_state.cc:2838
 msgid "Unknown node \"%1\" found in Bundles list from session file"
 msgstr "从会话文件的包裹列表里发现未知的节点 \"%1\""
 
-#: session_state.cc:3330
+#: session_state.cc:3320
 msgid "Cannot cleanup peak-files for read-only session."
 msgstr "无法为只读会话清除峰值文件。"
 
-#: session_state.cc:3334
+#: session_state.cc:3324
 msgid "Cannot cleanup peak-files while recording"
 msgstr "录制时无法清除峰值文件。"
 
-#: session_state.cc:3357
+#: session_state.cc:3347
 msgid ""
 "Timeout waiting for peak-file creation to terminate before cleanup, please "
 "try again later."
 msgstr "为峰值文件的创建而超时的等待在清理前终止，请稍后再次尝试。"
 
-#: session_state.cc:3626
+#: session_state.cc:3616
 msgid "Session: cannot create dead file folder \"%1\" (%2)"
 msgstr "会话：无法创建沉寂文件的文件夹 \"%1\" (%2)"
 
-#: session_state.cc:3659
+#: session_state.cc:3649
 msgid "cannot rename unused file source from %1 to %2 (%3)"
 msgstr "无法重命名未使用的文件来源从 %1 到 %2 (%3)"
 
-#: session_state.cc:3675
+#: session_state.cc:3665
 msgid "cannot remove peakfile %1 for %2 (%3)"
 msgstr "无法移除峰值文件 %1 为 %2 (%3)"
 
-#: session_state.cc:3854
+#: session_state.cc:3844
 msgid "could not backup old history file, current history not saved"
 msgstr "无法备份旧的历史文件，目前历史未保存"
 
-#: session_state.cc:3868
+#: session_state.cc:3858
 msgid "history could not be saved to %1"
 msgstr "历史无法保存为 %1"
 
-#: session_state.cc:3871
+#: session_state.cc:3861
 msgid "Could not remove history file at path \"%1\" (%2)"
 msgstr "在路径 \"%1\" (%2) 上无法移除历史文件"
 
-#: session_state.cc:3875
+#: session_state.cc:3865
 msgid "could not restore history file from backup %1 (%2)"
 msgstr "无法从备份 %1 (%2) 恢复历史文件"
 
-#: session_state.cc:3900
+#: session_state.cc:3890
 msgid "%1: no history file \"%2\" for this session."
 msgstr "%1：无历史文件 \"%2\" 用于本会话。"
 
-#: session_state.cc:3906
+#: session_state.cc:3896
 msgid "Could not understand session history file \"%1\""
 msgstr "无法理解会话历史文件 \"%1\""
 
-#: session_state.cc:3956
+#: session_state.cc:3946
 msgid "Failed to downcast MidiSource for NoteDiffCommand"
 msgstr "向下转换 Midi 来源为音符差异命令失败"
 
-#: session_state.cc:3967
+#: session_state.cc:3957
 msgid "Failed to downcast MidiSource for SysExDiffCommand"
 msgstr "向下转换 Midi 来源为系统扩展差异命令失败"
 
-#: session_state.cc:3978
+#: session_state.cc:3968
 msgid "Failed to downcast MidiSource for PatchChangeDiffCommand"
 msgstr "向下转换 Midi 来源为切变音色差异命令失败"
 
-#: session_state.cc:3986
+#: session_state.cc:3976
 msgid "Couldn't figure out how to make a Command out of a %1 XMLNode."
 msgstr "无法推算出如何用一个 %1 XML 节点来实现一个命令"
 
-#: session_state.cc:4336
+#: session_state.cc:4326
 msgid "Cannot rename read-only session."
 msgstr "无法重命名只读会话。"
 
-#: session_state.cc:4340
+#: session_state.cc:4330
 msgid "Cannot rename session while recording"
 msgstr "录制时无法重命名会话"
 
-#: session_state.cc:4425 session_state.cc:4426 session_state.cc:4468
-#: session_state.cc:4472
+#: session_state.cc:4415 session_state.cc:4416 session_state.cc:4458
+#: session_state.cc:4462
 msgid "renaming %s as %2 failed (%3)"
 msgstr "重命名 %s 为 %2 失败（%3）"
 
-#: session_state.cc:4488 session_state.cc:4489 session_state.cc:4503
-#: session_state.cc:4504
+#: session_state.cc:4478 session_state.cc:4479 session_state.cc:4493
+#: session_state.cc:4494
 msgid "renaming %1 as %2 failed (%3)"
 msgstr "重命名 %1 为 %2 失败（%3）"
 
-#: session_state.cc:4880
+#: session_state.cc:4870
 msgid "Cannot create new session folder %1"
 msgstr "无法创建新的会话文件夹 %1"
 
-#: session_state.cc:4942 session_state.cc:5017
+#: session_state.cc:4932 session_state.cc:5007
 msgid ""
 "\n"
 "copying \"%1\" failed !"
@@ -3287,7 +3278,7 @@ msgstr ""
 "\n"
 "复制 \"%1\" 失败！"
 
-#: session_state.cc:5232
+#: session_state.cc:5222
 msgid "unknown reason"
 msgstr "不明原因"
 
@@ -3295,21 +3286,21 @@ msgstr "不明原因"
 msgid "Unknown transport state %1 in sync callback"
 msgstr "在同步回调中未知的播送状态 %1"
 
-#: session_transport.cc:173
+#: session_transport.cc:172
 msgid "Locate called for negative sample position - ignored"
 msgstr "定位调用负值样本位置——已忽略"
 
-#: session_transport.cc:496
+#: session_transport.cc:478
 msgid ""
 "Global varispeed cannot be supported while %1 is connected to JACK transport "
 "control"
 msgstr "当 %1 已连接到 JACK 播送控制时不支持全局变速"
 
-#: session_transport.cc:1007
+#: session_transport.cc:987
 msgid "Cannot loop - no loop range defined"
 msgstr "无法循环——未定义循环范围"
 
-#: session_transport.cc:1591
+#: session_transport.cc:1577
 msgid ""
 "Looping cannot be supported while %1 is using JACK transport.\n"
 "Recommend changing the configured options"
@@ -3674,79 +3665,83 @@ msgstr ""
 "这将取代当前的节奏映射！\n"
 "您是否确定您要这样做？"
 
-#: track.cc:645
+#: track.cc:630
 msgid "DiskIOProcessor: \"%1\" isn't an playlist"
 msgstr "硬盘盘输入输出处理器：“％1”不是播放列表"
 
-#: track.cc:692
+#: track.cc:677
 msgid "DiskIOProcessor %1: there is no existing playlist to make a copy of!"
 msgstr "硬盘盘输入输出处理器 ％1 ：没有现有的播放列表可以复制！"
 
-#: track.cc:966
+#: track.cc:946
 msgid "%1: could not create region for complete midi file"
 msgstr "%1：无法为完成 MIDI 文件而创建区域"
 
-#: track.cc:1013
+#: track.cc:993
 msgid "MidiDiskstream: could not create region for captured midi!"
 msgstr "Midi 硬盘流：无法为已捕获的 MIDI 创建区域！"
 
-#: track.cc:1066
+#: track.cc:1046
 msgid "%1: could not create region for complete audio file"
 msgstr "%1：无法为完整的音频文件创建区域"
 
-#: track.cc:1103
+#: track.cc:1083
 msgid "AudioDiskstream: could not create region for captured audio!"
 msgstr "音频硬盘流：无法为捕获的音频创建区域！"
 
-#: transport_master.cc:398 transport_master.cc:399
+#: transport_master.cc:392 transport_master.cc:393
 msgid "Construction of transport master object of type %1 failed"
 msgstr "类型 ％1 的传输主对象的构造失败"
 
-#: transport_master.cc:423 transport_master.cc:456
+#: transport_master.cc:417 transport_master.cc:450
 msgid "SyncSource|JACK"
 msgstr ""
 
-#: transport_master.cc:430
+#: transport_master.cc:424
 msgid "SyncSource|MTC"
 msgstr ""
 
-#: transport_master.cc:440
+#: transport_master.cc:434
 msgid "SyncSource|M-Clk"
 msgstr ""
 
-#: transport_master.cc:450
+#: transport_master.cc:444
 msgid "SyncSource|LTC"
 msgstr ""
 
-#: transport_master.cc:493
+#: transport_master.cc:487
 msgid "All"
 msgstr "全部"
 
-#: transport_master.cc:497
+#: transport_master.cc:491
 msgid "Start/Stop"
 msgstr "开始/停止"
 
-#: transport_master.cc:499
+#: transport_master.cc:493
 msgid "Speed"
 msgstr "速度"
 
-#: transport_master.cc:501
+#: transport_master.cc:495
 msgid "Locate"
 msgstr "定位"
 
-#: transport_master.cc:503
+#: transport_master.cc:497
 msgid "Complex"
 msgstr " 复合"
 
-#: transport_master_manager.cc:134
+#: transport_master_manager.cc:136
 msgid "programming error:%1"
 msgstr "程序设计错误：%1"
 
-#: transport_master_manager.cc:349
+#: transport_master_manager.cc:347
+msgid "Transport master adjusted framerate from %1 to %2."
+msgstr ""
+
+#: transport_master_manager.cc:396
 msgid "There is already a transport master named \"%1\" - not duplicated"
 msgstr "已有一个名为“％1”的播送主控——不可重复"
 
-#: transport_master_manager.cc:664
+#: transport_master_manager.cc:713
 msgid "Cannot initialize transport master manager"
 msgstr "无法初始化播送主控"
 
@@ -3823,6 +3818,19 @@ msgstr "主控指定被忽略以防止递归"
 #: vca_manager.cc:206
 msgid "Cannot set state of a VCA"
 msgstr "无法设置 VCA（电压控制放大器）的状态"
+
+#~ msgid "Session framerate adjusted from %1 to LTC's %2."
+#~ msgstr "会话帧率从 %1 已调整为 LTC（纵向时间码）的 %2。"
+
+#~ msgid "Session and LTC framerate mismatch: LTC:%1 Session:%2."
+#~ msgstr ""
+#~ "会话与LTC（纵向时间码）的帧率不匹配： LTC（纵向时间码）：%1 会话： %2。"
+
+#~ msgid "Session framerate adjusted from %1 TO: MTC's %2."
+#~ msgstr "会话帧率从 %1 调整为：MTC（MIDI 时间码）的 %2。"
+
+#~ msgid "Session and MTC framerate mismatch: MTC:%1 %2:%3."
+#~ msgstr "会话与MTC（MIDI 时间码）帧率不匹配：MTC（MIDI 时间码）：%1 %2:%3。"
 
 #~ msgid "programmer error: %1"
 #~ msgstr "程序错误：%1"

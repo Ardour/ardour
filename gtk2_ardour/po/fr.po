@@ -11,11 +11,13 @@
 # Edouard <edwsaintesprit@hotmail.com>, 2016.
 # Rivaud Julien <frnchfrgg@free.fr>, 2016, 2019.
 # Olivier Humbert <trebmuh@tuxfamily.org>, 2016, 2018, 2019.
+#: audio_clock.cc:941 audio_clock.cc:942 session_dialog.cc:604
+#: session_dialog.cc:605
 msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 6\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-05-17 17:00+0200\n"
+"POT-Creation-Date: 2020-05-20 14:36-0600\n"
 "PO-Revision-Date: 2020-05-19 21:03+0200\n"
 "Last-Translator: Fred Rech <fred_rech@laposte.net>\n"
 "Language-Team: French <>\n"
@@ -1865,15 +1867,19 @@ msgstr ""
 msgid "Don't close"
 msgstr "Ne pas fermer"
 
-#: ardour_ui_dialogs.cc:315
+#: ardour_ui_dialogs.cc:316 template_dialog.cc:325
+msgid "Discard"
+msgstr "Rejeter"
+
+#: ardour_ui_dialogs.cc:318
 msgid "Just close"
 msgstr "Fermer"
 
-#: ardour_ui_dialogs.cc:316
+#: ardour_ui_dialogs.cc:320
 msgid "Save and close"
 msgstr "Sauvegarder et fermer"
 
-#: ardour_ui_dialogs.cc:1012 ardour_ui_ed.cc:431 ardour_ui_ed.cc:442
+#: ardour_ui_dialogs.cc:1021 ardour_ui_ed.cc:431 ardour_ui_ed.cc:442
 #: audio_clock.cc:2151 editor.cc:197 editor.cc:327 editor_actions.cc:616
 #: editor_actions.cc:625 export_timespan_selector.cc:100
 #: session_option_editor.cc:46 session_option_editor.cc:66
@@ -1884,7 +1890,7 @@ msgstr "Sauvegarder et fermer"
 msgid "Timecode"
 msgstr "Timecode"
 
-#: ardour_ui_dialogs.cc:1025 session_option_editor.cc:176
+#: ardour_ui_dialogs.cc:1034 session_option_editor.cc:176
 #: session_option_editor.cc:184 session_option_editor.cc:208
 msgid "Media"
 msgstr "Médias"
@@ -2690,11 +2696,11 @@ msgstr ""
 msgid "Open Existing Session"
 msgstr "Ouvrir une Session Existante"
 
-#: ardour_ui_session.cc:186 ardour_ui_session.cc:1105 startup_fsm.cc:673
+#: ardour_ui_session.cc:186 ardour_ui_session.cc:1108 startup_fsm.cc:673
 msgid "Extracting session-archive failed: %1"
 msgstr "Échec d'extraction d'archive-session : %1"
 
-#: ardour_ui_session.cc:236 ardour_ui_session.cc:269 ardour_ui_session.cc:797
+#: ardour_ui_session.cc:236 ardour_ui_session.cc:269 ardour_ui_session.cc:800
 #: startup_fsm.cc:741
 msgid ""
 "To ensure compatibility with various systems\n"
@@ -2790,11 +2796,11 @@ msgstr "Abandon de la sauvegarde du cliché"
 msgid "Don't save now, just snapshot"
 msgstr "Juste un cliché, sans sauvegarde"
 
-#: ardour_ui_session.cc:706 ardour_ui_session.cc:863
+#: ardour_ui_session.cc:706 ardour_ui_session.cc:866
 msgid "Save it first"
 msgstr "Sauvegarder d'abord"
 
-#: ardour_ui_session.cc:714 ardour_ui_session.cc:871
+#: ardour_ui_session.cc:714 ardour_ui_session.cc:874
 msgid ""
 "%1 was unable to save your session.\n"
 "\n"
@@ -2812,7 +2818,7 @@ msgstr ""
 msgid "Snapshot and switch"
 msgstr "Basculer sur un nouveau cliché"
 
-#: ardour_ui_session.cc:733 ardour_ui_session.cc:782
+#: ardour_ui_session.cc:733 ardour_ui_session.cc:785
 msgid "New session name"
 msgstr "Nom de la nouvelle session"
 
@@ -2824,24 +2830,24 @@ msgstr "Prendre un cliché"
 msgid "Name of new snapshot"
 msgstr "Nom du nouveau cliché"
 
-#: ardour_ui_session.cc:778
+#: ardour_ui_session.cc:781
 msgid "Name Session"
 msgstr "Nommer la Session"
 
-#: ardour_ui_session.cc:779
+#: ardour_ui_session.cc:782
 msgid "Session name"
 msgstr "Nom de la Session"
 
-#: ardour_ui_session.cc:781
+#: ardour_ui_session.cc:784
 msgid "Rename Session"
 msgstr "Renommer la session"
 
-#: ardour_ui_session.cc:805
+#: ardour_ui_session.cc:808
 msgid ""
 "That name is already in use by another directory/folder. Please try again."
 msgstr "Un fichier ou un répertoire utilise déjà ce nom. Essayez autre chose."
 
-#: ardour_ui_session.cc:813
+#: ardour_ui_session.cc:816
 msgid ""
 "Renaming this session failed.\n"
 "Things could be seriously messed up at this point"
@@ -2849,32 +2855,32 @@ msgstr ""
 "Le renommage de la session a échoué.\n"
 "Il est possible que les données soient à présent corrompues."
 
-#: ardour_ui_session.cc:833
+#: ardour_ui_session.cc:836
 #, c-format
 msgid "Copied %<PRId64> of %<PRId64>"
 msgstr "%<PRId64> de %<PRId64> copié(s)"
 
-#: ardour_ui_session.cc:861
+#: ardour_ui_session.cc:864
 msgid "Abort save-as"
 msgstr "Abandon d'enregistrement-sous"
 
-#: ardour_ui_session.cc:862
+#: ardour_ui_session.cc:865
 msgid "Don't save now, just save-as"
 msgstr "Ne pas sauvegarder, enregistrer une copie"
 
-#: ardour_ui_session.cc:918 save_as_dialog.cc:35
+#: ardour_ui_session.cc:921 save_as_dialog.cc:35
 msgid "Save As"
 msgstr "Sauvegarder sous"
 
-#: ardour_ui_session.cc:945
+#: ardour_ui_session.cc:948
 msgid "Save As failed: %1"
 msgstr "Échec de la sauvegarde : %1"
 
-#: ardour_ui_session.cc:982
+#: ardour_ui_session.cc:985
 msgid "Session Archiving failed."
 msgstr "Échec de l'archivage de session."
 
-#: ardour_ui_session.cc:1010
+#: ardour_ui_session.cc:1013
 msgid ""
 "To ensure compatibility with various systems\n"
 "snapshot names may not contain a '%1' character"
@@ -2883,32 +2889,32 @@ msgstr ""
 "systèmes, les noms de cliché ne peuvent pas\n"
 "utiliser le caractère \"%1\"."
 
-#: ardour_ui_session.cc:1024
+#: ardour_ui_session.cc:1027
 msgid "Confirm Snapshot Overwrite"
 msgstr "Confirmer l'écrasement du cliché"
 
-#: ardour_ui_session.cc:1025
+#: ardour_ui_session.cc:1028
 msgid "A snapshot already exists with that name. Do you want to overwrite it?"
 msgstr "Un cliché avec ce nom existe déjà. Voulez-vous l'écraser ?"
 
-#: ardour_ui_session.cc:1047
+#: ardour_ui_session.cc:1050
 msgid "Open Session"
 msgstr "Ouvrir une session"
 
-#: ardour_ui_session.cc:1071 session_dialog.cc:455 session_import_dialog.cc:179
+#: ardour_ui_session.cc:1074 session_dialog.cc:455 session_import_dialog.cc:179
 #: session_metadata_dialog.cc:921
 msgid "%1 sessions"
 msgstr "Sessions %1"
 
-#: ardour_ui_session.cc:1076 session_dialog.cc:460
+#: ardour_ui_session.cc:1079 session_dialog.cc:460
 msgid "Session Archives"
 msgstr "Archives-Session"
 
-#: ardour_ui_session.cc:1162
+#: ardour_ui_session.cc:1165
 msgid "Unsaved Session"
 msgstr "Session non sauvegardée"
 
-#: ardour_ui_session.cc:1183
+#: ardour_ui_session.cc:1186
 msgid ""
 "The session \"%1\"\n"
 "has not been saved.\n"
@@ -2926,7 +2932,7 @@ msgstr ""
 "\n"
 "Que voulez-vous faire ?"
 
-#: ardour_ui_session.cc:1186
+#: ardour_ui_session.cc:1189
 msgid ""
 "The snapshot \"%1\"\n"
 "has not been saved.\n"
@@ -2943,7 +2949,7 @@ msgstr ""
 "\n"
 "Que voulez-vous faire ?"
 
-#: ardour_ui_session.cc:1200
+#: ardour_ui_session.cc:1203
 msgid "Prompter"
 msgstr "Question"
 
@@ -3108,7 +3114,7 @@ msgstr "Impossible de lancer le serveur vidéo"
 msgid "Video-server was started but does not respond to requests..."
 msgstr "Le serveur vidéo a été démarré mais ne répond pas aux requêtes..."
 
-#: ardour_ui_video.cc:255 editor_audio_import.cc:727
+#: ardour_ui_video.cc:255 editor_audio_import.cc:719
 msgid "could not open %1"
 msgstr "impossible d'ouvrir %1"
 
@@ -3241,15 +3247,15 @@ msgid_plural "Set to %1 beats"
 msgstr[0] "Fixer sur %1 temps"
 msgstr[1] "Fixer sur %1 temps"
 
-#: automation_line.cc:299 editor_drag.cc:4916
+#: automation_line.cc:304 editor_drag.cc:4916
 msgid "automation event move"
 msgstr "déplacement d'événement d'automation"
 
-#: automation_line.cc:870 region_gain_line.cc:79
+#: automation_line.cc:875 region_gain_line.cc:79
 msgid "remove control point"
 msgstr "retrait de point de contrôle"
 
-#: automation_line.cc:995
+#: automation_line.cc:1000
 msgid "Ignoring illegal points on AutomationLine \"%1\""
 msgstr "Les points illégaux sur la ligne d'automation \"%1\" sont ignorés"
 
@@ -4329,8 +4335,8 @@ msgstr "Garder la liste de lecture"
 msgid "Keep Remaining"
 msgstr "Conserver le reste"
 
-#: editor.cc:4214 editor_audio_import.cc:682 editor_ops.cc:6964
-#: engine_dialog.cc:3144 sfdb_freesound_mootcher.cc:69 keyeditor.cc:80
+#: editor.cc:4214 editor_audio_import.cc:674 editor_ops.cc:6964
+#: engine_dialog.cc:3162 sfdb_freesound_mootcher.cc:69 keyeditor.cc:80
 #: processor_box.cc:3646 processor_box.cc:3671 pt_import_selector.cc:44
 #: template_dialog.cc:525 transport_masters_dialog.cc:756 utils.cc:124
 msgid "Cancel"
@@ -5672,34 +5678,34 @@ msgstr ""
 msgid "Cancel Import"
 msgstr "Annuler l'importation"
 
-#: editor_audio_import.cc:641
+#: editor_audio_import.cc:633
 msgid "Editor: cannot open file \"%1\", (%2)"
 msgstr "Éditeur : impossible d'ouvrir le fichier \"%1\" (%2)"
 
-#: editor_audio_import.cc:646
+#: editor_audio_import.cc:638
 msgid ""
 "%1\n"
 "This audiofile cannot be embedded. It must be imported!"
 msgstr ""
 
-#: editor_audio_import.cc:655
+#: editor_audio_import.cc:647
 msgid "Cancel entire import"
 msgstr "Annuler toute l'importation"
 
-#: editor_audio_import.cc:656
+#: editor_audio_import.cc:648
 msgid "Don't embed it"
 msgstr "Ne pas le lier"
 
-#: editor_audio_import.cc:657
+#: editor_audio_import.cc:649
 msgid "Embed all without questions"
 msgstr "Lier tout sans poser de question"
 
-#: editor_audio_import.cc:660 editor_audio_import.cc:686
+#: editor_audio_import.cc:652 editor_audio_import.cc:678
 #: export_format_dialog.cc:75
 msgid "Sample rate"
 msgstr "Échantillonnage"
 
-#: editor_audio_import.cc:661 editor_audio_import.cc:687
+#: editor_audio_import.cc:653 editor_audio_import.cc:679
 msgid ""
 "%1\n"
 "This audiofile's sample rate doesn't match the session sample rate!"
@@ -5708,7 +5714,7 @@ msgstr ""
 "La fréquence d'échantillonnage du fichier audio différe de celle de la "
 "session !"
 
-#: editor_audio_import.cc:683
+#: editor_audio_import.cc:675
 msgid "Embed it anyway"
 msgstr "Lier quand même"
 
@@ -7265,7 +7271,7 @@ msgstr "Utiliser des E/S avec tampon"
 msgid "Autostart"
 msgstr "Auto-démarrage"
 
-#: engine_dialog.cc:103 engine_dialog.cc:3158
+#: engine_dialog.cc:103 engine_dialog.cc:3176
 msgid "Measure"
 msgstr "Mesurer"
 
@@ -7331,7 +7337,7 @@ msgstr ""
 "Lorsque vous êtes satisfait des résultats, cliquez sur le bouton \"Utiliser "
 "les résultats\"."
 
-#: engine_dialog.cc:256 engine_dialog.cc:3353 engine_dialog.cc:3363
+#: engine_dialog.cc:256 engine_dialog.cc:3371 engine_dialog.cc:3381
 msgid "No measurement results yet"
 msgstr "Aucun résultat de mesure pour le moment"
 
@@ -7463,7 +7469,7 @@ msgstr "Entrée"
 msgid "Output"
 msgstr "Sortie"
 
-#: engine_dialog.cc:1068
+#: engine_dialog.cc:1073
 msgid "Calibrate"
 msgstr "Calibrer"
 
@@ -7482,59 +7488,59 @@ msgstr[1] "%1 échantillons"
 msgid "(%.1f ms)"
 msgstr "(%.1f ms)"
 
-#: engine_dialog.cc:2507
+#: engine_dialog.cc:2522
 msgid "Could not start backend engine %1"
 msgstr "Impossible de démarrer le moteur %1"
 
-#: engine_dialog.cc:2539
+#: engine_dialog.cc:2554
 msgid "Cannot set driver to %1"
 msgstr "Impossible de régler le pilote sur %1"
 
-#: engine_dialog.cc:2544
+#: engine_dialog.cc:2559
 msgid "Cannot set input device name to %1"
 msgstr "Impossible de paramétrer le nom de périphérique d'entrée à %1"
 
-#: engine_dialog.cc:2548
+#: engine_dialog.cc:2563
 msgid "Cannot set output device name to %1"
 msgstr "Impossible de paramétrer le nom de périphérique de sortie à %1"
 
-#: engine_dialog.cc:2553
+#: engine_dialog.cc:2568
 msgid "Cannot set device name to %1"
 msgstr "Impossible de nommer l'appareil %1"
 
-#: engine_dialog.cc:2558
+#: engine_dialog.cc:2573
 msgid "Cannot set sample rate to %1"
 msgstr "Impossible de régler la fréquence d’échantillonnage sur %1"
 
-#: engine_dialog.cc:2562
+#: engine_dialog.cc:2577
 msgid "Cannot set buffer size to %1"
 msgstr "Impossible de régler la taille du tampon à %1"
 
-#: engine_dialog.cc:2566
+#: engine_dialog.cc:2581
 msgid "Cannot set periods to %1"
 msgstr "Impossible de régler le nombre de périodes sur %1"
 
-#: engine_dialog.cc:2572
+#: engine_dialog.cc:2587
 msgid "Cannot set input channels to %1"
 msgstr "Impossible de régler les canaux d'entrée sur %1"
 
-#: engine_dialog.cc:2576
+#: engine_dialog.cc:2591
 msgid "Cannot set output channels to %1"
 msgstr "Impossible de régler les canaux de sortie sur %1"
 
-#: engine_dialog.cc:2582
+#: engine_dialog.cc:2597
 msgid "Cannot set input latency to %1"
 msgstr "Impossible de régler la latence d'entrée sur %1"
 
-#: engine_dialog.cc:2586
+#: engine_dialog.cc:2601
 msgid "Cannot set output latency to %1"
 msgstr "Impossible de régler la latence de sortie sur %1"
 
-#: engine_dialog.cc:3009 engine_dialog.cc:3075
+#: engine_dialog.cc:3027 engine_dialog.cc:3093
 msgid "No signal detected "
 msgstr "Aucun signal détecté "
 
-#: engine_dialog.cc:3016
+#: engine_dialog.cc:3034
 msgid ""
 "Input signal is > -3dBFS. Lower the signal level (output gain, input gain) "
 "on the audio-interface."
@@ -7542,64 +7548,64 @@ msgstr ""
 "Le signal id'entrée est > -3dBFS. Abaissez le niveau de signal (gain de "
 "sortie, gain d'entrée) sur l'interface audio."
 
-#: engine_dialog.cc:3029 engine_dialog.cc:3083 port_insert_ui.cc:74
+#: engine_dialog.cc:3047 engine_dialog.cc:3101 port_insert_ui.cc:74
 #: port_insert_ui.cc:102
 msgid "Disconnected from audio engine"
 msgstr "Déconnecté du moteur audio"
 
-#: engine_dialog.cc:3038 engine_dialog.cc:3091
+#: engine_dialog.cc:3056 engine_dialog.cc:3109
 msgid "Detected roundtrip latency: "
 msgstr "Latence aller-retour détectée : "
 
-#: engine_dialog.cc:3040 engine_dialog.cc:3093
+#: engine_dialog.cc:3058 engine_dialog.cc:3111
 msgid "Systemic latency: "
 msgstr "Latence systémique : "
 
-#: engine_dialog.cc:3047
+#: engine_dialog.cc:3065
 msgid "(signal detection error)"
 msgstr "(erreur de détection du signal)"
 
-#: engine_dialog.cc:3053
+#: engine_dialog.cc:3071
 msgid "(inverted - bad wiring)"
 msgstr "(inversé − mauvaise liaison)"
 
-#: engine_dialog.cc:3100
+#: engine_dialog.cc:3118
 msgid "(averaging)"
 msgstr "(en moyenne)"
 
-#: engine_dialog.cc:3106
+#: engine_dialog.cc:3124
 msgid "(too large jitter)"
 msgstr "(gigue trop importante)"
 
-#: engine_dialog.cc:3110
+#: engine_dialog.cc:3128
 msgid "(large jitter)"
 msgstr "(gigue importante)"
 
-#: engine_dialog.cc:3122
+#: engine_dialog.cc:3140
 msgid "Timeout - large MIDI jitter."
 msgstr "Délai dépassé − gigue MIDI importante."
 
-#: engine_dialog.cc:3138 port_insert_ui.cc:138
+#: engine_dialog.cc:3156 port_insert_ui.cc:138
 msgid "Detecting ..."
 msgstr "Détection ..."
 
-#: engine_dialog.cc:3277
+#: engine_dialog.cc:3295
 msgid "Disconnect from %1"
 msgstr "Déconnecter de %1"
 
-#: engine_dialog.cc:3282
+#: engine_dialog.cc:3300
 msgid "Running"
 msgstr "Fonctionne"
 
-#: engine_dialog.cc:3284
+#: engine_dialog.cc:3302
 msgid "Connected"
 msgstr "Connecté"
 
-#: engine_dialog.cc:3295
+#: engine_dialog.cc:3313
 msgid "Connect to %1"
 msgstr "Connecter à %1"
 
-#: engine_dialog.cc:3299
+#: engine_dialog.cc:3317
 msgid "Stopped"
 msgstr "Arrêt"
 
@@ -16593,10 +16599,6 @@ msgstr ""
 "La description du modèle \"%1\" a été modifiée mais n'est pas sauvegardée "
 "pour l'instant.\n"
 "Voulez vous la sauvegarder ?"
-
-#: template_dialog.cc:325
-msgid "Discard"
-msgstr "Rejeter"
 
 #: template_dialog.cc:391
 msgid "Template of name \"%1\" already exists"

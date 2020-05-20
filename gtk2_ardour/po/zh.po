@@ -2,11 +2,13 @@
 # Copyright (C) 2008 Paul Davis
 # This file is distributed under the same license as the gtk-ardour package.
 # 一善鱼 <YQ-YSY@163.com> 最后翻译于 2020-05-17
+#: audio_clock.cc:941 audio_clock.cc:942 session_dialog.cc:604
+#: session_dialog.cc:605
 msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 6.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-05-13 15:36+0800\n"
+"POT-Creation-Date: 2020-05-20 14:36-0600\n"
 "PO-Revision-Date: 2020-05-17 12:07+0800\n"
 "Last-Translator: \n"
 "Language-Team: 一善鱼 YQ-YSY@163.com\n"
@@ -993,7 +995,7 @@ msgstr "空程'o'节拍"
 msgid "Plugin DSP Load"
 msgstr "插件 DSP（数字信号处理）负载"
 
-#: ardour_ui.cc:338 rc_option_editor.cc:3411 transport_masters_dialog.cc:687
+#: ardour_ui.cc:338 rc_option_editor.cc:3411 transport_masters_dialog.cc:696
 msgid "Transport Masters"
 msgstr "播送主控"
 
@@ -1171,7 +1173,7 @@ msgstr "无"
 msgid "kHz"
 msgstr "kHz（千赫）"
 
-#: ardour_ui.cc:1217 ardour_ui.cc:1221 editor_ops.cc:7323 editor_ops.cc:7334
+#: ardour_ui.cc:1217 ardour_ui.cc:1221 editor_ops.cc:7322 editor_ops.cc:7333
 #: rhythm_ferret.cc:131 rhythm_ferret.cc:146
 msgid "ms"
 msgstr "ms（毫秒）"
@@ -1816,15 +1818,19 @@ msgstr ""
 msgid "Don't close"
 msgstr "不关闭"
 
-#: ardour_ui_dialogs.cc:315
+#: ardour_ui_dialogs.cc:316 template_dialog.cc:325
+msgid "Discard"
+msgstr "放弃"
+
+#: ardour_ui_dialogs.cc:318
 msgid "Just close"
 msgstr "只管关闭"
 
-#: ardour_ui_dialogs.cc:316
+#: ardour_ui_dialogs.cc:320
 msgid "Save and close"
 msgstr "保存并关闭"
 
-#: ardour_ui_dialogs.cc:1012 ardour_ui_ed.cc:431 ardour_ui_ed.cc:442
+#: ardour_ui_dialogs.cc:1021 ardour_ui_ed.cc:431 ardour_ui_ed.cc:442
 #: audio_clock.cc:2151 editor.cc:197 editor.cc:327 editor_actions.cc:616
 #: editor_actions.cc:625 export_timespan_selector.cc:100
 #: session_option_editor.cc:46 session_option_editor.cc:66
@@ -1835,7 +1841,7 @@ msgstr "保存并关闭"
 msgid "Timecode"
 msgstr "时间码"
 
-#: ardour_ui_dialogs.cc:1025 session_option_editor.cc:176
+#: ardour_ui_dialogs.cc:1034 session_option_editor.cc:176
 #: session_option_editor.cc:184 session_option_editor.cc:208
 msgid "Media"
 msgstr "媒体"
@@ -2628,11 +2634,11 @@ msgstr ""
 msgid "Open Existing Session"
 msgstr "打开已存在的会话"
 
-#: ardour_ui_session.cc:186 ardour_ui_session.cc:1105 startup_fsm.cc:673
+#: ardour_ui_session.cc:186 ardour_ui_session.cc:1108 startup_fsm.cc:673
 msgid "Extracting session-archive failed: %1"
 msgstr "解压缩会话档案失败：%1"
 
-#: ardour_ui_session.cc:236 ardour_ui_session.cc:269 ardour_ui_session.cc:797
+#: ardour_ui_session.cc:236 ardour_ui_session.cc:269 ardour_ui_session.cc:800
 #: startup_fsm.cc:741
 msgid ""
 "To ensure compatibility with various systems\n"
@@ -2727,11 +2733,11 @@ msgstr "中止保存快照"
 msgid "Don't save now, just snapshot"
 msgstr "现在不保存，仅保存快照"
 
-#: ardour_ui_session.cc:706 ardour_ui_session.cc:863
+#: ardour_ui_session.cc:706 ardour_ui_session.cc:866
 msgid "Save it first"
 msgstr "先保存"
 
-#: ardour_ui_session.cc:714 ardour_ui_session.cc:871
+#: ardour_ui_session.cc:714 ardour_ui_session.cc:874
 msgid ""
 "%1 was unable to save your session.\n"
 "\n"
@@ -2749,7 +2755,7 @@ msgstr ""
 msgid "Snapshot and switch"
 msgstr "快照和切换"
 
-#: ardour_ui_session.cc:733 ardour_ui_session.cc:782
+#: ardour_ui_session.cc:733 ardour_ui_session.cc:785
 msgid "New session name"
 msgstr "新建会话的名称"
 
@@ -2761,24 +2767,24 @@ msgstr "生成快照"
 msgid "Name of new snapshot"
 msgstr "新建快照的名称"
 
-#: ardour_ui_session.cc:778
+#: ardour_ui_session.cc:781
 msgid "Name Session"
 msgstr "命名会话"
 
-#: ardour_ui_session.cc:779
+#: ardour_ui_session.cc:782
 msgid "Session name"
 msgstr "会话名称"
 
-#: ardour_ui_session.cc:781
+#: ardour_ui_session.cc:784
 msgid "Rename Session"
 msgstr "重命名会话"
 
-#: ardour_ui_session.cc:805
+#: ardour_ui_session.cc:808
 msgid ""
 "That name is already in use by another directory/folder. Please try again."
 msgstr "此名称已被另一个目录/文件夹使用。请再尝试另一个。"
 
-#: ardour_ui_session.cc:813
+#: ardour_ui_session.cc:816
 msgid ""
 "Renaming this session failed.\n"
 "Things could be seriously messed up at this point"
@@ -2786,32 +2792,32 @@ msgstr ""
 "重命名会话失败.\n"
 "从现在开始事情真的将会变得很麻烦。"
 
-#: ardour_ui_session.cc:833
+#: ardour_ui_session.cc:836
 #, c-format
 msgid "Copied %<PRId64> of %<PRId64>"
 msgstr "%<PRId64> 的 %<PRId64> 已复制"
 
-#: ardour_ui_session.cc:861
+#: ardour_ui_session.cc:864
 msgid "Abort save-as"
 msgstr "中止另存为"
 
-#: ardour_ui_session.cc:862
+#: ardour_ui_session.cc:865
 msgid "Don't save now, just save-as"
 msgstr "现在不要保存，只需另存为"
 
-#: ardour_ui_session.cc:918 save_as_dialog.cc:35
+#: ardour_ui_session.cc:921 save_as_dialog.cc:35
 msgid "Save As"
 msgstr "另存为"
 
-#: ardour_ui_session.cc:945
+#: ardour_ui_session.cc:948
 msgid "Save As failed: %1"
 msgstr "Save As failed: %1 另存已失败：%1"
 
-#: ardour_ui_session.cc:982
+#: ardour_ui_session.cc:985
 msgid "Session Archiving failed."
 msgstr "会话归档失败。"
 
-#: ardour_ui_session.cc:1010
+#: ardour_ui_session.cc:1013
 msgid ""
 "To ensure compatibility with various systems\n"
 "snapshot names may not contain a '%1' character"
@@ -2819,32 +2825,32 @@ msgstr ""
 "为了确保在不同系统间的兼容性\n"
 "快照名称不能包含 '%1' 字符"
 
-#: ardour_ui_session.cc:1024
+#: ardour_ui_session.cc:1027
 msgid "Confirm Snapshot Overwrite"
 msgstr "确定覆盖快照"
 
-#: ardour_ui_session.cc:1025
+#: ardour_ui_session.cc:1028
 msgid "A snapshot already exists with that name. Do you want to overwrite it?"
 msgstr "已存在一个相同名称的快照。您打算覆盖它？"
 
-#: ardour_ui_session.cc:1047
+#: ardour_ui_session.cc:1050
 msgid "Open Session"
 msgstr "打开会话"
 
-#: ardour_ui_session.cc:1071 session_dialog.cc:455 session_import_dialog.cc:179
+#: ardour_ui_session.cc:1074 session_dialog.cc:455 session_import_dialog.cc:179
 #: session_metadata_dialog.cc:921
 msgid "%1 sessions"
 msgstr "%1 会话"
 
-#: ardour_ui_session.cc:1076 session_dialog.cc:460
+#: ardour_ui_session.cc:1079 session_dialog.cc:460
 msgid "Session Archives"
 msgstr "会话档案"
 
-#: ardour_ui_session.cc:1162
+#: ardour_ui_session.cc:1165
 msgid "Unsaved Session"
 msgstr " 未保存的会话"
 
-#: ardour_ui_session.cc:1183
+#: ardour_ui_session.cc:1186
 msgid ""
 "The session \"%1\"\n"
 "has not been saved.\n"
@@ -2861,7 +2867,7 @@ msgstr ""
 "\n"
 "您打算如何做？"
 
-#: ardour_ui_session.cc:1186
+#: ardour_ui_session.cc:1189
 msgid ""
 "The snapshot \"%1\"\n"
 "has not been saved.\n"
@@ -2878,7 +2884,7 @@ msgstr ""
 "\n"
 "您打算如何做？"
 
-#: ardour_ui_session.cc:1200
+#: ardour_ui_session.cc:1203
 msgid "Prompter"
 msgstr "提词机"
 
@@ -2948,23 +2954,27 @@ msgstr ""
 msgid "NSM: initialization failed"
 msgstr "NSM（网络服务管理）：初始化失败"
 
-#: ardour_ui_startup.cc:406
+#: ardour_ui_startup.cc:407
+msgid "NSM server did not announce itself. Continuing without NSM."
+msgstr ""
+
+#: ardour_ui_startup.cc:409
 msgid "NSM server did not announce itself"
 msgstr "NSM（网络服务管理）服务器没有表明身份"
 
-#: ardour_ui_startup.cc:419
+#: ardour_ui_startup.cc:425
 msgid "NSM: no client ID provided"
 msgstr "NSM（网络服务管理）: 没有提供客户机识别号"
 
-#: ardour_ui_startup.cc:426
+#: ardour_ui_startup.cc:434
 msgid "NSM: no session created"
 msgstr "NSM（网络服务管理）：没有已创建的会话"
 
-#: ardour_ui_startup.cc:571 new_user_wizard.cc:419
+#: ardour_ui_startup.cc:581 new_user_wizard.cc:419
 msgid "%1 is ready for use"
 msgstr "%1 准备就绪"
 
-#: ardour_ui_startup.cc:621
+#: ardour_ui_startup.cc:631
 msgid ""
 "WARNING: Your system has a limit for maximum amount of locked memory. This "
 "might cause %1 to run out of memory before your system runs out of memory. \n"
@@ -2977,7 +2987,7 @@ msgstr ""
 "\n"
 "您可以使用“ulimit -l”命令来查看内存限制，通常它由 %2 来控制。"
 
-#: ardour_ui_startup.cc:638
+#: ardour_ui_startup.cc:648
 msgid "Do not show this window again"
 msgstr "不再显示此窗口"
 
@@ -3030,7 +3040,7 @@ msgstr "无法启动视频服务器"
 msgid "Video-server was started but does not respond to requests..."
 msgstr "视频服务器已经启动但没有响应请求…"
 
-#: ardour_ui_video.cc:255 editor_audio_import.cc:727
+#: ardour_ui_video.cc:255 editor_audio_import.cc:719
 msgid "could not open %1"
 msgstr "无法打开 %1"
 
@@ -3088,8 +3098,8 @@ msgid "TimeSignature|TS"
 msgstr "拍号"
 
 #: audio_clock.cc:1896 audio_streamview.cc:118 editor_actions.cc:1104
-#: luainstance.cc:1323 luainstance.cc:1328 luainstance.cc:2170
-#: luainstance.cc:2175 plugin_pin_dialog.cc:876 session_metadata_dialog.cc:499
+#: luainstance.cc:1324 luainstance.cc:1329 luainstance.cc:2171
+#: luainstance.cc:2176 plugin_pin_dialog.cc:876 session_metadata_dialog.cc:499
 #: session_metadata_dialog.cc:547 session_metadata_dialog.cc:603
 #: session_metadata_dialog.cc:907 streamview.cc:475
 msgid "programming error: %1"
@@ -3162,15 +3172,15 @@ msgid "Set to %1 beat"
 msgid_plural "Set to %1 beats"
 msgstr[0] "设置为 %1 拍"
 
-#: automation_line.cc:299 editor_drag.cc:4916
+#: automation_line.cc:304 editor_drag.cc:4916
 msgid "automation event move"
 msgstr "自动化事件移动"
 
-#: automation_line.cc:870 region_gain_line.cc:79
+#: automation_line.cc:875 region_gain_line.cc:79
 msgid "remove control point"
 msgstr "移除控制点"
 
-#: automation_line.cc:995
+#: automation_line.cc:1000
 msgid "Ignoring illegal points on AutomationLine \"%1\""
 msgstr "忽略自动化线路上的非法点“%1”"
 
@@ -3302,7 +3312,7 @@ msgstr "删除"
 #: editor_routes.cc:247 lua_script_manager.cc:55 lua_script_manager.cc:104
 #: lua_script_manager.cc:145 midi_list_editor.cc:109 plugin_selector.cc:98
 #: plugin_selector.cc:165 session_metadata_dialog.cc:694
-#: transport_masters_dialog.cc:79 transport_masters_dialog.cc:712
+#: transport_masters_dialog.cc:79 transport_masters_dialog.cc:733
 msgid "Name"
 msgstr "名称"
 
@@ -4236,10 +4246,10 @@ msgstr "保留播放列表"
 msgid "Keep Remaining"
 msgstr "保留剩余的"
 
-#: editor.cc:4214 editor_audio_import.cc:682 editor_ops.cc:6965
-#: engine_dialog.cc:3144 sfdb_freesound_mootcher.cc:69 keyeditor.cc:80
+#: editor.cc:4214 editor_audio_import.cc:674 editor_ops.cc:6964
+#: engine_dialog.cc:3162 sfdb_freesound_mootcher.cc:69 keyeditor.cc:80
 #: processor_box.cc:3646 processor_box.cc:3671 pt_import_selector.cc:44
-#: template_dialog.cc:525 transport_masters_dialog.cc:735 utils.cc:124
+#: template_dialog.cc:525 transport_masters_dialog.cc:756 utils.cc:124
 msgid "Cancel"
 msgstr "取消"
 
@@ -4260,7 +4270,7 @@ msgid "Please wait while %1 loads visual data."
 msgstr "请等候 %1 载入可见数据"
 
 #: editor.cc:6204 editor.cc:6239 editor_markers.cc:1030 editor_markers.cc:1052
-#: panner_ui.cc:414 processor_box.cc:3930
+#: panner_ui.cc:417 processor_box.cc:3930
 msgid "Edit..."
 msgstr "编辑…"
 
@@ -4325,7 +4335,7 @@ msgstr "分层"
 msgid "Position"
 msgstr "位置"
 
-#: editor_actions.cc:141 panner_ui.cc:178 route_time_axis.cc:586
+#: editor_actions.cc:141 panner_ui.cc:181 route_time_axis.cc:586
 #: vca_time_axis.cc:501
 msgid "Trim"
 msgstr "修剪"
@@ -5269,7 +5279,7 @@ msgstr "编辑音符力度"
 
 #: editor_actions.cc:1093 editor_actions.cc:1231 editor_actions.cc:1242
 #: editor_actions.cc:1297 editor_actions.cc:1308 editor_actions.cc:1355
-#: luainstance.cc:368 luainstance.cc:2296
+#: luainstance.cc:368 luainstance.cc:2297
 msgid "programming error: %1: %2"
 msgstr "程序设计错误： %1: %2"
 
@@ -5577,11 +5587,11 @@ msgstr ""
 msgid "Cancel Import"
 msgstr "取消导入"
 
-#: editor_audio_import.cc:641
+#: editor_audio_import.cc:633
 msgid "Editor: cannot open file \"%1\", (%2)"
 msgstr "编辑器: 无法打开文件 \"%1\"，（%2）"
 
-#: editor_audio_import.cc:646
+#: editor_audio_import.cc:638
 msgid ""
 "%1\n"
 "This audiofile cannot be embedded. It must be imported!"
@@ -5589,24 +5599,24 @@ msgstr ""
 "%1\n"
 "该音频文件无法嵌入。它必须先被导入！"
 
-#: editor_audio_import.cc:655
+#: editor_audio_import.cc:647
 msgid "Cancel entire import"
 msgstr "取消整体导入"
 
-#: editor_audio_import.cc:656
+#: editor_audio_import.cc:648
 msgid "Don't embed it"
 msgstr "不嵌入它"
 
-#: editor_audio_import.cc:657
+#: editor_audio_import.cc:649
 msgid "Embed all without questions"
 msgstr "全部嵌入，不必询问"
 
-#: editor_audio_import.cc:660 editor_audio_import.cc:686
+#: editor_audio_import.cc:652 editor_audio_import.cc:678
 #: export_format_dialog.cc:75
 msgid "Sample rate"
 msgstr "采样率"
 
-#: editor_audio_import.cc:661 editor_audio_import.cc:687
+#: editor_audio_import.cc:653 editor_audio_import.cc:679
 msgid ""
 "%1\n"
 "This audiofile's sample rate doesn't match the session sample rate!"
@@ -5614,7 +5624,7 @@ msgstr ""
 "%1\n"
 "此音频文件的采样率与会话的采样率不匹配！"
 
-#: editor_audio_import.cc:683
+#: editor_audio_import.cc:675
 msgid "Embed it anyway"
 msgstr "只管嵌入它"
 
@@ -6380,7 +6390,7 @@ msgstr ""
 "您是否确定要销毁最后已捕获内容？\n"
 "（这个操作有破坏性且不能撤销！）"
 
-#: editor_ops.cc:5183 editor_ops.cc:7730 editor_regions.cc:410
+#: editor_ops.cc:5183 editor_ops.cc:7729 editor_regions.cc:410
 #: editor_snapshots.cc:176 editor_sources.cc:641 vca_master_strip.cc:513
 msgid "No, do nothing."
 msgstr "否， 什么都不做。"
@@ -6486,67 +6496,67 @@ msgstr "从已选择部分设置循环范围"
 msgid "set loop range from region"
 msgstr "从区域设置循环范围"
 
-#: editor_ops.cc:6676
+#: editor_ops.cc:6675
 msgid "set punch range from selection"
 msgstr "从已选择部分设置切换范围"
 
-#: editor_ops.cc:6700
+#: editor_ops.cc:6699
 msgid "Auto Punch In"
 msgstr "自动切换入"
 
-#: editor_ops.cc:6707 editor_ops.cc:6711
+#: editor_ops.cc:6706 editor_ops.cc:6710
 msgid "Auto Punch In/Out"
 msgstr "自动切换入/出"
 
-#: editor_ops.cc:6753
+#: editor_ops.cc:6752
 msgid "set session start/end from selection"
 msgstr "从已选择部分设置会话起点/终点"
 
-#: editor_ops.cc:6788
+#: editor_ops.cc:6787
 msgid "set punch start from EP"
 msgstr "从 EP 设置切换起点"
 
-#: editor_ops.cc:6813
+#: editor_ops.cc:6812
 msgid "set punch end from EP"
 msgstr "从 EP 设置切换终点"
 
-#: editor_ops.cc:6843
+#: editor_ops.cc:6842
 msgid "set loop start from EP"
 msgstr "从 EP 设置循环起点"
 
-#: editor_ops.cc:6868
+#: editor_ops.cc:6867
 msgid "set loop end from EP"
 msgstr "从 EP 设置循环终点"
 
-#: editor_ops.cc:6879
+#: editor_ops.cc:6878
 msgid "set punch range from region"
 msgstr "从区域设置切换范围"
 
-#: editor_ops.cc:6966
+#: editor_ops.cc:6965
 msgid "Add new marker"
 msgstr "添加新标记"
 
-#: editor_ops.cc:6967
+#: editor_ops.cc:6966
 msgid "Set global tempo"
 msgstr "设置全局节奏"
 
-#: editor_ops.cc:6970
+#: editor_ops.cc:6969
 msgid "Define one bar"
 msgstr "定义一个小节"
 
-#: editor_ops.cc:6971
+#: editor_ops.cc:6970
 msgid "Do you want to set the global tempo or add a new tempo marker?"
 msgstr "您是否要设置全局节奏或者添加一个新的节奏标志？"
 
-#: editor_ops.cc:6997
+#: editor_ops.cc:6996
 msgid "set tempo from region"
 msgstr "从区域设置节奏"
 
-#: editor_ops.cc:7027
+#: editor_ops.cc:7026
 msgid "split regions"
 msgstr "拆分区域"
 
-#: editor_ops.cc:7069
+#: editor_ops.cc:7068
 msgid ""
 "You are about to split\n"
 "%1\n"
@@ -6558,11 +6568,11 @@ msgstr ""
 " 成为 %2 部分。\n"
 "这需要一些时间。"
 
-#: editor_ops.cc:7076
+#: editor_ops.cc:7075
 msgid "Call for the Ferret!"
 msgstr "调用探测！"
 
-#: editor_ops.cc:7077
+#: editor_ops.cc:7076
 msgid ""
 "Press OK to continue with this split operation\n"
 "or ask the Ferret dialog to tune the analysis"
@@ -6570,47 +6580,47 @@ msgstr ""
 "按下“确定”继续本次拆分操作\n"
 "或者请求探测对话框进行优化分析"
 
-#: editor_ops.cc:7079
+#: editor_ops.cc:7078
 msgid "Press OK to continue with this split operation"
 msgstr "按下“确定”继续本次拆分操作"
 
-#: editor_ops.cc:7082
+#: editor_ops.cc:7081
 msgid "Excessive split?"
 msgstr "过多的拆分？"
 
-#: editor_ops.cc:7234
+#: editor_ops.cc:7233
 msgid "place transient"
 msgstr "放置过渡"
 
-#: editor_ops.cc:7268
+#: editor_ops.cc:7267
 msgid "snap regions to grid"
 msgstr "吸附区域到网格"
 
-#: editor_ops.cc:7309
+#: editor_ops.cc:7308
 msgid "Close Region Gaps"
 msgstr "封闭区域间隙"
 
-#: editor_ops.cc:7314
+#: editor_ops.cc:7313
 msgid "Crossfade length"
 msgstr "交叉淡化长度"
 
-#: editor_ops.cc:7325
+#: editor_ops.cc:7324
 msgid "Pull-back length"
 msgstr "撤回长度"
 
-#: editor_ops.cc:7338
+#: editor_ops.cc:7337
 msgid "Ok"
 msgstr "确定"
 
-#: editor_ops.cc:7357
+#: editor_ops.cc:7356
 msgid "close region gaps"
 msgstr "封闭区域间隙"
 
-#: editor_ops.cc:7660
+#: editor_ops.cc:7659
 msgid "That would be bad news ...."
 msgstr "这将是个坏消息…"
 
-#: editor_ops.cc:7664
+#: editor_ops.cc:7663
 msgid ""
 "Removing the master or monitor bus is such a bad idea\n"
 "that %1 is not going to allow it.\n"
@@ -6626,124 +6636,124 @@ msgstr ""
 "编辑您的 ardour.rc 文件\n"
 "把\"allow-special-bus-removal\" 选项设为 \"yes\" "
 
-#: editor_ops.cc:7681
+#: editor_ops.cc:7680
 msgid "track"
 msgid_plural "tracks"
 msgstr[0] "音轨"
 
-#: editor_ops.cc:7682
+#: editor_ops.cc:7681
 msgid "bus"
 msgid_plural "busses"
 msgstr[0] "总线"
 
-#: editor_ops.cc:7683
+#: editor_ops.cc:7682
 msgid "VCA"
 msgid_plural "VCAs"
 msgstr[0] "VCA（电压控制放大器）"
 
-#: editor_ops.cc:7686
+#: editor_ops.cc:7685
 msgid "Remove various strips"
 msgstr "移除各种片段"
 
-#: editor_ops.cc:7687
+#: editor_ops.cc:7686
 msgid "Do you really want to remove %1 %2, %3 %4 and %5 %6?"
 msgstr "您是否真的要移除 %1 %2, %3 %4 和 %5 %6 ？"
 
-#: editor_ops.cc:7691 editor_ops.cc:7696 editor_ops.cc:7701
+#: editor_ops.cc:7690 editor_ops.cc:7695 editor_ops.cc:7700
 msgid "Remove %1 and %2"
 msgstr "移除 %1 和 %2"
 
-#: editor_ops.cc:7692 editor_ops.cc:7697 editor_ops.cc:7702
+#: editor_ops.cc:7691 editor_ops.cc:7696 editor_ops.cc:7701
 msgid "Do you really want to remove %1 %2 and %3 %4?"
 msgstr "您是否真的要移除 %1 %2 和 %3 %4 ？"
 
-#: editor_ops.cc:7706 editor_ops.cc:7711 editor_ops.cc:7716
+#: editor_ops.cc:7705 editor_ops.cc:7710 editor_ops.cc:7715
 #: vca_master_strip.cc:508
 msgid "Remove %1"
 msgstr "移除 %1"
 
-#: editor_ops.cc:7707 editor_ops.cc:7712 editor_ops.cc:7717
+#: editor_ops.cc:7706 editor_ops.cc:7711 editor_ops.cc:7716
 msgid "Do you really want to remove %1 %2?"
 msgstr "您是否真的要移除 %1 %2 ？"
 
-#: editor_ops.cc:7728
+#: editor_ops.cc:7727
 msgid "This action cannot be undone, and the session file will be overwritten!"
 msgstr "此操作无法撤消，会话文件将被覆盖！"
 
-#: editor_ops.cc:7732
+#: editor_ops.cc:7731
 msgid "Yes, remove them."
 msgstr "是的，移除它们。"
 
-#: editor_ops.cc:7734 editor_snapshots.cc:177 vca_master_strip.cc:514
+#: editor_ops.cc:7733 editor_snapshots.cc:177 vca_master_strip.cc:514
 msgid "Yes, remove it."
 msgstr "是的，移除它。"
 
-#: editor_ops.cc:7786
+#: editor_ops.cc:7785
 msgid "You must first select some tracks to Insert Time."
 msgstr "您必须首先选择一些音轨以插入时间。"
 
-#: editor_ops.cc:7793
+#: editor_ops.cc:7792
 msgid "You cannot insert time in Lock Edit mode."
 msgstr "您无法在锁定编辑模式下插入时间。"
 
-#: editor_ops.cc:7868 editor_ops.cc:7890 editor_ops.cc:7931 editor_ops.cc:7941
+#: editor_ops.cc:7867 editor_ops.cc:7889 editor_ops.cc:7930 editor_ops.cc:7940
 msgid "insert time"
 msgstr "插入时间"
 
-#: editor_ops.cc:7959
+#: editor_ops.cc:7958
 msgid "You must first select some tracks to Remove Time."
 msgstr "您必须首先选择一些音轨以移除时间。"
 
-#: editor_ops.cc:7966
+#: editor_ops.cc:7965
 msgid "You cannot remove time in Lock Edit mode."
 msgstr "您无法在锁定编辑模式下移除时间。"
 
-#: editor_ops.cc:8003
+#: editor_ops.cc:8002
 msgid "Cannot insert or delete time when in Lock edit."
 msgstr "当锁定编辑时，无法插入或删除时间。"
 
-#: editor_ops.cc:8017 editor_ops.cc:8036 editor_ops.cc:8110 editor_ops.cc:8123
+#: editor_ops.cc:8016 editor_ops.cc:8035 editor_ops.cc:8109 editor_ops.cc:8122
 msgid "remove time"
 msgstr "移除时间"
 
-#: editor_ops.cc:8196
+#: editor_ops.cc:8195
 msgid "There are too many tracks to fit in the current window"
 msgstr "音轨太多以至于无法匹配当前窗口"
 
-#: editor_ops.cc:8258
+#: editor_ops.cc:8257
 msgid "Sel"
 msgstr "选择"
 
-#: editor_ops.cc:8297
+#: editor_ops.cc:8296
 #, c-format
 msgid "Saved view %u"
 msgstr "存视图 %u"
 
-#: editor_ops.cc:8322
+#: editor_ops.cc:8321
 msgid "mute regions"
 msgstr "静音区域"
 
-#: editor_ops.cc:8324
+#: editor_ops.cc:8323
 msgid "mute region"
 msgstr "静音区域"
 
-#: editor_ops.cc:8361
+#: editor_ops.cc:8360
 msgid "combine regions"
 msgstr "整合区域"
 
-#: editor_ops.cc:8399
+#: editor_ops.cc:8398
 msgid "uncombine regions"
 msgstr "撤销整合区域"
 
-#: editor_ops.cc:8438
+#: editor_ops.cc:8437
 msgid "%1: Locked"
 msgstr "%1: 锁定"
 
-#: editor_ops.cc:8446
+#: editor_ops.cc:8445
 msgid "Click to unlock"
 msgstr "点击撤销锁定"
 
-#: editor_ops.cc:8497
+#: editor_ops.cc:8496
 msgid "Moving embedded files into session folder"
 msgstr "移动已嵌入的文件到会话文件夹"
 
@@ -7146,7 +7156,7 @@ msgstr "使用已缓冲的输入/输出"
 msgid "Autostart"
 msgstr "自动启动"
 
-#: engine_dialog.cc:103 engine_dialog.cc:3158
+#: engine_dialog.cc:103 engine_dialog.cc:3176
 msgid "Measure"
 msgstr "测量"
 
@@ -7206,7 +7216,7 @@ msgstr "一旦声道已连接好，单击“测量”按钮。"
 msgid "When satisfied with the results, click the \"Use results\" button."
 msgstr "如果得到了令人满意的结果，请点击“使用结果”按钮。"
 
-#: engine_dialog.cc:256 engine_dialog.cc:3353 engine_dialog.cc:3363
+#: engine_dialog.cc:256 engine_dialog.cc:3371 engine_dialog.cc:3381
 msgid "No measurement results yet"
 msgstr "还没有测量结果"
 
@@ -7334,7 +7344,7 @@ msgstr "输入"
 msgid "Output"
 msgstr "输出"
 
-#: engine_dialog.cc:1068
+#: engine_dialog.cc:1073
 msgid "Calibrate"
 msgstr "校正"
 
@@ -7352,59 +7362,59 @@ msgstr[0] "%1 样本"
 msgid "(%.1f ms)"
 msgstr "（%.1f ms 毫秒）"
 
-#: engine_dialog.cc:2507
+#: engine_dialog.cc:2522
 msgid "Could not start backend engine %1"
 msgstr "无法启动后端引擎 %1"
 
-#: engine_dialog.cc:2539
+#: engine_dialog.cc:2554
 msgid "Cannot set driver to %1"
 msgstr "无法设置驱动到 %1"
 
-#: engine_dialog.cc:2544
+#: engine_dialog.cc:2559
 msgid "Cannot set input device name to %1"
 msgstr "无法设置输入设备名称到 %1"
 
-#: engine_dialog.cc:2548
+#: engine_dialog.cc:2563
 msgid "Cannot set output device name to %1"
 msgstr "无法设置输出设备名称到 %1"
 
-#: engine_dialog.cc:2553
+#: engine_dialog.cc:2568
 msgid "Cannot set device name to %1"
 msgstr "无法设置设备名称到 %1"
 
-#: engine_dialog.cc:2558
+#: engine_dialog.cc:2573
 msgid "Cannot set sample rate to %1"
 msgstr "无法设置采样率到 %1"
 
-#: engine_dialog.cc:2562
+#: engine_dialog.cc:2577
 msgid "Cannot set buffer size to %1"
 msgstr "无法设置缓冲区大小到 %1"
 
-#: engine_dialog.cc:2566
+#: engine_dialog.cc:2581
 msgid "Cannot set periods to %1"
 msgstr "无法设置周期到 %1"
 
-#: engine_dialog.cc:2572
+#: engine_dialog.cc:2587
 msgid "Cannot set input channels to %1"
 msgstr "无法设置输入声道到 %1"
 
-#: engine_dialog.cc:2576
+#: engine_dialog.cc:2591
 msgid "Cannot set output channels to %1"
 msgstr "无法设置输出声道到 %1"
 
-#: engine_dialog.cc:2582
+#: engine_dialog.cc:2597
 msgid "Cannot set input latency to %1"
 msgstr "无法设置输入延迟到 %1"
 
-#: engine_dialog.cc:2586
+#: engine_dialog.cc:2601
 msgid "Cannot set output latency to %1"
 msgstr "无法设置输出延迟到 %1"
 
-#: engine_dialog.cc:3009 engine_dialog.cc:3075
+#: engine_dialog.cc:3027 engine_dialog.cc:3093
 msgid "No signal detected "
 msgstr "未检测到信号"
 
-#: engine_dialog.cc:3016
+#: engine_dialog.cc:3034
 msgid ""
 "Input signal is > -3dBFS. Lower the signal level (output gain, input gain) "
 "on the audio-interface."
@@ -7412,64 +7422,64 @@ msgstr ""
 "输入信号 > -3 dBFS 分贝振幅。在音频界面上较低的信号电平（输出增益，输入增"
 "益） 。"
 
-#: engine_dialog.cc:3029 engine_dialog.cc:3083 port_insert_ui.cc:74
+#: engine_dialog.cc:3047 engine_dialog.cc:3101 port_insert_ui.cc:74
 #: port_insert_ui.cc:102
 msgid "Disconnected from audio engine"
 msgstr "与音频引擎已断开连接"
 
-#: engine_dialog.cc:3038 engine_dialog.cc:3091
+#: engine_dialog.cc:3056 engine_dialog.cc:3109
 msgid "Detected roundtrip latency: "
 msgstr "检测到往返延迟："
 
-#: engine_dialog.cc:3040 engine_dialog.cc:3093
+#: engine_dialog.cc:3058 engine_dialog.cc:3111
 msgid "Systemic latency: "
 msgstr "系统延迟："
 
-#: engine_dialog.cc:3047
+#: engine_dialog.cc:3065
 msgid "(signal detection error)"
 msgstr "（信号检测错误）"
 
-#: engine_dialog.cc:3053
+#: engine_dialog.cc:3071
 msgid "(inverted - bad wiring)"
 msgstr "（反向——损坏接线）"
 
-#: engine_dialog.cc:3100
+#: engine_dialog.cc:3118
 msgid "(averaging)"
 msgstr "（平均）"
 
-#: engine_dialog.cc:3106
+#: engine_dialog.cc:3124
 msgid "(too large jitter)"
 msgstr "（过大振幅）"
 
-#: engine_dialog.cc:3110
+#: engine_dialog.cc:3128
 msgid "(large jitter)"
 msgstr "（大振幅）"
 
-#: engine_dialog.cc:3122
+#: engine_dialog.cc:3140
 msgid "Timeout - large MIDI jitter."
 msgstr "超时——巨大的 MIDI 振幅。"
 
-#: engine_dialog.cc:3138 port_insert_ui.cc:138
+#: engine_dialog.cc:3156 port_insert_ui.cc:138
 msgid "Detecting ..."
 msgstr "检测中…"
 
-#: engine_dialog.cc:3277
+#: engine_dialog.cc:3295
 msgid "Disconnect from %1"
 msgstr "与 %1 失去连接"
 
-#: engine_dialog.cc:3282
+#: engine_dialog.cc:3300
 msgid "Running"
 msgstr "运行中"
 
-#: engine_dialog.cc:3284
+#: engine_dialog.cc:3302
 msgid "Connected"
 msgstr "已连接"
 
-#: engine_dialog.cc:3295
+#: engine_dialog.cc:3313
 msgid "Connect to %1"
 msgstr "连接到 %1"
 
-#: engine_dialog.cc:3299
+#: engine_dialog.cc:3317
 msgid "Stopped"
 msgstr "已停止"
 
@@ -8218,7 +8228,7 @@ msgid "<b>OUTPUT</b> from %1"
 msgstr "<b>输出</b> 来自 %1"
 
 #: foldback_strip.cc:965 mixer_strip.cc:1359 monitor_section.cc:1521
-#: rc_option_editor.cc:1421 transport_masters_dialog.cc:390
+#: rc_option_editor.cc:1421 transport_masters_dialog.cc:394
 msgid "Disconnected"
 msgstr "失去连接"
 
@@ -8491,7 +8501,7 @@ msgstr "空程 O 节拍"
 msgid "<b>GUI Idle Timing Statistics</b>"
 msgstr "<b>GUI（图形用户界面）空闲时间统计</b>"
 
-#: idleometer.cc:52 latency_gui.cc:92 panner_ui.cc:413 plugin_pin_dialog.cc:116
+#: idleometer.cc:52 latency_gui.cc:92 panner_ui.cc:416 plugin_pin_dialog.cc:116
 #: plugin_selector.cc:271 plugin_ui.cc:470 plugin_dspload_ui.cc:37
 #: rc_option_editor.cc:762
 msgid "Reset"
@@ -8879,47 +8889,47 @@ msgstr "重定向菜单"
 msgid "ProcessorMenu"
 msgstr "处理器菜单"
 
-#: luainstance.cc:1351
+#: luainstance.cc:1352
 msgid "Loading user ui scripts file %1"
 msgstr "加载用户界面脚本文件 ％1"
 
-#: luainstance.cc:1354
+#: luainstance.cc:1355
 msgid "cannot read ui scripts file \"%1\""
 msgstr "无法读取用户界面脚本文件 \"%1\""
 
-#: luainstance.cc:1359
+#: luainstance.cc:1360
 msgid "user ui scripts file \"%1\" not loaded successfully."
 msgstr "用户界面脚本文件 \"%1\" 载入不成功。"
 
-#: luainstance.cc:1384
+#: luainstance.cc:1385
 msgid "UI script file %1 not saved"
 msgstr "用户界面脚本文件 \"%1\" 尚未保存"
 
-#: luainstance.cc:1527
+#: luainstance.cc:1528
 msgid "Add Shortcut or Lua Script"
 msgstr "添加快捷方式或 Lua 脚本"
 
-#: luainstance.cc:1531
+#: luainstance.cc:1532
 msgid "Add Lua Callback Hook"
 msgstr "添加 Lua 回应牵引"
 
-#: luainstance.cc:1538
+#: luainstance.cc:1539
 msgid "Add Lua Session Script"
 msgstr "添加 Lua 会话脚本"
 
-#: luainstance.cc:1561
+#: luainstance.cc:1562
 msgid "Cannot read script '%1': %2"
 msgstr "无法读取脚本 '%1': %2"
 
-#: luainstance.cc:1578
+#: luainstance.cc:1579
 msgid "Set Script Parameters"
 msgstr "设置脚本首选项"
 
-#: luainstance.cc:1603
+#: luainstance.cc:1604
 msgid "Session script '%1' instantiation failed: %2"
 msgstr "会话脚本 '%1' 实例化失败： %2"
 
-#: luainstance.cc:1607 luainstance.cc:1611
+#: luainstance.cc:1608 luainstance.cc:1612
 msgid "Loading Session script '%1' failed: %2"
 msgstr "载入会话脚本 '%1' 失败：%2"
 
@@ -9404,7 +9414,7 @@ msgstr "库"
 msgid "Channel "
 msgstr "声道"
 
-#: midi_region_view.cc:3696
+#: midi_region_view.cc:3695
 msgid "paste"
 msgstr "粘贴"
 
@@ -10755,7 +10765,7 @@ msgstr "官方网站 http://ardour.org\n"
 msgid "Panner (2D)"
 msgstr "声相器（2D）"
 
-#: panner2d.cc:909 panner_ui.cc:404 plugin_ui.cc:532
+#: panner2d.cc:909 panner_ui.cc:407 plugin_ui.cc:532
 msgid "Bypass"
 msgstr "略过"
 
@@ -10767,11 +10777,11 @@ msgstr "声相器"
 msgid "Pan automation mode"
 msgstr "声相自动模式"
 
-#: panner_ui.cc:179
+#: panner_ui.cc:182
 msgid "Abs"
 msgstr "绝对"
 
-#: panner_ui.cc:420 processor_box.cc:842
+#: panner_ui.cc:423 processor_box.cc:842
 msgid "Link panner controls"
 msgstr "链接声相器控制"
 
@@ -11076,7 +11086,7 @@ msgid "Creator"
 msgstr "创建者"
 
 #: plugin_selector.cc:101 transport_masters_dialog.cc:80
-#: transport_masters_dialog.cc:713
+#: transport_masters_dialog.cc:734
 msgid "Type"
 msgstr "类型"
 
@@ -11228,7 +11238,7 @@ msgstr ""
 msgid "create_lv2_editor called on non-LV2 plugin"
 msgstr "创建_lv2_编辑器调用 non-LV2 插件"
 
-#: plugin_ui.cc:466 transport_masters_dialog.cc:736
+#: plugin_ui.cc:466 transport_masters_dialog.cc:757
 msgid "Add"
 msgstr "添加"
 
@@ -16236,10 +16246,6 @@ msgstr ""
 "模板“％1”的描述说明已被修改，但尚未保存。\n"
 "您打算保存它吗？"
 
-#: template_dialog.cc:325
-msgid "Discard"
-msgstr "放弃"
-
 #: template_dialog.cc:391
 msgid "Template of name \"%1\" already exists"
 msgstr "模版名称\"%1\"已经存在"
@@ -16708,23 +16714,23 @@ msgstr "<b>启用时</b> 假定外部时间码源被采样计时器同步到被 
 msgid "New transport master not added - check error log for details"
 msgstr "新的播送主控尚未添加——检查错误日志以获取详细信息"
 
-#: transport_masters_dialog.cc:498
+#: transport_masters_dialog.cc:502
 msgid "Accept start/stop commands"
 msgstr "接受启动/停止命令"
 
-#: transport_masters_dialog.cc:503
+#: transport_masters_dialog.cc:507
 msgid "Accept speed-changing commands"
 msgstr "接受变速命令"
 
-#: transport_masters_dialog.cc:508
+#: transport_masters_dialog.cc:512
 msgid "Accept locate commands"
 msgstr "接受定位命令"
 
-#: transport_masters_dialog.cc:657
+#: transport_masters_dialog.cc:666
 msgid "%1 %2"
 msgstr ""
 
-#: transport_masters_dialog.cc:711
+#: transport_masters_dialog.cc:732
 msgid "Add Transport Master"
 msgstr "添加播送主控"
 

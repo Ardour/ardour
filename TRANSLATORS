@@ -57,6 +57,22 @@ to install them.
 7. Restart Ardour to see what your translation looks like and whether it needs 
 fixes, e.g. has to be shorter.
 
+8. IMPORTANT NOTE: there are times when the English phrase to be translated is
+ambiguous without more context. What does "S" mean? In such cases, we use a
+different markup for translated strings which includes context. It will appear
+in the msgid in the .po/.pot file like this:
+
+    CONTEXT|ToBeTranslated
+
+So for example
+
+    Solo|S
+
+This should help you understand the the "S" here is a short form designed to refer to "Solo".
+
+In your translated text, you should remove the CONTEXT and the | symbol. 
+
+
 Note that as of Ardour 4 the translations are only installed when you run 
 './waf i18n' after './waf' and before 'sudo ./waf install'.
 
