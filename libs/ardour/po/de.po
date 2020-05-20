@@ -3876,19 +3876,19 @@ msgstr "Konstruktion eines transport master Objekts vom Typ %1 misslungen"
 
 #: transport_master.cc:423 transport_master.cc:456
 msgid "SyncSource|JACK"
-msgstr "SyncQuelle|JACK"
+msgstr "JACK"
 
 #: transport_master.cc:430
 msgid "SyncSource|MTC"
-msgstr "SyncQuelle|MTC"
+msgstr "MTC"
 
 #: transport_master.cc:440
 msgid "SyncSource|M-Clk"
-msgstr "SyncQuelle|M-Clk"
+msgstr "M-Clk"
 
 #: transport_master.cc:450
 msgid "SyncSource|LTC"
-msgstr "SyncQuelle|LTC"
+msgstr "LTC"
 
 #: transport_master.cc:493
 msgid "All"

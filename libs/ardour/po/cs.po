@@ -3688,19 +3688,19 @@ msgstr "Konstrukce objektu řízení přehrávání typu %1 selhala"
 
 #: transport_master.cc:420 transport_master.cc:453
 msgid "SyncSource|JACK"
-msgstr "SyncSource|JACK"
+msgstr "JACK"
 
 #: transport_master.cc:427
 msgid "SyncSource|MTC"
-msgstr "SyncSource|MTC"
+msgstr "MTC"
 
 #: transport_master.cc:437
 msgid "SyncSource|M-Clk"
-msgstr "SyncSource|M-Clk"
+msgstr "M-Clk"
 
 #: transport_master.cc:447
 msgid "SyncSource|LTC"
-msgstr "SyncSource|LTC"
+msgstr "LTC"
 
 #: transport_master_manager.cc:135
 msgid "programming error:%1"
@@ -4696,7 +4696,7 @@ msgstr "Nelze nastavit stav VCA"
 #~ msgstr "Disk: <span foreground=\"%s\">%02dh:%02dm:%02ds</span>"
 
 #~ msgid "Timecode|TC: <span foreground=\"%s\">%s</span>"
-#~ msgstr "Časový kód|ČK: <span foreground=\"%s\">%s</span>"
+#~ msgstr "ČK: <span foreground=\"%s\">%s</span>"
 
 #~ msgid ""
 #~ "%1 is not connected to any audio backend.\n"
@@ -8645,7 +8645,7 @@ msgstr "Nelze nastavit stav VCA"
 #~ msgstr "Vstup MIDI povolen"
 
 #~ msgid "Rec|R"
-#~ msgstr "Rec|N"
+#~ msgstr "N"
 
 #~ msgid "Record enabled"
 #~ msgstr "Nahrávání povoleno"
@@ -8663,13 +8663,13 @@ msgstr "Nelze nastavit stav VCA"
 #~ msgstr "Sólo"
 
 #~ msgid "SoloIso|SI"
-#~ msgstr "SoloIso|OS"
+#~ msgstr "OS"
 
 #~ msgid "Solo Isolated"
 #~ msgstr "Oddělené sólo"
 
 #~ msgid "SoloLock|SS"
-#~ msgstr "SoloLock|ZS"
+#~ msgstr "ZS"
 
 #~ msgid "Solo Safe (Locked)"
 #~ msgstr "Zajištěné sólo (zamknuto)"
@@ -9467,10 +9467,10 @@ msgstr "Nelze nastavit stav VCA"
 #~ msgstr "Spousta"
 
 #~ msgid "Logscale|Lg"
-#~ msgstr "Logaritmicky|Lg"
+#~ msgstr "Lg"
 
 #~ msgid "Rectified|Rf"
-#~ msgstr "Napraveno|Npv"
+#~ msgstr "Npv"
 
 #~ msgid "Logscale"
 #~ msgstr "Logaritmicky"
@@ -12186,7 +12186,7 @@ msgstr "Nelze nastavit stav VCA"
 #~ msgstr "Toto nastavení se neprojeví, dokud %1 nespustíte znovu."
 
 #~ msgid "Options|Undo"
-#~ msgstr "Volby|Zpět"
+#~ msgstr "Zpět"
 
 #~ msgid "Verify removal of last capture"
 #~ msgstr "Potvrdit odstranění poslední nahrávky"
@@ -13013,7 +13013,7 @@ msgstr "Nelze nastavit stav VCA"
 #~ msgstr "Viditelnost tlačítka skriptu pro činnost"
 
 #~ msgid "Preferences|Metering"
-#~ msgstr "Nastavení|Ukazatel hladiny"
+#~ msgstr "Ukazatel hladiny"
 
 #~ msgid "Peak hold time"
 #~ msgstr "Čas držení nejvyšší hodnoty"
@@ -13869,7 +13869,7 @@ msgstr "Nelze nastavit stav VCA"
 #~ msgstr "Směšovač DJ"
 
 #~ msgid "Metadata|Mixer"
-#~ msgstr "Popisná data|Směšovač"
+#~ msgstr "Směšovač"
 
 #~ msgid "School"
 #~ msgstr "Škola"
@@ -15087,7 +15087,7 @@ msgstr "Nelze nastavit stav VCA"
 #~ msgstr "Centy:"
 
 #~ msgid "Time|Shift"
-#~ msgstr "Čas|Posun"
+#~ msgstr "Posun"
 
 #~ msgid "TimeFXButton"
 #~ msgstr "Tlačítko TimeFX"
@@ -16056,25 +16056,25 @@ msgstr "Nelze nastavit stav VCA"
 #~ msgstr "Vložit oblast ze seznamu oblastí"
 
 #~ msgid "group|G"
-#~ msgstr "Skupina|Sk"
+#~ msgstr "Sk"
 
 #~ msgid "relative|Rel"
-#~ msgstr "Poměrně|Pom"
+#~ msgstr "Pom"
 
 #~ msgid "mute|M"
-#~ msgstr "Ztlumit|Z"
+#~ msgstr "Z"
 
 #~ msgid "solo|S"
-#~ msgstr "Sólo|S"
+#~ msgstr "S"
 
 #~ msgid "monitoring|Mon"
-#~ msgstr "Sledování|Sl"
+#~ msgstr "Sl"
 
 #~ msgid "selection|Sel"
-#~ msgstr "Výběr|V"
+#~ msgstr "V"
 
 #~ msgid "active|A"
-#~ msgstr "Činný|Č"
+#~ msgstr "Č"
 
 #~ msgid "File Exists!"
 #~ msgstr "Soubor existuje!"
@@ -17538,7 +17538,7 @@ msgstr "Nelze nastavit stav VCA"
 #~ msgstr "Nástroje pro propojení předmětu/rozsahu"
 
 #~ msgid "editing|E"
-#~ msgstr "Úpravy|Ú"
+#~ msgstr "Ú"
 
 #~ msgid "Sharing Editing?"
 #~ msgstr "Sdílení úprav?"
@@ -17547,7 +17547,7 @@ msgstr "Nelze nastavit stav VCA"
 #~ msgstr "Zakázat přídavné moduly během nahrávání"
 
 #~ msgid "Visual|Interface"
-#~ msgstr "Viditelný|Rozhraní"
+#~ msgstr "Rozhraní"
 
 #~ msgid "Editing"
 #~ msgstr "Úpravy"
