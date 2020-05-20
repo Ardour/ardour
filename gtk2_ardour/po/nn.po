@@ -12144,7 +12144,7 @@ msgstr ""
 
 #: rc_option_editor.cc:2421
 msgid "Options|Undo"
-msgstr "Val|Angra"
+msgstr "Angra"
 
 #: rc_option_editor.cc:2428
 msgid "Verify removal of last capture"

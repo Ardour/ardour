@@ -20513,7 +20513,7 @@ msgstr ""
 #~ msgstr "Nástroje pro propojení předmětu/rozsahu"
 
 #~ msgid "editing|E"
-#~ msgstr "Úpravy|Ú"
+#~ msgstr "Ú"
 
 #~ msgid "Sharing Editing?"
 #~ msgstr "Sdílení úprav?"

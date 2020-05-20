@@ -915,7 +915,7 @@ msgstr "Om"
 
 #: ardour_ui.cc:331 location_ui.cc:1215
 msgid "Ranges|Locations"
-msgstr "Omfång|Platser"
+msgstr "Platser"
 
 #: ardour_ui.cc:332 route_params_ui.cc:65 route_params_ui.cc:567
 msgid "Tracks and Busses"
@@ -987,7 +987,7 @@ msgstr "Redigerare"
 
 #: ardour_ui.cc:358 mixer_ui.cc:2916 mixer_ui.cc:2922
 msgid "Window|Mixer"
-msgstr "Fönster|Mixer"
+msgstr "Mixer"
 
 #: ardour_ui.cc:359
 msgid "Window|Preferences"
