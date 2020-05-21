@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libardour 4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-05-20 14:36-0600\n"
+"POT-Creation-Date: 2020-05-21 22:10+0200\n"
 "PO-Revision-Date: 2020-04-22 19:41+0300\n"
 "Last-Translator: Alexandre Prokoudine <alexandre.prokoudine@gmail.com>\n"
 "Language-Team: русский <gnome-cyr@lists.gnome.org>\n"
@@ -1352,47 +1352,43 @@ msgstr "Ошибка сохранения файла пресетов %1."
 msgid "Could not locate HOME.  Preset not saved."
 msgstr "Невозможно найти HOME. Предустановки не сохранены."
 
-#: location.cc:477
-msgid "You cannot put a CD marker at this position"
-msgstr "Вы не можете поставить CD-маркер в это положение"
-
-#: location.cc:636
+#: location.cc:622
 msgid "incorrect XML node passed to Location::set_state"
 msgstr "некорректный XML узел одобрен для Location::set_state"
 
-#: location.cc:641
+#: location.cc:627
 msgid "XML node for Location has no ID information"
 msgstr "У XML-узла позиции нет данных ID"
 
-#: location.cc:646
+#: location.cc:632
 msgid "XML node for Location has no name information"
 msgstr "У XML-узла позиции нет данных имени"
 
-#: location.cc:657
+#: location.cc:643
 msgid "XML node for Location has no start information"
 msgstr "У XML-узла позиции нет данных о начале"
 
-#: location.cc:662
+#: location.cc:648
 msgid "XML node for Location has no end information"
 msgstr "У XML-узла позиции нет данных о конце"
 
-#: location.cc:671
+#: location.cc:657
 msgid "XML node for Location has no flags information"
 msgstr "У XML-узла позиции нет данных о флагах"
 
-#: location.cc:907
+#: location.cc:893
 msgid "Locations: attempt to use unknown location as selected location"
 msgstr "Позиции: попытка использовать неизвестную позицию как выбранную"
 
-#: location.cc:1101
+#: location.cc:1087
 msgid "incorrect XML mode passed to Locations::set_state"
 msgstr "Неверный режим XML одобрен для Locations::set_state"
 
-#: location.cc:1114 session.cc:1601 session_state.cc:1441
+#: location.cc:1100 session.cc:1601 session_state.cc:1441
 msgid "session"
 msgstr "Сесссия"
 
-#: location.cc:1181
+#: location.cc:1167
 msgid "could not load location from session file - ignored"
 msgstr "Не удалось загрузить позицию из файла сессии, проигнорировано"
 

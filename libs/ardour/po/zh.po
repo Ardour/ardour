@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 6\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-05-20 14:36-0600\n"
+"POT-Creation-Date: 2020-05-21 22:10+0200\n"
 "PO-Revision-Date: 2020-05-17 12:05+0800\n"
 "Last-Translator: \n"
 "Language-Team: 一善鱼 YQ-YSY@163.com\n"
@@ -1333,47 +1333,43 @@ msgstr "保存预设文件 %1 时出错。"
 msgid "Could not locate HOME.  Preset not saved."
 msgstr "无法定位 HOME。预设未保存。"
 
-#: location.cc:477
-msgid "You cannot put a CD marker at this position"
-msgstr "您不能安放一个 CD 标记在这个位置"
-
-#: location.cc:636
+#: location.cc:622
 msgid "incorrect XML node passed to Location::set_state"
 msgstr "不正确的 XML节点传递给 Location::set_state（位置 :: 设置状态）"
 
-#: location.cc:641
+#: location.cc:627
 msgid "XML node for Location has no ID information"
 msgstr "用于定位的 XML 节点没有 ID 信息"
 
-#: location.cc:646
+#: location.cc:632
 msgid "XML node for Location has no name information"
 msgstr "用于定位的 XML 节点没有名称信息"
 
-#: location.cc:657
+#: location.cc:643
 msgid "XML node for Location has no start information"
 msgstr "用于定位的 XML 节点没有起点信息"
 
-#: location.cc:662
+#: location.cc:648
 msgid "XML node for Location has no end information"
 msgstr "用于定位的 XML 节点没有终点信息"
 
-#: location.cc:671
+#: location.cc:657
 msgid "XML node for Location has no flags information"
 msgstr "用于定位的 XML 节点没有标志信息"
 
-#: location.cc:907
+#: location.cc:893
 msgid "Locations: attempt to use unknown location as selected location"
 msgstr "位置：尝试使用未知的位置作为已选择的位置"
 
-#: location.cc:1101
+#: location.cc:1087
 msgid "incorrect XML mode passed to Locations::set_state"
 msgstr "不正确的 XML模式传递给 Location::set_state（位置 :: 设置状态）"
 
-#: location.cc:1114 session.cc:1601 session_state.cc:1441
+#: location.cc:1100 session.cc:1601 session_state.cc:1441
 msgid "session"
 msgstr "会话"
 
-#: location.cc:1181
+#: location.cc:1167
 msgid "could not load location from session file - ignored"
 msgstr "无法从会话文件载入位置——已忽略"
 

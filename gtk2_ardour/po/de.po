@@ -3,16 +3,16 @@
 # This file is distributed under the same license as the gtk-ardour package.
 #
 #
-#: audio_clock.cc:941 audio_clock.cc:942 session_dialog.cc:604
-#: session_dialog.cc:605
 # Karsten Petersen <kapet@kapet.de>, 2003.
 # Edgar Aichinger <edgar.aichinger@aon.at>, 2008, 2012, 2013, 2014, 2015, 2016, 2017, 2020.
 # Benjamin Scherrer <benjamin@wagnerbrutal.de>, 2015.
+#: audio_clock.cc:941 audio_clock.cc:942 session_dialog.cc:604
+#: session_dialog.cc:605
 msgid ""
 msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-05-23 09:12+0200\n"
+"POT-Creation-Date: 2020-05-21 22:10+0200\n"
 "PO-Revision-Date: 2020-05-23 09:21+0200\n"
 "Last-Translator: Edgar Aichinger <edgar.aichinger@aon.at>\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
@@ -797,7 +797,7 @@ msgid "Manual Configuration"
 msgstr "Manuelle Konfiguration"
 
 #: add_route_dialog.cc:590 add_route_dialog.cc:756 ardour_ui.cc:1194
-#: ardour_ui_ed.cc:782 engine_dialog.cc:264 plugin_pin_dialog.cc:74
+#: ardour_ui_ed.cc:782 engine_dialog.cc:265 plugin_pin_dialog.cc:74
 #: rc_option_editor.cc:2975 rc_option_editor.cc:2977 rc_option_editor.cc:2979
 #: rc_option_editor.cc:2981 rc_option_editor.cc:3028 rc_option_editor.cc:3030
 #: rc_option_editor.cc:3032 rc_option_editor.cc:3040
@@ -805,7 +805,7 @@ msgid "Audio"
 msgstr "Audio"
 
 #: add_route_dialog.cc:593 add_route_dialog.cc:757 editor_actions.cc:145
-#: engine_dialog.cc:266 missing_file_dialog.cc:65 mixer_ui.cc:2417
+#: engine_dialog.cc:267 missing_file_dialog.cc:65 mixer_ui.cc:2417
 #: plugin_pin_dialog.cc:75 rc_option_editor.cc:3050 rc_option_editor.cc:3052
 #: rc_option_editor.cc:3061 rc_option_editor.cc:3063 rc_option_editor.cc:3071
 #: rc_option_editor.cc:3087 rc_option_editor.cc:3090 rc_option_editor.cc:3092
@@ -859,7 +859,7 @@ msgid "12 Channel"
 msgstr "12 Kanäle"
 
 #: add_route_dialog.cc:900 gain_meter.cc:810 mixer_strip.cc:2076
-#: mixer_strip.cc:2536 processor_box.cc:3928
+#: mixer_strip.cc:2536 processor_box.cc:3926
 msgid "Custom"
 msgstr "Benutzerdefiniert"
 
@@ -995,7 +995,7 @@ msgstr "Spuren/Busse hinzufügen"
 msgid "About"
 msgstr "Über..."
 
-#: ardour_ui.cc:331 location_ui.cc:1215
+#: ardour_ui.cc:331 location_ui.cc:1191
 msgid "Ranges|Locations"
 msgstr "Positionen"
 
@@ -2423,7 +2423,7 @@ msgstr "Zu nächstem Marker springen"
 #: ardour_ui_ed.cc:567 editor_audio_import.cc:356 luawindow.cc:100
 #: pt_import_selector.cc:43 session_import_dialog.cc:82
 #: session_import_dialog.cc:104 session_metadata_dialog.cc:465 sfdb_ui.cc:638
-#: template_dialog.cc:228 editor_videotimeline.cc:97
+#: template_dialog.cc:228 editor_videotimeline.cc:94
 msgid "Import"
 msgstr "Importieren"
 
@@ -2531,7 +2531,7 @@ msgstr "Alle sichtbaren Automationsspuren auswählen"
 msgid "Select All Tracks"
 msgstr "Alle Spuren auswählen"
 
-#: ardour_ui_ed.cc:654 export_timespan_selector.cc:66 processor_box.cc:3908
+#: ardour_ui_ed.cc:654 export_timespan_selector.cc:66 processor_box.cc:3906
 msgid "Deselect All"
 msgstr "Nichts auswählen"
 
@@ -3085,8 +3085,8 @@ msgstr ""
 #: ardour_ui_startup.cc:727
 msgid "NSM: %1 cannot connect to the JACK server. Please start jackd first."
 msgstr ""
-"NSM: %1 kann nicht mit dem JACK Server verbinden. Starten Sie bitte zuerst"
-" JACK."
+"NSM: %1 kann nicht mit dem JACK Server verbinden. Starten Sie bitte zuerst "
+"JACK."
 
 #: ardour_ui_video.cc:70
 msgid "Video-Server was not launched by %1. The request to stop it is ignored."
@@ -3410,7 +3410,7 @@ msgstr "Bearbeiten"
 
 #: bundle_manager.cc:267 editor.cc:6205 editor.cc:6235 editor_actions.cc:386
 #: editor_actions.cc:387 luawindow.cc:102 plugin_ui.cc:468
-#: processor_box.cc:3892 processor_box.cc:3894
+#: processor_box.cc:3890 processor_box.cc:3892
 msgid "Delete"
 msgstr "Löschen"
 
@@ -3578,7 +3578,7 @@ msgstr "Zeitpunkt"
 
 #: edit_note_dialog.cc:101 editor_regions.cc:178
 #: export_timespan_selector.cc:412 export_timespan_selector.cc:534
-#: location_ui.cc:336 midi_list_editor.cc:117 time_info_box.cc:100
+#: location_ui.cc:330 midi_list_editor.cc:117 time_info_box.cc:100
 msgid "Length"
 msgstr "Länge"
 
@@ -4023,15 +4023,15 @@ msgstr "Wähle Bereich zwischen Positionszeiger und Arbeitspunkt aus"
 msgid "Select"
 msgstr "Auswahl"
 
-#: editor.cc:2034 editor.cc:2105 editor_actions.cc:385 processor_box.cc:3888
+#: editor.cc:2034 editor.cc:2105 editor_actions.cc:385 processor_box.cc:3886
 msgid "Cut"
 msgstr "Ausschneiden"
 
-#: editor.cc:2035 editor.cc:2106 editor_actions.cc:391 processor_box.cc:3890
+#: editor.cc:2035 editor.cc:2106 editor_actions.cc:391 processor_box.cc:3888
 msgid "Copy"
 msgstr "Kopieren"
 
-#: editor.cc:2036 editor.cc:2107 editor_actions.cc:392 processor_box.cc:3902
+#: editor.cc:2036 editor.cc:2107 editor_actions.cc:392 processor_box.cc:3900
 msgid "Paste"
 msgstr "Einfügen"
 
@@ -4361,8 +4361,8 @@ msgid "Keep Remaining"
 msgstr "Übrige behalten"
 
 #: editor.cc:4214 editor_audio_import.cc:674 editor_ops.cc:6964
-#: engine_dialog.cc:3151 sfdb_freesound_mootcher.cc:69 keyeditor.cc:80
-#: processor_box.cc:3648 processor_box.cc:3673 pt_import_selector.cc:44
+#: engine_dialog.cc:3162 sfdb_freesound_mootcher.cc:69 keyeditor.cc:80
+#: processor_box.cc:3646 processor_box.cc:3671 pt_import_selector.cc:44
 #: template_dialog.cc:525 transport_masters_dialog.cc:756 utils.cc:124
 msgid "Cancel"
 msgstr "Abbrechen"
@@ -4384,7 +4384,7 @@ msgid "Please wait while %1 loads visual data."
 msgstr "Bitte warten Sie, während %1 die Daten zur Anzeige des Projekts lädt."
 
 #: editor.cc:6204 editor.cc:6239 editor_markers.cc:1030 editor_markers.cc:1052
-#: panner_ui.cc:417 processor_box.cc:3932
+#: panner_ui.cc:417 processor_box.cc:3930
 msgid "Edit..."
 msgstr "Bearbeiten..."
 
@@ -5697,7 +5697,7 @@ msgstr ""
 "Das Projekt enthält bereits eine Datei namens %1. Wollen Sie %2 als neue "
 "Quelle importieren, oder überspringen?"
 
-#: editor_audio_import.cc:356 editor_pt_import.cc:96 editor_videotimeline.cc:97
+#: editor_audio_import.cc:356 editor_pt_import.cc:96 editor_videotimeline.cc:94
 msgid "Cancel Import"
 msgstr "Importieren Abbrechen"
 
@@ -6024,7 +6024,7 @@ msgid "mark"
 msgstr "Marker"
 
 #: editor_markers.cc:665 editor_ops.cc:2233 editor_ops.cc:2255
-#: editor_ops.cc:2392 editor_ops.cc:2429 location_ui.cc:1073
+#: editor_ops.cc:2392 editor_ops.cc:2429 location_ui.cc:1049
 msgid "add marker"
 msgstr "Marker hinzufügen"
 
@@ -6044,7 +6044,7 @@ msgstr "Bereich"
 msgid "new range marker"
 msgstr "Neuer Bereich"
 
-#: editor_markers.cc:766 editor_ops.cc:2353 location_ui.cc:906
+#: editor_markers.cc:766 editor_ops.cc:2353 location_ui.cc:882
 msgid "remove marker"
 msgstr "Marker entfernen"
 
@@ -6168,8 +6168,8 @@ msgstr "Marker umbenennen"
 msgid "Rename Range"
 msgstr "Bereich umbenennen"
 
-#: editor_markers.cc:1628 editor_mouse.cc:2493 processor_box.cc:3388
-#: processor_box.cc:3904 route_time_axis.cc:1072 route_ui.cc:1714
+#: editor_markers.cc:1628 editor_mouse.cc:2493 processor_box.cc:3386
+#: processor_box.cc:3902 route_time_axis.cc:1072 route_ui.cc:1714
 #: template_dialog.cc:226 vca_master_strip.cc:463
 msgid "Rename"
 msgstr "Umbenennen"
@@ -6261,7 +6261,7 @@ msgstr "Schritt nach hinten"
 msgid "sequence regions"
 msgstr "Regionen aneinanderreihen"
 
-#: editor_ops.cc:2184 location_ui.cc:769
+#: editor_ops.cc:2184 location_ui.cc:745
 msgid "New Range"
 msgstr "Neuer Bereich"
 
@@ -6325,7 +6325,7 @@ msgstr "Regionen ganz nach unten"
 msgid "Rename Region"
 msgstr "Region umbenennen"
 
-#: editor_ops.cc:2913 processor_box.cc:3386 route_ui.cc:1712
+#: editor_ops.cc:2913 processor_box.cc:3384 route_ui.cc:1712
 msgid "New name:"
 msgstr "Neuer Name:"
 
@@ -7302,7 +7302,7 @@ msgstr "Gepuffertes E/A benutzen"
 msgid "Autostart"
 msgstr "Autostart"
 
-#: engine_dialog.cc:103 engine_dialog.cc:3165
+#: engine_dialog.cc:103 engine_dialog.cc:3176
 msgid "Measure"
 msgstr "Messen"
 
@@ -7322,7 +7322,7 @@ msgstr "Audio kalibrieren"
 msgid "Back to settings"
 msgstr "Zurück zu Einstellungen"
 
-#: engine_dialog.cc:132
+#: engine_dialog.cc:133
 msgid ""
 "No audio/MIDI backends detected. %1 cannot run\n"
 "\n"
@@ -7332,11 +7332,11 @@ msgstr ""
 "\n"
 "(Das ist ein Kompilier-/Paket-/Systemfehler und sollte nie passieren.)"
 
-#: engine_dialog.cc:157
+#: engine_dialog.cc:158
 msgid "Latency Measurement Tool"
 msgstr "Latenzmesswerkzeug"
 
-#: engine_dialog.cc:169
+#: engine_dialog.cc:170
 msgid ""
 "<span weight=\"bold\">Turn down the volume on your audio equipment to a very "
 "low level.</span>"
@@ -7344,113 +7344,108 @@ msgstr ""
 "<span weight=\"bold\">Drehen Sie die Lautstärke Ihrer Audioanlage sehr leise."
 "</span>"
 
-#: engine_dialog.cc:178
+#: engine_dialog.cc:179
 msgid "Select two channels below and connect them using a cable."
 msgstr "Wählen Sie unten zwei Kanäle aus und verbinden sie mit einem Kabel."
 
-#: engine_dialog.cc:183
+#: engine_dialog.cc:184
 msgid "Output channel:"
 msgstr "Ausgangskanal:"
 
-#: engine_dialog.cc:195
+#: engine_dialog.cc:196
 msgid "Input channel:"
 msgstr "Eingangskanal:"
 
-#: engine_dialog.cc:233
+#: engine_dialog.cc:234
 msgid "Once the channels are connected, click the \"Measure\" button."
 msgstr "Wenn die Kanäle verbunden sind, klicken Sie den \"Messen\"-Knopf."
 
-#: engine_dialog.cc:240
+#: engine_dialog.cc:241
 msgid "When satisfied with the results, click the \"Use results\" button."
 msgstr ""
 "Wenn Sie mit dem Resultat zufrieden sind, klicken Sie den Knopf \"Benutze "
 "Ergebnisse\"."
 
-#: engine_dialog.cc:255 engine_dialog.cc:3359 engine_dialog.cc:3369
+#: engine_dialog.cc:256 engine_dialog.cc:3371 engine_dialog.cc:3381
 msgid "No measurement results yet"
 msgstr "Noch keine Messergebnisse"
 
-#: engine_dialog.cc:265
+#: engine_dialog.cc:266
 msgid "Latency"
 msgstr "Latenz"
 
-#: engine_dialog.cc:317
+#: engine_dialog.cc:318
 msgid ""
 "Always try these settings when starting %1, if the same device is available"
 msgstr ""
 "%1 immer mit diesen Einstellungen zu starten versuchen, falls das gleiche "
 "Gerät verfügbar ist"
 
-#: engine_dialog.cc:483
-msgid "Could not configure Audio/MIDI engine with given settings."
-msgstr ""
-"Konnte Audio/MIDI Engine mit den angegebenen Einstellungen nicht starten."
-
-#: engine_dialog.cc:513
+#: engine_dialog.cc:510
 msgid "Audio System:"
 msgstr "Audiosystem:"
 
-#: engine_dialog.cc:557
+#: engine_dialog.cc:554
 msgid "Driver:"
 msgstr "Treiber:"
 
-#: engine_dialog.cc:564
+#: engine_dialog.cc:561
 msgid "Input Device:"
 msgstr "Eingangsgerät:"
 
-#: engine_dialog.cc:568
+#: engine_dialog.cc:565
 msgid "Output Device:"
 msgstr "Ausgangsgerät:"
 
-#: engine_dialog.cc:575
+#: engine_dialog.cc:572
 msgid "Device:"
 msgstr "Gerät:"
 
-#: engine_dialog.cc:603 engine_dialog.cc:720 export_report.cc:165
+#: engine_dialog.cc:600 engine_dialog.cc:717 export_report.cc:165
 #: export_report.cc:337 sfdb_ui.cc:183 sfdb_ui.cc:412 sfdb_ui.cc:417
 msgid "Sample rate:"
 msgstr "Samplerate:"
 
-#: engine_dialog.cc:608 engine_dialog.cc:727
+#: engine_dialog.cc:605 engine_dialog.cc:724
 msgid "Buffer size:"
 msgstr "Puffergröße:"
 
-#: engine_dialog.cc:617
+#: engine_dialog.cc:614
 msgid "Periods:"
 msgstr "Perioden:"
 
-#: engine_dialog.cc:634
+#: engine_dialog.cc:631
 msgid "Input channels:"
 msgstr "Eingangskanäle:"
 
-#: engine_dialog.cc:647
+#: engine_dialog.cc:644
 msgid "Output channels:"
 msgstr "Ausgangskanäle:"
 
-#: engine_dialog.cc:666
+#: engine_dialog.cc:663
 msgid "Hardware input latency:"
 msgstr "Hardware Eingangslatenz (Samples)"
 
-#: engine_dialog.cc:669 engine_dialog.cc:682
+#: engine_dialog.cc:666 engine_dialog.cc:679
 msgid "samples"
 msgstr "Samples"
 
-#: engine_dialog.cc:679
+#: engine_dialog.cc:676
 msgid "Hardware output latency:"
 msgstr "Hardware Ausgangslatenz (Samples)"
 
-#: engine_dialog.cc:690
+#: engine_dialog.cc:687
 msgid "MIDI System:"
 msgstr "MIDI System:"
 
-#: engine_dialog.cc:712
+#: engine_dialog.cc:709
 msgid ""
 "%1 is already running. %2 will connect to it and use the existing settings."
 msgstr ""
 "%1 läuft bereits. %2 wird zu ihm verbinden und die existierenden "
 "Einstellungen übernehmen."
 
-#: engine_dialog.cc:766
+#: engine_dialog.cc:763
 msgid ""
 "Failed to start or connect to audio-engine.\n"
 "\n"
@@ -7460,7 +7455,7 @@ msgstr ""
 "\n"
 "Latenzkalibrierung erfordert ein funktionierendes Audio-Interface."
 
-#: engine_dialog.cc:772
+#: engine_dialog.cc:769
 msgid ""
 "Your selected audio configuration is playback- or capture-only.\n"
 "\n"
@@ -7472,111 +7467,111 @@ msgstr ""
 "Latenzkalibrierung verlangt Duplexbetrieb (gleichzeitig Aufnahme und "
 "Wiedergabe)"
 
-#: engine_dialog.cc:932
+#: engine_dialog.cc:929
 msgid "Engine|Stop"
 msgstr "Stop"
 
-#: engine_dialog.cc:936
+#: engine_dialog.cc:933
 msgid "Engine|Start"
 msgstr "Start"
 
-#: engine_dialog.cc:1022
+#: engine_dialog.cc:1019
 msgid "MIDI Devices"
 msgstr "MIDI Geräte"
 
-#: engine_dialog.cc:1028
+#: engine_dialog.cc:1025
 msgid "Device"
 msgstr "Gerät"
 
-#: engine_dialog.cc:1030
+#: engine_dialog.cc:1027
 msgid "Systemic Latency [samples]"
 msgstr "Systemlatenz (samples)"
 
-#: engine_dialog.cc:1033 gain_meter.cc:802 mixer_strip.cc:191
+#: engine_dialog.cc:1030 gain_meter.cc:802 mixer_strip.cc:191
 #: mixer_strip.cc:408 mixer_strip.cc:2532 plugin_eq_gui.cc:131
 #: rc_option_editor.cc:4000
 msgid "Input"
 msgstr "Eingang"
 
-#: engine_dialog.cc:1035 foldback_strip.cc:407 gain_meter.cc:808
+#: engine_dialog.cc:1032 foldback_strip.cc:407 gain_meter.cc:808
 #: mixer_strip.cc:195 mixer_strip.cc:412 mixer_strip.cc:2535
 #: monitor_section.cc:305 monitor_section.cc:309 plugin_eq_gui.cc:132
 #: rc_option_editor.cc:4004 vca_master_strip.cc:236
 msgid "Output"
 msgstr "Ausgang"
 
-#: engine_dialog.cc:1076
+#: engine_dialog.cc:1073
 msgid "Calibrate"
 msgstr "Kalibrieren"
 
-#: engine_dialog.cc:1181
+#: engine_dialog.cc:1178
 msgid "all available channels"
 msgstr "alle verfügbaren Kanäle"
 
-#: engine_dialog.cc:1711
+#: engine_dialog.cc:1708
 msgid "%1 sample"
 msgid_plural "%1 samples"
 msgstr[0] "%1 Sample"
 msgstr[1] "%1 Samples"
 
-#: engine_dialog.cc:1771
+#: engine_dialog.cc:1768
 #, c-format
 msgid "(%.1f ms)"
 msgstr "(%.1f ms)"
 
-#: engine_dialog.cc:2525
+#: engine_dialog.cc:2522
 msgid "Could not start backend engine %1"
 msgstr "Konnte Backend-Engine %1 nicht starten"
 
-#: engine_dialog.cc:2557
+#: engine_dialog.cc:2554
 msgid "Cannot set driver to %1"
 msgstr "Kann Treiber nicht auf %1 setzen"
 
-#: engine_dialog.cc:2562
+#: engine_dialog.cc:2559
 msgid "Cannot set input device name to %1"
 msgstr "Kann Namen des Eingangsgeräts nicht auf %1 setzen"
 
-#: engine_dialog.cc:2566
+#: engine_dialog.cc:2563
 msgid "Cannot set output device name to %1"
 msgstr "Kann Namen des Ausgangsgeräts nicht auf %1 setzen"
 
-#: engine_dialog.cc:2571
+#: engine_dialog.cc:2568
 msgid "Cannot set device name to %1"
 msgstr "Kann Gerät nicht auf %1 setzen"
 
-#: engine_dialog.cc:2576
+#: engine_dialog.cc:2573
 msgid "Cannot set sample rate to %1"
 msgstr "Kann Samplerate nicht auf %1 setzen"
 
-#: engine_dialog.cc:2580
+#: engine_dialog.cc:2577
 msgid "Cannot set buffer size to %1"
 msgstr "Kann Buffergröße nicht auf %1 setzen"
 
-#: engine_dialog.cc:2584
+#: engine_dialog.cc:2581
 msgid "Cannot set periods to %1"
 msgstr "Kann Perioden nicht auf %1 setzen"
 
-#: engine_dialog.cc:2590
+#: engine_dialog.cc:2587
 msgid "Cannot set input channels to %1"
 msgstr "Kann Eingangskanäle nicht auf %1 setzen"
 
-#: engine_dialog.cc:2594
+#: engine_dialog.cc:2591
 msgid "Cannot set output channels to %1"
 msgstr "Kann Ausgangskanäle nicht auf %1 setzen"
 
-#: engine_dialog.cc:2600
+#: engine_dialog.cc:2597
 msgid "Cannot set input latency to %1"
 msgstr "Kann Eingangslatenz nicht auf %1 setzen"
 
-#: engine_dialog.cc:2604
+#: engine_dialog.cc:2601
 msgid "Cannot set output latency to %1"
 msgstr "Kann Ausgangslatenz nicht auf %1 setzen"
 
-#: engine_dialog.cc:3016 engine_dialog.cc:3082
+#: engine_dialog.cc:3027 engine_dialog.cc:3093
 msgid "No signal detected "
 msgstr "Kein Signal erkannt "
 
-#: engine_dialog.cc:3023
+#: engine_dialog.cc:3034
 msgid ""
 "Input signal is > -3dBFS. Lower the signal level (output gain, input gain) "
 "on the audio-interface."
@@ -7584,64 +7579,64 @@ msgstr ""
 "Eingangssignal is > -3dBFS. Verringern Sie den Signalpegel (E/A-Lautstärken) "
 "am Audio Interface."
 
-#: engine_dialog.cc:3036 engine_dialog.cc:3090 port_insert_ui.cc:74
+#: engine_dialog.cc:3047 engine_dialog.cc:3101 port_insert_ui.cc:74
 #: port_insert_ui.cc:102
 msgid "Disconnected from audio engine"
 msgstr "Von Audioengine getrennt"
 
-#: engine_dialog.cc:3045 engine_dialog.cc:3098
+#: engine_dialog.cc:3056 engine_dialog.cc:3109
 msgid "Detected roundtrip latency: "
 msgstr "Entdeckte Roundtrip-Latenz: "
 
-#: engine_dialog.cc:3047 engine_dialog.cc:3100
+#: engine_dialog.cc:3058 engine_dialog.cc:3111
 msgid "Systemic latency: "
 msgstr "Systemische Latenz: "
 
-#: engine_dialog.cc:3054
+#: engine_dialog.cc:3065
 msgid "(signal detection error)"
 msgstr "(Fehler bei der Signalerkennung)"
 
-#: engine_dialog.cc:3060
+#: engine_dialog.cc:3071
 msgid "(inverted - bad wiring)"
 msgstr "(invertiert - schlechte Verkabelung)"
 
-#: engine_dialog.cc:3107
+#: engine_dialog.cc:3118
 msgid "(averaging)"
 msgstr "(durchschnittlich)"
 
-#: engine_dialog.cc:3113
+#: engine_dialog.cc:3124
 msgid "(too large jitter)"
 msgstr "(zu viel Jitter)"
 
-#: engine_dialog.cc:3117
+#: engine_dialog.cc:3128
 msgid "(large jitter)"
 msgstr "(viel Jitter)"
 
-#: engine_dialog.cc:3129
+#: engine_dialog.cc:3140
 msgid "Timeout - large MIDI jitter."
 msgstr "Timeout - viel MIDI Jitter."
 
-#: engine_dialog.cc:3145 port_insert_ui.cc:138
+#: engine_dialog.cc:3156 port_insert_ui.cc:138
 msgid "Detecting ..."
 msgstr "Messe..."
 
-#: engine_dialog.cc:3283
+#: engine_dialog.cc:3295
 msgid "Disconnect from %1"
 msgstr "Trenne von %1"
 
-#: engine_dialog.cc:3288
+#: engine_dialog.cc:3300
 msgid "Running"
 msgstr "Läuft"
 
-#: engine_dialog.cc:3290
+#: engine_dialog.cc:3302
 msgid "Connected"
 msgstr "Verbunden"
 
-#: engine_dialog.cc:3301
+#: engine_dialog.cc:3313
 msgid "Connect to %1"
 msgstr "Verbinde zu %1"
 
-#: engine_dialog.cc:3305
+#: engine_dialog.cc:3317
 msgid "Stopped"
 msgstr "Gestoppt"
 
@@ -8303,7 +8298,7 @@ msgstr "Zeitanzeige:"
 msgid "Realtime Export"
 msgstr "Echtzeit-Export"
 
-#: export_timespan_selector.cc:58 processor_box.cc:3906
+#: export_timespan_selector.cc:58 processor_box.cc:3904
 msgid "Select All"
 msgstr "Alles auswählen"
 
@@ -8545,7 +8540,7 @@ msgstr "Plugin Editor: konnte kein Kontrollelement für Eigenschaft %1 erzeugen"
 msgid "Switches"
 msgstr "Schalter"
 
-#: generic_pluginui.cc:507 generic_pluginui.cc:613 processor_box.cc:3876
+#: generic_pluginui.cc:507 generic_pluginui.cc:613 processor_box.cc:3874
 msgid "Controls"
 msgstr "Steuerelemente"
 
@@ -8917,59 +8912,55 @@ msgstr "Komponist:"
 msgid "Pre-Emphasis"
 msgstr "Präemphase"
 
-#: location_ui.cc:333
+#: location_ui.cc:327
 msgid "Remove this range"
 msgstr "Diesen Bereich entfernen"
 
-#: location_ui.cc:334
+#: location_ui.cc:328
 msgid "Start time - middle click to locate here"
 msgstr "Startzeit - Mittelklick, um hierher zu positionieren"
 
-#: location_ui.cc:335
+#: location_ui.cc:329
 msgid "End time - middle click to locate here"
 msgstr "Endzeit - Mittelklick, um hierher zu positionieren"
 
-#: location_ui.cc:338
+#: location_ui.cc:332
 msgid "Set range start from playhead location"
 msgstr "Bereichsbeginn auf Positionszeiger setzen"
 
-#: location_ui.cc:339
+#: location_ui.cc:333
 msgid "Set range end from playhead location"
 msgstr "Bereichsende auf Positionszeiger setzen"
 
-#: location_ui.cc:343
+#: location_ui.cc:337
 msgid "Remove this marker"
 msgstr "Diesen Marker entfernen"
 
-#: location_ui.cc:344
+#: location_ui.cc:338
 msgid "Position - middle click to locate here"
 msgstr "Position - Mittelklick, um hierher zu positionieren"
 
-#: location_ui.cc:346
+#: location_ui.cc:340
 msgid "Set marker time from playhead location"
 msgstr "Markerposition auf Positionszeiger setzen"
 
-#: location_ui.cc:542
-msgid "You cannot put a CD marker at the start of the session"
-msgstr "Sie können keinen CD-Marker am Anfang des Projekts erstellen"
-
-#: location_ui.cc:768
+#: location_ui.cc:744
 msgid "New Marker"
 msgstr "Neuer Marker"
 
-#: location_ui.cc:785
+#: location_ui.cc:761
 msgid "<b>Loop/Punch Ranges</b>"
 msgstr "<b>Schleifen/Punchbereiche</b>"
 
-#: location_ui.cc:811
+#: location_ui.cc:787
 msgid "<b>Markers (Including CD Index)</b>"
 msgstr "<b>Marker (auch CD-Index)</b>"
 
-#: location_ui.cc:846
+#: location_ui.cc:822
 msgid "<b>Ranges (Including CD Track Ranges)</b>"
 msgstr "<b>Bereiche (auch CD-Track-Bereichen)</b>"
 
-#: location_ui.cc:1092
+#: location_ui.cc:1068
 msgid "add range marker"
 msgstr "Bereich hinzufügen"
 
@@ -10023,7 +10014,7 @@ msgstr "Benutzerdefinierte Aufnahme- und Wiedergabe-Positionen"
 msgid "Disk I/O..."
 msgstr "Disk E/A..."
 
-#: mixer_strip.cc:1760 processor_box.cc:3921
+#: mixer_strip.cc:1760 processor_box.cc:3919
 msgid "Pin Connections..."
 msgstr "Pin-Verbindungen..."
 
@@ -11231,7 +11222,7 @@ msgstr "Konnte Ausgangskonfiguration des Plugins nicht ändern."
 msgid "Failed to alter plugin input configuration."
 msgstr "Konnte Eingangskonfiguration des Plugins nicht ändern."
 
-#: plugin_pin_dialog.cc:1750 processor_box.cc:2721
+#: plugin_pin_dialog.cc:1750 processor_box.cc:2719
 msgid "Cannot set up new send: %1"
 msgstr "Kann keinen neuen Send erstellen: %1"
 
@@ -11780,7 +11771,7 @@ msgstr "Return"
 msgid "New Favorite Preset for \"%1\""
 msgstr "Neuer Vorzugspreset für \"%1\""
 
-#: processor_box.cc:539 processor_box.cc:1662
+#: processor_box.cc:539 processor_box.cc:1660
 msgid ""
 "\n"
 "%1+double-click to toggle inline-display"
@@ -11796,7 +11787,7 @@ msgstr ""
 "\n"
 "Dieses Plugin ist %1 mal repliziert worden."
 
-#: processor_box.cc:548 processor_box.cc:1666
+#: processor_box.cc:548 processor_box.cc:1664
 msgid ""
 "<b>%1</b>\n"
 "Double-click to show GUI.\n"
@@ -11806,7 +11797,7 @@ msgstr ""
 "Doppelklick, um GUI zu zeigen.\n"
 "%2+Doppelklick , um einfaches GUI zu zeigen.%3"
 
-#: processor_box.cc:551 processor_box.cc:1669
+#: processor_box.cc:551 processor_box.cc:1667
 msgid ""
 "<b>%1</b>\n"
 "Double-click to show generic GUI.%2"
@@ -11840,7 +11831,7 @@ msgstr "Alle Regler verbergen"
 msgid "Allow Feedback Loop"
 msgstr "Rückkopplungsschleife erlauben"
 
-#: processor_box.cc:1867
+#: processor_box.cc:1865
 msgid ""
 "Right-click to add/remove/edit\n"
 "plugins,inserts,sends and more"
@@ -11848,7 +11839,7 @@ msgstr ""
 "Rechtsklick, um Plugins, Inserts, Sends etc.\n"
 "hinzuzufügen/zu editieren/zu löschen"
 
-#: processor_box.cc:2016
+#: processor_box.cc:2014
 msgid ""
 "Processor Drag/Drop failed. Probably because\n"
 "the I/O configuration of the plugins could\n"
@@ -11858,15 +11849,15 @@ msgstr ""
 "weil die E/A Konfiguration der Plugins nicht mit der\n"
 "dieser Spur übereinstimmt."
 
-#: processor_box.cc:2656 processor_box.cc:3182
+#: processor_box.cc:2654 processor_box.cc:3180
 msgid "Plugin Incompatibility"
 msgstr "Plugin-Inkompatibilität"
 
-#: processor_box.cc:2659
+#: processor_box.cc:2657
 msgid "You attempted to add the plugin \"%1\" in slot %2.\n"
 msgstr "Sie haben versucht, das Plugin \"%1\" im Einschub %2 hinzuzufügen.\n"
 
-#: processor_box.cc:2665
+#: processor_box.cc:2663
 msgid ""
 "\n"
 "This plugin has:\n"
@@ -11874,19 +11865,19 @@ msgstr ""
 "\n"
 "Dieses Plugin hat:\n"
 
-#: processor_box.cc:2668
+#: processor_box.cc:2666
 msgid "\t%1 MIDI input\n"
 msgid_plural "\t%1 MIDI inputs\n"
 msgstr[0] "\t%1 MIDI Eingang\n"
 msgstr[1] "\t%1 MIDI Eingänge\n"
 
-#: processor_box.cc:2672
+#: processor_box.cc:2670
 msgid "\t%1 audio input\n"
 msgid_plural "\t%1 audio inputs\n"
 msgstr[0] "\t%1 Audio-Eingang\n"
 msgstr[1] "\t%1 Audio-Eingänge\n"
 
-#: processor_box.cc:2675
+#: processor_box.cc:2673
 msgid ""
 "\n"
 "but at the insertion point, there are:\n"
@@ -11894,19 +11885,19 @@ msgstr ""
 "\n"
 "aber am Einfügepunkt gibt es:\n"
 
-#: processor_box.cc:2678
+#: processor_box.cc:2676
 msgid "\t%1 MIDI channel\n"
 msgid_plural "\t%1 MIDI channels\n"
 msgstr[0] "\t%1 MIDI-Kanal\n"
 msgstr[1] "\t%1 MIDI-Kanäle\n"
 
-#: processor_box.cc:2682
+#: processor_box.cc:2680
 msgid "\t%1 audio channel\n"
 msgid_plural "\t%1 audio channels\n"
 msgstr[0] "\t%1 Audio-Kanal\n"
 msgstr[1] "\t%1 Audio-Kanäle\n"
 
-#: processor_box.cc:2685
+#: processor_box.cc:2683
 msgid ""
 "\n"
 "%1 is unable to insert this plugin here.\n"
@@ -11914,7 +11905,7 @@ msgstr ""
 "\n"
 "%1 kann dieses Plugin hier nicht einfügen.\n"
 
-#: processor_box.cc:3185
+#: processor_box.cc:3183
 msgid ""
 "You cannot reorder these plugins/sends/inserts\n"
 "in that way because the inputs and\n"
@@ -11924,21 +11915,21 @@ msgstr ""
 "nicht auf diese Weise verändern, sonst würden\n"
 "die Ein-/Ausgänge nicht mehr richtig funktionieren."
 
-#: processor_box.cc:3385
+#: processor_box.cc:3383
 msgid "Rename Processor"
 msgstr "Prozessor umbenennen"
 
-#: processor_box.cc:3416
+#: processor_box.cc:3414
 msgid "At least 100 IO objects exist with a name like %1 - name not changed"
 msgstr ""
 "Es gibt mindestens 100 E/A-Objekte mit einem Namen wie %1 - Name nicht "
 "geändert"
 
-#: processor_box.cc:3580
+#: processor_box.cc:3578
 msgid "plugin insert constructor failed"
 msgstr "Einfügen des Plugins fehlgeschlagen"
 
-#: processor_box.cc:3591
+#: processor_box.cc:3589
 msgid ""
 "Copying the set of processors on the clipboard failed,\n"
 "probably because the I/O configuration of the plugins\n"
@@ -11948,7 +11939,7 @@ msgstr ""
 "kopieren, vermutlich weil die E/A Konfiguration der Plugins\n"
 "nicht mit der dieser Spur übereinstimmt."
 
-#: processor_box.cc:3645
+#: processor_box.cc:3643
 msgid ""
 "Do you really want to remove all processors from %1?\n"
 "(this cannot be undone)"
@@ -11956,15 +11947,15 @@ msgstr ""
 "Wollen Sie wirklich alle Prozessoren von %1 entfernen?\n"
 "(Dies kann nicht rückgängig gemacht werden)"
 
-#: processor_box.cc:3649 processor_box.cc:3674
+#: processor_box.cc:3647 processor_box.cc:3672
 msgid "Yes, remove them all"
 msgstr "Ja, alle löschen"
 
-#: processor_box.cc:3651 processor_box.cc:3676
+#: processor_box.cc:3649 processor_box.cc:3674
 msgid "Remove processors"
 msgstr "Prozessoren entfernen"
 
-#: processor_box.cc:3666
+#: processor_box.cc:3664
 msgid ""
 "Do you really want to remove all pre-fader processors from %1?\n"
 "(this cannot be undone)"
@@ -11972,7 +11963,7 @@ msgstr ""
 "Wollen Sie wirklich alle Pre-Fader-Prozessoren von %1 entfernen?\n"
 "(Dies kann nicht rückgängig gemacht werden)"
 
-#: processor_box.cc:3669
+#: processor_box.cc:3667
 msgid ""
 "Do you really want to remove all post-fader processors from %1?\n"
 "(this cannot be undone)"
@@ -11980,79 +11971,79 @@ msgstr ""
 "Wollen Sie wirklich alle Post-Fader-Prozessoren von %1 entfernen?\n"
 "(Dies kann nicht rückgängig gemacht werden)"
 
-#: processor_box.cc:3862
+#: processor_box.cc:3860
 msgid "New Plugin"
 msgstr "Plugin einfügen"
 
-#: processor_box.cc:3865
+#: processor_box.cc:3863
 msgid "New Insert"
 msgstr "Insert einfügen"
 
-#: processor_box.cc:3868
+#: processor_box.cc:3866
 msgid "New External Send ..."
 msgstr "Neuer externer Send..."
 
-#: processor_box.cc:3872
+#: processor_box.cc:3870
 msgid "New Aux Send ..."
 msgstr "Neuer Aux-Send..."
 
-#: processor_box.cc:3873
+#: processor_box.cc:3871
 msgid "New Foldback Send ..."
 msgstr "Neuer Foldback Send..."
 
-#: processor_box.cc:3874
+#: processor_box.cc:3872
 msgid "Remove Foldback Send ..."
 msgstr "Foldback Send entfernen ..."
 
-#: processor_box.cc:3877
+#: processor_box.cc:3875
 msgid "Send Options"
 msgstr "Send Optionen"
 
-#: processor_box.cc:3879
+#: processor_box.cc:3877
 msgid "Clear (all)"
 msgstr "Löschen (alle)"
 
-#: processor_box.cc:3881
+#: processor_box.cc:3879
 msgid "Clear (pre-fader)"
 msgstr "Löschen (Pre-Fader)"
 
-#: processor_box.cc:3883
+#: processor_box.cc:3881
 msgid "Clear (post-fader)"
 msgstr "Löschen (Post-Fader)"
 
-#: processor_box.cc:3913
+#: processor_box.cc:3911
 msgid "Activate All"
 msgstr "Alle aktivieren"
 
-#: processor_box.cc:3915
+#: processor_box.cc:3913
 msgid "Deactivate All"
 msgstr "Alle deaktivieren"
 
-#: processor_box.cc:3917
+#: processor_box.cc:3915
 msgid "A/B Plugins"
 msgstr "A/B Plugins"
 
-#: processor_box.cc:3925
+#: processor_box.cc:3923
 msgid "Disk I/O ..."
 msgstr "Disk E/A ..."
 
-#: processor_box.cc:3926
+#: processor_box.cc:3924
 msgid "Pre-Fader"
 msgstr "Pre-Fader"
 
-#: processor_box.cc:3927
+#: processor_box.cc:3925
 msgid "Post-Fader"
 msgstr "Post-Fader"
 
-#: processor_box.cc:3936
+#: processor_box.cc:3934
 msgid "Edit with generic controls..."
 msgstr "Mit einfachen Kontrollelementen editieren..."
 
-#: processor_box.cc:4290
+#: processor_box.cc:4288
 msgid "%1: %2 (by %3)"
 msgstr "%1: %2 (von %3)"
 
-#: processor_box.cc:4292
+#: processor_box.cc:4290
 msgid "%1 (by %2)"
 msgstr "%1 (von %2)"
 
@@ -17960,3 +17951,7 @@ msgstr ""
 "Sehen Sie bitte im Handbuch unter %2/Video-Zeitleiste/Bearbeitung/#Export.\n"
 "\n"
 "Handbuch im Browser öffnen? "
+
+#~ msgid "Could not configure Audio/MIDI engine with given settings."
+#~ msgstr ""
+#~ "Konnte Audio/MIDI Engine mit den angegebenen Einstellungen nicht starten."

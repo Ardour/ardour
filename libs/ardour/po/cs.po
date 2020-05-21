@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-05-20 14:36-0600\n"
+"POT-Creation-Date: 2020-05-21 22:10+0200\n"
 "PO-Revision-Date: 2020-05-08 14:31+0200\n"
 "Last-Translator: Pavel Fric <pavelfric@seznam.cz>\n"
 "Language-Team: Czech <translation-team-cs@lists.sourceforge.net>\n"
@@ -1374,47 +1374,43 @@ msgstr "Chyba při ukládání souboru s přednastavením %1."
 msgid "Could not locate HOME.  Preset not saved."
 msgstr "Nepodařilo se najít HOME. Přednastavení neuloženo."
 
-#: location.cc:477
-msgid "You cannot put a CD marker at this position"
-msgstr "V této poloze nelze dát značku CD."
-
-#: location.cc:636
+#: location.cc:622
 msgid "incorrect XML node passed to Location::set_state"
 msgstr "Nesprávný uzel XML předán do Location::set_state"
 
-#: location.cc:641
+#: location.cc:627
 msgid "XML node for Location has no ID information"
 msgstr "Uzel XML pro polohu nemá žádnou informaci o ID"
 
-#: location.cc:646
+#: location.cc:632
 msgid "XML node for Location has no name information"
 msgstr "Uzel XML pro polohu nemá žádnou informaci o názvu"
 
-#: location.cc:657
+#: location.cc:643
 msgid "XML node for Location has no start information"
 msgstr "Uzel XML pro polohu nemá žádnou informaci o začátku"
 
-#: location.cc:662
+#: location.cc:648
 msgid "XML node for Location has no end information"
 msgstr "Uzel XML pro polohu nemá žádnou informaci o konci"
 
-#: location.cc:671
+#: location.cc:657
 msgid "XML node for Location has no flags information"
 msgstr "Uzel XML pro polohu nemá žádnou informaci o příznaku"
 
-#: location.cc:907
+#: location.cc:893
 msgid "Locations: attempt to use unknown location as selected location"
 msgstr "Polohy: pokus o použití neznámé polohy jako vybrané polohy"
 
-#: location.cc:1101
+#: location.cc:1087
 msgid "incorrect XML mode passed to Locations::set_state"
 msgstr "Nesprávný režim XML předán do Locations::set_state"
 
-#: location.cc:1114 session.cc:1601 session_state.cc:1441
+#: location.cc:1100 session.cc:1601 session_state.cc:1441
 msgid "session"
 msgstr "Sezení"
 
-#: location.cc:1181
+#: location.cc:1167
 msgid "could not load location from session file - ignored"
 msgstr "Nepodařilo se nahrát polohu ze souboru se sezením - přehlíží se"
 
@@ -10075,9 +10071,6 @@ msgstr "Nelze nastavit stav VCA"
 
 #~ msgid "Set marker time from playhead location"
 #~ msgstr "Nastavit čas značky z místa ukazatele polohy"
-
-#~ msgid "You cannot put a CD marker at the start of the session"
-#~ msgstr "Na začátku sezení nemůžete zřídit žádnou značku na CD"
 
 #~ msgid "New Marker"
 #~ msgstr "Nová značka"

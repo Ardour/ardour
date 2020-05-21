@@ -1376,49 +1376,45 @@ msgstr "Fehler beim Sichern der Preset-Datei %1."
 msgid "Could not locate HOME.  Preset not saved."
 msgstr "Konnte HOME nicht eruieren. Preset nicht gesichert."
 
-#: location.cc:477
-msgid "You cannot put a CD marker at this position"
-msgstr "An dieser Stelle können Sie keinen CD-Marker ablegen"
-
-#: location.cc:636
+#: location.cc:622
 msgid "incorrect XML node passed to Location::set_state"
 msgstr "Unkorrekter XML-Knoten an Location::set_state weitergereicht"
 
-#: location.cc:641
+#: location.cc:627
 msgid "XML node for Location has no ID information"
 msgstr "XML-Knoten für Position hat keine ID-Information"
 
-#: location.cc:646
+#: location.cc:632
 msgid "XML node for Location has no name information"
 msgstr "XML-Knoten für Position hat keine Namensinformation"
 
-#: location.cc:657
+#: location.cc:643
 msgid "XML node for Location has no start information"
 msgstr "XML-Knoten für Position hat keine Start-Information"
 
-#: location.cc:662
+#: location.cc:648
 msgid "XML node for Location has no end information"
 msgstr "XML-Knoten für Position hat keine End-Information"
 
-#: location.cc:671
+#: location.cc:657
 msgid "XML node for Location has no flags information"
 msgstr "XML-Knoten für Position hat keine Flags-Information"
 
-#: location.cc:907
+#: location.cc:893
 msgid "Locations: attempt to use unknown location as selected location"
 msgstr ""
 "Locations: Versuch, eine unbekannte Position als ausgewählte Position zu "
 "verwenden"
 
-#: location.cc:1101
+#: location.cc:1087
 msgid "incorrect XML mode passed to Locations::set_state"
 msgstr "unkorrekter XML-Modus an Locations::set_state weitergereicht"
 
-#: location.cc:1114 session.cc:1601 session_state.cc:1441
+#: location.cc:1100 session.cc:1601 session_state.cc:1441
 msgid "session"
 msgstr "Projekt"
 
-#: location.cc:1181
+#: location.cc:1167
 msgid "could not load location from session file - ignored"
 msgstr "konnte Position nicht aus Projektdatei laden - ignoriert"
 

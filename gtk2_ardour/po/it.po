@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ardour 0.354.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-05-20 14:36-0600\n"
+"POT-Creation-Date: 2020-05-21 22:10+0200\n"
 "PO-Revision-Date: 2020-05-02 17:39+0200\n"
 "Last-Translator: Stefano Della Morte <stefano1996linc@gmail.com>\n"
 "Language-Team: Italiano <>\n"
@@ -974,7 +974,7 @@ msgstr "Aggiungi tracce/bus"
 msgid "About"
 msgstr "Informazioni"
 
-#: ardour_ui.cc:331 location_ui.cc:1215
+#: ardour_ui.cc:331 location_ui.cc:1191
 msgid "Ranges|Locations"
 msgstr "Posizioni"
 
@@ -2929,7 +2929,7 @@ msgstr ""
 msgid "Prompter"
 msgstr "Suggeritore"
 
-#: ardour_ui_startup.cc:167
+#: ardour_ui_startup.cc:168
 msgid ""
 "%4This is a session from an older version of %3%5\n"
 "\n"
@@ -2955,11 +2955,11 @@ msgstr ""
 "\n"
 "Da ora in poi,  usa la copia di backup con le vecchie versioni di %3"
 
-#: ardour_ui_startup.cc:183
+#: ardour_ui_startup.cc:184
 msgid "Sample Rate Mismatch"
 msgstr "Frequenza di campionamento non coincidente"
 
-#: ardour_ui_startup.cc:184
+#: ardour_ui_startup.cc:185
 msgid ""
 "This session was created with a sample rate of %1 Hz, but\n"
 "%2 is currently running at %3 Hz.  If you load this session,\n"
@@ -2969,15 +2969,15 @@ msgstr ""
 "ma %2 al momento funziona a %3 Hz. Se carichi questa sessione l'audio\n"
 "potrà essere riprodotto alla frequenza di campionamento errata.\n"
 
-#: ardour_ui_startup.cc:193
+#: ardour_ui_startup.cc:194
 msgid "Do not load session"
 msgstr "Non caricare la sessione"
 
-#: ardour_ui_startup.cc:194
+#: ardour_ui_startup.cc:195
 msgid "Load session anyway"
 msgstr "Apri comunque la sessione"
 
-#: ardour_ui_startup.cc:214
+#: ardour_ui_startup.cc:215
 msgid ""
 "This session was created with a sample rate of %1 Hz, but\n"
 "%2 is currently running at %3 Hz.\n"
@@ -2992,31 +2992,31 @@ msgstr ""
 "Riconfigura il motore audio in\n"
 "Menu > Finestre > Impostazioni audio/MIDI"
 
-#: ardour_ui_startup.cc:380
+#: ardour_ui_startup.cc:381
 msgid "NSM: initialization failed"
 msgstr "NSM: inizializzazione fallita"
 
-#: ardour_ui_startup.cc:407
+#: ardour_ui_startup.cc:408
 msgid "NSM server did not announce itself. Continuing without NSM."
 msgstr ""
 
-#: ardour_ui_startup.cc:409
+#: ardour_ui_startup.cc:410
 msgid "NSM server did not announce itself"
 msgstr "Nessuna notifica dal server NSM"
 
-#: ardour_ui_startup.cc:425
+#: ardour_ui_startup.cc:427
 msgid "NSM: no client ID provided"
 msgstr "NSM: non è stato fornito nessun ID dal client"
 
-#: ardour_ui_startup.cc:434
+#: ardour_ui_startup.cc:436
 msgid "NSM: no session created"
 msgstr "NSM: non è stata creata una sessione"
 
-#: ardour_ui_startup.cc:581 new_user_wizard.cc:419
+#: ardour_ui_startup.cc:586 new_user_wizard.cc:419
 msgid "%1 is ready for use"
 msgstr "%1 è pronto"
 
-#: ardour_ui_startup.cc:631
+#: ardour_ui_startup.cc:636
 msgid ""
 "WARNING: Your system has a limit for maximum amount of locked memory. This "
 "might cause %1 to run out of memory before your system runs out of memory. \n"
@@ -3030,9 +3030,17 @@ msgstr ""
 "Puoi controllare il limite massimo di memoria usando 'ulimit -l', "
 "normalmente gestito da %2"
 
-#: ardour_ui_startup.cc:648
+#: ardour_ui_startup.cc:653
 msgid "Do not show this window again"
 msgstr "Non mostrare di nuovo"
+
+#: ardour_ui_startup.cc:709
+msgid "NSM: The JACK backend is mandatory and can not be loaded."
+msgstr ""
+
+#: ardour_ui_startup.cc:727
+msgid "NSM: %1 cannot connect to the JACK server. Please start jackd first."
+msgstr ""
 
 #: ardour_ui_video.cc:70
 msgid "Video-Server was not launched by %1. The request to stop it is ignored."
@@ -3523,7 +3531,7 @@ msgstr "Tempo"
 
 #: edit_note_dialog.cc:101 editor_regions.cc:178
 #: export_timespan_selector.cc:412 export_timespan_selector.cc:534
-#: location_ui.cc:336 midi_list_editor.cc:117 time_info_box.cc:100
+#: location_ui.cc:330 midi_list_editor.cc:117 time_info_box.cc:100
 msgid "Length"
 msgstr "Durata"
 
@@ -5968,7 +5976,7 @@ msgid "mark"
 msgstr "marcatore"
 
 #: editor_markers.cc:665 editor_ops.cc:2233 editor_ops.cc:2255
-#: editor_ops.cc:2392 editor_ops.cc:2429 location_ui.cc:1073
+#: editor_ops.cc:2392 editor_ops.cc:2429 location_ui.cc:1049
 msgid "add marker"
 msgstr "aggiungi marcatore"
 
@@ -5988,7 +5996,7 @@ msgstr "intervallo"
 msgid "new range marker"
 msgstr "nuovo marcatore di intervallo"
 
-#: editor_markers.cc:766 editor_ops.cc:2353 location_ui.cc:906
+#: editor_markers.cc:766 editor_ops.cc:2353 location_ui.cc:882
 msgid "remove marker"
 msgstr "rimuovi marcatore"
 
@@ -6208,7 +6216,7 @@ msgstr "spingi indietro"
 msgid "sequence regions"
 msgstr "sequenzia regioni"
 
-#: editor_ops.cc:2184 location_ui.cc:769
+#: editor_ops.cc:2184 location_ui.cc:745
 msgid "New Range"
 msgstr "Nuovo Intervallo"
 
@@ -8847,59 +8855,55 @@ msgstr "Compositore:"
 msgid "Pre-Emphasis"
 msgstr "Pre-enfasi"
 
-#: location_ui.cc:333
+#: location_ui.cc:327
 msgid "Remove this range"
 msgstr "Rimuovi questo intervallo"
 
-#: location_ui.cc:334
+#: location_ui.cc:328
 msgid "Start time - middle click to locate here"
 msgstr "Tempo d'inizio - clicca con il centrale per posizionarti qui"
 
-#: location_ui.cc:335
+#: location_ui.cc:329
 msgid "End time - middle click to locate here"
 msgstr "Tempo di fine - clicca con il centrale per posizionarti qui"
 
-#: location_ui.cc:338
+#: location_ui.cc:332
 msgid "Set range start from playhead location"
 msgstr "Imposta l'inizio intervallo dalla posizione della testina"
 
-#: location_ui.cc:339
+#: location_ui.cc:333
 msgid "Set range end from playhead location"
 msgstr "Imposta la fine intervallo dalla posizione della testina"
 
-#: location_ui.cc:343
+#: location_ui.cc:337
 msgid "Remove this marker"
 msgstr "Rimuovi questo marcatore"
 
-#: location_ui.cc:344
+#: location_ui.cc:338
 msgid "Position - middle click to locate here"
 msgstr "Posizione - clicca con il centrale per posizionarti qui"
 
-#: location_ui.cc:346
+#: location_ui.cc:340
 msgid "Set marker time from playhead location"
 msgstr "Imposta il cambio di tempo dalla posizione della testina"
 
-#: location_ui.cc:542
-msgid "You cannot put a CD marker at the start of the session"
-msgstr "Impossibile inserire un marcatore CD all'inizio della sessione"
-
-#: location_ui.cc:768
+#: location_ui.cc:744
 msgid "New Marker"
 msgstr "Nuovo marcatore"
 
-#: location_ui.cc:785
+#: location_ui.cc:761
 msgid "<b>Loop/Punch Ranges</b>"
 msgstr "<b>Intervalli di Ciclo/Punch</b>"
 
-#: location_ui.cc:811
+#: location_ui.cc:787
 msgid "<b>Markers (Including CD Index)</b>"
 msgstr "<b>Marcatori (inclusi gli indici CD)</b>"
 
-#: location_ui.cc:846
+#: location_ui.cc:822
 msgid "<b>Ranges (Including CD Track Ranges)</b>"
 msgstr "<b>Intervalli (inclusi gli intervalli traccia CD)</b>"
 
-#: location_ui.cc:1092
+#: location_ui.cc:1068
 msgid "add range marker"
 msgstr "aggiungi marcatore di intervallo"
 

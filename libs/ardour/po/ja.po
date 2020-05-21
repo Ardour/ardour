@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-05-20 14:36-0600\n"
+"POT-Creation-Date: 2020-05-21 22:10+0200\n"
 "PO-Revision-Date: 2020-04-26 22:25+0100\n"
 "Last-Translator: Hiroki Inagaki <hiroki.ingk@gmail.com>\n"
 "Language-Team: Japanese <ardour-dev@lists.ardour.org>\n"
@@ -1377,47 +1377,43 @@ msgstr "プリセットファイル %1 保存エラー。"
 msgid "Could not locate HOME.  Preset not saved."
 msgstr "HOME の場所を特定できません。プリセットは保存されません。"
 
-#: location.cc:477
-msgid "You cannot put a CD marker at this position"
-msgstr "この位置に CD マーカーを置くことはできません"
-
-#: location.cc:636
+#: location.cc:622
 msgid "incorrect XML node passed to Location::set_state"
 msgstr "誤った XML ノードを Location::set_state に渡しました"
 
-#: location.cc:641
+#: location.cc:627
 msgid "XML node for Location has no ID information"
 msgstr "Location の XML ノードに ID 情報がありません"
 
-#: location.cc:646
+#: location.cc:632
 msgid "XML node for Location has no name information"
 msgstr "Location の XML ノードに名前情報がありません"
 
-#: location.cc:657
+#: location.cc:643
 msgid "XML node for Location has no start information"
 msgstr "Location の XML ノードに開始情報がありません"
 
-#: location.cc:662
+#: location.cc:648
 msgid "XML node for Location has no end information"
 msgstr "Location の XML ノードに終了情報がありません"
 
-#: location.cc:671
+#: location.cc:657
 msgid "XML node for Location has no flags information"
 msgstr "Location の XML ノードにフラグ情報がありません"
 
-#: location.cc:907
+#: location.cc:893
 msgid "Locations: attempt to use unknown location as selected location"
 msgstr "Locations: 選択した位置として不明な位置を使用しようとしています"
 
-#: location.cc:1101
+#: location.cc:1087
 msgid "incorrect XML mode passed to Locations::set_state"
 msgstr "不正な XML モードを Locations::set_state に渡しました"
 
-#: location.cc:1114 session.cc:1601 session_state.cc:1441
+#: location.cc:1100 session.cc:1601 session_state.cc:1441
 msgid "session"
 msgstr "session"
 
-#: location.cc:1181
+#: location.cc:1167
 msgid "could not load location from session file - ignored"
 msgstr "セッションファイルから位置を読み込めません - 無視します"
 
