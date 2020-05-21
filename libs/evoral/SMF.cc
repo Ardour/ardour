@@ -173,6 +173,7 @@ SMF::open(const std::string& path, int track)
 			}
 			_type0channels.insert(chan);
 		}
+		free (buf);
 		_type0 = true;
 		seek_to_start();
 	}
