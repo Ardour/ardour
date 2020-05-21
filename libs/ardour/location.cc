@@ -213,12 +213,6 @@ Location::set_start (samplepos_t s, bool force, bool allow_beat_recompute, const
 		}
 	}
 
-	if (is_cd_marker()) {
-		if (s <= _session.current_start_sample()) {
-			return -1;
-		}
-	}
-
 	if (is_mark()) {
 		if (_start != s) {
 			_start = s;
@@ -470,14 +464,6 @@ Location::set_hidden (bool yn, void*)
 void
 Location::set_cd (bool yn, void*)
 {
-	// XXX this really needs to be session start
-	// but its not available here - leave to GUI
-
-	if (yn && _start == 0) {
-		error << _("You cannot put a CD marker at this position") << endmsg;
-		return;
-	}
-
 	if (set_flag_internal (yn, IsCDMarker)) {
 		flags_changed (this); /* EMIT SIGNAL */
 		FlagsChanged ();
