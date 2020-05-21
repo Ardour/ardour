@@ -55,6 +55,9 @@ Editor::update_video_timeline (bool flush)
 {
 	// catch GUIIdle -> Editor::idle_visual_changer during quit/close
 	assert (ARDOUR_UI::instance()->video_timeline);
+	if (!ARDOUR_UI::instance()->video_timeline) {
+		return;
+	}
 
 	if (flush) {
 		ARDOUR_UI::instance()->video_timeline->flush_local_cache();
