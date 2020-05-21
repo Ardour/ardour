@@ -705,9 +705,26 @@ ARDOUR_UI::load_from_application_api (const std::string& path)
 	}
 
 	if (nsm) {
-		AudioEngine::instance()->set_backend("JACK", "", "");
+		if (!AudioEngine::instance()->set_backend("JACK", "", "")) {
+			error << _("NSM: The JACK backend is mandatory and can not be loaded.") << endmsg;
+			return;
+		}
+
 		if (!AudioEngine::instance()->running()) {
+			/* this auto-starts jackd with recent settings
+			 * TODO: if Glib::file_test (path, Glib::FILE_TEST_IS_DIR)
+			 *  query sample-rate of the session and use it.
+			 */
+			if (Glib::file_test (path, Glib::FILE_TEST_IS_DIR)) {
+				float sr;
+				SampleFormat sf;
+				string pv;
+				if (0 == Session::get_info_from_path (Glib::build_filename (path, basename_nosuffix (path) + statefile_suffix), sr, sf, pv)) {
+					ARDOUR::AudioEngine::instance ()->set_sample_rate (sr);
+				}
+			}
 			if (AudioEngine::instance()->start()) {
+				error << string_compose (_("NSM: %1 cannot connect to the JACK server. Please start jackd first."), PROGRAM_NAME) << endmsg;
 				return;
 			}
 		}
