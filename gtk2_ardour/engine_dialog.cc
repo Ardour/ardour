@@ -472,20 +472,24 @@ EngineControl::config_parameter_changed (std::string const & p)
 bool
 EngineControl::start_engine ()
 {
-	if (push_state_to_backend (true) != 0) {
+	int rv = push_state_to_backend (true);
+	if (rv < 0) {
+		/* error message from backend */
 		ArdourMessageDialog msg (*this, ARDOUR::AudioEngine::instance()->get_last_backend_error());
 		msg.run();
-		return false;
+	} else if (rv > 0) {
+		/* error from push_state_to_backend() */
+		// TODO: get error message from push_state_to_backend
+		ArdourMessageDialog msg (*this, _("Could not configure Audio/MIDI engine with given settings."));
+		msg.run();
 	}
-	return true;
+	return rv == 0;
 }
 
 bool
 EngineControl::stop_engine (bool for_latency)
 {
 	if (ARDOUR::AudioEngine::instance()->stop(for_latency)) {
-		ArdourMessageDialog msg(*this, ARDOUR::AudioEngine::instance()->get_last_backend_error());
-		msg.run();
 		return false;
 	}
 	return true;
@@ -2544,61 +2548,61 @@ EngineControl::push_state_to_backend (bool start)
 	if (was_running) {
 		if (restart_required) {
 			if (ARDOUR::AudioEngine::instance()->stop()) {
-				return -1;
+				return 1;
 			}
 		}
 	}
 
 	if (change_driver && backend->set_driver (get_driver())) {
 		error << string_compose (_("Cannot set driver to %1"), get_driver()) << endmsg;
-		return -1;
+		return 1;
 	}
 	if (backend->use_separate_input_and_output_devices()) {
 		if (change_device && backend->set_input_device_name (get_input_device_name())) {
 			error << string_compose (_("Cannot set input device name to %1"), get_input_device_name()) << endmsg;
-			return -1;
+			return 1;
 		}
 		if (change_device && backend->set_output_device_name (get_output_device_name())) {
 			error << string_compose (_("Cannot set output device name to %1"), get_output_device_name()) << endmsg;
-			return -1;
+			return 1;
 		}
 	} else {
 		if (change_device && backend->set_device_name (get_device_name())) {
 			error << string_compose (_("Cannot set device name to %1"), get_device_name()) << endmsg;
-			return -1;
+			return 1;
 		}
 	}
 	if (change_rate && backend->set_sample_rate (get_rate())) {
 		error << string_compose (_("Cannot set sample rate to %1"), get_rate()) << endmsg;
-		return -1;
+		return 1;
 	}
 	if (change_bufsize && backend->set_buffer_size (get_buffer_size())) {
 		error << string_compose (_("Cannot set buffer size to %1"), get_buffer_size()) << endmsg;
-		return -1;
+		return 1;
 	}
 	if (change_nperiods && backend->set_peridod_size (get_nperiods())) {
 		error << string_compose (_("Cannot set periods to %1"), get_nperiods()) << endmsg;
-		return -1;
+		return 1;
 	}
 
 	if (change_channels || get_input_channels() == 0 || get_output_channels() == 0) {
 		if (backend->set_input_channels (get_input_channels())) {
 			error << string_compose (_("Cannot set input channels to %1"), get_input_channels()) << endmsg;
-			return -1;
+			return 1;
 		}
 		if (backend->set_output_channels (get_output_channels())) {
 			error << string_compose (_("Cannot set output channels to %1"), get_output_channels()) << endmsg;
-			return -1;
+			return 1;
 		}
 	}
 	if (change_latency) {
 		if (backend->set_systemic_input_latency (get_input_latency())) {
 			error << string_compose (_("Cannot set input latency to %1"), get_input_latency()) << endmsg;
-			return -1;
+			return 1;
 		}
 		if (backend->set_systemic_output_latency (get_output_latency())) {
 			error << string_compose (_("Cannot set output latency to %1"), get_output_latency()) << endmsg;
-			return -1;
+			return 1;
 		}
 	}
 
