@@ -70,6 +70,7 @@
 #include "nsm.h"
 #include "opts.h"
 #include "pingback.h"
+#include "plugin_scan_dialog.h"
 #include "public_editor.h"
 #include "splash.h"
 
@@ -412,8 +413,9 @@ ARDOUR_UI::nsm_init ()
 		nsm = 0;
 		return 0;
 	}
-	// wait for open command from nsm server
-	for ( i = 0; i < 5000; ++i) {
+
+	/* wait for open command from nsm server */
+	for (i = 0; i < 5000; ++i) {
 		nsm->check ();
 		Glib::usleep (1000);
 		if (nsm->client_id ()) {
@@ -510,6 +512,9 @@ ARDOUR_UI::starting ()
 		return -1;
 	} else  {
 
+		if (nsm) {
+			return 0;
+		}
 
 		startup_fsm = new StartupFSM (*amd);
 		startup_fsm->signal_response().connect (sigc::mem_fun (*this, &ARDOUR_UI::sfsm_response));
@@ -678,6 +683,7 @@ ARDOUR_UI::load_from_application_api (const std::string& path)
 		return;
 	}
 
+
 	/* Cancel SessionDialog if it's visible to make OSX delegates work.
 	 *
 	 * ARDOUR_UI::starting connects app->ShouldLoad signal and then shows a SessionDialog
@@ -698,11 +704,30 @@ ARDOUR_UI::load_from_application_api (const std::string& path)
 		return;
 	}
 
+	if (nsm) {
+		AudioEngine::instance()->set_backend("JACK", "", "");
+		if (!AudioEngine::instance()->running()) {
+			if (AudioEngine::instance()->start()) {
+				return;
+			}
+		}
+
+		PluginScanDialog psd (true, false);
+		psd.start ();
+
+		post_engine ();
+	}
+
 	/* the mechanisms that can result is this being called are only
 	 * possible for existing sessions.
 	 */
 
 	if (!Glib::file_test (path, Glib::FILE_TEST_EXISTS)) {
+		if (nsm) {
+			BusProfile bus_profile;
+			bus_profile.master_out_channels = 2;
+			build_session (path, basename_nosuffix (path), "", bus_profile, true, false);
+		}
 		return;
 	}
 
