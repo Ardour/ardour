@@ -34,6 +34,7 @@ canvas_sources = [
         'canvas.cc',
         'circle.cc',
         'container.cc',
+        'constraint_packer.cc',
         'curve.cc',
         'debug.cc',
         'item.cc',
@@ -160,6 +161,15 @@ def build(bld):
                     manual_testobj.name         = 'libcanvas-benchmark-%s' % name
                     manual_testobj.target       = target
                     manual_testobj.install_path = ''
+
+    constraint_test_src = [ 'constraint_test.cc' ]
+    constraint_test = bld (features = 'cxx cxxprogram')
+    constraint_test.source = constraint_test_src
+    constraint_test.includes = obj.includes + ['../pbd', '../gtkmm2ext']
+    constraint_test.use = [ 'GTKMM', 'libcanvas', 'libgtkmm2ext' ]
+    constraint_test.name         = 'constraint_test'
+    constraint_test.target       = 'constraint_test'
+    constraint_test.install_path = ''
 
 def shutdown():
     autowaf.shutdown()
