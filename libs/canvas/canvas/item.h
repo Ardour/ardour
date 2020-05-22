@@ -40,6 +40,7 @@ namespace ArdourCanvas
 
 class Canvas;
 class ScrollGroup;
+class ConstrainedItem;
 
 /** The parent class for anything that goes on the canvas.
  *
@@ -147,7 +148,8 @@ public:
 
 	/* item implementations can override this if they need to */
 	virtual Rect size_request() const { return bounding_box (true); }
-	void size_allocate (Rect const&);
+	virtual void size_allocate (Rect const&);
+	virtual void constrained (ConstrainedItem const &) {}
 
 	/** bounding box is the public API to get the size of the item.
 	 * If @param for_own_purposes is false, then it will return the
@@ -211,13 +213,16 @@ public:
 	void* get_data (std::string const &) const;
 
 	/* nested item ("grouping") API */
-	void add (Item *);
-	void add_front (Item *);
-	void remove (Item *);
+	virtual void add (Item *);
+	virtual void add_front (Item *);
+	virtual void remove (Item *);
+	/* XXX this should become virtual also */
 	void clear (bool with_delete = false);
+
 	std::list<Item*> const & items () const {
 		return _items;
 	}
+
 	void raise_child_to_top (Item *);
 	void raise_child (Item *, int);
 	void lower_child_to_bottom (Item *);
