@@ -475,10 +475,10 @@ enum MeterState {
 };
 
 enum VUMeterStandard {
-	MeteringVUfrench,   // 0VU = -2dBu
-	MeteringVUamerican, // 0VU =  0dBu
-	MeteringVUstandard, // 0VU = +4dBu
-	MeteringVUeight     // 0VU = +8dBu
+	MeteringVUfrench,   ///< 0VU = -2dBu
+	MeteringVUamerican, ///< 0VU =  0dBu
+	MeteringVUstandard, ///< 0VU = +4dBu
+	MeteringVUeight     ///< 0VU = +8dBu
 };
 
 enum MeterLineUp {
