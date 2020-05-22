@@ -20,11 +20,13 @@
 #define __CANVAS_CONSTRAINT_PACKER_H__
 
 #include "canvas/item.h"
+#include "kiwi/kiwi.h"
 
 namespace ArdourCanvas
 {
 
 class Rectangle;
+class ConstrainedItem;
 
 class LIBCANVAS_API ConstraintPacker : public Item
 {
@@ -32,13 +34,29 @@ public:
 	ConstraintPacker (Canvas *);
 	ConstraintPacker (Item *);
 
+	void add (Item *);
+	void remove (Item *);
+	void constrain (kiwi::Constraint const &);
+
+	void solve ();
+	void apply ();
+
 	void compute_bounding_box () const;
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const;
+
+	void size_allocate (Rect const &);
 
   protected:
 	void child_changed ();
 
   private:
+	typedef std::map<Item*,ConstrainedItem*> ConstraintMap;
+	ConstraintMap constraint_map;
+
+	kiwi::Solver _solver;
+	kiwi::Variable width;
+	kiwi::Variable height;
+
 	Rectangle *self;
 	bool collapse_on_hide;
 
