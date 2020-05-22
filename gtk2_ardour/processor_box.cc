@@ -884,13 +884,14 @@ ProcessorEntry::Control::Control (ProcessorEntry& e,boost::shared_ptr<Automation
 	, _visible (false)
 	, _name (n)
 {
-	_slider.set_controllable (c);
 	box.set_padding(0, 0, 4, 4);
 
 	if (c->toggled()) {
 		_button.set_text (_name);
 		_button.set_led_left (true);
 		_button.set_name ("processor control button");
+		_button.set_controllable (c);
+
 		box.add (_button);
 		_button.show ();
 
@@ -909,6 +910,7 @@ ProcessorEntry::Control::Control (ProcessorEntry& e,boost::shared_ptr<Automation
 
 		_slider.set_name ("ProcessorControlSlider");
 		_slider.set_text (_name);
+		_slider.set_controllable (c);
 
 		box.add (_slider);
 		_slider.show ();
