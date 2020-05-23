@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-05-20 14:36-0600\n"
-"PO-Revision-Date: 2020-04-26 22:25+0100\n"
+"PO-Revision-Date: 2020-05-23 23:28+0100\n"
 "Last-Translator: Hiroki Inagaki <hiroki.ingk@gmail.com>\n"
 "Language-Team: Japanese <ardour-dev@lists.ardour.org>\n"
 "Language: ja\n"
@@ -453,7 +453,7 @@ msgstr "フェーダー"
 
 #: automatable.cc:196
 msgid "Send"
-msgstr ""
+msgstr "センド"
 
 #: automatable.cc:198
 msgid "Trim"
@@ -465,15 +465,15 @@ msgstr "ミュート"
 
 #: automatable.cc:202
 msgid "Azimuth"
-msgstr ""
+msgstr "方位角"
 
 #: automatable.cc:204
 msgid "Width"
-msgstr ""
+msgstr "幅"
 
 #: automatable.cc:206
 msgid "Elevation"
-msgstr ""
+msgstr "標高"
 
 #: automation_control.cc:326
 msgid "record %1 automation"
@@ -608,11 +608,15 @@ msgstr "リッスン"
 msgid ""
 "DiskReader %1: when overwriting(1), cannot read %2 from playlist at sample %3"
 msgstr ""
+"DiskReader %1: 上書きの際(1)、サンプル %3 でプレイリストから %2 読み込むこと"
+"ができません"
 
 #: disk_reader.cc:738
 msgid ""
 "DiskReader %1: when overwriting(2), cannot read %2 from playlist at sample %3"
 msgstr ""
+"DiskReader %1: 上書きの際(2)、サンプル %3 でプレイリストから %2 読み込むこと"
+"ができません"
 
 #: disk_reader.cc:1043
 msgid "DiskReader %1: cannot read %2 from playlist at sample %3"
@@ -623,12 +627,12 @@ msgstr ""
 msgid ""
 "DiskReader %1: when refilling, cannot read %2 from playlist at sample %3"
 msgstr ""
-"DiskReader %1: リフィルの際、サンプル %3 でプレイリストから %2 読み込むことが"
-"できません"
+"DiskReader %1: リフィルの際、サンプル %3 でプレイリストから %2 を読み込むこと"
+"ができません"
 
 #: disk_reader.cc:1307
 msgid "DiskReader %1: when refilling, cannot write %2 into buffer"
-msgstr ""
+msgstr "DiskReader %1: リフィルの際、バッファに %2 を書き込むことができません"
 
 #: disk_writer.cc:869 disk_writer.cc:888
 msgid "AudioDiskstream %1: cannot write to disk"
@@ -842,7 +846,7 @@ msgstr "%1 から読み込まれたフォーマットをエクスポートでき
 
 #: export_profile_manager.cc:785
 msgid "Ignored format '%1': encoder is not available"
-msgstr ""
+msgstr "フォーマット '%1' を無視: エンコーダが見つかりません"
 
 #: export_profile_manager.cc:877
 msgid "No timespan has been selected!"
@@ -1082,7 +1086,7 @@ msgstr "Master"
 #: globals.cc:595 midiport_manager.cc:71 port_manager.cc:1273
 #: port_manager.cc:1283
 msgid "Virtual Keyboard"
-msgstr ""
+msgstr "バーチャルキーボード"
 
 #: globals.cc:599
 msgid "Control"
@@ -1314,15 +1318,15 @@ msgstr "R"
 
 #: io_processor.cc:279
 msgid "send "
-msgstr ""
+msgstr "センド "
 
 #: io_processor.cc:279
 msgid "insert "
-msgstr ""
+msgstr "インサート "
 
 #: io_processor.cc:279
 msgid "return "
-msgstr ""
+msgstr "リターン "
 
 #: ladspa_plugin.cc:100
 msgid "LADSPA: Unable to open module: "
@@ -1533,7 +1537,7 @@ msgstr "スクリプト '%1' には正当な descriptor がありません。"
 
 #: meter.cc:82
 msgid "Meter"
-msgstr ""
+msgstr "メーター"
 
 #: midi_model.cc:518
 msgid "Change has no note, using note ID"
@@ -1636,7 +1640,7 @@ msgstr "ソロコントロール"
 
 #: mp3filesource.cc:71
 msgid "MPEG Layer %1 (%2 kbps)"
-msgstr ""
+msgstr "MPEG Layer %1 (%2 kbps)"
 
 #: mtc_slave.cc:387
 msgid ""
@@ -1963,7 +1967,7 @@ msgstr "プラグインスキャン完了..."
 
 #: plugin_manager.cc:449
 msgid "Indexing Plugins..."
-msgstr ""
+msgstr "プラグインをインデックスしています..."
 
 #: plugin_manager.cc:685
 msgid "LADSPA"
@@ -2147,117 +2151,121 @@ msgstr "%1 を登録できませんでした"
 
 #: port_engine_shared.cc:50
 msgid "BackendPort::connect (): invalid (null) port"
-msgstr ""
+msgstr "BackendPort::connect (): 不正な (null) ポート"
 
 #: port_engine_shared.cc:55
 msgid "BackendPort::connect (): wrong port-type"
-msgstr ""
+msgstr "BackendPort::connect (): 誤ったポートタイプ"
 
 #: port_engine_shared.cc:60
 msgid "BackendPort::connect (): cannot inter-connect output ports."
 msgstr ""
+"BackendPort::connect (): アウトプットポートにインナーコネクトできません。"
 
 #: port_engine_shared.cc:65
 msgid "BackendPort::connect (): cannot inter-connect input ports."
 msgstr ""
+"BackendPort::connect (): インプットポートにインナーコネクトできません。"
 
 #: port_engine_shared.cc:70
 msgid "BackendPort::connect (): cannot self-connect ports."
-msgstr ""
+msgstr "BackendPort::connect (): ポートに自己接続できません。"
 
 #: port_engine_shared.cc:76
 msgid "BackendPort::connect (): ports are already connected:"
-msgstr ""
+msgstr "BackendPort::connect (): ポートはすでに接続されています。"
 
 #: port_engine_shared.cc:101
 msgid "BackendPort::disconnect (): invalid (null) port"
-msgstr ""
+msgstr "BackendPort::disconnect (): 不正な (null) ポート"
 
 #: port_engine_shared.cc:106
 msgid "BackendPort::disconnect (): ports are not connected:"
-msgstr ""
+msgstr "BackendPort::disconnect (): ポートが接続されていません:"
 
 #: port_engine_shared.cc:234
 msgid "BackendPort::port_is_physical (): invalid port."
-msgstr ""
+msgstr "BackendPort::port_is_physical (): 不正なポート。"
 
 #: port_engine_shared.cc:320
 msgid "%1::register_port: Port already exists: (%2)"
-msgstr ""
+msgstr "%1::register_port: ポートはすでに存在します: (%2)"
 
 #: port_engine_shared.cc:359
 msgid "%1::unregister_port: Failed to find port"
-msgstr ""
+msgstr "%1::unregister_port: ポートの検索に失敗しました"
 
 #: port_engine_shared.cc:416
 msgid ""
 "PortEngineSharedImpl: recovering from unclean shutdown, port registry is not "
 "empty."
 msgstr ""
+"PortEngineSharedImpl: 予期せぬシャットダウンからリカバリ中に、ポートレジスト"
+"リが空ではありません。"
 
 #: port_engine_shared.cc:444
 msgid "%1::set_port_name: Invalid Port"
-msgstr ""
+msgstr "%1::set_port_name: 不正なポート"
 
 #: port_engine_shared.cc:449
 msgid "%1::set_port_name: Port with given name already exists"
-msgstr ""
+msgstr "%1::set_port_name: ポートの名前がすでに存在します。"
 
 #: port_engine_shared.cc:474
 msgid "%1::get_port_name: invalid port"
-msgstr ""
+msgstr "%1::get_port_name: 不正なポート"
 
 #: port_engine_shared.cc:485
 msgid "%1::get_port_flags: invalid port"
-msgstr ""
+msgstr "%1::get_port_flags: 不正なポート"
 
 #: port_engine_shared.cc:495
 msgid "%1::get_port_property: invalid port"
-msgstr ""
+msgstr "%1::get_port_property: 不正なポート"
 
 #: port_engine_shared.cc:512
 msgid "%1::set_port_property: invalid port"
-msgstr ""
+msgstr "%1::set_port_property: 不正なポート"
 
 #: port_engine_shared.cc:558
 msgid "%1::connect: Invalid Source port: (%2)"
-msgstr ""
+msgstr "%1::connect: 不正なソースポート: (%2)"
 
 #: port_engine_shared.cc:562
 msgid "%1::connect: Invalid Destination port: (%2)"
-msgstr ""
+msgstr "%1::connect: 不正な宛先ポート: (%2)"
 
 #: port_engine_shared.cc:578 port_engine_shared.cc:613
 msgid "%1::disconnect: invalid port"
-msgstr ""
+msgstr "%1::disconnect: 不正なポート"
 
 #: port_engine_shared.cc:590
 msgid "%1::connect: Invalid Source Port Handle"
-msgstr ""
+msgstr "%1::connect: 不正なソースポートハンドル"
 
 #: port_engine_shared.cc:597
 msgid "%1::connect: Invalid Destination Port: (%2)"
-msgstr ""
+msgstr "%1::connect: 不正な宛先ポート: (%2)"
 
 #: port_engine_shared.cc:625
 msgid "%1::disconnect_all: invalid port"
-msgstr ""
+msgstr "%1::disconnect_all: 不正なポート"
 
 #: port_engine_shared.cc:640
 msgid "%1::disconnect_all: Invalid Port"
-msgstr ""
+msgstr "%1::disconnect_all: 不正なポート"
 
 #: port_engine_shared.cc:653
 msgid "%1::connected_to: Invalid Port"
-msgstr ""
+msgstr "%1::connected_to: 不正なポート"
 
 #: port_engine_shared.cc:666
 msgid "%1::physically_connected: Invalid Port"
-msgstr ""
+msgstr "%1::physically_connected: 不正なポート"
 
 #: port_engine_shared.cc:678
 msgid "%1::get_connections: Invalid Port"
-msgstr ""
+msgstr "%1::get_connections: 不正なポート"
 
 #: port_insert.cc:45 port_insert.cc:277
 msgid "insert %1"
@@ -2326,7 +2334,7 @@ msgstr ""
 
 #: port_manager.cc:1396
 msgid "Ambiguous latency for port '%1' (%2, %3)"
-msgstr ""
+msgstr "ポート '%1' の曖昧なレイテンシ (%2, %3)"
 
 #: processor.cc:235
 msgid "No %1 property flag in element %2"
@@ -2378,19 +2386,19 @@ msgstr "設定ファイル %1 は保存されません"
 
 #: rc_configuration.cc:160 rc_configuration.cc:168
 msgid "Could not remove temporary config file at path \"%1\" (%2)"
-msgstr ""
+msgstr "パス \"%1\" の一時設定ファイルを消去できません (%2)"
 
 #: rc_configuration.cc:166
 msgid "Could not rename temporary config file %1 to %2 (%3)"
-msgstr ""
+msgstr "一時設定ファイル %1 を %2 に名称変更できません (%3)"
 
 #: readable.cc:42
 msgid "Cannot open File \"%1\": %2"
-msgstr ""
+msgstr "ファイル \"%1\" を開けません: %2"
 
 #: readable.cc:61
 msgid "Could not read file \"%1\"."
-msgstr ""
+msgstr "ファイル \"%1\" を読み込みできませんでした。"
 
 #: recent_sessions.cc:59
 msgid "cannot open recent session file %1 (%2)"
@@ -2909,7 +2917,7 @@ msgstr ""
 
 #: session_export.cc:149
 msgid "Cannot prepare transport for export"
-msgstr ""
+msgstr "エクスポートのためのトランスポートを用意できません"
 
 #: session_export.cc:168
 msgid "%1: cannot seek to %2 for export"
@@ -3097,6 +3105,8 @@ msgid ""
 "Incompatible Session Version. That session was created with a newer version "
 "of %1"
 msgstr ""
+"非互換のセッションバージョン。そのセッションは %1 の新しいバージョンで作成さ"
+"れています"
 
 #: session_state.cc:1347
 msgid "Session-Save: Failed to copy MIDI Source '%1' for snapshot"
@@ -3180,6 +3190,8 @@ msgstr "トラック/バスの追加が完了しました"
 #: session_state.cc:1986
 msgid "Could not find diskstream for diskstream-id: '%1', playlist: '%2'"
 msgstr ""
+"diskstream-id: '%1' のディスクストリームが見つかりませんでした, playlist: "
+"'%2'"
 
 #: session_state.cc:2043
 msgid "Session: cannot create Region from XML description."
@@ -3419,6 +3431,8 @@ msgid ""
 "Looping cannot be supported while %1 is using JACK transport.\n"
 "Recommend changing the configured options"
 msgstr ""
+"%1 が JACK トランスポートを使用中はループはサポートされていません。\n"
+"設定のオプションを変更してください"
 
 #: slavable.cc:124
 msgid "Master #%1 not found, assignment lost"
@@ -3852,23 +3866,23 @@ msgstr "LTC"
 
 #: transport_master.cc:487
 msgid "All"
-msgstr ""
+msgstr "すべて"
 
 #: transport_master.cc:491
 msgid "Start/Stop"
-msgstr ""
+msgstr "スタート/ストップ"
 
 #: transport_master.cc:493
 msgid "Speed"
-msgstr ""
+msgstr "スピード"
 
 #: transport_master.cc:495
 msgid "Locate"
-msgstr ""
+msgstr "ロケート"
 
 #: transport_master.cc:497
 msgid "Complex"
-msgstr ""
+msgstr "複雑"
 
 #: transport_master_manager.cc:136
 msgid "programming error:%1"
@@ -3876,7 +3890,7 @@ msgstr "プログラミングエラー:%1"
 
 #: transport_master_manager.cc:347
 msgid "Transport master adjusted framerate from %1 to %2."
-msgstr ""
+msgstr "トランスポートマスタがフレームレートを %1 から %2 に調整しました。"
 
 #: transport_master_manager.cc:396
 msgid "There is already a transport master named \"%1\" - not duplicated"
@@ -3955,7 +3969,7 @@ msgstr "VCA %1 : %2"
 
 #: vca.cc:217
 msgid "Master assignment ignored to prevent recursion"
-msgstr ""
+msgstr "再起防止のためマスタ割り当てが無視されました"
 
 #: vca_manager.cc:206
 msgid "Cannot set state of a VCA"

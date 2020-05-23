@@ -3,14 +3,12 @@
 # This file is distributed under the same license as the gtk-ardour package.
 #
 # Hiroki Inagaki <hiroki.ingk@gmail.com>, 2017.
-#: audio_clock.cc:941 audio_clock.cc:942 session_dialog.cc:604
-#: session_dialog.cc:605
 msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-05-20 14:36-0600\n"
-"PO-Revision-Date: 2020-04-25 22:39+0100\n"
+"POT-Creation-Date: 2020-05-23 23:30+0100\n"
+"PO-Revision-Date: 2020-05-23 23:33+0100\n"
 "Last-Translator: Hiroki Inagaki <hiroki.ingk@gmail.com>\n"
 "Language-Team: Japanese <ardour-dev@lists.ardour.org>\n"
 "Language: ja\n"
@@ -348,6 +346,13 @@ msgid ""
 "\tOlivier Humbert <trebmuh@tuxfamily.org>\n"
 "\tFrédéric Rech <fred_rech@laposte.net>\n"
 msgstr ""
+"フランス語:\n"
+"\tAlain Fréhel <alain.frehel@free.fr>\n"
+"\tChristophe Combelles <ccomb@free.fr>\n"
+"\tMartin Blanchard\n"
+"\tRomain Arnaud <roming22@gmail.com>\n"
+"\tOlivier Humbert <trebmuh@tuxfamily.org>\n"
+"\tFrédéric Rech <fred_rech@laposte.net>\n"
 
 #: about.cc:217
 msgid ""
@@ -772,7 +777,7 @@ msgid "Manual Configuration"
 msgstr "手動設定"
 
 #: add_route_dialog.cc:590 add_route_dialog.cc:756 ardour_ui.cc:1194
-#: ardour_ui_ed.cc:782 engine_dialog.cc:265 plugin_pin_dialog.cc:74
+#: ardour_ui_ed.cc:782 engine_dialog.cc:264 plugin_pin_dialog.cc:74
 #: rc_option_editor.cc:2975 rc_option_editor.cc:2977 rc_option_editor.cc:2979
 #: rc_option_editor.cc:2981 rc_option_editor.cc:3028 rc_option_editor.cc:3030
 #: rc_option_editor.cc:3032 rc_option_editor.cc:3040
@@ -780,7 +785,7 @@ msgid "Audio"
 msgstr "Audio"
 
 #: add_route_dialog.cc:593 add_route_dialog.cc:757 editor_actions.cc:145
-#: engine_dialog.cc:267 missing_file_dialog.cc:65 mixer_ui.cc:2417
+#: engine_dialog.cc:266 missing_file_dialog.cc:65 mixer_ui.cc:2417
 #: plugin_pin_dialog.cc:75 rc_option_editor.cc:3050 rc_option_editor.cc:3052
 #: rc_option_editor.cc:3061 rc_option_editor.cc:3063 rc_option_editor.cc:3071
 #: rc_option_editor.cc:3087 rc_option_editor.cc:3090 rc_option_editor.cc:3092
@@ -834,7 +839,7 @@ msgid "12 Channel"
 msgstr "12チャンネル"
 
 #: add_route_dialog.cc:900 gain_meter.cc:810 mixer_strip.cc:2076
-#: mixer_strip.cc:2536 processor_box.cc:3926
+#: mixer_strip.cc:2536 processor_box.cc:3928
 msgid "Custom"
 msgstr "Custom"
 
@@ -2368,7 +2373,7 @@ msgstr "次のマークにジャンプ"
 #: ardour_ui_ed.cc:567 editor_audio_import.cc:356 luawindow.cc:100
 #: pt_import_selector.cc:43 session_import_dialog.cc:82
 #: session_import_dialog.cc:104 session_metadata_dialog.cc:465 sfdb_ui.cc:638
-#: template_dialog.cc:228 editor_videotimeline.cc:94
+#: template_dialog.cc:228 editor_videotimeline.cc:97
 msgid "Import"
 msgstr "インポート"
 
@@ -2476,7 +2481,7 @@ msgstr "すべての表示されているレーンを選択"
 msgid "Select All Tracks"
 msgstr "すべてのトラックを選択"
 
-#: ardour_ui_ed.cc:654 export_timespan_selector.cc:66 processor_box.cc:3906
+#: ardour_ui_ed.cc:654 export_timespan_selector.cc:66 processor_box.cc:3908
 msgid "Deselect All"
 msgstr "すべて選択解除"
 
@@ -2621,6 +2626,8 @@ msgid ""
 "It is not possible to use JACK as the sync source\n"
 " when the pull up/down setting is non-zero."
 msgstr ""
+"プルアップ/ダウン設定が 0 でない場合は\n"
+"同期ソースとして JACK を使用することができません"
 
 #: ardour_ui_options.cc:307 ardour_ui_options.cc:327
 msgid "SyncSource|Int."
@@ -2909,7 +2916,7 @@ msgstr ""
 msgid "Prompter"
 msgstr "プロンプター"
 
-#: ardour_ui_startup.cc:167
+#: ardour_ui_startup.cc:168
 msgid ""
 "%4This is a session from an older version of %3%5\n"
 "\n"
@@ -2937,11 +2944,11 @@ msgstr ""
 "\n"
 "今後、%3 の古いバージョンのバックアップコピーを使用してください。"
 
-#: ardour_ui_startup.cc:183
+#: ardour_ui_startup.cc:184
 msgid "Sample Rate Mismatch"
 msgstr "サンプルレート不一致"
 
-#: ardour_ui_startup.cc:184
+#: ardour_ui_startup.cc:185
 msgid ""
 "This session was created with a sample rate of %1 Hz, but\n"
 "%2 is currently running at %3 Hz.  If you load this session,\n"
@@ -2951,15 +2958,15 @@ msgstr ""
 "%2 は現在 %3 Hzで動作しています。このセッションを読み込んだ場合、\n"
 "オーディオは異なるサンプルレートで再生される可能性があります。\n"
 
-#: ardour_ui_startup.cc:193
+#: ardour_ui_startup.cc:194
 msgid "Do not load session"
 msgstr "セッションを読み込まない"
 
-#: ardour_ui_startup.cc:194
+#: ardour_ui_startup.cc:195
 msgid "Load session anyway"
 msgstr "とにかくセッションを読み込む"
 
-#: ardour_ui_startup.cc:214
+#: ardour_ui_startup.cc:215
 msgid ""
 "This session was created with a sample rate of %1 Hz, but\n"
 "%2 is currently running at %3 Hz.\n"
@@ -2973,31 +2980,31 @@ msgstr ""
 "以下からオーディオエンジンを再設定してください\n"
 "メニュー > ウインドウ > オーティオ/MIDI セットアップ"
 
-#: ardour_ui_startup.cc:380
+#: ardour_ui_startup.cc:381
 msgid "NSM: initialization failed"
 msgstr "NSM: 初期化に失敗しました"
 
-#: ardour_ui_startup.cc:407
+#: ardour_ui_startup.cc:408
 msgid "NSM server did not announce itself. Continuing without NSM."
-msgstr ""
+msgstr "NSM サーバが応答していません。NSMなしで続行します。"
 
-#: ardour_ui_startup.cc:409
+#: ardour_ui_startup.cc:410
 msgid "NSM server did not announce itself"
 msgstr "NSM サーバが応答していません"
 
-#: ardour_ui_startup.cc:425
+#: ardour_ui_startup.cc:427
 msgid "NSM: no client ID provided"
 msgstr "NSM: クライアント ID が提供されていません"
 
-#: ardour_ui_startup.cc:434
+#: ardour_ui_startup.cc:436
 msgid "NSM: no session created"
 msgstr "NSM: セッションが作成されていません"
 
-#: ardour_ui_startup.cc:581 new_user_wizard.cc:419
+#: ardour_ui_startup.cc:586 new_user_wizard.cc:419
 msgid "%1 is ready for use"
 msgstr "%1 を使用する準備ができました"
 
-#: ardour_ui_startup.cc:631
+#: ardour_ui_startup.cc:636
 msgid ""
 "WARNING: Your system has a limit for maximum amount of locked memory. This "
 "might cause %1 to run out of memory before your system runs out of memory. \n"
@@ -3011,9 +3018,18 @@ msgstr ""
 "'ulimit -l’ によりメモリの制限を参照できます。メモリの制限は通常、%2 により制"
 "御されます。"
 
-#: ardour_ui_startup.cc:648
+#: ardour_ui_startup.cc:653
 msgid "Do not show this window again"
 msgstr "今後このウィンドウを表示しない"
+
+#: ardour_ui_startup.cc:709
+msgid "NSM: The JACK backend is mandatory and can not be loaded."
+msgstr "NSM: JACK バックエンドは必須ですが読み込めません"
+
+#: ardour_ui_startup.cc:727
+msgid "NSM: %1 cannot connect to the JACK server. Please start jackd first."
+msgstr ""
+"NSM: %1 は JACK サーバに接続できません。まずjackdをスタートしてください。"
 
 #: ardour_ui_video.cc:70
 msgid "Video-Server was not launched by %1. The request to stop it is ignored."
@@ -3332,7 +3348,7 @@ msgstr "編集"
 
 #: bundle_manager.cc:267 editor.cc:6205 editor.cc:6235 editor_actions.cc:386
 #: editor_actions.cc:387 luawindow.cc:102 plugin_ui.cc:468
-#: processor_box.cc:3890 processor_box.cc:3892
+#: processor_box.cc:3892 processor_box.cc:3894
 msgid "Delete"
 msgstr "削除"
 
@@ -3945,15 +3961,15 @@ msgstr "再生ヘッドと編集ポイントの間のレンジを選択"
 msgid "Select"
 msgstr "選択"
 
-#: editor.cc:2034 editor.cc:2105 editor_actions.cc:385 processor_box.cc:3886
+#: editor.cc:2034 editor.cc:2105 editor_actions.cc:385 processor_box.cc:3888
 msgid "Cut"
 msgstr "カット"
 
-#: editor.cc:2035 editor.cc:2106 editor_actions.cc:391 processor_box.cc:3888
+#: editor.cc:2035 editor.cc:2106 editor_actions.cc:391 processor_box.cc:3890
 msgid "Copy"
 msgstr "コピー"
 
-#: editor.cc:2036 editor.cc:2107 editor_actions.cc:392 processor_box.cc:3900
+#: editor.cc:2036 editor.cc:2107 editor_actions.cc:392 processor_box.cc:3902
 msgid "Paste"
 msgstr "ペースト"
 
@@ -4279,8 +4295,8 @@ msgid "Keep Remaining"
 msgstr "残りを保持"
 
 #: editor.cc:4214 editor_audio_import.cc:674 editor_ops.cc:6964
-#: engine_dialog.cc:3162 sfdb_freesound_mootcher.cc:69 keyeditor.cc:80
-#: processor_box.cc:3646 processor_box.cc:3671 pt_import_selector.cc:44
+#: engine_dialog.cc:3151 sfdb_freesound_mootcher.cc:69 keyeditor.cc:80
+#: processor_box.cc:3648 processor_box.cc:3673 pt_import_selector.cc:44
 #: template_dialog.cc:525 transport_masters_dialog.cc:756 utils.cc:124
 msgid "Cancel"
 msgstr "キャンセル"
@@ -4302,7 +4318,7 @@ msgid "Please wait while %1 loads visual data."
 msgstr "%1 がビジュアルデータを読み込むまでお待ち下さい"
 
 #: editor.cc:6204 editor.cc:6239 editor_markers.cc:1030 editor_markers.cc:1052
-#: panner_ui.cc:417 processor_box.cc:3930
+#: panner_ui.cc:417 processor_box.cc:3932
 msgid "Edit..."
 msgstr "編集..."
 
@@ -5216,7 +5232,7 @@ msgstr "ノートベロシティを増やす（細かく、相対でない）"
 
 #: editor_actions.cc:739
 msgid "Increase Velocity (maintain ratios, allow mush)"
-msgstr ""
+msgstr "ノートベロシティを増やす（比率を保持しマッシュを許可）"
 
 #: editor_actions.cc:740
 msgid "Increase Velocity (fine, allow mush, non-relative)"
@@ -5248,7 +5264,7 @@ msgstr "ノートベロシティを減らす（細かく、相対でない）"
 
 #: editor_actions.cc:748
 msgid "Decrease Velocity (maintain ratios, allow mush)"
-msgstr ""
+msgstr "ノートベロシティを減らす（比率を保持しマッシュを許可）"
 
 #: editor_actions.cc:749
 msgid "Decrease Velocity (fine, allow mush, non-relative)"
@@ -5617,7 +5633,7 @@ msgstr ""
 "%1 という名前のソースファイルは既にセッションに含まれています。%2 を新規ソー"
 "スとしてインポートしますか？それともスキップしますか？"
 
-#: editor_audio_import.cc:356 editor_pt_import.cc:96 editor_videotimeline.cc:94
+#: editor_audio_import.cc:356 editor_pt_import.cc:96 editor_videotimeline.cc:97
 msgid "Cancel Import"
 msgstr "インポートをキャンセル"
 
@@ -6088,8 +6104,8 @@ msgstr "マークを名前変更"
 msgid "Rename Range"
 msgstr "レンジを名前変更"
 
-#: editor_markers.cc:1628 editor_mouse.cc:2493 processor_box.cc:3386
-#: processor_box.cc:3902 route_time_axis.cc:1072 route_ui.cc:1714
+#: editor_markers.cc:1628 editor_mouse.cc:2493 processor_box.cc:3388
+#: processor_box.cc:3904 route_time_axis.cc:1072 route_ui.cc:1714
 #: template_dialog.cc:226 vca_master_strip.cc:463
 msgid "Rename"
 msgstr "名前変更"
@@ -6246,7 +6262,7 @@ msgstr "リージョンを一番下へ"
 msgid "Rename Region"
 msgstr "リージョンを名前変更"
 
-#: editor_ops.cc:2913 processor_box.cc:3384 route_ui.cc:1712
+#: editor_ops.cc:2913 processor_box.cc:3386 route_ui.cc:1712
 msgid "New name:"
 msgstr "新しい名前:"
 
@@ -7210,7 +7226,7 @@ msgstr "バッファー IO を使用"
 msgid "Autostart"
 msgstr "オートスタート"
 
-#: engine_dialog.cc:103 engine_dialog.cc:3176
+#: engine_dialog.cc:103 engine_dialog.cc:3165
 msgid "Measure"
 msgstr "測定"
 
@@ -7230,7 +7246,7 @@ msgstr "オーディオをキャリブレーション"
 msgid "Back to settings"
 msgstr "設定に戻る"
 
-#: engine_dialog.cc:133
+#: engine_dialog.cc:132
 msgid ""
 "No audio/MIDI backends detected. %1 cannot run\n"
 "\n"
@@ -7241,11 +7257,11 @@ msgstr ""
 "\n"
 "（これはビルド/パッケージング/システムエラーです。通常は起こりません。）"
 
-#: engine_dialog.cc:158
+#: engine_dialog.cc:157
 msgid "Latency Measurement Tool"
 msgstr "レイテンシ測定ツール"
 
-#: engine_dialog.cc:170
+#: engine_dialog.cc:169
 msgid ""
 "<span weight=\"bold\">Turn down the volume on your audio equipment to a very "
 "low level.</span>"
@@ -7253,104 +7269,108 @@ msgstr ""
 "<span weight=\"bold\">可能な限りオーディオデバイスのボリュームを下げてくださ"
 "い。</span>"
 
-#: engine_dialog.cc:179
+#: engine_dialog.cc:178
 msgid "Select two channels below and connect them using a cable."
 msgstr "下記の2チャンネルを選択し、ケーブルで接続してください。"
 
-#: engine_dialog.cc:184
+#: engine_dialog.cc:183
 msgid "Output channel:"
 msgstr "アウトプットチャンネル:"
 
-#: engine_dialog.cc:196
+#: engine_dialog.cc:195
 msgid "Input channel:"
 msgstr "インプットチャンネル:"
 
-#: engine_dialog.cc:234
+#: engine_dialog.cc:233
 msgid "Once the channels are connected, click the \"Measure\" button."
 msgstr "チャンネルが接続されたら \"測定\" ボタンを押してください。"
 
-#: engine_dialog.cc:241
+#: engine_dialog.cc:240
 msgid "When satisfied with the results, click the \"Use results\" button."
 msgstr "測定結果がよろしければ、 \"結果を使用\" ボタンをクリックしてください。"
 
-#: engine_dialog.cc:256 engine_dialog.cc:3371 engine_dialog.cc:3381
+#: engine_dialog.cc:255 engine_dialog.cc:3359 engine_dialog.cc:3369
 msgid "No measurement results yet"
 msgstr "まだ測定結果はありません。"
 
-#: engine_dialog.cc:266
+#: engine_dialog.cc:265
 msgid "Latency"
 msgstr "レイテンシ"
 
-#: engine_dialog.cc:318
+#: engine_dialog.cc:317
 msgid ""
 "Always try these settings when starting %1, if the same device is available"
 msgstr ""
 "%1 を起動する際には、同じデバイスが利用可能であれば常にこれらの設定をしてみて"
 "ください"
 
-#: engine_dialog.cc:510
+#: engine_dialog.cc:483
+msgid "Could not configure Audio/MIDI engine with given settings."
+msgstr "オーディオ/MIDI エンジンを与えられた設定に設定できませんでした"
+
+#: engine_dialog.cc:513
 msgid "Audio System:"
 msgstr "オーディオシステム:"
 
-#: engine_dialog.cc:554
+#: engine_dialog.cc:557
 msgid "Driver:"
 msgstr "ドライバー:"
 
-#: engine_dialog.cc:561
+#: engine_dialog.cc:564
 msgid "Input Device:"
 msgstr "インプットデバイス:"
 
-#: engine_dialog.cc:565
+#: engine_dialog.cc:568
 msgid "Output Device:"
 msgstr "アウトプットデバイス:"
 
-#: engine_dialog.cc:572
+#: engine_dialog.cc:575
 msgid "Device:"
 msgstr "デバイス:"
 
-#: engine_dialog.cc:600 engine_dialog.cc:717 export_report.cc:165
+#: engine_dialog.cc:603 engine_dialog.cc:720 export_report.cc:165
 #: export_report.cc:337 sfdb_ui.cc:183 sfdb_ui.cc:412 sfdb_ui.cc:417
 msgid "Sample rate:"
 msgstr "サンプルレート:"
 
-#: engine_dialog.cc:605 engine_dialog.cc:724
+#: engine_dialog.cc:608 engine_dialog.cc:727
 msgid "Buffer size:"
 msgstr "バッファーサイズ:"
 
-#: engine_dialog.cc:614
+#: engine_dialog.cc:617
 msgid "Periods:"
 msgstr "期間:"
 
-#: engine_dialog.cc:631
+#: engine_dialog.cc:634
 msgid "Input channels:"
 msgstr "インプットチャンネル:"
 
-#: engine_dialog.cc:644
+#: engine_dialog.cc:647
 msgid "Output channels:"
 msgstr "アウトプットチャンネル:"
 
-#: engine_dialog.cc:663
+#: engine_dialog.cc:666
 msgid "Hardware input latency:"
 msgstr "ハードウェアインプットレイテンシ:"
 
-#: engine_dialog.cc:666 engine_dialog.cc:679
+#: engine_dialog.cc:669 engine_dialog.cc:682
 msgid "samples"
 msgstr "サンプル"
 
-#: engine_dialog.cc:676
+#: engine_dialog.cc:679
 msgid "Hardware output latency:"
 msgstr "ハードウェアアウトプットレイテンシ:"
 
-#: engine_dialog.cc:687
+#: engine_dialog.cc:690
 msgid "MIDI System:"
 msgstr "MIDI システム:"
 
-#: engine_dialog.cc:709
+#: engine_dialog.cc:712
 msgid ""
 "%1 is already running. %2 will connect to it and use the existing settings."
 msgstr "%1 は既に実行中です。%2 に接続され、既存の設定が使用されます。"
 
-#: engine_dialog.cc:763
+#: engine_dialog.cc:766
 msgid ""
 "Failed to start or connect to audio-engine.\n"
 "\n"
@@ -7361,7 +7381,7 @@ msgstr ""
 "レイテンシーキャリブレーションには正常に動作するオーディオインターフェイスが"
 "必要です。"
 
-#: engine_dialog.cc:769
+#: engine_dialog.cc:772
 msgid ""
 "Your selected audio configuration is playback- or capture-only.\n"
 "\n"
@@ -7371,110 +7391,110 @@ msgstr ""
 "\n"
 "レイテンシーキャリブレーションにはプレイバックとキャプチャ両方が必要です。"
 
-#: engine_dialog.cc:929
+#: engine_dialog.cc:932
 msgid "Engine|Stop"
-msgstr ""
+msgstr "ストップ"
 
-#: engine_dialog.cc:933
+#: engine_dialog.cc:936
 msgid "Engine|Start"
-msgstr ""
+msgstr "スタート"
 
-#: engine_dialog.cc:1019
+#: engine_dialog.cc:1022
 msgid "MIDI Devices"
 msgstr "MIDI デバイス"
 
-#: engine_dialog.cc:1025
+#: engine_dialog.cc:1028
 msgid "Device"
 msgstr "デバイス"
 
-#: engine_dialog.cc:1027
+#: engine_dialog.cc:1030
 msgid "Systemic Latency [samples]"
 msgstr "システムレイテンシ [samples]"
 
-#: engine_dialog.cc:1030 gain_meter.cc:802 mixer_strip.cc:191
+#: engine_dialog.cc:1033 gain_meter.cc:802 mixer_strip.cc:191
 #: mixer_strip.cc:408 mixer_strip.cc:2532 plugin_eq_gui.cc:131
 #: rc_option_editor.cc:4000
 msgid "Input"
 msgstr "インプット"
 
-#: engine_dialog.cc:1032 foldback_strip.cc:407 gain_meter.cc:808
+#: engine_dialog.cc:1035 foldback_strip.cc:407 gain_meter.cc:808
 #: mixer_strip.cc:195 mixer_strip.cc:412 mixer_strip.cc:2535
 #: monitor_section.cc:305 monitor_section.cc:309 plugin_eq_gui.cc:132
 #: rc_option_editor.cc:4004 vca_master_strip.cc:236
 msgid "Output"
 msgstr "アウトプット"
 
-#: engine_dialog.cc:1073
+#: engine_dialog.cc:1076
 msgid "Calibrate"
 msgstr "キャリブレーション"
 
-#: engine_dialog.cc:1178
+#: engine_dialog.cc:1181
 msgid "all available channels"
 msgstr "利用可能なすべてのチャンネル"
 
-#: engine_dialog.cc:1708
+#: engine_dialog.cc:1711
 msgid "%1 sample"
 msgid_plural "%1 samples"
 msgstr[0] "%1サンプル"
 
-#: engine_dialog.cc:1768
+#: engine_dialog.cc:1771
 #, c-format
 msgid "(%.1f ms)"
 msgstr "(%.1f ms)"
 
-#: engine_dialog.cc:2522
+#: engine_dialog.cc:2525
 msgid "Could not start backend engine %1"
 msgstr "バックエンドエンジン %1 を開始できません。"
 
-#: engine_dialog.cc:2554
+#: engine_dialog.cc:2557
 msgid "Cannot set driver to %1"
 msgstr "ドライバーを %1 に設定できません"
 
-#: engine_dialog.cc:2559
+#: engine_dialog.cc:2562
 msgid "Cannot set input device name to %1"
 msgstr "インプットデバイス名を %1 に設定できません"
 
-#: engine_dialog.cc:2563
+#: engine_dialog.cc:2566
 msgid "Cannot set output device name to %1"
 msgstr "アウトプットデバイス名を %1 に設定できません"
 
-#: engine_dialog.cc:2568
+#: engine_dialog.cc:2571
 msgid "Cannot set device name to %1"
 msgstr "デバイス名を %1 に設定できません"
 
-#: engine_dialog.cc:2573
+#: engine_dialog.cc:2576
 msgid "Cannot set sample rate to %1"
 msgstr "サンプルレートを %1 に設定できません"
 
-#: engine_dialog.cc:2577
+#: engine_dialog.cc:2580
 msgid "Cannot set buffer size to %1"
 msgstr "バッファーサイズを %1 に設定できません"
 
-#: engine_dialog.cc:2581
+#: engine_dialog.cc:2584
 msgid "Cannot set periods to %1"
 msgstr "期間をを %1 に設定できません"
 
-#: engine_dialog.cc:2587
+#: engine_dialog.cc:2590
 msgid "Cannot set input channels to %1"
 msgstr "インプットチャンネルを %1 に設定できません"
 
-#: engine_dialog.cc:2591
+#: engine_dialog.cc:2594
 msgid "Cannot set output channels to %1"
 msgstr "アウトプットチャンネルを %1 に設定できません"
 
-#: engine_dialog.cc:2597
+#: engine_dialog.cc:2600
 msgid "Cannot set input latency to %1"
 msgstr "インプットレイテンシを %1 に設定できません"
 
-#: engine_dialog.cc:2601
+#: engine_dialog.cc:2604
 msgid "Cannot set output latency to %1"
 msgstr "アウトプットレイテンシを %1 に設定できません"
 
-#: engine_dialog.cc:3027 engine_dialog.cc:3093
+#: engine_dialog.cc:3016 engine_dialog.cc:3082
 msgid "No signal detected "
 msgstr "シグナルを検出できません "
 
-#: engine_dialog.cc:3034
+#: engine_dialog.cc:3023
 msgid ""
 "Input signal is > -3dBFS. Lower the signal level (output gain, input gain) "
 "on the audio-interface."
@@ -7482,64 +7502,64 @@ msgstr ""
 "インプットシグナルが -3dBFS を超えています。オーディオインタフェースのシグナ"
 "ルレベル (アウトプットゲイン、インプットゲイン) を下げてください。"
 
-#: engine_dialog.cc:3047 engine_dialog.cc:3101 port_insert_ui.cc:74
+#: engine_dialog.cc:3036 engine_dialog.cc:3090 port_insert_ui.cc:74
 #: port_insert_ui.cc:102
 msgid "Disconnected from audio engine"
 msgstr "オーディオエンジンの接続が解除されました"
 
-#: engine_dialog.cc:3056 engine_dialog.cc:3109
+#: engine_dialog.cc:3045 engine_dialog.cc:3098
 msgid "Detected roundtrip latency: "
 msgstr "検出されたラウンドトリップレイテンシ:"
 
-#: engine_dialog.cc:3058 engine_dialog.cc:3111
+#: engine_dialog.cc:3047 engine_dialog.cc:3100
 msgid "Systemic latency: "
 msgstr "システムレイテンシ: "
 
-#: engine_dialog.cc:3065
+#: engine_dialog.cc:3054
 msgid "(signal detection error)"
 msgstr "(シグナル検出エラー)"
 
-#: engine_dialog.cc:3071
+#: engine_dialog.cc:3060
 msgid "(inverted - bad wiring)"
 msgstr "(逆転 - 配線ミス)"
 
-#: engine_dialog.cc:3118
+#: engine_dialog.cc:3107
 msgid "(averaging)"
 msgstr "(平均化中)"
 
-#: engine_dialog.cc:3124
+#: engine_dialog.cc:3113
 msgid "(too large jitter)"
 msgstr "(ジッター過大)"
 
-#: engine_dialog.cc:3128
+#: engine_dialog.cc:3117
 msgid "(large jitter)"
 msgstr "(深刻なジッター)"
 
-#: engine_dialog.cc:3140
+#: engine_dialog.cc:3129
 msgid "Timeout - large MIDI jitter."
 msgstr "タイムアウト - 深刻なMIDIジッター。"
 
-#: engine_dialog.cc:3156 port_insert_ui.cc:138
+#: engine_dialog.cc:3145 port_insert_ui.cc:138
 msgid "Detecting ..."
 msgstr "検出中..."
 
-#: engine_dialog.cc:3295
+#: engine_dialog.cc:3283
 msgid "Disconnect from %1"
 msgstr "%1 から接続解除"
 
-#: engine_dialog.cc:3300
+#: engine_dialog.cc:3288
 msgid "Running"
 msgstr "実行中"
 
-#: engine_dialog.cc:3302
+#: engine_dialog.cc:3290
 msgid "Connected"
 msgstr "接続完了"
 
-#: engine_dialog.cc:3313
+#: engine_dialog.cc:3301
 msgid "Connect to %1"
 msgstr "%1 に接続"
 
-#: engine_dialog.cc:3317
+#: engine_dialog.cc:3305
 msgid "Stopped"
 msgstr "停止"
 
@@ -8197,7 +8217,7 @@ msgstr "時間を次のように表示する:"
 msgid "Realtime Export"
 msgstr "リアルタイムエクスポート"
 
-#: export_timespan_selector.cc:58 processor_box.cc:3904
+#: export_timespan_selector.cc:58 processor_box.cc:3906
 msgid "Select All"
 msgstr "すべてを選択"
 
@@ -8440,7 +8460,7 @@ msgstr ""
 msgid "Switches"
 msgstr "スイッチ"
 
-#: generic_pluginui.cc:507 generic_pluginui.cc:613 processor_box.cc:3874
+#: generic_pluginui.cc:507 generic_pluginui.cc:613 processor_box.cc:3876
 msgid "Controls"
 msgstr "コントロール"
 
@@ -8890,12 +8910,12 @@ msgid ""
 "Action Scripts are user initiated actions (menu, shortcuts, toolbar-button) "
 "for batch processing or customized tasks."
 msgstr ""
-"Action Scripts　はバッチプロセスやカスタマイズしたタスクとして、ユーザが（メ"
-"ニュー・ショートカット・ツールバーボタンから）実行する動作です。"
+"アクションスクリプトはバッチプロセスやカスタマイズしたタスクとして、ユーザが"
+"（メニュー・ショートカット・ツールバーボタンから）実行する動作です。"
 
 #: lua_script_manager.cc:98
 msgid "Action Scripts"
-msgstr ""
+msgstr "アクションスクリプト"
 
 #: lua_script_manager.cc:105
 msgid "Signal(s)"
@@ -8913,7 +8933,7 @@ msgstr ""
 
 #: lua_script_manager.cc:139
 msgid "Action Hooks"
-msgstr ""
+msgstr "アクションフック"
 
 #: lua_script_manager.cc:160
 msgid ""
@@ -8927,7 +8947,7 @@ msgstr ""
 
 #: lua_script_manager.cc:175
 msgid "Session Scripts"
-msgstr ""
+msgstr "セッションスクリプト"
 
 #: lua_script_manager.cc:220
 msgid "Action %1"
@@ -9744,6 +9764,10 @@ msgid ""
 "If this is unexpected, manually locate the files and restore them in the "
 "session folder.\n"
 msgstr ""
+"\n"
+"リージョンと編集は保持されています。\n"
+"もしこれが想定していない動作の場合は、手動でファイルの位置を特定しセッション"
+"フォルダに置き直してください。\n"
 
 #: missing_filesource_dialog.cc:56
 msgid ""
@@ -9897,7 +9921,7 @@ msgstr "カスタムの録音+プレイバック位置"
 msgid "Disk I/O..."
 msgstr "ディスク I/O..."
 
-#: mixer_strip.cc:1760 processor_box.cc:3919
+#: mixer_strip.cc:1760 processor_box.cc:3921
 msgid "Pin Connections..."
 msgstr "ピン・コネクション..."
 
@@ -11094,7 +11118,7 @@ msgstr "プラグインアウトプット設定の変更に失敗しました。
 msgid "Failed to alter plugin input configuration."
 msgstr "プラグインインプット設定の変更に失敗しました。"
 
-#: plugin_pin_dialog.cc:1750 processor_box.cc:2719
+#: plugin_pin_dialog.cc:1750 processor_box.cc:2721
 msgid "Cannot set up new send: %1"
 msgstr "新規センドをセットアップできません: %1"
 
@@ -11642,7 +11666,7 @@ msgstr "リターン"
 msgid "New Favorite Preset for \"%1\""
 msgstr "\"%1\" の新規お気に入りプリセット"
 
-#: processor_box.cc:539 processor_box.cc:1660
+#: processor_box.cc:539 processor_box.cc:1662
 msgid ""
 "\n"
 "%1+double-click to toggle inline-display"
@@ -11658,7 +11682,7 @@ msgstr ""
 "\n"
 "このプラグインは %1 複製されています。"
 
-#: processor_box.cc:548 processor_box.cc:1664
+#: processor_box.cc:548 processor_box.cc:1666
 msgid ""
 "<b>%1</b>\n"
 "Double-click to show GUI.\n"
@@ -11668,7 +11692,7 @@ msgstr ""
 "ダブルクリックして GUI を表示します。\n"
 "%2+ダブルクリックでジェネリック GUI を表示します。%3"
 
-#: processor_box.cc:551 processor_box.cc:1667
+#: processor_box.cc:551 processor_box.cc:1669
 msgid ""
 "<b>%1</b>\n"
 "Double-click to show generic GUI.%2"
@@ -11702,7 +11726,7 @@ msgstr "すべてのコントロールを隠す"
 msgid "Allow Feedback Loop"
 msgstr "フィードバック・ループを許可"
 
-#: processor_box.cc:1865
+#: processor_box.cc:1867
 msgid ""
 "Right-click to add/remove/edit\n"
 "plugins,inserts,sends and more"
@@ -11710,7 +11734,7 @@ msgstr ""
 "右クリックしてプラグイン/インサート/\n"
 "センド/その他を追加/削除/編集"
 
-#: processor_box.cc:2014
+#: processor_box.cc:2016
 msgid ""
 "Processor Drag/Drop failed. Probably because\n"
 "the I/O configuration of the plugins could\n"
@@ -11720,15 +11744,15 @@ msgstr ""
 "おそらくプラグインの I/O 設定がこのトラックの\n"
 "設定と合っていないのが原因です。"
 
-#: processor_box.cc:2654 processor_box.cc:3180
+#: processor_box.cc:2656 processor_box.cc:3182
 msgid "Plugin Incompatibility"
 msgstr "プラグイン不適合"
 
-#: processor_box.cc:2657
+#: processor_box.cc:2659
 msgid "You attempted to add the plugin \"%1\" in slot %2.\n"
 msgstr "プラグイン \"%1\" をスロット %2 に追加しようとしました。\n"
 
-#: processor_box.cc:2663
+#: processor_box.cc:2665
 msgid ""
 "\n"
 "This plugin has:\n"
@@ -11736,17 +11760,17 @@ msgstr ""
 "\n"
 "このプラグインには次のものがあります:\n"
 
-#: processor_box.cc:2666
+#: processor_box.cc:2668
 msgid "\t%1 MIDI input\n"
 msgid_plural "\t%1 MIDI inputs\n"
 msgstr[0] "\t%1 MIDI インプット\n"
 
-#: processor_box.cc:2670
+#: processor_box.cc:2672
 msgid "\t%1 audio input\n"
 msgid_plural "\t%1 audio inputs\n"
 msgstr[0] "\t%1 Audio インプット\n"
 
-#: processor_box.cc:2673
+#: processor_box.cc:2675
 msgid ""
 "\n"
 "but at the insertion point, there are:\n"
@@ -11754,17 +11778,17 @@ msgstr ""
 "\n"
 "しかし、インサートポイントには次のものがあります:\n"
 
-#: processor_box.cc:2676
+#: processor_box.cc:2678
 msgid "\t%1 MIDI channel\n"
 msgid_plural "\t%1 MIDI channels\n"
 msgstr[0] "\t%1 MIDI チャンネル\n"
 
-#: processor_box.cc:2680
+#: processor_box.cc:2682
 msgid "\t%1 audio channel\n"
 msgid_plural "\t%1 audio channels\n"
 msgstr[0] "\t%1 Audio チャンネル\n"
 
-#: processor_box.cc:2683
+#: processor_box.cc:2685
 msgid ""
 "\n"
 "%1 is unable to insert this plugin here.\n"
@@ -11772,7 +11796,7 @@ msgstr ""
 "\n"
 "%1 はこのプラグインをここにインサートできませんでした。\n"
 
-#: processor_box.cc:3183
+#: processor_box.cc:3185
 msgid ""
 "You cannot reorder these plugins/sends/inserts\n"
 "in that way because the inputs and\n"
@@ -11782,21 +11806,21 @@ msgstr ""
 "そのような順序にプラグイン/センド/インサートを\n"
 "並び変えることはできません。"
 
-#: processor_box.cc:3383
+#: processor_box.cc:3385
 msgid "Rename Processor"
 msgstr "プロセッサを名前変更"
 
-#: processor_box.cc:3414
+#: processor_box.cc:3416
 msgid "At least 100 IO objects exist with a name like %1 - name not changed"
 msgstr ""
 "少なくとも100の IO オブジェクトが %1 のような名前で存在します - 名前は変更さ"
 "れません"
 
-#: processor_box.cc:3578
+#: processor_box.cc:3580
 msgid "plugin insert constructor failed"
 msgstr "プラグイン・インサート・コンストラクタが失敗しました"
 
-#: processor_box.cc:3589
+#: processor_box.cc:3591
 msgid ""
 "Copying the set of processors on the clipboard failed,\n"
 "probably because the I/O configuration of the plugins\n"
@@ -11806,7 +11830,7 @@ msgstr ""
 "おそらくプラグインの I/O 設定がこのトラックの\n"
 "設定と合っていないのが原因です。"
 
-#: processor_box.cc:3643
+#: processor_box.cc:3645
 msgid ""
 "Do you really want to remove all processors from %1?\n"
 "(this cannot be undone)"
@@ -11814,15 +11838,15 @@ msgstr ""
 "本当に %1 からすべてのプロセッサを削除しますか？\n"
 "（この操作は元に戻せません）"
 
-#: processor_box.cc:3647 processor_box.cc:3672
+#: processor_box.cc:3649 processor_box.cc:3674
 msgid "Yes, remove them all"
 msgstr "はい、すべてを削除します"
 
-#: processor_box.cc:3649 processor_box.cc:3674
+#: processor_box.cc:3651 processor_box.cc:3676
 msgid "Remove processors"
 msgstr "プロセッサを削除"
 
-#: processor_box.cc:3664
+#: processor_box.cc:3666
 msgid ""
 "Do you really want to remove all pre-fader processors from %1?\n"
 "(this cannot be undone)"
@@ -11830,7 +11854,7 @@ msgstr ""
 "本当に %1 からすべてのプリ・フェーダー・プロセッサを削除しますか？\n"
 "（この操作は元に戻せません）"
 
-#: processor_box.cc:3667
+#: processor_box.cc:3669
 msgid ""
 "Do you really want to remove all post-fader processors from %1?\n"
 "(this cannot be undone)"
@@ -11838,79 +11862,79 @@ msgstr ""
 "本当に %1 からすべてのポスト・フェーダー・プロセッサを削除しますか？\n"
 "（この操作は元に戻せません）"
 
-#: processor_box.cc:3860
+#: processor_box.cc:3862
 msgid "New Plugin"
 msgstr "新規プラグイン"
 
-#: processor_box.cc:3863
+#: processor_box.cc:3865
 msgid "New Insert"
 msgstr "新規インサート"
 
-#: processor_box.cc:3866
+#: processor_box.cc:3868
 msgid "New External Send ..."
 msgstr "新規外部センド..."
 
-#: processor_box.cc:3870
+#: processor_box.cc:3872
 msgid "New Aux Send ..."
 msgstr "新規 Aux センド..."
 
-#: processor_box.cc:3871
+#: processor_box.cc:3873
 msgid "New Foldback Send ..."
 msgstr "新規フォールバックセンド..."
 
-#: processor_box.cc:3872
+#: processor_box.cc:3874
 msgid "Remove Foldback Send ..."
 msgstr "フォールバックセンドを削除"
 
-#: processor_box.cc:3875
+#: processor_box.cc:3877
 msgid "Send Options"
 msgstr "センドオプション"
 
-#: processor_box.cc:3877
+#: processor_box.cc:3879
 msgid "Clear (all)"
 msgstr "クリア (すべて)"
 
-#: processor_box.cc:3879
+#: processor_box.cc:3881
 msgid "Clear (pre-fader)"
 msgstr "クリア (プリ・フェーダー)"
 
-#: processor_box.cc:3881
+#: processor_box.cc:3883
 msgid "Clear (post-fader)"
 msgstr "クリア (ポスト・フェーダー)"
 
-#: processor_box.cc:3911
+#: processor_box.cc:3913
 msgid "Activate All"
 msgstr "すべてを有効にする"
 
-#: processor_box.cc:3913
+#: processor_box.cc:3915
 msgid "Deactivate All"
 msgstr "すべてを無効にする"
 
-#: processor_box.cc:3915
+#: processor_box.cc:3917
 msgid "A/B Plugins"
 msgstr "A/B プラグイン"
 
-#: processor_box.cc:3923
+#: processor_box.cc:3925
 msgid "Disk I/O ..."
 msgstr "ディスク I/O..."
 
-#: processor_box.cc:3924
+#: processor_box.cc:3926
 msgid "Pre-Fader"
 msgstr "プリ・フェーダー"
 
-#: processor_box.cc:3925
+#: processor_box.cc:3927
 msgid "Post-Fader"
 msgstr "ポスト・フェーダー"
 
-#: processor_box.cc:3934
+#: processor_box.cc:3936
 msgid "Edit with generic controls..."
 msgstr "ジェネリック・コントロールで編集..."
 
-#: processor_box.cc:4288
+#: processor_box.cc:4290
 msgid "%1: %2 (by %3)"
 msgstr "%1: %2 (作成者: %3)"
 
-#: processor_box.cc:4290
+#: processor_box.cc:4292
 msgid "%1 (by %2)"
 msgstr "%1 (作成者: %2)"
 
@@ -12414,7 +12438,7 @@ msgstr "%1 環境設定"
 
 #: rc_option_editor.cc:2290
 msgid "preferences"
-msgstr ""
+msgstr "環境設定"
 
 #: rc_option_editor.cc:2302 rc_option_editor.cc:2320 rc_option_editor.cc:2324
 #: rc_option_editor.cc:2336 rc_option_editor.cc:2338 rc_option_editor.cc:2340
@@ -12956,6 +12980,10 @@ msgid ""
 "is connected to the hardware playback ports, otherwise the master-bus output "
 "is directly used for playback."
 msgstr ""
+"<b>有効の場合</b>メインアウトプットバスは最初の N 物理ポートに自動接続されま"
+"す。モニタセクションがセッションにある場合にはモニタバスアウトプットがハード"
+"ウェアのプレイバックポートに接続され、ない場合にはマスタバスが直接プレイバッ"
+"クとして利用されます。"
 
 #: rc_option_editor.cc:2936
 msgid "Connect track inputs"
@@ -16835,7 +16863,7 @@ msgstr "新規トランスポートマスタを追加"
 
 #: transport_masters_dialog.cc:54
 msgid "Keep rolling if sync is lost"
-msgstr ""
+msgstr "同期が失われてもロールを保持する"
 
 #: transport_masters_dialog.cc:73
 msgid ""
@@ -16849,11 +16877,11 @@ msgstr ""
 
 #: transport_masters_dialog.cc:83
 msgid "Sync Position + Delta"
-msgstr ""
+msgstr "同期ポジション + デルタ"
 
 #: transport_masters_dialog.cc:84
 msgid "Last Message + Age"
-msgstr ""
+msgstr "最終メッセージ + 経過時間"
 
 #: transport_masters_dialog.cc:85
 msgid ""
@@ -16941,7 +16969,7 @@ msgstr "ロケートコマンドを許可"
 
 #: transport_masters_dialog.cc:666
 msgid "%1 %2"
-msgstr ""
+msgstr "%1 %2"
 
 #: transport_masters_dialog.cc:732
 msgid "Add Transport Master"
