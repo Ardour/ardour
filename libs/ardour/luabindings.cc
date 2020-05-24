@@ -2200,6 +2200,11 @@ LuaBindings::common (lua_State* L)
 		.addConst ("Logarithmic", ARDOUR::WaveformScale(Logarithmic))
 		.endNamespace ()
 
+		.beginNamespace ("WaveformShape")
+		.addConst ("Traditional", ARDOUR::WaveformShape(Traditional))
+		.addConst ("Rectified", ARDOUR::WaveformShape(Rectified))
+		.endNamespace ()
+
 		.beginNamespace ("MeterLineUp")
 		.addConst ("MeteringLineUp24", ARDOUR::MeterLineUp(MeteringLineUp24))
 		.addConst ("MeteringLineUp20", ARDOUR::MeterLineUp(MeteringLineUp20))
