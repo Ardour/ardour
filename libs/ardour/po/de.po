@@ -7,15 +7,15 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-05-20 14:36-0600\n"
-"PO-Revision-Date: 2020-04-18 13:35+0200\n"
-"Last-Translator: Nils Philippsen <nils@tiptoe.de>\n"
+"PO-Revision-Date: 2020-05-23 09:09+0200\n"
+"Last-Translator: Edgar Aichinger <edgar.aichinger@aon.at>\n"
 "Language-Team: German <ardour-dev@lists.ardour.org>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.3\n"
+"X-Generator: Lokalize 20.04.0\n"
 
 #: analyser.cc:127 audioregion.cc:1791
 msgid "Transient Analysis failed for %1."
@@ -2388,10 +2388,11 @@ msgstr "Konfigurationsdatei %1 nicht gesichert"
 #: rc_configuration.cc:160 rc_configuration.cc:168
 msgid "Could not remove temporary config file at path \"%1\" (%2)"
 msgstr ""
+"Konnte temporäre Konfigurationsdatei im Pfad \"%1\" nicht entfernen (%2)"
 
 #: rc_configuration.cc:166
 msgid "Could not rename temporary config file %1 to %2 (%3)"
-msgstr ""
+msgstr "Konnte temporäre Konfigurationsdatei %1 nicht zu %2 umbenennen (%3)"
 
 #: readable.cc:42
 msgid "Cannot open File \"%1\": %2"
@@ -3907,7 +3908,7 @@ msgstr "Programmierfehler:%1"
 
 #: transport_master_manager.cc:347
 msgid "Transport master adjusted framerate from %1 to %2."
-msgstr ""
+msgstr "Transport Master passte Framerate von %1 auf %2 an."
 
 #: transport_master_manager.cc:396
 msgid "There is already a transport master named \"%1\" - not duplicated"
@@ -3992,17 +3993,3 @@ msgstr "Master Zuordnung ignoriert, um Rekursion zu vermeiden"
 msgid "Cannot set state of a VCA"
 msgstr "Kann den Status eines VCA nicht setzen"
 
-#~ msgid "Session framerate adjusted from %1 to LTC's %2."
-#~ msgstr "Projekt-Framerate von %1 auf %2 (von LTC) geändert."
-
-#~ msgid "Session and LTC framerate mismatch: LTC:%1 Session:%2."
-#~ msgstr ""
-#~ "Die Frameraten von Projekt und LTC unterscheiden sich: LTC: %1 Projekt: "
-#~ "%2."
-
-#~ msgid "Session framerate adjusted from %1 TO: MTC's %2."
-#~ msgstr "Projekt-Framerate von %1 auf die von MTC: %2 geändert."
-
-#~ msgid "Session and MTC framerate mismatch: MTC:%1 %2:%3."
-#~ msgstr ""
-#~ "Framerate von Projekt und MTC stimmen nicht überein: MTC: %1 %2: %3."
