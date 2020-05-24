@@ -127,6 +127,7 @@ public:
 	}
 	bool empty() const { return _events.empty(); }
 
+	/** Remove all events from this list. */
 	void clear ();
 	void x_scale (double factor);
 	bool extend_to (double);
@@ -136,7 +137,11 @@ public:
 	void y_transform (boost::function<double(double)> callback);
 	void list_merge (ControlList const& other, boost::function<double(double, double)> callback);
 
-	/** add automation events
+	/** Add an event to this list.
+	 *
+	 * This method is intended to write automation in realtime. If the transport
+	 * is stopped, guard-points will be added regardless of parameter with_guards.
+	 *
 	 * @param when absolute time in samples
 	 * @param value parameter value
 	 * @param with_guards if true, add guard-points
@@ -144,6 +149,17 @@ public:
 	 */
 	virtual void add (double when, double value, bool with_guards=true, bool with_initial=true);
 
+	/** Add an event to this list.
+	 *
+	 * This method is intended for making manual changes from the GUI. An event
+	 * will only be created if no other event exists at the given time.
+	 *
+	 * @param when absolute time in samples
+	 * @param value parameter value
+	 * @param with_guards if true, add guard-points
+	 *
+	 * @return true if an event was added.
+	 */
 	virtual bool editor_add (double when, double value, bool with_guard);
 
 	/* to be used only for loading pre-sorted data from saved state */
@@ -179,7 +195,8 @@ public:
 	boost::shared_ptr<ControlList> cut (double, double);
 	boost::shared_ptr<ControlList> copy (double, double);
 
-	/** remove all automation events between the given time range
+	/** Remove all events in the given time range from this list.
+	 *
 	 * @param start start of range (inclusive) in audio samples
 	 * @param end end of range (inclusive) in audio samples
 	 */
@@ -187,12 +204,15 @@ public:
 
 	bool paste (const ControlList&, double position);
 
-	/** truncate the event list after the given time
-	 * @param last_coordinate last event to include
+	/** Remove all events after the given time from this list.
+	 *
+	 * @param last_coordinate time in audio samples of the last event to keep
 	 */
 	void truncate_end (double last_coordinate);
-	/** truncate the event list to the given time
-	 * @param overall_length overall length
+
+	/** Remove all events up to to the given time from this list.
+	 *
+	 * @param overall_length overall length in audio samples
 	 */
 	void truncate_start (double overall_length);
 
@@ -216,7 +236,9 @@ public:
 		(obj.*method)(*this);
 	}
 
-	/** query value at given time (takes a read-lock, not safe while writing automation)
+	/** Queries the event value at the given time (takes a read-lock, not safe
+	 * while writing automation).
+	 *
 	 * @param where absolute time in samples
 	 * @returns parameter value
 	 */
@@ -225,7 +247,9 @@ public:
 		return unlocked_eval (where);
 	}
 
-	/** realtime safe version of eval, may fail if read-lock cannot be taken
+	/** Realtime safe version of eval(). This may fail if a read-lock cannot
+	 * be taken.
+	 *
 	 * @param where absolute time in samples
 	 * @param ok boolean reference if returned value is valid
 	 * @returns parameter value
@@ -259,6 +283,7 @@ public:
 		ControlList::const_iterator first;
 	};
 
+	/** @return the list of events */
 	const EventList& events() const { return _events; }
 
 	// FIXME: const violations for Curve
@@ -302,7 +327,7 @@ public:
 	/** query default interpolation for parameter-descriptor */
 	virtual InterpolationStyle default_interpolation() const;
 
-	/** set the interpolation style of the automation data.
+	/** Sets the interpolation style of the automation data.
 	 *
 	 * This will fail when asking for Logarithmic scale and min,max crosses 0
 	 * or Exponential scale with min != 0.
@@ -318,6 +343,7 @@ public:
 	void start_write_pass (double when);
 	void write_pass_finished (double when, double thinning_factor=0.0);
 	void set_in_write_pass (bool, bool add_point = false, double when = 0.0);
+	/** @return true if transport is running and this list is in write mode */
 	bool in_write_pass () const;
 	bool in_new_write_pass () { return new_write_pass; }
 
