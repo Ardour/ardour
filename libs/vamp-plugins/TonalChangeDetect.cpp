@@ -319,7 +319,7 @@ TonalChangeDetect::process(const float *const *inputBuffers,
     if (!m_chromagram) {
 	std::cerr << "ERROR: TonalChangeDetect::process: "
 	          << "Chromagram has not been initialised"
-	          << endl;
+	          << std::endl;
 	return FeatureSet();
     }
 
