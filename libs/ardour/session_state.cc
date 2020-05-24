@@ -1831,7 +1831,7 @@ Session::load_routes (const XMLNode& node, int version)
 		}
 
 		if (route == 0) {
-			error << _("Session: cannot create Route from XML description.") << endmsg;
+			error << _("Session: cannot create track/bus from XML description.") << endmsg;
 			return -1;
 		}
 

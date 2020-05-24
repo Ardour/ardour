@@ -2526,7 +2526,7 @@ Session::new_midi_route (RouteGroup* route_group, uint32_t how_many, string name
 		}
 
 		catch (failed_constructor &err) {
-			error << _("Session: could not create new audio route.") << endmsg;
+			error << _("Session: could not create new MIDI bus.") << endmsg;
 			goto failure;
 		}
 
@@ -2806,7 +2806,7 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 		}
 
 		catch (failed_constructor &err) {
-			error << _("Session: could not create new audio route.") << endmsg;
+			error << _("Session: could not create new audio bus.") << endmsg;
 			goto failure;
 		}
 
@@ -3059,7 +3059,7 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 		}
 
 		catch (failed_constructor &err) {
-			error << _("Session: could not create new route from template") << endmsg;
+			error << _("Session: could not create new track/bus from template") << endmsg;
 			goto out;
 		}
 

@@ -2670,7 +2670,7 @@ Route::set_state (const XMLNode& node, int version)
 			if (_pannable) {
 				_pannable->set_state (*child, version);
 			} else {
-				warning << string_compose (_("Pannable state found for route (%1) without a panner!"), name()) << endmsg;
+				warning << string_compose (_("Panner state mismatches for track/bus (%1)."), name()) << endmsg;
 			}
 		} else if (child->name() == Slavable::xml_node_name) {
 			Slavable::set_state (*child, version);
@@ -4937,7 +4937,7 @@ Route::setup_invisible_processors ()
 	ProcessorList::iterator amp = find (new_processors.begin(), new_processors.end(), _amp);
 
 	if (amp == new_processors.end ()) {
-		error << string_compose (_("Amp/Fader on Route '%1' went AWOL. Re-added."), name()) << endmsg;
+		error << string_compose (_("Amp/Fader on track/bus '%1' was missing."), name()) << endmsg;
 		new_processors.push_front (_amp);
 		amp = find (new_processors.begin(), new_processors.end(), _amp);
 	}
