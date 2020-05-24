@@ -2885,7 +2885,7 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 				 */
 
 				if (!find_route_name (name_base.c_str(), ++number, name, (being_added > 1))) {
-					fatal << _("Session: UINT_MAX routes? impossible!") << endmsg;
+					fatal << _("Session: Failed to create unique ID for track from template.") << endmsg;
 					abort(); /*NOTREACHED*/
 				}
 
@@ -2895,7 +2895,7 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 
 				/* generate a new name by adding a number to the end of the template name */
 				if (!find_route_name (route_name.c_str(), ++number, name, true)) {
-					fatal << _("Session: UINT_MAX routes? impossible!") << endmsg;
+					fatal << _("Session: Failed to generate unique name and ID for track from template.") << endmsg;
 					abort(); /*NOTREACHED*/
 				}
 			}

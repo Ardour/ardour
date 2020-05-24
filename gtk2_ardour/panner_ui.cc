@@ -419,7 +419,7 @@ PannerUI::build_pan_menu ()
 
 	if (_send_mode) {
 		items.push_back (SeparatorElem());
-		items.push_back (CheckMenuElem (_("Link to route panner"), sigc::mem_fun(*this, &PannerUI::pan_bypass_toggle)));
+		items.push_back (CheckMenuElem (_("Link send and main panner"), sigc::mem_fun(*this, &PannerUI::pan_bypass_toggle)));
 		send_link_menu_item = static_cast<Gtk::CheckMenuItem*> (&items.back());
 		send_link_menu_item->set_active (_panshell->is_linked_to_route ());
 		send_link_menu_item->signal_toggled().connect (sigc::mem_fun(*this, &PannerUI::pan_link_toggle));

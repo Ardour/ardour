@@ -351,7 +351,7 @@ Session::import_pt (PTFFormat& ptf, ImportStatus& status)
 					/* generate a unique name by adding a number if needed */
 					uint32_t id = 0;
 					if (!find_route_name (trackname.c_str (), id, trackname, false)) {
-						fatal << _("PTImport: UINT_MAX routes? impossible!") << endmsg;
+						fatal << _("PTImport: failed to generate unique Track ID!") << endmsg;
 						abort(); /*NOTREACHED*/
 					}
 					existing_track->set_name (trackname);

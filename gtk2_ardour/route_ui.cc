@@ -1949,7 +1949,7 @@ RouteUI::save_as_template ()
 	const std::string dir = ARDOUR::user_route_template_directory ();
 
 	if (g_mkdir_with_parents (dir.c_str(), 0755)) {
-		error << string_compose (_("Cannot create route template directory %1"), dir) << endmsg;
+		error << string_compose (_("Cannot create template directory %1"), dir) << endmsg;
 		return;
 	}
 

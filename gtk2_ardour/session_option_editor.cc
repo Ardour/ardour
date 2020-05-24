@@ -278,7 +278,7 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	add_option (_("Monitoring"), new OptionEditorBlank ());
 
 	/* Meterbridge */
-	add_option (_("Meterbridge"), new OptionEditorHeading (_("Route Display")));
+	add_option (_("Meterbridge"), new OptionEditorHeading (_("Display Options")));
 
 	add_option (_("Meterbridge"), new BoolOption (
 			    "show-midi-on-meterbridge",

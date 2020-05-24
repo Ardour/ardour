@@ -274,7 +274,7 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 	set_tooltip(*solo_button,_("Solo"));
 	set_tooltip(*mute_button,_("Mute"));
-	set_tooltip(route_group_button, _("Route Group"));
+	set_tooltip(route_group_button, _("Group"));
 
 	mute_button->set_tweaks(ArdourButton::TrackHeader);
 	solo_button->set_tweaks(ArdourButton::TrackHeader);

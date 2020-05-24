@@ -195,7 +195,7 @@ RouteParams_UI::route_property_changed (const PropertyChange& what_changed, boos
 	}
 
 	if(!found) {
-		error << _("route display list item for renamed route not found!") << endmsg;
+		error << _("Display list item for renamed track/bus was not found!") << endmsg;
 	}
 
 	if (route == _route) {
