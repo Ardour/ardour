@@ -19,19 +19,19 @@
 export const JSON_INF = 1.0e+128;
 
 export const ANode = Object.freeze({
-	TEMPO:                    'tempo',
-	POSITION_TIME:            'position_time',
-	TRANSPORT_ROLL:           'transport_roll',
-	RECORD_STATE:             'record_state',
-	STRIP_DESC:               'strip_desc',
-	STRIP_METER:              'strip_meter',
-	STRIP_GAIN:               'strip_gain',
-	STRIP_PAN:                'strip_pan',
-	STRIP_MUTE:               'strip_mute',
-	STRIP_PLUGIN_DESC:        'strip_plugin_desc',
-	STRIP_PLUGIN_ENABLE:      'strip_plugin_enable',
-	STRIP_PLUGIN_PARAM_DESC:  'strip_plugin_param_desc',
-	STRIP_PLUGIN_PARAM_VALUE: 'strip_plugin_param_value'
+	TEMPO:                          'tempo',
+	POSITION_TIME:                  'position_time',
+	TRANSPORT_ROLL:                 'transport_roll',
+	RECORD_STATE:                   'record_state',
+	STRIP_DESCRIPTION:              'strip_description',
+	STRIP_METER:                    'strip_meter',
+	STRIP_GAIN:                     'strip_gain',
+	STRIP_PAN:                      'strip_pan',
+	STRIP_MUTE:                     'strip_mute',
+	STRIP_PLUGIN_DESCRIPTION:       'strip_plugin_description',
+	STRIP_PLUGIN_ENABLE:            'strip_plugin_enable',
+	STRIP_PLUGIN_PARAM_DESCRIPTION: 'strip_plugin_param_description',
+	STRIP_PLUGIN_PARAM_VALUE:       'strip_plugin_param_value'
 });
 
 export class Message {
