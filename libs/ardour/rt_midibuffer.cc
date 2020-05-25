@@ -302,8 +302,16 @@ RTMidiBuffer::read (MidiBuffer& dst, samplepos_t start, samplepos_t end, MidiSta
 		 */
 
 		if (reverse) {
+			if (evtime > start) {
+				--item;
+				continue;
+			}
 			evtime = start - evtime;
 		} else {
+			if (evtime < start) {
+				++item;
+				continue;
+			}
 			evtime -= start;
 		}
 
