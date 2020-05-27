@@ -298,12 +298,6 @@ LocationEditRow::set_location (Location *loc)
 		cd_check_button.set_active (location->is_cd_marker());
 		cd_check_button.show();
 
-		if (location->start() == _session->current_start_sample()) {
-			cd_check_button.set_sensitive (false);
-		} else {
-			cd_check_button.set_sensitive (true);
-		}
-
 		hide_check_button.show();
 		lock_check_button.show();
 		glue_check_button.show();
@@ -533,18 +527,6 @@ LocationEditRow::cd_toggled ()
 		return;
 	}
 
-	//if (cd_check_button.get_active() == location->is_cd_marker()) {
-	//	return;
-	//}
-
-	if (cd_check_button.get_active()) {
-		if (location->start() <= _session->current_start_sample()) {
-			error << _("You cannot put a CD marker at the start of the session") << endmsg;
-			cd_check_button.set_active (false);
-			return;
-		}
-	}
-
 	location->set_cd (cd_check_button.get_active(), this);
 
 	if (location->is_cd_marker()) {
@@ -659,12 +641,6 @@ LocationEditRow::start_changed ()
 	i_am_the_modifier++;
 
 	start_clock.set (location->start());
-
-	if (location->start() == _session->current_start_sample()) {
-		cd_check_button.set_sensitive (false);
-	} else {
-		cd_check_button.set_sensitive (true);
-	}
 
 	i_am_the_modifier--;
 }
