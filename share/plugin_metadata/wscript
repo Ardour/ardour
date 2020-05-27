@@ -9,7 +9,7 @@ def configure(conf):
     pass
 
 def build(bld):
-    maps = bld.path.ant_glob ('*')
+    maps = bld.path.ant_glob ('plugin*')
     bld.install_files (os.path.join(bld.env['DATADIR'], 'plugin_metadata'),
                        maps)
 
