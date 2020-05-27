@@ -126,13 +126,13 @@ MIDIClock_TransportMaster::pre_process (MIDI::pframes_t nframes, samplepos_t now
 
 	/* no clock messages ever, or no clock messages for 1/4 second ? conclude that its stopped */
 
-	if (!current.timestamp || (now > current.timestamp && ((now - current.timestamp) > (ENGINE->sample_rate() / 4)))) {
+	if (!current.timestamp || one_ppqn_in_samples == 0 || (now > current.timestamp && ((now - current.timestamp) > (ENGINE->sample_rate() / 4)))) {
 		_bpm = 0.0;
 		_running = false;
 		_current_delta = 0;
 		midi_clock_count = 0;
 
-		DEBUG_TRACE (DEBUG::MidiClock, "No MIDI Clock messages received for some time, stopping!\n");
+		DEBUG_TRACE (DEBUG::MidiClock, string_compose ("No MIDI Clock messages received for some time, stopping! ts = %1 @ %2 ppqn = %3\n", current.timestamp, now, one_ppqn_in_samples));
 		return;
 	}
 
@@ -152,7 +152,7 @@ MIDIClock_TransportMaster::calculate_one_ppqn_in_samples_at(samplepos_t time)
 	const double samples_per_quarter_note = _session->tempo_map().samples_per_quarter_note_at (time, ENGINE->sample_rate());
 
 	one_ppqn_in_samples = samples_per_quarter_note / double (ppqn);
-	// DEBUG_TRACE (DEBUG::MidiClock, string_compose ("at %1, one ppqn = %2\n", time, one_ppqn_in_samples));
+	// DEBUG_TRACE (DEBUG::MidiClock, string_compose ("at %1, one ppqn = %2 [spl] spqn = %3, ppqn = %4\n", time, one_ppqn_in_samples, samples_per_quarter_note, ppqn));
 }
 
 ARDOUR::samplepos_t
@@ -190,7 +190,6 @@ void
 MIDIClock_TransportMaster::update_midi_clock (Parser& /*parser*/, samplepos_t timestamp)
 {
 	samplepos_t elapsed_since_start = timestamp - first_timestamp;
-	double e = 0;
 
 	calculate_one_ppqn_in_samples_at (current.position);
 
@@ -206,29 +205,34 @@ MIDIClock_TransportMaster::update_midi_clock (Parser& /*parser*/, samplepos_t ti
 
 		midi_clock_count++;
 
-		current.position += one_ppqn_in_samples;
-
 	} else if (midi_clock_count == 1) {
 
 		/* second 0xf8 message has arrived. we can now estimate QPM
 		 * (quarters per minute, and fully initialize the DLL
 		 */
 
-		e  = timestamp - current.timestamp;
+		e2 = timestamp - current.timestamp;
 
-		const samplecnt_t samples_per_quarter = e * 24;
-		_bpm = (ENGINE->sample_rate() * 60.0) / samples_per_quarter;
+		const samplecnt_t samples_per_quarter = e2 * 24;
+		double bpm = (ENGINE->sample_rate() * 60.0) / samples_per_quarter;
 
-		calculate_filter_coefficients (_bpm);
+		if (bpm < 1 || bpm > 999) {
+			current.update (0, timestamp, 0);
+			midi_clock_count = 1; /* start over */
+			DEBUG_TRACE (DEBUG::MidiClock, string_compose ("BPM is out of bounds (%1)\n", timestamp, current.timestamp));
+		} else {
+			_bpm = bpm;
 
-		/* finish DLL initialization */
+			calculate_filter_coefficients (_bpm);
 
-		t0 = timestamp;
-		e2 = e;
-		t1 = t0 + e2; /* timestamp we predict for the next 0xf8 clock message */
+			/* finish DLL initialization */
 
-		midi_clock_count++;
-		current.update (one_ppqn_in_samples, timestamp, 0);
+			t0 = timestamp;
+			t1 = t0 + e2; /* timestamp we predict for the next 0xf8 clock message */
+
+			midi_clock_count++;
+			current.update (one_ppqn_in_samples + midi_port_latency.max, timestamp, 0);
+		}
 
 	} else {
 
@@ -236,7 +240,7 @@ MIDIClock_TransportMaster::update_midi_clock (Parser& /*parser*/, samplepos_t ti
 		 * speed (and tempo) with the DLL
 		 */
 
-		e = timestamp - t1; // error between actual time of arrival of clock message and our predicted time
+		double e = timestamp - t1; // error between actual time of arrival of clock message and our predicted time
 		t0 = t1;
 		t1 += b * e + e2;
 		e2 += c * e;
@@ -281,22 +285,22 @@ MIDIClock_TransportMaster::update_midi_clock (Parser& /*parser*/, samplepos_t ti
 		}
 	}
 
-	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("clock #%1 @ %2 should-be %3 transport %4 error %5 appspeed %6 "
-						       "read-delta %7 should-be delta %8 t1-t0 %9 t0 %10 t1 %11 framerate %12 engine %13 running %14\n",
-						       midi_clock_count,                                          // #
-						       elapsed_since_start,                                       // @
-	                                               current.position,                                        // should-be
-						       _session->transport_sample(),                                // transport
-	                                               e,                                                     // error
-						       (t1 - t0) / one_ppqn_in_samples, // appspeed
-						       timestamp - current.timestamp,                                // read delta
-						       one_ppqn_in_samples,                                        // should-be delta
-	                                               (t1 - t0),                         // t1-t0
-	                                               t0,                                // t0
-						       t1,                                // t1
-						       ENGINE->sample_rate(),                                      // framerate
-	                                               ENGINE->sample_time(),
-	                                               _running
+	DEBUG_TRACE (DEBUG::MidiClock, string_compose (
+	             "clock #%1 @ %2 should-be %3 transport %4 appspeed %6 "
+	             "read-delta %7 should-be-delta %8 t1-t0 %9 t0 %10 t1 %11 sample-rate %12 engine %13 running %14\n",
+	             midi_clock_count,                 // #
+	             elapsed_since_start,              // @
+	             current.position,                 // should-be
+	             _session->transport_sample(),     // transport
+	             (t1 - t0) / one_ppqn_in_samples,  // appspeed
+	             timestamp - current.timestamp,    // read delta
+	             one_ppqn_in_samples,              // should-be delta
+	             (t1 - t0),                        // t1-t0
+	             t0,                               // t0 (current position)
+	             t1,                               // t1 (expected next pos)
+	             ENGINE->sample_rate(),            // framerate
+	             ENGINE->sample_time(),
+	             _running
 
 	));
 }
@@ -377,7 +381,7 @@ MIDIClock_TransportMaster::position (Parser& /*parser*/, MIDI::byte* message, si
 
 	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("Song Position: %1 samples: %2\n", position_in_sixteenth_notes, position_in_samples));
 
-	current.update (position_in_samples, timestamp, current.speed);
+	current.update (position_in_samples + midi_port_latency.max, timestamp, current.speed);
 }
 
 bool
