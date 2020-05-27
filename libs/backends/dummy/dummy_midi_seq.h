@@ -780,11 +780,15 @@ static const MIDISequence s7[] = { // channel1, nonsense
 };
 
 static const MIDISequence s8[] = {
-	{-1.0, 0, {0} }, // MTC Generator
+	{-2.0, 0, {0} }, // MTC Generator
+};
+
+static const MIDISequence s9[] = {
+	{-1.0, 0, {0} }, // MClk Generator
 };
 
 static const MIDISequence *sequences[] = {
-	s0, s1, s2, s3, s4, s5, s6, s7, s8
+	s0, s1, s2, s3, s4, s5, s6, s7, s8, s9
 };
 
 static const char *sequence_names[] = {
@@ -796,7 +800,8 @@ static const char *sequence_names[] = {
 	"CCs only",
 	"Aftertouch",
 	"Nonsense, Dups",
-	"MTC 25fps"
+	"MTC 25fps",
+	"MClk 120 BPM"
 };
 
 }} // namespace

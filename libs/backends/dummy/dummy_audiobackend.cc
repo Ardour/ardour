@@ -1698,9 +1698,20 @@ DummyMidiPort::setup_generator (int seq_id, const float sr)
 	_midi_seq_pos = 0;
 	_midi_seq_time = 0;
 
-	if (_midi_seq_dat && _midi_seq_dat[0].beat_time < 0) {
-	_midi_seq_spb = sr / 25; // 25fps MTC
+	if (_midi_seq_dat && _midi_seq_dat[0].beat_time < -1) {
+		_midi_seq_spb = sr / 25; // 25fps MTC
+	} else if (_midi_seq_dat && _midi_seq_dat[0].beat_time < 0) {
+		/* MIDI Clock 120 BPM */
+		const double bpm = 120;
+		double quarter_notes_per_beat = 1.0;
+
+		const double samples_per_beat = sr * 60.0 / bpm;
+		const double samples_per_quarter_note = samples_per_beat / quarter_notes_per_beat;
+		const double clock_tick_interval = samples_per_quarter_note / 24.0;
+
+		_midi_seq_spb = clock_tick_interval;
 	}
+
 	return DummyMidiData::sequence_names[seq_id];
 }
 
@@ -1734,7 +1745,7 @@ void DummyMidiPort::midi_generate (const pframes_t n_samples)
 		return;
 	}
 
-	if (_midi_seq_dat[0].beat_time < 0) {
+	if (_midi_seq_dat[0].beat_time < -1) {
 		/* MTC generator */
 		const int audio_samples_per_video_frame = _midi_seq_spb; // sample-rate / 25
 		const int audio_samples_per_qf =  audio_samples_per_video_frame / 4;
@@ -1774,6 +1785,51 @@ void DummyMidiPort::midi_generate (const pframes_t n_samples)
 		_midi_seq_time += n_samples;
 		if (_midi_seq_time >= /* 24 * 3600 * 25 */ 2160000LL * audio_samples_per_video_frame) {
 			_midi_seq_time -= 2160000LL * audio_samples_per_video_frame; // 24h @ 25fps
+		}
+
+		return;
+
+	} else if (_midi_seq_dat[0].beat_time < 0) {
+		/* MClk generator */
+		uint8_t buf[3];
+
+		if (_midi_seq_time == 0) {
+			/* Position Message */
+			int64_t bcnt = 0; // beat count
+			buf[0] = 0xf2;
+			buf[1] = bcnt & 0x7f; // LSB
+			buf[2] = (bcnt >> 7) & 0x7f; // MSB
+			_buffer.push_back (boost::shared_ptr<DummyMidiEvent>(new DummyMidiEvent (0, buf, 3)));
+		}
+
+		/* MIDI System Real-Time Messages */
+#define MIDI_RT_CLOCK    (0xF8)
+#define MIDI_RT_START    (0xFA)
+#define MIDI_RT_CONTINUE (0xFB)
+#define MIDI_RT_STOP     (0xFC)
+
+		if (_midi_seq_time == 0) {
+			/* start */
+			buf[0] = MIDI_RT_START;
+			_buffer.push_back (boost::shared_ptr<DummyMidiEvent>(new DummyMidiEvent (0, buf, 1)));
+		}
+
+		const int clock_tick_interval = _midi_seq_spb; // samples per clock-tick
+		samplepos_t clk_tick = _midi_seq_time / clock_tick_interval;
+		samplepos_t clk_sample = clk_tick * clock_tick_interval;
+
+		while (clk_sample < _midi_seq_time + n_samples) {
+			if (clk_sample >= _midi_seq_time) {
+				buf[0] = MIDI_RT_CLOCK;
+				_buffer.push_back (boost::shared_ptr<DummyMidiEvent>(new DummyMidiEvent (clk_sample - _midi_seq_time, buf, 1)));
+			}
+			clk_sample += clock_tick_interval;
+		}
+
+		_midi_seq_time += n_samples;
+
+		if (_midi_seq_time >= 16384 * 24 * clock_tick_interval) {
+			_midi_seq_time -= 16384 * 24 * clock_tick_interval;
 		}
 		return;
 	}
