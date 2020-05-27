@@ -73,7 +73,6 @@ MTC_TransportMaster::MTC_TransportMaster (std::string const & name)
 MTC_TransportMaster::~MTC_TransportMaster()
 {
 	port_connections.drop_connections();
-	session_connections.drop_connections();
 }
 
 void
@@ -95,20 +94,6 @@ MTC_TransportMaster::connection_handler (boost::weak_ptr<ARDOUR::Port> w0, std::
 }
 
 void
-MTC_TransportMaster::resync_latency (bool playback)
-{
-	if (playback) {
-		return;
-	}
-
-	DEBUG_TRACE (DEBUG::MTC, "MTC resync_latency()\n");
-
-	if (_port) {
-		_port->get_connected_latency_range (mtc_slave_latency, false);
-	}
-}
-
-void
 MTC_TransportMaster::create_port ()
 {
 	if ((_port = create_midi_port (string_compose ("%1 in", _name))) == 0) {
@@ -117,12 +102,12 @@ MTC_TransportMaster::create_port ()
 }
 
 void
-MTC_TransportMaster::set_session (Session *s)
+MTC_TransportMaster::set_session (Session* s)
 {
-	port_connections.drop_connections();
-	session_connections.drop_connections();
+	TransportMaster::set_session (s);
+	TransportMasterViaMIDI::set_session (s);
 
-	_session = s;
+	port_connections.drop_connections();
 
 	if (_session) {
 
@@ -136,9 +121,6 @@ MTC_TransportMaster::set_session (Session *s)
 		parser.mtc_time.connect_same_thread (port_connections,  boost::bind (&MTC_TransportMaster::update_mtc_time, this, _1, _2, _3));
 		parser.mtc_qtr.connect_same_thread (port_connections, boost::bind (&MTC_TransportMaster::update_mtc_qtr, this, _1, _2, _3));
 		parser.mtc_status.connect_same_thread (port_connections, boost::bind (&MTC_TransportMaster::update_mtc_status, this, _1));
-
-		_session->config.ParameterChanged.connect_same_thread (session_connections, boost::bind (&MTC_TransportMaster::parameter_changed, this, _1));
-		_session->LatencyUpdated.connect_same_thread (session_connections, boost::bind (&MTC_TransportMaster::resync_latency, this, _1));
 	}
 }
 
@@ -461,9 +443,9 @@ MTC_TransportMaster::update_mtc_time (const MIDI::byte *msg, bool was_full, samp
 			if (first_mtc_timestamp == 0 || current.timestamp == 0) {
 				first_mtc_timestamp = now;
 				init_mtc_dll(mtc_frame, qtr);
-				mtc_frame_dll = mtc_frame + mtc_slave_latency.max;
+				mtc_frame_dll = mtc_frame + midi_port_latency.max;
 			}
-			current.update (mtc_frame + mtc_slave_latency.max, now, current.speed);
+			current.update (mtc_frame + midi_port_latency.max, now, current.speed);
 			reset_window (mtc_frame);
 		}
 	}

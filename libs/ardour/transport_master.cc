@@ -459,20 +459,6 @@ TransportMaster::unregister_port ()
 	}
 }
 
-boost::shared_ptr<Port>
-TransportMasterViaMIDI::create_midi_port (std::string const & port_name)
-{
-	boost::shared_ptr<Port> p;
-
-	if ((p = AudioEngine::instance()->register_input_port (DataType::MIDI, port_name, false, TransportMasterPort)) == 0) {
-		return boost::shared_ptr<Port> ();
-	}
-
-	_midi_port = boost::dynamic_pointer_cast<MidiPort> (p);
-
-	return p;
-}
-
 bool
 TransportMaster::allow_request (TransportRequestSource src, TransportRequestType type) const
 {
@@ -556,4 +542,48 @@ TransportMaster::format_delta_time (sampleoffset_t delta) const
 	snprintf (buf, sizeof(buf), "\u0394%s%s%lldsm", PLUSMINUS(-delta), LEADINGZERO(::llabs(delta)), ::llabs(delta));
 	buf[63] = '\0';
 	return std::string(buf);
+}
+
+TransportMasterViaMIDI::~TransportMasterViaMIDI ()
+{
+	session_connections.drop_connections();
+}
+
+boost::shared_ptr<Port>
+TransportMasterViaMIDI::create_midi_port (std::string const & port_name)
+{
+	boost::shared_ptr<Port> p;
+
+	if ((p = AudioEngine::instance()->register_input_port (DataType::MIDI, port_name, false, TransportMasterPort)) == 0) {
+		return boost::shared_ptr<Port> ();
+	}
+
+	_midi_port = boost::dynamic_pointer_cast<MidiPort> (p);
+
+	return p;
+}
+
+void
+TransportMasterViaMIDI::set_session (Session* s)
+{
+	session_connections.drop_connections();
+
+	if (!s) {
+		return;
+	}
+
+	s->config.ParameterChanged.connect_same_thread (session_connections, boost::bind (&TransportMasterViaMIDI::parameter_changed, this, _1));
+	s->LatencyUpdated.connect_same_thread (session_connections, boost::bind (&TransportMasterViaMIDI::resync_latency, this, _1));
+}
+
+void
+TransportMasterViaMIDI::resync_latency (bool playback)
+{
+	if (playback) {
+		return;
+	}
+
+	if (_midi_port) {
+		_midi_port->get_connected_latency_range (midi_port_latency, false);
+	}
 }

@@ -455,17 +455,29 @@ protected:
 class LIBARDOUR_API TransportMasterViaMIDI
 {
 public:
+	virtual ~TransportMasterViaMIDI ();
+
 	boost::shared_ptr<MidiPort> midi_port () const
 	{
 		return _midi_port;
 	}
 	boost::shared_ptr<Port> create_midi_port (std::string const& port_name);
 
-protected:
-	TransportMasterViaMIDI (){};
+	virtual void set_session (Session*);
 
+protected:
+	TransportMasterViaMIDI () {};
+
+	void resync_latency (bool);
 	MIDI::Parser                parser;
 	boost::shared_ptr<MidiPort> _midi_port;
+
+	virtual void parameter_changed (std::string const& p) {}
+
+	LatencyRange midi_port_latency;
+
+private:
+	PBD::ScopedConnectionList session_connections;
 };
 
 class LIBARDOUR_API TimecodeTransportMaster : public TransportMaster
@@ -530,7 +542,6 @@ public:
 
 private:
 	PBD::ScopedConnectionList port_connections;
-	PBD::ScopedConnectionList session_connections;
 	bool                      can_notify_on_unknown_rate;
 
 	static const int sample_tolerance;
@@ -567,9 +578,6 @@ private:
 	void parameter_changed (std::string const& p);
 
 	void connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string, boost::weak_ptr<ARDOUR::Port>, std::string, bool);
-	void resync_latency (bool);
-
-	LatencyRange mtc_slave_latency;
 };
 
 class LIBARDOUR_API LTC_TransportMaster : public TimecodeTransportMaster
@@ -703,14 +711,16 @@ protected:
 	double _bpm;
 
 	void start (MIDI::Parser& parser, samplepos_t timestamp);
-	void contineu (MIDI::Parser& parser, samplepos_t timestamp);
+	void contineu (MIDI::Parser& parser, samplepos_t timestamp); // we can't use continue because it is a C++ keyword
 	void stop (MIDI::Parser& parser, samplepos_t timestamp);
 	void position (MIDI::Parser& parser, MIDI::byte* message, size_t size, samplepos_t timestamp);
-	// we can't use continue because it is a C++ keyword
+
 	void        calculate_one_ppqn_in_samples_at (samplepos_t time);
 	samplepos_t calculate_song_position (uint16_t song_position_in_sixteenth_notes);
 	void        calculate_filter_coefficients (double qpm);
 	void        update_midi_clock (MIDI::Parser& parser, samplepos_t timestamp);
+
+	void connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string, boost::weak_ptr<ARDOUR::Port>, std::string, bool);
 };
 
 class LIBARDOUR_API Engine_TransportMaster : public TransportMaster

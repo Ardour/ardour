@@ -82,8 +82,9 @@ LTC_TransportMaster::create_port ()
 void
 LTC_TransportMaster::set_session (Session *s)
 {
+	TransportMaster::set_session (s);
+
 	session_connections.drop_connections();
-	_session = s;
 
 	if (_session) {
 
