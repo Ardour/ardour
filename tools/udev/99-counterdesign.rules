@@ -1,7 +1,8 @@
-# This is a sample udev file to set "ContourDesign ShuttlePRO v2 and
+# This is a sample udev file to set "ContourDesign ShuttlePRO, ShuttlePRO v2 and
 # shuttleXpress" device permissions on GNU/Linux systems.
 #
 # copy this file to /etc/udev/rules.d/
 
 SUBSYSTEM=="usb", ATTRS{idVendor}=="0b33", ATTRS{idProduct}=="0030", MODE="660", GROUP="audio"
 SUBSYSTEM=="usb", ATTRS{idVendor}=="0b33", ATTRS{idProduct}=="0020", MODE="660", GROUP="audio"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0b33", ATTRS{idProduct}=="0010", MODE="660", GROUP="audio"

@@ -41,7 +41,8 @@ using namespace ArdourSurface;
 #include "pbd/abstract_ui.cc" // instantiate template
 
 static const uint16_t ContourDesign = 0x0b33;
-static const uint16_t ShuttlePRO_id = 0x0030;
+static const uint16_t ShuttlePRO_id = 0x0010;
+static const uint16_t ShuttlePRO_v2_id = 0x0030;
 static const uint16_t ShuttleXpress_id = 0x0020;
 
 static void LIBUSB_CALL event_callback (struct libusb_transfer* transfer);
@@ -312,7 +313,11 @@ ContourDesignControlProtocol::acquire_device ()
 	}
 	else if ((err = get_usb_device (ContourDesign, ShuttlePRO_id, &dev)) == LIBUSB_SUCCESS) {
 		_device_type = ShuttlePRO;
-	} else {
+	}
+	else if ((err = get_usb_device (ContourDesign, ShuttlePRO_v2_id, &dev)) == LIBUSB_SUCCESS) {
+		_device_type = ShuttlePRO_v2;
+	}
+	else {
 		_device_type = None;
 		return err;
 	}

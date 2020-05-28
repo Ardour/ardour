@@ -278,6 +278,11 @@ ContourDesignGUI::update_device_state ()
 {
 	switch (_ccp.device_type ()) {
 	case ContourDesignControlProtocol::ShuttlePRO:
+		_device_state_lbl.set_markup ("<span weight=\"bold\" foreground=\"green\">Found ShuttlePRO</span>");
+		XpressButtonsSensitive (true);
+		ProButtonsSensitive (true);
+		break;
+	case ContourDesignControlProtocol::ShuttlePRO_v2:
 		_device_state_lbl.set_markup ("<span weight=\"bold\" foreground=\"green\">Found ShuttlePRO v2</span>");
 		XpressButtonsSensitive (true);
 		ProButtonsSensitive (true);
