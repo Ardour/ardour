@@ -7059,7 +7059,6 @@ Session::maybe_update_tempo_from_midiclock_tempo (float bpm)
 		TempoSection& ts (_tempo_map->tempo_section_at_sample (0));
 		if (fabs (ts.note_types_per_minute() - bpm) > (0.01 * ts.note_types_per_minute())) {
 			const Tempo tempo (bpm, 4.0, bpm);
-			std::cerr << "new tempo " << bpm << " old " << ts.note_types_per_minute() << std::endl;
 			_tempo_map->replace_tempo (ts, tempo, 0.0, 0.0, AudioTime);
 		}
 	}
