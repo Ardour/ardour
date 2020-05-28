@@ -77,6 +77,7 @@ public:
 	enum DeviceType {
 		None = 0,
 		ShuttlePRO,
+		ShuttlePRO_v2,
 		ShuttleXpress
 	};
 
