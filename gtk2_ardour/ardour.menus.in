@@ -619,7 +619,7 @@
       <menuitem action='forums'/>
 #else
       <menuitem action='chat'/>
-      <menuitem action='manual'/>
+      <menuitem action='tutorial'/>
       <menuitem action='reference'/>
       <menuitem action='forums'/>
       <menuitem action='howto-report'/>

@@ -195,7 +195,7 @@ public:
 	void hide_splash ();
 
 	void launch_chat ();
-	void launch_manual ();
+	void launch_tutorial ();
 	void launch_reference ();
 	void launch_tracker ();
 	void launch_subscribe ();

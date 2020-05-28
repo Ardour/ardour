@@ -65,7 +65,7 @@ ARDOUR_UI::launch_chat ()
 }
 
 void
-ARDOUR_UI::launch_manual ()
+ARDOUR_UI::launch_tutorial ()
 {
 	PBD::open_uri (Config->get_tutorial_manual_url());
 }
