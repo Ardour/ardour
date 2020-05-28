@@ -36,6 +36,7 @@
 #include <string>
 #include <list>
 #include <map> // for multimap
+#include <ostream>
 
 #include "pbd/libpbd_visibility.h"
 
