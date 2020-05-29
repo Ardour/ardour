@@ -4189,6 +4189,24 @@ TempoMap::get_grid (vector<TempoMap::BBTPoint>& points,
 	}
 }
 
+void
+TempoMap::midi_clock_beat_at_of_after (samplepos_t const pos, samplepos_t& clk_pos, uint32_t& clk_beat)
+{
+	/* Sequences are always assumed to start on a MIDI Beat of 0 (ie, the downbeat).
+	 * Each MIDI Beat spans 6 MIDI Clocks. In other words, each MIDI Beat is a 16th note
+	 * (since there are 24 MIDI Clocks in a quarter note, therefore 4 MIDI Beats also fit in a quarter).
+	 * So, a master can sync playback to a resolution of any particular 16th note
+	 *
+	 * from http://midi.teragonaudio.com/tech/midispec/seq.htm
+	 */
+	Glib::Threads::RWLock::ReaderLock lm (lock);
+
+	/* pulse is a whole note */
+	clk_beat = ceil (16.0 * (pulse_at_minute_locked  (_metrics, minute_at_sample (pos))));
+	clk_pos =  sample_at_minute (minute_at_pulse_locked (_metrics, clk_beat / 16.0));
+	assert (clk_pos >= pos);
+}
+
 const TempoSection&
 TempoMap::tempo_section_at_sample (samplepos_t sample) const
 {
