@@ -50,7 +50,7 @@ end
 local hp = {}  -- the biquad high-pass filter instances (DSP)
 local lp = {}  -- the biquad high-pass filter instances (DSP)
 local filt = nil -- the biquad filter instance (GUI, response)
-local cur = {0, 0, 0, 0, 0, 0} -- current parameters
+local cur = {0, 0, 0, 0, 0, 0, 1} -- current parameters
 local lpf = 0.03 -- parameter low-pass filter time-constant
 local chn = 0 -- channel/filter count
 local lpf_chunk = 0 -- chunk size for audio processing when interpolating parameters
@@ -132,6 +132,12 @@ function santize_params (ctrl)
 	-- low pass, clamp range
 	ctrl[5] = math.min (max_freq, math.max (20, ctrl[5]))
 	ctrl[6] = math.min (6, math.max (0.1, ctrl[6]))
+
+	if ctrl[7] <= 0 then -- when disabled
+		ctrl[1] = 0;
+		ctrl[4] = 0;
+	end
+
 	return ctrl
 end
 
@@ -159,21 +165,14 @@ function apply_params (ctrl)
 		return
 	end
 
-	local ho = ctrl[1]
-	local lo = ctrl[4]
-
-	if ctrl[7] <= 0 then -- when disabled
-		ho = 0;
-		lo = 0;
-	end
-
 	-- low-pass filter ctrl parameter values, smooth transition
-	cur[1] = low_pass_filter_param (cur[1], ho,      0.05) -- HP order x-fade
+	cur[1] = low_pass_filter_param (cur[1], ctrl[1], 0.05) -- HP order x-fade
 	cur[2] = low_pass_filter_param (cur[2], ctrl[2], 1.0)  -- HP freq/Hz
 	cur[3] = low_pass_filter_param (cur[3], ctrl[3], 0.01) -- HP quality
-	cur[4] = low_pass_filter_param (cur[4], lo,      0.05) -- LP order x-fade
+	cur[4] = low_pass_filter_param (cur[4], ctrl[4], 0.05) -- LP order x-fade
 	cur[5] = low_pass_filter_param (cur[5], ctrl[5], 1.0)  -- LP freq/Hz
 	cur[6] = low_pass_filter_param (cur[6], ctrl[6], 0.01) -- LP quality
+	cur[7] = ctrl[7]
 
 	for c = 1, chn do
 		for k = 1,4 do
@@ -202,6 +201,18 @@ function dsp_run (ins, outs, n_samples)
 		siz = lpf_chunk
 	end
 
+	if changed == false and cur[1] == 0 and cur[4] == 0 then
+		-- fully bypassed
+		for c = 1, #ins do
+			if ins[c] ~= outs[c] then
+				ARDOUR.DSP.copy_vector (outs[c]:offset (0), ins[c]:offset (0), n_samples)
+			end
+		end
+		-- nothing left to do
+		n_samples = 0
+	end
+
+		-- process all channels
 	while n_samples > 0 do
 		if changed then apply_params (ctrl) end
 		if siz > n_samples then siz = n_samples end
@@ -209,7 +220,6 @@ function dsp_run (ins, outs, n_samples)
 		local ho = math.floor(cur[1])
 		local lo = math.floor(cur[4])
 
-		-- process all channels
 		for c = 1, #ins do
 
 			-- High Pass
@@ -384,11 +394,6 @@ function render_inline (ctx, w, max_h)
 	-- draw transfer function line
 	local ho = math.floor(cur[1])
 	local lo = math.floor(cur[4])
-
-	if cur[7] <= 0 then
-		ho = 0;
-		lo = 0;
-	end
 
 	ctx:set_source_rgba (.8, .8, .8, 1.0)
 	ctx:move_to (-.5, db_to_y (response(ho, lo, freq_at_x (0, w)), h))
