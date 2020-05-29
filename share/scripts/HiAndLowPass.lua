@@ -42,6 +42,7 @@ function dsp_params ()
 		},
 		{ ["type"] = "input", name = "Low Pass Cut off frequency",  min =  20, max = 20000, default = 18000, unit="Hz", logarithmic = true },
 		{ ["type"] = "input", name = "Low Pass Resonance",          min = 0.1, max = 6,     default = .707, logarithmic = true },
+		{ ["type"] = "input", name = "Enable", min = 0, max = 1, default = 1, bypass = true, toggled = true },
 	}
 end
 
@@ -136,7 +137,7 @@ end
 
 -- helper functions for parameter interpolation
 function param_changed (ctrl)
-	for p = 1,6 do
+	for p = 1,7 do
 		if ctrl[p] ~= cur[p] then
 			return true
 		end
@@ -158,11 +159,19 @@ function apply_params (ctrl)
 		return
 	end
 
+	local ho = ctrl[1]
+	local lo = ctrl[4]
+
+	if ctrl[7] <= 0 then -- when disabled
+		ho = 0;
+		lo = 0;
+	end
+
 	-- low-pass filter ctrl parameter values, smooth transition
-	cur[1] = low_pass_filter_param (cur[1], ctrl[1], 0.05) -- HP order x-fade
+	cur[1] = low_pass_filter_param (cur[1], ho,      0.05) -- HP order x-fade
 	cur[2] = low_pass_filter_param (cur[2], ctrl[2], 1.0)  -- HP freq/Hz
 	cur[3] = low_pass_filter_param (cur[3], ctrl[3], 0.01) -- HP quality
-	cur[4] = low_pass_filter_param (cur[4], ctrl[4], 0.05) -- LP order x-fade
+	cur[4] = low_pass_filter_param (cur[4], lo,      0.05) -- LP order x-fade
 	cur[5] = low_pass_filter_param (cur[5], ctrl[5], 1.0)  -- LP freq/Hz
 	cur[6] = low_pass_filter_param (cur[6], ctrl[6], 0.01) -- LP quality
 
@@ -332,7 +341,7 @@ function render_inline (ctx, w, max_h)
 	local ctrl = santize_params (CtrlPorts:array ())
 	-- set filter coefficients if they have changed
 	if param_changed (ctrl) then
-		for k = 1,6 do cur[k] = ctrl[k] end
+		for k = 1,7 do cur[k] = ctrl[k] end
 		filt['hp']:compute (ARDOUR.DSP.BiquadType.HighPass, cur[2], cur[3], 0)
 		filt['lp']:compute (ARDOUR.DSP.BiquadType.LowPass,  cur[5], cur[6], 0)
 	end
@@ -375,6 +384,11 @@ function render_inline (ctx, w, max_h)
 	-- draw transfer function line
 	local ho = math.floor(cur[1])
 	local lo = math.floor(cur[4])
+
+	if cur[7] <= 0 then
+		ho = 0;
+		lo = 0;
+	end
 
 	ctx:set_source_rgba (.8, .8, .8, 1.0)
 	ctx:move_to (-.5, db_to_y (response(ho, lo, freq_at_x (0, w)), h))
