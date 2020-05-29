@@ -1,0 +1,116 @@
+/*
+ * Copyright © 2020 Luciano Iam <lucianito@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+import { AddressableComponent } from '../base/component.js';
+import { Plugin } from './plugin.js';
+import { StateNode } from '../base/protocol.js';
+
+export class Strip extends AddressableComponent {
+
+	constructor (parent, addr, desc) {
+		super(parent, addr);
+		this._plugins = {};
+		this._name = desc[0];
+		this._isVca = desc[1];
+		this._meter = 0;
+		this._gain = 0;
+		this._pan = 0;
+		this._mute = false;
+	}
+
+	get plugins () {
+		return Object.values(this._plugins);
+	}
+
+	get name () {
+		return this._name;
+	}
+
+	get isVca () {
+		return this._isVca;
+	}
+
+	get meter () {
+		return this._meter;
+	}
+
+	get gain () {
+		return this._gain;
+	}
+
+	set gain (db) {
+		this.updateRemote('gain', db, StateNode.STRIP_GAIN);
+	}
+
+	get pan () {
+		return this._pan;
+	}
+
+	set pan (value) {
+		this.updateRemote('pan', value, StateNode.STRIP_PAN);
+	}
+
+	get mute () {
+		return this._mute;
+	}
+
+	set mute (value) {
+		this.updateRemote('mute', value, StateNode.STRIP_MUTE);
+	}
+
+ 	handle (node, addr, val) {
+ 		if (node.startsWith('strip_plugin')) {
+	 		if (node == StateNode.STRIP_PLUGIN_DESCRIPTION) {
+
+	 			this._plugins[addr] = new Plugin(this, addr, val);
+	 			this.notifyObservers('plugins');
+	 		} else {
+	 			const pluginAddr = [addr[0], addr[1]];
+	 			if (pluginAddr in this._plugins) {
+	 				this._plugins[pluginAddr].handle(node, addr, val);
+	 			} else {
+	 				return false;
+	 			}
+	 		}
+
+	 		return true;
+ 		} else {
+ 			switch (node) {
+ 				case StateNode.STRIP_METER:
+	 				this.updateLocal('meter', val[0]);
+ 					break;
+ 				case StateNode.STRIP_GAIN:
+	 				this.updateLocal('gain', val[0]);
+ 					break;
+  				case StateNode.STRIP_PAN:
+	 				this.updateLocal('pan', val[0]);
+ 					break;
+  				case StateNode.STRIP_MUTE:
+	 				this.updateLocal('mute', val[0]);
+ 					break;
+ 				default:
+ 					return false;
+ 			}
+
+  			return true;
+ 		}
+
+ 		return false;
+ 	}
+
+}

@@ -16,13 +16,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-import { ANode, Message } from './message.js';
+import { Message } from './protocol.js';
 
 export class MessageChannel {
 
 	constructor (host) {
 		// https://developer.mozilla.org/en-US/docs/Web/API/URL/host
 		this._host = host;
+		this._pending = null;
 	}
 
 	async open () {
@@ -34,7 +35,14 @@ export class MessageChannel {
 			this._socket.onerror = (error) => this.onError(error);
 
 			this._socket.onmessage = (event) => {
-				this.onMessage (Message.fromJsonText(event.data));
+				const msg = Message.fromJsonText(event.data);
+
+				if (this._pending && (this._pending.nodeAddrId == msg.nodeAddrId)) {
+					this._pending.resolve(msg);
+					this._pending = null;
+				} else {
+					this.onMessage(msg, true);
+				}
 			};
 
 			this._socket.onopen = resolve;
@@ -43,18 +51,31 @@ export class MessageChannel {
 
 	close () {
 		this._socket.close();
+
+		if (this._pending) {
+			this._pending.reject(Error('MessageChannel: socket closed awaiting response'));
+			this._pending = null;
+		}
 	}
 
 	send (msg) {
 		if (this._socket) {
 			this._socket.send(msg.toJsonText());
+			this.onMessage(msg, false);
 		} else {
-			throw Error('MessageChannel: cannot call send() before open()');
+			this.onError(Error('MessageChannel: cannot call send() before open()'));
 		}
+	}
+
+	async sendAndReceive (msg) {
+		return new Promise((resolve, reject) => {
+			this._pending = {resolve: resolve, reject: reject, nodeAddrId: msg.nodeAddrId};
+			this.send(msg);
+		});
 	}
 
 	onClose () {}
 	onError (error) {}
-	onMessage (msg) {}
+	onMessage (msg, inbound) {}
 
 }
