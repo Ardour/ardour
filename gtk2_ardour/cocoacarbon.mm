@@ -78,16 +78,28 @@ set_language_preference ()
 	 */
 
 	NSArray* languages = [[NSUserDefaults standardUserDefaults] objectForKey:@"AppleLanguages"];
-	
+
 	/* push into LANGUAGE */
 
-	if (languages && [languages count] > 0) {
+	int count;
 
-		int i, count = [languages count];
+	if (languages && ((count = [languages count]) > 0)) {
+
 		bool have_translatable_languages = true;
 
-		for (i = 0; i < count; ++i) {
-			if (i == 0 && [[languages objectAtIndex:i] isEqualToString:@"en-US"]) {
+		const char *cstr = [[languages objectAtIndex:0] UTF8String];
+		const size_t len = strlen (cstr);
+
+		if (len > 1 && cstr[0] == 'e' && cstr[1] == 'n') {
+			if (len == 2) {
+				/* primary language is english (no region). Do not set
+				   LANGUAGE, gettext should not translate
+				*/
+				have_translatable_languages = false;
+				cout << "User has en as primary language choice. " << PROGRAM_NAME << " will not be translated\n";
+				break;
+			}
+			if (len == 5 && cstr[len-2] == 'U' && cstr[len-1] == 'S') {
 				/* primary language choice is english (US). Stop looking, and do not set
 				   LANGUAGE. gettext needs to just skip translation entirely.
 				*/
@@ -95,6 +107,10 @@ set_language_preference ()
 				cout << "User has en_US as primary language choice. " << PROGRAM_NAME << " will not be translated\n";
 				break;
 			}
+
+			/* else en-<FOO> ... still leave the door open for translation
+			   to other version of english (e.g. en_IN, en_GB, etc)
+			*/
 		}
 
 		if (have_translatable_languages) {
