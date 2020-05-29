@@ -16,10 +16,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
- // This example does not call the API methods in control.js,
- // instead it couples the widgets directly to the message stream
-
-import { ANode, Message } from '/shared/message.js';
 import { ArdourClient } from '/shared/ardour.js';
 
 import { Switch, DiscreteSlider, ContinuousSlider, LogarithmicSlider,
@@ -29,108 +25,127 @@ import { Switch, DiscreteSlider, ContinuousSlider, LogarithmicSlider,
 
     const MAX_LOG_LINES = 1000;
     
-    const ardour = new ArdourClient(location.host);
-    const widgets = {};
-
-    main();
+    const ardour = new ArdourClient();
 
     function main () {
+        ardour.handlers = {
+            onConnected: (connected) => {
+                if (connected) {
+                    log('Client connected', 'info');
+                } else {
+                    log('Client disconnected', 'error');
+                }
+            },
+
+            onMessage: (message, inbound) => {
+                if (inbound) {
+                    log(`↙ ${message}`, 'message-in');
+                } else {
+                    log(`↗ ${message}`, 'message-out');
+                }
+            }
+        };
+
         ardour.getSurfaceManifest().then((manifest) => {
             const div = document.getElementById('manifest');
-            div.innerHTML = `${manifest.name.toUpperCase()} v${manifest.version} — ${manifest.description}`;
+            div.innerHTML = manifest.name.toUpperCase()
+                            + ' v' + manifest.version + ' — ' + manifest.description;
         });
 
-        ardour.addCallbacks({
-            onConnected: (error) => { log('Client connected', 'info'); },
-            onDisconnected: (error) => { log('Client disconnected', 'error'); },
-            onMessage: processMessage,
-            onStripDescription: createStrip,
-            onStripPluginDescription: createStripPlugin,
-            onStripPluginParamDescription: createStripPluginParam
+        ardour.mixer.on('ready', () => {
+            const div = document.getElementById('strips');
+            for (const strip of ardour.mixer.strips) {
+                createStrip(strip, div);
+            }
         });
-        
+
         ardour.connect();
     }
 
-    function createStrip (stripId, name, isVca) {
-        const domId = `strip-${stripId}`;
+    function createStrip (strip, parentDiv) {
+        const domId = `strip-${strip.addrId}`;
         if (document.getElementById(domId) != null) {
             return;
         }
 
-        const strips = document.getElementById('strips');
-        const div = createElem(`<div class="strip" id="${domId}"></div>`, strips);
-        createElem(`<label class="comp-name" for="${domId}">∿&emsp;&emsp;${name}</label>`, div);
+        const div = createElem(`<div class="strip" id="${domId}"></div>`, parentDiv);
+        createElem(`<label class="comp-name" for="${domId}">∿&emsp;&emsp;${strip.name}</label>`, div);
         
         // meter
         const meter = new StripMeter();
         meter.el.classList.add('slider-meter');
         meter.appendTo(div);
-        connectWidget(meter, ANode.STRIP_METER, stripId);
+        bind(strip, 'meter', meter);
 
         // gain
         let holder = createElem(`<div class="strip-slider"></div>`, div); 
         createElem(`<label>Gain</label>`, holder);
         const gain = new StripGainSlider();
         gain.appendTo(holder);
-        connectWidget(gain, ANode.STRIP_GAIN, stripId);
+        bind(strip, 'gain', gain);
 
-        if (!isVca) {
+        if (!strip.isVca) {
             // pan
             holder = createElem(`<div class="strip-slider"></div>`, div); 
             createElem(`<label>Pan</label>`, holder);
             const pan = new StripPanSlider();
             pan.appendTo(holder);
-            connectWidget(pan, ANode.STRIP_PAN, stripId);
+            bind(strip, 'pan', pan);
+        }
+
+        for (const plugin of strip.plugins) {
+            createStripPlugin(plugin, div);
         }
     }
 
-    function createStripPlugin (stripId, pluginId, name) {
-        const domId = `plugin-${stripId}-${pluginId}`;
+    function createStripPlugin (plugin, parentDiv) {
+        const domId = `plugin-${plugin.addrId}`;
         if (document.getElementById(domId) != null) {
             return;
         }
 
-        const strip = document.getElementById(`strip-${stripId}`);
-        const div = createElem(`<div class="plugin" id="${domId}"></div>`, strip);
+        const div = createElem(`<div class="plugin" id="${domId}"></div>`, parentDiv);
         createElem(`<label class="comp-name">⨍&emsp;&emsp;${name}</label>`, div);
         
         const enable = new Switch();
         enable.el.classList.add('plugin-enable');
         enable.appendTo(div);
-        connectWidget(enable, ANode.STRIP_PLUGIN_ENABLE, stripId, pluginId);
+        bind(plugin, 'enable', enable);
+
+        for (const param of plugin.parameters) {
+            createStripPluginParam(param, div);
+        }
     }
 
-    function createStripPluginParam (stripId, pluginId, paramId, name, valueType, min, max, isLog) {
-        const domId = `param-${stripId}-${pluginId}-${paramId}`;
+    function createStripPluginParam (param, parentDiv) {
+        const domId = `param-${param.addrId}`;
         if (document.getElementById(domId) != null) {
             return;
         }
 
-        let param, cssClass;
+        let widget, cssClass;
 
-        if (valueType == 'b') {
+        if (param.valueType.isBoolean) {
             cssClass = 'boolean';
-            param = new Switch();
-        } else if (valueType == 'i') {
+            widget = new Switch();
+        } else if (param.valueType.isInteger) {
             cssClass = 'discrete';
-            param = new DiscreteSlider(min, max);
-        } else if (valueType == 'd') {
+            widget = new DiscreteSlider(param.min, param.max);
+        } else if (param.valueType.isDouble) {
             cssClass = 'continuous';
-            if (isLog) {
-                param = new LogarithmicSlider(min, max);
+            if (param.isLog) {
+                widget = new LogarithmicSlider(param.min, param.max);
             } else {
-                param = new ContinuousSlider(min, max);
+                widget = new ContinuousSlider(param.min, param.max);
             }
         }
 
-        const plugin = document.getElementById(`plugin-${stripId}-${pluginId}`);
-        const div = createElem(`<div class="plugin-param ${cssClass}" id="${domId}"></div>`, plugin);
-        createElem(`<label for="${domId}">${name}</label>`, div);
+        const div = createElem(`<div class="plugin-param ${cssClass}" id="${domId}"></div>`, parentDiv);
+        createElem(`<label for="${domId}">${param.name}</label>`, div);
 
-        param.el.name = domId;
-        param.appendTo(div);
-        connectWidget(param, ANode.STRIP_PLUGIN_PARAM_VALUE, stripId, pluginId, paramId);
+        widget.el.name = domId;
+        widget.appendTo(div);
+        bind(param, 'value', widget);
     }
 
     function createElem (html, parent) {
@@ -146,24 +161,12 @@ import { Switch, DiscreteSlider, ContinuousSlider, LogarithmicSlider,
         return elem;
     }
 
-    function connectWidget (widget, node, ...addr) {
-        const nodeAddrId = Message.nodeAddrId(node, addr);
-
-        widgets[nodeAddrId] = widget;
-
-        widget.callback = (val) => {
-            const msg = new Message(node, addr, [val]);
-            log(`↗ ${msg}`, 'message-out');
-            ardour.send(msg);
-        };
-    }
-
-    function processMessage (msg) {
-        log(`↙ ${msg}`, 'message-in');
-
-        if (widgets[msg.nodeAddrId]) {
-            widgets[msg.nodeAddrId].value = msg.val[0];
-        }
+    function bind (component, property, widget) {
+        // ardour → ui
+        widget.value = component[property];
+        component.on(property, (value) => widget.value = value);
+        // ui → ardour
+        widget.callback = (value) => component[property] = value;
     }
 
     function log (message, className) {
@@ -180,5 +183,7 @@ import { Switch, DiscreteSlider, ContinuousSlider, LogarithmicSlider,
         output.appendChild(pre);
         output.scrollTop = output.scrollHeight;
     }
+
+    main();
 
 })();

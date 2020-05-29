@@ -18,7 +18,7 @@
 
 export const JSON_INF = 1.0e+128;
 
-export const ANode = Object.freeze({
+export const StateNode = Object.freeze({
 	TEMPO:                          'tempo',
 	POSITION_TIME:                  'position_time',
 	TRANSPORT_ROLL:                 'transport_roll',

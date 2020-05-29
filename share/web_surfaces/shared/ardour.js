@@ -16,40 +16,54 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-import { ControlMixin } from './control.js';
-import { MetadataMixin } from './metadata.js';
-import { Message } from './message.js';
-import { MessageChannel } from './channel.js';
+import { MessageChannel } from './base/channel.js';
+import { StateNode } from './base/protocol.js';
+import { Mixer } from './components/mixer.js';
+import { Transport } from './components/transport.js';
 
-// See ControlMixin and MetadataMixin for available APIs
-// See ArdourCallback for an example callback implementation
+export class ArdourClient {
 
-class BaseArdourClient {
-
-	constructor (host) {
-		this._callbacks = [];
+	constructor (handlers, options) {
+		this._options = options || {};
+		this._components = [];
 		this._connected = false;
-		this._pendingRequest = null;
-		this._channel = new MessageChannel(host || location.host);
 
-		this._channel.onError = (error) => {
-			this._fireCallbacks('error', error);
+		this._channel = new MessageChannel(this._options['host'] || location.host);
+
+		this._channel.onMessage = (msg, inbound) => {
+			this._handleMessage(msg, inbound);
 		};
 
-		this._channel.onMessage = (msg) => {
-			this._onChannelMessage(msg);
-		};
+		if (!('components' in this._options) || this._options['components']) {
+			this._mixer = new Mixer(this._channel);
+			this._transport = new Transport(this._channel);
+			this._components.push(this._mixer, this._transport);
+		}
+
+		this.handlers = handlers;
 	}
 
-	addCallbacks (callbacks) {
-		this._callbacks.push(callbacks);
+	set handlers (handlers) {
+		this._handlers = handlers || {};
+		this._channel.onError = this._handlers['onError'] || console.log;
 	}
+
+	// Access to the object-oriented API (enabled by default)
+
+	get mixer () {
+		return this._mixer;
+	}
+
+	get transport () {
+		return this._transport;
+	}
+
+	// Low level control messages flow through a WebSocket
 
 	async connect (autoReconnect) {
 		this._channel.onClose = async () => {
 			if (this._connected) {
-				this._fireCallbacks('disconnected');
-				this._connected = false;
+				this._setConnected(false);
 			}
 
 			if ((autoReconnect == null) || autoReconnect) {
@@ -71,50 +85,69 @@ class BaseArdourClient {
 		this._channel.send(msg);
 	}
 
-	// Private methods
-	
-	async _connect () {
-		await this._channel.open();
-		this._connected = true;
-		this._fireCallbacks('connected');
+	async sendAndReceive (msg) {
+		return await this._channel.sendAndReceive(msg);
 	}
 
-	_send (node, addr, val) {
-		const msg = new Message(node, addr, val);
-		this.send(msg);
-		return msg;
-	}
+	// Surface metadata API goes over HTTP
 
-	async _sendAndReceive (node, addr, val) {
-		return new Promise((resolve, reject) => {
-			const nodeAddrId = this._send(node, addr, val).nodeAddrId;
-			this._pendingRequest = {resolve: resolve, nodeAddrId: nodeAddrId};
-		});
-	}
-
-	async _sendRecvSingle (node, addr, val) {
-		return (await this._sendAndReceive (node, addr, val))[0];
-	}
-
-	_onChannelMessage (msg) {
-		if (this._pendingRequest && (this._pendingRequest.nodeAddrId == msg.nodeAddrId)) {
-			this._pendingRequest.resolve(msg.val);
-			this._pendingRequest = null;
+	async getAvailableSurfaces () {
+		const response = await fetch('/surfaces.json');
+		
+		if (response.status == 200) {
+			return await response.json();
 		} else {
-			this._fireCallbacks('message', msg);
-			this._fireCallbacks(msg.node, ...msg.addr, ...msg.val);
+			throw this._fetchResponseStatusError(response.status);
 		}
 	}
 
-	_fireCallbacks (name, ...args) {
-		// name_with_underscores -> onNameWithUnderscores
-		const method = 'on' + name.split('_').map((s) => {
-			return s[0].toUpperCase() + s.slice(1).toLowerCase();
-		}).join('');
+	async getSurfaceManifest () {
+		const response = await fetch('manifest.xml');
 
-		for (const callbacks of this._callbacks) {
-			if (method in callbacks) {
-				callbacks[method](...args)
+		if (response.status == 200) {
+			const manifest = {};
+			const xmlText = await response.text();
+			const xmlDoc = new DOMParser().parseFromString(xmlText, 'text/xml');
+			
+			for (const child of xmlDoc.children[0].children) {
+				manifest[child.tagName.toLowerCase()] = child.getAttribute('value');
+			}
+
+			return manifest;
+		} else {
+			throw this._fetchResponseStatusError(response.status);
+		}
+	}
+
+	// Private methods
+	
+	async _sleep (t) {
+		return new Promise(resolve => setTimeout(resolve, t));
+	}
+
+	async _connect () {
+		await this._channel.open();
+		this._setConnected(true);
+	}
+
+	_setConnected (connected) {
+		this._connected = connected;
+		
+		if (this._handlers['onConnected']) {
+			this._handlers['onConnected'](this._connected);
+		}
+	}
+
+	_handleMessage (msg, inbound) {
+		if (this._handlers['onMessage']) {
+			this._handlers['onMessage'](msg, inbound);
+		}
+
+		if (inbound) {
+			for (const component of this._components) {
+				if (component.handleMessage(msg)) {
+					break;
+				}
 			}
 		}
 	}
@@ -123,21 +156,4 @@ class BaseArdourClient {
 		return new Error(`HTTP response status ${status}`);
 	}
 
-	async _sleep (t) {
-		return new Promise(resolve => setTimeout(resolve, 1000));
-	}
-
-}
-
-export class ArdourClient extends mixin(BaseArdourClient, ControlMixin, MetadataMixin) {}
-
-function mixin (dstClass, ...classes) {
-	for (const srcClass of classes) {
-		for (const propName of Object.getOwnPropertyNames(srcClass.prototype)) {
-			if (propName != 'constructor') {
-				dstClass.prototype[propName] = srcClass.prototype[propName];
-			}
-		}
-	}
-	return dstClass;
 }

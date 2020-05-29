@@ -55,11 +55,6 @@ WebsocketsDispatcher::dispatch (Client client, const NodeStateMessage& msg)
 void
 WebsocketsDispatcher::update_all_nodes (Client client)
 {
-	update (client, Node::tempo, globals ().tempo ());
-	update (client, Node::position_time, globals ().position_time ());
-	update (client, Node::transport_roll, globals ().transport_roll ());
-	update (client, Node::record_state, globals ().record_state ());
-
 	for (uint32_t strip_n = 0; strip_n < strips ().strip_count (); ++strip_n) {
 		boost::shared_ptr<Stripable> strip = strips ().nth_strip (strip_n);
 
@@ -140,6 +135,11 @@ WebsocketsDispatcher::update_all_nodes (Client client)
 			}
 		}
 	}
+
+	update (client, Node::tempo, globals ().tempo ());
+	update (client, Node::position_time, globals ().position_time ());
+	update (client, Node::transport_roll, globals ().transport_roll ());
+	update (client, Node::record_state, globals ().record_state ());
 }
 
 void

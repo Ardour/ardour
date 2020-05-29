@@ -21,11 +21,11 @@ import { ArdourClient } from '/shared/ardour.js';
 (() => {
 
     const dom = {
-        main: document.getElementById('main'),
-        time: document.getElementById('time'),
-        roll: document.getElementById('roll'),
-        record: document.getElementById('record'),
-        fullscreen: document.getElementById('fullscreen')
+        main       : document.getElementById('main'),
+        time       : document.getElementById('time'),
+        roll       : document.getElementById('roll'),
+        record     : document.getElementById('record'),
+        fullscreen : document.getElementById('fullscreen')
     };
 
     const ardour = new ArdourClient();
@@ -36,12 +36,9 @@ import { ArdourClient } from '/shared/ardour.js';
     function main () {
         addDomEventListeners();
 
-        ardour.addCallbacks({
-            onError: console.log,
-            onPositionTime: setPosition,
-            onTransportRoll: setRolling,
-            onRecordState: setRecord
-        });
+        ardour.transport.on('time', setPosition);
+        ardour.transport.on('roll', setRolling);
+        ardour.transport.on('record', setRecord);
 
         ardour.connect();
     }
@@ -52,14 +49,14 @@ import { ArdourClient } from '/shared/ardour.js';
 
         const roll = () => {
             setRolling(!_rolling);
-            ardour.setTransportRoll(_rolling);
+            ardour.transport.roll = _rolling;
         };
 
         dom.roll.addEventListener(touchOrClick, roll);
 
         const record = () => {
             setRecord(!_record);
-            ardour.setRecordState(_record);
+            ardour.transport.record = _record;
         };
 
         dom.record.addEventListener(touchOrClick, record);
