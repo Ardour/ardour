@@ -38,7 +38,7 @@ export class Transport extends RootComponent {
 	}
 
 	set tempo (bpm) {
-		this.updateRemote('tempo', bpm, StateNode.TEMPO);
+		this.updateRemote('tempo', bpm, StateNode.TRANSPORT_TEMPO);
 	}
 
 	get roll () {
@@ -54,21 +54,21 @@ export class Transport extends RootComponent {
 	}
 
 	set record (value) {
-		this.updateRemote('record', value, StateNode.RECORD_STATE);
+		this.updateRemote('record', value, StateNode.TRANSPORT_RECORD);
 	}
 
  	handle (node, addr, val) {
  		switch (node) {
- 			case StateNode.TEMPO:
+ 			case StateNode.TRANSPORT_TEMPO:
  				this.updateLocal('tempo', val[0]);
  				break;
- 			case StateNode.POSITION_TIME:
+ 			case StateNode.TRANSPORT_TIME:
  				this.updateLocal('time', val[0]);
  				break;
  			case StateNode.TRANSPORT_ROLL:
  				this.updateLocal('roll', val[0]);
  				break;
- 			case StateNode.RECORD_STATE:
+ 			case StateNode.TRANSPORT_RECORD:
  				this.updateLocal('record', val[0]);
  				break;
  			default:

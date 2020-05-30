@@ -37,14 +37,14 @@ using namespace ArdourSurface;
 ArdourWebsockets::ArdourWebsockets (Session& s)
     : ControlProtocol (s, X_ (surface_name))
     , AbstractUI<ArdourWebsocketsUIRequest> (name ())
-    , _strips (*this)
-    , _globals (*this)
+    , _mixer (*this)
+    , _transport (*this)
     , _feedback (*this)
     , _server (*this)
     , _dispatcher (*this)
 {
-	_components.push_back (&_strips);
-	_components.push_back (&_globals);
+	_components.push_back (&_mixer);
+	_components.push_back (&_transport);
 	_components.push_back (&_server);
 	_components.push_back (&_feedback);
 	_components.push_back (&_dispatcher);

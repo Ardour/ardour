@@ -56,30 +56,12 @@ export class Mixer extends RootComponent {
 	 		}
 
 	 		return true;
+ 		} else {
+ 			// all initial strip description messages have been received at this point
+			if (!this._ready) {
+	 			this.updateLocal('ready', true);
+			}
  		}
-
- 		/*
-		   RECORD_STATE signals all mixer initial state has been sent because
-		   it is the last message to arrive immediately after client connection,
-		   see WebsocketsDispatcher::update_all_nodes() in dispatcher.cc
-		  
-		   For this to work the mixer component needs to receive incoming
-		   messages before the transport component, otherwise the latter would
-		   consume RECORD_STATE.
-		  
-		   Some ideas for a better implementation of mixer readiness detection:
-		
- 		   - Implement message bundles like OSC to pack all initial state
- 		     updates into a single unit
- 		   - Move *_DESCRIPTION messages to single message with val={JSON data},
- 		     currently val only supports primitive data types
- 		   - Append a termination or mixer ready message in update_all_nodes(),
- 		     easiest but the least elegant
-		*/
-		
-		if (!this._ready && (node == StateNode.RECORD_STATE)) {
- 			this.updateLocal('ready', true);
-		}
 
  		return false;
  	}

@@ -31,10 +31,10 @@
 
 namespace Node
 {
-	const std::string tempo                          = "tempo";
-	const std::string position_time                  = "position_time";
+	const std::string transport_tempo                = "transport_tempo";
+	const std::string transport_time                 = "transport_time";
 	const std::string transport_roll                 = "transport_roll";
-	const std::string record_state                   = "record_state";
+	const std::string transport_record               = "transport_record";
 	const std::string strip_description              = "strip_description";
 	const std::string strip_meter                    = "strip_meter";
 	const std::string strip_gain                     = "strip_gain";

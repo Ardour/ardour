@@ -16,18 +16,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _ardour_surface_websockets_strips_h_
-#define _ardour_surface_websockets_strips_h_
+#ifndef _ardour_surface_websockets_mixer_h_
+#define _ardour_surface_websockets_mixer_h_
 
 #include "component.h"
 #include "typed_value.h"
 
-class ArdourStrips : public SurfaceComponent
+class ArdourMixer : public SurfaceComponent
 {
 public:
-	ArdourStrips (ArdourSurface::ArdourWebsockets& surface)
+	ArdourMixer (ArdourSurface::ArdourWebsockets& surface)
 	    : SurfaceComponent (surface){};
-	virtual ~ArdourStrips (){};
+	virtual ~ArdourMixer (){};
 
 	int start ();
 	int stop ();
@@ -65,4 +65,4 @@ private:
 	StripableVector                                           _strips;
 };
 
-#endif // _ardour_surface_websockets_strips_h_
+#endif // _ardour_surface_websockets_mixer_h_

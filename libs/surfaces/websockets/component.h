@@ -31,8 +31,8 @@ namespace ArdourSurface
 class ArdourWebsockets;
 }
 
-class ArdourStrips;
-class ArdourGlobals;
+class ArdourMixer;
+class ArdourTransport;
 class WebsocketsServer;
 class WebsocketsDispatcher;
 
@@ -57,8 +57,8 @@ public:
 	PBD::EventLoop*              event_loop () const;
 	Glib::RefPtr<Glib::MainLoop> main_loop () const;
 	ARDOUR::Session&             session () const;
-	ArdourStrips&                strips () const;
-	ArdourGlobals&               globals () const;
+	ArdourMixer&                mixer () const;
+	ArdourTransport&             transport () const;
 	WebsocketsServer&            server () const;
 	WebsocketsDispatcher&        dispatcher () const;
 
