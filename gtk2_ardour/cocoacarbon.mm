@@ -97,15 +97,12 @@ set_language_preference ()
 				*/
 				have_translatable_languages = false;
 				cout << "User has en as primary language choice. " << PROGRAM_NAME << " will not be translated\n";
-				break;
-			}
-			if (len == 5 && cstr[len-2] == 'U' && cstr[len-1] == 'S') {
+			} else if (len == 5 && cstr[len-2] == 'U' && cstr[len-1] == 'S') {
 				/* primary language choice is english (US). Stop looking, and do not set
 				   LANGUAGE. gettext needs to just skip translation entirely.
 				*/
 				have_translatable_languages = false;
 				cout << "User has en_US as primary language choice. " << PROGRAM_NAME << " will not be translated\n";
-				break;
 			}
 
 			/* else en-<FOO> ... still leave the door open for translation
