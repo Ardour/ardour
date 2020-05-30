@@ -470,6 +470,7 @@ AudioEngine::process_callback (pframes_t nframes)
 		Freewheel (nframes);
 	} else {
 		samplepos_t start_sample = _session->transport_sample ();
+		samplecnt_t pre_roll = _session->remaining_latency_preroll ();
 
 		if (Port::cycle_nframes () <= nframes) {
 			_session->process (Port::cycle_nframes ());
@@ -495,6 +496,8 @@ AudioEngine::process_callback (pframes_t nframes)
 		/* send timecode for current cycle */
 		samplepos_t end_sample = _session->transport_sample ();
 		_session->send_ltc_for_cycle (start_sample, end_sample, nframes);
+		/* and MIDI Clock */
+		_session->send_mclk_for_cycle (start_sample, end_sample, nframes, pre_roll);
 	}
 
 	if (_freewheeling) {

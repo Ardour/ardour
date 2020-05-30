@@ -37,60 +37,36 @@ namespace ARDOUR
 class Session;
 class MidiPort;
 
-class LIBARDOUR_API MidiClockTicker : public SessionHandlePtr, boost::noncopyable
+class LIBARDOUR_API MidiClockTicker : boost::noncopyable
 {
 public:
-	MidiClockTicker ();
+	MidiClockTicker (Session*);
 	virtual ~MidiClockTicker ();
 
-	void tick (const samplepos_t& transport_samples, pframes_t nframes);
-
-	bool has_midi_port () const
-	{
-		return _midi_port != 0;
-	}
-
-	void set_session (Session* s);
-	void session_going_away ();
-
-	/// slot for the signal session::MIDIClock_PortChanged
-	void update_midi_clock_port ();
-
-	/// slot for the signal session::TransportStateChange
-	void transport_state_changed ();
-
-	/// slot for the signal session::TransportLooped
-	void transport_looped ();
-
-	/// slot for the signal session::Located
-	void session_located ();
-
-	/// pulses per quarter note (default 24)
-	void set_ppqn (int ppqn)
-	{
-		_ppqn = ppqn;
-	}
+	void tick (samplepos_t, samplepos_t, pframes_t, samplecnt_t);
 
 private:
 	boost::shared_ptr<MidiPort> _midi_port;
 
-	int    _ppqn;
-	double _last_tick;
-	bool   _send_pos;
-	bool   _send_state;
-
-	class Position;
-	boost::scoped_ptr<Position> _pos;
-
-	double one_ppqn_in_samples (samplepos_t transport_position);
+	void   reset ();
+	double one_ppqn_in_samples (samplepos_t transport_position) const;
 
 	void send_midi_clock_event (pframes_t offset, pframes_t nframes);
 	void send_start_event (pframes_t offset, pframes_t nframes);
 	void send_continue_event (pframes_t offset, pframes_t nframes);
 	void send_stop_event (pframes_t offset, pframes_t nframes);
 	void send_position_event (uint32_t midi_clocks, pframes_t offset, pframes_t nframes);
+
+	bool        _rolling;
+	double      _next_tick;
+	uint32_t    _beat_pos;
+	uint32_t    _clock_cnt;
+	samplepos_t _transport_pos;
+
+	ARDOUR::Session* _session;
+	LatencyRange     _mclk_out_latency;
 };
+
 } // namespace ARDOUR
-  // namespace
 
 #endif /* __libardour_ticker_h__ */

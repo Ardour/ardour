@@ -147,12 +147,7 @@ Session::process (pframes_t nframes)
 	 */
 
 	try {
-		if (!_silent && !_engine.freewheeling() && Config->get_send_midi_clock() && (transport_speed() == 1.0f || transport_speed() == 0.0f) && midi_clock->has_midi_port()) {
-			midi_clock->tick (transport_at_start, nframes);
-		}
-
 		_scene_changer->run (transport_at_start, transport_at_start + nframes);
-
 	} catch (...) {
 		/* don't bother with a message */
 	}

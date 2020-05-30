@@ -78,7 +78,7 @@ MidiPortManager::create_ports ()
 	p = AudioEngine::instance()->register_output_port (DataType::MIDI, X_("MTC out"));
 	_mtc_output_port= boost::dynamic_pointer_cast<MidiPort> (p);
 
-	p = AudioEngine::instance()->register_output_port (DataType::MIDI, X_("MIDI Clock out"));
+	p = AudioEngine::instance()->register_output_port (DataType::MIDI, X_("MIDI Clock out"), false, TransportGenerator);
 	_midi_clock_output_port= boost::dynamic_pointer_cast<MidiPort> (p);
 }
 
