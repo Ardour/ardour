@@ -38,11 +38,13 @@ LoudnessReader::LoudnessReader (float sample_rate, unsigned int channels, sample
 		using namespace Vamp::HostExt;
 		PluginLoader* loader (PluginLoader::getInstance ());
 		_ebur_plugin = loader->loadPlugin ("libardourvampplugins:ebur128", sample_rate, PluginLoader::ADAPT_ALL_SAFE);
-		assert (_ebur_plugin);
-		_ebur_plugin->reset ();
-		if (!_ebur_plugin->initialise (channels, _bufsize, _bufsize)) {
-			delete _ebur_plugin;
-			_ebur_plugin = 0;
+		assert (_ebur_plugin); // should always be available
+		if (_ebur_plugin) {
+			_ebur_plugin->reset ();
+			if (!_ebur_plugin->initialise (channels, _bufsize, _bufsize)) {
+				delete _ebur_plugin;
+				_ebur_plugin = 0;
+			}
 		}
 	}
 
@@ -50,6 +52,10 @@ LoudnessReader::LoudnessReader (float sample_rate, unsigned int channels, sample
 		using namespace Vamp::HostExt;
 		PluginLoader* loader (PluginLoader::getInstance ());
 		Vamp::Plugin* dbtp_plugin = loader->loadPlugin ("libardourvampplugins:dBTP", sample_rate, PluginLoader::ADAPT_ALL_SAFE);
+		assert (dbtp_plugin); // should always be available
+		if (!dbtp_plugin) {
+			continue;
+		}
 		dbtp_plugin->reset ();
 		if (!dbtp_plugin->initialise (1, _bufsize, _bufsize)) {
 			delete dbtp_plugin;
