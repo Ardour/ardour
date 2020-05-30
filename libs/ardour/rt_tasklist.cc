@@ -16,6 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cerrno>
+#include <cstring>
 
 #include "pbd/pthread_utils.h"
 
@@ -91,7 +93,7 @@ RTTaskList::reset_thread_list ()
 			pthread_attr_init (&attr);
 			pthread_attr_setstacksize (&attr, PBD_RT_STACKSIZE_HELP);
 			if (pthread_create (&thread_id, &attr, _thread_run, this)) {
-				PBD::fatal << _("Cannot create thread for TaskList!") << endmsg;
+				PBD::fatal << _("Cannot create thread for TaskList! (%s") << strerror(errno) << ')' << endmsg;
 				/* NOT REACHED */
 			}
 			pthread_attr_destroy (&attr);
