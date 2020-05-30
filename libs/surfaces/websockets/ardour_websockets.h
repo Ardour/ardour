@@ -35,9 +35,9 @@
 #include "component.h"
 #include "dispatcher.h"
 #include "feedback.h"
-#include "globals.h"
+#include "transport.h"
 #include "server.h"
-#include "strips.h"
+#include "mixer.h"
 
 namespace ArdourSurface
 {
@@ -65,13 +65,13 @@ public:
 	{
 		return *session;
 	}
-	ArdourStrips& strips_component ()
+	ArdourMixer& mixer_component ()
 	{
-		return _strips;
+		return _mixer;
 	}
-	ArdourGlobals& globals_component ()
+	ArdourTransport& transport_component ()
 	{
-		return _globals;
+		return _transport;
 	}
 	WebsocketsServer& server_component ()
 	{
@@ -93,8 +93,8 @@ protected:
 	void do_request (ArdourWebsocketsUIRequest*);
 
 private:
-	ArdourStrips                   _strips;
-	ArdourGlobals                  _globals;
+	ArdourMixer                    _mixer;
+	ArdourTransport                _transport;
 	ArdourFeedback                 _feedback;
 	WebsocketsServer               _server;
 	WebsocketsDispatcher           _dispatcher;

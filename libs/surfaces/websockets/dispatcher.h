@@ -41,9 +41,9 @@ private:
 
 	static NodeMethodMap _node_to_method;
 
-	void tempo_handler (Client, const NodeStateMessage&);
+	void transport_tempo_handler (Client, const NodeStateMessage&);
 	void transport_roll_handler (Client client, const NodeStateMessage&);
-	void record_state_handler (Client client, const NodeStateMessage&);
+	void transport_record_handler (Client client, const NodeStateMessage&);
 	void strip_gain_handler (Client, const NodeStateMessage&);
 	void strip_pan_handler (Client, const NodeStateMessage&);
 	void strip_mute_handler (Client, const NodeStateMessage&);

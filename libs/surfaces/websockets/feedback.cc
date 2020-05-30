@@ -22,10 +22,10 @@
 #include "ardour/tempo.h"
 
 #include "feedback.h"
-#include "globals.h"
+#include "transport.h"
 #include "server.h"
 #include "state.h"
-#include "strips.h"
+#include "mixer.h"
 
 // TO DO: make this configurable
 #define POLL_INTERVAL_MS 100
@@ -35,21 +35,21 @@ using namespace ARDOUR;
 struct TransportObserver {
 	void operator() (ArdourFeedback* p)
 	{
-		p->update_all (Node::transport_roll, p->globals ().transport_roll ());
+		p->update_all (Node::transport_roll, p->transport ().roll ());
 	}
 };
 
 struct RecordStateObserver {
 	void operator() (ArdourFeedback* p)
 	{
-		p->update_all (Node::record_state, p->globals ().record_state ());
+		p->update_all (Node::transport_record, p->transport ().record ());
 	}
 };
 
 struct TempoObserver {
 	void operator() (ArdourFeedback* p)
 	{
-		p->update_all (Node::tempo, p->globals ().tempo ());
+		p->update_all (Node::transport_tempo, p->transport ().tempo ());
 	}
 };
 
@@ -57,21 +57,21 @@ struct StripGainObserver {
 	void operator() (ArdourFeedback* p, uint32_t strip_n)
 	{
 		// fires multiple times (4x as of ardour 6.0)
-		p->update_all (Node::strip_gain, strip_n, p->strips ().strip_gain (strip_n));
+		p->update_all (Node::strip_gain, strip_n, p->mixer ().strip_gain (strip_n));
 	}
 };
 
 struct StripPanObserver {
 	void operator() (ArdourFeedback* p, uint32_t strip_n)
 	{
-		p->update_all (Node::strip_pan, strip_n, p->strips ().strip_pan (strip_n));
+		p->update_all (Node::strip_pan, strip_n, p->mixer ().strip_pan (strip_n));
 	}
 };
 
 struct StripMuteObserver {
 	void operator() (ArdourFeedback* p, uint32_t strip_n)
 	{
-		p->update_all (Node::strip_mute, strip_n, p->strips ().strip_mute (strip_n));
+		p->update_all (Node::strip_mute, strip_n, p->mixer ().strip_mute (strip_n));
 	}
 };
 
@@ -79,7 +79,7 @@ struct PluginBypassObserver {
 	void operator() (ArdourFeedback* p, uint32_t strip_n, uint32_t plugin_n)
 	{
 		p->update_all (Node::strip_plugin_enable, strip_n, plugin_n,
-		               p->strips ().strip_plugin_enabled (strip_n, plugin_n));
+		               p->mixer ().strip_plugin_enabled (strip_n, plugin_n));
 	}
 };
 
@@ -92,15 +92,15 @@ struct PluginParamValueObserver {
 			return;
 		}
 		p->update_all (Node::strip_plugin_param_value, strip_n, plugin_n, param_n,
-		               ArdourStrips::plugin_param_value (control));
+		               ArdourMixer::plugin_param_value (control));
 	}
 };
 
 int
 ArdourFeedback::start ()
 {
-	observe_globals ();
-	observe_strips ();
+	observe_transport ();
+	observe_mixer ();
 
 	// some things need polling like the strip meters
 	Glib::RefPtr<Glib::TimeoutSource> periodic_timeout = Glib::TimeoutSource::create (POLL_INTERVAL_MS);
@@ -165,11 +165,11 @@ ArdourFeedback::update_all (std::string node, uint32_t strip_n, uint32_t plugin_
 bool
 ArdourFeedback::poll () const
 {
-	update_all (Node::position_time, globals ().position_time ());
+	update_all (Node::transport_time, transport ().time ());
 
-	for (uint32_t strip_n = 0; strip_n < strips ().strip_count (); ++strip_n) {
+	for (uint32_t strip_n = 0; strip_n < mixer ().strip_count (); ++strip_n) {
 		// meters
-		boost::shared_ptr<Stripable> strip = strips ().nth_strip (strip_n);
+		boost::shared_ptr<Stripable> strip = mixer ().nth_strip (strip_n);
 		boost::shared_ptr<PeakMeter> meter = strip->peak_meter ();
 		float                        db    = meter ? meter->meter_level (0, MeterMCP) : -193;
 		update_all (Node::strip_meter, strip_n, static_cast<double> (db));
@@ -179,7 +179,7 @@ ArdourFeedback::poll () const
 }
 
 void
-ArdourFeedback::observe_globals ()
+ArdourFeedback::observe_transport ()
 {
 	ARDOUR::Session& sess = session ();
 	sess.TransportStateChange.connect (_signal_connections, MISSING_INVALIDATOR,
@@ -191,10 +191,10 @@ ArdourFeedback::observe_globals ()
 }
 
 void
-ArdourFeedback::observe_strips ()
+ArdourFeedback::observe_mixer ()
 {
-	for (uint32_t strip_n = 0; strip_n < strips ().strip_count (); ++strip_n) {
-		boost::shared_ptr<Stripable> strip = strips ().nth_strip (strip_n);
+	for (uint32_t strip_n = 0; strip_n < mixer ().strip_count (); ++strip_n) {
+		boost::shared_ptr<Stripable> strip = mixer ().nth_strip (strip_n);
 
 		strip->gain_control ()->Changed.connect (_signal_connections, MISSING_INVALIDATOR,
 		                                         boost::bind<void> (StripGainObserver (), this, strip_n), event_loop ());
@@ -215,7 +215,7 @@ void
 ArdourFeedback::observe_strip_plugins (uint32_t strip_n, boost::shared_ptr<ARDOUR::Stripable> strip)
 {
 	for (uint32_t plugin_n = 0;; ++plugin_n) {
-		boost::shared_ptr<PluginInsert> insert = strips ().strip_plugin_insert (strip_n, plugin_n);
+		boost::shared_ptr<PluginInsert> insert = mixer ().strip_plugin_insert (strip_n, plugin_n);
 		if (!insert) {
 			break;
 		}
@@ -240,7 +240,7 @@ ArdourFeedback::observe_strip_plugin_param_values (uint32_t strip_n,
 	boost::shared_ptr<Plugin> plugin = insert->plugin ();
 
 	for (uint32_t param_n = 0; param_n < plugin->parameter_count (); ++param_n) {
-		boost::shared_ptr<AutomationControl> control = strips ().strip_plugin_param_control (
+		boost::shared_ptr<AutomationControl> control = mixer ().strip_plugin_param_control (
 		    strip_n, plugin_n, param_n);
 
 		if (!control) {

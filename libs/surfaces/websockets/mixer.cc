@@ -21,12 +21,12 @@
 #include "ardour/session.h"
 #include "pbd/controllable.h"
 
-#include "strips.h"
+#include "mixer.h"
 
 using namespace ARDOUR;
 
 int
-ArdourStrips::start ()
+ArdourMixer::start ()
 {
 	/* take an indexed snapshot of current strips */
 	StripableList strips;
@@ -40,14 +40,14 @@ ArdourStrips::start ()
 }
 
 int
-ArdourStrips::stop ()
+ArdourMixer::stop ()
 {
 	_strips.clear ();
 	return 0;
 }
 
 double
-ArdourStrips::to_db (double k)
+ArdourMixer::to_db (double k)
 {
 	if (k == 0) {
 		return -std::numeric_limits<double>::infinity ();
@@ -59,7 +59,7 @@ ArdourStrips::to_db (double k)
 }
 
 double
-ArdourStrips::from_db (double db)
+ArdourMixer::from_db (double db)
 {
 	if (db < -192) {
 		return 0;
@@ -71,19 +71,19 @@ ArdourStrips::from_db (double db)
 }
 
 double
-ArdourStrips::strip_gain (uint32_t strip_n) const
+ArdourMixer::strip_gain (uint32_t strip_n) const
 {
 	return to_db (nth_strip (strip_n)->gain_control ()->get_value ());
 }
 
 void
-ArdourStrips::set_strip_gain (uint32_t strip_n, double db)
+ArdourMixer::set_strip_gain (uint32_t strip_n, double db)
 {
 	nth_strip (strip_n)->gain_control ()->set_value (from_db (db), PBD::Controllable::NoGroup);
 }
 
 double
-ArdourStrips::strip_pan (uint32_t strip_n) const
+ArdourMixer::strip_pan (uint32_t strip_n) const
 {
 	boost::shared_ptr<AutomationControl> ac = nth_strip (strip_n)->pan_azimuth_control ();
 	if (!ac) {
@@ -95,7 +95,7 @@ ArdourStrips::strip_pan (uint32_t strip_n) const
 }
 
 void
-ArdourStrips::set_strip_pan (uint32_t strip_n, double value)
+ArdourMixer::set_strip_pan (uint32_t strip_n, double value)
 {
 	boost::shared_ptr<AutomationControl> ac = nth_strip (strip_n)->pan_azimuth_control ();
 	if (!ac) {
@@ -107,38 +107,38 @@ ArdourStrips::set_strip_pan (uint32_t strip_n, double value)
 }
 
 bool
-ArdourStrips::strip_mute (uint32_t strip_n) const
+ArdourMixer::strip_mute (uint32_t strip_n) const
 {
 	return nth_strip (strip_n)->mute_control ()->muted ();
 }
 
 void
-ArdourStrips::set_strip_mute (uint32_t strip_n, bool mute)
+ArdourMixer::set_strip_mute (uint32_t strip_n, bool mute)
 {
 	nth_strip (strip_n)->mute_control ()->set_value (mute ? 1.0 : 0.0, PBD::Controllable::NoGroup);
 }
 
 bool
-ArdourStrips::strip_plugin_enabled (uint32_t strip_n, uint32_t plugin_n) const
+ArdourMixer::strip_plugin_enabled (uint32_t strip_n, uint32_t plugin_n) const
 {
 	return strip_plugin_insert (strip_n, plugin_n)->enabled ();
 }
 
 void
-ArdourStrips::set_strip_plugin_enabled (uint32_t strip_n, uint32_t plugin_n, bool enabled)
+ArdourMixer::set_strip_plugin_enabled (uint32_t strip_n, uint32_t plugin_n, bool enabled)
 {
 	strip_plugin_insert (strip_n, plugin_n)->enable (enabled);
 }
 
 TypedValue
-ArdourStrips::strip_plugin_param_value (uint32_t strip_n, uint32_t plugin_n,
+ArdourMixer::strip_plugin_param_value (uint32_t strip_n, uint32_t plugin_n,
                                         uint32_t param_n) const
 {
 	return plugin_param_value (strip_plugin_param_control (strip_n, plugin_n, param_n));
 }
 
 void
-ArdourStrips::set_strip_plugin_param_value (uint32_t strip_n, uint32_t plugin_n,
+ArdourMixer::set_strip_plugin_param_value (uint32_t strip_n, uint32_t plugin_n,
                                             uint32_t param_n, TypedValue value)
 {
 	boost::shared_ptr<AutomationControl> control = strip_plugin_param_control (
@@ -161,13 +161,13 @@ ArdourStrips::set_strip_plugin_param_value (uint32_t strip_n, uint32_t plugin_n,
 }
 
 uint32_t
-ArdourStrips::strip_count () const
+ArdourMixer::strip_count () const
 {
 	return _strips.size ();
 }
 
 boost::shared_ptr<Stripable>
-ArdourStrips::nth_strip (uint32_t strip_n) const
+ArdourMixer::nth_strip (uint32_t strip_n) const
 {
 	if (strip_n < _strips.size ()) {
 		return _strips[strip_n];
@@ -177,7 +177,7 @@ ArdourStrips::nth_strip (uint32_t strip_n) const
 }
 
 TypedValue
-ArdourStrips::plugin_param_value (boost::shared_ptr<ARDOUR::AutomationControl> control)
+ArdourMixer::plugin_param_value (boost::shared_ptr<ARDOUR::AutomationControl> control)
 {
 	TypedValue value = TypedValue ();
 
@@ -197,7 +197,7 @@ ArdourStrips::plugin_param_value (boost::shared_ptr<ARDOUR::AutomationControl> c
 }
 
 boost::shared_ptr<PluginInsert>
-ArdourStrips::strip_plugin_insert (uint32_t strip_n, uint32_t plugin_n) const
+ArdourMixer::strip_plugin_insert (uint32_t strip_n, uint32_t plugin_n) const
 {
 	boost::shared_ptr<Stripable> strip = nth_strip (strip_n);
 
@@ -222,7 +222,7 @@ ArdourStrips::strip_plugin_insert (uint32_t strip_n, uint32_t plugin_n) const
 }
 
 boost::shared_ptr<AutomationControl>
-ArdourStrips::strip_plugin_param_control (uint32_t strip_n, uint32_t plugin_n,
+ArdourMixer::strip_plugin_param_control (uint32_t strip_n, uint32_t plugin_n,
                                           uint32_t param_n) const
 {
 	boost::shared_ptr<PluginInsert> insert = strip_plugin_insert (strip_n, plugin_n);

@@ -18,19 +18,19 @@
 
 #include "ardour/tempo.h"
 
-#include "globals.h"
+#include "transport.h"
 
 using namespace ARDOUR;
 
 double
-ArdourGlobals::tempo () const
+ArdourTransport::tempo () const
 {
 	Tempo tempo = session ().tempo_map ().tempo_at_sample (0);
 	return tempo.note_type () * tempo.pulses_per_minute ();
 }
 
 void
-ArdourGlobals::set_tempo (double bpm)
+ArdourTransport::set_tempo (double bpm)
 {
 	bpm                 = max (0.01, bpm);
 	TempoMap& tempo_map = session ().tempo_map ();
@@ -39,7 +39,7 @@ ArdourGlobals::set_tempo (double bpm)
 }
 
 double
-ArdourGlobals::position_time () const
+ArdourTransport::time () const
 {
 	samplepos_t t = session ().transport_sample ();
 	samplecnt_t f = session ().sample_rate ();
@@ -47,30 +47,30 @@ ArdourGlobals::position_time () const
 }
 
 bool
-ArdourGlobals::transport_roll () const
+ArdourTransport::roll () const
 {
 	return basic_ui ().transport_rolling ();
 }
 
 void
-ArdourGlobals::set_transport_roll (bool value)
+ArdourTransport::set_roll (bool value)
 {
-	if ((value && !transport_roll ()) || (!value && transport_roll ())) {
+	if ((value && !roll ()) || (!value && roll ())) {
 		// this call is equivalent to hitting the spacebar
 		basic_ui ().toggle_roll (false);
 	}
 }
 
 bool
-ArdourGlobals::record_state () const
+ArdourTransport::record () const
 {
 	return session ().get_record_enabled ();
 }
 
 void
-ArdourGlobals::set_record_state (bool value)
+ArdourTransport::set_record (bool value)
 {
-	if ((value && !record_state ()) || (!value && record_state ())) {
+	if ((value && !record ()) || (!value && record ())) {
 		basic_ui ().rec_enable_toggle ();
 	}
 }

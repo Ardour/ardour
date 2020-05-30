@@ -43,16 +43,16 @@ SurfaceComponent::session () const
 	return _surface.ardour_session ();
 }
 
-ArdourStrips&
-SurfaceComponent::strips () const
+ArdourMixer&
+SurfaceComponent::mixer () const
 {
-	return _surface.strips_component ();
+	return _surface.mixer_component ();
 }
 
-ArdourGlobals&
-SurfaceComponent::globals () const
+ArdourTransport&
+SurfaceComponent::transport () const
 {
-	return _surface.globals_component ();
+	return _surface.transport_component ();
 }
 
 WebsocketsServer&

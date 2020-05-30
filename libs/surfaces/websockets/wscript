@@ -22,8 +22,8 @@ def build(bld):
             message.cc
             client.cc
             component.cc
-            strips.cc
-            globals.cc
+            mixer.cc
+            transport.cc
             server.cc
             feedback.cc
             dispatcher.cc
