@@ -12,16 +12,14 @@ msgstr ""
 "Project-Id-Version: ardour 0.354.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-05-20 14:36-0600\n"
-"PO-Revision-Date: 2020-05-31 01:58+0200\n"
+"PO-Revision-Date: 2020-05-31 10:59+0200\n"
 "Last-Translator: Vincenzo Reale <smart2128@baslug.org>\n"
-"Language-Team: Italian <it@workshop-chapina.it>\n"
 "Language: it\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Lokalize 20.04.1\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Poedit-Bookmarks: 3725,-1,-1,-1,-1,-1,-1,-1,-1,-1\n"
 
 #: about.cc:133
 msgid "Fons Adriaensen"
@@ -759,15 +757,16 @@ msgid "Modified With"
 msgstr "Modificato con"
 
 #: add_route_dialog.cc:303 rc_option_editor.cc:2968
-#, fuzzy
 msgid ""
 "With strict-i/o enabled, Effect Processors will not modify the number of "
 "channels on a track. The number of output channels will always match the "
 "number of input channels."
 msgstr ""
-"Quando l'I/O è attivato i processori di effetto non modificheranno i canali "
-"di una traccia. Il numero di uscite coinciderà sempre con il numero di "
-"ingressi."
+"Quando strict-i/o è attivato, i processori di effetto non modificheranno il"
+" numero di "
+"canali di una traccia. Il numero di canali di uscita coinciderà sempre con il"
+" numero di "
+"canali di ingresso."
 
 #: add_route_dialog.cc:322
 msgid "Add selected items (and leave dialog open)"
@@ -1286,7 +1285,7 @@ msgstr "%02dh:%02dm:%02ds"
 
 #: ardour_ui.cc:1374
 msgid "Available record time"
-msgstr ""
+msgstr "Tempo di registrazione disponibile"
 
 #: ardour_ui.cc:1376 editor_route_groups.cc:110
 msgid "Rec"
@@ -1700,7 +1699,6 @@ msgstr ""
 "Per riportare indietro la finestra usa Finestre > %1 > Ancora"
 
 #: ardour_ui2.cc:411
-#, fuzzy
 msgid "Start recording at auto-punch start"
 msgstr "Comincia a registrare all'inizio dell'auto-punch"
 
@@ -2424,7 +2422,7 @@ msgstr "Pulisci regioni inutilizzate..."
 
 #: ardour_ui_ed.cc:585
 msgid "Rebuild Peak Files"
-msgstr ""
+msgstr "Rigenera i file di picco"
 
 #: ardour_ui_ed.cc:598
 msgid "Set Session Start from Playhead"
@@ -2656,6 +2654,8 @@ msgid ""
 "It is not possible to use JACK as the sync source\n"
 " when the pull up/down setting is non-zero."
 msgstr ""
+"Non è possibile utilizzare JACK come sorgente di sincronizzazione\n"
+"quando l'impostazione pull up/down è diversa da zero."
 
 #: ardour_ui_options.cc:307 ardour_ui_options.cc:327
 msgid "SyncSource|Int."
@@ -3011,7 +3011,7 @@ msgstr "NSM: inizializzazione non riuscita"
 
 #: ardour_ui_startup.cc:407
 msgid "NSM server did not announce itself. Continuing without NSM."
-msgstr ""
+msgstr "Il server NSM non si è annunciato. Continuare senza NSM."
 
 #: ardour_ui_startup.cc:409
 msgid "NSM server did not announce itself"
@@ -3594,7 +3594,7 @@ msgstr "1/24 (terzina di 64-esimi)"
 
 #: editor.cc:191 quantize_dialog.cc:51
 msgid "1/5 (8th quintuplet)"
-msgstr "1/5 (quintina di 8a)"
+msgstr "1/5 (quintina di ottavi)"
 
 #: editor.cc:192 quantize_dialog.cc:52
 msgid "1/10 (16th quintuplet)"
@@ -4047,11 +4047,11 @@ msgstr "Terzine"
 
 #: editor.cc:3307
 msgid "Quintuplets"
-msgstr "Cinquine"
+msgstr "Quintine"
 
 #: editor.cc:3317
 msgid "Septuplets"
-msgstr "Settine"
+msgstr "Settimine"
 
 #: editor.cc:3328
 msgid "Smart Mode (add range functions to Grab Mode)"
@@ -4677,11 +4677,11 @@ msgstr "Seleziona pista mixer precedente"
 
 #: editor_actions.cc:260
 msgid "Toggle All Existing Automation"
-msgstr ""
+msgstr "Attiva/disattiva tutta l'automazione esistente"
 
 #: editor_actions.cc:261
 msgid "Toggle Layer Display"
-msgstr ""
+msgstr "Attiva/disattiva la visualizzazione dei livelli"
 
 #: editor_actions.cc:263
 msgid "Toggle Record Enable"
@@ -5751,6 +5751,10 @@ msgid ""
 "Locked to Video.\n"
 "The video cannot be moved."
 msgstr ""
+"Una o più regioni audio\n"
+"sono entrambi bloccate e\n"
+"bloccate al video.\n"
+"Il video non può essere spostato."
 
 #: editor_drag.cc:2873
 msgid "Video Start:"
@@ -7186,7 +7190,7 @@ msgstr "Rimuovi soltanto le regioni che utilizzano queste sorgenti."
 
 #: editor_sources.cc:643
 msgid "Yes, remove the Regions and Sources (cannot be undone!)"
-msgstr ""
+msgstr "Sì, rimuovi le regioni e le sorgenti (non è possibile annullarla!)"
 
 #: editor_sources.cc:645
 msgid "Remove selected Sources"
@@ -7721,9 +7725,8 @@ msgid "Encoding '%3' (timespan %1 of %2)"
 msgstr "Codifica di '%3' (intervallo %1 of %2)"
 
 #: export_dialog.cc:473
-#, fuzzy
 msgid "Tagging '%3' (timespan %1 of %2)"
-msgstr "Etichettatura di '%3' (timespan %1 of %2)"
+msgstr "Etichettatura di '%3' (intervallo %1 di %2)"
 
 #: export_dialog.cc:477
 msgid "Uploading '%3' (timespan %1 of %2)"
@@ -8429,9 +8432,8 @@ msgid "dBFS - Digital Peak Hold. Click to reset."
 msgstr "dBFS - Tenuta picco digitale. Clic per reimpostare."
 
 #: gain_meter.cc:178
-#, fuzzy
 msgid "Metering point"
-msgstr "Metering point"
+msgstr "Punto di misurazione"
 
 #: gain_meter.cc:783
 msgid "Manual|M"
@@ -9810,6 +9812,10 @@ msgid ""
 "If this is unexpected, manually locate the files and restore them in the "
 "session folder.\n"
 msgstr ""
+"\n"
+"Le regioni e le modifiche sono state mantenute.\n"
+"In caso contrario, individuare manualmente i file e ripristinarli nella "
+"cartella di sessione.\n"
 
 #: missing_filesource_dialog.cc:56
 msgid ""
@@ -12317,7 +12323,7 @@ msgstr ""
 
 #: rc_option_editor.cc:1312
 msgid "LTC Output Port:"
-msgstr ""
+msgstr "Porta di uscita LTC:"
 
 #: rc_option_editor.cc:1319
 msgid ""
@@ -13510,7 +13516,7 @@ msgstr "Crea marcatori in corrispondenza di ogni xrun"
 
 #: rc_option_editor.cc:3404
 msgid "Reset x-run counter when starting to record"
-msgstr ""
+msgstr "Ripristina il contatore x-run all'inizio della registrazione"
 
 #: rc_option_editor.cc:3417
 msgid "Match session video frame rate to external timecode"
@@ -16019,6 +16025,9 @@ msgid ""
 "The audio/MIDI engine has stopped running unexpectedly.\n"
 "Something is probably wrong with your audio/MIDI device settings."
 msgstr ""
+"Il motore audio/MIDI ha smesso di funzionare in modo imprevisto.\n"
+"Probabilmente c'è qualche problema nelle impostazioni del tuo dispositivo"
+" audio/MIDI."
 
 #: startup_fsm.cc:558
 msgid "Cannot get existing session information from %1"
@@ -16029,7 +16038,6 @@ msgid "Pre-Release Warning"
 msgstr "Attenzione: versione pre-rilascio"
 
 #: startup_fsm.cc:880
-#, fuzzy
 msgid ""
 "<span size=\"x-large\" weight=\"bold\">Welcome to this pre-release build of "
 "%1 %2</span>\n"
@@ -16060,29 +16068,32 @@ msgid ""
 "                http://ardour.org/support</span>\n"
 msgstr ""
 "<span size=\"x-large\" weight=\"bold\">Benvenuto in questa versione"
-" pre-rilascio "
-"di %1 %2</span>\n"
+" pre-rilascio di %1 %2</span>\n"
 "\n"
 "<span size=\"large\">Ci sono ancora diversi bug su cui lavorare,\n"
-"così come accorgimenti generali, prima di considerarla\n"
-"software ufficiale. Dunque, qualche linea guida:\n"
+"così come miglioramenti generali, prima di considerarla\n"
+"un rilascio ufficiale. Dunque, qualche linea guida:\n"
 "\n"
-"1) <b>NON</b> usare questo software come se fosse stabile e affidabile\n"
+"1) <b>NON</b> utilizzare questo programma come se fosse stabile e affidabile\n"
 "   anche se potrebbe esserlo, a seconda delle tue necessità.\n"
-"2) Per favore aspetta per un riassunto delle nuove funzionalità.\n"
-"3) <b>Per favore NON usare i forum su ardour.org per riportare problemi</"
+"2) Attendi un riepilogo delle nuove funzionalità.\n"
+"3) <b>NON utilizzare i forum su ardour.org per segnalare problemi</"
 "b>.\n"
-"4) Per favore <b>USARE</b> il sistema di tracciamento dei bug su"
-" http://tracker.ardour.org/ per "
-"segnalare problemi\n"
-"   prestando USA a segnare la versione del software 6.0-pre.\n"
-"5) Per favore <b>USA</b> le ardour-users mailing per discutere idee e "
-"commentare.\n"
-"6) Per favore <b>UNISCITI</b> al canale IRC per discussioni in tempo reale "
-"su %1 %2. \n"
-"   Puoi arrivarci direttamente dal programma da Aiuto > Chat.\n"
+"4) <b>Non utilizzare il sistema di tracciamento dei bug su"
+" http://tracker.ardour.org/ per segnalare problemi relativi alle versioni in"
+" fase alfa di sviluppo</b>\n"
+"   Non è prevista alcuna analisi dei bug prima della conclusione dello"
+" sviluppo iniziale e\n"
+"   segnalare un problema su codice incompleto, in lavorazione è per lo più"
+" inutile.\n"
+"5) <b>RAGGIUNGICI</b> su IRC per discutere in tempo reale su %1 %2.\n"
+"Puoi\n"
+"   farlo direttamente dall'interno del programma tramite l'opzione di menu"
+" Aiuto->Chat.\n"
+"6) <b>INVIA</b> patch di correzione dopo averne discusso su IRC.\n"
 "\n"
-"Informazioni più dettagliate possono essere reperite sulla pagina di "
+"Informazioni più dettagliate su quanto esposto qui sono disponibili sulla"
+" pagina di "
 "supporto:\n"
 "\n"
 "                http://ardour.org/support</span>\n"
@@ -16600,7 +16611,7 @@ msgstr "Impossibile rinominare cartella modello da %1 a %2: %3"
 
 #: template_dialog.cc:858
 msgid "Could not rename state dir \"%1\" to \"%2\": %3"
-msgstr ""
+msgstr "Impossibile rinominare la cartella di stato \"%1\" in \"%2\": %3"
 
 #: template_dialog.cc:867
 msgid "Could not write new template file \"%1\"."
@@ -16935,7 +16946,7 @@ msgstr "Nuovo Master trasporto"
 
 #: transport_masters_dialog.cc:54
 msgid "Keep rolling if sync is lost"
-msgstr ""
+msgstr "Continua a scorrere se la sincronizzazione viene persa"
 
 #: transport_masters_dialog.cc:73
 msgid ""
@@ -16954,7 +16965,7 @@ msgstr "Posizione di sincronizzazione + Delta"
 
 #: transport_masters_dialog.cc:84
 msgid "Last Message + Age"
-msgstr ""
+msgstr "Ultimo messaggio + Età"
 
 #: transport_masters_dialog.cc:85
 msgid ""
