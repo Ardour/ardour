@@ -165,9 +165,7 @@ PortExportChannelSelector::RouteCols::add_channels (uint32_t chans)
 PortExportChannelSelector::RouteCols::Channel &
 PortExportChannelSelector::RouteCols::get_channel (uint32_t channel)
 {
-	if (channel > n_channels) {
-		std::cout << "Invalid channel count for get_channel!" << std::endl;
-	}
+	assert (channel > 0 && channel <= channels.size ());
 
 	std::list<Channel>::iterator it = channels.begin();
 
@@ -274,7 +272,9 @@ PortExportChannelSelector::ChannelTreeView::set_config (ChannelConfigPtr c)
 			r_it->set_value (route_cols.get_channel (i).label, label);
 		}
 
-		++i;
+		if (++i > n_channels) {
+			break;
+		}
 	}
 }
 
