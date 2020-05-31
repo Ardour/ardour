@@ -48,11 +48,13 @@ using namespace Glib;
 using namespace ARDOUR;
 using namespace PBD;
 
+#define MAX_EXPORT_CHANNELS 32
+
 PortExportChannelSelector::PortExportChannelSelector (ARDOUR::Session * session, ProfileManagerPtr manager) :
   ExportChannelSelector (session, manager),
   channels_label (_("Channels:"), Gtk::ALIGN_LEFT),
   split_checkbox (_("Split to mono files")),
-  max_channels (20),
+  max_channels (MAX_EXPORT_CHANNELS),
   channel_view (max_channels)
 {
 	channels_hbox.pack_start (channels_label, false, false, 0);
