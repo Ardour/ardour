@@ -28,13 +28,13 @@ export class ArdourClient {
 		this._components = [];
 		this._connected = false;
 
-		this._channel = new MessageChannel(this._options['host'] || location.host);
+		this._channel = new MessageChannel(this._getOption('host', location.host));
 
 		this._channel.onMessage = (msg, inbound) => {
 			this._handleMessage(msg, inbound);
 		};
 
-		if (!('components' in this._options) || this._options['components']) {
+		if (this._getOption('components', true)) {
 			this._mixer = new Mixer(this._channel);
 			this._transport = new Transport(this._channel);
 			this._components.push(this._mixer, this._transport);
@@ -60,13 +60,13 @@ export class ArdourClient {
 
 	// Low level control messages flow through a WebSocket
 
-	async connect (autoReconnect) {
+	async connect () {
 		this._channel.onClose = async () => {
 			if (this._connected) {
 				this._setConnected(false);
 			}
 
-			if ((autoReconnect == null) || autoReconnect) {
+			if (this._getOption('autoReconnect', true)) {
 				await this._sleep(1000);
 				await this._connect();
 			}
@@ -154,6 +154,10 @@ export class ArdourClient {
 
 	_fetchResponseStatusError (status) {
 		return new Error(`HTTP response status ${status}`);
+	}
+
+	_getOption (key, defaultValue) {
+		return key in this._options ? this._options[key] : defaultValue;
 	}
 
 }
