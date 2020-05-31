@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: libardour 0.664.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-05-20 14:36-0600\n"
-"PO-Revision-Date: 2020-05-31 01:47+0200\n"
+"PO-Revision-Date: 2020-05-31 11:10+0200\n"
 "Last-Translator: Vincenzo Reale <smart2128@baslug.org>\n"
 "Language-Team: Italian <it@workshop-chapina.it>\n"
 "Language: Italian\n"
@@ -1701,7 +1701,7 @@ msgstr "Re#"
 
 #: parameter_descriptor.cc:263
 msgid "Note|E"
-msgstr "iM"
+msgstr "Mi"
 
 #: parameter_descriptor.cc:264
 msgid "Note|F"
@@ -1821,59 +1821,59 @@ msgstr ""
 
 #: plugin_manager.cc:247
 msgid "Discovering Plugins"
-msgstr ""
+msgstr "Rilevamento plugin"
 
 #: plugin_manager.cc:352
 msgid "Scanning LADSPA Plugins"
-msgstr ""
+msgstr "Scansione plugin LADSPA"
 
 #: plugin_manager.cc:354
 msgid "Scanning Lua DSP Processors"
-msgstr ""
+msgstr "Scansione processori DSP Lua"
 
 #: plugin_manager.cc:357
 msgid "Scanning LV2 Plugins"
-msgstr ""
+msgstr "Scansione plugin LV2"
 
 #: plugin_manager.cc:384
 msgid "Scanning Windows VST Plugins"
-msgstr ""
+msgstr "Scansione plugin VST Windows"
 
 #: plugin_manager.cc:386
 msgid "Discovering Windows VST Plugins"
-msgstr ""
+msgstr "Rilevamento plugin VST Windows"
 
 #: plugin_manager.cc:395
 msgid "Scanning Linux VST Plugins"
-msgstr ""
+msgstr "Scansione plugin VST Linux"
 
 #: plugin_manager.cc:397
 msgid "Discovering Linux VST Plugins"
-msgstr ""
+msgstr "Rilevamento plugin VST Linux"
 
 #: plugin_manager.cc:406
 msgid "Scanning Mac VST Plugins"
-msgstr ""
+msgstr "Scansione plugin VST Mac"
 
 #: plugin_manager.cc:408
 msgid "Discovering Mac VST Plugins"
-msgstr ""
+msgstr "Rilevamento plugin VST Mac"
 
 #: plugin_manager.cc:425
 msgid "VST Blacklist: "
-msgstr ""
+msgstr "Lista nera VST: "
 
 #: plugin_manager.cc:427
 msgid "VST Blacklist:"
-msgstr ""
+msgstr "Lista nera VST:"
 
 #: plugin_manager.cc:437
 msgid "Scanning AU Plugins"
-msgstr ""
+msgstr "Scansione plugin AU"
 
 #: plugin_manager.cc:439
 msgid "Discovering AU Plugins"
-msgstr ""
+msgstr "Rilevamento plugin AU"
 
 #: plugin_manager.cc:444
 msgid "Plugin Scan Complete..."
@@ -1881,7 +1881,7 @@ msgstr ""
 
 #: plugin_manager.cc:449
 msgid "Indexing Plugins..."
-msgstr ""
+msgstr "Indicizzazione dei plugin..."
 
 #: plugin_manager.cc:685
 msgid "LADSPA"
@@ -1917,11 +1917,11 @@ msgstr ""
 
 #: plugin_manager.cc:1051
 msgid "cannot open dll"
-msgstr ""
+msgstr "impossibile aprire la dll"
 
 #: plugin_manager.cc:1055
 msgid "invalid dll, file too small"
-msgstr ""
+msgstr "dll non valida, file troppo piccolo"
 
 #: plugin_manager.cc:1059
 msgid "not a dll"
@@ -1929,7 +1929,7 @@ msgstr "non una dll"
 
 #: plugin_manager.cc:1065
 msgid "cannot determine dll type"
-msgstr ""
+msgstr "impossibile determinare il tipo di dll"
 
 #: plugin_manager.cc:1069
 msgid "cannot read dll PE header"
@@ -1953,11 +1953,11 @@ msgstr "x64 (64-bit)"
 
 #: plugin_manager.cc:1090
 msgid "Native Architecture"
-msgstr ""
+msgstr "Architettura nativa"
 
 #: plugin_manager.cc:1093
 msgid "Unknown Architecture"
-msgstr ""
+msgstr "Architettura sconosciuta"
 
 #: plugin_manager.cc:1109
 msgid " *  %1 (cache only)"
@@ -2055,7 +2055,7 @@ msgstr ""
 
 #: port.cc:546
 msgid "could not reregister %1"
-msgstr ""
+msgstr "impossibile registrare %1"
 
 #: port_engine_shared.cc:50
 msgid "BackendPort::connect (): invalid (null) port"
@@ -2095,11 +2095,11 @@ msgstr ""
 
 #: port_engine_shared.cc:320
 msgid "%1::register_port: Port already exists: (%2)"
-msgstr ""
+msgstr "%1::register_port: la porta esiste già: (%2)"
 
 #: port_engine_shared.cc:359
 msgid "%1::unregister_port: Failed to find port"
-msgstr ""
+msgstr "%1::unregister_port: impossibile trovare la porta"
 
 #: port_engine_shared.cc:416
 msgid ""
@@ -2109,7 +2109,7 @@ msgstr ""
 
 #: port_engine_shared.cc:444
 msgid "%1::set_port_name: Invalid Port"
-msgstr ""
+msgstr "%1::set_port_name: porta non valida"
 
 #: port_engine_shared.cc:449
 msgid "%1::set_port_name: Port with given name already exists"
@@ -2117,19 +2117,19 @@ msgstr ""
 
 #: port_engine_shared.cc:474
 msgid "%1::get_port_name: invalid port"
-msgstr ""
+msgstr "%1::get_port_name: porta non valida"
 
 #: port_engine_shared.cc:485
 msgid "%1::get_port_flags: invalid port"
-msgstr ""
+msgstr "%1::get_port_flags: porta non valida"
 
 #: port_engine_shared.cc:495
 msgid "%1::get_port_property: invalid port"
-msgstr ""
+msgstr "%1::get_port_property: porta non valida"
 
 #: port_engine_shared.cc:512
 msgid "%1::set_port_property: invalid port"
-msgstr ""
+msgstr "%1::set_port_property: porta non valida"
 
 #: port_engine_shared.cc:558
 msgid "%1::connect: Invalid Source port: (%2)"
@@ -2141,7 +2141,7 @@ msgstr ""
 
 #: port_engine_shared.cc:578 port_engine_shared.cc:613
 msgid "%1::disconnect: invalid port"
-msgstr ""
+msgstr "%1::disconnect: porta non valida"
 
 #: port_engine_shared.cc:590
 msgid "%1::connect: Invalid Source Port Handle"
@@ -2153,7 +2153,7 @@ msgstr ""
 
 #: port_engine_shared.cc:625
 msgid "%1::disconnect_all: invalid port"
-msgstr ""
+msgstr "%1::disconnect_all: porta non valida"
 
 #: port_engine_shared.cc:640
 msgid "%1::disconnect_all: Invalid Port"
