@@ -114,6 +114,12 @@ PortExportChannelSelector::sync_with_manager ()
 	channel_view.set_config (state->config);
 }
 
+bool
+PortExportChannelSelector::channel_limit_reached () const
+{
+	return channel_view.max_route_channel_count () > channel_view.channel_count ();
+}
+
 void
 PortExportChannelSelector::fill_route_list ()
 {
@@ -455,6 +461,22 @@ PortExportChannelSelector::ChannelTreeView::update_selection_text (std::string c
 	}
 
 	update_config ();
+}
+
+uint32_t
+PortExportChannelSelector::ChannelTreeView::max_route_channel_count () const
+{
+	uint32_t rv = 0;
+	for (Gtk::ListStore::Children::const_iterator it = route_list->children().begin(); it != route_list->children().end(); ++it) {
+		Gtk::TreeModel::Row row = *it;
+		if (!row[route_cols.selected]) {
+			continue;
+		}
+		ARDOUR::IO* io = row[route_cols.io];
+		uint32_t outs = io->n_ports().n_audio();
+		rv = std::max (rv, outs);
+	}
+	return rv;
 }
 
 RegionExportChannelSelector::RegionExportChannelSelector (ARDOUR::Session * _session,

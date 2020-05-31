@@ -78,6 +78,7 @@ public:
 	virtual ~ExportChannelSelector () {}
 
 	virtual void sync_with_manager () = 0;
+	virtual bool channel_limit_reached () const = 0;
 
 	sigc::signal<void> CriticalSelectionChanged;
 };
@@ -90,6 +91,7 @@ public:
 	~PortExportChannelSelector ();
 
 	void sync_with_manager ();
+	bool channel_limit_reached () const;
 
 private:
 
@@ -183,6 +185,8 @@ private:
 		void clear_routes () { route_list->clear (); }
 		void add_route (ARDOUR::IO * route);
 		void set_channel_count (uint32_t channels);
+		uint32_t channel_count () const { return n_channels; }
+		uint32_t max_route_channel_count () const;
 
 		sigc::signal<void> CriticalSelectionChanged;
 
@@ -220,6 +224,7 @@ public:
 	                             ARDOUR::AudioTrack & track);
 
 	virtual void sync_with_manager ();
+	bool channel_limit_reached () const { return false; }
 
 private:
 
@@ -250,6 +255,7 @@ class TrackExportChannelSelector : public ExportChannelSelector
 	virtual void sync_with_manager ();
 
 	bool track_output () const { return track_output_button.get_active(); }
+	bool channel_limit_reached () const { return false; }
 
   private:
 

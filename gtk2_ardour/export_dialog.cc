@@ -274,6 +274,11 @@ ExportDialog::update_warnings_and_example_filename ()
 		add_warning (*it);
 	}
 
+	/* add channel count warning */
+	if (channel_selector && channel_selector->channel_limit_reached ()) {
+		add_warning (_("A track or bus has more channels than the target."));
+	}
+
 	if (!warnings->conflicting_filenames.empty()) {
 		list_files_hbox.show ();
 		for (std::list<string>::iterator it = warnings->conflicting_filenames.begin(); it != warnings->conflicting_filenames.end(); ++it) {
