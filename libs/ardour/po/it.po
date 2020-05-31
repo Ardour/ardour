@@ -1,20 +1,22 @@
-# SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR Paul Davis
 # This file is distributed under the same license as the PACKAGE package.
-# Filippo Pappalardo <filippo@email.it>, 2003.
 #
+# Filippo Pappalardo <filippo@email.it>, 2003.
+# Vincenzo Reale <smart2128@baslug.org>, 2020.
 msgid ""
 msgstr ""
 "Project-Id-Version: libardour 0.664.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-05-20 14:36-0600\n"
-"PO-Revision-Date: 2003-05-21 12:50+0500\n"
-"Last-Translator: Filippo Pappalardo <filippo@email.it>\n"
-"Language-Team: Italian\n"
+"PO-Revision-Date: 2020-05-31 01:47+0200\n"
+"Last-Translator: Vincenzo Reale <smart2128@baslug.org>\n"
+"Language-Team: Italian <it@workshop-chapina.it>\n"
 "Language: Italian\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=ISO-8859-1\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Lokalize 20.04.1\n"
 
 #: analyser.cc:127 audioregion.cc:1791
 msgid "Transient Analysis failed for %1."
@@ -26,11 +28,11 @@ msgstr ""
 
 #: analysis_graph.cc:136
 msgid "%1 (%2..%3)"
-msgstr ""
+msgstr "%1 (%2..%3)"
 
 #: audio_backend.cc:31
 msgid "No Error occurred"
-msgstr ""
+msgstr "Non si è verificato alcun errore"
 
 #: audio_backend.cc:33
 msgid "Failed to initialize audio backend"
@@ -56,15 +58,15 @@ msgstr ""
 
 #: audio_backend.cc:43
 msgid "Audio device not valid"
-msgstr ""
+msgstr "Dispositivo audio non valido"
 
 #: audio_backend.cc:45
 msgid "Audio device unavailable"
-msgstr ""
+msgstr "Dispositivo audio non disponibile"
 
 #: audio_backend.cc:47
 msgid "Audio device not connected"
-msgstr ""
+msgstr "Dispositivo audio non connesso"
 
 #: audio_backend.cc:49
 msgid "Failed to request and reserve audio device"
@@ -84,11 +86,11 @@ msgstr ""
 
 #: audio_backend.cc:57
 msgid "MIDI device unavailable"
-msgstr ""
+msgstr "Dispositivo MIDI non disponibile"
 
 #: audio_backend.cc:59
 msgid "MIDI device not connected"
-msgstr ""
+msgstr "Dispositivo MIDI non connesso"
 
 #: audio_backend.cc:61
 msgid "MIDI device Input/Output error"
@@ -173,11 +175,11 @@ msgstr ""
 #: audio_backend.cc:107 export_formats.cc:60 session.cc:6791
 #: transport_master.cc:489
 msgid "None"
-msgstr ""
+msgstr "Nessuno"
 
 #: audio_backend.cc:109
 msgid "Default"
-msgstr ""
+msgstr "Predefinito"
 
 #: audio_library.cc:90
 msgid "Could not open %1.  Audio Library not saved"
@@ -197,15 +199,15 @@ msgstr ""
 
 #: audio_playlist_importer.cc:70
 msgid "Audio Playlists"
-msgstr ""
+msgstr "Scalette audio"
 
 #: audio_playlist_importer.cc:163
 msgid "region"
-msgstr ""
+msgstr "regione"
 
 #: audio_playlist_importer.cc:165
 msgid "regions"
-msgstr ""
+msgstr "regioni"
 
 #: audio_playlist_importer.cc:176 audio_track_importer.cc:246
 msgid "A playlist with this name already exists, please rename it."
@@ -229,27 +231,31 @@ msgstr "errore di programmazione: %1"
 
 #: audio_region_importer.cc:77
 msgid "Audio Regions"
-msgstr ""
+msgstr "Regioni audio"
 
 #: audio_region_importer.cc:147
 msgid "Length: "
-msgstr ""
+msgstr "Durata:"
 
 #: audio_region_importer.cc:149
 msgid ""
 "\n"
 "Position: "
 msgstr ""
+"\n"
+"Posizione: "
 
 #: audio_region_importer.cc:151
 msgid ""
 "\n"
 "Channels: "
 msgstr ""
+"\n"
+"Canali: "
 
 #: audio_track_importer.cc:70
 msgid "Audio Tracks"
-msgstr ""
+msgstr "Tracce audio"
 
 #: audio_track_importer.cc:255 audio_track_importer.cc:261
 msgid "badly-formed XML in imported track"
@@ -302,7 +308,7 @@ msgstr ""
 
 #: audioregion.cc:1791
 msgid "Audio Region"
-msgstr ""
+msgstr "Regione audio"
 
 #: audiosource.cc:231
 msgid "cannot rename peakfile for %1 from %2 to %3 (%4)"
@@ -415,7 +421,7 @@ msgstr ""
 
 #: automatable.cc:194 send.cc:103 session.cc:822
 msgid "Fader"
-msgstr ""
+msgstr "Fader"
 
 #: automatable.cc:196
 msgid "Send"
@@ -427,15 +433,15 @@ msgstr ""
 
 #: automatable.cc:200
 msgid "Mute"
-msgstr ""
+msgstr "Silenzia"
 
 #: automatable.cc:202
 msgid "Azimuth"
-msgstr ""
+msgstr "Azimuth"
 
 #: automatable.cc:204
 msgid "Width"
-msgstr ""
+msgstr "Larghezza"
 
 #: automatable.cc:206
 msgid "Elevation"
@@ -547,15 +553,15 @@ msgstr "impossibile localizzare \"cpu MHz\" in /proc/cpuinfo"
 
 #: data_type.cc:27
 msgid "audio"
-msgstr ""
+msgstr "audio"
 
 #: data_type.cc:28 session.cc:2388
 msgid "MIDI"
-msgstr ""
+msgstr "MIDI"
 
 #: data_type.cc:29
 msgid "unknown"
-msgstr ""
+msgstr "sconosciuto"
 
 #: delivery.cc:126
 msgid "main outs"
@@ -630,7 +636,7 @@ msgstr ""
 
 #: export_filename.cc:292
 msgid "No Date"
-msgstr ""
+msgstr "Nessuna data"
 
 #: export_filename.cc:307
 msgid "Invalid date format"
@@ -638,15 +644,15 @@ msgstr ""
 
 #: export_format_manager.cc:60
 msgid "CD"
-msgstr ""
+msgstr "CD"
 
 #: export_format_manager.cc:69
 msgid "DVD-A"
-msgstr ""
+msgstr "DVD-A"
 
 #: export_format_manager.cc:83
 msgid "iPod"
-msgstr ""
+msgstr "iPod"
 
 #: export_format_manager.cc:94
 msgid "Something else"
@@ -698,39 +704,39 @@ msgstr ""
 
 #: export_formats.cc:58
 msgid "Triangular"
-msgstr ""
+msgstr "Triangolare"
 
 #: export_formats.cc:59
 msgid "Rectangular"
-msgstr ""
+msgstr "Rettangolare"
 
 #: export_formats.cc:167
 msgid "8-bit"
-msgstr ""
+msgstr "8 bit"
 
 #: export_formats.cc:169
 msgid "16-bit"
-msgstr ""
+msgstr "16 bit"
 
 #: export_formats.cc:171
 msgid "24-bit"
-msgstr ""
+msgstr "24 bit"
 
 #: export_formats.cc:173
 msgid "32-bit"
-msgstr ""
+msgstr "32 bit"
 
 #: export_formats.cc:175
 msgid "float"
-msgstr ""
+msgstr "virgola mobile"
 
 #: export_formats.cc:177
 msgid "double"
-msgstr ""
+msgstr "double"
 
 #: export_formats.cc:179
 msgid "8-bit unsigned"
-msgstr ""
+msgstr "8 bit senza segno"
 
 #: export_formats.cc:181
 msgid "Vorbis sample format"
@@ -771,7 +777,7 @@ msgstr ""
 
 #: export_profile_manager.cc:365
 msgid "Selection"
-msgstr ""
+msgstr "Selezione"
 
 #: export_profile_manager.cc:623
 msgid "Unable to rename export format %1 to %2: %3"
@@ -783,7 +789,7 @@ msgstr ""
 
 #: export_profile_manager.cc:689
 msgid "empty format"
-msgstr ""
+msgstr "formato vuoto"
 
 #: export_profile_manager.cc:770
 msgid "Cannot load export format from %1"
@@ -815,11 +821,11 @@ msgstr ""
 
 #: export_profile_manager.cc:928
 msgid "No format selected!"
-msgstr ""
+msgstr "Nessun formato selezionato!"
 
 #: export_profile_manager.cc:930
 msgid "All channels are empty!"
-msgstr ""
+msgstr "Tutti i canali sono vuoti!"
 
 #: export_profile_manager.cc:932
 msgid "One or more of the selected formats is not compatible with this system!"
@@ -938,7 +944,7 @@ msgstr "tipo di fle sconosciuto per la sessione %1"
 
 #: find_session.cc:210 find_session.cc:269
 msgid "Archive is empty"
-msgstr ""
+msgstr "L'archivio è vuoto"
 
 #: find_session.cc:217 find_session.cc:271
 msgid "Archive does not contain a session folder"
@@ -970,11 +976,11 @@ msgstr ""
 
 #: find_session.cc:265
 msgid "No Error"
-msgstr ""
+msgstr "Nessun errore"
 
 #: find_session.cc:267
 msgid "File extension is not %1"
-msgstr ""
+msgstr "L'estensione del file non è %1"
 
 #: find_session.cc:279
 msgid "Destination folder already exists."
@@ -982,7 +988,7 @@ msgstr ""
 
 #: find_session.cc:286
 msgid "Unknown Error"
-msgstr ""
+msgstr "Errore sconosciuto"
 
 #: globals.cc:278
 msgid "Could not set system open files limit to \"unlimited\""
@@ -1006,20 +1012,20 @@ msgstr ""
 
 #: globals.cc:510
 msgid "Loading configuration"
-msgstr ""
+msgstr "Caricamento della configurazione"
 
 #: globals.cc:592 route.cc:207 session.cc:1006
 msgid "Monitor"
-msgstr ""
+msgstr "Monitor"
 
 #: globals.cc:593 session.cc:1267
 msgid "Master"
-msgstr ""
+msgstr "Master"
 
 #: globals.cc:595 midiport_manager.cc:71 port_manager.cc:1273
 #: port_manager.cc:1283
 msgid "Virtual Keyboard"
-msgstr ""
+msgstr "Tastiera virtuale"
 
 #: globals.cc:599
 msgid "Control"
@@ -1027,7 +1033,7 @@ msgstr ""
 
 #: globals.cc:600
 msgid "Mackie"
-msgstr ""
+msgstr "Mackie"
 
 #: globals.cc:601
 msgid "FaderPort Recv"
@@ -1083,7 +1089,7 @@ msgstr ""
 
 #: import.cc:241
 msgid "Copying %1"
-msgstr ""
+msgstr "Copia di %1"
 
 #: import.cc:460
 msgid "Track %1 of %2 contained no usable MIDI data"
@@ -1107,7 +1113,7 @@ msgstr ""
 
 #: import.cc:588
 msgid "Loading MIDI file %1"
-msgstr ""
+msgstr "Caricamento file MIDI %1"
 
 #: import.cc:649
 msgid "Failed to remove some files after failed/cancelled import operation"
@@ -1140,7 +1146,7 @@ msgstr ""
 
 #: instrument_info.cc:41 instrument_info.cc:74
 msgid "Unknown"
-msgstr ""
+msgstr "Sconosciuto"
 
 #: internal_send.cc:431 internal_send.cc:432
 msgid "%1 - cannot find any track/bus with the ID %2 to connect to"
@@ -1221,7 +1227,7 @@ msgstr ""
 #: io.cc:1483
 #, c-format
 msgid "%s %u"
-msgstr ""
+msgstr "%s %u"
 
 #: io.cc:1529
 #, c-format
@@ -1235,7 +1241,7 @@ msgstr ""
 
 #: io.cc:1601 session_bundles.cc:143 session_bundles.cc:177
 msgid "mono"
-msgstr ""
+msgstr "mono"
 
 #: io.cc:1603 session_bundles.cc:156 session_bundles.cc:191
 msgid "L"
@@ -1345,7 +1351,7 @@ msgstr ""
 
 #: location.cc:1114 session.cc:1601 session_state.cc:1441
 msgid "session"
-msgstr ""
+msgstr "sessione"
 
 #: location.cc:1181
 msgid "could not load location from session file - ignored"
@@ -1495,7 +1501,7 @@ msgstr ""
 
 #: midi_scene_changer.cc:312
 msgid "Scene "
-msgstr ""
+msgstr "Scena "
 
 #: midi_source.cc:127
 msgid "Missing parameter property on InterpolationStyle"
@@ -1659,7 +1665,7 @@ msgstr ""
 
 #: parameter_descriptor.cc:119
 msgid "Normal"
-msgstr ""
+msgstr "Normale"
 
 #: parameter_descriptor.cc:120
 msgid "Invert"
@@ -1675,55 +1681,55 @@ msgstr ""
 
 #: parameter_descriptor.cc:130
 msgid "Disk"
-msgstr ""
+msgstr "Disco"
 
 #: parameter_descriptor.cc:259
 msgid "Note|C"
-msgstr ""
+msgstr "Do"
 
 #: parameter_descriptor.cc:260
 msgid "Note|C#"
-msgstr ""
+msgstr "Do#"
 
 #: parameter_descriptor.cc:261
 msgid "Note|D"
-msgstr ""
+msgstr "Re"
 
 #: parameter_descriptor.cc:262
 msgid "Note|D#"
-msgstr ""
+msgstr "Re#"
 
 #: parameter_descriptor.cc:263
 msgid "Note|E"
-msgstr ""
+msgstr "iM"
 
 #: parameter_descriptor.cc:264
 msgid "Note|F"
-msgstr ""
+msgstr "Fa"
 
 #: parameter_descriptor.cc:265
 msgid "Note|F#"
-msgstr ""
+msgstr "Fa#"
 
 #: parameter_descriptor.cc:266
 msgid "Note|G"
-msgstr ""
+msgstr "Sol"
 
 #: parameter_descriptor.cc:267
 msgid "Note|G#"
-msgstr ""
+msgstr "Sol#"
 
 #: parameter_descriptor.cc:268
 msgid "Note|A"
-msgstr ""
+msgstr "La"
 
 #: parameter_descriptor.cc:269
 msgid "Note|A#"
-msgstr ""
+msgstr "La#"
 
 #: parameter_descriptor.cc:270
 msgid "Note|B"
-msgstr ""
+msgstr "Si"
 
 #: playlist.cc:2327
 msgid "region state node has no ID, ignored"
@@ -1755,15 +1761,15 @@ msgstr ""
 
 #: plugin.cc:280
 msgid "Audio"
-msgstr ""
+msgstr "Audio"
 
 #: plugin.cc:283
 msgid "Midi"
-msgstr ""
+msgstr "Midi"
 
 #: plugin.cc:286
 msgid "?"
-msgstr ""
+msgstr "?"
 
 #: plugin_insert.cc:525
 msgid "Plugin Enable"
@@ -1779,7 +1785,7 @@ msgstr "errore di programmazione: "
 
 #: plugin_insert.cc:1890
 msgid "SC %1"
-msgstr ""
+msgstr "SC %1"
 
 #: plugin_insert.cc:2579
 msgid "XML node describing plugin is missing the `type' field"
@@ -1879,7 +1885,7 @@ msgstr ""
 
 #: plugin_manager.cc:685
 msgid "LADSPA"
-msgstr ""
+msgstr "LADSPA"
 
 #: plugin_manager.cc:743
 msgid "Could not parse rdf file: %1"
@@ -1903,7 +1909,7 @@ msgstr ""
 
 #: plugin_manager.cc:1031
 msgid "VST"
-msgstr ""
+msgstr "VST"
 
 #: plugin_manager.cc:1036
 msgid "--- Windows VST plugins Scan Done"
@@ -1919,7 +1925,7 @@ msgstr ""
 
 #: plugin_manager.cc:1059
 msgid "not a dll"
-msgstr ""
+msgstr "non una dll"
 
 #: plugin_manager.cc:1065
 msgid "cannot determine dll type"
@@ -1935,15 +1941,15 @@ msgstr ""
 
 #: plugin_manager.cc:1081
 msgid "i386 (32-bit)"
-msgstr ""
+msgstr "i386 (32-bit)"
 
 #: plugin_manager.cc:1084
 msgid "Itanium"
-msgstr ""
+msgstr "Itanium"
 
 #: plugin_manager.cc:1087
 msgid "x64 (64-bit)"
-msgstr ""
+msgstr "x64 (64-bit)"
 
 #: plugin_manager.cc:1090
 msgid "Native Architecture"
@@ -1985,7 +1991,7 @@ msgstr ""
 
 #: plugin_manager.cc:1231
 msgid "MacVST"
-msgstr ""
+msgstr "MacVST"
 
 #: plugin_manager.cc:1270
 msgid ""
@@ -1999,7 +2005,7 @@ msgstr ""
 
 #: plugin_manager.cc:1351
 msgid "LXVST"
-msgstr ""
+msgstr "LXVST"
 
 #: plugin_manager.cc:1377
 msgid ""
@@ -2399,7 +2405,7 @@ msgstr ""
 
 #: route.cc:5886 route.cc:5888 route.cc:5905 route.cc:5907
 msgid "???"
-msgstr ""
+msgstr "???"
 
 #: route.cc:5898
 msgid "Attk"
@@ -2573,11 +2579,11 @@ msgstr ""
 
 #: session.cc:2357
 msgid "Audio "
-msgstr ""
+msgstr "Audio "
 
 #: session.cc:2361
 msgid "MIDI "
-msgstr ""
+msgstr "MIDI "
 
 #: session.cc:2430
 msgid "Session: could not create new midi track."
@@ -2591,7 +2597,7 @@ msgstr ""
 
 #: session.cc:2484 session.cc:2487
 msgid "Midi Bus"
-msgstr ""
+msgstr "Bus midi"
 
 #: session.cc:2509
 msgid "cannot configure new midi bus input"
@@ -2615,7 +2621,7 @@ msgstr "Sessione: impossibile creare una nuova traccia audio"
 
 #: session.cc:2760 session.cc:2763
 msgid "Bus"
-msgstr ""
+msgstr "Bus"
 
 #: session.cc:2888 session.cc:2898
 msgid "Session: UINT_MAX routes? impossible!"
@@ -3292,27 +3298,27 @@ msgstr ""
 
 #: sndfile_helpers.cc:35
 msgid "WAV"
-msgstr ""
+msgstr "WAV"
 
 #: sndfile_helpers.cc:36
 msgid "AIFF"
-msgstr ""
+msgstr "AIFF"
 
 #: sndfile_helpers.cc:37
 msgid "CAF"
-msgstr ""
+msgstr "CAF"
 
 #: sndfile_helpers.cc:38
 msgid "W64 (64-bit WAV)"
-msgstr ""
+msgstr "W64 (64-bit WAV)"
 
 #: sndfile_helpers.cc:39
 msgid "FLAC"
-msgstr ""
+msgstr "FLAC"
 
 #: sndfile_helpers.cc:40
 msgid "Ogg/Vorbis"
-msgstr ""
+msgstr "Ogg/Vorbis"
 
 #: sndfile_helpers.cc:41
 msgid "raw (no header)"
@@ -3320,31 +3326,31 @@ msgstr ""
 
 #: sndfile_helpers.cc:46
 msgid ".wav"
-msgstr ""
+msgstr ".wav"
 
 #: sndfile_helpers.cc:47
 msgid ".aiff"
-msgstr ""
+msgstr ".aiff"
 
 #: sndfile_helpers.cc:48
 msgid ".caf"
-msgstr ""
+msgstr ".caf"
 
 #: sndfile_helpers.cc:49
 msgid ".w64"
-msgstr ""
+msgstr ".w64"
 
 #: sndfile_helpers.cc:50
 msgid ".flac"
-msgstr ""
+msgstr ".flac"
 
 #: sndfile_helpers.cc:51
 msgid ".ogg"
-msgstr ""
+msgstr ".ogg"
 
 #: sndfile_helpers.cc:52
 msgid ".raw"
-msgstr ""
+msgstr ".raw"
 
 #: sndfile_helpers.cc:67
 msgid "Signed 16-bit PCM"
@@ -3364,15 +3370,15 @@ msgstr ""
 
 #: sndfile_helpers.cc:71
 msgid "32-bit float"
-msgstr ""
+msgstr "32 bit in virgola mobile"
 
 #: sndfile_helpers.cc:84
 msgid "Little-endian (Intel)"
-msgstr ""
+msgstr "Little-endian (Intel)"
 
 #: sndfile_helpers.cc:85
 msgid "Big-endian (PowerPC)"
-msgstr ""
+msgstr "Big-endian (PowerPC)"
 
 #: sndfilesource.cc:274
 msgid "Cannot set flac compression level: %1"
@@ -3481,11 +3487,11 @@ msgstr ""
 
 #: template_utils.cc:117 template_utils.cc:172
 msgid "(unknown)"
-msgstr ""
+msgstr "(sconosciuto)"
 
 #: template_utils.cc:127 template_utils.cc:182
 msgid "No Description"
-msgstr ""
+msgstr "Nessuna descrizione"
 
 #: tempo.cc:143
 msgid "TempoSection XML node has no \"movable\" property"
@@ -3653,11 +3659,11 @@ msgstr ""
 
 #: transport_master.cc:487
 msgid "All"
-msgstr ""
+msgstr "Tutti"
 
 #: transport_master.cc:491
 msgid "Start/Stop"
-msgstr ""
+msgstr "Avvia/Ferma"
 
 #: transport_master.cc:493
 msgid "Speed"
@@ -3747,11 +3753,11 @@ msgstr ""
 #: vca.cc:44
 #, c-format
 msgid "VCA %n"
-msgstr ""
+msgstr "VCA %n"
 
 #: vca.cc:116
 msgid "VCA %1 : %2"
-msgstr ""
+msgstr "VCA %1 : %2"
 
 #: vca.cc:217
 msgid "Master assignment ignored to prevent recursion"
