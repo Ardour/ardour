@@ -291,6 +291,7 @@ MidiPort::flush_buffers (pframes_t nframes)
 			port_buffer = port_engine.get_buffer (_port_handle, nframes);
 		}
 
+		double speed_ratio = (flags () & TransportGenerator) ? 1.0 : _speed_ratio;
 
 		for (MidiBuffer::iterator i = _buffer->begin(); i != _buffer->end(); ++i) {
 
@@ -302,7 +303,7 @@ MidiPort::flush_buffers (pframes_t nframes)
 				uint8_t const * const buf = ev.buffer();
 				const samplepos_t now = AudioEngine::instance()->sample_time_at_cycle_start();
 
-				_trace_parser->set_timestamp (now + adjusted_time / _speed_ratio);
+				_trace_parser->set_timestamp (now + adjusted_time / speed_ratio);
 
 				uint32_t limit = ev.size();
 
@@ -336,14 +337,14 @@ MidiPort::flush_buffers (pframes_t nframes)
 			// and just send 'em all, at cycle_end
 			// see AudioEngine::split_cycle (), PortManager::cycle_end()
 			if ((adjusted_time >= _global_port_buffer_offset) && (adjusted_time < _global_port_buffer_offset + nframes)) {
-				pframes_t tme = floor (adjusted_time / _speed_ratio);
+				pframes_t tme = floor (adjusted_time / speed_ratio);
 				if (port_engine.midi_event_put (port_buffer, tme, ev.buffer(), ev.size()) != 0) {
 					cerr << "write failed, dropped event, time " << adjusted_time << '/' << ev.time() << endl;
 				}
 			} else {
-				pframes_t tme = floor (adjusted_time / _speed_ratio);
+				pframes_t tme = floor (adjusted_time / speed_ratio);
 				cerr << "Dropped outgoing MIDI event. time " << adjusted_time
-				     << " (" << ev.time() << ") @" << _speed_ratio << " = " << tme
+				     << " (" << ev.time() << ") @" << speed_ratio << " = " << tme
 				     << " out of range [" << _global_port_buffer_offset
 				     << " .. " << _global_port_buffer_offset + nframes
 				     << "]";
