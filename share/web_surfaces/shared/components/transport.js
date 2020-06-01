@@ -19,6 +19,13 @@
 import { RootComponent } from '../base/component.js';
 import { StateNode } from '../base/protocol.js';
 
+const NodeToProperty = Object.freeze({
+	[StateNode.TRANSPORT_TEMPO]  : 'tempo',
+	[StateNode.TRANSPORT_TIME]   : 'time',
+	[StateNode.TRANSPORT_ROLL]   : 'roll',
+	[StateNode.TRANSPORT_RECORD] : 'record'
+});
+
 export class Transport extends RootComponent {
 
 	constructor (channel) {
@@ -58,24 +65,12 @@ export class Transport extends RootComponent {
 	}
 
  	handle (node, addr, val) {
- 		switch (node) {
- 			case StateNode.TRANSPORT_TEMPO:
- 				this.updateLocal('tempo', val[0]);
- 				break;
- 			case StateNode.TRANSPORT_TIME:
- 				this.updateLocal('time', val[0]);
- 				break;
- 			case StateNode.TRANSPORT_ROLL:
- 				this.updateLocal('roll', val[0]);
- 				break;
- 			case StateNode.TRANSPORT_RECORD:
- 				this.updateLocal('record', val[0]);
- 				break;
- 			default:
- 				return false;
+ 		if (node in NodeToProperty) {
+ 			this.updateLocal(NodeToProperty[node], val[0]);
+ 			return true;
  		}
 
- 		return true;
+ 		return false;
  	}
 
 }

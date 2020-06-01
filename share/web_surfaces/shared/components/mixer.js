@@ -46,20 +46,18 @@ export class Mixer extends RootComponent {
 	 		if (node == StateNode.STRIP_DESCRIPTION) {
 	 			this._strips[addr] = new Strip(this, addr, val);
 	 			this.notifyObservers('strips');
+	 			return true;
 	 		} else {
 	 			const stripAddr = [addr[0]];
 	 			if (stripAddr in this._strips) {
-	 				this._strips[stripAddr].handle(node, addr, val);
-	 			} else {
-	 				return false;
+	 				return this._strips[stripAddr].handle(node, addr, val);
 	 			}
 	 		}
-
-	 		return true;
  		} else {
  			// all initial strip description messages have been received at this point
 			if (!this._ready) {
 	 			this.updateLocal('ready', true);
+	 			// passthrough by allowing to return false
 			}
  		}
 

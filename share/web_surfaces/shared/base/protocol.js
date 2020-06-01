@@ -19,19 +19,19 @@
 export const JSON_INF = 1.0e+128;
 
 export const StateNode = Object.freeze({
-	STRIP_DESCRIPTION:              'strip_description',
-	STRIP_METER:                    'strip_meter',
-	STRIP_GAIN:                     'strip_gain',
-	STRIP_PAN:                      'strip_pan',
-	STRIP_MUTE:                     'strip_mute',
-	STRIP_PLUGIN_DESCRIPTION:       'strip_plugin_description',
-	STRIP_PLUGIN_ENABLE:            'strip_plugin_enable',
-	STRIP_PLUGIN_PARAM_DESCRIPTION: 'strip_plugin_param_description',
-	STRIP_PLUGIN_PARAM_VALUE:       'strip_plugin_param_value',
-	TRANSPORT_TEMPO:                'transport_tempo',
-	TRANSPORT_TIME:                 'transport_time',
-	TRANSPORT_ROLL:                 'transport_roll',
-	TRANSPORT_RECORD:               'transport_record'
+	STRIP_DESCRIPTION              : 'strip_description',
+	STRIP_METER                    : 'strip_meter',
+	STRIP_GAIN                     : 'strip_gain',
+	STRIP_PAN                      : 'strip_pan',
+	STRIP_MUTE                     : 'strip_mute',
+	STRIP_PLUGIN_DESCRIPTION       : 'strip_plugin_description',
+	STRIP_PLUGIN_ENABLE            : 'strip_plugin_enable',
+	STRIP_PLUGIN_PARAM_DESCRIPTION : 'strip_plugin_param_description',
+	STRIP_PLUGIN_PARAM_VALUE       : 'strip_plugin_param_value',
+	TRANSPORT_TEMPO                : 'transport_tempo',
+	TRANSPORT_TIME                 : 'transport_time',
+	TRANSPORT_ROLL                 : 'transport_roll',
+	TRANSPORT_RECORD               : 'transport_record'
 });
 
 export class Message {
@@ -41,13 +41,13 @@ export class Message {
 		this.addr = addr;
 		this.val = [];
 
-		for (const i in val) {
-			if (val[i] >= JSON_INF) {
+		for (const v of val) {
+			if (v >= JSON_INF) {
 				this.val.push(Infinity);
-			} else if (val[i] <= -JSON_INF) {
+			} else if (v <= -JSON_INF) {
 				this.val.push(-Infinity);
 			} else {
-				this.val.push(val[i]);
+				this.val.push(v);
 			}
 		}
 	}
@@ -64,13 +64,13 @@ export class Message {
 	toJsonText () {
 		let val = [];
 
-		for (const i in this.val) {
-			if (this.val[i] == Infinity) {
+		for (const v of this.val) {
+			if (v == Infinity) {
 				val.push(JSON_INF);
-			} else if (this.val[i] == -Infinity) {
+			} else if (v == -Infinity) {
 				val.push(-JSON_INF);
 			} else {
-				val.push(this.val[i]);
+				val.push(v);
 			}
 		}
 		
