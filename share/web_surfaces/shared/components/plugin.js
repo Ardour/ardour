@@ -54,13 +54,12 @@ export class Plugin extends AddressableComponent {
 	 		if (node == StateNode.STRIP_PLUGIN_PARAM_DESCRIPTION) {
 	 			this._parameters[addr] = new Parameter(this, addr, val);
 	 			this.notifyObservers('parameters');
+	 			return true;
 	 		} else {
 	 			if (addr in this._parameters) {
-	 				this._parameters[addr].handle(node, addr, val);
+	 				return this._parameters[addr].handle(node, addr, val);
 	 			}
 	 		}
-
-	 		return true;
  		} else if (node == StateNode.STRIP_PLUGIN_ENABLE) {
  			this.updateLocal('enable', val[0]);
 			return true;

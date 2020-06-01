@@ -20,6 +20,13 @@ import { AddressableComponent } from '../base/component.js';
 import { Plugin } from './plugin.js';
 import { StateNode } from '../base/protocol.js';
 
+const NodeToProperty = Object.freeze({
+	[StateNode.STRIP_METER] : 'meter',
+	[StateNode.STRIP_GAIN]  : 'gain',
+	[StateNode.STRIP_PAN]   : 'pan',
+	[StateNode.STRIP_MUTE]  : 'mute'
+});
+
 export class Strip extends AddressableComponent {
 
 	constructor (parent, addr, desc) {
@@ -76,38 +83,18 @@ export class Strip extends AddressableComponent {
  	handle (node, addr, val) {
  		if (node.startsWith('strip_plugin')) {
 	 		if (node == StateNode.STRIP_PLUGIN_DESCRIPTION) {
-
 	 			this._plugins[addr] = new Plugin(this, addr, val);
 	 			this.notifyObservers('plugins');
+	 			return true;
 	 		} else {
 	 			const pluginAddr = [addr[0], addr[1]];
 	 			if (pluginAddr in this._plugins) {
-	 				this._plugins[pluginAddr].handle(node, addr, val);
-	 			} else {
-	 				return false;
+	 				return this._plugins[pluginAddr].handle(node, addr, val);
 	 			}
 	 		}
-
-	 		return true;
- 		} else {
- 			switch (node) {
- 				case StateNode.STRIP_METER:
-	 				this.updateLocal('meter', val[0]);
- 					break;
- 				case StateNode.STRIP_GAIN:
-	 				this.updateLocal('gain', val[0]);
- 					break;
-  				case StateNode.STRIP_PAN:
-	 				this.updateLocal('pan', val[0]);
- 					break;
-  				case StateNode.STRIP_MUTE:
-	 				this.updateLocal('mute', val[0]);
- 					break;
- 				default:
- 					return false;
- 			}
-
-  			return true;
+ 		} else if (node in NodeToProperty) {
+ 			this.updateLocal(NodeToProperty[node], val[0]);
+ 			return true;
  		}
 
  		return false;
