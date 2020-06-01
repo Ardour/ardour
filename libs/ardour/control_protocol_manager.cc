@@ -324,6 +324,13 @@ ControlProtocolManager::load_mandatory_protocols ()
 	}
 }
 
+struct ControlProtocolOrderByName
+{
+	bool operator() (ControlProtocolInfo* const & a, ControlProtocolInfo* const & b) const {
+		return a->name < b->name;
+	}
+};
+
 void
 ControlProtocolManager::discover_control_protocols ()
 {
@@ -367,6 +374,9 @@ ControlProtocolManager::discover_control_protocols ()
 	for (vector<std::string>::iterator i = cp_modules.begin(); i != cp_modules.end(); ++i) {
 		control_protocol_discover (*i);
 	}
+
+	ControlProtocolOrderByName cpn;
+	control_protocol_info.sort (cpn);
 }
 
 int
