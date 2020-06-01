@@ -1,0 +1,163 @@
+# Copyright (C) YEAR "Paul Davis"
+# This file is distributed under the same license as the PACKAGE package.
+#
+# Vincenzo Reale <smart2128@baslug.org>, 2020.
+msgid ""
+msgstr ""
+"Project-Id-Version: gtkmm2ext\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-06-01 11:01+0200\n"
+"PO-Revision-Date: 2020-06-01 11:13+0200\n"
+"Last-Translator: Vincenzo Reale <smart2128@baslug.org>\n"
+"Language-Team: Italian\n"
+"Language: it\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Lokalize 20.04.1\n"
+
+#: actions.cc:215
+msgid "Unknown action name: %1/%2"
+msgstr "Nome azione sconosciuta: %1/%2"
+
+#: action_model.cc:56 action_model.cc:171
+msgid "Disabled"
+msgstr "Disabilitata"
+
+#: action_model.cc:83
+msgid "Main_menu"
+msgstr "Menu_principale"
+
+#: action_model.cc:85
+msgid "JACK"
+msgstr "JACK"
+
+#: action_model.cc:87
+msgid "redirectmenu"
+msgstr "menu"
+
+#: action_model.cc:89
+msgid "Editor_menus"
+msgstr "Editor_menu"
+
+#: action_model.cc:91
+msgid "RegionList"
+msgstr "ElencoRegioni"
+
+#: action_model.cc:93
+msgid "ProcessorMenu"
+msgstr "MenuProcessori"
+
+#: bindings.cc:840 bindings.cc:842
+msgid "Window"
+msgstr "Finestra"
+
+#: bindings.cc:840
+msgid " (Categorized)"
+msgstr " (Categorizzato)"
+
+#: bindings.cc:842
+msgid " (Alphabetical)"
+msgstr " (Alfabetico)"
+
+#: bindings.cc:858
+msgid "Uncategorized"
+msgstr "Non categorizzato"
+
+#: cursors.cc:81
+msgid "cursor hotspots info file %1 has an error on line %2"
+msgstr ""
+"il file delle informazioni sui punti attivi del cursore %1 presenta un errore"
+" alla riga %2"
+
+#: emscale.cc:52
+msgid "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+msgstr "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+
+#: gtk_ui.cc:126
+msgid "Log"
+msgstr "Registro"
+
+#: gtk_ui.cc:395
+msgid ""
+"\n"
+"\n"
+"Shortcut: "
+msgstr ""
+"\n"
+"\n"
+"Scorciatoia: "
+
+#: gtk_ui.cc:694
+msgid "Press To Exit"
+msgstr "Premi per uscire"
+
+#: gtk_ui.cc:730
+msgid "I'm sorry %1, I can't do that"
+msgstr "Spiancente %1, non posso farlo"
+
+#: keyboard.cc:75
+msgid "Command"
+msgstr "Comando"
+
+#: keyboard.cc:76 keyboard.cc:98
+msgid "Control"
+msgstr "Controllo"
+
+#: keyboard.cc:77 keyboard.cc:82 keyboard.cc:100 keyboard.cc:105
+msgid "Key|Shift"
+msgstr "Maiusc"
+
+#: keyboard.cc:78
+msgid "Option"
+msgstr "Opzione"
+
+#: keyboard.cc:80
+msgid "Cmd"
+msgstr "Cmd"
+
+#: keyboard.cc:81 keyboard.cc:103
+msgid "Ctrl"
+msgstr "Ctrl"
+
+#: keyboard.cc:83
+msgid "Opt"
+msgstr "Opt"
+
+#: keyboard.cc:99 keyboard.cc:104
+msgid "Alt"
+msgstr "Alt"
+
+#: keyboard.cc:101
+msgid "Windows"
+msgstr "Windows"
+
+#: keyboard.cc:106
+msgid "Win"
+msgstr "Win"
+
+#: keyboard.cc:159 keyboard.cc:605
+msgid "Unknown"
+msgstr "Sconosciuto"
+
+#: keyboard.cc:616
+msgid "key bindings file not found at \"%2\" or contains errors."
+msgstr ""
+"file di associazione dei tasti non trovato in \"%2\" o contiene errori."
+
+#: keyboard.cc:642
+msgid "Keyboard binding found without a name"
+msgstr "Associazione della tastiera trovata senza un nome"
+
+#: keyboard.cc:674
+msgid "Cannot save key bindings to %1"
+msgstr "Impossibile salvare l'associazione dei tasti in %1"
+
+#: keyboard.cc:690
+msgid "Cannot rename your own keybinding file (%1)"
+msgstr "Impossibile rinominare il tuo file delle associazioni dei tasti (%1)"
+
+#: textviewer.cc:32
+msgid "Close"
+msgstr "Chiudi"
