@@ -73,9 +73,14 @@ StripableTimeAxisView::add_automation_child (Evoral::Parameter param, boost::sha
 
 	add_child (track);
 
-	track->Hiding.connect (sigc::bind (sigc::mem_fun (*this, &StripableTimeAxisView::automation_track_hidden), param));
-
-	_automation_tracks[param] = track;
+	if (param.type() != PluginAutomation) {
+		/* PluginAutomation is handled by
+		 * - RouteTimeAxisView::processor_automation_track_hidden
+		 * - RouteTimeAxisView::processor_automation
+		 */
+		track->Hiding.connect (sigc::bind (sigc::mem_fun (*this, &StripableTimeAxisView::automation_track_hidden), param));
+		_automation_tracks[param] = track;
+	}
 
 	/* existing state overrides "show" argument */
 	bool visible;
@@ -155,6 +160,7 @@ StripableTimeAxisView::update_mute_track_visibility ()
 Gtk::CheckMenuItem*
 StripableTimeAxisView::automation_child_menu_item (Evoral::Parameter param)
 {
+	assert (param.type() != PluginAutomation);
 	ParameterMenuMap::iterator i = _main_automation_menu_map.find (param);
 	if (i != _main_automation_menu_map.end()) {
 		return i->second;
@@ -186,6 +192,7 @@ StripableTimeAxisView::automation_track_hidden (Evoral::Parameter param)
 boost::shared_ptr<AutomationTimeAxisView>
 StripableTimeAxisView::automation_child(Evoral::Parameter param)
 {
+	assert (param.type() != PluginAutomation);
 	AutomationTracks::iterator i = _automation_tracks.find(param);
 	if (i != _automation_tracks.end()) {
 		return i->second;

@@ -1740,6 +1740,8 @@ RouteTimeAxisView::color_handler ()
 void
 RouteTimeAxisView::toggle_automation_track (const Evoral::Parameter& param)
 {
+	assert (param.type() != PluginAutomation);
+
 	boost::shared_ptr<AutomationTimeAxisView> track = automation_child (param);
 	Gtk::CheckMenuItem* menu = automation_child_menu_item (param);
 
@@ -2145,10 +2147,12 @@ RouteTimeAxisView::add_processor_to_subplugin_menu (boost::weak_ptr<Processor> p
 
 		}
 
-		boost::shared_ptr<AutomationTimeAxisView> atav = automation_child (*i);
+		boost::shared_ptr<AutomationTimeAxisView> atav = pan->view;
 		bool visible;
 		if (atav && atav->get_gui_property ("visible", visible)) {
 			mitem->set_active(true);
+		} else {
+			mitem->set_active(false);
 		}
 
 		mitem->signal_toggled().connect (sigc::bind (sigc::mem_fun(*this, &RouteTimeAxisView::processor_menu_item_toggled), rai, pan));
