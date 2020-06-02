@@ -29,7 +29,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-MissingFileSourceDialog::MissingFileSourceDialog (Session * s, list<string> const & plugins, DataType dt)
+MissingFileSourceDialog::MissingFileSourceDialog (Session * s, list<string> const& files, DataType dt)
 	: ArdourDialog (_("Missing Source Files"), true, false)
 {
 	/* This dialog is always shown programatically. Center the window.*/
@@ -45,8 +45,16 @@ MissingFileSourceDialog::MissingFileSourceDialog (Session * s, list<string> cons
 	stringstream t;
 	t << string_compose (_("This session misses following %1 files.\nThey have been replaced with silence:\n\n"), dt.to_string());
 
-	for (list<string>::const_iterator i = plugins.begin(); i != plugins.end(); ++i) {
+	size_t cnt = 0;
+
+	for (list<string>::const_iterator i = files.begin(); i != files.end(); ++i, ++cnt) {
 		t << *i << "\n";
+		if (cnt > 14) {
+			break;
+		}
+	}
+	if (cnt < files.size()) {
+		t << string_compose (_("... and %1 more files. See the Log window for a complete list.\n"), files.size () - cnt);
 	}
 
 	t << _("\nThe Regions and edits have been retained.\n"
