@@ -1,14 +1,14 @@
-# SOME DESCRIPTIVE TITLE.
+# BASQUE TRANSLATION FOR ARDOUR 6
 # Copyright (C) YEAR "Paul Davis"
 # This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# PORRUMENTZIO <PORRUMENTZIO@RISEUP.NET>, 2020.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-05-20 14:36-0600\n"
-"PO-Revision-Date: 2020-05-02 18:26+0200\n"
+"PO-Revision-Date: 2020-06-05 11:21+0200\n"
 "Last-Translator: Enara Larraitz & Porrumentzio <porruren-grabatokia@riseup."
 "net>\n"
 "Language-Team: Euskera <porrumentzio@riseup.net>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.2.1\n"
+"X-Generator: Poedit 2.3\n"
 
 #: analyser.cc:127 audioregion.cc:1791
 msgid "Transient Analysis failed for %1."
@@ -571,12 +571,12 @@ msgstr "Konboluzioa: “%1” IR fitxategia luzeegia da."
 
 #: cycle_timer.cc:41
 msgid "CycleTimer::get_mhz(): can't open /proc/cpuinfo"
-msgstr "ZikloTenporizadorea::get_mhz(): ezin da /proc/cpuinfo ireki"
+msgstr "ZikloTenporizadorea::hartu_mhz(): ezin da /proc/cpuinfo ireki"
 
 #: cycle_timer.cc:53
 msgid "CycleTimer::get_mhz(): cannot locate cpu MHz in /proc/cpuinfo"
 msgstr ""
-"ZikloTenporizadorea::get_mhz(): ezin da cpu MHz in /proc/cpuinfo aurkitu"
+"ZikloTenporizadorea::hartu_mhz(): ezin da cpu MHz /proc/cpuinfo-n aurkitu"
 
 #: cycle_timer.cc:76
 msgid "cannot locate cpu MHz in /proc/cpuinfo"
@@ -843,7 +843,7 @@ msgstr "Ezin da esportazio formatua hemendik irakurri: %1"
 
 #: export_profile_manager.cc:785
 msgid "Ignored format '%1': encoder is not available"
-msgstr ""
+msgstr "Ezikusitako '%1' formatua: kodetzailea ez dago eskuragarri"
 
 #: export_profile_manager.cc:877
 msgid "No timespan has been selected!"
@@ -1353,7 +1353,7 @@ msgstr ""
 
 #: ladspa_plugin.cc:383 ladspa_plugin.cc:427
 msgid "Bad node sent to LadspaPlugin::set_state"
-msgstr "Nodo okerra hona bidali da: LadspaPlugin::set_state"
+msgstr "Nodo okerra hona bidali da: LadspaPlugina::zehaztu_egoera"
 
 #: ladspa_plugin.cc:397 ladspa_plugin.cc:440
 msgid "LADSPA: no ladspa port number"
@@ -1385,7 +1385,7 @@ msgstr "Ezin duzu CD markatzailea posizio honetan jarri"
 
 #: location.cc:636
 msgid "incorrect XML node passed to Location::set_state"
-msgstr "XML nodo okerra hona pasa da: Location::set_state"
+msgstr "XML nodo okerra hona pasa da: Kokalekua::zehaztu_egoera"
 
 #: location.cc:641
 msgid "XML node for Location has no ID information"
@@ -1415,7 +1415,7 @@ msgstr ""
 
 #: location.cc:1101
 msgid "incorrect XML mode passed to Locations::set_state"
-msgstr "XML modu okerra hona pasa da: Location::set_state"
+msgstr "XML modu okerra hona pasa da: Kokalekuak::zehaztu_egoerak"
 
 #: location.cc:1114 session.cc:1601 session_state.cc:1441
 msgid "session"
@@ -1489,7 +1489,7 @@ msgstr "LTCFitxategiIrakurgailua: “%1” audio-fitxategia hutsik dago"
 
 #: ltc_file_reader.cc:192
 msgid "LTCFileReader:: invalid audio channel selected"
-msgstr "LTCFitxategiIrakurgailua: hautatutako audio-kanala baliogabea da"
+msgstr "LTCFitxategiIrakurgailua:: hautatutako audio-kanala baliogabea da"
 
 #: ltc_slave.cc:650
 msgid "flywheel"
@@ -1517,7 +1517,7 @@ msgstr "Lua script baliogabea/bateraezina aurkitu da LuaProzesatzailearentzat."
 
 #: luaproc.cc:871
 msgid "Bad node sent to LuaProc::set_state"
-msgstr "Nodo okerra hona bidali da: LuaProc::set_state"
+msgstr "Nodo okerra hona bidali da: LuaProc::zehaztu_egoera"
 
 #: luaproc.cc:883
 msgid "LuaProc: port has no symbol, ignored"
@@ -1537,7 +1537,7 @@ msgstr "‘%1’ script-ak deskriptore baliogabea du."
 
 #: meter.cc:82
 msgid "Meter"
-msgstr ""
+msgstr "Metrika"
 
 #: midi_model.cc:518
 msgid "Change has no note, using note ID"
@@ -2149,7 +2149,8 @@ msgstr "Ezin da pluginaren etiketa-informazioa %1-(e)tik analizatu"
 
 #: plugin_manager.cc:1808
 msgid "PluginManager::sanitize_tag could not tokenize string: "
-msgstr "PluginKudeatzailea::sanitize_tag ezin izan da katea sinbolo bihurtu: "
+msgstr ""
+"PluginKudeatzailea::osasuntze_fitxa -k ezin izan du katea sinbolo bihurtu: "
 
 #: plugin_manager.cc:1858
 msgid "PluginManager: Could not tokenize string: "
@@ -2161,117 +2162,119 @@ msgstr "ezin izan da %1 erregistratu"
 
 #: port_engine_shared.cc:50
 msgid "BackendPort::connect (): invalid (null) port"
-msgstr ""
+msgstr "AtzealdeAtaka::konektatu (): ataka baliogabea (hutsa)"
 
 #: port_engine_shared.cc:55
 msgid "BackendPort::connect (): wrong port-type"
-msgstr ""
+msgstr "AtzealdeAtaka::konektatu (): ataka-tipo okerra"
 
 #: port_engine_shared.cc:60
 msgid "BackendPort::connect (): cannot inter-connect output ports."
-msgstr ""
+msgstr "AtzealdeAtaka:konektatu (): ezin dira elkar lotu irteera-atakak."
 
 #: port_engine_shared.cc:65
 msgid "BackendPort::connect (): cannot inter-connect input ports."
-msgstr ""
+msgstr "AtzealdeAtaka:konektatu (): ezin dira elkar lotu sarrera-atakak."
 
 #: port_engine_shared.cc:70
 msgid "BackendPort::connect (): cannot self-connect ports."
-msgstr ""
+msgstr "AtzealdeAtaka:konektatu (): ezin dira bakarrik lotu atakak."
 
 #: port_engine_shared.cc:76
 msgid "BackendPort::connect (): ports are already connected:"
-msgstr ""
+msgstr "AtzealdeAtaka:konektatu (): atakak jada konektatuta daude:"
 
 #: port_engine_shared.cc:101
 msgid "BackendPort::disconnect (): invalid (null) port"
-msgstr ""
+msgstr "AtzealdeAtaka::deskonektatu (): ataka baliogabea (hutsa)"
 
 #: port_engine_shared.cc:106
 msgid "BackendPort::disconnect (): ports are not connected:"
-msgstr ""
+msgstr "AtzealdeAtaka::deskonektatu (): atakak ez daude konektatuak:"
 
 #: port_engine_shared.cc:234
 msgid "BackendPort::port_is_physical (): invalid port."
-msgstr ""
+msgstr "AtzealdeAtaka:ataka_fisikoa_da (): ataka baliogabea."
 
 #: port_engine_shared.cc:320
 msgid "%1::register_port: Port already exists: (%2)"
-msgstr ""
+msgstr "%1::erregistro_ataka: Ataka jada badago: (%2)"
 
 #: port_engine_shared.cc:359
 msgid "%1::unregister_port: Failed to find port"
-msgstr ""
+msgstr "%1::erregistro-kentze_ataka: Ataka bilatzeak huts egin du"
 
 #: port_engine_shared.cc:416
 msgid ""
 "PortEngineSharedImpl: recovering from unclean shutdown, port registry is not "
 "empty."
 msgstr ""
+"AtakaMotorPartekatzeInpl: itzaltze ez-garbi batetik berreskuratzen, ataka "
+"erregistroa ez dago hutsik."
 
 #: port_engine_shared.cc:444
 msgid "%1::set_port_name: Invalid Port"
-msgstr ""
+msgstr "%1::zehaztu_ataka_izena: Ataka baliogabea"
 
 #: port_engine_shared.cc:449
 msgid "%1::set_port_name: Port with given name already exists"
-msgstr ""
+msgstr "%1::zehaztu_ataka_izena: Jada badago izen hori duen ataka"
 
 #: port_engine_shared.cc:474
 msgid "%1::get_port_name: invalid port"
-msgstr ""
+msgstr "%1::hartu_ataka_izena: ataka baliogabea"
 
 #: port_engine_shared.cc:485
 msgid "%1::get_port_flags: invalid port"
-msgstr ""
+msgstr "%1::hartu_ataka_adierazleak: ataka baliogabea"
 
 #: port_engine_shared.cc:495
 msgid "%1::get_port_property: invalid port"
-msgstr ""
+msgstr "%1::hartu_ataka_ezaugarria: ataka baliogabea"
 
 #: port_engine_shared.cc:512
 msgid "%1::set_port_property: invalid port"
-msgstr ""
+msgstr "%1::zehaztu_ataka_ezaugarria: ataka baliogabea"
 
 #: port_engine_shared.cc:558
 msgid "%1::connect: Invalid Source port: (%2)"
-msgstr ""
+msgstr "%1::konektatu: Iturburu ataka baliogabea: (%2)"
 
 #: port_engine_shared.cc:562
 msgid "%1::connect: Invalid Destination port: (%2)"
-msgstr ""
+msgstr "%1::konektatu: Helmuga ataka baliogabea: (%2)"
 
 #: port_engine_shared.cc:578 port_engine_shared.cc:613
 msgid "%1::disconnect: invalid port"
-msgstr ""
+msgstr "%1::deskonektatu: ataka baliogabea"
 
 #: port_engine_shared.cc:590
 msgid "%1::connect: Invalid Source Port Handle"
-msgstr ""
+msgstr "%1::konektatu: Iturburu ataka baliogabe heldulekua"
 
 #: port_engine_shared.cc:597
 msgid "%1::connect: Invalid Destination Port: (%2)"
-msgstr ""
+msgstr "%1::konektatu: Helmuga Ataka baliogabea: (%2)"
 
 #: port_engine_shared.cc:625
 msgid "%1::disconnect_all: invalid port"
-msgstr ""
+msgstr "%1::deskonektatu_guztiak: ataka baliogabea"
 
 #: port_engine_shared.cc:640
 msgid "%1::disconnect_all: Invalid Port"
-msgstr ""
+msgstr "%1::deskonektatu_guztiak: Ataka baliogabea"
 
 #: port_engine_shared.cc:653
 msgid "%1::connected_to: Invalid Port"
-msgstr ""
+msgstr "%1::konektatu_hona: Ataka baliogabea"
 
 #: port_engine_shared.cc:666
 msgid "%1::physically_connected: Invalid Port"
-msgstr ""
+msgstr "%1::fisikoki_konektatua: Ataka baliogabea"
 
 #: port_engine_shared.cc:678
 msgid "%1::get_connections: Invalid Port"
-msgstr ""
+msgstr "%1::hartu_konekxioak: Ataka baliogabea"
 
 #: port_insert.cc:45 port_insert.cc:277
 msgid "insert %1"
@@ -2338,7 +2341,7 @@ msgstr ""
 
 #: port_manager.cc:1396
 msgid "Ambiguous latency for port '%1' (%2, %3)"
-msgstr ""
+msgstr "Latentzia zalantzagarria '%1' atakarentzat (%2, %3)"
 
 #: processor.cc:235
 msgid "No %1 property flag in element %2"
@@ -2391,10 +2394,12 @@ msgstr "%1 konfigurazio-fitxategia ez da gorde"
 #: rc_configuration.cc:160 rc_configuration.cc:168
 msgid "Could not remove temporary config file at path \"%1\" (%2)"
 msgstr ""
+"Ezin izan da ezabatu konfigurazio-tenporal fitxategia \"%1\" bidean (%2)"
 
 #: rc_configuration.cc:166
 msgid "Could not rename temporary config file %1 to %2 (%3)"
 msgstr ""
+"Ezin izan da berrizentadu %1 konfigurazio-tenporal fitxategia%2 gisa (%3)"
 
 #: readable.cc:42
 msgid "Cannot open File \"%1\": %2"
@@ -2429,7 +2434,7 @@ msgstr "Errorea %1 gordetako txantiloi-fitxategia idazterakoan (%2)"
 msgid ""
 "programming error: RegionFactory::create() called with unknown Region type"
 msgstr ""
-"programazio-errorea: RegionFactory::create() deitu da eremu-mota "
+"programazio-errorea: JatorrizkoEremua::sortu() deitu da eremu-mota "
 "ezezagunarekin"
 
 #: region_factory.cc:557
@@ -2466,7 +2471,7 @@ msgstr "prozesatzailea ezin izan da sortu. Alde batera utzi da."
 
 #: route.cc:2602 route.cc:2808
 msgid "Bad node sent to Route::set_state() [%1]"
-msgstr "Nodo okerra hona bidali da: Route::set_state() [%1]"
+msgstr "Nodo okerra hona bidali da: Bideratzea::zehaztu_egoera() [%1]"
 
 #: route.cc:2673
 msgid "Pannable state found for route (%1) without a panner!"
@@ -2928,7 +2933,7 @@ msgstr "Saioa: ezin dira %1 motako bi gertaera aldi berean eduki (%2)."
 
 #: session_export.cc:149
 msgid "Cannot prepare transport for export"
-msgstr ""
+msgstr "Ezin da garraioa prestatu esportaziorako"
 
 #: session_export.cc:168
 msgid "%1: cannot seek to %2 for export"
@@ -3114,6 +3119,8 @@ msgid ""
 "Incompatible Session Version. That session was created with a newer version "
 "of %1"
 msgstr ""
+"Saio-bertsio bateraezina. Saio hori %1(r)en bertsio berriago batekin sortu "
+"zen"
 
 #: session_state.cc:1347
 msgid "Session-Save: Failed to copy MIDI Source '%1' for snapshot"
@@ -3197,6 +3204,8 @@ msgstr "Pistak/busak gehitzea amaituta"
 #: session_state.cc:1986
 msgid "Could not find diskstream for diskstream-id: '%1', playlist: '%2'"
 msgstr ""
+"Ezin izan da aurkitu disko-jarioa disko-jario-id -rako: '%1', erreprodukzio-"
+"zerrenda: '%2'"
 
 #: session_state.cc:2043
 msgid "Session: cannot create Region from XML description."
@@ -3898,7 +3907,7 @@ msgstr "programazio-errorea:%1"
 
 #: transport_master_manager.cc:347
 msgid "Transport master adjusted framerate from %1 to %2."
-msgstr ""
+msgstr "Garraio-masterrak marko-abiadura %1-(e)tik %2-(e)ra aldatu du."
 
 #: transport_master_manager.cc:396
 msgid "There is already a transport master named \"%1\" - not duplicated"
@@ -3978,7 +3987,7 @@ msgstr "%1 VCA : %2"
 
 #: vca.cc:217
 msgid "Master assignment ignored to prevent recursion"
-msgstr ""
+msgstr "Esleipen nagusia ezikusi da errepikatzea eragozteko"
 
 #: vca_manager.cc:206
 msgid "Cannot set state of a VCA"

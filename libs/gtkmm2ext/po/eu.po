@@ -1,7 +1,7 @@
-# SOME DESCRIPTIVE TITLE.
+# BASQUE TRANSLATION FOR ARDOUR 6
 # Copyright (C) YEAR "Paul Davis"
 # This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# PORRUMENTZIO <PORRUMENTZIO@RISEUP.NET>, 2020.
 #
 msgid ""
 msgstr ""

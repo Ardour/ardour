@@ -1,25 +1,23 @@
-# SOME DESCRIPTIVE TITLE.
+# BASQUE TRANSLATION FOR ARDOUR 6
 # Copyright (C) YEAR "Paul Davis"
 # This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# PORRUMENTZIO <PORRUMENTZIO@RISEUP.NET>, 2020.
 #
-#: audio_clock.cc:941 audio_clock.cc:942 session_dialog.cc:604
-#: session_dialog.cc:605
 msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-05-20 14:36-0600\n"
-"PO-Revision-Date: 2020-05-10 12:56+0200\n"
+"PO-Revision-Date: 2020-06-05 11:29+0200\n"
 "Last-Translator: Enara Larraitz & Porrumentzio <porruren-grabatokia@riseup."
-"net\n"
+"net>\n"
 "Language-Team: Euskera <porrumentzio@riseup.net>\n"
 "Language: eu\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.2.1\n"
+"X-Generator: Poedit 2.3\n"
 
 #: about.cc:133
 msgid "Fons Adriaensen"
@@ -347,6 +345,13 @@ msgid ""
 "\tOlivier Humbert <trebmuh@tuxfamily.org>\n"
 "\tFrédéric Rech <fred_rech@laposte.net>\n"
 msgstr ""
+"Frantsesa:\n"
+"\tAlain Fréhel <alain.frehel@free.fr>\n"
+"\tChristophe Combelles <ccomb@free.fr>\n"
+"\tMartin Blanchard\n"
+"\tRomain Arnaud <roming22@gmail.com>\n"
+"\tOlivier Humbert <trebmuh@tuxfamily.org>\n"
+"\tFrédéric Rech <fred_rech@laposte.net>\n"
 
 #: about.cc:217
 msgid ""
@@ -374,7 +379,7 @@ msgid ""
 "\tFilippo Pappalardo <filippo@email.it>\n"
 "\tRaffaele Morelli <raffaele.morelli@gmail.com>\n"
 msgstr ""
-"Italiarra:\n"
+"Italiera:\n"
 "\tFilippo Pappalardo <filippo@email.it>\n"
 "\tRaffaele Morelli <raffaele.morelli@gmail.com>\n"
 
@@ -429,7 +434,7 @@ msgid ""
 "Swedish:\n"
 "\t Petter Sundlöf <petter.sundlof@gmail.com>\n"
 msgstr ""
-"Suediarra:\n"
+"Suediera:\n"
 "\t Petter Sundlöf <petter.sundlof@gmail.com>\n"
 
 #: about.cc:233
@@ -706,8 +711,9 @@ msgid ""
 "by\n"
 "hidden monitor sends."
 msgstr ""
-"Foldback busak irteera nagusi gisa erabiltzen dira monitore-kanaletarako, "
-"eta ezkutuko monitore-bidalketa bidez elikatzen dira."
+"Foldback busak irteera nagusi gisa erabiltzen dira monitorizazio-"
+"kanaletarako,\n"
+"eta ezkutuko monitorizazio-bidalketa bidez elikatzen dira."
 
 #: add_route_dialog.cc:174 add_route_dialog.cc:1055
 #: duplicate_routes_dialog.cc:57 duplicate_routes_dialog.cc:224
@@ -840,7 +846,7 @@ msgstr "Perts."
 
 #: add_route_dialog.cc:941 session_dialog.cc:582 session_dialog.cc:583
 msgid "Factory Template"
-msgstr ""
+msgstr "Jatorrizko txantiloia"
 
 #: add_route_dialog.cc:1000 add_route_dialog.cc:1016 route_group_menu.cc:86
 msgid "New Group..."
@@ -2329,7 +2335,7 @@ msgstr "Desgaitu atzerapen-konpentsazioa"
 
 #: ardour_ui_ed.cc:491 new_user_wizard.cc:406
 msgid "Monitor Section"
-msgstr "Monitorizazio-eremua"
+msgstr "Monitorizazio-sekzioa"
 
 #: ardour_ui_ed.cc:494
 msgid "Sync Startup to Video"
@@ -2651,6 +2657,8 @@ msgid ""
 "It is not possible to use JACK as the sync source\n"
 " when the pull up/down setting is non-zero."
 msgstr ""
+"Ezin da JACK erabili sinkronia-iturri gisa\n"
+" igoera/jaitsiera ezarpena zero ez bada."
 
 #: ardour_ui_options.cc:307 ardour_ui_options.cc:327
 msgid "SyncSource|Int."
@@ -2887,7 +2895,7 @@ msgstr "Ireki saioa"
 #: ardour_ui_session.cc:1074 session_dialog.cc:455 session_import_dialog.cc:179
 #: session_metadata_dialog.cc:921
 msgid "%1 sessions"
-msgstr "%1 saioak"
+msgstr "%1 saio"
 
 #: ardour_ui_session.cc:1079 session_dialog.cc:460
 msgid "Session Archives"
@@ -3005,7 +3013,7 @@ msgstr "NSM: hasieraketak huts egin du"
 
 #: ardour_ui_startup.cc:407
 msgid "NSM server did not announce itself. Continuing without NSM."
-msgstr ""
+msgstr "NSM morroia ez da iragarri. NSM gabe jarraituko da."
 
 #: ardour_ui_startup.cc:409
 msgid "NSM server did not announce itself"
@@ -3454,7 +3462,7 @@ msgstr "Kendu esleipena guztiei"
 
 #: duplicate_routes_dialog.cc:35
 msgid "Duplicate Tracks/Busses"
-msgstr ""
+msgstr "Bikoiztu pistak/busak"
 
 #: duplicate_routes_dialog.cc:36
 msgid "For each Track:"
@@ -4661,11 +4669,11 @@ msgstr "Hautatu aurreko kanala"
 
 #: editor_actions.cc:260
 msgid "Toggle All Existing Automation"
-msgstr ""
+msgstr "Gaitu/Desgaitu automatizazio guztia"
 
 #: editor_actions.cc:261
 msgid "Toggle Layer Display"
-msgstr ""
+msgstr "Gaitu/Desgaitu geruzakako ikuspegia"
 
 #: editor_actions.cc:263
 msgid "Toggle Record Enable"
@@ -5159,183 +5167,183 @@ msgstr "Kuantizatu"
 
 #: editor_actions.cc:713
 msgid "Delete Selection"
-msgstr ""
+msgstr "Ezabatu hautapena"
 
 #: editor_actions.cc:714
 msgid "Delete Selection (alternate)"
-msgstr ""
+msgstr "Ezabatu hautapena (ordezkoa)"
 
 #: editor_actions.cc:716
 msgid "Clear Note Selection"
-msgstr ""
+msgstr "Garbitu nota-hautapena"
 
 #: editor_actions.cc:717
 msgid "Move Note Start Earlier (fine)"
-msgstr ""
+msgstr "Mugitu nota-hasiera ezkerrera (ongi)"
 
 #: editor_actions.cc:718
 msgid "Move Note Start Earlier"
-msgstr ""
+msgstr "Mugitu nota-hasiera ezkerrera"
 
 #: editor_actions.cc:719
 msgid "Move Note Ends Later (fine)"
-msgstr ""
+msgstr "Mugitu nota-hasiera eskuinera (ongi)"
 
 #: editor_actions.cc:720
 msgid "Move Note Ends Later"
-msgstr ""
+msgstr "Mugitu nota-hasiera eskuinera"
 
 #: editor_actions.cc:724
 msgid "Select Next"
-msgstr ""
+msgstr "Hautatu hurrengoa"
 
 #: editor_actions.cc:725
 msgid "Select Next (alternate)"
-msgstr ""
+msgstr "Hautatu hurrengoa (ordezkoa)"
 
 #: editor_actions.cc:726
 msgid "Select Previous"
-msgstr ""
+msgstr "Hautatu aurrekoa"
 
 #: editor_actions.cc:727
 msgid "Select Previous (alternate)"
-msgstr ""
+msgstr "Hautatu aurrekoa (ordezkoa)"
 
 #: editor_actions.cc:728
 msgid "Add Next to Selection"
-msgstr ""
+msgstr "Gehitu hurrengoa hautapenari"
 
 #: editor_actions.cc:729
 msgid "Add Next to Selection (alternate)"
-msgstr ""
+msgstr "Gehitu hurrengoa hautapenari (ordezkoa)"
 
 #: editor_actions.cc:730
 msgid "Add Previous to Selection"
-msgstr ""
+msgstr "Gehitu aurrekoa hautapenari"
 
 #: editor_actions.cc:731
 msgid "Add Previous to Selection (alternate)"
-msgstr ""
+msgstr "Gehitu aurrekoa hautapenari (ordezkoa)"
 
 #: editor_actions.cc:733
 msgid "Increase Velocity"
-msgstr ""
+msgstr "Handitu indarra"
 
 #: editor_actions.cc:734
 msgid "Increase Velocity (fine)"
-msgstr ""
+msgstr "Handitu indarra (ongi)"
 
 #: editor_actions.cc:735
 msgid "Increase Velocity (allow mush)"
-msgstr ""
+msgstr "Handitu indarra (baimendu plasta)"
 
 #: editor_actions.cc:736
 msgid "Increase Velocity (non-relative)"
-msgstr ""
+msgstr "Handitu indarra (ez-erlatiboa)"
 
 #: editor_actions.cc:737
 msgid "Increase Velocity (fine, allow mush)"
-msgstr ""
+msgstr "Handitu indarra (ongi, baimendu plasta)"
 
 #: editor_actions.cc:738
 msgid "Increase Velocity (fine, non-relative)"
-msgstr ""
+msgstr "Handitu indarra (ongi, ez-erlatiboa)"
 
 #: editor_actions.cc:739
 msgid "Increase Velocity (maintain ratios, allow mush)"
-msgstr ""
+msgstr "Handitu indarra (mantendu proportzioak, baimendu plasta)"
 
 #: editor_actions.cc:740
 msgid "Increase Velocity (fine, allow mush, non-relative)"
-msgstr ""
+msgstr "Handitu indarra (ongi, baimendu plasta, ez erlatiboa)"
 
 #: editor_actions.cc:742
 msgid "Decrease Velocity"
-msgstr ""
+msgstr "Txikitu indarra"
 
 #: editor_actions.cc:743
 msgid "Decrease Velocity (fine)"
-msgstr ""
+msgstr "Txikitu indarra (ongi)"
 
 #: editor_actions.cc:744
 msgid "Decrease Velocity (allow mush)"
-msgstr ""
+msgstr "Txikitu indarra (baimendu plasta)"
 
 #: editor_actions.cc:745
 msgid "Decrease Velocity (non-relative)"
-msgstr ""
+msgstr "Txikitu indarra (ez-erlatiboa)"
 
 #: editor_actions.cc:746
 msgid "Decrease Velocity (fine, allow mush)"
-msgstr ""
+msgstr "Txikitu indarra (ongi, baimendu plasta)"
 
 #: editor_actions.cc:747
 msgid "Decrease Velocity (fine, non-relative)"
-msgstr ""
+msgstr "Txikitu indarra (ongi, ez-erlatiboa)"
 
 #: editor_actions.cc:748
 msgid "Decrease Velocity (maintain ratios, allow mush)"
-msgstr ""
+msgstr "Txikitu indarra (mantendu proportzioak, baimendu plasta)"
 
 #: editor_actions.cc:749
 msgid "Decrease Velocity (fine, allow mush, non-relative)"
-msgstr ""
+msgstr "Txikitu indarra (ongi, baimendu plasta, ez erlatiboa)"
 
 #: editor_actions.cc:751
 msgid "Transpose Up (octave)"
-msgstr ""
+msgstr "Transposatu gora (zortziduna)"
 
 #: editor_actions.cc:752
 msgid "Transpose Up (octave, allow mush)"
-msgstr ""
+msgstr "Transposatu gora (zortziduna, baimendu plasta)"
 
 #: editor_actions.cc:753
 msgid "Transpose Up (semitone)"
-msgstr ""
+msgstr "Transposatu gora (tonuerdia)"
 
 #: editor_actions.cc:754
 msgid "Transpose Up (semitone, allow mush)"
-msgstr ""
+msgstr "Transposatu gora (tonuerdia, baimendu plasta)"
 
 #: editor_actions.cc:756
 msgid "Transpose Down (octave)"
-msgstr ""
+msgstr "Transposatu behera (zortziduna)"
 
 #: editor_actions.cc:757
 msgid "Transpose Down (octave, allow mush)"
-msgstr ""
+msgstr "Transposatu behera (zortziduna, baimendu plasta)"
 
 #: editor_actions.cc:758
 msgid "Transpose Down (semitone)"
-msgstr ""
+msgstr "Transposatu behera (tonuerdia)"
 
 #: editor_actions.cc:759
 msgid "Transpose Down (semitone, allow mush)"
-msgstr ""
+msgstr "Transposatu behera (tonuerdia, baimendu plasta)"
 
 #: editor_actions.cc:761
 msgid "Nudge Notes Later (grid)"
-msgstr ""
+msgstr "Eraman notak eskuinera (sareta)"
 
 #: editor_actions.cc:762
 msgid "Nudge Notes Later (1/4 grid)"
-msgstr ""
+msgstr "Eraman notak eskuinera (sareta 1/4)"
 
 #: editor_actions.cc:763
 msgid "Nudge Notes Earlier (grid)"
-msgstr ""
+msgstr "Eraman notak ezkerrera (sareta)"
 
 #: editor_actions.cc:764
 msgid "Nudge Notes Earlier (1/4 grid)"
-msgstr ""
+msgstr "Eraman notak ezkerrera (sareta 1/4)"
 
 #: editor_actions.cc:766
 msgid "Edit Note Channels"
-msgstr ""
+msgstr "Editatu noten kanalak"
 
 #: editor_actions.cc:767
 msgid "Edit Note Velocities"
-msgstr ""
+msgstr "Editatu noten indarrak"
 
 #: editor_actions.cc:1093 editor_actions.cc:1231 editor_actions.cc:1242
 #: editor_actions.cc:1297 editor_actions.cc:1308 editor_actions.cc:1355
@@ -5735,6 +5743,10 @@ msgid ""
 "Locked to Video.\n"
 "The video cannot be moved."
 msgstr ""
+"Audio-eremu bat edo gehiago\n"
+"blokeatuta eta bideoari\n"
+"lotuta daude.\n"
+"Ezin da bideoa mugitu."
 
 #: editor_drag.cc:2873
 msgid "Video Start:"
@@ -7129,7 +7141,7 @@ msgstr "Fitxategiaren kokaleku originala denbora-lerroan, grabatu zenean"
 
 #: editor_sources.cc:145
 msgid "Path (folder) of the file location"
-msgstr ""
+msgstr "Fitxategiaren kokalekuaren bidea (karpeta)"
 
 #: editor_sources.cc:371
 msgid "(MISSING) "
@@ -7165,7 +7177,7 @@ msgstr "Iturburu hauek erabiltzen dituzten eremuak soilik ezabatu."
 
 #: editor_sources.cc:643
 msgid "Yes, remove the Regions and Sources (cannot be undone!)"
-msgstr ""
+msgstr "Bai, ezabatu eremuak eta iturburuak (hau itzulezina da!)"
 
 #: editor_sources.cc:645
 msgid "Remove selected Sources"
@@ -7320,7 +7332,7 @@ msgstr ""
 
 #: engine_dialog.cc:510
 msgid "Audio System:"
-msgstr "Audio-sistema:"
+msgstr "Audio-morroia:"
 
 #: engine_dialog.cc:554
 msgid "Driver:"
@@ -7404,11 +7416,11 @@ msgstr ""
 
 #: engine_dialog.cc:929
 msgid "Engine|Stop"
-msgstr ""
+msgstr "Gelditu"
 
 #: engine_dialog.cc:933
 msgid "Engine|Start"
-msgstr ""
+msgstr "Abiarazi"
 
 #: engine_dialog.cc:1019
 msgid "MIDI Devices"
@@ -7569,7 +7581,7 @@ msgstr "Konektatuta"
 
 #: engine_dialog.cc:3313
 msgid "Connect to %1"
-msgstr "%1-(e)ra konektatu"
+msgstr "%1(e)ra konektatu"
 
 #: engine_dialog.cc:3317
 msgid "Stopped"
@@ -8767,6 +8779,9 @@ msgid ""
 "\n"
 "You can replace the existing binding or cancel this action."
 msgstr ""
+"Teklen sekuentzia dagoeneko %1(e)ri lotuta dago.\n"
+"\n"
+"Lehendik dagoen lotura ordezka dezakezu edo ekintza bertan behera utzi."
 
 #: keyeditor.cc:81 plugin_setup_dialog.cc:57
 msgid "Replace"
@@ -8938,7 +8953,7 @@ msgstr ""
 
 #: lua_script_manager.cc:98
 msgid "Action Scripts"
-msgstr ""
+msgstr "Ekintza-scriptak"
 
 #: lua_script_manager.cc:105
 msgid "Signal(s)"
@@ -8956,7 +8971,7 @@ msgstr ""
 
 #: lua_script_manager.cc:139
 msgid "Action Hooks"
-msgstr ""
+msgstr "Ekintza-amuak"
 
 #: lua_script_manager.cc:160
 msgid ""
@@ -8970,7 +8985,7 @@ msgstr ""
 
 #: lua_script_manager.cc:175
 msgid "Session Scripts"
-msgstr ""
+msgstr "Saio-scriptak"
 
 #: lua_script_manager.cc:220
 msgid "Action %1"
@@ -9110,7 +9125,7 @@ msgstr ""
 
 #: luawindow.cc:477 luawindow.cc:529
 msgid "Saved as %1"
-msgstr "%1 bezala gordeta"
+msgstr "%1 gisa gordeta"
 
 #: luawindow.cc:480 luawindow.cc:532
 msgid "Error saving file: %1"
@@ -9786,6 +9801,10 @@ msgid ""
 "If this is unexpected, manually locate the files and restore them in the "
 "session folder.\n"
 msgstr ""
+"\n"
+"Eremuak eta edizioak ez dira gehitu.\n"
+"Hau ustekabekoa bada, eskuz aurkitu fitxategiak eta birkokatu saioaren "
+"karpetan.\n"
 
 #: missing_filesource_dialog.cc:56
 msgid ""
@@ -10167,7 +10186,7 @@ msgstr "Hautatu hurrengo nahasketa-kanala"
 
 #: mixer_ui.cc:3535
 msgid "Select Previous Mixer Strip"
-msgstr ""
+msgstr "Hautatu aurreko nahasketa-kanala"
 
 #: mixer_ui.cc:3537
 msgid "Scroll Mixer Window to the left"
@@ -10195,7 +10214,7 @@ msgstr "Nahasgailua: erakutsi nahasketa-busak"
 
 #: mixer_ui.cc:3551
 msgid "Mixer: Show Monitor Section"
-msgstr "Nahasgailua: erakutsi monitorizatze-eremua"
+msgstr "Nahasgailua: erakutsi monitorizazio-sekzioa"
 
 #: mixer_ui.cc:3553
 msgid "Mixer: Show Foldback Strip"
@@ -10352,7 +10371,7 @@ msgstr "Prozesadoreak"
 
 #: monitor_section.cc:194
 msgid "Allow one to add monitor effect processors"
-msgstr "Utzi gehitzen monitore-efektuko prozesadoreak"
+msgstr "Utzi gehitzen monitorizazio-efektuko prozesadoreak"
 
 #: monitor_section.cc:209 monitor_section.cc:212
 msgid "Gain increase for soloed signals (0dB is normal)"
@@ -10409,7 +10428,7 @@ msgstr "Moztu SiP"
 
 #: monitor_section.cc:246 monitor_section.cc:249
 msgid "Gain reduction to use when dimming monitor outputs"
-msgstr "Monitore-irteerak ahultzeko erabiliko den irabazi-txikitzea"
+msgstr "Monitorizazio-irteerak ahultzeko erabiliko den irabazi-txikitzea"
 
 #: monitor_section.cc:253 monitor_section.cc:299
 msgid "-3 dB"
@@ -10430,15 +10449,15 @@ msgstr "Inb."
 
 #: monitor_section.cc:403 port_group.cc:612
 msgid "Monitor"
-msgstr "Monitore"
+msgstr "Monitorizatu"
 
 #: monitor_section.cc:948
 msgid "Use Monitor Section"
-msgstr "Erabili monitore-eremua"
+msgstr "Erabili monitorizazio-sekzioa"
 
 #: monitor_section.cc:962
 msgid "Toggle Monitor Section Processor Box"
-msgstr "Gaitu/Desgaitu monitore-eremuko prozesadore-kutxa"
+msgstr "Gaitu/Desgaitu monitorizazio-sekzioko prozesadore-kutxa"
 
 #: monitor_section.cc:969
 msgid "Cut monitor channel %1"
@@ -10482,7 +10501,7 @@ msgstr "Saiorik ez - ez da posible S/I aldaketarik"
 
 #: monitor_selector.cc:200
 msgid "Monitor output selector"
-msgstr "Monitore-irteera hautatzailea"
+msgstr "Monitorizazio-irteera hautatzailea"
 
 # bypass = saihespen edo salbuespen?
 #: mono_panner.cc:107 stereo_panner.cc:120
@@ -10605,7 +10624,7 @@ msgstr ""
 
 #: new_user_wizard.cc:78
 msgid "Ask %1 to play back material as it is being recorded"
-msgstr "Eskatu %1(r)i materiala erreproduzitzea grabatu bitartean"
+msgstr "Eskatu %1(r)i materiala erreproduzitzeko grabatu bitartean"
 
 #: new_user_wizard.cc:137
 msgid ""
@@ -10670,7 +10689,7 @@ msgid ""
 "\n"
 "<i>(You can put new sessions anywhere, this is just a default)</i>"
 msgstr ""
-"%1ekin lan egiten duzun proiektu bakoitzak bere karpeta du.\n"
+"%1(r)ekin lan egiten duzun proiektu bakoitzak bere karpeta du.\n"
 "Audioa grabatzen ari bazara, diskoan leku asko beharko duzu.\n"
 "\n"
 "Non nahi duzu biltegiratzea %1 saio berriak lehenespenez?\n"
@@ -10694,8 +10713,7 @@ msgid ""
 "\n"
 "<i>If you do not understand what this is about, just accept the default.</i>"
 msgstr ""
-"Musika-instrumentu eta ahotsak grabatu bitartean, seinalea entzun nahiko "
-"duzu.\n"
+"Musika-tresnak eta ahotsak grabatu bitartean, seinalea entzun nahiko duzu.\n"
 "Hau \"monitorizazioa\" deitzen da. Hau egiteko modu ezberdinak daude, duzun\n"
 "ekipamenduaren eta honen konfigurazioaren arabera. Hona hemen bi ohikoenak.\n"
 "Hautatu zure konfiguraziorako egokiena.\n"
@@ -10740,7 +10758,7 @@ msgid ""
 "<i>If you do not understand what this is about, just accept the default.</i>"
 msgstr ""
 "<i>Hobespen hau edonoiz alda dezakezu, Hobespenak leihoan.\n"
-"Era berean, monitorizazio-eremua edozein saiotik gehitu edo ken dezakezu.</"
+"Era berean, monitorizazio-sekzioa edozein saiotik gehitu edo ken dezakezu.</"
 "i>\n"
 "\n"
 "<i>Ez baduzu hau zer den ulertzen, lehenetsia besterik ez hautatu.</i>"
@@ -10829,7 +10847,7 @@ msgid ""
 "  -c, --name <name>           Use a specific backend client name, default is "
 "ardour\n"
 msgstr ""
-"  -c, --name <name>           Erabili motor-izen zehatz bat, lehenetsia "
+"  -c, --name <izena>           Erabili motor-izen zehatz bat, lehenetsia "
 "ardour da\n"
 
 #: opts.cc:77
@@ -10841,7 +10859,7 @@ msgid ""
 "  -D, --debug <options>       Set debug flags. Use \"-D list\" to see "
 "available options\n"
 msgstr ""
-"  -D, --debug <options>       Arazketa-banderak ezarri. Erabili \"-D list\" "
+"  -D, --debug <aukerak>       Arazketa-banderak ezarri. Erabili \"-D list\" "
 "erabilgarri dauden aukerak ikusteko\n"
 
 #: opts.cc:81
@@ -10851,6 +10869,8 @@ msgstr "  -h, --help                  Erakutsi mezu hau\n"
 #: opts.cc:82
 msgid "  -k, --keybindings <file>    Path to the key bindings file to load\n"
 msgstr ""
+"  -k, --keybindings <fitxategia>    Kargatu nahi den laster-teklen "
+"fitxategiaren bidea\n"
 
 #: opts.cc:83
 msgid "  -m, --menus file            Use \"file\" to define menus\n"
@@ -10863,7 +10883,7 @@ msgstr "  -n, --no-splash             Ez erakutsi hasierako pantaila\n"
 #: opts.cc:85
 msgid ""
 "  -N, --new session-name      Create a new session from the command line\n"
-msgstr "  -N, --new session-name      Sortu saio berria komando-lineatik\n"
+msgstr "  -N, --new saio-izena      Sortu saio berria komando-lineatik\n"
 
 #: opts.cc:86
 msgid "  -O, --no-hw-optimizations   Disable h/w specific optimizations\n"
@@ -10880,7 +10900,8 @@ msgstr "  -S, --sync                  Marraztu interfazea sinkroniaz\n"
 #: opts.cc:89
 msgid "  -T, --template <name>       Use given template for new session\n"
 msgstr ""
-"  -T, --template <name>       Erabili hautatutako txantiloia saio berrirako\n"
+"  -T, --template <izena>       Erabili hautatutako txantiloia saio "
+"berrirako\n"
 
 #: opts.cc:90
 msgid "  -v, --version               Print version and exit\n"
@@ -11900,11 +11921,11 @@ msgstr "Bidalketa-osagarri berria ..."
 
 #: processor_box.cc:3871
 msgid "New Foldback Send ..."
-msgstr ""
+msgstr "Foldback-bidalketa berria ..."
 
 #: processor_box.cc:3872
 msgid "Remove Foldback Send ..."
-msgstr ""
+msgstr "Ezabatu foldback-bidalketa ..."
 
 #: processor_box.cc:3875
 msgid "Send Options"
@@ -12221,6 +12242,8 @@ msgid ""
 "Adjusting the scale requires an application restart for fully accurate re-"
 "layout."
 msgstr ""
+"Eskala doitzeko aplikazioa berrabiarazi behar da, birdiseinua erabat zehatza "
+"izan dadin."
 
 #: rc_option_editor.cc:1142
 msgid "Scan Time Out"
@@ -12285,13 +12308,15 @@ msgstr "programazio-akatsa: buffer-kate aurrezarpen ezezaguna, indizea = %1"
 
 #: rc_option_editor.cc:1312
 msgid "LTC Output Port:"
-msgstr ""
+msgstr "LTC irteera ataka:"
 
 #: rc_option_editor.cc:1319
 msgid ""
 "The LTC generator output will be auto-connected to this port when a session "
 "is loaded."
 msgstr ""
+"LTC sorgailuaren irteera automatikoki konektatuko da ataka honetara saio bat "
+"kargatzean."
 
 #: rc_option_editor.cc:1495
 msgid "Enable"
@@ -12459,7 +12484,7 @@ msgstr "%1(r)en hobespenak"
 
 #: rc_option_editor.cc:2290
 msgid "preferences"
-msgstr ""
+msgstr "hobespenak"
 
 #: rc_option_editor.cc:2302 rc_option_editor.cc:2320 rc_option_editor.cc:2324
 #: rc_option_editor.cc:2336 rc_option_editor.cc:2338 rc_option_editor.cc:2340
@@ -12599,6 +12624,8 @@ msgstr "Egin saio-fitxategiaren babeskopia periodikoak"
 #: rc_option_editor.cc:2439
 msgid "Drag and drop import always copies files to session"
 msgstr ""
+"Arrastatu eta askatu moduko inportazioak beti kopiatzen ditu fitxategiak "
+"saiora"
 
 #: rc_option_editor.cc:2446
 msgid "Default folder for new sessions:"
@@ -12736,14 +12763,15 @@ msgstr "Audio-eremuak mugitzean, mugitu ere bere automatizazioak"
 #: rc_option_editor.cc:2586
 msgid "Ignore Y-axis click position when adding new automation-points"
 msgstr ""
-"Y ardatzaren klik posizioari kasurik ez egin automatizazio-puntu berriak "
-"gehitzean"
+"Ezikusi saguaren kokapen bertikala automatizazio-puntu berriak gehitzean"
 
 #: rc_option_editor.cc:2592
 msgid ""
 "<b>When enabled</b> the new points drawn in any automation lane will be "
 "placed on the existing line, regardless of mouse y-axis position."
 msgstr ""
+"<b>Gaituta badago</b>, automatizazio-lerro batean marraztutako puntu berriak "
+"jatorrizko lerroan kokatuko dira, saguaren kokapen bertikala ezikusiz."
 
 #: rc_option_editor.cc:2596
 msgid "Default fade shape"
@@ -12805,7 +12833,7 @@ msgstr "Zatitze-operazio baten ostean, Objektu moduan"
 
 #: rc_option_editor.cc:2657
 msgid "Clear the Region Selection"
-msgstr ""
+msgstr "Garbitu eremu-hautapena"
 
 #: rc_option_editor.cc:2658
 msgid "Select only the newly-created regions BEFORE the split point"
@@ -12985,6 +13013,9 @@ msgid ""
 "<b>When enabled</b>, and Transport->Auto-Input is enabled, %1 will always "
 "monitor audio inputs when transport is stopped, even if tracks aren't armed."
 msgstr ""
+"<b>Gaituta badago</b>, eta Garraioa->Auto-sarrera gaituta badago, %1(e)k "
+"beti monitorizatuko ditu audio-sarrerak garraioa geldituta dagoenean, pistak "
+"grabatzeko gaituta ez badaude ere."
 
 #: rc_option_editor.cc:2920
 msgid "Track and Bus Connections"
@@ -13003,6 +13034,10 @@ msgid ""
 "is connected to the hardware playback ports, otherwise the master-bus output "
 "is directly used for playback."
 msgstr ""
+"<b>Gaituta badago</b>, irteera-nagusi busa automatikoki konektatuko da "
+"lehenengo dauden ataka fisikoetara. Saioak monitorizazio-sekzioa badu, "
+"monitorizazio-busaren irteera hardware-erreprodukzio ataketara konektatuko "
+"da; bestela master-busa erabiliko da erreprodukziorako."
 
 #: rc_option_editor.cc:2936
 msgid "Connect track inputs"
@@ -13466,7 +13501,7 @@ msgstr "Sortu markak xrunak gertatzen diren tokian"
 
 #: rc_option_editor.cc:3404
 msgid "Reset x-run counter when starting to record"
-msgstr ""
+msgstr "Berrezarri x-run kontagailua grabatzen hastean"
 
 #: rc_option_editor.cc:3417
 msgid "Match session video frame rate to external timecode"
@@ -14121,6 +14156,15 @@ msgid ""
 "These settings will only take effect after %1 is restarted.\n"
 "\t"
 msgstr ""
+"Leihoak itxi, minimizatu, maximizatu eta gainean-gelditzeko arauak zure "
+"SEaren bertsio bakoitzarekin alda daitezke, eta baita zure SEan ezarritako "
+"hobespenekin.\n"
+"\n"
+"Hemen azpian aukerak doitu ditzakezu aplikazioaren leiho eta elkarrizketa-"
+"koadroek nola jarduten duten aldatzeko.\n"
+"\n"
+"Ezarpen hauek %1 berrabiarazi ostean bakarrik izango dute eragina.\n"
+"\t"
 
 #: rc_option_editor.cc:4183 rc_option_editor.cc:4193 rc_option_editor.cc:4204
 #: rc_option_editor.cc:4214 rc_option_editor.cc:4226 rc_option_editor.cc:4229
@@ -14973,7 +15017,7 @@ msgstr "Azkenengoz aldatuta honekin: %1"
 
 #: session_dialog.cc:1055
 msgid "Remove session from recent list"
-msgstr "Kendu saioa aken elementuen zerrendatik"
+msgstr "Kendu saioa azken elementuen zerrendatik"
 
 #: session_import_dialog.cc:81
 msgid "Elements"
@@ -15443,7 +15487,7 @@ msgstr ""
 
 #: session_option_editor.cc:274
 msgid "Use monitor section in this session"
-msgstr "Erabili monitore-eremua saio honetan"
+msgstr "Erabili monitorizazio-sekzioa saio honetan"
 
 #: session_option_editor.cc:281 session_option_editor.cc:283
 #: session_option_editor.cc:290 session_option_editor.cc:297
@@ -15975,6 +16019,8 @@ msgid ""
 "The audio/MIDI engine has stopped running unexpectedly.\n"
 "Something is probably wrong with your audio/MIDI device settings."
 msgstr ""
+"Audio/MIDI motorra ustekabean gelditu da.\n"
+"Zer edo zer oker dago zure audio/MIDI gailuaren hobespenetan."
 
 #: startup_fsm.cc:558
 msgid "Cannot get existing session information from %1"
@@ -16291,7 +16337,7 @@ msgstr "Handitu notaren indarra"
 
 #: step_entry.cc:633
 msgid "Decrease Note Velocity"
-msgstr "Murriztu notaren indarra"
+msgstr "Txikitu notaren indarra"
 
 #: step_entry.cc:635
 msgid "Switch to the 1st octave"
@@ -16549,12 +16595,11 @@ msgstr "Ezin izan da \"%1\" txantiloi-fitxategi berrian idatzi."
 
 #: template_dialog.cc:759
 msgid "Could not rename template directory from \"%1\" to \"%2\": %3"
-msgstr ""
-"Ezin izan da \"%1\" txantiloi-direktorioa \"%2\" bezala berrizendatu: %3"
+msgstr "Ezin izan da berrizendatu \"%1\" txantiloi-direktorioa \"%2\" gisa: %3"
 
 #: template_dialog.cc:858
 msgid "Could not rename state dir \"%1\" to \"%2\": %3"
-msgstr ""
+msgstr "Ezin izan da berrizendatu \"%1\" egoera-direktorioa \"%2\" gisa: %3"
 
 #: template_dialog.cc:867
 msgid "Could not write new template file \"%1\"."
@@ -16888,7 +16933,7 @@ msgstr "Gehitu garraio-master berria"
 
 #: transport_masters_dialog.cc:54
 msgid "Keep rolling if sync is lost"
-msgstr ""
+msgstr "Jarraitu martxan sinkronizazioa galtzen bada"
 
 #: transport_masters_dialog.cc:73
 msgid ""
@@ -16903,11 +16948,11 @@ msgstr ""
 
 #: transport_masters_dialog.cc:83
 msgid "Sync Position + Delta"
-msgstr ""
+msgstr "Sink. posizioa + delta"
 
 #: transport_masters_dialog.cc:84
 msgid "Last Message + Age"
-msgstr ""
+msgstr "Azken mezua + adina"
 
 #: transport_masters_dialog.cc:85
 msgid ""
@@ -16956,7 +17001,7 @@ msgid ""
 msgstr ""
 "<b>Gaituta badago</b>, kanpoko denbora-kodeak 29,97 fps erabiliko ditu "
 "30000/1001 ordez.\n"
-"SMPTE 12M-1999-ek 29,97df 30000/1001 bezala zehazten du. Are gehiago, "
+"SMPTE 12M-1999-ek 29,97df 30000/1001 gisa zehazten du. Are gehiago, "
 "zehaztapenek argitzen dute jaurtitako-lagin denbora-kodeak -86ms-ko errore "
 "pilatu bat duela 24 orduko tarte batean.\n"
 "Jaurtitako-lagin denbora-kodeak zehatz-mehatz NTSC 30 * 0,9990 (adb. "
@@ -16995,7 +17040,7 @@ msgstr "Onartu kokapen-komandoak"
 
 #: transport_masters_dialog.cc:666
 msgid "%1 %2"
-msgstr ""
+msgstr "%1 %2"
 
 #: transport_masters_dialog.cc:732
 msgid "Add Transport Master"
