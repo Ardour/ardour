@@ -74,6 +74,7 @@ static inline cycles_t get_cycles (void)
 
 #elif defined(__powerpc64__)
 
+typedef uint64_t cycles_t;
 static inline cycles_t get_cycles(void)
 {
 #warning You are compiling libardour on a platform for which ardour/cycles.h needs work
