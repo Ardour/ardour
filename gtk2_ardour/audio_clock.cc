@@ -2180,6 +2180,9 @@ AudioClock::locate ()
 	if (!_session || is_duration) {
 		return;
 	}
+	if (_session->actively_recording()) {
+		return;
+	}
 
 	_session->request_locate (current_time(), RollIfAppropriate);
 }
