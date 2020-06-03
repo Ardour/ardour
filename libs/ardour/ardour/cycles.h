@@ -43,8 +43,6 @@
  */
 typedef uint64_t cycles_t;
 
-extern cycles_t cacheflush_time;
-
 #if defined(__x86_64__)
 
 #define rdtscll(lo, hi) \
@@ -91,8 +89,6 @@ typedef uint32_t cycles_t;
  * For the "cycle" counter we use the timebase lower half.
  * Currently only used on SMP.
  */
-
-extern cycles_t cacheflush_time;
 
 static inline cycles_t get_cycles(void)
 {
@@ -235,8 +231,6 @@ static inline cycles_t get_cycles (void)
 #include <sys/time.h>
 
 typedef long cycles_t;
-
-extern cycles_t cacheflush_time;
 
 static inline cycles_t get_cycles(void)
 {
