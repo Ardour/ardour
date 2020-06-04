@@ -134,6 +134,7 @@ public:
 	int set_state (const XMLNode&, int version);
 
 	virtual Gtk::CheckMenuItem* automation_child_menu_item (Evoral::Parameter);
+	virtual boost::shared_ptr<AutomationTimeAxisView> automation_child(Evoral::Parameter param, PBD::ID ctrl_id = PBD::ID(0));
 
 	StreamView*         view() const { return _view; }
 	ARDOUR::RouteGroup* route_group() const;

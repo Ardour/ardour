@@ -1073,6 +1073,7 @@ Selection::get_state () const
 			XMLNode* t = node->add_child (X_("AutomationView"));
 			t->set_property (X_("id"), atv->parent_stripable()->id ());
 			t->set_property (X_("parameter"), EventTypeMap::instance().to_symbol (atv->parameter ()));
+			t->set_property (X_("ctrl_id"), atv->control()->id())
 		}
 	}
 
@@ -1302,30 +1303,28 @@ Selection::set_state (XMLNode const & node, int)
 
 		} else if ((*i)->name() == X_("AutomationView")) {
 
-#if 0
+			// XXX is this even used? -> StripableAutomationControl
 			std::string param;
+			PBD::ID ctrl_id (0);
 
 			if (!(*i)->get_property (X_("id"), id) || !(*i)->get_property (X_("parameter"), param)) {
 				assert (false);
 			}
 
-			// TODO we need additional information Evoral::Parmeter does not uniquely identify an Automation Lane
-
 			StripableTimeAxisView* stv = editor->get_stripable_time_axis_by_id (id);
 
-			if (stv) {
-				boost::shared_ptr<AutomationTimeAxisView> atv = stv->automation_child (EventTypeMap::instance().from_symbol (param));
+			if (stv && (*i)->get_property (X_("control_id"), ctrl_id)) {
+				boost::shared_ptr<AutomationTimeAxisView> atv = stv->automation_child (EventTypeMap::instance().from_symbol (param), ctrl_id);
 
 				/* the automation could be for an entity that was never saved
-				   in the session file. Don't freak out if we can't find
-				   it.
-				*/
+				 * in the session file. Don't freak out if we can't find
+				 * it.
+				 */
 
 				if (atv) {
 					add (atv.get());
 				}
 			}
-#endif
 
 		} else if ((*i)->name() == X_("Marker")) {
 

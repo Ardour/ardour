@@ -36,7 +36,7 @@ public:
 	virtual Gtk::CheckMenuItem* automation_child_menu_item (Evoral::Parameter);
 
 	virtual void create_automation_child (const Evoral::Parameter& param, bool show) = 0;
-	boost::shared_ptr<AutomationTimeAxisView> automation_child(Evoral::Parameter param);
+	virtual boost::shared_ptr<AutomationTimeAxisView> automation_child (Evoral::Parameter param, PBD::ID ctrl_id = PBD::ID(0));
 
 	virtual boost::shared_ptr<AutomationLine> automation_child_by_alist_id (PBD::ID);
 

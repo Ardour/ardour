@@ -2749,6 +2749,23 @@ RouteTimeAxisView::remove_child (boost::shared_ptr<TimeAxisView> c)
 	}
 }
 
+boost::shared_ptr<AutomationTimeAxisView>
+RouteTimeAxisView::automation_child(Evoral::Parameter param, PBD::ID ctrl_id)
+{
+	if (param.type() != PluginAutomation) {
+		return StripableTimeAxisView::automation_child (param, ctrl_id);
+	}
+	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
+		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
+			boost::shared_ptr<AutomationTimeAxisView> atv ((*ii)->view);
+			if (atv->control()->id() == ctrl_id) {
+				return atv;
+			}
+		}
+	}
+	return boost::shared_ptr<AutomationTimeAxisView>();
+}
+
 boost::shared_ptr<AutomationLine>
 RouteTimeAxisView::automation_child_by_alist_id (PBD::ID alist_id)
 {

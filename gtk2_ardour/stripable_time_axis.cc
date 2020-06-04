@@ -191,7 +191,7 @@ StripableTimeAxisView::automation_track_hidden (Evoral::Parameter param)
 }
 
 boost::shared_ptr<AutomationTimeAxisView>
-StripableTimeAxisView::automation_child(Evoral::Parameter param)
+StripableTimeAxisView::automation_child(Evoral::Parameter param, PBD::ID)
 {
 	assert (param.type() != PluginAutomation);
 	AutomationTracks::iterator i = _automation_tracks.find(param);
