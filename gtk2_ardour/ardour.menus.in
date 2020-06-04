@@ -613,7 +613,7 @@
 #endif
 #ifdef MIXBUS
       <menuitem action='website'/>
-      <menuitem action='manual'/>
+      <menuitem action='tutorial'/>
       <menuitem action='reference'/>
       <menuitem action='videos'/>
       <menuitem action='forums'/>
