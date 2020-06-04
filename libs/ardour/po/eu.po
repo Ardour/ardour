@@ -2706,7 +2706,7 @@ msgstr "berrelikadura loop-a %1 eta %2 artean ezarri da"
 
 #: session.cc:2357
 msgid "Audio "
-msgstr "Audio: "
+msgstr "Audio "
 
 #: session.cc:2361
 msgid "MIDI "
