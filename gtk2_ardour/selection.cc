@@ -1247,17 +1247,12 @@ Selection::set_state (XMLNode const & node, int)
 				vector <ControlPoint *> cps;
 
 				if (stv) {
-					boost::shared_ptr<AutomationTimeAxisView> atv = stv->automation_child (EventTypeMap::instance().from_symbol (param));
-					if (atv) {
-						list<boost::shared_ptr<AutomationLine> > lines = atv->lines();
-						for (list<boost::shared_ptr<AutomationLine> > ::iterator li = lines.begin(); li != lines.end(); ++li) {
-							if ((*li)->the_list()->id() == alist_id) {
-								ControlPoint* cp = (*li)->nth(view_index);
-								if (cp) {
-									cps.push_back (cp);
-									cp->show();
-								}
-							}
+					boost::shared_ptr<AutomationLine> li = stv->automation_child_by_alist_id (alist_id);
+					if (li) {
+						ControlPoint* cp = li->nth(view_index);
+						if (cp) {
+							cps.push_back (cp);
+							cp->show();
 						}
 					}
 				}
@@ -1307,11 +1302,14 @@ Selection::set_state (XMLNode const & node, int)
 
 		} else if ((*i)->name() == X_("AutomationView")) {
 
+#if 0
 			std::string param;
 
 			if (!(*i)->get_property (X_("id"), id) || !(*i)->get_property (X_("parameter"), param)) {
 				assert (false);
 			}
+
+			// TODO we need additional information Evoral::Parmeter does not uniquely identify an Automation Lane
 
 			StripableTimeAxisView* stv = editor->get_stripable_time_axis_by_id (id);
 
@@ -1327,6 +1325,7 @@ Selection::set_state (XMLNode const & node, int)
 					add (atv.get());
 				}
 			}
+#endif
 
 		} else if ((*i)->name() == X_("Marker")) {
 

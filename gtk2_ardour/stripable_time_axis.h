@@ -38,6 +38,8 @@ public:
 	virtual void create_automation_child (const Evoral::Parameter& param, bool show) = 0;
 	boost::shared_ptr<AutomationTimeAxisView> automation_child(Evoral::Parameter param);
 
+	virtual boost::shared_ptr<AutomationLine> automation_child_by_alist_id (PBD::ID);
+
 	void request_redraw ();
 
 	virtual void show_all_automation (bool apply_to_selection = false);

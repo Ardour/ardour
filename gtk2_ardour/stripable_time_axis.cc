@@ -25,6 +25,7 @@
 
 #include "public_editor.h"
 #include "stripable_time_axis.h"
+#include "automation_line.h"
 
 #include "pbd/i18n.h"
 
@@ -199,6 +200,21 @@ StripableTimeAxisView::automation_child(Evoral::Parameter param)
 	} else {
 		return boost::shared_ptr<AutomationTimeAxisView>();
 	}
+}
+
+boost::shared_ptr<AutomationLine>
+StripableTimeAxisView::automation_child_by_alist_id (PBD::ID alist_id)
+{
+	for (AutomationTracks::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
+		boost::shared_ptr<AutomationTimeAxisView> atv (i->second);
+		std::list<boost::shared_ptr<AutomationLine> > lines = atv->lines();
+		for (std::list<boost::shared_ptr<AutomationLine> >::const_iterator li = lines.begin(); li != lines.end(); ++li) {
+			if ((*li)->the_list()->id() == alist_id) {
+				return *li;
+			}
+		}
+	}
+	return boost::shared_ptr<AutomationLine> ();
 }
 
 void
