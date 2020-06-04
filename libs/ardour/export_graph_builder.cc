@@ -34,6 +34,7 @@
 #include "audiographer/process_context.h"
 #include "audiographer/general/chunker.h"
 #include "audiographer/general/cmdpipe_writer.h"
+#include "audiographer/general/demo_noise.h"
 #include "audiographer/general/interleaver.h"
 #include "audiographer/general/normalizer.h"
 #include "audiographer/general/analyser.h"
@@ -436,6 +437,8 @@ ExportGraphBuilder::SFC::SFC (ExportGraphBuilder &parent, FileSpec const & new_c
 	data_width = sndfile_data_width (Encoder::get_real_format (config));
 	unsigned channels = new_config.channel_config->get_n_chans();
 	_analyse = config.format->analyse();
+
+	boost::shared_ptr<AudioGrapher::ListedSource<float> > intermediate;
 	if (_analyse) {
 		samplecnt_t sample_rate = parent.session.nominal_sample_rate();
 		samplecnt_t sb = config.format->silence_beginning_at (parent.timespan->get_start(), sample_rate);
@@ -449,25 +452,37 @@ ExportGraphBuilder::SFC::SFC (ExportGraphBuilder &parent, FileSpec const & new_c
 
 		config.filename->set_channel_config (config.channel_config);
 		parent.add_analyser (config.filename->get_path (config.format), analyser);
+		intermediate = analyser;
+	}
+
+	if (config.format->demo_noise_duration () > 0 && config.format->demo_noise_interval () > 0) {
+		samplecnt_t sample_rate = parent.session.nominal_sample_rate();
+		demo_noise_adder.reset (new DemoNoiseAdder (channels));
+		demo_noise_adder->init (max_samples,
+				sample_rate * config.format->demo_noise_interval (),
+				sample_rate * config.format->demo_noise_duration (),
+				config.format->demo_noise_level ());
+		if (intermediate) { intermediate->add_output (demo_noise_adder); }
+		intermediate = demo_noise_adder;
 	}
 
 	if (data_width == 8 || data_width == 16) {
 		short_converter = ShortConverterPtr (new SampleFormatConverter<short> (channels));
 		short_converter->init (max_samples, config.format->dither_type(), data_width);
 		add_child (config);
-		if (_analyse) { analyser->add_output (short_converter); }
+		if (intermediate) { intermediate->add_output (short_converter); }
 
 	} else if (data_width == 24 || data_width == 32) {
 		int_converter = IntConverterPtr (new SampleFormatConverter<int> (channels));
 		int_converter->init (max_samples, config.format->dither_type(), data_width);
 		add_child (config);
-		if (_analyse) { analyser->add_output (int_converter); }
+		if (intermediate) { intermediate->add_output (int_converter); }
 	} else {
 		int actual_data_width = 8 * sizeof(Sample);
 		float_converter = FloatConverterPtr (new SampleFormatConverter<Sample> (channels));
 		float_converter->init (max_samples, config.format->dither_type(), actual_data_width);
 		add_child (config);
-		if (_analyse) { analyser->add_output (float_converter); }
+		if (intermediate) { intermediate->add_output (float_converter); }
 	}
 }
 
@@ -482,8 +497,10 @@ ExportGraphBuilder::SFC::set_peak (float gain)
 ExportGraphBuilder::FloatSinkPtr
 ExportGraphBuilder::SFC::sink ()
 {
-	if (_analyse) {
+	if (chunker) {
 		return chunker;
+	} else if (demo_noise_adder) {
+		return demo_noise_adder;
 	} else if (data_width == 8 || data_width == 16) {
 		return short_converter;
 	} else if (data_width == 24 || data_width == 32) {

@@ -99,6 +99,10 @@ class LIBARDOUR_API ExportFormatSpecification : public ExportFormatBase {
 	void set_normalize_lufs (float value) { _normalize_lufs = value; }
 	void set_normalize_dbtp (float value) { _normalize_dbtp = value; }
 
+	void set_demo_noise_level    (float db) { _demo_noise_level = db; }
+	void set_demo_noise_duration (int msec) { _demo_noise_duration = msec; }
+	void set_demo_noise_interval (int msec) { _demo_noise_interval = msec; }
+
 	void set_tag (bool tag_it) { _tag = tag_it; }
 	void set_with_cue (bool yn) { _with_cue = yn; }
 	void set_with_toc (bool yn) { _with_toc = yn; }
@@ -172,6 +176,10 @@ class LIBARDOUR_API ExportFormatSpecification : public ExportFormatBase {
 	bool with_cue() const { return _with_cue; }
 	bool with_mp4chaps() const { return _with_mp4chaps; }
 
+	float demo_noise_level () const    { return _demo_noise_level; }
+	int   demo_noise_duration () const { return _demo_noise_duration; }
+	int   demo_noise_interval () const { return _demo_noise_interval; }
+
 	bool soundcloud_upload() const { return _soundcloud_upload; }
 	std::string command() const { return _command; }
 	bool analyse() const { return _analyse; }
@@ -231,6 +239,10 @@ class LIBARDOUR_API ExportFormatSpecification : public ExportFormatBase {
 	bool            _with_cue;
 	bool            _with_mp4chaps;
 	bool            _soundcloud_upload;
+
+	float           _demo_noise_level;
+	int             _demo_noise_duration;
+	int             _demo_noise_interval;
 
 	std::string     _command;
 	bool            _analyse;

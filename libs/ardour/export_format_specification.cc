@@ -157,6 +157,9 @@ ExportFormatSpecification::ExportFormatSpecification (Session & s)
 	, _with_cue (false)
 	, _with_mp4chaps (false)
 	, _soundcloud_upload (false)
+	, _demo_noise_level (-20)
+	, _demo_noise_duration (0)
+	, _demo_noise_interval (0)
 	, _command ("")
 	, _analyse (true)
 	, _codec_quality (0)
@@ -193,6 +196,9 @@ ExportFormatSpecification::ExportFormatSpecification (Session & s, XMLNode const
 	, _with_cue (false)
 	, _with_mp4chaps (false)
 	, _soundcloud_upload (false)
+	, _demo_noise_level (-20)
+	, _demo_noise_duration (0)
+	, _demo_noise_interval (0)
 	, _command ("")
 	, _analyse (true)
 	, _codec_quality (0)
@@ -212,6 +218,9 @@ ExportFormatSpecification::ExportFormatSpecification (ExportFormatSpecification 
 	, _with_cue (other._with_cue)
 	, _with_mp4chaps (other._with_mp4chaps)
 	, _soundcloud_upload (false)
+	, _demo_noise_level (other._demo_noise_level)
+	, _demo_noise_duration (other._demo_noise_duration)
+	, _demo_noise_interval (other._demo_noise_interval)
 	, _command (other._command)
 	, _analyse (other._analyse)
 	, _codec_quality (other._codec_quality)
@@ -286,6 +295,11 @@ ExportFormatSpecification::get_state ()
 
 	node = root->add_child ("SRCQuality");
 	node->set_property ("quality", src_quality());
+
+	node = root->add_child ("Watermark");
+	node->set_property ("level",    demo_noise_level ());
+	node->set_property ("duration", demo_noise_duration ());
+	node->set_property ("interval", demo_noise_interval ());
 
 	if (_has_codec_quality) {
 		node = root->add_child ("CodecQuality");
@@ -397,6 +411,12 @@ ExportFormatSpecification::set_state (const XMLNode & root)
 
 	if ((child = root.child ("SRCQuality"))) {
 		child->get_property ("quality", _src_quality);
+	}
+
+	if ((child = root.child ("Watermark"))) {
+		child->get_property ("level", _demo_noise_level);
+		child->get_property ("duration", _demo_noise_duration);
+		child->get_property ("interval", _demo_noise_interval);
 	}
 
 	if ((child = root.child ("CodecQuality"))) {

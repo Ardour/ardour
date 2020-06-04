@@ -36,6 +36,7 @@ namespace AudioGrapher {
 	class LoudnessReader;
 	class Normalizer;
 	class Analyser;
+	class DemoNoiseAdder;
 	template <typename T> class Chunker;
 	template <typename T> class SampleFormatConverter;
 	template <typename T> class Interleaver;
@@ -137,6 +138,7 @@ class LIBARDOUR_API ExportGraphBuilder
 
 	                                        private:
 		typedef boost::shared_ptr<AudioGrapher::Chunker<float> > ChunkerPtr;
+		typedef boost::shared_ptr<AudioGrapher::DemoNoiseAdder> DemoNoisePtr;
 		typedef boost::shared_ptr<AudioGrapher::SampleFormatConverter<Sample> > FloatConverterPtr;
 		typedef boost::shared_ptr<AudioGrapher::SampleFormatConverter<int> >   IntConverterPtr;
 		typedef boost::shared_ptr<AudioGrapher::SampleFormatConverter<short> > ShortConverterPtr;
@@ -145,6 +147,7 @@ class LIBARDOUR_API ExportGraphBuilder
 		boost::ptr_list<Encoder> children;
 		int                data_width;
 
+		DemoNoisePtr    demo_noise_adder;
 		ChunkerPtr      chunker;
 		AnalysisPtr     analyser;
 		bool            _analyse;
