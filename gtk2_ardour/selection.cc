@@ -1073,7 +1073,7 @@ Selection::get_state () const
 			XMLNode* t = node->add_child (X_("AutomationView"));
 			t->set_property (X_("id"), atv->parent_stripable()->id ());
 			t->set_property (X_("parameter"), EventTypeMap::instance().to_symbol (atv->parameter ()));
-			t->set_property (X_("ctrl_id"), atv->control()->id())
+			t->set_property (X_("ctrl_id"), atv->control()->id());
 		}
 	}
 
