@@ -302,6 +302,12 @@ PulseAudioBackend::init_pulse ()
 	pa_stream_flags_t sf = (pa_stream_flags_t) (
 			  (int)PA_STREAM_START_CORKED
 			| (int)PA_STREAM_FAIL_ON_SUSPEND
+
+			| (int)PA_STREAM_NO_REMAP_CHANNELS
+			| (int)PA_STREAM_NO_REMIX_CHANNELS
+			| (int)PA_STREAM_DONT_MOVE
+			| (int)PA_STREAM_EARLY_REQUESTS
+
 			/*
 			| (int)PA_STREAM_ADJUST_LATENCY
 			| (int)PA_STREAM_AUTO_TIMING_UPDATE
@@ -1001,10 +1007,11 @@ PulseAudioBackend::main_process_thread ()
 	manager.registration_callback ();
 	manager.graph_order_callback ();
 
-
+#if 0
 	/* flush stream */
 	pa_threaded_mainloop_lock (p_mainloop);
 	sync_pulse (pa_stream_flush (p_stream, stream_operation_cb, this));
+#endif
 
 	/* begin streaming */
 	if (!cork_pulse (false)) {
@@ -1014,6 +1021,9 @@ PulseAudioBackend::main_process_thread ()
 		}
 	}
 
+	pa_threaded_mainloop_lock (p_mainloop);
+	sync_pulse (pa_stream_drain (p_stream, stream_operation_cb, this));
+
 	_dsp_load_calc.reset ();
 	stream_latency_update_cb (p_stream, this);
 
@@ -1022,10 +1032,10 @@ PulseAudioBackend::main_process_thread ()
 			_freewheel = _freewheeling;
 			engine.freewheel_callback (_freewheel);
 
-			/* drain stream freewheeling */
+			/* flush stream before freewheeling */
 			pa_threaded_mainloop_lock (p_mainloop);
 			_operation_succeeded = false;
-			if (!sync_pulse (pa_stream_drain (p_stream, stream_operation_cb, this)) || !_operation_succeeded) {
+			if (!sync_pulse (pa_stream_flush (p_stream, stream_operation_cb, this)) || !_operation_succeeded) {
 				break;
 			}
 
@@ -1036,7 +1046,7 @@ PulseAudioBackend::main_process_thread ()
 			if (!_freewheel) {
 				pa_threaded_mainloop_lock (p_mainloop);
 				_operation_succeeded = false;
-				if (!sync_pulse (pa_stream_flush (p_stream, stream_operation_cb, this)) || !_operation_succeeded) {
+				if (!sync_pulse (pa_stream_drain (p_stream, stream_operation_cb, this)) || !_operation_succeeded) {
 					break;
 				}
 				_dsp_load_calc.reset ();
