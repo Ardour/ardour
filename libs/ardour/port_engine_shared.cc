@@ -153,11 +153,13 @@ bool BackendPort::is_physically_connected () const
 void
 BackendPort::set_latency_range (const LatencyRange &latency_range, bool for_playback)
 {
-	if (for_playback) {
-		_playback_latency_range = latency_range;
-	} else {
-		_capture_latency_range = latency_range;
+	LatencyRange& lr = for_playback ? _playback_latency_range : _capture_latency_range;
+
+	if (lr == latency_range) {
+		return;
 	}
+
+	lr = latency_range;
 
 	for (std::set<BackendPortPtr>::const_iterator it = _connections.begin (); it != _connections.end (); ++it) {
 		if ((*it)->is_physical ()) {
