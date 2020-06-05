@@ -677,8 +677,8 @@ ExportFormatSpecification::description (bool include_name)
 		components.push_back ("CUE");
 	}
 
-	if (_with_mp4chaps) {
-		components.push_back ("MP4ch");
+	if (_demo_noise_duration > 0 && _demo_noise_interval > 0) {
+		components.push_back ("Demo-Noise");
 	}
 
 	if (!_command.empty()) {

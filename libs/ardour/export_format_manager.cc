@@ -388,6 +388,27 @@ ExportFormatManager::select_normalize_dbtp (float value)
 }
 
 void
+ExportFormatManager::select_demo_noise_level (float value)
+{
+	current_selection->set_demo_noise_level (value);
+	check_for_description_change ();
+}
+
+void
+ExportFormatManager::select_demo_noise_duration (int value)
+{
+	current_selection->set_demo_noise_duration (value);
+	check_for_description_change ();
+}
+
+void
+ExportFormatManager::select_demo_noise_interval (int value)
+{
+	current_selection->set_demo_noise_interval (value);
+	check_for_description_change ();
+}
+
+void
 ExportFormatManager::select_tagging (bool tag)
 {
 	current_selection->set_tag (tag);

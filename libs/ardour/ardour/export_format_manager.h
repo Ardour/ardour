@@ -117,6 +117,9 @@ class LIBARDOUR_API ExportFormatManager : public PBD::ScopedConnectionList
 	void select_normalize_lufs (float value);
 	void select_normalize_dbtp (float value);
 	void select_tagging (bool tag);
+	void select_demo_noise_level (float value);
+	void select_demo_noise_duration (int value);
+	void select_demo_noise_interval (int value);
 
   private:
 

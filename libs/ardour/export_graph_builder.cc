@@ -459,8 +459,8 @@ ExportGraphBuilder::SFC::SFC (ExportGraphBuilder &parent, FileSpec const & new_c
 		samplecnt_t sample_rate = parent.session.nominal_sample_rate();
 		demo_noise_adder.reset (new DemoNoiseAdder (channels));
 		demo_noise_adder->init (max_samples,
-				sample_rate * config.format->demo_noise_interval (),
-				sample_rate * config.format->demo_noise_duration (),
+				sample_rate * config.format->demo_noise_interval () / 1000,
+				sample_rate * config.format->demo_noise_duration () / 1000,
 				config.format->demo_noise_level ());
 		if (intermediate) { intermediate->add_output (demo_noise_adder); }
 		intermediate = demo_noise_adder;
