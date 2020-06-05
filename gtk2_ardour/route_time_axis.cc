@@ -2772,6 +2772,9 @@ RouteTimeAxisView::automation_child_by_alist_id (PBD::ID alist_id)
 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
 		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
 			boost::shared_ptr<AutomationTimeAxisView> atv ((*ii)->view);
+			if (!atv) {
+				continue;
+			}
 			list<boost::shared_ptr<AutomationLine> > lines = atv->lines();
 			for (list<boost::shared_ptr<AutomationLine> >::const_iterator li = lines.begin(); li != lines.end(); ++li) {
 				if ((*li)->the_list()->id() == alist_id) {
