@@ -777,15 +777,15 @@ PluginManager::ladspa_discover (string path)
 	void* func = 0;
 
 	if (!module) {
-		error << string_compose(_("LADSPA: cannot load module \"%1\" (%2)"),
+		warning << string_compose(_("LADSPA: cannot load module \"%1\" (%2)"),
 			path, Glib::Module::get_last_error()) << endmsg;
 		return -1;
 	}
 
 
 	if (!module.get_symbol("ladspa_descriptor", func)) {
-		error << string_compose(_("LADSPA: module \"%1\" has no descriptor function."), path) << endmsg;
-		error << Glib::Module::get_last_error() << endmsg;
+		warning << string_compose(_("LADSPA: module \"%1\" has no descriptor function."), path) << endmsg;
+		warning << Glib::Module::get_last_error() << endmsg;
 		return -1;
 	}
 
