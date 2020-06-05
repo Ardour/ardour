@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Ardour 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-05-20 14:36-0600\n"
-"PO-Revision-Date: 2020-06-02 10:12+0200\n"
+"PO-Revision-Date: 2020-06-05 11:29+0200\n"
 "Last-Translator: Enara Larraitz & Porrumentzio <porruren-grabatokia@riseup."
 "net>\n"
 "Language-Team: Euskera <porrumentzio@riseup.net>\n"
@@ -2895,7 +2895,7 @@ msgstr "Ireki saioa"
 #: ardour_ui_session.cc:1074 session_dialog.cc:455 session_import_dialog.cc:179
 #: session_metadata_dialog.cc:921
 msgid "%1 sessions"
-msgstr "%1 saioak"
+msgstr "%1 saio"
 
 #: ardour_ui_session.cc:1079 session_dialog.cc:460
 msgid "Session Archives"
@@ -14163,7 +14163,8 @@ msgstr ""
 "Hemen azpian aukerak doitu ditzakezu aplikazioaren leiho eta elkarrizketa-"
 "koadroek nola jarduten duten aldatzeko.\n"
 "\n"
-"Ezarpen hauek %1 berrabiarazi ostean bakarrik izango dute eragina."
+"Ezarpen hauek %1 berrabiarazi ostean bakarrik izango dute eragina.\n"
+"\t"
 
 #: rc_option_editor.cc:4183 rc_option_editor.cc:4193 rc_option_editor.cc:4204
 #: rc_option_editor.cc:4214 rc_option_editor.cc:4226 rc_option_editor.cc:4229
