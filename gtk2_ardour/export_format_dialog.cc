@@ -75,6 +75,18 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
   sample_rate_label (_("Sample rate"), Gtk::ALIGN_LEFT),
   src_quality_label (_("Sample rate conversion quality:"), Gtk::ALIGN_RIGHT),
 
+  /* Watermarking */
+  watermark_heading (_("Preview / Watermark"), Gtk::ALIGN_LEFT),
+
+  demo_noise_mode_label (_("Mode:"), Gtk::ALIGN_LEFT),
+  demo_noise_level_label (_("Noise Level:"), Gtk::ALIGN_LEFT),
+  demo_noise_dbfs_unit (_("dBFS"), Gtk::ALIGN_LEFT),
+
+  demo_noise_dbfs_adjustment ( -20.0, -90.00, -6.00, 1, 5),
+  demo_noise_dbfs_spinbutton (demo_noise_dbfs_adjustment, 1, 0),
+
+  /* Changing encoding options from here on */
+
   encoding_options_label ("", Gtk::ALIGN_LEFT),
 
   /* Changing encoding options from here on */
@@ -93,7 +105,8 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
 
 	get_vbox()->pack_start (silence_table, false, false, 6);
 	get_vbox()->pack_start (format_table, false, false, 6);
-	get_vbox()->pack_start (encoding_options_vbox, false, false, 0);
+	get_vbox()->pack_start (watermark_options_table, false, false, 6);
+	get_vbox()->pack_start (encoding_options_vbox, false, false, 6);
 	get_vbox()->pack_start (cue_toc_vbox, false, false, 0);
 	get_vbox()->pack_start (name_hbox, false, false, 6);
 
@@ -185,6 +198,15 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
 
 	init_format_table();
 
+	/* Watermark */
+
+	watermark_options_table.attach (watermark_heading,          0, 3, 0, 1, Gtk::EXPAND|Gtk::FILL, Gtk::SHRINK);
+	watermark_options_table.attach (demo_noise_mode_label,      0, 1, 1, 2, Gtk::FILL, Gtk::SHRINK);
+	watermark_options_table.attach (demo_noise_combo,           1, 3, 1, 2, Gtk::EXPAND|Gtk::FILL, Gtk::SHRINK);
+	watermark_options_table.attach (demo_noise_level_label,     0, 1, 2, 3, Gtk::FILL, Gtk::SHRINK);
+	watermark_options_table.attach (demo_noise_dbfs_spinbutton, 1, 2, 2, 3, Gtk::FILL, Gtk::SHRINK);
+	watermark_options_table.attach (demo_noise_dbfs_unit,       2, 3, 2, 3, Gtk::EXPAND|Gtk::FILL, Gtk::SHRINK);
+
 	/* Encoding options */
 
 	init_encoding_option_widgets();
@@ -252,6 +274,10 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
 
 	src_quality_combo.signal_changed().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_src_quality_selection));
 	codec_quality_combo.signal_changed().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_codec_quality_selection));
+
+	watermark_heading.set_attributes (bold);
+	demo_noise_combo.signal_changed().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_demo_noise_selection));
+	demo_noise_dbfs_spinbutton.signal_value_changed().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_demo_noise_selection));
 
 	/* Format table signals */
 
@@ -342,6 +368,18 @@ ExportFormatDialog::load_state (FormatPtr spec)
 	with_cue.set_active (spec->with_cue());
 	with_toc.set_active (spec->with_toc());
 	with_mp4chaps.set_active (spec->with_mp4chaps());
+
+	demo_noise_combo.set_active (0);
+	for (Gtk::ListStore::Children::iterator it = demo_noise_list->children().begin(); it != demo_noise_list->children().end(); ++it) {
+		if (it->get_value (demo_noise_cols.interval) == spec->demo_noise_interval ()
+		    && it->get_value (demo_noise_cols.duration) == spec->demo_noise_duration ()) {
+			demo_noise_combo.set_active (it);
+			break;
+		}
+	}
+
+	demo_noise_dbfs_spinbutton.set_value (spec->demo_noise_level ());
+	update_demo_noise_sensitivity ();
 
 	for (Gtk::ListStore::Children::iterator it = src_quality_list->children().begin(); it != src_quality_list->children().end(); ++it) {
 		if (it->get_value (src_quality_cols.id) == spec->src_quality()) {
@@ -580,6 +618,41 @@ ExportFormatDialog::init_format_table ()
 
 	src_quality_combo.pack_start (src_quality_cols.label);
 	src_quality_combo.set_active (0);
+
+	/* Demo Noise Optoins */
+
+	demo_noise_list = Gtk::ListStore::create (demo_noise_cols);
+	demo_noise_combo.set_model (demo_noise_list);
+
+	iter = demo_noise_list->append();
+	row = *iter;
+	row[demo_noise_cols.duration] = 0;
+	row[demo_noise_cols.interval] = 0;
+	row[demo_noise_cols.label] = _("No Watermark");
+
+	iter = demo_noise_list->append();
+	row = *iter;
+	row[demo_noise_cols.duration] = 500;
+	row[demo_noise_cols.interval] = 15000;
+	row[demo_noise_cols.label] = _("1/2 sec white noise every 15 sec");
+
+	iter = demo_noise_list->append();
+	row = *iter;
+	row[demo_noise_cols.duration] = 1000;
+	row[demo_noise_cols.interval] = 30000;
+	row[demo_noise_cols.label] = _("1 sec white noise every 30 sec");
+
+	iter = demo_noise_list->append();
+	row = *iter;
+	row[demo_noise_cols.duration] = 1000;
+	row[demo_noise_cols.interval] = 1200000;
+	row[demo_noise_cols.label] = _("1 sec white noise every 2 mins");
+
+	demo_noise_combo.pack_start (demo_noise_cols.label);
+	demo_noise_combo.set_active (0);
+
+	ArdourWidgets::set_tooltip (demo_noise_combo,
+			_("This option allows to add noise, to send complete mixes to the clients for preview but watermarked. White noise is injected after analysis, right before the sample-format conversion or encoding. The first noise burst happens at 1/3 of the interval. Note: there is currently no limiter."));
 }
 
 void
@@ -955,6 +1028,35 @@ ExportFormatDialog::update_src_quality_selection ()
 	Gtk::TreeModel::const_iterator iter = src_quality_combo.get_active();
 	ExportFormatBase::SRCQuality quality = iter->get_value (src_quality_cols.id);
 	manager.select_src_quality (quality);
+}
+
+void
+ExportFormatDialog::update_demo_noise_sensitivity ()
+{
+	Gtk::TreeModel::const_iterator iter = demo_noise_combo.get_active();
+	if (!iter) {
+		demo_noise_dbfs_spinbutton.set_sensitive (false);
+		return;
+	}
+	int duration = iter->get_value (demo_noise_cols.duration);
+	int interval = iter->get_value (demo_noise_cols.interval);
+	demo_noise_dbfs_spinbutton.set_sensitive (interval != 0 && duration != 0);
+}
+
+void
+ExportFormatDialog::update_demo_noise_selection ()
+{
+	Gtk::TreeModel::const_iterator iter = demo_noise_combo.get_active();
+	if (!iter) {
+		demo_noise_dbfs_spinbutton.set_sensitive (false);
+		return;
+	}
+	int duration = iter->get_value (demo_noise_cols.duration);
+	int interval = iter->get_value (demo_noise_cols.interval);
+	demo_noise_dbfs_spinbutton.set_sensitive (interval != 0 && duration != 0);
+
+	manager.select_demo_noise_duration (duration);
+	manager.select_demo_noise_interval (interval);
 }
 
 void

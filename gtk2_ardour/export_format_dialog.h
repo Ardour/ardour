@@ -146,10 +146,15 @@ private:
 	void update_clock (AudioClock & clock, ARDOUR::AnyTime const & time);
 	void update_time (ARDOUR::AnyTime & time, AudioClock const & clock);
 
+	/* SRC, codec, etc */
+
 	void update_src_quality_selection ();
 	void update_codec_quality_selection ();
 	void update_tagging_selection ();
 	void set_codec_quality_selection ();
+
+	void update_demo_noise_selection ();
+	void update_demo_noise_sensitivity ();
 
 	/*** Encoding options */
 
@@ -291,6 +296,36 @@ private:
 
 	Gtk::Label      src_quality_label;
 	Gtk::ComboBox   src_quality_combo;
+
+	/* Watermark */
+
+	struct DemoNoiseCols : public Gtk::TreeModelColumnRecord
+	{
+	public:
+		Gtk::TreeModelColumn<std::string> label;
+		Gtk::TreeModelColumn<int> interval;
+		Gtk::TreeModelColumn<int> duration;
+
+		DemoNoiseCols () {
+			add(label);
+			add(interval);
+			add(duration);
+		}
+	};
+
+	DemoNoiseCols                demo_noise_cols;
+	Glib::RefPtr<Gtk::ListStore> demo_noise_list;
+
+	Gtk::Table watermark_options_table;
+
+	Gtk::Label watermark_heading;
+	Gtk::Label demo_noise_mode_label;
+	Gtk::Label demo_noise_level_label;
+	Gtk::Label demo_noise_dbfs_unit;
+
+	Gtk::ComboBox   demo_noise_combo;
+	Gtk::Adjustment demo_noise_dbfs_adjustment;
+	Gtk::SpinButton demo_noise_dbfs_spinbutton;
 
 	/* Common encoding option components */
 
