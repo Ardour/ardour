@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Ardour 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-05-20 14:36-0600\n"
-"PO-Revision-Date: 2020-06-02 13:32+0200\n"
+"PO-Revision-Date: 2020-06-05 11:21+0200\n"
 "Last-Translator: Enara Larraitz & Porrumentzio <porruren-grabatokia@riseup."
 "net>\n"
 "Language-Team: Euskera <porrumentzio@riseup.net>\n"
@@ -2711,7 +2711,7 @@ msgstr "berrelikadura loop-a %1 eta %2 artean ezarri da"
 
 #: session.cc:2357
 msgid "Audio "
-msgstr "Audio: "
+msgstr "Audio "
 
 #: session.cc:2361
 msgid "MIDI "
