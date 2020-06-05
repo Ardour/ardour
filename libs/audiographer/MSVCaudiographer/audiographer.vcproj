@@ -281,6 +281,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\src\general\demo_noise.cc"
+					>
+				</File>
+				<File
 					RelativePath="..\src\general\loudness_reader.cc"
 					>
 				</File>
@@ -341,6 +345,10 @@
 			</File>
 			<File
 				RelativePath="..\audiographer\general\deinterleaver.h"
+				>
+			</File>
+			<File
+				RelativePath="..\audiographer\general\demo_noise.h"
 				>
 			</File>
 			<File
