@@ -58,7 +58,7 @@ DemoNoiseAdder::init (samplecnt_t max_samples, samplecnt_t interval, samplecnt_t
 
 	_interval = interval;
 	_level = dB_to_coefficient (level);
-	_pos = interval / 5 + duration;
+	_pos = interval / 3 + duration;
 }
 
 void
