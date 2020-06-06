@@ -23,6 +23,10 @@
 #include <cstring>
 #include <stdint.h>
 
+#ifndef PLATFORM_WINDOWS
+#include <dlfcn.h>
+#endif
+
 #include "pbd/pthread_utils.h"
 #ifdef WINE_THREAD_SUPPORT
 #include <fst.h>
@@ -222,6 +226,44 @@ pthread_cancel_one (pthread_t thread)
 	pthread_mutex_unlock (&thread_map_lock);
 }
 
+static size_t pbd_stack_size ()
+{
+	size_t rv = 0;
+#ifndef PLATFORM_WINDOWS
+
+	size_t pt_min_stack = 16384;
+
+#ifdef PTHREAD_STACK_MIN
+	pt_min_stack = PTHREAD_STACK_MIN;
+#endif
+
+  void *handle = dlopen (NULL, RTLD_LAZY);
+
+	/* This function is internal (it has a GLIBC_PRIVATE) version, but
+	 * available via weak symbol, or dlsym, and returns
+	 *
+	 * GLRO(dl_pagesize) + __static_tls_size + PTHREAD_STACK_MIN
+	 */
+
+	size_t (*__pthread_get_minstack)(const pthread_attr_t* attr) =
+		(size_t (*)(const pthread_attr_t*)) dlsym(handle, "__pthread_get_minstack");
+
+  if (__pthread_get_minstack != NULL) {
+    pthread_attr_t attr;
+    pthread_attr_init(&attr);
+		rv = __pthread_get_minstack(&attr);
+#ifndef NDEBUG
+    printf("TLS of parent thread: %zd Bytes (pthread min-stack: %zu)\n", rv, pt_min_stack);
+#endif
+		assert (rc >= pt_min_stack);
+		rv -= pt_min_stack;
+    pthread_attr_destroy(&attr);
+  }
+  dlclose(handle);
+#endif
+	return rv;
+}
+
 int
 pbd_pthread_create (
 		const size_t stacksize,
@@ -233,7 +275,7 @@ pbd_pthread_create (
 
 	pthread_attr_t attr;
 	pthread_attr_init (&attr);
-	pthread_attr_setstacksize (&attr, stacksize);
+	pthread_attr_setstacksize (&attr, stacksize + pbd_stack_size ());
 	rv = pthread_create (thread, &attr, start_routine, arg);
 	pthread_attr_destroy (&attr);
 	return rv;
@@ -282,7 +324,7 @@ pbd_realtime_pthread_create (
 	pthread_attr_setschedparam (&attr, &parm);
 	pthread_attr_setscope (&attr, PTHREAD_SCOPE_SYSTEM);
 	pthread_attr_setinheritsched (&attr, PTHREAD_EXPLICIT_SCHED);
-	pthread_attr_setstacksize (&attr, stacksize);
+	pthread_attr_setstacksize (&attr, stacksize + pbd_stack_size ());
 	rv = pthread_create (thread, &attr, start_routine, arg);
 	pthread_attr_destroy (&attr);
 	return rv;
