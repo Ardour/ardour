@@ -65,6 +65,13 @@ LIBPBD_API void pthread_kill_all (int signum);
 LIBPBD_API const char* pthread_name ();
 LIBPBD_API void pthread_set_name (const char* name);
 
+LIBPBD_API int pbd_pthread_create (
+		const size_t stacksize,
+		pthread_t *thread,
+		void *(*start_routine) (void *),
+		void *arg);
+
+
 LIBPBD_API int pbd_realtime_pthread_create (
 		const int policy, int priority, const size_t stacksize,
 		pthread_t *thread,

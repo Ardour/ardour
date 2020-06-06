@@ -223,6 +223,23 @@ pthread_cancel_one (pthread_t thread)
 }
 
 int
+pbd_pthread_create (
+		const size_t stacksize,
+		pthread_t *thread,
+		void *(*start_routine) (void *),
+		void *arg)
+{
+	int rv;
+
+	pthread_attr_t attr;
+	pthread_attr_init (&attr);
+	pthread_attr_setstacksize (&attr, stacksize);
+	rv = pthread_create (thread, &attr, start_routine, arg);
+	pthread_attr_destroy (&attr);
+	return rv;
+}
+
+int
 pbd_absolute_rt_priority (int policy, int priority)
 {
 	/* POSIX requires a spread of at least 32 steps between min..max */
@@ -245,8 +262,6 @@ pbd_absolute_rt_priority (int policy, int priority)
 	if (priority < p_min) priority = p_min;
 	return priority;
 }
-
-
 
 int
 pbd_realtime_pthread_create (
@@ -272,6 +287,7 @@ pbd_realtime_pthread_create (
 	pthread_attr_destroy (&attr);
 	return rv;
 }
+
 int
 pbd_set_thread_priority (pthread_t thread, const int policy, int priority)
 {
