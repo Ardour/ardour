@@ -113,7 +113,7 @@ AlsaAudioSlave::start ()
 	if (pbd_realtime_pthread_create (PBD_SCHED_FIFO, PBD_RT_PRI_MAIN, PBD_RT_STACKSIZE_HELP,
 				&_thread, _process_thread, this))
 	{
-		if (pthread_create (&_thread, NULL, _process_thread, this)) {
+		if (pbd_pthread_create (PBD_RT_STACKSIZE_HELP, &_thread, _process_thread, this)) {
 			_run = false;
 			PBD::error << _("AlsaAudioBackend: failed to create slave process thread.") << endmsg;
 			return false;

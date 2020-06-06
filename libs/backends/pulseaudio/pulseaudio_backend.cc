@@ -636,7 +636,7 @@ PulseAudioBackend::_start (bool /*for_latency_measurement*/)
 
 	if (pbd_realtime_pthread_create (PBD_SCHED_FIFO, PBD_RT_PRI_MAIN, PBD_RT_STACKSIZE_PROC,
 	                                 &_main_thread, pthread_process, this)) {
-		if (pthread_create (&_main_thread, NULL, pthread_process, this)) {
+		if (pbd_pthread_create (PBD_RT_STACKSIZE_PROC, &_main_thread, pthread_process, this)) {
 			PBD::error << _("PulseAudioBackend: failed to create process thread.") << endmsg;
 			stop ();
 			_run = false;
@@ -748,21 +748,15 @@ PulseAudioBackend::pulse_process_thread (void* arg)
 int
 PulseAudioBackend::create_process_thread (boost::function<void()> func)
 {
-	pthread_t      thread_id;
-	pthread_attr_t attr;
-
+	pthread_t   thread_id;
 	ThreadData* td = new ThreadData (this, func, PBD_RT_STACKSIZE_PROC);
 
 	if (pbd_realtime_pthread_create (PBD_SCHED_FIFO, PBD_RT_PRI_PROC, PBD_RT_STACKSIZE_PROC,
 	                                 &thread_id, pulse_process_thread, td)) {
-		pthread_attr_init (&attr);
-		pthread_attr_setstacksize (&attr, PBD_RT_STACKSIZE_PROC);
-		if (pthread_create (&thread_id, &attr, pulse_process_thread, td)) {
+		if (pbd_pthread_create (PBD_RT_STACKSIZE_PROC, &thread_id, pulse_process_thread, td)) {
 			PBD::error << _("AudioEngine: cannot create process thread.") << endmsg;
-			pthread_attr_destroy (&attr);
 			return -1;
 		}
-		pthread_attr_destroy (&attr);
 	}
 
 	_threads.push_back (thread_id);

@@ -76,7 +76,7 @@ AlsaMidiIO::start ()
 	if (pbd_realtime_pthread_create (PBD_SCHED_FIFO, PBD_RT_PRI_MIDI, PBD_RT_STACKSIZE_HELP,
 				&_main_thread, pthread_process, this))
 	{
-		if (pthread_create (&_main_thread, NULL, pthread_process, this)) {
+		if (pbd_pthread_create (PBD_RT_STACKSIZE_HELP, &_main_thread, pthread_process, this)) {
 			PBD::error << _("AlsaMidiIO: Failed to create process thread.") << endmsg;
 			return -1;
 		} else {

@@ -36,9 +36,11 @@
 
 #include "pbd/error.h"
 #include "pbd/compose.h"
-#include "pbd/i18n.h"
+#include "pbd/pthread_utils.h"
 
 #include "ardour/port_manager.h"
+
+#include "pbd/i18n.h"
 
 using namespace ARDOUR;
 
@@ -463,7 +465,7 @@ DummyAudioBackend::_start (bool /*for_latency_measurement*/)
 	engine.reconnect_ports ();
 	_port_change_flag = false;
 
-	if (pthread_create (&_main_thread, NULL, pthread_process, this)) {
+	if (pbd_pthread_create (PBD_RT_STACKSIZE_PROC, &_main_thread, pthread_process, this)) {
 		PBD::error << _("DummyAudioBackend: cannot start.") << endmsg;
 	}
 
@@ -553,19 +555,13 @@ DummyAudioBackend::dummy_process_thread (void *arg)
 int
 DummyAudioBackend::create_process_thread (boost::function<void()> func)
 {
-	pthread_t thread_id;
-	pthread_attr_t attr;
-
-	pthread_attr_init (&attr);
-	pthread_attr_setstacksize (&attr, PBD_RT_STACKSIZE_PROC);
+	pthread_t   thread_id;
 	ThreadData* td = new ThreadData (this, func, PBD_RT_STACKSIZE_PROC);
 
-	if (pthread_create (&thread_id, &attr, dummy_process_thread, td)) {
+	if (pbd_pthread_create (PBD_RT_STACKSIZE_PROC, &thread_id, dummy_process_thread, td)) {
 		PBD::error << _("AudioEngine: cannot create process thread.") << endmsg;
-		pthread_attr_destroy (&attr);
 		return -1;
 	}
-	pthread_attr_destroy (&attr);
 
 	_threads.push_back (thread_id);
 	return 0;

@@ -845,22 +845,16 @@ CoreAudioBackend::coreaudio_process_thread (void *arg)
 int
 CoreAudioBackend::create_process_thread (boost::function<void()> func)
 {
-	pthread_t thread_id;
-	pthread_attr_t attr;
-
+	pthread_t   thread_id;
 	ThreadData* td = new ThreadData (this, func, PBD_RT_STACKSIZE_PROC);
 
 	if (pbd_realtime_pthread_create (PBD_SCHED_FIFO, PBD_RT_PRI_PROC, PBD_RT_STACKSIZE_PROC,
 	                              &thread_id, coreaudio_process_thread, td)) {
-		pthread_attr_init (&attr);
-		pthread_attr_setstacksize (&attr, PBD_RT_STACKSIZE_PROC);
-		if (pthread_create (&thread_id, &attr, coreaudio_process_thread, td)) {
+		if (pbd_pthread_create (PBD_RT_STACKSIZE_PROC, &thread_id, coreaudio_process_thread, td)) {
 			PBD::error << _("AudioEngine: cannot create process thread.") << endmsg;
-			pthread_attr_destroy (&attr);
 			return -1;
 		}
 		PBD::warning << _("AudioEngine: process thread failed to acquire realtime permissions.") << endmsg;
-		pthread_attr_destroy (&attr);
 	}
 
 	if (pbd_mach_set_realtime_policy (thread_id, 1e9 * _samples_per_period / _samplerate)) {
