@@ -382,7 +382,7 @@ MIDIControllable::midi_sense_controller (Parser &, EventTwoBytes *msg)
 						if (msg->value > 0x40) {
 							_controllable->set_value (midi_to_control (last_value + offset + 1), Controllable::UseGroup);
 						} else {
-							_controllable->set_value (midi_to_control (last_value - (0x40 - offset)), Controllable::UseGroup);
+							_controllable->set_value (midi_to_control (last_value - (0x41 - msg->value)), Controllable::UseGroup);
 						}
 						break;
 					default:
