@@ -2964,9 +2964,11 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 					/* ForceIDRegeneration does not catch the following */
 					XMLProperty const * role = (*i)->property (X_("role"));
 					XMLProperty const * type = (*i)->property (X_("type"));
+
 					if (role && role->value() == X_("Aux")) {
-						/* check if the target bus exists.
-						 * we should not save aux-sends in templates.
+						/* Check if the target bus exists.
+						 * This is mainly useful when duplicating tracks
+						 * (aux-sends should not be saved in templates).
 						 */
 						XMLProperty const * target = (*i)->property (X_("target"));
 						if (!target) {
@@ -2979,6 +2981,7 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 							continue;
 						}
 					}
+
 					if (role && role->value() == X_("Listen")) {
 						(*i)->remove_property (X_("bitslot"));
 					}
@@ -2986,18 +2989,25 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 						Delivery::Role xrole;
 						uint32_t bitslot = 0;
 						xrole = Delivery::Role (string_2_enum (role->value(), xrole));
+
+						/* generate new bitslot ID */
 						std::string name = Send::name_and_id_new_send(*this, xrole, bitslot, false);
 						(*i)->remove_property (X_("bitslot"));
-						(*i)->remove_property (X_("name"));
 						(*i)->set_property ("bitslot", bitslot);
-						(*i)->set_property ("name", name);
-						XMLNodeList io_kids = (*i)->children ();
-						for (XMLNodeList::iterator j = io_kids.begin(); j != io_kids.end(); ++j) {
-							if ((*j)->name() != X_("IO")) {
-								continue;
+
+						/* external sends need unique names */
+						if (role->value() == X_("Send")) {
+							(*i)->remove_property (X_("name"));
+							(*i)->set_property ("name", name);
+
+							XMLNodeList io_kids = (*i)->children ();
+							for (XMLNodeList::iterator j = io_kids.begin(); j != io_kids.end(); ++j) {
+								if ((*j)->name() != X_("IO")) {
+									continue;
+								}
+								(*j)->remove_property (X_("name"));
+								(*j)->set_property ("name", name);
 							}
-							(*j)->remove_property (X_("name"));
-							(*j)->set_property ("name", name);
 						}
 					}
 					else if (type && type->value() == X_("intreturn")) {
