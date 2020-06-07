@@ -493,7 +493,7 @@ Editor::register_actions ()
 		string const a = string_compose (X_("script-%1"), i);
 		string const n = string_compose (_("Unset #%1"), i);
 		act = ActionManager::register_action (lua_script_actions, a.c_str(), n.c_str(), sigc::bind (sigc::mem_fun (*this, &Editor::trigger_script), i - 1));
-		act->set_tooltip (_("no action bound"));
+		act->set_tooltip (_("No action bound\nRight-click to assign"));
 		act->set_sensitive (false);
 	}
 
