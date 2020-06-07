@@ -252,9 +252,6 @@ static size_t pbd_stack_size ()
     pthread_attr_t attr;
     pthread_attr_init(&attr);
 		rv = __pthread_get_minstack(&attr);
-#ifndef NDEBUG
-    printf("TLS of parent thread: %zd Bytes (pthread min-stack: %zu)\n", rv, pt_min_stack);
-#endif
 		assert (rv >= pt_min_stack);
 		rv -= pt_min_stack;
     pthread_attr_destroy(&attr);
