@@ -18,10 +18,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <set>
-#include <string>
 #include <cstring>
+#include <set>
 #include <stdint.h>
+#include <string>
 
 #ifndef PLATFORM_WINDOWS
 #include <dlfcn.h>
@@ -33,7 +33,7 @@
 #endif
 
 #ifdef COMPILER_MSVC
-DECLARE_DEFAULT_COMPARISONS(pthread_t)  // Needed for 'DECLARE_DEFAULT_COMPARISONS'. Objects in an STL container can be
+DECLARE_DEFAULT_COMPARISONS (pthread_t) // Needed for 'DECLARE_DEFAULT_COMPARISONS'. Objects in an STL container can be
                                         // searched and sorted. Thus, when instantiating the container, MSVC complains
                                         // if the type of object being contained has no appropriate comparison operators
                                         // defined (specifically, if operators '<' and '==' are undefined). This seems
@@ -41,33 +41,34 @@ DECLARE_DEFAULT_COMPARISONS(pthread_t)  // Needed for 'DECLARE_DEFAULT_COMPARISO
 #endif
 
 #ifdef __APPLE__
-#include <mach/thread_policy.h>
-#include <mach/thread_act.h>
 #include <mach/mach_time.h>
+#include <mach/thread_act.h>
+#include <mach/thread_policy.h>
 #endif
 
 using namespace std;
 
-typedef std::list<pthread_t> ThreadMap;
-static ThreadMap all_threads;
-static pthread_mutex_t thread_map_lock = PTHREAD_MUTEX_INITIALIZER;
+typedef std::list<pthread_t>        ThreadMap;
+static ThreadMap                    all_threads;
+static pthread_mutex_t              thread_map_lock = PTHREAD_MUTEX_INITIALIZER;
 static Glib::Threads::Private<char> thread_name (free);
 
-namespace PBD {
-	PBD::Signal3<void,pthread_t,std::string,uint32_t> ThreadCreatedWithRequestSize;
+namespace PBD
+{
+	PBD::Signal3<void, pthread_t, std::string, uint32_t> ThreadCreatedWithRequestSize;
 }
 
 using namespace PBD;
 
-static int thread_creator (pthread_t* thread_id, const pthread_attr_t* attr, void *(*function)(void*), void* arg)
+static int
+thread_creator (pthread_t* thread_id, const pthread_attr_t* attr, void* (*function) (void*), void* arg)
 {
 #ifdef WINE_THREAD_SUPPORT
-       return wine_pthread_create (thread_id, attr, function, arg);
+	return wine_pthread_create (thread_id, attr, function, arg);
 #else
-       return pthread_create (thread_id, attr, function, arg);
+	return pthread_create (thread_id, attr, function, arg);
 #endif
 }
-
 
 void
 PBD::notify_event_loops_about_thread_creation (pthread_t thread, const std::string& emitting_thread_name, int request_count)
@@ -83,39 +84,38 @@ PBD::notify_event_loops_about_thread_creation (pthread_t thread, const std::stri
 }
 
 struct ThreadStartWithName {
-    void* (*thread_work)(void*);
-    void* arg;
-    std::string name;
+	void* (*thread_work) (void*);
+	void*       arg;
+	std::string name;
 
-    ThreadStartWithName (void* (*f)(void*), void* a, const std::string& s)
-	    : thread_work (f), arg (a), name (s) {}
+	ThreadStartWithName (void* (*f) (void*), void* a, const std::string& s)
+		: thread_work (f)
+		, arg (a)
+		, name (s)
+	{}
 };
 
 static void*
 fake_thread_start (void* arg)
 {
-	ThreadStartWithName* ts = (ThreadStartWithName*) arg;
-	void* (*thread_work)(void*) = ts->thread_work;
-	void* thread_arg = ts->arg;
+	ThreadStartWithName* ts      = (ThreadStartWithName*)arg;
+	void* (*thread_work) (void*) = ts->thread_work;
+	void* thread_arg             = ts->arg;
 
 	/* name will be deleted by the default handler for GStaticPrivate, when the thread exits */
-
-	pthread_set_name (ts->name.c_str());
+	pthread_set_name (ts->name.c_str ());
 
 	/* we don't need this object anymore */
-
 	delete ts;
 
 	/* actually run the thread's work function */
-
 	void* ret = thread_work (thread_arg);
 
 	/* cleanup */
-
 	pthread_mutex_lock (&thread_map_lock);
 
-	for (ThreadMap::iterator i = all_threads.begin(); i != all_threads.end(); ++i) {
-		if (pthread_equal ((*i), pthread_self())) {
+	for (ThreadMap::iterator i = all_threads.begin (); i != all_threads.end (); ++i) {
+		if (pthread_equal ((*i), pthread_self ())) {
 			all_threads.erase (i);
 			break;
 		}
@@ -124,19 +124,18 @@ fake_thread_start (void* arg)
 	pthread_mutex_unlock (&thread_map_lock);
 
 	/* done */
-
 	return ret;
 }
 
 int
-pthread_create_and_store (string name, pthread_t  *thread, void * (*start_routine)(void *), void * arg)
+pthread_create_and_store (string name, pthread_t* thread, void* (*start_routine) (void*), void* arg)
 {
 	pthread_attr_t default_attr;
-	int ret;
+	int            ret;
 
-	// set default stack size to sensible default for memlocking
-	pthread_attr_init(&default_attr);
-	pthread_attr_setstacksize(&default_attr, 0x80000); // 512kB
+	/* set default stack size to sensible default for memlocking */
+	pthread_attr_init (&default_attr);
+	pthread_attr_setstacksize (&default_attr, 0x80000); // 512kB
 
 	ThreadStartWithName* ts = new ThreadStartWithName (start_routine, arg, name);
 
@@ -146,16 +145,15 @@ pthread_create_and_store (string name, pthread_t  *thread, void * (*start_routin
 		pthread_mutex_unlock (&thread_map_lock);
 	}
 
-	pthread_attr_destroy(&default_attr);
+	pthread_attr_destroy (&default_attr);
 
 	return ret;
 }
 
 void
-pthread_set_name (const char *str)
+pthread_set_name (const char* str)
 {
 	/* copy string and delete it when exiting */
-
 	thread_name.set (strdup (str)); // leaks
 
 #if !defined PLATFORM_WINDOWS && defined _GNU_SOURCE
@@ -163,11 +161,11 @@ pthread_set_name (const char *str)
 	char ptn[16];
 	memset (ptn, 0, 16);
 	strncpy (ptn, str, 15);
-	pthread_setname_np (pthread_self(), ptn);
+	pthread_setname_np (pthread_self (), ptn);
 #endif
 }
 
-const char *
+const char*
 pthread_name ()
 {
 	const char* str = thread_name.get ();
@@ -182,12 +180,12 @@ void
 pthread_kill_all (int signum)
 {
 	pthread_mutex_lock (&thread_map_lock);
-	for (ThreadMap::iterator i = all_threads.begin(); i != all_threads.end(); ++i) {
-		if (!pthread_equal ((*i), pthread_self())) {
+	for (ThreadMap::iterator i = all_threads.begin (); i != all_threads.end (); ++i) {
+		if (!pthread_equal ((*i), pthread_self ())) {
 			pthread_kill ((*i), signum);
 		}
 	}
-	all_threads.clear();
+	all_threads.clear ();
 	pthread_mutex_unlock (&thread_map_lock);
 }
 
@@ -196,18 +194,17 @@ pthread_cancel_all ()
 {
 	pthread_mutex_lock (&thread_map_lock);
 
-	for (ThreadMap::iterator i = all_threads.begin(); i != all_threads.end(); ) {
-
+	for (ThreadMap::iterator i = all_threads.begin (); i != all_threads.end ();) {
 		ThreadMap::iterator nxt = i;
 		++nxt;
 
-		if (!pthread_equal ((*i), pthread_self())) {
+		if (!pthread_equal ((*i), pthread_self ())) {
 			pthread_cancel ((*i));
 		}
 
 		i = nxt;
 	}
-	all_threads.clear();
+	all_threads.clear ();
 	pthread_mutex_unlock (&thread_map_lock);
 }
 
@@ -215,7 +212,7 @@ void
 pthread_cancel_one (pthread_t thread)
 {
 	pthread_mutex_lock (&thread_map_lock);
-	for (ThreadMap::iterator i = all_threads.begin(); i != all_threads.end(); ++i) {
+	for (ThreadMap::iterator i = all_threads.begin (); i != all_threads.end (); ++i) {
 		if (pthread_equal ((*i), thread)) {
 			all_threads.erase (i);
 			break;
@@ -226,7 +223,8 @@ pthread_cancel_one (pthread_t thread)
 	pthread_mutex_unlock (&thread_map_lock);
 }
 
-static size_t pbd_stack_size ()
+static size_t
+pbd_stack_size ()
 {
 	size_t rv = 0;
 #ifndef PLATFORM_WINDOWS
@@ -237,7 +235,7 @@ static size_t pbd_stack_size ()
 	pt_min_stack = PTHREAD_STACK_MIN;
 #endif
 
-  void *handle = dlopen (NULL, RTLD_LAZY);
+	void* handle = dlopen (NULL, RTLD_LAZY);
 
 	/* This function is internal (it has a GLIBC_PRIVATE) version, but
 	 * available via weak symbol, or dlsym, and returns
@@ -245,18 +243,18 @@ static size_t pbd_stack_size ()
 	 * GLRO(dl_pagesize) + __static_tls_size + PTHREAD_STACK_MIN
 	 */
 
-	size_t (*__pthread_get_minstack)(const pthread_attr_t* attr) =
-		(size_t (*)(const pthread_attr_t*)) dlsym(handle, "__pthread_get_minstack");
+	size_t (*__pthread_get_minstack) (const pthread_attr_t* attr) =
+	    (size_t (*) (const pthread_attr_t*))dlsym (handle, "__pthread_get_minstack");
 
-  if (__pthread_get_minstack != NULL) {
-    pthread_attr_t attr;
-    pthread_attr_init(&attr);
-		rv = __pthread_get_minstack(&attr);
+	if (__pthread_get_minstack != NULL) {
+		pthread_attr_t attr;
+		pthread_attr_init (&attr);
+		rv = __pthread_get_minstack (&attr);
 		assert (rv >= pt_min_stack);
 		rv -= pt_min_stack;
-    pthread_attr_destroy(&attr);
-  }
-  dlclose(handle);
+		pthread_attr_destroy (&attr);
+	}
+	dlclose (handle);
 #endif
 	return rv;
 }
@@ -264,9 +262,9 @@ static size_t pbd_stack_size ()
 int
 pbd_pthread_create (
 		const size_t stacksize,
-		pthread_t *thread,
-		void *(*start_routine) (void *),
-		void *arg)
+		pthread_t*   thread,
+		void* (*start_routine) (void*),
+		void* arg)
 {
 	int rv;
 
@@ -297,21 +295,23 @@ pbd_absolute_rt_priority (int policy, int priority)
 	} else {
 		priority += p_max;
 	}
-	if (priority > p_max) priority = p_max;
-	if (priority < p_min) priority = p_min;
+	if (priority > p_max)
+		priority = p_max;
+	if (priority < p_min)
+		priority = p_min;
 	return priority;
 }
 
 int
 pbd_realtime_pthread_create (
 		const int policy, int priority, const size_t stacksize,
-		pthread_t *thread,
-		void *(*start_routine) (void *),
-		void *arg)
+		pthread_t* thread,
+		void* (*start_routine) (void*),
+		void* arg)
 {
 	int rv;
 
-	pthread_attr_t attr;
+	pthread_attr_t     attr;
 	struct sched_param parm;
 
 	parm.sched_priority = pbd_absolute_rt_priority (policy, priority);
@@ -344,24 +344,24 @@ pbd_mach_set_realtime_policy (pthread_t thread_id, double period_ns)
 	thread_time_constraint_policy_data_t policy;
 #ifndef NDEBUG
 	mach_msg_type_number_t msgt = 4;
-	boolean_t dflt = false;
-	kern_return_t rv = thread_policy_get (pthread_mach_thread_np (thread_id),
-			THREAD_TIME_CONSTRAINT_POLICY, (thread_policy_t) &policy,
-			&msgt, &dflt);
+	boolean_t              dflt = false;
+	kern_return_t          rv   = thread_policy_get (pthread_mach_thread_np (thread_id),
+	                                                 THREAD_TIME_CONSTRAINT_POLICY, (thread_policy_t)&policy, &msgt, &dflt);
+
 	printf ("Mach Thread(%p) get: period=%d comp=%d constraint=%d preemt=%d OK: %d\n", thread_id, policy.period, policy.computation, policy.constraint, policy.preemptible, rv == KERN_SUCCESS);
 #endif
 
 	mach_timebase_info_data_t timebase_info;
-	mach_timebase_info(&timebase_info);
+	mach_timebase_info (&timebase_info);
 	const double period_clk = period_ns * (double)timebase_info.denom / (double)timebase_info.numer;
 
-	policy.period = period_clk;
+	policy.period      = period_clk;
 	policy.computation = period_clk * .9;
-	policy.constraint = period_clk * .95;
+	policy.constraint  = period_clk * .95;
 	policy.preemptible = true;
-	kern_return_t res = thread_policy_set (pthread_mach_thread_np (thread_id),
-			THREAD_TIME_CONSTRAINT_POLICY, (thread_policy_t) &policy,
-			THREAD_TIME_CONSTRAINT_POLICY_COUNT);
+	kern_return_t res  = thread_policy_set (pthread_mach_thread_np (thread_id),
+	                                        THREAD_TIME_CONSTRAINT_POLICY, (thread_policy_t)&policy,
+	                                        THREAD_TIME_CONSTRAINT_POLICY_COUNT);
 
 #ifndef NDEBUG
 	printf ("Mach Thread(%p) set: period=%d comp=%d constraint=%d preemt=%d OK: %d\n", thread_id, policy.period, policy.computation, policy.constraint, policy.preemptible, res == KERN_SUCCESS);
