@@ -778,6 +778,10 @@ SessionDialog::redisplay_recent_sessions ()
 
 		/* remove any trailing / */
 
+		if (dirname.empty()) {
+			continue;
+		}
+
 		if (dirname[dirname.length()-1] == '/') {
 			dirname = dirname.substr (0, dirname.length()-1);
 		}
