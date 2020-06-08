@@ -85,11 +85,13 @@ RTTaskList::reset_thread_list ()
 	g_atomic_int_set (&_threads_active, 1);
 	for (uint32_t i = 0; i < num_threads; ++i) {
 		pthread_t thread_id;
-		int rv = AudioEngine::instance()->is_realtime () ?
-			pbd_realtime_pthread_create (PBD_SCHED_FIFO, AudioEngine::instance()->client_real_time_priority(), PBD_RT_STACKSIZE_HELP, &thread_id, _thread_run, this)
-			:
-			pbd_pthread_create (PBD_RT_STACKSIZE_HELP, &thread_id, _thread_run, this);
-
+		int rv = 1;
+		if (AudioEngine::instance()->is_realtime ()) {
+			rv = pbd_realtime_pthread_create (PBD_SCHED_FIFO, AudioEngine::instance()->client_real_time_priority(), PBD_RT_STACKSIZE_HELP, &thread_id, _thread_run, this);
+		}
+		if (rv) {
+			rv = pbd_pthread_create (PBD_RT_STACKSIZE_HELP, &thread_id, _thread_run, this);
+		}
 		if (rv) {
 			PBD::fatal << _("Cannot create thread for TaskList! (") << strerror(rv) << ')' << endmsg;
 			/* NOT REACHED */
