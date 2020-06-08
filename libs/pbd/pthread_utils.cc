@@ -23,7 +23,8 @@
 #include <stdint.h>
 #include <string>
 
-#ifndef PLATFORM_WINDOWS
+#if !defined PLATFORM_WINDOWS && defined __GLIBC__
+#include <climits>
 #include <dlfcn.h>
 #endif
 
@@ -227,7 +228,7 @@ static size_t
 pbd_stack_size ()
 {
 	size_t rv = 0;
-#ifndef PLATFORM_WINDOWS
+#if !defined PLATFORM_WINDOWS && defined __GLIBC__
 
 	size_t pt_min_stack = 16384;
 
