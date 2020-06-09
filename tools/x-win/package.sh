@@ -427,15 +427,12 @@ Section "${PROGRAM_NAME}${PROGRAM_VERSION} (required)" SecMainProg
   CreateShortCut "\$INSTDIR\\${PROGRAM_NAME}${PROGRAM_VERSION}.lnk" "\$INSTDIR\\bin\\${PRODUCT_EXE}" "" "\$INSTDIR\\bin\\${PRODUCT_EXE}" 0
   \${registerExtension} "\$INSTDIR\\bin\\${STATEFILE_SUFFIX}" ".${PRODUCT_NAME}" "${PROGRAM_NAME} Session"
 SectionEnd
-
-Section "WASAPI sound driver" SecWASAPI
-SectionEnd
 EOF
 
 if test -z "$NOVIDEOTOOLS"; then
 
 	cat >> $NSISFILE << EOF
-Section "Videotimeline Tools" SecVideo
+Section "Videotimeline Tools (required)" SecVideo
   WriteRegStr HKLM "Software\\${PROGRAM_KEY}\\v${major_version}\\video" "Install_Dir" "\$INSTDIR\\video"
   SectionIn RO
   SetOutPath \$INSTDIR
@@ -446,6 +443,10 @@ EOF
 fi
 
 cat >> $NSISFILE << EOF
+
+Section "WASAPI sound driver" SecWASAPI
+SectionEnd
+
 Section "Start Menu Shortcuts" SecMenu
   SetShellVarContext all
   CreateDirectory "\$SMPROGRAMS\\${PRODUCT_ID}${SFX}"
