@@ -201,6 +201,10 @@ MidiPort::read_and_parse_entire_midi_buffer_with_no_speed_adjustment (pframes_t 
 
 		parser.set_timestamp (now + timestamp);
 
+		if (_trace_parser) {
+			_trace_parser->set_timestamp (now + timestamp);
+		}
+
 		/* During this parsing stage, signals will be emitted from the
 		 * Parser, which will update anything connected to it.
 		 *
