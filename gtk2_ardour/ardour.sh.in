@@ -61,7 +61,7 @@ export VAMP_PATH=@LIBDIR@/vamp${VAMP_PATH:+:$VAMP_PATH}
 
 if [ $# -gt 0 ] ; then
     case $1 in
-        -d|--ddd) DEBUGGER=ddd; shift ;;
+        --ddd)    DEBUGGER=ddd; shift ;;
         -g|--gdb) DEBUGGER=gdb; shift ;;
     esac
 fi
