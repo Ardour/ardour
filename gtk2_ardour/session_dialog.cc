@@ -59,6 +59,7 @@
 
 #include "LuaBridge/LuaBridge.h"
 
+#include "ardour_message.h"
 #include "ardour_ui.h"
 #include "session_dialog.h"
 #include "opts.h"
@@ -722,9 +723,26 @@ SessionDialog::new_name_edited (GdkEventKey* ev)
 	return false;
 }
 
+
+static bool is_invalid_session_char (char c)
+{
+	/* see also Session::session_name_is_legal */
+	return iscntrl (c) || c == '/' || c == '\\' || c == ':' || c == ';';
+}
+
 void
 SessionDialog::new_name_changed ()
 {
+	std::string new_name = new_name_entry.get_text();
+
+	std::string const& illegal = Session::session_name_is_legal (new_name);
+	if (!illegal.empty()) {
+		ArdourMessageDialog msg (string_compose (_("To ensure compatibility with various systems\nsession names may not contain a '%1' character"), illegal));
+		msg.run ();
+		new_name.erase (remove_if (new_name.begin(), new_name.end(), is_invalid_session_char), new_name.end());
+		new_name_entry.set_text (new_name);
+	}
+
 	if (!new_name_entry.get_text().empty()) {
 		session_selected ();
 		open_button->set_sensitive (true);
