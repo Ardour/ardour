@@ -2933,9 +2933,9 @@ OSC::name_session (char *n, lo_message msg)
 		return -1;
 	}
 	string new_name = n;
-	char illegal = Session::session_name_is_legal (new_name);
+	std::string const& illegal = Session::session_name_is_legal (new_name);
 
-	if (illegal) {
+	if (!illegal.empty()) {
 		PBD::warning  << (string_compose (_("To ensure compatibility with various systems\n"
 				    "session names may not contain a '%1' character"), illegal)) << endmsg;
 		return -1;

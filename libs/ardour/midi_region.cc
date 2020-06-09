@@ -828,7 +828,7 @@ MidiRegion::set_name (const std::string& str)
 		return true;
 	}
 
-	if (Session::session_name_is_legal (str) != 0) {
+	if (!Session::session_name_is_legal (str).empty ()) {
 		return false;
 	}
 

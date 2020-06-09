@@ -357,7 +357,8 @@ public:
 	template<class A>            void foreach_route (void (Route::*method)(A), A arg);
 	template<class A1, class A2> void foreach_route (void (Route::*method)(A1, A2), A1 arg1, A2 arg2);
 
-	static char session_name_is_legal (const std::string&);
+	static const std::string session_name_is_legal (const std::string&);
+
 	bool io_name_is_legal (const std::string&) const;
 	boost::shared_ptr<Route> route_by_name (std::string) const;
 	boost::shared_ptr<Route> route_by_id (PBD::ID) const;

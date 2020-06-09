@@ -6760,18 +6760,23 @@ Session::update_latency_compensation (bool force_whole_graph, bool called_from_b
 	DEBUG_TRACE (DEBUG::LatencyCompensation, "update_latency_compensation: complete\n");
 }
 
-char
+const std::string
 Session::session_name_is_legal (const string& path)
 {
-	char illegal_chars[] = { '/', '\\', ':', ';', '\0' };
+	char illegal_chars[] = { '/', '\\', ':', ';' };
 
 	for (int i = 0; illegal_chars[i]; ++i) {
 		if (path.find (illegal_chars[i]) != string::npos) {
-			return illegal_chars[i];
+			return std::string (1, illegal_chars[i]);
 		}
 	}
 
-	return 0;
+	for (size_t i = 0; i < path.length(); ++i)  {
+		if (iscntrl (path[i])) {
+			return _("Control Char");
+		}
+	}
+	return std::string ();
 }
 
 void
