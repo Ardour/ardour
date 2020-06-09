@@ -229,9 +229,9 @@ ARDOUR_UI::session_dialog_response_handler (int response, SessionDialog* session
 
 		session_path = session_dialog->session_folder();
 
-		char illegal = Session::session_name_is_legal (session_name);
+		std::string const& illegal = Session::session_name_is_legal (session_name);
 
-		if (illegal) {
+		if (!illegal.empty()) {
 			ArdourMessageDialog msg (*session_dialog,
 			                         string_compose (_("To ensure compatibility with various systems\n"
 			                                           "session names may not contain a '%1' character"),
@@ -263,9 +263,9 @@ ARDOUR_UI::session_dialog_response_handler (int response, SessionDialog* session
 			return; /* back to main event loop */
 		}
 
-		char illegal = Session::session_name_is_legal(session_name);
+		std::string const& illegal = Session::session_name_is_legal (session_name);
 
-		if (illegal) {
+		if (!illegal.empty()) {
 			ArdourMessageDialog msg (*session_dialog, string_compose(_("To ensure compatibility with various systems\n"
 			                                                           "session names may not contain a '%1' character"), illegal));
 			msg.run ();
@@ -794,9 +794,9 @@ ARDOUR_UI::rename_session (bool for_unnamed)
 		bool do_rename = (name.length() != 0);
 
 		if (do_rename) {
-			char illegal = Session::session_name_is_legal (name);
+			std::string const& illegal = Session::session_name_is_legal (name);
 
-			if (illegal) {
+			if (!illegal.empty()) {
 				ArdourMessageDialog msg (string_compose (_("To ensure compatibility with various systems\n"
 				                                     "session names may not contain a '%1' character"), illegal));
 				msg.run ();
@@ -1008,8 +1008,8 @@ ARDOUR_UI::process_snapshot_session_prompter (Prompter& prompter, bool switch_to
 	bool do_save = (snapname.length() != 0);
 
 	if (do_save) {
-		char illegal = Session::session_name_is_legal(snapname);
-		if (illegal) {
+		std::string const& illegal = Session::session_name_is_legal (snapname);
+		if (!illegal.empty()) {
 			ArdourMessageDialog msg (string_compose (_("To ensure compatibility with various systems\n"
 			                                           "snapshot names may not contain a '%1' character"), illegal));
 			msg.run ();

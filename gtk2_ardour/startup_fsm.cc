@@ -732,21 +732,6 @@ StartupFSM::check_session_parameters (bool must_be_new)
 		/* session name is just a name */
 	}
 
-	/* check if name is legal */
-
-	const char illegal = Session::session_name_is_legal (session_name);
-
-	if (illegal) {
-		ArdourMessageDialog msg (*session_dialog,
-		                         string_compose (_("To ensure compatibility with various systems\n"
-		                                           "session names may not contain a '%1' character"),
-		                                         illegal));
-		msg.run ();
-		ARDOUR_COMMAND_LINE::session_name = ""; // cancel that
-		return 1; /* keep running dialog */
-	}
-
-
 	/* check if the currently-exists status matches whether or not
 	 * it should be new
 	 */
@@ -779,6 +764,21 @@ StartupFSM::check_session_parameters (bool must_be_new)
 
 		session_is_new = true;
 	}
+
+
+	/* check if name is legal (error for new sessions only) */
+	std::string const& illegal = Session::session_name_is_legal (session_name);
+
+	if (!illegal.empty() && session_is_new) {
+		ArdourMessageDialog msg (*session_dialog,
+		                         string_compose (_("To ensure compatibility with various systems\n"
+		                                           "session names may not contain a '%1' character"),
+		                                         illegal));
+		msg.run ();
+		ARDOUR_COMMAND_LINE::session_name = ""; // cancel that
+		return 1; /* keep running dialog */
+	}
+
 
 	float sr;
 	SampleFormat fmt;
