@@ -873,6 +873,8 @@ GtkCanvas::on_size_allocate (Gtk::Allocation& a)
 	}
 #endif
 
+	Rect r (a.get_x(), a.get_y(), a.get_width(), a.get_height());
+	_root.size_allocate (r);
 }
 
 /** Handler for GDK expose events.
