@@ -146,6 +146,7 @@ libardour_sources = [
         'mididm.cc',
         'midiport_manager.cc',
         'mix.cc',
+        'mixer_snapshot.cc',
         'mode.cc',
         'monitor_control.cc',
         'monitor_processor.cc',
