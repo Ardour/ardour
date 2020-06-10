@@ -254,6 +254,9 @@ public:
 
 #ifdef CANVAS_DEBUG
 	std::string name;
+	std::string whoami() const { return whatami() + '/' + name; }
+#else
+	std::string whoami() const { return whatami(); }
 #endif
 
 #ifdef CANVAS_COMPATIBILITY
