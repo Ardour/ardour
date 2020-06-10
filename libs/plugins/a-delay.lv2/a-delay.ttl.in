@@ -169,5 +169,5 @@ A simple delay plugin
     doap:license "GPL v2+" ;
     doap:maintainer <http://ardour.org/credits.html> ;
 
-    lv2:microVersion 1 ;
-    lv2:minorVersion 1 .
+    lv2:microVersion 0 ;
+    lv2:minorVersion 2 .
