@@ -17,8 +17,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "pbd/stacktrace.h"
+
 #include "canvas/root_group.h"
 #include "canvas/canvas.h"
+#include "canvas/constraint_packer.h"
 
 using namespace std;
 using namespace ArdourCanvas;
@@ -32,12 +35,34 @@ Root::Root (Canvas* canvas)
 }
 
 void
-Root::compute_bounding_box () const
+Root::preferred_size (Duple& min, Duple& natural) const
 {
-	Container::compute_bounding_box ();
+	if (_items.size() == 1) {
+		cerr << "Call prefsize on " << _items.front()->whoami() << endl;
+		_items.front()->preferred_size (min, natural);
+		return;
+	}
 
-	if (_bounding_box) {
-		Rect r (_bounding_box);
-		_canvas->request_size (Duple (r.width (), r.height ()));
+	cerr << "use regular prefsize for root\n";
+
+	Item::preferred_size (min, natural);
+}
+
+void
+Root::size_allocate (Rect const & r)
+{
+	bool have_constraint_container = false;
+
+	cerr << "ROOT alloc " << r << endl;
+
+	for (list<Item*>::const_iterator i = _items.begin(); i != _items.end(); ++i) {
+		if (dynamic_cast<ConstraintPacker*> (*i)) {
+			(*i)->size_allocate (r);
+			have_constraint_container = true;
+		}
+	}
+
+	if (have_constraint_container) {
+		_bounding_box_dirty = true;
 	}
 }
