@@ -278,9 +278,8 @@ Item::set_position (Duple p)
 	if (visible()) {
 		_canvas->item_moved (this, pre_change_parent_bounding_box);
 
-
 		if (_parent) {
-			_parent->child_changed ();
+			_parent->child_changed (false);
 		}
 	}
 }
@@ -378,7 +377,7 @@ Item::propagate_show_hide ()
 	/* bounding box may have changed while we were hidden */
 
 	if (_parent) {
-		_parent->child_changed ();
+		_parent->child_changed (false);
 	}
 
 	_canvas->item_shown_or_hidden (this);
@@ -640,7 +639,7 @@ Item::end_change ()
 		_canvas->item_changed (this, _pre_change_bounding_box);
 
 		if (_parent) {
-			_parent->child_changed ();
+			_parent->child_changed (_pre_change_bounding_box != _bounding_box);
 		}
 	}
 }
@@ -1061,13 +1060,13 @@ Item::invalidate_lut () const
 }
 
 void
-Item::child_changed ()
+Item::child_changed (bool bbox_changed)
 {
 	invalidate_lut ();
-	_bounding_box_dirty = true;
+	_bounding_box_dirty = bbox_changed;
 
 	if (_parent) {
-		_parent->child_changed ();
+		_parent->child_changed (bbox_changed);
 	}
 }
 
