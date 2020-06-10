@@ -192,7 +192,7 @@ Text::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 		return;
 	}
 
-	Rect self = item_to_window (Rect (0, 0, min (_clamped_width, (double)_image->get_width ()), _image->get_height ()));
+	Rect self = item_to_window (Rect (_position.x, _position.y, _position.x + min (_clamped_width, (double)_image->get_width ()), _position.y + _image->get_height ()));
 	Rect i = self.intersection (area);
 
 	if (!i) {
@@ -323,3 +323,4 @@ Text::text_width() const
 
     return _width;
 }
+
