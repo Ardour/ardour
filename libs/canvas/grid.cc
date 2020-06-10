@@ -353,11 +353,11 @@ Grid::place (Item* i, double x, double y, double col_span, double row_span)
 }
 
 void
-Grid::child_changed ()
+Grid::child_changed (bool bbox_changed)
 {
 	/* catch visibility and size changes */
 
-	Item::child_changed ();
+	Item::child_changed (bbox_changed);
 	reposition_children ();
 }
 

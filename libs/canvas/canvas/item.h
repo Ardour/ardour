@@ -226,7 +226,7 @@ public:
 	void raise_child_to_top (Item *);
 	void raise_child (Item *, int);
 	void lower_child_to_bottom (Item *);
-	virtual void child_changed ();
+	virtual void child_changed (bool bbox_changed);
 
 	static int default_items_per_cell;
 
