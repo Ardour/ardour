@@ -73,7 +73,7 @@ Fill::setup_fill_context (Cairo::RefPtr<Cairo::Context> context) const
         if (_pattern) {
                 context->set_source (_pattern);
         } else {
-					Gtkmm2ext::set_source_rgba (context, _fill_color);
+	        Gtkmm2ext::set_source_rgba (context, _fill_color);
         }
 }
 
