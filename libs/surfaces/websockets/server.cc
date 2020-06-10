@@ -116,13 +116,6 @@ WebsocketsServer::WebsocketsServer (ArdourSurface::ArdourWebsockets& surface)
 int
 WebsocketsServer::start ()
 {
-#if !defined(LWS_WITH_GLIB) && !defined(LWS_WITH_EXTERNAL_POLL)
-	PBD::error << "ArdourWebsockets: check your libwebsockets was compiled"
-	              " with LWS_WITH_GLIB or LWS_WITH_EXTERNAL_POLL enabled"
-	           << endmsg;
-	return -1;
-#endif
-
 #ifndef NDEBUG
 	lws_set_log_level (LLL_ERR | LLL_WARN | LLL_DEBUG, 0);
 #endif
@@ -144,6 +137,17 @@ WebsocketsServer::start ()
 		PBD::error << "ArdourWebsockets: could not create the libwebsockets context" << endmsg;
 		return -1;
 	}
+
+#ifndef LWS_WITH_GLIB
+	/* sometimes LWS_WITH_EXTERNAL_POLL is missing from lws_config.h
+	   but the feature is still available, hence this runtime check */
+	if (_fd_ctx.empty ()) {
+		PBD::error << "ArdourWebsockets: check your libwebsockets was compiled"
+		              " with LWS_WITH_GLIB or LWS_WITH_EXTERNAL_POLL enabled"
+		           << endmsg;
+		return -1;
+	}
+#endif
 
 	return 0;
 }
