@@ -6,6 +6,7 @@
 | The full license is in the file LICENSE, distributed with this software.
 |----------------------------------------------------------------------------*/
 #pragma once
+#include <ostream>
 #include <utility>
 #include "variable.h"
 
@@ -48,4 +49,10 @@ private:
 	double m_coefficient;
 };
 
+static std::ostream& operator<< (std::ostream& o, kiwi::Term const & t)
+{
+	return o << t.variable().name() << " * " << t.coefficient();
+}
+
 } // namespace kiwi
+
