@@ -146,3 +146,23 @@ Arc::covers (Duple const & point) const
 		(angle_degs <= (_start_degrees + _arc_degrees)) &&
 		(radius < _radius);
 }
+
+void
+Arc::size_allocate (Rect const & r)
+{
+	begin_change ();
+
+	Item::size_allocate (r);
+
+	/* This is an arc - some section of a circle, so any difference between
+	 * height and width cannot change what is drawn. Pick width arbitrarily
+	 * as the "key" dimension
+	 */
+
+	_radius = min (r.width(),r.height()) / 2.0;
+	_center = Duple ((r.width()/2.), (r.height() /2.));
+
+	_bounding_box_dirty = true;
+
+	end_change ();
+}
