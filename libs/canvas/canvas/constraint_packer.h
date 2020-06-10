@@ -19,7 +19,10 @@
 #ifndef __CANVAS_CONSTRAINT_PACKER_H__
 #define __CANVAS_CONSTRAINT_PACKER_H__
 
-#include "canvas/item.h"
+#include <list>
+#include <map>
+
+#include "canvas/container.h"
 #include "kiwi/kiwi.h"
 
 namespace ArdourCanvas
@@ -28,40 +31,43 @@ namespace ArdourCanvas
 class Rectangle;
 class ConstrainedItem;
 
-class LIBCANVAS_API ConstraintPacker : public Item
+class LIBCANVAS_API ConstraintPacker : public Container
 {
 public:
 	ConstraintPacker (Canvas *);
 	ConstraintPacker (Item *);
 
 	void add (Item *);
+	void add_front (Item *);
 	void remove (Item *);
 	void constrain (kiwi::Constraint const &);
 
+	virtual ConstrainedItem* add_constrained (Item* item);
+
 	void solve ();
-	void apply ();
+	void apply (kiwi::Solver*);
 
 	void compute_bounding_box () const;
-	void render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const;
 
+	void  preferred_size (Duple& mininum, Duple& natural) const;
 	void size_allocate (Rect const &);
 
-  protected:
-	void child_changed ();
-
-  private:
-	typedef std::map<Item*,ConstrainedItem*> ConstraintMap;
-	ConstraintMap constraint_map;
-
-	kiwi::Solver _solver;
 	kiwi::Variable width;
 	kiwi::Variable height;
 
-	Rectangle *self;
-	bool collapse_on_hide;
+  protected:
+	void child_changed (bool bbox_changed);
 
-	void reset_self ();
-	void reposition_children ();
+	typedef std::map<Item*,ConstrainedItem*> ConstrainedItemMap;
+	ConstrainedItemMap constrained_map;
+	typedef std::list<kiwi::Constraint> ConstraintList;
+	ConstraintList constraint_list;
+
+	bool in_alloc;
+
+	void add_constrained_internal (Item*, ConstrainedItem*);
+
+	void add_constraints (kiwi::Solver&, ConstrainedItem*) const;
 };
 
 }
