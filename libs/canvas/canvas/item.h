@@ -146,18 +146,19 @@ public:
 
 	ScrollGroup* scroll_parent() const { return _scroll_parent; }
 
-	/* item implementations can override this if they need to */
-	virtual Rect size_request() const { return bounding_box (true); }
+	/* layout-related methods */
+
+	virtual void preferred_size (Duple& minimum, Duple& natural) const;
 	virtual void size_allocate (Rect const&);
-	virtual void constrained (ConstrainedItem const &) {}
+	Rect allocation() const { return _allocation; }
+	void set_layout_sensitive (bool);
+	bool layout_sensitive () const { return _layout_sensitive; }
+	virtual Duple intrinsic_size() const { return Duple (_intrinsic_width, _intrinsic_height); }
+	virtual void set_intrinsic_size (Distance, Distance);
 
 	/** bounding box is the public API to get the size of the item.
-	 * If @param for_own_purposes is false, then it will return the
-	 * allocated bounding box (if there is one) in preference to the
-	 * one that would naturally be computed by the item.
 	 */
-	Rect bounding_box (bool for_own_purposes = false) const;
-	Rect allocation() const { return _allocation; }
+	Rect bounding_box () const;
 
 	Coord height() const;
 	Coord width() const;
@@ -310,6 +311,9 @@ protected:
 	/** true if _bounding_box might be out of date, false if its definitely not */
 	mutable bool _bounding_box_dirty;
 	Rect _allocation;
+	bool _layout_sensitive;
+	Distance _intrinsic_width;
+	Distance _intrinsic_height;
 
 	/* XXX: this is a bit grubby */
 	std::map<std::string, void *> _data;
