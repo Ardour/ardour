@@ -21,6 +21,7 @@
 #include <cmath>
 #include <stdint.h>
 #include <cfloat>
+#include <cstdlib>
 
 #include "pbd/failed_constructor.h"
 #include "pbd/string_convert.h"
@@ -697,4 +698,10 @@ Gtkmm2ext::set_source_rgb_a (cairo_t *cr, Color color, float alpha)
 		((color >>  8) & 0xff) / 255.0,
 		alpha
 		);
+}
+
+Color
+Gtkmm2ext::random_color ()
+{
+	return ((random() % 16777215) << 8 | 0xff);
 }
