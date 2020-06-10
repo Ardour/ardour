@@ -42,6 +42,9 @@ Item::Item (Canvas* canvas)
 	, _scroll_parent (0)
 	, _visible (true)
 	, _bounding_box_dirty (true)
+	, _layout_sensitive (false)
+	, _intrinsic_width (-1.)
+	, _intrinsic_height(-1.)
 	, _lut (0)
 	, _ignore_events (false)
 {
@@ -56,6 +59,9 @@ Item::Item (Item* parent)
 	, _scroll_parent (0)
 	, _visible (true)
 	, _bounding_box_dirty (true)
+	, _layout_sensitive (false)
+	, _intrinsic_width (-1.)
+	, _intrinsic_height(-1.)
 	, _lut (0)
 	, _ignore_events (false)
 {
@@ -77,6 +83,8 @@ Item::Item (Item* parent, Duple const& p)
 	, _position (p)
 	, _visible (true)
 	, _bounding_box_dirty (true)
+	, _intrinsic_width (-1.)
+	, _intrinsic_height(-1.)
 	, _lut (0)
 	, _ignore_events (false)
 {
@@ -406,6 +414,7 @@ Item::unparent ()
 {
 	_parent = 0;
 	_scroll_parent = 0;
+	_layout_sensitive = false;
 }
 
 void
@@ -418,6 +427,7 @@ Item::reparent (Item* new_parent, bool already_added)
 	assert (_canvas == new_parent->canvas());
 
 	if (_parent) {
+		cerr << "remove " << whatami() << '/' << name << " from " << _parent->whatami() << '/' << _parent->name << endl;
 		_parent->remove (this);
 	}
 
@@ -427,6 +437,7 @@ Item::reparent (Item* new_parent, bool already_added)
 	_canvas = _parent->canvas ();
 
 	find_scroll_parent ();
+	set_layout_sensitive (_parent->layout_sensitive());
 
 	if (!already_added) {
 		_parent->add (this);
@@ -573,23 +584,20 @@ Item::grab_focus ()
 void
 Item::size_allocate (Rect const & r)
 {
-	_allocation = r;
+	if (_layout_sensitive) {
+		_position = Duple (r.x0, r.y0);
+		_allocation = r;
+	}
 }
 
 /** @return Bounding box in this item's coordinates */
 ArdourCanvas::Rect
-Item::bounding_box (bool for_own_purposes) const
+Item::bounding_box () const
 {
 	if (_bounding_box_dirty) {
 		compute_bounding_box ();
 		assert (!_bounding_box_dirty);
 		add_child_bounding_boxes ();
-	}
-
-	if (!for_own_purposes) {
-		if (_allocation) {
-			return _allocation;
-		}
 	}
 
 	return _bounding_box;
@@ -869,7 +877,7 @@ Item::prepare_for_render_children (Rect const & area) const
 void
 Item::add_child_bounding_boxes (bool include_hidden) const
 {
-	Rect self;
+Rect self;
 	Rect bbox;
 	bool have_one = false;
 
@@ -949,6 +957,7 @@ Item::remove (Item* i)
 	}
 
 	i->unparent ();
+	i->set_layout_sensitive (false);
 	_items.remove (i);
 	invalidate_lut ();
 	_bounding_box_dirty = true;
@@ -1128,14 +1137,8 @@ Item::dump (ostream& o) const
 {
 	ArdourCanvas::Rect bb = bounding_box();
 
-	o << _canvas->indent() << whatami() << ' ' << this << " self-Visible ? " << self_visible() << " visible ? " << visible();
-	o << " @ " << position();
-
-#ifdef CANVAS_DEBUG
-	if (!name.empty()) {
-		o << ' ' << name;
-	}
-#endif
+	o << _canvas->indent() << whoami() << ' ' << this << " self-Visible ? " << self_visible() << " visible ? " << visible() << " layout " << layout_sensitive()
+	  << " @ " << position();
 
 	if (bb) {
 		o << endl << _canvas->indent() << "\tbbox: " << bb;
@@ -1184,3 +1187,55 @@ ArdourCanvas::operator<< (ostream& o, const Item& i)
 	return o;
 }
 
+void
+Item::set_intrinsic_size (Distance w, Distance h)
+{
+	_intrinsic_width = w;
+	_intrinsic_height = h;
+}
+
+void
+Item::preferred_size (Duple& minimum, Duple& natural) const
+{
+	/* this is the default mechanism to get a preferred size. It assumes
+	 * items whose dimensions are essentially fixed externally by calling
+	 * various methods that set the limits, and those same limits are used
+	 * when computing the bounding box. So ... just get the bounding box,
+	 * and use the dimensions it specifies.
+	 *
+	 * Note that items that fit this assumption also cannot have their size
+	 * adjusted by a container that they are placed in, so their miniumum
+	 * and natural sizes are the same.
+	 */
+
+	if (_intrinsic_height < 0 && _intrinsic_width < 0) {
+
+		/* intrinsic size untouched, use bounding box */
+
+		Rect bb (bounding_box());
+
+		if (!bb) {
+			natural.x = 2;
+			natural.y = 2;
+		} else {
+			natural.x = bb.width();
+			natural.y = bb.height();
+		}
+
+		minimum.x = 1;
+		minimum.y = 1;
+
+	} else {
+
+		natural.x = _intrinsic_width;
+		natural.y = _intrinsic_height;
+
+		minimum = natural;
+	}
+}
+
+void
+Item::set_layout_sensitive (bool yn)
+{
+	_layout_sensitive = yn;
+}
