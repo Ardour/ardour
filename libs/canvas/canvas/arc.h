@@ -37,6 +37,8 @@ public:
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
 	void compute_bounding_box () const;
 
+	void size_allocate (Rect const & r);
+
 	void set_center (Duple const &);
 	void set_radius (Coord);
 	void set_arc (double degrees);
