@@ -75,7 +75,7 @@ public:
 	double top_padding, right_padding, bottom_padding, left_padding;
 	double top_margin, right_margin, bottom_margin, left_margin;
 
-	void child_changed ();
+	void child_changed (bool bbox_changed);
   private:
 	Rectangle *self;
 	bool collapse_on_hide;

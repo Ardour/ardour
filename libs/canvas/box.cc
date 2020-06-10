@@ -265,11 +265,11 @@ Box::add (Item* i)
 }
 
 void
-Box::child_changed ()
+Box::child_changed (bool bbox_changed)
 {
 	/* catch visibility and size changes */
 
-	Item::child_changed ();
+	Item::child_changed (bbox_changed);
 	reposition_children ();
 }
 
