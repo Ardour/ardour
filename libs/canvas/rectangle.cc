@@ -180,6 +180,8 @@ Rectangle::set (Rect const & r)
 	   as cheap to do it when asked.
 	*/
 
+	cerr << name << " setting self rect\n";
+
 	if (r != _rect) {
 
 		begin_change ();
@@ -274,4 +276,10 @@ Rectangle::vertical_fraction (double y) const
          */
 
         return 1.0 - ((i.y - bbox.y0) / bbox.height());
+}
+
+void
+Rectangle::size_allocate (Rect const & r)
+{
+	set (r);
 }

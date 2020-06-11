@@ -37,6 +37,7 @@ public:
 
 	void render (Rect const &, Cairo::RefPtr<Cairo::Context>) const;
 	void compute_bounding_box () const;
+	void size_allocate (Rect const&);
 
 	Rect const & get () const {
 		return _rect;
