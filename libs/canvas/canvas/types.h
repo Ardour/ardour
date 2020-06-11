@@ -81,6 +81,11 @@ struct LIBCANVAS_API Duple
 	Coord x;
 	Coord y;
 
+	/* alias */
+
+	Coord width() const { return x; }
+	Coord height() const { return y; }
+
 	Duple translate (const Duple& t) const throw() {
 		return Duple (canvas_safe_add (x, t.x), canvas_safe_add (y, t.y));
 	}
