@@ -1001,6 +1001,7 @@ PortManager::port_is_control_only (std::string const& name)
 			X_(".*FaderPort2 .*"),
 			X_(".*US-2400 .*"),
 			X_(".*Mackie .*"),
+			X_(".*MIDI Control .*"),
 		};
 
 		pattern = "(";
