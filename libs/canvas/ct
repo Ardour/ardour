@@ -1,0 +1,18 @@
+#!/bin/sh
+
+args=
+
+if [ $# -gt 0 ] ; then
+    args="$@"
+fi
+
+t=`dirname "$0"`/../..
+TOP=`realpath $t`
+
+libs=$TOP/build/libs
+
+for lib in pbd canvas gtkmm2ext ; do
+    export LD_LIBRARY_PATH=$libs/$lib:${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+done    
+
+$args $TOP/build/libs/canvas/constraint_test
