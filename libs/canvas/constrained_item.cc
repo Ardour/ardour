@@ -50,9 +50,7 @@ ConstrainedItem::constrained (ConstraintPacker const & parent)
 	/* our variables should be set. Deliver computed size to item */
 
 	Rect r (_left.value(), _top.value(), _right.value(), _bottom.value());
-	dump (cerr);
-	cerr << _item.whatami() << '/' << _item.name << " constrained-alloc " << r << endl;
-
+	//cerr << _item.whatami() << '/' << _item.name << " constrained-alloc " << r << endl;
 	_item.size_allocate (r);
 }
 
