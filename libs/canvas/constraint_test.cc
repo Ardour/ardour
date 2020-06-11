@@ -20,19 +20,6 @@ using namespace Gtk;
 using std::cerr;
 using std::endl;
 
-struct Column {
-	Column (Canvas* c) {
-		box = new cBox (c, Vertical);
-		for (int i = 0; i < 16; ++i) {
-			rects[i] = new Rectangle (box);
-			rects[i]->set_fill_color (Gtkmm2ext::random_color());
-		}
-	}
-
-	cBox* box;
-	Rectangle* rects[16];
-};
-
 int
 main (int argc, char* argv[])
 {
@@ -52,57 +39,26 @@ main (int argc, char* argv[])
 
 	win.add (cview);
 
-	cBox* main_hbox = new cBox (c->root(), Horizontal);
+	Rectangle* r1 = new Rectangle (c);
+	Rectangle* r2 = new Rectangle (c);
+	Rectangle* r3 = new Rectangle (c);
 
-	Column* cols[16];
+	r1->set_fill_color (Gtkmm2ext::random_color());
+	r2->set_fill_color (Gtkmm2ext::random_color());
+	r3->set_fill_color (Gtkmm2ext::random_color());
 
-	for (size_t i = 0; i < sizeof (cols) / sizeof (cols[0]); ++i) {
-		cols[i] = new Column (c);
-		main_hbox->pack_start (cols[i]->box, PackOptions (PackExpand|PackFill));
-	}
+	r1->name = "r1";
+	r2->name = "r2";
+	r3->name = "r3";
 
+	//r1->set_intrinsic_size (20, 20);
+	//r2->set_intrinsic_size (30, 30);
+	//r3->set_intrinsic_size (40, 40);
 
-#if 0
-	Circle* circle = new Circle (c);
-	circle->name = "circle";
-	//circle->set_radius (30);
-	circle->set_fill_color (Gtkmm2ext::random_color());
-	circle->set_outline_color (Gtkmm2ext::random_color());
+//#define FULL_PACKER
+#define CBOX_PACKER
 
-	ci = vbox->pack_start (circle, PackOptions (PackExpand|PackFill));
-	ci->add_constraint (ci->height() == 0.5 * hb1->height());
-
-	cBox* hbox2 = new cBox (c, Horizontal);
-	hbox2->name = "hbox2";
-	hbox2->set_fill (true);
-	hbox2->set_fill_color (Gtkmm2ext::random_color());
-
-	Text* txt = new Text (c);
-	txt->name = "text";
-
-	Pango::FontDescription font ("Sans");
-
-	txt->set_font_description (font);
-	txt->set ("hello, world");
-
-	ConstrainedItem* ti = hbox2->pack_start (txt, PackExpand);
-	ti->add_constraint (ti->left() == 25);
-
-	vbox->pack_start (hbox2, PackOptions (PackExpand|PackFill));
-#endif
-
-
-	win.show_all ();
-	app.run ();
-
-	return 0;
-}
-
-
-
-#if 0
-/* code test arbitrary constraint layout */
-
+#ifdef FULL_PACKER
 	ConstraintPacker* packer = new ConstraintPacker (c->root());
 
 	ConstrainedItem* left = packer->add_constrained (r1);
@@ -136,5 +92,74 @@ main (int argc, char* argv[])
 	packer->constrain (left->bottom() == left->top() + left->height());
 	packer->constrain (center->bottom() == center->top() + center->height());
 	packer->constrain (right->bottom() == right->top() + right->height());
+
+#elif defined(CBOX_PACKER)
+
+	cBox* vbox = new cBox (c->root(), Vertical);
+	vbox->name = "vbox";
+
+	vbox->set_margin (10, 20, 30, 40);
+
+	vbox->pack_start (r1,  PackOptions(PackExpand|PackFill));
+	vbox->pack_start (r2, PackOptions(PackExpand|PackFill));
+	vbox->pack_start (r3, PackOptions(PackExpand|PackFill));
+
+	cBox* hbox1 = new cBox (c, Horizontal);
+	hbox1->name = "hbox1";
+
+	hbox1->set_margin (10, 10, 10, 10);
+
+	Rectangle* r4 = new Rectangle (c);
+	Rectangle* r5 = new Rectangle (c);
+	Rectangle* r6 = new Rectangle (c);
+
+	r4->set_fill_color (Gtkmm2ext::random_color());
+	r5->set_fill_color (Gtkmm2ext::random_color());
+	r6->set_fill_color (Gtkmm2ext::random_color());
+
+	r4->name = "r4";
+	r5->name = "r5";
+	r6->name = "r6";
+	hbox1->pack_start (r4, PackOptions(PackExpand|PackFill));
+	hbox1->pack_start (r5, PackOptions(PackExpand|PackFill));
+	hbox1->pack_start (r6, PackOptions(PackExpand|PackFill));
+
+	BoxConstrainedItem* hb1;
+	ConstrainedItem* ci;
+
+	hb1 = vbox->pack_start (hbox1, PackOptions (PackExpand|PackFill));
+
+	Circle* circle = new Circle (c);
+	circle->name = "circle";
+	//circle->set_radius (30);
+	circle->set_fill_color (Gtkmm2ext::random_color());
+	circle->set_outline_color (Gtkmm2ext::random_color());
+
+	ci = vbox->pack_start (circle, PackOptions (PackExpand|PackFill));
+	ci->add_constraint (ci->height() == 0.5 * hb1->height());
+
+	cBox* hbox2 = new cBox (c, Horizontal);
+	hbox2->name = "hbox2";
+	hbox2->set_fill (true);
+	hbox2->set_fill_color (Gtkmm2ext::random_color());
+
+	Text* txt = new Text (c);
+	txt->name = "text";
+
+	Pango::FontDescription font ("Sans");
+
+	txt->set_font_description (font);
+	txt->set ("hello, world");
+
+	ConstrainedItem* ti = hbox2->pack_start (txt, PackExpand);
+	ti->add_constraint (ti->left() == 25);
+
+	vbox->pack_start (hbox2, PackOptions (PackExpand|PackFill));
+
 #endif
 
+	win.show_all ();
+	app.run ();
+
+	return 0;
+}

@@ -168,13 +168,13 @@ cBox::preferred_size (Duple& min, Duple& natural) const
 	Distance largest_opposite = 0;
 	Duple i_min, i_natural;
 
-	//cerr << "cbox::prefsize (" << (orientation == Vertical ? " vert) " : " horiz) ") << endl;
+	cerr << "cbox::prefsize (" << (orientation == Vertical ? " vert) " : " horiz) ") << endl;
 
 	for (Order::const_iterator o = order.begin(); o != order.end(); ++o) {
 
 		(*o)->item().preferred_size (i_min, i_natural);
 
-		// cerr << '\t' << (*o)->item().whoami() << " min " << i_min << " nat " << i_natural << endl;
+		cerr << '\t' << (*o)->item().whoami() << " min " << i_min << " nat " << i_natural << endl;
 
 		if ((*o)->primary_axis_pack_options() & PackExpand) {
 			n_expanding++;
@@ -218,17 +218,17 @@ cBox::preferred_size (Duple& min, Duple& natural) const
 	Duple r;
 
 	if (orientation == Vertical) {
-		//cerr << "+++ vertical box, neu = " << non_expanding_used << " largest = " << largest << " opp " << largest_opposite << " total " << total << endl;
+		cerr << "+++ vertical box, neu = " << non_expanding_used << " largest = " << largest << " opp " << largest_opposite << " total " << total << endl;
 		min.x = non_expanding_used + (n_expanding * largest_opposite) + _left_margin + _right_margin + ((total - 1) * _spacing);
 		min.y = non_expanding_used + (n_expanding * largest) + _top_margin + _bottom_margin + ((total - 1) * _spacing);
 	} else {
-		// cerr << "+++ horiz box, neu = " << non_expanding_used << " largest = " << largest << " opp " << largest_opposite << " total " << total << endl;
+		cerr << "+++ horiz box, neu = " << non_expanding_used << " largest = " << largest << " opp " << largest_opposite << " total " << total << endl;
 		min.x = non_expanding_used + (n_expanding * largest) + _left_margin + _right_margin + ((total - 1) * _spacing);
 		min.y = non_expanding_used + (n_expanding * largest_opposite) + _top_margin + _bottom_margin + ((total - 1) * _spacing);
 
 	}
 
-	// cerr << "++++ " << whoami() << " rpref " << min << endl;
+	cerr << "++++ " << whoami() << " rpref " << min << endl;
 
 	natural = min;
 }
@@ -274,7 +274,7 @@ cBox::size_allocate (Rect const & r)
 		expanded_size = (r.width() - _left_margin - _right_margin - ((total - 1) * _spacing) - non_expanding_used) / n_expanding;
 	}
 
-	// cerr << "\n\n\n" << whoami() << " SIZE-ALLOC " << r << " expanded items (" << n_expanding << ")will be " << expanded_size << " neu " << non_expanding_used << " t = " << total << " s " << _spacing << '\n';
+	cerr << "\n\n\n" << whoami() << " SIZE-ALLOC " << r << " expanded items (" << n_expanding << ")will be " << expanded_size << " neu " << non_expanding_used << " t = " << total << " s " << _spacing << '\n';
 
 	Order::size_type n = 0;
 	Order::iterator prev = order.end();
@@ -284,7 +284,7 @@ cBox::size_allocate (Rect const & r)
 			Duple min, natural;
 			(*o)->item().preferred_size (min, natural);
 
-			// cerr << "\t" << (*o)->item().whoami() << " min " << min << " nat " << natural << endl;
+			cerr << "\t" << (*o)->item().whoami() << " min " << min << " nat " << natural << endl;
 
 			/* setup center_{x,y} variables in case calling/using
 			 * code wants to use them for additional constraints
@@ -337,7 +337,7 @@ cBox::size_allocate (Rect const & r)
 					 * height.
 					 */
 
-					// cerr << (*o)->item().whoami() << " will use natural height of " << natural.height() << endl;
+					cerr << (*o)->item().whoami() << " will use natural height of " << natural.height() << endl;
 					solver.addConstraint ((*o)->height() == natural.height());
 					solver.addConstraint ((*o)->top_padding() == 0.);
 					solver.addConstraint ((*o)->bottom_padding() == 0.);
@@ -365,10 +365,10 @@ cBox::size_allocate (Rect const & r)
 				solver.addConstraint ((*o)->left() == _left_margin + (*o)->left_padding() | kiwi::strength::strong);
 
 				if (!((*o)->secondary_axis_pack_options() & PackExpand) && natural.width() > 0) {
-					// cerr << "\t\t also using  natural width of " << natural.width() << endl;
+					cerr << "\t\t also using  natural width of " << natural.width() << endl;
 					solver.addConstraint ((*o)->width() == natural.width());
 				} else {
-					// cerr << "\t\t also using container width of " << r.width() << endl;
+					cerr << "\t\t also using container width of " << r.width() << endl;
 					solver.addConstraint ((*o)->width() == r.width() - (_left_margin + _right_margin + (*o)->right_padding()) | kiwi::strength::strong);
 				}
 
@@ -442,10 +442,10 @@ cBox::size_allocate (Rect const & r)
 				solver.addConstraint ((*o)->top() == _top_margin + (*o)->top_padding() | kiwi::strength::strong);
 
 				if (!((*o)->secondary_axis_pack_options() & PackExpand) && natural.height() > 0) {
-					// cerr << "\t\tand natural height of " << natural.height() << endl;
+					cerr << "\t\tand natural height of " << natural.height() << endl;
 					solver.addConstraint ((*o)->height() == natural.height());
 				} else {
-					// cerr << "\t\tand container height of " << r.height() << endl;
+					cerr << "\t\tand container height of " << r.height() << endl;
 					solver.addConstraint ((*o)->height() == r.height() - (_top_margin + _bottom_margin + (*o)->bottom_padding()) | kiwi::strength::strong);
 				}
 			}
@@ -471,7 +471,7 @@ cBox::size_allocate (Rect const & r)
 	//solver.dump (cerr);
 
 	for (Order::iterator o = order.begin(); o != order.end(); ++o, ++n) {
-		// (*o)->dump (cerr);
+		(*o)->dump (cerr);
 	}
 
 	apply (&solver);
