@@ -31,7 +31,8 @@ PRODUCT_NAME=Ardour
 PRODUCT_VERSION=${major_version}
 
 WITH_HARRISON_LV2=1 ;
-WITH_X42_LV2=1 ;
+WITH_COMMERCIAL_X42_LV2=
+WITH_GRATIS_X42_LV2=
 
 # TODO: grep from build/config.log instead
 while [ $# -gt 0 ] ; do
@@ -40,7 +41,8 @@ while [ $# -gt 0 ] ; do
 		--mixbus)
 			MIXBUS=1
 			WITH_HARRISON_LV2=1 ;
-			WITH_X42_LV2=1 ;
+			WITH_COMMERCIAL_X42_LV2=1
+			WITH_GRATIS_X42_LV2=1
 			PROGRAM_NAME=Mixbus
 			PROGRAM_KEY=Mixbus
 			PRODUCT_NAME=Mixbus
@@ -49,7 +51,8 @@ while [ $# -gt 0 ] ; do
 		--mixbus32c)
 			MIXBUS=1
 			WITH_HARRISON_LV2=1 ;
-			WITH_X42_LV2=1 ;
+			WITH_COMMERCIAL_X42_LV2=1
+			WITH_GRATIS_X42_LV2=1
 			PRODUCT_NAME=Mixbus32C
 			PROGRAM_KEY=Mixbus32C
 			PROGRAM_NAME=Mixbus32C-${PROGRAM_VERSION}
@@ -272,12 +275,27 @@ if true ; then
 	done
 fi
 
-if test x$WITH_X42_LV2 != x ; then
+if test x$WITH_COMMERCIAL_X42_LV2 != x ; then
 	mkdir -p $ALIBDIR/LV2
 
-	echo "Adding x42 Plugins"
+	echo "Adding commercial x42 Plugins"
 
-	for proj in x42-meters x42-midifilter x42-stereoroute x42-eq setBfree x42-avldrums x42-whirl x42-limiter x42-tuner; do
+	for proj in x42-meters x42-eq x42-whirl; do
+		X42_VERSION=$(curl -s -S http://x42-plugins.com/x42/win/${proj}.latest.txt)
+		rsync -a -q --partial \
+			rsync://x42-plugins.com/x42/win/${proj}-lv2-${WARCH}-${X42_VERSION}.zip \
+			"${SRCCACHE}/${proj}-lv2-${WARCH}-${X42_VERSION}.zip"
+		unzip -q -d "$ALIBDIR/LV2/" "${SRCCACHE}/${proj}-lv2-${WARCH}-${X42_VERSION}.zip"
+	done
+fi
+
+
+if test x$WITH_GRATIS_X42_LV2 != x ; then
+	mkdir -p $ALIBDIR/LV2
+
+	echo "Adding gratis x42 Plugins"
+
+	for proj in x42-midifilter x42-stereoroute setBfree x42-avldrums x42-limiter x42-tuner; do
 		X42_VERSION=$(curl -s -S http://x42-plugins.com/x42/win/${proj}.latest.txt)
 		rsync -a -q --partial \
 			rsync://x42-plugins.com/x42/win/${proj}-lv2-${WARCH}-${X42_VERSION}.zip \

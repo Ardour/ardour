@@ -18,7 +18,8 @@ MIXBUS=
 MIXBUS32C=
 WITH_HARVID=1
 WITH_HARRISON_LV2=
-WITH_X42_LV2=
+WITH_COMMERCIAL_X42_LV2=
+WITH_GRATIS_X42_LV2=
 STRIP=1
 PRINT_SYSDEPS=
 WITH_NLS=1
@@ -39,7 +40,8 @@ while [ $# -gt 0 ] ; do
 
 	--mixbus) MIXBUS=1;
 		WITH_HARRISON_LV2=1 ;
-		WITH_X42_LV2=1 ;
+		WITH_COMMERCIAL_X42_LV2=1
+		WITH_GRATIS_X42_LV2=1
 		STRIP= ;
 		PRODUCT_PKG_DIR=Mixbus;
 		APPNAME=Mixbus ;
@@ -49,7 +51,8 @@ while [ $# -gt 0 ] ; do
 	--mixbus32c) MIXBUS=1;
 		MIXBUS32C=1;
 		WITH_HARRISON_LV2=1 ;
-		WITH_X42_LV2=1 ;
+		WITH_COMMERCIAL_X42_LV2=1
+		WITH_GRATIS_X42_LV2=1
 		STRIP= ;
 		PRODUCT_PKG_DIR=Mixbus32C;
 		lower_case_appname=mixbus32c;
@@ -58,7 +61,6 @@ while [ $# -gt 0 ] ; do
 		shift ;;
 	--public)
 		WITH_HARRISON_LV2=1 ;
-		WITH_X42_LV2=1 ;
 		PRODUCT_PKG_DIR=Ardour;
 		APPNAME=Ardour ;
 		BUNDLENAME=Ardour${major_version} ;
@@ -706,19 +708,13 @@ if true; then
 		bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf \
 			"$CACHEDIR/${proj}-lv2-osx-${X42_VERSION}.zip"
 	done
-
-	for file in ${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/*/*.dylib ; do
-		lipo -extract_family ${OSX_ARCH} ${file} -output ${file}.thin
-		mv ${file}.thin ${file}
-	done
-
 fi
 
-if test x$WITH_X42_LV2 != x ; then
-	echo "bundling x42 plugins"
+if test x$WITH_COMMERCIAL_X42_LV2 != x ; then
+	echo "Adding commercial x42 plugins"
 	mkdir -p "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2"
 
-	for proj in x42-meters x42-midifilter x42-stereoroute x42-eq setBfree x42-avldrums x42-whirl x42-limiter x42-tuner; do
+	for proj in x42-meters x42-eq x42-whirl; do
 		X42_VERSION=$(curl -s -S http://x42-plugins.com/x42/osx/${proj}.latest.txt)
 		rsync -a -q --partial \
 			rsync://x42-plugins.com/x42/osx/${proj}-lv2-osx-${X42_VERSION}.zip \
@@ -726,7 +722,24 @@ if test x$WITH_X42_LV2 != x ; then
 		bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf \
 			"$CACHEDIR/${proj}-lv2-osx-${X42_VERSION}.zip"
 	done
+fi
 
+if test x$WITH_GRATIS_X42_LV2 != x ; then
+	echo "Adding gratis x42 plugins"
+	mkdir -p "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2"
+
+	for proj in x42-midifilter x42-stereoroute setBfree x42-avldrums x42-limiter x42-tuner; do
+		X42_VERSION=$(curl -s -S http://x42-plugins.com/x42/osx/${proj}.latest.txt)
+		rsync -a -q --partial \
+			rsync://x42-plugins.com/x42/osx/${proj}-lv2-osx-${X42_VERSION}.zip \
+			"$CACHEDIR/${proj}-lv2-osx-${X42_VERSION}.zip"
+		bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf \
+			"$CACHEDIR/${proj}-lv2-osx-${X42_VERSION}.zip"
+	done
+fi
+
+if test -d ${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/; then
+	echo "Removing unused achitectures from LV plugins"
 	for file in ${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/*/*.dylib ; do
 		lipo -extract_family ${OSX_ARCH} ${file} -output ${file}.thin
 		mv ${file}.thin ${file}
@@ -734,7 +747,7 @@ if test x$WITH_X42_LV2 != x ; then
 fi
 
 if test -n "$MIXBUS"; then
-	echo "deploying harrison channelstrip for $OSX_BENSID"
+	echo "Deploying harrison channelstrip for $OSX_BENSID"
 
 	mkdir -p "${PRODUCT_PKG_DIR}/${APPROOT}/lib/ladspa/strip"
 
