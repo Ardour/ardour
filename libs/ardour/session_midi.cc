@@ -738,9 +738,20 @@ Session::rewire_selected_midi (boost::shared_ptr<MidiTrack> new_midi_target)
 			 * functionality.
 			 */
 
-			if (MidiPortControl != mpi.properties) {
+			if (0 == (mpi.properties & MidiPortControl)) {
 				/* disconnect the port from everything */
 				AudioEngine::instance()->disconnect (*p);
+			} else {
+				/* only disconnect from non-control ports */
+				vector<string> port_connections;
+				AudioEngine::instance()->get_connections (*p, port_connections);
+				for (vector<string>::iterator i = port_connections.begin(); i != port_connections.end(); ++i) {
+					/* test if (*i) is a control-surface input port */
+					if (AudioEngine::instance()->port_is_control_only (*i)) {
+						continue;
+					}
+					AudioEngine::instance()->disconnect (*p, *i);
+				}
 			}
 			/* connect it to the new target */
 			new_midi_target->input()->connect (new_midi_target->input()->nth(0), (*p), this);
