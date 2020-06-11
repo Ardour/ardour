@@ -57,7 +57,6 @@ main (int argc, char* argv[])
 
 //#define FULL_PACKER
 #define CBOX_PACKER
-//#define BOX_PACKER
 
 #ifdef FULL_PACKER
 	ConstraintPacker* packer = new ConstraintPacker (c->root());
@@ -139,8 +138,6 @@ main (int argc, char* argv[])
 	ci = vbox->pack_start (circle, PackOptions (PackExpand|PackFill));
 	ci->add_constraint (ci->height() == 0.5 * hb1->height());
 
-//#endif
-
 	cBox* hbox2 = new cBox (c, Horizontal);
 	hbox2->name = "hbox2";
 	hbox2->set_fill (true);
@@ -148,28 +145,20 @@ main (int argc, char* argv[])
 
 	Text* txt = new Text (c);
 	txt->name = "text";
+
 	Pango::FontDescription font ("Sans");
+
 	txt->set_font_description (font);
 	txt->set ("hello, world");
 
-	BoxConstrainedItem* ti = hbox2->pack_start (txt, PackExpand);
-	BoxConstrainedItem* hb2 = vbox->pack_start (hbox2, PackOptions (PackExpand|PackFill));
+	ConstrainedItem* ti = hbox2->pack_start (txt, PackExpand);
+	ti->add_constraint (ti->left() == 25);
 
-	// c1 == first hbox
-	// ci = circle
-	// hb2 == second hbox
-	// ti == text inside second hbox
-
-	//ti->add_constraint (ti->center_x() == hb2->center_x());
-
-	cerr << "hbox1 f = " << hbox1->fill() << " o " << hbox1->outline() << endl;
+	vbox->pack_start (hbox2, PackOptions (PackExpand|PackFill));
 
 #endif
 
 	win.show_all ();
-
-	// cerr << "\n\n\n text center @ " << c3->center_x().value() << " hbox center @ " << c1->center_x().value() << endl;
-
 	app.run ();
 
 	return 0;
