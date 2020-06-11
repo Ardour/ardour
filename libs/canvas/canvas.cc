@@ -1478,9 +1478,14 @@ GtkCanvasViewport::scrolled ()
 void
 GtkCanvasViewport::on_size_request (Gtk::Requisition* req)
 {
-	/* force the canvas to size itself */
-	// _canvas.root()->bounding_box();
+	Duple minimum;
+	Duple natural;
 
-	req->width = 16;
-	req->height = 16;
+	cerr << "GCV::osr()\n";
+	_canvas.root()->preferred_size (minimum, natural);
+	cerr << "size canvas to " << natural << endl;
+	_canvas.request_size (natural);
+
+	req->width = natural.width();
+	req->height = natural.height();
 }
