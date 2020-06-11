@@ -80,7 +80,7 @@ using namespace PBD;
 
 namespace ARDOUR { class AudioEngine; }
 
-PBD::Signal2<void, std::string, Plugin*> Plugin::PresetsChanged;
+PBD::Signal3<void, std::string, Plugin*, bool> Plugin::PresetsChanged;
 
 bool
 PluginInfo::needs_midi_input () const
@@ -100,6 +100,7 @@ Plugin::Plugin (AudioEngine& e, Session& s)
 	, _immediate_events(6096) // FIXME: size?
 {
 	_pending_stop_events.ensure_buffers (DataType::MIDI, 1, 4096);
+	PresetsChanged.connect_same_thread(_preset_connection, boost::bind (&Plugin::invalidate_preset_cache, this, _1, _2, _3));
 }
 
 Plugin::Plugin (const Plugin& other)
@@ -118,6 +119,8 @@ Plugin::Plugin (const Plugin& other)
 	, _immediate_events(6096) // FIXME: size?
 {
 	_pending_stop_events.ensure_buffers (DataType::MIDI, 1, 4096);
+
+	PresetsChanged.connect_same_thread(_preset_connection, boost::bind (&Plugin::invalidate_preset_cache, this, _1, _2, _3));
 }
 
 Plugin::~Plugin ()
@@ -143,7 +146,7 @@ Plugin::remove_preset (string name)
 	_last_preset.uri = "";
 	_parameter_changed_since_last_preset = false;
 	_have_presets = false;
-	PresetsChanged (unique_id(), this); /* EMIT SIGNAL */
+	PresetsChanged (unique_id(), this, false); /* EMIT SIGNAL */
 	PresetRemoved (); /* EMIT SIGNAL */
 }
 
@@ -160,11 +163,30 @@ Plugin::save_preset (string name)
 	if (!uri.empty()) {
 		_presets.insert (make_pair (uri, PresetRecord (uri, name)));
 		_have_presets = false;
-		PresetsChanged (unique_id(), this); /* EMIT SIGNAL */
+		PresetsChanged (unique_id(), this, true); /* EMIT SIGNAL */
 		PresetAdded (); /* EMIT SIGNAL */
 	}
 
 	return PresetRecord (uri, name);
+}
+
+void
+Plugin::invalidate_preset_cache (std::string const& id, Plugin* plugin, bool added)
+{
+	if (this == plugin || id != unique_id ()) {
+		return;
+	}
+
+	// TODO: use a shared cache in _info (via PluginInfo::get_presets)
+
+	_presets.clear ();
+	_have_presets = false;
+
+	if (added) {
+		PresetAdded (); /* EMIT SIGNAL */
+	} else {
+		PresetRemoved (); /* EMIT SIGNAL */
+	}
 }
 
 PluginPtr

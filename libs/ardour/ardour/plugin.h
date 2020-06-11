@@ -270,7 +270,7 @@ public:
 	PBD::Signal0<void> PresetRemoved;
 
 	/** Emitted when any preset has been changed */
-	static PBD::Signal2<void, std::string, Plugin*> PresetsChanged;
+	static PBD::Signal3<void, std::string, Plugin*, bool> PresetsChanged;
 
 	/** Emitted when a preset has been loaded */
 	PBD::Signal0<void> PresetLoaded;
@@ -405,6 +405,7 @@ private:
 
 	MidiRingBuffer<samplepos_t> _immediate_events;
 
+	void invalidate_preset_cache (std::string const&, Plugin*, bool);
 	void resolve_midi ();
 };
 
