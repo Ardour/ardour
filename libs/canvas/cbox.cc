@@ -174,7 +174,7 @@ cBox::preferred_size (Duple& min, Duple& natural) const
 
 		(*o)->item().preferred_size (i_min, i_natural);
 
-		cerr << '\t' << (*o)->item().debug_name() << " min " << i_min << " nat " << i_natural << endl;
+		cerr << '\t' << (*o)->item().whoami() << " min " << i_min << " nat " << i_natural << endl;
 
 		if ((*o)->primary_axis_pack_options() & PackExpand) {
 			n_expanding++;
@@ -228,7 +228,7 @@ cBox::preferred_size (Duple& min, Duple& natural) const
 
 	}
 
-	cerr << "++++ " << debug_name() << " rpref " << min << endl;
+	cerr << "++++ " << whoami() << " rpref " << min << endl;
 
 	natural = min;
 }
@@ -274,7 +274,7 @@ cBox::size_allocate (Rect const & r)
 		expanded_size = (r.width() - _left_margin - _right_margin - ((total - 1) * _spacing) - non_expanding_used) / n_expanding;
 	}
 
-	cerr << "\n\n\n" << debug_name() << " SIZE-ALLOC " << r << " expanded items (" << n_expanding << ")will be " << expanded_size << " neu " << non_expanding_used << " t = " << total << " s " << _spacing << '\n';
+	cerr << "\n\n\n" << whoami() << " SIZE-ALLOC " << r << " expanded items (" << n_expanding << ")will be " << expanded_size << " neu " << non_expanding_used << " t = " << total << " s " << _spacing << '\n';
 
 	Order::size_type n = 0;
 	Order::iterator prev = order.end();
@@ -284,7 +284,7 @@ cBox::size_allocate (Rect const & r)
 			Duple min, natural;
 			(*o)->item().preferred_size (min, natural);
 
-			cerr << "\t" << (*o)->item().debug_name() << " min " << min << " nat " << natural << endl;
+			cerr << "\t" << (*o)->item().whoami() << " min " << min << " nat " << natural << endl;
 
 			/* setup center_{x,y} variables in case calling/using
 			 * code wants to use them for additional constraints
@@ -337,7 +337,7 @@ cBox::size_allocate (Rect const & r)
 					 * height.
 					 */
 
-					cerr << (*o)->item().debug_name() << " will use natural height of " << natural.height() << endl;
+					cerr << (*o)->item().whoami() << " will use natural height of " << natural.height() << endl;
 					solver.addConstraint ((*o)->height() == natural.height());
 					solver.addConstraint ((*o)->top_padding() == 0.);
 					solver.addConstraint ((*o)->bottom_padding() == 0.);
