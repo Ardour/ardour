@@ -225,7 +225,7 @@ AutomationWatch::transport_state_change ()
 		return;
 	}
 
-	bool rolling = _session->transport_rolling();
+	bool rolling = _session->transport_state_rolling ();
 
 	_last_time = _session->audible_sample ();
 
