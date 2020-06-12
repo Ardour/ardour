@@ -213,10 +213,10 @@ MidiTracer::tracer (Parser&, byte* msg, size_t len, samplecnt_t now)
 	bufsize = buffer_size;
 
 	if (_last_receipt != 0 && show_delta_time) {
-		s = snprintf (buf, bufsize, "+%12ld", now - _last_receipt);
+		s = snprintf (buf, bufsize, "+%12" PRId64, now - _last_receipt);
 		bufsize -= s;
 	} else {
-		s = snprintf (buf, bufsize, "%12ld", now);
+		s = snprintf (buf, bufsize, "%12" PRId64, now);
 		bufsize -= s;
 	}
 
@@ -350,7 +350,7 @@ MidiTracer::tracer (Parser&, byte* msg, size_t len, samplecnt_t now)
 
 			/* other sys-ex */
 
-			s += snprintf (&buf[s], bufsize, "%16s (%d) = [", "Sysex", (int) len);
+			s += snprintf (&buf[s], bufsize, "%16s (%" PRId64 ") = [", "Sysex", len);
 			bufsize -= s;
 
 			for (unsigned int i = 0; i < len && bufsize > 3; ++i) {
