@@ -446,10 +446,12 @@ ARDOUR_UI::action_script_changed (int i, const std::string& n)
 		act->set_label (string_compose (_("Unset #%1"), i + 1));
 		act->set_tooltip (_("No action bound\nRight-click to assign"));
 		act->set_sensitive (false);
+		action_script_call_btn[i].set_text (string_compose ("%1%2", std::hex, i+1));
 	} else {
 		act->set_label (n);
 		act->set_tooltip (string_compose (_("%1\n\nClick to run\nRight-click to re-assign\nShift+right-click to unassign"), n));
 		act->set_sensitive (true);
+		action_script_call_btn[i].set_text (n.substr(0,1));
 	}
 	KeyEditor::UpdateBindings ();
 }
