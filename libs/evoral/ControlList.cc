@@ -505,7 +505,7 @@ ControlList::write_pass_finished (double /*when*/, double thinning_factor)
 void
 ControlList::set_in_write_pass (bool yn, bool add_point, double when)
 {
-	DEBUG_TRACE (DEBUG::ControlList, string_compose ("now in write pass @ %1, add point ? %2\n", when, add_point));
+	DEBUG_TRACE (DEBUG::ControlList, string_compose ("set_in_write_pass: in-write: %1 @ %2 add point? %3\n", yn, when, add_point));
 
 	_in_write_pass = yn;
 
