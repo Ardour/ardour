@@ -471,10 +471,11 @@ ARDOUR_UI::sfsm_response (StartupFSM::Result r)
 	case StartupFSM::LoadSession:
 
 		if (load_session_from_startup_fsm () == 0) {
+			startup_done ();
 			delete startup_fsm;
 			startup_fsm = 0;
-			startup_done ();
 		} else {
+			DEBUG_TRACE (DEBUG::GuiStartup, "FSM reset\n");
 			startup_fsm->reset ();
 		}
 
@@ -518,6 +519,16 @@ ARDOUR_UI::starting ()
 
 		startup_fsm = new StartupFSM (*amd);
 		startup_fsm->signal_response().connect (sigc::mem_fun (*this, &ARDOUR_UI::sfsm_response));
+
+
+		/* allow signals to be handled, ShouldLoad() from flush-pending */
+		Splash::instance()->pop_front();
+		flush_pending ();
+
+		if (!startup_fsm) {
+			DEBUG_TRACE (DEBUG::GuiStartup, "Starting: SFSM was driven by flush-pending\n");
+			return 0;
+		}
 
 		/* Note: entire startup process could happen in this one call
 		 * if:
@@ -788,6 +799,7 @@ ARDOUR_UI::load_from_application_api (const std::string& path)
 		 * 3) no audio/MIDI setup required
 		 */
 
+		Splash::instance()->pop_front();
 		startup_fsm->start ();
 	}
 }

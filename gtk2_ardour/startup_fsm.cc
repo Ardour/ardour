@@ -127,11 +127,6 @@ StartupFSM::queue_finish ()
 void
 StartupFSM::start ()
 {
-	/* get the splash screen visible, if it isn't yet */
-	Splash::instance()->pop_front();
-	/* make it all happen on-screen */
-	ARDOUR_UI::instance()->flush_pending ();
-
 	DEBUG_TRACE (DEBUG::GuiStartup, string_compose (X_("State at startup: %1\n"), enum_2_string (_state)));
 
 	switch (_state) {
@@ -143,6 +138,9 @@ StartupFSM::start ()
 		break;
 	case WaitingForSessionPath:
 		handle_waiting_for_session_path ();
+		break;
+	case WaitingForEngineParams:
+		start_audio_midi_setup ();
 		break;
 	default:
 		fatal << string_compose (_("Programming error: %1"), string_compose (X_("impossible starting state in StartupFSM (%1)"), enum_2_string (_state))) << endmsg;
