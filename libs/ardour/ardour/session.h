@@ -790,8 +790,18 @@ public:
 		return 0;
 	}
 	double transport_speed() const { return _count_in_samples > 0 ? 0. : _transport_speed; }
+	/** @return true if the transport state (TFSM) is stopped */
 	bool   transport_stopped() const;
+	/** @return true if the transport state (TFSM) is stopped or stopping */
 	bool   transport_stopped_or_stopping() const;
+	/** @return true if the transport state (TFSM) is rolling.
+	 *  Note: the transport may not yet move if pre-roll or count-in in ongoing.
+	 */
+	bool   transport_state_rolling() const;
+	/** @return true if the the transport is actively (audible) rolling.
+	 *  playback speed is not zero, and count-in as well as latency-preroll is complete,
+	 *  and _transport_sample changes every process cycle.
+	 */
 	bool   transport_rolling() const;
 	bool   transport_will_roll_forwards() const;
 
