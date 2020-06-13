@@ -10,7 +10,7 @@
 # Raphaël Doursenaud <rdoursenaud@free.fr>, 2015.
 # Edouard <edwsaintesprit@hotmail.com>, 2016.
 # Rivaud Julien <frnchfrgg@free.fr>, 2016, 2019.
-# Olivier Humbert <trebmuh@tuxfamily.org>, 2016, 2018, 2019.
+# Olivier Humbert <trebmuh@tuxfamily.org>, 2016, 2018, 2019, 2020.
 #: audio_clock.cc:941 audio_clock.cc:942 session_dialog.cc:604
 #: session_dialog.cc:605
 msgid ""
@@ -18,8 +18,8 @@ msgstr ""
 "Project-Id-Version: Ardour 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-05-20 14:36-0600\n"
-"PO-Revision-Date: 2020-05-19 21:03+0200\n"
-"Last-Translator: Fred Rech <fred_rech@laposte.net>\n"
+"PO-Revision-Date: 2020-06-13 22:13+0200\n"
+"Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>\n"
 "Language-Team: French <>\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
@@ -9599,11 +9599,11 @@ msgstr "Type de note"
 
 #: midi_time_axis.cc:618
 msgid "Channel Selector..."
-msgstr "Sélecteur de Canal..."
+msgstr "Sélecteur de canal..."
 
 #: midi_time_axis.cc:621 mixer_strip.cc:1764 route_time_axis.cc:789
 msgid "Patch Selector..."
-msgstr "Sélecteur de Programme..."
+msgstr "Sélecteur de programme..."
 
 #: midi_time_axis.cc:624
 msgid "Color Mode"
