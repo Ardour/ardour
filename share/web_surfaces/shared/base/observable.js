@@ -22,41 +22,40 @@ export default class Observable {
 		this._observers = {};
 	}
 
-	addObserver (property, observer) {
-		// property=undefined means the caller is interested in observing all properties
-		if (!(property in this._observers)) {
-			this._observers[property] = [];
+	addObserver (event, observer) {
+		// event=undefined means the caller is interested in observing all events
+		if (!(event in this._observers)) {
+			this._observers[event] = [];
 		}
 
-		this._observers[property].push(observer);
+		this._observers[event].push(observer);
 	}
 
-	removeObserver (property, observer) {
-		// property=undefined means the caller is not interested in any property anymore
-		if (typeof(property) == 'undefined') {
-			for (const property in this._observers) {
-				this.removeObserver(property, observer);
+	removeObserver (event, observer) {
+		// event=undefined means the caller is not interested in any event anymore
+		if (typeof(event) == 'undefined') {
+			for (const event in this._observers) {
+				this.removeObserver(event, observer);
 			}
 		} else {
-			const index = this._observers[property].indexOf(observer);
-
+			const index = this._observers[event].indexOf(observer);
 			if (index > -1) {
-				this._observers[property].splice(index, 1);
+				this._observers[event].splice(index, 1);
 			}
 		}
 	}
 
-	notifyObservers (property) {
-		// always notify observers that observe all properties
+	notifyObservers (event, ...args) {
+		// always notify observers that observe all events
 		if (undefined in this._observers) {
 			for (const observer of this._observers[undefined]) {
-				observer(this, property);
+				observer(event, ...args);
 			}
 		}
 
-		if (property in this._observers) {
-			for (const observer of this._observers[property]) {
-				observer(this);
+		if (event in this._observers) {
+			for (const observer of this._observers[event]) {
+				observer(...args);
 			}
 		}
 	}

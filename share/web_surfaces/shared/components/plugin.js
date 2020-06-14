@@ -53,7 +53,7 @@ export default class Plugin extends AddressableComponent {
 		if (node.startsWith('strip_plugin_param')) {
 	 		if (node == StateNode.STRIP_PLUGIN_PARAM_DESCRIPTION) {
 	 			this._parameters[addr] = new Parameter(this, addr, val);
-	 			this.notifyObservers('parameters');
+	 			this.notify('parameters');
 	 			return true;
 	 		} else {
 	 			if (addr in this._parameters) {
