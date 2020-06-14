@@ -16,7 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-import { Component } from '../base/component.js';
+import { ChildComponent } from '../base/component.js';
 import { StateNode } from '../base/protocol.js';
 
 const NodeToProperty = Object.freeze({
@@ -26,10 +26,10 @@ const NodeToProperty = Object.freeze({
 	[StateNode.TRANSPORT_RECORD] : 'record'
 });
 
-export default class Transport extends Component {
+export default class Transport extends ChildComponent {
 
-	constructor (channel) {
-		super(channel);
+	constructor (parent) {
+		super(parent);
 		this._time = 0;
 		this._tempo = 0;
 		this._roll = false;
