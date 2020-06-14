@@ -45,7 +45,7 @@ export class ArdourClient {
 
 	set handlers (handlers) {
 		this._handlers = handlers || {};
-		this._channel.onError = this._handlers['onError'] || console.log;
+		this._channel.onError = this._handlers.onError || console.log;
 	}
 
 	// Access to the object-oriented API (enabled by default)
@@ -133,14 +133,14 @@ export class ArdourClient {
 	_setConnected (connected) {
 		this._connected = connected;
 		
-		if (this._handlers['onConnected']) {
-			this._handlers['onConnected'](this._connected);
+		if (this._handlers.onConnected) {
+			this._handlers.onConnected(this._connected);
 		}
 	}
 
 	_handleMessage (msg, inbound) {
-		if (this._handlers['onMessage']) {
-			this._handlers['onMessage'](msg, inbound);
+		if (this._handlers.onMessage) {
+			this._handlers.onMessage(msg, inbound);
 		}
 
 		if (inbound) {
