@@ -30,8 +30,12 @@ export class Component extends Observable {
  		return this._channel;
  	}
 
-	on (property, callback) {
-		this.addObserver(property, (self) => callback(self[property]));
+	on (event, callback) {
+		this.addObserver(event, callback);
+	}
+	
+	notify (property) {
+		this.notifyObservers(property, this['_' + property]);
 	}
 
  	send (node, addr, val) {
@@ -48,7 +52,7 @@ export class Component extends Observable {
 
 	updateLocal (property, value) {
 		this['_' + property] = value;
-		this.notifyObservers(property);
+		this.notify(property);
 	}
 
 	updateRemote (property, value, node, addr) {
