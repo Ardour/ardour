@@ -45,7 +45,7 @@ export default class Mixer extends Component {
  		if (node.startsWith('strip')) {
 	 		if (node == StateNode.STRIP_DESCRIPTION) {
 	 			this._strips[addr] = new Strip(this, addr, val);
-	 			this.notify('strips');
+	 			this.notifyPropertyChanged('strips');
 	 			return true;
 	 		} else {
 	 			const stripAddr = [addr[0]];

@@ -34,7 +34,7 @@ export class Component extends Observable {
 		this.addObserver(event, callback);
 	}
 	
-	notify (property) {
+	notifyPropertyChanged (property) {
 		this.notifyObservers(property, this['_' + property]);
 	}
 
@@ -52,7 +52,7 @@ export class Component extends Observable {
 
 	updateLocal (property, value) {
 		this['_' + property] = value;
-		this.notify(property);
+		this.notifyPropertyChanged(property);
 	}
 
 	updateRemote (property, value, node, addr) {
