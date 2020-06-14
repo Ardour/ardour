@@ -18,9 +18,9 @@
 
 import { Component } from '../base/component.js';
 import { StateNode } from '../base/protocol.js';
-import { Strip } from './strip.js';
+import Strip from './strip.js';
 
-export class Mixer extends Component {
+export default class Mixer extends Component {
 
 	constructor (channel) {
 		super(channel);

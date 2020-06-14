@@ -17,8 +17,8 @@
  */
 
 import { AddressableComponent } from '../base/component.js';
-import { Plugin } from './plugin.js';
 import { StateNode } from '../base/protocol.js';
+import Plugin from './plugin.js';
 
 const NodeToProperty = Object.freeze({
 	[StateNode.STRIP_METER] : 'meter',
@@ -27,7 +27,7 @@ const NodeToProperty = Object.freeze({
 	[StateNode.STRIP_MUTE]  : 'mute'
 });
 
-export class Strip extends AddressableComponent {
+export default class Strip extends AddressableComponent {
 
 	constructor (parent, addr, desc) {
 		super(parent, addr);

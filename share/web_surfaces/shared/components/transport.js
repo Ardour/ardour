@@ -26,7 +26,7 @@ const NodeToProperty = Object.freeze({
 	[StateNode.TRANSPORT_RECORD] : 'record'
 });
 
-export class Transport extends Component {
+export default class Transport extends Component {
 
 	constructor (channel) {
 		super(channel);

@@ -39,7 +39,7 @@ class ValueType {
 
 }
 
-export class Parameter extends AddressableComponent {
+export default class Parameter extends AddressableComponent {
 
 	constructor (parent, addr, desc) {
 		super(parent, addr);

@@ -17,7 +17,7 @@
  */
 
 import { Message } from './protocol.js';
-import { Observable } from './observable.js';
+import Observable from './observable.js';
 
 export class Component extends Observable {
 

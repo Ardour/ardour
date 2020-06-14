@@ -16,7 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-export class Observable {
+export default class Observable {
 
 	constructor () {
 		this._observers = {};
