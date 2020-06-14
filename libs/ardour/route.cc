@@ -6055,6 +6055,12 @@ Route::automation_control_recurse (PBD::ID const & id) const
 		return ac;
 	}
 
+	if  (_pannable) {
+		if ((ac = _pannable->automation_control (id))) {
+			return ac;
+		}
+	}
+
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 
 	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
