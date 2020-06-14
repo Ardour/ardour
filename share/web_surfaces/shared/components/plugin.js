@@ -17,10 +17,10 @@
  */
 
 import { AddressableComponent } from '../base/component.js';
-import { Parameter } from './parameter.js';
 import { StateNode } from '../base/protocol.js';
+import Parameter from './parameter.js';
 
-export class Plugin extends AddressableComponent {
+export default class Plugin extends AddressableComponent {
 
 	constructor (parent, addr, desc) {
 		super(parent, addr);

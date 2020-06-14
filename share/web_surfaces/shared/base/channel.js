@@ -18,7 +18,7 @@
 
 import { Message } from './protocol.js';
 
-export class MessageChannel {
+export default class MessageChannel {
 
 	constructor (host) {
 		// https://developer.mozilla.org/en-US/docs/Web/API/URL/host

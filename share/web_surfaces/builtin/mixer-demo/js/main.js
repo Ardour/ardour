@@ -16,7 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-import { ArdourClient } from '/shared/ardour.js';
+import ArdourClient from '/shared/ardour.js';
 
 import { Switch, DiscreteSlider, ContinuousSlider, LogarithmicSlider,
         StripPanSlider, StripGainSlider, StripMeter } from './widget.js';

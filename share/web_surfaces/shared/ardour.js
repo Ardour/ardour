@@ -16,12 +16,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-import { MessageChannel } from './base/channel.js';
 import { StateNode } from './base/protocol.js';
-import { Mixer } from './components/mixer.js';
-import { Transport } from './components/transport.js';
+import MessageChannel from './base/channel.js';
+import Mixer from './components/mixer.js';
+import Transport from './components/transport.js';
 
-export class ArdourClient {
+export default class ArdourClient {
 
 	constructor (handlers, options) {
 		this._options = options || {};
