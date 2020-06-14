@@ -84,7 +84,7 @@ export default class Strip extends AddressableComponent {
  		if (node.startsWith('strip_plugin')) {
 	 		if (node == StateNode.STRIP_PLUGIN_DESCRIPTION) {
 	 			this._plugins[addr] = new Plugin(this, addr, val);
-	 			this.notify('plugins');
+	 			this.notifyPropertyChanged('plugins');
 	 			return true;
 	 		} else {
 	 			const pluginAddr = [addr[0], addr[1]];

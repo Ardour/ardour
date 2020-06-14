@@ -16,36 +16,34 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+import { Component } from './base/component.js';
 import { StateNode } from './base/protocol.js';
 import MessageChannel from './base/channel.js';
 import Mixer from './components/mixer.js';
 import Transport from './components/transport.js';
 
-export default class ArdourClient {
+function getOption (options, key, defaultValue) {
+	return options ? (key in options ? options[key] : defaultValue) : defaultValue;
+}
 
-	constructor (handlers, options) {
-		this._options = options || {};
-		this._components = [];
-		this._connected = false;
+export default class ArdourClient extends Component {
 
-		this._channel = new MessageChannel(this._getOption('host', location.host));
+	constructor (options) {
+		super(new MessageChannel(getOption(options, 'host', location.host)));
 
-		this._channel.onMessage = (msg, inbound) => {
-			this._handleMessage(msg, inbound);
-		};
-
-		if (this._getOption('components', true)) {
-			this._mixer = new Mixer(this._channel);
-			this._transport = new Transport(this._channel);
-			this._components.push(this._mixer, this._transport);
+		if (getOption(options, 'components', true)) {
+			this._mixer = new Mixer(this.channel);
+			this._transport = new Transport(this.channel);
+			this._components = [this._mixer, this._transport];
+		} else {
+			this._components = [];
 		}
 
-		this.handlers = handlers;
-	}
+		this._autoReconnect = getOption(options, 'autoReconnect', true);
+		this._connected = false;
 
-	set handlers (handlers) {
-		this._handlers = handlers || {};
-		this._channel.onError = this._handlers.onError || console.log;
+		this.channel.onMessage = (msg, inbound) => this._handleMessage(msg, inbound);
+		this.channel.onError = (err) => this.notifyObservers('error', err);
 	}
 
 	// Access to the object-oriented API (enabled by default)
@@ -61,12 +59,12 @@ export default class ArdourClient {
 	// Low level control messages flow through a WebSocket
 
 	async connect () {
-		this._channel.onClose = async () => {
+		this.channel.onClose = async () => {
 			if (this._connected) {
 				this._setConnected(false);
 			}
 
-			if (this._getOption('autoReconnect', true)) {
+			if (this._autoReconnect) {
 				await this._sleep(1000);
 				await this._connect();
 			}
@@ -76,17 +74,17 @@ export default class ArdourClient {
 	}
 
 	disconnect () {
-		this._channel.onClose = () => {};
-		this._channel.close();
+		this.channel.onClose = () => {};
+		this.channel.close();
 		this._connected = false;
 	}
 
 	send (msg) {
-		this._channel.send(msg);
+		this.channel.send(msg);
 	}
 
 	async sendAndReceive (msg) {
-		return await this._channel.sendAndReceive(msg);
+		return await this.channel.sendAndReceive(msg);
 	}
 
 	// Surface metadata API goes over HTTP
@@ -126,22 +124,17 @@ export default class ArdourClient {
 	}
 
 	async _connect () {
-		await this._channel.open();
+		await this.channel.open();
 		this._setConnected(true);
 	}
 
 	_setConnected (connected) {
 		this._connected = connected;
-		
-		if (this._handlers.onConnected) {
-			this._handlers.onConnected(this._connected);
-		}
+		this.notifyPropertyChanged('connected');
 	}
 
 	_handleMessage (msg, inbound) {
-		if (this._handlers.onMessage) {
-			this._handlers.onMessage(msg, inbound);
-		}
+		this.notifyObservers('message', msg, inbound);
 
 		if (inbound) {
 			for (const component of this._components) {
@@ -154,10 +147,6 @@ export default class ArdourClient {
 
 	_fetchResponseStatusError (status) {
 		return new Error(`HTTP response status ${status}`);
-	}
-
-	_getOption (key, defaultValue) {
-		return key in this._options ? this._options[key] : defaultValue;
 	}
 
 }

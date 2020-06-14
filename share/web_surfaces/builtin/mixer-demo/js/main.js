@@ -27,29 +27,21 @@ import { Switch, DiscreteSlider, ContinuousSlider, LogarithmicSlider,
     
     const ardour = new ArdourClient();
 
-    function main () {
-        ardour.handlers = {
-            onConnected: (connected) => {
-                if (connected) {
-                    log('Client connected', 'info');
-                } else {
-                    log('Client disconnected', 'error');
-                }
-            },
-
-            onMessage: (message, inbound) => {
-                if (inbound) {
-                    log(`↙ ${message}`, 'message-in');
-                } else {
-                    log(`↗ ${message}`, 'message-out');
-                }
+    async function main () {
+        ardour.on('connected', (connected) => {
+            if (connected) {
+                log('Client connected', 'info');
+            } else {
+                log('Client disconnected', 'error');
             }
-        };
+        });
 
-        ardour.getSurfaceManifest().then((manifest) => {
-            const div = document.getElementById('manifest');
-            div.innerHTML = manifest.name.toUpperCase()
-                            + ' v' + manifest.version + ' — ' + manifest.description;
+        ardour.on('message', (msg, inbound) => {
+            if (inbound) {
+                log(`↙ ${msg}`, 'message-in');
+            } else {
+                log(`↗ ${msg}`, 'message-out');
+            }
         });
 
         ardour.mixer.on('ready', () => {
@@ -59,7 +51,11 @@ import { Switch, DiscreteSlider, ContinuousSlider, LogarithmicSlider,
             }
         });
 
-        ardour.connect();
+        await ardour.connect();
+
+        const manifest = await ardour.getSurfaceManifest();
+        document.getElementById('manifest').innerHTML = manifest.name.toUpperCase()
+                        + ' v' + manifest.version + ' — ' + manifest.description;
     }
 
     function createStrip (strip, parentDiv) {
