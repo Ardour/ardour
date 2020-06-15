@@ -63,6 +63,7 @@ if [ $# -gt 0 ] ; then
     case $1 in
         --ddd)    DEBUGGER=ddd; shift ;;
         -g|--gdb) DEBUGGER=gdb; shift ;;
+        --lldb)   DEBUGGER=lldb; shift ;;
     esac
 fi
 
