@@ -11230,7 +11230,7 @@ msgstr "Délai d'expiration de l'arrêt"
 
 #: plugin_scan_dialog.cc:45
 msgid "Cancel Plugin Scan"
-msgstr ""
+msgstr "Annuler le scan de greffon"
 
 #: plugin_scan_dialog.cc:66
 msgid "Scan Timeout"
