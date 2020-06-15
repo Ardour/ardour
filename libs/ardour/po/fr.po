@@ -3,7 +3,7 @@
 # Fred Rech <f.rech@yahoo.fr>, 2014.
 # Raphaël Doursenaud <rdoursenaud@free.fr>, 2015
 # Julien Rivaud <frnchfrgg@free.fr>, 2016
-# Olivier Humbert <trebmuh@tuxfamily.org>, 2016, 2020
+# Olivier Humbert <trebmuh@tuxfamily.org>, 2016, 2017, 2020
 #
 msgid ""
 msgstr ""
