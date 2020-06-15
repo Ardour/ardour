@@ -3,14 +3,14 @@
 # Fred Rech <f.rech@yahoo.fr>, 2014.
 # Raphaël Doursenaud <rdoursenaud@free.fr>, 2015
 # Julien Rivaud <frnchfrgg@free.fr>, 2016
-# Olivier Humbert <trebmuh@tuxfamily.org>, 2016
+# Olivier Humbert <trebmuh@tuxfamily.org>, 2016, 2017, 2020
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: libardour 5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-05-20 14:36-0600\n"
-"PO-Revision-Date: 2020-04-28 16:06+0200\n"
+"PO-Revision-Date: 2020-06-15 19:15+0200\n"
 "Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>\n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -2563,15 +2563,15 @@ msgstr ""
 
 #: session.cc:408
 msgid "Invalid TempoMap in session-file."
-msgstr ""
+msgstr "Carte de tempo invalide dans le fichier-session."
 
 #: session.cc:411
 msgid "Invalid or corrupt session state."
-msgstr ""
+msgstr "État de session invalide ou corrompu."
 
 #: session.cc:414
 msgid "Port registration failed."
-msgstr ""
+msgstr "La déclaration du port a échoué."
 
 #: session.cc:417
 msgid ""
@@ -2597,11 +2597,11 @@ msgstr "Régler le clic"
 
 #: session.cc:534
 msgid "Set up standard connections"
-msgstr ""
+msgstr "Établissement des connexions standard"
 
 #: session.cc:859
 msgid "could not setup Click I/O"
-msgstr ""
+msgstr "impossible d'établir les E/S de Click"
 
 #: session.cc:920
 msgid "cannot connect master output %1 to %2"
@@ -3077,7 +3077,7 @@ msgstr ""
 
 #: session_state.cc:1644
 msgid "Session: XML state has no Tempo Map section"
-msgstr ""
+msgstr "Session : l'état XML n'a pas de section de carte de tempo"
 
 #: session_state.cc:1651
 msgid "Session: XML state has no locations section"
@@ -3577,65 +3577,67 @@ msgstr ""
 
 #: template_utils.cc:127 template_utils.cc:182
 msgid "No Description"
-msgstr ""
+msgstr "Pas de description"
 
 #: tempo.cc:143
 msgid "TempoSection XML node has no \"movable\" property"
-msgstr ""
+msgstr "Le nœud XML de TempoSection n'a pas de propriété \"movable\""
 
 #: tempo.cc:178
 msgid "Legacy session detected. TempoSection XML node will be altered."
-msgstr ""
+msgstr "Session ancienne détectée. Le nœud XML de TempoSection sera modifié."
 
 #: tempo.cc:187
 msgid "TempoSection XML node has an illegal \"beats_per_minute\" value"
-msgstr ""
+msgstr "Le nœud XML de TempoSection a une valeur \"beats_per_minute\" illégale"
 
 #: tempo.cc:194
 msgid "TempoSection XML node has an illegal \"note-type\" value"
-msgstr ""
+msgstr "Le nœud XML de TempoSection a une valeur \"note-type\" illégale"
 
 #: tempo.cc:208
 msgid "TempoSection XML node has an illegal \"end-beats-per-minute\" value"
-msgstr ""
+msgstr "Le nœud XML de TempoSection a une valeur \"end-beats-per-minute\" illégale"
 
 #: tempo.cc:228
 msgid "TempoSection XML node has no \"active\" property"
-msgstr ""
+msgstr "Le nœud XML de TempoSection n'a pas de propriété \"active\""
 
 #: tempo.cc:567
 msgid "Legacy session detected - MeterSection XML node will be altered."
-msgstr ""
+msgstr "Session ancienne détectée. Le nœud XML de MeterSection sera modifié."
 
 #: tempo.cc:570
 msgid "MeterSection XML node has an illegal \"start\" value"
-msgstr ""
+msgstr "Le nœud XML de MeterSection a une valeur \"start\" illégale"
 
 #: tempo.cc:580
 msgid "MeterSection XML node has an illegal \"bbt\" value"
-msgstr ""
+msgstr "Le nœud XML de MeterSection a une valeur \"bbt\" illégale"
 
 #: tempo.cc:584
 msgid "MeterSection XML node has no \"bbt\" property"
-msgstr ""
+msgstr "Le nœud XML de MeterSection n'a pas de propriété \"bbr\""
 
 #: tempo.cc:593
 msgid ""
 "MeterSection XML node has no \"beats-per-bar\" or \"divisions-per-bar\" "
 "property"
 msgstr ""
+"Le nœud XML de MeterSection n'a ni propriété \"beats-per-bar\" ni "
+"\"divisions-per-bar\""
 
 #: tempo.cc:599
 msgid "MeterSection XML node has an illegal \"divisions-per-bar\" value"
-msgstr ""
+msgstr "Le nœud XML de MeterSection a une valeur \"divisions-per-bar\" illégale"
 
 #: tempo.cc:604
 msgid "MeterSection XML node has no \"note-type\" property"
-msgstr ""
+msgstr "Le nœud XML de MeterSection n'a pas de propriété \"note-type\""
 
 #: tempo.cc:609
 msgid "MeterSection XML node has an illegal \"note-type\" value"
-msgstr ""
+msgstr "Le nœud XML de MeterSection a une valeur \"note-type\" illégale"
 
 #: tempo.cc:908
 msgid ""
@@ -3668,6 +3670,7 @@ msgstr ""
 #: tempo.cc:4639 tempo.cc:4653
 msgid "Tempo map: could not set new state, restoring old one."
 msgstr ""
+"Carte de tempo : impossible d'établir un nouvel état, on restore l'ancien."
 
 #: tempo.cc:4695 tempo.cc:4696
 msgid "Multiple meter definitions found at %1"
@@ -3675,19 +3678,19 @@ msgstr "Plusieurs définitions de Rythme trouvées à %1"
 
 #: tempo.cc:4701 tempo.cc:4702
 msgid "Multiple tempo definitions found at %1"
-msgstr "Plusieurs définitions de Tempo trouvées à %1"
+msgstr "Plusieurs définitions de tempo trouvées à %1"
 
 #: tempo_map_importer.cc:52
 msgid "Tempo map"
-msgstr "Table de tempo "
+msgstr "Carte de tempo"
 
 #: tempo_map_importer.cc:60
 msgid "Tempo Map"
-msgstr "Table de Tempo"
+msgstr "Carte de tempo"
 
 #: tempo_map_importer.cc:80
 msgid "Tempo marks: "
-msgstr "Repères de Tempo : "
+msgstr "Repères de tempo : "
 
 #: tempo_map_importer.cc:80
 msgid ""
@@ -3695,14 +3698,14 @@ msgid ""
 "Meter marks: "
 msgstr ""
 "\n"
-"Repères de Chiffrage : "
+"Repères de chiffrage : "
 
 #: tempo_map_importer.cc:89
 msgid ""
 "This will replace the current tempo map!\n"
 "Are you sure you want to do this?"
 msgstr ""
-"Vous allez remplacer la table de Tempo actuelle !\n"
+"Vous allez remplacer la carte de tempo actuelle !\n"
 "Etes vous sur de le vouloir ?"
 
 #: track.cc:630
@@ -3751,7 +3754,7 @@ msgstr ""
 
 #: transport_master.cc:487
 msgid "All"
-msgstr ""
+msgstr "Tout"
 
 #: transport_master.cc:491
 msgid "Start/Stop"
@@ -3759,7 +3762,7 @@ msgstr ""
 
 #: transport_master.cc:493
 msgid "Speed"
-msgstr ""
+msgstr "Vitesse"
 
 #: transport_master.cc:495
 msgid "Locate"
