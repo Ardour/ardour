@@ -5249,15 +5249,6 @@ Route::processor_by_id (PBD::ID id) const
 	return boost::shared_ptr<Processor> ();
 }
 
-/** @return what we should be metering; either the data coming from the input
- *  IO or the data that is flowing through the route.
- */
-MeterState
-Route::metering_state () const
-{
-	return MeteringRoute;
-}
-
 bool
 Route::can_freeze_processor (boost::shared_ptr<Processor> p, bool allow_routing) const
 {

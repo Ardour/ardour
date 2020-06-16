@@ -827,20 +827,6 @@ Track::monitoring_changed (bool, Controllable::GroupControlDisposition)
 	}
 }
 
-MeterState
-Track::metering_state () const
-{
-	bool rv;
-	if (_session.transport_rolling ()) {
-		// audio_track.cc || midi_track.cc roll() runs meter IFF:
-		rv = _meter_point == MeterInput && ((_monitoring_control->monitoring_choice() & MonitorInput) || _disk_writer->record_enabled());
-	} else {
-		// track no_roll() always metering if
-		rv = _meter_point == MeterInput;
-	}
-	return rv ? MeteringInput : MeteringRoute;
-}
-
 bool
 Track::set_processor_state (XMLNode const& node, int version, XMLProperty const* prop, ProcessorList& new_order, bool& must_configure)
 {

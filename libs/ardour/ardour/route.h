@@ -141,8 +141,6 @@ public:
 	MonitorState monitoring_state () const;
 	virtual MonitorState get_auto_monitoring_state () const { return MonitoringSilence; }
 
-	virtual MeterState metering_state () const;
-
 	/* these are the core of the API of a Route. see the protected sections as well */
 
 	virtual void filter_input (BufferSet &) {}

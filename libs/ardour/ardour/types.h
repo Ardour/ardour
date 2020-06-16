@@ -469,11 +469,6 @@ enum MonitorState {
 	MonitoringCue = 0x6,
 };
 
-enum MeterState {
-	MeteringInput, ///< meter the input IO, regardless of what is going through the route
-	MeteringRoute  ///< meter what is going through the route
-};
-
 enum VUMeterStandard {
 	MeteringVUfrench,   ///< 0VU = -2dBu
 	MeteringVUamerican, ///< 0VU =  0dBu
