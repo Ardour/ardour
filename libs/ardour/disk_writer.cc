@@ -746,7 +746,7 @@ DiskWriter::set_record_safe (bool yn)
 bool
 DiskWriter::prep_record_enable ()
 {
-	if (!recordable() || !_session.record_enabling_legal() || channels.reader()->empty() || record_safe ()) { // REQUIRES REVIEW "|| record_safe ()"
+	if (!recordable() || !_session.record_enabling_legal() || (channels.reader()->empty() && !_midi_buf)  || record_safe ()) { // REQUIRES REVIEW "|| record_safe ()"
 		return false;
 	}
 
