@@ -8,17 +8,31 @@ ardour {
 
 function factory () return function ()
 
-	function portlist ()
+	function midi_targets ()
 		local rv = {}
-		local a = Session:engine()
-		local _, t = a:get_ports (ARDOUR.DataType("midi"), ARDOUR.PortList())
-		for p in t[2]:iter() do
-			local amp = p:to_asyncmidiport ()
-			if amp:isnil() or not amp:sends_output() then goto continue end
-			rv[amp:name()] = amp
-			--print (amp:name(), amp:sends_output())
+		for r in Session:get_tracks():iter() do
+
+			if not r:to_track():isnil() then
+				local mtr = r:to_track():to_midi_track()
+				if not mtr:isnil() then
+					rv["Track: '" .. r:name() .. "'"] = mtr
+				end
+			end
+
+			local i = 0;
+			while true do
+				local proc = r:nth_plugin (i)
+				if proc:isnil () then break end
+				local pi = proc:to_plugininsert ()
+				if pi:is_instrument () then
+					rv["Track: '" .. r:name() .. "' | Plugin: '" .. pi:name() .. "'"] = pi
+				end
+				i = i + 1
+			end
+
 			::continue::
 		end
+
 		return rv
 	end
 
@@ -40,7 +54,7 @@ function factory () return function ()
 
 	local dialog_options = {
 		{ type = "file", key = "file", title = "Select .scl MIDI file" },
-		{ type = "dropdown", key = "port", title = "Target Port", values = portlist () }
+		{ type = "dropdown", key = "tx", title = "Target", values = midi_targets () }
 	}
 
 	local rv = LuaDialog.Dialog ("Select Taget", dialog_options):run ()
@@ -104,7 +118,7 @@ function factory () return function ()
 	-- calc frequency at ref_root
 	local ref_base = ref_freq * 2.0 ^ ((ref_root - ref_note) / 12);
 
-	local async_midi_port = rv["port"] -- reference to port
+	local tx = rv["tx"]
 	local parser = ARDOUR.RawMidiParser () -- construct a MIDI parser
 
 	-- show progress dialog
@@ -143,7 +157,7 @@ function factory () return function ()
 
 		for b = 1, 12 do
 			if parser:process_byte (syx:byte (b)) then
-				async_midi_port:write (parser:midi_buffer (), parser:buffer_size (), 0)
+				tx:write_immediate_event (parser:buffer_size (), parser:midi_buffer ())
 				-- Physical MIDI is sent at 31.25kBaud.
 				-- Every message is sent as 10bit message on the wire,
 				-- so every MIDI byte needs 320usec.
