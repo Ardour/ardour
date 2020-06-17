@@ -38,7 +38,7 @@ class LIBARDOUR_API AudioTrack : public Track
 	AudioTrack (Session&, std::string name = "", TrackMode m = Normal);
 	~AudioTrack ();
 
-	MonitorState get_auto_monitoring_state () const;
+	MonitorState get_input_monitoring_state (bool recording, bool talkback) const;
 
 	void freeze_me (InterThreadInfo&);
 	void unfreeze ();

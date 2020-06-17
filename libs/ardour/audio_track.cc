@@ -70,72 +70,6 @@ AudioTrack::~AudioTrack ()
 	}
 }
 
-MonitorState
-AudioTrack::get_auto_monitoring_state () const
-{
-	/* This is an implementation of the truth table in doc/monitor_modes.pdf;
-	   I don't think it's ever going to be too pretty too look at.
-	*/
-
-	bool const roll = _session.transport_rolling ();
-	bool const track_rec = _disk_writer->record_enabled ();
-	bool const auto_input = _session.config.get_auto_input ();
-	bool const software_monitor = Config->get_monitoring_model() == SoftwareMonitoring;
-	bool const auto_input_does_talkback = Config->get_auto_input_does_talkback ();
-	bool session_rec;
-
-	/* I suspect that just use actively_recording() is good enough all the
-	 * time, but just to keep the semantics the same as they were before
-	 * sept 26th 2012, we differentiate between the cases where punch is
-	 * enabled and those where it is not.
-	 *
-	 * rg: sept 30 2017: Above is not the case: punch-in/out location is
-	 * global session playhead position.
-	 * When this method is called from process_output_buffers() we need
-	 * to use delay-compensated route's process-position.
-	 *
-	 * NB. Disk reader/writer may also be offset by a same amount of time.
-	 *
-	 * Also keep in mind that _session.transport_rolling() is false during
-	 * pre-roll but the disk already produces output.
-	 *
-	 * TODO: FIXME
-	 */
-
-	if (_session.config.get_punch_in() || _session.config.get_punch_out()) {
-		session_rec = _session.actively_recording ();
-	} else {
-		session_rec = _session.get_record_enabled();
-	}
-
-	if (track_rec) {
-
-		if (!session_rec && roll && auto_input) {
-			return MonitoringDisk;
-		} else {
-			return software_monitor ? MonitoringInput : MonitoringSilence;
-		}
-
-	} else {
-
-		if (auto_input_does_talkback) {
-
-			if (!roll && auto_input) { 
-				return software_monitor ? MonitoringInput : MonitoringSilence;
-			} else {
-				return MonitoringDisk;
-			}
-
-		} else {
-
-			return MonitoringDisk;
-		}
-	}
-
-	abort(); /* NOTREACHED */
-	return MonitoringSilence;
-}
-
 int
 AudioTrack::set_state (const XMLNode& node, int version)
 {
@@ -246,6 +180,16 @@ AudioTrack::set_state_part_two ()
 			frii->id = prop->value ();
 			_freeze_record.processor_info.push_back (frii);
 		}
+	}
+}
+
+MonitorState
+AudioTrack::get_input_monitoring_state (bool recording, bool talkback) const
+{
+	if (Config->get_monitoring_model() == SoftwareMonitoring && (recording || talkback)) {
+		return MonitoringInput;
+	} else {
+		return MonitoringSilence;
 	}
 }
 

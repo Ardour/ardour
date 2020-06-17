@@ -139,7 +139,7 @@ public:
 	boost::shared_ptr<MonitorControl> monitoring_control() const { return _monitoring_control; }
 
 	MonitorState monitoring_state () const;
-	virtual MonitorState get_auto_monitoring_state () const { return MonitoringSilence; }
+	virtual MonitorState get_input_monitoring_state (bool recording, bool talkback) const { return MonitoringSilence; }
 
 	/* these are the core of the API of a Route. see the protected sections as well */
 

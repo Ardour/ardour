@@ -138,6 +138,18 @@ MidiTrack::can_be_record_enabled ()
 	return Track::can_be_record_enabled ();
 }
 
+MonitorState
+MidiTrack::get_input_monitoring_state (bool recording, bool talkback) const
+{
+	if (!_session.config.get_layered_record_mode () && (recording || talkback)) {
+		return MonitoringCue;
+	} else if (!_session.config.get_layered_record_mode () || recording || talkback) {
+		return MonitoringInput;
+	} else {
+		return MonitoringSilence;
+	}
+}
+
 int
 MidiTrack::set_state (const XMLNode& node, int version)
 {
@@ -859,16 +871,10 @@ MidiTrack::monitoring_state () const
 {
 	MonitorState ms = Track::monitoring_state();
 	if (ms == MonitoringSilence) {
+		/* MIDI always monitor input as fallback */
 		return MonitoringInput;
 	}
 	return ms;
-}
-
-MonitorState
-MidiTrack::get_auto_monitoring_state () const
-{
-	//if we are a midi track,  we ignore auto_input, tape_mode, etc etc.  "Auto" will monitor Disk+In
-	return MonitoringCue;
 }
 
 void
