@@ -50,11 +50,6 @@ function factory () return function ()
 		return note, cent
 	end
 
-	-- apply octave and cent offset to the given frequency
-	function calc_freq (hz, cent, octave)
-		return hz * 2 ^ ((cent + 1200 * octave) / 1200)
-	end
-
 	local dialog_options = {
 		{ type = "file", key = "file", title = "Select .scl file" },
 		{ type = "dropdown", key = "tx", title = "MIDI SysEx Target", values = midi_targets () }
@@ -117,15 +112,8 @@ function factory () return function ()
 		return
 	end
 
-	-- The last entry must be an octave to map it
-	if freqtbl[expected_len + 1] ~= 1200 then
-		LuaDialog.Message ("Scala to MTS", "The scale does not repeat after an octave.", LuaDialog.MessageType.Error, LuaDialog.ButtonType.Close):run ()
-		return
-	end
-
 	assert (expected_len + 2 == ln)
 	assert (expected_len > 0)
-	assert (freqtbl[expected_len + 1] == 1200)
 
 	-- TODO consider reading a .kbm file or make these configurable in the dialog
 	-- http://www.huygens-fokker.org/scala/help.htm#mappings
@@ -134,7 +122,11 @@ function factory () return function ()
 	local ref_freq = 440.0
 
 	-- calculate frequency at ref_root
-	local ref_base = ref_freq * 2.0 ^ ((ref_root - ref_note) / 12);
+	local delta = ref_note - ref_root
+	local delta_octv = math.floor (delta / expected_len)
+	local delta_note = delta % expected_len
+
+	local ref_base = ref_freq * 2 ^ ((freqtbl[delta_note + 1] + freqtbl[expected_len + 1] * delta_octv) / -1200)
 
 	-- prepare sending data
 	local tx = rv["tx"] -- output port
@@ -149,12 +141,13 @@ function factory () return function ()
 		if pdialog:canceled () then break end
 
 		-- calculate the note relative to kbm's ref_root
-		local delta = nn - ref_root
-		local delta_octv = math.floor (delta / expected_len)
-		local delta_note = delta % expected_len
+		delta = nn - ref_root
+		delta_octv = math.floor (delta / expected_len)
+		delta_note = delta % expected_len
 
 		-- calculate the frequency of the note according to the scl
-		local fq = calc_freq (ref_base, freqtbl [ delta_note + 1 ], delta_octv)
+		local fq = ref_base * 2 ^ ((freqtbl[delta_note + 1] + freqtbl[expected_len + 1] * delta_octv) / 1200)
+
 		-- and then convert this frequency to the MIDI note number (and cent offset)
 		local base, cent = freq_to_mts (fq)
 
