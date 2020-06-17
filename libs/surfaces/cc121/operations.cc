@@ -246,9 +246,7 @@ CC121::set_controllable (boost::shared_ptr<AutomationControl> ac, float delta)
 		return;
 	}
 	ac->start_touch (ac->session().transport_sample());
-	double v = ac->internal_to_interface (ac->get_value());
-	v = std::max (0.0, std::min (1.0, v + delta));
-	ac->set_value (ac->interface_to_internal(v), PBD::Controllable::NoGroup);
+	ac->set_interface ((ac->internal_to_interface (ac->get_value(), true) + delta), true);
 }
 
 
