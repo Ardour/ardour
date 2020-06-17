@@ -682,7 +682,7 @@ Push2::button_octave_down ()
 		return;
 	}
 
-	int os = (max (-4, octave_shift - 1));
+	int os = (std::max (-4, octave_shift - 1));
 	if (os != octave_shift) {
 		octave_shift = os;
 	}
@@ -696,7 +696,7 @@ Push2::button_octave_up ()
 		return;
 	}
 
-	int os = (min (4, octave_shift + 1));
+	int os = (std::min (4, octave_shift + 1));
 	if (os != octave_shift) {
 		octave_shift = os;
 	}

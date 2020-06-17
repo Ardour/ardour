@@ -444,7 +444,7 @@ ExportGraphBuilder::SFC::SFC (ExportGraphBuilder &parent, FileSpec const & new_c
 		samplecnt_t sb = config.format->silence_beginning_at (parent.timespan->get_start(), sample_rate);
 		samplecnt_t se = config.format->silence_end_at (parent.timespan->get_end(), sample_rate);
 		samplecnt_t duration = parent.timespan->get_length () + sb + se;
-		max_samples = min ((samplecnt_t) 8192 * channels, max ((samplecnt_t) 4096 * channels, max_samples));
+		max_samples = std::min ((samplecnt_t) 8192 * channels, std::max ((samplecnt_t) 4096 * channels, max_samples));
 		chunker.reset (new Chunker<Sample> (max_samples));
 		analyser.reset (new Analyser (config.format->sample_rate(), channels, max_samples,
 					(samplecnt_t) ceil (duration * config.format->sample_rate () / (double) sample_rate)));

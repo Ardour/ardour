@@ -502,7 +502,7 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 			} else if (possible_out < -2) {
 				/* variable number of outputs up to -N,
 				 * invalid if in == -2 but we accept it anyway */
-				FOUNDCFG (min (-possible_out, preferred_out));
+				FOUNDCFG (std::min (-possible_out, preferred_out));
 				UPTO (-possible_out)
 			} else {
 				/* exact number of outputs */
@@ -518,7 +518,7 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 				desired_in = possible_in;
 			} else {
 				/* configuration can match up to -possible_in */
-				desired_in = min (-possible_in, audio_in);
+				desired_in = std::min (-possible_in, audio_in);
 			}
 			if (!imprecise && audio_in != desired_in) {
 				/* skip that configuration, it cannot match
@@ -534,7 +534,7 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 				/* variable number of outputs up to -N
 				 * not specified if in > 0, but we accept it anyway.
 				 * Really imprecise only if desired_in != audio_in */
-				FOUNDCFG_IMPRECISE (desired_in, min (-possible_out, preferred_out));
+				FOUNDCFG_IMPRECISE (desired_in, std::min (-possible_out, preferred_out));
 				UPTO (-possible_out)
 			} else {
 				/* exact number of outputs

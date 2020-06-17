@@ -34,9 +34,6 @@
 
 #include "pbd/statefuldestructible.h"
 
-using std::min;
-using std::max;
-
 class XMLNode;
 
 namespace PBD {

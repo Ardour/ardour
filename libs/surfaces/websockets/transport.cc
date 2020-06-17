@@ -32,7 +32,7 @@ ArdourTransport::tempo () const
 void
 ArdourTransport::set_tempo (double bpm)
 {
-	bpm                 = max (0.01, bpm);
+	bpm                 = std::max (0.01, bpm);
 	TempoMap& tempo_map = session ().tempo_map ();
 	Tempo     tempo (bpm, tempo_map.tempo_at_sample (0).note_type (), bpm);
 	tempo_map.add_tempo (tempo, 0.0, 0, AudioTime);
