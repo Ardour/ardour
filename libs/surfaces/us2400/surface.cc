@@ -643,13 +643,11 @@ Surface::handle_midi_controller_message (MIDI::Parser &, MIDI::EventTwoBytes* ev
 			if (r && r->is_input_strip()) {
 				boost::shared_ptr<AutomationControl> pc = r->send_pan_azimuth_controllable (10);
 				if (pc) {
-					float v = pc->interface_to_internal(value);
-					pc->set_value (v, PBD::Controllable::NoGroup);
+					pc->set_interface (value, true);
 				}
 				pc = r->send_pan_azimuth_controllable (11);
 				if (pc) {
-					float v = pc->interface_to_internal(value);
-					pc->set_value (v, PBD::Controllable::NoGroup);
+					pc->set_interface (value, true);
 				}
 			}
 		}
