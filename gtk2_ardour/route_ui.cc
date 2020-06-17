@@ -1998,6 +1998,10 @@ RouteUI::parameter_changed (string const & p)
 		update_monitoring_display ();
 	} else if (p == "auto-input") {
 		update_monitoring_display ();
+	} else if (p == "layered-record-mode") {
+		update_monitoring_display ();
+	} else if (p == "auto-input-does-talkback") {
+		update_monitoring_display ();
 	} else if (p == "blink-rec-arm") {
 		if (UIConfiguration::instance().get_blink_rec_arm()) {
 			rec_blink_connection.disconnect ();
