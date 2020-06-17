@@ -791,7 +791,7 @@ Editor::set_timecode_ruler_scale (samplepos_t lower, samplepos_t upper)
 
 		timecode_nmarks = _track_canvas->width() / text_width_rough_guess;
 		timecode_ruler_scale = timecode_show_many_hours;
-		timecode_mark_modulo = max ((samplecnt_t) 1, 1 + (hours_in_range / timecode_nmarks));
+		timecode_mark_modulo = std::max ((samplecnt_t) 1, 1 + (hours_in_range / timecode_nmarks));
 	}
 }
 
@@ -974,14 +974,14 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 
 	std::vector<TempoMap::BBTPoint>::const_iterator i;
 	Timecode::BBT_Time lower_beat, upper_beat; // the beats at each end of the ruler
-	double floor_lower_beat = floor(max (0.0, _session->tempo_map().beat_at_sample (lower)));
+	double floor_lower_beat = floor(std::max (0.0, _session->tempo_map().beat_at_sample (lower)));
 
 	if (floor_lower_beat < 0.0) {
 		floor_lower_beat = 0.0;
 	}
 
 	const samplecnt_t beat_before_lower_pos = _session->tempo_map().sample_at_beat (floor_lower_beat);
-	const samplecnt_t beat_after_upper_pos = _session->tempo_map().sample_at_beat (floor (max (0.0, _session->tempo_map().beat_at_sample (upper))) + 1.0);
+	const samplecnt_t beat_after_upper_pos = _session->tempo_map().sample_at_beat (floor (std::max (0.0, _session->tempo_map().beat_at_sample (upper))) + 1.0);
 
 	_session->bbt_time (beat_before_lower_pos, lower_beat);
 	_session->bbt_time (beat_after_upper_pos, upper_beat);
@@ -1064,7 +1064,7 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 		break;
 	}
 
-	const double ceil_upper_beat = floor (max (0.0, _session->tempo_map().beat_at_sample (upper))) + 1.0;
+	const double ceil_upper_beat = floor (std::max (0.0, _session->tempo_map().beat_at_sample (upper))) + 1.0;
 	if (ceil_upper_beat == floor_lower_beat) {
 		return;
 	}
@@ -1704,7 +1704,7 @@ Editor::set_minsec_ruler_scale (samplepos_t lower, samplepos_t upper)
 		*/
 
 		minsec_nmarks = _track_canvas->width() / text_width_rough_guess;
-		minsec_mark_modulo = max ((samplecnt_t) 1, 1 + (hours_in_range / minsec_nmarks));
+		minsec_mark_modulo = std::max ((samplecnt_t) 1, 1 + (hours_in_range / minsec_nmarks));
 		minsec_mark_interval = minsec_mark_modulo * (60 * 60 * fr);
 		minsec_ruler_scale = minsec_show_many_hours;
 	}

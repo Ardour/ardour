@@ -160,22 +160,22 @@ TempoCurve::set_position (samplepos_t sample, samplepos_t end_sample)
 		points->push_back (ArdourCanvas::Duple (editor.sample_to_pixel (end_sample - sample), y_pos));
 	} else {
 
-		const samplepos_t sample_step = max ((end_sample - sample) / 5, (samplepos_t) 1);
+		const samplepos_t sample_step = std::max ((end_sample - sample) / 5, (samplepos_t) 1);
 		samplepos_t current_sample = sample;
 
 		while (current_sample < end_sample) {
 			const double tempo_at = _tempo.tempo_at_minute (_tempo.minute_at_sample (current_sample)).note_types_per_minute();
-			const double y_pos = max ((curve_height) - (((tempo_at - _min_tempo) / (_max_tempo - _min_tempo)) * curve_height), 0.0);
+			const double y_pos = std::max ((curve_height) - (((tempo_at - _min_tempo) / (_max_tempo - _min_tempo)) * curve_height), 0.0);
 
-			points->push_back (ArdourCanvas::Duple (editor.sample_to_pixel (current_sample - sample), min (y_pos, curve_height)));
+			points->push_back (ArdourCanvas::Duple (editor.sample_to_pixel (current_sample - sample), std::min (y_pos, curve_height)));
 
 			current_sample += sample_step;
 		}
 
 		const double tempo_at = _tempo.tempo_at_minute (_tempo.minute_at_sample (end_sample)).note_types_per_minute();
-		const double y_pos = max ((curve_height) - (((tempo_at - _min_tempo) / (_max_tempo - _min_tempo)) * curve_height), 0.0);
+		const double y_pos = std::max ((curve_height) - (((tempo_at - _min_tempo) / (_max_tempo - _min_tempo)) * curve_height), 0.0);
 
-		points->push_back (ArdourCanvas::Duple (editor.sample_to_pixel (end_sample - sample), min (y_pos, curve_height)));
+		points->push_back (ArdourCanvas::Duple (editor.sample_to_pixel (end_sample - sample), std::min (y_pos, curve_height)));
 	}
 
 	_curve->set (*points);
