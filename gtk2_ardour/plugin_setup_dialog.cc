@@ -75,7 +75,7 @@ PluginSetupDialog::PluginSetupDialog (boost::shared_ptr<ARDOUR::Route> r, boost:
 		tbl->attach (*f, 0, 1, row, row + 1, EXPAND|FILL, SHRINK, 0, 8);
 
 		_keep_mapping.signal_clicked.connect (sigc::mem_fun (*this, &PluginSetupDialog::apply_mapping));
-		add_button ("Replace", 2);
+		add_button (_("Replace"), 2);
 	} else {
 
 		Gtk::Label *l = manage (new Label (string_compose (
