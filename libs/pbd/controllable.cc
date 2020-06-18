@@ -158,3 +158,10 @@ Controllable::dump_registry ()
 	}
 	cout << "Total number of registered sontrollables: " << cnt << "\n";
 }
+
+void
+Controllable::set_interface (float fraction, bool rotary, GroupControlDisposition gcd)
+{
+	fraction = std::min (std::max (0.0f, fraction), 1.0f);
+	set_value (interface_to_internal (fraction, rotary), gcd);
+}

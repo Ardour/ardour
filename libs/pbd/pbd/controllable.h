@@ -131,10 +131,7 @@ public:
 	/** Get and Set `interface' value  (typically, fraction of knob travel) */
 	virtual float get_interface(bool rotary=false) const { return (internal_to_interface(get_value(), rotary)); }
 
-	virtual void set_interface (float fraction, bool rotary=false, GroupControlDisposition gcd = NoGroup) {
-		fraction = std::min (std::max (0.0f, fraction), 1.0f);
-		set_value (interface_to_internal (fraction, rotary), gcd);
-	}
+	virtual void set_interface (float fraction, bool rotary=false, GroupControlDisposition gcd = NoGroup);
 
 	virtual std::string get_user_string() const { return std::string(); }
 
