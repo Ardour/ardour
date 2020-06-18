@@ -34,9 +34,6 @@
 
 #include "pbd/statefuldestructible.h"
 
-using std::min;
-using std::max;
-
 class XMLNode;
 
 namespace PBD {
@@ -135,7 +132,7 @@ public:
 	virtual float get_interface(bool rotary=false) const { return (internal_to_interface(get_value(), rotary)); }
 
 	virtual void set_interface (float fraction, bool rotary=false, GroupControlDisposition gcd = NoGroup) {
-		fraction = min (max (0.0f, fraction), 1.0f);
+		fraction = std::min (std::max (0.0f, fraction), 1.0f);
 		set_value (interface_to_internal (fraction, rotary), gcd);
 	}
 
