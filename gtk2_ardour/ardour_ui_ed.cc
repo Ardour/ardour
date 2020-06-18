@@ -563,6 +563,13 @@ ARDOUR_UI::install_dependent_actions ()
 	act = ActionManager::register_action (common_actions, "jump-forward-to-mark", _("Jump to Next Mark"), sigc::mem_fun(*editor, &PublicEditor::jump_forward_to_mark));
 	ActionManager::session_sensitive_actions.push_back (act);
 
+	for (int i = 1; i <= 9; ++i) {
+		string const a = string_compose(X_("goto-mark-%1"), i);
+		string const n = string_compose(_("Locate to Mark %1"), i);
+		act = ActionManager::register_action (transport_actions, a.c_str(), n.c_str(), sigc::bind(sigc::mem_fun(*editor, &PublicEditor::goto_nth_marker), i-1));
+		ActionManager::session_sensitive_actions.push_back (act);
+	}
+
 	act = ActionManager::register_action (common_actions, X_("addExistingAudioFiles"), _("Import"), sigc::mem_fun (*editor, &PublicEditor::external_audio_dialog));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
