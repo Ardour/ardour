@@ -301,7 +301,7 @@ msgid ""
 "queue\n"
 msgstr ""
 "Chyba v programování: přípojku %1 se nepodařilo umístit do řady určené ke "
-"smazání"
+"smazání\n"
 
 #: audioregion.cc:1759
 msgid ""
