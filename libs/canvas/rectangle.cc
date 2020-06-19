@@ -65,7 +65,7 @@ Rectangle::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 	   we should take that into account when rendering.
 	*/
 
-	Rect self (item_to_window (_rect.translate (_position), false));
+	Rect self (item_to_window (_rect, false));
 	const Rect draw = self.intersection (area);
 
 	if (!draw) {
@@ -181,8 +181,6 @@ Rectangle::set (Rect const & r)
 	   as cheap to do it when asked.
 	*/
 
-	cerr << name << " setting self rect\n";
-
 	if (r != _rect) {
 
 		begin_change ();
@@ -282,5 +280,11 @@ Rectangle::vertical_fraction (double y) const
 void
 Rectangle::size_allocate (Rect const & r)
 {
-	set (r);
+	/* leave position alone */
+
+	_allocation = r;
+
+	if (_layout_sensitive) {
+		set (r);
+	}
 }
