@@ -192,18 +192,17 @@ Text::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 		return;
 	}
 
-	Rect self = item_to_window (Rect (_position.x, _position.y, _position.x + min (_clamped_width, (double)_image->get_width ()), _position.y + _image->get_height ()));
-	Rect i = self.intersection (area);
+	const Rect r (0, 0, min (_clamped_width, (double)_image->get_width ()), _image->get_height ());
+	Rect self = item_to_window (r);
+	Rect intersection = self.intersection (area);
 
-	if (!i) {
+	if (!intersection) {
 		return;
 	}
 
 	if (_need_redraw) {
 		_redraw ();
 	}
-
-	Rect intersection (i);
 
 	context->rectangle (intersection.x0, intersection.y0, intersection.width(), intersection.height());
 #ifdef __APPLE__
