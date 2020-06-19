@@ -120,7 +120,8 @@ main (int argc, char* argv[])
 	r4->name = "r4";
 	r5->name = "r5";
 	r6->name = "r6";
-	hbox1->pack_start (r4, PackOptions(PackExpand|PackFill));
+
+	ConstrainedItem* rbi = hbox1->pack_start (r4, PackOptions(PackExpand|PackFill));
 	hbox1->pack_start (r5, PackOptions(PackExpand|PackFill));
 	hbox1->pack_start (r6, PackOptions(PackExpand|PackFill));
 
@@ -128,6 +129,8 @@ main (int argc, char* argv[])
 	ConstrainedItem* ci;
 
 	hb1 = vbox->pack_start (hbox1, PackOptions (PackExpand|PackFill));
+
+	rbi->add_constraint (rbi->width() == hb1->width() / 2.);
 
 	Circle* circle = new Circle (c);
 	circle->name = "circle";
@@ -137,6 +140,7 @@ main (int argc, char* argv[])
 
 	ci = vbox->pack_start (circle, PackOptions (PackExpand|PackFill));
 	ci->add_constraint (ci->height() == 0.5 * hb1->height());
+	ci->add_constraint (ci->center_x() == rbi->center_x());
 
 	cBox* hbox2 = new cBox (c, Horizontal);
 	hbox2->name = "hbox2";
@@ -149,7 +153,7 @@ main (int argc, char* argv[])
 	Pango::FontDescription font ("Sans");
 
 	txt->set_font_description (font);
-	txt->set ("hello, world");
+	txt->set ("hello world");
 
 	ConstrainedItem* ti = hbox2->pack_start (txt, PackExpand);
 	ti->add_constraint (ti->left() == 25);
