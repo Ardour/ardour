@@ -759,9 +759,9 @@ Item::render_children (Rect const & area, Cairo::RefPtr<Cairo::Context> context)
 
 #ifdef CANVAS_DEBUG
 	if (DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
-		cerr << string_compose ("%1%7 %2 @ %7 render %5 @ %6 %3 items out of %4\n",
-					_canvas->render_indent(), (name.empty() ? string ("[unnamed]") : name), items.size(), _items.size(), area, _position, this,
-					whatami());
+		cerr << string_compose ("%1%8 %2 @ %7 render %5 @ %6 %3 items out of %4\n",
+		                        _canvas->render_indent(), (name.empty() ? string ("[unnamed]") : name), items.size(), _items.size(), area, _position, 0 /* this */,
+		                        whatami());
 	}
 #endif
 
@@ -804,6 +804,7 @@ Item::render_children (Rect const & area, Cairo::RefPtr<Cairo::Context> context)
 						     << ' '
 						     << (*i)->whatami()
 						     << ' '
+
 						     << (*i)->name
 						     << " item "
 						     << item_bbox
