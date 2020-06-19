@@ -133,11 +133,6 @@ Session::realtime_stop (bool abort, bool clear_state)
 	_clear_event_type (SessionEvent::RangeStop);
 	_clear_event_type (SessionEvent::RangeLocate);
 
-	//clear our solo-selection, if there is one
-	if ( solo_selection_active() ) {
-		solo_selection ( _soloSelection, false );
-	}
-
 	/* if we're going to clear loop state, then force disabling record BUT only if we're not doing latched rec-enable */
 	disable_record (true, (!Config->get_latched_record_enable() && clear_state));
 
@@ -882,6 +877,11 @@ Session::request_stop (bool abort, bool clear_state, TransportRequestSource orig
 		return;
 	}
 
+	/* clear our solo-selection, if there is one */
+	if ( solo_selection_active() ) {
+		solo_selection ( _soloSelection, false );
+	}
+
 	SessionEvent* ev = new SessionEvent (SessionEvent::SetTransportSpeed, SessionEvent::Add, SessionEvent::Immediate, audible_sample(), 0.0, abort, clear_state);
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request transport stop, audible %3 transport %4 abort = %1, clear state = %2\n", abort, clear_state, audible_sample(), _transport_sample));
 	queue_event (ev);
@@ -1048,11 +1048,6 @@ Session::solo_selection (StripableList &list, bool new_state)
 	boost::shared_ptr<ControlList> solo_list (new ControlList);
 	boost::shared_ptr<ControlList> unsolo_list (new ControlList);
 
-	if (new_state)
-		_soloSelection = list;
-	else
-		_soloSelection.clear();
-
 	boost::shared_ptr<RouteList> rl = get_routes();
 
 	for (ARDOUR::RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
@@ -1064,11 +1059,9 @@ Session::solo_selection (StripableList &list, bool new_state)
 		boost::shared_ptr<Stripable> s (*i);
 
 		bool found = (std::find(list.begin(), list.end(), s) != list.end());
-		if ( new_state && found ) {
-
-			solo_list->push_back (s->solo_control());
-
-			//must invalidate playlists on selected tracks, so only selected regions get heard
+		if ( found ) {
+			/* must invalidate playlists on selected track, so disk reader
+			 * will re-fill with the new selection state for solo_selection */
 			boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (*i);
 			if (track) {
 				boost::shared_ptr<Playlist> playlist = track->playlist();
@@ -1076,13 +1069,23 @@ Session::solo_selection (StripableList &list, bool new_state)
 					playlist->ContentsChanged();
 				}
 			}
+		}
+
+		if ( found & new_state ) {
+			solo_list->push_back (s->solo_control());
 		} else {
 			unsolo_list->push_back (s->solo_control());
 		}
 	}
 
+	/* set/unset solos of the associated tracks */
 	set_controls (solo_list, 1.0, Controllable::NoGroup);
 	set_controls (unsolo_list, 0.0, Controllable::NoGroup);
+
+	if (new_state)
+		_soloSelection = list;
+	else
+		_soloSelection.clear();
 }
 
 
