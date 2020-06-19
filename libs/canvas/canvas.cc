@@ -850,6 +850,9 @@ GtkCanvas::on_realize ()
 		Gtkmm2ext::nsglview_overlay (_nsglview, get_window()->gobj());
 	}
 #endif
+
+	_root.set_fill (false);
+	_root.set_outline (false);
 }
 
 void
