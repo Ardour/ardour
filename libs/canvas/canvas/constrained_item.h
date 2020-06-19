@@ -46,11 +46,16 @@ class /* LIBCANVAS_API */ ConstrainedItem
 	kiwi::Variable& width () { return _width; }
 	kiwi::Variable& height () { return _height; }
 
+	kiwi::Variable& center_x () { return _center_x; }
+	kiwi::Variable& center_y () { return _center_y; }
+
 	void constrained (ConstraintPacker const & parent);
 	virtual bool involved (kiwi::Constraint const &) const;
 
 	std::vector<kiwi::Constraint> const & constraints() const { return _constraints; }
 	void add_constraint (kiwi::Constraint const & c) { _constraints.push_back (c); }
+
+	virtual void dump (std::ostream&);
 
   protected:
 	Item& _item;
@@ -63,7 +68,10 @@ class /* LIBCANVAS_API */ ConstrainedItem
 	kiwi::Variable _width;
 	kiwi::Variable _height;
 
-	virtual void dump (std::ostream&);
+	/* derived */
+
+	kiwi::Variable _center_x;
+	kiwi::Variable _center_y;
 };
 
 class /* LIBCANVAS_API */ BoxConstrainedItem : public ConstrainedItem
@@ -74,8 +82,6 @@ class /* LIBCANVAS_API */ BoxConstrainedItem : public ConstrainedItem
 
 	virtual bool involved (kiwi::Constraint const &) const;
 
-	kiwi::Variable& center_x () { return _center_x; }
-	kiwi::Variable& center_y () { return _center_y; }
 	kiwi::Variable& left_margin () { return _left_margin; }
 	kiwi::Variable& right_margin () { return _right_margin; }
 	kiwi::Variable& top_margin () { return _top_margin; }
@@ -98,8 +104,6 @@ class /* LIBCANVAS_API */ BoxConstrainedItem : public ConstrainedItem
 	void dump (std::ostream&);
 
   private:
-	kiwi::Variable _center_x;
-	kiwi::Variable _center_y;
 	kiwi::Variable _left_margin;
 	kiwi::Variable _right_margin;
 	kiwi::Variable _top_margin;

@@ -50,13 +50,14 @@ public:
 	BoxConstrainedItem* pack_start (Item*, PackOptions primary_axis_packing = PackOptions (0), PackOptions secondary_axis_packing = PackOptions (PackExpand|PackFill));
 	BoxConstrainedItem* pack_end (Item*, PackOptions primary_axis_packing = PackOptions (0), PackOptions secondary_axis_packing = PackOptions (PackExpand|PackFill));
 
+	void add_vertical_box_constraints (kiwi::Solver& solver, BoxConstrainedItem* ci, BoxConstrainedItem* prev, double expanded_size, double main_dimenion, double second_dimension, double alloc_dimension);
+	void add_horizontal_box_constraints (kiwi::Solver& solver, BoxConstrainedItem* ci, BoxConstrainedItem* prev, double expanded_size, double main_dimenion, double second_dimension, double alloc_dimension);
+
 	void set_collapse_on_hide (bool);
 	void set_homogenous (bool);
 
 	void preferred_size(Duple& minimum, Duple& natural) const;
 	void size_allocate (Rect const &);
-
-	ConstrainedItem* add_constrained (Item*);
 
   protected:
 	Orientation orientation;
