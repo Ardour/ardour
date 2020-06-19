@@ -37,7 +37,15 @@ ConstrainedItem::ConstrainedItem (Item& i)
 	, _bottom (_item.name + " bottom")
 	, _width (_item.name + " width")
 	, _height (_item.name + " height")
+	, _center_x (_item.name + " center_x")
+	, _center_y (_item.name + " center_y")
 {
+	/* setup center_{x,y} variables in case calling/using
+	 * code wants to use them for additional constraints
+	 */
+
+	_constraints.push_back (center_x() == left() + (width() / 2.));
+	_constraints.push_back (center_y() == top() + (height() / 2.));
 }
 
 ConstrainedItem::~ConstrainedItem ()
@@ -50,8 +58,8 @@ ConstrainedItem::constrained (ConstraintPacker const & parent)
 	/* our variables should be set. Deliver computed size to item */
 
 	Rect r (_left.value(), _top.value(), _right.value(), _bottom.value());
-	dump (cerr);
-	cerr << _item.whatami() << '/' << _item.name << " constrained-alloc " << r << endl;
+	//dump (cerr);
+	// cerr << _item.whoami() << " constrained-alloc " << r << endl;
 
 	_item.size_allocate (r);
 }
@@ -59,14 +67,15 @@ ConstrainedItem::constrained (ConstraintPacker const & parent)
 void
 ConstrainedItem::dump (std::ostream& out)
 {
-	out << _item.name << " value dump:\n\n";
-
-	out << '\t' << "left: " << _left.value() << '\n';
-	out << '\t' << "right: " << _right.value() << '\n';
-	out << '\t' << "top: " << _top.value() << '\n';
-	out << '\t' << "bottom: " << _bottom.value() << '\n';
-	out << '\t' << "width: " << _width.value() << '\n';
-	out << '\t' << "height: " << _height.value() << '\n';
+	out << _item.name << " value dump:\n"
+	    << '\t' << "left: " << _left.value() << '\n'
+	    << '\t' << "right: " << _right.value() << '\n'
+	    << '\t' << "top: " << _top.value() << '\n'
+	    << '\t' << "bottom: " << _bottom.value() << '\n'
+	    << '\t' << "width: " << _width.value() << '\n'
+	    << '\t' << "height: " << _height.value() << '\n'
+	    << '\t' << "center_x: " << _center_x.value() << '\n'
+	    << '\t' << "center_y: " << _center_y.value() << '\n';
 }
 
 bool
@@ -77,7 +86,9 @@ ConstrainedItem::involved (Constraint const & c) const
 	    c.involves (_top) ||
 	    c.involves (_bottom) ||
 	    c.involves (_width) ||
-	    c.involves (_height)) {
+	    c.involves (_height) ||
+	    c.involves (_center_x) ||
+	    c.involves (_center_y)) {
 		return true;
 	}
 
@@ -88,12 +99,14 @@ ConstrainedItem::involved (Constraint const & c) const
 
 BoxConstrainedItem::BoxConstrainedItem (Item& parent, PackOptions primary_axis_opts, PackOptions secondary_axis_opts)
 	: ConstrainedItem (parent)
-	, _center_x (_item.name + " center_x")
-	, _center_y (_item.name + " center_y")
 	, _left_margin (_item.name + " left_margin")
 	, _right_margin (_item.name + " right_margin")
 	, _top_margin (_item.name + " top_margin")
 	, _bottom_margin (_item.name + " bottom_margin")
+	, _left_padding (_item.name + " left_padding")
+	, _right_padding (_item.name + " right_padding")
+	, _top_padding (_item.name + " top_padding")
+	, _bottom_padding (_item.name + " bottom_padding")
 	, _primary_axis_pack_options (primary_axis_opts)
 	, _secondary_axis_pack_options (secondary_axis_opts)
 {
@@ -110,9 +123,7 @@ BoxConstrainedItem::involved (Constraint const & c) const
 		return true;
 	}
 
-	if (c.involves (_center_x) ||
-	    c.involves (_center_y) ||
-	    c.involves (_left_margin) ||
+	if (c.involves (_left_margin) ||
 	    c.involves (_right_margin) ||
 	    c.involves (_top_margin) ||
 	    c.involves (_bottom_margin)) {
@@ -127,16 +138,12 @@ BoxConstrainedItem::dump (std::ostream& out)
 {
 	ConstrainedItem::dump (out);
 
-	out << '\t' << "center_x: " << _center_x.value() << '\n';
-	out << '\t' << "center_y: " << _center_y.value() << '\n';
-	out << '\t' << "left_margin: " << _left_margin.value() << '\n';
-	out << '\t' << "right_margin: " << _right_margin.value() << '\n';
-	out << '\t' << "top_margin: " << _top_margin.value() << '\n';
-	out << '\t' << "bottom_margin: " << _bottom_margin.value() << '\n';
-
-	out << '\t' << "right_padding: " << _right_padding.value() << '\n';
-	out << '\t' << "left_padding: " << _left_padding.value() << '\n';
-	out << '\t' << "top_padding: " << _top_padding.value() << '\n';
-	out << '\t' << "bottom_padding: " << _bottom_padding.value() << '\n';
+	out << '\t' << "left_margin: " << _left_margin.value() << '\n'
+	    << '\t' << "right_margin: " << _right_margin.value() << '\n'
+	    << '\t' << "top_margin: " << _top_margin.value() << '\n'
+	    << '\t' << "bottom_margin: " << _bottom_margin.value() << '\n'
+	    << '\t' << "right_padding: " << _right_padding.value() << '\n'
+	    << '\t' << "left_padding: " << _left_padding.value() << '\n'
+	    << '\t' << "top_padding: " << _top_padding.value() << '\n'
+	    << '\t' << "bottom_padding: " << _bottom_padding.value() << '\n';
 }
-

@@ -128,12 +128,6 @@ cBox::remove (Item* item)
 	ConstraintPacker::remove (item);
 }
 
-ConstrainedItem*
-cBox::add_constrained (Item* item)
-{
-	return pack (item, PackOptions (0), PackOptions (PackExpand|PackFill));
-}
-
 BoxConstrainedItem*
 cBox::pack_start (Item* item, PackOptions primary_axis_opts, PackOptions secondary_axis_opts)
 {
@@ -168,13 +162,11 @@ cBox::preferred_size (Duple& min, Duple& natural) const
 	Distance largest_opposite = 0;
 	Duple i_min, i_natural;
 
-	cerr << "cbox::prefsize (" << (orientation == Vertical ? " vert) " : " horiz) ") << endl;
-
 	for (Order::const_iterator o = order.begin(); o != order.end(); ++o) {
 
 		(*o)->item().preferred_size (i_min, i_natural);
 
-		cerr << '\t' << (*o)->item().whoami() << " min " << i_min << " nat " << i_natural << endl;
+		// cerr << '\t' << (*o)->item().whoami() << " min " << i_min << " nat " << i_natural << endl;
 
 		if ((*o)->primary_axis_pack_options() & PackExpand) {
 			n_expanding++;
@@ -182,9 +174,6 @@ cBox::preferred_size (Duple& min, Duple& natural) const
 			if (orientation == Vertical) {
 				if (i_natural.height() > largest) {
 					largest = i_natural.height();
-				}
-				if (i_natural.width() > largest) {
-					largest_opposite = i_natural.width();
 				}
 			} else {
 				if (i_natural.width() > largest) {
@@ -199,36 +188,43 @@ cBox::preferred_size (Duple& min, Duple& natural) const
 			n_nonexpanding++;
 
 			if (orientation == Vertical) {
-				if (i_natural.height() > 0) {
-					non_expanding_used += i_natural.height();
-				} else {
-					non_expanding_used += i_min.height();
-				}
+				non_expanding_used += i_natural.height();
 			} else {
-				if (i_natural.width() > 0) {
-					non_expanding_used += i_natural.width();
-				} else {
-					non_expanding_used += i_min.width();
-				}
+				non_expanding_used += i_natural.width();
 			}
 		}
+
+		/* determine the maximum size for the opposite axis. All items
+		 * will be this size or less on this axis
+		 */
+
+		if (orientation == Vertical) {
+			if (i_natural.width() > largest_opposite) {
+				largest_opposite = i_natural.width();
+			}
+		} else {
+			if (i_natural.height() > largest_opposite) {
+				largest_opposite = i_natural.height();
+			}
+		}
+
 		total++;
 	}
 
 	Duple r;
 
 	if (orientation == Vertical) {
-		cerr << "+++ vertical box, neu = " << non_expanding_used << " largest = " << largest << " opp " << largest_opposite << " total " << total << endl;
-		min.x = non_expanding_used + (n_expanding * largest_opposite) + _left_margin + _right_margin + ((total - 1) * _spacing);
+		// cerr << "+++ vertical box, neu = " << non_expanding_used << " neuo " << non_expanding_used_opposite << " largest = " << largest << " opp " << largest_opposite << " total " << total << endl;
 		min.y = non_expanding_used + (n_expanding * largest) + _top_margin + _bottom_margin + ((total - 1) * _spacing);
+		min.x = largest_opposite + _left_margin + _right_margin;
 	} else {
-		cerr << "+++ horiz box, neu = " << non_expanding_used << " largest = " << largest << " opp " << largest_opposite << " total " << total << endl;
+		// cerr << "+++ horiz box, neu = " << non_expanding_used << " neuo " << non_expanding_used_opposite << " largest = " << largest << " opp " << largest_opposite << " total " << total << endl;
 		min.x = non_expanding_used + (n_expanding * largest) + _left_margin + _right_margin + ((total - 1) * _spacing);
-		min.y = non_expanding_used + (n_expanding * largest_opposite) + _top_margin + _bottom_margin + ((total - 1) * _spacing);
+		min.y = largest_opposite + _top_margin + _bottom_margin;
 
 	}
 
-	cerr << "++++ " << whoami() << " rpref " << min << endl;
+	// cerr << whoami() << " preferred-size = " << min << endl;
 
 	natural = min;
 }
@@ -274,205 +270,53 @@ cBox::size_allocate (Rect const & r)
 		expanded_size = (r.width() - _left_margin - _right_margin - ((total - 1) * _spacing) - non_expanding_used) / n_expanding;
 	}
 
-	cerr << "\n\n\n" << whoami() << " SIZE-ALLOC " << r << " expanded items (" << n_expanding << ")will be " << expanded_size << " neu " << non_expanding_used << " t = " << total << " s " << _spacing << '\n';
+	// cerr << "\n\n\n" << whoami() << " SIZE-ALLOC " << r << " expanded items (" << n_expanding << ")will be " << expanded_size << " neu " << non_expanding_used << " t = " << total << " s " << _spacing << '\n';
 
-	Order::size_type n = 0;
 	Order::iterator prev = order.end();
+
 	try {
-		for (Order::iterator o = order.begin(); o != order.end(); ++o, ++n) {
+		for (Order::iterator o = order.begin(); o != order.end(); ++o) {
 
 			Duple min, natural;
+
 			(*o)->item().preferred_size (min, natural);
 
-			cerr << "\t" << (*o)->item().whoami() << " min " << min << " nat " << natural << endl;
-
-			/* setup center_{x,y} variables in case calling/using
-			 * code wants to use them for additional constraints
-			 */
-
-			solver.addConstraint ((*o)->center_x() == (*o)->left() + ((*o)->width() / 2.));
-			solver.addConstraint ((*o)->center_y() == (*o)->top() + ((*o)->height() / 2.));
-
-			/* Add constraints that will size the item within this box */
-
 			if (orientation == Vertical) {
-
-				/* set up constraints for expand/fill options, done by
-				 * adjusting height and margins of each item
-				 */
-
-				if ((*o)->primary_axis_pack_options() & PackExpand) {
-
-					/* item will take up more than it's natural
-					 * size, if space is available
-					 */
-
-					if ((*o)->primary_axis_pack_options() & PackFill) {
-
-						/* item is expanding to fill all
-						 * available space and wants that space
-						 * for itself.
-						 */
-
-						solver.addConstraint ((*o)->height() == expanded_size | kiwi::strength::strong);
-						solver.addConstraint ((*o)->top_padding() == 0. | kiwi::strength::strong);
-						solver.addConstraint ((*o)->bottom_padding() == 0. | kiwi::strength::strong);
-
-					} else {
-
-						/* item is expanding to fill all
-						 * available space and wants that space
-						 * as padding
-						 */
-
-						solver.addConstraint ((*o)->height() == natural.height());
-						solver.addConstraint ((*o)->top_padding() + (*o)->bottom_padding() + (*o)->height() == expanded_size | kiwi::strength::strong);
-						solver.addConstraint ((*o)->bottom_padding() == (*o)->top_padding() | kiwi::strength::strong);
-					}
-
-				} else {
-
-					/* item is not going to expand to fill
-					 * available space. just give it's preferred
-					 * height.
-					 */
-
-					cerr << (*o)->item().whoami() << " will use natural height of " << natural.height() << endl;
-					solver.addConstraint ((*o)->height() == natural.height());
-					solver.addConstraint ((*o)->top_padding() == 0.);
-					solver.addConstraint ((*o)->bottom_padding() == 0.);
-				}
-
-
-				/* now set upper left corner of the item */
-
-				if (n == 0) {
-
-					/* first item */
-
-					solver.addConstraint ((*o)->top() == _top_margin + (*o)->top_padding() | kiwi::strength::strong);
-
-				} else {
-					/* subsequent items */
-
-					solver.addConstraint ((*o)->top() == (*prev)->bottom() + (*prev)->bottom_padding() + (*o)->top_padding() + _spacing | kiwi::strength::strong);
-				}
-
-				/* set the side-effect variables and/or constants */
-
-				solver.addConstraint ((*o)->left() + (*o)->width() == (*o)->right()| kiwi::strength::strong);
-				solver.addConstraint ((*o)->bottom() == (*o)->top() + (*o)->height());
-				solver.addConstraint ((*o)->left() == _left_margin + (*o)->left_padding() | kiwi::strength::strong);
-
-				if (!((*o)->secondary_axis_pack_options() & PackExpand) && natural.width() > 0) {
-					cerr << "\t\t also using  natural width of " << natural.width() << endl;
-					solver.addConstraint ((*o)->width() == natural.width());
-				} else {
-					cerr << "\t\t also using container width of " << r.width() << endl;
-					solver.addConstraint ((*o)->width() == r.width() - (_left_margin + _right_margin + (*o)->right_padding()) | kiwi::strength::strong);
-				}
-
-
+				add_vertical_box_constraints (solver, *o, prev == order.end() ? 0 : *prev, expanded_size, natural.height(), natural.width(), r.width());
 			} else {
-
-				/* set up constraints for expand/fill options, done by
-				 * adjusting width and margins of each item
-				 */
-
-				if ((*o)->primary_axis_pack_options() & PackExpand) {
-
-					/* item will take up more than it's natural
-					 * size, if space is available
-					 */
-
-					if ((*o)->primary_axis_pack_options() & PackFill) {
-
-						/* item is expanding to fill all
-						 * available space and wants that space
-						 * for itself.
-						 */
-
-						solver.addConstraint ((*o)->width() == expanded_size | kiwi::strength::strong);
-						solver.addConstraint ((*o)->left_padding() == 0. | kiwi::strength::strong);
-						solver.addConstraint ((*o)->right_padding() == 0. | kiwi::strength::strong);
-
-					} else {
-
-						/* item is expanding to fill all
-						 * available space and wants that space
-						 * as padding
-						 */
-
-						solver.addConstraint ((*o)->width() == natural.width());
-						solver.addConstraint ((*o)->left_padding() + (*o)->right_padding() + (*o)->width() == expanded_size | kiwi::strength::strong);
-						solver.addConstraint ((*o)->left_padding() == (*o)->right_padding() | kiwi::strength::strong);
-					}
-
-				} else {
-
-					/* item is not going to expand to fill
-					 * available space. just give it's preferred
-					 * width.
-					 */
-
-					solver.addConstraint ((*o)->width() == natural.width());
-					solver.addConstraint ((*o)->left_padding() == 0.);
-					solver.addConstraint ((*o)->right_padding() == 0.);
-				}
-
-
-				/* now set upper left corner of the item */
-
-				if (n == 0) {
-
-					/* first item */
-
-					solver.addConstraint ((*o)->left() == _left_margin + (*o)->left_padding() | kiwi::strength::strong);
-
-				} else {
-					/* subsequent items */
-
-					solver.addConstraint ((*o)->left() == (*prev)->right() + (*prev)->right_padding() + (*o)->left_padding() + _spacing | kiwi::strength::strong);
-				}
-
-				/* set the side-effect variables and/or constants */
-
-				solver.addConstraint ((*o)->bottom() == (*o)->top() + (*o)->height());
-				solver.addConstraint ((*o)->right() == (*o)->left() + (*o)->width());
-				solver.addConstraint ((*o)->top() == _top_margin + (*o)->top_padding() | kiwi::strength::strong);
-
-				if (!((*o)->secondary_axis_pack_options() & PackExpand) && natural.height() > 0) {
-					cerr << "\t\tand natural height of " << natural.height() << endl;
-					solver.addConstraint ((*o)->height() == natural.height());
-				} else {
-					cerr << "\t\tand container height of " << r.height() << endl;
-					solver.addConstraint ((*o)->height() == r.height() - (_top_margin + _bottom_margin + (*o)->bottom_padding()) | kiwi::strength::strong);
-				}
-			}
-
-			/* Add constraints that come with the item */
-
-			std::vector<Constraint> const & constraints ((*o)->constraints());
-
-			for (std::vector<Constraint>::const_iterator c = constraints.begin(); c != constraints.end(); ++c) {
-				solver.addConstraint (*c);
+				add_horizontal_box_constraints (solver, *o, prev == order.end() ? 0 : *prev, expanded_size, natural.width(), natural.height(), r.height());
 			}
 
 			prev = o;
 		}
+
+		/* There maybe items that were not pack_start()'ed or
+		 * pack_end()'ed into this box, but just added with
+		 * constraints. Find all items in the box, and add any
+		 * constraints that come with them.
+		 */
+
+		for (ConstrainedItemMap::const_iterator x = constrained_map.begin(); x != constrained_map.end(); ++x) {
+
+			std::vector<Constraint> const & constraints (x->second->constraints());
+
+			for (std::vector<Constraint>::const_iterator c = constraints.begin(); c != constraints.end(); ++c) {
+				solver.addConstraint (*c);
+			}
+		}
+
 
 	} catch (std::exception& e) {
 		cerr << "Setting up sovler failed: " << e.what() << endl;
 		return;
 	}
 
-
 	solver.updateVariables ();
 	//solver.dump (cerr);
 
-	for (Order::iterator o = order.begin(); o != order.end(); ++o, ++n) {
-		(*o)->dump (cerr);
-	}
+	//for (ConstrainedItemMap::const_iterator o = constrained_map.begin(); o != constrained_map.end(); ++o) {
+	//o->second->dump (cerr);
+	//}
 
 	apply (&solver);
 
@@ -483,4 +327,127 @@ cBox::size_allocate (Rect const & r)
 void
 cBox::child_changed (bool bbox_changed)
 {
+}
+
+/* It would be nice to do this with templates or even by passing ptr-to-method,
+ * but both of them interfere with the similarly meta-programming-ish nature of
+ * the way that kiwi builds Constraint objects from expressions. So a macro it
+ * is ...
+ */
+
+#define add_box_constraints(\
+	solver, \
+	bci, \
+	prev, \
+	expanded_size, \
+	natural_main_dimension, \
+	natural_second_dimension, \
+	alloc_second_dimension, \
+	m_main_dimension, \
+	m_second_dimension, \
+	m_trailing, \
+	m_leading, \
+	m_trailing_padding, \
+	m_leading_padding, \
+	m_second_trailing, \
+	m_second_leading, \
+	m_second_trailing_padding, \
+	m_second_leading_padding) \
+ \
+	/* Add constraints that will size the item within this box */ \
+ \
+	/* set up constraints for expand/fill options, done by \
+	 * adjusting height and margins of each item \
+	 */ \
+ \
+	if (bci->primary_axis_pack_options() & PackExpand) { \
+ \
+		/* item will take up more than it's natural \
+		 * size, if space is available \
+		 */ \
+ \
+		if (bci->primary_axis_pack_options() & PackFill) { \
+ \
+			/* item is expanding to fill all \
+			 * available space and wants that space \
+			 * for itself. \
+			 */ \
+ \
+			solver.addConstraint (bci->m_main_dimension() == expanded_size | kiwi::strength::strong); \
+			solver.addConstraint (bci->m_trailing_padding() == 0. | kiwi::strength::strong); \
+			solver.addConstraint (bci->m_leading_padding() == 0. | kiwi::strength::strong); \
+ \
+		} else { \
+ \
+			/* item is expanding to fill all \
+			 * available space and wants that space \
+			 * as padding \
+			 */ \
+ \
+			solver.addConstraint (bci->m_main_dimension() == natural_main_dimension); \
+			solver.addConstraint (bci->m_trailing_padding() + bci->m_leading_padding() + bci->m_main_dimension() == expanded_size | kiwi::strength::strong); \
+			solver.addConstraint (bci->m_leading_padding() == bci->m_trailing_padding() | kiwi::strength::strong); \
+		} \
+ \
+	} else { \
+ \
+		/* item is not going to expand to fill \
+		 * available space. just give it's preferred \
+		 * height. \
+		 */ \
+ \
+		/* cerr << bci->item().whoami() << " will usenatural height of " << natural.height() << endl; */ \
+ \
+		solver.addConstraint (bci->m_main_dimension() == natural_main_dimension); \
+		solver.addConstraint (bci->m_trailing_padding() == 0.); \
+		solver.addConstraint (bci->m_leading_padding() == 0.); \
+	} \
+ \
+	/* now set upper upper edge of the item */ \
+ \
+	if (prev == 0) { \
+ \
+		/* first item */ \
+ \
+		solver.addConstraint (bci->m_trailing() == _top_margin + bci->m_trailing_padding() | kiwi::strength::strong); \
+ \
+	} else { \
+		/* subsequent items */ \
+ \
+		solver.addConstraint (bci->m_trailing() == prev->m_leading() + prev->m_leading_padding() + bci->m_trailing_padding() + _spacing | kiwi::strength::strong); \
+	} \
+ \
+	solver.addConstraint (bci->m_leading() == bci->m_trailing() + bci->m_main_dimension()); \
+ \
+	/* set the side-effect variables and/or constants */ \
+ \
+	solver.addConstraint (bci->m_second_trailing_padding() == 0 | kiwi::strength::weak); \
+	solver.addConstraint (bci->m_second_leading_padding() == 0 | kiwi::strength::weak); \
+ \
+	solver.addConstraint (bci->m_second_trailing() + bci->m_second_dimension() == bci->m_second_leading()); \
+	solver.addConstraint (bci->m_second_trailing() == _left_margin + bci->m_second_trailing_padding() | kiwi::strength::strong); \
+ \
+	if (!(bci->secondary_axis_pack_options() & PackExpand) && natural_second_dimension > 0) { \
+		solver.addConstraint (bci->m_second_dimension() == natural_second_dimension); \
+	} else { \
+		solver.addConstraint (bci->m_second_dimension() == alloc_second_dimension - (_left_margin + _right_margin + bci->m_second_leading_padding()) | kiwi::strength::strong); \
+	}
+
+
+void
+cBox::add_vertical_box_constraints (kiwi::Solver& solver, BoxConstrainedItem* ci, BoxConstrainedItem* prev, double expanded_size, double main_dimension, double second_dimension, double alloc_dimension)
+{
+	add_box_constraints (solver, ci, prev, expanded_size, main_dimension, second_dimension, alloc_dimension,
+	                     height, width,
+	                     top, bottom, top_padding, bottom_padding,
+	                     left, right, left_padding, right_padding);
+}
+
+void
+cBox::add_horizontal_box_constraints (kiwi::Solver& solver, BoxConstrainedItem* ci, BoxConstrainedItem* prev, double expanded_size, double main_dimension, double second_dimension, double alloc_dimension)
+{
+	add_box_constraints (solver, ci, prev, expanded_size, main_dimension, second_dimension, alloc_dimension,
+	                     width, height,
+	                     left, right, left_padding, right_padding,
+	                     top, bottom, top_padding, bottom_padding);
 }
