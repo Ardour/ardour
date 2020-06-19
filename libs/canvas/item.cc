@@ -1211,28 +1211,22 @@ Item::preferred_size (Duple& minimum, Duple& natural) const
 
 	if (_intrinsic_height < 0 && _intrinsic_width < 0) {
 
-		/* intrinsic size untouched, use bounding box */
+		/* intrinsic size untouched ... fall back on
+		   arbitrary default (small) sizes.
+		*/
 
-		Rect bb (bounding_box());
-
-		if (!bb) {
-			natural.x = 2;
-			natural.y = 2;
-		} else {
-			natural.x = bb.width();
-			natural.y = bb.height();
-		}
-
-		minimum.x = 1;
-		minimum.y = 1;
+		natural.x = 2;
+		natural.y = 2;
 
 	} else {
 
 		natural.x = _intrinsic_width;
 		natural.y = _intrinsic_height;
 
-		minimum = natural;
 	}
+
+	minimum.x = 1;
+	minimum.y = 1;
 }
 
 void
