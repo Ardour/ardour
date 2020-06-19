@@ -540,10 +540,24 @@ Function .onInit
     "UninstallString"
   StrCmp \$R0 "" done
 
+  IfSilent silentuninst
+
   MessageBox MB_OKCANCEL|MB_ICONEXCLAMATION \
     "${PROGRAM_NAME} is already installed. Click 'OK' to remove the previous version or 'Cancel' to cancel this upgrade." \
     IDOK uninst
     Abort
+
+  silentuninst:
+    ExecWait '\$R0 /S _?=\$INSTDIR'
+
+    ReadRegStr \$R1 HKLM \
+      "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${PRODUCT_ID}-${WARCH}" \
+      "UninstallString"
+    StrCmp \$R1 "" 0 done
+
+    Delete "\$INSTDIR\\uninstall.exe"
+    RMDir "\$INSTDIR"
+    goto done
 
   uninst:
     ClearErrors
