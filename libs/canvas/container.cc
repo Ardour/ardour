@@ -52,9 +52,8 @@ Container::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 		Rect self (item_to_window (bb, false));
 		const Rect draw = self.intersection (area);
 
-		std::cerr << whoami() << " render bb " << bb << " self " << self << " area  " << area << " draw " << draw << std::endl;
-
 		if (fill()) {
+
 			setup_fill_context (context);
 			context->rectangle (draw.x0, draw.y0, draw.width(), draw.height());
 			context->fill_preserve ();
