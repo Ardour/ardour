@@ -219,8 +219,8 @@ inline int64_t abs(int64_t val) throw()
 
 // fmin() and fmax()
 #if defined(_MSC_VER) && (_MSC_VER < 1900)
-#define fmin(a, b) min((double)a, (double)b)
-#define fmax(a, b) max((double)a, (double)b)
+#define fmin(a, b) __min((double)a, (double)b)
+#define fmax(a, b) __max((double)a, (double)b)
 #endif
 
 // approximate POSIX pipe()

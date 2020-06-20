@@ -19,11 +19,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifdef COMPILER_MSVC
-#include <algorithm>
-using std::min; using std::max;
-#endif
-
 #include <iostream>
 
 #include <glibmm.h>
