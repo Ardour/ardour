@@ -181,6 +181,15 @@ def build(bld):
     constraint_test2.name         = 'constraint_test2'
     constraint_test2.target       = 'constraint_test2'
     constraint_test2.install_path = ''
+
+    constraint_test3_src = [ 'constraint_test3.cc' ]
+    constraint_test3 = bld (features = 'cxx cxxprogram')
+    constraint_test3.source = constraint_test3_src
+    constraint_test3.includes = obj.includes + ['../pbd', '../gtkmm2ext']
+    constraint_test3.use = [ 'GTKMM', 'libcanvas', 'libgtkmm2ext' ]
+    constraint_test3.name         = 'constraint_test3'
+    constraint_test3.target       = 'constraint_test3'
+    constraint_test3.install_path = ''
     
 def shutdown():
     autowaf.shutdown()
