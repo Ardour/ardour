@@ -192,8 +192,6 @@ ConstraintPacker::size_allocate (Rect const & r)
 
 	Item::size_allocate (r);
 
-	cerr << "CP alloc " << r << " with " << constrained_map.size() << " children\n";
-
 	kiwi::Solver s;
 
 	s.addConstraint (width == r.width());
