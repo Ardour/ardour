@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ArdourMIDIBindings version="1.0.0" name="Nektar Panorama">
+
+
+  <DeviceInfo bank-size="8"/>
+<!-- Buttons labelled 'track-' and 'track+' mapped to switch banks -->
+  <Binding channel="1" ctl="103" function="prev-bank"/>
+  <Binding channel="1" ctl="104" function="next-bank"/>
+
+<!-- Faders mapped to track faders 1-8 and Master -->
+  <Binding channel="1" ctl="40" uri="/route/gain B1"/>
+  <Binding channel="1" ctl="41" uri="/route/gain B2"/>
+  <Binding channel="1" ctl="42" uri="/route/gain B3"/>
+  <Binding channel="1" ctl="43" uri="/route/gain B4"/>
+  <Binding channel="1" ctl="44" uri="/route/gain B5"/>
+  <Binding channel="1" ctl="45" uri="/route/gain B6"/>
+  <Binding channel="1" ctl="46" uri="/route/gain B7"/>
+  <Binding channel="1" ctl="47" uri="/route/gain B8"/>
+  <Binding channel="1" ctl="3" uri="/bus/gain master"/>
+
+<!-- Buttons below the faders mapped to Mute-->
+  <Binding channel="1" ctl="56" uri="/route/mute B1" momentary="yes"/>
+  <Binding channel="1" ctl="57" uri="/route/mute B2" momentary="yes"/>
+  <Binding channel="1" ctl="58" uri="/route/mute B3" momentary="yes"/>
+  <Binding channel="1" ctl="59" uri="/route/mute B4" momentary="yes"/>
+  <Binding channel="1" ctl="60" uri="/route/mute B5" momentary="yes"/>
+  <Binding channel="1" ctl="61" uri="/route/mute B6" momentary="yes"/>
+  <Binding channel="1" ctl="62" uri="/route/mute B7" momentary="yes"/>
+  <Binding channel="1" ctl="63" uri="/route/mute B8" momentary="yes"/>
+  <Binding channel="1" ctl="118" uri="/route/recenable S1" momentary="yes"/>
+
+<!-- Encoders above faders mapped to pan direction. -->
+  <Binding channel="1" enc-2="32" uri="/route/pandirection B1"/>
+  <Binding channel="1" enc-2="33" uri="/route/pandirection B2"/>
+  <Binding channel="1" enc-2="34" uri="/route/pandirection B3"/>
+  <Binding channel="1" enc-2="35" uri="/route/pandirection B4"/>
+  <Binding channel="1" enc-2="36" uri="/route/pandirection B5"/>
+  <Binding channel="1" enc-2="37" uri="/route/pandirection B6"/>
+  <Binding channel="1" enc-2="38" uri="/route/pandirection B7"/>
+  <Binding channel="1" enc-2="39" uri="/route/pandirection B8"/>
+  
+ <!-- 2x4 Encoders mapped to plugin parameters -->
+  <Binding channel="1" enc-2="48" uri="/route/plugin/parameter S1 1 1"/>
+  <Binding channel="1" enc-2="49" uri="/route/plugin/parameter S1 1 2"/>
+  <Binding channel="1" enc-2="50" uri="/route/plugin/parameter S1 1 3"/>
+  <Binding channel="1" enc-2="51" uri="/route/plugin/parameter S1 1 4"/>
+  <Binding channel="1" enc-2="52" uri="/route/plugin/parameter S1 1 5"/>
+  <Binding channel="1" enc-2="53" uri="/route/plugin/parameter S1 1 6"/>
+  <Binding channel="1" enc-2="54" uri="/route/plugin/parameter S1 1 7"/>
+  <Binding channel="1" enc-2="55" uri="/route/plugin/parameter S1 1 8"/>
+
+<!-- Transport controls -->
+
+  <Binding channel="1" ctl="108" function="loop-toggle" momentary="yes"/>
+  <Binding channel="1" ctl="109" action="Transport/Rewind"/>
+  <Binding channel="1" ctl="110" action="Transport/Forward"/>
+  <Binding channel="1" ctl="114" function="transport-start"/>
+  <Binding channel="1" ctl="115" function="transport-end"/>
+  <Binding channel="1" ctl="111" function="transport-stop" momentary="yes"/>
+  <Binding channel="1" ctl="112" function="transport-roll" momentary="yes"/>
+  <Binding channel="1" ctl="113" function="toggle-rec-enable" momentary="yes"/>
+
+
+</ArdourMIDIBindings>
