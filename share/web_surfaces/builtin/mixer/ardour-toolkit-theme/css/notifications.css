@@ -1,0 +1,10 @@
+.toolkit-notifications {
+  position: fixed;
+  z-index: 100000000000;
+  bottom: 0;
+  right: 0;
+  width: 100%;
+  max-width: 400px;
+  
+  transform: translate3d(0, 0, 0);
+}

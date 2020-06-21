@@ -1,0 +1,117 @@
+/*
+ * This file is part of Toolkit.
+ *
+ * Toolkit is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * Toolkit is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU General
+ * Public License along with this program; if not, write to the
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA  02110-1301  USA
+ */
+.toolkit-window {
+    border: 1px solid #fff;
+    background: #eee url(../images/window/background.png) no-repeat;
+    -webkit-box-shadow:  0px 4px 12px 0px rgba(0, 0, 0, 0.33);
+    -moz-box-shadow:  0px 4px 12px 0px rgba(0, 0, 0, 0.33);
+    box-shadow:  0px 4px 12px 0px rgba(0, 0, 0, 0.33);
+    opacity: 1;
+    -webkit-border-radius: 6px;
+    -moz-border-radius:    6px;
+    border-radius:         6px;
+}
+.toolkit-window.toolkit-inactive {
+    opacity: 0.5;
+    -webkit-box-shadow:  0px 3px 10px 0px rgba(0, 0, 0, 0.2);
+    -moz-box-shadow:  0px 3px 10px 0px rgba(0, 0, 0, 0.2);
+    box-shadow:  0px 3px 10px 0px rgba(0, 0, 0, 0.2);
+}
+
+.toolkit-window.toolkit-resizing,
+.toolkit-window.toolkit-dragging {
+    opacity: 0.7;
+}
+
+.toolkit-window > .toolkit-content {
+    padding: 4px;
+}
+
+.toolkit-window > .toolkit-header {
+    height: 32px;
+    line-height: 30px;
+    border-bottom: 1px solid rgba(0,0,0,0.033);
+    background: rgba(255,255,255,0.33);
+}
+.toolkit-window > .toolkit-footer {
+    height: 28px;
+    line-height: 28px;
+    border-top: 1px solid rgba(255,255,255,0.6);
+    background: rgba(255,255,255,0.33);
+}
+
+.toolkit-window > .toolkit-header > .toolkit-title,
+.toolkit-window > .toolkit-footer > .toolkit-title {
+    font-weight: 700;
+    text-align: left;
+    font-size: 14px;
+    color: #999;
+    text-shadow: 0px 1px 0px white;
+    margin: 0 5px;
+}
+.toolkit-window.toolkit-active > .toolkit-header > .toolkit-title,
+.toolkit-window.toolkit-active > .toolkit-footer > .toolkit-title {
+    color: #002f42;
+}
+.toolkit-window > .toolkit-header .toolkit-status,
+.toolkit-window > .toolkit-footer .toolkit-status {
+    color: #999;
+    margin: 0 5px;
+    text-align: left;
+}
+.toolkit-window > .toolkit-header > .toolkit-icon,
+.toolkit-window > .toolkit-footer > .toolkit-icon {
+    width: 24px;
+    height: 24px;
+    margin: 2px;
+}
+.toolkit-window > .toolkit-header > .toolkit-button,
+.toolkit-window > .toolkit-footer > .toolkit-button {
+    margin: 0 2px;
+    padding: 0px;
+    border: 0px solid transparent;
+    background: transparent;
+    transition: border-color 0.33s;
+    border-radius: 0;
+    box-shadow: none;
+}
+.toolkit-window > .toolkit-header > .toolkit-button:hover,
+.toolkit-window > .toolkit-footer > .toolkit-button:hover {
+    background: white;
+}
+.toolkit-window > .toolkit-header > .toolkit-button .toolkit-icon,
+.toolkit-window > .toolkit-footer > .toolkit-button .toolkit-icon {
+    height: 16px;
+    margin: 0;
+    font-size: 16px;
+    line-height: 16px;
+    text-shadow: none !important;
+}
+.toolkit-window > .toolkit-header > .toolkit-button.toolkit-close .toolkit-icon,
+.toolkit-window > .toolkit-footer > .toolkit-button.toolkit-close .toolkit-icon {
+    color: #BA1B25 !important;
+}
+
+.toolkit-window.toolkit-shrinked {
+    height: 32px !important;
+}
+.toolkit-window > .toolkit-header > .toolkit-size,
+.toolkit-window > .toolkit-footer > .toolkit-size {
+    color: #ccc;
+}

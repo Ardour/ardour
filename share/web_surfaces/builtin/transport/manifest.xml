@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <WebSurface>
   <Name value="Transport"/>
-  <Description value="Provides basic transport control"/>
+  <Description value="Provides basic transport control like play, pause and record"/>
   <Version value="0.1.2"/>
 </WebSurface>

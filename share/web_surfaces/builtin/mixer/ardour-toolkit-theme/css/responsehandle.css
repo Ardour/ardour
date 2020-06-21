@@ -1,0 +1,227 @@
+/*
+ * This file is part of Toolkit.
+ *
+ * Toolkit is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * Toolkit is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU General
+ * Public License along with this program; if not, write to the
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA  02110-1301  USA
+ */
+.toolkit-response-handle {
+    fill: rgb(255,255,255);
+}
+.toolkit-response-handle.toolkit-disabled {
+    display: none;
+}
+.toolkit-response-handle:hover {
+    
+}
+.toolkit-response-handle.toolkit-inactive {
+    
+}
+.toolkit-response-handle.toolkit-active {
+    cursor: move !important;
+}
+.toolkit-response-handle.toolkit-warn {
+    
+}
+.toolkit-response-handle.toolkit-circular {
+    
+}
+.toolkit-response-handle.toolkit-circular:hover {
+    
+}
+.toolkit-response-handle.toolkit-circular.toolkit-active {
+    
+}
+.toolkit-response-handle.toolkit-line {
+    
+}
+.toolkit-response-handle.toolkit-line-vertical {
+    
+}
+.toolkit-response-handle.toolkit-line-horizontal {
+    
+}
+.toolkit-response-handle.toolkit-block {
+    
+}
+.toolkit-response-handle.toolkit-block-left {
+    
+}
+.toolkit-response-handle.toolkit-block-right {
+    
+}
+.toolkit-response-handle.toolkit-block-top {
+    
+}
+.toolkit-response-handle.toolkit-block-bottom {
+    
+}
+
+.toolkit-response-handle > .toolkit-z-handle {
+    fill: rgb(255,255,255);
+    opacity: 0.5;
+    cursor: pointer;
+    stroke: rgba(255,255,255, 0.5);
+    stroke-width: 4;
+}
+.toolkit-response-handle > .toolkit-z-handle:hover {
+    opacity: 0.75;
+    stroke: rgb(255,255,255);
+}
+.toolkit-response-handle.toolkit-active > .toolkit-z-handle {
+    opacity: 0.75;
+    cursor: move;
+    stroke: rgb(255,255,255);
+}
+
+.toolkit-response-handle > .toolkit-label {
+    cursor: pointer;
+    font-size: 0.8em;
+}
+.toolkit-response-handle:hover > .toolkit-label {
+    
+}
+.toolkit-response-handle.toolkit-active > .toolkit-label {
+    cursor:move;
+}
+.toolkit-response-handle > .toolkit-label > tspan {
+    
+}
+
+.toolkit-response-handle.toolkit-circular > .toolkit-label {
+    opacity: 0.5;
+}
+.toolkit-response-handle.toolkit-circular:hover > .toolkit-label {
+    opacity: 0.66;
+}
+.toolkit-response-handle.toolkit-circular.toolkit-active > .toolkit-label {
+    opacity: 0.8;
+}
+.toolkit-response-handle.toolkit-line > .toolkit-label {
+    opacity: 0.5;
+}
+.toolkit-response-handle.toolkit-line:hover > .toolkit-label {
+    opacity: 0.66;
+}
+.toolkit-response-handle.toolkit-line.toolkit-active > .toolkit-label {
+    opacity: 0.8;
+}
+.toolkit-response-handle.toolkit-block > .toolkit-label {
+    opacity: 0.5;
+}
+.toolkit-response-handle.toolkit-block:hover > .toolkit-label {
+    opacity: 0.66;
+}
+.toolkit-response-handle.toolkit-block.toolkit-active > .toolkit-label {
+    opacity: 0.8;
+}
+
+
+
+.toolkit-response-handle > .toolkit-handle {
+    cursor:pointer;
+}
+.toolkit-response-handle.toolkit-active > .toolkit-handle {
+    cursor:move;
+}
+.toolkit-response-handle.toolkit-warn > .toolkit-handle {
+    stroke: rgba(255,255,255,0.33);
+    stroke-width: 20;
+}
+.toolkit-response-handle.toolkit-circular > .toolkit-handle {
+    opacity: 0.33;
+}
+.toolkit-response-handle.toolkit-circular:hover > .toolkit-handle {
+    opacity: 0.5;
+}
+.toolkit-response-handle.toolkit-circular.toolkit-active > .toolkit-handle {
+    opacity: 0.66;
+}
+.toolkit-response-handle.toolkit-line > .toolkit-handle {
+    opacity: 0.33;
+}
+.toolkit-response-handle.toolkit-line:hover > .toolkit-handle {
+    opacity: 0.5;
+}
+.toolkit-response-handle.toolkit-line.toolkit-active > .toolkit-handle {
+    opacity: 0.66;
+}
+.toolkit-response-handle.toolkit-block > .toolkit-handle {
+    opacity: 0.2;
+}
+.toolkit-response-handle.toolkit-block:hover > .toolkit-handle {
+    opacity: 0.33;
+}
+.toolkit-response-handle.toolkit-block.toolkit-active > .toolkit-handle {
+    opacity: 0.5;
+}
+
+
+
+.toolkit-response-handle > .toolkit-line {
+    stroke-width: 1;
+}
+.toolkit-response-handle:hover > .toolkit-line {
+    
+}
+.toolkit-response-handle.toolkit-active > .toolkit-line {
+    
+}
+.toolkit-response-handle.toolkit-circular > .toolkit-line {
+    stroke: white;
+/*     stroke-dasharray: 1,1; */
+    opacity: 0.5;
+}
+.toolkit-response-handle.toolkit-circular.toolkit-active > .toolkit-line {
+    
+}
+
+.toolkit-response-handle.toolkit-line > .toolkit-line-1 {
+    stroke: #fff;
+    stroke-dasharray: 1,1;
+    opacity: 0.6;
+}
+.toolkit-response-handle.toolkit-line:hover > .toolkit-line-1 {
+    stroke-dasharray: 0;
+}
+.toolkit-response-handle.toolkit-line.toolkit-active > .toolkit-line-1 {
+    stroke-dasharray: 0;
+}
+.toolkit-response-handle.toolkit-line > .toolkit-line-2 {
+    stroke: #fff;
+    opacity: 0.5;
+}
+.toolkit-response-handle.toolkit-line.toolkit-active > .toolkit-line-2 {
+    
+}
+
+.toolkit-response-handle.toolkit-block > .toolkit-line-1 {
+    stroke: #fff;
+    stroke-dasharray: 1,1;
+    opacity: 0.6;
+}
+.toolkit-response-handle.toolkit-block:hover > .toolkit-line-1 {
+    stroke-dasharray: 0;
+}
+.toolkit-response-handle.toolkit-block.toolkit-active > .toolkit-line-1 {
+    stroke-dasharray: 0;
+    opacity: 0.9;
+}
+.toolkit-response-handle.toolkit-block > .toolkit-line-2 {
+    stroke: #fff;
+    opacity: 0.5;
+}
+.toolkit-response-handle.toolkit-block.toolkit-active > .toolkit-line-2 {
+    
+}

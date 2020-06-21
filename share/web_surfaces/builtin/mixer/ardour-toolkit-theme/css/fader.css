@@ -1,0 +1,140 @@
+/*
+ * This file is part of Toolkit.
+ *
+ * Toolkit is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * Toolkit is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU General
+ * Public License along with this program; if not, write to the
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA  02110-1301  USA
+ */
+.toolkit-fader {
+    margin: 4px;
+    padding: 0px;
+    background-repeat: no-repeat;
+}
+
+.toolkit-fader.toolkit-horizontal {
+    grid-column-gap: 4px;
+    grid-row-gap: 2px;
+}
+.toolkit-fader.toolkit-vertical {
+    grid-column-gap: 2px;
+    grid-row-gap: 4px;
+}
+
+/* TRACK */
+
+
+.toolkit-fader > .toolkit-track {
+    background-color: #303030;
+    border-radius: 5px;
+}
+
+.toolkit-fader.toolkit-vertical > .toolkit-track {
+    width: 46px;
+}
+.toolkit-fader.toolkit-horizontal > .toolkit-track {
+    height: 46px;
+}
+
+.toolkit-fader.toolkit-top > .toolkit-track {
+    align-self: end;
+}
+.toolkit-fader.toolkit-bottom > .toolkit-track {
+    align-self: start;
+}
+.toolkit-fader.toolkit-left > .toolkit-track {
+    justify-self: end;
+}
+.toolkit-fader.toolkit-right > .toolkit-track {
+    justify-self: start;
+}
+
+/* HANDLE */
+
+.toolkit-fader > .toolkit-track > .toolkit-handle {
+    cursor: pointer;
+    cursor: hand;
+    margin: 1px;
+    box-shadow: 1px 3px 8px rgba(0, 0, 0, 0.5);
+    border-radius: 4px;
+}
+.toolkit-fader.toolkit-vertical > .toolkit-track > .toolkit-handle {
+    width: 44px;
+    height: 80px;
+    background: url(../images/fader/handle_vertical.png) no-repeat;
+}
+.toolkit-fader.toolkit-vertical.toolkit-warn > .toolkit-track > .toolkit-handle {
+    width: 44px;
+    height: 80px;
+    background: url(../images/fader/handle_vertical_warn.png) no-repeat;
+}
+.toolkit-fader.toolkit-horizontal > .toolkit-track > .toolkit-handle {
+    height: 44px;
+    width: 80px;
+    background: url(../images/fader/handle_horizontal.png) no-repeat;
+}
+.toolkit-fader.toolkit-horizontal.toolkit-warn > .toolkit-track > .toolkit-handle {
+    height: 44px;
+    width: 80px;
+    background: url(../images/fader/handle_horizontal_warn.png) no-repeat;
+}
+
+
+/* SCALE */
+
+.toolkit-fader.toolkit-horizontal > .toolkit-scale {
+    margin: 0 40px;
+}
+.toolkit-fader.toolkit-vertical > .toolkit-scale {
+    margin: 40px 0;
+}
+
+.toolkit-fader.toolkit-top > .toolkit-scale {
+    align-self: start;
+}
+.toolkit-fader.toolkit-bottom > .toolkit-scale {
+    align-self: end;
+}
+.toolkit-fader.toolkit-left > .toolkit-scale {
+    justify-self: start;
+}
+.toolkit-fader.toolkit-right > .toolkit-scale {
+    justify-self: end;
+}
+
+/* LABEL */
+
+.toolkit-fader > .toolkit-label {
+    line-height: 23px;
+    height: 23px;
+    text-align: center;
+}
+
+
+/* VALUE */
+
+.toolkit-fader > .toolkit-value,
+.toolkit-fader > .toolkit-value > .toolkit-input {
+    line-height: 23px;
+    height: 23px;
+    font-size: 14px;
+}
+.toolkit-fader > .toolkit-value > .toolkit-input {
+    background: transparent;
+}
+.toolkit-fader > .toolkit-value.toolkit-active {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+.toolkit-fader > .toolkit-value.toolkit-active > .toolkit-input {
+    background: #002f42;
+}

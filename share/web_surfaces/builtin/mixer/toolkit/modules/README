@@ -1,0 +1,6 @@
+@category: Modules
+
+Modules are Classes to build other widgets from. They normally can't
+exist on their own and require a parent item which makes use of them.
+For example: Graph is mainly a SVG path which needs a parent item containing
+a SVG image.

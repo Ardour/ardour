@@ -1,0 +1,41 @@
+/*
+ * This file is part of Toolkit.
+ *
+ * Toolkit is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * Toolkit is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU General
+ * Public License along with this program; if not, write to the
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA  02110-1301  USA
+ */
+.toolkit-dynamics {
+}
+
+.toolkit-dynamics > svg {
+    position:absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.toolkit-dynamics > svg > .toolkit-grid > .toolkit-grid-line.toolkit-highlight {
+    stroke: rgba(255,0,0,0.66);
+}
+.toolkit-dynamics > svg > .toolkit-grid > .toolkit-grid-label.toolkit-highlight {
+    fill: rgb(255,255,255);
+    font-weight: bold;
+}
+
+.toolkit-dynamics > svg > .toolkit-graphs > .toolkit-steady {
+    stroke: rgba(255,255,255,0.5);
+    stroke-dasharray: 1.41421,1.41421;
+    stroke-width: 1px;
+}

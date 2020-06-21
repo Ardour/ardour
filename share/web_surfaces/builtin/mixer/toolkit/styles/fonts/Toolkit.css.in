@@ -1,0 +1,32 @@
+@font-face {
+  font-family: "[name]";
+  font-style: normal;
+  font-weight: normal;
+  src: url("[name].ttf") format("truetype");
+}
+
+.[prefix]icon {
+  font-family: "[name]", sans-serif;
+  font-size: 24px;
+  text-align: center;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.[prefix]button.[prefix]icon::before{
+  display: table-cell;
+  vertical-align: middle;
+  text-align: center;
+}
+
+.[prefix]icon.[prefix]12  { font-size: 12px; }
+.[prefix]icon.[prefix]16  { font-size: 16px; }
+.[prefix]icon.[prefix]20  { font-size: 20px; }
+.[prefix]icon.[prefix]24  { font-size: 24px; }
+.[prefix]icon.[prefix]32  { font-size: 32px; }
+.[prefix]icon.[prefix]40  { font-size: 40px; }
+.[prefix]icon.[prefix]48  { font-size: 48px; }
+.[prefix]icon.[prefix]56  { font-size: 56px; }
+.[prefix]icon.[prefix]64  { font-size: 64px; }
+.[prefix]icon.[prefix]128 { font-size: 128px; }
+.[prefix]icon.[prefix]256 { font-size: 256px; }
