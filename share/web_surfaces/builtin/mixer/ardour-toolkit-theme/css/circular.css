@@ -1,0 +1,62 @@
+/*
+ * This file is part of Toolkit.
+ *
+ * Toolkit is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * Toolkit is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU General
+ * Public License along with this program; if not, write to the
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA  02110-1301  USA
+ */
+.toolkit-circular {
+    fill: #101010;
+    stroke: none;
+    stroke-width: 0;
+}
+
+.toolkit-circular > .toolkit-base {
+    /*opacity: 0.2;*/
+}
+.toolkit-circular.toolkit-warn > .toolkit-base {
+    opacity: 0.5;
+}
+
+.toolkit-circular > .toolkit-value {
+    
+}
+.toolkit-circular.toolkit-warn > .toolkit-value {
+    opacity: 1;
+    fill: white;
+}
+
+.toolkit-circular > .toolkit-hand {
+    fill: #c00;
+}
+
+.toolkit-circular > .toolkit-dots {
+    
+}
+.toolkit-circular > .toolkit-dots > .toolkit-dot {
+}
+
+.toolkit-circular > .toolkit-markers {
+    
+}
+.toolkit-circular > .toolkit-markers > .toolkit-marker {
+    fill: #c00;
+}
+
+.toolkit-circular > .toolkit-labels {
+    
+}
+.toolkit-circular > .toolkit-labels > .toolkit-label {
+    font-size: 0.7em;
+}

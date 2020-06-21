@@ -1,0 +1,67 @@
+/*
+ * This file is part of Toolkit.
+ *
+ * Toolkit is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * Toolkit is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU General
+ * Public License along with this program; if not, write to the
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA  02110-1301  USA
+ */
+.toolkit-chart > svg {
+    background-color: rgb(0, 56, 103);
+    background-image: url(../images/chart/background.png);
+    background-repeat: repeat-x;
+    background-size: 100% 100%;
+    background-position: 50% 50%;
+    background-clip: padding-box;
+    filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='../images/chart/background.png',sizingMethod='scale');
+    -webkit-box-shadow: inset 0px 4px 12px 0px rgba(0, 0, 0, 0.9);
+    -moz-box-shadow: inset 0px 4px 12px 0px rgba(0, 0, 0, 0.9);
+    box-shadow: inset 0px 4px 12px 0px rgba(0, 0, 0, 0.9);
+    border-top: 3px solid #ddd;
+    border-bottom: 3px solid #fff;
+    border-left: 2px solid #e8e8e8;
+    border-right: 2px solid #f3f3f3;
+}
+
+.toolkit-chart {
+}
+
+.toolkit-chart > svg > .toolkit-background {
+    fill: rgba(0, 0, 0, 0.2);
+}
+.toolkit-chart > svg > .toolkit-background.toolkit-hover {
+    fill: rgba(0, 0, 0, 0.5);
+}
+.toolkit-chart > svg > .toolkit-key {
+    margin: 8px;
+    padding: 8px;
+    fill: white;
+    opacity: 0.8;
+}
+.toolkit-chart > svg > .toolkit-key.toolkit-hover {
+    opacity: 1;
+}
+.toolkit-chart > svg > .toolkit-key > text > .toolkit-label {
+    line-height: 1.2em; /* sets the distance between key entries */
+    margin: 5px; /* sets the distance between labels and example rects */
+}
+.toolkit-chart > svg > .toolkit-key > .toolkit-rect {
+    
+}
+
+.toolkit-chart > svg > .toolkit-title {
+    fill: rgba(255,255,255,0.2);
+    margin: 8px 26px;
+    font-weight: bold;
+    font-size: 2em;
+}

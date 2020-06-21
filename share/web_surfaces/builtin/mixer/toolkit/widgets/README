@@ -1,0 +1,5 @@
+@category: Widgets
+
+Widgets are fully functional elements to build user interfaces.
+They typically rely on other elements like #Modules and #Implements and
+are somehow based on #Widget itself or other widgets.

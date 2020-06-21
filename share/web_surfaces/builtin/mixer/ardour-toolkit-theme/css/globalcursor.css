@@ -1,0 +1,106 @@
+/*
+ * This file is part of Toolkit.
+ *
+ * Toolkit is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * Toolkit is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU General
+ * Public License along with this program; if not, write to the
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA  02110-1301  USA
+ */
+body.toolkit-cursor-default,
+body.toolkit-cursor-default * {
+    cursor:default !important;
+}
+body.toolkit-cursor-crosshair,
+body.toolkit-cursor-crosshair * {
+    cursor:crosshair !important;
+}
+body.toolkit-cursor-pointer,
+body.toolkit-cursor-pointer * {
+    cursor:pointer !important;
+}
+body.toolkit-cursor-move,
+body.toolkit-cursor-move * {
+    cursor:move !important;
+}
+body.toolkit-cursor-text,
+body.toolkit-cursor-text * {
+    cursor:text !important;
+}
+body.toolkit-cursor-wait,
+body.toolkit-cursor-wait * {
+    cursor:wait !important;
+}
+body.toolkit-cursor-help,
+body.toolkit-cursor-help * {
+    cursor:help !important;
+}
+body.toolkit-cursor-n-resize,
+body.toolkit-cursor-n-resize * {
+    cursor:n-resize !important;
+}
+body.toolkit-cursor-ne-resize,
+body.toolkit-cursor-ne-resize * {
+    cursor:ne-resize !important;
+}
+body.toolkit-cursor-e-resize,
+body.toolkit-cursor-e-resize * {
+    cursor:e-resize !important;
+}
+body.toolkit-cursor-se-resize,
+body.toolkit-cursor-se-resize * {
+    cursor:se-resize !important;
+}
+body.toolkit-cursor-s-resize,
+body.toolkit-cursor-s-resize * {
+    cursor:s-resize !important;
+}
+body.toolkit-cursor-sw-resize,
+body.toolkit-cursor-sw-resize * {
+    cursor:sw-resize !important;
+}
+body.toolkit-cursor-w-resize,
+body.toolkit-cursor-w-resize * {
+    cursor:w-resize !important;
+}
+body.toolkit-cursor-nw-resize,
+body.toolkit-cursor-nw-resize * {
+    cursor:nw-resize !important;
+}
+body.toolkit-cursor-progress,
+body.toolkit-cursor-progress * {
+    cursor:progress !important;
+}
+body.toolkit-cursor-not-allowed,
+body.toolkit-cursor-not-allowed * {
+    cursor:not-allowed !important;
+}
+body.toolkit-cursor-no-drop,
+body.toolkit-cursor-no-drop * {
+    cursor:no-drop !important;
+}
+body.toolkit-cursor-vertical-text,
+body.toolkit-cursor-vertical-text * {
+    cursor:vertical-text !important;
+}
+body.toolkit-cursor-all-scroll,
+body.toolkit-cursor-all-scroll * {
+    cursor:all-scroll !important;
+}
+body.toolkit-cursor-col-resize,
+body.toolkit-cursor-col-resize * {
+    cursor:col-resize !important;
+}
+body.toolkit-cursor-row-resize,
+body.toolkit-cursor-row-resize * {
+    cursor:row-resize !important;
+}

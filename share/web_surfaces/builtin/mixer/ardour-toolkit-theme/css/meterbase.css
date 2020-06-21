@@ -1,0 +1,101 @@
+/*
+ * This file is part of Toolkit.
+ *
+ * Toolkit is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * Toolkit is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU General
+ * Public License along with this program; if not, write to the
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA  02110-1301  USA
+ */
+/*
+    AVAILABLE DEFAULT BACKGROUNDS
+    background-image: url(../images/meterbase/grid_soft.png);
+    background-image: url(../images/meterbase/grid_strong.png);
+    background-image: url(../images/meterbase/slim_soft_vertical.png);
+    background-image: url(../images/meterbase/slim_strong_vertical.png);
+    background-image: url(../images/meterbase/slim_soft_horizontal.png);
+    background-image: url(../images/meterbase/slim_strong_horizontal.png);
+    background-image: url(../images/meterbase/led_vertical.png);
+    background-image: url(../images/meterbase/led_horizontal.png);
+    background-image: url(../images/meterbase/bevel_soft_vertical.png);
+    background-image: url(../images/meterbase/bevel_strong_vertical.png);
+    background-image: url(../images/meterbase/bevel_soft_horizontal.png);
+    background-image: url(../images/meterbase/bevel_strong_horizontal.png);
+*/
+
+/* BASE */
+
+.toolkit-meter-base {
+    /*padding: 4px;
+    background: #eee;
+    border: 1px solid #fff;
+    -webkit-border-radius: 6px;
+    -moz-border-radius:    6px;
+    border-radius:         6px;
+    -webkit-box-shadow:  0px 1px 2px 0px rgba(0, 0, 0, 0.2);
+    -moz-box-shadow:  0px 1px 2px 0px rgba(0, 0, 0, 0.2);
+    box-shadow:  0px 1px 2px 0px rgba(0, 0, 0, 0.2);
+    box-sizing: border-box;
+    margin: 4px;*/
+    background: #139513;
+}
+
+/* LABEL */
+
+.toolkit-meter-base > .toolkit-label {
+    line-height: 1.2em;
+    height: 1.2em;
+    overflow: visible;
+    font-size: 0.8em;
+}
+
+/* TITLE */
+
+.toolkit-meter-base > .toolkit-title {
+    line-height: 1.2em;
+    height: 1.2em;
+    overflow: visible;
+    font-size: 0.8em;
+}
+
+/* SCALE */
+
+.toolkit-meter-base > .toolkit-scale {
+    color: #aaa;
+    border: 0 solid transparent;
+    border-width: 3px 2px;
+}
+.toolkit-meter-base > .toolkit-scale > .toolkit-label.toolkit-base {
+    color: #666;
+}
+
+/* BAR */
+
+.toolkit-meter-base > .toolkit-bar {
+    /*border-top: 3px solid #ddd;
+    border-bottom: 3px solid #fff;
+    border-left: 2px solid #e8e8e8;
+    border-right: 2px solid #f3f3f3;
+    background-clip: padding-box !important;*/
+}
+.toolkit-meter-base.toolkit-horizontal > .toolkit-bar {
+    height: 32px;
+}
+.toolkit-meter-base.toolkit-vertical > .toolkit-bar {
+    width: 8px;
+}
+
+/* MASK */
+
+.toolkit-meter-base > .toolkit-bar > .toolkit-mask {
+    background: #303030;
+}

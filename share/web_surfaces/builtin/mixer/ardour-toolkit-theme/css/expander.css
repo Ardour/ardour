@@ -1,0 +1,68 @@
+/*
+ * This file is part of Toolkit.
+ *
+ * Toolkit is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * Toolkit is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU General
+ * Public License along with this program; if not, write to the
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA  02110-1301  USA
+ */
+
+/* POPUP */
+.toolkit-expander.toolkit-popup {
+    background: rgba(216, 216, 216, 0.9);
+}
+.toolkit-expander.toolkit-popup.toolkit-expanded > .toolkit-toggle-expand {
+    width: 42px;
+    height: 42px;
+}
+.toolkit-expander.toolkit-popup.toolkit-expanded > .toolkit-toggle-expand::after,
+.toolkit-expander.toolkit-popup.toolkit-expanded > .toolkit-toggle-expand::before {
+    content: "";
+    display: block;
+    position: absolute;
+    height: 4px;
+    width: 32px;
+    top: 19px;
+    left: 5px;
+    transform: rotate(45deg);
+    background: #003050;
+}
+.toolkit-expander.toolkit-popup.toolkit-expanded > .toolkit-toggle-expand::before {
+    transform: rotate(135deg);
+}
+
+/* POPUP INPLACE */
+
+.toolkit-expander.toolkit-popup-inplace {
+    background: rgba(216, 216, 216, 0.9);
+}
+
+.toolkit-expander.toolkit-popup-inplace.toolkit-expanded > .toolkit-toggle-expand {
+    width: 42px;
+    height: 42px;
+}
+.toolkit-expander.toolkit-popup-inplace.toolkit-expanded > .toolkit-toggle-expand::after,
+.toolkit-expander.toolkit-popup-inplace.toolkit-expanded > .toolkit-toggle-expand::before {
+    content: "";
+    display: block;
+    position: absolute;
+    height: 4px;
+    width: 32px;
+    top: 19px;
+    left: 5px;
+    transform: rotate(45deg);
+    background: #003050;
+}
+.toolkit-expander.toolkit-popup.toolkit-expanded > .toolkit-toggle-expand::before {
+    transform: rotate(135deg);
+}

@@ -1,0 +1,41 @@
+<html>
+  <head>
+    <title>[title]</title>
+    <link href="[name].css" rel="stylesheet" type="text/css">
+    <style>
+      body {
+        background: white;
+        color: #222;
+        font-family: sans-serif;
+      }
+      table {
+        border-spacing: 0;
+        margin: 20px 0;
+        width: 100%;
+      }
+      th, h1 {
+        background: #ddd;
+        padding: 4px;
+        font-weight: normal;
+      }
+      td {
+        padding: 6px;
+      }
+      tr:nth-child(odd) {
+        background: #f5f5f5;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>[title]</h1>
+    <table>
+      <tr><td>Title</td><td>[title]</td></tr>
+      <tr><td>Name</td><td>[name]</td></tr>
+      <tr><td>Family</td><td>[family]</td></tr>
+      <tr><td>CSS-File</td><td>[name].css</td></tr>
+      <tr><td>TTF-File</td><td>[name].ttf</td></tr>
+      <tr><td>HTML</td><td>&lt;link href="[name].css" rel="stylesheet" type="text/css"></td></tr>
+    </table>
+    [glyphs]
+  </body>
+</html>

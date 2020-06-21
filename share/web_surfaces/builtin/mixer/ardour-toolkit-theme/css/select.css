@@ -1,0 +1,63 @@
+/*
+ * This file is part of Toolkit.
+ *
+ * Toolkit is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * Toolkit is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU General
+ * Public License along with this program; if not, write to the
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA  02110-1301  USA
+ */
+.toolkit-button.toolkit-select {
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+.toolkit-button.toolkit-select > .toolkit-cell > .toolkit-label {
+    margin-right: 20px;
+}
+.toolkit-button.toolkit-select > .toolkit-cell > .toolkit-arrow {
+    background: url(../images/select/arrow_down.png) 50% 50% no-repeat;
+    width: 16px;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.toolkit-select-list {
+    background: #efefef;
+    border: 1px solid white;
+    margin: 0;
+    padding: 0;
+    -webkit-box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+    -moz-box-shadow:    0px 2px 5px rgba(0, 0, 0, 0.2);
+    box-shadow:         0px 2px 5px rgba(0, 0, 0, 0.2);
+    transition: opacity 200ms;
+    text-align: left;
+}
+
+.toolkit-select-list > .toolkit-option {
+    list-style: none;
+    margin: 0;
+    padding: 0 5px;
+    line-height: 2em;
+    cursor: pointer;
+    transition: background 0.25s ease-in-out, color 0.25s ease-in-out;
+}
+
+.toolkit-select-list > .toolkit-option:hover {
+    background: #002f42;
+    color: white;
+}
+.toolkit-select-list > .toolkit-option.toolkit-active {
+    background: #dfdfdf;
+}

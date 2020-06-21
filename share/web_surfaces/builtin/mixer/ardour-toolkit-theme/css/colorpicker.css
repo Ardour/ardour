@@ -1,0 +1,52 @@
+/*
+ * This file is part of Toolkit.
+ *
+ * Toolkit is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * Toolkit is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU General
+ * Public License along with this program; if not, write to the
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA  02110-1301  USA
+ */
+ 
+ .toolkit-color-picker {
+    
+}
+
+.toolkit-color-picker > .toolkit-canvas {
+}
+.toolkit-color-picker > .toolkit-canvas > .toolkit-grayscale {
+}
+.toolkit-color-picker > .toolkit-canvas > .toolkit-indicator {
+    border: 0.5px solid;
+    -webkit-box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
+    -moz-box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
+    -ms-box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
+}
+
+
+.toolkit-color-picker > .toolkit-hex {
+    border: 0px solid black;
+}
+
+.toolkit-color-picker > .toolkit-hue {
+}
+.toolkit-color-picker  >.toolkit-saturation {
+}
+.toolkit-color-picker > .toolkit-lightness {
+}
+
+.toolkit-color-picker > .toolkit-red {
+}
+.toolkit-color-picker > .toolkit-green {
+}
+.toolkit-color-picker > .toolkit-blue {
+}

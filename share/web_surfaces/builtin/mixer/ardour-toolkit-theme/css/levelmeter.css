@@ -1,0 +1,156 @@
+/*
+ * This file is part of Toolkit.
+ *
+ * Toolkit is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * Toolkit is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU General
+ * Public License along with this program; if not, write to the
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA  02110-1301  USA
+ */
+/* UNIVERSAL */
+
+.toolkit-level-meter.toolkit-clipping > .toolkit-label {
+    color: #ff8000;
+    text-shadow: 0 0 3px white,0 0 3px white;
+}
+
+/* CLIP */
+
+.toolkit-level-meter > .toolkit-clip {
+    background-color: #f60 !important;
+    margin: 0;
+}
+.toolkit-level-meter.toolkit-horizontal > .toolkit-clip {
+    height: 32px;
+    width: 8px;
+}
+
+/* PEAK */
+
+.toolkit-level-meter > .toolkit-bar > .toolkit-peak {
+    line-height: 16px;
+}
+
+.toolkit-level-meter.toolkit-vertical > .toolkit-bar > .toolkit-peak {
+    top: 0;
+    width: 100%;
+    height: 12px;
+    transform: translateY(-50%);
+}
+.toolkit-level-meter.toolkit-vertical.toolkit-left > .toolkit-bar > .toolkit-peak {
+    left: 0px;
+    text-align: left;
+}
+.toolkit-level-meter.toolkit-vertical.toolkit-left > .toolkit-bar > .toolkit-peak::before {
+    content: "";
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 0;
+    height: 0;
+    width: 0;
+    border-left: 5px solid #efefef;
+    border-top: 3px solid transparent;
+    border-bottom: 3px solid transparent;
+    z-index: 1;
+    transform: translateY(-3px);
+}
+.toolkit-level-meter.toolkit-vertical.toolkit-right > .toolkit-bar > .toolkit-peak {
+    right: 0px;
+    text-align: right;
+}
+.toolkit-level-meter.toolkit-vertical.toolkit-right > .toolkit-bar > .toolkit-peak::before {
+    content: "";
+    display: block;
+    position: absolute;
+    top: 50%;
+    right: 0;
+    height: 0;
+    width: 0;
+    border-right: 5px solid #f5f5f5;
+    border-top: 3px solid transparent;
+    border-bottom: 3px solid transparent;
+    z-index: 1;
+    transform: translateY(-3px);
+}
+
+.toolkit-level-meter.toolkit-horizontal > .toolkit-bar > .toolkit-peak {
+    transform: translateX(-50%);
+}
+.toolkit-level-meter.toolkit-horizontal.toolkit-top > .toolkit-bar > .toolkit-peak {
+    top: 0px;
+}
+.toolkit-level-meter.toolkit-horizontal.toolkit-top > .toolkit-bar > .toolkit-peak::before {
+    content: "";
+    display: block;
+    position: absolute;
+    left: 50%;
+    top: 0;
+    height: 0;
+    width: 0;
+    border-top: 5px solid #ddd;
+    border-left: 3px solid transparent;
+    border-right: 3px solid transparent;
+    z-index: 1;
+    transform: translateX(-3px);
+}
+.toolkit-level-meter.toolkit-horizontal.toolkit-bottom > .toolkit-bar > .toolkit-peak {
+    bottom: 0px;
+}
+.toolkit-level-meter.toolkit-horizontal.toolkit-bottom > .toolkit-bar > .toolkit-peak::before {
+    content: "";
+    display: block;
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    height: 0;
+    width: 0;
+    border-bottom: 5px solid #f5f5f5;
+    border-right: 3px solid transparent;
+    border-left: 3px solid transparent;
+    z-index: 1;
+    transform: translateX(-3px);
+}
+/* PEAK LABEL */
+
+.toolkit-level-meter > .toolkit-bar > .toolkit-peak > .toolkit-peak-label {
+    color: white;
+    font-size: 8px;
+    line-height: 12px;
+    opacity: 0.9;
+    overflow: hidden;
+}
+.toolkit-level-meter.toolkit-vertical > .toolkit-bar > .toolkit-peak .toolkit-peak-label {
+    text-shadow: 0 1px 2px black,0 1px 2px black;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+.toolkit-level-meter.toolkit-vertical.toolkit-left > .toolkit-bar > .toolkit-peak > .toolkit-peak-label {
+    padding-left: 7px;
+}
+.toolkit-level-meter.toolkit-vertical.toolkit-right > .toolkit-bar > .toolkit-peak > .toolkit-peak-label {
+    padding-right: 7px;
+}
+
+.toolkit-level-meter.toolkit-horizontal > .toolkit-bar > .toolkit-peak .toolkit-peak-label {
+    text-shadow: -1px 0 2px black,-1px 0 2px black;
+    padding: 7px;
+}
+.toolkit-level-meter.toolkit-horizontal.toolkit-top > .toolkit-bar > .toolkit-peak > .toolkit-peak-label {
+    
+}
+.toolkit-level-meter.toolkit-horizontal.toolkit-bottom > .toolkit-bar > .toolkit-peak > .toolkit-peak-label {
+    
+}

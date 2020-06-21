@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<WebSurface>
+  <Name value="Protocol"/>
+  <Description value="Prints traffic between Ardour and the web browser. This is a tool primarily aimed at developers."/>
+  <Version value="1.0.0"/>
+</WebSurface>

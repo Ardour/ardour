@@ -1,0 +1,103 @@
+/*
+ * This file is part of Toolkit.
+ *
+ * Toolkit is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * Toolkit is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU General
+ * Public License along with this program; if not, write to the
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA  02110-1301  USA
+ */
+.toolkit-buttonarray {
+    height: 50px;
+}
+
+.toolkit-buttonarray.toolkit-vertical {
+    text-align: left;
+}
+.toolkit-buttonarray.toolkit-vertical > .toolkit-previous {
+    margin-bottom: 5px;
+}
+.toolkit-buttonarray.toolkit-vertical > .toolkit-next {
+    margin-top: 5px;
+}
+.toolkit-buttonarray.toolkit-horizontal > .toolkit-previous {
+    width: 40px;
+    padding-left: 4px;
+    padding-right: 4px;
+    margin-right: 5px;
+}
+.toolkit-buttonarray.toolkit-horizontal > .toolkit-next {
+    width: 40px;
+    padding-left: 4px;
+    padding-right: 4px;
+    margin-left: 5px;
+}
+
+.toolkit-buttonarray > .toolkit-clip {
+s    -webkit-border-radius: 6px;
+    -moz-border-radius:    6px;
+    border-radius:         6px;
+    border: 1px solid #aaa;
+    transition: left 0.5s ease-in-out, top 0.5s ease-in-out, right 0.5s ease-in-out, bottom 0.5s ease-in-out;
+    background-color: rgb(245,245,245);
+    background-image: url(../images/gradients/grey_out.png);
+    background-repeat: repeat-x;
+    background-size: 100% 200%;
+    background-position: 50% 0;
+}
+.toolkit-buttonarray.toolkit-over.toolkit-vertical > .toolkit-clip {
+    background-color: rgb(245,245,245);
+    background-image: url(../images/gradients/grey_out.png);
+    background-repeat: repeat-x;
+    background-size: 100% 200%;
+    background-position: 50% 0;
+}
+
+.toolkit-buttonarray > .toolkit-clip > .toolkit-container {
+    transition: left 0.5s ease-in-out, top 0.5s ease-in-out;
+}
+
+.toolkit-buttonarray.toolkit-horizontal > .toolkit-clip > .toolkit-container {
+    
+}
+.toolkit-buttonarray.toolkit-vertical > .toolkit-clip > .toolkit-container {
+    
+}
+
+.toolkit-buttonarray > .toolkit-clip > .toolkit-container > .toolkit-button {
+    margin: 0;
+    border: none;
+    -webkit-border-radius: 0px;
+    -moz-border-radius:    0px;
+    border-radius:         0px;
+}
+.toolkit-buttonarray > .toolkit-clip > .toolkit-container > .toolkit-button > .toolkit-label {
+    white-space: nowrap;
+    width: 100%;
+    box-sizing: border-box;
+}
+.toolkit-buttonarray.toolkit-horizontal > .toolkit-clip > .toolkit-container > .toolkit-button {
+    height: 100%;
+}
+.toolkit-buttonarray.toolkit-vertical > .toolkit-clip > .toolkit-container > .toolkit-button {
+    display: flex;
+    width: 100%;
+    background: none;
+}
+.toolkit-buttonarray.toolkit-vertical > .toolkit-clip > .toolkit-container > .toolkit-button:hover,
+.toolkit-buttonarray.toolkit-vertical > .toolkit-clip > .toolkit-container > .toolkit-button:active
+ {
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+    background: rgba(0,0,0,0.05);
+}
