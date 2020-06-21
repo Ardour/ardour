@@ -1902,6 +1902,9 @@ LV2Plugin::set_property(uint32_t key, const Variant& value)
 	              _uri_map.urids.atom_eventTransfer,
 	              lv2_atom_total_size(atom),
 	              (const uint8_t*)atom);
+
+	/* mark session (and preset) as modified */
+	Plugin::state_changed ();
 }
 
 const ParameterDescriptor&
