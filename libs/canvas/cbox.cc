@@ -270,7 +270,9 @@ cBox::size_allocate (Rect const & r)
 		expanded_size = (r.width() - _left_margin - _right_margin - ((total - 1) * _spacing) - non_expanding_used) / n_expanding;
 	}
 
-	// cerr << "\n\n\n" << whoami() << " SIZE-ALLOC " << r << " expanded items (" << n_expanding << ")will be " << expanded_size << " neu " << non_expanding_used << " t = " << total << " s " << _spacing << '\n';
+	cerr << "\n\n\n" << whoami() << " SIZE-ALLOC " << r << " expanded items (" << n_expanding << ")will be " << expanded_size << " neu " << non_expanding_used << " t = " << total << " s " << _spacing
+	     << " t " << _top_margin << " b " << _bottom_margin << " l " << _left_margin << " r " << _right_margin
+	     << endl;
 
 	Order::iterator prev = order.end();
 
@@ -352,7 +354,11 @@ cBox::child_changed (bool bbox_changed)
 	m_second_trailing, \
 	m_second_leading, \
 	m_second_trailing_padding, \
-	m_second_leading_padding) \
+	m_second_leading_padding, \
+	m_trailing_margin, \
+	m_leading_margin, \
+	m_second_trailing_margin, \
+	m_second_leading_margin) \
  \
 	/* Add constraints that will size the item within this box */ \
  \
@@ -409,7 +415,7 @@ cBox::child_changed (bool bbox_changed)
  \
 		/* first item */ \
  \
-		solver.addConstraint (bci->m_trailing() == _top_margin + bci->m_trailing_padding() | kiwi::strength::strong); \
+		solver.addConstraint (bci->m_trailing() == m_trailing_margin + bci->m_trailing_padding() | kiwi::strength::strong); \
  \
 	} else { \
 		/* subsequent items */ \
@@ -425,12 +431,12 @@ cBox::child_changed (bool bbox_changed)
 	solver.addConstraint (bci->m_second_leading_padding() == 0 | kiwi::strength::weak); \
  \
 	solver.addConstraint (bci->m_second_trailing() + bci->m_second_dimension() == bci->m_second_leading()); \
-	solver.addConstraint (bci->m_second_trailing() == _left_margin + bci->m_second_trailing_padding() | kiwi::strength::strong); \
+	solver.addConstraint (bci->m_second_trailing() == m_second_trailing_margin + bci->m_second_trailing_padding() | kiwi::strength::strong); \
  \
 	if (!(bci->secondary_axis_pack_options() & PackExpand) && natural_second_dimension > 0) { \
 		solver.addConstraint (bci->m_second_dimension() == natural_second_dimension); \
 	} else { \
-		solver.addConstraint (bci->m_second_dimension() == alloc_second_dimension - (_left_margin + _right_margin + bci->m_second_leading_padding()) | kiwi::strength::strong); \
+		solver.addConstraint (bci->m_second_dimension() == alloc_second_dimension - (m_second_trailing_margin + m_second_leading_margin + bci->m_second_leading_padding()) | kiwi::strength::strong); \
 	}
 
 
@@ -440,7 +446,9 @@ cBox::add_vertical_box_constraints (kiwi::Solver& solver, BoxConstrainedItem* ci
 	add_box_constraints (solver, ci, prev, expanded_size, main_dimension, second_dimension, alloc_dimension,
 	                     height, width,
 	                     top, bottom, top_padding, bottom_padding,
-	                     left, right, left_padding, right_padding);
+	                     left, right, left_padding, right_padding,
+	                     _top_margin, _bottom_margin, _left_margin, _right_margin);
+
 }
 
 void
@@ -449,5 +457,40 @@ cBox::add_horizontal_box_constraints (kiwi::Solver& solver, BoxConstrainedItem* 
 	add_box_constraints (solver, ci, prev, expanded_size, main_dimension, second_dimension, alloc_dimension,
 	                     width, height,
 	                     left, right, left_padding, right_padding,
-	                     top, bottom, top_padding, bottom_padding);
+	                     top, bottom, top_padding, bottom_padding,
+	                     _left_margin, _right_margin, _top_margin, _bottom_margin);
+}
+
+void
+cBox::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
+{
+	if (fill() || outline() && _allocation) {
+
+		Rect contents = _allocation;
+
+		contents.x0 += _left_margin;
+		contents.x1 -= _right_margin;
+		contents.y0 += _top_margin;
+		contents.y1 -= _bottom_margin;
+
+		Rect self (item_to_window (contents, false));
+		const Rect draw = self.intersection (area);
+
+		if (fill()) {
+
+			setup_fill_context (context);
+			context->rectangle (draw.x0, draw.y0, draw.width(), draw.height());
+			context->fill_preserve ();
+		}
+
+		if (outline()) {
+			if (!fill()) {
+				context->rectangle (draw.x0, draw.y0, draw.width(), draw.height());
+			}
+			setup_outline_context (context);
+			context->stroke ();
+		}
+	}
+
+	Item::render_children (area, context);
 }
