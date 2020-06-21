@@ -59,6 +59,8 @@ public:
 	void preferred_size(Duple& minimum, Duple& natural) const;
 	void size_allocate (Rect const &);
 
+	void render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const;
+
   protected:
 	Orientation orientation;
 
