@@ -493,6 +493,14 @@ Plugin::parameter_changed_externally (uint32_t which, float /* value */)
 	PresetDirty (); /* EMIT SIGNAL */
 }
 
+void
+Plugin::state_changed ()
+{
+	_parameter_changed_since_last_preset = true;
+	_session.set_dirty ();
+	PresetDirty (); /* EMIT SIGNAL */
+}
+
 int
 Plugin::set_state (const XMLNode& node, int /*version*/)
 {

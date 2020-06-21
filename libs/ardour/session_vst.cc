@@ -502,10 +502,14 @@ intptr_t Session::vst_callback (
 
 	case audioMasterUpdateDisplay:
 		SHOW_CALLBACK ("audioMasterUpdateDisplay");
-		// something has changed, update 'multi-fx' display
-		/* TODO: consider emitting  ParameterChangedExternally() for each ctrl input */
-		if (session) {
-			session->set_dirty ();
+		/* Something has changed, update 'multi-fx' display.
+		 * (Ardour watches output ports already, and redraws when idle.)
+		 *
+		 * We assume that the internal state of the plugin has changed,
+		 * and session as well as preset is marked as modified.
+		 */
+		if (plug) {
+			plug->state_changed ();
 		}
 		return 0;
 

@@ -2999,7 +2999,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 					    atom->type == _uri_map.urids.atom_Object) {
 						LV2_Atom_Object* obj = (LV2_Atom_Object*)atom;
 						if (obj->body.otype == _uri_map.urids.state_StateChanged) {
-							_session.set_dirty ();
+							Plugin::state_changed ();
 						}
 					}
 				}

@@ -376,6 +376,12 @@ protected:
 	/** Do the actual removal of a preset of the provided name */
 	virtual void do_remove_preset (std::string) = 0;
 
+
+	/** Plugin's [internal] state changed, mark preset and session
+	 * as modified.
+	 */
+	void state_changed ();
+
 	ARDOUR::AudioEngine& _engine;
 	ARDOUR::Session&     _session;
 	PluginInfoPtr        _info;
