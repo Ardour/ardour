@@ -1902,9 +1902,6 @@ LV2Plugin::set_property(uint32_t key, const Variant& value)
 	              _uri_map.urids.atom_eventTransfer,
 	              lv2_atom_total_size(atom),
 	              (const uint8_t*)atom);
-
-	/* mark session (and preset) as modified */
-	Plugin::state_changed ();
 }
 
 const ParameterDescriptor&
@@ -2830,6 +2827,28 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 				if (!lv2_evbuf_write(&i, nframes - 1, 0, atom->type, atom->size,
 				                (const uint8_t*)(atom + 1))) {
 					error << "Failed to write data to LV2 event buffer\n";
+				}
+				/* Intercept patch:Set messages from GUIs (custom,
+				 * or generic via LV2Plugin::set_property).
+				 */
+				else if (atom->type == _uri_map.urids.atom_Blank ||
+				         atom->type == _uri_map.urids.atom_Object) {
+					LV2_Atom_Object* obj = (LV2_Atom_Object*)atom;
+					if (obj->body.otype == _uri_map.urids.patch_Set) {
+						const LV2_Atom* property = NULL;
+						const LV2_Atom* value    = NULL;
+						lv2_atom_object_get(obj,
+						                    _uri_map.urids.patch_property, &property,
+						                    _uri_map.urids.patch_value,    &value,
+						                    0);
+
+						if (property && value &&
+						    property->type == _uri_map.urids.atom_URID &&
+						    value->type    == _uri_map.urids.atom_Path) {
+							/* mark session (and preset) as modified */
+							Plugin::state_changed ();
+						}
+					}
 				}
 			} else {
 				error << string_compose (_("LV2<%1>: Received unknown message type from UI"), name()) << endmsg;
