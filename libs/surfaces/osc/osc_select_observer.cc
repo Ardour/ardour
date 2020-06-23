@@ -35,6 +35,7 @@
 #include "ardour/route_group.h"
 #include "ardour/route_group_member.h"
 #include "ardour/send.h"
+#include "ardour/panner_shell.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/processor.h"
@@ -97,6 +98,7 @@ OSCSelectObserver::no_strip ()
 	// This gets called on drop references
 	_init = true;
 
+	pan_connections.drop_connections ();
 	strip_connections.drop_connections ();
 	send_connections.drop_connections ();
 	plugin_connections.drop_connections ();
@@ -211,31 +213,9 @@ OSCSelectObserver::refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip
 		trim_message (X_("/select/trimdB"), _strip->trim_control());
 	}
 
-	boost::shared_ptr<Controllable> pan_controllable = boost::dynamic_pointer_cast<Controllable>(_strip->pan_azimuth_control());
-	if (pan_controllable) {
-		pan_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_stereo_position"), _strip->pan_azimuth_control()), OSC::instance());
-		change_message (X_("/select/pan_stereo_position"), _strip->pan_azimuth_control());
-	}
-
-	boost::shared_ptr<Controllable> width_controllable = boost::dynamic_pointer_cast<Controllable>(_strip->pan_width_control());
-	if (width_controllable) {
-		width_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_stereo_width"), _strip->pan_width_control()), OSC::instance());
-		change_message (X_("/select/pan_stereo_width"), _strip->pan_width_control());
-	}
-
-	// Rest of possible pan controls... Untested because I can't find a way to get them in the GUI :)
-	if (_strip->pan_elevation_control ()) {
-		_strip->pan_elevation_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_elevation_position"), _strip->pan_elevation_control()), OSC::instance());
-		change_message (X_("/select/pan_elevation_position"), _strip->pan_elevation_control());
-	}
-	if (_strip->pan_frontback_control ()) {
-		_strip->pan_frontback_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_frontback_position"), _strip->pan_frontback_control()), OSC::instance());
-		change_message (X_("/select/pan_frontback_position"), _strip->pan_frontback_control());
-	}
-	if (_strip->pan_lfe_control ()) {
-		_strip->pan_lfe_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_lfe_control"), _strip->pan_lfe_control()), OSC::instance());
-		change_message (X_("/select/pan_lfe_control"), _strip->pan_lfe_control());
-	}
+	boost::shared_ptr<PannerShell> pan_sh =  rt->panner_shell();
+	pan_sh->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::panner_changed, this), OSC::instance());
+	panner_changed ();
 
 	// sends, plugins and eq
 	// detecting processor changes is now in osc.cc
@@ -673,6 +653,42 @@ OSCSelectObserver::name_changed (const PBD::PropertyChange& what_changed)
 		_osc.float_message (X_("/select/n_inputs"), (float) route->n_inputs().n_total(), addr);
 		// lets tell the surface how many outputs this strip has
 		_osc.float_message (X_("/select/n_outputs"), (float) route->n_outputs().n_total(), addr);
+	}
+}
+
+void
+OSCSelectObserver::panner_changed ()
+{
+	pan_connections.drop_connections ();
+
+	if (feedback[1]) {
+
+		boost::shared_ptr<Controllable> pan_controllable = boost::dynamic_pointer_cast<Controllable>(_strip->pan_azimuth_control());
+		if (pan_controllable) {
+			pan_controllable->Changed.connect (pan_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_stereo_position"), _strip->pan_azimuth_control()), OSC::instance());
+			change_message (X_("/select/pan_stereo_position"), _strip->pan_azimuth_control());
+		}
+
+		boost::shared_ptr<Controllable> width_controllable = boost::dynamic_pointer_cast<Controllable>(_strip->pan_width_control());
+		if (width_controllable) {
+			width_controllable->Changed.connect (pan_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_stereo_width"), _strip->pan_width_control()), OSC::instance());
+			change_message (X_("/select/pan_stereo_width"), _strip->pan_width_control());
+		}
+
+		// Rest of possible pan controls... Untested because I can't find a way to get them in the GUI :)
+		if (_strip->pan_elevation_control ()) {
+			_strip->pan_elevation_control()->Changed.connect (pan_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_elevation_position"), _strip->pan_elevation_control()), OSC::instance());
+			change_message (X_("/select/pan_elevation_position"), _strip->pan_elevation_control());
+		}
+		if (_strip->pan_frontback_control ()) {
+			_strip->pan_frontback_control()->Changed.connect (pan_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_frontback_position"), _strip->pan_frontback_control()), OSC::instance());
+			change_message (X_("/select/pan_frontback_position"), _strip->pan_frontback_control());
+		}
+		if (_strip->pan_lfe_control ()) {
+			_strip->pan_lfe_control()->Changed.connect (pan_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_lfe_control"), _strip->pan_lfe_control()), OSC::instance());
+			change_message (X_("/select/pan_lfe_control"), _strip->pan_lfe_control());
+		}
+
 	}
 }
 

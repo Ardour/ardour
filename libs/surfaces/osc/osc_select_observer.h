@@ -59,7 +59,8 @@ class OSCSelectObserver
 	ArdourSurface::OSC& _osc;
 
 	PBD::ScopedConnectionList strip_connections;
-	// sends, plugins and eq need their own
+	// pans, sends, plugins and eq need their own
+	PBD::ScopedConnectionList pan_connections;
 	PBD::ScopedConnectionList send_connections;
 	PBD::ScopedConnectionList plugin_connections;
 	PBD::ScopedConnectionList eq_connections;
@@ -97,6 +98,7 @@ class OSCSelectObserver
 	ARDOUR::Session* session;
 
 	void name_changed (const PBD::PropertyChange& what_changed);
+	void panner_changed ();
 	void group_name ();
 	void group_sharing (ARDOUR::RouteGroup *rg_c);
 	void comment_changed ();

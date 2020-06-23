@@ -87,6 +87,7 @@ OSCRouteObserver::OSCRouteObserver (OSC& o, uint32_t ss, ArdourSurface::OSC::OSC
 OSCRouteObserver::~OSCRouteObserver ()
 {
 	_init = true;
+	pan_connections.drop_connections ();
 	strip_connections.drop_connections ();
 
 	lo_address_free (addr);
@@ -98,6 +99,7 @@ OSCRouteObserver::no_strip ()
 	// This gets called on drop references
 	_init = true;
 
+	pan_connections.drop_connections ();
 	strip_connections.drop_connections ();
 	_gain_control = boost::shared_ptr<ARDOUR::GainControl> ();
 	_send = boost::shared_ptr<ARDOUR::Send> ();
@@ -128,6 +130,7 @@ OSCRouteObserver::refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip,
 		_init = false;
 		return;
 	}
+	pan_connections.drop_connections ();
 	strip_connections.drop_connections ();
 	_strip = new_strip;
 	if (!_strip) {
@@ -199,11 +202,12 @@ OSCRouteObserver::refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip,
 			send_trim_message ();
 		}
 
-		boost::shared_ptr<Controllable> pan_controllable = boost::dynamic_pointer_cast<Controllable>(_strip->pan_azimuth_control());
-		if (pan_controllable) {
-			pan_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_change_message, this, X_("/strip/pan_stereo_position"), _strip->pan_azimuth_control()), OSC::instance());
-			send_change_message (X_("/strip/pan_stereo_position"), _strip->pan_azimuth_control());
-		}
+		boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (_strip);
+		boost::shared_ptr<PannerShell> pan_sh =  rt->panner_shell();
+		current_pan_shell = pan_sh;
+		pan_sh->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::panner_changed, this, current_pan_shell), OSC::instance());
+		panner_changed (pan_sh);
+
 	}
 	_init = false;
 	tick();
@@ -227,6 +231,7 @@ OSCRouteObserver::refresh_send (boost::shared_ptr<ARDOUR::Send> new_send, bool f
 		_init = false;
 		return;
 	}
+	pan_connections.drop_connections ();
 	strip_connections.drop_connections ();
 	if (!_strip) {
 		// this strip is blank and should be cleared
@@ -249,15 +254,11 @@ OSCRouteObserver::refresh_send (boost::shared_ptr<ARDOUR::Send> new_send, bool f
 		_gain_control->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_gain_message, this), OSC::instance());
 		gain_automation ();
 
-		if (_send->pan_outs() > 1) {
-			boost::shared_ptr<Controllable> pan_controllable = boost::dynamic_pointer_cast<Controllable>(_send->panner_shell()->panner()->pannable()->pan_azimuth_control);
-			if (pan_controllable) {
-				pan_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_change_message, this, X_("/strip/pan_stereo_position"), pan_controllable), OSC::instance());
-				send_change_message (X_("/strip/pan_stereo_position"), pan_controllable);
-			}
-		} else {
-			_osc.float_message_with_id (X_("/strip/pan_stereo_position"), ssid, 0.5, in_line, addr);
-		}
+		boost::shared_ptr<PannerShell> pan_sh =  _send->panner_shell();
+		current_pan_shell = pan_sh;
+		pan_sh->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::panner_changed, this, current_pan_shell), OSC::instance());
+		panner_changed (pan_sh);
+
 	}
 	_init = false;
 	tick();
@@ -437,6 +438,29 @@ OSCRouteObserver::name_changed (const PBD::PropertyChange& what_changed)
 
 	if (_strip) {
 		_osc.text_message_with_id (X_("/strip/name"), ssid, name, in_line, addr);
+	}
+}
+
+void
+OSCRouteObserver::panner_changed (boost::shared_ptr<ARDOUR::PannerShell> pan_sh)
+{
+	pan_connections.drop_connections ();
+
+	if (feedback[1]) {
+		boost::shared_ptr<Controllable> pan_controllable = boost::dynamic_pointer_cast<Controllable>(pan_sh->panner()->pannable()->pan_azimuth_control);
+		if (pan_controllable) {
+			pan_controllable->Changed.connect (pan_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_change_message, this, X_("/strip/pan_stereo_position"), current_pan_shell->panner()->pannable()->pan_azimuth_control), OSC::instance());
+			send_change_message (X_("/strip/pan_stereo_position"), pan_controllable);
+		} else {
+			_osc.float_message_with_id (X_("/strip/pan_stereo_position"), ssid, 0.5, in_line, addr);
+		}
+		boost::shared_ptr<Controllable> width_controllable = boost::dynamic_pointer_cast<Controllable>(pan_sh->panner()->pannable()->pan_width_control);
+		if (width_controllable) {
+			width_controllable->Changed.connect (pan_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_change_message, this, X_("/strip/pan_stereo_width"), current_pan_shell->panner()->pannable()->pan_width_control), OSC::instance());
+			send_change_message (X_("/strip/pan_stereo_width"), width_controllable);
+		} else {
+			_osc.float_message_with_id (X_("/strip/pan_stereo_width"), ssid, 1.0, in_line, addr);
+		}
 	}
 }
 
