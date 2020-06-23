@@ -2025,6 +2025,8 @@ LV2Plugin::load_supported_properties(PropertyDescriptors& descs)
 		load_parameter_descriptor(_world, desc, datatype, prop);
 		descs.insert(std::make_pair(desc.key, desc));
 
+		_property_values[desc.key] = Variant();
+
 		lilv_node_free(range);
 	}
 	lilv_nodes_free(properties);
@@ -2842,11 +2844,12 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 						                    _uri_map.urids.patch_value,    &value,
 						                    0);
 
-						if (property && value &&
-						    property->type == _uri_map.urids.atom_URID &&
-						    value->type    == _uri_map.urids.atom_Path) {
-							/* mark session (and preset) as modified */
-							Plugin::state_changed ();
+						if (property && value && property->type == _uri_map.urids.atom_URID) {
+							/* check if it's a property we know or care about */
+							const uint32_t prop_id = ((const LV2_Atom_URID*)property)->body;
+							if (_property_values.find (prop_id) != _property_values.end()) {
+								Plugin::state_changed ();
+							}
 						}
 					}
 				}
@@ -3040,18 +3043,26 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 							                    _uri_map.urids.patch_value,    &value,
 							                    0);
 
-							if (property && value &&
-							    property->type == _uri_map.urids.atom_URID &&
-							    value->type    == _uri_map.urids.atom_Path) {
-								const uint32_t prop_id = ((const LV2_Atom_URID*)property)->body;
-								const char*    path    = (const char*)LV2_ATOM_BODY_CONST(value);
+							if (property && value && property->type == _uri_map.urids.atom_URID) {
+								const uint32_t prop_id  = ((const LV2_Atom_URID*)property)->body;
+								if (_property_values.find (prop_id) != _property_values.end()) {
+									if (value->type == _uri_map.urids.atom_Path) {
+										const char* path          = (const char*)LV2_ATOM_BODY_CONST(value);
+										_property_values[prop_id] = Variant(Variant::PATH, path);
+									}
+									if (value->type == _uri_map.urids.atom_Float) {
+										const float* val          = (float*)LV2_ATOM_BODY_CONST(value);
+										_property_values[prop_id] = Variant(Variant::FLOAT, *val);
+									}
+									// TODO add support for other props (Int, Bool, ..)
 
-								// Emit PropertyChanged signal for UI
-								// TODO: This should emit the control's Changed signal
-								PropertyChanged(prop_id, Variant(Variant::PATH, path));
-								_property_values[prop_id] = Variant(Variant::PATH, path);
+									// TODO: This should emit the control's Changed signal
+									PropertyChanged(prop_id, _property_values[prop_id]);
+								} else {
+									std::cerr << "warning: patch:Set for unknown property" << std::endl;
+								}
 							} else {
-								std::cerr << "warning: patch:Set for unknown property" << std::endl;
+								std::cerr << "warning: patch:Set for unsupported property" << std::endl;
 							}
 						}
 					}
