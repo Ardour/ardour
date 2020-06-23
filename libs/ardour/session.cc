@@ -6765,7 +6765,7 @@ Session::session_name_is_legal (const string& path)
 {
 	char illegal_chars[] = { '/', '\\', ':', ';' };
 
-	for (int i = 0; illegal_chars[i]; ++i) {
+	for (int i = 0; i < 4; ++i) {
 		if (path.find (illegal_chars[i]) != string::npos) {
 			return std::string (1, illegal_chars[i]);
 		}
