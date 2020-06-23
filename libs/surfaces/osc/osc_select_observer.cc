@@ -126,6 +126,7 @@ OSCSelectObserver::refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip
 		return;
 	}
 
+	no_strip();
 	_strip = new_strip;
 	if (!_strip) {
 		clear_observer ();
