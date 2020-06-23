@@ -6763,9 +6763,9 @@ Session::update_latency_compensation (bool force_whole_graph, bool called_from_b
 const std::string
 Session::session_name_is_legal (const string& path)
 {
-	const string illegal_chars = "/\\:;";
+	static const char illegal_chars[] = { '/', '\\', ':', ';' };
 
-	for (int i = 0; i < illegal_chars.length(); ++i) {
+	for (size_t i = 0; i < sizeof (illegal_chars); ++i) {
 		if (path.find (illegal_chars[i]) != string::npos) {
 			return std::string (1, illegal_chars[i]);
 		}
