@@ -153,19 +153,30 @@ Plugin::remove_preset (string name)
 Plugin::PresetRecord
 Plugin::save_preset (string name)
 {
-	if (preset_by_label (name)) {
-		PBD::error << _("Preset with given name already exists.") << endmsg;
+	Plugin::PresetRecord const* p = preset_by_label (name);
+	if (p && !p->user) {
+		PBD::error << _("A factory presets with given name already exists.") << endmsg;
 		return Plugin::PresetRecord ();
 	}
 
 	string const uri = do_save_preset (name);
 
-	if (!uri.empty()) {
-		_presets.insert (make_pair (uri, PresetRecord (uri, name)));
-		_have_presets = false;
-		PresetsChanged (unique_id(), this, true); /* EMIT SIGNAL */
-		PresetAdded (); /* EMIT SIGNAL */
+	if (uri.empty()) {
+		/* save failed, clean up preset */
+		do_remove_preset (name);
+		PBD::error << _("Failed to save plugin preset.") << endmsg;
+		return Plugin::PresetRecord ();
 	}
+
+	if (p) {
+		_presets.erase (p->uri);
+		_parameter_changed_since_last_preset = false;
+	}
+
+	_presets.insert (make_pair (uri, PresetRecord (uri, name)));
+	_have_presets = false;
+	PresetsChanged (unique_id(), this, true); /* EMIT SIGNAL */
+	PresetAdded (); /* EMIT SIGNAL */
 
 	return PresetRecord (uri, name);
 }

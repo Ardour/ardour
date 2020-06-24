@@ -1633,6 +1633,15 @@ LV2Plugin::do_save_preset(string name)
 #endif
 
 	/* delete reference to old preset (if any) */
+#if 0 // prefer this when https://github.com/lv2/lilv/issues/37 is resolved
+	do_remove_preset (name);
+#else
+	/* this works around https://github.com/lv2/lilv/issues/37
+	 *
+	 * do_remove_preset() calls lilv_state_delete(); That
+	 * deletes all mapped files without re-creating them.
+	 * So for the time being we just leave them in place.
+	 */
 	const PresetRecord* r = preset_by_label(name);
 	if (r) {
 		LilvNode*  pset  = lilv_new_uri (_world.world, r->uri.c_str());
@@ -1641,6 +1650,7 @@ LV2Plugin::do_save_preset(string name)
 			lilv_node_free(pset);
 		}
 	}
+#endif
 
 	LilvState* state = lilv_state_new_from_instance(
 		_impl->plugin,

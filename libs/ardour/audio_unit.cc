@@ -2224,6 +2224,9 @@ AUPlugin::do_save_preset (string preset_name)
 
 	user_preset_path = Glib::build_filename (v);
 
+	/* delete old preset if it exists */
+	g_unlink (user_preset_path.c_str());
+
 	set_preset_name_in_plist (propertyList, preset_name);
 
 	if (save_property_list (propertyList, user_preset_path)) {

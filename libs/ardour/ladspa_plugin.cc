@@ -899,6 +899,8 @@ string
 LadspaPlugin::do_save_preset (string name)
 {
 #ifdef HAVE_LRDF
+	do_remove_preset (name);
+
 	/* make a vector of pids that are input parameters */
 	vector<int> input_parameter_pids;
 	for (uint32_t i = 0; i < parameter_count(); ++i) {
