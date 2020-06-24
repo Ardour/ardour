@@ -82,12 +82,10 @@ public:
 	};
 
 	std::string user_plugin_metadata_dir () const;
-	void load_statuses ();
 	void save_statuses ();
 	void set_status (ARDOUR::PluginType type, std::string unique_id, PluginStatusType status);
 	PluginStatusType get_status (const PluginInfoPtr&) const;
 
-	void load_tags ();
 	void save_tags ();
 
 	bool load_plugin_order_file (XMLNode &n) const;  //returns TRUE if the passed-in node has valid info
@@ -123,56 +121,53 @@ public:
 private:
 
 	struct PluginTag {
-		ARDOUR::PluginType type;
-		std::string unique_id;
-		std::string tags;
-		std::string name;
-		TagType tagtype;
+		PluginType const  type;
+		std::string const unique_id;
+		std::string const name;
+		std::string       tags;
+		TagType           tagtype;
 
-		PluginTag (ARDOUR::PluginType t, std::string id, std::string tag, std::string n, TagType tt)
-			: type (t), unique_id (id), tags (tag), name(n), tagtype (tt) {}
+		PluginTag (ARDOUR::PluginType t, std::string const& id, std::string const& tag, std::string const& n, TagType tt)
+			: type (t), unique_id (id), name(n), tags (tag), tagtype (tt) {}
 
 		bool operator== (PluginTag const& other) const {
 			return other.type == type && other.unique_id == unique_id;
 		}
 
 		bool operator< (PluginTag const& other) const {
-			if (other.type < type) {
-				return true;
-			} else if (other.type == type && other.unique_id < unique_id) {
-				return true;
+			if (other.type == type) {
+				return other.unique_id < unique_id;
 			}
-			return false;
+			return other.type < type;
 		}
 	};
+
+
+	struct PluginStatus {
+		PluginType const       type;
+		std::string const      unique_id;
+		PluginStatusType const status;
+
+		PluginStatus (ARDOUR::PluginType t, std::string const& id, PluginStatusType s = Normal)
+			: type (t), unique_id (id), status (s) {}
+
+		bool operator==(const PluginStatus& other) const {
+			return other.type == type && other.unique_id == unique_id;
+		}
+
+		bool operator<(const PluginStatus& other) const {
+			if (other.type == type) {
+				return other.unique_id < unique_id;
+			}
+			return other.type < type;
+		}
+	};
+
 
 	typedef std::set<PluginTag> PluginTagList;
 	PluginTagList ptags;
 	PluginTagList ftags; /* factory-file defaults */
 
-	std::string sanitize_tag (const std::string) const;
-
-	struct PluginStatus {
-	    ARDOUR::PluginType type;
-	    std::string unique_id;
-	    PluginStatusType status;
-
-	    PluginStatus (ARDOUR::PluginType t, std::string id, PluginStatusType s = Normal)
-	    : type (t), unique_id (id), status (s) {}
-
-	    bool operator==(const PluginStatus& other) const {
-		    return other.type == type && other.unique_id == unique_id;
-	    }
-
-	    bool operator<(const PluginStatus& other) const {
-		    if (other.type < type) {
-			    return true;
-		    } else if (other.type == type && other.unique_id < unique_id) {
-			    return true;
-		    }
-		    return false;
-	    }
-	};
 	typedef std::set<PluginStatus> PluginStatusList;
 	PluginStatusList statuses;
 
@@ -195,6 +190,11 @@ private:
 
 	void detect_name_ambiguities (ARDOUR::PluginInfoList*);
 	void detect_type_ambiguities (ARDOUR::PluginInfoList&);
+
+	void load_statuses ();
+	void load_tags ();
+
+	std::string sanitize_tag (const std::string) const;
 
 	void ladspa_refresh ();
 	void lua_refresh ();

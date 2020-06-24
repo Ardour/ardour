@@ -1784,7 +1784,8 @@ PluginManager::reset_tags (PluginInfoPtr const& pi)
 
 	PluginTagList::const_iterator j = find (ftags.begin(), ftags.end(), ps);
 	if (j != ftags.end()) {
-		ps = *j;
+		ps.tags = j->tags;
+		ps.tagtype = j->tagtype;
 	}
 
 	PluginTagList::const_iterator i = find (ptags.begin(), ptags.end(), ps);
