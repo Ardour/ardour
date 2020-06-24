@@ -74,6 +74,10 @@ public:
 	bool cancelled () { return _cancel_scan; }
 	bool no_timeout () { return _cancel_timeout; }
 
+	void stats_use_plugin (PluginInfoPtr const&);
+	bool stats (PluginInfoPtr const&, time_t& lru, uint64_t& use_count) const;
+	void save_stats ();
+
 	enum PluginStatusType {
 		Normal = 0,
 		Favorite,
@@ -142,7 +146,6 @@ private:
 		}
 	};
 
-
 	struct PluginStatus {
 		PluginType const       type;
 		std::string const      unique_id;
@@ -163,6 +166,26 @@ private:
 		}
 	};
 
+	struct PluginStats {
+		PluginType const  type;
+		std::string const unique_id;
+		time_t            lru;
+		uint64_t          use_count;
+
+		PluginStats (ARDOUR::PluginType t, std::string const& id, time_t lru = 0, uint64_t use_count = 0)
+			: type (t), unique_id (id), lru (lru), use_count (use_count) {}
+
+		bool operator==(const PluginStats& other) const {
+			return other.type == type && other.unique_id == unique_id;
+		}
+
+		bool operator<(const PluginStats& other) const {
+			if (other.type == type) {
+				return other.unique_id < unique_id;
+			}
+			return other.type < type;
+		}
+	};
 
 	typedef std::set<PluginTag> PluginTagList;
 	PluginTagList ptags;
@@ -170,6 +193,9 @@ private:
 
 	typedef std::set<PluginStatus> PluginStatusList;
 	PluginStatusList statuses;
+
+	typedef std::set<PluginStats> PluginStatsList;
+	PluginStatsList statistics;
 
 	ARDOUR::PluginInfoList  _empty_plugin_info;
 	ARDOUR::PluginInfoList* _windows_vst_plugin_info;
@@ -193,6 +219,7 @@ private:
 
 	void load_statuses ();
 	void load_tags ();
+	void load_stats ();
 
 	std::string sanitize_tag (const std::string) const;
 

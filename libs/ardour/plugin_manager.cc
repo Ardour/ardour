@@ -179,8 +179,8 @@ PluginManager::PluginManager ()
 #endif
 
 	load_statuses ();
-
 	load_tags ();
+	load_stats ();
 
 	if ((s = getenv ("LADSPA_RDF_PATH"))){
 		lrdf_path = s;
@@ -1581,6 +1581,94 @@ PluginManager::set_status (PluginType t, string id, PluginStatusType status)
 	}
 
 	PluginStatusChanged (t, id, status); /* EMIT SIGNAL */
+}
+
+void
+PluginManager::save_stats ()
+{
+	// TODO: consider thinning out the list
+	// (LRU > 1 year? or LRU > 2 weeks && use_count < 10% of avg use-count)
+	std::string path = Glib::build_filename (user_plugin_metadata_dir(), "plugin_stats");
+	XMLNode* root = new XMLNode (X_("PluginStats"));
+
+	for (PluginStatsList::iterator i = statistics.begin(); i != statistics.end(); ++i) {
+		XMLNode* node = new XMLNode (X_("Plugin"));
+		node->set_property (X_("type"), (*i).type);
+		node->set_property (X_("id"), (*i).unique_id);
+		node->set_property (X_("lru"), (*i).lru);
+		node->set_property (X_("use-count"), (*i).use_count);
+		root->add_child_nocopy (*node);
+	}
+
+	XMLTree tree;
+	tree.set_root (root);
+	if (!tree.write (path)) {
+		error << string_compose (_("Could not save Plugin Statistics to %1"), path) << endmsg;
+	}
+}
+
+void
+PluginManager::load_stats ()
+{
+	std::string path = Glib::build_filename (user_plugin_metadata_dir(), "plugin_stats");
+	if (!Glib::file_test (path, Glib::FILE_TEST_EXISTS)) {
+		return;
+	}
+	info << string_compose (_("Loading plugin statistics file %1"), path) << endmsg;
+
+	XMLTree tree;
+	if (!tree.read (path)) {
+		error << string_compose (_("Cannot parse plugin statistics from %1"), path) << endmsg;
+		return;
+	}
+
+	statistics.clear ();
+
+	for (XMLNodeConstIterator i = tree.root()->children().begin(); i != tree.root()->children().end(); ++i)
+	{
+		PluginType type;
+		string     id;
+		time_t     lru;
+		uint64_t   use_count;
+
+		if (!(*i)->get_property (X_("type"), type) ||
+				!(*i)->get_property (X_("id"), id) ||
+				!(*i)->get_property (X_("lru"), lru) ||
+				!(*i)->get_property (X_("use-count"), use_count)) {
+			continue;
+		}
+		PluginStats ps (type, id, lru, use_count);
+		statistics.insert (ps);
+	}
+}
+
+void
+PluginManager::stats_use_plugin (PluginInfoPtr const& pip)
+{
+	PluginStats ps (pip->type, pip->unique_id, time (NULL));
+	PluginStatsList::const_iterator i = find (statistics.begin(), statistics.end(), ps);
+	if (i == statistics.end()) {
+		ps.use_count = 1;
+		statistics.insert (ps);
+	} else {
+		ps.use_count = i->use_count + 1;
+		statistics.erase (ps);
+		statistics.insert (ps);
+	}
+	save_stats (); // XXX
+}
+
+bool
+PluginManager::stats (PluginInfoPtr const& pip, time_t& lru, uint64_t& use_count) const
+{
+	PluginStats ps (pip->type, pip->unique_id, time (NULL));
+	PluginStatsList::const_iterator i = find (statistics.begin(), statistics.end(), ps);
+	if (i == statistics.end()) {
+		return false;
+	}
+	lru = i->lru;
+	use_count = i->use_count;
+	return true;
 }
 
 PluginType
