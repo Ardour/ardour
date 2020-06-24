@@ -2274,7 +2274,12 @@ OSC::strip_feedback (OSCSurface* sur, bool new_bank_size)
 	} else {
 		sur->strips = get_sorted_stripables(sur->strip_types, sur->cue, 1, sur->temp_strips);
 	}
+	uint32_t old_size = sur->nstrips;
 	sur->nstrips = sur->strips.size();
+	if (old_size != sur->nstrips) {
+		new_bank_size = true;
+	}
+
 	if (ls) {
 		set->strips = sur->strips;
 	}
@@ -2282,9 +2287,6 @@ OSC::strip_feedback (OSCSurface* sur, bool new_bank_size)
 	if (new_bank_size || (!sur->feedback[0] && !sur->feedback[1])) {
 		// delete old observers
 		for (uint32_t i = 0; i < sur->observers.size(); i++) {
-			if (!sur->bank_size) {
-				sur->observers[i]->clear_strip ();
-			}
 			delete sur->observers[i];
 		}
 		sur->observers.clear();
@@ -2359,10 +2361,7 @@ OSC::_recalcbanks ()
 	 * either banksize is changed or Ardour exits.
 	 *
 	 * 2) banksize is 0 or unlimited and so is the same size as the number
-	 * of strips. For a recalc, We want to tear down all strips but not send
-	 * a reset value for any of the controls and then rebuild all observers.
-	 * this is easier than detecting change in "bank" size and deleting or
-	 * adding just a few.
+	 * of strips.
 	 */
 
 	// refresh each surface we know about.
@@ -2373,7 +2372,7 @@ OSC::_recalcbanks ()
 		if (sur->cue) {
 			_cue_set (sur->aux, addr);
 		} else if (!sur->bank_size) {
-			strip_feedback (sur, true);
+			strip_feedback (sur, false);
 			// This surface uses /strip/list tell it routes have changed
 			lo_message reply;
 			reply = lo_message_new ();
