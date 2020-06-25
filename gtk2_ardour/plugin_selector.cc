@@ -969,6 +969,9 @@ PluginSelector::build_plugin_menu ()
 	items.push_back (MenuElem (_("Plugin Manager..."), sigc::mem_fun (*this, &PluginSelector::show_manager)));
 	items.push_back (SeparatorElem ());
 
+	Menu* charts = create_charts_menu(all_plugs);
+	items.push_back (MenuElem (_("Top-10"), *manage (charts)));
+
 	Menu* by_creator = create_by_creator_menu(all_plugs);
 	items.push_back (MenuElem (_("By Creator"), *manage (by_creator)));
 
@@ -1024,6 +1027,39 @@ PluginSelector::create_favs_menu (PluginInfoList& all_plugs)
 		}
 	}
 	return favs;
+}
+
+Gtk::Menu*
+PluginSelector::create_charts_menu (PluginInfoList& all_plugs)
+{
+	using namespace Menu_Helpers;
+
+	Menu* charts = new Menu();
+	charts->set_name("ArdourContextMenu");
+
+	PluginInfoList plugs;
+
+	for (PluginInfoList::const_iterator i = all_plugs.begin(); i != all_plugs.end(); ++i) {
+		int64_t lru;
+		uint64_t use_count;
+		if (manager.stats (*i, lru, use_count)) {
+			plugs.push_back (*i);
+		}
+	}
+	PluginChartsSorter cmp;
+	plugs.sort (cmp);
+	plugs.resize (std::min (plugs.size(), size_t(10)));
+
+	PluginABCSorter abc;
+	plugs.sort (abc);
+
+	for (PluginInfoList::const_iterator i = plugs.begin(); i != plugs.end(); ++i) {
+		string typ = GetPluginTypeStr(*i);
+		MenuElem elem ((*i)->name + typ, (sigc::bind (sigc::mem_fun (*this, &PluginSelector::plugin_chosen_from_menu), *i)));
+		elem.get_child()->set_use_underline (false);
+		charts->items().push_back (elem);
+	}
+	return charts;
 }
 
 Gtk::Menu*
