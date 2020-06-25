@@ -45,6 +45,7 @@ ConstraintPacker::ConstraintPacker (Canvas* canvas)
 {
 	set_fill (false);
 	set_outline (false);
+	set_layout_sensitive (true);
 }
 
 ConstraintPacker::ConstraintPacker (Item* parent)
@@ -55,11 +56,13 @@ ConstraintPacker::ConstraintPacker (Item* parent)
 {
 	set_fill (false);
 	set_outline (false);
+	set_layout_sensitive (true);
 }
 
 void
 ConstraintPacker::compute_bounding_box () const
 {
+	cerr << whoami() << " CBB from " << _allocation << endl;
 	_bounding_box = _allocation;
 	_bounding_box_dirty = false;
 }
