@@ -278,7 +278,7 @@ Mixer_UI::Mixer_UI ()
 	favorite_plugins_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
 	favorite_plugins_search_hbox.pack_start (plugin_search_entry, true, true);
-	favorite_plugins_search_hbox.pack_start (plugin_search_clear_button, true, true);
+	favorite_plugins_search_hbox.pack_start (plugin_search_clear_button, false, false);
 
 	favorite_plugins_frame.set_name ("BaseFrame");
 	favorite_plugins_frame.set_shadow_type (Gtk::SHADOW_IN);
