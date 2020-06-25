@@ -1622,7 +1622,10 @@ PluginManager::load_stats ()
 		return;
 	}
 
-	statistics.clear ();
+	PluginStatsList stats;
+
+	float avg_age = 0;
+	float avg_cnt = 0;
 
 	for (XMLNodeConstIterator i = tree.root()->children().begin(); i != tree.root()->children().end(); ++i)
 	{
@@ -1637,8 +1640,36 @@ PluginManager::load_stats ()
 				!(*i)->get_property (X_("use-count"), use_count)) {
 			continue;
 		}
+		avg_age += lru;
+		avg_cnt += use_count;
 		PluginStats ps (type, id, lru, use_count);
-		statistics.insert (ps);
+		stats.insert (ps);
+	}
+
+	if (stats.size () > 0) {
+		avg_age /= stats.size ();
+		avg_cnt /= stats.size ();
+	}
+
+	statistics.clear ();
+	for (PluginStatsList::iterator i = stats.begin(); i != stats.end(); ++i) {
+		/* we use average age in case ardour has not been used for a while,
+		 * ignoring old plugins changes the average age, so we only flush
+		 * the least use plugins.
+		 */
+		if (i->lru + 2592000 /*30 days*/ < avg_age && i->use_count < avg_cnt / 2) {
+#ifndef NDEBUG
+			std::cout << "- Zero stats of plugin '" << i->unique_id << "' use-count: " << i->use_count << " LRU: " << (time(NULL) - i->lru) / 3600 << std::endl;
+#endif
+			continue;
+		}
+		if (i->lru + 604800 /*7 days*/ < avg_age && i->use_count < 2) {
+#ifndef NDEBUG
+			std::cout << "- Zero stats of plugin '" << i->unique_id << "' use-count: " << i->use_count << " LRU: " << (time(NULL) - i->lru) / 3600 << std::endl;
+#endif
+			continue;
+		}
+		statistics.insert (*i);
 	}
 }
 
