@@ -2476,7 +2476,7 @@ struct RecentABCSorter {
 struct RecentPluginSorter {
 	bool operator() (PluginInfoPtr a, PluginInfoPtr b) const {
 		PluginManager& manager (PluginManager::instance());
-		time_t lru_a, lru_b;
+		int64_t lru_a, lru_b;
 		uint64_t use_a, use_b;
 		bool stats_a, stats_b;
 
@@ -2504,7 +2504,7 @@ private:
 struct TopHitPluginSorter {
 	bool operator() (PluginInfoPtr a, PluginInfoPtr b) const {
 		PluginManager& manager (PluginManager::instance());
-		time_t lru_a, lru_b;
+		int64_t  lru_a, lru_b;
 		uint64_t use_a, use_b;
 		bool stats_a, stats_b;
 
@@ -3218,7 +3218,7 @@ Mixer_UI::refiller (PluginInfoList& result, const PluginInfoList& plugs)
 				maybe_show |= match_search_strings (compstr, searchstr);
 			}
 		} else {
-			time_t lru;
+			int64_t lru;
 			uint64_t use_count;
 			if (!manager.stats (*i, lru, use_count)) {
 				maybe_show = false;
