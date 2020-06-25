@@ -46,6 +46,25 @@ class LIBGTKMM2EXT_API DnDTreeViewBase : public Gtk::TreeView
 	DnDTreeViewBase ();
 	~DnDTreeViewBase() {}
 
+	struct BoolAccumulator {
+		typedef bool result_type;
+		template <class U>
+			result_type operator () (U first, U last) {
+				while (first != last) {
+					if (!*first) {
+						/* break on first slot that returns false */
+						return false;
+					}
+					++first;
+				}
+				/* no connected slots -> return true */
+				return true;
+			}
+	};
+
+
+	sigc::signal4<bool, const Glib::RefPtr<Gdk::DragContext>&, int, int, guint, BoolAccumulator> signal_motion;
+
 	void add_drop_targets (std::list<Gtk::TargetEntry>&);
 	void add_object_drag (int column, std::string type_name);
 
@@ -59,15 +78,11 @@ class LIBGTKMM2EXT_API DnDTreeViewBase : public Gtk::TreeView
 	}
 
 	void on_drag_leave(const Glib::RefPtr<Gdk::DragContext>& context, guint time) {
-		suggested_action = context->get_suggested_action();
 		TreeView::on_drag_leave (context, time);
-	}
-
-	bool on_drag_motion(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, guint time) {
 		suggested_action = context->get_suggested_action();
-		return TreeView::on_drag_motion (context, x, y, time);
 	}
 
+	bool on_drag_motion(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, guint time);
 	bool on_drag_drop(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, guint time);
 
 	void set_drag_column (int c) {

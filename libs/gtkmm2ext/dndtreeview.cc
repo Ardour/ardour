@@ -141,3 +141,14 @@ DnDTreeViewBase::on_drag_drop(const Glib::RefPtr<Gdk::DragContext>& context, int
 	drag_data.source = 0;
 	return TreeView::on_drag_drop (context, x, y, time);
 }
+
+bool
+DnDTreeViewBase::on_drag_motion(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, guint time)
+{
+	bool rv = TreeView::on_drag_motion (context, x, y, time);
+	if (rv) {
+		rv = signal_motion (context, x, y, time);
+	}
+	suggested_action = context->get_suggested_action();
+	return rv;
+}
