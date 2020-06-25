@@ -1655,6 +1655,7 @@ PluginManager::stats_use_plugin (PluginInfoPtr const& pip)
 		statistics.erase (ps);
 		statistics.insert (ps);
 	}
+	PluginStatsChanged (); /* EMIT SIGNAL */
 	save_stats (); // XXX
 }
 

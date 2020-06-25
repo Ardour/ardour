@@ -116,6 +116,9 @@ public:
 	/** plugins were added to or removed from one of the PluginInfoLists */
 	PBD::Signal0<void> PluginListChanged;
 
+	/** Plugin Statistics (use-count, recently-used) changed */
+	PBD::Signal0<void> PluginStatsChanged;
+
 	/** A single plugin's Hidden/Favorite status changed */
 	PBD::Signal3<void, ARDOUR::PluginType, std::string, PluginStatusType> PluginStatusChanged; //PluginType t, string id, string tag
 
