@@ -34,7 +34,6 @@
 #include <sigc++/bind.h>
 
 #include <boost/foreach.hpp>
-#include <boost/tokenizer.hpp>
 
 #include <glibmm/threads.h>
 
@@ -82,6 +81,7 @@
 #include "actions.h"
 #include "gui_thread.h"
 #include "mixer_group_tabs.h"
+#include "plugin_utils.h"
 #include "route_sorter.h"
 #include "timers.h"
 #include "ui_config.h"
@@ -91,6 +91,7 @@
 
 using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
+using namespace ARDOUR_PLUGIN_UTILS;
 using namespace PBD;
 using namespace Gtk;
 using namespace Glib;
@@ -2444,91 +2445,6 @@ Mixer_UI::set_strip_width (Width w, bool save)
 	}
 }
 
-
-struct FavoritePluginSorter {
-public:
-	bool operator() (PluginInfoPtr a, PluginInfoPtr b) const {
-		std::list<std::string>::const_iterator aiter = std::find(_user.begin(), _user.end(), (*a).unique_id);
-		std::list<std::string>::const_iterator biter = std::find(_user.begin(), _user.end(), (*b).unique_id);
-		if (aiter != _user.end() && biter != _user.end()) {
-			return std::distance (_user.begin(), aiter)  < std::distance (_user.begin(), biter);
-		}
-		if (aiter != _user.end()) {
-			return true;
-		}
-		if (biter != _user.end()) {
-			return false;
-		}
-		return ARDOUR::cmp_nocase((*a).name, (*b).name) == -1;
-	}
-
-	FavoritePluginSorter (std::list<std::string> user) : _user (user)  { }
-private:
-	std::list<std::string> _user;
-};
-
-struct RecentABCSorter {
-	bool operator() (PluginInfoPtr a, PluginInfoPtr b) const {
-		return ARDOUR::cmp_nocase((*a).name, (*b).name) == -1;
-	}
-};
-
-struct RecentPluginSorter {
-	bool operator() (PluginInfoPtr a, PluginInfoPtr b) const {
-		PluginManager& manager (PluginManager::instance());
-		int64_t lru_a, lru_b;
-		uint64_t use_a, use_b;
-		bool stats_a, stats_b;
-
-		stats_a = manager.stats (a, lru_a, use_a);
-		stats_b = manager.stats (b, lru_b, use_b);
-
-		if (stats_a && stats_b) {
-			return lru_a > lru_b;
-		}
-		if (stats_a) {
-			return true;
-		}
-		if (stats_b) {
-			return false;
-		}
-		return ARDOUR::cmp_nocase((*a).name, (*b).name) == -1;
-	}
-	RecentPluginSorter ()
-		: manager (PluginManager::instance())
-	{}
-private:
-	PluginManager& manager;
-};
-
-struct TopHitPluginSorter {
-	bool operator() (PluginInfoPtr a, PluginInfoPtr b) const {
-		PluginManager& manager (PluginManager::instance());
-		int64_t  lru_a, lru_b;
-		uint64_t use_a, use_b;
-		bool stats_a, stats_b;
-
-		stats_a = manager.stats (a, lru_a, use_a);
-		stats_b = manager.stats (b, lru_b, use_b);
-
-		if (stats_a && stats_b) {
-			return use_a > use_b;
-		}
-		if (stats_a) {
-			return true;
-		}
-		if (stats_b) {
-			return false;
-		}
-		return ARDOUR::cmp_nocase((*a).name, (*b).name) == -1;
-	}
-	TopHitPluginSorter ()
-		: manager (PluginManager::instance())
-	{}
-private:
-	PluginManager& manager;
-};
-
 int
 Mixer_UI::set_state (const XMLNode& node, int version)
 {
@@ -3169,26 +3085,6 @@ Mixer_UI::plugin_search_clear_button_clicked ()
 	plugin_search_entry.set_text ("");
 }
 
-static void
-setup_search_string (string& searchstr)
-{
-  transform (searchstr.begin(), searchstr.end(), searchstr.begin(), ::toupper);
-}
-
-static bool
-match_search_strings (string const& haystack, string const& needle)
-{
-  boost::char_separator<char> sep (" ");
-  typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-  tokenizer t (needle, sep);
-  for (tokenizer::iterator ti = t.begin(); ti != t.end(); ++ti) {
-    if (haystack.find (*ti) == string::npos) {
-      return false;
-    }
-  }
-  return true;
-}
-
 void
 Mixer_UI::refiller (PluginInfoList& result, const PluginInfoList& plugs)
 {
@@ -3269,14 +3165,14 @@ Mixer_UI::refill_favorite_plugins ()
 			break;
 		case PLM_TopHits:
 			{
-				TopHitPluginSorter cmp;
+				PluginChartsSorter cmp;
 				plugs.sort (cmp);
 				plugs.resize (std::min (plugs.size(), size_t(10)));
 			}
 			break;
 		case PLM_Recent:
 			{
-				RecentPluginSorter cmp;
+				PluginRecentSorter cmp;
 				plugs.sort (cmp);
 				plugs.resize (std::min (plugs.size(), size_t(10)));
 			}
@@ -3329,11 +3225,11 @@ Mixer_UI::sync_treeview_from_favorite_order ()
 {
 	PBD::Unwinder<bool> uw (ignore_plugin_reorder, true);
 	if (plugin_list_mode () == PLM_Favorite) {
-		FavoritePluginSorter cmp (favorite_ui_order);
+		PluginUIOrderSorter cmp (favorite_ui_order);
 		plugin_list.sort (cmp);
 	} else {
 #if 0
-		RecentABCSorter cmp;
+		PluginABCSorter cmp;
 		plugin_list.sort (cmp);
 #endif
 	}

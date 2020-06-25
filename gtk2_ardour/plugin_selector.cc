@@ -31,7 +31,6 @@
 #include <map>
 
 #include <algorithm>
-#include <boost/tokenizer.hpp>
 
 #include <gtkmm/button.h>
 #include <gtkmm/comboboxtext.h>
@@ -52,6 +51,7 @@
 #include "ardour/utils.h"
 
 #include "plugin_selector.h"
+#include "plugin_utils.h"
 #include "gui_thread.h"
 #include "ui_config.h"
 
@@ -62,6 +62,7 @@ using namespace PBD;
 using namespace Gtk;
 using namespace std;
 using namespace ArdourWidgets;
+using namespace ARDOUR_PLUGIN_UTILS;
 
 static const uint32_t MAX_CREATOR_LEN = 24;
 
@@ -356,27 +357,6 @@ PluginSelector::added_row_clicked(GdkEventButton* event)
 {
 	if (event->type == GDK_2BUTTON_PRESS)
 		btn_remove_clicked();
-}
-
-
-static void
-setup_search_string (string& searchstr)
-{
-	transform (searchstr.begin(), searchstr.end(), searchstr.begin(), ::toupper);
-}
-
-static bool
-match_search_strings (string const& haystack, string const& needle)
-{
-	boost::char_separator<char> sep (" ");
-	typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-	tokenizer t (needle, sep);
-	for (tokenizer::iterator ti = t.begin(); ti != t.end(); ++ti) {
-		if (haystack.find (*ti) == string::npos) {
-			return false;
-		}
-	}
-	return true;
 }
 
 bool
@@ -938,24 +918,6 @@ struct PluginMenuCompareByCreator {
 	}
 };
 
-struct PluginMenuCompareByName {
-	bool operator() (PluginInfoPtr a, PluginInfoPtr b) const {
-		int cmp;
-
-		cmp = cmp_nocase_utf8 (a->name, b->name);
-
-		if (cmp < 0) {
-			return true;
-		} else if (cmp == 0) {
-			/* same name ... compare type */
-			if (a->type < b->type) {
-				return true;
-			}
-		}
-		return false;
-	}
-};
-
 /** @return Plugin menu. The caller should not delete it */
 Gtk::Menu*
 PluginSelector::plugin_menu()
@@ -1050,7 +1012,7 @@ PluginSelector::create_favs_menu (PluginInfoList& all_plugs)
 	Menu* favs = new Menu();
 	favs->set_name("ArdourContextMenu");
 
-	PluginMenuCompareByName cmp_by_name;
+	PluginABCSorter cmp_by_name;
 	all_plugs.sort (cmp_by_name);
 
 	for (PluginInfoList::const_iterator i = all_plugs.begin(); i != all_plugs.end(); ++i) {
@@ -1142,7 +1104,7 @@ PluginSelector::create_by_tags_menu (ARDOUR::PluginInfoList& all_plugs)
 		submenu->set_name("ArdourContextMenu");
 	}
 
-	PluginMenuCompareByName cmp_by_name;
+	PluginABCSorter cmp_by_name;
 	all_plugs.sort (cmp_by_name);
 
 	for (PluginInfoList::const_iterator i = all_plugs.begin(); i != all_plugs.end(); ++i) {
