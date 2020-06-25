@@ -75,7 +75,7 @@ public:
 	bool no_timeout () { return _cancel_timeout; }
 
 	void stats_use_plugin (PluginInfoPtr const&);
-	bool stats (PluginInfoPtr const&, time_t& lru, uint64_t& use_count) const;
+	bool stats (PluginInfoPtr const&, int64_t& lru, uint64_t& use_count) const;
 	void save_stats ();
 
 	enum PluginStatusType {
@@ -172,10 +172,10 @@ private:
 	struct PluginStats {
 		PluginType const  type;
 		std::string const unique_id;
-		time_t            lru;
+		int64_t           lru;
 		uint64_t          use_count;
 
-		PluginStats (ARDOUR::PluginType t, std::string const& id, time_t lru = 0, uint64_t use_count = 0)
+		PluginStats (ARDOUR::PluginType t, std::string const& id, int64_t lru = 0, uint64_t use_count = 0)
 			: type (t), unique_id (id), lru (lru), use_count (use_count) {}
 
 		bool operator==(const PluginStats& other) const {

@@ -1631,7 +1631,7 @@ PluginManager::load_stats ()
 	{
 		PluginType type;
 		string     id;
-		time_t     lru;
+		int64_t    lru;
 		uint64_t   use_count;
 
 		if (!(*i)->get_property (X_("type"), type) ||
@@ -1691,7 +1691,7 @@ PluginManager::stats_use_plugin (PluginInfoPtr const& pip)
 }
 
 bool
-PluginManager::stats (PluginInfoPtr const& pip, time_t& lru, uint64_t& use_count) const
+PluginManager::stats (PluginInfoPtr const& pip, int64_t& lru, uint64_t& use_count) const
 {
 	PluginStats ps (pip->type, pip->unique_id, time (NULL));
 	PluginStatsList::const_iterator i = find (statistics.begin(), statistics.end(), ps);
