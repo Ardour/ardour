@@ -333,6 +333,7 @@ protected:
 	void prepare_for_render_children (Rect const & area) const;
 
 	Duple scroll_offset() const;
+  public:
 	Duple position_offset() const;
 
 private:

@@ -108,7 +108,7 @@ Canvas::zoomed ()
 	pick_current_item (0); // no current mouse position
 }
 
-static bool debug_render = true;
+static bool debug_render = false;
 #define CANVAS_DEBUG
 
 /** Render an area of the canvas.
@@ -147,7 +147,6 @@ Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context
 		   area, so render it.
 		*/
 
-		cerr << "root draw\n";
 		_root.render (draw, context);
 
 #if defined CANVAS_DEBUG && !PLATFORM_WINDOWS

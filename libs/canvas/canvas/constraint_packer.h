@@ -62,12 +62,15 @@ public:
 	ConstrainedItemMap constrained_map;
 	typedef std::list<kiwi::Constraint> ConstraintList;
 	ConstraintList constraint_list;
-
+	kiwi::Solver _solver;
 	bool in_alloc;
+	bool _need_constraint_update;
 
 	void add_constrained_internal (Item*, ConstrainedItem*);
 
 	void add_constraints (kiwi::Solver&, ConstrainedItem*) const;
+
+	virtual void update_constraints ();
 };
 
 }

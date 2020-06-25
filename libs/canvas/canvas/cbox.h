@@ -50,8 +50,8 @@ public:
 	BoxConstrainedItem* pack_start (Item*, PackOptions primary_axis_packing = PackOptions (0), PackOptions secondary_axis_packing = PackOptions (PackExpand|PackFill));
 	BoxConstrainedItem* pack_end (Item*, PackOptions primary_axis_packing = PackOptions (0), PackOptions secondary_axis_packing = PackOptions (PackExpand|PackFill));
 
-	void add_vertical_box_constraints (kiwi::Solver& solver, BoxConstrainedItem* ci, BoxConstrainedItem* prev, double expanded_size, double main_dimenion, double second_dimension, double alloc_dimension);
-	void add_horizontal_box_constraints (kiwi::Solver& solver, BoxConstrainedItem* ci, BoxConstrainedItem* prev, double expanded_size, double main_dimenion, double second_dimension, double alloc_dimension);
+	void add_vertical_box_constraints (kiwi::Solver& solver, BoxConstrainedItem* ci, BoxConstrainedItem* prev, double main_dimenion, double second_dimension, kiwi::Variable& alloc_var);
+	void add_horizontal_box_constraints (kiwi::Solver& solver, BoxConstrainedItem* ci, BoxConstrainedItem* prev, double main_dimenion, double second_dimension, kiwi::Variable& alloc_var);
 
 	void set_collapse_on_hide (bool);
 	void set_homogenous (bool);
@@ -75,12 +75,14 @@ public:
 	double _right_margin;
 
 	void child_changed (bool bbox_changed);
+	void update_constraints ();
 
   private:
 	typedef std::list<BoxConstrainedItem*> Order;
 	Order order;
 	bool collapse_on_hide;
 	bool homogenous;
+	kiwi::Variable expanded_item_size;
 
 	BoxConstrainedItem* pack (Item*, PackOptions primary_axis_packing, PackOptions secondary_axis_packing);
 };

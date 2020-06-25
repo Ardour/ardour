@@ -747,14 +747,12 @@ Item::covers (Duple const & point) const
 
 /* nesting/grouping API */
 
-static bool debug_render = true;
+static bool debug_render = false;
 #define CANVAS_DEBUG 1
 
 void
 Item::render_children (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
-	cerr << "I::rc\n";
-
 	if (_items.empty()) {
 		return;
 	}

@@ -44,6 +44,7 @@ cBox::cBox (Canvas* c, Orientation o)
 	, collapse_on_hide (false)
 	, homogenous (true)
 {
+	_solver.addEditVariable (expanded_item_size, kiwi::strength::strong);
 }
 
 cBox::cBox (Item* i, Orientation o)
@@ -61,6 +62,7 @@ cBox::cBox (Item* i, Orientation o)
 	, collapse_on_hide (false)
 	, homogenous (true)
 {
+	_solver.addEditVariable (expanded_item_size, kiwi::strength::strong);
 }
 
 void
@@ -236,8 +238,6 @@ cBox::size_allocate (Rect const & r)
 
 	Item::size_allocate (r);
 
-	kiwi::Solver solver;
-
 	double expanded_size;
 	Order::size_type n_expanding = 0;
 	Order::size_type n_nonexpanding = 0;
@@ -270,13 +270,43 @@ cBox::size_allocate (Rect const & r)
 		expanded_size = (r.width() - _left_margin - _right_margin - ((total - 1) * _spacing) - non_expanding_used) / n_expanding;
 	}
 
-	cerr << "\n\n\n" << whoami() << " SIZE-ALLOC " << r << " expanded items (" << n_expanding << ")will be " << expanded_size << " neu " << non_expanding_used << " t = " << total << " s " << _spacing
-	     << " t " << _top_margin << " b " << _bottom_margin << " l " << _left_margin << " r " << _right_margin
-	     << endl;
+	// cerr << "\n\n\n" << whoami() << " SIZE-ALLOC " << r << " NCU ? " << _need_constraint_update << " expanded items (" << n_expanding << ")will be " << expanded_size << " neu " << non_expanding_used << " t = " << total << " s " << _spacing
+	// << " t " << _top_margin << " b " << _bottom_margin << " l " << _left_margin << " r " << _right_margin
+	// << endl;
 
-	Order::iterator prev = order.end();
+
+	if (_need_constraint_update) {
+		update_constraints ();
+	}
+
+	_solver.suggestValue (width, r.width());
+	_solver.suggestValue (height, r.height());
+	_solver.suggestValue (expanded_item_size, expanded_size);
+
+	_solver.updateVariables ();
+	//solver.dump (cerr);
+
+	//for (ConstrainedItemMap::const_iterator o = constrained_map.begin(); o != constrained_map.end(); ++o) {
+	//o->second->dump (cerr);
+	//}
+
+	apply (&_solver);
+
+	_bounding_box_dirty = true;
+
+}
+
+void
+cBox::update_constraints ()
+{
+	ConstraintPacker::update_constraints ();
+
+	_solver.addEditVariable (expanded_item_size, kiwi::strength::strong);
 
 	try {
+
+		Order::iterator prev = order.end();
+
 		for (Order::iterator o = order.begin(); o != order.end(); ++o) {
 
 			Duple min, natural;
@@ -284,9 +314,9 @@ cBox::size_allocate (Rect const & r)
 			(*o)->item().preferred_size (min, natural);
 
 			if (orientation == Vertical) {
-				add_vertical_box_constraints (solver, *o, prev == order.end() ? 0 : *prev, expanded_size, natural.height(), natural.width(), r.width());
+				add_vertical_box_constraints (_solver, *o, prev == order.end() ? 0 : *prev, natural.height(), natural.width(), width);
 			} else {
-				add_horizontal_box_constraints (solver, *o, prev == order.end() ? 0 : *prev, expanded_size, natural.width(), natural.height(), r.height());
+				add_horizontal_box_constraints (_solver, *o, prev == order.end() ? 0 : *prev, natural.width(), natural.height(), height);
 			}
 
 			prev = o;
@@ -303,7 +333,7 @@ cBox::size_allocate (Rect const & r)
 			std::vector<Constraint> const & constraints (x->second->constraints());
 
 			for (std::vector<Constraint>::const_iterator c = constraints.begin(); c != constraints.end(); ++c) {
-				solver.addConstraint (*c);
+				_solver.addConstraint (*c);
 			}
 		}
 
@@ -313,17 +343,7 @@ cBox::size_allocate (Rect const & r)
 		return;
 	}
 
-	solver.updateVariables ();
-	//solver.dump (cerr);
-
-	//for (ConstrainedItemMap::const_iterator o = constrained_map.begin(); o != constrained_map.end(); ++o) {
-	//o->second->dump (cerr);
-	//}
-
-	apply (&solver);
-
-	_bounding_box_dirty = true;
-
+	_need_constraint_update = false;
 }
 
 void
@@ -341,10 +361,9 @@ cBox::child_changed (bool bbox_changed)
 	solver, \
 	bci, \
 	prev, \
-	expanded_size, \
 	natural_main_dimension, \
 	natural_second_dimension, \
-	alloc_second_dimension, \
+	alloc_var, \
 	m_main_dimension, \
 	m_second_dimension, \
 	m_trailing, \
@@ -379,7 +398,7 @@ cBox::child_changed (bool bbox_changed)
 			 * for itself. \
 			 */ \
  \
-			solver.addConstraint (bci->m_main_dimension() == expanded_size | kiwi::strength::strong); \
+			solver.addConstraint (bci->m_main_dimension() == expanded_item_size | kiwi::strength::strong); \
 			solver.addConstraint (bci->m_trailing_padding() == 0. | kiwi::strength::strong); \
 			solver.addConstraint (bci->m_leading_padding() == 0. | kiwi::strength::strong); \
  \
@@ -391,7 +410,7 @@ cBox::child_changed (bool bbox_changed)
 			 */ \
  \
 			solver.addConstraint (bci->m_main_dimension() == natural_main_dimension); \
-			solver.addConstraint (bci->m_trailing_padding() + bci->m_leading_padding() + bci->m_main_dimension() == expanded_size | kiwi::strength::strong); \
+			solver.addConstraint (bci->m_trailing_padding() + bci->m_leading_padding() + bci->m_main_dimension() == expanded_item_size | kiwi::strength::strong); \
 			solver.addConstraint (bci->m_leading_padding() == bci->m_trailing_padding() | kiwi::strength::strong); \
 		} \
  \
@@ -436,14 +455,14 @@ cBox::child_changed (bool bbox_changed)
 	if (!(bci->secondary_axis_pack_options() & PackExpand) && natural_second_dimension > 0) { \
 		solver.addConstraint (bci->m_second_dimension() == natural_second_dimension); \
 	} else { \
-		solver.addConstraint (bci->m_second_dimension() == alloc_second_dimension - (m_second_trailing_margin + m_second_leading_margin + bci->m_second_leading_padding()) | kiwi::strength::strong); \
+		solver.addConstraint (bci->m_second_dimension() == alloc_var - (m_second_trailing_margin + m_second_leading_margin + bci->m_second_leading_padding()) | kiwi::strength::strong); \
 	}
 
 
 void
-cBox::add_vertical_box_constraints (kiwi::Solver& solver, BoxConstrainedItem* ci, BoxConstrainedItem* prev, double expanded_size, double main_dimension, double second_dimension, double alloc_dimension)
+cBox::add_vertical_box_constraints (kiwi::Solver& solver, BoxConstrainedItem* ci, BoxConstrainedItem* prev, double main_dimension, double second_dimension, kiwi::Variable & alloc_var)
 {
-	add_box_constraints (solver, ci, prev, expanded_size, main_dimension, second_dimension, alloc_dimension,
+	add_box_constraints (solver, ci, prev, main_dimension, second_dimension, alloc_var,
 	                     height, width,
 	                     top, bottom, top_padding, bottom_padding,
 	                     left, right, left_padding, right_padding,
@@ -452,9 +471,9 @@ cBox::add_vertical_box_constraints (kiwi::Solver& solver, BoxConstrainedItem* ci
 }
 
 void
-cBox::add_horizontal_box_constraints (kiwi::Solver& solver, BoxConstrainedItem* ci, BoxConstrainedItem* prev, double expanded_size, double main_dimension, double second_dimension, double alloc_dimension)
+cBox::add_horizontal_box_constraints (kiwi::Solver& solver, BoxConstrainedItem* ci, BoxConstrainedItem* prev, double main_dimension, double second_dimension, kiwi::Variable& alloc_var)
 {
-	add_box_constraints (solver, ci, prev, expanded_size, main_dimension, second_dimension, alloc_dimension,
+	add_box_constraints (solver, ci, prev, main_dimension, second_dimension, alloc_var,
 	                     width, height,
 	                     left, right, left_padding, right_padding,
 	                     top, bottom, top_padding, bottom_padding,
@@ -464,8 +483,6 @@ cBox::add_horizontal_box_constraints (kiwi::Solver& solver, BoxConstrainedItem* 
 void
 cBox::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
-	cerr << whoami() << " render f " << fill() << " o " << outline() << " a " << _allocation << endl;
-
 	if (fill() || outline() && _allocation) {
 
 		Rect contents = _allocation;

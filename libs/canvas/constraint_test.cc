@@ -59,9 +59,9 @@ main (int argc, char* argv[])
 	vbox->name = "vbox";
 	vbox->set_fill (true);
 	vbox->set_fill_color (0xff0000ff);
-	// vbox->set_margin (10, 20, 30, 40);
 	vbox->set_margin (20);
 
+#if 1
 	vbox->pack_start (r1,  PackOptions(PackExpand|PackFill));
 	vbox->pack_start (r2, PackOptions(PackExpand|PackFill));
 	vbox->pack_start (r3, PackOptions(PackExpand|PackFill));
@@ -71,7 +71,7 @@ main (int argc, char* argv[])
 	hbox1->set_fill (true);
 	hbox1->set_fill_color (0x00ff00ff);
 
-	hbox1->set_margin (10, 10, 10, 10);
+	hbox1->set_margin (10);
 
 	Rectangle* r4 = new Rectangle (c);
 	Rectangle* r5 = new Rectangle (c);
@@ -110,6 +110,7 @@ main (int argc, char* argv[])
 	hbox2->name = "hbox2";
 	hbox2->set_fill (true);
 	hbox2->set_fill_color (Gtkmm2ext::random_color());
+	hbox2->set_outline (true);
 
 	Text* txt = new Text (c);
 	txt->name = "text";
@@ -119,11 +120,12 @@ main (int argc, char* argv[])
 	txt->set_font_description (font);
 	txt->set ("hello world");
 
-	ConstrainedItem* ti = hbox2->pack_start (txt, PackExpand);
-	ti->add_constraint (ti->left() == 50);
+	ConstrainedItem* hb2 = vbox->pack_start (hbox2, PackOptions (PackExpand|PackFill));
 
-	vbox->pack_start (hbox2, PackOptions (PackExpand|PackFill));
-
+	ConstrainedItem* ti = hbox2->pack_start (txt, PackOptions (PackExpand|PackFill));
+	ti->add_constraint (ti->center_x() == hb2->center_x());
+	ti->add_constraint (ti->center_y() == hb2->center_y() + 20);
+#endif
 	win.show_all ();
 	app.run ();
 

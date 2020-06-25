@@ -42,10 +42,14 @@ ConstraintPacker::ConstraintPacker (Canvas* canvas)
 	, width (X_("packer width"))
 	, height (X_("packer height"))
 	, in_alloc (false)
+	, _need_constraint_update (false)
 {
 	set_fill (false);
 	set_outline (false);
 	set_layout_sensitive (true);
+
+	_solver.addEditVariable (width, kiwi::strength::strong);
+	_solver.addEditVariable (height, kiwi::strength::strong);
 }
 
 ConstraintPacker::ConstraintPacker (Item* parent)
@@ -53,16 +57,19 @@ ConstraintPacker::ConstraintPacker (Item* parent)
 	, width (X_("packer width"))
 	, height (X_("packer height"))
 	, in_alloc (false)
+	, _need_constraint_update (false)
 {
 	set_fill (false);
 	set_outline (false);
 	set_layout_sensitive (true);
+
+	_solver.addEditVariable (width, kiwi::strength::strong);
+	_solver.addEditVariable (height, kiwi::strength::strong);
 }
 
 void
 ConstraintPacker::compute_bounding_box () const
 {
-	cerr << whoami() << " CBB from " << _allocation << endl;
 	_bounding_box = _allocation;
 	_bounding_box_dirty = false;
 }
@@ -268,6 +275,7 @@ ConstraintPacker::add_constrained_internal (Item* item, ConstrainedItem* ci)
 	Item::add (item);
 	item->set_layout_sensitive (true);
 	constrained_map.insert (std::make_pair (item, ci));
+	_need_constraint_update = true;
 	child_changed (true);
 }
 
@@ -299,6 +307,7 @@ ConstraintPacker::remove (Item* item)
 
 	}
 
+	_need_constraint_update = true;
 }
 
 void
@@ -307,4 +316,12 @@ ConstraintPacker::apply (Solver* s)
 	for (ConstrainedItemMap::iterator x = constrained_map.begin(); x != constrained_map.end(); ++x) {
 		x->second->constrained (*this);
 	}
+}
+
+void
+ConstraintPacker::update_constraints ()
+{
+	_solver.reset ();
+	_solver.addEditVariable (width, kiwi::strength::strong);
+	_solver.addEditVariable (height, kiwi::strength::strong);
 }
