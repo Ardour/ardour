@@ -53,8 +53,6 @@ Root::size_allocate (Rect const & r)
 {
 	bool have_constraint_container = false;
 
-	cerr << "ROOT alloc " << r << endl;
-
 	for (list<Item*>::const_iterator i = _items.begin(); i != _items.end(); ++i) {
 		if (dynamic_cast<ConstraintPacker*> (*i)) {
 			(*i)->size_allocate (r);
