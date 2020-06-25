@@ -379,7 +379,7 @@ private:
 	void sync_treeview_from_presentation_info (PBD::PropertyChange const &);
 	void sync_presentation_info_from_treeview ();
 
-	bool ignore_reorder;
+	bool ignore_track_reorder;
 
 	void parameter_changed (std::string const &);
 	void set_route_group_activation (ARDOUR::RouteGroup *, bool);

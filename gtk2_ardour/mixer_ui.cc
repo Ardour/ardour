@@ -121,7 +121,7 @@ Mixer_UI::Mixer_UI ()
 	, _show_foldback_strip (true)
 	, _strip_width (UIConfiguration::instance().get_default_narrow_ms() ? Narrow : Wide)
 	, _spill_scroll_position (0)
-	, ignore_reorder (false)
+	, ignore_track_reorder (false)
 	, _in_group_rebuild_or_clear (false)
 	, _route_deletion_in_progress (false)
 	, _maximised (false)
@@ -739,7 +739,7 @@ Mixer_UI::remove_strip (MixerStrip* strip)
 		strips.erase (i);
 	}
 
-	PBD::Unwinder<bool> uwi (ignore_reorder, true);
+	PBD::Unwinder<bool> uwi (ignore_track_reorder, true);
 
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
 		if ((*ri)[stripable_columns.strip] == strip) {
@@ -785,7 +785,7 @@ Mixer_UI::presentation_info_changed (PropertyChange const & what_changed)
 void
 Mixer_UI::sync_presentation_info_from_treeview ()
 {
-	if (ignore_reorder || !_session || _session->deletion_in_progress()) {
+	if (ignore_track_reorder || !_session || _session->deletion_in_progress()) {
 		return;
 	}
 
@@ -892,7 +892,7 @@ Mixer_UI::sync_treeview_from_presentation_info (PropertyChange const & what_chan
 	}
 
 	if (changed) {
-		Unwinder<bool> uw (ignore_reorder, true);
+		Unwinder<bool> uw (ignore_track_reorder, true);
 		track_model->reorder (neworder);
 	}
 
@@ -1814,7 +1814,7 @@ Mixer_UI::initial_track_display ()
 		 *  them here because we're going to clear the track_model also.
 		 */
 		Unwinder<bool> uw1 (no_track_list_redisplay, true);
-		Unwinder<bool> uw2 (ignore_reorder, true);
+		Unwinder<bool> uw2 (ignore_track_reorder, true);
 
 		track_model->clear ();
 		add_stripables (sl);
