@@ -3117,7 +3117,7 @@ Mixer_UI::plugin_list_mode () const
 void
 Mixer_UI::store_current_favorite_order ()
 {
-	if (plugin_list_mode () != PLM_Favorite) {
+	if (plugin_list_mode () != PLM_Favorite || !plugin_search_entry.get_text ().empty()) {
 		return;
 	}
 
@@ -3586,7 +3586,7 @@ Mixer_UI::plugin_drag_motion (const Glib::RefPtr<Gdk::DragContext>& ctx, int x, 
 	}
 
 	if (target == "GTK_TREE_MODEL_ROW") {
-		if (plugin_list_mode () == PLM_Favorite) {
+		if (plugin_list_mode () == PLM_Favorite && plugin_search_entry.get_text ().empty()) {
 			/* re-order rows */
 			ctx->drag_status (Gdk::ACTION_MOVE, time);
 			return true;
