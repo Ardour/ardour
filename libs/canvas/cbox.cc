@@ -464,19 +464,34 @@ cBox::add_horizontal_box_constraints (kiwi::Solver& solver, BoxConstrainedItem* 
 void
 cBox::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
+	cerr << whoami() << " render f " << fill() << " o " << outline() << " a " << _allocation << endl;
+
 	if (fill() || outline() && _allocation) {
 
 		Rect contents = _allocation;
 
-		contents.x0 += _left_margin;
-		contents.x1 -= _right_margin;
-		contents.y0 += _top_margin;
-		contents.y1 -= _bottom_margin;
+		/* allocation will have been left with (x0,y0) as given by the
+		 * parent, but _position is set to the same value and will
+		 * be taken into account by item_to_window()
+		 */
+
+		double width = contents.width() - (_left_margin + _top_margin);
+		double height = contents.height() - (_top_margin + _bottom_margin);
+
+		contents.x0 = _left_margin;
+		contents.y0 = _top_margin;
+
+		contents.x1 = contents.x0 + width;
+		contents.y1 = contents.y0 + height;
+
+		cerr << whoami() << " !!! RI !!! " << width << " x " << height << " @ " << contents.x0 << ", " << contents.y0 << " marg " << _top_margin << endl;
 
 		Rect self (item_to_window (contents, false));
 		const Rect draw = self.intersection (area);
 
 		if (fill()) {
+
+			cerr << whoami() << " will fill " << draw << " from contents = " << contents << " from " << _allocation <<  " self was " << self << " area " << area << endl;
 
 			setup_fill_context (context);
 			context->rectangle (draw.x0, draw.y0, draw.width(), draw.height());
