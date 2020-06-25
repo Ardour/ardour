@@ -398,9 +398,9 @@ cBox::child_changed (bool bbox_changed)
 			 * for itself. \
 			 */ \
  \
-			solver.addConstraint (bci->m_main_dimension() == expanded_item_size | kiwi::strength::strong); \
-			solver.addConstraint (bci->m_trailing_padding() == 0. | kiwi::strength::strong); \
-			solver.addConstraint (bci->m_leading_padding() == 0. | kiwi::strength::strong); \
+			solver.addConstraint ({(bci->m_main_dimension() == expanded_item_size) | kiwi::strength::strong}); \
+			solver.addConstraint ({(bci->m_trailing_padding() == 0. ) | kiwi::strength::strong}); \
+			solver.addConstraint ({(bci->m_leading_padding() == 0. ) | kiwi::strength::strong}); \
  \
 		} else { \
  \
@@ -409,9 +409,9 @@ cBox::child_changed (bool bbox_changed)
 			 * as padding \
 			 */ \
  \
-			solver.addConstraint (bci->m_main_dimension() == natural_main_dimension); \
-			solver.addConstraint (bci->m_trailing_padding() + bci->m_leading_padding() + bci->m_main_dimension() == expanded_item_size | kiwi::strength::strong); \
-			solver.addConstraint (bci->m_leading_padding() == bci->m_trailing_padding() | kiwi::strength::strong); \
+			solver.addConstraint ({bci->m_main_dimension() == natural_main_dimension}); \
+			solver.addConstraint ({(bci->m_trailing_padding() + bci->m_leading_padding() + bci->m_main_dimension() == expanded_item_size) | kiwi::strength::strong}); \
+			solver.addConstraint ({(bci->m_leading_padding() == bci->m_trailing_padding()) | kiwi::strength::strong}); \
 		} \
  \
 	} else { \
@@ -423,9 +423,9 @@ cBox::child_changed (bool bbox_changed)
  \
 		/* cerr << bci->item().whoami() << " will usenatural height of " << natural.height() << endl; */ \
  \
-		solver.addConstraint (bci->m_main_dimension() == natural_main_dimension); \
-		solver.addConstraint (bci->m_trailing_padding() == 0.); \
-		solver.addConstraint (bci->m_leading_padding() == 0.); \
+		solver.addConstraint ({bci->m_main_dimension() == natural_main_dimension}); \
+		solver.addConstraint ({bci->m_trailing_padding() == 0.}); \
+		solver.addConstraint ({bci->m_leading_padding() == 0.}); \
 	} \
  \
 	/* now set upper upper edge of the item */ \
@@ -434,28 +434,28 @@ cBox::child_changed (bool bbox_changed)
  \
 		/* first item */ \
  \
-		solver.addConstraint (bci->m_trailing() == m_trailing_margin + bci->m_trailing_padding() | kiwi::strength::strong); \
+		solver.addConstraint ({(bci->m_trailing() == m_trailing_margin + bci->m_trailing_padding()) | kiwi::strength::strong}); \
  \
 	} else { \
 		/* subsequent items */ \
  \
-		solver.addConstraint (bci->m_trailing() == prev->m_leading() + prev->m_leading_padding() + bci->m_trailing_padding() + _spacing | kiwi::strength::strong); \
+		solver.addConstraint ({(bci->m_trailing() == prev->m_leading() + prev->m_leading_padding() + bci->m_trailing_padding() + _spacing) | kiwi::strength::strong}); \
 	} \
  \
-	solver.addConstraint (bci->m_leading() == bci->m_trailing() + bci->m_main_dimension()); \
+	solver.addConstraint ({bci->m_leading() == bci->m_trailing() + bci->m_main_dimension()}); \
  \
 	/* set the side-effect variables and/or constants */ \
  \
-	solver.addConstraint (bci->m_second_trailing_padding() == 0 | kiwi::strength::weak); \
-	solver.addConstraint (bci->m_second_leading_padding() == 0 | kiwi::strength::weak); \
+	solver.addConstraint ({(bci->m_second_trailing_padding() == 0) | kiwi::strength::weak}); \
+	solver.addConstraint ({(bci->m_second_leading_padding() == 0) | kiwi::strength::weak}); \
  \
-	solver.addConstraint (bci->m_second_trailing() + bci->m_second_dimension() == bci->m_second_leading()); \
-	solver.addConstraint (bci->m_second_trailing() == m_second_trailing_margin + bci->m_second_trailing_padding() | kiwi::strength::strong); \
+	solver.addConstraint ({bci->m_second_trailing() + bci->m_second_dimension() == bci->m_second_leading()}); \
+	solver.addConstraint ({(bci->m_second_trailing() == m_second_trailing_margin + bci->m_second_trailing_padding()) | kiwi::strength::strong}); \
  \
 	if (!(bci->secondary_axis_pack_options() & PackExpand) && natural_second_dimension > 0) { \
-		solver.addConstraint (bci->m_second_dimension() == natural_second_dimension); \
+		solver.addConstraint ({bci->m_second_dimension() == natural_second_dimension}); \
 	} else { \
-		solver.addConstraint (bci->m_second_dimension() == alloc_var - (m_second_trailing_margin + m_second_leading_margin + bci->m_second_leading_padding()) | kiwi::strength::strong); \
+		solver.addConstraint ({(bci->m_second_dimension() == alloc_var - (m_second_trailing_margin + m_second_leading_margin + bci->m_second_leading_padding())) | kiwi::strength::strong}); \
 	}
 
 
@@ -483,7 +483,7 @@ cBox::add_horizontal_box_constraints (kiwi::Solver& solver, BoxConstrainedItem* 
 void
 cBox::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
-	if (fill() || outline() && _allocation) {
+	if ((fill() || outline()) && _allocation) {
 
 		Rect contents = _allocation;
 
@@ -501,14 +501,10 @@ cBox::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 		contents.x1 = contents.x0 + width;
 		contents.y1 = contents.y0 + height;
 
-		cerr << whoami() << " !!! RI !!! " << width << " x " << height << " @ " << contents.x0 << ", " << contents.y0 << " marg " << _top_margin << endl;
-
 		Rect self (item_to_window (contents, false));
 		const Rect draw = self.intersection (area);
 
 		if (fill()) {
-
-			cerr << whoami() << " will fill " << draw << " from contents = " << contents << " from " << _allocation <<  " self was " << self << " area " << area << endl;
 
 			setup_fill_context (context);
 			context->rectangle (draw.x0, draw.y0, draw.width(), draw.height());
