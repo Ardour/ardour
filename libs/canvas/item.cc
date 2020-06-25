@@ -747,9 +747,14 @@ Item::covers (Duple const & point) const
 
 /* nesting/grouping API */
 
+static bool debug_render = true;
+#define CANVAS_DEBUG 1
+
 void
 Item::render_children (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
+	cerr << "I::rc\n";
+
 	if (_items.empty()) {
 		return;
 	}
@@ -758,7 +763,7 @@ Item::render_children (Rect const & area, Cairo::RefPtr<Cairo::Context> context)
 	std::vector<Item*> items = _lut->get (area);
 
 #ifdef CANVAS_DEBUG
-	if (DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
+	if (debug_render || DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
 		cerr << string_compose ("%1%8 %2 @ %7 render %5 @ %6 %3 items out of %4\n",
 		                        _canvas->render_indent(), (name.empty() ? string ("[unnamed]") : name), items.size(), _items.size(), area, _position, 0 /* this */,
 		                        whatami());
@@ -771,7 +776,7 @@ Item::render_children (Rect const & area, Cairo::RefPtr<Cairo::Context> context)
 
 		if (!(*i)->visible ()) {
 #ifdef CANVAS_DEBUG
-			if (DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
+			if (debug_render || DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
 				cerr << _canvas->render_indent() << "Item " << (*i)->whatami() << " [" << (*i)->name << "] invisible - skipped\n";
 			}
 #endif
@@ -782,7 +787,7 @@ Item::render_children (Rect const & area, Cairo::RefPtr<Cairo::Context> context)
 
 		if (!item_bbox) {
 #ifdef CANVAS_DEBUG
-			if (DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
+			if (debug_render || DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
 				cerr << _canvas->render_indent() << "Item " << (*i)->whatami() << " [" << (*i)->name << "] empty - skipped\n";
 			}
 #endif
@@ -796,16 +801,13 @@ Item::render_children (Rect const & area, Cairo::RefPtr<Cairo::Context> context)
 			Rect draw = d;
 			if (draw.width() && draw.height()) {
 #ifdef CANVAS_DEBUG
-				if (DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
+				if (debug_render || DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
 					if (dynamic_cast<Container*>(*i) == 0) {
 						cerr << _canvas->render_indent() << "render "
 						     << ' '
 						     << (*i)
 						     << ' '
-						     << (*i)->whatami()
-						     << ' '
-
-						     << (*i)->name
+						     << (*i)->whoami()
 						     << " item "
 						     << item_bbox
 						     << " window = "
@@ -826,7 +828,7 @@ Item::render_children (Rect const & area, Cairo::RefPtr<Cairo::Context> context)
 		} else {
 
 #ifdef CANVAS_DEBUG
-			if (DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
+			if (debug_render || DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
 				cerr << string_compose ("%1skip render of %2 %3, no intersection between %4 and %5\n", _canvas->render_indent(), (*i)->whatami(),
 							(*i)->name, item, area);
 			}
@@ -837,6 +839,7 @@ Item::render_children (Rect const & area, Cairo::RefPtr<Cairo::Context> context)
 
 	--render_depth;
 }
+#undef CANVAS_DEBUG
 
 void
 Item::prepare_for_render_children (Rect const & area) const

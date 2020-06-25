@@ -108,6 +108,9 @@ Canvas::zoomed ()
 	pick_current_item (0); // no current mouse position
 }
 
+static bool debug_render = true;
+#define CANVAS_DEBUG
+
 /** Render an area of the canvas.
  *  @param area Area in window coordinates.
  *  @param context Cairo context to render to.
@@ -120,7 +123,7 @@ Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context
 	_last_render_start_timestamp = g_get_monotonic_time();
 
 #ifdef CANVAS_DEBUG
-	if (DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
+	if (debug_render || DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
 		cerr << this << " RENDER: " << area << endl;
 		//cerr << "CANVAS @ " << this << endl;
 		//dump (cerr);
@@ -133,6 +136,7 @@ Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context
 	Rect root_bbox = _root.bounding_box();
 	if (!root_bbox) {
 		/* the root has no bounding box, so there's nothing to render */
+		cerr << "no bbox\n";
 		return;
 	}
 
@@ -143,6 +147,7 @@ Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context
 		   area, so render it.
 		*/
 
+		cerr << "root draw\n";
 		_root.render (draw, context);
 
 #if defined CANVAS_DEBUG && !PLATFORM_WINDOWS
