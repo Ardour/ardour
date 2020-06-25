@@ -185,7 +185,10 @@ private:
 	Gtk::Frame            group_display_frame;
 	Gtk::Frame            favorite_plugins_frame;
 	Gtk::VBox             favorite_plugins_vbox;
-	Gtk::ComboBoxText     favorite_plugins_tag_combo;
+	Gtk::HBox             favorite_plugins_search_hbox;
+	Gtk::ComboBoxText     favorite_plugins_mode_combo;
+	Gtk::Entry            plugin_search_entry;
+	Gtk::Button           plugin_search_clear_button;
 	ArdourWidgets::VPane  rhs_pane1;
 	ArdourWidgets::VPane  rhs_pane2;
 	ArdourWidgets::HPane  inner_pane;
@@ -259,6 +262,7 @@ private:
 	bool plugin_row_button_press (GdkEventButton*);
 	void popup_note_context_menu (GdkEventButton*);
 	void plugin_drop (const Glib::RefPtr<Gdk::DragContext>&, const Gtk::SelectionData& data);
+	bool plugin_drag_motion (Glib::RefPtr<Gdk::DragContext> const&, int, int, guint);
 
 	enum ProcessorPosition {
 		AddTop,
@@ -351,7 +355,9 @@ private:
 		Gtk::TreeModelColumn<ARDOUR::PluginPresetPtr> plugin;
 	};
 
-	ARDOUR::PluginInfoList favorite_order;
+	ARDOUR::PluginInfoList plugin_list;
+
+	std::list<std::string>      favorite_ui_order;
 	std::map<std::string, bool> favorite_ui_state;
 
 	StripableDisplayModelColumns stripable_columns;
@@ -380,6 +386,8 @@ private:
 	void sync_presentation_info_from_treeview ();
 
 	bool ignore_track_reorder;
+	bool ignore_plugin_refill;
+	bool ignore_plugin_reorder;
 
 	void parameter_changed (std::string const &);
 	void set_route_group_activation (ARDOUR::RouteGroup *, bool);
@@ -405,16 +413,21 @@ private:
 	void monitor_section_attached ();
 	void monitor_section_detached ();
 
-	void store_current_favorite_order();
+	enum PluginListMode {
+		PLM_Favorite,
+		PLM_Recent,
+		PLM_TopHits
+	};
+
 	void refiller (ARDOUR::PluginInfoList& result, const ARDOUR::PluginInfoList& plugs);
-
-	void plugin_list_changed ();
-
 	void refill_favorite_plugins ();
-	void refill_tag_combo ();
-
-	void tag_combo_changed ();
-
+	void maybe_refill_favorite_plugins (PluginListMode);
+	void store_current_favorite_order();
+	enum PluginListMode plugin_list_mode () const;
+	void plugin_list_mode_changed ();
+	void plugin_search_entry_changed ();
+	void plugin_search_clear_button_clicked ();
+	void favorite_plugins_deleted (const Gtk::TreeModel::Path&);
 	void sync_treeview_from_favorite_order ();
 	void sync_treeview_favorite_ui_state (const Gtk::TreeModel::Path&, const Gtk::TreeModel::iterator&);
 	void save_favorite_ui_state (const Gtk::TreeModel::iterator& iter, const Gtk::TreeModel::Path& path);
