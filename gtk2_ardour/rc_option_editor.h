@@ -65,6 +65,7 @@ private:
 
 	/* plugin actions */
 	void plugin_scan_refresh ();
+	void plugin_reset_stats ();
 	void clear_vst_cache ();
 	void clear_vst_blacklist ();
 	void clear_au_cache ();

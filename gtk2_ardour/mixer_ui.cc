@@ -3167,7 +3167,7 @@ Mixer_UI::refill_favorite_plugins ()
 			{
 				PluginChartsSorter cmp;
 				plugs.sort (cmp);
-				plugs.resize (std::min (plugs.size(), size_t(10)));
+				plugs.resize (std::min (plugs.size(), size_t(UIConfiguration::instance().get_max_plugin_chart())));
 			}
 			break;
 		case PLM_Recent:
@@ -3175,6 +3175,7 @@ Mixer_UI::refill_favorite_plugins ()
 				PluginRecentSorter cmp;
 				plugs.sort (cmp);
 				plugs.resize (std::min (plugs.size(), size_t(10)));
+				plugs.resize (std::min (plugs.size(), size_t(UIConfiguration::instance().get_max_plugin_recent())));
 			}
 			break;
 	}

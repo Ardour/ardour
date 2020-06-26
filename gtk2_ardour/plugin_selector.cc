@@ -970,7 +970,7 @@ PluginSelector::build_plugin_menu ()
 	items.push_back (SeparatorElem ());
 
 	Menu* charts = create_charts_menu(all_plugs);
-	items.push_back (MenuElem (_("Top-10"), *manage (charts)));
+	items.push_back (MenuElem (_("By Popularity"), *manage (charts)));
 
 	Menu* by_creator = create_by_creator_menu(all_plugs);
 	items.push_back (MenuElem (_("By Creator"), *manage (by_creator)));
@@ -1048,7 +1048,7 @@ PluginSelector::create_charts_menu (PluginInfoList& all_plugs)
 	}
 	PluginChartsSorter cmp;
 	plugs.sort (cmp);
-	plugs.resize (std::min (plugs.size(), size_t(10)));
+	plugs.resize (std::min (plugs.size(), size_t(UIConfiguration::instance().get_max_plugin_chart())));
 
 	PluginABCSorter abc;
 	plugs.sort (abc);

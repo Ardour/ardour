@@ -3767,6 +3767,30 @@ RCOptionEditor::RCOptionEditor ()
 			_("<b>When enabled</b> show a dialog to select instrument channel configuration before adding a multichannel plugin."));
 
 #endif
+	add_option (_("Plugins"), new OptionEditorHeading (_("Statistics")));
+
+	add_option (_("Plugins"),
+			new RcActionButton (_("Reset Statistics"),
+				sigc::mem_fun (*this, &RCOptionEditor::plugin_reset_stats)));
+
+	add_option (_("Plugins"),
+	     new SpinOption<int32_t> (
+		     "max-plugin-chart",
+		     _("Plugin chart (use-count) length"),
+				 sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_max_plugin_chart),
+				 sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_max_plugin_chart),
+		     10, 25, 1, 5
+		     ));
+
+	add_option (_("Plugins"),
+	     new SpinOption<int32_t> (
+		     "max-plugin-recent",
+		     _("Plugin recent list length"),
+				 sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_max_plugin_recent),
+				 sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_max_plugin_recent),
+		     10, 50, 1, 5
+		     ));
+
 	add_option (_("Plugins"), new OptionEditorBlank ());
 
 	/* INTERFACE */
@@ -4294,6 +4318,10 @@ void RCOptionEditor::plugin_scan_refresh () {
 	/* first argument says discover new plugins, second means be verbose */
 	PluginScanDialog psd (false, true);
 	psd.start ();
+}
+
+void RCOptionEditor::plugin_reset_stats () {
+	PluginManager::instance().reset_stats();
 }
 
 void RCOptionEditor::clear_vst_cache () {
