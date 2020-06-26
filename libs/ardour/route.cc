@@ -2256,7 +2256,7 @@ Route::reorder_processors (const ProcessorList& new_order, ProcessorStreams* err
 bool
 Route::add_remove_sidechain (boost::shared_ptr<Processor> proc, bool add)
 {
-	if (_session.actively_recording ()) {
+	if (_session.actively_recording () || _in_sidechain_setup) {
 		return false;
 	}
 
@@ -2278,11 +2278,8 @@ Route::add_remove_sidechain (boost::shared_ptr<Processor> proc, bool add)
 	}
 
 	{
-		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ()); // take before Writerlock to avoid deadlock
-		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
 		PBD::Unwinder<bool> uw (_in_sidechain_setup, true);
 
-		lx.release (); // IO::add_port() and ~IO takes process lock  - XXX check if this is safe
 		if (add) {
 			if (!pi->add_sidechain ()) {
 				return false;
@@ -2293,11 +2290,15 @@ Route::add_remove_sidechain (boost::shared_ptr<Processor> proc, bool add)
 			}
 		}
 
-		lx.acquire ();
+		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ()); // take before Writerlock to avoid deadlock
+		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
+
 		list<pair<ChanCount, ChanCount> > c = try_configure_processors_unlocked (n_inputs (), 0);
-		lx.release ();
 
 		if (c.empty()) {
+			lm.release ();
+			lx.release ();
+
 			if (add) {
 				pi->del_sidechain ();
 			} else {
@@ -2306,7 +2307,7 @@ Route::add_remove_sidechain (boost::shared_ptr<Processor> proc, bool add)
 			}
 			return false;
 		}
-		lx.acquire ();
+
 		configure_processors_unlocked (0, &lm);
 	}
 
