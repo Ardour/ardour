@@ -1674,6 +1674,14 @@ PluginManager::load_stats ()
 }
 
 void
+PluginManager::reset_stats ()
+{
+	statistics.clear ();
+	PluginStatsChanged (); /* EMIT SIGNAL */
+	save_stats ();
+}
+
+void
 PluginManager::stats_use_plugin (PluginInfoPtr const& pip)
 {
 	PluginStats ps (pip->type, pip->unique_id, time (NULL));

@@ -74,6 +74,7 @@ public:
 	bool cancelled () { return _cancel_scan; }
 	bool no_timeout () { return _cancel_timeout; }
 
+	void reset_stats ();
 	void stats_use_plugin (PluginInfoPtr const&);
 	bool stats (PluginInfoPtr const&, int64_t& lru, uint64_t& use_count) const;
 	void save_stats ();
