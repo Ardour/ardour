@@ -3224,14 +3224,20 @@ void
 Mixer_UI::sync_treeview_from_favorite_order ()
 {
 	PBD::Unwinder<bool> uw (ignore_plugin_reorder, true);
-	if (plugin_list_mode () == PLM_Favorite) {
-		PluginUIOrderSorter cmp (favorite_ui_order);
-		plugin_list.sort (cmp);
-	} else {
-#if 0
-		PluginABCSorter cmp;
-		plugin_list.sort (cmp);
-#endif
+	switch (plugin_list_mode ()) {
+		case PLM_Favorite:
+			{
+				PluginUIOrderSorter cmp (favorite_ui_order);
+				plugin_list.sort (cmp);
+			}
+			break;
+		case PLM_TopHits:
+			{
+				PluginABCSorter cmp;
+				plugin_list.sort (cmp);
+			}
+		case PLM_Recent:
+			break;
 	}
 
 	favorite_plugins_model->clear ();
