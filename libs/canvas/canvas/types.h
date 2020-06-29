@@ -50,11 +50,6 @@ enum Orientation {
 	Vertical = 0x2,
 };
 
-enum Dimension {
-	Width = 0x1,
-	Height = 0x2
-};
-
 inline Coord
 canvas_safe_add (Coord a, Coord b)
 {
