@@ -45,15 +45,47 @@ class /* LIBCANVAS_API */ ConstrainedItem
 	kiwi::Variable& bottom () { return _bottom; }
 	kiwi::Variable& width () { return _width; }
 	kiwi::Variable& height () { return _height; }
-
 	kiwi::Variable& center_x () { return _center_x; }
 	kiwi::Variable& center_y () { return _center_y; }
+
+	kiwi::Variable const & left () const { return _left; }
+	kiwi::Variable const & right () const { return _right; }
+	kiwi::Variable const & top () const { return _top; }
+	kiwi::Variable const & bottom () const { return _bottom; }
+	kiwi::Variable const & width () const { return _width; }
+	kiwi::Variable const & height () const { return _height; }
+	kiwi::Variable const & center_x () const { return _center_x; }
+	kiwi::Variable const & center_y () const { return _center_y; }
+
+	kiwi::Variable& left_padding () { return _left_padding; }
+	kiwi::Variable& right_padding () { return _right_padding; }
+	kiwi::Variable& top_padding () { return _top_padding; }
+	kiwi::Variable& bottom_padding () { return _bottom_padding; }
 
 	void constrained (ConstraintPacker const & parent);
 	virtual bool involved (kiwi::Constraint const &) const;
 
 	std::vector<kiwi::Constraint> const & constraints() const { return _constraints; }
 	void add_constraint (kiwi::Constraint const & c) { _constraints.push_back (c); }
+
+	ConstrainedItem& at (Duple const &);
+	ConstrainedItem& size (Duple const &);
+	ConstrainedItem& box (Rect const &);
+
+	ConstrainedItem& left_of (ConstrainedItem const &, Distance pad = 0);
+	ConstrainedItem& right_of (ConstrainedItem const &, Distance pad = 0);
+	ConstrainedItem& above (ConstrainedItem const &, Distance pad = 0);
+	ConstrainedItem& below (ConstrainedItem const &, Distance pad = 0);
+	ConstrainedItem& x_centered (ConstrainedItem const &, Distance offset = 0);
+	ConstrainedItem& y_centered (ConstrainedItem const &, Distance offset = 0);
+	ConstrainedItem& centered_on (ConstrainedItem const &, Distance xoffset = 0, Distance yoffset = 0);
+	ConstrainedItem& top_aligned_with (ConstrainedItem const &, Distance offset = 0);
+	ConstrainedItem& bottom_aligned_with (ConstrainedItem const &, Distance offset = 0);
+	ConstrainedItem& left_aligned_with (ConstrainedItem const &, Distance offset = 0);
+	ConstrainedItem& right_aligned_with (ConstrainedItem const &, Distance offset = 0);
+	ConstrainedItem& same_size_as (ConstrainedItem const &, Distance wdelta = 0, Distance hdelta = 0);
+	ConstrainedItem& same_width_as (ConstrainedItem const &, Distance delta = 0);
+	ConstrainedItem& same_height_as (ConstrainedItem const &, Distance delta = 0);
 
 	virtual void dump (std::ostream&);
 
@@ -67,6 +99,10 @@ class /* LIBCANVAS_API */ ConstrainedItem
 	kiwi::Variable _bottom;
 	kiwi::Variable _width;
 	kiwi::Variable _height;
+	kiwi::Variable _left_padding;
+	kiwi::Variable _right_padding;
+	kiwi::Variable _top_padding;
+	kiwi::Variable _bottom_padding;
 
 	/* derived */
 
@@ -87,17 +123,6 @@ class /* LIBCANVAS_API */ BoxConstrainedItem : public ConstrainedItem
 	kiwi::Variable& top_margin () { return _top_margin; }
 	kiwi::Variable& bottom_margin () { return _bottom_margin; }
 
-	/* Padding is not for use by items or anyone except the parent
-	 * (constraint) container. It is used to space out items that are set
-	 * to expand inside a container but not to "fill" (i.e. the extra space
-	 * is assigned to padding around the item, not the item itself).
-	 */
-
-	kiwi::Variable& left_padding () { return _left_padding; }
-	kiwi::Variable& right_padding () { return _right_padding; }
-	kiwi::Variable& top_padding () { return _top_padding; }
-	kiwi::Variable& bottom_padding () { return _bottom_padding; }
-
 	PackOptions primary_axis_pack_options() const { return _primary_axis_pack_options; }
 	PackOptions secondary_axis_pack_options() const { return _secondary_axis_pack_options; }
 
@@ -108,10 +133,6 @@ class /* LIBCANVAS_API */ BoxConstrainedItem : public ConstrainedItem
 	kiwi::Variable _right_margin;
 	kiwi::Variable _top_margin;
 	kiwi::Variable _bottom_margin;
-	kiwi::Variable _left_padding;
-	kiwi::Variable _right_padding;
-	kiwi::Variable _top_padding;
-	kiwi::Variable _bottom_padding;
 
 	PackOptions _primary_axis_pack_options;
 	PackOptions _secondary_axis_pack_options;
@@ -120,4 +141,3 @@ class /* LIBCANVAS_API */ BoxConstrainedItem : public ConstrainedItem
 }
 
 #endif
-

@@ -284,11 +284,11 @@ cBox::size_allocate (Rect const & r)
 	_solver.suggestValue (expanded_item_size, expanded_size);
 
 	_solver.updateVariables ();
-	//solver.dump (cerr);
+	_solver.dump (cerr);
 
-	//for (ConstrainedItemMap::const_iterator o = constrained_map.begin(); o != constrained_map.end(); ++o) {
-	//o->second->dump (cerr);
-	//}
+	for (ConstrainedItemMap::const_iterator o = constrained_map.begin(); o != constrained_map.end(); ++o) {
+		o->second->dump (cerr);
+	}
 
 	apply (&_solver);
 
@@ -299,8 +299,11 @@ cBox::size_allocate (Rect const & r)
 void
 cBox::update_constraints ()
 {
-	ConstraintPacker::update_constraints ();
+	/* must totally override ConstraintPacker::update_constraints() */
 
+	_solver.reset ();
+	_solver.addEditVariable (width, kiwi::strength::strong);
+	_solver.addEditVariable (height, kiwi::strength::strong);
 	_solver.addEditVariable (expanded_item_size, kiwi::strength::strong);
 
 	try {
@@ -505,6 +508,8 @@ cBox::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 		const Rect draw = self.intersection (area);
 
 		if (fill()) {
+
+			cerr << whoami() << " setting fill context with 0x" << std::hex << _fill_color << std::dec << " draw " << draw << endl;
 
 			setup_fill_context (context);
 			context->rectangle (draw.x0, draw.y0, draw.width(), draw.height());

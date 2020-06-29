@@ -37,6 +37,10 @@ ConstrainedItem::ConstrainedItem (Item& i)
 	, _bottom (_item.name + " bottom")
 	, _width (_item.name + " width")
 	, _height (_item.name + " height")
+	, _left_padding (_item.name + " left_padding")
+	, _right_padding (_item.name + " right_padding")
+	, _top_padding (_item.name + " top_padding")
+	, _bottom_padding (_item.name + " bottom_padding")
 	, _center_x (_item.name + " center_x")
 	, _center_y (_item.name + " center_y")
 {
@@ -46,6 +50,9 @@ ConstrainedItem::ConstrainedItem (Item& i)
 
 	_constraints.push_back (center_x() == left() + (width() / 2.));
 	_constraints.push_back (center_y() == top() + (height() / 2.));
+
+	_constraints.push_back (_right == _left + _width);
+	_constraints.push_back (_bottom == _top + _height);
 }
 
 ConstrainedItem::~ConstrainedItem ()
@@ -74,6 +81,10 @@ ConstrainedItem::dump (std::ostream& out)
 	    << '\t' << "bottom: " << _bottom.value() << '\n'
 	    << '\t' << "width: " << _width.value() << '\n'
 	    << '\t' << "height: " << _height.value() << '\n'
+	    << '\t' << "right_padding: " << _right_padding.value() << '\n'
+	    << '\t' << "left_padding: " << _left_padding.value() << '\n'
+	    << '\t' << "top_padding: " << _top_padding.value() << '\n'
+	    << '\t' << "bottom_padding: " << _bottom_padding.value() << '\n'
 	    << '\t' << "center_x: " << _center_x.value() << '\n'
 	    << '\t' << "center_y: " << _center_y.value() << '\n';
 }
@@ -103,10 +114,6 @@ BoxConstrainedItem::BoxConstrainedItem (Item& parent, PackOptions primary_axis_o
 	, _right_margin (_item.name + " right_margin")
 	, _top_margin (_item.name + " top_margin")
 	, _bottom_margin (_item.name + " bottom_margin")
-	, _left_padding (_item.name + " left_padding")
-	, _right_padding (_item.name + " right_padding")
-	, _top_padding (_item.name + " top_padding")
-	, _bottom_padding (_item.name + " bottom_padding")
 	, _primary_axis_pack_options (primary_axis_opts)
 	, _secondary_axis_pack_options (secondary_axis_opts)
 {
@@ -141,9 +148,126 @@ BoxConstrainedItem::dump (std::ostream& out)
 	out << '\t' << "left_margin: " << _left_margin.value() << '\n'
 	    << '\t' << "right_margin: " << _right_margin.value() << '\n'
 	    << '\t' << "top_margin: " << _top_margin.value() << '\n'
-	    << '\t' << "bottom_margin: " << _bottom_margin.value() << '\n'
-	    << '\t' << "right_padding: " << _right_padding.value() << '\n'
-	    << '\t' << "left_padding: " << _left_padding.value() << '\n'
-	    << '\t' << "top_padding: " << _top_padding.value() << '\n'
-	    << '\t' << "bottom_padding: " << _bottom_padding.value() << '\n';
+	    << '\t' << "bottom_margin: " << _bottom_margin.value() << '\n';
 }
+
+ConstrainedItem&
+ConstrainedItem::at (Duple const & d)
+{
+	_constraints.push_back (_left == d.x);
+	_constraints.push_back (_top == d.y);
+
+	return *this;
+}
+
+ConstrainedItem&
+ConstrainedItem::size (Duple const & d)
+{
+	_constraints.push_back (_width == d.x);
+	_constraints.push_back (_height == d.y);
+
+	return *this;
+}
+
+ConstrainedItem&
+ConstrainedItem::box (Rect const & r)
+{
+	_constraints.push_back (_left == r.x0);
+	_constraints.push_back (_top == r.y0);
+	_constraints.push_back (_width == r.width());
+	_constraints.push_back (_height == r.height());
+
+	return *this;
+}
+
+
+ConstrainedItem&
+ConstrainedItem::left_of (ConstrainedItem const & other, Distance by)
+{
+	_constraints.push_back (_right_padding == by);
+	_constraints.push_back (_right == other.left() + _right_padding);
+	return *this;
+}
+
+ConstrainedItem&
+ConstrainedItem::right_of (ConstrainedItem const & other, Distance by)
+{
+	_constraints.push_back (_left_padding == by);
+	_constraints.push_back (_left == other.right() + _left_padding);
+	return *this;
+}
+
+ConstrainedItem&
+ConstrainedItem::above (ConstrainedItem const & other, Distance by)
+{
+	_constraints.push_back (_bottom_padding == by);
+	_constraints.push_back (_bottom == other.top() + _bottom_padding);
+	return *this;
+}
+
+ConstrainedItem&
+ConstrainedItem::below (ConstrainedItem const & other, Distance by)
+{
+	_constraints.push_back (_top_padding == by);
+	_constraints.push_back (_top == other.bottom() + _top_padding);
+	return *this;
+}
+
+ConstrainedItem&
+ConstrainedItem::centered_on (ConstrainedItem const & other, Distance xoffset, Distance yoffset)
+{
+	_constraints.push_back (_center_x == other.center_x() + xoffset);
+	_constraints.push_back (_center_y == other.center_y() + yoffset);
+	return *this;
+}
+
+ConstrainedItem&
+ConstrainedItem::top_aligned_with (ConstrainedItem const & other, Distance offset)
+{
+	_constraints.push_back (_top == other.top() + offset);
+	return *this;
+}
+
+ConstrainedItem&
+ConstrainedItem::bottom_aligned_with (ConstrainedItem const & other, Distance offset)
+{
+	_constraints.push_back (_bottom == other.bottom() + offset);
+	return *this;
+}
+
+ConstrainedItem&
+ConstrainedItem::left_aligned_with (ConstrainedItem const & other, Distance offset)
+{
+	_constraints.push_back (_left == other.left() + offset);
+	return *this;
+}
+
+ConstrainedItem&
+ConstrainedItem::right_aligned_with (ConstrainedItem const & other, Distance offset)
+{
+	_constraints.push_back (_right == other.right() + offset);
+	return *this;
+}
+
+ConstrainedItem&
+ConstrainedItem::same_size_as (ConstrainedItem const & other, Distance wdelta, Distance hdelta)
+{
+	_constraints.push_back (_width == other.width() + wdelta);
+	_constraints.push_back (_height == other.height() + hdelta);
+	return *this;
+}
+
+ConstrainedItem&
+ConstrainedItem::same_width_as (ConstrainedItem const & other, Distance delta)
+{
+	_constraints.push_back (_width == other.width() + delta);
+	return *this;
+}
+
+ConstrainedItem&
+ConstrainedItem::same_height_as (ConstrainedItem const & other, Distance delta)
+{
+	_constraints.push_back (_height == other.height() + delta);
+	return *this;
+}
+
