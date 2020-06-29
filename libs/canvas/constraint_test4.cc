@@ -35,8 +35,6 @@ main (int argc, char* argv[])
 
 	srandom (time ((time_t) 0));
 
-	cview.set_size_request (100, 100);
-
 	win.add (cview);
 
 	/* Make some items */
@@ -74,6 +72,10 @@ main (int argc, char* argv[])
 	/* create a container */
 
 	ConstraintPacker* packer = new ConstraintPacker (c->root());
+
+	/* give it a minimum size */
+
+	packer->set_intrinsic_size (100, 100);
 
 	/* add stuff */
 

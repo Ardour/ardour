@@ -137,7 +137,12 @@ ConstraintPacker::constrain (kiwi::Constraint const &c)
 void
 ConstraintPacker::preferred_size (Duple& minimum, Duple& natural) const
 {
-#if 0
+	const_cast<ConstraintPacker*>(this)->non_const_preferred_size (minimum, natural);
+}
+
+void
+ConstraintPacker::non_const_preferred_size (Duple& minimum, Duple& natural)
+{
 	/* our parent wants to know how big we are.
 
 	   We may have some intrinsic size (i.e. "everything in this constraint
@@ -152,6 +157,12 @@ ConstraintPacker::preferred_size (Duple& minimum, Duple& natural) const
 	   We may have no intrinsic dimensions at all. This is the tricky one.
 	*/
 
+	if (_intrinsic_width == 0 && _intrinsic_height == 0) {
+		natural = Duple (100,100);
+		minimum = natural;
+		return;
+	}
+
 	if (_need_constraint_update) {
 		const_cast<ConstraintPacker*>(this)->update_constraints ();
 	}
@@ -163,19 +174,24 @@ ConstraintPacker::preferred_size (Duple& minimum, Duple& natural) const
 	}
 
 	_solver.updateVariables ();
+	apply (0);
+
+	Rect bb (bounding_box());
 
 	Duple ret;
 
-	natural.x = width.value ();
-	natural.y = height.value ();
+	natural.x = std::max (bb.width(), _intrinsic_width);
+	natural.y = std::max (bb.height(), _intrinsic_width);
 
-	minimum = natural;
-#endif
-	natural.x = 100;
-	natural.y = 100;
-	minimum = natural;
+	minimum.x = std::min (bb.width(), _intrinsic_width);
+	minimum.y = std::min (bb.height(), _intrinsic_width);
 
-	cerr << "CP::sr returns " << natural<< endl;
+	/* put solver back to default state */
+
+	_solver.reset ();
+	_need_constraint_update = true;
+
+	cerr << "CP min " << minimum << " pref " << natural << endl;
 }
 
 void
@@ -301,10 +317,10 @@ ConstraintPacker::update_constraints ()
 
 		x->first->preferred_size (min, natural);
 
-		_solver.addConstraint (ci->width() >= min.width() | kiwi::strength::required);
-		_solver.addConstraint (ci->height() >= min.height() | kiwi::strength::required);
-		_solver.addConstraint (ci->width() == natural.width() | kiwi::strength::medium);
-		_solver.addConstraint (ci->height() == natural.width() | kiwi::strength::medium);
+		_solver.addConstraint ((ci->width() >= min.width()) | kiwi::strength::required);
+		_solver.addConstraint ((ci->height() >= min.height()) | kiwi::strength::required);
+		_solver.addConstraint ((ci->width() == natural.width()) | kiwi::strength::medium);
+		_solver.addConstraint ((ci->height() == natural.width()) | kiwi::strength::medium);
 
 		add_constraints (_solver, ci);
 	}

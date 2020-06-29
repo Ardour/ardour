@@ -70,6 +70,7 @@ public:
 
 	void add_constraints (kiwi::Solver&, ConstrainedItem*) const;
 
+	void non_const_preferred_size (Duple& mininum, Duple& natural);
 	virtual void update_constraints ();
 };
 
