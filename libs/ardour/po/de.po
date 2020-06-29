@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-06-19 11:19+0200\n"
-"PO-Revision-Date: 2020-06-19 19:53+0200\n"
+"POT-Creation-Date: 2020-06-29 07:30+0200\n"
+"PO-Revision-Date: 2020-06-29 07:43+0200\n"
 "Last-Translator: Edgar Aichinger <edgar.aichinger@aon.at>\n"
 "Language-Team: German <ardour-dev@lists.ardour.org>\n"
 "Language: de\n"
@@ -1069,7 +1069,7 @@ msgstr ""
 msgid "Loading configuration"
 msgstr "Lade Konfiguration"
 
-#: globals.cc:592 route.cc:207 session.cc:1006
+#: globals.cc:592 route.cc:208 session.cc:1006
 msgid "Monitor"
 msgstr "Monitor"
 
@@ -1275,11 +1275,11 @@ msgstr "IO: schlecht geformte Zeichenkette in XML-Knoten für Ausgänge \"%1\""
 msgid "IO: bad output string in XML node \"%1\""
 msgstr "IO: schlechte Zeichenkette für Ausgang in XML-Knoten \"%1\""
 
-#: io.cc:1237 plugin.cc:314
+#: io.cc:1237 plugin.cc:325
 msgid "Out"
 msgstr "Aus"
 
-#: io.cc:1237 plugin.cc:312
+#: io.cc:1237 plugin.cc:323
 msgid "In"
 msgstr "Ein"
 
@@ -1372,7 +1372,7 @@ msgstr "Konnte %1 nicht erzeugen. Preset nicht gesichert. (%2)"
 msgid "Error saving presets file %1."
 msgstr "Fehler beim Sichern der Preset-Datei %1."
 
-#: ladspa_plugin.cc:930
+#: ladspa_plugin.cc:932
 msgid "Could not locate HOME.  Preset not saved."
 msgstr "Konnte HOME nicht eruieren. Preset nicht gesichert."
 
@@ -1837,19 +1837,23 @@ msgstr "Versuche, nicht-existente Voreinstellung zu entfernen."
 msgid "Cannot remove plugin factory preset."
 msgstr "Factory-Preset des Plugins kann nicht entfernt werden."
 
-#: plugin.cc:157
-msgid "Preset with given name already exists."
-msgstr "Ein Preset mit diesem Namen existiert bereits."
+#: plugin.cc:158
+msgid "A factory presets with given name already exists."
+msgstr "Ein Factory-Preset mit diesem Namen existiert bereits."
 
-#: plugin.cc:302
+#: plugin.cc:167
+msgid "Failed to save plugin preset."
+msgstr "Sichern des Plugin-Presets fehlgeschlagen."
+
+#: plugin.cc:313
 msgid "Audio"
 msgstr "Audio"
 
-#: plugin.cc:305
+#: plugin.cc:316
 msgid "Midi"
 msgstr "MIDI"
 
-#: plugin.cc:308
+#: plugin.cc:319
 msgid "?"
 msgstr "?"
 
@@ -2112,35 +2116,47 @@ msgstr "unbekannter Plugin-Statustyp \"%1\" - alle Einträge ignoriert"
 msgid "unknown plugin type \"%1\" - ignored"
 msgstr "unbekannter Plugintyp \"%1\" - ignoriert"
 
-#: plugin_manager.cc:1650
+#: plugin_manager.cc:1606
+msgid "Could not save Plugin Statistics to %1"
+msgstr "Kann Plugin-Statistik nicht nach %1 sichern"
+
+#: plugin_manager.cc:1617
+msgid "Loading plugin statistics file %1"
+msgstr "Lade Plugin-Statistik Datei %1"
+
+#: plugin_manager.cc:1621
+msgid "Cannot parse plugin statistics from %1"
+msgstr "Kann Plugin-Statistik aus %1 nicht parsen"
+
+#: plugin_manager.cc:1778
 msgid "Loading plugin order file %1"
 msgstr "Lade Plugin-Reihenfolge-Datei %1"
 
-#: plugin_manager.cc:1660
+#: plugin_manager.cc:1788
 msgid "Cannot parse Plugin Order info from %1"
-msgstr "Kann die Plugin-Reihenfolge nicht aus %1 laden"
+msgstr "Kann die Plugin-Reihenfolge nicht aus %1 parsen"
 
-#: plugin_manager.cc:1674
+#: plugin_manager.cc:1802
 msgid "Could not save Plugin Order info to %1"
 msgstr "Konnte die Plugin-Reihenfolge nicht nach %1 speichern"
 
-#: plugin_manager.cc:1711
+#: plugin_manager.cc:1839
 msgid "Could not save Plugin Tags info to %1"
 msgstr "Konnte Tags-Info des Plugins nicht nach %1 speichern"
 
-#: plugin_manager.cc:1724
+#: plugin_manager.cc:1852
 msgid "Loading plugin meta data file %1"
 msgstr "Lade Plugin-Metadatendatei %1"
 
-#: plugin_manager.cc:1731
+#: plugin_manager.cc:1859
 msgid "Cannot parse plugin tag info from %1"
-msgstr "Kann Tags-Info des Plugins aus %1 nicht analysieren"
+msgstr "Kann Tags-Info des Plugins aus %1 nicht parsen"
 
-#: plugin_manager.cc:1808
+#: plugin_manager.cc:1937
 msgid "PluginManager::sanitize_tag could not tokenize string: "
 msgstr "PluginManager::sanitize_tag konnte String nicht tokenisieren: "
 
-#: plugin_manager.cc:1858
+#: plugin_manager.cc:1987
 msgid "PluginManager: Could not tokenize string: "
 msgstr "PluginManager: Konnte String nicht tokenisieren: "
 
@@ -2450,79 +2466,79 @@ msgstr "Import: Fehler in src_new() : %1"
 msgid "return %1"
 msgstr "Rückgabewert: %1"
 
-#: route.cc:949 route.cc:3174 track.cc:853
+#: route.cc:950 route.cc:3177 track.cc:853
 msgid "unknown Processor type \"%1\"; ignored"
 msgstr "unbekannter Prozessortyp \"%1\"; ignoriert"
 
-#: route.cc:971
+#: route.cc:972
 msgid "processor could not be created. Ignored."
 msgstr "Prozessor konnte nicht erzeugt werden. Ignoriert."
 
-#: route.cc:2602 route.cc:2808
+#: route.cc:2605 route.cc:2811
 msgid "Bad node sent to Route::set_state() [%1]"
 msgstr "Schlechter Knoten an Route::set_state() gesendet [%1]"
 
-#: route.cc:2673
+#: route.cc:2676
 msgid "Panner state mismatches for track/bus (%1)."
 msgstr "Pannerzustände für Spur/Bus stimmen nicht überein (%1)"
 
-#: route.cc:3673
+#: route.cc:3676
 msgid "Invalid Solo-Isolate propagation: from:%1 new:%2 - old:%3 = delta:%4"
 msgstr "Ungültige Solo-Isolate Propagierung: von:%1 neu:%2 - alt:%3 = delta:%4"
 
-#: route.cc:4940
+#: route.cc:4943
 msgid "Amp/Fader on track/bus '%1' was missing."
 msgstr "Amp/Fader an Spur/Bus %1 fehlte."
 
-#: route.cc:5784 route.cc:5795
+#: route.cc:5787 route.cc:5798
 msgid "lo"
 msgstr "lo"
 
-#: route.cc:5785
+#: route.cc:5788
 msgid "mid"
 msgstr "mid"
 
-#: route.cc:5786 route.cc:5798
+#: route.cc:5789 route.cc:5801
 msgid "hi"
 msgstr "hi"
 
-#: route.cc:5796
+#: route.cc:5799
 msgid "lm"
 msgstr "lm"
 
-#: route.cc:5797
+#: route.cc:5800
 msgid "hm"
 msgstr "hm"
 
-#: route.cc:5872
+#: route.cc:5875
 msgid "Leveler"
 msgstr "Leveller"
 
-#: route.cc:5874
+#: route.cc:5877
 msgid "Compressor"
 msgstr "Kompressor"
 
-#: route.cc:5876 route.cc:5878
+#: route.cc:5879 route.cc:5881
 msgid "Limiter"
 msgstr "Limiter"
 
-#: route.cc:5878
+#: route.cc:5881
 msgid "Sidechain"
 msgstr "Sidechain"
 
-#: route.cc:5881 route.cc:5883 route.cc:5900 route.cc:5902
+#: route.cc:5884 route.cc:5886 route.cc:5903 route.cc:5905
 msgid "???"
 msgstr "???"
 
-#: route.cc:5893
+#: route.cc:5896
 msgid "Attk"
 msgstr "Attk"
 
-#: route.cc:5895
+#: route.cc:5898
 msgid "Ratio"
 msgstr "Ratio"
 
-#: route.cc:5898
+#: route.cc:5901
 msgid "Rels"
 msgstr "Rels"
 
@@ -2548,8 +2564,8 @@ msgid "error writing tempo-adjusted data to %1"
 msgstr "Fehler beim Schreiben der tempo-angepassten Daten nach %1"
 
 #: rt_tasklist.cc:96
-msgid "Cannot create thread for TaskList! ("
-msgstr ""
+msgid "Cannot create thread for TaskList!"
+msgstr "Konnte Thread für Aufgabenliste nicht anlegen!"
 
 #: send.cc:75
 msgid "aux %1"
@@ -2577,7 +2593,7 @@ msgstr "Konnte Vorlagen/Schnappschussstatus nicht laden"
 
 #: session.cc:374
 msgid "Failed to parse template/snapshot state"
-msgstr "Konnte Vorlagen/Schnappschuss-Status nicht analysieren"
+msgstr "Konnte Vorlagen/Schnappschuss-Status nicht parsen"
 
 #: session.cc:394
 msgid "Failed to load state"
@@ -3431,11 +3447,11 @@ msgstr "unbekannter Grund"
 msgid "Unknown transport state %1 in sync callback"
 msgstr "Unbekannter Transportstatus %1 im Sync-Callback"
 
-#: session_transport.cc:172
+#: session_transport.cc:167
 msgid "Locate called for negative sample position - ignored"
 msgstr "Locate für negative Sample-Position aufgerufen - ignoriert"
 
-#: session_transport.cc:478
+#: session_transport.cc:473
 msgid ""
 "Global varispeed cannot be supported while %1 is connected to JACK transport "
 "control"
@@ -3447,7 +3463,7 @@ msgstr ""
 msgid "Cannot loop - no loop range defined"
 msgstr "Kann nicht loopen - kein Schleifenbereich definieert"
 
-#: session_transport.cc:1577
+#: session_transport.cc:1580
 msgid ""
 "Looping cannot be supported while %1 is using JACK transport.\n"
 "Recommend changing the configured options"
