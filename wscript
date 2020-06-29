@@ -275,7 +275,7 @@ children = [
         'libs/plugins/a-eq.lv2',
         'libs/plugins/a-reverb.lv2',
         'libs/plugins/a-fluidsynth.lv2',
-        # 'gtk2_ardour',
+        'gtk2_ardour',
         'share/export',
         'share/midi_maps',
         'share/mcp',
