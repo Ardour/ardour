@@ -61,7 +61,6 @@ main (int argc, char* argv[])
 	vbox->set_fill_color (0xff0000ff);
 	vbox->set_margin (20);
 
-#if 1
 	vbox->pack_start (r1,  PackOptions(PackExpand|PackFill));
 	vbox->pack_start (r2, PackOptions(PackExpand|PackFill));
 	vbox->pack_start (r3, PackOptions(PackExpand|PackFill));
@@ -90,7 +89,7 @@ main (int argc, char* argv[])
 	hbox1->pack_start (r6, PackOptions(PackExpand|PackFill));
 
 	BoxConstrainedItem* hb1;
-	ConstrainedItem* ci;
+	BoxConstrainedItem* ci;
 
 	hb1 = vbox->pack_start (hbox1, PackOptions (PackExpand|PackFill));
 
@@ -105,6 +104,8 @@ main (int argc, char* argv[])
 	ci = vbox->pack_start (circle, PackOptions (PackExpand|PackFill));
 	ci->add_constraint (ci->height() == 0.5 * hb1->height());
 	ci->add_constraint (ci->center_x() == ci4->center_x());
+	ci->add_constraint (ci->top_padding() == 10);
+	ci->add_constraint (ci->bottom_padding() == 10);
 
 	cBox* hbox2 = new cBox (c, Horizontal);
 	hbox2->name = "hbox2";
@@ -121,11 +122,11 @@ main (int argc, char* argv[])
 	txt->set ("hello world");
 
 	ConstrainedItem* hb2 = vbox->pack_start (hbox2, PackOptions (PackExpand|PackFill));
+	ConstrainedItem* ti = hbox2->pack_start (txt, PackOptions (PackExpand), PackOptions (0));
 
-	ConstrainedItem* ti = hbox2->pack_start (txt, PackOptions (PackExpand|PackFill));
 	ti->add_constraint (ti->center_x() == hb2->center_x());
-	ti->add_constraint (ti->center_y() == hb2->center_y() + 20);
-#endif
+	ti->add_constraint (ti->center_y() == hb2->center_y());
+
 	win.show_all ();
 	app.run ();
 

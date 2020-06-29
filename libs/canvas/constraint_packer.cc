@@ -131,11 +131,13 @@ void
 ConstraintPacker::constrain (kiwi::Constraint const &c)
 {
 	constraint_list.push_back (c);
+	_need_constraint_update = true;
 }
 
 void
 ConstraintPacker::preferred_size (Duple& minimum, Duple& natural) const
 {
+#if 0
 	/* our parent wants to know how big we are.
 
 	   We may have some intrinsic size (i.e. "everything in this constraint
@@ -150,46 +152,27 @@ ConstraintPacker::preferred_size (Duple& minimum, Duple& natural) const
 	   We may have no intrinsic dimensions at all. This is the tricky one.
 	*/
 
-	kiwi::Solver s;
+	if (_need_constraint_update) {
+		const_cast<ConstraintPacker*>(this)->update_constraints ();
+	}
 
 	if (_intrinsic_width > 0) {
-
-		s.addEditVariable (width, kiwi::strength::strong);
-		s.suggestValue (width, _intrinsic_width);
-
+		_solver.suggestValue (width, _intrinsic_width);
 	} else if (_intrinsic_height > 0) {
-
-		s.addEditVariable (height, kiwi::strength::strong);
-		s.suggestValue (height, _intrinsic_height);
-
+		_solver.suggestValue (height, _intrinsic_height);
 	}
 
-	for (ConstrainedItemMap::const_iterator x = constrained_map.begin(); x != constrained_map.end(); ++x) {
-
-		Duple min, natural;
-		ConstrainedItem* ci = x->second;
-
-		x->first->preferred_size (min, natural);
-
-		s.addConstraint (ci->width() >= min.width() | kiwi::strength::required);
-		s.addConstraint (ci->height() >= min.height() | kiwi::strength::required);
-		s.addConstraint (ci->width() == natural.width() | kiwi::strength::medium);
-		s.addConstraint (ci->height() == natural.width() | kiwi::strength::medium);
-
-		add_constraints (s, ci);
-	}
-
-	for (ConstraintList::const_iterator c = constraint_list.begin(); c != constraint_list.end(); ++c) {
-		s.addConstraint (*c);
-	}
-
-	s.updateVariables ();
+	_solver.updateVariables ();
 
 	Duple ret;
 
 	natural.x = width.value ();
 	natural.y = height.value ();
 
+	minimum = natural;
+#endif
+	natural.x = 100;
+	natural.y = 100;
 	minimum = natural;
 
 	cerr << "CP::sr returns " << natural<< endl;
@@ -202,36 +185,22 @@ ConstraintPacker::size_allocate (Rect const & r)
 
 	Item::size_allocate (r);
 
-	kiwi::Solver s;
-
-	s.addConstraint (width == r.width());
-	s.addConstraint (height == r.height());
-
-//	s.addEditVariable (width, kiwi::strength::strong);
-//	s.addEditVariable (height, kiwi::strength::strong);
-//	s.suggestValue (width, r.width());
-//	s.suggestValue (height, r.height());
-
-	for (ConstrainedItemMap::iterator x = constrained_map.begin(); x != constrained_map.end(); ++x) {
-
-		Duple min, natural;
-		ConstrainedItem* ci = x->second;
-
-		x->first->preferred_size (min, natural);
-
-		s.addConstraint (ci->width() >= min.width() | kiwi::strength::required);
-		s.addConstraint (ci->height() >= min.height() | kiwi::strength::required);
-		s.addConstraint (ci->width() == natural.width() | kiwi::strength::medium);
-		s.addConstraint (ci->height() == natural.width() | kiwi::strength::medium);
-
-		add_constraints (s, ci);
+	if (_need_constraint_update) {
+		update_constraints ();
 	}
 
-	for (ConstraintList::const_iterator c = constraint_list.begin(); c != constraint_list.end(); ++c) {
-		s.addConstraint (*c);
-	}
+	_solver.suggestValue (width, r.width());
+	_solver.suggestValue (height, r.height());
+	_solver.updateVariables ();
 
-	s.updateVariables ();
+#if 0
+	_solver.dump (cerr);
+
+	for (ConstrainedItemMap::const_iterator o = constrained_map.begin(); o != constrained_map.end(); ++o) {
+		o->second->dump (cerr);
+	}
+#endif
+
 	apply (0);
 
 	_bounding_box_dirty = true;
@@ -324,4 +293,23 @@ ConstraintPacker::update_constraints ()
 	_solver.reset ();
 	_solver.addEditVariable (width, kiwi::strength::strong);
 	_solver.addEditVariable (height, kiwi::strength::strong);
+
+	for (ConstrainedItemMap::iterator x = constrained_map.begin(); x != constrained_map.end(); ++x) {
+
+		Duple min, natural;
+		ConstrainedItem* ci = x->second;
+
+		x->first->preferred_size (min, natural);
+
+		_solver.addConstraint (ci->width() >= min.width() | kiwi::strength::required);
+		_solver.addConstraint (ci->height() >= min.height() | kiwi::strength::required);
+		_solver.addConstraint (ci->width() == natural.width() | kiwi::strength::medium);
+		_solver.addConstraint (ci->height() == natural.width() | kiwi::strength::medium);
+
+		add_constraints (_solver, ci);
+	}
+
+	for (ConstraintList::const_iterator c = constraint_list.begin(); c != constraint_list.end(); ++c) {
+		_solver.addConstraint (*c);
+	}
 }
