@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-06-19 11:19+0200\n"
-"PO-Revision-Date: 2020-06-19 12:02+0200\n"
+"POT-Creation-Date: 2020-06-29 07:30+0200\n"
+"PO-Revision-Date: 2020-06-29 07:35+0200\n"
 "Last-Translator: Edgar Aichinger <edgar.aichinger@aon.at>\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de\n"
@@ -805,7 +805,7 @@ msgid "Audio"
 msgstr "Audio"
 
 #: add_route_dialog.cc:593 add_route_dialog.cc:757 editor_actions.cc:145
-#: engine_dialog.cc:266 missing_file_dialog.cc:65 mixer_ui.cc:2417
+#: engine_dialog.cc:266 missing_file_dialog.cc:65 mixer_ui.cc:2431
 #: plugin_pin_dialog.cc:75 rc_option_editor.cc:3050 rc_option_editor.cc:3052
 #: rc_option_editor.cc:3061 rc_option_editor.cc:3063 rc_option_editor.cc:3071
 #: rc_option_editor.cc:3087 rc_option_editor.cc:3090 rc_option_editor.cc:3092
@@ -937,8 +937,8 @@ msgstr "FFT-Analyse"
 msgid "Track"
 msgstr "Spur"
 
-#: analysis_window.cc:65 ardour_ui_ed.cc:671 mixer_strip.cc:814 mixer_ui.cc:196
-#: mixer_ui.cc:2853
+#: analysis_window.cc:65 ardour_ui_ed.cc:671 mixer_strip.cc:814 mixer_ui.cc:201
+#: mixer_ui.cc:2821
 msgid "Show"
 msgstr "Anzeigen"
 
@@ -1067,7 +1067,7 @@ msgstr "Tastaturkürzel"
 msgid "Window|Editor"
 msgstr "Editor"
 
-#: ardour_ui.cc:358 mixer_ui.cc:2919 mixer_ui.cc:2925
+#: ardour_ui.cc:358 mixer_ui.cc:2887 mixer_ui.cc:2893
 msgid "Window|Mixer"
 msgstr "Mixer"
 
@@ -1745,10 +1745,10 @@ msgstr ""
 "Zwinge alle Spuren, die Festplatten-Wiedergabe an den Monitor zu schicken, "
 "sofern sie nicht explizit auf \"Eingang\" eingestellt sind"
 
-#: ardour_ui2.cc:865 rc_option_editor.cc:3774 rc_option_editor.cc:3787
-#: rc_option_editor.cc:3799 rc_option_editor.cc:3801 rc_option_editor.cc:3803
-#: rc_option_editor.cc:3811 rc_option_editor.cc:3829 rc_option_editor.cc:3831
-#: rc_option_editor.cc:3839 rc_option_editor.cc:3850
+#: ardour_ui2.cc:865 rc_option_editor.cc:3798 rc_option_editor.cc:3811
+#: rc_option_editor.cc:3823 rc_option_editor.cc:3825 rc_option_editor.cc:3827
+#: rc_option_editor.cc:3835 rc_option_editor.cc:3853 rc_option_editor.cc:3855
+#: rc_option_editor.cc:3863 rc_option_editor.cc:3874
 msgid "Appearance"
 msgstr "Erscheinungsbild"
 
@@ -1832,12 +1832,12 @@ msgid "UI: cannot setup luawindow"
 msgstr "UI: kann Luafenster nicht einrichten"
 
 #: ardour_ui_dependents.cc:287 ardour_ui_ed.cc:160 ardour_ui_ed.cc:672
-#: rc_option_editor.cc:2290 rc_option_editor.cc:4368
+#: rc_option_editor.cc:2290 rc_option_editor.cc:4396
 msgid "Preferences"
 msgstr "Globale Einstellungen"
 
-#: ardour_ui_dependents.cc:288 ardour_ui_ed.cc:158 mixer_ui.cc:115
-#: mixer_ui.cc:434 rc_option_editor.cc:2762 rc_option_editor.cc:2771
+#: ardour_ui_dependents.cc:288 ardour_ui_ed.cc:158 mixer_ui.cc:117
+#: mixer_ui.cc:449 rc_option_editor.cc:2762 rc_option_editor.cc:2771
 #: rc_option_editor.cc:2773 rc_option_editor.cc:2781 rc_option_editor.cc:2789
 #: rc_option_editor.cc:2797 rc_option_editor.cc:2815 rc_option_editor.cc:2827
 #: rc_option_editor.cc:2839 rc_option_editor.cc:2841 rc_option_editor.cc:2843
@@ -1977,6 +1977,8 @@ msgstr "Eingabegeräte / Controller"
 #: rc_option_editor.cc:3712 rc_option_editor.cc:3722 rc_option_editor.cc:3723
 #: rc_option_editor.cc:3732 rc_option_editor.cc:3746 rc_option_editor.cc:3749
 #: rc_option_editor.cc:3757 rc_option_editor.cc:3765 rc_option_editor.cc:3770
+#: rc_option_editor.cc:3772 rc_option_editor.cc:3776 rc_option_editor.cc:3785
+#: rc_option_editor.cc:3794
 msgid "Plugins"
 msgstr "Plugins"
 
@@ -2106,7 +2108,7 @@ msgstr "Beenden"
 
 #: ardour_ui_ed.cc:261 ardour_ui_ed.cc:674 ardour_ui_ed.cc:675
 #: ardour_ui_ed.cc:676 automation_time_axis.cc:641 editor_markers.cc:918
-#: location_ui.cc:68 plugin_selector.cc:97 route_time_axis.cc:847
+#: location_ui.cc:68 plugin_selector.cc:98 route_time_axis.cc:847
 msgid "Hide"
 msgstr "Verbergen"
 
@@ -3246,7 +3248,7 @@ msgstr "Regionen-Lautstärke:"
 
 #: audio_region_editor.cc:76 export_format_dialog.cc:56
 #: export_format_dialog.cc:83 export_report.cc:781 export_report.cc:1194
-#: fft_graph.cc:500 normalize_dialog.cc:62 normalize_dialog.cc:66
+#: fft_graph.cc:495 normalize_dialog.cc:62 normalize_dialog.cc:66
 #: strip_silence_dialog.cc:83
 msgid "dBFS"
 msgstr "dBFS"
@@ -3421,8 +3423,8 @@ msgstr "Löschen"
 
 #: bundle_manager.cc:273 bundle_manager.cc:437 editor_route_groups.cc:103
 #: editor_routes.cc:247 lua_script_manager.cc:55 lua_script_manager.cc:104
-#: lua_script_manager.cc:145 midi_list_editor.cc:109 plugin_selector.cc:98
-#: plugin_selector.cc:165 session_metadata_dialog.cc:694
+#: lua_script_manager.cc:145 midi_list_editor.cc:109 plugin_selector.cc:99
+#: plugin_selector.cc:166 session_metadata_dialog.cc:694
 #: transport_masters_dialog.cc:79 transport_masters_dialog.cc:733
 msgid "Name"
 msgstr "Name"
@@ -5000,12 +5002,12 @@ msgstr "Am größten"
 msgid "Larger"
 msgstr "Größer"
 
-#: editor_actions.cc:460 editor_rulers.cc:254 rc_option_editor.cc:3885
+#: editor_actions.cc:460 editor_rulers.cc:254 rc_option_editor.cc:3909
 #: time_axis_view.cc:1361
 msgid "Large"
 msgstr "Groß"
 
-#: editor_actions.cc:466 editor_rulers.cc:258 rc_option_editor.cc:3884
+#: editor_actions.cc:466 editor_rulers.cc:258 rc_option_editor.cc:3908
 #: time_axis_view.cc:1363
 msgid "Small"
 msgstr "Klein"
@@ -5143,7 +5145,7 @@ msgstr "Min:Sek"
 msgid "Video Monitor"
 msgstr "Videomonitor"
 
-#: editor_actions.cc:615 rc_option_editor.cc:4232 rc_option_editor.cc:4233
+#: editor_actions.cc:615 rc_option_editor.cc:4256 rc_option_editor.cc:4257
 msgid "Video"
 msgstr "Video"
 
@@ -5877,7 +5879,7 @@ msgstr "CD"
 msgid "new CD marker"
 msgstr "neuer CD Marker"
 
-#: editor_drag.cc:5999 editor_route_groups.cc:441 mixer_ui.cc:2363
+#: editor_drag.cc:5999 editor_route_groups.cc:441 mixer_ui.cc:2377
 msgid "unnamed"
 msgstr "unbenannt"
 
@@ -6895,8 +6897,8 @@ msgstr "Verschiebe eingebettete Dateien in den Projektordner"
 msgid "Region name, with number of channels in []'s"
 msgstr "Name der Region, mit Kanalzahl in []"
 
-#: editor_regions.cc:176 editor_sources.cc:142 plugin_selector.cc:99
-#: plugin_selector.cc:169
+#: editor_regions.cc:176 editor_sources.cc:142 plugin_selector.cc:100
+#: plugin_selector.cc:170
 msgid "Tags"
 msgstr "Tags"
 
@@ -7054,36 +7056,35 @@ msgstr "SS"
 msgid "Solo Safe (Locked)"
 msgstr "Solo Safe (gesperrt)"
 
-#: editor_routes.cc:560 mixer_ui.cc:1943 mixer_ui.cc:3091 mixer_ui.cc:3178
-#: mixer_ui.cc:3184 plugin_selector.cc:214
+#: editor_routes.cc:560 mixer_ui.cc:1957 plugin_selector.cc:215
 msgid "Show All"
 msgstr "Alles anzeigen"
 
-#: editor_routes.cc:561 mixer_ui.cc:1944
+#: editor_routes.cc:561 mixer_ui.cc:1958
 msgid "Hide All"
 msgstr "Alle verbergen"
 
-#: editor_routes.cc:562 mixer_ui.cc:1945
+#: editor_routes.cc:562 mixer_ui.cc:1959
 msgid "Show All Audio Tracks"
 msgstr "Zeige alle Audiospuren"
 
-#: editor_routes.cc:563 mixer_ui.cc:1946
+#: editor_routes.cc:563 mixer_ui.cc:1960
 msgid "Hide All Audio Tracks"
 msgstr "Verberge alle Audiospuren"
 
-#: editor_routes.cc:564 mixer_ui.cc:1947
+#: editor_routes.cc:564 mixer_ui.cc:1961
 msgid "Show All Midi Tracks"
 msgstr "Zeige alle MIDI-Spuren"
 
-#: editor_routes.cc:565 mixer_ui.cc:1948
+#: editor_routes.cc:565 mixer_ui.cc:1962
 msgid "Hide All Midi Tracks"
 msgstr "Verberge alle MIDI-Spuren"
 
-#: editor_routes.cc:566 mixer_ui.cc:1949
+#: editor_routes.cc:566 mixer_ui.cc:1963
 msgid "Show All Busses"
 msgstr "Alle Busse anzeigen"
 
-#: editor_routes.cc:567 mixer_ui.cc:1950
+#: editor_routes.cc:567 mixer_ui.cc:1964
 msgid "Hide All Busses"
 msgstr "Alle Busse verstecken"
 
@@ -7491,14 +7492,14 @@ msgstr "Systemlatenz (samples)"
 
 #: engine_dialog.cc:1033 gain_meter.cc:802 mixer_strip.cc:191
 #: mixer_strip.cc:408 mixer_strip.cc:2532 plugin_eq_gui.cc:131
-#: rc_option_editor.cc:4000
+#: rc_option_editor.cc:4024
 msgid "Input"
 msgstr "Eingang"
 
 #: engine_dialog.cc:1035 foldback_strip.cc:407 gain_meter.cc:808
 #: mixer_strip.cc:195 mixer_strip.cc:412 mixer_strip.cc:2535
 #: monitor_section.cc:305 monitor_section.cc:309 plugin_eq_gui.cc:132
-#: rc_option_editor.cc:4004 vca_master_strip.cc:236
+#: rc_option_editor.cc:4028 vca_master_strip.cc:236
 msgid "Output"
 msgstr "Ausgang"
 
@@ -8112,12 +8113,11 @@ msgid ""
 "before the sample-format conversion or encoding. The first noise burst "
 "happens at 1/3 of the interval. Note: there is currently no limiter."
 msgstr ""
-"Diese Option gestattet, Rauschen einzufügen, um fertige, aber mit"
-" Wasserzeichen versehene Mischungen zum Anhören an Klienten zu versenden."
-" Weises Rauschen wird nach der Analyse, direkt vor der"
-" Sampleformt-Konvertierung bzw. Kodierung eingefügt. Der erste Rausch-Burst"
-" tritt bei 1/3 des Zeitintervalls auf. Achtung: derzeit gibt es hierbei"
-" keinen Limiter."
+"Diese Option gestattet, Rauschen einzufügen, um fertige, aber mit "
+"Wasserzeichen versehene Mischungen zum Anhören an Klienten zu versenden. "
+"Weises Rauschen wird nach der Analyse, direkt vor der Sampleformt-"
+"Konvertierung bzw. Kodierung eingefügt. Der erste Rausch-Burst tritt bei 1/3 "
+"des Zeitintervalls auf. Achtung: derzeit gibt es hierbei keinen Limiter."
 
 #: export_format_dialog.cc:1122
 msgid "Linear encoding options"
@@ -8393,7 +8393,7 @@ msgstr "Entferne diesen Send"
 
 #: foldback_strip.cc:308 foldback_strip.cc:1138 foldback_strip.cc:1149
 #: mixer_strip.cc:119 mixer_strip.cc:152 mixer_strip.cc:413 mixer_strip.cc:1576
-#: mixer_strip.cc:1587 rc_option_editor.cc:4005 vca_master_strip.cc:237
+#: mixer_strip.cc:1587 rc_option_editor.cc:4029 vca_master_strip.cc:237
 msgid "Comments"
 msgstr "Kommentare"
 
@@ -8717,7 +8717,7 @@ msgid "<b>GUI Idle Timing Statistics</b>"
 msgstr "<b>GUI Untätigkeitszeiten-Statistik</b>"
 
 #: idleometer.cc:52 latency_gui.cc:92 panner_ui.cc:416 plugin_pin_dialog.cc:116
-#: plugin_selector.cc:271 plugin_ui.cc:470 plugin_dspload_ui.cc:37
+#: plugin_selector.cc:272 plugin_ui.cc:470 plugin_dspload_ui.cc:37
 #: rc_option_editor.cc:762
 msgid "Reset"
 msgstr "Reset"
@@ -9390,7 +9390,7 @@ msgid "MarkerText"
 msgstr "MarkerText"
 
 #: midi_channel_selector.cc:164 midi_channel_selector.cc:396
-#: midi_channel_selector.cc:435 rc_option_editor.cc:3883
+#: midi_channel_selector.cc:435 rc_option_editor.cc:3907
 #: session_archive_dialog.cc:46 session_archive_dialog.cc:51
 #: session_archive_dialog.cc:199 session_archive_dialog.cc:210
 #: session_archive_dialog.cc:224 sfdb_ui.cc:750
@@ -9998,19 +9998,19 @@ msgstr "Mixgruppe"
 msgid "Trim: "
 msgstr "Anpassen: "
 
-#: mixer_strip.cc:409 rc_option_editor.cc:4001
+#: mixer_strip.cc:409 rc_option_editor.cc:4025
 msgid "Phase Invert"
 msgstr "Phaseninvertierung"
 
-#: mixer_strip.cc:410 rc_option_editor.cc:4002
+#: mixer_strip.cc:410 rc_option_editor.cc:4026
 msgid "Record & Monitor"
 msgstr "Aufnahme & Monitor"
 
-#: mixer_strip.cc:411 rc_option_editor.cc:4003
+#: mixer_strip.cc:411 rc_option_editor.cc:4027
 msgid "Solo Iso / Lock"
 msgstr "Solo Iso / Sperre"
 
-#: mixer_strip.cc:414 rc_option_editor.cc:4006
+#: mixer_strip.cc:414 rc_option_editor.cc:4030
 msgid "VCA Assigns"
 msgstr "VCA Zuweisungen"
 
@@ -10172,19 +10172,27 @@ msgstr "Alle zu %1 ändern"
 msgid "Change same track-type to %1"
 msgstr "Gleichen Spurtyp zu %1 ändern"
 
-#: mixer_ui.cc:197 route_time_axis.cc:277 route_time_axis.cc:810
+#: mixer_ui.cc:202 route_time_axis.cc:277 route_time_axis.cc:810
 msgid "Group"
 msgstr "Gruppe"
 
-#: mixer_ui.cc:242
+#: mixer_ui.cc:247 mixer_ui.cc:269 mixer_ui.cc:272
 msgid "Favorite Plugins"
 msgstr "Plugin-Favoriten"
 
-#: mixer_ui.cc:673
+#: mixer_ui.cc:270 mixer_ui.cc:3026
+msgid "Recent Plugins"
+msgstr "Zuletzt verwendete Plugins"
+
+#: mixer_ui.cc:271 mixer_ui.cc:3024
+msgid "Top-10 Plugins"
+msgstr "Top-10 Plugins"
+
+#: mixer_ui.cc:688
 msgid "Error adding GUI elements for new tracks/busses %1"
 msgstr "Fehler beim Hinzufügen von GUI-Elementen für neue Spuren/Busse %1"
 
-#: mixer_ui.cc:950
+#: mixer_ui.cc:965
 msgid ""
 "The Plugin's number of audio outputs ports (%1) does not match the Tracks's "
 "number of audio outputs (%2). Cannot fan out."
@@ -10192,152 +10200,152 @@ msgstr ""
 "Die Zahl der Audio-Ausgangsports ded Plugins (%1) entspricht nicht der Zahl "
 "der Ausgangsports der Spur (%2). Kann nicht verzweigen."
 
-#: mixer_ui.cc:968
+#: mixer_ui.cc:983
 msgid "Instrument has only 1 output bus. Nothing to fan out."
 msgstr "Das Instrument hat nur 1 Ausgangsbus. Es gibt nichts zu verzweigen."
 
-#: mixer_ui.cc:1992
+#: mixer_ui.cc:2006
 msgid "track display list item for renamed strip not found!"
 msgstr ""
 "Konnte Bezeichnung für umbenannten Kanalzug nicht in der Spurliste finden!"
 
-#: mixer_ui.cc:2090
+#: mixer_ui.cc:2104
 msgid "-all-"
 msgstr "-alle-"
 
-#: mixer_ui.cc:2854
+#: mixer_ui.cc:2822
 msgid "Strips"
 msgstr "Kanalzüge"
 
-#: mixer_ui.cc:3246
+#: mixer_ui.cc:3281
 msgid "No Track/Bus is selected."
 msgstr "Kein(e) Spur/Bus ausgewählt."
 
-#: mixer_ui.cc:3248
+#: mixer_ui.cc:3283
 msgid "Add at the top"
 msgstr "Am Anfang hinzufügen"
 
-#: mixer_ui.cc:3250
+#: mixer_ui.cc:3285
 msgid "Add Pre-Fader"
 msgstr "Vor dem Fader hinzufügen"
 
-#: mixer_ui.cc:3252
+#: mixer_ui.cc:3287
 msgid "Add Post-Fader"
 msgstr "Nach dem Fader hinzufügen"
 
-#: mixer_ui.cc:3254
+#: mixer_ui.cc:3289
 msgid "Add at the end"
 msgstr "Am Ende hinzufügen"
 
-#: mixer_ui.cc:3260
+#: mixer_ui.cc:3295
 msgid "Remove from favorites"
 msgstr "Von Favoriten entfernen"
 
-#: mixer_ui.cc:3266
+#: mixer_ui.cc:3301
 msgid "Delete Preset"
 msgstr "Preset löschen"
 
-#: mixer_ui.cc:3517
+#: mixer_ui.cc:3579
 msgid "Toggle Solo on Mixer-Selected Tracks/Busses"
 msgstr "Im Mixer ausgewählte Spuren/Busse auf Solo schalten"
 
-#: mixer_ui.cc:3518
+#: mixer_ui.cc:3580
 msgid "Toggle Mute on Mixer-Selected Tracks/Busses"
 msgstr "Stummschaltung der im Mixer ausgewählten Spuren/Busse ändern"
 
-#: mixer_ui.cc:3519
+#: mixer_ui.cc:3581
 msgid "Toggle Rec-enable on Mixer-Selected Tracks/Busses"
 msgstr "Aufnahmebereitschaft auf im Mixer ausgewählten Spuren/Busse ändern"
 
-#: mixer_ui.cc:3520
+#: mixer_ui.cc:3582
 msgid "Decrease Gain on Mixer-Selected Tracks/Busses"
 msgstr "Lautstärke im Mixer ausgewählter Spuren/Busse reduzieren"
 
-#: mixer_ui.cc:3521
+#: mixer_ui.cc:3583
 msgid "Increase Gain on Mixer-Selected Tracks/Busses"
 msgstr "Lautstärke im Mixer ausgewählter Spuren/Busse erhöhen"
 
-#: mixer_ui.cc:3522
+#: mixer_ui.cc:3584
 msgid "Set Gain to 0dB on Mixer-Selected Tracks/Busses"
 msgstr "Lautstärke im Mixer ausgewählter Spuren/Busse auf 0dB setzen"
 
-#: mixer_ui.cc:3525
+#: mixer_ui.cc:3587
 msgid "Copy Selected Processors"
 msgstr "Ausgewählte Prozessoren kopieren"
 
-#: mixer_ui.cc:3526
+#: mixer_ui.cc:3588
 msgid "Cut Selected Processors"
 msgstr "Ausgewählte Prozessoren ausschneiden"
 
-#: mixer_ui.cc:3527
+#: mixer_ui.cc:3589
 msgid "Paste Selected Processors"
 msgstr "Ausgewählte Prozessoren einfügen"
 
-#: mixer_ui.cc:3528
+#: mixer_ui.cc:3590
 msgid "Delete Selected Processors"
 msgstr "Ausgewählte Prozessoren löschen"
 
-#: mixer_ui.cc:3529
+#: mixer_ui.cc:3591
 msgid "Select All (visible) Processors"
 msgstr "Alle (sichtbaren) Prozessoren auswählen"
 
-#: mixer_ui.cc:3530
+#: mixer_ui.cc:3592
 msgid "Toggle Selected Processors"
 msgstr "Ausgewählte Prozessoren umschalten"
 
-#: mixer_ui.cc:3531
+#: mixer_ui.cc:3593
 msgid "Toggle Selected Plugins"
 msgstr "Ausgewählte Plugins umschalten"
 
-#: mixer_ui.cc:3532
+#: mixer_ui.cc:3594
 msgid "Deselect all strips and processors"
 msgstr "Alle Kanalzüge und Prozessoren deselektieren"
 
-#: mixer_ui.cc:3534
+#: mixer_ui.cc:3596
 msgid "Select Next Mixer Strip"
 msgstr "Nächsten Kanalzug auswählen"
 
-#: mixer_ui.cc:3535
+#: mixer_ui.cc:3597
 msgid "Select Previous Mixer Strip"
 msgstr "Vorigen Mixer Strip auswählen"
 
-#: mixer_ui.cc:3537
+#: mixer_ui.cc:3599
 msgid "Scroll Mixer Window to the left"
 msgstr "Mixerfenster nach links scrollen"
 
-#: mixer_ui.cc:3538
+#: mixer_ui.cc:3600
 msgid "Scroll Mixer Window to the right"
 msgstr "Mixerfenster nach rechts scrollen"
 
-#: mixer_ui.cc:3540
+#: mixer_ui.cc:3602
 msgid "Toggle MIDI Input Active for Mixer-Selected Tracks/Busses"
 msgstr "MIDI Eingang für im Mixer ausgewählte Spuren/Busse de/aktivieren"
 
-#: mixer_ui.cc:3543
+#: mixer_ui.cc:3605
 msgid "Mixer: Show Mixer List"
 msgstr "Mixer: Zeige Mixer Liste"
 
-#: mixer_ui.cc:3545
+#: mixer_ui.cc:3607
 msgid "Mixer: Show VCAs"
 msgstr "Mixer: Zeige VCAs"
 
-#: mixer_ui.cc:3548
+#: mixer_ui.cc:3610
 msgid "Mixer: Show Mixbusses"
 msgstr "Mixer: Zeige Mixbusse"
 
-#: mixer_ui.cc:3551
+#: mixer_ui.cc:3613
 msgid "Mixer: Show Monitor Section"
 msgstr "Mixer: Monitorsektion anzeigen"
 
-#: mixer_ui.cc:3553
+#: mixer_ui.cc:3615
 msgid "Mixer: Show Foldback Strip"
 msgstr "Mixer: Zeige Foldback Strip"
 
-#: mixer_ui.cc:3555
+#: mixer_ui.cc:3617
 msgid "Toggle Disk Monitoring"
 msgstr "Zu Festplatten-Monitoring umschalten"
 
-#: mixer_ui.cc:3556
+#: mixer_ui.cc:3618
 msgid "Toggle Input Monitoring"
 msgstr "Zu Eingangsmonitoring umschalten"
 
@@ -11360,116 +11368,116 @@ msgstr "Konfiguriere Plugin '%1'"
 msgid "Output Configuration"
 msgstr "Ausgangskonfiguration"
 
-#: plugin_selector.cc:69
+#: plugin_selector.cc:70
 msgid "Plugin Manager"
 msgstr "Pluginmanager"
 
-#: plugin_selector.cc:96
+#: plugin_selector.cc:97
 msgid "Fav"
 msgstr "Fav"
 
-#: plugin_selector.cc:100
+#: plugin_selector.cc:101
 msgid "Creator"
 msgstr "Ersteller"
 
-#: plugin_selector.cc:101 transport_masters_dialog.cc:80
+#: plugin_selector.cc:102 transport_masters_dialog.cc:80
 #: transport_masters_dialog.cc:734
 msgid "Type"
 msgstr "Typ"
 
-#: plugin_selector.cc:102
+#: plugin_selector.cc:103
 msgid "Audio I/O"
 msgstr "Audio E/A"
 
-#: plugin_selector.cc:103
+#: plugin_selector.cc:104
 msgid "MIDI I/O"
 msgstr "MIDI E/A"
 
-#: plugin_selector.cc:134
+#: plugin_selector.cc:135
 msgid "Plugins to be connected"
 msgstr "Plugins, die verbunden werden"
 
-#: plugin_selector.cc:149
+#: plugin_selector.cc:150
 msgid "Add a plugin to the effect list"
 msgstr "Plugin zur Effektliste hinzufügen"
 
-#: plugin_selector.cc:153
+#: plugin_selector.cc:154
 msgid "Remove a plugin from the effect list"
 msgstr "Plugin aus der Effektliste entfernen"
 
-#: plugin_selector.cc:173
+#: plugin_selector.cc:174
 msgid "Ignore Filters when searching"
 msgstr "Bei Suche Filter ignorieren"
 
-#: plugin_selector.cc:178
+#: plugin_selector.cc:179
 msgid "All search terms must be matched."
 msgstr "Alle Suchkriterien müssen zutreffen."
 
-#: plugin_selector.cc:181
+#: plugin_selector.cc:182
 msgid "Ex: \"ess dyn\" will find \"dynamic de-esser\" but not \"de-esser\"."
 msgstr ""
 "Z.B.: \"ess dyn\" wird \"dynamic de-esser\", aber nicht \"de-esser\" finden."
 
-#: plugin_selector.cc:197 sfdb_ui.cc:630 sfdb_ui.cc:632
+#: plugin_selector.cc:198 sfdb_ui.cc:630 sfdb_ui.cc:632
 msgid "Search"
 msgstr "Suchen"
 
-#: plugin_selector.cc:209
+#: plugin_selector.cc:210
 msgid "Show Effects Only"
 msgstr "Zeige nur Effekte"
 
-#: plugin_selector.cc:210
+#: plugin_selector.cc:211
 msgid "Show Instruments Only"
 msgstr "Zeige nur Instrumente"
 
-#: plugin_selector.cc:211
+#: plugin_selector.cc:212
 msgid "Show Utilities Only"
 msgstr "Zeige nur Utilities"
 
-#: plugin_selector.cc:212
+#: plugin_selector.cc:213
 msgid "Show Favorites Only"
 msgstr "Zeige nur Favoriten"
 
-#: plugin_selector.cc:213
+#: plugin_selector.cc:214
 msgid "Show Hidden Only"
 msgstr "Zeige nur versteckte"
 
-#: plugin_selector.cc:217 plugin_selector.cc:227
+#: plugin_selector.cc:218 plugin_selector.cc:228
 msgid "Show All Formats"
 msgstr "Zeige alle"
 
-#: plugin_selector.cc:248
+#: plugin_selector.cc:249
 msgid "Filter"
 msgstr "Filter"
 
-#: plugin_selector.cc:275
+#: plugin_selector.cc:276
 msgid "Enter space-separated, one-word Tags for the selected plugin."
 msgstr ""
 "Geben Sie durch Leerzeichen getrennte, aus einem Wort bestehende Tags für "
 "das gewählte Plugin ein."
 
-#: plugin_selector.cc:278
+#: plugin_selector.cc:279
 msgid "You can include dashes, colons or underscores in a Tag."
 msgstr ""
 "Sie können in einem Tag Bindestriche, Beistriche und Unterstriche verwenden."
 
-#: plugin_selector.cc:281
+#: plugin_selector.cc:282
 msgid "Ex: \"dynamic de-esser vocal\" applies 3 Tags."
 msgstr "Z.B.: \"Dynamik De-Esser Vocal\" wendet drei Tags an."
 
-#: plugin_selector.cc:292
+#: plugin_selector.cc:293
 msgid "Tags for Selected Plugin"
 msgstr "Tags des ausgewählten Plugins"
 
-#: plugin_selector.cc:330
+#: plugin_selector.cc:331
 msgid "Insert Plugin(s)"
 msgstr "Plugin(s) einfügen"
 
-#: plugin_selector.cc:473 plugin_selector.cc:1072 plugin_selector.cc:1073
+#: plugin_selector.cc:453 plugin_selector.cc:1070 plugin_selector.cc:1071
 msgid "Show All Creators"
 msgstr "Zeige alle Urheber"
 
-#: plugin_selector.cc:795
+#: plugin_selector.cc:775
 msgid ""
 "The plugin \"%1\" could not be loaded\n"
 "\n"
@@ -11479,19 +11487,23 @@ msgstr ""
 "\n"
 "Im Logfenster befinden sich möglicherweise mehr Informationen"
 
-#: plugin_selector.cc:1005
+#: plugin_selector.cc:967
 msgid "Favorites"
 msgstr "Favoriten"
 
-#: plugin_selector.cc:1007
+#: plugin_selector.cc:969
 msgid "Plugin Manager..."
 msgstr "Plugin Manager..."
 
-#: plugin_selector.cc:1011
+#: plugin_selector.cc:973
+msgid "By Popularity"
+msgstr "Nach Beliebtheit"
+
+#: plugin_selector.cc:976
 msgid "By Creator"
 msgstr "Nach Urheber"
 
-#: plugin_selector.cc:1014
+#: plugin_selector.cc:979
 msgid "By Tags"
 msgstr "Nach Tags"
 
@@ -11594,7 +11606,7 @@ msgstr "Signalverarbeitung des Plugins deaktivieren"
 msgid "Edit Plugin Delay/Latency Compensation"
 msgstr "Plugin-Verzögerung/Latenz-Kompensation bearbeiten"
 
-#: plugin_ui.cc:548 plugin_ui.cc:764
+#: plugin_ui.cc:548 plugin_ui.cc:759
 msgid ""
 "Click to allow the plugin to receive keyboard events that %1 would normally "
 "use as a shortcut"
@@ -11614,15 +11626,15 @@ msgstr "Latenz bearbeiten"
 msgid "New Preset"
 msgstr "Neues Preset"
 
-#: plugin_ui.cc:721
+#: plugin_ui.cc:716
 msgid "Select Preset"
 msgstr "Voreinstellung wählen"
 
-#: plugin_ui.cc:771
+#: plugin_ui.cc:766
 msgid "Click to allow normal use of %1 keyboard shortcuts"
 msgstr "Klicke, um die normale Verwendung von %1 Tastaturkürzeln zu aktivieren"
 
-#: plugin_ui.cc:907
+#: plugin_ui.cc:902
 msgid "(none)"
 msgstr "(kein)"
 
@@ -12618,8 +12630,8 @@ msgstr "%1 Einstellungen"
 #: rc_option_editor.cc:2348 rc_option_editor.cc:2350 rc_option_editor.cc:2359
 #: rc_option_editor.cc:2368 rc_option_editor.cc:2380 rc_option_editor.cc:2383
 #: rc_option_editor.cc:2396 rc_option_editor.cc:2409 rc_option_editor.cc:2482
-#: rc_option_editor.cc:3287 rc_option_editor.cc:3548 rc_option_editor.cc:3852
-#: rc_option_editor.cc:4250
+#: rc_option_editor.cc:3287 rc_option_editor.cc:3548 rc_option_editor.cc:3876
+#: rc_option_editor.cc:4274
 msgid "General"
 msgstr "Allgemein"
 
@@ -13799,15 +13811,15 @@ msgstr ""
 msgid "Limit automatable parameters per plugin"
 msgstr "Automatisierbare Parameter pro Plugin begrenzen"
 
-#: rc_option_editor.cc:3588 rc_option_editor.cc:4031
+#: rc_option_editor.cc:3588 rc_option_editor.cc:4055
 msgid "Unlimited"
 msgstr "Unbegrenzt"
 
-#: rc_option_editor.cc:3589 rc_option_editor.cc:4034
+#: rc_option_editor.cc:3589 rc_option_editor.cc:4058
 msgid "64 parameters"
 msgstr "64 Parameter"
 
-#: rc_option_editor.cc:3590 rc_option_editor.cc:4035
+#: rc_option_editor.cc:3590 rc_option_editor.cc:4059
 msgid "128 parameters"
 msgstr "128 Parameter"
 
@@ -13990,15 +14002,31 @@ msgstr ""
 "<b>Wenn aktiviert</b>, erscheint ein Dialog zur Auswahl einer Instrumenten-"
 "Kanalkonfiguration, bevor ein Mehrkanalplugin hinzugefügt wird."
 
-#: rc_option_editor.cc:3774
+#: rc_option_editor.cc:3770
+msgid "Statistics"
+msgstr "Statistik"
+
+#: rc_option_editor.cc:3773
+msgid "Reset Statistics"
+msgstr "Statistik zurücksetzen"
+
+#: rc_option_editor.cc:3779
+msgid "Plugin chart (use-count) length"
+msgstr "Länge der Plugin-Tabelle (Benutzt-Zähler)"
+
+#: rc_option_editor.cc:3788
+msgid "Plugin recent list length"
+msgstr "Länge der Liste der zuletzt benutzten Plugins"
+
+#: rc_option_editor.cc:3798
 msgid "Graphics Acceleration"
 msgstr "Grafikbeschleunigung"
 
-#: rc_option_editor.cc:3780
+#: rc_option_editor.cc:3804
 msgid "Disable Graphics Hardware Acceleration (requires restart)"
 msgstr "Deaktiviere Grafik-Hardwarebeschleunigung (benötigt Neustart)"
 
-#: rc_option_editor.cc:3786
+#: rc_option_editor.cc:3810
 msgid ""
 "Render large parts of the application user-interface in software, instead of "
 "using 2D-graphics acceleration.\n"
@@ -14008,12 +14036,12 @@ msgstr ""
 "2D-Grafik-Beschleunigung zu verwenden.\n"
 "Dies erfordert einen Neustart von %1, um Auswirkung zu zeigen"
 
-#: rc_option_editor.cc:3793
+#: rc_option_editor.cc:3817
 msgid "Possibly improve slow graphical performance (requires restart)"
 msgstr ""
 "Versuche, langsame Grafikperformance zu verbessern (erfordert Neustart)"
 
-#: rc_option_editor.cc:3798
+#: rc_option_editor.cc:3822
 msgid ""
 "Disables hardware gradient rendering on buggy video drivers (\"buggy "
 "gradients patch\").\n"
@@ -14023,23 +14051,23 @@ msgstr ""
 "Videotreibern (\"buggy gradients patch\").\n"
 "Diese Einstellung wird erst nach einem Neustart von %1 wirksam"
 
-#: rc_option_editor.cc:3801
+#: rc_option_editor.cc:3825
 msgid "Graphical User Interface"
 msgstr "Grafische Benutzerschnittstelle"
 
-#: rc_option_editor.cc:3806
+#: rc_option_editor.cc:3830
 msgid "Highlight widgets on mouseover"
 msgstr "Widgets bei Mauskontakt hervorheben"
 
-#: rc_option_editor.cc:3814
+#: rc_option_editor.cc:3838
 msgid "Show tooltips if mouse hovers over a control"
 msgstr "Zeige Tooltips, wenn die Maus über einem Element schwebt"
 
-#: rc_option_editor.cc:3821
+#: rc_option_editor.cc:3845
 msgid "Update clocks at TC Frame rate"
 msgstr "Uhrdarstellung mit TC-Framerate erneuern"
 
-#: rc_option_editor.cc:3826
+#: rc_option_editor.cc:3850
 msgid ""
 "<b>When enabled</b> clock displays are updated every Timecode Frame (fps).\n"
 "\n"
@@ -14050,229 +14078,229 @@ msgstr ""
 "\n"
 "<b>Wenn deaktiviert</b> werden die Uhrdarstellungen nur alle 100ms erneuert."
 
-#: rc_option_editor.cc:3834
+#: rc_option_editor.cc:3858
 msgid "Blink Rec-Arm buttons"
 msgstr "Aufnahmebereitschaftsknopf blinkt"
 
-#: rc_option_editor.cc:3842
+#: rc_option_editor.cc:3866
 msgid "Blink Alert Indicators"
 msgstr "Indikatoren, die Ihre Aufmerksamkeit wecken sollen, blinken"
 
-#: rc_option_editor.cc:3852 rc_option_editor.cc:3853 rc_option_editor.cc:3861
-#: rc_option_editor.cc:3869 rc_option_editor.cc:3886 rc_option_editor.cc:3888
-#: rc_option_editor.cc:3891 rc_option_editor.cc:3900 rc_option_editor.cc:3908
-#: rc_option_editor.cc:3916 rc_option_editor.cc:3928 rc_option_editor.cc:3940
-#: rc_option_editor.cc:3942 rc_option_editor.cc:3944 rc_option_editor.cc:3952
-#: rc_option_editor.cc:3960 rc_option_editor.cc:3962 rc_option_editor.cc:3970
-#: rc_option_editor.cc:3979 rc_option_editor.cc:3987 rc_option_editor.cc:3995
+#: rc_option_editor.cc:3876 rc_option_editor.cc:3877 rc_option_editor.cc:3885
+#: rc_option_editor.cc:3893 rc_option_editor.cc:3910 rc_option_editor.cc:3912
+#: rc_option_editor.cc:3915 rc_option_editor.cc:3924 rc_option_editor.cc:3932
+#: rc_option_editor.cc:3940 rc_option_editor.cc:3952 rc_option_editor.cc:3964
+#: rc_option_editor.cc:3966 rc_option_editor.cc:3968 rc_option_editor.cc:3976
+#: rc_option_editor.cc:3984 rc_option_editor.cc:3986 rc_option_editor.cc:3994
+#: rc_option_editor.cc:4003 rc_option_editor.cc:4011 rc_option_editor.cc:4019
 msgid "Appearance/Editor"
 msgstr "Erscheinungsbild/Editor"
 
-#: rc_option_editor.cc:3856
+#: rc_option_editor.cc:3880
 msgid "Use name highlight bars in region displays (requires a restart)"
 msgstr ""
 "Verwende Farbbalken zur Namenshervorhebung in der Regionendarstellung "
 "(erfordert Neustart)"
 
-#: rc_option_editor.cc:3864
+#: rc_option_editor.cc:3888
 msgid "Region color follows track color"
 msgstr "Regionenfarbe folgt Spurfarbe"
 
-#: rc_option_editor.cc:3872
+#: rc_option_editor.cc:3896
 msgid "Show Region Names"
 msgstr "Zeige Name der Region"
 
-#: rc_option_editor.cc:3879
+#: rc_option_editor.cc:3903
 msgid "Add a visual gap below Audio Regions"
 msgstr "Erzeuge einen sichtbaren Abstand zwischen Audiospuren"
 
-#: rc_option_editor.cc:3888
+#: rc_option_editor.cc:3912
 msgid "Waveforms"
 msgstr "Wellenformen"
 
-#: rc_option_editor.cc:3894
+#: rc_option_editor.cc:3918
 msgid "Show waveforms in regions"
 msgstr "Zeige Wellenformen in Regionen"
 
-#: rc_option_editor.cc:3903
+#: rc_option_editor.cc:3927
 msgid "Show waveforms while recording"
 msgstr "Während der Aufnahme Wellenformen anzeigen"
 
-#: rc_option_editor.cc:3911
+#: rc_option_editor.cc:3935
 msgid "Show waveform clipping"
 msgstr "Clipping der Wellenform anzeigen"
 
-#: rc_option_editor.cc:3920
+#: rc_option_editor.cc:3944
 msgid "Waveform scale"
 msgstr "Wellenformskalierung"
 
-#: rc_option_editor.cc:3925
+#: rc_option_editor.cc:3949
 msgid "linear"
 msgstr "Linear"
 
-#: rc_option_editor.cc:3926
+#: rc_option_editor.cc:3950
 msgid "logarithmic"
 msgstr "Logarithmisch"
 
-#: rc_option_editor.cc:3932
+#: rc_option_editor.cc:3956
 msgid "Waveform shape"
 msgstr "Wellenform Anzeigeart"
 
-#: rc_option_editor.cc:3937
+#: rc_option_editor.cc:3961
 msgid "traditional"
 msgstr "Traditionell"
 
-#: rc_option_editor.cc:3938
+#: rc_option_editor.cc:3962
 msgid "rectified"
 msgstr "Rektifiziert"
 
-#: rc_option_editor.cc:3942
+#: rc_option_editor.cc:3966
 msgid "Editor Meters"
 msgstr "Editor-Pegelanzeige"
 
-#: rc_option_editor.cc:3947
+#: rc_option_editor.cc:3971
 msgid "Show meters in track headers"
 msgstr "Pegelanzeigen in Spurköpfen anzeigen"
 
-#: rc_option_editor.cc:3955
+#: rc_option_editor.cc:3979
 msgid "Limit track header meters to stereo"
 msgstr "Spurkopf-Pegelanzeigen auf Stereo begrenzen"
 
-#: rc_option_editor.cc:3960
+#: rc_option_editor.cc:3984
 msgid "MIDI Regions"
 msgstr "MIDI-Regionen"
 
-#: rc_option_editor.cc:3965
+#: rc_option_editor.cc:3989
 msgid "Display first MIDI bank/program as 0"
 msgstr "Erste(s) MIDI Bank/Programm als 0 anzeigen"
 
-#: rc_option_editor.cc:3973
+#: rc_option_editor.cc:3997
 msgid "Don't display periodic (MTC, MMC) SysEx messages in MIDI Regions"
 msgstr "In MIDI-Regionen periodische SysEx-Meldungen (MTC, MMC) ausblenden"
 
-#: rc_option_editor.cc:3982
+#: rc_option_editor.cc:4006
 msgid "Show velocity horizontally inside notes"
 msgstr "Zeige Velocity horizontal im Inneren des Notenbalkens"
 
-#: rc_option_editor.cc:3990
+#: rc_option_editor.cc:4014
 msgid "Use colors to show note velocity"
 msgstr "Benutze Farben zur Anzeige der Noten-Velocity"
 
-#: rc_option_editor.cc:4008 rc_option_editor.cc:4017 rc_option_editor.cc:4036
-#: rc_option_editor.cc:4038
+#: rc_option_editor.cc:4032 rc_option_editor.cc:4041 rc_option_editor.cc:4060
+#: rc_option_editor.cc:4062
 msgid "Appearance/Mixer"
 msgstr "Erscheinungsbild/Mixer"
 
-#: rc_option_editor.cc:4010
+#: rc_option_editor.cc:4034
 msgid "Mixer Strip"
 msgstr "Anzeige im Kanalzug"
 
-#: rc_option_editor.cc:4020
+#: rc_option_editor.cc:4044
 msgid "Use narrow strips in the mixer for new strips by default"
 msgstr "Standardmäßig schlanke Kanalzüge für neue Mixerkanäle benutzen"
 
-#: rc_option_editor.cc:4027
+#: rc_option_editor.cc:4051
 msgid "Limit inline-mixer-strip controls per plugin"
 msgstr "Inline.Mixerstrip-Bedienelemente pro Plugin limitieren"
 
-#: rc_option_editor.cc:4032
+#: rc_option_editor.cc:4056
 msgid "16 parameters"
 msgstr "16 Parameter"
 
-#: rc_option_editor.cc:4033
+#: rc_option_editor.cc:4057
 msgid "32 parameters"
 msgstr "32 Parameter"
 
-#: rc_option_editor.cc:4040 rc_option_editor.cc:4042 rc_option_editor.cc:4050
-#: rc_option_editor.cc:4058 rc_option_editor.cc:4066 rc_option_editor.cc:4075
-#: rc_option_editor.cc:4084 rc_option_editor.cc:4092 rc_option_editor.cc:4100
-#: rc_option_editor.cc:4107
+#: rc_option_editor.cc:4064 rc_option_editor.cc:4066 rc_option_editor.cc:4074
+#: rc_option_editor.cc:4082 rc_option_editor.cc:4090 rc_option_editor.cc:4099
+#: rc_option_editor.cc:4108 rc_option_editor.cc:4116 rc_option_editor.cc:4124
+#: rc_option_editor.cc:4131
 msgid "Appearance/Toolbar"
 msgstr "Erscheinungsbild/Werkzeugleiste"
 
-#: rc_option_editor.cc:4040
+#: rc_option_editor.cc:4064
 msgid "Main Transport Toolbar Items"
 msgstr "Elemente der Haupt-Werkzeugleiste"
 
-#: rc_option_editor.cc:4045
+#: rc_option_editor.cc:4069
 msgid "Display Record/Punch Options"
 msgstr "Aufnahme/Punch-Optionen darstellen"
 
-#: rc_option_editor.cc:4053
+#: rc_option_editor.cc:4077
 msgid "Display Monitor Options"
 msgstr "Monitor-Optionen darstellen"
 
-#: rc_option_editor.cc:4061
+#: rc_option_editor.cc:4085
 msgid "Display Latency Compensation Info"
 msgstr "Info zur Latenz-Kompensation anzeigen"
 
-#: rc_option_editor.cc:4069
+#: rc_option_editor.cc:4093
 msgid "Display Selection Clock"
 msgstr "Auswahl-Uhr darstellen"
 
-#: rc_option_editor.cc:4078
+#: rc_option_editor.cc:4102
 msgid "Display Secondary Clock"
 msgstr "Zweite Uhr darstellen"
 
-#: rc_option_editor.cc:4087
+#: rc_option_editor.cc:4111
 msgid "Display Navigation Timeline"
 msgstr "Navigations-Zeitleiste darstellen"
 
-#: rc_option_editor.cc:4095
+#: rc_option_editor.cc:4119
 msgid "Display Master Level Meter"
 msgstr "Master-Pegelanzeige darstellen"
 
-#: rc_option_editor.cc:4102
+#: rc_option_editor.cc:4126
 msgid "Display Action-Buttons"
 msgstr "Aktions-Schaltflächen anzeigen"
 
-#: rc_option_editor.cc:4112 rc_option_editor.cc:4114 rc_option_editor.cc:4121
-#: rc_option_editor.cc:4128 rc_option_editor.cc:4144 rc_option_editor.cc:4154
-#: rc_option_editor.cc:4166
+#: rc_option_editor.cc:4136 rc_option_editor.cc:4138 rc_option_editor.cc:4145
+#: rc_option_editor.cc:4152 rc_option_editor.cc:4168 rc_option_editor.cc:4178
+#: rc_option_editor.cc:4190
 msgid "Appearance/Theme"
 msgstr "Erscheinungsbild/Thema"
 
-#: rc_option_editor.cc:4112
+#: rc_option_editor.cc:4136
 msgid "Theme"
 msgstr "Thema"
 
-#: rc_option_editor.cc:4116
+#: rc_option_editor.cc:4140
 msgid "Draw \"flat\" buttons"
 msgstr "Zeichne \"flache\" Schaltflächen"
 
-#: rc_option_editor.cc:4123
+#: rc_option_editor.cc:4147
 msgid "Draw \"boxy\" buttons"
 msgstr "Zeichne \"eckige\" Schaltflächen"
 
-#: rc_option_editor.cc:4130
+#: rc_option_editor.cc:4154
 msgid "LED meter style"
 msgstr "Pegelanzeigen im LED-Stil"
 
-#: rc_option_editor.cc:4138
+#: rc_option_editor.cc:4162
 msgid "Waveforms color gradient depth"
 msgstr "Farbverlaufs-Intensität der Wellenform"
 
-#: rc_option_editor.cc:4148
+#: rc_option_editor.cc:4172
 msgid "Timeline item gradient depth"
 msgstr "Farbverlaufs-Intensität von Zeitleisten-Objekten"
 
-#: rc_option_editor.cc:4159
+#: rc_option_editor.cc:4183
 msgid "Icon Set"
 msgstr "Icon-Satz"
 
-#: rc_option_editor.cc:4169 rc_option_editor.cc:4170 rc_option_editor.cc:4171
+#: rc_option_editor.cc:4193 rc_option_editor.cc:4194 rc_option_editor.cc:4195
 msgid "Appearance/Colors"
 msgstr "Erscheinungsbild/Farben"
 
-#: rc_option_editor.cc:4169
+#: rc_option_editor.cc:4193
 msgid "Colors"
 msgstr "Farben"
 
-#: rc_option_editor.cc:4175
+#: rc_option_editor.cc:4199
 msgid "Various Workarounds for Windowing Systems"
 msgstr "Diverse Anpassungen für Fenstermanager"
 
-#: rc_option_editor.cc:4177
+#: rc_option_editor.cc:4201
 msgid ""
 "Rules for closing, minimizing, maximizing, and stay-on-top can vary with "
 "each version of your OS, and the preferences that you've set in your OS.\n"
@@ -14293,17 +14321,17 @@ msgstr ""
 "Diese Einstellungen werden erst nach einem Neustart von %1 wirksam .\n"
 "\t"
 
-#: rc_option_editor.cc:4183 rc_option_editor.cc:4193 rc_option_editor.cc:4204
-#: rc_option_editor.cc:4214 rc_option_editor.cc:4226 rc_option_editor.cc:4229
+#: rc_option_editor.cc:4207 rc_option_editor.cc:4217 rc_option_editor.cc:4228
+#: rc_option_editor.cc:4238 rc_option_editor.cc:4250 rc_option_editor.cc:4253
 msgid "Appearance/Quirks"
 msgstr "Erscheinungsbild/Sonderregelungen"
 
-#: rc_option_editor.cc:4187
+#: rc_option_editor.cc:4211
 msgid "Use visibility information provided by your Window Manager/Desktop"
 msgstr ""
 "Benutze die Sichtbarkeitsinformationen des Fenstermanagers/der Arbeitsfläche"
 
-#: rc_option_editor.cc:4192
+#: rc_option_editor.cc:4216
 msgid ""
 "If you have trouble toggling between hidden Editor and Mixer windows, try "
 "changing this setting."
@@ -14311,11 +14339,11 @@ msgstr ""
 "Falls Sie beim Wechsel zwischen versteckten Editor- und Mixerfenstern "
 "Probleme bekommen, probieren Sie, diese Einstellung zu ändern."
 
-#: rc_option_editor.cc:4198
+#: rc_option_editor.cc:4222
 msgid "All floating windows are dialogs"
 msgstr "Alle schwebenden Fenster sind Dialoge"
 
-#: rc_option_editor.cc:4203
+#: rc_option_editor.cc:4227
 msgid ""
 "Mark all floating windows to be type \"Dialog\" rather than using \"Utility"
 "\" for some.\n"
@@ -14325,11 +14353,11 @@ msgstr ""
 "\" kennzeichnen.\n"
 "Dies kann bei einigen Fenstermanagern hilfreich sein."
 
-#: rc_option_editor.cc:4208
+#: rc_option_editor.cc:4232
 msgid "Transient windows follow front window."
 msgstr "Vorübergehend angezeigte Fenster folgen dem Hauptfenster."
 
-#: rc_option_editor.cc:4213
+#: rc_option_editor.cc:4237
 msgid ""
 "Make transient windows follow the front window when toggling between the "
 "editor and mixer."
@@ -14337,11 +14365,11 @@ msgstr ""
 "Transientenfenster sollen beim Wechsel zwischen Editor und Mixer dem Fenster "
 "im Vordergrund folgen."
 
-#: rc_option_editor.cc:4220
+#: rc_option_editor.cc:4244
 msgid "Float detached monitor-section window"
 msgstr "Abgelöstes Monitorsektionfenster schwebend"
 
-#: rc_option_editor.cc:4225
+#: rc_option_editor.cc:4249
 msgid ""
 "When detaching the monitoring section, mark it as \"Utility\" window to stay "
 "in front."
@@ -14349,19 +14377,19 @@ msgstr ""
 "Beim Ablösen der Monitorsektion das Fenster als \"Utility\"-Fenster "
 "kennzeichnen, damit es immer im Vordergrund bleibt."
 
-#: rc_option_editor.cc:4232
+#: rc_option_editor.cc:4256
 msgid "Video Server"
 msgstr "Video Server"
 
-#: rc_option_editor.cc:4318
+#: rc_option_editor.cc:4346
 msgid "Set Linux VST Search Path"
 msgstr "Linux VST Suchpfad setzen"
 
-#: rc_option_editor.cc:4327 rc_option_editor.cc:4348
+#: rc_option_editor.cc:4355 rc_option_editor.cc:4376
 msgid "Re-scan Plugins now?"
 msgstr "Plugins erneut scannen?"
 
-#: rc_option_editor.cc:4340
+#: rc_option_editor.cc:4368
 msgid "Set Windows VST Search Path"
 msgstr "Windows VST Suchpfad setzen"
 
