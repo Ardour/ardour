@@ -13,7 +13,7 @@ msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-06-29 07:30+0200\n"
-"PO-Revision-Date: 2020-06-29 19:30+0200\n"
+"PO-Revision-Date: 2020-06-29 19:37+0200\n"
 "Last-Translator: Edgar Aichinger <edgar.aichinger@aon.at>\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de\n"
@@ -3687,7 +3687,7 @@ msgstr "Maus"
 
 #: editor.cc:211 editor_actions.cc:550
 msgid "Slide"
-msgstr "Slide"
+msgstr "Gleiten"
 
 #: editor.cc:212
 msgid "Splice"
