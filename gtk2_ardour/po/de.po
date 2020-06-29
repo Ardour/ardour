@@ -13,7 +13,7 @@ msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-06-29 07:30+0200\n"
-"PO-Revision-Date: 2020-06-29 09:19+0200\n"
+"PO-Revision-Date: 2020-06-29 12:07+0200\n"
 "Last-Translator: Edgar Aichinger <edgar.aichinger@aon.at>\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de\n"
@@ -3695,12 +3695,12 @@ msgstr "Splice"
 
 #: editor.cc:213 editor_actions.cc:549
 msgid "Ripple"
-msgstr "Ripple"
+msgstr "Schieben"
 
 #: editor.cc:214 editor_actions.cc:1492 editor_markers.cc:921
 #: editor_rulers.cc:265 location_ui.cc:69
 msgid "Lock"
-msgstr "Lock"
+msgstr "Sperren"
 
 #: editor.cc:219 mono_panner_editor.cc:45
 msgid "Left"
@@ -5517,11 +5517,11 @@ msgstr "Bereich unter aktueller Region entfernen"
 
 #: editor_actions.cc:1577 editor_actions.cc:1578
 msgid "Set Fade In Length"
-msgstr "Fade-In bis Positionszeiger"
+msgstr "Fade-In Länge setzen"
 
 #: editor_actions.cc:1579 editor_actions.cc:1580
 msgid "Set Fade Out Length"
-msgstr "Fade-Out ab Positionszeiger"
+msgstr "Fade-Out -Länge setzen"
 
 #: editor_actions.cc:1582
 msgid "Set Tempo from Region = Bar"
@@ -5773,7 +5773,7 @@ msgstr "Region zeitgleich verschieben"
 
 #: editor_drag.cc:2415
 msgid "Ripple drag"
-msgstr "Wellenmodus-Ziehen"
+msgstr "Schiebemodus-Ziehen"
 
 #: editor_drag.cc:2504
 msgid "create region"
