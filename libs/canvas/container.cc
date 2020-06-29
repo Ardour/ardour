@@ -46,7 +46,7 @@ Container::prepare_for_render (Rect const & area) const
 void
 Container::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
-	if (fill() || outline()) {
+	if (0 && (fill() || outline())) {
 
 		Rect bb (bounding_box());
 		Rect self (item_to_window (bb, false));
