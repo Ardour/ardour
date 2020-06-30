@@ -2920,6 +2920,8 @@ EngineControl::manage_control_app_sensitivity ()
 	} else {
 		control_app_button.set_sensitive (true);
 	}
+
+	lm_button_audio.set_sensitive (backend->can_measure_systemic_latency ());
 }
 
 void
