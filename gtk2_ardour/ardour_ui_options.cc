@@ -33,6 +33,7 @@
 #include "pbd/stacktrace.h"
 #include "pbd/unwind.h"
 
+#include "ardour/lv2_plugin.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/session.h"
 #include "ardour/transport_master_manager.h"
@@ -475,6 +476,7 @@ ARDOUR_UI::parameter_changed (std::string p)
 			ArdourButton::set_flat_buttons (flat);
 			/* force a redraw */
 			gtk_rc_reset_styles (gtk_settings_get_default());
+			LV2Plugin::set_global_ui_style_flat (flat);
 		}
 	} else if (p == "boxy-buttons") {
 		bool boxy = UIConfiguration::instance().get_boxy_buttons();
@@ -482,6 +484,7 @@ ARDOUR_UI::parameter_changed (std::string p)
 			ArdourButton::set_boxy_buttons (boxy);
 			/* force a redraw */
 			gtk_rc_reset_styles (gtk_settings_get_default());
+			LV2Plugin::set_global_ui_style_boxy (boxy);
 		}
 	} else if ( (p == "snap-to-region-sync") || (p == "snap-to-region-start") || (p == "snap-to-region-end") ) {
 		if (editor) editor->mark_region_boundary_cache_dirty();

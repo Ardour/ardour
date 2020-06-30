@@ -950,6 +950,7 @@ ARDOUR_UI::on_theme_changed ()
 {
 	LV2Plugin::set_global_ui_background_color (UIConfiguration::instance().color ("gtk_background"));
 	LV2Plugin::set_global_ui_foreground_color (UIConfiguration::instance().color ("gtk_foreground"));
+	LV2Plugin::set_global_ui_contrasting_color (UIConfiguration::instance().color ("theme:contrasting clock")); // more contrast that "theme:contrasting"
 	LV2Plugin::set_global_ui_scale_factor (UIConfiguration::instance().get_ui_scale());
 }
 
