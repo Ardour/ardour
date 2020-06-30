@@ -575,9 +575,9 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id("http://lv2plug.in/ns/extensions/ui#scaleFactor"),
 		  sizeof(float), atom_Float, &_ui_scale_factor },
 		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id("http://ardour.org/lv2/theme/#styleBoxy"),
-		  sizeof(float), atom_Bool, &_ui_style_boxy },
+		  sizeof(bool), atom_Bool, &_ui_style_boxy },
 		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id("http://ardour.org/lv2/theme/#styleFlat"),
-		  sizeof(float), atom_Bool, &_ui_style_flat },
+		  sizeof(bool), atom_Bool, &_ui_style_flat },
 		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id("http://kxstudio.sf.net/ns/lv2ext/props#TransientWindowId"),
 		  sizeof(int32_t), atom_Long, &_ui_transient_win_id },
 		{ LV2_OPTIONS_INSTANCE, 0, 0, 0, 0, NULL }
