@@ -147,6 +147,7 @@ class AlsaAudioBackend : public AudioBackend, public PortEngineSharedImpl
 		bool can_change_sample_rate_when_running () const;
 		bool can_change_buffer_size_when_running () const;
 
+		bool can_measure_systemic_latency () const;
 		bool can_change_systemic_latency_when_running () const { return true; }
 
 		bool can_request_update_devices () { return true; }

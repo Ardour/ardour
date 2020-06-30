@@ -375,6 +375,12 @@ AlsaAudioBackend::set_device_name (const std::string& d)
 	return rv;
 }
 
+bool
+AlsaAudioBackend::can_measure_systemic_latency () const
+{
+	return _input_audio_device == _output_audio_device && _input_audio_device != get_standard_device_name (DeviceNone);
+}
+
 int
 AlsaAudioBackend::set_sample_rate (float sr)
 {

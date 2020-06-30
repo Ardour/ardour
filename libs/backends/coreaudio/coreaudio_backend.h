@@ -179,6 +179,7 @@ class CoreAudioBackend : public AudioBackend, public PortEngineSharedImpl {
 
 	bool can_change_sample_rate_when_running () const;
 	bool can_change_buffer_size_when_running () const;
+	bool can_measure_systemic_latency () const { return true; }
 
 	int set_device_name (const std::string&);
 	int set_input_device_name (const std::string&);

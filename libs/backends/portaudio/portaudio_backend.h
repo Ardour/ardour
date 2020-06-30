@@ -158,6 +158,7 @@ class PortAudioBackend : public AudioBackend, public PortEngineSharedImpl {
 		uint32_t     systemic_midi_input_latency (std::string const) const;
 		uint32_t     systemic_midi_output_latency (std::string const) const;
 
+		bool can_measure_systemic_latency () const { return true; }
 		bool can_set_systemic_midi_latencies () const { return true; }
 
 		/* External control app */

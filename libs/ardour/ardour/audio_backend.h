@@ -432,6 +432,12 @@ public:
 	 */
 	virtual bool can_change_buffer_size_when_running () const = 0;
 
+	/** return true if the backend is configured using a single
+	 * full-duplex device and measuring systemic latency can
+	 * produce meaningful results.
+	 */
+	virtual bool can_measure_systemic_latency () const = 0;
+
 	/** return true if the backend can measure and update
 	 * systemic latencies without restart.
 	 */

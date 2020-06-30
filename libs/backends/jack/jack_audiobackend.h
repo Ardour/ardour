@@ -190,6 +190,9 @@ class JACKAudioBackend : public AudioBackend {
     bool can_set_period_size () const {
 	return true;
     }
+    bool can_measure_systemic_latency () const {
+	return false;
+    }
 
     int      midi_event_get (pframes_t& timestamp, size_t& size, uint8_t const** buf, void* port_buffer, uint32_t event_index);
     int      midi_event_put (void* port_buffer, pframes_t timestamp, const uint8_t* buffer, size_t size);
