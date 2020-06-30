@@ -6185,9 +6185,7 @@ Route::monitoring_state () const
 	bool const track_rec   = _disk_writer->record_enabled ();
 	bool session_rec;
 
-	bool const software_monitor         = Config->get_monitoring_model() == SoftwareMonitoring;
 	bool const auto_input_does_talkback = Config->get_auto_input_does_talkback ();
-
 
 	/* I suspect that just use actively_recording() is good enough all the
 	 * time, but just to keep the semantics the same as they were before
