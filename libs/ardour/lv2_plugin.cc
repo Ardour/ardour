@@ -128,11 +128,14 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-bool          LV2Plugin::force_state_save = false;
-uint32_t      LV2Plugin::_ui_background_color = 0x000000ff; // RGBA
-uint32_t      LV2Plugin::_ui_foreground_color = 0xffffffff; // RGBA
-float         LV2Plugin::_ui_scale_factor = 1.0;
-unsigned long LV2Plugin::_ui_transient_win_id = 0;
+bool          LV2Plugin::force_state_save      = false;
+bool          LV2Plugin::_ui_style_flat        = false;
+bool          LV2Plugin::_ui_style_boxy        = false;
+uint32_t      LV2Plugin::_ui_background_color  = 0x000000ff; // RGBA
+uint32_t      LV2Plugin::_ui_foreground_color  = 0xffffffff; // RGBA
+uint32_t      LV2Plugin::_ui_contrasting_color = 0x33ff33ff; // RGBA
+float         LV2Plugin::_ui_scale_factor      = 1.0;
+unsigned long LV2Plugin::_ui_transient_win_id  = 0;
 
 class LV2World : boost::noncopyable {
 public:
@@ -533,6 +536,7 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 #endif
 
 	LV2_URID atom_Int   = _uri_map.uri_to_id(LV2_ATOM__Int);
+	LV2_URID atom_Bool  = _uri_map.uri_to_id(LV2_ATOM__Bool);
 	LV2_URID atom_Long  = _uri_map.uri_to_id(LV2_ATOM__Long);
 	LV2_URID atom_Float = _uri_map.uri_to_id(LV2_ATOM__Float);
 
@@ -566,8 +570,14 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 		  sizeof(int32_t), atom_Int, &_ui_background_color },
 		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id("http://lv2plug.in/ns/extensions/ui#foregroundColor"),
 		  sizeof(int32_t), atom_Int, &_ui_foreground_color },
+		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id("http://lv2plug.in/ns/extensions/ui#contrastingColor"),
+		  sizeof(int32_t), atom_Int, &_ui_contrasting_color },
 		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id("http://lv2plug.in/ns/extensions/ui#scaleFactor"),
 		  sizeof(float), atom_Float, &_ui_scale_factor },
+		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id("http://ardour.org/lv2/theme/#styleBoxy"),
+		  sizeof(float), atom_Bool, &_ui_style_boxy },
+		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id("http://ardour.org/lv2/theme/#styleFlat"),
+		  sizeof(float), atom_Bool, &_ui_style_flat },
 		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id("http://kxstudio.sf.net/ns/lv2ext/props#TransientWindowId"),
 		  sizeof(int32_t), atom_Long, &_ui_transient_win_id },
 		{ LV2_OPTIONS_INSTANCE, 0, 0, 0, 0, NULL }
