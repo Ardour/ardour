@@ -630,7 +630,6 @@ Item::set_size_request (double w, double h)
 	end_change ();
 }
 
-
 /** @return Bounding box in this item's coordinates */
 ArdourCanvas::Rect
 Item::bounding_box () const
