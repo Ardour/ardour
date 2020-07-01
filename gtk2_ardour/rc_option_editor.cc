@@ -3907,7 +3907,7 @@ RCOptionEditor::RCOptionEditor ()
 		);
 	emode->add (-1, _("Ellipsize start of name"));
 	emode->add (0, _("Ellipsize middle of name"));
-	emode->add (-1, _("Ellipsize end of name"));
+	emode->add (1, _("Ellipsize end of name"));
 
 	Gtkmm2ext::UI::instance()->set_tip (emode->tip_widget(), _("Choose which part of long track names are hidden in the editor's track headers"));
 	add_option (_("Appearance/Editor"), emode);
