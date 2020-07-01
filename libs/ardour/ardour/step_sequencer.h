@@ -32,7 +32,7 @@
 #include "pbd/ringbuffer.h"
 #include "pbd/stateful.h"
 
-#include "evoral/Event.hpp"
+#include "evoral/Event.h"
 
 #include "temporal/types.h"
 #include "temporal/beats.h"
