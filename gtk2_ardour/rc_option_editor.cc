@@ -3898,6 +3898,20 @@ RCOptionEditor::RCOptionEditor ()
 			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_region_name)
 			));
 
+
+	ComboOption<int>* emode = new ComboOption<int> (
+			"time-axis-name-ellipsize-mode",
+			_("Track name ellipsize mode"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_time_axis_name_ellipsize_mode),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_time_axis_name_ellipsize_mode)
+		);
+	emode->add (-1, _("Ellipsize start of name"));
+	emode->add (0, _("Ellipsize middle of name"));
+	emode->add (-1, _("Ellipsize end of name"));
+
+	Gtkmm2ext::UI::instance()->set_tip (emode->tip_widget(), _("Choose which part of long track names are hidden in the editor's track headers"));
+	add_option (_("Appearance/Editor"), emode);
+
 	ComboOption<uint32_t>* gap = new ComboOption<uint32_t> (
 		     "vertical-region-gap",
 		     _("Add a visual gap below Audio Regions"),
