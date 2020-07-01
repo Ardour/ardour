@@ -168,17 +168,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 		Gtk::Requisition req = an_entry->size_request ();
 
 		name_label.set_size_request (-1, req.height);
-		switch (UIConfiguration::instance().get_time_axis_name_ellipsize_mode()) {
-		case -1:
-			name_label.set_ellipsize (Pango::ELLIPSIZE_START);
-			break;
-		case 1:
-			name_label.set_ellipsize (Pango::ELLIPSIZE_END);
-			break;
-		default:
-			name_label.set_ellipsize (Pango::ELLIPSIZE_MIDDLE);
-			break;
-		}
+		set_name_ellipsize_mode ();
 	}
 
 	// set min. track-header width if fader is not visible
@@ -1224,6 +1214,8 @@ TimeAxisView::parameter_changed (string const & what_changed)
 		if (selected ()) {
 			show_selection (_editor.get_selection().time);
 		}
+	} else if (what_changed == "time-axis-name-ellipsize-mode") {
+		set_name_ellipsize_mode ();
 	}
 
 	if (view()) {
@@ -1411,4 +1403,20 @@ TrackViewList::filter_to_unique_playlists ()
 		}
 	}
 	return ts;
+}
+
+void
+TimeAxisView::set_name_ellipsize_mode ()
+{
+	switch (UIConfiguration::instance().get_time_axis_name_ellipsize_mode()) {
+	case -1:
+		name_label.set_ellipsize (Pango::ELLIPSIZE_START);
+		break;
+	case 1:
+		name_label.set_ellipsize (Pango::ELLIPSIZE_END);
+		break;
+	default:
+		name_label.set_ellipsize (Pango::ELLIPSIZE_MIDDLE);
+		break;
+	}
 }
