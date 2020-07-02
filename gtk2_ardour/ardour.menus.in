@@ -415,6 +415,8 @@
         <menuitem action='track-height-small'/>
       </menu>
       <separator/>
+        <menuitem action='toggle-layer-display'/>
+      <separator/>
       <menuitem action='toggle-track-active'/>
       <menuitem action='remove-track'/>
       <separator/>
