@@ -5566,25 +5566,19 @@ Editor::apply_midi_note_edit_op (MidiOperator& op, const RegionSelection& rs)
 
 	bool in_command = false;
 
-	for (RegionSelection::const_iterator r = rs.begin(); r != rs.end(); ) {
-		RegionSelection::const_iterator tmp = r;
-		++tmp;
+	vector<MidiRegionView*> views = filter_to_unique_midi_region_views (rs);
 
-		MidiRegionView* const mrv = dynamic_cast<MidiRegionView*> (*r);
+	for (vector<MidiRegionView*>::iterator mrv = views.begin(); mrv != views.end(); ++mrv) {
 
-		if (mrv) {
-			Command* cmd = apply_midi_note_edit_op_to_region (op, *mrv);
-			if (cmd) {
-				if (!in_command) {
-					begin_reversible_command (op.name ());
-					in_command = true;
-				}
-				(*cmd)();
-				_session->add_command (cmd);
+		Command* cmd = apply_midi_note_edit_op_to_region (op, **mrv);
+		if (cmd) {
+			if (!in_command) {
+				begin_reversible_command (op.name ());
+				in_command = true;
 			}
-		}
-
-		r = tmp;
+			(*cmd)();
+			_session->add_command (cmd);
+			}
 	}
 
 	if (in_command) {
@@ -8567,12 +8561,24 @@ Editor::toggle_layer_display ()
 
 }
 
-void
-Editor::midi_action (void (MidiRegionView::*method)())
+vector<MidiRegionView*>
+Editor::filter_to_unique_midi_region_views (RegionSelection const & ms) const
 {
-	MidiRegionSelection ms = selection->midi_regions();
+	typedef std::pair<boost::shared_ptr<MidiSource>,samplepos_t> MapEntry;
+	std::set<MapEntry> single_region_set;
 
-	for (MidiRegionSelection::iterator i = ms.begin(); i != ms.end(); ++i) {
+	vector<MidiRegionView*> views;
+
+	/* build a list of regions that are unique with respect to their source
+	 * and start position. Note: this is non-exhaustive... if someone has a
+	 * non-forked copy of a MIDI region and then suitably modifies it, this
+	 * will still put both regions into the list of things to be acted
+	 * upon.
+	 *
+	 * Solution: user should not select both regions, or should fork one of them.
+	 */
+
+	for (MidiRegionSelection::const_iterator i = ms.begin(); i != ms.end(); ++i) {
 
 		MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (*i);
 
@@ -8580,6 +8586,40 @@ Editor::midi_action (void (MidiRegionView::*method)())
 			continue;
 		}
 
-		(mrv->*method) ();
+		MapEntry entry = make_pair (mrv->midi_region()->midi_source(), mrv->region()->start());
+
+		if (single_region_set.insert (entry).second) {
+			views.push_back (mrv);
+		}
+	}
+
+	return views;
+}
+
+
+void
+Editor::midi_action (void (MidiRegionView::*method)())
+{
+	MidiRegionSelection ms = selection->midi_regions();
+
+	if (ms.empty()) {
+		return;
+	}
+
+	if (ms.size() > 1) {
+
+		vector<MidiRegionView*> views = filter_to_unique_midi_region_views (ms);
+
+		for (vector<MidiRegionView*>::iterator mrv = views.begin(); mrv != views.end(); ++mrv) {
+			((*mrv)->*method) ();
+		}
+
+	} else {
+
+		MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(ms.front());
+
+		if (mrv) {
+			(mrv->*method)();
+		}
 	}
 }

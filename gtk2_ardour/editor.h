@@ -2330,6 +2330,7 @@ private:
 
 	/* MIDI actions, proxied to selected MidiRegionView(s) */
 	void midi_action (void (MidiRegionView::*method)());
+	std::vector<MidiRegionView*> filter_to_unique_midi_region_views (RegionSelection const & ms) const;
 
 	/* private helper functions to help with registering region actions */
 
