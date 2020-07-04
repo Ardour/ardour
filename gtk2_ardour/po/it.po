@@ -12,14 +12,15 @@ msgstr ""
 "Project-Id-Version: ardour 0.354.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-05-20 14:36-0600\n"
-"PO-Revision-Date: 2020-05-31 10:59+0200\n"
+"PO-Revision-Date: 2020-07-04 07:40+0200\n"
 "Last-Translator: Vincenzo Reale <smart2128@baslug.org>\n"
 "Language: it\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Lokalize 20.04.1\n"
+"X-Generator: Lokalize 20.04.2\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language-Team: Italian\n"
 
 #: about.cc:133
 msgid "Fons Adriaensen"
@@ -854,7 +855,7 @@ msgstr "Personalizzato"
 
 #: add_route_dialog.cc:941 session_dialog.cc:582 session_dialog.cc:583
 msgid "Factory Template"
-msgstr ""
+msgstr "Modello di fabbrica"
 
 #: add_route_dialog.cc:1000 add_route_dialog.cc:1016 route_group_menu.cc:86
 msgid "New Group..."
@@ -1025,9 +1026,8 @@ msgid "Add Video"
 msgstr "Aggiungi video"
 
 #: ardour_ui.cc:341 bundle_manager.cc:265
-#, fuzzy
 msgid "Bundle Manager"
-msgstr "Gestore dei bundle"
+msgstr "Gestore dei pacchetti"
 
 #: ardour_ui.cc:342 big_clock_window.cc:39
 msgid "Big Clock"
@@ -1445,7 +1445,7 @@ msgstr[0] ""
 "\n"
 "Dopo il riavvio di %5\n"
 "\n"
-"<span face=\"mono\">Sessione > Pulizia > Svuota il cestino</span>\n"
+"<span face=\"mono\">Sessione -> Pulizia -> Svuota il cestino</span>\n"
 "\n"
 "verranno liberati ulteriori %3 %4byte di spazio su disco.\n"
 msgstr[1] ""
@@ -1610,7 +1610,7 @@ msgstr "Ripristina tutti gli indicatori di picco"
 
 #: ardour_ui2.cc:97
 msgid "Show Error Log and acknowledge warnings"
-msgstr "Mostra i messaggi di errore e scarta gli avvertimenti"
+msgstr "Mostra i messaggi di errore e scarta gli avvisi"
 
 #: ardour_ui2.cc:99
 msgid ""
@@ -1696,7 +1696,7 @@ msgstr ""
 "Trascina questa scheda sulla scrivania per mostrare %1 in una finestra "
 "dedicata\n"
 "\n"
-"Per riportare indietro la finestra usa Finestre > %1 > Ancora"
+"Per riagganciare la finestra usa l'azione di menu Finestre > %1 > Ancora"
 
 #: ardour_ui2.cc:411
 msgid "Start recording at auto-punch start"
@@ -1922,7 +1922,7 @@ msgstr "Finestre"
 #: ardour_ui_ed.cc:161 ardour_ui_ed.cc:676 ardour_ui_ed.cc:677
 #: ardour_ui_ed.cc:678
 msgid "Detach"
-msgstr "Disancora"
+msgstr "Sgancia"
 
 #: ardour_ui_ed.cc:162
 msgid "Help"
@@ -2117,7 +2117,7 @@ msgstr "Riferimenti"
 
 #: ardour_ui_ed.cc:277
 msgid "Report a Bug"
-msgstr "Riporta un bug"
+msgstr "Segnala un bug"
 
 #: ardour_ui_ed.cc:278
 msgid "Cheat Sheet"
@@ -2137,7 +2137,7 @@ msgstr "Forum utenti"
 
 #: ardour_ui_ed.cc:282
 msgid "How to Report a Bug"
-msgstr "Come riportare un bug"
+msgstr "Come segnalare un bug"
 
 #: ardour_ui_ed.cc:284 luawindow.cc:101 luawindow.cc:693 plugin_ui.cc:467
 #: template_dialog.cc:324
@@ -2410,7 +2410,7 @@ msgstr "Esporta stem..."
 
 #: ardour_ui_ed.cc:574
 msgid "Export to Audio File(s)..."
-msgstr "Esporta file(s) audio..."
+msgstr "Esporta file audio..."
 
 #: ardour_ui_ed.cc:577
 msgid "Clean-up Unused Sources..."
@@ -2547,7 +2547,7 @@ msgstr "Scheda successiva"
 
 #: ardour_ui_ed.cc:702
 msgid "Toggle Editor & Mixer"
-msgstr "Editor/mixer"
+msgstr "Editor e mixer"
 
 #: ardour_ui_ed.cc:706
 msgid "Maximise Editor Space"
@@ -4833,7 +4833,7 @@ msgstr "Riproduci le regioni selezionate"
 
 #: editor_actions.cc:347 editor_actions.cc:1599
 msgid "Tag Selected Regions"
-msgstr "Etichetta regioni selezionate"
+msgstr "Etichetta le regioni selezionate"
 
 #: editor_actions.cc:350
 msgid "Play from Edit Point and Return"
@@ -4921,7 +4921,7 @@ msgstr "Rimuovi l'ultima registrazione"
 
 #: editor_actions.cc:441 editor_ops.cc:5202
 msgid "Tag Last Capture"
-msgstr "Etichetta ultima registrazione"
+msgstr "Etichetta l'ultima registrazione"
 
 #: editor_actions.cc:443
 msgid "Stationary Playhead"
@@ -5064,7 +5064,7 @@ msgstr "Modalità modifica del ciclo"
 
 #: editor_actions.cc:560
 msgid "Snap & Grid"
-msgstr "Griglia & allineamento"
+msgstr "Griglia e allineamento"
 
 #: editor_actions.cc:564 rc_option_editor.cc:2750
 msgid "Grid"
@@ -5187,19 +5187,19 @@ msgstr "Cancella selezione delle note"
 
 #: editor_actions.cc:717
 msgid "Move Note Start Earlier (fine)"
-msgstr ""
+msgstr "Sposta in avanti l'inizio della nota (fine)"
 
 #: editor_actions.cc:718
 msgid "Move Note Start Earlier"
-msgstr ""
+msgstr "Sposta in avanti l'inizio della nota"
 
 #: editor_actions.cc:719
 msgid "Move Note Ends Later (fine)"
-msgstr ""
+msgstr "Sposta indietro la fine della nota (fine)"
 
 #: editor_actions.cc:720
 msgid "Move Note Ends Later"
-msgstr ""
+msgstr "Sposta in avanti la fine della nota"
 
 #: editor_actions.cc:724
 msgid "Select Next"
@@ -5207,7 +5207,7 @@ msgstr "Seleziona successiva"
 
 #: editor_actions.cc:725
 msgid "Select Next (alternate)"
-msgstr ""
+msgstr "Seleziona successiva (alternativa)"
 
 #: editor_actions.cc:726
 msgid "Select Previous"
@@ -5215,23 +5215,23 @@ msgstr "Seleziona precedente"
 
 #: editor_actions.cc:727
 msgid "Select Previous (alternate)"
-msgstr ""
+msgstr "Seleziona precedente (alternativa)"
 
 #: editor_actions.cc:728
 msgid "Add Next to Selection"
-msgstr ""
+msgstr "Aggiungi successiva a selezione"
 
 #: editor_actions.cc:729
 msgid "Add Next to Selection (alternate)"
-msgstr ""
+msgstr "Aggiungi successiva a selezione (alternativa)"
 
 #: editor_actions.cc:730
 msgid "Add Previous to Selection"
-msgstr ""
+msgstr "Aggiungi precedente a selezione"
 
 #: editor_actions.cc:731
 msgid "Add Previous to Selection (alternate)"
-msgstr ""
+msgstr "Aggiungi precedente a selezione (alternativa)"
 
 #: editor_actions.cc:733
 msgid "Increase Velocity"
@@ -5239,7 +5239,7 @@ msgstr "Aumenta velocità"
 
 #: editor_actions.cc:734
 msgid "Increase Velocity (fine)"
-msgstr ""
+msgstr "Aumenta velocità (fine)"
 
 #: editor_actions.cc:735
 msgid "Increase Velocity (allow mush)"
@@ -5247,7 +5247,7 @@ msgstr ""
 
 #: editor_actions.cc:736
 msgid "Increase Velocity (non-relative)"
-msgstr ""
+msgstr "Aumenta velocità (non relativa)"
 
 #: editor_actions.cc:737
 msgid "Increase Velocity (fine, allow mush)"
@@ -5255,7 +5255,7 @@ msgstr ""
 
 #: editor_actions.cc:738
 msgid "Increase Velocity (fine, non-relative)"
-msgstr ""
+msgstr "Aumenta velocità (fine, non relativa)"
 
 #: editor_actions.cc:739
 msgid "Increase Velocity (maintain ratios, allow mush)"
@@ -5271,7 +5271,7 @@ msgstr "Riduci velocità"
 
 #: editor_actions.cc:743
 msgid "Decrease Velocity (fine)"
-msgstr ""
+msgstr "Riduci velocità (fine)"
 
 #: editor_actions.cc:744
 msgid "Decrease Velocity (allow mush)"
@@ -5279,7 +5279,7 @@ msgstr ""
 
 #: editor_actions.cc:745
 msgid "Decrease Velocity (non-relative)"
-msgstr ""
+msgstr "Riduci velocità (non relativa)"
 
 #: editor_actions.cc:746
 msgid "Decrease Velocity (fine, allow mush)"
@@ -5287,7 +5287,7 @@ msgstr ""
 
 #: editor_actions.cc:747
 msgid "Decrease Velocity (fine, non-relative)"
-msgstr ""
+msgstr "Riduci velocità (fine, non relativa)"
 
 #: editor_actions.cc:748
 msgid "Decrease Velocity (maintain ratios, allow mush)"
@@ -5299,7 +5299,7 @@ msgstr ""
 
 #: editor_actions.cc:751
 msgid "Transpose Up (octave)"
-msgstr ""
+msgstr "Trasponi in su (ottava)"
 
 #: editor_actions.cc:752
 msgid "Transpose Up (octave, allow mush)"
@@ -5307,7 +5307,7 @@ msgstr ""
 
 #: editor_actions.cc:753
 msgid "Transpose Up (semitone)"
-msgstr ""
+msgstr "Trasponi in su (semitono)"
 
 #: editor_actions.cc:754
 msgid "Transpose Up (semitone, allow mush)"
@@ -5315,7 +5315,7 @@ msgstr ""
 
 #: editor_actions.cc:756
 msgid "Transpose Down (octave)"
-msgstr ""
+msgstr "Trasponi in giù (ottava)"
 
 #: editor_actions.cc:757
 msgid "Transpose Down (octave, allow mush)"
@@ -5323,7 +5323,7 @@ msgstr ""
 
 #: editor_actions.cc:758
 msgid "Transpose Down (semitone)"
-msgstr ""
+msgstr "Trasponi in giù (semitono)"
 
 #: editor_actions.cc:759
 msgid "Transpose Down (semitone, allow mush)"
@@ -5331,27 +5331,27 @@ msgstr ""
 
 #: editor_actions.cc:761
 msgid "Nudge Notes Later (grid)"
-msgstr ""
+msgstr "Spingi note alla fine (griglia)"
 
 #: editor_actions.cc:762
 msgid "Nudge Notes Later (1/4 grid)"
-msgstr ""
+msgstr "Spingi note alla fine (1/4  della griglia)"
 
 #: editor_actions.cc:763
 msgid "Nudge Notes Earlier (grid)"
-msgstr ""
+msgstr "Spingi note all'inizio (griglia)"
 
 #: editor_actions.cc:764
 msgid "Nudge Notes Earlier (1/4 grid)"
-msgstr ""
+msgstr "Spingi note all'inizio (1/4 della griglia)"
 
 #: editor_actions.cc:766
 msgid "Edit Note Channels"
-msgstr ""
+msgstr "Modifica canali delle note"
 
 #: editor_actions.cc:767
 msgid "Edit Note Velocities"
-msgstr ""
+msgstr "Modifica velocità delle note"
 
 #: editor_actions.cc:1093 editor_actions.cc:1231 editor_actions.cc:1242
 #: editor_actions.cc:1297 editor_actions.cc:1308 editor_actions.cc:1355
@@ -7182,7 +7182,7 @@ msgstr ""
 "Vuoi rimuovere le sorgenti selezionate?\n"
 "Questa operazione non può essere annullata.\n"
 "I file sorgente non saranno effettivamente eliminati finché non esegui "
-"Sessione>Pulizia."
+"Sessione->Pulizia."
 
 #: editor_sources.cc:642
 msgid "Only remove the Regions that use these Sources."
@@ -7660,7 +7660,7 @@ msgid ""
 "<span color=\"#ffa755\">Some already existing files will be overwritten.</"
 "span>"
 msgstr ""
-"<span color=\"#ffa755\">Alcuni file preesistenti verranno sovrascritti.</"
+"<span color=\"#ffa755\">Alcuni file preesistenti saranno sovrascritti.</"
 "span>"
 
 #: export_dialog.cc:63
@@ -7690,7 +7690,7 @@ msgstr ""
 
 #: export_dialog.cc:323
 msgid "Files that will be overwritten"
-msgstr "File che verranno sovrascritti"
+msgstr "File che saranno sovrascritti"
 
 #: export_dialog.cc:368
 msgid "Export initialization failed: %1"
@@ -8784,6 +8784,9 @@ msgid ""
 "\n"
 "You can replace the existing binding or cancel this action."
 msgstr ""
+"La sequenza di tasti è già associata a '%1'.\n"
+"\n"
+"Puoi sostituire l'associazione esistente o annullare questa azione."
 
 #: keyeditor.cc:81 plugin_setup_dialog.cc:57
 msgid "Replace"
@@ -9192,7 +9195,7 @@ msgid ""
 "   %1 could not understand your command line      "
 msgstr ""
 "\n"
-"   %1 impossibile comprendere la linea di comando      "
+"   %1 impossibile comprendere la riga di comando      "
 
 #: main.cc:261
 msgid "An error was encountered while launching %1"
@@ -9802,7 +9805,7 @@ msgid ""
 "\n"
 msgstr ""
 "Mancano i seguenti %1 file.\n"
-"Sono stati rimpiazzati con del silenzio:\n"
+"Sono stati sostituiti con del silenzio:\n"
 "\n"
 
 #: missing_filesource_dialog.cc:52
@@ -9900,7 +9903,7 @@ msgstr "Inverti fase"
 
 #: mixer_strip.cc:410 rc_option_editor.cc:4002
 msgid "Record & Monitor"
-msgstr "Registrazione & monitor"
+msgstr "Registrazione e monitor"
 
 #: mixer_strip.cc:411 rc_option_editor.cc:4003
 msgid "Solo Iso / Lock"
@@ -10195,7 +10198,7 @@ msgstr "Seleziona pista mixer seguente"
 
 #: mixer_ui.cc:3535
 msgid "Select Previous Mixer Strip"
-msgstr ""
+msgstr "Seleziona striscia del mixer precedente"
 
 #: mixer_ui.cc:3537
 msgid "Scroll Mixer Window to the left"
@@ -10364,7 +10367,7 @@ msgstr "Solo esclusivo significa che soltanto un solo alla volta è attivo"
 
 #: monitor_section.cc:185
 msgid "Solo » Mute"
-msgstr "Solo  Muto"
+msgstr "Solo » Muto"
 
 #: monitor_section.cc:187
 msgid ""
@@ -11624,9 +11627,8 @@ msgid "No signal detected"
 msgstr "Nessun segnale rilevato"
 
 #: port_insert_ui.cc:169
-#, fuzzy
 msgid "Port Insert "
-msgstr "Insert "
+msgstr "Inserimento porta "
 
 #: port_matrix.cc:353 port_matrix.cc:379
 msgid "<b>Sources</b>"
@@ -12062,7 +12064,7 @@ msgid ""
 "Sample rate mismatch,\n"
 "will be resampling\n"
 msgstr ""
-"%1WARNING:\n"
+"%1AVVISO:\n"
 "\n"
 "Frequenza di campionamento non corrispondente, \n"
 "avverrà un ricampionamento\n"
@@ -12258,6 +12260,8 @@ msgid ""
 "Adjusting the scale requires an application restart for fully accurate re-"
 "layout."
 msgstr ""
+"La regolazione della scala richiede un riavvio dell'applicazione per una"
+" ri-disposizione completamente accurata."
 
 #: rc_option_editor.cc:1142
 msgid "Scan Time Out"
@@ -12330,6 +12334,8 @@ msgid ""
 "The LTC generator output will be auto-connected to this port when a session "
 "is loaded."
 msgstr ""
+"L'uscita del generatore LTC sarà connessa automaticamente a questa porta"
+" quando viene caricata una sessione."
 
 #: rc_option_editor.cc:1495
 msgid "Enable"
@@ -12638,7 +12644,7 @@ msgstr "Backup periodici del file di sessione"
 
 #: rc_option_editor.cc:2439
 msgid "Drag and drop import always copies files to session"
-msgstr ""
+msgstr "Trascina selezione per copiare sempre i file nella sessione"
 
 #: rc_option_editor.cc:2446
 msgid "Default folder for new sessions:"
@@ -12788,6 +12794,9 @@ msgid ""
 "<b>When enabled</b> the new points drawn in any automation lane will be "
 "placed on the existing line, regardless of mouse y-axis position."
 msgstr ""
+"<b>Se abilitata</b> i nuovi punti tracciati in qualsiasi corsia di"
+" automazione saranno posizionati sulla linea esistente, indipendentemente"
+" dalla posizione dell'asse y del mouse."
 
 #: rc_option_editor.cc:2596
 msgid "Default fade shape"
@@ -13031,6 +13040,9 @@ msgid ""
 "<b>When enabled</b>, and Transport->Auto-Input is enabled, %1 will always "
 "monitor audio inputs when transport is stopped, even if tracks aren't armed."
 msgstr ""
+"<b>Se abilitata</b> e Trasporto-> Ingresso automatico è abilitata, %1"
+" monitorerà sempre gli ingressi audio quando il trasporto è fermo, anche se"
+" le tracce non sono inserite."
 
 #: rc_option_editor.cc:2920
 msgid "Track and Bus Connections"
@@ -13047,6 +13059,12 @@ msgid ""
 "is connected to the hardware playback ports, otherwise the master-bus output "
 "is directly used for playback."
 msgstr ""
+"<b>Se abilitata</b> il bus di uscita principale è collegato automaticamente"
+" alle prime N porte fisiche. "
+"Se la sessione ha una sezione monitor, l'uscita del monitor-bus è collegata"
+" alle porte di riproduzione "
+"hardware, altrimenti l'uscita del bus principale viene utilizzata"
+" direttamente per la riproduzione."
 
 #: rc_option_editor.cc:2936
 msgid "Connect track inputs"
@@ -17430,7 +17448,7 @@ msgid ""
 "see also http://manual.ardour.org/video-timeline/setup/"
 msgstr ""
 "ffmpeg non è stato rilevato come installato nel sistema.\n"
-"%1 richiede ffmpeg e ffprobe da ffmpeg.org - versione >=1.1.\n"
+"%1 richiede ffmpeg e ffprobe da ffmpeg.org - versione 1.1 o superiore.\n"
 "L'importazione e l'esportazione di video non sarà possibile fino "
 "all'installazione di questi strumenti.\n"
 "\n"

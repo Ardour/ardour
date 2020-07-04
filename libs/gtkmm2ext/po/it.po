@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: gtkmm2ext\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-06-01 11:01+0200\n"
-"PO-Revision-Date: 2020-06-01 11:13+0200\n"
+"PO-Revision-Date: 2020-07-04 10:31+0200\n"
 "Last-Translator: Vincenzo Reale <smart2128@baslug.org>\n"
 "Language-Team: Italian\n"
 "Language: it\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 20.04.1\n"
+"X-Generator: Lokalize 20.04.2\n"
 
 #: actions.cc:215
 msgid "Unknown action name: %1/%2"
@@ -35,7 +35,7 @@ msgstr "JACK"
 
 #: action_model.cc:87
 msgid "redirectmenu"
-msgstr "menu"
+msgstr "menuredirezione"
 
 #: action_model.cc:89
 msgid "Editor_menus"
@@ -95,7 +95,7 @@ msgstr "Premi per uscire"
 
 #: gtk_ui.cc:730
 msgid "I'm sorry %1, I can't do that"
-msgstr "Spiancente %1, non posso farlo"
+msgstr "Spiacente %1, non posso farlo"
 
 #: keyboard.cc:75
 msgid "Command"
