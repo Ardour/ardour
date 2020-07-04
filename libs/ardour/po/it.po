@@ -8,14 +8,15 @@ msgstr ""
 "Project-Id-Version: libardour 0.664.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-05-20 14:36-0600\n"
-"PO-Revision-Date: 2020-05-31 11:10+0200\n"
+"PO-Revision-Date: 2020-07-04 10:41+0200\n"
 "Last-Translator: Vincenzo Reale <smart2128@baslug.org>\n"
 "Language: Italian\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=ISO-8859-1\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 20.04.1\n"
+"X-Generator: Lokalize 20.04.2\n"
+"Language-Team: Italian\n"
 
 #: analyser.cc:127 audioregion.cc:1791
 msgid "Transient Analysis failed for %1."
@@ -23,7 +24,7 @@ msgstr ""
 
 #: analyser.cc:127
 msgid "Audio File Source"
-msgstr ""
+msgstr "Sorgente file audio"
 
 #: analysis_graph.cc:136
 msgid "%1 (%2..%3)"
@@ -77,11 +78,11 @@ msgstr ""
 
 #: audio_backend.cc:53
 msgid "Failed to open MIDI device"
-msgstr ""
+msgstr "Apertura del dispositivo MIDI non riuscita"
 
 #: audio_backend.cc:55
 msgid "Failed to close MIDI device"
-msgstr ""
+msgstr "Chiusura del dispositivo MIDI non riuscita"
 
 #: audio_backend.cc:57
 msgid "MIDI device unavailable"
@@ -93,27 +94,27 @@ msgstr "Dispositivo MIDI non connesso"
 
 #: audio_backend.cc:61
 msgid "MIDI device Input/Output error"
-msgstr ""
+msgstr "Errore di input/output del dispositivo MIDI"
 
 #: audio_backend.cc:63
 msgid "Sample format is not supported"
-msgstr ""
+msgstr "Il formato del campione non è supportato"
 
 #: audio_backend.cc:65
 msgid "Sample rate is not supported"
-msgstr ""
+msgstr "Il campionamento non è supportato"
 
 #: audio_backend.cc:67
 msgid "Requested input latency is not supported"
-msgstr ""
+msgstr "La latenza di ingresso richiesta non è supportata"
 
 #: audio_backend.cc:69
 msgid "Requested output latency is not supported"
-msgstr ""
+msgstr "La latenza di uscita richiesta non è supportata"
 
 #: audio_backend.cc:71
 msgid "Period size is not supported"
-msgstr ""
+msgstr "La dimensione del periodo non è supportata"
 
 #: audio_backend.cc:73
 msgid "Period count is not supported"
@@ -424,7 +425,7 @@ msgstr "Fader"
 
 #: automatable.cc:196
 msgid "Send"
-msgstr ""
+msgstr "Invia"
 
 #: automatable.cc:198
 msgid "Trim"
@@ -444,7 +445,7 @@ msgstr "Larghezza"
 
 #: automatable.cc:206
 msgid "Elevation"
-msgstr ""
+msgstr "Elevazione"
 
 #: automation_control.cc:326
 msgid "record %1 automation"
@@ -564,7 +565,7 @@ msgstr "sconosciuto"
 
 #: delivery.cc:126
 msgid "main outs"
-msgstr ""
+msgstr "uscite principali"
 
 #: delivery.cc:129 send.cc:78
 msgid "listen"
@@ -619,7 +620,7 @@ msgstr ""
 
 #: export_failed.cc:32
 msgid "Export failed: %1"
-msgstr ""
+msgstr "Esportazione non riuscita: %1"
 
 #: export_filename.cc:131
 msgid "Existing export folder for this session (%1) does not exist - ignored"
@@ -627,11 +628,11 @@ msgstr ""
 
 #: export_filename.cc:274
 msgid "No Time"
-msgstr ""
+msgstr "Nessun orario"
 
 #: export_filename.cc:283
 msgid "Invalid time format"
-msgstr ""
+msgstr "Formato dell'orario non valido"
 
 #: export_filename.cc:292
 msgid "No Date"
@@ -639,7 +640,7 @@ msgstr "Nessuna data"
 
 #: export_filename.cc:307
 msgid "Invalid date format"
-msgstr ""
+msgstr "Formato della data non valido"
 
 #: export_format_manager.cc:60
 msgid "CD"
@@ -655,23 +656,23 @@ msgstr "iPod"
 
 #: export_format_manager.cc:94
 msgid "Something else"
-msgstr ""
+msgstr "Qualcos'altro"
 
 #: export_format_manager.cc:113
 msgid "Any"
-msgstr ""
+msgstr "Qualsiasi"
 
 #: export_format_manager.cc:114
 msgid "Lossless (linear PCM)"
-msgstr ""
+msgstr "Senza perdita (PCM lineare)"
 
 #: export_format_manager.cc:115
 msgid "Lossy compression"
-msgstr ""
+msgstr "Compressione con perdita"
 
 #: export_format_manager.cc:116
 msgid "Lossless compression"
-msgstr ""
+msgstr "Compressione senza perdita"
 
 #: export_format_manager.cc:227 export_format_specification.cc:646
 msgid "Session rate"
@@ -747,7 +748,7 @@ msgstr ""
 
 #: export_handler.cc:483
 msgid "File %1 uploaded to %2"
-msgstr ""
+msgstr "File %1 caricato in %2"
 
 #: export_handler.cc:489
 msgid ""
@@ -812,7 +813,7 @@ msgstr ""
 
 #: export_profile_manager.cc:885
 msgid "Some channels are empty"
-msgstr ""
+msgstr "Alcuni canali sono vuoti"
 
 #: export_profile_manager.cc:909
 msgid "Destination folder does not exist."
@@ -840,7 +841,7 @@ msgstr ""
 msgid ""
 "there are already 1000 files with names like %1; versioning discontinued"
 msgstr ""
-"ci sono gia' 1000 file con nomi come %1; tracciamento di versione interrotto"
+"ci sono già 1000 file con nomi come %1; tracciamento di versione interrotto"
 
 #: file_source.cc:209
 msgid "cannot rename file source from %1 to %2 (%3)"
@@ -1169,19 +1170,19 @@ msgstr ""
 
 #: io.cc:715
 msgid "in"
-msgstr ""
+msgstr "in"
 
 #: io.cc:715
 msgid "out"
-msgstr ""
+msgstr "out"
 
 #: io.cc:716
 msgid "input"
-msgstr ""
+msgstr "ingresso"
 
 #: io.cc:716
 msgid "output"
-msgstr ""
+msgstr "uscita"
 
 #: io.cc:727
 msgid "Unknown bundle \"%1\" listed for %2 of %3"
@@ -1217,11 +1218,11 @@ msgstr "IO: stringa mal formata nel nodo XML \"%1\""
 
 #: io.cc:1237 plugin.cc:292
 msgid "Out"
-msgstr ""
+msgstr "Out"
 
 #: io.cc:1237 plugin.cc:290
 msgid "In"
-msgstr ""
+msgstr "In"
 
 #: io.cc:1483
 #, c-format
@@ -1231,12 +1232,12 @@ msgstr "%s %u"
 #: io.cc:1529
 #, c-format
 msgid "%s in"
-msgstr ""
+msgstr "%s in"
 
 #: io.cc:1531
 #, c-format
 msgid "%s out"
-msgstr ""
+msgstr "%s out"
 
 #: io.cc:1601 session_bundles.cc:143 session_bundles.cc:177
 msgid "mono"
@@ -1358,23 +1359,27 @@ msgstr ""
 
 #: location_importer.cc:62
 msgid "Locations"
-msgstr ""
+msgstr "Posizioni"
 
 #: location_importer.cc:124
 msgid "Location: "
-msgstr ""
+msgstr "Posizione: "
 
 #: location_importer.cc:126
 msgid ""
 "Range\n"
 "start: "
 msgstr ""
+"Intervallo\n"
+"inizio: "
 
 #: location_importer.cc:127
 msgid ""
 "\n"
 "end: "
 msgstr ""
+"\n"
+"fine: "
 
 #: location_importer.cc:147
 msgid ""
@@ -1578,15 +1583,15 @@ msgstr "incolla"
 
 #: operations.cc:43
 msgid "duplicate region"
-msgstr ""
+msgstr "duplica regione"
 
 #: operations.cc:44
 msgid "insert file"
-msgstr ""
+msgstr "inserisci file"
 
 #: operations.cc:45
 msgid "insert region"
-msgstr ""
+msgstr "inserisci regione"
 
 #: operations.cc:46
 msgid "drag region brush"
@@ -1594,7 +1599,7 @@ msgstr ""
 
 #: operations.cc:47
 msgid "region drag"
-msgstr ""
+msgstr "trascinamento regione"
 
 #: operations.cc:48
 msgid "selection grab"
@@ -1602,19 +1607,19 @@ msgstr ""
 
 #: operations.cc:49
 msgid "region fill"
-msgstr ""
+msgstr "riempimento regione"
 
 #: operations.cc:50
 msgid "fill selection"
-msgstr ""
+msgstr "riempi selezione"
 
 #: operations.cc:51
 msgid "create region"
-msgstr ""
+msgstr "crea regione"
 
 #: operations.cc:52
 msgid "region copy"
-msgstr ""
+msgstr "copia regione"
 
 #: operations.cc:53
 msgid "fixed time region copy"
@@ -1668,7 +1673,7 @@ msgstr "Normale"
 
 #: parameter_descriptor.cc:120
 msgid "Invert"
-msgstr ""
+msgstr "Inverti"
 
 #: parameter_descriptor.cc:128
 msgid "Auto"
@@ -1676,7 +1681,7 @@ msgstr ""
 
 #: parameter_descriptor.cc:129
 msgid "Input"
-msgstr ""
+msgstr "Ingresso"
 
 #: parameter_descriptor.cc:130
 msgid "Disk"
@@ -1960,11 +1965,11 @@ msgstr "Architettura sconosciuta"
 
 #: plugin_manager.cc:1109
 msgid " *  %1 (cache only)"
-msgstr ""
+msgstr " *  %1 (solo cache)"
 
 #: plugin_manager.cc:1111
 msgid " *  %1 - %2"
-msgstr ""
+msgstr " *  %1 - %2"
 
 #: plugin_manager.cc:1125
 msgid " -> Cannot get Windows VST information, plugin ignored."
@@ -2172,7 +2177,7 @@ msgstr ""
 
 #: port_insert.cc:45 port_insert.cc:277
 msgid "insert %1"
-msgstr ""
+msgstr "inserisci %1"
 
 #: port_insert.cc:196
 msgid "XML node describing port insert is missing the `type' field"
@@ -2200,11 +2205,11 @@ msgstr ""
 
 #: port_manager.cc:419
 msgid "(unknown type)"
-msgstr ""
+msgstr "(tipo sconosciuto)"
 
 #: port_manager.cc:436
 msgid "(unknown error)"
-msgstr ""
+msgstr "(errore sconosciuto)"
 
 #: port_manager.cc:562
 msgid "AudioEngine: cannot connect %1 (%2) to %3 (%4)"
@@ -2332,7 +2337,7 @@ msgstr "impossibile creare un nuovo nome per la regione \"%1\""
 
 #: resampled_source.cc:110
 msgid "Import: %1"
-msgstr ""
+msgstr "Importa: %1"
 
 #: resampled_source.cc:139 srcfilesource.cc:74
 msgid "Import: src_new() failed : %1"
@@ -2392,7 +2397,7 @@ msgstr ""
 
 #: route.cc:5879
 msgid "Compressor"
-msgstr ""
+msgstr "Compressore"
 
 #: route.cc:5881 route.cc:5883
 msgid "Limiter"
@@ -2683,32 +2688,32 @@ msgstr ""
 #: session_bundles.cc:137
 #, c-format
 msgid "out %s"
-msgstr ""
+msgstr "out %s"
 
 #: session_bundles.cc:139
 #, c-format
 msgid "out %<PRIu32>"
-msgstr ""
+msgstr "out %<PRIu32>"
 
 #: session_bundles.cc:154
 #, c-format
 msgid "out %<PRIu32>+%<PRIu32>"
-msgstr ""
+msgstr "out %<PRIu32>+%<PRIu32>"
 
 #: session_bundles.cc:171
 #, c-format
 msgid "in %s"
-msgstr ""
+msgstr "in %s"
 
 #: session_bundles.cc:173
 #, c-format
 msgid "in %<PRIu32>"
-msgstr ""
+msgstr "in %<PRIu32>"
 
 #: session_bundles.cc:188
 #, c-format
 msgid "in %<PRIu32>+%<PRIu32>"
-msgstr ""
+msgstr "in %<PRIu32>+%<PRIu32>"
 
 #: session_click.cc:275
 msgid "cannot open click soundfile %1 (%2)"
@@ -2854,7 +2859,7 @@ msgstr ""
 
 #: session_state.cc:302
 msgid "Session state: "
-msgstr ""
+msgstr "Stato della sessione: "
 
 #: session_state.cc:398
 msgid "Reset Remote Controls"
@@ -3130,7 +3135,7 @@ msgstr ""
 
 #: session_state.cc:2591
 msgid "template not saved"
-msgstr ""
+msgstr "modello non salvato"
 
 #: session_state.cc:2838
 msgid "Unknown node \"%1\" found in Bundles list from session file"
@@ -3232,7 +3237,7 @@ msgstr ""
 
 #: session_state.cc:5222
 msgid "unknown reason"
-msgstr ""
+msgstr "motivo sconosciuto"
 
 #: session_time.cc:230
 msgid "Unknown transport state %1 in sync callback"
@@ -3353,19 +3358,19 @@ msgstr ".raw"
 
 #: sndfile_helpers.cc:67
 msgid "Signed 16-bit PCM"
-msgstr ""
+msgstr "PCM con segno a 16 bit"
 
 #: sndfile_helpers.cc:68
 msgid "Signed 24-bit PCM"
-msgstr ""
+msgstr "PCM con segno a 24 bit"
 
 #: sndfile_helpers.cc:69
 msgid "Signed 32-bit PCM"
-msgstr ""
+msgstr "PCM con segno a 32 bit"
 
 #: sndfile_helpers.cc:70
 msgid "Signed 8-bit PCM"
-msgstr ""
+msgstr "PCM con segno a 8 bit"
 
 #: sndfile_helpers.cc:71
 msgid "32-bit float"
@@ -3642,19 +3647,19 @@ msgstr ""
 
 #: transport_master.cc:417 transport_master.cc:450
 msgid "SyncSource|JACK"
-msgstr ""
+msgstr "SyncSource|JACK"
 
 #: transport_master.cc:424
 msgid "SyncSource|MTC"
-msgstr ""
+msgstr "SyncSource|MTC"
 
 #: transport_master.cc:434
 msgid "SyncSource|M-Clk"
-msgstr ""
+msgstr "SyncSource|M-Clk"
 
 #: transport_master.cc:444
 msgid "SyncSource|LTC"
-msgstr ""
+msgstr "SyncSource|LTC"
 
 #: transport_master.cc:487
 msgid "All"
@@ -3666,7 +3671,7 @@ msgstr "Avvia/Ferma"
 
 #: transport_master.cc:493
 msgid "Speed"
-msgstr ""
+msgstr "Velocità"
 
 #: transport_master.cc:495
 msgid "Locate"
