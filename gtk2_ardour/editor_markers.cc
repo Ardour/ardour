@@ -1352,11 +1352,15 @@ Editor::marker_menu_loop_range ()
 	Location* l;
 	bool is_start;
 
+	cerr << "look for location from marker " << marker << endl;
+
 	if ((l = find_location_from_marker (marker, is_start)) != 0) {
 		if (l != transport_loop_location()) {
+			cerr << "Set loop\n";
 			set_loop_range (l->start(), l->end(), _("loop range from marker"));
+		} else {
+			cerr << " at TL\n";
 		}
-		_session->request_locate (l->start(), MustRoll);
 		_session->request_play_loop (true);
 	}
 }
