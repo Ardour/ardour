@@ -101,6 +101,16 @@
     [
         a lv2:InputPort, lv2:ControlPort ;
         lv2:index 7 ;
+        lv2:name "Dotted" ;
+        lv2:symbol "dot" ;
+        lv2:default 0 ;
+        lv2:minimum 0 ;
+        lv2:maximum 1 ;
+        lv2:portProperty lv2:integer, lv2:toggled ;
+    ] ,
+    [
+        a lv2:InputPort, lv2:ControlPort ;
+        lv2:index 8 ;
         lv2:name "Dry/Wet" ;
         lv2:symbol "drywet" ;
         lv2:default 50.000000 ;
@@ -110,7 +120,7 @@
     ] ,
     [
         a lv2:InputPort, lv2:ControlPort ;
-        lv2:index 8 ;
+        lv2:index 9 ;
         lv2:name "Feedback" ;
         lv2:symbol "feedback" ;
         lv2:default 20.000000 ;
@@ -120,7 +130,7 @@
     ] ,
     [
         a lv2:InputPort, lv2:ControlPort ;
-        lv2:index 9 ;
+        lv2:index 10 ;
         lv2:name "LPF" ;
         lv2:symbol "lpf" ;
         lv2:default 6000.000000 ;
@@ -131,7 +141,7 @@
     ] ,
     [
         a lv2:InputPort, lv2:ControlPort ;
-        lv2:index 10 ;
+        lv2:index 11 ;
         lv2:name "Output Gain" ;
         lv2:symbol "gain" ;
         lv2:default 0.000000 ;
@@ -141,7 +151,7 @@
     ] ,
     [
         a lv2:OutputPort, lv2:ControlPort ;
-        lv2:index 11 ;
+        lv2:index 12 ;
         lv2:name "Delaytime" ;
         lv2:symbol "delaytime" ;
         lv2:default 0.000000 ;
@@ -151,7 +161,7 @@
     ] ,
     [
         a lv2:InputPort, lv2:ControlPort ;
-        lv2:index 12 ;
+        lv2:index 13 ;
         lv2:name "Enable" ;
         lv2:symbol "enable" ;
         lv2:default 1 ;
@@ -170,4 +180,4 @@ A simple delay plugin
     doap:maintainer <http://ardour.org/credits.html> ;
 
     lv2:microVersion 0 ;
-    lv2:minorVersion 2 .
+    lv2:minorVersion 3 .
