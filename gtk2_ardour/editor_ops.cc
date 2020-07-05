@@ -6631,8 +6631,10 @@ Editor::set_loop_from_selection (bool play)
 	}
 
 	samplepos_t start, end;
-	if (!get_selection_extents (start, end))
+
+	if (!get_selection_extents (start, end)) {
 		return;
+	}
 
 	set_loop_range (start, end,  _("set loop range from selection"));
 
