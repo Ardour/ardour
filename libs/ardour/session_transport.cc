@@ -716,7 +716,7 @@ void
 Session::schedule_butler_for_transport_work ()
 {
 	assert (_transport_fsm->waiting_for_butler ());
-	DEBUG_TRACE (DEBUG::Butler, "summon butler for transport work\n");
+	DEBUG_TRACE (DEBUG::Butler, string_compose ("summon butler for transport work (%1)\n", enum_2_string (post_transport_work())));
 	_butler->schedule_transport_work ();
 }
 
