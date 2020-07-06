@@ -1554,8 +1554,6 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		SaveSessionRequested (_current_snapshot_name);
 	}
 
-	set_post_transport_work (PostTransportWork (post_transport_work() & ~PostTransportStop));
-
 	PositionChanged (_transport_sample); /* EMIT SIGNAL */
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC with speed = %1\n", _transport_speed));
 	TransportStateChange (); /* EMIT SIGNAL */
