@@ -6152,10 +6152,10 @@ Route::monitoring_state () const
 
 	if (m != MonitorAuto) {
 
-		MonitorState ms ((MonitorState) 0);
+		MonitorState ms = MonitoringSilence;
 
 		if (m & MonitorInput) {
-			ms = MonitoringInput;
+			ms = MonitorState (ms | MonitoringInput);
 		}
 
 		if (m & MonitorDisk) {

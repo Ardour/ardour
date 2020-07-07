@@ -463,7 +463,7 @@ enum MonitorChoice {
 };
 
 enum MonitorState {
-	MonitoringSilence = 0x1,
+	MonitoringSilence = 0x0,
 	MonitoringInput = 0x2,
 	MonitoringDisk = 0x4,
 	MonitoringCue = 0x6,
