@@ -2194,7 +2194,7 @@ RegionRippleDrag::add_all_after_to_views(TimeAxisView *tav, samplepos_t where, c
 		}
 	}
 
-	for (RegionSelection::iterator i = to_ripple.begin(); i != to_ripple.end(); ++i) {
+	for (RegionSelection::reverse_iterator i = to_ripple.rbegin(); i != to_ripple.rend(); ++i) {
 		if (!exclude.contains (*i)) {
 			// the selection has already been added to _views
 
