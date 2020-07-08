@@ -496,12 +496,11 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 	_features[0] = &_instance_access_feature;
 	_features[1] = &_data_access_feature;
 	_features[2] = &_make_path_feature;
-	_features[3] = _uri_map.uri_map_feature();
-	_features[4] = _uri_map.urid_map_feature();
-	_features[5] = _uri_map.urid_unmap_feature();
-	_features[6] = &_log_feature;
+	_features[3] = _uri_map.urid_map_feature();
+	_features[4] = _uri_map.urid_unmap_feature();
+	_features[5] = &_log_feature;
 
-	unsigned n_features = 7;
+	unsigned n_features = 6;
 	_features[n_features++] = &_def_state_feature;
 
 	lv2_atom_forge_init(&_impl->forge, _uri_map.urid_map());
@@ -2867,7 +2866,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 				 */
 				else if (atom->type == _uri_map.urids.atom_Blank ||
 				         atom->type == _uri_map.urids.atom_Object) {
-					LV2_Atom_Object* obj = (LV2_Atom_Object*)atom;
+					const LV2_Atom_Object* obj = (const LV2_Atom_Object*)atom;
 					if (obj->body.otype == _uri_map.urids.patch_Set) {
 						const LV2_Atom* property = NULL;
 						const LV2_Atom* value    = NULL;
@@ -3083,7 +3082,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 										_property_values[prop_id] = Variant(Variant::PATH, path);
 									}
 									if (value->type == _uri_map.urids.atom_Float) {
-										const float* val          = (float*)LV2_ATOM_BODY_CONST(value);
+										const float* val          = (const float*)LV2_ATOM_BODY_CONST(value);
 										_property_values[prop_id] = Variant(Variant::FLOAT, *val);
 									}
 									// TODO add support for other props (Int, Bool, ..)

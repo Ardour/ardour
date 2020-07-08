@@ -28,14 +28,13 @@
 #include <glibmm/threads.h>
 
 #include "lv2.h"
-#include "lv2/lv2plug.in/ns/ext/uri-map/uri-map.h"
 #include "lv2/lv2plug.in/ns/ext/urid/urid.h"
 
 #include "ardour/libardour_visibility.h"
 
 namespace ARDOUR {
 
-/** Implementation of the LV2 uri-map and urid extensions.
+/** Implementation of the LV2 urid extension.
  *
  * This just uses a pair of std::map and is not so great in the space overhead
  * department, but it's fast enough and not really performance critical anyway.
@@ -46,7 +45,6 @@ public:
 
 	URIMap();
 
-	LV2_Feature* uri_map_feature()    { return &_uri_map_feature; }
 	LV2_Feature* urid_map_feature()   { return &_urid_map_feature; }
 	LV2_Feature* urid_unmap_feature() { return &_urid_unmap_feature; }
 
@@ -107,8 +105,6 @@ private:
 	Map   _map;
 	Unmap _unmap;
 
-	LV2_Feature         _uri_map_feature;
-	LV2_URI_Map_Feature _uri_map_feature_data;
 	LV2_Feature         _urid_map_feature;
 	LV2_URID_Map        _urid_map_feature_data;
 	LV2_Feature         _urid_unmap_feature;
