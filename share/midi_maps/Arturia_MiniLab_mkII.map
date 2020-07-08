@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ArdourMIDIBindings version="1.0.0" name="Arturia MiniLab mkII">
+<!-- Works with device's factory settings, 1 (Analog Lab). -->
+
+<!-- Leftmost knobs are special, 7 left. -->
+  <DeviceInfo bank-size="7"/>
+
+<!-- Knobs -->
+  <!-- Pan controls. Upper controller knobs mapped to pan direction. -->
+  <Binding channel="1" ctl="74" uri="/route/pandirection B1"/>
+  <Binding channel="1" ctl="71" uri="/route/pandirection B2"/>
+  <Binding channel="1" ctl="76" uri="/route/pandirection B3"/>
+  <Binding channel="1" ctl="77" uri="/route/pandirection B4"/>
+  <Binding channel="1" ctl="93" uri="/route/pandirection B5"/>
+  <Binding channel="1" ctl="73" uri="/route/pandirection B6"/>
+  <Binding channel="1" ctl="75" uri="/route/pandirection B7"/>
+
+  <!-- Gain controls. Lower controller knobs mapped to faders. -->
+  <Binding channel="1" ctl="18" uri="/route/gain B1"/>
+  <Binding channel="1" ctl="19" uri="/route/gain B2"/>
+  <Binding channel="1" ctl="16" uri="/route/gain B3"/>
+  <Binding channel="1" ctl="17" uri="/route/gain B4"/>
+  <Binding channel="1" ctl="91" uri="/route/gain B5"/>
+  <Binding channel="1" ctl="79" uri="/route/gain B6"/>
+  <Binding channel="1" ctl="72" uri="/route/gain B7"/>
+
+<!-- Pads -->
+  <!-- Pads 2-8 are mapped to mute toggles.  -->
+
+  <Binding channel="10" note="37" uri="/route/mute B1"/>
+  <Binding channel="10" note="38" uri="/route/mute B2"/>
+  <Binding channel="10" note="39" uri="/route/mute B3"/>
+  <Binding channel="10" note="40" uri="/route/mute B4"/>
+  <Binding channel="10" note="41" uri="/route/mute B5"/>
+  <Binding channel="10" note="42" uri="/route/mute B6"/>
+  <Binding channel="10" note="43" uri="/route/mute B7"/>
+
+  <!-- Pads 10-16 are mapped to solo toggles.  -->
+
+  <Binding channel="1" ctl="23" uri="/route/solo B1"/>
+  <Binding channel="1" ctl="24" uri="/route/solo B2"/>
+  <Binding channel="1" ctl="25" uri="/route/solo B3"/>
+  <Binding channel="1" ctl="26" uri="/route/solo B4"/>
+  <Binding channel="1" ctl="27" uri="/route/solo B5"/>
+  <Binding channel="1" ctl="28" uri="/route/solo B6"/>
+  <Binding channel="1" ctl="29" uri="/route/solo B7"/>
+
+<!-- Button Oct - and Oct + are mapped to bank changes. -->
+
+  <Binding sysex="f0 00 20 6b 7f 42 02 00 00 11 7f f7" function="next-bank"/>
+  <Binding sysex="f0 00 20 6b 7f 42 02 00 00 10 7f f7" function="prev-bank"/>
+
+</ArdourMIDIBindings>
