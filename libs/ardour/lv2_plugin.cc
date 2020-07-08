@@ -722,9 +722,6 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 			flags |= PORT_CONTROL;
 		} else if (lilv_port_is_a(_impl->plugin, port, _world.lv2_AudioPort)) {
 			flags |= PORT_AUDIO;
-		} else if (lilv_port_is_a(_impl->plugin, port, _world.ev_EventPort)) {
-			flags |= PORT_EVENT;
-			flags |= PORT_MIDI;  // We assume old event API ports are for MIDI
 		} else if (lilv_port_is_a(_impl->plugin, port, _world.atom_AtomPort)) {
 			LilvNodes* buffer_types = lilv_port_get_value(
 				_impl->plugin, port, _world.atom_bufferType);
@@ -2334,7 +2331,7 @@ LV2Plugin::describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id) const
 			match = PORT_AUDIO;
 			break;
 		case DataType::MIDI:
-			match = PORT_SEQUENCE | PORT_MIDI; // ignore old PORT_EVENT
+			match = PORT_SEQUENCE | PORT_MIDI;
 			break;
 		default:
 			return Plugin::IOPortDescription ("?");
@@ -2594,8 +2591,9 @@ LV2Plugin::allocate_atom_event_buffers()
 	DEBUG_TRACE(DEBUG::LV2, string_compose("allocate %1 atom_ev_buffers of %2 bytes\n", total_atom_buffers, minimumSize));
 	_atom_ev_buffers = (LV2_Evbuf**) malloc((total_atom_buffers + 1) * sizeof(LV2_Evbuf*));
 	for (int i = 0; i < total_atom_buffers; ++i ) {
-		_atom_ev_buffers[i] = lv2_evbuf_new(minimumSize, LV2_EVBUF_ATOM,
-				_uri_map.urids.atom_Chunk, _uri_map.urids.atom_Sequence);
+		_atom_ev_buffers[i] = lv2_evbuf_new(minimumSize,
+		                                    _uri_map.urids.atom_Chunk,
+		                                    _uri_map.urids.atom_Sequence);
 	}
 	_atom_ev_buffers[total_atom_buffers] = 0;
 	return;
@@ -2740,7 +2738,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 					? bufs.get_audio(index).data(offset)
 					: scratch_bufs.get_audio(0).data(offset);
 			}
-		} else if (flags & (PORT_EVENT|PORT_SEQUENCE)) {
+		} else if (flags & PORT_SEQUENCE) {
 			/* FIXME: The checks here for bufs.count().n_midi() > index shouldn't
 			   be necessary, but the mapping is illegal in some cases.  Ideally
 			   that should be fixed, but this is easier...
@@ -2759,7 +2757,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 					 */
 					bufs.ensure_lv2_bufsize((flags & PORT_INPUT), index, _port_minimumSize[port_index]);
 					_ev_buffers[port_index] = bufs.get_lv2_midi(
-						(flags & PORT_INPUT), index, (flags & PORT_EVENT));
+						(flags & PORT_INPUT), index);
 				}
 			} else if ((flags & PORT_POSITION) && (flags & PORT_INPUT)) {
 				lv2_evbuf_reset(_atom_ev_buffers[atom_port_index], true);
@@ -2829,7 +2827,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 				scratch_bufs.ensure_lv2_bufsize((flags & PORT_INPUT),
 						0, _port_minimumSize[port_index]);
 				_ev_buffers[port_index] = scratch_bufs.get_lv2_midi(
-					(flags & PORT_INPUT), 0, (flags & PORT_EVENT));
+					(flags & PORT_INPUT), 0);
 			}
 
 			buf = lv2_evbuf_get_buffer(_ev_buffers[port_index]);
@@ -2911,7 +2909,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 		 *                            for quite a while at least ;)
 		 */
 		// copy output of LV2 plugin's MIDI port to Ardour MIDI buffers -- MIDI OUT
-		if ((flags & PORT_OUTPUT) && (flags & (PORT_EVENT|PORT_SEQUENCE|PORT_MIDI))) {
+		if ((flags & PORT_OUTPUT) && (flags & (PORT_SEQUENCE|PORT_MIDI))) {
 			const uint32_t buf_index = out_map.get(
 				DataType::MIDI, midi_out_index++, &valid);
 			if (valid) {
@@ -2919,7 +2917,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 			}
 		}
 		// Flush MIDI (write back to Ardour MIDI buffers) -- MIDI THRU
-		else if ((flags & PORT_OUTPUT) && (flags & (PORT_EVENT|PORT_SEQUENCE))) {
+		else if ((flags & PORT_OUTPUT) && (flags & PORT_SEQUENCE)) {
 			const uint32_t buf_index = out_map.get(
 				DataType::MIDI, midi_out_index++, &valid);
 			if (valid) {
@@ -2929,7 +2927,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 
 		// Write messages to UI
 		if ((_to_ui || _can_write_automation || _patch_port_out_index != (uint32_t)-1) &&
-		    (flags & PORT_OUTPUT) && (flags & (PORT_EVENT|PORT_SEQUENCE))) {
+		    (flags & PORT_OUTPUT) && (flags & PORT_SEQUENCE)) {
 			LV2_Evbuf* buf = _ev_buffers[port_index];
 			for (LV2_Evbuf_Iterator i = lv2_evbuf_begin(buf);
 			     lv2_evbuf_is_valid(i);
@@ -3149,13 +3147,6 @@ LV2Plugin::parameter_is_audio(uint32_t param) const
 {
 	assert(param < _port_flags.size());
 	return _port_flags[param] & PORT_AUDIO;
-}
-
-bool
-LV2Plugin::parameter_is_event(uint32_t param) const
-{
-	assert(param < _port_flags.size());
-	return _port_flags[param] & PORT_EVENT;
 }
 
 bool
