@@ -842,11 +842,8 @@ PluginInsert::inplace_silence_unconnected (BufferSet& bufs, const PinMappings& o
 void
 PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t end, double speed, pframes_t nframes, samplecnt_t offset, bool with_auto)
 {
-	if (_mapping_changed) { // ToDo use a counter, increment until match
-		_no_inplace = check_inplace ();
-		_mapping_changed = false;
-	}
 	// TODO: atomically copy maps & _no_inplace
+	const bool no_inplace = _no_inplace;
 	PinMappings in_map (_in_map); // TODO Split case below overrides, use const& in_map
 	PinMappings const& out_map (_out_map);
 	ChanMapping const& thru_map (_thru_map);
@@ -868,7 +865,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t e
 		_delaybuffers.set (ChanCount::max(bufs.count(), _configured_out), plugin_latency ());
 	}
 
-	if (_match.method == Split && !_no_inplace) {
+	if (_match.method == Split && !no_inplace) {
 		// TODO: also use this optimization if one source-buffer
 		// feeds _all_ *connected* inputs.
 		// currently this is *first* buffer to all only --
@@ -941,7 +938,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t e
 		}
 	} else
 #endif
-	if (_no_inplace) {
+	if (no_inplace) {
 		// TODO optimize -- build maps once.
 		uint32_t pc = 0;
 		BufferSet& inplace_bufs  = _session.get_noinplace_buffers();
@@ -1086,18 +1083,15 @@ PluginInsert::bypass (BufferSet& bufs, pframes_t nframes)
 	/* bypass the plugin(s) not the whole processor.
 	 * -> use mappings just like connect_and_run
 	 */
-	if (_mapping_changed) {
-		_no_inplace = check_inplace ();
-		_mapping_changed = false;
-	}
 	// TODO: atomically copy maps & _no_inplace
+	const bool no_inplace = _no_inplace;
 	ChanMapping const& in_map (no_sc_input_map ());
 	ChanMapping const& out_map (output_map ());
 
 	bufs.set_count(ChanCount::max(bufs.count(), _configured_internal));
 	bufs.set_count(ChanCount::max(bufs.count(), _configured_out));
 
-	if (_no_inplace) {
+	if (no_inplace) {
 		ChanMapping thru_map (_thru_map);
 
 		BufferSet& inplace_bufs  = _session.get_noinplace_buffers();
@@ -1458,9 +1452,7 @@ PluginInsert::set_input_map (uint32_t num, ChanMapping m) {
 		_in_map[num] = m;
 		changed |= sanitize_maps ();
 		if (changed) {
-			PluginMapChanged (); /* EMIT SIGNAL */
-			_mapping_changed = true;
-			_session.set_dirty();
+			mapping_changed ();
 		}
 	}
 }
@@ -1472,9 +1464,7 @@ PluginInsert::set_output_map (uint32_t num, ChanMapping m) {
 		_out_map[num] = m;
 		changed |= sanitize_maps ();
 		if (changed) {
-			PluginMapChanged (); /* EMIT SIGNAL */
-			_mapping_changed = true;
-			_session.set_dirty();
+			mapping_changed ();
 		}
 	}
 }
@@ -1485,9 +1475,7 @@ PluginInsert::set_thru_map (ChanMapping m) {
 	_thru_map = m;
 	changed |= sanitize_maps ();
 	if (changed) {
-		PluginMapChanged (); /* EMIT SIGNAL */
-		_mapping_changed = true;
-		_session.set_dirty();
+		mapping_changed ();
 	}
 }
 
@@ -1591,6 +1579,14 @@ bool
 PluginInsert::is_channelstrip () const
 {
 	return false;
+}
+
+void
+PluginInsert::mapping_changed ()
+{
+	PluginMapChanged (); /* EMIT SIGNAL */
+	_no_inplace = check_inplace ();
+	_session.set_dirty();
 }
 
 bool
@@ -1850,9 +1846,7 @@ PluginInsert::reset_map (bool emit)
 		return false;
 	}
 	if (emit) {
-		PluginMapChanged (); /* EMIT SIGNAL */
-		_mapping_changed = true;
-		_session.set_dirty();
+		mapping_changed ();
 	}
 	return true;
 }
@@ -2044,7 +2038,6 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 	}
 
 	_no_inplace = check_inplace ();
-	_mapping_changed = false;
 
 	/* only the "noinplace_buffers" thread buffers need to be this large,
 	 * this can be optimized. other buffers are fine with

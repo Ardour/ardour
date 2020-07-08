@@ -124,8 +124,6 @@ public:
 	void set_output_map (uint32_t, ChanMapping);
 	void set_thru_map (ChanMapping);
 	bool reset_map (bool emit = true);
-	bool sanitize_maps ();
-	bool check_inplace ();
 	bool configured () const { return _configured; }
 
 	// these are ports visible on the outside
@@ -414,6 +412,10 @@ private:
 
 	void enable_changed ();
 	void bypassable_changed ();
+
+	bool sanitize_maps ();
+	bool check_inplace ();
+	void mapping_changed ();
 
 	boost::shared_ptr<Plugin> plugin_factory (boost::shared_ptr<Plugin>);
 	void add_plugin (boost::shared_ptr<Plugin>);
