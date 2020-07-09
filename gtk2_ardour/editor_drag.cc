@@ -2248,25 +2248,6 @@ RegionRippleDrag::RegionRippleDrag (Editor* e, ArdourCanvas::Item* i, RegionView
 void
 RegionRippleDrag::motion (GdkEvent* event, bool first_move)
 {
-	/* Which trackview is this ? */
-
-	pair<TimeAxisView*, double> const tvp = _editor->trackview_by_y_position (current_pointer_y ());
-	RouteTimeAxisView* tv = dynamic_cast<RouteTimeAxisView*> (tvp.first);
-
-	/* The region motion is only processed if the pointer is over
-	   an audio track.
-	 */
-
-	if (!tv || !tv->is_track()) {
-		/* To make sure we hide the verbose canvas cursor when the mouse is
-		   not held over an audiotrack.
-		 */
-		_editor->verbose_cursor()->hide ();
-		return;
-	}
-
-	samplepos_t where = adjusted_current_sample (event);
-	assert (where >= 0);
 	MusicSample after (0, 0);
 	double delta = compute_x_delta (event, &after);
 
