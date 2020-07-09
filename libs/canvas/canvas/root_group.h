@@ -29,7 +29,6 @@ class LIBCANVAS_API Root : public Container
 {
   public:
 	void preferred_size (Duple&, Duple&) const;
-	void size_allocate (Rect const &);
 
   private:
 	friend class Canvas;

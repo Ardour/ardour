@@ -24,6 +24,7 @@
 #include "pbd/convert.h"
 
 #include "canvas/canvas.h"
+#include "canvas/constraint_packer.h"
 #include "canvas/debug.h"
 #include "canvas/item.h"
 #include "canvas/scroll_group.h"
@@ -606,6 +607,27 @@ Item::size_allocate (Rect const & r)
 	if (_layout_sensitive) {
 		_position = Duple (r.x0, r.y0);
 		_allocation = r;
+	}
+
+	size_allocate_children (r);
+}
+
+void
+Item::size_allocate_children (Rect const & r)
+{
+	bool have_constraint_container = false;
+
+	for (list<Item*>::const_iterator i = _items.begin(); i != _items.end(); ++i) {
+
+		(*i)->size_allocate (r);
+
+		if (dynamic_cast<ConstraintPacker*> (*i)) {
+			have_constraint_container = true;
+		}
+	}
+
+	if (have_constraint_container) {
+		_bounding_box_dirty = true;
 	}
 }
 

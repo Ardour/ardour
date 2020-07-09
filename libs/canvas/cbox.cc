@@ -509,8 +509,6 @@ cBox::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 
 		if (fill()) {
 
-			cerr << whoami() << " setting fill context with 0x" << std::hex << _fill_color << std::dec << " draw " << draw << endl;
-
 			setup_fill_context (context);
 			context->rectangle (draw.x0, draw.y0, draw.width(), draw.height());
 			context->fill_preserve ();

@@ -288,13 +288,13 @@ Rectangle::vertical_fraction (double y) const
 void
 Rectangle::size_allocate (Rect const & r)
 {
-	_allocation = r;
+	Item::size_allocate (r);
 
 	if (_layout_sensitive) {
-		/* set position, and then set the _rect member with values that
-		   use _position as the origin.
+		/* Item::size_allocate() will have set _position, and then set
+		   the _rect member with values that use _position as the
+		   origin.
 		*/
-		_position = Duple (r.x0, r.y0);
 		Rect r2 (0, 0, r.x1 - r.x0, r.y1 - r.y0);
 		set (r2);
 	}

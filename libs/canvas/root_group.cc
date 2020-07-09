@@ -21,7 +21,6 @@
 
 #include "canvas/root_group.h"
 #include "canvas/canvas.h"
-#include "canvas/constraint_packer.h"
 
 using namespace std;
 using namespace ArdourCanvas;
@@ -48,19 +47,3 @@ Root::preferred_size (Duple& min, Duple& natural) const
 	Item::preferred_size (min, natural);
 }
 
-void
-Root::size_allocate (Rect const & r)
-{
-	bool have_constraint_container = false;
-
-	for (list<Item*>::const_iterator i = _items.begin(); i != _items.end(); ++i) {
-		if (dynamic_cast<ConstraintPacker*> (*i)) {
-			(*i)->size_allocate (r);
-			have_constraint_container = true;
-		}
-	}
-
-	if (have_constraint_container) {
-		_bounding_box_dirty = true;
-	}
-}

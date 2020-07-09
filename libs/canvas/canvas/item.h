@@ -347,6 +347,7 @@ public:
 	void add_child_bounding_boxes (bool include_hidden = false) const;
 	void render_children (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const;
 	void prepare_for_render_children (Rect const & area) const;
+	void size_allocate_children (Rect const & r);
 
 	Duple scroll_offset() const;
   public:
