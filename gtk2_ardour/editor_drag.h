@@ -511,17 +511,12 @@ protected:
 	bool y_movement_allowed (int delta_track, double delta_layer, int skip_invisible = 0) const;
 
 private:
-	TimeAxisView *prev_tav; // where regions were most recently dragged from
-	TimeAxisView *orig_tav; // where drag started
 	ARDOUR::samplecnt_t prev_amount;
 	ARDOUR::samplepos_t prev_position;
 	ARDOUR::samplecnt_t selection_length;
-	bool allow_moves_across_tracks; // only if all selected regions are on one track
 	ARDOUR::RegionList *exclude;
-	void add_all_after_to_views (TimeAxisView *tav, ARDOUR::samplepos_t where, const RegionSelection &exclude, bool drag_in_progress);
+	virtual void add_all_after_to_views (TimeAxisView *tav, ARDOUR::samplepos_t where, const RegionSelection &exclude);
 	void remove_unselected_from_views (ARDOUR::samplecnt_t amount, bool move_regions);
-
-	std::list<boost::shared_ptr<ARDOUR::Region> > _orig_tav_ripples;
 };
 
 /** "Drag" to cut a region (action only on button release) */
