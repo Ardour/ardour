@@ -284,10 +284,10 @@ cBox::size_allocate (Rect const & r)
 	_solver.suggestValue (expanded_item_size, expanded_size);
 
 	_solver.updateVariables ();
-	_solver.dump (cerr);
+	// _solver.dump (cerr);
 
 	for (ConstrainedItemMap::const_iterator o = constrained_map.begin(); o != constrained_map.end(); ++o) {
-		o->second->dump (cerr);
+		//o->second->dump (cerr);
 	}
 
 	apply (&_solver);
