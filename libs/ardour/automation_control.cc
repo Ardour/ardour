@@ -128,6 +128,10 @@ AutomationControl::set_value (double val, PBD::Controllable::GroupControlDisposi
 		return;
 	}
 
+	if (_list && !touching () && alist()->automation_state() == Latch && _session.transport_rolling ()) {
+		start_touch (_session.transport_sample ());
+	}
+
 	/* enforce strict double/boolean value mapping */
 
 	if (_desc.toggled) {
