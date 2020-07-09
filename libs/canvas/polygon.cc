@@ -46,15 +46,23 @@ Polygon::~Polygon ()
 void
 Polygon::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
+	Points::size_type npoints = _points.size();
+	if (npoints < 2) {
+		return;
+	}
+
 	if (_outline || _fill) {
-		render_path (area, context);
+		const double pixel_adjust = (_outline_width == 1.0 ? 0.5 : 0.0);
 
-		if (!_points.empty ()) {
-			/* close path */
-			Duple p = item_to_window (Duple (_points.front().x, _points.front().y));
-			context->line_to (p.x, p.y);
+		for (Points::size_type i = 0; i < npoints; i++) {
+			Duple c = item_to_window (Duple (_points[i].x, _points[i].y));
+			if (i == 0) {
+				context->move_to (c.x + pixel_adjust, c.y + pixel_adjust);
+			} else {
+				context->line_to (c.x + pixel_adjust, c.y + pixel_adjust);
+			}
 		}
-
+		context->close_path ();
 	}
 
 	if (_outline) {
