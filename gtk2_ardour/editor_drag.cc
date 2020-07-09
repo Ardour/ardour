@@ -2193,47 +2193,10 @@ RegionRippleDrag::add_all_after_to_views(TimeAxisView *tav, samplepos_t where, c
 		}
 	}
 
-	for (RegionSelection::reverse_iterator i = to_ripple.rbegin(); i != to_ripple.rend(); ++i) {
+	for (RegionSelection::iterator i = to_ripple.begin(); i != to_ripple.end(); ++i) {
 		if (!exclude.contains (*i)) {
 			// the selection has already been added to _views
 			_views.push_back (DraggingView (*i, this, tav));
-		}
-	}
-}
-
-void
-RegionRippleDrag::remove_unselected_from_views(samplecnt_t amount, bool move_regions)
-{
-
-	for (std::list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ) {
-		// we added all the regions after the selection
-
-		std::list<DraggingView>::iterator to_erase = i++;
-		if (!_editor->selection->regions.contains (to_erase->view)) {
-			// restore the non-selected regions to their original playlist & positions,
-			// and then ripple them back by the length of the regions that were dragged away
-			// do the same things as RegionMotionDrag::aborted
-
-			RegionView *rv = to_erase->view;
-			TimeAxisView* tv = &(rv->get_time_axis_view ());
-			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
-			assert (rtv);
-
-			// plonk them back onto their own track
-			rv->get_canvas_group()->reparent(rtv->view()->canvas_item());
-			rv->get_canvas_group()->set_y_position (0);
-			rv->drag_end ();
-
-			if (move_regions) {
-				// move the underlying region to match the view
-				rv->region()->set_position (rv->region()->position() + amount);
-			} else {
-				// restore the view to match the underlying region's original position
-				rv->move(-amount, 0); // second parameter is y delta - seems 0 is OK
-			}
-
-			rv->set_height (rtv->view()->child_height ());
-			_views.erase (to_erase);
 		}
 	}
 }
@@ -2335,22 +2298,6 @@ RegionRippleDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	_editor->begin_reversible_command(_("Ripple drag"));
 
-	std::set<boost::shared_ptr<ARDOUR::Playlist> > playlists = _editor->selection->regions.playlists();
-	std::set<boost::shared_ptr<ARDOUR::Playlist> >::const_iterator pi;
-
-	for (pi = playlists.begin(); pi != playlists.end(); ++pi) {
-		(*pi)->clear_changes();
-		(*pi)->clear_owned_changes();
-	}
-	remove_unselected_from_views (prev_amount, true);
-
-	for (pi = playlists.begin(); pi != playlists.end(); ++pi) {
-		vector<Command*> cmds;
-		(*pi)->rdiff (cmds);
-		_editor->session()->add_commands (cmds);
-	}
-
-	// other modified playlists are added to undo by RegionMoveDrag::finished()
 	RegionMoveDrag::finished (event, movement_occurred);
 	_editor->commit_reversible_command();
 }

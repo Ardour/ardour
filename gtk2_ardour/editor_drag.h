@@ -516,7 +516,6 @@ private:
 	ARDOUR::samplecnt_t selection_length;
 	ARDOUR::RegionList *exclude;
 	virtual void add_all_after_to_views (TimeAxisView *tav, ARDOUR::samplepos_t where, const RegionSelection &exclude);
-	void remove_unselected_from_views (ARDOUR::samplecnt_t amount, bool move_regions);
 };
 
 /** "Drag" to cut a region (action only on button release) */
