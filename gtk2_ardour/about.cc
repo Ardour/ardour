@@ -221,7 +221,7 @@ static const char* translators[] = {
 \n\tEdgar Aichinger <edogawa@aon.at>\
 \n\tRichard Oax <richard@pagliacciempire.de>\
 \n\tRobin Gloster <robin@loc-com.de>\n"),
-	N_("Italian:\n\tFilippo Pappalardo <filippo@email.it>\n\tRaffaele Morelli <raffaele.morelli@gmail.com>\n"),
+	N_("Italian:\n\tVincenzo Reale <smart2128@baslug.org>\n\tFilippo Pappalardo <filippo@email.it>\n\tRaffaele Morelli <raffaele.morelli@gmail.com>\n"),
 	N_("Portuguese:\n\tRui Nuno Capela <rncbc@rncbc.org>\n"),
 	N_("Brazilian Portuguese:\n\tAlexander da Franca Fernandes <alexander@nautae.eti.br>\
 \n\tChris Ross <chris@tebibyte.org>\n"),
