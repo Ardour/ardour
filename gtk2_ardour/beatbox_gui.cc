@@ -20,7 +20,7 @@
 #include <cstdlib>
 #include <ctime>
 
-#include <boost/math/common_factor.hpp>
+#include <boost/integer/common_factor.hpp>
 
 #include "pbd/compose.h"
 #include "pbd/i18n.h"
@@ -38,6 +38,7 @@
 #include "canvas/canvas.h"
 #include "canvas/grid.h"
 #include "canvas/box.h"
+#include "canvas/cbox.h"
 #include "canvas/rectangle.h"
 #include "canvas/polygon.h"
 #include "canvas/scroll_group.h"
@@ -69,6 +70,7 @@ BBGUI::BBGUI (boost::shared_ptr<BeatBox> bb)
 	, bbox (bb)
 	, horizontal_adjustment (0.0, 0.0, 800.0)
 	, vertical_adjustment (0.0, 0.0, 10.0, 400.0)
+	, export_as_region_button (_("Export as Region"))
 	, vscrollbar (vertical_adjustment)
 {
 	_canvas_viewport = new GtkCanvasViewport (horizontal_adjustment, vertical_adjustment);
@@ -242,67 +244,66 @@ SequencerView::SequencerView (StepSequencer& s, ArdourCanvas::Item *p)
 	const Duple mode_button_center (mode_button_width/2.0, mode_button_height/2.0);
 
 	no_scroll_group = new ArdourCanvas::Container (_canvas->root());
+	no_scroll_vbox = new ArdourCanvas::cBox (_canvas->root(), ArdourCanvas::Vertical);
+	button_packer = new ArdourCanvas::cBox (_canvas->root(), ArdourCanvas::Horizontal);
+	no_scroll_vbox->pack_start (button_packer, PackOptions (PackExpand|PackFill), PackOptions (0));
 
 	v_scroll_group = new ScrollGroup (_canvas->root(), ScrollGroup::ScrollsVertically);
 	_canvas->add_scroller (*v_scroll_group);
 
-	sequence_vbox = new ArdourCanvas::VBox (v_scroll_group);
+	sequence_vbox = new ArdourCanvas::cBox (v_scroll_group, ArdourCanvas::Vertical);
 	sequence_vbox->set_position (Duple (0, (mode_button_ydim + mode_button_spacing) + _step_dimen + 3));
 
-	velocity_mode_button = new Rectangle (no_scroll_group);
+	velocity_mode_button = new Rectangle (_canvas);
 	velocity_mode_button->set_corner_radius (10.0);
-	velocity_mode_button->set_position (Duple (rhs_xoffset, mode_button_spacing));
-	velocity_mode_button->set (Rect (0, 0, mode_button_width, mode_button_height));
+	velocity_mode_button->set_intrinsic_size (mode_button_width, mode_button_height);
 	velocity_mode_button->set_fill_color (current_mode_color);
 	velocity_mode_text = new Text (velocity_mode_button);
 	velocity_mode_text->set_font_description (UIConfiguration::instance().get_LargeFont());
 	velocity_mode_text->set (_("Velocity"));
 	velocity_mode_text->set_color (contrasting_text_color (velocity_mode_button->fill_color()));
-	velocity_mode_text->set_position (mode_button_center.translate (Duple (-velocity_mode_text->width()/2.0, -velocity_mode_text->height()/2.0)));
 
-	pitch_mode_button = new Rectangle (no_scroll_group);
+	pitch_mode_button = new Rectangle (_canvas);
 	pitch_mode_button->set_corner_radius (10.0);
-	pitch_mode_button->set_position (Duple (rhs_xoffset + mode_button_xdim, mode_button_spacing));
-	pitch_mode_button->set (Rect (0, 0, mode_button_width, mode_button_height));
+	pitch_mode_button->set_intrinsic_size (mode_button_width, mode_button_height);
 	pitch_mode_button->set_fill_color (not_current_mode_color);
 	pitch_mode_text = new Text (pitch_mode_button);
 	pitch_mode_text->set_font_description (UIConfiguration::instance().get_LargeFont());
 	pitch_mode_text->set (_("Pitch"));
 	pitch_mode_text->set_color (contrasting_text_color (pitch_mode_button->fill_color()));
-	pitch_mode_text->set_position (mode_button_center.translate (Duple (-pitch_mode_text->width()/2.0, -pitch_mode_text->height()/2.0)));
 
-	gate_mode_button = new Rectangle (no_scroll_group);
+	gate_mode_button = new Rectangle (_canvas);
 	gate_mode_button->set_corner_radius (10.0);
-	gate_mode_button->set_position (Duple (rhs_xoffset + (mode_button_xdim * 2), mode_button_spacing));
-	gate_mode_button->set (Rect (0, 0, mode_button_width, mode_button_height));
+	gate_mode_button->set_intrinsic_size (mode_button_width, mode_button_height);
 	gate_mode_button->set_fill_color (not_current_mode_color);
 	gate_mode_text = new Text (gate_mode_button);
 	gate_mode_text->set_font_description (UIConfiguration::instance().get_LargeFont());
 	gate_mode_text->set (_("Gate"));
 	gate_mode_text->set_color (contrasting_text_color (gate_mode_button->fill_color()));
-	gate_mode_text->set_position (mode_button_center.translate (Duple (-gate_mode_text->width()/2.0, -gate_mode_text->height()/2.0)));
 
-	octave_mode_button = new Rectangle (no_scroll_group);
+	octave_mode_button = new Rectangle (_canvas);
 	octave_mode_button->set_corner_radius (10.0);
-	octave_mode_button->set_position (Duple (rhs_xoffset + (mode_button_xdim * 3), mode_button_spacing));
-	octave_mode_button->set (Rect (0, 0, mode_button_width, mode_button_height));
+	octave_mode_button->set_intrinsic_size (mode_button_width, mode_button_height);
 	octave_mode_button->set_fill_color (not_current_mode_color);
 	octave_mode_text = new Text (octave_mode_button);
 	octave_mode_text->set_font_description (UIConfiguration::instance().get_LargeFont());
 	octave_mode_text->set (_("Octave"));
 	octave_mode_text->set_color (contrasting_text_color (octave_mode_button->fill_color()));
-	octave_mode_text->set_position (mode_button_center.translate (Duple (-octave_mode_text->width()/2.0, -octave_mode_text->height()/2.0)));
 
-	timing_mode_button = new Rectangle (no_scroll_group);
+	timing_mode_button = new Rectangle (_canvas);
 	timing_mode_button->set_corner_radius (10.0);
-	timing_mode_button->set_position (Duple (rhs_xoffset + (mode_button_xdim * 4), mode_button_spacing));
-	timing_mode_button->set (Rect (0, 0, mode_button_width, mode_button_height));
+	timing_mode_button->set_intrinsic_size (mode_button_width, mode_button_height);
 	timing_mode_button->set_fill_color (not_current_mode_color);
 	timing_mode_text = new Text (timing_mode_button);
 	timing_mode_text->set_font_description (UIConfiguration::instance().get_LargeFont());
 	timing_mode_text->set (_("Timing"));
 	timing_mode_text->set_color (contrasting_text_color (timing_mode_button->fill_color()));
-	timing_mode_text->set_position (mode_button_center.translate (Duple (-timing_mode_text->width()/2.0, -timing_mode_text->height()/2.0)));
+
+	button_packer->pack_start (velocity_mode_button, PackOptions (PackExpand|PackFill), PackOptions (0));
+	button_packer->pack_start (pitch_mode_button, PackOptions (PackExpand|PackFill), PackOptions (0));
+	button_packer->pack_start (gate_mode_button, PackOptions (PackExpand|PackFill), PackOptions (0));
+	button_packer->pack_start (octave_mode_button, PackOptions (PackExpand|PackFill), PackOptions (0));
+	button_packer->pack_start (timing_mode_button, PackOptions (PackExpand|PackFill), PackOptions (0));
 
 	/* place "us", the rectangle that contains/defines/draws the grid */
 	set_position (Duple (rhs_xoffset, _step_dimen + mode_button_ydim + mode_button_spacing));
@@ -370,8 +371,8 @@ SequencerView::sequencer_changed (PropertyChange const &)
 	set (Rect (0, 0, _width, _height));
 
 	if (!step_indicator_box) {
-		step_indicator_box = new ArdourCanvas::HBox (no_scroll_group);
-		step_indicator_box->set_position (Duple (rhs_xoffset, mode_button_height + (mode_button_spacing * 2.0)));
+		step_indicator_box = new ArdourCanvas::cBox (_canvas, ArdourCanvas::Horizontal);
+		no_scroll_vbox->pack_start (step_indicator_box);
 		step_indicator_box->name = "step_indicator_box";
 		step_indicator_box->set_fill (true);
 		step_indicator_box->set_spacing (1.0);
@@ -388,7 +389,8 @@ SequencerView::sequencer_changed (PropertyChange const &)
 	size_t n = step_indicators.size();
 
 	while (step_indicators.size() < nsteps) {
-		SequencerStepIndicator* ssi = new SequencerStepIndicator (*this, step_indicator_box, n);
+		SequencerStepIndicator* ssi = new SequencerStepIndicator (*this, canvas(), n);
+		step_indicator_box->pack_start (ssi, PackOptions (PackExpand|PackFill), PackOptions (0));
 		step_indicators.push_back (ssi);
 		++n;
 	}
@@ -522,8 +524,8 @@ Gtkmm2ext::Color SequencerStepIndicator::current_text_color = Gtkmm2ext::Color (
 Gtkmm2ext::Color SequencerStepIndicator::bright_outline_color = Gtkmm2ext::Color (0);
 int SequencerStepIndicator::dragging = 0;
 
-SequencerStepIndicator::SequencerStepIndicator (SequencerView& s, Item* p, size_t n)
-	: Rectangle (p)
+SequencerStepIndicator::SequencerStepIndicator (SequencerView& s, ArdourCanvas::Canvas* c, size_t n)
+	: Rectangle (c)
 	, sv (s)
 	, number (n)
 	, being_dragged (false)
@@ -536,7 +538,7 @@ SequencerStepIndicator::SequencerStepIndicator (SequencerView& s, Item* p, size_
 		bright_outline_color = UIConfiguration::instance().color ("gtk_bright_indicator");
 	}
 
-	set (Rect (0.0, 0.0, _step_dimen - 1, _step_dimen - 1)); // UR/LR corners, not UR, width, height
+	set_intrinsic_size (_step_dimen - 1, _step_dimen - 1);
 
 	set_fill_color (HSV (UIConfiguration::instance().color ("gtk_bases")).lighter (0.1));
 	set_fill (true);
@@ -696,8 +698,8 @@ SequencerStepIndicator::render  (Rect const & area, Cairo::RefPtr<Cairo::Context
 Gtkmm2ext::Color StepView::on_fill_color = Gtkmm2ext::Color (0);
 Gtkmm2ext::Color StepView::off_fill_color = Gtkmm2ext::Color (0);
 
-StepView::StepView (SequenceView& sview, Step& s, ArdourCanvas::Item* parent)
-	: ArdourCanvas::Rectangle (parent)
+StepView::StepView (SequenceView& sview, Step& s, ArdourCanvas::Canvas* c)
+	: ArdourCanvas::Rectangle (c)
 	, _step (s)
 	, sv (sview)
 	, text (new Text (this))
@@ -780,7 +782,7 @@ StepView::set_timing_text ()
 	if (_step.offset() == Temporal::Beats()) {
 		text->set (X_("0"));
 	} else {
-		const int64_t gcd = boost::math::gcd (_step.offset().to_ticks(), int64_t (1920));
+		const int64_t gcd = boost::integer::gcd (_step.offset().to_ticks(), int64_t (1920));
 		const int64_t n = _step.offset().to_ticks() / gcd;
 		const int64_t d = 1920 / gcd;
 		text->set (string_compose ("%1/%2", n, d));
@@ -1047,7 +1049,7 @@ StepView::adjust_step_duration (Step::DurationRatio const & amt)
 /**/
 
 SequenceView::SequenceView (SequencerView& sview, StepSequence& sq, Item* parent)
-	: HBox (parent)
+	: cBox (parent, Horizontal)
 	, sv (sview)
 	, sequence (sq)
 {
@@ -1098,8 +1100,9 @@ SequenceView::SequenceView (SequencerView& sview, StepSequence& sq, Item* parent
 	const size_t nsteps = sequencer().nsteps();
 
 	for (size_t n = 0; n < nsteps; ++n) {
-		StepView* stepview = new StepView (*this, sequence.step (n), this);
+		StepView* stepview = new StepView (*this, sequence.step (n), canvas());
 		step_views.push_back (stepview);
+		pack_start (stepview, PackOptions (PackExpand|PackFill), PackOptions (PackExpand|PackFill));
 	}
 }
 

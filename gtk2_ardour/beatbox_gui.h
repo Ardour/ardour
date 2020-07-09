@@ -36,6 +36,7 @@
 #include "widgets/ardour_button.h"
 
 #include "canvas/box.h"
+#include "canvas/cbox.h"
 #include "canvas/canvas.h"
 #include "canvas/rectangle.h"
 
@@ -110,8 +111,10 @@ class SequencerView : public ArdourCanvas::Rectangle, public sigc::trackable {
 	Mode   _mode;
 	ArdourCanvas::ScrollGroup* v_scroll_group;
 	ArdourCanvas::Container* no_scroll_group;
-	ArdourCanvas::HBox* step_indicator_box;
-	ArdourCanvas::VBox* sequence_vbox;
+	ArdourCanvas::cBox* no_scroll_vbox;
+	ArdourCanvas::cBox* button_packer;
+	ArdourCanvas::cBox* step_indicator_box;
+	ArdourCanvas::cBox* sequence_vbox;
 
 	ArdourCanvas::Rectangle* velocity_mode_button;
 	ArdourCanvas::Rectangle* pitch_mode_button;
@@ -135,7 +138,7 @@ class SequencerView : public ArdourCanvas::Rectangle, public sigc::trackable {
 
 };
 
-class SequenceView : public ArdourCanvas::HBox
+class SequenceView : public ArdourCanvas::cBox
 {
   public:
 	SequenceView (SequencerView&, ARDOUR::StepSequence&, ArdourCanvas::Item* parent);
@@ -172,7 +175,7 @@ class SequenceView : public ArdourCanvas::HBox
 
 class StepView : public ArdourCanvas::Rectangle, public sigc::trackable {
    public:
-	StepView (SequenceView&, ARDOUR::Step&, ArdourCanvas::Item* parent);
+	StepView (SequenceView&, ARDOUR::Step&, ArdourCanvas::Canvas* canvas);
 
 	void render (ArdourCanvas::Rect const &, Cairo::RefPtr<Cairo::Context>) const;
 	bool on_event (GdkEvent*);
@@ -213,7 +216,7 @@ class StepView : public ArdourCanvas::Rectangle, public sigc::trackable {
 
 class SequencerStepIndicator : public ArdourCanvas::Rectangle, public sigc::trackable {
   public:
-	SequencerStepIndicator (SequencerView&, ArdourCanvas::Item* parent, size_t n);
+	SequencerStepIndicator (SequencerView&, ArdourCanvas::Canvas*, size_t n);
 	void render (ArdourCanvas::Rect const &, Cairo::RefPtr<Cairo::Context>) const;
 	bool on_event (GdkEvent*);
 
