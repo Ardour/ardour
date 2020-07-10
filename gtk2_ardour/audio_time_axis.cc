@@ -296,6 +296,7 @@ AudioTimeAxisView::route_active_changed ()
 		controls_table.hide();
 		inactive_table.show();
 		RouteTimeAxisView::hide_all_automation();
+		name_label.show();
 	} else {
 		inactive_table.hide();
 		controls_table.show();
