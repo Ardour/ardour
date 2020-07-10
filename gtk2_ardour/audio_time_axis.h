@@ -87,6 +87,9 @@ public:
 	void show_existing_automation (bool apply_to_selection = false);
 	void hide_all_automation (bool apply_to_selection = false);
 
+ protected:
+	bool can_edit_name () const override;
+
 private:
 	friend class AudioStreamView;
 	friend class AudioRegionView;
