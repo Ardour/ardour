@@ -2293,8 +2293,12 @@ RouteTimeAxisView::reset_processor_automation_curves ()
 bool
 RouteTimeAxisView::can_edit_name () const
 {
-	/* we do not allow track name changes if it is record enabled
-	 */
+	/* inactive routes do not have an editable label */
+	if (_route && !_route->active()) {
+		return false;
+	}
+
+	/* we do not allow track name changes if it is record enabled */
 	boost::shared_ptr<Track> trk (boost::dynamic_pointer_cast<Track> (_route));
 	if (!trk) {
 		return true;
