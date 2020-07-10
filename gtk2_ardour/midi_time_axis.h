@@ -142,6 +142,7 @@ private:
 	void contents_height_changed ();
 
 	void update_control_names ();
+	void update_midi_controls_visibility (uint32_t);
 
 	bool                          _ignore_signals;
 	std::string                   _effective_model;

@@ -175,6 +175,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	name_label.set_size_request(name_width_px, -1);
 
 	name_label.show ();
+	inactive_label.show ();
 
 	controls_table.set_row_spacings (2);
 	controls_table.set_col_spacings (2);

@@ -559,8 +559,23 @@ MidiTimeAxisView::midi_view()
 }
 
 void
+MidiTimeAxisView::update_midi_controls_visibility (uint32_t h)
+{
+	if (_route && !_route->active ()) {
+		h = 0;
+	}
+	if (h >= MIDI_CONTROLS_BOX_MIN_HEIGHT) {
+		_midi_controls_box.show ();
+	} else {
+		_midi_controls_box.hide();
+	}
+}
+
+void
 MidiTimeAxisView::set_height (uint32_t h, TrackHeightMode m)
 {
+	update_midi_controls_visibility (h);
+
 	if (h >= MIDI_CONTROLS_BOX_MIN_HEIGHT) {
 		_midi_controls_box.show ();
 	} else {
@@ -1356,10 +1371,11 @@ MidiTimeAxisView::route_active_changed ()
 {
 	RouteTimeAxisView::route_active_changed ();
 	update_control_names();
+	update_midi_controls_visibility (height);
 
 	if (!_route->active()) {
 		controls_table.hide();
-		inactive_table.show_all();
+		inactive_table.show();
 		RouteTimeAxisView::hide_all_automation();
 	} else {
 		inactive_table.hide();
