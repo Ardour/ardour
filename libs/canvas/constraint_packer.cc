@@ -294,6 +294,26 @@ ConstraintPacker::remove (Item* item)
 
 	}
 
+	bool found_packed = false;
+
+	for (BoxPackedItems::iterator t = hpacked.begin(); t != hpacked.end(); ++t) {
+		if (&(*t)->item() == item) {
+			hpacked.erase (t);
+			found_packed = true;
+			break;
+		}
+	}
+
+	if (!found_packed) {
+		for (BoxPackedItems::iterator t = vpacked.begin(); t != vpacked.end(); ++t) {
+			if (&(*t)->item() == item) {
+				vpacked.erase (t);
+				found_packed = true;
+				break;
+			}
+		}
+	}
+
 	_need_constraint_update = true;
 }
 
@@ -331,3 +351,32 @@ ConstraintPacker::update_constraints ()
 		_solver.addConstraint (*c);
 	}
 }
+
+BoxConstrainedItem*
+ConstraintPacker::pack_start (Item* item, PackOptions primary_axis_opts, PackOptions secondary_axis_opts)
+{
+	return pack (item, PackOptions (primary_axis_opts|PackFromStart), secondary_axis_opts);
+}
+
+BoxConstrainedItem*
+ConstraintPacker::pack_end (Item* item, PackOptions primary_axis_opts, PackOptions secondary_axis_opts)
+{
+	return pack (item, PackOptions (primary_axis_opts|PackFromEnd), secondary_axis_opts);
+}
+
+BoxConstrainedItem*
+ConstraintPacker::pack (Item* item, PackOptions primary_axis_opts, PackOptions secondary_axis_opts)
+{
+	BoxConstrainedItem* ci =  new BoxConstrainedItem (*item, primary_axis_opts, secondary_axis_opts);
+
+	add_constrained_internal (item, ci);
+
+	if (_orientation == Horizontal) {
+		hpacked.push_back (ci);
+	} else {
+		vpacked.push_back (ci);
+	}
+
+	return ci;
+}
+

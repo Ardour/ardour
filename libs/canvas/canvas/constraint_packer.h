@@ -43,6 +43,9 @@ public:
 	void remove (Item *);
 	void constrain (kiwi::Constraint const &);
 
+	BoxConstrainedItem* pack_start (Item*, PackOptions primary_axis_packing = PackOptions (0), PackOptions secondary_axis_packing = PackOptions (PackExpand|PackFill));
+	BoxConstrainedItem* pack_end (Item*, PackOptions primary_axis_packing = PackOptions (0), PackOptions secondary_axis_packing = PackOptions (PackExpand|PackFill));
+
 	virtual ConstrainedItem* add_constrained (Item* item);
 
 	void solve ();
@@ -79,6 +82,8 @@ public:
 	typedef std::list<BoxConstrainedItem*> BoxPackedItems;
 	BoxPackedItems vpacked;
 	BoxPackedItems hpacked;
+
+	BoxConstrainedItem* pack (Item*, PackOptions primary_axis_packing, PackOptions secondary_axis_packing);
 };
 
 }
