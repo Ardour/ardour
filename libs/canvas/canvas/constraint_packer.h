@@ -30,12 +30,13 @@ namespace ArdourCanvas
 
 class Rectangle;
 class ConstrainedItem;
+class BoxConstrainedItem;
 
 class LIBCANVAS_API ConstraintPacker : public Container
 {
 public:
-	ConstraintPacker (Canvas *);
-	ConstraintPacker (Item *);
+	ConstraintPacker (Canvas *, Orientation o = Horizontal);
+	ConstraintPacker (Item *, Orientation o = Horizontal);
 
 	void add (Item *);
 	void add_front (Item *);
@@ -72,6 +73,12 @@ public:
 
 	void non_const_preferred_size (Duple& mininum, Duple& natural);
 	virtual void update_constraints ();
+
+  private:
+	Orientation _orientation;
+	typedef std::list<BoxConstrainedItem*> BoxPackedItems;
+	BoxPackedItems vpacked;
+	BoxPackedItems hpacked;
 };
 
 }

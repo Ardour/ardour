@@ -37,12 +37,13 @@ using std::vector;
 using kiwi::Constraint;
 using namespace kiwi;
 
-ConstraintPacker::ConstraintPacker (Canvas* canvas)
+ConstraintPacker::ConstraintPacker (Canvas* canvas, Orientation o)
 	: Container (canvas)
 	, width (X_("packer width"))
 	, height (X_("packer height"))
 	, in_alloc (false)
 	, _need_constraint_update (false)
+	, _orientation (o)
 {
 	set_fill (false);
 	set_outline (false);
@@ -52,12 +53,13 @@ ConstraintPacker::ConstraintPacker (Canvas* canvas)
 	_solver.addEditVariable (height, kiwi::strength::strong);
 }
 
-ConstraintPacker::ConstraintPacker (Item* parent)
+ConstraintPacker::ConstraintPacker (Item* parent, Orientation o)
 	: Container (parent)
 	, width (X_("packer width"))
 	, height (X_("packer height"))
 	, in_alloc (false)
 	, _need_constraint_update (false)
+	, _orientation (o)
 {
 	set_fill (false);
 	set_outline (false);
