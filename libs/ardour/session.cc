@@ -6550,7 +6550,12 @@ Session::update_latency (bool playback)
 	 * but may indirectly be triggered from
 	 * Session::update_latency_compensation -> _engine.update_latencies
 	 */
-	DEBUG_TRACE (DEBUG::LatencyCompensation, string_compose ("Engine latency callback: %1 (initial/deletion? %2)\n", (playback ? "PLAYBACK" : "CAPTURE"), inital_connect_or_deletion_in_progress()));
+	DEBUG_TRACE (DEBUG::LatencyCompensation, string_compose ("Engine latency callback: %1 (initial/deletion: %2 adding: %3 deletion: %4)\n", 
+				(playback ? "PLAYBACK" : "CAPTURE"),
+				inital_connect_or_deletion_in_progress(),
+				_adding_routes_in_progress,
+				_route_deletion_in_progress
+				));
 
 	if (inital_connect_or_deletion_in_progress () || _adding_routes_in_progress || _route_deletion_in_progress) {
 		return;
