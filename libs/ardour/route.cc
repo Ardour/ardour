@@ -1437,45 +1437,35 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 
 		ProcessorState pstate (this);
 
-		ProcessorList::iterator i;
-		bool removed = false;
-
-		for (i = _processors.begin(); i != _processors.end(); ) {
-			if (*i == processor) {
-
-				/* move along, see failure case for configure_processors()
-				   where we may need to reconfigure the processor.
-				*/
-
-				/* stop redirects that send signals to JACK ports
-				   from causing noise as a result of no longer being
-				   run.
-				*/
-
-				boost::shared_ptr<IOProcessor> iop = boost::dynamic_pointer_cast<IOProcessor> (*i);
-				boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert>(*i);
-
-				if (pi != 0) {
-					assert (iop == 0);
-					iop = pi->sidechain();
-				}
-
-				if (iop != 0) {
-					iop->disconnect ();
-				}
-
-				i = _processors.erase (i);
-				removed = true;
-				break;
-
-			} else {
-				++i;
-			}
-		}
-
-		if (!removed) {
+		ProcessorList::iterator i = find (_processors.begin(), _processors.end(), processor);
+		if (i == _processors.end ()) {
 			/* what? */
 			return 1;
+		}
+
+		_processors.erase (i);
+
+		/* stop redirects that send signals to JACK ports
+		 * from causing noise as a result of no longer being run
+		 */
+
+		boost::shared_ptr<IOProcessor> iop = boost::dynamic_pointer_cast<IOProcessor> (*i);
+		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert>(*i);
+
+		if (pi != 0) {
+			assert (iop == 0);
+			iop = pi->sidechain();
+		}
+
+		if (iop != 0) {
+			/* This calls Route::sidechain_change_handler -> Route::input_change_handler()
+			 * When the route is implicitly soloed this further calls
+			 * Route::direct_feeds_according_to_reality() which takes a
+			 * ReaderLock (_processor_lock). So we need to release the lock first.
+			 */
+			lm.release ();
+			iop->disconnect ();
+			lm.acquire ();
 		}
 
 		if (configure_processors_unlocked (err, &lm)) {
