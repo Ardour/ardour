@@ -6558,6 +6558,7 @@ Session::update_latency (bool playback)
 				));
 
 	if (inital_connect_or_deletion_in_progress () || _adding_routes_in_progress || _route_deletion_in_progress) {
+		_engine.queue_latency_update (playback);
 		return;
 	}
 	if (!_engine.running() || _exporting) {
