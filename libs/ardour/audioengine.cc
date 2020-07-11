@@ -1416,27 +1416,37 @@ void
 AudioEngine::latency_callback (bool for_playback)
 {
 	DEBUG_TRACE (DEBUG::BackendCallbacks, string_compose (X_("latency callback playback ? %1\n"), for_playback));
-	if (_session) {
-		if (in_process_thread ()) {
-			/* internal backends emit the latency callback in the rt-callback,
-			 * async to connect/disconnect or port creation/deletion.
-			 * All is fine.
-			 *
-			 * However jack 1/2 emit the callback in sync with creating the port
-			 * (or while handling the connection change).
-			 * e.g. JACK2 jack_port_register() blocks and the jack_latency_callback
-			 * from a different thread: https://pastebin.com/mitGBwpq
-			 * but at this point in time Ardour still holds the process callback
-			 * because JACK2 can process in parallel to latency callbacks.
-			 *
-			 * see also Session::update_latency() and git-ref 1983f56592dfea5f7498
-			 */
-			_session->update_latency (for_playback);
-		} else if (for_playback) {
-			g_atomic_int_set (&_pending_playback_latency_callback, 1);
-		} else {
-			g_atomic_int_set (&_pending_capture_latency_callback, 1);
-		}
+	if (!_session) {
+		return;
+	}
+
+	if (in_process_thread ()) {
+		/* internal backends emit the latency callback in the rt-callback,
+		 * async to connect/disconnect or port creation/deletion.
+		 * All is fine.
+		 */
+		_session->update_latency (for_playback);
+	} else {
+		/* However jack 1/2 emit the callback in sync with creating the port
+		 * (or while handling the connection change).
+		 * e.g. JACK2 jack_port_register() blocks and the jack_latency_callback
+		 * from a different thread: https://pastebin.com/mitGBwpq
+		 * but at this point in time Ardour still holds the process callback
+		 * because JACK2 can process in parallel to latency callbacks.
+		 *
+		 * see also Session::update_latency() and git-ref 1983f56592dfea5f7498
+		 */
+		queue_latency_update (for_playback);
+	}
+}
+
+void
+AudioEngine::queue_latency_update (bool for_playback)
+{
+	if (for_playback) {
+		g_atomic_int_set (&_pending_playback_latency_callback, 1);
+	} else {
+		g_atomic_int_set (&_pending_capture_latency_callback, 1);
 	}
 }
 

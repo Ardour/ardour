@@ -210,8 +210,7 @@ class LIBARDOUR_API AudioEngine : public PortManager, public SessionHandlePtr
 	static void destroy();
 	void died ();
 
-	/* The backend will cause these at the appropriate time(s)
-	 */
+	/* The backend will cause these at the appropriate time(s) */
 	int  process_callback (pframes_t nframes);
 	int  buffer_size_change (pframes_t nframes);
 	int  sample_rate_change (pframes_t nframes);
@@ -259,6 +258,7 @@ class LIBARDOUR_API AudioEngine : public PortManager, public SessionHandlePtr
 	void reset_silence_countdown ();
 
 	void add_pending_port_deletion (Port*);
+	void queue_latency_update (bool);
 
   private:
 	AudioEngine ();
