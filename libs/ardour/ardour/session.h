@@ -1726,6 +1726,7 @@ private:
 	bool              ltc_timecode_negative_offset;
 
 	LatencyRange      ltc_out_latency;
+	LatencyRange      mtc_out_latency;
 
 	void ltc_tx_initialize();
 	void ltc_tx_cleanup();
@@ -1789,6 +1790,7 @@ private:
 	 * cycle
 	 */
 
+	void mtc_tx_resync_latency (bool);
 	int  send_full_time_code (samplepos_t, pframes_t nframes);
 	void send_song_position_pointer (samplepos_t);
 

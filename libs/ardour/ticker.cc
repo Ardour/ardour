@@ -45,6 +45,7 @@ MidiClockTicker::MidiClockTicker (Session* s)
 	_session   = s;
 	_midi_port = s->midi_clock_output_port ();
 	reset ();
+	s->LatencyUpdated.connect_same_thread (_latency_connection, boost::bind (&MidiClockTicker::resync_latency, this, _1));
 }
 
 MidiClockTicker::~MidiClockTicker ()
@@ -59,6 +60,19 @@ MidiClockTicker::reset ()
 	_beat_pos      = 0;
 	_clock_cnt     = 0;
 	_transport_pos = -1;
+
+	resync_latency (true);
+}
+
+void
+MidiClockTicker::resync_latency (bool playback)
+{
+	if (_session->deletion_in_progress() || !playback) {
+		return;
+	}
+	assert (_midi_port);
+	_midi_port->get_connected_latency_range(_mclk_out_latency, true);
+	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("resync latency: %1\n", _mclk_out_latency.max));
 }
 
 void
@@ -76,9 +90,6 @@ MidiClockTicker::tick (samplepos_t start_sample, samplepos_t end_sample, pframes
 		reset ();
 		goto out;
 	}
-
-	// TODO: cache
-	_midi_port->get_connected_latency_range (_mclk_out_latency, true);
 
 	if (speed == 0 && start_sample == 0 && end_sample == 0) {
 		/* test if pre-roll is active, special-case

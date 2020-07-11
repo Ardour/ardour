@@ -242,6 +242,10 @@ Session::post_engine_init ()
 
 	setup_midi_machine_control ();
 
+	/* setup MTC generator */
+	mtc_tx_resync_latency (true);
+	LatencyUpdated.connect_same_thread (*this, boost::bind (&Session::mtc_tx_resync_latency, this, _1));
+
 	if (_butler->start_thread()) {
 		error << _("Butler did not start") << endmsg;
 		return -1;

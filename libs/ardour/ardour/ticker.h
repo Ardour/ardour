@@ -49,6 +49,7 @@ private:
 	boost::shared_ptr<MidiPort> _midi_port;
 
 	void   reset ();
+	void   resync_latency (bool);
 	double one_ppqn_in_samples (samplepos_t transport_position) const;
 
 	void send_midi_clock_event (pframes_t offset, pframes_t nframes);
@@ -64,7 +65,9 @@ private:
 	samplepos_t _transport_pos;
 
 	ARDOUR::Session* _session;
-	LatencyRange     _mclk_out_latency;
+
+	LatencyRange          _mclk_out_latency;
+	PBD::ScopedConnection _latency_connection;
 };
 
 } // namespace ARDOUR

@@ -376,6 +376,19 @@ Session::mmc_record_enable (MIDI::MachineControl &mmc, size_t trk, bool enabled)
 	}
 }
 
+void
+Session::mtc_tx_resync_latency (bool playback)
+{
+	if (deletion_in_progress() || !playback) {
+		return;
+	}
+	boost::shared_ptr<Port> mtxport = _midi_ports->mtc_output_port ();
+	if (mtxport) {
+		mtxport->get_connected_latency_range(mtc_out_latency, true);
+		DEBUG_TRACE (DEBUG::MTC, string_compose ("resync latency: %1\n", mtc_out_latency.max));
+	}
+}
+
 /** Send MTC Full Frame message (complete Timecode time) for the start of this cycle.
  * This resets the MTC code, the next quarter frame message that is sent will be
  * the first one with the beginning of this cycle as the new start point.
@@ -409,8 +422,6 @@ Session::send_full_time_code (samplepos_t const t, MIDI::pframes_t nframes)
 	outbound_mtc_timecode_frame = mtc_tc;
 	transmitting_timecode_time = timecode;
 
-	LatencyRange mtc_out_latency;
-	_midi_ports->mtc_output_port ()->get_connected_latency_range (ltc_out_latency, true);
 	sampleoffset_t mtc_offset = mtc_out_latency.max;
 
 	// only if rolling.. ?
