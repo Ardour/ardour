@@ -106,6 +106,8 @@ AudioEngine::AudioEngine ()
 	, _stop_hw_devicelist_processing(0)
 	, _start_cnt (0)
 	, _init_countdown (0)
+	, _pending_playback_latency_callback (0)
+	, _pending_capture_latency_callback (0)
 #ifdef SILENCE_AFTER_SECONDS
 	, _silence_countdown (0)
 	, _silence_hit_cnt (0)
@@ -280,6 +282,20 @@ AudioEngine::process_callback (pframes_t nframes)
 	 */
 	if (! SessionEvent::has_per_thread_pool ()) {
 		thread_init_callback (NULL);
+	}
+
+	/* This is for JACK, where the latency callback arrives in sync with
+	 * port registration (usually while ardour holds the process-lock
+	 * or with _adding_routes_in_progress or _route_deletion_in_progress set,
+	 * potentially while processing in parallel.
+	 */
+	if (_session) {
+		if (g_atomic_int_compare_and_exchange (&_pending_playback_latency_callback, 1, 0)) {
+			_session->update_latency (true);
+		}
+		if (g_atomic_int_compare_and_exchange (&_pending_capture_latency_callback, 1, 0)) {
+			_session->update_latency (false);
+		}
 	}
 
 	if (_session && _init_countdown > 0) {
@@ -736,6 +752,8 @@ AudioEngine::set_session (Session *s)
 
 	if (_session) {
 		_init_countdown = std::max (4, (int)(_backend->sample_rate () / _backend->buffer_size ()) / 8);
+		g_atomic_int_set (&_pending_playback_latency_callback, 0);
+		g_atomic_int_set (&_pending_capture_latency_callback, 0);
 	}
 }
 
@@ -1399,7 +1417,26 @@ AudioEngine::latency_callback (bool for_playback)
 {
 	DEBUG_TRACE (DEBUG::BackendCallbacks, string_compose (X_("latency callback playback ? %1\n"), for_playback));
 	if (_session) {
-		_session->update_latency (for_playback);
+		if (in_process_thread ()) {
+			/* internal backends emit the latency callback in the rt-callback,
+			 * async to connect/disconnect or port creation/deletion.
+			 * All is fine.
+			 *
+			 * However jack 1/2 emit the callback in sync with creating the port
+			 * (or while handling the connection change).
+			 * e.g. JACK2 jack_port_register() blocks and the jack_latency_callback
+			 * from a different thread: https://pastebin.com/mitGBwpq
+			 * but at this point in time Ardour still holds the process callback
+			 * because JACK2 can process in parallel to latency callbacks.
+			 *
+			 * see also Session::update_latency() and git-ref 1983f56592dfea5f7498
+			 */
+			_session->update_latency (for_playback);
+		} else if (for_playback) {
+			g_atomic_int_set (&_pending_playback_latency_callback, 1);
+		} else {
+			g_atomic_int_set (&_pending_capture_latency_callback, 1);
+		}
 	}
 }
 

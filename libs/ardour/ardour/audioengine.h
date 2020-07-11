@@ -309,6 +309,8 @@ class LIBARDOUR_API AudioEngine : public PortManager, public SessionHandlePtr
 	gint                      _stop_hw_devicelist_processing;
 	uint32_t                  _start_cnt;
 	uint32_t                  _init_countdown;
+	volatile gint             _pending_playback_latency_callback;
+	volatile gint             _pending_capture_latency_callback;
 
 	void start_hw_event_processing();
 	void stop_hw_event_processing();
