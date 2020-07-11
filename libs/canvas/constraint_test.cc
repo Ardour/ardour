@@ -8,7 +8,6 @@
 
 #include "canvas/box.h"
 #include "canvas/canvas.h"
-#include "canvas/cbox.h"
 #include "canvas/circle.h"
 #include "canvas/constrained_item.h"
 #include "canvas/constraint_packer.h"
@@ -55,7 +54,7 @@ main (int argc, char* argv[])
 	//r2->set_intrinsic_size (30, 30);
 	//r3->set_intrinsic_size (40, 40);
 
-	cBox* vbox = new cBox (c->root(), Vertical);
+	ConstraintPacker* vbox = new ConstraintPacker (c->root(), Vertical);
 	vbox->name = "vbox";
 	vbox->set_fill (true);
 	vbox->set_fill_color (0xff0000ff);
@@ -65,7 +64,7 @@ main (int argc, char* argv[])
 	vbox->pack_start (r2, PackOptions(PackExpand|PackFill));
 	vbox->pack_start (r3, PackOptions(PackExpand|PackFill));
 
-	cBox* hbox1 = new cBox (c, Horizontal);
+	ConstraintPacker* hbox1 = new ConstraintPacker (c, Horizontal);
 	hbox1->name = "hbox1";
 	hbox1->set_fill (true);
 	hbox1->set_fill_color (0x00ff00ff);
@@ -107,7 +106,7 @@ main (int argc, char* argv[])
 	ci->add_constraint (ci->top_padding() == 10);
 	ci->add_constraint (ci->bottom_padding() == 10);
 
-	cBox* hbox2 = new cBox (c, Horizontal);
+	ConstraintPacker* hbox2 = new ConstraintPacker (c, Horizontal);
 	hbox2->name = "hbox2";
 	hbox2->set_fill (true);
 	hbox2->set_fill_color (Gtkmm2ext::random_color());

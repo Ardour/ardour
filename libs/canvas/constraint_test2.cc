@@ -10,7 +10,6 @@
 
 #include "canvas/box.h"
 #include "canvas/canvas.h"
-#include "canvas/cbox.h"
 #include "canvas/circle.h"
 #include "canvas/constrained_item.h"
 #include "canvas/constraint_packer.h"
@@ -26,7 +25,7 @@ using std::endl;
 
  struct Column {
 	Column (Canvas* c, uint32_t num) : number (num) {
-		box = new cBox (c, Vertical);
+		box = new ConstraintPacker (c, Vertical);
 		box->name = string_compose ("col%1", num);
 		box->set_spacing (12);
 
@@ -56,6 +55,11 @@ using std::endl;
 			 * the current text contents of labels[i].
 			 */
 
+			l->centered_on (*b);
+			l->add_constraint (l->width() == labels[i]->width());
+			l->add_constraint (l->height() == labels[i]->height());
+
+#if 0
 			l->add_constraint (l->left() == b->center_x() - (labels[i]->width() / 2.));
 			l->add_constraint (l->width() == labels[i]->width());
 			l->add_constraint (l->right() == l->left() + labels[i]->width());
@@ -63,10 +67,11 @@ using std::endl;
 			l->add_constraint (l->top() == b->center_y() - (labels[i]->height() / 2));
 			l->add_constraint (l->height() == labels[i]->height());
 			l->add_constraint (l->bottom() == l->top() + l->height());
+#endif
 		}
 	}
 
-	cBox* box;
+	ConstraintPacker* box;
 	Rectangle* rects[SQUARED];
 	Text* labels[SQUARED];
 	uint32_t number;
@@ -91,7 +96,7 @@ main (int argc, char* argv[])
 
 	win.add (cview);
 
-	cBox* main_hbox = new cBox (c->root(), Horizontal);
+	ConstraintPacker* main_hbox = new ConstraintPacker (c->root(), Horizontal);
 	main_hbox->name = "main";
 	main_hbox->set_spacing (12);
 	main_hbox->set_margin (24);
@@ -114,7 +119,7 @@ main (int argc, char* argv[])
 	ci = vbox->pack_start (circle, PackOptions (PackExpand|PackFill));
 	ci->add_constraint (ci->height() == 0.5 * hb1->height());
 
-	cBox* hbox2 = new cBox (c, Horizontal);
+	ConstraintPacker* hbox2 = new ConstraintPacker (c, Horizontal);
 	hbox2->name = "hbox2";
 	hbox2->set_fill (true);
 	hbox2->set_fill_color (Gtkmm2ext::random_color());

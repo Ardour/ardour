@@ -256,16 +256,17 @@ ConstraintPacker::non_const_preferred_size (Duple& minimum, Duple& natural)
 	   We may have no intrinsic dimensions at all. This is the tricky one.
 	*/
 
-	if (_intrinsic_width == 0 && _intrinsic_height == 0) {
-
+	if (packed.size() == constrained_map.size()) {
+		/* All child items were packed using ::pack() */
 		Duple m, n;
-
-		/* we can use the size of things packed using the box
-		   interface
-		*/
-
 		box_preferred_size (m, n);
 		natural = Duple (std::min (100.0, n.x), std::min (100.0, n.y));
+		minimum = natural;
+		return;
+	}
+
+	if (_intrinsic_width == 0 && _intrinsic_height == 0) {
+		natural = Duple (100.0, 100.0);
 		minimum = natural;
 		return;
 	}
@@ -297,8 +298,6 @@ ConstraintPacker::non_const_preferred_size (Duple& minimum, Duple& natural)
 
 	_solver.reset ();
 	_need_constraint_update = true;
-
-	cerr << "CP min " << minimum << " pref " << natural << endl;
 }
 
 void
@@ -494,6 +493,7 @@ ConstraintPacker::update_constraints ()
 		for (ConstrainedItemMap::iterator x = constrained_map.begin(); x != constrained_map.end(); ++x) {
 
 			if (std::find (packed.begin(), packed.end(), x->second) != packed.end()) {
+				add_constraints (_solver, x->second);
 				continue;
 			}
 

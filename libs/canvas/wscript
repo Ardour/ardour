@@ -32,7 +32,6 @@ canvas_sources = [
         'arrow.cc',
         'box.cc',
         'canvas.cc',
-	'cbox.cc',
         'circle.cc',
         'container.cc',
         'constrained_item.cc',

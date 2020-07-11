@@ -8,7 +8,6 @@
 
 #include "canvas/box.h"
 #include "canvas/canvas.h"
-#include "canvas/cbox.h"
 #include "canvas/circle.h"
 #include "canvas/constrained_item.h"
 #include "canvas/constraint_packer.h"
