@@ -41,9 +41,18 @@ ConstraintPacker::ConstraintPacker (Canvas* canvas, Orientation o)
 	: Container (canvas)
 	, width (X_("packer width"))
 	, height (X_("packer height"))
+	, _orientation (o)
+	, _spacing (0)
+	, _top_padding (0)
+	, _bottom_padding (0)
+	, _left_padding (0)
+	, _right_padding (0)
+	, _top_margin (0)
+	, _bottom_margin (0)
+	, _left_margin (0)
+	, _right_margin (0)
 	, in_alloc (false)
 	, _need_constraint_update (false)
-	, _orientation (o)
 {
 	set_fill (false);
 	set_outline (false);
@@ -57,9 +66,18 @@ ConstraintPacker::ConstraintPacker (Item* parent, Orientation o)
 	: Container (parent)
 	, width (X_("packer width"))
 	, height (X_("packer height"))
+	, _orientation (o)
+	, _spacing (0)
+	, _top_padding (0)
+	, _bottom_padding (0)
+	, _left_padding (0)
+	, _right_padding (0)
+	, _top_margin (0)
+	, _bottom_margin (0)
+	, _left_margin (0)
+	, _right_margin (0)
 	, in_alloc (false)
 	, _need_constraint_update (false)
-	, _orientation (o)
 {
 	set_fill (false);
 	set_outline (false);
@@ -142,6 +160,85 @@ ConstraintPacker::preferred_size (Duple& minimum, Duple& natural) const
 	const_cast<ConstraintPacker*>(this)->non_const_preferred_size (minimum, natural);
 }
 
+
+void
+ConstraintPacker::box_preferred_size (Duple& min, Duple& natural) const
+{
+	BoxPackedItems::size_type n_expanding = 0;
+	BoxPackedItems::size_type n_nonexpanding = 0;
+	BoxPackedItems::size_type total = 0;
+	Distance non_expanding_used = 0;
+	Distance largest = 0;
+	Distance largest_opposite = 0;
+	Duple i_min, i_natural;
+
+	for (BoxPackedItems::const_iterator o = packed.begin(); o != packed.end(); ++o) {
+
+		(*o)->item().preferred_size (i_min, i_natural);
+
+		// cerr << '\t' << (*o)->item().whoami() << " min " << i_min << " nat " << i_natural << endl;
+
+		if ((*o)->primary_axis_pack_options() & PackExpand) {
+			n_expanding++;
+
+			if (_orientation == Vertical) {
+				if (i_natural.height() > largest) {
+					largest = i_natural.height();
+				}
+			} else {
+				if (i_natural.width() > largest) {
+					largest = i_natural.width();
+				}
+				if (i_natural.height() > largest) {
+					largest_opposite = i_natural.height();
+				}
+			}
+
+		} else {
+			n_nonexpanding++;
+
+			if (_orientation == Vertical) {
+				non_expanding_used += i_natural.height();
+			} else {
+				non_expanding_used += i_natural.width();
+			}
+		}
+
+		/* determine the maximum size for the opposite axis. All items
+		 * will be this size or less on this axis
+		 */
+
+		if (_orientation == Vertical) {
+			if (i_natural.width() > largest_opposite) {
+				largest_opposite = i_natural.width();
+			}
+		} else {
+			if (i_natural.height() > largest_opposite) {
+				largest_opposite = i_natural.height();
+			}
+		}
+
+		total++;
+	}
+
+	Duple r;
+
+	if (_orientation == Vertical) {
+		// cerr << "+++ vertical box, neu = " << non_expanding_used << " neuo " << non_expanding_used_opposite << " largest = " << largest << " opp " << largest_opposite << " total " << total << endl;
+		min.y = non_expanding_used + (n_expanding * largest) + _top_margin + _bottom_margin + ((total - 1) * _spacing);
+		min.x = largest_opposite + _left_margin + _right_margin;
+	} else {
+		// cerr << "+++ horiz box, neu = " << non_expanding_used << " neuo " << non_expanding_used_opposite << " largest = " << largest << " opp " << largest_opposite << " total " << total << endl;
+		min.x = non_expanding_used + (n_expanding * largest) + _left_margin + _right_margin + ((total - 1) * _spacing);
+		min.y = largest_opposite + _top_margin + _bottom_margin;
+
+	}
+
+	// cerr << whoami() << " preferred-size = " << min << endl;
+
+	natural = min;
+}
+
 void
 ConstraintPacker::non_const_preferred_size (Duple& minimum, Duple& natural)
 {
@@ -160,7 +257,15 @@ ConstraintPacker::non_const_preferred_size (Duple& minimum, Duple& natural)
 	*/
 
 	if (_intrinsic_width == 0 && _intrinsic_height == 0) {
-		natural = Duple (100,100);
+
+		Duple m, n;
+
+		/* we can use the size of things packed using the box
+		   interface
+		*/
+
+		box_preferred_size (m, n);
+		natural = Duple (std::min (100.0, n.x), std::min (100.0, n.y));
 		minimum = natural;
 		return;
 	}
@@ -200,8 +305,43 @@ void
 ConstraintPacker::size_allocate (Rect const & r)
 {
 	PBD::Unwinder<bool> uw (in_alloc, true);
+	double expanded_size;
 
 	Item::size_allocate (r);
+
+	if (!packed.empty()) {
+
+		BoxPackedItems::size_type n_expanding = 0;
+		BoxPackedItems::size_type n_nonexpanding = 0;
+		BoxPackedItems::size_type total = 0;
+		Distance non_expanding_used = 0;
+
+		for (BoxPackedItems::iterator o = packed.begin(); o != packed.end(); ++o) {
+			if ((*o)->primary_axis_pack_options() & PackExpand) {
+				n_expanding++;
+			} else {
+				n_nonexpanding++;
+
+				Duple min, natural;
+
+				(*o)->item().preferred_size (min, natural);
+
+				if (_orientation == Vertical) {
+					non_expanding_used += natural.height();
+				} else {
+					non_expanding_used += natural.width();
+				}
+
+			}
+			total++;
+		}
+
+		if (_orientation == Vertical) {
+			expanded_size = (r.height() - _top_margin - _bottom_margin - ((total - 1) * _spacing) - non_expanding_used) / n_expanding;
+		} else {
+			expanded_size = (r.width() - _left_margin - _right_margin - ((total - 1) * _spacing) - non_expanding_used) / n_expanding;
+		}
+	}
 
 	if (_need_constraint_update) {
 		update_constraints ();
@@ -209,6 +349,11 @@ ConstraintPacker::size_allocate (Rect const & r)
 
 	_solver.suggestValue (width, r.width());
 	_solver.suggestValue (height, r.height());
+
+	if (!packed.empty()) {
+		_solver.suggestValue (expanded_item_size, expanded_size);
+	}
+
 	_solver.updateVariables ();
 
 #if 0
@@ -294,23 +439,10 @@ ConstraintPacker::remove (Item* item)
 
 	}
 
-	bool found_packed = false;
-
-	for (BoxPackedItems::iterator t = hpacked.begin(); t != hpacked.end(); ++t) {
+	for (BoxPackedItems::iterator t = packed.begin(); t != packed.end(); ++t) {
 		if (&(*t)->item() == item) {
-			hpacked.erase (t);
-			found_packed = true;
+			packed.erase (t);
 			break;
-		}
-	}
-
-	if (!found_packed) {
-		for (BoxPackedItems::iterator t = vpacked.begin(); t != vpacked.end(); ++t) {
-			if (&(*t)->item() == item) {
-				vpacked.erase (t);
-				found_packed = true;
-				break;
-			}
 		}
 	}
 
@@ -332,23 +464,62 @@ ConstraintPacker::update_constraints ()
 	_solver.addEditVariable (width, kiwi::strength::strong);
 	_solver.addEditVariable (height, kiwi::strength::strong);
 
-	for (ConstrainedItemMap::iterator x = constrained_map.begin(); x != constrained_map.end(); ++x) {
-
-		Duple min, natural;
-		ConstrainedItem* ci = x->second;
-
-		x->first->preferred_size (min, natural);
-
-		_solver.addConstraint ((ci->width() >= min.width()) | kiwi::strength::required);
-		_solver.addConstraint ((ci->height() >= min.height()) | kiwi::strength::required);
-		_solver.addConstraint ((ci->width() == natural.width()) | kiwi::strength::medium);
-		_solver.addConstraint ((ci->height() == natural.width()) | kiwi::strength::medium);
-
-		add_constraints (_solver, ci);
+	if (!packed.empty()) {
+		_solver.addEditVariable (expanded_item_size, kiwi::strength::strong);
 	}
 
-	for (ConstraintList::const_iterator c = constraint_list.begin(); c != constraint_list.end(); ++c) {
-		_solver.addConstraint (*c);
+	try {
+
+		/* First handle box-packed items */
+
+		BoxPackedItems::iterator prev = packed.end();
+
+		for (BoxPackedItems::iterator o = packed.begin(); o != packed.end(); ++o) {
+
+			Duple min, natural;
+
+			(*o)->item().preferred_size (min, natural);
+
+			if (_orientation == Vertical) {
+				add_vertical_box_constraints (_solver, *o, prev == packed.end() ? 0 : *prev, natural.height(), natural.width(), width);
+			} else {
+				add_horizontal_box_constraints (_solver, *o, prev == packed.end() ? 0 : *prev, natural.width(), natural.height(), height);
+			}
+
+			prev = o;
+		}
+
+		/* Now handle all other items (exclude those already dealt with */
+
+		for (ConstrainedItemMap::iterator x = constrained_map.begin(); x != constrained_map.end(); ++x) {
+
+			if (std::find (packed.begin(), packed.end(), x->second) != packed.end()) {
+				continue;
+			}
+
+			Duple min, natural;
+			ConstrainedItem* ci = x->second;
+
+			x->first->preferred_size (min, natural);
+
+			_solver.addConstraint ((ci->width() >= min.width()) | kiwi::strength::required);
+			_solver.addConstraint ((ci->height() >= min.height()) | kiwi::strength::required);
+			_solver.addConstraint ((ci->width() == natural.width()) | kiwi::strength::medium);
+			_solver.addConstraint ((ci->height() == natural.width()) | kiwi::strength::medium);
+
+			add_constraints (_solver, ci);
+		}
+
+		/* Now add packer-level constraints */
+
+		for (ConstraintList::const_iterator c = constraint_list.begin(); c != constraint_list.end(); ++c) {
+			_solver.addConstraint (*c);
+		}
+
+		_need_constraint_update = false;
+
+	} catch (std::exception& e) {
+		cerr << "Setting up sovler failed: " << e.what() << endl;
 	}
 }
 
@@ -370,13 +541,232 @@ ConstraintPacker::pack (Item* item, PackOptions primary_axis_opts, PackOptions s
 	BoxConstrainedItem* ci =  new BoxConstrainedItem (*item, primary_axis_opts, secondary_axis_opts);
 
 	add_constrained_internal (item, ci);
-
-	if (_orientation == Horizontal) {
-		hpacked.push_back (ci);
-	} else {
-		vpacked.push_back (ci);
-	}
+	packed.push_back (ci);
 
 	return ci;
 }
 
+
+/* It would be nice to do this with templates or even by passing ptr-to-method,
+ * but both of them interfere with the similarly meta-programming-ish nature of
+ * the way that kiwi builds Constraint objects from expressions. So a macro it
+ * is ...
+ */
+
+#define add_box_constraints(\
+	solver, \
+	bci, \
+	prev, \
+	natural_main_dimension, \
+	natural_second_dimension, \
+	alloc_var, \
+	m_main_dimension, \
+	m_second_dimension, \
+	m_trailing, \
+	m_leading, \
+	m_trailing_padding, \
+	m_leading_padding, \
+	m_second_trailing, \
+	m_second_leading, \
+	m_second_trailing_padding, \
+	m_second_leading_padding, \
+	m_trailing_margin, \
+	m_leading_margin, \
+	m_second_trailing_margin, \
+	m_second_leading_margin) \
+ \
+	/* Add constraints that will size the item within this box */ \
+ \
+	/* set up constraints for expand/fill options, done by \
+	 * adjusting height and margins of each item \
+	 */ \
+ \
+	if (bci->primary_axis_pack_options() & PackExpand) { \
+ \
+		/* item will take up more than it's natural \
+		 * size, if space is available \
+		 */ \
+ \
+		if (bci->primary_axis_pack_options() & PackFill) { \
+ \
+			/* item is expanding to fill all \
+			 * available space and wants that space \
+			 * for itself. \
+			 */ \
+ \
+			solver.addConstraint ({(bci->m_main_dimension() == expanded_item_size) | kiwi::strength::strong}); \
+			solver.addConstraint ({(bci->m_trailing_padding() == 0. ) | kiwi::strength::strong}); \
+			solver.addConstraint ({(bci->m_leading_padding() == 0. ) | kiwi::strength::strong}); \
+ \
+		} else { \
+ \
+			/* item is expanding to fill all \
+			 * available space and wants that space \
+			 * as padding \
+			 */ \
+ \
+			solver.addConstraint ({bci->m_main_dimension() == natural_main_dimension}); \
+			solver.addConstraint ({(bci->m_trailing_padding() + bci->m_leading_padding() + bci->m_main_dimension() == expanded_item_size) | kiwi::strength::strong}); \
+			solver.addConstraint ({(bci->m_leading_padding() == bci->m_trailing_padding()) | kiwi::strength::strong}); \
+		} \
+ \
+	} else { \
+ \
+		/* item is not going to expand to fill \
+		 * available space. just give it's preferred \
+		 * height. \
+		 */ \
+ \
+		/* cerr << bci->item().whoami() << " will usenatural height of " << natural.height() << endl; */ \
+ \
+		solver.addConstraint ({bci->m_main_dimension() == natural_main_dimension}); \
+		solver.addConstraint ({bci->m_trailing_padding() == 0.}); \
+		solver.addConstraint ({bci->m_leading_padding() == 0.}); \
+	} \
+ \
+	/* now set upper upper edge of the item */ \
+ \
+	if (prev == 0) { \
+ \
+		/* first item */ \
+ \
+		solver.addConstraint ({(bci->m_trailing() == m_trailing_margin + bci->m_trailing_padding()) | kiwi::strength::strong}); \
+ \
+	} else { \
+		/* subsequent items */ \
+ \
+		solver.addConstraint ({(bci->m_trailing() == prev->m_leading() + prev->m_leading_padding() + bci->m_trailing_padding() + _spacing) | kiwi::strength::strong}); \
+	} \
+ \
+	solver.addConstraint ({bci->m_leading() == bci->m_trailing() + bci->m_main_dimension()}); \
+ \
+	/* set the side-effect variables and/or constants */ \
+ \
+	solver.addConstraint ({(bci->m_second_trailing_padding() == 0) | kiwi::strength::weak}); \
+	solver.addConstraint ({(bci->m_second_leading_padding() == 0) | kiwi::strength::weak}); \
+ \
+	solver.addConstraint ({bci->m_second_trailing() + bci->m_second_dimension() == bci->m_second_leading()}); \
+	solver.addConstraint ({(bci->m_second_trailing() == m_second_trailing_margin + bci->m_second_trailing_padding()) | kiwi::strength::strong}); \
+ \
+	if (!(bci->secondary_axis_pack_options() & PackExpand) && natural_second_dimension > 0) { \
+		solver.addConstraint ({bci->m_second_dimension() == natural_second_dimension}); \
+	} else { \
+		solver.addConstraint ({(bci->m_second_dimension() == alloc_var - (m_second_trailing_margin + m_second_leading_margin + bci->m_second_leading_padding())) | kiwi::strength::strong}); \
+	}
+
+
+void
+ConstraintPacker::add_vertical_box_constraints (kiwi::Solver& solver, BoxConstrainedItem* ci, BoxConstrainedItem* prev, double main_dimension, double second_dimension, kiwi::Variable & alloc_var)
+{
+	add_box_constraints (solver, ci, prev, main_dimension, second_dimension, alloc_var,
+	                     height, width,
+	                     top, bottom, top_padding, bottom_padding,
+	                     left, right, left_padding, right_padding,
+	                     _top_margin, _bottom_margin, _left_margin, _right_margin);
+
+}
+
+void
+ConstraintPacker::add_horizontal_box_constraints (kiwi::Solver& solver, BoxConstrainedItem* ci, BoxConstrainedItem* prev, double main_dimension, double second_dimension, kiwi::Variable& alloc_var)
+{
+	add_box_constraints (solver, ci, prev, main_dimension, second_dimension, alloc_var,
+	                     width, height,
+	                     left, right, left_padding, right_padding,
+	                     top, bottom, top_padding, bottom_padding,
+	                     _left_margin, _right_margin, _top_margin, _bottom_margin);
+}
+
+void
+ConstraintPacker::set_spacing (double s)
+{
+	_spacing = s;
+}
+
+void
+ConstraintPacker::set_padding (double top, double right, double bottom, double left)
+{
+	double last = top;
+
+	_top_padding = last;
+
+	if (right >= 0) {
+		last = right;
+	}
+	_right_padding = last;
+
+	if (bottom >= 0) {
+		last = bottom;
+	}
+	_bottom_padding = last;
+
+	if (left >= 0) {
+		last = left;
+	}
+	_left_padding = last;
+}
+
+void
+ConstraintPacker::set_margin (double top, double right, double bottom, double left)
+{
+	double last = top;
+
+	_top_margin = last;
+
+	if (right >= 0) {
+		last = right;
+	}
+	_right_margin = last;
+
+	if (bottom >= 0) {
+		last = bottom;
+	}
+	_bottom_margin = last;
+
+	if (left >= 0) {
+		last = left;
+	}
+	_left_margin = last;
+}
+
+void
+ConstraintPacker::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
+{
+	if ((fill() || outline()) && _allocation) {
+
+		Rect contents = _allocation;
+
+		/* allocation will have been left with (x0,y0) as given by the
+		 * parent, but _position is set to the same value and will
+		 * be taken into account by item_to_window()
+		 */
+
+		double width = contents.width() - (_left_margin + _top_margin);
+		double height = contents.height() - (_top_margin + _bottom_margin);
+
+		contents.x0 = _left_margin;
+		contents.y0 = _top_margin;
+
+		contents.x1 = contents.x0 + width;
+		contents.y1 = contents.y0 + height;
+
+		Rect self (item_to_window (contents, false));
+		const Rect draw = self.intersection (area);
+
+		if (fill()) {
+
+			setup_fill_context (context);
+			context->rectangle (draw.x0, draw.y0, draw.width(), draw.height());
+			context->fill_preserve ();
+		}
+
+		if (outline()) {
+			if (!fill()) {
+				context->rectangle (draw.x0, draw.y0, draw.width(), draw.height());
+			}
+			setup_outline_context (context);
+			context->stroke ();
+		}
+	}
+
+	Item::render_children (area, context);
+}

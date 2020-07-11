@@ -38,6 +38,15 @@ public:
 	ConstraintPacker (Canvas *, Orientation o = Horizontal);
 	ConstraintPacker (Item *, Orientation o = Horizontal);
 
+	void set_spacing (double s);
+	void set_padding (double top, double right = -1.0, double bottom = -1.0, double left = -1.0);
+	void set_margin (double top, double right = -1.0, double bottom = -1.0, double left = -1.0);
+
+	/* aliases so that CSS box model terms work */
+	void set_border_width (double w) { set_outline_width (w); }
+	void set_border_color (Gtkmm2ext::Color c)  { set_outline_color (c); }
+
+
 	void add (Item *);
 	void add_front (Item *);
 	void remove (Item *);
@@ -56,11 +65,26 @@ public:
 	void  preferred_size (Duple& mininum, Duple& natural) const;
 	void size_allocate (Rect const &);
 
+	void render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const;
+
 	kiwi::Variable width;
 	kiwi::Variable height;
 
   protected:
 	void child_changed (bool bbox_changed);
+
+	Orientation _orientation;
+	double _spacing;
+	double _top_padding;
+	double _bottom_padding;
+	double _left_padding;
+	double _right_padding;
+	double _top_margin;
+	double _bottom_margin;
+	double _left_margin;
+	double _right_margin;
+
+	kiwi::Variable expanded_item_size;
 
 	typedef std::map<Item*,ConstrainedItem*> ConstrainedItemMap;
 	ConstrainedItemMap constrained_map;
@@ -77,13 +101,15 @@ public:
 	void non_const_preferred_size (Duple& mininum, Duple& natural);
 	virtual void update_constraints ();
 
+	void add_vertical_box_constraints (kiwi::Solver& solver, BoxConstrainedItem* ci, BoxConstrainedItem* prev, double main_dimenion, double second_dimension, kiwi::Variable& alloc_var);
+	void add_horizontal_box_constraints (kiwi::Solver& solver, BoxConstrainedItem* ci, BoxConstrainedItem* prev, double main_dimenion, double second_dimension, kiwi::Variable& alloc_var);
+
   private:
-	Orientation _orientation;
 	typedef std::list<BoxConstrainedItem*> BoxPackedItems;
-	BoxPackedItems vpacked;
-	BoxPackedItems hpacked;
+	BoxPackedItems packed;
 
 	BoxConstrainedItem* pack (Item*, PackOptions primary_axis_packing, PackOptions secondary_axis_packing);
+	void box_preferred_size (Duple& mininum, Duple& natural) const;
 };
 
 }
