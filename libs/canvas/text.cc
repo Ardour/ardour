@@ -310,7 +310,7 @@ Text::dump (ostream& o) const
 	Item::dump (o);
 
 	o << _canvas->indent() << '\t' << " text = " << _text << endl
-	  << _canvas->indent() << " color = " << _color;
+	  << _canvas->indent() << " color = 0x" << hex << _color << dec;
 
 	o << endl;
 }
