@@ -60,6 +60,7 @@ LuaProc::LuaProc (AudioEngine& engine,
 	, _script (script)
 	, _lua_does_channelmapping (false)
 	, _lua_has_inline_display (false)
+	, _connect_all_audio_outputs (false)
 	, _designated_bypass_port (UINT32_MAX)
 	, _signal_latency (0)
 	, _control_data (0)
@@ -252,6 +253,26 @@ LuaProc::load_script ()
 	luabridge::LuaRef lua_dsp_latency = luabridge::getGlobal (L, "dsp_latency");
 	if (lua_dsp_latency.type () == LUA_TFUNCTION) {
 		_lua_latency = new luabridge::LuaRef (lua_dsp_latency);
+	}
+
+	/* parse I/O options */
+	luabridge::LuaRef ioconfig = luabridge::getGlobal (L, "dsp_ioconfig");
+	if (ioconfig.isFunction ()) {
+		try {
+			luabridge::LuaRef iotable = ioconfig ();
+			if (iotable.isTable ()) {
+				for (luabridge::Iterator i (iotable); !i.isNil (); ++i) {
+					if (!i.key().isString()) {
+						continue;
+					}
+					if (i.key().cast<std::string> () == "connect_all_audio_outputs" && i.value().isBoolean ()) {
+						_connect_all_audio_outputs = i.value().cast<bool> ();
+					}
+				}
+			}
+		} catch (...) {
+			return true;
+		}
 	}
 
 	// initialize the DSP if needed

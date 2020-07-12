@@ -85,6 +85,7 @@ public:
 	void cleanup () { }
 
 	int set_block_size (pframes_t /*nframes*/) { return 0; }
+	bool connect_all_audio_outputs () const { return _connect_all_audio_outputs; }
 
 	int connect_and_run (BufferSet& bufs,
 			samplepos_t start, samplepos_t end, double speed,
@@ -153,6 +154,7 @@ private:
 	std::string _docs;
 	bool _lua_does_channelmapping;
 	bool _lua_has_inline_display;
+	bool _connect_all_audio_outputs;
 
 	void queue_draw () { QueueDraw(); /* EMIT SIGNAL */ }
 	DSP::DspShm lshm;
