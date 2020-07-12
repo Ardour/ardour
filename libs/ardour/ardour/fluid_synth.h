@@ -36,7 +36,7 @@ namespace ARDOUR {
 			 * @param samplerate samplerate
 			 * @param polyphony polyphony
 			 */
-			FluidSynth (float samplerate, int polyphony = 32);
+			FluidSynth (float samplerate, int polyphony = 256);
 			~FluidSynth ();
 
 			bool load_sf2 (const std::string& fn);

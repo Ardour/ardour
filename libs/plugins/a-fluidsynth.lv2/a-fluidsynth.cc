@@ -343,7 +343,7 @@ instantiate (const LV2_Descriptor*     descriptor,
 	}
 
 	fluid_synth_set_gain (self->synth, 1.0f);
-	fluid_synth_set_polyphony (self->synth, 32);
+	fluid_synth_set_polyphony (self->synth, 256);
 	fluid_synth_set_sample_rate (self->synth, (float)rate);
 
 	fluid_synth_set_reverb_on (self->synth, 0);
