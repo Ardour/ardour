@@ -307,7 +307,10 @@ ConstraintPacker::size_allocate (Rect const & r)
 	PBD::Unwinder<bool> uw (in_alloc, true);
 	double expanded_size;
 
-	Item::size_allocate (r);
+	if (_layout_sensitive) {
+		_position = Duple (r.x0, r.y0);
+		_allocation = r;
+	}
 
 	if (!packed.empty()) {
 
