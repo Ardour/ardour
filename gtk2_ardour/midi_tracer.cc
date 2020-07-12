@@ -207,8 +207,6 @@ MidiTracer::tracer (Parser&, byte* msg, size_t len, samplecnt_t now)
 	size_t bufsize;
 	size_t s;
 
-	std::cerr << "tracer msg " << len << " bytes, first = " << hex << (int) msg[0] << dec << std::endl;
-
 	buf = (char *) buffer_pool.alloc ();
 	bufsize = buffer_size;
 
