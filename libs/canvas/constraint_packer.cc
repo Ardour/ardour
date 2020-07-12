@@ -24,6 +24,7 @@
 
 #include "kiwi/kiwi.h"
 
+#include "canvas/canvas.h"
 #include "canvas/constraint_packer.h"
 #include "canvas/constrained_item.h"
 #include "canvas/item.h"
@@ -356,7 +357,9 @@ ConstraintPacker::size_allocate (Rect const & r)
 	_solver.updateVariables ();
 
 #if 0
-	_solver.dump (cerr);
+	PBD::stacktrace (cerr, 100);
+	// _canvas->dump (cerr);
+	// _solver.dump (cerr);
 
 	for (ConstrainedItemMap::const_iterator o = constrained_map.begin(); o != constrained_map.end(); ++o) {
 		o->second->dump (cerr);
