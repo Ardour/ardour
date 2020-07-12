@@ -5731,7 +5731,7 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 		goto out;
 	}
 
-	legal_playlist_name = "(bounce)" + legalize_for_path (playlist->name());
+	legal_playlist_name = legalize_for_path (playlist->name());
 
 	for (uint32_t chan_n = 0; chan_n < diskstream_channels.n(data_type); ++chan_n) {
 
@@ -5914,6 +5914,7 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 		plist.add (Properties::whole_file, true);
 		plist.add (Properties::length, srcs.front()->length(srcs.front()->natural_position()));
 		plist.add (Properties::name, region_name_from_path (srcs.front()->name(), true));
+		plist.add (Properties::tags, "(bounce)");
 
 		result = RegionFactory::create (srcs, plist, true);
 
