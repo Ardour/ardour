@@ -38,7 +38,7 @@
 #include "canvas/canvas.h"
 #include "canvas/grid.h"
 #include "canvas/box.h"
-#include "canvas/cbox.h"
+#include "canvas/constrained_item.h"
 #include "canvas/rectangle.h"
 #include "canvas/polygon.h"
 #include "canvas/scroll_group.h"
@@ -71,7 +71,6 @@ BBGUI::BBGUI (boost::shared_ptr<BeatBox> bb)
 	, horizontal_adjustment (0.0, 0.0, 800.0)
 	, vertical_adjustment (0.0, 0.0, 10.0, 400.0)
 	, export_as_region_button (_("Export as Region"))
-	, vscrollbar (vertical_adjustment)
 {
 	_canvas_viewport = new GtkCanvasViewport (horizontal_adjustment, vertical_adjustment);
 	_canvas = _canvas_viewport->canvas();
@@ -81,7 +80,6 @@ BBGUI::BBGUI (boost::shared_ptr<BeatBox> bb)
 	_sequencer = new SequencerView (bbox->sequencer(), _canvas->root());
 
 	canvas_hbox.pack_start (*_canvas_viewport, true, true);
-	canvas_hbox.pack_start (vscrollbar, false, false);
 
 	get_vbox()->set_spacing (12);
 	get_vbox()->pack_start (canvas_hbox, true, true);
@@ -231,11 +229,14 @@ double SequencerView::mode_button_xdim = mode_button_width + mode_button_spacing
 double SequencerView::mode_button_ydim = mode_button_height + mode_button_spacing;
 
 SequencerView::SequencerView (StepSequencer& s, ArdourCanvas::Item *p)
-	: Rectangle (p)
+	: ConstraintPacker (p, Vertical)
 	, _sequencer (s)
 	, _mode (Velocity)
 	, step_indicator_box (0)
 {
+	name = "SequencerView";
+	set_fill (false);
+
 	if (current_mode_color == 0) {
 		current_mode_color = UIConfiguration::instance().color ("gtk_lightest");
 		not_current_mode_color = contrasting_text_color (current_mode_color);
@@ -243,22 +244,15 @@ SequencerView::SequencerView (StepSequencer& s, ArdourCanvas::Item *p)
 
 	const Duple mode_button_center (mode_button_width/2.0, mode_button_height/2.0);
 
-	no_scroll_group = new ArdourCanvas::Container (_canvas->root());
-	no_scroll_vbox = new ArdourCanvas::cBox (_canvas->root(), ArdourCanvas::Vertical);
-	button_packer = new ArdourCanvas::cBox (_canvas->root(), ArdourCanvas::Horizontal);
-	no_scroll_vbox->pack_start (button_packer, PackOptions (PackExpand|PackFill), PackOptions (0));
-
-	v_scroll_group = new ScrollGroup (_canvas->root(), ScrollGroup::ScrollsVertically);
-	_canvas->add_scroller (*v_scroll_group);
-
-	sequence_vbox = new ArdourCanvas::cBox (v_scroll_group, ArdourCanvas::Vertical);
-	sequence_vbox->set_position (Duple (0, (mode_button_ydim + mode_button_spacing) + _step_dimen + 3));
+	button_packer = new ArdourCanvas::ConstraintPacker (_canvas, ArdourCanvas::Horizontal);
+	button_packer->name = "ButtonPacker";
+	pack_start (button_packer);
 
 	velocity_mode_button = new Rectangle (_canvas);
 	velocity_mode_button->set_corner_radius (10.0);
 	velocity_mode_button->set_intrinsic_size (mode_button_width, mode_button_height);
 	velocity_mode_button->set_fill_color (current_mode_color);
-	velocity_mode_text = new Text (velocity_mode_button);
+	velocity_mode_text = new Text (_canvas);
 	velocity_mode_text->set_font_description (UIConfiguration::instance().get_LargeFont());
 	velocity_mode_text->set (_("Velocity"));
 	velocity_mode_text->set_color (contrasting_text_color (velocity_mode_button->fill_color()));
@@ -299,14 +293,47 @@ SequencerView::SequencerView (StepSequencer& s, ArdourCanvas::Item *p)
 	timing_mode_text->set (_("Timing"));
 	timing_mode_text->set_color (contrasting_text_color (timing_mode_button->fill_color()));
 
-	button_packer->pack_start (velocity_mode_button, PackOptions (PackExpand|PackFill), PackOptions (0));
-	button_packer->pack_start (pitch_mode_button, PackOptions (PackExpand|PackFill), PackOptions (0));
-	button_packer->pack_start (gate_mode_button, PackOptions (PackExpand|PackFill), PackOptions (0));
-	button_packer->pack_start (octave_mode_button, PackOptions (PackExpand|PackFill), PackOptions (0));
-	button_packer->pack_start (timing_mode_button, PackOptions (PackExpand|PackFill), PackOptions (0));
+	ConstrainedItem* b;
+	ConstrainedItem* t;
 
-	/* place "us", the rectangle that contains/defines/draws the grid */
-	set_position (Duple (rhs_xoffset, _step_dimen + mode_button_ydim + mode_button_spacing));
+#if 1
+	b = button_packer->pack_start (velocity_mode_button, PackOptions (PackExpand|PackFill), PackOptions (0));
+	t = button_packer->add_constrained (velocity_mode_text);
+	t->centered_on (*b);
+
+	b = button_packer->pack_start (pitch_mode_button, PackOptions (PackExpand|PackFill), PackOptions (0));
+	t = button_packer->add_constrained (pitch_mode_text);
+	t->centered_on (*b);
+
+	b = button_packer->pack_start (gate_mode_button, PackOptions (PackExpand|PackFill), PackOptions (0));
+	t = button_packer->add_constrained (gate_mode_text);
+	t->centered_on (*b);
+
+	b = button_packer->pack_start (octave_mode_button, PackOptions (PackExpand|PackFill), PackOptions (0));
+	t = button_packer->add_constrained (octave_mode_text);
+	t->centered_on (*b);
+
+	b = button_packer->pack_start (timing_mode_button, PackOptions (PackExpand|PackFill), PackOptions (0));
+	t = button_packer->add_constrained (timing_mode_text);
+	t->centered_on (*b);
+#endif
+	// v_scroll_group = new ScrollGroup (_canvas->root(), ScrollGroup::ScrollsVertically);
+	// _canvas->add_scroller (*v_scroll_group);
+
+	sequence_vbox = new ArdourCanvas::ConstraintPacker (_canvas, ArdourCanvas::Vertical);
+	sequence_vbox->name = "SequenceVBox";
+	pack_start (sequence_vbox, PackOptions (PackExpand|PackFill));
+
+	step_indicator_box = new ArdourCanvas::ConstraintPacker (_canvas, ArdourCanvas::Horizontal);
+	ConstrainedItem* sib = pack_start (step_indicator_box);
+	sib->add_constraint (sib->height() == _step_dimen);
+	sib->add_constraint (sib->right() == width);
+	sib->add_constraint (sib->left() == 0);
+
+	step_indicator_box->name = "step_indicator_box";
+	step_indicator_box->set_spacing (1.0);
+
+	// set_position (Duple (rhs_xoffset, _step_dimen + mode_button_ydim + mode_button_spacing));
 
 	octave_mode_button->Event.connect (sigc::bind (sigc::mem_fun (*this, &SequencerView::mode_button_event), Octave));
 	gate_mode_button->Event.connect (sigc::bind (sigc::mem_fun (*this, &SequencerView::mode_button_event), Duration));
@@ -368,21 +395,12 @@ SequencerView::sequencer_changed (PropertyChange const &)
 	_width = _step_dimen * nsteps;
 	_height = _step_dimen * nsequences;
 
-	set (Rect (0, 0, _width, _height));
-
-	if (!step_indicator_box) {
-		step_indicator_box = new ArdourCanvas::cBox (_canvas, ArdourCanvas::Horizontal);
-		no_scroll_vbox->pack_start (step_indicator_box);
-		step_indicator_box->name = "step_indicator_box";
-		step_indicator_box->set_fill (true);
-		step_indicator_box->set_spacing (1.0);
-	}
-
 	/* indicator row */
 
 	while (step_indicators.size() > nsteps) {
 		SequencerStepIndicator* ssi = step_indicators.back();
 		step_indicators.pop_back();
+		step_indicator_box->remove (ssi);
 		delete ssi;
 	}
 
@@ -404,8 +422,9 @@ SequencerView::sequencer_changed (PropertyChange const &)
 	n = sequence_views.size();
 
 	while (sequence_views.size() < nsequences) {
-		SequenceView* sh = new SequenceView (*this, _sequencer.sequence (n), sequence_vbox);
-		sequence_views.push_back (sh);
+		SequenceView* sv = new SequenceView (*this, _sequencer.sequence (n), canvas());
+		sequence_vbox->pack_start (sv);
+		sequence_views.push_back (sv);
 		++n;
 	}
 }
@@ -504,8 +523,7 @@ void
 SequencerView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
 	/* might do more one day */
-	Rectangle::render (area, context);
-	render_children (area, context);
+	ConstraintPacker::render (area, context);
 }
 
 SequenceView&
@@ -565,6 +583,7 @@ SequencerStepIndicator::SequencerStepIndicator (SequencerView& s, ArdourCanvas::
 	text->set_position (Duple ((_step_dimen/2.0) - (text->width()/2.0), 5.0));
 	text->set_color (other_text_color);
 	text->set_ignore_events (true);
+	text->name = string_compose ("SI %1", n);
 
 	Event.connect (sigc::mem_fun (*this, &SequencerStepIndicator::on_event));
 	sv.sequencer().PropertyChanged.connect (sequencer_connection, invalidator (*this), boost::bind (&SequencerStepIndicator::sequencer_changed, this, _1), gui_context());
@@ -705,7 +724,7 @@ StepView::StepView (SequenceView& sview, Step& s, ArdourCanvas::Canvas* c)
 	, text (new Text (this))
 	, grabbed (false)
 {
-	set (Rect (0, 0, _step_dimen - 1, _step_dimen - 1)); // x0, y0, x1, y1 NOT x0, y0 width, height
+	set_intrinsic_size (_step_dimen - 1, _step_dimen - 1);
 	name = string_compose ("stepview for %1", _step.index());
 
 	if (on_fill_color == 0) {
@@ -715,11 +734,12 @@ StepView::StepView (SequenceView& sview, Step& s, ArdourCanvas::Canvas* c)
 
 	set_fill_color (off_fill_color);
 	set_outline_color (UIConfiguration::instance().color ("gtk_bright_color"));
-	set_outline (false);
+	set_outline (true);
 
 	text->set_color (contrasting_text_color (fill_color()));
 	text->set_font_description (UIConfiguration::instance ().get_SmallFont ());
 	text->hide ();
+	text->name = string_compose ("step %1", _step.index());
 
 	Event.connect (sigc::mem_fun (*this, &StepView::on_event));
 	_step.PropertyChanged.connect (step_connection, invalidator (*this), boost::bind (&StepView::step_changed, this, _1), gui_context());
@@ -1048,61 +1068,61 @@ StepView::adjust_step_duration (Step::DurationRatio const & amt)
 
 /**/
 
-SequenceView::SequenceView (SequencerView& sview, StepSequence& sq, Item* parent)
-	: cBox (parent, Horizontal)
+SequenceView::SequenceView (SequencerView& sview, StepSequence& sq, Canvas* canvas)
+	: ConstraintPacker (canvas, Horizontal)
 	, sv (sview)
 	, sequence (sq)
 {
 	set_spacing (1.0);
 
-	lhs_box = new ArdourCanvas::HBox (this);
+	lhs_box = new ArdourCanvas::ConstraintPacker (canvas, ArdourCanvas::Horizontal);
+	lhs_box->set_padding (12);
+	rhs_box = new ArdourCanvas::ConstraintPacker (canvas, ArdourCanvas::Horizontal);
+	rhs_box->set_padding (12);
+	step_box = new ArdourCanvas::ConstraintPacker (canvas, ArdourCanvas::Horizontal);
+	step_box->set_padding (6);
+
+	pack_start (lhs_box, PackOptions (0));
+	pack_start (step_box, PackOptions (PackExpand|PackFill));
+	pack_start (rhs_box, PackOptions (0));
+
 	lhs_box->set_fill_color (UIConfiguration::instance().color ("gtk_bright_color"));
 	lhs_box->set_fill (true);
 	lhs_box->set_outline (false);
 	lhs_box->set_spacing (5.0);
 	lhs_box->name = string_compose ("lhs box for %1", sequence.index());
 
-	number_display = new Rectangle (lhs_box);
-	number_display->set_position (Duple (4.0, 4.0));
-	number_display->set_corner_radius (5);
-
-	number_text = new Text (number_display);
+	number_text = new Text (canvas);
 	number_text->set_font_description (UIConfiguration::instance().get_LargeFont());
-
-	number_text->set ("88"); // likely widest number label
-	number_display->set (Rect (0.0, 0.0, number_text->width() + 8.0, _step_dimen - 8.0));
-
+	number_text->set_intrinsic_size (_step_dimen - 1, _step_dimen - 1);
+	number_text->name = string_compose ("%1 text bit", sequence.index() + 1);
+	number_text->set_color (contrasting_text_color (lhs_box->fill_color()));
 	number_text->set (string_compose ("%1", sequence.index() + 1));
-	number_text->set_position (Duple ((number_display->width()/2.0) - (number_text->width()/2.0), ((_step_dimen - 8.0) / 2.0) - (number_text->height() / 2.0)));
-	number_text->set_color (contrasting_text_color (number_display->fill_color()));
 
-	name_text = new Text (lhs_box);
-	name_text->set (_("Snare"));
+	name_text = new Text (canvas);
+	name_text->set_intrinsic_size (100, name_text->height());
 	name_text->set_font_description (UIConfiguration::instance().get_LargeFont());
-	name_text->set_position (Duple (number_display->width() + 5.0, (_step_dimen/2.0) - (name_text->height() / 2.0)));
-	name_text->set_color (contrasting_text_color (fill_color()));
+	name_text->set_color (contrasting_text_color (lhs_box->fill_color()));
 	name_text->Event.connect (sigc::mem_fun (*this, &SequenceView::name_text_event));
+	name_text->set (_("Snare"));
 
-	root_display = new Rectangle (lhs_box);
-	root_display->set (Rect (0.0, 0.0, _step_dimen * 1.5, _step_dimen - 8.0));
-	root_display->set_corner_radius (5);
-
-	root_text = new Text (root_display);
-	root_text->set ("G#2"); // likely widest root label
+	root_text = new Text (canvas);
+	root_text->set ("F#2"); // likely widest root label
 	root_text->set (ParameterDescriptor::midi_note_name (sequence.root()));
 	root_text->set_font_description (UIConfiguration::instance().get_LargeFont());
-	root_text->set_position (Duple (4.0, ((_step_dimen - 8.0) / 2.0) - (root_text->height() / 2.0)));
-	root_text->set_color (contrasting_text_color (root_display->fill_color()));
+	root_text->set_intrinsic_size (name_text->width(), _step_dimen - 1);
+	root_text->set_color (contrasting_text_color (lhs_box->fill_color()));
 
-	name_text->set_size_request (SequencerView::rhs_xoffset - number_display->get().width() - root_display->get().width() - 2.0, _step_dimen);
-	root_display->set_position (Duple (SequencerView::rhs_xoffset - root_display->get().width() - 4.0, 4.0));
+	lhs_box->pack_start (number_text);
+	lhs_box->pack_start (name_text, PackOptions (PackExpand|PackFill));
+	lhs_box->pack_start (root_text);
 
 	const size_t nsteps = sequencer().nsteps();
 
 	for (size_t n = 0; n < nsteps; ++n) {
-		StepView* stepview = new StepView (*this, sequence.step (n), canvas());
+		StepView* stepview = new StepView (*this, sequence.step (n), canvas);
 		step_views.push_back (stepview);
-		pack_start (stepview, PackOptions (PackExpand|PackFill), PackOptions (PackExpand|PackFill));
+		step_box->pack_start (stepview, PackOptions (PackExpand|PackFill), PackOptions (PackExpand|PackFill));
 	}
 }
 
@@ -1173,3 +1193,4 @@ SequenceView::name_edited (std::string str, int next)
 		break;
 	}
 }
+

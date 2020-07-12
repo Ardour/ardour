@@ -36,8 +36,8 @@
 #include "widgets/ardour_button.h"
 
 #include "canvas/box.h"
-#include "canvas/cbox.h"
 #include "canvas/canvas.h"
+#include "canvas/constraint_packer.h"
 #include "canvas/rectangle.h"
 
 #include "ardour/step_sequencer.h"
@@ -69,7 +69,7 @@ class StepView;
 class FloatingTextEntry;
 class SequencerStepIndicator;
 
-class SequencerView : public ArdourCanvas::Rectangle, public sigc::trackable {
+class SequencerView : public ArdourCanvas::ConstraintPacker, public sigc::trackable {
   public:
 	enum Mode {
 		Velocity,
@@ -111,10 +111,10 @@ class SequencerView : public ArdourCanvas::Rectangle, public sigc::trackable {
 	Mode   _mode;
 	ArdourCanvas::ScrollGroup* v_scroll_group;
 	ArdourCanvas::Container* no_scroll_group;
-	ArdourCanvas::cBox* no_scroll_vbox;
-	ArdourCanvas::cBox* button_packer;
-	ArdourCanvas::cBox* step_indicator_box;
-	ArdourCanvas::cBox* sequence_vbox;
+	ArdourCanvas::ConstraintPacker* no_scroll_vbox;
+	ArdourCanvas::ConstraintPacker* button_packer;
+	ArdourCanvas::ConstraintPacker* step_indicator_box;
+	ArdourCanvas::ConstraintPacker* sequence_vbox;
 
 	ArdourCanvas::Rectangle* velocity_mode_button;
 	ArdourCanvas::Rectangle* pitch_mode_button;
@@ -138,10 +138,10 @@ class SequencerView : public ArdourCanvas::Rectangle, public sigc::trackable {
 
 };
 
-class SequenceView : public ArdourCanvas::cBox
+class SequenceView : public ArdourCanvas::ConstraintPacker
 {
   public:
-	SequenceView (SequencerView&, ARDOUR::StepSequence&, ArdourCanvas::Item* parent);
+	SequenceView (SequencerView&, ARDOUR::StepSequence&, ArdourCanvas::Canvas* canvas);
 
 	void view_mode_changed ();
 	SequencerView::Mode mode() const { return sv.mode(); }
@@ -151,10 +151,9 @@ class SequenceView : public ArdourCanvas::cBox
 	SequencerView& sv;
 	ARDOUR::StepSequence& sequence;
 
-	ArdourCanvas::HBox* lhs_box;
-
-	ArdourCanvas::Rectangle* number_display;
-	ArdourCanvas::Rectangle* root_display;
+	ArdourCanvas::ConstraintPacker* lhs_box;
+	ArdourCanvas::ConstraintPacker* rhs_box;
+	ArdourCanvas::ConstraintPacker* step_box;
 
 	ArdourCanvas::Text* number_text;
 	ArdourCanvas::Text* name_text;
