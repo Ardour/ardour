@@ -430,8 +430,9 @@ EditorRegions::region_changed (boost::shared_ptr<Region> r, const PropertyChange
 		/* this region is not on an active playlist
 		 * maybe it got deleted, or whatever */
 		if (map_it != region_row_map.end ()) {
+			Gtk::TreeModel::iterator r = map_it->second;
 			region_row_map.erase (map_it);
-			_model->erase (map_it->second);
+			_model->erase (r);
 		}
 		return;
 	}
