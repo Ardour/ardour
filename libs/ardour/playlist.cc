@@ -42,6 +42,7 @@
 #include "ardour/playlist_factory.h"
 #include "ardour/playlist_source.h"
 #include "ardour/region.h"
+#include "ardour/midi_region.h"
 #include "ardour/region_factory.h"
 #include "ardour/region_sorters.h"
 #include "ardour/session.h"
@@ -255,6 +256,21 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, samplepos_t start, 
 		RegionFactory::region_name (new_name, region->name(), false);
 
 		PropertyList plist;
+
+		if (_type == DataType::MIDI) {
+			boost::shared_ptr<MidiRegion> mregion = boost::dynamic_pointer_cast<MidiRegion> (region);
+			if ( mregion && offset ) {
+				int32_t division = 1;  /*magic value that ignores the meter (right?)*/
+				const double start_quarter_note =_session.tempo_map().exact_qn_at_sample (start, division );
+				const double start_offset_quarter_note = start_quarter_note - region->quarter_note();
+				const double end_samples = (overlap == Evoral::OverlapStart ?
+											end :  /*end the new region at the end of the selection*/
+											region->position() + region->length() -1);  /*use the region's end*/
+				const double length_quarter_note = _session.tempo_map().exact_qn_at_sample ( end_samples, division ) - start_quarter_note;
+				plist.add (Properties::start_beats, mregion->start_beats() + start_offset_quarter_note);
+				plist.add (Properties::length_beats, length_quarter_note);
+			}
+		}
 
 		plist.add (Properties::start, region->start() + offset);
 		plist.add (Properties::length, len);
