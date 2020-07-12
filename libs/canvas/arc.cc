@@ -80,7 +80,11 @@ Arc::render (Rect const & /*area*/, Cairo::RefPtr<Cairo::Context> context) const
 
 	if (fill()) {
 		setup_fill_context (context);
-		context->fill_preserve ();
+		if (outline()) {
+			context->fill_preserve ();
+		} else {
+			context->fill ();
+		}
 	}
 
 	if (outline()) {

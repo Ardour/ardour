@@ -756,7 +756,11 @@ ConstraintPacker::render (Rect const & area, Cairo::RefPtr<Cairo::Context> conte
 
 			setup_fill_context (context);
 			context->rectangle (draw.x0, draw.y0, draw.width(), draw.height());
-			context->fill_preserve ();
+			if (outline()) {
+				context->fill_preserve ();
+			} else {
+				context->fill ();
+			}
 		}
 
 		if (outline()) {
