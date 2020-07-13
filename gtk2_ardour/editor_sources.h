@@ -86,7 +86,7 @@ private:
 
 	void freeze_tree_model ();
 	void thaw_tree_model ();
-	void source_changed (boost::shared_ptr<ARDOUR::Region>);
+	void source_changed (boost::shared_ptr<ARDOUR::Region>, PBD::PropertyChange const &);
 	void populate_row (Gtk::TreeModel::Row row, boost::shared_ptr<ARDOUR::Region> region);
 	void selection_changed ();
 
@@ -129,6 +129,7 @@ private:
 
 	Glib::RefPtr<Gtk::TreeStore> _model;
 
+	PBD::ScopedConnection source_property_connection;
 	PBD::ScopedConnection add_source_connection;
 	PBD::ScopedConnection remove_source_connection;
 	PBD::ScopedConnectionList remove_region_connections;

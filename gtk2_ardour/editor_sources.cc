@@ -282,6 +282,8 @@ EditorSources::set_session (ARDOUR::Session* s)
 	SessionHandlePtr::set_session (s);
 
 	if (s) {
+		ARDOUR::Region::RegionPropertyChanged.connect (source_property_connection, MISSING_INVALIDATOR, boost::bind (&EditorSources::source_changed, this, _1, _2), gui_context ());
+
 		ARDOUR::RegionFactory::CheckNewRegion.connect (add_source_connection, MISSING_INVALIDATOR, boost::bind (&EditorSources::add_source, this, _1), gui_context());
 
 		s->SourceRemoved.connect (remove_source_connection, MISSING_INVALIDATOR, boost::bind (&EditorSources::remove_weak_source, this, _1), gui_context());
@@ -459,9 +461,12 @@ EditorSources::add_source (boost::shared_ptr<ARDOUR::Region> region)
 }
 
 void
-EditorSources::source_changed (boost::shared_ptr<ARDOUR::Region> region)
+EditorSources::source_changed (boost::shared_ptr<ARDOUR::Region> region, PBD::PropertyChange const &)
 {
-	/* Currently never reached .. we have no mutable properties shown in the list*/
+	if ( !region->whole_file() ) {
+		/*this isn't on our list anyway; we can ignore it*/
+		return;
+	}
 
 	TreeModel::iterator i;
 	TreeModel::Children rows = _model->children();
