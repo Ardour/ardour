@@ -8,15 +8,15 @@ msgstr ""
 "Project-Id-Version: libardour 0.664.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-05-20 14:36-0600\n"
-"PO-Revision-Date: 2020-07-04 10:41+0200\n"
+"PO-Revision-Date: 2020-07-13 08:51+0200\n"
 "Last-Translator: Vincenzo Reale <smart2128@baslug.org>\n"
 "Language: Italian\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=ISO-8859-1\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 20.04.2\n"
-"Language-Team: Italian\n"
+"X-Generator: Lokalize 20.04.3\n"
+"Language-Team: Italian <kde-i18n-it@kde.org>\n"
 
 #: analyser.cc:127 audioregion.cc:1791
 msgid "Transient Analysis failed for %1."
@@ -54,7 +54,7 @@ msgstr ""
 
 #: audio_backend.cc:41
 msgid "Failed to close audio device"
-msgstr ""
+msgstr "Chiusura del dispositivo audio non riuscita"
 
 #: audio_backend.cc:43
 msgid "Audio device not valid"
@@ -74,7 +74,7 @@ msgstr ""
 
 #: audio_backend.cc:51
 msgid "Audio device Input/Output error"
-msgstr ""
+msgstr "Errore di input/output del dispositivo audio"
 
 #: audio_backend.cc:53
 msgid "Failed to open MIDI device"
@@ -122,7 +122,7 @@ msgstr ""
 
 #: audio_backend.cc:75
 msgid "Device configuration not supported"
-msgstr ""
+msgstr "La configurazione del dispositivo non è supportata"
 
 #: audio_backend.cc:77
 msgid "Channel count configuration not supported"
@@ -150,7 +150,7 @@ msgstr ""
 
 #: audio_backend.cc:89
 msgid "Failed to start process thread"
-msgstr ""
+msgstr "Avvia del thread del processo non riuscito"
 
 #: audio_backend.cc:91
 msgid "Failed to start freewheel thread"
@@ -166,7 +166,7 @@ msgstr ""
 
 #: audio_backend.cc:97
 msgid "Out Of Memory Error"
-msgstr ""
+msgstr "Errore di memoria insufficiente"
 
 #: audio_backend.cc:99
 msgid "Could not reconnect to Audio/MIDI engine"
@@ -211,15 +211,15 @@ msgstr "regioni"
 
 #: audio_playlist_importer.cc:176 audio_track_importer.cc:246
 msgid "A playlist with this name already exists, please rename it."
-msgstr ""
+msgstr "Una scaletta con questo nome esiste già, rinominala."
 
 #: audio_playlist_importer.cc:185
 msgid "badly-formed XML in imported playlist"
-msgstr ""
+msgstr "XML malformato nella scaletta importata"
 
 #: audio_playlist_importer.cc:269
 msgid "Audio Playlists (unused)"
-msgstr ""
+msgstr "Scalette audio (inutilizzate)"
 
 #: audio_playlist_source.cc:169 audiosource.cc:1054 midi_playlist_source.cc:163
 #: midi_playlist_source.cc:171 midi_playlist_source.cc:178 midi_source.cc:410
@@ -940,7 +940,7 @@ msgstr "impossibile determinare la cartella di lavoro corrente (%1)"
 
 #: find_session.cc:164
 msgid "unknown file type for session %1"
-msgstr "tipo di fle sconosciuto per la sessione %1"
+msgstr "tipo di file sconosciuto per la sessione %1"
 
 #: find_session.cc:210 find_session.cc:269
 msgid "Archive is empty"
@@ -1245,11 +1245,11 @@ msgstr "mono"
 
 #: io.cc:1603 session_bundles.cc:156 session_bundles.cc:191
 msgid "L"
-msgstr ""
+msgstr "S"
 
 #: io.cc:1603 session_bundles.cc:158 session_bundles.cc:193
 msgid "R"
-msgstr ""
+msgstr "D"
 
 #: io_processor.cc:279
 msgid "send "
@@ -1565,7 +1565,7 @@ msgstr ""
 
 #: mp3filesource.cc:71
 msgid "MPEG Layer %1 (%2 kbps)"
-msgstr ""
+msgstr "MPEG Layer %1 (%2 kbps)"
 
 #: mtc_slave.cc:387
 msgid ""
@@ -1575,7 +1575,7 @@ msgstr ""
 
 #: operations.cc:41
 msgid "capture"
-msgstr ""
+msgstr "cattura"
 
 #: operations.cc:42
 msgid "paste"
@@ -1677,7 +1677,7 @@ msgstr "Inverti"
 
 #: parameter_descriptor.cc:128
 msgid "Auto"
-msgstr ""
+msgstr "Automatico"
 
 #: parameter_descriptor.cc:129
 msgid "Input"
@@ -1741,7 +1741,7 @@ msgstr ""
 
 #: playlist.cc:2343
 msgid "Playlist: cannot create region from XML"
-msgstr ""
+msgstr "Scaletta: impossibile creare la regione da XML"
 
 #: playlist_source.cc:111
 msgid "No playlist ID in PlaylistSource XML!"
@@ -1761,7 +1761,7 @@ msgstr ""
 
 #: plugin.cc:154
 msgid "Preset with given name already exists."
-msgstr ""
+msgstr "La preimpostazione con un determinato nome esiste già."
 
 #: plugin.cc:280
 msgid "Audio"
@@ -1881,7 +1881,7 @@ msgstr "Rilevamento plugin AU"
 
 #: plugin_manager.cc:444
 msgid "Plugin Scan Complete..."
-msgstr ""
+msgstr "Scansione dei plugin completa..."
 
 #: plugin_manager.cc:449
 msgid "Indexing Plugins..."
@@ -1893,7 +1893,7 @@ msgstr "LADSPA"
 
 #: plugin_manager.cc:743
 msgid "Could not parse rdf file: %1"
-msgstr ""
+msgstr "Impossibile analizzare il file rdf: %1"
 
 #: plugin_manager.cc:780
 msgid "LADSPA: cannot load module \"%1\" (%2)"
@@ -2245,77 +2245,83 @@ msgstr ""
 
 #: rc_configuration.cc:101
 msgid "Loading system configuration file %1"
-msgstr ""
+msgstr "Caricamento del file di configurazione del sistema %1"
 
 #: rc_configuration.cc:105
 msgid "%1: cannot read system configuration file \"%2\""
-msgstr ""
+msgstr "%1: impossibile leggere il file di configurazione del sistema \"%2\""
 
 #: rc_configuration.cc:110
 msgid "%1: system configuration file \"%2\" not loaded successfully."
 msgstr ""
+"%1: file di configurazione del sistema \"%2\" non caricato correttamente."
 
 #: rc_configuration.cc:114
 msgid ""
 "Your system %1 configuration file is empty. This probably means that there "
 "was an error installing %1"
 msgstr ""
+"Il file di configurazione del sistema %1 è vuoto. Questo probabilmente"
+" significa che si è verificato un errore durante l'installazione di %1"
 
 #: rc_configuration.cc:129
 msgid "Loading user configuration file %1"
-msgstr ""
+msgstr "Caricamento del file di configurazione utente %1"
 
 #: rc_configuration.cc:133
 msgid "%1: cannot read configuration file \"%2\""
-msgstr ""
+msgstr "%1: impossibile leggere il file di configurazione \"%2\""
 
 #: rc_configuration.cc:138
 msgid "%1: user configuration file \"%2\" not loaded successfully."
-msgstr ""
+msgstr "%1: file di configurazione utente \"%2\" non caricato correttamente."
 
 #: rc_configuration.cc:142
 msgid "your %1 configuration file is empty. This is not normal."
-msgstr ""
+msgstr "Il tuo file di configurazione %1 è vuoto. Questo non è normale."
 
 #: rc_configuration.cc:158
 msgid "Config file %1 not saved"
-msgstr ""
+msgstr "File di configurazione %1 non salvato"
 
 #: rc_configuration.cc:160 rc_configuration.cc:168
 msgid "Could not remove temporary config file at path \"%1\" (%2)"
 msgstr ""
+"Impossibile rimuovere il file di configurazione temporaneo nel percorso \""
+"%1\" (%2)"
 
 #: rc_configuration.cc:166
 msgid "Could not rename temporary config file %1 to %2 (%3)"
 msgstr ""
+"Impossibile rinominare il file di configurazione temporaneo da %1 a %2 (%3)"
 
 #: readable.cc:42
 msgid "Cannot open File \"%1\": %2"
-msgstr ""
+msgstr "Impossibile aprire il file \"%1\": %2"
 
 #: readable.cc:61
 msgid "Could not read file \"%1\"."
-msgstr ""
+msgstr "Impossibile leggere il file \"%1\"."
 
 #: recent_sessions.cc:59
 msgid "cannot open recent session file %1 (%2)"
-msgstr ""
+msgstr "impossibile aprire il file delle sessioni recenti %1 (%2)"
 
 #: recent_sessions.cc:72 recent_sessions.cc:130
 msgid "Error reading recent session file %1 (%2)"
-msgstr ""
+msgstr "Errore durante la lettura del file delle sessioni recenti %1 (%2)"
 
 #: recent_sessions.cc:117
 msgid "Cannot open recent template file %1 (%2)"
-msgstr ""
+msgstr "Impossibile aprire il file dei modelli recenti %1 (%2)"
 
 #: recent_sessions.cc:180
 msgid "Error writing recent sessions file %1 (%2)"
-msgstr ""
+msgstr "Errore durante la scrittura del file delle sessioni recenti %1 (%2)"
 
 #: recent_sessions.cc:215
 msgid "Error writing saved template file %1 (%2)"
-msgstr ""
+msgstr "Errore durante la scrittura del file di modello salvato %1 (%2)"
 
 #: region_factory.cc:83 region_factory.cc:122 region_factory.cc:161
 #: region_factory.cc:201
@@ -2349,11 +2355,11 @@ msgstr ""
 
 #: route.cc:949 route.cc:3174 track.cc:867
 msgid "unknown Processor type \"%1\"; ignored"
-msgstr ""
+msgstr "Tipo di processore sconosciuto \"%1\"; ignorato"
 
 #: route.cc:971
 msgid "processor could not be created. Ignored."
-msgstr ""
+msgstr "non è stato possibile creare il processore. Ignorato."
 
 #: route.cc:2602 route.cc:2808
 msgid "Bad node sent to Route::set_state() [%1]"
@@ -2401,7 +2407,7 @@ msgstr "Compressore"
 
 #: route.cc:5881 route.cc:5883
 msgid "Limiter"
-msgstr ""
+msgstr "Limitatore"
 
 #: route.cc:5883
 msgid "Sidechain"
@@ -2462,7 +2468,7 @@ msgstr ""
 
 #: session.cc:354
 msgid "Session initialization failed"
-msgstr ""
+msgstr "Inizializzazione della sessione non riuscita"
 
 #: session.cc:371
 msgid "Failed to load template/snapshot state"
@@ -2474,7 +2480,7 @@ msgstr ""
 
 #: session.cc:394
 msgid "Failed to load state"
-msgstr ""
+msgstr "Caricamento dello stato non riuscito"
 
 #: session.cc:404 session.cc:408 session.cc:411 session.cc:414 session.cc:417
 msgid "Cannot initialize session/engine: %1"
@@ -2490,11 +2496,11 @@ msgstr ""
 
 #: session.cc:411
 msgid "Invalid or corrupt session state."
-msgstr ""
+msgstr "Stato della sessione non valido o danneggiato."
 
 #: session.cc:414
 msgid "Port registration failed."
-msgstr ""
+msgstr "Registrazione della porta non riuscita."
 
 #: session.cc:417
 msgid ""
@@ -2504,11 +2510,11 @@ msgstr ""
 
 #: session.cc:449
 msgid "Connect to engine"
-msgstr ""
+msgstr "Connetti al motore"
 
 #: session.cc:471
 msgid "Session loading complete"
-msgstr ""
+msgstr "Caricamento sessione completato"
 
 #: session.cc:530
 msgid "Set up LTC"
@@ -2520,7 +2526,7 @@ msgstr ""
 
 #: session.cc:534
 msgid "Set up standard connections"
-msgstr ""
+msgstr "Configura connessioni standard"
 
 #: session.cc:859
 msgid "could not setup Click I/O"
@@ -2591,13 +2597,15 @@ msgstr "MIDI "
 
 #: session.cc:2430
 msgid "Session: could not create new midi track."
-msgstr ""
+msgstr "Sessione: impossibile creare una nuova traccia midi."
 
 #: session.cc:2436
 msgid ""
 "No more JACK ports are available. You will need to stop %1 and restart JACK "
 "with more ports if you need this many tracks."
 msgstr ""
+"Non sono disponibili altre porte JACK. Dovrai fermare %1 e riavviare JACK "
+"con più porte se hai bisogno di così tante tracce."
 
 #: session.cc:2484 session.cc:2487
 msgid "Midi Bus"
@@ -2752,11 +2760,11 @@ msgstr ""
 
 #: session_configuration.cc:165
 msgid "Loaded custom session defaults."
-msgstr ""
+msgstr "Impostazioni predefinite di sessione personalizzate caricate."
 
 #: session_configuration.cc:167
 msgid "Found no session defaults in XML file."
-msgstr ""
+msgstr "Non sono stati trovati valori predefiniti di sessione nel file XML."
 
 #: session_configuration.cc:193
 msgid "Could not save session options"
@@ -2847,15 +2855,15 @@ msgstr ""
 
 #: session_state.cc:269 session_state.cc:391
 msgid "Unexpected exception during session setup: "
-msgstr ""
+msgstr "Eccezione imprevista durante l'installazione della sessione:"
 
 #: session_state.cc:272 session_state.cc:394
 msgid "Unknown exception during session setup"
-msgstr ""
+msgstr "Eccezione sconosciuta durante l'installazione della sezione"
 
 #: session_state.cc:298
 msgid "Could not set session state from XML"
-msgstr ""
+msgstr "Impossibile impostare la stato della sessione da XML"
 
 #: session_state.cc:302
 msgid "Session state: "
@@ -2863,7 +2871,7 @@ msgstr "Stato della sessione: "
 
 #: session_state.cc:398
 msgid "Reset Remote Controls"
-msgstr ""
+msgstr "Ripristina controlli remoti"
 
 #: session_state.cc:411 session_state.cc:441
 msgid "Filling playback buffers"
@@ -3227,13 +3235,15 @@ msgstr ""
 
 #: session_state.cc:4870
 msgid "Cannot create new session folder %1"
-msgstr ""
+msgstr "Impossibile creare la cartella %1 della nuova sessione"
 
 #: session_state.cc:4932 session_state.cc:5007
 msgid ""
 "\n"
 "copying \"%1\" failed !"
 msgstr ""
+"\n"
+"copia di \"%1\" non riuscita!"
 
 #: session_state.cc:5222
 msgid "unknown reason"
@@ -3326,7 +3336,7 @@ msgstr "Ogg/Vorbis"
 
 #: sndfile_helpers.cc:41
 msgid "raw (no header)"
-msgstr ""
+msgstr "grezzo (nessuna intestazione)"
 
 #: sndfile_helpers.cc:46
 msgid ".wav"
@@ -3386,11 +3396,11 @@ msgstr "Big-endian (PowerPC)"
 
 #: sndfilesource.cc:274
 msgid "Cannot set flac compression level: %1"
-msgstr ""
+msgstr "Impossibile impostare il livello di compressione flac: %1"
 
 #: sndfilesource.cc:359
 msgid "SndFileSource: cannot open file \"%1\" for %2"
-msgstr ""
+msgstr "SndFileSource: impossibile aprire il file \"%1\" per %2"
 
 #: sndfilesource.cc:377
 msgid ""
@@ -3412,7 +3422,7 @@ msgstr ""
 
 #: sndfilesource.cc:486
 msgid "could not open file %1 for reading."
-msgstr ""
+msgstr "impossibile aprire il file %1 in lettura."
 
 #: sndfilesource.cc:521
 msgid "SndFileSource: could not seek to sample %1 within %2 (%3)"
@@ -3429,7 +3439,7 @@ msgstr ""
 
 #: sndfilesource.cc:585 utils.cc:517 utils.cc:545
 msgid "programming error: %1 %2"
-msgstr ""
+msgstr "errore di programmazione: %1 %2"
 
 #: sndfilesource.cc:623 sndfilesource.cc:641
 msgid "attempt to flush a non-writable audio file source (%1)"
@@ -3437,7 +3447,7 @@ msgstr ""
 
 #: sndfilesource.cc:628
 msgid "could not allocate file %1 to write header"
-msgstr ""
+msgstr "impossibile allocare il file %1 per scrivere l'intestazione"
 
 #: sndfilesource.cc:646
 msgid "could not allocate file %1 to flush contents"
@@ -3458,7 +3468,7 @@ msgstr ""
 
 #: sndfilesource.cc:747
 msgid "SndFileSource: cannot open file \"%1\" for reading"
-msgstr ""
+msgstr "SndFileSource: impossibile aprire il \"%1\" in lettura"
 
 #: solo_control.cc:198
 msgid "Cleared Explicit solo: %1\n"
@@ -3487,7 +3497,7 @@ msgstr ""
 
 #: srcfilesource.cc:141
 msgid "SrcFileSource: %1"
-msgstr ""
+msgstr "SrcFileSource: %1"
 
 #: template_utils.cc:117 template_utils.cc:172
 msgid "(unknown)"
@@ -3619,7 +3629,7 @@ msgstr ""
 
 #: track.cc:630
 msgid "DiskIOProcessor: \"%1\" isn't an playlist"
-msgstr ""
+msgstr "DiskIOProcessor: \"%1\" non è una scaletta"
 
 #: track.cc:677
 msgid "DiskIOProcessor %1: there is no existing playlist to make a copy of!"
@@ -3683,7 +3693,7 @@ msgstr ""
 
 #: transport_master_manager.cc:136
 msgid "programming error:%1"
-msgstr ""
+msgstr "errore di programmazione:%1"
 
 #: transport_master_manager.cc:347
 msgid "Transport master adjusted framerate from %1 to %2."
