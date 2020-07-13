@@ -4055,6 +4055,8 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 		return;
 	}
 
+	string bounce_name;
+
 	TrackSelection views = selection->tracks;
 
 	for (TrackViewList::iterator i = views.begin(); i != views.end(); ++i) {
@@ -4074,6 +4076,49 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 				return;
 			}
 		}
+
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
+		if (rtv && rtv->track()) {
+			if (i!=views.begin())
+				bounce_name.append("+");
+			bounce_name.append(rtv->track()->name());
+		}
+	}
+
+	/*prompt the user for a new name*/
+	{
+		ArdourWidgets::Prompter dialog (true);
+
+		if (replace) {
+			dialog.set_prompt (_("Name for Consolidated Region:"));
+		} else {
+			dialog.set_prompt (_("Name for Bounced Region:"));
+		}
+
+		dialog.set_name ("BounceNameWindow");
+		dialog.set_size_request (400, -1);
+		dialog.set_position (Gtk::WIN_POS_MOUSE);
+
+		dialog.add_button (_("Rename"), RESPONSE_ACCEPT);
+		dialog.set_initial_text (bounce_name);
+
+		if (!replace) {
+			Label label;
+			label.set_text (_("Bounced Range will appear in the Source list."));
+			dialog.get_vbox()->set_spacing (8);
+			dialog.get_vbox()->pack_start (label);
+			label.show();
+		}
+		
+		dialog.show ();
+
+		switch (dialog.run ()) {
+		case RESPONSE_ACCEPT:
+			break;
+		default:
+			return;
+		}
+		dialog.get_result(bounce_name);
 	}
 
 	samplepos_t start = selection->time[clicked_selection].start;
@@ -4103,9 +4148,9 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 		boost::shared_ptr<Region> r;
 
 		if (enable_processing) {
-			r = rtv->track()->bounce_range (start, start+cnt, itt, rtv->track()->main_outs(), false);
+			r = rtv->track()->bounce_range (start, start+cnt, itt, rtv->track()->main_outs(), false, bounce_name);
 		} else {
-			r = rtv->track()->bounce_range (start, start+cnt, itt, boost::shared_ptr<Processor>(), false);
+			r = rtv->track()->bounce_range (start, start+cnt, itt, boost::shared_ptr<Processor>(), false, bounce_name);
 		}
 
 		if (!r) {

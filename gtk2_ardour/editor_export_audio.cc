@@ -48,6 +48,9 @@
 
 #include "ardour_ui.h"
 #include "ardour_message.h"
+
+#include "widgets/prompter.h"
+
 #include "audio_region_view.h"
 #include "audio_time_axis.h"
 #include "editor.h"
@@ -252,6 +255,37 @@ Editor::bounce_region_selection (bool with_processing)
 	 * its results back in the playlist (only in the region list).
 	 */
 
+	/*prompt the user for a new name*/
+	string bounce_name;
+	{
+		ArdourWidgets::Prompter dialog (true);
+
+		dialog.set_prompt (_("Name for Bounced Region:"));
+
+		dialog.set_name ("BounceNameWindow");
+		dialog.set_size_request (400, -1);
+		dialog.set_position (Gtk::WIN_POS_MOUSE);
+
+		dialog.add_button (_("Rename"), RESPONSE_ACCEPT);
+		dialog.set_initial_text (bounce_name);
+
+		Label label;
+		label.set_text (_("Bounced Region will appear in the Source list."));
+		dialog.get_vbox()->set_spacing (8);
+		dialog.get_vbox()->pack_start (label);
+		label.show();
+
+		dialog.show ();
+
+		switch (dialog.run ()) {
+		case RESPONSE_ACCEPT:
+			break;
+		default:
+			return;
+		}
+		dialog.get_result(bounce_name);
+	}
+
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 
 		boost::shared_ptr<Region> region ((*i)->region());
@@ -263,9 +297,9 @@ Editor::bounce_region_selection (bool with_processing)
 		boost::shared_ptr<Region> r;
 
 		if (with_processing) {
-			r = track->bounce_range (region->position(), region->position() + region->length(), itt, track->main_outs(), false);
+			r = track->bounce_range (region->position(), region->position() + region->length(), itt, track->main_outs(), false, bounce_name);
 		} else {
-			r = track->bounce_range (region->position(), region->position() + region->length(), itt, boost::shared_ptr<Processor>(), false);
+			r = track->bounce_range (region->position(), region->position() + region->length(), itt, boost::shared_ptr<Processor>(), false, bounce_name);
 		}
 	}
 }
