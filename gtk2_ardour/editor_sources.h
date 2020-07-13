@@ -61,6 +61,7 @@ private:
 	struct Columns : public Gtk::TreeModel::ColumnRecord {
 		Columns () {
 			add (name);
+			add (channels);
 			add (tags);
 			add (take_id);
 			add (natural_pos);
@@ -71,6 +72,7 @@ private:
 		}
 
 		Gtk::TreeModelColumn<std::string> name;
+		Gtk::TreeModelColumn<int> channels;
 		Gtk::TreeModelColumn<std::string> tags;
 		Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Region> > region;
 		Gtk::TreeModelColumn<Gdk::Color> color_;
