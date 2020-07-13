@@ -539,9 +539,9 @@ MidiTrack::export_stuff (BufferSet&                   buffers,
 }
 
 boost::shared_ptr<Region>
-MidiTrack::bounce (InterThreadInfo& itt)
+MidiTrack::bounce (InterThreadInfo& itt, const std::string name)
 {
-	return bounce_range (_session.current_start_sample(), _session.current_end_sample(), itt, main_outs(), false);
+	return bounce_range (_session.current_start_sample(), _session.current_end_sample(), itt, main_outs(), false, name);
 }
 
 boost::shared_ptr<Region>
@@ -549,10 +549,11 @@ MidiTrack::bounce_range (samplepos_t                  start,
                          samplepos_t                  end,
                          InterThreadInfo&             itt,
                          boost::shared_ptr<Processor> endpoint,
-                         bool                         include_endpoint)
+                         bool                         include_endpoint,
+                         const std::string            name)
 {
 	vector<boost::shared_ptr<Source> > srcs;
-	return _session.write_one_track (*this, start, end, false, srcs, itt, endpoint, include_endpoint, false, false);
+	return _session.write_one_track (*this, start, end, false, srcs, itt, endpoint, include_endpoint, false, false, name);
 }
 
 void

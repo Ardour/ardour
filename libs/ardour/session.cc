@@ -5672,7 +5672,7 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 			  bool /*overwrite*/, vector<boost::shared_ptr<Source> >& srcs,
 			  InterThreadInfo& itt,
 			  boost::shared_ptr<Processor> endpoint, bool include_endpoint,
-			  bool for_export, bool for_freeze)
+			  bool for_export, bool for_freeze, const std::string name)
 {
 	boost::shared_ptr<Region> result;
 	boost::shared_ptr<Playlist> playlist;
@@ -5731,11 +5731,15 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 		goto out;
 	}
 
-	legal_playlist_name = legalize_for_path (playlist->name());
+	if (name.length() > 0) {
+		/*if the user passed in a name, we will use it, and also prepend the resulting sources with that name*/
+		legal_playlist_name.append(legalize_for_path (name) + "-");
+	}
+
+	legal_playlist_name.append(legalize_for_path(playlist->name()));
 
 	for (uint32_t chan_n = 0; chan_n < diskstream_channels.n(data_type); ++chan_n) {
 
-		string base_name = string_compose ("%1-%2-bounce", playlist->name(), chan_n);
 		string path = ((data_type == DataType::AUDIO)
 		               ? new_audio_source_path (legal_playlist_name, diskstream_channels.n_audio(), chan_n, true)
 		               : new_midi_source_path (legal_playlist_name));
@@ -5918,6 +5922,7 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 
 		result = RegionFactory::create (srcs, plist, true);
 
+		result->set_name((name.length() != 0) ? name : legal_playlist_name); /*setting name in the properties didn't seem to work, but this does*/
 	}
 
 	out:

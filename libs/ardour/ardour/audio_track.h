@@ -44,9 +44,10 @@ class LIBARDOUR_API AudioTrack : public Track
 	void unfreeze ();
 
 	bool bounceable (boost::shared_ptr<Processor>, bool include_endpoint) const;
-	boost::shared_ptr<Region> bounce (InterThreadInfo&);
+	boost::shared_ptr<Region> bounce (InterThreadInfo&, const std::string name);
 	boost::shared_ptr<Region> bounce_range (samplepos_t start, samplepos_t end, InterThreadInfo&,
-						boost::shared_ptr<Processor> endpoint, bool include_endpoint);
+						boost::shared_ptr<Processor> endpoint, bool include_endpoint,
+	                    const std::string name);
 	int export_stuff (BufferSet& bufs, samplepos_t start_sample, samplecnt_t nframes,
 	                  boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze,
 	                  MidiStateTracker&);

@@ -913,7 +913,7 @@ public:
 	boost::shared_ptr<Region> write_one_track (Track&, samplepos_t start, samplepos_t end,
 	                                           bool overwrite, std::vector<boost::shared_ptr<Source> >&, InterThreadInfo& wot,
 	                                           boost::shared_ptr<Processor> endpoint,
-	                                           bool include_endpoint, bool for_export, bool for_freeze);
+	                                           bool include_endpoint, bool for_export, bool for_freeze, const std::string name);
 	int freeze_all (InterThreadInfo&);
 
 	/* session-wide solo/mute/rec-enable */

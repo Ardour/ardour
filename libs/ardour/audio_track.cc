@@ -292,17 +292,17 @@ AudioTrack::bounceable (boost::shared_ptr<Processor> endpoint, bool include_endp
 }
 
 boost::shared_ptr<Region>
-AudioTrack::bounce (InterThreadInfo& itt)
+AudioTrack::bounce (InterThreadInfo& itt, const std::string name)
 {
-	return bounce_range (_session.current_start_sample(), _session.current_end_sample(), itt, main_outs(), false);
+	return bounce_range (_session.current_start_sample(), _session.current_end_sample(), itt, main_outs(), false, name);
 }
 
 boost::shared_ptr<Region>
 AudioTrack::bounce_range (samplepos_t start, samplepos_t end, InterThreadInfo& itt,
-			  boost::shared_ptr<Processor> endpoint, bool include_endpoint)
+			  boost::shared_ptr<Processor> endpoint, bool include_endpoint, const std::string name)
 {
 	vector<boost::shared_ptr<Source> > srcs;
-	return _session.write_one_track (*this, start, end, false, srcs, itt, endpoint, include_endpoint, false, false);
+	return _session.write_one_track (*this, start, end, false, srcs, itt, endpoint, include_endpoint, false, false, name);
 }
 
 void
@@ -345,7 +345,7 @@ AudioTrack::freeze_me (InterThreadInfo& itt)
 	boost::shared_ptr<Region> res;
 
 	if ((res = _session.write_one_track (*this, _session.current_start_sample(), _session.current_end_sample(),
-					true, srcs, itt, main_outs(), false, false, true)) == 0) {
+					true, srcs, itt, main_outs(), false, false, true, "")) == 0) {
 		return;
 	}
 
