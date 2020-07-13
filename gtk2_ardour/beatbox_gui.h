@@ -109,12 +109,14 @@ class SequencerView : public ArdourCanvas::ConstraintPacker, public sigc::tracka
 	double _width;
 	double _height;
 	Mode   _mode;
-	ArdourCanvas::ScrollGroup* v_scroll_group;
-	ArdourCanvas::Container* no_scroll_group;
-	ArdourCanvas::ConstraintPacker* no_scroll_vbox;
 	ArdourCanvas::ConstraintPacker* button_packer;
+
 	ArdourCanvas::ConstraintPacker* step_indicator_box;
-	ArdourCanvas::ConstraintPacker* sequence_vbox;
+
+	ArdourCanvas::ConstraintPacker* sequence_hbox;
+	ArdourCanvas::ConstraintPacker* lhs_vbox;
+	ArdourCanvas::ConstraintPacker* steps_vbox;
+	ArdourCanvas::ConstraintPacker* rhs_vbox;
 
 	ArdourCanvas::Rectangle* velocity_mode_button;
 	ArdourCanvas::Rectangle* pitch_mode_button;
@@ -138,7 +140,7 @@ class SequencerView : public ArdourCanvas::ConstraintPacker, public sigc::tracka
 
 };
 
-class SequenceView : public ArdourCanvas::ConstraintPacker
+class SequenceView : public sigc::trackable
 {
   public:
 	SequenceView (SequencerView&, ARDOUR::StepSequence&, ArdourCanvas::Canvas* canvas);
@@ -147,17 +149,19 @@ class SequenceView : public ArdourCanvas::ConstraintPacker
 	SequencerView::Mode mode() const { return sv.mode(); }
 	ARDOUR::StepSequencer& sequencer() const  { return sv.sequencer(); }
 
-   private:
-	SequencerView& sv;
-	ARDOUR::StepSequence& sequence;
-
 	ArdourCanvas::ConstraintPacker* lhs_box;
 	ArdourCanvas::ConstraintPacker* rhs_box;
 	ArdourCanvas::ConstraintPacker* step_box;
 
+   private:
+	SequencerView& sv;
+	ARDOUR::StepSequence& sequence;
+
 	ArdourCanvas::Text* number_text;
 	ArdourCanvas::Text* name_text;
 	ArdourCanvas::Text* root_text;
+	ArdourCanvas::Rectangle* step_cnt_button;
+	ArdourCanvas::Rectangle* speed_slide;
 
 	bool name_text_event (GdkEvent*);
 	void edit_name ();
