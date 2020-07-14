@@ -39,6 +39,7 @@
 #include <unistd.h>
 #include <limits.h>
 
+#include <glibmm/datetime.h>
 #include <glibmm/threads.h>
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
@@ -5758,6 +5759,11 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 		}
 
 		source->set_captured_for(track.name());
+
+		time_t now;
+		time (&now);
+		Glib::DateTime tm (Glib::DateTime::create_now_local (now));
+		source->set_take_id (tm.format ("%F %H.%M.%S"));
 
 		srcs.push_back (source);
 	}
