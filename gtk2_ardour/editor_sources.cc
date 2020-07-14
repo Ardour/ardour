@@ -81,6 +81,7 @@ EditorSources::EditorSources (Editor* e)
 	: EditorComponent (e)
 	, old_focus (0)
 	, tags_editable (0)
+	, name_editable (0)
 {
 	_display.set_size_request (100, -1);
 	_display.set_rules_hint (true);
@@ -187,6 +188,12 @@ EditorSources::EditorSources (Editor* e)
 	tv_col->add_attribute(renderer->property_text(), _columns.name);
 	tv_col->add_attribute(renderer->property_foreground_gdk(), _columns.color_);
 
+	/* Name cell: make editable */
+	CellRendererText* region_name_cell = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (0));
+	region_name_cell->property_editable() = true;
+	region_name_cell->signal_edited().connect (sigc::mem_fun (*this, &EditorSources::name_edit));
+	region_name_cell->signal_editing_started().connect (sigc::mem_fun (*this, &EditorSources::name_editing_started));
+
 	/* Tags cell: make editable */
 	CellRendererText* region_tags_cell = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (3));
 	region_tags_cell->property_editable() = true;
@@ -253,6 +260,7 @@ EditorSources::focus_in (GdkEventFocus*)
 	}
 
 	tags_editable = 0;
+	name_editable = 0;
 
 	/* try to do nothing on focus in (doesn't work, hence selection_count nonsense) */
 	return true;
@@ -267,6 +275,7 @@ EditorSources::focus_out (GdkEventFocus*)
 	}
 
 	tags_editable = 0;
+	name_editable = 0;
 
 	return false;
 }
@@ -274,7 +283,7 @@ EditorSources::focus_out (GdkEventFocus*)
 bool
 EditorSources::enter_notify (GdkEventCrossing*)
 {
-	if (tags_editable) {
+	if (tags_editable || name_editable) {
 		return true;
 	}
 
@@ -735,6 +744,11 @@ EditorSources::key_press (GdkEventKey* ev)
 			tags_editable = 0;
 		}
 
+		if (name_editable) {
+			name_editable->editing_done ();
+			name_editable = 0;
+		}
+
 		col = _display.get_column (1); // select&focus on tags column
 
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
@@ -805,6 +819,51 @@ EditorSources::tag_edit (const std::string& path, const std::string& new_text)
 
 	if (region) {
 		region->set_tags (new_text);
+
+		_session->set_dirty(); // whole-file regions aren't in a playlist to catch property changes, so we need to explicitly set the session dirty
+
+		populate_row ((*row_iter), region);
+	}
+}
+
+void
+EditorSources::name_editing_started (CellEditable* ce, const Glib::ustring& path)
+{
+	name_editable = ce;
+
+	/* give it a special name */
+
+	Gtk::Entry *e = dynamic_cast<Gtk::Entry*> (ce);
+
+	if (e) {
+		e->set_name (X_("SourceNameEditorEntry"));
+
+		TreeIter iter;
+		if ((iter = _model->get_iter (path))) {
+			boost::shared_ptr<Region> region = (*iter)[_columns.region];
+
+			if(region) {
+				e->set_text(region->name());
+			}
+		}
+	}
+}
+
+void
+EditorSources::name_edit (const std::string& path, const std::string& new_text)
+{
+	name_editable = 0;
+
+	boost::shared_ptr<Region> region;
+	TreeIter row_iter;
+
+	if ((row_iter = _model->get_iter (path))) {
+		region = (*row_iter)[_columns.region];
+		(*row_iter)[_columns.name] = new_text;
+	}
+
+	if (region) {
+		region->set_name (new_text);
 
 		_session->set_dirty(); // whole-file regions aren't in a playlist to catch property changes, so we need to explicitly set the session dirty
 

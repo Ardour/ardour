@@ -102,6 +102,10 @@ private:
 	void tag_editing_started (Gtk::CellEditable*, const Glib::ustring&);
 	void tag_edit (const std::string&, const std::string&);
 
+	Gtk::CellEditable* name_editable;
+	void name_editing_started (Gtk::CellEditable*, const Glib::ustring&);
+	void name_edit (const std::string&, const std::string&);
+
 	bool key_press (GdkEventKey *);
 	bool button_press (GdkEventButton *);
 
