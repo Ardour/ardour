@@ -104,7 +104,7 @@ EditorSources::EditorSources (Editor* e)
 	Glib::RefPtr<Pango::Layout> layout2 = _display.create_pango_layout (X_("2018-10-14 12:12:30"));
 	Gtkmm2ext::get_pixel_size (layout2, date_width, height);
 
-	Glib::RefPtr<Pango::Layout> layout3 = _display.create_pango_layout (X_("Chans  "));
+	Glib::RefPtr<Pango::Layout> layout3 = _display.create_pango_layout (X_("Chans   "));
 	Gtkmm2ext::get_pixel_size (layout3, chan_width, height);
 
 	TreeViewColumn* col_name = manage (new TreeViewColumn ("", _columns.name));
@@ -117,28 +117,34 @@ EditorSources::EditorSources (Editor* e)
 	col_chans->set_sizing (TREE_VIEW_COLUMN_FIXED);
 	col_chans->set_sort_column(1);
 
+	TreeViewColumn* captd_for = manage (new TreeViewColumn ("", _columns.captd_for));
+	captd_for->set_fixed_width (date_width);
+	captd_for->set_sizing (TREE_VIEW_COLUMN_FIXED);
+	captd_for->set_sort_column(2);
+
 	TreeViewColumn* col_tags = manage (new TreeViewColumn ("", _columns.tags));
-	col_tags->set_fixed_width (bbt_width*2);
+	col_tags->set_fixed_width (date_width);
 	col_tags->set_sizing (TREE_VIEW_COLUMN_FIXED);
-	col_tags->set_sort_column(2);
+	col_tags->set_sort_column(3);
 
 	TreeViewColumn* col_take_id = manage (new TreeViewColumn ("", _columns.take_id));
 	col_take_id->set_fixed_width (date_width);
 	col_take_id->set_sizing (TREE_VIEW_COLUMN_FIXED);
-	col_take_id->set_sort_column(3);
+	col_take_id->set_sort_column(4);
 
 	TreeViewColumn* col_nat_pos = manage (new TreeViewColumn ("", _columns.natural_pos));
 	col_nat_pos->set_fixed_width (bbt_width);
 	col_nat_pos->set_sizing (TREE_VIEW_COLUMN_FIXED);
-	col_nat_pos->set_sort_column(8);
+	col_nat_pos->set_sort_column(9);
 
 	TreeViewColumn* col_path = manage (new TreeViewColumn ("", _columns.path));
 	col_path->set_fixed_width (bbt_width);
 	col_path->set_sizing (TREE_VIEW_COLUMN_FIXED);
-	col_path->set_sort_column(5);
+	col_path->set_sort_column(6);
 
 	_display.append_column (*col_name);
 	_display.append_column (*col_chans);
+	_display.append_column (*captd_for);
 	_display.append_column (*col_tags);
 	_display.append_column (*col_take_id);
 	_display.append_column (*col_nat_pos);
@@ -150,10 +156,11 @@ EditorSources::EditorSources (Editor* e)
 	ColumnInfo ci[] = {
 		{ 0,   _("Name"),      _("Region name") },
 		{ 1,   _("Chans"),     _("Channels") },
-		{ 2,   _("Tags"),      _("Tags") },
-		{ 3,   _("Take ID"),   _("Take ID") },
-		{ 4,   _("Orig Pos"),  _("Original Position of the file on timeline, when it was recorded") },
-		{ 5,   _("Path"),      _("Path (folder) of the file location") },
+		{ 2,   _("Captured For"), _("Original Track this was recorded on") },
+		{ 3,   _("Tags"),      _("Tags") },
+		{ 4,   _("Take ID"),   _("Take ID") },
+		{ 5,   _("Orig Pos"),  _("Original Position of the file on timeline, when it was recorded") },
+		{ 6,   _("Path"),      _("Path (folder) of the file location") },
 		{ -1, 0, 0 }
 	};
 
@@ -181,22 +188,22 @@ EditorSources::EditorSources (Editor* e)
 	tv_col->add_attribute(renderer->property_foreground_gdk(), _columns.color_);
 
 	/* Tags cell: make editable */
-	CellRendererText* region_tags_cell = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (2));
+	CellRendererText* region_tags_cell = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (3));
 	region_tags_cell->property_editable() = true;
 	region_tags_cell->signal_edited().connect (sigc::mem_fun (*this, &EditorSources::tag_edit));
 	region_tags_cell->signal_editing_started().connect (sigc::mem_fun (*this, &EditorSources::tag_editing_started));
 
 	/* right-align the Natural Pos column */
-	TreeViewColumn* nat_col = _display.get_column(4);
+	TreeViewColumn* nat_col = _display.get_column(5);
 	nat_col->set_alignment (ALIGN_RIGHT);
-	renderer = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (4));
+	renderer = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (5));
 	if (renderer) {
 		renderer->property_xalign() = ( 1.0 );
 	}
 
 	/* the PATH field should expand when the pane is opened wider */
-	tv_col = _display.get_column(4);
-	renderer = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (5));
+	tv_col = _display.get_column(6);
+	renderer = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (6));
 	tv_col->add_attribute(renderer->property_text(), _columns.path);
 	tv_col->set_expand (true);
 
@@ -370,7 +377,11 @@ EditorSources::populate_row (TreeModel::Row row, boost::shared_ptr<ARDOUR::Regio
 	/* NAME */
 	row[_columns.name] = region->name();
 
+	/* N CHANNELS */
 	row[_columns.channels] = region->n_channels();
+
+	/* CAPTURED FOR */
+	row[_columns.captd_for] = source->captured_for();
 
 	/* TAGS */
 	row[_columns.tags] = region->tags();
