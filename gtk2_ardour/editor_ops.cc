@@ -4450,7 +4450,7 @@ Editor::cut_copy_points (Editing::CutCopyOp op, Temporal::Beats earliest, bool m
 			lists[al].copy->fast_simple_add ((*ctrl_evt)->when, (*ctrl_evt)->value);
 			if (midi) {
 				/* Update earliest MIDI start time in beats */
-				earliest = std::min(earliest, Temporal::Beats((*ctrl_evt)->when));
+				earliest = std::min(earliest, Temporal::Beats::from_double ((*ctrl_evt)->when));
 			} else {
 				/* Update earliest session start time in samples */
 				start.sample = std::min(start.sample, (*sel_point)->line().session_position(ctrl_evt));
@@ -4470,7 +4470,9 @@ Editor::cut_copy_points (Editing::CutCopyOp op, Temporal::Beats earliest, bool m
 			snap_to(start, RoundDownMaybe);
 		}
 
-		const double line_offset = midi ? earliest.to_double() : start.sample;
+		/* XXX NUTEMPO BROKEN FOR MIDI */
+		//const double line_offset = midi ? earliest.to_double() : start.sample;
+		const double line_offset = start.sample;
 		for (Lists::iterator i = lists.begin(); i != lists.end(); ++i) {
 			/* Correct this copy list so that it is relative to the earliest
 			   start time, so relative ordering between points is preserved
@@ -5700,7 +5702,7 @@ Editor::apply_midi_note_edit_op_to_region (MidiOperator& op, MidiRegionView& mrv
 	vector<Evoral::Sequence<Temporal::Beats>::Notes> v;
 	v.push_back (selected);
 
-	Temporal::Beats pos_beats  = Temporal::Beats (mrv.midi_region()->beat()) - mrv.midi_region()->start_beats();
+	Temporal::Beats pos_beats  = Temporal::Beats::from_double (mrv.midi_region()->beat() - mrv.midi_region()->start_beats());
 
 	return op (mrv.midi_region()->model(), pos_beats, v);
 }

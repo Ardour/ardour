@@ -443,7 +443,7 @@ StepEditor::region_removed (boost::weak_ptr<Region> wr)
 		step_edit_region.reset();
 		step_edit_region_view = 0;
 		// force a recompute of the insert position
-		step_edit_beat_pos = Temporal::Beats(-1);
+		step_edit_beat_pos = Temporal::Beats::from_double (-1);
 	}
 }
 

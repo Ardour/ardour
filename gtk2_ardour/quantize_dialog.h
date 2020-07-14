@@ -27,6 +27,8 @@
 #include <gtkmm/checkbutton.h>
 #include <gtkmm/spinbutton.h>
 
+#include "temporal/beats.h"
+
 #include "ardour/types.h"
 
 #include "ardour_dialog.h"
@@ -49,7 +51,7 @@ public:
 	bool   snap_start() const { return snap_start_button.get_active(); }
 	bool   snap_end() const { return snap_end_button.get_active(); }
 	float  strength() const;
-	float  threshold () const;
+	Temporal::Beats  threshold () const;
 	float  swing () const;
 
 private:

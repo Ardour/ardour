@@ -5935,11 +5935,11 @@ NoteDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 }
 
 /** @return Current total drag x change in quarter notes */
-double
+Temporal::Beats
 NoteDrag::total_dx (GdkEvent * event) const
 {
 	if (_x_constrained) {
-		return 0;
+		return Temporal::Beats();
 	}
 
 	TempoMap& map (_editor->session()->tempo_map());
@@ -5948,10 +5948,10 @@ NoteDrag::total_dx (GdkEvent * event) const
 	sampleoffset_t const dx = _editor->pixel_to_sample (_drags->current_pointer_x() - grab_x());
 
 	/* primary note time */
-	sampleoffset_t const n = map.sample_at_quarter_note (_region->session_relative_qn (_primary->note()->time().to_double()));
+	sampleoffset_t const n = map.sample_at_quarter_note (_region->session_relative_qn (_primary->note()->time()));
 
 	/* primary note time in quarter notes */
-	double const n_qn = _region->session_relative_qn (_primary->note()->time().to_double());
+	double const n_qn = _region->session_relative_qn (_primary->note()->time());
 
 	/* new time of the primary note in session samples */
 	sampleoffset_t st = n + dx + snap_delta (event->button.state);
@@ -5959,7 +5959,7 @@ NoteDrag::total_dx (GdkEvent * event) const
 	/* possibly snap and return corresponding delta in quarter notes */
 	MusicSample snap (st, 0);
 	_editor->snap_to_with_modifier (snap, event, RoundNearest, SnapToGrid_Unscaled);
-	double ret = map.exact_qn_at_sample (snap.sample, snap.division) - n_qn - snap_delta_music (event->button.state);
+	Temporal::Beats ret = Temporal::Beats::from_double (map.exact_qn_at_sample (snap.sample, snap.division) - n_qn - snap_delta_music (event->button.state));
 
 	/* prevent the earliest note being dragged earlier than the region's start position */
 	if (_earliest + ret < _region->midi_region()->start_beats()) {
@@ -6000,7 +6000,7 @@ NoteDrag::motion (GdkEvent * event, bool first_move)
 	}
 
 	/* Total change in x and y since the start of the drag */
-	double const dx_qn = total_dx (event);
+	Temporal::Beats const dx_qn = total_dx (event);
 	int8_t const dy = total_dy ();
 
 	/* Now work out what we have to do to the note canvas items to set this new drag delta */
@@ -6690,7 +6690,7 @@ HitCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	}
 
 	const samplepos_t start = map.sample_at_quarter_note (eqaf) - _region_view->region()->position();
-	Temporal::Beats length = Temporal::Beats(1.0 / 32.0); /* 1/32 beat = 1/128 note */
+	Temporal::Beats length = Temporal::Beats::from_double (1.0 / 32.0); /* 1/32 beat = 1/128 note */
 
 	_editor->begin_reversible_command (_("Create Hit"));
 	_region_view->clear_note_selection();

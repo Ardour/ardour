@@ -247,7 +247,7 @@ AutomationRegionView::paste (samplepos_t                                     pos
 	/* add multi-paste offset if applicable */
 	if (parameter_is_midi (src_type)) {
 		// convert length to samples (incl tempo-ramps)
-		len = DoubleBeatsSamplesConverter (view->session()->tempo_map(), pos).to (len * paste_count);
+		len = BeatsSamplesConverter (view->session()->tempo_map(), pos).to (Temporal::Beats::from_double (len * paste_count));
 		pos += view->editor ().get_paste_offset (pos, paste_count > 0 ? 1 : 0, len);
 	} else {
 		pos += view->editor ().get_paste_offset (pos, paste_count, len);
@@ -258,7 +258,7 @@ AutomationRegionView::paste (samplepos_t                                     pos
 		pos - _source_relative_time_converter.origin_b());
 
 	XMLNode& before = my_list->get_state();
-	my_list->paste(*slist, model_pos, DoubleBeatsSamplesConverter (view->session()->tempo_map(), pos));
+	my_list->paste(*slist, model_pos, BeatsSamplesConverter (view->session()->tempo_map(), pos));
 	view->session()->add_command(
 		new MementoCommand<ARDOUR::AutomationList>(_line->memento_command_binder(), &before, &my_list->get_state()));
 

@@ -597,7 +597,7 @@ public:
 
 private:
 
-	double total_dx (GdkEvent * event) const; // total movement in quarter notes
+	Temporal::Beats total_dx (GdkEvent * event) const; // total movement in quarter notes
 	int8_t total_dy () const;
 
 	MidiRegionView* _region;

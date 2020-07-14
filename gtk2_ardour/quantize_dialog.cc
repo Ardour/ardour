@@ -189,8 +189,8 @@ QuantizeDialog::strength () const
 	return strength_adjustment.get_value ();
 }
 
-float
+Temporal::Beats
 QuantizeDialog::threshold () const
 {
-	return threshold_adjustment.get_value ();
+	return Temporal::Beats::from_double (threshold_adjustment.get_value ());
 }

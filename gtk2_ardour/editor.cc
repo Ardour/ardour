@@ -4154,16 +4154,16 @@ Editor::get_grid_type_as_beats (bool& success, samplepos_t position)
 
 	const unsigned divisions = get_grid_beat_divisions(position);
 	if (divisions) {
-		return Temporal::Beats(1.0 / (double)get_grid_beat_divisions(position));
+		return Temporal::Beats::from_double (1.0 / (double)get_grid_beat_divisions(position));
 	}
 
 	switch (_grid_type) {
 	case GridTypeBeat:
-		return Temporal::Beats(4.0 / _session->tempo_map().meter_at_sample (position).note_divisor());
+		return Temporal::Beats::from_double (4.0 / _session->tempo_map().meter_at_sample (position).note_divisor());
 	case GridTypeBar:
 		if (_session) {
 			const Meter& m = _session->tempo_map().meter_at_sample (position);
-			return Temporal::Beats((4.0 * m.divisions_per_bar()) / m.note_divisor());
+			return Temporal::Beats::from_double ((4.0 * m.divisions_per_bar()) / m.note_divisor());
 		}
 		break;
 	default:

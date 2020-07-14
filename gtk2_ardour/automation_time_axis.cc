@@ -858,7 +858,7 @@ AutomationTimeAxisView::paste_one (samplepos_t pos, unsigned paste_count, float 
 
 	if (parameter_is_midi (src_type)) {
 		// convert length to samples (incl tempo-ramps)
-		len = DoubleBeatsSamplesConverter (_session->tempo_map(), pos).to (len * paste_count);
+		len = BeatsSamplesConverter (_session->tempo_map(), pos).to (Temporal::Beats::from_double (len * paste_count));
 		pos += _editor.get_paste_offset (pos, paste_count > 0 ? 1 : 0, len);
 	} else {
 		pos += _editor.get_paste_offset (pos, paste_count, len);
@@ -868,7 +868,7 @@ AutomationTimeAxisView::paste_one (samplepos_t pos, unsigned paste_count, float 
 	double const model_pos = _line->time_converter().from (pos - _line->time_converter().origin_b ());
 
 	XMLNode &before = alist->get_state();
-	alist->paste (**p, model_pos, DoubleBeatsSamplesConverter (_session->tempo_map(), pos));
+	alist->paste (**p, model_pos, BeatsSamplesConverter (_session->tempo_map(), pos));
 	_session->add_command (new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
 
 	return true;

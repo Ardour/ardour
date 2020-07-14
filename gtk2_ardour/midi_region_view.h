@@ -211,9 +211,9 @@ public:
 
 	Temporal::Beats earliest_in_selection ();
 	void move_selection(double dx, double dy, double cumulative_dy);
-	void note_dropped (NoteBase* ev, double d_qn, int8_t d_note, bool copy);
+	void note_dropped (NoteBase* ev, Temporal::Beats const & d_qn, int8_t d_note, bool copy);
 	NoteBase* copy_selection (NoteBase* primary);
-	void move_copies(double dx_qn, double dy, double cumulative_dy);
+	void move_copies(Temporal::Beats const & dx_qn, double dy, double cumulative_dy);
 
 	void select_notes (std::list<Evoral::event_id_t>, bool allow_audition);
 	void select_matching_notes (uint8_t notenum, uint16_t channel_mask, bool add, bool extend);
@@ -306,8 +306,8 @@ public:
 		return _source_relative_time_converter;
 	}
 
-	ARDOUR::DoubleBeatsSamplesConverter const & region_relative_time_converter_double () const {
-		return _region_relative_time_converter_double;
+	ARDOUR::BeatsSamplesConverter const & region_relative_time_converter_double () const {
+		return _region_relative_time_converter;
 	}
 
 	double session_relative_qn (double qn) const;
@@ -485,7 +485,7 @@ public:
 
 	ARDOUR::BeatsSamplesConverter _region_relative_time_converter;
 	ARDOUR::BeatsSamplesConverter _source_relative_time_converter;
-	ARDOUR::DoubleBeatsSamplesConverter _region_relative_time_converter_double;
+	ARDOUR::BeatsSamplesConverter _region_relative_time_converter_double;
 
 	boost::shared_ptr<ARDOUR::MidiModel> _model;
 	Events                               _events;
