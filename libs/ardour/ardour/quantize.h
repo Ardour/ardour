@@ -30,7 +30,7 @@ class LIBARDOUR_API Quantize : public MidiOperator {
 public:
 	Quantize (bool snap_start, bool snap_end,
 			double start_grid, double end_grid,
-			float strength, float swing, float threshold);
+	          float strength, float swing, Temporal::Beats const & threshold);
 	~Quantize ();
 
 	Command* operator() (boost::shared_ptr<ARDOUR::MidiModel>,
@@ -45,7 +45,7 @@ private:
 	double _end_grid;
 	float  _strength;
 	float  _swing;
-	float  _threshold;
+	Temporal::Beats  _threshold;
 };
 
 } /* namespace */

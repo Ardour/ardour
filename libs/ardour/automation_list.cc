@@ -315,7 +315,7 @@ AutomationList::thaw ()
 }
 
 bool
-AutomationList::paste (const ControlList& alist, double pos, DoubleBeatsSamplesConverter const& bfc)
+AutomationList::paste (const ControlList& alist, double pos, BeatsSamplesConverter const& bfc)
 {
 	AutomationType src_type = (AutomationType)alist.parameter().type();
 	AutomationType dst_type = (AutomationType)_parameter.type();
@@ -330,9 +330,9 @@ AutomationList::paste (const ControlList& alist, double pos, DoubleBeatsSamplesC
 	for (const_iterator i = alist.begin ();i != alist.end (); ++i) {
 		double when = (*i)->when;
 		if (to_sample) {
-			when = bfc.to ((*i)->when);
+			when = bfc.to (Temporal::Beats::from_double ((*i)->when));
 		} else {
-			when = bfc.from ((*i)->when);
+			when = bfc.from ((*i)->when).to_double ();
 		}
 		cl.fast_simple_add (when, (*i)->value);
 	}

@@ -67,7 +67,6 @@ SMFSource::SMFSource (Session& s, const string& path, Source::Flag flags)
 	, FileSource(s, DataType::MIDI, path, string(), flags)
 	, Evoral::SMF()
 	, _open (false)
-	, _last_ev_time_beats(0.0)
 	, _last_ev_time_samples(0)
 	, _smf_last_read_end (0)
 	, _smf_last_read_time (0)
@@ -103,7 +102,6 @@ SMFSource::SMFSource (Session& s, const string& path)
 	, FileSource(s, DataType::MIDI, path, string(), Source::Flag (0))
 	, Evoral::SMF()
 	, _open (false)
-	, _last_ev_time_beats(0.0)
 	, _last_ev_time_samples(0)
 	, _smf_last_read_end (0)
 	, _smf_last_read_time (0)
@@ -135,7 +133,6 @@ SMFSource::SMFSource (Session& s, const XMLNode& node, bool must_exist)
 	, MidiSource(s, node)
 	, FileSource(s, node, must_exist)
 	, _open (false)
-	, _last_ev_time_beats(0.0)
 	, _last_ev_time_samples(0)
 	, _smf_last_read_end (0)
 	, _smf_last_read_time (0)
@@ -419,7 +416,7 @@ SMFSource::append_event_beats (const Glib::Threads::Mutex::Lock&   lock,
 	Temporal::Beats time = ev.time();
 	if (time < _last_ev_time_beats) {
 		const Temporal::Beats difference = _last_ev_time_beats - time;
-		if (difference.to_double() / (double)ppqn() < 1.0) {
+		if (difference < Temporal::Beats::ticks (ppqn())) {
 			/* Close enough.  This problem occurs because Sequence is not
 			   actually ordered due to fuzzy time comparison.  I'm pretty sure
 			   this is inherently a bad idea which causes problems all over the
@@ -428,7 +425,7 @@ SMFSource::append_event_beats (const Glib::Threads::Mutex::Lock&   lock,
 		} else {
 			/* Out of order by more than a tick. */
 			warning << string_compose(_("Skipping event with unordered beat time %1 < %2 (off by %3 beats, %4 ticks)"),
-			                          ev.time(), _last_ev_time_beats, difference, difference.to_double() / (double)ppqn())
+			                          ev.time(), _last_ev_time_beats, difference, difference)
 			        << endmsg;
 			return;
 		}

@@ -66,7 +66,6 @@ using namespace PBD;
 MidiSource::MidiSource (Session& s, string name, Source::Flag flags)
 	: Source(s, DataType::MIDI, name, flags)
 	, _writing(false)
-	, _length_beats(0.0)
 	, _capture_length(0)
 	, _capture_loop_length(0)
 {
@@ -75,7 +74,6 @@ MidiSource::MidiSource (Session& s, string name, Source::Flag flags)
 MidiSource::MidiSource (Session& s, const XMLNode& node)
 	: Source(s, node)
 	, _writing(false)
-	, _length_beats(0.0)
 	, _capture_length(0)
 	, _capture_loop_length(0)
 {

@@ -453,8 +453,8 @@ no_audio_tracks:
 
 		for (vector<PTFFormat::midi_ev_t>::const_iterator j = a->reg.midi.begin (); j != a->reg.midi.end (); ++j) {
 			//printf(" : MIDI : pos=%f len=%f\n", (float)j->pos / 960000., (float)j->length / 960000.);
-			Temporal::Beats start = (Temporal::Beats)(j->pos / 960000.);
-			Temporal::Beats len = (Temporal::Beats)(j->length / 960000.);
+			Temporal::Beats start = Temporal::Beats::from_double (j->pos / 960000.);
+			Temporal::Beats len = Temporal::Beats::from_double(j->length / 960000.);
 			/* PT C-2 = 0, Ardour C-1 = 0, subtract twelve to convert ? */
 			midicmd->add (boost::shared_ptr<Evoral::Note<Temporal::Beats> > (new Evoral::Note<Temporal::Beats> ((uint8_t)1, start, len, j->note, j->velocity)));
 		}

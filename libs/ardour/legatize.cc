@@ -43,7 +43,7 @@ Legatize::operator()(boost::shared_ptr<ARDOUR::MidiModel> model,
 				break;
 			}
 
-			const Temporal::Beats new_end = (*next)->time() - Temporal::Beats::tick();
+			const Temporal::Beats new_end = (*next)->time() - Temporal::Beats::one_tick();
 			if ((*i)->end_time() > new_end ||
 			    (!_shrink_only && (*i)->end_time() < new_end)) {
 				const Temporal::Beats new_length(new_end - (*i)->time());

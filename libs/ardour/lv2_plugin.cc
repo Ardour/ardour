@@ -1776,6 +1776,15 @@ LV2Plugin::write_to_ui(uint32_t       index,
 	}
 	return true;
 }
+/* this used to be computed by Temporal::Beats::to_double() but that
+ * method has been hidden as of February 2017 to prevent inadvertent
+ * use of floating point musical time.
+ */
+inline static double
+beats_to_double (Temporal::Beats const & b)
+{
+	return (double) b.get_beats() + (b.get_ticks() / (double) Temporal::ticks_per_beat);
+}
 
 static void
 forge_variant(LV2_Atom_Forge* forge, const Variant& value)
@@ -1785,7 +1794,7 @@ forge_variant(LV2_Atom_Forge* forge, const Variant& value)
 		break;
 	case Variant::BEATS:
 		// No atom type for this, just forge a double
-		lv2_atom_forge_double(forge, value.get_beats().to_double());
+		lv2_atom_forge_double(forge, beats_to_double (value.get_beats()));
 		break;
 	case Variant::BOOL:
 		lv2_atom_forge_bool(forge, value.get_bool());

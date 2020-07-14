@@ -39,7 +39,7 @@ using namespace ARDOUR;
 
 Quantize::Quantize (bool snap_start, bool snap_end,
 		    double start_grid, double end_grid,
-		    float strength, float swing, float threshold)
+                    float strength, float swing, Temporal::Beats const & threshold)
 	: _snap_start (snap_start)
 	, _snap_end (snap_end)
 	, _start_grid(start_grid)
@@ -122,8 +122,8 @@ Quantize::operator () (boost::shared_ptr<MidiModel> model,
 	   to quantize relative to actual session beats (etc.) rather than from the
 	   start of the model.
 	*/
-	const double round_pos = round(position.to_double() / _start_grid) * _start_grid;
-	const double offset    = round_pos - position.to_double();
+	const double round_pos = (position / _start_grid) * _start_grid;
+	const double offset    = round_pos - position;
 
 	MidiModel::NoteDiffCommand* cmd = new MidiModel::NoteDiffCommand (model, "quantize");
 
@@ -138,8 +138,8 @@ Quantize::operator () (boost::shared_ptr<MidiModel> model,
 			 * guaranteed to precisely align with the quantize grid(s).
 			 */
 
-			double new_start = round (((*i)->time().to_double() - offset) / _start_grid) * _start_grid;
-			double new_end = round (((*i)->end_time().to_double() - offset) / _end_grid) * _end_grid;
+			Temporal::Beats new_start = (((*i)->time()  - offset) / _start_grid) * _start_grid;
+			Temporal::Beats new_end = (((*i)->end_time() - offset) / _end_grid) * _end_grid;
 
 			if (_swing) {
 
@@ -154,25 +154,25 @@ Quantize::operator () (boost::shared_ptr<MidiModel> model,
 				new_end += offset;
 			}
 
-			double delta = new_start - (*i)->time().to_double();
+			Temporal::Beats delta = new_start - (*i)->time();
 
-
-			if (fabs (delta) >= _threshold) {
+			if (delta.abs() >= _threshold) {
 				if (_snap_start) {
-					delta *= _strength;
+					delta = delta * _strength;
 					cmd->change ((*i), MidiModel::NoteDiffCommand::StartTime,
 					             (*i)->time() + delta);
 				}
 			}
 
 			if (_snap_end) {
-				delta = new_end - (*i)->end_time().to_double();
+				delta = new_end - (*i)->end_time();
 
-				if (fabs (delta) >= _threshold) {
+				if (delta.abs() >= _threshold) {
+
 					Temporal::Beats new_dur(new_end - new_start);
 
 					if (!new_dur) {
-						new_dur = Temporal::Beats(_end_grid);
+						new_dur = Temporal::Beats::from_double (_end_grid);
 					}
 
 					cmd->change ((*i), MidiModel::NoteDiffCommand::Length, new_dur);

@@ -191,7 +191,7 @@ MidiStateTracker::resolve_notes (MidiSource& src, const MidiSource::Lock& lock, 
 										       this, (int) note, (int) channel, time));
 				_active_notes[note + 128 * channel]--;
 				/* don't stack events up at the same time */
-				time += Temporal::Beats::tick();
+				time += Temporal::Beats::one_tick();
 			}
 		}
 	}

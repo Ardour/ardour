@@ -16,6 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstdlib>
+
 #include "temporal/beats.h"
 #include "evoral/TimeConverter.h"
 
@@ -66,6 +68,7 @@ public:
 private:
 	const TempoMap& _tempo_map;
 };
+
 
 } /* namespace ARDOUR */
 

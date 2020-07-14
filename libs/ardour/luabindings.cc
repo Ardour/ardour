@@ -200,7 +200,6 @@ CLASSKEYS(std::list<Selectable*>);
 
 CLASSKEYS(ARDOUR::AudioEngine);
 CLASSKEYS(ARDOUR::BeatsSamplesConverter);
-CLASSKEYS(ARDOUR::DoubleBeatsSamplesConverter);
 CLASSKEYS(ARDOUR::BufferSet);
 CLASSKEYS(ARDOUR::ChanCount);
 CLASSKEYS(ARDOUR::ChanMapping);
@@ -557,8 +556,7 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.beginClass <Temporal::Beats> ("Beats")
-		.addConstructor <void (*) (double)> ()
-		.addFunction ("to_double", &Temporal::Beats::to_double)
+		/* XXX need some way to construct beats in Lua */
 		.endClass ()
 
 		.beginClass <Evoral::Parameter> ("Parameter")
@@ -1903,12 +1901,6 @@ LuaBindings::common (lua_State* L)
 		.addConstructor <void (*) (const TempoMap&, samplepos_t)> ()
 		.addFunction ("to", &BeatsSamplesConverter::to)
 		.addFunction ("from", &BeatsSamplesConverter::from)
-		.endClass ()
-
-		.beginClass <DoubleBeatsSamplesConverter> ("DoubleBeatsSamplesConverter")
-		.addConstructor <void (*) (const TempoMap&, samplepos_t)> ()
-		.addFunction ("to", &DoubleBeatsSamplesConverter::to)
-		.addFunction ("from", &DoubleBeatsSamplesConverter::from)
 		.endClass ()
 
 		.beginClass <TempoMap> ("TempoMap")

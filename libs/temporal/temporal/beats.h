@@ -28,14 +28,44 @@
 #include <iostream>
 #include <limits>
 
+#include "pbd/compose.h"
+#include "pbd/failed_constructor.h"
+#include "pbd/string_convert.h"
+
+
 #include "temporal/visibility.h"
+#include "temporal/types.h"
+
+namespace ARDOUR {
+class Variant; /* Can stay since LV2 has no way to exchange beats as anything except double */
+/* these all need fixing to not use ::to_double() */
+class TempoMap;
+class Track;
+class MidiStretch;
+class MidiModel;
+class AutomationList;
+class MidiSource;
+class MidiRegion;
+/* these use ::to_double() but should be removed */
+class DoubleBeatsSamplesConverter;
+}
+
+namespace Evoral {
+template<typename T> class Sequence;
+}
+
+/* XXX hack friends for ::do_double() access ... remove */
+
+class QuantizeDialog;
+class NoteDrag;
+class NoteCreateDrag;
 
 namespace Temporal {
 
 /** Musical time in beats. */
 class /*LIBTEMPORAL_API*/ Beats {
 public:
-	LIBTEMPORAL_API static const int32_t PPQN = 1920;
+	LIBTEMPORAL_API static const int32_t PPQN = Temporal::ticks_per_beat;
 
 	Beats() : _beats(0), _ticks(0) {}
 	Beats(const Beats& other) : _beats(other._beats), _ticks(other._ticks) {}
@@ -72,18 +102,16 @@ public:
 		_ticks = sign * ticks;
 	}
 
-	/** Create from a precise BT time. */
+	/** Create from a precise beats:ticks pair. */
 	explicit Beats(int32_t b, int32_t t) : _beats(b), _ticks(t) {
 		normalize();
 	}
 
 	/** Create from a real number of beats. */
-	explicit Beats(double time) {
+	static Beats from_double (double beats) {
 		double       whole;
-		const double frac = modf(time, &whole);
-
-		_beats = whole;
-		_ticks = frac * PPQN;
+		const double frac = modf (beats, &whole);
+		return Beats (whole, (int32_t) rint (frac * PPQN));
 	}
 
 	/** Create from an integer number of beats. */
@@ -106,6 +134,12 @@ public:
 	static Beats ticks_at_rate(int64_t ticks, uint32_t ppqn) {
 		return Beats(ticks / ppqn, (ticks % ppqn) * PPQN / ppqn);
 	}
+
+	int64_t to_ticks()               const { return (int64_t)_beats * PPQN + _ticks; }
+	int64_t to_ticks(uint32_t ppqn)  const { return (int64_t)_beats * ppqn + (_ticks * ppqn / PPQN); }
+
+	int32_t get_beats() const { return _beats; }
+	int32_t get_ticks() const { return _ticks; }
 
 	Beats& operator=(double time) {
 		double       whole;
@@ -134,9 +168,123 @@ public:
 		return Beats(_beats, 0);
 	}
 
-	Beats snap_to(const Temporal::Beats& snap) const {
+
+	Beats prev_beat() const {
+		/* always moves backwards even if currently on beat */
+		return Beats (_beats-1, 0);
+	}
+
+	Beats next_beat() const {
+		/* always moves forwards even if currently on beat */
+		return Beats (_beats+1, 0);
+	}
+
+	Beats round_to_subdivision (int subdivision, RoundMode dir) const {
+		uint32_t ticks = to_ticks();
+		const uint32_t ticks_one_subdivisions_worth = ticks_per_beat / subdivision;
+		uint32_t mod = ticks % ticks_one_subdivisions_worth;
+		uint32_t beats = _beats;
+
+		if (dir > 0) {
+
+			if (mod == 0 && dir == RoundUpMaybe) {
+				/* right on the subdivision, which is fine, so do nothing */
+
+			} else if (mod == 0) {
+				/* right on the subdivision, so the difference is just the subdivision ticks */
+				ticks += ticks_one_subdivisions_worth;
+
+			} else {
+				/* not on subdivision, compute distance to next subdivision */
+
+				ticks += ticks_one_subdivisions_worth - mod;
+			}
+
+			// NOTE:  this code intentionally limits the rounding so we don't advance to the next beat.
+			// For the purposes of "jump-to-next-subdivision", we DO want to advance to the next beat.
+			// And since the "prev" direction DOES move beats, I assume this code is unintended.
+			// But I'm keeping it around, until we determine there are no terrible consequences.
+			// if (ticks >= BBT_Time::ticks_per_beat) {
+			//	ticks -= BBT_Time::ticks_per_beat;
+			// }
+
+		} else if (dir < 0) {
+
+			/* round to previous (or same iff dir == RoundDownMaybe) */
+
+			uint32_t difference = ticks % ticks_one_subdivisions_worth;
+
+			if (difference == 0 && dir == RoundDownAlways) {
+				/* right on the subdivision, but force-rounding down,
+				   so the difference is just the subdivision ticks */
+				difference = ticks_one_subdivisions_worth;
+			}
+
+			if (ticks < difference) {
+				ticks = ticks_per_beat - ticks;
+			} else {
+				ticks -= difference;
+			}
+
+		} else {
+			/* round to nearest */
+			double rem;
+
+			/* compute the distance to the previous and next subdivision */
+
+			if ((rem = fmod ((double) ticks, (double) ticks_one_subdivisions_worth)) > ticks_one_subdivisions_worth/2.0) {
+
+				/* closer to the next subdivision, so shift forward */
+
+				ticks = lrint (ticks + (ticks_one_subdivisions_worth - rem));
+
+				//DEBUG_TRACE (DEBUG::SnapBBT, string_compose ("moved forward to %1\n", ticks));
+
+				if (ticks > ticks_per_beat) {
+					++beats;
+					ticks -= ticks_per_beat;
+					//DEBUG_TRACE (DEBUG::SnapBBT, string_compose ("fold beat to %1\n", beats));
+				}
+
+			} else if (rem > 0) {
+
+				/* closer to previous subdivision, so shift backward */
+
+				if (rem > ticks) {
+					if (beats == 0) {
+						/* can't go backwards past zero, so ... */
+						return *this;
+					}
+					/* step back to previous beat */
+					--beats;
+					ticks = lrint (ticks_per_beat - rem);
+					//DEBUG_TRACE (DEBUG::SnapBBT, string_compose ("step back beat to %1\n", beats));
+				} else {
+					ticks = lrint (ticks - rem);
+					//DEBUG_TRACE (DEBUG::SnapBBT, string_compose ("moved backward to %1\n", ticks));
+				}
+			} else {
+				/* on the subdivision, do nothing */
+			}
+		}
+
+		return Beats::ticks (ticks);
+	}
+
+	Beats snap_to (Temporal::Beats const & snap) const {
 		const double snap_time = snap.to_double();
-		return Beats(ceil(to_double() / snap_time) * snap_time);
+		return Beats::from_double (ceil(to_double() / snap_time) * snap_time);
+	}
+
+	Beats abs () const {
+		return Beats (::abs (_beats), ::abs (_ticks));
+	}
+
+	Beats diff (Beats const & other) const {
+		if (other > *this) {
+			return other - *this;
+		}
+		return *this - other;
 	}
 
 	inline bool operator==(const Beats& b) const {
@@ -264,6 +412,11 @@ public:
 		_beats = B._beats;
 		_ticks = B._ticks;
 		return *this;
+
+	/* avoids calling ::to_double() to compute ratios of two Beat distances
+	 */
+	double operator/ (Beats const & other) {
+		return (double) to_ticks() / (double) other.to_ticks();
 	}
 
 	Beats& operator+=(const Beats& b) {
@@ -280,20 +433,43 @@ public:
 		return *this;
 	}
 
-	double  to_double()              const { return (double)_beats + (_ticks / (double)PPQN); }
-	int64_t to_ticks()               const { return (int64_t)_beats * PPQN + _ticks; }
-	int64_t to_ticks(uint32_t ppqn)  const { return (int64_t)_beats * ppqn + (_ticks * ppqn / PPQN); }
-
-	int32_t get_beats() const { return _beats; }
-	int32_t get_ticks() const { return _ticks; }
-
 	bool operator!() const { return _beats == 0 && _ticks == 0; }
+	operator bool () const { return _beats != 0 || _ticks != 0; }
 
-	static Beats tick() { return Beats(0, 1); }
+	static Beats one_tick() { return Beats(0, 1); }
 
 private:
 	int32_t _beats;
 	int32_t _ticks;
+
+	/* almost nobody should ever be allowed to use this method */
+	friend class TempoPoint;
+	friend class ARDOUR::TempoMap;
+	friend class ARDOUR::Track;
+	friend class ARDOUR::Variant;
+	friend class ARDOUR::MidiStretch;
+	friend class ARDOUR::MidiModel;
+	friend class ARDOUR::AutomationList;
+	friend class ARDOUR::MidiSource;
+	friend class ARDOUR::MidiRegion;
+	friend class ARDOUR::DoubleBeatsSamplesConverter;
+	friend class ::QuantizeDialog;
+	friend class ::NoteDrag;
+	friend class ::NoteCreateDrag;
+	double  to_double()              const { return (double)_beats + (_ticks / (double)PPQN); }
+
+	/* this needs to exist because Evoral::Sequence is templated, and some
+	 * other possible template types cannot provide ::from_double
+	 */
+
+	friend class Evoral::Sequence<Beats>;
+	explicit Beats (double beats) {
+		double       whole;
+		const double frac = modf (beats, &whole);
+
+		_beats = whole;
+		_ticks = frac * PPQN;
+	}
 };
 
 /*
@@ -309,17 +485,18 @@ private:
 inline std::ostream&
 operator<<(std::ostream& os, const Beats& t)
 {
-	os << t.get_beats() << '.' << t.get_ticks();
+	os << t.get_beats() << ':' << t.get_ticks();
 	return os;
 }
 
 inline std::istream&
-operator>>(std::istream& is, Beats& t)
+operator>>(std::istream& istr, Beats& b)
 {
-	double beats;
-	is >> beats;
-	t = Beats(beats);
-	return is;
+	int32_t beats, ticks;
+	char d; /* delimiter, whatever it is */
+	istr >> beats >> d >> ticks;
+	b = Beats (beats, ticks);
+	return istr;
 }
 
 } // namespace Evoral
@@ -346,5 +523,30 @@ namespace std {
 		}
 	};
 }
+
+namespace PBD {
+	namespace DEBUG {
+		LIBTEMPORAL_API extern uint64_t Beats;
+	}
+
+template<>
+inline bool to_string (Temporal::Beats val, std::string & str)
+{
+	std::ostringstream ostr;
+	ostr << val;
+	str = ostr.str();
+	return true;
+}
+
+template<>
+inline bool string_to (std::string const & str, Temporal::Beats & val)
+{
+	std::istringstream istr (str);
+	istr >> val;
+	return (bool) istr;
+}
+
+} /* end namsepace PBD */
+
 
 #endif // TEMPORAL_BEATS_HPP
