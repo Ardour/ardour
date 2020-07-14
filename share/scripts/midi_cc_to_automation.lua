@@ -93,7 +93,7 @@ function factory () return function ()
 
 		-- MIDI events are timestamped in "bar-beat" units, we need to convert those
 		-- using the tempo-map, relative to the region-start
-		local bfc = ARDOUR.DoubleBeatsSamplesConverter (Session:tempo_map (), r:start ())
+		local bfc = ARDOUR.BeatsSamplesConverter (Session:tempo_map (), r:start ())
 
 		-- iterate over CC-events
 		for av in ec:list ():events ():iter () do
