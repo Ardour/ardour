@@ -5757,6 +5757,8 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 			goto out;
 		}
 
+		source->set_captured_for(track.name());
+
 		srcs.push_back (source);
 	}
 

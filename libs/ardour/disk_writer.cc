@@ -1125,7 +1125,7 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 		if (as) {
 			audio_srcs.push_back (as);
 			as->update_header (capture_info.front()->start, when, twhen);
-			as->set_captured_for (_name.val());
+			as->set_captured_for (_track->name());
 			as->mark_immutable ();
 
 			Glib::DateTime tm (Glib::DateTime::create_now_local (mktime (&when)));
@@ -1140,6 +1140,7 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 
 		if (_midi_write_source) {
 			midi_srcs.push_back (_midi_write_source);
+			_midi_write_source->set_captured_for (_track->name());
 		}
 
 		(*chan)->write_source->stamp (twhen);
