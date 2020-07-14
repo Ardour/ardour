@@ -104,7 +104,7 @@ EditorRegions::EditorRegions (Editor* e)
 	_model->set_sort_column (0, SORT_ASCENDING);
 
 	/* column widths */
-	int bbt_width, date_width, check_width, height;
+	int bbt_width, date_width, chan_width, check_width, height;
 
 	Glib::RefPtr<Pango::Layout> layout = _display.create_pango_layout (X_ ("000|000|000"));
 	Gtkmm2ext::get_pixel_size (layout, bbt_width, height);
@@ -112,11 +112,17 @@ EditorRegions::EditorRegions (Editor* e)
 	Glib::RefPtr<Pango::Layout> layout2 = _display.create_pango_layout (X_ ("2099-10-10 10:10:30"));
 	Gtkmm2ext::get_pixel_size (layout2, date_width, height);
 
+	Glib::RefPtr<Pango::Layout> layout3 = _display.create_pango_layout (X_ ("Chans    "));
+	Gtkmm2ext::get_pixel_size (layout3, chan_width, height);
+
 	check_width = 20;
 
 	TreeViewColumn* col_name = manage (new TreeViewColumn ("", _columns.name));
 	col_name->set_fixed_width (120);
 	col_name->set_sizing (TREE_VIEW_COLUMN_FIXED);
+	TreeViewColumn* col_chans = manage (new TreeViewColumn ("", _columns.channels));
+	col_chans->set_fixed_width (chan_width);
+	col_chans->set_sizing (TREE_VIEW_COLUMN_FIXED);
 	TreeViewColumn* col_tags = manage (new TreeViewColumn ("", _columns.tags));
 	col_tags->set_fixed_width (date_width);
 	col_tags->set_sizing (TREE_VIEW_COLUMN_FIXED);
@@ -152,6 +158,7 @@ EditorRegions::EditorRegions (Editor* e)
 	col_opaque->set_sizing (TREE_VIEW_COLUMN_FIXED);
 
 	_display.append_column (*col_name);
+	_display.append_column (*col_chans);
 	_display.append_column (*col_tags);
 	_display.append_column (*col_start);
 	_display.append_column (*col_length);
@@ -172,19 +179,20 @@ EditorRegions::EditorRegions (Editor* e)
 
 	/* clang-format off */
 	ColumnInfo ci[] = {
-		{ 0,  0,  ALIGN_LEFT,    _("Region"),    _("Region name, with number of channels in []'s") },
-		{ 1,  1,  ALIGN_LEFT,    _("Tags"),      _("Tags") },
-		{ 2, 15,  ALIGN_RIGHT,   _("Start"),     _("Position of start of region") },
-		{ 3,  3,  ALIGN_RIGHT,   _("Length"),    _("Length of the region") },
-		{ 4, -1,  ALIGN_CENTER, S_("Lock|L"),    _("Region position locked?") },
-		{ 5, -1,  ALIGN_CENTER, S_("Glued|G"),   _("Region position glued to Bars|Beats time?") },
-		{ 6, -1,  ALIGN_CENTER, S_("Mute|M"),    _("Region muted?") },
-		{ 7, -1,  ALIGN_CENTER, S_("Opaque|O"),  _("Region opaque (blocks regions below it from being heard)?") },
+		{ 0,  0,  ALIGN_LEFT,    _("Name"),      _("Region name") },
+		{ 1,  1,  ALIGN_LEFT,    _("# Ch"),      _("# Channels in the region") },
+		{ 2,  2,  ALIGN_LEFT,    _("Tags"),      _("Tags") },
+		{ 3, 16,  ALIGN_RIGHT,   _("Start"),     _("Position of start of region") },
+		{ 4,  4,  ALIGN_RIGHT,   _("Length"),    _("Length of the region") },
+		{ 5, -1,  ALIGN_CENTER, S_("Lock|L"),    _("Region position locked?") },
+		{ 6, -1,  ALIGN_CENTER, S_("Glued|G"),   _("Region position glued to Bars|Beats time?") },
+		{ 7, -1,  ALIGN_CENTER, S_("Mute|M"),    _("Region muted?") },
+		{ 8, -1,  ALIGN_CENTER, S_("Opaque|O"),  _("Region opaque (blocks regions below it from being heard)?") },
 #ifdef SHOW_REGION_EXTRAS
-		{ 8,  4,  ALIGN_RIGHT,  _("End"),       _("Position of end of region") },
-		{ 9, -1,  ALIGN_RIGHT,  _("Sync"),      _("Position of region sync point, relative to start of the region") },
-		{ 10,-1,  ALIGN_RIGHT,  _("Fade In"),   _("Length of region fade-in (units: secondary clock), () if disabled") },
-		{ 11,-1,  ALIGN_RIGHT,  _("Fade Out"),  _("Length of region fade-out (units: secondary clock), () if disabled") },
+		{ 9,  5,  ALIGN_RIGHT,  _("End"),       _("Position of end of region") },
+		{ 10, -1,  ALIGN_RIGHT,  _("Sync"),      _("Position of region sync point, relative to start of the region") },
+		{ 11,-1,  ALIGN_RIGHT,  _("Fade In"),   _("Length of region fade-in (units: secondary clock), () if disabled") },
+		{ 12,-1,  ALIGN_RIGHT,  _("Fade Out"),  _("Length of region fade-out (units: secondary clock), () if disabled") },
 #endif
 		{ -1,-1,  ALIGN_CENTER, 0, 0 }
 	};
@@ -221,7 +229,7 @@ EditorRegions::EditorRegions (Editor* e)
 
 	if (UIConfiguration::instance ().get_use_tooltips ()) {
 		/* show path as the row tooltip */
-		_display.set_tooltip_column (12); /* path */
+		_display.set_tooltip_column (13); /* path */
 	}
 	_display.get_selection ()->set_select_function (sigc::mem_fun (*this, &EditorRegions::selection_filter));
 
@@ -239,13 +247,13 @@ EditorRegions::EditorRegions (Editor* e)
 	tv_col->set_expand (true);
 
 	/* Tags cell: make editable */
-	CellRendererText* region_tags_cell     = dynamic_cast<CellRendererText*> (_display.get_column_cell_renderer (1));
+	CellRendererText* region_tags_cell     = dynamic_cast<CellRendererText*> (_display.get_column_cell_renderer (2));
 	region_tags_cell->property_editable () = true;
 	region_tags_cell->signal_edited ().connect (sigc::mem_fun (*this, &EditorRegions::tag_edit));
 	region_tags_cell->signal_editing_started ().connect (sigc::mem_fun (*this, &EditorRegions::tag_editing_started));
 
 	/* checkbox cells */
-	int check_start_col = 4;
+	int check_start_col = 5;
 
 	CellRendererToggle* locked_cell      = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (check_start_col++));
 	locked_cell->property_activatable () = true;
@@ -860,10 +868,12 @@ EditorRegions::populate_row_opaque (boost::shared_ptr<Region> region, TreeModel:
 void
 EditorRegions::populate_row_name (boost::shared_ptr<Region> region, TreeModel::Row const& row)
 {
-	if (region->n_channels () > 1) {
-		row[_columns.name] = string_compose ("%1  [%2]", Gtkmm2ext::markup_escape_text (region->name ()), region->n_channels ());
+	row[_columns.name] = Gtkmm2ext::markup_escape_text (region->name ());
+
+	if (region->data_type() == DataType::MIDI) {
+		row[_columns.channels] = 0;  /*TODO: some better recognition of midi regions*/
 	} else {
-		row[_columns.name] = Gtkmm2ext::markup_escape_text (region->name ());
+		row[_columns.channels] = region->n_channels();
 	}
 
 	row[_columns.tags] = region->tags ();
