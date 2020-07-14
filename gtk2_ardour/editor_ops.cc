@@ -4147,6 +4147,7 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 
 		boost::shared_ptr<Region> r;
 
+		/*make the "source" (whole-file region)*/
 		if (enable_processing) {
 			r = rtv->track()->bounce_range (start, start+cnt, itt, rtv->track()->main_outs(), false, bounce_name);
 		} else {
@@ -4158,10 +4159,17 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 		}
 
 		if (replace) {
+			/*remove the edxisting regions under the edit range*/
 			list<AudioRange> ranges;
 			ranges.push_back (AudioRange (start, start+cnt, 0));
 			playlist->cut (ranges); // discard result
-			playlist->add_region (r, start);
+
+			/*SPECIAL CASE:  we are bouncing to a new Source *AND* replacing the existing range on the timeline  (consolidate)*/
+			/*we don't add the whole_file region here; we insert a discrete copy*/
+			PropertyList plist;
+			plist.add (ARDOUR::Properties::whole_file, false);
+			boost::shared_ptr<Region> copy (RegionFactory::create (r, plist));
+			playlist->add_region (copy, start);
 		}
 
 		if (!in_command) {
