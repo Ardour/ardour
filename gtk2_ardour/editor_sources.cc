@@ -156,7 +156,7 @@ EditorSources::EditorSources (Editor* e)
 
 	ColumnInfo ci[] = {
 		{ 0,   _("Name"),      _("Region name") },
-		{ 1,   _("Chans"),     _("Channels") },
+		{ 1,   _("# Ch"),      _("# Channels") },
 		{ 2,   _("Captured For"), _("Original Track this was recorded on") },
 		{ 3,   _("Tags"),      _("Tags") },
 		{ 4,   _("Take ID"),   _("Take ID") },
@@ -182,6 +182,11 @@ EditorSources::EditorSources (Editor* e)
 	_display.set_headers_visible (true);
 	_display.set_rules_hint ();
 
+	if (UIConfiguration::instance ().get_use_tooltips ()) {
+		/* show path as the row tooltip */
+		_display.set_tooltip_column (6); /* path */
+	}
+	
 	/* set the color of the name field */
 	TreeViewColumn* tv_col = _display.get_column(0);
 	CellRendererText* renderer = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (0));
@@ -387,8 +392,12 @@ EditorSources::populate_row (TreeModel::Row row, boost::shared_ptr<ARDOUR::Regio
 	row[_columns.name] = region->name();
 
 	/* N CHANNELS */
-	row[_columns.channels] = region->n_channels();
-
+	if (region->data_type() == DataType::MIDI) {
+		row[_columns.channels] = 0;  /*TODO: some better recognition of midi regions*/
+	} else {
+		row[_columns.channels] = region->n_channels();
+	}
+	
 	/* CAPTURED FOR */
 	row[_columns.captd_for] = source->captured_for();
 
