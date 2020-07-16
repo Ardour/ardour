@@ -247,7 +247,6 @@ smf_event_new(void)
 
 	event->delta_time_pulses = -1;
 	event->time_pulses = -1;
-	event->time_seconds = -1.0;
 	event->track_number = -1;
 
 	return (event);
@@ -466,7 +465,6 @@ smf_track_add_event(smf_track_t *track, smf_event_t *event)
 	assert(track->smf != NULL);
 	assert(event->track == NULL);
 	assert(event->delta_time_pulses == -1);
-	assert(event->time_seconds >= 0.0);
 
 	remove_eot_if_before_pulses(track, event->time_pulses);
 
@@ -574,26 +572,6 @@ smf_track_add_eot_pulses(smf_track_t *track, size_t pulses)
 	return (0);
 }
 
-int
-smf_track_add_eot_seconds(smf_track_t *track, double seconds)
-{
-	smf_event_t *event, *last_event;
-
-	last_event = smf_track_get_last_event(track);
-	if (last_event != NULL) {
-		if (last_event->time_seconds > seconds)
-			return (-2);
-	}
-
-	event = smf_event_new_from_bytes(0xFF, 0x2F, 0x00);
-	if (event == NULL)
-		return (-1);
-
-	smf_track_add_event_seconds(track, event, seconds);
-
-	return (0);
-}
-
 /**
  * Detaches event from its track.
  */
@@ -642,7 +620,6 @@ smf_event_remove_from_track(smf_event_t *event)
 	event->event_number = 0;
 	event->delta_time_pulses = -1;
 	event->time_pulses = 0;
-	event->time_seconds = -1.0;
 }
 
 /**
@@ -977,52 +954,6 @@ smf_seek_to_event(smf_t *smf, const smf_event_t *target)
 			break;
 	}
 
-	smf->last_seek_position = event->time_seconds;
-
-	return (0);
-}
-
-/**
-  * Seeks the SMF to the given position.  For example, after seeking to 1.0 seconds,
-  * smf_get_next_event will return first event that happens after the first second of song.
-  * \return 0 if everything went ok, nonzero otherwise.
-  */
-int
-smf_seek_to_seconds(smf_t *smf, double seconds)
-{
-	smf_event_t *event;
-
-	assert(seconds >= 0.0);
-
-	if (seconds == smf->last_seek_position) {
-#if 0
-		g_debug("Avoiding seek to %f seconds.", seconds);
-#endif
-		return (0);
-	}
-
-	smf_rewind(smf);
-
-#if 0
-	g_debug("Seeking to %f seconds.", seconds);
-#endif
-
-	for (;;) {
-		event = smf_peek_next_event(smf);
-
-		if (event == NULL) {
-			g_warning("Trying to seek past the end of song.");
-			return (-1);
-		}
-
-		if (event->time_seconds < seconds)
-			smf_skip_next_event(smf);
-		else
-			break;
-	}
-
-	smf->last_seek_position = seconds;
-
 	return (0);
 }
 
@@ -1056,8 +987,6 @@ smf_seek_to_pulses(smf_t *smf, size_t pulses)
 			break;
 	}
 
-	smf->last_seek_position = event->time_seconds;
-
 	return (0);
 }
 
@@ -1087,34 +1016,6 @@ smf_get_length_pulses(const smf_t *smf)
 	}
 
 	return (pulses);
-}
-
-/**
-  * \return Length of SMF, in seconds.
-  */
-double
-smf_get_length_seconds(const smf_t *smf)
-{
-	int i;
-	double seconds = 0.0;
-
-	for (i = 1; i <= smf->number_of_tracks; i++) {
-		smf_track_t *track;
-		smf_event_t *event;
-
-		track = smf_get_track_by_number(smf, i);
-		assert(track);
-
-		event = smf_track_get_last_event(track);
-		/* Empty track? */
-		if (event == NULL)
-			continue;
-
-		if (event->time_seconds > seconds)
-			seconds = event->time_seconds;
-	}
-
-	return (seconds);
 }
 
 /**
