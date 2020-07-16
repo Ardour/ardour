@@ -133,6 +133,10 @@ maybe_add_to_tempo_map(smf_event_t *event)
 
 	/* Tempo Change? */
 	if (event->midi_buffer[1] == 0x51) {
+		if (event->midi_buffer_length < 6) {
+			g_warning("Ignoring incomplete tempo change event.");
+			return;
+		}
 		int ntempo = (event->midi_buffer[3] << 16) + (event->midi_buffer[4] << 8) + event->midi_buffer[5];
 		if (ntempo <= 0) {
 			g_warning("Ignoring invalid tempo change.");
