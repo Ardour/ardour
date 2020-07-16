@@ -82,7 +82,7 @@ public:
 	push_back (T const& data)
 	{
 		cell_t* cell;
-		guint   pos = g_atomic_int_get (&_enqueue_pos);
+		gint    pos = g_atomic_int_get (&_enqueue_pos);
 		for (;;) {
 			cell         = &_buffer[pos & _buffer_mask];
 			guint    seq = g_atomic_int_get (&cell->_sequence);
@@ -108,7 +108,7 @@ public:
 	pop_front (T& data)
 	{
 		cell_t* cell;
-		guint   pos = g_atomic_int_get (&_dequeue_pos);
+		gint    pos = g_atomic_int_get (&_dequeue_pos);
 		for (;;) {
 			cell         = &_buffer[pos & _buffer_mask];
 			guint    seq = g_atomic_int_get (&cell->_sequence);
@@ -138,8 +138,8 @@ private:
 	cell_t* _buffer;
 	size_t  _buffer_mask;
 
-	volatile guint _enqueue_pos;
-	volatile guint _dequeue_pos;
+	volatile gint _enqueue_pos;
+	volatile gint _dequeue_pos;
 };
 
 } /* end namespace */
