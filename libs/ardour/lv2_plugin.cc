@@ -954,11 +954,12 @@ LV2Plugin::set_block_size (pframes_t nframes)
 	if (_impl->opts_iface) {
 		LV2_URID atom_Int = _uri_map.uri_to_id(LV2_ATOM__Int);
 		_impl->block_length = nframes;
-		LV2_Options_Option block_size_option = {
-			LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id ("http://lv2plug.in/ns/ext/buf-size#nominalBlockLength"),
-			sizeof(int32_t), atom_Int, (void*)&_impl->block_length
+		LV2_Options_Option block_size_option[] = {
+			{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id ("http://lv2plug.in/ns/ext/buf-size#nominalBlockLength"),
+			  sizeof(int32_t), atom_Int, (void*)&_impl->block_length},
+			{ LV2_OPTIONS_INSTANCE, 0, 0, 0, 0, NULL }
 		};
-		_impl->opts_iface->set (_impl->instance->lv2_handle, &block_size_option);
+		_impl->opts_iface->set (_impl->instance->lv2_handle, block_size_option);
 	}
 
 	return 0;
