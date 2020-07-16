@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ArdourMIDIBindings version="1.0.0" name="AKAI MPK249">
+
+<!-- MMC MIDI Mapping for Akai MPK249 -->
+<!-- Intended to be used with the MPK249 'Generic' MIDI/MMC (Preset 18) -->
+<!-- Contributed by J. Hoffman. Based on AKAI_MPK61 from GMaq. -->
+
+<!-- MMC Transport buttons except for record seem to 'just work' -->
+<!-- This binding will toggle record -->
+  <Binding sysex="f0 7f 7f 06 06 f7" action="Transport/Record"  momentary="yes"/> <!-- Makes record toggle -->
+
+<!-- Faders mapped to Ardour Faders - Control Bank A  -->
+
+  <Binding channel="1" ctl="18" uri="/route/gain 1"/>
+  <Binding channel="1" ctl="21" uri="/route/gain 2"/>
+  <Binding channel="1" ctl="22" uri="/route/gain 3"/>
+  <Binding channel="1" ctl="23" uri="/route/gain 4"/>
+  <Binding channel="1" ctl="24" uri="/route/gain 5"/>
+  <Binding channel="1" ctl="25" uri="/route/gain 6"/>
+  <Binding channel="1" ctl="26" uri="/route/gain 7"/>
+  <Binding channel="1" ctl="27" uri="/route/gain 8"/>
+
+<!-- Faders mapped to Ardour Faders - Control Bank B  -->
+
+  <Binding channel="1" ctl="61" uri="/route/gain 9"/>
+  <Binding channel="1" ctl="62" uri="/route/gain 10"/>
+  <Binding channel="1" ctl="63" uri="/route/gain 11"/>
+  <Binding channel="1" ctl="70" uri="/route/gain 12"/>
+  <Binding channel="1" ctl="71" uri="/route/gain 13"/>
+  <Binding channel="1" ctl="72" uri="/route/gain 14"/>
+  <Binding channel="1" ctl="73" uri="/route/gain 15"/>
+  <Binding channel="1" ctl="74" uri="/route/gain 16"/>
+
+<!-- Faders mapped to Ardour Faders - Control Bank C  -->
+
+  <Binding channel="1" ctl="92" uri="/route/gain 17"/>
+  <Binding channel="1" ctl="93" uri="/route/gain 18"/>
+  <Binding channel="1" ctl="94" uri="/route/gain 19"/>
+  <Binding channel="1" ctl="95" uri="/route/gain 20"/>
+  <Binding channel="1" ctl="102" uri="/route/gain 21"/>
+  <Binding channel="1" ctl="103" uri="/route/gain 22"/>
+  <Binding channel="1" ctl="104" uri="/route/gain 23"/>
+
+<!-- Last Fader Binding On Control Bank C reserved for Master Bus  -->
+  <Binding channel="1" ctl="105" uri="/bus/gain master"/>
+
+<!-- Encoder Knob bindings to Pan Direction -->
+
+
+<!-- Encoder Knobs mapped to Track Pan Direction - Control Bank A  -->
+
+  <Binding channel="1" ctl="3" uri="/route/pandirection 1"/>
+  <Binding channel="1" ctl="9" uri="/route/pandirection 2"/>
+  <Binding channel="1" ctl="14" uri="/route/pandirection 3"/>
+  <Binding channel="1" ctl="15" uri="/route/pandirection 4"/>
+  <Binding channel="1" ctl="16" uri="/route/pandirection 5"/>
+  <Binding channel="1" ctl="17" uri="/route/pandirection 6"/>
+  <Binding channel="1" ctl="20" uri="/route/pandirection 7"/>
+  <Binding channel="1" ctl="19" uri="/route/pandirection 8"/>
+
+<!-- Encoder Knobs mapped to Track Pan Direction - Control Bank B  -->
+
+  <Binding channel="1" ctl="52" uri="/route/pandirection 9"/>
+  <Binding channel="1" ctl="53" uri="/route/pandirection 10"/>
+  <Binding channel="1" ctl="54" uri="/route/pandirection 11"/>
+  <Binding channel="1" ctl="55" uri="/route/pandirection 12"/>
+  <Binding channel="1" ctl="57" uri="/route/pandirection 13"/>
+  <Binding channel="1" ctl="58" uri="/route/pandirection 14"/>
+  <Binding channel="1" ctl="59" uri="/route/pandirection 15"/>
+  <Binding channel="1" ctl="60" uri="/route/pandirection 16"/>
+
+<!-- Encoder Knobs mapped to Track Pan Direction - Control Bank C  -->
+
+  <Binding channel="1" ctl="83" uri="/route/pandirection 17"/>
+  <Binding channel="1" ctl="85" uri="/route/pandirection 18"/>
+  <Binding channel="1" ctl="86" uri="/route/pandirection 19"/>
+  <Binding channel="1" ctl="87" uri="/route/pandirection 20"/>
+  <Binding channel="1" ctl="88" uri="/route/pandirection 21"/>
+  <Binding channel="1" ctl="89" uri="/route/pandirection 22"/>
+  <Binding channel="1" ctl="90" uri="/route/pandirection 23"/>
+
+<!-- Last Encoder Knob Binding On Control Bank C reserved for Master Bus  -->
+<!-- *Note Pan Direction doesn't work on Master Bus, mapped anyway for consistency  -->
+
+  <Binding channel="1" ctl="91" uri="/bus/pandirection master"/>
+
+
+<!-- MPK61 Solo Buttons mapped to Ardour track Solo -->
+
+<!-- MPK61 Solo Buttons mapped to Ardour track Solo - Control Bank A -->
+
+
+  <Binding channel="1" ctl="28" uri="/route/solo 1"/>
+  <Binding channel="1" ctl="29" uri="/route/solo 2"/>
+  <Binding channel="1" ctl="30" uri="/route/solo 3"/>
+  <Binding channel="1" ctl="31" uri="/route/solo 4"/>
+  <Binding channel="1" ctl="35" uri="/route/solo 5"/>
+  <Binding channel="1" ctl="41" uri="/route/solo 6"/>
+  <Binding channel="1" ctl="46" uri="/route/solo 7"/>
+  <Binding channel="1" ctl="47" uri="/route/solo 8"/>
+
+<!-- MPK61 Solo Buttons mapped to Ardour track Solo - Control Bank B -->
+
+
+  <Binding channel="1" ctl="75" uri="/route/solo 9"/>
+  <Binding channel="1" ctl="76" uri="/route/solo 10"/>
+  <Binding channel="1" ctl="77" uri="/route/solo 11"/>
+  <Binding channel="1" ctl="78" uri="/route/solo 12"/>
+  <Binding channel="1" ctl="79" uri="/route/solo 13"/>
+  <Binding channel="1" ctl="80" uri="/route/solo 14"/>
+  <Binding channel="1" ctl="81" uri="/route/solo 15"/>
+  <Binding channel="1" ctl="82" uri="/route/solo 16"/>
+
+<!-- MPK61 Solo Buttons mapped to Ardour track Solo - Control Bank C -->
+
+
+  <Binding channel="1" ctl="106" uri="/route/solo 17"/>
+  <Binding channel="1" ctl="107" uri="/route/solo 18"/>
+  <Binding channel="1" ctl="108" uri="/route/solo 19"/>
+  <Binding channel="1" ctl="109" uri="/route/solo 20"/>
+  <Binding channel="1" ctl="110" uri="/route/solo 21"/>
+  <Binding channel="1" ctl="111" uri="/route/solo 22"/>
+  <Binding channel="1" ctl="112" uri="/route/solo 23"/>
+
+<!-- Last Button Binding On Control Bank C reserved for Master Bus  -->
+<!-- This binding will mute the Master Bus since it has no Solo Function  -->
+
+  <Binding channel="1" ctl="113" uri="/bus/mute master"/>
+
+
+</ArdourMIDIBindings>
+
