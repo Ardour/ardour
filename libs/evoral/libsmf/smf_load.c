@@ -821,7 +821,6 @@ smf_event_is_valid(const smf_event_t *event)
 static int
 parse_mtrk_chunk(smf_track_t *track)
 {
-	smf_t *smf = track->smf;
 	smf_event_t *event;
 
 	if (parse_mtrk_header(track))
