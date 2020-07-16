@@ -39,11 +39,6 @@
 #include <assert.h>
 #include <math.h>
 #include <errno.h>
-#ifdef PLATFORM_WINDOWS
-#include <winsock2.h>
-#else
-#include <arpa/inet.h>
-#endif
 #include "smf.h"
 #include "smf_private.h"
 
@@ -109,10 +104,10 @@ write_mthd_header(smf_t *smf)
 	struct mthd_chunk_struct mthd_chunk;
 
 	memcpy(mthd_chunk.mthd_header.id, "MThd", 4);
-	mthd_chunk.mthd_header.length = htonl(6);
-	mthd_chunk.format = htons(smf->format);
-	mthd_chunk.number_of_tracks = htons(smf->number_of_tracks);
-	mthd_chunk.division = htons(smf->ppqn);
+	mthd_chunk.mthd_header.length = GUINT32_TO_BE(6);
+	mthd_chunk.format = GUINT16_TO_BE(smf->format);
+	mthd_chunk.number_of_tracks = GUINT16_TO_BE(smf->number_of_tracks);
+	mthd_chunk.division = GUINT16_TO_BE(smf->ppqn);
 
 	return (smf_append(smf, &mthd_chunk, sizeof(mthd_chunk)));
 }
@@ -364,7 +359,7 @@ write_mtrk_length(smf_track_t *track)
 	assert(track->file_buffer_length >= 6);
 
 	mtrk_header = (struct chunk_header_struct *)track->file_buffer;
-	mtrk_header->length = htonl(track->file_buffer_length - sizeof(struct chunk_header_struct));
+	mtrk_header->length = GUINT32_TO_BE(track->file_buffer_length - sizeof(struct chunk_header_struct));
 
 	return (0);
 }
