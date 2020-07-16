@@ -375,7 +375,7 @@ void smf_event_remove_from_track(smf_event_t *event);
 smf_event_t *smf_event_new(void) WARN_UNUSED_RESULT;
 smf_event_t *smf_event_new_from_pointer(const void *midi_data, size_t len) WARN_UNUSED_RESULT;
 smf_event_t *smf_event_new_from_bytes(int byte1, int byte2, int byte3) WARN_UNUSED_RESULT;
-smf_event_t *smf_event_new_textual(int type, const char *text);
+smf_event_t *smf_event_new_textual(int type, const char *text) WARN_UNUSED_RESULT;
 void         smf_event_delete(smf_event_t *event);
 
 int   smf_event_is_valid(const smf_event_t *event) WARN_UNUSED_RESULT;

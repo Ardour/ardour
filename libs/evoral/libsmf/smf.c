@@ -668,6 +668,7 @@ smf_event_is_tempo_change_or_time_signature(const smf_event_t *event)
   * from 0 to 1 when you add the second track.
   * \param smf SMF.
   * \param format 0 for one track per file, 1 for several tracks per file.
+  * \return 0 if everything went ok, nonzero otherwise.
   */
 int
 smf_set_format(smf_t *smf, int format)
@@ -690,6 +691,7 @@ smf_set_format(smf_t *smf, int format)
   * of all the events.
   * \param smf SMF.
   * \param ppqn New PPQN.
+  * \return 0 if everything went ok, nonzero otherwise.
   */
 int
 smf_set_ppqn(smf_t *smf, uint16_t ppqn)
@@ -983,6 +985,7 @@ smf_seek_to_event(smf_t *smf, const smf_event_t *target)
 /**
   * Seeks the SMF to the given position.  For example, after seeking to 1.0 seconds,
   * smf_get_next_event will return first event that happens after the first second of song.
+  * \return 0 if everything went ok, nonzero otherwise.
   */
 int
 smf_seek_to_seconds(smf_t *smf, double seconds)
@@ -1026,6 +1029,7 @@ smf_seek_to_seconds(smf_t *smf, double seconds)
 /**
   * Seeks the SMF to the given position.  For example, after seeking to 10 pulses,
   * smf_get_next_event will return first event that happens after the first ten pulses.
+  * \return 0 if everything went ok, nonzero otherwise.
   */
 int
 smf_seek_to_pulses(smf_t *smf, size_t pulses)
