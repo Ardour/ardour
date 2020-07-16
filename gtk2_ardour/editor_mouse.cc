@@ -1379,8 +1379,22 @@ bool
 Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
 	if (event->type == GDK_2BUTTON_PRESS) {
-		_drags->mark_double_click ();
-		gdk_pointer_ungrab (GDK_CURRENT_TIME);
+		if (Keyboard::modifier_state_equals(event->button.state, Keyboard::PrimaryModifier)) {
+			if (!_region_is_maximized) {
+				if (_minimized_visual_state)
+					delete _minimized_visual_state;
+				_minimized_visual_state = current_visual_state ();
+				temporal_zoom_selection(Both);
+				_region_is_maximized = true;
+			} else {
+				if (_minimized_visual_state)
+					use_visual_state(*_minimized_visual_state);
+				_region_is_maximized = false;
+			}
+		} else {
+			_drags->mark_double_click ();
+			gdk_pointer_ungrab (GDK_CURRENT_TIME);
+		}
 		return true;
 	}
 

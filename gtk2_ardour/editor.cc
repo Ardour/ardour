@@ -252,6 +252,8 @@ Editor::Editor ()
 	, _playlist_selector (0)
 	, _time_info_box (0)
 	, no_save_visual (false)
+	, _minimized_visual_state (0)
+	, _region_is_maximized (false)
 	, _leftmost_sample (0)
 	, samples_per_pixel (2048)
 	, zoom_focus (ZoomFocusPlayhead)
@@ -887,6 +889,8 @@ Editor::~Editor()
 	delete selection;
 	delete cut_buffer;
 	delete _cursors;
+	if (_minimized_visual_state)
+		delete _minimized_visual_state;
 
 	LuaInstance::destroy_instance ();
 

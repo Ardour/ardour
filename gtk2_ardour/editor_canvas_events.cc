@@ -89,6 +89,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 			scroll_left_step ();
 			return true;
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollZoomVerticalModifier)) {
+			_region_is_maximized = false;
 			if (!current_stepping_trackview) {
 				step_timeout = Glib::signal_timeout().connect (sigc::mem_fun(*this, &Editor::track_height_step_timeout), 500);
 				std::pair<TimeAxisView*, int> const p = trackview_by_y_position (event_coords.y, false);
@@ -114,6 +115,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 			scroll_right_step ();
 			return true;
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollZoomVerticalModifier)) {
+			_region_is_maximized = false;
 			if (!current_stepping_trackview) {
 				step_timeout = Glib::signal_timeout().connect (sigc::mem_fun(*this, &Editor::track_height_step_timeout), 500);
 				std::pair<TimeAxisView*, int> const p = trackview_by_y_position (event_coords.y, false);
@@ -126,6 +128,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 			current_stepping_trackview->step_height (true);
 			return true;
 		} else {
+			_region_is_maximized = false;
 			scroll_down_one_track ();
 			return true;
 		}

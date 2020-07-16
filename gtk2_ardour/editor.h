@@ -619,6 +619,8 @@ private:
 	void swap_visual_state ();
 
 	std::vector<VisualState*> visual_states;
+	VisualState *_minimized_visual_state;
+	bool _region_is_maximized;
 	void start_visual_state_op (uint32_t n);
 	void cancel_visual_state_op (uint32_t n);
 
