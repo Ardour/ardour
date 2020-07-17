@@ -930,8 +930,6 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 							save_path, g_strerror (errno)) << endmsg;
 			}
 		}
-
-		StateSaved (snapshot_name); /* EMIT SIGNAL */
 	}
 
 	if (!pending && !for_archive) {
