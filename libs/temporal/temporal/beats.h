@@ -499,7 +499,7 @@ operator>>(std::istream& istr, Beats& b)
 	return istr;
 }
 
-} // namespace Evoral
+} // namespace Temporal
 
 namespace PBD {
 	namespace DEBUG {

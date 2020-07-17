@@ -21,14 +21,16 @@
 
 #include <stdint.h>
 
-namespace ARDOUR {
+#include "pbd/integer_division.h"
+
+namespace Temporal {
 
 typedef uint64_t superclock_t;
 
 static const superclock_t superclock_ticks_per_second = 508032000; // 2^10 * 3^4 * 5^3 * 7^2
 
-static inline superclock_t superclock_to_samples (superclock_t s, int sr) { return (s * sr) / superclock_ticks_per_second; }
-static inline superclock_t samples_to_superclock (int samples, int sr) { return (samples * superclock_ticks_per_second) / sr; }
+static inline superclock_t superclock_to_samples (superclock_t s, int sr) { return int_div_round (s * sr, superclock_ticks_per_second); }
+static inline superclock_t samples_to_superclock (int samples, int sr) { return int_div_round (samples * superclock_ticks_per_second, superclock_t (sr)); }
 
 }
 
