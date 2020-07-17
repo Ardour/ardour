@@ -36,6 +36,9 @@
 #include <vector>
 
 #include <gtkmm/separator.h>
+#include <glibmm/fileutils.h>
+#include <giomm/fileinfo.h>
+#include <giomm/file.h>
 
 #include "pbd/stl_delete.h"
 #include "pbd/unwind.h"
@@ -1337,12 +1340,40 @@ GenericPluginUI::set_path_property (const ParameterDescriptor& desc,
 	plugin->set_property(desc.key, Variant(Variant::PATH, widget->get_filename()));
 }
 
+bool
+test_and_jump_to_symlink(string& path) 
+{
+	if (!Glib::file_test(path, Glib::FILE_TEST_IS_SYMLINK)) {
+		return false;
+	}
+
+	const auto file = Gio::File::create_for_path(path);
+	if (!file) {
+		return false;
+	}
+
+	const auto parent = file->get_parent();
+	if (!parent) {
+		return false;
+	}
+
+	const auto symlink_target = file->query_info()->get_symlink_target();
+	path = parent->resolve_relative_path(symlink_target)->get_path();
+	return true;
+}
+
 void
 GenericPluginUI::path_property_changed (uint32_t key, const Variant& value)
 {
 	FilePathControls::iterator c = _filepath_controls.find(key);
 	if (c != _filepath_controls.end()) {
-		c->second->set_filename(value.get_path());
+		auto path = value.get_path();
+		
+		while (test_and_jump_to_symlink(path)) {
+			// Nothing to do
+		}
+
+		c->second->set_filename(path);
 	} else {
 		std::cerr << "warning: property change for property with no control" << std::endl;
 	}
