@@ -2457,30 +2457,12 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, bool s
 
 	failed:
 	if (!new_routes.empty()) {
-		add_routes (new_routes, true, true, order);
+		ChanCount existing_inputs;
+		ChanCount existing_outputs;
+		count_existing_track_channels (existing_inputs, existing_outputs);
 
-		if (instrument) {
-			for (RouteList::iterator r = new_routes.begin(); r != new_routes.end(); ++r) {
-				PluginPtr plugin = instrument->load (*this);
-				if (!plugin) {
-					warning << "Failed to add Synth Plugin to newly created track." << endmsg;
-					continue;
-				}
-				if (pset) {
-					plugin->load_preset (*pset);
-				}
-				boost::shared_ptr<PluginInsert> pi (new PluginInsert (*this, plugin));
-				if (strict_io) {
-					pi->set_strict_io (true);
-				}
-
-				(*r)->add_processor (pi, PreFader);
-
-				if (Profile->get_mixbus () && pi->configured () && pi->output_streams().n_audio() > 2) {
-					(*r)->move_instrument_down (false);
-				}
-			}
-		}
+		add_routes (new_routes, true, !instrument, order);
+		load_and_connect_instruments (new_routes, strict_io, instrument, pset, existing_outputs);
 	}
 
 	return ret;
@@ -2556,30 +2538,12 @@ Session::new_midi_route (RouteGroup* route_group, uint32_t how_many, string name
 
 	failure:
 	if (!ret.empty()) {
-		add_routes (ret, false, true, order);
+		ChanCount existing_inputs;
+		ChanCount existing_outputs;
+		count_existing_track_channels (existing_inputs, existing_outputs);
 
-		if (instrument) {
-			for (RouteList::iterator r = ret.begin(); r != ret.end(); ++r) {
-				PluginPtr plugin = instrument->load (*this);
-				if (!plugin) {
-					warning << "Failed to add Synth Plugin to newly created track." << endmsg;
-					continue;
-				}
-				if (pset) {
-					plugin->load_preset (*pset);
-				}
-				boost::shared_ptr<PluginInsert> pi (new PluginInsert (*this, plugin));
-				if (strict_io) {
-					pi->set_strict_io (true);
-				}
-
-				(*r)->add_processor (pi, PreFader);
-
-				if (Profile->get_mixbus () && pi->configured () && pi->output_streams().n_audio() > 2) {
-					(*r)->move_instrument_down (false);
-				}
-			}
-		}
+		add_routes (ret, false, !instrument, order);
+		load_and_connect_instruments (ret, strict_io, instrument, pset, existing_outputs);
 	}
 
 	return ret;
@@ -2588,13 +2552,9 @@ Session::new_midi_route (RouteGroup* route_group, uint32_t how_many, string name
 
 
 void
-Session::midi_output_change_handler (IOChange change, void * /*src*/, boost::weak_ptr<Route> wmt)
+Session::midi_output_change_handler (IOChange change, void * /*src*/, boost::weak_ptr<Route> wr)
 {
-	boost::shared_ptr<Route> midi_track (wmt.lock());
-
-	if (!midi_track) {
-		return;
-	}
+	boost::shared_ptr<Route> midi_route (wr.lock());
 
 	if ((change.type & IOChange::ConfigurationChanged) && Config->get_output_auto_connect() != ManualConnect) {
 
@@ -2609,7 +2569,7 @@ Session::midi_output_change_handler (IOChange change, void * /*src*/, boost::wea
 		 * to do with matching input and output indices, and we are only changing
 		 * outputs here.
 		 */
-		auto_connect_route (midi_track, false, ChanCount(), change.before);
+		auto_connect_route (midi_route, false, !midi_route->instrument_fanned_out (), ChanCount(), change.before);
 	}
 }
 
@@ -3207,7 +3167,6 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 				boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (tr);
 				if (mt) {
 					mt->StepEditStatusChange.connect_same_thread (*this, boost::bind (&Session::step_edit_status_change, this, _1));
-					mt->output()->changed.connect_same_thread (*this, boost::bind (&Session::midi_output_change_handler, this, _1, _2, boost::weak_ptr<Route>(mt)));
 					mt->presentation_info().PropertyChanged.connect_same_thread (*this, boost::bind (&Session::midi_track_presentation_info_changed, this, _1, boost::weak_ptr<MidiTrack>(mt)));
 				}
 			}
@@ -3245,9 +3204,13 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 
 
 			if (input_auto_connect || output_auto_connect) {
-				auto_connect_route (r, input_auto_connect, ChanCount (), ChanCount (), existing_inputs, existing_outputs);
-				existing_inputs += r->n_inputs();
-				existing_outputs += r->n_outputs();
+				auto_connect_route (r, input_auto_connect, output_auto_connect, ChanCount (), ChanCount (), existing_inputs, existing_outputs);
+				if (input_auto_connect) {
+					existing_inputs += r->n_inputs();
+				}
+				if (output_auto_connect) {
+					existing_outputs += r->n_outputs();
+				}
 			}
 
 			ARDOUR::GUIIdle ();
@@ -3266,6 +3229,44 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 	}
 
 	reassign_track_numbers ();
+}
+
+void
+Session::load_and_connect_instruments (RouteList& new_routes, bool strict_io, boost::shared_ptr<PluginInfo> instrument, Plugin::PresetRecord* pset, ChanCount& existing_outputs)
+{
+	if (instrument) {
+		for (RouteList::iterator r = new_routes.begin(); r != new_routes.end(); ++r) {
+			PluginPtr plugin = instrument->load (*this);
+			if (!plugin) {
+				warning << "Failed to add Synth Plugin to newly created track." << endmsg;
+				continue;
+			}
+			if (pset) {
+				plugin->load_preset (*pset);
+			}
+			boost::shared_ptr<PluginInsert> pi (new PluginInsert (*this, plugin));
+			if (strict_io) {
+				pi->set_strict_io (true);
+			}
+
+			(*r)->add_processor (pi, PreFader);
+
+			if (Profile->get_mixbus () && pi->configured () && pi->output_streams().n_audio() > 2) {
+				(*r)->move_instrument_down (false);
+			}
+
+			/* Route::add_processors -> Delivery::configure_io -> IO::ensure_ports
+			 * should have registered the ports, so now we can call.. */
+			if (!(*r)->instrument_fanned_out ()) {
+				auto_connect_route (*r, false, true, ChanCount (), ChanCount (), ChanCount (), existing_outputs);
+				existing_outputs += (*r)->n_outputs();
+			}
+		}
+	}
+	for (RouteList::iterator r = new_routes.begin(); r != new_routes.end(); ++r) {
+		(*r)->output()->changed.connect_same_thread (*this, boost::bind (&Session::midi_output_change_handler, this, _1, _2, boost::weak_ptr<Route>(*r)));
+	}
+
 }
 
 void
@@ -6565,7 +6566,7 @@ Session::update_latency (bool playback)
 	 * but may indirectly be triggered from
 	 * Session::update_latency_compensation -> _engine.update_latencies
 	 */
-	DEBUG_TRACE (DEBUG::LatencyCompensation, string_compose ("Engine latency callback: %1 (initial/deletion: %2 adding: %3 deletion: %4)\n", 
+	DEBUG_TRACE (DEBUG::LatencyCompensation, string_compose ("Engine latency callback: %1 (initial/deletion: %2 adding: %3 deletion: %4)\n",
 				(playback ? "PLAYBACK" : "CAPTURE"),
 				inital_connect_or_deletion_in_progress(),
 				_adding_routes_in_progress,
@@ -6855,7 +6856,9 @@ Session::clear_object_selection ()
 }
 
 void
-Session::auto_connect_route (boost::shared_ptr<Route> route, bool connect_inputs,
+Session::auto_connect_route (boost::shared_ptr<Route> route,
+		bool connect_inputs,
+		bool connect_outputs,
 		const ChanCount& input_start,
 		const ChanCount& output_start,
 		const ChanCount& input_offset,
@@ -6864,11 +6867,12 @@ Session::auto_connect_route (boost::shared_ptr<Route> route, bool connect_inputs
 	Glib::Threads::Mutex::Lock lx (_auto_connect_queue_lock);
 
 	DEBUG_TRACE (DEBUG::PortConnectAuto,
-	             string_compose ("Session::auto_connect_route '%1' ci: %2 is=(%3) os=(%4) io=(%5) oo=(%6)\n",
-	             route->name(), connect_inputs,
+	             string_compose ("Session::auto_connect_route '%1' ci: %2 co: %3 is=(%4) os=(%5) io=(%6) oo=(%7)\n",
+	             route->name(), connect_inputs, connect_outputs,
 	             input_start, output_start, input_offset, output_offset));
 
-	_auto_connect_queue.push (AutoConnectRequest (route, connect_inputs,
+	_auto_connect_queue.push (AutoConnectRequest (route,
+				connect_inputs, connect_outputs,
 				input_start, output_start,
 				input_offset, output_offset));
 
@@ -6959,7 +6963,7 @@ Session::auto_connect (const AutoConnectRequest& ar)
 			}
 		}
 
-		if (!physoutputs.empty()) {
+		if (!physoutputs.empty() && ar.connect_outputs) {
 			DEBUG_TRACE (DEBUG::PortConnectAuto,
 			             string_compose ("Connect %1 outputs # %2 .. %3\n",
 			             (*t).to_string(), ar.output_start.get(*t), route->n_outputs().get(*t)));

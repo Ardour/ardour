@@ -1615,13 +1615,15 @@ private:
 
 	struct AutoConnectRequest {
 		public:
-		AutoConnectRequest (boost::shared_ptr <Route> r, bool ci,
+		AutoConnectRequest (boost::shared_ptr <Route> r,
+				bool ci, bool co,
 				const ChanCount& is,
 				const ChanCount& os,
 				const ChanCount& io,
 				const ChanCount& oo)
 			: route (boost::weak_ptr<Route> (r))
 			, connect_inputs (ci)
+			, connect_outputs (co)
 			, input_start (is)
 			, output_start (os)
 			, input_offset (io)
@@ -1630,6 +1632,7 @@ private:
 
 		boost::weak_ptr <Route> route;
 		bool connect_inputs;
+		bool connect_outputs;
 		ChanCount input_start;
 		ChanCount output_start;
 		ChanCount input_offset;
@@ -1816,6 +1819,13 @@ private:
 	bool _reconnecting_routes_in_progress;
 	bool _route_deletion_in_progress;
 
+	void load_and_connect_instruments (RouteList&,
+			bool strict_io,
+			boost::shared_ptr<PluginInfo> instrument,
+			Plugin::PresetRecord* pset,
+			ChanCount& existing_outputs
+			);
+
 	boost::shared_ptr<Route> XMLRouteFactory (const XMLNode&, int);
 	boost::shared_ptr<Route> XMLRouteFactory_2X (const XMLNode&, int);
 	boost::shared_ptr<Route> XMLRouteFactory_3X (const XMLNode&, int);
@@ -1824,7 +1834,7 @@ private:
 
 	bool find_route_name (std::string const &, uint32_t& id, std::string& name, bool);
 	void count_existing_track_channels (ChanCount& in, ChanCount& out);
-	void auto_connect_route (boost::shared_ptr<Route>, bool, const ChanCount&, const ChanCount&, const ChanCount& io = ChanCount(), const ChanCount& oo = ChanCount());
+	void auto_connect_route (boost::shared_ptr<Route>, bool, bool, const ChanCount&, const ChanCount&, const ChanCount& io = ChanCount(), const ChanCount& oo = ChanCount());
 	void midi_output_change_handler (IOChange change, void* /*src*/, boost::weak_ptr<Route> midi_track);
 
 	/* track numbering */
