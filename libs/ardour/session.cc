@@ -2457,6 +2457,7 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, bool s
 
 	failed:
 	if (!new_routes.empty()) {
+		add_routes (new_routes, true, true, order);
 
 		if (instrument) {
 			for (RouteList::iterator r = new_routes.begin(); r != new_routes.end(); ++r) {
@@ -2480,8 +2481,6 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, bool s
 				}
 			}
 		}
-
-		add_routes (new_routes, true, true, order);
 	}
 
 	return ret;
@@ -2557,6 +2556,8 @@ Session::new_midi_route (RouteGroup* route_group, uint32_t how_many, string name
 
 	failure:
 	if (!ret.empty()) {
+		add_routes (ret, false, true, order);
+
 		if (instrument) {
 			for (RouteList::iterator r = ret.begin(); r != ret.end(); ++r) {
 				PluginPtr plugin = instrument->load (*this);
@@ -2579,8 +2580,6 @@ Session::new_midi_route (RouteGroup* route_group, uint32_t how_many, string name
 				}
 			}
 		}
-
-		add_routes (ret, false, true, order);
 	}
 
 	return ret;
