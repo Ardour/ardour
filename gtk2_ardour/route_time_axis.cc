@@ -430,7 +430,7 @@ RouteTimeAxisView::label_view ()
 		name_label.set_text (x);
 	}
 
-	inactive_label.set_text (string_compose("(%1)", x));
+	inactive_label.set_text (string_compose("%1", x));
 	inactive_label.show ();
 
 	const int64_t track_number = _route->track_number ();
