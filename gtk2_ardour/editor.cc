@@ -903,6 +903,14 @@ Editor::~Editor()
 	for (std::map<ARDOUR::FadeShape, Gtk::Image*>::const_iterator i = _xfade_out_images.begin(); i != _xfade_out_images.end (); ++i) {
 		delete i->second;
 	}
+
+	for (std::list<VisualState*>::iterator it = undo_visual_stack.begin (); it != undo_visual_stack.end (); ++it) {
+		delete *it;
+	}
+
+	for (std::list<VisualState*>::iterator it = redo_visual_stack.begin (); it != redo_visual_stack.end (); ++it) {
+		delete *it;
+	}
 }
 
 XMLNode*
@@ -4475,7 +4483,8 @@ Editor::VisualState::VisualState (bool with_tracks)
 
 Editor::VisualState::~VisualState ()
 {
-	delete gui_state;
+	if (gui_state)
+		delete gui_state;
 }
 
 Editor::VisualState*
@@ -4509,6 +4518,7 @@ Editor::undo_visual_state ()
 
 	if (vs) {
 		use_visual_state (*vs);
+		delete vs;
 	}
 }
 
@@ -4527,6 +4537,7 @@ Editor::redo_visual_state ()
 
 	if (vs) {
 		use_visual_state (*vs);
+		delete vs;
 	}
 }
 
