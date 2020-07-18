@@ -6876,7 +6876,7 @@ Session::auto_connect_route (boost::shared_ptr<Route> route,
 				input_start, output_start,
 				input_offset, output_offset));
 
-	lx.release ();
+	lx.release (); // XXX check try-lock + pthread_cond_wait
 	auto_connect_thread_wakeup ();
 }
 
@@ -7054,9 +7054,10 @@ Session::auto_connect_thread_run ()
 	SessionEvent::create_per_thread_pool (X_("autoconnect"), 1024);
 	PBD::notify_event_loops_about_thread_creation (pthread_self(), X_("autoconnect"), 1024);
 	pthread_mutex_lock (&_auto_connect_mutex);
+
+	Glib::Threads::Mutex::Lock lx (_auto_connect_queue_lock);
 	while (g_atomic_int_get (&_ac_thread_active)) {
 
-		Glib::Threads::Mutex::Lock lx (_auto_connect_queue_lock);
 		if (!_auto_connect_queue.empty ()) {
 			/* Why would we need the process lock?
 			 *
@@ -7100,8 +7101,14 @@ Session::auto_connect_thread_run ()
 			AudioEngine::instance()->clear_pending_port_deletions ();
 		}
 
-		pthread_cond_wait (&_auto_connect_cond, &_auto_connect_mutex);
+		lx.acquire ();
+		if (_auto_connect_queue.empty ()) {
+			lx.release ();
+			pthread_cond_wait (&_auto_connect_cond, &_auto_connect_mutex);
+			lx.acquire ();
+		}
 	}
+	lx.release ();
 	pthread_mutex_unlock (&_auto_connect_mutex);
 }
 
