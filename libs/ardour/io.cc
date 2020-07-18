@@ -168,6 +168,9 @@ IO::disconnect (boost::shared_ptr<Port> our_port, string other_port, void* src)
 
 		/* disconnect it from the source */
 
+		DEBUG_TRACE (DEBUG::PortConnectIO,
+		             string_compose("IO::disconnect %1 from %2\n", our_port->name(), other_port));
+
 		if (our_port->disconnect (other_port)) {
 			error << string_compose(_("IO: cannot disconnect port %1 from %2"), our_port->name(), other_port) << endmsg;
 			return -1;
@@ -198,6 +201,9 @@ IO::connect (boost::shared_ptr<Port> our_port, string other_port, void* src)
 		}
 
 		/* connect it to the source */
+
+		DEBUG_TRACE (DEBUG::PortConnectIO,
+		             string_compose("IO::connect %1 to %2\n", our_port->name(), other_port));
 
 		if (our_port->connect (other_port)) {
 			return -1;

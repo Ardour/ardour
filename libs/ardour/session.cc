@@ -6862,6 +6862,12 @@ Session::auto_connect_route (boost::shared_ptr<Route> route, bool connect_inputs
 		const ChanCount& output_offset)
 {
 	Glib::Threads::Mutex::Lock lx (_auto_connect_queue_lock);
+
+	DEBUG_TRACE (DEBUG::PortConnectAuto,
+	             string_compose ("Session::auto_connect_route '%1' ci: %2 is=(%3) os=(%4) io=(%5) oo=(%6)\n",
+	             route->name(), connect_inputs,
+	             input_start, output_start, input_offset, output_offset));
+
 	_auto_connect_queue.push (AutoConnectRequest (route, connect_inputs,
 				input_start, output_start,
 				input_offset, output_offset));
@@ -6917,6 +6923,10 @@ Session::auto_connect (const AutoConnectRequest& ar)
 		? ChanCount::max(ar.input_offset, ar.output_offset)
 		: ar.output_offset;
 
+	DEBUG_TRACE (DEBUG::PortConnectAuto,
+	             string_compose ("Session::auto_connect '%1' iop: %2 is=(%3) os=(%4) Eio=(%5) Eoo=(%6)\n",
+	             route->name(), in_out_physical, ar.input_start, ar.output_start, in_offset, out_offset));
+
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 		vector<string> physinputs;
 		vector<string> physoutputs;
@@ -6927,6 +6937,10 @@ Session::auto_connect (const AutoConnectRequest& ar)
 		 */
 
 		get_physical_ports (physinputs, physoutputs, *t, MidiPortMusic);
+
+		DEBUG_TRACE (DEBUG::PortConnectAuto,
+		             string_compose ("Physical MidiPortMusic %1 Ports count in: %2 out %3\n",
+		             (*t).to_string(), physinputs.size(), physoutputs.size()));
 
 		if (!physinputs.empty() && ar.connect_inputs) {
 			uint32_t nphysical_in = physinputs.size();
@@ -6939,12 +6953,17 @@ Session::auto_connect (const AutoConnectRequest& ar)
 				}
 
 				if (!port.empty() && route->input()->connect (route->input()->ports().port(*t, i), port, this)) {
+					DEBUG_TRACE (DEBUG::PortConnectAuto, "Failed to auto-connect input.");
 					break;
 				}
 			}
 		}
 
 		if (!physoutputs.empty()) {
+			DEBUG_TRACE (DEBUG::PortConnectAuto,
+			             string_compose ("Connect %1 outputs # %2 .. %3\n",
+			             (*t).to_string(), ar.output_start.get(*t), route->n_outputs().get(*t)));
+
 			uint32_t nphysical_out = physoutputs.size();
 			for (uint32_t i = ar.output_start.get(*t); i < route->n_outputs().get(*t); ++i) {
 				string port;
@@ -6960,6 +6979,7 @@ Session::auto_connect (const AutoConnectRequest& ar)
 				}
 
 				if (!port.empty() && route->output()->connect (route->output()->ports().port(*t, i), port, this)) {
+					DEBUG_TRACE (DEBUG::PortConnectAuto, "Failed to auto-connect ouput.");
 					break;
 				}
 			}

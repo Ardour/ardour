@@ -78,6 +78,8 @@ namespace PBD {
 		LIBARDOUR_API extern DebugBits Panning;
 		LIBARDOUR_API extern DebugBits Peaks;
 		LIBARDOUR_API extern DebugBits PluginManager;
+		LIBARDOUR_API extern DebugBits PortConnectAuto;
+		LIBARDOUR_API extern DebugBits PortConnectIO;
 		LIBARDOUR_API extern DebugBits Ports;
 		LIBARDOUR_API extern DebugBits ProcessThreads;
 		LIBARDOUR_API extern DebugBits Processors;
