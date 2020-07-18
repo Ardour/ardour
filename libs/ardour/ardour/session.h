@@ -337,6 +337,7 @@ public:
 	uint32_t nstripables (bool with_monitor = false) const;
 	uint32_t nroutes() const { return routes.reader()->size(); }
 	uint32_t ntracks () const;
+	uint32_t naudiotracks () const;
 	uint32_t nbusses () const;
 
 	bool plot_process_graph (std::string const& file_name) const;
@@ -1296,6 +1297,7 @@ protected:
 	double speed() const { return _transport_speed; }
 	samplepos_t position() const { return _transport_sample; }
 	void set_transport_speed (double speed, bool abort, bool clear_state, bool as_default);
+	bool need_declick_before_locate () const;
 
 private:
 	int  create (const std::string& mix_template, BusProfile const *, bool unnamed);

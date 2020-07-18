@@ -648,6 +648,15 @@ Session::start_transport ()
 }
 
 bool
+Session::need_declick_before_locate () const
+{
+	/* At this time (July 2020) only audio playback from disk readers is
+	   de-clicked. MIDI tracks with audio output really need it too.
+	*/
+	return naudiotracks() > 0;
+}
+
+bool
 Session::should_roll_after_locate () const
 {
 	/* a locate must previously have been requested and completed before

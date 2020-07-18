@@ -6002,11 +6002,30 @@ Session::get_mix_buffers (ChanCount count)
 uint32_t
 Session::ntracks () const
 {
+	/* XXX Could be optimized by caching */
+
 	uint32_t n = 0;
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
 		if (boost::dynamic_pointer_cast<Track> (*i)) {
+			++n;
+		}
+	}
+
+	return n;
+}
+
+uint32_t
+Session::naudiotracks () const
+{
+	/* XXX Could be optimized by caching */
+
+	uint32_t n = 0;
+	boost::shared_ptr<RouteList> r = routes.reader ();
+
+	for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
+		if (boost::dynamic_pointer_cast<AudioTrack> (*i)) {
 			++n;
 		}
 	}

@@ -43,6 +43,7 @@ class LIBARDOUR_API TransportAPI
 	virtual double speed() const = 0;
 	virtual void set_transport_speed (double speed, bool abort_capture, bool clear_state, bool as_default) = 0;
 	virtual samplepos_t position() const = 0;
+   	virtual bool need_declick_before_locate () const = 0;
 };
 
 } /* end namespace ARDOUR */

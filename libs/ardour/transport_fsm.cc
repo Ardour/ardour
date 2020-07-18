@@ -292,6 +292,7 @@ TransportFSM::process_event (Event& ev, bool already_deferred, bool& deferred)
 			break;
 		case Rolling:
 			if (ev.for_loop_end) {
+
 				/* we will finish the locate synchronously, so
 				 * that after returning from
 				 * ::locate_for_loop() we will already have
@@ -308,6 +309,7 @@ TransportFSM::process_event (Event& ev, bool already_deferred, bool& deferred)
 				 */
 				transition (WaitingForLocate);
 				locate_for_loop (ev);
+
 			} else if (DiskReader::no_disk_output()) {
 
 				/* separate clause to allow a comment that is
@@ -326,8 +328,14 @@ TransportFSM::process_event (Event& ev, bool already_deferred, bool& deferred)
 				transition (WaitingForLocate);
 				locate_for_loop (ev);
 			} else {
-				transition (DeclickToLocate);
-				start_declick_for_locate (ev);
+
+				if (api->need_declick_before_locate()) {
+					transition (DeclickToLocate);
+					start_declick_for_locate (ev);
+				} else {
+					transition (WaitingForLocate);
+					locate_for_loop (ev);
+				}
 			}
 			break;
 		case WaitingForLocate:
@@ -675,4 +683,3 @@ TransportFSM::will_roll_fowards () const
 	}
 	return (_direction_state == Forwards);
 }
-
