@@ -6876,6 +6876,7 @@ Session::auto_connect_route (boost::shared_ptr<Route> route,
 				input_start, output_start,
 				input_offset, output_offset));
 
+	lx.release ();
 	auto_connect_thread_wakeup ();
 }
 
@@ -6998,9 +6999,11 @@ Session::auto_connect_thread_start ()
 		return;
 	}
 
+	Glib::Threads::Mutex::Lock lx (_auto_connect_queue_lock);
 	while (!_auto_connect_queue.empty ()) {
 		_auto_connect_queue.pop ();
 	}
+	lx.release ();
 
 	g_atomic_int_set (&_ac_thread_active, 1);
 	if (pthread_create (&_auto_connect_thread, NULL, auto_connect_thread, this)) {
@@ -7053,6 +7056,7 @@ Session::auto_connect_thread_run ()
 	pthread_mutex_lock (&_auto_connect_mutex);
 	while (g_atomic_int_get (&_ac_thread_active)) {
 
+		Glib::Threads::Mutex::Lock lx (_auto_connect_queue_lock);
 		if (!_auto_connect_queue.empty ()) {
 			/* Why would we need the process lock?
 			 *
@@ -7063,7 +7067,6 @@ Session::auto_connect_thread_run ()
 			 */
 			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 
-			Glib::Threads::Mutex::Lock lx (_auto_connect_queue_lock);
 			while (!_auto_connect_queue.empty ()) {
 				const AutoConnectRequest ar (_auto_connect_queue.front());
 				_auto_connect_queue.pop ();
@@ -7072,6 +7075,7 @@ Session::auto_connect_thread_run ()
 				lx.acquire ();
 			}
 		}
+		lx.release ();
 
 		if (!actively_recording ()) { // might not be needed,
 			/* this is only used for updating plugin latencies, the
