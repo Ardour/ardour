@@ -1846,6 +1846,16 @@ Session::load_routes (const XMLNode& node, int version)
 
 	add_routes (new_routes, false, false, PresentationInfo::max_order);
 
+	/* re-subscribe to MIDI connection handler */
+	for (RouteList::iterator r = new_routes.begin(); r != new_routes.end(); ++r) {
+		boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (*r);
+		bool is_midi_route = (*r)->n_inputs().n_midi() > 0 && (*r)->n_inputs().n_midi() > 0;
+		if (mt || is_midi_route) {
+			(*r)->output()->changed.connect_same_thread (*this, boost::bind (&Session::midi_output_change_handler, this, _1, _2, boost::weak_ptr<Route>(*r)));
+		}
+	}
+
+
 	BootMessage (_("Finished adding tracks/busses"));
 
 	return 0;

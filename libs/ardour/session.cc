@@ -2556,6 +2556,10 @@ Session::midi_output_change_handler (IOChange change, void * /*src*/, boost::wea
 {
 	boost::shared_ptr<Route> midi_route (wr.lock());
 
+	if (!midi_route) {
+		return;
+	}
+
 	if ((change.type & IOChange::ConfigurationChanged) && Config->get_output_auto_connect() != ManualConnect) {
 
 		if (change.after.n_audio() <= change.before.n_audio()) {
@@ -3266,7 +3270,6 @@ Session::load_and_connect_instruments (RouteList& new_routes, bool strict_io, bo
 	for (RouteList::iterator r = new_routes.begin(); r != new_routes.end(); ++r) {
 		(*r)->output()->changed.connect_same_thread (*this, boost::bind (&Session::midi_output_change_handler, this, _1, _2, boost::weak_ptr<Route>(*r)));
 	}
-
 }
 
 void
