@@ -511,6 +511,7 @@ public:
 	*/
 	boost::shared_ptr<Processor> the_instrument() const;
 	InstrumentInfo& instrument_info() { return _instrument_info; }
+	bool instrument_fanned_out () const { return _instrument_fanned_out;}
 
 
 	/* "well-known" controls.
@@ -661,6 +662,7 @@ protected:
 	FedBy          _fed_by;
 
 	InstrumentInfo _instrument_info;
+	bool           _instrument_fanned_out;
 	Location*      _loop_location;
 
 	virtual ChanCount input_streams () const;

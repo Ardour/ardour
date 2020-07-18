@@ -123,6 +123,7 @@ Route::Route (Session& sess, string name, PresentationInfo::Flag flag, DataType 
 	, _recordable (true)
 	, _have_internal_generator (false)
 	, _default_type (default_type)
+	, _instrument_fanned_out (false)
 	, _loop_location (NULL)
 	, _track_number (0)
 	, _strict_io (false)
@@ -1158,6 +1159,7 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 			&& boost::dynamic_pointer_cast<PluginInsert> (the_instrument ()) == fanout) {
 		/* This adds new tracks or busses, and changes connections.
 		 * This cannot be done here, and needs to be delegated to the GUI thread. */
+		_instrument_fanned_out = true;
 		FanOut (boost::dynamic_pointer_cast<ARDOUR::Route>(shared_from_this())); /* EMIT SIGNAL */
 	}
 	return 0;
@@ -1698,6 +1700,9 @@ void
 Route::reset_instrument_info ()
 {
 	boost::shared_ptr<Processor> instr = the_instrument();
+	if (!instr) {
+		_instrument_fanned_out = false;
+	}
 	_instrument_info.set_internal_instrument (instr);
 }
 
