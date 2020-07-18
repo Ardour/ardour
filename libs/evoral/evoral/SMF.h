@@ -96,7 +96,6 @@ public:
 	/* This is exactly modelled on smf_tempo_t */
 	struct Tempo {
 		size_t time_pulses;
-		double time_seconds;
 		int    microseconds_per_quarter_note;
 		int    numerator;
 		int    denominator;
@@ -105,7 +104,6 @@ public:
 
 		Tempo ()
 			: time_pulses (0)
-			, time_seconds (0)
 			, microseconds_per_quarter_note (-1)
 			, numerator (-1)
 			, denominator (-1)
@@ -118,8 +116,6 @@ public:
 		}
 	};
 
-	Tempo* tempo_at_smf_pulse (size_t smf_pulse) const;
-	Tempo* tempo_at_seconds (double seconds) const;
 	Tempo* nth_tempo (size_t n) const;
 
   private:

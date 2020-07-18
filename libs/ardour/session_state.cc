@@ -925,12 +925,11 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 			save_path += "-";
 			save_path += timebuf;
 			save_path += statefile_suffix;
-			if ( !tree.write (save_path) )
+			if (!copy_file (xml_path, save_path)) {
 					error << string_compose(_("Could not save backup file at path \"%1\" (%2)"),
 							save_path, g_strerror (errno)) << endmsg;
+			}
 		}
-
-		StateSaved (snapshot_name); /* EMIT SIGNAL */
 	}
 
 	if (!pending && !for_archive) {

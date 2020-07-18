@@ -40,11 +40,6 @@
 #include <math.h>
 #include <errno.h>
 #include <ctype.h>
-#ifdef PLATFORM_WINDOWS
-#include <winsock2.h>
-#else
-#include <arpa/inet.h>
-#endif
 #include "smf.h"
 #include "smf_private.h"
 
@@ -79,10 +74,11 @@ next_chunk(smf_t *smf)
 	 * XXX: On SPARC, after compiling with "-fast" option there will be SIGBUS here.
 	 * Please compile with -xmemalign=8i".
 	 */
-	smf->next_chunk_offset += sizeof(struct chunk_header_struct) + ntohl(chunk->length);
+	smf->next_chunk_offset += sizeof(struct chunk_header_struct) + GUINT32_FROM_BE(chunk->length);
 
 	if (smf->next_chunk_offset > smf->file_buffer_length) {
-		g_warning("SMF error: malformed chunk; truncated file?");
+		g_warning("SMF warning: malformed chunk; truncated file?");
+		smf->next_chunk_offset = smf->file_buffer_length;
 	}
 
 	return (chunk);
@@ -137,7 +133,7 @@ parse_mthd_header(smf_t *smf)
 
 	assert(mthd == tmp_mthd);
 
-	len = ntohl(mthd->length);
+	len = GUINT32_FROM_BE(mthd->length);
 	if (len != 6) {
 		g_warning("SMF error: MThd chunk length %d, must be 6.", len);
 
@@ -164,7 +160,7 @@ parse_mthd_chunk(smf_t *smf)
 
 	mthd = (struct mthd_chunk_struct *)smf->file_buffer;
 
-	smf->format = ntohs(mthd->format);
+	smf->format = GUINT16_FROM_BE(mthd->format);
 	if (smf->format < 0 || smf->format > 2) {
 		g_warning("SMF error: bad MThd format field value: %d, valid values are 0-2, inclusive.", smf->format);
 		return (-1);
@@ -175,7 +171,7 @@ parse_mthd_chunk(smf_t *smf)
 		return (-2);
 	}
 
-	smf->expected_number_of_tracks = ntohs(mthd->number_of_tracks);
+	smf->expected_number_of_tracks = GUINT16_FROM_BE(mthd->number_of_tracks);
 	if (smf->expected_number_of_tracks <= 0) {
 		g_warning("SMF error: bad number of tracks: %d, must be greater than zero.", smf->expected_number_of_tracks);
 		return (-3);
@@ -186,7 +182,7 @@ parse_mthd_chunk(smf_t *smf)
 	second_byte_of_division = *((signed char *)&(mthd->division) + 1);
 
 	if (first_byte_of_division >= 0) {
-		smf->ppqn = ntohs(mthd->division);
+		smf->ppqn = GUINT16_FROM_BE(mthd->division);
 		smf->frames_per_second = 0;
 		smf->resolution = 0;
 	} else {
@@ -215,6 +211,8 @@ smf_extract_vlq(const unsigned char *buf, const size_t buffer_length, uint32_t *
 	uint32_t val = 0;
 	const unsigned char *c = buf;
 	int i = 0;
+
+	assert(buffer_length > 0);
 
 	for (;; ++i) {
 		if (c >= buf + buffer_length) {
@@ -290,7 +288,7 @@ expected_sysex_length(const unsigned char status, const unsigned char *second_by
 #ifndef NDEBUG
 	(void) status;
 #else
-	assert(status == 0xF0);
+	assert(status == 0xF0 || status == 0xF7);
 #endif
 
 	if (buffer_length < 3) {
@@ -298,7 +296,9 @@ expected_sysex_length(const unsigned char status, const unsigned char *second_by
 		return (-1);
 	}
 
-	smf_extract_vlq(second_byte, buffer_length, &sysex_length, &len);
+	if (smf_extract_vlq(second_byte, buffer_length, &sysex_length, &len)) {
+		return (-1);
+	}
 
 	if (consumed_bytes != NULL)
 		*consumed_bytes = len;
@@ -469,7 +469,7 @@ extract_escaped_event(const unsigned char *buf, const size_t buffer_length, smf_
 
 	message_length = expected_escaped_length(status, c, buffer_length - 1, &vlq_length);
 
-	if (message_length < 0)
+	if (message_length <= 0)
 		return (-3);
 
 	c += vlq_length;
@@ -488,12 +488,12 @@ extract_escaped_event(const unsigned char *buf, const size_t buffer_length, smf_
 
 	memcpy(event->midi_buffer, c, message_length);
 
-	if (smf_event_is_valid(event)) {
+	if (!smf_event_is_valid(event)) {
 		g_warning("Escaped event is invalid.");
 		return (-1);
 	}
 
-	if (smf_event_is_system_realtime(event) || smf_event_is_system_common(event)) {
+	if (!(smf_event_is_system_realtime(event) || smf_event_is_system_common(event))) {
 		g_warning("Escaped event is not System Realtime nor System Common.");
 	}
 
@@ -532,11 +532,21 @@ extract_midi_event(const unsigned char *buf, const size_t buffer_length, smf_eve
 		return (-1);
 	}
 
-	if (is_sysex_byte(status))
+	if (is_sysex_byte(status)) {
+		if (c == buf) {
+			g_critical("SMF error: running status is not applicable to System Exclusive events.");
+			return (-2);
+		}
 		return (extract_sysex_event(buf, buffer_length, event, len, last_status));
+	}
 
-	if (is_escape_byte(status))
+	if (is_escape_byte(status)) {
+		if (c == buf) {
+			g_critical("SMF error: running status is not applicable to Escape events.");
+			return (-2);
+		}
 		return (extract_escaped_event(buf, buffer_length, event, len, last_status));
+	}
 
 	/* At this point, "c" points to first byte following the status byte. */
 	message_length = expected_message_length(status, c, buffer_length - (c - buf));
@@ -589,6 +599,7 @@ parse_next_event(smf_track_t *track)
 	assert(track->next_event_offset > 0);
 
 	buffer_length = track->file_buffer_length - track->next_event_offset;
+
 	/* if there was no meta-EOT event, buffer_length can be zero. This is
 	   an error in the SMF file, but it shouldn't be treated as fatal.
 	*/
@@ -733,7 +744,7 @@ parse_mtrk_header(smf_track_t *track)
 	}
 
 	track->file_buffer = mtrk;
-	track->file_buffer_length = sizeof(struct chunk_header_struct) + ntohl(mtrk->length);
+	track->file_buffer_length = sizeof(struct chunk_header_struct) + GUINT32_FROM_BE(mtrk->length);
 	track->next_event_offset = sizeof(struct chunk_header_struct);
 
 	return (0);
@@ -811,19 +822,29 @@ static int
 parse_mtrk_chunk(smf_track_t *track)
 {
 	smf_event_t *event;
-	int ret = 0;
 
 	if (parse_mtrk_header(track))
 		return (-1);
 
 	for (;;) {
+		if (track->next_event_offset == track->file_buffer_length) {
+			g_warning("SMF warning: The track did not finish with the End of Track event.");
+			break;
+		}
+
 		event = parse_next_event(track);
 
 		/* Couldn't parse an event? */
-		if (event == NULL || !smf_event_is_valid(event)) {
-			ret = -1;
+		if (event == NULL) {
+			g_warning("Unable to parse MIDI event; truncating track.");
+			if (smf_track_add_eot_delta_pulses(track, 0) != 0) {
+				g_critical("smf_track_add_eot_delta_pulses failed.");
+				return (-2);
+			}
 			break;
 		}
+
+		assert(smf_event_is_valid(event));
 
 		if (event_is_end_of_track(event)) {
 			break;
@@ -847,7 +868,7 @@ parse_mtrk_chunk(smf_track_t *track)
 	track->file_buffer_length = 0;
 	track->next_event_offset = -1;
 
-	return (ret);
+	return (0);
 }
 
 /**
@@ -909,7 +930,6 @@ smf_t *
 smf_load_from_memory(void *buffer, const size_t buffer_length)
 {
 	int i;
-	int ret;
 
 	smf_t *smf = smf_new();
 
@@ -917,26 +937,30 @@ smf_load_from_memory(void *buffer, const size_t buffer_length)
 	smf->file_buffer_length = buffer_length;
 	smf->next_chunk_offset = 0;
 
-	if (parse_mthd_chunk(smf))
+	if (parse_mthd_chunk(smf)) {
+		smf_delete(smf);
 		return (NULL);
+	}
 
 	for (i = 1; i <= smf->expected_number_of_tracks; i++) {
 		smf_track_t *track = smf_track_new();
-		if (track == NULL)
+		if (track == NULL) {
+			smf_delete(smf);
 			return (NULL);
+		}
 
 		smf_add_track(smf, track);
 
-		ret = parse_mtrk_chunk(track);
+		/* Skip unparseable chunks. */
+		if (parse_mtrk_chunk(track)) {
+			g_warning("SMF warning: Cannot load track.");
+			smf_track_delete(track);
+			break;
+		}
 
 		track->file_buffer = NULL;
 		track->file_buffer_length = 0;
 		track->next_event_offset = -1;
-
-		if (ret) {
-			g_warning("SMF warning: Error parsing track, continuing with data loaded so far.");
-			break;
-		}
 	}
 
 	if (smf->expected_number_of_tracks != smf->number_of_tracks) {

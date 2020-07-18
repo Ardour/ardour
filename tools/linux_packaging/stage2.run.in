@@ -119,7 +119,21 @@ cd "${PKG_PATH}"
 
 echo ""
 echo "Welcome to the ${PGM_NAME} installer"
-echo ""
+
+case `uname -s` in
+	Linux)
+		echo ""
+		;;
+	*)
+		echo ""
+		echo "!!! ERROR !!! - Unsupported Operating System `uname -s`."
+		echo "This installer is for 'Linux' kernel based systems only."
+		echo ""
+		read -p "Press ENTER to exit installer:" BLAH
+		exit 1
+		;;
+esac
+
 echo "${PGM_NAME} will be installed for user ${USER_NAME} in ${INSTALL_DEST_BASE}"
 echo ""
 #############################

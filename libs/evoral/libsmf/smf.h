@@ -262,7 +262,6 @@ typedef struct smf_struct smf_t;
 /** Describes a single tempo or time signature change. */
 struct smf_tempo_struct {
 	size_t time_pulses;
-	double time_seconds;
 	int    microseconds_per_quarter_note;
 	int    numerator;
 	int    denominator;
@@ -313,9 +312,6 @@ struct smf_event_struct {
 	/** Time, in pulses, since the start of the song. */
 	size_t       time_pulses;
 
-	/** Time, in seconds, since the start of the song. */
-	double       time_seconds;
-
 	/** Tracks are numbered consecutively, starting from 1. */
 	int          track_number;
 
@@ -344,12 +340,10 @@ smf_event_t *smf_get_next_event(smf_t *smf) WARN_UNUSED_RESULT;
 void         smf_skip_next_event(smf_t *smf);
 
 void smf_rewind(smf_t *smf);
-int  smf_seek_to_seconds(smf_t *smf, double seconds) WARN_UNUSED_RESULT;
 int  smf_seek_to_pulses(smf_t *smf, size_t pulses) WARN_UNUSED_RESULT;
 int  smf_seek_to_event(smf_t *smf, const smf_event_t *event) WARN_UNUSED_RESULT;
 
 size_t smf_get_length_pulses(const smf_t *smf) WARN_UNUSED_RESULT;
-double smf_get_length_seconds(const smf_t *smf) WARN_UNUSED_RESULT;
 int    smf_event_is_last(const smf_event_t *event) WARN_UNUSED_RESULT;
 
 void smf_add_track(smf_t *smf, smf_track_t *track);
@@ -365,17 +359,15 @@ smf_event_t *smf_track_get_last_event(const smf_track_t *track) WARN_UNUSED_RESU
 
 void smf_track_add_event_delta_pulses(smf_track_t *track, smf_event_t *event, uint32_t delta);
 void smf_track_add_event_pulses(smf_track_t *track, smf_event_t *event, size_t pulses);
-void smf_track_add_event_seconds(smf_track_t *track, smf_event_t *event, double seconds);
 int  smf_track_add_eot_delta_pulses(smf_track_t *track, uint32_t delta) WARN_UNUSED_RESULT;
 int  smf_track_add_eot_pulses(smf_track_t *track, size_t pulses) WARN_UNUSED_RESULT;
-int  smf_track_add_eot_seconds(smf_track_t *track, double seconds) WARN_UNUSED_RESULT;
 void smf_event_remove_from_track(smf_event_t *event);
 
 /* Routines for manipulating smf_event_t. */
 smf_event_t *smf_event_new(void) WARN_UNUSED_RESULT;
 smf_event_t *smf_event_new_from_pointer(const void *midi_data, size_t len) WARN_UNUSED_RESULT;
 smf_event_t *smf_event_new_from_bytes(int byte1, int byte2, int byte3) WARN_UNUSED_RESULT;
-smf_event_t *smf_event_new_textual(int type, const char *text);
+smf_event_t *smf_event_new_textual(int type, const char *text) WARN_UNUSED_RESULT;
 void         smf_event_delete(smf_event_t *event);
 
 int   smf_event_is_valid(const smf_event_t *event) WARN_UNUSED_RESULT;

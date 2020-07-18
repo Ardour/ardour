@@ -1762,7 +1762,7 @@ private:
 		OnlyLoop,
 	};
 
-	volatile guint _punch_or_loop; // enum PunchLoopLock
+	volatile gint _punch_or_loop; // enum PunchLoopLock
 	gint current_usecs_per_track;
 
 	bool punch_active () const;
