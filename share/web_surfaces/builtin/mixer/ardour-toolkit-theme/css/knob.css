@@ -28,14 +28,14 @@
     height: 100%;
 }
 .toolkit-knob > svg > .toolkit-circular > .toolkit-hand {
-    fill: #002a42;
+    fill: #487c92;
 }
 
 .toolkit-knob > svg > .toolkit-circular > .toolkit-base {
     
 }
 .toolkit-knob > svg > .toolkit-circular > .toolkit-value {
-    fill: #487c92;
+    /*fill: #487c92;*/
 }
 .toolkit-knob > svg > .toolkit-circular > .toolkit-dots > .toolkit-dot {
     fill: #002f42;

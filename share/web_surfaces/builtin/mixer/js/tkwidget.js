@@ -177,7 +177,11 @@ export class PanKnob extends Knob {
             //scale: 'linear',
             scale: (k) => 1.0 - k,
             min: 0,
-            max: 1.0
+            max: 1.0,
+            hand: {
+                width: 5,
+                length: 15
+            }
         });
     }
 
