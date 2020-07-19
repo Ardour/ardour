@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: libardour 5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-05-20 14:36-0600\n"
-"PO-Revision-Date: 2020-06-15 19:15+0200\n"
+"PO-Revision-Date: 2020-07-19 23:40+0200\n"
 "Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>\n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -1957,7 +1957,7 @@ msgstr "Scan des greffons complet"
 
 #: plugin_manager.cc:449
 msgid "Indexing Plugins..."
-msgstr "Indexage des Greffons..."
+msgstr "Indexage des greffons..."
 
 #: plugin_manager.cc:685
 msgid "LADSPA"
@@ -2605,7 +2605,7 @@ msgstr "impossible d'établir les E/S de Click"
 
 #: session.cc:920
 msgid "cannot connect master output %1 to %2"
-msgstr "Connection de sortie Master %1 à %2 impossible"
+msgstr "Connection de sortie master %1 à %2 impossible"
 
 #: session.cc:937
 msgid "Cannot remove monitor section while the engine is offline."
