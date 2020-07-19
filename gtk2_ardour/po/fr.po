@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: Ardour 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-06-18 16:34+0200\n"
-"PO-Revision-Date: 2020-06-18 23:48+0200\n"
+"PO-Revision-Date: 2020-07-19 23:40+0200\n"
 "Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>\n"
 "Language-Team: French <>\n"
 "Language: fr\n"
@@ -1658,7 +1658,7 @@ msgstr "Sortie"
 
 #: ardour_ui2.cc:385
 msgid "Non-Layered"
-msgstr "Non-Empilé"
+msgstr "Non-empilé"
 
 #: ardour_ui2.cc:387 ardour_ui_ed.cc:454
 msgid "All In"
@@ -2128,11 +2128,11 @@ msgstr "Liste des raccourcis"
 
 #: ardour_ui_ed.cc:279
 msgid "Website"
-msgstr "Internet"
+msgstr "Site internet (anglais)"
 
 #: ardour_ui_ed.cc:280
 msgid "Development"
-msgstr "Développement"
+msgstr "Développement (anglais)"
 
 #: ardour_ui_ed.cc:281
 msgid "User Forums"
@@ -2671,7 +2671,7 @@ msgstr "Int."
 
 #: ardour_ui_options.cc:573
 msgid "Enable/Disable external positional sync"
-msgstr "Dés/Activer la synchro de position externe"
+msgstr "Dés/activer la synchro de position externe"
 
 #: ardour_ui_options.cc:575
 msgid "Sync to JACK is not possible: video pull up/down is set"
@@ -3567,7 +3567,7 @@ msgstr "éditer la note"
 
 #: editor.cc:179 editor_actions.cc:563
 msgid "No Grid"
-msgstr "Sans Grille"
+msgstr "Sans grille"
 
 #: editor.cc:180
 msgid "Bar"
@@ -4162,7 +4162,7 @@ msgstr "Nombre de pistes visibles"
 
 #: editor.cc:3347
 msgid "Grid Mode"
-msgstr "Unité de la Grille"
+msgstr "Unité de la grille"
 
 #: editor.cc:3348
 msgid ""
@@ -4691,11 +4691,11 @@ msgstr "Sélectionner piste ou bus précédent"
 
 #: editor_actions.cc:257
 msgid "Select Next Strip"
-msgstr "Sélectionner la Tranche Suivante"
+msgstr "Sélectionner la tranche suivante"
 
 #: editor_actions.cc:258
 msgid "Select Previous Strip"
-msgstr "Sélectionner la Tranche Précédante"
+msgstr "Sélectionner la tranche précédante"
 
 #: editor_actions.cc:260
 msgid "Toggle All Existing Automation"
@@ -5086,7 +5086,7 @@ msgstr "Changer le mode d'édition"
 
 #: editor_actions.cc:560
 msgid "Snap & Grid"
-msgstr "Aimant et Grille"
+msgstr "Aimant et grille"
 
 #: editor_actions.cc:564 rc_option_editor.cc:2750
 msgid "Grid"
@@ -5102,15 +5102,15 @@ msgstr "Aimant"
 
 #: editor_actions.cc:571
 msgid "Toggle Snap"
-msgstr "Basculer l'Aimant"
+msgstr "Basculer l'aimant"
 
 #: editor_actions.cc:572
 msgid "Next Quantize Grid Choice"
-msgstr "Choix de Grille Suivant"
+msgstr "Choix de grille suivant"
 
 #: editor_actions.cc:573
 msgid "Previous Quantize Grid Choice"
-msgstr "Choix de Grille Précédent"
+msgstr "Choix de grille précédent"
 
 #: editor_actions.cc:603
 msgid "Show Marker Lines"
@@ -5482,7 +5482,7 @@ msgstr "Ajouter un repère d'intervalle par région"
 
 #: editor_actions.cc:1569
 msgid "Snap Position to Grid"
-msgstr "Aimanter la Position à la grille"
+msgstr "Aimanter la position à la grille"
 
 #: editor_actions.cc:1572
 msgid "Close Gaps"
@@ -6106,7 +6106,7 @@ msgstr "Régler Constant"
 
 #: editor_markers.cc:1017
 msgid "Ramp to Next"
-msgstr "Rampe vers le Suivant"
+msgstr "Rampe vers le suivant"
 
 #: editor_markers.cc:1022 editor_markers.cc:1047
 msgid "Lock to Music"
@@ -8644,7 +8644,7 @@ msgstr "Assigner les pistes armées en enregistrement au VCA..."
 
 #: group_tabs.cc:456
 msgid "Assign Soloed to VCA..."
-msgstr "Assigner les Solo au VCA..."
+msgstr "Assigner les solo au VCA..."
 
 #: group_tabs.cc:459
 msgid "Enable All Groups"
@@ -9848,7 +9848,7 @@ msgstr ""
 msgid ""
 "Editing the MIDI files by adding new content will re-create the file and "
 "disable this warning,\n"
-"but also prevent future recovery of the original in the exising region(s).\n"
+"but also prevent future recovery of the original in the existing region(s).\n"
 msgstr ""
 "Modifier les fichiers MIDI en ajoutant du nouveau contenu re-crééra le "
 "fichier et désactivera\n"
@@ -9901,7 +9901,7 @@ msgstr "Cacher cette tranche de mixage"
 
 #: mixer_strip.cc:208
 msgid "Isolate Solo"
-msgstr "Isoler le Solo"
+msgstr "Isoler le solo"
 
 #: mixer_strip.cc:216
 msgid "Lock Solo Status"
@@ -9932,9 +9932,8 @@ msgid "Record & Monitor"
 msgstr "Enregistrement et écoute de contrôle"
 
 #: mixer_strip.cc:411 rc_option_editor.cc:4003
-#, fuzzy
 msgid "Solo Iso / Lock"
-msgstr "Solo Iso / verr. solo"
+msgstr "Solo iso / verr."
 
 #: mixer_strip.cc:414 rc_option_editor.cc:4006
 msgid "VCA Assigns"
@@ -10309,9 +10308,8 @@ msgid "Peak (0dBFS)"
 msgstr "Pic (0dBFS)"
 
 #: meter_patterns.cc:92
-#, fuzzy
 msgid "RMS + Peak"
-msgstr "RMS + Crête"
+msgstr "RMS + Pic"
 
 #: meter_patterns.cc:95
 msgid "IEC1/DIN"
@@ -10382,9 +10380,8 @@ msgid "Solo controls affect solo-in-place"
 msgstr "Les contrôles de solo affectent le solo-en-place"
 
 #: monitor_section.cc:164
-#, fuzzy
 msgid "Solo controls toggle after-fader-listen"
-msgstr "Les contrôles de solo sont post-fader"
+msgstr "Les contrôles solos permettent de basculer l'écoute-après-fader"
 
 #: monitor_section.cc:170
 msgid "Solo controls toggle pre-fader-listen"
@@ -10392,7 +10389,7 @@ msgstr "Les contrôles de solo sont pré-fader"
 
 #: monitor_section.cc:176
 msgid "Excl. Solo"
-msgstr "Solo Excl."
+msgstr "Solo excl."
 
 #: monitor_section.cc:178
 msgid "Exclusive solo means that only 1 solo is active at a time"
@@ -11424,7 +11421,7 @@ msgstr "Par créateur"
 
 #: plugin_selector.cc:1014
 msgid "By Tags"
-msgstr "Par Marques"
+msgstr "Par étiquettes"
 
 #: plugin_ui.cc:132
 msgid "Eh? LADSPA plugins don't have editors!"
@@ -11597,7 +11594,7 @@ msgstr "Sans greffon"
 
 #: port_group.cc:347
 msgid "%1 Busses"
-msgstr "bus %1"
+msgstr "Bus %1"
 
 #: port_group.cc:348
 msgid "%1 Tracks"
@@ -12107,7 +12104,7 @@ msgstr ""
 
 #: quantize_dialog.cc:39
 msgid "Main Grid"
-msgstr "Grille Principale"
+msgstr "Grille principale"
 
 #: quantize_dialog.cc:78
 msgid "Strength"
@@ -12914,11 +12911,11 @@ msgstr ""
 
 #: rc_option_editor.cc:2668
 msgid "General Snap options:"
-msgstr "Options Générales de l'Aimant : "
+msgstr "Options générales de l'aimant : "
 
 #: rc_option_editor.cc:2673
 msgid "Snap Threshold (pixels)"
-msgstr "Seuil de l'Aimant (pixels) "
+msgstr "Seuil de l'aimant (pixels) "
 
 #: rc_option_editor.cc:2683
 msgid "Show \"snapped cursor\""
@@ -12937,7 +12934,7 @@ msgstr ""
 msgid "Rulers automatically change to follow the Grid mode selection"
 msgstr ""
 "Les règles (barres verticales) changent automatiquement pour suivre la "
-"sélection d'unité de la Grille"
+"sélection d'unité de la grille"
 
 #: rc_option_editor.cc:2712
 msgid "When \"Snap\" is enabled, snap to:"
@@ -16777,7 +16774,7 @@ msgstr "musique"
 
 #: tempo_dialog.cc:191
 msgid "Start Beats per Minute:"
-msgstr "BPM au Début :"
+msgstr "BPM au début :"
 
 #: tempo_dialog.cc:200
 msgid "Tempo Type:"
@@ -17007,11 +17004,11 @@ msgid ""
 "Mouse-wheel to modify level\n"
 "Signal Level: %1 dBFS"
 msgstr ""
-"Activer/Désactiver le métronome\n"
+"Dés/activer le métronome\n"
 "\n"
 "Clic-droit pour accéder aux préférences\n"
 "Molette de souris pour modifier le volume\n"
-"Niveau de Signal : %1 dBFS"
+"Niveau de signal : %1 dBFS"
 
 #: transport_masters_dialog.cc:53
 msgid "Add a new Transport Master"
@@ -17809,7 +17806,7 @@ msgstr "Audio :"
 
 #: export_video_dialog.cc:155
 msgid "Master Bus"
-msgstr "Bus Master"
+msgstr "Bus master"
 
 #: export_video_dialog.cc:161
 msgid "<b>Settings:</b>"
