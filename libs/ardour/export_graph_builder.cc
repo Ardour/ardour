@@ -455,6 +455,12 @@ ExportGraphBuilder::SFC::SFC (ExportGraphBuilder &parent, FileSpec const & new_c
 		intermediate = analyser;
 	}
 
+	if (config.format->format_id() == ExportFormatBase::F_None) {
+		/* do not encode result, stop after chunker/analyzer */
+		assert (_analyse);
+		return;
+	}
+
 	if (config.format->demo_noise_duration () > 0 && config.format->demo_noise_interval () > 0) {
 		samplecnt_t sample_rate = parent.session.nominal_sample_rate();
 		demo_noise_adder.reset (new DemoNoiseAdder (channels));
