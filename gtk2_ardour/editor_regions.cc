@@ -383,6 +383,14 @@ EditorRegions::add_region (boost::shared_ptr<Region> region)
 		return;
 	}
 
+	/* we only show files-on-disk.
+	 * if there's some other kind of region, we ignore it (for now)
+	 */
+	boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource> (region->source());
+	if (!fs || fs->empty()) {
+		return;
+	}
+
 	PropertyChange pc;
 	region_changed (region, pc);
 }
