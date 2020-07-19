@@ -40,6 +40,7 @@
 #include "ardour/audioplaylist.h"
 #include "ardour/audioregion.h"
 #include "ardour/chan_count.h"
+#include "ardour/lua_api.h"
 #include "ardour/midi_region.h"
 #include "ardour/session.h"
 #include "ardour/session_directory.h"
@@ -50,6 +51,7 @@
 #include "audio_time_axis.h"
 #include "editor.h"
 #include "export_dialog.h"
+#include "loudness_dialog.h"
 #include "midi_export_dialog.h"
 #include "midi_region_view.h"
 #include "public_editor.h"
@@ -86,6 +88,22 @@ Editor::export_selection ()
 	ExportSelectionDialog dialog (*this);
 	dialog.set_session (_session);
 	dialog.run();
+}
+
+void
+Editor::analyze_range_export ()
+{
+	LoudnessDialog ld (_session, get_selection().time);
+
+	if (ld.run () == RESPONSE_APPLY) {
+		// TODO lookup if already present, perhaps even use a special-cased gain plugin
+		// if plugin is present, use relative gain (and disable automation..)
+		boost::shared_ptr<Processor> proc = LuaAPI::new_luaproc (_session, "a-Amplifier");
+		assert (proc);
+		assert (_session->master_out());
+		LuaAPI::set_processor_param (proc, 0, ld.gain ());
+		_session->master_out()->add_processor_by_index (proc, -1, NULL, true);
+	}
 }
 
 void

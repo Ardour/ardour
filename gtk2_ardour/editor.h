@@ -308,6 +308,7 @@ public:
 	void export_selection ();
 	void export_range ();
 	void export_region ();
+	void analyze_range_export ();
 
 	bool process_midi_export_dialog (MidiExportDialog& dialog, boost::shared_ptr<ARDOUR::MidiRegion> midi_region);
 
