@@ -63,6 +63,39 @@ VaildateYesNoQuestion ()
 	
 }
 
+VaildateYesNoEnterQuestion ()
+{
+	# $1 = Question Text
+	# $2 = default y/n
+
+	local INPUT_OK="n"
+	local USER_INPUT=""
+	local PRMT="[Y/n]"
+	local DFLT="y"
+
+	if [ "$2" = "n" ]; then
+		PRMT="[y/N]"
+		DFLT="n"
+	fi
+
+	until test "y" = $INPUT_OK; do
+		echo ""
+		read -p "$1 $PRMT: " USER_INPUT
+		echo ""
+
+		if [ -z $USER_INPUT ]; then
+			INPUT_OK="y"
+			USER_INPUT=$DFLT
+		else
+			if [ "Y" = $USER_INPUT -o "y" = $USER_INPUT -o "n" = $USER_INPUT -o "N" = $USER_INPUT ]; then
+				INPUT_OK="y"
+			fi
+		fi
+	done
+
+	echo $USER_INPUT | tr '[:upper:]' '[:lower:]'
+}
+
 SystemInstall ()
 {
 
@@ -666,6 +699,20 @@ if [ -d "${USER_BIN_DIR}" ]; then
 	
 else
 	echo "Can not create link because ${USER_BIN_DIR} does not exist"
+fi
+
+############################################
+# Allow to remove non-free stuff for purists
+############################################
+
+if test "${PGM_VENDOR}" = "Ardour"; then
+	ANSWER=$(VaildateYesNoEnterQuestion "Install Harrison XT plugins?" "y")
+
+	if test "n" = $ANSWER; then
+		${SUPER} rm -rf "${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/LV2/Harrison.lv2"
+	else
+		echo "Deploying Harrison plugins to ${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/LV2/Harrison.lv2"
+	fi
 fi
 
 ###########################
