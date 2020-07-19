@@ -90,8 +90,7 @@ ArdourMixer::strip_pan (uint32_t strip_n) const
 		/* TODO: inform GUI that strip has no panner */
 		return 0;
 	}
-	/* scale from [0.0 ; 1.0] to [-1.0 ; 1.0] */
-	return 2.0 * ac->get_value () - 1.0; //TODO: prefer ac->internal_to_interface (c->get_value ());
+	return ac->internal_to_interface (ac->get_value ());
 }
 
 void
@@ -101,9 +100,7 @@ ArdourMixer::set_strip_pan (uint32_t strip_n, double value)
 	if (!ac) {
 		return;
 	}
-	/* TODO: prefer ac->set_value (ac->interface_to_internal (value), NoGroup); */
-	value = (value + 1.0) / 2.0;
-	ac->set_value (value, PBD::Controllable::NoGroup);
+	ac->set_value (ac->interface_to_internal (value), PBD::Controllable::NoGroup);
 }
 
 bool
