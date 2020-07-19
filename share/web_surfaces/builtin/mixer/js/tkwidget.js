@@ -170,14 +170,13 @@ export class DiscreteKnob extends Knob {
 
 }
 
-// TODO: consider switching to [0-1.0] pan scale in Ardour surface code
-
 export class PanKnob extends Knob {
 
     constructor () {
         super({
-            scale: 'linear',
-            min: -1.0,
+            //scale: 'linear',
+            scale: (k) => 1.0 - k,
+            min: 0,
             max: 1.0
         });
     }
