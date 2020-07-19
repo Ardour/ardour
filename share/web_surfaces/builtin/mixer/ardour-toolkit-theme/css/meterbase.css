@@ -46,6 +46,7 @@
     box-shadow:  0px 1px 2px 0px rgba(0, 0, 0, 0.2);
     box-sizing: border-box;
     margin: 4px;*/
+    margin: 8px;
     background: #139513;
 }
 
@@ -91,7 +92,7 @@
     height: 32px;
 }
 .toolkit-meter-base.toolkit-vertical > .toolkit-bar {
-    width: 8px;
+    width: 8.5px;
 }
 
 /* MASK */
