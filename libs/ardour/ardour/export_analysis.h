@@ -32,8 +32,10 @@ namespace ARDOUR {
 		ExportAnalysis ()
 			: peak (0)
 			, truepeak (0)
-			, loudness (0)
 			, loudness_range (0)
+			, integrated_loudness (0)
+			, max_loudness_short (0)
+			, max_loudness_momentary (0)
 			, loudness_hist_max (0)
 			, have_loudness (false)
 			, have_dbtp (false)
@@ -50,8 +52,10 @@ namespace ARDOUR {
 		ExportAnalysis (const ExportAnalysis& other)
 			: peak (other.peak)
 			, truepeak (other.truepeak)
-			, loudness (other.loudness)
 			, loudness_range (other.loudness_range)
+			, integrated_loudness (other.integrated_loudness)
+			, max_loudness_short (other.max_loudness_short)
+			, max_loudness_momentary (other.max_loudness_momentary)
 			, loudness_hist_max (other.loudness_hist_max)
 			, have_loudness (other.have_loudness)
 			, have_dbtp (other.have_dbtp)
@@ -69,14 +73,16 @@ namespace ARDOUR {
 
 		float peak;
 		float truepeak;
-		float loudness;
 		float loudness_range;
-		int loudness_hist[540];
-		int loudness_hist_max;
-		bool have_loudness;
-		bool have_dbtp;
+		float integrated_loudness;
+		float max_loudness_short;
+		float max_loudness_momentary;
+		int   loudness_hist[540];
+		int   loudness_hist_max;
+		bool  have_loudness;
+		bool  have_dbtp;
 		float norm_gain_factor;
-		bool normalized;
+		bool  normalized;
 
 		uint32_t n_channels;
 		uint32_t freq[6]; // y-pos, 50, 100, 500, 1k, 5k, 10k [Hz]

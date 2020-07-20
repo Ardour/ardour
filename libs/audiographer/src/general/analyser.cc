@@ -234,7 +234,10 @@ Analyser::result ()
 	if (_ebur_plugin) {
 		Vamp::Plugin::FeatureSet features = _ebur_plugin->getRemainingFeatures ();
 		if (!features.empty () && features.size () == 3) {
-			_result.loudness = features[0][0].values[0];
+			_result.integrated_loudness    = features[0][0].values[0];
+			_result.max_loudness_short     = features[0][1].values[0];
+			_result.max_loudness_momentary = features[0][2].values[0];
+
 			_result.loudness_range = features[1][0].values[0];
 			assert (features[2][0].values.size () == 540);
 			for (int i = 0; i < 540; ++i) {
