@@ -134,12 +134,13 @@ JACKSession::timebase_callback (jack_transport_state_t /*state*/,
 		pos->beat = bbt.beats;
 		pos->tick = bbt.ticks;
 
-		// XXX still need to set bar_start_tick
-
 		pos->beats_per_bar = metric.meter().divisions_per_bar();
 		pos->beat_type = metric.meter().note_divisor();
 		pos->ticks_per_beat = Timecode::BBT_Time::ticks_per_beat;
 		pos->beats_per_minute = metric.tempo().note_types_per_minute();
+
+		double current_tick = tempo_map.quarter_note_at_bbt_rt (bbt) / 4 * pos->beat_type * pos->ticks_per_beat;
+		pos->bar_start_tick = current_tick - ((pos->beat - 1) * pos->ticks_per_beat + pos->tick);
 
 		pos->valid = jack_position_bits_t (pos->valid | JackPositionBBT);
 
