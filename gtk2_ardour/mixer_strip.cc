@@ -100,6 +100,8 @@ using namespace ArdourMeter;
 MixerStrip* MixerStrip::_entered_mixer_strip;
 PBD::Signal1<void,MixerStrip*> MixerStrip::CatchDeletion;
 
+#define PX_SCALE(px) std::max((float)px, rintf((float)px * UIConfiguration::instance().get_ui_scale()))
+
 MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	: SessionHandlePtr (sess)
 	, RouteUI (sess)
@@ -112,12 +114,16 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	, rec_mon_table (2, 2)
 	, solo_iso_table (1, 2)
 	, mute_solo_table (1, 2)
+	, master_volume_table (1, 2)
 	, bottom_button_table (1, 3)
 	, monitor_section_button (0)
 	, midi_input_enable_button (0)
 	, _plugin_insert_cnt (0)
 	, _comment_button (_("Comments"))
 	, trim_control (ArdourKnob::default_elements, ArdourKnob::Flags (ArdourKnob::Detent | ArdourKnob::ArcToZero))
+	, _master_volume_menu (0)
+	, _loudess_analysis_button (0)
+	, _volume_control_knob (0)
 	, _visibility (X_("mixer-element-visibility"))
 	, _suspend_menu_callbacks (false)
 	, control_slave_ui (sess)
@@ -145,12 +151,16 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt
 	, rec_mon_table (2, 2)
 	, solo_iso_table (1, 2)
 	, mute_solo_table (1, 2)
+	, master_volume_table (1, 2)
 	, bottom_button_table (1, 3)
 	, monitor_section_button (0)
 	, midi_input_enable_button (0)
 	, _plugin_insert_cnt (0)
 	, _comment_button (_("Comments"))
 	, trim_control (ArdourKnob::default_elements, ArdourKnob::Flags (ArdourKnob::Detent | ArdourKnob::ArcToZero))
+	, _master_volume_menu (0)
+	, _loudess_analysis_button (0)
+	, _volume_control_knob (0)
 	, _visibility (X_("mixer-element-visibility"))
 	, _suspend_menu_callbacks (false)
 	, control_slave_ui (sess)
@@ -273,16 +283,16 @@ MixerStrip::init ()
 	_comment_button.signal_clicked.connect (sigc::mem_fun (*this, &RouteUI::toggle_comment_editor));
 	_comment_button.signal_size_allocate().connect (sigc::mem_fun (*this, &MixerStrip::comment_button_resized));
 
-	// TODO implement ArdourKnob::on_size_request properly
-#define PX_SCALE(px) std::max((float)px, rintf((float)px * UIConfiguration::instance().get_ui_scale()))
 	trim_control.set_size_request (PX_SCALE(19), PX_SCALE(19));
-#undef PX_SCALE
 	trim_control.set_tooltip_prefix (_("Trim: "));
 	trim_control.set_name ("trim knob");
 	trim_control.set_no_show_all (true);
 	trim_control.StartGesture.connect(sigc::mem_fun(*this, &MixerStrip::trim_start_touch));
 	trim_control.StopGesture.connect(sigc::mem_fun(*this, &MixerStrip::trim_end_touch));
 	input_button_box.pack_start (trim_control, false, false);
+
+	master_volume_table.set_homogeneous (true);
+	master_volume_table.set_spacings (2);
 
 	global_vpacker.set_no_show_all ();
 	global_vpacker.set_border_width (1);
@@ -316,6 +326,7 @@ MixerStrip::init ()
 	global_vpacker.pack_start (processor_box, true, true);
 	global_vpacker.pack_start (panners, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (rec_mon_table, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (master_volume_table, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (solo_iso_table, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (mute_solo_table, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (gpm, Gtk::PACK_SHRINK);
@@ -429,8 +440,10 @@ MixerStrip::~MixerStrip ()
 {
 	CatchDeletion (this);
 
-	if (this ==_entered_mixer_strip)
+	if (this ==_entered_mixer_strip) {
 		_entered_mixer_strip = NULL;
+	}
+	delete _master_volume_menu;
 }
 
 void
@@ -580,7 +593,34 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		solo_button->hide ();
 		mute_button->show ();
 		rec_mon_table.hide ();
+		master_volume_table.show ();
 		mute_solo_table.attach (*mute_button, 0, 2, 0, 1);
+
+		if (_volume_control_knob == 0) {
+			assert (_loudess_analysis_button == 0);
+			assert (route()->volume_control());
+
+			_volume_control_knob = manage (new ArdourKnob (ArdourKnob::default_elements, ArdourKnob::Flags (ArdourKnob::Detent | ArdourKnob::ArcToZero)));
+			_loudess_analysis_button = manage (new ArdourButton (S_("Loudness|LM")));
+			set_tooltip (_loudess_analysis_button, _("Measure loudness of the session, normalize master output volume"));
+
+			_volume_control_knob->set_size_request (PX_SCALE(19), PX_SCALE(19));
+			_volume_control_knob->set_controllable (route()->volume_control());
+
+			_volume_control_knob->set_tooltip_prefix (_("Output Volume: "));
+			_volume_control_knob->set_name ("trim knob");
+			_volume_control_knob->set_sensitive (false);
+
+			_loudess_analysis_button->signal_clicked.connect (mem_fun (*this, &MixerStrip::loudess_analysis_button_clicked));
+			_loudess_analysis_button->signal_button_press_event().connect (sigc::mem_fun(*this, &MixerStrip::loudess_analysis_button_pressed), false);
+
+			master_volume_table.attach (*_loudess_analysis_button, 0, 1, 0, 1);
+			master_volume_table.attach (*_volume_control_knob, 1, 2, 0, 1);
+
+			_loudess_analysis_button->show ();
+			_volume_control_knob->show ();
+		}
+
 		if (monitor_section_button == 0) {
 			Glib::RefPtr<Action> act = ActionManager::get_action ("Mixer", "ToggleMonitorSection");
 			_session->MonitorChanged.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::monitor_changed, this), gui_context());
@@ -602,6 +642,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		mute_button->show ();
 		solo_button->show ();
 		rec_mon_table.show ();
+		master_volume_table.hide ();
 	}
 
 	hide_master_spacer (false);
@@ -1943,6 +1984,37 @@ MixerStrip::width_button_pressed (GdkEventButton* ev)
 	}
 
 	return true;
+}
+
+void
+MixerStrip::loudess_analysis_button_clicked ()
+{
+	PublicEditor::instance().measure_master_loudness (false);
+}
+
+bool
+MixerStrip::loudess_analysis_button_pressed (GdkEventButton* ev)
+{
+	using namespace Menu_Helpers;
+	assert (_volume_control_knob);
+
+	if (Keyboard::is_context_menu_event (ev)) {
+		bool is_sensitive = _volume_control_knob->sensitive ();
+		delete _master_volume_menu;
+		_master_volume_menu = new Menu;
+		_master_volume_menu->set_name ("ArdourContextMenu");
+
+		MenuList& items = _master_volume_menu->items();
+		items.clear ();
+		items.push_back (CheckMenuElem (_("Allow Manual Gain Control")));
+		CheckMenuItem* cmi = static_cast<Gtk::CheckMenuItem*> (&items.back());
+		cmi->set_active (is_sensitive);
+		cmi->signal_toggled().connect (sigc::bind (sigc::mem_fun (*_volume_control_knob, &ArdourKnob::set_sensitive), !is_sensitive));
+
+		_master_volume_menu->popup (ev->button, ev->time);
+		return true;
+	}
+	return false;
 }
 
 void

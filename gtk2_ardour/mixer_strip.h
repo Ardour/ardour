@@ -190,6 +190,7 @@ private:
 	Gtk::Table rec_mon_table;
 	Gtk::Table solo_iso_table;
 	Gtk::Table mute_solo_table;
+	Gtk::Table master_volume_table;
 	Gtk::Table bottom_button_table;
 
 	void vca_assign (boost::shared_ptr<ARDOUR::VCA>);
@@ -227,10 +228,17 @@ private:
 	ArdourWidgets::ArdourButton _comment_button;
 	ArdourWidgets::ArdourKnob   trim_control;
 
+	Gtk::Menu*                   _master_volume_menu;
+	ArdourWidgets::ArdourButton* _loudess_analysis_button;
+	ArdourWidgets::ArdourKnob*   _volume_control_knob;
+
 	void trim_start_touch ();
 	void trim_end_touch ();
 
 	void setup_comment_button ();
+
+	void loudess_analysis_button_clicked ();
+	bool loudess_analysis_button_pressed (GdkEventButton*);
 
 	ArdourWidgets::ArdourButton group_button;
 	RouteGroupMenu*             group_menu;
