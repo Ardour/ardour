@@ -237,9 +237,11 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 		TXTSIZE(5, _("+888.88 dB"), get_SmallMonospaceFont);
 
 		TXTSIZE(0, _("Integrated Loudness:"), get_SmallFont);
-		TXTSIZE(1, string_compose (_("%1 LUFS"), std::setprecision (1), std::fixed, p->loudness), get_LargeFont);
+		TXTSIZE(1, string_compose (_("%1 LUFS"), std::setprecision (1), std::fixed, p->integrated_loudness), get_LargeFont);
 		TXTSIZE(2, _("Loudness Range:"), get_SmallFont);
 		TXTSIZE(3, string_compose (_("%1 LU"), std::setprecision (1), std::fixed, p->loudness_range), get_LargeFont);
+		TXTSIZE(4, _("Max Short/Momentary:"), get_SmallFont);
+		TXTSIZE(5, string_compose (_("%1/%2 LUFS"), std::setprecision (1), std::fixed, p->max_loudness_short, p->max_loudness_momentary), get_SmallFont);
 
 		mnw += 8;
 		const int ht = lin[0] * 1.25 + lin[1] * 1.25 + lin[2] * 1.25 + lin[3] *1.25 + lin[4] * 1.25 + lin[5];
@@ -256,10 +258,10 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 		const int nw2 = mnw / 2; // nums, horizontal center
 
 		int y0[6];
-		if (p->normalized) {
-			y0[0] = (hh - ht) * .5;
+		if (true /*p->normalized*/) {
+			y0[0] = (hh - ht) * .5; // 5 lines
 		} else {
-			y0[0] = (hh - htn) * .5;
+			y0[0] = (hh - htn) * .5; // 4 lines
 		}
 		y0[1] = y0[0] + lin[0] * 1.25;
 		y0[2] = y0[1] + lin[1] * 1.25;
@@ -436,7 +438,7 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 				cr->move_to (rint (nw2 - w * .5), rint ((hh - h) * .5));
 				layout->show_in_cairo_context (cr);
 			}
-			else if (p->loudness == -200 && p->loudness_range == 0) {
+			else if (p->integrated_loudness == -200 && p->loudness_range == 0) {
 				layout->set_alignment (Pango::ALIGN_CENTER);
 				layout->set_font_description (UIConfiguration::instance ().get_LargeFont ());
 				layout->set_text (_("Not\nAvailable"));
@@ -460,7 +462,7 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 				layout->show_in_cairo_context (cr);
 
 				layout->set_font_description (UIConfiguration::instance ().get_LargeFont ());
-				layout->set_text (string_compose (_("%1 LUFS"), std::setprecision (1), std::fixed,  p->loudness));
+				layout->set_text (string_compose (_("%1 LUFS"), std::setprecision (1), std::fixed,  p->integrated_loudness));
 				layout->get_pixel_size (w, h);
 				cr->move_to (rint (nw2 - w * .5), y0[1]);
 				layout->show_in_cairo_context (cr);
@@ -476,6 +478,19 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 				layout->get_pixel_size (w, h);
 				cr->move_to (rint (nw2 - w * .5), y0[3]);
 				layout->show_in_cairo_context (cr);
+
+				layout->set_font_description (UIConfiguration::instance ().get_SmallFont ());
+				layout->set_text (_("Max Short/Momentary:"));
+				layout->get_pixel_size (w, h);
+				cr->move_to (rint (nw2 - w * .5), y0[4]);
+				layout->show_in_cairo_context (cr);
+
+				layout->set_text (string_compose (_("%1/%2 LUFS"), std::setprecision (1), std::fixed, p->max_loudness_short, p->max_loudness_momentary));
+				layout->get_pixel_size (w, h);
+				cr->move_to (rint (nw2 - w * .5), y0[5]);
+				layout->show_in_cairo_context (cr);
+
+				layout->set_font_description (UIConfiguration::instance ().get_LargeFont ());
 			}
 			ebur->flush ();
 

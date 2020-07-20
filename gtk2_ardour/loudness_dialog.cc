@@ -237,7 +237,7 @@ LoudnessDialog::display_results ()
 
 	_dbfs = accurate_coefficient_to_dB (p->peak);
 	_dbtp = accurate_coefficient_to_dB (p->truepeak);
-	_lufs = p->loudness;
+	_lufs = p->integrated_loudness;
 
 	_dbfs_label.set_text (string_compose (_("%1 dBFS"), std::setprecision (1), std::fixed, _dbfs));
 	_dbtp_label.set_text (string_compose (_("%1 dBTP"), std::setprecision (1), std::fixed, _dbtp));
