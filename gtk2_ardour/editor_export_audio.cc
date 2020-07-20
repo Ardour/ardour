@@ -40,13 +40,14 @@
 #include "ardour/audioplaylist.h"
 #include "ardour/audioregion.h"
 #include "ardour/chan_count.h"
-#include "ardour/lua_api.h"
+#include "ardour/dB.h"
 #include "ardour/midi_region.h"
 #include "ardour/session.h"
 #include "ardour/session_directory.h"
 #include "ardour/source_factory.h"
 #include "ardour/types.h"
 
+#include "ardour_message.h"
 #include "audio_region_view.h"
 #include "audio_time_axis.h"
 #include "editor.h"
@@ -93,16 +94,25 @@ Editor::export_selection ()
 void
 Editor::analyze_range_export ()
 {
+	if (!_session->master_volume()) {
+		ArdourMessageDialog (_("Loudness Analysis is only available for sessions with a master-bus"));
+		return;
+	}
+	assert (_session->master_out());
+	if (_session->master_out()->output()->n_ports().n_audio() != 2) {
+		ArdourMessageDialog (_("Loudness Analysis is only available for sessions with a stereo master-bus"));
+		return;
+	}
+
+	float prev_gain = _session->master_volume()->get_value();
+	_session->master_volume ()->set_value (GAIN_COEFF_UNITY, Controllable::NoGroup);
+
 	LoudnessDialog ld (_session, get_selection().time);
 
 	if (ld.run () == RESPONSE_APPLY) {
-		// TODO lookup if already present, perhaps even use a special-cased gain plugin
-		// if plugin is present, use relative gain (and disable automation..)
-		boost::shared_ptr<Processor> proc = LuaAPI::new_luaproc (_session, "a-Amplifier");
-		assert (proc);
-		assert (_session->master_out());
-		LuaAPI::set_processor_param (proc, 0, ld.gain ());
-		_session->master_out()->add_processor_by_index (proc, -1, NULL, true);
+		_session->master_volume ()->set_value (dB_to_coefficient (ld.gain_db ()), Controllable::NoGroup);
+	} else {
+		_session->master_volume ()->set_value (prev_gain, Controllable::NoGroup);
 	}
 }
 

@@ -38,7 +38,7 @@ class LoudnessDialog : public ArdourDialog
 public:
 	LoudnessDialog (ARDOUR::Session*, TimeSelection const&);
 	int run ();
-	float gain () const { return _gain; }
+	float gain_db () const { return _gain; }
 
 protected:
 	bool on_delete_event (GdkEventAny*);
