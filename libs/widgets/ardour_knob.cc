@@ -260,9 +260,17 @@ ArdourKnob::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t*
 	cairo_line_to (cr, ((center_radius*0.4) * value_x), ((center_radius*0.4) * value_y));
 	cairo_stroke (cr);
 
+	// a transparent overlay to indicate insensitivity
+	if (!sensitive ()) {
+		cairo_arc (cr, 0, 0, center_radius, 0, 2.0*G_PI);
+		uint32_t ins_color = UIConfigurationBase::instance().color ("gtk_background");
+		Gtkmm2ext::set_source_rgb_a (cr, ins_color, 0.6);
+		cairo_fill (cr);
+	}
+
 	//highlight if grabbed or if mouse is hovering over me
 	if (_tooltip.dragging() || (_hovering && UIConfigurationBase::instance().get_widget_prelight() ) ) {
-		cairo_set_source_rgba (cr, 1,1,1, 0.12 );
+		cairo_set_source_rgba (cr, 1,1,1, 0.12);
 		cairo_arc (cr, 0, 0, center_radius, 0, 2.0*G_PI);
 		cairo_fill (cr);
 	}
