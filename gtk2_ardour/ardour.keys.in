@@ -284,13 +284,13 @@ This mode provides many different operations on both regions and control points,
 
 ;; keypad
 
-@rop|Region/nudge-backward|KP_Subtract|nudge backward
+@select|Editor/nudge-backward|KP_Subtract|nudge backward
 @trans|Common/nudge-next-backward|<@PRIMARY@>KP_Subtract|some text
 
 @gmark|Common/alternate-jump-forward-to-mark|<@PRIMARY@>KP_Right|to next mark
 @gmark|Common/alternate-jump-backward-to-mark|<@PRIMARY@>KP_Left|to previous mark
 
-@rop|Region/nudge-forward|KP_Add|nudge forward
+@select|Editor/nudge-forward|KP_Add|nudge forward
 @trans|Common/nudge-next-forward|<@PRIMARY@>KP_Add|some text
 
 @gedt|Common/start-range|comma|some text
