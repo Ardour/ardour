@@ -62,7 +62,7 @@ MissingFileSourceDialog::MissingFileSourceDialog (Session * s, list<string> cons
 
 	if (dt == DataType::MIDI) {
 		t << _("Editing the MIDI files by adding new content will re-create the file and disable this warning,\n"
-		       "but also prevent future recovery of the original in the exising region(s).\n");
+		       "but also prevent future recovery of the original in the existing region(s).\n");
 	}
 
 	m->set_markup (t.str ());
