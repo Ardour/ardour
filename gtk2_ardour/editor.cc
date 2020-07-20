@@ -252,6 +252,7 @@ Editor::Editor ()
 	, _playlist_selector (0)
 	, _time_info_box (0)
 	, no_save_visual (false)
+	, _minimized_visual_state (0)
 	, _leftmost_sample (0)
 	, samples_per_pixel (2048)
 	, zoom_focus (ZoomFocusPlayhead)
@@ -887,6 +888,7 @@ Editor::~Editor()
 	delete selection;
 	delete cut_buffer;
 	delete _cursors;
+	delete _minimized_visual_state;
 
 	LuaInstance::destroy_instance ();
 
@@ -4534,6 +4536,32 @@ Editor::swap_visual_state ()
 	} else {
 		undo_visual_state ();
 	}
+}
+
+bool
+Editor::is_maximized_region_mode() const
+{
+	return _minimized_visual_state != 0;
+}
+
+void
+Editor::enter_maximized_region_mode(bool maximize)
+{
+	if (maximize) {
+		delete _minimized_visual_state;
+		_minimized_visual_state = current_visual_state ();
+		temporal_zoom_selection(Both);
+	} else if (_minimized_visual_state) {
+		use_visual_state(*_minimized_visual_state);
+		clear_maximized_region_mode();
+	}
+}
+
+void
+Editor::clear_maximized_region_mode()
+{
+	delete _minimized_visual_state;
+	_minimized_visual_state = 0;
 }
 
 void

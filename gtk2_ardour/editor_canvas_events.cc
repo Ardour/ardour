@@ -82,6 +82,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 
 	switch (direction) {
 	case GDK_SCROLL_UP:
+		clear_maximized_region_mode();
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollZoomHorizontalModifier)) {
 			temporal_zoom_step_mouse_focus (false);
 			return true;
@@ -107,6 +108,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 		break;
 
 	case GDK_SCROLL_DOWN:
+		clear_maximized_region_mode();
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollZoomHorizontalModifier)) {
 			temporal_zoom_step_mouse_focus (true);
 			return true;

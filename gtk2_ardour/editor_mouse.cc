@@ -1379,8 +1379,12 @@ bool
 Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
 	if (event->type == GDK_2BUTTON_PRESS) {
-		_drags->mark_double_click ();
-		gdk_pointer_ungrab (GDK_CURRENT_TIME);
+		if (Keyboard::modifier_state_equals(event->button.state, Keyboard::PrimaryModifier)) {
+			enter_maximized_region_mode(!is_maximized_region_mode());
+		} else {
+			_drags->mark_double_click ();
+			gdk_pointer_ungrab (GDK_CURRENT_TIME);
+		}
 		return true;
 	}
 
