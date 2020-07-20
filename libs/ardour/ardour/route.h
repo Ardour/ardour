@@ -500,6 +500,7 @@ public:
 
 	boost::shared_ptr<GainControl> gain_control() const;
 	boost::shared_ptr<GainControl> trim_control() const;
+	boost::shared_ptr<GainControl> volume_control() const;
 	boost::shared_ptr<PhaseControl> phase_control() const;
 
 	/**
@@ -682,6 +683,7 @@ protected:
 
 	boost::shared_ptr<GainControl>  _gain_control;
 	boost::shared_ptr<GainControl>  _trim_control;
+	boost::shared_ptr<GainControl>  _volume_control;
 	boost::shared_ptr<PhaseControl> _phase_control;
 	boost::shared_ptr<Amp>               _amp;
 	boost::shared_ptr<Amp>               _trim;

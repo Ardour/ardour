@@ -252,6 +252,13 @@ Route::init ()
 	}
 
 	_main_outs.reset (new Delivery (_session, _output, _pannable, _mute_master, _name, Delivery::Main));
+	/* master outut volume */
+	if (is_master()) {
+		_volume_control.reset (new GainControl (_session, MainOutVolume));
+		_volume_control->set_flag (Controllable::NotAutomatable);
+		//add_control (_volume_control);
+		_main_outs->add_gain (_volume_control);
+	}
 	_main_outs->activate ();
 
 	if (is_monitor()) {
@@ -2524,6 +2531,10 @@ Route::state (bool save_template)
 	node->add_child_nocopy (_mute_control->get_state ());
 	node->add_child_nocopy (_phase_control->get_state ());
 
+	if (_volume_control) {
+		node->add_child_nocopy (_volume_control->get_state ());
+	}
+
 	if (!skip_saving_automation) {
 		node->add_child_nocopy (Automatable::get_automation_xml_state ());
 	}
@@ -2761,6 +2772,8 @@ Route::set_state (const XMLNode& node, int version)
 				_solo_isolate_control->set_state (*child, version);
 			} else if (control_name == _mute_control->name()) {
 				_mute_control->set_state (*child, version);
+			} else if (_volume_control && control_name == _volume_control->name()) {
+				_volume_control->set_state (*child, version);
 			} else if (control_name == _phase_control->name()) {
 				_phase_control->set_state (*child, version);
 			} else {
@@ -4610,6 +4623,12 @@ boost::shared_ptr<GainControl>
 Route::trim_control() const
 {
 	return _trim_control;
+}
+
+boost::shared_ptr<GainControl>
+Route::volume_control() const
+{
+	return _volume_control;
 }
 
 boost::shared_ptr<PhaseControl>

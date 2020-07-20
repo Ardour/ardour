@@ -925,6 +925,15 @@ Session::auto_connect_master_bus ()
 	}
 }
 
+boost::shared_ptr<GainControl>
+Session::master_volume () const
+{
+	if (_master_out) {
+		return _master_out->volume_control ();
+	}
+	return boost::shared_ptr<GainControl> ();
+}
+
 void
 Session::remove_monitor_section ()
 {
