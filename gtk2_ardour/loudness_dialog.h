@@ -26,9 +26,9 @@
 
 #include "ardour_dialog.h"
 #include "progress_reporter.h"
-#include "time_selection.h"
 
 namespace ARDOUR {
+	class AudioRange;
 	class ExportStatus;
 	class Session;
 }
@@ -36,7 +36,7 @@ namespace ARDOUR {
 class LoudnessDialog : public ArdourDialog
 {
 public:
-	LoudnessDialog (ARDOUR::Session*, TimeSelection const&);
+	LoudnessDialog (ARDOUR::Session*, ARDOUR::AudioRange const&);
 	int run ();
 	float gain_db () const { return _gain; }
 
@@ -52,7 +52,7 @@ private:
 	void calculate_gain ();
 
 	ARDOUR::Session*                        _session;
-	TimeSelection const&                    _time;
+	ARDOUR::AudioRange const&               _range;
 	boost::shared_ptr<ARDOUR::ExportStatus> _status;
 
 	Gtk::VBox        _progress_box;

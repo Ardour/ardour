@@ -92,8 +92,27 @@ Editor::export_selection ()
 }
 
 void
-Editor::analyze_range_export ()
+Editor::measure_master_loudness (bool range_selection)
 {
+	samplepos_t start, end;
+	TimeSelection const& ts (get_selection().time);
+	if (range_selection && !ts.empty ()) {
+		start = ts.start();
+		end = ts.end_sample();
+	} else {
+		start = _session->current_start_sample();
+		end   = _session->current_end_sample();
+	}
+
+	if (start >= end) {
+		if (range_selection) {
+			ArdourMessageDialog (_("Loudness Analysis requires a session-range or range-selection."));
+		} else {
+			ArdourMessageDialog (_("Loudness Analysis requires a session-range."));
+		}
+		return;
+	}
+
 	if (!_session->master_volume()) {
 		ArdourMessageDialog (_("Loudness Analysis is only available for sessions with a master-bus"));
 		return;
@@ -104,16 +123,23 @@ Editor::analyze_range_export ()
 		return;
 	}
 
+	ARDOUR::AudioRange ar (start, end, 0);
 	float prev_gain = _session->master_volume()->get_value();
 	_session->master_volume ()->set_value (GAIN_COEFF_UNITY, Controllable::NoGroup);
 
-	LoudnessDialog ld (_session, get_selection().time);
+	LoudnessDialog ld (_session, ar);
 
 	if (ld.run () == RESPONSE_APPLY) {
 		_session->master_volume ()->set_value (dB_to_coefficient (ld.gain_db ()), Controllable::NoGroup);
 	} else {
 		_session->master_volume ()->set_value (prev_gain, Controllable::NoGroup);
 	}
+}
+
+void
+Editor::analyze_range_export ()
+{
+	measure_master_loudness (true);
 }
 
 void

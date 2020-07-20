@@ -19,8 +19,8 @@
 #include <gtkmm/label.h>
 #include <gtkmm/stock.h>
 
-#include "ardour/session.h"
 #include "ardour/dB.h"
+#include "ardour/session.h"
 
 #include "ardour/export_channel_configuration.h"
 #include "ardour/export_filename.h"
@@ -38,10 +38,10 @@
 using namespace Gtk;
 using namespace ARDOUR;
 
-LoudnessDialog::LoudnessDialog (Session* s, TimeSelection const& ts)
+LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar)
 	: ArdourDialog (_("Loudness Mate"))
 	, _session (s)
-	, _time (ts)
+	, _range (ar)
 	, _status (s->get_export_status ())
 	, _report_button (_("Show"))
 	, _dbfs_adjustment ( 0.00, -90.00, 0.00, 0.1, 0.2)
@@ -174,8 +174,8 @@ LoudnessDialog::analyze ()
 	if (master_out->n_ports().n_audio() != 2) {
 		return -2;
 	}
-	if (_time.empty()) {
-		// use whole session ?!
+
+	if (_range.start >= _range.end) {
 		return -3;
 	}
 
@@ -197,7 +197,7 @@ LoudnessDialog::analyze ()
 
 	/* setup range */
 	// TODO: consider multiple ranges
-	tsp->set_range (_time.front().start, _time.front().end);
+	tsp->set_range (_range.start, _range.end);
 	tsp->set_range_id ("selection");
 	tsp->set_realtime (false);
 
