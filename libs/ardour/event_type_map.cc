@@ -139,6 +139,8 @@ EventTypeMap::from_symbol(const string& str) const
 		p_type = BusSendLevel;
 	} else if (str == "trim") {
 		p_type = TrimAutomation;
+	} else if (str == "main-out-volume") {
+		p_type = MainOutVolume;
 	} else if (str == "solo") {
 		p_type = SoloAutomation;
 	} else if (str == "solo-iso") {
@@ -241,6 +243,8 @@ EventTypeMap::to_symbol(const Evoral::Parameter& param) const
 		return "send";
 	} else if (t == TrimAutomation) {
 		return "trim";
+	} else if (t == MainOutVolume) {
+		return "main-out-volume";
 	} else if (t == PanAzimuthAutomation) {
 		return "pan-azimuth";
 	} else if (t == PanElevationAutomation) {

@@ -196,6 +196,8 @@ Automatable::describe_parameter (Evoral::Parameter param)
 		return _("Send");
 	} else if (param.type() == TrimAutomation) {
 		return _("Trim");
+	} else if (param.type() == MainOutVolume) {
+		return _("Master Volume");
 	} else if (param.type() == MuteAutomation) {
 		return _("Mute");
 	} else if (param.type() == PanAzimuthAutomation) {
@@ -553,6 +555,8 @@ Automatable::control_factory(const Evoral::Parameter& param)
 	} else if (param.type() == GainAutomation) {
 		control = new GainControl(_a_session, param);
 	} else if (param.type() == TrimAutomation) {
+		control = new GainControl(_a_session, param);
+	} else if (param.type() == MainOutVolume) {
 		control = new GainControl(_a_session, param);
 	} else if (param.type() == BusSendLevel) {
 		control = new GainControl(_a_session, param);

@@ -53,7 +53,7 @@ value_as_string(const ARDOUR::ParameterDescriptor& desc,
 	// Value is not a scale point, print it normally
 	if (desc.unit == ARDOUR::ParameterDescriptor::MIDI_NOTE) {
 		snprintf(buf, sizeof(buf), "%s", ParameterDescriptor::midi_note_name (rint(v)).c_str());
-	} else if (desc.type == GainAutomation || desc.type == BusSendLevel || desc.type == TrimAutomation || desc.type == EnvelopeAutomation) {
+	} else if (desc.type == GainAutomation || desc.type == BusSendLevel || desc.type == TrimAutomation || desc.type == EnvelopeAutomation || desc.type == MainOutVolume) {
 		snprintf(buf, sizeof(buf), "%.1f dB", accurate_coefficient_to_dB (v));
 	} else if (desc.type == PanWidthAutomation) {
 		snprintf (buf, sizeof (buf), "%d%%", (int) floor (100.0 * v));

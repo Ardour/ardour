@@ -231,6 +231,7 @@ AutomationList::default_interpolation () const
 		case EnvelopeAutomation:
 			return ControlList::Exponential;
 			break;
+		case MainOutVolume:
 		case TrimAutomation:
 			return ControlList::Logarithmic;
 			break;

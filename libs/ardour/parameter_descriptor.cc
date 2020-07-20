@@ -71,6 +71,12 @@ ParameterDescriptor::ParameterDescriptor(const Evoral::Parameter& parameter)
 		normal = 1.0f;
 		logarithmic = true;
 		break;
+	case MainOutVolume:
+		upper  = 100; // +40dB
+		lower  = .01; // -40dB
+		normal = 1.0f;
+		logarithmic = true;
+		break;
 	case PanAzimuthAutomation:
 		normal = 0.5f; // there really is no _normal but this works for stereo, sort of
 		upper  = 1.0f;
@@ -198,7 +204,7 @@ ParameterDescriptor::update_steps()
 	if (unit == ParameterDescriptor::MIDI_NOTE) {
 		step      = smallstep = 1;  // semitone
 		largestep = 12;             // octave
-	} else if (type == GainAutomation || type == TrimAutomation || type == BusSendLevel) {
+	} else if (type == GainAutomation || type == TrimAutomation || type == BusSendLevel || type == MainOutVolume) {
 		/* dB_coeff_step gives a step normalized for [0, max_gain].  This is
 		   like "slider position", so we convert from "slider position" to gain
 		   to have the correct unit here. */
@@ -314,11 +320,15 @@ ParameterDescriptor::to_interface (float val, bool rotary) const
 	val = std::min (upper, std::max (lower, val));
 	switch(type) {
 		case GainAutomation:
+			/* fallthrough */
 		case BusSendLevel:
+			/* fallthrough */
 		case EnvelopeAutomation:
 			val = gain_to_slider_position_with_max (val, upper);
 			break;
 		case TrimAutomation:
+			/* fallthrough */
+		case MainOutVolume:
 			{
 				const float lower_db = accurate_coefficient_to_dB (lower);
 				const float range_db = accurate_coefficient_to_dB (upper) - lower_db;
