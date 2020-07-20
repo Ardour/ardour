@@ -29,6 +29,7 @@
 #include "ardour/types.h"
 #include "ardour/chan_count.h"
 #include "ardour/io_processor.h"
+#include "ardour/gain_control.h"
 
 namespace ARDOUR {
 
@@ -100,6 +101,10 @@ public:
 	boost::shared_ptr<PannerShell> panner_shell() const { return _panshell; }
 	boost::shared_ptr<Panner> panner() const;
 
+	void add_gain (boost::shared_ptr<GainControl> gc) {
+		_gain_control = gc;
+	}
+
 	void unpan ();
 	void reset_panner ();
 	void defer_pan_reset ();
@@ -116,14 +121,13 @@ protected:
 	gain_t      _current_gain;
 	boost::shared_ptr<PannerShell> _panshell;
 
-#ifdef MIXBUS
-public: /* expose target_gain to mixbus processor Route::process_output_buffers */
-#endif
 	gain_t target_gain ();
 
 private:
-	bool        _no_outs_cuz_we_no_monitor;
-	boost::shared_ptr<MuteMaster> _mute_master;
+	bool _no_outs_cuz_we_no_monitor;
+
+	boost::shared_ptr<MuteMaster>  _mute_master;
+	boost::shared_ptr<GainControl> _gain_control;
 
 	static bool panners_legal;
 	static PBD::Signal0<void> PannersLegal;

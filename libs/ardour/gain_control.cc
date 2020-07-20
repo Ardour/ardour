@@ -35,10 +35,49 @@
 using namespace ARDOUR;
 using namespace std;
 
+static std::string gain_control_name (Evoral::Parameter const& param)
+{
+	switch (param.type()) {
+		case GainAutomation:
+			/* fallthrough */
+		case BusSendLevel:
+			return X_("gaincontrol");
+		case TrimAutomation:
+			return X_("trimcontrol");
+		case MainOutVolume:
+			return X_("mastervolume");
+		default:
+			break;
+	}
+	/* default in AutomationControl c'tor uses
+	 * EventTypeMap::instance().to_symbol(parameter)
+	 */
+	return "";
+}
+
+static boost::shared_ptr<AutomationList> automation_list_new (Evoral::Parameter const& param)
+{
+	switch (param.type()) {
+		case GainAutomation:
+			/* fallthrough */
+		case BusSendLevel:
+			/* fallthrough */
+		case TrimAutomation:
+			return boost::shared_ptr<AutomationList> (new AutomationList (param));
+		case MainOutVolume:
+			/* not automatable */
+			break;
+		default:
+			assert (0);
+			break;
+	}
+	return boost::shared_ptr<AutomationList> ();
+}
+
 GainControl::GainControl (Session& session, const Evoral::Parameter &param, boost::shared_ptr<AutomationList> al)
 	: SlavableAutomationControl (session, param, ParameterDescriptor(param),
-	                             al ? al : boost::shared_ptr<AutomationList> (new AutomationList (param)),
-	                             (param.type() == GainAutomation || param.type() == BusSendLevel) ? X_("gaincontrol") : X_("trimcontrol"),
+	                             al ? al : automation_list_new (param),
+	                             gain_control_name (param),
 	                             Controllable::GainLike)
 {
 }

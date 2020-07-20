@@ -571,6 +571,10 @@ Delivery::target_gain ()
 
 	gain_t desired_gain = _mute_master->mute_gain_at (mp);
 
+	if (_gain_control) {
+		desired_gain *= _gain_control->get_value();
+	}
+
 	if (_role == Listen && _session.monitor_out() && !_session.listening()) {
 
 		/* nobody is soloed, and this delivery is a listen-send to the
