@@ -146,6 +146,11 @@ EditorSources::EditorSources (Editor* e)
 		{ -1, 0, 0 }
 	};
 
+	/* make Name and Path columns manually resizable */
+
+	_display.get_column (0)->set_resizable (true);
+	_display.get_column (4)->set_resizable (true);
+
 	for (int i = 0; ci[i].index >= 0; ++i) {
 		col = _display.get_column (ci[i].index);
 		l = manage (new Label (ci[i].label));
