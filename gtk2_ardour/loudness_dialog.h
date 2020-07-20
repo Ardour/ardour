@@ -63,7 +63,9 @@ private:
 
 	Gtk::Label       _dbfs_label;
 	Gtk::Label       _dbtp_label;
-	Gtk::Label       _lufs_label;
+	Gtk::Label       _lufs_integrated_label;
+	Gtk::Label       _lufs_short_label;
+	Gtk::Label       _lufs_momentary_label;
 	Gtk::Label       _gain_label;
 
 	ArdourWidgets::ArdourButton _report_button;

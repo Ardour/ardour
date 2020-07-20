@@ -53,29 +53,41 @@ LoudnessDialog::LoudnessDialog (Session* s, TimeSelection const& ts)
 	, _gain (0)
 {
 	Gtk::Label* l;
-	Gtk::Table* t = manage (new Table (5, 3, false));
+	Gtk::Table* t = manage (new Table (8, 3, false));
 	t->set_spacings (4);
+	l = manage (new Label (_("<b>Measured</b>"), Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER));
+	l->set_use_markup (true);
+	t->attach (*l, 1, 2, 0, 1);
+	l = manage (new Label (_("<b>Target</b>"), Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER));
+	l->set_use_markup (true);
+	t->attach (*l, 2, 3, 0, 1);
+
 	l = manage (new Label (_("Digital Peak:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
-	t->attach (*l, 0, 1, 0, 1);
-	l = manage (new Label (_("Analog Peak:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
 	t->attach (*l, 0, 1, 1, 2);
-	l = manage (new Label (_("Loudness:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label (_("Analog Peak:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
 	t->attach (*l, 0, 1, 2, 3);
-	l = manage (new Label (_("Detailed Report:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label (_("Integrated Loudness:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
 	t->attach (*l, 0, 1, 3, 4);
-	l = manage (new Label (_("Suggested Gain:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label (_("Max. Short Loudness:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
 	t->attach (*l, 0, 1, 4, 5);
+	l = manage (new Label (_("Max. Momentary Loudness:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	t->attach (*l, 0, 1, 5, 6);
+	l = manage (new Label (_("Detailed Report:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	t->attach (*l, 0, 1, 6, 7);
+	l = manage (new Label (_("Suggested Gain:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	t->attach (*l, 0, 1, 7, 8);
 
-	t->attach (_dbfs_label, 1, 2, 0, 1);
-	t->attach (_dbtp_label, 1, 2, 1, 2);
-	t->attach (_lufs_label, 1, 2, 2, 3);
-	t->attach (_report_button, 1, 2, 3, 4);
+	t->attach (_dbfs_label,            1, 2, 1, 2);
+	t->attach (_dbtp_label,            1, 2, 2, 3);
+	t->attach (_lufs_integrated_label, 1, 2, 3, 4);
+	t->attach (_lufs_short_label,      1, 2, 4, 5);
+	t->attach (_lufs_momentary_label,  1, 2, 5, 6);
+	t->attach (_report_button,         1, 2, 6, 7);
+	t->attach (_gain_label,            1, 2, 7, 8);
 
-	t->attach (_dbfs_spinbutton, 2, 3, 0, 1);
-	t->attach (_dbtp_spinbutton, 2, 3, 1, 2);
-	t->attach (_lufs_spinbutton, 2, 3, 2, 3);
-
-	t->attach (_gain_label, 1, 2, 4, 5);
+	t->attach (_dbfs_spinbutton,       2, 3, 1, 2);
+	t->attach (_dbtp_spinbutton,       2, 3, 2, 3);
+	t->attach (_lufs_spinbutton,       2, 3, 3, 4);
 
 	_report_button.set_name ("generic button");
 
@@ -241,7 +253,9 @@ LoudnessDialog::display_results ()
 
 	_dbfs_label.set_text (string_compose (_("%1 dBFS"), std::setprecision (1), std::fixed, _dbfs));
 	_dbtp_label.set_text (string_compose (_("%1 dBTP"), std::setprecision (1), std::fixed, _dbtp));
-	_lufs_label.set_text (string_compose (_("%1 LUFS"), std::setprecision (1), std::fixed, _lufs));
+	_lufs_integrated_label.set_text (string_compose (_("%1 LUFS"), std::setprecision (1), std::fixed, _lufs));
+	_lufs_short_label.set_text (string_compose (_("%1 LUFS"), std::setprecision (1), std::fixed, p->max_loudness_short));
+	_lufs_momentary_label.set_text (string_compose (_("%1 LUFS"), std::setprecision (1), std::fixed, p->max_loudness_momentary));
 
 	calculate_gain ();
 
