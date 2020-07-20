@@ -111,7 +111,7 @@ VampEBUr128::getOutputDescriptors() const
     OutputDescriptor zc;
     zc.identifier = "loundless";
     zc.name = "Integrated loudness";
-    zc.description = "Integrated Loudness";
+    zc.description = "Loudness (integrated, short, momentary)";
     zc.unit = "LUFS";
     zc.hasFixedBinCount = true;
     zc.binCount = 0;
@@ -167,10 +167,21 @@ VampEBUr128::getRemainingFeatures()
 {
     FeatureSet returnFeatures;
 
-    Feature loudness;
-    loudness.hasTimestamp = false;
-    loudness.values.push_back(ebu.integrated());
-    returnFeatures[0].push_back(loudness);
+    Feature loudness_integrated;
+    loudness_integrated.hasTimestamp = false;
+    loudness_integrated.values.push_back(ebu.integrated());
+
+    Feature loudness_short;
+    loudness_short.hasTimestamp = false;
+    loudness_short.values.push_back(ebu.maxloudn_S());
+
+    Feature loudness_momentary;
+    loudness_momentary.hasTimestamp = false;
+    loudness_momentary.values.push_back(ebu.maxloudn_M());
+
+    returnFeatures[0].push_back(loudness_integrated);
+    returnFeatures[0].push_back(loudness_short);
+    returnFeatures[0].push_back(loudness_momentary);
 
     Feature range;
     range.hasTimestamp = false;
