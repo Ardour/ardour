@@ -70,7 +70,7 @@ TimeSelection::consolidate ()
 }
 
 samplepos_t
-TimeSelection::start ()
+TimeSelection::start () const
 {
 	if (empty()) {
 		return 0;
@@ -78,7 +78,7 @@ TimeSelection::start ()
 
 	samplepos_t first = max_samplepos;
 
-	for (std::list<AudioRange>::iterator i = begin(); i != end(); ++i) {
+	for (std::list<AudioRange>::const_iterator i = begin(); i != end(); ++i) {
 		if ((*i).start < first) {
 			first = (*i).start;
 		}
@@ -87,13 +87,13 @@ TimeSelection::start ()
 }
 
 samplepos_t
-TimeSelection::end_sample ()
+TimeSelection::end_sample () const
 {
 	samplepos_t last = 0;
 
 	/* XXX make this work like RegionSelection: no linear search needed */
 
-	for (std::list<AudioRange>::iterator i = begin(); i != end(); ++i) {
+	for (std::list<AudioRange>::const_iterator i = begin(); i != end(); ++i) {
 		if ((*i).end > last) {
 			last = (*i).end;
 		}
@@ -102,7 +102,7 @@ TimeSelection::end_sample ()
 }
 
 samplecnt_t
-TimeSelection::length()
+TimeSelection::length() const
 {
 	if (empty()) {
 		return 0;

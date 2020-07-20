@@ -33,9 +33,9 @@ class TimeSelection : public std::list<ARDOUR::AudioRange>
 public:
 	ARDOUR::AudioRange& operator[](uint32_t);
 
-	ARDOUR::samplepos_t start();
-	ARDOUR::samplepos_t end_sample();
-	ARDOUR::samplepos_t length();
+	ARDOUR::samplepos_t start() const;
+	ARDOUR::samplepos_t end_sample() const;
+	ARDOUR::samplepos_t length() const;
 
 	bool consolidate ();
 };
