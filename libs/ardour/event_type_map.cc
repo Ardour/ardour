@@ -240,17 +240,17 @@ EventTypeMap::to_symbol(const Evoral::Parameter& param) const
 	} else if (t == BusSendLevel) {
 		return "send";
 	} else if (t == TrimAutomation) {
-                return "trim";
+		return "trim";
 	} else if (t == PanAzimuthAutomation) {
-                return "pan-azimuth";
+		return "pan-azimuth";
 	} else if (t == PanElevationAutomation) {
-                return "pan-elevation";
+		return "pan-elevation";
 	} else if (t == PanWidthAutomation) {
-                return "pan-width";
+		return "pan-width";
 	} else if (t == PanFrontBackAutomation) {
-                return "pan-frontback";
+		return "pan-frontback";
 	} else if (t == PanLFEAutomation) {
-                return "pan-lfe";
+		return "pan-lfe";
 	} else if (t == SoloAutomation) {
 		return "solo";
 	} else if (t == MuteAutomation) {
