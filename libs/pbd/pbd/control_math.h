@@ -23,6 +23,9 @@
 #include <math.h>
 #include <stdint.h>
 
+/* these numbers ar arbitrary; we use them to keep floats well out of the denormal range */
+#define TINY_NUMBER (0.0000001)  /* (-140dB) */
+
 /* map gain-coeff [0..2] to position [0..1] */
 static inline double
 gain_to_position (double g)
@@ -100,12 +103,20 @@ interpolate_logarithmic (double from, double to, double fraction, double /*lower
 }
 
 static inline double
-interpolate_gain (double from, double to, double fraction, double upper)
+interpolate_gain (double f, double t, double fraction, double upper)
 {
+	double from = f + TINY_NUMBER; //kill denormals before we use them for anything
+	double to = t + TINY_NUMBER; //kill denormals before we use them for anything
+	if ( fabs(to-from) < TINY_NUMBER ){
+		 return to;
+	}
+
 	// this is expensive -- optimize
 	double g0 = gain_to_position (from * 2. / upper);
 	double g1 = gain_to_position (to * 2. / upper);
-	return position_to_gain (g0 + fraction * (g1 - g0)) * upper / 2.;
+	double diff = g1 - g0;
+
+	return position_to_gain (g0 + fraction * (diff)) * upper / 2.;
 }
 
 #endif
