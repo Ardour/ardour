@@ -256,8 +256,9 @@ Route::init ()
 	if (is_master()) {
 		_volume_control.reset (new GainControl (_session, MainOutVolume));
 		_volume_control->set_flag (Controllable::NotAutomatable);
-		//add_control (_volume_control);
-		_main_outs->add_gain (_volume_control);
+		if (Config->get_use_master_volume ()) {
+			_main_outs->add_gain (_volume_control);
+		}
 	}
 	_main_outs->activate ();
 

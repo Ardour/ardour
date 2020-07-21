@@ -4236,6 +4236,14 @@ Session::config_changed (std::string p, bool ours)
 	} else if (p == "loop-fade-choice") {
 		last_loopend = 0; /* force locate to refill buffers with new loop boundary data */
 		auto_loop_changed (_locations->auto_loop_location());
+	} else if (p == "use-master-volume") {
+		if (master_volume ()) {
+			bool en = Config->get_use_master_volume ();
+			_master_out->main_outs()->add_gain (en ? master_volume () : boost::shared_ptr<GainControl> ());
+			if (!en) {
+				master_volume ()->set_value (GAIN_COEFF_UNITY, Controllable::NoGroup);
+			}
+		}
 	}
 
 	set_dirty ();
