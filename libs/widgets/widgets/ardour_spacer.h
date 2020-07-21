@@ -22,6 +22,8 @@
 #define _WIDGETS_ARDOUR_SPACER_H_
 
 #include "gtkmm2ext/cairo_widget.h"
+#include "gtkmm2ext/colors.h"
+#include "widgets/ui_config.h"
 
 #include "widgets/visibility.h"
 
@@ -40,7 +42,8 @@ protected:
 		float h = height * ratio;
 		float t = .5f * (height - h);
 		ctx->rectangle (0, t, 1, h);
-		ctx->set_source_rgb (0, 0, 0);
+		uint32_t c = UIConfigurationBase::instance().color ("neutral:backgroundest");
+		Gtkmm2ext::set_source_rgba (ctx, c);
 		ctx->fill ();
 	}
 
@@ -66,7 +69,8 @@ protected:
 		float w = width * ratio;
 		float t = .5f * (width - w);
 		ctx->rectangle (t, 0, w, 1);
-		ctx->set_source_rgb (0, 0, 0);
+		uint32_t c = UIConfigurationBase::instance().color ("neutral:backgroundest");
+		Gtkmm2ext::set_source_rgba (ctx, c);
 		ctx->fill ();
 	}
 
