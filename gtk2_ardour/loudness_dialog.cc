@@ -188,10 +188,10 @@ LoudnessDialog::start_analysis ()
 }
 
 bool
-LoudnessDialog::on_delete_event (GdkEventAny*)
+LoudnessDialog::on_delete_event (GdkEventAny* ev)
 {
 	cancel_analysis ();
-	return true;
+	return ArdourDialog::on_delete_event (ev);
 }
 
 int
@@ -295,10 +295,9 @@ LoudnessDialog::analyze ()
 void
 LoudnessDialog::display_report ()
 {
-	hide ();
 	ExportReport er ("Export Loudness Report", _status->result_map);
+	er.set_transient_for (*this);
 	er.run();
-	show ();
 }
 
 void

@@ -138,6 +138,9 @@ Editor::measure_master_loudness (bool range_selection)
 	_session->master_volume ()->set_value (GAIN_COEFF_UNITY, Controllable::NoGroup);
 
 	LoudnessDialog ld (_session, ar, range_selection);
+	if (own_window ()) {
+		ld.set_transient_for (*own_window ());
+	}
 
 	if (ld.run () == RESPONSE_APPLY) {
 		_session->master_volume ()->set_value (dB_to_coefficient (ld.gain_db ()), Controllable::NoGroup);
