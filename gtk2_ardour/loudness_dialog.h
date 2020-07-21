@@ -36,7 +36,7 @@ namespace ARDOUR {
 class LoudnessDialog : public ArdourDialog
 {
 public:
-	LoudnessDialog (ARDOUR::Session*, ARDOUR::AudioRange const&);
+	LoudnessDialog (ARDOUR::Session*, ARDOUR::AudioRange const&, bool);
 	int run ();
 	float gain_db () const { return _gain; }
 
@@ -45,6 +45,7 @@ protected:
 
 private:
 	int  analyze ();
+	void start_analysis ();
 	void cancel_analysis ();
 	gint progress_timeout ();
 	void display_results ();
@@ -54,7 +55,9 @@ private:
 	ARDOUR::Session*                        _session;
 	ARDOUR::AudioRange const&               _range;
 	boost::shared_ptr<ARDOUR::ExportStatus> _status;
+	bool                                    _autostart;
 
+	Gtk::VBox        _setup_box;
 	Gtk::VBox        _progress_box;
 	Gtk::VBox        _result_box;
 	Gtk::ProgressBar _progress_bar;
@@ -63,23 +66,39 @@ private:
 
 	Gtk::Label       _dbfs_label;
 	Gtk::Label       _dbtp_label;
-	Gtk::Label       _lufs_integrated_label;
-	Gtk::Label       _lufs_short_label;
-	Gtk::Label       _lufs_momentary_label;
+	Gtk::Label       _lufs_i_label;
+	Gtk::Label       _lufs_s_label;
+	Gtk::Label       _lufs_m_label;
+
+	Gtk::Label       _delta_dbfs_label;
+	Gtk::Label       _delta_dbtp_label;
+	Gtk::Label       _delta_lufs_i_label;
+	Gtk::Label       _delta_lufs_s_label;
+	Gtk::Label       _delta_lufs_m_label;
+
+
 	Gtk::Label       _gain_label;
 
-	ArdourWidgets::ArdourButton _report_button;
+	ArdourWidgets::ArdourButton _rt_analysis_button;
+	ArdourWidgets::ArdourButton _start_analysis_button;
+	ArdourWidgets::ArdourButton _show_report_button;
 
   Gtk::Adjustment _dbfs_adjustment;
   Gtk::Adjustment _dbtp_adjustment;
-  Gtk::Adjustment _lufs_adjustment;
+  Gtk::Adjustment _lufs_i_adjustment;
+  Gtk::Adjustment _lufs_s_adjustment;
+  Gtk::Adjustment _lufs_m_adjustment;
 
 	Gtk::SpinButton _dbfs_spinbutton;
   Gtk::SpinButton _dbtp_spinbutton;
-  Gtk::SpinButton _lufs_spinbutton;
+  Gtk::SpinButton _lufs_i_spinbutton;
+  Gtk::SpinButton _lufs_s_spinbutton;
+  Gtk::SpinButton _lufs_m_spinbutton;
 
 	float _dbfs;
 	float _dbtp;
-	float _lufs;
+	float _lufs_i;
+	float _lufs_s;
+	float _lufs_m;
 	float _gain;
 };
