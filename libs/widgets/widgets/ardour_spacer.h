@@ -53,6 +53,32 @@ protected:
 	float ratio;
 };
 
+class LIBWIDGETS_API ArdourHSpacer : public CairoWidget
+{
+public:
+	ArdourHSpacer (float r = 0.75f);
+
+protected:
+	void render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t*) {
+
+		float width = get_width();
+
+		float w = width * ratio;
+		float t = .5f * (width - w);
+		ctx->rectangle (t, 0, w, 1);
+		ctx->set_source_rgb (0, 0, 0);
+		ctx->fill ();
+	}
+
+	void on_size_request (Gtk::Requisition* req) {
+		req->width = 0;
+		req->height = 1;
+		CairoWidget::on_size_request (req);
+	}
+
+	float ratio;
+};
+
 class LIBWIDGETS_API ArdourDropShadow : public CairoWidget
 {
 public:
