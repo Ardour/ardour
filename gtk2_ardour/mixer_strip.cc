@@ -2009,7 +2009,7 @@ MixerStrip::loudess_analysis_button_pressed (GdkEventButton* ev)
 		MenuList& items = _master_volume_menu->items();
 		items.clear ();
 		items.push_back (CheckMenuElem (_("Allow Manual Gain Control")));
-		CheckMenuItem* cmi = static_cast<Gtk::CheckMenuItem*> (&items.back());
+		Gtk::CheckMenuItem* cmi = static_cast<Gtk::CheckMenuItem*> (&items.back());
 		cmi->set_active (is_sensitive);
 		cmi->signal_toggled().connect (sigc::bind (sigc::mem_fun (*_volume_control_knob, &ArdourKnob::set_sensitive), !is_sensitive));
 
