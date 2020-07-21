@@ -580,6 +580,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		solo_button->hide ();
 		mute_button->show ();
 		rec_mon_table.hide ();
+		mute_solo_table.attach (*mute_button, 0, 2, 0, 1);
 		if (monitor_section_button == 0) {
 			Glib::RefPtr<Action> act = ActionManager::get_action ("Mixer", "ToggleMonitorSection");
 			_session->MonitorChanged.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::monitor_changed, this), gui_context());
