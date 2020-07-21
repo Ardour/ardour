@@ -865,6 +865,14 @@ ARDOUR_UI::show_ui_prefs ()
 		rc_option_editor->set_current_page (_("Appearance"));
 	}
 }
+void
+ARDOUR_UI::show_mixer_prefs ()
+{
+	if (rc_option_editor) {
+		show_tabbable (rc_option_editor);
+		rc_option_editor->set_current_page (_("Mixer"));
+	}
+}
 
 bool
 ARDOUR_UI::click_button_clicked (GdkEventButton* ev)

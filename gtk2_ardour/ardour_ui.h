@@ -332,6 +332,7 @@ public:
 	void restore_editing_space ();
 
 	void show_ui_prefs ();
+	void show_mixer_prefs ();
 
 	bool check_audioengine(Gtk::Window&);
 

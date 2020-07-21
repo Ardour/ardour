@@ -47,6 +47,7 @@
 #include "ardour/source_factory.h"
 #include "ardour/types.h"
 
+#include "ardour_ui.h"
 #include "ardour_message.h"
 #include "audio_region_view.h"
 #include "audio_time_axis.h"
@@ -94,6 +95,15 @@ Editor::export_selection ()
 void
 Editor::measure_master_loudness (bool range_selection)
 {
+	if (!Config->get_use_master_volume ()) {
+		ArdourMessageDialog md (_("Master bus output gain control is disabled.\nVisit preferences to enable it?"), false,
+				MESSAGE_QUESTION, BUTTONS_YES_NO);
+		if (md.run () == RESPONSE_YES) {
+			ARDOUR_UI::instance()->show_mixer_prefs ();
+		}
+		return;
+	}
+
 	samplepos_t start, end;
 	TimeSelection const& ts (get_selection().time);
 	if (range_selection && !ts.empty ()) {
@@ -106,20 +116,20 @@ Editor::measure_master_loudness (bool range_selection)
 
 	if (start >= end) {
 		if (range_selection) {
-			ArdourMessageDialog (_("Loudness Analysis requires a session-range or range-selection."));
+			ArdourMessageDialog (_("Loudness Analysis requires a session-range or range-selection."), false, MESSAGE_ERROR).run ();
 		} else {
-			ArdourMessageDialog (_("Loudness Analysis requires a session-range."));
+			ArdourMessageDialog (_("Loudness Analysis requires a session-range."), false, MESSAGE_ERROR).run ();
 		}
 		return;
 	}
 
 	if (!_session->master_volume()) {
-		ArdourMessageDialog (_("Loudness Analysis is only available for sessions with a master-bus"));
+		ArdourMessageDialog (_("Loudness Analysis is only available for sessions with a master-bus"), false, MESSAGE_ERROR).run ();
 		return;
 	}
 	assert (_session->master_out());
 	if (_session->master_out()->output()->n_ports().n_audio() != 2) {
-		ArdourMessageDialog (_("Loudness Analysis is only available for sessions with a stereo master-bus"));
+		ArdourMessageDialog (_("Loudness Analysis is only available for sessions with a stereo master-bus"), false, MESSAGE_ERROR).run ();
 		return;
 	}
 

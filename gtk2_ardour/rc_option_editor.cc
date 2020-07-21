@@ -2838,6 +2838,15 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Mixer"), pa);
 
+	add_option (_("Mixer"), new OptionEditorHeading (_("Master")));
+	add_option (_("Mixer"),
+			new BoolOption (
+				"use-master-volume",
+				_("Enable master-bus output gain control"),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::get_use_master_volume),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::set_use_master_volume)
+				));
+
 	add_option (_("Mixer"), new OptionEditorHeading (_("Default Track / Bus Muting Options")));
 
 	add_option (_("Mixer"),

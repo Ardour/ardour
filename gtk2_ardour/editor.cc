@@ -1919,7 +1919,8 @@ Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items)
 	edit_items.push_back (SeparatorElem());
 	edit_items.push_back (MenuElem (_("Loudness Analysis"), sigc::mem_fun(*this, &Editor::loudness_analyze_range_selection)));
 	edit_items.push_back (MenuElem (_("Spectral Analysis"), sigc::mem_fun(*this, &Editor::spectral_analyze_range_selection)));
-
+	edit_items.push_back (SeparatorElem());
+	edit_items.push_back (MenuElem (_("Analyze Session Loudness..."), sigc::mem_fun(*this, &Editor::analyze_range_export)));
 	edit_items.push_back (SeparatorElem());
 
 	edit_items.push_back (
@@ -1975,9 +1976,6 @@ Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items)
 	edit_items.push_back (MenuElem (_("Bounce Range to Source List"), sigc::bind (sigc::mem_fun(*this, &Editor::bounce_range_selection), false, false)));
 	edit_items.push_back (MenuElem (_("Bounce Range to Source List with Processing"), sigc::bind (sigc::mem_fun(*this, &Editor::bounce_range_selection), false, true)));
 	edit_items.push_back (MenuElem (_("Export Range..."), sigc::mem_fun(*this, &Editor::export_selection)));
-#ifndef NDEBUG // debug builds only, so far
-	edit_items.push_back (MenuElem (_("Export Analyze Range..."), sigc::mem_fun(*this, &Editor::analyze_range_export)));
-#endif
 	if (ARDOUR_UI::instance()->video_timeline->get_duration() > 0) {
 		edit_items.push_back (MenuElem (_("Export Video Range..."), sigc::bind (sigc::mem_fun(*(ARDOUR_UI::instance()), &ARDOUR_UI::export_video), true)));
 	}

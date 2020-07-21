@@ -593,8 +593,10 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		solo_button->hide ();
 		mute_button->show ();
 		rec_mon_table.hide ();
-		master_volume_table.show ();
 		mute_solo_table.attach (*mute_button, 0, 2, 0, 1);
+		if (Config->get_use_master_volume ()) {
+			master_volume_table.show ();
+		}
 
 		if (_volume_control_knob == 0) {
 			assert (_loudess_analysis_button == 0);
@@ -2452,6 +2454,14 @@ MixerStrip::parameter_changed (string p)
 	} else if (p == "track-name-number") {
 		name_changed ();
 		update_track_number_visibility();
+	} else if (p == "use-master-volume") {
+		if (route () && route()->is_master()) {
+			if (Config->get_use_master_volume ()) {
+				master_volume_table.show ();
+			} else {
+				master_volume_table.hide ();
+			}
+		}
 	}
 }
 
