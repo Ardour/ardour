@@ -1871,6 +1871,12 @@ RouteUI::is_track () const
 	return boost::dynamic_pointer_cast<Track>(_route) != 0;
 }
 
+bool
+RouteUI::is_master () const
+{
+	return _route && _route->is_master ();
+}
+
 boost::shared_ptr<Track>
 RouteUI::track() const
 {

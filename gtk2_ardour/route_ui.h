@@ -100,6 +100,7 @@ public:
 	virtual void set_button_names () = 0;
 
 	bool is_track() const;
+	bool is_master() const;
 	bool is_audio_track() const;
 	bool is_midi_track() const;
 	bool has_audio_outputs () const;

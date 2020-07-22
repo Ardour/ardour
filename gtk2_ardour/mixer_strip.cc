@@ -419,7 +419,7 @@ MixerStrip::init ()
 	*/
 	_visibility.add (&input_button_box, X_("Input"), _("Input"), false);
 	_visibility.add (&_invert_button_box, X_("PhaseInvert"), _("Phase Invert"), false);
-	_visibility.add (&rec_mon_table, X_("RecMon"), _("Record & Monitor"), false);
+	_visibility.add (&rec_mon_table, X_("RecMon"), _("Record & Monitor"), false, boost::bind (&MixerStrip::override_rec_mon_visibility, this));
 	_visibility.add (&solo_iso_table, X_("SoloIsoLock"), _("Solo Iso / Lock"), false);
 	_visibility.add (&output_button, X_("Output"), _("Output"), false);
 	_visibility.add (&_comment_button, X_("Comments"), _("Comments"), false);
@@ -592,7 +592,6 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	if (route()->is_master()) {
 		solo_button->hide ();
 		mute_button->show ();
-		rec_mon_table.hide ();
 		mute_solo_table.attach (*mute_button, 0, 2, 0, 1);
 		if (Config->get_use_master_volume ()) {
 			master_volume_table.show ();
@@ -641,7 +640,6 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		mute_solo_table.attach (*solo_button, 1, 2, 0, 1);
 		mute_button->show ();
 		solo_button->show ();
-		rec_mon_table.show ();
 		master_volume_table.hide ();
 	}
 
@@ -2446,12 +2444,23 @@ MixerStrip::parameter_changed (string p)
 boost::optional<bool>
 MixerStrip::override_solo_visibility () const
 {
-	if (_route && _route->is_master ()) {
+	if (is_master ()) {
 		return boost::optional<bool> (false);
 	}
 
 	return boost::optional<bool> ();
 }
+
+boost::optional<bool>
+MixerStrip::override_rec_mon_visibility () const
+{
+	if (is_master ()) {
+		return boost::optional<bool> (false);
+	}
+
+	return boost::optional<bool> ();
+}
+
 
 void
 MixerStrip::add_input_port (DataType t)
