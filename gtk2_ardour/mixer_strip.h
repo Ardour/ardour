@@ -79,6 +79,7 @@ class Mixer_UI;
 class MotionController;
 class RouteGroupMenu;
 class ArdourWindow;
+class AutomationController;
 
 class MixerStrip : public AxisView, public RouteUI, public Gtk::EventBox
 {
@@ -228,9 +229,8 @@ private:
 	ArdourWidgets::ArdourButton _comment_button;
 	ArdourWidgets::ArdourKnob   trim_control;
 
-	Gtk::Menu*                   _master_volume_menu;
 	ArdourWidgets::ArdourButton* _loudess_analysis_button;
-	ArdourWidgets::ArdourKnob*   _volume_control_knob;
+	boost::shared_ptr<AutomationController> _volume_controller;
 
 	void trim_start_touch ();
 	void trim_end_touch ();
@@ -238,7 +238,6 @@ private:
 	void setup_comment_button ();
 
 	void loudess_analysis_button_clicked ();
-	bool loudess_analysis_button_pressed (GdkEventButton*);
 
 	ArdourWidgets::ArdourButton group_button;
 	RouteGroupMenu*             group_menu;
