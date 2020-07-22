@@ -39,16 +39,28 @@ SliderController::SliderController (Gtk::Adjustment *adj, boost::shared_ptr<PBD:
 	, _ctrl_ignore (false)
 	, _spin_ignore (false)
 {
-	if (mc) {
-		_spin_adj.set_lower (mc->lower ());
-		_spin_adj.set_upper (mc->upper ());
-		_spin_adj.set_step_increment(_ctrl->interface_to_internal(adj->get_step_increment()) - mc->lower ());
-		_spin_adj.set_page_increment(_ctrl->interface_to_internal(adj->get_page_increment()) - mc->lower ());
+	if (_ctrl) {
+		// TODO consider a more generic method similar to
+		// get_user_string() or value_as_string() for numeric entry.
+		if (_ctrl->is_gain_like()) {
+			/* use a slightly lower threadhold than ardour/dB.h to map -infinity <> -320 */
+			float lower = _ctrl->lower () > 1e-16 ? 20.0f * log10f (_ctrl->lower ()) : -320.0f;
+			float upper = _ctrl->upper () > 1e-16 ? 20.0f * log10f (_ctrl->upper ()) : -320.0f;
+			_spin_adj.set_lower (lower);
+			_spin_adj.set_upper (upper);
+			_spin_adj.set_step_increment(0.1);
+			_spin_adj.set_page_increment(1.0);
+		} else {
+			_spin_adj.set_lower (_ctrl->lower ());
+			_spin_adj.set_upper (_ctrl->upper ());
+			_spin_adj.set_step_increment(_ctrl->interface_to_internal(adj->get_step_increment()) - _ctrl->lower ());
+			_spin_adj.set_page_increment(_ctrl->interface_to_internal(adj->get_page_increment()) - _ctrl->lower ());
+		}
 
 		adj->signal_value_changed().connect (sigc::mem_fun(*this, &SliderController::ctrl_adjusted));
 		_spin_adj.signal_value_changed().connect (sigc::mem_fun(*this, &SliderController::spin_adjusted));
 
-		_binding_proxy.set_controllable (mc);
+		_binding_proxy.set_controllable (_ctrl);
 	}
 
 	_spin.set_name ("SliderControllerValue");
@@ -88,13 +100,17 @@ SliderController::on_leave_notify_event (GdkEventCrossing* ev)
 void
 SliderController::ctrl_adjusted ()
 {
-	assert (_ctrl); // only used w/BarControlle
+	assert (_ctrl); // only used w/BarController
 	if (_spin_ignore) return;
 	_ctrl_ignore = true;
-	// TODO consider using internal_to_user, too (amp, dB)
-	// (also needs _spin_adj min/max range changed accordingly
-	//  and dedicated support for log-scale, revert parts of ceff2e3a62f839)
-	_spin_adj.set_value (_ctrl->interface_to_internal (_ctrl_adj->get_value()));
+
+	if (_ctrl->is_gain_like ()) {
+		float coeff = _ctrl->interface_to_internal (_ctrl_adj->get_value());
+		float db = coeff > 1e-16 ? 20.0f * log10f (coeff) : -320.0f;
+		_spin_adj.set_value (db);
+	} else {
+		_spin_adj.set_value (_ctrl->interface_to_internal (_ctrl_adj->get_value()));
+	}
 	_ctrl_ignore = false;
 }
 
@@ -104,8 +120,13 @@ SliderController::spin_adjusted ()
 	assert (_ctrl); // only used w/BarController
 	if (_ctrl_ignore) return;
 	_spin_ignore = true;
-	// TODO consider using user_to_internal, as well
-	_ctrl_adj->set_value(_ctrl->internal_to_interface (_spin_adj.get_value()));
+	if (_ctrl->is_gain_like ()) {
+		float db = _spin_adj.get_value();
+	  float coeff = db > -320.f ? pow (10.0f, db * 0.05f) : 0.0f;
+		_ctrl_adj->set_value(_ctrl->internal_to_interface (coeff));
+	} else {
+		_ctrl_adj->set_value(_ctrl->internal_to_interface (_spin_adj.get_value()));
+	}
 	_spin_ignore = false;
 }
 
