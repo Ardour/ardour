@@ -134,18 +134,16 @@ Editor::measure_master_loudness (bool range_selection)
 	}
 
 	ARDOUR::AudioRange ar (start, end, 0);
-	float prev_gain = _session->master_volume()->get_value();
-	_session->master_volume ()->set_value (GAIN_COEFF_UNITY, Controllable::NoGroup);
 
 	LoudnessDialog ld (_session, ar, range_selection);
+	ld.set_gain_offset_db (accurate_coefficient_to_dB (_session->master_volume()->get_value()));
+
 	if (own_window ()) {
 		ld.set_transient_for (*own_window ());
 	}
 
 	if (ld.run () == RESPONSE_APPLY) {
 		_session->master_volume ()->set_value (dB_to_coefficient (ld.gain_db ()), Controllable::NoGroup);
-	} else {
-		_session->master_volume ()->set_value (prev_gain, Controllable::NoGroup);
 	}
 }
 

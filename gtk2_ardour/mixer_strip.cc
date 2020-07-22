@@ -603,7 +603,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 			assert (route()->volume_control());
 
 			_volume_control_knob = manage (new ArdourKnob (ArdourKnob::default_elements, ArdourKnob::Flags (ArdourKnob::Detent | ArdourKnob::ArcToZero)));
-			_loudess_analysis_button = manage (new ArdourButton (S_("Loudness|LM")));
+			_loudess_analysis_button = manage (new ArdourButton (S_("Loudness|LAN")));
 			set_tooltip (_loudess_analysis_button, _("Measure loudness of the session, normalize master output volume"));
 
 			_volume_control_knob->set_size_request (PX_SCALE(19), PX_SCALE(19));

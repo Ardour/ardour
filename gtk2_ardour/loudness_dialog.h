@@ -38,7 +38,13 @@ class LoudnessDialog : public ArdourDialog
 public:
 	LoudnessDialog (ARDOUR::Session*, ARDOUR::AudioRange const&, bool);
 	int run ();
-	float gain_db () const { return _gain; }
+
+	void set_gain_offset_db (float db) {
+		_gain_init = db;
+	}
+	float gain_db () const {
+		return _gain_norm + _gain_init;
+	}
 
 protected:
 	bool on_delete_event (GdkEventAny*);
@@ -64,6 +70,12 @@ private:
 	Gtk::Button*     _ok_button;
 	Gtk::Button*     _cancel_button;
 
+	ArdourWidgets::ArdourButton _dbfs_btn;
+	ArdourWidgets::ArdourButton _dbtp_btn;
+	ArdourWidgets::ArdourButton _lufs_i_btn;
+	ArdourWidgets::ArdourButton _lufs_s_btn;
+	ArdourWidgets::ArdourButton _lufs_m_btn;
+
 	Gtk::Label       _dbfs_label;
 	Gtk::Label       _dbtp_label;
 	Gtk::Label       _lufs_i_label;
@@ -76,8 +88,9 @@ private:
 	Gtk::Label       _delta_lufs_s_label;
 	Gtk::Label       _delta_lufs_m_label;
 
-
-	Gtk::Label       _gain_label;
+	Gtk::Label       _gain_init_label;
+	Gtk::Label       _gain_norm_label;
+	Gtk::Label       _gain_total_label;
 
 	ArdourWidgets::ArdourButton _rt_analysis_button;
 	ArdourWidgets::ArdourButton _start_analysis_button;
@@ -100,5 +113,7 @@ private:
 	float _lufs_i;
 	float _lufs_s;
 	float _lufs_m;
-	float _gain;
+
+	float _gain_init;
+	float _gain_norm;
 };
