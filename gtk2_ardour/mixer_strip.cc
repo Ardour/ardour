@@ -278,6 +278,9 @@ MixerStrip::init ()
 	set_tooltip (&group_button, _("Mix group"));
 	group_button.set_name ("mixer strip button");
 
+	Gtk::Requisition mpb_size = gpm.meter_point_button.size_request();
+	group_button.set_size_request (mpb_size.width, mpb_size.height);
+
 	_comment_button.set_name (X_("mixer strip button"));
 	_comment_button.set_text_ellipsize (Pango::ELLIPSIZE_END);
 	_comment_button.signal_clicked.connect (sigc::mem_fun (*this, &RouteUI::toggle_comment_editor));
