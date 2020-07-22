@@ -21,7 +21,7 @@ function factory () return function ()
 
 	local rl;
 	if rv['select-tracks'] then
-		rl = Editor:get_selection ()
+		rl = Editor:get_selection ().tracks:routelist ()
 	else
 		rl = Session:get_routes()
 	end
