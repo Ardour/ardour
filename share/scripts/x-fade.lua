@@ -66,14 +66,19 @@ function dsp_runmap (bufs, in_map, out_map, n_samples, offset)
 		-- optimize hard A/B fixed gain case (copy buffers)
 		if cur_a == target_A and cur_b == target_B then
 			if target_A == 1.0 then
-				-- the first (and only first) channel may be in-place
-				if buf_aout ~= bufs:get_audio(ia) then
+				if ia == ARDOUR.ChanMapping.Invalid then
+					buf_aout:silence (n_samples, offset)
+				elseif buf_aout ~= bufs:get_audio(ia) then
 					buf_aout:read_from (bufs:get_audio(ia):data (0), n_samples, offset, offset)
 				end
 				goto next
 			elseif target_B == 1.0 then
-				assert (buf_aout ~= bufs:get_audio(ib))
-				buf_aout:read_from (bufs:get_audio(ib):data (0), n_samples, offset, offset)
+				if ib == ARDOUR.ChanMapping.Invalid then
+					buf_aout:silence (n_samples, offset)
+				else
+					assert (buf_aout ~= bufs:get_audio(ib))
+					buf_aout:read_from (bufs:get_audio(ib):data (0), n_samples, offset, offset)
+				end
 				goto next
 			end
 		end
@@ -86,16 +91,17 @@ function dsp_runmap (bufs, in_map, out_map, n_samples, offset)
 			cur_b = ARDOUR.Amp.apply_gain (bufs:get_audio(ib), sr, n_samples, gB, target_B, offset)
 		end
 
-		-- channels are supposed to be in linear order
-		assert (buf_aout ~= bufs:get_audio(ib))
-
 		-- copy input to output if needed (first set of channels may be in-place)
-		if buf_aout ~= bufs:get_audio(ia) then
+		if ia == ARDOUR.ChanMapping.Invalid then
+			buf_aout:silence (n_samples, offset)
+		elseif buf_aout ~= bufs:get_audio(ia) then
 			buf_aout:read_from (bufs:get_audio(ia):data (0), n_samples, offset, offset)
 		end
 
 		-- add the second buffer
-		ARDOUR.DSP.mix_buffers_no_gain (buf_aout:data (offset), bufs:get_audio(ib):data (offset), n_samples)
+		if ib ~= ARDOUR.ChanMapping.Invalid then
+			ARDOUR.DSP.mix_buffers_no_gain (buf_aout:data (offset), bufs:get_audio(ib):data (offset), n_samples)
+		end
 
 		::next::
 	end
