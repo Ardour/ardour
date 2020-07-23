@@ -23,6 +23,7 @@
 #include <gtkmm/table.h>
 
 #include "widgets/ardour_button.h"
+#include "widgets/ardour_dropdown.h"
 
 #include "ardour_dialog.h"
 #include "progress_reporter.h"
@@ -57,6 +58,20 @@ private:
 	void display_results ();
 	void display_report ();
 	void calculate_gain ();
+
+	void load_preset (size_t);
+	void apply_preset ();
+	void update_settings ();
+
+	struct LoudnessPreset
+	{
+		std::string name;
+		bool        enable[5];
+		float       level[5];
+	};
+
+	static LoudnessPreset presets[];
+	static LoudnessPreset _preset;
 
 	ARDOUR::Session*                        _session;
 	ARDOUR::AudioRange const&               _range;
@@ -96,6 +111,9 @@ private:
 	ArdourWidgets::ArdourButton _start_analysis_button;
 	ArdourWidgets::ArdourButton _show_report_button;
 
+	ArdourWidgets::ArdourDropdown _preset_dropdown;
+	std::string                   _initial_preset_name;
+
   Gtk::Adjustment _dbfs_adjustment;
   Gtk::Adjustment _dbtp_adjustment;
   Gtk::Adjustment _lufs_i_adjustment;
@@ -116,4 +134,5 @@ private:
 
 	float _gain_init;
 	float _gain_norm;
+	bool  _ignore_change;
 };

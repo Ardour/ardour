@@ -19,6 +19,8 @@
 #include <gtkmm/label.h>
 #include <gtkmm/stock.h>
 
+#include "pbd/unwind.h"
+
 #include "ardour/dB.h"
 #include "ardour/session.h"
 
@@ -30,6 +32,7 @@
 #include "ardour/export_status.h"
 #include "ardour/export_timespan.h"
 
+#include "gtkmm2ext/menu_elems.h"
 #include "gtkmm2ext/utils.h"
 
 #include "widgets/ardour_spacer.h"
@@ -43,6 +46,15 @@
 using namespace Gtk;
 using namespace ARDOUR;
 using namespace ArdourWidgets;
+
+LoudnessDialog::LoudnessPreset LoudnessDialog::presets[] =
+{
+	{"EBU",          { false, true, true, false, false},  { 0, -1, -23,   0, 0 }},
+	{"Digital Peak", { true, false, false, false, false}, { 0,  0,   0,   0, 0 }},
+	{"Bach",         { false, true, false, true, false},  { 0, -1,   0, -16, 0 }},
+};
+
+LoudnessDialog::LoudnessPreset LoudnessDialog::_preset = LoudnessDialog::presets [0];
 
 LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 	: ArdourDialog (as ? _("Loudness Assistant") : _("Loudness Analyzer and Normalizer"))
@@ -70,6 +82,7 @@ LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 	, _lufs_m_spinbutton (_lufs_m_adjustment, 0.1, 1)
 	, _gain_init (0)
 	, _gain_norm (0)
+	, _ignore_change (false)
 {
 	_start_analysis_button.set_name ("generic button");
 	_rt_analysis_button.set_name ("generic button");
@@ -104,7 +117,7 @@ LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 	_gain_total_label.modify_font (UIConfiguration::instance().get_NormalMonospaceFont());
 
 	Label* l;
-	Table* t = manage (new Table (8, 3, false));
+	Table* t = manage (new Table (12, 4, false));
 	t->set_spacings (4);
 
 	l = manage (new Label (_("<b>Analysis Results</b>"), ALIGN_LEFT));
@@ -134,6 +147,8 @@ LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 	t->attach (*l, 0, 1, 9, 10);
 	l = manage (new Label (_("Total gain:"), ALIGN_LEFT));
 	t->attach (*l, 0, 1, 10, 11);
+	l = manage (new Label (_("Preset:"), ALIGN_LEFT));
+	t->attach (*l, 0, 1, 11, 12);
 
 	t->attach (_dbfs_label,         1, 2, 2, 3);
 	t->attach (_dbtp_label,         1, 2, 3, 4);
@@ -158,6 +173,8 @@ LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 	t->attach (_gain_norm_label,    3, 4,  8,  9);
 	t->attach (_gain_init_label,    3, 4,  9, 10);
 	t->attach (_gain_total_label,   3, 4, 10, 11);
+
+	t->attach (_preset_dropdown,    1, 3, 11, 12);
 
 	_dbfs_label.set_alignment (ALIGN_RIGHT);
 	_dbtp_label.set_alignment (ALIGN_RIGHT);
@@ -192,11 +209,11 @@ LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 	  "session. If any outboard gear is used, a <i>realtime</i> export is available, to "
 	  "play at normal speed.\n"
 	));
-	t->attach (*l,                     1, 4, 1, 2, EXPAND|FILL, EXPAND|FILL, 0, 8);
+	t->attach (*l,                     0, 3, 0, 1, EXPAND|FILL, EXPAND|FILL, 0, 8);
 	l = manage (new Label (""));
-	t->attach (*l,                     1, 2, 2, 3);
-	t->attach (_rt_analysis_button,    2, 3, 2, 3, FILL, SHRINK);
-	t->attach (_start_analysis_button, 3, 4, 2, 3, FILL, SHRINK);
+	t->attach (*l,                     0, 1, 1, 2);
+	t->attach (_rt_analysis_button,    1, 2, 1, 2, FILL, SHRINK);
+	t->attach (_start_analysis_button, 2, 3, 1, 2, FILL, SHRINK);
 	_setup_box.pack_start (*t, false, false, 6);
 
 	get_vbox()->pack_start (_setup_box);
@@ -208,29 +225,33 @@ LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 	_ok_button     = add_button (Stock::APPLY, RESPONSE_APPLY);
 	_cancel_button = add_button (Stock::CANCEL, RESPONSE_CANCEL);
 
-	// TODO preset, remember
-	_dbfs_btn.set_active (false);
-	_dbtp_btn.set_active (true);
-	_lufs_i_btn.set_active (true);
-	_lufs_s_btn.set_active (false);
-	_lufs_m_btn.set_active (false);
+	for (size_t i = 0; i < sizeof (presets) / sizeof (LoudnessDialog::LoudnessPreset); ++i) {
+		using namespace Gtkmm2ext;
+		_preset_dropdown.AddMenuElem (MenuElemNoMnemonic (presets[i].name, sigc::bind (sigc::mem_fun (*this, &LoudnessDialog::load_preset), i)));
+	}
+
+	_preset_dropdown.disable_scrolling ();
+
+	_initial_preset_name = _preset.name;
+	apply_preset ();
 
 	_cancel_button->signal_clicked().connect (sigc::mem_fun (this, &LoudnessDialog::cancel_analysis));
-	_dbfs_spinbutton.signal_value_changed().connect (mem_fun (*this, &LoudnessDialog::calculate_gain));
-	_dbtp_spinbutton.signal_value_changed().connect (mem_fun (*this, &LoudnessDialog::calculate_gain));
-	_lufs_i_spinbutton.signal_value_changed().connect (mem_fun (*this, &LoudnessDialog::calculate_gain));
-	_lufs_s_spinbutton.signal_value_changed().connect (mem_fun (*this, &LoudnessDialog::calculate_gain));
-	_lufs_m_spinbutton.signal_value_changed().connect (mem_fun (*this, &LoudnessDialog::calculate_gain));
+	_dbfs_spinbutton.signal_value_changed().connect (mem_fun (*this, &LoudnessDialog::update_settings));
+	_dbtp_spinbutton.signal_value_changed().connect (mem_fun (*this, &LoudnessDialog::update_settings));
+	_lufs_i_spinbutton.signal_value_changed().connect (mem_fun (*this, &LoudnessDialog::update_settings));
+	_lufs_s_spinbutton.signal_value_changed().connect (mem_fun (*this, &LoudnessDialog::update_settings));
+	_lufs_m_spinbutton.signal_value_changed().connect (mem_fun (*this, &LoudnessDialog::update_settings));
 	_show_report_button.signal_clicked.connect (mem_fun (*this, &LoudnessDialog::display_report));
 	_start_analysis_button.signal_clicked.connect (mem_fun (*this, &LoudnessDialog::start_analysis));
-	_dbfs_btn.signal_clicked.connect (mem_fun (*this, &LoudnessDialog::calculate_gain));
-	_dbtp_btn.signal_clicked.connect (mem_fun (*this, &LoudnessDialog::calculate_gain));
-	_lufs_i_btn.signal_clicked.connect (mem_fun (*this, &LoudnessDialog::calculate_gain));
-	_lufs_s_btn.signal_clicked.connect (mem_fun (*this, &LoudnessDialog::calculate_gain));
-	_lufs_m_btn.signal_clicked.connect (mem_fun (*this, &LoudnessDialog::calculate_gain));
+	_dbfs_btn.signal_clicked.connect (mem_fun (*this, &LoudnessDialog::update_settings));
+	_dbtp_btn.signal_clicked.connect (mem_fun (*this, &LoudnessDialog::update_settings));
+	_lufs_i_btn.signal_clicked.connect (mem_fun (*this, &LoudnessDialog::update_settings));
+	_lufs_s_btn.signal_clicked.connect (mem_fun (*this, &LoudnessDialog::update_settings));
+	_lufs_m_btn.signal_clicked.connect (mem_fun (*this, &LoudnessDialog::update_settings));
 
 	_ok_button->set_sensitive (false);
 	_show_report_button.set_sensitive (false);
+
 	show_all_children ();
 
 	_result_box.hide ();
@@ -276,6 +297,23 @@ LoudnessDialog::run ()
 
 	int const r = ArdourDialog::run ();
 	cancel_analysis ();
+
+	if (r == RESPONSE_APPLY) {
+		_preset.level[0] = _dbfs_spinbutton.get_value();
+		_preset.level[1] = _dbtp_spinbutton.get_value();
+		_preset.level[2] = _lufs_i_spinbutton.get_value();
+		_preset.level[3] = _lufs_s_spinbutton.get_value();
+		_preset.level[4] = _lufs_m_spinbutton.get_value();
+		_preset.enable[0] = _dbfs_btn.get_active ();
+		_preset.enable[1] = _dbtp_btn.get_active ();
+		_preset.enable[2] = _lufs_i_btn.get_active ();
+		_preset.enable[3] = _lufs_s_btn.get_active ();
+		_preset.enable[4] = _lufs_m_btn.get_active ();
+	} else {
+		/* retore preset name, in case user has changed it */
+		_preset.name = _initial_preset_name;
+	}
+
 	return r;
 }
 
@@ -366,6 +404,44 @@ LoudnessDialog::display_report ()
 	ExportReport er ("Export Loudness Report", _status->result_map);
 	er.set_transient_for (*this);
 	er.run();
+}
+
+void
+LoudnessDialog::load_preset (size_t n)
+{
+	_preset = presets[n];
+	apply_preset ();
+	calculate_gain ();
+}
+
+void
+LoudnessDialog::apply_preset ()
+{
+	PBD::Unwinder<bool> uw (_ignore_change, true);
+	_preset_dropdown.set_text (_preset.name);
+
+	_dbfs_btn.set_active (_preset.enable[0]);
+	_dbtp_btn.set_active (_preset.enable[1]);
+	_lufs_i_btn.set_active (_preset.enable[2]);
+	_lufs_s_btn.set_active (_preset.enable[3]);
+	_lufs_m_btn.set_active (_preset.enable[4]);
+	_dbfs_spinbutton.set_value (_preset.level[0]);
+	_dbtp_spinbutton.set_value (_preset.level[1]);
+	_lufs_i_spinbutton.set_value (_preset.level[2]);
+	_lufs_s_spinbutton.set_value (_preset.level[3]);
+	_lufs_m_spinbutton.set_value (_preset.level[4]);
+}
+
+void
+LoudnessDialog::update_settings ()
+{
+	if (_ignore_change) {
+		return;
+	}
+	_preset.name = "User";
+	_preset_dropdown.set_text (_preset.name);
+
+	calculate_gain ();
 }
 
 void
