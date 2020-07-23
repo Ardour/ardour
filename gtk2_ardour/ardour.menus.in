@@ -27,6 +27,8 @@
       <menuitem action='OpenVideo'/>
       <menuitem action='CloseVideo'/>
 
+      <menuitem action='LoudnessAssistant'/>
+
       <menu name='Export' action='Export'>
         <menuitem action='ExportAudio'/>
         <menuitem action='StemExport'/>

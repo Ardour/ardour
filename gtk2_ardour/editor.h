@@ -310,7 +310,6 @@ public:
 	void export_region ();
 
 	/* export for analysis only */
-	void analyze_range_export ();
 	void measure_master_loudness (bool);
 
 	bool process_midi_export_dialog (MidiExportDialog& dialog, boost::shared_ptr<ARDOUR::MidiRegion> midi_region);

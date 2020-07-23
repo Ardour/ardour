@@ -148,12 +148,6 @@ Editor::measure_master_loudness (bool range_selection)
 }
 
 void
-Editor::analyze_range_export ()
-{
-	measure_master_loudness (true);
-}
-
-void
 Editor::export_range ()
 {
 	ArdourMarker* marker;
