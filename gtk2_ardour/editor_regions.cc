@@ -603,7 +603,7 @@ EditorRegions::clock_format_changed ()
 void
 EditorRegions::format_position (samplepos_t pos, char* buf, size_t bufsize, bool onoff)
 {
-	Timecode::BBT_Time bbt;
+	Temporal::BBT_Time bbt;
 	Timecode::Time     timecode;
 
 	if (pos < 0) {
@@ -772,7 +772,7 @@ EditorRegions::populate_row_length (boost::shared_ptr<Region> region, TreeModel:
 
 	if (ARDOUR_UI::instance ()->primary_clock->mode () == AudioClock::BBT) {
 		TempoMap&          map (_session->tempo_map ());
-		Timecode::BBT_Time bbt = map.bbt_at_beat (map.beat_at_sample (region->last_sample ()) - map.beat_at_sample (region->first_sample ()));
+		Temporal::BBT_Time bbt = map.bbt_at_beat (map.beat_at_sample (region->last_sample ()) - map.beat_at_sample (region->first_sample ()));
 		snprintf (buf, sizeof (buf), "%03d|%02d|%04d", bbt.bars, bbt.beats, bbt.ticks);
 	} else {
 		format_position (region->length (), buf, sizeof (buf));

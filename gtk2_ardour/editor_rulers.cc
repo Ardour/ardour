@@ -977,7 +977,9 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 		return;
 	}
 
-	Timecode::BBT_Time lower_beat, upper_beat; // the beats at each end of the ruler
+	std::vector<TempoMap::BBTPoint>::const_iterator i;
+	Temporal::BBT_Time lower_beat, upper_beat; // the beats at each end of the ruler
+
 	double floor_lower_beat = floor(std::max (0.0, _session->tempo_map().beat_at_sample (lower)));
 
 	if (floor_lower_beat < 0.0) {
@@ -1083,7 +1085,7 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 	char buf[64];
 	gint  n = 0;
 	samplepos_t pos;
-	Timecode::BBT_Time next_beat;
+	Temporal::BBT_Time next_beat;
 	uint32_t beats = 0;
 	uint32_t tick = 0;
 	uint32_t skip;
@@ -1362,11 +1364,11 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 			}
 
 			/* Add the tick marks */
-			skip = Timecode::BBT_Time::ticks_per_beat / bbt_beat_subdivision;
+			skip = Temporal::ticks_per_beat / bbt_beat_subdivision;
 			tick = skip; // the first non-beat tick
 
 			t = 0;
-			while (tick < Timecode::BBT_Time::ticks_per_beat && (n < bbt_nmarks)) {
+			while (tick < Temporal::ticks_per_beat && (n < bbt_nmarks)) {
 
 				next_beat.beats = (*i).beat;
 				next_beat.bars = (*i).bar;
@@ -1400,6 +1402,181 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 		}
 
 	  break;
+
+	case bbt_show_thirtyseconds:
+
+		beats = distance (grid.begin(), grid.end());
+		bbt_nmarks = (beats + 2) * bbt_beat_subdivision;
+
+		bbt_position_of_helper = lower + (3 * Editor::get_current_zoom ());
+
+		mark.label = "";
+		mark.position = lower;
+		mark.style = ArdourCanvas::Ruler::Mark::Micro;
+		marks.push_back (mark);
+
+		for (n = 1, i = grid.begin(); n < bbt_nmarks && i != grid.end(); ++i) {
+
+			if ((*i).sample < lower && (bbt_bar_helper_on)) {
+				  snprintf (buf, sizeof(buf), "<%" PRIu32 "|%" PRIu32, (*i).bar, (*i).beat);
+				  edit_last_mark_label (marks, buf);
+				  helper_active = true;
+			} else {
+
+				  if ((*i).is_bar()) {
+					  mark.style = ArdourCanvas::Ruler::Mark::Major;
+					  snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
+				  } else {
+					  mark.style = ArdourCanvas::Ruler::Mark::Minor;
+					  snprintf (buf, sizeof(buf), "%" PRIu32, (*i).beat);
+				  }
+				  if (((*i).sample < bbt_position_of_helper) && helper_active) {
+					  buf[0] = '\0';
+				  }
+				  mark.label =  buf;
+				  mark.position = (*i).sample;
+				  marks.push_back (mark);
+				  n++;
+			}
+
+			/* Add the tick marks */
+			skip = Temporal::ticks_per_beat / bbt_beat_subdivision;
+
+			next_beat.beats = (*i).beat;
+			next_beat.bars = (*i).bar;
+			tick = skip; // the first non-beat tick
+			t = 0;
+			while (tick < Temporal::ticks_per_beat && (n < bbt_nmarks)) {
+
+				next_beat.ticks = tick;
+				pos = _session->tempo_map().sample_at_bbt (next_beat);
+				if (t % bbt_accent_modulo == (bbt_accent_modulo - 1)) {
+					i_am_accented = true;
+				}
+
+				if (pos > bbt_position_of_helper) {
+					snprintf (buf, sizeof(buf), "%" PRIu32, tick);
+				} else {
+					buf[0] = '\0';
+				}
+
+				mark.label = buf;
+				mark.position = pos;
+
+				if ((bbt_beat_subdivision > 4) && i_am_accented) {
+					mark.style = ArdourCanvas::Ruler::Mark::Minor;
+				} else {
+					mark.style = ArdourCanvas::Ruler::Mark::Micro;
+				}
+				i_am_accented = false;
+				marks.push_back (mark);
+
+				tick += skip;
+				++t;
+				++n;
+			}
+		}
+
+	  break;
+
+	case bbt_show_many:
+		bbt_nmarks = 1;
+		snprintf (buf, sizeof(buf), "cannot handle %" PRIu32 " bars", bbt_bars);
+		mark.style = ArdourCanvas::Ruler::Mark::Major;
+		mark.label = buf;
+		mark.position = lower;
+		marks.push_back (mark);
+		break;
+
+	case bbt_show_64:
+			bbt_nmarks = (gint) (bbt_bars / 64) + 1;
+			for (n = 0, i = grid.begin(); i != grid.end() && n < bbt_nmarks; i++) {
+				if ((*i).is_bar()) {
+					if ((*i).bar % 64 == 1) {
+						if ((*i).bar % 256 == 1) {
+							snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
+							mark.style = ArdourCanvas::Ruler::Mark::Major;
+						} else {
+							buf[0] = '\0';
+							if ((*i).bar % 256 == 129)  {
+								mark.style = ArdourCanvas::Ruler::Mark::Minor;
+							} else {
+								mark.style = ArdourCanvas::Ruler::Mark::Micro;
+							}
+						}
+						mark.label = buf;
+						mark.position = (*i).sample;
+						marks.push_back (mark);
+						++n;
+					}
+				}
+			}
+			break;
+
+	case bbt_show_16:
+		bbt_nmarks = (bbt_bars / 16) + 1;
+		for (n = 0,  i = grid.begin(); i != grid.end() && n < bbt_nmarks; i++) {
+			if ((*i).is_bar()) {
+			  if ((*i).bar % 16 == 1) {
+				if ((*i).bar % 64 == 1) {
+					snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
+					mark.style = ArdourCanvas::Ruler::Mark::Major;
+				} else {
+					buf[0] = '\0';
+					if ((*i).bar % 64 == 33)  {
+						mark.style = ArdourCanvas::Ruler::Mark::Minor;
+					} else {
+						mark.style = ArdourCanvas::Ruler::Mark::Micro;
+					}
+				}
+				mark.label = buf;
+				mark.position = (*i).sample;
+				marks.push_back (mark);
+				++n;
+			  }
+			}
+		}
+	  break;
+
+	case bbt_show_4:
+		bbt_nmarks = (bbt_bars / 4) + 1;
+		for (n = 0, i = grid.begin(); i != grid.end() && n < bbt_nmarks; ++i) {
+			if ((*i).is_bar()) {
+				if ((*i).bar % 4 == 1) {
+					if ((*i).bar % 16 == 1) {
+						snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
+						mark.style = ArdourCanvas::Ruler::Mark::Major;
+					} else {
+						buf[0] = '\0';
+						if ((*i).bar % 16 == 9)  {
+							mark.style = ArdourCanvas::Ruler::Mark::Minor;
+						} else {
+							mark.style = ArdourCanvas::Ruler::Mark::Micro;
+						}
+					}
+					mark.label = buf;
+					mark.position = (*i).sample;
+					marks.push_back (mark);
+					++n;
+				}
+			}
+		}
+	  break;
+
+	case bbt_show_1:
+//	default:
+		bbt_nmarks = bbt_bars + 2;
+		for (n = 0,  i = grid.begin(); i != grid.end() && n < bbt_nmarks; ++i) {
+			if ((*i).is_bar()) {
+				snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bbt().bars);
+				mark.style = ArdourCanvas::Ruler::Mark::Major;
+				mark.label = buf;
+				mark.position = (*i).sample;
+				marks.push_back (mark);
+				++n;
+			}
+		}
+		break;
 
 	}
 }

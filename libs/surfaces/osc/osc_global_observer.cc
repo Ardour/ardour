@@ -242,7 +242,7 @@ OSCGlobalObserver::tick ()
 			_osc.text_message (X_("/position/smpte"), os.str(), addr);
 		}
 		if (feedback[5]) { // Bar beat enabled
-			Timecode::BBT_Time bbt_time;
+			Temporal::BBT_Time bbt_time;
 
 			session->bbt_time (now_sample, bbt_time);
 

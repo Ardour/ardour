@@ -301,10 +301,11 @@ ExportTimespanSelector::bbt_str (samplepos_t samples) const
 	}
 
 	std::ostringstream oss;
-	Timecode::BBT_Time time;
+	Temporal::BBT_Time time;
 	_session->bbt_time (samples, time);
 
-	print_padded (oss, time);
+	time.print_padded (oss);
+
 	return oss.str ();
 }
 

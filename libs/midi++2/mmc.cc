@@ -42,13 +42,6 @@ using namespace std;
 using namespace MIDI;
 using namespace PBD;
 
-/**
- * As libtimecode is linked statically to libmidi++ this
- * is necessary to pull in all the symbols from libtimecode
- * so they are exported for other users of libtimecode.
- */
-double tmp = Timecode::BBT_Time::ticks_per_beat;
-
 static std::map<int,string> mmc_cmd_map;
 static void build_mmc_cmd_map ()
 {

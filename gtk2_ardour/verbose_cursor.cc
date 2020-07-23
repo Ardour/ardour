@@ -100,7 +100,7 @@ VerboseCursor::set_time (samplepos_t sample)
 {
 	char buf[128];
 	Timecode::Time timecode;
-	Timecode::BBT_Time bbt;
+	Temporal::BBT_Time bbt;
 
 	if (_editor->_session == 0) {
 		return;
@@ -142,8 +142,8 @@ VerboseCursor::set_duration (samplepos_t start, samplepos_t end)
 {
 	char buf[128];
 	Timecode::Time timecode;
-	Timecode::BBT_Time sbbt;
-	Timecode::BBT_Time ebbt;
+	Temporal::BBT_Time sbbt;
+	Temporal::BBT_Time ebbt;
 	Meter meter_at_start (_editor->_session->tempo_map().meter_at_sample (start));
 
 	if (_editor->_session == 0) {
@@ -173,7 +173,7 @@ VerboseCursor::set_duration (samplepos_t start, samplepos_t end)
 
 		ticks -= sbbt.ticks;
 		if (ticks < 0) {
-			ticks += int (Timecode::BBT_Time::ticks_per_beat);
+			ticks += int (Temporal::ticks_per_beat);
 			--beats;
 		}
 

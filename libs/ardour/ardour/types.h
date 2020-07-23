@@ -284,7 +284,7 @@ class AnyTime {
 	Type type;
 
 	Timecode::Time     timecode;
-	Timecode::BBT_Time bbt;
+	Temporal::BBT_Time bbt;
 
 	union {
 		samplecnt_t     samples;
@@ -375,11 +375,11 @@ struct AudioRange {
 };
 
 struct MusicRange {
-	Timecode::BBT_Time start;
-	Timecode::BBT_Time end;
+	Temporal::BBT_Time start;
+	Temporal::BBT_Time end;
 	uint32_t id;
 
-	MusicRange (Timecode::BBT_Time& s, Timecode::BBT_Time& e, uint32_t i)
+	MusicRange (Temporal::BBT_Time& s, Temporal::BBT_Time& e, uint32_t i)
 		: start (s), end (e), id (i) {}
 
 	bool operator== (const MusicRange& other) const {

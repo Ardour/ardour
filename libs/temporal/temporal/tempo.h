@@ -146,7 +146,7 @@ class LIBTEMPORAL_API Tempo : public Rampable {
 	 * It is not required that big_numerator equal superclock_ticks_per_second but since the values in both cases have similar
 	 * desired properties (many, many factors), it doesn't hurt to use the same number.
 	 */
-	static const superclock_t big_numerator = superclock_ticks_per_second;
+	static const superclock_t big_numerator = 508032000; // 2^10 * 3^4 * 5^3 * 7^2
 
   public:
 	enum Type {

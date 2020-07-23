@@ -590,7 +590,7 @@ EditorSources::clock_format_changed ()
 void
 EditorSources::format_position (samplepos_t pos, char* buf, size_t bufsize, bool onoff)
 {
-	Timecode::BBT_Time bbt;
+	Temporal::BBT_Time bbt;
 	Timecode::Time timecode;
 
 	if (pos < 0) {

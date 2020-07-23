@@ -47,7 +47,7 @@ using namespace PBD;
 /* BBT TIME*/
 
 void
-Session::bbt_time (samplepos_t when, Timecode::BBT_Time& bbt)
+Session::bbt_time (samplepos_t when, Temporal::BBT_Time& bbt)
 {
 	bbt = _tempo_map->bbt_at_sample (when);
 }

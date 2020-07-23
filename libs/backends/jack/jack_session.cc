@@ -113,7 +113,7 @@ JACKSession::timebase_callback (jack_transport_state_t /*state*/,
 				 jack_position_t* pos,
 				 int /*new_position*/)
 {
-	Timecode::BBT_Time bbt;
+	Temporal::BBT_Time bbt;
 	TempoMap& tempo_map (_session->tempo_map());
 	samplepos_t tf;
 
@@ -136,7 +136,7 @@ JACKSession::timebase_callback (jack_transport_state_t /*state*/,
 
 		pos->beats_per_bar = metric.meter().divisions_per_bar();
 		pos->beat_type = metric.meter().note_divisor();
-		pos->ticks_per_beat = Timecode::BBT_Time::ticks_per_beat;
+		pos->ticks_per_beat = Temporal::ticks_per_beat;
 		pos->beats_per_minute = metric.tempo().note_types_per_minute();
 
 		double current_tick = tempo_map.quarter_note_at_bbt_rt (bbt) / 4 * pos->beat_type * pos->ticks_per_beat;

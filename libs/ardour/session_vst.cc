@@ -198,7 +198,7 @@ intptr_t Session::vst_callback (
 				newflags |= (kVstTimeSigValid);
 			}
 			if ((value & (kVstPpqPosValid)) || (value & (kVstBarsValid))) {
-				Timecode::BBT_Time bbt;
+				Temporal::BBT_Time bbt;
 
 				try {
 					bbt = session->tempo_map().bbt_at_sample_rt (now);

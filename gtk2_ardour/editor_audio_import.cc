@@ -291,7 +291,7 @@ Editor::import_smf_tempo_map (Evoral::SMF const & smf, samplepos_t pos)
 
 		Tempo tempo (t->tempo(), 32.0 / (double) t->notes_per_note);
 		Meter meter (t->numerator, t->denominator);
-		Timecode::BBT_Time bbt; /* 1|1|0 which is correct for the no-meter case */
+		Temporal::BBT_Time bbt; /* 1|1|0 which is correct for the no-meter case */
 
 		if (have_initial_meter) {
 			new_map.add_tempo (tempo, t->time_pulses/ (double)smf.ppqn() / 4.0, 0, MusicTime);

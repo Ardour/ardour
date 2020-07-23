@@ -1153,7 +1153,7 @@ MackieControlProtocol::set_state (const XMLNode & node, int version)
 string
 MackieControlProtocol::format_bbt_timecode (samplepos_t now_sample)
 {
-	Timecode::BBT_Time bbt_time;
+	Temporal::BBT_Time bbt_time;
 
 	session->bbt_time (now_sample, bbt_time);
 

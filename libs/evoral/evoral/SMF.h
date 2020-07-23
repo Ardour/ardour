@@ -65,7 +65,7 @@ public:
 
 	static bool test(const std::string& path);
 	int  open(const std::string& path, int track=1);
-	// XXX 19200 = 10 * Timecode::BBT_Time::ticks_per_beat
+	// XXX 19200 = 10 * Temporal::ticks_per_beat
 	int  create(const std::string& path, int track=1, uint16_t ppqn=19200);
 	void close();
 

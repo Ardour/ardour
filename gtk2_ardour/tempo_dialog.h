@@ -49,12 +49,12 @@ public:
 	double get_bpm ();
 	double get_end_bpm ();
 	double get_note_type ();
-	bool   get_bbt_time (Timecode::BBT_Time&);
+	bool   get_bbt_time (Temporal::BBT_Time&);
 	ARDOUR::TempoSection::Type get_tempo_type ();
 	ARDOUR::PositionLockStyle get_lock_style ();
 
 private:
-	void init (const Timecode::BBT_Time& start, double bpm, double end_bpm, double note_type, ARDOUR::TempoSection::Type type, bool movable, ARDOUR::PositionLockStyle style);
+	void init (const Temporal::BBT_Time& start, double bpm, double end_bpm, double note_type, ARDOUR::TempoSection::Type type, bool movable, ARDOUR::PositionLockStyle style);
 	bool is_user_input_valid() const;
 	void bpm_changed ();
 	bool bpm_button_press (GdkEventButton* );
@@ -113,10 +113,10 @@ public:
 	double get_bpb ();
 	double get_note_type ();
 	ARDOUR::PositionLockStyle get_lock_style ();
-	bool   get_bbt_time (Timecode::BBT_Time&);
+	bool   get_bbt_time (Temporal::BBT_Time&);
 
 private:
-	void init (const Timecode::BBT_Time&, double, double, bool, ARDOUR::PositionLockStyle style);
+	void init (const Temporal::BBT_Time&, double, double, bool, ARDOUR::PositionLockStyle style);
 	bool is_user_input_valid() const;
 	bool entry_key_press (GdkEventKey* );
 	bool entry_key_release (GdkEventKey* );

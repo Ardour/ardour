@@ -273,7 +273,7 @@ MiniTimeline::format_time (samplepos_t when)
 		case AudioClock::BBT:
 			{
 				char buf[64];
-				Timecode::BBT_Time BBT = _session->tempo_map().bbt_at_sample (when);
+				Temporal::BBT_Time BBT = _session->tempo_map().bbt_at_sample (when);
 				snprintf (buf, sizeof (buf), "%03" PRIu32 BBT_BAR_CHAR "%02" PRIu32 BBT_BAR_CHAR "%04" PRIu32,
 						BBT.bars, BBT.beats, BBT.ticks);
 				_layout->set_text (buf);

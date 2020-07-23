@@ -449,7 +449,7 @@ Editor::mouse_add_new_meter_event (samplepos_t sample)
 
 	double note_type = meter_dialog.get_note_type ();
 
-	Timecode::BBT_Time requested;
+	Temporal::BBT_Time requested;
 	meter_dialog.get_bbt_time (requested);
 
 	const double al_sample = map.sample_at_bbt (requested);
@@ -507,7 +507,7 @@ Editor::edit_meter_section (MeterSection* section)
 	double const note_type = meter_dialog.get_note_type ();
 	const Meter meter (bpb, note_type);
 
-	Timecode::BBT_Time when;
+	Temporal::BBT_Time when;
 	meter_dialog.get_bbt_time (when);
 	const samplepos_t sample = _session->tempo_map().sample_at_bbt (when);
 	const PositionLockStyle pls = (meter_dialog.get_lock_style() == AudioTime) ? AudioTime : MusicTime;
@@ -540,7 +540,7 @@ Editor::edit_tempo_section (TempoSection* section)
 	bpm = max (0.01, bpm);
 	const Tempo tempo (bpm, nt, end_bpm);
 
-	Timecode::BBT_Time when;
+	Temporal::BBT_Time when;
 	tempo_dialog.get_bbt_time (when);
 
 	begin_reversible_command (_("replace tempo mark"));

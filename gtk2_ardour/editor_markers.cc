@@ -1509,7 +1509,7 @@ Editor::toggle_marker_lock_style ()
 		MeterSection* msp = &mm->meter();
 
 		const Meter meter (msp->divisions_per_bar(), msp->note_divisor());
-		const Timecode::BBT_Time bbt (msp->bbt());
+		const Temporal::BBT_Time bbt (msp->bbt());
 		const PositionLockStyle pls = (msp->position_lock_style() == AudioTime) ? MusicTime : AudioTime;
 
 		_session->tempo_map().replace_meter (*msp, meter, bbt, msp->sample(), pls);

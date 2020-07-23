@@ -56,7 +56,7 @@ TempoDialog::TempoDialog (TempoMap& map, samplepos_t sample, const string&)
 	, tap_tempo_button (_("Tap tempo"))
 {
 	Tempo tempo (map.tempo_at_sample (sample));
-	Timecode::BBT_Time when (map.bbt_at_sample (sample));
+	Temporal::BBT_Time when (map.bbt_at_sample (sample));
 
 	init (when, tempo.note_types_per_minute(), tempo.end_note_types_per_minute(), tempo.note_type(), TempoSection::Constant, true, MusicTime);
 }
@@ -75,13 +75,13 @@ TempoDialog::TempoDialog (TempoMap& map, TempoSection& section, const string&)
 	, pulse_selector_label (_("Pulse:"), ALIGN_LEFT, ALIGN_CENTER)
 	, tap_tempo_button (_("Tap tempo"))
 {
-	Timecode::BBT_Time when (map.bbt_at_sample (section.sample()));
+	Temporal::BBT_Time when (map.bbt_at_sample (section.sample()));
 	init (when, section.note_types_per_minute(), section.end_note_types_per_minute(), section.note_type(), section.type()
 	      , section.initial() || section.locked_to_meter(), section.position_lock_style());
 }
 
 void
-TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double end_bpm, double note_type, TempoSection::Type type, bool initial, PositionLockStyle style)
+TempoDialog::init (const Temporal::BBT_Time& when, double bpm, double end_bpm, double note_type, TempoSection::Type type, bool initial, PositionLockStyle style)
 {
 	vector<string> strings;
 	NoteTypes::iterator x;
@@ -314,7 +314,7 @@ TempoDialog::bpm_button_release (GdkEventButton*)
 bool
 TempoDialog::entry_key_release (GdkEventKey*)
 {
-	Timecode::BBT_Time bbt;
+	Temporal::BBT_Time bbt;
 	get_bbt_time (bbt);
 
 	if (_section && is_user_input_valid()) {
@@ -343,7 +343,7 @@ TempoDialog::get_end_bpm ()
 }
 
 bool
-TempoDialog::get_bbt_time (Timecode::BBT_Time& requested)
+TempoDialog::get_bbt_time (Temporal::BBT_Time& requested)
 {
 	if (sscanf (when_bar_entry.get_text().c_str(), "%" PRIu32, &requested.bars) != 1) {
 		return false;
@@ -491,7 +491,7 @@ MeterDialog::MeterDialog (TempoMap& map, samplepos_t sample, const string&)
 	: ArdourDialog (_("New Meter"))
 {
 	sample = map.round_to_bar(sample, RoundNearest).sample;
-	Timecode::BBT_Time when (map.bbt_at_sample (sample));
+	Temporal::BBT_Time when (map.bbt_at_sample (sample));
 	Meter meter (map.meter_at_sample (sample));
 
 	init (when, meter.divisions_per_bar(), meter.note_divisor(), false, MusicTime);
@@ -500,13 +500,13 @@ MeterDialog::MeterDialog (TempoMap& map, samplepos_t sample, const string&)
 MeterDialog::MeterDialog (TempoMap& map, MeterSection& section, const string&)
 	: ArdourDialog (_("Edit Meter"))
 {
-	Timecode::BBT_Time when (map.bbt_at_sample (section.sample()));
+	Temporal::BBT_Time when (map.bbt_at_sample (section.sample()));
 
 	init (when, section.divisions_per_bar(), section.note_divisor(), section.initial(), section.position_lock_style());
 }
 
 void
-MeterDialog::init (const Timecode::BBT_Time& when, double bpb, double divisor, bool initial, PositionLockStyle style)
+MeterDialog::init (const Temporal::BBT_Time& when, double bpb, double divisor, bool initial, PositionLockStyle style)
 {
 	char buf[64];
 	vector<string> strings;
@@ -728,7 +728,7 @@ MeterDialog::get_lock_style ()
 }
 
 bool
-MeterDialog::get_bbt_time (Timecode::BBT_Time& requested)
+MeterDialog::get_bbt_time (Temporal::BBT_Time& requested)
 {
 	if (sscanf (when_bar_entry.get_text().c_str(), "%" PRIu32, &requested.bars) != 1) {
 		return false;

@@ -1392,7 +1392,7 @@ Region::set_state (const XMLNode& node, int version)
 int
 Region::_set_state (const XMLNode& node, int /*version*/, PropertyChange& what_changed, bool send)
 {
-	Timecode::BBT_Time bbt_time;
+	Temporal::BBT_Time bbt_time;
 
 	Stateful::save_extra_xml (node);
 

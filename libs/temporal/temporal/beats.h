@@ -206,8 +206,8 @@ public:
 			// For the purposes of "jump-to-next-subdivision", we DO want to advance to the next beat.
 			// And since the "prev" direction DOES move beats, I assume this code is unintended.
 			// But I'm keeping it around, until we determine there are no terrible consequences.
-			// if (ticks >= BBT_Time::ticks_per_beat) {
-			//	ticks -= BBT_Time::ticks_per_beat;
+			// if (ticks >= Temporal::ticks_per_beat) {
+			//	ticks -= Temporal::ticks_per_beat;
 			// }
 
 		} else if (dir < 0) {

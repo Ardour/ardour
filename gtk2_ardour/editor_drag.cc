@@ -3142,7 +3142,7 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 		} else {
 			_editor->begin_reversible_command (_("copy meter mark"));
 
-			Timecode::BBT_Time bbt = _real_section->bbt();
+			Temporal::BBT_Time bbt = _real_section->bbt();
 
 			/* we can't add a meter where one currently exists */
 			if (_real_section->sample() < adjusted_current_sample (event, false)) {

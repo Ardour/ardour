@@ -54,8 +54,8 @@ class Meter;
 class TempoMap;
 
 // Find a better place for these
-LIBARDOUR_API bool bbt_time_to_string (const Timecode::BBT_Time& bbt, std::string& str);
-LIBARDOUR_API bool string_to_bbt_time (const std::string& str, Timecode::BBT_Time& bbt);
+LIBARDOUR_API bool bbt_time_to_string (const Temporal::BBT_Time& bbt, std::string& str);
+LIBARDOUR_API bool string_to_bbt_time (const std::string& str, Temporal::BBT_Time& bbt);
 
 /** Tempo, the speed at which musical time progresses (BPM). */
 class LIBARDOUR_API Tempo {
@@ -185,7 +185,7 @@ private:
 /** A section of timeline with a certain Meter. */
 class LIBARDOUR_API MeterSection : public MetricSection, public Meter {
   public:
-	MeterSection (double pulse, double minute, double beat, const Timecode::BBT_Time& bbt, double bpb, double note_type, PositionLockStyle pls, samplecnt_t sr)
+	MeterSection (double pulse, double minute, double beat, const Temporal::BBT_Time& bbt, double bpb, double note_type, PositionLockStyle pls, samplecnt_t sr)
 		: MetricSection (pulse, minute, pls, false, sr), Meter (bpb, note_type), _bbt (bbt),  _beat (beat) {}
 
 	MeterSection (const XMLNode&, const samplecnt_t sample_rate);
@@ -194,17 +194,17 @@ class LIBARDOUR_API MeterSection : public MetricSection, public Meter {
 
 	XMLNode& get_state() const;
 
-	void set_beat (std::pair<double, Timecode::BBT_Time>& w) {
+	void set_beat (std::pair<double, Temporal::BBT_Time>& w) {
 		_beat = w.first;
 		_bbt = w.second;
 	}
 
-	const Timecode::BBT_Time& bbt() const { return _bbt; }
+	const Temporal::BBT_Time& bbt() const { return _bbt; }
 	const double& beat () const { return _beat; }
 	void set_beat (double beat) { _beat = beat; }
 
 private:
-	Timecode::BBT_Time _bbt;
+	Temporal::BBT_Time _bbt;
 	double _beat;
 };
 
@@ -254,7 +254,7 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	double pulse_at_sample (const samplepos_t sample) const;
 	samplepos_t sample_at_pulse (const double& pulse) const;
 
-	Timecode::BBT_Time legacy_bbt () { return _legacy_bbt; }
+	Temporal::BBT_Time legacy_bbt () { return _legacy_bbt; }
 
   private:
 
@@ -287,7 +287,7 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	bool _active;
 	bool _locked_to_meter;
 	bool _clamped;
-	Timecode::BBT_Time _legacy_bbt;
+	Temporal::BBT_Time _legacy_bbt;
 };
 
 typedef std::list<MetricSection*> Metrics;
@@ -360,8 +360,8 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 		          uint32_t b, uint32_t e, double qnote)
 		: meter (m), tempo (t), sample (f), bar (b), beat (e), qn (qnote) {}
 
-		Timecode::BBT_Time bbt() const { return Timecode::BBT_Time (bar, beat, 0); }
-		operator Timecode::BBT_Time() const { return bbt(); }
+		Temporal::BBT_Time bbt() const { return Temporal::BBT_Time (bar, beat, 0); }
+		operator Temporal::BBT_Time() const { return bbt(); }
 		operator samplepos_t() const { return sample; }
 		bool is_bar() const { return beat == 1; }
 	};
@@ -410,14 +410,14 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	 * adding an audio-locked meter will add a meter-locked tempo section at the meter position.
 	 * the meter-locked tempo tempo will be the Tempo at the beat
 	 */
-	MeterSection* add_meter (const Meter& meter, const Timecode::BBT_Time& where, samplepos_t sample, PositionLockStyle pls);
+	MeterSection* add_meter (const Meter& meter, const Temporal::BBT_Time& where, samplepos_t sample, PositionLockStyle pls);
 
 	void remove_tempo (const TempoSection&, bool send_signal);
 	void remove_meter (const MeterSection&, bool send_signal);
 
 	void replace_tempo (TempoSection&, const Tempo&, const double& pulse, const samplepos_t sample, PositionLockStyle pls);
 
-	void replace_meter (const MeterSection&, const Meter&, const Timecode::BBT_Time& where, samplepos_t sample, PositionLockStyle pls);
+	void replace_meter (const MeterSection&, const Meter&, const Temporal::BBT_Time& where, samplepos_t sample, PositionLockStyle pls);
 
 	MusicSample round_to_bar  (samplepos_t sample, RoundMode dir);
 	MusicSample round_to_beat (samplepos_t sample, RoundMode dir);
@@ -431,7 +431,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	void dump (std::ostream&) const;
 	void clear ();
 
-	TempoMetric metric_at (Timecode::BBT_Time bbt) const;
+	TempoMetric metric_at (Temporal::BBT_Time bbt) const;
 
 	/** Return the TempoMetric at sample @p t, and point @p last to the latest
 	 * metric change <= t, if it is non-NULL.
@@ -470,19 +470,19 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	/* bbt - it's nearly always better to use meter-based beat (above)
 	   unless tick resolution is desirable.
 	*/
-	Timecode::BBT_Time bbt_at_sample (samplepos_t when) const;
-	Timecode::BBT_Time bbt_at_sample_rt (samplepos_t when) const;
-	samplepos_t sample_at_bbt (const Timecode::BBT_Time&);
+	Temporal::BBT_Time bbt_at_sample (samplepos_t when);
+	Temporal::BBT_Time bbt_at_sample_rt (samplepos_t when) const;
+	samplepos_t sample_at_bbt (const Temporal::BBT_Time&);
 
-	double beat_at_bbt (const Timecode::BBT_Time& bbt);
-	Timecode::BBT_Time bbt_at_beat (const double& beats);
+	double beat_at_bbt (const Temporal::BBT_Time& bbt);
+	Temporal::BBT_Time bbt_at_beat (const double& beats);
 
-	double quarter_note_at_bbt (const Timecode::BBT_Time& bbt);
-	double quarter_note_at_bbt_rt (const Timecode::BBT_Time& bbt);
-	Timecode::BBT_Time bbt_at_quarter_note (const double& quarter_note);
+	double quarter_note_at_bbt (const Temporal::BBT_Time& bbt);
+	double quarter_note_at_bbt_rt (const Temporal::BBT_Time& bbt);
+	Temporal::BBT_Time bbt_at_quarter_note (const double& quarter_note);
 
-	samplecnt_t bbt_duration_at (samplepos_t, const Timecode::BBT_Time&, int dir);
-	samplepos_t samplepos_plus_bbt (samplepos_t pos, Timecode::BBT_Time b) const;
+	samplecnt_t bbt_duration_at (samplepos_t, const Temporal::BBT_Time&, int dir);
+	samplepos_t samplepos_plus_bbt (samplepos_t pos, Temporal::BBT_Time b) const;
 
 	/* TEMPO-SENSITIVE FUNCTIONS
 
@@ -526,8 +526,8 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	void gui_stretch_tempo_end (TempoSection* tempo, const samplepos_t sample, const samplepos_t end_sample);
 	bool gui_twist_tempi (TempoSection* first, const Tempo& bpm, const samplepos_t sample, const samplepos_t end_sample);
 
-	std::pair<double, samplepos_t> predict_tempo_position (TempoSection* section, const Timecode::BBT_Time& bbt);
-	bool can_solve_bbt (TempoSection* section, const Timecode::BBT_Time& bbt);
+	std::pair<double, samplepos_t> predict_tempo_position (TempoSection* section, const Temporal::BBT_Time& bbt);
+	bool can_solve_bbt (TempoSection* section, const Temporal::BBT_Time& bbt);
 
 	PBD::Signal1<void,const PBD::PropertyChange&> MetricPositionChanged;
 	void fix_legacy_session();
@@ -557,14 +557,14 @@ private:
 	Tempo tempo_at_pulse_locked (const Metrics& metrics, const double& pulse) const;
 	double pulse_at_tempo_locked (const Metrics& metrics, const Tempo& tempo) const;
 
-	Timecode::BBT_Time bbt_at_minute_locked (const Metrics& metrics, const double& minute) const;
-	double minute_at_bbt_locked (const Metrics& metrics, const Timecode::BBT_Time&) const;
+	Temporal::BBT_Time bbt_at_minute_locked (const Metrics& metrics, const double& minute) const;
+	double minute_at_bbt_locked (const Metrics& metrics, const Temporal::BBT_Time&) const;
 
-	double beat_at_bbt_locked (const Metrics& metrics, const Timecode::BBT_Time& bbt) const ;
-	Timecode::BBT_Time bbt_at_beat_locked (const Metrics& metrics, const double& beats) const;
+	double beat_at_bbt_locked (const Metrics& metrics, const Temporal::BBT_Time& bbt) const ;
+	Temporal::BBT_Time bbt_at_beat_locked (const Metrics& metrics, const double& beats) const;
 
-	double pulse_at_bbt_locked (const Metrics& metrics, const Timecode::BBT_Time& bbt) const;
-	Timecode::BBT_Time bbt_at_pulse_locked (const Metrics& metrics, const double& pulse) const;
+	double pulse_at_bbt_locked (const Metrics& metrics, const Temporal::BBT_Time& bbt) const;
+	Temporal::BBT_Time bbt_at_pulse_locked (const Metrics& metrics, const double& pulse) const;
 
 	double minutes_between_quarter_notes_locked (const Metrics& metrics, const double start_qn, const double end_qn) const;
 	double quarter_notes_between_samples_locked (const Metrics& metrics, const samplecnt_t  start, const samplecnt_t end) const;
@@ -582,7 +582,7 @@ private:
 	bool solve_map_minute (Metrics& metrics, TempoSection* section, const double& minute);
 	bool solve_map_pulse (Metrics& metrics, TempoSection* section, const double& pulse);
 	bool solve_map_minute (Metrics& metrics, MeterSection* section, const double& minute);
-	bool solve_map_bbt (Metrics& metrics, MeterSection* section, const Timecode::BBT_Time& bbt);
+	bool solve_map_bbt (Metrics& metrics, MeterSection* section, const Temporal::BBT_Time& bbt);
 
 	double exact_beat_at_sample_locked (const Metrics& metrics, const samplepos_t sample, const int32_t sub_num) const;
 	double exact_qn_at_sample_locked (const Metrics& metrics, const samplepos_t sample, const int32_t sub_num) const;
@@ -618,7 +618,7 @@ private:
 	TempoSection* add_tempo_locked (const Tempo&, double pulse, double minute
 					, PositionLockStyle pls, bool recompute, bool locked_to_meter = false, bool clamped = false);
 
-	MeterSection* add_meter_locked (const Meter&, const Timecode::BBT_Time& where, samplepos_t sample, PositionLockStyle pls, bool recompute);
+	MeterSection* add_meter_locked (const Meter&, const Temporal::BBT_Time& where, samplepos_t sample, PositionLockStyle pls, bool recompute);
 
 	bool remove_tempo_locked (const TempoSection&);
 	bool remove_meter_locked (const MeterSection&);
