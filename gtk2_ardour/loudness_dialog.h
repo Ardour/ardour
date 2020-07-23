@@ -62,6 +62,7 @@ private:
 	void load_preset (size_t);
 	void apply_preset ();
 	void update_settings ();
+	void update_sensitivity ();
 
 	struct LoudnessPreset
 	{

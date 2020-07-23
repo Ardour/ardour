@@ -232,7 +232,8 @@ LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 	  "This allows to analyze the loudness of of the signal at the master-bus "
 	  "output of the complete session, as it would be exported.\n"
 	  "The result can be used to interactively normalize the session's loudness level "
-	  "(as opposed to automatic normalization during export)."
+	  "(as opposed to automatic normalization during export). "
+	  "When using this feature, remember to disable normalization in the session export profile."
 	));
 	t->attach (*l,                     0, 1, 0, 2, EXPAND|FILL, FILL, 8, 2);
 
@@ -264,8 +265,6 @@ LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 		using namespace Gtkmm2ext;
 		_preset_dropdown.AddMenuElem (MenuElemNoMnemonic (presets[i].name, sigc::bind (sigc::mem_fun (*this, &LoudnessDialog::load_preset), i)));
 	}
-
-	_preset_dropdown.disable_scrolling ();
 
 	_initial_preset_name = _preset.name;
 	apply_preset ();
@@ -465,6 +464,17 @@ LoudnessDialog::apply_preset ()
 	_lufs_i_spinbutton.set_value (_preset.level[2]);
 	_lufs_s_spinbutton.set_value (_preset.level[3]);
 	_lufs_m_spinbutton.set_value (_preset.level[4]);
+	update_sensitivity ();
+}
+
+void
+LoudnessDialog::update_sensitivity ()
+{
+	_dbfs_spinbutton.set_sensitive (_dbfs_btn.get_active ());
+	_dbtp_spinbutton.set_sensitive (_dbtp_btn.get_active ());
+	_lufs_i_spinbutton.set_sensitive (_lufs_i_btn.get_active ());
+	_lufs_s_spinbutton.set_sensitive (_lufs_s_btn.get_active ());
+	_lufs_m_spinbutton.set_sensitive (_lufs_m_btn.get_active ());
 }
 
 void
@@ -476,6 +486,7 @@ LoudnessDialog::update_settings ()
 	_preset.name = "User";
 	_preset_dropdown.set_text (_preset.name);
 
+	update_sensitivity ();
 	calculate_gain ();
 }
 
