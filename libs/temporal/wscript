@@ -24,7 +24,7 @@ APPNAME = 'temporal'
 VERSION = TEMPORAL_VERSION
 I18N_PACKAGE = 'libtemporal'
 
-temporal_sources = [ 'time.cc', 'bbt_time.cc' ]
+temporal_sources = [ 'time.cc', 'bbt_time.cc', 'tempo.cc' ]
 
 def options(opt):
     autowaf.set_options(opt)
@@ -50,7 +50,9 @@ def build(bld):
     obj.target       = 'temporal'
     obj.vnum         = TEMPORAL_LIB_VERSION
     obj.install_path = bld.env['LIBDIR']
-    obj.defines      += [ 'PACKAGE="' + I18N_PACKAGE + '"' ]
+    obj.defines     += [ 'PACKAGE="' + I18N_PACKAGE + '"' ]
+    obj.uselib       = [ 'GLIBMM', 'XML' ]
+    obj.use          = [ 'libpbd' ]
 
 def shutdown():
     autowaf.shutdown()

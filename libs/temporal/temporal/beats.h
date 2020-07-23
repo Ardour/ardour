@@ -135,6 +135,8 @@ public:
 		return Beats(ticks / ppqn, (ticks % ppqn) * PPQN / ppqn);
 	}
 
+	static int64_t make_ticks (Beats const & b) { return b.get_beats() * ticks_per_beat + b.get_ticks(); }
+
 	int64_t to_ticks()               const { return (int64_t)_beats * PPQN + _ticks; }
 	int64_t to_ticks(uint32_t ppqn)  const { return (int64_t)_beats * ppqn + (_ticks * ppqn / PPQN); }
 
