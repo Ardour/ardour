@@ -88,6 +88,10 @@ LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 	_rt_analysis_button.set_name ("generic button");
 	_show_report_button.set_name ("generic button");
 
+	GtkRequisition req = _start_analysis_button.size_request ();
+	_start_analysis_button.set_size_request (-1, req.height * 1.1);
+	_rt_analysis_button.set_size_request (-1, req.height * 1.1);
+
 	_dbfs_btn.set_name ("generic button");
 	_dbtp_btn.set_name ("generic button");
 	_lufs_i_btn.set_name ("generic button");
@@ -116,6 +120,9 @@ LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 	_gain_norm_label.modify_font (UIConfiguration::instance().get_NormalMonospaceFont());
 	_gain_total_label.modify_font (UIConfiguration::instance().get_NormalMonospaceFont());
 
+#define ROW row, row +1
+
+	int row;
 	Label* l;
 	Table* t = manage (new Table (12, 4, false));
 	t->set_spacings (4);
@@ -123,58 +130,62 @@ LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 	l = manage (new Label (_("<b>Analysis Results</b>"), ALIGN_LEFT));
 	l->set_use_markup (true);
 	t->attach (*l, 0, 1, 0, 1);
-	t->attach (_show_report_button, 1, 4, 0, 1);
+	l = manage (new Label (_("Preset:"), ALIGN_LEFT));
+	t->attach (*l, 0, 1, 1, 2);
 
-	l = manage (new Label (_("<b>Measured</b>"), ALIGN_CENTER));
-	l->set_use_markup (true);
-	t->attach (*l, 1, 2, 1, 2);
+	t->attach (_show_report_button, 1, 4, 0, 1);
+	t->attach (_preset_dropdown,    1, 3, 1, 2);
+
 	l = manage (new Label (_("<b>Target</b>"), ALIGN_CENTER));
 	l->set_use_markup (true);
-	t->attach (*l, 2, 3, 1, 2);
+	t->attach (*l, 1, 2, 2, 3);
+	l = manage (new Label (_("<b>Measured</b>"), ALIGN_CENTER));
+	l->set_use_markup (true);
+	t->attach (*l, 2, 3, 2, 3);
 	l = manage (new Label (_("<b>Delta</b>"), ALIGN_CENTER));
 	l->set_use_markup (true);
-	t->attach (*l, 3, 4, 1, 2);
+	t->attach (*l, 3, 4, 2, 3);
 
-	t->attach (_dbfs_btn,   0, 1, 2, 3);
-	t->attach (_dbtp_btn,   0, 1, 3, 4);
-	t->attach (_lufs_i_btn, 0, 1, 4, 5);
-	t->attach (_lufs_s_btn, 0, 1, 5, 6);
-	t->attach (_lufs_m_btn, 0, 1, 6, 7);
+	row = 3;
+	t->attach (_dbfs_btn,   0, 1, ROW); ++row;
+	t->attach (_dbtp_btn,   0, 1, ROW); ++row;
+	t->attach (_lufs_i_btn, 0, 1, ROW); ++row;
+	t->attach (_lufs_s_btn, 0, 1, ROW); ++row;
+	t->attach (_lufs_m_btn, 0, 1, ROW); ++row;
 
 	l = manage (new Label (_("Gain to normalize:"), ALIGN_LEFT));
-	t->attach (*l, 0, 1, 8, 9);
+	t->attach (*l, 0, 1, ROW); ++row;
 	l = manage (new Label (_("Previously applied gain:"), ALIGN_LEFT));
-	t->attach (*l, 0, 1, 9, 10);
+	t->attach (*l, 0, 1, ROW); ++row;
 	l = manage (new Label (_("Total gain:"), ALIGN_LEFT));
-	t->attach (*l, 0, 1, 10, 11);
-	l = manage (new Label (_("Preset:"), ALIGN_LEFT));
-	t->attach (*l, 0, 1, 11, 12);
+	t->attach (*l, 0, 1, ROW); ++row;
 
-	t->attach (_dbfs_label,         1, 2, 2, 3);
-	t->attach (_dbtp_label,         1, 2, 3, 4);
-	t->attach (_lufs_i_label,       1, 2, 4, 5);
-	t->attach (_lufs_s_label,       1, 2, 5, 6);
-	t->attach (_lufs_m_label,       1, 2, 6, 7);
+	row = 3;
+	t->attach (_dbfs_spinbutton,    1, 2, ROW, EXPAND|FILL, EXPAND|FILL, 8, 0); ++row;
+	t->attach (_dbtp_spinbutton,    1, 2, ROW, EXPAND|FILL, EXPAND|FILL, 8, 0); ++row;
+	t->attach (_lufs_i_spinbutton,  1, 2, ROW, EXPAND|FILL, EXPAND|FILL, 8, 0); ++row;
+	t->attach (_lufs_s_spinbutton,  1, 2, ROW, EXPAND|FILL, EXPAND|FILL, 8, 0); ++row;
+	t->attach (_lufs_m_spinbutton,  1, 2, ROW, EXPAND|FILL, EXPAND|FILL, 8, 0); ++row;
 
-	t->attach (_dbfs_spinbutton,    2, 3, 2, 3, EXPAND|FILL, EXPAND|FILL, 8, 0);
-	t->attach (_dbtp_spinbutton,    2, 3, 3, 4, EXPAND|FILL, EXPAND|FILL, 8, 0);
-	t->attach (_lufs_i_spinbutton,  2, 3, 4, 5, EXPAND|FILL, EXPAND|FILL, 8, 0);
-	t->attach (_lufs_s_spinbutton,  2, 3, 5, 6, EXPAND|FILL, EXPAND|FILL, 8, 0);
-	t->attach (_lufs_m_spinbutton,  2, 3, 6, 7, EXPAND|FILL, EXPAND|FILL, 8, 0);
+	row = 3;
+	t->attach (_dbfs_label,         2, 3, ROW); ++row;
+	t->attach (_dbtp_label,         2, 3, ROW); ++row;
+	t->attach (_lufs_i_label,       2, 3, ROW); ++row;
+	t->attach (_lufs_s_label,       2, 3, ROW); ++row;
+	t->attach (_lufs_m_label,       2, 3, ROW); ++row;
 
-	t->attach (_delta_dbfs_label,   3, 4, 2, 3);
-	t->attach (_delta_dbtp_label,   3, 4, 3, 4);
-	t->attach (_delta_lufs_i_label, 3, 4, 4, 5);
-	t->attach (_delta_lufs_s_label, 3, 4, 5, 6);
-	t->attach (_delta_lufs_m_label, 3, 4, 6, 7);
+	row = 3;
+	t->attach (_delta_dbfs_label,   3, 4, ROW); ++row;
+	t->attach (_delta_dbtp_label,   3, 4, ROW); ++row;
+	t->attach (_delta_lufs_i_label, 3, 4, ROW); ++row;
+	t->attach (_delta_lufs_s_label, 3, 4, ROW); ++row;
+	t->attach (_delta_lufs_m_label, 3, 4, ROW); ++row;
 
 	ArdourHSpacer* spc = manage (new ArdourHSpacer (1.0));
-	t->attach (*spc       ,         1, 4,  7,  8);
-	t->attach (_gain_norm_label,    3, 4,  8,  9);
-	t->attach (_gain_init_label,    3, 4,  9, 10);
-	t->attach (_gain_total_label,   3, 4, 10, 11);
-
-	t->attach (_preset_dropdown,    1, 3, 11, 12);
+	t->attach (*spc,                2, 4, ROW); ++row;
+	t->attach (_gain_norm_label,    3, 4, ROW); ++row;
+	t->attach (_gain_init_label,    3, 4, ROW); ++row;
+	t->attach (_gain_total_label,   3, 4, ROW); ++row;
 
 	_dbfs_label.set_alignment (ALIGN_RIGHT);
 	_dbtp_label.set_alignment (ALIGN_RIGHT);
@@ -199,21 +210,29 @@ LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 	t->set_spacings (4);
 	l = manage (new Label ());
 	l->set_line_wrap ();
+	l->set_alignment (ALIGN_LEFT, ALIGN_TOP);
 	l->set_markup (_(
 	  "<b>Loudness Analysis</b>\n\n"
 	  "This allows to analyze the loudness of of the signal at the master-bus "
 	  "output of the complete session, as it would be exported.\n"
-	  "The result an be used to interactively normalize the session's loudnless level "
-	  "(as opposed to automatical normalization during export).\n"
+	  "The result can be used to interactively normalize the session's loudness level "
+	  "(as opposed to automatic normalization during export)."
+	));
+	t->attach (*l,                     0, 1, 0, 2, EXPAND|FILL, FILL, 8, 2);
+
+	l = manage (new Label ());
+	l->set_line_wrap ();
+	l->set_alignment (ALIGN_LEFT, ALIGN_TOP);
+	l->set_markup (_(
 	  "By default a faster than realtime export is is used to asses the loudness of the "
 	  "session. If any outboard gear is used, a <i>realtime</i> export is available, to "
-	  "play at normal speed.\n"
+	  "play at normal speed."
 	));
-	t->attach (*l,                     0, 3, 0, 1, EXPAND|FILL, EXPAND|FILL, 0, 8);
-	l = manage (new Label (""));
-	t->attach (*l,                     0, 1, 1, 2);
-	t->attach (_rt_analysis_button,    1, 2, 1, 2, FILL, SHRINK);
-	t->attach (_start_analysis_button, 2, 3, 1, 2, FILL, SHRINK);
+	t->attach (*l,                     0, 1, 2, 4, EXPAND|FILL, FILL, 8, 2);
+
+	t->attach (_start_analysis_button, 1, 2, 0, 1, FILL, SHRINK, 2, 0);
+	t->attach (_rt_analysis_button,    1, 2, 2, 3, FILL, SHRINK, 2, 0);
+
 	_setup_box.pack_start (*t, false, false, 6);
 
 	get_vbox()->pack_start (_setup_box);
