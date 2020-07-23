@@ -47,11 +47,27 @@ using namespace Gtk;
 using namespace ARDOUR;
 using namespace ArdourWidgets;
 
+/* https://www.masteringthemix.com/blogs/learn/76296773-mastering-audio-for-soundcloud-itunes-spotify-and-youtube
+ * https://youlean.co/loudness-standards-full-comparison-table/
+ */
 LoudnessDialog::LoudnessPreset LoudnessDialog::presets[] =
 {
-	{"EBU",          { false, true, true, false, false},  { 0, -1, -23,   0, 0 }},
-	{"Digital Peak", { true, false, false, false, false}, { 0,  0,   0,   0, 0 }},
-	{"Bach",         { false, true, false, true, false},  { 0, -1,   0, -16, 0 }},
+	/*                   | dbFS   dBTP   LUFS   short   mom.    | FS,  TP , int, sht, mom ||  notes */
+	{"EBU R128",         { false, true,  true,  false, false},  {  0, -1.0, -23,   0,   0 }},
+	{"EBU R128 S1",      { false, true,  true,  true,  false},  {  0, -1.0, -23, -18,   0 }},
+	{"AES Streaming",    { false, true,  true,  false, false},  {  0, -1.0, -16,   0,   0 }}, //min/max Integrated: -20 / -16 LUFS
+	{"Digital Peak",     { true,  false, false, false, false},  {  0,  0.0,   0,   0,   0 }},
+	{"CD",               { true,  true,  true,  false, false},  {  0, -0.1,  -9,   0,   0 }},
+	{"Classical",        { false, true,  false, false, true },  {  0, -1.0, -18, -17, -16 }},
+
+	{"Amazon Music",     { false, true,  true,  false, false},  {  0, -2.0, -14,   0,   0 }}, // -9 to -13 LUFS
+	{"Apple Music",      { false, true,  true,  false, false},  {  0, -1.0, -16,   0,   0 }}, // (+/- 1.0 LU)
+	{"Deezer",           { false, true,  true,  false, false},  {  0, -1.0, -15,   0,   0 }}, // -14 to -16 LUFS
+	{"Netflix (dialog)", { false, true,  true,  false, false},  {  0, -2.0, -27,   0,   0 }}, // dialog only
+	{"Soundcloud",       { false, true,  true,  false, false},  {  0, -1.0, -10,   0,   0 }}, // -8 to -13 LUFS
+	{"Spotify",          { false, true,  true,  false, false},  {  0, -1.0, -14,   0,   0 }},
+	{"Spotify Loud",     { false, true,  true,  false, false},  {  0, -2.0, -11,   0,   0 }},
+	{"Youtube",          { false, true,  true,  false, false},  {  0, -1.0, -14,   0,   0 }}, // -13 to -15 LUFS
 };
 
 LoudnessDialog::LoudnessPreset LoudnessDialog::_preset = LoudnessDialog::presets [0];
