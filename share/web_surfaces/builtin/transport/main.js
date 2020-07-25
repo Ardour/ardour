@@ -76,7 +76,7 @@ import ArdourClient from '/shared/ardour.js';
             dom.fullscreen.addEventListener(touchOrClick, requestFullscreen);
 
             document.addEventListener(fullscreenChange, (e) => {
-                const fullscreen = document.fullScreen || document.webkitIsFullScreen;
+                const fullscreen = document.fullscreen || document.webkitIsFullScreen;
                 dom.fullscreen.style.display = fullscreen ? 'none' : 'inline';
             });
         } else {
