@@ -18,8 +18,10 @@
 
 export class BaseWidget {
 
-    get element () {
-        // empty
+    constructor (element) {
+        if (element) {
+            this.element = element;
+        }
     }
 
     appendTo (container) {
@@ -38,16 +40,12 @@ export class BaseWidget {
         return this.element.classList;
     }
 
-    set classList (classList) {
-        this.element.classList = classList;
-    }
-
 }
 
 export class BaseContainer extends BaseWidget {
 
-    constructor (context) {
-        super(context);
+    constructor () {
+        super();
         this.children = [];
     }
 
@@ -79,13 +77,4 @@ export class BaseControl extends BaseWidget {
         this.callback = (value) => component[property] = value;
     }
 
-}
-
-// Currently unused
-
-export function createElement (html) {
-    const t = document.createElement('template');
-    t.innerHTML = html;
-    const elem = t.content.firstChild;
-    return elem;
 }

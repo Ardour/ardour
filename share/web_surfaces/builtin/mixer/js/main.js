@@ -17,8 +17,8 @@
  */
 
 import ArdourClient from '/shared/ardour.js';
-import { createRootContainer, Container, DiscreteKnob, LinearKnob, PanKnob,
-            StripGainFader, StripMeter, Toggle } from './tkwidget.js';
+import { createRootContainer, Container, Label, DiscreteKnob, LinearKnob,
+            PanKnob, StripGainFader, StripMeter, Toggle } from './tkwidget.js';
 
 (() => {
     
@@ -40,7 +40,7 @@ import { createRootContainer, Container, DiscreteKnob, LinearKnob, PanKnob,
 
             for (const strip of ardour.mixer.strips) {
                 const container = new Container();
-                container.classList = 'strip';
+                container.classList.add('strip');
                 container.appendTo(mixer);
                 createStrip(strip, container);
             }
@@ -53,10 +53,9 @@ import { createRootContainer, Container, DiscreteKnob, LinearKnob, PanKnob,
 
     function createStrip (strip, container) {
         const pan = new PanKnob();
-        pan.classList += 'pan';
         pan.appendTo(container);
         if (strip.isVca) {
-            // hide pan, keeping layout
+            // hide pan keeping layout
             pan.element.style.visibility = 'hidden';
         } else {
             pan.bindTo(strip, 'pan');
@@ -64,7 +63,7 @@ import { createRootContainer, Container, DiscreteKnob, LinearKnob, PanKnob,
 
         const meterFader = new Container();
         meterFader.appendTo(container);
-        meterFader.classList = 'strip-meter-fader';
+        meterFader.classList.add('strip-meter-fader');
 
         const gain = new StripGainFader();
         gain.appendTo(meterFader);
@@ -73,6 +72,11 @@ import { createRootContainer, Container, DiscreteKnob, LinearKnob, PanKnob,
         const meter = new StripMeter();
         meter.appendTo(meterFader);
         meter.bindTo(strip, 'meter');
+
+        const label = new Label();
+        label.text = strip.name;
+        label.classList.add('strip-label');
+        label.appendTo(container);
 
         // TO DO
         /*for (const plugin of strip.plugins) {
