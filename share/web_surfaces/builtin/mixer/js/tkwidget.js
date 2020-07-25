@@ -17,9 +17,39 @@
  */
 
 import loadToolkit from './tkloader.js';
-import { BaseContainer, BaseControl } from './widget.js';
+import { BaseWidget, BaseContainer, BaseControl } from './widget.js';
+
+class Widget extends BaseWidget {
+
+    constructor (tk) {
+        super();
+        this.tk = tk;
+    }
+
+    get element () {
+        return this.tk.element;
+    }
+
+}
+
+export class Label extends Widget {
+
+    constructor () {
+        super(new TK.Label());
+    }
+
+    set text (text) {
+        this.tk.set('label', text);
+    }
+    
+}
 
 class Control extends BaseControl {
+
+    constructor (tk) {
+        super();
+        this.tk = tk;
+    }
 
     get element () {
         return this.tk.element;
@@ -30,7 +60,7 @@ class Control extends BaseControl {
 class RangeControl extends Control {
 
     constructor (tk) {
-        super();
+        super(tk);
 
         this.tk = tk;
         this.lastValue = NaN;
