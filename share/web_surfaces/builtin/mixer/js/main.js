@@ -25,6 +25,8 @@ import { createRootContainer, Container, Label, DiscreteKnob, LinearKnob,
     const ardour = new ArdourClient();
 
     async function main () {
+        setupFullscreenButton();
+
         const root = await createRootContainer();
 
         ardour.mixer.on('ready', () => {
@@ -36,6 +38,7 @@ import { createRootContainer, Container, Label, DiscreteKnob, LinearKnob,
             mixer.id = 'mixer';
             mixer.appendTo(root);
 
+            // left flexbox padding
             mixer.appendChild(new Container());
 
             for (const strip of ardour.mixer.strips) {
@@ -45,6 +48,7 @@ import { createRootContainer, Container, Label, DiscreteKnob, LinearKnob,
                 createStrip(strip, container);
             }
 
+            // right flexbox padding
             mixer.appendChild(new Container());
         });
 
@@ -111,6 +115,33 @@ import { createRootContainer, Container, Label, DiscreteKnob, LinearKnob,
 
         widget.appendTo(container);
         widget.bindTo(param, 'value');
+    }
+
+    function setupFullscreenButton () {
+        const doc = document.documentElement,
+              button = document.getElementById('fullscreen'),
+              touchOrClick = ('ontouchstart' in doc) ? 'touchstart' : 'click';
+
+        let requestFullscreen = null, fullscreenChange = null;
+
+        if ('requestFullscreen' in doc) {
+            requestFullscreen = doc.requestFullscreen.bind(doc);
+            fullscreenChange = 'fullscreenchange';
+        } else if ('webkitRequestFullscreen' in doc) {
+            requestFullscreen = doc.webkitRequestFullscreen.bind(doc);
+            fullscreenChange = 'webkitfullscreenchange';
+        }
+
+        if (requestFullscreen && fullscreenChange) {
+            button.addEventListener(touchOrClick, requestFullscreen);
+
+            document.addEventListener(fullscreenChange, (e) => {
+                const fullscreen = document.fullscreen || document.webkitIsFullScreen;
+                button.style.display = fullscreen ? 'none' : 'inline';
+            });
+        } else {
+            button.style.display = 'none';
+        }
     }
 
     main();
