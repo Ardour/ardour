@@ -19,13 +19,10 @@
 import loadToolkit from './tkloader.js';
 import { BaseWidget, BaseContainer, BaseDialog, BaseControl } from './widget.js';
 
-let _tkRoot = null;
-
 export async function createRootContainer () {
     await loadToolkit();
-    _tkRoot = new TK.Root({id: 'root'});
     const root = new Container();
-    root.tk = _tkRoot;
+    root.tk = new TK.Root({id: 'root'});
     document.body.appendChild(root.element);
     return root;
 }

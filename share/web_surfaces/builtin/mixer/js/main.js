@@ -72,6 +72,7 @@ import { createRootContainer, Container, Dialog, Label, Button, DiscreteKnob,
 
         const pan = new PanKnob();
         pan.appendTo(container);
+
         if (!strip.isVca) {
             pan.bindTo(strip, 'pan');
         }
