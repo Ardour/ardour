@@ -31,6 +31,8 @@
 namespace ARDOUR {
 	class AudioRange;
 	class ExportStatus;
+	class PluginInsert;
+	class Processor;
 	class Session;
 }
 
@@ -40,11 +42,8 @@ public:
 	LoudnessDialog (ARDOUR::Session*, ARDOUR::AudioRange const&, bool);
 	int run ();
 
-	void set_gain_offset_db (float db) {
-		_gain_init = db;
-	}
 	float gain_db () const {
-		return _gain_norm + _gain_init;
+		return _gain_norm + _gain_out + _gain_amp;
 	}
 
 protected:
@@ -63,6 +62,13 @@ private:
 	void apply_preset ();
 	void update_settings ();
 	void update_sensitivity ();
+
+	bool  instantiate_amp ();
+	bool  set_amp_gain (float db);
+	float amp_gain () const;
+	void  find_amp_cb (boost::weak_ptr<ARDOUR::Processor> p);
+
+	boost::shared_ptr<ARDOUR::PluginInsert> _amp;
 
 	struct LoudnessPreset
 	{
@@ -104,13 +110,15 @@ private:
 	Gtk::Label       _delta_lufs_s_label;
 	Gtk::Label       _delta_lufs_m_label;
 
-	Gtk::Label       _gain_init_label;
+	Gtk::Label       _gain_out_label;
+	Gtk::Label       _gain_amp_label;
 	Gtk::Label       _gain_norm_label;
 	Gtk::Label       _gain_total_label;
 
 	ArdourWidgets::ArdourButton _rt_analysis_button;
 	ArdourWidgets::ArdourButton _start_analysis_button;
 	ArdourWidgets::ArdourButton _show_report_button;
+	ArdourWidgets::ArdourButton _use_amp_button;
 
 	ArdourWidgets::ArdourDropdown _preset_dropdown;
 	std::string                   _initial_preset_name;
@@ -133,7 +141,8 @@ private:
 	float _lufs_s;
 	float _lufs_m;
 
-	float _gain_init;
+	float _gain_out;
+	float _gain_amp;
 	float _gain_norm;
 	bool  _ignore_change;
 };

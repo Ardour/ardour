@@ -22,6 +22,9 @@
 #include "pbd/unwind.h"
 
 #include "ardour/dB.h"
+#include "ardour/plugin_manager.h"
+#include "ardour/plugin_insert.h"
+#include "ardour/processor.h"
 #include "ardour/session.h"
 
 #include "ardour/export_channel_configuration.h"
@@ -36,7 +39,9 @@
 #include "gtkmm2ext/utils.h"
 
 #include "widgets/ardour_spacer.h"
+#include "widgets/tooltips.h"
 
+#include "ardour_message.h"
 #include "export_report.h"
 #include "loudness_dialog.h"
 #include "ui_config.h"
@@ -86,6 +91,7 @@ LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 	, _rt_analysis_button (_("Realtime"), ArdourButton::led_default_elements, true)
 	, _start_analysis_button (_("Analyze"))
 	, _show_report_button (_("Show Detailed Report"))
+	, _use_amp_button (_("Use Amp Plugin"), ArdourButton::led_default_elements, true)
 	, _dbfs_adjustment ( 0.00, -90.00, 0.00, 0.1, 0.2)
 	, _dbtp_adjustment ( -1.0, -90.00, 0.00, 0.1, 0.2)
 	, _lufs_i_adjustment (-23.0, -90.00, 0.00, 0.1, 1.0)
@@ -96,13 +102,22 @@ LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 	, _lufs_i_spinbutton (_lufs_i_adjustment, 0.1, 1)
 	, _lufs_s_spinbutton (_lufs_s_adjustment, 0.1, 1)
 	, _lufs_m_spinbutton (_lufs_m_adjustment, 0.1, 1)
-	, _gain_init (0)
+	, _gain_out (0)
+	, _gain_amp (0)
 	, _gain_norm (0)
 	, _ignore_change (false)
 {
+	/* query initial gain */
+	_session->master_out()->foreach_processor (sigc::mem_fun (*this, &LoudnessDialog::find_amp_cb));
+	_gain_amp = amp_gain ();
+	_gain_out = accurate_coefficient_to_dB (_session->master_volume()->get_value());
+
 	_start_analysis_button.set_name ("generic button");
 	_rt_analysis_button.set_name ("generic button");
 	_show_report_button.set_name ("generic button");
+	_use_amp_button.set_name ("generic button");
+
+	_use_amp_button.set_active (_amp ? true : false);
 
 	GtkRequisition req = _start_analysis_button.size_request ();
 	_start_analysis_button.set_size_request (-1, req.height * 1.1);
@@ -132,7 +147,8 @@ LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 	_delta_lufs_s_label.modify_font (UIConfiguration::instance().get_NormalMonospaceFont());
 	_delta_lufs_m_label.modify_font (UIConfiguration::instance().get_NormalMonospaceFont());
 
-	_gain_init_label.modify_font (UIConfiguration::instance().get_NormalMonospaceFont());
+	_gain_out_label.modify_font (UIConfiguration::instance().get_NormalMonospaceFont());
+	_gain_amp_label.modify_font (UIConfiguration::instance().get_NormalMonospaceFont());
 	_gain_norm_label.modify_font (UIConfiguration::instance().get_NormalMonospaceFont());
 	_gain_total_label.modify_font (UIConfiguration::instance().get_NormalMonospaceFont());
 
@@ -169,11 +185,25 @@ LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 	t->attach (_lufs_s_btn, 0, 1, ROW); ++row;
 	t->attach (_lufs_m_btn, 0, 1, ROW); ++row;
 
+	++row; // spacer
+
 	l = manage (new Label (_("Gain to normalize:"), ALIGN_LEFT));
 	t->attach (*l, 0, 1, ROW); ++row;
-	l = manage (new Label (_("Previously applied gain:"), ALIGN_LEFT));
+	l = manage (new Label (_("Previous output gain:"), ALIGN_LEFT));
 	t->attach (*l, 0, 1, ROW); ++row;
+
+	if (_amp) {
+		l = manage (new Label (_("Previous a-amp gain:"), ALIGN_LEFT));
+		t->attach (*l, 0, 1, ROW); ++row;
+	}
+
 	l = manage (new Label (_("Total gain:"), ALIGN_LEFT));
+	t->attach (*l, 0, 1, ROW); ++row;
+	if (_amp) {
+		l = manage (new Label (_("Update a-Amplifier's Gain:"), ALIGN_LEFT));
+	} else {
+		l = manage (new Label (_("Add a-Amplifier Plugin:"), ALIGN_LEFT));
+	}
 	t->attach (*l, 0, 1, ROW); ++row;
 
 	row = 3;
@@ -200,8 +230,19 @@ LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 	ArdourHSpacer* spc = manage (new ArdourHSpacer (1.0));
 	t->attach (*spc,                2, 4, ROW); ++row;
 	t->attach (_gain_norm_label,    3, 4, ROW); ++row;
-	t->attach (_gain_init_label,    3, 4, ROW); ++row;
+	t->attach (_gain_out_label,    3, 4, ROW); ++row;
+	if (_amp) {
+		t->attach (_gain_amp_label,    3, 4, ROW); ++row;
+	}
 	t->attach (_gain_total_label,   3, 4, ROW); ++row;
+	t->attach (_use_amp_button,     2, 4, ROW); ++row;
+
+	set_tooltip (_use_amp_button,
+		_("<b>When enabled</b> a amplifier plugin is used to apply the gain. "
+		  "This allows for custom positons of the gain-stage in the master-bus' signal flow, potentially followed by a limiter. "
+		  "Depending on limiter settings or DSP after the gain-stage, repeat loudness measurements may produce different results.\n"
+		  "<b>When disabled</b>, the gain is applied diretcly to the output of the master-bus. This results in an efficient and reliable volume adjustment."
+		 ));
 
 	_dbfs_label.set_alignment (ALIGN_RIGHT);
 	_dbtp_label.set_alignment (ALIGN_RIGHT);
@@ -216,7 +257,8 @@ LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 	_delta_lufs_m_label.set_alignment (ALIGN_RIGHT);
 
 	_gain_norm_label.set_alignment (ALIGN_RIGHT);
-	_gain_init_label.set_alignment (ALIGN_RIGHT);
+	_gain_out_label.set_alignment (ALIGN_RIGHT);
+	_gain_amp_label.set_alignment (ALIGN_RIGHT);
 	_gain_total_label.set_alignment (ALIGN_RIGHT);
 
 	_result_box.pack_start (*t, false, false, 6);
@@ -268,6 +310,9 @@ LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 
 	_initial_preset_name = _preset.name;
 	apply_preset ();
+
+	_gain_out_label.set_text (string_compose (_("%1 dB"), std::setprecision (2), std::showpos, std::fixed, _gain_out));
+	_gain_amp_label.set_text (string_compose (_("%1 dB"), std::setprecision (2), std::showpos, std::fixed, _gain_amp));
 
 	_cancel_button->signal_clicked().connect (sigc::mem_fun (this, &LoudnessDialog::cancel_analysis));
 	_dbfs_spinbutton.signal_value_changed().connect (mem_fun (*this, &LoudnessDialog::update_settings));
@@ -333,6 +378,19 @@ LoudnessDialog::run ()
 	cancel_analysis ();
 
 	if (r == RESPONSE_APPLY) {
+
+		if (!_use_amp_button.get_active ()) {
+			_session->master_volume ()->set_value (dB_to_coefficient (gain_db ()), PBD::Controllable::NoGroup);
+			set_amp_gain (0);
+		} else {
+			instantiate_amp ();
+			if (set_amp_gain (gain_db ())) {
+				_session->master_volume ()->set_value (dB_to_coefficient (0), PBD::Controllable::NoGroup);
+			} else {
+				_session->master_volume ()->set_value (dB_to_coefficient (gain_db ()), PBD::Controllable::NoGroup);
+			}
+		}
+
 		_preset.level[0] = _dbfs_spinbutton.get_value();
 		_preset.level[1] = _dbtp_spinbutton.get_value();
 		_preset.level[2] = _lufs_i_spinbutton.get_value();
@@ -351,6 +409,102 @@ LoudnessDialog::run ()
 	return r;
 }
 
+bool
+LoudnessDialog::instantiate_amp ()
+{
+	if (_amp) {
+		return true;
+	}
+	PluginPtr p;
+	PluginManager& pm = PluginManager::instance ();
+	const PluginInfoList& plugs = pm.lua_plugin_info();
+	for (PluginInfoList::const_iterator i = plugs.begin(); i != plugs.end(); ++i) {
+		if ((*i)->name  == "a-Amplifier") {
+			p = (*i)->load (*_session);
+			break;
+		}
+	}
+	if (!p) {
+		// this cannot really happen a-amp (Lua script) is bundled with Ardour
+		ArdourMessageDialog (*this, _("a-Amplifier plugin was not found\nMaster-bus output volume is used instead")).run ();
+		return false;
+	}
+	boost::shared_ptr<Processor> proc (new PluginInsert (*_session, p));
+	_amp = boost::dynamic_pointer_cast<PluginInsert> (proc);
+	if (!_amp) {
+		return false;
+	}
+	return 0 == _session->master_out()->add_processor_by_index (proc, -1, NULL, true);
+}
+
+bool
+LoudnessDialog::set_amp_gain (float db)
+{
+	if (!_amp) {
+		return false;
+	}
+	/* compare ARDOUR::LuaAPI::set_processor_param */
+	uint32_t which = 0;
+
+	boost::shared_ptr<Plugin> plugin = _amp->plugin ();
+
+	bool ok = false;
+	uint32_t controlid = plugin->nth_parameter (which, ok);
+	if (!ok || !plugin->parameter_is_input (controlid)) {
+		return false;
+	}
+
+	ParameterDescriptor pd;
+	if (0 != plugin->get_parameter_descriptor (controlid, pd)) {
+		return false;
+	}
+
+	db = std::max (db, pd.lower);
+	db = std::min (db, pd.upper);
+
+	boost::shared_ptr<AutomationControl> c = _amp->automation_control (Evoral::Parameter (PluginAutomation, 0, controlid));
+	if (!c) {
+		return false;
+	}
+	c->set_value (db, PBD::Controllable::NoGroup);
+	return true;
+}
+
+float
+LoudnessDialog::amp_gain () const
+{
+	const uint32_t which = 0;
+
+	if (!_amp) {
+		return 0;
+	}
+
+	bool ok = false;
+	boost::shared_ptr<Plugin> plugin = _amp->plugin ();
+	uint32_t controlid = plugin->nth_parameter (which, ok);
+	if (!ok || !plugin->parameter_is_input (controlid)) {
+		return 0;
+	}
+
+	return plugin->get_parameter (controlid);
+}
+
+void
+LoudnessDialog::find_amp_cb (boost::weak_ptr<Processor> p)
+{
+	boost::shared_ptr<Processor> proc = p.lock ();
+	if (!proc || !proc->display_to_user ()) {
+		return;
+	}
+	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (proc);
+	if (!pi) {
+		return;
+	}
+	if (pi->display_name () == "a-Amplifier") {
+		_amp = pi;
+	}
+}
+
 gint
 LoudnessDialog::progress_timeout ()
 {
@@ -365,6 +519,7 @@ LoudnessDialog::analyze ()
 {
 	 /* These are ensured in Editor::measure_master_loudness () */
 	assert (_session->master_out());
+	assert (_session->master_volume ());
 	assert (_session->master_out()->output());
 	assert (_session->master_out()->output()->n_ports().n_audio() == 2);
 	assert (_range.start < _range.end);
@@ -561,6 +716,5 @@ LoudnessDialog::calculate_gain ()
 
 	_gain_norm = gain;
 	_gain_norm_label.set_text (string_compose (_("%1 dB"), std::setprecision (2), std::showpos, std::fixed, _gain_norm));
-	_gain_init_label.set_text (string_compose (_("%1 dB"), std::setprecision (2), std::showpos, std::fixed, _gain_init));
 	_gain_total_label.set_markup (string_compose (_("<b>%1 dB</b>"), std::setw(7), std::setprecision (2), std::showpos, std::fixed, gain_db ()));
 }

@@ -40,7 +40,6 @@
 #include "ardour/audioplaylist.h"
 #include "ardour/audioregion.h"
 #include "ardour/chan_count.h"
-#include "ardour/dB.h"
 #include "ardour/midi_region.h"
 #include "ardour/session.h"
 #include "ardour/session_directory.h"
@@ -136,15 +135,12 @@ Editor::measure_master_loudness (bool range_selection)
 	ARDOUR::AudioRange ar (start, end, 0);
 
 	LoudnessDialog ld (_session, ar, range_selection);
-	ld.set_gain_offset_db (accurate_coefficient_to_dB (_session->master_volume()->get_value()));
 
 	if (own_window ()) {
 		ld.set_transient_for (*own_window ());
 	}
 
-	if (ld.run () == RESPONSE_APPLY) {
-		_session->master_volume ()->set_value (dB_to_coefficient (ld.gain_db ()), Controllable::NoGroup);
-	}
+	ld.run ();
 }
 
 void
