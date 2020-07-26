@@ -243,7 +243,7 @@ function factory (params) return function ()
 		playlist:to_stateful ():clear_changes ()
 
 		-- do the actual work
-		local region = track:bounce_range (loop:start (), loop:_end (), itt, proc, false)
+		local region = track:bounce_range (loop:start (), loop:_end (), itt, proc, false, "")
 		playlist:add_region (region, playhead, n_paste, false, 0, 0, false)
 
 		n_regions_created = n_regions_created + 1
