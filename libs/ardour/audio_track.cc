@@ -292,14 +292,18 @@ AudioTrack::bounceable (boost::shared_ptr<Processor> endpoint, bool include_endp
 }
 
 boost::shared_ptr<Region>
-AudioTrack::bounce (InterThreadInfo& itt, const std::string name)
+AudioTrack::bounce (InterThreadInfo& itt, std::string const& name)
 {
 	return bounce_range (_session.current_start_sample(), _session.current_end_sample(), itt, main_outs(), false, name);
 }
 
 boost::shared_ptr<Region>
-AudioTrack::bounce_range (samplepos_t start, samplepos_t end, InterThreadInfo& itt,
-			  boost::shared_ptr<Processor> endpoint, bool include_endpoint, const std::string name)
+AudioTrack::bounce_range (samplepos_t start,
+                          samplepos_t end,
+                          InterThreadInfo& itt,
+                          boost::shared_ptr<Processor> endpoint,
+                          bool include_endpoint,
+                          std::string const& name)
 {
 	vector<boost::shared_ptr<Source> > srcs;
 	return _session.write_one_track (*this, start, end, false, srcs, itt, endpoint, include_endpoint, false, false, name);

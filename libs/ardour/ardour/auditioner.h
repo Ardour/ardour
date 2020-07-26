@@ -79,11 +79,11 @@ public:
 	void freeze_me (InterThreadInfo&) {}
 	void unfreeze () {}
 
-	boost::shared_ptr<Region> bounce (InterThreadInfo&, const std::string name) {
+	boost::shared_ptr<Region> bounce (InterThreadInfo&, std::string const& name) {
 		return boost::shared_ptr<Region> ();
 	}
 
-	boost::shared_ptr<Region> bounce_range (samplepos_t, samplepos_t, InterThreadInfo&, boost::shared_ptr<Processor>, bool, const std::string) {
+	boost::shared_ptr<Region> bounce_range (samplepos_t, samplepos_t, InterThreadInfo&, boost::shared_ptr<Processor>, bool, std::string const&) {
 		return boost::shared_ptr<Region> ();
 	}
 

@@ -53,13 +53,13 @@ public:
 	void unfreeze ();
 
 	bool bounceable (boost::shared_ptr<Processor>, bool) const { return false; }
-	boost::shared_ptr<Region> bounce (InterThreadInfo&, const std::string name);
+	boost::shared_ptr<Region> bounce (InterThreadInfo&, std::string const&);
 	boost::shared_ptr<Region> bounce_range (samplepos_t                  start,
 	                                        samplepos_t                  end,
 	                                        InterThreadInfo&             iti,
 	                                        boost::shared_ptr<Processor> endpoint,
 	                                        bool                         include_endpoint,
-	                                        const std::string			 name);
+	                                        std::string const&           name);
 
 	int export_stuff (BufferSet&                   bufs,
 	                  samplepos_t                  start_sample,
