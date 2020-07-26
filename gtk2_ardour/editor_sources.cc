@@ -210,7 +210,7 @@ EditorSources::EditorSources (Editor* e)
 	nat_col->set_alignment (ALIGN_RIGHT);
 	renderer = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (5));
 	if (renderer) {
-		renderer->property_xalign() = ( 1.0 );
+		renderer->property_xalign() = 1.0;
 	}
 
 	/* the PATH field should expand when the pane is opened wider */
@@ -421,7 +421,7 @@ EditorSources::populate_row (TreeModel::Row row, boost::shared_ptr<ARDOUR::Regio
 			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(source);
 			if (afs) {
 				const string audio_directory = _session->session_directory().sound_path();
-				if ( !PBD::path_is_within(audio_directory, fs->path())) {
+				if (!PBD::path_is_within(audio_directory, fs->path())) {
 					pathstr = Gtkmm2ext::markup_escape_text (fs->path());
 				}
 			}
@@ -429,7 +429,7 @@ EditorSources::populate_row (TreeModel::Row row, boost::shared_ptr<ARDOUR::Regio
 			boost::shared_ptr<SMFSource> mfs = boost::dynamic_pointer_cast<SMFSource>(source);
 			if (mfs) {
 				const string midi_directory = _session->session_directory().midi_path();
-				if ( !PBD::path_is_within(midi_directory, fs->path())) {
+				if (!PBD::path_is_within(midi_directory, fs->path())) {
 					pathstr = Gtkmm2ext::markup_escape_text (fs->path());
 				}
 			}
@@ -469,7 +469,7 @@ EditorSources::redisplay ()
 void
 EditorSources::add_source (boost::shared_ptr<ARDOUR::Region> region)
 {
-	if (!region || !_session ) {
+	if (!region || !_session) {
 		return;
 	}
 
@@ -477,7 +477,7 @@ EditorSources::add_source (boost::shared_ptr<ARDOUR::Region> region)
 	 * this roughly equates to Source objects, but preserves the stereo-ness
 	 * (or multichannel-ness) of a stereo source file.
 	 */
-	if ( !region->whole_file() ) {
+	if (!region->whole_file ()) {
 		return;
 	}
 
@@ -498,7 +498,7 @@ EditorSources::add_source (boost::shared_ptr<ARDOUR::Region> region)
 void
 EditorSources::source_changed (boost::shared_ptr<ARDOUR::Region> region, PBD::PropertyChange const &)
 {
-	if ( !region->whole_file() ) {
+	if (!region->whole_file ()) {
 		/*this isn't on our list anyway; we can ignore it*/
 		return;
 	}
@@ -538,9 +538,9 @@ EditorSources::selection_changed ()
 				if (source) {
 
 					set<boost::shared_ptr<Region> > regions;
-					RegionFactory::get_regions_using_source ( source, regions );
+					RegionFactory::get_regions_using_source (source, regions);
 
-					for (set<boost::shared_ptr<Region> >::iterator region = regions.begin(); region != regions.end(); region++ ) {
+					for (set<boost::shared_ptr<Region> >::iterator region = regions.begin(); region != regions.end(); region++) {
 						_change_connection.block (true);
 						_editor->set_selected_regionview_from_region_list (*region, Selection::Add);
 						_change_connection.block (false);
@@ -691,7 +691,7 @@ EditorSources::remove_selected_sources ()
 
 	int opt = prompter.run ();
 
-	if ( opt >= 1) {
+	if (opt >= 1) {
 
 		std::list<boost::weak_ptr<ARDOUR::Source> > to_be_removed;
 
@@ -713,9 +713,9 @@ EditorSources::remove_selected_sources ()
  					boost::shared_ptr<ARDOUR::Source> source = region->source();
 					if (source) {
 						set<boost::shared_ptr<Region> > regions;
-						RegionFactory::get_regions_using_source ( source, regions );
+						RegionFactory::get_regions_using_source (source, regions);
 
-						for (set<boost::shared_ptr<Region> >::iterator region = regions.begin(); region != regions.end(); region++ ) {
+						for (set<boost::shared_ptr<Region> >::iterator region = regions.begin(); region != regions.end(); region++) {
 							_change_connection.block (true);
 							_editor->set_selected_regionview_from_region_list (*region, Selection::Add);
 							_change_connection.block (false);
