@@ -328,6 +328,8 @@ LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 	_lufs_s_btn.signal_clicked.connect (mem_fun (*this, &LoudnessDialog::update_settings));
 	_lufs_m_btn.signal_clicked.connect (mem_fun (*this, &LoudnessDialog::update_settings));
 
+	_use_amp_button.signal_clicked.connect (mem_fun (*this, &LoudnessDialog::calculate_gain));
+
 	_ok_button->set_sensitive (false);
 	_show_report_button.set_sensitive (false);
 
@@ -445,6 +447,12 @@ LoudnessDialog::set_amp_gain (float db)
 	}
 	/* compare ARDOUR::LuaAPI::set_processor_param */
 	uint32_t which = 0;
+
+	boost::shared_ptr<AutomationControl> ac = _amp->automation_control (Evoral::Parameter (PluginAutomation, 0, which));
+	assert (ac);
+	if (ac) {
+		ac->set_automation_state (ARDOUR::Off);
+	}
 
 	boost::shared_ptr<Plugin> plugin = _amp->plugin ();
 
@@ -625,11 +633,11 @@ LoudnessDialog::apply_preset ()
 void
 LoudnessDialog::update_sensitivity ()
 {
-	_dbfs_spinbutton.set_sensitive (_dbfs_btn.get_active ());
-	_dbtp_spinbutton.set_sensitive (_dbtp_btn.get_active ());
-	_lufs_i_spinbutton.set_sensitive (_lufs_i_btn.get_active ());
-	_lufs_s_spinbutton.set_sensitive (_lufs_s_btn.get_active ());
-	_lufs_m_spinbutton.set_sensitive (_lufs_m_btn.get_active ());
+	_dbfs_spinbutton.set_sensitive (_dbfs_btn.get_active () && _dbfs_btn.sensitive ());
+	_dbtp_spinbutton.set_sensitive (_dbtp_btn.get_active () && _dbtp_btn.sensitive ());
+	_lufs_i_spinbutton.set_sensitive (_lufs_i_btn.get_active () && _dbtp_btn.sensitive ());
+	_lufs_s_spinbutton.set_sensitive (_lufs_s_btn.get_active () && _lufs_s_btn.sensitive ());
+	_lufs_m_spinbutton.set_sensitive (_lufs_m_btn.get_active () && _lufs_m_btn.sensitive ());
 }
 
 void
@@ -645,6 +653,17 @@ LoudnessDialog::update_settings ()
 	calculate_gain ();
 }
 
+float
+LoudnessDialog::gain_db () const
+{
+#if 0 // option to set output gain only instead of zeroing plugin
+	if (_amp && ! _use_amp_button.get_active ()) {
+		return _gain_norm + _gain_out;
+	}
+#endif
+	return _gain_norm + _gain_out + _gain_amp;
+}
+
 void
 LoudnessDialog::display_results ()
 {
@@ -654,9 +673,15 @@ LoudnessDialog::display_results ()
 
 	_dbfs   = accurate_coefficient_to_dB (p->peak);
 	_dbtp   = accurate_coefficient_to_dB (p->truepeak);
-	_lufs_i = p->integrated_loudness;
-	_lufs_s = p->max_loudness_short;
-	_lufs_m = p->max_loudness_momentary;
+	_lufs_i = p->integrated_loudness    > -200  ? p->integrated_loudness    : -std::numeric_limits<float>::infinity();
+	_lufs_s = p->max_loudness_short     > -200  ? p->max_loudness_short     : -std::numeric_limits<float>::infinity();
+	_lufs_m = p->max_loudness_momentary > - 200 ? p->max_loudness_momentary : -std::numeric_limits<float>::infinity();
+
+	_dbfs_btn.set_sensitive (_dbfs > -300);
+	_dbtp_btn.set_sensitive (_dbtp > -300);
+	_lufs_i_btn.set_sensitive (p->integrated_loudness > -200);
+	_lufs_s_btn.set_sensitive (p->max_loudness_short > -200);
+	_lufs_m_btn.set_sensitive (p->max_loudness_momentary > -200);
 
 	_dbfs_label.set_text (string_compose (_("%1 dBFS"), std::setprecision (1), std::fixed, _dbfs));
 	_dbtp_label.set_text (string_compose (_("%1 dBTP"), std::setprecision (1), std::fixed, _dbtp));
@@ -664,10 +689,10 @@ LoudnessDialog::display_results ()
 	_lufs_s_label.set_text (string_compose (_("%1 LUFS"), std::setprecision (1), std::fixed, _lufs_s));
 	_lufs_m_label.set_text (string_compose (_("%1 LUFS"), std::setprecision (1), std::fixed, _lufs_m));
 
+	update_sensitivity ();
 	calculate_gain ();
 
 	_result_box.show_all ();
-	_ok_button->set_sensitive (true);
 	_show_report_button.set_sensitive (true);
 }
 
@@ -686,19 +711,19 @@ LoudnessDialog::calculate_gain ()
 #define MIN_IF_SET(A, B) \
 	{ if (set) { gain = std::min (gain, (A) - (B));} else { gain = (A) - (B); } set = true; }
 
-	if (_dbfs_btn.get_active ()) {
+	if (_dbfs_btn.get_active () && _dbfs_btn.sensitive ()) {
 		MIN_IF_SET (dbfs, _dbfs);
 	}
-	if (_dbtp_btn.get_active ()) {
+	if (_dbtp_btn.get_active () && _dbtp_btn.sensitive ()) {
 		MIN_IF_SET (dbtp, _dbtp);
 	}
-	if (_lufs_i_btn.get_active ()) {
+	if (_lufs_i_btn.get_active () && _lufs_i_btn.sensitive ()) {
 		MIN_IF_SET (lufs_i, _lufs_i);
 	}
-	if (_lufs_s_btn.get_active ()) {
+	if (_lufs_s_btn.get_active () && _lufs_s_btn.sensitive ()) {
 		MIN_IF_SET (lufs_s, _lufs_s);
 	}
-	if (_lufs_m_btn.get_active ()) {
+	if (_lufs_m_btn.get_active () && _lufs_m_btn.sensitive ()) {
 		MIN_IF_SET (lufs_m, _lufs_m);
 	}
 
@@ -715,6 +740,14 @@ LoudnessDialog::calculate_gain ()
 	_delta_lufs_m_label.set_sensitive (_lufs_m_btn.get_active ());
 
 	_gain_norm = gain;
+	bool in_range = gain_db () >= -20 && gain_db () <= 20;
+
 	_gain_norm_label.set_text (string_compose (_("%1 dB"), std::setprecision (2), std::showpos, std::fixed, _gain_norm));
-	_gain_total_label.set_markup (string_compose (_("<b>%1 dB</b>"), std::setw(7), std::setprecision (2), std::showpos, std::fixed, gain_db ()));
+	if (!in_range) {
+		_gain_total_label.set_markup (_("<b>exceeds \u00B120 dB</b>"));
+	} else {
+		_gain_total_label.set_markup (string_compose (_("<b>%1 dB</b>"), std::setw(7), std::setprecision (2), std::showpos, std::fixed, gain_db ()));
+	}
+
+	_ok_button->set_sensitive (in_range);
 }

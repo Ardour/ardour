@@ -42,9 +42,7 @@ public:
 	LoudnessDialog (ARDOUR::Session*, ARDOUR::AudioRange const&, bool);
 	int run ();
 
-	float gain_db () const {
-		return _gain_norm + _gain_out + _gain_amp;
-	}
+	float gain_db () const;
 
 protected:
 	bool on_delete_event (GdkEventAny*);
