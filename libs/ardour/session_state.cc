@@ -4237,12 +4237,9 @@ Session::config_changed (std::string p, bool ours)
 		last_loopend = 0; /* force locate to refill buffers with new loop boundary data */
 		auto_loop_changed (_locations->auto_loop_location());
 	} else if (p == "use-master-volume") {
-		if (master_volume ()) {
-			bool en = Config->get_use_master_volume ();
-			_master_out->main_outs()->add_gain (en ? master_volume () : boost::shared_ptr<GainControl> ());
-			if (!en) {
-				master_volume ()->set_value (GAIN_COEFF_UNITY, Controllable::NoGroup);
-			}
+		if (master_volume () && !Config->get_use_master_volume ()) {
+			_master_out->set_volume_applies_to_output (true);
+			master_volume ()->set_value (GAIN_COEFF_UNITY, Controllable::NoGroup);
 		}
 	}
 

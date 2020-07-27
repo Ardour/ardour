@@ -503,6 +503,12 @@ public:
 	boost::shared_ptr<GainControl> volume_control() const;
 	boost::shared_ptr<PhaseControl> phase_control() const;
 
+	void set_volume_applies_to_output (bool);
+
+	bool volume_applies_to_output () const {
+		return _volume_applies_to_output;
+	}
+
 	/**
 	   Return the first processor that accepts has at least one MIDI input
 	   and at least one audio output. In the vast majority of cases, this
@@ -687,8 +693,11 @@ protected:
 	boost::shared_ptr<PhaseControl> _phase_control;
 	boost::shared_ptr<Amp>               _amp;
 	boost::shared_ptr<Amp>               _trim;
+	boost::shared_ptr<Amp>               _volume;
 	boost::shared_ptr<PeakMeter>         _meter;
 	boost::shared_ptr<PolarityProcessor> _polarity;
+
+	bool _volume_applies_to_output;
 
 	boost::shared_ptr<DelayLine> _delayline;
 

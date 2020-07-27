@@ -334,7 +334,20 @@ XMLNode&
 Amp::state ()
 {
 	XMLNode& node (Processor::state ());
-	node.set_property("type", _gain_control->parameter().type() == GainAutomation ? "amp" : "trim");
+	switch (_gain_control->parameter().type()) {
+		case GainAutomation:
+			node.set_property("type", "amp");
+			break;
+		case TrimAutomation:
+			node.set_property("type", "trim");
+			break;
+		case MainOutVolume:
+			node.set_property("type", "main-volume");
+			break;
+		default:
+			assert (0);
+			break;
+	}
 	node.add_child_nocopy (_gain_control->get_state());
 
 	return node;
