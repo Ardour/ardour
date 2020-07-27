@@ -65,13 +65,6 @@ private:
 	void test_conformity ();
 	void toggle_conformity_display ();
 
-	bool  instantiate_amp ();
-	bool  set_amp_gain (float db);
-	float amp_gain () const;
-	void  find_amp_cb (boost::weak_ptr<ARDOUR::Processor> p);
-
-	boost::shared_ptr<ARDOUR::PluginInsert> _amp;
-
 	struct LoudnessPreset
 	{
 		std::string name;
@@ -123,7 +116,7 @@ private:
 	ArdourWidgets::ArdourButton _rt_analysis_button;
 	ArdourWidgets::ArdourButton _start_analysis_button;
 	ArdourWidgets::ArdourButton _show_report_button;
-	ArdourWidgets::ArdourButton _use_amp_button;
+	ArdourWidgets::ArdourButton _custom_pos_button;
 
 	ArdourWidgets::ArdourDropdown _preset_dropdown;
 	std::string                   _initial_preset_name;
@@ -147,7 +140,6 @@ private:
 	float _lufs_m;
 
 	float _gain_out;
-	float _gain_amp;
 	float _gain_norm;
 	bool  _ignore_change;
 };
