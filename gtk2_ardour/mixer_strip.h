@@ -229,6 +229,7 @@ private:
 	ArdourWidgets::ArdourButton _comment_button;
 	ArdourWidgets::ArdourKnob   trim_control;
 
+	Gtk::Menu* _master_volume_menu;
 	ArdourWidgets::ArdourButton* _loudess_analysis_button;
 	boost::shared_ptr<AutomationController> _volume_controller;
 
@@ -238,6 +239,7 @@ private:
 	void setup_comment_button ();
 
 	void loudess_analysis_button_clicked ();
+	bool loudess_analysis_button_pressed (GdkEventButton*);
 
 	ArdourWidgets::ArdourButton group_button;
 	RouteGroupMenu*             group_menu;

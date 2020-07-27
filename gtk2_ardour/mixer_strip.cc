@@ -122,6 +122,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	, _plugin_insert_cnt (0)
 	, _comment_button (_("Comments"))
 	, trim_control (ArdourKnob::default_elements, ArdourKnob::Flags (ArdourKnob::Detent | ArdourKnob::ArcToZero))
+	, _master_volume_menu (0)
 	, _loudess_analysis_button (0)
 	, _visibility (X_("mixer-element-visibility"))
 	, _suspend_menu_callbacks (false)
@@ -157,6 +158,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt
 	, _plugin_insert_cnt (0)
 	, _comment_button (_("Comments"))
 	, trim_control (ArdourKnob::default_elements, ArdourKnob::Flags (ArdourKnob::Detent | ArdourKnob::ArcToZero))
+	, _master_volume_menu (0)
 	, _loudess_analysis_button (0)
 	, _visibility (X_("mixer-element-visibility"))
 	, _suspend_menu_callbacks (false)
@@ -444,6 +446,8 @@ MixerStrip::~MixerStrip ()
 	if (this ==_entered_mixer_strip) {
 		_entered_mixer_strip = NULL;
 	}
+
+	delete _master_volume_menu;
 }
 
 void
@@ -609,6 +613,8 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
 			_loudess_analysis_button = manage (new ArdourButton (S_("Loudness|LAN")));
 			_loudess_analysis_button->signal_clicked.connect (mem_fun (*this, &MixerStrip::loudess_analysis_button_clicked));
+			_loudess_analysis_button->signal_button_press_event().connect (mem_fun (*this, &MixerStrip::loudess_analysis_button_pressed), false);
+			_volume_controller->signal_button_press_event().connect (mem_fun (*this, &MixerStrip::loudess_analysis_button_pressed), false);
 
 			set_tooltip (*_volume_controller, _("Master output volume"));
 			set_tooltip (_loudess_analysis_button, _("Measure loudness of the session, normalize master output volume"));
@@ -1988,6 +1994,27 @@ void
 MixerStrip::loudess_analysis_button_clicked ()
 {
 	PublicEditor::instance().measure_master_loudness (false);
+}
+
+bool
+MixerStrip::loudess_analysis_button_pressed (GdkEventButton* ev)
+{
+	using namespace Menu_Helpers;
+	if (Keyboard::is_context_menu_event (ev)) {
+		delete _master_volume_menu;
+		_master_volume_menu = new Menu;
+		_master_volume_menu->set_name ("ArdourContextMenu");
+		MenuList& items = _master_volume_menu->items();
+		items.clear ();
+		items.push_back (CheckMenuElem (_("Custom Loudness Gain Processor Position")));
+		Gtk::CheckMenuItem* cmi = static_cast<Gtk::CheckMenuItem*> (&items.back());
+		cmi->set_active (!_route->volume_applies_to_output ());
+		cmi->signal_toggled().connect (sigc::bind (sigc::mem_fun (_route.get(), &Route::set_volume_applies_to_output), !_route->volume_applies_to_output ()));
+
+		_master_volume_menu->popup (ev->button, ev->time);
+		return true;
+	}
+	return false;
 }
 
 void
