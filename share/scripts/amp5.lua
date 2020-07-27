@@ -44,6 +44,7 @@ function dsp_runmap (bufs, in_map, out_map, n_samples, offset)
 	local ctrl = CtrlPorts:array() -- get control port array
 	local target_gain  = ARDOUR.DSP.dB_to_coefficient (ctrl[1]) -- 10 ^ (0.05 * ctrl[1])
 	local current_gain = cur_gain -- start with the same for all channels
+	cur_gain = target_gain -- use target gain if no channel is mapped.
 
 	for c = 1, n_audio do
 		local ob = out_map:get (ARDOUR.DataType ("audio"), c - 1); -- get id of mapped output buffer for given cannel
