@@ -17,6 +17,7 @@
  */
 
 #include <gtkmm/box.h>
+#include <gtkmm/expander.h>
 #include <gtkmm/label.h>
 #include <gtkmm/progressbar.h>
 #include <gtkmm/spinbutton.h>
@@ -61,6 +62,9 @@ private:
 	void update_settings ();
 	void update_sensitivity ();
 
+	void test_conformity ();
+	void toggle_conformity_display ();
+
 	bool  instantiate_amp ();
 	bool  set_amp_gain (float db);
 	float amp_gain () const;
@@ -73,6 +77,7 @@ private:
 		std::string name;
 		bool        enable[5];
 		float       level[5];
+		float       max_integrated[2];
 	};
 
 	static LoudnessPreset presets[];
@@ -86,6 +91,7 @@ private:
 	Gtk::VBox        _setup_box;
 	Gtk::VBox        _progress_box;
 	Gtk::VBox        _result_box;
+	Gtk::Expander    _conformity_expander;
 	Gtk::ProgressBar _progress_bar;
 	Gtk::Button*     _ok_button;
 	Gtk::Button*     _cancel_button;
@@ -112,6 +118,7 @@ private:
 	Gtk::Label       _gain_amp_label;
 	Gtk::Label       _gain_norm_label;
 	Gtk::Label       _gain_total_label;
+	Gtk::Label       _gain_exceeds_label;
 
 	ArdourWidgets::ArdourButton _rt_analysis_button;
 	ArdourWidgets::ArdourButton _start_analysis_button;

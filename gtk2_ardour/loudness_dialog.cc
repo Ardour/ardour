@@ -57,22 +57,21 @@ using namespace ArdourWidgets;
  */
 LoudnessDialog::LoudnessPreset LoudnessDialog::presets[] =
 {
-	/*                   | dbFS   dBTP   LUFS   short   mom.    | FS,  TP , int, sht, mom ||  notes */
-	{"EBU R128",         { false, true,  true,  false, false},  {  0, -1.0, -23,   0,   0 }},
-	{"EBU R128 S1",      { false, true,  true,  true,  false},  {  0, -1.0, -23, -18,   0 }},
-	{"AES Streaming",    { false, true,  true,  false, false},  {  0, -1.0, -16,   0,   0 }}, //min/max Integrated: -20 / -16 LUFS
-	{"Digital Peak",     { true,  false, false, false, false},  {  0,  0.0,   0,   0,   0 }},
-	{"CD",               { true,  true,  true,  false, false},  {  0, -0.1,  -9,   0,   0 }},
-	{"Classical",        { false, true,  false, false, true },  {  0, -1.0, -18, -17, -16 }},
+	/*                   | dbFS   dBTP   LUFS   short   mom.    | FS,  TP , int, sht, mom |maxIntg|  notes */
+	{"EBU R128",         { false, true,  true,  false, false},  {  0, -1.0, -23,   0,   0 }, {-22.5,  -23.5}}, // +/- 0.5 LUFS
+	{"EBU R128 S1",      { false, true,  true,  true,  false},  {  0, -1.0, -23, -18,   0 }, {-22.5,  -23.5}}, // +/- 0.5 LUFS
+	{"AES Streaming",    { false, true,  true,  false, false},  {  0, -1.0, -18,   0,   0 }, {-16.0,  -20.0}}, // min/max Integrated: -20 / -16 LUFS
+	{"Digital Peak",     { true,  false, false, false, false},  {  0,  0.0,   0,   0,   0 }, {  0.0, -200.0}},
+	{"CD",               { true,  true,  true,  false, false},  {  0, -0.1,  -9,   0,   0 }, {  0.0, -200.0}},
+	{"Classical",        { false, true,  false, false, true },  {  0, -1.0, -18, -17, -16 }, {-16.0,  -24.0}}, // generic, momentrary based
 
-	{"Amazon Music",     { false, true,  true,  false, false},  {  0, -2.0, -14,   0,   0 }}, // -9 to -13 LUFS
-	{"Apple Music",      { false, true,  true,  false, false},  {  0, -1.0, -16,   0,   0 }}, // (+/- 1.0 LU)
-	{"Deezer",           { false, true,  true,  false, false},  {  0, -1.0, -15,   0,   0 }}, // -14 to -16 LUFS
-	{"Netflix (dialog)", { false, true,  true,  false, false},  {  0, -2.0, -27,   0,   0 }}, // dialog only
-	{"Soundcloud",       { false, true,  true,  false, false},  {  0, -1.0, -10,   0,   0 }}, // -8 to -13 LUFS
-	{"Spotify",          { false, true,  true,  false, false},  {  0, -1.0, -14,   0,   0 }},
-	{"Spotify Loud",     { false, true,  true,  false, false},  {  0, -2.0, -11,   0,   0 }},
-	{"Youtube",          { false, true,  true,  false, false},  {  0, -1.0, -14,   0,   0 }}, // -13 to -15 LUFS
+	{"Amazon Music",     { false, true,  true,  false, false},  {  0, -2.0, -14,   0,   0 }, { -9.0,  -19.0}}, // -9 to -19 LUFS
+	{"Apple Music",      { false, true,  true,  false, false},  {  0, -1.0, -16,   0,   0 }, {-15.0,  -17.0}}, // (+/- 1.0 LU)
+	{"Deezer",           { false, true,  true,  false, false},  {  0, -1.0, -15,   0,   0 }, {-14.0,  -16.0}}, // -14 to -16 LUFS
+	{"Soundcloud",       { false, true,  true,  false, false},  {  0, -1.0, -10,   0,   0 }, { -8.0,  -13.0}}, // -8 to -13 LUFS
+	{"Spotify",          { false, true,  true,  false, false},  {  0, -1.0, -14,   0,   0 }, { -8.0,  -20.0}}, // Spotify use replay-gain to match -14 or -11 ..
+	{"Spotify Loud",     { false, true,  true,  false, false},  {  0, -2.0, -11,   0,   0 }, { -5.0,  -17.0}}, // .. so the min/max range is arbitrary +/- 6dB
+	{"Youtube",          { false, true,  true,  false, false},  {  0, -1.0, -14,   0,   0 }, {-13.0,  -15.0}}, // -13 to -15 LUFS
 };
 
 LoudnessDialog::LoudnessPreset LoudnessDialog::_preset = LoudnessDialog::presets [0];
@@ -83,6 +82,7 @@ LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 	, _range (ar)
 	, _status (s->get_export_status ())
 	, _autostart (as)
+	, _conformity_expander (_("Conformity Analysis"))
 	, _dbfs_btn (_("Peak:"), ArdourButton::led_default_elements, true)
 	, _dbtp_btn (_("True Peak:"), ArdourButton::led_default_elements, true)
 	, _lufs_i_btn (_("Integrated Loudness:"), ArdourButton::led_default_elements, true)
@@ -151,6 +151,7 @@ LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 	_gain_amp_label.modify_font (UIConfiguration::instance().get_NormalMonospaceFont());
 	_gain_norm_label.modify_font (UIConfiguration::instance().get_NormalMonospaceFont());
 	_gain_total_label.modify_font (UIConfiguration::instance().get_NormalMonospaceFont());
+	_gain_exceeds_label.modify_font (UIConfiguration::instance().get_NormalFont());
 
 #define ROW row, row +1
 
@@ -234,7 +235,9 @@ LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 	if (_amp) {
 		t->attach (_gain_amp_label,    3, 4, ROW); ++row;
 	}
+	t->attach (_gain_exceeds_label, 2, 3, ROW);
 	t->attach (_gain_total_label,   3, 4, ROW); ++row;
+
 	t->attach (_use_amp_button,     2, 4, ROW); ++row;
 
 	set_tooltip (_use_amp_button,
@@ -260,8 +263,11 @@ LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 	_gain_out_label.set_alignment (ALIGN_RIGHT);
 	_gain_amp_label.set_alignment (ALIGN_RIGHT);
 	_gain_total_label.set_alignment (ALIGN_RIGHT);
+	_gain_exceeds_label.set_alignment (ALIGN_RIGHT);
 
 	_result_box.pack_start (*t, false, false, 6);
+	_result_box.pack_start (_conformity_expander, false, false, 6);
+
 	_progress_box.pack_start (_progress_bar, false, false, 6);
 
 	t = manage (new Table (2, 3, false));
@@ -308,6 +314,7 @@ LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 		_preset_dropdown.AddMenuElem (MenuElemNoMnemonic (presets[i].name, sigc::bind (sigc::mem_fun (*this, &LoudnessDialog::load_preset), i)));
 	}
 
+	_conformity_expander.set_expanded(false);
 	_initial_preset_name = _preset.name;
 	apply_preset ();
 
@@ -329,6 +336,8 @@ LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 	_lufs_m_btn.signal_clicked.connect (mem_fun (*this, &LoudnessDialog::update_settings));
 
 	_use_amp_button.signal_clicked.connect (mem_fun (*this, &LoudnessDialog::calculate_gain));
+
+	_conformity_expander.property_expanded().signal_changed().connect( sigc::mem_fun(*this, &LoudnessDialog::toggle_conformity_display));
 
 	_ok_button->set_sensitive (false);
 	_show_report_button.set_sensitive (false);
@@ -740,14 +749,97 @@ LoudnessDialog::calculate_gain ()
 	_delta_lufs_m_label.set_sensitive (_lufs_m_btn.get_active ());
 
 	_gain_norm = gain;
-	bool in_range = gain_db () >= -20 && gain_db () <= 20;
+	bool in_range = gain_db () >= -40 && gain_db () <= 40;
 
 	_gain_norm_label.set_text (string_compose (_("%1 dB"), std::setprecision (2), std::showpos, std::fixed, _gain_norm));
 	if (!in_range) {
-		_gain_total_label.set_markup (_("<b>exceeds \u00B120 dB</b>"));
+		_gain_exceeds_label.set_text (_("exceeds"));
+		_gain_total_label.set_markup (_("<b>    \u00B140 dB</b>"));
 	} else {
+		_gain_exceeds_label.set_text (X_(""));
 		_gain_total_label.set_markup (string_compose (_("<b>%1 dB</b>"), std::setw(7), std::setprecision (2), std::showpos, std::fixed, gain_db ()));
 	}
 
+	test_conformity ();
 	_ok_button->set_sensitive (in_range);
+}
+
+void
+LoudnessDialog::toggle_conformity_display ()
+{
+	if (_conformity_expander.get_expanded ()) {
+		test_conformity ();
+	} else {
+		const int child_height = _conformity_expander.get_child ()->get_height ();
+		_conformity_expander.remove ();
+
+		Gtk::Requisition wr;
+		get_size (wr.width, wr.height);
+		wr.height -= child_height;
+		resize (wr.width, wr.height);
+	}
+}
+
+void
+LoudnessDialog::test_conformity ()
+{
+	if (!_conformity_expander.get_expanded ()) {
+		return;
+	}
+	if (_conformity_expander.get_child ()) {
+		_conformity_expander.remove ();
+	}
+
+	const float dbfs = rintf ((_dbfs + _gain_norm) * 10.f) / 10.f;
+	const float dbtp = rintf ((_dbtp + _gain_norm) * 10.f) / 10.f;
+	const float lufs_i = rintf ((_lufs_i + _gain_norm) * 10.f) / 10.f;
+
+	Table* t = manage (new Table ());
+	size_t n_pset = sizeof (presets) / sizeof (LoudnessDialog::LoudnessPreset);
+	size_t n_rows = ceil (n_pset / 3.0);
+
+	size_t row = 0;
+	size_t col = 0;
+
+	uint32_t c_good = UIConfigurationBase::instance().color ("alert:green"); // OK / green
+	uint32_t c_warn = UIConfigurationBase::instance().color ("alert:yellow"); // Warning / yellow
+	uint32_t c_fail = UIConfigurationBase::instance().color ("alert:red"); // Fail / red
+
+	Gdk::Color color_good = ARDOUR_UI_UTILS::gdk_color_from_rgba (c_good);
+	Gdk::Color color_warn = ARDOUR_UI_UTILS::gdk_color_from_rgba (c_warn);
+	Gdk::Color color_fail = ARDOUR_UI_UTILS::gdk_color_from_rgba (c_fail);
+
+	for (size_t i = 0; i < n_pset; ++i) {
+		Label* l = manage (new Label (presets[i].name + ":", ALIGN_LEFT));
+		t->attach (*l, col, col + 1, row, row + 1, EXPAND|FILL, SHRINK, 2, 0);
+
+		if (lufs_i > presets[i].max_integrated[0]
+		    || (presets[i].enable[0] && dbfs > presets[i].level[0])
+		    || (presets[i].enable[1] && dbtp > presets[i].level[1])
+		   ) {
+			l = manage (new Label ("\u274C", ALIGN_CENTER)); // "X"
+			l->modify_fg (Gtk::STATE_NORMAL, color_fail);
+			set_tooltip (*l, "The signal is too loud.");
+		} else if (lufs_i < presets[i].max_integrated[1]) {
+			l = manage (new Label ("\u2713", ALIGN_CENTER)); // "check-mark" - maybe use inv-box: \u274C
+			l->modify_fg (Gtk::STATE_NORMAL, color_warn);
+			set_tooltip (*l, "The signal is too quiet, but satisfies the max. loudness spec.");
+		} else {
+			l = manage (new Label ("\u2713", ALIGN_CENTER)); // "check-mark"
+			l->modify_fg (Gtk::STATE_NORMAL, color_good);
+			set_tooltip (*l, "Signal loudness is within the spec.");
+		}
+
+		t->attach (*l, col + 1, col + 2, row, row + 1, SHRINK, SHRINK, 2, 0);
+
+		if (++row == n_rows) {
+			ArdourVSpacer* spc = manage (new ArdourVSpacer (1.0));
+			t->attach (*spc, col + 2, col + 3, 0, n_rows, FILL, EXPAND|FILL, 8, 0);
+			row = 0;
+			col += 3;
+		}
+	}
+
+	_conformity_expander.add (*t);
+	_conformity_expander.show_all ();
 }
