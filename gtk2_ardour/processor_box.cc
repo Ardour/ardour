@@ -177,6 +177,11 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 	if (boost::dynamic_pointer_cast<PeakMeter> (_processor)) {
 		_button.set_elements(ArdourButton::Element(_button.elements() & ~ArdourButton::Indicator));
 	}
+	if (boost::dynamic_pointer_cast<Amp> (_processor) &&
+	    boost::dynamic_pointer_cast<Amp> (_processor)->gain_control()->parameter().type() != GainAutomation) {
+		/* Trim, Volume */
+		_button.set_elements(ArdourButton::Element(_button.elements() & ~ArdourButton::Indicator));
+	}
 	if (boost::dynamic_pointer_cast<UnknownProcessor> (_processor)) {
 		_button.set_elements(ArdourButton::Element(_button.elements() & ~ArdourButton::Indicator));
 		_unknown_processor = true;
