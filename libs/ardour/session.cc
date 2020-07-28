@@ -5918,13 +5918,13 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 			}
 		}
 
-		/* construct a region to represent the bounced material */
+		/* construct a whole-file region to represent the bounced material */
 
 		PropertyList plist;
 
 		plist.add (Properties::start, 0);
 		plist.add (Properties::whole_file, true);
-		plist.add (Properties::length, srcs.front()->length(srcs.front()->natural_position()));
+		plist.add (Properties::length, len); //ToDo: in nutempo, if the Range is snapped to bbt, this should be in bbt (?)
 		plist.add (Properties::name, region_name_from_path (srcs.front()->name(), true));
 		plist.add (Properties::tags, "(bounce)");
 
