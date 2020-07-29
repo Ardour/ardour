@@ -51,6 +51,8 @@ VSTPluginUI::VSTPluginUI (boost::shared_ptr<ARDOUR::PluginInsert> insert, boost:
 	box->pack_end (delete_button, false, false);
 	box->pack_end (save_button, false, false);
 	box->pack_end (add_button, false, false);
+	box->pack_end (next_button, false, false);
+	box->pack_end (prev_button, false, false);
 	box->pack_end (_preset_combo, false, false);
 	box->pack_end (_preset_modified, false, false);
 	box->pack_end (pin_management_button, false, false);
