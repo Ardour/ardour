@@ -126,6 +126,10 @@ protected:
 	ArdourWidgets::ArdourDropdown _preset_combo;
 	/** a label which has a * in if the current settings are different from the preset being shown */
 	Gtk::Label _preset_modified;
+	/** a button to load previous preset */
+	ArdourWidgets::ArdourButton prev_button;
+	/** a button to load next preset */
+	ArdourWidgets::ArdourButton next_button;
 	/** a button to add a preset */
 	ArdourWidgets::ArdourButton add_button;
 	/** a button to save the current settings as a new user preset */
@@ -175,6 +179,8 @@ protected:
 	int _no_load_preset;
 
 	virtual void preset_selected (ARDOUR::Plugin::PresetRecord preset);
+	void next_preset ();
+	void prev_preset ();
 	void add_plugin_setting ();
 	void save_plugin_setting ();
 	void delete_plugin_setting ();

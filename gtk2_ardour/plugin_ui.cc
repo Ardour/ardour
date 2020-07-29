@@ -463,6 +463,8 @@ PluginUIWindow::plugin_going_away ()
 PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	: insert (pi)
 	, plugin (insert->plugin())
+	, prev_button (_("Previous"))
+	, next_button (_("Next"))
 	, add_button (_("Add"))
 	, save_button (_("Save"))
 	, delete_button (_("Delete"))
@@ -483,6 +485,8 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	_preset_modified.set_size_request (16, -1);
 	_preset_combo.set_text("(default)");
 	set_tooltip (_preset_combo, _("Presets (if any) for this plugin\n(Both factory and user-created)"));
+	set_tooltip (prev_button, _("Load previous preset"));
+	set_tooltip (next_button, _("Load next preset"));
 	set_tooltip (add_button, _("Save a new preset"));
 	set_tooltip (save_button, _("Save the current preset"));
 	set_tooltip (delete_button, _("Delete the current preset"));
@@ -500,6 +504,14 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	latency_button.add_elements (ArdourButton::Text);
 	latency_button.signal_clicked.connect (sigc::mem_fun (*this, &PlugUIBase::latency_button_clicked));
 	set_latency_label ();
+
+	prev_button.set_name ("generic button");
+	prev_button.set_icon (ArdourIcon::NudgeLeft);
+	prev_button.signal_clicked.connect (sigc::mem_fun (*this, &PlugUIBase::prev_preset));
+
+	next_button.set_name ("generic button");
+	next_button.set_icon (ArdourIcon::NudgeRight);
+	next_button.signal_clicked.connect (sigc::mem_fun (*this, &PlugUIBase::next_preset));
 
 	add_button.set_name ("generic button");
 	add_button.set_icon (ArdourIcon::PsetAdd);
@@ -643,6 +655,51 @@ PlugUIBase::preset_selected (Plugin::PresetRecord preset)
 		plugin->clear_preset();
 	}
 }
+
+void
+PlugUIBase::next_preset ()
+{
+	Plugin::PresetRecord const last_preset = plugin->last_preset();
+
+	std::vector<Plugin::PresetRecord> presets = insert->plugin()->get_presets();
+
+	// if last preset is not valid load firs one 
+	if (!last_preset.valid && presets.begin() != presets.end())
+	{
+		insert->load_preset (*presets.begin());
+		return;
+	}
+
+	for (std::vector<Plugin::PresetRecord>::const_iterator i = presets.begin(); i != presets.end(); ++i) {
+		if ((*i).uri == last_preset.uri) {
+			auto next_i = next(i);
+			if (next_i != presets.end())
+				insert->load_preset (*next_i);
+			break;
+		}
+	}
+}
+
+void
+PlugUIBase::prev_preset ()
+{
+	Plugin::PresetRecord const last_preset = plugin->last_preset();
+
+	std::vector<Plugin::PresetRecord> presets = insert->plugin()->get_presets();
+
+	// if last preset is not valid or is the same as first element just return 
+	if (!last_preset.valid || presets.begin() == presets.end() || (presets.begin() != presets.end() && last_preset.uri == (*presets.begin()).uri))
+		return;
+
+	for (std::vector<Plugin::PresetRecord>::const_iterator i = presets.begin(); i != presets.end(); ++i) {
+		if ((*i).uri == last_preset.uri) {
+			auto prev_i = prev(i);
+			insert->load_preset (*prev_i);
+			break;
+		}
+	}
+}
+
 
 void
 PlugUIBase::add_plugin_setting ()
@@ -904,6 +961,21 @@ PlugUIBase::update_preset ()
 		_preset_combo.set_text (p.label);
 	}
 	--_no_load_preset;
+
+	vector<ARDOUR::Plugin::PresetRecord> presets = plugin->get_presets();
+
+	bool next_sensitive = presets.begin() != presets.end();
+	bool prev_sensitive = next_sensitive;
+
+	if (next_sensitive) {
+		next_sensitive = p.uri != (*prev(presets.end())).uri;
+		prev_sensitive = p.valid;
+		if (prev_sensitive)
+			prev_sensitive = p.uri != (*presets.begin()).uri;
+    }
+
+    next_button.set_sensitive(next_sensitive);
+    prev_button.set_sensitive(prev_sensitive);
 
 	delete_button.set_sensitive (!p.uri.empty() && p.user);
 	update_preset_modified ();

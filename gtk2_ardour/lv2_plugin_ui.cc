@@ -319,6 +319,8 @@ LV2PluginUI::LV2PluginUI(boost::shared_ptr<PluginInsert> pi,
 	_ardour_buttons_box.pack_end (delete_button, false, false);
 	_ardour_buttons_box.pack_end (save_button, false, false);
 	_ardour_buttons_box.pack_end (add_button, false, false);
+	_ardour_buttons_box.pack_end (next_button, false, false);
+	_ardour_buttons_box.pack_end (prev_button, false, false);
 	_ardour_buttons_box.pack_end (_preset_combo, false, false);
 	_ardour_buttons_box.pack_end (_preset_modified, false, false);
 	_ardour_buttons_box.pack_end (pin_management_button, false, false);
