@@ -3056,9 +3056,10 @@ EngineControl::check_audio_latency_measurement ()
 	}
 
 	if (mtdm->inv ()) {
+                // Even though the signal is inverted, the latency is measured
+                // So warn, but allow
 		strcat (buf, " ");
 		strcat (buf, _("(inverted - bad wiring)"));
-		solid = false;
 	}
 
 	lm_results.set_markup (string_compose (results_markup, buf));
