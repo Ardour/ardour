@@ -622,6 +622,25 @@ private:
 	void swap_visual_state ();
 
 	std::vector<VisualState*> visual_states;
+
+	// Visual state that was just before entering in the maximized region mode.
+	VisualState *_minimized_visual_state;
+
+	/**
+         * Returns true if the current visual state is in maximized region mode.
+         *
+	 * If the current visual state contains a maximized region (the same as key f does),
+         * and in this visual state editor entered by "Ctrl + double click" on the region,
+         * let's call this special viewing state "maximized region mode".
+         */
+	bool is_maximized_region_mode() const;
+
+	// Set the viewing state to be in the state of maximized region mode.
+	void enter_maximized_region_mode(bool maximize = true);
+
+	// Clear the region maximized mode (without changing the visual state).
+	void clear_maximized_region_mode();
+
 	void start_visual_state_op (uint32_t n);
 	void cancel_visual_state_op (uint32_t n);
 
