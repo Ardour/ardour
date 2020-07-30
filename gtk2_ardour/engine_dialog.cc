@@ -3056,9 +3056,11 @@ EngineControl::check_audio_latency_measurement ()
 	}
 
 	if (mtdm->inv ()) {
+		/* only warn user, in some cases the measured value is correct,
+		 * regardless of the warning - https://github.com/Ardour/ardour/pull/656
+		 */
 		strcat (buf, " ");
 		strcat (buf, _("(inverted - bad wiring)"));
-		solid = false;
 	}
 
 	lm_results.set_markup (string_compose (results_markup, buf));
