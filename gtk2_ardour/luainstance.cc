@@ -1498,10 +1498,9 @@ LuaInstance::set_state (const XMLNode& node)
 }
 
 void
-LuaInstance::pre_seed_scripts ()
+LuaInstance::pre_seed_script (std::string const& name, int& id)
 {
-	LuaScriptInfoPtr spi = LuaScripting::instance ().by_name ("Mixer Screenshot", LuaScriptInfo::EditorAction);
-	int id = 0;
+	LuaScriptInfoPtr spi = LuaScripting::instance ().by_name (name, LuaScriptInfo::EditorAction);
 	if (spi) {
 		try {
 			std::string script = Glib::file_get_contents (spi->path);
@@ -1513,6 +1512,14 @@ LuaInstance::pre_seed_scripts ()
 			set_lua_action (id++, "Mixer Screenshot", script, lsp);
 		} catch (...) { }
 	}
+}
+
+void
+LuaInstance::pre_seed_scripts ()
+{
+	int id = 0;
+	pre_seed_script ("Mixer Screenshot", id);
+	pre_seed_script ("List Plugins", id);
 }
 
 bool
