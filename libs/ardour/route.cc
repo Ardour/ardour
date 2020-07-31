@@ -4273,8 +4273,10 @@ Route::update_signal_latency (bool apply_to_delayline, bool* delayline_update_ne
 		return 0;
 	}
 
-	samplecnt_t capt_lat_in = _input->connected_latency (false);
+	samplecnt_t capt_lat_in  = _input->connected_latency (false);
 	samplecnt_t play_lat_out = _output->connected_latency (true);
+	samplecnt_t in_latency   = _input->latency ();
+	_output_latency          = _output->latency ();
 
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 
@@ -4282,12 +4284,12 @@ Route::update_signal_latency (bool apply_to_delayline, bool* delayline_update_ne
 	samplecnt_t l_out = 0;
 	for (ProcessorList::reverse_iterator i = _processors.rbegin(); i != _processors.rend(); ++i) {
 		if (boost::shared_ptr<LatentSend> snd = boost::dynamic_pointer_cast<LatentSend> (*i)) {
-			snd->set_delay_in (l_out + _output->latency());
+			snd->set_delay_in (l_out + _output_latency);
 		}
 
 		if (boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (*i)) {
 			if (boost::shared_ptr<IO> pio = pi->sidechain_input ()) {
-				samplecnt_t lat = l_out + _output->latency();
+				samplecnt_t lat = l_out + _output_latency;
 				pio->set_private_port_latencies (lat, true);
 				pio->set_public_port_latencies (lat, true);
 			}
@@ -4326,8 +4328,8 @@ Route::update_signal_latency (bool apply_to_delayline, bool* delayline_update_ne
 		}
 
 		(*i)->set_input_latency (l_in);
-		(*i)->set_playback_offset (_signal_latency + _output->latency ());
-		(*i)->set_capture_offset (_input->latency ());
+		(*i)->set_playback_offset (_signal_latency + _output_latency);
+		(*i)->set_capture_offset (in_latency);
 		if ((*i)->active ()) {
 			l_in += (*i)->effective_latency ();
 		}
@@ -4348,8 +4350,6 @@ Route::update_signal_latency (bool apply_to_delayline, bool* delayline_update_ne
 			*delayline_update_needed = true;
 		}
 	}
-
-	_output_latency = _output->latency ();
 
 	return _signal_latency;
 }
