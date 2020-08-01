@@ -61,7 +61,7 @@ BarController::BarController (Gtk::Adjustment& adj,
 	spinner.signal_activate().connect (mem_fun (*this, &BarController::entry_activated));
 	spinner.signal_focus_out_event().connect (mem_fun (*this, &BarController::entry_focus_out));
 	if (mc && mc->is_gain_like ()) {
-		spinner.set_digits (1); // 0.1 dB
+		spinner.set_digits (2); // 0.01 dB
 	} else {
 		spinner.set_digits (4);
 	}
