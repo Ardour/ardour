@@ -68,7 +68,8 @@ public:
 
 	enum VisibleNoteRange {
 		FullRange,
-		ContentsRange
+		ContentsRange,
+		OneNoteRange
 	};
 
 	Gtk::Adjustment note_range_adjustment;

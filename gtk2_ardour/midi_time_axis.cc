@@ -628,6 +628,11 @@ MidiTimeAxisView::append_extra_display_menu_items ()
 		          sigc::bind (sigc::mem_fun(*this, &MidiTimeAxisView::set_note_range),
 		                      MidiStreamView::ContentsRange, true)));
 
+	range_items.push_back (
+		MenuElem (_("One Note"),
+		          sigc::bind (sigc::mem_fun(*this, &MidiTimeAxisView::set_note_range),
+		                      MidiStreamView::OneNoteRange, true)));
+
 	items.push_back (MenuElem (_("Note Range"), *range_menu));
 	items.push_back (MenuElem (_("Note Mode"), *build_note_mode_menu()));
 	items.push_back (MenuElem (_("Channel Selector..."),

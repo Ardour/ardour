@@ -376,12 +376,19 @@ MidiStreamView::draw_note_lines()
 void
 MidiStreamView::set_note_range(VisibleNoteRange r)
 {
-	if (r == FullRange) {
+	switch (r) {
+	case FullRange:
 		_lowest_note = 0;
 		_highest_note = 127;
-	} else {
+		break;
+	case OneNoteRange:
+		_lowest_note = _data_note_min;
+		_highest_note = _data_note_min;
+		break;
+	default:
 		_lowest_note = _data_note_min;
 		_highest_note = _data_note_max;
+		break;
 	}
 
 	apply_note_range(_lowest_note, _highest_note, true);
