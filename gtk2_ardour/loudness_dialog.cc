@@ -91,7 +91,7 @@ LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 	, _rt_analysis_button (_("Realtime"), ArdourButton::led_default_elements, true)
 	, _start_analysis_button (_("Analyze"))
 	, _show_report_button (_("Show Detailed Report"))
-	, _custom_pos_button (_("Custom Gain Processor Position"), ArdourButton::led_default_elements, true)
+	, _custom_pos_button (_("Custom Amplifier Position"), ArdourButton::led_default_elements, true)
 	, _dbfs_adjustment ( 0.00, -90.00, 0.00, 0.1, 0.2)
 	, _dbtp_adjustment ( -1.0, -90.00, 0.00, 0.1, 0.2)
 	, _lufs_i_adjustment (-23.0, -90.00, 0.00, 0.1, 1.0)
@@ -223,7 +223,8 @@ LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 
 	set_tooltip (_custom_pos_button,
 		_("<b>When enabled</b> an amplifier processor is used to apply the gain. "
-		  "This allows for custom positons of the gain-stage in the master-bus' signal flow, potentially followed by a limiter. "
+		  "This allows for custom positoning of the gain-stage in the master-bus' signal flow, "
+		  "potentially followed by a limiter to conform to both loudness and peak requirements. "
 		  "Depending on limiter settings or DSP after the gain-stage, repeat loudness measurements may produce different results.\n"
 		  "<b>When disabled</b>, the gain is applied diretcly to the output of the master-bus. This results in an efficient and reliable volume adjustment."
 		 ));
