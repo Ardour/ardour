@@ -8,7 +8,7 @@
     <Color name="alert:orange" value="e58b05ff"/>
     <Color name="alert:red" value="f10000ff"/>
     <Color name="alert:ruddy" value="bb2828ff"/>
-    <Color name="alert:yellow" value="bba900ff"/>
+    <Color name="alert:yellow" value="e0e000ff"/>
     <Color name="theme:bg" value="3d3d3dff"/>  <!--gtk_background-->
     <Color name="theme:bg1" value="373737ff"/>  <!--gtk_audio_track-->
     <Color name="theme:bg2" value="101010ff"/>  <!--ruler base-->
