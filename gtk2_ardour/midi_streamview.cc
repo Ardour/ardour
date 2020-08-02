@@ -401,11 +401,11 @@ MidiStreamView::apply_note_range(uint8_t lowest, uint8_t highest, bool to_region
 	_lowest_note = lowest;
 
 	int const max_note_height = 20;  // This should probably be based on text size...
-	int const range = _highest_note - _lowest_note;
+	int const range = _highest_note == _lowest_note ? 1 : _highest_note - _lowest_note;
 	int const pixels_per_note = floor (child_height () / range);
 
-	/* do not grow note height beyond 10 pixels */
-	if (pixels_per_note > max_note_height) {
+	/* do not grow note height beyond 10 pixels (except when we want one note) */
+	if (pixels_per_note > max_note_height && range > 1) {
 
 		int const available_note_range = floor (child_height() / max_note_height);
 		int additional_notes = available_note_range - range;
