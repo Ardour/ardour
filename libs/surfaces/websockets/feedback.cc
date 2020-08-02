@@ -115,7 +115,20 @@ int
 ArdourFeedback::stop ()
 {
 	_periodic_connection.disconnect ();
-	_signal_connections.drop_connections ();
+	_transport_connections.drop_connections ();
+
+	for (StripConnectionMap::iterator it = _strip_connections.begin (); it != _strip_connections.end(); ++it) {
+		it->second->drop_connections ();
+	}
+	
+	_strip_connections.clear();
+
+	for (PluginConnectionMap::iterator it = _plugin_connections.begin (); it != _plugin_connections.end(); ++it) {
+		it->second->drop_connections ();
+	}
+
+	_plugin_connections.clear();
+
 	return 0;
 }
 
@@ -182,11 +195,11 @@ void
 ArdourFeedback::observe_transport ()
 {
 	ARDOUR::Session& sess = session ();
-	sess.TransportStateChange.connect (_signal_connections, MISSING_INVALIDATOR,
+	sess.TransportStateChange.connect (_transport_connections, MISSING_INVALIDATOR,
 	                                   boost::bind<void> (TransportObserver (), this), event_loop ());
-	sess.RecordStateChanged.connect (_signal_connections, MISSING_INVALIDATOR,
+	sess.RecordStateChanged.connect (_transport_connections, MISSING_INVALIDATOR,
 	                                 boost::bind<void> (RecordStateObserver (), this), event_loop ());
-	sess.tempo_map ().PropertyChanged.connect (_signal_connections, MISSING_INVALIDATOR,
+	sess.tempo_map ().PropertyChanged.connect (_transport_connections, MISSING_INVALIDATOR,
 	                                 boost::bind<void> (TempoObserver (), this), event_loop ());
 }
 
@@ -196,16 +209,23 @@ ArdourFeedback::observe_mixer ()
 	for (uint32_t strip_n = 0; strip_n < mixer ().strip_count (); ++strip_n) {
 		boost::shared_ptr<Stripable> strip = mixer ().nth_strip (strip_n);
 
-		strip->gain_control ()->Changed.connect (_signal_connections, MISSING_INVALIDATOR,
+		std::unique_ptr<PBD::ScopedConnectionList> connections (new PBD::ScopedConnectionList());
+
+		strip->gain_control ()->Changed.connect (*connections, MISSING_INVALIDATOR,
 		                                         boost::bind<void> (StripGainObserver (), this, strip_n), event_loop ());
 
 		if (strip->pan_azimuth_control ()) {
-			strip->pan_azimuth_control ()->Changed.connect (_signal_connections, MISSING_INVALIDATOR,
+			strip->pan_azimuth_control ()->Changed.connect (*connections, MISSING_INVALIDATOR,
 			                                                boost::bind<void> (StripPanObserver (), this, strip_n), event_loop ());
 		}
 
-		strip->mute_control ()->Changed.connect (_signal_connections, MISSING_INVALIDATOR,
+		strip->mute_control ()->Changed.connect (*connections, MISSING_INVALIDATOR,
 		                                         boost::bind<void> (StripMuteObserver (), this, strip_n), event_loop ());
+	
+		strip->DropReferences.connect (*connections, MISSING_INVALIDATOR,
+									   boost::bind (&ArdourFeedback::on_drop_strip, this, strip_n), event_loop ());
+
+		_strip_connections[strip_n] = std::move (connections);
 
 		observe_strip_plugins (strip_n, strip);
 	}
@@ -220,14 +240,21 @@ ArdourFeedback::observe_strip_plugins (uint32_t strip_n, boost::shared_ptr<ARDOU
 			break;
 		}
 
-		uint32_t                             bypass  = insert->plugin ()->designated_bypass_port ();
-		Evoral::Parameter                    param   = Evoral::Parameter (PluginAutomation, 0, bypass);
-		boost::shared_ptr<AutomationControl> control = insert->automation_control (param);
+		uint32_t                             	   bypass  = insert->plugin ()->designated_bypass_port ();
+		Evoral::Parameter                   	   param   = Evoral::Parameter (PluginAutomation, 0, bypass);
+		boost::shared_ptr<AutomationControl>	   control = insert->automation_control (param);
+		std::unique_ptr<PBD::ScopedConnectionList> connections (new PBD::ScopedConnectionList());
 
 		if (control) {
-			control->Changed.connect (_signal_connections, MISSING_INVALIDATOR,
+			control->Changed.connect (*connections, MISSING_INVALIDATOR,
 			                          boost::bind<void> (PluginBypassObserver (), this, strip_n, plugin_n), event_loop ());
 		}
+
+		insert->DropReferences.connect (*connections, MISSING_INVALIDATOR,
+										boost::bind (&ArdourFeedback::on_drop_plugin, this, strip_n, plugin_n), event_loop ());
+
+		// assume each strip can hold up to 65535 plugins
+		_plugin_connections[(strip_n << 16) | plugin_n] = std::move (connections);
 
 		observe_strip_plugin_param_values (strip_n, plugin_n, insert);
 	}
@@ -247,9 +274,35 @@ ArdourFeedback::observe_strip_plugin_param_values (uint32_t strip_n,
 			continue;
 		}
 
-		control->Changed.connect (_signal_connections, MISSING_INVALIDATOR,
+		PBD::ScopedConnectionList *connections = _plugin_connections[(strip_n << 16) | plugin_n].get();
+
+		control->Changed.connect (*connections, MISSING_INVALIDATOR,
 		                          boost::bind<void> (PluginParamValueObserver (), this, strip_n, plugin_n, param_n,
 		                                             boost::weak_ptr<AutomationControl>(control)),
 		                          event_loop ());
 	}
+}
+
+void
+ArdourFeedback::on_drop_strip (uint32_t strip_n)
+{
+	for (uint32_t plugin_n = 0;; ++plugin_n) {
+		boost::shared_ptr<PluginInsert> insert = mixer ().strip_plugin_insert (strip_n, plugin_n);
+		if (!insert) {
+			break;
+		}
+
+		on_drop_plugin (strip_n, plugin_n);
+	}
+
+	_strip_connections[strip_n]->drop_connections ();
+	_strip_connections.erase (strip_n);
+}
+
+void
+ArdourFeedback::on_drop_plugin (uint32_t strip_n, uint32_t plugin_n)
+{
+	uint32_t key = (strip_n << 16) | plugin_n;	
+	_plugin_connections[key]->drop_connections ();
+	_plugin_connections.erase (key);
 }
