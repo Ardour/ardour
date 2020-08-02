@@ -270,18 +270,8 @@ MidiStreamView::redisplay_track ()
 
 	list<RegionView*>::iterator i;
 
-	// Load models if necessary, and find note range of all our contents
-	_range_dirty = false;
-	_data_note_min = 127;
-	_data_note_max = 0;
-	_trackview.track()->playlist()->foreach_region(
-		sigc::mem_fun (*this, &StreamView::update_contents_metrics));
-
-	// No notes, use default range
-	if (!_range_dirty) {
-		_data_note_min = 60;
-		_data_note_max = 71;
-	}
+    // Load models if necessary, and find note range of all our contents;
+    read_data_note_range_from_regions();
 
 	// Flag region views as invalid and disable drawing
 	for (i = region_views.begin(); i != region_views.end(); ++i) {
@@ -300,6 +290,23 @@ MidiStreamView::redisplay_track ()
 	apply_note_range(_lowest_note, _highest_note, false);
 }
 
+
+void
+MidiStreamView::read_data_note_range_from_regions()
+{
+	// Load models if necessary, and find note range of all our contents
+	_range_dirty = false;
+	_data_note_min = 127;
+	_data_note_max = 0;
+	_trackview.track()->playlist()->foreach_region(
+		sigc::mem_fun (*this, &StreamView::update_contents_metrics));
+
+	// No notes, use default range
+	if (!_range_dirty) {
+		_data_note_min = 60;
+		_data_note_max = 71;
+	}
+}
 
 void
 MidiStreamView::update_contents_height ()
@@ -386,6 +393,20 @@ MidiStreamView::set_note_range(VisibleNoteRange r)
 		_highest_note = _data_note_min;
 		break;
 	default:
+		/* range was one note so need read note data range again 
+		 * (if there was other notes range will be expanded) 
+		 */
+		if (_lowest_note == _highest_note)
+			read_data_note_range_from_regions();
+		/* the range read may still contain only one note, 
+		 *  if so, we have to enlarge it manually
+		 */
+		if (_data_note_min == _data_note_max) {
+			if (_data_note_max < 117)
+				_data_note_max += 11;
+			else
+				_data_note_min -= 11;
+		}
 		_lowest_note = _data_note_min;
 		_highest_note = _data_note_max;
 		break;

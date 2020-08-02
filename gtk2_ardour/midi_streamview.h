@@ -134,6 +134,7 @@ private:
 	void draw_note_lines();
 	bool update_data_note_range(uint8_t min, uint8_t max);
 	void update_contents_metrics(boost::shared_ptr<ARDOUR::Region> r);
+	void read_data_note_range_from_regions();
 
 	void color_handler ();
 
