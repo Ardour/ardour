@@ -20,6 +20,7 @@
 #define _ardour_surface_websockets_feedback_h_
 
 #include <boost/shared_ptr.hpp>
+#include <boost/unordered_map.hpp>
 #include <glibmm/main.h>
 
 #include "component.h"
@@ -42,8 +43,14 @@ public:
 
 private:
 	Glib::Threads::Mutex      _client_state_lock;
-	PBD::ScopedConnectionList _signal_connections;
+	PBD::ScopedConnectionList _transport_connections;
 	sigc::connection          _periodic_connection;
+
+	typedef boost::unordered_map<uint32_t, std::unique_ptr<PBD::ScopedConnectionList>> StripConnectionMap;
+	StripConnectionMap _strip_connections;
+
+	typedef boost::unordered_map<uint32_t, std::unique_ptr<PBD::ScopedConnectionList>> PluginConnectionMap;
+	StripConnectionMap _plugin_connections;	// also holds connections to parameters
 
 	bool poll () const;
 
@@ -52,6 +59,9 @@ private:
 	void observe_strip_plugins (uint32_t, boost::shared_ptr<ARDOUR::Stripable>);
 	void observe_strip_plugin_param_values (uint32_t, uint32_t,
 	                                        boost::shared_ptr<ARDOUR::PluginInsert>);
+
+	void on_drop_strip (uint32_t);
+	void on_drop_plugin (uint32_t, uint32_t);
 };
 
 #endif // _ardour_surface_websockets_feedback_h_
