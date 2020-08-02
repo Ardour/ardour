@@ -258,7 +258,7 @@ LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 	l->set_alignment (ALIGN_LEFT, ALIGN_TOP);
 	l->set_markup (_(
 	  "<b>Loudness Analysis</b>\n\n"
-	  "This allows to analyze the loudness of of the signal at the master-bus "
+	  "This allows the user to analyze the loudness of of the signal at the master-bus "
 	  "output of the complete session, as it would be exported.\n"
 	  "The result can be used to interactively normalize the session's loudness level "
 	  "(as opposed to automatic normalization during export). "
@@ -270,7 +270,7 @@ LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 	l->set_line_wrap ();
 	l->set_alignment (ALIGN_LEFT, ALIGN_TOP);
 	l->set_markup (_(
-	  "By default a faster than realtime export is is used to asses the loudness of the "
+	  "By default, a faster-than-realtime export is used to assess the loudness of the "
 	  "session. If any outboard gear is used, a <i>realtime</i> export is available, to "
 	  "play at normal speed."
 	));
