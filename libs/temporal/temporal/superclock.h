@@ -25,7 +25,7 @@
 
 namespace Temporal {
 
-typedef uint64_t superclock_t;
+typedef int64_t superclock_t;
 
 extern superclock_t superclock_ticks_per_second;
 
