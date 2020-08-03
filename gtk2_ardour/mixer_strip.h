@@ -239,7 +239,7 @@ private:
 	void setup_comment_button ();
 
 	void loudess_analysis_button_clicked ();
-	bool loudess_analysis_button_pressed (GdkEventButton*);
+	bool volume_controller_button_pressed (GdkEventButton*);
 
 	ArdourWidgets::ArdourButton group_button;
 	RouteGroupMenu*             group_menu;

@@ -688,6 +688,7 @@
       <menuitem action='disk-io-postfader'/>
       <menuitem action='disk-io-custom'/>
     </menu>
+    <menuitem action='custom-volume-pos'/>
     <separator/>
     <menuitem action='clear'/>
     <menuitem action='clear_pre'/>

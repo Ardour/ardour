@@ -613,13 +613,12 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
 			_loudess_analysis_button = manage (new ArdourButton (S_("Loudness|LAN")));
 			_loudess_analysis_button->signal_clicked.connect (mem_fun (*this, &MixerStrip::loudess_analysis_button_clicked));
-			_loudess_analysis_button->signal_button_press_event().connect (mem_fun (*this, &MixerStrip::loudess_analysis_button_pressed), false);
-			_volume_controller->signal_button_press_event().connect (mem_fun (*this, &MixerStrip::loudess_analysis_button_pressed), false);
+			_volume_controller->signal_button_press_event().connect (mem_fun (*this, &MixerStrip::volume_controller_button_pressed), false);
 
 			set_tooltip (*_volume_controller, _("Master output volume"));
 			set_tooltip (_loudess_analysis_button, _("Measure loudness of the session, normalize master output volume"));
 
-			master_volume_table.attach (*_loudess_analysis_button, 0, 1, 0, 1);
+			master_volume_table.attach (*_loudess_analysis_button, 0, 2, 0, 1);
 			master_volume_table.attach (*_volume_controller, 0, 2, 1, 2);
 
 			_loudess_analysis_button->show ();
@@ -1997,7 +1996,7 @@ MixerStrip::loudess_analysis_button_clicked ()
 }
 
 bool
-MixerStrip::loudess_analysis_button_pressed (GdkEventButton* ev)
+MixerStrip::volume_controller_button_pressed (GdkEventButton* ev)
 {
 	using namespace Menu_Helpers;
 	if (Keyboard::is_context_menu_event (ev)) {
@@ -2006,7 +2005,7 @@ MixerStrip::loudess_analysis_button_pressed (GdkEventButton* ev)
 		_master_volume_menu->set_name ("ArdourContextMenu");
 		MenuList& items = _master_volume_menu->items();
 		items.clear ();
-		items.push_back (CheckMenuElem (_("Custom Loudness Gain Processor Position")));
+		items.push_back (CheckMenuElem (_("Custom Volume Ctrl. Pos.")));
 		Gtk::CheckMenuItem* cmi = static_cast<Gtk::CheckMenuItem*> (&items.back());
 		cmi->set_active (!_route->volume_applies_to_output ());
 		cmi->signal_toggled().connect (sigc::bind (sigc::mem_fun (_route.get(), &Route::set_volume_applies_to_output), !_route->volume_applies_to_output ()));

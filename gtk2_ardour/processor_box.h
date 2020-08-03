@@ -564,6 +564,7 @@ private:
 	void get_selected_processors (ProcSelection&) const;
 
 	void set_disk_io_position (ARDOUR::DiskIOPoint);
+	void toggle_custom_loudness_pos ();
 
 	bool can_cut() const;
 	bool stub_processor_selected() const;
@@ -611,6 +612,7 @@ private:
 	static void rb_ab_plugins ();
 	static void rb_manage_pins ();
 	static void rb_set_disk_io_position (ARDOUR::DiskIOPoint);
+	static void rb_toggle_custom_loudness_pos ();
 	static void rb_edit ();
 	static void rb_edit_generic ();
 
@@ -634,7 +636,7 @@ private:
 	XMLNode* entry_gui_object_state (ProcessorEntry *);
 	PBD::ScopedConnection amp_config_connection;
 
-	static bool _ignore_disk_io_change;
+	static bool _ignore_rb_change;
 };
 
 #endif /* __ardour_gtk_processor_box__ */

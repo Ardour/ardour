@@ -116,7 +116,7 @@ using namespace Gtkmm2ext;
 using namespace ArdourWidgets;
 
 ProcessorBox*  ProcessorBox::_current_processor_box = 0;
-bool           ProcessorBox::_ignore_disk_io_change = false;
+bool           ProcessorBox::_ignore_rb_change = false;
 
 RefPtr<Action> ProcessorBox::paste_action;
 RefPtr<Action> ProcessorBox::cut_action;
@@ -2345,12 +2345,21 @@ ProcessorBox::show_processor_menu (int arg)
 	manage_pins_action->set_sensitive (pi != 0);
 	if (boost::dynamic_pointer_cast<Track>(_route)) {
 		disk_io_action->set_sensitive (true);
-		PBD::Unwinder<bool> uw (_ignore_disk_io_change, true);
+		PBD::Unwinder<bool> uw (_ignore_rb_change, true);
 		ActionManager::get_toggle_action (X_("ProcessorMenu"), "disk-io-prefader")->set_active (_route->disk_io_point () == DiskIOPreFader);
 		ActionManager::get_toggle_action (X_("ProcessorMenu"), "disk-io-postfader")->set_active (_route->disk_io_point () == DiskIOPostFader);
 		ActionManager::get_toggle_action (X_("ProcessorMenu"), "disk-io-custom")->set_active (_route->disk_io_point () == DiskIOCustom);
 	} else {
 		disk_io_action->set_sensitive (false);
+	}
+
+	RefPtr<ToggleAction> volume_pos_action = ActionManager::get_toggle_action (X_("ProcessorMenu"), "custom-volume-pos");
+	if (_route->is_master () && Config->get_use_master_volume ()) {
+		PBD::Unwinder<bool> uw (_ignore_rb_change, true);
+		volume_pos_action->set_sensitive (true);
+		volume_pos_action->set_active (!_route->volume_applies_to_output ());
+	} else {
+		volume_pos_action->set_sensitive (false);
 	}
 
 	/* allow editing with an Ardour-generated UI for plugin inserts with editors */
@@ -3642,6 +3651,12 @@ ProcessorBox::set_disk_io_position (DiskIOPoint diop)
 }
 
 void
+ProcessorBox::toggle_custom_loudness_pos ()
+{
+	_route->set_volume_applies_to_output (!_route->volume_applies_to_output ());
+}
+
+void
 ProcessorBox::clear_processors ()
 {
 	string prompt;
@@ -3932,6 +3947,9 @@ ProcessorBox::register_actions ()
 	ActionManager::register_toggle_action (processor_box_actions, X_("disk-io-postfader"), _("Post-Fader"), sigc::bind (sigc::ptr_fun (ProcessorBox::rb_set_disk_io_position), DiskIOPostFader));
 	ActionManager::register_toggle_action (processor_box_actions, X_("disk-io-custom"), _("Custom"), sigc::bind (sigc::ptr_fun (ProcessorBox::rb_set_disk_io_position), DiskIOCustom));
 
+	/* Loudness Volume Control */
+	ActionManager::register_toggle_action (processor_box_actions, X_("custom-volume-pos"), _("Custom Volume Ctrl. Pos."), sigc::ptr_fun (ProcessorBox::rb_toggle_custom_loudness_pos));
+
 	/* show editors */
 	edit_action = ActionManager::register_action (
 		processor_box_actions, X_("edit"), _("Edit..."),
@@ -3966,14 +3984,20 @@ ProcessorBox::rb_ab_plugins ()
 void
 ProcessorBox::rb_set_disk_io_position (DiskIOPoint diop)
 {
-	if (_current_processor_box == 0) {
-		return;
-	}
-	if (_ignore_disk_io_change) {
+	if (_current_processor_box == 0 || _ignore_rb_change) {
 		return;
 	}
 
 	_current_processor_box->set_disk_io_position (diop);
+}
+
+void
+ProcessorBox::rb_toggle_custom_loudness_pos ()
+{
+	if (_current_processor_box == 0 || _ignore_rb_change) {
+		return;
+	}
+	_current_processor_box->toggle_custom_loudness_pos ();
 }
 
 void
