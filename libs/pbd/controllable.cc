@@ -156,7 +156,7 @@ Controllable::dump_registry ()
 	for (Controllables::iterator i = registry.begin(); i != registry.end(); ++i, ++cnt) {
 		cout << "CTRL: " << (*i)->name() << "\n";
 	}
-	cout << "Total number of registered sontrollables: " << cnt << "\n";
+	cout << "Total number of registered controllables: " << cnt << "\n";
 }
 
 void
