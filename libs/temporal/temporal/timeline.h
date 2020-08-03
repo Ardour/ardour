@@ -142,12 +142,10 @@ class timepos_t : public int62_t  {
 	   at other positions on the timeline.
 	*/
 
-
 	timecnt_t distance (timecnt_t const & p) const;
-	timecnt_t distance (timepos_t const & p) const; // { if (is_beats() == p.is_beats()) return timecnt_t (v - p.val()); return expensive_distance (p); }
-	timecnt_t distance (superclock_t s) const; // { if (is_samples()) return timecnt_t (v, v - s); }
-	timecnt_t distance (Temporal::Beats const & b) const; // { if (is_beats()) return timecnt_t (v, ....); return expensive_distance (b); }
-
+	timecnt_t distance (superclock_t s) const;
+	timecnt_t distance (Temporal::Beats const & b) const;
+	timecnt_t distance (timepos_t const & p) const;
 
 	/* computes a new position value that is @param d earlier than this */
 
@@ -220,6 +218,12 @@ class timepos_t : public int62_t  {
 	bool expensive_lte (timecnt_t const &) const;
 	bool expensive_gt (timecnt_t const &) const;
 	bool expensive_gte(timecnt_t const &) const;
+
+	/* used to compute distance when time domains do not match */
+
+	timecnt_t expensive_distance (timepos_t const & p) const;
+	timecnt_t expensive_distance (superclock_t s) const;
+	timecnt_t expensive_distance (Temporal::Beats const & b) const;
 
 	timepos_t expensive_add (Temporal::Beats const &) const;
 	timepos_t expensive_add (superclock_t s) const;
