@@ -58,12 +58,13 @@ using namespace ArdourWidgets;
 LoudnessDialog::LoudnessPreset LoudnessDialog::presets[] =
 {
 	/*                   | dbFS   dBTP   LUFS   short   mom.    | FS,  TP , int, sht, mom |maxIntg|  notes */
-	{"EBU R128",         { false, true,  true,  false, false},  {  0, -1.0, -23,   0,   0 }, {-22.5,  -23.5}}, // +/- 0.5 LUFS
-	{"EBU R128 S1",      { false, true,  true,  true,  false},  {  0, -1.0, -23, -18,   0 }, {-22.5,  -23.5}}, // +/- 0.5 LUFS
-	{"AES Streaming",    { false, true,  true,  false, false},  {  0, -1.0, -18,   0,   0 }, {-16.0,  -20.0}}, // min/max Integrated: -20 / -16 LUFS
+	{"EBU R128",         { false, true,  true,  false, false},  {  0, -1.0, -23,   0,   0 }, {-22.5,  -23.5}}, // +/- 0.5 LU
+	{"EBU R128 S1",      { false, true,  true,  true,  false},  {  0, -1.0, -23, -18,   0 }, {-22.5,  -23.5}}, // +/- 0.5 LU
+	{"ATSC A/85",        { false, true,  true,  true,  false},  {  0, -2.0, -24,   0,   0 }, {-22.0,  -26.0}}, // +/- 2 LU
+	{"AES Streaming",    { false, true,  true,  false, false},  {  0, -1.0, -18,   0,   0 }, {-16.0,  -20.0}}, // min/max Integrated: -20 / -16 LUFS - same as "ASWG-R001 PORTABLE"
+	{"ASWG-R001 HOME",   { false, true,  true,  true,  false},  {  0, -1.0, -24,   0,   0 }, {-22.0,  -26.0}}, // +/- 2 LU
 	{"Digital Peak",     { true,  false, false, false, false},  {  0,  0.0,   0,   0,   0 }, {  0.0, -200.0}},
 	{"CD",               { true,  true,  true,  false, false},  {  0, -0.1,  -9,   0,   0 }, {  0.0, -200.0}},
-	{"Classical",        { false, true,  false, false, true },  {  0, -1.0, -18, -17, -16 }, {-16.0,  -24.0}}, // generic, momentrary based
 
 	{"Amazon Music",     { false, true,  true,  false, false},  {  0, -2.0, -14,   0,   0 }, { -9.0,  -19.0}}, // -9 to -19 LUFS
 	{"Apple Music",      { false, true,  true,  false, false},  {  0, -1.0, -16,   0,   0 }, {-15.0,  -17.0}}, // (+/- 1.0 LU)
