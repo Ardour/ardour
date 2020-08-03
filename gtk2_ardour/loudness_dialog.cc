@@ -259,10 +259,8 @@ LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 	l->set_alignment (ALIGN_LEFT, ALIGN_TOP);
 	l->set_markup (_(
 	  "<b>Loudness Analysis</b>\n\n"
-	  "This allows the user to analyze the loudness of the signal at the master-bus "
-	  "output of the complete session, as it would be exported.\n"
-	  "The result can be used to interactively normalize the session's loudness level "
-	  "(as opposed to automatic normalization during export). "
+	  "This allows the user to analyze and conform the loudness of the signal at the master-bus "
+	  "output of the complete session, as it would be exported. "
 	  "When using this feature, remember to disable normalization in the session export profile."
 	));
 	t->attach (*l,                     0, 1, 0, 2, EXPAND|FILL, FILL, 8, 2);
