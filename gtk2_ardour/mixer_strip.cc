@@ -2349,7 +2349,12 @@ MixerStrip::set_button_names ()
 		break;
 
 	default:
-		mute_button->set_text (S_("Mute|M"));
+		if (is_master ()) {
+			/* master bus has no solo button, "Mute" fits in narrow mode */
+			mute_button->set_text (_("Mute"));
+		} else {
+			mute_button->set_text (S_("Mute|M"));
+		}
 		monitor_input_button->set_text (S_("MonitorInput|I"));
 		monitor_disk_button->set_text (S_("MonitorDisk|D"));
 		if (monitor_section_button) {
