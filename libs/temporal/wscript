@@ -24,7 +24,7 @@ APPNAME = 'temporal'
 VERSION = TEMPORAL_VERSION
 I18N_PACKAGE = 'libtemporal'
 
-temporal_sources = [ 'time.cc', 'bbt_time.cc', 'tempo.cc' ]
+temporal_sources = [ 'time.cc', 'bbt_time.cc', 'tempo.cc', 'timeline.cc' ]
 
 def options(opt):
     autowaf.set_options(opt)

@@ -30,6 +30,8 @@
 #include <glibmm/threads.h>
 
 #include "pbd/enum_convert.h"
+#include "pbd/integer_division.h"
+#include "pbd/rcu.h"
 #include "pbd/signals.h"
 #include "pbd/statefuldestructible.h"
 
@@ -224,10 +226,10 @@ class LIBTEMPORAL_API Tempo : public Rampable {
 
 	static void superbeats_to_beats_ticks (int64_t sb, int32_t& b, int32_t& t) {
 		b = sb / big_numerator;
-		uint64_t remain = sb - (b * big_numerator);
+		int64_t remain = sb - (b * big_numerator);
 		t = int_div_round ((Temporal::ticks_per_beat * remain), big_numerator);
 	}
-	
+
 	bool active () const { return _active; }
 	void set_active (bool yn) { _active = yn; }
 
@@ -566,6 +568,54 @@ typedef std::list<TempoMapPoint> TempoMapPoints;
 
 class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 {
+	/* Any given thread must be able to carry out tempo-related arithmetic
+	 * and time domain conversions using a consistent version of a
+	 * TempoMap. The map could be updated at any time, and for any reason
+	 * (typically from a GUI thread), but some other thread could be
+	 * using the map to convert from audio to music time (for example).
+	 *
+	 * We do not want to use locks for this - this math may happen in a
+	 * realtime thread, and even worse, the lock may need to be held for
+	 * long periods of time in order to have the desired effect: a thread
+	 * may be performing some tempo-based arithmetic as part of a complex
+	 * operation that requires multiple steps. The tempo map it uses must
+	 * remain consistent across all steps, and so we would have to hold the
+	 * lock across them all. That would create awkward and difficult
+	 * semantics for map users - somewhat arbitrary rules about how long
+	 * one could hold the map for, etc.
+	 *
+	 * Elsewhere in the codebase, we use RCU to solve this sort of
+	 * issue. For example, if we need to operate an the current list of
+	 * Routes, we get read-only copy of the list, and iterate over it,
+	 * knowing that even if the canonical version is being changed, the
+	 * copy we are using will not.
+	 *
+	 * However, the tempo map's use is often implicit rather than
+	 * explicit. The callstack to convert between an audio domain time and
+	 * a music domain time should not require passing a tempo map into
+	 * every call.
+	 *
+	 * The approach taken here is to use a combination of RCU and
+	 * thread-local variables. Any given thread is by definition ... single
+	 * threaded. If the thread has a thread-local copy of a tempo map, it
+	 * will not change except at explicit calls to change it. The tempo map
+	 * can be accessed from any method executed by the thread. But the
+	 * relationship between the thread-local copy and "actual" tempo map(s)
+	 * is managed via RCU, meaning that read-only access is cheap (no
+	 * actual copy required).
+	 *
+	 */
+  public:
+	typedef boost::shared_ptr<TempoMap> SharedPtr;
+  private:
+	static Glib::Threads::Private<SharedPtr> _tempo_map_p;
+	static SerializedRCUManager<TempoMap> _map_mgr;
+  public:
+	static void update_thread_tempo_map() { SharedPtr p = _map_mgr.reader(); _tempo_map_p.set (&p); }
+	static SharedPtr fetch() { update_thread_tempo_map(); SharedPtr p = *_tempo_map_p.get(); return p; }
+
+	/* and now on with the rest of the show ... */
+
    public:
 	TempoMap (Tempo const & initial_tempo, Meter const & initial_meter, samplecnt_t sr);
 	~TempoMap();
