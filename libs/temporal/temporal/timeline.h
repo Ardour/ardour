@@ -201,9 +201,12 @@ class timepos_t : public int62_t  {
   private:
 	int64_t v;
 
-	/* special constructor for max_timepos */
-
 	static timepos_t _max_timepos;
+
+	/* these can only be called after verifying that the time domain does
+	 * not match the relevant one i.e. call _beats() to get a Beats value
+	 * when this is using the audio time doamin
+	 */
 
 	superclock_t _superclocks() const;
 	int64_t _ticks() const;
