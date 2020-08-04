@@ -137,14 +137,68 @@ timecnt_t::operator%= (timecnt_t const & d)
 bool
 timecnt_t::string_to (std::string const & str)
 {
-#warning paul how to do this with two timepos_t
+	superclock_t s;
+	Beats beats;
+	char sep;
+
+	if (isdigit (str[0])) {
+		/* old school position format: we assume samples */
+		std::stringstream ss (str);
+		ss >> s;
+		_distance = s;
+		std::cerr << "deserialized timecnt from older " << str << " as " << *this << std::endl;
+		return true;
+	}
+
+	std::stringstream ss (str.substr (1));
+
+	switch (str[0]) {
+	case 'a':
+		ss >> s;
+		_distance = s;
+		break;
+	case 'b':
+		ss >> beats;
+		_distance = beats;
+		break;
+	}
+
+	/* eat separator character */
+
+	ss >> sep;
+
+	/* grab what's left, generate a new string and parse _position with it */
+
+	std::string remaining;
+	ss >> remaining;
+
+	_position.string_to (remaining);
+
+	return true;
 }
 
 std::string
 timecnt_t::to_string () const
 {
-#warning paul how to do this with two timepos_t
-	return std::string();
+	std::stringstream ss;
+
+	if (_distance.flagged()) {
+		ss << 'b';
+	} else {
+		ss << 'a';
+	}
+
+	ss << _distance.val();
+
+	/* add a separator. character doesn't matter as long as it will never be
+	   parsed as part of a numerical value. Using '@' makes it "read
+	   nicely" e.g. "3 beats at superclock 28229992292"
+	*/
+
+	ss << '@';
+	ss << _position.to_string();
+
+	return ss.str();
 }
 
 /* timepos */
