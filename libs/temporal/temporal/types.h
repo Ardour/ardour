@@ -20,6 +20,7 @@
 #define __libpbd_position_types_h__
 
 #include <stdint.h>
+#include <boost/rational.hpp>
 
 namespace Temporal {
 
@@ -50,6 +51,8 @@ static const samplecnt_t max_samplecnt = INT64_MAX;
 */
 
 static const int32_t ticks_per_beat = 1920;
+
+typedef boost::rational<int64_t> ratio_t;
 
 enum TimeDomain {
 	/* simple ordinals, since these are mutually exclusive */
