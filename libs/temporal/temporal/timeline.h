@@ -198,6 +198,10 @@ class timepos_t : public int62_t  {
 
   private:
 	int64_t v;
+	/* special private constructor for use when constructing timepos_t as a
+	   return value using arithmetic ops
+	*/
+	explicit timepos_t (bool b, int64_t v) : int62_t (b, v) {}
 
 	static timepos_t _max_timepos;
 

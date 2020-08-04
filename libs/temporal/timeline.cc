@@ -264,14 +264,14 @@ timepos_t::operator/(ratio_t const & n) const
 
 	/* note: v / (N/D) = (v * D) / N */
 
-	return timepos_t (int_div_round (val() * n.denominator(), n.numerator()));
+	return timepos_t (is_beats(), int_div_round (val() * n.denominator(), n.numerator()));
 }
 
 timepos_t
 timepos_t::operator*(ratio_t const & n) const
 {
 	assert (n >= 0); /* do not allow a position to become negative via multiplication */
-	return timepos_t (int_div_round (val() * n.numerator(), n.denominator()));
+	return timepos_t (is_beats(), int_div_round (val() * n.numerator(), n.denominator()));
 }
 
 timepos_t &
