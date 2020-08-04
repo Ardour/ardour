@@ -465,8 +465,9 @@ timepos_t:: operator+= (superclock_t s)
 		v += s;
 	} else {
 		TempoMap::SharedPtr tm (TempoMap::fetch());
-#warning paul imeplement TempoMap::beats_plus_superclock_as_beats
+		v = build (true, tm->scwalk_to_quarters (beats(), s).to_ticks());
 	}
+
 	return *this;
 }
 
