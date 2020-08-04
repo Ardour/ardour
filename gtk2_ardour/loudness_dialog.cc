@@ -16,6 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <gtkmm/alignment.h>
 #include <gtkmm/label.h>
 #include <gtkmm/stock.h>
 
@@ -110,6 +111,7 @@ LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 	/* query initial gain */
 	_gain_out = accurate_coefficient_to_dB (_session->master_volume()->get_value());
 
+	/* setup styles */
 	_start_analysis_button.set_name ("generic button");
 	_rt_analysis_button.set_name ("generic button");
 	_show_report_button.set_name ("generic button");
@@ -133,6 +135,16 @@ LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 	_lufs_s_btn.set_led_left (true);
 	_lufs_m_btn.set_led_left (true);
 
+	_start_analysis_button.set_can_focus (true);
+	_rt_analysis_button.set_can_focus (true);
+	_show_report_button.set_can_focus (true);
+	_custom_pos_button.set_can_focus (true);
+	_dbfs_btn.set_can_focus (true);
+	_dbtp_btn.set_can_focus (true);
+	_lufs_i_btn.set_can_focus (true);
+	_lufs_s_btn.set_can_focus (true);
+	_lufs_m_btn.set_can_focus (true);
+
 	_dbfs_label.modify_font (UIConfiguration::instance().get_NormalMonospaceFont());
 	_dbtp_label.modify_font (UIConfiguration::instance().get_NormalMonospaceFont());
 	_lufs_i_label.modify_font (UIConfiguration::instance().get_NormalMonospaceFont());
@@ -150,6 +162,7 @@ LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 	_gain_total_label.modify_font (UIConfiguration::instance().get_NormalMonospaceFont());
 	_gain_exceeds_label.modify_font (UIConfiguration::instance().get_NormalFont());
 
+	/* result display layout */
 #define ROW row, row +1
 
 	int row;
@@ -250,20 +263,26 @@ LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 	_result_box.pack_start (*t, false, false, 6);
 	_result_box.pack_start (_conformity_expander, false, false, 6);
 
+	/* analysis progress layout */
 	_progress_box.pack_start (_progress_bar, false, false, 6);
 
+	/* setup and info layout */
 	t = manage (new Table (2, 3, false));
 	t->set_spacings (4);
+	l = manage (new Label ());
+	l->set_markup (_("<b>Loudness Analysis</b>\n"));
+	l->set_alignment (ALIGN_LEFT, ALIGN_TOP);
+	t->attach (*l, 0, 1, 0, 1, EXPAND|FILL, FILL, 8, 2);
+
 	l = manage (new Label ());
 	l->set_line_wrap ();
 	l->set_alignment (ALIGN_LEFT, ALIGN_TOP);
 	l->set_markup (_(
-	  "<b>Loudness Analysis</b>\n\n"
 	  "This allows the user to analyze and conform the loudness of the signal at the master-bus "
 	  "output of the complete session, as it would be exported. "
 	  "When using this feature, remember to disable normalization in the session export profile."
 	));
-	t->attach (*l,                     0, 1, 0, 2, EXPAND|FILL, FILL, 8, 2);
+	t->attach (*l, 0, 1, 1, 2, EXPAND|FILL, FILL, 8, 2);
 
 	l = manage (new Label ());
 	l->set_line_wrap ();
@@ -273,13 +292,19 @@ LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 	  "session. If any outboard gear is used, a <i>realtime</i> export is available, to "
 	  "play at normal speed."
 	));
-	t->attach (*l,                     0, 1, 2, 4, EXPAND|FILL, FILL, 8, 2);
+	t->attach (*l, 0, 1, 2, 3, EXPAND|FILL, FILL, 8, 2);
 
-	t->attach (_start_analysis_button, 1, 2, 0, 1, FILL, SHRINK, 2, 0);
-	t->attach (_rt_analysis_button,    1, 2, 2, 3, FILL, SHRINK, 2, 0);
+	Alignment* align = manage (new Alignment (0, 0, 1, 0));
+	align->add (_start_analysis_button);
+	t->attach (*align, 1, 2, 1, 2, FILL, FILL, 2, 0);
+
+	align = manage (new Alignment (0, 0, 1, 0));
+	align->add (_rt_analysis_button);
+	t->attach (*align, 1, 2, 2, 3, FILL, FILL, 2, 0);
 
 	_setup_box.pack_start (*t, false, false, 6);
 
+	/* global layout */
 	get_vbox()->pack_start (_setup_box);
 	get_vbox()->pack_start (_progress_box);
 	get_vbox()->pack_start (_result_box);
@@ -289,6 +314,7 @@ LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 	_ok_button     = add_button (Stock::APPLY, RESPONSE_APPLY);
 	_cancel_button = add_button (Stock::CANCEL, RESPONSE_CANCEL);
 
+	/* fill in presets */
 	for (size_t i = 0; i < sizeof (presets) / sizeof (LoudnessDialog::LoudnessPreset); ++i) {
 		using namespace Gtkmm2ext;
 		_preset_dropdown.AddMenuElem (MenuElemNoMnemonic (presets[i].name, sigc::bind (sigc::mem_fun (*this, &LoudnessDialog::load_preset), i)));
@@ -300,6 +326,7 @@ LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 
 	_gain_out_label.set_text (string_compose (_("%1 dB"), std::setprecision (2), std::showpos, std::fixed, _gain_out));
 
+	/* connect signals */
 	_cancel_button->signal_clicked().connect (sigc::mem_fun (this, &LoudnessDialog::cancel_analysis));
 	_dbfs_spinbutton.signal_value_changed().connect (mem_fun (*this, &LoudnessDialog::update_settings));
 	_dbtp_spinbutton.signal_value_changed().connect (mem_fun (*this, &LoudnessDialog::update_settings));
@@ -313,7 +340,6 @@ LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 	_lufs_i_btn.signal_clicked.connect (mem_fun (*this, &LoudnessDialog::update_settings));
 	_lufs_s_btn.signal_clicked.connect (mem_fun (*this, &LoudnessDialog::update_settings));
 	_lufs_m_btn.signal_clicked.connect (mem_fun (*this, &LoudnessDialog::update_settings));
-
 	_conformity_expander.property_expanded().signal_changed().connect( sigc::mem_fun(*this, &LoudnessDialog::toggle_conformity_display));
 
 	_ok_button->set_sensitive (false);
