@@ -141,5 +141,6 @@ private:
 
 	float _gain_out;
 	float _gain_norm;
+	bool  _ignore_preset;
 	bool  _ignore_change;
 };

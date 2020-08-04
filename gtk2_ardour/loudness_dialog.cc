@@ -59,6 +59,7 @@ using namespace ArdourWidgets;
 LoudnessDialog::LoudnessPreset LoudnessDialog::presets[] =
 {
 	/*                   | dbFS   dBTP   LUFS   short   mom.    | FS,  TP , int, sht, mom |maxIntg|  notes */
+	{"-Analysis Only-",  { false, false, false, false, false},  {  0,  0.0,   0,   0,   0 }, {  0.0, -200.0}},
 	{"EBU R128",         { false, true,  true,  false, false},  {  0, -1.0, -23,   0,   0 }, {-22.5,  -23.5}}, // +/- 0.5 LU
 	{"EBU R128 S1",      { false, true,  true,  true,  false},  {  0, -1.0, -23, -18,   0 }, {-22.5,  -23.5}}, // +/- 0.5 LU
 	{"ATSC A/85",        { false, true,  true,  true,  false},  {  0, -2.0, -24,   0,   0 }, {-22.0,  -26.0}}, // +/- 2 LU
@@ -76,7 +77,7 @@ LoudnessDialog::LoudnessPreset LoudnessDialog::presets[] =
 	{"Youtube",          { false, true,  true,  false, false},  {  0, -1.0, -14,   0,   0 }, {-13.0,  -15.0}}, // -13 to -15 LUFS
 };
 
-LoudnessDialog::LoudnessPreset LoudnessDialog::_preset = LoudnessDialog::presets [0];
+LoudnessDialog::LoudnessPreset LoudnessDialog::_preset = LoudnessDialog::presets [1];
 
 LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 	: ArdourDialog (as ? _("Loudness Assistant") : _("Loudness Analyzer and Normalizer"))
@@ -84,7 +85,7 @@ LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 	, _range (ar)
 	, _status (s->get_export_status ())
 	, _autostart (as)
-	, _conformity_expander (_("Conformity Analysis"))
+	, _conformity_expander (_("Conformity Analysis (with gain applied)"))
 	, _dbfs_btn (_("Peak:"), ArdourButton::led_default_elements, true)
 	, _dbtp_btn (_("True Peak:"), ArdourButton::led_default_elements, true)
 	, _lufs_i_btn (_("Integrated Loudness:"), ArdourButton::led_default_elements, true)
@@ -106,6 +107,7 @@ LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 	, _lufs_m_spinbutton (_lufs_m_adjustment, 0.1, 1)
 	, _gain_out (0)
 	, _gain_norm (0)
+	, _ignore_preset (false)
 	, _ignore_change (false)
 {
 	/* query initial gain */
@@ -320,10 +322,15 @@ LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 		_preset_dropdown.AddMenuElem (MenuElemNoMnemonic (presets[i].name, sigc::bind (sigc::mem_fun (*this, &LoudnessDialog::load_preset), i)));
 	}
 
-	_conformity_expander.set_expanded(false);
 	_initial_preset_name = _preset.name;
+	if (_preset.name != _("Custom")) {
+		/* call _menu.set_active to initialize 'current_active' item */
+		PBD::Unwinder<bool> uw (_ignore_preset, true);
+		_preset_dropdown.set_active (_preset.name);
+	}
 	apply_preset ();
 
+	_conformity_expander.set_expanded(false);
 	_gain_out_label.set_text (string_compose (_("%1 dB"), std::setprecision (2), std::showpos, std::fixed, _gain_out));
 
 	/* connect signals */
@@ -506,6 +513,9 @@ LoudnessDialog::display_report ()
 void
 LoudnessDialog::load_preset (size_t n)
 {
+	if (_ignore_preset) {
+		return;
+	}
 	_preset = presets[n];
 	apply_preset ();
 	calculate_gain ();
@@ -546,7 +556,7 @@ LoudnessDialog::update_settings ()
 	if (_ignore_change) {
 		return;
 	}
-	_preset.name = "User";
+	_preset.name = _("Custom");
 	_preset_dropdown.set_text (_preset.name);
 
 	update_sensitivity ();
@@ -695,7 +705,7 @@ LoudnessDialog::test_conformity ()
 	Gdk::Color color_warn = ARDOUR_UI_UTILS::gdk_color_from_rgba (c_warn);
 	Gdk::Color color_fail = ARDOUR_UI_UTILS::gdk_color_from_rgba (c_fail);
 
-	for (size_t i = 0; i < n_pset; ++i) {
+	for (size_t i = 1; i < n_pset; ++i) {
 		Label* l = manage (new Label (presets[i].name + ":", ALIGN_LEFT));
 		t->attach (*l, col, col + 1, row, row + 1, EXPAND|FILL, SHRINK, 2, 0);
 
