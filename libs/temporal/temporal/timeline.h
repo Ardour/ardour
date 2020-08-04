@@ -25,8 +25,6 @@
 #include <cassert>
 #include <limits>
 
-#include <boost/rational.hpp>
-
 #include "pbd/enumwriter.h"
 #include "pbd/int62.h"
 
@@ -162,11 +160,11 @@ class timepos_t : public int62_t  {
 	timepos_t & shift_earlier (Temporal::Beats const &);
 	timepos_t & shift_earlier (Temporal::BBT_Offset const &);
 
-	timepos_t operator/(double) const;
-	timepos_t operator*(double) const;
+	timepos_t operator/(ratio_t const &) const;
+	timepos_t operator*(ratio_t const &) const;
 
-	timepos_t & operator*=(double);
-	timepos_t & operator/=(double);
+	timepos_t & operator*=(ratio_t const &);
+	timepos_t & operator/=(ratio_t const &);
 
 	timepos_t & operator+=(timecnt_t const & d);
 	timepos_t & operator+=(samplepos_t);
@@ -290,8 +288,8 @@ class LIBTEMPORAL_API timecnt_t {
 	timecnt_t operator++ () { _distance += 1; return *this; }
 	timecnt_t operator-- () { _distance -= 1; return *this; }
 
-	timecnt_t operator*(boost::rational<int64_t> const &) const;
-	timecnt_t operator/(boost::rational<int64_t> const &) const;
+	timecnt_t operator*(ratio_t const &) const;
+	timecnt_t operator/(ratio_t const &) const;
 
 	timecnt_t operator-() const { return timecnt_t (-_distance.val(), _position); }
 	timecnt_t operator- (timecnt_t const & t) const { return timecnt_t (_distance - t.distance(), _position); }
