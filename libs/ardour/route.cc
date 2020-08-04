@@ -258,7 +258,7 @@ Route::init ()
 		_volume_control.reset (new GainControl (_session, MainOutVolume));
 		_volume_control->set_flag (Controllable::NotAutomatable);
 		_main_outs->add_gain (_volume_control);
-		_volume.reset (new Amp (_session, X_("Volume Ctrl"), _volume_control, false));
+		_volume.reset (new Amp (_session, X_("LAN Amp"), _volume_control, false));
 		_volume->set_display_to_user (false);
 		_volume->deactivate ();
 	}
