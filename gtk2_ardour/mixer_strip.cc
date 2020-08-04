@@ -2005,7 +2005,7 @@ MixerStrip::volume_controller_button_pressed (GdkEventButton* ev)
 		_master_volume_menu->set_name ("ArdourContextMenu");
 		MenuList& items = _master_volume_menu->items();
 		items.clear ();
-		items.push_back (CheckMenuElem (_("Custom Volume Ctrl. Pos.")));
+		items.push_back (CheckMenuElem (_("Custom LAN Amp Position")));
 		Gtk::CheckMenuItem* cmi = static_cast<Gtk::CheckMenuItem*> (&items.back());
 		cmi->set_active (!_route->volume_applies_to_output ());
 		cmi->signal_toggled().connect (sigc::bind (sigc::mem_fun (_route.get(), &Route::set_volume_applies_to_output), !_route->volume_applies_to_output ()));

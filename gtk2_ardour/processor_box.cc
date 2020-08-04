@@ -3948,7 +3948,7 @@ ProcessorBox::register_actions ()
 	ActionManager::register_toggle_action (processor_box_actions, X_("disk-io-custom"), _("Custom"), sigc::bind (sigc::ptr_fun (ProcessorBox::rb_set_disk_io_position), DiskIOCustom));
 
 	/* Loudness Volume Control */
-	ActionManager::register_toggle_action (processor_box_actions, X_("custom-volume-pos"), _("Custom Volume Ctrl. Pos."), sigc::ptr_fun (ProcessorBox::rb_toggle_custom_loudness_pos));
+	ActionManager::register_toggle_action (processor_box_actions, X_("custom-volume-pos"), _("Custom LAN Amp Position"), sigc::ptr_fun (ProcessorBox::rb_toggle_custom_loudness_pos));
 
 	/* show editors */
 	edit_action = ActionManager::register_action (
