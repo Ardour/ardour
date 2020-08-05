@@ -1455,12 +1455,9 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 			return 1;
 		}
 
-		_processors.erase (i);
-
 		/* stop redirects that send signals to JACK ports
 		 * from causing noise as a result of no longer being run
 		 */
-
 		boost::shared_ptr<IOProcessor> iop = boost::dynamic_pointer_cast<IOProcessor> (*i);
 		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert>(*i);
 
@@ -1479,6 +1476,8 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 			iop->disconnect ();
 			lm.acquire ();
 		}
+
+		_processors.erase (i);
 
 		if (configure_processors_unlocked (err, &lm)) {
 			pstate.restore ();
