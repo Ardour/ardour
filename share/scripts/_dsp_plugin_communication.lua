@@ -65,14 +65,14 @@ function dsp_run (ins, outs, n_samples)
 	local a = shmem:to_float (0):array ()
 	if s == 0 then
 		-- the first plugin saves the peak
-		a[0] = peak
+		a[1] = peak
 		ctrl[2] = -1
 	else
 		-- all later plugins display the difference to the first.
-		if (a[0] == 0) then
+		if (a[1] == 0) then
 			ctrl[2] = 1
 		else
-			ctrl[2] = peak / a[0]
+			ctrl[2] = peak / a[1]
 		end
 	end
 end
