@@ -61,6 +61,8 @@ public:
 	PluginInsert (Session&, boost::shared_ptr<Plugin> = boost::shared_ptr<Plugin>());
 	~PluginInsert ();
 
+	void drop_references ();
+
 	static const std::string port_automation_node_name;
 
 	int set_state(const XMLNode&, int version);

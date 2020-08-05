@@ -111,6 +111,15 @@ PluginInsert::~PluginInsert ()
 }
 
 void
+PluginInsert::drop_references ()
+{
+	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
+		(*i)->drop_references ();
+	}
+	Processor::drop_references ();
+}
+
+void
 PluginInsert::set_strict_io (bool b)
 {
 	if (!_plugins.empty() && _plugins.front()->connect_all_audio_outputs ()) {

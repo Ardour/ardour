@@ -78,6 +78,8 @@ public:
 
 	PluginOutputConfiguration possible_output () const { return _output_configs; }
 
+	void drop_references ();
+
 	std::set<Evoral::Parameter> automatable() const;
 
 	void activate () { }

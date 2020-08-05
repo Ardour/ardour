@@ -130,7 +130,7 @@ LuaProc::~LuaProc () {
 				_stats_max[1] * (float)_stats_cnt / _stats_avg[1]);
 	}
 #endif
-	lua.do_command ("collectgarbage();");
+	lua.collect_garbage ();
 	delete (_lua_dsp);
 	delete (_lua_latency);
 	delete [] _control_data;
@@ -180,6 +180,12 @@ LuaProc::init ()
 	lua.do_command ("for n in pairs(_G) do print(n) end print ('----')"); // print global env
 #endif
 	lua.do_command ("function ardour () end");
+}
+
+void
+LuaProc::drop_references ()
+{
+	lua.collect_garbage ();
 }
 
 boost::weak_ptr<Route>
