@@ -1592,12 +1592,11 @@ PluginManager::save_stats ()
 	XMLNode* root = new XMLNode (X_("PluginStats"));
 
 	for (PluginStatsList::iterator i = statistics.begin(); i != statistics.end(); ++i) {
-		XMLNode* node = new XMLNode (X_("Plugin"));
+		XMLNode* node = root->add_child (X_("Plugin"));
 		node->set_property (X_("type"), (*i).type);
 		node->set_property (X_("id"), (*i).unique_id);
 		node->set_property (X_("lru"), (*i).lru);
 		node->set_property (X_("use-count"), (*i).use_count);
-		root->add_child_nocopy (*node);
 	}
 
 	XMLTree tree;
