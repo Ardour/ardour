@@ -97,7 +97,7 @@ superclock_t
 timecnt_t::compute_superclocks() const
 {
 	assert (_distance.flagged());
-	TempoMap::SharedPtr tm (TempoMap::fetch());
+	TempoMap::SharedPtr tm (TempoMap::use());
 	return tm->full_duration_at (_position, *this, AudioTime).superclocks();
 }
 
@@ -105,7 +105,7 @@ Beats
 timecnt_t::compute_beats() const
 {
 	assert (!_distance.flagged());
-	TempoMap::SharedPtr tm (TempoMap::fetch());
+	TempoMap::SharedPtr tm (TempoMap::use());
 	return tm->full_duration_at (_position, *this, BeatTime).beats();
 }
 
@@ -238,7 +238,7 @@ timepos_t::_superclocks () const
 {
 	stats.beats_to_audio++;
 
-	TempoMap::SharedPtr tm (TempoMap::fetch());
+	TempoMap::SharedPtr tm (TempoMap::use());
 	return tm->superclock_at (beats ());
 }
 
@@ -247,7 +247,7 @@ timepos_t::_beats () const
 {
 	stats.audio_to_beats++;
 
-	TempoMap::SharedPtr tm (TempoMap::fetch());
+	TempoMap::SharedPtr tm (TempoMap::use());
 	return tm->quarter_note_at (v);
 }
 
@@ -363,7 +363,7 @@ timepos_t:: earlier (superclock_t s) const
 	superclock_t sc;
 
 	if (is_beats()) {
-		TempoMap::SharedPtr tm (TempoMap::fetch());
+		TempoMap::SharedPtr tm (TempoMap::use());
 		sc = tm->superclock_at (beats());
 	} else {
 		sc = val();
@@ -382,7 +382,7 @@ timepos_t::earlier (Temporal::Beats const & b) const
 	Beats bb;
 
 	if (is_superclock()) {
-		TempoMap::SharedPtr tm (TempoMap::fetch());
+		TempoMap::SharedPtr tm (TempoMap::use());
 		bb = tm->quarter_note_at (superclocks());
 	} else {
 		bb = beats ();
@@ -428,7 +428,7 @@ timepos_t:: shift_earlier (superclock_t s)
 	superclock_t sc;
 
 	if (is_beats ()) {
-		TempoMap::SharedPtr tm (TempoMap::fetch());
+		TempoMap::SharedPtr tm (TempoMap::use());
 		sc = tm->superclock_at (beats());
 	} else {
 		sc = val();
@@ -445,7 +445,7 @@ timepos_t::shift_earlier (Temporal::Beats const & b)
 	Beats bb;
 
 	if (is_superclock()) {
-		TempoMap::SharedPtr tm (TempoMap::fetch());
+		TempoMap::SharedPtr tm (TempoMap::use());
 		bb = tm->quarter_note_at (val());
 	} else {
 		bb = beats ();
@@ -464,7 +464,7 @@ timepos_t:: operator+= (superclock_t s)
 	if (is_superclock()) {
 		v += s;
 	} else {
-		TempoMap::SharedPtr tm (TempoMap::fetch());
+		TempoMap::SharedPtr tm (TempoMap::use());
 		v = build (true, tm->scwalk_to_quarters (beats(), s).to_ticks());
 	}
 
@@ -477,7 +477,7 @@ timepos_t::operator+=(Temporal::Beats const & b)
 	if (is_beats()) {
 		v += build (true, b.to_ticks());
 	} else {
-		TempoMap::SharedPtr tm (TempoMap::fetch());
+		TempoMap::SharedPtr tm (TempoMap::use());
 		v = tm->superclock_plus_quarters_as_superclock (val(), b);
 	}
 
