@@ -280,7 +280,8 @@ class LIBTEMPORAL_API timecnt_t {
 
 	Temporal::TimeDomain time_domain () const { return _position.time_domain (); }
 
-	superclock_t     superclocks() const { if (_position.is_superclock()) return _distance.val(); return compute_superclocks(); }
+	superclock_t    superclocks() const { if (_position.is_superclock()) return _distance.val(); return compute_superclocks(); }
+	int64_t         samples() const { return superclock_to_samples (superclocks(), _thread_sample_rate); }
 	Temporal::Beats beats  () const { if (_position.is_beats()) return Beats::ticks (_distance.val()); return compute_beats(); }
 	int64_t         ticks  () const { if (_position.is_beats()) return _distance.val(); return compute_ticks(); }
 
