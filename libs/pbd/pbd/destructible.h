@@ -32,7 +32,7 @@ class LIBPBD_API Destructible {
 	PBD::Signal0<void> Destroyed;
 	PBD::Signal0<void> DropReferences;
 
-	void drop_references () { DropReferences();  }
+	virtual void drop_references () { DropReferences();  }
 };
 
 }
