@@ -123,7 +123,7 @@ stop_and_destroy_backend ()
 Session *
 load_session (string dir, string state)
 {
-	Session* session = new Session (*AudioEngine::instance(), dir, state);
+	Session* session = new Session (*AudioEngine::instance(), dir, state, 0, "", true);
 	AudioEngine::instance ()->set_session (session);
 	return session;
 }
