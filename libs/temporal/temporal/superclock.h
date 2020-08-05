@@ -32,6 +32,10 @@ extern superclock_t superclock_ticks_per_second;
 static inline superclock_t superclock_to_samples (superclock_t s, int sr) { return int_div_round (s * sr, superclock_ticks_per_second); }
 static inline superclock_t samples_to_superclock (int samples, int sr) { return int_div_round (samples * superclock_ticks_per_second, superclock_t (sr)); }
 
+/* this needs to be updated per-thread at a suitable time */
+
+extern thread_local uint32_t _thread_sample_rate;
+
 }
 
 #endif /* __ardour_superclock_h__ */

@@ -56,6 +56,7 @@ class timepos_t : public int62_t  {
 	Temporal::TimeDomain time_domain () const { if (flagged()) return Temporal::BeatTime; return Temporal::AudioTime; }
 
 	superclock_t superclocks() const { if (is_superclock()) return v; return _superclocks (); }
+	int64_t samples() const { return superclock_to_samples (superclocks(), _thread_sample_rate); }
 	int64_t ticks() const { if (is_beats()) return val(); return _ticks (); }
 	Beats beats() const { if (is_beats()) return Beats::ticks (val()); return _beats (); }
 
