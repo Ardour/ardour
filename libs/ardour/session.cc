@@ -50,7 +50,6 @@
 #include "pbd/convert.h"
 #include "pbd/error.h"
 #include "pbd/file_utils.h"
-#include "pbd/i18n.h"
 #include "pbd/md5.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/search_path.h"
@@ -133,6 +132,8 @@
 #include "LuaBridge/LuaBridge.h"
 
 #include <glibmm/checksum.h>
+
+#include "pbd/i18n.h"
 
 namespace ARDOUR {
 class MidiSource;
