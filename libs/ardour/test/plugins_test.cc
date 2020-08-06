@@ -28,6 +28,8 @@ print_plugin_info (PluginInfoPtr pp)
 void
 PluginsTest::test ()
 {
+	create_and_start_dummy_backend ();
+
 	PluginManager& pm = PluginManager::instance ();
 
 	pm.refresh (true);
@@ -50,5 +52,5 @@ PluginsTest::test ()
 		print_plugin_info (*i);
 	}
 
-
+	stop_and_destroy_backend ();
 }
