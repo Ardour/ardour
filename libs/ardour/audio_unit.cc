@@ -660,19 +660,6 @@ AUPlugin::init ()
 		}
 	}
 
-	for (size_t i = 0; i < input_elements; ++i) {
-		/* setup render callback: the plugin calls this to get input data */
-		AURenderCallbackStruct renderCallbackInfo;
-		renderCallbackInfo.inputProc = _render_callback;
-		renderCallbackInfo.inputProcRefCon = this;
-		DEBUG_TRACE (DEBUG::AudioUnits, "set render callback in input scope\n");
-		if ((err = unit->SetProperty (kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input,
-					      i, (void*) &renderCallbackInfo, sizeof(renderCallbackInfo))) != 0) {
-			error << string_compose (_("cannot install render callback (err = %1)"), err) << endmsg;
-			throw failed_constructor();
-		}
-	}
-
 	/* tell the plugin about tempo/meter/transport callbacks in case it wants them */
 
 	HostCallbackInfo info;
@@ -1149,6 +1136,11 @@ AUPlugin::configure_io (ChanCount in, ChanCount out)
 	}
 	for (size_t i = 0; i < input_elements; ++i) {
 		unit->Reset (kAudioUnitScope_Input, i);
+		/* remove any input callbacks */
+		AURenderCallbackStruct renderCallbackInfo;
+		renderCallbackInfo.inputProc = 0;
+		renderCallbackInfo.inputProcRefCon = 0;
+		unit->SetProperty (kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input, i, (void*) &renderCallbackInfo, sizeof(renderCallbackInfo));
 	}
 
 	/* now assign the channels to available busses */
@@ -1209,6 +1201,19 @@ AUPlugin::configure_io (ChanCount in, ChanCount out)
 			used_out += cnt;
 			remain -= cnt;
 			++configured_output_busses;
+		}
+	}
+
+	for (size_t i = 0; used_in > 0 && i < configured_input_busses; ++i) {
+		/* setup render callback: the plugin calls this to get input data */
+		AURenderCallbackStruct renderCallbackInfo;
+		renderCallbackInfo.inputProc = _render_callback;
+		renderCallbackInfo.inputProcRefCon = this;
+		DEBUG_TRACE (DEBUG::AudioUnits, "set render callback in input scope\n");
+		OSErr err;
+		if ((err = unit->SetProperty (kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input,
+						i, (void*) &renderCallbackInfo, sizeof(renderCallbackInfo))) != 0) {
+			error << string_compose (_("cannot install render callback (err = %1)"), err) << endmsg;
 		}
 	}
 
@@ -1276,6 +1281,13 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
 
 	vector<pair<int,int> > io_configs = pinfo->cache.io_configs;
 
+#if 0
+	printf ("AU I/O Initial Config list for '%s' (%zu) n_in-bus: %d n_out-bus: %d\n", name(), io_configs.size(), input_elements, output_elements);
+	for (vector<pair<int,int> >::iterator i = io_configs.begin(); i != io_configs.end(); ++i) {
+		printf ("- I/O  %d / %d\n", i->first, i->second);
+	}
+#endif
+
 	if (input_elements > 1) {
 		const vector<pair<int,int> >& ioc (pinfo->cache.io_configs);
 		for (vector<pair<int,int> >::const_iterator i = ioc.begin(); i != ioc.end(); ++i) {
@@ -1325,7 +1337,7 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
 							name(), io_configs.size(), in, out));
 
 #if 0
-	printf ("AU I/O Configs %s %d\n", name(), io_configs.size());
+	printf ("AU I/O Config list for '%s' (%zu)\n", name(), io_configs.size());
 	for (vector<pair<int,int> >::iterator i = io_configs.begin(); i != io_configs.end(); ++i) {
 		printf ("- I/O  %d / %d\n", i->first, i->second);
 	}
