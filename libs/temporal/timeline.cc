@@ -67,7 +67,7 @@ static TemporalStatistics stats;
 
 /* timecnt */
 
-timecnt_t timecnt_t::_max_timecnt (max_samplepos, timepos_t());
+timecnt_t timecnt_t::_max_timecnt (int62_t::max - 1, timepos_t());
 
 timecnt_t::timecnt_t (timecnt_t const & tc, timepos_t const & pos)
 	: _position (pos)

@@ -45,7 +45,7 @@ class timecnt_t;
 
 class timepos_t : public int62_t  {
   public:
-	timepos_t ();
+	timepos_t () : int62_t (false, 0) {}
 	timepos_t (superclock_t s) : int62_t (false, s) {}
 	explicit timepos_t (timecnt_t const &); /* will throw() if val is negative */
 	explicit timepos_t (Temporal::Beats const & b) : int62_t (false, b.to_ticks()) {}
