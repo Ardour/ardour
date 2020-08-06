@@ -30,7 +30,7 @@ PluginsTest::test ()
 {
 	PluginManager& pm = PluginManager::instance ();
 
-	pm.refresh ();
+	pm.refresh (true);
 
 	Searchpath ladspa_paths(ladspa_search_path ());
 
