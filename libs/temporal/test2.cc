@@ -1,3 +1,9 @@
+/* standalone compile, from within this directory:
+
+   g++ `pkg-config --cflags --libs libxml-2.0` `pkg-config --cflags --libs glibmm-2.4` -I../pbd -I../../build/libs/pbd  -I. -o test2 test2.cc
+
+*/
+
 #include <atomic>
 #include <bitset>
 #include <iostream>
