@@ -964,17 +964,21 @@ PluginManager::au_refresh (bool cache_only)
 {
 	DEBUG_TRACE (DEBUG::PluginManager, "AU: refresh\n");
 
-	// disable automatic discovery in case we crash
 	bool discover_at_start = Config->get_discover_audio_units ();
-	Config->set_discover_audio_units (false);
-	Config->save_state();
+	if (discover_at_start) {
+		/* disable automatic discovery in case scanning crashes */
+		Config->set_discover_audio_units (false);
+		Config->save_state();
+	}
 
 	delete _au_plugin_info;
 	_au_plugin_info = AUPluginInfo::discover(cache_only && !discover_at_start);
 
-	// successful scan re-enabled automatic discovery if it was set
-	Config->set_discover_audio_units (discover_at_start);
-	Config->save_state();
+	if (discover_at_start) {
+		/* successful scan re-enabled automatic discovery if it was set */
+		Config->set_discover_audio_units (discover_at_start);
+		Config->save_state();
+	}
 
 	for (PluginInfoList::iterator i = _au_plugin_info->begin(); i != _au_plugin_info->end(); ++i) {
 		set_tags ((*i)->type, (*i)->unique_id, (*i)->category, (*i)->name, FromPlug);
