@@ -255,11 +255,11 @@ main (int argc, char *argv[])
 
 	srandom (time ((time_t *) 0));
 
-	//single_atomic ();
-	//bitfields ();
-	//masks ();
+	single_atomic ();
+	bitfields ();
+	masks ();
 	atomic_masks ();
-	test_ints ();
+	// test_ints ();
 
 	return 0;
 }
