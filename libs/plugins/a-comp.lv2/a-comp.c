@@ -39,6 +39,8 @@
 #  define M_PI 3.14159265358979323846
 #endif
 
+#define MINUS_60 0.0001f
+
 #ifdef COMPILER_MSVC
 #include <float.h>
 #define isfinite_local(val) (bool)_finite((double)val)
@@ -417,7 +419,7 @@ run(LV2_Handle instance, uint32_t n_samples)
 		makeup_gain = makeup_target;
 	}
 
-	*(acomp->outlevel) = (max_out < 0.0056f) ? -70.f : to_dB(max_out);
+	*(acomp->outlevel) = (max_out < MINUS_60) ? -60.f : to_dB(max_out);
 	*(acomp->inlevel) = in_peak_db;
 	acomp->makeup_gain = makeup_gain;
 

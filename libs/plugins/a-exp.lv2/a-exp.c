@@ -36,6 +36,8 @@
 
 #define RESET_PEAK_AFTER_SECONDS 3
 
+#define MINUS_60 0.0001f
+
 #ifndef M_PI
 #  define M_PI 3.14159265358979323846
 #endif
@@ -432,7 +434,7 @@ run(LV2_Handle instance, uint32_t n_samples)
 		makeup_gain = makeup_target;
 	}
 
-	*(aexp->outlevel) = (max_out < 0.0056f) ? -45.f : to_dB(max_out);
+	*(aexp->outlevel) = (max_out < 0.0001) ? -60.f : to_dB(max_out);
 	*(aexp->inlevel) = in_peak_db;
 	aexp->makeup_gain = makeup_gain;
 
@@ -449,7 +451,7 @@ run(LV2_Handle instance, uint32_t n_samples)
 		}
 	}
 
-	const float v_lvl_out = (max_out < 0.001f) ? -1600.f : to_dB(max_out);
+	const float v_lvl_out = (max_out < MINUS_60) ? -60.f : to_dB(max_out);
 	const float v_lvl_in = in_peak_db;
 
 	if (fabsf (aexp->v_lvl_out - v_lvl_out) >= .1 ||
