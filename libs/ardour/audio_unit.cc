@@ -508,7 +508,7 @@ AUPlugin::AUPlugin (const AUPlugin& other)
 	set_state (root, Stateful::loading_state_version);
 
 	for (size_t i = 0; i < descriptors.size(); ++i) {
-		set_parameter (i, other.get_parameter (i));
+		set_parameter (i, other.get_parameter (i), 0);
 	}
 }
 
@@ -961,7 +961,7 @@ AUPlugin::plugin_latency () const
 }
 
 void
-AUPlugin::set_parameter (uint32_t which, float val)
+AUPlugin::set_parameter (uint32_t which, float val, sampleoffset_t when)
 {
 	if (which >= descriptors.size()) {
 		return;
@@ -989,7 +989,7 @@ AUPlugin::set_parameter (uint32_t which, float val)
         /* Note the 1st argument, which means "Don't notify us about a change we made ourselves" */
         AUEventListenerNotify (_parameter_listener, NULL, &theEvent);
 
-	Plugin::set_parameter (which, val);
+	Plugin::set_parameter (which, val, when);
 }
 
 float

@@ -489,7 +489,7 @@ Plugin::clear_preset ()
 }
 
 void
-Plugin::set_parameter (uint32_t /* which */, float /* value */)
+Plugin::set_parameter (uint32_t /* which */, float /* value */, sampleoffset_t /* when */)
 {
 	_parameter_changed_since_last_preset = true;
 	PresetDirty (); /* EMIT SIGNAL */

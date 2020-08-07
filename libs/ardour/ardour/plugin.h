@@ -368,8 +368,13 @@ protected:
 	/* should be overridden by plugin API specific derived types to
 	 * actually implement changing the parameter. The derived type should
 	 * call this after the change is made.
+	 *
+	 * @param which parameter-id
+	 * @param val the raw value (plugin internal)
+	 * @param when time offset of samples in current cycle (0 .. n_samples)
+	 *             when the event is effective.
 	 */
-	virtual void set_parameter (uint32_t which, float val);
+	virtual void set_parameter (uint32_t which, float val, sampleoffset_t when);
 
 	/** Do the actual saving of the current plugin settings to a preset of the provided name.
 	 *  Should return a URI on success, or an empty string on failure.

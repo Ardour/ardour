@@ -187,7 +187,7 @@ VSTPlugin::get_parameter (uint32_t which) const
 }
 
 void
-VSTPlugin::set_parameter (uint32_t which, float newval)
+VSTPlugin::set_parameter (uint32_t which, float newval, sampleoffset_t when)
 {
 	if (which == UINT32_MAX - 1) {
 		// ardour uses enable-semantics: 1: enabled, 0: bypassed
@@ -217,15 +217,15 @@ VSTPlugin::set_parameter (uint32_t which, float newval)
 
 	if (!PBD::floateq (curval, oldval, 1)) {
 		/* value has changed, follow rest of the notification path */
-		Plugin::set_parameter (which, newval);
+		Plugin::set_parameter (which, newval, when);
 	}
 }
 
 void
-VSTPlugin::parameter_changed_externally (uint32_t which, float value )
+VSTPlugin::parameter_changed_externally (uint32_t which, float value)
 {
 	ParameterChangedExternally (which, value); /* EMIT SIGNAL */
-	Plugin::set_parameter (which, value);
+	Plugin::set_parameter (which, value, 0);
 }
 
 
@@ -531,7 +531,7 @@ VSTPlugin::load_user_preset (PresetRecord r)
 						assert (false);
 					}
 
-					set_parameter (index, value);
+					set_parameter (index, value, 0);
 					PresetPortSetValue (index, value); /* EMIT SIGNAL */
 				}
 			}

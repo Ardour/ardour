@@ -71,7 +71,7 @@ class LIBARDOUR_API AUPlugin : public ARDOUR::Plugin
 	const char * maker () const { return _info->creator.c_str(); }
 	uint32_t parameter_count () const;
 	float default_value (uint32_t port);
-	void set_parameter (uint32_t which, float val);
+	void set_parameter (uint32_t which, float val, sampleoffset_t);
 	float get_parameter (uint32_t which) const;
 
 	PluginOutputConfiguration possible_output () const { return _output_configs; }

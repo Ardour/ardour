@@ -289,7 +289,7 @@ PluginInsert::control_list_automation_state_changed (Evoral::Parameter which, Au
 			= boost::dynamic_pointer_cast<AutomationControl>(control (which));
 
 	if (c && s != Off) {
-		_plugins[0]->set_parameter (which.id(), c->list()->eval (_session.transport_sample()));
+		_plugins[0]->set_parameter (which.id(), c->list()->eval (_session.transport_sample()), 0);
 	}
 }
 
@@ -595,12 +595,12 @@ PluginInsert::parameter_changed_externally (uint32_t which, float val)
 	if (i != _plugins.end()) {
 		++i;
 		for (; i != _plugins.end(); ++i) {
-			(*i)->set_parameter (which, val);
+			(*i)->set_parameter (which, val, 0);
 		}
 	}
 	boost::shared_ptr<Plugin> iasp = _impulseAnalysisPlugin.lock();
 	if (iasp) {
-		iasp->set_parameter (which, val);
+		iasp->set_parameter (which, val, 0);
 	}
 }
 
@@ -909,11 +909,40 @@ PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t e
 			boost::shared_ptr<const Evoral::ControlList> clist (c.list());
 			/* we still need to check for Touch and Latch */
 			if (clist && (static_cast<AutomationList const&> (*clist)).automation_playback ()) {
+				/* 1. Set value at [sub]cycle start */
 				bool valid;
-				const float val = c.list()->rt_safe_eval (start, valid);
+				float val = clist->rt_safe_eval (start, valid);
 				if (valid) {
 					c.set_value_unchecked(val);
 				}
+#if 0
+				/* 2. VST3: events between now and end. */
+				assert (_plugins.front()->requires_fixed_sized_buffers());
+				samplepos_t now = start;
+				while (true) {
+					Evoral::ControlEvent next_event (end, 0.0f);
+					find_next_ac_event (*ci, now, end, next_event);
+					if (next_event.when >= end) {
+						break;
+					}
+					now = next_event.when;
+					const float val = c.list()->rt_safe_eval (now, valid);
+					if (valid) {
+						for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
+							(*i)->set_parameter (clist->parameter().id(), val, now - start);
+						}
+					}
+				}
+#endif
+#if 0
+				/* 3. set value at cycle-end */
+				val = c.list()->rt_safe_eval (end, valid);
+				if (valid) {
+					for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
+						(*i)->set_parameter (clist->parameter().id(), val, end - start);
+					}
+				}
+#endif
 			}
 		}
 	}
@@ -2990,12 +3019,12 @@ PluginInsert::PluginControl::actually_set_value (double user_val, PBD::Controlla
 	/* FIXME: probably should be taking out some lock here.. */
 
 	for (Plugins::iterator i = _plugin->_plugins.begin(); i != _plugin->_plugins.end(); ++i) {
-		(*i)->set_parameter (_list->parameter().id(), user_val);
+		(*i)->set_parameter (_list->parameter().id(), user_val, 0);
 	}
 
 	boost::shared_ptr<Plugin> iasp = _plugin->_impulseAnalysisPlugin.lock();
 	if (iasp) {
-		iasp->set_parameter (_list->parameter().id(), user_val);
+		iasp->set_parameter (_list->parameter().id(), user_val, 0);
 	}
 
 	AutomationControl::actually_set_value (user_val, group_override);

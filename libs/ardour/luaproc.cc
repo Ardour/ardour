@@ -916,7 +916,7 @@ LuaProc::set_state (const XMLNode& node, int version)
 			continue;
 		}
 
-		set_parameter (port_id, value);
+		set_parameter (port_id, value, 0);
 	}
 
 	return Plugin::set_state (node, version);
@@ -940,14 +940,14 @@ LuaProc::default_value (uint32_t port)
 }
 
 void
-LuaProc::set_parameter (uint32_t port, float val)
+LuaProc::set_parameter (uint32_t port, float val, sampleoffset_t when)
 {
 	assert (port < parameter_count ());
 	if (get_parameter (port) == val) {
 		return;
 	}
 	_shadow_data[port] = val;
-	Plugin::set_parameter (port, val);
+	Plugin::set_parameter (port, val, when);
 }
 
 float
@@ -1176,7 +1176,7 @@ LuaProc::load_preset (PresetRecord r)
 					assert (false);
 					continue;
 				}
-				set_parameter (index, value);
+				set_parameter (index, value, 0);
 				PresetPortSetValue (index, value); /* EMIT SIGNAL */
 			}
 		}

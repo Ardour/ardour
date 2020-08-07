@@ -263,7 +263,7 @@ set_port_value(const char* port_symbol,
 
 	const uint32_t port_index = self->port_index(port_symbol);
 	if (port_index != (uint32_t)-1) {
-		self->set_parameter(port_index, *(const float*)value);
+		self->set_parameter(port_index, *(const float*)value, 0);
 		self->PresetPortSetValue (port_index, *(const float*)value); /* EMIT SIGNAL */
 	}
 }
@@ -1222,7 +1222,7 @@ LV2Plugin::port_index (const char* symbol) const
 }
 
 void
-LV2Plugin::set_parameter(uint32_t which, float val)
+LV2Plugin::set_parameter(uint32_t which, float val, sampleoffset_t when)
 {
 	DEBUG_TRACE(DEBUG::LV2, string_compose(
 		            "%1 set parameter %2 to %3\n", name(), which, val));
@@ -1240,7 +1240,7 @@ LV2Plugin::set_parameter(uint32_t which, float val)
 		    name(), PROGRAM_NAME, unique_id()) << endmsg;
 	}
 
-	Plugin::set_parameter(which, val);
+	Plugin::set_parameter(which, val, when);
 }
 
 float
@@ -2212,7 +2212,7 @@ LV2Plugin::set_state(const XMLNode& node, int version)
 			continue;
 		}
 
-		set_parameter(port_id, val);
+		set_parameter(port_id, val, 0);
 	}
 
 	std::string template_dir;

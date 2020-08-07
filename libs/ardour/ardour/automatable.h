@@ -127,10 +127,11 @@ protected:
 
 	SlavableControlList slavables () const { return SlavableControlList(); }
 
-private:
-	inline void find_next_ac_event (boost::shared_ptr<AutomationControl>, double start, double end, Evoral::ControlEvent& ev) const;
-	inline void find_prev_ac_event (boost::shared_ptr<AutomationControl>, double start, double end, Evoral::ControlEvent& ev) const;
+protected:
+	void find_next_ac_event (boost::shared_ptr<AutomationControl>, double start, double end, Evoral::ControlEvent& ev) const;
+	void find_prev_ac_event (boost::shared_ptr<AutomationControl>, double start, double end, Evoral::ControlEvent& ev) const;
 
+private:
 	PBD::ScopedConnectionList _control_connections; ///< connections to our controls' signals
 };
 

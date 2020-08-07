@@ -68,7 +68,7 @@ public:
 
 	uint32_t    parameter_count() const;
 	float       default_value (uint32_t port);
-	void        set_parameter (uint32_t port, float val);
+	void        set_parameter (uint32_t port, float val, sampleoffset_t);
 	float       get_parameter (uint32_t port) const;
 	int         get_parameter_descriptor (uint32_t which, ParameterDescriptor&) const;
 	uint32_t    nth_parameter (uint32_t port, bool& ok) const;

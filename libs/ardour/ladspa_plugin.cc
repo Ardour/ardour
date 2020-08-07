@@ -295,7 +295,7 @@ LadspaPlugin::_default_value (uint32_t port) const
 }
 
 void
-LadspaPlugin::set_parameter (uint32_t which, float val)
+LadspaPlugin::set_parameter (uint32_t which, float val, sampleoffset_t when)
 {
 	if (which < _descriptor->PortCount) {
 
@@ -318,7 +318,7 @@ LadspaPlugin::set_parameter (uint32_t which, float val)
 			<< endmsg;
 	}
 
-	Plugin::set_parameter (which, val);
+	Plugin::set_parameter (which, val, when);
 }
 
 /** @return `plugin' value */
@@ -403,7 +403,7 @@ LadspaPlugin::set_state (const XMLNode& node, int version)
 			continue;
 		}
 
-		set_parameter (port_id, value);
+		set_parameter (port_id, value, 0);
 	}
 
 	latency_compute_run ();
@@ -448,7 +448,7 @@ LadspaPlugin::set_state_2X (const XMLNode& node, int /* version */)
 		}
 
 		sscanf (port, "%" PRIu32, &port_id);
-		set_parameter (port_id, atof(data));
+		set_parameter (port_id, atof(data), 0);
 	}
 
 	latency_compute_run ();
@@ -774,7 +774,7 @@ LadspaPlugin::load_preset (PresetRecord r)
 	if (defs) {
 		for (uint32_t i = 0; i < (uint32_t) defs->count; ++i) {
 			if (parameter_is_input (defs->items[i].pid)) {
-				set_parameter(defs->items[i].pid, defs->items[i].value);
+				set_parameter(defs->items[i].pid, defs->items[i].value, 0);
 				PresetPortSetValue (defs->items[i].pid, defs->items[i].value); /* EMIT SIGNAL */
 			}
 		}

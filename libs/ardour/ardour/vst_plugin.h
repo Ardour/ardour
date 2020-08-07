@@ -58,7 +58,7 @@ public:
 	float default_value (uint32_t port);
 	float get_parameter (uint32_t port) const;
 	uint32_t nth_parameter (uint32_t port, bool& ok) const;
-	void set_parameter (uint32_t port, float val);
+	void set_parameter (uint32_t port, float val, sampleoffset_t);
 	void set_parameter_automated (uint32_t port, float val);
 	bool load_preset (PresetRecord);
 	int get_parameter_descriptor (uint32_t which, ParameterDescriptor&) const;

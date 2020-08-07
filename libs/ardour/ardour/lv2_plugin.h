@@ -79,7 +79,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	uint32_t    parameter_count () const;
 	float       default_value (uint32_t port);
 	samplecnt_t max_latency () const;
-	void        set_parameter (uint32_t port, float val);
+	void        set_parameter (uint32_t port, float val, sampleoffset_t);
 	float       get_parameter (uint32_t port) const;
 	std::string get_docs() const;
 	std::string get_parameter_docs(uint32_t which) const;

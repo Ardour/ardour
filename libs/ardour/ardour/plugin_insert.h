@@ -323,7 +323,7 @@ private:
 
 	void parameter_changed_externally (uint32_t, float);
 
-	void set_parameter (Evoral::Parameter param, float val);
+	void set_parameter (Evoral::Parameter param, float val, sampleoffset_t);
 
 	float default_parameter_value (const Evoral::Parameter& param);
 
