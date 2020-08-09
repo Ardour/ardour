@@ -84,7 +84,11 @@ FoldbackSend::FoldbackSend (boost::shared_ptr<Send> snd, \
 	_button.set_fallthrough_to_parent(true);
 	_button.set_led_left (true);
 	_button.signal_led_clicked.connect (sigc::mem_fun (*this, &FoldbackSend::led_clicked));
-	_button.set_name ("processor prefader");
+	if (_send_proc->get_pre_fader ()) {
+		_button.set_name ("processor prefader");
+	} else {
+		_button.set_name ("processor postfader");
+	}
 	_button.set_layout_ellipsize_width (PX_SCALE(_width) * PANGO_SCALE);
 	_button.set_text_ellipsize (Pango::ELLIPSIZE_END);
 	name_changed ();
@@ -259,6 +263,15 @@ FoldbackSend::build_send_menu ()
 	items.push_back (
 		MenuElem(_("Set send gain to 0dB"), sigc::bind (sigc::mem_fun (*this, &FoldbackSend::set_gain), 1.0))
 		);
+	if (_send_proc->get_pre_fader ()) {
+		items.push_back (
+			MenuElem(_("Set send post fader"), sigc::bind (sigc::mem_fun (*this, &FoldbackSend::set_send_position), true))
+			);
+	} else {
+		items.push_back (
+			MenuElem(_("Set send pre fader"), sigc::bind (sigc::mem_fun (*this, &FoldbackSend::set_send_position), false))
+			);
+	}
 	items.push_back (MenuElem(_("Remove This Send"), sigc::mem_fun (*this, &FoldbackSend::remove_me)));
 
 	return menu;
@@ -279,6 +292,41 @@ FoldbackSend::set_gain (float new_gain)
 	}
 	lc->set_value (new_gain, Controllable::NoGroup);
 
+}
+
+void
+FoldbackSend::set_send_position (bool post)
+{
+	boost::shared_ptr<Route> new_snd_rt = _send_route;
+	boost::shared_ptr<Route> new_fb_rt = _foldback_route;
+	float new_level = _send->gain_control()->get_value();
+	bool new_enable = _send_proc->enabled ();
+	bool is_pan = false;
+	float new_pan = 0.0;
+	if (_foldback_route->input()->n_ports().n_audio() == 2) {
+		is_pan = true;
+		boost::shared_ptr<Pannable> pannable = _send_del->panner()->pannable();
+		boost::shared_ptr<Controllable> ac;
+		ac = pannable->pan_azimuth_control;
+		new_pan = ac->get_value();
+	}
+
+	remove_me ();
+	new_snd_rt->add_foldback_send (new_fb_rt, post);
+
+	boost::shared_ptr<Send> snd = new_snd_rt->internal_send_for (new_fb_rt);
+	if (snd) {
+		snd->gain_control()->set_value(new_level, Controllable::NoGroup);
+		boost::shared_ptr<Processor> snd_proc = boost::dynamic_pointer_cast<Processor> (snd);
+		snd_proc->enable (new_enable);
+		if (is_pan) {
+			boost::shared_ptr<Delivery> new_del = boost::dynamic_pointer_cast<Delivery> (snd);
+			boost::shared_ptr<Pannable> pannable = new_del->panner()->pannable();
+			boost::shared_ptr<Controllable> ac;
+			ac = pannable->pan_azimuth_control;
+			ac->set_value(new_pan, Controllable::NoGroup);
+		}
+	}
 }
 
 void
@@ -416,7 +464,7 @@ FoldbackStrip::init ()
 	global_vpacker.set_border_width (1);
 	global_vpacker.set_spacing (2);
 
-	// Packing is from top down to the send box. Thje send box
+	// Packing is from top down to the send box. The send box
 	// needs the most room and takes all left over space
 	// Everything below the send box is packed from the bottom up
 	// the panner is the last thing to pack as it doesn't always show
@@ -1586,20 +1634,17 @@ FoldbackStrip::ab_plugins ()
 }
 
 void
-FoldbackStrip::create_selected_sends (bool include_buses)
+FoldbackStrip::create_selected_sends (bool post_fader)
 {
 	boost::shared_ptr<StripableList> slist (new StripableList);
-	PresentationInfo::Flag fl = PresentationInfo::AudioTrack;
-	if (include_buses) {
-		fl = PresentationInfo::MixerRoutes;
-	}
+	PresentationInfo::Flag fl = PresentationInfo::MixerRoutes;
 	_session->get_stripables (*slist, fl);
 
 	for (StripableList::iterator i = (*slist).begin(); i != (*slist).end(); ++i) {
 		if ((*i)->is_selected() && !(*i)->is_master() && !(*i)->is_monitor()) {
 			boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route>(*i);
 			if (rt) {
-				rt->add_foldback_send (_route);
+				rt->add_foldback_send (_route, post_fader);
 			}
 		}
 	}
@@ -1627,11 +1672,11 @@ FoldbackStrip::build_sends_menu ()
 	menu->set_name ("ArdourContextMenu");
 
 	items.push_back (
-		MenuElem(_("Assign selected tracks (prefader)"), sigc::bind (sigc::mem_fun (*this, &FoldbackStrip::create_selected_sends), false))
+		MenuElem(_("Assign selected tracks and buses (prefader)"), sigc::bind (sigc::mem_fun (*this, &FoldbackStrip::create_selected_sends), false))
 		);
 
 	items.push_back (
-		MenuElem(_("Assign selected tracks and buses (prefader)"), sigc::bind (sigc::mem_fun (*this, &FoldbackStrip::create_selected_sends), true)));
+		MenuElem(_("Assign selected tracks and buses (postfader)"), sigc::bind (sigc::mem_fun (*this, &FoldbackStrip::create_selected_sends), true)));
 
 	items.push_back (MenuElem(_("Copy track/bus gains to sends"), sigc::mem_fun (*this, &RouteUI::set_sends_gain_from_track)));
 	items.push_back (MenuElem(_("Set sends gain to -inf"), sigc::mem_fun (*this, &RouteUI::set_sends_gain_to_zero)));
@@ -1664,7 +1709,9 @@ FoldbackStrip::duplicate_current_fb ()
 			if (i->sends_only) {
 				boost::shared_ptr<Route> rt (i->r.lock());
 				boost::shared_ptr<Send> old_snd = rt->internal_send_for (old_fb);
-				rt->add_foldback_send (new_fb);
+				boost::shared_ptr<Processor> old_proc = old_snd;
+				bool old_pre = old_proc->get_pre_fader ();
+				rt->add_foldback_send (new_fb, !old_pre);
 				if (old_snd) {
 					float old_gain = old_snd->gain_control()->get_value ();
 					boost::shared_ptr<Send> new_snd = rt->internal_send_for (new_fb);
