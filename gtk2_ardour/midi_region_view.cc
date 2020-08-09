@@ -39,6 +39,7 @@
 
 #include "pbd/memento_command.h"
 #include "pbd/stateful_diff_command.h"
+#include "pbd/unwind.h"
 
 #include "ardour/midi_model.h"
 #include "ardour/midi_playlist.h"
@@ -2249,7 +2250,7 @@ MidiRegionView::select_matching_notes (uint8_t notenum, uint16_t channel_mask, b
 		high_note = max (high_note, notenum);
 	}
 
-	_no_sound_notes = true;
+	PBD::Unwinder<bool> uw (_no_sound_notes, true);
 
 	for (MidiModel::Notes::iterator n = notes.begin(); n != notes.end(); ++n) {
 
@@ -2278,8 +2279,6 @@ MidiRegionView::select_matching_notes (uint8_t notenum, uint16_t channel_mask, b
 		add = true; // we need to add all remaining matching notes, even if the passed in value was false (for "set")
 
 	}
-
-	_no_sound_notes = false;
 }
 
 void
