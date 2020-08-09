@@ -1665,8 +1665,9 @@ FoldbackStrip::duplicate_current_fb ()
 			if (i->sends_only) {
 				boost::shared_ptr<Route> rt (i->r.lock());
 				boost::shared_ptr<Send> old_snd = rt->internal_send_for (old_fb);
-				// XXXX needs false to be replaced with value from duplicated send
-				rt->add_foldback_send (new_fb, false);
+				boost::shared_ptr<Processor> old_proc = old_snd;
+				bool old_pre = old_proc->get_pre_fader ();
+				rt->add_foldback_send (new_fb, !old_pre);
 				if (old_snd) {
 					float old_gain = old_snd->gain_control()->get_value ();
 					boost::shared_ptr<Send> new_snd = rt->internal_send_for (new_fb);
