@@ -72,17 +72,17 @@ class alignas(16) int62_t {
 
 	int62_t operator- () const      { int64_t tmp = v; return int62_t (flagged (tmp), -int62(tmp)); }
 
-	int62_t operator+ (int n) const { int64_t tmp = v; return int62_t (flagged (tmp), int62 (tmp) + n); }
-	int62_t operator- (int n) const { int64_t tmp = v; return int62_t (flagged (tmp), int62 (tmp) - n); }
-	int62_t operator* (int n) const { int64_t tmp = v; return int62_t (flagged (tmp), int62 (tmp) * n); }
-	int62_t operator/ (int n) const { int64_t tmp = v; return int62_t (flagged (tmp), int62 (tmp) / n); }
-	int62_t operator% (int n) const { int64_t tmp = v; return int62_t (flagged (tmp), int62 (tmp) % n); }
+	int62_t operator+ (int64_t n) const { int64_t tmp = v; return int62_t (flagged (tmp), int62 (tmp) + n); }
+	int62_t operator- (int64_t n) const { int64_t tmp = v; return int62_t (flagged (tmp), int62 (tmp) - n); }
+	int62_t operator* (int64_t n) const { int64_t tmp = v; return int62_t (flagged (tmp), int62 (tmp) * n); }
+	int62_t operator/ (int64_t n) const { int64_t tmp = v; return int62_t (flagged (tmp), int62 (tmp) / n); }
+	int62_t operator% (int64_t n) const { int64_t tmp = v; return int62_t (flagged (tmp), int62 (tmp) % n); }
 
-	int62_t operator+ (int62_t n) const { int64_t tmp = v; return int62_t (flagged (tmp), int62 (tmp) + n); }
-	int62_t operator- (int62_t n) const { int64_t tmp = v; return int62_t (flagged (tmp), int62 (tmp) - n); }
-	int62_t operator* (int62_t n) const { int64_t tmp = v; return int62_t (flagged (tmp), int62 (tmp) * n); }
-	int62_t operator/ (int62_t n) const { int64_t tmp = v; return int62_t (flagged (tmp), int62 (tmp) / n); }
-	int62_t operator% (int62_t n) const { int64_t tmp = v; return int62_t (flagged (tmp), int62 (tmp) % n); }
+	int62_t operator+ (int62_t n) const { int64_t tmp = v; return int62_t (flagged (tmp), int62 (tmp) + n.val()); }
+	int62_t operator- (int62_t n) const { int64_t tmp = v; return int62_t (flagged (tmp), int62 (tmp) - n.val()); }
+	int62_t operator* (int62_t n) const { int64_t tmp = v; return int62_t (flagged (tmp), int62 (tmp) * n.val()); }
+	int62_t operator/ (int62_t n) const { int64_t tmp = v; return int62_t (flagged (tmp), int62 (tmp) / n.val()); }
+	int62_t operator% (int62_t n) const { int64_t tmp = v; return int62_t (flagged (tmp), int62 (tmp) % n.val()); }
 
 	/* comparison operators .. will throw if the two objects have different
 	 * flag settings (which is assumed to indicate that they differ in some
@@ -101,7 +101,14 @@ class alignas(16) int62_t {
 	bool operator!= (int62_t const & other) const { if (flagged() != other.flagged()) throw flag_mismatch(); return val() != other.val(); }
 	bool operator== (int62_t const & other) const { if (flagged() != other.flagged()) throw flag_mismatch(); return val() == other.val(); }
 
-	operator int64_t() const { return int62(v); }
+	explicit operator int64_t() const { return int62(v); }
+
+	bool operator< (int64_t n) const { return val() < n; }
+	bool operator<= (int64_t n) const { return val() <= n; }
+	bool operator> (int64_t n) const { return val() > n; }
+	bool operator>= (int64_t n) const { return val() >= n; }
+	bool operator!= (int64_t n) const { return val() != n; }
+	bool operator== (int64_t n) const { return val() == n; }
 
 	int62_t abs() const { int64_t tmp = v; return int62_t (flagged(tmp), ::abs(int62(tmp))); }
 
@@ -156,7 +163,57 @@ class alignas(16) int62_t {
 		return *this;
 	}
 
-	bool operator== (int64_t vv) const { return val() == v; }
+	int62_t& operator+= (int62_t n) {
+		while (1) {
+			int64_t oldval (v);
+			int64_t newval = build (flagged (oldval), int62 (oldval) + n.val());
+			if (v.compare_exchange_strong (oldval, newval)) {
+				break;
+			}
+		}
+		return *this;
+	}
+	int62_t& operator-= (int62_t n) {
+		while (1) {
+			int64_t oldval (v);
+			int64_t newval = build (flagged (oldval), int62 (oldval) - n.val());
+			if (v.compare_exchange_strong (oldval, newval)) {
+				break;
+			}
+		}
+		return *this;
+	}
+	int62_t& operator*= (int62_t n) {
+		while (1) {
+			int64_t oldval (v);
+			int64_t newval = build (flagged (oldval), int62 (oldval) * n.val());
+			if (v.compare_exchange_strong (oldval, newval)) {
+				break;
+			}
+		}
+		return *this;
+	}
+	int62_t& operator/= (int62_t n) {
+		while (1) {
+			int64_t oldval (v);
+			int64_t newval = build (flagged (oldval), int62 (oldval) / n.val());
+			if (v.compare_exchange_strong (oldval, newval)) {
+				break;
+			}
+		}
+		return *this;
+	}
+	int62_t& operator%= (int62_t n) {
+		while (1) {
+			int64_t oldval (v);
+			int64_t  newval = build (flagged (oldval), int62 (oldval) % n.val());
+			if (v.compare_exchange_strong (oldval, newval)) {
+				break;
+			}
+		}
+		return *this;
+	}
+
 };
 
 namespace std {
