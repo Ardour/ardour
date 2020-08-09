@@ -1590,20 +1590,17 @@ FoldbackStrip::ab_plugins ()
 }
 
 void
-FoldbackStrip::create_selected_sends (bool include_buses)
+FoldbackStrip::create_selected_sends (bool post_fader)
 {
 	boost::shared_ptr<StripableList> slist (new StripableList);
-	PresentationInfo::Flag fl = PresentationInfo::AudioTrack;
-	if (include_buses) {
-		fl = PresentationInfo::MixerRoutes;
-	}
+	PresentationInfo::Flag fl = PresentationInfo::MixerRoutes;
 	_session->get_stripables (*slist, fl);
 
 	for (StripableList::iterator i = (*slist).begin(); i != (*slist).end(); ++i) {
 		if ((*i)->is_selected() && !(*i)->is_master() && !(*i)->is_monitor()) {
 			boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route>(*i);
 			if (rt) {
-				rt->add_foldback_send (_route, false);
+				rt->add_foldback_send (_route, post_fader);
 			}
 		}
 	}
@@ -1631,11 +1628,11 @@ FoldbackStrip::build_sends_menu ()
 	menu->set_name ("ArdourContextMenu");
 
 	items.push_back (
-		MenuElem(_("Assign selected tracks (prefader)"), sigc::bind (sigc::mem_fun (*this, &FoldbackStrip::create_selected_sends), false))
+		MenuElem(_("Assign selected tracks and buses (prefader)"), sigc::bind (sigc::mem_fun (*this, &FoldbackStrip::create_selected_sends), false))
 		);
 
 	items.push_back (
-		MenuElem(_("Assign selected tracks and buses (prefader)"), sigc::bind (sigc::mem_fun (*this, &FoldbackStrip::create_selected_sends), true)));
+		MenuElem(_("Assign selected tracks and buses (postfader)"), sigc::bind (sigc::mem_fun (*this, &FoldbackStrip::create_selected_sends), true)));
 
 	items.push_back (MenuElem(_("Copy track/bus gains to sends"), sigc::mem_fun (*this, &RouteUI::set_sends_gain_from_track)));
 	items.push_back (MenuElem(_("Set sends gain to -inf"), sigc::mem_fun (*this, &RouteUI::set_sends_gain_to_zero)));
