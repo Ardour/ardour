@@ -889,7 +889,7 @@ MidiRegionView::create_note_at (samplepos_t t, double y, Temporal::Beats length,
 	trackview.editor().set_selected_midi_region_view (*this);
 	list<Evoral::event_id_t> to_be_selected;
 	to_be_selected.push_back (new_note->id());
-	select_notes (to_be_selected);
+	select_notes (to_be_selected, true);
 
 	play_midi_note (new_note);
 }
@@ -2159,6 +2159,7 @@ MidiRegionView::unique_select(NoteBase* ev)
 void
 MidiRegionView::select_all_notes ()
 {
+	PBD::Unwinder<bool> uw (_no_sound_notes, true);
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
 		add_to_selection (i->second);
 	}
@@ -2167,6 +2168,7 @@ MidiRegionView::select_all_notes ()
 void
 MidiRegionView::select_range (samplepos_t start, samplepos_t end)
 {
+	PBD::Unwinder<bool> uw (_no_sound_notes, true);
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
 		samplepos_t t = source_beats_to_absolute_samples(i->first->time());
 		if (t >= start && t <= end) {
@@ -2178,6 +2180,7 @@ MidiRegionView::select_range (samplepos_t start, samplepos_t end)
 void
 MidiRegionView::invert_selection ()
 {
+	PBD::Unwinder<bool> uw (_no_sound_notes, true);
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
 		if (i->second->selected()) {
 			remove_from_selection(i->second);
@@ -2191,10 +2194,12 @@ MidiRegionView::invert_selection ()
     The requested notes most likely won't exist in the view until the next model redisplay.
 */
 void
-MidiRegionView::select_notes (list<Evoral::event_id_t> notes)
+MidiRegionView::select_notes (list<Evoral::event_id_t> notes, bool allow_audition)
 {
 	NoteBase* cne;
 	list<Evoral::event_id_t>::iterator n;
+
+	PBD::Unwinder<bool> uw (_no_sound_notes, allow_audition ? _no_sound_notes : true);
 
 	for (n = notes.begin(); n != notes.end(); ++n) {
 		if ((cne = find_canvas_note(*n)) != 0) {

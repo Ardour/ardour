@@ -5319,7 +5319,7 @@ Editor::region_view_added (RegionView * rv)
 		list<pair<PBD::ID const, list<Evoral::event_id_t> > >::iterator rnote;
 		for (rnote = selection->pending_midi_note_selection.begin(); rnote != selection->pending_midi_note_selection.end(); ++rnote) {
 			if (rv->region()->id () == (*rnote).first) {
-				mrv->select_notes ((*rnote).second);
+				mrv->select_notes ((*rnote).second, false);
 				selection->pending_midi_note_selection.erase(rnote);
 				break;
 			}

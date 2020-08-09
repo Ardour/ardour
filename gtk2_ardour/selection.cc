@@ -1216,7 +1216,7 @@ Selection::set_state (XMLNode const & node, int)
 			for (RegionSelection::iterator rsi = rs.begin(); rsi != rs.end(); ++rsi) {
 				MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (*rsi);
 				if (mrv) {
-					mrv->select_notes(notes);
+					mrv->select_notes(notes, false);
 				}
 			}
 

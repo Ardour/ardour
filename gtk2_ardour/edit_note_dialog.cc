@@ -233,5 +233,5 @@ EditNoteDialog::done (int r)
 		notes.push_back ((*i)->note()->id());
 	}
 
-	_region_view->select_notes (notes);
+	_region_view->select_notes (notes, true);
 }

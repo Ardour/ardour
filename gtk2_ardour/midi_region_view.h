@@ -214,7 +214,7 @@ public:
 	NoteBase* copy_selection (NoteBase* primary);
 	void move_copies(double dx_qn, double dy, double cumulative_dy);
 
-	void select_notes (std::list<Evoral::event_id_t>);
+	void select_notes (std::list<Evoral::event_id_t>, bool allow_audition);
 	void select_matching_notes (uint8_t notenum, uint16_t channel_mask, bool add, bool extend);
 	void toggle_matching_notes (uint8_t notenum, uint16_t channel_mask);
 
