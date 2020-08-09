@@ -536,6 +536,15 @@ def build(bld):
             obj.defines += [ 'LXVST_SUPPORT' ]
             obj.use += [ 'X11' ]
 
+        if bld.is_defined('VST3_SUPPORT'):
+            obj.source += [ 'vst3_plugin_ui.cc' ]
+            if sys.platform == 'darwin':
+                obj.source += [ 'vst3_nsview_plugin_ui.mm' ]
+            elif bld.env['build_target'] == 'mingw':
+                obj.source += [ 'vst3_hwnd_plugin_ui.cc' ]
+            else:
+                obj.source += [ 'vst3_x11_plugin_ui.cc' ]
+
 #    # Tool to test libcanvas
 #    if re.search ("linux", sys.platform) != None and bld.env['CANVASTESTUI']:
 #        obj = bld (features = 'cxx c cxxprogram')
@@ -703,6 +712,15 @@ def build(bld):
 
     if bld.is_defined('AUDIOUNIT_SUPPORT'):
         obj.source += [ 'au_pluginui.mm' ]
+
+    if bld.is_defined('VST3_SUPPORT'):
+        obj.source += [ 'vst3_plugin_ui.cc' ]
+        if sys.platform == 'darwin':
+            obj.source += [ 'vst3_nsview_plugin_ui.mm' ]
+        elif bld.env['build_target'] == 'mingw':
+            obj.source += [ 'vst3_hwnd_plugin_ui.cc' ]
+        else:
+            obj.source += [ 'vst3_x11_plugin_ui.cc' ]
 
     # Wrappers
 
