@@ -84,12 +84,12 @@ class timepos_t : public int62_t  {
 
 	bool operator== (timepos_t const & other) const { return v == other.v; }
 	bool operator!= (timepos_t const & other) const { return v != other.v; }
-#if 0
-	bool operator<  (timecnt_t const & other) const { if (is_beats() == other.is_beats()) return val() < other.val(); return expensive_lt (other); }
-	bool operator>  (timecnt_t const & other) const { if (is_beats() == other.is_beats()) return val() > other.val(); return expensive_gt (other); }
-	bool operator<= (timecnt_t const & other) const { if (is_beats() == other.is_beats()) return val() <= other.val(); return expensive_lte (other); }
-	bool operator>= (timecnt_t const & other) const { if (is_beats() == other.is_beats()) return val() >= other.val(); return expensive_gte (other); }
-#endif
+
+	bool operator<  (timecnt_t const & other) const;
+	bool operator>  (timecnt_t const & other) const;
+	bool operator<= (timecnt_t const & other) const;
+	bool operator>= (timecnt_t const & other) const;
+
 	bool operator<  (timepos_t const & other) const { if (is_beats() == other.is_beats()) return val() < other.val(); return expensive_lt (other); }
 	bool operator>  (timepos_t const & other) const { if (is_beats() == other.is_beats()) return val() > other.val(); return expensive_gt (other); }
 	bool operator<= (timepos_t const & other) const { if (is_beats() == other.is_beats()) return val() <= other.val(); return expensive_lte (other); }
@@ -98,7 +98,7 @@ class timepos_t : public int62_t  {
 	timepos_t operator+(timecnt_t const & d) const;
 	timepos_t operator+(timepos_t const & d) const { if (is_beats() == d.is_beats()) return timepos_t (v + d.ticks()); return expensive_add (d.superclocks()); }
 	timepos_t operator+(superclock_t s) const { if (is_superclock()) return timepos_t (v + s); return expensive_add (s); }
-	timepos_t operator+(Temporal::Beats const &b ) const { if (is_beats()) return timepos_t (ticks() + b.to_ticks()); return expensive_add (b); } 
+	timepos_t operator+(Temporal::Beats const &b ) const { if (is_beats()) return timepos_t (ticks() + b.to_ticks()); return expensive_add (b); }
 
 	/* operator-() poses severe and thorny problems for a class that represents position on a timeline.
 
@@ -233,6 +233,8 @@ class timepos_t : public int62_t  {
 
 	timepos_t expensive_add (Temporal::Beats const &) const;
 	timepos_t expensive_add (superclock_t s) const;
+
+	using int62_t::operator int64_t;
 };
 
 
@@ -259,19 +261,31 @@ class timepos_t : public int62_t  {
  */
 
 class LIBTEMPORAL_API timecnt_t {
-  public:
-	timecnt_t () : _distance (false, 0), _position (0) {}
+   public:
+	/* default to zero superclocks @ zero */
+	timecnt_t () : _distance (int62_t (false, 0)), _position (superclock_t(0)) {}
+
+	/* construct from timeline types */
 	timecnt_t (timepos_t const & d, timepos_t const & p) : _distance (d), _position (p) { assert (p.is_beats() == d.is_beats()); }
 	timecnt_t (timecnt_t const &, timepos_t const & pos);
-	timecnt_t (superclock_t s, timepos_t const & pos) : _distance (false, s), _position (pos) { assert (_distance.flagged() == _position.is_beats()); }
+
+	/* construct from int62_t (which will be flagged or not) and timepos_t */
+	timecnt_t (int62_t d, timepos_t p) : _distance (d), _position (p) { assert (p.is_beats() == d.flagged()); }
+
+	/* construct from position/distance primitives */
+	explicit timecnt_t (superclock_t s, timepos_t const & pos) : _distance (false, s), _position (pos) { assert (_distance.flagged() == _position.is_beats()); }
 	explicit timecnt_t (Temporal::Beats const & b, timepos_t const & pos) :  _distance (true, b.to_ticks()), _position (pos) { assert ( _distance.flagged() == _position.is_beats()); }
+
+	/* Construct from just a distance value - position is assumed to be zero */
+	explicit timecnt_t (superclock_t s) : _distance (false, s), _position (superclock_t (0)) {}
+	explicit timecnt_t (Temporal::Beats const & b) :  _distance (true, b.to_ticks()), _position (Beats()) {}
 
 	int62_t const & distance() const { return _distance; }
 	timepos_t const & position() const { return _position; }
 	void set_position (timepos_t const &pos);
 
-	bool positive() const { return _distance > 0; }
-	bool negative() const {return _distance < 0; }
+	bool positive() const { return _distance.val() > 0; }
+	bool negative() const {return _distance.val() < 0; }
 	bool zero() const { return _distance.val() == 0; }
 
 	static timecnt_t const & max() { return _max_timecnt; }
@@ -297,12 +311,12 @@ class LIBTEMPORAL_API timecnt_t {
 	timecnt_t operator*(ratio_t const &) const;
 	timecnt_t operator/(ratio_t const &) const;
 
-	timecnt_t operator-() const { return timecnt_t (-_distance.val(), _position); }
-	timecnt_t operator- (timecnt_t const & t) const { return timecnt_t (_distance - t.distance(), _position); }
-	timecnt_t operator+ (timecnt_t const & t) const { return timecnt_t (_distance + t.distance(), _position); }
+	timecnt_t operator-() const;
+	timecnt_t operator- (timecnt_t const & t) const;
+	timecnt_t operator+ (timecnt_t const & t) const;
 
-	timecnt_t & operator-= (timecnt_t const & t)  { _distance -= t.distance(); return *this; }
-	timecnt_t & operator+= (timecnt_t const & t)  { _distance += t.distance(); return *this; }
+	timecnt_t & operator-= (timecnt_t const & t);
+	timecnt_t & operator+= (timecnt_t const & t);
 
 	//timecnt_t operator- (timepos_t const & t) const;
 	//timecnt_t operator+ (timepos_t const & t) const;
@@ -334,20 +348,19 @@ class LIBTEMPORAL_API timecnt_t {
 	*/
 	bool operator== (timepos_t const & other) const { return _distance == other; }
 
-#if 0
-	bool operator< (superclock_t s) { if (_distance.is_superclock()) return _distance < s; return false; }
-	bool operator< (Temporal::Beats const & b) { if (_distance.is_beats()) return _distance < b; return false; }
-	bool operator<= (superclock_t s) { if (_distance.is_superclock()) return _distance <= s; return false; }
-	bool operator<= (Temporal::Beats const & b) { if (_distance.is_beats()) return _distance <= b; return false; }
-	bool operator> (superclock_t s) { if (_distance.is_superclock()) return _distance > s; return false; }
-	bool operator> (Temporal::Beats const & b) { if (_distance.is_beats()) return _distance > b; return false; }
-	bool operator>= (superclock_t s) { if (_distance.is_superclock()) return _distance >= s; return false; }
-	bool operator>= (Temporal::Beats const & b) { if (_distance.is_beats()) return _distance >= b; return false; }
-	bool operator== (superclock_t s) { if (_distance.is_superclock()) return _distance == s; return false; }
-	bool operator== (Temporal::Beats const & b) { if (_distance.is_beats()) return _distance == b; return false; }
-	bool operator!= (superclock_t s) { if (_distance.is_superclock()) return _distance != s; return false; }
-	bool operator!= (Temporal::Beats const & b) { if (_distance.is_beats()) return _distance != b; return false; }
-#endif
+	bool operator< (Temporal::samplepos_t s) { return samples() < s; }
+	bool operator< (Temporal::Beats const & b) { return beats() < b; }
+	bool operator<= (Temporal::samplepos_t s) { return samples() <= s; }
+	bool operator<= (Temporal::Beats const & b) { return beats() <= b; }
+	bool operator> (Temporal::samplepos_t s) { return samples() > s; }
+	bool operator> (Temporal::Beats const & b) { return beats() > b; }
+	bool operator>= (Temporal::samplepos_t s) { return samples() >= s; }
+	bool operator>= (Temporal::Beats const & b) { return beats() >= b; }
+	bool operator== (Temporal::samplepos_t s) { return samples() == s; }
+	bool operator== (Temporal::Beats const & b) { return beats() == b; }
+	bool operator!= (Temporal::samplepos_t s) { return samples() != s; }
+	bool operator!= (Temporal::Beats const & b) { return beats() != b; }
+
 	timecnt_t   operator% (timecnt_t const &) const;
 	timecnt_t & operator%=(timecnt_t const &);
 
@@ -390,5 +403,38 @@ std::ostream&  operator<< (std::ostream & o, Temporal::timecnt_t const & tc);
 std::ostream&  operator<< (std::ostream & o, Temporal::timepos_t const & tp);
 }
 
+#if 0
+inline static bool operator< (Temporal::samplepos_t s, Temporal::timepos_t const & t) { return s < t.samples(); }
+inline static bool operator< (Temporal::Beats const & b, Temporal::timepos_t const & t) { return b < t.beats(); }
+
+inline static bool operator<= (Temporal::samplepos_t s, Temporal::timepos_t const & t) { return s <= t.samples(); }
+inline static bool operator<= (Temporal::Beats const & b, Temporal::timepos_t const & t) { return b <= t.beats(); }
+
+inline static bool operator> (Temporal::samplepos_t s, Temporal::timepos_t const & t) { return s > t.samples(); }
+inline static bool operator> (Temporal::Beats const & b, Temporal::timepos_t const & t) { return b > t.beats(); }
+
+inline static bool operator>= (Temporal::samplepos_t s, Temporal::timepos_t const & t) { return s >= t.samples(); }
+inline static bool operator>= (Temporal::Beats const & b, Temporal::timepos_t const & t) { return b >= t.beats(); }
+
+#ifdef TEMPORAL_DOMAIN_WARNING
+#undef TEMPORAL_DOMAIN_WARNING
+#endif
+
+#define TEMPORAL_DOMAIN_WARNING(d) if (t.time_domain() != (d)) std::cerr << "DOMAIN CONVERSION WARNING IN COMPARATOR with t.domain = " << enum_2_string (t.time_domain()) << " not " << enum_2_string (d) << std::endl;
+
+inline static bool operator< (Temporal::samplepos_t s, Temporal::timecnt_t const & t) { TEMPORAL_DOMAIN_WARNING (Temporal::AudioTime); return s < t.samples(); }
+inline static bool operator< (Temporal::Beats const & b, Temporal::timecnt_t const & t) { TEMPORAL_DOMAIN_WARNING (Temporal::BeatTime); return b < t.beats(); }
+
+inline static bool operator<= (Temporal::samplepos_t s, Temporal::timecnt_t const & t) { TEMPORAL_DOMAIN_WARNING (Temporal::AudioTime); return s <= t.samples(); }
+inline static bool operator<= (Temporal::Beats const & b, Temporal::timecnt_t const & t) { TEMPORAL_DOMAIN_WARNING (Temporal::BeatTime); return b <= t.beats(); }
+
+inline static bool operator> (Temporal::samplepos_t s, Temporal::timecnt_t const & t) { TEMPORAL_DOMAIN_WARNING (Temporal::AudioTime); return s > t.samples(); }
+inline static bool operator> (Temporal::Beats const & b, Temporal::timecnt_t const & t) { TEMPORAL_DOMAIN_WARNING (Temporal::BeatTime); return b > t.beats(); }
+
+inline static bool operator>= (Temporal::samplepos_t s, Temporal::timecnt_t const & t) { TEMPORAL_DOMAIN_WARNING (Temporal::AudioTime); return s >= t.samples(); }
+inline static bool operator>= (Temporal::Beats const & b, Temporal::timecnt_t const & t) { TEMPORAL_DOMAIN_WARNING (Temporal::BeatTime); return b >= t.beats(); }
+#endif
+
+#undef TEMPORAL_DOMAIN_WARNING
 
 #endif /* __libtemporal_timeline_h__ */

@@ -130,6 +130,7 @@ atomic_masks ()
 
 	for (int n = 0; n < loop_count; ++n) {
 		t = random ();
+		t = t + 1;
 		if ((t.val() % 2LL) == 0LL) {
 			odd++;
 		}

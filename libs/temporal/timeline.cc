@@ -209,7 +209,7 @@ timepos_t::timepos_t (timecnt_t const & t)
 		throw  std::domain_error("negative value for timepos_t constructor");
 	}
 
-	v = t.distance ();
+	v = build (t.distance().flagged(), t.distance ().val());
 }
 
 // timepos_t timepos_t::_max_timepos (Temporal::AudioTime);
@@ -217,7 +217,7 @@ timepos_t::timepos_t (timecnt_t const & t)
 timepos_t &
 timepos_t::operator= (timecnt_t const & t)
 {
-	v = t.distance();
+	v = build (t.distance().flagged(), t.distance().val());
 	return *this;
 }
 
