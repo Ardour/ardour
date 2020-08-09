@@ -416,7 +416,7 @@ FoldbackStrip::init ()
 	global_vpacker.set_border_width (1);
 	global_vpacker.set_spacing (2);
 
-	// Packing is from top down to the send box. Thje send box
+	// Packing is from top down to the send box. The send box
 	// needs the most room and takes all left over space
 	// Everything below the send box is packed from the bottom up
 	// the panner is the last thing to pack as it doesn't always show
@@ -1599,7 +1599,7 @@ FoldbackStrip::create_selected_sends (bool include_buses)
 		if ((*i)->is_selected() && !(*i)->is_master() && !(*i)->is_monitor()) {
 			boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route>(*i);
 			if (rt) {
-				rt->add_foldback_send (_route);
+				rt->add_foldback_send (_route, false);
 			}
 		}
 	}
@@ -1664,7 +1664,8 @@ FoldbackStrip::duplicate_current_fb ()
 			if (i->sends_only) {
 				boost::shared_ptr<Route> rt (i->r.lock());
 				boost::shared_ptr<Send> old_snd = rt->internal_send_for (old_fb);
-				rt->add_foldback_send (new_fb);
+				// XXXX needs false to be replaced with value from duplicated send
+				rt->add_foldback_send (new_fb, false);
 				if (old_snd) {
 					float old_gain = old_snd->gain_control()->get_value ();
 					boost::shared_ptr<Send> new_snd = rt->internal_send_for (new_fb);

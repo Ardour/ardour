@@ -3384,10 +3384,15 @@ Route::add_aux_send (boost::shared_ptr<Route> route, boost::shared_ptr<Processor
 }
 
 int
-Route::add_foldback_send (boost::shared_ptr<Route> route)
+Route::add_foldback_send (boost::shared_ptr<Route> route, bool post_fader)
 {
 	assert (route != _session.monitor_out ());
-	boost::shared_ptr<Processor> before = before_processor_for_placement (PreFader);
+	boost::shared_ptr<Processor> before;
+	if (post_fader) {
+		before = before_processor_for_placement (PostFader);
+	} else {
+		before = before_processor_for_placement (PreFader);
+	}
 
 	{
 		Glib::Threads::RWLock::ReaderLock rm (_processor_lock);
@@ -3413,6 +3418,7 @@ Route::add_foldback_send (boost::shared_ptr<Route> route)
 		}
 
 		listener->panner_shell()->set_linked_to_route (false);
+		listener->set_pre_fader (!post_fader);
 		add_processor (listener, before);
 
 	} catch (failed_constructor& err) {

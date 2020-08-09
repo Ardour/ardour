@@ -2821,7 +2821,7 @@ ProcessorBox::choose_aux (boost::weak_ptr<Route> wr)
 	}
 
 	if (target->is_foldbackbus ()) {
-		_route->add_foldback_send (target);
+		_route->add_foldback_send (target, false);
 	} else {
 		_session->add_internal_send (target, _placement, _route);
 	}
