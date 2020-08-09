@@ -84,6 +84,10 @@ numerically_less (const char* a, const char* b)
 			continue;
 		}
 		if (d_a) {
+			/* strip leading zeros to prevent `strtol` from using octal */
+			while (*d_a == '0') { if (d_a[1] && isdigit (d_a[1])) { ++d_a; } else { break; } }
+			while (*d_b == '0') { if (d_b[1] && isdigit (d_b[1])) { ++d_b; } else { break; } }
+
 			const int64_t ia = strtol (d_a, NULL, 0) * order_of_magnitude (d_a);
 			const int64_t ib = strtol (d_b, NULL, 0) * order_of_magnitude (d_b);
 			if (ia != ib) {
