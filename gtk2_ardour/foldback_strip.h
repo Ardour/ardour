@@ -94,6 +94,7 @@ private:
 	gboolean button_press (GdkEventButton*);
 	Gtk::Menu* build_send_menu ();
 	void set_gain (float new_gain);
+	void set_send_position (bool post);
 	void remove_me ();
 
 	void route_property_changed (const PBD::PropertyChange&);

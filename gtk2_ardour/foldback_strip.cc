@@ -263,6 +263,15 @@ FoldbackSend::build_send_menu ()
 	items.push_back (
 		MenuElem(_("Set send gain to 0dB"), sigc::bind (sigc::mem_fun (*this, &FoldbackSend::set_gain), 1.0))
 		);
+	if (_send_proc->get_pre_fader ()) {
+		items.push_back (
+			MenuElem(_("Set send post fader"), sigc::bind (sigc::mem_fun (*this, &FoldbackSend::set_send_position), true))
+			);
+	} else {
+		items.push_back (
+			MenuElem(_("Set send pre fader"), sigc::bind (sigc::mem_fun (*this, &FoldbackSend::set_send_position), false))
+			);
+	}
 	items.push_back (MenuElem(_("Remove This Send"), sigc::mem_fun (*this, &FoldbackSend::remove_me)));
 
 	return menu;
@@ -283,6 +292,41 @@ FoldbackSend::set_gain (float new_gain)
 	}
 	lc->set_value (new_gain, Controllable::NoGroup);
 
+}
+
+void
+FoldbackSend::set_send_position (bool post)
+{
+	boost::shared_ptr<Route> new_snd_rt = _send_route;
+	boost::shared_ptr<Route> new_fb_rt = _foldback_route;
+	float new_level = _send->gain_control()->get_value();
+	bool new_enable = _send_proc->enabled ();
+	bool is_pan = false;
+	float new_pan = 0.0;
+	if (_foldback_route->input()->n_ports().n_audio() == 2) {
+		is_pan = true;
+		boost::shared_ptr<Pannable> pannable = _send_del->panner()->pannable();
+		boost::shared_ptr<Controllable> ac;
+		ac = pannable->pan_azimuth_control;
+		new_pan = ac->get_value();
+	}
+
+	remove_me ();
+	new_snd_rt->add_foldback_send (new_fb_rt, post);
+
+	boost::shared_ptr<Send> snd = new_snd_rt->internal_send_for (new_fb_rt);
+	if (snd) {
+		snd->gain_control()->set_value(new_level, Controllable::NoGroup);
+		boost::shared_ptr<Processor> snd_proc = boost::dynamic_pointer_cast<Processor> (snd);
+		snd_proc->enable (new_enable);
+		if (is_pan) {
+			boost::shared_ptr<Delivery> new_del = boost::dynamic_pointer_cast<Delivery> (snd);
+			boost::shared_ptr<Pannable> pannable = new_del->panner()->pannable();
+			boost::shared_ptr<Controllable> ac;
+			ac = pannable->pan_azimuth_control;
+			ac->set_value(new_pan, Controllable::NoGroup);
+		}
+	}
 }
 
 void
