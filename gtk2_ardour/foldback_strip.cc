@@ -84,7 +84,11 @@ FoldbackSend::FoldbackSend (boost::shared_ptr<Send> snd, \
 	_button.set_fallthrough_to_parent(true);
 	_button.set_led_left (true);
 	_button.signal_led_clicked.connect (sigc::mem_fun (*this, &FoldbackSend::led_clicked));
-	_button.set_name ("processor prefader");
+	if (_send_proc->get_pre_fader ()) {
+		_button.set_name ("processor prefader");
+	} else {
+		_button.set_name ("processor postfader");
+	}
 	_button.set_layout_ellipsize_width (PX_SCALE(_width) * PANGO_SCALE);
 	_button.set_text_ellipsize (Pango::ELLIPSIZE_END);
 	name_changed ();
