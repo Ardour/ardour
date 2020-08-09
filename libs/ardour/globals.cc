@@ -189,14 +189,8 @@ setup_hardware_optimization (bool try_optimization)
 
 #if defined(ARCH_X86) && defined(BUILD_SSE_OPTIMIZATIONS)
 
-#ifdef PLATFORM_WINDOWS
-		/* We have AVX-optimized code for Windows */
-		if (fpu->has_avx ())
-#else
-		/* AVX code doesn't compile on Linux yet */
-		if (false)
-#endif
-		{
+		/* We have AVX-optimized code for Windows and Linux */
+		if (fpu->has_avx ()) {
 			info << "Using AVX optimized routines" << endmsg;
 
 			// AVX SET
