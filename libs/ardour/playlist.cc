@@ -776,7 +776,9 @@ Playlist::add_region_internal (boost::shared_ptr<Region> region, samplepos_t pos
 		boost::shared_ptr<Playlist> foo (shared_from_this ());
 		region->set_playlist (boost::weak_ptr<Playlist> (foo));
 	}
+
 	if (for_music) {
+#warning NUTEMPO FIXME need timepos_t here
 		region->set_position_music (quarter_note);
 	} else {
 		region->set_position (position, sub_num);

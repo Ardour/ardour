@@ -77,7 +77,6 @@ class LIBARDOUR_API MidiRegion : public Region
 
 	/* Stub Readable interface */
 	virtual samplecnt_t read (Sample*, samplepos_t /*pos*/, samplecnt_t /*cnt*/, int /*channel*/) const { return 0; }
-	virtual samplecnt_t readable_length() const { return length(); }
 
 	samplecnt_t read_at (Evoral::EventSink<samplepos_t>& dst,
 	                    samplepos_t position,
@@ -157,12 +156,11 @@ class LIBARDOUR_API MidiRegion : public Region
 
 	bool set_name (const std::string & str);
 
-	void set_position_internal (samplepos_t pos, bool allow_bbt_recompute, const int32_t sub_num);
-	void set_position_music_internal (double qn);
-	void set_length_internal (samplecnt_t len, const int32_t sub_num);
-	void set_start_internal (samplecnt_t, const int32_t sub_num);
-	void trim_to_internal (samplepos_t position, samplecnt_t length, const int32_t sub_num);
-	void update_length_beats (const int32_t sub_num);
+	void set_position_internal (timepos_t pos);
+	void set_length_internal (timecnt_t const & len);
+	void set_start_internal (timecnt_t const &);
+	void trim_to_internal (timepos_t position, timecnt_t const & length);
+	void update_length_beats ();
 
 	void model_changed ();
 	void model_contents_changed ();

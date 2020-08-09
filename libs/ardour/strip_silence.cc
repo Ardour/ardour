@@ -66,7 +66,7 @@ StripSilence::run (boost::shared_ptr<Region> r, Progress* progress)
 
         const AudioIntervalResult& silence = sm->second;
 
-	if (silence.size () == 1 && silence.front().first == 0 && silence.front().second == region->length() - 1) {
+	if (silence.size () == 1 && silence.front().first == 0 && silence.front().second == region->length_samples() - 1) {
 		/* the region is all silence, so just return with nothing */
 		return 0;
 	}
@@ -82,8 +82,8 @@ StripSilence::run (boost::shared_ptr<Region> r, Progress* progress)
 
 	/* Add the possible audible section at the start of the region */
 	AudioIntervalResult::const_iterator first_silence = silence.begin ();
-	if (first_silence->first != region->start()) {
-		audible.push_back (std::make_pair (r->start(), first_silence->first));
+	if (first_silence->first != region->start_sample()) {
+		audible.push_back (std::make_pair (r->start_sample(), first_silence->first));
 	}
 
 	/* Add audible sections in the middle of the region */
@@ -100,7 +100,7 @@ StripSilence::run (boost::shared_ptr<Region> r, Progress* progress)
 	AudioIntervalResult::const_iterator last_silence = silence.end ();
 	--last_silence;
 
-	sampleoffset_t const end_of_region = r->start() + r->length();
+	sampleoffset_t const end_of_region = r->start_sample() + r->length_samples();
 
 	if (last_silence->second < end_of_region - 1) {
 		audible.push_back (std::make_pair (last_silence->second, end_of_region - 1));
@@ -115,11 +115,12 @@ StripSilence::run (boost::shared_ptr<Region> r, Progress* progress)
 		boost::shared_ptr<AudioRegion> copy;
 
 		plist.add (Properties::length, i->second - i->first);
-		plist.add (Properties::position, r->position() + (i->first - r->start()));
+		plist.add (Properties::position, r->position_sample() + (i->first - r->start_sample()));
 
-		copy = boost::dynamic_pointer_cast<AudioRegion> (
-			RegionFactory::create (region, MusicSample (i->first - r->start(), 0), plist)
-			);
+#warning NUTEMPO FIXME need new constructors etc.
+//		copy = boost::dynamic_pointer_cast<AudioRegion> (
+//			RegionFactory::create (region, MusicSample (i->first - r->start(), 0), plist)
+//			);
 
 		copy->set_name (RegionFactory::new_region_name (region->name ()));
 

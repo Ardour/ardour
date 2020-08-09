@@ -354,24 +354,6 @@ MidiRegion::set_position_internal (samplepos_t pos, bool allow_bbt_recompute, co
 	}
 }
 
-void
-MidiRegion::set_position_music_internal (double qn)
-{
-	Region::set_position_music_internal (qn);
-	/* set _start to new position in tempo map */
-	_start = _session.tempo_map().samples_between_quarter_notes (quarter_note() - start_beats(), quarter_note());
-
-	if (position_lock_style() == AudioTime) {
-		_length_beats = _session.tempo_map().quarter_note_at_sample (_position + _length) - quarter_note();
-
-	} else {
-		/* leave _length_beats alone, and change _length to reflect the state of things
-		   at the new position (tempo map may dictate a different number of samples).
-		*/
-		_length = _session.tempo_map().samples_between_quarter_notes (quarter_note(), quarter_note() + length_beats());
-	}
-}
-
 samplecnt_t
 MidiRegion::read_at (Evoral::EventSink<samplepos_t>& out,
                      samplepos_t                     position,

@@ -84,11 +84,11 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 	string::size_type at;
 
 #ifndef NDEBUG
-	cerr << "RBEffect: source region: position = " << region->position ()
-	     << ", start = " << region->start ()
-	     << ", length = " << region->length ()
-	     << ", ancestral_start = " << region->ancestral_start ()
-	     << ", ancestral_length = " << region->ancestral_length ()
+	cerr << "RBEffect: source region: position = " << region->position_sample ()
+	     << ", start = " << region->start_sample ()
+	     << ", length = " << region->length_samples ()
+	     << ", ancestral_start = " << region->ancestral_start_sample ()
+	     << ", ancestral_length = " << region->ancestral_length_samples ()
 	     << ", stretch " << region->stretch ()
 	     << ", shift " << region->shift () << endl;
 #endif
@@ -151,11 +151,10 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 	double stretch = region->stretch () * tsr.time_fraction;
 	double shift   = region->shift () * tsr.pitch_fraction;
 
-	samplecnt_t read_start = region->ancestral_start () +
-	                         samplecnt_t (region->start () / (double)region->stretch ());
+	samplecnt_t read_start = region->ancestral_start_sample () +
+	                         samplecnt_t (region->start_sample () / (double)region->stretch ());
 
-	samplecnt_t read_duration =
-	    samplecnt_t (region->length () / (double)region->stretch ());
+	samplecnt_t read_duration = samplecnt_t (region->length_samples () / (double)region->stretch ());
 
 	uint32_t channels = region->n_channels ();
 
@@ -221,7 +220,7 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 
 				samplepos_t this_position;
 				this_position = read_start + pos -
-				                region->start () + region->position ();
+				                region->start_sample () + region->position_sample ();
 
 				this_read = region->master_read_at (buffers[i],
 				                                    buffers[i],
@@ -258,7 +257,7 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 
 				samplepos_t this_position;
 				this_position = read_start + pos -
-				                region->start () + region->position ();
+				                region->start_sample () + region->position_sample ();
 
 				this_read = region->master_read_at (buffers[i],
 				                                    buffers[i],
@@ -269,7 +268,7 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 
 				if (this_read != this_time) {
 					error << string_compose (_("tempoize: error reading data from %1 at %2 (wanted %3, got %4)"),
-					                         region->name (), pos + region->position (), this_time, this_read)
+					                         region->name (), pos + region->position_sample (), this_time, this_read)
 					      << endmsg;
 					goto out;
 				}
@@ -353,15 +352,16 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 	/* now reset ancestral data for each new region */
 
 	for (vector<boost::shared_ptr<Region> >::iterator x = results.begin (); x != results.end (); ++x) {
-		(*x)->set_ancestral_data (read_start,
-		                          read_duration,
+		(*x)->set_ancestral_data (timecnt_t (read_start, timepos_t()),
+		                          timecnt_t (read_duration, read_start),
 		                          stretch,
 		                          shift);
 		(*x)->set_master_sources (region->master_sources ());
 		/* multiply the old (possibly previously stretched) region length by the extra
 		 * stretch this time around to get its new length. this is a non-music based edit atm.
 		 */
-		(*x)->set_length ((*x)->length () * tsr.time_fraction, 0);
+#warning NUTEMPO FIXME should use (*x)->position() sa 2nd arg also needs to figure out units for first arg
+		(*x)->set_length (timecnt_t (samplepos_t ((*x)->length_samples () * tsr.time_fraction), (*x)->position_samples()));
 	}
 
 	/* stretch region gain envelope */

@@ -113,7 +113,6 @@ class LIBARDOUR_API AudioRegion : public Region
 	/* Readable interface */
 
 	virtual samplecnt_t read (Sample*, samplepos_t pos, samplecnt_t cnt, int channel) const;
-	virtual samplecnt_t readable_length() const { return length(); }
 
 	virtual samplecnt_t read_at (Sample *buf, Sample *mixdown_buf, float *gain_buf,
 	                             samplepos_t position,

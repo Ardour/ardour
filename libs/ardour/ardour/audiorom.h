@@ -34,7 +34,7 @@ public:
 	~AudioRom();
 
 	samplecnt_t read (Sample*, samplepos_t pos, samplecnt_t cnt, int channel) const;
-	samplecnt_t readable_length() const { return _size; }
+	samplecnt_t readable_length_samples() const { return _size; }
 	uint32_t  n_channels () const { return 1; }
 
 private:

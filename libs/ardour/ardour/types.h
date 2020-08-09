@@ -43,7 +43,9 @@
 #include <inttypes.h>
 
 #include "temporal/bbt_time.h"
+#include "temporal/superclock.h"
 #include "temporal/time.h"
+#include "temporal/timeline.h"
 #include "temporal/types.h"
 
 #include "pbd/id.h"
@@ -84,6 +86,10 @@ typedef uint32_t pframes_t;
 typedef Temporal::samplecnt_t samplecnt_t;
 typedef Temporal::samplepos_t samplepos_t;
 typedef Temporal::sampleoffset_t sampleoffset_t;
+
+typedef Temporal::timepos_t timepos_t;
+typedef Temporal::timecnt_t timecnt_t;
+typedef Temporal::superclock_t superclock_t;
 
 static const layer_t    max_layer    = UINT32_MAX;
 

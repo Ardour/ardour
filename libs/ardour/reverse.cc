@@ -52,8 +52,10 @@ Reverse::run (boost::shared_ptr<Region> r, Progress*)
 	int ret = -1;
 
 	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion>(r);
-	if (!region)
+
+	if (!region) {
 		return ret;
+	}
 
 	/* create new sources */
 
@@ -61,13 +63,13 @@ Reverse::run (boost::shared_ptr<Region> r, Progress*)
 		goto out;
 	}
 
-	fstart = region->start();
+	fstart = region->start_sample();
 
-	if (blocksize > region->length()) {
-		blocksize = region->length();
+	if (blocksize > region->length_samples()) {
+		blocksize = region->length_samples();
 	}
 
-	fpos = max (fstart, (fstart + region->length() - blocksize));
+	fpos = max (fstart, (fstart + region->length_samples() - blocksize));
 
 	buf = new Sample[blocksize];
 	to_read = blocksize;

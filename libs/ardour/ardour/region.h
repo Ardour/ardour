@@ -29,6 +29,8 @@
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/utility.hpp>
 
+#include "temporal/timeline.h"
+
 #include "pbd/undo.h"
 #include "pbd/signals.h"
 #include "ardour/ardour.h"
@@ -59,14 +61,14 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>              hidden;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>              position_locked;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>              valid_transients;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<samplepos_t>       start;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<samplecnt_t>       length;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<samplepos_t>       position;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<timecnt_t>         start;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<timecnt_t>         length;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<timepos_t>         position;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<double>            beat;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<samplecnt_t>       sync_position;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<timecnt_t>         sync_position;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<layer_t>           layer;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<samplepos_t>       ancestral_start;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<samplecnt_t>       ancestral_length;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<timecnt_t>         ancestral_start;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<timecnt_t>         ancestral_length;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<float>             stretch;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<float>             shift;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<PositionLockStyle> position_lock_style;
@@ -116,9 +118,22 @@ public:
 	 * START:    first sample of the region within its source(s)
 	 * LENGTH:   number of samples the region represents
 	 */
-	samplepos_t position () const { return _position; }
-	samplepos_t start ()    const { return _start; }
-	samplecnt_t length ()   const { return _length; }
+
+	timepos_t nt_position ()  const { return _position.val(); }
+	timecnt_t nt_start ()     const { return _start.val(); }
+	timecnt_t nt_length ()    const { return _length.val(); }
+	timepos_t nt_end()        const;
+
+	timepos_t source_position () const;
+	timepos_t source_relative_position (Temporal::timepos_t const &) const;
+	timepos_t region_relative_position (Temporal::timepos_t const &) const;
+
+	samplepos_t position_sample ()  const { return _position.val().samples(); }
+	samplecnt_t start_sample ()     const { return _start.val().samples(); }
+	samplecnt_t length_samples ()    const { return _length.val().samples(); }
+
+	samplecnt_t readable_length_samples() const { return length_samples(); }
+
 	layer_t    layer ()     const { return _layer; }
 
 	void set_selected_for_solo(bool yn);
@@ -128,38 +143,41 @@ public:
 
 	/* these two are valid ONLY during a StateChanged signal handler */
 
-	samplepos_t last_position () const { return _last_position; }
-	samplecnt_t last_length ()   const { return _last_length; }
+	timepos_t last_position () const { return _last_position; }
+	timecnt_t last_length ()   const { return _last_length; }
 
-	samplepos_t ancestral_start ()  const { return _ancestral_start; }
-	samplecnt_t ancestral_length () const { return _ancestral_length; }
+	samplecnt_t ancestral_start_sample ()  const { return _ancestral_start.val().samples(); }
+	samplecnt_t ancestral_length_samples () const { return _ancestral_length.val().samples(); }
+	timecnt_t ancestral_start ()  const { return _ancestral_start.val(); }
+	timecnt_t ancestral_length () const { return _ancestral_length.val(); }
 
 	float stretch () const { return _stretch; }
 	float shift ()   const { return _shift; }
 
-	void set_ancestral_data (samplepos_t start, samplecnt_t length, float stretch, float shift);
+	void set_ancestral_data (timecnt_t const & start, timecnt_t const & length, float stretch, float shift);
 
-	sampleoffset_t sync_offset (int& dir) const;
-	samplepos_t sync_position () const;
+	timecnt_t sync_offset (int& dir) const;
+	timepos_t sync_position () const;
 
-	samplepos_t adjust_to_sync (samplepos_t) const;
+	timepos_t adjust_to_sync (timepos_t) const;
 
 	/* first_sample() is an alias; last_sample() just hides some math */
 
-	samplepos_t first_sample () const { return _position; }
-	samplepos_t last_sample ()  const { return _position + _length - 1; }
+	samplepos_t first_sample () const { return _position.val().samples(); }
+	samplepos_t last_sample ()  const { return first_sample() + length_samples() - 1; }
 
 	/** Return the earliest possible value of _position given the
 	 *  value of _start within the region's sources
 	 */
-	samplepos_t earliest_possible_position () const;
+	timepos_t earliest_possible_position () const;
 	/** Return the last possible value of _last_sample given the
 	 *  value of _startin the regions's sources
 	 */
 	samplepos_t latest_possible_sample () const;
 
 	Evoral::Range<samplepos_t> last_range () const {
-		return Evoral::Range<samplepos_t> (_last_position, _last_position + _last_length - 1);
+		//return Evoral::Range<samplepos_t> (_last_position, _last_position + _last_length - 1);
+		return Evoral::Range<samplepos_t> (0, 0);
 	}
 
 	Evoral::Range<samplepos_t> range () const {
@@ -184,7 +202,7 @@ public:
 
 	PositionLockStyle position_lock_style () const { return _position_lock_style; }
 	void set_position_lock_style (PositionLockStyle ps);
-	void recompute_position_from_lock_style (const int32_t sub_num);
+	void recompute_position_from_lock_style ();
 
 	/* meter-based beat at the region position */
 	double beat () const { return _beat; }
@@ -224,27 +242,27 @@ public:
 
 	/* EDITING OPERATIONS */
 
-	void set_length (samplecnt_t, const int32_t sub_num);
-	void set_start (samplepos_t);
-	void set_position (samplepos_t, int32_t sub_num = 0);
-	void set_position_music (double qn);
-	void set_initial_position (samplepos_t);
-	void special_set_position (samplepos_t);
+	void set_length (timecnt_t const &);
+	void set_start (timecnt_t const &);
+	void set_position (timepos_t);
+	void set_initial_position (timepos_t);
+	void special_set_position (timepos_t);
 	virtual void update_after_tempo_map_change (bool send_change = true);
-	void nudge_position (sampleoffset_t);
+	void nudge_position (timecnt_t const &);
 
 	bool at_natural_position () const;
 	void move_to_natural_position ();
 
-	void move_start (sampleoffset_t distance, const int32_t sub_num = 0);
-	void trim_front (samplepos_t new_position, const int32_t sub_num = 0);
-	void trim_end (samplepos_t new_position, const int32_t sub_num = 0);
-	void trim_to (samplepos_t position, samplecnt_t length, const int32_t sub_num = 0);
+	void move_start (timecnt_t const & distance);
+	void trim_front (timepos_t new_position);
+	void trim_end (timepos_t new_position);
+	void trim_to (timepos_t pos,  timecnt_t const & length);
 
+	/* fades are inherently audio in nature and we specify them in samples */
 	virtual void fade_range (samplepos_t, samplepos_t) {}
 
-	void cut_front (samplepos_t new_position, const int32_t sub_num = 0);
-	void cut_end (samplepos_t new_position, const int32_t sub_num = 0);
+	void cut_front (timepos_t new_position);
+	void cut_end (timepos_t new_position);
 
 	void set_layer (layer_t l); /* ONLY Playlist can call this */
 	void raise ();
@@ -252,7 +270,7 @@ public:
 	void raise_to_top ();
 	void lower_to_bottom ();
 
-	void set_sync_position (samplepos_t n);
+	void set_sync_position (timepos_t n);
 	void clear_sync_position ();
 	void set_hidden (bool yn);
 	void set_muted (bool yn);
@@ -389,13 +407,13 @@ protected:
 	Region (boost::shared_ptr<const Region>);
 
 	/** Construct a region from another region, at an offset within that region */
-	Region (boost::shared_ptr<const Region>, ARDOUR::MusicSample start_offset);
+	Region (boost::shared_ptr<const Region>, timecnt_t start_offset);
 
 	/** Construct a region as a copy of another region, but with different sources */
 	Region (boost::shared_ptr<const Region>, const SourceList&);
 
 	/** Constructor for derived types only */
-	Region (Session& s, samplepos_t start, samplecnt_t length, const std::string& name, DataType);
+	Region (Session& s, timepos_t start, timecnt_t length, const std::string& name, DataType);
 
 	virtual bool can_trim_start_before_source_start () const {
 		return false;
@@ -406,25 +424,24 @@ protected:
 	void send_change (const PBD::PropertyChange&);
 	virtual int _set_state (const XMLNode&, int version, PBD::PropertyChange& what_changed, bool send_signal);
 	void post_set (const PBD::PropertyChange&);
-	virtual void set_position_internal (samplepos_t pos, bool allow_bbt_recompute, const int32_t sub_num);
-	virtual void set_position_music_internal (double qn);
-	virtual void set_length_internal (samplecnt_t, const int32_t sub_num);
-	virtual void set_start_internal (samplecnt_t, const int32_t sub_num = 0);
-	bool verify_start_and_length (samplepos_t, samplecnt_t&);
+	virtual void set_position_internal (timepos_t pos);
+	virtual void set_length_internal (timecnt_t const &);
+	virtual void set_start_internal (timecnt_t const &);
+	bool verify_start_and_length (timecnt_t const &, timecnt_t&);
 	void first_edit ();
 
 	DataType _type;
 
-	PBD::Property<bool>        _sync_marked;
-	PBD::Property<bool>        _left_of_split;
-	PBD::Property<bool>        _right_of_split;
-	PBD::Property<bool>        _valid_transients;
-	PBD::Property<samplepos_t> _start;
-	PBD::Property<samplecnt_t> _length;
-	PBD::Property<samplepos_t> _position;
-	PBD::Property<double>      _beat;
+	PBD::Property<bool>      _sync_marked;
+	PBD::Property<bool>      _left_of_split;
+	PBD::Property<bool>      _right_of_split;
+	PBD::Property<bool>      _valid_transients;
+	PBD::Property<timecnt_t> _start;
+	PBD::Property<timecnt_t> _length;
+	PBD::Property<timepos_t> _position;
+	PBD::Property<double>    _beat;
 	/** Sync position relative to the start of our file */
-	PBD::Property<samplepos_t> _sync_position;
+	PBD::Property<timecnt_t> _sync_position;
 
 	double                  _quarter_note;
 
@@ -452,15 +469,15 @@ protected:
 private:
 	void mid_thaw (const PBD::PropertyChange&);
 
-	virtual void trim_to_internal (samplepos_t position, samplecnt_t length, const int32_t sub_num);
-	void modify_front (samplepos_t new_position, bool reset_fade, const int32_t sub_num);
-	void modify_end (samplepos_t new_position, bool reset_fade, const int32_t sub_num);
+	virtual void trim_to_internal (timepos_t position, timecnt_t const & length);
+	void modify_front (timepos_t new_position, bool reset_fade);
+	void modify_end (timepos_t new_position, bool reset_fade);
 
 	void maybe_uncopy ();
 
-	bool verify_start (samplepos_t);
-	bool verify_start_mutable (samplepos_t&_start);
-	bool verify_length (samplecnt_t&);
+	bool verify_start (timecnt_t const &);
+	bool verify_start_mutable (timecnt_t&);
+	bool verify_length (timecnt_t&);
 
 	virtual void recompute_at_start () = 0;
 	virtual void recompute_at_end () = 0;
@@ -475,8 +492,8 @@ private:
 	PBD::Property<bool>        _external;
 	PBD::Property<bool>        _hidden;
 	PBD::Property<bool>        _position_locked;
-	PBD::Property<samplepos_t> _ancestral_start;
-	PBD::Property<samplecnt_t> _ancestral_length;
+	PBD::Property<timecnt_t>   _ancestral_start;
+	PBD::Property<timecnt_t>   _ancestral_length;
 	PBD::Property<float>       _stretch;
 	PBD::Property<float>       _shift;
 	PBD::EnumProperty<PositionLockStyle> _position_lock_style;
@@ -484,8 +501,8 @@ private:
 	PBD::Property<std::string> _tags;
 	PBD::Property<bool>        _contents; // type is irrelevant
 
-	samplecnt_t             _last_length;
-	samplepos_t             _last_position;
+	timecnt_t             _last_length;
+	timepos_t             _last_position;
 	mutable RegionEditState _first_edit;
 	layer_t                 _layer;
 

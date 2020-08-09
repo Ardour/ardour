@@ -46,7 +46,7 @@ EBUr128Analysis::run (Readable* src)
 {
 	int ret = -1;
 	bool done = false;
-	samplecnt_t len = src->readable_length();
+	samplecnt_t len = src->readable_length_samples();
 	samplepos_t pos = 0;
 	uint32_t n_channels = src->n_channels();
 	Plugin::FeatureSet features;

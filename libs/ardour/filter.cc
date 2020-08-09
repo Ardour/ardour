@@ -114,13 +114,13 @@ Filter::finish (boost::shared_ptr<Region> region, SourceList& nsrcs, string regi
 		boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(*si);
 		if (afs) {
 			afs->done_with_peakfile_writes ();
-			afs->update_header (region->position(), *now, xnow);
+			afs->update_header (region->position_sample(), *now, xnow);
 			afs->mark_immutable ();
 		}
 
 		boost::shared_ptr<SMFSource> smfs = boost::dynamic_pointer_cast<SMFSource>(*si);
 		if (smfs) {
-			smfs->set_natural_position (region->position());
+			smfs->set_natural_position (region->position_sample());
 			smfs->flush ();
 		}
 
@@ -139,10 +139,10 @@ Filter::finish (boost::shared_ptr<Region> region, SourceList& nsrcs, string regi
 	PropertyList plist;
 
 	plist.add (Properties::start, 0);
-	plist.add (Properties::length, region->length());
+	plist.add (Properties::length, region->nt_length());
 	plist.add (Properties::name, region_name);
 	plist.add (Properties::whole_file, true);
-	plist.add (Properties::position, region->position());
+	plist.add (Properties::position, region->nt_position());
 
 	boost::shared_ptr<Region> r = RegionFactory::create (nsrcs, plist);
 
