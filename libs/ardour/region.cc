@@ -254,7 +254,7 @@ Region::register_properties ()
 	, _contents (Properties::contents, other->_contents)
 
 /* derived-from-derived constructor (no sources in constructor) */
-Region::Region (Session& s, timepos_t start, timecnt_t length, const string& name, DataType type)
+Region::Region (Session& s, timepos_t const & start, timecnt_t length, const string& name, DataType type)
 	: SessionObject(s, name)
 	, _type(type)
 	, REGION_DEFAULT_STATE(start,length)
@@ -576,7 +576,7 @@ Region::move_to_natural_position ()
 }
 
 void
-Region::special_set_position (timepos_t pos)
+Region::special_set_position (timepos_t const & pos)
 {
 	/* this is used when creating a whole file region as
 	 * a way to store its "natural" or "captured" position.
@@ -621,7 +621,7 @@ Region::update_after_tempo_map_change (bool send)
 }
 
 void
-Region::set_position (timepos_t pos)
+Region::set_position (timepos_t const & pos)
 {
 	if (!can_move()) {
 		return;
@@ -652,7 +652,7 @@ Region::set_position (timepos_t pos)
 }
 
 void
-Region::set_position_internal (timepos_t pos)
+Region::set_position_internal (timepos_t const & pos)
 {
 	/* We emit a change of Properties::position even if the position hasn't changed
 	 * (see Region::set_position), so we must always set this up so that
@@ -684,7 +684,7 @@ Region::set_position_internal (timepos_t pos)
  * _last_position to prevent an implied move.
  */
 void
-Region::set_initial_position (timepos_t pos)
+Region::set_initial_position (timepos_t const & pos)
 {
 	if (!can_move()) {
 		return;
@@ -838,25 +838,25 @@ Region::move_start (timecnt_t const & distance)
 }
 
 void
-Region::trim_front (timepos_t new_position)
+Region::trim_front (timepos_t const & new_position)
 {
 	modify_front (new_position, false);
 }
 
 void
-Region::cut_front (timepos_t new_position)
+Region::cut_front (timepos_t const & new_position)
 {
 	modify_front (new_position, true);
 }
 
 void
-Region::cut_end (timepos_t new_endpoint)
+Region::cut_end (timepos_t const & new_endpoint)
 {
 	modify_end (new_endpoint, true);
 }
 
 void
-Region::modify_front (timepos_t new_position, bool reset_fade)
+Region::modify_front (timepos_t const & new_position, bool reset_fade)
 {
 	if (locked()) {
 		return;
@@ -902,7 +902,7 @@ Region::modify_front (timepos_t new_position, bool reset_fade)
 }
 
 void
-Region::modify_end (timepos_t new_endpoint, bool reset_fade)
+Region::modify_end (timepos_t const & new_endpoint, bool reset_fade)
 {
 	if (locked()) {
 		return;
@@ -923,13 +923,13 @@ Region::modify_end (timepos_t new_endpoint, bool reset_fade)
  * a region at 0 of length 10 has an endpoint of 9.
  */
 void
-Region::trim_end (timepos_t new_endpoint)
+Region::trim_end (timepos_t const & new_endpoint)
 {
 	modify_end (new_endpoint, false);
 }
 
 void
-Region::trim_to (timepos_t position, timecnt_t const & length)
+Region::trim_to (timepos_t const & position, timecnt_t const & length)
 {
 	if (locked()) {
 		return;
@@ -944,7 +944,7 @@ Region::trim_to (timepos_t position, timecnt_t const & length)
 }
 
 void
-Region::trim_to_internal (timepos_t position, timecnt_t const & length)
+Region::trim_to_internal (timepos_t const & position, timecnt_t const & length)
 {
 	timecnt_t new_start;
 
@@ -1100,7 +1100,7 @@ Region::set_position_locked (bool yn)
  *  @param absolute_pos Session time.
  */
 void
-Region::set_sync_position (timepos_t absolute_pos)
+Region::set_sync_position (timepos_t const & absolute_pos)
 {
 	/* position within our file */
 	const timecnt_t file_pos = nt_start() + nt_position().distance (absolute_pos);
@@ -1148,7 +1148,7 @@ Region::sync_offset (int& dir) const
 }
 
 timepos_t
-Region::adjust_to_sync (timepos_t pos) const
+Region::adjust_to_sync (timepos_t const & pos) const
 {
 	int sync_dir;
 	timepos_t p = pos;

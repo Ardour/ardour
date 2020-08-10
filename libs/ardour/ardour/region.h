@@ -159,7 +159,7 @@ public:
 	timecnt_t sync_offset (int& dir) const;
 	timepos_t sync_position () const;
 
-	timepos_t adjust_to_sync (timepos_t) const;
+	timepos_t adjust_to_sync (timepos_t const &) const;
 
 	/* first_sample() is an alias; last_sample() just hides some math */
 
@@ -244,9 +244,9 @@ public:
 
 	void set_length (timecnt_t const &);
 	void set_start (timecnt_t const &);
-	void set_position (timepos_t);
-	void set_initial_position (timepos_t);
-	void special_set_position (timepos_t);
+	void set_position (timepos_t const &);
+	void set_initial_position (timepos_t const &);
+	void special_set_position (timepos_t const &);
 	virtual void update_after_tempo_map_change (bool send_change = true);
 	void nudge_position (timecnt_t const &);
 
@@ -254,15 +254,15 @@ public:
 	void move_to_natural_position ();
 
 	void move_start (timecnt_t const & distance);
-	void trim_front (timepos_t new_position);
-	void trim_end (timepos_t new_position);
-	void trim_to (timepos_t pos,  timecnt_t const & length);
+	void trim_front (timepos_t const & new_position);
+	void trim_end (timepos_t const & new_position);
+	void trim_to (timepos_t const & pos,  timecnt_t const & length);
 
 	/* fades are inherently audio in nature and we specify them in samples */
 	virtual void fade_range (samplepos_t, samplepos_t) {}
 
-	void cut_front (timepos_t new_position);
-	void cut_end (timepos_t new_position);
+	void cut_front (timepos_t const & new_position);
+	void cut_end (timepos_t const & new_position);
 
 	void set_layer (layer_t l); /* ONLY Playlist can call this */
 	void raise ();
@@ -270,7 +270,7 @@ public:
 	void raise_to_top ();
 	void lower_to_bottom ();
 
-	void set_sync_position (timepos_t n);
+	void set_sync_position (timepos_t const & n);
 	void clear_sync_position ();
 	void set_hidden (bool yn);
 	void set_muted (bool yn);
@@ -413,7 +413,7 @@ protected:
 	Region (boost::shared_ptr<const Region>, const SourceList&);
 
 	/** Constructor for derived types only */
-	Region (Session& s, timepos_t start, timecnt_t length, const std::string& name, DataType);
+	Region (Session& s, timepos_t const & start, timecnt_t length, const std::string& name, DataType);
 
 	virtual bool can_trim_start_before_source_start () const {
 		return false;
@@ -424,7 +424,7 @@ protected:
 	void send_change (const PBD::PropertyChange&);
 	virtual int _set_state (const XMLNode&, int version, PBD::PropertyChange& what_changed, bool send_signal);
 	void post_set (const PBD::PropertyChange&);
-	virtual void set_position_internal (timepos_t pos);
+	virtual void set_position_internal (timepos_t const & pos);
 	virtual void set_length_internal (timecnt_t const &);
 	virtual void set_start_internal (timecnt_t const &);
 	bool verify_start_and_length (timecnt_t const &, timecnt_t&);
@@ -469,9 +469,9 @@ protected:
 private:
 	void mid_thaw (const PBD::PropertyChange&);
 
-	virtual void trim_to_internal (timepos_t position, timecnt_t const & length);
-	void modify_front (timepos_t new_position, bool reset_fade);
-	void modify_end (timepos_t new_position, bool reset_fade);
+	virtual void trim_to_internal (timepos_t const & position, timecnt_t const & length);
+	void modify_front (timepos_t const & new_position, bool reset_fade);
+	void modify_end (timepos_t const & new_position, bool reset_fade);
 
 	void maybe_uncopy ();
 
