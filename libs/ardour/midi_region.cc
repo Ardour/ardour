@@ -327,7 +327,7 @@ MidiRegion::update_length_beats (const int32_t sub_num)
 }
 
 void
-MidiRegion::set_position_internal (samplepos_t pos, bool allow_bbt_recompute, const int32_t sub_num)
+MidiRegion::set_position_internal (timepos_t const & pos, bool allow_bbt_recompute, const int32_t sub_num)
 {
 	Region::set_position_internal (pos, allow_bbt_recompute, sub_num);
 
@@ -737,7 +737,7 @@ MidiRegion::set_start_internal (samplecnt_t s, const int32_t sub_num)
 }
 
 void
-MidiRegion::trim_to_internal (samplepos_t position, samplecnt_t length, const int32_t sub_num)
+MidiRegion::trim_to_internal (timepos_t const &  position, samplecnt_t length, const int32_t sub_num)
 {
 	if (locked()) {
 		return;

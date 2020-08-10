@@ -156,10 +156,10 @@ class LIBARDOUR_API MidiRegion : public Region
 
 	bool set_name (const std::string & str);
 
-	void set_position_internal (timepos_t pos);
+	void set_position_internal (timepos_t const & pos);
 	void set_length_internal (timecnt_t const & len);
 	void set_start_internal (timecnt_t const &);
-	void trim_to_internal (timepos_t position, timecnt_t const & length);
+	void trim_to_internal (timepos_t const & position, timecnt_t const & length);
 	void update_length_beats ();
 
 	void model_changed ();
