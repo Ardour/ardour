@@ -40,7 +40,7 @@ extern "C" {
 	LIBARDOUR_API void  x86_sse_avx_mix_buffers_with_gain(float * dst, const float * src, uint32_t nframes, float gain);
 	LIBARDOUR_API void  x86_sse_avx_mix_buffers_no_gain  (float * dst, const float * src, uint32_t nframes);
 	LIBARDOUR_API void  x86_sse_avx_copy_vector          (float * dst, const float * src, uint32_t nframes);
-	LIBARDOUR_API void  x86_sse_avx_find_peaks             (const float * buf, uint32_t nsamples, float *min, float *max);
+	LIBARDOUR_API void  x86_sse_avx_find_peaks           (const float * buf, uint32_t nsamples, float *min, float *max);
 }
 
 LIBARDOUR_API void  x86_sse_find_peaks                 (const float * buf, uint32_t nsamples, float *min, float *max);
