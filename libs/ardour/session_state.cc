@@ -1908,7 +1908,6 @@ Session::XMLRouteFactory (const XMLNode& node, int version)
 		PresentationInfo::Flag flags = PresentationInfo::get_flags (node);
 		boost::shared_ptr<Route> r (new Route (*this, X_("toBeResetFroXML"), flags));
 
-
 		if (r->init () == 0 && r->set_state (node, version) == 0) {
 			BOOST_MARK_ROUTE (r);
 			ret = r;
@@ -1956,7 +1955,7 @@ Session::XMLRouteFactory_3X (const XMLNode& node, int version)
 		ret = track;
 
 	} else {
-		PresentationInfo::Flag flags = PresentationInfo::get_flags (node);
+		PresentationInfo::Flag flags = PresentationInfo::get_flags2X3X (node);
 		boost::shared_ptr<Route> r (new Route (*this, X_("toBeResetFroXML"), flags));
 
 		if (r->init () == 0 && r->set_state (node, version) == 0) {
@@ -2027,7 +2026,7 @@ Session::XMLRouteFactory_2X (const XMLNode& node, int version)
 		ret = track;
 
 	} else {
-		PresentationInfo::Flag flags = PresentationInfo::get_flags (node);
+		PresentationInfo::Flag flags = PresentationInfo::get_flags2X3X (node);
 		boost::shared_ptr<Route> r (new Route (*this, X_("toBeResetFroXML"), flags));
 
 		if (r->init () == 0 && r->set_state (node, version) == 0) {

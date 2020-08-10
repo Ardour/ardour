@@ -225,6 +225,17 @@ PresentationInfo::get_flags (XMLNode const& node)
 	return Flag (0);
 }
 
+PresentationInfo::Flag
+PresentationInfo::get_flags2X3X (XMLNode const& node)
+{
+	/* Ardour 2.x and session-format 300x used <Route flags="MasterOut" .. /> */
+	Flag f;
+	if (node->get_property (X_("flags"), f)) {
+		return f;
+	}
+	return get_flags (node);
+}
+
 void
 PresentationInfo::set_color (PresentationInfo::color_t c)
 {
