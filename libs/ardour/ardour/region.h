@@ -407,13 +407,13 @@ protected:
 	Region (boost::shared_ptr<const Region>);
 
 	/** Construct a region from another region, at an offset within that region */
-	Region (boost::shared_ptr<const Region>, timecnt_t start_offset);
+	Region (boost::shared_ptr<const Region>, timecnt_t const & start_offset);
 
 	/** Construct a region as a copy of another region, but with different sources */
 	Region (boost::shared_ptr<const Region>, const SourceList&);
 
 	/** Constructor for derived types only */
-	Region (Session& s, timepos_t const & start, timecnt_t length, const std::string& name, DataType);
+	Region (Session& s, timepos_t const & start, timecnt_t const & length, const std::string& name, DataType);
 
 	virtual bool can_trim_start_before_source_start () const {
 		return false;

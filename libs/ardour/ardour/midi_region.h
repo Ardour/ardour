@@ -36,13 +36,6 @@
 
 class XMLNode;
 
-namespace ARDOUR {
-	namespace Properties {
-		LIBARDOUR_API extern PBD::PropertyDescriptor<double> start_beats;
-		LIBARDOUR_API extern PBD::PropertyDescriptor<double> length_beats;
-	}
-}
-
 namespace Evoral {
 template<typename Time> class EventSink;
 }
@@ -113,8 +106,6 @@ class LIBARDOUR_API MidiRegion : public Region
 	boost::shared_ptr<const MidiModel> model() const;
 
 	void fix_negative_start ();
-	double start_beats () const {return _start_beats; }
-	double length_beats () const {return _length_beats; }
 
 	void clobber_sources (boost::shared_ptr<MidiSource> source);
 
@@ -131,12 +122,10 @@ class LIBARDOUR_API MidiRegion : public Region
 
   private:
 	friend class RegionFactory;
-	PBD::Property<double> _start_beats;
-	PBD::Property<double> _length_beats;
 
 	MidiRegion (const SourceList&);
 	MidiRegion (boost::shared_ptr<const MidiRegion>);
-	MidiRegion (boost::shared_ptr<const MidiRegion>, ARDOUR::MusicSample offset);
+	MidiRegion (boost::shared_ptr<const MidiRegion>, timecnt_t const & offset);
 
 	samplecnt_t _read_at (const SourceList&, Evoral::EventSink<samplepos_t>& dst,
 	                     samplepos_t position,

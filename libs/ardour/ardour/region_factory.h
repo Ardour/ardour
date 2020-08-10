@@ -83,7 +83,7 @@ public:
 	/** create a copy of \p other starting at zero within \p other's sources */
 	static boost::shared_ptr<Region> create (boost::shared_ptr<Region> other, const PBD::PropertyList&, bool announce = true, ThawList* tl = 0);
 	/** create a copy of \p other starting at \p offset within \p other */
-	static boost::shared_ptr<Region> create (boost::shared_ptr<Region> other, ARDOUR::MusicSample offset, const PBD::PropertyList&, bool announce = true, ThawList* tl = 0);
+	static boost::shared_ptr<Region> create (boost::shared_ptr<Region> other, timecnt_t const & offset, const PBD::PropertyList&, bool announce = true, ThawList* tl = 0);
 	/** create a "copy" of \p other but using a different set of sources \p srcs */
 	static boost::shared_ptr<Region> create (boost::shared_ptr<Region> other, const SourceList& srcs, const PBD::PropertyList&, bool announce = true, ThawList* tl = 0);
 

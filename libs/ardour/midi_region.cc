@@ -67,22 +67,6 @@ namespace ARDOUR {
 	}
 }
 
-void
-MidiRegion::make_property_quarks ()
-{
-	Properties::start_beats.property_id = g_quark_from_static_string (X_("start-beats"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for start-beats = %1\n", Properties::start_beats.property_id));
-	Properties::length_beats.property_id = g_quark_from_static_string (X_("length-beats"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for length-beats = %1\n", Properties::length_beats.property_id));
-}
-
-void
-MidiRegion::register_properties ()
-{
-	add_property (_start_beats);
-	add_property (_length_beats);
-}
-
 /* Basic MidiRegion constructor (many channels) */
 MidiRegion::MidiRegion (const SourceList& srcs)
 	: Region (srcs)
@@ -90,7 +74,6 @@ MidiRegion::MidiRegion (const SourceList& srcs)
 	, _length_beats (Properties::length_beats, midi_source(0)->length_beats().to_double())
 	, _ignore_shift (false)
 {
-	register_properties ();
 	midi_source(0)->ModelChanged.connect_same_thread (_source_connection, boost::bind (&MidiRegion::model_changed, this));
 	model_changed ();
 	assert(_name.val().find("/") == string::npos);
@@ -103,29 +86,18 @@ MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other)
 	, _length_beats (Properties::length_beats, other->_length_beats)
 	, _ignore_shift (false)
 {
-	//update_length_beats ();
-	register_properties ();
-
 	assert(_name.val().find("/") == string::npos);
 	midi_source(0)->ModelChanged.connect_same_thread (_source_connection, boost::bind (&MidiRegion::model_changed, this));
 	model_changed ();
 }
 
 /** Create a new MidiRegion that is part of an existing one */
-MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other, MusicSample offset)
+MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other, timecnt_t const & offset)
 	: Region (other, offset)
 	, _start_beats (Properties::start_beats, other->_start_beats)
 	, _length_beats (Properties::length_beats, other->_length_beats)
 	, _ignore_shift (false)
 {
-
-	register_properties ();
-
-	const double offset_quarter_note = _session.tempo_map().exact_qn_at_sample (other->_position + offset.sample, offset.division) - other->_quarter_note;
-	if (offset.sample != 0) {
-		_start_beats = other->_start_beats + offset_quarter_note;
-		_length_beats = other->_length_beats - offset_quarter_note;
-	}
 
 	assert(_name.val().find("/") == string::npos);
 	midi_source(0)->ModelChanged.connect_same_thread (_source_connection, boost::bind (&MidiRegion::model_changed, this));

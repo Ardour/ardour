@@ -254,7 +254,7 @@ Region::register_properties ()
 	, _contents (Properties::contents, other->_contents)
 
 /* derived-from-derived constructor (no sources in constructor) */
-Region::Region (Session& s, timepos_t const & start, timecnt_t length, const string& name, DataType type)
+Region::Region (Session& s, timepos_t const & start, timecnt_t const & length, const string& name, DataType type)
 	: SessionObject(s, name)
 	, _type(type)
 	, REGION_DEFAULT_STATE(start,length)
@@ -355,7 +355,7 @@ Region::Region (boost::shared_ptr<const Region> other)
  * the start within \a other is given by \a offset
  * (i.e. relative to the start of \a other's sources, the start is \a offset + \a other.start()
  */
-Region::Region (boost::shared_ptr<const Region> other, timecnt_t offset)
+Region::Region (boost::shared_ptr<const Region> other, timecnt_t const & offset)
 	: SessionObject(other->session(), other->name())
 	, _type (other->data_type())
 	, REGION_COPY_STATE (other)

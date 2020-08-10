@@ -117,10 +117,10 @@ StripSilence::run (boost::shared_ptr<Region> r, Progress* progress)
 		plist.add (Properties::length, i->second - i->first);
 		plist.add (Properties::position, r->position_sample() + (i->first - r->start_sample()));
 
-#warning NUTEMPO FIXME need new constructors etc.
-//		copy = boost::dynamic_pointer_cast<AudioRegion> (
-//			RegionFactory::create (region, MusicSample (i->first - r->start(), 0), plist)
-//			);
+#warning NUTEMPO are these arguments samples or superclocks?
+		const timecnt_t offset (i->first - r->start_sample(), timepos_t (i->first));
+
+		copy = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (region, offset, plist));
 
 		copy->set_name (RegionFactory::new_region_name (region->name ()));
 

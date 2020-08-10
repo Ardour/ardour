@@ -59,7 +59,7 @@ RegionFactory::create (boost::shared_ptr<const Region> region, bool announce, bo
 	boost::shared_ptr<const MidiRegion>  mr;
 
 	if ((ar = boost::dynamic_pointer_cast<const AudioRegion> (region)) != 0) {
-		ret = boost::shared_ptr<Region> (new AudioRegion (ar, MusicSample (0, 0)));
+		ret = boost::shared_ptr<Region> (new AudioRegion (ar, timecnt_t (superclock_t (0), timepos_t (superclock_t (0)))));
 
 	} else if ((mr = boost::dynamic_pointer_cast<const MidiRegion> (region)) != 0) {
 		if (mr->session ().config.get_midi_copy_is_fork () || fork) {
@@ -75,7 +75,7 @@ RegionFactory::create (boost::shared_ptr<const Region> region, bool announce, bo
 			source->set_ancestor_name (mr->sources ().front ()->name ());
 			ret = mr->clone (source, tl);
 		} else {
-			ret = boost::shared_ptr<Region> (new MidiRegion (mr, MusicSample (0, 0)));
+			ret = boost::shared_ptr<Region> (new MidiRegion (mr, timecnt_t (Temporal::Beats (), timepos_t (Temporal::Beats()))));
 		}
 
 	} else {
@@ -148,7 +148,7 @@ RegionFactory::create (boost::shared_ptr<Region> region, const PropertyList& pli
 }
 
 boost::shared_ptr<Region>
-RegionFactory::create (boost::shared_ptr<Region> region, MusicSample offset, const PropertyList& plist, bool announce, ThawList* tl)
+RegionFactory::create (boost::shared_ptr<Region> region, timecnt_t const & offset, const PropertyList& plist, bool announce, ThawList* tl)
 {
 	boost::shared_ptr<Region>            ret;
 	boost::shared_ptr<const AudioRegion> other_a;

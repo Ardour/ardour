@@ -235,7 +235,7 @@ AudioRegion::init ()
 }
 
 /** Constructor for use by derived types only */
-AudioRegion::AudioRegion (Session& s, samplepos_t start, samplecnt_t len, std::string name)
+AudioRegion::AudioRegion (Session& s, timecnt_t const &  start, timecnt_t const & len, std::string name)
 	: Region (s, start, len, name, DataType::AUDIO)
 	, AUDIOREGION_STATE_DEFAULT
 	, _envelope (Properties::envelope, boost::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter(EnvelopeAutomation))))
@@ -282,7 +282,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other)
 	assert (_sources.size() == _master_sources.size());
 }
 
-AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, MusicSample offset)
+AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, timecnt_t const & offset)
 	: Region (other, offset)
 	, AUDIOREGION_COPY_STATE (other)
 	  /* As far as I can see, the _envelope's times are relative to region position, and have nothing

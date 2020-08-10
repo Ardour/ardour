@@ -361,7 +361,7 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 		 * stretch this time around to get its new length. this is a non-music based edit atm.
 		 */
 #warning NUTEMPO FIXME should use (*x)->position() sa 2nd arg also needs to figure out units for first arg
-		(*x)->set_length (timecnt_t (samplepos_t ((*x)->length_samples () * tsr.time_fraction), (*x)->position_samples()));
+		(*x)->set_length (timecnt_t (samplepos_t ((*x)->length_samples () * tsr.time_fraction), (*x)->position_sample()));
 	}
 
 	/* stretch region gain envelope */
