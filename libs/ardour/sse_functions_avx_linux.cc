@@ -22,7 +22,7 @@
 #include <xmmintrin.h>
 
 #ifndef __AVX__
-#error "__AVX__ must be eanbled for this module to work"
+#error "__AVX__ must be enabled for this module to work"
 #endif
 
 #define IS_ALIGNED_TO(ptr, bytes) (((uintptr_t)ptr) % (bytes) == 0)
@@ -34,21 +34,11 @@
 #endif
 
 /**
- * External funcions
- */
-C_FUNC void
-x86_sse_mix_buffers_with_gain(float *dst, const float *src, uint32_t nframes, float gain);
-
-C_FUNC void
-x86_sse_mix_buffers_no_gain(float *dst, const float *src, uint32_t nframes);
-
-/**
  * Local functions
  */
 
-static inline __m256 avx_abs_ps(__m256 x);
-static inline float avx_getmax_ps(__m256 vmax);
-static inline float avx_getmin_ps(__m256 vmin);
+static inline __m256 avx_getmax_ps(__m256 vmax);
+static inline __m256 avx_getmin_ps(__m256 vmin);
 
 static void
 x86_sse_avx_mix_buffers_with_gain_unaligned(float *dst, const float *src, uint32_t nframes, float gain);
@@ -85,7 +75,8 @@ x86_sse_avx_compute_peak(const float *src, uint32_t nframes, float current)
 	while ((((intptr_t)src) % 32 != 0) && nframes > 0) {
 		__m256 vsrc;
 
-		vsrc = _mm256_broadcast_ss(src);
+		vsrc = _mm256_setzero_ps();
+		vsrc = _mm256_castps128_ps256(_mm_load_ss(src));
 		vsrc = _mm256_andnot_ps(ABS_MASK, vsrc);
 		vcurrent = _mm256_max_ps(vcurrent, vsrc);
 
@@ -93,38 +84,12 @@ x86_sse_avx_compute_peak(const float *src, uint32_t nframes, float current)
 		--nframes;
 	}
 
-	// Process the aligned portion 32 samples at a time
-	while (nframes >= 32) {
-#if defined(COMPILER_MSVC) || defined(COMPILER_MINGW)
-		_mm_prefetch(((char *)src + 64), _mm_hint(0));
-#else
-		__builtin_prefetch(src + 64, 0, 0);
-#endif
-		__m256 vsrc1, vsrc2, vsrc3, vsrc4;
-
-		vsrc1 = _mm256_load_ps(src + 0 );
-		vsrc2 = _mm256_load_ps(src + 8 );
-		vsrc3 = _mm256_load_ps(src + 16);
-		vsrc4 = _mm256_load_ps(src + 24);
-
-		vsrc1 = _mm256_andnot_ps(ABS_MASK, vsrc1);
-		vsrc2 = _mm256_andnot_ps(ABS_MASK, vsrc2);
-		vsrc3 = _mm256_andnot_ps(ABS_MASK, vsrc3);
-		vsrc4 = _mm256_andnot_ps(ABS_MASK, vsrc4);
-
-		vcurrent = _mm256_max_ps(vcurrent, vsrc1);
-		vcurrent = _mm256_max_ps(vcurrent, vsrc2);
-
-		src += 32;
-		nframes -= 32;
-	}
-
 	// Process the aligned portion 16 samples at a time
 	while (nframes >= 16) {
 #if defined(COMPILER_MSVC) || defined(COMPILER_MINGW)
-		_mm_prefetch(((char *)src + 64), _mm_hint(0));
+		_mm_prefetch(((char *)src + (16 * sizeof(float))), _mm_hint(0));
 #else
-		__builtin_prefetch(src + 64, 0, 0);
+		__builtin_prefetch(src + (16 * sizeof(float)), 0, 0);
 #endif
 		__m256 vsrc1, vsrc2;
 		vsrc1 = _mm256_load_ps(src + 0);
@@ -156,7 +121,8 @@ x86_sse_avx_compute_peak(const float *src, uint32_t nframes, float current)
 	while (nframes > 0) {
 		__m256 vsrc;
 
-		vsrc = _mm256_broadcast_ss(src);
+		vsrc = _mm256_setzero_ps();
+		vsrc = _mm256_castps128_ps256(_mm_load_ss(src));
 		vsrc = _mm256_andnot_ps(ABS_MASK, vsrc);
 		vcurrent = _mm256_max_ps(vcurrent, vsrc);
 
@@ -165,11 +131,12 @@ x86_sse_avx_compute_peak(const float *src, uint32_t nframes, float current)
 	}
 
 	// Get the current max from YMM register
-	current = avx_getmax_ps(vcurrent);
+	vcurrent = avx_getmax_ps(vcurrent);
 
 	// zero upper 128 bit of 256 bit ymm register to avoid penalties using non-AVX instructions
 	_mm256_zeroupper();
-	return current;
+
+	return _mm256_cvtss_f32(vcurrent);
 }
 
 /**
@@ -198,35 +165,9 @@ x86_sse_avx_find_peaks(const float *src, uint32_t nframes, float *minf, float *m
 		--nframes;
 	}
 
-	// Process the aligned portion 32 samples at a time
-	while (nframes >= 32) {
-#if defined(COMPILER_MSVC) || defined(COMPILER_MINGW)
-		_mm_prefetch(((char *)src + 128), _mm_hint(0));
-#else
-		__builtin_prefetch(src + 128, 0, 0);
-#endif
-		__m256 vsrc1, vsrc2, vsrc3, vsrc4;
-		vsrc1 = _mm256_load_ps(src + 0 );
-		vsrc2 = _mm256_load_ps(src + 8 );
-		vsrc3 = _mm256_load_ps(src + 16);
-		vsrc4 = _mm256_load_ps(src + 24);
-
-		vmax = _mm256_max_ps(vmax, vsrc1);
-		vmax = _mm256_max_ps(vmax, vsrc2);
-		vmax = _mm256_max_ps(vmax, vsrc3);
-		vmax = _mm256_max_ps(vmax, vsrc4);
-
-		vmin = _mm256_min_ps(vmin, vsrc1);
-		vmin = _mm256_min_ps(vmin, vsrc2);
-		vmin = _mm256_min_ps(vmin, vsrc3);
-		vmin = _mm256_min_ps(vmin, vsrc4);
-
-		src += 32;
-		nframes -= 32;
-	}
-
 	// Process the remaining samples 16 at a time
-	while (nframes >= 16) {
+	while (nframes >= 16)
+	{
 #if defined(COMPILER_MSVC) || defined(COMPILER_MINGW)
 		_mm_prefetch(((char *)src + 64), _mm_hint(0));
 #else
@@ -272,14 +213,18 @@ x86_sse_avx_find_peaks(const float *src, uint32_t nframes, float *minf, float *m
 	}
 
 	// Get min and max of the YMM registers
-	float vminf = avx_getmin_ps(vmin);
-	float vmaxf = avx_getmax_ps(vmax);
+	vmin = avx_getmin_ps(vmin);
+	vmax = avx_getmax_ps(vmax);
 
-	*minf = vminf;
-	*maxf = vmaxf;
+	// There's a penalty going away from AVX mode to SSE mode. This can
+	// be avoided by ensuring to the CPU that rest of the routine is no
+	// longer interested in the upper portion of the YMM register.
 
 	// zero upper 128 bit of 256 bit ymm register to avoid penalties using non-AVX instructions
 	_mm256_zeroupper();
+
+	_mm_store_ss(minf, _mm256_castps256_ps128(vmin));
+	_mm_store_ss(maxf, _mm256_castps256_ps128(vmax));
 }
 
 /**
@@ -291,8 +236,11 @@ x86_sse_avx_find_peaks(const float *src, uint32_t nframes, float *minf, float *m
 C_FUNC void
 x86_sse_avx_apply_gain_to_buffer(float *dst, uint32_t nframes, float gain)
 {
+	// Load gain vector to all elements of YMM register
+	__m256 vgain = _mm256_set1_ps(gain);
+
 	if (nframes) {
-		__m128 g1 = _mm_set1_ps(gain);
+		__m128 g0 = _mm256_castps256_ps128(vgain);
 		// Here comes the horror, poor-man's loop unrolling
 		switch (((intptr_t)dst) % 32) {
 		case 0:
@@ -300,70 +248,39 @@ x86_sse_avx_apply_gain_to_buffer(float *dst, uint32_t nframes, float gain)
 			// Buffer is aligned, skip to the next section of aligned
 			break;
 		case 4:
-			_mm_store_ss(dst, _mm_mul_ss(g1, _mm_load_ss(dst)));
+			_mm_store_ss(dst, _mm_mul_ss(g0, _mm_load_ss(dst)));
 			++dst;
 			--nframes;
 		case 8:
-			_mm_store_ss(dst, _mm_mul_ss(g1, _mm_load_ss(dst)));
+			_mm_store_ss(dst, _mm_mul_ss(g0, _mm_load_ss(dst)));
 			++dst;
 			--nframes;
 		case 12:
-			_mm_store_ss(dst, _mm_mul_ss(g1, _mm_load_ss(dst)));
+			_mm_store_ss(dst, _mm_mul_ss(g0, _mm_load_ss(dst)));
 			++dst;
 			--nframes;
 		case 16:
 			// This is a special case where pointer is 16 byte aligned
 			// for a XMM load/store operation.
-			_mm_store_ps(dst, _mm_mul_ps(g1, _mm_load_ps(dst)));
+			_mm_store_ps(dst, _mm_mul_ps(g0, _mm_load_ps(dst)));
 			dst += 4;
 			nframes -= 4;
 			break;
 		case 20:
-			_mm_store_ss(dst, _mm_mul_ss(g1, _mm_load_ss(dst)));
+			_mm_store_ss(dst, _mm_mul_ss(g0, _mm_load_ss(dst)));
 			++dst;
 			--nframes;
 		case 24:
-			_mm_store_ss(dst, _mm_mul_ss(g1, _mm_load_ss(dst)));
+			_mm_store_ss(dst, _mm_mul_ss(g0, _mm_load_ss(dst)));
 			++dst;
 			--nframes;
 		case 28:
-			_mm_store_ss(dst, _mm_mul_ss(g1, _mm_load_ss(dst)));
+			_mm_store_ss(dst, _mm_mul_ss(g0, _mm_load_ss(dst)));
 			++dst;
 			--nframes;
 		}
 	} else {
 		return;
-	}
-
-	// Load gain vector to all elements of YMM register
-	__m256 vgain = _mm256_set1_ps(gain);
-
-	// Process the aligned portion 32 samples at a time
-	while (nframes >= 32)
-	{
-#if defined(COMPILER_MSVC) || defined(COMPILER_MINGW)
-		_mm_prefetch(((char *)dst + (32 * sizeof(float))), _mm_hint(0));
-#else
-		__builtin_prefetch(dst + (32 * sizeof(float)), 0, 0);
-#endif
-		__m256 d0, d1, d2, d3;
-		d0 = _mm256_load_ps(dst + 0 );
-		d1 = _mm256_load_ps(dst + 8 );
-		d2 = _mm256_load_ps(dst + 16);
-		d3 = _mm256_load_ps(dst + 24);
-
-		d0 = _mm256_mul_ps(vgain, d0);
-		d1 = _mm256_mul_ps(vgain, d1);
-		d2 = _mm256_mul_ps(vgain, d2);
-		d3 = _mm256_mul_ps(vgain, d3);
-
-		_mm256_store_ps(dst + 0 , d0);
-		_mm256_store_ps(dst + 8 , d1);
-		_mm256_store_ps(dst + 16, d2);
-		_mm256_store_ps(dst + 24, d3);
-
-		dst += 32;
-		nframes -= 32;
 	}
 
 	// Process the remaining samples 16 at a time
@@ -402,43 +319,15 @@ x86_sse_avx_apply_gain_to_buffer(float *dst, uint32_t nframes, float gain)
 
 	_mm256_zeroupper(); // zeros the upper portion of YMM register
 
-	if (nframes) {
-		__m128 g2 = _mm_set1_ps(gain);
-		switch (nframes % 8) {
-		case 0:
-		default:
-			// No more samples left, break out
-			break;
-		case 7:
-			_mm_store_ss(dst, _mm_mul_ss(g2, _mm_load_ss(dst)));
-			++dst;
-			--nframes;
-		case 6:
-			_mm_store_ss(dst, _mm_mul_ss(g2, _mm_load_ss(dst)));
-			++dst;
-			--nframes;
-		case 5:
-			_mm_store_ss(dst, _mm_mul_ss(g2, _mm_load_ss(dst)));
-			++dst;
-			--nframes;
-		case 4:
-			_mm_store_ss(dst, _mm_mul_ss(g2, _mm_load_ss(dst)));
-			++dst;
-			--nframes;
-		case 3:
-			_mm_store_ss(dst, _mm_mul_ss(g2, _mm_load_ss(dst)));
-			++dst;
-			--nframes;
-		case 2:
-			_mm_store_ss(dst, _mm_mul_ss(g2, _mm_load_ss(dst)));
-			++dst;
-			--nframes;
-		case 1:
-			_mm_store_ss(dst, _mm_mul_ss(g2, _mm_load_ss(dst)));
+	// Process the remaining samples
+	do {
+		__m128 g0 = _mm256_castps256_ps128(vgain);
+		while (nframes > 0) {
+			_mm_store_ss(dst, _mm_mul_ss(g0, _mm_load_ss(dst)));
 			++dst;
 			--nframes;
 		}
-	}
+	} while (0);
 }
 
 /**
@@ -494,6 +383,17 @@ x86_sse_avx_mix_buffers_no_gain(float *dst, const float *src, uint32_t nframes)
 	}
 }
 
+/**
+ * @brief Copy vector from one location to another
+ *
+ * This has not been hand optimized for AVX with the rationale that standard
+ * C library implementation will provide faster memory copy operation. It will
+ * be redundant to implement memcpy for floats.
+ *
+ * @param[out] dst Pointer to destination buffer
+ * @param[in] src Pointer to source buffer
+ * @param nframes Number of samples to copy
+ */
 C_FUNC void
 x86_sse_avx_copy_vector(float *dst, const float *src, uint32_t nframes)
 {
@@ -509,55 +409,6 @@ x86_sse_avx_mix_buffers_with_gain_unaligned(float *dst, const float *src, uint32
 {
 	// Load gain vector to all elements of YMM register
 	__m256 vgain = _mm256_set1_ps(gain);
-
-	// Process portion 32 samples at a time
-	while (nframes >= 32)
-	{
-#if defined(COMPILER_MSVC) || defined(COMPILER_MINGW)
-		_mm_prefetch(((char *)dst + (32 * sizeof(float))), _mm_hint(0));
-		_mm_prefetch(((char *)src + (32 * sizeof(float))), _mm_hint(0));
-#else
-		__builtin_prefetch(src + (32 * sizeof(float)), 0, 0);
-		__builtin_prefetch(dst + (32 * sizeof(float)), 0, 0);
-#endif
-		__m256 s0, s1, s2, s3;
-		__m256 d0, d1, d2, d3;
-
-		// Load sources
-		s0 = _mm256_loadu_ps(src + 0 );
-		s1 = _mm256_loadu_ps(src + 8 );
-		s2 = _mm256_loadu_ps(src + 16);
-		s3 = _mm256_loadu_ps(src + 24);
-
-		// Load destinations
-		d0 = _mm256_loadu_ps(dst + 0 );
-		d1 = _mm256_loadu_ps(dst + 8 );
-		d2 = _mm256_loadu_ps(dst + 16);
-		d3 = _mm256_loadu_ps(dst + 24);
-
-		// src = src * gain
-		s0 = _mm256_mul_ps(vgain, s0);
-		s1 = _mm256_mul_ps(vgain, s1);
-		s2 = _mm256_mul_ps(vgain, s2);
-		s3 = _mm256_mul_ps(vgain, s3);
-
-		// dst = dst + src
-		d0 = _mm256_add_ps(d0, s0);
-		d1 = _mm256_add_ps(d1, s1);
-		d2 = _mm256_add_ps(d2, s2);
-		d3 = _mm256_add_ps(d3, s3);
-
-		// Store result
-		_mm256_storeu_ps(dst + 0 , d0);
-		_mm256_storeu_ps(dst + 8 , d1);
-		_mm256_storeu_ps(dst + 16, d2);
-		_mm256_storeu_ps(dst + 24, d3);
-
-		// Update pointers and counters
-		src += 32;
-		dst += 32;
-		nframes -= 32;
-	}
 
 	// Process the remaining samples 16 at a time
 	while (nframes >= 16)
@@ -624,138 +475,40 @@ x86_sse_avx_mix_buffers_with_gain_unaligned(float *dst, const float *src, uint32
 
 	_mm256_zeroupper(); // zeros the upper portion of YMM register
 
-	if (nframes) {
-		__m128 vgain = _mm_set1_ps(gain);
-		__m128 vsrc;
-		__m128 vdst;
-
-		switch (nframes % 8) {
-		case 0:
-		default:
-			// No more samples left, break out
-			break;
-		case 7:
-			vsrc = _mm_load_ss(src);
-			vdst = _mm_load_ss(dst);
-			vsrc = _mm_mul_ss(vgain, vsrc);
-			vdst = _mm_add_ss(vdst, vsrc);
-			_mm_store_ss(dst, vdst);
-			++src;
-			++dst;
-			--nframes;
-		case 6:
-			vsrc = _mm_load_ss(src);
-			vdst = _mm_load_ss(dst);
-			vsrc = _mm_mul_ss(vgain, vsrc);
-			vdst = _mm_add_ss(vdst, vsrc);
-			_mm_store_ss(dst, vdst);
-			++src;
-			++dst;
-			--nframes;
-		case 5:
-			vsrc = _mm_load_ss(src);
-			vdst = _mm_load_ss(dst);
-			vsrc = _mm_mul_ss(vgain, vsrc);
-			vdst = _mm_add_ss(vdst, vsrc);
-			_mm_store_ss(dst, vdst);
-			++src;
-			++dst;
-			--nframes;
-		case 4:
-			vsrc = _mm_loadu_ps(src);
-			vdst = _mm_loadu_ps(dst);
-			vsrc = _mm_mul_ps(vgain, vsrc);
-			vdst = _mm_add_ps(vdst, vsrc);
-			_mm_storeu_ps(dst, vdst);
-			src += 4;
-			dst += 4;
-			nframes -= 4;
-			break;
-		case 3:
-			vsrc = _mm_load_ss(src);
-			vdst = _mm_load_ss(dst);
-			vsrc = _mm_mul_ss(vgain, vsrc);
-			vdst = _mm_add_ss(vdst, vsrc);
-			_mm_store_ss(dst, vdst);
-			++src;
-			++dst;
-			--nframes;
-		case 2:
-			vsrc = _mm_load_ss(src);
-			vdst = _mm_load_ss(dst);
-			vsrc = _mm_mul_ss(vgain, vsrc);
-			vdst = _mm_add_ss(vdst, vsrc);
-			_mm_store_ss(dst, vdst);
-			++src;
-			++dst;
-			--nframes;
-		case 1:
-			vsrc = _mm_load_ss(src);
-			vdst = _mm_load_ss(dst);
-			vsrc = _mm_mul_ss(vgain, vsrc);
-			vdst = _mm_add_ss(vdst, vsrc);
-			_mm_store_ss(dst, vdst);
+	// Process the remaining samples
+	do {
+		__m128 g0 = _mm_set_ss(gain);
+		while (nframes > 0) {
+			__m128 s0, d0;
+			s0 = _mm_load_ss(src);
+			d0 = _mm_load_ss(dst);
+			s0 = _mm_mul_ss(g0, s0);
+			d0 = _mm_add_ss(d0, s0);
+			_mm_store_ss(dst, d0);
 			++src;
 			++dst;
 			--nframes;
 		}
-	}
+	} while (0);
 }
 
+/**
+ * @brief Helper routine for mixing buffers with gain for aligned buffers
+ *
+ * @details This routine executes the following expression below per element:
+ *
+ * dst = dst + (gain * src)
+ *
+ * @param[in,out] dst Pointer to destination buffer, which gets updated
+ * @param[in] src Pointer to source buffer (not updated)
+ * @param nframes Number of samples to process
+ * @param gain Gain to apply
+ */
 static void
 x86_sse_avx_mix_buffers_with_gain_aligned(float *dst, const float *src, uint32_t nframes, float gain)
 {
 	// Load gain vector to all elements of YMM register
 	__m256 vgain = _mm256_set1_ps(gain);
-
-	// Process the aligned portion 32 samples at a time
-	while (nframes >= 32)
-	{
-#if defined(COMPILER_MSVC) || defined(COMPILER_MINGW)
-		_mm_prefetch(((char *)dst + (32 * sizeof(float))), _mm_hint(0));
-		_mm_prefetch(((char *)src + (32 * sizeof(float))), _mm_hint(0));
-#else
-		__builtin_prefetch(src + (32 * sizeof(float)), 0, 0);
-		__builtin_prefetch(dst + (32 * sizeof(float)), 0, 0);
-#endif
-		__m256 s0, s1, s2, s3;
-		__m256 d0, d1, d2, d3;
-
-		// Load sources
-		s0 = _mm256_load_ps(src + 0 );
-		s1 = _mm256_load_ps(src + 8 );
-		s2 = _mm256_load_ps(src + 16);
-		s3 = _mm256_load_ps(src + 24);
-
-		// Load destinations
-		d0 = _mm256_load_ps(dst + 0 );
-		d1 = _mm256_load_ps(dst + 8 );
-		d2 = _mm256_load_ps(dst + 16);
-		d3 = _mm256_load_ps(dst + 24);
-
-		// src = src * gain
-		s0 = _mm256_mul_ps(vgain, s0);
-		s1 = _mm256_mul_ps(vgain, s1);
-		s2 = _mm256_mul_ps(vgain, s2);
-		s3 = _mm256_mul_ps(vgain, s3);
-
-		// dst = dst + src
-		d0 = _mm256_add_ps(d0, s0);
-		d1 = _mm256_add_ps(d1, s1);
-		d2 = _mm256_add_ps(d2, s2);
-		d3 = _mm256_add_ps(d3, s3);
-
-		// Store result
-		_mm256_store_ps(dst + 0 , d0);
-		_mm256_store_ps(dst + 8 , d1);
-		_mm256_store_ps(dst + 16, d2);
-		_mm256_store_ps(dst + 24, d3);
-
-		// Update pointers and counters
-		src += 32;
-		dst += 32;
-		nframes -= 32;
-	}
 
 	// Process the remaining samples 16 at a time
 	while (nframes >= 16)
@@ -822,130 +575,37 @@ x86_sse_avx_mix_buffers_with_gain_aligned(float *dst, const float *src, uint32_t
 
 	_mm256_zeroupper(); // zeros the upper portion of YMM register
 
-	if (nframes) {
-		__m128 vgain = _mm_load_ss(&gain);
-		__m128 vsrc;
-		__m128 vdst;
-
-		switch (nframes % 8) {
-		case 0:
-		default:
-			// No more samples left, break out
-			break;
-		case 7:
-			vsrc = _mm_load_ss(src);
-			vdst = _mm_load_ss(dst);
-			vsrc = _mm_mul_ss(vgain, vsrc);
-			vdst = _mm_add_ss(vdst, vsrc);
-			_mm_store_ss(dst, vdst);
-			++src;
-			++dst;
-			--nframes;
-		case 6:
-			vsrc = _mm_load_ss(src);
-			vdst = _mm_load_ss(dst);
-			vsrc = _mm_mul_ss(vgain, vsrc);
-			vdst = _mm_add_ss(vdst, vsrc);
-			_mm_store_ss(dst, vdst);
-			++src;
-			++dst;
-			--nframes;
-		case 5:
-			vsrc = _mm_load_ss(src);
-			vdst = _mm_load_ss(dst);
-			vsrc = _mm_mul_ss(vgain, vsrc);
-			vdst = _mm_add_ss(vdst, vsrc);
-			_mm_store_ss(dst, vdst);
-			++src;
-			++dst;
-			--nframes;
-		case 4:
-			vsrc = _mm_load_ss(src);
-			vdst = _mm_load_ss(dst);
-			vsrc = _mm_mul_ss(vgain, vsrc);
-			vdst = _mm_add_ss(vdst, vsrc);
-			_mm_store_ss(dst, vdst);
-			++src;
-			++dst;
-			--nframes;
-		case 3:
-			vsrc = _mm_load_ss(src);
-			vdst = _mm_load_ss(dst);
-			vsrc = _mm_mul_ss(vgain, vsrc);
-			vdst = _mm_add_ss(vdst, vsrc);
-			_mm_store_ss(dst, vdst);
-			++src;
-			++dst;
-			--nframes;
-		case 2:
-			vsrc = _mm_load_ss(src);
-			vdst = _mm_load_ss(dst);
-			vsrc = _mm_mul_ss(vgain, vsrc);
-			vdst = _mm_add_ss(vdst, vsrc);
-			_mm_store_ss(dst, vdst);
-			++src;
-			++dst;
-			--nframes;
-		case 1:
-			vsrc = _mm_load_ss(src);
-			vdst = _mm_load_ss(dst);
-			vsrc = _mm_mul_ss(vgain, vsrc);
-			vdst = _mm_add_ss(vdst, vsrc);
-			_mm_store_ss(dst, vdst);
+	// Process the remaining samples, one sample at a time.
+	do {
+		__m128 g0 = _mm256_castps256_ps128(vgain); // use the same register
+		while (nframes > 0) {
+			__m128 s0, d0;
+			s0 = _mm_load_ss(src);
+			d0 = _mm_load_ss(dst);
+			s0 = _mm_mul_ss(g0, s0);
+			d0 = _mm_add_ss(d0, s0);
+			_mm_store_ss(dst, d0);
 			++src;
 			++dst;
 			--nframes;
 		}
-	}
+	} while (0);
 }
 
-
+/**
+ * @brief Helper routine for mixing buffers with no gain for aligned buffers
+ *
+ * @details This routine executes the following expression below per element:
+ *
+ * dst = dst + src
+ *
+ * @param[in,out] dst Pointer to destination buffer, which gets updated
+ * @param[in] src Pointer to source buffer (not updated)
+ * @param nframes Number of samples to process
+ */
 static void
 x86_sse_avx_mix_buffers_no_gain_unaligned(float *dst, const float *src, uint32_t nframes)
 {
-	// Process portion 32 samples at a time
-	while (nframes >= 32)
-	{
-#if defined(COMPILER_MSVC) || defined(COMPILER_MINGW)
-		_mm_prefetch(((char *)dst + (32 * sizeof(float))), _mm_hint(0));
-		_mm_prefetch(((char *)src + (32 * sizeof(float))), _mm_hint(0));
-#else
-		__builtin_prefetch(src + (32 * sizeof(float)), 0, 0);
-		__builtin_prefetch(dst + (32 * sizeof(float)), 0, 0);
-#endif
-		__m256 s0, s1, s2, s3;
-		__m256 d0, d1, d2, d3;
-
-		// Load sources
-		s0 = _mm256_loadu_ps(src + 0 );
-		s1 = _mm256_loadu_ps(src + 8 );
-		s2 = _mm256_loadu_ps(src + 16);
-		s3 = _mm256_loadu_ps(src + 24);
-
-		// Load destinations
-		d0 = _mm256_loadu_ps(dst + 0 );
-		d1 = _mm256_loadu_ps(dst + 8 );
-		d2 = _mm256_loadu_ps(dst + 16);
-		d3 = _mm256_loadu_ps(dst + 24);
-
-		// dst = dst + src
-		d0 = _mm256_add_ps(d0, s0);
-		d1 = _mm256_add_ps(d1, s1);
-		d2 = _mm256_add_ps(d2, s2);
-		d3 = _mm256_add_ps(d3, s3);
-
-		// Store result
-		_mm256_storeu_ps(dst + 0 , d0);
-		_mm256_storeu_ps(dst + 8 , d1);
-		_mm256_storeu_ps(dst + 16, d2);
-		_mm256_storeu_ps(dst + 24, d3);
-
-		// Update pointers and counters
-		src += 32;
-		dst += 32;
-		nframes -= 32;
-	}
-
 	// Process the remaining samples 16 at a time
 	while (nframes >= 16)
 	{
@@ -1004,76 +664,33 @@ x86_sse_avx_mix_buffers_no_gain_unaligned(float *dst, const float *src, uint32_t
 
 	_mm256_zeroupper(); // zeros the upper portion of YMM register
 
-	if (nframes) {
-		__m128 vsrc;
-		__m128 vdst;
-
-		switch (nframes % 8) {
-		case 0:
-		default:
-			// No more samples left, break out
-			break;
-		case 7:
-			vsrc = _mm_load_ss(src);
-			vdst = _mm_load_ss(dst);
-			vdst = _mm_add_ss(vdst, vsrc);
-			_mm_store_ss(dst, vdst);
-			++src;
-			++dst;
-			--nframes;
-		case 6:
-			vsrc = _mm_load_ss(src);
-			vdst = _mm_load_ss(dst);
-			vdst = _mm_add_ss(vdst, vsrc);
-			_mm_store_ss(dst, vdst);
-			++src;
-			++dst;
-			--nframes;
-		case 5:
-			vsrc = _mm_load_ss(src);
-			vdst = _mm_load_ss(dst);
-			vdst = _mm_add_ss(vdst, vsrc);
-			_mm_store_ss(dst, vdst);
-			++src;
-			++dst;
-			--nframes;
-		case 4:
-			vsrc = _mm_loadu_ps(src);
-			vdst = _mm_loadu_ps(dst);
-			vdst = _mm_add_ps(vdst, vsrc);
-			_mm_storeu_ps(dst, vdst);
-			src += 4;
-			dst += 4;
-			nframes -= 4;
-			break;
-		case 3:
-			vsrc = _mm_load_ss(src);
-			vdst = _mm_load_ss(dst);
-			vdst = _mm_add_ss(vdst, vsrc);
-			_mm_store_ss(dst, vdst);
-			++src;
-			++dst;
-			--nframes;
-		case 2:
-			vsrc = _mm_load_ss(src);
-			vdst = _mm_load_ss(dst);
-			vdst = _mm_add_ss(vdst, vsrc);
-			_mm_store_ss(dst, vdst);
-			++src;
-			++dst;
-			--nframes;
-		case 1:
-			vsrc = _mm_load_ss(src);
-			vdst = _mm_load_ss(dst);
-			vdst = _mm_add_ss(vdst, vsrc);
-			_mm_store_ss(dst, vdst);
+	// Process the remaining samples
+	do {
+		while (nframes > 0) {
+			__m128 s0, d0;
+			s0 = _mm_load_ss(src);
+			d0 = _mm_load_ss(dst);
+			d0 = _mm_add_ss(d0, s0);
+			_mm_store_ss(dst, d0);
 			++src;
 			++dst;
 			--nframes;
 		}
-	}
+	} while (0);
+
 }
 
+/**
+ * @brief Helper routine for mixing buffers with no gain for unaligned buffers
+ *
+ * @details This routine executes the following expression below per element:
+ *
+ * dst = dst + src
+ *
+ * @param[in,out] dst Pointer to destination buffer, which gets updated
+ * @param[in] src Pointer to source buffer (not updated)
+ * @param nframes Number of samples to process
+ */
 static void
 x86_sse_avx_mix_buffers_no_gain_aligned(float *dst, const float *src, uint32_t nframes)
 {
@@ -1178,109 +795,44 @@ x86_sse_avx_mix_buffers_no_gain_aligned(float *dst, const float *src, uint32_t n
 
 	_mm256_zeroupper(); // zeros the upper portion of YMM register
 
-	if (nframes) {
-		__m128 vsrc;
-		__m128 vdst;
-
-		switch (nframes % 8) {
-		case 0:
-		default:
-			// No more samples left, break out
-			break;
-		case 7:
-			vsrc = _mm_load_ss(src);
-			vdst = _mm_load_ss(dst);
-			vdst = _mm_add_ss(vdst, vsrc);
-			_mm_store_ss(dst, vdst);
-			++src;
-			++dst;
-			--nframes;
-		case 6:
-			vsrc = _mm_load_ss(src);
-			vdst = _mm_load_ss(dst);
-			vdst = _mm_add_ss(vdst, vsrc);
-			_mm_store_ss(dst, vdst);
-			++src;
-			++dst;
-			--nframes;
-		case 5:
-			vsrc = _mm_load_ss(src);
-			vdst = _mm_load_ss(dst);
-			vdst = _mm_add_ss(vdst, vsrc);
-			_mm_store_ss(dst, vdst);
-			++src;
-			++dst;
-			--nframes;
-		case 4:
-			vsrc = _mm_load_ss(src);
-			vdst = _mm_load_ss(dst);
-			vdst = _mm_add_ss(vdst, vsrc);
-			_mm_store_ss(dst, vdst);
-			++src;
-			++dst;
-			--nframes;
-		case 3:
-			vsrc = _mm_load_ss(src);
-			vdst = _mm_load_ss(dst);
-			vdst = _mm_add_ss(vdst, vsrc);
-			_mm_store_ss(dst, vdst);
-			++src;
-			++dst;
-			--nframes;
-		case 2:
-			vsrc = _mm_load_ss(src);
-			vdst = _mm_load_ss(dst);
-			vdst = _mm_add_ss(vdst, vsrc);
-			_mm_store_ss(dst, vdst);
-			++src;
-			++dst;
-			--nframes;
-		case 1:
-			vsrc = _mm_load_ss(src);
-			vdst = _mm_load_ss(dst);
-			vdst = _mm_add_ss(vdst, vsrc);
-			_mm_store_ss(dst, vdst);
+	// Process the remaining samples
+	do {
+		while (nframes > 0) {
+			__m128 s0, d0;
+			s0 = _mm_load_ss(src);
+			d0 = _mm_load_ss(dst);
+			d0 = _mm_add_ss(d0, s0);
+			_mm_store_ss(dst, d0);
 			++src;
 			++dst;
 			--nframes;
 		}
-	}
-}
-
-/**
- * @brief Compute the absolute value of a packed float 8x register
- * @param x Packed float 8x register
- * @return __m256 Absolute value
- */
-static inline __m256 avx_abs_ps(__m256 x)
-{
-	const __m256 abs_mask = _mm256_set1_ps(-0.0F);
-	return _mm256_andnot_ps(abs_mask, x);
+	} while (0);
 }
 
 /**
  * @brief Get the maximum value of packed float register
  * @param vmax Packed float 8x register
- * @return float Maximum value
+ * @return __m256 Maximum value in p[0]
  */
-static inline float avx_getmax_ps(__m256 vmax)
+static inline __m256 avx_getmax_ps(__m256 vmax)
 {
 	__m256 tmp;
-	tmp = _mm256_shuffle_ps(vmax, vmax, _MM_SHUFFLE(2, 3, 0, 1));
+	tmp  = _mm256_shuffle_ps(vmax, vmax, _MM_SHUFFLE(2, 3, 0, 1));
 	vmax = _mm256_max_ps(tmp, vmax);
-	tmp = _mm256_shuffle_ps(vmax, vmax, _MM_SHUFFLE(1, 0, 3, 2));
+	tmp  = _mm256_shuffle_ps(vmax, vmax, _MM_SHUFFLE(1, 0, 3, 2));
 	vmax = _mm256_max_ps(tmp, vmax);
-	tmp = _mm256_permute2f128_ps(vmax, vmax, 1);
+	tmp  = _mm256_permute2f128_ps(vmax, vmax, 1);
 	vmax = _mm256_max_ps(tmp, vmax);
-	return _mm256_cvtss_f32(vmax);
+	return vmax;
 }
 
 /**
  * @brief Get the minimum value of packed float register
  * @param vmax Packed float 8x register
- * @return float Minimum value
+ * @return __m256 Minimum value in p[0]
  */
-static inline float avx_getmin_ps(__m256 vmin)
+static inline __m256 avx_getmin_ps(__m256 vmin)
 {
 	__m256 tmp;
 	tmp = _mm256_shuffle_ps(vmin, vmin, _MM_SHUFFLE(2, 3, 0, 1));
@@ -1289,5 +841,5 @@ static inline float avx_getmin_ps(__m256 vmin)
 	vmin = _mm256_min_ps(tmp, vmin);
 	tmp = _mm256_permute2f128_ps(vmin, vmin, 1);
 	vmin = _mm256_min_ps(tmp, vmin);
-	return _mm256_cvtss_f32(vmin);
+	return vmin;
 }
