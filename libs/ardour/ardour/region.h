@@ -30,6 +30,7 @@
 #include <boost/utility.hpp>
 
 #include "temporal/timeline.h"
+#include "temporal/range.h"
 
 #include "pbd/undo.h"
 #include "pbd/signals.h"
@@ -175,13 +176,12 @@ public:
 	 */
 	samplepos_t latest_possible_sample () const;
 
-	Evoral::Range<samplepos_t> last_range () const {
-		//return Evoral::Range<samplepos_t> (_last_position, _last_position + _last_length - 1);
-		return Evoral::Range<samplepos_t> (0, 0);
+	Temporal::TimeRange last_range () const {
+		return Temporal::TimeRange (_last_position, _last_position + _last_length);
 	}
 
-	Evoral::Range<samplepos_t> range () const {
-		return Evoral::Range<samplepos_t> (first_sample(), last_sample());
+	Temporal::TimeRange range_samples () const {
+		return Temporal::TimeRange (first_sample(), first_sample() + length_samples());
 	}
 
 	bool hidden ()           const { return _hidden; }
