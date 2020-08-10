@@ -258,39 +258,6 @@ timepos_t::_ticks () const
 }
 
 timepos_t
-timepos_t::operator/(ratio_t const & n) const
-{
-	assert (n >= 0); /* do not allow a position to become negative via division */
-
-	/* note: v / (N/D) = (v * D) / N */
-
-	return timepos_t (is_beats(), int_div_round (val() * n.denominator(), n.numerator()));
-}
-
-timepos_t
-timepos_t::operator*(ratio_t const & n) const
-{
-	assert (n >= 0); /* do not allow a position to become negative via multiplication */
-	return timepos_t (is_beats(), int_div_round (val() * n.numerator(), n.denominator()));
-}
-
-timepos_t &
-timepos_t::operator/=(ratio_t const & n)
-{
-	assert (n >= 0); /* do not allow a position to become negative via division */
-	v = build (flagged(), int_div_round (val() * n.numerator(), n.denominator()));
-	return *this;
-}
-
-timepos_t &
-timepos_t::operator*=(ratio_t const & n)
-{
-	assert (n >= 0); /* do not allow a position to become negative via multiplication */
-	v = build (flagged(), int_div_round (val() * n.denominator(), n.numerator()));
-	return *this;
-}
-
-timepos_t
 timepos_t::expensive_add (Beats const & b) const
 {
 	assert (is_beats());

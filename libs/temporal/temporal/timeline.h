@@ -1,20 +1,20 @@
 /*
-    Copyright (C) 2020 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * Copyright (C) 2020 Paul Davis
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef __libtemporal_timeline_h__
 #define __libtemporal_timeline_h__
@@ -101,32 +101,32 @@ class timepos_t : public int62_t  {
 	timepos_t operator+(Temporal::Beats const &b ) const { if (is_beats()) return timepos_t (ticks() + b.to_ticks()); return expensive_add (b); }
 
 	/* operator-() poses severe and thorny problems for a class that represents position on a timeline.
-
-	   If the value of the class is a simple scalar, then subtraction can be used for both:
-
-	     1) movement backwards along the timeline
-	     2) computing the distance between two positions
-
-	   But timepos_t is not a simple scalar, and neither is timecnt_t, and these two operations are quite different.
-
-	     1) movement backwards along the timeline should result in another timepos_t
-             2) the distance between two positions is a timecnt_t
-
-           so already we have a hint that we would need at least:
-
-              timepos_t operator- (timecnt_t const &); ... compute new position
-              timecnt_t operator- (timepos_t const &); ... compute distance
-
-            But what happens we try to use more explicit types. What does this expression mean:
-
-              timepos_t pos;
-              pos - Beats (3);
-
-            is this computing a new position 3 beats earlier than pos? or is it computing the distance between
-            pos and the 3rd beat?
-
-            For this reason, we do not provide any operator-() methods, but instead require the use of
-            explicit methods with clear semantics.
+	 *
+	 * If the value of the class is a simple scalar, then subtraction can be used for both:
+	 *
+	 *    1) movement backwards along the timeline
+	 *    2) computing the distance between two positions
+	 *
+	 * But timepos_t is not a simple scalar, and neither is timecnt_t, and these two operations are quite different.
+	 *
+	 *    1) movement backwards along the timeline should result in another timepos_t
+	 *    2) the distance between two positions is a timecnt_t
+	 *
+	 * so already we have a hint that we would need at least:
+	 *
+	 *    timepos_t operator- (timecnt_t const &); ... compute new position
+	 *    timecnt_t operator- (timepos_t const &); ... compute distance
+	 *
+	 * But what happens we try to use more explicit types. What does this expression mean:
+	 *
+	 *    timepos_t pos;
+	 *    pos - Beats (3);
+	 *
+	 * is this computing a new position 3 beats earlier than pos? or is it computing the distance between
+	 * pos and the 3rd beat?
+	 *
+	 * For this reason, we do not provide any operator-() methods, but instead require the use of
+	 * explicit methods with clear semantics.
 	*/
 
 	/* computes the distance between this timepos_t and @param p
@@ -160,12 +160,6 @@ class timepos_t : public int62_t  {
 	timepos_t & shift_earlier (samplepos_t);
 	timepos_t & shift_earlier (Temporal::Beats const &);
 	timepos_t & shift_earlier (Temporal::BBT_Offset const &);
-
-	timepos_t operator/(ratio_t const &) const;
-	timepos_t operator*(ratio_t const &) const;
-
-	timepos_t & operator*=(ratio_t const &);
-	timepos_t & operator/=(ratio_t const &);
 
 	timepos_t & operator+=(timecnt_t const & d);
 	timepos_t & operator+=(samplepos_t);
@@ -235,6 +229,8 @@ class timepos_t : public int62_t  {
 	timepos_t expensive_add (superclock_t s) const;
 
 	using int62_t::operator int64_t;
+	using int62_t::operator-;
+	using int62_t::operator-=;
 };
 
 
