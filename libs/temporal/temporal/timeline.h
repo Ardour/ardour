@@ -386,15 +386,35 @@ class LIBTEMPORAL_API timecnt_t {
  */
 
 namespace std {
-	template<>
-	struct numeric_limits<Temporal::timepos_t> {
-		static Temporal::timepos_t min() {
-			return Temporal::timepos_t (0);
-		}
-		static Temporal::timepos_t max() {
-			return Temporal::timepos_t (4611686018427387904); /* pow (2,62) */
-		}
-	};
+
+/* The utility of these two specializations of std::numeric_limits<> is not
+ * clear, since both timepos_t and timecnt_t have a time domain, and comparing
+ * across time domains, while possible, is expensive. 
+ *
+ * To avoid hidden costs, it seems easier to use timepos_t::max and
+ * timecnt_t::max although these have a similar fundamental problem.
+ */
+
+template<>
+struct numeric_limits<Temporal::timepos_t> {
+	static Temporal::timepos_t min() {
+		return Temporal::timepos_t (0);
+	}
+	static Temporal::timepos_t max() {
+		return Temporal::timepos_t (4611686018427387904); /* pow (2,62) */
+	}
+};
+
+template<>
+struct numeric_limits<Temporal::timecnt_t> {
+	static Temporal::timecnt_t min() {
+		return Temporal::timecnt_t (Temporal::superclock_t (0), Temporal::timepos_t (Temporal::superclock_t (0)));
+	}
+	static Temporal::timecnt_t max() {
+		return Temporal::timecnt_t (Temporal::superclock_t (4611686018427387904), Temporal::timepos_t (Temporal::superclock_t (0))); /* pow (2,62) */
+	}
+};
+
 }
 
 
@@ -438,3 +458,4 @@ inline static bool operator>= (Temporal::Beats const & b, Temporal::timecnt_t co
 #undef TEMPORAL_DOMAIN_WARNING
 
 #endif /* __libtemporal_timeline_h__ */
+
