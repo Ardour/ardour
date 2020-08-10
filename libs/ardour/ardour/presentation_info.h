@@ -235,6 +235,7 @@ class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 	PresentationInfo& operator= (PresentationInfo const& other);
 
 	static Flag get_flags (XMLNode const& node);
+	static Flag get_flags2X3X (XMLNode const& node);
 	static std::string state_node_name;
 
 	/* for things concerned about *any* PresentationInfo.
