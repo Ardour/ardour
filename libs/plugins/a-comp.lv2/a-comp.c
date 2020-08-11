@@ -540,10 +540,10 @@ render_inline_full (cairo_t* cr, const AComp* self)
 	// draw state
 	cairo_set_source_rgba (cr, .8, .8, .8, 1.0);
 
-	const float state_x = w * (1.f - (10.f-self->v_state_x)/70.f);
-	const float state_y = h * (comp_curve (self, self->v_state_x) - 10.f) / -70.f;
+	const float state_x = w * (1.f - (10.f-(*self->inlevel))/70.f);
+	const float state_y = h * ((*self->outlevel) - 10.f) / -70.f;
 
-	cairo_arc (cr, state_x, state_y, 3.f, 0.f, 2.f*M_PI);
+	cairo_arc (cr, state_x, state_y, 6.f, 0.f, 2.f*M_PI);
 	cairo_fill (cr);
 
 	// draw curve
