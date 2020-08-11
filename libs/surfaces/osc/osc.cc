@@ -494,8 +494,8 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, X_("/click/level"), "f", click_level);
 		REGISTER_CALLBACK (serv, X_("/midi_panic"), "", midi_panic);
 		REGISTER_CALLBACK (serv, X_("/midi_panic"), "f", midi_panic);
-		REGISTER_CALLBACK (serv, X_("/toggle_roll"), "", toggle_roll);
-		REGISTER_CALLBACK (serv, X_("/toggle_roll"), "f", toggle_roll);
+		REGISTER_CALLBACK (serv, X_("/toggle_roll"), "", osc_toggle_roll);
+		REGISTER_CALLBACK (serv, X_("/toggle_roll"), "f", osc_toggle_roll);
 		REGISTER_CALLBACK (serv, X_("/stop_forget"), "", stop_forget);
 		REGISTER_CALLBACK (serv, X_("/stop_forget"), "f", stop_forget);
 		REGISTER_CALLBACK (serv, X_("/set_punch_range"), "", set_punch_range);
@@ -1447,6 +1447,13 @@ int
 OSC::cancel_all_solos ()
 {
 	session->cancel_all_solo ();
+	return 0;
+}
+
+int
+OSC::osc_toggle_roll ()
+{
+	toggle_roll (false);
 	return 0;
 }
 
