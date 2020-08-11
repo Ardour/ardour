@@ -405,6 +405,18 @@ x86_sse_avx_copy_vector(float *dst, const float *src, uint32_t nframes)
  * Local helper functions
  */
 
+/**
+ * @brief Helper routine for mixing buffers with gain for unaligned buffers
+ *
+ * @details This routine executes the following expression below per element:
+ *
+ * dst = dst + (gain * src)
+ *
+ * @param[in,out] dst Pointer to destination buffer, which gets updated
+ * @param[in] src Pointer to source buffer (not updated)
+ * @param nframes Number of samples to process
+ * @param gain Gain to apply
+ */
 static void
 x86_sse_avx_mix_buffers_with_gain_unaligned(float *dst, const float *src, uint32_t nframes, float gain)
 {
