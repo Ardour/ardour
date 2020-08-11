@@ -529,9 +529,9 @@ render_inline_full (cairo_t* cr, const AComp* self)
 	draw_grid (cr, w,h);
 
 	if (self->v_thresdb < 0) {
-		const float y = -.5 + floorf (h * ((makeup_thres - 10.f) / -70.f));
-		cairo_move_to (cr, 0, y);
-		cairo_line_to (cr, w, y);
+		const float x = w * (1.f - (10.f-self->v_thresdb)/70.f) + 0.5;
+		cairo_move_to (cr, x, 0);
+		cairo_line_to (cr, x, h);
 		cairo_stroke (cr);
 	}
 
