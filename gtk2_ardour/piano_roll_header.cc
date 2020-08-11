@@ -460,13 +460,16 @@ PianoRollHeader::on_expose_event (GdkEventExpose* ev)
 			Cairo::TextExtents te;
 			cr->get_text_extents(note_name, te);
 
-			if (is_white_key)
-				cr->set_source_rgb(0.0f, 0.0f, 0.0f);
-			else
-				cr->set_source_rgb(1.0f, 1.0f, 1.0f);
+			double r, g, b;
 
+			if (is_white_key)
+				note_name_color(white, r, g, b);
+			else
+				note_name_color(black, r, g, b);
+
+			cr->set_source_rgb(r, g, b);
 			cr->move_to(2.0f + font_size , y + note_height - 1.0f - (note_height - te.width) / 2.0f);
-			cr->rotate(-1.5707); // -90 degrees
+			cr->rotate(M_PI / -2.0); // -90 degrees
 			cr->show_text(note_name);
 		}
 		else if (oct_rel == 0) {
@@ -474,7 +477,10 @@ PianoRollHeader::on_expose_event (GdkEventExpose* ev)
 			double y = floor(_view.note_to_y(i)) - 0.5f;
 			double note_height = floor(_view.note_to_y(i - 1)) - y;
 
-			cr->set_source_rgb(0.0f, 0.0f, 0.0f);
+			double r, g, b;
+			note_name_color(white, r, g, b);
+
+			cr->set_source_rgb(r, g, b);
 			cr->move_to(2.0f, y + note_height - 1.0f - (note_height - font_size) / 2.0f);
 			cr->show_text(ParameterDescriptor::midi_note_name(i));
 		}
@@ -483,7 +489,15 @@ PianoRollHeader::on_expose_event (GdkEventExpose* ev)
 	return true;
 }
 
+void
+PianoRollHeader::note_name_color(const PianoRollHeader::Color& key_color, double& r, double& g, double& b)
+{
+	Gtkmm2ext::Color text_color = Gtkmm2ext::rgba_to_color(key_color.r, key_color.g, key_color.b, 1.0f);
+	text_color = Gtkmm2ext::contrasting_text_color(text_color);
 
+	double a;
+	Gtkmm2ext::color_to_rgba(text_color, r, g, b, a);
+}
 
 bool
 PianoRollHeader::on_motion_notify_event (GdkEventMotion* ev)

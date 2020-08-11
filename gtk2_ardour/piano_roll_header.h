@@ -75,6 +75,8 @@ private:
 	static Color black_shade_light;
 	static Color black_shade_dark;
 
+	static void note_name_color(const Color& key_color, double& r, double& g, double& b);
+
 	PianoRollHeader(const PianoRollHeader&);
 
 	enum ItemType {
