@@ -137,7 +137,7 @@ x86_sse_avx_compute_peak(const float *src, uint32_t nframes, float current)
 	// zero upper 128 bit of 256 bit ymm register to avoid penalties using non-AVX instructions
 	_mm256_zeroupper();
 
-	return _mm256_cvtss_f32(vcurrent);
+	return vcurrent[0]; // _mm256_cvtss_f32
 }
 
 /**
