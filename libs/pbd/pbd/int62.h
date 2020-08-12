@@ -70,6 +70,21 @@ class alignas(16) int62_t {
 	int62_t& operator= (int64_t n) { v.store (build (flagged (v.load()), n)); return *this; }
 	int62_t& operator= (int62_t const & other) { v.store (other.v.load()); return *this; }
 
+	/* there's a pattern to many of these operators:
+
+	   1) atomically load the current in64_t into "tmp". This value has
+	      both the flag bit and the values bits of this int62_t.
+
+	   2) constructor a new int62_t from
+	        (a) is the flag bit set (using ::flagged (tmp))
+	        (b) the result of applying the operator (plus arg) to the value
+	            bits (obtained using ::int62 (tmp))
+
+	   Note that we need to ensure that we're atomically determining both
+	   the flag bit and values bit, hence the initial load into "tmp"
+	   rather than two separate loads for each "part".
+	*/
+
 	int62_t operator- () const      { int64_t tmp = v; return int62_t (flagged (tmp), -int62(tmp)); }
 
 	int62_t operator+ (int64_t n) const { int64_t tmp = v; return int62_t (flagged (tmp), int62 (tmp) + n); }
@@ -114,9 +129,9 @@ class alignas(16) int62_t {
 
 	int62_t& operator+= (int64_t n) {
 		while (1) {
-			int64_t oldval (v);
+			int64_t oldval = v.load (std::memory_order_relaxed);
 			int64_t newval = build (flagged (oldval), int62 (oldval) + n);
-			if (v.compare_exchange_strong (oldval, newval)) {
+			if (v.compare_exchange_weak (oldval, newval)) {
 				break;
 			}
 		}
@@ -124,9 +139,9 @@ class alignas(16) int62_t {
 	}
 	int62_t& operator-= (int64_t n) {
 		while (1) {
-			int64_t oldval (v);
+			int64_t oldval = v.load (std::memory_order_relaxed);
 			int64_t newval = build (flagged (oldval), int62 (oldval) - n);
-			if (v.compare_exchange_strong (oldval, newval)) {
+			if (v.compare_exchange_weak (oldval, newval)) {
 				break;
 			}
 		}
@@ -134,9 +149,9 @@ class alignas(16) int62_t {
 	}
 	int62_t& operator*= (int64_t n) {
 		while (1) {
-			int64_t oldval (v);
+			int64_t oldval = v.load (std::memory_order_relaxed);
 			int64_t newval = build (flagged (oldval), int62 (oldval) * n);
-			if (v.compare_exchange_strong (oldval, newval)) {
+			if (v.compare_exchange_weak (oldval, newval)) {
 				break;
 			}
 		}
@@ -144,9 +159,9 @@ class alignas(16) int62_t {
 	}
 	int62_t& operator/= (int64_t n) {
 		while (1) {
-			int64_t oldval (v);
+			int64_t oldval = v.load (std::memory_order_relaxed);
 			int64_t newval = build (flagged (oldval), int62 (oldval) / n);
-			if (v.compare_exchange_strong (oldval, newval)) {
+			if (v.compare_exchange_weak (oldval, newval)) {
 				break;
 			}
 		}
@@ -154,9 +169,9 @@ class alignas(16) int62_t {
 	}
 	int62_t& operator%= (int64_t n) {
 		while (1) {
-			int64_t oldval (v);
+			int64_t oldval = v.load (std::memory_order_relaxed);
 			int64_t newval = build (flagged (oldval), int62 (oldval) % n);
-			if (v.compare_exchange_strong (oldval, newval)) {
+			if (v.compare_exchange_weak (oldval, newval)) {
 				break;
 			}
 		}
@@ -165,9 +180,9 @@ class alignas(16) int62_t {
 
 	int62_t& operator+= (int62_t n) {
 		while (1) {
-			int64_t oldval (v);
+			int64_t oldval = v.load (std::memory_order_relaxed);
 			int64_t newval = build (flagged (oldval), int62 (oldval) + n.val());
-			if (v.compare_exchange_strong (oldval, newval)) {
+			if (v.compare_exchange_weak (oldval, newval)) {
 				break;
 			}
 		}
@@ -175,9 +190,9 @@ class alignas(16) int62_t {
 	}
 	int62_t& operator-= (int62_t n) {
 		while (1) {
-			int64_t oldval (v);
+			int64_t oldval = v.load (std::memory_order_relaxed);
 			int64_t newval = build (flagged (oldval), int62 (oldval) - n.val());
-			if (v.compare_exchange_strong (oldval, newval)) {
+			if (v.compare_exchange_weak (oldval, newval)) {
 				break;
 			}
 		}
@@ -185,9 +200,9 @@ class alignas(16) int62_t {
 	}
 	int62_t& operator*= (int62_t n) {
 		while (1) {
-			int64_t oldval (v);
+			int64_t oldval = v.load (std::memory_order_relaxed);
 			int64_t newval = build (flagged (oldval), int62 (oldval) * n.val());
-			if (v.compare_exchange_strong (oldval, newval)) {
+			if (v.compare_exchange_weak (oldval, newval)) {
 				break;
 			}
 		}
@@ -195,9 +210,9 @@ class alignas(16) int62_t {
 	}
 	int62_t& operator/= (int62_t n) {
 		while (1) {
-			int64_t oldval (v);
+			int64_t oldval = v.load (std::memory_order_relaxed);
 			int64_t newval = build (flagged (oldval), int62 (oldval) / n.val());
-			if (v.compare_exchange_strong (oldval, newval)) {
+			if (v.compare_exchange_weak (oldval, newval)) {
 				break;
 			}
 		}
@@ -205,9 +220,9 @@ class alignas(16) int62_t {
 	}
 	int62_t& operator%= (int62_t n) {
 		while (1) {
-			int64_t oldval (v);
+			int64_t oldval = v.load (std::memory_order_relaxed);
 			int64_t  newval = build (flagged (oldval), int62 (oldval) % n.val());
-			if (v.compare_exchange_strong (oldval, newval)) {
+			if (v.compare_exchange_weak (oldval, newval)) {
 				break;
 			}
 		}
