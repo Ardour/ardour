@@ -53,7 +53,7 @@ class LIBTEMPORAL_API timepos_t : public int62_t  {
 	 * which means we cannot use polymorphism to differentiate them.
 	 */
 	static timepos_t from_superclock (superclock_t s)  { return timepos_t (false, s); }
-	static timepos_t from_samples (superclock_t s)  { return timepos_t (false, samples_to_superclock (s, _thread_sample_rate)); }
+	static timepos_t from_samples (samplepos_t s)  { return timepos_t (false, samples_to_superclock (s, _thread_sample_rate)); }
 
 	bool is_beats() const { return flagged(); }
 	bool is_superclock() const { return !flagged(); }
