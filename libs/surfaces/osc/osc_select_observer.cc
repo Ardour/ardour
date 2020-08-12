@@ -664,6 +664,18 @@ OSCSelectObserver::panner_changed ()
 
 	if (feedback[1]) {
 
+		boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (_strip);
+		boost::shared_ptr<PannerShell> pan_sh =  rt->panner_shell();
+		string pt = pan_sh->current_panner_uri();
+		if (pt.size()){
+			string ptype = pt.substr(pt.find_last_of ('/') + 1);
+			_osc.text_message (X_("/strip/pan_type"), ptype, addr);
+		} else {
+			_osc.text_message (X_("/select/pan_type"), "none", addr);
+			_osc.float_message (X_("/strip/pan_stereo_position"), 0.5, addr);
+			_osc.float_message (X_("/strip/pan_stereo_width"), 1.0, addr);
+			return;
+		}
 		boost::shared_ptr<Controllable> pan_controllable = boost::dynamic_pointer_cast<Controllable>(_strip->pan_azimuth_control());
 		if (pan_controllable) {
 			pan_controllable->Changed.connect (pan_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_stereo_position"), _strip->pan_azimuth_control()), OSC::instance());
