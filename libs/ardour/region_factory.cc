@@ -59,7 +59,7 @@ RegionFactory::create (boost::shared_ptr<const Region> region, bool announce, bo
 	boost::shared_ptr<const MidiRegion>  mr;
 
 	if ((ar = boost::dynamic_pointer_cast<const AudioRegion> (region)) != 0) {
-		ret = boost::shared_ptr<Region> (new AudioRegion (ar, timecnt_t (superclock_t (0), timepos_t (superclock_t (0)))));
+		ret = boost::shared_ptr<Region> (new AudioRegion (ar, timecnt_t::from_superclock (0)));
 
 	} else if ((mr = boost::dynamic_pointer_cast<const MidiRegion> (region)) != 0) {
 		if (mr->session ().config.get_midi_copy_is_fork () || fork) {

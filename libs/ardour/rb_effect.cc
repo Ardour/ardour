@@ -352,16 +352,15 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 	/* now reset ancestral data for each new region */
 
 	for (vector<boost::shared_ptr<Region> >::iterator x = results.begin (); x != results.end (); ++x) {
-		(*x)->set_ancestral_data (timecnt_t (read_start, timepos_t()),
-		                          timecnt_t (read_duration, read_start),
+		(*x)->set_ancestral_data (timecnt_t::from_samples (read_start),
+		                          timecnt_t::from_samples (read_duration, timepos_t::from_samples (read_start)),
 		                          stretch,
 		                          shift);
 		(*x)->set_master_sources (region->master_sources ());
 		/* multiply the old (possibly previously stretched) region length by the extra
 		 * stretch this time around to get its new length. this is a non-music based edit atm.
 		 */
-#warning NUTEMPO FIXME should use (*x)->position() sa 2nd arg also needs to figure out units for first arg
-		(*x)->set_length (timecnt_t (samplepos_t ((*x)->length_samples () * tsr.time_fraction), (*x)->position_sample()));
+		(*x)->set_length (timecnt_t::from_samples (samplepos_t ((*x)->length_samples () * tsr.time_fraction), (*x)->nt_position()));
 	}
 
 	/* stretch region gain envelope */

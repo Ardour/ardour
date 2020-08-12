@@ -65,7 +65,6 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<timecnt_t>         start;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<timecnt_t>         length;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<timepos_t>         position;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<double>            beat;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<timecnt_t>         sync_position;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<layer_t>           layer;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<timecnt_t>         ancestral_start;
@@ -181,7 +180,7 @@ public:
 	}
 
 	Temporal::TimeRange range_samples () const {
-		return Temporal::TimeRange (first_sample(), first_sample() + length_samples());
+		return Temporal::TimeRange (timepos_t::from_samples (first_sample()), timepos_t::from_samples (first_sample() + length_samples()));
 	}
 
 	bool hidden ()           const { return _hidden; }
@@ -203,13 +202,6 @@ public:
 	PositionLockStyle position_lock_style () const { return _position_lock_style; }
 	void set_position_lock_style (PositionLockStyle ps);
 	void recompute_position_from_lock_style ();
-
-	/* meter-based beat at the region position */
-	double beat () const { return _beat; }
-	void set_beat (double beat) { _beat = beat; }
-	/* quarter-note at the region position */
-	double quarter_note () const { return _quarter_note; }
-	void set_quarter_note (double qn) { _quarter_note = qn; }
 
 	void suspend_property_changes ();
 
@@ -413,7 +405,7 @@ protected:
 	Region (boost::shared_ptr<const Region>, const SourceList&);
 
 	/** Constructor for derived types only */
-	Region (Session& s, timepos_t const & start, timecnt_t const & length, const std::string& name, DataType);
+	Region (Session& s, timecnt_t const & start, timecnt_t const & length, const std::string& name, DataType);
 
 	virtual bool can_trim_start_before_source_start () const {
 		return false;
@@ -439,11 +431,8 @@ protected:
 	PBD::Property<timecnt_t> _start;
 	PBD::Property<timecnt_t> _length;
 	PBD::Property<timepos_t> _position;
-	PBD::Property<double>    _beat;
 	/** Sync position relative to the start of our file */
 	PBD::Property<timecnt_t> _sync_position;
-
-	double                  _quarter_note;
 
 	SourceList              _sources;
 	/** Used when timefx are applied, so we can always use the original source */
