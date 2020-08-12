@@ -67,7 +67,7 @@ static TemporalStatistics stats;
 
 /* timecnt */
 
-timecnt_t timecnt_t::_max_timecnt (int62_t::max - 1, timepos_t());
+timecnt_t timecnt_t::_max_timecnt (timecnt_t::from_superclock (int62_t::max - 1));
 
 timecnt_t::timecnt_t (timecnt_t const & tc, timepos_t const & pos)
 	: _position (pos)
@@ -112,13 +112,17 @@ timecnt_t::compute_beats() const
 timecnt_t
 timecnt_t::operator*(ratio_t const & r) const
 {
-	return timecnt_t (int_div_round (_distance.val() * r.numerator(), r.denominator()), _position);
+	const int62_t v (_distance.flagged(), int_div_round (_distance.val() * r.numerator(), r.denominator()));
+	return timecnt_t (v, _position);
 }
 
 timecnt_t
 timecnt_t::operator/(ratio_t const & r) const
 {
-	return timecnt_t (int_div_round (_distance.val() * r.denominator(), r.numerator()), _position);
+	/* note: x / (N/D) => x * (D/N) => (x * D) / N */
+
+	const int62_t v (_distance.flagged(), int_div_round (_distance.val() * r.denominator(), r.numerator()));
+	return timecnt_t (v, _position);
 }
 
 timecnt_t
@@ -260,14 +264,21 @@ timepos_t::_ticks () const
 timepos_t
 timepos_t::expensive_add (Beats const & b) const
 {
-	assert (is_beats());
+	assert (!is_beats());
+
 	return timepos_t (beats() + b);
 }
 
 timepos_t
-timepos_t::expensive_add (superclock_t sc) const
+timepos_t::expensive_add (timepos_t const & t) const
 {
-	return timepos_t (val() + sc);
+	assert (is_beats() != t.is_beats ());
+
+	if (is_beats()) {
+		return timepos_t (beats() + t.beats());
+	}
+
+	return timepos_t::from_superclock (superclocks() + t.superclocks());
 }
 
 /* */
@@ -277,20 +288,10 @@ timepos_t::expensive_add (superclock_t sc) const
  */
 
 timecnt_t
-timepos_t::distance (superclock_t s) const
-{
-	if (is_superclock()) {
-		return timecnt_t (s - val(), *this);
-	}
-
-	return expensive_distance (s);
-}
-
-timecnt_t
 timepos_t::distance (Beats const & b) const
 {
 	if (is_beats()) {
-		return timecnt_t ((b - _beats()).to_ticks(), *this);
+		return timecnt_t (b - _beats(), *this);
 	}
 
 	return expensive_distance (b);
@@ -303,17 +304,7 @@ timepos_t::distance (timepos_t const & d) const
 		return distance (d._beats());
 	}
 
-	return distance (d._superclocks());
-}
-
-timecnt_t
-timepos_t::expensive_distance (superclock_t s) const
-{
-	if (is_superclock() && (val() < s)) {
-		PBD::warning << string_compose (_("programming warning: sample arithmetic will generate negative sample time (%1 - %2)"), superclocks(), s) << endmsg;
-	}
-
-	return timecnt_t (s - superclocks(), *this);
+	return expensive_distance (d);
 }
 
 timecnt_t
@@ -322,26 +313,17 @@ timepos_t::expensive_distance (Temporal::Beats const & b) const
 	return timecnt_t (b - beats(), *this);
 }
 
-/* */
 
-timepos_t
-timepos_t:: earlier (superclock_t s) const
+timecnt_t
+timepos_t::expensive_distance (timepos_t const & p) const
 {
-	superclock_t sc;
-
 	if (is_beats()) {
-		TempoMap::SharedPtr tm (TempoMap::use());
-		sc = tm->superclock_at (beats());
-	} else {
-		sc = val();
+		return timecnt_t (beats() + p.beats(), *this);
 	}
-
-	if (sc < s) {
-		PBD::warning << string_compose (_("programming warning: sample arithmetic will generate negative sample time (%1 - %2)"), superclocks(), s) << endmsg;
-	}
-
-	return timepos_t (sc - s);
+	return timecnt_t::from_superclock (superclocks() + p.superclocks(), *this);
 }
+
+/* */
 
 timepos_t
 timepos_t::earlier (Temporal::Beats const & b) const
@@ -390,23 +372,6 @@ timepos_t::shift_earlier (timecnt_t const & d)
 }
 
 timepos_t &
-timepos_t:: shift_earlier (superclock_t s)
-{
-	superclock_t sc;
-
-	if (is_beats ()) {
-		TempoMap::SharedPtr tm (TempoMap::use());
-		sc = tm->superclock_at (beats());
-	} else {
-		sc = val();
-	}
-
-	v = sc - s;
-
-	return *this;
-}
-
-timepos_t &
 timepos_t::shift_earlier (Temporal::Beats const & b)
 {
 	Beats bb;
@@ -424,19 +389,6 @@ timepos_t::shift_earlier (Temporal::Beats const & b)
 }
 
 /* */
-
-timepos_t &
-timepos_t:: operator+= (superclock_t s)
-{
-	if (is_superclock()) {
-		v += s;
-	} else {
-		TempoMap::SharedPtr tm (TempoMap::use());
-		v = build (true, tm->scwalk_to_quarters (beats(), s).to_ticks());
-	}
-
-	return *this;
-}
 
 timepos_t &
 timepos_t::operator+=(Temporal::Beats const & b)
@@ -457,7 +409,7 @@ timepos_t
 timepos_t::operator+(timecnt_t const & d) const
 {
 	if (d.time_domain() == AudioTime) {
-		return operator+ (d.superclocks());
+		return operator+ (timepos_t::from_superclock (d.superclocks()));
 	}
 
 	return operator+ (d.beats());
@@ -467,9 +419,30 @@ timepos_t &
 timepos_t::operator+=(timecnt_t const & d)
 {
 	if (d.time_domain() == AudioTime) {
-		return operator+= (d.superclocks());
+		return operator+= (timepos_t::from_superclock (d.superclocks()));
 	}
 	return operator+= (d.beats());
+}
+
+/* */
+
+timepos_t &
+timepos_t::operator+=(timepos_t const & d)
+{
+	if (d.is_beats() == is_beats()) {
+
+		v = build (flagged(), val() + d.val());
+
+	} else {
+
+		if (is_beats()) {
+			v = build (false, val() + d.ticks());
+		} else {
+			v = build (true, val() + d.superclocks());
+		}
+	}
+
+	return *this;
 }
 
 

@@ -38,17 +38,22 @@ namespace Temporal {
 
 class timecnt_t;
 
-/* 62 bit time value.
- * 63rd bit: indicates music or audio time value
- * 64th bit: sign bit
+/* 62 bit positional time value. Theoretically signed, but the intent is for to
+ * always be positive. If the flag bit is set (i.e. ::flagged() is true), the
+ * numerical value counts musical ticks; otherwise it counts superclocks.
  */
 
-class timepos_t : public int62_t  {
+class LIBTEMPORAL_API timepos_t : public int62_t  {
   public:
 	timepos_t () : int62_t (false, 0) {}
-	timepos_t (superclock_t s) : int62_t (false, s) {}
 	explicit timepos_t (timecnt_t const &); /* will throw() if val is negative */
 	explicit timepos_t (Temporal::Beats const & b) : int62_t (false, b.to_ticks()) {}
+
+	/* superclock_t and samplepos_t are the same underlying primitive type,
+	 * which means we cannot use polymorphism to differentiate them.
+	 */
+	static timepos_t from_superclock (superclock_t s)  { return timepos_t (false, s); }
+	static timepos_t from_samples (superclock_t s)  { return timepos_t (false, samples_to_superclock (s, _thread_sample_rate)); }
 
 	bool is_beats() const { return flagged(); }
 	bool is_superclock() const { return !flagged(); }
@@ -59,24 +64,6 @@ class timepos_t : public int62_t  {
 	int64_t samples() const { return superclock_to_samples (superclocks(), _thread_sample_rate); }
 	int64_t ticks() const { if (is_beats()) return val(); return _ticks (); }
 	Beats beats() const { if (is_beats()) return Beats::ticks (val()); return _beats (); }
-
-	/* return a timepos_t that is the next (later) possible position given
-	 * this one
-	 */
-
-	timepos_t increment () const {
-		return timepos_t (val() + 1);
-	}
-
-	/* return a timepos_t that is the previous (earlier) possible position given
-	 * this one
-	 */
-	timepos_t decrement () const {
-		if (is_beats()) {
-			return timepos_t (val() - 1); /* beats can go negative */
-		}
-		return timepos_t (val() > 0 ? val() - 1 : val()); /* samples cannot go negative */
-	}
 
 	timepos_t & operator= (timecnt_t const & t); /* will throw() if val is negative */
 	timepos_t & operator= (superclock_t s) { v = s; return *this; }
@@ -96,9 +83,15 @@ class timepos_t : public int62_t  {
 	bool operator>= (timepos_t const & other) const { if (is_beats() == other.is_beats()) return val() >= other.val(); return expensive_gte (other); }
 
 	timepos_t operator+(timecnt_t const & d) const;
-	timepos_t operator+(timepos_t const & d) const { if (is_beats() == d.is_beats()) return timepos_t (v + d.ticks()); return expensive_add (d.superclocks()); }
-	timepos_t operator+(superclock_t s) const { if (is_superclock()) return timepos_t (v + s); return expensive_add (s); }
-	timepos_t operator+(Temporal::Beats const &b ) const { if (is_beats()) return timepos_t (ticks() + b.to_ticks()); return expensive_add (b); }
+	timepos_t operator+(timepos_t const & d) const { if (is_beats() == d.is_beats()) return timepos_t (is_beats(), val() + d.val()); return expensive_add (d); }
+
+	timepos_t operator+(Temporal::Beats const &b ) const { if (is_beats()) return timepos_t (true, ticks() + b.to_ticks()); return expensive_add (b); }
+
+	/* donn't provide operator+(samplepos_t) or operator+(superclock_t)
+	 * because the compiler can't disambiguate them and neither can we.
+	 * to add such types, use ::from_samples() or ::from_superclock() to
+	 * create a timepo_t and then add that.
+	 */
 
 	/* operator-() poses severe and thorny problems for a class that represents position on a timeline.
 	 *
@@ -130,39 +123,45 @@ class timepos_t : public int62_t  {
 	*/
 
 	/* computes the distance between this timepos_t and @param p
-	   such that: this + distance = p
+	 * such that: this + distance = p
+	 *
+	 * This means that if @param p is later than this, distance is positive;
+	 * if @param p is earlier than this, distance is negative.
 
-	   This means that if @param p is later than this, distance is positive;
-	   if @param p is earlier than this, distance is negative.
-
-	   Note that the return value is a timecnt_t whose position member
-	   is equal to the value of this. That means if the distance uses
-	   musical time value, the distance may not have constant value
-	   at other positions on the timeline.
+	 * Note that the return value is a timecnt_t whose position member
+	 * is equal to the value of this. That means if the distance uses
+	 * musical time value, the distance may not have constant value
+	 * at other positions on the timeline.
 	*/
 
 	timecnt_t distance (timecnt_t const & p) const;
-	timecnt_t distance (superclock_t s) const;
 	timecnt_t distance (Temporal::Beats const & b) const;
 	timecnt_t distance (timepos_t const & p) const;
 
 	/* computes a new position value that is @param d earlier than this */
-
 	timepos_t earlier (timepos_t const & d) const; /* treat d as distance measured from timeline origin */
 	timepos_t earlier (timecnt_t const & d) const;
-	timepos_t earlier (samplepos_t d) const;
 	timepos_t earlier (Beats const & d) const;
 	timepos_t earlier (BBT_Offset const & d) const;
 
 	/* like ::earlier() but changes this. loosely equivalent to operator-= */
-
 	timepos_t & shift_earlier (timecnt_t const & d);
-	timepos_t & shift_earlier (samplepos_t);
 	timepos_t & shift_earlier (Temporal::Beats const &);
 	timepos_t & shift_earlier (Temporal::BBT_Offset const &);
 
+	/* given the absence of operator- and thus also operator--, return a
+	 * timepos_t that is the previous (earlier) possible position given
+	 * this one
+	 */
+	timepos_t decrement () const { return timepos_t (false, val() > 0 ? val() - 1 : val()); /* cannot go negative */ }
+
+	/* purely for reasons of symmetry with ::decrement(), return a
+	 * timepos_t that is the next (later) possible position given this one
+	 */
+	timepos_t increment () const { return timepos_t (flagged(), val() + 1); }
+
 	timepos_t & operator+=(timecnt_t const & d);
-	timepos_t & operator+=(samplepos_t);
+	timepos_t & operator+=(timepos_t const & d);
 	timepos_t & operator+=(Temporal::Beats const &);
 	timepos_t & operator+=(Temporal::BBT_Offset const &);
 
@@ -222,11 +221,10 @@ class timepos_t : public int62_t  {
 	/* used to compute distance when time domains do not match */
 
 	timecnt_t expensive_distance (timepos_t const & p) const;
-	timecnt_t expensive_distance (superclock_t s) const;
-	timecnt_t expensive_distance (Temporal::Beats const & b) const;
+	timecnt_t expensive_distance (Beats const &) const;
 
 	timepos_t expensive_add (Temporal::Beats const &) const;
-	timepos_t expensive_add (superclock_t s) const;
+	timepos_t expensive_add (timepos_t const & s) const;
 
 	using int62_t::operator int64_t;
 	using int62_t::operator-;
@@ -259,22 +257,29 @@ class timepos_t : public int62_t  {
 class LIBTEMPORAL_API timecnt_t {
    public:
 	/* default to zero superclocks @ zero */
-	timecnt_t () : _distance (int62_t (false, 0)), _position (superclock_t(0)) {}
+	timecnt_t () : _distance (int62_t (false, 0)), _position (timepos_t::from_superclock (0)) {}
+	timecnt_t (timecnt_t const &other) : _distance (other.distance()), _position (other.position()) {}
 
 	/* construct from timeline types */
-	timecnt_t (timepos_t const & d, timepos_t const & p) : _distance (d), _position (p) { assert (p.is_beats() == d.is_beats()); }
-	timecnt_t (timecnt_t const &, timepos_t const & pos);
+	explicit timecnt_t (timepos_t const & d, timepos_t const & p) : _distance (d), _position (p) { assert (p.is_beats() == d.is_beats()); }
+	explicit timecnt_t (timecnt_t const &, timepos_t const & pos);
 
 	/* construct from int62_t (which will be flagged or not) and timepos_t */
-	timecnt_t (int62_t d, timepos_t p) : _distance (d), _position (p) { assert (p.is_beats() == d.flagged()); }
+	explicit timecnt_t (int62_t d, timepos_t p) : _distance (d), _position (p) { assert (p.is_beats() == d.flagged()); }
 
-	/* construct from position/distance primitives */
-	explicit timecnt_t (superclock_t s, timepos_t const & pos) : _distance (false, s), _position (pos) { assert (_distance.flagged() == _position.is_beats()); }
+	/* construct from beats */
 	explicit timecnt_t (Temporal::Beats const & b, timepos_t const & pos) :  _distance (true, b.to_ticks()), _position (pos) { assert ( _distance.flagged() == _position.is_beats()); }
 
+	/* superclock_t and samplepos_t are the same underlying primitive type,
+	 * which means we cannot use polymorphism to differentiate them.
+	 */
+	static timecnt_t from_superclock (superclock_t s, timepos_t const & pos) { return timecnt_t (int62_t (false, s), pos); }
+	static timecnt_t from_samples (samplepos_t s, timepos_t const & pos) { return timecnt_t (int62_t (false, samples_to_superclock (s, _thread_sample_rate)), pos); }
+
 	/* Construct from just a distance value - position is assumed to be zero */
-	explicit timecnt_t (superclock_t s) : _distance (false, s), _position (superclock_t (0)) {}
 	explicit timecnt_t (Temporal::Beats const & b) :  _distance (true, b.to_ticks()), _position (Beats()) {}
+	static timecnt_t from_superclock (superclock_t s) { return timecnt_t (int62_t (false, s), timepos_t::from_superclock (0)); }
+	static timecnt_t from_samples (samplepos_t s) { return timecnt_t (int62_t (false, samples_to_superclock (s, _thread_sample_rate)), timepos_t::from_superclock (0)); }
 
 	int62_t const & distance() const { return _distance; }
 	timepos_t const & position() const { return _position; }
@@ -385,7 +390,7 @@ namespace std {
 
 /* The utility of these two specializations of std::numeric_limits<> is not
  * clear, since both timepos_t and timecnt_t have a time domain, and comparing
- * across time domains, while possible, is expensive. 
+ * across time domains, while possible, is expensive.
  *
  * To avoid hidden costs, it seems easier to use timepos_t::max and
  * timecnt_t::max although these have a similar fundamental problem.
@@ -394,21 +399,17 @@ namespace std {
 template<>
 struct numeric_limits<Temporal::timepos_t> {
 	static Temporal::timepos_t min() {
-		return Temporal::timepos_t (0);
+		return Temporal::timepos_t::from_superclock (0);
 	}
 	static Temporal::timepos_t max() {
-		return Temporal::timepos_t (4611686018427387904); /* pow (2,62) */
+		return Temporal::timepos_t::from_superclock (4611686018427387904); /* pow (2,62) */
 	}
 };
 
 template<>
 struct numeric_limits<Temporal::timecnt_t> {
-	static Temporal::timecnt_t min() {
-		return Temporal::timecnt_t (Temporal::superclock_t (0), Temporal::timepos_t (Temporal::superclock_t (0)));
-	}
-	static Temporal::timecnt_t max() {
-		return Temporal::timecnt_t (Temporal::superclock_t (4611686018427387904), Temporal::timepos_t (Temporal::superclock_t (0))); /* pow (2,62) */
-	}
+	static Temporal::timecnt_t min() { return Temporal::timecnt_t::from_superclock (0); }
+	static Temporal::timecnt_t max() { return Temporal::timecnt_t::from_superclock (4611686018427387904); /* pow (2,62) */ }
 };
 
 }
@@ -454,4 +455,3 @@ inline static bool operator>= (Temporal::Beats const & b, Temporal::timecnt_t co
 #undef TEMPORAL_DOMAIN_WARNING
 
 #endif /* __libtemporal_timeline_h__ */
-

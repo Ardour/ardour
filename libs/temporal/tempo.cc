@@ -77,7 +77,7 @@ Point::time() const
 {
 	switch (_map->time_domain()) {
 	case AudioTime:
-		return timepos_t (sclock());
+		return timepos_t::from_superclock (sclock());
 	case BeatTime:
 		return timepos_t (beats());
 	case BarTime:
@@ -2508,7 +2508,7 @@ TempoMap::full_duration_at (timepos_t const & pos, timecnt_t const & duration, T
 			/* determine superclocks */
 			s = metric_at (p).superclock_at (p.beats());
 			/* return duration in sc */
-			return timecnt_t (s - pos.superclocks(), pos);
+			return timecnt_t::from_superclock (s - pos.superclocks(), pos);
 			break;
 		}
 		break;
@@ -2545,7 +2545,7 @@ TempoMap::full_duration_at (timepos_t const & pos, timecnt_t const & duration, T
 	abort ();
 	/*NOTREACHED*/
 
-	return timecnt_t (0, timepos_t());
+	return timecnt_t::from_superclock (0);
 
 }
 
