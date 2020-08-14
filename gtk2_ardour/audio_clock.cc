@@ -1269,14 +1269,18 @@ AudioClock::set_bbt (samplepos_t when, samplecnt_t offset, bool /*force*/)
 
 		TempoMetric m (_session->tempo_map().metric_at (pos));
 
+#ifndef PLATFORM_WINDOWS
+		/* UTF8 1/4 note and 1/8 note ♩ (\u2669) and ♪ (\u266a) are n/a on Windows */
 		if (m.tempo().note_type() == 4) {
 			snprintf (buf, sizeof(buf), "\u2669 = %.3f", _session->tempo_map().tempo_at_sample (pos).note_types_per_minute());
 			_left_btn.set_text (string_compose ("%1", buf), false);
 		} else if (m.tempo().note_type() == 8) {
 			snprintf (buf, sizeof(buf), "\u266a = %.3f", _session->tempo_map().tempo_at_sample (pos).note_types_per_minute());
 			_left_btn.set_text (string_compose ("%1", buf), false);
-		} else {
-			snprintf (buf, sizeof(buf), "%.1f = %.3f", m.tempo().note_type(), _session->tempo_map().tempo_at_sample (pos).note_types_per_minute());
+		} else
+#endif
+		{
+			snprintf (buf, sizeof(buf), "1/%.0f = %.3f", m.tempo().note_type(), _session->tempo_map().tempo_at_sample (pos).note_types_per_minute());
 			_left_btn.set_text (string_compose ("%1: %2", S_("Tempo|T"), buf), false);
 		}
 
