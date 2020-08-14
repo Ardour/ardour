@@ -152,7 +152,7 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>&            
 		if (_force_discrete || i->second->list()->interpolation() == ControlList::Discrete) {
 			ret = i->second->list()->rt_safe_earliest_event_discrete_unlocked (t.to_double(), x, y, true);
 		} else {
-			ret = i->second->list()->rt_safe_earliest_event_unlocked(t.to_double(), x, y, true);
+			ret = i->second->list()->rt_safe_earliest_event_linear_unlocked(t.to_double(), x, y, true);
 		}
 		if (!ret) {
 			DEBUG_TRACE (DEBUG::Sequence, string_compose ("Iterator: CC %1 (size %2) has no events past %3\n",

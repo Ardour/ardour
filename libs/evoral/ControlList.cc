@@ -1538,44 +1538,6 @@ ControlList::build_search_cache_if_necessary (double start) const
 	_search_cache.left = start;
 }
 
-/** Get the earliest event after \a start using the current interpolation style.
- *
- * If an event is found, \a x and \a y are set to its coordinates.
- *
- * \param inclusive Include events with timestamp exactly equal to \a start
- * \return true if event is found (and \a x and \a y are valid).
- */
-bool
-ControlList::rt_safe_earliest_event (double start, double& x, double& y, bool inclusive) const
-{
-	// FIXME: It would be nice if this was unnecessary..
-	Glib::Threads::RWLock::ReaderLock lm(_lock, Glib::Threads::TRY_LOCK);
-	if (!lm.locked()) {
-		return false;
-	}
-
-	return rt_safe_earliest_event_unlocked (start, x, y, inclusive);
-}
-
-
-/** Get the earliest event after \a start using the current interpolation style.
- *
- * If an event is found, \a x and \a y are set to its coordinates.
- *
- * \param inclusive Include events with timestamp exactly equal to \a start
- * \return true if event is found (and \a x and \a y are valid).
- */
-bool
-ControlList::rt_safe_earliest_event_unlocked (double start, double& x, double& y, bool inclusive) const
-{
-	if (_interpolation == Discrete) {
-		return rt_safe_earliest_event_discrete_unlocked(start, x, y, inclusive);
-	} else {
-		return rt_safe_earliest_event_linear_unlocked(start, x, y, inclusive);
-	}
-}
-
-
 /** Get the earliest event after \a start without interpolation.
  *
  * If an event is found, \a x and \a y are set to its coordinates.
