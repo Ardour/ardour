@@ -30,13 +30,16 @@ get_microseconds ()
 void
 single_atomic ()
 {
-	struct alignas(16) thing {
+	struct thing {
 		std::atomic<int64_t> v;
 		thing() : v (0) { }
 	};
 
 	thing t;
 	int odd = 0;
+
+	cout << "atomic<int64_t> is lock free ? " << t.v.is_lock_free() << endl;
+
 	int64_t before = get_microseconds ();
 
 	for (int n = 0; n < loop_count; ++n) {
@@ -181,7 +184,7 @@ test_ints ()
 		case 0:
 			if (INT64_MAX - arg >= i64) {
 				i64 += arg;
-				if (i64 <= std::numeric_limits<int62_t>::max() && i64 >= std::numeric_limits<int62_t>::min()) {
+				if (i64 <= std::numeric_limits<int62_t>::max().val() && i64 >= std::numeric_limits<int62_t>::min().val()) {
 					i62 += arg;
 				} else {
 					i64 = old64;
@@ -193,7 +196,7 @@ test_ints ()
 		case 1:
 			if (INT64_MIN + arg <= i64) {
 				i64 -= arg;
-				if (i64 <= std::numeric_limits<int62_t>::max() && i64 >= std::numeric_limits<int62_t>::min()) {
+				if (i64 <= std::numeric_limits<int62_t>::max().val() && i64 >= std::numeric_limits<int62_t>::min().val()) {
 					i62 -= arg;
 				} else {
 					i64 = old64;
@@ -209,7 +212,7 @@ test_ints ()
 			} else {
 				if (INT64_MAX / arg > i64) {
 					i64 *= arg;
-					if (i64 <= std::numeric_limits<int62_t>::max() && i64 >= std::numeric_limits<int62_t>::min()) {
+					if (i64 <= std::numeric_limits<int62_t>::max().val() && i64 >= std::numeric_limits<int62_t>::min().val()) {
 						i62 *= arg;
 					} else {
 						i64 = old64;
@@ -226,7 +229,7 @@ test_ints ()
 			}
 
 			i64 /= arg;
-			if (i64 <= std::numeric_limits<int62_t>::max() && i64 >= std::numeric_limits<int62_t>::min()) {
+			if (i64 <= std::numeric_limits<int62_t>::max().val() && i64 >= std::numeric_limits<int62_t>::min().val()) {
 				i62 /= arg;
 			} else {
 				i64 = old64;
