@@ -41,6 +41,15 @@ using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
 
+
+enum MY_PROCESS_DPI_AWARENESS {
+  PROCESS_DPI_UNAWARE,
+  PROCESS_SYSTEM_DPI_AWARE,
+  PROCESS_PER_MONITOR_DPI_AWARE
+};
+
+typedef HRESULT (WINAPI* SetProcessDpiAwareness_t)(MY_PROCESS_DPI_AWARENESS);
+
 void
 fixup_bundle_environment (int, char* [], string & localedir)
 {
@@ -89,6 +98,16 @@ fixup_bundle_environment (int, char* [], string & localedir)
 	 * furthermore it'll be even less common for derived products.
 	 */
 	Glib::setenv ("ARDOUR_SELF", Glib::build_filename(ardour_dll_directory(), "ardour.exe"), true);
+
+	/* https://docs.microsoft.com/en-us/windows/win32/api/shellscalingapi/nf-shellscalingapi-setprocessdpiawareness */
+	HMODULE module = LoadLibraryA ("Shcore.dll");
+	if (module) {
+		SetProcessDpiAwareness_t setProcessDpiAwareness = reinterpret_cast<SetProcessDpiAwareness_t> (GetProcAddress (module, "SetProcessDpiAwareness"));
+		if (setProcessDpiAwareness) {
+			setProcessDpiAwareness (PROCESS_SYSTEM_DPI_AWARE);
+		}
+		FreeLibrary (module);
+	}
 }
 
 static __cdecl void
