@@ -1587,7 +1587,7 @@ ControlList::rt_safe_earliest_event_discrete_unlocked (double start, double& x, 
  * \return true if event is found (and \a x and \a y are valid).
  */
 bool
-ControlList::rt_safe_earliest_event_linear_unlocked (double start, double& x, double& y, bool inclusive) const
+ControlList::rt_safe_earliest_event_linear_unlocked (double start, double& x, double& y, bool inclusive, double min_x_delta) const
 {
 	// cout << "earliest_event(start: " << start << ", x: " << x << ", y: " << y << ", inclusive: " << inclusive <<  ")" << endl;
 
@@ -1595,8 +1595,29 @@ ControlList::rt_safe_earliest_event_linear_unlocked (double start, double& x, do
 	if (_events.empty()) { // 0 events
 		return false;
 	} else if (_events.end() == ++length_check_iter) { // 1 event
-		return rt_safe_earliest_event_discrete_unlocked (start, x, y, inclusive);
+		return rt_safe_earliest_event_discrete_unlocked (start + min_x_delta, x, y, inclusive);
 	}
+
+
+	if (min_x_delta > 0) {
+		/* if there is an event between [start and start + min_x_delta], use it,
+		 * otherwise interpolate at start + min_x_delta
+		 */
+		build_search_cache_if_necessary (start);
+		const ControlEvent* first = *_search_cache.first;
+		if (_search_cache.first != _events.end()) {
+			if (((first->when > start) || (inclusive && first->when == start)) && first->when < start + min_x_delta) {
+				x = first->when;
+				y = first->value;
+				/* Move left of cache to this point
+				 * (Optimize for immediate call this cycle within range) */
+				_search_cache.left = x;
+				return true;
+			}
+		}
+	}
+
+	start += min_x_delta;
 
 	// Hack to avoid infinitely repeating the same event
 	build_search_cache_if_necessary (start);
@@ -1671,9 +1692,11 @@ ControlList::rt_safe_earliest_event_linear_unlocked (double start, double& x, do
 			x = first->when + (y - first->value) / (double)slope;
 		}
 
-		/*cerr << first->value << " @ " << first->when << " ... "
+#if 0
+		cerr << first->value << " @ " << first->when << " ... "
 		  << next->value << " @ " << next->when
-		  << " = " << y << " @ " << x << endl;*/
+		  << " = " << y << " @ " << x << endl;
+#endif
 
 		assert(    (y >= first->value && y <= next->value)
 		           || (y <= first->value && y >= next->value) );

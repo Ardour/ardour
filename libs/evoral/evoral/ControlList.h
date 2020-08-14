@@ -298,8 +298,8 @@ public:
 	 */
 	double unlocked_eval (double x) const;
 
-	bool rt_safe_earliest_event_linear_unlocked (double start, double& x, double& y, bool inclusive) const;
 	bool rt_safe_earliest_event_discrete_unlocked (double start, double& x, double& y, bool inclusive) const;
+	bool rt_safe_earliest_event_linear_unlocked (double start, double& x, double& y, bool inclusive, double min_d_delta = 0) const;
 
 	void create_curve();
 	void destroy_curve();

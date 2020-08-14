@@ -370,7 +370,7 @@ Sequence<Time>::const_iterator::operator++()
 				_control_iter->x, x, y, false);
 		} else {
 			ret = _control_iter->list->rt_safe_earliest_event_linear_unlocked (
-				_control_iter->x + time_between_interpolated_controller_outputs, x, y, false);
+				_control_iter->x, x, y, false, time_between_interpolated_controller_outputs);
 		}
 		assert(!ret || x > _control_iter->x);
 		if (ret) {
