@@ -138,12 +138,7 @@ import { createRootContainer, Container, Dialog, Label, Button, DiscreteKnob,
 
     function setupFullscreenButton () {
         const doc = document.documentElement,
-<<<<<<< HEAD
               button = document.getElementById('fullscreen');
-=======
-              button = document.getElementById('fullscreen'),
-              touchOrClick = ('ontouchstart' in doc) ? 'touchstart' : 'click';
->>>>>>> WS: Add a fullscreen toggle to the mixer demo
 
         let requestFullscreen = null, fullscreenChange = null;
 
