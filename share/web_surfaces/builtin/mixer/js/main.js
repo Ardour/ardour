@@ -34,6 +34,10 @@ import { createRootContainer, Container, Dialog, Label, Button, DiscreteKnob,
                 root.removeChild(root.children[0]);
             }
 
+            const top = new Container();
+            top.id = 'top';
+            top.appendTo(root);
+
             const mixer = new Container();
             mixer.id = 'mixer';
             mixer.appendTo(root);

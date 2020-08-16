@@ -34,6 +34,7 @@
     text-decoration: none;
     box-sizing: border-box;
     transition: border 0.25s ease-in-out, box-shadow 0.25s ease-in-out;
+    min-height: 37px;
 }
 /*.toolkit-button:hover {
     border: 1px solid #002f42;

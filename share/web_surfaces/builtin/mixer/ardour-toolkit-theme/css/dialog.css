@@ -8,3 +8,21 @@
     -moz-box-shadow:    0px 2px 9px 0px rgba(0, 0, 0, 0.75);
     box-shadow:         0px 2px 9px 0px rgba(0, 0, 0, 0.75);
 }
+
+/* disable show/hide animations */
+
+.toolkit-dialog {
+    -webkit-animation: none;
+    -moz-animation: none;
+    -ms-animation: none;
+    -o-animation: none;
+    animation: none;
+}
+
+.toolkit-dialog.toolkit-hiding {
+    -webkit-transition: none;
+    -moz-transition: none;
+    -ms-transition: none;
+    -o-transition: none;
+    transition: none;
+}
