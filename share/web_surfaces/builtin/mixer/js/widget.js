@@ -55,6 +55,19 @@ export class BaseContainer extends BaseWidget {
 
 }
 
+export class BaseDialog extends BaseContainer {
+
+    constructor () {
+        super();
+        this.children = [];
+    }
+
+    show () {
+        // empty
+    }
+
+}
+
 export class BaseControl extends BaseWidget {
 
     get value () {

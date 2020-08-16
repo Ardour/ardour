@@ -17,8 +17,8 @@
  */
 
 import ArdourClient from '/shared/ardour.js';
-import { createRootContainer, Container, Label, DiscreteKnob, LinearKnob,
-            PanKnob, StripGainFader, StripMeter, Toggle } from './tkwidget.js';
+import { createRootContainer, Container, Dialog, Label, Button, DiscreteKnob,
+            LinearKnob, PanKnob, StripGainFader, StripMeter, Toggle } from './tkwidget.js';
 
 (() => {
     
@@ -56,14 +56,27 @@ import { createRootContainer, Container, Label, DiscreteKnob, LinearKnob,
     }
 
     function createStrip (strip, container) {
+        const inserts = new Button();
+        inserts.text = 'ƒ';
+        inserts.appendTo(container);
+        inserts.classList.add('strip-inserts');
+        if (strip.isVca || (strip.plugins.length == 0)) {
+            inserts.classList.add('disabled');
+        } else {
+            inserts.callback = () => openInserts (strip.plugins);
+        }
+
         const pan = new PanKnob();
         pan.appendTo(container);
-        if (strip.isVca) {
-            // hide pan keeping layout
-            pan.element.style.visibility = 'hidden';
-        } else {
+        if (!strip.isVca) {
             pan.bindTo(strip, 'pan');
         }
+
+        const mute = new Toggle();
+        mute.text = 'Mute';
+        mute.appendTo(container);
+        mute.bindTo(strip, 'mute');
+        mute.classList.add('strip-mute');
 
         const meterFader = new Container();
         meterFader.appendTo(container);
@@ -82,10 +95,11 @@ import { createRootContainer, Container, Label, DiscreteKnob, LinearKnob,
         label.classList.add('strip-label');
         label.appendTo(container);
 
-        // TO DO
-        /*for (const plugin of strip.plugins) {
-            createStripPlugin(plugin, container);
-        }*/
+        if (strip.isVca) {
+            // hide inserts and pan keeping layout
+            pan.element.style.visibility = 'hidden';
+            inserts.element.style.visibility = 'hidden';
+        }
     }
 
     function createStripPlugin (plugin, container) {
@@ -119,8 +133,7 @@ import { createRootContainer, Container, Label, DiscreteKnob, LinearKnob,
 
     function setupFullscreenButton () {
         const doc = document.documentElement,
-              button = document.getElementById('fullscreen'),
-              touchOrClick = ('ontouchstart' in doc) ? 'touchstart' : 'click';
+              button = document.getElementById('fullscreen');
 
         let requestFullscreen = null, fullscreenChange = null;
 
@@ -133,7 +146,7 @@ import { createRootContainer, Container, Label, DiscreteKnob, LinearKnob,
         }
 
         if (requestFullscreen && fullscreenChange) {
-            button.addEventListener(touchOrClick, requestFullscreen);
+            button.addEventListener('click', requestFullscreen);
 
             document.addEventListener(fullscreenChange, (e) => {
                 const fullscreen = document.fullscreen || document.webkitIsFullScreen;
@@ -142,6 +155,21 @@ import { createRootContainer, Container, Label, DiscreteKnob, LinearKnob,
         } else {
             button.style.display = 'none';
         }
+    }
+
+    function openInserts (plugins) {
+        const dialog = new Dialog();
+        dialog.classList.add('inserts-view');
+        dialog.show();
+
+        const label = new Label();
+        label.text = `WIP: This strip has ${plugins.length} plugins...`;
+        label.appendTo(dialog);
+
+        // TO DO
+        /*for (const plugin of plugins) {
+            createStripPlugin(plugin, container);
+        }*/
     }
 
     main();

@@ -17,7 +17,18 @@
  */
 
 import loadToolkit from './tkloader.js';
-import { BaseWidget, BaseContainer, BaseControl } from './widget.js';
+import { BaseWidget, BaseContainer, BaseDialog, BaseControl } from './widget.js';
+
+let _tkRoot = null;
+
+export async function createRootContainer () {
+    await loadToolkit();
+    _tkRoot = new TK.Root({id: 'root'});
+    const root = new Container();
+    root.tk = _tkRoot;
+    document.body.appendChild(root.element);
+    return root;
+}
 
 class Widget extends BaseWidget {
 
@@ -91,14 +102,6 @@ class Knob extends RangeControl {
 
 }
 
-export async function createRootContainer () {
-    await loadToolkit();
-    const root = new Container();
-    root.tk = new TK.Root({id: 'root'});
-    document.body.appendChild(root.element);
-    return root;
-}
-
 export class Container extends BaseContainer {
 
     constructor () {
@@ -117,11 +120,62 @@ export class Container extends BaseContainer {
 
 }
 
+export class Dialog extends BaseDialog {
+
+    constructor () {
+        super();
+        this.tk = new TK.Dialog({
+            anchor: 'center',   // center v&h
+            auto_close: true,
+            auto_remove: true,
+            showing_duration: 10,
+            hiding_duration: 10,
+            container: document.getElementById('root')
+        });
+    }
+
+    get element () {
+        return this.tk.element;
+    }
+
+    appendChild (child) {
+        super.appendChild(child);
+        this.tk.append_child(child.tk);
+    }
+
+    show () {
+        // opening a TK.Dialog with auto_close=true from a TK.Button callback 
+        // fails otherwise ev.stopPropagation() is called in the button event
+        // handler or setTimeout() is used here
+        setTimeout(() => {
+            this.tk.set('display_state', 'show');
+        }, 0);
+    }
+
+}
+
+export class Button extends Control {
+
+    constructor () {
+        super(new TK.Button());
+        this.tk.add_event('click', (ev) => this.callback(ev));
+    }
+    
+    set text (text) {
+        this.tk.set('label', text);
+    }
+
+}
+
 export class Toggle extends Control {
 
     constructor () {
         super(new TK.Toggle());
         this.tk.add_event('toggled', (state) => this.callback(state));
+    }
+    
+    set text (text) {
+        this.tk.set('label', text);
     }
 
     get value () {
