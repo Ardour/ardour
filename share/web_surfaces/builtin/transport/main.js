@@ -44,22 +44,19 @@ import ArdourClient from '/shared/ardour.js';
     }
 
     function addDomEventListeners () {
-        // transport buttons
-        const touchOrClick = ('ontouchstart' in document.documentElement) ? 'touchstart' : 'click';
-
         const roll = () => {
             setRolling(!_rolling);
             ardour.transport.roll = _rolling;
         };
 
-        dom.roll.addEventListener(touchOrClick, roll);
+        dom.roll.addEventListener('click', roll);
 
         const record = () => {
             setRecord(!_record);
             ardour.transport.record = _record;
         };
 
-        dom.record.addEventListener(touchOrClick, record);
+        dom.record.addEventListener('click', record);
 
         // fullscreen button
         let requestFullscreen = null, fullscreenChange = null;
@@ -73,7 +70,7 @@ import ArdourClient from '/shared/ardour.js';
         }
 
         if (requestFullscreen && fullscreenChange) {
-            dom.fullscreen.addEventListener(touchOrClick, requestFullscreen);
+            dom.fullscreen.addEventListener('click', requestFullscreen);
 
             document.addEventListener(fullscreenChange, (e) => {
                 const fullscreen = document.fullscreen || document.webkitIsFullScreen;

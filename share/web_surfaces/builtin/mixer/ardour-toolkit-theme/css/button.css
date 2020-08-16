@@ -20,13 +20,13 @@
     margin: 4px;
     padding: 8px 16px;
     color: #002f42;
-    text-shadow: 0px 1px 0px rgba(255,255,255,0.6);
-    background-color: rgb(245,245,245);
+    /*text-shadow: 0px 1px 0px rgba(255,255,255,0.6);*/
+    /*background-color: rgb(245,245,245);
     background-image: url(../images/gradients/grey_out.png);
     background-repeat: repeat-x;
     background-size: 100% 200%;
     background-position: 50% 0;
-    background-clip: padding-box;
+    background-clip: padding-box;*/
     border: 1px solid #aaa;
     -webkit-border-radius: 6px;
     -moz-border-radius:    6px;
@@ -35,15 +35,15 @@
     box-sizing: border-box;
     transition: border 0.25s ease-in-out, box-shadow 0.25s ease-in-out;
 }
-.toolkit-button:hover {
+/*.toolkit-button:hover {
     border: 1px solid #002f42;
     background-size: 100% 120%;
     background-position: 50% 0;
     -webkit-box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.1);
     -moz-box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.1);
     box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.1);
-}
-.toolkit-button:active {
+}*/
+/*.toolkit-button:active {
     background-image: url(../images/gradients/grey_in.png);
     background-size: 100% 250%;
     background-position: 50% 75%;
@@ -51,14 +51,14 @@
     -moz-box-shadow: 0px 3px 0px rgba(255,255,255,0.5), 0px -3px 0px rgba(0,0,0,0.05), 2px 0px 0px rgba(255,255,255,0.3), 0px -2px 0px rgba(0,0,0,0.025);
     box-shadow: 0px 3px 0px rgba(255,255,255,0.5), 0px -3px 0px rgba(0,0,0,0.05), 2px 0px 0px rgba(255,255,255,0.3), 0px -2px 0px rgba(0,0,0,0.025);
     filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='../images/gradients/grey_in.png',sizingMethod='scale');
-}
+}*/
 
 .toolkit-button > .toolkit-label {
     line-height: 1.1em;
     text-align: center;
     margin: auto;
     padding: 0 3px;
-    transition: background 0.33s ease-in-out, color 0.33s ease-in-out;
+    /*transition: background 0.33s ease-in-out, color 0.33s ease-in-out;*/
     -webkit-border-radius: 3px;
     -moz-border-radius:    3px;
     border-radius:         3px;
@@ -78,13 +78,13 @@
     margin-right: 5px;
 }
 
-.toolkit-button.toolkit-active {
+/*.toolkit-button.toolkit-active {
     border: 1px solid #002f42;
-}
+}*/
 .toolkit-button.toolkit-active > .toolkit-label {
     background-color: #002f42;
     color: white;
-    text-shadow: 0px -1px 0px black;
+    /*text-shadow: 0px -1px 0px black;*/
 }
 .toolkit-button.toolkit-active > .toolkit-icon {
     
