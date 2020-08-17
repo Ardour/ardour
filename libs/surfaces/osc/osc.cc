@@ -3945,6 +3945,45 @@ OSC::touch_detect (const char *path, const char* types, lo_arg **argv, int argc,
 			if (send) {
 				control = send->gain_control ();
 			}
+		} else if (!strncmp (&path[ctr], X_("pan"), 3)) {
+			if (send) {
+				if (send->panner_linked_to_route () || !send->has_panner ()) {
+					PBD::warning << "Send panner not available" << endmsg;
+				} else {
+					boost::shared_ptr<Delivery> _send_del = boost::dynamic_pointer_cast<Delivery> (send);
+					boost::shared_ptr<Pannable> pannable = _send_del->panner()->pannable();
+					if (!strncmp (&path[ctr], X_("pan_stereo_position"), 19)) {
+						if (pannable->pan_azimuth_control) {
+							control = pannable->pan_azimuth_control;
+						} else {
+							PBD::warning << "Automation not available for " << path << endmsg;
+						}
+					} else if (!strncmp (&path[ctr], X_("pan_stereo_width"), 16)) {
+						if (strp->pan_width_control ()) {
+								control = strp->pan_width_control ();
+						} else {
+							PBD::warning << "Automation not available for " << path << endmsg;
+						}
+					}
+				}
+			}
+		} else if (!strncmp (&path[ctr], X_("trimdB"), 6)) {
+			if (send) {
+				PBD::warning << "Send trim not available" << endmsg;
+			} else if (strp->trim_control ()) {
+				control = strp->trim_control ();
+			} else {
+				PBD::warning << "No trim for this strip" << endmsg;
+			}
+		} else if (!strncmp (&path[ctr], X_("mute"), 4)) {
+			if (send) {
+				PBD::warning << "Send mute not automatable" << endmsg;
+			} else if (strp->mute_control ()) {
+				control = strp->mute_control ();
+			} else {
+				PBD::warning << "No trim for this strip" << endmsg;
+			}
+
 		} else {
 			PBD::warning << "Automation not available for " << path << endmsg;
 		}
@@ -4095,6 +4134,7 @@ OSC::route_mute (int ssid, int yn, lo_message msg)
 		}
 		if (s->mute_control()) {
 			s->mute_control()->set_value (yn ? 1.0 : 0.0, sur->usegroup);
+			fake_touch (s->mute_control());
 			return 0;
 		}
 	}
@@ -4111,6 +4151,7 @@ OSC::sel_mute (uint32_t yn, lo_message msg)
 	if (s) {
 		if (s->mute_control()) {
 			s->mute_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
+			fake_touch (s->mute_control());
 			return 0;
 		}
 	}
@@ -5031,6 +5072,7 @@ OSC::route_set_trim_abs (int ssid, float level, lo_message msg)
 		}
 		if (s->trim_control()) {
 			s->trim_control()->set_value (level, sur->usegroup);
+			fake_touch (s->trim_control());
 			return 0;
 		}
 
@@ -5061,6 +5103,7 @@ OSC::sel_trim (float val, lo_message msg)
 	if (s) {
 		if (s->trim_control()) {
 			s->trim_control()->set_value (dB_to_coefficient (val), PBD::Controllable::NoGroup);
+			fake_touch (s->trim_control());
 			return 0;
 		}
 	}
@@ -5090,6 +5133,7 @@ OSC::sel_pan_position (float val, lo_message msg)
 	if (s) {
 		if(s->pan_azimuth_control()) {
 			s->pan_azimuth_control()->set_value (s->pan_azimuth_control()->interface_to_internal (val), PBD::Controllable::NoGroup);
+			fake_touch (s->pan_azimuth_control());
 			return 0;
 		}
 	}
@@ -5105,6 +5149,7 @@ OSC::sel_pan_width (float val, lo_message msg)
 	if (s) {
 		if (s->pan_width_control()) {
 			s->pan_width_control()->set_value (s->pan_width_control()->interface_to_internal (val), PBD::Controllable::NoGroup);
+			fake_touch (s->pan_width_control());
 			return 0;
 		}
 	}
@@ -5130,6 +5175,8 @@ OSC::route_set_pan_stereo_position (int ssid, float pos, lo_message msg)
 		}
 		if(pan_control) {
 			pan_control->set_value (s->pan_azimuth_control()->interface_to_internal (pos), sur->usegroup);
+			boost::shared_ptr<AutomationControl>pan_automate = boost::dynamic_pointer_cast<AutomationControl> (pan_control);
+			fake_touch (pan_automate);
 			return 0;
 		}
 	}
@@ -5150,6 +5197,7 @@ OSC::route_set_pan_stereo_width (int ssid, float pos, lo_message msg)
 		}
 		if (s->pan_width_control()) {
 			s->pan_width_control()->set_value (pos, sur->usegroup);
+			fake_touch (s->pan_width_control());
 			return 0;
 		}
 	}
