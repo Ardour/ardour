@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2016-2017 Robin Gareus <robin@gareus.org>
- * Copyright (C) 2016-2018 Len Ovens <len@ovenwerks.net>
+ * Copyright (C) 2016-2020 Len Ovens <len@ovenwerks.net>
  * Copyright (C) 2016 Paul Davis <paul@linuxaudiosystems.com>
  *
  * This program is free software; you can redistribute it and/or modify

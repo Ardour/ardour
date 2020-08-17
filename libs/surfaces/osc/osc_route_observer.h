@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2010-2015 Paul Davis <paul@linuxaudiosystems.com>
- * Copyright (C) 2016-2018 Len Ovens <len@ovenwerks.net>
+ * Copyright (C) 2016-2020 Len Ovens <len@ovenwerks.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

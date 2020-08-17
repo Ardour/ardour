@@ -2,7 +2,7 @@
  * Copyright (C) 2010-2016 Paul Davis <paul@linuxaudiosystems.com>
  * Copyright (C) 2011 Carl Hetherington <carl@carlh.net>
  * Copyright (C) 2015-2017 Robin Gareus <robin@gareus.org>
- * Copyright (C) 2016-2018 Len Ovens <len@ovenwerks.net>
+ * Copyright (C) 2016-2020 Len Ovens <len@ovenwerks.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

@@ -3811,14 +3811,49 @@ OSC::set_automation (const char *path, const char* types, lo_arg **argv, int arg
 		boost::shared_ptr<AutomationControl> control = boost::shared_ptr<AutomationControl>();
 		// other automatable controls can be added by repeating the next 6.5 lines
 		if ((!strncmp (&path[ctr], X_("fader"), 5)) || (!strncmp (&path[ctr], X_("gain"), 4))) {
-			if (strp->gain_control ()) {
+			if (send) {
+				control = send->gain_control ();
+			} else if (strp->gain_control ()) {
 				control = strp->gain_control ();
 			} else {
 				PBD::warning << "No fader for this strip" << endmsg;
 			}
+		} else if (!strncmp (&path[ctr], X_("pan"), 3)) {
 			if (send) {
-				control = send->gain_control ();
+				if (send->panner_linked_to_route () || !send->has_panner ()) {
+					PBD::warning << "Send panner not available" << endmsg;
+				} else {
+					boost::shared_ptr<Delivery> _send_del = boost::dynamic_pointer_cast<Delivery> (send);
+					boost::shared_ptr<Pannable> pannable = _send_del->panner()->pannable();
+					if (pannable->pan_azimuth_control) {
+						control = pannable->pan_azimuth_control;
+					} else {
+						PBD::warning << "Automation not available for " << path << endmsg;
+					}
+				}
+			} else if (strp->pan_azimuth_control ()) {
+					control = strp->pan_azimuth_control ();
+			} else {
+				PBD::warning << "Automation not available for " << path << endmsg;
 			}
+
+		} else if (!strncmp (&path[ctr], X_("trimdB"), 6)) {
+			if (send) {
+				PBD::warning << "Send trim not available" << endmsg;
+			} else if (strp->trim_control ()) {
+				control = strp->trim_control ();
+			} else {
+				PBD::warning << "No trim for this strip" << endmsg;
+			}
+		} else if (!strncmp (&path[ctr], X_("mute"), 4)) {
+			if (send) {
+				PBD::warning << "Send mute not automatable" << endmsg;
+			} else if (strp->mute_control ()) {
+				control = strp->mute_control ();
+			} else {
+				PBD::warning << "No trim for this strip" << endmsg;
+			}
+
 		} else {
 			PBD::warning << "Automation not available for " << path << endmsg;
 		}
