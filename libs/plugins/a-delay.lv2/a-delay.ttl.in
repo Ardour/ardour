@@ -175,7 +175,7 @@
 A simple delay plugin
 """ ;
 
-    doap:name "a-Delay" ;
+    doap:name "ACE Delay" ;
     doap:license "GPL v2+" ;
     doap:maintainer <http://ardour.org/credits.html> ;
 
