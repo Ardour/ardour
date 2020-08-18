@@ -20,6 +20,7 @@
 
 #include "pbd/failed_constructor.h"
 #include "ardour/audiorom.h"
+#include "ardour/runtime_functions.h"
 
 using namespace ARDOUR;
 
@@ -51,6 +52,6 @@ AudioRom::read (Sample* dst, samplepos_t pos, samplecnt_t cnt, int channel) cons
 		return 0;
 	}
 	samplecnt_t to_copy = std::min (cnt, _size - pos);
-	memcpy (dst, &_rom[pos], sizeof (Sample) * _size);
+	copy_vector (dst, &_rom[pos], to_copy);
 	return to_copy;
 }
