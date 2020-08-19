@@ -155,6 +155,8 @@ OSCRouteObserver::refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip,
 		_osc.int_message_with_id (X_("/strip/hide"), ssid, _strip->is_hidden (), in_line, addr);
 
 		_strip->mute_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_change_message, this, X_("/strip/mute"), _strip->mute_control()), OSC::instance());
+		_strip->mute_control()->alist()->automation_state_changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_automation, this, X_("/strip/mute"), _strip->mute_control()), OSC::instance());
+		send_automation (X_("/strip/mute"), _strip->mute_control());
 		send_change_message (X_("/strip/mute"), _strip->mute_control());
 
 		_strip->solo_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_change_message, this, X_("/strip/solo"), _strip->solo_control()), OSC::instance());
@@ -196,9 +198,11 @@ OSCRouteObserver::refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip,
 		_gain_control->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_gain_message, this), OSC::instance());
 		gain_automation ();
 
-		boost::shared_ptr<Controllable> trim_controllable = boost::dynamic_pointer_cast<Controllable>(_strip->trim_control());
-		if (trim_controllable) {
-			trim_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_trim_message, this), OSC::instance());
+		boost::shared_ptr<Controllable> trim_control = boost::dynamic_pointer_cast<Controllable>(_strip->trim_control());
+		if (trim_control) {
+			_strip->trim_control()->alist()->automation_state_changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_automation, this, X_("/strip/trimdB"), _strip->trim_control()), OSC::instance());
+			send_automation (X_("/strip/trimdB"), _strip->trim_control());
+			trim_control->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_trim_message, this), OSC::instance());
 			send_trim_message ();
 		}
 
@@ -413,12 +417,6 @@ OSCRouteObserver::tick ()
 			}
 			gain_timeout--;
 		}
-		if (as == ARDOUR::Play ||  as == ARDOUR::Touch) {
-			if(_last_gain != _gain_control->get_value()) {
-				_last_gain = _gain_control->get_value();
-				send_gain_message ();
-			}
-		}
 	}
 	_tick_busy = false;
 }
@@ -459,15 +457,22 @@ OSCRouteObserver::panner_changed (boost::shared_ptr<ARDOUR::PannerShell> pan_sh)
 		}
 		boost::shared_ptr<Controllable> pan_controllable = boost::dynamic_pointer_cast<Controllable>(pan_sh->panner()->pannable()->pan_azimuth_control);
 		if (pan_controllable) {
+			boost::shared_ptr<AutomationControl>at = boost::dynamic_pointer_cast<AutomationControl> (pan_controllable);
+
 			pan_controllable->Changed.connect (pan_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_change_message, this, X_("/strip/pan_stereo_position"), current_pan_shell->panner()->pannable()->pan_azimuth_control), OSC::instance());
+			at->alist()->automation_state_changed.connect (pan_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_automation, this, X_("/strip/pan_stereo_position"), current_pan_shell->panner()->pannable()->pan_azimuth_control), OSC::instance());
 			send_change_message (X_("/strip/pan_stereo_position"), pan_controllable);
+			send_automation (X_("/strip/pan_stereo_position"), pan_controllable);
 		} else {
 			_osc.float_message_with_id (X_("/strip/pan_stereo_position"), ssid, 0.5, in_line, addr);
 		}
 		boost::shared_ptr<Controllable> width_controllable = boost::dynamic_pointer_cast<Controllable>(pan_sh->panner()->pannable()->pan_width_control);
 		if (width_controllable) {
+			boost::shared_ptr<AutomationControl>at = boost::dynamic_pointer_cast<AutomationControl> (width_controllable);
 			width_controllable->Changed.connect (pan_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_change_message, this, X_("/strip/pan_stereo_width"), current_pan_shell->panner()->pannable()->pan_width_control), OSC::instance());
+			at->alist()->automation_state_changed.connect (pan_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_automation, this, X_("/strip/pan_stereo_width"), current_pan_shell->panner()->pannable()->pan_width_control), OSC::instance());
 			send_change_message (X_("/strip/pan_stereo_width"), width_controllable);
+			send_automation (X_("/strip/pan_stereo_width"), width_controllable);
 		} else {
 			_osc.float_message_with_id (X_("/strip/pan_stereo_width"), ssid, 1.0, in_line, addr);
 		}
@@ -501,6 +506,42 @@ OSCRouteObserver::send_change_message (string path, boost::shared_ptr<Controllab
 {
 	float val = controllable->get_value();
 	_osc.float_message_with_id (path, ssid, (float) controllable->internal_to_interface (val), in_line, addr);
+}
+
+void
+OSCRouteObserver::send_automation (string path, boost::shared_ptr<PBD::Controllable> control)
+{
+	boost::shared_ptr<AutomationControl>automate = boost::dynamic_pointer_cast<AutomationControl> (control);
+
+	AutoState as = automate->alist()->automation_state();
+	string auto_name;
+	float output = 0;
+	switch (as) {
+		case ARDOUR::Off:
+			output = 0;
+			auto_name = "Manual";
+			break;
+		case ARDOUR::Play:
+			output = 1;
+			auto_name = "Play";
+			break;
+		case ARDOUR::Write:
+			output = 2;
+			auto_name = "Write";
+			break;
+		case ARDOUR::Touch:
+			output = 3;
+			auto_name = "Touch";
+			break;
+		case ARDOUR::Latch:
+			output = 4;
+			auto_name = "Latch";
+			break;
+		default:
+			break;
+	}
+	_osc.float_message_with_id (string_compose (X_("%1/automation"), path), ssid, output, in_line, addr);
+	_osc.text_message_with_id (string_compose (X_("%1/automation_name"), path), ssid, auto_name, in_line, addr);
 }
 
 void
