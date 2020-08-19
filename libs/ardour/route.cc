@@ -147,7 +147,7 @@ int
 Route::init ()
 {
 	/* default master bus to use strict i/o */
-	if (is_master()) {
+	if (is_master() || is_monitor ()) {
 		_strict_io = true;
 	}
 
@@ -1783,11 +1783,14 @@ Route::try_configure_processors_unlocked (ChanCount in, ProcessorStreams* err)
 				 * by calling _output->ensure_io()
 				 */
 				if (!is_master() && _session.master_out () && in.n_audio() > 0) {
-					/* ..but at least as many as there are master-inputs, if
-					 * the delivery is dealing with audio */
-					// XXX this may need special-casing for mixbus (master-outputs)
-					// and should maybe be a preference anyway ?!
-					out = ChanCount::max (in, _session.master_out ()->n_inputs ());
+					if (!is_monitor()) {
+						/* ..but at least as many as there are master-inputs, if
+						 * the delivery is dealing with audio */
+						out = ChanCount::max (in, _session.master_out ()->n_inputs ());
+					} else {
+						/* monitor-bus follows the master-bus' output */
+						out = ChanCount::max (in, _session.master_out ()->n_outputs ());
+					}
 				} else {
 					out = in;
 				}
