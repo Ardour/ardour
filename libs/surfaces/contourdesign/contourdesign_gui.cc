@@ -37,11 +37,11 @@
 
 #include "widgets/ardour_button.h"
 
-#include "pbd/i18n.h"
-
 #include "contourdesign.h"
 #include "jump_distance_widget.h"
 #include "button_config_widget.h"
+
+#include "pbd/i18n.h"
 
 using namespace ArdourSurface;
 

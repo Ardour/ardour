@@ -85,6 +85,12 @@ DiskWriter::default_chunk_samples ()
 	return 65536;
 }
 
+std::string
+DiskWriter::display_name () const
+{
+	return std::string (_ ("recorder"));
+}
+
 void
 DiskWriter::WriterChannelInfo::resize (samplecnt_t bufsize)
 {

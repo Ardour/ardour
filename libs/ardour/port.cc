@@ -26,13 +26,14 @@
 #include "pbd/compose.h"
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
-#include "pbd/i18n.h"
 
 #include "ardour/audioengine.h"
 #include "ardour/debug.h"
 #include "ardour/port.h"
 #include "ardour/port_engine.h"
 #include "ardour/rc_configuration.h"
+
+#include "pbd/i18n.h"
 
 using namespace std;
 using namespace ARDOUR;

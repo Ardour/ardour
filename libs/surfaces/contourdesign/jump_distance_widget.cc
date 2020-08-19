@@ -21,10 +21,10 @@
 #include <gtkmm/spinbutton.h>
 
 #include "gtkmm2ext/utils.h"
-#include "pbd/i18n.h"
 
 #include "jump_distance_widget.h"
 
+#include "pbd/i18n.h"
 
 using namespace std;
 using namespace Gtk;

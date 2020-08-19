@@ -24,11 +24,12 @@
 #include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/action_model.h"
 
-#include "pbd/i18n.h"
 #include "pbd/strsplit.h"
 #include "pbd/signals.h"
 
 #include "button_config_widget.h"
+
+#include "pbd/i18n.h"
 
 using namespace std;
 using namespace Gtk;

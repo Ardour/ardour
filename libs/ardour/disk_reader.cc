@@ -76,6 +76,12 @@ DiskReader::~DiskReader ()
 	DEBUG_TRACE (DEBUG::Destruction, string_compose ("DiskReader %1 @ %2 deleted\n", _name, this));
 }
 
+std::string
+DiskReader::display_name () const
+{
+	return std::string (_("player"));
+}
+
 void
 DiskReader::ReaderChannelInfo::resize (samplecnt_t bufsize)
 {

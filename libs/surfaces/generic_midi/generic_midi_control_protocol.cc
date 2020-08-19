@@ -41,7 +41,6 @@
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/file_utils.h"
-#include "pbd/i18n.h"
 #include "pbd/strsplit.h"
 #include "pbd/types_convert.h"
 #include "pbd/xml++.h"
@@ -65,6 +64,8 @@
 #include "midiaction.h"
 
 #include "pbd/abstract_ui.cc" // instantiate template
+
+#include "pbd/i18n.h"
 
 using namespace ARDOUR;
 using namespace PBD;

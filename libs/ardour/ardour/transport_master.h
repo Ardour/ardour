@@ -29,7 +29,6 @@
 
 #include <ltc.h>
 
-#include "pbd/i18n.h"
 #include "pbd/properties.h"
 #include "pbd/signals.h"
 #include "pbd/statefuldestructible.h"
@@ -123,7 +122,7 @@ struct LIBARDOUR_API SafeTime {
 
 		do {
 			if (tries == 10) {
-				std::cerr << X_("SafeTime: atomic read of current time failed, sleeping!") << std::endl;
+				std::cerr << "SafeTime: atomic read of current time failed, sleeping!" << std::endl;
 				Glib::usleep (20);
 				tries = 0;
 			}

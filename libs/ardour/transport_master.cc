@@ -21,7 +21,6 @@
 
 #include "pbd/boost_debug.h"
 #include "pbd/debug.h"
-#include "pbd/i18n.h"
 
 #include "ardour/audioengine.h"
 #include "ardour/debug.h"
@@ -32,6 +31,7 @@
 #include "ardour/types_convert.h"
 #include "ardour/utils.h"
 
+#include "pbd/i18n.h"
 
 namespace ARDOUR {
 	namespace Properties {

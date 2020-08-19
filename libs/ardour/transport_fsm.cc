@@ -22,7 +22,6 @@
 #include <boost/none.hpp>
 
 #include "pbd/error.h"
-#include "pbd/i18n.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/stacktrace.h"
 
@@ -30,6 +29,8 @@
 #include "ardour/disk_reader.h"
 #include "ardour/session.h"
 #include "ardour/transport_fsm.h"
+
+#include "pbd/i18n.h"
 
 using namespace ARDOUR;
 using namespace PBD;

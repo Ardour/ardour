@@ -23,8 +23,6 @@
 #include <list>
 #include <vector>
 
-#include "pbd/i18n.h"
-
 #include "ardour/disk_io.h"
 #include "ardour/midi_buffer.h"
 
@@ -42,7 +40,7 @@ public:
 	~DiskWriter ();
 
 	bool set_name (std::string const& str);
-	std::string display_name () const { return std::string (_ ("recorder")); }
+	std::string display_name () const;
 
 	bool recordable () const { return _flags & Recordable; }
 

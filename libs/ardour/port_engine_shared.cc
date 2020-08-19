@@ -21,9 +21,10 @@
 #include <regex.h>
 
 #include "pbd/error.h"
-#include "pbd/i18n.h"
 
 #include "ardour/port_engine_shared.h"
+
+#include "pbd/i18n.h"
 
 using namespace ARDOUR;
 

@@ -22,8 +22,6 @@
 
 #include <boost/optional.hpp>
 
-#include "pbd/i18n.h"
-
 #include "evoral/Curve.h"
 
 #include "ardour/disk_io.h"
@@ -46,10 +44,7 @@ public:
 
 	bool set_name (std::string const& str);
 
-	std::string display_name () const
-	{
-		return std::string (_("player"));
-	}
+	std::string display_name () const;
 
 	static samplecnt_t chunk_samples ()
 	{
