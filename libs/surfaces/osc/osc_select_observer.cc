@@ -161,7 +161,9 @@ OSCSelectObserver::refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip
 	_osc.float_message (X_("/select/hide"), _strip->is_hidden (), addr);
 
 	_strip->mute_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/mute"), _strip->mute_control()), OSC::instance());
+	_strip->mute_control()->alist()->automation_state_changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_automation, this, X_("/select/mute"), _strip->mute_control()), OSC::instance());
 	change_message (X_("/select/mute"), _strip->mute_control());
+	send_automation (X_("/select/mute"), _strip->mute_control());
 
 	_strip->solo_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/solo"), _strip->solo_control()), OSC::instance());
 	change_message (X_("/select/solo"), _strip->solo_control());
@@ -211,7 +213,9 @@ OSCSelectObserver::refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip
 	boost::shared_ptr<Controllable> trim_controllable = boost::dynamic_pointer_cast<Controllable>(_strip->trim_control());
 	if (trim_controllable) {
 		trim_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::trim_message, this, X_("/select/trimdB"), _strip->trim_control()), OSC::instance());
+		_strip->trim_control()->alist()->automation_state_changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_automation, this, X_("/select/trimdB"), _strip->trim_control()), OSC::instance());
 		trim_message (X_("/select/trimdB"), _strip->trim_control());
+		send_automation (X_("/select/trimdB"), _strip->trim_control());
 	}
 
 	boost::shared_ptr<PannerShell> pan_sh =  rt->panner_shell();
@@ -678,14 +682,20 @@ OSCSelectObserver::panner_changed ()
 		}
 		boost::shared_ptr<Controllable> pan_controllable = boost::dynamic_pointer_cast<Controllable>(_strip->pan_azimuth_control());
 		if (pan_controllable) {
+			boost::shared_ptr<AutomationControl>at = boost::dynamic_pointer_cast<AutomationControl> (pan_controllable);
 			pan_controllable->Changed.connect (pan_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_stereo_position"), _strip->pan_azimuth_control()), OSC::instance());
+			at->alist()->automation_state_changed.connect (pan_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_automation, this, X_("/select/pan_stereo_position"), _strip->pan_azimuth_control()), OSC::instance());
 			change_message (X_("/select/pan_stereo_position"), _strip->pan_azimuth_control());
+			send_automation (X_("/select/pan_stereo_position"), _strip->pan_azimuth_control());
 		}
 
 		boost::shared_ptr<Controllable> width_controllable = boost::dynamic_pointer_cast<Controllable>(_strip->pan_width_control());
 		if (width_controllable) {
+			boost::shared_ptr<AutomationControl>at = boost::dynamic_pointer_cast<AutomationControl> (width_controllable);
 			width_controllable->Changed.connect (pan_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_stereo_width"), _strip->pan_width_control()), OSC::instance());
+			at->alist()->automation_state_changed.connect (pan_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_automation, this, X_("/select/pan_stereo_width"), _strip->pan_width_control()), OSC::instance());
 			change_message (X_("/select/pan_stereo_width"), _strip->pan_width_control());
+			send_automation (X_("/select/pan_stereo_width"), _strip->pan_width_control());
 		}
 
 		// Rest of possible pan controls... Untested because I can't find a way to get them in the GUI :)
@@ -807,6 +817,42 @@ OSCSelectObserver::change_message (string path, boost::shared_ptr<Controllable> 
 	float val = controllable->get_value();
 
 	_osc.float_message (path, (float) controllable->internal_to_interface (val), addr);
+}
+
+void
+OSCSelectObserver::send_automation (string path, boost::shared_ptr<PBD::Controllable> control)
+{
+	boost::shared_ptr<AutomationControl>automate = boost::dynamic_pointer_cast<AutomationControl> (control);
+
+	AutoState as = automate->alist()->automation_state();
+	string auto_name;
+	float output = 0;
+	switch (as) {
+		case ARDOUR::Off:
+			output = 0;
+			auto_name = "Manual";
+			break;
+		case ARDOUR::Play:
+			output = 1;
+			auto_name = "Play";
+			break;
+		case ARDOUR::Write:
+			output = 2;
+			auto_name = "Write";
+			break;
+		case ARDOUR::Touch:
+			output = 3;
+			auto_name = "Touch";
+			break;
+		case ARDOUR::Latch:
+			output = 4;
+			auto_name = "Latch";
+			break;
+		default:
+			break;
+	}
+	_osc.float_message (string_compose (X_("%1/automation"), path), output, addr);
+	_osc.text_message (string_compose (X_("%1/automation_name"), path), auto_name, addr);
 }
 
 void

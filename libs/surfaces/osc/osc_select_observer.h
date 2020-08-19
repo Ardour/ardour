@@ -111,6 +111,7 @@ class OSCSelectObserver
 	void monitor_status (boost::shared_ptr<PBD::Controllable> controllable);
 	void gain_message ();
 	void gain_automation ();
+	void send_automation (std::string path, boost::shared_ptr<PBD::Controllable> control);
 	void trim_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);
 	// sends stuff
 	void send_init (void);
