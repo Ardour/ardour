@@ -26,7 +26,6 @@
 #include "pbd/basename.h"
 #include "pbd/file_archive.h"
 #include "pbd/file_utils.h"
-#include "pbd/i18n.h"
 
 #include "ardour/audioengine.h"
 #include "ardour/filename_extensions.h"
@@ -57,6 +56,8 @@
 #ifdef WAF_BUILD
 #include "gtk2ardour-version.h"
 #endif
+
+#include "pbd/i18n.h"
 
 using namespace ARDOUR;
 using namespace Gtk;

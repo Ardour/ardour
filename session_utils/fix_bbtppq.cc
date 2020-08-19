@@ -25,7 +25,6 @@
 #include <glibmm.h>
 
 #include "pbd/file_utils.h"
-#include "pbd/i18n.h"
 #include "pbd/stateful.h"
 
 #include "ardour/region_factory.h"
@@ -43,6 +42,8 @@
 #include "evoral/Sequence.h"
 
 #include "common.h"
+
+#include "pbd/i18n.h"
 
 using namespace std;
 using namespace ARDOUR;

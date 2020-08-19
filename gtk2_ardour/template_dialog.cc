@@ -40,7 +40,6 @@
 #include "pbd/error.h"
 #include "pbd/file_archive.h"
 #include "pbd/file_utils.h"
-#include "pbd/i18n.h"
 #include "pbd/xml++.h"
 
 #include "gtkmm2ext/gui_thread.h"
@@ -52,8 +51,9 @@
 #include "ardour/template_utils.h"
 
 #include "progress_reporter.h"
-
 #include "template_dialog.h"
+
+#include "pbd/i18n.h"
 
 using namespace std;
 using namespace Gtk;

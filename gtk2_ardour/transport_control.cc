@@ -16,14 +16,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "pbd/i18n.h"
-
 #include "ardour/location.h"
 #include "ardour/session.h"
 
 #include "actions.h"
 #include "ardour_ui.h"
 #include "transport_control.h"
+
+#include "pbd/i18n.h"
 
 using namespace Gtk;
 

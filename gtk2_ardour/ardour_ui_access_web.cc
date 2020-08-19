@@ -36,11 +36,12 @@
 #include "gtk2ardour-version.h"
 #endif
 
-#include "pbd/i18n.h"
 #include "pbd/openuri.h"
 
 #include "ardour_message.h"
 #include "ardour_ui.h"
+
+#include "pbd/i18n.h"
 
 using namespace ARDOUR;
 using namespace PBD;

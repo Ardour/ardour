@@ -22,7 +22,6 @@
 #include <iostream>
 
 #include "pbd/gstdio_compat.h"
-#include "pbd/i18n.h"
 #include "pbd/file_utils.h"
 
 #include "ptformat/ptformat.h"
@@ -32,6 +31,8 @@
 #include "gtkmm2ext/utils.h"
 
 #include "pt_import_selector.h"
+
+#include "pbd/i18n.h"
 
 using namespace Gtk;
 using namespace ARDOUR;

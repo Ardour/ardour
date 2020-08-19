@@ -33,7 +33,6 @@
 #include <cstdio>
 
 #include "pbd/error.h"
-#include "pbd/i18n.h"
 
 #include "ardour/session.h"
 #include "ardour/lv2_plugin.h"
@@ -61,6 +60,8 @@
 #ifdef GDK_WINDOWING_X11
 #include <gdk/gdkx.h>
 #endif
+
+#include "pbd/i18n.h"
 
 using namespace Gtk;
 using namespace PBD;
