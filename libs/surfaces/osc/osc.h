@@ -438,7 +438,6 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK(mark_out);
 	PATH_CALLBACK(toggle_click);
 	PATH_CALLBACK(midi_panic);
-	PATH_CALLBACK(osc_toggle_roll);
 	PATH_CALLBACK(stop_forget);
 	PATH_CALLBACK(set_punch_range);
 	PATH_CALLBACK(set_loop_range);
@@ -822,7 +821,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	void notify_vca_added (ARDOUR::VCAList &);
 
 	int cancel_all_solos ();
-	int osc_toggle_roll ();
+	int osc_toggle_roll (bool ret2strt);
 	bool periodic (void);
 	sigc::connection periodic_connection;
 	PBD::ScopedConnectionList session_connections;

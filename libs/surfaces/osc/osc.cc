@@ -494,8 +494,6 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, X_("/click/level"), "f", click_level);
 		REGISTER_CALLBACK (serv, X_("/midi_panic"), "", midi_panic);
 		REGISTER_CALLBACK (serv, X_("/midi_panic"), "f", midi_panic);
-		REGISTER_CALLBACK (serv, X_("/toggle_roll"), "", osc_toggle_roll);
-		REGISTER_CALLBACK (serv, X_("/toggle_roll"), "f", osc_toggle_roll);
 		REGISTER_CALLBACK (serv, X_("/stop_forget"), "", stop_forget);
 		REGISTER_CALLBACK (serv, X_("/stop_forget"), "f", stop_forget);
 		REGISTER_CALLBACK (serv, X_("/set_punch_range"), "", set_punch_range);
@@ -843,6 +841,17 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 	if (strstr (path, X_("/touch"))) {
 		ret = touch_detect (path, types, argv, argc, msg);
 
+	} else
+	if (strstr (path, X_("/toggle_roll"))) {
+		if (!argc) {
+			ret = osc_toggle_roll (false);
+		} else {
+			if ((types[0] == 'f' && argv[0]->f == 1.0) || (types[0] == 'i' && argv[0]->i == 1)) {
+				ret = osc_toggle_roll (true);
+			} else if ((types[0] == 'f' && argv[0]->f == 0.0) || (types[0] == 'i' && argv[0]->i == 0)) {
+				ret = osc_toggle_roll (false);
+			}
+		}
 	} else
 	if (strstr (path, X_("/spill"))) {
 		ret = spill (path, types, argv, argc, msg);
@@ -1451,9 +1460,29 @@ OSC::cancel_all_solos ()
 }
 
 int
-OSC::osc_toggle_roll ()
+OSC::osc_toggle_roll (bool ret2strt)
 {
-	toggle_roll (false);
+	if (!session) {
+		return 0;
+	}
+
+	if (session->is_auditioning()) {
+		session->cancel_audition ();
+		return 0;
+	}
+
+	bool rolling = transport_rolling();
+
+	if (rolling) {
+		session->request_stop (ret2strt, true);
+	} else {
+
+		if (session->get_play_loop() && Config->get_loop_is_mode()) {
+			session->request_locate (session->locations()->auto_loop_location()->start(), MustRoll);
+		} else {
+			session->request_transport_speed (1.0f);
+		}
+	}
 	return 0;
 }
 
