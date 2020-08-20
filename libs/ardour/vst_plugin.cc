@@ -661,7 +661,9 @@ VSTPlugin::automatable () const
 	set<Evoral::Parameter> ret;
 
 	for (uint32_t i = 0; i < parameter_count(); ++i) {
-		ret.insert (ret.end(), Evoral::Parameter(PluginAutomation, 0, i));
+		if (_plugin->dispatcher (_plugin, effCanBeAutomated, i, 0, NULL, 0)) {
+			ret.insert (ret.end(), Evoral::Parameter(PluginAutomation, 0, i));
+		}
 	}
 
 	return ret;

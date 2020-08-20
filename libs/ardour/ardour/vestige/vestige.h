@@ -106,6 +106,7 @@
 #define effEditIdle 19
 #define effEditTop 20
 #define effProcessEvents 25
+#define effCanBeAutomated 26
 // the next one from http://asseca.com/vst-24-specs/index.html
 #define effGetPlugCategory 35
 #define effGetEffectName 45
