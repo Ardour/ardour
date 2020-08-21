@@ -516,7 +516,7 @@ int main() { return 0; }''',
 
         compiler_flags.append ("-DARCH_X86")
 
-        if platform == 'linux' :
+        if platform == 'linux' and conf.env['build_target'] != 'armhf' and conf.env['build_target'] != 'aarch64':
 
             #
             # determine processor flags via /proc/cpuinfo
