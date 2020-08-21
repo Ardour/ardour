@@ -220,6 +220,8 @@ setup_hardware_optimization (bool try_optimization)
 #elif defined ARM_NEON_SUPPORT
 		/* Use NEON routines */
 		do {
+			info << "Using ARM NEON optimized routines" << endmsg;
+
 			compute_peak          = arm_neon_compute_peak;
 			find_peaks            = arm_neon_find_peaks;
 			apply_gain_to_buffer  = arm_neon_apply_gain_to_buffer;
