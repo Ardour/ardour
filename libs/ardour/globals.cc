@@ -217,7 +217,7 @@ setup_hardware_optimization (bool try_optimization)
 			generic_mix_functions = false;
 		}
 
-#elif defined(__arm__) && !defined(__APPLE__)
+#elif defined ARM_NEON_SUPPORT
 		/* Use NEON routines */
 		do {
 			compute_peak          = arm_neon_compute_peak;

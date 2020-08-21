@@ -474,6 +474,9 @@ int main() { return 0; }''',
         #
         compiler_flags.append ('-U__STRICT_ANSI__')
 
+    if conf.env['build_target'] == 'armhf' or conf.env['build_target'] == 'aarch64':
+        conf.define('ARM_NEON_SUPPORT', 1)
+
     if opt.use_libcpp or conf.env['build_host'] in [ 'el_capitan', 'sierra', 'high_sierra', 'mojave', 'catalina' ]:
        cxx_flags.append('--stdlib=libc++')
        linker_flags.append('--stdlib=libc++')

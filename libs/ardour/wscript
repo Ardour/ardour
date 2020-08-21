@@ -467,7 +467,6 @@ def build(bld):
     avx_sources = []
 
     if Options.options.fpu_optimization:
-        obj.source += ['arm_neon_functions.cc']
         if (bld.env['build_target'] == 'i386' or bld.env['build_target'] == 'i686'):
             obj.source += [ 'sse_functions_xmm.cc', 'sse_functions.s', ]
             avx_sources = [ 'sse_functions_avx_linux.cc' ]
@@ -482,6 +481,9 @@ def build(bld):
                         obj.source += [ 'sse_functions_xmm.cc' ]
                         obj.source += [ 'sse_functions_64bit_win.s',  'sse_avx_functions_64bit_win.s' ]
                         avx_sources = [ 'sse_functions_avx.cc' ]
+        elif bld.env['build_target'] == 'armhf' or bld.env['build_target'] == 'aarch64':
+            obj.source += ['arm_neon_functions.cc']
+            obj.defines += [ 'ARM_NEON_SUPPORT' ]
 
         if avx_sources:
             # as long as we want to use AVX intrinsics in this file,

@@ -70,8 +70,8 @@ LIBARDOUR_API void  veclib_mix_buffers_no_gain       (ARDOUR::Sample * dst, cons
 
 #endif
 
+#if defined ARM_NEON_SUPPORT
 /* Optimized NEON functions */
-#if defined(__arm__) && !defined(__APPLE__)
 extern "C" {
 	LIBARDOUR_API float arm_neon_compute_peak          (const float * buf, uint32_t nsamples, float current);
 	LIBARDOUR_API void  arm_neon_apply_gain_to_buffer  (float * buf, uint32_t nframes, float gain);
