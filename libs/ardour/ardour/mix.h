@@ -35,13 +35,13 @@ extern "C" {
 
 extern "C" {
 /* AVX functions */
-	LIBARDOUR_API float x86_sse_avx_compute_peak         (const float * buf, uint32_t nsamples, float current);
-	LIBARDOUR_API void  x86_sse_avx_apply_gain_to_buffer (float * buf, uint32_t nframes, float gain);
-	LIBARDOUR_API void  x86_sse_avx_mix_buffers_with_gain(float * dst, const float * src, uint32_t nframes, float gain);
-	LIBARDOUR_API void  x86_sse_avx_mix_buffers_no_gain  (float * dst, const float * src, uint32_t nframes);
-	LIBARDOUR_API void  x86_sse_avx_copy_vector          (float * dst, const float * src, uint32_t nframes);
+	LIBARDOUR_API float x86_sse_avx_compute_peak          (const float * buf, uint32_t nsamples, float current);
+	LIBARDOUR_API void  x86_sse_avx_apply_gain_to_buffer  (float * buf, uint32_t nframes, float gain);
+	LIBARDOUR_API void  x86_sse_avx_mix_buffers_with_gain (float * dst, const float * src, uint32_t nframes, float gain);
+	LIBARDOUR_API void  x86_sse_avx_mix_buffers_no_gain   (float * dst, const float * src, uint32_t nframes);
+	LIBARDOUR_API void  x86_sse_avx_copy_vector           (float * dst, const float * src, uint32_t nframes);
 #ifndef PLATFORM_WINDOWS
-	LIBARDOUR_API void  x86_sse_avx_find_peaks           (const float * buf, uint32_t nsamples, float *min, float *max);
+	LIBARDOUR_API void  x86_sse_avx_find_peaks            (const float * buf, uint32_t nsamples, float *min, float *max);
 #endif
 }
 
@@ -63,11 +63,23 @@ LIBARDOUR_API void  debug_copy_vector                (ARDOUR::Sample * dst, cons
 #if defined (__APPLE__)
 
 LIBARDOUR_API float veclib_compute_peak              (const ARDOUR::Sample * buf, ARDOUR::pframes_t nsamples, float current);
-LIBARDOUR_API void veclib_find_peaks                 (const ARDOUR::Sample * buf, ARDOUR::pframes_t nsamples, float *min, float *max);
+LIBARDOUR_API void  veclib_find_peaks                (const ARDOUR::Sample * buf, ARDOUR::pframes_t nsamples, float *min, float *max);
 LIBARDOUR_API void  veclib_apply_gain_to_buffer      (ARDOUR::Sample * buf, ARDOUR::pframes_t nframes, float gain);
 LIBARDOUR_API void  veclib_mix_buffers_with_gain     (ARDOUR::Sample * dst, const ARDOUR::Sample * src, ARDOUR::pframes_t nframes, float gain);
 LIBARDOUR_API void  veclib_mix_buffers_no_gain       (ARDOUR::Sample * dst, const ARDOUR::Sample * src, ARDOUR::pframes_t nframes);
 
+#endif
+
+/* Optimized NEON functions */
+#if defined(__arm__) && !defined(__APPLE__)
+extern "C" {
+	LIBARDOUR_API float arm_neon_compute_peak          (const float * buf, uint32_t nsamples, float current);
+	LIBARDOUR_API void  arm_neon_apply_gain_to_buffer  (float * buf, uint32_t nframes, float gain);
+	LIBARDOUR_API void  arm_neon_copy_vector           (float * dst, const float * src, uint32_t nframes);
+	LIBARDOUR_API void  arm_neon_find_peaks            (const float *src, uint32_t nframes, float *minf, float *maxf);
+	LIBARDOUR_API void  arm_neon_mix_buffers_no_gain   (float * dst, const float * src, uint32_t nframes);
+	LIBARDOUR_API void  arm_neon_mix_buffers_with_gain (float * dst, const float * src, uint32_t nframes, float gain);
+}
 #endif
 
 /* non-optimized functions */

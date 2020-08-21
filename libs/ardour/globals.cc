@@ -217,6 +217,19 @@ setup_hardware_optimization (bool try_optimization)
 			generic_mix_functions = false;
 		}
 
+#elif defined(__arm__) && !defined(__APPLE__)
+		/* Use NEON routines */
+		do {
+			compute_peak          = arm_neon_compute_peak;
+			find_peaks            = arm_neon_find_peaks;
+			apply_gain_to_buffer  = arm_neon_apply_gain_to_buffer;
+			mix_buffers_with_gain = arm_neon_mix_buffers_with_gain;
+			mix_buffers_no_gain   = arm_neon_mix_buffers_no_gain;
+			copy_vector           = arm_neon_copy_vector;
+
+			generic_mix_functions = false;
+		} while (0);
+
 #elif defined(__APPLE__) && defined(BUILD_VECLIB_OPTIMIZATIONS)
 
 		if (floor (kCFCoreFoundationVersionNumber) > kCFCoreFoundationVersionNumber10_4) { /* at least Tiger */
