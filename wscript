@@ -474,8 +474,9 @@ int main() { return 0; }''',
         #
         compiler_flags.append ('-U__STRICT_ANSI__')
 
-    if conf.env['build_target'] == 'armhf' or conf.env['build_target'] == 'aarch64':
-        conf.define('ARM_NEON_SUPPORT', 1)
+    if opt.fpu_optimization:
+        if conf.env['build_target'] == 'armhf' or conf.env['build_target'] == 'aarch64':
+            conf.define('ARM_NEON_SUPPORT', 1)
 
     if opt.use_libcpp or conf.env['build_host'] in [ 'el_capitan', 'sierra', 'high_sierra', 'mojave', 'catalina' ]:
        cxx_flags.append('--stdlib=libc++')
@@ -1383,6 +1384,7 @@ const char* const ardour_config_info = "\\n\\
     config_text.write("\\n\\\n")
     write_config_text('ALSA DBus Reservation', conf.is_defined('HAVE_DBUS'))
     write_config_text('Architecture flags',    opts.arch)
+    write_config_text('ARM NEON support',      conf.is_defined('ARM_NEON_SUPPORT'))
     write_config_text('Aubio',                 conf.is_defined('HAVE_AUBIO'))
     write_config_text('AudioUnits',            conf.is_defined('AUDIOUNIT_SUPPORT'))
     write_config_text('Build target',          conf.env['build_target'])
