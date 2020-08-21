@@ -18,7 +18,7 @@
 
 #include "ardour/mix.h"
 
-#if defined(__arm__) && defined(__ARM_NEON)
+#ifdef ARM_NEON_SUPPORT
 
 #include <arm_acle.h>
 #include <arm_neon.h>
@@ -515,4 +515,4 @@ arm_neon_copy_vector(
 	}
 }
 
-#endif /* defined (__arm__) && defined (__ARM_NEON) */
+#endif
