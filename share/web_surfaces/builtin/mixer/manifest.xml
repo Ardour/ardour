@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <WebSurface>
-  <Name value="Mixer (Work In Progress)"/>
+  <Name value="Mixer"/>
   <Description value="Provides basic mixer controls like gain, pan, mute and effects."/>
-  <Version value="0.2.0"/>
+  <Version value="1.0.0"/>
 </WebSurface>

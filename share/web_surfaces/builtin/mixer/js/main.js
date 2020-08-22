@@ -17,8 +17,9 @@
  */
 
 import ArdourClient from '/shared/ardour.js';
-import { createRootContainer, Container, Dialog, Label, Button, DiscreteKnob,
-            LinearKnob, PanKnob, StripGainFader, StripMeter, Toggle } from './tkwidget.js';
+import { createRootContainer, Container, Dialog, Label, Button, Toggle,
+            DiscreteKnob, LinearKnob, LogKnob, PanKnob,
+            StripGainFader, StripMeter  } from './tkwidget.js';
 
 (() => {
     
@@ -33,10 +34,6 @@ import { createRootContainer, Container, Dialog, Label, Button, DiscreteKnob,
             if (root.children.length > 0) {
                 root.removeChild(root.children[0]);
             }
-
-            const top = new Container();
-            top.id = 'top';
-            top.appendTo(root);
 
             const mixer = new Container();
             mixer.id = 'mixer';
@@ -57,83 +54,6 @@ import { createRootContainer, Container, Dialog, Label, Button, DiscreteKnob,
         });
 
         ardour.connect();
-    }
-
-    function createStrip (strip, container) {
-        const inserts = new Button();
-        inserts.text = 'ƒ';
-        inserts.appendTo(container);
-        inserts.classList.add('strip-inserts');
-        if (strip.isVca || (strip.plugins.length == 0)) {
-            inserts.classList.add('disabled');
-        } else {
-            inserts.callback = () => openInserts (strip.plugins);
-        }
-
-        const pan = new PanKnob();
-        pan.appendTo(container);
-
-        if (!strip.isVca) {
-            pan.bindTo(strip, 'pan');
-        }
-
-        const mute = new Toggle();
-        mute.text = 'Mute';
-        mute.appendTo(container);
-        mute.bindTo(strip, 'mute');
-        mute.classList.add('strip-mute');
-
-        const meterFader = new Container();
-        meterFader.appendTo(container);
-        meterFader.classList.add('strip-meter-fader');
-
-        const gain = new StripGainFader();
-        gain.appendTo(meterFader);
-        gain.bindTo(strip, 'gain');
-
-        const meter = new StripMeter();
-        meter.appendTo(meterFader);
-        meter.bindTo(strip, 'meter');
-
-        const label = new Label();
-        label.text = strip.name;
-        label.classList.add('strip-label');
-        label.appendTo(container);
-
-        if (strip.isVca) {
-            // hide inserts and pan keeping layout
-            pan.element.style.visibility = 'hidden';
-            inserts.element.style.visibility = 'hidden';
-        }
-    }
-
-    function createStripPlugin (plugin, container) {
-        const enable = new Toggle();
-        enable.appendTo(container);
-        enable.bindTo(plugin, 'enable');
-
-        for (const param of plugin.parameters) {
-            createStripPluginParam(param, container);
-        }
-    }
-
-    function createStripPluginParam (param, container) {
-        let widget;
-
-        if (param.valueType.isBoolean) {
-            widget = new Toggle();
-        } else if (param.valueType.isInteger) {
-            widget = new DiscreteKnob(param.min, param.max);
-        } else if (param.valueType.isDouble) {
-            if (param.isLog) {
-                widget = new LogKnob(param.min, param.max);
-            } else {
-                widget = new LinearKnob(param.min, param.max);
-            }
-        }
-
-        widget.appendTo(container);
-        widget.bindTo(param, 'value');
     }
 
     function setupFullscreenButton () {
@@ -162,19 +82,141 @@ import { createRootContainer, Container, Dialog, Label, Button, DiscreteKnob,
         }
     }
 
-    function openInserts (plugins) {
-        const dialog = new Dialog();
-        dialog.classList.add('inserts-view');
-        dialog.show();
+    function createStrip (strip, container) {
+        const plugins = new Button();
+        plugins.text = 'ƒ';
+        plugins.classList.add('strip-plugins');
+        plugins.appendTo(container);
+
+        if (strip.isVca || (strip.plugins.length == 0)) {
+            plugins.classList.add('disabled');
+        } else {
+            plugins.callback = () => openPlugins (strip);
+        }
+
+        const pan = new PanKnob();
+        pan.appendTo(container);
+
+        if (!strip.isVca) {
+            pan.bindTo(strip, 'pan');
+        }
+
+        const mute = new Toggle();
+        mute.text = 'Mute';
+        mute.classList.add('strip-mute');
+        mute.appendTo(container);
+        mute.bindTo(strip, 'mute');
+
+        const meterFader = new Container();
+        meterFader.classList.add('strip-meter-fader');
+        meterFader.appendTo(container);
+
+        const gain = new StripGainFader();
+        gain.appendTo(meterFader);
+        gain.bindTo(strip, 'gain');
+
+        const meter = new StripMeter();
+        meter.appendTo(meterFader);
+        meter.bindTo(strip, 'meter');
 
         const label = new Label();
-        label.text = `WIP: This strip has ${plugins.length} plugins...`;
-        label.appendTo(dialog);
+        label.text = strip.name;
+        label.classList.add('strip-label');
+        label.appendTo(container);
 
-        // TO DO
-        /*for (const plugin of plugins) {
-            createStripPlugin(plugin, container);
-        }*/
+        if (strip.isVca) {
+            // hide plugins and pan keeping layout
+            pan.element.style.visibility = 'hidden';
+            plugins.element.style.visibility = 'hidden';
+        }
+    }
+
+    function openPlugins (strip) {
+        const dialog = new Dialog();
+        dialog.id = 'plugins-dialog';
+
+        const close = new Button();
+        close.id = 'plugins-close';
+        close.icon = 'close';
+        dialog.closeButton = close;
+
+        const plugins = new Container();
+        plugins.id = 'plugins';
+        plugins.appendTo(dialog);
+
+        const label = new Label();
+        label.id = 'plugins-title';
+        label.text = strip.name;
+        label.appendTo(plugins);
+
+        for (const plugin of strip.plugins) {
+            createStripPlugin(plugin, plugins);
+        }
+
+        dialog.onClose = () => {
+            // disconnect all parameters
+            for (const plugin of strip.plugins) {
+                for (const param of plugin.parameters) {
+                    param.removeObserver();
+                }
+            }
+        };
+
+        dialog.show();
+    }
+
+    function createStripPlugin (plugin, dialog) {
+        const enableAndName = new Container();
+        enableAndName.appendTo(dialog);
+
+        const enable = new Toggle();
+        enable.setIcons('unchecked', 'checked');
+        enable.appendTo(enableAndName);
+        enable.bindTo(plugin, 'enable');
+
+        const label = new Label();
+        label.text = plugin.name;
+        label.appendTo(enableAndName);
+
+        const container = new Container();
+        container.classList.add('plugin-parameters');
+        container.appendTo(dialog);
+
+        for (const param of plugin.parameters) {
+            createStripPluginParam(param, container);
+        }
+    }
+
+    function createStripPluginParam (param, container) {
+        let widget;
+
+        if (param.valueType.isBoolean) {
+            widget = new Toggle();
+            widget.setIcons('unchecked', 'checked');
+        } else if (param.valueType.isInteger) {
+            widget = new DiscreteKnob(param.min, param.max);
+        } else if (param.valueType.isDouble) {
+            if (param.isLog) {
+                widget = new LogKnob(param.min, param.max);
+            } else {
+                widget = new LinearKnob(param.min, param.max);
+            }
+        }
+
+        const labeledWidget = new Container();
+        labeledWidget.classList.add('plugin-parameter');
+        labeledWidget.appendTo(container);
+
+        const widgetContainer = new Container();
+        widgetContainer.classList.add('plugin-parameter-widget');
+        widgetContainer.appendTo(labeledWidget);
+
+        widget.appendTo(widgetContainer);
+        widget.bindTo(param, 'value');
+
+        const label = new Label();
+        label.text = param.name;
+        label.appendTo(labeledWidget);
     }
 
     main();

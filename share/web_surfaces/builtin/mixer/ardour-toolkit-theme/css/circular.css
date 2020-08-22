@@ -26,7 +26,7 @@
     /*opacity: 0.2;*/
 }
 .toolkit-circular.toolkit-warn > .toolkit-base {
-    opacity: 0.5;
+    /*opacity: 0.5;*/
 }
 
 .toolkit-circular > .toolkit-value {
@@ -34,7 +34,7 @@
 }
 .toolkit-circular.toolkit-warn > .toolkit-value {
     opacity: 1;
-    fill: white;
+    /*fill: white;*/
 }
 
 .toolkit-circular > .toolkit-hand {

@@ -45,17 +45,14 @@ div {
     background-image: url('expand.svg');
 }
 
-#top {
-    height: 10vh;
-}
-
 #mixer {
     display: flex;
     flex-direction: row;
     height: 100%;
     width: 100%;
-    padding-bottom: 10vh;
+    padding: 10vh 0;
     overflow-x: auto;
+    overflow-y: hidden;
     justify-content: space-between;
 }
 
@@ -97,24 +94,76 @@ div {
     background-color: inherit;
 }
 
-.strip-inserts {
+.strip-plugins {
     color: rgb(248,248,242);
     border: 1px solid rgb(36,36,36);
     width: 50%;
 }
 
-.strip-inserts.disabled {
+.strip-plugins.disabled {
     color: rgb(36,36,36);
 }
 
-.inserts-view {
-    width: 100%;
-    max-width: 666px;
-    height: 100%;
-    max-height: 500px;
-    background: rgb(62,61,61);
+#plugins-dialog {
+    width: 60%;
+    min-width: 666px;
+    height: 80%;
+    min-height: 500px;
+    background: rgb(52,51,51);
     border: none;
     /* absolute positioning cannot be disabled for tk dialogs */
     left: inherit !important;
     top: inherit !important;
+}
+
+#plugins {
+    width: 100%;
+    height: 100%;
+    padding: 1em;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+#plugins-title {
+    width: 100%;
+    text-align: center;
+    font-size: 1.25em;
+    margin-bottom: 1em;
+}
+
+#plugins-close {
+    position: fixed;
+    top: 0;
+    right: 0;
+    padding: 5px;
+    opacity: 0.5;
+    z-index: 10;
+}
+
+.plugin-parameters {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 1em;
+}
+
+.plugin-parameters:not(:last-child) {
+    border-bottom: solid 1px rgba(255,255,255,0.1);
+}
+
+.plugin-parameter {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 1em;
+}
+
+.plugin-parameter-widget {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    justify-content: center;
 }

@@ -135,6 +135,11 @@ export class Dialog extends BaseDialog {
         return this.tk.element;
     }
 
+    set closeButton (button) {
+        button.callback = () => this.close();
+        this.appendChild(button);
+    }
+
     appendChild (child) {
         super.appendChild(child);
         this.tk.append_child(child.tk);
@@ -146,7 +151,12 @@ export class Dialog extends BaseDialog {
         // handler or setTimeout() is used here
         setTimeout(() => {
             this.tk.set('display_state', 'show');
+            this.tk.add_event('close', (ev) => this.onClose(ev));
         }, 0);
+    }
+
+    close () {
+        this.tk.close();
     }
 
 }
@@ -160,6 +170,12 @@ export class Button extends Control {
     
     set text (text) {
         this.tk.set('label', text);
+    }
+
+    set icon (icon) {
+        // see toolkit/styles/Toolkit.html
+        this.tk.set('icon', icon);
+        this.element.style.border = 'none';
     }
 
 }
@@ -183,6 +199,12 @@ export class Toggle extends Control {
         this.tk.set('state', val);
     }
      
+    setIcons (inactive, active) {
+        this.tk.set('icon', inactive);
+        this.tk.set('icon_active', active);
+        this.element.style.border = 'none';
+    }
+
 }
 
 export class StripGainFader extends RangeControl {
@@ -220,7 +242,11 @@ export class LinearKnob extends Knob {
         super({
             scale: 'linear',
             min: min,
-            max: max
+            max: max,
+            hand: {
+                width: 5,
+                length: 15
+            }
         });
     }
 
@@ -230,9 +256,13 @@ export class LogKnob extends Knob {
 
     constructor (min, max) {
         super({
-            scale: 'log2',
+            scale: 'frequency',
             min: min,
-            max: max
+            max: max,
+            hand: {
+                width: 5,
+                length: 15
+            }
         });
     }
 
@@ -245,7 +275,11 @@ export class DiscreteKnob extends Knob {
             scale: 'linear',
             min: min,
             max: max,
-            snap: step || 1
+            snap: step || 1,
+            hand: {
+                width: 5,
+                length: 15
+            }
         });
     }
 

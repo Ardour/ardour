@@ -62,7 +62,19 @@ export class BaseDialog extends BaseContainer {
         this.children = [];
     }
 
+    set closeButton (button) {
+        // empty
+    }
+
     show () {
+        // empty
+    }
+
+    close () {
+        // empty
+    }
+
+    onClose () {
         // empty
     }
 
