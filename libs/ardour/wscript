@@ -481,9 +481,24 @@ def build(bld):
                         obj.source += [ 'sse_functions_xmm.cc' ]
                         obj.source += [ 'sse_functions_64bit_win.s',  'sse_avx_functions_64bit_win.s' ]
                         avx_sources = [ 'sse_functions_avx.cc' ]
-        elif bld.env['build_target'] == 'armhf' or bld.env['build_target'] == 'aarch64':
+        elif bld.env['build_target'] == 'aarch64':
             obj.source += ['arm_neon_functions.cc']
             obj.defines += [ 'ARM_NEON_SUPPORT' ]
+
+        elif bld.env['build_target'] == 'armhf':
+            # 32bit ARM needs -mfpu=neon
+            obj.defines += [ 'ARM_NEON_SUPPORT' ]
+            arm_neon_cxxflags = list(bld.env['CXXFLAGS'])
+            arm_neon_cxxflags.append (bld.env['compiler_flags_dict']['neon'])
+            bld(features = 'cxx cxxstlib asm',
+                source   = ['arm_neon_functions.cc'],
+                cxxflags = arm_neon_cxxflags,
+                includes = [ '.' ],
+                definfes = obj.defines,
+                use = [ 'libpbd', 'libevoral'],
+                target   = 'arm_neon_functions')
+
+            obj.use += ['arm_neon_functions' ]
 
         if avx_sources:
             # as long as we want to use AVX intrinsics in this file,

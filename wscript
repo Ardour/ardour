@@ -86,6 +86,8 @@ compiler_flags_dictionaries= {
         'attasm': '-masm=att',
         # Flags to make AVX instructions/intrinsics available
         'avx': '-mavx',
+        # Flags to make ARM/NEON instructions/intrinsics available
+        'neon': '-mfpu=neon',
         # Flags to generate position independent code, when needed to build a shared object
         'pic': '-fPIC',
         # Flags required to compile C code with anonymous unions (only part of C11)
@@ -120,6 +122,7 @@ compiler_flags_dictionaries= {
         'c99': '/TP',
         'attasm': '',
         'avx': '',
+        'neon': '',
         'pic': '',
         'c-anonymous-union': '',
     },
