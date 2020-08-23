@@ -1107,6 +1107,7 @@ def configure(conf):
     autowaf.check_pkg(conf, 'vamp-sdk', uselib_store='VAMPSDK', atleast_version='2.1', mandatory=True)
     autowaf.check_pkg(conf, 'vamp-hostsdk', uselib_store='VAMPHOSTSDK', atleast_version='2.1', mandatory=True)
     autowaf.check_pkg(conf, 'rubberband', uselib_store='RUBBERBAND', mandatory=True)
+    autowaf.check_pkg(conf, 'soundtouch', uselib_store='SOUNDTOUCH', mandatory=True)
 
     have_rf64_riff_support = conf.check_cc(fragment = '''
 #include <sndfile.h>

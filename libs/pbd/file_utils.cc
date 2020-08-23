@@ -28,6 +28,7 @@
 
 #ifdef COMPILER_MINGW
 #include <io.h> // For W_OK
+#include <windows.h>
 #endif
 
 #include <glibmm/fileutils.h>

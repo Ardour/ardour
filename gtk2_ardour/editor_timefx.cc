@@ -193,7 +193,7 @@ Editor::time_fx (RegionList& regions, float val, bool pitching)
 		current_timefx->hide ();
 		return 0;
 	}
-
+	
 #ifdef USE_RUBBERBAND
 	/* parse options */
 
@@ -218,7 +218,7 @@ Editor::time_fx (RegionList& regions, float val, bool pitching)
 
 	txt = current_timefx->stretch_opts_selector.get_active_text ();
 
-	for (int i = 0; i <= 6; i++) {
+	for (int i = 0; i <= 7; i++) {
 		if (txt == rb_opt_strings[i]) {
 			rb_current_opt = i;
 			break;
@@ -229,23 +229,23 @@ Editor::time_fx (RegionList& regions, float val, bool pitching)
 
 	if (pitching /*&& rb_current_opt == 6*/) {
 		/* The timefx dialog does not show the "stretch_opts_selector"
-		 * when pitch-shifting.  So the most recently used option from
-		 * "Time Stretch" would be used (if any). That may even be
-		 * "resample without preserving pitch", which would be invalid.
-		 *
-		 * TODO: also show stretch_opts_selector when pitching (except the option
-		 * to not preserve pitch) and use separate  rb_current_opt when pitching.
-		 *
-		 * Actually overhaul this the dialog and processing opts below and use rubberband's
-		 * "Crispness" levels:
-		 *   -c 0   equivalent to --no-transients --no-lamination --window-long
-		 *   -c 1   equivalent to --detector-soft --no-lamination --window-long (for piano)
-		 *   -c 2   equivalent to --no-transients --no-lamination
-		 *   -c 3   equivalent to --no-transients
-		 *   -c 4   equivalent to --bl-transients
-		 *   -c 5   default processing options
-		 *   -c 6   equivalent to --no-lamination --window-short (may be good for drums)
-		 */
+		* when pitch-shifting.  So the most recently used option from
+		* "Time Stretch" would be used (if any). That may even be
+		* "resample without preserving pitch", which would be invalid.
+		*
+		* TODO: also show stretch_opts_selector when pitching (except the option
+		* to not preserve pitch) and use separate  rb_current_opt when pitching.
+		*
+		* Actually overhaul this the dialog and processing opts below and use rubberband's
+		* "Crispness" levels:
+		*   -c 0   equivalent to --no-transients --no-lamination --window-long
+		*   -c 1   equivalent to --detector-soft --no-lamination --window-long (for piano)
+		*   -c 2   equivalent to --no-transients --no-lamination
+		*   -c 3   equivalent to --no-transients
+		*   -c 4   equivalent to --bl-transients
+		*   -c 5   default processing options
+		*   -c 6   equivalent to --no-lamination --window-short (may be good for drums)
+		*/
 		rb_mode = 4;
 	}
 
@@ -272,6 +272,9 @@ Editor::time_fx (RegionList& regions, float val, bool pitching)
 			current_timefx->request.pitch_fraction = 1.0 / current_timefx->request.time_fraction;
 			shortwin = true;
 			// peaklock = false;
+			break;
+		case 7:
+			current_timefx->request.use_soundtouch = true;
 			break;
 		default:
 			/* default/4 */
@@ -378,11 +381,11 @@ Editor::do_timefx ()
 		if (current_timefx->pitching) {
 			fx = new Pitch (*_session, current_timefx->request);
 		} else {
-#ifdef USE_RUBBERBAND
-			fx = new RBStretch (*_session, current_timefx->request);
-#else
-			fx = new STStretch (*_session, current_timefx->request);
-#endif
+			if (current_timefx->request.use_soundtouch == false) {
+				fx = new RBStretch (*_session, current_timefx->request);
+			} else {
+				fx = new STStretch (*_session, current_timefx->request);
+			}
 		}
 
 		current_timefx->descend (1.0 / N);

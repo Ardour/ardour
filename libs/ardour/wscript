@@ -199,6 +199,7 @@ libardour_sources = [
         'route_group.cc',
         'route_group_member.cc',
         'rb_effect.cc',
+        'st_stretch.cc',
         'rt_tasklist.cc',
         'scene_change.cc',
         'search_paths.cc',
@@ -402,7 +403,7 @@ def build(bld):
     obj.target       = 'ardour'
     obj.uselib       = ['GLIBMM','GTHREAD','AUBIO','SIGCPP','XML','UUID', 'LO',
                         'SNDFILE','SAMPLERATE','LRDF','AUDIOUNITS', 'GIOMM',
-                        'OSX','BOOST','CURL','TAGLIB','VAMPSDK','VAMPHOSTSDK','RUBBERBAND']
+                        'OSX','BOOST','CURL','TAGLIB','VAMPSDK','VAMPHOSTSDK','RUBBERBAND', 'SOUNDTOUCH']
     obj.use          = ['libpbd','libmidipp','libevoral',
                         'libaudiographer',
                         'libtemporal',
