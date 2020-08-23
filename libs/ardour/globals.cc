@@ -219,7 +219,7 @@ setup_hardware_optimization (bool try_optimization)
 
 #elif defined ARM_NEON_SUPPORT
 		/* Use NEON routines */
-		do {
+		if (fpu->has_neon ()) {
 			info << "Using ARM NEON optimized routines" << endmsg;
 
 			compute_peak          = arm_neon_compute_peak;
@@ -230,7 +230,7 @@ setup_hardware_optimization (bool try_optimization)
 			copy_vector           = arm_neon_copy_vector;
 
 			generic_mix_functions = false;
-		} while (0);
+		}
 
 #elif defined(__APPLE__) && defined(BUILD_VECLIB_OPTIMIZATIONS)
 
