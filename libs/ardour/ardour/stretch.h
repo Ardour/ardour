@@ -27,7 +27,6 @@
 #include "ardour/filter.h"
 #include "ardour/timefx_request.h"
 
-#ifdef USE_RUBBERBAND
 
 #include "ardour/rb_effect.h"
 
@@ -41,8 +40,7 @@ class LIBARDOUR_API RBStretch : public RBEffect {
 
 } /* namespace */
 
-#else
-
+#ifdef HAVE_SOUNDTOUCH
 #include <soundtouch/SoundTouch.h>
 
 namespace ARDOUR {
@@ -52,16 +50,14 @@ class LIBARDOUR_API STStretch : public Filter {
 	STStretch (ARDOUR::Session&, TimeFXRequest&);
 	~STStretch ();
 
-	int run (boost::shared_ptr<ARDOUR::Region>);
+	int run (boost::shared_ptr<ARDOUR::Region>, Progress* progress = 0);
 
   private:
 	TimeFXRequest& tsr;
-
-	soundtouch::SoundTouch st;
 };
 
 } /* namespace */
-
 #endif
+
 
 #endif /* __ardour_stretch_h__ */
