@@ -31,6 +31,12 @@
 #include <intrin.h>
 #endif
 
+#ifdef ARM_NEON_SUPPORT
+/* Needed for ARM NEON detection */
+#include <sys/auxv.h>
+#include <asm/hwcap.h>
+#endif
+
 #include "pbd/compose.h"
 #include "pbd/fpu.h"
 #include "pbd/error.h"
@@ -154,6 +160,13 @@ FPU::FPU ()
 		_flags = Flags (atoi (getenv("ARDOUR_FPU_FLAGS")));
 		return;
 	}
+
+
+#ifdef ARM_NEON_SUPPORT
+	if (getauxval(AT_HWCAP) & HWCAP_NEON) {
+		_flags = Flags(_flags & HasNEON);
+	}
+#endif
 
 #if !( (defined __x86_64__) || (defined __i386__) || (defined _M_X64) || (defined _M_IX86) ) // !ARCH_X86
 	/* Non-Intel architecture, nothing to do here */

@@ -31,7 +31,10 @@ class LIBPBD_API FPU {
 		HasDenormalsAreZero = 0x2,
 		HasSSE = 0x4,
 		HasSSE2 = 0x8,
-		HasAVX = 0x10
+		HasAVX = 0x10,
+#ifdef ARM_NEON_SUPPORT
+		HasNEON = 0x20,
+#endif
 	};
 
   public:
@@ -45,6 +48,12 @@ class LIBPBD_API FPU {
 	bool has_sse () const { return _flags & HasSSE; }
 	bool has_sse2 () const { return _flags & HasSSE2; }
 	bool has_avx () const { return _flags & HasAVX; }
+
+#ifdef ARM_NEON_SUPPORT
+	bool has_neon () const { return _flags & HasNEON; }
+#else
+	bool has_neon () const { return false; }
+#endif
 
   private:
 	Flags _flags;
