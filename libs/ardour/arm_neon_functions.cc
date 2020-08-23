@@ -18,8 +18,6 @@
 
 #include "ardour/mix.h"
 
-#ifdef ARM_NEON_SUPPORT
-
 #include <arm_acle.h>
 #include <arm_neon.h>
 
@@ -514,5 +512,3 @@ arm_neon_copy_vector(
 		--nframes;
 	}
 }
-
-#endif
