@@ -563,10 +563,16 @@ About::About ()
 	const std::string cpu_arch = _("PowerPC 64-bit");
 #elif defined __ppc__
 	const std::string cpu_arch = _("PowerPC 32-bit");
+#elif defined  __aarch64__
+	const std::string cpu_arch = _("ARM 64-bit (aarch64)");
+#elif defined  __arm__ && defined __ARM_NEON
+	const std::string cpu_arch = _("ARM 32-bit (armhf)");
+#elif defined  __arm__
+	const std::string cpu_arch = _("ARM 32-bit");
 #elif defined  __LP64__
 	const std::string cpu_arch = _("64-bit");
 #else
-	const std::string cpu_arch = _("32-bit"); // ARM, ALPHA,..
+	const std::string cpu_arch = _("32-bit");
 #endif
 	std::string codename = CODENAME;
 	if (ARDOUR::Profile->get_mixbus()) {
