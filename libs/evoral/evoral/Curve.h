@@ -22,6 +22,8 @@
 #include <inttypes.h>
 #include <boost/utility.hpp>
 
+#include "temporal/timeline.h"
+
 #include "evoral/visibility.h"
 
 namespace Evoral {
@@ -33,17 +35,17 @@ class LIBEVORAL_API Curve : public boost::noncopyable
 public:
 	Curve (const ControlList& cl);
 
-	bool rt_safe_get_vector (double x0, double x1, float *arg, int32_t veclen) const;
-	void get_vector (double x0, double x1, float *arg, int32_t veclen) const;
+	bool rt_safe_get_vector (Temporal::timepos_t const & x0, Temporal::timepos_t const & x1, float *arg, int32_t veclen) const;
+	void get_vector (Temporal::timepos_t const & x0, Temporal::timepos_t const & x1, float *arg, int32_t veclen) const;
 
 	void solve () const;
 
 	void mark_dirty() const { _dirty = true; }
 
 private:
-	double multipoint_eval (double x) const;
+	double multipoint_eval (Temporal::timepos_t const & x) const;
 
-	void _get_vector (double x0, double x1, float *arg, int32_t veclen) const;
+	void _get_vector (Temporal::timepos_t const & x0, Temporal::timepos_t const & x1, float *arg, int32_t veclen) const;
 
 	mutable bool       _dirty;
 	const ControlList& _list;

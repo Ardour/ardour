@@ -58,7 +58,7 @@ using namespace PBD;
     XXX: This is a hack.  The time should probably be expressed in
     seconds rather than beats, and should be configurable etc. etc.
 */
-static double const time_between_interpolated_controller_outputs = 1.0 / 256;
+static Temporal::Beats const time_between_interpolated_controller_outputs = Temporal::Beats::ticks (256);
 
 namespace Evoral {
 
@@ -78,11 +78,11 @@ Sequence<Time>::const_iterator::const_iterator()
 
 /** @param force_discrete true to force ControlLists to use discrete evaluation, otherwise false to get them to use their configured mode */
 template<typename Time>
-Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>&              seq,
-                                               Time                               t,
-                                               bool                               force_discrete,
-                                               const std::set<Evoral::Parameter>& filtered,
-                                               const std::set<WeakNotePtr>*       active_notes)
+Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>&               seq,
+                                               Time                                t,
+                                               bool                                force_discrete,
+                                               const std::set<Evoral::Parameter>&  filtered,
+                                               std::set<WeakNotePtr> const *                 active_notes)
 	: _seq(&seq)
 	, _active_patch_change_message (0)
 	, _type(NIL)
@@ -103,8 +103,7 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>&            
 
 	// Add currently active notes, if given
 	if (active_notes) {
-		for (typename std::set<WeakNotePtr>::const_iterator i = active_notes->begin();
-		     i != active_notes->end(); ++i) {
+		for (typename std::set<WeakNotePtr>::const_iterator i = active_notes->begin(); i != active_notes->end(); ++i) {
 			NotePtr note = i->lock();
 			if (note && note->time() <= t && note->end_time() > t) {
 				_active_notes.push(note);
@@ -114,7 +113,6 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>&            
 
 	// Find first note which begins at or after t
 	_note_iter = seq.note_lower_bound(t);
-
 	// Find first sysex event at or after t
 	for (typename Sequence<Time>::SysExes::const_iterator i = seq.sysexes().begin();
 	     i != seq.sysexes().end(); ++i) {
@@ -138,7 +136,8 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>&            
 	_control_iters.reserve(seq._controls.size());
 	bool   found                  = false;
 	size_t earliest_control_index = 0;
-	double earliest_control_x     = DBL_MAX;
+	Temporal::timepos_t earliest_control_x = std::numeric_limits<Temporal::timepos_t>::max();
+
 	for (Controls::const_iterator i = seq._controls.begin(); i != seq._controls.end(); ++i) {
 
 		if (filtered.find (i->first) != filtered.end()) {
@@ -147,20 +146,20 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>&            
 		}
 
 		DEBUG_TRACE (DEBUG::Sequence, string_compose ("Iterator: control: %1\n", seq._type_map.to_symbol(i->first)));
-		double x, y;
+		Temporal::timepos_t xtime;
+		double y;
 		bool ret;
 		if (_force_discrete || i->second->list()->interpolation() == ControlList::Discrete) {
-			ret = i->second->list()->rt_safe_earliest_event_discrete_unlocked (t.to_double(), x, y, true);
+			ret = i->second->list()->rt_safe_earliest_event_discrete_unlocked (Temporal::timepos_t (t), xtime, y, true);
 		} else {
-			ret = i->second->list()->rt_safe_earliest_event_linear_unlocked(t.to_double(), x, y, true);
+			ret = i->second->list()->rt_safe_earliest_event_linear_unlocked(Temporal::timepos_t (t), xtime, y, true);
 		}
+
 		if (!ret) {
 			DEBUG_TRACE (DEBUG::Sequence, string_compose ("Iterator: CC %1 (size %2) has no events past %3\n",
 			                                              i->first.id(), i->second->list()->size(), t));
 			continue;
 		}
-
-		assert(x >= 0);
 
 		const ParameterDescriptor& desc = seq.type_map().descriptor(i->first);
 		if (y < desc.lower || y > desc.upper) {
@@ -170,14 +169,14 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>&            
 			continue;
 		}
 
-		DEBUG_TRACE (DEBUG::Sequence, string_compose ("Iterator: CC %1 added (%2, %3)\n", i->first.id(), x, y));
+		DEBUG_TRACE (DEBUG::Sequence, string_compose ("Iterator: CC %1 added (%2, %3)\n", i->first.id(), xtime, y));
 
-		const ControlIterator new_iter(i->second->list(), x, y);
+		const ControlIterator new_iter(i->second->list(), xtime, y);
 		_control_iters.push_back(new_iter);
 
 		// Found a new earliest_control
-		if (x < earliest_control_x) {
-			earliest_control_x     = x;
+		if (xtime < earliest_control_x) {
+			earliest_control_x     = xtime;
 			earliest_control_index = _control_iters.size() - 1;
 			found                  = true;
 		}
@@ -215,13 +214,22 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>&            
 
 template<typename Time>
 void
-Sequence<Time>::const_iterator::invalidate(std::set< boost::weak_ptr< Note<Time> > >* notes)
+Sequence<Time>::const_iterator::get_active_notes (std::set<WeakNotePtr>& active_notes) const
 {
-	while (!_active_notes.empty()) {
-		if (notes) {
-			notes->insert(_active_notes.top());
-		}
-		_active_notes.pop();
+	/* can't iterate over a std::priority_queue<> such as ActiveNotes */
+	ActiveNotes copy (_active_notes);
+	while (!copy.empty()) {
+		active_notes.insert (copy.top());
+		copy.pop ();
+	}
+}
+
+template<typename Time>
+void
+Sequence<Time>::const_iterator::invalidate(bool preserve_active_notes)
+{
+	if (!preserve_active_notes) {
+		_active_notes = ActiveNotes();
 	}
 	_type = NIL;
 	_is_end = true;
@@ -260,16 +268,16 @@ Sequence<Time>::const_iterator::choose_next(Time earliest_t)
 	/* Use the next earliest controller iff it's earlier or coincident with the note-on
 	 * or patch-change. Bank-select (CC0, CC32) needs to be sent before the PGM. */
 	if (_control_iter != _control_iters.end() &&
-	    _control_iter->list && _control_iter->x != DBL_MAX) {
-		if (_type == NIL || _control_iter->x <= earliest_t.to_double()) {
+	    _control_iter->list && _control_iter->x != std::numeric_limits<Temporal::timepos_t>::max()) {
+		if (_type == NIL || _control_iter->x <= earliest_t) {
 			_type      = CONTROL;
-			earliest_t = Time(_control_iter->x);
+			earliest_t = _control_iter->x.beats();
 		}
 	}
 
 	/* .. but prefer to send any Note-off first */
 	if ((!_active_notes.empty())) {
-		if (_type == NIL || _active_notes.top()->end_time().to_double() <= earliest_t.to_double()) {
+		if (_type == NIL || _active_notes.top()->end_time() <= earliest_t) {
 			_type      = NOTE_OFF;
 			earliest_t = _active_notes.top()->end_time();
 		}
@@ -351,9 +359,10 @@ Sequence<Time>::const_iterator::operator++()
 		     << int(ev.buffer()[0]) << int(ev.buffer()[1]) << int(ev.buffer()[2]) << endl;
 	}
 
-	double x   = 0.0;
-	double y   = 0.0;
-	bool   ret = false;
+	Temporal::timepos_t x;
+	Temporal::timepos_t xtime;
+	double    y   = 0.0;
+	bool      ret = false;
 
 	// Increment past current event
 	switch (_type) {
@@ -366,19 +375,18 @@ Sequence<Time>::const_iterator::operator++()
 	case CONTROL:
 		// Increment current controller iterator
 		if (_force_discrete || _control_iter->list->interpolation() == ControlList::Discrete) {
-			ret = _control_iter->list->rt_safe_earliest_event_discrete_unlocked (
-				_control_iter->x, x, y, false);
+			ret = _control_iter->list->rt_safe_earliest_event_discrete_unlocked (_control_iter->x, xtime, y, false);
 		} else {
 			ret = _control_iter->list->rt_safe_earliest_event_linear_unlocked (
-				_control_iter->x, x, y, false, time_between_interpolated_controller_outputs);
+				_control_iter->x, xtime, y, false, Temporal::timecnt_t::from_ticks (time_between_interpolated_controller_outputs));
 		}
 		assert(!ret || x > _control_iter->x);
 		if (ret) {
-			_control_iter->x = x;
+			_control_iter->x = xtime;
 			_control_iter->y = y;
 		} else {
 			_control_iter->list.reset();
-			_control_iter->x = DBL_MAX;
+			_control_iter->x = std::numeric_limits<Time>::max();
 			_control_iter->y = DBL_MAX;
 		}
 
@@ -550,7 +558,7 @@ Sequence<Time>::control_to_midi_event(
 		assert(iter.list->parameter().id() <= INT8_MAX);
 		assert(iter.y <= INT8_MAX);
 
-		ev->set_time(Time(iter.x));
+		ev->set_time(iter.x.beats());
 		ev->realloc(3);
 		ev->buffer()[0] = MIDI_CMD_CONTROL + iter.list->parameter().channel();
 		ev->buffer()[1] = (uint8_t)iter.list->parameter().id();
@@ -562,7 +570,7 @@ Sequence<Time>::control_to_midi_event(
 		assert(iter.list->parameter().channel() < 16);
 		assert(iter.y <= INT8_MAX);
 
-		ev->set_time(Time(iter.x));
+		ev->set_time(iter.x.beats());
 		ev->realloc(2);
 		ev->buffer()[0] = MIDI_CMD_PGM_CHANGE + iter.list->parameter().channel();
 		ev->buffer()[1] = (uint8_t)iter.y;
@@ -573,7 +581,7 @@ Sequence<Time>::control_to_midi_event(
 		assert(iter.list->parameter().channel() < 16);
 		assert(iter.y < (1<<14));
 
-		ev->set_time(Time(iter.x));
+		ev->set_time(iter.x.beats());
 		ev->realloc(3);
 		ev->buffer()[0] = MIDI_CMD_BENDER + iter.list->parameter().channel();
 		ev->buffer()[1] = uint16_t(iter.y) & 0x7F; // LSB
@@ -586,7 +594,7 @@ Sequence<Time>::control_to_midi_event(
 		assert(iter.list->parameter().id() <= INT8_MAX);
 		assert(iter.y <= INT8_MAX);
 
-		ev->set_time(Time(iter.x));
+		ev->set_time(iter.x.beats());
 		ev->realloc(3);
 		ev->buffer()[0] = MIDI_CMD_NOTE_PRESSURE + iter.list->parameter().channel();
 		ev->buffer()[1] = (uint8_t)iter.list->parameter().id();
@@ -598,7 +606,7 @@ Sequence<Time>::control_to_midi_event(
 		assert(iter.list->parameter().channel() < 16);
 		assert(iter.y <= INT8_MAX);
 
-		ev->set_time(Time(iter.x));
+		ev->set_time(iter.x.beats());
 		ev->realloc(2);
 		ev->buffer()[0] = MIDI_CMD_CHANNEL_PRESSURE + iter.list->parameter().channel();
 		ev->buffer()[1] = (uint8_t)iter.y;
@@ -1075,7 +1083,7 @@ Sequence<Time>::append_control_unlocked(const Parameter& param, Time time, doubl
 	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 %2 @ %3 = %4 # controls: %5\n",
 	                                              this, _type_map.to_symbol(param), time, value, _controls.size()));
 	boost::shared_ptr<Control> c = control(param, true);
-	c->list()->add (time.to_double(), value, true, false);
+	c->list()->add (Temporal::timepos_t (time), value, true, false);
 	/* XXX control events should use IDs */
 }
 
@@ -1411,12 +1419,26 @@ Sequence<Time>::control_list_marked_dirty ()
 
 template<typename Time>
 void
-Sequence<Time>::dump (ostream& str) const
+Sequence<Time>::dump (ostream& str, typename Sequence<Time>::const_iterator x, uint32_t limit) const
 {
-	typename Sequence<Time>::const_iterator i;
-	str << "+++ dump\n";
-	for (i = begin(); i != end(); ++i) {
+	typename Sequence<Time>::const_iterator i = begin();
+
+	if (x != end()) {
+		i = x;
+	}
+
+	str << "+++ dump";
+	if (i != end()) {
+		str << " from " << i->time();
+	}
+	str << endl;
+	for (; i != end() && (limit >= 0); ++i) {
 		str << *i << endl;
+		if (limit) {
+			if (--limit == 0) {
+				break;
+			}
+		}
 	}
 	str << "--- dump\n";
 }

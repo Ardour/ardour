@@ -62,20 +62,23 @@ Curve::solve () const
 		   (www.korf.co.uk/spline.pdf) for more details.
 		*/
 
-		vector<double> x(npoints);
+		vector<Temporal::timepos_t> x (npoints);
 		vector<double> y(npoints);
 		uint32_t i;
 		ControlList::EventList::const_iterator xx;
 
 		for (i = 0, xx = _list.events().begin(); xx != _list.events().end(); ++xx, ++i) {
-			x[i] = (double) (*xx)->when;
-			y[i] = (double) (*xx)->value;
+			x[i] = (*xx)->when;
+			y[i] = (*xx)->value;
 		}
 
 		double lp0, lp1, fpone;
+		double xd;
 
-		lp0 = (x[1] - x[0])/(y[1] - y[0]);
-		lp1 = (x[2] - x[1])/(y[2] - y[1]);
+		xd = x[0].distance (x[1]).magnitude();
+		lp0 = xd/(y[1] - y[0]);
+		xd = x[1].distance (x[2]).magnitude();
+		lp1 = xd/(y[2] - y[1]);
 
 		if (lp0*lp1 < 0) {
 			fpone = 0;
@@ -92,9 +95,12 @@ Curve::solve () const
 			double ydelta;   /* ditto */
 			double fppL, fppR;
 			double fpi;
+			double xi = x[i].val();
+			double xim1;
 
 			if (i > 0) {
-				xdelta = x[i] - x[i-1];
+				xim1 = x[i-1].val();
+				xdelta = xi - xim1;
 				xdelta2 = xdelta * xdelta;
 				ydelta = y[i] - y[i-1];
 			}
@@ -105,7 +111,7 @@ Curve::solve () const
 
 				/* first segment */
 
-				fplast = ((3 * (y[1] - y[0]) / (2 * (x[1] - x[0]))) - (fpone * 0.5));
+				fplast = ((3 * (y[1] - y[0]) / (2 * (xi - xim1))) - (fpone * 0.5));
 
 				/* we don't store coefficients for i = 0 */
 
@@ -121,7 +127,9 @@ Curve::solve () const
 
 				/* all other segments */
 
-				double slope_before = ((x[i+1] - x[i]) / (y[i+1] - y[i]));
+				double xip1 = x[i+1].val();
+
+				double slope_before = (xip1 - xi) / (y[i+1] - y[i]);
 				double slope_after = (xdelta / ydelta);
 
 				if (slope_after * slope_before < 0.0) {
@@ -145,22 +153,22 @@ Curve::solve () const
 			double b, c, d;
 
 			d = (fppR - fppL) / (6 * xdelta);
-			c = ((x[i] * fppL) - (x[i-1] * fppR))/(2 * xdelta);
+			c = ((xi * fppL) - (xim1 * fppR))/(2 * xdelta);
 
 			double xim12, xim13;
 			double xi2, xi3;
 
-			xim12 = x[i-1] * x[i-1];  /* "x[i-1] squared" */
-			xim13 = xim12 * x[i-1];   /* "x[i-1] cubed" */
-			xi2 = x[i] * x[i];        /* "x[i] squared" */
-			xi3 = xi2 * x[i];         /* "x[i] cubed" */
+			xim12 = xim1 * xim1;  /* "x[i-1] squared" */
+			xim13 = xim12 * xim1;   /* "x[i-1] cubed" */
+			xi2 = xi * xi;        /* "x[i] squared" */
+			xi3 = xi2 * xi;         /* "x[i] cubed" */
 
 			b = (ydelta - (c * (xi2 - xim12)) - (d * (xi3 - xim13))) / xdelta;
 
 			/* store */
 
 			(*xx)->create_coeffs();
-			(*xx)->coeff[0] = y[i-1] - (b * x[i-1]) - (c * xim12) - (d * xim13);
+			(*xx)->coeff[0] = y[i-1] - (b * xim1) - (c * xim12) - (d * xim13);
 			(*xx)->coeff[1] = b;
 			(*xx)->coeff[2] = c;
 			(*xx)->coeff[3] = d;
@@ -174,7 +182,7 @@ Curve::solve () const
 }
 
 bool
-Curve::rt_safe_get_vector (double x0, double x1, float *vec, int32_t veclen) const
+Curve::rt_safe_get_vector (Temporal::timepos_t const & x0, Temporal::timepos_t const & x1, float *vec, int32_t veclen) const
 {
 	Glib::Threads::RWLock::ReaderLock lm(_list.lock(), Glib::Threads::TRY_LOCK);
 
@@ -187,16 +195,20 @@ Curve::rt_safe_get_vector (double x0, double x1, float *vec, int32_t veclen) con
 }
 
 void
-Curve::get_vector (double x0, double x1, float *vec, int32_t veclen) const
+Curve::get_vector (Temporal::timepos_t const & x0, Temporal::timepos_t const & x1, float *vec, int32_t veclen) const
 {
 	Glib::Threads::RWLock::ReaderLock lm(_list.lock());
 	_get_vector (x0, x1, vec, veclen);
 }
 
 void
-Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen) const
+Curve::_get_vector (Temporal::timepos_t const & x0, Temporal::timepos_t const & x1, float *vec, int32_t veclen) const
 {
-	double rx, lx, hx, max_x, min_x;
+	double rx, lx, hx;
+	const double start = x0.val();
+	const double end = x1.val();
+	double max_x;
+	double min_x;
 	int32_t i;
 	int32_t original_veclen;
 	int32_t npoints;
@@ -222,10 +234,10 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen) const
 
 	/* events is now known not to be empty */
 
-	max_x = _list.events().back()->when;
-	min_x = _list.events().front()->when;
+	max_x = _list.events().back()->when.val();
+	min_x = _list.events().front()->when.val();
 
-	if (x0 > max_x) {
+	if (start > max_x) {
 		/* totally past the end - just fill the entire array with the final value */
 		for (int32_t i = 0; i < veclen; ++i) {
 			vec[i] = _list.events().back()->value;
@@ -233,7 +245,7 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen) const
 		return;
 	}
 
-	if (x1 < min_x) {
+	if (end < min_x) {
 		/* totally before the first event - fill the entire array with
 		 * the initial value.
 		 */
@@ -245,13 +257,13 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen) const
 
 	original_veclen = veclen;
 
-	if (x0 < min_x) {
+	if (start < min_x) {
 
 		/* fill some beginning section of the array with the
 		   initial (used to be default) value
 		*/
 
-		double frac = (min_x - x0) / (x1 - x0);
+		double frac = (min_x - start) / (end - start);
 		int64_t fill_len = (int64_t) floor (veclen * frac);
 
 		fill_len = min (fill_len, (int64_t)veclen);
@@ -264,11 +276,11 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen) const
 		vec += fill_len;
 	}
 
-	if (veclen && x1 > max_x) {
+	if (veclen && end > max_x) {
 
 		/* fill some end section of the array with the default or final value */
 
-		double frac = (x1 - max_x) / (x1 - x0);
+		double frac = (end - max_x) / (end - start);
 		int64_t fill_len = (int64_t) floor (original_veclen * frac);
 		float val;
 
@@ -282,14 +294,14 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen) const
 		veclen -= fill_len;
 	}
 
-	lx = max (min_x, x0);
-	hx = min (max_x, x1);
+	lx = max (min_x, start);
+	hx = min (max_x, end);
 
 	if (npoints == 2) {
 
-		const double lpos = _list.events().front()->when;
+		const double lpos = _list.events().front()->when.val();
 		const double lval = _list.events().front()->value;
-		const double upos = _list.events().back()->when;
+		const double upos = _list.events().back()->when.val();
 		const double uval = _list.events().back()->value;
 
 		/* dx that we are using */
@@ -360,18 +372,19 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen) const
 
 	rx = lx;
 
-	double dx = 0;
+	double dx = 0.;
+
 	if (veclen > 1) {
 		dx = (hx - lx) / (veclen - 1);
 	}
 
 	for (i = 0; i < veclen; ++i, rx += dx) {
-		vec[i] = multipoint_eval (rx);
+		vec[i] = multipoint_eval (x0.is_beats() ? Temporal::timepos_t::from_ticks (rx) : Temporal::timepos_t::from_superclock (rx));
 	}
 }
 
 double
-Curve::multipoint_eval (double x) const
+Curve::multipoint_eval (Temporal::timepos_t const & x) const
 {
 	pair<ControlList::EventList::const_iterator,ControlList::EventList::const_iterator> range;
 
@@ -427,8 +440,11 @@ Curve::multipoint_eval (double x) const
 			return before->value;
 		}
 
-		double tdelta = x - before->when;
-		double trange = after->when - before->when;
+		double aw = after->when.val();
+		double bw = before->when.val();
+
+		double tdelta = x.val() - bw;
+		double trange = aw - bw;
 
 		switch (_list.interpolation()) {
 			case ControlList::Discrete:
@@ -440,8 +456,9 @@ Curve::multipoint_eval (double x) const
 			case ControlList::Curved:
 				if (after->coeff) {
 					ControlEvent* ev = after;
-					double x2 = x * x;
-					return ev->coeff[0] + (ev->coeff[1] * x) + (ev->coeff[2] * x2) + (ev->coeff[3] * x2 * x);
+#warning NUTEMPO fixme possible overflow ... multiplyng two position types .. also, units?
+					double x2 = x.val() * x.val();
+					return ev->coeff[0] + (ev->coeff[1] * x.val()) + (ev->coeff[2] * x2) + (ev->coeff[3] * x2 * x.val());
 				}
 				/* fallthrough */
 			case ControlList::Linear:

@@ -95,7 +95,6 @@ def build(bld):
             Note.cc
             SMF.cc
             Sequence.cc
-            TimeConverter.cc
             debug.cc
     '''
 

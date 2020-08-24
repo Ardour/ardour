@@ -49,14 +49,14 @@ template<typename Time> class Event;
  */
 class /*LIBEVORAL_API*/ ControlIterator {
 public:
-	ControlIterator(boost::shared_ptr<const ControlList> al, double ax, double ay)
+	ControlIterator(boost::shared_ptr<const ControlList> al, Temporal::timepos_t const & ax, double ay)
 		: list(al)
 		, x(ax)
 		, y(ay)
 	{}
 
 	boost::shared_ptr<const ControlList> list;
-	double x;
+	Temporal::timepos_t x;
 	double y;
 };
 
@@ -151,7 +151,7 @@ public:
 		typedef const Note<Time>* value_type;
 		inline bool operator()(const boost::shared_ptr< const Note<Time> > a,
 		                       const boost::shared_ptr< const Note<Time> > b) const {
-			return a->end_time().to_double() > b->end_time().to_double();
+			return a->end_time() > b->end_time();
 		}
 	};
 
@@ -216,8 +216,6 @@ public:
 	inline       PatchChanges& patch_changes ()       { return _patch_changes; }
 	inline const PatchChanges& patch_changes () const { return _patch_changes; }
 
-	void dump (std::ostream&) const;
-
 private:
 	typedef std::priority_queue<NotePtr, std::deque<NotePtr>, LaterNoteEndComparator> ActiveNotes;
 public:
@@ -226,15 +224,15 @@ public:
 	class LIBEVORAL_API const_iterator {
 	public:
 		const_iterator();
-		const_iterator(const Sequence<Time>&              seq,
-		               Time                               t,
-		               bool                               force_discrete,
-		               const std::set<Evoral::Parameter>& filtered,
-		               const std::set<WeakNotePtr>*       active_notes=NULL);
+		const_iterator(const Sequence<Time>&               seq,
+		               Time                                t,
+		               bool                                force_discrete,
+		               std::set<Evoral::Parameter> const & filtered,
+		               std::set<WeakNotePtr> const*        active_notes = 0);
 
 		inline bool valid() const { return !_is_end && _event; }
 
-		void invalidate(std::set<WeakNotePtr>* notes);
+		void invalidate (bool preserve_notes);
 
 		const Event<Time>& operator*() const { return *_event;  }
 		const boost::shared_ptr< const Event<Time> > operator->() const { return _event; }
@@ -245,6 +243,8 @@ public:
 		bool operator!=(const const_iterator& other) const { return ! operator==(other); }
 
 		const_iterator& operator=(const const_iterator& other);
+
+		void get_active_notes (std::set<WeakNotePtr>&) const;
 
 	private:
 		friend class Sequence<Time>;
@@ -277,11 +277,13 @@ public:
 		Time                               t              = Time(),
 		bool                               force_discrete = false,
 		const std::set<Evoral::Parameter>& f              = std::set<Evoral::Parameter>(),
-		const std::set<WeakNotePtr>*       active_notes   = NULL) const {
+		std::set<WeakNotePtr> const *      active_notes   = 0) const {
 		return const_iterator (*this, t, force_discrete, f, active_notes);
 	}
 
 	const const_iterator& end() const { return _end_iter; }
+
+	void dump (std::ostream&, const_iterator x, uint32_t limit = 0) const;
 
 	// CONST iterator implementations (x3)
 	typename Notes::const_iterator note_lower_bound (Time t) const;
@@ -378,4 +380,3 @@ template<typename Time> /*LIBEVORAL_API*/ std::ostream& operator<<(std::ostream&
 
 
 #endif // EVORAL_SEQUENCE_HPP
-

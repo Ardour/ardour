@@ -41,10 +41,10 @@ Control::Control(const Parameter&               parameter,
 /** Get the currently effective value (ie the one that corresponds to current output)
  */
 double
-Control::get_double (bool from_list, double frame) const
+Control::get_double (bool from_list, Temporal::timepos_t when) const
 {
 	if (from_list) {
-		return _list->eval(frame);
+		return _list->eval (when);
 	} else {
 		return _user_value;
 	}
@@ -52,7 +52,7 @@ Control::get_double (bool from_list, double frame) const
 
 
 void
-Control::set_double (double value, double frame, bool to_list)
+Control::set_double (double value, Temporal::timepos_t when, bool to_list)
 {
 	_user_value = value;
 
@@ -61,7 +61,7 @@ Control::set_double (double value, double frame, bool to_list)
 	*/
 
 	if (to_list && (!_list->in_write_pass() || _list->descriptor().toggled)) {
-		_list->add (frame, value, false);
+		_list->add (when, value, false);
 	}
 }
 
