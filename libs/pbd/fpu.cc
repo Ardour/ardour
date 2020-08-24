@@ -161,16 +161,15 @@ FPU::FPU ()
 		return;
 	}
 
-
 #ifdef ARM_NEON_SUPPORT
-#ifdef __aarch64__
-	if (getauxval(AT_HWCAP) & HWCAP_SIMD)
-#else
-	if (getauxval(AT_HWCAP) & HWCAP_NEON)
-#endif
-	{
-		_flags = Flags(_flags & HasNEON);
+# ifdef __aarch64__
+	/* all armv8+ features NEON used in arm_neon_functions.cc */
+	_flags = Flags(_flags | HasNEON);
+# elif defined __arm__
+	if (getauxval(AT_HWCAP) & HWCAP_NEON) {
+		_flags = Flags(_flags | HasNEON);
 	}
+# endif
 #endif
 
 #if !( (defined __x86_64__) || (defined __i386__) || (defined _M_X64) || (defined _M_IX86) ) // !ARCH_X86
