@@ -163,7 +163,12 @@ FPU::FPU ()
 
 
 #ifdef ARM_NEON_SUPPORT
-	if (getauxval(AT_HWCAP) & HWCAP_NEON) {
+#ifdef __aarch64__
+	if (getauxval(AT_HWCAP) & HWCAP_SIMD)
+#else
+	if (getauxval(AT_HWCAP) & HWCAP_NEON)
+#endif
+	{
 		_flags = Flags(_flags & HasNEON);
 	}
 #endif
