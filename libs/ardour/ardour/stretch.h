@@ -40,7 +40,7 @@ class LIBARDOUR_API RBStretch : public RBEffect {
 
 } /* namespace */
 
-
+#ifdef HAVE_SOUNDTOUCH
 #include <soundtouch/SoundTouch.h>
 
 namespace ARDOUR {
@@ -57,6 +57,7 @@ class LIBARDOUR_API STStretch : public Filter {
 };
 
 } /* namespace */
+#endif
 
 
 #endif /* __ardour_stretch_h__ */

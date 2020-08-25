@@ -234,7 +234,9 @@ static const gchar *_rb_opt_strings[] = {
 	N_("Crisp monophonic instrumental"),
 	N_("Unpitched solo percussion"),
 	N_("Resample without preserving pitch"),
+#ifdef HAVE_SOUNDTOUCH
 	N_("Vocal"),
+#endif
 	0
 };
 #endif
