@@ -24,6 +24,8 @@
 
 #include "ardour/audio_track.h"
 #include "ardour/audioplaylist.h"
+#include "ardour/midi_playlist.h"
+
 #include "ardour/playlist.h"
 #include "ardour/session_playlist.h"
 
@@ -209,20 +211,25 @@ PlaylistSelector::show_for (RouteUI* ruix)
 void
 PlaylistSelector::add_playlist_to_map (boost::shared_ptr<Playlist> pl)
 {
-	boost::shared_ptr<AudioPlaylist> apl;
-
 	if (pl->frozen()) {
 		return;
 	}
 
-	if ((apl = boost::dynamic_pointer_cast<AudioPlaylist> (pl)) == 0) {
-		return;
+	if (rui->is_midi_track ()) {
+		if (boost::dynamic_pointer_cast<MidiPlaylist> (pl) == 0) {
+			return;
+		}
+	} else {
+		assert (rui->is_audio_track ());
+		if (boost::dynamic_pointer_cast<AudioPlaylist> (pl) == 0) {
+			return;
+		}
 	}
 
 	TrackPlaylistMap::iterator x;
 
-	if ((x = trpl_map.find (apl->get_orig_track_id())) == trpl_map.end()) {
-		x = trpl_map.insert (trpl_map.end(), make_pair (apl->get_orig_track_id(), new list<boost::shared_ptr<Playlist> >));
+	if ((x = trpl_map.find (pl->get_orig_track_id ())) == trpl_map.end()) {
+		x = trpl_map.insert (trpl_map.end(), make_pair (pl->get_orig_track_id(), new list<boost::shared_ptr<Playlist> >));
 	}
 
 	x->second->push_back (pl);
@@ -238,7 +245,7 @@ PlaylistSelector::close_button_click ()
 void
 PlaylistSelector::selection_changed ()
 {
-	boost::shared_ptr<Playlist> playlist;
+	boost::shared_ptr<Playlist> pl;
 
 	TreeModel::iterator iter = tree.get_selection()->get_selected();
 
@@ -247,25 +254,17 @@ PlaylistSelector::selection_changed ()
 		return;
 	}
 
-	if ((playlist = ((*iter)[columns.playlist])) != 0) {
+	if ((pl = ((*iter)[columns.playlist])) != 0) {
 
-		boost::shared_ptr<AudioTrack> at;
-		boost::shared_ptr<AudioPlaylist> apl;
-
-		if ((at = rui->audio_track()) == 0) {
-			/* eh? */
+		if (rui->is_audio_track () && boost::dynamic_pointer_cast<AudioPlaylist> (pl) == 0) {
+			return;
+		}
+		if (rui->is_midi_track () && boost::dynamic_pointer_cast<MidiPlaylist> (pl) == 0) {
 			return;
 		}
 
-		if ((apl = boost::dynamic_pointer_cast<AudioPlaylist> (playlist)) == 0) {
-			/* eh? */
-			return;
-		}
-
-		at->use_playlist (DataType::AUDIO, apl);
+		rui->track ()->use_playlist (rui->is_audio_track () ? DataType::AUDIO : DataType::MIDI, pl);
 
 		hide ();
 	}
-
 }
-
