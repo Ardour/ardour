@@ -35,6 +35,9 @@ void
 PianoKeyBindings::set_layout (Layout layout)
 {
 	switch (layout) {
+		case NO_KEYS:
+			clear_notes ();
+			break;
 		case QWERTY:
 			bind_keys_qwerty ();
 			break;
@@ -91,11 +94,13 @@ PianoKeyBindings::layout (std::string const& l)
 		return S_QWERTY;
 	} else if (l == "QWERTZ Single") {
 		return S_QWERTZ;
+	} else if (l == "None") {
+		return NO_KEYS;
 	}
 
 	// Unrecognized keyboard layout, maybe an assert is too stringent though
 	assert(false);
-	return QWERTY;
+	return NO_KEYS;
 }
 
 const char*

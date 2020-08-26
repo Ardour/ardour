@@ -3086,6 +3086,7 @@ RCOptionEditor::RCOptionEditor ()
 		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_vkeybd_layout)
 		);
 
+	vkeybdlayout->add ("None",   _("Mouse-only (no keyboard)"));
 	vkeybdlayout->add ("QWERTY", _("QWERTY"));
 	vkeybdlayout->add ("QWERTZ", _("QWERTZ"));
 	vkeybdlayout->add ("AZERTY", _("AZERTY"));

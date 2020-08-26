@@ -36,6 +36,7 @@ public:
 	~PianoKeyBindings ();
 
 	enum Layout {
+		NO_KEYS,
 		QWERTY,
 		QWERTZ,
 		AZERTY,
