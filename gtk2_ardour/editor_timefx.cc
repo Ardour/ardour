@@ -218,7 +218,7 @@ Editor::time_fx (RegionList& regions, float val, bool pitching)
 
 	txt = current_timefx->stretch_opts_selector.get_active_text ();
 
-	for (int i = 0; i <= 6; i++) {
+	for (size_t i = 0; i < rb_opt_strings.size(); i++) {
 		if (txt == rb_opt_strings[i]) {
 			rb_current_opt = i;
 			break;
@@ -273,6 +273,11 @@ Editor::time_fx (RegionList& regions, float val, bool pitching)
 			shortwin = true;
 			// peaklock = false;
 			break;
+	#ifdef HAVE_SOUNDTOUCH
+		case 7:
+			current_timefx->request.use_soundtouch = true;
+			break;
+	#endif
 		default:
 			/* default/4 */
 			transients = Transients; peaklock = true; longwin = false; shortwin = false;
@@ -379,7 +384,15 @@ Editor::do_timefx ()
 			fx = new Pitch (*_session, current_timefx->request);
 		} else {
 #ifdef USE_RUBBERBAND
+		#ifdef HAVE_SOUNDTOUCH
+			if (current_timefx->request.use_soundtouch) {
+				fx = new STStretch (*_session, current_timefx->request);
+			} else {
+				fx = new RBStretch (*_session, current_timefx->request);
+			}
+		#else
 			fx = new RBStretch (*_session, current_timefx->request);
+		#endif
 #else
 			fx = new STStretch (*_session, current_timefx->request);
 #endif
