@@ -22,6 +22,7 @@
 #include <iostream>
 #include "evoral/midi_events.h"
 #include "ardour/midi_track.h"
+#include "ardour/parameter_descriptor.h"
 
 #include "gtkmm2ext/keyboard.h"
 
@@ -34,6 +35,7 @@
 
 using namespace std;
 using namespace Gtkmm2ext;
+using namespace ARDOUR;
 
 PianoRollHeader::Color PianoRollHeader::white = PianoRollHeader::Color(0.77f, 0.78f, 0.76f);
 PianoRollHeader::Color PianoRollHeader::white_highlight = PianoRollHeader::Color(1.00f, 0.40f, 0.40f);
@@ -302,6 +304,7 @@ PianoRollHeader::on_expose_event (GdkEventExpose* ev)
 	int oct_rel;
 	int y1 = max(rect.y, 0);
 	int y2 = min(rect.y + rect.height, (int) floor(_view.contents_height() - 1.0f));
+	bool is_white_key;
 
 	//Cairo::TextExtents te;
 	lowest = max(_view.lowest_note(), _view.y_to_note(y2));
@@ -313,7 +316,6 @@ PianoRollHeader::on_expose_event (GdkEventExpose* ev)
 
 	cr->select_font_face ("Georgia", Cairo::FONT_SLANT_NORMAL, Cairo::FONT_WEIGHT_BOLD);
 	font_size = min((double) 10.0f, _note_height - 4.0f);
-	cr->set_font_size(font_size);
 
 	/* fill the entire rect with the color for non-highlighted white notes.
 	 * then we won't have to draw the background for those notes,
@@ -348,6 +350,8 @@ PianoRollHeader::on_expose_event (GdkEventExpose* ev)
 		case 8:
 		case 10:
 			/* black note */
+			is_white_key = false;
+
 			if (i == _highlighted_note) {
 				bg.set(black_highlight);
 			} else {
@@ -378,6 +382,8 @@ PianoRollHeader::on_expose_event (GdkEventExpose* ev)
 
 		default:
 			/* white note */
+			is_white_key = true;
+
 			if (i == _highlighted_note) {
 				bg.set(white_highlight);
 			} else {
@@ -443,23 +449,54 @@ PianoRollHeader::on_expose_event (GdkEventExpose* ev)
 
 		}
 
-		/* render the name of which C this is */
-		if (oct_rel == 0) {
-			std::stringstream s;
+		/* if only one note visible render note name vertical (because A#3 don't fit on key) */
+		if (lowest == highest) {
+			string const note_name = ParameterDescriptor::midi_note_name(i);
 			double y = floor(_view.note_to_y(i)) - 0.5f;
 			double note_height = floor(_view.note_to_y(i - 1)) - y;
 
-			int cn = i / 12 - 1;
-			s << "C" << cn;
+			cr->set_font_size(font_size);
 
-			//cr->get_text_extents(s.str(), te);
-			cr->set_source_rgb(0.30f, 0.30f, 0.30f);
+			Cairo::TextExtents te;
+			cr->get_text_extents(note_name, te);
+
+			double r, g, b;
+
+			if (is_white_key)
+				note_name_color(white, r, g, b);
+			else
+				note_name_color(black, r, g, b);
+
+			cr->set_source_rgb(r, g, b);
+			cr->move_to(2.0f + font_size , y + note_height - 1.0f - (note_height - te.width) / 2.0f);
+			cr->rotate(M_PI / -2.0); // -90 degrees
+			cr->show_text(note_name);
+		}
+		else if (oct_rel == 0) {
+			/* render the name of which C this is */
+			double y = floor(_view.note_to_y(i)) - 0.5f;
+			double note_height = floor(_view.note_to_y(i - 1)) - y;
+
+			double r, g, b;
+			note_name_color(white, r, g, b);
+
+			cr->set_source_rgb(r, g, b);
 			cr->move_to(2.0f, y + note_height - 1.0f - (note_height - font_size) / 2.0f);
-			cr->show_text(s.str());
+			cr->show_text(ParameterDescriptor::midi_note_name(i));
 		}
 	}
 
 	return true;
+}
+
+void
+PianoRollHeader::note_name_color(const PianoRollHeader::Color& key_color, double& r, double& g, double& b)
+{
+	Gtkmm2ext::Color text_color = Gtkmm2ext::rgba_to_color(key_color.r, key_color.g, key_color.b, 1.0f);
+	text_color = Gtkmm2ext::contrasting_text_color(text_color);
+
+	double a;
+	Gtkmm2ext::color_to_rgba(text_color, r, g, b, a);
 }
 
 bool
