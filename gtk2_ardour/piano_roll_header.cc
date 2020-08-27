@@ -591,6 +591,9 @@ PianoRollHeader::on_enter_notify_event (GdkEventCrossing* ev)
 bool
 PianoRollHeader::on_leave_notify_event (GdkEventCrossing*)
 {
+	if (has_grab () && _dragging) {
+		return true;
+	}
 	invalidate_note_range(_highlighted_note, _highlighted_note);
 
 	if (_clicked_note != NO_MIDI_NOTE) {
