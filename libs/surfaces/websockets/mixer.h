@@ -33,7 +33,8 @@ public:
 	ArdourMixerPlugin (boost::shared_ptr<ARDOUR::PluginInsert>);
 
 	boost::shared_ptr<ARDOUR::PluginInsert> insert () const;
-
+	boost::shared_ptr<PBD::ScopedConnectionList> connections () const;
+	
 	bool enabled () const;
 	void set_enabled (bool);
 
@@ -58,8 +59,10 @@ public:
 	boost::shared_ptr<ARDOUR::Stripable> stripable () const;
 	boost::shared_ptr<PBD::ScopedConnectionList> connections () const;
 
-	int                plugin_count () const;
-	ArdourMixerPlugin& nth_plugin (uint32_t);
+	typedef std::map<uint32_t, ArdourMixerPlugin> PluginMap;
+
+	PluginMap&         plugins ();
+	ArdourMixerPlugin& plugin (uint32_t);
 
 	double gain () const;
 	void   set_gain (double);
@@ -80,7 +83,8 @@ public:
 private:
 	boost::shared_ptr<ARDOUR::Stripable>         _stripable;
 	boost::shared_ptr<PBD::ScopedConnectionList> _connections;
-	std::vector<ArdourMixerPlugin>               _plugins;
+
+	PluginMap _plugins;
 
 	void on_drop_plugin (uint32_t);
 
@@ -96,13 +100,14 @@ public:
 	int start ();
 	int stop ();
 
-	uint32_t          strip_count () const;
-	ArdourMixerStrip& nth_strip (uint32_t);
+	typedef std::map<uint32_t, ArdourMixerStrip> StripMap;
+
+	StripMap&         strips ();
+	ArdourMixerStrip& strip (uint32_t);
 	void              on_drop_strip (uint32_t);
 
 private:
-	typedef std::vector<ArdourMixerStrip> StripsVector;
-	StripsVector                         _strips;
+	StripMap _strips;
 };
 
 #endif // _ardour_surface_websockets_mixer_h_
