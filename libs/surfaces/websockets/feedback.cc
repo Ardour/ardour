@@ -52,38 +52,38 @@ struct TempoObserver {
 };
 
 struct StripGainObserver {
-	void operator() (ArdourFeedback* p, uint32_t strip_n)
+	void operator() (ArdourFeedback* p, uint32_t strip_id)
 	{
 		// fires multiple times (4x as of ardour 6.0)
-		p->update_all (Node::strip_gain, strip_n, p->mixer ().strip (strip_n).gain ());
+		p->update_all (Node::strip_gain, strip_id, p->mixer ().strip (strip_id).gain ());
 	}
 };
 
 struct StripPanObserver {
-	void operator() (ArdourFeedback* p, uint32_t strip_n)
+	void operator() (ArdourFeedback* p, uint32_t strip_id)
 	{
-		p->update_all (Node::strip_pan, strip_n, p->mixer ().strip (strip_n).pan ());
+		p->update_all (Node::strip_pan, strip_id, p->mixer ().strip (strip_id).pan ());
 	}
 };
 
 struct StripMuteObserver {
-	void operator() (ArdourFeedback* p, uint32_t strip_n)
+	void operator() (ArdourFeedback* p, uint32_t strip_id)
 	{
-		p->update_all (Node::strip_mute, strip_n, p->mixer ().strip (strip_n).mute ());
+		p->update_all (Node::strip_mute, strip_id, p->mixer ().strip (strip_id).mute ());
 	}
 };
 
 struct PluginBypassObserver {
-	void operator() (ArdourFeedback* p, uint32_t strip_n, uint32_t plugin_n)
+	void operator() (ArdourFeedback* p, uint32_t strip_id, uint32_t plugin_id)
 	{
-		p->update_all (Node::strip_plugin_enable, strip_n, plugin_n,
-		               p->mixer ().strip (strip_n).plugin (plugin_n).enabled ());
+		p->update_all (Node::strip_plugin_enable, strip_id, plugin_id,
+		               p->mixer ().strip (strip_id).plugin (plugin_id).enabled ());
 	}
 };
 
 struct PluginParamValueObserver {
-	void operator() (ArdourFeedback* p, uint32_t strip_n, uint32_t plugin_n,
-	                 uint32_t param_n, boost::weak_ptr<AutomationControl> ctrl)
+	void operator() (ArdourFeedback* p, uint32_t strip_id, uint32_t plugin_id,
+	                 uint32_t param_id, boost::weak_ptr<AutomationControl> ctrl)
 	{
 		boost::shared_ptr<AutomationControl> control = ctrl.lock ();
 
@@ -91,7 +91,7 @@ struct PluginParamValueObserver {
 			return;
 		}
 		
-		p->update_all (Node::strip_plugin_param_value, strip_n, plugin_n, param_n,
+		p->update_all (Node::strip_plugin_param_value, strip_id, plugin_id, param_id,
 		               ArdourMixerPlugin::param_value (control));
 	}
 };
@@ -116,19 +116,7 @@ ArdourFeedback::stop ()
 {
 	_periodic_connection.disconnect ();
 	_transport_connections.drop_connections ();
-
-	/*for (StripConnectionMap::iterator it = _strip_connections.begin (); it != _strip_connections.end(); ++it) {
-		it->second->drop_connections ();
-	}
 	
-	_strip_connections.clear();
-*/
-	/*for (PluginConnectionMap::iterator it = _plugin_connections.begin (); it != _plugin_connections.end(); ++it) {
-		it->second->drop_connections ();
-	}
-
-	_plugin_connections.clear();*/
-
 	return 0;
 }
 
@@ -139,34 +127,34 @@ ArdourFeedback::update_all (std::string node, TypedValue value) const
 }
 
 void
-ArdourFeedback::update_all (std::string node, uint32_t strip_n, TypedValue value) const
+ArdourFeedback::update_all (std::string node, uint32_t strip_id, TypedValue value) const
 {
-	update_all (node, strip_n, ADDR_NONE, ADDR_NONE, value);
+	update_all (node, strip_id, ADDR_NONE, ADDR_NONE, value);
 }
 
 void
-ArdourFeedback::update_all (std::string node, uint32_t strip_n, uint32_t plugin_n,
+ArdourFeedback::update_all (std::string node, uint32_t strip_id, uint32_t plugin_id,
                             TypedValue value) const
 {
-	update_all (node, strip_n, plugin_n, ADDR_NONE, value);
+	update_all (node, strip_id, plugin_id, ADDR_NONE, value);
 }
 
 void
-ArdourFeedback::update_all (std::string node, uint32_t strip_n, uint32_t plugin_n, uint32_t param_n,
+ArdourFeedback::update_all (std::string node, uint32_t strip_id, uint32_t plugin_id, uint32_t param_id,
                             TypedValue value) const
 {
 	AddressVector addr = AddressVector ();
 
-	if (strip_n != ADDR_NONE) {
-		addr.push_back (strip_n);
+	if (strip_id != ADDR_NONE) {
+		addr.push_back (strip_id);
 	}
 
-	if (plugin_n != ADDR_NONE) {
-		addr.push_back (plugin_n);
+	if (plugin_id != ADDR_NONE) {
+		addr.push_back (plugin_id);
 	}
 
-	if (param_n != ADDR_NONE) {
-		addr.push_back (param_n);
+	if (param_id != ADDR_NONE) {
+		addr.push_back (param_id);
 	}
 
 	ValueVector val = ValueVector ();
@@ -206,32 +194,32 @@ void
 ArdourFeedback::observe_mixer ()
 {
 	for (ArdourMixer::StripMap::iterator it = mixer().strips().begin(); it != mixer().strips().end(); ++it) {
-		uint32_t strip_n        = it->first;
+		uint32_t strip_id        = it->first;
 		ArdourMixerStrip& strip = it->second;
 
 		boost::shared_ptr<Stripable> stripable = strip.stripable ();
 		boost::shared_ptr<PBD::ScopedConnectionList> connections = it->second.connections ();
 
 		stripable->gain_control ()->Changed.connect (*connections, MISSING_INVALIDATOR,
-		                                         boost::bind<void> (StripGainObserver (), this, strip_n), event_loop ());
+		                                         boost::bind<void> (StripGainObserver (), this, strip_id), event_loop ());
 
 		if (stripable->pan_azimuth_control ()) {
 			stripable->pan_azimuth_control ()->Changed.connect (*connections, MISSING_INVALIDATOR,
-			                                                boost::bind<void> (StripPanObserver (), this, strip_n), event_loop ());
+			                                                boost::bind<void> (StripPanObserver (), this, strip_id), event_loop ());
 		}
 
 		stripable->mute_control ()->Changed.connect (*connections, MISSING_INVALIDATOR,
-		                                         boost::bind<void> (StripMuteObserver (), this, strip_n), event_loop ());
+		                                         boost::bind<void> (StripMuteObserver (), this, strip_id), event_loop ());
 	
-		observe_strip_plugins (strip_n, strip.plugins ());
+		observe_strip_plugins (strip_id, strip.plugins ());
 	}
 }
 
 void
-ArdourFeedback::observe_strip_plugins (uint32_t strip_n, ArdourMixerStrip::PluginMap& plugins)
+ArdourFeedback::observe_strip_plugins (uint32_t strip_id, ArdourMixerStrip::PluginMap& plugins)
 {
 	for (ArdourMixerStrip::PluginMap::iterator it = plugins.begin(); it != plugins.end(); ++it) {
-		uint32_t                                     plugin_n    = it->first;
+		uint32_t                                     plugin_id    = it->first;
 		ArdourMixerPlugin&                           plugin      = it->second;
 		boost::shared_ptr<PluginInsert>              insert      = plugin.insert ();
 		boost::shared_ptr<PBD::ScopedConnectionList> connections = plugin.connections ();
@@ -241,27 +229,20 @@ ArdourFeedback::observe_strip_plugins (uint32_t strip_n, ArdourMixerStrip::Plugi
 
 		if (control) {
 			control->Changed.connect (*connections, MISSING_INVALIDATOR,
-			                          boost::bind<void> (PluginBypassObserver (), this, strip_n, plugin_n), event_loop ());
+			                          boost::bind<void> (PluginBypassObserver (), this, strip_id, plugin_id), event_loop ());
 		}
 
-		observe_strip_plugin_param_values (strip_n, plugin_n, plugin);
-	}
-}
+		for (uint32_t param_id = 0; param_id < plugin.param_count (); ++param_id) {
+			try {
+				boost::shared_ptr<AutomationControl> control = plugin.param_control (param_id);
 
-void
-ArdourFeedback::observe_strip_plugin_param_values (uint32_t strip_n,
-                                                   uint32_t plugin_n, ArdourMixerPlugin& plugin)
-{
-	for (uint32_t param_n = 0; param_n < plugin.param_count (); ++param_n) {
-		try {
-			boost::shared_ptr<AutomationControl> control = plugin.param_control (param_n);
-
-			control->Changed.connect (*plugin.connections (), MISSING_INVALIDATOR,
-			                          boost::bind<void> (PluginParamValueObserver (), this, strip_n, plugin_n, param_n,
-			                                             boost::weak_ptr<AutomationControl>(control)),
-			                          event_loop ());
-		} catch (ArdourMixerNotFoundException) {
-			/* ignore */
+				control->Changed.connect (*plugin.connections (), MISSING_INVALIDATOR,
+				                          boost::bind<void> (PluginParamValueObserver (), this, strip_id, plugin_id, param_id,
+				                                             boost::weak_ptr<AutomationControl>(control)),
+				                          event_loop ());
+			} catch (ArdourMixerNotFoundException) {
+				/* ignore */
+			}
 		}
 	}
 }

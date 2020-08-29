@@ -52,7 +52,6 @@ private:
 	void observe_transport ();
 	void observe_mixer ();
 	void observe_strip_plugins (uint32_t, ArdourMixerStrip::PluginMap&);
-	void observe_strip_plugin_param_values (uint32_t, uint32_t, ArdourMixerPlugin&);
 };
 
 #endif // _ardour_surface_websockets_feedback_h_
