@@ -22,6 +22,70 @@
 #include "component.h"
 #include "typed_value.h"
 
+struct ArdourMixerNotFoundException : public virtual std::runtime_error
+{
+	using std::runtime_error::runtime_error;
+};
+
+class ArdourMixerPlugin
+{
+public:
+	ArdourMixerPlugin (boost::shared_ptr<ARDOUR::PluginInsert>);
+
+	boost::shared_ptr<ARDOUR::PluginInsert> insert () const;
+
+	bool enabled () const;
+	void set_enabled (bool);
+
+	TypedValue param_value (uint32_t);
+	void       set_param_value (uint32_t, TypedValue);
+
+	boost::shared_ptr<ARDOUR::AutomationControl> param_control (uint32_t) const;
+
+	static TypedValue param_value (boost::shared_ptr<ARDOUR::AutomationControl>);
+
+private:
+	boost::shared_ptr<ARDOUR::PluginInsert>      _insert;
+	boost::shared_ptr<PBD::ScopedConnectionList> _connections;
+
+};
+
+class ArdourMixerStrip
+{
+public:
+	ArdourMixerStrip (boost::shared_ptr<ARDOUR::Stripable>);
+
+	boost::shared_ptr<ARDOUR::Stripable> stripable () const;
+	boost::shared_ptr<PBD::ScopedConnectionList> connections () const;
+
+	int                plugin_count () const;
+	ArdourMixerPlugin& nth_plugin (uint32_t);
+
+	double gain () const;
+	void   set_gain (double);
+
+	double pan () const;
+	void   set_pan (double);
+
+	bool mute () const;
+	void set_mute (bool);
+
+	std::string name () const;
+
+	float meter_level_db () const;
+
+	static double to_db (double);
+	static double from_db (double);
+
+private:
+	boost::shared_ptr<ARDOUR::Stripable>         _stripable;
+	boost::shared_ptr<PBD::ScopedConnectionList> _connections;
+	std::vector<ArdourMixerPlugin>               _plugins;
+
+	void on_drop_plugin (uint32_t);
+
+};
+
 class ArdourMixer : public SurfaceComponent
 {
 public:
@@ -32,37 +96,13 @@ public:
 	int start ();
 	int stop ();
 
-	static double to_db (double);
-	static double from_db (double);
-
-	double strip_gain (uint32_t) const;
-	void   set_strip_gain (uint32_t, double);
-
-	double strip_pan (uint32_t) const;
-	void   set_strip_pan (uint32_t, double);
-
-	bool strip_mute (uint32_t) const;
-	void set_strip_mute (uint32_t, bool);
-
-	bool strip_plugin_enabled (uint32_t, uint32_t) const;
-	void set_strip_plugin_enabled (uint32_t, uint32_t, bool);
-
-	TypedValue strip_plugin_param_value (uint32_t, uint32_t, uint32_t) const;
-	void       set_strip_plugin_param_value (uint32_t, uint32_t, uint32_t, TypedValue);
-
-	uint32_t                             strip_count () const;
-	boost::shared_ptr<ARDOUR::Stripable> nth_strip (uint32_t) const;
-
-	boost::shared_ptr<ARDOUR::PluginInsert> strip_plugin_insert (uint32_t, uint32_t) const;
-
-	boost::shared_ptr<ARDOUR::AutomationControl> strip_plugin_param_control (
-	    uint32_t, uint32_t, uint32_t) const;
-
-	static TypedValue plugin_param_value (boost::shared_ptr<ARDOUR::AutomationControl>);
+	uint32_t          strip_count () const;
+	ArdourMixerStrip& nth_strip (uint32_t);
+	void              on_drop_strip (uint32_t);
 
 private:
-	typedef std::vector<boost::shared_ptr<ARDOUR::Stripable> > StripableVector;
-	StripableVector                                           _strips;
+	typedef std::vector<ArdourMixerStrip> StripsVector;
+	StripsVector                         _strips;
 };
 
 #endif // _ardour_surface_websockets_mixer_h_
