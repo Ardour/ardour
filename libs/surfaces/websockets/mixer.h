@@ -19,6 +19,8 @@
 #ifndef _ardour_surface_websockets_mixer_h_
 #define _ardour_surface_websockets_mixer_h_
 
+#include <glibmm/threads.h>
+
 #include "component.h"
 #include "typed_value.h"
 
@@ -31,13 +33,15 @@ class ArdourMixerPlugin
 {
 public:
 	ArdourMixerPlugin (boost::shared_ptr<ARDOUR::PluginInsert>);
+	~ArdourMixerPlugin ();
 
-	boost::shared_ptr<ARDOUR::PluginInsert> insert () const;
+	boost::shared_ptr<ARDOUR::PluginInsert>      insert () const;
 	boost::shared_ptr<PBD::ScopedConnectionList> connections () const;
 	
 	bool enabled () const;
 	void set_enabled (bool);
 
+	uint32_t   param_count () const;
 	TypedValue param_value (uint32_t);
 	void       set_param_value (uint32_t, TypedValue);
 
@@ -54,9 +58,10 @@ private:
 class ArdourMixerStrip
 {
 public:
-	ArdourMixerStrip (boost::shared_ptr<ARDOUR::Stripable>);
-
-	boost::shared_ptr<ARDOUR::Stripable> stripable () const;
+	ArdourMixerStrip (boost::shared_ptr<ARDOUR::Stripable>, PBD::EventLoop*);
+	~ArdourMixerStrip ();
+	
+	boost::shared_ptr<ARDOUR::Stripable>         stripable () const;
 	boost::shared_ptr<PBD::ScopedConnectionList> connections () const;
 
 	typedef std::map<uint32_t, ArdourMixerPlugin> PluginMap;
@@ -106,8 +111,11 @@ public:
 	ArdourMixerStrip& strip (uint32_t);
 	void              on_drop_strip (uint32_t);
 
+	Glib::Threads::Mutex& mutex ();
+
 private:
-	StripMap _strips;
+	StripMap             _strips;
+	Glib::Threads::Mutex _mutex;
 };
 
 #endif // _ardour_surface_websockets_mixer_h_
