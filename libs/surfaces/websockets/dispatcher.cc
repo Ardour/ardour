@@ -56,36 +56,35 @@ void
 WebsocketsDispatcher::update_all_nodes (Client client)
 {
 	for (uint32_t strip_n = 0; strip_n < mixer ().strip_count (); ++strip_n) {
-		boost::shared_ptr<Stripable> strip = mixer ().nth_strip (strip_n);
+		ArdourMixerStrip &strip = mixer ().nth_strip (strip_n);
 
-		bool is_vca = strip->presentation_info ().flags () & ARDOUR::PresentationInfo::VCA;
+		bool is_vca = strip.stripable ()->presentation_info ().flags () & ARDOUR::PresentationInfo::VCA;
 
 		AddressVector strip_addr = AddressVector ();
 		strip_addr.push_back (strip_n);
 		ValueVector strip_desc = ValueVector ();
-		strip_desc.push_back (strip->name ());
+		strip_desc.push_back (strip.name ());
 		strip_desc.push_back (is_vca);
 		
 		update (client, Node::strip_description, strip_addr, strip_desc);
 		
-		update (client, Node::strip_gain, strip_n, mixer ().strip_gain (strip_n));
-		update (client, Node::strip_mute, strip_n, mixer ().strip_mute (strip_n));
+		update (client, Node::strip_gain, strip_n, strip.gain ());
+		update (client, Node::strip_mute, strip_n, strip.mute ());
 
 		// Pan and plugins not available in VCAs
 		if (is_vca) {
 			continue;
 		}
 
-		boost::shared_ptr<Route> route = boost::dynamic_pointer_cast<Route> (strip);
+		boost::shared_ptr<Route> route = boost::dynamic_pointer_cast<Route> (strip.stripable ());
 		if (!route) {
 			continue;
 		}
 
-		update (client, Node::strip_pan, strip_n, mixer ().strip_pan (strip_n));
+		update (client, Node::strip_pan, strip_n, strip.pan ());
 
 		for (uint32_t plugin_n = 0;; ++plugin_n) {
-			boost::shared_ptr<PluginInsert> insert = mixer ()
-			                                             .strip_plugin_insert (strip_n, plugin_n);
+			boost::shared_ptr<PluginInsert> insert = strip.nth_plugin (plugin_n).insert ();
 			if (!insert) {
 				break;
 			}
@@ -95,11 +94,11 @@ WebsocketsDispatcher::update_all_nodes (Client client)
 			        static_cast<std::string> (plugin->name ()));
 
 			update (client, Node::strip_plugin_enable, strip_n, plugin_n,
-			        mixer ().strip_plugin_enabled (strip_n, plugin_n));
+			        strip.nth_plugin (plugin_n).enabled ());
 
 			for (uint32_t param_n = 0; param_n < plugin->parameter_count (); ++param_n) {
 				boost::shared_ptr<AutomationControl> a_ctrl =
-				    mixer ().strip_plugin_param_control (strip_n, plugin_n, param_n);
+				    strip.nth_plugin (plugin_n).param_control (param_n);
 				if (!a_ctrl) {
 					continue;
 				}
@@ -130,7 +129,7 @@ WebsocketsDispatcher::update_all_nodes (Client client)
 
 				update (client, Node::strip_plugin_param_description, addr, val);
 
-				TypedValue value = mixer ().strip_plugin_param_value (strip_n, plugin_n, param_n);
+				TypedValue value = strip.nth_plugin (plugin_n).param_value (param_n);
 				update (client, Node::strip_plugin_param_value, strip_n, plugin_n, param_n, value);
 			}
 		}
@@ -190,9 +189,9 @@ WebsocketsDispatcher::strip_gain_handler (Client client, const NodeStateMessage&
 	uint32_t strip_id = state.nth_addr (0);
 
 	if (msg.is_write () && (state.n_val () > 0)) {
-		mixer ().set_strip_gain (strip_id, state.nth_val (0));
+		mixer ().nth_strip (strip_id).set_gain (state.nth_val (0));
 	} else {
-		update (client, Node::strip_gain, strip_id, mixer ().strip_gain (strip_id));
+		update (client, Node::strip_gain, strip_id, mixer ().nth_strip (strip_id).gain ());
 	}
 }
 
@@ -208,9 +207,9 @@ WebsocketsDispatcher::strip_pan_handler (Client client, const NodeStateMessage& 
 	uint32_t strip_id = state.nth_addr (0);
 
 	if (msg.is_write () && (state.n_val () > 0)) {
-		mixer ().set_strip_pan (strip_id, state.nth_val (0));
+		mixer ().nth_strip (strip_id).set_pan (state.nth_val (0));
 	} else {
-		update (client, Node::strip_pan, strip_id, mixer ().strip_pan (strip_id));
+		update (client, Node::strip_pan, strip_id, mixer ().nth_strip (strip_id).pan ());
 	}
 }
 
@@ -226,9 +225,9 @@ WebsocketsDispatcher::strip_mute_handler (Client client, const NodeStateMessage&
 	uint32_t strip_id = state.nth_addr (0);
 
 	if (msg.is_write () && (state.n_val () > 0)) {
-		mixer ().set_strip_mute (strip_id, state.nth_val (0));
+		mixer ().nth_strip (strip_id).set_mute (state.nth_val (0));
 	} else {
-		update (client, Node::strip_mute, strip_id, mixer ().strip_mute (strip_id));
+		update (client, Node::strip_mute, strip_id, mixer ().nth_strip (strip_id).mute ());
 	}
 }
 
@@ -245,10 +244,10 @@ WebsocketsDispatcher::strip_plugin_enable_handler (Client client, const NodeStat
 	uint32_t plugin_id = state.nth_addr (1);
 
 	if (msg.is_write () && (state.n_val () > 0)) {
-		mixer ().set_strip_plugin_enabled (strip_id, plugin_id, state.nth_val (0));
+		mixer ().nth_strip (strip_id).nth_plugin (plugin_id).set_enabled (state.nth_val (0));
 	} else {
 		update (client, Node::strip_plugin_enable, strip_id, plugin_id,
-		        mixer ().strip_plugin_enabled (strip_id, plugin_id));
+		        mixer ().nth_strip (strip_id).nth_plugin (plugin_id).enabled ());
 	}
 }
 
@@ -266,10 +265,10 @@ WebsocketsDispatcher::strip_plugin_param_value_handler (Client client, const Nod
 	uint32_t param_id  = state.nth_addr (2);
 
 	if (msg.is_write () && (state.n_val () > 0)) {
-		mixer ().set_strip_plugin_param_value (strip_id, plugin_id, param_id,
+		mixer ().nth_strip (strip_id).nth_plugin (plugin_id).set_param_value (param_id,
 		                                        state.nth_val (0));
 	} else {
-		TypedValue value = mixer ().strip_plugin_param_value (strip_id, plugin_id, param_id);
+		TypedValue value = mixer ().nth_strip (strip_id).nth_plugin (plugin_id).param_value (param_id);
 		update (client, Node::strip_plugin_param_value, strip_id, plugin_id, param_id, value);
 	}
 }

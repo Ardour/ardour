@@ -16,7 +16,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ardour/meter.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/session.h"
 #include "ardour/tempo.h"
@@ -57,21 +56,21 @@ struct StripGainObserver {
 	void operator() (ArdourFeedback* p, uint32_t strip_n)
 	{
 		// fires multiple times (4x as of ardour 6.0)
-		p->update_all (Node::strip_gain, strip_n, p->mixer ().strip_gain (strip_n));
+		p->update_all (Node::strip_gain, strip_n, p->mixer ().nth_strip (strip_n).gain ());
 	}
 };
 
 struct StripPanObserver {
 	void operator() (ArdourFeedback* p, uint32_t strip_n)
 	{
-		p->update_all (Node::strip_pan, strip_n, p->mixer ().strip_pan (strip_n));
+		p->update_all (Node::strip_pan, strip_n, p->mixer ().nth_strip (strip_n).pan ());
 	}
 };
 
 struct StripMuteObserver {
 	void operator() (ArdourFeedback* p, uint32_t strip_n)
 	{
-		p->update_all (Node::strip_mute, strip_n, p->mixer ().strip_mute (strip_n));
+		p->update_all (Node::strip_mute, strip_n, p->mixer ().nth_strip (strip_n).mute ());
 	}
 };
 
@@ -79,7 +78,7 @@ struct PluginBypassObserver {
 	void operator() (ArdourFeedback* p, uint32_t strip_n, uint32_t plugin_n)
 	{
 		p->update_all (Node::strip_plugin_enable, strip_n, plugin_n,
-		               p->mixer ().strip_plugin_enabled (strip_n, plugin_n));
+		               p->mixer ().nth_strip (strip_n).nth_plugin (plugin_n).enabled ());
 	}
 };
 
@@ -92,7 +91,7 @@ struct PluginParamValueObserver {
 			return;
 		}
 		p->update_all (Node::strip_plugin_param_value, strip_n, plugin_n, param_n,
-		               ArdourMixer::plugin_param_value (control));
+		               ArdourMixerPlugin::param_value (control));
 	}
 };
 
@@ -117,17 +116,17 @@ ArdourFeedback::stop ()
 	_periodic_connection.disconnect ();
 	_transport_connections.drop_connections ();
 
-	for (StripConnectionMap::iterator it = _strip_connections.begin (); it != _strip_connections.end(); ++it) {
+	/*for (StripConnectionMap::iterator it = _strip_connections.begin (); it != _strip_connections.end(); ++it) {
 		it->second->drop_connections ();
 	}
 	
 	_strip_connections.clear();
-
-	for (PluginConnectionMap::iterator it = _plugin_connections.begin (); it != _plugin_connections.end(); ++it) {
+*/
+	/*for (PluginConnectionMap::iterator it = _plugin_connections.begin (); it != _plugin_connections.end(); ++it) {
 		it->second->drop_connections ();
 	}
 
-	_plugin_connections.clear();
+	_plugin_connections.clear();*/
 
 	return 0;
 }
@@ -181,10 +180,7 @@ ArdourFeedback::poll () const
 	update_all (Node::transport_time, transport ().time ());
 
 	for (uint32_t strip_n = 0; strip_n < mixer ().strip_count (); ++strip_n) {
-		// meters
-		boost::shared_ptr<Stripable> strip = mixer ().nth_strip (strip_n);
-		boost::shared_ptr<PeakMeter> meter = strip->peak_meter ();
-		float                        db    = meter ? meter->meter_level (0, MeterMCP) : -193;
+		float db = mixer ().nth_strip (strip_n).meter_level_db ();
 		update_all (Node::strip_meter, strip_n, static_cast<double> (db));
 	}
 
@@ -207,27 +203,21 @@ void
 ArdourFeedback::observe_mixer ()
 {
 	for (uint32_t strip_n = 0; strip_n < mixer ().strip_count (); ++strip_n) {
-		boost::shared_ptr<Stripable> strip = mixer ().nth_strip (strip_n);
+		boost::shared_ptr<Stripable> stripable = mixer ().nth_strip (strip_n).stripable ();
+		boost::shared_ptr<PBD::ScopedConnectionList> connections = mixer().nth_strip (strip_n).connections ();
 
-		std::unique_ptr<PBD::ScopedConnectionList> connections (new PBD::ScopedConnectionList());
-
-		strip->gain_control ()->Changed.connect (*connections, MISSING_INVALIDATOR,
+		stripable->gain_control ()->Changed.connect (*connections, MISSING_INVALIDATOR,
 		                                         boost::bind<void> (StripGainObserver (), this, strip_n), event_loop ());
 
-		if (strip->pan_azimuth_control ()) {
-			strip->pan_azimuth_control ()->Changed.connect (*connections, MISSING_INVALIDATOR,
+		if (stripable->pan_azimuth_control ()) {
+			stripable->pan_azimuth_control ()->Changed.connect (*connections, MISSING_INVALIDATOR,
 			                                                boost::bind<void> (StripPanObserver (), this, strip_n), event_loop ());
 		}
 
-		strip->mute_control ()->Changed.connect (*connections, MISSING_INVALIDATOR,
+		stripable->mute_control ()->Changed.connect (*connections, MISSING_INVALIDATOR,
 		                                         boost::bind<void> (StripMuteObserver (), this, strip_n), event_loop ());
 	
-		strip->DropReferences.connect (*connections, MISSING_INVALIDATOR,
-									   boost::bind (&ArdourFeedback::on_drop_strip, this, strip_n), event_loop ());
-
-		_strip_connections[strip_n] = std::move (connections);
-
-		observe_strip_plugins (strip_n, strip);
+		observe_strip_plugins (strip_n, stripable);
 	}
 }
 
@@ -235,7 +225,7 @@ void
 ArdourFeedback::observe_strip_plugins (uint32_t strip_n, boost::shared_ptr<ARDOUR::Stripable> strip)
 {
 	for (uint32_t plugin_n = 0;; ++plugin_n) {
-		boost::shared_ptr<PluginInsert> insert = mixer ().strip_plugin_insert (strip_n, plugin_n);
+		boost::shared_ptr<PluginInsert> insert = mixer ().nth_strip (strip_n).nth_plugin (plugin_n).insert ();
 		if (!insert) {
 			break;
 		}
@@ -250,11 +240,11 @@ ArdourFeedback::observe_strip_plugins (uint32_t strip_n, boost::shared_ptr<ARDOU
 			                          boost::bind<void> (PluginBypassObserver (), this, strip_n, plugin_n), event_loop ());
 		}
 
-		insert->DropReferences.connect (*connections, MISSING_INVALIDATOR,
-										boost::bind (&ArdourFeedback::on_drop_plugin, this, strip_n, plugin_n), event_loop ());
+		//insert->DropReferences.connect (*connections, MISSING_INVALIDATOR,
+		//								boost::bind (&ArdourFeedback::on_drop_plugin, this, strip_n, plugin_n), event_loop ());
 
 		// assume each strip can hold up to 65535 plugins
-		_plugin_connections[(strip_n << 16) | plugin_n] = std::move (connections);
+		//_plugin_connections[(strip_n << 16) | plugin_n] = std::move (connections);
 
 		observe_strip_plugin_param_values (strip_n, plugin_n, insert);
 	}
@@ -267,42 +257,17 @@ ArdourFeedback::observe_strip_plugin_param_values (uint32_t strip_n,
 	boost::shared_ptr<Plugin> plugin = insert->plugin ();
 
 	for (uint32_t param_n = 0; param_n < plugin->parameter_count (); ++param_n) {
-		boost::shared_ptr<AutomationControl> control = mixer ().strip_plugin_param_control (
-		    strip_n, plugin_n, param_n);
+		boost::shared_ptr<AutomationControl> control = mixer ().nth_strip (strip_n).nth_plugin (plugin_n).param_control (param_n);
 
 		if (!control) {
 			continue;
 		}
 
-		PBD::ScopedConnectionList *connections = _plugin_connections[(strip_n << 16) | plugin_n].get();
+		/*PBD::ScopedConnectionList *connections = _plugin_connections[(strip_n << 16) | plugin_n].get();
 
 		control->Changed.connect (*connections, MISSING_INVALIDATOR,
 		                          boost::bind<void> (PluginParamValueObserver (), this, strip_n, plugin_n, param_n,
 		                                             boost::weak_ptr<AutomationControl>(control)),
-		                          event_loop ());
+		                          event_loop ());*/
 	}
-}
-
-void
-ArdourFeedback::on_drop_strip (uint32_t strip_n)
-{
-	for (uint32_t plugin_n = 0;; ++plugin_n) {
-		boost::shared_ptr<PluginInsert> insert = mixer ().strip_plugin_insert (strip_n, plugin_n);
-		if (!insert) {
-			break;
-		}
-
-		on_drop_plugin (strip_n, plugin_n);
-	}
-
-	_strip_connections[strip_n]->drop_connections ();
-	_strip_connections.erase (strip_n);
-}
-
-void
-ArdourFeedback::on_drop_plugin (uint32_t strip_n, uint32_t plugin_n)
-{
-	uint32_t key = (strip_n << 16) | plugin_n;	
-	_plugin_connections[key]->drop_connections ();
-	_plugin_connections.erase (key);
 }

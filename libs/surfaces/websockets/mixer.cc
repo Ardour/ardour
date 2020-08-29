@@ -17,6 +17,7 @@
  */
 
 #include "ardour/dB.h"
+#include "ardour/meter.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/session.h"
 #include "pbd/controllable.h"
@@ -25,157 +26,33 @@
 
 using namespace ARDOUR;
 
-int
-ArdourMixer::start ()
+ArdourMixerPlugin::ArdourMixerPlugin (boost::shared_ptr<ARDOUR::PluginInsert> insert)
+	: _insert (insert)
+	, _connections (boost::shared_ptr<PBD::ScopedConnectionList> (new PBD::ScopedConnectionList()))
+{}
+
+boost::shared_ptr<ARDOUR::PluginInsert>
+ArdourMixerPlugin::insert () const
 {
-	/* take an indexed snapshot of current strips */
-	StripableList strips;
-	session ().get_stripables (strips, PresentationInfo::AllStripables);
-
-	for (StripableList::iterator strip = strips.begin (); strip != strips.end (); ++strip) {
-		_strips.push_back (*strip);
-	}
-
-	return 0;
-}
-
-int
-ArdourMixer::stop ()
-{
-	_strips.clear ();
-	return 0;
-}
-
-double
-ArdourMixer::to_db (double k)
-{
-	if (k == 0) {
-		return -std::numeric_limits<double>::infinity ();
-	}
-
-	float db = accurate_coefficient_to_dB (static_cast<float> (k));
-
-	return static_cast<double> (db);
-}
-
-double
-ArdourMixer::from_db (double db)
-{
-	if (db < -192) {
-		return 0;
-	}
-
-	float k = dB_to_coefficient (static_cast<float> (db));
-
-	return static_cast<double> (k);
-}
-
-double
-ArdourMixer::strip_gain (uint32_t strip_n) const
-{
-	return to_db (nth_strip (strip_n)->gain_control ()->get_value ());
-}
-
-void
-ArdourMixer::set_strip_gain (uint32_t strip_n, double db)
-{
-	nth_strip (strip_n)->gain_control ()->set_value (from_db (db), PBD::Controllable::NoGroup);
-}
-
-double
-ArdourMixer::strip_pan (uint32_t strip_n) const
-{
-	boost::shared_ptr<AutomationControl> ac = nth_strip (strip_n)->pan_azimuth_control ();
-	if (!ac) {
-		/* TODO: inform GUI that strip has no panner */
-		return 0;
-	}
-	return ac->internal_to_interface (ac->get_value ());
-}
-
-void
-ArdourMixer::set_strip_pan (uint32_t strip_n, double value)
-{
-	boost::shared_ptr<AutomationControl> ac = nth_strip (strip_n)->pan_azimuth_control ();
-	if (!ac) {
-		return;
-	}
-	ac->set_value (ac->interface_to_internal (value), PBD::Controllable::NoGroup);
+	return _insert;
 }
 
 bool
-ArdourMixer::strip_mute (uint32_t strip_n) const
+ArdourMixerPlugin::enabled () const
 {
-	return nth_strip (strip_n)->mute_control ()->muted ();
+	insert ()->enabled ();
 }
 
 void
-ArdourMixer::set_strip_mute (uint32_t strip_n, bool mute)
+ArdourMixerPlugin::set_enabled (bool enabled)
 {
-	nth_strip (strip_n)->mute_control ()->set_value (mute ? 1.0 : 0.0, PBD::Controllable::NoGroup);
-}
-
-bool
-ArdourMixer::strip_plugin_enabled (uint32_t strip_n, uint32_t plugin_n) const
-{
-	return strip_plugin_insert (strip_n, plugin_n)->enabled ();
-}
-
-void
-ArdourMixer::set_strip_plugin_enabled (uint32_t strip_n, uint32_t plugin_n, bool enabled)
-{
-	strip_plugin_insert (strip_n, plugin_n)->enable (enabled);
+	insert ()->enable (enabled);
 }
 
 TypedValue
-ArdourMixer::strip_plugin_param_value (uint32_t strip_n, uint32_t plugin_n,
-                                        uint32_t param_n) const
+ArdourMixerPlugin::param_value (uint32_t param_n)
 {
-	return plugin_param_value (strip_plugin_param_control (strip_n, plugin_n, param_n));
-}
-
-void
-ArdourMixer::set_strip_plugin_param_value (uint32_t strip_n, uint32_t plugin_n,
-                                            uint32_t param_n, TypedValue value)
-{
-	boost::shared_ptr<AutomationControl> control = strip_plugin_param_control (
-	    strip_n, plugin_n, param_n);
-
-	if (control) {
-		ParameterDescriptor pd = control->desc ();
-		double              dbl_val;
-
-		if (pd.toggled) {
-			dbl_val = static_cast<double> (static_cast<bool> (value));
-		} else if (pd.enumeration || pd.integer_step) {
-			dbl_val = static_cast<double> (static_cast<int> (value));
-		} else {
-			dbl_val = static_cast<double> (value);
-		}
-
-		control->set_value (dbl_val, PBD::Controllable::NoGroup);
-	}
-}
-
-uint32_t
-ArdourMixer::strip_count () const
-{
-	return _strips.size ();
-}
-
-boost::shared_ptr<Stripable>
-ArdourMixer::nth_strip (uint32_t strip_n) const
-{
-	if (strip_n < _strips.size ()) {
-		return _strips[strip_n];
-	}
-
-	return boost::shared_ptr<Stripable> ();
-}
-
-TypedValue
-ArdourMixer::plugin_param_value (boost::shared_ptr<ARDOUR::AutomationControl> control)
-{
+	boost::shared_ptr<ARDOUR::AutomationControl> control = param_control (param_n);
 	TypedValue value = TypedValue ();
 
 	if (control) {
@@ -193,48 +70,241 @@ ArdourMixer::plugin_param_value (boost::shared_ptr<ARDOUR::AutomationControl> co
 	return value;
 }
 
-boost::shared_ptr<PluginInsert>
-ArdourMixer::strip_plugin_insert (uint32_t strip_n, uint32_t plugin_n) const
+void
+ArdourMixerPlugin::set_param_value (uint32_t param_n, TypedValue value)
 {
-	boost::shared_ptr<Stripable> strip = nth_strip (strip_n);
+	boost::shared_ptr<AutomationControl> control = param_control (param_n);
 
-	if ((strip->presentation_info ().flags () & ARDOUR::PresentationInfo::VCA) == 0) {
-		boost::shared_ptr<Route> route = boost::dynamic_pointer_cast<Route> (strip);
+	if (control) {
+		ParameterDescriptor pd = control->desc ();
+		double              dbl_val;
 
-		if (route) {
-			boost::shared_ptr<Processor> processor = route->nth_plugin (plugin_n);
+		if (pd.toggled) {
+			dbl_val = static_cast<double> (static_cast<bool> (value));
+		} else if (pd.enumeration || pd.integer_step) {
+			dbl_val = static_cast<double> (static_cast<int> (value));
+		} else {
+			dbl_val = static_cast<double> (value);
+		}
 
-			if (processor) {
-				boost::shared_ptr<PluginInsert> insert =
-				    boost::static_pointer_cast<PluginInsert> (processor);
+		control->set_value (dbl_val, PBD::Controllable::NoGroup);
+	}
+}
 
-				if (insert) {
-					return insert;
-				}
+boost::shared_ptr<ARDOUR::AutomationControl>
+ArdourMixerPlugin::param_control (uint32_t param_n) const
+{
+	bool                      ok         = false;
+	boost::shared_ptr<Plugin> plugin     = _insert->plugin ();
+	uint32_t                  control_id = plugin->nth_parameter (param_n, ok);
+
+	if (!ok || !plugin->parameter_is_input (control_id)) {
+		throw ArdourMixerNotFoundException("invalid automation control");
+	}
+
+	return _insert->automation_control (Evoral::Parameter (PluginAutomation, 0, control_id));
+}
+
+ArdourMixerStrip::ArdourMixerStrip (boost::shared_ptr<ARDOUR::Stripable> stripable)
+	: _stripable (stripable)
+	, _connections (boost::shared_ptr<PBD::ScopedConnectionList> (new PBD::ScopedConnectionList()))
+{
+	if (_stripable->presentation_info ().flags () & ARDOUR::PresentationInfo::VCA) {
+		return;
+	}
+
+	boost::shared_ptr<Route> route = boost::dynamic_pointer_cast<Route> (_stripable);
+
+	if (!route) {
+		return;
+	}
+
+	for (uint32_t plugin_n = 0;; ++plugin_n) {
+		boost::shared_ptr<Processor> processor = route->nth_plugin (plugin_n);
+
+		if (processor) {
+			boost::shared_ptr<PluginInsert> insert = boost::static_pointer_cast<PluginInsert> (processor);
+
+			if (insert) {
+				ArdourMixerPlugin plugin (insert);
+				_plugins.push_back (plugin);
 			}
 		}
 	}
-
-	return boost::shared_ptr<PluginInsert> ();
 }
 
-boost::shared_ptr<AutomationControl>
-ArdourMixer::strip_plugin_param_control (uint32_t strip_n, uint32_t plugin_n,
-                                          uint32_t param_n) const
+boost::shared_ptr<ARDOUR::Stripable>
+ArdourMixerStrip::stripable () const
 {
-	boost::shared_ptr<PluginInsert> insert = strip_plugin_insert (strip_n, plugin_n);
+	return _stripable;
+}
 
-	if (insert) {
-		bool                      ok         = false;
-		boost::shared_ptr<Plugin> plugin     = insert->plugin ();
-		uint32_t                  control_id = plugin->nth_parameter (param_n, ok);
+boost::shared_ptr<PBD::ScopedConnectionList>
+ArdourMixerStrip::connections () const
+{
+	return _connections;
+}
 
-		if (ok && plugin->parameter_is_input (control_id)) {
-			boost::shared_ptr<AutomationControl> control =
-			    insert->automation_control (Evoral::Parameter (PluginAutomation, 0, control_id));
-			return control;
-		}
+int
+ArdourMixerStrip::plugin_count () const
+{
+	return _plugins.size ();
+}
+
+ArdourMixerPlugin&
+ArdourMixerStrip::nth_plugin (uint32_t plugin_n)
+{
+	if (plugin_n < _plugins.size ()) {
+		return _plugins[plugin_n];
 	}
 
-	return boost::shared_ptr<AutomationControl> ();
+	throw ArdourMixerNotFoundException (""/*"Plugin with ID " + plugin_n + " not found"*/);
+}
+
+double
+ArdourMixerStrip::gain () const
+{
+	return to_db (_stripable->gain_control ()->get_value ());
+}
+
+void
+ArdourMixerStrip::set_gain (double db)
+{
+	_stripable->gain_control ()->set_value (from_db (db), PBD::Controllable::NoGroup);
+}
+
+double
+ArdourMixerStrip::pan () const
+{
+	boost::shared_ptr<AutomationControl> ac = _stripable->pan_azimuth_control ();
+	if (!ac) {
+		/* TODO: inform GUI that strip has no panner */
+		return 0;
+	}
+	return ac->internal_to_interface (ac->get_value ());
+}
+
+void
+ArdourMixerStrip::set_pan (double value)
+{
+	boost::shared_ptr<AutomationControl> ac = _stripable->pan_azimuth_control ();
+	if (!ac) {
+		return;
+	}
+	ac->set_value (ac->interface_to_internal (value), PBD::Controllable::NoGroup);
+}
+
+bool
+ArdourMixerStrip::mute () const
+{
+	return _stripable->mute_control ()->muted ();
+}
+
+void
+ArdourMixerStrip::set_mute (bool mute)
+{
+	_stripable->mute_control ()->set_value (mute ? 1.0 : 0.0, PBD::Controllable::NoGroup);
+}
+
+float
+ArdourMixerStrip::meter_level_db () const
+{
+	boost::shared_ptr<PeakMeter> meter = _stripable->peak_meter ();
+	return meter ? meter->meter_level (0, MeterMCP) : -193;
+}
+
+std::string
+ArdourMixerStrip::name () const
+{
+	return _stripable->name ();
+}
+
+void
+ArdourMixerStrip::on_drop_plugin (uint32_t)
+{
+	//uint32_t key = (strip_n << 16) | plugin_n;	
+	//_plugin_connections[key]->drop_connections ();
+	//_plugin_connections.erase (key);
+}
+
+double
+ArdourMixerStrip::to_db (double k)
+{
+	if (k == 0) {
+		return -std::numeric_limits<double>::infinity ();
+	}
+
+	float db = accurate_coefficient_to_dB (static_cast<float> (k));
+
+	return static_cast<double> (db);
+}
+
+double
+ArdourMixerStrip::from_db (double db)
+{
+	if (db < -192) {
+		return 0;
+	}
+
+	float k = dB_to_coefficient (static_cast<float> (db));
+
+	return static_cast<double> (k);
+}
+
+int
+ArdourMixer::start ()
+{
+	/* take an indexed snapshot of current strips */
+	StripableList strips;
+	session ().get_stripables (strips, PresentationInfo::AllStripables);
+	uint32_t strip_n = 0;
+
+	for (StripableList::iterator it = strips.begin (); it != strips.end (); ++it) {
+		ArdourMixerStrip strip (*it);
+		//(*it)->DropReferences.connect (_connections, MISSING_INVALIDATOR,
+		//							boost::bind (&ArdourMixer::on_drop_strip, this, strip_n), event_loop ());
+		_strips.push_back (strip);
+		strip_n++;
+	}
+
+	return 0;
+}
+
+int
+ArdourMixer::stop ()
+{
+	_strips.clear ();
+	return 0;
+}
+
+uint32_t
+ArdourMixer::strip_count () const
+{
+	return _strips.size ();
+}
+
+ArdourMixerStrip&
+ArdourMixer::nth_strip (uint32_t strip_n)
+{
+	if (strip_n < _strips.size ()) {
+		return _strips[strip_n];
+	}
+
+	throw ArdourMixerNotFoundException (""/*"Strip with ID " + strip_n + " not found"*/);
+}
+
+void
+ArdourMixer::on_drop_strip (uint32_t strip_n)
+{
+	/*for (uint32_t plugin_n = 0;; ++plugin_n) {
+		boost::shared_ptr<PluginInsert> insert = strip_plugin_insert (strip_n, plugin_n);
+		if (!insert) {
+			break;
+		}
+
+		on_drop_plugin (strip_n, plugin_n);
+	}*/
+
+	//_strip_connections[strip_n]->drop_connections ();
+	//_strip_connections.erase (strip_n);
 }
