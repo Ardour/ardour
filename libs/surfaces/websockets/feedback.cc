@@ -24,7 +24,6 @@
 #include "transport.h"
 #include "server.h"
 #include "state.h"
-#include "mixer.h"
 
 // TO DO: make this configurable
 #define POLL_INTERVAL_MS 100
@@ -56,21 +55,21 @@ struct StripGainObserver {
 	void operator() (ArdourFeedback* p, uint32_t strip_n)
 	{
 		// fires multiple times (4x as of ardour 6.0)
-		p->update_all (Node::strip_gain, strip_n, p->mixer ().nth_strip (strip_n).gain ());
+		p->update_all (Node::strip_gain, strip_n, p->mixer ().strip (strip_n).gain ());
 	}
 };
 
 struct StripPanObserver {
 	void operator() (ArdourFeedback* p, uint32_t strip_n)
 	{
-		p->update_all (Node::strip_pan, strip_n, p->mixer ().nth_strip (strip_n).pan ());
+		p->update_all (Node::strip_pan, strip_n, p->mixer ().strip (strip_n).pan ());
 	}
 };
 
 struct StripMuteObserver {
 	void operator() (ArdourFeedback* p, uint32_t strip_n)
 	{
-		p->update_all (Node::strip_mute, strip_n, p->mixer ().nth_strip (strip_n).mute ());
+		p->update_all (Node::strip_mute, strip_n, p->mixer ().strip (strip_n).mute ());
 	}
 };
 
@@ -78,7 +77,7 @@ struct PluginBypassObserver {
 	void operator() (ArdourFeedback* p, uint32_t strip_n, uint32_t plugin_n)
 	{
 		p->update_all (Node::strip_plugin_enable, strip_n, plugin_n,
-		               p->mixer ().nth_strip (strip_n).nth_plugin (plugin_n).enabled ());
+		               p->mixer ().strip (strip_n).plugin (plugin_n).enabled ());
 	}
 };
 
@@ -87,9 +86,11 @@ struct PluginParamValueObserver {
 	                 uint32_t param_n, boost::weak_ptr<AutomationControl> ctrl)
 	{
 		boost::shared_ptr<AutomationControl> control = ctrl.lock ();
+
 		if (!control) {
 			return;
 		}
+		
 		p->update_all (Node::strip_plugin_param_value, strip_n, plugin_n, param_n,
 		               ArdourMixerPlugin::param_value (control));
 	}
@@ -101,7 +102,7 @@ ArdourFeedback::start ()
 	observe_transport ();
 	observe_mixer ();
 
-	// some things need polling like the strip meters
+	// some values need polling like the strip meters
 	Glib::RefPtr<Glib::TimeoutSource> periodic_timeout = Glib::TimeoutSource::create (POLL_INTERVAL_MS);
 	_periodic_connection                               = periodic_timeout->connect (sigc::mem_fun (*this,
                                                                          &ArdourFeedback::poll));
@@ -179,9 +180,9 @@ ArdourFeedback::poll () const
 {
 	update_all (Node::transport_time, transport ().time ());
 
-	for (uint32_t strip_n = 0; strip_n < mixer ().strip_count (); ++strip_n) {
-		float db = mixer ().nth_strip (strip_n).meter_level_db ();
-		update_all (Node::strip_meter, strip_n, static_cast<double> (db));
+	for (ArdourMixer::StripMap::iterator it = mixer().strips().begin(); it != mixer().strips().end(); ++it) {
+		float db = it->second.meter_level_db ();
+		update_all (Node::strip_meter, it->first, static_cast<double> (db));
 	}
 
 	return true;
@@ -202,9 +203,12 @@ ArdourFeedback::observe_transport ()
 void
 ArdourFeedback::observe_mixer ()
 {
-	for (uint32_t strip_n = 0; strip_n < mixer ().strip_count (); ++strip_n) {
-		boost::shared_ptr<Stripable> stripable = mixer ().nth_strip (strip_n).stripable ();
-		boost::shared_ptr<PBD::ScopedConnectionList> connections = mixer().nth_strip (strip_n).connections ();
+	for (ArdourMixer::StripMap::iterator it = mixer().strips().begin(); it != mixer().strips().end(); ++it) {
+		uint32_t strip_n        = it->first;
+		ArdourMixerStrip& strip = it->second;
+
+		boost::shared_ptr<Stripable> stripable = strip.stripable ();
+		boost::shared_ptr<PBD::ScopedConnectionList> connections = it->second.connections ();
 
 		stripable->gain_control ()->Changed.connect (*connections, MISSING_INVALIDATOR,
 		                                         boost::bind<void> (StripGainObserver (), this, strip_n), event_loop ());
@@ -217,23 +221,20 @@ ArdourFeedback::observe_mixer ()
 		stripable->mute_control ()->Changed.connect (*connections, MISSING_INVALIDATOR,
 		                                         boost::bind<void> (StripMuteObserver (), this, strip_n), event_loop ());
 	
-		observe_strip_plugins (strip_n, stripable);
+		observe_strip_plugins (strip_n, strip.plugins ());
 	}
 }
 
 void
-ArdourFeedback::observe_strip_plugins (uint32_t strip_n, boost::shared_ptr<ARDOUR::Stripable> strip)
+ArdourFeedback::observe_strip_plugins (uint32_t strip_n, ArdourMixerStrip::PluginMap& plugins)
 {
-	for (uint32_t plugin_n = 0;; ++plugin_n) {
-		boost::shared_ptr<PluginInsert> insert = mixer ().nth_strip (strip_n).nth_plugin (plugin_n).insert ();
-		if (!insert) {
-			break;
-		}
-
-		uint32_t                             	   bypass  = insert->plugin ()->designated_bypass_port ();
-		Evoral::Parameter                   	   param   = Evoral::Parameter (PluginAutomation, 0, bypass);
-		boost::shared_ptr<AutomationControl>	   control = insert->automation_control (param);
-		std::unique_ptr<PBD::ScopedConnectionList> connections (new PBD::ScopedConnectionList());
+	for (ArdourMixerStrip::PluginMap::iterator it = plugins.begin(); it != plugins.end(); ++it) {
+		uint32_t                                     plugin_n    = it->first;
+		boost::shared_ptr<PluginInsert>              insert      = it->second.insert ();
+		boost::shared_ptr<PBD::ScopedConnectionList> connections = it->second.connections ();
+		uint32_t                             	     bypass      = insert->plugin ()->designated_bypass_port ();
+		Evoral::Parameter                   	     param       = Evoral::Parameter (PluginAutomation, 0, bypass);
+		boost::shared_ptr<AutomationControl>	     control     = insert->automation_control (param);
 
 		if (control) {
 			control->Changed.connect (*connections, MISSING_INVALIDATOR,
@@ -257,17 +258,17 @@ ArdourFeedback::observe_strip_plugin_param_values (uint32_t strip_n,
 	boost::shared_ptr<Plugin> plugin = insert->plugin ();
 
 	for (uint32_t param_n = 0; param_n < plugin->parameter_count (); ++param_n) {
-		boost::shared_ptr<AutomationControl> control = mixer ().nth_strip (strip_n).nth_plugin (plugin_n).param_control (param_n);
+		try {
+			boost::shared_ptr<AutomationControl> control = mixer ().strip (strip_n).plugin (plugin_n).param_control (param_n);
 
-		if (!control) {
-			continue;
+			/*PBD::ScopedConnectionList *connections = _plugin_connections[(strip_n << 16) | plugin_n].get();
+
+			control->Changed.connect (*connections, MISSING_INVALIDATOR,
+			                          boost::bind<void> (PluginParamValueObserver (), this, strip_n, plugin_n, param_n,
+			                                             boost::weak_ptr<AutomationControl>(control)),
+			                          event_loop ());*/
+		} catch (ArdourMixerNotFoundException) {
+			/* ignore */
 		}
-
-		/*PBD::ScopedConnectionList *connections = _plugin_connections[(strip_n << 16) | plugin_n].get();
-
-		control->Changed.connect (*connections, MISSING_INVALIDATOR,
-		                          boost::bind<void> (PluginParamValueObserver (), this, strip_n, plugin_n, param_n,
-		                                             boost::weak_ptr<AutomationControl>(control)),
-		                          event_loop ());*/
 	}
 }

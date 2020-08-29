@@ -39,10 +39,16 @@ ArdourMixerPlugin::insert () const
 	return _insert;
 }
 
+boost::shared_ptr<PBD::ScopedConnectionList>
+ArdourMixerPlugin::connections () const
+{
+	return _connections;
+}
+
 bool
 ArdourMixerPlugin::enabled () const
 {
-	insert ()->enabled ();
+	return insert ()->enabled ();
 }
 
 void
@@ -55,18 +61,15 @@ TypedValue
 ArdourMixerPlugin::param_value (uint32_t param_n)
 {
 	boost::shared_ptr<ARDOUR::AutomationControl> control = param_control (param_n);
-	TypedValue value = TypedValue ();
+	ParameterDescriptor pd    = control->desc ();
+	TypedValue          value = TypedValue ();
 
-	if (control) {
-		ParameterDescriptor pd = control->desc ();
-
-		if (pd.toggled) {
-			value = TypedValue (static_cast<bool> (control->get_value ()));
-		} else if (pd.enumeration || pd.integer_step) {
-			value = TypedValue (static_cast<int> (control->get_value ()));
-		} else {
-			value = TypedValue (control->get_value ());
-		}
+	if (pd.toggled) {
+		value = TypedValue (static_cast<bool> (control->get_value ()));
+	} else if (pd.enumeration || pd.integer_step) {
+		value = TypedValue (static_cast<int> (control->get_value ()));
+	} else {
+		value = TypedValue (control->get_value ());
 	}
 
 	return value;
@@ -76,21 +79,18 @@ void
 ArdourMixerPlugin::set_param_value (uint32_t param_n, TypedValue value)
 {
 	boost::shared_ptr<AutomationControl> control = param_control (param_n);
+	ParameterDescriptor pd = control->desc ();
+	double              dbl_val;
 
-	if (control) {
-		ParameterDescriptor pd = control->desc ();
-		double              dbl_val;
-
-		if (pd.toggled) {
-			dbl_val = static_cast<double> (static_cast<bool> (value));
-		} else if (pd.enumeration || pd.integer_step) {
-			dbl_val = static_cast<double> (static_cast<int> (value));
-		} else {
-			dbl_val = static_cast<double> (value);
-		}
-
-		control->set_value (dbl_val, PBD::Controllable::NoGroup);
+	if (pd.toggled) {
+		dbl_val = static_cast<double> (static_cast<bool> (value));
+	} else if (pd.enumeration || pd.integer_step) {
+		dbl_val = static_cast<double> (static_cast<int> (value));
+	} else {
+		dbl_val = static_cast<double> (value);
 	}
+
+	control->set_value (dbl_val, PBD::Controllable::NoGroup);
 }
 
 boost::shared_ptr<ARDOUR::AutomationControl>
@@ -113,6 +113,7 @@ ArdourMixerStrip::ArdourMixerStrip (boost::shared_ptr<ARDOUR::Stripable> stripab
 	, _connections (boost::shared_ptr<PBD::ScopedConnectionList> (new PBD::ScopedConnectionList()))
 {
 	if (_stripable->presentation_info ().flags () & ARDOUR::PresentationInfo::VCA) {
+		/* no plugins to handle */
 		return;
 	}
 
@@ -125,13 +126,15 @@ ArdourMixerStrip::ArdourMixerStrip (boost::shared_ptr<ARDOUR::Stripable> stripab
 	for (uint32_t plugin_n = 0;; ++plugin_n) {
 		boost::shared_ptr<Processor> processor = route->nth_plugin (plugin_n);
 
-		if (processor) {
-			boost::shared_ptr<PluginInsert> insert = boost::static_pointer_cast<PluginInsert> (processor);
+		if (!processor) {
+			break;
+		}
 
-			if (insert) {
-				ArdourMixerPlugin plugin (insert);
-				_plugins.push_back (plugin);
-			}
+		boost::shared_ptr<PluginInsert> insert = boost::static_pointer_cast<PluginInsert> (processor);
+
+		if (insert) {
+			ArdourMixerPlugin plugin (insert);
+			_plugins.emplace (plugin_n, plugin);
 		}
 	}
 }
@@ -148,20 +151,20 @@ ArdourMixerStrip::connections () const
 	return _connections;
 }
 
-int
-ArdourMixerStrip::plugin_count () const
-{
-	return _plugins.size ();
-}
-
 ArdourMixerPlugin&
-ArdourMixerStrip::nth_plugin (uint32_t plugin_n)
+ArdourMixerStrip::plugin (uint32_t plugin_n)
 {
-	if (plugin_n < _plugins.size ()) {
-		return _plugins[plugin_n];
+	if (_plugins.find (plugin_n) == _plugins.end ()) {
+		throw ArdourMixerNotFoundException ("plugin id = " + boost::lexical_cast<std::string>(plugin_n) + " not found");
 	}
 
-	throw ArdourMixerNotFoundException ("plugin id = " + boost::lexical_cast<std::string>(plugin_n) + " not found");
+	return _plugins.at (plugin_n);
+}
+
+ArdourMixerStrip::PluginMap&
+ArdourMixerStrip::plugins ()
+{
+	return _plugins;
 }
 
 double
@@ -180,9 +183,11 @@ double
 ArdourMixerStrip::pan () const
 {
 	boost::shared_ptr<AutomationControl> ac = _stripable->pan_azimuth_control ();
+	
 	if (!ac) {
 		throw ArdourMixerNotFoundException ("strip has no panner");
 	}
+
 	return ac->internal_to_interface (ac->get_value ());
 }
 
@@ -190,9 +195,11 @@ void
 ArdourMixerStrip::set_pan (double value)
 {
 	boost::shared_ptr<AutomationControl> ac = _stripable->pan_azimuth_control ();
+
 	if (!ac) {
 		return;
 	}
+
 	ac->set_value (ac->interface_to_internal (value), PBD::Controllable::NoGroup);
 }
 
@@ -265,8 +272,7 @@ ArdourMixer::start ()
 		ArdourMixerStrip strip (*it);
 		//(*it)->DropReferences.connect (_connections, MISSING_INVALIDATOR,
 		//							boost::bind (&ArdourMixer::on_drop_strip, this, strip_n), event_loop ());
-		_strips.push_back (strip);
-		strip_n++;
+		_strips.emplace (strip_n++, strip);
 	}
 
 	return 0;
@@ -279,20 +285,21 @@ ArdourMixer::stop ()
 	return 0;
 }
 
-uint32_t
-ArdourMixer::strip_count () const
+ArdourMixer::StripMap&
+ArdourMixer::strips ()
 {
-	return _strips.size ();
+	return _strips;
 }
 
+
 ArdourMixerStrip&
-ArdourMixer::nth_strip (uint32_t strip_n)
+ArdourMixer::strip (uint32_t strip_n)
 {
-	if (strip_n < _strips.size ()) {
-		return _strips[strip_n];
+	if (_strips.find (strip_n) == _strips.end ()) {
+		throw ArdourMixerNotFoundException ("strip id = " + boost::lexical_cast<std::string>(strip_n) + " not found");
 	}
 
-	throw ArdourMixerNotFoundException ("strip id = " + boost::lexical_cast<std::string>(strip_id) + " not found");
+	return _strips.at (strip_n);
 }
 
 void
