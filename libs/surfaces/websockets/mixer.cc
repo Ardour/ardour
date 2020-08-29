@@ -69,15 +69,15 @@ ArdourMixerPlugin::param_count () const
 }
 
 TypedValue
-ArdourMixerPlugin::param_value (uint32_t param_n)
+ArdourMixerPlugin::param_value (uint32_t param_id)
 {
-	return param_value (param_control (param_n));
+	return param_value (param_control (param_id));
 }
 
 void
-ArdourMixerPlugin::set_param_value (uint32_t param_n, TypedValue value)
+ArdourMixerPlugin::set_param_value (uint32_t param_id, TypedValue value)
 {
-	boost::shared_ptr<AutomationControl> control = param_control (param_n);
+	boost::shared_ptr<AutomationControl> control = param_control (param_id);
 	ParameterDescriptor pd = control->desc ();
 	double              dbl_val;
 
@@ -93,15 +93,15 @@ ArdourMixerPlugin::set_param_value (uint32_t param_n, TypedValue value)
 }
 
 boost::shared_ptr<ARDOUR::AutomationControl>
-ArdourMixerPlugin::param_control (uint32_t param_n) const
+ArdourMixerPlugin::param_control (uint32_t param_id) const
 {
 	bool                      ok         = false;
 	boost::shared_ptr<Plugin> plugin     = _insert->plugin ();
-	uint32_t                  control_id = plugin->nth_parameter (param_n, ok);
+	uint32_t                  control_id = plugin->nth_parameter (param_id, ok);
 
 	if (!ok || !plugin->parameter_is_input (control_id)) {
 		throw ArdourMixerNotFoundException("invalid automation control for param id = "
-			+ boost::lexical_cast<std::string>(param_n));
+			+ boost::lexical_cast<std::string>(param_id));
 	}
 
 	return _insert->automation_control (Evoral::Parameter (PluginAutomation, 0, control_id));
@@ -139,8 +139,8 @@ ArdourMixerStrip::ArdourMixerStrip (boost::shared_ptr<ARDOUR::Stripable> stripab
 		return;
 	}
 
-	for (uint32_t plugin_n = 0;; ++plugin_n) {
-		boost::shared_ptr<Processor> processor = route->nth_plugin (plugin_n);
+	for (uint32_t plugin_id = 0;; ++plugin_id) {
+		boost::shared_ptr<Processor> processor = route->nth_plugin (plugin_id);
 
 		if (!processor) {
 			break;
@@ -151,8 +151,8 @@ ArdourMixerStrip::ArdourMixerStrip (boost::shared_ptr<ARDOUR::Stripable> stripab
 		if (insert) {
 			ArdourMixerPlugin plugin (insert);
 			plugin.insert ()->DropReferences.connect (*plugin.connections (), MISSING_INVALIDATOR,
-									boost::bind (&ArdourMixerStrip::on_drop_plugin, this, plugin_n), event_loop);
-			_plugins.emplace (plugin_n, plugin);
+									boost::bind (&ArdourMixerStrip::on_drop_plugin, this, plugin_id), event_loop);
+			_plugins.emplace (plugin_id, plugin);
 		}
 	}
 }
@@ -175,13 +175,13 @@ ArdourMixerStrip::connections () const
 }
 
 ArdourMixerPlugin&
-ArdourMixerStrip::plugin (uint32_t plugin_n)
+ArdourMixerStrip::plugin (uint32_t plugin_id)
 {
-	if (_plugins.find (plugin_n) == _plugins.end ()) {
-		throw ArdourMixerNotFoundException ("plugin id = " + boost::lexical_cast<std::string>(plugin_n) + " not found");
+	if (_plugins.find (plugin_id) == _plugins.end ()) {
+		throw ArdourMixerNotFoundException ("plugin id = " + boost::lexical_cast<std::string>(plugin_id) + " not found");
 	}
 
-	return _plugins.at (plugin_n);
+	return _plugins.at (plugin_id);
 }
 
 ArdourMixerStrip::PluginMap&
@@ -252,9 +252,9 @@ ArdourMixerStrip::name () const
 }
 
 void
-ArdourMixerStrip::on_drop_plugin (uint32_t plugin_n)
+ArdourMixerStrip::on_drop_plugin (uint32_t plugin_id)
 {
-	_plugins.erase (plugin_n);
+	_plugins.erase (plugin_id);
 }
 
 double
@@ -287,14 +287,14 @@ ArdourMixer::start ()
 	/* take a snapshot of current strips */
 	StripableList strips;
 	session ().get_stripables (strips, PresentationInfo::AllStripables);
-	uint32_t strip_n = 0;
+	uint32_t strip_id = 0;
 
 	for (StripableList::iterator it = strips.begin (); it != strips.end (); ++it) {
 		ArdourMixerStrip strip (*it, event_loop ());
 		strip.stripable ()->DropReferences.connect (*strip.connections (), MISSING_INVALIDATOR,
-									boost::bind (&ArdourMixer::on_drop_strip, this, strip_n), event_loop ());
-		_strips.emplace (strip_n, strip);
-		strip_n++;
+									boost::bind (&ArdourMixer::on_drop_strip, this, strip_id), event_loop ());
+		_strips.emplace (strip_id, strip);
+		strip_id++;
 	}
 
 	return 0;
@@ -316,20 +316,20 @@ ArdourMixer::strips ()
 
 
 ArdourMixerStrip&
-ArdourMixer::strip (uint32_t strip_n)
+ArdourMixer::strip (uint32_t strip_id)
 {
-	if (_strips.find (strip_n) == _strips.end ()) {
-		throw ArdourMixerNotFoundException ("strip id = " + boost::lexical_cast<std::string>(strip_n) + " not found");
+	if (_strips.find (strip_id) == _strips.end ()) {
+		throw ArdourMixerNotFoundException ("strip id = " + boost::lexical_cast<std::string>(strip_id) + " not found");
 	}
 
-	return _strips.at (strip_n);
+	return _strips.at (strip_id);
 }
 
 void
-ArdourMixer::on_drop_strip (uint32_t strip_n)
+ArdourMixer::on_drop_strip (uint32_t strip_id)
 {
 	Glib::Threads::Mutex::Lock lock (_mutex);
-	_strips.erase (strip_n);
+	_strips.erase (strip_id);
 }
 
 Glib::Threads::Mutex&
