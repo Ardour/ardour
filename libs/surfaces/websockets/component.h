@@ -57,7 +57,7 @@ public:
 	PBD::EventLoop*              event_loop () const;
 	Glib::RefPtr<Glib::MainLoop> main_loop () const;
 	ARDOUR::Session&             session () const;
-	ArdourMixer&                mixer () const;
+	ArdourMixer&                 mixer () const;
 	ArdourTransport&             transport () const;
 	WebsocketsServer&            server () const;
 	WebsocketsDispatcher&        dispatcher () const;

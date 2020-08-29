@@ -180,7 +180,9 @@ ArdourFeedback::poll () const
 {
 	update_all (Node::transport_time, transport ().time ());
 
-	for (ArdourMixer::StripMap::iterator it = mixer().strips().begin(); it != mixer().strips().end(); ++it) {
+	Glib::Threads::Mutex::Lock lock (mixer ().mutex ());
+
+	for (ArdourMixer::StripMap::iterator it = mixer ().strips ().begin (); it != mixer ().strips ().end (); ++it) {
 		float db = it->second.meter_level_db ();
 		update_all (Node::strip_meter, it->first, static_cast<double> (db));
 	}
@@ -230,8 +232,9 @@ ArdourFeedback::observe_strip_plugins (uint32_t strip_n, ArdourMixerStrip::Plugi
 {
 	for (ArdourMixerStrip::PluginMap::iterator it = plugins.begin(); it != plugins.end(); ++it) {
 		uint32_t                                     plugin_n    = it->first;
-		boost::shared_ptr<PluginInsert>              insert      = it->second.insert ();
-		boost::shared_ptr<PBD::ScopedConnectionList> connections = it->second.connections ();
+		ArdourMixerPlugin&                           plugin      = it->second;
+		boost::shared_ptr<PluginInsert>              insert      = plugin.insert ();
+		boost::shared_ptr<PBD::ScopedConnectionList> connections = plugin.connections ();
 		uint32_t                             	     bypass      = insert->plugin ()->designated_bypass_port ();
 		Evoral::Parameter                   	     param       = Evoral::Parameter (PluginAutomation, 0, bypass);
 		boost::shared_ptr<AutomationControl>	     control     = insert->automation_control (param);
@@ -241,32 +244,22 @@ ArdourFeedback::observe_strip_plugins (uint32_t strip_n, ArdourMixerStrip::Plugi
 			                          boost::bind<void> (PluginBypassObserver (), this, strip_n, plugin_n), event_loop ());
 		}
 
-		//insert->DropReferences.connect (*connections, MISSING_INVALIDATOR,
-		//								boost::bind (&ArdourFeedback::on_drop_plugin, this, strip_n, plugin_n), event_loop ());
-
-		// assume each strip can hold up to 65535 plugins
-		//_plugin_connections[(strip_n << 16) | plugin_n] = std::move (connections);
-
-		observe_strip_plugin_param_values (strip_n, plugin_n, insert);
+		observe_strip_plugin_param_values (strip_n, plugin_n, plugin);
 	}
 }
 
 void
 ArdourFeedback::observe_strip_plugin_param_values (uint32_t strip_n,
-                                                   uint32_t plugin_n, boost::shared_ptr<ARDOUR::PluginInsert> insert)
+                                                   uint32_t plugin_n, ArdourMixerPlugin& plugin)
 {
-	boost::shared_ptr<Plugin> plugin = insert->plugin ();
-
-	for (uint32_t param_n = 0; param_n < plugin->parameter_count (); ++param_n) {
+	for (uint32_t param_n = 0; param_n < plugin.param_count (); ++param_n) {
 		try {
-			boost::shared_ptr<AutomationControl> control = mixer ().strip (strip_n).plugin (plugin_n).param_control (param_n);
+			boost::shared_ptr<AutomationControl> control = plugin.param_control (param_n);
 
-			/*PBD::ScopedConnectionList *connections = _plugin_connections[(strip_n << 16) | plugin_n].get();
-
-			control->Changed.connect (*connections, MISSING_INVALIDATOR,
+			control->Changed.connect (*plugin.connections (), MISSING_INVALIDATOR,
 			                          boost::bind<void> (PluginParamValueObserver (), this, strip_n, plugin_n, param_n,
 			                                             boost::weak_ptr<AutomationControl>(control)),
-			                          event_loop ());*/
+			                          event_loop ());
 		} catch (ArdourMixerNotFoundException) {
 			/* ignore */
 		}

@@ -33,6 +33,11 @@ ArdourMixerPlugin::ArdourMixerPlugin (boost::shared_ptr<ARDOUR::PluginInsert> in
 	, _connections (boost::shared_ptr<PBD::ScopedConnectionList> (new PBD::ScopedConnectionList()))
 {}
 
+ArdourMixerPlugin::~ArdourMixerPlugin ()
+{
+	_connections->drop_connections ();
+}
+
 boost::shared_ptr<ARDOUR::PluginInsert>
 ArdourMixerPlugin::insert () const
 {
@@ -57,22 +62,16 @@ ArdourMixerPlugin::set_enabled (bool enabled)
 	insert ()->enable (enabled);
 }
 
+uint32_t
+ArdourMixerPlugin::param_count () const
+{
+	return _insert->plugin ()->parameter_count ();
+}
+
 TypedValue
 ArdourMixerPlugin::param_value (uint32_t param_n)
 {
-	boost::shared_ptr<ARDOUR::AutomationControl> control = param_control (param_n);
-	ParameterDescriptor pd    = control->desc ();
-	TypedValue          value = TypedValue ();
-
-	if (pd.toggled) {
-		value = TypedValue (static_cast<bool> (control->get_value ()));
-	} else if (pd.enumeration || pd.integer_step) {
-		value = TypedValue (static_cast<int> (control->get_value ()));
-	} else {
-		value = TypedValue (control->get_value ());
-	}
-
-	return value;
+	return param_value (param_control (param_n));
 }
 
 void
@@ -108,7 +107,24 @@ ArdourMixerPlugin::param_control (uint32_t param_n) const
 	return _insert->automation_control (Evoral::Parameter (PluginAutomation, 0, control_id));
 }
 
-ArdourMixerStrip::ArdourMixerStrip (boost::shared_ptr<ARDOUR::Stripable> stripable)
+TypedValue
+ArdourMixerPlugin::param_value (boost::shared_ptr<ARDOUR::AutomationControl> control)
+{
+	ParameterDescriptor pd    = control->desc ();
+	TypedValue          value = TypedValue ();
+
+	if (pd.toggled) {
+		value = TypedValue (static_cast<bool> (control->get_value ()));
+	} else if (pd.enumeration || pd.integer_step) {
+		value = TypedValue (static_cast<int> (control->get_value ()));
+	} else {
+		value = TypedValue (control->get_value ());
+	}
+
+	return value;
+}
+
+ArdourMixerStrip::ArdourMixerStrip (boost::shared_ptr<ARDOUR::Stripable> stripable, PBD::EventLoop* event_loop)
 	: _stripable (stripable)
 	, _connections (boost::shared_ptr<PBD::ScopedConnectionList> (new PBD::ScopedConnectionList()))
 {
@@ -134,9 +150,16 @@ ArdourMixerStrip::ArdourMixerStrip (boost::shared_ptr<ARDOUR::Stripable> stripab
 
 		if (insert) {
 			ArdourMixerPlugin plugin (insert);
+			plugin.insert ()->DropReferences.connect (*plugin.connections (), MISSING_INVALIDATOR,
+									boost::bind (&ArdourMixerStrip::on_drop_plugin, this, plugin_n), event_loop);
 			_plugins.emplace (plugin_n, plugin);
 		}
 	}
+}
+
+ArdourMixerStrip::~ArdourMixerStrip ()
+{
+	_connections->drop_connections ();
 }
 
 boost::shared_ptr<ARDOUR::Stripable>
@@ -229,11 +252,9 @@ ArdourMixerStrip::name () const
 }
 
 void
-ArdourMixerStrip::on_drop_plugin (uint32_t)
+ArdourMixerStrip::on_drop_plugin (uint32_t plugin_n)
 {
-	//uint32_t key = (strip_n << 16) | plugin_n;	
-	//_plugin_connections[key]->drop_connections ();
-	//_plugin_connections.erase (key);
+	_plugins.erase (plugin_n);
 }
 
 double
@@ -263,16 +284,17 @@ ArdourMixerStrip::from_db (double db)
 int
 ArdourMixer::start ()
 {
-	/* take an indexed snapshot of current strips */
+	/* take a snapshot of current strips */
 	StripableList strips;
 	session ().get_stripables (strips, PresentationInfo::AllStripables);
 	uint32_t strip_n = 0;
 
 	for (StripableList::iterator it = strips.begin (); it != strips.end (); ++it) {
-		ArdourMixerStrip strip (*it);
-		//(*it)->DropReferences.connect (_connections, MISSING_INVALIDATOR,
-		//							boost::bind (&ArdourMixer::on_drop_strip, this, strip_n), event_loop ());
-		_strips.emplace (strip_n++, strip);
+		ArdourMixerStrip strip (*it, event_loop ());
+		strip.stripable ()->DropReferences.connect (*strip.connections (), MISSING_INVALIDATOR,
+									boost::bind (&ArdourMixer::on_drop_strip, this, strip_n), event_loop ());
+		_strips.emplace (strip_n, strip);
+		strip_n++;
 	}
 
 	return 0;
@@ -281,6 +303,7 @@ ArdourMixer::start ()
 int
 ArdourMixer::stop ()
 {
+	Glib::Threads::Mutex::Lock lock (mixer ().mutex ());
 	_strips.clear ();
 	return 0;
 }
@@ -305,15 +328,12 @@ ArdourMixer::strip (uint32_t strip_n)
 void
 ArdourMixer::on_drop_strip (uint32_t strip_n)
 {
-	/*for (uint32_t plugin_n = 0;; ++plugin_n) {
-		boost::shared_ptr<PluginInsert> insert = strip_plugin_insert (strip_n, plugin_n);
-		if (!insert) {
-			break;
-		}
+	Glib::Threads::Mutex::Lock lock (_mutex);
+	_strips.erase (strip_n);
+}
 
-		on_drop_plugin (strip_n, plugin_n);
-	}*/
-
-	//_strip_connections[strip_n]->drop_connections ();
-	//_strip_connections.erase (strip_n);
+Glib::Threads::Mutex&
+ArdourMixer::mutex ()
+{
+	return _mutex;
 }
