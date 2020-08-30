@@ -484,7 +484,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		 */
 		if (rec_nframes) {
 			_accumulated_capture_offset += rec_offset;
-		} else {
+		} else if (start_sample >= _capture_start_sample) {
 			_accumulated_capture_offset += nframes;
 		}
 
