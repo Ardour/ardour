@@ -24,6 +24,8 @@
 
 #include "manifest.h"
 
+namespace ArdourSurface {
+
 typedef std::vector<SurfaceManifest> SurfaceManifestVector;
 
 class ServerResources
@@ -48,5 +50,7 @@ private:
 	SurfaceManifestVector read_manifests (std::string);
 
 };
+
+} // namespace ArdourSurface
 
 #endif // _ardour_surface_websockets_resources_h_

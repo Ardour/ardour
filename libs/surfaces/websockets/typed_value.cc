@@ -23,6 +23,8 @@
 
 #include "typed_value.h"
 
+using namespace ArdourSurface;
+
 #define DBL_TOLERANCE 0.001
 
 TypedValue::TypedValue ()

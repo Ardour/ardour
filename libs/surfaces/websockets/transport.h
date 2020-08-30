@@ -21,6 +21,8 @@
 
 #include "component.h"
 
+namespace ArdourSurface {
+
 class ArdourTransport : public SurfaceComponent
 {
 public:
@@ -39,5 +41,7 @@ public:
 	bool record () const;
 	void set_record (bool);
 };
+
+} // namespace ArdourSurface
 
 #endif // _ardour_surface_websockets_transport_h_

@@ -25,7 +25,10 @@
 #include "message.h"
 #include "state.h"
 
-typedef struct lws*                 Client;
+typedef struct lws* Client;
+
+namespace ArdourSurface {
+
 typedef std::list<NodeStateMessage> ClientOutputBuffer;
 
 class ClientContext
@@ -58,5 +61,7 @@ private:
 
 	ClientOutputBuffer _output_buf;
 };
+
+} // namespace ArdourSurface
 
 #endif // _ardour_surface_websockets_client_h_

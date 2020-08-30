@@ -21,6 +21,8 @@
 
 #include "state.h"
 
+namespace ArdourSurface {
+
 class NodeStateMessage
 {
 public:
@@ -47,5 +49,7 @@ private:
 	bool      _write;
 	NodeState _state;
 };
+
+} // namespace ArdourSurface
 
 #endif // _ardour_surface_websockets_message_h_

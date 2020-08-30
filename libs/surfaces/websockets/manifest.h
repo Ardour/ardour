@@ -21,6 +21,8 @@
 
 #include <string>
 
+namespace ArdourSurface {
+
 class SurfaceManifest
 {
 public:
@@ -46,5 +48,7 @@ private:
 	std::string _description;
 	std::string _version;
 };
+
+} // namespace ArdourSurface
 
 #endif // _ardour_surface_websockets_manifest_h_

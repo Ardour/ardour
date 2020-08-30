@@ -20,6 +20,8 @@
 
 #include "client.h"
 
+using namespace ArdourSurface;
+
 bool
 ClientContext::has_state (const NodeState& node_state)
 {

@@ -19,9 +19,13 @@
 #ifndef _ardour_surface_websockets_json_h_
 #define _ardour_surface_websockets_json_h_
 
-namespace Json
+namespace ArdourSurface {
+
+namespace WebSocketsJSON
 {
 	std::string escape (const std::string&);
 }
+
+} // namespace ArdourSurface
 
 #endif // _ardour_surface_websockets_json_h_

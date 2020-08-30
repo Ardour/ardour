@@ -21,6 +21,7 @@
 #include "transport.h"
 
 using namespace ARDOUR;
+using namespace ArdourSurface;
 
 double
 ArdourTransport::tempo () const

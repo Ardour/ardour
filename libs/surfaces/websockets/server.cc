@@ -47,6 +47,7 @@
 #define MAX_INDEX_SIZE	65536
 
 using namespace Glib;
+using namespace ArdourSurface;
 
 WebsocketsServer::WebsocketsServer (ArdourSurface::ArdourWebsockets& surface)
     : SurfaceComponent (surface)

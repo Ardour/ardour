@@ -19,6 +19,8 @@
 #include "component.h"
 #include "ardour_websockets.h"
 
+using namespace ArdourSurface;
+
 BasicUI&
 SurfaceComponent::basic_ui () const
 {

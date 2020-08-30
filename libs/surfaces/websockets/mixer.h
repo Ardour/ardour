@@ -24,9 +24,11 @@
 #include "component.h"
 #include "typed_value.h"
 
+namespace ArdourSurface {
+
 struct ArdourMixerNotFoundException : public virtual std::runtime_error
 {
-	using std::runtime_error::runtime_error;
+	using std::runtime_error::runtime_error; // XXX!
 };
 
 class ArdourMixerPlugin
@@ -119,5 +121,7 @@ private:
 	StripMap             _strips;
 	Glib::Threads::Mutex _mutex;
 };
+
+} // namespace ArdourSurface
 
 #endif // _ardour_surface_websockets_mixer_h_

@@ -28,9 +28,8 @@
 
 namespace ArdourSurface
 {
-class ArdourWebsockets;
-}
 
+class ArdourWebsockets;
 class ArdourMixer;
 class ArdourTransport;
 class WebsocketsServer;
@@ -65,5 +64,7 @@ public:
 protected:
 	ArdourSurface::ArdourWebsockets& _surface;
 };
+
+} // namespace ArdourSurface
 
 #endif // _ardour_surface_websockets_component_h_

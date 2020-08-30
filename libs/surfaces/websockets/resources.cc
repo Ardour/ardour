@@ -28,6 +28,8 @@
 #include "resources.h"
 #include "json.h"
 
+using namespace ArdourSurface;
+
 static const char* const data_dir_env_var = "ARDOUR_WEBSURFACES_PATH";
 static const char* const data_dir_name = "web_surfaces";
 static const char* const builtin_dir_name = "builtin";
@@ -85,8 +87,8 @@ ServerResources::scan ()
 	SurfaceManifestVector builtin = read_manifests (builtin_dir_str);
 
 	ss << "[{"
-		<< "\"filesystemPath\":\"" << Json::escape (builtin_dir_str) << "\""
-		<< ",\"path\":\"" << Json::escape (builtin_dir_name) << "\""
+		<< "\"filesystemPath\":\"" << WebSocketsJSON::escape (builtin_dir_str) << "\""
+		<< ",\"path\":\"" << WebSocketsJSON::escape (builtin_dir_name) << "\""
 		<< ",\"surfaces\":"
 		<< "[";
 
@@ -101,8 +103,8 @@ ServerResources::scan ()
 	SurfaceManifestVector user = read_manifests (user_dir_str);
 
 	ss << "]},{" 
-		<< "\"filesystemPath\":\"" << Json::escape (user_dir_str) << "\""
-		<< ",\"path\":\"" << Json::escape (user_dir_name) << "\"" 
+		<< "\"filesystemPath\":\"" << WebSocketsJSON::escape (user_dir_str) << "\""
+		<< ",\"path\":\"" << WebSocketsJSON::escape (user_dir_name) << "\"" 
 		<< ",\"surfaces\":" 
 		<< "[";
 

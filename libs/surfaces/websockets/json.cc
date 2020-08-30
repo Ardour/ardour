@@ -21,10 +21,12 @@
 
 #include "json.h"
 
+using namespace ArdourSurface;
+
 /* adapted from https://stackoverflow.com/questions/7724448/simple-json-string-escape-for-c
    CC BY-SA 4.0 license */
 std::string
-Json::escape (const std::string &s) {
+WebSocketsJSON::escape (const std::string &s) {
     std::ostringstream o;
 
     for (std::string::const_iterator it = s.begin(); it != s.end(); ++it) {

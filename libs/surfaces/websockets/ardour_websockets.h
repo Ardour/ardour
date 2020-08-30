@@ -39,8 +39,8 @@
 #include "server.h"
 #include "mixer.h"
 
-namespace ArdourSurface
-{
+namespace ArdourSurface {
+
 const char * const surface_name = "WebSockets Server (Experimental)";
 const char * const surface_id = "uri://ardour.org/surfaces/ardour_websockets:0";
 

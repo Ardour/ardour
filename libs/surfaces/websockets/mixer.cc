@@ -27,6 +27,7 @@
 #include "mixer.h"
 
 using namespace ARDOUR;
+using namespace ArdourSurface;
 
 ArdourMixerPlugin::ArdourMixerPlugin (boost::shared_ptr<ARDOUR::PluginInsert> insert)
 	: _insert (insert)

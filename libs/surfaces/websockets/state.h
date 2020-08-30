@@ -29,6 +29,8 @@
 
 #define ADDR_NONE UINT_MAX
 
+namespace ArdourSurface {
+
 namespace Node
 {
 	const std::string strip_description              = "strip_description";
@@ -83,5 +85,7 @@ private:
 
 std::size_t
 hash_value (const NodeState&);
+
+} // namespace ArdourSurface
 
 #endif // _ardour_surface_websockets_state_h_

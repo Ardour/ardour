@@ -21,6 +21,8 @@
 #ifndef _ardour_surface_websockets_typed_value_h_
 #define _ardour_surface_websockets_typed_value_h_
 
+namespace ArdourSurface {
+
 class TypedValue
 {
 public:
@@ -64,5 +66,7 @@ private:
 	double      _d;
 	std::string _s;
 };
+
+} // namespace ArdourSurface
 
 #endif // _ardour_surface_websockets_typed_value_h_

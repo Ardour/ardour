@@ -28,6 +28,8 @@
 #include "resources.h"
 #include "json.h"
 
+using namespace ArdourSurface;
+
 static const char* const manifest_filename = "manifest.xml";
 
 SurfaceManifest::SurfaceManifest (std::string path)
@@ -77,10 +79,10 @@ SurfaceManifest::to_json ()
 	std::stringstream ss;
 
 	ss << "{"
-		<< "\"path\":\"" << Json::escape (Glib::path_get_basename (_path)) << "\""
-		<< ",\"name\":\"" << Json::escape (_name) << "\""
-		<< ",\"description\":\"" << Json::escape (_description) << "\""
-		<< ",\"version\":\"" << Json::escape (_version) << "\""
+		<< "\"path\":\"" << WebSocketsJSON::escape (Glib::path_get_basename (_path)) << "\""
+		<< ",\"name\":\"" << WebSocketsJSON::escape (_name) << "\""
+		<< ",\"description\":\"" << WebSocketsJSON::escape (_description) << "\""
+		<< ",\"version\":\"" << WebSocketsJSON::escape (_version) << "\""
 		<< "}";
 
 	return ss.str ();

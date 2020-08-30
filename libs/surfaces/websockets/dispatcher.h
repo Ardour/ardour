@@ -25,6 +25,8 @@
 #include "component.h"
 #include "message.h"
 
+namespace ArdourSurface {
+
 class WebsocketsDispatcher : public SurfaceComponent
 {
 public:
@@ -56,5 +58,7 @@ private:
 	void update (Client, std::string, uint32_t, uint32_t, uint32_t, TypedValue);
 	void update (Client, std::string, const AddressVector&, const ValueVector&);
 };
+
+} // namespace ArdourSurface
 
 #endif // _ardour_surface_websockets_dispatcher_h_

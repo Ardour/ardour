@@ -49,6 +49,8 @@ struct LwsPollFdGlibSource {
 };
 #endif
 
+namespace ArdourSurface {
+
 class WebsocketsServer : public SurfaceComponent
 {
 public:
@@ -101,5 +103,7 @@ private:
 	int               ioc_to_events (Glib::IOCondition);
 #endif
 };
+
+} // namespace ArdourSurface
 
 #endif // _ardour_surface_websockets_server_h_

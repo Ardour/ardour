@@ -29,6 +29,7 @@
 #define POLL_INTERVAL_MS 100
 
 using namespace ARDOUR;
+using namespace ArdourSurface;
 
 struct TransportObserver {
 	void operator() (ArdourFeedback* p)

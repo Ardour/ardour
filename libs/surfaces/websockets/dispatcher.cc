@@ -25,6 +25,7 @@
 #include "state.h"
 
 using namespace ARDOUR;
+using namespace ArdourSurface;
 
 #define NODE_METHOD_PAIR(x) (Node::x, &WebsocketsDispatcher::x##_handler)
 

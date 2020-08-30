@@ -21,6 +21,8 @@
 
 #include "state.h"
 
+using namespace ArdourSurface;
+
 NodeState::NodeState () {}
 
 NodeState::NodeState (std::string node)

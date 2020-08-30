@@ -34,6 +34,8 @@
 #define JSON_INF 1.0e+128
 #define JSON_INF_STR XSTR (JSON_INF)
 
+using namespace ArdourSurface;
+
 namespace pt = boost::property_tree;
 
 NodeStateMessage::NodeStateMessage (const NodeState& state)
@@ -167,7 +169,7 @@ NodeStateMessage::serialize (void* buf, size_t len) const
 					break;
 				}
 				case TypedValue::String:
-					ss << '"' << Json::escape (static_cast<std::string> (val)) << '"';
+					ss << '"' << WebSocketsJSON::escape (static_cast<std::string> (val)) << '"';
 					break;
 				default:
 					break;

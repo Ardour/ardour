@@ -27,6 +27,8 @@
 #include "typed_value.h"
 #include "mixer.h"
 
+namespace ArdourSurface {
+
 class ArdourFeedback : public SurfaceComponent
 {
 public:
@@ -53,5 +55,7 @@ private:
 	void observe_mixer ();
 	void observe_strip_plugins (uint32_t, ArdourMixerStrip::PluginMap&);
 };
+
+} // namespace ArdourSurface
 
 #endif // _ardour_surface_websockets_feedback_h_
