@@ -165,7 +165,7 @@ unit:db-display
 A powerful mono compressor.
 """ ;
 
-    doap:name "ACE Compressor" ;
+    doap:name "a-Compressor" ;
 		doap:license <http://usefulinc.com/doap/licenses/gpl> ;
     doap:maintainer <http://ardour.org/credits.html> ;
 

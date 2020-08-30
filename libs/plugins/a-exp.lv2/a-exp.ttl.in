@@ -165,7 +165,7 @@ unit:db-display
 A powerful mono expander
 """ ;
 
-    doap:name "ACE Expander" ;
+    doap:name "a-Expander" ;
 		doap:license <http://usefulinc.com/doap/licenses/gpl> ;
     doap:maintainer <http://ardour.org/credits.html> ;
 

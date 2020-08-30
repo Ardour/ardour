@@ -303,7 +303,7 @@ unit:db1
 A basic 4 band EQ.
 """ ;
 
-    doap:name "ACE EQ" ;
+    doap:name "a-EQ" ;
     doap:license "GPL v2+" ;
     doap:maintainer <http://ardour.org/credits.html> ;
 
