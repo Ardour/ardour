@@ -101,7 +101,7 @@ ArdourMixerPlugin::param_control (uint32_t param_id) const
 	uint32_t                  control_id = plugin->nth_parameter (param_id, ok);
 
 	if (!ok || !plugin->parameter_is_input (control_id)) {
-		throw ArdourMixerNotFoundException("invalid automation control for param id = "
+		throw ArdourMixerNotFoundException ("invalid automation control for param id = "
 			+ boost::lexical_cast<std::string>(param_id));
 	}
 

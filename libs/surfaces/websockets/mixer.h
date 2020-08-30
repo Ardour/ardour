@@ -28,7 +28,14 @@ namespace ArdourSurface {
 
 struct ArdourMixerNotFoundException : public virtual std::runtime_error
 {
-	using std::runtime_error::runtime_error; // XXX!
+public:
+	ArdourMixerNotFoundException (std::string const & what)
+		: runtime_error (what)
+		, _what (what)
+	{}
+	virtual const char* what() const throw() { return _what.c_str(); }
+private:
+	std::string _what;
 };
 
 class ArdourMixerPlugin

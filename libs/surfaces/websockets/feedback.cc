@@ -241,7 +241,7 @@ ArdourFeedback::observe_strip_plugins (uint32_t strip_id, ArdourMixerStrip::Plug
 				                          boost::bind<void> (PluginParamValueObserver (), this, strip_id, plugin_id, param_id,
 				                                             boost::weak_ptr<AutomationControl>(control)),
 				                          event_loop ());
-			} catch (ArdourMixerNotFoundException) {
+			} catch (ArdourMixerNotFoundException& e) {
 				/* ignore */
 			}
 		}

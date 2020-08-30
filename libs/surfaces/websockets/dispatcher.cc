@@ -95,7 +95,7 @@ WebsocketsDispatcher::update_all_nodes (Client client)
 
 				try {
 				    a_ctrl = strip.plugin (plugin_id).param_control (param_id);
-				} catch (ArdourMixerNotFoundException) {
+				} catch (ArdourMixerNotFoundException& err) {
 					continue;
 				}
 
