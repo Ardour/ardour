@@ -59,14 +59,12 @@ WebsocketsDispatcher::update_all_nodes (Client client)
 		uint32_t strip_id        = it->first;
 		ArdourMixerStrip& strip = it->second;
 
-		bool is_vca = strip.stripable ()->presentation_info ().flags () & ARDOUR::PresentationInfo::VCA;
-
 		AddressVector strip_addr = AddressVector ();
 		strip_addr.push_back (strip_id);
 		
 		ValueVector strip_desc = ValueVector ();
 		strip_desc.push_back (strip.name ());
-		strip_desc.push_back (is_vca);
+		strip_desc.push_back (strip.is_vca ());
 		
 		update (client, Node::strip_description, strip_addr, strip_desc);
 		
@@ -74,12 +72,7 @@ WebsocketsDispatcher::update_all_nodes (Client client)
 		update (client, Node::strip_mute, strip_id, strip.mute ());
 
 		// Pan and plugins not available in VCAs
-		if (is_vca) {
-			continue;
-		}
-
-		boost::shared_ptr<Route> route = boost::dynamic_pointer_cast<Route> (strip.stripable ());
-		if (!route) {
+		if (strip.is_vca ()) {
 			continue;
 		}
 

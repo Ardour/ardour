@@ -128,7 +128,7 @@ ArdourMixerStrip::ArdourMixerStrip (boost::shared_ptr<ARDOUR::Stripable> stripab
 	: _stripable (stripable)
 	, _connections (boost::shared_ptr<PBD::ScopedConnectionList> (new PBD::ScopedConnectionList()))
 {
-	if (_stripable->presentation_info ().flags () & ARDOUR::PresentationInfo::VCA) {
+	if (is_vca ()) {
 		/* no plugins to handle */
 		return;
 	}
@@ -236,6 +236,12 @@ void
 ArdourMixerStrip::set_mute (bool mute)
 {
 	_stripable->mute_control ()->set_value (mute ? 1.0 : 0.0, PBD::Controllable::NoGroup);
+}
+
+bool
+ArdourMixerStrip::is_vca () const
+{
+	return _stripable->presentation_info ().flags () & ARDOUR::PresentationInfo::VCA;
 }
 
 float

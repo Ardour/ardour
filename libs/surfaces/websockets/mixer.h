@@ -78,6 +78,8 @@ public:
 	bool mute () const;
 	void set_mute (bool);
 
+	bool is_vca () const;
+
 	std::string name () const;
 
 	float meter_level_db () const;
