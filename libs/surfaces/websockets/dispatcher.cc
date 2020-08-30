@@ -56,7 +56,7 @@ void
 WebsocketsDispatcher::update_all_nodes (Client client)
 {
 	for (ArdourMixer::StripMap::iterator it = mixer().strips().begin(); it != mixer().strips().end(); ++it) {
-		uint32_t strip_id        = it->first;
+		uint32_t strip_id       = it->first;
 		ArdourMixerStrip& strip = it->second;
 
 		AddressVector strip_addr = AddressVector ();
@@ -79,7 +79,7 @@ WebsocketsDispatcher::update_all_nodes (Client client)
 		update (client, Node::strip_pan, strip_id, strip.pan ());
 
 		for (ArdourMixerStrip::PluginMap::iterator it = strip.plugins ().begin (); it != strip.plugins ().end (); ++it) {
-			uint32_t plugin_id                      = it->first;
+			uint32_t plugin_id                     = it->first;
 			boost::shared_ptr<PluginInsert> insert = it->second.insert ();
 			boost::shared_ptr<Plugin> plugin       = insert->plugin ();
 

@@ -194,7 +194,7 @@ void
 ArdourFeedback::observe_mixer ()
 {
 	for (ArdourMixer::StripMap::iterator it = mixer().strips().begin(); it != mixer().strips().end(); ++it) {
-		uint32_t strip_id        = it->first;
+		uint32_t strip_id       = it->first;
 		ArdourMixerStrip& strip = it->second;
 
 		boost::shared_ptr<Stripable> stripable = strip.stripable ();
@@ -219,7 +219,7 @@ void
 ArdourFeedback::observe_strip_plugins (uint32_t strip_id, ArdourMixerStrip::PluginMap& plugins)
 {
 	for (ArdourMixerStrip::PluginMap::iterator it = plugins.begin(); it != plugins.end(); ++it) {
-		uint32_t                                     plugin_id    = it->first;
+		uint32_t                                     plugin_id   = it->first;
 		ArdourMixerPlugin&                           plugin      = it->second;
 		boost::shared_ptr<PluginInsert>              insert      = plugin.insert ();
 		boost::shared_ptr<PBD::ScopedConnectionList> connections = plugin.connections ();

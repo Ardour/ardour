@@ -19,12 +19,9 @@
 #ifndef _ardour_surface_websockets_json_h_
 #define _ardour_surface_websockets_json_h_
 
-class Json
+namespace Json
 {
-public:
-	
-	static std::string escape (const std::string&);
-
-};
+	std::string escape (const std::string&);
+}
 
 #endif // _ardour_surface_websockets_json_h_
