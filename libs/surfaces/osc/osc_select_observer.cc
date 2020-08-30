@@ -153,6 +153,13 @@ OSCSelectObserver::refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip
 
 		session->RouteGroupPropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::group_sharing, this, _1), OSC::instance());
 		group_sharing (rt->route_group ());
+
+		boost::shared_ptr<PannerShell> pan_sh =  rt->panner_shell();
+		if (pan_sh) {
+			pan_sh->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::panner_changed, this), OSC::instance());
+		}
+		panner_changed ();
+
 	} else {
 		group_sharing (0);
 	}
@@ -217,10 +224,6 @@ OSCSelectObserver::refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip
 		trim_message (X_("/select/trimdB"), _strip->trim_control());
 		send_automation (X_("/select/trimdB"), _strip->trim_control());
 	}
-
-	boost::shared_ptr<PannerShell> pan_sh =  rt->panner_shell();
-	pan_sh->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::panner_changed, this), OSC::instance());
-	panner_changed ();
 
 	// sends, plugins and eq
 	// detecting processor changes is now in osc.cc
@@ -669,49 +672,57 @@ OSCSelectObserver::panner_changed ()
 	if (feedback[1]) {
 
 		boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (_strip);
+		if (!rt) {
+			return;
+		}
 		boost::shared_ptr<PannerShell> pan_sh =  rt->panner_shell();
-		string pt = pan_sh->current_panner_uri();
-		if (pt.size()){
-			string ptype = pt.substr(pt.find_last_of ('/') + 1);
-			_osc.text_message (X_("/strip/pan_type"), ptype, addr);
+		if (pan_sh) {
+			string pt = pan_sh->current_panner_uri();
+			if (pt.size()){
+				string ptype = pt.substr(pt.find_last_of ('/') + 1);
+				_osc.text_message (X_("/strip/pan_type"), ptype, addr);
+			} else {
+				_osc.text_message (X_("/select/pan_type"), "none", addr);
+				_osc.float_message (X_("/strip/pan_stereo_position"), 0.5, addr);
+				_osc.float_message (X_("/strip/pan_stereo_width"), 1.0, addr);
+				return;
+			}
+			boost::shared_ptr<Controllable> pan_controllable = boost::dynamic_pointer_cast<Controllable>(_strip->pan_azimuth_control());
+			if (pan_controllable) {
+				boost::shared_ptr<AutomationControl>at = boost::dynamic_pointer_cast<AutomationControl> (pan_controllable);
+				pan_controllable->Changed.connect (pan_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_stereo_position"), _strip->pan_azimuth_control()), OSC::instance());
+				at->alist()->automation_state_changed.connect (pan_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_automation, this, X_("/select/pan_stereo_position"), _strip->pan_azimuth_control()), OSC::instance());
+				change_message (X_("/select/pan_stereo_position"), _strip->pan_azimuth_control());
+				send_automation (X_("/select/pan_stereo_position"), _strip->pan_azimuth_control());
+			}
+
+			boost::shared_ptr<Controllable> width_controllable = boost::dynamic_pointer_cast<Controllable>(_strip->pan_width_control());
+			if (width_controllable) {
+				boost::shared_ptr<AutomationControl>at = boost::dynamic_pointer_cast<AutomationControl> (width_controllable);
+				width_controllable->Changed.connect (pan_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_stereo_width"), _strip->pan_width_control()), OSC::instance());
+				at->alist()->automation_state_changed.connect (pan_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_automation, this, X_("/select/pan_stereo_width"), _strip->pan_width_control()), OSC::instance());
+				change_message (X_("/select/pan_stereo_width"), _strip->pan_width_control());
+				send_automation (X_("/select/pan_stereo_width"), _strip->pan_width_control());
+			}
+
+			// Rest of possible pan controls... Untested because I can't find a way to get them in the GUI :)
+			if (_strip->pan_elevation_control ()) {
+				_strip->pan_elevation_control()->Changed.connect (pan_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_elevation_position"), _strip->pan_elevation_control()), OSC::instance());
+				change_message (X_("/select/pan_elevation_position"), _strip->pan_elevation_control());
+			}
+			if (_strip->pan_frontback_control ()) {
+				_strip->pan_frontback_control()->Changed.connect (pan_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_frontback_position"), _strip->pan_frontback_control()), OSC::instance());
+				change_message (X_("/select/pan_frontback_position"), _strip->pan_frontback_control());
+			}
+			if (_strip->pan_lfe_control ()) {
+				_strip->pan_lfe_control()->Changed.connect (pan_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_lfe_control"), _strip->pan_lfe_control()), OSC::instance());
+				change_message (X_("/select/pan_lfe_control"), _strip->pan_lfe_control());
+			}
 		} else {
 			_osc.text_message (X_("/select/pan_type"), "none", addr);
 			_osc.float_message (X_("/strip/pan_stereo_position"), 0.5, addr);
 			_osc.float_message (X_("/strip/pan_stereo_width"), 1.0, addr);
-			return;
 		}
-		boost::shared_ptr<Controllable> pan_controllable = boost::dynamic_pointer_cast<Controllable>(_strip->pan_azimuth_control());
-		if (pan_controllable) {
-			boost::shared_ptr<AutomationControl>at = boost::dynamic_pointer_cast<AutomationControl> (pan_controllable);
-			pan_controllable->Changed.connect (pan_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_stereo_position"), _strip->pan_azimuth_control()), OSC::instance());
-			at->alist()->automation_state_changed.connect (pan_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_automation, this, X_("/select/pan_stereo_position"), _strip->pan_azimuth_control()), OSC::instance());
-			change_message (X_("/select/pan_stereo_position"), _strip->pan_azimuth_control());
-			send_automation (X_("/select/pan_stereo_position"), _strip->pan_azimuth_control());
-		}
-
-		boost::shared_ptr<Controllable> width_controllable = boost::dynamic_pointer_cast<Controllable>(_strip->pan_width_control());
-		if (width_controllable) {
-			boost::shared_ptr<AutomationControl>at = boost::dynamic_pointer_cast<AutomationControl> (width_controllable);
-			width_controllable->Changed.connect (pan_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_stereo_width"), _strip->pan_width_control()), OSC::instance());
-			at->alist()->automation_state_changed.connect (pan_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_automation, this, X_("/select/pan_stereo_width"), _strip->pan_width_control()), OSC::instance());
-			change_message (X_("/select/pan_stereo_width"), _strip->pan_width_control());
-			send_automation (X_("/select/pan_stereo_width"), _strip->pan_width_control());
-		}
-
-		// Rest of possible pan controls... Untested because I can't find a way to get them in the GUI :)
-		if (_strip->pan_elevation_control ()) {
-			_strip->pan_elevation_control()->Changed.connect (pan_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_elevation_position"), _strip->pan_elevation_control()), OSC::instance());
-			change_message (X_("/select/pan_elevation_position"), _strip->pan_elevation_control());
-		}
-		if (_strip->pan_frontback_control ()) {
-			_strip->pan_frontback_control()->Changed.connect (pan_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_frontback_position"), _strip->pan_frontback_control()), OSC::instance());
-			change_message (X_("/select/pan_frontback_position"), _strip->pan_frontback_control());
-		}
-		if (_strip->pan_lfe_control ()) {
-			_strip->pan_lfe_control()->Changed.connect (pan_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_lfe_control"), _strip->pan_lfe_control()), OSC::instance());
-			change_message (X_("/select/pan_lfe_control"), _strip->pan_lfe_control());
-		}
-
 	}
 }
 

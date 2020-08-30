@@ -207,10 +207,17 @@ OSCRouteObserver::refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip,
 		}
 
 		boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (_strip);
-		boost::shared_ptr<PannerShell> pan_sh =  rt->panner_shell();
-		current_pan_shell = pan_sh;
-		pan_sh->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::panner_changed, this, current_pan_shell), OSC::instance());
-		panner_changed (pan_sh);
+		if (rt) {
+			boost::shared_ptr<PannerShell> pan_sh =  rt->panner_shell();
+			current_pan_shell = pan_sh;
+			if (pan_sh) {
+
+				pan_sh->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::panner_changed, this, current_pan_shell), OSC::instance());
+			}
+			panner_changed (pan_sh);
+		} else {
+			current_pan_shell = boost::shared_ptr<PannerShell> ();
+		}
 
 	}
 	_init = false;
@@ -260,7 +267,9 @@ OSCRouteObserver::refresh_send (boost::shared_ptr<ARDOUR::Send> new_send, bool f
 
 		boost::shared_ptr<PannerShell> pan_sh =  _send->panner_shell();
 		current_pan_shell = pan_sh;
-		pan_sh->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::panner_changed, this, current_pan_shell), OSC::instance());
+		if (pan_sh) {
+			pan_sh->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::panner_changed, this, current_pan_shell), OSC::instance());
+		}
 		panner_changed (pan_sh);
 
 	}
@@ -445,35 +454,41 @@ OSCRouteObserver::panner_changed (boost::shared_ptr<ARDOUR::PannerShell> pan_sh)
 	pan_connections.drop_connections ();
 
 	if (feedback[1]) {
-		string pt = pan_sh->current_panner_uri();
-		if (pt.size()){
-			string ptype = pt.substr(pt.find_last_of ('/') + 1);
-			_osc.text_message_with_id (X_("/strip/pan_type"), ssid, ptype, in_line, addr);
+		if (pan_sh){
+			string pt = pan_sh->current_panner_uri();
+			if (pt.size()){
+				string ptype = pt.substr(pt.find_last_of ('/') + 1);
+				_osc.text_message_with_id (X_("/strip/pan_type"), ssid, ptype, in_line, addr);
+			} else {
+				_osc.text_message_with_id (X_("/strip/pan_type"), ssid, "none", in_line, addr);
+				_osc.float_message_with_id (X_("/strip/pan_stereo_position"), ssid, 0.5, in_line, addr);
+				_osc.float_message_with_id (X_("/strip/pan_stereo_width"), ssid, 1.0, in_line, addr);
+				return;
+			}
+			boost::shared_ptr<Controllable> pan_controllable = boost::dynamic_pointer_cast<Controllable>(pan_sh->panner()->pannable()->pan_azimuth_control);
+			if (pan_controllable) {
+				boost::shared_ptr<AutomationControl>at = boost::dynamic_pointer_cast<AutomationControl> (pan_controllable);
+
+				pan_controllable->Changed.connect (pan_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_change_message, this, X_("/strip/pan_stereo_position"), current_pan_shell->panner()->pannable()->pan_azimuth_control), OSC::instance());
+				at->alist()->automation_state_changed.connect (pan_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_automation, this, X_("/strip/pan_stereo_position"), current_pan_shell->panner()->pannable()->pan_azimuth_control), OSC::instance());
+				send_change_message (X_("/strip/pan_stereo_position"), pan_controllable);
+				send_automation (X_("/strip/pan_stereo_position"), pan_controllable);
+			} else {
+				_osc.float_message_with_id (X_("/strip/pan_stereo_position"), ssid, 0.5, in_line, addr);
+			}
+			boost::shared_ptr<Controllable> width_controllable = boost::dynamic_pointer_cast<Controllable>(pan_sh->panner()->pannable()->pan_width_control);
+			if (width_controllable) {
+				boost::shared_ptr<AutomationControl>at = boost::dynamic_pointer_cast<AutomationControl> (width_controllable);
+				width_controllable->Changed.connect (pan_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_change_message, this, X_("/strip/pan_stereo_width"), current_pan_shell->panner()->pannable()->pan_width_control), OSC::instance());
+				at->alist()->automation_state_changed.connect (pan_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_automation, this, X_("/strip/pan_stereo_width"), current_pan_shell->panner()->pannable()->pan_width_control), OSC::instance());
+				send_change_message (X_("/strip/pan_stereo_width"), width_controllable);
+				send_automation (X_("/strip/pan_stereo_width"), width_controllable);
+			} else {
+				_osc.float_message_with_id (X_("/strip/pan_stereo_width"), ssid, 1.0, in_line, addr);
+			}
 		} else {
 			_osc.text_message_with_id (X_("/strip/pan_type"), ssid, "none", in_line, addr);
 			_osc.float_message_with_id (X_("/strip/pan_stereo_position"), ssid, 0.5, in_line, addr);
-			_osc.float_message_with_id (X_("/strip/pan_stereo_width"), ssid, 1.0, in_line, addr);
-			return;
-		}
-		boost::shared_ptr<Controllable> pan_controllable = boost::dynamic_pointer_cast<Controllable>(pan_sh->panner()->pannable()->pan_azimuth_control);
-		if (pan_controllable) {
-			boost::shared_ptr<AutomationControl>at = boost::dynamic_pointer_cast<AutomationControl> (pan_controllable);
-
-			pan_controllable->Changed.connect (pan_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_change_message, this, X_("/strip/pan_stereo_position"), current_pan_shell->panner()->pannable()->pan_azimuth_control), OSC::instance());
-			at->alist()->automation_state_changed.connect (pan_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_automation, this, X_("/strip/pan_stereo_position"), current_pan_shell->panner()->pannable()->pan_azimuth_control), OSC::instance());
-			send_change_message (X_("/strip/pan_stereo_position"), pan_controllable);
-			send_automation (X_("/strip/pan_stereo_position"), pan_controllable);
-		} else {
-			_osc.float_message_with_id (X_("/strip/pan_stereo_position"), ssid, 0.5, in_line, addr);
-		}
-		boost::shared_ptr<Controllable> width_controllable = boost::dynamic_pointer_cast<Controllable>(pan_sh->panner()->pannable()->pan_width_control);
-		if (width_controllable) {
-			boost::shared_ptr<AutomationControl>at = boost::dynamic_pointer_cast<AutomationControl> (width_controllable);
-			width_controllable->Changed.connect (pan_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_change_message, this, X_("/strip/pan_stereo_width"), current_pan_shell->panner()->pannable()->pan_width_control), OSC::instance());
-			at->alist()->automation_state_changed.connect (pan_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_automation, this, X_("/strip/pan_stereo_width"), current_pan_shell->panner()->pannable()->pan_width_control), OSC::instance());
-			send_change_message (X_("/strip/pan_stereo_width"), width_controllable);
-			send_automation (X_("/strip/pan_stereo_width"), width_controllable);
-		} else {
 			_osc.float_message_with_id (X_("/strip/pan_stereo_width"), ssid, 1.0, in_line, addr);
 		}
 	}
