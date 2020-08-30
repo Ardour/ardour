@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: Ardour 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-06-18 16:34+0200\n"
-"PO-Revision-Date: 2020-07-19 23:40+0200\n"
+"PO-Revision-Date: 2020-08-30 23:58+0200\n"
 "Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>\n"
 "Language-Team: French <>\n"
 "Language: fr\n"
@@ -2111,8 +2111,8 @@ msgid "Chat"
 msgstr "Salon de discussion (anglais)"
 
 #: ardour_ui_ed.cc:275
-msgid "Help|Manual"
-msgstr "Manuel (anglais)"
+msgid "Help|Tutorial"
+msgstr "Tutoriel (anglais)"
 
 #: ardour_ui_ed.cc:276
 msgid "Manual|Reference"
@@ -2671,7 +2671,7 @@ msgstr "Int."
 
 #: ardour_ui_options.cc:573
 msgid "Enable/Disable external positional sync"
-msgstr "Dés/activer la synchro de position externe"
+msgstr "(Dés)activer la synchro de position externe"
 
 #: ardour_ui_options.cc:575
 msgid "Sync to JACK is not possible: video pull up/down is set"
@@ -4695,7 +4695,7 @@ msgstr "Sélectionner la tranche suivante"
 
 #: editor_actions.cc:258
 msgid "Select Previous Strip"
-msgstr "Sélectionner la tranche précédante"
+msgstr "Sélectionner la tranche précédente"
 
 #: editor_actions.cc:260
 msgid "Toggle All Existing Automation"
@@ -11414,6 +11414,10 @@ msgstr "Favoris"
 #: plugin_selector.cc:1007
 msgid "Plugin Manager..."
 msgstr "Gestionnaire de greffon..."
+ 
+#: plugin_selector.cc:973
+msgid "By Popularity"
+msgstr "Par popularité"
 
 #: plugin_selector.cc:1011
 msgid "By Creator"
@@ -17004,7 +17008,7 @@ msgid ""
 "Mouse-wheel to modify level\n"
 "Signal Level: %1 dBFS"
 msgstr ""
-"Dés/activer le métronome\n"
+"(Dés)activer le métronome\n"
 "\n"
 "Clic-droit pour accéder aux préférences\n"
 "Molette de souris pour modifier le volume\n"
