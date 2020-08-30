@@ -26,19 +26,23 @@
 
 namespace ArdourSurface {
 
-struct ArdourMixerNotFoundException : public virtual std::runtime_error
+class ArdourMixerNotFoundException : public std::runtime_error
 {
 public:
 	ArdourMixerNotFoundException (std::string const & what)
-		: runtime_error (what)
+		: std::runtime_error (what)
 		, _what (what)
 	{}
-	virtual const char* what() const throw() { return _what.c_str(); }
+
+	~ArdourMixerNotFoundException() throw() {}
+
+	const char* what() const throw() { return _what.c_str(); }
+
 private:
 	std::string _what;
 };
 
-class ArdourMixerPlugin
+class ArdourMixerPlugin : public PBD::ScopedConnectionList
 {
 public:
 	ArdourMixerPlugin (boost::shared_ptr<ARDOUR::PluginInsert>);
@@ -60,11 +64,9 @@ public:
 
 private:
 	boost::shared_ptr<ARDOUR::PluginInsert>      _insert;
-	boost::shared_ptr<PBD::ScopedConnectionList> _connections;
-
 };
 
-class ArdourMixerStrip
+class ArdourMixerStrip : public PBD::ScopedConnectionList
 {
 public:
 	ArdourMixerStrip (boost::shared_ptr<ARDOUR::Stripable>, PBD::EventLoop*);
@@ -73,7 +75,7 @@ public:
 	boost::shared_ptr<ARDOUR::Stripable>         stripable () const;
 	boost::shared_ptr<PBD::ScopedConnectionList> connections () const;
 
-	typedef std::map<uint32_t, ArdourMixerPlugin> PluginMap;
+	typedef std::map<uint32_t, boost::shared_ptr<ArdourMixerPlugin> > PluginMap;
 
 	PluginMap&         plugins ();
 	ArdourMixerPlugin& plugin (uint32_t);
@@ -98,7 +100,6 @@ public:
 
 private:
 	boost::shared_ptr<ARDOUR::Stripable>         _stripable;
-	boost::shared_ptr<PBD::ScopedConnectionList> _connections;
 
 	PluginMap _plugins;
 
@@ -116,7 +117,7 @@ public:
 	int start ();
 	int stop ();
 
-	typedef std::map<uint32_t, ArdourMixerStrip> StripMap;
+	typedef std::map<uint32_t, boost::shared_ptr<ArdourMixerStrip> > StripMap;
 
 	StripMap&         strips ();
 	ArdourMixerStrip& strip (uint32_t);

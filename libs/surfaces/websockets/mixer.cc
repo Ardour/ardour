@@ -31,24 +31,17 @@ using namespace ArdourSurface;
 
 ArdourMixerPlugin::ArdourMixerPlugin (boost::shared_ptr<ARDOUR::PluginInsert> insert)
 	: _insert (insert)
-	, _connections (boost::shared_ptr<PBD::ScopedConnectionList> (new PBD::ScopedConnectionList()))
 {}
 
 ArdourMixerPlugin::~ArdourMixerPlugin ()
 {
-	_connections->drop_connections ();
+	drop_connections ();
 }
 
 boost::shared_ptr<ARDOUR::PluginInsert>
 ArdourMixerPlugin::insert () const
 {
 	return _insert;
-}
-
-boost::shared_ptr<PBD::ScopedConnectionList>
-ArdourMixerPlugin::connections () const
-{
-	return _connections;
 }
 
 bool
@@ -127,7 +120,6 @@ ArdourMixerPlugin::param_value (boost::shared_ptr<ARDOUR::AutomationControl> con
 
 ArdourMixerStrip::ArdourMixerStrip (boost::shared_ptr<ARDOUR::Stripable> stripable, PBD::EventLoop* event_loop)
 	: _stripable (stripable)
-	, _connections (boost::shared_ptr<PBD::ScopedConnectionList> (new PBD::ScopedConnectionList()))
 {
 	if (is_vca ()) {
 		/* no plugins to handle */
@@ -150,29 +142,22 @@ ArdourMixerStrip::ArdourMixerStrip (boost::shared_ptr<ARDOUR::Stripable> stripab
 		boost::shared_ptr<PluginInsert> insert = boost::static_pointer_cast<PluginInsert> (processor);
 
 		if (insert) {
-			ArdourMixerPlugin plugin (insert);
-			plugin.insert ()->DropReferences.connect (*plugin.connections (), MISSING_INVALIDATOR,
-									boost::bind (&ArdourMixerStrip::on_drop_plugin, this, plugin_id), event_loop);
-			_plugins.emplace (plugin_id, plugin);
+			_plugins[plugin_id] = boost::shared_ptr<ArdourMixerPlugin> (new ArdourMixerPlugin (insert));
+			insert->DropReferences.connect (*_plugins[plugin_id], MISSING_INVALIDATOR,
+			                                boost::bind (&ArdourMixerStrip::on_drop_plugin, this, plugin_id), event_loop);
 		}
 	}
 }
 
 ArdourMixerStrip::~ArdourMixerStrip ()
 {
-	_connections->drop_connections ();
+	drop_connections ();
 }
 
 boost::shared_ptr<ARDOUR::Stripable>
 ArdourMixerStrip::stripable () const
 {
 	return _stripable;
-}
-
-boost::shared_ptr<PBD::ScopedConnectionList>
-ArdourMixerStrip::connections () const
-{
-	return _connections;
 }
 
 ArdourMixerPlugin&
@@ -182,7 +167,7 @@ ArdourMixerStrip::plugin (uint32_t plugin_id)
 		throw ArdourMixerNotFoundException ("plugin id = " + boost::lexical_cast<std::string>(plugin_id) + " not found");
 	}
 
-	return _plugins.at (plugin_id);
+	return *_plugins.at (plugin_id);
 }
 
 ArdourMixerStrip::PluginMap&
@@ -297,10 +282,9 @@ ArdourMixer::start ()
 	uint32_t strip_id = 0;
 
 	for (StripableList::iterator it = strips.begin (); it != strips.end (); ++it) {
-		ArdourMixerStrip strip (*it, event_loop ());
-		strip.stripable ()->DropReferences.connect (*strip.connections (), MISSING_INVALIDATOR,
-									boost::bind (&ArdourMixer::on_drop_strip, this, strip_id), event_loop ());
-		_strips.emplace (strip_id, strip);
+		_strips[strip_id] = boost::shared_ptr<ArdourMixerStrip> (new ArdourMixerStrip (*it, event_loop ()));
+		(*it)->DropReferences.connect (*_strips[strip_id], MISSING_INVALIDATOR,
+		                               boost::bind (&ArdourMixer::on_drop_strip, this, strip_id), event_loop ());
 		strip_id++;
 	}
 
@@ -329,7 +313,7 @@ ArdourMixer::strip (uint32_t strip_id)
 		throw ArdourMixerNotFoundException ("strip id = " + boost::lexical_cast<std::string>(strip_id) + " not found");
 	}
 
-	return _strips.at (strip_id);
+	return *_strips.at (strip_id);
 }
 
 void
