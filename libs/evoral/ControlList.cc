@@ -227,10 +227,10 @@ ControlList::default_interpolation () const
 void
 ControlList::maybe_signal_changed ()
 {
-	mark_dirty ();
-
 	if (_frozen) {
 		_changed_when_thawed = true;
+	} else {
+		Dirty (); /* EMIT SIGNAL */
 	}
 }
 
@@ -874,7 +874,6 @@ ControlList::add (double when, double value, bool with_guards, bool with_initial
 
 		mark_dirty ();
 	}
-
 	maybe_signal_changed ();
 }
 
@@ -925,7 +924,6 @@ ControlList::erase (double when, double value)
 
 		mark_dirty ();
 	}
-
 	maybe_signal_changed ();
 }
 
@@ -941,7 +939,6 @@ ControlList::erase_range (double start, double endt)
 		if (erased) {
 			mark_dirty ();
 		}
-
 	}
 
 	if (erased) {
@@ -987,7 +984,6 @@ ControlList::slide (iterator before, double distance)
 
 		mark_dirty ();
 	}
-
 	maybe_signal_changed ();
 }
 
@@ -1044,7 +1040,6 @@ ControlList::shift (double pos, double frames)
 
 		mark_dirty ();
 	}
-
 	maybe_signal_changed ();
 }
 
@@ -1078,7 +1073,6 @@ ControlList::modify (iterator iter, double when, double val)
 
 		mark_dirty ();
 	}
-
 	maybe_signal_changed ();
 }
 
@@ -1140,6 +1134,7 @@ ControlList::thaw ()
 			_sort_pending = false;
 		}
 	}
+	maybe_signal_changed ();
 }
 
 void
@@ -1154,8 +1149,6 @@ ControlList::mark_dirty () const
 	if (_curve) {
 		_curve->mark_dirty();
 	}
-
-	Dirty (); /* EMIT SIGNAL */
 }
 
 void
@@ -1257,7 +1250,6 @@ ControlList::truncate_end (double last_coordinate)
 		unlocked_invalidate_insert_iterator ();
 		mark_dirty();
 	}
-
 	maybe_signal_changed ();
 }
 
@@ -1358,7 +1350,6 @@ ControlList::truncate_start (double overall_length)
 		unlocked_invalidate_insert_iterator ();
 		mark_dirty();
 	}
-
 	maybe_signal_changed ();
 }
 
@@ -1589,6 +1580,8 @@ ControlList::rt_safe_earliest_event_discrete_unlocked (double start, double& x, 
 bool
 ControlList::rt_safe_earliest_event_linear_unlocked (double start, double& x, double& y, bool inclusive, double min_x_delta) const
 {
+	Glib::Threads::RWLock::ReaderLock lm (_lock); // XXX
+
 	// cout << "earliest_event(start: " << start << ", x: " << x << ", y: " << y << ", inclusive: " << inclusive <<  ")" << endl;
 
 	const_iterator length_check_iter = _events.begin();
@@ -1908,7 +1901,6 @@ ControlList::paste (const ControlList& alist, double pos)
 		unlocked_invalidate_insert_iterator ();
 		mark_dirty ();
 	}
-
 	maybe_signal_changed ();
 	return true;
 }
@@ -1970,7 +1962,6 @@ ControlList::move_ranges (const list< RangeMove<double> >& movements)
 
 		mark_dirty ();
 	}
-
 	maybe_signal_changed ();
 	return true;
 }
