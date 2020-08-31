@@ -115,6 +115,13 @@ NodeState::operator== (const NodeState& other) const
 	return node_addr_hash () == other.node_addr_hash ();
 }
 
+bool
+NodeState::operator< (const NodeState& other) const
+{
+	return node_addr_hash () < other.node_addr_hash ();
+}
+
+
 std::size_t
 hash_value (const NodeState& state)
 {

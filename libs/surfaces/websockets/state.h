@@ -76,6 +76,7 @@ public:
 	std::size_t node_addr_hash () const;
 
 	bool operator== (const NodeState& other) const;
+	bool operator< (const NodeState& other) const;
 
 private:
 	std::string   _node;

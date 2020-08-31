@@ -19,7 +19,7 @@
 #ifndef _ardour_surface_websockets_client_h_
 #define _ardour_surface_websockets_client_h_
 
-#include <boost/unordered_set.hpp>
+#include <set>
 #include <list>
 
 #include "message.h"
@@ -56,8 +56,8 @@ public:
 private:
 	Client _wsi;
 
-	typedef boost::unordered_set<NodeState> ClientState;
-	ClientState                             _state;
+	typedef std::set<NodeState> ClientState;
+	ClientState                 _state;
 
 	ClientOutputBuffer _output_buf;
 };
