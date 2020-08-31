@@ -104,7 +104,7 @@ Editor::embed_audio_from_video (std::string path, samplepos_t n, bool lock_posit
 			boost::shared_ptr<ARDOUR::Playlist> pl = track->playlist();
 			pl->find_next_region(n, ARDOUR::End, 0)->set_video_locked(true);
 		}
-		_session->save_state ("");
+		_session->save_state ("", true);
 	}
 
 	import_status.all_done = true;
