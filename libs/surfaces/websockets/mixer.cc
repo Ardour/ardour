@@ -167,7 +167,7 @@ ArdourMixerStrip::plugin (uint32_t plugin_id)
 		throw ArdourMixerNotFoundException ("plugin id = " + boost::lexical_cast<std::string>(plugin_id) + " not found");
 	}
 
-	return *_plugins.at (plugin_id);
+	return *_plugins[plugin_id];
 }
 
 ArdourMixerStrip::PluginMap&
@@ -313,7 +313,7 @@ ArdourMixer::strip (uint32_t strip_id)
 		throw ArdourMixerNotFoundException ("strip id = " + boost::lexical_cast<std::string>(strip_id) + " not found");
 	}
 
-	return *_strips.at (strip_id);
+	return *_strips[strip_id];
 }
 
 void
