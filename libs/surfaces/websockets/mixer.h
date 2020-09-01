@@ -83,13 +83,12 @@ public:
 	double gain () const;
 	void   set_gain (double);
 
+	bool   has_pan () const;
 	double pan () const;
 	void   set_pan (double);
 
 	bool mute () const;
 	void set_mute (bool);
-
-	bool is_vca () const;
 
 	std::string name () const;
 
