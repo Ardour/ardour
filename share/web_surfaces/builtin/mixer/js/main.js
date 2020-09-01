@@ -88,8 +88,9 @@ import { createRootContainer, Container, Dialog, Label, Button, Toggle,
         plugins.classList.add('strip-plugins');
         plugins.appendTo(container);
 
-        if (strip.isVca || (strip.plugins.length == 0)) {
+        if (strip.plugins.length == 0) {
             plugins.classList.add('disabled');
+            plugins.element.style.visibility = 'hidden';
         } else {
             plugins.callback = () => openPlugins (strip);
         }
@@ -97,8 +98,10 @@ import { createRootContainer, Container, Dialog, Label, Button, Toggle,
         const pan = new PanKnob();
         pan.appendTo(container);
 
-        if (!strip.isVca) {
+        if (strip.hasPan) {
             pan.bindTo(strip, 'pan');
+        } else {
+            pan.element.style.visibility = 'hidden';
         }
 
         const mute = new Toggle();
@@ -123,12 +126,6 @@ import { createRootContainer, Container, Dialog, Label, Button, Toggle,
         label.text = strip.name;
         label.classList.add('strip-label');
         label.appendTo(container);
-
-        if (strip.isVca) {
-            // hide plugins and pan keeping layout
-            pan.element.style.visibility = 'hidden';
-            plugins.element.style.visibility = 'hidden';
-        }
     }
 
     function openPlugins (strip) {

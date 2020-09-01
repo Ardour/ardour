@@ -65,19 +65,16 @@ WebsocketsDispatcher::update_all_nodes (Client client)
 		
 		ValueVector strip_desc = ValueVector ();
 		strip_desc.push_back (strip.name ());
-		strip_desc.push_back (strip.is_vca ());
+		strip_desc.push_back (strip.has_pan ());
 		
 		update (client, Node::strip_description, strip_addr, strip_desc);
 		
 		update (client, Node::strip_gain, strip_id, strip.gain ());
 		update (client, Node::strip_mute, strip_id, strip.mute ());
 
-		// Pan and plugins not available in VCAs
-		if (strip.is_vca ()) {
-			continue;
+		if (strip.has_pan ()) {
+			update (client, Node::strip_pan, strip_id, strip.pan ());
 		}
-
-		update (client, Node::strip_pan, strip_id, strip.pan ());
 
 		for (ArdourMixerStrip::PluginMap::iterator it = strip.plugins ().begin (); it != strip.plugins ().end (); ++it) {
 			uint32_t plugin_id                     = it->first;

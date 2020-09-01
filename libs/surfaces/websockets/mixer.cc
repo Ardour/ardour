@@ -121,11 +121,6 @@ ArdourMixerPlugin::param_value (boost::shared_ptr<ARDOUR::AutomationControl> con
 ArdourMixerStrip::ArdourMixerStrip (boost::shared_ptr<ARDOUR::Stripable> stripable, PBD::EventLoop* event_loop)
 	: _stripable (stripable)
 {
-	if (is_vca ()) {
-		/* no plugins to handle */
-		return;
-	}
-
 	boost::shared_ptr<Route> route = boost::dynamic_pointer_cast<Route> (_stripable);
 
 	if (!route) {
@@ -188,6 +183,12 @@ ArdourMixerStrip::set_gain (double db)
 	_stripable->gain_control ()->set_value (from_db (db), PBD::Controllable::NoGroup);
 }
 
+bool
+ArdourMixerStrip::has_pan () const
+{
+	return _stripable->pan_azimuth_control () != 0;
+}
+
 double
 ArdourMixerStrip::pan () const
 {
@@ -222,12 +223,6 @@ void
 ArdourMixerStrip::set_mute (bool mute)
 {
 	_stripable->mute_control ()->set_value (mute ? 1.0 : 0.0, PBD::Controllable::NoGroup);
-}
-
-bool
-ArdourMixerStrip::is_vca () const
-{
-	return _stripable->presentation_info ().flags () & ARDOUR::PresentationInfo::VCA;
 }
 
 float

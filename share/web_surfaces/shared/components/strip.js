@@ -33,7 +33,7 @@ export default class Strip extends AddressableComponent {
 		super(parent, addr);
 		this._plugins = {};
 		this._name = desc[0];
-		this._isVca = desc[1];
+		this._hasPan = desc[1];
 		this._meter = 0;
 		this._gain = 0;
 		this._pan = 0;
@@ -48,8 +48,8 @@ export default class Strip extends AddressableComponent {
 		return this._name;
 	}
 
-	get isVca () {
-		return this._isVca;
+	get hasPan () {
+		return this._hasPan;
 	}
 
 	get meter () {
