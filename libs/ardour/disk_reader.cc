@@ -1578,7 +1578,7 @@ DiskReader::dec_no_disk_output ()
 
 DiskReader::DeclickAmp::DeclickAmp (samplecnt_t sample_rate)
 {
-	_a = 4550.f / (gain_t)sample_rate;
+	_a = 800.f / (gain_t)sample_rate; // ~ 1/50Hz to fade by 40dB
 	_l = -log1p (_a);
 	_g = 0;
 }
@@ -1600,7 +1600,7 @@ DiskReader::DeclickAmp::apply_gain (AudioBuffer& buf, samplecnt_t n_samples, con
 	const float   a      = _a;
 	Sample* const buffer = buf.data ();
 
-	const int max_nproc = 16;
+	const int max_nproc = 4;
 	uint32_t  remain    = n_samples;
 	uint32_t  offset    = buffer_offset;
 
@@ -1648,7 +1648,7 @@ DiskReader::Declicker::alloc (samplecnt_t sr, bool fadein)
 	delete[] vec;
 	vec = new Sample[loop_fade_length];
 
-	const float a = 1024.0f / sr;
+	const float a = 390.0f / sr; // ~ 1/100Hz for 40dB
 
 	/* build a psuedo-exponential (linear-volume) shape for the fade */
 
@@ -1876,7 +1876,7 @@ DiskReader::rt_midibuffer ()
 void
 DiskReader::alloc_loop_declick (samplecnt_t sr)
 {
-	loop_fade_length = lrintf (ceil (-log (GAIN_COEFF_DELTA / 2.) / (1024. / sr)));
+	loop_fade_length = lrintf (ceil (-log (GAIN_COEFF_DELTA / 2.) / (390. / sr)));
 	loop_declick_in.alloc (sr, true);
 	loop_declick_out.alloc (sr, false);
 }
