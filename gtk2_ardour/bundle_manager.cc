@@ -375,13 +375,14 @@ BundleManager::add_bundle (boost::shared_ptr<Bundle> b)
 	(*i)[_list_model_columns.name] = u->name ();
 	(*i)[_list_model_columns.bundle] = u;
 
-	u->Changed.connect (bundle_connections, invalidator (*this), boost::bind (&BundleManager::bundle_changed, this, _1, u), gui_context());
+	u->Changed.connect (bundle_connections, invalidator (*this), boost::bind (&BundleManager::bundle_changed, this, _1, boost::weak_ptr<UserBundle> (u)), gui_context());
 }
 
 void
-BundleManager::bundle_changed (Bundle::Change c, boost::shared_ptr<UserBundle> b)
+BundleManager::bundle_changed (Bundle::Change c, boost::weak_ptr<UserBundle> wb)
 {
-	if ((c & Bundle::NameChanged) == 0) {
+	boost::shared_ptr<UserBundle> b = wb.lock ();
+	if (!b || 0 == (c & Bundle::NameChanged)) {
 		return;
 	}
 

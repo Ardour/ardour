@@ -95,7 +95,7 @@ private:
 	void edit_clicked ();
 	void delete_clicked ();
 	void add_bundle (boost::shared_ptr<ARDOUR::Bundle>);
-	void bundle_changed (ARDOUR::Bundle::Change, boost::shared_ptr<ARDOUR::UserBundle>);
+	void bundle_changed (ARDOUR::Bundle::Change, boost::weak_ptr<ARDOUR::UserBundle>);
 	void set_button_sensitivity ();
 	void row_activated (Gtk::TreeModel::Path const & p, Gtk::TreeViewColumn* c);
 
