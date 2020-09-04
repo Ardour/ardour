@@ -810,7 +810,7 @@ PortMatrix::can_add_channel_proxy (boost::weak_ptr<Bundle> w, DataType t) const
 		return false;
 	}
 	boost::shared_ptr<IO> io = io_from_bundle (b);
-	return io->can_add_port (t);
+	return io && io->can_add_port (t);
 }
 
 void
