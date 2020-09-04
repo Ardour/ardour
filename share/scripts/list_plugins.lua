@@ -20,7 +20,7 @@ function factory () return function ()
 			local cnt = 0
 			if pi:is_channelstrip () then goto nextproc end
 			if all_plugs[id] then cnt = all_plugs[id]['cnt'] end
-			all_plugs[id] = { name = proc:name(), ["type"] = pi:type(), id = pp:unique_id(), cnt = (cnt + 1) }
+			all_plugs[id] = { name = proc:name(), ["type"] = pi:type(), id = pp:unique_id(), author = pp:get_info().creator, cnt = (cnt + 1) }
 			::nextproc::
 			i = i + 1
 		end
@@ -46,7 +46,7 @@ function factory () return function ()
 
 	for k,v in pairs (all_plugs) do
 		print (string.format ("%2d * %-6s %-30s (%s)", v['cnt'], plugintypestr(v['type']), v['name'], v['id']))
-		rv = rv .. "\n<span face=\"mono\">" .. string.format ("%3d * %-6s %s", v['cnt'], plugintypestr(v['type']), v['name']) .. "</span>"
+		rv = rv .. "\n<span face=\"mono\">" .. string.format ("%3d * %-6s %s (by %s)", v['cnt'], plugintypestr(v['type']), v['name'], v['author']) .. "</span>"
 	end
 
 	LuaDialog.Message ("All Plugins",rv , LuaDialog.MessageType.Info, LuaDialog.ButtonType.Close):run()
