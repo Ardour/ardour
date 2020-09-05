@@ -77,11 +77,9 @@ DummyAudioBackend::DummyAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, _systemic_input_latency (0)
 	, _systemic_output_latency (0)
 	, _processed_samples (0)
-	, _port_change_flag (false)
 {
 	_instance_name = s_instance_name;
 	_device = _("Silence");
-	pthread_mutex_init (&_port_callback_mutex, 0);
 
 	if (_driver_speed.empty()) {
 		_driver_speed.push_back (DriverSpeed (_("Half Speed"),   2.0f));
@@ -99,7 +97,6 @@ DummyAudioBackend::DummyAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 DummyAudioBackend::~DummyAudioBackend ()
 {
 	clear_ports ();
-	pthread_mutex_destroy (&_port_callback_mutex);
 }
 
 /* AUDIOBACKEND API */
@@ -1113,12 +1110,10 @@ DummyPort::DummyPort (DummyAudioBackend &b, const std::string& name, PortFlags f
 	, _gen_cycle (false)
 	, _engine (b)
 {
-	_backend.port_connect_add_remove_callback();
 }
 
 DummyPort::~DummyPort ()
 {
-	_backend.port_connect_add_remove_callback();
 }
 
 void DummyPort::setup_random_number_generator ()

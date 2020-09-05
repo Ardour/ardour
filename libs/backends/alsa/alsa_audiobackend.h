@@ -119,7 +119,6 @@ class AlsaDeviceReservation
 
 class AlsaAudioBackend : public AudioBackend, public PortEngineSharedImpl
 {
-	friend class AlsaPort;
 	public:
 		AlsaAudioBackend (AudioEngine& e, AudioBackendInfo& info);
 		~AlsaAudioBackend ();
@@ -374,31 +373,6 @@ class AlsaAudioBackend : public AudioBackend, public PortEngineSharedImpl
 
 		std::vector<AlsaMidiOut *> _rmidi_out;
 		std::vector<AlsaMidiIn  *> _rmidi_in;
-
-		struct PortConnectData {
-			std::string a;
-			std::string b;
-			bool c;
-
-			PortConnectData (const std::string& a, const std::string& b, bool c)
-				: a (a) , b (b) , c (c) {}
-		};
-
-		std::vector<PortConnectData *> _port_connection_queue;
-		pthread_mutex_t _port_callback_mutex;
-		bool _port_change_flag;
-
-		void port_connect_callback (const std::string& a, const std::string& b, bool conn) {
-			pthread_mutex_lock (&_port_callback_mutex);
-			_port_connection_queue.push_back(new PortConnectData(a, b, conn));
-			pthread_mutex_unlock (&_port_callback_mutex);
-		}
-
-		void port_connect_add_remove_callback () {
-			pthread_mutex_lock (&_port_callback_mutex);
-			_port_change_flag = true;
-			pthread_mutex_unlock (&_port_callback_mutex);
-		}
 
 		void update_systemic_audio_latencies ();
 		void update_systemic_midi_latencies ();

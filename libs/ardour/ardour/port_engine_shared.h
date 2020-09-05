@@ -154,16 +154,39 @@ public:
 	bool physically_connected (PortEngine::PortHandle, bool process_callback_safe);
 	int  get_connections (PortEngine::PortHandle, std::vector<std::string>&, bool process_callback_safe);
 
-	virtual void port_connect_callback (const std::string& a, const std::string& b, bool conn) = 0;
-	virtual void port_connect_add_remove_callback () = 0;
-
 protected:
+	friend class BackendPort;
 	std::string _instance_name;
 
 	std::vector<BackendPortPtr> _system_inputs;
 	std::vector<BackendPortPtr> _system_outputs;
 	std::vector<BackendPortPtr> _system_midi_in;
 	std::vector<BackendPortPtr> _system_midi_out;
+
+	struct PortConnectData {
+		std::string a;
+		std::string b;
+		bool c;
+
+		PortConnectData (const std::string& a, const std::string& b, bool c)
+			: a (a) , b (b) , c (c) {}
+	};
+
+	std::vector<PortConnectData *> _port_connection_queue;
+	pthread_mutex_t _port_callback_mutex;
+	bool _port_change_flag;
+
+	void port_connect_callback (const std::string& a, const std::string& b, bool conn) {
+		pthread_mutex_lock (&_port_callback_mutex);
+		_port_connection_queue.push_back(new PortConnectData(a, b, conn));
+		pthread_mutex_unlock (&_port_callback_mutex);
+	}
+
+	void port_connect_add_remove_callback () {
+		pthread_mutex_lock (&_port_callback_mutex);
+		_port_change_flag = true;
+		pthread_mutex_unlock (&_port_callback_mutex);
+	}
 
 	virtual void update_system_port_latencies ();
 

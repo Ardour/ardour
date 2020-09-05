@@ -97,8 +97,6 @@ private:
 
 class PulseAudioBackend : public AudioBackend, public PortEngineSharedImpl
 {
-	friend class PulsePort;
-
 public:
 	PulseAudioBackend (AudioEngine& e, AudioBackendInfo& info);
 	~PulseAudioBackend ();
@@ -295,35 +293,6 @@ private:
 	/* port engine */
 	BackendPort* port_factory (std::string const & name, ARDOUR::DataType dt, ARDOUR::PortFlags flags);
 	int  register_system_ports ();
-
-	struct PortConnectData {
-		std::string a;
-		std::string b;
-		bool        c;
-
-		PortConnectData (const std::string& a, const std::string& b, bool c)
-			: a (a), b (b), c (c) {}
-	};
-
-	std::vector<PortConnectData*> _port_connection_queue;
-	pthread_mutex_t               _port_callback_mutex;
-	bool                          _port_change_flag;
-
-	void
-	port_connect_callback (const std::string& a, const std::string& b, bool conn)
-	{
-		pthread_mutex_lock (&_port_callback_mutex);
-		_port_connection_queue.push_back (new PortConnectData (a, b, conn));
-		pthread_mutex_unlock (&_port_callback_mutex);
-	}
-
-	void
-	port_connect_add_remove_callback ()
-	{
-		pthread_mutex_lock (&_port_callback_mutex);
-		_port_change_flag = true;
-		pthread_mutex_unlock (&_port_callback_mutex);
-	}
 
 }; // class PulseAudioBackend
 

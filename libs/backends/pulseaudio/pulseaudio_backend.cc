@@ -61,17 +61,13 @@ PulseAudioBackend::PulseAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, _systemic_audio_output_latency (0)
 	, _dsp_load (0)
 	, _processed_samples (0)
-	, _port_change_flag (false)
 {
 	_instance_name = s_instance_name;
-	pthread_mutex_init (&_port_callback_mutex, 0);
 }
 
 PulseAudioBackend::~PulseAudioBackend ()
 {
 	clear_ports ();
-
-	pthread_mutex_destroy (&_port_callback_mutex);
 }
 
 /* Pulseaudio */
@@ -1214,12 +1210,10 @@ PulseAudioPort::PulseAudioPort (PulseAudioBackend& b, const std::string& name, P
 {
 	memset (_buffer, 0, sizeof (_buffer));
 	mlock (_buffer, sizeof (_buffer));
-	_backend.port_connect_add_remove_callback (); // XXX -> RT
 }
 
 PulseAudioPort::~PulseAudioPort ()
 {
-	_backend.port_connect_add_remove_callback (); // XXX -> RT
 }
 
 void*
@@ -1254,12 +1248,10 @@ PulseMidiPort::PulseMidiPort (PulseAudioBackend& b, const std::string& name, Por
 {
 	_buffer.clear ();
 	_buffer.reserve (256);
-	_backend.port_connect_add_remove_callback (); // XXX -> RT
 }
 
 PulseMidiPort::~PulseMidiPort ()
 {
-	_backend.port_connect_add_remove_callback (); // XXX -> RT
 }
 
 struct MidiEventSorter {

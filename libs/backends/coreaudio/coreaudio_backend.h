@@ -155,7 +155,6 @@ class CoreMidiPort : public BackendPort {
 }; // class CoreMidiPort
 
 class CoreAudioBackend : public AudioBackend, public PortEngineSharedImpl {
-	friend class CoreBackendPort;
   public:
 	CoreAudioBackend (AudioEngine& e, AudioBackendInfo& info);
 	~CoreAudioBackend ();
@@ -397,32 +396,6 @@ class CoreAudioBackend : public AudioBackend, public PortEngineSharedImpl {
 
 	/* port engine */
 	int register_system_audio_ports ();
-
-	struct PortConnectData {
-		std::string a;
-		std::string b;
-		bool c;
-
-		PortConnectData (const std::string& a, const std::string& b, bool c)
-			: a (a) , b (b) , c (c) {}
-	};
-
-	std::vector<PortConnectData *> _port_connection_queue;
-	pthread_mutex_t _port_callback_mutex;
-	pthread_mutex_t _port_registration_mutex;
-	bool _port_change_flag;
-
-	void port_connect_callback (const std::string& a, const std::string& b, bool conn) {
-		pthread_mutex_lock (&_port_callback_mutex);
-		_port_connection_queue.push_back(new PortConnectData(a, b, conn));
-		pthread_mutex_unlock (&_port_callback_mutex);
-	}
-
-	void port_connect_add_remove_callback () {
-		pthread_mutex_lock (&_port_callback_mutex);
-		_port_change_flag = true;
-		pthread_mutex_unlock (&_port_callback_mutex);
-	}
 
 	BackendPortPtr find_port_in (std::vector<BackendPortPtr> const & plist, const std::string& port_name) const {
 		for (std::vector<BackendPortPtr>::const_iterator it = plist.begin (); it != plist.end (); ++it) {

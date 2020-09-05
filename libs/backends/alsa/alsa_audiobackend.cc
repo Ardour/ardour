@@ -76,10 +76,8 @@ AlsaAudioBackend::AlsaAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, _midi_device_thread_active (false)
 	, _dsp_load (0)
 	, _processed_samples (0)
-	, _port_change_flag (false)
 {
 	_instance_name = s_instance_name;
-	pthread_mutex_init (&_port_callback_mutex, 0);
 	pthread_mutex_init (&_device_port_mutex, 0);
 	_input_audio_device_info.valid = false;
 	_output_audio_device_info.valid = false;
@@ -91,7 +89,6 @@ AlsaAudioBackend::~AlsaAudioBackend ()
 {
 	clear_ports ();
 
-	pthread_mutex_destroy (&_port_callback_mutex);
 	pthread_mutex_destroy (&_device_port_mutex);
 }
 
@@ -2230,12 +2227,10 @@ AlsaAudioPort::AlsaAudioPort (AlsaAudioBackend &b, const std::string& name, Port
 {
 	memset (_buffer, 0, sizeof (_buffer));
 	mlock (_buffer, sizeof (_buffer));
-	_backend.port_connect_add_remove_callback (); // XXX -> RT
 }
 
 AlsaAudioPort::~AlsaAudioPort ()
 {
-	_backend.port_connect_add_remove_callback (); // XXX -> RT
 }
 
 void*
@@ -2277,13 +2272,10 @@ AlsaMidiPort::AlsaMidiPort (AlsaAudioBackend &b, const std::string& name, PortFl
 	_buffer[0].reserve(256);
 	_buffer[1].reserve(256);
 	_buffer[2].reserve(256);
-
-	_backend.port_connect_add_remove_callback (); // XXX -> RT
 }
 
 AlsaMidiPort::~AlsaMidiPort ()
 {
-	_backend.port_connect_add_remove_callback (); // XXX -> RT
 }
 
 struct MidiEventSorter {

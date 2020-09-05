@@ -94,7 +94,6 @@ class PortMidiPort : public BackendPort {
 }; // class PortMidiPort
 
 class PortAudioBackend : public AudioBackend, public PortEngineSharedImpl {
-	friend class PamPort;
 	public:
 		PortAudioBackend (AudioEngine& e, AudioBackendInfo& info);
 		~PortAudioBackend ();
@@ -372,31 +371,6 @@ class PortAudioBackend : public AudioBackend, public PortEngineSharedImpl {
 
 		int register_system_audio_ports ();
 		int register_system_midi_ports ();
-
-		struct PortConnectData {
-			std::string a;
-			std::string b;
-			bool c;
-
-			PortConnectData (const std::string& a, const std::string& b, bool c)
-				: a (a) , b (b) , c (c) {}
-		};
-
-		std::vector<PortConnectData *> _port_connection_queue;
-		pthread_mutex_t _port_callback_mutex;
-		bool _port_change_flag;
-
-		void port_connect_callback (const std::string& a, const std::string& b, bool conn) {
-			pthread_mutex_lock (&_port_callback_mutex);
-			_port_connection_queue.push_back(new PortConnectData(a, b, conn));
-			pthread_mutex_unlock (&_port_callback_mutex);
-		}
-
-		void port_connect_add_remove_callback () {
-			pthread_mutex_lock (&_port_callback_mutex);
-			_port_change_flag = true;
-			pthread_mutex_unlock (&_port_callback_mutex);
-		}
 
 }; // class PortAudioBackend
 

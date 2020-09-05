@@ -37,10 +37,13 @@ BackendPort::BackendPort (PortEngineSharedImpl &b, const std::string& name, Port
 	_capture_latency_range.max = 0;
 	_playback_latency_range.min = 0;
 	_playback_latency_range.max = 0;
+
+	_backend.port_connect_add_remove_callback (); // XXX -> RT
 }
 
 BackendPort::~BackendPort ()
 {
+	_backend.port_connect_add_remove_callback (); // XXX -> RT
 	assert (_connections.empty());
 }
 
@@ -186,14 +189,17 @@ BackendPort::update_connected_latency (bool for_playback)
 
 
 PortEngineSharedImpl::PortEngineSharedImpl (PortManager& mgr, std::string const & str)
-	:  _instance_name (str)
+	: _instance_name (str)
+	, _port_change_flag (false)
 	, _portmap (new PortMap)
 	, _ports (new PortIndex)
 {
+	pthread_mutex_init (&_port_callback_mutex, 0);
 }
 
 PortEngineSharedImpl::~PortEngineSharedImpl ()
 {
+	pthread_mutex_destroy (&_port_callback_mutex);
 }
 
 int
