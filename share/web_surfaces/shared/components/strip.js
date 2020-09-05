@@ -27,13 +27,25 @@ const NodeToProperty = Object.freeze({
 	[StateNode.STRIP_MUTE]  : 'mute'
 });
 
+// from presentation_info.h
+const StripFlags = Object.freeze({
+	AUDIO_TRACK: 0x1,
+	MIDI_TRACK:  0x2,
+	AUDIO_BUS:   0x4,
+	MIDI_BUS:    0x8,
+	VCA:         0x10,
+	MASTER_OUT:  0x20,
+	MONITOR_OUT: 0x40,
+	AUDITIONER:  0x80
+});
+
 export default class Strip extends AddressableComponent {
 
 	constructor (parent, addr, desc) {
 		super(parent, addr);
 		this._plugins = {};
 		this._name = desc[0];
-		this._hasPan = desc[1];
+		this._flags = desc[1];
 		this._meter = 0;
 		this._gain = 0;
 		this._pan = 0;
@@ -48,8 +60,8 @@ export default class Strip extends AddressableComponent {
 		return this._name;
 	}
 
-	get hasPan () {
-		return this._hasPan;
+	get flags () {
+		return this._flags;
 	}
 
 	get meter () {
@@ -62,6 +74,10 @@ export default class Strip extends AddressableComponent {
 
 	set gain (db) {
 		this.updateRemote('gain', db, StateNode.STRIP_GAIN);
+	}
+
+	get hasPan () {
+		return !this.isMidi && !this.isVca;
 	}
 
 	get pan () {
@@ -78,6 +94,18 @@ export default class Strip extends AddressableComponent {
 
 	set mute (value) {
 		this.updateRemote('mute', value, StateNode.STRIP_MUTE);
+	}
+
+	get isAudio () {
+		return this._flags & StripFlags.AUDIO_TRACK;
+	}
+
+	get isMidi () {
+		return this._flags & StripFlags.MIDI_TRACK;
+	}
+
+	get isVca () {
+		return this._flags & StripFlags.VCA;
 	}
 
  	handle (node, addr, val) {

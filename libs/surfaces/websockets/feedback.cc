@@ -219,12 +219,12 @@ void
 ArdourFeedback::observe_strip_plugins (uint32_t strip_id, ArdourMixerStrip::PluginMap& plugins)
 {
 	for (ArdourMixerStrip::PluginMap::iterator it = plugins.begin(); it != plugins.end(); ++it) {
-		uint32_t                                   plugin_id   = it->first;
-		boost::shared_ptr<ArdourMixerPlugin>       plugin      = it->second;
-		boost::shared_ptr<PluginInsert>            insert      = plugin->insert ();
-		uint32_t                             	     bypass      = insert->plugin ()->designated_bypass_port ();
-		Evoral::Parameter                   	     param       = Evoral::Parameter (PluginAutomation, 0, bypass);
-		boost::shared_ptr<AutomationControl>	     control     = insert->automation_control (param);
+		uint32_t                             plugin_id = it->first;
+		boost::shared_ptr<ArdourMixerPlugin> plugin    = it->second;
+		boost::shared_ptr<PluginInsert>      insert    = plugin->insert ();
+		uint32_t                             bypass    = insert->plugin ()->designated_bypass_port ();
+		Evoral::Parameter                    param     = Evoral::Parameter (PluginAutomation, 0, bypass);
+		boost::shared_ptr<AutomationControl> control   = insert->automation_control (param);
 
 		if (control) {
 			control->Changed.connect (*plugin, MISSING_INVALIDATOR,

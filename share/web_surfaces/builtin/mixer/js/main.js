@@ -19,7 +19,8 @@
 import ArdourClient from '/shared/ardour.js';
 import { createRootContainer, Container, Dialog, Label, Button, Toggle,
             DiscreteKnob, LinearKnob, LogKnob, PanKnob,
-            StripGainFader, StripMeter  } from './tkwidget.js';
+            AudioStripGainFader, MidiStripGainFader,
+            AudioStripMeter, MidiStripMeter  } from './tkwidget.js';
 
 (() => {
     
@@ -95,6 +96,10 @@ import { createRootContainer, Container, Dialog, Label, Button, Toggle,
             plugins.callback = () => openPlugins (strip);
         }
 
+        if (strip.isMidi || strip.isVca) {
+            plugins.element.style.visibility = 'hidden';
+        }
+
         const pan = new PanKnob();
         pan.appendTo(container);
 
@@ -114,11 +119,11 @@ import { createRootContainer, Container, Dialog, Label, Button, Toggle,
         meterFader.classList.add('strip-meter-fader');
         meterFader.appendTo(container);
 
-        const gain = new StripGainFader();
+        const gain = strip.isMidi ? new MidiStripGainFader : new AudioStripGainFader();
         gain.appendTo(meterFader);
         gain.bindTo(strip, 'gain');
 
-        const meter = new StripMeter();
+        const meter = strip.isMidi ? new MidiStripMeter() : new AudioStripMeter();
         meter.appendTo(meterFader);
         meter.bindTo(strip, 'meter');
 

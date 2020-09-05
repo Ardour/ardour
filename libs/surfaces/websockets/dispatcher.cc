@@ -65,7 +65,7 @@ WebsocketsDispatcher::update_all_nodes (Client client)
 		
 		ValueVector strip_desc = ValueVector ();
 		strip_desc.push_back (strip.name ());
-		strip_desc.push_back (strip.has_pan ());
+		strip_desc.push_back ((int)strip.stripable ()->presentation_info ().flags ());
 		
 		update (client, Node::strip_description, strip_addr, strip_desc);
 		
