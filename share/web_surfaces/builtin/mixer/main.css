@@ -12,6 +12,7 @@ body {
     width: 100%;
     position: fixed;
     margin: 0;
+    overflow: none;
 }
 
 div {

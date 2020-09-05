@@ -27,7 +27,7 @@ export async function createRootContainer () {
     return root;
 }
 
-class Widget extends BaseWidget {
+class TkWidget extends BaseWidget {
 
     constructor (tk) {
         super();
@@ -40,19 +40,7 @@ class Widget extends BaseWidget {
 
 }
 
-export class Label extends Widget {
-
-    constructor () {
-        super(new TK.Label());
-    }
-
-    set text (text) {
-        this.tk.set('label', text);
-    }
-    
-}
-
-class Control extends BaseControl {
+class TkControl extends BaseControl {
 
     constructor (tk) {
         super();
@@ -65,7 +53,7 @@ class Control extends BaseControl {
 
 }
 
-class RangeControl extends Control {
+class TkRangeControl extends TkControl {
 
     constructor (tk) {
         super(tk);
@@ -91,12 +79,44 @@ class RangeControl extends Control {
 
 }
 
-class Knob extends RangeControl {
+class TkKnob extends TkRangeControl {
 
     constructor (options) {
         super(new TK.Knob(options));
     }
 
+}
+
+class TkFader extends TkRangeControl {
+
+    constructor (options) {
+        super(new TK.Fader(options));
+    }
+
+}
+
+class TkMeter extends TkRangeControl {
+
+    constructor (options) {
+        super(new TK.LevelMeter(options));
+    }
+
+    set value (val) {
+        this.tk.set('value', val);
+    }
+
+}
+
+export class Label extends TkWidget {
+
+    constructor () {
+        super(new TK.Label());
+    }
+
+    set text (text) {
+        this.tk.set('label', text);
+    }
+    
 }
 
 export class Container extends BaseContainer {
@@ -161,7 +181,7 @@ export class Dialog extends BaseDialog {
 
 }
 
-export class Button extends Control {
+export class Button extends TkControl {
 
     constructor () {
         super(new TK.Button());
@@ -180,7 +200,7 @@ export class Button extends Control {
 
 }
 
-export class Toggle extends Control {
+export class Toggle extends TkControl {
 
     constructor () {
         super(new TK.Toggle());
@@ -207,36 +227,59 @@ export class Toggle extends Control {
 
 }
 
-export class StripGainFader extends RangeControl {
+export class AudioStripGainFader extends TkFader {
 
     constructor () {
-        super(new TK.Fader({
+        super({
             scale: 'decibel',
+            labels: TK.FORMAT("%d"),
             min: -58.0,
             max: 6.0
-        }));
+        });
     }
 
 }
 
-export class StripMeter extends RangeControl {
+export class MidiStripGainFader extends TkFader {
 
     constructor () {
-        super(new TK.LevelMeter({
+        super({
+            scale: 'linear',
+            labels: TK.FORMAT("%d"),
+            min: 0,
+            max: 127
+        });
+    }
+
+}
+
+export class AudioStripMeter extends TkMeter {
+
+    constructor () {
+        super({
             show_scale: false,
             scale: 'decibel',
             min: -58.0,
             max: 6.0
-        }));
-    }
-
-    set value (val) {
-        this.tk.set('value', val);
+        });
     }
 
 }
 
-export class LinearKnob extends Knob {
+export class MidiStripMeter extends TkMeter {
+
+    constructor () {
+        super({
+            show_scale: false,
+            scale: 'linear',
+            min: 0,
+            max: 127
+        });
+    }
+
+}
+
+export class LinearKnob extends TkKnob {
 
     constructor (min, max) {
         super({
@@ -252,7 +295,7 @@ export class LinearKnob extends Knob {
 
 }
 
-export class LogKnob extends Knob {
+export class LogKnob extends TkKnob {
 
     constructor (min, max) {
         super({
@@ -268,7 +311,7 @@ export class LogKnob extends Knob {
 
 }
 
-export class DiscreteKnob extends Knob {
+export class DiscreteKnob extends TkKnob {
 
     constructor (min, max, step) {
         super({
@@ -285,7 +328,7 @@ export class DiscreteKnob extends Knob {
 
 }
 
-export class PanKnob extends Knob {
+export class PanKnob extends TkKnob {
 
     constructor () {
         super({

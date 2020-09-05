@@ -174,13 +174,15 @@ ArdourMixerStrip::plugins ()
 double
 ArdourMixerStrip::gain () const
 {
-	return to_db (_stripable->gain_control ()->get_value ());
+	double val = _stripable->gain_control ()->get_value ();
+	return is_midi () ? static_cast<double> (to_velocity (val)) : to_db (val);
 }
 
 void
-ArdourMixerStrip::set_gain (double db)
+ArdourMixerStrip::set_gain (double gain)
 {
-	_stripable->gain_control ()->set_value (from_db (db), PBD::Controllable::NoGroup);
+	double val = is_midi () ? from_velocity (static_cast<int> (gain)) : from_db (gain);
+	_stripable->gain_control ()->set_value (val, PBD::Controllable::NoGroup);
 }
 
 bool
@@ -238,6 +240,12 @@ ArdourMixerStrip::name () const
 	return _stripable->name ();
 }
 
+bool
+ArdourMixerStrip::is_midi () const
+{
+	return _stripable->presentation_info ().flags () & PresentationInfo::Flag::MidiTrack;
+}
+
 void
 ArdourMixerStrip::on_drop_plugin (uint32_t plugin_id)
 {
@@ -266,6 +274,18 @@ ArdourMixerStrip::from_db (double db)
 	float k = dB_to_coefficient (static_cast<float> (db));
 
 	return static_cast<double> (k);
+}
+	
+int
+ArdourMixerStrip::to_velocity (double k)
+{
+	return static_cast<int> (127.0 * k / 2.0);
+}
+
+double
+ArdourMixerStrip::from_velocity (int k)
+{
+	return 2.0 * static_cast<double> (k) / 127.0;
 }
 
 int
