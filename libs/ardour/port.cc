@@ -48,7 +48,7 @@ pframes_t    Port::_global_port_buffer_offset = 0;
 pframes_t    Port::_cycle_nframes = 0;
 double       Port::_speed_ratio = 1.0;
 std::string  Port::state_node_name = X_("Port");
-const uint32_t Port::_resampler_quality = 12;
+const uint32_t Port::_resampler_quality = 17;
 
 /* a handy define to shorten what would otherwise be a needlessly verbose
  * repeated phrase
