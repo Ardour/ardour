@@ -1525,7 +1525,7 @@ private:
 
 	TransportFSM* _transport_fsm;
 
-	static const PostTransportWork ProcessCannotProceedMask = PostTransportWork (PostTransportAudition| PostTransportClearSubstate);
+	static const PostTransportWork ProcessCannotProceedMask = PostTransportWork (PostTransportAudition);
 
 	gint _post_transport_work; /* accessed only atomic ops */
 	PostTransportWork post_transport_work() const        { return (PostTransportWork) g_atomic_int_get (const_cast<gint*>(&_post_transport_work)); }
