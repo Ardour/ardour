@@ -435,6 +435,10 @@ PortEngineSharedImpl::clear_ports ()
 	_ports.flush ();
 	_portmap.flush ();
 
+	pthread_mutex_lock (&_port_callback_mutex);
+	_port_change_flag = false;
+	_port_connection_queue.clear();
+	pthread_mutex_unlock (&_port_callback_mutex);
 }
 
 uint32_t
