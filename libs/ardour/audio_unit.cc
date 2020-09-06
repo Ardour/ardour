@@ -1594,8 +1594,9 @@ AUPlugin::connect_and_run (BufferSet& bufs,
 {
 	Plugin::connect_and_run(bufs, start, end, speed, in_map, out_map, nframes, offset);
 
-	transport_sample = start;
-	transport_speed = speed;
+	/* remain at zero during pre-roll at zero */
+	transport_speed = end > 0 ? speed : 0;
+	transport_sample = std::max (start, samplepos_t (0));
 
 	AudioUnitRenderActionFlags flags = 0;
 	AudioTimeStamp ts;
@@ -1774,11 +1775,11 @@ AUPlugin::get_beat_and_tempo_callback (Float64* outCurrentBeat,
 	DEBUG_TRACE (DEBUG::AudioUnits, "AU calls ardour beat&tempo callback\n");
 
 	if (outCurrentBeat) {
-		*outCurrentBeat = tmap.quarter_note_at_sample (transport_sample + input_offset);
+		*outCurrentBeat = tmap.quarter_note_at_sample (transport_sample);
 	}
 
 	if (outCurrentTempo) {
-		*outCurrentTempo = tmap.tempo_at_sample (transport_sample + input_offset).quarter_notes_per_minute();
+		*outCurrentTempo = tmap.tempo_at_sample (transport_sample).quarter_notes_per_minute();
 	}
 
 	return noErr;
@@ -1795,18 +1796,18 @@ AUPlugin::get_musical_time_location_callback (UInt32*   outDeltaSampleOffsetToNe
 
 	DEBUG_TRACE (DEBUG::AudioUnits, "AU calls ardour music time location callback\n");
 
-	TempoMetric metric = tmap.metric_at (transport_sample + input_offset);
-	Timecode::BBT_Time bbt = _session.tempo_map().bbt_at_sample (transport_sample + input_offset);
+	TempoMetric metric = tmap.metric_at (transport_sample);
+	Timecode::BBT_Time bbt = _session.tempo_map().bbt_at_sample (transport_sample);
 
 	if (outDeltaSampleOffsetToNextBeat) {
 		if (bbt.ticks == 0) {
 			/* on the beat */
 			*outDeltaSampleOffsetToNextBeat = 0;
 		} else {
-			double const next_beat = ceil (tmap.quarter_note_at_sample (transport_sample + input_offset));
+			double const next_beat = ceil (tmap.quarter_note_at_sample (transport_sample));
 			samplepos_t const next_beat_sample = tmap.sample_at_quarter_note (next_beat);
 
-			*outDeltaSampleOffsetToNextBeat = next_beat_sample - (transport_sample + input_offset);
+			*outDeltaSampleOffsetToNextBeat = next_beat_sample - transport_sample;
 		}
 	}
 
@@ -1866,7 +1867,7 @@ AUPlugin::get_transport_state_callback (Boolean*  outIsPlaying,
 		/* this assumes that the AU can only call this host callback from render context,
 		   where input_offset is valid.
 		*/
-		*outCurrentSampleInTimeLine = transport_sample + input_offset;
+		*outCurrentSampleInTimeLine = transport_sample;
 	}
 
 	if (outIsCycling) {
@@ -1884,11 +1885,11 @@ AUPlugin::get_transport_state_callback (Boolean*  outIsPlaying,
 				Timecode::BBT_Time bbt;
 
 				if (outCycleStartBeat) {
-					*outCycleStartBeat = tmap.quarter_note_at_sample (loc->start() + input_offset);
+					*outCycleStartBeat = tmap.quarter_note_at_sample (loc->start());
 				}
 
 				if (outCycleEndBeat) {
-					*outCycleEndBeat = tmap.quarter_note_at_sample (loc->end() + input_offset);
+					*outCycleEndBeat = tmap.quarter_note_at_sample (loc->end());
 				}
 			}
 		}

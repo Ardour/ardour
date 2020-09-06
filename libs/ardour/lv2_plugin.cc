@@ -2671,16 +2671,20 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 
 	cycles_t then = get_cycles();
 
+	/* remain at zero during pre-roll at zero */
+	speed = end > 0 ? speed : 0;
+	samplepos_t start0 = std::max (samplepos_t (0), start);
+
 	TempoMap&               tmap     = _session.tempo_map();
 	Metrics::const_iterator metric_i = tmap.metrics_end();
-	TempoMetric             tmetric  = tmap.metric_at(start, &metric_i);
+	TempoMetric             tmetric  = tmap.metric_at(start0, &metric_i);
 
 	if (_freewheel_control_port) {
 		*_freewheel_control_port = _session.engine().freewheeling() ? 1.f : 0.f;
 	}
 
 	if (_bpm_control_port) {
-		float bpm = tmap.tempo_at_sample (start).note_types_per_minute();
+		float bpm = tmap.tempo_at_sample (start0).note_types_per_minute();
 		if (*_bpm_control_port != bpm) {
 			AutomationCtrlPtr c = get_automation_control (_bpm_control_port_index);
 			if (c && c->ac) {
@@ -2759,9 +2763,9 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 
 			if (valid && (flags & PORT_INPUT)) {
 				if ((flags & PORT_POSITION)) {
-					Timecode::BBT_Time bbt (tmap.bbt_at_sample (start));
+					Timecode::BBT_Time bbt (tmap.bbt_at_sample (start0));
 					double time_scale = Port::speed_ratio ();
-					double bpm = tmap.tempo_at_sample (start).note_types_per_minute();
+					double bpm = tmap.tempo_at_sample (start0).note_types_per_minute();
 					double beatpos = (bbt.bars - 1) * tmetric.meter().divisions_per_bar()
 					               + (bbt.beats - 1)
 					               + (bbt.ticks / Timecode::BBT_Time::ticks_per_beat);
@@ -2773,7 +2777,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 							bpm != _current_bpm) {
 						// Transport or Tempo has changed, write position at cycle start
 						write_position(&_impl->forge, _ev_buffers[port_index],
-								tmetric, bbt, speed, time_scale,  bpm, start, 0);
+								tmetric, bbt, speed, time_scale, bpm, start, 0);
 					}
 				}
 
@@ -2805,11 +2809,11 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 						tmetric.set_metric(metric);
 						Timecode::BBT_Time bbt;
 						bbt = tmap.bbt_at_sample (metric->sample());
-						double bpm = tmap.tempo_at_sample (start/*XXX*/).note_types_per_minute();
+						double bpm = tmap.tempo_at_sample (start0 /*XXX metric->sample() */).note_types_per_minute();
 						write_position(&_impl->forge, _ev_buffers[port_index],
 						               tmetric, bbt, speed, Port::speed_ratio (),
 						               bpm, metric->sample(),
-						               metric->sample() - start);
+						               metric->sample() - start0);
 						++metric_i;
 					}
 				}
@@ -3102,7 +3106,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 
 	// Update expected transport information for next cycle so we can detect changes
 	_next_cycle_speed = speed;
-	_next_cycle_start = end;
+	_next_cycle_start = end + (start - start0);
 	_prev_time_scale = Port::speed_ratio ();
 
 	{
@@ -3110,9 +3114,9 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 		 * Note: for no-midi plugins, we only ever send information at cycle-start,
 		 * so it needs to be realative to that.
 		 */
-		TempoMetric t = tmap.metric_at(start);
-		_current_bpm = tmap.tempo_at_sample (start).note_types_per_minute();
-		Timecode::BBT_Time bbt (tmap.bbt_at_sample (start));
+		TempoMetric t = tmap.metric_at (start0);
+		_current_bpm = tmap.tempo_at_sample (start0).note_types_per_minute();
+		Timecode::BBT_Time bbt (tmap.bbt_at_sample (start0));
 		double beatpos = (bbt.bars - 1) * t.meter().divisions_per_bar()
 		               + (bbt.beats - 1)
 		               + (bbt.ticks / Timecode::BBT_Time::ticks_per_beat);

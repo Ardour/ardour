@@ -687,8 +687,9 @@ VSTPlugin::connect_and_run (BufferSet& bufs,
 		return 0;
 	}
 
-	_transport_sample = start;
-	_transport_speed = speed;
+	/* remain at zero during pre-roll at zero */
+	_transport_speed = end > 0 ? speed : 0;
+	_transport_sample = std::max (samplepos_t (0), start);
 
 	ChanCount bufs_count;
 	bufs_count.set(DataType::AUDIO, 1);
