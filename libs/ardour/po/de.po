@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-06-29 07:30+0200\n"
-"PO-Revision-Date: 2020-06-29 07:43+0200\n"
+"PO-Revision-Date: 2020-09-05 16:31+0200\n"
 "Last-Translator: Edgar Aichinger <edgar.aichinger@aon.at>\n"
 "Language-Team: German <ardour-dev@lists.ardour.org>\n"
 "Language: de\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 20.04.2\n"
+"X-Generator: Lokalize 20.08.0\n"
 
 #: analyser.cc:127 audioregion.cc:1791
 msgid "Transient Analysis failed for %1."
@@ -3972,19 +3972,19 @@ msgstr "Knoten für Port hat keine Eigenschaft \"name\""
 
 #: utils.cc:419 utils.cc:448
 msgid "Splice"
-msgstr "Schneiden"
+msgstr "Splice"
 
 #: utils.cc:421 utils.cc:438
 msgid "Slide"
-msgstr "Gleiten"
+msgstr "Slide"
 
 #: utils.cc:423 utils.cc:444
 msgid "Ripple"
-msgstr "Schieben"
+msgstr "Ripple"
 
 #: utils.cc:425 utils.cc:441
 msgid "Lock"
-msgstr "Sperren"
+msgstr "Lock"
 
 #: utils.cc:428
 msgid "programming error: unknown edit mode string \"%1\""

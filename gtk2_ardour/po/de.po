@@ -13,7 +13,7 @@ msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-06-29 07:30+0200\n"
-"PO-Revision-Date: 2020-06-29 19:37+0200\n"
+"PO-Revision-Date: 2020-09-05 16:30+0200\n"
 "Last-Translator: Edgar Aichinger <edgar.aichinger@aon.at>\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de\n"
@@ -21,7 +21,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 20.04.2\n"
+"X-Generator: Lokalize 20.08.0\n"
 "X-Poedit-Basepath: ../..\n"
 "X-Poedit-SearchPath-0: gtk2_ardour\n"
 
@@ -3687,7 +3687,7 @@ msgstr "Maus"
 
 #: editor.cc:211 editor_actions.cc:550
 msgid "Slide"
-msgstr "Gleiten"
+msgstr "Slide"
 
 #: editor.cc:212
 msgid "Splice"
@@ -3695,12 +3695,12 @@ msgstr "Splice"
 
 #: editor.cc:213 editor_actions.cc:549
 msgid "Ripple"
-msgstr "Schieben"
+msgstr "Ripple"
 
 #: editor.cc:214 editor_actions.cc:1492 editor_markers.cc:921
 #: editor_rulers.cc:265 location_ui.cc:69
 msgid "Lock"
-msgstr "Sperren"
+msgstr "Lock"
 
 #: editor.cc:219 mono_panner_editor.cc:45
 msgid "Left"
@@ -5773,7 +5773,7 @@ msgstr "Region zeitgleich verschieben"
 
 #: editor_drag.cc:2415
 msgid "Ripple drag"
-msgstr "Schiebemodus-Ziehen"
+msgstr "Ripple-Ziehen"
 
 #: editor_drag.cc:2504
 msgid "create region"
