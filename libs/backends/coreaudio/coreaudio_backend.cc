@@ -109,7 +109,6 @@ CoreAudioBackend::CoreAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, _processed_samples (0)
 {
 	_instance_name = s_instance_name;
-	pthread_mutex_init (&_port_registration_mutex, 0);
 	pthread_mutex_init (&_process_callback_mutex, 0);
 	pthread_mutex_init (&_freewheel_mutex, 0);
 	pthread_cond_init  (&_freewheel_signal, 0);
@@ -130,7 +129,6 @@ CoreAudioBackend::~CoreAudioBackend ()
 
 	clear_ports ();
 
-	pthread_mutex_destroy (&_port_registration_mutex);
 	pthread_mutex_destroy (&_process_callback_mutex);
 	pthread_mutex_destroy (&_freewheel_mutex);
 	pthread_cond_destroy  (&_freewheel_signal);
