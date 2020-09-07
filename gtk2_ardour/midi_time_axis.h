@@ -145,6 +145,7 @@ private:
 	void update_midi_controls_visibility (uint32_t);
 
 	bool                          _ignore_signals;
+	bool                          _asked_all_automation;
 	std::string                   _effective_model;
 	std::string                   _effective_mode;
 	MidiScroomer*                 _range_scroomer;

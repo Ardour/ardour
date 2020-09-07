@@ -44,6 +44,7 @@
 #include "pbd/enumwriter.h"
 #include "pbd/memento_command.h"
 #include "pbd/stateful_diff_command.h"
+#include "pbd/unwind.h"
 
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/utils.h"
@@ -72,6 +73,7 @@
 #include "ardour/track.h"
 #include "ardour/types.h"
 
+#include "ardour_message.h"
 #include "automation_line.h"
 #include "automation_time_axis.h"
 #include "editor.h"
@@ -119,6 +121,7 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess, ArdourCanva
 	: SessionHandlePtr (sess)
 	, RouteTimeAxisView (ed, sess, canvas)
 	, _ignore_signals(false)
+	, _asked_all_automation(false)
 	, _range_scroomer(0)
 	, _piano_roll_header(0)
 	, _note_mode(Sustained)
@@ -1201,6 +1204,19 @@ void
 MidiTimeAxisView::show_all_automation (bool apply_to_selection)
 {
 	using namespace MIDI::Name;
+
+	if (!_asked_all_automation) {
+		ArdourMessageDialog md (_("Are you sure you want to\nshow all MIDI automation lanes?"), false, MESSAGE_QUESTION, BUTTONS_YES_NO);
+
+		md.set_title (_("Show All Automation"));
+
+		md.set_secondary_text (_("There are a total of 16 MIDI channels times 128 Control-Change parameters, not including other MIDI controls. Showing all will add more than 2000 automation lanes which is not generally useful. This will take some time and also slow down Ardour's GUI signficantly."));
+		if (md.run () != RESPONSE_YES) {
+			return;
+		}
+	}
+
+	PBD::Unwinder<bool> uw (_asked_all_automation, true);
 
 	if (apply_to_selection) {
 		_editor.get_selection().tracks.foreach_midi_time_axis (
