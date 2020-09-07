@@ -123,11 +123,11 @@ public:
 
 	struct LIBARDOUR_API IOPortDescription {
 	public:
-		IOPortDescription (const std::string& n)
+		IOPortDescription (const std::string& n, bool sc = false, std::string gn = "", uint32_t gc = 0)
 		        : name (n)
-		        , is_sidechain (false)
-		        , group_name (n)
-		        , group_channel (0)
+		        , is_sidechain (sc)
+		        , group_name (gn.empty () ? n : gn)
+		        , group_channel (gc)
 		{ }
 
 		IOPortDescription (const IOPortDescription& other)
