@@ -2493,7 +2493,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	ComboOption<float>* dps = new ComboOption<float> (
 		     "draggable-playhead-speed",
-		     _("Auto-scroll speed when dragging playhead (%)"),
+		     _("Auto-scroll speed when dragging playhead"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_draggable_playhead_speed),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_draggable_playhead_speed)
 		     );
