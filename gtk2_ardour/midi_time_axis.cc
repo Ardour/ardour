@@ -1206,6 +1206,7 @@ MidiTimeAxisView::show_all_automation (bool apply_to_selection)
 		_editor.get_selection().tracks.foreach_midi_time_axis (
 			boost::bind (&MidiTimeAxisView::show_all_automation, _1, false));
 	} else {
+		no_redraw = true; // unset in RouteTimeAxisView::show_all_automation
 		if (midi_track()) {
 			// Show existing automation
 			const set<Evoral::Parameter> params = midi_track()->midi_playlist()->contained_automation();
