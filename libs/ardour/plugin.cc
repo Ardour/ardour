@@ -368,6 +368,9 @@ Plugin::preset_by_label (const string& label)
 const Plugin::PresetRecord *
 Plugin::preset_by_uri (const string& uri)
 {
+	if (uri.empty ()) {
+		return 0;
+	}
 	if (!_have_presets) {
 		find_presets ();
 		_have_presets = true;
