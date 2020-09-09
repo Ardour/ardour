@@ -305,7 +305,7 @@ if test x$WITH_GRATIS_X42_LV2 != x ; then
 fi
 
 if test x$WITH_HARRISON_LV2 != x ; then
-	mkdir -p $ALIBDIR/LV2
+	mkdir -p $DESTDIR/LV2
 
 	echo "Including Harrison LV2s"
 
@@ -313,7 +313,7 @@ if test x$WITH_HARRISON_LV2 != x ; then
 		-z "${SRCCACHE}/${HARRISONLV2}.${WARCH}.zip" \
 		-o "${SRCCACHE}/${HARRISONLV2}.${WARCH}.zip" \
 		"${HARRISONDSPURL}/${HARRISONLV2}.${WARCH}.zip"
-	unzip -q -d "$ALIBDIR/LV2/" "${SRCCACHE}/${HARRISONLV2}.${WARCH}.zip"
+	unzip -q -d "$DESTDIR/LV2/" "${SRCCACHE}/${HARRISONLV2}.${WARCH}.zip"
 fi
 
 if test -n "$MIXBUS"; then
@@ -460,6 +460,25 @@ EOF
 
 fi
 
+if test x$WITH_HARRISON_LV2 != x ; then
+if test -n "$MIXBUS"; then
+	cat >> $NSISFILE << EOF
+Section "Harrison XT plugins and a-/ACE plugin GUIs\$\\r\$\\n" SecXT
+  SectionIn RO
+  SetOutPath \$INSTDIR\\lib
+  File /r LV2
+SectionEnd
+EOF
+else
+	cat >> $NSISFILE << EOF
+Section "Harrison XT-plugins" SecXT
+  SetOutPath \$INSTDIR\\lib\\${LOWERCASE_DIRNAME}
+  File /r LV2
+SectionEnd
+EOF
+fi
+fi
+
 cat >> $NSISFILE << EOF
 
 Section "WASAPI sound driver" SecWASAPI
@@ -496,6 +515,11 @@ if test -z "$NOVIDEOTOOLS"; then
 LangString DESC_SecVideo \${LANG_ENGLISH} "Video Tools\$\\r\$\\nxjadeo-${XJADEO_VERSION}\$\\r\$\\nharvid-${HARVID_VERSION}"
 EOF
 fi
+if test x$WITH_HARRISON_LV2 != x ; then
+	cat >> $NSISFILE << EOF
+LangString DESC_SecXT \${LANG_ENGLISH} "These are proprietary additions, but the DSP is not license encumbered. XT-plugin GUIs are commercial, the additional a-*/ACE plugin GUIs are free."
+EOF
+fi
 
 cat >> $NSISFILE << EOF
 LangString DESC_SecMenu \${LANG_ENGLISH} "Create Start-Menu Shortcuts (recommended)."
@@ -507,6 +531,12 @@ EOF
 if test -z "$NOVIDEOTOOLS"; then
 	cat >> $NSISFILE << EOF
 !insertmacro MUI_DESCRIPTION_TEXT \${SecVideo} \$(DESC_SecVideo)
+EOF
+fi
+
+if test x$WITH_HARRISON_LV2 != x ; then
+	cat >> $NSISFILE << EOF
+!insertmacro MUI_DESCRIPTION_TEXT \${SecXT} \$(DESC_SecXT)
 EOF
 fi
 
