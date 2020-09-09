@@ -26,7 +26,6 @@
 #include "ardour/audioplaylist.h"
 #include "ardour/midi_playlist.h"
 
-#include "ardour/playlist.h"
 #include "ardour/session_playlist.h"
 
 #include <gtkmm2ext/gtk_ui.h>
@@ -65,8 +64,10 @@ PlaylistSelector::PlaylistSelector ()
 
 	get_vbox()->pack_start (scroller);
 
-	Button* b = add_button (_("Close"), RESPONSE_CANCEL);
-	b->signal_clicked().connect (sigc::mem_fun(*this, &PlaylistSelector::close_button_click));
+	Button* close_btn = add_button (_("Close"), RESPONSE_CANCEL);
+	Button* ok_btn = add_button (_("OK"), RESPONSE_OK);
+	close_btn->signal_clicked().connect (sigc::mem_fun(*this, &PlaylistSelector::close_button_click));
+	ok_btn->signal_clicked().connect (sigc::mem_fun(*this, &PlaylistSelector::ok_button_click));
 
 }
 
@@ -118,6 +119,10 @@ PlaylistSelector::show_for (RouteUI* ruix)
 	others[columns.text] = _("Other tracks");
 	boost::shared_ptr<Playlist> proxy = others[columns.playlist];
 	proxy.reset ();
+
+	if (this_track->playlist()) {
+		current_playlist = this_track->playlist();
+	}
 
 	for (TrackPlaylistMap::iterator x = trpl_map.begin(); x != trpl_map.end(); ++x) {
 
@@ -238,8 +243,24 @@ PlaylistSelector::add_playlist_to_map (boost::shared_ptr<Playlist> pl)
 void
 PlaylistSelector::close_button_click ()
 {
+	if (rui && current_playlist) {
+		rui->track ()->use_playlist (rui->is_audio_track () ? DataType::AUDIO : DataType::MIDI, current_playlist);
+	}
 	rui = 0;
 	hide ();
+}
+
+void
+PlaylistSelector::ok_button_click()
+{
+	rui = 0;
+	hide();
+}
+
+bool PlaylistSelector::on_delete_event (GdkEventAny*)
+{
+	close_button_click();
+	return false;
 }
 
 void
@@ -264,7 +285,5 @@ PlaylistSelector::selection_changed ()
 		}
 
 		rui->track ()->use_playlist (rui->is_audio_track () ? DataType::AUDIO : DataType::MIDI, pl);
-
-		hide ();
 	}
 }

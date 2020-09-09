@@ -30,6 +30,7 @@
 #include <gtkmm/treestore.h>
 
 #include "ardour_dialog.h"
+#include "ardour/playlist.h"
 #include "ardour/session_handle.h"
 
 namespace ARDOUR {
@@ -63,7 +64,9 @@ private:
 	void add_playlist_to_map (boost::shared_ptr<ARDOUR::Playlist>);
 	void clear_map ();
 	void close_button_click ();
+	void ok_button_click ();
 	void selection_changed ();
+	bool on_delete_event (GdkEventAny*);
 
 	struct ModelColumns : public Gtk::TreeModel::ColumnRecord
 	{
@@ -78,6 +81,8 @@ private:
 	ModelColumns columns;
 	Glib::RefPtr<Gtk::TreeStore> model;
 	Gtk::TreeView tree;
+
+	boost::shared_ptr<ARDOUR::Playlist> current_playlist;
 };
 
 #endif // __ardour_playlist_selector_h__
