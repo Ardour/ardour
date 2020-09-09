@@ -1053,10 +1053,12 @@ ExportFormatDialog::update_demo_noise_selection ()
 	}
 	int duration = iter->get_value (demo_noise_cols.duration);
 	int interval = iter->get_value (demo_noise_cols.interval);
+	int level = demo_noise_dbfs_spinbutton.get_value();
 	demo_noise_dbfs_spinbutton.set_sensitive (interval != 0 && duration != 0);
 
 	manager.select_demo_noise_duration (duration);
 	manager.select_demo_noise_interval (interval);
+	manager.select_demo_noise_level(level);
 }
 
 void
