@@ -657,7 +657,7 @@ PlugUIBase::add_plugin_setting ()
 
 		Plugin::PresetRecord const r = plugin->save_preset (d.name());
 		if (!r.uri.empty ()) {
-			plugin->load_preset (r);
+			plugin->Plugin::load_preset (r);
 		}
 		break;
 	}
@@ -669,7 +669,7 @@ PlugUIBase::save_plugin_setting ()
 	string const name = _preset_combo.get_text ();
 	Plugin::PresetRecord const r = plugin->save_preset (name);
 	if (!r.uri.empty ()) {
-		plugin->load_preset (r);
+		plugin->Plugin::load_preset (r);
 	}
 }
 
