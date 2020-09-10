@@ -123,7 +123,7 @@ CoreAudioSource::safe_read (Sample* dst, samplepos_t start, samplecnt_t cnt, Aud
 		try {
 			af.Seek (start+nread);
 		} catch (CAXException& cax) {
-			error << string_compose("CoreAudioSource: %1 to %2 [%3] (%3)", cax.mOperation, start+nread, cax.mError, _name.val().substr (1)) << endmsg;
+			error << string_compose("CoreAudioSource: %1 to %2 [%3] (%4)", cax.mOperation, start+nread, cax.mError, _name.val().substr (1)) << endmsg;
 			return -1;
 		}
 
