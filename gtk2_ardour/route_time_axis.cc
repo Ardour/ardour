@@ -1384,7 +1384,39 @@ RouteTimeAxisView::paste (samplepos_t pos, const Selection& selection, PasteCont
 void
 RouteTimeAxisView::update_playlist_tip ()
 {
-	set_tooltip (playlist_button, playlist_tip ());
+	RouteGroup* rg = route_group ();
+	if (rg && rg->is_active() && rg->enabled_property (ARDOUR::Properties::group_select.property_id)) {
+		string group_string = "." + rg->name() + ".";
+
+		string take_name = track()->playlist()->name();
+		string::size_type idx = take_name.find(group_string);
+
+		if (idx != string::npos) {
+			/* find the bit containing the take number / name */
+			take_name = take_name.substr (idx + group_string.length());
+
+			/* set the playlist button tooltip to the take name */
+			set_tooltip (
+				playlist_button,
+				string_compose(_("Take: %1.%2"),
+					Gtkmm2ext::markup_escape_text (rg->name()),
+					Gtkmm2ext::markup_escape_text (take_name))
+				);
+
+			return;
+		}
+	}
+
+	/* set the playlist button tooltip to the playlist name */
+	set_tooltip (playlist_button, _("Playlist") + std::string(": ") + Gtkmm2ext::markup_escape_text (track()->playlist()->name()));
+}
+
+
+void
+RouteTimeAxisView::show_playlist_selector ()
+{
+	_editor.playlist_selector().set_rui(this);
+	_editor.playlist_selector().redisplay();
 }
 
 void

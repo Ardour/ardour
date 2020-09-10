@@ -47,7 +47,8 @@ public:
 	PlaylistSelector ();
 	~PlaylistSelector ();
 
-	void show_for (RouteUI*);
+	void redisplay();
+	void set_rui(RouteUI*);
 
 protected:
 	bool on_unmap_event (GdkEventAny*);
@@ -60,8 +61,10 @@ private:
 	RouteUI* rui;
 
 	sigc::connection select_connection;
+	PBD::ScopedConnectionList signal_connections;
 
 	void add_playlist_to_map (boost::shared_ptr<ARDOUR::Playlist>);
+	void playlist_added();
 	void clear_map ();
 	void close_button_click ();
 	void ok_button_click ();

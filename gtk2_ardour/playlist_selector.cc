@@ -48,7 +48,7 @@ PlaylistSelector::PlaylistSelector ()
 	rui = 0;
 
 	set_name ("PlaylistSelectorWindow");
-	set_modal(true);
+	set_modal(false);
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 	set_size_request (300, 200);
 
@@ -68,7 +68,33 @@ PlaylistSelector::PlaylistSelector ()
 	Button* ok_btn = add_button (_("OK"), RESPONSE_OK);
 	close_btn->signal_clicked().connect (sigc::mem_fun(*this, &PlaylistSelector::close_button_click));
 	ok_btn->signal_clicked().connect (sigc::mem_fun(*this, &PlaylistSelector::ok_button_click));
+}
 
+void PlaylistSelector::set_rui(RouteUI* ruix)
+{
+	if (rui == ruix) {
+		return;
+	}
+
+	rui = ruix;
+
+	boost::shared_ptr<Track> this_track = rui->track();
+
+	if (this_track) {
+		this_track->PlaylistAdded.connect(
+			signal_connections,
+			invalidator(*this),
+			boost::bind(&PlaylistSelector::playlist_added, this),
+			gui_context()
+		);
+
+		this_track->DropReferences.connect(
+			signal_connections,
+			invalidator(*this),
+			boost::bind(&PlaylistSelector::ok_button_click, this),
+			gui_context()
+		);
+	}
 }
 
 PlaylistSelector::~PlaylistSelector ()
@@ -96,12 +122,10 @@ PlaylistSelector::on_unmap_event (GdkEventAny* ev)
 }
 
 void
-PlaylistSelector::show_for (RouteUI* ruix)
+PlaylistSelector::redisplay()
 {
 	vector<const char*> item;
 	string str;
-
-	rui = ruix;
 
 	set_title (string_compose (_("Playlist for %1"), rui->route()->name()));
 
@@ -220,6 +244,10 @@ PlaylistSelector::add_playlist_to_map (boost::shared_ptr<Playlist> pl)
 		return;
 	}
 
+	if (!rui) {
+		return;
+	}
+
 	if (rui->is_midi_track ()) {
 		if (boost::dynamic_pointer_cast<MidiPlaylist> (pl) == 0) {
 			return;
@@ -238,6 +266,12 @@ PlaylistSelector::add_playlist_to_map (boost::shared_ptr<Playlist> pl)
 	}
 
 	x->second->push_back (pl);
+}
+
+void
+PlaylistSelector::playlist_added()
+{
+	redisplay();
 }
 
 void
