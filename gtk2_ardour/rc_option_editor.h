@@ -66,8 +66,10 @@ private:
 	/* plugin actions */
 	void plugin_scan_refresh ();
 	void plugin_reset_stats ();
-	void clear_vst_cache ();
-	void clear_vst_blacklist ();
+	void clear_vst2_cache ();
+	void clear_vst2_blacklist ();
+	void clear_vst3_cache ();
+	void clear_vst3_blacklist ();
 	void clear_au_cache ();
 	void clear_au_blacklist ();
 	void edit_lxvst_path ();

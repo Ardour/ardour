@@ -3547,7 +3547,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	/* PLUGINS */
 
-#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT || defined AUDIOUNIT_SUPPORT)
+#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT || defined AUDIOUNIT_SUPPORT || defined VST3_SUPPORT)
 	add_option (_("Plugins"), new OptionEditorHeading (_("Scan/Discover")));
 	add_option (_("Plugins"),
 			new RcActionButton (_("Scan for Plugins"),
@@ -3557,7 +3557,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Plugins"), new OptionEditorHeading (_("General")));
 
-#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT || defined AUDIOUNIT_SUPPORT)
+#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT || defined AUDIOUNIT_SUPPORT || defined VST3_SUPPORT)
 	bo = new BoolOption (
 			"show-plugin-scan-window",
 			_("Always Display Plugin Scan Progress"),
@@ -3605,8 +3605,7 @@ RCOptionEditor::RCOptionEditor ()
 	Gtkmm2ext::UI::instance()->set_tip (lna->tip_widget(),
 					    _("Some Plugins expose an unreasonable amount of control-inputs. This option limits the number of parameters that can are listed as automatable without restricting the number of total controls.\n\nThis reduces lag in the GUI and shortens excessively long drop-down lists for plugins with a large number of control ports.\n\nNote: This only affects newly added plugins and is applied to plugin on session-reload. Already automated parameters are retained."));
 
-
-#if (defined WINDOWS_VST_SUPPORT || defined MACVST_SUPPORT || defined LXVST_SUPPORT)
+#if (defined WINDOWS_VST_SUPPORT || defined MACVST_SUPPORT || defined LXVST_SUPPORT || defined VST3_SUPPORT)
 	add_option (_("Plugins/VST"), new OptionEditorHeading (_("VST")));
 #if 0
 	add_option (_("Plugins/VST"),
@@ -3649,15 +3648,19 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Plugins/VST"), new VstTimeOutSliderOption (_rc_config));
 
-	add_option (_("Plugins/VST"),
-			new RcActionButton (_("Clear"),
-				sigc::mem_fun (*this, &RCOptionEditor::clear_vst_cache),
-				_("VST Cache:")));
+#if (defined WINDOWS_VST_SUPPORT || defined MACVST_SUPPORT || defined LXVST_SUPPORT)
+	add_option (_("Plugins/VST"), new OptionEditorHeading (_("VST 2.x")));
 
 	add_option (_("Plugins/VST"),
 			new RcActionButton (_("Clear"),
-				sigc::mem_fun (*this, &RCOptionEditor::clear_vst_blacklist),
-				_("VST Blacklist:")));
+				sigc::mem_fun (*this, &RCOptionEditor::clear_vst2_cache),
+				_("VST 3 Cache:")));
+
+	add_option (_("Plugins/VST"),
+			new RcActionButton (_("Clear"),
+				sigc::mem_fun (*this, &RCOptionEditor::clear_vst2_blacklist),
+				_("VST 2 Blacklist:")));
+#endif
 #endif
 
 #ifdef LXVST_SUPPORT
@@ -3685,6 +3688,31 @@ RCOptionEditor::RCOptionEditor ()
 				_("Path:"),
 				sigc::mem_fun (*_rc_config, &RCConfiguration::get_plugin_path_vst),
 				';'));
+#endif
+
+#ifdef VST3_SUPPORT
+	add_option (_("Plugins/VST"), new OptionEditorHeading (_("VST 3")));
+	add_option (_("Plugins/VST"),
+			new RcActionButton (_("Clear"),
+				sigc::mem_fun (*this, &RCOptionEditor::clear_vst3_cache),
+				_("VST 3 Cache:")));
+
+	add_option (_("Plugins/VST"),
+			new RcActionButton (_("Clear"),
+				sigc::mem_fun (*this, &RCOptionEditor::clear_vst3_blacklist),
+				_("VST 3 Blacklist:")));
+
+
+#if (defined WINDOWS_VST_SUPPORT || defined MACVST_SUPPORT || defined LXVST_SUPPORT)
+	add_option (_("Plugins/VST"), new OptionEditorHeading (_("VST2/VST3")));
+	add_option (_("Plugins/VST"),
+	     new BoolOption (
+		     "conceal-vst2-if-vst3-exists",
+		     _("Conceal VST2 Plugins if matching VST3 exists"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_conceal_vst2_if_vst3_exists),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_conceal_vst2_if_vst3_exists)
+		     ));
+#endif
 #endif
 
 #ifdef AUDIOUNIT_SUPPORT
@@ -4331,6 +4359,8 @@ RCOptionEditor::parameter_changed (string const & p)
 #endif
 	} else if (p == "conceal-lv1-if-lv2-exists") {
 		plugin_scan_refresh ();
+	} else if (p == "conceal-vst2-if-vst3-exists") {
+		plugin_scan_refresh ();
 	}
 }
 
@@ -4344,12 +4374,20 @@ void RCOptionEditor::plugin_reset_stats () {
 	PluginManager::instance().reset_stats();
 }
 
-void RCOptionEditor::clear_vst_cache () {
+void RCOptionEditor::clear_vst2_cache () {
 	PluginManager::instance().clear_vst_cache();
 }
 
-void RCOptionEditor::clear_vst_blacklist () {
+void RCOptionEditor::clear_vst2_blacklist () {
 	PluginManager::instance().clear_vst_blacklist();
+}
+
+void RCOptionEditor::clear_vst3_cache () {
+	PluginManager::instance().clear_vst3_cache();
+}
+
+void RCOptionEditor::clear_vst3_blacklist () {
+	PluginManager::instance().clear_vst3_blacklist();
 }
 
 void RCOptionEditor::clear_au_cache () {
