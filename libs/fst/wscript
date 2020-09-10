@@ -13,10 +13,6 @@ from waflib.Task import Task
 top = '.'
 out = 'build'
 
-scanner_app_src = [
-    'scanner.cc',
-    ]
-
 # needed for code used from libardour
 I18N_PACKAGE = 'ardour'
 
@@ -42,6 +38,33 @@ def set_winegcc(self):
 
 def build(bld):
     VERSION = "%s.%s" % (bld.env['MAJOR'], bld.env['MINOR'])
+
+    if bld.is_defined('VST3_SUPPORT'):
+        obj = bld (features = 'cxx c cxxprogram')
+        obj.source    = 'vst3-scanner.cc'
+        obj.target    = 'ardour-vst3-scanner'
+        obj.includes  = [ '../pbd/', '../ardour/', '../vst3/', '..' ]
+        obj.defines   = [
+            '_POSIX_SOURCE',
+            'VERSIONSTRING="' + str(bld.env['VERSION']) + '"',
+            'PACKAGE="' + I18N_PACKAGE + str(bld.env['MAJOR']) + '"',
+            'LIBARDOUR="' + bld.env['lwrcase_dirname'] + '"',
+            'LOCALEDIR="' + os.path.join(os.path.normpath(bld.env['DATADIR']), 'locale') + '"',
+            ]
+        obj.use = [ 'libpbd' ]
+
+        if bld.env['build_target'] == 'mingw':
+            obj.uselib = ['GIOMM', 'DL', 'GDI32', 'XML']
+            obj.linkflags = ['-mwindows']
+        else:
+            obj.uselib = ['GIOMM', 'DL', 'OSX', 'XML']
+
+        if re.search ("bsd", sys.platform) != None:
+            obj.defines.append('_POSIX_C_SOURCE=200809')
+            obj.defines.append('_XOPEN_SOURCE=700')
+        obj.install_path = os.path.join(bld.env['LIBDIR'])
+
+
     if not (bld.is_defined('WINDOWS_VST_SUPPORT') or bld.is_defined('LXVST_SUPPORT') or bld.is_defined ('MACVST_SUPPORT')):
         return
 
