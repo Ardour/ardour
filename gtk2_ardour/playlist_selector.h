@@ -41,24 +41,40 @@ namespace ARDOUR {
 
 class RouteUI;
 
+struct PlaylistSorterByID {
+	bool operator() (boost::shared_ptr<ARDOUR::Playlist> a, boost::shared_ptr<ARDOUR::Playlist> b) const {
+		return a->sort_id() < b->sort_id();
+	}
+};
+
 class PlaylistSelector : public ArdourDialog
 {
 public:
 	PlaylistSelector ();
 	~PlaylistSelector ();
 
+	enum plMode {
+		plSelect,
+		plCopy,
+		plShare,
+		plSteal
+	};
+
 	void redisplay();
-	void set_rui(RouteUI*);
+	void set_tav(RouteTimeAxisView*, plMode in);
 
 protected:
 	bool on_unmap_event (GdkEventAny*);
 
 private:
-	typedef std::map<PBD::ID,std::list<boost::shared_ptr<ARDOUR::Playlist> >*> TrackPlaylistMap;
+	typedef std::map<PBD::ID,std::vector<boost::shared_ptr<ARDOUR::Playlist> >*> TrackPlaylistMap;
 
 	Gtk::ScrolledWindow scroller;
 	TrackPlaylistMap trpl_map;
-	RouteUI* rui;
+
+	RouteTimeAxisView* _tav;
+
+	plMode _mode;
 
 	sigc::connection select_connection;
 	PBD::ScopedConnectionList signal_connections;

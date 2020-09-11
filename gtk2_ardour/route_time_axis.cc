@@ -1380,7 +1380,6 @@ RouteTimeAxisView::paste (samplepos_t pos, const Selection& selection, PasteCont
 	return true;
 }
 
-
 void
 RouteTimeAxisView::update_playlist_tip ()
 {
@@ -1409,14 +1408,6 @@ RouteTimeAxisView::update_playlist_tip ()
 
 	/* set the playlist button tooltip to the playlist name */
 	set_tooltip (playlist_button, _("Playlist") + std::string(": ") + Gtkmm2ext::markup_escape_text (track()->playlist()->name()));
-}
-
-
-void
-RouteTimeAxisView::show_playlist_selector ()
-{
-	_editor.playlist_selector().set_rui(this);
-	_editor.playlist_selector().redisplay();
 }
 
 void

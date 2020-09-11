@@ -1811,7 +1811,7 @@ void
 RouteUI::set_route_active (bool a, bool apply_to_selection)
 {
 	if (apply_to_selection) {
-		ARDOUR_UI::instance()->the_editor().get_selection().tracks.foreach_route_ui (boost::bind (&RouteTimeAxisView::set_route_active, _1, a, false));
+		ARDOUR_UI::instance()->the_editor().get_selection().tracks.foreach_route_ui (boost::bind (&RouteUI::set_route_active, _1, a, false));
 	} else {
 		_route->set_active (a, this);
 	}
@@ -2552,7 +2552,7 @@ RouteUI::build_playlist_menu ()
 	vector<boost::shared_ptr<Playlist> > playlists_tr = _session->playlists()->playlists_for_track (tr);
 
 	/* sort the playlists */
-	PlaylistSorter cmp;
+	PlaylistSorterByID cmp;
 	sort (playlists_tr.begin(), playlists_tr.end(), cmp);
 
 	/* add the playlists to the menu */
@@ -2567,6 +2567,9 @@ RouteUI::build_playlist_menu ()
 	}
 
 	playlist_items.push_back (SeparatorElem());
+	playlist_items.push_back (MenuElem(_("Select ..."), sigc::mem_fun(*this, &RouteUI::show_playlist_selector)));
+
+	playlist_items.push_back (SeparatorElem());
 	playlist_items.push_back (MenuElem (_("Rename..."), sigc::mem_fun(*this, &RouteUI::rename_current_playlist)));
 	playlist_items.push_back (SeparatorElem());
 
@@ -2576,8 +2579,8 @@ RouteUI::build_playlist_menu ()
 
 	} else {
 		// Use a label which tells the user what is happening
-		playlist_items.push_back (MenuElem (_("New Take"), sigc::bind(sigc::mem_fun(editor, &PublicEditor::new_playlists), this)));
-		playlist_items.push_back (MenuElem (_("Copy Take"), sigc::bind(sigc::mem_fun(editor, &PublicEditor::copy_playlists), this)));
+		playlist_items.push_back (MenuElem (_("New Group Playlist"), sigc::bind(sigc::mem_fun(editor, &PublicEditor::new_playlists), this)));
+		playlist_items.push_back (MenuElem (_("Copy Group Playlist"), sigc::bind(sigc::mem_fun(editor, &PublicEditor::copy_playlists), this)));
 
 	}
 
@@ -2585,7 +2588,12 @@ RouteUI::build_playlist_menu ()
 	playlist_items.push_back (MenuElem (_("Clear Current"), sigc::bind(sigc::mem_fun(editor, &PublicEditor::clear_playlists), this)));
 	playlist_items.push_back (SeparatorElem());
 
-	playlist_items.push_back (MenuElem(_("Select from All..."), sigc::mem_fun(*this, &RouteUI::show_playlist_selector)));
+	Menu* advanced_menu = manage (new Menu);
+	MenuList& advanced_items = advanced_menu->items();
+	advanced_items.push_back (MenuElem(_("Copy from ..."), sigc::mem_fun(*this, &RouteUI::show_playlist_copy_selector)));
+	advanced_items.push_back (MenuElem(_("Share with ..."), sigc::mem_fun(*this, &RouteUI::show_playlist_share_selector)));
+	advanced_items.push_back (MenuElem(_("Steal from ..."), sigc::mem_fun(*this, &RouteUI::show_playlist_steal_selector)));
+	playlist_items.push_back (MenuElem (_("Advanced"), *advanced_menu));
 }
 
 void
@@ -2594,7 +2602,7 @@ RouteUI::use_playlist (RadioMenuItem *item, boost::weak_ptr<Playlist> wpl)
 	assert (is_track());
 
 	// exit if we were triggered by deactivating the old playlist
-	if (!item->get_active()) {
+	if (item && !item->get_active()) {
 		return;
 	}
 
@@ -2659,7 +2667,41 @@ RouteUI::use_playlist (RadioMenuItem *item, boost::weak_ptr<Playlist> wpl)
 void
 RouteUI::show_playlist_selector ()
 {
-	ARDOUR_UI::instance()->the_editor().playlist_selector().show_for (this);
+	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (this);
+	if (rtv) {
+		ARDOUR_UI::instance()->the_editor().playlist_selector().set_tav(rtv, PlaylistSelector::plSelect);
+		ARDOUR_UI::instance()->the_editor().playlist_selector().redisplay ();
+	}
+}
+
+void
+RouteUI::show_playlist_copy_selector ()
+{
+	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (this);
+	if (rtv) {
+		ARDOUR_UI::instance()->the_editor().playlist_selector().set_tav(rtv, PlaylistSelector::plCopy);
+		ARDOUR_UI::instance()->the_editor().playlist_selector().redisplay ();
+	}
+}
+
+void
+RouteUI::show_playlist_share_selector ()
+{
+	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (this);
+	if (rtv) {
+		ARDOUR_UI::instance()->the_editor().playlist_selector().set_tav(rtv, PlaylistSelector::plShare);
+		ARDOUR_UI::instance()->the_editor().playlist_selector().redisplay ();
+	}
+}
+
+void
+RouteUI::show_playlist_steal_selector ()
+{
+	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (this);
+	if (rtv) {
+		ARDOUR_UI::instance()->the_editor().playlist_selector().set_tav(rtv, PlaylistSelector::plSteal);
+		ARDOUR_UI::instance()->the_editor().playlist_selector().redisplay ();
+	}
 }
 
 void

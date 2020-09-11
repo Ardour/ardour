@@ -161,6 +161,8 @@ public:
 	void use_new_playlist (bool prompt, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const&, bool copy);
 	void clear_playlist ();
 
+	void        use_playlist (Gtk::RadioMenuItem* item, boost::weak_ptr<ARDOUR::Playlist> wpl);
+
 	/* used by EditorRoutes */
 	static Gtkmm2ext::ActiveState solo_active_state (boost::shared_ptr<ARDOUR::Stripable>);
 	static Gtkmm2ext::ActiveState solo_isolate_active_state (boost::shared_ptr<ARDOUR::Stripable>);
@@ -239,8 +241,12 @@ protected:
 
 	std::string playlist_tip () const;
 	void        build_playlist_menu ();
-	void        use_playlist (Gtk::RadioMenuItem* item, boost::weak_ptr<ARDOUR::Playlist> wpl);
 	Gtk::Menu*  playlist_action_menu;
+
+	void         show_playlist_selector ();
+	void         show_playlist_copy_selector ();
+	void         show_playlist_share_selector ();
+	void         show_playlist_steal_selector ();
 
 	Gtk::CheckMenuItem* denormal_menu_item;
 
@@ -285,7 +291,6 @@ private:
 	void set_sends_gain_to_zero ();
 	void set_sends_gain_to_unity ();
 
-	void show_playlist_selector ();
 	void rename_current_playlist ();
 
 	void parameter_changed (std::string const&);
