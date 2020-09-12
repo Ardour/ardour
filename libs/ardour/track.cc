@@ -660,13 +660,15 @@ Track::find_and_use_playlist (DataType dt, PBD::ID const & id)
 }
 
 int
-Track::use_playlist (DataType dt, boost::shared_ptr<Playlist> p)
+Track::use_playlist (DataType dt, boost::shared_ptr<Playlist> p, bool set_orig)
 {
 	int ret;
 
 	if ((ret = _disk_reader->use_playlist (dt, p)) == 0) {
 		if ((ret = _disk_writer->use_playlist (dt, p)) == 0) {
-			p->set_orig_track_id (id());
+			if (set_orig) {
+				p->set_orig_track_id (id());
+			}
 		}
 	}
 
@@ -716,7 +718,9 @@ Track::use_copy_playlist ()
 
 	playlist->reset_shares();
 
-	return use_playlist (data_type(), playlist);
+	int rv = use_playlist (data_type(), playlist);
+	PlaylistAdded (); /* EMIT SIGNAL */
+	return rv;
 }
 
 int
@@ -737,7 +741,9 @@ Track::use_new_playlist (DataType dt)
 		return -1;
 	}
 
-	return use_playlist (dt, playlist);
+	int rv = use_playlist (dt, playlist);
+	PlaylistAdded (); /* EMIT SIGNAL */
+	return rv;
 }
 
 void
