@@ -509,7 +509,7 @@ VirtualKeyboardWindow::pitch_bend_update_tooltip (int value)
 	_pitch_slider_tooltip->set_tip (string_compose (
 	      _("Pitchbend: %1\n"
 	        "Use mouse-drag for sprung mode,\n"
-	        "mouse-wheel for presisent bends.\n"
+	        "mouse-wheel for precise bends.\n"
 	        "F1-F4 and arrow-up/down keys jump\n"
 	        "to select values."), value));
 }
