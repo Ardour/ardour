@@ -12382,7 +12382,7 @@ msgstr "Pré-fader"
 
 #: processor_box.cc:3947
 msgid "Post-Fader"
-msgstr "Pré-fader"
+msgstr "Post-fader"
 
 # It is for showing the LV2 generic GUI, so translation is correct.
 #: processor_box.cc:3959
