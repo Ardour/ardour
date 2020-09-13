@@ -575,6 +575,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("clear_list", (void (Evoral::ControlList::*)())&Evoral::ControlList::clear)
 		.addFunction ("in_write_pass", &Evoral::ControlList::in_write_pass)
 		.addFunction ("events", &Evoral::ControlList::events)
+		.addFunction ("size", &Evoral::ControlList::size)
 		.endClass ()
 
 		.beginWSPtrClass <Evoral::ControlSet> ("ControlSet")
