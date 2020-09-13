@@ -239,10 +239,10 @@ LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 
 	set_tooltip (_custom_pos_button,
 		_("<b>When enabled</b> an amplifier processor is used to apply the gain. "
-		  "This allows for custom positoning of the gain-stage in the master-bus' signal flow, "
+		  "This allows for custom positioning of the gain-stage in the master-bus' signal flow, "
 		  "potentially followed by a limiter to conform to both loudness and peak requirements. "
 		  "Depending on limiter settings or DSP after the gain-stage, repeat loudness measurements may produce different results.\n"
-		  "<b>When disabled</b>, the gain is applied diretcly to the output of the master-bus. This results in an efficient and reliable volume adjustment."
+		  "<b>When disabled</b>, the gain is applied directly to the output of the master-bus. This results in an efficient and reliable volume adjustment."
 		 ));
 
 	_dbfs_label.set_alignment (ALIGN_RIGHT);
