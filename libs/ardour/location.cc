@@ -455,6 +455,11 @@ Location::move_to (samplepos_t pos, const uint32_t sub_num)
 void
 Location::set_hidden (bool yn, void*)
 {
+	/* do not allow session range markers to be hidden */
+	if (is_session_range()) {
+		return;
+	}
+
 	if (set_flag_internal (yn, IsHidden)) {
 		flags_changed (this); /* EMIT SIGNAL */
 		FlagsChanged ();
