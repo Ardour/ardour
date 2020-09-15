@@ -4313,12 +4313,13 @@ ProcessorBox::generate_processor_title (boost::shared_ptr<PluginInsert> pi)
 		maker += " ...";
 	}
 
-	SessionObject* owner = pi->owner();
+	SessionObject* owner = pi->owner ();
+	std::string type = PluginManager::plugin_type_name (pi->type ());
 
 	if (owner) {
-		return string_compose(_("%1: %2 (by %3)"), owner->name(), pi->name(), maker);
+		return string_compose(_("%1: %2 (by %3) [%4]"), owner->name(), pi->name(), maker, type);
 	} else {
-		return string_compose(_("%1 (by %2)"), pi->name(), maker);
+		return string_compose(_("%1 (by %2) [%3]"), pi->name(), maker, type);
 	}
 }
 
