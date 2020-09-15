@@ -621,11 +621,7 @@ PluginSelector::lv2_refiller (const std::string& searchstr)
 }
 
 void
-#ifdef WINDOWS_VST_SUPPORT
 PluginSelector::vst_refiller (const std::string& searchstr)
-#else
-PluginSelector::vst_refiller (const std::string&)
-#endif
 {
 #ifdef WINDOWS_VST_SUPPORT
 	refiller (manager.windows_vst_plugin_info(), searchstr, "VST");
@@ -633,11 +629,7 @@ PluginSelector::vst_refiller (const std::string&)
 }
 
 void
-#ifdef LXVST_SUPPORT
 PluginSelector::lxvst_refiller (const std::string& searchstr)
-#else
-PluginSelector::lxvst_refiller (const std::string&)
-#endif
 {
 #ifdef LXVST_SUPPORT
 	refiller (manager.lxvst_plugin_info(), searchstr, "LXVST");
@@ -645,11 +637,7 @@ PluginSelector::lxvst_refiller (const std::string&)
 }
 
 void
-#ifdef MACVST_SUPPORT
 PluginSelector::mac_vst_refiller (const std::string& searchstr)
-#else
-PluginSelector::mac_vst_refiller (const std::string&)
-#endif
 {
 #ifdef MACVST_SUPPORT
 	refiller (manager.mac_vst_plugin_info(), searchstr, "MacVST");
@@ -657,11 +645,7 @@ PluginSelector::mac_vst_refiller (const std::string&)
 }
 
 void
-#ifdef AUDIOUNIT_SUPPORT
 PluginSelector::au_refiller (const std::string& searchstr)
-#else
-PluginSelector::au_refiller (const std::string&)
-#endif
 {
 #ifdef AUDIOUNIT_SUPPORT
 	refiller (manager.au_plugin_info(), searchstr, "AU");
