@@ -281,7 +281,7 @@ PluginManager::detect_name_ambiguities (PluginInfoList* pil)
 	for (PluginInfoList::iterator i = pil->begin(); i != pil->end();) {
 		 PluginInfoPtr& p = *i;
 		 ++i;
-		 if (i != pil->end() && (*i)->name == p->name) {
+		 if (i != pil->end() && PBD::downcase ((*i)->name) == PBD::downcase (p->name)) {
 			 /* mark name as ambiguous IFF ambiguity can be resolved
 				* by listing number of audio outputs.
 				* This is used in the instrument selector.
@@ -303,12 +303,12 @@ PluginManager::detect_type_ambiguities (PluginInfoList& pil)
 			case 0:
 				break;
 			case 1:
-				if (dup.back()->name != (*i)->name) {
+				if (PBD::downcase (dup.back()->name) != PBD::downcase ((*i)->name)) {
 					dup.clear ();
 				}
 				break;
 			default:
-				if (dup.back()->name != (*i)->name) {
+				if (PBD::downcase (dup.back()->name) != PBD::downcase ((*i)->name)) {
 					/* found multiple plugins with same name */
 					bool typediff = false;
 					bool chandiff = false;
