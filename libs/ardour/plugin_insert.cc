@@ -39,13 +39,10 @@
 #include "ardour/event_type_map.h"
 #include "ardour/ladspa_plugin.h"
 #include "ardour/luaproc.h"
+#include "ardour/lv2_plugin.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/port.h"
-
-#ifdef LV2_SUPPORT
-#include "ardour/lv2_plugin.h"
-#endif
 
 #ifdef WINDOWS_VST_SUPPORT
 #include "ardour/windows_vst_plugin.h"
@@ -1434,9 +1431,7 @@ PluginInsert::plugin_factory (boost::shared_ptr<Plugin> other)
 {
 	boost::shared_ptr<LadspaPlugin> lp;
 	boost::shared_ptr<LuaProc> lua;
-#ifdef LV2_SUPPORT
 	boost::shared_ptr<LV2Plugin> lv2p;
-#endif
 #ifdef WINDOWS_VST_SUPPORT
 	boost::shared_ptr<WindowsVSTPlugin> vp;
 #endif
@@ -1454,10 +1449,8 @@ PluginInsert::plugin_factory (boost::shared_ptr<Plugin> other)
 		return boost::shared_ptr<Plugin> (new LadspaPlugin (*lp));
 	} else if ((lua = boost::dynamic_pointer_cast<LuaProc> (other)) != 0) {
 		return boost::shared_ptr<Plugin> (new LuaProc (*lua));
-#ifdef LV2_SUPPORT
 	} else if ((lv2p = boost::dynamic_pointer_cast<LV2Plugin> (other)) != 0) {
 		return boost::shared_ptr<Plugin> (new LV2Plugin (*lv2p));
-#endif
 #ifdef WINDOWS_VST_SUPPORT
 	} else if ((vp = boost::dynamic_pointer_cast<WindowsVSTPlugin> (other)) != 0) {
 		return boost::shared_ptr<Plugin> (new WindowsVSTPlugin (*vp));
@@ -2523,7 +2516,6 @@ PluginInsert::set_control_ids (const XMLNode& node, int version)
 		}
 
 		uint32_t p = (uint32_t)-1;
-#ifdef LV2_SUPPORT
 		std::string str;
 		if ((*iter)->get_property (X_("symbol"), str)) {
 			boost::shared_ptr<LV2Plugin> lv2plugin = boost::dynamic_pointer_cast<LV2Plugin> (_plugins[0]);
@@ -2531,7 +2523,6 @@ PluginInsert::set_control_ids (const XMLNode& node, int version)
 				p = lv2plugin->port_index(str.c_str());
 			}
 		}
-#endif
 		if (p == (uint32_t)-1) {
 			(*iter)->get_property (X_("parameter"), p);
 		}
@@ -2568,7 +2559,7 @@ PluginInsert::update_control_values (const XMLNode& node, int version)
 		}
 
 		uint32_t p = (uint32_t)-1;
-#ifdef LV2_SUPPORT
+
 		std::string str;
 		if ((*iter)->get_property (X_("symbol"), str)) {
 			boost::shared_ptr<LV2Plugin> lv2plugin = boost::dynamic_pointer_cast<LV2Plugin> (_plugins[0]);
@@ -2576,7 +2567,7 @@ PluginInsert::update_control_values (const XMLNode& node, int version)
 				p = lv2plugin->port_index(str.c_str());
 			}
 		}
-#endif
+
 		if (p == (uint32_t)-1) {
 			(*iter)->get_property (X_("parameter"), p);
 		}
@@ -3041,12 +3032,11 @@ PluginInsert::PluginControl::get_state ()
 {
 	XMLNode& node (AutomationControl::get_state());
 	node.set_property (X_("parameter"), parameter().id());
-#ifdef LV2_SUPPORT
+
 	boost::shared_ptr<LV2Plugin> lv2plugin = boost::dynamic_pointer_cast<LV2Plugin> (_plugin->_plugins[0]);
 	if (lv2plugin) {
 		node.set_property (X_("symbol"), lv2plugin->port_symbol (parameter().id()));
 	}
-#endif
 
 	return node;
 }

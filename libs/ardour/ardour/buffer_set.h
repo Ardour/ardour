@@ -41,9 +41,7 @@ struct _VstMidiEvent;
 typedef struct _VstMidiEvent VstMidiEvent;
 #endif
 
-#ifdef LV2_SUPPORT
 typedef struct LV2_Evbuf_Impl LV2_Evbuf;
-#endif
 
 namespace ARDOUR {
 
@@ -114,7 +112,6 @@ public:
 	Buffer&       get_available(DataType type, size_t i);
 	const Buffer& get_available(DataType type, size_t i) const;
 
-#ifdef LV2_SUPPORT
 	/** Get a MIDI buffer translated into an LV2 MIDI buffer for use with
 	 * plugins.  The index here corresponds directly to MIDI buffer numbers
 	 * (i.e. the index passed to get_midi), translation back and forth will
@@ -131,7 +128,6 @@ public:
 
 	/** Forward plugin MIDI output to to Ardour buffers */
 	void forward_lv2_midi(LV2_Evbuf*, size_t, bool purge_ardour_buffer = true);
-#endif
 
 #if defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT
 	VstEvents* get_vst_midi (size_t);
@@ -188,11 +184,9 @@ private:
 	/// Vector of vectors, indexed by DataType
 	std::vector<BufferVec> _buffers;
 
-#ifdef LV2_SUPPORT
 	/// LV2 MIDI buffers (for conversion to/from MIDI buffers)
 	typedef std::vector< std::pair<bool, LV2_Evbuf*> > LV2Buffers;
 	LV2Buffers _lv2_buffers;
-#endif
 
 #if defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT
 	class VSTBuffer {

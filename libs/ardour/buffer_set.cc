@@ -37,11 +37,9 @@
 #include "ardour/midi_buffer.h"
 #include "ardour/port.h"
 #include "ardour/port_set.h"
-#ifdef LV2_SUPPORT
 #include "ardour/lv2_plugin.h"
 #include "lv2_evbuf.h"
 #include "ardour/uri_map.h"
-#endif
 #if defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT
 #include "ardour/vestige/vestige.h"
 #endif
@@ -90,12 +88,10 @@ BufferSet::clear()
 	_vst_buffers.clear ();
 #endif
 
-#ifdef LV2_SUPPORT
 	for (LV2Buffers::iterator i = _lv2_buffers.begin(); i != _lv2_buffers.end(); ++i) {
 		free ((*i).second);
 	}
 	_lv2_buffers.clear ();
-#endif
 
 }
 
@@ -195,7 +191,6 @@ BufferSet::ensure_buffers(DataType type, size_t num_buffers, size_t buffer_capac
 		_count.set (type, num_buffers);
 	}
 
-#ifdef LV2_SUPPORT
 	// Ensure enough low level MIDI format buffers are available for conversion
 	// in both directions (input & output, out-of-place)
 	if (type == DataType::MIDI && _lv2_buffers.size() < _buffers[type].size() * 2 + 1) {
@@ -207,7 +202,6 @@ BufferSet::ensure_buffers(DataType type, size_t num_buffers, size_t buffer_capac
 				                                    URIMap::instance().urids.atom_Sequence)));
 		}
 	}
-#endif
 
 #if defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT
 	// As above but for VST
@@ -260,8 +254,6 @@ BufferSet::get_available(DataType type, size_t i) const
 	assert(i < _available.get(type));
 	return *_buffers[type][i];
 }
-
-#ifdef LV2_SUPPORT
 
 void
 BufferSet::ensure_lv2_bufsize(bool input, size_t i, size_t buffer_capacity)
@@ -343,8 +335,6 @@ BufferSet::flush_lv2_midi(bool input, size_t i)
 		}
 	}
 }
-
-#endif /* LV2_SUPPORT */
 
 #if defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT
 

@@ -106,9 +106,7 @@
 #include "ardour/filename_extensions.h"
 #include "ardour/graph.h"
 #include "ardour/location.h"
-#ifdef LV2_SUPPORT
 #include "ardour/lv2_plugin.h"
-#endif
 #include "ardour/midi_model.h"
 #include "ardour/midi_region.h"
 #include "ardour/midi_scene_changer.h"

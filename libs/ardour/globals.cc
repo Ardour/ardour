@@ -128,9 +128,7 @@
 #include "ardour/source_factory.h"
 #include "ardour/transport_fsm.h"
 #include "ardour/transport_master_manager.h"
-#ifdef LV2_SUPPORT
 #include "ardour/uri_map.h"
-#endif
 
 #include "audiographer/routines.h"
 
@@ -554,9 +552,7 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 
 	/* singletons - first object is "it" */
 	(void)PluginManager::instance ();
-#ifdef LV2_SUPPORT
 	(void)URIMap::instance ();
-#endif
 	(void)EventTypeMap::instance ();
 
 	ControlProtocolManager::instance ().discover_control_protocols ();

@@ -128,9 +128,7 @@ ARDOUR::LuaAPI::list_plugins ()
 #ifdef AUDIOUNIT_SUPPORT
 	all_plugs.insert (all_plugs.end (), manager.au_plugin_info ().begin (), manager.au_plugin_info ().end ());
 #endif
-#ifdef LV2_SUPPORT
 	all_plugs.insert (all_plugs.end (), manager.lv2_plugin_info ().begin (), manager.lv2_plugin_info ().end ());
-#endif
 	all_plugs.insert (all_plugs.end (), manager.lua_plugin_info ().begin (), manager.lua_plugin_info ().end ());
 
 	return all_plugs;
@@ -155,9 +153,7 @@ ARDOUR::LuaAPI::new_plugin_info (const string& name, ARDOUR::PluginType type)
 #ifdef AUDIOUNIT_SUPPORT
 	all_plugs.insert (all_plugs.end (), manager.au_plugin_info ().begin (), manager.au_plugin_info ().end ());
 #endif
-#ifdef LV2_SUPPORT
 	all_plugs.insert (all_plugs.end (), manager.lv2_plugin_info ().begin (), manager.lv2_plugin_info ().end ());
-#endif
 	all_plugs.insert (all_plugs.end (), manager.lua_plugin_info ().begin (), manager.lua_plugin_info ().end ());
 
 	for (PluginInfoList::const_iterator i = all_plugs.begin (); i != all_plugs.end (); ++i) {

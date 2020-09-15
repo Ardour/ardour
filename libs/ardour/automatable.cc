@@ -41,9 +41,7 @@
 #include "ardour/plugin_insert.h"
 #include "ardour/record_enable_control.h"
 #include "ardour/session.h"
-#ifdef LV2_SUPPORT
 #include "ardour/uri_map.h"
-#endif
 #include "ardour/value_as_string.h"
 
 #include "pbd/i18n.h"
@@ -216,10 +214,8 @@ Automatable::describe_parameter (Evoral::Parameter param)
 		return string_compose("Pressure [%1]", int(param.channel()) + 1);
 	} else if (param.type() == MidiNotePressureAutomation) {
 		return string_compose("PolyPressure [%1]", int(param.channel()) + 1);
-#ifdef LV2_SUPPORT
 	} else if (param.type() == PluginPropertyAutomation) {
 		return string_compose("Property %1", URIMap::instance().id_to_uri(param.id()));
-#endif
 	} else {
 		return EventTypeMap::instance().to_symbol(param);
 	}

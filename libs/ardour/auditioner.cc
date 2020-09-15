@@ -96,9 +96,7 @@ Auditioner::lookup_fallback_synth_plugin_info (std::string const& uri) const
 {
 	PluginManager& mgr (PluginManager::instance());
 	PluginInfoList plugs;
-#ifdef LV2_SUPPORT
 	plugs = mgr.lv2_plugin_info();
-#endif
 	for (PluginInfoList::const_iterator i = plugs.begin (); i != plugs.end (); ++i) {
 		if (uri == (*i)->unique_id){
 			return (*i);

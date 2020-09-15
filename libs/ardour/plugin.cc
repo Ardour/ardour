@@ -53,6 +53,7 @@
 #include "ardour/chan_mapping.h"
 #include "ardour/data_type.h"
 #include "ardour/luaproc.h"
+#include "ardour/lv2_plugin.h"
 #include "ardour/midi_buffer.h"
 #include "ardour/midi_state_tracker.h"
 #include "ardour/plugin.h"
@@ -63,10 +64,6 @@
 
 #ifdef AUDIOUNIT_SUPPORT
 #include "ardour/audio_unit.h"
-#endif
-
-#ifdef LV2_SUPPORT
-#include "ardour/lv2_plugin.h"
 #endif
 
 #include "pbd/stl_delete.h"
@@ -215,11 +212,9 @@ ARDOUR::find_plugin(Session& session, string identifier, PluginType type)
 		plugs = mgr.ladspa_plugin_info();
 		break;
 
-#ifdef LV2_SUPPORT
 	case ARDOUR::LV2:
 		plugs = mgr.lv2_plugin_info();
 		break;
-#endif
 
 #ifdef WINDOWS_VST_SUPPORT
 	case ARDOUR::Windows_VST:

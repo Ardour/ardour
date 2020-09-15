@@ -87,15 +87,13 @@
 #include "ardour/ladspa_plugin.h"
 #include "ardour/luascripting.h"
 #include "ardour/luaproc.h"
+#include "ardour/lv2_plugin.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_manager.h"
 #include "ardour/rc_configuration.h"
 
 #include "ardour/search_paths.h"
 
-#ifdef LV2_SUPPORT
-#include "ardour/lv2_plugin.h"
-#endif
 
 #ifdef WINDOWS_VST_SUPPORT
 #include "ardour/windows_vst_plugin.h"
@@ -353,7 +351,7 @@ PluginManager::refresh (bool cache_only)
 	ladspa_refresh ();
 	BootMessage (_("Scanning Lua DSP Processors"));
 	lua_refresh ();
-#ifdef LV2_SUPPORT
+
 	BootMessage (_("Scanning LV2 Plugins"));
 	lv2_refresh ();
 
@@ -377,7 +375,7 @@ PluginManager::refresh (bool cache_only)
 			}
 		}
 	}
-#endif
+
 #ifdef WINDOWS_VST_SUPPORT
 	if (Config->get_use_windows_vst()) {
 		if (cache_only) {
@@ -944,7 +942,6 @@ PluginManager::get_ladspa_category (uint32_t plugin_id)
 #endif
 }
 
-#ifdef LV2_SUPPORT
 void
 PluginManager::lv2_refresh ()
 {
@@ -956,7 +953,6 @@ PluginManager::lv2_refresh ()
 		set_tags ((*i)->type, (*i)->unique_id, (*i)->category, (*i)->name, FromPlug);
 	}
 }
-#endif
 
 #ifdef AUDIOUNIT_SUPPORT
 void
@@ -2083,12 +2079,8 @@ PluginManager::ladspa_plugin_info ()
 const ARDOUR::PluginInfoList&
 PluginManager::lv2_plugin_info ()
 {
-#ifdef LV2_SUPPORT
 	assert(_lv2_plugin_info);
 	return *_lv2_plugin_info;
-#else
-	return _empty_plugin_info;
-#endif
 }
 
 const ARDOUR::PluginInfoList&

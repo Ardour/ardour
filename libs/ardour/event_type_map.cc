@@ -26,9 +26,7 @@
 #include "ardour/event_type_map.h"
 #include "ardour/parameter_descriptor.h"
 #include "ardour/parameter_types.h"
-#ifdef LV2_SUPPORT
 #include "ardour/uri_map.h"
-#endif
 #include "evoral/Parameter.h"
 #include "evoral/ParameterDescriptor.h"
 #include "evoral/midi_events.h"
@@ -45,11 +43,7 @@ EventTypeMap&
 EventTypeMap::instance()
 {
 	if (!EventTypeMap::event_type_map) {
-#ifdef LV2_SUPPORT
 		EventTypeMap::event_type_map = new EventTypeMap(&URIMap::instance());
-#else
-		EventTypeMap::event_type_map = new EventTypeMap(NULL);
-#endif
 	}
 	return *EventTypeMap::event_type_map;
 }
@@ -178,7 +172,6 @@ EventTypeMap::from_symbol(const string& str) const
 	} else if (str.length() > 10 && str.substr(0, 10) == "parameter-") {
 		p_type = PluginAutomation;
 		p_id = atoi(str.c_str()+10);
-#ifdef LV2_SUPPORT
 	} else if (str.length() > 9 && str.substr(0, 9) == "property-") {
 		p_type = PluginPropertyAutomation;
 		const char* name = str.c_str() + 9;
@@ -187,7 +180,6 @@ EventTypeMap::from_symbol(const string& str) const
 		} else {
 			p_id = _uri_map->uri_to_id(name);
 		}
-#endif
 	} else if (str.length() > 7 && str.substr(0, 7) == "midicc-") {
 		p_type = MidiCCAutomation;
 		uint32_t channel = 0;
@@ -279,7 +271,6 @@ EventTypeMap::to_symbol(const Evoral::Parameter& param) const
 		return "rec-safe";
 	} else if (t == PluginAutomation) {
 		return std::string("parameter-") + PBD::to_string(param.id());
-#ifdef LV2_SUPPORT
 	} else if (t == PluginPropertyAutomation) {
 		const char* uri = _uri_map->id_to_uri(param.id());
 		if (uri) {
@@ -287,7 +278,6 @@ EventTypeMap::to_symbol(const Evoral::Parameter& param) const
 		} else {
 			return std::string("property-") + PBD::to_string(param.id());
 		}
-#endif
 	} else if (t == MidiCCAutomation) {
 		return std::string("midicc-") + PBD::to_string (param.channel()) + "-" + PBD::to_string (param.id());
 	} else if (t == MidiPgmChangeAutomation) {
