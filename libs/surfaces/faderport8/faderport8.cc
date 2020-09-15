@@ -41,6 +41,7 @@
 #include "ardour/panner_shell.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
+#include "ardour/plugin_manager.h"
 #include "ardour/processor.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/route.h"
@@ -1428,27 +1429,6 @@ FaderPort8::select_plugin_preset (size_t num)
 	assign_processor_ctrls ();
 }
 
-/* short 4 chars at most */
-static std::string plugintype (ARDOUR::PluginType t) {
-	switch (t) {
-		case AudioUnit:
-			return "AU";
-		case LADSPA:
-			return "LV1";
-		case LV2:
-			return "LV2";
-		case Windows_VST:
-		case LXVST:
-		case MacVST:
-			return "VST";
-		case Lua:
-			return "Lua";
-		default:
-			break;
-	}
-	return enum_2_string (t);
-}
-
 void
 FaderPort8::spill_plugins ()
 {
@@ -1540,7 +1520,7 @@ FaderPort8::spill_plugins ()
 		_ctrls.strip(id).select_button ().set_blinking (false);
 		_ctrls.strip(id).set_text_line (0, proc->name());
 		_ctrls.strip(id).set_text_line (1, pi->plugin()->maker());
-		_ctrls.strip(id).set_text_line (2, plugintype (pi->type()));
+		_ctrls.strip(id).set_text_line (2, PluginManager::plugin_type_name (pi->type()));
 		_ctrls.strip(id).set_text_line (3, "");
 
 		pi->ActiveChanged.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::spill_plugins, this), this);

@@ -28,14 +28,7 @@ function factory () return function ()
 	end
 
 	function plugintypestr (t)
-		if (t == ARDOUR.PluginType.LADSPA) then  return "LADSPA" end
-		if (t == ARDOUR.PluginType.LV2) then return "LV2" end
-		if (t == ARDOUR.PluginType.AudioUnit) then return "AU" end
-		if (t == ARDOUR.PluginType.Windows_VST) then return "VST" end
-		if (t == ARDOUR.PluginType.LXVST) then return "VST" end
-		if (t == ARDOUR.PluginType.MacVST) then return "VST" end
-		if (t == ARDOUR.PluginType.Lua) then return "Lua" end
-		return "??"
+		return ARDOUR.PluginType.name (t)
 	end
 
 	if next(all_plugs) == nil then
