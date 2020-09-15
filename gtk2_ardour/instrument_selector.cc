@@ -153,19 +153,7 @@ InstrumentSelector::build_instrument_list()
 #endif
 
 		if (p->plugintype_name_ambiguity) {
-			std::string pt;
-			switch (p->type) {
-				case AudioUnit:
-					pt = "AU";
-					break;
-				case Windows_VST:
-				case LXVST:
-				case MacVST:
-					pt = "VST";
-					break;
-				default:
-					pt = enum_2_string (p->type);
-			}
+			std::string pt = PluginManager::plugin_type_name (p->type);
 			if (!suffix.empty ()) {
 				suffix += ", ";
 			}

@@ -982,29 +982,7 @@ PluginSelector::build_plugin_menu ()
 string
 GetPluginTypeStr(PluginInfoPtr info)
 {
-	string type;
-
-	switch (info->type) {
-	case LADSPA:
-		type = X_(" (LADSPA)");
-		break;
-	case AudioUnit:
-		type = X_(" (AU)");
-		break;
-	case LV2:
-		type = X_(" (LV2)");
-		break;
-	case Windows_VST:
-	case LXVST:
-	case MacVST:
-		type = X_(" (VST)");
-		break;
-	case Lua:
-		type = X_(" (Lua)");
-		break;
-	}
-
-	return type;
+	return string_compose (" (%1)", PluginManager::plugin_type_name (info->type, false));
 }
 
 Gtk::Menu*
