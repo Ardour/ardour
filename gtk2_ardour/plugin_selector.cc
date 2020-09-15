@@ -216,13 +216,14 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 
 	//_fil_type_combo = manage (new ComboBoxText);
 	_fil_type_combo.append_text_item (_("Show All Formats"));
+
+#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT)
 	_fil_type_combo.append_text_item (X_("VST"));
+#endif
 #ifdef AUDIOUNIT_SUPPORT
 	_fil_type_combo.append_text_item (X_("AudioUnit"));
 #endif
-#ifdef LV2_SUPPORT
 	_fil_type_combo.append_text_item (X_("LV2"));
-#endif
 	_fil_type_combo.append_text_item (X_("Lua"));
 	_fil_type_combo.append_text_item (X_("LADSPA"));
 	_fil_type_combo.set_text (_("Show All Formats"));
@@ -434,11 +435,9 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 		return false;
 	}
 
-#ifdef LV2_SUPPORT
 	if (_fil_type_combo.get_text() == X_("LV2") && info->type != LV2) {
 		return false;
 	}
-#endif
 
 	if (_fil_type_combo.get_text() == X_("Lua") && info->type != Lua) {
 		return false;
@@ -618,9 +617,7 @@ PluginSelector::lua_refiller (const std::string& searchstr)
 void
 PluginSelector::lv2_refiller (const std::string& searchstr)
 {
-#ifdef LV2_SUPPORT
 	refiller (manager.lv2_plugin_info(), searchstr, "LV2");
-#endif
 }
 
 void
@@ -937,6 +934,7 @@ PluginSelector::build_plugin_menu ()
 
 	all_plugs.insert (all_plugs.end(), manager.ladspa_plugin_info().begin(), manager.ladspa_plugin_info().end());
 	all_plugs.insert (all_plugs.end(), manager.lua_plugin_info().begin(), manager.lua_plugin_info().end());
+	all_plugs.insert (all_plugs.end(), manager.lv2_plugin_info().begin(), manager.lv2_plugin_info().end());
 #ifdef WINDOWS_VST_SUPPORT
 	all_plugs.insert (all_plugs.end(), manager.windows_vst_plugin_info().begin(), manager.windows_vst_plugin_info().end());
 #endif
@@ -948,9 +946,6 @@ PluginSelector::build_plugin_menu ()
 #endif
 #ifdef AUDIOUNIT_SUPPORT
 	all_plugs.insert (all_plugs.end(), manager.au_plugin_info().begin(), manager.au_plugin_info().end());
-#endif
-#ifdef LV2_SUPPORT
-	all_plugs.insert (all_plugs.end(), manager.lv2_plugin_info().begin(), manager.lv2_plugin_info().end());
 #endif
 
 	using namespace Menu_Helpers;

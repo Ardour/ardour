@@ -50,6 +50,8 @@
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/ladspa_plugin.h"
+#include "ardour/lv2_plugin.h"
+#include "lv2_plugin_ui.h"
 #ifdef WINDOWS_VST_SUPPORT
 #include "ardour/windows_vst_plugin.h"
 #include "windows_vst_plugin_ui.h"
@@ -61,10 +63,6 @@
 #ifdef MACVST_SUPPORT
 #include "ardour/mac_vst_plugin.h"
 #include "vst_plugin_ui.h"
-#endif
-#ifdef LV2_SUPPORT
-#include "ardour/lv2_plugin.h"
-#include "lv2_plugin_ui.h"
 #endif
 
 #include "ardour_window.h"

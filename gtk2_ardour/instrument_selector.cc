@@ -96,6 +96,7 @@ InstrumentSelector::build_instrument_list()
 	PluginInfoList all_plugs;
 	all_plugs.insert(all_plugs.end(), manager.ladspa_plugin_info().begin(), manager.ladspa_plugin_info().end());
 	all_plugs.insert(all_plugs.end(), manager.lua_plugin_info().begin(), manager.lua_plugin_info().end());
+	all_plugs.insert(all_plugs.end(), manager.lv2_plugin_info().begin(), manager.lv2_plugin_info().end());
 #ifdef WINDOWS_VST_SUPPORT
 	all_plugs.insert(all_plugs.end(), manager.windows_vst_plugin_info().begin(), manager.windows_vst_plugin_info().end());
 #endif
@@ -107,9 +108,6 @@ InstrumentSelector::build_instrument_list()
 #endif
 #ifdef AUDIOUNIT_SUPPORT
 	all_plugs.insert(all_plugs.end(), manager.au_plugin_info().begin(), manager.au_plugin_info().end());
-#endif
-#ifdef LV2_SUPPORT
-	all_plugs.insert(all_plugs.end(), manager.lv2_plugin_info().begin(), manager.lv2_plugin_info().end());
 #endif
 
 	all_plugs.remove_if (invalid_instrument);

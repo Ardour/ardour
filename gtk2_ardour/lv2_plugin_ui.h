@@ -38,7 +38,6 @@
 #include "ardour/types.h"
 #include "plugin_ui.h"
 
-#ifdef LV2_SUPPORT
 #include "ardour/plugin_insert.h"
 
 #include "lv2_external_ui.h"
@@ -145,7 +144,4 @@ private:
 	virtual void on_window_hide();
 };
 
-#endif // LV2_SUPPORT
-
 #endif /* __ardour_lv2_plugin_ui_h__ */
-

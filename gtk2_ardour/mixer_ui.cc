@@ -3141,9 +3141,6 @@ Mixer_UI::refill_favorite_plugins ()
 	PluginInfoList plugs;
 	PluginManager& mgr (PluginManager::instance());
 
-#ifdef LV2_SUPPORT
-	refiller (plugs, mgr.lv2_plugin_info ());
-#endif
 #ifdef WINDOWS_VST_SUPPORT
 	refiller (plugs, mgr.windows_vst_plugin_info ());
 #endif
@@ -3157,6 +3154,7 @@ Mixer_UI::refill_favorite_plugins ()
 	refiller (plugs, mgr.au_plugin_info ());
 #endif
 	refiller (plugs, mgr.ladspa_plugin_info ());
+	refiller (plugs, mgr.lv2_plugin_info ());
 	refiller (plugs, mgr.lua_plugin_info ());
 
 	switch (plugin_list_mode ()) {
