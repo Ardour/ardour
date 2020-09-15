@@ -3675,6 +3675,24 @@ LV2PluginInfo::discover()
 		const LilvNode*        label  = lilv_plugin_class_get_label(pclass);
 		info->category = lilv_node_as_string(label);
 
+		/* check main category */
+		const char* pcat = lilv_node_as_uri (lilv_plugin_class_get_uri (pclass));
+		assert (pcat);
+		info->_is_instrument = 0 == strcmp (pcat, LV2_CORE__InstrumentPlugin);
+		info->_is_utility    = 0 == strcmp (pcat, LV2_CORE__UtilityPlugin);
+		info->_is_analyzer   = 0 == strcmp (pcat, LV2_CORE__AnalyserPlugin);
+
+		/* iterate over additional classes */
+		LilvPluginClasses* classes  = lilv_plugin_class_get_children (pclass);
+		LILV_FOREACH(plugin_classes, i, classes) {
+			const char* pc = lilv_node_as_uri (lilv_plugin_class_get_uri (lilv_plugin_classes_get (classes, i)));
+			assert (pc);
+			info->_is_instrument |= 0 == strcmp (pc, LV2_CORE__InstrumentPlugin);
+			info->_is_utility    |= 0 == strcmp (pc, LV2_CORE__UtilityPlugin);
+			info->_is_analyzer   |= 0 == strcmp (pc, LV2_CORE__AnalyserPlugin);
+		}
+		lilv_plugin_classes_free (classes);
+
 		LilvNode* author_name = lilv_plugin_get_author_name(p);
 		info->creator = author_name ? string(lilv_node_as_string(author_name)) : "Unknown";
 		lilv_node_free(author_name);
@@ -3733,4 +3751,31 @@ LV2PluginInfo::discover()
 	}
 
 	return plugs;
+}
+
+bool
+LV2PluginInfo::is_instrument () const
+{
+	if (_is_instrument) {
+		return true;
+	}
+	return PluginInfo::is_instrument ();
+}
+
+bool
+LV2PluginInfo::is_utility () const
+{
+	if (_is_utility) {
+		return true;
+	}
+	return PluginInfo::is_utility ();
+}
+
+bool
+LV2PluginInfo::is_analyzer () const
+{
+	if (_is_analyzer) {
+		return true;
+	}
+	return PluginInfo::is_analyzer ();
 }

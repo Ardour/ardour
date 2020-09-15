@@ -403,7 +403,16 @@ public:
 	PluginPtr load (Session& session);
 	std::vector<Plugin::PresetRecord> get_presets (bool user_only) const;
 
+	bool is_instrument () const;
+	bool is_utility () const;
+	bool is_analyzer () const;
+
 	char * _plugin_uri;
+
+private:
+	bool _is_instrument;
+	bool _is_utility;
+	bool _is_analyzer;
 };
 
 typedef boost::shared_ptr<LV2PluginInfo> LV2PluginInfoPtr;
