@@ -1728,6 +1728,34 @@ PluginManager::to_generic_vst (const PluginType t)
 	return t;
 }
 
+std::string
+PluginManager::plugin_type_name (const PluginType t, bool short_name)
+{
+#if defined WINDOWS_VST_SUPPORT && defined LXVST_SUPPORT
+	switch (t) {
+		case Windows_VST:
+			return short_name ? "VST" : "Windows-VST";
+		case LXVST:
+			return short_name ? "LXVST" : "Linux-VST";
+		default:
+			break;
+	}
+#endif
+
+	switch (t) {
+		case Windows_VST:
+		case LXVST:
+		case MacVST:
+			return short_name ? "VST" : "VST2";
+		case AudioUnit:
+			return short_name ? "AU" : enum_2_string (t);
+		case LADSPA:
+			return short_name ? "LV1" : enum_2_string (t);
+		default:
+			return enum_2_string (t);
+	}
+}
+
 struct SortByTag {
 	bool operator() (std::string a, std::string b) {
 		return a.compare (b) < 0;

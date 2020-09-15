@@ -69,7 +69,12 @@ public:
 	const std::string get_default_lxvst_path() const { return lxvst_path; }
 
 	/* always return LXVST for any VST subtype */
-	static PluginType to_generic_vst (PluginType);
+	static PluginType to_generic_vst (const PluginType);
+
+	/* format plugin type to human readable name
+	 * @param short use at most 4 chars (useful for ctrl-surface displays)
+	 */
+	static std::string plugin_type_name (const PluginType, bool short_name = true);
 
 	bool cancelled () { return _cancel_scan; }
 	bool no_timeout () { return _cancel_timeout; }

@@ -73,6 +73,7 @@
 #include "ardour/playlist.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
+#include "ardour/plugin_manager.h"
 #include "ardour/polarity_processor.h"
 #include "ardour/port_manager.h"
 #include "ardour/progress.h"
@@ -1887,6 +1888,7 @@ LuaBindings::common (lua_State* L)
 
 		/* libardour enums */
 		.beginNamespace ("PluginType")
+		.addFunction ("name", &PluginManager::plugin_type_name)
 		.addConst ("AudioUnit", ARDOUR::PluginType(AudioUnit))
 		.addConst ("LADSPA", ARDOUR::PluginType(LADSPA))
 		.addConst ("LV2", ARDOUR::PluginType(LV2))
