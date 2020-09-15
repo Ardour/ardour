@@ -23,34 +23,33 @@ def build(bld):
     module_pat = re.sub('^lib', '', bld.env.cshlib_PATTERN)
     module_ext = module_pat[module_pat.rfind('.'):]
 
-    if bld.is_defined('HAVE_LV2'):
-        # Build RDF files
-        for i in ['manifest.ttl', 'a-fluidsynth.ttl']:
-            obj = bld(features='subst')
-            obj.source = i + '.in'
-            obj.target = '../../LV2/%s/%s' % (bundle, i)
-            obj.install_path = '${LV2DIR}/%s' % bundle
-            obj.chmod = Utils.O644
-            obj.LIB_EXT = module_ext
+    # Build RDF files
+    for i in ['manifest.ttl', 'a-fluidsynth.ttl']:
+        obj = bld(features='subst')
+        obj.source = i + '.in'
+        obj.target = '../../LV2/%s/%s' % (bundle, i)
+        obj.install_path = '${LV2DIR}/%s' % bundle
+        obj.chmod = Utils.O644
+        obj.LIB_EXT = module_ext
 
-        # Build plugin library
-        obj = bld(features     = 'cxx cshlib',
-                  source       = 'a-fluidsynth.cc',
-                  name         = 'a-fluidsynth',
-                  cxxflags     = [ bld.env['compiler_flags_dict']['pic'] ],
-                  includes     = [ '../../ardour' ],
-                  target       = '../../LV2/%s/a-fluidsynth' % bundle,
-                  install_path = '${LV2DIR}/%s' % bundle,
-                  uselib       = ['LIBFLUIDSYNTH', 'GLIB'],
-                  use          = ['LV2_1_0_0']
-                  )
+    # Build plugin library
+    obj = bld(features     = 'cxx cshlib',
+              source       = 'a-fluidsynth.cc',
+              name         = 'a-fluidsynth',
+              cxxflags     = [ bld.env['compiler_flags_dict']['pic'] ],
+              includes     = [ '../../ardour' ],
+              target       = '../../LV2/%s/a-fluidsynth' % bundle,
+              install_path = '${LV2DIR}/%s' % bundle,
+              uselib       = ['LIBFLUIDSYNTH', 'GLIB'],
+              use          = ['LV2_1_0_0']
+              )
 
-        if bld.is_defined('USE_EXTERNAL_LIBS'):
-            obj.uselib.extend(['LIBFLUIDSYNTH'])
-        else:
-            obj.use.extend(['libfluidsynth_includes', 'libfluidsynth'])
+    if bld.is_defined('USE_EXTERNAL_LIBS'):
+        obj.uselib.extend(['LIBFLUIDSYNTH'])
+    else:
+        obj.use.extend(['libfluidsynth_includes', 'libfluidsynth'])
 
-        obj.env.cshlib_PATTERN = module_pat
-        obj.env.cxxshlib_PATTERN = module_pat
+    obj.env.cshlib_PATTERN = module_pat
+    obj.env.cxxshlib_PATTERN = module_pat
 
 # vi:set ts=4 sw=4 et:
