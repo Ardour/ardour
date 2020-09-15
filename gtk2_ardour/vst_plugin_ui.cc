@@ -40,21 +40,7 @@ VSTPluginUI::VSTPluginUI (boost::shared_ptr<ARDOUR::PluginInsert> insert, boost:
 	Gtk::HBox* box = manage (new Gtk::HBox);
 	box->set_spacing (6);
 	box->set_border_width (6);
-	box->pack_end (focus_button, false, false);
-	box->pack_end (bypass_button, false, false, 4);
-	if (insert->controls().size() > 0) {
-		box->pack_end (reset_button, false, false, 4);
-	}
-	if (has_descriptive_presets ()) {
-		box->pack_end (preset_browser_button, false, false);
-	}
-	box->pack_end (delete_button, false, false);
-	box->pack_end (save_button, false, false);
-	box->pack_end (add_button, false, false);
-	box->pack_end (_preset_combo, false, false);
-	box->pack_end (_preset_modified, false, false);
-	box->pack_end (pin_management_button, false, false);
-	box->pack_end (latency_button, false, false);
+	add_common_widgets (box);
 
 	pack_start (*box, false, false);
 	box->signal_size_allocate().connect (sigc::mem_fun (*this, &VSTPluginUI::top_box_allocated));

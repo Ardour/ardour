@@ -421,52 +421,17 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 
 	/* stuff some stuff into the top of the window */
 
-	HBox* smaller_hbox = manage (new HBox);
-
-	smaller_hbox->set_spacing (6);
-	smaller_hbox->pack_start (latency_button, false, false, 4);
-	smaller_hbox->pack_start (pin_management_button, false, false, 4);
-	smaller_hbox->pack_start (preset_label, false, false, 4);
-	smaller_hbox->pack_start (_preset_modified, false, false);
-	smaller_hbox->pack_start (_preset_combo, false, false);
-	smaller_hbox->pack_start (add_button, false, false);
-	smaller_hbox->pack_start (save_button, false, false);
-	smaller_hbox->pack_start (delete_button, false, false);
-	if (has_descriptive_presets ()) {
-		smaller_hbox->pack_start (preset_browser_button, false, false);
-	}
-#if 0
-	/* one day these might be useful with an AU plugin, but not yet */
-	smaller_hbox->pack_start (automation_mode_label, false, false);
-	smaller_hbox->pack_start (automation_mode_selector, false, false);
-#endif
-	if (insert->controls().size() > 0) {
-		smaller_hbox->pack_start (reset_button, false, false);
-	}
-	smaller_hbox->pack_start (bypass_button, false, true);
-
-	VBox* v1_box = manage (new VBox);
-	VBox* v2_box = manage (new VBox);
-
-	v1_box->pack_start (*smaller_hbox, false, true);
-	v2_box->pack_start (focus_button, false, true);
 
 	top_box.set_homogeneous (false);
 	top_box.set_spacing (6);
 	top_box.set_border_width (6);
+	add_common_widgets (&top_box);
 
-	top_box.pack_end (*v2_box, false, false);
-	top_box.pack_end (*v1_box, false, false);
-
-	set_spacing (6);
+	set_spacing (0);
 	pack_start (top_box, false, false);
 	pack_start (low_box, true, true);
 
-	preset_label.show ();
-	_preset_combo.show ();
-	automation_mode_label.show ();
-	automation_mode_selector.show ();
-	bypass_button.show ();
+	top_box.show_all ();
 	top_box.show ();
 	low_box.show ();
 
@@ -1113,7 +1078,7 @@ AUPluginUI::parent_cocoa_window ()
 	gtk_widget_translate_coordinates(
 			GTK_WIDGET(low_box.gobj()),
 			GTK_WIDGET(low_box.get_parent()->gobj()),
-			8, 6, &xx, &yy);
+			0, 0, &xx, &yy);
 	[au_view setFrame:NSMakeRect(xx, yy, req_width, req_height)];
 
 	last_au_frame = [au_view frame];

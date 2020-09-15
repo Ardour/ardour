@@ -461,13 +461,13 @@ PluginUIWindow::plugin_going_away ()
 PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	: insert (pi)
 	, plugin (insert->plugin())
-	, add_button (_("Add"))
-	, save_button (_("Save"))
-	, delete_button (_("Delete"))
-	, preset_browser_button (_("Preset Browser"))
-	, reset_button (_("Reset"))
-	, bypass_button (ArdourButton::led_default_elements)
-	, pin_management_button (_("Pinout"))
+	, _add_button (_("Add"))
+	, _save_button (_("Save"))
+	, _delete_button (_("Delete"))
+	, _preset_browser_button (_("Preset Browser"))
+	, _reset_button (_("Reset"))
+	, _bypass_button (ArdourButton::led_default_elements)
+	, _pin_management_button (_("Pinout"))
 	, description_expander (_("Description"))
 	, plugin_analysis_expander (_("Plugin analysis"))
 	, cpuload_expander (_("CPU Profile"))
@@ -481,70 +481,70 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	_preset_modified.set_size_request (16, -1);
 	_preset_combo.set_text("(default)");
 	set_tooltip (_preset_combo, _("Presets (if any) for this plugin\n(Both factory and user-created)"));
-	set_tooltip (add_button, _("Save a new preset"));
-	set_tooltip (save_button, _("Save the current preset"));
-	set_tooltip (delete_button, _("Delete the current preset"));
-	set_tooltip (preset_browser_button, _("Show Preset Browser Dialog"));
-	set_tooltip (reset_button, _("Reset parameters to default (if no parameters are in automation play mode)"));
-	set_tooltip (pin_management_button, _("Show Plugin Pin Management Dialog"));
-	set_tooltip (bypass_button, _("Disable signal processing by the plugin"));
-	set_tooltip (latency_button, _("Edit Plugin Delay/Latency Compensation"));
+	set_tooltip (_add_button, _("Save a new preset"));
+	set_tooltip (_save_button, _("Save the current preset"));
+	set_tooltip (_delete_button, _("Delete the current preset"));
+	set_tooltip (_preset_browser_button, _("Show Preset Browser Dialog"));
+	set_tooltip (_reset_button, _("Reset parameters to default (if no parameters are in automation play mode)"));
+	set_tooltip (_pin_management_button, _("Show Plugin Pin Management Dialog"));
+	set_tooltip (_bypass_button, _("Disable signal processing by the plugin"));
+	set_tooltip (_latency_button, _("Edit Plugin Delay/Latency Compensation"));
 	_no_load_preset = 0;
 
 	update_preset_list ();
 	update_preset ();
 
-	latency_button.set_icon (ArdourIcon::LatencyClock);
-	latency_button.add_elements (ArdourButton::Text);
-	latency_button.signal_clicked.connect (sigc::mem_fun (*this, &PlugUIBase::latency_button_clicked));
+	_latency_button.set_icon (ArdourIcon::LatencyClock);
+	_latency_button.add_elements (ArdourButton::Text);
+	_latency_button.signal_clicked.connect (sigc::mem_fun (*this, &PlugUIBase::latency_button_clicked));
 	set_latency_label ();
 
-	add_button.set_name ("generic button");
-	add_button.set_icon (ArdourIcon::PsetAdd);
-	add_button.signal_clicked.connect (sigc::mem_fun (*this, &PlugUIBase::add_plugin_setting));
+	_add_button.set_name ("generic button");
+	_add_button.set_icon (ArdourIcon::PsetAdd);
+	_add_button.signal_clicked.connect (sigc::mem_fun (*this, &PlugUIBase::add_plugin_setting));
 
-	save_button.set_name ("generic button");
-	save_button.set_icon (ArdourIcon::PsetSave);
-	save_button.signal_clicked.connect(sigc::mem_fun(*this, &PlugUIBase::save_plugin_setting));
+	_save_button.set_name ("generic button");
+	_save_button.set_icon (ArdourIcon::PsetSave);
+	_save_button.signal_clicked.connect(sigc::mem_fun(*this, &PlugUIBase::save_plugin_setting));
 
-	delete_button.set_name ("generic button");
-	delete_button.set_icon (ArdourIcon::PsetDelete);
-	delete_button.signal_clicked.connect (sigc::mem_fun (*this, &PlugUIBase::delete_plugin_setting));
+	_delete_button.set_name ("generic button");
+	_delete_button.set_icon (ArdourIcon::PsetDelete);
+	_delete_button.signal_clicked.connect (sigc::mem_fun (*this, &PlugUIBase::delete_plugin_setting));
 
-	preset_browser_button.set_name ("generic button");
-	preset_browser_button.set_icon (ArdourIcon::PsetBrowse);
-	preset_browser_button.signal_clicked.connect (sigc::mem_fun (*this, &PlugUIBase::browse_presets));
+	_preset_browser_button.set_name ("generic button");
+	_preset_browser_button.set_icon (ArdourIcon::PsetBrowse);
+	_preset_browser_button.signal_clicked.connect (sigc::mem_fun (*this, &PlugUIBase::browse_presets));
 
-	reset_button.set_name ("generic button");
-	reset_button.set_icon (ArdourIcon::PluginReset);
-	reset_button.signal_clicked.connect (sigc::mem_fun (*this, &PlugUIBase::reset_plugin_parameters));
+	_reset_button.set_name ("generic button");
+	_reset_button.set_icon (ArdourIcon::PluginReset);
+	_reset_button.signal_clicked.connect (sigc::mem_fun (*this, &PlugUIBase::reset_plugin_parameters));
 
-	pin_management_button.set_name ("generic button");
-	pin_management_button.set_icon (ArdourIcon::PluginPinout);
-	pin_management_button.signal_clicked.connect (sigc::mem_fun (*this, &PlugUIBase::manage_pins));
+	_pin_management_button.set_name ("generic button");
+	_pin_management_button.set_icon (ArdourIcon::PluginPinout);
+	_pin_management_button.signal_clicked.connect (sigc::mem_fun (*this, &PlugUIBase::manage_pins));
 
 
 	insert->ActiveChanged.connect (active_connection, invalidator (*this), boost::bind (&PlugUIBase::processor_active_changed, this,  boost::weak_ptr<Processor>(insert)), gui_context());
 
-	bypass_button.set_name ("plugin bypass button");
-	bypass_button.set_text (_("Bypass"));
-	bypass_button.set_icon (ArdourIcon::PluginBypass);
-	bypass_button.set_active (!pi->enabled ());
-	bypass_button.signal_button_release_event().connect (sigc::mem_fun(*this, &PlugUIBase::bypass_button_release), false);
-	focus_button.add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
+	_bypass_button.set_name ("plugin bypass button");
+	_bypass_button.set_text (_("Bypass"));
+	_bypass_button.set_icon (ArdourIcon::PluginBypass);
+	_bypass_button.set_active (!pi->enabled ());
+	_bypass_button.signal_button_release_event().connect (sigc::mem_fun(*this, &PlugUIBase::bypass_button_release), false);
+	_focus_button.add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
 
-	focus_button.signal_button_release_event().connect (sigc::mem_fun(*this, &PlugUIBase::focus_toggled));
-	focus_button.add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
+	_focus_button.signal_button_release_event().connect (sigc::mem_fun(*this, &PlugUIBase::focus_toggled));
+	_focus_button.add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
 
 	/* these images are not managed, so that we can remove them at will */
 
-	focus_out_image = new Image (get_icon (X_("computer_keyboard")));
-	focus_in_image = new Image (get_icon (X_("computer_keyboard_active")));
+	_focus_out_image = new Image (get_icon (X_("computer_keyboard")));
+	_focus_in_image = new Image (get_icon (X_("computer_keyboard_active")));
 
-	focus_button.add (*focus_out_image);
+	_focus_button.add (*_focus_out_image);
 
-	set_tooltip (focus_button, string_compose (_("Click to allow the plugin to receive keyboard events that %1 would normally use as a shortcut"), PROGRAM_NAME));
-	set_tooltip (bypass_button, _("Click to enable/disable this plugin"));
+	set_tooltip (_focus_button, string_compose (_("Click to allow the plugin to receive keyboard events that %1 would normally use as a shortcut"), PROGRAM_NAME));
+	set_tooltip (_bypass_button, _("Click to enable/disable this plugin"));
 
 	description_expander.property_expanded().signal_changed().connect( sigc::mem_fun(*this, &PlugUIBase::toggle_description));
 	description_expander.set_expanded(false);
@@ -577,6 +577,9 @@ PlugUIBase::~PlugUIBase()
 	delete latency_gui;
 	delete latency_dialog;
 	delete preset_dialog;
+
+	delete _focus_out_image;
+	delete _focus_in_image;
 }
 
 void
@@ -588,12 +591,37 @@ PlugUIBase::plugin_going_away ()
 }
 
 void
+PlugUIBase::add_common_widgets (Gtk::HBox* b, bool with_focus)
+{
+	if (with_focus) {
+		b->pack_end (_focus_button, false, false);
+	}
+
+	b->pack_end (_bypass_button, false, false, with_focus ? 4 : 0);
+
+	if (insert->controls().size() > 0) {
+		b->pack_end (_reset_button, false, false, 4);
+	}
+	if (has_descriptive_presets ()) {
+		b->pack_end (_preset_browser_button, false, false);
+	}
+	b->pack_end (_delete_button, false, false);
+	b->pack_end (_save_button, false, false);
+	b->pack_end (_add_button, false, false);
+	b->pack_end (_preset_combo, false, false);
+	b->pack_end (_preset_modified, false, false);
+	b->pack_end (_pin_management_button, false, false);
+
+	b->pack_start (_latency_button, false, false, 4);
+}
+
+void
 PlugUIBase::set_latency_label ()
 {
 	samplecnt_t const l = insert->effective_latency ();
 	float const sr = insert->session().sample_rate ();
 
-	latency_button.set_text (samples_as_time_string (l, sr, true));
+	_latency_button.set_text (samples_as_time_string (l, sr, true));
 }
 
 void
@@ -606,7 +634,7 @@ PlugUIBase::latency_button_clicked ()
 		   different WM's as possible.
 		*/
 		latency_dialog->set_keep_above (true);
-		Window* win = dynamic_cast<Window*> (bypass_button.get_toplevel ());
+		Window* win = dynamic_cast<Window*> (_bypass_button.get_toplevel ());
 		if (win) {
 			latency_dialog->set_transient_for (*win);
 		}
@@ -624,7 +652,7 @@ PlugUIBase::processor_active_changed (boost::weak_ptr<Processor> weak_p)
 	boost::shared_ptr<Processor> p (weak_p.lock());
 
 	if (p) {
-		bypass_button.set_active (!p->enabled ());
+		_bypass_button.set_active (!p->enabled ());
 	}
 }
 
@@ -680,7 +708,7 @@ PlugUIBase::delete_plugin_setting ()
 void
 PlugUIBase::automation_state_changed ()
 {
-	reset_button.set_sensitive (insert->can_reset_all_parameters());
+	_reset_button.set_sensitive (insert->can_reset_all_parameters());
 }
 
 void
@@ -713,7 +741,7 @@ PlugUIBase::browse_presets ()
 		}
 		preset_dialog = new ArdourWindow (_("Select Preset"));
 		preset_dialog->set_keep_above (true);
-		Window* win = dynamic_cast<Window*> (preset_browser_button.get_toplevel ());
+		Window* win = dynamic_cast<Window*> (_preset_browser_button.get_toplevel ());
 		if (win) {
 			preset_dialog->set_transient_for (*win);
 		}
@@ -737,7 +765,7 @@ PlugUIBase::manage_pins ()
 bool
 PlugUIBase::bypass_button_release (GdkEventButton*)
 {
-	bool view_says_bypassed = (bypass_button.active_state() != 0);
+	bool view_says_bypassed = (_bypass_button.active_state() != 0);
 
 	if (view_says_bypassed != insert->enabled ()) {
 		insert->enable (view_says_bypassed);
@@ -751,17 +779,17 @@ PlugUIBase::focus_toggled (GdkEventButton*)
 {
 	if (Keyboard::the_keyboard().some_magic_widget_has_focus()) {
 		Keyboard::the_keyboard().magic_widget_drop_focus();
-		focus_button.remove ();
-		focus_button.add (*focus_out_image);
-		focus_out_image->show ();
-		set_tooltip (focus_button, string_compose (_("Click to allow the plugin to receive keyboard events that %1 would normally use as a shortcut"), PROGRAM_NAME));
+		_focus_button.remove ();
+		_focus_button.add (*_focus_out_image);
+		_focus_out_image->show ();
+		set_tooltip (_focus_button, string_compose (_("Click to allow the plugin to receive keyboard events that %1 would normally use as a shortcut"), PROGRAM_NAME));
 		KeyboardFocused (false);
 	} else {
 		Keyboard::the_keyboard().magic_widget_grab_focus();
-		focus_button.remove ();
-		focus_button.add (*focus_in_image);
-		focus_in_image->show ();
-		set_tooltip (focus_button, string_compose (_("Click to allow normal use of %1 keyboard shortcuts"), PROGRAM_NAME));
+		_focus_button.remove ();
+		_focus_button.add (*_focus_in_image);
+		_focus_in_image->show ();
+		set_tooltip (_focus_button, string_compose (_("Click to allow normal use of %1 keyboard shortcuts"), PROGRAM_NAME));
 		KeyboardFocused (true);
 	}
 
@@ -903,7 +931,7 @@ PlugUIBase::update_preset ()
 	}
 	--_no_load_preset;
 
-	delete_button.set_sensitive (!p.uri.empty() && p.user);
+	_delete_button.set_sensitive (!p.uri.empty() && p.user);
 	update_preset_modified ();
 }
 
@@ -913,7 +941,7 @@ PlugUIBase::update_preset_modified ()
 	Plugin::PresetRecord p = plugin->last_preset();
 
 	if (p.uri.empty()) {
-		save_button.set_sensitive (false);
+		_save_button.set_sensitive (false);
 		_preset_modified.set_text ("");
 		return;
 	}
@@ -922,7 +950,7 @@ PlugUIBase::update_preset_modified ()
 	if (_preset_modified.get_text().empty() == c) {
 		_preset_modified.set_text (c ? "*" : "");
 	}
-	save_button.set_sensitive (c && p.user);
+	_save_button.set_sensitive (c && p.user);
 }
 
 void

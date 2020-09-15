@@ -92,32 +92,15 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	, _piano_channel (*manage (new Adjustment (0, 1, 16, 1, 1)))
 {
 	set_name ("PluginEditor");
-	set_border_width (10);
+	set_border_width (6);
 	//set_homogeneous (false);
 
 	pack_start (main_contents, true, true);
-	settings_box.set_homogeneous (false);
 
-	HBox* constraint_hbox = manage (new HBox);
 	HBox* smaller_hbox = manage (new HBox);
-	smaller_hbox->set_spacing (4);
-	Label* combo_label = manage (new Label (_("<span size=\"large\">Presets</span>")));
-	combo_label->set_use_markup (true);
-
-	smaller_hbox->pack_start (latency_button, false, false, 4);
-	smaller_hbox->pack_start (pin_management_button, false, false, 4);
-	smaller_hbox->pack_start (_preset_modified, false, false);
-	smaller_hbox->pack_start (_preset_combo, false, false);
-	smaller_hbox->pack_start (add_button, false, false);
-	smaller_hbox->pack_start (save_button, false, false);
-	smaller_hbox->pack_start (delete_button, false, false);
-	if (pi->controls().size() > 0 && has_descriptive_presets ()) {
-		smaller_hbox->pack_start (preset_browser_button, false, false);
-	}
-	if (pi->controls().size() > 0) {
-		smaller_hbox->pack_start (reset_button, false, false, 4);
-	}
-	smaller_hbox->pack_start (bypass_button, false, true, 4);
+	smaller_hbox->set_spacing (6);
+	smaller_hbox->set_border_width (0);
+	add_common_widgets (smaller_hbox, false);
 
 	automation_manual_all_button.set_text (GainMeterBase::astate_string (ARDOUR::Off));
 	automation_manual_all_button.set_name (X_("generic button"));
@@ -130,11 +113,6 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	automation_latch_all_button.set_text (GainMeterBase::astate_string (ARDOUR::Latch));
 	automation_latch_all_button.set_name (X_("generic button"));
 
-	constraint_hbox->set_spacing (5);
-	constraint_hbox->set_homogeneous (false);
-
-	VBox* v1_box = manage (new VBox);
-	VBox* v2_box = manage (new VBox);
 	if (pi->is_instrument ()) {
 		_piano = new APianoKeyboard ();
 		_piano->set_flags(Gtk::CAN_FOCUS);
@@ -171,8 +149,11 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 		pack_end (description_expander, false, false);
 	}
 
-	v1_box->set_spacing (6);
-	v1_box->pack_start (*smaller_hbox, false, true);
+	settings_box.set_homogeneous (false);
+	settings_box.set_spacing (0);
+	settings_box.set_border_width (0);
+	settings_box.pack_start (*smaller_hbox, false, false);
+
 	if (pi->controls().size() > 0) {
 		HBox* automation_hbox = manage (new HBox);
 		automation_hbox->set_spacing (6);
@@ -183,20 +164,13 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 		automation_hbox->pack_start (automation_play_all_button, false, false);
 		automation_hbox->pack_start (automation_write_all_button, false, false);
 		automation_hbox->pack_start (automation_touch_all_button, false, false);
-		v1_box->pack_start (*automation_hbox, false, true);
+		settings_box.pack_start (*automation_hbox, false, false, 6);
 	}
-	v2_box->pack_start (focus_button, false, true);
 
 	main_contents.pack_start (settings_box, false, false);
 
-	constraint_hbox->pack_end (*v2_box, false, false);
-	constraint_hbox->pack_end (*v1_box, false, false);
-
-	main_contents.pack_start (*constraint_hbox, false, false);
-
 	pi->ActiveChanged.connect (active_connection, invalidator (*this), boost::bind (&GenericPluginUI::processor_active_changed, this, boost::weak_ptr<Processor>(pi)), gui_context());
-
-	bypass_button.set_active (!pi->enabled());
+	_bypass_button.set_active (!pi->enabled());
 
 	/* ScrolledWindow will wrap hpacker in a Viewport */
 	scroller.add (hpacker);

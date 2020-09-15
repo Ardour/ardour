@@ -120,28 +120,30 @@ protected:
 	boost::shared_ptr<ARDOUR::PluginInsert> insert;
 	boost::shared_ptr<ARDOUR::Plugin> plugin;
 
-	/* UI elements that can subclasses can add to their widgets */
+	void add_common_widgets (Gtk::HBox*, bool with_focus = true);
+
+	/* UI elements that subclasses can add to their widgets */
 
 	/** a ComboBoxText which lists presets and manages their selection */
 	ArdourWidgets::ArdourDropdown _preset_combo;
 	/** a label which has a * in if the current settings are different from the preset being shown */
 	Gtk::Label _preset_modified;
 	/** a button to add a preset */
-	ArdourWidgets::ArdourButton add_button;
+	ArdourWidgets::ArdourButton _add_button;
 	/** a button to save the current settings as a new user preset */
-	ArdourWidgets::ArdourButton save_button;
+	ArdourWidgets::ArdourButton _save_button;
 	/** a button to delete the current preset (if it is a user one) */
-	ArdourWidgets::ArdourButton delete_button;
+	ArdourWidgets::ArdourButton _delete_button;
 	/** a button to show a preset browser */
-	ArdourWidgets::ArdourButton preset_browser_button;
+	ArdourWidgets::ArdourButton _preset_browser_button;
 	/** a button to delete the reset the plugin params */
-	ArdourWidgets::ArdourButton reset_button;
+	ArdourWidgets::ArdourButton _reset_button;
 	/** a button to bypass the plugin */
-	ArdourWidgets::ArdourButton bypass_button;
+	ArdourWidgets::ArdourButton _bypass_button;
 	/** and self-explaining button :) */
-	ArdourWidgets::ArdourButton pin_management_button;
+	ArdourWidgets::ArdourButton _pin_management_button;
 	/** a button to acquire keyboard focus */
-	Gtk::EventBox focus_button;
+	Gtk::EventBox _focus_button;
 	/** an expander containing the plugin description */
 	Gtk::Expander description_expander;
 	/** an expander containing the plugin analysis graph */
@@ -149,7 +151,7 @@ protected:
 	/** an expander containing the plugin cpu profile */
 	Gtk::Expander cpuload_expander;
 	/** a button which, when clicked, opens the latency GUI */
-	ArdourWidgets::ArdourButton latency_button;
+	ArdourWidgets::ArdourButton _latency_button;
 	/** a button which sets all controls' automation setting to Manual */
 	ArdourWidgets::ArdourButton automation_manual_all_button;
 	/** a button which sets all controls' automation setting to Play */
@@ -170,8 +172,6 @@ protected:
 	PluginPresetsUI* preset_gui;
 	ArdourWindow* preset_dialog;
 
-	Gtk::Image* focus_out_image;
-	Gtk::Image* focus_in_image;
 	int _no_load_preset;
 
 	virtual void preset_selected (ARDOUR::Plugin::PresetRecord preset);
@@ -199,6 +199,10 @@ protected:
 	PBD::ScopedConnection preset_added_connection;
 	PBD::ScopedConnection preset_removed_connection;
 	PBD::ScopedConnectionList control_connections;
+
+private:
+	Gtk::Image* _focus_out_image;
+	Gtk::Image* _focus_in_image;
 };
 
 class GenericPluginUI : public PlugUIBase, public Gtk::VBox
@@ -215,7 +219,7 @@ public:
 
 private:
 	Gtk::VBox main_contents;
-	Gtk::HBox settings_box;
+	Gtk::VBox settings_box;
 	Gtk::HBox hpacker;
 	Gtk::Menu* automation_menu;
 

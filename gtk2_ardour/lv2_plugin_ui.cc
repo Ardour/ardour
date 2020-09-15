@@ -308,21 +308,7 @@ LV2PluginUI::LV2PluginUI(boost::shared_ptr<PluginInsert> pi,
 {
 	_ardour_buttons_box.set_spacing (6);
 	_ardour_buttons_box.set_border_width (6);
-	_ardour_buttons_box.pack_end (focus_button, false, false);
-	_ardour_buttons_box.pack_end (bypass_button, false, false, 4);
-	if (pi->controls().size() > 0) {
-		_ardour_buttons_box.pack_end (reset_button, false, false, 4);
-	}
-	if (has_descriptive_presets ()) {
-		_ardour_buttons_box.pack_end (preset_browser_button, false, false);
-	}
-	_ardour_buttons_box.pack_end (delete_button, false, false);
-	_ardour_buttons_box.pack_end (save_button, false, false);
-	_ardour_buttons_box.pack_end (add_button, false, false);
-	_ardour_buttons_box.pack_end (_preset_combo, false, false);
-	_ardour_buttons_box.pack_end (_preset_modified, false, false);
-	_ardour_buttons_box.pack_end (pin_management_button, false, false);
-	_ardour_buttons_box.pack_start (latency_button, false, false, 4);
+	add_common_widgets (&_ardour_buttons_box);
 
 	plugin->PresetLoaded.connect (*this, invalidator (*this), boost::bind (&LV2PluginUI::queue_port_update, this), gui_context ());
 }
