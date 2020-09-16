@@ -465,7 +465,7 @@ if test -n "$MIXBUS"; then
 	cat >> $NSISFILE << EOF
 Section "Harrison XT plugins and a-/ACE plugin GUIs\$\\r\$\\n" SecXT
   SectionIn RO
-  SetOutPath \$INSTDIR\\lib
+  SetOutPath \$INSTDIR\\lib\\${LOWERCASE_DIRNAME}
   File /r LV2
 SectionEnd
 EOF
@@ -486,6 +486,7 @@ SectionEnd
 
 Section "Start Menu Shortcuts" SecMenu
   SetShellVarContext all
+  SetOutPath \$INSTDIR
   CreateDirectory "\$SMPROGRAMS\\${PRODUCT_ID}${SFX}"
   CreateShortCut "\$SMPROGRAMS\\${PRODUCT_ID}${SFX}\\${PROGRAM_NAME}${PROGRAM_VERSION}.lnk" "\$INSTDIR\\bin\\${PRODUCT_EXE}" "" "\$INSTDIR\\bin\\${PRODUCT_EXE}" 0
 EOF
