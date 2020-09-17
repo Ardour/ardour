@@ -17,6 +17,7 @@
  *
  */
 
+#include <ctype.h>
 #include <algorithm>
 
 #if (__cplusplus >= 201103L)
@@ -769,7 +770,7 @@ RAMStream::hexdump (int64 max_len) const
 		if (true) {
 			for (size_t j = 0; j < row_size; ++j) {
 				if (i + j < length) {
-					if (std::isprint(_data[i + j])) {
+					if (isprint(_data[i + j])) {
 						out << static_cast<char>(_data[i + j]);
 					} else {
 						out << ".";
