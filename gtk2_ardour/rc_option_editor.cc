@@ -4122,7 +4122,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Appearance/Toolbar"),
 	     new BoolOption (
 		     "show-toolbar-monitoring",
-		     _("Display Monitor Options"),
+		     _("Display Monitoring Options"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_toolbar_monitoring),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_toolbar_monitoring)
 		     ));
@@ -4135,14 +4135,6 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_toolbar_latency)
 		     ));
 
-	add_option (_("Appearance/Toolbar"),
-	     new BoolOption (
-		     "show-toolbar-selclock",
-		     _("Display Selection Clock"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_toolbar_selclock),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_toolbar_selclock)
-		     ));
-
 	if (!ARDOUR::Profile->get_small_screen()) {
 		add_option (_("Appearance/Toolbar"),
 				new BoolOption (
@@ -4152,6 +4144,22 @@ RCOptionEditor::RCOptionEditor ()
 					sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_secondary_clock)
 					));
 	}
+
+	add_option (_("Appearance/Toolbar"),
+	     new BoolOption (
+		     "show-toolbar-selclock",
+		     _("Display Selection Clock"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_toolbar_selclock),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_toolbar_selclock)
+		     ));
+
+	add_option (_("Appearance/Toolbar"),
+	     new BoolOption (
+		     "show-toolbar-monitor-info",
+		     _("Display Monitor Section Info"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_toolbar_monitor_info),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_toolbar_monitor_info)
+		     ));
 
 	add_option (_("Appearance/Toolbar"),
 	     new BoolOption (

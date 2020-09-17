@@ -250,6 +250,19 @@ ARDOUR_UI::repack_transport_hbox ()
 		io_latency_value.hide ();
 		latency_spacer.hide ();
 	}
+
+	bool show_mnfo = UIConfiguration::instance().get_show_toolbar_monitor_info ();
+	if (show_mnfo) {
+		monitor_dim_button.show ();
+		monitor_mono_button.show ();
+		monitor_mute_button.show ();
+		monitor_spacer.show ();
+	} else {
+		monitor_dim_button.hide ();
+		monitor_mono_button.hide ();
+		monitor_mute_button.hide ();
+		monitor_spacer.hide ();
+	}
 }
 
 void
@@ -319,6 +332,13 @@ ARDOUR_UI::setup_transport ()
 	act = ActionManager::get_action ("Transport", "SessionMonitorDisk");
 	monitor_disk_button.set_related_action (act);
 
+	act = ActionManager::get_action (X_("Monitor Section"), X_("monitor-dim-all"));
+	monitor_dim_button.set_related_action (act);
+	act = ActionManager::get_action (X_("Monitor Section"), X_("monitor-mono"));
+	monitor_mono_button.set_related_action (act);
+	act = ActionManager::get_action (X_("Monitor Section"), X_("monitor-cut-all"));
+	monitor_mute_button.set_related_action (act);
+
 	act = ActionManager::get_action ("Main", "ToggleLatencyCompensation");
 	latency_disable_button.set_related_action (act);
 
@@ -375,6 +395,18 @@ ARDOUR_UI::setup_transport ()
 
 	latency_disable_button.set_name ("latency button");
 
+	monitor_dim_button.set_name ("monitor section dim");
+	monitor_mono_button.set_name ("monitor section mono");
+	monitor_mute_button.set_name ("mute button");
+
+	monitor_dim_button.set_layout_font (UIConfiguration::instance().get_SmallerFont());
+	monitor_mono_button.set_layout_font (UIConfiguration::instance().get_SmallerFont());
+	monitor_mute_button.set_layout_font (UIConfiguration::instance().get_SmallerFont());
+
+	monitor_dim_button.set_elements (ArdourButton::Element(ArdourButton::Body|ArdourButton::Text));
+	monitor_mono_button.set_elements (ArdourButton::Element(ArdourButton::Body|ArdourButton::Text));
+	monitor_mute_button.set_elements (ArdourButton::Element(ArdourButton::Body|ArdourButton::Text));
+
 	sync_button.set_name ("transport active option button");
 
 	/* and widget text */
@@ -390,6 +422,10 @@ ARDOUR_UI::setup_transport ()
 
 	latency_disable_button.set_text (_("Disable PDC"));
 	io_latency_label.set_text (_("I/O Latency:"));
+
+	monitor_dim_button.set_text (_("Dim All"));
+	monitor_mono_button.set_text (_("Mono"));
+	monitor_mute_button.set_text (_("Mute All"));
 
 	punch_label.set_text (_("Punch:"));
 	layered_label.set_text (_("Rec:"));
@@ -414,15 +450,25 @@ ARDOUR_UI::setup_transport ()
 	Gtkmm2ext::UI::instance()->set_tip (monitor_in_button, _("Force all tracks to monitor Input, unless they are explicitly set to monitor Disk"));
 	Gtkmm2ext::UI::instance()->set_tip (monitor_disk_button, _("Force all tracks to monitor Disk playback, unless they are explicitly set to Input"));
 
+	/* monitor section */
+	Gtkmm2ext::UI::instance()->set_tip (monitor_dim_button, _("Monitor section dim output"));
+	Gtkmm2ext::UI::instance()->set_tip (monitor_mono_button, _("Monitor section mono output"));
+	Gtkmm2ext::UI::instance()->set_tip (monitor_mute_button, _("Monitor section mute output"));
+
 	/* transport control size-group */
 
 	Glib::RefPtr<SizeGroup> punch_button_size_group = SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL);
 	punch_button_size_group->add_widget (punch_in_button);
 	punch_button_size_group->add_widget (punch_out_button);
 
+	Glib::RefPtr<SizeGroup> monitoring_button_size_group = SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL);
+	monitoring_button_size_group->add_widget (monitor_in_button);
+	monitoring_button_size_group->add_widget (monitor_disk_button);
+
 	Glib::RefPtr<SizeGroup> monitor_button_size_group = SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL);
-	monitor_button_size_group->add_widget (monitor_in_button);
-	monitor_button_size_group->add_widget (monitor_disk_button);
+	monitor_button_size_group->add_widget (monitor_dim_button);
+	monitor_button_size_group->add_widget (monitor_mono_button);
+	monitor_button_size_group->add_widget (monitor_mute_button);
 
 	/* and now the layout... */
 
@@ -454,6 +500,15 @@ ARDOUR_UI::setup_transport ()
 	alert_box->pack_start (solo_alert_button, true, true);
 	alert_box->pack_start (auditioning_alert_button, true, true);
 	alert_box->pack_start (feedback_alert_button, true, true);
+
+	/* monitor section sub-group */
+	VBox* monitor_box = manage (new VBox);
+	monitor_box->set_homogeneous (true);
+	monitor_box->set_spacing (1);
+	monitor_box->set_border_width (0);
+	monitor_box->pack_start (monitor_mono_button, true, true);
+	monitor_box->pack_start (monitor_dim_button, true, true);
+	monitor_box->pack_start (monitor_mute_button, true, true);
 
 	/* clock button size groups */
 	Glib::RefPtr<SizeGroup> button_height_size_group = SizeGroup::create (Gtk::SIZE_GROUP_VERTICAL);
@@ -583,6 +638,12 @@ ARDOUR_UI::setup_transport ()
 	}
 
 	transport_table.attach (*alert_box, TCOL, 0, 2, SHRINK, EXPAND|FILL, hpadding, 0);
+	++col;
+
+	transport_table.attach (monitor_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
+	++col;
+
+	transport_table.attach (*monitor_box, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 	++col;
 
 	/* editor-meter, mini-timeline and selection clock are options in the transport_hbox */

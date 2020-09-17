@@ -440,6 +440,8 @@ ARDOUR_UI::parameter_changed (std::string p)
 		repack_transport_hbox ();
 	} else if (p == "show-toolbar-latency") {
 		repack_transport_hbox ();
+	} else if (p == "show-toolbar-monitor-info") {
+		repack_transport_hbox ();
 	} else if (p == "show-editor-meter") {
 		repack_transport_hbox ();
 	} else if (p == "show-secondary-clock") {
