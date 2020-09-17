@@ -6153,6 +6153,7 @@ void
 Route::set_meter_type (MeterType t)
 {
 	_meter->set_meter_type (t);
+	_session.set_dirty ();
 }
 
 MeterType
