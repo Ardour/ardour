@@ -554,7 +554,7 @@ VST3Plugin::connect_and_run (BufferSet&  bufs,
 	    Vst::ProcessContext::kContTimeValid | Vst::ProcessContext::kSystemTimeValid | Vst::ProcessContext::kSmpteValid | Vst::ProcessContext::kProjectTimeMusicValid | Vst::ProcessContext::kBarPositionValid | Vst::ProcessContext::kTempoValid | Vst::ProcessContext::kTimeSigValid | Vst::ProcessContext::kClockValid;
 
 	context.projectTimeSamples   = start;
-	context.continousTimeSamples = _session.engine ().processed_samples ();
+	context.continousTimeSamples = _engine.processed_samples ();
 	context.systemTime           = g_get_monotonic_time ();
 
 	{
@@ -1331,7 +1331,7 @@ VST3PI::update_processor ()
 	}
 
 	Vst::ProcessSetup setup;
-	setup.processMode        = Vst::kRealtime;
+	setup.processMode        = AudioEngine::instance()->freewheeling () ? Vst::kOffline : Vst::kRealtime;
 	setup.symbolicSampleSize = Vst::kSample32;
 	setup.maxSamplesPerBlock = _block_size;
 	setup.sampleRate         = _context.sampleRate;
@@ -1780,7 +1780,7 @@ VST3PI::process (float** ins, float** outs, uint32_t n_samples)
 
 	Vst::ProcessData data;
 	data.numSamples         = n_samples;
-	data.processMode        = Vst::kRealtime; // or kOffline
+	data.processMode        = AudioEngine::instance()->freewheeling () ? Vst::kOffline : Vst::kRealtime;
 	data.symbolicSampleSize = Vst::kSample32;
 	data.numInputs          = used_bus_count (_n_aux_inputs, _n_inputs);
 	data.numOutputs         = used_bus_count (_n_aux_outputs, _n_outputs);
