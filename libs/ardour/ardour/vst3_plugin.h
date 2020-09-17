@@ -56,18 +56,20 @@ public:
 	virtual ~VST3PI ();
 
 	/* IComponentHandler */
-	tresult beginEdit (Vst::ParamID id) SMTG_OVERRIDE;
-	tresult performEdit (Vst::ParamID id, Vst::ParamValue value) SMTG_OVERRIDE;
-	tresult endEdit (Vst::ParamID id) SMTG_OVERRIDE;
-	tresult restartComponent (int32 flags) SMTG_OVERRIDE;
+	tresult PLUGIN_API beginEdit (Vst::ParamID id) SMTG_OVERRIDE;
+	tresult PLUGIN_API performEdit (Vst::ParamID id, Vst::ParamValue value) SMTG_OVERRIDE;
+	tresult PLUGIN_API endEdit (Vst::ParamID id) SMTG_OVERRIDE;
+	tresult PLUGIN_API restartComponent (int32 flags) SMTG_OVERRIDE;
 
 	/* IConnectionPoint API */
-	tresult connect (Vst::IConnectionPoint* other) SMTG_OVERRIDE;
-	tresult disconnect (Vst::IConnectionPoint* other) SMTG_OVERRIDE;
-	tresult notify (Vst::IMessage* message) SMTG_OVERRIDE;
+	tresult PLUGIN_API connect (Vst::IConnectionPoint* other) SMTG_OVERRIDE;
+	tresult PLUGIN_API disconnect (Vst::IConnectionPoint* other) SMTG_OVERRIDE;
+	tresult PLUGIN_API notify (Vst::IMessage* message) SMTG_OVERRIDE;
+
+	/* IPlugFrame */
+	tresult PLUGIN_API resizeView (IPlugView* view, ViewRect* newSize) SMTG_OVERRIDE;
 
 	/* GUI */
-	tresult resizeView (IPlugView* view, ViewRect* newSize) SMTG_OVERRIDE;
 	IPlugView* view ();
 	void close_view ();
 	PBD::Signal2<void, int, int> OnResizeView;
@@ -76,9 +78,9 @@ public:
 #endif
 	void update_contoller_param ();
 
-	tresult queryInterface (const TUID _iid, void** obj);
-	uint32 addRef () SMTG_OVERRIDE { return 1; }
-	uint32 release () SMTG_OVERRIDE { return 1; }
+	tresult PLUGIN_API queryInterface (const TUID _iid, void** obj);
+	uint32  PLUGIN_API addRef () SMTG_OVERRIDE { return 1; }
+	uint32  PLUGIN_API release () SMTG_OVERRIDE { return 1; }
 
 	/* Ardour Preset Helpers */
 	Vst::IUnitInfo* unit_info ();

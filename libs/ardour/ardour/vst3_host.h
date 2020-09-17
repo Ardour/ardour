@@ -30,13 +30,13 @@
 #include "ardour/libardour_visibility.h"
 #include "vst3/vst3.h"
 
-#define QUERY_INTERFACE_IMPL(Interface)                  \
-tresult queryInterface (const TUID _iid, void** obj)     \
-{                                                        \
-  QUERY_INTERFACE (_iid, obj, FUnknown::iid, Interface)  \
-  QUERY_INTERFACE (_iid, obj, Interface::iid, Interface) \
-  *obj = nullptr;                                        \
-  return kNoInterface;                                   \
+#define QUERY_INTERFACE_IMPL(Interface)                         \
+tresult PLUGIN_API queryInterface (const TUID _iid, void** obj) \
+{                                                               \
+  QUERY_INTERFACE (_iid, obj, FUnknown::iid, Interface)         \
+  QUERY_INTERFACE (_iid, obj, Interface::iid, Interface)        \
+  *obj = nullptr;                                               \
+  return kNoInterface;                                          \
 }
 
 #if defined(__clang__)
@@ -145,8 +145,8 @@ class LIBARDOUR_API RefObject : public FUnknown
 public:
 	RefObject ();
 	virtual ~RefObject () {}
-	uint32 addRef ();
-	uint32 release ();
+	uint32 PLUGIN_API addRef ();
+	uint32 PLUGIN_API release ();
 
 private:
 	gint _cnt; // atomic
@@ -159,17 +159,17 @@ public:
 	virtual ~HostAttributeList ();
 
 	QUERY_INTERFACE_IMPL (Vst::IAttributeList);
-	uint32 addRef () SMTG_OVERRIDE { return RefObject::addRef (); }
-	uint32 release () SMTG_OVERRIDE { return RefObject::release (); }
+	uint32 PLUGIN_API addRef () SMTG_OVERRIDE { return RefObject::addRef (); }
+	uint32 PLUGIN_API release () SMTG_OVERRIDE { return RefObject::release (); }
 
-	tresult setInt (AttrID aid, int64 value) SMTG_OVERRIDE;
-	tresult getInt (AttrID aid, int64& value) SMTG_OVERRIDE;
-	tresult setFloat (AttrID aid, double value) SMTG_OVERRIDE;
-	tresult getFloat (AttrID aid, double& value) SMTG_OVERRIDE;
-	tresult setString (AttrID aid, const Vst::TChar* string) SMTG_OVERRIDE;
-	tresult getString (AttrID aid, Vst::TChar* string, uint32 size) SMTG_OVERRIDE;
-	tresult setBinary (AttrID aid, const void* data, uint32 size) SMTG_OVERRIDE;
-	tresult getBinary (AttrID aid, const void*& data, uint32& size) SMTG_OVERRIDE;
+	tresult PLUGIN_API setInt (AttrID aid, int64 value) SMTG_OVERRIDE;
+	tresult PLUGIN_API getInt (AttrID aid, int64& value) SMTG_OVERRIDE;
+	tresult PLUGIN_API setFloat (AttrID aid, double value) SMTG_OVERRIDE;
+	tresult PLUGIN_API getFloat (AttrID aid, double& value) SMTG_OVERRIDE;
+	tresult PLUGIN_API setString (AttrID aid, const Vst::TChar* string) SMTG_OVERRIDE;
+	tresult PLUGIN_API getString (AttrID aid, Vst::TChar* string, uint32 size) SMTG_OVERRIDE;
+	tresult PLUGIN_API setBinary (AttrID aid, const void* data, uint32 size) SMTG_OVERRIDE;
+	tresult PLUGIN_API getBinary (AttrID aid, const void*& data, uint32& size) SMTG_OVERRIDE;
 
 protected:
 	void removeAttrID (AttrID aid);
@@ -184,12 +184,12 @@ public:
 	virtual ~HostMessage ();
 
 	QUERY_INTERFACE_IMPL (Vst::IMessage);
-	uint32 addRef () SMTG_OVERRIDE { return RefObject::addRef (); }
-	uint32 release () SMTG_OVERRIDE { return RefObject::release (); }
+	uint32 PLUGIN_API addRef () SMTG_OVERRIDE { return RefObject::addRef (); }
+	uint32 PLUGIN_API release () SMTG_OVERRIDE { return RefObject::release (); }
 
-	const char* getMessageID () SMTG_OVERRIDE;
-	void setMessageID (const char* messageID) SMTG_OVERRIDE;
-	Vst::IAttributeList* getAttributes () SMTG_OVERRIDE;
+	const char* PLUGIN_API          getMessageID () SMTG_OVERRIDE;
+	void PLUGIN_API                 setMessageID (const char* messageID) SMTG_OVERRIDE;
+	Vst::IAttributeList* PLUGIN_API getAttributes () SMTG_OVERRIDE;
 
 protected:
 	char*                                _messageId;
@@ -201,11 +201,12 @@ class LIBARDOUR_API PlugInterfaceSupport : public Vst::IPlugInterfaceSupport
 public:
 	PlugInterfaceSupport ();
 	QUERY_INTERFACE_IMPL (Vst::IPlugInterfaceSupport);
-	uint32 addRef () SMTG_OVERRIDE { return 1; }
-	uint32 release () SMTG_OVERRIDE { return 1; }
+	uint32 PLUGIN_API addRef () SMTG_OVERRIDE { return 1; }
+	uint32 PLUGIN_API release () SMTG_OVERRIDE { return 1; }
 
-	tresult isPlugInterfaceSupported (const TUID) SMTG_OVERRIDE;
-	void    addPlugInterfaceSupported (const TUID);
+	tresult PLUGIN_API isPlugInterfaceSupported (const TUID) SMTG_OVERRIDE;
+
+	void addPlugInterfaceSupported (const TUID);
 
 private:
 	std::vector<FUID> _interfaces;
@@ -222,13 +223,13 @@ public:
 
 	HostApplication ();
 	virtual ~HostApplication () {}
-	tresult queryInterface (const TUID _iid, void** obj) SMTG_OVERRIDE;
+	tresult PLUGIN_API queryInterface (const TUID _iid, void** obj) SMTG_OVERRIDE;
 
-	uint32 addRef () SMTG_OVERRIDE { return 1; }
-	uint32 release () SMTG_OVERRIDE { return 1; }
+	uint32 PLUGIN_API addRef () SMTG_OVERRIDE { return 1; }
+	uint32 PLUGIN_API release () SMTG_OVERRIDE { return 1; }
 
-	tresult getName (Vst::String128 name) SMTG_OVERRIDE;
-	tresult createInstance (TUID cid, TUID _iid, void** obj) SMTG_OVERRIDE;
+	tresult PLUGIN_API getName (Vst::String128 name) SMTG_OVERRIDE;
+	tresult PLUGIN_API createInstance (TUID cid, TUID _iid, void** obj) SMTG_OVERRIDE;
 
 protected:
 	boost::shared_ptr<PlugInterfaceSupport> _plug_interface_support;
@@ -238,8 +239,8 @@ class LIBARDOUR_LOCAL Vst3ParamValueQueue : public Vst::IParamValueQueue
 {
 public:
 	QUERY_INTERFACE_IMPL (Vst::IParamValueQueue);
-	uint32 addRef () SMTG_OVERRIDE { return 1; }
-	uint32 release () SMTG_OVERRIDE { return 1; }
+	uint32 PLUGIN_API addRef () SMTG_OVERRIDE { return 1; }
+	uint32 PLUGIN_API release () SMTG_OVERRIDE { return 1; }
 
 	static const int maxNumPoints = 64;
 
@@ -248,16 +249,16 @@ public:
 		_id = Vst::kNoParamId;
 	}
 
-	Vst::ParamID getParameterId() SMTG_OVERRIDE { return _id; }
+	Vst::ParamID PLUGIN_API getParameterId() SMTG_OVERRIDE { return _id; }
 
 	void setParameterId (Vst::ParamID id) {
 		_values.clear();
 		_id = id;
 	}
 
-	int32   getPointCount() SMTG_OVERRIDE { return _values.size(); }
-	tresult getPoint (int32 index, int32&, Vst::ParamValue&) SMTG_OVERRIDE;
-	tresult addPoint (int32, Vst::ParamValue, int32&) SMTG_OVERRIDE;
+	int32   PLUGIN_API getPointCount() SMTG_OVERRIDE { return _values.size(); }
+	tresult PLUGIN_API getPoint (int32 index, int32&, Vst::ParamValue&) SMTG_OVERRIDE;
+	tresult PLUGIN_API addPoint (int32, Vst::ParamValue, int32&) SMTG_OVERRIDE;
 
 protected:
 	struct Value {
@@ -277,8 +278,8 @@ class LIBARDOUR_LOCAL Vst3ParameterChanges : public Vst::IParameterChanges
 {
 public:
 	QUERY_INTERFACE_IMPL (Vst::IParameterChanges);
-	uint32 addRef () SMTG_OVERRIDE { return 1; }
-	uint32 release () SMTG_OVERRIDE { return 1; }
+	uint32 PLUGIN_API addRef () SMTG_OVERRIDE { return 1; }
+	uint32 PLUGIN_API release () SMTG_OVERRIDE { return 1; }
 
 	Vst3ParameterChanges () {
 		clear ();
@@ -292,12 +293,12 @@ public:
 		_used_queue_count = 0;
 	}
 
-	int32 getParameterCount() SMTG_OVERRIDE {
+	int32 PLUGIN_API getParameterCount() SMTG_OVERRIDE {
 		return _used_queue_count;
 	}
 
-	Vst::IParamValueQueue* getParameterData (int32 index) SMTG_OVERRIDE;
-	Vst::IParamValueQueue* addParameterData (Vst::ParamID const& id, int32& index) SMTG_OVERRIDE;
+	Vst::IParamValueQueue* PLUGIN_API getParameterData (int32 index) SMTG_OVERRIDE;
+	Vst::IParamValueQueue* PLUGIN_API addParameterData (Vst::ParamID const& id, int32& index) SMTG_OVERRIDE;
 
 protected:
 	std::vector<Vst3ParamValueQueue> _queue;
@@ -312,10 +313,10 @@ public:
 	}
 
 	QUERY_INTERFACE_IMPL (Vst::IEventList)
-	uint32 addRef () SMTG_OVERRIDE { return 1; }
-	uint32 release () SMTG_OVERRIDE { return 1; }
+	uint32 PLUGIN_API addRef () SMTG_OVERRIDE { return 1; }
+	uint32 PLUGIN_API release () SMTG_OVERRIDE { return 1; }
 
-	int32 PLUGIN_API getEventCount() {
+	int32 PLUGIN_API PLUGIN_API getEventCount() {
 		return _events.size ();
 	}
 
@@ -351,8 +352,8 @@ public:
 	virtual ~RAMStream ();
 
 	QUERY_INTERFACE_IMPL (IBStream)
-	uint32 addRef () SMTG_OVERRIDE { return 1; }
-	uint32 release () SMTG_OVERRIDE { return 1; }
+	uint32 PLUGIN_API addRef () SMTG_OVERRIDE { return 1; }
+	uint32 PLUGIN_API release () SMTG_OVERRIDE { return 1; }
 
 	/* IBStream API */
 	tresult PLUGIN_API read  (void* buffer, int32 numBytes, int32* numBytesRead) SMTG_OVERRIDE;
