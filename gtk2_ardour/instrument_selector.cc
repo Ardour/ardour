@@ -181,7 +181,7 @@ InstrumentSelector::build_instrument_list()
 }
 
 PluginInfoPtr
-InstrumentSelector::selected_instrument()
+InstrumentSelector::selected_instrument() const
 {
 	TreeModel::iterator iter = get_active();
 	if (!iter) {
@@ -190,4 +190,14 @@ InstrumentSelector::selected_instrument()
 
 	const TreeModel::Row& row = (*iter);
 	return row[_instrument_list_columns.info_ptr];
+}
+
+std::string
+InstrumentSelector::selected_instrument_name () const
+{
+	PluginInfoPtr pip = selected_instrument ();
+	if (!pip) {
+		return "";
+	}
+	return pip->name;
 }

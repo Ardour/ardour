@@ -334,6 +334,7 @@ AddRouteDialog::AddRouteDialog ()
 	channel_combo.set_row_separator_func (sigc::mem_fun (*this, &AddRouteDialog::channel_separator));
 	route_group_combo.set_row_separator_func (sigc::mem_fun (*this, &AddRouteDialog::route_separator));
 	route_group_combo.signal_changed ().connect (sigc::mem_fun (*this, &AddRouteDialog::group_changed));
+	instrument_combo.signal_changed ().connect (sigc::mem_fun (*this, &AddRouteDialog::instrument_changed));
 
 	routes_spinner.signal_activate ().connect (sigc::bind (sigc::mem_fun (*this, &Gtk::Dialog::response), AddAndClose));
 	name_template_entry.signal_activate ().connect (sigc::bind (sigc::mem_fun (*this, &Gtk::Dialog::response), AddAndClose));
@@ -503,6 +504,16 @@ AddRouteDialog::trk_template_row_selected ()
 	}
 }
 
+void
+AddRouteDialog::instrument_changed ()
+{
+	if (name_edited_by_user) {
+		return;
+	}
+	std::string n = instrument_combo.selected_instrument_name ();
+	name_template_entry.set_text (n.empty () ? _("MIDI") : n);
+	reset_name_edited ();
+}
 
 void
 AddRouteDialog::name_template_entry_insertion (Glib::ustring const &,int*)
@@ -590,7 +601,8 @@ AddRouteDialog::maybe_update_name_template_entry ()
 		name_template_entry.set_text (_("Audio"));
 		break;
 	case MidiTrack:
-		name_template_entry.set_text (_("MIDI"));
+		/* set name of instrument or _("MIDI") */
+		instrument_changed ();
 		break;
 	case AudioBus:
 	case MidiBus:

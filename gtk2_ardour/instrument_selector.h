@@ -41,7 +41,8 @@ class InstrumentSelector : public Gtk::ComboBox
 public:
 	InstrumentSelector();
 
-	ARDOUR::PluginInfoPtr selected_instrument();
+	ARDOUR::PluginInfoPtr selected_instrument () const;
+	std::string selected_instrument_name () const;
 
 private:
 	struct InstrumentListColumns : public Gtk::TreeModel::ColumnRecord {
