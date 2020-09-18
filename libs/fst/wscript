@@ -57,12 +57,13 @@ def build(bld):
             obj.uselib += ' OSX'
         if bld.env['build_target'] == 'mingw':
             obj.uselib += ' GDI32'
+            obj.linkflags = ['-mwindows']
 
         if re.search ("bsd", sys.platform) != None:
             obj.defines.append('_POSIX_C_SOURCE=200809')
             obj.defines.append('_XOPEN_SOURCE=700')
-        obj.install_path = os.path.join(bld.env['LIBDIR'])
 
+        obj.install_path = os.path.join(bld.env['LIBDIR'])
 
     if not (bld.is_defined('WINDOWS_VST_SUPPORT') or bld.is_defined('LXVST_SUPPORT') or bld.is_defined ('MACVST_SUPPORT')):
         return
