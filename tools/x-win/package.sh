@@ -464,17 +464,19 @@ fi
 if test x$WITH_HARRISON_LV2 != x ; then
 if test -n "$MIXBUS"; then
 	cat >> $NSISFILE << EOF
-Section "Harrison XT plugins and a-/ACE plugin GUIs\$\\r\$\\n" SecXT
+Section "Harrison XT plugins (required)" SecXT
   SectionIn RO
-  SetOutPath \$INSTDIR\\lib\\${LOWERCASE_DIRNAME}
-  File /r LV2
+  SetOutPath \$INSTDIR\\lib\\${LOWERCASE_DIRNAME}\\LV2
+  File LV2\\.harrison_version.txt
+  File /r LV2\\*.lv2
 SectionEnd
 EOF
 else
 	cat >> $NSISFILE << EOF
-Section "Harrison XT-plugins" SecXT
-  SetOutPath \$INSTDIR\\lib\\${LOWERCASE_DIRNAME}
-  File /r LV2
+Section "Harrison XT plugins and a-/ACE plugin GUIs" SecXT
+  SetOutPath \$INSTDIR\\lib\\${LOWERCASE_DIRNAME}\\LV2
+  File LV2\\.harrison_version.txt
+  File /r LV2\\*.lv2
 SectionEnd
 EOF
 fi
