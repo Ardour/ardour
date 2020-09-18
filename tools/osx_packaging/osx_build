@@ -397,7 +397,8 @@ fi
 
 # VST scanner app and wrapper script, if they exist
 if test -d $BUILD_ROOT/libs/fst ; then
-	cp $BUILD_ROOT/libs/fst/ardour-vst-scanner* $Frameworks/
+	cp $BUILD_ROOT/libs/fst/ardour-vst-scanner* $Frameworks/ || true
+	cp $BUILD_ROOT/libs/fst/ardour-vst3-scanner* $Frameworks/ || true
 fi
 
 # vfork wrapper
@@ -548,6 +549,10 @@ fi
 
 if test -f "$Frameworks/ardour-vst-scanner"; then
 	executables="$executables ../lib/ardour-vst-scanner"
+fi
+
+if test -f "$Frameworks/ardour-vst3-scanner"; then
+	executables="$executables ../lib/ardour-vst3-scanner"
 fi
 
 for exe in $executables; do

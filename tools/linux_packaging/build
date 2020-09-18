@@ -447,8 +447,10 @@ fi
 #  neither binary nor script exists)
 if test -d $BUILD_ROOT/libs/fst ; then
     cp $BUILD_ROOT/libs/fst/ardour-vst-scanner* $APPLIB || true
+    cp $BUILD_ROOT/libs/fst/ardour-vst3-scanner* $APPLIB || true
     if test x$STRIP = xall ; then
         strip -s $APPLIB/ardour-vst-scanner*
+        strip -s $APPLIB/ardour-vst3-scanner*
     fi
 fi
 

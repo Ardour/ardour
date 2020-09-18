@@ -146,6 +146,7 @@ cp build/libs/pbd/pbd-*.dll $DESTDIR/bin/
 cp build/libs/ptformat/ptformat-*.dll $DESTDIR/bin/
 cp build/libs/audiographer/audiographer-*.dll $DESTDIR/bin/
 cp build/libs/fst/ardour-vst-scanner.exe $DESTDIR/bin/ || true
+cp build/libs/fst/ardour-vst3-scanner.exe $DESTDIR/bin/ || true
 cp build/session_utils/*-*.exe $DESTDIR/bin/ || true
 cp build/luasession/ardour6-lua.exe $DESTDIR/bin/ || true
 cp `ls -t build/gtk2_ardour/ardour-*.exe | head -n1` $DESTDIR/bin/${PRODUCT_EXE}
