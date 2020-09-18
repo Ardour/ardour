@@ -26,6 +26,7 @@
 
 #include "pbd/convert.h"
 #include "pbd/error.h"
+#include "pbd/unwind.h"
 
 #include "ardour/plugin_insert.h"
 #include "ardour/vst3_plugin.h"
@@ -116,6 +117,8 @@ VST3NSViewPluginUI::view_size_allocate (Gtk::Allocation& allocation)
 			GTK_WIDGET(_gui_widget.get_parent()->gobj()),
 			0, 0, &xx, &yy);
 
+	PBD::Unwinder<bool> uw (_resize_in_progress, true);
+
 	ViewRect rect;
 	if (view->getSize (&rect) == kResultOk) {
 		rect.left   = xx;
@@ -147,7 +150,7 @@ VST3NSViewPluginUI::resize_callback (int width, int height)
 {
 	//printf ("VST3NSViewPluginUI::resize_callback %d x %d\n", width, height);
 	IPlugView* view = _vst3->view ();
-	if (!view) {
+	if (!view || _resize_in_progress) {
 		return;
 	}
 	if (view->canResize() == kResultTrue) {

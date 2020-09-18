@@ -25,6 +25,8 @@
 #include <glibmm/main.h>
 #include <gtkmm/socket.h>
 
+#include "pbd/unwind.h"
+
 #include "ardour/plugin_insert.h"
 #include "ardour/vst3_plugin.h"
 
@@ -212,6 +214,8 @@ VST3X11PluginUI::view_size_allocate (Gtk::Allocation& allocation)
 	if (!view) {
 		return;
 	}
+	PBD::Unwinder<bool> uw (_resize_in_progress, true);
+
 	ViewRect rect;
 	if (view->getSize (&rect) == kResultOk) {
 		rect.right = rect.left + allocation.get_width ();
@@ -234,7 +238,7 @@ VST3X11PluginUI::resize_callback (int width, int height)
 {
 	// printf ("VST3X11PluginUI::resize_callback %d x %d\n", width, height);
 	IPlugView* view = _vst3->view ();
-	if (!view) {
+	if (!view || _resize_in_progress) {
 		return;
 	}
 	if (view->canResize() == kResultTrue) {

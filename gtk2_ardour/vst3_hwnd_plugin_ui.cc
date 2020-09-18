@@ -22,6 +22,8 @@
 
 #include <glibmm/main.h>
 
+#include "pbd/unwind.h"
+
 #include "ardour/plugin_insert.h"
 #include "ardour/vst3_plugin.h"
 
@@ -85,6 +87,7 @@ VST3HWNDPluginUI::view_size_allocate (Gtk::Allocation& allocation)
 	if (!view) {
 		return;
 	}
+	PBD::Unwinder<bool> uw (_resize_in_progress, true);
 	ViewRect rect;
 	if (view->getSize (&rect) == kResultOk) {
 		rect.right = rect.left + allocation.get_width ();
@@ -106,18 +109,10 @@ void
 VST3HWNDPluginUI::resize_callback (int width, int height)
 {
 	//printf ("VST3HWNDPluginUI::resize_callback %d x %d\n", width, height);
-#if 0
-	HWND hwnd = gdk_win32_drawable_get_handle (_gui_widget.window);
-	WINDOWINFO windowInfo;
-	GetWindowInfo (hwnd, &windowInfo);
-	RECT clientRect {};
-	clientRect.right = newSize.width;
-	clientRect.bottom = newSize.height;
-	AdjustWindowRectEx (&clientRect, windowInfo.dwStyle, false, windowInfo.dwExStyle);
-	SetWindowPos (hwnd, HWND_TOP, 0, 0, clientRect.right - clientRect.left,
-			clientRect.bottom - clientRect.top, SWP_NOMOVE | SWP_NOCOPYBITS | SWP_NOACTIVATE);
-#else
 	IPlugView* view = _vst3->view ();
+	if (!view || _resize_in_progress) {
+		return;
+	}
 	if (view->canResize() == kResultTrue) {
 		gint xx, yy;
 		if (gtk_widget_translate_coordinates (
@@ -132,7 +127,6 @@ VST3HWNDPluginUI::resize_callback (int width, int height)
 		_req_height = height;
 		_gui_widget.queue_resize ();
 	}
-#endif
 }
 
 bool

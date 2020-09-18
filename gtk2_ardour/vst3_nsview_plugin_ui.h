@@ -35,8 +35,6 @@
 #undef NO
 #endif
 
-
-
 #include <gtkmm/widget.h>
 #include <gtkmm/eventbox.h>
 

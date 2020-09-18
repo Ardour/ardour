@@ -35,6 +35,7 @@ VST3PluginUI::VST3PluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_pt
 	, _vst3 (vst3)
 	, _req_width (0)
 	, _req_height (0)
+	, _resize_in_progress (false)
 {
 	_ardour_buttons_box.set_spacing (6);
 	_ardour_buttons_box.set_border_width (6);
