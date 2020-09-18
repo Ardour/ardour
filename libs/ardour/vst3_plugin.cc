@@ -1247,6 +1247,9 @@ VST3PI::restartComponent (int32 flags)
 		update_shadow_data ();
 	}
 	if (flags & Vst::kLatencyChanged) {
+		/* need to re-activate the plugin as per spec */
+		deactivate ();
+		activate ();
 		_plugin_latency.reset ();
 	}
 	return kResultOk;
