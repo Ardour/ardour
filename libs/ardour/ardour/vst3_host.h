@@ -21,6 +21,7 @@
 
 #include <map>
 #include <vector>
+#include <string>
 #include <stdint.h>
 
 #include <glib.h>
