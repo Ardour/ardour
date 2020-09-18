@@ -321,7 +321,9 @@ AlsaAudioSlave::process_thread ()
 #endif
 			} else {
 				if (!drain) {
+#ifndef NDEBUG
 					printf ("Slave Process: Playback Buffer Underflow, have %u want %lu\n", _rb_playback.read_space (), _pcmi.nplay () * spp); // XXX DEBUG 
+#endif
 					_play_latency += spp * _ratio;
 					update_latencies (_play_latency, _capt_latency);
 				}
@@ -387,7 +389,9 @@ AlsaAudioSlave::cycle_start (double tme, double mst_speed, bool drain)
 	/* estimate required samples */
 	const double rratio = _ratio * mst_speed / slave_speed;
 	if (_rb_capture.read_space() < ceil (nchn * _samples_per_period / rratio)) {
+#ifndef NDEBUG
 		printf ("--- UNDERFLOW ---  have %u  want %.1f\n", _rb_capture.read_space(), ceil (nchn * _samples_per_period / rratio)); // XXX DEBUG
+#endif
 		_capt_latency += _samples_per_period;
 		update_latencies (_play_latency, _capt_latency);
 		return;
@@ -417,7 +421,9 @@ AlsaAudioSlave::cycle_start (double tme, double mst_speed, bool drain)
 	}
 
 	if (underflow) {
-		std::cerr << "ALSA Slave: Capture Ringbuffer Underflow\n"; // XXX
+#ifndef NDEBUG
+		std::cerr << "ALSA Slave: Capture Ringbuffer Underflow\n"; // XXX DEBUG
+#endif
 		g_atomic_int_set(&_draining, 1);
 	}
 
@@ -492,7 +498,9 @@ AlsaAudioSlave::cycle_end ()
 	}
 
 	if (overflow) {
-		std::cerr << "ALSA Slave: Playback Ringbuffer Overflow\n"; // XXX
+#ifndef NDEBUG
+		std::cerr << "ALSA Slave: Playback Ringbuffer Overflow\n"; // XXX DEBUG
+#endif
 		g_atomic_int_set(&_draining, 1);
 		return;
 	}

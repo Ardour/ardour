@@ -2155,7 +2155,9 @@ AlsaAudioBackend::AudioSlave::update_latencies (uint32_t play, uint32_t capt)
 	for (std::vector<BackendPortPtr>::const_iterator it = outputs.begin (); it != outputs.end (); ++it) {
 		(*it)->set_latency_range (lr, true);
 	}
-	printf (" ----- SLAVE LATENCY play=%d capt=%d\n", play, capt); // XXX DEBUG
+#ifndef NDEBUG
+	printf ("ALSA SLAVE-device latency play=%d capt=%d\n", play, capt); // XXX DEBUG
+#endif
 	UpdateLatency (); /* EMIT SIGNAL */
 }
 
