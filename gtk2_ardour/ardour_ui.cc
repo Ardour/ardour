@@ -528,6 +528,10 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	WM::Manager::instance().register_window (&plugin_dsp_load_window);
 	WM::Manager::instance().register_window (&transport_masters_window);
 
+	/* session-sensitive windows */
+	ActionManager::session_sensitive_actions.push_back (ActionManager::get_action (X_("Window"), X_("toggle-session-options-editor")));
+	ActionManager::session_sensitive_actions.push_back (ActionManager::get_action (X_("Window"), X_("toggle-transport-masters")));
+
 	/* do not retain position for add route dialog */
 	add_route_dialog.set_state_mask (WindowProxy::Size);
 
