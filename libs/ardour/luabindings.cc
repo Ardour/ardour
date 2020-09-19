@@ -2731,7 +2731,7 @@ LuaBindings::dsp (lua_State* L)
 		.addFunction ("resize", &MidiBuffer::resize)
 		.addFunction ("copy", (void (MidiBuffer::*)(MidiBuffer const * const))&MidiBuffer::copy)
 		.addFunction ("push_event", (bool (MidiBuffer::*)(const Evoral::Event<samplepos_t>&))&MidiBuffer::push_back)
-		.addFunction ("push_back", (bool (MidiBuffer::*)(samplepos_t, size_t, const uint8_t*))&MidiBuffer::push_back)
+		.addFunction ("push_back", (bool (MidiBuffer::*)(samplepos_t, size_t, const uint8_t*, Evoral::EventType))&MidiBuffer::push_back)
 		// TODO iterators..
 		.addExtCFunction ("table", &luabridge::CFunc::listToTable<const Evoral::Event<samplepos_t>, MidiBuffer>)
 		.endClass()

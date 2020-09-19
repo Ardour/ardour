@@ -48,6 +48,7 @@ MidiRingBuffer<T>::read (MidiBuffer& dst, samplepos_t start, samplepos_t end, sa
 	}
 
 	T                 ev_time;
+	Evoral::EventType ev_type;
 	uint32_t          ev_size;
 	size_t            count = 0;
 	const size_t      prefix_size = sizeof(T) + sizeof(Evoral::EventType) + sizeof(uint32_t);
@@ -62,6 +63,7 @@ MidiRingBuffer<T>::read (MidiBuffer& dst, samplepos_t start, samplepos_t end, sa
 		this->peek (peekbuf, prefix_size);
 
 		ev_time = *(reinterpret_cast<T*>((uintptr_t)peekbuf));
+		ev_type = *(reinterpret_cast<Evoral::EventType*>((uintptr_t)(peekbuf + sizeof(T))));
 		ev_size = *(reinterpret_cast<uint32_t*>((uintptr_t)(peekbuf + sizeof(T) + sizeof (Evoral::EventType))));
 
 		if (this->read_space() < ev_size) {
@@ -92,7 +94,7 @@ MidiRingBuffer<T>::read (MidiBuffer& dst, samplepos_t start, samplepos_t end, sa
 
 		/* lets see if we are going to be able to write this event into dst.
 		 */
-		uint8_t* write_loc = dst.reserve (ev_time, ev_size);
+		uint8_t* write_loc = dst.reserve (ev_time, ev_type, ev_size);
 		if (write_loc == 0) {
 			if (stop_on_overflow_in_dst) {
 				DEBUG_TRACE (DEBUG::MidiRingBuffer, string_compose ("MidiRingBuffer: overflow in destination MIDI buffer, stopped after %1 events\n", count));

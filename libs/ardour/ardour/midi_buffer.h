@@ -53,9 +53,9 @@ public:
 	void skip_to (TimeType when);
 
 	bool push_back(const Evoral::Event<TimeType>& event);
-	bool push_back(TimeType time, size_t size, const uint8_t* data);
+	bool push_back(TimeType time, size_t size, const uint8_t* data, Evoral::EventType event_type = Evoral::MIDI_EVENT);
 
-	uint8_t* reserve(TimeType time, size_t size);
+	uint8_t* reserve(TimeType time, Evoral::EventType event_type, size_t size);
 
 	void resize(size_t);
 	size_t size() const { return _size; }
@@ -86,19 +86,21 @@ public:
 		}
 
 		inline EventType operator*() const {
-			uint8_t* ev_start = buffer->_data + offset + sizeof(TimeType);
+			uint8_t* ev_start = buffer->_data + offset + sizeof(TimeType) + sizeof (Evoral::EventType);
 			int event_size = Evoral::midi_event_size(ev_start);
 			assert(event_size >= 0);
-			return EventType(midi_parameter_type(*ev_start),
+			return EventType(
+					*((Evoral::EventType*)(buffer->_data + offset + sizeof(TimeType))),
 					*((TimeType*)(buffer->_data + offset)),
 					event_size, ev_start);
 		}
 
 		inline EventType operator*() {
-			uint8_t* ev_start = buffer->_data + offset + sizeof(TimeType);
+			uint8_t* ev_start = buffer->_data + offset + sizeof(TimeType) + sizeof (Evoral::EventType);
 			int event_size = Evoral::midi_event_size(ev_start);
 			assert(event_size >= 0);
-			return EventType(Evoral::MIDI_EVENT,
+			return EventType(
+					*(reinterpret_cast<Evoral::EventType*>((uintptr_t)(buffer->_data + offset + sizeof(TimeType)))),
 					*(reinterpret_cast<TimeType*>((uintptr_t)(buffer->_data + offset))),
 					event_size, ev_start);
 		}
@@ -107,11 +109,15 @@ public:
 			return reinterpret_cast<TimeType*>((uintptr_t)(buffer->_data + offset));
 		}
 
+		inline Evoral::EventType * event_type_ptr() {
+			return reinterpret_cast<Evoral::EventType*>((uintptr_t)(buffer->_data + offset + sizeof(TimeType)));
+		}
+
 		inline iterator_base<BufferType, EventType>& operator++() {
-			uint8_t* ev_start = buffer->_data + offset + sizeof(TimeType);
+			uint8_t* ev_start = buffer->_data + offset + sizeof(TimeType) + sizeof (Evoral::EventType);
 			int event_size = Evoral::midi_event_size(ev_start);
 			assert(event_size >= 0);
-			offset += sizeof(TimeType) + event_size;
+			offset += sizeof(TimeType) + sizeof (Evoral::EventType) + event_size;
 			return *this;
 		}
 
@@ -138,7 +144,7 @@ public:
 
 	iterator erase(const iterator& i) {
 		assert (i.buffer == this);
-		uint8_t* ev_start = _data + i.offset + sizeof (TimeType);
+		uint8_t* ev_start = _data + i.offset + sizeof (TimeType) + sizeof (Evoral::EventType);
 		int event_size = Evoral::midi_event_size (ev_start);
 
 		if (event_size < 0) {
@@ -146,7 +152,7 @@ public:
 			return end();
 		}
 
-		size_t total_data_deleted = sizeof(TimeType) + event_size;
+		size_t total_data_deleted = sizeof(TimeType) + sizeof (Evoral::EventType) + event_size;
 
 		if (i.offset + total_data_deleted > _size) {
 			_size = 0;
@@ -182,7 +188,7 @@ private:
 	friend class iterator_base< MidiBuffer, Evoral::Event<TimeType> >;
 	friend class iterator_base< const MidiBuffer, const Evoral::Event<TimeType> >;
 
-	uint8_t* _data; ///< timestamp, event, timestamp, event, ...
+	uint8_t* _data; ///< [timestamp, event-type, event]*
 	pframes_t _size;
 };
 

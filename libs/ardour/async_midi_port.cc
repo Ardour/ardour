@@ -83,7 +83,7 @@ AsyncMIDIPort::flush_output_fifo (MIDI::pframes_t nframes)
 		assert (evp->buffer());
 
 		for (size_t n = 0; n < vec.len[0]; ++n, ++evp) {
-			if (mb.push_back (evp->time(), evp->size(), evp->buffer())) {
+			if (mb.push_back (evp->time(), evp->size(), evp->buffer(), evp->event_type ())) {
 				written++;
 			}
 		}
@@ -96,7 +96,7 @@ AsyncMIDIPort::flush_output_fifo (MIDI::pframes_t nframes)
 		assert (evp->buffer());
 
 		for (size_t n = 0; n < vec.len[1]; ++n, ++evp) {
-			if (mb.push_back (evp->time(), evp->size(), evp->buffer())) {
+			if (mb.push_back (evp->time(), evp->size(), evp->buffer(), evp->event_type ())) {
 				written++;
 			}
 		}

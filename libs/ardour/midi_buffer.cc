@@ -115,7 +115,7 @@ MidiBuffer::read_from (const Buffer& src, samplecnt_t nframes, sampleoffset_t ds
 		const Evoral::Event<TimeType> ev(*i, false);
 
 		if (ev.time() >= 0 && ev.time() < nframes) {
-			push_back (ev.time(), ev.size(), ev.buffer());
+			push_back (ev.time(), ev.size(), ev.buffer(), ev.event_type ());
 		} else {
 			cerr << "\t!!!! MIDI event @ " <<  ev.time() << " skipped, not within range 0 .. " << nframes << endl;
 			PBD::stacktrace (cerr, 30);
@@ -146,7 +146,7 @@ MidiBuffer::merge_from (const Buffer& src, samplecnt_t /*nframes*/, sampleoffset
 bool
 MidiBuffer::push_back(const Evoral::Event<TimeType>& ev)
 {
-	return push_back (ev.time(), ev.size(), ev.buffer());
+	return push_back (ev.time(), ev.size(), ev.buffer(), ev.event_type ());
 }
 
 
@@ -158,9 +158,10 @@ MidiBuffer::push_back(const Evoral::Event<TimeType>& ev)
  * @return false if operation failed (not enough room)
  */
 bool
-MidiBuffer::push_back(TimeType time, size_t size, const uint8_t* data)
+MidiBuffer::push_back(TimeType time, size_t size, const uint8_t* data, Evoral::EventType event_type)
 {
 	const size_t stamp_size = sizeof(TimeType);
+	const size_t etype_size = sizeof(Evoral::EventType);
 
 #ifndef NDEBUG
 	if (DEBUG_ENABLED(DEBUG::MidiIO)) {
@@ -177,7 +178,7 @@ MidiBuffer::push_back(TimeType time, size_t size, const uint8_t* data)
 	}
 #endif
 
-	if (_size + stamp_size + size >= _capacity) {
+	if (_size + stamp_size + etype_size + size >= _capacity) {
 		return false;
 	}
 
@@ -187,9 +188,10 @@ MidiBuffer::push_back(TimeType time, size_t size, const uint8_t* data)
 
 	uint8_t* const write_loc = _data + _size;
 	*(reinterpret_cast<TimeType*>((uintptr_t)write_loc)) = time;
-	memcpy(write_loc + stamp_size, data, size);
+	*(reinterpret_cast<Evoral::EventType*>((uintptr_t)(write_loc + stamp_size))) = event_type;
+	memcpy(write_loc + stamp_size + etype_size, data, size);
 
-	_size += stamp_size + size;
+	_size += stamp_size + etype_size + size;
 	_silent = false;
 
 	return true;
@@ -205,7 +207,9 @@ MidiBuffer::insert_event(const Evoral::Event<TimeType>& ev)
 	}
 
 	const size_t stamp_size = sizeof(TimeType);
-	const size_t bytes_to_merge = stamp_size + ev.size();
+	const size_t etype_size = sizeof(Evoral::EventType);
+
+	const size_t bytes_to_merge = stamp_size + etype_size + ev.size();
 
 	if (_size + bytes_to_merge >= _capacity) {
 		cerr << string_compose ("MidiBuffer::push_back failed (buffer is full: size: %1 capacity %2 new bytes %3)", _size, _capacity, bytes_to_merge) << endl;
@@ -243,7 +247,8 @@ MidiBuffer::insert_event(const Evoral::Event<TimeType>& ev)
 
 	uint8_t* const write_loc = _data + insert_offset;
 	*(reinterpret_cast<TimeType*>((uintptr_t)write_loc)) = t;
-	memcpy(write_loc + stamp_size, ev.buffer(), ev.size());
+	*(reinterpret_cast<Evoral::EventType*>((uintptr_t)(write_loc + stamp_size))) = ev.event_type ();
+	memcpy(write_loc + stamp_size + etype_size, ev.buffer(), ev.size());
 
 	_size += bytes_to_merge;
 
@@ -265,21 +270,23 @@ MidiBuffer::write(TimeType time, Evoral::EventType type, uint32_t size, const ui
  * location, or the buffer will be corrupted and very nasty things will happen.
  */
 uint8_t*
-MidiBuffer::reserve(TimeType time, size_t size)
+MidiBuffer::reserve(TimeType time, Evoral::EventType event_type, size_t size)
 {
 	const size_t stamp_size = sizeof(TimeType);
-	if (_size + stamp_size + size >= _capacity) {
+	const size_t etype_size = sizeof(Evoral::EventType);
+	if (_size + stamp_size + etype_size + size >= _capacity) {
 		return 0;
 	}
 
-	// write timestamp
+	// write timestamp and event-type
 	uint8_t* write_loc = _data + _size;
 	*(reinterpret_cast<TimeType*>((uintptr_t)write_loc)) = time;
+	*(reinterpret_cast<Evoral::EventType*>((uintptr_t)(write_loc + stamp_size))) = event_type;
 
 	// move write_loc to begin of MIDI buffer data to write to
-	write_loc += stamp_size;
+	write_loc += stamp_size + etype_size;
 
-	_size += stamp_size + size;
+	_size += stamp_size + etype_size + size;
 	_silent = false;
 
 	return write_loc;
@@ -422,6 +429,8 @@ MidiBuffer::second_simultaneous_midi_byte_is_first (uint8_t a, uint8_t b)
 bool
 MidiBuffer::merge_in_place (const MidiBuffer &other)
 {
+	const size_t header_size = sizeof(TimeType) + sizeof(Evoral::EventType);
+
 	if (other.size() && size()) {
 		DEBUG_TRACE (DEBUG::MidiIO, string_compose ("merge in place, sizes %1/%2\n", size(), other.size()));
 	}
@@ -458,7 +467,7 @@ MidiBuffer::merge_in_place (const MidiBuffer &other)
 			if (merge_offset == -1) {
 				merge_offset = them.offset;
 			}
-			bytes_to_merge += sizeof (TimeType) + (*them).size();
+			bytes_to_merge += header_size + (*them).size();
 			++them;
 		}
 
@@ -505,11 +514,11 @@ MidiBuffer::merge_in_place (const MidiBuffer &other)
 			DEBUG_TRACE (DEBUG::MidiIO,
 				     string_compose ("simultaneous MIDI events discovered during merge, times %1/%2 status %3/%4\n",
 						     (*us).time(), (*them).time(),
-						     (int) *(_data + us.offset + sizeof (TimeType)),
-						     (int) *(other._data + them.offset + sizeof (TimeType))));
+						     (int) *(_data + us.offset + header_size),
+						     (int) *(other._data + them.offset + header_size)));
 
-			uint8_t our_midi_status_byte = *(_data + us.offset + sizeof (TimeType));
-			uint8_t their_midi_status_byte = *(other._data + them.offset + sizeof (TimeType));
+			uint8_t our_midi_status_byte = *(_data + us.offset + header_size);
+			uint8_t their_midi_status_byte = *(other._data + them.offset + header_size);
 			bool them_first = second_simultaneous_midi_byte_is_first (our_midi_status_byte, their_midi_status_byte);
 
 			DEBUG_TRACE (DEBUG::MidiIO, string_compose ("other message came first ? %1\n", them_first));
@@ -519,7 +528,7 @@ MidiBuffer::merge_in_place (const MidiBuffer &other)
 				++us;
 			}
 
-			bytes_to_merge = sizeof (TimeType) + (*them).size();
+			bytes_to_merge = header_size + (*them).size();
 
 			/* move our remaining events later in the buffer by
 			 * enough to fit the one message we're going to merge
