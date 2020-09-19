@@ -171,7 +171,7 @@ function factory () return function ()
 			-- parse message to C/C++ uint8_t* array (Validate message correctness. This
 			-- also returns C/C++ uint8_t* array for direct use with write_immediate_event.)
 			if parser:process_byte (syx:byte (b)) then
-				tx:write_immediate_event (parser:buffer_size (), parser:midi_buffer ())
+				tx:write_immediate_event (Evoral.EventType.MIDI_EVENT, parser:buffer_size (), parser:midi_buffer ())
 				-- Slow things down a bit to ensure that no messages as lost.
 				-- Physical MIDI is sent at 31.25kBaud.
 				-- Every message is sent as 10bit message on the wire,

@@ -27,11 +27,11 @@ function dsp_runmap (bufs, in_map, out_map, n_samples, offset)
 		local ba = C.ByteVector () -- construct a byte vector
 		ba:add ({0x90, 64, 127}) -- add some data to the vector
 		-- send a message at cycle-start
-		mb:push_back (offset, ba:size (), ba:to_array());
+		mb:push_back (offset, Evoral.EventType.MIDI_EVENT, ba:size (), ba:to_array());
 
 		ba:clear ()
 		ba:add ({0x80, 64, 127})
-		mb:push_back (n_samples - 1 - offset, ba:size (), ba:to_array());
+		mb:push_back (n_samples - 1 - offset, Evoral.EventType.MIDI_EVENT, ba:size (), ba:to_array(), 0);
 	end
 	ARDOUR.DSP.process_map (bufs, n_out, in_map, out_map, n_samples, offset)
 end
