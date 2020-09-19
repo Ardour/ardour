@@ -123,6 +123,9 @@ public:
 	inline const uint8_t* buffer()        const { return _buf; }
 	inline uint8_t*       buffer()              { return _buf; }
 
+	inline bool           is_midi ()      const { return _type == LIVE_MIDI_EVENT || _type == MIDI_EVENT; }
+	inline bool           is_live_midi () const { return _type == LIVE_MIDI_EVENT; }
+
 	inline void set_event_type(EventType t) { _type = t; }
 
 	inline void set_time(Time t) { _time = t; }

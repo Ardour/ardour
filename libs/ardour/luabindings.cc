@@ -620,6 +620,12 @@ LuaBindings::common (lua_State* L)
 		.addConst ("Curved", Evoral::ControlList::InterpolationStyle(Evoral::ControlList::Curved))
 		.endNamespace ()
 
+		.beginNamespace ("EventType")
+		.addConst ("NO_EVENT", Evoral::EventType(Evoral::NO_EVENT))
+		.addConst ("MIDI_EVENT", Evoral::EventType(Evoral::MIDI_EVENT))
+		.addConst ("LIVE_MIDI_EVENT", Evoral::EventType(Evoral::LIVE_MIDI_EVENT))
+		.endNamespace ()
+
 		.endNamespace (); // Evoral
 
 	luabridge::getGlobalNamespace (L)

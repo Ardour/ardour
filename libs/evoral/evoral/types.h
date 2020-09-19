@@ -51,7 +51,8 @@ typedef int32_t event_id_t;
  */
 enum EventType {
 	NO_EVENT,
-	MIDI_EVENT
+	MIDI_EVENT,
+	LIVE_MIDI_EVENT
 };
 
 /** Type of a parameter (opaque, mapped by application, e.g. gain) */
