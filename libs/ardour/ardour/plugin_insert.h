@@ -84,7 +84,7 @@ public:
 	bool reset_parameters_to_default ();
 	bool can_reset_all_parameters ();
 
-	bool write_immediate_event (size_t size, const uint8_t* buf);
+	bool write_immediate_event (Evoral::EventType event_type, size_t size, const uint8_t* buf);
 
 	void automation_run (samplepos_t, pframes_t, bool only_active = false);
 	bool find_next_event (double, double, Evoral::ControlEvent&, bool only_active = true) const;

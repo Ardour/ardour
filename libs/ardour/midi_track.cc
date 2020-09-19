@@ -589,24 +589,24 @@ MidiTrack::midi_panic()
 	DEBUG_TRACE (DEBUG::MidiIO, string_compose ("%1 delivers panic data\n", name()));
 	for (uint8_t channel = 0; channel <= 0xF; channel++) {
 		uint8_t ev[3] = { ((uint8_t) (MIDI_CMD_CONTROL | channel)), ((uint8_t) MIDI_CTL_SUSTAIN), 0 };
-		write_immediate_event(3, ev);
+		write_immediate_event (Evoral::MIDI_EVENT, 3, ev);
 		ev[1] = MIDI_CTL_ALL_NOTES_OFF;
-		write_immediate_event(3, ev);
+		write_immediate_event (Evoral::MIDI_EVENT, 3, ev);
 		ev[1] = MIDI_CTL_RESET_CONTROLLERS;
-		write_immediate_event(3, ev);
+		write_immediate_event (Evoral::MIDI_EVENT, 3, ev);
 	}
 }
 
 /** \return true on success, false on failure (no buffer space left)
  */
 bool
-MidiTrack::write_immediate_event(size_t size, const uint8_t* buf)
+MidiTrack::write_immediate_event(Evoral::EventType event_type, size_t size, const uint8_t* buf)
 {
 	if (!Evoral::midi_event_is_valid(buf, size)) {
 		cerr << "WARNING: Ignoring illegal immediate MIDI event" << endl;
 		return false;
 	}
-	return (_immediate_events.write (0, Evoral::MIDI_EVENT, size, buf) == size);
+	return (_immediate_events.write (0, event_type, size, buf) == size);
 }
 
 void
@@ -696,7 +696,7 @@ MidiTrack::MidiControl::actually_set_value (double val, PBD::Controllable::Group
 			size = 0;
 			assert(false);
 		}
-		_route->write_immediate_event(size,  ev);
+		_route->write_immediate_event(Evoral::MIDI_EVENT, size, ev);
 	}
 
 	AutomationControl::actually_set_value(val, group_override);
@@ -834,7 +834,7 @@ MidiTrack::act_on_mute ()
 
 				DEBUG_TRACE (DEBUG::MidiIO, string_compose ("%1 delivers mute message to channel %2\n", name(), channel+1));
 				uint8_t ev[3] = { ((uint8_t) (MIDI_CMD_CONTROL | channel)), MIDI_CTL_SUSTAIN, 0 };
-				write_immediate_event (3, ev);
+				write_immediate_event (Evoral::MIDI_EVENT, 3, ev);
 
 				/* Note we do not send MIDI_CTL_ALL_NOTES_OFF here, since this may
 				   silence notes that came from another non-muted track. */

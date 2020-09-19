@@ -173,7 +173,7 @@ public:
 	                             pframes_t nframes, samplecnt_t offset);
 
 
-	bool write_immediate_event (size_t size, const uint8_t* buf);
+	bool write_immediate_event (Evoral::EventType event_type, size_t size, const uint8_t* buf);
 
 	void realtime_handle_transport_stopped ();
 	void realtime_locate (bool);

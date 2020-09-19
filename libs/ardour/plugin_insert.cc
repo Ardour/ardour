@@ -789,11 +789,11 @@ PluginInsert::bypassable_changed ()
 }
 
 bool
-PluginInsert::write_immediate_event (size_t size, const uint8_t* buf)
+PluginInsert::write_immediate_event (Evoral::EventType event_type, size_t size, const uint8_t* buf)
 {
 	bool rv = true;
 	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
-		if (!(*i)->write_immediate_event (size, buf)) {
+		if (!(*i)->write_immediate_event (event_type, size, buf)) {
 			rv = false;
 		}
 	}

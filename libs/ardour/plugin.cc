@@ -386,12 +386,12 @@ Plugin::preset_by_uri (const string& uri)
 }
 
 bool
-Plugin::write_immediate_event (size_t size, const uint8_t* buf)
+Plugin::write_immediate_event (Evoral::EventType event_type, size_t size, const uint8_t* buf)
 {
 	if (!Evoral::midi_event_is_valid (buf, size)) {
 		return false;
 	}
-	return (_immediate_events.write (0, Evoral::MIDI_EVENT, size, buf) == size);
+	return (_immediate_events.write (0, event_type, size, buf) == size);
 }
 
 int

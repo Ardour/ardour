@@ -73,7 +73,7 @@ public:
 	int set_state (const XMLNode&, int version);
 
 	void midi_panic(void);
-	bool write_immediate_event(size_t size, const uint8_t* buf);
+	bool write_immediate_event (Evoral::EventType event_type, size_t size, const uint8_t* buf);
 
 	/** A control that will send "immediate" events to a MIDI track when twiddled */
 	struct MidiControl : public AutomationControl {
