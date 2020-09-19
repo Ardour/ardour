@@ -163,9 +163,9 @@ MidiPort::get_midi_buffer (pframes_t nframes)
 				ev[0] = 0x80 | (buf[0] & 0x0F);  /* note off */
 				ev[1] = buf[1];
 				ev[2] = 0x40;  /* default velocity */
-				_buffer->push_back (timestamp, Evoral::MIDI_EVENT, size, ev);
+				_buffer->push_back (timestamp, Evoral::LIVE_MIDI_EVENT, size, ev);
 			} else {
-				_buffer->push_back (timestamp, Evoral::MIDI_EVENT, size, buf);
+				_buffer->push_back (timestamp, Evoral::LIVE_MIDI_EVENT, size, buf);
 			}
 		}
 

@@ -696,7 +696,7 @@ MidiTrack::MidiControl::actually_set_value (double val, PBD::Controllable::Group
 			size = 0;
 			assert(false);
 		}
-		_route->write_immediate_event(Evoral::MIDI_EVENT, size, ev);
+		_route->write_immediate_event(Evoral::LIVE_MIDI_EVENT, size, ev);
 	}
 
 	AutomationControl::actually_set_value(val, group_override);

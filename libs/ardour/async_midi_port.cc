@@ -257,12 +257,14 @@ AsyncMIDIPort::write (const MIDI::byte * msg, size_t msglen, MIDI::timestamp_t t
 				vec.buf[0]->set_buffer (0, 0, true);
 			}
 			vec.buf[0]->set (msg, msglen, timestamp);
+			vec.buf[0]->set_event_type (Evoral::LIVE_MIDI_EVENT);
 		} else {
 			/* see comment in previous branch of if() statement */
 			if (!vec.buf[1]->owns_buffer()) {
 				vec.buf[1]->set_buffer (0, 0, true);
 			}
 			vec.buf[1]->set (msg, msglen, timestamp);
+			vec.buf[1]->set_event_type (Evoral::LIVE_MIDI_EVENT);
 		}
 
 		output_fifo.increment_write_idx (1);
@@ -297,7 +299,7 @@ AsyncMIDIPort::write (const MIDI::byte * msg, size_t msglen, MIDI::timestamp_t t
 				timestamp = _last_write_timestamp;
 			}
 
-			if (mb.push_back (timestamp, Evoral::MIDI_EVENT, msglen, msg)) {
+			if (mb.push_back (timestamp, Evoral::LIVE_MIDI_EVENT, msglen, msg)) {
 				ret = msglen;
 				_last_write_timestamp = timestamp;
 
