@@ -781,15 +781,15 @@ GenericPluginUI::midi_bank_patch_select (uint8_t chn, uint32_t bankpgm)
 		event[0] = (MIDI_CMD_CONTROL | chn);
 		event[1] = 0x00;
 		event[2] = bank >> 7;
-		insert->write_immediate_event (3, event);
+		insert->write_immediate_event (Evoral::MIDI_EVENT, 3, event);
 
 		event[1] = 0x20;
 		event[2] = bank & 127;
-		insert->write_immediate_event (3, event);
+		insert->write_immediate_event (Evoral::MIDI_EVENT, 3, event);
 
 		event[0] = (MIDI_CMD_PGM_CHANGE | chn);
 		event[1] = pgm;
-		insert->write_immediate_event (2, event);
+		insert->write_immediate_event (Evoral::MIDI_EVENT, 2, event);
 	}
 }
 
@@ -1354,9 +1354,9 @@ GenericPluginUI::note_on_event_handler (int note, int)
 	event[1] = note;
 	event[2] = _piano_velocity.get_value_as_int ();
 	if (mt) {
-		mt->write_immediate_event (3, event);
+		mt->write_immediate_event (Evoral::MIDI_EVENT, 3, event);
 	} else {
-		insert->write_immediate_event (3, event);
+		insert->write_immediate_event (Evoral::MIDI_EVENT, 3, event);
 	}
 }
 
@@ -1370,8 +1370,8 @@ GenericPluginUI::note_off_event_handler (int note)
 	event[1] = note;
 	event[2] = 0;
 	if (mt) {
-		mt->write_immediate_event (3, event);
+		mt->write_immediate_event (Evoral::MIDI_EVENT, 3, event);
 	} else {
-		insert->write_immediate_event (3, event);
+		insert->write_immediate_event (Evoral::MIDI_EVENT, 3, event);
 	}
 }

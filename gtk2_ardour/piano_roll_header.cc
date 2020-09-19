@@ -692,7 +692,7 @@ PianoRollHeader::send_note_on (uint8_t note)
 		_event[1] = note;
 		_event[2] = 100;
 
-		track->write_immediate_event (3, _event);
+		track->write_immediate_event (Evoral::MIDI_EVENT, 3, _event);
 	}
 }
 
@@ -707,7 +707,7 @@ PianoRollHeader::send_note_off (uint8_t note)
 		_event[1] = note;
 		_event[2] = 100;
 
-		track->write_immediate_event (3, _event);
+		track->write_immediate_event (Evoral::MIDI_EVENT, 3, _event);
 	}
 }
 

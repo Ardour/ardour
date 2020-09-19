@@ -395,11 +395,11 @@ PatchChangeWidget::select_bank (uint32_t bank)
 		event[0] = (MIDI_CMD_CONTROL | _channel);
 		event[1] = 0x00;
 		event[2] = bank >> 7;
-		pi->write_immediate_event (3, event);
+		pi->write_immediate_event (Evoral::MIDI_EVENT, 3, event);
 
 		event[1] = 0x20;
 		event[2] = bank & 127;
-		pi->write_immediate_event (3, event);
+		pi->write_immediate_event (Evoral::MIDI_EVENT, 3, event);
 	}
 
 	select_program (program (_channel));
@@ -424,7 +424,7 @@ PatchChangeWidget::select_program (uint8_t pgm)
 		uint8_t event[2];
 		event[0] = (MIDI_CMD_PGM_CHANGE | _channel);
 		event[1] = pgm;
-		pi->write_immediate_event (2, event);
+		pi->write_immediate_event (Evoral::MIDI_EVENT, 2, event);
 	}
 
 	audition ();
@@ -573,9 +573,9 @@ PatchChangeWidget::note_on_event_handler (int note, bool for_audition)
 	_audition_note_num = note;
 
 	if (boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (_route)) {
-		mt->write_immediate_event (3, event);
+		mt->write_immediate_event (Evoral::MIDI_EVENT, 3, event);
 	} else if (boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (_route->the_instrument())) {
-		pi->write_immediate_event (3, event);
+		pi->write_immediate_event (Evoral::MIDI_EVENT, 3, event);
 	}
 }
 
@@ -589,9 +589,9 @@ PatchChangeWidget::note_off_event_handler (int note)
 	_audition_note_on = false;
 
 	if (boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (_route)) {
-		mt->write_immediate_event (3, event);
+		mt->write_immediate_event (Evoral::MIDI_EVENT, 3, event);
 	} else if (boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (_route->the_instrument())) {
-		pi->write_immediate_event (3, event);
+		pi->write_immediate_event (Evoral::MIDI_EVENT, 3, event);
 	}
 }
 
