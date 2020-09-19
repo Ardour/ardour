@@ -123,7 +123,10 @@ AudioStreamView::create_region_view (boost::shared_ptr<Region> r, bool wait_for_
 	region_view->init (wait_for_waves);
 	region_view->set_amplitude_above_axis(_amplitude_above_axis);
 	region_view->set_height (child_height ());
-
+	const RouteTimeAxisView& view = trackview();
+	bool yn = false;
+	view.get_gui_property("show-spectrogram", yn);
+	region_view->set_show_spectrogram(yn);
 	/* if its the special single-sample length that we use for rec-regions, make it
 	   insensitive to events
 	*/
@@ -188,6 +191,17 @@ AudioStreamView::reload_waves ()
 		}
 		arv->delete_waves();
 		arv->create_waves();
+	}
+}
+void
+AudioStreamView::set_show_spectrogram (bool yn)
+{
+	for (RegionViewList::iterator i = region_views.begin(); i != region_views.end(); ++i) {
+		AudioRegionView* arv = dynamic_cast<AudioRegionView*> (*i);
+		if (!arv) {
+			continue;
+		}
+		arv->set_show_spectrogram(yn);
 	}
 }
 

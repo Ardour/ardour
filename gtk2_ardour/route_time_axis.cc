@@ -626,7 +626,16 @@ RouteTimeAxisView::build_display_menu ()
 
 	MenuList& items = display_menu->items();
 	display_menu->set_name ("ArdourContextMenu");
-
+	
+	if (is_audio_track()) {
+		items.push_back (CheckMenuElem (_("Show Spectrogram")));
+		Gtk::CheckMenuItem* i = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
+		bool click_sets_active = false;
+		if (get_gui_property("show-spectrogram", click_sets_active)) {
+			i->set_active (click_sets_active);
+		}
+		i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::set_show_spectrogram), !click_sets_active));
+	}
 	items.push_back (MenuElem (_("Color..."), sigc::mem_fun (*this, &RouteUI::choose_color)));
 
 	items.push_back (MenuElem (_("Comments..."), sigc::mem_fun (*this, &RouteUI::open_comment_editor)));
@@ -1009,6 +1018,16 @@ RouteTimeAxisView::set_height (uint32_t h, TrackHeightMode m)
 	if (height_changed && !no_redraw) {
 		/* only emit the signal if the height really changed */
 		request_redraw ();
+	}
+}
+
+void
+RouteTimeAxisView::set_show_spectrogram (bool yn)
+{	
+	AudioStreamView* asv = dynamic_cast<AudioStreamView*>(_view);
+	if (asv) {
+		asv->set_show_spectrogram (yn);
+		set_gui_property ("show-spectrogram", yn);
 	}
 }
 

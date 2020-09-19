@@ -1057,6 +1057,16 @@ AudioRegionView::set_samples_per_pixel (gdouble fpp)
 	reset_fade_shapes ();
 }
 
+void AudioRegionView::set_show_spectrogram (bool yn)
+{
+	uint32_t wcnt = waves.size();
+	if (wcnt > 0) {
+		for (uint32_t n = 0; n < wcnt; ++n) {
+			waves[n]->set_show_spectrogram (yn);
+		}
+	}
+}
+
 void
 AudioRegionView::set_amplitude_above_axis (gdouble a)
 {

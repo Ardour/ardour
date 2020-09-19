@@ -108,6 +108,7 @@ public:
 	void set_zero_color (Gtkmm2ext::Color);
 	void set_clip_color (Gtkmm2ext::Color);
 	void set_logscaled (bool);
+	void set_show_spectrogram (bool);
 
 	void set_gradient_depth (double);
 	double gradient_depth () const;
@@ -236,6 +237,13 @@ private:
 	static void draw_image (Cairo::RefPtr<Cairo::ImageSurface>&, ARDOUR::PeakData*, int n_peaks,
 	                        boost::shared_ptr<WaveViewDrawRequest>);
 	static void draw_absent_image (Cairo::RefPtr<Cairo::ImageSurface>&, ARDOUR::PeakData*, int);
+	
+	static float hz_to_mel (float);
+	static void make_mel_scale_table (uint16_t*, const ARDOUR::samplecnt_t, const uint32_t);
+	static void make_color_map (unsigned char*, int32_t);
+	static inline float fft_power_at_bin (const float*, const uint32_t, const float);
+	static void draw_spectrum (boost::shared_ptr<const ARDOUR::AudioRegion>,
+	                          Cairo::RefPtr<Cairo::ImageSurface>&, const WaveViewProperties&);
 
 	ARDOUR::samplecnt_t optimal_image_width_samples () const;
 

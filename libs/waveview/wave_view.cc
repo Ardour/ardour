@@ -19,6 +19,7 @@
  */
 
 #include <cmath>
+#include <fftw3.h>
 
 #include <boost/scoped_array.hpp>
 
@@ -458,6 +459,225 @@ WaveView::draw_absent_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData
 	context->set_source_rgba (1.0, 1.0, 0.0, 0.3);
 	context->mask (stripe, 0, 0);
 	context->fill ();
+}
+
+float
+WaveView::hz_to_mel (float hz)
+{
+	return 1127 * log (1 + hz / 700);
+}
+
+void
+WaveView::make_mel_scale_table (uint16_t *scale, const samplecnt_t sample_rate, const uint32_t fft_data_size)
+{
+	const uint32_t fft_bufsize = fft_data_size * 2;
+	const float max_mel = hz_to_mel(sample_rate / 2);
+	
+	for (uint32_t i = 0; i < fft_data_size; ++i) {
+		float mel = hz_to_mel (i * sample_rate / fft_bufsize);
+		scale[i] = std::min (fft_data_size - 1u, (uint32_t) floorf (mel * (fft_data_size) / max_mel));
+	}
+}
+
+void
+WaveView::make_color_map (unsigned char *map, int32_t fft_range_db)
+{
+	for (int32_t i = 0; i <= fft_range_db; ++i) {
+		int32_t level = fft_range_db - i;
+		int32_t tmp = floorf (level * (180. / fft_range_db));
+		float h = (270 + (tmp * tmp) / 180) % 360;
+		float v = (float)(level * level) / (fft_range_db * fft_range_db);
+		double r, g, b, a;
+		Gtkmm2ext::Color c = Gtkmm2ext::hsva_to_color(h, 0.9, v);
+		Gtkmm2ext::color_to_rgba(c, r, g, b, a);
+		map[i * 3] = r * 255;
+		map[i * 3 + 1] = g * 255;
+		map[i * 3 + 2] = b * 255;
+	}
+}
+
+float
+WaveView::fft_power_at_bin (const float *fft_power, const uint32_t b, const float norm)
+{
+	const float a = fft_power[b] * norm;
+	return a > 1e-12 ? 10.0 * fast_log10 (a) : -INFINITY;
+}
+
+void
+WaveView::draw_spectrum (boost::shared_ptr<const ARDOUR::AudioRegion> region,
+                       Cairo::RefPtr<Cairo::ImageSurface>& image, const WaveViewProperties& prop)
+{
+	const samplecnt_t n_samples = prop.get_length_samples();
+	const samplecnt_t sample_rate = region->session().sample_rate();
+	
+	const int32_t height = image->get_height();
+	const int32_t width = image->get_width();
+	const int32_t stride = image->get_stride();
+	const float fpp = ((n_samples) / (float) width);
+	
+	const int32_t fft_range_db = 120;
+	const samplecnt_t fft_bufsize = (height > 256) ? 1024 : (height <= 128 ? 256 : 512);
+	const uint32_t fft_data_size = fft_bufsize / 2;
+	
+	float *fft_data_in  = (float *)fftwf_malloc(sizeof(float) * fft_bufsize);
+	float *fft_data_out = (float *)fftwf_malloc(sizeof(float) * fft_bufsize);
+	float *fft_power    = (float *)fftwf_malloc(sizeof(float) * fft_data_size);
+	float *hann_window  = (float *)fftwf_malloc(sizeof(float) * fft_bufsize);
+	fftwf_plan fft_plan = fftwf_plan_r2r_1d (fft_bufsize, fft_data_in, fft_data_out, FFTW_R2HC, FFTW_MEASURE);
+	
+	double sum = 0.0;
+	for (samplecnt_t i = 0; i < fft_bufsize; ++i) {
+		hann_window[i] = 0.5f - (0.5f * (float) cos (2.0f * M_PI * (float)i / (float)(fft_bufsize)));
+		sum += hann_window[i];
+	}
+	const double isum = 2.0 / sum;
+	for (samplecnt_t i = 0; i < fft_bufsize; ++i) {
+		hann_window[i] *= isum;
+	}
+	
+	uint16_t y_scale_table[fft_data_size];
+	uint8_t color_map_rgb[(fft_range_db + 1) * 3];
+	
+	make_mel_scale_table (y_scale_table, sample_rate, fft_data_size);
+	make_color_map (color_map_rgb, fft_range_db);
+
+	assert(image->get_format () == Cairo::FORMAT_ARGB32);
+	unsigned char *bgra = image->get_data ();
+	Cairo::RefPtr<Cairo::Context> cr = Cairo::Context::create (image);
+	Gtkmm2ext::set_source_rgba (cr, rgba_to_color(0, 0, 0, 1.0));
+	cr->rectangle (0, 0, width, height);
+	cr->fill ();
+	
+	samplecnt_t step = std::max ((samplecnt_t)32, n_samples / width);
+	for (samplecnt_t pos = 0; pos < n_samples; pos += step) {
+		int32_t x0 = floorf (pos / fpp);
+		int32_t x1 = floorf ((pos + step) / fpp);
+		if (x0 >= width) { x0 = width - 1; }
+		if (x1 >= width) { x1 = width - 1; }
+		if (x0 == x1) { continue; }
+		samplecnt_t read_n = fft_bufsize;
+		samplecnt_t read_start = prop.get_sample_start () - region->start ()  + pos;
+		if (read_start >= region->start () + read_n / 2) {
+			read_start -= (read_n / 2);
+		}
+		
+		samplecnt_t n = region->read (fft_data_in, read_start, read_n, prop.channel);
+		if (n == 0) {
+			std::cerr << "region read zero samples\n";
+			break;
+		}
+		
+		samplecnt_t s;
+		for (s = 0; s < n; ++s) {
+			fft_data_in[s] = fft_data_in[s] * hann_window[s];
+		}
+		for (; s < fft_bufsize; ++s) {
+			fft_data_in[s] = 0.;
+		}
+		fftwf_execute (fft_plan);
+		
+		fft_power[0] = fft_data_out[0] * fft_data_out[0];
+#define FRe (fft_data_out[i])
+#define FIm (fft_data_out[fft_bufsize - i])
+		for (uint32_t i = 1; i < fft_data_size - 1; ++i) {
+			fft_power[i] = (FRe * FRe) + (FIm * FIm);
+		}
+#undef FRe
+#undef FIm
+		
+		for (uint32_t i = 0; i < fft_data_size - 1; ++i) {
+			float level = fft_power_at_bin (fft_power, i, i);
+			if (level < -fft_range_db) continue;
+			if (level > 0.0) level = 0.0;
+		
+			int32_t y0 = floorf (y_scale_table[i] * (float) height / fft_data_size);
+			int32_t y1 = floorf (y_scale_table[i + 1] * (float) height / fft_data_size);
+			if (y0 == y1) { continue; }
+			
+			uint32_t idx = ((uint32_t) floorf (-level)) * 3;
+			for (int32_t y = y0; y < y1 && y < height; ++y) {
+				int32_t yy = height - 1 - y;
+				unsigned char *p = bgra + (yy * stride);
+				for (int32_t x = x0; x < x1; ++x) {
+					p[x * 4] = color_map_rgb[idx + 2];
+					p[x * 4 + 1] = color_map_rgb[idx + 1];
+					p[x * 4 + 2] = color_map_rgb[idx];
+				}
+			}
+		}
+	}
+	
+	fftwf_destroy_plan (fft_plan);
+	fftwf_free(fft_data_in);
+	fftwf_free(fft_data_out);
+	fftwf_free(fft_power);
+	fftwf_free(hann_window);
+	
+	// y-Axis
+#define YPOS(FREQ) ((int32_t) floorf (y_scale_table[std::min ((int32_t)fft_data_size - 1, \
+					(int32_t) floorf ((FREQ) * fft_bufsize / sample_rate))] * (float) height / fft_data_size))
+
+#define YAXISLABEL(FREQ, TXT) do {              \
+	int32_t yy = height - 1 - YPOS(FREQ);       \
+	cr->set_source_rgba (0.9, 0.9, 0.9, 0.7);   \
+	cr->move_to (width / 2 + 16, yy);           \
+	cr->show_text (TXT);                        \
+	cr->set_source_rgba (0.9, 0.9, 0.9, 0.2);   \
+	cr->move_to (0, yy - 0.5);                  \
+	cr->line_to (width - 1, yy - 0.5);          \
+	} while(0)
+
+	
+	cr->set_line_width(1.0);
+	cr->select_font_face("sans", Cairo::FONT_SLANT_NORMAL, Cairo::FONT_WEIGHT_NORMAL);
+	cr->set_font_size(12);
+	
+	if (width >= 60) {
+		if (height >= 450) {
+			YAXISLABEL(100, "100");
+			YAXISLABEL(200, "200");
+			YAXISLABEL(400, "400");
+			YAXISLABEL(600, "600");
+			YAXISLABEL(800, "800");
+			YAXISLABEL(1000, "1k");
+			YAXISLABEL(1500, "1.5k");
+			YAXISLABEL(2000, "2k");
+			YAXISLABEL(2500, "2.5k");
+			YAXISLABEL(3000, "3k");
+			YAXISLABEL(4000, "4k");
+			YAXISLABEL(5000, "5k");
+			YAXISLABEL(6000, "6k");
+			YAXISLABEL(8000, "8k");
+			YAXISLABEL(10000, "10k");
+			YAXISLABEL(12000, "12k");
+			YAXISLABEL(15000, "15k");
+			YAXISLABEL(18000, "18k");
+		} else if (height >= 250) {
+			YAXISLABEL(100, "100");
+			YAXISLABEL(300, "300");
+			YAXISLABEL(500, "500");
+			YAXISLABEL(1000, "1k");
+			YAXISLABEL(2000, "2k");
+			YAXISLABEL(3000, "3k");
+			YAXISLABEL(5000, "5k");
+			YAXISLABEL(8000, "8k");
+			YAXISLABEL(10000, "10k");
+			YAXISLABEL(12000, "12k");
+			YAXISLABEL(15000, "15k");
+			YAXISLABEL(18000, "18k");
+		} else if (height >= 150) {
+			YAXISLABEL(200, "200");
+			YAXISLABEL(500, "500");
+			YAXISLABEL(1000, "1k");
+			YAXISLABEL(3000, "3k");
+			YAXISLABEL(8000, "8k");
+			YAXISLABEL(15000, "15k");
+		}
+	}
+#undef YPOS
+#undef YAXISLABEL
+
+	cr->stroke ();
 }
 
 struct ImageSet {
@@ -964,7 +1184,9 @@ WaveView::process_draw_request (boost::shared_ptr<WaveViewDrawRequest> req)
 	// http://tracker.ardour.org/view.php?id=6478
 	assert (cairo_image);
 
-	if (peaks_read > 0) {
+	if (req->image->props.show_spectrogram) {
+		draw_spectrum(region, cairo_image, props);
+	} else if (peaks_read > 0) {
 
 		/* region amplitude will have been used to generate the
 		 * peak values already, but not the visual-only
@@ -1216,6 +1438,17 @@ WaveView::set_logscaled (bool yn)
 	if (_props->logscaled != yn) {
 		begin_visual_change ();
 		_props->logscaled = yn;
+		end_visual_change ();
+	}
+}
+
+void
+WaveView::set_show_spectrogram (bool yn)
+{
+	if (_props->show_spectrogram != yn) {
+		begin_visual_change ();
+		_props->show_spectrogram = yn;
+		reset_cache_group ();
 		end_visual_change ();
 	}
 }

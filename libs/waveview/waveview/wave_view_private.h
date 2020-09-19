@@ -53,6 +53,7 @@ public: // member variables
 	Gtkmm2ext::Color      clip_color;
 	bool                  show_zero;
 	bool                  logscaled;
+	bool                  show_spectrogram;
 	WaveView::Shape       shape;
 	double                gradient_depth;
 	double                start_shift;
@@ -153,7 +154,8 @@ public: // methods
 		        outline_color == other.outline_color && zero_color == other.zero_color &&
 		        clip_color == other.clip_color && show_zero == other.show_zero &&
 		        logscaled == other.logscaled && shape == other.shape &&
-		        gradient_depth == other.gradient_depth);
+		        gradient_depth == other.gradient_depth &&
+		        show_spectrogram == other.show_spectrogram);
 		// region_start && start_shift??
 	}
 

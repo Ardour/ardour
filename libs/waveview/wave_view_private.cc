@@ -44,6 +44,7 @@ WaveViewProperties::WaveViewProperties (boost::shared_ptr<ARDOUR::AudioRegion> r
     , clip_color (0xff0000ff)
     , show_zero (false)
     , logscaled (WaveView::global_logscaled())
+    , show_spectrogram(false)
     , shape (WaveView::global_shape())
     , gradient_depth (WaveView::global_gradient_depth ())
     , start_shift (0.0) // currently unused
