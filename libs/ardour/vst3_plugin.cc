@@ -316,6 +316,9 @@ VST3PI::evoral_to_vst3 (Vst::Event& e, Evoral::Event<samplepos_t> const& ev, int
 				e.polyPressure.noteId   = -1;
 				return true;
 			case MIDI_CMD_CONTROL:
+				if (ev.is_live_midi ()/* live input -- no playback */) {
+					live_midi_cc (bus, channel, data1);
+				}
 				if (midi_controller (bus, channel, data1, id)) {
 					set_parameter_by_id (id, data2 / 127.f, ev.time ());
 				}
@@ -1632,6 +1635,16 @@ VST3PI::get_parameter (uint32_t p) const
 }
 
 bool
+VST3PI::live_midi_cc (int32_t bus, int16_t channel, Vst::CtrlNumber ctrl)
+{
+	FUnknownPtr<Vst::IMidiLearn> midiLearn (_controller);
+	if (!midiLearn) {
+		return false;
+	}
+	return kResultOk == midiLearn->onLiveMIDIControllerInput (bus, channel, ctrl);
+}
+
+bool
 VST3PI::midi_controller (int32_t bus, int16_t channel, Vst::CtrlNumber ctrl, Vst::ParamID &id)
 {
 	FUnknownPtr<Vst::IMidiMapping> midiMapping (_controller);
@@ -1653,7 +1666,7 @@ VST3PI::add_event (Evoral::Event<samplepos_t> const& ev, int32_t bus)
 {
 	Vst::Event e;
 	e.busIndex     = bus;
-	e.flags        = Vst::Event::kIsLive;
+	e.flags        = ev.is_live_midi () ? Vst::Event::kIsLive : 0;
 	e.sampleOffset = ev.time();
 	e.ppqPosition  = _context.projectTimeMusic;
 	if (evoral_to_vst3 (e, ev, bus)) {

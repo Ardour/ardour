@@ -39,7 +39,7 @@
 //#include "pluginterfaces/vst/ivstinterappaudio.h"
 #include "pluginterfaces/vst/ivstmessage.h"
 #include "pluginterfaces/vst/ivstmidicontrollers.h"
-//#include "pluginterfaces/vst/ivstmidilearn.h"
+#include "pluginterfaces/vst/ivstmidilearn.h"
 //#include "pluginterfaces/vst/ivstnoteexpression.h"
 #include "pluginterfaces/vst/ivstparameterchanges.h"
 //#include "pluginterfaces/vst/ivstphysicalui.h"

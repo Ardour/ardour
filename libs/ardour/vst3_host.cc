@@ -46,6 +46,7 @@ DEF_CLASS_IID (Vst::IEventList)
 DEF_CLASS_IID (Vst::IHostApplication)
 DEF_CLASS_IID (Vst::IMessage)
 DEF_CLASS_IID (Vst::IMidiMapping)
+DEF_CLASS_IID (Vst::IMidiLearn)
 DEF_CLASS_IID (Vst::IParameterChanges)
 DEF_CLASS_IID (Vst::IParamValueQueue)
 DEF_CLASS_IID (Vst::IPlugInterfaceSupport)
@@ -315,8 +316,8 @@ PlugInterfaceSupport::PlugInterfaceSupport ()
 	addPlugInterfaceSupported (INoteExpressionPhysicalUIMapping::iid);
 
 	//---VST 3.6.12--------------------------------
-	addPlugInterfaceSupported (IMidiLearn::iid);
 #endif
+	addPlugInterfaceSupported (IMidiLearn::iid);
 }
 
 tresult

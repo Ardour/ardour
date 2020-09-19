@@ -156,6 +156,7 @@ private:
 	void set_parameter_internal (Vst::ParamID id, float& value, int32 sample_off, bool normalized);
 
 	bool midi_controller (int32_t, int16_t, Vst::CtrlNumber, Vst::ParamID &id);
+	bool live_midi_cc (int32_t, int16_t, Vst::CtrlNumber);
 
 	boost::shared_ptr<ARDOUR::VST3PluginModule> _module;
 
