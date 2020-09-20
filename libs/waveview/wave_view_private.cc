@@ -163,6 +163,120 @@ WaveViewCacheGroup::clear_cache ()
 }
 
 /*-------------------------------------------------*/
+WaveViewFFT::WaveViewFFT()
+	: fft_bufsize(max_fft_bufsize)
+	, fft_data_size(max_fft_bufsize / 2)
+	, sample_rate(44100)
+{
+	fft_data_in  = (float *)fftwf_malloc(sizeof(float) * max_fft_bufsize);
+	fft_data_out = (float *)fftwf_malloc(sizeof(float) * max_fft_bufsize);
+	fft_power    = (float *)fftwf_malloc(sizeof(float) * max_fft_bufsize);
+	hann_window  = (float *)fftwf_malloc(sizeof(float) * max_fft_bufsize);
+	
+	init_fft();
+	make_color_map (color_map_rgb, fft_range_db);
+}
+
+WaveViewFFT::~WaveViewFFT()
+{
+	fftwf_destroy_plan (fft_plan);
+	fftwf_free(fft_data_in);
+	fftwf_free(fft_data_out);
+	fftwf_free(fft_power);
+	fftwf_free(hann_window);
+}
+
+void
+WaveViewFFT::reset_if(int32_t fft_bufsize, int32_t sample_rate)
+{
+	assert(fft_bufsize <= max_fft_bufsize);
+	
+	if (this->fft_bufsize != fft_bufsize || this->sample_rate != sample_rate) {
+		this->fft_bufsize = fft_bufsize;
+		this->sample_rate = sample_rate;
+		fft_data_size = fft_bufsize / 2;
+		
+		fftwf_destroy_plan (fft_plan);
+		init_fft();
+	}
+}
+
+void
+WaveViewFFT::run(const ARDOUR::samplecnt_t cnt)
+{
+	ARDOUR::samplecnt_t s;
+	for (s = 0; s < cnt; ++s) {
+		fft_data_in[s] = fft_data_in[s] * hann_window[s];
+	}
+	for (; s < fft_bufsize; ++s) {
+		fft_data_in[s] = 0.;
+	}
+	fftwf_execute (fft_plan);
+	
+	fft_power[0] = fft_data_out[0] * fft_data_out[0];
+#define FRe (fft_data_out[i])
+#define FIm (fft_data_out[fft_bufsize - i])
+	for (int32_t i = 1; i < fft_data_size - 1; ++i) {
+		fft_power[i] = (FRe * FRe) + (FIm * FIm);
+	}
+#undef FRe
+#undef FIm
+}
+
+void
+WaveViewFFT::init_fft()
+{
+	fft_plan = fftwf_plan_r2r_1d (fft_bufsize, fft_data_in, fft_data_out, FFTW_R2HC, FFTW_MEASURE);
+		
+	double sum = 0.0;
+	for (int32_t i = 0; i < fft_bufsize; ++i) {
+		hann_window[i] = 0.5f - (0.5f * (float) cos (2.0f * M_PI * (float)i / (float)(fft_bufsize)));
+		sum += hann_window[i];
+	}
+	const double isum = 2.0 / sum;
+	for (int32_t i = 0; i < fft_bufsize; ++i) {
+		hann_window[i] *= isum;
+	}
+		
+	make_mel_scale_table (y_scale_table, sample_rate, fft_data_size);
+}
+
+float
+WaveViewFFT::hz_to_mel (float hz)
+{
+	return 1127 * log (1 + hz / 700);
+}
+
+void
+WaveViewFFT::make_mel_scale_table (uint16_t *scale, const ARDOUR::samplecnt_t sample_rate, const uint32_t fft_data_size)
+{
+	const uint32_t fft_bufsize = fft_data_size * 2;
+	const float max_mel = hz_to_mel(sample_rate / 2);
+	
+	for (uint32_t i = 0; i < fft_data_size; ++i) {
+		float mel = hz_to_mel (i * sample_rate / fft_bufsize);
+		scale[i] = std::min (fft_data_size - 1u, (uint32_t) floorf (mel * (fft_data_size) / max_mel));
+	}
+}
+
+void
+WaveViewFFT::make_color_map (unsigned char *map, int32_t fft_range_db)
+{
+	for (int32_t i = 0; i <= fft_range_db; ++i) {
+		int32_t level = fft_range_db - i;
+		int32_t tmp = floorf (level * (180. / fft_range_db));
+		float h = (270 + (tmp * tmp) / 180) % 360;
+		float v = (float)(level * level) / (fft_range_db * fft_range_db);
+		double r, g, b, a;
+		Gtkmm2ext::Color c = Gtkmm2ext::hsva_to_color(h, 0.9, v);
+		Gtkmm2ext::color_to_rgba(c, r, g, b, a);
+		map[i * 3] = r * 255;
+		map[i * 3 + 1] = g * 255;
+		map[i * 3 + 2] = b * 255;
+	}
+}
+
+/*-------------------------------------------------*/
 
 WaveViewCache::WaveViewCache ()
 	: image_cache_size (0)

@@ -20,6 +20,7 @@
 #define _WAVEVIEW_WAVE_VIEW_PRIVATE_H_
 
 #include <deque>
+#include <fftw3.h>
 
 #include "waveview/wave_view.h"
 
@@ -198,6 +199,48 @@ public: // methods
 	}
 };
 
+struct WaveViewFFT
+{
+public:
+	WaveViewFFT ();
+	~WaveViewFFT ();
+    
+public:
+	enum {
+		max_fft_bufsize = 1024,
+		max_fft_data_size = max_fft_bufsize / 2,
+		fft_range_db = 120,
+	};
+    
+	int32_t fft_bufsize;
+	int32_t fft_data_size;
+	int32_t sample_rate;
+	float *fft_data_in;
+	float *fft_data_out;
+	float *fft_power;
+	float *hann_window;
+	fftwf_plan fft_plan;
+	mutable Glib::Threads::Mutex mutex;
+    
+	uint16_t y_scale_table[max_fft_data_size];
+	uint8_t color_map_rgb[(fft_range_db + 1) * 3];
+    
+public:
+	void reset_if(int32_t, int32_t);
+	void run(const ARDOUR::samplecnt_t);
+	
+	inline float fft_power_at_bin (const uint32_t b, const float norm) {
+		const float a = fft_power[b] * norm;
+		return a > 1e-12 ? 10.0 * fast_log10 (a) : -INFINITY;
+	}
+	
+private:
+	void init_fft();
+	static void make_color_map (unsigned char*, int32_t);
+	static float hz_to_mel (float);
+	static void make_mel_scale_table (uint16_t*, const ARDOUR::samplecnt_t, const uint32_t);
+};
+
 struct WaveViewDrawRequest
 {
 public:
@@ -209,6 +252,7 @@ public:
 	bool finished() { return image->finished(); }
 
 	boost::shared_ptr<WaveViewImage> image;
+	boost::shared_ptr<WaveViewFFT> fft;
 
 	bool is_valid () {
 		return (image && image->is_valid());

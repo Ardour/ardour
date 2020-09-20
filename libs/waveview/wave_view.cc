@@ -83,6 +83,7 @@ WaveView::WaveView (Canvas* c, boost::shared_ptr<ARDOUR::AudioRegion> region)
 	: Item (c)
 	, _region (region)
 	, _props (new WaveViewProperties (region))
+	, _fft (new WaveViewFFT ())
 	, _shape_independent (false)
 	, _logscaled_independent (false)
 	, _gradient_depth_independent (false)
@@ -96,6 +97,7 @@ WaveView::WaveView (Item* parent, boost::shared_ptr<ARDOUR::AudioRegion> region)
 	: Item (parent)
 	, _region (region)
 	, _props (new WaveViewProperties (region))
+	, _fft (new WaveViewFFT ())
 	, _shape_independent (false)
 	, _logscaled_independent (false)
 	, _gradient_depth_independent (false)
@@ -240,6 +242,7 @@ WaveView::create_draw_request (WaveViewProperties const& props) const
 	boost::shared_ptr<WaveViewDrawRequest> request (new WaveViewDrawRequest);
 
 	request->image = boost::shared_ptr<WaveViewImage> (new WaveViewImage (_region, props));
+	request->fft = _fft;
 	return request;
 }
 
@@ -461,51 +464,9 @@ WaveView::draw_absent_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData
 	context->fill ();
 }
 
-float
-WaveView::hz_to_mel (float hz)
-{
-	return 1127 * log (1 + hz / 700);
-}
-
-void
-WaveView::make_mel_scale_table (uint16_t *scale, const samplecnt_t sample_rate, const uint32_t fft_data_size)
-{
-	const uint32_t fft_bufsize = fft_data_size * 2;
-	const float max_mel = hz_to_mel(sample_rate / 2);
-	
-	for (uint32_t i = 0; i < fft_data_size; ++i) {
-		float mel = hz_to_mel (i * sample_rate / fft_bufsize);
-		scale[i] = std::min (fft_data_size - 1u, (uint32_t) floorf (mel * (fft_data_size) / max_mel));
-	}
-}
-
-void
-WaveView::make_color_map (unsigned char *map, int32_t fft_range_db)
-{
-	for (int32_t i = 0; i <= fft_range_db; ++i) {
-		int32_t level = fft_range_db - i;
-		int32_t tmp = floorf (level * (180. / fft_range_db));
-		float h = (270 + (tmp * tmp) / 180) % 360;
-		float v = (float)(level * level) / (fft_range_db * fft_range_db);
-		double r, g, b, a;
-		Gtkmm2ext::Color c = Gtkmm2ext::hsva_to_color(h, 0.9, v);
-		Gtkmm2ext::color_to_rgba(c, r, g, b, a);
-		map[i * 3] = r * 255;
-		map[i * 3 + 1] = g * 255;
-		map[i * 3 + 2] = b * 255;
-	}
-}
-
-float
-WaveView::fft_power_at_bin (const float *fft_power, const uint32_t b, const float norm)
-{
-	const float a = fft_power[b] * norm;
-	return a > 1e-12 ? 10.0 * fast_log10 (a) : -INFINITY;
-}
-
 void
 WaveView::draw_spectrum (boost::shared_ptr<const ARDOUR::AudioRegion> region,
-                       Cairo::RefPtr<Cairo::ImageSurface>& image, const WaveViewProperties& prop)
+                       Cairo::RefPtr<Cairo::ImageSurface>& image, const WaveViewProperties& prop, WaveViewFFT* fft)
 {
 	const samplecnt_t n_samples = prop.get_length_samples();
 	const samplecnt_t sample_rate = region->session().sample_rate();
@@ -515,31 +476,12 @@ WaveView::draw_spectrum (boost::shared_ptr<const ARDOUR::AudioRegion> region,
 	const int32_t stride = image->get_stride();
 	const float fpp = ((n_samples) / (float) width);
 	
-	const int32_t fft_range_db = 120;
-	const samplecnt_t fft_bufsize = (height > 256) ? 1024 : (height <= 128 ? 256 : 512);
+	const int32_t fft_range_db = WaveViewFFT::fft_range_db;
+	const samplecnt_t fft_bufsize = (height > 256) ? WaveViewFFT::max_fft_bufsize : \
+										(height <= 128 ? WaveViewFFT::max_fft_bufsize >> 2 : WaveViewFFT::max_fft_bufsize >> 1);
 	const uint32_t fft_data_size = fft_bufsize / 2;
 	
-	float *fft_data_in  = (float *)fftwf_malloc(sizeof(float) * fft_bufsize);
-	float *fft_data_out = (float *)fftwf_malloc(sizeof(float) * fft_bufsize);
-	float *fft_power    = (float *)fftwf_malloc(sizeof(float) * fft_data_size);
-	float *hann_window  = (float *)fftwf_malloc(sizeof(float) * fft_bufsize);
-	fftwf_plan fft_plan = fftwf_plan_r2r_1d (fft_bufsize, fft_data_in, fft_data_out, FFTW_R2HC, FFTW_MEASURE);
-	
-	double sum = 0.0;
-	for (samplecnt_t i = 0; i < fft_bufsize; ++i) {
-		hann_window[i] = 0.5f - (0.5f * (float) cos (2.0f * M_PI * (float)i / (float)(fft_bufsize)));
-		sum += hann_window[i];
-	}
-	const double isum = 2.0 / sum;
-	for (samplecnt_t i = 0; i < fft_bufsize; ++i) {
-		hann_window[i] *= isum;
-	}
-	
-	uint16_t y_scale_table[fft_data_size];
-	uint8_t color_map_rgb[(fft_range_db + 1) * 3];
-	
-	make_mel_scale_table (y_scale_table, sample_rate, fft_data_size);
-	make_color_map (color_map_rgb, fft_range_db);
+	fft->reset_if(fft_bufsize, sample_rate);
 
 	assert(image->get_format () == Cairo::FORMAT_ARGB32);
 	unsigned char *bgra = image->get_data ();
@@ -561,37 +503,21 @@ WaveView::draw_spectrum (boost::shared_ptr<const ARDOUR::AudioRegion> region,
 			read_start -= (read_n / 2);
 		}
 		
-		samplecnt_t n = region->read (fft_data_in, read_start, read_n, prop.channel);
+		samplecnt_t n = region->read (fft->fft_data_in, read_start, read_n, prop.channel);
 		if (n == 0) {
 			std::cerr << "region read zero samples\n";
 			break;
 		}
 		
-		samplecnt_t s;
-		for (s = 0; s < n; ++s) {
-			fft_data_in[s] = fft_data_in[s] * hann_window[s];
-		}
-		for (; s < fft_bufsize; ++s) {
-			fft_data_in[s] = 0.;
-		}
-		fftwf_execute (fft_plan);
-		
-		fft_power[0] = fft_data_out[0] * fft_data_out[0];
-#define FRe (fft_data_out[i])
-#define FIm (fft_data_out[fft_bufsize - i])
-		for (uint32_t i = 1; i < fft_data_size - 1; ++i) {
-			fft_power[i] = (FRe * FRe) + (FIm * FIm);
-		}
-#undef FRe
-#undef FIm
+		fft->run(n);
 		
 		for (uint32_t i = 0; i < fft_data_size - 1; ++i) {
-			float level = fft_power_at_bin (fft_power, i, i);
+			float level = fft->fft_power_at_bin (i, i);
 			if (level < -fft_range_db) continue;
 			if (level > 0.0) level = 0.0;
 		
-			int32_t y0 = floorf (y_scale_table[i] * (float) height / fft_data_size);
-			int32_t y1 = floorf (y_scale_table[i + 1] * (float) height / fft_data_size);
+			int32_t y0 = floorf (fft->y_scale_table[i] * (float) height / fft_data_size);
+			int32_t y1 = floorf (fft->y_scale_table[i + 1] * (float) height / fft_data_size);
 			if (y0 == y1) { continue; }
 			
 			uint32_t idx = ((uint32_t) floorf (-level)) * 3;
@@ -599,22 +525,16 @@ WaveView::draw_spectrum (boost::shared_ptr<const ARDOUR::AudioRegion> region,
 				int32_t yy = height - 1 - y;
 				unsigned char *p = bgra + (yy * stride);
 				for (int32_t x = x0; x < x1; ++x) {
-					p[x * 4] = color_map_rgb[idx + 2];
-					p[x * 4 + 1] = color_map_rgb[idx + 1];
-					p[x * 4 + 2] = color_map_rgb[idx];
+					p[x * 4] = fft->color_map_rgb[idx + 2];
+					p[x * 4 + 1] = fft->color_map_rgb[idx + 1];
+					p[x * 4 + 2] = fft->color_map_rgb[idx];
 				}
 			}
 		}
 	}
 	
-	fftwf_destroy_plan (fft_plan);
-	fftwf_free(fft_data_in);
-	fftwf_free(fft_data_out);
-	fftwf_free(fft_power);
-	fftwf_free(hann_window);
-	
 	// y-Axis
-#define YPOS(FREQ) ((int32_t) floorf (y_scale_table[std::min ((int32_t)fft_data_size - 1, \
+#define YPOS(FREQ) ((int32_t) floorf (fft->y_scale_table[std::min ((int32_t)fft_data_size - 1, \
 					(int32_t) floorf ((FREQ) * fft_bufsize / sample_rate))] * (float) height / fft_data_size))
 
 #define YAXISLABEL(FREQ, TXT) do {              \
@@ -1185,7 +1105,11 @@ WaveView::process_draw_request (boost::shared_ptr<WaveViewDrawRequest> req)
 	assert (cairo_image);
 
 	if (req->image->props.show_spectrogram) {
-		draw_spectrum(region, cairo_image, props);
+		if (req->fft) {
+			req->fft->mutex.lock();
+			draw_spectrum(region, cairo_image, props, req->fft.get());
+			req->fft->mutex.unlock();
+		}
 	} else if (peaks_read > 0) {
 
 		/* region amplitude will have been used to generate the
