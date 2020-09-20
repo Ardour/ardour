@@ -23,16 +23,22 @@
   #define LIBTEMPORAL_DLL_IMPORT __declspec(dllimport)
   #define LIBTEMPORAL_DLL_EXPORT __declspec(dllexport)
   #define LIBTEMPORAL_DLL_LOCAL
+  #define LIBTEMPORAL_TEMPLATE_DLL_IMPORT __declspec(dllimport)
+  #define LIBTEMPORAL_TEMPLATE_DLL_EXPORT __declspec(dllexport)
 #else
   #define LIBTEMPORAL_DLL_IMPORT __attribute__ ((visibility ("default")))
   #define LIBTEMPORAL_DLL_EXPORT __attribute__ ((visibility ("default")))
   #define LIBTEMPORAL_DLL_LOCAL  __attribute__ ((visibility ("hidden")))
+  #define LIBTEMPORAL_TEMPLATE_DLL_IMPORT __attribute__ ((visibility ("default")))
+  #define LIBTEMPORAL_TEMPLATE_DLL_EXPORT __attribute__ ((visibility ("default")))
 #endif
 
 #ifdef LIBTEMPORAL_DLL_EXPORTS // defined if we are building the libtimecode DLL (instead of using it)
     #define LIBTEMPORAL_API LIBTEMPORAL_DLL_EXPORT
+    #define LIBTEMPORAL_TEMPLATE_API LIBTEMPORAL_TEMPLATE_DLL_EXPORT
 #else
     #define LIBTEMPORAL_API LIBTEMPORAL_DLL_IMPORT
+    #define LIBTEMPORAL_TEMPLATE_API LIBTEMPORAL_TEMPLATE_DLL_IMPORT
 #endif
 #define LIBTEMPORAL_LOCAL LIBTEMPORAL_DLL_LOCAL
 

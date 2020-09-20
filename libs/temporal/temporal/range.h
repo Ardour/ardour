@@ -25,16 +25,9 @@
 
 #include "temporal/visibility.h"
 #include "temporal/timeline.h"
+#include "temporal/types.h"
 
 namespace Temporal {
-
-enum /*LIBTEMPORAL_API*/ OverlapType {
-	OverlapNone,      // no overlap
-	OverlapInternal,  // the overlap is 100% within the object
-	OverlapStart,     // overlap covers start, but ends within
-	OverlapEnd,       // overlap begins within and covers end
-	OverlapExternal   // overlap extends to (at least) begin+end
-};
 
 /** end position arguments are inclusive */
 template<typename T>
@@ -137,6 +130,8 @@ template<typename T>
 	return coverage_inclusive_ends (sa, eaE.decrement(), sb, ebE.decrement());
 }
 
+template<>  /*LIBTEMPORAL_API*/ OverlapType coverage_exclusive_ends<int64_t> (int64_t sa, int64_t eaE, int64_t sb, int64_t ebE);
+
 
 class RangeList;
 
@@ -174,9 +169,9 @@ class LIBTEMPORAL_API Range {
 	 * looping). If the argument is earlier than or equal to the end of
 	 * this range, do nothing.
 	 */
-	timepos_t squish (timepos_t t) const {
+	timepos_t squish (timepos_t const & t) const {
 		if (t >= _end) {
-			t = _start + (_start.distance (t) % length());
+			return _start + (_start.distance (t) % length());
 		}
 		return t;
 	}

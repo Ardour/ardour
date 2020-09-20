@@ -19,10 +19,16 @@
 #ifndef __libpbd_position_types_h__
 #define __libpbd_position_types_h__
 
+#include <cstdlib>
 #include <stdint.h>
+
 #include <boost/rational.hpp>
 
+#include "pbd/integer_division.h"
+
 namespace Temporal {
+
+extern void init ();
 
 /* Any position measured in audio samples.
    Assumed to be non-negative but not enforced.
@@ -52,7 +58,45 @@ static const samplecnt_t max_samplecnt = INT64_MAX;
 
 static const int32_t ticks_per_beat = 1920;
 
-typedef boost::rational<int64_t> ratio_t;
+template<class T>
+class _ratio_t {
+  public:
+	/* do not allow negative values, this is just a ratio */
+
+	_ratio_t (T n, T d) : _numerator (abs (n)), _denominator (abs(d)) { assert (_denominator != 0); }
+	_ratio_t (T n) : _numerator (abs (n)), _denominator (1) {}
+
+	T numerator() const { return _numerator; }
+	T denominator() const { return _denominator; }
+
+	bool is_unity() const { return _numerator == _denominator; }
+	bool is_zero() const { return _numerator == 0; }
+
+	/* provide an easy way to multiply double by ratio_t. Note that this
+	   must be written as ratio_t * double, not the other way around. We
+	   are not trying to duplicate boost::rational here (which also doesn't
+	   allow this without a lot of syntactic fluff.
+	*/
+	double operator* (double v) const { return (v * (double) _numerator) / (double) _denominator; }
+
+	/* ditto for int64_t */
+
+	int64_t operator* (int64_t v) const { return int_div_round (v * _numerator, _denominator); }
+
+                                        private:
+	T _numerator;
+	T _denominator;
+};
+
+typedef _ratio_t<int64_t> ratio_t;
+
+enum OverlapType {
+	OverlapNone,      // no overlap
+	OverlapInternal,  // the overlap is 100% within the object
+	OverlapStart,     // overlap covers start, but ends within
+	OverlapEnd,       // overlap begins within and covers end
+	OverlapExternal   // overlap extends to (at least) begin+end
+};
 
 enum TimeDomain {
 	/* simple ordinals, since these are mutually exclusive */

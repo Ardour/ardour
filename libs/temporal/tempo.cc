@@ -87,7 +87,7 @@ Point::time() const
 	/*NOTREACHED*/
 	abort();
 	/*NOTREACHED*/
-	return timepos_t();
+	return timepos_t (AudioTime);
 }
 
 Tempo::Tempo (XMLNode const & node)
@@ -2473,7 +2473,7 @@ TempoMap::bbt_duration_at (superclock_t pos, const BBT_Time& bbt, int /* dir_ign
 timecnt_t
 TempoMap::full_duration_at (timepos_t const & pos, timecnt_t const & duration, TimeDomain return_domain) const
 {
-	timepos_t p;
+	timepos_t p (return_domain);
 	Beats b;
 	superclock_t s;
 

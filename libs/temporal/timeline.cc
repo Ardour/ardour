@@ -228,7 +228,7 @@ timepos_t::operator= (timecnt_t const & t)
 void
 timepos_t::set_superclock (superclock_t s)
 {
-	v = s;
+	v = build (false, s);
 }
 
 void
@@ -259,6 +259,38 @@ int64_t
 timepos_t::_ticks () const
 {
 	return _beats().to_ticks();
+}
+
+timepos_t
+timepos_t::operator/(ratio_t const & n) const
+{
+	/* this cannot make the value negative, since ratio_t is always positive */
+	/* note: v / (N/D) = (v * D) / N */
+
+	return timepos_t (is_beats(), int_div_round (val() * n.denominator(), n.numerator()));
+}
+
+timepos_t
+timepos_t::operator*(ratio_t const & n) const
+{
+	/* this cannot make the value negative, since ratio_t is always positive */
+	return timepos_t (is_beats(), int_div_round (val() * n.numerator(), n.denominator()));
+}
+
+timepos_t &
+timepos_t::operator/=(ratio_t const & n)
+{
+	/* this cannot make the value negative, since ratio_t is always positive */
+	v = build (flagged(), int_div_round (val() * n.numerator(), n.denominator()));
+	return *this;
+}
+
+timepos_t &
+timepos_t::operator*=(ratio_t const & n)
+{
+	/* this cannot make the value negative, since ratio_t is always positive */
+	v = build (flagged(), int_div_round (val() * n.denominator(), n.numerator()));
+	return *this;
 }
 
 timepos_t

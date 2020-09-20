@@ -27,6 +27,7 @@ I18N_PACKAGE = 'libtemporal'
 temporal_sources = [ 
     'debug.cc',
     'bbt_time.cc',
+    'enums.cc',
     'tempo.cc',
     'time.cc',
     'timeline.cc',
