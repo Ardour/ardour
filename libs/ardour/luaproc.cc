@@ -776,7 +776,7 @@ LuaProc::connect_and_run (BufferSet& bufs,
 							data[size] = di.value ();
 						}
 						if (size > 0 && size < 64) {
-							mbuf.push_back(tme - 1, size, data);
+							mbuf.push_back(tme - 1, Evoral::MIDI_EVENT, size, data);
 						}
 					}
 

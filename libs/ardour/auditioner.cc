@@ -254,11 +254,11 @@ Auditioner::roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_s
 		_queue_panic = false;
 		for (uint8_t chn = 0; chn < 0xf; ++chn) {
 			uint8_t buf[3] = { ((uint8_t) (MIDI_CMD_CONTROL | chn)), ((uint8_t) MIDI_CTL_SUSTAIN), 0 };
-			mbuf.push_back(0, 3, buf);
+			mbuf.push_back(0, Evoral::MIDI_EVENT, 3, buf);
 			buf[1] = MIDI_CTL_ALL_NOTES_OFF;
-			mbuf.push_back(0, 3, buf);
+			mbuf.push_back(0, Evoral::MIDI_EVENT, 3, buf);
 			buf[1] = MIDI_CTL_RESET_CONTROLLERS;
-			mbuf.push_back(0, 3, buf);
+			mbuf.push_back(0, Evoral::MIDI_EVENT, 3, buf);
 		}
 	}
 

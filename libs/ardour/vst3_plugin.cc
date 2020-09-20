@@ -374,25 +374,25 @@ VST3PI::vst3_to_midi_buffers (BufferSet& bufs, ChanMapping const& out_map)
 		switch (e.type) {
 			case Vst::Event::kDataEvent:
 				/* sysex */
-				mb.push_back (e.sampleOffset, e.data.size, (uint8_t const*)e.data.bytes);
+				mb.push_back (e.sampleOffset, Evoral::MIDI_EVENT, e.data.size, (uint8_t const*)e.data.bytes);
 				break;
 			case Vst::Event::kNoteOffEvent:
 				data[0] = 0x80 | e.noteOff.channel;
 				data[1] = e.noteOff.pitch;
 				data[2] = vst_to_midi (e.noteOff.velocity);
-				mb.push_back (e.sampleOffset, 3, data);
+				mb.push_back (e.sampleOffset, Evoral::MIDI_EVENT, 3, data);
 				break;
 			case Vst::Event::kNoteOnEvent:
 				data[0] = 0x90 | e.noteOn.channel;
 				data[1] = e.noteOn.pitch;
 				data[2] = vst_to_midi (e.noteOn.velocity);
-				mb.push_back (e.sampleOffset, 3, data);
+				mb.push_back (e.sampleOffset, Evoral::MIDI_EVENT, 3, data);
 				break;
 			case Vst::Event::kPolyPressureEvent:
 				data[0] = 0xa0 | e.noteOff.channel;
 				data[1] = e.polyPressure.pitch;
 				data[2] = vst_to_midi (e.polyPressure.pressure);
-				mb.push_back (e.sampleOffset, 3, data);
+				mb.push_back (e.sampleOffset, Evoral::MIDI_EVENT, 3, data);
 				break;
 			case Vst::Event::kLegacyMIDICCOutEvent:
 				switch (e.midiCCOut.controlNumber) {
@@ -422,7 +422,7 @@ VST3PI::vst3_to_midi_buffers (BufferSet& bufs, ChanMapping const& out_map)
 						data[2] = e.midiCCOut.value2;
 						break;
 				}
-				mb.push_back (e.sampleOffset, e.midiCCOut.controlNumber == Vst::kCtrlProgramChange ? 2 : 3, data);
+				mb.push_back (e.sampleOffset, Evoral::MIDI_EVENT, e.midiCCOut.controlNumber == Vst::kCtrlProgramChange ? 2 : 3, data);
 				break;
 
 			case Vst::Event::kNoteExpressionValueEvent:

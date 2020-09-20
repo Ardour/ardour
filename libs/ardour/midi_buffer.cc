@@ -115,7 +115,7 @@ MidiBuffer::read_from (const Buffer& src, samplecnt_t nframes, sampleoffset_t ds
 		const Evoral::Event<TimeType> ev(*i, false);
 
 		if (ev.time() >= 0 && ev.time() < nframes) {
-			push_back (ev.time(), ev.size(), ev.buffer(), ev.event_type ());
+			push_back (ev.time(), ev.event_type (), ev.size(), ev.buffer());
 		} else {
 			cerr << "\t!!!! MIDI event @ " <<  ev.time() << " skipped, not within range 0 .. " << nframes << endl;
 			PBD::stacktrace (cerr, 30);
@@ -146,7 +146,7 @@ MidiBuffer::merge_from (const Buffer& src, samplecnt_t /*nframes*/, sampleoffset
 bool
 MidiBuffer::push_back(const Evoral::Event<TimeType>& ev)
 {
-	return push_back (ev.time(), ev.size(), ev.buffer(), ev.event_type ());
+	return push_back (ev.time(), ev.event_type (), ev.size(), ev.buffer());
 }
 
 
@@ -158,7 +158,7 @@ MidiBuffer::push_back(const Evoral::Event<TimeType>& ev)
  * @return false if operation failed (not enough room)
  */
 bool
-MidiBuffer::push_back(TimeType time, size_t size, const uint8_t* data, Evoral::EventType event_type)
+MidiBuffer::push_back(TimeType time, Evoral::EventType event_type, size_t size, const uint8_t* data)
 {
 	const size_t stamp_size = sizeof(TimeType);
 	const size_t etype_size = sizeof(Evoral::EventType);

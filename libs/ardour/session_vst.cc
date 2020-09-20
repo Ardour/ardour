@@ -298,7 +298,7 @@ intptr_t Session::vst_callback (
 			for (int n = 0 ; n < v->numEvents; ++n) {
 				VstMidiEvent *vme = (VstMidiEvent*) (v->events[n]->dump);
 				if (vme->type == kVstMidiType) {
-					plug->midi_buffer()->push_back(vme->deltaSamples, 3, (uint8_t*)vme->midiData);
+					plug->midi_buffer()->push_back(vme->deltaSamples, Evoral::MIDI_EVENT, 3, (uint8_t*)vme->midiData);
 				}
 			}
 		}

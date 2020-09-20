@@ -615,7 +615,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 						/* This may fail if buf is larger than _gui_feed_buffer, but it's not really
 						   the end of the world if it does.
 						*/
-						_gui_feed_buffer.push_back ((*i).time() + start_sample, (*i).size(), (*i).buffer());
+						_gui_feed_buffer.push_back ((*i).time() + start_sample, Evoral::MIDI_EVENT, (*i).size(), (*i).buffer());
 					}
 				}
 

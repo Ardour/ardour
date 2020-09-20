@@ -106,17 +106,17 @@ MIDISceneChanger::rt_deliver (MidiBuffer& mbuf, samplepos_t when, boost::shared_
 	MIDIOutputActivity (); /* EMIT SIGNAL */
 
 	if ((cnt = msc->get_bank_msb_message (buf, sizeof (buf))) > 0) {
-		mbuf.push_back (when, cnt, buf);
+		mbuf.push_back (when, Evoral::MIDI_EVENT, cnt, buf);
 
 		if ((cnt = msc->get_bank_lsb_message (buf, sizeof (buf))) > 0) {
-			mbuf.push_back (when, cnt, buf);
+			mbuf.push_back (when, Evoral::MIDI_EVENT, cnt, buf);
 		}
 
 		last_delivered_bank = msc->bank();
 	}
 
 	if ((cnt = msc->get_program_message (buf, sizeof (buf))) > 0) {
-		mbuf.push_back (when, cnt, buf);
+		mbuf.push_back (when, Evoral::MIDI_EVENT, cnt, buf);
 
 		last_delivered_program = msc->program();
 	}

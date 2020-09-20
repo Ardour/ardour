@@ -301,7 +301,7 @@ BufferSet::forward_lv2_midi(LV2_Evbuf* buf, size_t i, bool purge_ardour_buffer)
 		uint8_t* data;
 		lv2_evbuf_get(i, &samples, &subframes, &type, &size, &data);
 		if (type == URIMap::instance().urids.midi_MidiEvent) {
-			mbuf.push_back(samples, size, data);
+			mbuf.push_back(samples, Evoral::MIDI_EVENT, size, data);
 		}
 	}
 }
@@ -331,7 +331,7 @@ BufferSet::flush_lv2_midi(bool input, size_t i)
 #endif
 		if (type == URIMap::instance().urids.midi_MidiEvent) {
 			// TODO: Make Ardour event buffers generic so plugins can communicate
-			mbuf.push_back(samples, size, data);
+			mbuf.push_back(samples, Evoral::MIDI_EVENT, size, data);
 		}
 	}
 }

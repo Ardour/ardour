@@ -337,7 +337,7 @@ RTMidiBuffer::read (MidiBuffer& dst, samplepos_t start, samplepos_t end, MidiSta
 
 		}
 
-		if (!dst.push_back (evtime, size, addr)) {
+		if (!dst.push_back (evtime, Evoral::MIDI_EVENT, size, addr)) {
 			DEBUG_TRACE (DEBUG::MidiRingBuffer, string_compose ("MidiRingBuffer: overflow in destination MIDI buffer, stopped after %1 events, dst size = %2\n", count, dst.size()));
 			break;
 		}
