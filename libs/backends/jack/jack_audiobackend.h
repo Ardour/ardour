@@ -191,7 +191,7 @@ class JACKAudioBackend : public AudioBackend {
 	return true;
     }
     bool can_measure_systemic_latency () const {
-	return false;
+	return true;
     }
 
     int      midi_event_get (pframes_t& timestamp, size_t& size, uint8_t const** buf, void* port_buffer, uint32_t event_index);
