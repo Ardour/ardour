@@ -159,7 +159,6 @@ ARDOUR::discover_vst3 (boost::shared_ptr<VST3PluginModule> m, std::vector<VST3In
 			FUnknownPtr<Vst::IAudioProcessor> processor;
 			if (!(processor = FUnknownPtr<Vst::IAudioProcessor> (component))) {
 				cerr << "VST3: No valid processor";
-				//controller->terminate();
 				component->terminate ();
 				continue;
 			}
@@ -177,11 +176,16 @@ ARDOUR::discover_vst3 (boost::shared_ptr<VST3PluginModule> m, std::vector<VST3In
 			nfo.n_midi_inputs  = count_channels (component, Vst::kEvent, Vst::kInput,  Vst::kMain);
 			nfo.n_midi_outputs = count_channels (component, Vst::kEvent, Vst::kOutput, Vst::kMain);
 
+			processor->setProcessing (false);
+			component->setActive (false);
+
 			//controller->terminate();
 			component->terminate ();
 			rv.push_back (nfo);
 		}
 	}
+
+	factory->release ();
 	return true;
 }
 

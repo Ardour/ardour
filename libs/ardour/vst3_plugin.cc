@@ -1099,7 +1099,6 @@ VST3PI::VST3PI (boost::shared_ptr<ARDOUR::VST3PluginModule> m, int index, std::s
 
 VST3PI::~VST3PI ()
 {
-	_processor = 0;
 	terminate ();
 }
 
@@ -1128,6 +1127,10 @@ VST3PI::unit_data ()
 void
 VST3PI::terminate ()
 {
+	deactivate ();
+
+	_processor = 0;
+
 	disconnect_components ();
 
 	bool controller_is_component = false;
@@ -1136,9 +1139,18 @@ VST3PI::terminate ()
 		_component->terminate ();
 	}
 
+	if (_controller) {
+		_controller->setComponentHandler (0);
+	}
+
 	if (_controller && controller_is_component == false) {
 		_controller->terminate ();
 	}
+
+	if (_factory) {
+		_factory->release ();
+	}
+
 	_component  = 0;
 	_controller = 0;
 }
