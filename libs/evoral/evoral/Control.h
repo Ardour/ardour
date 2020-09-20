@@ -29,12 +29,12 @@
 #include "temporal/timeline.h"
 
 #include "evoral/visibility.h"
+#include "evoral/ControlList.h"
 #include "evoral/Parameter.h"
 #include "evoral/ParameterDescriptor.h"
 
 namespace Evoral {
 
-class ControlList;
 class ParameterDescriptor;
 class Transport;
 class TypeMap;
@@ -48,14 +48,14 @@ class TypeMap;
 class LIBEVORAL_API Control
 {
 public:
-	Control(const Parameter&               parameter,
-	        const ParameterDescriptor&     desc,
-	        boost::shared_ptr<ControlList> list);
+	Control (const Parameter&               parameter,
+	         const ParameterDescriptor&     desc,
+	         boost::shared_ptr<ControlList> list);
 
 	virtual ~Control() {}
 
-	virtual void   set_double (double val, Temporal::timepos_t when = std::numeric_limits<Temporal::timepos_t>::min(), bool to_list=false);
-	virtual double get_double (bool from_list=false, Temporal::timepos_t frame = std::numeric_limits<Temporal::timepos_t>::min()) const;
+	virtual void   set_double (double val, Temporal::timepos_t const & when = Temporal::timepos_t (), bool to_list = false);
+	virtual double get_double (bool from_list = false, Temporal::timepos_t const & when = Temporal::timepos_t ()) const;
 
 	/** Get the latest user-set value
 	 * (which may not equal get_value() when automation is playing back).

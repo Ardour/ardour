@@ -33,7 +33,7 @@
 #define isnan_local std::isnan
 #endif
 
-#define GUARD_POINT_DELTA Temporal::timecnt_t::from_samples (64)
+#define GUARD_POINT_DELTA Temporal::timecnt_t (64)
 
 #include <cassert>
 #include <cmath>
@@ -54,6 +54,7 @@
 
 using namespace std;
 using namespace PBD;
+using namespace Temporal;
 
 namespace Evoral {
 
@@ -62,11 +63,11 @@ inline bool event_time_less_than (ControlEvent* a, ControlEvent* b)
 	return a->when < b->when;
 }
 
-ControlList::ControlList (const Parameter& id, const ParameterDescriptor& desc, Temporal::TimeDomain ts)
+ControlList::ControlList (const Parameter& id, const ParameterDescriptor& desc, TimeDomain ts)
 	: _parameter(id)
 	, _desc(desc)
 	, _interpolation (default_interpolation ())
-	, _time_style (ts)
+	, _time_domain (ts)
 	, _curve(0)
 {
 	_frozen = 0;
@@ -88,7 +89,7 @@ ControlList::ControlList (const ControlList& other)
 	: _parameter(other._parameter)
 	, _desc(other._desc)
 	, _interpolation(other._interpolation)
-	, _time_style (other._time_style)
+	, _time_domain (other._time_domain)
 	, _curve(0)
 {
 	_frozen = 0;
@@ -107,11 +108,11 @@ ControlList::ControlList (const ControlList& other)
 	copy_events (other);
 }
 
-ControlList::ControlList (const ControlList& other, Temporal::timepos_t const & start, Temporal::timepos_t const & end)
+ControlList::ControlList (const ControlList& other, timepos_t const & start, timepos_t const & end)
 	: _parameter(other._parameter)
 	, _desc(other._desc)
 	, _interpolation(other._interpolation)
-	, _time_style (other._time_style)
+	, _time_domain (other._time_domain)
 	, _curve(0)
 {
 	_frozen = 0;
@@ -150,7 +151,7 @@ ControlList::~ControlList()
 }
 
 boost::shared_ptr<ControlList>
-ControlList::create(const Parameter& id, const ParameterDescriptor& desc, Temporal::TimeDomain time_style)
+ControlList::create(const Parameter& id, const ParameterDescriptor& desc, TimeDomain time_style)
 {
 	return boost::shared_ptr<ControlList>(new ControlList(id, desc, time_style));
 }
@@ -256,14 +257,14 @@ ControlList::clear ()
 }
 
 void
-ControlList::x_scale (Temporal::ratio_t const & factor)
+ControlList::x_scale (ratio_t const & factor)
 {
 	Glib::Threads::RWLock::WriterLock lm (_lock);
 	_x_scale (factor);
 }
 
 bool
-ControlList::extend_to (Temporal::timepos_t const & end)
+ControlList::extend_to (timepos_t const & end)
 {
 	Glib::Threads::RWLock::WriterLock lm (_lock);
 
@@ -271,7 +272,7 @@ ControlList::extend_to (Temporal::timepos_t const & end)
 		return false;
 	}
 
-	Temporal::ratio_t factor (end.val(), _events.back()->when.val());
+	ratio_t factor (end.val(), _events.back()->when.val());
 	_x_scale (factor);
 
 	return true;
@@ -338,7 +339,7 @@ ControlList::list_merge (ControlList const& other, boost::function<double(double
 }
 
 void
-ControlList::_x_scale (Temporal::ratio_t const & factor)
+ControlList::_x_scale (ratio_t const & factor)
 {
 	for (iterator i = _events.begin(); i != _events.end(); ++i) {
 		(*i)->when = (*i)->when.operator* (factor);
@@ -427,7 +428,7 @@ ControlList::thin (double thinning_factor)
 }
 
 void
-ControlList::fast_simple_add (Temporal::timepos_t const & time, double value)
+ControlList::fast_simple_add (timepos_t const & time, double value)
 {
 	Glib::Threads::RWLock::WriterLock lm (_lock);
 	/* to be used only for loading pre-sorted data from saved state */
@@ -471,10 +472,10 @@ ControlList::unlocked_remove_duplicates ()
 }
 
 void
-ControlList::start_write_pass (Temporal::timepos_t const & time)
+ControlList::start_write_pass (timepos_t const & time)
 {
 	Glib::Threads::RWLock::WriterLock lm (_lock);
-	Temporal::timepos_t when = time;
+	timepos_t when = time;
 
 	DEBUG_TRACE (DEBUG::ControlList, string_compose ("%1: setup write pass @ %2\n", this, when));
 
@@ -494,7 +495,7 @@ ControlList::start_write_pass (Temporal::timepos_t const & time)
 	 */
 	if (_in_write_pass && !new_write_pass) {
 #if 1
-		add_guard_point (when, std::numeric_limits<Temporal::timecnt_t>::min()); // also sets most_recent_insert_iterator
+		add_guard_point (when, std::numeric_limits<timecnt_t>::min()); // also sets most_recent_insert_iterator
 #else
 		const ControlEvent cp (when, 0.0);
 		most_recent_insert_iterator = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
@@ -503,7 +504,7 @@ ControlList::start_write_pass (Temporal::timepos_t const & time)
 }
 
 void
-ControlList::write_pass_finished (Temporal::timepos_t const & /*when*/, double thinning_factor)
+ControlList::write_pass_finished (timepos_t const & /*when*/, double thinning_factor)
 {
 	DEBUG_TRACE (DEBUG::ControlList, "write pass finished\n");
 
@@ -516,7 +517,7 @@ ControlList::write_pass_finished (Temporal::timepos_t const & /*when*/, double t
 }
 
 void
-ControlList::set_in_write_pass (bool yn, bool add_point, Temporal::timepos_t when)
+ControlList::set_in_write_pass (bool yn, bool add_point, timepos_t when)
 {
 	DEBUG_TRACE (DEBUG::ControlList, string_compose ("set_in_write_pass: in-write: %1 @ %2 add point? %3\n", yn, when, add_point));
 
@@ -524,14 +525,14 @@ ControlList::set_in_write_pass (bool yn, bool add_point, Temporal::timepos_t whe
 
 	if (yn && add_point) {
 		Glib::Threads::RWLock::WriterLock lm (_lock);
-		add_guard_point (when, std::numeric_limits<Temporal::timecnt_t>::min());
+		add_guard_point (when, std::numeric_limits<timecnt_t>::min());
 	}
 }
 
 void
-ControlList::add_guard_point (Temporal::timepos_t const & time, Temporal::timecnt_t const & offset)
+ControlList::add_guard_point (timepos_t const & time, timecnt_t const & offset)
 {
-	Temporal::timepos_t when = time;
+	timepos_t when = time;
 
 	// caller needs to hold writer-lock
 
@@ -619,12 +620,12 @@ ControlList::in_write_pass () const
 }
 
 bool
-ControlList::editor_add (Temporal::timepos_t const & time, double value, bool with_guard)
+ControlList::editor_add (timepos_t const & time, double value, bool with_guard)
 {
 	/* this is for making changes from a graphical line editor */
 	{
 		Glib::Threads::RWLock::WriterLock lm (_lock);
-		Temporal::timepos_t when = time;
+		timepos_t when = time;
 
 		ControlEvent cp (when, 0.0f);
 		iterator i = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
@@ -643,7 +644,7 @@ ControlList::editor_add (Temporal::timepos_t const & time, double value, bool wi
 			 */
 
 			if (when >= 1) {
-				_events.insert (_events.end(), new ControlEvent (std::numeric_limits<Temporal::timepos_t>::min(), value));
+				_events.insert (_events.end(), new ControlEvent (std::numeric_limits<timepos_t>::min(), value));
 				DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 added value %2 at zero\n", this, value));
 			}
 		}
@@ -671,9 +672,9 @@ ControlList::editor_add (Temporal::timepos_t const & time, double value, bool wi
 }
 
 void
-ControlList::maybe_add_insert_guard (Temporal::timepos_t const & time)
+ControlList::maybe_add_insert_guard (timepos_t const & time)
 {
-	Temporal::timepos_t when = time;
+	timepos_t when = time;
 	// caller needs to hold writer-lock
 	if (most_recent_insert_iterator != _events.end()) {
 		if ((*most_recent_insert_iterator)->when.earlier (when) > GUARD_POINT_DELTA) {
@@ -693,9 +694,9 @@ ControlList::maybe_add_insert_guard (Temporal::timepos_t const & time)
 
 /** If we would just be adding to a straight line, move the previous point instead. */
 bool
-ControlList::maybe_insert_straight_line (Temporal::timepos_t const & time, double value)
+ControlList::maybe_insert_straight_line (timepos_t const & time, double value)
 {
-	Temporal::timepos_t when = time;
+	timepos_t when = time;
 
 	// caller needs to hold writer-lock
 	if (_events.empty()) {
@@ -724,9 +725,9 @@ ControlList::maybe_insert_straight_line (Temporal::timepos_t const & time, doubl
 }
 
 ControlList::iterator
-ControlList::erase_from_iterator_to (iterator iter, Temporal::timepos_t const & time)
+ControlList::erase_from_iterator_to (iterator iter, timepos_t const & time)
 {
-	Temporal::timepos_t when = time;
+	timepos_t when = time;
 
 	// caller needs to hold writer-lock
 	while (iter != _events.end()) {
@@ -747,9 +748,9 @@ ControlList::erase_from_iterator_to (iterator iter, Temporal::timepos_t const & 
  * control surface (GUI, MIDI, OSC etc)
  */
 void
-ControlList::add (Temporal::timepos_t const & time, double value, bool with_guards, bool with_initial)
+ControlList::add (timepos_t const & time, double value, bool with_guards, bool with_initial)
 {
-	Temporal::timepos_t when = time;
+	timepos_t when = time;
 
 	/* clamp new value to allowed range */
 	value = std::min ((double)_desc.upper, std::max ((double)_desc.lower, value));
@@ -770,11 +771,11 @@ ControlList::add (Temporal::timepos_t const & time, double value, bool with_guar
 			if (when >= 1) {
 				if (_desc.toggled) {
 					const double opp_val = ((value >= 0.5) ? 1.0 : 0.0);
-					_events.insert (_events.end(), new ControlEvent (std::numeric_limits<Temporal::timepos_t>::min(), opp_val));
+					_events.insert (_events.end(), new ControlEvent (std::numeric_limits<timepos_t>::min(), opp_val));
 					DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 added toggled value %2 at zero\n", this, opp_val));
 
 				} else {
-					_events.insert (_events.end(), new ControlEvent (std::numeric_limits<Temporal::timepos_t>::min(), value));
+					_events.insert (_events.end(), new ControlEvent (std::numeric_limits<timepos_t>::min(), value));
 					DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 added default value %2 at zero\n", this, _desc.normal));
 				}
 			}
@@ -785,7 +786,7 @@ ControlList::add (Temporal::timepos_t const & time, double value, bool with_guar
 			/* first write in a write pass: add guard point if requested */
 
 			if (with_guards) {
-				add_guard_point (insert_position, std::numeric_limits<Temporal::timecnt_t>::min());
+				add_guard_point (insert_position, std::numeric_limits<timecnt_t>::min());
 				did_write_during_pass = true;
 			} else {
 				/* not adding a guard, but we need to set iterator appropriately */
@@ -931,11 +932,11 @@ ControlList::erase (iterator start, iterator end)
 
 /** Erase the first event which matches the given time and value */
 void
-ControlList::erase (Temporal::timepos_t const & time, double value)
+ControlList::erase (timepos_t const & time, double value)
 {
 	{
 		Glib::Threads::RWLock::WriterLock lm (_lock);
-		Temporal::timepos_t when = time;
+		timepos_t when = time;
 
 		iterator i = begin ();
 		while (i != end() && ((*i)->when != when || (*i)->value != value)) {
@@ -955,7 +956,7 @@ ControlList::erase (Temporal::timepos_t const & time, double value)
 }
 
 void
-ControlList::erase_range (Temporal::timepos_t const & start, Temporal::timepos_t const & endt)
+ControlList::erase_range (timepos_t const & start, timepos_t const & endt)
 {
 	bool erased = false;
 
@@ -975,7 +976,7 @@ ControlList::erase_range (Temporal::timepos_t const & start, Temporal::timepos_t
 }
 
 bool
-ControlList::erase_range_internal (Temporal::timepos_t const & start, Temporal::timepos_t const & endt, EventList & events)
+ControlList::erase_range_internal (timepos_t const & start, timepos_t const & endt, EventList & events)
 {
 	bool erased = false;
 	iterator s;
@@ -993,7 +994,7 @@ ControlList::erase_range_internal (Temporal::timepos_t const & start, Temporal::
 	 *
 	 * eg. start = 1000000 samples == 12.34 beats
 	 *     cp.when = 100000 if ControlList uses AudioTime
-	 *     cp.when = 23074  if ControlList uses BeatTime (see Temporal::Beats::to_ticks())
+	 *     cp.when = 23074  if ControlList uses BeatTime (see Beats::to_ticks())
 	 *
 	 */
 
@@ -1014,7 +1015,7 @@ ControlList::erase_range_internal (Temporal::timepos_t const & start, Temporal::
 }
 
 void
-ControlList::slide (iterator before, Temporal::timecnt_t const & distance)
+ControlList::slide (iterator before, timecnt_t const & distance)
 {
 	{
 		Glib::Threads::RWLock::WriterLock lm (_lock);
@@ -1023,7 +1024,7 @@ ControlList::slide (iterator before, Temporal::timecnt_t const & distance)
 			return;
 		}
 
-		Temporal::timecnt_t wd = distance;
+		timecnt_t wd = distance;
 
 		while (before != _events.end()) {
 			(*before)->when += wd;
@@ -1036,9 +1037,9 @@ ControlList::slide (iterator before, Temporal::timecnt_t const & distance)
 }
 
 void
-ControlList::shift (Temporal::timepos_t const & time, Temporal::timecnt_t const & distance)
+ControlList::shift (timepos_t const & time, timecnt_t const & distance)
 {
-	Temporal::timepos_t pos = time;
+	timepos_t pos = time;
 
 	{
 		Glib::Threads::RWLock::WriterLock lm (_lock);
@@ -1095,7 +1096,7 @@ ControlList::shift (Temporal::timepos_t const & time, Temporal::timecnt_t const 
 }
 
 void
-ControlList::modify (iterator iter, Temporal::timepos_t const & time, double val)
+ControlList::modify (iterator iter, timepos_t const & time, double val)
 {
 	/* note: we assume higher level logic is in place to avoid this
 	 * reordering the time-order of control events in the list. ie. all
@@ -1107,7 +1108,7 @@ ControlList::modify (iterator iter, Temporal::timepos_t const & time, double val
 
 	{
 		Glib::Threads::RWLock::WriterLock lm (_lock);
-		Temporal::timepos_t when = time;
+		timepos_t when = time;
 
 		(*iter)->when = when;
 		(*iter)->value = val;
@@ -1129,11 +1130,11 @@ ControlList::modify (iterator iter, Temporal::timepos_t const & time, double val
 }
 
 std::pair<ControlList::iterator,ControlList::iterator>
-ControlList::control_points_adjacent (Temporal::timepos_t const & xtime)
+ControlList::control_points_adjacent (timepos_t const & xtime)
 {
 	Glib::Threads::RWLock::ReaderLock lm (_lock);
 	iterator i;
-	Temporal::timepos_t xval = xtime;
+	timepos_t xval = xtime;
 	ControlEvent cp (xval, 0.0f);
 	std::pair<iterator,iterator> ret;
 
@@ -1193,10 +1194,10 @@ ControlList::thaw ()
 void
 ControlList::mark_dirty () const
 {
-	_lookup_cache.left = std::numeric_limits<Temporal::timepos_t>::max();
+	_lookup_cache.left = std::numeric_limits<timepos_t>::max();
 	_lookup_cache.range.first = _events.end();
 	_lookup_cache.range.second = _events.end();
-	_search_cache.left = std::numeric_limits<Temporal::timepos_t>::max();
+	_search_cache.left = std::numeric_limits<timepos_t>::max();
 	_search_cache.first = _events.end();
 
 	if (_curve) {
@@ -1205,11 +1206,11 @@ ControlList::mark_dirty () const
 }
 
 void
-ControlList::truncate_end (Temporal::timepos_t const & last_time)
+ControlList::truncate_end (timepos_t const & last_time)
 {
 	{
 		Glib::Threads::RWLock::WriterLock lm (_lock);
-		Temporal::timepos_t last_coordinate = last_time;
+		timepos_t last_coordinate = last_time;
 		ControlEvent cp (last_coordinate, 0);
 		ControlList::reverse_iterator i;
 		double last_val;
@@ -1308,14 +1309,14 @@ ControlList::truncate_end (Temporal::timepos_t const & last_time)
 }
 
 void
-ControlList::truncate_start (Temporal::timecnt_t const & overall)
+ControlList::truncate_start (timecnt_t const & overall)
 {
 	{
 		Glib::Threads::RWLock::WriterLock lm (_lock);
 		iterator i;
 		double first_legal_value;
-		Temporal::timepos_t first_legal_coordinate;
-		Temporal::timepos_t overall_length (overall);
+		timepos_t first_legal_coordinate;
+		timepos_t overall_length (overall);
 
 		if (_events.empty()) {
 			/* nothing to truncate */
@@ -1329,7 +1330,7 @@ ControlList::truncate_start (Temporal::timecnt_t const & overall)
 
 			/* growing at front: duplicate first point. shift all others */
 
-			Temporal::timepos_t shift (_events.back()->when.distance (overall_length));
+			timepos_t shift (_events.back()->when.distance (overall_length));
 			uint32_t np;
 
 			for (np = 0, i = _events.begin(); i != _events.end(); ++i, ++np) {
@@ -1339,7 +1340,7 @@ ControlList::truncate_start (Temporal::timecnt_t const & overall)
 			if (np < 2) {
 
 				/* less than 2 points: add a new point */
-				_events.push_front (new ControlEvent (std::numeric_limits<Temporal::timepos_t>::min(), _events.front()->value));
+				_events.push_front (new ControlEvent (std::numeric_limits<timepos_t>::min(), _events.front()->value));
 
 			} else {
 
@@ -1356,7 +1357,7 @@ ControlList::truncate_start (Temporal::timecnt_t const & overall)
 					_events.front()->when = 0;
 				} else {
 					/* leave non-flat segment in place, add a new leading point. */
-					_events.push_front (new ControlEvent (std::numeric_limits<Temporal::timepos_t>::min(), _events.front()->value));
+					_events.push_front (new ControlEvent (std::numeric_limits<timepos_t>::min(), _events.front()->value));
 				}
 			}
 
@@ -1394,12 +1395,12 @@ ControlList::truncate_start (Temporal::timecnt_t const & overall)
 			*/
 
 			for (i = _events.begin(); i != _events.end(); ++i) {
-				(*i)->when.shift_earlier (Temporal::timecnt_t (first_legal_coordinate, Temporal::timepos_t()));
+				(*i)->when.shift_earlier (timecnt_t (first_legal_coordinate, timepos_t()));
 			}
 
 			/* add a new point for the interpolated new value */
 
-			_events.push_front (new ControlEvent (std::numeric_limits<Temporal::timepos_t>::min(), first_legal_value));
+			_events.push_front (new ControlEvent (std::numeric_limits<timepos_t>::min(), first_legal_value));
 		}
 
 		unlocked_invalidate_insert_iterator ();
@@ -1409,11 +1410,11 @@ ControlList::truncate_start (Temporal::timecnt_t const & overall)
 }
 
 double
-ControlList::unlocked_eval (Temporal::timepos_t const & xtime) const
+ControlList::unlocked_eval (timepos_t const & xtime) const
 {
 	pair<EventList::iterator,EventList::iterator> range;
 	int32_t npoints;
-	Temporal::timepos_t lpos, upos;
+	timepos_t lpos, upos;
 	double lval, uval;
 	double fraction;
 	double xx;
@@ -1479,9 +1480,9 @@ ControlList::unlocked_eval (Temporal::timepos_t const & xtime) const
 }
 
 double
-ControlList::multipoint_eval (Temporal::timepos_t const & xtime) const
+ControlList::multipoint_eval (timepos_t const & xtime) const
 {
-	Temporal::timepos_t upos, lpos;
+	timepos_t upos, lpos;
 	double uval, lval;
 	double fraction;
 
@@ -1502,7 +1503,7 @@ ControlList::multipoint_eval (Temporal::timepos_t const & xtime) const
 
 	/* Only do the range lookup if xtime is in a different range than last time
 	 * this was called (or if the lookup cache has been marked "dirty" (left<0) */
-	if ((_lookup_cache.left == std::numeric_limits<Temporal::timepos_t>::max()) ||
+	if ((_lookup_cache.left == std::numeric_limits<timepos_t>::max()) ||
 	    ((_lookup_cache.left > xtime) ||
 	     (_lookup_cache.range.first == _events.end()) ||
 	     ((*_lookup_cache.range.second)->when < xtime))) {
@@ -1559,21 +1560,21 @@ ControlList::multipoint_eval (Temporal::timepos_t const & xtime) const
 	}
 
 	/* x is a control point in the data */
-	_lookup_cache.left = std::numeric_limits<Temporal::timepos_t>::max();
+	_lookup_cache.left = std::numeric_limits<timepos_t>::max();
 	return (*range.first)->value;
 }
 
 void
-ControlList::build_search_cache_if_necessary (Temporal::timepos_t const & start_time) const
+ControlList::build_search_cache_if_necessary (timepos_t const & start_time) const
 {
-	Temporal::timepos_t start = start_time;
+	timepos_t start = start_time;
 
 	if (_events.empty()) {
 		/* Empty, nothing to cache, move to end. */
 		_search_cache.first = _events.end();
-		_search_cache.left = Temporal::timepos_t();
+		_search_cache.left = timepos_t();
 		return;
-	} else if ((_search_cache.left == std::numeric_limits<Temporal::timepos_t>::max()) || (_search_cache.left > start)) {
+	} else if ((_search_cache.left == std::numeric_limits<timepos_t>::max()) || (_search_cache.left > start)) {
 		/* Marked dirty (left == max), or we're too far forward, re-search. */
 
 		const ControlEvent start_point (start, 0);
@@ -1599,9 +1600,9 @@ ControlList::build_search_cache_if_necessary (Temporal::timepos_t const & start_
  * \return true if event is found (and \a x and \a y are valid).
  */
 bool
-ControlList::rt_safe_earliest_event_discrete_unlocked (Temporal::timepos_t const & start_time, Temporal::timepos_t & x, double& y, bool inclusive) const
+ControlList::rt_safe_earliest_event_discrete_unlocked (timepos_t const & start_time, timepos_t & x, double& y, bool inclusive) const
 {
-	Temporal::timepos_t start = start_time;
+	timepos_t start = start_time;
 
 	build_search_cache_if_necessary (start);
 
@@ -1644,7 +1645,7 @@ ControlList::rt_safe_earliest_event_discrete_unlocked (Temporal::timepos_t const
 bool
 ControlList::rt_safe_earliest_event_linear_unlocked (Temporal::timepos_t const & start_time, Temporal::timepos_t & x, double& y, bool inclusive, timepos_t const & min_x_delta) const
 {
-	Temporal::timepos_t start = start_time;
+	timepos_t start = start_time;
 
 	// cout << "earliest_event(start: " << start << ", x: " << x << ", y: " << y << ", inclusive: " << inclusive <<  ")" << endl;
 
@@ -1737,10 +1738,10 @@ ControlList::rt_safe_earliest_event_linear_unlocked (Temporal::timepos_t const &
 			y = floor(y);
 		}
 
-		if (_time_style == Temporal::AudioTime) {
-			x = first->when + Temporal::timepos_t::from_samples ((y - first->value) / (double)slope);
+		if (_time_domain == AudioTime) {
+			x = first->when + timepos_t (samplepos_t ((y - first->value) / (double)slope));
 		} else {
-			x = first->when + Temporal::timepos_t::from_ticks ((y - first->value) / (double)slope);
+			x = first->when + timepos_t::from_ticks ((y - first->value) / (double)slope);
 		}
 
 		while ((inclusive && x < start_time) || (x <= start_time && y != next->value)) {
@@ -1751,10 +1752,10 @@ ControlList::rt_safe_earliest_event_linear_unlocked (Temporal::timepos_t const &
 				y -= 1.0;
 			}
 
-			if (_time_style == Temporal::AudioTime) {
-				x = first->when + Temporal::timepos_t::from_samples ((y - first->value) / (double)slope);
+			if (_time_domain == AudioTime) {
+				x = first->when + timepos_t (samplepos_t ((y - first->value) / (double)slope));
 			} else {
-				x = first->when + Temporal::timepos_t::from_ticks ((y - first->value) / (double)slope);
+				x = first->when + timepos_t::from_ticks (int64_t ((y - first->value) / (double)slope));
 			}
 		}
 
@@ -1798,12 +1799,12 @@ ControlList::rt_safe_earliest_event_linear_unlocked (Temporal::timepos_t const &
  *  @param op 0 = cut, 1 = copy, 2 = clear.
  */
 boost::shared_ptr<ControlList>
-ControlList::cut_copy_clear (Temporal::timepos_t const & start_time, Temporal::timepos_t const & end_time, int op)
+ControlList::cut_copy_clear (timepos_t const & start_time, timepos_t const & end_time, int op)
 {
-	boost::shared_ptr<ControlList> nal = create (_parameter, _desc, _time_style);
+	boost::shared_ptr<ControlList> nal = create (_parameter, _desc, _time_domain);
 	iterator s, e;
-	Temporal::timepos_t start = start_time;
-	Temporal::timepos_t end = end_time;
+	timepos_t start = start_time;
+	timepos_t end = end_time;
 	ControlEvent cp (start, 0.0);
 
 	{
@@ -1849,7 +1850,7 @@ ControlList::cut_copy_clear (Temporal::timepos_t const & start_time, Temporal::t
 			}
 
 			if (op != 2) { // ! clear
-				nal->_events.push_back (new ControlEvent (std::numeric_limits<Temporal::timepos_t>::min(), val));
+				nal->_events.push_back (new ControlEvent (std::numeric_limits<timepos_t>::min(), val));
 			}
 		}
 
@@ -1860,7 +1861,7 @@ ControlList::cut_copy_clear (Temporal::timepos_t const & start_time, Temporal::t
 			*/
 
 			if (op != 2) {
-				nal->_events.push_back (new ControlEvent (Temporal::timepos_t (start.distance ((*x)->when)), (*x)->value));
+				nal->_events.push_back (new ControlEvent (timepos_t (start.distance ((*x)->when)), (*x)->value));
 			}
 
 			if (op != 1) {
@@ -1880,7 +1881,7 @@ ControlList::cut_copy_clear (Temporal::timepos_t const & start_time, Temporal::t
 			}
 
 			if (op != 2 && (e != _events.end() && end < (*e)->when)) { // cut/copy
-				nal->_events.push_back (new ControlEvent (Temporal::timepos_t (start.distance (start)), end_value));
+				nal->_events.push_back (new ControlEvent (timepos_t (start.distance (start)), end_value));
 			}
 		}
 
@@ -1897,26 +1898,26 @@ ControlList::cut_copy_clear (Temporal::timepos_t const & start_time, Temporal::t
 
 
 boost::shared_ptr<ControlList>
-ControlList::cut (Temporal::timepos_t const & start, Temporal::timepos_t const & end)
+ControlList::cut (timepos_t const & start, timepos_t const & end)
 {
 	return cut_copy_clear (start, end, 0);
 }
 
 boost::shared_ptr<ControlList>
-ControlList::copy (Temporal::timepos_t const & start, Temporal::timepos_t const & end)
+ControlList::copy (timepos_t const & start, timepos_t const & end)
 {
 	return cut_copy_clear (start, end, 1);
 }
 
 void
-ControlList::clear (Temporal::timepos_t const & start, Temporal::timepos_t const & end)
+ControlList::clear (timepos_t const & start, timepos_t const & end)
 {
 	cut_copy_clear (start, end, 2);
 }
 
 /** @param pos Position in model coordinates */
 bool
-ControlList::paste (const ControlList& alist, Temporal::timepos_t const &  time)
+ControlList::paste (const ControlList& alist, timepos_t const &  time)
 {
 	if (alist._events.empty()) {
 		return false;
@@ -1926,8 +1927,8 @@ ControlList::paste (const ControlList& alist, Temporal::timepos_t const &  time)
 		Glib::Threads::RWLock::WriterLock lm (_lock);
 		iterator where;
 		iterator prev;
-		Temporal::timepos_t end;
-		Temporal::timepos_t pos = time;
+		timepos_t end;
+		timepos_t pos = time;
 		ControlEvent cp (pos, 0.0);
 
 		where = upper_bound (_events.begin(), _events.end(), &cp, time_comparator);
@@ -1986,9 +1987,9 @@ ControlList::paste (const ControlList& alist, Temporal::timepos_t const &  time)
  *  @param return true if anything was changed, otherwise false (ie nothing needed changing)
  */
 bool
-ControlList::move_ranges (const list< Temporal::RangeMove> & movements)
+ControlList::move_ranges (const list< RangeMove> & movements)
 {
-	typedef list<Temporal::RangeMove> RangeMoveList;
+	typedef list<RangeMove> RangeMoveList;
 
 	{
 		Glib::Threads::RWLock::WriterLock lm (_lock);
@@ -2000,8 +2001,8 @@ ControlList::move_ranges (const list< Temporal::RangeMove> & movements)
 		bool things_erased = false;
 		for (RangeMoveList::const_iterator i = movements.begin (); i != movements.end (); ++i) {
 
-			Temporal::timepos_t start = i->from;
-			Temporal::timepos_t end = i->from + i->length;
+			timepos_t start = i->from;
+			timepos_t end = i->from + i->length;
 
 			if (erase_range_internal (start, end, _events)) {
 				things_erased = true;
@@ -2024,18 +2025,18 @@ ControlList::move_ranges (const list< Temporal::RangeMove> & movements)
 		for (RangeMoveList::const_iterator i = movements.begin (); i != movements.end (); ++i) {
 			iterator j = old_events.begin ();
 
-			const Temporal::timepos_t limit = i->from + i->length;
-			const Temporal::timecnt_t dx = i->from.distance (i->to);
+			const timepos_t limit = i->from + i->length;
+			const timecnt_t dx = i->from.distance (i->to);
 
 			while (j != old_events.end ()) {
 
-				Temporal::timepos_t jtime;
+				timepos_t jtime;
 
-				switch (_time_style) {
-				case Temporal::AudioTime:
+				switch (_time_domain) {
+				case AudioTime:
 					jtime = (*j)->when;
 					break;
-				case Temporal::BeatTime:
+				case BeatTime:
 					jtime = (*j)->when;
 					break;
 				default:
@@ -2050,11 +2051,11 @@ ControlList::move_ranges (const list< Temporal::RangeMove> & movements)
 				if (jtime >= i->from) {
 					ControlEvent* ev = new ControlEvent (**j);
 
-					switch (_time_style) {
-					case Temporal::AudioTime:
+					switch (_time_domain) {
+					case AudioTime:
 						ev->when += dx.samples();
 						break;
-					case Temporal::BeatTime:
+					case BeatTime:
 						ev->when += dx.beats().to_ticks();
 						break;
 					default:
@@ -2163,6 +2164,14 @@ ControlList::dump (ostream& o)
 	for (EventList::iterator x = _events.begin(); x != _events.end(); ++x) {
 		o << (*x)->value << " @ " << (*x)->when << endl;
 	}
+}
+
+void
+ControlList::set_time_domain (Temporal::TimeDomain td)
+{
+	/* can only do this on an emtpy list */
+	assert (_events.empty());
+	_time_domain = td;
 }
 
 } // namespace Evoral

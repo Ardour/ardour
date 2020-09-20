@@ -41,7 +41,7 @@ Control::Control(const Parameter&               parameter,
 /** Get the currently effective value (ie the one that corresponds to current output)
  */
 double
-Control::get_double (bool from_list, Temporal::timepos_t when) const
+Control::get_double (bool from_list, Temporal::timepos_t const & when) const
 {
 	if (from_list) {
 		return _list->eval (when);
@@ -52,7 +52,7 @@ Control::get_double (bool from_list, Temporal::timepos_t when) const
 
 
 void
-Control::set_double (double value, Temporal::timepos_t when, bool to_list)
+Control::set_double (double value, Temporal::timepos_t const & when, bool to_list)
 {
 	_user_value = value;
 

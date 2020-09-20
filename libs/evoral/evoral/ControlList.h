@@ -98,7 +98,8 @@ public:
 	ControlList (const ControlList&);
 	virtual ~ControlList();
 
-	Temporal::TimeDomain time_style() const { return _time_style; }
+	Temporal::TimeDomain time_domain() const { return _time_domain; }
+	void set_time_domain (Temporal::TimeDomain td);
 
 	virtual boost::shared_ptr<ControlList> create(const Parameter& id, const ParameterDescriptor& desc, Temporal::TimeDomain);
 
@@ -131,7 +132,7 @@ public:
 
 	Temporal::timecnt_t length() const {
 		Glib::Threads::RWLock::ReaderLock lm (_lock);
-		return _events.empty() ? std::numeric_limits<Temporal::timecnt_t>::min() : Temporal::timecnt_t (_events.back()->when, Temporal::timepos_t());
+		return _events.empty() ? std::numeric_limits<Temporal::timecnt_t>::min() : Temporal::timecnt_t (_events.back()->when);
 	}
 	bool empty() const { return _events.empty(); }
 
@@ -393,7 +394,7 @@ public:
 	int8_t                _frozen;
 	bool                  _changed_when_thawed;
 	bool                  _sort_pending;
-	Temporal::TimeDomain   _time_style;
+	Temporal::TimeDomain  _time_domain;
 
 	Curve* _curve;
 

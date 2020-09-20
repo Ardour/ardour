@@ -146,7 +146,7 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>&            
 		}
 
 		DEBUG_TRACE (DEBUG::Sequence, string_compose ("Iterator: control: %1\n", seq._type_map.to_symbol(i->first)));
-		Temporal::timepos_t xtime;
+		Temporal::timepos_t xtime (Temporal::AudioTime); /* domain may change */
 		double y;
 		bool ret;
 		if (_force_discrete || i->second->list()->interpolation() == ControlList::Discrete) {
@@ -359,8 +359,8 @@ Sequence<Time>::const_iterator::operator++()
 		     << int(ev.buffer()[0]) << int(ev.buffer()[1]) << int(ev.buffer()[2]) << endl;
 	}
 
-	Temporal::timepos_t x;
-	Temporal::timepos_t xtime;
+	Temporal::timepos_t x (Temporal::AudioTime);
+	Temporal::timepos_t xtime (Temporal::AudioTime);
 	double    y   = 0.0;
 	bool      ret = false;
 
