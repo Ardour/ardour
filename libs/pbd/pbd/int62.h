@@ -35,7 +35,7 @@
  */
 
 class alignas(16) int62_t {
-   private:
+  protected:
 	/* std::atomic<> takes care of memory barriers for us; the actual load and stores
 	   are atomic on architectures that we're likely to care about.
 	*/
