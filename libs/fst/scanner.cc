@@ -32,6 +32,7 @@
 #include "pbd/pbd.h"
 #include "pbd/transmitter.h"
 #include "pbd/receiver.h"
+#include "pbd/win_console.h"
 
 #ifdef __MINGW64__
 #define NO_OLDNAMES // no backwards compat _pid_t, conflict with w64 pthread/sched
@@ -94,6 +95,7 @@ class DummyReceiver : public Receiver {
 			std::cerr << prefix << str << std::endl;
 
 			if (chn == Transmitter::Fatal) {
+				console_madness_end ();
 				::exit (EXIT_FAILURE);
 			}
 		}
@@ -103,6 +105,8 @@ DummyReceiver dummy_receiver;
 
 int main (int argc, char **argv) {
 	char *dllpath = NULL;
+	console_madness_begin ();
+
 	if (argc == 3 && !strcmp("-f", argv[1])) {
 		dllpath = argv[2];
 		const size_t slen = strlen (dllpath);
@@ -118,6 +122,7 @@ int main (int argc, char **argv) {
 	}
 	else if (argc != 2) {
 		fprintf(stderr, "usage: %s [-f] <vst>\n", argv[0]);
+		console_madness_end ();
 		return EXIT_FAILURE;
 	} else {
 		dllpath = argv[1];
@@ -156,6 +161,8 @@ int main (int argc, char **argv) {
 	}
 
 	PBD::cleanup();
+
+	console_madness_end ();
 
 	if (!infos || infos->empty()) {
 		return EXIT_FAILURE;

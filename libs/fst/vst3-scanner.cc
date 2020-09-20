@@ -32,6 +32,7 @@
 #include "pbd/transmitter.h"
 #include "pbd/receiver.h"
 #include "pbd/pbd.h"
+#include "pbd/win_console.h"
 #include "pbd/xml++.h"
 
 #ifdef __MINGW64__
@@ -70,6 +71,7 @@ protected:
 		std::cout << prefix << str << std::endl;
 
 		if (chn == Transmitter::Fatal) {
+			console_madness_end ();
 			::exit (EXIT_FAILURE);
 		}
 	}
@@ -124,6 +126,8 @@ This tool ...\n\
 
 	printf ("Report bugs to <http://tracker.ardour.org/>\n"
 	        "Website: <http://ardour.org/>\n");
+
+	console_madness_end ();
 	::exit (EXIT_SUCCESS);
 }
 
@@ -145,12 +149,15 @@ main (int argc, char **argv)
 	};
 	/* clang-format on */
 
+	console_madness_begin ();
+
 	int c = 0;
 	while (EOF != (c = getopt_long (argc, argv, optstring, longopts, (int*)0))) {
 		switch (c) {
 			case 'V':
 				printf ("ardour-vst3-scanner version %s\n\n", VERSIONSTRING);
 				printf ("Copyright (C) GPL 2020 Robin Gareus <robin@gareus.org>\n");
+				console_madness_end ();
 				exit (EXIT_SUCCESS);
 				break;
 
@@ -168,6 +175,7 @@ main (int argc, char **argv)
 
 			default:
 				std::cerr << "Error: unrecognized option. See --help for usage information.\n";
+				console_madness_end ();
 				::exit (EXIT_FAILURE);
 				break;
 		}
@@ -175,6 +183,7 @@ main (int argc, char **argv)
 
 	if (optind >= argc) {
 		std::cerr << "Error: Missing parameter. See --help for usage information.\n";
+		console_madness_end ();
 		::exit (EXIT_FAILURE);
 	}
 
@@ -200,6 +209,8 @@ main (int argc, char **argv)
 	}
 
 	PBD::cleanup();
+
+	console_madness_end ();
 
 	if (err) {
 		return EXIT_FAILURE;
