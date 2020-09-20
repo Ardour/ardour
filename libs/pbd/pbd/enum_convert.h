@@ -20,6 +20,8 @@
 #ifndef PBD_ENUM_CONVERT_H
 #define PBD_ENUM_CONVERT_H
 
+#include <typeinfo>
+
 #include "pbd/enumwriter.h"
 #include "pbd/string_convert.h"
 
