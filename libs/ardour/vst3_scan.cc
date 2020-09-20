@@ -152,7 +152,6 @@ ARDOUR::discover_vst3 (boost::shared_ptr<VST3PluginModule> m, std::vector<VST3In
 
 			if (component->initialize (HostApplication::getHostContext ()) != kResultOk) {
 				cerr << "Failed to initialize VST3 component\n";
-				//component->terminate();
 				continue;
 			}
 
@@ -160,12 +159,14 @@ ARDOUR::discover_vst3 (boost::shared_ptr<VST3PluginModule> m, std::vector<VST3In
 			if (!(processor = FUnknownPtr<Vst::IAudioProcessor> (component))) {
 				cerr << "VST3: No valid processor";
 				component->terminate ();
+				component->release ();
 				continue;
 			}
 
 			if (processor->canProcessSampleSize (Vst::kSample32) != kResultTrue) {
 				cerr << "VST3: Cannot process 32bit float";
 				component->terminate ();
+				component->release ();
 				continue;
 			}
 
@@ -179,8 +180,8 @@ ARDOUR::discover_vst3 (boost::shared_ptr<VST3PluginModule> m, std::vector<VST3In
 			processor->setProcessing (false);
 			component->setActive (false);
 
-			//controller->terminate();
 			component->terminate ();
+			component->release ();
 			rv.push_back (nfo);
 		}
 	}

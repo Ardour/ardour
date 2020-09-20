@@ -1003,17 +1003,19 @@ VST3PI::VST3PI (boost::shared_ptr<ARDOUR::VST3PluginModule> m, int index, std::s
 
 	if (!_controller) {
 		_component->terminate ();
+		_component->release ();
 		throw failed_constructor ();
 	}
 
 	if (_controller->setComponentHandler (this) != kResultOk) {
 		_component->terminate ();
+		_component->release ();
 		throw failed_constructor ();
 	}
 
 	if (!(_processor = FUnknownPtr<Vst::IAudioProcessor> (_component))) {
-		//_controller->terminate();
 		_component->terminate ();
+		_component->release ();
 		throw failed_constructor ();
 	}
 
@@ -1031,6 +1033,7 @@ VST3PI::VST3PI (boost::shared_ptr<ARDOUR::VST3PluginModule> m, int index, std::s
 	if (!connect_components ()) {
 		//_controller->terminate(); // XXX ?
 		_component->terminate ();
+		_component->release ();
 		throw failed_constructor ();
 	}
 
@@ -1147,12 +1150,15 @@ VST3PI::terminate ()
 		_controller->terminate ();
 	}
 
+	_component->release ();
+
 	if (_factory) {
 		_factory->release ();
 	}
 
-	_component  = 0;
 	_controller = 0;
+	_component  = 0;
+	_factory  = 0;
 }
 
 bool
