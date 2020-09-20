@@ -268,10 +268,10 @@ intptr_t Session::vst_callback (
 				newflags |= kVstTransportCycleActive;
 				Location * looploc = session->locations ()->auto_loop_location ();
 				if (looploc) try {
-					timeinfo->cycleStartPos = session->tempo_map ().quarter_note_at_sample_rt (looploc->start ());
-					timeinfo->cycleEndPos = session->tempo_map ().quarter_note_at_sample_rt (looploc->end ());
-
-					newflags |= kVstCyclePosValid;
+#warning NUTEMPO FIXME needs new session tempo map
+						//timeinfo->cycleStartPos = session->tempo_map ().quarter_note_at_sample_rt (looploc->start ());
+						//timeinfo->cycleEndPos = session->tempo_map ().quarter_note_at_sample_rt (looploc->end ());
+						// newflags |= kVstCyclePosValid;
 				} catch (...) { }
 			}
 
@@ -519,7 +519,7 @@ intptr_t Session::vst_callback (
 		if (plug && plug->plugin_insert ()) {
 			boost::shared_ptr<AutomationControl> ac = plug->plugin_insert ()->automation_control (Evoral::Parameter (PluginAutomation, 0, index));
 			if (ac) {
-				ac->start_touch (ac->session().transport_sample());
+				ac->start_touch (timepos_t (ac->session().transport_sample()));
 			}
 		}
 		return 0;
@@ -530,7 +530,7 @@ intptr_t Session::vst_callback (
 		if (plug && plug->plugin_insert ()) {
 			boost::shared_ptr<AutomationControl> ac = plug->plugin_insert ()->automation_control (Evoral::Parameter (PluginAutomation, 0, index));
 			if (ac) {
-				ac->stop_touch (ac->session().transport_sample());
+				ac->stop_touch (timepos_t (ac->session().transport_sample()));
 			}
 		}
 		return 0;

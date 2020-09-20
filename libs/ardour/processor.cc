@@ -292,12 +292,12 @@ Processor::map_loop_range (samplepos_t& start, samplepos_t& end) const
 		return false;
 	}
 
-	const samplepos_t loop_end = _loop_location->end ();
+	const samplepos_t loop_end = _loop_location->end().samples ();
 	if (start < loop_end) {
 		return false;
 	}
 
-	const samplepos_t loop_start   = _loop_location->start ();
+	const samplepos_t loop_start   = _loop_location->start().samples ();
 	const samplecnt_t looplen      = loop_end - loop_start;
 	const sampleoffset_t start_off = (start - loop_start) % looplen;
 	const samplepos_t start_pos    = loop_start + start_off;

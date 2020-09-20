@@ -43,6 +43,8 @@
 #include "evoral/Control.h"
 #include "evoral/SMF.h"
 
+#include "temporal/tempo.h"
+
 #include "ardour/debug.h"
 #include "ardour/midi_channel_filter.h"
 #include "ardour/midi_model.h"
@@ -68,8 +70,6 @@ SMFSource::SMFSource (Session& s, const string& path, Source::Flag flags)
 	, Evoral::SMF()
 	, _open (false)
 	, _last_ev_time_samples(0)
-	, _smf_last_read_end (0)
-	, _smf_last_read_time (0)
 {
 	/* note that origin remains empty */
 
@@ -103,8 +103,6 @@ SMFSource::SMFSource (Session& s, const string& path)
 	, Evoral::SMF()
 	, _open (false)
 	, _last_ev_time_samples(0)
-	, _smf_last_read_end (0)
-	, _smf_last_read_time (0)
 {
 	/* note that origin remains empty */
 
@@ -134,8 +132,6 @@ SMFSource::SMFSource (Session& s, const XMLNode& node, bool must_exist)
 	, FileSource(s, node, must_exist)
 	, _open (false)
 	, _last_ev_time_samples(0)
-	, _smf_last_read_end (0)
-	, _smf_last_read_time (0)
 {
 	if (set_state(node, Stateful::loading_state_version)) {
 		throw failed_constructor ();
@@ -216,23 +212,22 @@ SMFSource::close ()
 
 extern PBD::Timing minsert;
 
-/** All stamps in audio samples */
-samplecnt_t
-SMFSource::read_unlocked (const Lock&                    lock,
+timecnt_t
+SMFSource::read_unlocked (const Lock&                     lock,
                           Evoral::EventSink<samplepos_t>& destination,
-                          samplepos_t const               source_start,
-                          samplepos_t                     start,
-                          samplecnt_t                     duration,
-                          Evoral::Range<samplepos_t>*     loop_range,
-                          MidiStateTracker*              tracker,
-                          MidiChannelFilter*             filter) const
+                          timepos_t const &               source_start,
+                          timecnt_t const &               start,
+                          timecnt_t const &               duration,
+                          Temporal::Range*                loop_range,
+                          MidiStateTracker*               tracker,
+                          MidiChannelFilter*              filter) const
 {
 	int      ret  = 0;
-	uint64_t time = 0; // in SMF ticks, 1 tick per _ppqn
+	timepos_t time; // in SMF ticks, 1 tick per _ppqn
 
 	if (writable() && !_open) {
 		/* nothing to read since nothing has ben written */
-		return duration;
+		return timecnt_t();
 	}
 
 	DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("SMF read_unlocked: start %1 duration %2\n", start, duration));
@@ -244,9 +239,9 @@ SMFSource::read_unlocked (const Lock&                    lock,
 
 	size_t scratch_size = 0; // keep track of scratch to minimize reallocs
 
-	BeatsSamplesConverter converter(_session.tempo_map(), source_start);
+	/* start of read in SMF ticks (which may differ from our own musical ticks */
+	const uint64_t start_ticks = llrint (start.beats().to_ticks() * (Temporal::Beats::PPQN / ppqn()));
 
-	const uint64_t start_ticks = converter.from(start).to_ticks();
 	DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("SMF read_unlocked: start in ticks %1\n", start_ticks));
 
 	if (_smf_last_read_end == 0 || start != _smf_last_read_end) {
@@ -258,7 +253,7 @@ SMFSource::read_unlocked (const Lock&                    lock,
 			ret = read_event(&ev_delta_t, &ev_size, &ev_buffer, &ignored);
 			if (ret == -1) { // EOF
 				_smf_last_read_end = start + duration;
-				return duration;
+				return timecnt_t();
 			}
 			time += ev_delta_t; // accumulate delta time
 		}
@@ -292,15 +287,17 @@ SMFSource::read_unlocked (const Lock&                    lock,
 		/* Note that we add on the source start time (in session samples) here so that ev_sample_time
 		   is in session samples.
 		*/
-		const samplepos_t ev_sample_time = converter.to(Temporal::Beats::ticks_at_rate(time, ppqn())) + source_start;
+#warning NUTEMPO FIXME needs session to use Temporal:;TempoMap
+		const samplepos_t ev_sample_time = 0; // = _session.tempo_map().sample_at (Temporal::Beats::ticks (time) + source_start.beats()); /* convert from Beats to samples */
+		timepos_t est (ev_sample_time);
 
 		if (loop_range) {
-			loop_range->squish (ev_sample_time);
+			est = loop_range->squish (est);
 		}
 
-		if (ev_sample_time < start + duration) {
+		if (est < start + duration) {
 			if (!filter || !filter->filter(ev_buffer, ev_size)) {
-				destination.write (ev_sample_time, Evoral::MIDI_EVENT, ev_size, ev_buffer);
+				destination.write (est.samples(), Evoral::MIDI_EVENT, ev_size, ev_buffer);
 				if (tracker) {
 					tracker->track(ev_buffer);
 				}
@@ -318,17 +315,20 @@ SMFSource::read_unlocked (const Lock&                    lock,
 	return duration;
 }
 
-samplecnt_t
-SMFSource::write_unlocked (const Lock&                 lock,
+timecnt_t
+SMFSource::write_unlocked (const Lock&                  lock,
                            MidiRingBuffer<samplepos_t>& source,
-                           samplepos_t                  position,
-                           samplecnt_t                  cnt)
+                           timepos_t const &            position,
+                           timecnt_t const &            cnt)
 {
+
 	if (!_writing) {
 		mark_streaming_write_started (lock);
 	}
 
 	samplepos_t        time;
+	const samplepos_t        pos_samples = position.samples();
+	const samplecnt_t        cnt_samples = cnt.samples();
 	Evoral::EventType type;
 	uint32_t          size;
 
@@ -348,8 +348,8 @@ SMFSource::write_unlocked (const Lock&                 lock,
 			break;
 		}
 
-		if ((cnt != max_samplecnt) &&
-		    (time > position + _capture_length + cnt)) {
+		if ((cnt != std::numeric_limits<timecnt_t>::max()) &&
+		    (time > pos_samples + _capture_length + cnt_samples)) {
 			/* The diskstream doesn't want us to write everything, and this
 			   event is past the end of this block, so we're done for now. */
 			break;
@@ -375,11 +375,11 @@ SMFSource::write_unlocked (const Lock&                 lock,
 		}
 
 		/* Convert event time from absolute to source relative. */
-		if (time < position) {
+		if (time < pos_samples) {
 			error << _("Event time is before MIDI source position") << endmsg;
 			break;
 		}
-		time -= position;
+		time -= pos_samples;
 
 		ev.set(buf, size, time);
 		ev.set_event_type(Evoral::MIDI_EVENT);
@@ -389,7 +389,7 @@ SMFSource::write_unlocked (const Lock&                 lock,
 			continue;
 		}
 
-		append_event_samples(lock, ev, position);
+		append_event_samples(lock, ev, pos_samples);
 	}
 
 	Evoral::SMF::flush ();
@@ -475,8 +475,10 @@ SMFSource::append_event_samples (const Glib::Threads::Mutex::Lock& lock,
 		return;
 	}
 
-	BeatsSamplesConverter converter(_session.tempo_map(), position);
-	const Temporal::Beats  ev_time_beats = converter.from(ev.time());
+#warning NUTEMPO FIXME needs session to use new tempo map
+	// BeatsSamplesConverter converter(_session.tempo_map(), position);
+	//const Temporal::Beats  ev_time_beats = converter.from(ev.time());
+	const Temporal::Beats  ev_time_beats;
 	Evoral::event_id_t   event_id;
 
 	if (ev.id() < 0) {
@@ -487,15 +489,17 @@ SMFSource::append_event_samples (const Glib::Threads::Mutex::Lock& lock,
 
 	if (_model) {
 		const Evoral::Event<Temporal::Beats> beat_ev (ev.event_type(),
-		                                            ev_time_beats,
-		                                            ev.size(),
-		                                            const_cast<uint8_t*>(ev.buffer()));
+		                                              ev_time_beats,
+		                                              ev.size(),
+		                                              const_cast<uint8_t*>(ev.buffer()));
 		_model->append (beat_ev, event_id);
 	}
 
 	_length_beats = max(_length_beats, ev_time_beats);
 
-	const Temporal::Beats last_time_beats  = converter.from (_last_ev_time_samples);
+#warning NUTEMPO FIXME needs session to use new tempo map
+	//const Temporal::Beats last_time_beats  = converter.from (_last_ev_time_samples);
+	const Temporal::Beats last_time_beats;
 	const Temporal::Beats delta_time_beats = ev_time_beats - last_time_beats;
 	const uint32_t      delta_time_ticks = delta_time_beats.to_ticks(ppqn());
 

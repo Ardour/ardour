@@ -24,9 +24,10 @@
 using namespace ARDOUR;
 using namespace PBD;
 
+#warning NUTEMPO question: what is the right time domain here
 RecordSafeControl::RecordSafeControl (Session& session, std::string const & name, Recordable& r)
 	: SlavableAutomationControl (session, RecSafeAutomation, ParameterDescriptor (RecSafeAutomation),
-	                             boost::shared_ptr<AutomationList>(new AutomationList(Evoral::Parameter(RecSafeAutomation))),
+	                             boost::shared_ptr<AutomationList>(new AutomationList(Evoral::Parameter(RecSafeAutomation), Temporal::AudioTime)),
 	                             name)
 	, _recordable (r)
 {

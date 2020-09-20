@@ -174,7 +174,7 @@ RegionExportChannelFactory::RegionExportChannelFactory (Session * session, Audio
 	, type (type)
 	, samples_per_cycle (session->engine().samples_per_cycle ())
 	, buffers_up_to_date (false)
-	, region_start (region.position())
+	, region_start (region.position_sample())
 	, position (region_start)
 {
 	switch (type) {

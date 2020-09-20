@@ -42,9 +42,9 @@ public:
 
 	float sample_rate () const { return _session.nominal_sample_rate(); }
 
-	samplepos_t natural_position() const { return _source->natural_position() * _ratio;}
-	samplecnt_t readable_length() const { return _source->readable_length() * _ratio; }
-	samplecnt_t length (samplepos_t pos) const { return _source->length(pos) * _ratio; }
+	timepos_t natural_position() const { return _source->natural_position() * _ratio;}
+	samplecnt_t readable_length_samples() const { return _source->length_samples (timepos_t (Temporal::AudioTime)) * _ratio; }
+	samplecnt_t length (samplepos_t /*pos*/) const { return _source->length_samples (timepos_t (Temporal::AudioTime)) * _ratio; }
 
 	bool can_be_analysed() const { return false; }
 	bool clamped_at_unity() const { return false; }

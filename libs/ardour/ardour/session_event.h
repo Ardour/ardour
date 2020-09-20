@@ -114,8 +114,8 @@ public:
 	RTeventCallback              rt_return;  /* called after rt_slot, with this event as an argument */
 	PBD::EventLoop*              event_loop;
 
-	std::list<AudioRange> audio_range;
-	std::list<MusicRange> music_range;
+	std::list<TimelineRange> audio_range;
+	std::list<TimelineRange> music_range;
 
 	boost::shared_ptr<Region> region;
 	boost::shared_ptr<TransportMaster> transport_master;

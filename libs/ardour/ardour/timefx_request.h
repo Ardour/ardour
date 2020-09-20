@@ -19,15 +19,21 @@
 #ifndef __libardour_timefx_request_h__
 #define __libardour_timefx_request_h__
 
+#include "temporal/types.h"
 #include "ardour/interthread_info.h"
 
 namespace ARDOUR {
 
 	struct TimeFXRequest : public InterThreadInfo {
 		TimeFXRequest()
-			: time_fraction(0), pitch_fraction(0),
-			use_soundtouch(false), quick_seek(false), antialias(false),  opts(0) {}
-		float time_fraction;
+			: time_fraction(0,0)
+			, pitch_fraction(0)
+			, use_soundtouch(false)
+			, quick_seek(false)
+			, antialias(false)
+			, opts(0) {}
+
+		Temporal::ratio_t time_fraction;
 		float pitch_fraction;
 		/* SoundTouch */
 		bool use_soundtouch;

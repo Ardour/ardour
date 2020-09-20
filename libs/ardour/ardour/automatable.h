@@ -85,7 +85,7 @@ public:
 	boost::shared_ptr<const AutomationControl> automation_control (const Evoral::Parameter& id) const;
 
 	virtual void add_control(boost::shared_ptr<Evoral::Control>);
-	virtual bool find_next_event (double start, double end, Evoral::ControlEvent& ev, bool only_active = true) const;
+	virtual bool find_next_event (Temporal::timepos_t const & start, Temporal::timepos_t const & end, Evoral::ControlEvent& ev, bool only_active = true) const;
 	void clear_controls ();
 
 	virtual void non_realtime_locate (samplepos_t now);
@@ -131,9 +131,8 @@ protected:
 
 	SlavableControlList slavables () const { return SlavableControlList(); }
 
-protected:
-	void find_next_ac_event (boost::shared_ptr<AutomationControl>, double start, double end, Evoral::ControlEvent& ev) const;
-	void find_prev_ac_event (boost::shared_ptr<AutomationControl>, double start, double end, Evoral::ControlEvent& ev) const;
+	void find_next_ac_event (boost::shared_ptr<AutomationControl>, Temporal::timepos_t const & start, Temporal::timepos_t const & end, Evoral::ControlEvent& ev) const;
+	void find_prev_ac_event (boost::shared_ptr<AutomationControl>, Temporal::timepos_t const & start, Temporal::timepos_t const & end, Evoral::ControlEvent& ev) const;
 
 private:
 	PBD::ScopedConnectionList _control_connections; ///< connections to our controls' signals

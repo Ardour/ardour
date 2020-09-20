@@ -314,7 +314,7 @@ AudioRegionImporter::prepare_region ()
 	// create region and update XML
 	boost::shared_ptr<Region> r = RegionFactory::create (source_list, xml_region);
 	if (session.config.get_glue_new_regions_to_bars_and_beats ()) {
-		r->set_position_lock_style (MusicTime);
+		r->set_position_time_domain (Temporal::BeatTime);
 	}
 	region.push_back (r);
 	if (*region.begin()) {

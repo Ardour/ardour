@@ -165,7 +165,7 @@ public:
 
 	/* end of vfunc-based API */
 
-	void shift (samplepos_t, samplecnt_t);
+	void shift (timepos_t const &, timecnt_t const &);
 
 	/* controls use set_solo() to modify this route's solo state */
 

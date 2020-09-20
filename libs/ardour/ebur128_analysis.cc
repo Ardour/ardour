@@ -42,7 +42,7 @@ EBUr128Analysis::~EBUr128Analysis()
 }
 
 int
-EBUr128Analysis::run (Readable* src)
+EBUr128Analysis::run (AudioReadable* src)
 {
 	int ret = -1;
 	bool done = false;

@@ -63,7 +63,7 @@ static boost::shared_ptr<AutomationList> automation_list_new (Evoral::Parameter 
 		case BusSendLevel:
 			/* fallthrough */
 		case TrimAutomation:
-			return boost::shared_ptr<AutomationList> (new AutomationList (param));
+			return boost::shared_ptr<AutomationList> (new AutomationList (param, Temporal::AudioTime));
 		case MainOutVolume:
 			/* not automatable */
 			break;
@@ -112,10 +112,10 @@ bool
 GainControl::get_masters_curve_locked (samplepos_t start, samplepos_t end, float* vec, samplecnt_t veclen) const
 {
 	if (_masters.empty()) {
-		return list()->curve().rt_safe_get_vector (start, end, vec, veclen);
+		return list()->curve().rt_safe_get_vector (timepos_t (start), timepos_t (end), vec, veclen);
 	}
 	for (samplecnt_t i = 0; i < veclen; ++i) {
 		vec[i] = 1.f;
 	}
-	return SlavableAutomationControl::masters_curve_multiply (start, end, vec, veclen);
+	return SlavableAutomationControl::masters_curve_multiply (timepos_t (start), timepos_t (end), vec, veclen);
 }

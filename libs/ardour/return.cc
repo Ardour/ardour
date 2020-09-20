@@ -52,7 +52,8 @@ Return::Return (Session& s, bool internal)
 {
 	/* never muted */
 
-	boost::shared_ptr<AutomationList> gl (new AutomationList (Evoral::Parameter (GainAutomation)));
+#warning NUTEMPO QUESTION what time domain shoudl this really use?
+	boost::shared_ptr<AutomationList> gl (new AutomationList (Evoral::Parameter (GainAutomation), Temporal::AudioTime));
 	_gain_control = boost::shared_ptr<GainControl> (new GainControl (_session, Evoral::Parameter (GainAutomation), gl));
 	add_control (_gain_control);
 

@@ -87,7 +87,7 @@ MIDISceneChanger::gather (const Locations::LocationList& locations)
 					have_seen_bank_changes = true;
 				}
 
-				scenes.insert (std::make_pair ((*l)->start(), msc));
+				scenes.insert (std::make_pair ((*l)->start_sample(), msc));
 			}
 		}
 	}
@@ -314,7 +314,7 @@ MIDISceneChanger::program_change_input (MIDI::Parser& parser, MIDI::byte program
 			return;
 		}
 
-		loc = new Location (_session, time, time, new_name, Location::IsMark, 0);
+		loc = new Location (_session, timepos_t (time), timepos_t (time), new_name, Location::IsMark);
 		new_mark = true;
 	}
 
@@ -356,7 +356,7 @@ MIDISceneChanger::jump_to (int bank, int program)
 {
 	const Locations::LocationList& locations (_session.locations()->list());
 	boost::shared_ptr<SceneChange> sc;
-	samplepos_t where = max_samplepos;
+	timepos_t where = timepos_t::max (Temporal::AudioTime);
 
 	for (Locations::LocationList::const_iterator l = locations.begin(); l != locations.end(); ++l) {
 
@@ -370,7 +370,7 @@ MIDISceneChanger::jump_to (int bank, int program)
 		}
 	}
 
-	if (where != max_samplepos) {
-		_session.request_locate (where);
+	if (where != timepos_t::max (Temporal::AudioTime)) {
+		_session.request_locate (where.samples());
 	}
 }

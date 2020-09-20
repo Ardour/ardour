@@ -29,8 +29,6 @@
 #include "pbd/enumwriter.h"
 #include "midi++/types.h"
 
-#include "evoral/Range.h" // shouldn't Evoral have its own enum registration?
-
 #include "ardour/delivery.h"
 #include "ardour/disk_io.h"
 #include "ardour/export_channel.h"
@@ -146,7 +144,6 @@ setup_enum_writer ()
 	ScreenSaverMode _ScreenSaverMode;
 	Session::PostTransportWork _Session_PostTransportWork;
 	MTC_Status _MIDI_MTC_Status;
-	Evoral::OverlapType _OverlapType;
 	BufferingPreset _BufferingPreset;
 	AutoReturnTarget _AutoReturnTarget;
 	PresentationInfo::Flag _PresentationInfo_Flag;
@@ -742,13 +739,6 @@ setup_enum_writer ()
 	REGISTER_ENUM(AudioTime);
 	REGISTER_ENUM(MusicTime);
 	REGISTER(_PositionLockStyle);
-
-	REGISTER_ENUM (Evoral::OverlapNone);
-	REGISTER_ENUM (Evoral::OverlapInternal);
-	REGISTER_ENUM (Evoral::OverlapStart);
-	REGISTER_ENUM (Evoral::OverlapEnd);
-	REGISTER_ENUM (Evoral::OverlapExternal);
-	REGISTER(_OverlapType);
 
 	REGISTER_ENUM (Small);
 	REGISTER_ENUM (Medium);

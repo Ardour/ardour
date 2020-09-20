@@ -94,7 +94,7 @@ class LIBARDOUR_API SndFileSource : public AudioFileSource {
 	int setup_broadcast_info (samplepos_t when, struct tm&, time_t);
 	void file_closed ();
 
-	void set_natural_position (samplepos_t);
+	void set_natural_position (timepos_t const &);
 	samplecnt_t nondestructive_write_unlocked (Sample *dst, samplecnt_t cnt);
 	PBD::ScopedConnection header_position_connection;
 };

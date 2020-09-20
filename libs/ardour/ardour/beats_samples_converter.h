@@ -16,10 +16,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <cstdlib>
-
 #include "temporal/beats.h"
-#include "evoral/TimeConverter.h"
+#include "temporal/superclock.h"
+#include "temporal/time_converter.h"
+#include "temporal/types.h"
 
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
@@ -27,48 +27,30 @@
 #ifndef __ardour_beats_samples_converter_h__
 #define __ardour_beats_samples_converter_h__
 
+namespace Temporal {
+	class TempoMap;
+}
+
 namespace ARDOUR {
 
-class TempoMap;
-
-/** Converter between quarter-note beats and samples.  Takes distances in quarter-note beats or samples
- *  from some origin (supplied to the constructor in samples), and converts
- *  them to the opposite unit, taking tempo changes into account.
+/** Converter between quarter-note beats and samplepos_t.  Takes distances in
+ *  quarter-note beats or samplepos_t from some origin (supplied to the
+ *  constructor in samplepos_t), and converts them to the opposite unit,
+ *  taking tempo changes into account.
  */
-class LIBARDOUR_API BeatsSamplesConverter
-	: public Evoral::TimeConverter<Temporal::Beats,samplepos_t> {
+class LIBARDOUR_API BeatsSamplesConverter : public Temporal::TimeConverter<Temporal::Beats,samplepos_t,samplecnt_t> {
 public:
-	BeatsSamplesConverter (const TempoMap& tempo_map, samplepos_t origin)
-		: Evoral::TimeConverter<Temporal::Beats, samplepos_t> (origin)
-		, _tempo_map(tempo_map)
+	BeatsSamplesConverter (const Temporal::TempoMap& tempo_map, Temporal::samplepos_t origin)
+		: Temporal::TimeConverter<Temporal::Beats, samplepos_t, samplecnt_t> (origin)
+		, _tempo_map (tempo_map)
 	{}
 
-	samplepos_t    to (Temporal::Beats beats) const;
-	Temporal::Beats from (samplepos_t samples) const;
+	samplecnt_t   to   (Temporal::Beats beats) const;
+	Temporal::Beats from (samplecnt_t distance) const;
 
 private:
-	const TempoMap& _tempo_map;
+	const Temporal::TempoMap& _tempo_map;
 };
-
-/** Converter between quarter-note beats and samples.  Takes distances in quarter-note beats or samples
- *  from some origin (supplied to the constructor in samples), and converts
- *  them to the opposite unit, taking tempo changes into account.
- */
-class LIBARDOUR_API DoubleBeatsSamplesConverter
-	: public Evoral::TimeConverter<double,samplepos_t> {
-public:
-	DoubleBeatsSamplesConverter (const TempoMap& tempo_map, samplepos_t origin)
-		: Evoral::TimeConverter<double, samplepos_t> (origin)
-		, _tempo_map(tempo_map)
-	{}
-
-	samplepos_t          to (double beats) const;
-	double from (samplepos_t samples) const;
-
-private:
-	const TempoMap& _tempo_map;
-};
-
 
 } /* namespace ARDOUR */
 

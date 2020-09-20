@@ -157,7 +157,7 @@ private:
 	bool prep_record_enable ();
 	bool prep_record_disable ();
 
-	void calculate_record_range (Evoral::OverlapType ot, samplepos_t transport_sample,
+	void calculate_record_range (Temporal::OverlapType ot, samplepos_t transport_sample,
 	                             samplecnt_t nframes, samplecnt_t& rec_nframes,
 	                             samplecnt_t& rec_offset);
 

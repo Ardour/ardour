@@ -37,7 +37,7 @@ class LIBARDOUR_API PlaylistFactory {
 	static boost::shared_ptr<Playlist> create (Session&, const XMLNode&, bool hidden = false, bool unused = false);
 	static boost::shared_ptr<Playlist> create (DataType type, Session&, std::string name, bool hidden = false);
 	static boost::shared_ptr<Playlist> create (boost::shared_ptr<const Playlist>, std::string name, bool hidden = false);
-	static boost::shared_ptr<Playlist> create (boost::shared_ptr<const Playlist>, samplepos_t start, samplecnt_t cnt, std::string name, bool hidden = false);
+	static boost::shared_ptr<Playlist> create (boost::shared_ptr<const Playlist>, timepos_t const & start, timepos_t const & cnt, std::string name, bool hidden = false);
 };
 
 }

@@ -104,8 +104,8 @@ Session::click (samplepos_t cycle_start, samplecnt_t nframes)
 
 		Location* loop_location = get_play_loop () ? locations()->auto_loop_location () : NULL;
 		if (loop_location) {
-			const samplepos_t loop_start = loop_location->start ();
-			const samplepos_t loop_end = loop_location->end ();
+			const samplepos_t loop_start = loop_location->start_sample();
+			const samplepos_t loop_end = loop_location->end_sample();
 			if (start >= loop_end) {
 				samplecnt_t off = (start - loop_end) % (loop_end - loop_start);
 				start = loop_start + off;
@@ -180,8 +180,8 @@ Session::run_click (samplepos_t start, samplepos_t nframes)
 	bool crossloop = false;
 	samplecnt_t span = nframes;
 	if (loop_location) {
-		const samplepos_t loop_start = loop_location->start ();
-		const samplepos_t loop_end = loop_location->end ();
+		const samplepos_t loop_start = loop_location->start_sample ();
+		const samplepos_t loop_end = loop_location->end_sample ();
 		if (start >= loop_end) {
 			samplecnt_t off = (start - loop_end) % (loop_end - loop_start);
 			start = loop_start + off;
@@ -197,8 +197,8 @@ Session::run_click (samplepos_t start, samplepos_t nframes)
 		Click *clk = *i;
 
 		if (loop_location) {
-			const samplepos_t loop_start = loop_location->start ();
-			const samplepos_t loop_end = loop_location->end ();
+			const samplepos_t loop_start = loop_location->start_sample ();
+			const samplepos_t loop_end = loop_location->end_sample ();
 			/* remove any clicks that are outside loop location, and not currently playing */
 			if ((clk->start < loop_start || clk->start >= loop_end) && clk->offset == 0) {
 				delete clk;
@@ -217,7 +217,7 @@ Session::run_click (samplepos_t start, samplepos_t nframes)
 		} else if (crossloop) {
 			/* When loop wraps around in current cycle, take
 			 * clicks at loop-start into account */
-			const samplepos_t loop_start = loop_location->start ();
+			const samplepos_t loop_start = loop_location->start_sample ();
 			internal_offset = clk->start - loop_start + span;
 		} else if (_count_in_samples > 0) {
 			++i;

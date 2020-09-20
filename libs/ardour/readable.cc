@@ -30,10 +30,10 @@
 
 using namespace ARDOUR;
 
-std::vector<boost::shared_ptr<Readable> >
-Readable::load (Session& session, std::string const& path)
+std::vector<boost::shared_ptr<AudioReadable> >
+AudioReadable::load (Session& session, std::string const& path)
 {
-	std::vector<boost::shared_ptr<Readable> > readables;
+	std::vector<boost::shared_ptr<AudioReadable> > readables;
 
 	ARDOUR::SoundFileInfo sf_info;
 	std::string error_msg;

@@ -27,7 +27,7 @@ using namespace ARDOUR;
 
 PhaseControl::PhaseControl (Session& session, std::string const & name)
 	: AutomationControl (session, PhaseAutomation, ParameterDescriptor (PhaseAutomation),
-	                     boost::shared_ptr<AutomationList>(new AutomationList(Evoral::Parameter(PhaseAutomation))),
+	                     boost::shared_ptr<AutomationList>(new AutomationList(Evoral::Parameter(PhaseAutomation), Temporal::AudioTime)),
 	                     name)
 {
 }

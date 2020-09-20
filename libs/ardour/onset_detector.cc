@@ -48,7 +48,7 @@ OnsetDetector::operational_identifier()
 }
 
 int
-OnsetDetector::run (const std::string& path, Readable* src, uint32_t channel, AnalysisFeatureList& results)
+OnsetDetector::run (const std::string& path, AudioReadable* src, uint32_t channel, AnalysisFeatureList& results)
 {
 	current_results = &results;
 	int ret = analyse (path, src, channel);

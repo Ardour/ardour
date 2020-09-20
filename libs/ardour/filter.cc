@@ -43,9 +43,10 @@ int
 Filter::make_new_sources (boost::shared_ptr<Region> region, SourceList& nsrcs, std::string suffix, bool use_session_sample_rate)
 {
 	vector<string> names = region->master_source_names();
-	assert (region->n_channels() <= names.size());
+	const SourceList::size_type nsrc = region->sources().size();
+	assert (nsrc <= names.size());
 
-	for (uint32_t i = 0; i < region->n_channels(); ++i) {
+	for (SourceList::size_type i = 0; i < nsrc; ++i) {
 
 		string name = PBD::basename_nosuffix (names[i]);
 
@@ -62,7 +63,7 @@ Filter::make_new_sources (boost::shared_ptr<Region> region, SourceList& nsrcs, s
 
 		const string path = (region->data_type() == DataType::MIDI)
 			? session.new_midi_source_path (name)
-			: session.new_audio_source_path (name, region->n_channels(), i, false);
+			: session.new_audio_source_path (name, nsrc, i, false);
 
 		if (path.empty()) {
 			error << string_compose (_("filter: error creating name for new file based on %1"), region->name())
@@ -120,7 +121,7 @@ Filter::finish (boost::shared_ptr<Region> region, SourceList& nsrcs, string regi
 
 		boost::shared_ptr<SMFSource> smfs = boost::dynamic_pointer_cast<SMFSource>(*si);
 		if (smfs) {
-			smfs->set_natural_position (region->position_sample());
+			smfs->set_natural_position (region->nt_position());
 			smfs->flush ();
 		}
 
@@ -138,7 +139,7 @@ Filter::finish (boost::shared_ptr<Region> region, SourceList& nsrcs, string regi
 
 	PropertyList plist;
 
-	plist.add (Properties::start, 0);
+	plist.add (Properties::start, std::numeric_limits<timecnt_t>::min());
 	plist.add (Properties::length, region->nt_length());
 	plist.add (Properties::name, region_name);
 	plist.add (Properties::whole_file, true);

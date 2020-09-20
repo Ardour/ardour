@@ -87,7 +87,8 @@ AutomationWatch::add_automation_watch (boost::shared_ptr<AutomationControl> ac)
 		DEBUG_TRACE (DEBUG::Automation, string_compose ("\ttransport is rolling @ %1, audible = %2so enter write pass\n",
 								_session->transport_speed(), _session->audible_sample()));
 		/* add a guard point since we are already moving */
-		ac->list()->set_in_write_pass (true, true, _session->audible_sample());
+#warning NUTEMPO QUESTION should the time be in the domain of the list ?
+		ac->list()->set_in_write_pass (true, true, timepos_t (_session->audible_sample()));
 	}
 
 	/* we can't store shared_ptr<Destructible> in connections because it
@@ -142,7 +143,7 @@ AutomationWatch::transport_stop_automation_watches (samplepos_t when)
 	}
 
 	for (AutomationWatches::iterator i = tmp.begin(); i != tmp.end(); ++i) {
-		(*i)->stop_touch (when);
+		(*i)->stop_touch (timepos_t (when));
 	}
 }
 
@@ -165,7 +166,7 @@ AutomationWatch::timer ()
 					if (sc) {
 						val = sc->reduce_by_masters (val, true);
 					}
-					(*aw)->list()->add (time, val, true);
+					(*aw)->list()->add (timepos_t (time), val, true);
 				}
 			}
 		} else if (time != _last_time) {  //transport stopped or reversed.  stop the automation pass and start a new one (for bonus points, someday store the previous pass in an undo record)
@@ -175,7 +176,7 @@ AutomationWatch::timer ()
 										(*aw)->alist()->automation_write()));
 				(*aw)->list()->set_in_write_pass (false);
 				if ( (*aw)->alist()->automation_write() ) {
-					(*aw)->list()->set_in_write_pass (true, true, time);
+					(*aw)->list()->set_in_write_pass (true, true, timepos_t (time));
 				}
 			}
 		}

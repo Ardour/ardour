@@ -51,7 +51,7 @@ TransientDetector::operational_identifier()
 }
 
 int
-TransientDetector::run (const std::string& path, Readable* src, uint32_t channel, AnalysisFeatureList& results)
+TransientDetector::run (const std::string& path, AudioReadable* src, uint32_t channel, AnalysisFeatureList& results)
 {
 	current_results = &results;
 	int ret = analyse (path, src, channel);
@@ -140,7 +140,7 @@ TransientDetector::cleanup_transients (AnalysisFeatureList& t, float sr, float g
 }
 
 void
-TransientDetector::update_positions (Readable* src, uint32_t channel, AnalysisFeatureList& positions)
+TransientDetector::update_positions (AudioReadable* src, uint32_t channel, AnalysisFeatureList& positions)
 {
 	int const buff_size = 1024;
 	int const step_size = 64;

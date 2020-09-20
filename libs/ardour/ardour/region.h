@@ -71,7 +71,6 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<timecnt_t>         ancestral_length;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<float>             stretch;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<float>             shift;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<PositionLockStyle> position_lock_style;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<uint64_t>          layering_index;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<std::string>	tags;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>		contents; // type doesn't matter here
@@ -92,7 +91,6 @@ enum LIBARDOUR_API RegionEditState {
 class LIBARDOUR_API Region
 	: public SessionObject
 	, public boost::enable_shared_from_this<Region>
-	, public Readable
 	, public Trimmable
 	, public Movable
 {
@@ -123,6 +121,7 @@ public:
 	timecnt_t nt_start ()     const { return _start.val(); }
 	timecnt_t nt_length ()    const { return _length.val(); }
 	timepos_t nt_end()        const;
+	timepos_t nt_last()       const { return nt_end().decrement(); }
 
 	timepos_t source_position () const;
 	timepos_t source_relative_position (Temporal::timepos_t const &) const;
@@ -131,8 +130,6 @@ public:
 	samplepos_t position_sample ()  const { return _position.val().samples(); }
 	samplecnt_t start_sample ()     const { return _start.val().samples(); }
 	samplecnt_t length_samples ()    const { return _length.val().samples(); }
-
-	samplecnt_t readable_length_samples() const { return length_samples(); }
 
 	layer_t    layer ()     const { return _layer; }
 
@@ -180,7 +177,11 @@ public:
 	}
 
 	Temporal::TimeRange range_samples () const {
-		return Temporal::TimeRange (timepos_t::from_samples (first_sample()), timepos_t::from_samples (first_sample() + length_samples()));
+		return Temporal::TimeRange (timepos_t (first_sample()), timepos_t (first_sample() + length_samples()));
+	}
+
+	Temporal::TimeRange range () const {
+		return Temporal::TimeRange (nt_position(), nt_position() + nt_length());
 	}
 
 	bool hidden ()           const { return _hidden; }
@@ -199,14 +200,18 @@ public:
 
 	Trimmable::CanTrim can_trim () const;
 
-	PositionLockStyle position_lock_style () const { return _position_lock_style; }
-	void set_position_lock_style (PositionLockStyle ps);
-	void recompute_position_from_lock_style ();
+	Temporal::TimeDomain position_time_domain () const;
+	void set_position_time_domain (Temporal::TimeDomain ps);
+	void recompute_position_from_time_domain ();
 
 	void suspend_property_changes ();
 
 	bool covers (samplepos_t sample) const {
 		return first_sample() <= sample && sample <= last_sample();
+	}
+
+	bool covers (timepos_t const & pos) const {
+		return nt_position() <= pos && pos <= nt_last();
 	}
 
 	/** @return coverage of this region with the given range;
@@ -215,8 +220,8 @@ public:
 	 *  OverlapEnd:      the range overlaps the end of this region.
 	 *  OverlapExternal: the range overlaps all of this region.
 	 */
-	Evoral::OverlapType coverage (samplepos_t start, samplepos_t end) const {
-		return Evoral::coverage (first_sample(), last_sample(), start, end);
+	Temporal::OverlapType coverage (timepos_t const & start, timepos_t const & end) const {
+		return Temporal::coverage_exclusive_ends (_position.val(), nt_last(), start, end);
 	}
 
 	bool exact_equivalent (boost::shared_ptr<const Region>) const;
@@ -283,7 +288,6 @@ public:
 	bool is_compound () const;
 
 	boost::shared_ptr<Source> source (uint32_t n=0) const { return _sources[ (n < _sources.size()) ? n : 0 ]; }
-	uint32_t n_channels() const { return _sources.size(); }
 
 	SourceList& sources_for_edit ()           { return _sources; }
 	const SourceList& sources ()        const { return _sources; }
@@ -415,7 +419,6 @@ protected:
 
 	void send_change (const PBD::PropertyChange&);
 	virtual int _set_state (const XMLNode&, int version, PBD::PropertyChange& what_changed, bool send_signal);
-	void post_set (const PBD::PropertyChange&);
 	virtual void set_position_internal (timepos_t const & pos);
 	virtual void set_length_internal (timecnt_t const &);
 	virtual void set_start_internal (timecnt_t const &);
@@ -458,7 +461,7 @@ protected:
 private:
 	void mid_thaw (const PBD::PropertyChange&);
 
-	virtual void trim_to_internal (timepos_t const & position, timecnt_t const & length);
+	void trim_to_internal (timepos_t const & position, timecnt_t const & length);
 	void modify_front (timepos_t const & new_position, bool reset_fade);
 	void modify_end (timepos_t const & new_position, bool reset_fade);
 
@@ -485,7 +488,6 @@ private:
 	PBD::Property<timecnt_t>   _ancestral_length;
 	PBD::Property<float>       _stretch;
 	PBD::Property<float>       _shift;
-	PBD::EnumProperty<PositionLockStyle> _position_lock_style;
 	PBD::Property<uint64_t>    _layering_index;
 	PBD::Property<std::string> _tags;
 	PBD::Property<bool>        _contents; // type is irrelevant

@@ -62,7 +62,7 @@ class LIBARDOUR_API SourceFactory {
 
 	static boost::shared_ptr<Source> createFromPlaylist
 		(DataType type, Session& s, boost::shared_ptr<Playlist> p, const PBD::ID& orig, const std::string& name,
-		 uint32_t chn, sampleoffset_t start, samplecnt_t len, bool copy, bool defer_peaks);
+		 uint32_t chn, timepos_t start, timepos_t const & len, bool copy, bool defer_peaks);
 
         static Glib::Threads::Cond                       PeaksToBuild;
         static Glib::Threads::Mutex                      peak_building_lock;

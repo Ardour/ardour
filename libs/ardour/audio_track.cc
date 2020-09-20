@@ -213,7 +213,7 @@ AudioTrack::export_stuff (BufferSet& buffers, samplepos_t start, samplecnt_t nfr
 	assert(buffers.count().n_audio() >= 1);
 	assert ((samplecnt_t) buffers.get_audio(0).capacity() >= nframes);
 
-	if (apl->read (buffers.get_audio(0).data(), mix_buffer.get(), gain_buffer.get(), start, nframes) != nframes) {
+	if (apl->read (buffers.get_audio(0).data(), mix_buffer.get(), gain_buffer.get(), timepos_t (start), timecnt_t (nframes)) != nframes) {
 		return -1;
 	}
 
@@ -223,7 +223,7 @@ AudioTrack::export_stuff (BufferSet& buffers, samplepos_t start, samplecnt_t nfr
 	++bi;
 	for ( ; bi != buffers.audio_end(); ++bi, ++n) {
 		if (n < _disk_reader->output_streams().n_audio()) {
-			if (apl->read (bi->data(), mix_buffer.get(), gain_buffer.get(), start, nframes, n) != nframes) {
+			if (apl->read (bi->data(), mix_buffer.get(), gain_buffer.get(), timepos_t (start), timecnt_t (nframes), n) != nframes) {
 				return -1;
 			}
 			b = bi->data();
@@ -402,14 +402,15 @@ AudioTrack::freeze_me (InterThreadInfo& itt)
 	PropertyList plist;
 
 	plist.add (Properties::start, 0);
-	plist.add (Properties::length, srcs[0]->length(srcs[0]->natural_position()));
+	plist.add (Properties::length, srcs[0]->length());
 	plist.add (Properties::name, region_name);
 	plist.add (Properties::whole_file, true);
 
 	boost::shared_ptr<Region> region (RegionFactory::create (srcs, plist, false));
 
 	new_playlist->set_orig_track_id (id());
-	new_playlist->add_region (region, _session.current_start_sample());
+#warning NUTEMPO fixme this probably should not use samples unconditionally
+	new_playlist->add_region (region, timepos_t (_session.current_start_sample()));
 	new_playlist->set_frozen (true);
 	region->set_locked (true);
 

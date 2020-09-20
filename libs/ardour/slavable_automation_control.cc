@@ -86,7 +86,7 @@ SlavableAutomationControl::get_value_locked() const
 	/* read or write masters lock must be held */
 
 	if (_masters.empty()) {
-		return Control::get_double (false, _session.transport_sample());
+		return Control::get_double (false, timepos_t (_session.transport_sample()));
 	}
 
 	if (_desc.toggled) {
@@ -94,12 +94,12 @@ SlavableAutomationControl::get_value_locked() const
 		 * enabled, this slave is enabled. So check our own value
 		 * first, because if we are enabled, we can return immediately.
 		 */
-		if (Control::get_double (false, _session.transport_sample())) {
+		if (Control::get_double (false, timepos_t (_session.transport_sample()))) {
 			return _desc.upper;
 		}
 	}
 
-	return Control::get_double() * get_masters_value_locked ();
+	return Control::get_double () * get_masters_value_locked ();
 }
 
 /** Get the current effective `user' value based on automation state */
@@ -116,7 +116,7 @@ SlavableAutomationControl::get_value() const
 		}
 		return get_value_locked ();
 	} else {
-		return Control::get_double (true, _session.transport_sample()) * get_masters_value_locked();
+		return Control::get_double (true, timepos_t (_session.transport_sample())) * get_masters_value_locked();
 	}
 }
 
@@ -133,7 +133,7 @@ SlavableAutomationControl::get_masters_curve_locked (samplepos_t, samplepos_t, f
 }
 
 bool
-SlavableAutomationControl::masters_curve_multiply (samplepos_t start, samplepos_t end, float* vec, samplecnt_t veclen) const
+SlavableAutomationControl::masters_curve_multiply (timepos_t const & start, timepos_t const & end, float* vec, samplecnt_t veclen) const
 {
 	gain_t* scratch = _session.scratch_automation_buffer ();
 	bool from_list = _list && boost::dynamic_pointer_cast<AutomationList>(_list)->automation_playback();
@@ -368,7 +368,8 @@ SlavableAutomationControl::remove_master (boost::shared_ptr<AutomationControl> m
 		double new_val = old_val * master_ratio;
 
 		if (old_val != new_val) {
-			AutomationControl::set_double (new_val, Controllable::NoGroup);
+			timepos_t foo;
+			AutomationControl::set_double (new_val, foo, Controllable::NoGroup);
 		}
 
 		/* ..and update automation */
@@ -441,7 +442,8 @@ SlavableAutomationControl::clear_masters ()
 			double new_val = old_val * master_ratio;
 
 			if (old_val != new_val) {
-				AutomationControl::set_double (new_val, Controllable::NoGroup);
+				timepos_t foo;
+				AutomationControl::set_double (new_val, foo, Controllable::NoGroup);
 			}
 
 			/* ..and update automation */
@@ -471,7 +473,7 @@ SlavableAutomationControl::clear_masters ()
 }
 
 bool
-SlavableAutomationControl::find_next_event_locked (double now, double end, Evoral::ControlEvent& next_event) const
+SlavableAutomationControl::find_next_event_locked (timepos_t const & now, timepos_t const & end, Evoral::ControlEvent& next_event) const
 {
 	if (_masters.empty()) {
 		return false;
@@ -537,7 +539,7 @@ SlavableAutomationControl::automation_run (samplepos_t start, pframes_t nframes)
 
 	assert (_list);
 	bool valid = false;
-	double val = _list->rt_safe_eval (start, valid);
+	double val = _list->rt_safe_eval (timepos_t (start), valid);
 	if (!valid) {
 		return;
 	}
@@ -571,7 +573,7 @@ SlavableAutomationControl::boolean_automation_run_locked (samplepos_t start, pfr
 		}
 		boost::shared_ptr<const Evoral::ControlList> alist (ac->list());
 		bool valid = false;
-		const bool yn = alist->rt_safe_eval (start, valid) >= 0.5;
+		const bool yn = alist->rt_safe_eval (timepos_t (start), valid) >= 0.5;
 		if (!valid) {
 			continue;
 		}

@@ -1472,16 +1472,16 @@ MidiModel::resolve_overlaps_unlocked (const NotePtr note, void* arg)
 
 		TimeType sb = (*i)->time();
 		TimeType eb = (*i)->end_time();
-		OverlapType overlap = OverlapNone;
+		Temporal::OverlapType overlap = Temporal::OverlapNone;
 
 		if ((sb > sa) && (eb <= ea)) {
-			overlap = OverlapInternal;
+			overlap = Temporal::OverlapInternal;
 		} else if ((eb > sa) && (eb <= ea)) {
-			overlap = OverlapStart;
+			overlap = Temporal::OverlapStart;
 		} else if ((sb > sa) && (sb < ea)) {
-			overlap = OverlapEnd;
+			overlap = Temporal::OverlapEnd;
 		} else if ((sa >= sb) && (sa <= eb) && (ea <= eb)) {
-			overlap = OverlapExternal;
+			overlap = Temporal::OverlapExternal;
 		} else {
 			/* no overlap */
 			continue;
@@ -1497,7 +1497,7 @@ MidiModel::resolve_overlaps_unlocked (const NotePtr note, void* arg)
 		}
 
 		switch (overlap) {
-		case OverlapStart:
+		case Temporal::OverlapStart:
 			cerr << "OverlapStart\n";
 			/* existing note covers start of new note */
 			switch (insert_merge_policy()) {
@@ -1530,7 +1530,7 @@ MidiModel::resolve_overlaps_unlocked (const NotePtr note, void* arg)
 			}
 			break;
 
-		case OverlapEnd:
+		case Temporal::OverlapEnd:
 			cerr << "OverlapEnd\n";
 			/* existing note covers end of new note */
 			switch (insert_merge_policy()) {
@@ -1566,7 +1566,7 @@ MidiModel::resolve_overlaps_unlocked (const NotePtr note, void* arg)
 			}
 			break;
 
-		case OverlapExternal:
+		case Temporal::OverlapExternal:
 			cerr << "OverlapExt\n";
 			/* existing note overlaps all the new note */
 			switch (insert_merge_policy()) {
@@ -1585,7 +1585,7 @@ MidiModel::resolve_overlaps_unlocked (const NotePtr note, void* arg)
 			}
 			break;
 
-		case OverlapInternal:
+		case Temporal::OverlapInternal:
 			cerr << "OverlapInt\n";
 			/* new note fully overlaps an existing note */
 			switch (insert_merge_policy()) {
@@ -1784,7 +1784,7 @@ MidiModel::insert_silence_at_start (TimeType t)
 	for (Controls::iterator i = controls().begin(); i != controls().end(); ++i) {
 		boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl> (i->second);
 		XMLNode& before = ac->alist()->get_state ();
-		i->second->list()->shift (0, t.to_double());
+		i->second->list()->shift (timepos_t::zero (i->second->list()->time_domain()), timecnt_t (t));
 		XMLNode& after = ac->alist()->get_state ();
 		s->session().add_command (new MementoCommand<AutomationList> (new MidiAutomationListBinder (s, i->first), &before, &after));
 	}
@@ -1801,7 +1801,7 @@ MidiModel::insert_silence_at_start (TimeType t)
 		apply_command_as_subcommand (s->session(), c);
 	}
 
-	ContentsShifted (t.to_double());
+	ContentsShifted (timecnt_t (t));
 }
 
 void

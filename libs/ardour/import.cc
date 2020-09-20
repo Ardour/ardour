@@ -231,7 +231,7 @@ create_mono_sources_for_writing (const vector<string>& new_paths,
 
 		boost::shared_ptr<AudioFileSource> afs;
 		if ((afs = boost::dynamic_pointer_cast<AudioFileSource>(source)) != 0) {
-			afs->set_natural_position (natural_position);
+			afs->set_natural_position (timepos_t (natural_position));
 		}
 	}
 	return true;
@@ -462,8 +462,7 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 
 				const samplepos_t     pos          = 0;
 				const Temporal::Beats  length_beats = Temporal::Beats::ticks_at_rate(t, source->ppqn());
-				BeatsSamplesConverter converter(smfs->session().tempo_map(), pos);
-				smfs->update_length(pos + converter.to(length_beats.round_up_to_beat()));
+				smfs->update_length (timecnt_t (length_beats.round_up_to_beat(), timepos_t(Temporal::BeatTime)));
 				smfs->mark_streaming_write_completed (source_lock);
 
 				if (status.cancel) {
@@ -618,7 +617,7 @@ Session::import_files (ImportStatus& status)
 		for (Sources::iterator x = all_new_sources.begin(); x != all_new_sources.end(); ) {
 
 			if ((afs = boost::dynamic_pointer_cast<AudioFileSource>(*x)) != 0) {
-				afs->update_header((*x)->natural_position(), *now, xnow);
+				afs->update_header((*x)->natural_position().samples(), *now, xnow);
 				afs->done_with_peakfile_writes ();
 
 				/* now that there is data there, requeue the file for analysis */

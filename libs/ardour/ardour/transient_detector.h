@@ -25,7 +25,7 @@
 namespace ARDOUR {
 
 class AudioSource;
-class Readable;
+class AudioReadable;
 class Session;
 
 class LIBARDOUR_API TransientDetector : public AudioAnalyser
@@ -39,8 +39,8 @@ public:
 	void set_threshold (float);
 	void set_sensitivity (uint32_t, float);
 
-	int run (const std::string& path, Readable*, uint32_t channel, AnalysisFeatureList& results);
-	void update_positions (Readable* src, uint32_t channel, AnalysisFeatureList& results);
+	int run (const std::string& path, AudioReadable*, uint32_t channel, AnalysisFeatureList& results);
+	void update_positions (AudioReadable* src, uint32_t channel, AnalysisFeatureList& results);
 
 	static void cleanup_transients (AnalysisFeatureList&, float sr, float gap_msecs);
 

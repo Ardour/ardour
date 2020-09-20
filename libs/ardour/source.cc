@@ -394,10 +394,11 @@ Source::mark_for_remove ()
 }
 
 void
-Source::set_natural_position (samplepos_t pos)
+Source::set_natural_position (timepos_t const & pos)
 {
 	_natural_position = pos;
 	_have_natural_position = true;
+	_length.set_position (pos);
 }
 
 void
@@ -459,9 +460,9 @@ Source::add_cue_marker (CueMarker const & cm)
 }
 
 bool
-Source::move_cue_marker (CueMarker const & cm, samplepos_t source_relative_position)
+Source::move_cue_marker (CueMarker const & cm, timepos_t const & source_relative_position)
 {
-	if (source_relative_position > length (0)) {
+	if (source_relative_position > length ()) {
 		return false;
 	}
 
@@ -507,3 +508,15 @@ Source::clear_cue_markers ()
 	CueMarkersChanged(); /* EMIT SIGNAL */
 	return true;
 }
+
+Source::empty () const
+{
+	return _length == timecnt_t();
+}
+
+timecnt_t
+Source::length() const
+{
+	return _length;
+}
+

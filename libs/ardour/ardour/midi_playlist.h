@@ -64,8 +64,8 @@ public:
 
 	/** This constructor does NOT notify others (session) */
 	MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other,
-	              samplepos_t                           start,
-	              samplecnt_t                           cnt,
+	              timepos_t const &                     start,
+	              timepos_t const &                     cnt,
 	              std::string                           name,
 	              bool                                  hidden = false);
 
@@ -77,7 +77,8 @@ public:
 	int set_state (const XMLNode&, int version);
 
 	bool destroy_region (boost::shared_ptr<Region>);
-	void _split_region (boost::shared_ptr<Region>, const MusicSample& position, ThawList& thawlist);
+
+	void _split_region (boost::shared_ptr<Region>, timepos_t const & position, Thawlist& thawlist);
 
 	void set_note_mode (NoteMode m) { _note_mode = m; }
 

@@ -1,4 +1,4 @@
-/*
+s/*
  * Copyright (C) 1999-2019 Paul Davis <paul@linuxaudiosystems.com>
  * Copyright (C) 2006-2007 Jesse Chappell <jesse@essej.net>
  * Copyright (C) 2006-2009 Sampo Savolainen <v2@iki.fi>
@@ -180,6 +180,7 @@ Session::Session (AudioEngine &eng,
 	: _playlists (new SessionPlaylists)
 	, _engine (eng)
 	, process_function (&Session::process_with_events)
+#if 1
 	, _bounce_processing_active (false)
 	, waiting_for_sync_offset (false)
 	, _base_sample_rate (0)
@@ -294,8 +295,8 @@ Session::Session (AudioEngine &eng,
 	, _clicks_cleared (0)
 	, _count_in_samples (0)
 	, _play_range (false)
-	, _range_selection (-1,-1)
-	, _object_selection (-1,-1)
+	, _range_selection (timepos_t::max (Temporal::AudioTime), timepos_t::max (Temporal::AudioTime))
+	, _object_selection (timepos_t::max (Temporal::AudioTime), timepos_t::max (Temporal::AudioTime))
 	, _preroll_record_trim_len (0)
 	, _count_in_once (false)
 	, main_outs (0)
@@ -330,6 +331,152 @@ Session::Session (AudioEngine &eng,
 	g_atomic_int_set (&_update_pretty_names, 0);
 	g_atomic_int_set (&_seek_counter, 0);
 	g_atomic_int_set (&_butler_seek_counter, 0);
+
+#if 0
+	_bounce_processing_active = false;
+	waiting_for_sync_offset = false;
+	_base_sample_rate = 0;
+	_nominal_sample_rate = 0;
+	_current_sample_rate = 0;
+	_record_status = Disabled;
+	_transport_sample = 0;
+	_seek_counter = 0;
+	_session_range_location = 0;
+	_session_range_is_free = true;
+	_silent = false;
+	_remaining_latency_preroll = 0;
+	_engine_speed = 1.0;
+	_transport_speed = 0;
+	_default_transport_speed = 1.0;
+	_signalled_varispeed = 0;
+	auto_play_legal = false;
+	_requested_return_sample = -1;
+	current_block_size = 0;
+	_worst_output_latency = 0;
+	_worst_input_latency = 0;
+	_worst_route_latency = 0;
+	_send_latency_changes = 0;
+	_have_captured = false;
+	_non_soloed_outs_muted = false;
+	_listening = false;
+	_listen_cnt = 0;
+	_solo_isolated_cnt = 0;
+	_writable = false;
+	_under_nsm_control = false;
+	_xrun_count = 0;
+	master_wait_end = 0;
+	post_export_sync = false;
+	post_export_position = 0;
+	_exporting = false;
+	_export_rolling = false;
+	_realtime_export = false;
+	_region_export = false;
+	_export_preroll = 0;
+	_pre_export_mmc_enabled = false;
+	_name = snapshot_name;
+	_is_new = true;
+	_send_qf_mtc = false;
+	_pframes_since_last_mtc = 0;
+	play_loop = false;
+	loop_changing = false;
+	last_loopend = 0;
+	_session_dir = new SessionDirectory (fullpath);
+	_current_snapshot_name = snapshot_name;
+	state_tree = 0;
+	state_was_pending = false;
+	_state_of_the_state = StateOfTheState (CannotSave | InitialConnecting | Loading);
+	_suspend_save = 0;
+	_save_queued = false;
+	_save_queued_pending = false;
+	_last_roll_location = 0;
+	_last_roll_or_reversal_location = 0;
+	_last_record_location = 0;
+	pending_auto_loop = false;
+	lua = lua_newstate (&PBD::ReallocPool::lalloc, &_mempool);
+	_n_lua_scripts = 0;
+	_butler = new Butler (*this);
+	_transport_fsm = new TransportFSM (*this);
+	_post_transport_work = 0;
+	_locations = new Locations (*this);
+	_ignore_skips_updates = false;
+	_rt_thread_active = false;
+	_rt_emit_pending = false;
+	_ac_thread_active = 0;
+	_latency_recompute_pending = 0;
+	step_speed = 0;
+	outbound_mtc_timecode_frame = 0;
+	next_quarter_frame_to_send = -1;
+	_samples_per_timecode_frame = 0;
+	_frames_per_hour = 0;
+	_timecode_frames_per_hour = 0;
+	last_timecode_valid = false;
+	last_timecode_when = 0;
+	_send_timecode_update = false;
+	ltc_encoder = 0;
+	ltc_enc_buf= 0;
+	ltc_buf_off = 0;
+	ltc_buf_len = 0;
+	ltc_speed = 0;
+	ltc_enc_byte = 0;
+	ltc_enc_pos = 0;
+	ltc_enc_cnt = 0;
+	ltc_enc_off = 0;
+	restarting = false;
+	ltc_prev_cycle = 0;
+	ltc_timecode_offset = 0;
+	ltc_timecode_negative_offset = false;
+	midi_control_ui = 0;
+	_punch_or_loop = NoConstraint;
+	current_usecs_per_track = 1000;
+	_tempo_map = 0;
+	_all_route_group = new RouteGroup (*this, "all");
+	_adding_routes_in_progress = false;
+	_reconnecting_routes_in_progress = false;
+	_route_deletion_in_progress = false;
+	_track_number_decimals= 1;
+	default_fade_steepness = 0;
+	default_fade_msecs = 0;
+	_total_free_4k_blocks = 0;
+	_total_free_4k_blocks_uncertain = false;
+	no_questions_about_missing_files = false;
+	_playback_load = 0;
+	_capture_load = 0;
+	_bundle_xml_node = 0;
+	_current_trans = 0;
+	_clicking = false;
+	_click_rec_only = false;
+	click_data = 0;
+	click_emphasis_data = 0;
+	click_length = 0;
+	click_emphasis_length = 0;
+	_clicks_cleared = 0;
+	_count_in_samples = 0;
+	_play_range = false;
+	_range_selection = -1,-1;
+	_object_selection = -1,-1;
+	_preroll_record_trim_len = 0;
+	_count_in_once = false;
+	main_outs = 0;
+	first_file_data_format_reset = true;
+	first_file_header_format_reset = true;
+	have_looped = false;
+	_have_rec_enabled_track = false;
+	_have_rec_disabled_track = true;
+	_step_editors = 0;
+	_suspend_timecode_transmission = 0;
+	_speakers = new Speakers;
+	_ignore_route_processor_changes = 0;
+	_ignored_a_processor_change = 0;
+	midi_clock = 0;
+	_scene_changer = 0;
+	_midi_ports = 0;
+	_mmc = 0;
+	_vca_manager = new VCAManager (*this);
+	_selection = new CoreSelection (*this);
+	_global_locate_pending = false;
+	_had_destructive_tracks = false;
+#endif
+>>>>>>> libardour: conversion to use timeline types (mega-commit)
 
 	created_with = string_compose ("%1 %2", PROGRAM_NAME, revision);
 
@@ -843,7 +990,7 @@ Session::setup_click ()
 {
 	_clicking = false;
 
-	boost::shared_ptr<AutomationList> gl (new AutomationList (Evoral::Parameter (GainAutomation)));
+	boost::shared_ptr<AutomationList> gl (new AutomationList (Evoral::Parameter (GainAutomation), Temporal::AudioTime));
 	boost::shared_ptr<GainControl> gain_control = boost::shared_ptr<GainControl> (new GainControl (*this, Evoral::Parameter(GainAutomation), gl));
 
 	_click_io.reset (new ClickIO (*this, X_("Click")));
@@ -1400,7 +1547,7 @@ Session::set_track_monitor_input_status (bool yn)
 void
 Session::auto_punch_start_changed (Location* location)
 {
-	replace_event (SessionEvent::PunchIn, location->start());
+	replace_event (SessionEvent::PunchIn, location->start_sample());
 
 	if (get_record_enabled() && config.get_punch_in() && !actively_recording ()) {
 		/* capture start has been changed, so save new pending state */
@@ -1493,7 +1640,7 @@ Session::unset_punch ()
 void
 Session::auto_punch_end_changed (Location* location)
 {
-	replace_event (SessionEvent::PunchOut, location->end());
+	replace_event (SessionEvent::PunchOut, location->end_sample());
 }
 
 void
@@ -1510,13 +1657,13 @@ Session::auto_loop_changed (Location* location)
 		return;
 	}
 
-	replace_event (SessionEvent::AutoLoop, location->end(), location->start());
+	replace_event (SessionEvent::AutoLoop, location->end_sample(), location->start_sample());
 
 	if (transport_rolling()) {
 
 		if (get_play_loop ()) {
 
-			if (_transport_sample < location->start() || _transport_sample > location->end()) {
+			if (_transport_sample < location->start_sample() || _transport_sample > location->end_sample()) {
 
 				/* new loop range excludes current transport
 				 * sample => relocate to beginning of loop and roll.
@@ -1528,7 +1675,7 @@ Session::auto_loop_changed (Location* location)
 				 */
 
 				loop_changing = true;
-				request_locate (location->start(), MustRoll);
+				request_locate (location->start_sample(), MustRoll);
 
 			} else {
 
@@ -1551,13 +1698,13 @@ Session::auto_loop_changed (Location* location)
 		samplepos_t pos;
 
 		if (select_playhead_priority_target (pos)) {
-			if (pos == location->start()) {
+			if (pos == location->start_sample()) {
 				request_locate (pos);
 			}
 		}
 	}
 
-	last_loopend = location->end();
+	last_loopend = location->end_sample();
 	set_dirty ();
 }
 
@@ -1599,7 +1746,7 @@ Session::set_auto_punch_location (Location* location)
 }
 
 void
-Session::set_session_extents (samplepos_t start, samplepos_t end)
+Session::set_session_extents (timepos_t const & start, timepos_t const & end)
 {
 	if (end <= start) {
 		error << _("Session: you can't use that location for session start/end)") << endmsg;
@@ -1608,7 +1755,7 @@ Session::set_session_extents (samplepos_t start, samplepos_t end)
 
 	Location* existing;
 	if ((existing = _locations->session_range_location()) == 0) {
-		_session_range_location = new Location (*this, start, end, _("session"), Location::IsSessionRange, 0);
+		_session_range_location = new Location (*this, start, end, _("session"), Location::IsSessionRange);
 		_locations->add (_session_range_location);
 	} else {
 		existing->set( start, end );
@@ -1625,7 +1772,7 @@ Session::set_auto_loop_location (Location* location)
 	if ((existing = _locations->auto_loop_location()) != 0 && existing != location) {
 		loop_connections.drop_connections ();
 		existing->set_auto_loop (false, this);
-		remove_event (existing->end(), SessionEvent::AutoLoop);
+		remove_event (existing->end_sample(), SessionEvent::AutoLoop);
 		auto_loop_location_changed (0);
 	}
 
@@ -1640,7 +1787,7 @@ Session::set_auto_loop_location (Location* location)
 		return;
 	}
 
-	last_loopend = location->end();
+	last_loopend = location->end_sample();
 
 	loop_connections.drop_connections ();
 
@@ -1709,11 +1856,11 @@ Session::consolidate_skips (Location* loc)
 			continue;
 		}
 
-		switch (Evoral::coverage ((*l)->start(), (*l)->end(), loc->start(), loc->end())) {
-			case Evoral::OverlapInternal:
-			case Evoral::OverlapExternal:
-			case Evoral::OverlapStart:
-			case Evoral::OverlapEnd:
+		switch (Temporal::coverage_exclusive_ends ((*l)->start(), (*l)->end(), loc->start(), loc->end())) {
+			case Temporal::OverlapInternal:
+			case Temporal::OverlapExternal:
+			case Temporal::OverlapStart:
+			case Temporal::OverlapEnd:
 				/* adjust new location to cover existing one */
 				loc->set_start (min (loc->start(), (*l)->start()));
 				loc->set_end (max (loc->end(), (*l)->end()));
@@ -1723,7 +1870,7 @@ Session::consolidate_skips (Location* loc)
 				l = all_locations.erase (l);
 				break;
 
-			case Evoral::OverlapNone:
+			case Temporal::OverlapNone:
 				++l;
 				break;
 		}
@@ -1751,7 +1898,7 @@ Session::_sync_locations_to_skips ()
 		Location* location = *i;
 
 		if (location->is_skip() && location->is_skipping()) {
-			SessionEvent* ev = new SessionEvent (SessionEvent::Skip, SessionEvent::Add, location->start(), location->end(), 1.0);
+			SessionEvent* ev = new SessionEvent (SessionEvent::Skip, SessionEvent::Add, location->start_sample(), location->end_sample(), 1.0);
 			queue_event (ev);
 		}
 	}
@@ -1783,7 +1930,8 @@ Session::location_added (Location *location)
 		location->EndChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_marks, this, location));
 		location->Changed.connect_same_thread (skip_update_connections, boost::bind (&Session::update_marks, this, location));
 		location->FlagsChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_marks, this, location));
-		location->PositionLockStyleChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_marks, this, location));
+#warning NUTEMPO can locations have their lock style changed and how
+		// location->PositionLockStyleChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_marks, this, location));
 	}
 
 	if (location->is_range_marker()) {
@@ -1793,7 +1941,8 @@ Session::location_added (Location *location)
 		location->EndChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_marks, this, location));
 		location->Changed.connect_same_thread (skip_update_connections, boost::bind (&Session::update_marks, this, location));
 		location->FlagsChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_marks, this, location));
-		location->PositionLockStyleChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_marks, this, location));
+#warning NUTEMPO can locations have their lock style changed and how
+		// location->PositionLockStyleChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_marks, this, location));
 	}
 
 	if (location->is_skip()) {
@@ -1803,7 +1952,8 @@ Session::location_added (Location *location)
 		location->EndChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_skips, this, location, true));
 		location->Changed.connect_same_thread (skip_update_connections, boost::bind (&Session::update_skips, this, location, true));
 		location->FlagsChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_skips, this, location, false));
-		location->PositionLockStyleChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_marks, this, location));
+#warning NUTEMPO can locations have their lock style changed and how
+		// location->PositionLockStyleChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_marks, this, location));
 
 		update_skips (location, true);
 	}
@@ -4268,7 +4418,7 @@ Session::playlist_region_added (boost::weak_ptr<Region> w)
 
 	/* If so, update the session range markers */
 	if (!in.empty ()) {
-		maybe_update_session_range (r->position (), r->last_sample ());
+		maybe_update_session_range (r->nt_position (), r->nt_end ());
 	}
 }
 
@@ -4276,7 +4426,7 @@ Session::playlist_region_added (boost::weak_ptr<Region> w)
  *  b is after the current end.
  */
 void
-Session::maybe_update_session_range (samplepos_t a, samplepos_t b)
+Session::maybe_update_session_range (timepos_t const & a, timepos_t const & b)
 {
 	if (loading ()) {
 		return;
@@ -4286,7 +4436,7 @@ Session::maybe_update_session_range (samplepos_t a, samplepos_t b)
 
 	if (_session_range_location == 0) {
 
-		set_session_extents (a, b + session_end_marker_shift_samples);
+		set_session_extents (a, b + timepos_t (session_end_marker_shift_samples));
 
 	} else {
 
@@ -4307,18 +4457,18 @@ Session::set_session_range_is_free (bool yn)
 }
 
 void
-Session::playlist_ranges_moved (list<Evoral::RangeMove<samplepos_t> > const & ranges)
+Session::playlist_ranges_moved (list<Temporal::RangeMove> const & ranges)
 {
-	for (list<Evoral::RangeMove<samplepos_t> >::const_iterator i = ranges.begin(); i != ranges.end(); ++i) {
-		maybe_update_session_range (i->to, i->to + i->length);
+	for (list<Temporal::RangeMove>::const_iterator i = ranges.begin(); i != ranges.end(); ++i) {
+		maybe_update_session_range (i->from, i->to);
 	}
 }
 
 void
-Session::playlist_regions_extended (list<Evoral::Range<samplepos_t> > const & ranges)
+Session::playlist_regions_extended (list<Temporal::Range> const & ranges)
 {
-	for (list<Evoral::Range<samplepos_t> >::const_iterator i = ranges.begin(); i != ranges.end(); ++i) {
-		maybe_update_session_range (i->from, i->to);
+	for (list<Temporal::Range>::const_iterator i = ranges.begin(); i != ranges.end(); ++i) {
+		maybe_update_session_range (i->start(), i->end());
 	}
 }
 
@@ -5409,9 +5559,10 @@ Session::tempo_map_changed (const PropertyChange&)
 void
 Session::update_locations_after_tempo_map_change (const Locations::LocationList& loc)
 {
-	for (Locations::LocationList::const_iterator i = loc.begin(); i != loc.end(); ++i) {
-		(*i)->recompute_samples_from_beat ();
-	}
+#warning NUTEMPO this is probably unnecessary now
+	// for (Locations::LocationList::const_iterator i = loc.begin(); i != loc.end(); ++i) {
+	// (*i)->recompute_samples_from_beat ();
+	// }
 }
 
 /** Ensures that all buffers (scratch, send, silent, etc) are allocated for
@@ -5862,12 +6013,34 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 						/* MidiTrack::export_stuff moves event to the current cycle */
 						ev.set_time(ev.time() + out_pos - position);
 					}
-					(*m)->src->append_event_samples ((*m)->lock, ev, (*m)->src->natural_position());
+					(*m)->src->append_event_samples ((*m)->lock, ev, (*m)->src->natural_position().samples());
 				}
 		}
 		out_pos += current_chunk;
 		latency_skip = 0;
 	}
+
+	tracker.resolve_notes (resolved, end-1);
+
+	if (!resolved.empty()) {
+
+		for (vector<MidiSourceLockMap*>::iterator m = midi_source_locks.begin(); m != midi_source_locks.end(); ++m) {
+
+			for (MidiBuffer::iterator i = resolved.begin(); i != resolved.end(); ++i) {
+				Evoral::Event<samplepos_t> ev = *i;
+				if (!endpoint || for_export) {
+					ev.set_time(ev.time() - position);
+				}
+				(*m)->src->append_event_samples ((*m)->lock, ev, (*m)->src->natural_position().samples());
+			}
+		}
+	}
+
+	for (vector<MidiSourceLockMap*>::iterator m = midi_source_locks.begin(); m != midi_source_locks.end(); ++m) {
+		delete *m;
+	}
+
+	midi_source_locks.clear ();
 
 	/* post-roll, pick up delayed processor output */
 	latency_skip = track.bounce_get_latency (endpoint, include_endpoint, for_export, for_freeze);
@@ -6282,7 +6455,7 @@ Session::get_tracks () const
 }
 
 boost::shared_ptr<RouteList>
-Session::get_routes_with_regions_at (samplepos_t const p) const
+Session::get_routes_with_regions_at (timepos_t const & p) const
 {
 	boost::shared_ptr<RouteList> r = routes.reader ();
 	boost::shared_ptr<RouteList> rl (new RouteList);
@@ -6310,7 +6483,7 @@ void
 Session::goto_end ()
 {
 	if (_session_range_location) {
-		request_locate (_session_range_location->end(), MustStop);
+		request_locate (_session_range_location->end().samples(), MustStop);
 	} else {
 		request_locate (0, MustStop);
 	}
@@ -6320,7 +6493,7 @@ void
 Session::goto_start (bool and_roll)
 {
 	if (_session_range_location) {
-		request_locate (_session_range_location->start(), and_roll ? MustRoll : RollIfAppropriate);
+		request_locate (_session_range_location->start().samples(), and_roll ? MustRoll : RollIfAppropriate);
 	} else {
 		request_locate (0, and_roll ? MustRoll : RollIfAppropriate);
 	}
@@ -6329,13 +6502,13 @@ Session::goto_start (bool and_roll)
 samplepos_t
 Session::current_start_sample () const
 {
-	return _session_range_location ? _session_range_location->start() : 0;
+	return _session_range_location ? _session_range_location->start().samples() : 0;
 }
 
 samplepos_t
 Session::current_end_sample () const
 {
-	return _session_range_location ? _session_range_location->end() : 0;
+	return _session_range_location ? _session_range_location->end().samples() : 0;
 }
 
 void
@@ -6926,25 +7099,25 @@ Session::reconnect_ltc_output ()
 void
 Session::set_range_selection (samplepos_t start, samplepos_t end)
 {
-	_range_selection = Evoral::Range<samplepos_t> (start, end);
+	_range_selection = Temporal::Range (timepos_t (start), timepos_t (end));
 }
 
 void
 Session::set_object_selection (samplepos_t start, samplepos_t end)
 {
-	_object_selection = Evoral::Range<samplepos_t> (start, end);
+	_object_selection = Temporal::Range (timepos_t (start), timepos_t (end));
 }
 
 void
 Session::clear_range_selection ()
 {
-	_range_selection = Evoral::Range<samplepos_t> (-1,-1);
+	_range_selection = Temporal::Range (timepos_t::max (Temporal::AudioTime), timepos_t::max (Temporal::AudioTime));
 }
 
 void
 Session::clear_object_selection ()
 {
-	_object_selection = Evoral::Range<samplepos_t> (-1,-1);
+	_object_selection = Temporal::Range (timepos_t::max (Temporal::AudioTime), timepos_t::max (Temporal::AudioTime));
 }
 
 void

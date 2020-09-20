@@ -300,7 +300,7 @@ public:
 	int set_state(const XMLNode&) { return 0; }
 
 	PBD::Signal0<void> ContentsChanged;
-	PBD::Signal1<void, double> ContentsShifted;
+	PBD::Signal1<void, Temporal::timecnt_t> ContentsShifted;
 
 	boost::shared_ptr<const MidiSource> midi_source ();
 	void set_midi_source (boost::shared_ptr<MidiSource>);

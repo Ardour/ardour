@@ -29,7 +29,7 @@ namespace ARDOUR {
 class LIBARDOUR_API Quantize : public MidiOperator {
 public:
 	Quantize (bool snap_start, bool snap_end,
-			double start_grid, double end_grid,
+	          int start_grid, int end_grid,
 	          float strength, float swing, Temporal::Beats const & threshold);
 	~Quantize ();
 
@@ -41,8 +41,8 @@ public:
 private:
 	bool   _snap_start;
 	bool   _snap_end;
-	double _start_grid;
-	double _end_grid;
+	int    _start_grid;
+	int    _end_grid;
 	float  _strength;
 	float  _swing;
 	Temporal::Beats  _threshold;

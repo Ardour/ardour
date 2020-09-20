@@ -363,7 +363,7 @@ ExportProfileManager::set_selection_range (samplepos_t start, samplepos_t end)
 	if (start || end) {
 		selection_range.reset (new Location (session));
 		selection_range->set_name (_("Selection"));
-		selection_range->set (start, end);
+		selection_range->set (timepos_t (start), timepos_t (end));
 	} else {
 		selection_range.reset();
 	}
@@ -380,7 +380,7 @@ ExportProfileManager::set_single_range (samplepos_t start, samplepos_t end, stri
 
 	single_range.reset (new Location (session));
 	single_range->set_name (name);
-	single_range->set (start, end);
+	single_range->set (timepos_t (start), timepos_t (end));
 
 	update_ranges ();
 
@@ -415,7 +415,7 @@ ExportProfileManager::init_timespans (XMLNodeList nodes)
 		ExportTimespanPtr timespan = handler->add_timespan();
 		timespan->set_name (session_range->name());
 		timespan->set_range_id (session_range->id().to_s());
-		timespan->set_range (session_range->start(), session_range->end());
+		timespan->set_range (session_range->start_sample(), session_range->end_sample());
 		state->timespans->push_back (timespan);
 		return false;
 	}
@@ -450,7 +450,7 @@ ExportProfileManager::deserialize_timespan (XMLNode & root)
 		ExportTimespanPtr timespan = handler->add_timespan();
 		timespan->set_name (location->name());
 		timespan->set_range_id (location->id().to_s());
-		timespan->set_range (location->start(), location->end());
+		timespan->set_range (location->start_sample(), location->end_sample());
 		state->timespans->push_back (timespan);
 	}
 

@@ -100,7 +100,7 @@ double
 AutomationControl::get_value() const
 {
 	bool from_list = alist() && alist()->automation_playback();
-	return Control::get_double (from_list, _session.transport_sample());
+	return Control::get_double (from_list, timepos_t (_session.transport_sample()));
 }
 
 double
@@ -128,7 +128,7 @@ AutomationControl::set_value (double val, PBD::Controllable::GroupControlDisposi
 	}
 
 	if (_list && !touching () && alist()->automation_state() == Latch && _session.transport_rolling ()) {
-		start_touch (_session.transport_sample ());
+		start_touch (timepos_t (_session.transport_sample ()));
 	}
 
 	/* enforce strict double/boolean value mapping */
@@ -170,7 +170,7 @@ AutomationControl::automation_run (samplepos_t start, pframes_t nframes)
 
 	assert (_list);
 	bool valid = false;
-	double val = _list->rt_safe_eval (start, valid);
+	double val = _list->rt_safe_eval (timepos_t (start), valid);
 	if (!valid) {
 		return;
 	}
@@ -216,7 +216,7 @@ AutomationControl::actually_set_value (double value, PBD::Controllable::GroupCon
 		to_list = false;
 	}
 
-	Control::set_double (value, pos, to_list);
+	Control::set_double (value, timepos_t (pos), to_list);
 
 	if (old_value != (float)value) {
 #if 0
@@ -254,9 +254,10 @@ AutomationControl::set_automation_state (AutoState as)
 		if (as == Write) {
 			AutomationWatch::instance().add_automation_watch (boost::dynamic_pointer_cast<AutomationControl>(shared_from_this()));
 		} else if (as & (Touch | Latch)) {
+#warning NUTEMPO fixme timestamps here are always in samples ... should match list time domain
 			if (alist()->empty()) {
-				Control::set_double (val, _session.current_start_sample (), true);
-				Control::set_double (val, _session.current_end_sample (), true);
+				Control::set_double (val, timepos_t (_session.current_start_sample ()), true);
+				Control::set_double (val, timepos_t (_session.current_end_sample ()), true);
 				Changed (true, Controllable::NoGroup);
 			}
 			if (!touching()) {
@@ -277,7 +278,7 @@ AutomationControl::set_automation_state (AutoState as)
 }
 
 void
-AutomationControl::start_touch (double when)
+AutomationControl::start_touch (timepos_t const & when)
 {
 	if (!_list || touching ()) {
 		return;
@@ -300,7 +301,7 @@ AutomationControl::start_touch (double when)
 }
 
 void
-AutomationControl::stop_touch (double when)
+AutomationControl::stop_touch (timepos_t const & when)
 {
 	if (!_list || !touching ()) {
 		return;

@@ -4414,7 +4414,7 @@ Route::protect_automation ()
  */
 
 void
-Route::shift (samplepos_t pos, samplecnt_t samples)
+Route::shift (timepos_t const & pos, timecnt_t const & distance)
 {
 	/* pan automation */
 	if (_pannable) {
@@ -4425,7 +4425,7 @@ Route::shift (samplepos_t pos, samplecnt_t samples)
 			if (pc) {
 				boost::shared_ptr<AutomationList> al = pc->alist();
 				XMLNode& before = al->get_state ();
-				al->shift (pos, samples);
+				al->shift (pos, timecnt_t (distance));
 				XMLNode& after = al->get_state ();
 				_session.add_command (new MementoCommand<AutomationList> (*al.get(), &before, &after));
 			}
@@ -4449,7 +4449,7 @@ Route::shift (samplepos_t pos, samplecnt_t samples)
 						continue;
 					}
 					XMLNode &before = al->get_state ();
-					al->shift (pos, samples);
+					al->shift (pos, distance);
 					XMLNode &after = al->get_state ();
 					_session.add_command (new MementoCommand<AutomationList> (*al.get(), &before, &after));
 				}

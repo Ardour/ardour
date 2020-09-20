@@ -28,6 +28,8 @@
 #include <sstream>
 #include <algorithm>
 
+#include "temporal/types_convert.h"
+
 #include "ardour/automation_list.h"
 #include "ardour/beats_samples_converter.h"
 #include "ardour/event_type_map.h"
@@ -60,8 +62,8 @@ static void dumpit (const AutomationList& al, string prefix = "")
 	cerr << "\n";
 }
 #endif
-AutomationList::AutomationList (const Evoral::Parameter& id, const Evoral::ParameterDescriptor& desc)
-	: ControlList(id, desc)
+AutomationList::AutomationList (const Evoral::Parameter& id, const Evoral::ParameterDescriptor& desc, Temporal::TimeDomain time_domain)
+	: ControlList(id, desc, time_domain)
 	, _before (0)
 {
 	_state = Off;
@@ -74,8 +76,8 @@ AutomationList::AutomationList (const Evoral::Parameter& id, const Evoral::Param
 	AutomationListCreated(this);
 }
 
-AutomationList::AutomationList (const Evoral::Parameter& id)
-	: ControlList(id, ARDOUR::ParameterDescriptor(id))
+AutomationList::AutomationList (const Evoral::Parameter& id, Temporal::TimeDomain time_domain)
+	: ControlList(id, ARDOUR::ParameterDescriptor(id), time_domain)
 	, _before (0)
 {
 	_state = Off;
@@ -102,7 +104,7 @@ AutomationList::AutomationList (const AutomationList& other)
 	AutomationListCreated(this);
 }
 
-AutomationList::AutomationList (const AutomationList& other, double start, double end)
+AutomationList::AutomationList (const AutomationList& other, timepos_t const & start, timepos_t const & end)
 	: ControlList(other, start, end)
 	, _before (0)
 {
@@ -119,7 +121,7 @@ AutomationList::AutomationList (const AutomationList& other, double start, doubl
  * in or below the AutomationList node.  It is used if @param id is non-null.
  */
 AutomationList::AutomationList (const XMLNode& node, Evoral::Parameter id)
-	: ControlList(id, ARDOUR::ParameterDescriptor(id))
+	: ControlList(id, ARDOUR::ParameterDescriptor(id), Temporal::AudioTime) /* domain may change in ::set_state */
 	, _before (0)
 {
 	g_atomic_int_set (&_touching, 0);
@@ -145,9 +147,10 @@ AutomationList::~AutomationList()
 
 boost::shared_ptr<Evoral::ControlList>
 AutomationList::create(const Evoral::Parameter&           id,
-                       const Evoral::ParameterDescriptor& desc)
+                       const Evoral::ParameterDescriptor& desc,
+                       Temporal::TimeDomain time_domain)
 {
-	return boost::shared_ptr<Evoral::ControlList>(new AutomationList(id, desc));
+	return boost::shared_ptr<Evoral::ControlList>(new AutomationList(id, desc, time_domain));
 }
 
 void
@@ -245,20 +248,20 @@ AutomationList::default_interpolation () const
 }
 
 void
-AutomationList::start_write_pass (double when)
+AutomationList::start_write_pass (timepos_t const & when)
 {
 	snapshot_history (true);
 	ControlList::start_write_pass (when);
 }
 
 void
-AutomationList::write_pass_finished (double when, double thinning_factor)
+AutomationList::write_pass_finished (timepos_t const & when, double thinning_factor)
 {
 	ControlList::write_pass_finished (when, thinning_factor);
 }
 
 void
-AutomationList::start_touch (double when)
+AutomationList::start_touch (timepos_t const & when)
 {
 	if (_state == Touch) {
 		start_write_pass (when);
@@ -268,7 +271,7 @@ AutomationList::start_touch (double when)
 }
 
 void
-AutomationList::stop_touch (double)
+AutomationList::stop_touch (timepos_t const & /* not used */)
 {
 	if (g_atomic_int_get (&_touching) == 0) {
 		/* this touch has already been stopped (probably by Automatable::transport_stopped),
@@ -315,26 +318,27 @@ AutomationList::thaw ()
 }
 
 bool
-AutomationList::paste (const ControlList& alist, double pos, BeatsSamplesConverter const& bfc)
+AutomationList::paste (const ControlList& alist, timepos_t const &  pos, BeatsSamplesConverter const& bfc)
 {
-	AutomationType src_type = (AutomationType)alist.parameter().type();
-	AutomationType dst_type = (AutomationType)_parameter.type();
-
-	if (parameter_is_midi (src_type) == parameter_is_midi (dst_type)) {
+	if (time_domain() == alist.time_domain()) {
 		return ControlList::paste (alist, pos);
 	}
-	bool to_sample = parameter_is_midi (src_type);
+
+	/* time domains differ - need to map the time of all points in alist
+	 * into our time domain
+	 */
+
+	const bool to_sample = (time_domain() == Temporal::AudioTime);
 
 	ControlList cl (alist);
 	cl.clear ();
+
 	for (const_iterator i = alist.begin ();i != alist.end (); ++i) {
-		double when = (*i)->when;
 		if (to_sample) {
-			when = bfc.to (Temporal::Beats::from_double ((*i)->when));
+			cl.fast_simple_add (timepos_t ((*i)->when.samples()), (*i)->value);
 		} else {
-			when = bfc.from ((*i)->when).to_double ();
+			cl.fast_simple_add (timepos_t ((*i)->when.beats ()), (*i)->value);
 		}
-		cl.fast_simple_add (when, (*i)->value);
 	}
 	return ControlList::paste (cl, pos);
 }
@@ -359,6 +363,7 @@ AutomationList::state (bool save_auto_state, bool need_lock)
 	root->set_property ("automation-id", EventTypeMap::instance().to_symbol(_parameter));
 	root->set_property ("id", id());
 	root->set_property ("interpolation-style", _interpolation);
+	root->set_property ("time-domain", enum_2_string (time_domain()));
 
 	if (save_auto_state) {
 		/* never serialize state with Write enabled - too dangerous
@@ -432,13 +437,13 @@ AutomationList::deserialize_events (const XMLNode& node)
 
 	std::string x_str;
 	std::string y_str;
-	double x;
+	timepos_t x;
 	double y;
 	bool ok = true;
 
 	while (str) {
 		str >> x_str;
-		if (!str || !PBD::string_to<double> (x_str, x)) {
+		if (!str || !PBD::string_to<timepos_t> (x_str, x)) {
 			break;
 		}
 		str >> y_str;
@@ -469,6 +474,11 @@ AutomationList::set_state (const XMLNode& node, int version)
 	XMLNodeList nlist = node.children();
 	XMLNode* nsos;
 	XMLNodeIterator niter;
+	Temporal::TimeDomain time_domain;
+
+	if (node.get_property ("time-domain", time_domain)) {
+		set_time_domain (time_domain);
+	}
 
 	if (node.name() == X_("events")) {
 		/* partial state setting*/
@@ -505,7 +515,7 @@ AutomationList::set_state (const XMLNode& node, int version)
 			}
 
 			y = std::min ((double)_desc.upper, std::max ((double)_desc.lower, y));
-			fast_simple_add (x, y);
+			fast_simple_add (timepos_t (x), y);
 		}
 
 		thaw ();

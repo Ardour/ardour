@@ -67,13 +67,14 @@ AudioPlaylist::AudioPlaylist (boost::shared_ptr<const AudioPlaylist> other, stri
 {
 }
 
-AudioPlaylist::AudioPlaylist (boost::shared_ptr<const AudioPlaylist> other, samplepos_t start, samplecnt_t cnt, string name, bool hidden)
+AudioPlaylist::AudioPlaylist (boost::shared_ptr<const AudioPlaylist> other, timepos_t const & start, timepos_t const & cnt, string name, bool hidden)
 	: Playlist (other, start, cnt, name, hidden)
 {
 	RegionReadLock rlock2 (const_cast<AudioPlaylist*> (other.get()));
 	in_set_state++;
 
-	samplepos_t const end = start + cnt - 1;
+	const timepos_t tend = start + cnt;
+	samplepos_t end = tend.samples();
 
 	/* Audio regions that have been created by the Playlist constructor
 	   will currently have the same fade in/out as the regions that they
@@ -89,43 +90,46 @@ AudioPlaylist::AudioPlaylist (boost::shared_ptr<const AudioPlaylist> other, samp
 		samplecnt_t fade_in = 64;
 		samplecnt_t fade_out = 64;
 
-		switch (region->coverage (start, end)) {
-		case Evoral::OverlapNone:
+		switch (region->coverage (start, tend)) {
+		case Temporal::OverlapNone:
 			continue;
 
-		case Evoral::OverlapInternal:
+		case Temporal::OverlapInternal:
 		{
-			samplecnt_t const offset = start - region->position ();
+			samplecnt_t const offset = start.samples() - region->position_sample ();
 			samplecnt_t const trim = region->last_sample() - end;
 			if (region->fade_in()->back()->when > offset) {
-				fade_in = region->fade_in()->back()->when - offset;
+				fade_in = region->fade_in()->back()->when.earlier (timepos_t (offset)).samples();
 			}
 			if (region->fade_out()->back()->when > trim) {
-				fade_out = region->fade_out()->back()->when - trim;
+				fade_out = region->fade_out()->back()->when.earlier (timepos_t (trim)).samples();
 			}
 			break;
 		}
 
-		case Evoral::OverlapStart: {
-			if (end > region->position() + region->fade_in()->back()->when)
-				fade_in = region->fade_in()->back()->when;  //end is after fade-in, preserve the fade-in
-			if (end > region->last_sample() - region->fade_out()->back()->when)
-				fade_out = region->fade_out()->back()->when - ( region->last_sample() - end );  //end is inside the fadeout, preserve the fades endpoint
+		case Temporal::OverlapStart: {
+			if (timepos_t (end) > region->nt_position() + region->fade_in()->back()->when) {
+				fade_in = region->fade_in()->back()->when.samples();  //end is after fade-in, preserve the fade-in
+			}
+			if (timepos_t (end) >= region->nt_end().earlier (region->fade_out()->back()->when)) {
+				fade_out = region->fade_out()->back()->when.earlier (timepos_t (region->last_sample() - end)).samples();  //end is inside the fadeout, preserve the fades endpoint
+			}
 			break;
 		}
 
-		case Evoral::OverlapEnd: {
-			if (start < region->last_sample() - region->fade_out()->back()->when)  //start is before fade-out, preserve the fadeout
-				fade_out = region->fade_out()->back()->when;
-
-			if (start < region->position() + region->fade_in()->back()->when)
-				fade_in = region->fade_in()->back()->when - (start - region->position());  //end is inside the fade-in, preserve the fade-in endpoint
+		case Temporal::OverlapEnd: {
+			if (start < region->nt_end().earlier (region->fade_out()->back()->when)) {  //start is before fade-out, preserve the fadeout
+				fade_out = region->fade_out()->back()->when.samples();
+			}
+			if (start < region->nt_position() + region->fade_in()->back()->when) {
+				fade_in = region->fade_in()->back()->when.earlier (start.distance (region->nt_position())).samples();  //end is inside the fade-in, preserve the fade-in endpoint
+			}
 			break;
 		}
 
-		case Evoral::OverlapExternal:
-			fade_in = region->fade_in()->back()->when;
-			fade_out = region->fade_out()->back()->when;
+		case Temporal::OverlapExternal:
+			fade_in = region->fade_in()->back()->when.samples();
+			fade_out = region->fade_out()->back()->when.samples();
 			break;
 		}
 
@@ -149,23 +153,23 @@ struct ReadSorter {
 		    return a->layer() > b->layer();
 	    }
 
-	    return a->position() < b->position();
+	    return a->nt_position() < b->nt_position();
     }
 };
 
 /** A segment of region that needs to be read */
 struct Segment {
-	Segment (boost::shared_ptr<AudioRegion> r, Evoral::Range<samplepos_t> a) : region (r), range (a) {}
+	Segment (boost::shared_ptr<AudioRegion> r, Temporal::Range a) : region (r), range (a) {}
 
 	boost::shared_ptr<AudioRegion> region; ///< the region
-	Evoral::Range<samplepos_t> range;       ///< range of the region to read, in session samples
+	Temporal::Range range;       ///< range of the region to read, in session samples
 };
 
 /** @param start Start position in session samples.
  *  @param cnt Number of samples to read.
  */
-ARDOUR::samplecnt_t
-AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, samplepos_t start, samplecnt_t cnt, unsigned chan_n)
+ARDOUR::timecnt_t
+AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, timepos_t const & start, timecnt_t const & cnt, uint32_t chan_n)
 {
 	DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("Playlist %1 read @ %2 for %3, channel %4, regions %5 mixdown @ %6 gain @ %7\n",
 							   name(), start, cnt, chan_n, regions.size(), mixdown_buffer, gain_buffer));
@@ -183,7 +187,7 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, sa
 	   zeroed.
 	*/
 
-	memset (buf, 0, sizeof (Sample) * cnt);
+	memset (buf, 0, sizeof (Sample) * cnt.samples());
 
 	/* this function is never called from a realtime thread, so
 	   its OK to block (for short intervals).
@@ -194,14 +198,14 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, sa
 	/* Find all the regions that are involved in the bit we are reading,
 	   and sort them by descending layer and ascending position.
 	*/
-	boost::shared_ptr<RegionList> all = regions_touched_locked (start, start + cnt - 1);
+	boost::shared_ptr<RegionList> all = regions_touched_locked (start, start + cnt);
 	all->sort (ReadSorter ());
 
 	/* This will be a list of the bits of our read range that we have
 	   handled completely (ie for which no more regions need to be read).
 	   It is a list of ranges in session samples.
 	*/
-	Evoral::RangeList<samplepos_t> done;
+	Temporal::RangeList done;
 
 	/* This will be a list of the bits of regions that we need to read */
 	list<Segment> to_do;
@@ -224,30 +228,31 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, sa
 		/* Work out which bits of this region need to be read;
 		   first, trim to the range we are reading...
 		*/
-		Evoral::Range<samplepos_t> region_range = ar->range ();
-		region_range.from = max (region_range.from, start);
-		region_range.to = min (region_range.to, start + cnt - 1);
+		Temporal::Range rrange = ar->range_samples ();
+		Temporal::Range region_range (max (rrange.start(), start),
+		                              min (rrange.end(), start + cnt));
 
 		/* ... and then remove the bits that are already done */
 
-		Evoral::RangeList<samplepos_t> region_to_do = Evoral::subtract (region_range, done);
+		Temporal::RangeList region_to_do = region_range.subtract (done);
 
 		/* Make a note to read those bits, adding their bodies (the parts between end-of-fade-in
 		   and start-of-fade-out) to the `done' list.
 		*/
 
-		Evoral::RangeList<samplepos_t>::List t = region_to_do.get ();
+		Temporal::RangeList::List t = region_to_do.get ();
 
-		for (Evoral::RangeList<samplepos_t>::List::iterator j = t.begin(); j != t.end(); ++j) {
-			Evoral::Range<samplepos_t> d = *j;
+		for (Temporal::RangeList::List::iterator j = t.begin(); j != t.end(); ++j) {
+			Temporal::Range d = *j;
 			to_do.push_back (Segment (ar, d));
 
 			if (ar->opaque ()) {
 				/* Cut this range down to just the body and mark it done */
-				Evoral::Range<samplepos_t> body = ar->body_range ();
-				if (body.from < d.to && body.to > d.from) {
-					d.from = max (d.from, body.from);
-					d.to = min (d.to, body.to);
+				Temporal::Range body = ar->body_range ();
+
+				if (body.start() < d.end() && body.end() > d.start()) {
+					d.set_start (max (d.start(), body.start()));
+					d.set_end (min (d.end(), body.end()));
 					done.add (d);
 				}
 			}
@@ -255,12 +260,14 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, sa
 	}
 
 	/* Now go backwards through the to_do list doing the actual reads */
+
 	for (list<Segment>::reverse_iterator i = to_do.rbegin(); i != to_do.rend(); ++i) {
 		DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("\tPlaylist %1 read %2 @ %3 for %4, channel %5, buf @ %6 offset %7\n",
-								   name(), i->region->name(), i->range.from,
-								   i->range.to - i->range.from + 1, (int) chan_n,
-								   buf, i->range.from - start));
-		i->region->read_at (buf + i->range.from - start, mixdown_buffer, gain_buffer, i->range.from, i->range.to - i->range.from + 1, chan_n);
+		                                                   name(), i->region->name(), i->range.start(),
+		                                                   i->range.length(), (int) chan_n,
+		                                                   buf, i->range.start().earlier (start)));
+
+		i->region->read_at (buf + start.distance (i->range.start()).samples(), mixdown_buffer, gain_buffer, i->range.start().samples(), i->range.start().distance (i->range.end()).samples(), chan_n);
 	}
 
 	return cnt;
@@ -278,9 +285,9 @@ AudioPlaylist::dump () const
 	for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
 		r = *i;
 		cerr << "  " << r->name() << " @ " << r << " ["
-		     << r->start() << "+" << r->length()
+		     << r->nt_start() << "+" << r->nt_length()
 		     << "] at "
-		     << r->position()
+		     << r->nt_position()
 		     << " on layer "
 		     << r->layer ()
 		     << endl;
@@ -460,7 +467,7 @@ AudioPlaylist::pre_uncombine (vector<boost::shared_ptr<Region> >& originals, boo
 			   original region.
 			*/
 
-			if (cr->fade_in()->back()->when <= ar->length()) {
+			if (cr->fade_in()->back()->when <= ar->nt_length()) {
 				/* don't do this if the fade is longer than the
 				 * region
 				 */
@@ -474,7 +481,7 @@ AudioPlaylist::pre_uncombine (vector<boost::shared_ptr<Region> >& originals, boo
 			   original region.
 			*/
 
-			if (cr->fade_out()->back()->when <= ar->length()) {
+			if (cr->fade_out()->back()->when <= ar->nt_length()) {
 				/* don't do this if the fade is longer than the
 				 * region
 				 */

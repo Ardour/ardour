@@ -73,20 +73,21 @@ private:
 class LIBARDOUR_API AutomationList : public Evoral::ControlList, public PBD::StatefulDestructible
 {
 public:
-	AutomationList (const Evoral::Parameter& id, const Evoral::ParameterDescriptor& desc);
-	AutomationList (const Evoral::Parameter& id);
+	AutomationList (const Evoral::Parameter& id, const Evoral::ParameterDescriptor& desc, Temporal::TimeDomain);
+	AutomationList (const Evoral::Parameter& id, Temporal::TimeDomain);
 	AutomationList (const XMLNode&, Evoral::Parameter id);
 	AutomationList (const AutomationList&);
-	AutomationList (const AutomationList&, double start, double end);
+	AutomationList (const AutomationList&, timepos_t const & start, timepos_t const & end);
 	~AutomationList();
 
 	virtual boost::shared_ptr<ControlList> create(const Evoral::Parameter&           id,
-	                                              const Evoral::ParameterDescriptor& desc);
+	                                              const Evoral::ParameterDescriptor& desc,
+	                                              Temporal::TimeDomain);
 
 	AutomationList& operator= (const AutomationList&);
 
 	void thaw ();
-	bool paste (const ControlList&, double, BeatsSamplesConverter const&);
+	bool paste (const ControlList&, timepos_t const &, BeatsSamplesConverter const&);
 
 	void set_automation_state (AutoState);
 	AutoState automation_state() const;
@@ -103,11 +104,11 @@ public:
 
 	static PBD::Signal1<void,AutomationList*> AutomationListCreated;
 
-	void start_write_pass (double when);
-	void write_pass_finished (double when, double thinning_factor=0.0);
+	void start_write_pass (timepos_t const & when);
+	void write_pass_finished (timepos_t const & when, double thinning_factor=0.0);
 
-	void start_touch (double when);
-	void stop_touch (double when);
+	void start_touch (timepos_t const & when);
+	void stop_touch (timepos_t const &  when);
 
 	bool touching () const { return g_atomic_int_get (&_touching) != 0; }
 	bool writing () const { return _state == Write; }

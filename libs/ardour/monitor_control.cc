@@ -26,7 +26,7 @@ using namespace PBD;
 
 MonitorControl::MonitorControl (Session& session, std::string const & name, Monitorable& m)
 	: SlavableAutomationControl (session, MonitoringAutomation, ParameterDescriptor (MonitoringAutomation),
-	                             boost::shared_ptr<AutomationList>(new AutomationList(Evoral::Parameter(MonitoringAutomation))),
+	                             boost::shared_ptr<AutomationList>(new AutomationList(Evoral::Parameter(MonitoringAutomation), Temporal::AudioTime)),
 	                             name)
 
 	, _monitorable (m)

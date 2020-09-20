@@ -168,65 +168,36 @@ MidiSource::set_state (const XMLNode& node, int /*version*/)
 	return 0;
 }
 
-bool
-MidiSource::empty () const
-{
-	return !_length_beats;
-}
-
-samplecnt_t
-MidiSource::length (samplepos_t pos) const
-{
-	if (!_length_beats) {
-		return 0;
-	}
-
-	BeatsSamplesConverter converter(_session.tempo_map(), pos);
-	return converter.to(_length_beats);
-}
-
-void
-MidiSource::update_length (samplecnt_t)
-{
-	// You're not the boss of me!
-}
-
 void
 MidiSource::invalidate (const Lock& lock)
 {
 	Invalidated(_session.transport_rolling());
 }
 
-samplecnt_t
+timecnt_t
 MidiSource::midi_read (const Lock&                        lm,
                        Evoral::EventSink<samplepos_t>&    dst,
-                       samplepos_t                        source_start,
-                       samplepos_t                        start,
-                       samplecnt_t                        cnt,
-                       Evoral::Range<samplepos_t>*        loop_range,
+                       timepos_t const &                  source_start,
+                       timecnt_t const &                  start,
+                       timecnt_t const &                  cnt,
+                       Temporal::Range*                   loop_range,
                        MidiCursor&                        cursor,
                        MidiStateTracker*                  tracker,
                        MidiChannelFilter*                 filter,
-                       const std::set<Evoral::Parameter>& filtered,
-                       const double                       pos_beats,
-                       const double                       start_beats) const
+                       const std::set<Evoral::Parameter>& filtered)
 {
-	BeatsSamplesConverter converter(_session.tempo_map(), source_start);
-
-	const double start_qn = pos_beats - start_beats;
-
 	DEBUG_TRACE (DEBUG::MidiSourceIO,
 	             string_compose ("MidiSource::midi_read() %5 sstart %1 start %2 cnt %3 tracker %4\n",
 	                             source_start, start, cnt, tracker, name()));
 
 	if (!_model) {
-		return read_unlocked (lm, dst, source_start, start, cnt, loop_range, tracker, filter);
+		return timecnt_t (read_unlocked (lm, dst, source_start, start, cnt, loop_range, tracker, filter), start.position());
 	}
 
 	// Find appropriate model iterator
-	Evoral::Sequence<Temporal::Beats>::const_iterator& i = cursor.iter;
+
 	const bool linear_read = cursor.last_read_end != 0 && start == cursor.last_read_end;
-	if (!linear_read || !i.valid()) {
+	if (!linear_read || !cursor.iter.valid()) {
 		/* Cached iterator is invalid, search for the first event past start.
 		   Note that multiple tracks can use a MidiSource simultaneously, so
 		   all playback state must be in parameters (the cursor) and must not
@@ -234,64 +205,76 @@ MidiSource::midi_read (const Lock&                        lm,
 		   See http://tracker.ardour.org/view.php?id=6541
 		*/
 		cursor.connect(Invalidated);
-		cursor.iter = _model->begin(converter.from(start), false, filtered, &cursor.active_notes);
+		cursor.iter = _model->begin (start.beats(), false, filtered, &cursor.active_notes);
 		cursor.active_notes.clear();
 	}
 
 	cursor.last_read_end = start + cnt;
 
+	// Find appropriate model iterator
+	Evoral::Sequence<Temporal::Beats>::const_iterator& i = cursor.iter;
+
 	// Copy events in [start, start + cnt) into dst
+
+	const Temporal::Beats source_start_beats = source_start.beats();
+	const Temporal::Beats region_start_beats = start.beats();
+	const Temporal::Beats cnt_beats = cnt.beats ();
+
+	const Temporal::Beats end = source_start_beats + region_start_beats + cnt_beats;
+	const Temporal::Beats session_source_start = (source_start + start).beats();
+
 	for (; i != _model->end(); ++i) {
 
 		// Offset by source start to convert event time to session time
 
-		samplepos_t time_samples = _session.tempo_map().sample_at_quarter_note (i->time().to_double() + start_qn);
+		const Temporal::Beats session_event_beats = source_start_beats + i->time();
 
-		if (time_samples < start + source_start) {
+		if (session_event_beats < session_source_start) {
 			/* event too early */
-
+			DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("%1: skip event, too early @ %2 for %3\n", _name, session_event_beats, session_source_start));
 			continue;
 
-		} else if (time_samples >= start + cnt + source_start) {
+		} else if (session_event_beats >= end) {
 
-			DEBUG_TRACE (DEBUG::MidiSourceIO,
-			             string_compose ("%1: reached end with event @ %2 vs. %3\n",
-			                             _name, time_samples, start+cnt));
+			DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("%1: reached end (%2) with event @ %3\n", _name, end, session_event_beats));
 			break;
 
 		} else {
 
 			/* in range */
 
+			timepos_t seb = timepos_t (session_event_beats);
+			samplepos_t time_samples = seb.samples();
+
 			if (loop_range) {
-				time_samples = loop_range->squish (time_samples);
+				time_samples = loop_range->squish (seb).samples();
 			}
 
 			const uint8_t status           = i->buffer()[0];
 			const bool    is_channel_event = (0x80 <= (status & 0xF0)) && (status <= 0xE0);
+
 			if (filter && is_channel_event) {
 				/* Copy event so the filter can modify the channel.  I'm not
-				   sure if this is necessary here (channels are mapped later in
-				   buffers anyway), but it preserves existing behaviour without
-				   destroying events in the model during read. */
+				 * sure if this is necessary here (channels are mapped later in
+				 * buffers anyway), but it preserves existing behaviour without
+				 *  destroying events in the model during read.
+				 */
 				Evoral::Event<Temporal::Beats> ev(*i, true);
+
 				if (!filter->filter(ev.buffer(), ev.size())) {
 					dst.write (time_samples, ev.event_type(), ev.size(), ev.buffer());
 				} else {
-					DEBUG_TRACE (DEBUG::MidiSourceIO,
-					             string_compose ("%1: filter event @ %2 type %3 size %4\n",
-					                             _name, time_samples, i->event_type(), i->size()));
+					DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("%1: filter event @ %2 type %3 size %4\n", _name, time_samples, i->event_type(), i->size()));
 				}
 			} else {
 				dst.write (time_samples, i->event_type(), i->size(), i->buffer());
 			}
 
+
 #ifndef NDEBUG
 			if (DEBUG_ENABLED(DEBUG::MidiSourceIO)) {
 				DEBUG_STR_DECL(a);
-				DEBUG_STR_APPEND(a, string_compose ("%1 added event @ %2 sz %3 within %4 .. %5 ",
-				                                    _name, time_samples, i->size(),
-				                                    start + source_start, start + cnt + source_start));
+				DEBUG_STR_APPEND(a, string_compose ("%1 added event @ %2 (%3) sz %4 within %5 .. %6 ", _name, time_samples, session_event_beats, i->size(), source_start + start, end));
 				for (size_t n=0; n < i->size(); ++n) {
 					DEBUG_STR_APPEND(a,hex);
 					DEBUG_STR_APPEND(a,"0x");
@@ -312,18 +295,18 @@ MidiSource::midi_read (const Lock&                        lm,
 	return cnt;
 }
 
-samplecnt_t
+timecnt_t
 MidiSource::midi_write (const Lock&                  lm,
                         MidiRingBuffer<samplepos_t>& source,
-                        samplepos_t                  source_start,
-                        samplecnt_t                  cnt)
+                        timepos_t const &            source_start,
+                        timecnt_t const &            cnt)
 {
-	const samplecnt_t ret = write_unlocked (lm, source, source_start, cnt);
+	const timecnt_t ret = write_unlocked (lm, source, source_start, cnt);
 
-	if (cnt == max_samplecnt) {
+	if (cnt == std::numeric_limits<timecnt_t>::max()) {
 		invalidate(lm);
 	} else {
-		_capture_length += cnt;
+		_capture_length += cnt.samples();
 	}
 
 	return ret;
@@ -356,13 +339,15 @@ MidiSource::mark_write_starting_now (samplecnt_t position,
 	   because it is not RT-safe.
 	*/
 
-	set_natural_position (position);
+#warning NUTEMPO QUESTION should the time domain here reflect some setting for this source?
+	set_natural_position (timepos_t (position));
 	_capture_length      = capture_length;
 	_capture_loop_length = loop_length;
 
-	TempoMap& map (_session.tempo_map());
-	BeatsSamplesConverter converter(map, position);
-	_length_beats = converter.from(capture_length);
+#warning NUTEMPO FIXME needs session to use tempo map
+	//TempoMap& map (_session.tempo_map());
+	//BeatsSamplesConverter converter(map, position);
+	//_length_beats = converter.from(capture_length);
 }
 
 void

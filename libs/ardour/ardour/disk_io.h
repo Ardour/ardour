@@ -181,13 +181,13 @@ protected:
 
 	virtual void playlist_changed (const PBD::PropertyChange&) {}
 	virtual void playlist_deleted (boost::weak_ptr<Playlist>);
-	virtual void playlist_ranges_moved (std::list< Evoral::RangeMove<samplepos_t> > const &, bool) {}
+	virtual void playlist_ranges_moved (std::list<Temporal::RangeMove> const &, bool) {}
 
 	/* The MIDI stuff */
 
 	MidiRingBuffer<samplepos_t>*  _midi_buf;
 
-	static void get_location_times (const Location* location, samplepos_t* start, samplepos_t* end, samplepos_t* length);
+	static void get_location_times (const Location* location, timepos_t* start, timepos_t* end, timecnt_t* length);
 };
 
 } // namespace ARDOUR

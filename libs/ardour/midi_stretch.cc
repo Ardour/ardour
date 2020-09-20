@@ -55,21 +55,7 @@ MidiStretch::run (boost::shared_ptr<Region> r, Progress*)
 		return -1;
 	}
 
-	const TempoMap& tmap (session.tempo_map ());
-
-	/* Fraction is based on sample-time, while MIDI source
-	 * is always using music-time. This matters in case there is
-	 * a tempo-ramp. So we need to scale the ratio to music-time */
-	const double mtfrac =
-		tmap.framewalk_to_qn (region->position (), region->length () * _request.time_fraction).to_double ()
-		/
-		tmap.framewalk_to_qn (region->position (), region->length ()).to_double ();
-
-	/* the name doesn't need to be super-precise, but allow for 2 fractional
-	 * digits just to disambiguate close but not identical stretches.
-	 */
-
-	snprintf (suffix, sizeof (suffix), "@%d", (int) floor (mtfrac * 100.0f));
+	snprintf (suffix, sizeof (suffix), "@%d", (int) floor ((_request.time_fraction.numerator()/ (double) _request.time_fraction.denominator()) * 100.0f));
 
 	string new_name = region->name();
 	string::size_type at = new_name.find ('@');
@@ -107,9 +93,6 @@ MidiStretch::run (boost::shared_ptr<Region> r, Progress*)
 	boost::shared_ptr<MidiModel> new_model = new_src->model();
 	new_model->start_write();
 
-	const double r_start = tmap.quarter_notes_between_samples (region->position () - region->start (), region->position ());
-	const double r_end = r_start + tmap.quarter_notes_between_samples (region->position (), region->position () + region->length ());
-
 #ifdef DEBUG_MIDI_STRETCH
 	printf ("stretch start: %f end: %f  [* %f] * %f\n", r_start, r_end, _request.time_fraction, mtfrac);
 #endif
@@ -119,26 +102,7 @@ MidiStretch::run (boost::shared_ptr<Region> r, Progress*)
 	 */
 	for (Evoral::Sequence<MidiModel::TimeType>::const_iterator i = old_model->begin (MidiModel::TimeType(), true); i != old_model->end(); ++i) {
 
-		if (i->time() < r_start) {
-#ifdef DEBUG_MIDI_STRETCH
-			cout << "SKIP EARLY EVENT " << i->time() << "\n";
-#endif
-			continue;
-		}
-		if (i->time() > r_end) {
-#ifdef DEBUG_MIDI_STRETCH
-			cout << "SKIP LATE EVENT " << i->time() << "\n";
-			continue;
-#else
-			break;
-#endif
-		}
-
-#ifdef DEBUG_MIDI_STRETCH
-		cout << "STRETCH " << i->time() << " OFFSET FROM START @ " << r_start << " = " << (i->time() - r_start) << " TO " << (i->time() - r_start) * mtfrac << "\n";
-#endif
-
-		const MidiModel::TimeType new_time = (i->time() - r_start) * mtfrac;
+		const MidiModel::TimeType new_time = i->time().operator* (_request.time_fraction);
 
 		// FIXME: double copy
 		Evoral::Event<MidiModel::TimeType> ev(*i, true);
@@ -154,9 +118,8 @@ MidiStretch::run (boost::shared_ptr<Region> r, Progress*)
 	const int ret = finish (region, nsrcs, new_name);
 
 	/* non-musical */
-	results[0]->set_start(0);
-	results[0]->set_position (r->position ()); // force updates the region's quarter-note position
-	results[0]->set_length((samplecnt_t) floor (r->length() * _request.time_fraction), 0);
+#warning NUTEMPO FIXME do we still need this?
+	results[0]->set_length (r->nt_length().operator* ( _request.time_fraction));
 
 	return ret;
 }

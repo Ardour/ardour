@@ -40,7 +40,7 @@ public:
 	void set_minioi (float);
 	void set_function (int);
 
-	int run (const std::string& path, Readable*, uint32_t channel, AnalysisFeatureList& results);
+	int run (const std::string& path, AudioReadable*, uint32_t channel, AnalysisFeatureList& results);
 
 	static void cleanup_onsets (AnalysisFeatureList&, float sr, float gap_msecs);
 

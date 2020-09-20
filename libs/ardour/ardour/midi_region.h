@@ -26,7 +26,7 @@
 #include <vector>
 
 #include "temporal/beats.h"
-#include "evoral/Range.h"
+#include "temporal/range.h"
 
 #include "pbd/string_convert.h"
 
@@ -68,26 +68,23 @@ class LIBARDOUR_API MidiRegion : public Region
 
 	boost::shared_ptr<MidiSource> midi_source (uint32_t n=0) const;
 
-	/* Stub Readable interface */
-	virtual samplecnt_t read (Sample*, samplepos_t /*pos*/, samplecnt_t /*cnt*/, int /*channel*/) const { return 0; }
+	timecnt_t read_at (Evoral::EventSink<samplepos_t>& dst,
+	                   timepos_t const & position,
+	                   timecnt_t const & dur,
+	                   Temporal::Range* loop_range,
+	                   MidiCursor& cursor,
+	                   uint32_t  chan_n = 0,
+	                   NoteMode  mode = Sustained,
+	                   MidiStateTracker* tracker = 0,
+	                   MidiChannelFilter* filter = 0) const;
 
-	samplecnt_t read_at (Evoral::EventSink<samplepos_t>& dst,
-	                    samplepos_t position,
-	                    samplecnt_t dur,
-	                    Evoral::Range<samplepos_t>* loop_range,
-	                    MidiCursor& cursor,
-	                    uint32_t  chan_n = 0,
-	                    NoteMode  mode = Sustained,
-	                    MidiStateTracker* tracker = 0,
-	                    MidiChannelFilter* filter = 0) const;
-
-	samplecnt_t master_read_at (MidiRingBuffer<samplepos_t>& dst,
-	                           samplepos_t position,
-	                           samplecnt_t dur,
-	                           Evoral::Range<samplepos_t>* loop_range,
-	                           MidiCursor& cursor,
-	                           uint32_t  chan_n = 0,
-	                           NoteMode  mode = Sustained) const;
+	timecnt_t master_read_at (MidiRingBuffer<samplepos_t>& dst,
+	                          timepos_t const & position,
+	                          timecnt_t const & dur,
+	                          Temporal::Range* loop_range,
+	                          MidiCursor& cursor,
+	                          uint32_t  chan_n = 0,
+	                          NoteMode  mode = Sustained) const;
 
 	XMLNode& state ();
 	int      set_state (const XMLNode&, int version);
@@ -127,37 +124,29 @@ class LIBARDOUR_API MidiRegion : public Region
 	MidiRegion (boost::shared_ptr<const MidiRegion>);
 	MidiRegion (boost::shared_ptr<const MidiRegion>, timecnt_t const & offset);
 
-	samplecnt_t _read_at (const SourceList&, Evoral::EventSink<samplepos_t>& dst,
-	                     samplepos_t position,
-	                     samplecnt_t dur,
-	                     Evoral::Range<samplepos_t>* loop_range,
-	                     MidiCursor& cursor,
-	                     uint32_t chan_n = 0,
-	                     NoteMode mode = Sustained,
-	                     MidiStateTracker* tracker = 0,
-	                     MidiChannelFilter* filter = 0) const;
+	timecnt_t _read_at (const SourceList&, Evoral::EventSink<samplepos_t>& dst,
+	                    timepos_t const & position,
+	                    timecnt_t const & dur,
+	                    Temporal::Range* loop_range,
+	                    MidiCursor& cursor,
+	                    uint32_t chan_n = 0,
+	                    NoteMode mode = Sustained,
+	                    MidiStateTracker* tracker = 0,
+	                    MidiChannelFilter* filter = 0) const;
 
 	void register_properties ();
-	void post_set (const PBD::PropertyChange&);
 
 	void recompute_at_start ();
 	void recompute_at_end ();
 
 	bool set_name (const std::string & str);
 
-	void set_position_internal (timepos_t const & pos);
-	void set_length_internal (timecnt_t const & len);
 	void set_start_internal (timecnt_t const &);
-	void trim_to_internal (timepos_t const & position, timecnt_t const & length);
-	void update_length_beats ();
 
 	void model_changed ();
 	void model_contents_changed ();
-	void model_shifted (double qn_distance);
+	void model_shifted (timecnt_t qn_distance);
 	void model_automation_state_changed (Evoral::Parameter const &);
-
-	void set_start_beats_from_start_samples ();
-	void update_after_tempo_map_change (bool send_change = true);
 
 	std::set<Evoral::Parameter> _filtered_parameters; ///< parameters that we ask our source not to return when reading
 	PBD::ScopedConnection _model_connection;

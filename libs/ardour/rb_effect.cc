@@ -148,8 +148,8 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 	 * I hope this is clear.
 	 */
 
-	double stretch = region->stretch () * tsr.time_fraction;
-	double shift   = region->shift () * tsr.pitch_fraction;
+	double stretch = tsr.time_fraction * region->stretch ();
+	double shift   = tsr.pitch_fraction * region->shift ();
 
 	samplecnt_t read_start = region->ancestral_start_sample () +
 	                         samplecnt_t (region->start_sample () / (double)region->stretch ());
@@ -352,21 +352,21 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 	/* now reset ancestral data for each new region */
 
 	for (vector<boost::shared_ptr<Region> >::iterator x = results.begin (); x != results.end (); ++x) {
-		(*x)->set_ancestral_data (timecnt_t::from_samples (read_start),
-		                          timecnt_t::from_samples (read_duration, timepos_t::from_samples (read_start)),
+		(*x)->set_ancestral_data (timecnt_t (read_start),
+		                          timecnt_t (read_duration, timepos_t (read_start)),
 		                          stretch,
 		                          shift);
 		(*x)->set_master_sources (region->master_sources ());
 		/* multiply the old (possibly previously stretched) region length by the extra
 		 * stretch this time around to get its new length. this is a non-music based edit atm.
 		 */
-		(*x)->set_length (timecnt_t::from_samples (samplepos_t ((*x)->length_samples () * tsr.time_fraction), (*x)->nt_position()));
+		(*x)->set_length (timecnt_t (tsr.time_fraction * (*x)->length_samples (), (*x)->nt_position()));
 	}
 
 	/* stretch region gain envelope */
 	/* XXX: assuming we've only processed one input region into one result here */
 
-	if (ret == 0 && tsr.time_fraction != 1) {
+	if (ret == 0 && !tsr.time_fraction.is_unity()) {
 		boost::shared_ptr<AudioRegion> result = boost::dynamic_pointer_cast<AudioRegion> (results.front ());
 		assert (result);
 		result->envelope ()->x_scale (tsr.time_fraction);

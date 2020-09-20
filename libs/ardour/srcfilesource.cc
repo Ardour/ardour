@@ -63,7 +63,7 @@ SrcFileSource::SrcFileSource (Session& s, boost::shared_ptr<AudioFileSource> src
 	}
 
 
-	_ratio = s.nominal_sample_rate() / _source->sample_rate();
+	_ratio = s.nominal_sample_rate() /  _source->sample_rate();
 	_src_data.src_ratio = _ratio;
 
 	src_buffer_size = ceil((double)max_blocksize / _ratio) + 2;
@@ -119,8 +119,7 @@ SrcFileSource::read_unlocked (Sample *dst, samplepos_t start, samplecnt_t cnt) c
 
 	_src_data.input_frames = _source->read (_src_buffer, _source_position, scnt);
 
-	if ((samplecnt_t) _src_data.input_frames * _ratio <= cnt
-			&& _source_position + scnt >= _source->length(0)) {
+	if ((samplecnt_t) _src_data.input_frames * _ratio <= cnt && _source_position + scnt >= _source->length().samples()) {
 		_src_data.end_of_input = true;
 		DEBUG_TRACE (DEBUG::AudioPlayback, "SRC: END OF INPUT\n");
 	} else {

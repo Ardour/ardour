@@ -1455,8 +1455,8 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool only_used_ass
 		const bool was_dirty = dirty();
 		// for a template, just create a new Locations, populate it
 		// with the default start and end, and get the state for that.
-		Location* range = new Location (*this, 0, 0, _("session"), Location::IsSessionRange, 0);
-		range->set (max_samplepos, 0);
+		Location* range = new Location (*this, timepos_t (Temporal::AudioTime), timepos_t (Temporal::AudioTime), _("session"), Location::IsSessionRange);
+		range->set (timepos_t::max (Temporal::AudioTime), timepos_t (Temporal::AudioTime));
 		loc.add (range);
 		XMLNode& locations_state = loc.get_state();
 
@@ -1674,7 +1674,7 @@ Session::set_state (const XMLNode& node, int version)
 	locations_changed ();
 
 	if (_session_range_location) {
-		AudioFileSource::set_header_position_offset (_session_range_location->start());
+		AudioFileSource::set_header_position_offset (_session_range_location->start().samples());
 	}
 
 	if ((child = find_named_node (node, "Regions")) == 0) {
@@ -2327,7 +2327,7 @@ Session::XMLAudioRegionFactory (const XMLNode& node, bool /*full*/)
 			for (SourceList::iterator sx = sources.begin(); sx != sources.end(); ++sx) {
 				boost::shared_ptr<SilentFileSource> sfp = boost::dynamic_pointer_cast<SilentFileSource> (*sx);
 				if (sfp) {
-					sfp->set_length (region->length());
+					sfp->set_length (region->nt_length().samples());
 				}
 			}
 		}
@@ -2396,7 +2396,7 @@ Session::XMLMidiRegionFactory (const XMLNode& node, bool /*full*/)
 			for (SourceList::iterator sx = sources.begin(); sx != sources.end(); ++sx) {
 				boost::shared_ptr<SilentFileSource> sfp = boost::dynamic_pointer_cast<SilentFileSource> (*sx);
 				if (sfp) {
-					sfp->set_length (region->length());
+					sfp->set_length (region->nt_length().samples());
 				}
 			}
 		}
@@ -3518,7 +3518,7 @@ Session::cleanup_sources (CleanupReport& rep)
 		 * capture files.
 		 */
 
-		if (!i->second->used() && (i->second->length(i->second->natural_position()) > 0)) {
+		if (!i->second->used() && (i->second->empty())) {
 			dead_sources.push_back (i->second);
 		}
 
@@ -5452,7 +5452,7 @@ Session::archive_session (const std::string& dest,
 				continue;
 			}
 			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (i->second);
-			if (!afs || afs->readable_length () == 0) {
+			if (!afs || afs->length ().zero()) {
 				continue;
 			}
 			if (only_used_sources) {
@@ -5471,7 +5471,7 @@ Session::archive_session (const std::string& dest,
 				continue;
 			}
 			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (i->second);
-			if (!afs || afs->readable_length () == 0) {
+			if (!afs || afs->length ().zero()) {
 				continue;
 			}
 
@@ -5487,7 +5487,7 @@ Session::archive_session (const std::string& dest,
 			std::string from = afs->path();
 
 			if (compress_audio != NO_ENCODE) {
-				total_size += afs->readable_length ();
+				total_size += afs->readable_length_samples ();
 			} else {
 				/* copy files as-is */
 				if (!afs->within_session()) {
@@ -5535,7 +5535,7 @@ Session::archive_session (const std::string& dest,
 				continue;
 			}
 			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (i->second);
-			if (!afs || afs->readable_length () == 0) {
+			if (!afs || afs->length ().zero()) {
 				continue;
 			}
 
@@ -5570,7 +5570,7 @@ Session::archive_session (const std::string& dest,
 			}
 
 			if (progress) {
-				progress->descend ((float)afs->readable_length () / total_size);
+				progress->descend ((float)afs->readable_length_samples () / total_size);
 			}
 
 			try {

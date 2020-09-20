@@ -36,7 +36,7 @@
 #include "ardour/session.h"
 
 namespace ARDOUR {
-	class Readable;
+	class AudioReadable;
 }
 
 namespace ARDOUR { namespace LuaAPI {
@@ -269,7 +269,7 @@ namespace ARDOUR { namespace LuaAPI {
 	 *
 	 * This interface allows to load a plugins and directly access it using the Vamp Plugin API.
 	 *
-	 * A convenience method is provided to analyze Ardour::Readable objects (Regions).
+	 * A convenience method is provided to analyze Ardour::AudioReadable objects (Regions).
 	 */
 		public:
 			Vamp (const std::string&, float sample_rate);
@@ -282,7 +282,7 @@ namespace ARDOUR { namespace LuaAPI {
 
 			::Vamp::Plugin* plugin () { return _plugin; }
 
-			/** high-level abstraction to process a single channel of the given Readable.
+			/** high-level abstraction to process a single channel of the given AudioReadable.
 			 *
 			 * If the plugin is not yet initialized, initialize() is called.
 			 *
@@ -294,7 +294,7 @@ namespace ARDOUR { namespace LuaAPI {
 			 * @param fn lua callback function or nil
 			 * @return 0 on success
 			 */
-			int analyze (boost::shared_ptr<ARDOUR::Readable> r, uint32_t channel, luabridge::LuaRef fn);
+			int analyze (boost::shared_ptr<ARDOUR::AudioReadable> r, uint32_t channel, luabridge::LuaRef fn);
 
 			/** call plugin():reset() and clear intialization flag */
 			void reset ();
@@ -341,7 +341,7 @@ namespace ARDOUR { namespace LuaAPI {
 
 	};
 
-	class Rubberband : public Readable , public boost::enable_shared_from_this<Rubberband>
+	class Rubberband : public AudioReadable , public boost::enable_shared_from_this<Rubberband>
 	{
 		public:
 			Rubberband (boost::shared_ptr<AudioRegion>, bool percussive);
@@ -349,10 +349,10 @@ namespace ARDOUR { namespace LuaAPI {
 			bool set_strech_and_pitch (double stretch_ratio, double pitch_ratio);
 			bool set_mapping (luabridge::LuaRef tbl);
 			boost::shared_ptr<AudioRegion> process (luabridge::LuaRef cb);
-			boost::shared_ptr<Readable> readable ();
+			boost::shared_ptr<AudioReadable> readable ();
 
-			/* readable API */
-			samplecnt_t readable_length () const { return _read_len; }
+			/* audioreadable API */
+			samplecnt_t readable_length_samples () const { return _read_len; }
 			uint32_t n_channels () const { return _n_channels; }
 			samplecnt_t read (Sample*, samplepos_t pos, samplecnt_t cnt, int channel) const;
 

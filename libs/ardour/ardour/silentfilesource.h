@@ -54,7 +54,7 @@ protected:
 	}
 
 	samplecnt_t read_unlocked (Sample *dst, samplepos_t start, samplecnt_t cnt) const {
-		cnt = std::min (cnt, std::max<samplecnt_t> (0, _length - start));
+		cnt = std::min (cnt, std::max<samplecnt_t> (0, _length.samples() - start));
 		memset (dst, 0, sizeof (Sample) * cnt);
 		return cnt;
 	}

@@ -66,7 +66,7 @@
 
 #include "lua/luastate.h"
 
-#include "evoral/Range.h"
+#include "temporal/range.h"
 
 #include "midi++/types.h"
 #include "midi++/mmc.h"
@@ -336,7 +336,7 @@ public:
 	StripableList get_stripables () const;
 	boost::shared_ptr<RouteList> get_tracks() const;
 	boost::shared_ptr<RouteList> get_routes_with_internal_returns() const;
-	boost::shared_ptr<RouteList> get_routes_with_regions_at (samplepos_t const) const;
+	boost::shared_ptr<RouteList> get_routes_with_regions_at (timepos_t const &) const;
 
 	boost::shared_ptr<AudioTrack> get_nth_audio_track (uint32_t) const;
 
@@ -528,7 +528,7 @@ public:
 
 	void set_auto_punch_location (Location *);
 	void set_auto_loop_location (Location *);
-	void set_session_extents (samplepos_t start, samplepos_t end);
+	void set_session_extents (timepos_t const & start, timepos_t const & end);
 	bool session_range_is_free () const { return _session_range_is_free; }
 	void set_session_range_is_free (bool);
 
@@ -1122,11 +1122,11 @@ public:
 
 	/* ranges */
 
-	void request_play_range (std::list<AudioRange>*, bool leave_rolling = false);
+	void request_play_range (std::list<TimelineRange>*, bool leave_rolling = false);
 	void request_cancel_play_range ();
 	bool get_play_range () const { return _play_range; }
 
-	void maybe_update_session_range (samplepos_t, samplepos_t);
+	void maybe_update_session_range (timepos_t const &, timepos_t const &);
 
 	/* preroll */
 	samplecnt_t preroll_samples (samplepos_t) const;
@@ -1311,7 +1311,7 @@ public:
 
 	void import_pt_sources (PTFFormat& ptf, ImportStatus& status);
 	void import_pt_rest (PTFFormat& ptf);
-	bool import_sndfile_as_region (std::string path, SrcQuality quality, samplepos_t& pos, SourceList& sources, ImportStatus& status, uint32_t current, uint32_t total);
+	bool import_sndfile_as_region (std::string path, SrcQuality quality, timepos_t& pos, SourceList& sources, ImportStatus& status, uint32_t current, uint32_t total);
 
 	struct ptflookup {
 		uint16_t index1;
@@ -1965,8 +1965,8 @@ private:
 	void remove_playlist (boost::weak_ptr<Playlist>);
 	void track_playlist_changed (boost::weak_ptr<Track>);
 	void playlist_region_added (boost::weak_ptr<Region>);
-	void playlist_ranges_moved (std::list<Evoral::RangeMove<samplepos_t> > const &);
-	void playlist_regions_extended (std::list<Evoral::Range<samplepos_t> > const &);
+	void playlist_ranges_moved (std::list<Temporal::RangeMove> const &);
+	void playlist_regions_extended (std::list<Temporal::Range> const &);
 
 	/* CURVES and AUTOMATION LISTS */
 	std::map<PBD::ID, AutomationList*> automation_lists;
@@ -2106,16 +2106,16 @@ private:
 
 	/* range playback */
 
-	std::list<AudioRange> current_audio_range;
+	std::list<TimelineRange> current_audio_range;
 	bool _play_range;
-	void set_play_range (std::list<AudioRange>&, bool leave_rolling);
+	void set_play_range (std::list<TimelineRange>&, bool leave_rolling);
 	void unset_play_range ();
 
 	/* temporary hacks to allow selection to be pushed from GUI into backend
 	   Whenever we move the selection object into libardour, these will go away.
 	*/
-	Evoral::Range<samplepos_t> _range_selection;
-	Evoral::Range<samplepos_t> _object_selection;
+	Temporal::Range _range_selection;
+	Temporal::Range _object_selection;
 
 	void unset_preroll_record_trim ();
 

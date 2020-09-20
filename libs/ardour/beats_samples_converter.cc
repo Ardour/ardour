@@ -18,16 +18,17 @@
 
 #include "pbd/stacktrace.h"
 
+#include "temporal/tempo.h"
+
 #include "ardour/beats_samples_converter.h"
-#include "ardour/tempo.h"
 
 namespace ARDOUR {
 
 /** Takes a positive duration in quarter-note beats and considers it as a distance from the origin
- *  supplied to the constructor.  Returns the equivalent number of samples,
+ *  supplied to the constructor. Returns the equivalent number of samples,
  *  taking tempo changes into account.
  */
-samplepos_t
+samplecnt_t
 BeatsSamplesConverter::to (Temporal::Beats beats) const
 {
 	if (beats < Temporal::Beats()) {
@@ -35,37 +36,17 @@ BeatsSamplesConverter::to (Temporal::Beats beats) const
 		PBD::stacktrace (std::cerr, 30);
 		return 0;
 	}
-	return _tempo_map.samplepos_plus_qn (_origin_b, beats) - _origin_b;
+	return _tempo_map.sample_quarters_delta_as_samples (_origin, beats) - _origin;
 }
 
-/** Takes a duration in samples and considers it as a distance from the origin
- *  supplied to the constructor.  Returns the equivalent number of quarter-note beats,
+/** Takes a positive duration in superclocks and considers it as a distance from the origin
+ *  supplied to the constructor. Returns the equivalent number of quarter-note beats,
  *  taking tempo changes into account.
+ *
+ *  Distance must be positive because we assume we are walking forward from our origin.
  */
 Temporal::Beats
-BeatsSamplesConverter::from (samplepos_t samples) const
+BeatsSamplesConverter::from (samplecnt_t distance) const
 {
-	return _tempo_map.framewalk_to_qn (_origin_b, samples);
+	return _tempo_map.sample_delta_as_quarters (_origin, distance);
 }
-
-/** As above, but with quarter-note beats in double instead (for GUI). */
-samplepos_t
-DoubleBeatsSamplesConverter::to (double beats) const
-{
-	if (beats < 0.0) {
-		std::cerr << "negative beats passed to BFC: " << beats << std::endl;
-		PBD::stacktrace (std::cerr, 30);
-		return 0;
-	}
-	return _tempo_map.samplepos_plus_qn (_origin_b, Temporal::Beats(beats)) - _origin_b;
-}
-
-/** As above, but with quarter-note beats in double instead (for GUI). */
-double
-DoubleBeatsSamplesConverter::from (samplepos_t samples) const
-{
-	return _tempo_map.framewalk_to_qn (_origin_b, samples).to_double();
-}
-
-} /* namespace ARDOUR */
-

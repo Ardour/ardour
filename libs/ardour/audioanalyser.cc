@@ -102,14 +102,14 @@ AudioAnalyser::reset ()
 }
 
 int
-AudioAnalyser::analyse (const string& path, Readable* src, uint32_t channel)
+AudioAnalyser::analyse (const string& path, AudioReadable* src, uint32_t channel)
 {
 	stringstream outss;
 	Plugin::FeatureSet features;
 	int ret = -1;
 	bool done = false;
 	Sample* data = 0;
-	samplecnt_t len = src->readable_length();
+	samplecnt_t len = src->readable_length_samples();
 	samplepos_t pos = 0;
 	float* bufs[1] = { 0 };
 

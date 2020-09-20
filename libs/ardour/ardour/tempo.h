@@ -50,6 +50,11 @@ class XMLNode;
 
 namespace ARDOUR {
 
+enum PositionLockStyle {
+	AudioTime,
+	MusicTime
+};
+
 class Meter;
 class TempoMap;
 

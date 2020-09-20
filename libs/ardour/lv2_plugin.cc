@@ -2934,9 +2934,9 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 									assert (start + samples - _current_latency >= 0);
 									if (c->guard) {
 										c->guard = false;
-										c->ac->list()->add (when, v, true, true);
+										c->ac->list()->add (timepos_t (when), v, true, true);
 									} else {
-										c->ac->set_double (v, when, true);
+										c->ac->set_double (v, timepos_t (when), true);
 									}
 								}
 							}
@@ -2993,7 +2993,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 								AutomationCtrlPtr c = get_automation_control (p);
 								DEBUG_TRACE(DEBUG::LV2Automate, string_compose ("Start Touch p: %1\n", p));
 								if (c) {
-									c->ac->start_touch (std::max ((samplepos_t)0, start - _current_latency));
+									c->ac->start_touch (timepos_t (std::max ((samplepos_t)0, start - _current_latency)));
 									c->guard = true;
 								}
 							}
@@ -3008,7 +3008,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 								AutomationCtrlPtr c = get_automation_control (p);
 								DEBUG_TRACE(DEBUG::LV2Automate, string_compose ("End Touch p: %1\n", p));
 								if (c) {
-									c->ac->stop_touch (std::max ((samplepos_t)0, start - _current_latency));
+									c->ac->stop_touch (timepos_t (std::max ((samplepos_t)0, start - _current_latency)));
 								}
 							}
 						}

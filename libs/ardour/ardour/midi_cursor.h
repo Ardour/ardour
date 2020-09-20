@@ -35,7 +35,7 @@
 namespace ARDOUR {
 
 struct MidiCursor : public boost::noncopyable {
-	MidiCursor() : last_read_end(0) {}
+	MidiCursor()  {}
 
 	void connect(PBD::Signal1<void, bool>& invalidated) {
 		connections.drop_connections();
@@ -50,7 +50,7 @@ struct MidiCursor : public boost::noncopyable {
 
 	Evoral::Sequence<Temporal::Beats>::const_iterator        iter;
 	std::set<Evoral::Sequence<Temporal::Beats>::WeakNotePtr> active_notes;
-	samplepos_t                                              last_read_end;
+	timepos_t                                                last_read_end;
 	PBD::ScopedConnectionList                                connections;
 };
 

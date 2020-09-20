@@ -33,7 +33,7 @@ public:
 	EBUr128Analysis (float sample_rate);
 	~EBUr128Analysis();
 
-	int run (Readable*);
+	int run (AudioReadable*);
 
 	float loudness () const { return _loudness; }
 	float loudness_range () const { return _loudness_range; }

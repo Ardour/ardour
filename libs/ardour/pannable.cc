@@ -151,7 +151,7 @@ Pannable::set_automation_state (AutoState state)
 }
 
 void
-Pannable::start_touch (double when)
+Pannable::start_touch (timepos_t const & when)
 {
 	const Controls& c (controls());
 
@@ -165,7 +165,7 @@ Pannable::start_touch (double when)
 }
 
 void
-Pannable::stop_touch (double when)
+Pannable::stop_touch (timepos_t const & when)
 {
 	const Controls& c (controls());
 

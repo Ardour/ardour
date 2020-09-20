@@ -310,7 +310,7 @@ PluginInsert::control_list_automation_state_changed (Evoral::Parameter which, Au
 			= boost::dynamic_pointer_cast<AutomationControl>(control (which));
 
 	if (c && s != Off) {
-		_plugins[0]->set_parameter (which.id(), c->list()->eval (_session.transport_sample()), 0);
+		_plugins[0]->set_parameter (which.id(), c->list()->eval (timepos_t (_session.transport_sample())), 0)
 	}
 }
 
@@ -516,7 +516,8 @@ PluginInsert::create_automatable_parameters ()
 
 		const bool automatable = a.find(param) != a.end();
 
-		boost::shared_ptr<AutomationList> list(new AutomationList(param, desc));
+#warning NUTEMPO question : how to decide the right time domain here?
+		boost::shared_ptr<AutomationList> list(new AutomationList(param, desc, Temporal::AudioTime));
 		boost::shared_ptr<AutomationControl> c (new PluginControl(this, param, desc, list));
 		if (!automatable || (limit_automatables > 0 && what_can_be_automated ().size() > limit_automatables)) {
 			c->set_flag (Controllable::NotAutomatable);
@@ -536,7 +537,8 @@ PluginInsert::create_automatable_parameters ()
 		if (desc.datatype != Variant::NOTHING) {
 			boost::shared_ptr<AutomationList> list;
 			if (Variant::type_is_numeric(desc.datatype)) {
-				list = boost::shared_ptr<AutomationList>(new AutomationList(param, desc));
+#warning NUTEMPO question : how to decide the right time domain here?
+				list = boost::shared_ptr<AutomationList>(new AutomationList(param, desc, Temporal::AudioTime));
 			}
 			boost::shared_ptr<AutomationControl> c (new PluginPropertyControl(this, param, desc, list));
 			if (!Variant::type_is_numeric(desc.datatype)) {
@@ -558,7 +560,8 @@ PluginInsert::create_automatable_parameters ()
 		desc.normal = 1;
 		desc.lower  = 0;
 		desc.upper  = 1;
-		boost::shared_ptr<AutomationList> list(new AutomationList(param, desc));
+#warning NUTEMPO question : how to decide the right time domain here?
+		boost::shared_ptr<AutomationList> list(new AutomationList(param, desc, Temporal::AudioTime));
 		boost::shared_ptr<AutomationControl> c (new PluginControl(this, param, desc, list));
 		add_control (c);
 	}
@@ -644,8 +647,8 @@ PluginInsert::automation_run (samplepos_t start, pframes_t nframes, bool only_ac
 {
 	// XXX does not work when rolling backwards
 	if (_loop_location && nframes > 0) {
-		const samplepos_t loop_start = _loop_location->start ();
-		const samplepos_t loop_end   = _loop_location->end ();
+		const samplepos_t loop_start = _loop_location->start_sample ();
+		const samplepos_t loop_end   = _loop_location->end_sample ();
 		const samplecnt_t looplen    = loop_end - loop_start;
 
 		samplecnt_t remain = nframes;
@@ -668,15 +671,12 @@ PluginInsert::automation_run (samplepos_t start, pframes_t nframes, bool only_ac
 }
 
 bool
-PluginInsert::find_next_event (double now, double end, Evoral::ControlEvent& next_event, bool only_active) const
+PluginInsert::find_next_event (timepos_t const & now, timepos_t const & end, Evoral::ControlEvent& next_event, bool only_active) const
 {
 	bool rv = Automatable::find_next_event (now, end, next_event, only_active);
 
 	if (_loop_location && now < end) {
-		if (rv) {
-			end = ceil (next_event.when);
-		}
-		const samplepos_t loop_end = _loop_location->end ();
+		const timepos_t loop_end = _loop_location->end ();
 		assert (now < loop_end); // due to map_loop_range ()
 		if (end > loop_end) {
 			next_event.when = loop_end;
@@ -932,7 +932,8 @@ PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t e
 			if (clist && (static_cast<AutomationList const&> (*clist)).automation_playback ()) {
 				/* 1. Set value at [sub]cycle start */
 				bool valid;
-				float val = clist->rt_safe_eval (start, valid);
+				float val = c.list()->rt_safe_eval (timepos_t (start), valid);
+
 				if (valid) {
 					c.set_value_unchecked(val);
 				}
@@ -1336,7 +1337,7 @@ PluginInsert::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 void
 PluginInsert::automate_and_run (BufferSet& bufs, samplepos_t start, samplepos_t end, double speed, pframes_t nframes)
 {
-	Evoral::ControlEvent next_event (0, 0.0f);
+	Evoral::ControlEvent next_event (timepos_t (Temporal::AudioTime), 0.0f);
 	samplecnt_t offset = 0;
 
 	Glib::Threads::Mutex::Lock lm (control_lock(), Glib::Threads::TRY_LOCK);
@@ -1349,9 +1350,9 @@ PluginInsert::automate_and_run (BufferSet& bufs, samplepos_t start, samplepos_t 
 	/* map start back into loop-range, adjust end */
 	map_loop_range (start, end);
 
-	bool no_split_cycle =_plugins.front()->requires_fixed_sized_buffers () || _plugins.front()->get_info ()->type == ARDOUR::VST3;
+	const bool no_split_cycle =_plugins.front()->requires_fixed_sized_buffers () || _plugins.front()->get_info ()->type == ARDOUR::VST3;
 
-	if (no_split_cycle || !find_next_event (start, end, next_event)) {
+	if (no_split_cycle || !find_next_event (timepos_t (start), timepos_t (end), next_event)) {
 
 		/* no events have a time within the relevant range */
 
@@ -1361,7 +1362,7 @@ PluginInsert::automate_and_run (BufferSet& bufs, samplepos_t start, samplepos_t 
 
 	while (nframes) {
 
-		samplecnt_t cnt = min ((samplecnt_t) ceil (fabs (next_event.when - start)), (samplecnt_t) nframes);
+		samplecnt_t cnt = min (timepos_t (start).distance (next_event.when).samples(), (samplecnt_t) nframes);
 		assert (cnt > 0);
 
 		connect_and_run (bufs, start, start + cnt * speed, speed, cnt, offset, true);
@@ -1372,7 +1373,7 @@ PluginInsert::automate_and_run (BufferSet& bufs, samplepos_t start, samplepos_t 
 
 		map_loop_range (start, end);
 
-		if (!find_next_event (start, end, next_event)) {
+		if (!find_next_event (timepos_t (start), timepos_t (end), next_event)) {
 			break;
 		}
 	}
@@ -3363,7 +3364,7 @@ PluginInsert::start_touch (uint32_t param_id)
 	boost::shared_ptr<AutomationControl> ac = automation_control (Evoral::Parameter (PluginAutomation, 0, param_id));
 	if (ac) {
 		// ToDo subtract _plugin_signal_latency  from audible_sample() when rolling, assert > 0
-		ac->start_touch (session().audible_sample());
+		ac->start_touch (timepos_t (session().audible_sample()));
 	}
 }
 
@@ -3373,7 +3374,7 @@ PluginInsert::end_touch (uint32_t param_id)
 	boost::shared_ptr<AutomationControl> ac = automation_control (Evoral::Parameter (PluginAutomation, 0, param_id));
 	if (ac) {
 		// ToDo subtract _plugin_signal_latency  from audible_sample() when rolling, assert > 0
-		ac->stop_touch (session().audible_sample());
+		ac->stop_touch (timepos_t (session().audible_sample()));
 	}
 }
 

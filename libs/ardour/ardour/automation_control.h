@@ -85,8 +85,8 @@ public:
 	}
 
 	void set_automation_state(AutoState as);
-	void start_touch(double when);
-	void stop_touch(double when);
+	void start_touch(timepos_t const & when);
+	void stop_touch(timepos_t const & when);
 
 	/* inherited from PBD::Controllable. */
 	virtual double get_value () const;

@@ -27,10 +27,14 @@
 #include <time.h>
 #include <glibmm/threads.h>
 #include <boost/enable_shared_from_this.hpp>
+
 #include "pbd/stateful.h"
 #include "pbd/xml++.h"
+
 #include "evoral/Sequence.h"
-#include "evoral/Range.h"
+
+#include "temporal/range.h"
+
 #include "ardour/ardour.h"
 #include "ardour/buffer.h"
 #include "ardour/midi_cursor.h"
@@ -95,21 +99,17 @@ class LIBARDOUR_API MidiSource : virtual public Source
 	 * @param filter Channel filter to apply or NULL to disable filter
 	 * @param tracker an optional pointer to MidiStateTracker object, for note on/off tracking.
 	 * @param filtered Parameters whose MIDI messages will not be returned.
-	 * @param pos_beats Start position (quarter note = \p pos_beats - \p start_beats)
-	 * @param start_beats Start position offset
 	 */
-	virtual samplecnt_t midi_read (const Lock&                        lock,
-	                              Evoral::EventSink<samplepos_t>&     dst,
-	                              samplepos_t                         source_start,
-	                              samplepos_t                         start,
-	                              samplecnt_t                         cnt,
-	                              Evoral::Range<samplepos_t>*         loop_range,
-	                              MidiCursor&                        cursor,
-	                              MidiStateTracker*                  tracker,
-	                              MidiChannelFilter*                 filter,
-	                              const std::set<Evoral::Parameter>& filtered,
-	                              const double                       pos_beats,
-	                              const double                       start_beats) const;
+	virtual timecnt_t midi_read (const Lock&                       lock,
+	                             Evoral::EventSink<samplepos_t>&    dst,
+	                             timepos_t const &                  source_start,
+	                             timecnt_t const &                  start,
+	                             timecnt_t const &                  cnt,
+	                             Temporal::Range*                   loop_range,
+	                             MidiCursor&                        cursor,
+	                             MidiStateTracker*                  tracker,
+	                             MidiChannelFilter*                 filter,
+	                             const std::set<Evoral::Parameter>& filtered);
 
 	/** Write data from a MidiRingBuffer to this source.
 	 * @param lock Reference to the Mutex to lock before modification
@@ -117,10 +117,10 @@ class LIBARDOUR_API MidiSource : virtual public Source
 	 * @param source_start This source's start position in session samples.
 	 * @param cnt The length of time to write.
 	 */
-	virtual samplecnt_t midi_write (const Lock&                 lock,
-	                               MidiRingBuffer<samplepos_t>& source,
-	                               samplepos_t                  source_start,
-	                               samplecnt_t                  cnt);
+	virtual timecnt_t midi_write (const Lock&                  lock,
+	                                MidiRingBuffer<samplepos_t>& source,
+	                                timepos_t const &            source_start,
+	                                timecnt_t const &            cnt);
 
 	/** Append a single event with a timestamp in beats.
 	 *
@@ -136,10 +136,6 @@ class LIBARDOUR_API MidiSource : virtual public Source
 	virtual void append_event_samples(const Lock&                      lock,
 	                                 const Evoral::Event<samplepos_t>& ev,
 	                                 samplepos_t                       source_start) = 0;
-
-	virtual bool       empty () const;
-	virtual samplecnt_t length (samplepos_t pos) const;
-	virtual void       update_length (samplecnt_t);
 
 	virtual void mark_streaming_midi_write_started (const Lock& lock, NoteMode mode);
 	virtual void mark_streaming_write_started (const Lock& lock);
@@ -216,14 +212,14 @@ class LIBARDOUR_API MidiSource : virtual public Source
   protected:
 	virtual void flush_midi(const Lock& lock) = 0;
 
-	virtual samplecnt_t read_unlocked (const Lock&                    lock,
-	                                  Evoral::EventSink<samplepos_t>& dst,
-	                                  samplepos_t                     position,
-	                                  samplepos_t                     start,
-	                                  samplecnt_t                     cnt,
-	                                  Evoral::Range<samplepos_t>*     loop_range,
-	                                  MidiStateTracker*              tracker,
-	                                  MidiChannelFilter*             filter) const = 0;
+	virtual timecnt_t read_unlocked (const Lock&                     lock,
+	                                 Evoral::EventSink<samplepos_t>& dst,
+	                                 timepos_t const &               position,
+	                                 timecnt_t const &               start,
+	                                 timecnt_t const &               cnt,
+	                                 Temporal::Range*                loop_range,
+	                                 MidiStateTracker*               tracker,
+	                                 MidiChannelFilter*              filter) const = 0;
 
 	/** Write data to this source from a MidiRingBuffer.
 	 * @param lock Reference to the Mutex to lock before modification
@@ -231,10 +227,10 @@ class LIBARDOUR_API MidiSource : virtual public Source
 	 * @param position This source's start position in session samples.
 	 * @param cnt The duration of this block to write for.
 	 */
-	virtual samplecnt_t write_unlocked (const Lock&                 lock,
-	                                   MidiRingBuffer<samplepos_t>& source,
-	                                   samplepos_t                  position,
-	                                   samplecnt_t                  cnt) = 0;
+	virtual timecnt_t write_unlocked (const Lock&                 lock,
+	                                  MidiRingBuffer<samplepos_t>& source,
+	                                  timepos_t const &            position,
+	                                  timecnt_t const &            cnt) = 0;
 
 	boost::shared_ptr<MidiModel> _model;
 	bool                         _writing;

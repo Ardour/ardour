@@ -51,13 +51,13 @@ public:
 	int set_state (const XMLNode&, int version);
 
 	bool can_truncate_peaks() const { return false; }
-	bool can_be_analysed() const    { return _length > 0; }
+	bool can_be_analysed() const    { return _length.positive(); }
 
 protected:
 	friend class SourceFactory;
 
 	AudioPlaylistSource (Session&, const PBD::ID& orig, const std::string& name, boost::shared_ptr<AudioPlaylist>, uint32_t chn,
-	                     sampleoffset_t begin, samplecnt_t len, Source::Flag flags);
+	                     timepos_t const & begin, timepos_t const & len, Source::Flag flags);
 	AudioPlaylistSource (Session&, const XMLNode&);
 
 

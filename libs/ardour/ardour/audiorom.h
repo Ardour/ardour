@@ -27,7 +27,7 @@ namespace ARDOUR {
 
 class Session;
 
-class LIBARDOUR_API AudioRom : public Readable
+class LIBARDOUR_API AudioRom : public AudioReadable
 {
 public:
 	static boost::shared_ptr<AudioRom> new_rom (Sample*, size_t);

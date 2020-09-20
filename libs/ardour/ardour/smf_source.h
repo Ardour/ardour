@@ -80,34 +80,33 @@ public:
 
   private:
 	bool _open;
-	Temporal::Beats     _last_ev_time_beats;
-	samplepos_t         _last_ev_time_samples;
+	Temporal::Beats   _last_ev_time_beats;
+	samplepos_t       _last_ev_time_samples;
 	/** end time (start + duration) of last call to read_unlocked */
-	mutable samplepos_t _smf_last_read_end;
+	mutable timecnt_t _smf_last_read_end;
 	/** time (in SMF ticks, 1 tick per _ppqn) of the last event read by read_unlocked */
-	mutable samplepos_t _smf_last_read_time;
+	mutable timepos_t _smf_last_read_time;
 
 	int open_for_write ();
 
 	void ensure_disk_file (const Lock& lock);
 
-	samplecnt_t read_unlocked (const Lock&                    lock,
-	                           Evoral::EventSink<samplepos_t>& dst,
-	                           samplepos_t                     position,
-	                           samplepos_t                     start,
-	                           samplecnt_t                     cnt,
-	                           Evoral::Range<samplepos_t>*     loop_range,
-	                           MidiStateTracker*               tracker,
-	                           MidiChannelFilter*              filter) const;
+	timecnt_t read_unlocked (const Lock&                     lock,
+	                         Evoral::EventSink<samplepos_t>& dst,
+	                         timepos_t const &               position,
+	                         timecnt_t const &               start,
+	                         timecnt_t const &               cnt,
+	                         Temporal::Range*                loop_range,
+	                         MidiStateTracker*               tracker,
+	                         MidiChannelFilter*              filter) const;
 
-	samplecnt_t write_unlocked (const Lock&                 lock,
-	                            MidiRingBuffer<samplepos_t>& src,
-	                            samplepos_t                  position,
-	                            samplecnt_t                  cnt);
+	timecnt_t write_unlocked (const Lock&                  lock,
+	                          MidiRingBuffer<samplepos_t>& src,
+	                          timepos_t const &            position,
+	                          timecnt_t const &            cnt);
 
 };
 
 }; /* namespace ARDOUR */
 
 #endif /* __ardour_smf_source_h__ */
-

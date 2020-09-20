@@ -169,12 +169,13 @@ DiskWriter::check_record_status (samplepos_t transport_sample, double speed, boo
 
 		Location* loc;
 		if  (_session.config.get_punch_in () && 0 != (loc = _session.locations()->auto_punch_location ())) {
-			_capture_start_sample = loc->start ();
+			_capture_start_sample = loc->start_sample ();
 		} else if (_loop_location) {
-			_capture_start_sample = _loop_location->start ();
+			_capture_start_sample = _loop_location->start_sample ();
 			if (_last_possibly_recording & transport_rolling) {
 				_accumulated_capture_offset = _playback_offset + transport_sample - _session.transport_sample (); // + rec_offset;
 			}
+
 		} else {
 			_capture_start_sample = _session.transport_sample ();
 		}
@@ -191,7 +192,7 @@ DiskWriter::check_record_status (samplepos_t transport_sample, double speed, boo
 			 * We should allow to move it or at least allow to disable punch-out
 			 * while rolling..
 			 */
-			_last_recordable_sample = loc->end ();
+			_last_recordable_sample = loc->end_sample ();
 			if (_alignment_style == ExistingMaterial) {
 				_last_recordable_sample += _capture_offset + _playback_offset;
 			}
@@ -234,14 +235,14 @@ DiskWriter::check_record_status (samplepos_t transport_sample, double speed, boo
 }
 
 void
-DiskWriter::calculate_record_range (Evoral::OverlapType ot, samplepos_t transport_sample, samplecnt_t nframes, samplecnt_t & rec_nframes, samplecnt_t & rec_offset)
+DiskWriter::calculate_record_range (Temporal::OverlapType ot, samplepos_t transport_sample, samplecnt_t nframes, samplecnt_t & rec_nframes, samplecnt_t & rec_offset)
 {
 	switch (ot) {
-	case Evoral::OverlapNone:
+	case Temporal::OverlapNone:
 		rec_nframes = 0;
 		break;
 
-	case Evoral::OverlapInternal:
+	case Temporal::OverlapInternal:
 		/*     ----------    recrange
 		 *       |---|       transrange
 		 */
@@ -249,7 +250,7 @@ DiskWriter::calculate_record_range (Evoral::OverlapType ot, samplepos_t transpor
 		rec_offset = 0;
 		break;
 
-	case Evoral::OverlapStart:
+	case Temporal::OverlapStart:
 		/*    |--------|    recrange
 		 *  -----|          transrange
 		 */
@@ -259,7 +260,7 @@ DiskWriter::calculate_record_range (Evoral::OverlapType ot, samplepos_t transpor
 		}
 		break;
 
-	case Evoral::OverlapEnd:
+	case Temporal::OverlapEnd:
 		/*    |--------|    recrange
 		 *       |--------  transrange
 		 */
@@ -267,7 +268,7 @@ DiskWriter::calculate_record_range (Evoral::OverlapType ot, samplepos_t transpor
 		rec_offset = 0;
 		break;
 
-	case Evoral::OverlapExternal:
+	case Temporal::OverlapExternal:
 		/*    |--------|    recrange
 		 *  --------------  transrange
 		 */
@@ -394,7 +395,8 @@ void
 DiskWriter::non_realtime_locate (samplepos_t position)
 {
 	if (_midi_write_source) {
-		_midi_write_source->set_natural_position (position);
+#warning NUTEMPO maybe fixme perhaps take sources time domain into account here e.g. beats
+		_midi_write_source->set_natural_position (timepos_t (position));
 	}
 
 	DiskIOProcessor::non_realtime_locate (position);
@@ -430,14 +432,14 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	bool re = record_enabled ();
 	bool punch_in = _session.config.get_punch_in () && _session.locations()->auto_punch_location ();
 	bool can_record = _session.actively_recording ();
-	can_record |= speed != 0 && _session.get_record_enabled () && punch_in && _session.transport_sample () <= _session.locations()->auto_punch_location ()->start ();
+	can_record |= speed != 0 && _session.get_record_enabled () && punch_in && _session.transport_sample () <= _session.locations()->auto_punch_location ()->start_sample ();
 
 	_need_butler = false;
 
-	const Location* const loop_loc    = _loop_location;
-	samplepos_t           loop_start  = 0;
-	samplepos_t           loop_end    = 0;
-	samplepos_t           loop_length = 0;
+	const Location* const loop_loc = _loop_location;
+	timepos_t loop_start;
+	timepos_t loop_end;
+	timecnt_t loop_length;
 
 	if (_transport_looped && _capture_captured == 0) {
 		_transport_looped = false;
@@ -446,9 +448,9 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	if (loop_loc) {
 		get_location_times (loop_loc, &loop_start, &loop_end, &loop_length);
 
-		if (_was_recording && _transport_looped && _capture_captured >= loop_length) {
-			samplecnt_t remain = _capture_captured - loop_length;
-			_capture_captured = loop_length;
+		if (_was_recording && _transport_looped && _capture_captured >= loop_length.samples()) {
+			samplecnt_t remain = _capture_captured - loop_length.samples();
+			_capture_captured = loop_length.samples();
 			loop (_transport_loop_sample);
 			_capture_captured = remain;
 		}
@@ -481,7 +483,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 	if (nominally_recording || (re && _was_recording && _session.get_record_enabled() && punch_in)) {
 
-		Evoral::OverlapType ot = Evoral::coverage (_first_recordable_sample, _last_recordable_sample, start_sample, end_sample);
+		Temporal::OverlapType ot = Temporal::coverage_exclusive_ends (_first_recordable_sample, _last_recordable_sample, start_sample, end_sample);
 		// XXX should this be transport_sample + nframes - 1 ? coverage() expects its parameter ranges to include their end points
 		// XXX also, first_recordable_sample & last_recordable_sample may both be == max_samplepos: coverage() will return OverlapNone in that case. Is thak OK?
 		calculate_record_range (ot, start_sample, nframes, rec_nframes, rec_offset);
@@ -498,9 +500,10 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				   at the loop start and can handle time wrapping around.
 				   Otherwise, start the source right now as usual.
 				*/
-				_capture_captured     = start_sample - loop_start + rec_offset;
-				_capture_start_sample = loop_start;
-				_first_recordable_sample = loop_start;
+
+				_capture_captured     = start_sample - loop_start.samples() + rec_offset;
+				_capture_start_sample = loop_start.samples();
+				_first_recordable_sample = loop_start.samples();
 
 				if (_alignment_style == ExistingMaterial) {
 					_capture_captured  -= _playback_offset + _capture_offset;
@@ -521,7 +524,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 			if (_midi_write_source) {
 				assert (_capture_start_sample);
-				_midi_write_source->mark_write_starting_now (_capture_start_sample.value (), _capture_captured, loop_length);
+				_midi_write_source->mark_write_starting_now (_capture_start_sample, _capture_captured, loop_length.samples());
 			}
 
 			g_atomic_int_set (&_samples_pending_write, 0);
@@ -629,7 +632,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				   reconstruct their actual time; future clever MIDI looping should
 				   probably be implemented in the source instead of here.
 				*/
-				const samplecnt_t loop_offset = g_atomic_int_get (&_num_captured_loops) * loop_length;
+				const samplecnt_t loop_offset = g_atomic_int_get (&_num_captured_loops) * loop_length.samples();
 				const samplepos_t event_time = start_sample + loop_offset - _accumulated_capture_offset + ev.time();
 				if (event_time < 0 || event_time < _first_recordable_sample) {
 					/* Event out of range, skip */
@@ -743,11 +746,11 @@ DiskWriter::finish_capture (boost::shared_ptr<ChannelList> c)
 	_xruns.clear ();
 
 	if (_loop_location) {
-		samplepos_t loop_start  = 0;
-		samplepos_t loop_end    = 0;
-		samplepos_t loop_length = 0;
+		timepos_t loop_start;
+		timepos_t loop_end;
+		timecnt_t loop_length;
 		get_location_times (_loop_location, &loop_start, &loop_end, &loop_length);
-		ci->loop_offset = g_atomic_int_get (&_num_captured_loops) * loop_length;
+	        ci->loop_offset = g_atomic_int_get (&_num_captured_loops) * loop_length.samples();
 	} else {
 		ci->loop_offset = 0;
 	}
@@ -1021,7 +1024,7 @@ DiskWriter::do_flush (RunContext ctxt, bool force_flush)
 
 		if ((total > _chunk_samples) || force_flush) {
 			Source::Lock lm(_midi_write_source->mutex());
-			if (_midi_write_source->midi_write (lm, *_midi_buf, get_capture_start_sample (0), to_write) != to_write) {
+			if (_midi_write_source->midi_write (lm, *_midi_buf, timepos_t (get_capture_start_sample (0)), timecnt_t (to_write)) != to_write) {
 				error << string_compose(_("MidiDiskstream %1: cannot write to disk"), id()) << endmsg;
 				return -1;
 			}
@@ -1221,7 +1224,7 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 				Analyser::queue_source_for_analysis (as, true);
 			}
 
-			DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("newly captured source %1 length %2\n", as->path(), as->length (0)));
+			DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("newly captured source %1 length %2\n", as->path(), as->length ()));
 		}
 
 		if (_midi_write_source) {
@@ -1238,7 +1241,7 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 
 	if (_midi_write_source) {
 
-		if (_midi_write_source->length (capture_info.front()->start) == 0) {
+		if (_midi_write_source->empty()) {
 			/* No data was recorded, so this capture will
 			   effectively be aborted; do the same as we
 			   do for an explicit abort.
@@ -1260,27 +1263,17 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 
 		midi_srcs.push_back (_midi_write_source);
 
-		_midi_write_source->set_natural_position (capture_info.front()->start);
-		_midi_write_source->set_captured_for (_track.name ());
+		_midi_write_source->set_natural_position (timepos_t (capture_info.front()->start));
+		_midi_write_source->set_captured_for (_track.name());
 
 		Glib::DateTime tm (Glib::DateTime::create_now_local (mktime (&when)));
 		_midi_write_source->set_take_id (tm.format ("%F %H.%M.%S"));
-
-		/* set length in beats to entire capture length */
-
-
-		Temporal::Beats total_capture_beats;
-		for (vector<CaptureInfo*>::iterator ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
-			BeatsSamplesConverter converter (_session.tempo_map(), (*ci)->start);
-			total_capture_beats += converter.from ((*ci)->samples);
-		}
-		_midi_write_source->set_length_beats (total_capture_beats);
 
 		/* flush to disk: this step differs from the audio path,
 		   where all the data is already on disk.
 		*/
 
-		_midi_write_source->mark_midi_streaming_write_completed (source_lock, Evoral::Sequence<Temporal::Beats>::ResolveStuckNotes, total_capture_beats);
+		_midi_write_source->mark_midi_streaming_write_completed (source_lock, Evoral::Sequence<Temporal::Beats>::ResolveStuckNotes, timecnt_t (total_capture, timepos_t (capture_info.front()->start)).beats());
 	}
 
 	_last_capture_sources.insert (_last_capture_sources.end(), audio_srcs.begin(), audio_srcs.end());

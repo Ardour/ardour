@@ -51,7 +51,6 @@ DEFINE_ENUM_CONVERT(ARDOUR::SyncSource)
 DEFINE_ENUM_CONVERT(ARDOUR::ShuttleUnits)
 DEFINE_ENUM_CONVERT(ARDOUR::ClockDeltaMode)
 DEFINE_ENUM_CONVERT(ARDOUR::DenormalModel)
-DEFINE_ENUM_CONVERT(ARDOUR::PositionLockStyle)
 DEFINE_ENUM_CONVERT(ARDOUR::FadeShape)
 DEFINE_ENUM_CONVERT(ARDOUR::RegionSelectionAfterSplit)
 DEFINE_ENUM_CONVERT(ARDOUR::RangeSelectionAfterSplit)
@@ -88,7 +87,7 @@ inline std::string to_string (ARDOUR::timepos_t val)
 template <>
 inline ARDOUR::timepos_t string_to (std::string const & str)
 {
-	ARDOUR::timepos_t tmp;
+	ARDOUR::timepos_t tmp (Temporal::AudioTime); /* domain may be changed */
 	tmp.string_to (str);
 	return tmp;
 }
@@ -116,7 +115,7 @@ inline std::string to_string (ARDOUR::timecnt_t val)
 template <>
 inline ARDOUR::timecnt_t string_to (std::string const & str)
 {
-	ARDOUR::timecnt_t tmp;
+	ARDOUR::timecnt_t tmp (Temporal::AudioTime); /* domain may change */
 	tmp.string_to (str);
 	return tmp;
 }

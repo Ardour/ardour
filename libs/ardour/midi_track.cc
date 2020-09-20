@@ -370,8 +370,8 @@ MidiTrack::update_controls (BufferSet const& bufs)
 		const Evoral::Parameter                  param   = midi_parameter(ev.buffer(), ev.size());
 		const boost::shared_ptr<AutomationControl> control = automation_control (param);
 		if (control) {
-			double old = control->get_double (false, 0);
-			control->set_double (ev.value(), 0, false);
+			double old = control->get_double (false, timepos_t::zero (true));
+			control->set_double (ev.value(), timepos_t::zero (false), false);
 			if (old != ev.value()) {
 				control->Changed (false, Controllable::NoGroup);
 			}
@@ -406,9 +406,11 @@ MidiTrack::realtime_locate (bool for_loop_end)
 }
 
 void
-MidiTrack::non_realtime_locate (samplepos_t pos)
+MidiTrack::non_realtime_locate (samplepos_t spos)
 {
-	Track::non_realtime_locate(pos);
+	timepos_t pos (spos);
+
+	Track::non_realtime_locate (spos);
 
 	boost::shared_ptr<MidiPlaylist> playlist = _disk_writer->midi_playlist();
 	if (!playlist) {
@@ -416,7 +418,7 @@ MidiTrack::non_realtime_locate (samplepos_t pos)
 	}
 
 	/* Get the top unmuted region at this position. */
-	boost::shared_ptr<MidiRegion> region = boost::dynamic_pointer_cast<MidiRegion>(playlist->top_unmuted_region_at(pos));
+	boost::shared_ptr<MidiRegion> region = boost::dynamic_pointer_cast<MidiRegion> (playlist->top_unmuted_region_at (pos));
 
 	if (!region) {
 		return;
@@ -433,8 +435,7 @@ MidiTrack::non_realtime_locate (samplepos_t pos)
 	}
 
 	/* Update track controllers based on its "automation". */
-	const samplepos_t     origin = region->position() - region->start();
-	BeatsSamplesConverter bfc(_session.tempo_map(), origin);
+	const timepos_t pos_beats = timepos_t (region->source_position().distance (pos).beats ()); /* relative to source start */
 
 	for (Controls::const_iterator c = _controls.begin(); c != _controls.end(); ++c) {
 
@@ -450,7 +451,7 @@ MidiTrack::non_realtime_locate (samplepos_t pos)
 		if ((tcontrol = boost::dynamic_pointer_cast<MidiTrack::MidiControl>(c->second)) &&
 
 		    (rcontrol = region->control(tcontrol->parameter()))) {
-			const Temporal::Beats pos_beats = bfc.from(pos - origin);
+
 			if (rcontrol->list()->size() > 0) {
 				tcontrol->set_value(rcontrol->list()->eval(pos_beats), Controllable::NoGroup);
 			}

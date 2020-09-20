@@ -38,7 +38,7 @@ using namespace ARDOUR;
  */
 
 Quantize::Quantize (bool snap_start, bool snap_end,
-		    double start_grid, double end_grid,
+		    int start_grid, int end_grid,
                     float strength, float swing, Temporal::Beats const & threshold)
 	: _snap_start (snap_start)
 	, _snap_end (snap_end)
@@ -116,14 +116,12 @@ Quantize::operator () (boost::shared_ptr<MidiModel> model,
                        Temporal::Beats position,
                        std::vector<Evoral::Sequence<Temporal::Beats>::Notes>& seqs)
 {
-	/* TODO: Rewrite this to be precise with fixed point? */
-
 	/* Calculate offset from start of model to next closest quantize step,
 	   to quantize relative to actual session beats (etc.) rather than from the
 	   start of the model.
 	*/
-	const double round_pos = (position / _start_grid) * _start_grid;
-	const double offset    = round_pos - position;
+	const Temporal::Beats round_pos = (position / _start_grid) * _start_grid;
+	const Temporal::Beats offset    = round_pos - position;
 
 	MidiModel::NoteDiffCommand* cmd = new MidiModel::NoteDiffCommand (model, "quantize");
 
@@ -158,9 +156,9 @@ Quantize::operator () (boost::shared_ptr<MidiModel> model,
 
 			if (delta.abs() >= _threshold) {
 				if (_snap_start) {
-					delta = delta * _strength;
-					cmd->change ((*i), MidiModel::NoteDiffCommand::StartTime,
-					             (*i)->time() + delta);
+					/* this is here because Beats intentionally does not have operator* (double) */
+					delta = Temporal::Beats::ticks (llrintf (delta.to_ticks()) * _strength);
+					cmd->change ((*i), MidiModel::NoteDiffCommand::StartTime, (*i)->time() + delta);
 				}
 			}
 

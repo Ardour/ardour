@@ -308,16 +308,17 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 		unload_synth (true);
 
 		midi_region.reset();
-		_import_position = 0;
+		_import_position = timepos_t (Temporal::AudioTime);
 
 		/* copy it */
+
 		the_region = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (region, false));
-		the_region->set_position (0);
+		the_region->set_position (timepos_t (Temporal::AudioTime));
 
 		_disk_reader->midi_playlist()->drop_regions ();
 
 		_disk_reader->audio_playlist()->drop_regions ();
-		_disk_reader->audio_playlist()->add_region (the_region, 0, 1);
+		_disk_reader->audio_playlist()->add_region (the_region, timepos_t (Temporal::AudioTime), 1);
 
 		ProcessorStreams ps;
 		{
@@ -325,7 +326,7 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 
 			if (configure_processors (&ps)) {
 				error << string_compose (_("Cannot setup auditioner processing flow for %1 channels"),
-				                         region->n_channels()) << endmsg;
+				                         region->sources().size()) << endmsg;
 				return;
 			}
 		}
@@ -334,7 +335,7 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 		_midi_audition = true;
 
 		the_region.reset();
-		_import_position = region->position();
+		_import_position = region->nt_position();
 
 		/* copy it */
 		midi_region = (boost::dynamic_pointer_cast<MidiRegion> (RegionFactory::create (region, false)));
@@ -362,7 +363,7 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 
 			if (configure_processors (&ps)) {
 				error << string_compose (_("Cannot setup auditioner processing flow for %1 channels"),
-							 region->n_channels()) << endmsg;
+				                         region->sources().size()) << endmsg;
 				unload_synth (true);
 				return;
 			}
@@ -380,13 +381,13 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 	_seeking = false;
 
 	int dir;
-	samplecnt_t offset;
+	timepos_t offset;
 
 	if (_midi_audition) {
-		length = midi_region->length();
+		length = midi_region->nt_length();
 		offset = _import_position + midi_region->sync_offset (dir);
 	} else {
-		length = the_region->length();
+		length = the_region->nt_length();
 		offset = the_region->sync_offset (dir);
 	}
 
@@ -402,7 +403,7 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 		offset = 0;
 	}
 
-	_disk_reader->seek (offset, true);
+	_disk_reader->seek (offset.samples(), true);
 
 	if (_midi_audition) {
 		/* Fill MIDI buffers.
@@ -415,7 +416,7 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 		_disk_reader->overwrite_existing_buffers ();
 	}
 
-	current_sample = offset;
+	current_sample = offset.samples();
 
 	g_atomic_int_set (&_auditioning, 1);
 }
@@ -455,7 +456,7 @@ Auditioner::play_audition (samplecnt_t nframes)
 
 	if(!_seeking) {
 		/* process audio */
-		this_nframes = min (nframes, length - current_sample + _import_position);
+		this_nframes = min (nframes, length.samples() - current_sample + _import_position.samples());
 
 		if (this_nframes > 0 && 0 != (ret = roll (this_nframes, current_sample, current_sample + this_nframes, need_butler))) {
 			silence (nframes);
@@ -475,7 +476,7 @@ Auditioner::play_audition (samplecnt_t nframes)
 		silence (nframes);
 	}
 
-	if (_seek_sample >= 0 && _seek_sample < length && !_seeking) {
+	if (_seek_sample >= 0 && _seek_sample < length.samples() && !_seeking) {
 		_queue_panic = true;
 		_seek_complete = false;
 		_seeking = true;
@@ -483,10 +484,10 @@ Auditioner::play_audition (samplecnt_t nframes)
 	}
 
 	if (!_seeking) {
-		AuditionProgress(current_sample - _import_position, length); /* emit */
+		AuditionProgress(current_sample - _import_position.samples(), length.samples()); /* emit */
 	}
 
-	if (current_sample >= length + _import_position) {
+	if (current_sample >= (length + _import_position).samples()) {
 		_session.cancel_audition ();
 		unload_synth (false);
 		return 0;
@@ -515,7 +516,7 @@ Auditioner::seek_to_sample (sampleoffset_t pos) {
 void
 Auditioner::seek_to_percent (float const pos) {
 	if (_seek_sample < 0 && !_seeking) {
-		_seek_sample = floorf(length * pos / 100.0);
+		_seek_sample = floorf(length.samples() * pos / 100.0);
 	}
 }
 

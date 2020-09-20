@@ -30,7 +30,7 @@
 
 namespace ARDOUR {
 
-class Readable;
+class AudioReadable;
 class Session;
 
 class LIBARDOUR_API AudioAnalyser : public boost::noncopyable {
@@ -44,7 +44,7 @@ class LIBARDOUR_API AudioAnalyser : public boost::noncopyable {
 
 	/* analysis object should provide a run method
 	   that accepts a path to write the results to (optionally empty)
-	   a Readable* to read data from
+	   a AudioReadable* to read data from
 	   and a reference to a type-specific container to return the
 	   results.
 	*/
@@ -60,7 +60,7 @@ class LIBARDOUR_API AudioAnalyser : public boost::noncopyable {
 	samplecnt_t stepsize;
 
 	int initialize_plugin (AnalysisPluginKey name, float sample_rate);
-	int analyse (const std::string& path, Readable*, uint32_t channel);
+	int analyse (const std::string& path, AudioReadable*, uint32_t channel);
 
 	/* instances of an analysis object will have this method called
 	   whenever there are results to process. if out is non-null,

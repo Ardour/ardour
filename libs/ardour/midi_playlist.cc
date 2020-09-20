@@ -78,8 +78,8 @@ MidiPlaylist::MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other, string 
 }
 
 MidiPlaylist::MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other,
-                            samplepos_t                            start,
-                            samplecnt_t                            dur,
+                            timepos_t  const &                    start,
+                            timepos_t  const &                    dur,
                             string                                name,
                             bool                                  hidden)
 	: Playlist (other, start, dur, name, hidden)
@@ -149,9 +149,9 @@ MidiPlaylist::dump () const
 	for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
 		r = *i;
 		cerr << "  " << r->name() << " @ " << r << " ["
-		<< r->start() << "+" << r->length()
+		<< r->nt_start() << "+" << r->nt_length()
 		<< "] at "
-		<< r->position()
+		<< r->nt_position()
 		<< " on layer "
 		<< r->layer ()
 		<< endl;
@@ -196,14 +196,14 @@ MidiPlaylist::destroy_region (boost::shared_ptr<Region> region)
 	return changed;
 }
 void
-MidiPlaylist::_split_region (boost::shared_ptr<Region> region, const MusicSample& playlist_position, ThawList& thawlist)
+MidiPlaylist::_split_region (boost::shared_ptr<Region> region, timepos_t const & playlist_position, Thawlist& thawlist)
 {
-	if (!region->covers (playlist_position.sample)) {
+	if (!region->covers (playlist_position)) {
 		return;
 	}
 
-	if (region->position() == playlist_position.sample ||
-	    region->last_sample() == playlist_position.sample) {
+	if (region->nt_position() == playlist_position ||
+	    region->nt_last() == playlist_position) {
 		return;
 	}
 
@@ -218,18 +218,16 @@ MidiPlaylist::_split_region (boost::shared_ptr<Region> region, const MusicSample
 
 	string before_name;
 	string after_name;
-	const double before_qn = _session.tempo_map().exact_qn_at_sample (playlist_position.sample, playlist_position.division) - region->quarter_note();
-	const double after_qn = mr->length_beats() - before_qn;
-	MusicSample before (playlist_position.sample - region->position(), playlist_position.division);
-	MusicSample after (region->length() - before.sample, playlist_position.division);
+
+	const timecnt_t before = region->nt_position().distance (playlist_position);
+	const timecnt_t after = region->nt_length() - before;
 
 	RegionFactory::region_name (before_name, region->name(), false);
 
 	{
 		PropertyList plist;
 
-		plist.add (Properties::length, before.sample);
-		plist.add (Properties::length_beats, before_qn);
+		plist.add (Properties::length, before);
 		plist.add (Properties::name, before_name);
 		plist.add (Properties::left_of_split, true);
 		plist.add (Properties::layering_index, region->layering_index ());
@@ -239,7 +237,7 @@ MidiPlaylist::_split_region (boost::shared_ptr<Region> region, const MusicSample
 		   since it supplies that offset to the Region constructor, which
 		   is necessary to get audio region gain envelopes right.
 		*/
-		left = RegionFactory::create (region, MusicSample (0, 0), plist, true, &thawlist);
+	        left = RegionFactory::create (region, plist, true, &thawlist);
 	}
 
 	RegionFactory::region_name (after_name, region->name(), false);
@@ -247,8 +245,7 @@ MidiPlaylist::_split_region (boost::shared_ptr<Region> region, const MusicSample
 	{
 		PropertyList plist;
 
-		plist.add (Properties::length, after.sample);
-		plist.add (Properties::length_beats, after_qn);
+		plist.add (Properties::length, after);
 		plist.add (Properties::name, after_name);
 		plist.add (Properties::right_of_split, true);
 		plist.add (Properties::layering_index, region->layering_index ());
@@ -258,8 +255,8 @@ MidiPlaylist::_split_region (boost::shared_ptr<Region> region, const MusicSample
 		right = RegionFactory::create (region, before, plist, true, &thawlist);
 	}
 
-	add_region_internal (left, region->position(), thawlist, 0, region->quarter_note(), true);
-	add_region_internal (right, region->position() + before.sample, thawlist, before.division, region->quarter_note() + before_qn, true);
+	add_region_internal (left, region->nt_position(), thawlist);
+	add_region_internal (right, region->nt_position() + before, thawlist);
 
 	remove_region_internal (region, thawlist);
 }

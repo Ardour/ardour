@@ -46,7 +46,7 @@
 #include "pbd/undo.h"
 #include "pbd/g_atomic_compat.h"
 
-#include "evoral/Range.h"
+#include "temporal/range.h"
 
 #include "ardour/ardour.h"
 #include "ardour/data_type.h"
@@ -95,7 +95,7 @@ public:
 	Playlist (Session&, const XMLNode&, DataType type, bool hidden = false);
 	Playlist (Session&, std::string name, DataType type, bool hidden = false);
 	Playlist (boost::shared_ptr<const Playlist>, std::string name, bool hidden = false);
-	Playlist (boost::shared_ptr<const Playlist>, samplepos_t start, samplecnt_t cnt, std::string name, bool hidden = false);
+	Playlist (boost::shared_ptr<const Playlist>, timepos_t const & start, timepos_t const & cnt, std::string name, bool hidden = false);
 
 	virtual ~Playlist ();
 
@@ -159,51 +159,54 @@ public:
 	bool shared_with (const PBD::ID&) const;
 	void reset_shares ();
 
-	uint32_t                            n_regions () const;
-	bool                                all_regions_empty () const;
-	std::pair<samplepos_t, samplepos_t> get_extent () const;
-	std::pair<samplepos_t, samplepos_t> get_extent_with_endspace () const;
-	layer_t                             top_layer () const;
+	uint32_t n_regions() const;
+	bool all_regions_empty() const;
+	std::pair<timepos_t, timepos_t> get_extent () const;
+	std::pair<timepos_t, timepos_t> get_extent_with_endspace() const;
+	layer_t top_layer() const;
+
+	EditMode get_edit_mode() const { return _edit_mode; }
+	void set_edit_mode (EditMode);
 
 	/* Editing operations */
 
-	void add_region (boost::shared_ptr<Region>, samplepos_t position, float times = 1, bool auto_partition = false, int32_t sub_num = 0, double quarter_note = 0.0, bool for_music = false);
+	void add_region (boost::shared_ptr<Region>, timepos_t const & position, float times = 1, bool auto_partition = false);
 	void remove_region (boost::shared_ptr<Region>);
 	void get_equivalent_regions (boost::shared_ptr<Region>, std::vector<boost::shared_ptr<Region> >&);
-	void replace_region (boost::shared_ptr<Region> old, boost::shared_ptr<Region> newr, samplepos_t pos);
-	void split_region (boost::shared_ptr<Region>, const MusicSample& position);
-	void split (const MusicSample& at);
-	void shift (samplepos_t at, sampleoffset_t distance, bool move_intersected, bool ignore_music_glue);
-	void partition (samplepos_t start, samplepos_t end, bool cut = false);
-	void duplicate (boost::shared_ptr<Region>, samplepos_t position, float times);
-	void duplicate (boost::shared_ptr<Region>, samplepos_t position, samplecnt_t gap, float times);
-	void duplicate_until (boost::shared_ptr<Region>, samplepos_t position, samplecnt_t gap, samplepos_t end);
-	void duplicate_range (AudioRange&, float times);
-	void duplicate_ranges (std::list<AudioRange>&, float times);
-	void nudge_after (samplepos_t start, samplecnt_t distance, bool forwards);
-	void fade_range (std::list<AudioRange>&);
-	void remove_gaps (samplepos_t gap_threshold, samplepos_t leave_gap, boost::function<void (samplepos_t, samplecnt_t)> gap_callback);
 
+	void get_region_list_equivalent_regions (boost::shared_ptr<Region>, std::vector<boost::shared_ptr<Region> >&);
+	void get_source_equivalent_regions (boost::shared_ptr<Region>, std::vector<boost::shared_ptr<Region> >&);
+	void replace_region (boost::shared_ptr<Region> old, boost::shared_ptr<Region> newr, timepos_t const & pos);
+	void split_region (boost::shared_ptr<Region>, timepos_t const & position);
+	void split (timepos_t const & at);
+	void shift (timepos_t const & at, timecnt_t const & distance, bool move_intersected, bool ignore_music_glue);
+	void partition (timepos_t const & start, timepos_t const & end, bool cut = false);
+	void duplicate (boost::shared_ptr<Region>, timepos_t & position, float times);
+	void duplicate (boost::shared_ptr<Region>, timepos_t & position, timecnt_t const & gap, float times);
+	void duplicate_until (boost::shared_ptr<Region>, timepos_t & position, timecnt_t const & gap, timepos_t const & end);
+	void duplicate_range (TimelineRange&, float times);
+	void duplicate_ranges (std::list<TimelineRange>&, float times);
+	void nudge_after (timepos_t const & start, timecnt_t const & distance, bool forwards);
 	boost::shared_ptr<Region> combine (const RegionList&);
-	void                      uncombine (boost::shared_ptr<Region>);
+	void uncombine (boost::shared_ptr<Region>);
+	void fade_range (std::list<TimelineRange>&);
 
 	void shuffle (boost::shared_ptr<Region>, int dir);
 
-	void ripple (samplepos_t at, samplecnt_t distance, RegionList* exclude);
-	void ripple (samplepos_t at, samplecnt_t distance, boost::shared_ptr<Region> exclude)
-	{
-		RegionList el;
-		if (exclude) {
-			el.push_back (exclude);
-		}
-		ripple (at, distance, &el);
+	void ripple (timepos_t const & at, timecnt_t const & distance, RegionList *exclude);
+	void ripple (timepos_t const & at, timecnt_t const & distance, boost::shared_ptr<Region> exclude) {
+		 RegionList el;
+		 if (exclude) {
+			 el.push_back (exclude);
+		 }
+		 ripple (at, distance, &el);
 	}
 
 	void update_after_tempo_map_change ();
 
-	boost::shared_ptr<Playlist> cut (std::list<AudioRange>&, bool result_is_hidden = true);
-	boost::shared_ptr<Playlist> copy (std::list<AudioRange>&, bool result_is_hidden = true);
-	int                         paste (boost::shared_ptr<Playlist>, samplepos_t position, float times, const int32_t sub_num);
+	boost::shared_ptr<Playlist> cut  (std::list<TimelineRange>&, bool result_is_hidden = true);
+	boost::shared_ptr<Playlist> copy (std::list<TimelineRange>&, bool result_is_hidden = true);
+	int                         paste (boost::shared_ptr<Playlist>, timepos_t const & position, float times);
 
 	const RegionListProperty& region_list_property () const
 	{
@@ -212,31 +215,31 @@ public:
 
 	boost::shared_ptr<RegionList> region_list ();
 
-	boost::shared_ptr<RegionList> regions_at (samplepos_t sample);
-	uint32_t                      count_regions_at (samplepos_t) const;
+	boost::shared_ptr<RegionList> regions_at (timepos_t const & sample);
+	uint32_t                      count_regions_at (timepos_t const &) const;
 
 	/** @param start Range start.
 	 *  @param end Range end.
 	 *  @return regions which have some part within this range.
 	 */
-	boost::shared_ptr<RegionList> regions_touched (samplepos_t start, samplepos_t end);
-	boost::shared_ptr<RegionList> regions_with_start_within (Evoral::Range<samplepos_t>);
-	boost::shared_ptr<RegionList> regions_with_end_within (Evoral::Range<samplepos_t>);
-	uint32_t                      region_use_count (boost::shared_ptr<Region>) const;
-	boost::shared_ptr<Region>     find_region (const PBD::ID&) const;
-	boost::shared_ptr<Region>     top_region_at (samplepos_t sample);
-	boost::shared_ptr<Region>     top_unmuted_region_at (samplepos_t sample);
-	boost::shared_ptr<Region>     find_next_region (samplepos_t sample, RegionPoint point, int dir);
-	samplepos_t                   find_next_region_boundary (samplepos_t sample, int dir);
-	bool                          region_is_shuffle_constrained (boost::shared_ptr<Region>);
-	bool                          has_region_at (samplepos_t const) const;
+	boost::shared_ptr<RegionList> regions_touched (timepos_t const & start, timepos_t const & end);
+	boost::shared_ptr<RegionList> regions_with_start_within (Temporal::TimeRange);
+	boost::shared_ptr<RegionList> regions_with_end_within (Temporal::TimeRange);
+	uint32_t                   region_use_count (boost::shared_ptr<Region>) const;
+	boost::shared_ptr<Region>  find_region (const PBD::ID&) const;
+	boost::shared_ptr<Region>  top_region_at (timepos_t const &);
+	boost::shared_ptr<Region>  top_unmuted_region_at (timepos_t const &);
+	boost::shared_ptr<Region>  find_next_region (timepos_t const &, RegionPoint point, int dir);
+	timepos_t                  find_next_region_boundary (timepos_t const &, int dir);
+	bool                       region_is_shuffle_constrained (boost::shared_ptr<Region>);
+	bool                       has_region_at (timepos_t const &) const;
 
 	samplepos_t                   find_prev_region_start (samplepos_t sample);
 
 	bool uses_source (boost::shared_ptr<const Source> src, bool shallow = false) const;
 	void deep_sources (std::set<boost::shared_ptr<Source> >&) const;
 
-	samplepos_t find_next_transient (samplepos_t position, int dir);
+	samplepos_t find_next_transient (timepos_t const & position, int dir);
 
 	void foreach_region (boost::function<void(boost::shared_ptr<Region>)>);
 
@@ -252,12 +255,12 @@ public:
 	PBD::Signal0<void>                           LayeringChanged;
 
 	/** Emitted when regions have moved (not when regions have only been trimmed) */
-	PBD::Signal2<void, std::list<Evoral::RangeMove<samplepos_t> > const&, bool> RangesMoved;
+	PBD::Signal2<void,std::list< Temporal::RangeMove> const &, bool> RangesMoved;
 
 	/** Emitted when regions are extended; the ranges passed are the new extra time ranges
 	    that these regions now occupy.
 	*/
-	PBD::Signal1<void, std::list<Evoral::Range<samplepos_t> > const&> RegionsExtended;
+	PBD::Signal1<void,std::list< Temporal::Range> const &> RegionsExtended;
 
 	static std::string bump_name (std::string old_name, Session&);
 
@@ -289,11 +292,8 @@ public:
 		return boost::shared_ptr<Crossfade> ();
 	}
 
-	samplepos_t find_next_top_layer_position (samplepos_t) const;
-	uint32_t    combine_ops () const
-	{
-		return _combine_ops;
-	}
+	timepos_t find_next_top_layer_position (timepos_t const &) const;
+	uint32_t combine_ops() const { return _combine_ops; }
 
 	void set_layer (boost::shared_ptr<Region>, double);
 
@@ -373,6 +373,7 @@ protected:
 	 *  region trims are not included in this list; it is used to
 	 *  do automation-follows-regions.
 	 */
+
 	std::list<Evoral::RangeMove<samplepos_t> > pending_range_moves;
 
 	/** Extra sections added to regions during trims */
@@ -393,6 +394,7 @@ protected:
 	uint32_t           subcnt;
 	PBD::ID            _orig_track_id;
 	uint32_t           _combine_ops;
+
 	std::list<PBD::ID> _shared_with_ids;
 
 	void init (bool hide);
@@ -410,7 +412,7 @@ protected:
 
 	void _set_sort_id ();
 
-	boost::shared_ptr<RegionList> regions_touched_locked (samplepos_t start, samplepos_t end);
+	boost::shared_ptr<RegionList> regions_touched_locked (timepos_t const & start, timepos_t const & end);
 
 	void notify_region_removed (boost::shared_ptr<Region>);
 	void notify_region_added (boost::shared_ptr<Region>);
@@ -431,34 +433,34 @@ protected:
 
 	void sort_regions ();
 
-
-	void ripple_locked (samplepos_t at, samplecnt_t distance, RegionList* exclude);
-	bool ripple_unlocked (samplepos_t at, samplecnt_t distance, RegionList* exclude, ThawList& thawlist);
+	void ripple_locked (timepos_t const & at, timecnt_t const & distance, RegionList *exclude);
+	void ripple_unlocked (timepos_t const & at, timecnt_t const & distance, RegionList *exclude, Thawlist& thawlist);
 
 	virtual void remove_dependents (boost::shared_ptr<Region> /*region*/) {}
 	virtual void region_going_away (boost::weak_ptr<Region> /*region*/) {}
 
 	virtual XMLNode& state (bool);
 
-	bool add_region_internal (boost::shared_ptr<Region>, samplepos_t position, ThawList& thawlist, int32_t sub_num = 0, double quarter_note = 0.0, bool for_music = false);
+	bool add_region_internal (boost::shared_ptr<Region>, timepos_t const & position, Thawlist& thawlist);
 
 	int  remove_region_internal (boost::shared_ptr<Region>, ThawList& thawlist);
 	void copy_regions (RegionList&) const;
-	void partition_internal (samplepos_t start, samplepos_t end, bool cutting, ThawList& thawlist);
 
-	std::pair<samplepos_t, samplepos_t> _get_extent () const;
+	void partition_internal (timepos_t const & start, timepos_t const & end, bool cutting, ThawList& thawlist);
 
-	boost::shared_ptr<Playlist> cut_copy (boost::shared_ptr<Playlist> (Playlist::*pmf) (samplepos_t, samplecnt_t, bool),
-	                                      std::list<AudioRange>& ranges, bool result_is_hidden);
-	boost::shared_ptr<Playlist> cut (samplepos_t start, samplecnt_t cnt, bool result_is_hidden);
-	boost::shared_ptr<Playlist> copy (samplepos_t start, samplecnt_t cnt, bool result_is_hidden);
+	std::pair<timepos_t, timepos_t> _get_extent() const;
+
+	boost::shared_ptr<Playlist> cut_copy (boost::shared_ptr<Playlist> (Playlist::*pmf)(timepos_t const &, timecnt_t const &, bool),
+	                                      std::list<TimelineRange>& ranges, bool result_is_hidden);
+	boost::shared_ptr<Playlist> cut (timepos_t const & start, timecnt_t const & cnt, bool result_is_hidden);
+	boost::shared_ptr<Playlist> copy (timepos_t const & start, timecnt_t const & cnt, bool result_is_hidden);
 
 	void relayer ();
 
 	void begin_undo ();
 	void end_undo ();
 
-	virtual void _split_region (boost::shared_ptr<Region>, const MusicSample& position, ThawList& thawlist);
+	virtual void _split_region (boost::shared_ptr<Region>, timepos_t const & position, Thawlist& thawlist);
 
 	typedef std::pair<boost::shared_ptr<Region>, boost::shared_ptr<Region> > TwoRegions;
 
@@ -479,15 +481,13 @@ private:
 
 private:
 	void freeze_locked ();
-	void setup_layering_indices (RegionList const&);
-	void coalesce_and_check_crossfades (std::list<Evoral::Range<samplepos_t> >);
+	void setup_layering_indices (RegionList const &);
+	void coalesce_and_check_crossfades (std::list<Temporal::TimeRange>);
+	boost::shared_ptr<RegionList> find_regions_at (timepos_t const &);
 
-	boost::shared_ptr<RegionList> find_regions_at (samplepos_t);
-
-	mutable boost::optional<std::pair<samplepos_t, samplepos_t> > _cached_extent;
-
-	samplepos_t _end_space; // this is used when we are pasting a range with extra space at the end
-	bool        _playlist_shift_active;
+	mutable boost::optional<std::pair<timepos_t, timepos_t> > _cached_extent;
+	timepos_t _end_space;  //this is used when we are pasting a range with extra space at the end
+	bool _playlist_shift_active;
 
 	std::string _pgroup_id; // when we make multiple playlists in one action, they will share the same pgroup_id
 };
@@ -495,3 +495,4 @@ private:
 } /* namespace ARDOUR */
 
 #endif /* __ardour_playlist_h__ */
+

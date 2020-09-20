@@ -43,6 +43,7 @@
 #include <inttypes.h>
 
 #include "temporal/bbt_time.h"
+#include "temporal/range.h"
 #include "temporal/superclock.h"
 #include "temporal/time.h"
 #include "temporal/timeline.h"
@@ -50,8 +51,6 @@
 
 #include "pbd/id.h"
 #include "pbd/microseconds.h"
-
-#include "evoral/Range.h"
 
 #include "ardour/chan_count.h"
 #include "ardour/plugin_types.h"
@@ -355,64 +354,41 @@ struct MusicSample {
 	MusicSample operator- (MusicSample other) { return MusicSample (sample - other.sample, 0); }
 };
 
-/* XXX: slightly unfortunate that there is this and Evoral::Range<>,
-   but this has a uint32_t id which Evoral::Range<> does not.
-*/
-struct AudioRange {
-	samplepos_t start;
-	samplepos_t end;
+/* Just a Temporal::Range with an ID for identity
+ */
+struct TimelineRange : public Temporal::TimeRange
+{
 	uint32_t id;
 
-	AudioRange (samplepos_t s, samplepos_t e, uint32_t i) : start (s), end (e) , id (i) {}
+	TimelineRange (Temporal::timepos_t const & s, Temporal::timepos_t e, uint32_t i) : Temporal::TimeRange (s, e), id (i) {}
 
-	samplecnt_t length() const { return end - start + 1; }
+	samplecnt_t length_samples() const { return length().samples(); }
 
-	bool operator== (const AudioRange& other) const {
-		return start == other.start && end == other.end && id == other.id;
+	bool operator== (const TimelineRange& other) const {
+		return id == other.id && Temporal::TimeRange::operator== (other);
 	}
 
-	bool equal (const AudioRange& other) const {
-		return start == other.start && end == other.end;
-	}
-
-	Evoral::OverlapType coverage (samplepos_t s, samplepos_t e) const {
-		return Evoral::coverage (start, end, s, e);
-	}
-};
-
-struct MusicRange {
-	Temporal::BBT_Time start;
-	Temporal::BBT_Time end;
-	uint32_t id;
-
-	MusicRange (Temporal::BBT_Time& s, Temporal::BBT_Time& e, uint32_t i)
-		: start (s), end (e), id (i) {}
-
-	bool operator== (const MusicRange& other) const {
-		return start == other.start && end == other.end && id == other.id;
-	}
-
-	bool equal (const MusicRange& other) const {
-		return start == other.start && end == other.end;
+	bool equal (const TimelineRange& other) const {
+		return Temporal::TimeRange::operator== (other);
 	}
 };
 
 class CueMarker {
   public:
-	CueMarker (std::string const& text, samplepos_t position) : _text (text), _position (position) {}
+	CueMarker (std::string const& text, timepos_t const & position) : _text (text), _position (position) {}
 
 	std::string text() const { return _text; }
 	void set_text (std::string const & str) { _text = str; }
 
-	samplepos_t position() const { return _position; }
-	void set_position (samplepos_t pos) { _position = pos; }
+	timepos_t position() const { return _position; }
+	void set_position (timepos_t const & pos) { _position = pos; }
 
 	bool operator== (CueMarker const & other) const { return _position == other.position() && _text == other.text(); }
 	bool operator< (CueMarker const & other) const { return _position < other.position(); }
 
   private:
 	std::string _text;
-	samplepos_t _position;
+	timepos_t _position;
 };
 
 typedef std::set<CueMarker> CueMarkers;
@@ -690,11 +666,6 @@ struct CleanupReport {
 	CleanupReport () : space (0) {}
 	std::vector<std::string> paths;
 	size_t                   space;
-};
-
-enum PositionLockStyle {
-	AudioTime,
-	MusicTime
 };
 
 /** A struct used to describe changes to processors in a route.

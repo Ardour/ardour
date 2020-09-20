@@ -79,7 +79,6 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<timecnt_t> ancestral_length;
 		PBD::PropertyDescriptor<float> stretch;
 		PBD::PropertyDescriptor<float> shift;
-		PBD::PropertyDescriptor<PositionLockStyle> position_lock_style;
 		PBD::PropertyDescriptor<uint64_t> layering_index;
 		PBD::PropertyDescriptor<std::string> tags;
 		PBD::PropertyDescriptor<bool> contents;
@@ -139,8 +138,6 @@ Region::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for stretch = %1\n", Properties::stretch.property_id));
 	Properties::shift.property_id = g_quark_from_static_string (X_("shift"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for shift = %1\n", Properties::shift.property_id));
-	Properties::position_lock_style.property_id = g_quark_from_static_string (X_("positional-lock-style"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for position_lock_style = %1\n", Properties::position_lock_style.property_id));
 	Properties::layering_index.property_id = g_quark_from_static_string (X_("layering-index"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for layering_index = %1\n",	Properties::layering_index.property_id));
 	Properties::tags.property_id = g_quark_from_static_string (X_("tags"));
@@ -176,7 +173,6 @@ Region::register_properties ()
 	add_property (_ancestral_length);
 	add_property (_stretch);
 	add_property (_shift);
-	add_property (_position_lock_style);
 	add_property (_layering_index);
 	add_property (_tags);
 	add_property (_contents);
@@ -209,7 +205,6 @@ Region::register_properties ()
 	, _ancestral_length (Properties::ancestral_length, (l)) \
 	, _stretch (Properties::stretch, 1.0) \
 	, _shift (Properties::shift, 1.0) \
-	, _position_lock_style (Properties::position_lock_style, _type == DataType::AUDIO ? AudioTime : MusicTime) \
 	, _layering_index (Properties::layering_index, 0) \
 	, _tags (Properties::tags, "") \
 	, _contents (Properties::contents, false)
@@ -243,7 +238,6 @@ Region::register_properties ()
 	, _ancestral_length (Properties::ancestral_length, other->_ancestral_length) \
 	, _stretch (Properties::stretch, other->_stretch) \
 	, _shift (Properties::shift, other->_shift) \
-	, _position_lock_style (Properties::position_lock_style, other->_position_lock_style) \
 	, _layering_index (Properties::layering_index, other->_layering_index) \
 	, _tags (Properties::tags, other->_tags) \
 	, _contents (Properties::contents, other->_contents)
@@ -310,7 +304,6 @@ Region::Region (boost::shared_ptr<const Region> other)
 	use_sources (other->_sources);
 	set_master_sources (other->_master_sources);
 
-	_position_lock_style = other->_position_lock_style.val();
 	_first_edit = other->_first_edit;
 
 	_start = other->_start;
@@ -478,7 +471,7 @@ Region::set_length (timecnt_t const & len)
 		 * length impossible.
 		 */
 
-		if (timepos_t::max().earlier (len) < _position) {
+		if (timepos_t::max (len.time_domain()).earlier (len) < _position) {
 			return;
 		}
 
@@ -579,16 +572,11 @@ Region::special_set_position (timepos_t const & pos)
 }
 
 void
-Region::set_position_lock_style (PositionLockStyle ps)
+Region::recompute_position_from_time_domain ()
 {
-	if (_position_lock_style != ps) {
-
-		boost::shared_ptr<Playlist> pl (playlist());
-
-		_position_lock_style = ps;
-
-		send_change (Properties::position_lock_style);
-	}
+	/* XXX currently do nothing, but if we wanted to reduce lazy evaluation
+	 * of timepos_t non-canonical values, we could possibly do it here.
+	 */
 }
 
 void
@@ -604,13 +592,23 @@ Region::update_after_tempo_map_change (bool send)
 		return;
 	}
 
+	if (!send) {
+		return;
+	}
+
+	PropertyChange what_changed;
+
+#warning NUTEMPO THINKME make this more nuanced ... nothing may have changed and maybe we don't need this at all
+
+	what_changed.add (Properties::start);
+	what_changed.add (Properties::length);
+	what_changed.add (Properties::position);
+
 	/* do this even if the position is the same. this helps out
 	 * a GUI that has moved its representation already.
 	 */
 
-	if (send) {
-		send_change (Properties::position);
-	}
+	send_change (what_changed);
 }
 
 void
@@ -636,7 +634,7 @@ Region::set_position (timepos_t const & pos)
 	 * given that we already are notifying about position change.
 	 */
 
-	if (position_lock_style() != AudioTime) {
+	if (position_time_domain() != Temporal::AudioTime) {
 		p_and_l.add (Properties::length);
 	}
 
@@ -664,9 +662,9 @@ Region::set_position_internal (timepos_t const & pos)
 		 *
 		 * XXX is this the right thing to do?
 		 */
-		if (timepos_t::max().earlier (_length) < _position) {
+		if (timepos_t::max (_length.val().time_domain()).earlier (_length) < _position) {
 			_last_length = _length;
-			_length = _position.call().distance (timepos_t::max());
+			_length = _position.call().distance (timepos_t::max(_position.val().time_domain()));
 		}
 	}
 }
@@ -692,12 +690,12 @@ Region::set_initial_position (timepos_t const & pos)
 		 * XXX is this the right thing to do?
 		 */
 
-		if (timepos_t::max().earlier (_length) < _position) {
+		if (timepos_t::max (_length.val().time_domain()).earlier (_length) < _position) {
 			_last_length = _length;
-			_length = _position.call().distance (timepos_t::max());
+			_length = _position.call().distance (timepos_t::max (_position.val().time_domain()));
 		}
 
-		recompute_position_from_lock_style ();
+		recompute_position_from_time_domain ();
 		/* ensure that this move doesn't cause a range move */
 		_last_position = _position;
 		_last_length.set_position (_position);
@@ -708,14 +706,6 @@ Region::set_initial_position (timepos_t const & pos)
 	 * a GUI that has moved its representation already.
 	 */
 	send_change (Properties::position);
-}
-
-void
-Region::recompute_position_from_lock_style ()
-{
-	/* XXX currently do nothing, but if we wanted to reduce lazy evaluation
-	 * of timepos_t non-canonical values, we could possibly do it here.
-	 */
 }
 
 void
@@ -732,8 +722,8 @@ Region::nudge_position (timecnt_t const & n)
 	timepos_t new_position = _position;
 
 	if (n.positive()) {
-		if (nt_position() > timepos_t::max().earlier (n)) {
-			new_position = timepos_t::max();
+		if (nt_position() > timepos_t::max (n.time_domain()).earlier (n)) {
+			new_position = timepos_t::max (n.time_domain());
 		} else {
 			new_position += n;
 		}
@@ -939,7 +929,7 @@ Region::trim_to (timepos_t const & position, timecnt_t const & length)
 void
 Region::trim_to_internal (timepos_t const & position, timecnt_t const & length)
 {
-	timecnt_t new_start;
+	timecnt_t new_start (length.time_domain());
 
 	if (locked()) {
 		return;
@@ -1156,7 +1146,7 @@ Region::adjust_to_sync (timepos_t const & pos) const
 			p = 0;
 		}
 	} else {
-		if (timepos_t::max().earlier (timecnt_t (p, p)) > offset) {
+		if (timepos_t::max (p.time_domain()).earlier (timecnt_t (p, p)) > offset) {
 			p += offset;
 		}
 	}
@@ -1334,10 +1324,10 @@ Region::_set_state (const XMLNode& node, int /*version*/, PropertyChange& what_c
 	 */
 
 	if (!_sources.empty() && _type == DataType::AUDIO) {
-		if ((nt_length().time_domain() == Temporal::AudioTime) && (length_samples() > _sources.front()->length(position_sample()))) {
 #warning NUTEMPO FIXME do this better
-			//_length = Temporal::samples_to_superclock (_sources.front()->length(position_sample()) - start_sample(), Temporal::_thread_sample_rate);
-		}
+		// if ((nt_length().time_domain() == Temporal::AudioTime) && (length_samples() > _sources.front()->length(position_sample()))) {
+		//_length = Temporal::samples_to_superclock (_sources.front()->length(position_sample()) - start_sample(), Temporal::_thread_sample_rate);
+		//}
 	}
 
 	set_id (node);
@@ -1425,14 +1415,14 @@ Region::send_change (const PropertyChange& what_changed)
 bool
 Region::overlap_equivalent (boost::shared_ptr<const Region> other) const
 {
-	return coverage (other->first_sample(), other->last_sample()) != Evoral::OverlapNone;
+	return coverage (other->nt_position(), other->nt_last()) != Temporal::OverlapNone;
 }
 
 bool
 Region::enclosed_equivalent (boost::shared_ptr<const Region> other) const
 {
-	return (first_sample() >= other->first_sample() && last_sample() <= other->last_sample()) ||
-	       (first_sample() <= other->first_sample() && last_sample() >= other->last_sample()) ;
+	return ((nt_position() >= other->nt_position() && nt_end() <= other->nt_end()) ||
+	        (nt_position() <= other->nt_position() && nt_end() >= other->nt_end()));
 }
 
 bool
@@ -1945,11 +1935,6 @@ bool
 Region::is_compound () const
 {
 	return max_source_level() > 0;
-}
-
-void
-Region::post_set (const PropertyChange& pc)
-{
 }
 
 void
