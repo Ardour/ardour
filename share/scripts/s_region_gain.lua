@@ -22,8 +22,9 @@ function factory () return function ()
 		end
 
 		-- to read the Region data, we use the Readable interface of the Region
-		-- http://manual.ardour.org/lua-scripting/class_reference/#ARDOUR:Readable
-		local rd = r:to_readable ()
+		-- http://manual.ardour.org/lua-scripting/class_reference/#ARDOUR:AudioReadable
+		local a = r.to_audioregion
+		local rd = a:to_readable ()	
 
 		local n_samples = rd:readable_length ()
 		local n_channels = rd:n_channels ()

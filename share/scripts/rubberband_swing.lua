@@ -63,7 +63,7 @@ function factory () return function ()
 		local rb = ARDOUR.LuaAPI.Rubberband (ar, false)
 
 		-- the rubberband-filter also implements the readable API.
-		-- https://manual.ardour.org/lua-scripting/class_reference/#ARDOUR:Readable
+		-- https://manual.ardour.org/lua-scripting/class_reference/#ARDOUR:AudioReadable
 		-- This allows to read from the master-source of the given audio-region.
 		-- Any prior time-stretch or pitch-shift are ignored when reading, however
 		-- processing retains the previous settings
