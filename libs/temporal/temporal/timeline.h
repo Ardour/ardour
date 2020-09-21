@@ -303,7 +303,7 @@ class LIBTEMPORAL_API timecnt_t {
 	/* construct from beats */
 	explicit timecnt_t (Temporal::Beats const & b, timepos_t const & pos) :  _distance (true, b.to_ticks()), _position (pos) { assert ( _distance.flagged() == _position.is_beats()); }
 
-	static timecnt_t zero_at (TimeDomain td, timepos_t const & pos) { return timecnt_t (timepos_t (td), pos); }
+	static timecnt_t zero (TimeDomain td) { return timecnt_t (timepos_t::zero (td), timepos_t::zero (td)); }
 
 	/* superclock_t and samplepos_t are the same underlying primitive type,
 	 * See comments in timepos_t above.
@@ -328,6 +328,7 @@ class LIBTEMPORAL_API timecnt_t {
 	bool zero() const { return _distance.val() == 0; }
 
 	static timecnt_t const & max() { return _max_timecnt; }
+	static timecnt_t max (Temporal::TimeDomain td) { return timecnt_t (timepos_t::max (td)); }
 
 	timecnt_t abs() const;
 
