@@ -302,7 +302,7 @@ MIDISceneChanger::program_change_input (MIDI::Parser& parser, MIDI::byte program
 
 	/* check for marker at current location */
 
-	loc = locations->mark_at (time, Config->get_inter_scene_gap_samples());
+	loc = locations->mark_at (timepos_t (time), timecnt_t (Config->get_inter_scene_gap_samples()));
 
 	if (!loc) {
 		/* create a new marker at the desired position */

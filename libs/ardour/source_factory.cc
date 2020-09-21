@@ -399,7 +399,7 @@ SourceFactory::createFromPlaylist (DataType type, Session& s, boost::shared_ptr<
 
 				if (copy) {
 					ap.reset (new AudioPlaylist (ap, start, len, name, true));
-					start = timecnt_t::zero_at (Temporal::AudioTime, timepos_t::zero (Temporal::AudioTime));
+					start = timecnt_t::zero (Temporal::AudioTime);
 				}
 
 				Source* src = new AudioPlaylistSource (s, orig, name, ap, chn, start, len, Source::Flag (0));

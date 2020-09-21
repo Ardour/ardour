@@ -428,7 +428,7 @@ Location::set_is_clock_origin (bool yn, void*)
 void
 Location::set_skip (bool yn)
 {
-	if (is_range_marker() && length_samples() > 0) {
+	if (is_range_marker() && length().positive()) {
 		if (set_flag_internal (yn, IsSkip)) {
 			flags_changed (this);
 			FlagsChanged ();
@@ -439,7 +439,7 @@ Location::set_skip (bool yn)
 void
 Location::set_skipping (bool yn)
 {
-	if (is_range_marker() && is_skip() && length_samples() > 0) {
+	if (is_range_marker() && is_skip() && length().positive()) {
 		if (set_flag_internal (yn, IsSkipping)) {
 			flags_changed (this);
 			FlagsChanged ();
@@ -1189,7 +1189,7 @@ Locations::set_state (const XMLNode& node, int version)
 }
 
 
-typedef std::pair<samplepos_t,Location*> LocationPair;
+typedef std::pair<timepos_t,Location*> LocationPair;
 
 struct LocationStartEarlierComparison
 {
@@ -1205,8 +1205,8 @@ struct LocationStartLaterComparison
 	}
 };
 
-samplepos_t
-Locations::first_mark_before (samplepos_t sample, bool include_special_ranges)
+timepos_t
+Locations::first_mark_before (timepos_t const & pos, bool include_special_ranges)
 {
 	vector<LocationPair> locs;
 	{
@@ -1232,20 +1232,20 @@ Locations::first_mark_before (samplepos_t sample, bool include_special_ranges)
 		if (!include_special_ranges && ((*i).second->is_auto_loop() || (*i).second->is_auto_punch())) {
 			continue;
 		}
-		if ((*i).first < sample) {
+		if ((*i).first < pos) {
 			return (*i).first;
 		}
 	}
 
-	return -1;
+	return timepos_t::max (pos.time_domain());
 }
 
 Location*
-Locations::mark_at (samplepos_t pos, samplecnt_t slop) const
+Locations::mark_at (timepos_t const & pos, timecnt_t const & slop) const
 {
 	Location* closest = 0;
-	sampleoffset_t mindelta = max_samplepos;
-	sampleoffset_t delta;
+	timecnt_t mindelta = timecnt_t::max (pos.time_domain());
+	timecnt_t delta;
 
 	/* locations are not necessarily stored in linear time order so we have
 	 * to iterate across all of them to find the one closest to a give point.
@@ -1255,13 +1255,13 @@ Locations::mark_at (samplepos_t pos, samplecnt_t slop) const
 	for (LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
 
 		if ((*i)->is_mark()) {
-			if (pos > (*i)->start_sample()) {
-				delta = pos - (*i)->start_sample();
+			if (pos > (*i)->start()) {
+				delta = (*i)->start().distance (pos);
 			} else {
-				delta = (*i)->start_sample() - pos;
+				delta = pos.distance ((*i)->start());
 			}
 
-			if (slop == 0 && delta == 0) {
+			if (slop.zero() && delta.zero()) {
 				/* special case: no slop, and direct hit for position */
 				return *i;
 			}
@@ -1278,8 +1278,8 @@ Locations::mark_at (samplepos_t pos, samplecnt_t slop) const
 	return closest;
 }
 
-samplepos_t
-Locations::first_mark_after (samplepos_t sample, bool include_special_ranges)
+timepos_t
+Locations::first_mark_after (timepos_t const & pos, bool include_special_ranges)
 {
 	vector<LocationPair> locs;
 
@@ -1287,9 +1287,9 @@ Locations::first_mark_after (samplepos_t sample, bool include_special_ranges)
 		Glib::Threads::RWLock::ReaderLock lm (_lock);
 
 		for (LocationList::iterator i = locations.begin(); i != locations.end(); ++i) {
-			locs.push_back (make_pair ((*i)->start_sample(), (*i)));
+			locs.push_back (make_pair ((*i)->start(), (*i)));
 			if (!(*i)->is_mark()) {
-				locs.push_back (make_pair ((*i)->end_sample(), (*i)));
+				locs.push_back (make_pair ((*i)->end(), (*i)));
 			}
 		}
 	}
@@ -1306,12 +1306,12 @@ Locations::first_mark_after (samplepos_t sample, bool include_special_ranges)
 		if (!include_special_ranges && ((*i).second->is_auto_loop() || (*i).second->is_auto_punch())) {
 			continue;
 		}
-		if ((*i).first > sample) {
+		if ((*i).first > pos) {
 			return (*i).first;
 		}
 	}
 
-	return -1;
+	return timepos_t::max (pos.time_domain());
 }
 
 /** Look for the `marks' (either locations which are marks, or start/end points of range markers) either

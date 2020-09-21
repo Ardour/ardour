@@ -535,7 +535,7 @@ MidiRegion::fix_negative_start ()
 
 	model()->insert_silence_at_start (-_start.val().beats());
 
-	_start = timecnt_t::zero_at (_start.val().time_domain(), nt_position());
+	_start = timecnt_t::zero (_start.val().time_domain());
 }
 
 bool

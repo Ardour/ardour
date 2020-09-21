@@ -221,12 +221,12 @@ public:
 	int set_current (Location *, bool want_lock = true);
 	Location *current () const { return current_location; }
 
-	Location* mark_at (samplepos_t, samplecnt_t slop = 0) const;
+	Location* mark_at (timepos_t const &, timecnt_t const & slop = timecnt_t::zero (Temporal::AudioTime)) const;
 
 	void set_clock_origin (Location*, void *src);
 
-	samplepos_t first_mark_before (samplepos_t, bool include_special_ranges = false);
-	samplepos_t first_mark_after (samplepos_t, bool include_special_ranges = false);
+	timepos_t first_mark_before (timepos_t const &, bool include_special_ranges = false);
+	timepos_t first_mark_after (timepos_t const &, bool include_special_ranges = false);
 
 	void marks_either_side (timepos_t const &, timepos_t &, timepos_t &) const;
 
