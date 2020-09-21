@@ -2144,6 +2144,7 @@ VST3PI::close_view ()
 	}
 	_view->removed ();
 	_view->setFrame (0);
+	_view->release ();
 	_view = 0;
 }
 
