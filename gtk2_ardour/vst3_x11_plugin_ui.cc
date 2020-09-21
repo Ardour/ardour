@@ -23,6 +23,8 @@
 #include <boost/unordered_map.hpp>
 
 #include <glibmm/main.h>
+#include <glibmm/threads.h>
+
 #include <gtkmm/socket.h>
 
 #include "pbd/unwind.h"
@@ -83,6 +85,11 @@ private:
 public:
 	~VST3X11Runloop ()
 	{
+		clear ();
+	}
+
+	void clear () {
+		Glib::Threads::Mutex::Lock lm (_lock);
 		for (boost::unordered_map<FileDescriptor, EventHandler>::iterator it = _event_handlers.begin (); it != _event_handlers.end (); ++it) {
 			g_source_remove (it->second._source_id);
 			g_io_channel_unref (it->second._gio_channel);
@@ -90,11 +97,14 @@ public:
 		for (boost::unordered_map<guint, Linux::ITimerHandler*>::iterator it = _timer_handlers.begin (); it != _timer_handlers.end (); ++it) {
 			g_source_remove (it->first);
 		}
+		_event_handlers.clear ();
+		_timer_handlers.clear ();
 	}
 
 	/* VST3 IRunLoop interface */
 	tresult registerEventHandler (Linux::IEventHandler* handler, FileDescriptor fd) SMTG_OVERRIDE
 	{
+		Glib::Threads::Mutex::Lock lm (_lock);
 		GIOChannel* gio_channel = g_io_channel_unix_new (fd);
 		guint id = g_io_add_watch (gio_channel, (GIOCondition) (G_IO_IN /*| G_IO_OUT*/ | G_IO_ERR | G_IO_HUP), event, handler);
 		_event_handlers[fd] = EventHandler (handler, gio_channel, id);
@@ -107,6 +117,7 @@ public:
 			return kInvalidArgument;
 		}
 
+		Glib::Threads::Mutex::Lock lm (_lock);
 		for (boost::unordered_map<FileDescriptor, EventHandler>::iterator it = _event_handlers.begin (); it != _event_handlers.end (); ++it) {
 			if (it->second._handler == handler) {
 				g_source_remove (it->second._source_id);
@@ -123,6 +134,7 @@ public:
 		if (!handler || milliseconds == 0) {
 			return kInvalidArgument;
 		}
+		Glib::Threads::Mutex::Lock lm (_lock);
 		guint id = g_timeout_add_full (G_PRIORITY_HIGH_IDLE, milliseconds, timeout, handler, NULL);
 		_timer_handlers[id] = handler;
 		return kResultTrue;
@@ -135,6 +147,7 @@ public:
 			return kInvalidArgument;
 		}
 
+		Glib::Threads::Mutex::Lock lm (_lock);
 		for (boost::unordered_map<guint, Linux::ITimerHandler*>::iterator it = _timer_handlers.begin (); it != _timer_handlers.end (); ++it) {
 			if (it->second == handler) {
 				g_source_remove (it->first);
@@ -148,6 +161,9 @@ public:
 	uint32 PLUGIN_API addRef () SMTG_OVERRIDE { return 1; }
 	uint32 PLUGIN_API release () SMTG_OVERRIDE { return 1; }
 	tresult queryInterface (const TUID, void**) SMTG_OVERRIDE { return kNoInterface; }
+
+private:
+	Glib::Threads::Mutex _lock;
 };
 
 VST3X11Runloop static_runloop;
