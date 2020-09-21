@@ -431,12 +431,12 @@ OSCGlobalObserver::marks_changed ()
 	// get Locations that are marks
 	for (Locations::LocationList::const_iterator l = ll.begin(); l != ll.end(); ++l) {
 		if ((*l)->is_session_range ()) {
-			lm.push_back (LocationMarker(_("start"), (*l)->start ()));
-			lm.push_back (LocationMarker(_("end"), (*l)->end ()));
+			lm.push_back (LocationMarker(_("start"), (*l)->start_sample ()));
+			lm.push_back (LocationMarker(_("end"), (*l)->end_sample ()));
 			continue;
 		}
 		if ((*l)->is_mark ()) {
-			lm.push_back (LocationMarker((*l)->name(), (*l)->start ()));
+			lm.push_back (LocationMarker((*l)->name(), (*l)->start_sample ()));
 		}
 	}
 	// sort them by position

@@ -485,7 +485,7 @@ MackieControlProtocol::marker_release (Button &)
 
 	samplepos_t where = session->audible_sample();
 
-	if (session->transport_stopped_or_stopping() && session->locations()->mark_at (where, session->sample_rate() / 100.0)) {
+	if (session->transport_stopped_or_stopping() && session->locations()->mark_at (timepos_t (where), timecnt_t (session->sample_rate() / 100.0))) {
 		return off;
 	}
 
@@ -865,10 +865,8 @@ MackieControlProtocol::master_fader_touch_press (Mackie::Button &)
 
 		Fader* master_fader = _master_surface->master_fader();
 
-		boost::shared_ptr<AutomationControl> ac = master_fader->control ();
-
 		master_fader->set_in_use (true);
-		master_fader->start_touch (transport_sample());
+		master_fader->start_touch (timepos_t (transport_sample()));
 	}
 	return none;
 }
@@ -881,7 +879,8 @@ MackieControlProtocol::master_fader_touch_release (Mackie::Button &)
 		Fader* master_fader = _master_surface->master_fader();
 
 		master_fader->set_in_use (false);
-		master_fader->stop_touch (transport_sample());
+		master_fader->stop_touch (timepos_t (transport_sample()));
+
 	}
 	return none;
 }

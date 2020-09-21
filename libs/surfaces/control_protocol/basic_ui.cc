@@ -113,7 +113,7 @@ BasicUI::loop_toggle ()
 }
 
 void
-BasicUI::loop_location (samplepos_t start, samplepos_t end)
+BasicUI::loop_location (timepos_t const & start, timepos_t const & end)
 {
 	Location* tll;
 	if ((tll = session->locations()->auto_loop_location()) == 0) {
@@ -147,7 +147,7 @@ BasicUI::goto_end ()
 void
 BasicUI::add_marker (const std::string& markername)
 {
-	samplepos_t where = session->audible_sample();
+	timepos_t where (session->audible_sample());
 	Location *location = new Location (*session, where, where, markername, Location::IsMark);
 	session->begin_reversible_command (_("add marker"));
 	XMLNode &before = session->locations()->get_state();
@@ -167,7 +167,7 @@ BasicUI::remove_marker_at_playhead ()
 
 		//find location(s) at this time
 		Locations::LocationList locs;
-		session->locations()->find_all_between (session->audible_sample(), session->audible_sample()+1, locs, Location::Flags(0));
+		session->locations()->find_all_between (timepos_t (session->audible_sample()), timepos_t (session->audible_sample()+1), locs, Location::Flags(0));
 		for (Locations::LocationList::iterator i = locs.begin(); i != locs.end(); ++i) {
 			if ((*i)->is_mark()) {
 				session->locations()->remove (*i);
@@ -420,10 +420,10 @@ BasicUI::save_state ()
 void
 BasicUI::prev_marker ()
 {
-	samplepos_t pos = session->locations()->first_mark_before (session->transport_sample());
+	timepos_t pos = session->locations()->first_mark_before (timepos_t (session->transport_sample()));
 
 	if (pos >= 0) {
-		session->request_locate (pos);
+		session->request_locate (pos.samples());
 	} else {
 		session->goto_start ();
 	}
@@ -432,10 +432,10 @@ BasicUI::prev_marker ()
 void
 BasicUI::next_marker ()
 {
-	samplepos_t pos = session->locations()->first_mark_after (session->transport_sample());
+	timepos_t pos = session->locations()->first_mark_after (timepos_t (session->transport_sample()));
 
 	if (pos >= 0) {
-		session->request_locate (pos);
+		session->request_locate (pos.samples());
 	} else {
 		session->goto_end();
 	}
@@ -679,7 +679,7 @@ BasicUI::toggle_roll (bool roll_out_of_bounded_mode)
 	} else { /* not rolling */
 
 		if (session->get_play_loop() && Config->get_loop_is_mode()) {
-			session->request_locate (session->locations()->auto_loop_location()->start(), MustRoll);
+			session->request_locate (session->locations()->auto_loop_location()->start().samples(), MustRoll);
 		} else {
 			session->request_roll (TRS_UI);
 		}
@@ -794,7 +794,7 @@ BasicUI::goto_nth_marker (int n)
 	for (Locations::LocationList::iterator i = ordered.begin(); n >= 0 && i != ordered.end(); ++i) {
 		if ((*i)->is_mark() && !(*i)->is_hidden() && !(*i)->is_session_range()) {
 			if (n == 0) {
-				session->request_locate ((*i)->start());
+				session->request_locate ((*i)->start().samples());
 				break;
 			}
 			--n;

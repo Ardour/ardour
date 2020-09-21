@@ -32,6 +32,8 @@
 #include "pbd/compose.h"
 #include "pbd/convert.h"
 
+#include "temporal/timeline.h"
+
 #include "ardour/amp.h"
 #include "ardour/bundle.h"
 #include "ardour/debug.h"
@@ -427,12 +429,12 @@ Strip::fader_touch_event (Button&, ButtonState bs)
 		boost::shared_ptr<AutomationControl> ac = _fader->control ();
 
 		_fader->set_in_use (true);
-		_fader->start_touch (_surface->mcp().transport_sample());
+		_fader->start_touch (timepos_t (_surface->mcp().transport_sample()));
 
 	} else {
 
 		_fader->set_in_use (false);
-		_fader->stop_touch (_surface->mcp().transport_sample());
+		_fader->stop_touch (timepos_t (_surface->mcp().transport_sample()));
 
 	}
 }
@@ -508,9 +510,9 @@ void
 Strip::handle_fader_touch (Fader& fader, bool touch_on)
 {
 	if (touch_on) {
-		fader.start_touch (_surface->mcp().transport_sample());
+		fader.start_touch (timepos_t (_surface->mcp().transport_sample()));
 	} else {
-		fader.stop_touch (_surface->mcp().transport_sample());
+		fader.stop_touch (timepos_t (_surface->mcp().transport_sample()));
 	}
 }
 

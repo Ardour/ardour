@@ -1611,7 +1611,7 @@ GenericMidiControlProtocol::maybe_start_touch (boost::shared_ptr<Controllable> c
 {
 	boost::shared_ptr<AutomationControl> actl = boost::dynamic_pointer_cast<AutomationControl> (controllable);
 	if (actl) {
-		actl->start_touch (session->audible_sample ());
+		actl->start_touch (timepos_t (session->audible_sample ()));
 	}
 }
 

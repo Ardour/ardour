@@ -309,7 +309,7 @@ CC121::button_press_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 		if (_current_stripable) {
 			boost::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
 			if (gain) {
-			  samplepos_t now = session->engine().sample_time();
+				timepos_t now (session->engine().sample_time());
 			  gain->start_touch (now);
 			}
 		}
@@ -352,15 +352,15 @@ CC121::button_release_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 
 	switch (id) {
 	case FaderTouch:
-	  fader_is_touched = false;
-	  if (_current_stripable) {
-	    boost::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
-	    if (gain) {
-	      samplepos_t now = session->engine().sample_time();
-	      gain->stop_touch (now);
-	    }
-	  }
-	  break;
+		fader_is_touched = false;
+		if (_current_stripable) {
+			boost::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
+			if (gain) {
+				timepos_t now (session->engine().sample_time());
+				gain->stop_touch (now);
+			}
+		}
+		break;
 	default:
 		break;
 	}

@@ -28,6 +28,8 @@
 
 #include "pbd/signals.h"
 
+#include "temporal/timeline.h"
+
 #include "ardour/types.h"
 #include "ardour/presentation_info.h"
 
@@ -57,7 +59,7 @@ class LIBCONTROLCP_API BasicUI {
 	/* transport control */
 
 	void loop_toggle ();
-	void loop_location (samplepos_t start, samplepos_t end);
+	void loop_location (Temporal::timepos_t const & start, Temporal::timepos_t const & end);
 	void access_action ( std::string action_path );
 	static PBD::Signal2<void,std::string,std::string> AccessAction;
 	void goto_zero ();

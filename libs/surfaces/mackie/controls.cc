@@ -97,18 +97,18 @@ Control::get_value ()
 }
 
 void
-Control::start_touch (double when)
+Control::start_touch (Temporal::timepos_t const & when)
 {
 	if (normal_ac) {
-		return normal_ac->start_touch (when);
+		normal_ac->start_touch (when);
 	}
 }
 
 void
-Control::stop_touch (double when)
+Control::stop_touch (Temporal::timepos_t const & when)
 {
 	if (normal_ac) {
-		return normal_ac->stop_touch (when);
+		normal_ac->stop_touch (when);
 	}
 }
 

@@ -1078,10 +1078,11 @@ Push2::other_vpot_touch (int n, bool touching)
 		if (master) {
 			boost::shared_ptr<AutomationControl> ac = master->gain_control();
 			if (ac) {
+				const timepos_t now (session->audible_sample());
 				if (touching) {
-					ac->start_touch (session->audible_sample());
+					ac->start_touch (now);
 				} else {
-					ac->stop_touch (session->audible_sample());
+					ac->stop_touch (now);
 				}
 			}
 		}

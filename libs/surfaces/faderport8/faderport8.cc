@@ -1718,7 +1718,7 @@ FaderPort8::select_strip (boost::weak_ptr<Stripable> ws)
 	if (s == first_selected_stripable () && !shift_mod ()) {
 		if (_ctrls.fader_mode () == ModeTrack) {
 			boost::shared_ptr<AutomationControl> ac = s->gain_control ();
-			ac->start_touch (ac->session().transport_sample());
+			ac->start_touch (timepos_t (ac->session().transport_sample()));
 			ac->set_value (ac->normal (), PBD::Controllable::UseGroup);
 		}
 		return;

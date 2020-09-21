@@ -32,6 +32,8 @@
 #include "pbd/controllable.h"
 #include "pbd/signals.h"
 
+#include "temporal/timeline.h"
+
 #include "mackie_control_exception.h"
 #include "midi_byte_array.h"
 
@@ -75,8 +77,8 @@ public:
 	float get_value ();
 	void set_value (float val, PBD::Controllable::GroupControlDisposition gcd = PBD::Controllable::UseGroup);
 
-	virtual void start_touch (double when);
-	virtual void stop_touch (double when);
+	virtual void start_touch (Temporal::timepos_t const & when);
+	virtual void stop_touch (Temporal::timepos_t const & when);
 
   protected:
 	boost::shared_ptr<ARDOUR::AutomationControl> normal_ac;

@@ -240,7 +240,7 @@ CC121::set_controllable (boost::shared_ptr<AutomationControl> ac, float delta)
 	if (!ac || delta == 0) {
 		return;
 	}
-	ac->start_touch (ac->session().transport_sample());
+	ac->start_touch (timepos_t (ac->session().transport_sample()));
 	ac->set_interface ((ac->internal_to_interface (ac->get_value(), true) + delta), true);
 }
 

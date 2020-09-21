@@ -42,6 +42,8 @@
 #include <pbd/file_utils.h>
 #include <pbd/failed_constructor.h>
 
+#include "temporal/timeline.h"
+
 #include "ardour/amp.h"
 #include "ardour/session.h"
 #include "ardour/route.h"
@@ -3141,7 +3143,7 @@ OSC::set_marker (const char* types, lo_arg **argv, int argc, lo_message msg)
 				for (Locations::LocationList::const_iterator l = ll.begin(); l != ll.end(); ++l) {
 					if ((*l)->is_mark ()) {
 						if (strcmp (&argv[0]->s, (*l)->name().c_str()) == 0) {
-							session->request_locate ((*l)->start (), MustStop);
+							session->request_locate ((*l)->start_sample (), MustStop);
 							return 0;
 						} else if ((*l)->start () == session->transport_sample()) {
 							cur_mark = (*l);
@@ -3170,7 +3172,7 @@ OSC::set_marker (const char* types, lo_arg **argv, int argc, lo_message msg)
 	// get Locations that are marks
 	for (Locations::LocationList::const_iterator l = ll.begin(); l != ll.end(); ++l) {
 		if ((*l)->is_mark ()) {
-			lm.push_back (LocationMarker((*l)->name(), (*l)->start ()));
+			lm.push_back (LocationMarker((*l)->name(), (*l)->start_sample ()));
 		}
 	}
 	// sort them by position
@@ -3497,7 +3499,6 @@ OSC::select_parse (const char *path, const char* types, lo_arg **argv, int argc,
 	}
 
 	return ret;
-
 }
 
 
@@ -5927,7 +5928,7 @@ OSC::periodic (void)
 		if (!(*x).second) {
 			boost::shared_ptr<ARDOUR::AutomationControl> ctrl = (*x).first;
 			// turn touch off
-			ctrl->stop_touch (ctrl->session().transport_sample());
+			ctrl->stop_touch (timepos_t (ctrl->session().transport_sample()));
 			_touch_timeout.erase (x++);
 		} else {
 			x++;
