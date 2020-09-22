@@ -76,7 +76,7 @@ VST3NSViewPluginUI::VST3NSViewPluginUI (boost::shared_ptr<PluginInsert> pi, boos
 		return;
 	}
 
-	if (kResultOk != view->attached (reinterpret_cast<void*> (_ns_view), "NSView")) {
+	if (kResultOk != view->attached (reinterpret_cast<void*> (_ns_view), Steinberg::kPlatformTypeNSView)) {
 		printf ("FAILED TO ATTACH..\n");
 	}
 

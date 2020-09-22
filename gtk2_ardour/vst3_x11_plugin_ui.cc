@@ -200,7 +200,7 @@ VST3X11PluginUI::view_realized ()
 		return;
 	}
 	Window window = _gui_widget.get_id ();
-	if (kResultOk != view->attached (reinterpret_cast<void*> (window), "X11EmbedWindowID")) {
+	if (kResultOk != view->attached (reinterpret_cast<void*> (window), Steinberg::kPlatformTypeX11EmbedWindowID)) {
 		assert (0);
 	}
 #if 0

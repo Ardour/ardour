@@ -62,7 +62,7 @@ VST3HWNDPluginUI::view_realized ()
 	IPlugView* view = _vst3->view ();
 	HWND hwnd = (HWND) gdk_win32_drawable_get_handle (GTK_WIDGET(_gui_widget.gobj())->window);
 	// SetWindowLongPtr (hwnd, GWLP_USERDATA, (__int3264) (LONG_PTR)this);
-	if (kResultOk != view->attached (reinterpret_cast<void*> (hwnd), "HWND")) {
+	if (kResultOk != view->attached (reinterpret_cast<void*> (hwnd), Steinberg::kPlatformTypeHWND)) {
 		assert (0);
 	}
 
