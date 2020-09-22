@@ -45,6 +45,7 @@ MidiClockTicker::MidiClockTicker (Session* s)
 	_session   = s;
 	_midi_port = s->midi_clock_output_port ();
 	reset ();
+	resync_latency (true);
 	s->LatencyUpdated.connect_same_thread (_latency_connection, boost::bind (&MidiClockTicker::resync_latency, this, _1));
 }
 
@@ -60,8 +61,6 @@ MidiClockTicker::reset ()
 	_beat_pos      = 0;
 	_clock_cnt     = 0;
 	_transport_pos = -1;
-
-	resync_latency (true);
 }
 
 void
