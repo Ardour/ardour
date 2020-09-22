@@ -1139,7 +1139,7 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 				(*i)->activate ();
 			}
 
-			(*i)->ActiveChanged.connect_same_thread (*this, boost::bind (&Session::update_latency_compensation, &_session, false, false));
+			(*i)->ActiveChanged.connect_same_thread (*this, boost::bind (&Session::queue_latency_recompute, &_session));
 
 			boost::shared_ptr<Send> send;
 			if ((send = boost::dynamic_pointer_cast<Send> (*i))) {
@@ -1598,7 +1598,7 @@ Route::replace_processor (boost::shared_ptr<Processor> old, boost::shared_ptr<Pr
 			sub->enable (true);
 		}
 
-		sub->ActiveChanged.connect_same_thread (*this, boost::bind (&Session::update_latency_compensation, &_session, false, false));
+		sub->ActiveChanged.connect_same_thread (*this, boost::bind (&Session::queue_latency_recompute, &_session));
 	}
 
 	reset_instrument_info ();
@@ -3138,7 +3138,7 @@ Route::set_processor_state (const XMLNode& node, int version)
 		for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
 
 			(*i)->set_owner (this);
-			(*i)->ActiveChanged.connect_same_thread (*this, boost::bind (&Session::update_latency_compensation, &_session, false, false));
+			(*i)->ActiveChanged.connect_same_thread (*this, boost::bind (&Session::queue_latency_recompute, &_session));
 
 			boost::shared_ptr<PluginInsert> pi;
 
