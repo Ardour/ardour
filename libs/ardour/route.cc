@@ -1131,7 +1131,7 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 
 			if (pi && pi->has_sidechain ()) {
 				pi->update_sidechain_name ();
-				pi->sidechain_input ()->changed.connect_same_thread (*this, boost::bind (&Route::sidechain_change_handler, this, _1, _2));
+				pi->sidechain_input ()->changed.connect_same_thread (*pi, boost::bind (&Route::sidechain_change_handler, this, _1, _2));
 			}
 
 			if ((*i)->active()) {
@@ -1143,7 +1143,7 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 
 			boost::shared_ptr<Send> send;
 			if ((send = boost::dynamic_pointer_cast<Send> (*i))) {
-				send->SelfDestruct.connect_same_thread (*this,
+				send->SelfDestruct.connect_same_thread (**i,
 						boost::bind (&Route::processor_selfdestruct, this, boost::weak_ptr<Processor> (*i)));
 			}
 		}
@@ -1598,7 +1598,7 @@ Route::replace_processor (boost::shared_ptr<Processor> old, boost::shared_ptr<Pr
 			sub->enable (true);
 		}
 
-		sub->ActiveChanged.connect_same_thread (*this, boost::bind (&Session::queue_latency_recompute, &_session));
+		sub->ActiveChanged.connect_same_thread (*sub, boost::bind (&Session::queue_latency_recompute, &_session));
 	}
 
 	reset_instrument_info ();
@@ -2319,7 +2319,7 @@ Route::add_remove_sidechain (boost::shared_ptr<Processor> proc, bool add)
 	}
 
 	if (pi->has_sidechain ()) {
-		pi->sidechain_input ()->changed.connect_same_thread (*this, boost::bind (&Route::sidechain_change_handler, this, _1, _2));
+		pi->sidechain_input ()->changed.connect_same_thread (*pi, boost::bind (&Route::sidechain_change_handler, this, _1, _2));
 	}
 
 	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
@@ -3138,7 +3138,7 @@ Route::set_processor_state (const XMLNode& node, int version)
 		for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
 
 			(*i)->set_owner (this);
-			(*i)->ActiveChanged.connect_same_thread (*this, boost::bind (&Session::queue_latency_recompute, &_session));
+			(*i)->ActiveChanged.connect_same_thread (**i, boost::bind (&Session::queue_latency_recompute, &_session));
 
 			boost::shared_ptr<PluginInsert> pi;
 
@@ -3205,8 +3205,7 @@ Route::set_processor_state (XMLNode const& node, int version, XMLProperty const*
 
 			processor.reset (new Send (_session, _pannable, _mute_master, Delivery::Send, true));
 			boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send> (processor);
-			send->SelfDestruct.connect_same_thread (*this,
-			                                        boost::bind (&Route::processor_selfdestruct, this, boost::weak_ptr<Processor> (processor)));
+			send->SelfDestruct.connect_same_thread (*send, boost::bind (&Route::processor_selfdestruct, this, boost::weak_ptr<Processor> (processor)));
 
 		} else {
 			warning << string_compose(_("unknown Processor type \"%1\"; ignored"), prop->value()) << endmsg;
@@ -3227,7 +3226,7 @@ Route::set_processor_state (XMLNode const& node, int version, XMLProperty const*
 
 		/* subscribe to Sidechain IO changes */
 		if (pi && pi->has_sidechain ()) {
-			pi->sidechain_input ()->changed.connect_same_thread (*this, boost::bind (&Route::sidechain_change_handler, this, _1, _2));
+			pi->sidechain_input ()->changed.connect_same_thread (*pi, boost::bind (&Route::sidechain_change_handler, this, _1, _2));
 		}
 
 		/* we have to note the monitor send here, otherwise a new one will be created
