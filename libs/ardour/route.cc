@@ -425,7 +425,7 @@ Route::process_output_buffers (BufferSet& bufs,
 	bool run_disk_writer = false;
 	if (_disk_writer && speed > 0) {
 		samplecnt_t latency_preroll = _session.remaining_latency_preroll ();
-		run_disk_writer = latency_preroll < nframes + (_signal_latency + _output->latency ());
+		run_disk_writer = latency_preroll < nframes + (_signal_latency + _output_latency);
 		if (end_sample - _disk_writer->input_latency () < _session.transport_sample ()) {
 			run_disk_writer = true;
 		}
@@ -3886,7 +3886,7 @@ Route::playback_latency (bool incl_downstream) const
 	if (incl_downstream) {
 		rv += _output->connected_latency (true);
 	} else {
-		rv += _output->latency ();
+		rv += _output_latency;
 	}
 	return rv;
 }
