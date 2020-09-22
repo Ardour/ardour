@@ -1648,7 +1648,7 @@ DiskReader::Declicker::alloc (samplecnt_t sr, bool fadein)
 	delete[] vec;
 	vec = new Sample[loop_fade_length];
 
-	const float a = 390.0f / sr; // ~ 1/100Hz for 40dB
+	const float a = 390.f / sr; // ~ 1/100Hz for 40dB
 
 	/* build a psuedo-exponential (linear-volume) shape for the fade */
 
@@ -1668,7 +1668,7 @@ DiskReader::Declicker::alloc (samplecnt_t sr, bool fadein)
 		}
 	}
 
-	assert (n < loop_fade_length);
+	assert (n <= loop_fade_length);
 
 	fade_length = n;
 
