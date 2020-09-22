@@ -15,6 +15,11 @@
 /* Comment out the above line to build Mixbus without VST support */
 #endif
 
+#if defined (WINDOWS_VST_SUPPORT) && !defined (VST3_SUPPORT)
+#define VST3_SUPPORT
+/* Comment out the above line to build Mixbus without VST3 support */
+#endif
+
 #ifndef PROGRAM_NAME
 #ifdef  MIXBUS
 #define PROGRAM_NAME "Mixbus"
