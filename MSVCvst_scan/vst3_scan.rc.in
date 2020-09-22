@@ -1,0 +1,101 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource."
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.K.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+1 VERSIONINFO
+ FILEVERSION @MSVC_SCANNER_APP_MAJOR@,@MSVC_SCANNER_APP_MINOR@,@MSVC_SCANNER_APP_MICRO@,@MSVC_SCANNER_APP_INTERFACE_AGE@
+ PRODUCTVERSION @MSVC_SCANNER_APP_MAJOR@,@MSVC_SCANNER_APP_MINOR@,@MSVC_SCANNER_APP_MICRO@,@MSVC_SCANNER_APP_INTERFACE_AGE@
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x29L
+#else
+ FILEFLAGS 0x28L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "080904b0"
+        BEGIN
+            VALUE "CompanyName", "Harrison Audio LLC"
+            VALUE "FileDescription", "VST3 Plugin Scanning Application"
+            VALUE "FileVersion", "@MSVC_SCANNER_APP_VERSION@.@MSVC_SCANNER_APP_INTERFACE_AGE@"
+            VALUE "InternalName", "vst3_scan@DLL_SUFFIX@"
+            VALUE "LegalCopyright", "Copyright Paul Davis and others © 1999-2014"
+            VALUE "LegalTrademarks", "Harrison and Mixbus are trademarks of Harrison Audio LLC"
+            VALUE "OriginalFilename", "ardour-vst3-scanner.exe"
+            VALUE "ProductName", "MSVCvst3_scan"
+            VALUE "ProductVersion", "@MSVC_SCANNER_APP_MAJOR@, @MSVC_SCANNER_APP_MINOR@, @MSVC_SCANNER_APP_MICRO@, @MSVC_SCANNER_APP_INTERFACE_AGE@"
+            VALUE "SpecialBuild", "Built for Microsoft Windows by John Emmas - (© 2014)"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x809, 1200
+    END
+END
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+#endif    // English (U.K.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

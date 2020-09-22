@@ -194,7 +194,15 @@ PluginManager::PluginManager ()
 #ifdef VST3_SUPPORT
 	if (!PBD::find_file (vstsp,
 #ifdef PLATFORM_WINDOWS
+    #ifdef DEBUGGABLE_SCANNER_APP
+        #if defined(DEBUG) || defined(_DEBUG)
+				"ardour-vst3-scannerD.exe"
+        #else
+				"ardour-vst3-scannerRDC.exe"
+        #endif
+    #else
 				"ardour-vst3-scanner.exe"
+    #endif
 #else
 				"ardour-vst3-scanner"
 #endif

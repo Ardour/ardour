@@ -99,5 +99,6 @@ if ($command eq -buildall) {
 	process_file ("MSVCardour3/MSVCArdour5.vsprops");
 	process_file ("MSVCMixbus3/MSVCMixbus5.vsprops");
 	process_file ("MSVCvst_scan/vst_scan.rc");
+	process_file ("MSVCvst_scan/vst3_scan.rc");
 	process_file ("gtk2_ardour/win32/msvc_resources.rc");
 }
