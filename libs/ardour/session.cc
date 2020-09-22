@@ -599,6 +599,7 @@ Session::destroy ()
 
 	/* remove I/O objects that we (the session) own */
 	_click_io.reset ();
+	_click_io_connection.disconnect ();
 
 	{
 		Glib::Threads::Mutex::Lock lm (controllables_lock);
@@ -828,6 +829,8 @@ Session::setup_click ()
 	} else {
 		setup_click_state (0);
 	}
+	click_io_resync_latency (true);
+	LatencyUpdated.connect_same_thread (_click_io_connection, boost::bind (&Session::click_io_resync_latency, this, _1));
 }
 
 void

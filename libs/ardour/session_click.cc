@@ -76,7 +76,7 @@ Session::click (samplepos_t cycle_start, samplecnt_t nframes)
 	 * we need to prepare frames that the user will hear
 	 * in "output latency's" worth of time.
 	 */
-	samplecnt_t offset = _click_io->connected_latency (true);
+	samplecnt_t offset = _click_io_latency;
 
 	Glib::Threads::RWLock::WriterLock clickm (click_lock, Glib::Threads::TRY_LOCK);
 
@@ -159,7 +159,7 @@ Session::run_click (samplepos_t start, samplepos_t nframes)
 	Glib::Threads::RWLock::ReaderLock clickm (click_lock, Glib::Threads::TRY_LOCK);
 
 	/* align to output */
-	start += _click_io->connected_latency (true);
+	start += _click_io_latency;
 
 	if (!clickm.locked() || click_data == 0) {
 		_click_io->silence (nframes);
@@ -348,4 +348,14 @@ Session::clear_clicks ()
 
 	clicks.clear ();
 	_clicks_cleared = _transport_sample;
+}
+
+void
+Session::click_io_resync_latency (bool playback)
+{
+	if (deletion_in_progress() || !playback) {
+		return;
+	}
+
+	_click_io_latency = _click_io->connected_latency (true);
 }

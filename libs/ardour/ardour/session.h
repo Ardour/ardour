@@ -2023,6 +2023,8 @@ private:
 	samplecnt_t                   click_length;
 	samplecnt_t                   click_emphasis_length;
 	mutable Glib::Threads::RWLock click_lock;
+	samplecnt_t                  _click_io_latency;
+	PBD::ScopedConnection        _click_io_connection;
 
 	static const Sample     default_click[];
 	static const samplecnt_t default_click_length;
@@ -2038,6 +2040,7 @@ private:
 	void click (samplepos_t start, samplecnt_t nframes);
 	void run_click (samplepos_t start, samplecnt_t nframes);
 	void add_click (samplepos_t pos, bool emphasis);
+	void click_io_resync_latency (bool);
 
 	/* range playback */
 
