@@ -4269,6 +4269,7 @@ Route::update_signal_latency (bool apply_to_delayline, bool* delayline_update_ne
 	if (!active()) {
 		_signal_latency = 0;
 		/* mark all send are inactive, set internal-return "delay-out" to zero. */
+		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 			if (boost::shared_ptr<LatentSend> snd = boost::dynamic_pointer_cast<LatentSend> (*i)) {
 				snd->set_delay_in (0);
