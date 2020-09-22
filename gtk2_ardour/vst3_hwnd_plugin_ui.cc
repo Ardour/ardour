@@ -60,7 +60,8 @@ void
 VST3HWNDPluginUI::view_realized ()
 {
 	IPlugView* view = _vst3->view ();
-	HWND hwnd = (HWND) gdk_win32_drawable_get_handle (GTK_WIDGET(_gui_widget.gobj())->window);
+	HWND hwnd = (HWND) gdk_win32_drawable_get_handle (GTK_WIDGET(_gui_widget.gobj())->window); // XXX is the window present?
+	printf ("VST3HWNDPluginUI::view_realized view: %p, hwnd: %p\n", view, (void*)hwnd);
 	// SetWindowLongPtr (hwnd, GWLP_USERDATA, (__int3264) (LONG_PTR)this);
 	if (kResultOk != view->attached (reinterpret_cast<void*> (hwnd), Steinberg::kPlatformTypeHWND)) {
 		assert (0);
@@ -70,6 +71,7 @@ VST3HWNDPluginUI::view_realized ()
 	if (view->getSize (&rect) == kResultOk) {
 		_req_width  = rect.right - rect.left;
 		_req_height = rect.bottom - rect.top;
+		printf ("VST3HWNDPluginUI::view_realized min-size: %d x %d\n", _req_width, _req_width);
 	}
 }
 
@@ -108,7 +110,7 @@ VST3HWNDPluginUI::view_size_allocate (Gtk::Allocation& allocation)
 void
 VST3HWNDPluginUI::resize_callback (int width, int height)
 {
-	//printf ("VST3HWNDPluginUI::resize_callback %d x %d\n", width, height);
+	printf ("VST3HWNDPluginUI::resize_callback %d x %d\n", width, height);
 	IPlugView* view = _vst3->view ();
 	if (!view || _resize_in_progress) {
 		return;
@@ -133,6 +135,7 @@ bool
 VST3HWNDPluginUI::on_window_show (const std::string& /*title*/)
 {
 	IPlugView* view = _vst3->view ();
+	printf ("VST3HWNDPluginUI::on_window_show, view: %p\n", view);
 	if (!view) {
 		return false;
 	}
