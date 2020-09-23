@@ -135,7 +135,6 @@ ARDOUR::discover_vst3 (boost::shared_ptr<VST3PluginModule> m, std::vector<VST3In
 				nfo.sdk_version = "VST 3";
 			}
 
-			nfo.index = i;
 			{
 				char suid[33] = "";
 				FUID::fromTUID (uid).toString (suid);
@@ -360,8 +359,7 @@ ARDOUR::vst3_scan_and_cache (std::string const& module_path, std::string const& 
 using namespace ARDOUR;
 
 VST3Info::VST3Info (XMLNode const& node)
-	: index (0)
-	, n_inputs (0)
+	: n_inputs (0)
 	, n_outputs (0)
 	, n_aux_inputs (0)
 	, n_aux_outputs (0)
@@ -373,7 +371,6 @@ VST3Info::VST3Info (XMLNode const& node)
 	if (node.name() != "VST3Info") {
 		throw failed_constructor ();
 	}
-	err |= !node.get_property ("index", index);
 	err |= !node.get_property ("uid", uid);
 	err |= !node.get_property ("name", name);
 	err |= !node.get_property ("vendor", vendor);
@@ -399,7 +396,6 @@ XMLNode&
 VST3Info::state () const
 {
 	XMLNode* node = new XMLNode("VST3Info");
-	node->set_property ("index",       index);
 	node->set_property ("uid",         uid);
 	node->set_property ("name",        name);
 	node->set_property ("vendor",      vendor);

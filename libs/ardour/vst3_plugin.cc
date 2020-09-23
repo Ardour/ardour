@@ -57,7 +57,7 @@ VST3Plugin::VST3Plugin (const VST3Plugin& other)
 	: Plugin (other)
 {
 	boost::shared_ptr<VST3PluginInfo> nfo = boost::dynamic_pointer_cast<VST3PluginInfo> (other.get_info ());
-	_plug = new VST3PI (nfo->m, nfo->index, nfo->unique_id);
+	_plug = new VST3PI (nfo->m, nfo->unique_id);
 	init ();
 }
 
@@ -667,17 +667,16 @@ VST3Plugin::load_preset (PresetRecord r)
 {
 	bool ok = false;
 
-	/* Extract the index of this preset from the URI */
+	/* Extract the UUID of this preset from the URI */
 	std::vector<std::string> tmp;
 	if (!PBD::tokenize (r.uri, std::string(":"), std::back_inserter (tmp))) {
 		return false;
 	}
-	if (tmp.size() != 4) {
+	if (tmp.size() != 3) {
 		return false;
 	}
 
 	std::string const& unique_id = tmp[1];
-	uint32_t index = PBD::atoi (tmp[2]);
 
 	FUID fuid;
 	if (!fuid.fromString (unique_id.c_str()) || fuid != _plug->fuid ()) {
@@ -685,13 +684,8 @@ VST3Plugin::load_preset (PresetRecord r)
 		return false;
 	}
 
-	if (index != _info->index) {
-		assert (0);
-		return false;
-	}
-
 	if (tmp[0] == "VST3-P") {
-		int program = PBD::atoi (tmp[3]);
+		int program = PBD::atoi (tmp[2]);
 		assert (!r.user);
 		if (!_plug->set_program (program, 0, false)) {
 #ifndef NDEBUG
@@ -742,7 +736,7 @@ VST3Plugin::do_save_preset (std::string name)
 			}
 			return "";
 		}
-		std::string uri = string_compose (X_("VST3-S:%1:%2:%3"), unique_id (), _info->index, PBD::basename_nosuffix (fn));
+		std::string uri = string_compose (X_("VST3-S:%1:%2"), unique_id (), PBD::basename_nosuffix (fn));
 		_preset_uri_map[uri] = fn;
 		return uri;
 	}
@@ -756,7 +750,7 @@ VST3Plugin::do_remove_preset (std::string name)
 	std::string dir = preset_search_path ().front ();
 	std::string fn = Glib::build_filename (dir, legalize_for_universal_path (name) + ".vstpreset");
 	::g_unlink (fn.c_str ());
-	std::string uri = string_compose (X_("VST3-S:%1:%2:%3"), unique_id (), _info->index, PBD::basename_nosuffix (fn));
+	std::string uri = string_compose (X_("VST3-S:%1:%2"), unique_id (), PBD::basename_nosuffix (fn));
 	if (_preset_uri_map.find (uri) != _preset_uri_map.end ()) {
 		_preset_uri_map.erase (_preset_uri_map.find (uri));
 	}
@@ -805,7 +799,7 @@ VST3Plugin::find_presets ()
 							warning << string_compose (_("VST3<%1>: ignored unnamed factory preset/program"), name ()) << endmsg;
 							continue;
 						}
-						std::string uri = string_compose (X_("VST3-P:%1:%2:%3"), unique_id (), _info->index, std::setw(4), std::setfill('0'), j);
+						std::string uri = string_compose (X_("VST3-P:%1:%2"), unique_id (), std::setw(4), std::setfill('0'), j);
 						PresetRecord r (uri , preset_name, false);
 						_presets.insert (make_pair (uri, r));
 					}
@@ -827,7 +821,7 @@ VST3Plugin::find_presets ()
 			float value = static_cast<Vst::ParamValue> (i) / static_cast<Vst::ParamValue> (pi.stepCount);
 			std::string preset_name = _plug->print_parameter (pi.id, value);
 			if (!preset_name.empty ()) {
-				std::string uri = string_compose (X_("VST3-P:%1:%2:%3"), unique_id (), _info->index, std::setw(4), std::setfill('0'), i);
+				std::string uri = string_compose (X_("VST3-P:%1:%2"), unique_id (), std::setw(4), std::setfill('0'), i);
 				PresetRecord r (uri , preset_name, false);
 				_presets.insert (make_pair (uri, r));
 			}
@@ -844,7 +838,7 @@ VST3Plugin::find_presets ()
 	for (std::vector<std::string>::iterator i = preset_files.begin(); i != preset_files.end (); ++i) {
 		bool is_user = PBD::path_is_within (psp.front(), *i);
 		std::string preset_name = PBD::basename_nosuffix (*i);
-		std::string uri = string_compose (X_("VST3-S:%1:%2:%3"), unique_id (), _info->index, preset_name);
+		std::string uri = string_compose (X_("VST3-S:%1:%2"), unique_id (), preset_name);
 		if (_presets.find (uri) != _presets.end ()) {
 			continue;
 		}
@@ -911,7 +905,7 @@ VST3PluginInfo::load (Session& session)
 #endif
 		}
 		PluginPtr          plugin;
-		Steinberg::VST3PI* plug = new VST3PI (m, index, unique_id);
+		Steinberg::VST3PI* plug = new VST3PI (m, unique_id);
 		plugin.reset (new VST3Plugin (session.engine (), session, plug));
 		plugin->set_info (PluginInfoPtr (new VST3PluginInfo (*this)));
 		return plugin;
@@ -941,7 +935,7 @@ VST3PluginInfo::is_instrument () const
 
 /* ****************************************************************************/
 
-VST3PI::VST3PI (boost::shared_ptr<ARDOUR::VST3PluginModule> m, int index, std::string unique_id)
+VST3PI::VST3PI (boost::shared_ptr<ARDOUR::VST3PluginModule> m, std::string unique_id)
 	: _module (m)
 	, _factory (0)
 	, _component (0)
@@ -969,18 +963,7 @@ VST3PI::VST3PI (boost::shared_ptr<ARDOUR::VST3PluginModule> m, int index, std::s
 		throw failed_constructor ();
 	}
 
-	PClassInfo ci;
-	if (_factory->getClassInfo (index, &ci) != kResultTrue) {
-		throw failed_constructor ();
-	}
-	if (strcmp (ci.category, kVstAudioEffectClass)) {
-		throw failed_constructor ();
-	}
-	if (FUID::fromTUID (ci.cid) != _fuid) {
-		throw failed_constructor ();
-	}
-
-	if (_factory->createInstance (ci.cid, Vst::IComponent::iid, (void**)&_component) != kResultTrue) {
+	if (_factory->createInstance (_fuid.toTUID (), Vst::IComponent::iid, (void**)&_component) != kResultTrue) {
 		throw failed_constructor ();
 	}
 

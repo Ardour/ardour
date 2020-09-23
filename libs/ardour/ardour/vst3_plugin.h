@@ -52,7 +52,7 @@ class LIBARDOUR_API VST3PI
 	, public IPlugFrame
 {
 public:
-	VST3PI (boost::shared_ptr<ARDOUR::VST3PluginModule> m, int index, std::string unique_id);
+	VST3PI (boost::shared_ptr<ARDOUR::VST3PluginModule> m, std::string unique_id);
 	virtual ~VST3PI ();
 
 	/* IComponentHandler */
