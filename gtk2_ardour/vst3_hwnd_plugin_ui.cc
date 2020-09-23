@@ -71,6 +71,8 @@ VST3HWNDPluginUI::view_realized ()
 		_req_width  = rect.right - rect.left;
 		_req_height = rect.bottom - rect.top;
 	}
+
+	_gui_widget.queue_resize ();
 }
 
 void
