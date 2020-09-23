@@ -209,6 +209,7 @@ VST3NSViewPluginUI::on_window_show (const std::string& /*title*/)
 {
 	gtk_widget_realize (GTK_WIDGET(_gui_widget.gobj()));
 	show_all ();
+	_gui_widget.queue_resize ();
 	return true;
 }
 
