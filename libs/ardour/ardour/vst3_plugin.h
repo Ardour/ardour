@@ -140,7 +140,9 @@ public:
 	void process (float** ins, float** outs, uint32_t n_samples);
 
 private:
-	void init ();
+	/* prevent copy construction */
+	VST3PI (const VST3PI&);
+
 	void terminate ();
 	bool connect_components ();
 	bool disconnect_components ();
