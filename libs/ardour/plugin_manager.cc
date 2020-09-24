@@ -135,6 +135,21 @@ PluginManager* PluginManager::_instance = 0;
 std::string PluginManager::scanner_bin_path = "";
 std::string PluginManager::vst3_scanner_bin_path = "";
 
+
+#ifdef VST3_SUPPORT
+# if defined __x86_64__ || defined _M_X64
+#  define VST3_BLACKLIST  "vst3_x64_blacklist.txt"
+# elif defined __i386__  || defined _M_IX86
+#  define VST3_BLACKLIST  "vst3_x86_blacklist.txt"
+# elif defined __aarch64__
+#  define VST3_BLACKLIST  "vst3_a64_blacklist.txt"
+# elif defined __arm__
+#  define VST3_BLACKLIST  "vst3_a32_blacklist.txt"
+# else
+#  define VST3_BLACKLIST  "vst3_blacklist.txt"
+# endif
+#endif
+
 PluginManager&
 PluginManager::instance()
 {
@@ -476,7 +491,7 @@ PluginManager::refresh (bool cache_only)
 	vst3_refresh (cache_only);
 
 	if (!cache_only) {
-		string fn = Glib::build_filename (ARDOUR::user_cache_directory(), "vst3_blacklist.txt");
+		string fn = Glib::build_filename (ARDOUR::user_cache_directory (), VST3_BLACKLIST);
 		if (Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
 			try {
 				std::string bl = Glib::file_get_contents (fn);
@@ -1521,17 +1536,19 @@ PluginManager::clear_vst3_cache ()
 void
 PluginManager::clear_vst3_blacklist ()
 {
-	string fn = Glib::build_filename (ARDOUR::user_cache_directory (), "vst3_blacklist.txt");
+#ifdef VST3_SUPPORT
+	string fn = Glib::build_filename (ARDOUR::user_cache_directory (), VST3_BLACKLIST);
 	if (Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
 		::g_unlink(fn.c_str());
 	}
+#endif
 }
 
 #ifdef VST3_SUPPORT
 
 static void vst3_blacklist (string const& module_path)
 {
-	string fn = Glib::build_filename (ARDOUR::user_cache_directory (), "vst3_blacklist.txt");
+	string fn = Glib::build_filename (ARDOUR::user_cache_directory (), VST3_BLACKLIST);
 	FILE* f = NULL;
 	if (! (f = g_fopen (fn.c_str (), "a"))) {
 		PBD::error << string_compose (_("Cannot write to VST3 blacklist file '%1'"), fn) << endmsg;
@@ -1543,7 +1560,7 @@ static void vst3_blacklist (string const& module_path)
 
 static void vst3_whitelist (string module_path)
 {
-	string fn = Glib::build_filename (ARDOUR::user_cache_directory (), "vst3_blacklist.txt");
+	string fn = Glib::build_filename (ARDOUR::user_cache_directory (), VST3_BLACKLIST);
 	if (!Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
 		return;
 	}
@@ -1569,7 +1586,7 @@ static void vst3_whitelist (string module_path)
 
 static bool vst3_is_blacklisted (string const& module_path)
 {
-	string fn = Glib::build_filename (ARDOUR::user_cache_directory (), "vst3_blacklist.txt");
+	string fn = Glib::build_filename (ARDOUR::user_cache_directory (), VST3_BLACKLIST);
 	if (!Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
 		return false;
 	}
