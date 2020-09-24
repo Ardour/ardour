@@ -86,6 +86,7 @@ public:
 	Vst::IUnitInfo* unit_info ();
 	FUID const& fuid() const { return _fuid; }
 	Vst::ParameterInfo const& program_change_port() const { return  _program_change_port; }
+	void set_n_factory_presets (size_t n) { _n_factory_presets = n; }
 
 	/* API for Ardour -- Ports */
 	uint32_t    designated_bypass_port () const { return _port_id_bypass; }
@@ -97,7 +98,7 @@ public:
 	void        get_parameter_descriptor (uint32_t, ARDOUR::ParameterDescriptor&) const;
 	std::string print_parameter (uint32_t p) const;
 	std::string print_parameter (Vst::ParamID, Vst::ParamValue) const;
-	bool        set_program (float p, int32 sample_off, bool normalized);
+	bool        set_program (int p, int32 sample_off);
 
 	ARDOUR::Plugin::IOPortDescription describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id) const;
 
@@ -217,6 +218,7 @@ private:
 	int _n_aux_outputs;
 	int _n_midi_inputs;
 	int _n_midi_outputs;
+	int _n_factory_presets;
 };
 
 } // namespace Steinberg
@@ -297,6 +299,8 @@ private:
 
 	Steinberg::VST3PI* _plug;
 	PBD::ScopedConnectionList _connections;
+
+	int32_t _factory_preset_count;
 	std::map <std::string, std::string> _preset_uri_map;
 
 	std::vector<bool> _connected_inputs;

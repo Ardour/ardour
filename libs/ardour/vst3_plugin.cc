@@ -325,7 +325,7 @@ VST3PI::evoral_to_vst3 (Vst::Event& e, Evoral::Event<samplepos_t> const& ev, int
 				return false;
 			case MIDI_CMD_PGM_CHANGE:
 				assert (size == 2);
-				set_program (data2 / 127.f, ev.time (), true); // TODO map to available programs ?!
+				set_program (data2, ev.time ());
 				return false;
 			case MIDI_CMD_CHANNEL_PRESSURE:
 				assert (size == 2);
@@ -687,7 +687,7 @@ VST3Plugin::load_preset (PresetRecord r)
 	if (tmp[0] == "VST3-P") {
 		int program = PBD::atoi (tmp[2]);
 		assert (!r.user);
-		if (!_plug->set_program (program, 0, false)) {
+		if (!_plug->set_program (program, 0)) {
 #ifndef NDEBUG
 			std::cerr << "set_program failed\n";
 #endif
@@ -764,7 +764,6 @@ static bool vst3_preset_filter (const std::string& str, void*)
 void
 VST3Plugin::find_presets ()
 {
-
 	_presets.clear ();
 	_preset_uri_map.clear ();
 
@@ -827,6 +826,8 @@ VST3Plugin::find_presets ()
 			}
 		}
 	}
+
+	_plug->set_n_factory_presets (_presets.size ());
 
 	// TODO check _plug->unit_data()
 	// IUnitData: programDataSupported -> setUnitProgramData (IBStream)
@@ -947,6 +948,7 @@ VST3PI::VST3PI (boost::shared_ptr<ARDOUR::VST3PluginModule> m, std::string uniqu
 	, _is_processing (false)
 	, _block_size (0)
 	, _port_id_bypass (UINT32_MAX)
+	, _n_factory_presets (0)
 {
 	using namespace std;
 
@@ -1530,16 +1532,32 @@ VST3PI::set_parameter (uint32_t p, float value, int32 sample_off)
 }
 
 bool
-VST3PI::set_program (float value, int32 sample_off, bool normalized)
+VST3PI::set_program (int pgm, int32 sample_off)
 {
 	if (_program_change_port.id == Vst::kNoParamId) {
 		return false;
 	}
-	Vst::ParamID id = _program_change_port.id;
-
-	if (!normalized) {
-		value = _controller->plainParamToNormalized (id, value);
+	if (_n_factory_presets < 1) {
+		return false;
 	}
+
+	if (pgm < 0 || pgm >= _n_factory_presets) {
+		return false;
+	}
+
+	Vst::ParamID id = _program_change_port.id;
+#if 0
+	/* This fails with some plugins (e.g. waves.vst3),
+	 * that do not use integer indexed presets.
+	 */
+	float value = _controller->plainParamToNormalized (id, pgm);
+#else
+	float value = pgm;
+	if (_n_factory_presets > 1) {
+		value /= (_n_factory_presets - 1.f);
+	}
+#endif
+
 	int32 index;
 	_input_param_changes.addParameterData (id, index)->addPoint (sample_off, value, index);
 	_controller->setParamNormalized (id, value);
