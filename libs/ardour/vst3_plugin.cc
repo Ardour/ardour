@@ -1386,11 +1386,17 @@ VST3PI::count_channels (Vst::MediaType media, Vst::BusDirection dir, Vst::BusTyp
 			bool is_sidechain = (type == Vst::kAux) && (dir == Vst::kInput);
 
 			if (media == Vst::kEvent) {
-				/* MIDI Channel count -> MIDI input */
+#if 0
+				/* Supported MIDI Channel count (for a single MIDI input) */
 				if (bus.channelCount > 0) {
 					_io_name[media][dir].push_back (Plugin::IOPortDescription (bus_name, is_sidechain));
 				}
 				return std::min<int32> (1, bus.channelCount);
+#else
+				/* Some plugin leave it at zero, even though they accept events */
+				_io_name[media][dir].push_back (Plugin::IOPortDescription (bus_name, is_sidechain));
+				return 1;
+#endif
 			} else {
 				for (int32_t j = 0; j < bus.channelCount; ++j) {
 					std::string channel_name;

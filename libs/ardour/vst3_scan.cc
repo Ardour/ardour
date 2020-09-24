@@ -61,8 +61,13 @@ count_channels (Vst::IComponent* c, Vst::MediaType media, Vst::BusDirection dir,
 			}
 #endif
 			if (media == Vst::kEvent) {
-				/* MIDI Channel count -> MIDI input */
+#if 0
+				/* Supported MIDI Channel count (for a single MIDI input) */
 				return std::min<int32> (1, bus.channelCount);
+#else
+				/* Some plugin leave it at zero, even though they accept events */
+				return 1;
+#endif
 			} else {
 				n_channels += bus.channelCount;
 			}
