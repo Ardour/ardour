@@ -43,14 +43,21 @@ using namespace std;
 using namespace Steinberg;
 
 static int32
-count_channels (Vst::IComponent* c, Vst::MediaType media, Vst::BusDirection dir, Vst::BusType type)
+count_channels (Vst::IComponent* c, Vst::MediaType media, Vst::BusDirection dir, Vst::BusType type, bool verbose = false)
 {
 	/* see also libs/ardour/vst3_plugin.cc VST3PI::count_channels */
 	int32 n_busses = c->getBusCount (media, dir);
+	if (verbose) {
+		PBD::info << "VST3: media: " << media << "dir: " << dir << "type: " << type << "n_busses: " << n_busses << endmsg;
+	}
 	int32 n_channels = 0;
 	for (int32 i = 0; i < n_busses; ++i) {
 		Vst::BusInfo bus;
-		if (c->getBusInfo (media, dir, i, bus) == kResultTrue && bus.busType == type) {
+		tresult rv = c->getBusInfo (media, dir, i, bus);
+		if (rv == kResultTrue && bus.busType == type) {
+			if (verbose) {
+				PBD::info << "VST3: bus: " << i << "count: " << bus.channelCount << endmsg;
+			}
 #if 1
 			if ((type == Vst::kMain && i != 0) || (type == Vst::kAux && i != 1)) {
 				/* For now allow we only support one main bus, and one aux-bus.
@@ -71,6 +78,8 @@ count_channels (Vst::IComponent* c, Vst::MediaType media, Vst::BusDirection dir,
 			} else {
 				n_channels += bus.channelCount;
 			}
+		} else if (verbose) {
+			PBD::info << "VST3: error getting busInfo for bus: " << i << " rv: " << rv << " busType: " << bus.busType << endmsg;
 		}
 	}
 	return n_channels;
