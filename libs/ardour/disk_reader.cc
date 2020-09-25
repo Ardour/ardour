@@ -1643,10 +1643,26 @@ DiskReader::Declicker::~Declicker ()
 }
 
 void
-DiskReader::Declicker::alloc (samplecnt_t sr, bool fadein)
+DiskReader::Declicker::alloc (samplecnt_t sr, bool fadein, bool linear)
 {
 	delete[] vec;
 	vec = new Sample[loop_fade_length];
+
+	if (linear) {
+		if (fadein) {
+			for (samplecnt_t n = 0; n < loop_fade_length; ++n) {
+				vec[n] = n / (float) loop_fade_length;
+			}
+		} else {
+			for (samplecnt_t n = 0; n < loop_fade_length; ++n) {
+				vec[n] = 1.f - n / (float) loop_fade_length;
+			}
+		}
+		fade_length = loop_fade_length - 1;
+		return;
+	}
+
+	/* Exponential fade */
 
 	const float a = 390.f / sr; // ~ 1/100Hz for 40dB
 
@@ -1884,8 +1900,8 @@ void
 DiskReader::alloc_loop_declick (samplecnt_t sr)
 {
 	loop_fade_length = lrintf (ceil (-log (GAIN_COEFF_DELTA / 2.) / (390. / sr)));
-	loop_declick_in.alloc (sr, true);
-	loop_declick_out.alloc (sr, false);
+	loop_declick_in.alloc (sr, true, Config->get_loop_fade_choice () == XFadeLoop);
+	loop_declick_out.alloc (sr, false, Config->get_loop_fade_choice () == XFadeLoop);
 }
 
 #undef GAIN_COEFF_DELTA

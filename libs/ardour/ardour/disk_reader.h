@@ -181,7 +181,7 @@ protected:
 		Declicker ();
 		~Declicker ();
 
-		void alloc (samplecnt_t sr, bool fadein);
+		void alloc (samplecnt_t sr, bool fadein, bool linear);
 
 		void run (Sample* buf, samplepos_t start, samplepos_t end);
 		void reset (samplepos_t start, samplepos_t end, bool fadein, samplecnt_t sr);
