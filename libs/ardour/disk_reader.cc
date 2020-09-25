@@ -1668,13 +1668,20 @@ DiskReader::Declicker::alloc (samplecnt_t sr, bool fadein)
 		}
 	}
 
-	assert (n <= loop_fade_length);
+	assert (n > 0 && n <= loop_fade_length);
 
-	fade_length = n;
+	fade_length = n - 1;
 
-	/* zero out the rest just to be safe */
-
-	memset (&vec[n], 0, sizeof (gain_t) * (loop_fade_length - n));
+	/* Fill remaining fader-buffer with the target value.
+	 *
+	 * This is needed for loop x-fade. Due to float precision near 1.0, fade-in length
+	 * is can be one or two samples shorter than fade-out length (depending on sample-rate).
+	 * Summing the fade-in and fade-out curve over the complete fade-range (fade-out,
+	 * as done by DiskReader::maybe_xfade_loop) must yield 1.0 +/- GAIN_COEFF_DELTA.
+	 */
+	for (; n < loop_fade_length; ++n) {
+		vec[n] = fadein ? 1.f : 0.f;
+	}
 }
 
 void
