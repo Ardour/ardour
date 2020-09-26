@@ -33,6 +33,8 @@ namespace ARDOUR {
 
 namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<std::string> name;
+	/* this has no inherent connection to SessionObject, but it needs to go * somewhere so .... */
+	LIBARDOUR_API extern PBD::PropertyDescriptor<Temporal::TimeDomain> time_domain;
 }
 
 class Session;
