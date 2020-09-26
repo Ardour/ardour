@@ -58,7 +58,7 @@ using namespace ArdourWidgets;
 bool LoudnessDialog::_first_time = true;
 CLoudnessPreset LoudnessDialog::_last_preset;
 
-LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
+LoudnessDialog::LoudnessDialog (Session* s, TimelineRange const& ar, bool as)
 	: ArdourDialog (as ? _("Loudness Assistant") : _("Loudness Analyzer and Normalizer"))
 	, _lp (false)
 	, _session (s)

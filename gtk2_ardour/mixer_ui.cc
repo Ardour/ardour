@@ -984,7 +984,7 @@ Mixer_UI::fan_out (boost::weak_ptr<Route> wr, bool to_busses, bool group)
 
 	boost::shared_ptr<AutomationControl> msac = route->master_send_enable_controllable ();
 	if (msac) {
-		msac->start_touch (msac->session().transport_sample());
+		msac->start_touch (timepos_t (msac->session().transport_sample()));
 		msac->set_value (0, PBD::Controllable::NoGroup);
 	}
 
@@ -3635,7 +3635,7 @@ Mixer_UI::control_action (boost::shared_ptr<T> (Stripable::*get_control)() const
 		if (s) {
 			ac = (s.get()->*get_control)();
 			if (ac) {
-				ac->start_touch (_session->audible_sample ());
+				ac->start_touch (timepos_t (_session->audible_sample ()));
 				cl->push_back (ac);
 				if (!have_val) {
 					val = !ac->get_value();

@@ -323,7 +323,7 @@ AutomationStreamView::get_lines () const
 }
 
 bool
-AutomationStreamView::paste (samplepos_t                               pos,
+AutomationStreamView::paste (timepos_t const &                         pos,
                              unsigned                                  paste_count,
                              float                                     times,
                              boost::shared_ptr<ARDOUR::AutomationList> alist)
@@ -339,7 +339,7 @@ AutomationStreamView::paste (samplepos_t                               pos,
 	list<RegionView*>::const_iterator prev = region_views.begin ();
 
 	for (list<RegionView*>::const_iterator i = region_views.begin(); i != region_views.end(); ++i) {
-		if ((*i)->region()->position() > pos) {
+		if ((*i)->region()->nt_position() > pos) {
 			break;
 		}
 		prev = i;
@@ -348,7 +348,7 @@ AutomationStreamView::paste (samplepos_t                               pos,
 	boost::shared_ptr<Region> r = (*prev)->region ();
 
 	/* If *prev doesn't cover pos, it's no good */
-	if (r->position() > pos || ((r->position() + r->length()) < pos)) {
+	if (r->nt_position() > pos || ((r->nt_position() + r->nt_length()) < pos)) {
 		return false;
 	}
 

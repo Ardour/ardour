@@ -1749,7 +1749,7 @@ Editor::loudness_analyze_range_selection ()
 		if (!pl || !rui) {
 			continue;
 		}
-		for (std::list<AudioRange>::iterator j = ts.begin (); j != ts.end (); ++j) {
+		for (std::list<TimelineRange>::iterator j = ts.begin (); j != ts.end (); ++j) {
 			total_work += j->length ();
 		}
 	}
@@ -2610,7 +2610,7 @@ Editor::set_snapped_cursor_position (samplepos_t pos)
  *  @param event Event to get current key modifier information from, or 0.
  */
 void
-Editor::snap_to_with_modifier (MusicSample& start, GdkEvent const * event, RoundMode direction, SnapPref pref)
+Editor::snap_to_with_modifier (Temporal::timepos_t & start, GdkEvent const * event, Temporal::RoundMode direction, bool for_mark)
 {
 	if (!_session || !event) {
 		return;
@@ -2618,33 +2618,32 @@ Editor::snap_to_with_modifier (MusicSample& start, GdkEvent const * event, Round
 
 	if (ArdourKeyboard::indicates_snap (event->button.state)) {
 		if (_snap_mode == SnapOff) {
-			snap_to_internal (start, direction, pref);
+			snap_to_internal (start, direction, for_mark);
 		} else {
-			start.set (start.sample, 0);
+			start = start.sample();
 		}
 	} else {
 		if (_snap_mode != SnapOff) {
-			snap_to_internal (start, direction, pref);
+			snap_to_internal (start, direction, for_mark);
 		} else if (ArdourKeyboard::indicates_snap_delta (event->button.state)) {
 			/* SnapOff, but we pressed the snap_delta modifier */
-			snap_to_internal (start, direction, pref);
+			snap_to_internal (start, direction, for_mark);
 		} else {
-			start.set (start.sample, 0);
+			start = start.sample ();
 		}
 	}
 }
 
 void
-Editor::snap_to (MusicSample& start, RoundMode direction, SnapPref pref, bool ensure_snap)
+Editor::snap_to (Temporal::timepos_t & start, Temporal::RoundMode direction, bool for_mark, bool ensure_snap)
 {
 	if (!_session || (_snap_mode == SnapOff && !ensure_snap)) {
-		start.set (start.sample, 0);
+		start = start.sample ();
 		return;
 	}
 
-	snap_to_internal (start, direction, pref, ensure_snap);
+	snap_to_internal (start, direction, for_mark, ensure_snap);
 }
-
 static void
 check_best_snap (samplepos_t presnap, samplepos_t &test, samplepos_t &dist, samplepos_t &best)
 {
@@ -2936,7 +2935,7 @@ Editor::snap_to_marker (samplepos_t presnap, RoundMode direction)
 }
 
 void
-Editor::snap_to_internal (MusicSample& start, RoundMode direction, SnapPref pref, bool ensure_snap)
+Editor::snap_to_internal (timepos_t const & start, RoundMode direction, SnapPref pref, bool ensure_snap)
 {
 	UIConfiguration const& uic (UIConfiguration::instance ());
 	const samplepos_t presnap = start.sample;
@@ -4054,23 +4053,28 @@ Editor::set_show_touched_automation (bool yn)
 	instant_save ();
 }
 
-samplecnt_t
-Editor::get_paste_offset (samplepos_t pos, unsigned paste_count, samplecnt_t duration)
+PlaylistSelector&
+Editor::playlist_selector () const
+{
+	return *_playlist_selector;
+}
+
+Temporal::timecnt_t
+Editor::get_paste_offset (Temporal::timepos_t const & pos, unsigned paste_count, Temporal::timecnt_t const & duration)
 {
 	if (paste_count == 0) {
 		/* don't bother calculating an offset that will be zero anyway */
-		return 0;
+		return timecnt_t (0, timepos_t());
 	}
 
 	/* calculate basic unsnapped multi-paste offset */
-	samplecnt_t offset = paste_count * duration;
+	Temporal::timecnt_t offset = duration * paste_count;
 
 	/* snap offset so pos + offset is aligned to the grid */
-	MusicSample offset_pos (pos + offset, 0);
-	snap_to(offset_pos, RoundUpMaybe);
-	offset = offset_pos.sample - pos;
+	Temporal::timepos_t snap_pos (pos + offset);
+	snap_to (snap_pos, Temporal::RoundUpMaybe);
 
-	return offset;
+	return pos.distance (snap_pos);
 }
 
 unsigned

@@ -891,6 +891,85 @@ AudioClock::set (samplepos_t when, bool force, samplecnt_t offset)
 		}
 	}
 
+	finish_set (timepos_t (when), btn_en);
+}
+
+void
+AudioClock::set_duration (Temporal::timecnt_t const & d, bool force, Temporal::timecnt_t const & offset)
+{
+	set_time (timepos_t (d), force, offset);
+}
+
+void
+AudioClock::set_time (Temporal::timepos_t const & w, bool force, Temporal::timecnt_t const & offset)
+{
+	Temporal::timepos_t when (w);
+
+	if ((!force && !is_visible()) || _session == 0) {
+		return;
+	}
+
+	if (is_duration) {
+		when = when.earlier (offset);
+	}
+
+	if (when > _limit_pos) {
+		when = _limit_pos;
+	} else if (when < -_limit_pos) {
+		when = -_limit_pos;
+	}
+
+	if (when == last_when && !force) {
+#if 0 // XXX return if no change and no change forced. verify Aug/2014
+		if (_mode != Timecode && _mode != MinSec) {
+			/* may need to force display of TC source
+			 * time, so don't return early.
+			 */
+			/* ^^ Why was that?,  delta times?
+			 * Timecode FPS, pull-up/down, etc changes
+			 * trigger a 'session_property_changed' which
+			 * eventually calls set(last_when, true)
+			 *
+			 * re-rendering the clock every 40ms or so just
+			 * because we can is not ideal.
+			 */
+			return;
+		}
+#else
+		return;
+#endif
+	}
+
+	bool btn_en = false;
+
+	if (!editing) {
+
+		switch (_mode) {
+		case Timecode:
+			set_timecode (when.sample(), force);
+			break;
+
+		case BBT:
+			_set_bbt (when.bbt(), when.bbt() < Temporal::timepos_t (Temporal::BBT_Time()));
+			btn_en = true;
+			break;
+
+		case MinSec:
+			set_minsec (when.sample(), force);
+			break;
+
+		case Samples:
+			set_samples (when.sample(), force);
+			break;
+		}
+	}
+
+	finish_set (when, btn_en);
+}
+
+void
+AudioClock::finish_set (Temporal::timepos_t const & when, bool btn_en)
+{
 	if (_with_info) {
 		_left_btn.set_sensitive (btn_en);
 		_right_btn.set_sensitive (btn_en);
@@ -2295,14 +2374,25 @@ AudioClock::set_editable (bool yn)
 }
 
 void
-AudioClock::set_is_duration (bool yn)
+AudioClock::set_is_duration (bool yn, timepos_t const & p)
 {
 	if (yn == is_duration) {
+		if (yn) {
+			/* just reset position */
+			duration_position = p;
+		}
+
 		return;
 	}
 
 	is_duration = yn;
-	AudioClock::set (last_when, true);
+	if (yn) {
+		duration_position = p;
+	} else {
+		duration_position = timepos_t ();
+	}
+
+	set_time (last_when, true);
 }
 
 void

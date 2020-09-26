@@ -79,14 +79,14 @@ public:
 
 	virtual void set_height (double);
 	virtual void set_samples_per_pixel (double);
-	virtual bool set_duration (samplecnt_t, void*);
+	virtual bool set_duration (Temporal::timecnt_t const &, void*);
 
 	void move (double xdelta, double ydelta);
 
 	void raise_to_top ();
 	void lower_to_bottom ();
 
-	bool set_position(samplepos_t pos, void* src, double* delta = 0);
+	bool set_position(Temporal::timepos_t const & pos, void* src, double* delta = 0);
 
 	virtual void show_region_editor ();
 	void hide_region_editor ();
@@ -125,11 +125,11 @@ public:
 
 	struct PositionOrder {
 		bool operator()(const RegionView* a, const RegionView* b) {
-			return a->region()->position() < b->region()->position();
+			return a->region()->nt_position() < b->region()->nt_position();
 		}
 	};
 
-	ARDOUR::MusicSample snap_sample_to_sample (ARDOUR::sampleoffset_t, bool ensure_snap = false) const;
+	Temporal::timepos_t snap_region_time_to_region_time (Temporal::timepos_t const &, bool ensure_snap = false) const;
 
 	void update_visibility ();
 
@@ -171,6 +171,9 @@ protected:
 	virtual void parameter_changed (std::string const&);
 
 	void maybe_raise_cue_markers ();
+
+	Temporal::timecnt_t region_relative_distance (Temporal::timecnt_t const &, Temporal::TimeDomain desired_time_domain);
+	Temporal::timecnt_t source_relative_distance (Temporal::timecnt_t const &, Temporal::TimeDomain desired_time_domain);
 
 	boost::shared_ptr<ARDOUR::Region> _region;
 

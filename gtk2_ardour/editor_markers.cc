@@ -174,7 +174,7 @@ Editor::add_new_location_internal (Location* location)
 	}
 
 	location->name_changed.connect (*this, invalidator (*this), boost::bind (&Editor::location_changed, this, _1), gui_context());
-	location->position_lock_style_changed.connect (*this, invalidator (*this), boost::bind (&Editor::location_changed, this, _1), gui_context());
+	location->position_time_domain_changed.connect (*this, invalidator (*this), boost::bind (&Editor::location_changed, this, _1), gui_context());
 	location->FlagsChanged.connect (*this, invalidator (*this), boost::bind (&Editor::location_flags_changed, this, location), gui_context());
 
 	pair<Location*,LocationMarkers*> newpair;
@@ -214,7 +214,7 @@ Editor::location_changed (Location *location)
 		return;
 	}
 
-	if (location->position_lock_style() == MusicTime) {
+	if (location->position_time_domain() == Temporal::BeatTime) {
 		lam->set_name ("\u266B" + location->name ()); // BEAMED EIGHTH NOTES
 	} else {
 		lam->set_name (location->name ());
@@ -278,7 +278,7 @@ Editor::check_marker_label (ArdourMarker* m)
 
 		/* Update just the available space between the previous marker and this one */
 
-		double const p = sample_to_pixel (m->position() - (*prev)->position());
+		double const p = sample_to_pixel ((*prev)->position().distance (m->position()).samples());
 
 		if (m->label_on_left()) {
 			(*prev)->set_right_label_limit (p / 2);
@@ -297,7 +297,7 @@ Editor::check_marker_label (ArdourMarker* m)
 
 		/* Update just the available space between this marker and the next */
 
-		double const p = sample_to_pixel ((*next)->position() - m->position());
+		double const p = sample_to_pixel (m->position().distance ((*next)->position()).samples());
 
 		if ((*next)->label_on_left()) {
 			m->set_right_label_limit (p / 2);
@@ -354,7 +354,7 @@ Editor::update_marker_labels (ArdourCanvas::Container* group)
 	while (i != sorted.end()) {
 
 		if (prev != sorted.end()) {
-			double const p = sample_to_pixel ((*i)->position() - (*prev)->position());
+			double const p = sample_to_pixel ((*prev)->position().distance ((*i)->position()).samples());
 
 			if ((*prev)->label_on_left()) {
 				(*i)->set_left_label_limit (p);
@@ -365,7 +365,7 @@ Editor::update_marker_labels (ArdourCanvas::Container* group)
 		}
 
 		if (next != sorted.end()) {
-			double const p = sample_to_pixel ((*next)->position() - (*i)->position());
+			double const p = sample_to_pixel ((*i)->position().distance ((*next)->position()).samples());
 
 			if ((*next)->label_on_left()) {
 				(*i)->set_right_label_limit (p / 2);
@@ -613,12 +613,12 @@ Editor::LocationMarkers::set_name (const string& str)
 }
 
 void
-Editor::LocationMarkers::set_position (samplepos_t startf,
-				       samplepos_t endf)
+Editor::LocationMarkers::set_position (timepos_t const & startt,
+				       timepos_t const & endt)
 {
-	start->set_position (startf);
-	if (end) {
-		end->set_position (endf);
+	start->set_position (startt);
+	if (!endt.zero()) {
+		end->set_position (endt);
 	}
 }
 
@@ -678,7 +678,8 @@ Editor::mouse_add_new_marker (samplepos_t where, bool is_cd)
 		if (!choose_new_marker_name(markername)) {
 			return;
 		}
-		Location *location = new Location (*_session, where, where, markername, (Location::Flags) flags, get_grid_music_divisions (0));
+#warning NUTEMPO how do we make the position be in musical time from a mouse event?
+		Location *location = new Location (*_session, timepos_t (where), timepos_t (where), markername, (Location::Flags) flags);
 		begin_reversible_command (_("add marker"));
 
 		XMLNode &before = _session->locations()->get_state();
@@ -745,7 +746,8 @@ Editor::mouse_add_new_range (samplepos_t where)
 
 	string name;
 	_session->locations()->next_available_name (name, _("range"));
-	Location* loc = new Location (*_session, where, end, name, Location::IsRangeMarker);
+#warning NUTEMPO how do we get music time here from a mouse event?
+	Location* loc = new Location (*_session, timepos_t (where), timepos_t (end), name, Location::IsRangeMarker);
 
 	begin_reversible_command (_("new range marker"));
 	XMLNode& before = _session->locations()->get_state ();
@@ -989,7 +991,7 @@ Editor::build_marker_menu (Location* loc)
 
 	items.push_back (CheckMenuElem (_("Glue to Bars and Beats")));
 	Gtk::CheckMenuItem* glue_item = static_cast<Gtk::CheckMenuItem*> (&items.back());
-	glue_item->set_active (loc->position_lock_style() == MusicTime);
+	glue_item->set_active (loc->position_time_domain() == Temporal::BeatTime);
 
 	glue_item->signal_activate().connect (sigc::mem_fun (*this, &Editor::toggle_marker_menu_glue));
 
@@ -1025,7 +1027,7 @@ Editor::build_range_marker_menu (Location* loc, bool loop_or_punch, bool session
 	items.push_back (CheckMenuElem (_("Glue to Bars and Beats")));
 
 	Gtk::CheckMenuItem* glue_item = static_cast<Gtk::CheckMenuItem*> (&items.back());
-	glue_item->set_active (loc->position_lock_style() == MusicTime);
+	glue_item->set_active (loc->position_time_domain() == Temporal::BeatTime);
 	glue_item->signal_activate().connect (sigc::mem_fun (*this, &Editor::toggle_marker_menu_glue));
 
 	items.push_back (SeparatorElem());
@@ -1202,7 +1204,7 @@ Editor::marker_menu_select_all_selectables_using_range ()
 	bool is_start;
 
 	if (((l = find_location_from_marker (marker, is_start)) != 0) && (l->end() > l->start())) {
-		select_all_within (l->start(), l->end() - 1, 0,  DBL_MAX, track_views, Selection::Set, false);
+		select_all_within (l->start(), l->end().decrement(), 0,  DBL_MAX, track_views, Selection::Set, false);
 	}
 
 }
@@ -1242,15 +1244,15 @@ Editor::marker_menu_play_from ()
 	if ((l = find_location_from_marker (marker, is_start)) != 0) {
 
 		if (l->is_mark()) {
-			_session->request_locate (l->start(), MustRoll);
+			_session->request_locate (l->start_sample(), MustRoll);
 		}
 		else {
-			//_session->request_bounded_roll (l->start(), l->end());
+			//_session->request_bounded_roll (l->start_sample(), l->end());
 
 			if (is_start) {
-				_session->request_locate (l->start(), MustRoll);
+				_session->request_locate (l->start_sample(), MustRoll);
 			} else {
-				_session->request_locate (l->end(), MustRoll);
+				_session->request_locate (l->end_sample(), MustRoll);
 			}
 		}
 	}
@@ -1272,13 +1274,13 @@ Editor::marker_menu_set_playhead ()
 	if ((l = find_location_from_marker (marker, is_start)) != 0) {
 
 		if (l->is_mark()) {
-			_session->request_locate (l->start(), MustStop);
+			_session->request_locate (l->start_sample(), MustStop);
 		}
 		else {
 			if (is_start) {
-				_session->request_locate (l->start(), MustStop);
+				_session->request_locate (l->start_sample(), MustStop);
 			} else {
-				_session->request_locate (l->end(), MustStop);
+				_session->request_locate (l->end_sample(), MustStop);
 			}
 		}
 	}
@@ -1304,8 +1306,8 @@ Editor::marker_menu_range_to_next ()
 		return;
 	}
 
-	samplepos_t start;
-	samplepos_t end;
+	timepos_t start;
+	timepos_t end;
 	_session->locations()->marks_either_side (marker->position(), start, end);
 
 	if (end != max_samplepos) {
@@ -1329,18 +1331,19 @@ Editor::marker_menu_set_from_playhead ()
 
 	Location* l;
 	bool is_start;
-	const int32_t divisions = get_grid_music_divisions (0);
 
 	if ((l = find_location_from_marker (marker, is_start)) != 0) {
 
+#warning NUTEMPO what if the user wants musical time here?
+
 		if (l->is_mark()) {
-			l->set_start (_session->audible_sample (), false, true, divisions);
+			l->set_start (timepos_t (_session->audible_sample ()), false);
 		}
 		else {
 			if (is_start) {
-				l->set_start (_session->audible_sample (), false, true, divisions);
+				l->set_start (timepos_t (_session->audible_sample ()), false);
 			} else {
-				l->set_end (_session->audible_sample (), false, true, divisions);
+				l->set_end (timepos_t (_session->audible_sample ()), false);
 			}
 		}
 	}
@@ -1368,9 +1371,9 @@ Editor::marker_menu_set_from_selection (bool /*force_regions*/)
 		} else {
 
 			if (!selection->time.empty()) {
-				l->set (selection->time.start(), selection->time.end_sample());
+				l->set (selection->time.start_time(), selection->time.end_time());
 			} else if (!selection->regions.empty()) {
-				l->set (selection->regions.start(), selection->regions.end_sample());
+				l->set (selection->regions.start_time(), selection->regions.end_time());
 			}
 		}
 	}
@@ -1393,10 +1396,10 @@ Editor::marker_menu_play_range ()
 	if ((l = find_location_from_marker (marker, is_start)) != 0) {
 
 		if (l->is_mark()) {
-			_session->request_locate (l->start(), MustRoll);
+			_session->request_locate (l->start().samples(), MustRoll);
 		}
 		else {
-			_session->request_bounded_roll (l->start(), l->end());
+			_session->request_bounded_roll (l->start().samples(), l->end().samples());
 
 		}
 	}
@@ -1418,7 +1421,7 @@ Editor::marker_menu_loop_range ()
 	if ((l = find_location_from_marker (marker, is_start)) != 0) {
 		if (l != transport_loop_location()) {
 			cerr << "Set loop\n";
-			set_loop_range (l->start(), l->end(), _("loop range from marker"));
+			set_loop_range (l->start().samples(), l->end().samples(), _("loop range from marker"));
 		} else {
 			cerr << " at TL\n";
 		}
@@ -1439,18 +1442,18 @@ Editor::marker_menu_zoom_to_range ()
 		return;
 	}
 
-	samplecnt_t const extra = l->length() * 0.05;
-	samplepos_t a = l->start ();
-	if (a >= extra) {
-		a -= extra;
+	timecnt_t const extra = l->length() * Temporal::ratio_t (5, 100);
+	timepos_t a = l->start ();
+	if (a >= timepos_t (extra)) {
+		a.shift_earlier (extra);
 	}
 
-	samplepos_t b = l->end ();
-	if (b < (max_samplepos - extra)) {
+	timepos_t b = l->end ();
+	if (b < (extra.distance (timepos_t::max (extra.time_domain())))) {
 		b += extra;
 	}
 
-	temporal_zoom_by_sample (a, b);
+	temporal_zoom_by_sample (a.samples(), b.samples());
 }
 
 void

@@ -71,7 +71,7 @@ void ArdourMarker::setup_sizes(const double timebar_height)
 }
 
 ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Container& parent, guint32 rgba, const string& annotation,
-                            Type type, samplepos_t sample, bool handle_events, RegionView* rv)
+                            Type type, timepos_t const & pos, bool handle_events, RegionView* rc)
 
 	: editor (ed)
 	, _parent (&parent)
@@ -267,8 +267,8 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Container& parent, g
 
 	}
 
-	sample_position = sample;
-	unit_position = editor.sample_to_pixel (sample);
+	_position = pos;
+	unit_position = editor.sample_to_pixel (pos.samples());
 	unit_position -= _shift;
 
 	group = new ArdourCanvas::Container (&parent, ArdourCanvas::Duple (unit_position, 1));
@@ -530,18 +530,18 @@ ArdourMarker::setup_name_display ()
 }
 
 void
-ArdourMarker::set_position (samplepos_t sample)
+ArdourMarker::set_position (timepos_t const & pos)
 {
-	unit_position = editor.sample_to_pixel (sample) - _shift;
+	unit_position = editor.sample_to_pixel (pos.samples()) - _shift;
 	group->set_x_position (unit_position);
 	setup_line ();
-	sample_position = sample;
+	_position = pos;
 }
 
 void
 ArdourMarker::reposition ()
 {
-	set_position (sample_position);
+	set_position (_position);
 }
 
 void
@@ -633,7 +633,9 @@ ArdourMarker::set_right_label_limit (double p)
 
 TempoMarker::TempoMarker (PublicEditor& editor, ArdourCanvas::Container& parent, guint32 rgba, const string& text,
 			  ARDOUR::TempoSection& temp)
-	: ArdourMarker (editor, parent, rgba, text, Tempo, temp.sample(), false),
+#warning NUTEMPO needs new tempo map
+//	: ArdourMarker (editor, parent, rgba, text, Tempo, temp.sample(), false),
+	: ArdourMarker (editor, parent, rgba, text, Tempo, timepos_t (), false),
 	  _tempo (temp)
 {
 	group->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_tempo_marker_event), group, this));
@@ -667,7 +669,10 @@ TempoMarker::update_height_mark (const double ratio)
 
 MeterMarker::MeterMarker (PublicEditor& editor, ArdourCanvas::Container& parent, guint32 rgba, const string& text,
 			  ARDOUR::MeterSection& m)
-	: ArdourMarker (editor, parent, rgba, text, Meter, m.sample(), false),
+
+#warning NUTEMPO needs new tempo map
+//	: ArdourMarker (editor, parent, rgba, text, Meter, m.sample(), false),
+	: ArdourMarker (editor, parent, rgba, text, Meter, timepos_t(), false),
 	  _meter (m)
 {
 	group->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_meter_marker_event), group, this));

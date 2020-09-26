@@ -2723,8 +2723,8 @@ Editor::play_selection ()
 	if (!get_selection_extents (start, end))
 		return;
 
-	AudioRange ar (start, end, 0);
-	list<AudioRange> lar;
+	TimelineRange ar (start, end, 0);
+	list<TimelineRange> lar;
 	lar.push_back (ar);
 
 	_session->request_play_range (&lar, true);
@@ -2767,8 +2767,8 @@ Editor::play_with_preroll ()
 
 		end = end + preroll;  //"post-roll"
 
-		AudioRange ar (start, end, 0);
-		list<AudioRange> lar;
+		TimelineRange ar (start, end, 0);
+		list<TimelineRange> lar;
 		lar.push_back (ar);
 
 		_session->request_play_range (&lar, true);
@@ -3152,10 +3152,10 @@ Editor::new_region_from_selection ()
 }
 
 static void
-add_if_covered (RegionView* rv, const AudioRange* ar, RegionSelection* rs)
+add_if_covered (RegionView* rv, const TimelineRange* ar, RegionSelection* rs)
 {
 	switch (rv->region()->coverage (ar->start, ar->end - 1)) {
-	// n.b. -1 because AudioRange::end is one past the end, but coverage expects inclusive ranges
+	// n.b. -1 because TimelineRange::end is one past the end, but coverage expects inclusive ranges
 	case Evoral::OverlapNone:
 		break;
 	default:
@@ -3229,7 +3229,7 @@ Editor::separate_regions_between (const TimeSelection& ts)
 
 			/* XXX need to consider musical time selections here at some point */
 
-			for (list<AudioRange>::const_iterator t = ts.begin(); t != ts.end(); ++t) {
+			for (list<TimelineRange>::const_iterator t = ts.begin(); t != ts.end(); ++t) {
 
 				if (!in_command) {
 					begin_reversible_command (_("separate"));
@@ -3313,7 +3313,7 @@ Editor::separate_region_from_selection ()
 
 		if (get_edit_op_range (start, end)) {
 
-			AudioRange ar (start, end, 1);
+			TimelineRange ar (start, end, 1);
 			TimeSelection ts;
 			ts.push_back (ar);
 
@@ -3347,7 +3347,7 @@ Editor::separate_regions_using_location (Location& loc)
 		return;
 	}
 
-	AudioRange ar (loc.start(), loc.end(), 1);
+	TimelineRange ar (loc.start(), loc.end(), 1);
 	TimeSelection ts;
 
 	ts.push_back (ar);
@@ -3437,7 +3437,7 @@ Editor::crop_region_to_selection ()
 	if (!selection->time.empty()) {
 
 		begin_reversible_command (_("Crop Regions to Time Selection"));
-		for (std::list<AudioRange>::iterator i = selection->time.begin(); i != selection->time.end(); ++i) {
+		for (std::list<TimelineRange>::iterator i = selection->time.begin(); i != selection->time.end(); ++i) {
 			crop_region_to ((*i).start, (*i).end);
 		}
 		commit_reversible_command();
@@ -4207,8 +4207,8 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 
 		if (replace) {
 			/*remove the edxisting regions under the edit range*/
-			list<AudioRange> ranges;
-			ranges.push_back (AudioRange (start, start+cnt, 0));
+			list<TimelineRange> ranges;
+			ranges.push_back (TimelineRange (start, start+cnt, 0));
 			playlist->cut (ranges); // discard result
 
 			/*SPECIAL CASE:  we are bouncing to a new Source *AND* replacing the existing range on the timeline  (consolidate)*/
@@ -8163,8 +8163,8 @@ Editor::remove_time (samplepos_t pos, samplecnt_t samples, InsertTimeOption opt,
 				in_command = true;
 			}
 
-			std::list<AudioRange> rl;
-			AudioRange ar(pos, pos+samples, 0);
+			std::list<TimelineRange> rl;
+			TimelineRange ar(pos, pos+samples, 0);
 			rl.push_back(ar);
 			pl->cut (rl);
 			pl->shift (pos, -samples, true, ignore_music_glue);

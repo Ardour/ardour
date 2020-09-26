@@ -152,7 +152,7 @@ public:
 	 * Snap a value according to the current snap setting.
 	 * ensure_snap overrides SnapOff and magnetic snap
 	 */
-	virtual void snap_to (ARDOUR::MusicSample& first,
+	virtual void snap_to (Temporal::timepos_t & first,
 	                      ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
 	                      ARDOUR::SnapPref    gpref = ARDOUR::SnapToAny_Visual,
 	                      bool                ensure_snap = false) = 0;
@@ -261,10 +261,10 @@ public:
 
 	/** Import existing media */
 	virtual void do_import (std::vector<std::string> paths, Editing::ImportDisposition, Editing::ImportMode mode, ARDOUR::SrcQuality,
-	                        ARDOUR::MidiTrackNameSource, ARDOUR::MidiTempoMapDisposition, samplepos_t&,
+	                        ARDOUR::MidiTrackNameSource, ARDOUR::MidiTempoMapDisposition, Temporal::timepos_t&,
 	                        boost::shared_ptr<ARDOUR::PluginInfo> instrument = boost::shared_ptr<ARDOUR::PluginInfo>(),
 	                        bool with_markers = false) = 0;
-	virtual void do_embed (std::vector<std::string> paths, Editing::ImportDisposition, Editing::ImportMode mode, samplepos_t&,
+	virtual void do_embed (std::vector<std::string> paths, Editing::ImportDisposition, Editing::ImportMode mode, Temporal::timepos_t&,
 	                       boost::shared_ptr<ARDOUR::PluginInfo> instrument = boost::shared_ptr<ARDOUR::PluginInfo>()) = 0;
 
 	/** Open main export dialog */
@@ -357,10 +357,10 @@ public:
 	virtual void mouse_add_new_marker (samplepos_t where, bool is_cd=false) = 0;
 	virtual void foreach_time_axis_view (sigc::slot<void,TimeAxisView&>) = 0;
 	virtual void add_to_idle_resize (TimeAxisView*, int32_t) = 0;
-	virtual samplecnt_t get_nudge_distance (samplepos_t pos, samplecnt_t& next) = 0;
-	virtual samplecnt_t get_paste_offset (samplepos_t pos, unsigned paste_count, samplecnt_t duration) = 0;
-	virtual unsigned get_grid_beat_divisions(samplepos_t position) = 0;
-	virtual Temporal::Beats get_grid_type_as_beats (bool& success, samplepos_t position) = 0;
+	virtual Temporal::timecnt_t get_nudge_distance (Temporal::timepos_t const & pos, Temporal::timecnt_t& next) = 0;
+	virtual Temporal::timecnt_t get_paste_offset (Temporal::timepos_t const & pos, unsigned paste_count, Temporal::timecnt_t const & duration) = 0;
+	virtual unsigned get_grid_beat_divisions(Temporal::timepos_t const & position) = 0;
+	virtual Temporal::Beats get_grid_type_as_beats (bool& success, Temporal::timepos_t const & position) = 0;
 	virtual int32_t get_grid_music_divisions (uint32_t event_state) = 0;
 	virtual void edit_notes (MidiRegionView*) = 0;
 
@@ -496,7 +496,7 @@ public:
 	virtual ARDOUR::Location* find_location_from_marker (ArdourMarker*, bool&) const = 0;
 	virtual ArdourMarker* find_marker_from_location_id (PBD::ID const&, bool) const = 0;
 
-	virtual void snap_to_with_modifier (ARDOUR::MusicSample& first,
+	virtual void snap_to_with_modifier (Temporal::timepos_t & first,
 	                                    GdkEvent const*      ev,
 	                                    ARDOUR::RoundMode    direction = ARDOUR::RoundNearest,
 	                                    ARDOUR::SnapPref     gpref = ARDOUR::SnapToAny_Visual) = 0;

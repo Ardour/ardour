@@ -118,7 +118,7 @@ Editor::loudness_assistant (bool range_selection)
 	samplepos_t start, end;
 	TimeSelection const& ts (get_selection().time);
 	if (range_selection && !ts.empty ()) {
-		start = ts.start();
+		start = ts.start_sample();
 		end = ts.end_sample();
 	} else {
 		start = _session->current_start_sample();
@@ -158,7 +158,7 @@ Editor::measure_master_loudness (samplepos_t start, samplepos_t end, bool is_ran
 		return;
 	}
 
-	ARDOUR::AudioRange ar (start, end, 0);
+	ARDOUR::TimelineRange ar (timepos_t (start), timepos_t (end), 0);
 
 	LoudnessDialog ld (_session, ar, is_range_selection);
 
@@ -320,9 +320,9 @@ Editor::bounce_region_selection (bool with_processing)
 		boost::shared_ptr<Region> r;
 
 		if (with_processing) {
-			r = track->bounce_range (region->position(), region->position() + region->length(), itt, track->main_outs(), false, bounce_name);
+			r = track->bounce_range (region->position_sample(), region->position_sample() + region->length_samples(), itt, track->main_outs(), false, bounce_name);
 		} else {
-			r = track->bounce_range (region->position(), region->position() + region->length(), itt, boost::shared_ptr<Processor>(), false, bounce_name);
+			r = track->bounce_range (region->position_sample(), region->position_sample() + region->length_samples(), itt, boost::shared_ptr<Processor>(), false, bounce_name);
 		}
 	}
 }
@@ -347,7 +347,7 @@ Editor::write_region (string path, boost::shared_ptr<AudioRegion> region)
 
 	/* don't do duplicate of the entire source if that's what is going on here */
 
-	if (region->start() == 0 && region->length() == region->source_length(0)) {
+	if (region->nt_start().zero() && region->nt_length() == region->source_length(0)) {
 		/* XXX should link(2) to create a new inode with "path" */
 		return true;
 	}
@@ -396,8 +396,8 @@ Editor::write_region (string path, boost::shared_ptr<AudioRegion> region)
 
 	}
 
-	to_read = region->length();
-	pos = region->position();
+	to_read = region->length_samples();
+	pos = region->position_sample();
 
 	while (to_read) {
 		samplepos_t this_time;
@@ -475,14 +475,14 @@ Editor::write_audio_selection (TimeSelection& ts)
 }
 
 bool
-Editor::write_audio_range (AudioPlaylist& playlist, const ChanCount& count, list<AudioRange>& range)
+Editor::write_audio_range (AudioPlaylist& playlist, const ChanCount& count, list<TimelineRange>& range)
 {
 	boost::shared_ptr<AudioFileSource> fs;
 	const samplepos_t chunk_size = 4096;
-	samplepos_t nframes;
+	timecnt_t nframes;
 	Sample buf[chunk_size];
 	gain_t gain_buffer[chunk_size];
-	samplepos_t pos;
+	timepos_t pos;
 	char s[PATH_MAX+1];
 	uint32_t cnt;
 	string path;
@@ -529,15 +529,14 @@ Editor::write_audio_range (AudioPlaylist& playlist, const ChanCount& count, list
 	}
 
 
-	for (list<AudioRange>::iterator i = range.begin(); i != range.end();) {
+	for (list<TimelineRange>::iterator i = range.begin(); i != range.end();) {
 
 		nframes = (*i).length();
-		pos = (*i).start;
+		pos = (*i).start();
 
-		while (nframes) {
-			samplepos_t this_time;
+		while (nframes.positive()) {
 
-			this_time = min (nframes, chunk_size);
+			timecnt_t this_time = min (nframes, timecnt_t (chunk_size));
 
 			for (uint32_t n=0; n < channels; ++n) {
 
@@ -547,7 +546,7 @@ Editor::write_audio_range (AudioPlaylist& playlist, const ChanCount& count, list
 					break;
 				}
 
-				if (fs->write (buf, this_time) != this_time) {
+				if (fs->write (buf, this_time.samples()) != this_time.samples()) {
 					goto error_out;
 				}
 			}
@@ -556,24 +555,24 @@ Editor::write_audio_range (AudioPlaylist& playlist, const ChanCount& count, list
 			pos += this_time;
 		}
 
-		list<AudioRange>::iterator tmp = i;
+		list<TimelineRange>::iterator tmp = i;
 		++tmp;
 
 		if (tmp != range.end()) {
 
 			/* fill gaps with silence */
 
-			nframes = (*tmp).start - (*i).end;
+			nframes = (*i).end().distance ((*tmp).start());
 
-			while (nframes) {
+			while (nframes.positive()) {
 
-				samplepos_t this_time = min (nframes, chunk_size);
-				memset (buf, 0, sizeof (Sample) * this_time);
+				timecnt_t this_time = min (nframes, timecnt_t (chunk_size));
+				memset (buf, 0, sizeof (Sample) * this_time.samples());
 
 				for (uint32_t n=0; n < channels; ++n) {
 
 					fs = sources[n];
-					if (fs->write (buf, this_time) != this_time) {
+					if (fs->write (buf, this_time.samples()) != this_time.samples()) {
 						goto error_out;
 					}
 				}

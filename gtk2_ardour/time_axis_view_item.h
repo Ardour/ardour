@@ -54,14 +54,14 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 public:
 	virtual ~TimeAxisViewItem();
 
-	virtual bool set_position(samplepos_t, void*, double* delta = 0);
-	samplepos_t get_position() const;
-	virtual bool set_duration(samplecnt_t, void*);
-	samplecnt_t get_duration() const;
-	virtual void set_max_duration(samplecnt_t, void*);
-	samplecnt_t get_max_duration() const;
-	virtual void set_min_duration(samplecnt_t, void*);
-	samplecnt_t get_min_duration() const;
+	virtual bool set_position(Temporal::timepos_t const &, void*, double* delta = 0);
+	Temporal::timepos_t get_position() const;
+	virtual bool set_duration(Temporal::timecnt_t const &, void*);
+	Temporal::timecnt_t get_duration() const;
+	virtual void set_max_duration(Temporal::timecnt_t const &, void*);
+	Temporal::timecnt_t get_max_duration() const;
+	virtual void set_min_duration(Temporal::timecnt_t const &, void*);
+	Temporal::timecnt_t get_min_duration() const;
 	virtual void set_position_locked(bool, void*);
 	bool get_position_locked() const;
 	void set_max_duration_active(bool, void*);

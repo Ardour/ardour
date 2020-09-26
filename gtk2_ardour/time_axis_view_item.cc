@@ -283,15 +283,15 @@ TimeAxisViewItem::canvas_group_event (GdkEvent* /*ev*/)
  */
 
 bool
-TimeAxisViewItem::set_position(samplepos_t pos, void* src, double* delta)
+TimeAxisViewItem::set_position(timepos_t const & pos, void* src, double* delta)
 {
 	if (position_locked) {
 		return false;
 	}
 
-	sample_position = pos;
+	sample_position = pos.samples();
 
-	double new_unit_pos = trackview.editor().sample_to_pixel (pos);
+	double new_unit_pos = trackview.editor().sample_to_pixel (sample_position);
 
 	if (delta) {
 		(*delta) = new_unit_pos - group->position().x;

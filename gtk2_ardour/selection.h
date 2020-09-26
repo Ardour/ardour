@@ -136,7 +136,7 @@ public:
 	void set (const MidiNoteSelection&);
 	void set (RegionView*, bool also_clear_tracks = true);
 	void set (std::vector<RegionView*>&);
-	long set (samplepos_t, samplepos_t);
+	long set (Temporal::timepos_t const &, Temporal::timepos_t const &);
 	void set_preserving_all_ranges (samplepos_t, samplepos_t);
 	void set (boost::shared_ptr<Evoral::ControlList>);
 	void set (boost::shared_ptr<ARDOUR::Playlist>);

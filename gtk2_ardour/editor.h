@@ -351,10 +351,10 @@ public:
 
 	/* nudge is initiated by transport controls owned by ARDOUR_UI */
 
-	samplecnt_t get_nudge_distance (samplepos_t pos, samplecnt_t& next);
-	samplecnt_t get_paste_offset (samplepos_t pos, unsigned paste_count, samplecnt_t duration);
-	unsigned get_grid_beat_divisions(samplepos_t position);
-	Temporal::Beats get_grid_type_as_beats (bool& success, samplepos_t position);
+	Temporal::timecnt_t get_nudge_distance (Temporal::timepos_t const & pos, Temporal::timecnt_t& next);
+	Temporal::timecnt_t get_paste_offset (Temporal::timepos_t const & pos, unsigned paste_count, Temporal::timecnt_t const & duration);
+	unsigned get_grid_beat_divisions(Temporal::timepos_t const & position);
+	Temporal::Beats get_grid_type_as_beats (bool& success, Temporal::timepos_t const & position);
 
 	int32_t get_grid_music_divisions (uint32_t event_state);
 
@@ -384,7 +384,7 @@ public:
 	void set_group_tabs ();
 
 	/* returns the left-most and right-most time that the gui should allow the user to scroll to */
-	std::pair <samplepos_t,samplepos_t> session_gui_extents (bool use_extra = true) const;
+	std::pair <Temporal::timepos_t,Temporal::timepos_t> session_gui_extents (bool use_extra = true) const;
 
 	/* RTAV Automation display option */
 	bool show_touched_automation () const;
@@ -457,15 +457,13 @@ public:
 	                ARDOUR::SrcQuality                    quality,
 	                ARDOUR::MidiTrackNameSource           mts,
 	                ARDOUR::MidiTempoMapDisposition       mtd,
-	                samplepos_t&                          pos,
-	                boost::shared_ptr<ARDOUR::PluginInfo> instrument = boost::shared_ptr<ARDOUR::PluginInfo>(),
-	                bool with_markers = false
-		);
+	                Temporal::timepos_t&                  pos,
+	                boost::shared_ptr<ARDOUR::PluginInfo> instrument = boost::shared_ptr<ARDOUR::PluginInfo>());
 
 	void do_embed (std::vector<std::string>              paths,
 	               Editing::ImportDisposition            disposition,
 	               Editing::ImportMode                   mode,
-	               samplepos_t&                          pos,
+	               Temporal::timepos_t&                  pos,
 	               boost::shared_ptr<ARDOUR::PluginInfo> instrument = boost::shared_ptr<ARDOUR::PluginInfo>());
 
 	void get_regionview_corresponding_to (boost::shared_ptr<ARDOUR::Region> region, std::vector<RegionView*>& regions);
@@ -477,15 +475,15 @@ public:
 
 	TrackViewList axis_views_from_routes (boost::shared_ptr<ARDOUR::RouteList>) const;
 
-	void snap_to (ARDOUR::MusicSample& first,
+	void snap_to (Temporal::timepos_t & first,
 	              ARDOUR::RoundMode    direction = ARDOUR::RoundNearest,
 	              ARDOUR::SnapPref     pref = ARDOUR::SnapToAny_Visual,
 	              bool                 ensure_snap = false);
 
-	void snap_to_with_modifier (ARDOUR::MusicSample& first,
+	void snap_to_with_modifier (Temporal::timepos_t & first,
 	                            GdkEvent const*      ev,
 	                            ARDOUR::RoundMode    direction = ARDOUR::RoundNearest,
-	                            ARDOUR::SnapPref     pref = ARDOUR::SnapToAny_Visual);
+	                            ARDOUR::SnapPref     gpref = ARDOUR::SnapToAny_Visual);
 
 	void set_snapped_cursor_position (samplepos_t pos);
 
@@ -729,7 +727,7 @@ private:
 		void setup_lines ();
 
 		void set_name (const std::string&);
-		void set_position (samplepos_t start, samplepos_t end = 0);
+		void set_position (Temporal::timepos_t const & start, Temporal::timepos_t const & end = Temporal::timepos_t());
 		void set_color_rgba (uint32_t);
 	};
 
@@ -1393,8 +1391,8 @@ private:
 
 	void bring_in_external_audio (Editing::ImportMode mode,  samplepos_t& pos);
 
-	bool  idle_drop_paths  (std::vector<std::string> paths, samplepos_t sample, double ypos, bool copy);
-	void  drop_paths_part_two  (const std::vector<std::string>& paths, samplepos_t sample, double ypos, bool copy);
+	bool  idle_drop_paths  (std::vector<std::string> paths, Temporal::timepos_t sample, double ypos, bool copy);
+	void  drop_paths_part_two  (const std::vector<std::string>& paths, Temporal::timepos_t const & sample, double ypos, bool copy);
 
 	int import_sndfiles (std::vector<std::string>              paths,
 	                     Editing::ImportDisposition            disposition,
@@ -1977,7 +1975,7 @@ private:
 
 	/* object rubberband select process */
 
-	void select_all_within (samplepos_t, samplepos_t, double, double, TrackViewList const &, Selection::Operation, bool);
+	void select_all_within (Temporal::timepos_t const &, Temporal::timepos_t const &, double, double, TrackViewList const &, Selection::Operation, bool);
 
 	ArdourCanvas::Rectangle* rubberband_rect;
 
@@ -2081,7 +2079,7 @@ private:
 	void external_edit_region ();
 
 	int write_audio_selection (TimeSelection&);
-	bool write_audio_range (ARDOUR::AudioPlaylist&, const ARDOUR::ChanCount& channels, std::list<ARDOUR::AudioRange>&);
+	bool write_audio_range (ARDOUR::AudioPlaylist&, const ARDOUR::ChanCount& channels, std::list<ARDOUR::TimelineRange>&);
 
 	void write_selection ();
 
@@ -2269,10 +2267,14 @@ private:
 	                                  ARDOUR::RoundMode   direction,
 	                                  ARDOUR::SnapPref    gpref);
 
-	void snap_to_internal (ARDOUR::MusicSample& first,
-	                       ARDOUR::RoundMode    direction = ARDOUR::RoundNearest,
-	                       ARDOUR::SnapPref     gpref = ARDOUR::SnapToAny_Visual,
-	                       bool                 ensure_snap = false);
+	void snap_to_internal (Temporal::timepos_t & first,
+	                       Temporal::RoundMode   direction = Temporal::RoundNearest,
+	                       bool                for_mark  = false,
+			       bool                ensure_snap = false);
+
+	void timecode_snap_to_internal (Temporal::timepos_t & first,
+	                                Temporal::RoundMode   direction = Temporal::RoundNearest,
+	                                bool                for_mark  = false);
 
 	samplepos_t snap_to_marker (samplepos_t       presnap,
 	                            ARDOUR::RoundMode direction = ARDOUR::RoundNearest);

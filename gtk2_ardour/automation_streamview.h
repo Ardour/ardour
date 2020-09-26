@@ -68,7 +68,7 @@ public:
 
 	std::list<boost::shared_ptr<AutomationLine> > get_lines () const;
 
-	bool paste (samplepos_t                               pos,
+	bool paste (Temporal::timepos_t const &               pos,
 	            unsigned                                  paste_count,
 	            float                                     times,
 	            boost::shared_ptr<ARDOUR::AutomationList> list);

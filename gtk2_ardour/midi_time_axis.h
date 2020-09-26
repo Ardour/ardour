@@ -95,7 +95,7 @@ public:
 
 	void get_regions_with_selected_data (RegionSelection&);
 
-	bool paste (ARDOUR::samplepos_t, const Selection&, PasteContext& ctx, const int32_t sub_num);
+	bool paste (Temporal::timepos_t const &, const Selection&, PasteContext& ctx);
 
 	ARDOUR::NoteMode  note_mode() const { return _note_mode; }
 	ARDOUR::ColorMode color_mode() const { return _color_mode; }

@@ -1160,31 +1160,48 @@ RegionView::move_contents (sampleoffset_t distance)
 	region_changed (PropertyChange (ARDOUR::Properties::start));
 }
 
-/** Snap a sample offset within our region using the current snap settings.
- *  @param x Frame offset from this region's position.
+
+/** Snap a time offset within our region using the current snap settings.
+ *  @param x Time offset from this region's position.
  *  @param ensure_snap whether to ignore snap_mode (in the case of SnapOff) and magnetic snap.
  *  Used when inverting snap mode logic with key modifiers, or snap distance calculation.
- *  @return Snapped sample offset from this region's position.
+ *  @return Snapped time offset from this region's position.
  */
-MusicSample
-RegionView::snap_sample_to_sample (sampleoffset_t x, bool ensure_snap) const
+timepos_t
+RegionView::snap_region_time_to_region_time (timepos_t const & x, bool ensure_snap) const
 {
 	PublicEditor& editor = trackview.editor();
-	/* x is region relative, convert it to global absolute samples */
-	samplepos_t const session_sample = x + _region->position();
+	/* x is region relative, convert it to global absolute time */
+	timepos_t const session_sample = _region->position() + x;
 
 	/* try a snap in either direction */
-	MusicSample sample (session_sample, 0);
-	editor.snap_to (sample, RoundNearest, SnapToAny_Visual, ensure_snap);
+	timepos_t snapped = session_sample;
+	editor.snap_to (snapped, RoundNearest, false, ensure_snap);
 
 	/* if we went off the beginning of the region, snap forwards */
-	if (sample.sample < _region->position ()) {
-		sample.sample = session_sample;
-		editor.snap_to (sample, RoundUpAlways, SnapToAny_Visual, ensure_snap);
+	if (snapped < _region->position ()) {
+		snapped = session_sample;
+		editor.snap_to (snapped, RoundUpAlways, false, ensure_snap);
 	}
 
-	/* back to region relative, keeping the relevant divisor */
-	return MusicSample (sample.sample - _region->position(), sample.division);
+	/* back to region relative */
+	return _region->region_relative_position (snapped);
+}
+
+timecnt_t
+RegionView::region_relative_distance (timecnt_t const & duration, Temporal::TimeDomain domain)
+{
+#warning NUTEMPO fixme needs new tempo map
+	//return _region->session().tempo_map().full_duration_at (_region->position(), duration, domain);
+	return timecnt_t();
+}
+
+timecnt_t
+RegionView::source_relative_distance (timecnt_t const & duration, Temporal::TimeDomain domain)
+{
+#warning NUTEMPO fixme needs new tempo map
+	//return _region->session().tempo_map().full_duration_at (_region->source_position(), duration, domain);
+	return timecnt_t();
 }
 
 void

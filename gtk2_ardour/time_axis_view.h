@@ -190,10 +190,9 @@ public:
 	 *  @param ctx Paste context.
 	 *  @param sub_num music-time sub-division: \c -1: snap to bar, \c 1: exact beat, \c >1: \c (1 \c / \p sub_num \c ) beat-divisions
 	 */
-	virtual bool paste (ARDOUR::samplepos_t pos,
+	virtual bool paste (Temporal::timepos_t const & pos,
 	                    const Selection&    selection,
-	                    PasteContext&       ctx,
-	                    const int32_t sub_num)
+	                    PasteContext&       ctx)
 	{
 		return false;
 	}
@@ -204,7 +203,7 @@ public:
 
 	virtual void fade_range (TimeSelection&) {}
 
-	virtual boost::shared_ptr<ARDOUR::Region> find_next_region (samplepos_t /*pos*/, ARDOUR::RegionPoint, int32_t /*dir*/) {
+	virtual boost::shared_ptr<ARDOUR::Region> find_next_region (ARDOUR::timepos_t const & /*pos*/, ARDOUR::RegionPoint, int32_t /*dir*/) {
 		return boost::shared_ptr<ARDOUR::Region> ();
 	}
 

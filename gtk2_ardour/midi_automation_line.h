@@ -33,8 +33,7 @@ public:
 	MidiAutomationLine (const std::string&, TimeAxisView&, ArdourCanvas::Item&,
 	                    boost::shared_ptr<ARDOUR::AutomationList>,
 	                    boost::shared_ptr<ARDOUR::MidiRegion>,
-	                    Evoral::Parameter,
-	                    Evoral::TimeConverter<double, ARDOUR::samplepos_t>* converter = 0);
+	                    Evoral::Parameter);
 
 	MementoCommandBinder<ARDOUR::AutomationList>* memento_command_binder ();
 

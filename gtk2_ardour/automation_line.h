@@ -33,8 +33,6 @@
 
 #include <sigc++/signal.h>
 
-#include "evoral/TimeConverter.h"
-
 #include "pbd/undo.h"
 #include "pbd/statefuldestructible.h"
 #include "pbd/memento_command.h"
@@ -71,8 +69,7 @@ public:
 	                TimeAxisView&                                      tv,
 	                ArdourCanvas::Item&                                parent,
 	                boost::shared_ptr<ARDOUR::AutomationList>          al,
-	                const ARDOUR::ParameterDescriptor&                 desc,
-	                Evoral::TimeConverter<double, ARDOUR::samplepos_t>* converter = 0);
+	                const ARDOUR::ParameterDescriptor&                 desc);
 
 	virtual ~AutomationLine ();
 
@@ -126,9 +123,9 @@ public:
 	std::string fraction_to_string (double) const;
 	std::string delta_to_string (double) const;
 	double string_to_fraction (std::string const &) const;
-	void   view_to_model_coord (double& x, double& y) const;
+	Temporal::timepos_t view_to_model_coord (double& x, double& y) const;
 	void   view_to_model_coord_y (double &) const;
-	void   model_to_view_coord (double& x, double& y) const;
+	Temporal::timepos_t model_to_view_coord (Evoral::ControlEvent const &, double& y) const;
 	void   model_to_view_coord_y (double &) const;
 
 	double compute_delta (double from, double to) const;
@@ -151,20 +148,16 @@ public:
 
 	virtual MementoCommandBinder<ARDOUR::AutomationList>* memento_command_binder ();
 
-	const Evoral::TimeConverter<double, ARDOUR::samplepos_t>& time_converter () const {
-		return *_time_converter;
-	}
-
 	std::pair<ARDOUR::samplepos_t, ARDOUR::samplepos_t> get_point_x_range () const;
 
-	void set_maximum_time (ARDOUR::samplecnt_t);
-	ARDOUR::samplecnt_t maximum_time () const {
+	void set_maximum_time (Temporal::timepos_t const &);
+	Temporal::timepos_t maximum_time () const {
 		return _maximum_time;
 	}
 
-	void set_offset (ARDOUR::samplecnt_t);
-	ARDOUR::samplecnt_t offset () { return _offset; }
-	void set_width (ARDOUR::samplecnt_t);
+	void set_offset (Temporal::timecnt_t const &);
+	Temporal::timecnt_t offset () { return _offset; }
+	void set_width (Temporal::timecnt_t const &);
 
 	samplepos_t session_position (ARDOUR::AutomationList::const_iterator) const;
 
@@ -175,9 +168,6 @@ protected:
 	uint32_t       _line_color;
 
 	boost::shared_ptr<ARDOUR::AutomationList> alist;
-	Evoral::TimeConverter<double, ARDOUR::samplepos_t>* _time_converter;
-	/** true if _time_converter belongs to us (ie we should delete it on destruction) */
-	bool _our_time_converter;
 
 	VisibleAspects _visible;
 
@@ -231,7 +221,7 @@ private:
 	/** offset from the start of the automation list to the start of the line, so that
 	 *  a +ve offset means that the 0 on the line is at _offset in the list
 	 */
-	ARDOUR::samplecnt_t _offset;
+	Temporal::timecnt_t _offset;
 
 	bool is_stepped() const;
 	void update_visibility ();
@@ -244,7 +234,7 @@ private:
 	PBD::ScopedConnectionList _list_connections;
 
 	/** maximum time that a point on this line can be at, relative to the position of its region or start of its track */
-	ARDOUR::samplecnt_t _maximum_time;
+	Temporal::timepos_t _maximum_time;
 
 	bool _fill;
 

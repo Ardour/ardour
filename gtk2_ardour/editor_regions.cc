@@ -601,10 +601,11 @@ EditorRegions::clock_format_changed ()
 }
 
 void
-EditorRegions::format_position (samplepos_t pos, char* buf, size_t bufsize, bool onoff)
+EditorRegions::format_position (timepos_t const & p, char* buf, size_t bufsize, bool onoff)
 {
 	Temporal::BBT_Time bbt;
 	Timecode::Time     timecode;
+	samplepos_t pos (p.samples());
 
 	if (pos < 0) {
 		error << string_compose (_ ("EditorRegions::format_position: negative timecode position: %1"), pos) << endmsg;
@@ -713,7 +714,7 @@ EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row co
 	if (all || what_changed.contains (Properties::locked)) {
 		populate_row_locked (region, row);
 	}
-	if (all || what_changed.contains (Properties::position_lock_style)) {
+	if (all || what_changed.contains (Properties::time_domain)) {
 		populate_row_glued (region, row);
 	}
 	if (all || what_changed.contains (Properties::muted)) {
@@ -775,7 +776,7 @@ EditorRegions::populate_row_length (boost::shared_ptr<Region> region, TreeModel:
 		Temporal::BBT_Time bbt = map.bbt_at_beat (map.beat_at_sample (region->last_sample ()) - map.beat_at_sample (region->first_sample ()));
 		snprintf (buf, sizeof (buf), "%03d|%02d|%04d", bbt.bars, bbt.beats, bbt.ticks);
 	} else {
-		format_position (region->length (), buf, sizeof (buf));
+		format_position (timepos_t (region->nt_length ()), buf, sizeof (buf));
 	}
 
 	row[_columns.length] = buf;
@@ -790,7 +791,7 @@ EditorRegions::populate_row_end (boost::shared_ptr<Region> region, TreeModel::Ro
 
 	if (region->last_sample () >= region->first_sample ()) {
 		char buf[16];
-		format_position (region->last_sample (), buf, sizeof (buf));
+		format_position (region->nt_last (), buf, sizeof (buf));
 		row[_columns.end] = buf;
 	} else {
 		row[_columns.end] = "empty";
@@ -800,10 +801,10 @@ EditorRegions::populate_row_end (boost::shared_ptr<Region> region, TreeModel::Ro
 void
 EditorRegions::populate_row_position (boost::shared_ptr<Region> region, TreeModel::Row const& row)
 {
-	row[_columns.position] = region->position ();
+	row[_columns.position] = region->nt_position ();
 
 	char buf[16];
-	format_position (region->position (), buf, sizeof (buf));
+	format_position (region->nt_position (), buf, sizeof (buf));
 	row[_columns.start] = buf;
 }
 
@@ -813,7 +814,7 @@ EditorRegions::populate_row_sync (boost::shared_ptr<Region> region, TreeModel::R
 #ifndef SHOW_REGION_EXTRAS
 	return;
 #endif
-	if (region->sync_position () == region->position ()) {
+	if (region->sync_position () == region->nt_position ()) {
 		row[_columns.sync] = _ ("Start");
 	} else if (region->sync_position () == (region->last_sample ())) {
 		row[_columns.sync] = _ ("End");
@@ -863,7 +864,7 @@ EditorRegions::populate_row_locked (boost::shared_ptr<Region> region, TreeModel:
 void
 EditorRegions::populate_row_glued (boost::shared_ptr<Region> region, TreeModel::Row const& row)
 {
-	if (region->position_lock_style () == MusicTime) {
+	if (region->position_time_domain () == Temporal::BeatTime) {
 		row[_columns.glued] = true;
 	} else {
 		row[_columns.glued] = false;
@@ -890,7 +891,7 @@ EditorRegions::populate_row_name (boost::shared_ptr<Region> region, TreeModel::R
 	if (region->data_type() == DataType::MIDI) {
 		row[_columns.channels] = 0;  /*TODO: some better recognition of midi regions*/
 	} else {
-		row[_columns.channels] = region->n_channels();
+		row[_columns.channels] = region->sources().size();
 	}
 
 	row[_columns.tags] = region->tags ();
@@ -1027,8 +1028,8 @@ EditorRegions::drag_data_received (const RefPtr<Gdk::DragContext>& context,
 	}
 
 	if (_editor->convert_drop_to_paths (paths, context, x, y, data, info, dtime) == 0) {
-		samplepos_t pos  = 0;
-		bool        copy = ((context->get_actions () & (Gdk::ACTION_COPY | Gdk::ACTION_LINK | Gdk::ACTION_MOVE)) == Gdk::ACTION_COPY);
+		timepos_t pos;
+		bool      copy = ((context->get_actions () & (Gdk::ACTION_COPY | Gdk::ACTION_LINK | Gdk::ACTION_MOVE)) == Gdk::ACTION_COPY);
 
 		if (UIConfiguration::instance ().get_only_copy_imported_files () || copy) {
 			_editor->do_import (paths, Editing::ImportDistinctFiles, Editing::ImportAsRegion,
@@ -1232,7 +1233,7 @@ EditorRegions::glued_changed (std::string const& path)
 		boost::shared_ptr<ARDOUR::Region> region = (*i)[_columns.region];
 		if (region) {
 			/* `glued' means MusicTime, and we're toggling here */
-			region->set_position_lock_style ((*i)[_columns.glued] ? AudioTime : MusicTime);
+			region->set_position_time_domain ((*i)[_columns.glued] ? Temporal::AudioTime : Temporal::BeatTime);
 		}
 	}
 }

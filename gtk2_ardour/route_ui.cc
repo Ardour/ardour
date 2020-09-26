@@ -533,7 +533,7 @@ RouteUI::mute_press (GdkEventButton* ev)
 					}
 
 					boost::shared_ptr<MuteControl> mc = _route->mute_control();
-					mc->start_touch (_session->audible_sample ());
+					mc->start_touch (timepos_t (_session->audible_sample ()));
 					_session->set_controls (route_list_to_control_list (rl, &Stripable::mute_control), _route->muted_by_self() ? 0.0 : 1.0, Controllable::InverseGroup);
 				}
 
@@ -549,7 +549,7 @@ RouteUI::mute_press (GdkEventButton* ev)
 				}
 
 				boost::shared_ptr<MuteControl> mc = _route->mute_control();
-				mc->start_touch (_session->audible_sample ());
+				mc->start_touch (timepos_t (_session->audible_sample ()));
 				mc->set_value (!_route->muted_by_self(), Controllable::UseGroup);
 			}
 		}
@@ -567,7 +567,7 @@ RouteUI::mute_release (GdkEventButton* /*ev*/)
 		_mute_release = 0;
 	}
 
-	_route->mute_control()->stop_touch (_session->audible_sample ());
+	_route->mute_control()->stop_touch (timepos_t (_session->audible_sample ()));
 
 	return false;
 }

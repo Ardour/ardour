@@ -880,7 +880,7 @@ TimeAxisView::show_selection (TimeSelection& ts)
 		gap = ceil (gap * ui_scale);
 	}
 
-	for (list<AudioRange>::iterator i = ts.begin(); i != ts.end(); ++i) {
+	for (list<TimelineRange>::iterator i = ts.begin(); i != ts.end(); ++i) {
 		samplepos_t start, end;
 		samplecnt_t cnt;
 

@@ -67,8 +67,8 @@ public:
 
 
 	ArdourMarker (PublicEditor& editor, ArdourCanvas::Container &, guint32 rgba, const std::string& text, Type,
-	              samplepos_t sample = 0, bool handle_events = true, RegionView* rv = 0);
-
+	              ARDOUR::timepos_t const & position, bool handle_events = true, RegionView* rv = 0);
+	
 	virtual ~ArdourMarker ();
 
 	static PBD::Signal1<void,ArdourMarker*> CatchDeletion;
@@ -82,13 +82,13 @@ public:
 	void set_show_line (bool);
 	void set_line_height (double);
 
-	void set_position (samplepos_t);
+	void set_position (Temporal::timepos_t const &);
 	void set_name (const std::string&);
 	void set_points_color (uint32_t rgba);
 	void set_color_rgba (uint32_t rgba);
 	void setup_line ();
 
-	samplepos_t position() const { return sample_position; }
+	ARDOUR::timepos_t position() const { return _position; }
 
 	ArdourCanvas::Container * get_parent() { return _parent; }
 	void reparent (ArdourCanvas::Container & parent);
@@ -126,7 +126,7 @@ protected:
 
 	std::string  _name;
 	double        unit_position;
-	samplepos_t   sample_position;
+	ARDOUR::timepos_t _position;
 	double       _shift;
 	Type         _type;
 	int           name_height;

@@ -74,11 +74,15 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	void focus ();
 
 	virtual void set (samplepos_t, bool force = false, ARDOUR::samplecnt_t offset = 0);
+	void set_time (Temporal::timepos_t const &, bool force = false, Temporal::timecnt_t const & offset = Temporal::timecnt_t());
+	void set_duration (Temporal::timecnt_t const &, bool force = false, Temporal::timecnt_t const & offset = Temporal::timecnt_t());
+
 	void set_from_playhead ();
 	void locate ();
 	void set_mode (Mode, bool noemit = false);
 	void set_bbt_reference (samplepos_t);
 	void set_is_duration (bool);
+	void set_is_duration (bool, Temporal::timepos_t const &);
 
 	void copy_text_to_clipboard () const;
 
@@ -139,6 +143,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	bool             edit_is_negative;
 
 	samplepos_t       _limit_pos;
+	Temporal::timepos_t duration_position;
 
 	ARDOUR::samplecnt_t _offset;
 
@@ -223,6 +228,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	void set_seconds (samplepos_t, bool);
 	void set_samples (samplepos_t, bool);
 	void set_out_of_bounds (bool negative);
+	void finish_set (Temporal::timepos_t const &, bool);
 
 	void set_clock_dimensions (Gtk::Requisition&);
 

@@ -2834,46 +2834,6 @@ MidiRegionView::get_end_position_pixels()
 	return trackview.editor().sample_to_pixel(sample);
 }
 
-samplepos_t
-MidiRegionView::source_beats_to_absolute_samples(Temporal::Beats beats) const
-{
-	/* the time converter will return the sample corresponding to `beats'
-	   relative to the start of the source. The start of the source
-	   is an implied position given by region->position - region->start
-	*/
-	const samplepos_t source_start = _region->position() - _region->start();
-	return  source_start +  _source_relative_time_converter.to (beats);
-}
-
-Temporal::Beats
-MidiRegionView::absolute_samples_to_source_beats(samplepos_t samples) const
-{
-	/* the `samples' argument needs to be converted into a sample count
-	   relative to the start of the source before being passed in to the
-	   converter.
-	*/
-	const samplepos_t source_start = _region->position() - _region->start();
-	return  _source_relative_time_converter.from (samples - source_start);
-}
-
-samplepos_t
-MidiRegionView::region_beats_to_region_samples(Temporal::Beats beats) const
-{
-	return _region_relative_time_converter.to(beats);
-}
-
-Temporal::Beats
-MidiRegionView::region_samples_to_region_beats(samplepos_t samples) const
-{
-	return _region_relative_time_converter.from(samples);
-}
-
-double
-MidiRegionView::region_samples_to_region_beats_double (samplepos_t samples) const
-{
-	return _region_relative_time_converter_double.from(samples);
-}
-
 void
 MidiRegionView::begin_resizing (bool /*at_front*/)
 {

@@ -241,14 +241,14 @@ RhythmFerret::run_analysis ()
 
 	for (RegionSelection::iterator i = regions_with_transients.begin(); i != regions_with_transients.end(); ++i) {
 
-		boost::shared_ptr<Readable> rd = boost::static_pointer_cast<AudioRegion> ((*i)->region());
+		boost::shared_ptr<AudioReadable> rd = boost::static_pointer_cast<AudioRegion> ((*i)->region());
 
 		switch (get_analysis_mode()) {
 		case PercussionOnset:
-			run_percussion_onset_analysis (rd, (*i)->region()->position(), current_results);
+			run_percussion_onset_analysis (rd, (*i)->region()->position_sample(), current_results);
 			break;
 		case NoteOnset:
-			run_note_onset_analysis (rd, (*i)->region()->position(), current_results);
+			run_note_onset_analysis (rd, (*i)->region()->position_sample(), current_results);
 			break;
 		default:
 			break;
@@ -260,7 +260,7 @@ RhythmFerret::run_analysis ()
 }
 
 int
-RhythmFerret::run_percussion_onset_analysis (boost::shared_ptr<Readable> readable, sampleoffset_t /*offset*/, AnalysisFeatureList& results)
+RhythmFerret::run_percussion_onset_analysis (boost::shared_ptr<AudioReadable> readable, sampleoffset_t /*offset*/, AnalysisFeatureList& results)
 {
 	try {
 		TransientDetector t (_session->sample_rate());
@@ -315,7 +315,7 @@ RhythmFerret::get_note_onset_function ()
 }
 
 int
-RhythmFerret::run_note_onset_analysis (boost::shared_ptr<Readable> readable, sampleoffset_t /*offset*/, AnalysisFeatureList& results)
+RhythmFerret::run_note_onset_analysis (boost::shared_ptr<AudioReadable> readable, sampleoffset_t /*offset*/, AnalysisFeatureList& results)
 {
 	try {
 		OnsetDetector t (_session->sample_rate());

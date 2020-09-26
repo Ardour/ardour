@@ -149,9 +149,9 @@ EditorSummary::render_background_image ()
 
 	/* compute start and end points for the summary */
 
-	std::pair<samplepos_t, samplepos_t> ext = _editor->session_gui_extents();
-	double theoretical_start = ext.first;
-	double theoretical_end = ext.second;
+	std::pair<timepos_t, timepos_t> ext = _editor->session_gui_extents();
+	double theoretical_start = ext.first.samples();
+	double theoretical_end = ext.second.samples();
 
 	/* the summary should encompass the full extent of everywhere we've visited since the session was opened */
 	if (_leftmost < theoretical_start)
@@ -337,14 +337,14 @@ EditorSummary::render_region (RegionView* r, cairo_t* cr, double y) const
 	uint32_t const c = r->get_fill_color ();
 	cairo_set_source_rgb (cr, UINT_RGBA_R (c) / 255.0, UINT_RGBA_G (c) / 255.0, UINT_RGBA_B (c) / 255.0);
 
-	if (r->region()->position() > _start) {
-		cairo_move_to (cr, (r->region()->position() - _start) * _x_scale, y);
+	if (r->region()->position_sample() > _start) {
+		cairo_move_to (cr, (r->region()->position_sample() - _start) * _x_scale, y);
 	} else {
 		cairo_move_to (cr, 0, y);
 	}
 
-	if ((r->region()->position() + r->region()->length()) > _start) {
-		cairo_line_to (cr, ((r->region()->position() - _start + r->region()->length())) * _x_scale, y);
+	if ((r->region()->nt_position() + r->region()->nt_length()) > _start) {
+		cairo_line_to (cr, ((r->region()->position_sample() - _start + r->region()->length_samples())) * _x_scale, y);
 	} else {
 		cairo_line_to (cr, 0, y);
 	}

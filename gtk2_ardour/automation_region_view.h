@@ -50,18 +50,10 @@ public:
 
 	void init (bool wfd);
 
-	bool paste (samplepos_t                                     pos,
+	bool paste (Temporal::timepos_t const &                     pos,
 	            unsigned                                        paste_count,
 	            float                                           times,
 	            boost::shared_ptr<const ARDOUR::AutomationList> slist);
-
-	ARDOUR::DoubleBeatsSamplesConverter const & region_relative_time_converter () const {
-		return _region_relative_time_converter;
-	}
-
-	ARDOUR::DoubleBeatsSamplesConverter const & source_relative_time_converter () const {
-		return _source_relative_time_converter;
-	}
 
 	inline AutomationTimeAxisView* automation_view() const
 		{ return dynamic_cast<AutomationTimeAxisView*>(&trackview); }
@@ -78,17 +70,15 @@ public:
 
 protected:
 	void create_line(boost::shared_ptr<ARDOUR::AutomationList> list);
-	bool set_position(samplepos_t pos, void* src, double* ignored);
+	bool set_position(Temporal::timepos_t const & pos, void* src, double* ignored);
 	void region_resized (const PBD::PropertyChange&);
 	bool canvas_group_event(GdkEvent* ev);
-	void add_automation_event (GdkEvent* event, samplepos_t when, double y, bool with_guard_points);
+	void add_automation_event (GdkEvent* event, Temporal::timepos_t const & when, double y, bool with_guard_points);
 	void mouse_mode_changed ();
 	void entered();
 	void exited();
 
 private:
-	ARDOUR::DoubleBeatsSamplesConverter _region_relative_time_converter;
-	ARDOUR::DoubleBeatsSamplesConverter _source_relative_time_converter;
 	Evoral::Parameter                   _parameter;
 	boost::shared_ptr<AutomationLine>   _line;
 	PBD::ScopedConnection               _mouse_mode_connection;

@@ -188,7 +188,7 @@ ARDOUR_UI::update_transport_clocks (samplepos_t pos)
 		case DeltaOriginMarker:
 			{
 				Location* loc = _session->locations()->clock_origin_location ();
-				primary_clock->set (pos, false, loc ? loc->start() : 0);
+				primary_clock->set (pos, false, loc ? loc->start_sample() : 0);
 			}
 			break;
 	}
@@ -203,7 +203,7 @@ ARDOUR_UI::update_transport_clocks (samplepos_t pos)
 		case DeltaOriginMarker:
 			{
 				Location* loc = _session->locations()->clock_origin_location ();
-				secondary_clock->set (pos, false, loc ? loc->start() : 0);
+				secondary_clock->set (pos, false, loc ? loc->start_sample() : 0);
 			}
 			break;
 	}

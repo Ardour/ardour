@@ -107,7 +107,7 @@ public:
 	/* editing operations */
 
 	void cut_copy_clear (Selection&, Editing::CutCopyOp);
-	bool paste (ARDOUR::samplepos_t, const Selection&, PasteContext&, const int32_t sub_num);
+	bool paste (Temporal::timepos_t const &, const Selection&, PasteContext&);
 
 	int  set_state (const XMLNode&, int version);
 

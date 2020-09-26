@@ -126,7 +126,7 @@ AudioStreamView::create_region_view (boost::shared_ptr<Region> r, bool wait_for_
 	   insensitive to events
 	*/
 
-	if (region->length() == 1) {
+	if (region->length_samples() == 1) {
 		region_view->set_sensitive (false);
 	}
 
@@ -226,7 +226,7 @@ AudioStreamView::setup_rec_box ()
 
 				samplepos_t start = 0;
 				if (rec_regions.size() > 0) {
-					start = rec_regions.back().first->start()
+					start = rec_regions.back().first->start_sample()
 							+ _trackview.track()->get_captured_samples(rec_regions.size()-1);
 				}
 
@@ -241,7 +241,7 @@ AudioStreamView::setup_rec_box ()
 					boost::dynamic_pointer_cast<AudioRegion>(RegionFactory::create (sources, plist, false)));
 
 				assert(region);
-				region->set_position (_trackview.session()->transport_sample());
+				region->set_position (timepos_t (_trackview.session()->transport_sample()));
 				rec_regions.push_back (make_pair(region, (RegionView*) 0));
 			}
 
@@ -355,20 +355,20 @@ AudioStreamView::update_rec_regions (samplepos_t start, samplecnt_t cnt)
 			continue;
 		}
 
-		samplecnt_t origlen = region->length();
+		samplecnt_t origlen = region->length_samples();
 
 		if (region == rec_regions.back().first && rec_active) {
 
-			if (last_rec_data_sample > region->start()) {
+			if (last_rec_data_sample > region->start_sample()) {
 
-				samplecnt_t nlen = last_rec_data_sample - region->start();
+				samplecnt_t nlen = last_rec_data_sample - region->start_sample();
 
-				if (nlen != region->length()) {
+				if (nlen != region->length_samples()) {
 
 					region->suspend_property_changes ();
 					/* set non-musical position / length */
-					region->set_position (_trackview.track()->get_capture_start_sample(n));
-					region->set_length (nlen, 0);
+					region->set_position (timepos_t (_trackview.track()->get_capture_start_sample(n)));
+					region->set_length (timecnt_t (nlen));
 					region->resume_property_changes ();
 
 					if (origlen == 1) {
@@ -377,11 +377,11 @@ AudioStreamView::update_rec_regions (samplepos_t start, samplecnt_t cnt)
 						setup_new_rec_layer_time (region);
 					}
 
-					check_record_layers (region, (region->position() - region->start() + start + cnt));
+					check_record_layers (region, (region->position_sample() - region->start_sample() + start + cnt));
 
 					/* also update rect */
 					ArdourCanvas::Rectangle * rect = rec_rects[n].rectangle;
-					gdouble xend = _trackview.editor().sample_to_pixel (region->position() + region->length());
+					gdouble xend = _trackview.editor().sample_to_pixel (region->position_sample() + region->length_samples());
 					rect->set_x1 (xend);
 				}
 
@@ -389,13 +389,13 @@ AudioStreamView::update_rec_regions (samplepos_t start, samplecnt_t cnt)
 
 				samplecnt_t nlen = _trackview.track()->get_captured_samples(n);
 
-				if (nlen != region->length()) {
+				if (nlen != region->length_samples()) {
 
-					if (region->source_length(0) >= region->start() + nlen) {
+					if (region->source_length(0) >= region->start_sample() + nlen) {
 
 						region->suspend_property_changes ();
-						region->set_position (_trackview.track()->get_capture_start_sample(n));
-						region->set_length (nlen, 0);
+						region->set_position (timepos_t (_trackview.track()->get_capture_start_sample(n)));
+						region->set_length (timecnt_t (nlen));
 						region->resume_property_changes ();
 
 						if (origlen == 1) {
@@ -451,8 +451,8 @@ AudioStreamView::hide_xfades_with (boost::shared_ptr<AudioRegion> ar)
 	for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
 		if (arv) {
-			switch (arv->region()->coverage (ar->position(), ar->last_sample())) {
-			case Evoral::OverlapNone:
+			switch (arv->region()->coverage (ar->nt_position(), ar->nt_last())) {
+			case Temporal::OverlapNone:
 				break;
 			default:
 				if (arv->start_xfade_visible ()) {

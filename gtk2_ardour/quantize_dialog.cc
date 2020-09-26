@@ -153,7 +153,7 @@ QuantizeDialog::grid_size_to_musical_time (const string& txt) const
 	if ( txt == _grid_strings[0] ) {  //"Main Grid"
 		bool success;
 
-		Temporal::Beats b = editor.get_grid_type_as_beats (success, 0);
+		Temporal::Beats b = editor.get_grid_type_as_beats (success, timepos_t (0));
 		if (!success) {
 			return 1.0;
 		}

@@ -107,12 +107,12 @@ public:
 	void toggle_layer_display ();
 	LayerDisplay layer_display () const;
 
-	boost::shared_ptr<ARDOUR::Region> find_next_region (samplepos_t pos, ARDOUR::RegionPoint, int32_t dir);
-	samplepos_t find_next_region_boundary (samplepos_t pos, int32_t dir);
+	boost::shared_ptr<ARDOUR::Region> find_next_region (ARDOUR::timepos_t const & pos, ARDOUR::RegionPoint, int32_t dir);
+	ARDOUR::timepos_t find_next_region_boundary (ARDOUR::timepos_t const & pos, int32_t dir);
 
 	/* Editing operations */
 	void cut_copy_clear (Selection&, Editing::CutCopyOp);
-	bool paste (ARDOUR::samplepos_t, const Selection&, PasteContext& ctx, const int32_t sub_num);
+	bool paste (Temporal::timepos_t const &, const Selection&, PasteContext& ctx);
 	RegionView* combine_regions ();
 	void uncombine_regions ();
 	void uncombine_region (RegionView*);

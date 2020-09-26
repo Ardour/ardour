@@ -234,16 +234,16 @@ TimeInfoBox::set_session (Session* s)
 void
 TimeInfoBox::region_selection_changed ()
 {
-	samplepos_t s, e;
+	timepos_t s, e;
 	Selection& selection (Editor::instance().get_selection());
-	s = selection.regions.start();
-	e = selection.regions.end_sample();
+	s = selection.regions.start_time();
+	e = selection.regions.end_sample_time();
 	selection_start->set_off (false);
 	selection_end->set_off (false);
 	selection_length->set_off (false);
-	selection_start->set (s);
-	selection_end->set (e);
-	selection_length->set (e, false, s);
+	selection_start->set_time (s);
+	selection_end->set_time (e);
+	selection_length->set_duration (e, false, s);
 }
 
 void
@@ -272,9 +272,10 @@ TimeInfoBox::selection_changed ()
 					selection_start->set_off (false);
 					selection_end->set_off (false);
 					selection_length->set_off (false);
-					selection_start->set (selection.time.start());
-					selection_end->set (selection.time.end_sample());
-					selection_length->set (selection.time.end_sample(), false, selection.time.start());
+					selection_start->set_time (selection.time.start_time());
+					selection_end->set_time (selection.time.end_time());
+					selection_length->set_is_duration (true, selection.time.start_time());
+					selection_length->set_duration (selection.time.start_time().distance (selection.time.end_time()));
 				} else {
 					selection_start->set_off (true);
 					selection_end->set_off (true);
@@ -335,9 +336,10 @@ TimeInfoBox::selection_changed ()
 			selection_start->set_off (false);
 			selection_end->set_off (false);
 			selection_length->set_off (false);
-			selection_start->set (selection.time.start());
-			selection_end->set (selection.time.end_sample());
-			selection_length->set (selection.time.end_sample(), false, selection.time.start());
+			selection_start->set_time (selection.time.start_time());
+			selection_end->set_time (selection.time.end_time());
+			selection_length->set_is_duration (true, selection.time.start_time());
+			selection_length->set_duration (selection.time.start_time().distance (selection.time.end_time()));
 		}
 		break;
 
@@ -382,6 +384,6 @@ TimeInfoBox::punch_changed (Location* loc)
 	punch_start->set_off (false);
 	punch_end->set_off (false);
 
-	punch_start->set (loc->start());
-	punch_end->set (loc->end());
+	punch_start->set_time (loc->start());
+	punch_end->set_time (loc->end());
 }

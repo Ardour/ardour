@@ -259,7 +259,7 @@ AnalysisWindow::analyze_data (Gtk::Button * /*button*/)
 				// std::cerr << "Analyzing ranges on track " << rui->route()->name() << std::endl;
 
 				FFTResult *res = fft_graph.prepareResult(rui->route_color(), rui->route()->name());
-				for (std::list<AudioRange>::iterator j = ts.begin(); j != ts.end(); ++j) {
+				for (std::list<TimelineRange>::iterator j = ts.begin(); j != ts.end(); ++j) {
 
 					int n;
 					for (int channel = 0; channel < n_inputs; channel++) {

@@ -1236,7 +1236,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 					if (boost::dynamic_pointer_cast<AudioPlaylist> (playlist) == 0) {
 						continue;
 					}
-					for (list<AudioRange>::const_iterator j = selection->time.begin(); j != selection->time.end(); ++j) {
+					for (list<TimelineRange>::const_iterator j = selection->time.begin(); j != selection->time.end(); ++j) {
 						boost::shared_ptr<RegionList> rl = playlist->regions_touched (j->start, j->end);
 						for (RegionList::iterator ir = rl->begin(); ir != rl->end(); ++ir) {
 							RegionView* rv;
