@@ -336,7 +336,7 @@ VST3PI::evoral_to_vst3 (Vst::Event& e, Evoral::Event<samplepos_t> const& ev, int
 			case MIDI_CMD_BENDER:
 				if (midi_controller (bus, channel, Vst::kPitchBend, id)) {
 					uint32_t m14 = (data2 << 7) | data1;
-					set_parameter_by_id (id, m14 / 127.f, ev.time ());
+					set_parameter_by_id (id, m14 / 16383.f, ev.time ());
 				}
 				return false;
 		}
