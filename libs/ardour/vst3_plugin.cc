@@ -479,20 +479,6 @@ VST3Plugin::set_state (const XMLNode& node, int version)
 		return -1;
 	}
 
-	XMLNode* chunk;
-	if ((chunk = find_named_node (node, X_("chunk"))) != 0) {
-		for (iter = chunk->children ().begin(); iter != chunk->children ().end(); ++iter) {
-			if ((*iter)->is_content ()) {
-				gsize size = 0;
-				guchar* _data = g_base64_decode ((*iter)->content().c_str(), &size);
-				RAMStream stream (_data, size);
-				if (!_plug->load_state (stream)) {
-					error << string_compose (_("VST3<%1>: failed to load chunk-data"), name ()) << endmsg;
-				}
-			}
-		}
-	}
-
 	XMLNodeList nodes = node.children ("Port");
 	for (iter = nodes.begin(); iter != nodes.end(); ++iter) {
 		XMLNode* child = *iter;
@@ -512,6 +498,20 @@ VST3Plugin::set_state (const XMLNode& node, int version)
 
 		if (!_plug->try_set_parameter_by_id ( param_id, value)) {
 			warning << string_compose (_("VST3<%1>: Invalid Vst::ParamID in VST3Plugin::set_state"), name ()) << endmsg;
+		}
+	}
+
+	XMLNode* chunk;
+	if ((chunk = find_named_node (node, X_("chunk"))) != 0) {
+		for (iter = chunk->children ().begin(); iter != chunk->children ().end(); ++iter) {
+			if ((*iter)->is_content ()) {
+				gsize size = 0;
+				guchar* _data = g_base64_decode ((*iter)->content().c_str(), &size);
+				RAMStream stream (_data, size);
+				if (!_plug->load_state (stream)) {
+					error << string_compose (_("VST3<%1>: failed to load chunk-data"), name ()) << endmsg;
+				}
+			}
 		}
 	}
 
