@@ -1350,12 +1350,17 @@ VST3PI::deactivate ()
 	if (!_is_processing) {
 		return true;
 	}
-	if (_processor->setProcessing (false) != kResultOk) {
+
+	tresult res = _processor->setProcessing (false);
+	if (!(res == kResultOk || res == kNotImplemented)) {
 		return false;
 	}
-	if (_component->setActive (false) != kResultOk) {
+
+	res = _component->setActive (false);
+	if (!(res == kResultOk || res == kNotImplemented)) {
 		return false;
 	}
+
 	_is_processing = false;
 	return true;
 }
@@ -1367,13 +1372,16 @@ VST3PI::activate ()
 		return true;
 	}
 
-	if (_component->setActive (true) != kResultOk) {
+	tresult res = _component->setActive (true);
+	if (!(res == kResultOk || res == kNotImplemented)) {
 		return false;
 	}
 
-	if (_processor->setProcessing (true) != kResultOk) {
+	res = _processor->setProcessing (true);
+	if (!(res == kResultOk || res == kNotImplemented)) {
 		return false;
 	}
+
 	_is_processing = true;
 	return true;
 }
