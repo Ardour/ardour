@@ -170,6 +170,8 @@ private:
 
 	boost::shared_ptr<ARDOUR::VST3PluginModule> _module;
 
+	std::vector <Vst::IConnectionPoint*> _connections;
+
 	FUID                  _fuid;
 	IPluginFactory*       _factory;
 	Vst::IComponent*      _component;

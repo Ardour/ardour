@@ -1195,13 +1195,22 @@ VST3PI::disconnect_components ()
 tresult
 VST3PI::connect (Vst::IConnectionPoint* other)
 {
-	return other ? kResultTrue : kInvalidArgument;
+	if (!other) {
+		return kInvalidArgument;
+	}
+	_connections.push_back (other);
+	return kResultTrue;
 }
 
 tresult
 VST3PI::disconnect (Vst::IConnectionPoint* other)
 {
-	return kResultTrue;
+	std::vector <Vst::IConnectionPoint*>::const_iterator i = std::find (_connections.begin(), _connections.end(), other); 
+	if (i != _connections.end()) {
+		_connections.erase (i);
+		return kResultTrue;
+	}
+	return kInvalidArgument;
 }
 
 tresult
@@ -1210,15 +1219,12 @@ VST3PI::notify (Vst::IMessage* msg)
 #ifndef NDEBUG
 	std::cerr << "VST3PI::notify\n";
 #endif
-	FUnknownPtr<Vst::IConnectionPoint> componentCP (_component);
-	FUnknownPtr<Vst::IConnectionPoint> controllerCP (_controller);
-	// XXX this bounces the message back..
-	// we likely need a proxy here
-	if (componentCP) {
-		componentCP->notify (msg);
-	}
-	if (controllerCP) {
-		controllerCP->notify (msg);
+	for (std::vector <Vst::IConnectionPoint*>::const_iterator i = _connections.begin(); i != _connections.end(); ++i) {
+		/* TODO delegate to GUI thread if available
+		 * see ./libs/pbd/pbd/event_loop.h ir->call_slot ()
+		 * and HostMessage()
+		 */
+		(*i)->notify (msg);
 	}
 	return kResultTrue;
 }
