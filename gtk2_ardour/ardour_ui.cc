@@ -505,6 +505,9 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 		transport_masters_window.set_state (*ui_xml, 0);
 	}
 
+	/* set default parent for dialogs and windows */
+	WM::Manager::instance().set_transient_for (&_main_window);
+
 	/* Separate windows */
 
 	WM::Manager::instance().register_window (&key_editor);
