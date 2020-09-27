@@ -105,6 +105,9 @@ VST3Plugin::parameter_change_handler (VST3PI::ParameterChange t, uint32_t param,
 			/* emit ParameterChangedExternally, mark preset dirty */
 			Plugin::parameter_changed_externally (param, value);
 			break;
+		case VST3PI::InternalChange:
+			Plugin::state_changed ();
+			break;
 	}
 }
 
@@ -1225,6 +1228,8 @@ VST3PI::queryInterface (const TUID _iid, void** obj)
 {
 	QUERY_INTERFACE (_iid, obj, FUnknown::iid, Vst::IComponentHandler)
 	QUERY_INTERFACE (_iid, obj, Vst::IComponentHandler::iid, Vst::IComponentHandler)
+	QUERY_INTERFACE (_iid, obj, FUnknown::iid, Vst::IComponentHandler2)
+	QUERY_INTERFACE (_iid, obj, Vst::IComponentHandler2::iid, Vst::IComponentHandler2)
 
 #if SMTG_OS_LINUX
 	if (_run_loop && FUnknownPrivate::iidEqual (_iid, Linux::IRunLoop::iid)) {
@@ -1294,6 +1299,43 @@ VST3PI::endEdit (Vst::ParamID id)
 		OnParameterChange (EndGesture, idx->second, 0); /* EMIT SIGNAL */
 	}
 	return kResultOk;
+}
+
+tresult
+VST3PI::setDirty (TBool state)
+{
+	if (state) {
+		OnParameterChange (InternalChange, 0, 0); /* EMIT SIGNAL */
+	}
+	return kResultOk;
+}
+
+tresult
+VST3PI::requestOpenEditor (FIDString name)
+{
+	if (name == Vst::ViewType::kEditor) {
+		/* TODO get plugin-insert (first plugin only, not replicated ones)
+		 * call pi->ShowUI ();
+		 */
+	}
+	return kNotImplemented;
+}
+
+tresult
+VST3PI::startGroupEdit ()
+{
+	/* TODO:
+	 * remember current time, update StartTouch API
+	 * to allow passing a timestamp to PluginInsert::start_touch
+	 * replacing  .audible_sample()
+	 */
+	return kNotImplemented;
+}
+
+tresult
+VST3PI::finishGroupEdit ()
+{
+	return kNotImplemented;
 }
 
 bool

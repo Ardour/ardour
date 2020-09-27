@@ -48,6 +48,7 @@ namespace Steinberg {
  */
 class LIBARDOUR_API VST3PI
 	: public Vst::IComponentHandler
+	, public Vst::IComponentHandler2
 	, public Vst::IConnectionPoint
 	, public IPlugFrame
 {
@@ -60,6 +61,12 @@ public:
 	tresult PLUGIN_API performEdit (Vst::ParamID id, Vst::ParamValue value) SMTG_OVERRIDE;
 	tresult PLUGIN_API endEdit (Vst::ParamID id) SMTG_OVERRIDE;
 	tresult PLUGIN_API restartComponent (int32 flags) SMTG_OVERRIDE;
+
+	/* IComponentHandler2 */
+	tresult PLUGIN_API setDirty (TBool state) SMTG_OVERRIDE;
+	tresult PLUGIN_API requestOpenEditor (FIDString name) SMTG_OVERRIDE;
+	tresult PLUGIN_API startGroupEdit () SMTG_OVERRIDE;
+	tresult PLUGIN_API finishGroupEdit () SMTG_OVERRIDE;
 
 	/* IConnectionPoint API */
 	tresult PLUGIN_API connect (Vst::IConnectionPoint* other) SMTG_OVERRIDE;
@@ -120,7 +127,7 @@ public:
 	std::string  format_parameter (uint32_t p) const;
 	Vst::ParamID index_to_id (uint32_t) const;
 
-	enum ParameterChange { BeginGesture, EndGesture , ValueChange };
+	enum ParameterChange { BeginGesture, EndGesture , ValueChange, InternalChange };
 	PBD::Signal3<void, ParameterChange, uint32_t, float> OnParameterChange;
 
 	/* API for Ardour -- Setup/Processing */
