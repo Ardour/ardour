@@ -52,7 +52,10 @@ typedef int32_t event_id_t;
 enum EventType {
 	NO_EVENT,
 	MIDI_EVENT,
-	LIVE_MIDI_EVENT
+	LIVE_MIDI_EVENT,
+#if defined(__arm__) || defined(__aarch64__)
+	_Force32BitAlignment = 0xffffffff
+#endif
 };
 
 /** Type of a parameter (opaque, mapped by application, e.g. gain) */
