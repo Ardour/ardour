@@ -117,7 +117,7 @@ public:
 			uint8_t* ev_start = buffer->_data + offset + sizeof(TimeType) + sizeof (Evoral::EventType);
 			int event_size = Evoral::midi_event_size(ev_start);
 			assert(event_size >= 0);
-			offset += sizeof(TimeType) + sizeof (Evoral::EventType) + event_size;
+			offset += align32 (sizeof(TimeType) + sizeof (Evoral::EventType) + event_size);
 			return *this;
 		}
 
@@ -152,7 +152,7 @@ public:
 			return end();
 		}
 
-		size_t total_data_deleted = sizeof(TimeType) + sizeof (Evoral::EventType) + event_size;
+		size_t total_data_deleted = align32 (sizeof(TimeType) + sizeof (Evoral::EventType) + event_size);
 
 		if (i.offset + total_data_deleted > _size) {
 			_size = 0;
@@ -187,6 +187,14 @@ public:
 private:
 	friend class iterator_base< MidiBuffer, Evoral::Event<TimeType> >;
 	friend class iterator_base< const MidiBuffer, const Evoral::Event<TimeType> >;
+
+	static size_t align32 (size_t s) {
+#if defined(__arm__) || defined(__aarch64__)
+		return s + s % 4;
+#else
+		return s;
+#endif
+	}
 
 	uint8_t* _data; ///< [timestamp, event-type, event]*
 	pframes_t _size;

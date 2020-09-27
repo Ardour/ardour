@@ -191,7 +191,7 @@ MidiBuffer::push_back(TimeType time, Evoral::EventType event_type, size_t size, 
 	*(reinterpret_cast<Evoral::EventType*>((uintptr_t)(write_loc + stamp_size))) = event_type;
 	memcpy(write_loc + stamp_size + etype_size, data, size);
 
-	_size += stamp_size + etype_size + size;
+	_size += align32 (stamp_size + etype_size + size);
 	_silent = false;
 
 	return true;
@@ -209,7 +209,7 @@ MidiBuffer::insert_event(const Evoral::Event<TimeType>& ev)
 	const size_t stamp_size = sizeof(TimeType);
 	const size_t etype_size = sizeof(Evoral::EventType);
 
-	const size_t bytes_to_merge = stamp_size + etype_size + ev.size();
+	const size_t bytes_to_merge = align32 (stamp_size + etype_size + ev.size());
 
 	if (_size + bytes_to_merge >= _capacity) {
 		cerr << string_compose ("MidiBuffer::push_back failed (buffer is full: size: %1 capacity %2 new bytes %3)", _size, _capacity, bytes_to_merge) << endl;
@@ -274,7 +274,7 @@ MidiBuffer::reserve(TimeType time, Evoral::EventType event_type, size_t size)
 {
 	const size_t stamp_size = sizeof(TimeType);
 	const size_t etype_size = sizeof(Evoral::EventType);
-	if (_size + stamp_size + etype_size + size >= _capacity) {
+	if (align32 (_size + stamp_size + etype_size + size) >= _capacity) {
 		return 0;
 	}
 
@@ -286,7 +286,7 @@ MidiBuffer::reserve(TimeType time, Evoral::EventType event_type, size_t size)
 	// move write_loc to begin of MIDI buffer data to write to
 	write_loc += stamp_size + etype_size;
 
-	_size += stamp_size + etype_size + size;
+	_size += align32 (stamp_size + etype_size + size);
 	_silent = false;
 
 	return write_loc;
@@ -467,7 +467,7 @@ MidiBuffer::merge_in_place (const MidiBuffer &other)
 			if (merge_offset == -1) {
 				merge_offset = them.offset;
 			}
-			bytes_to_merge += header_size + (*them).size();
+			bytes_to_merge += align32 (header_size + (*them).size());
 			++them;
 		}
 
@@ -528,7 +528,7 @@ MidiBuffer::merge_in_place (const MidiBuffer &other)
 				++us;
 			}
 
-			bytes_to_merge = header_size + (*them).size();
+			bytes_to_merge = align32 (header_size + (*them).size());
 
 			/* move our remaining events later in the buffer by
 			 * enough to fit the one message we're going to merge
