@@ -1205,7 +1205,7 @@ VST3PI::connect (Vst::IConnectionPoint* other)
 tresult
 VST3PI::disconnect (Vst::IConnectionPoint* other)
 {
-	std::vector <Vst::IConnectionPoint*>::const_iterator i = std::find (_connections.begin(), _connections.end(), other); 
+	std::vector <Vst::IConnectionPoint*>::iterator i = std::find (_connections.begin(), _connections.end(), other);
 	if (i != _connections.end()) {
 		_connections.erase (i);
 		return kResultTrue;
