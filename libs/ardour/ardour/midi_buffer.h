@@ -190,7 +190,7 @@ private:
 
 	static size_t align32 (size_t s) {
 #if defined(__arm__) || defined(__aarch64__)
-		return s + s % 4;
+		return ((s - 1) | 3) + 1
 #else
 		return s;
 #endif

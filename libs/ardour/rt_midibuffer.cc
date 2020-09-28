@@ -382,7 +382,7 @@ RTMidiBuffer::alloc_blob (uint32_t size)
 
 	uint32_t offset = _pool_size;
 #if defined(__arm__) || defined(__aarch64_
-		_pool_size += size + size % 4;
+		_pool_size += ((size - 1) | 3) + 1;
 #else
 		_pool_size += size;
 #endif
