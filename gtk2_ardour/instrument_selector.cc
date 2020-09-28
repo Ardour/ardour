@@ -85,6 +85,9 @@ invalid_instrument (PluginInfoPtr p) {
 	if (manager.get_status(p) == PluginManager::Hidden) {
 		return true;
 	}
+	if (manager.get_status(p) == PluginManager::Concealed) {
+		return true;
+	}
 	return !p->is_instrument();
 }
 
