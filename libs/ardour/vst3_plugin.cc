@@ -1226,6 +1226,16 @@ VST3PI::notify (Vst::IMessage* msg)
 		 */
 		(*i)->notify (msg);
 	}
+
+	FUnknownPtr<Vst::IConnectionPoint> componentCP (_component);
+	FUnknownPtr<Vst::IConnectionPoint> controllerCP (_controller);
+	if (componentCP) {
+		componentCP->notify (msg);
+	}
+	if (controllerCP) {
+		controllerCP->notify (msg);
+	}
+
 	return kResultTrue;
 }
 
