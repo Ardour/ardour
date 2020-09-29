@@ -342,12 +342,11 @@ int main (int argc, char *argv[])
 
 #ifdef HAVE_DRMINGW
 	if (true) {
-		Glib::DateTime tm (g_date_time_new_now_local ());
-		string crash_dir = Glib::get_home_dir();
-		if (crash_dir.empty ()) {
-			crash_dir = Glib::get_user_data_dir ();
-		}
+		/* %localappdata%\Ardour<X>\CrashLog\ */
+		string crash_dir = Glib::build_filename (Glib::get_user_data_dir (), string_compose ("%1%2", PROGRAM_NAME, PROGRAM_VERSION), "CrashLog");
+		g_mkdir_with_parents (crash_dir.c_str(), 0700);
 
+		Glib::DateTime tm (g_date_time_new_now_local ());
 		string crash_file = string_compose ("%1-crash-%2.txt", PROGRAM_NAME, tm.format ("%s"));
 		string crash_path = Glib::build_filename (crash_dir, crash_file);
 
