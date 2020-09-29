@@ -347,7 +347,7 @@ int main (int argc, char *argv[])
 		g_mkdir_with_parents (crash_dir.c_str(), 0700);
 
 		Glib::DateTime tm (g_date_time_new_now_local ());
-		string crash_file = string_compose ("%1-crash-%2.txt", PROGRAM_NAME, tm.format ("%s"));
+		string crash_file = string_compose ("%1-%2-crash-%3.txt", PROGRAM_NAME, VERSIONSTRING, tm.format ("%s"));
 		string crash_path = Glib::build_filename (crash_dir, crash_file);
 
 		ExcHndlInit ();
