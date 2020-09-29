@@ -154,8 +154,9 @@ cp `ls -t build/gtk2_ardour/ardour-*.exe | head -n1` $DESTDIR/bin/${PRODUCT_EXE}
 mkdir -p $DESTDIR/lib/gtk-2.0/engines
 cp build/libs/clearlooks-newer/clearlooks.dll $DESTDIR/lib/gtk-2.0/engines/libclearlooks.la
 
-cp $PREFIX/bin/*dll $DESTDIR/bin/
-cp $PREFIX/lib/*dll $DESTDIR/bin/
+cp $PREFIX/bin/*.dll $DESTDIR/bin/
+cp $PREFIX/bin/*.yes $DESTDIR/bin/ || true
+cp $PREFIX/lib/*.dll $DESTDIR/bin/
 # special case libportaudio (wasapi), old stack has no wasapi and hence no .xp
 cp $PREFIX/bin/libportaudio-2.xp $DESTDIR/bin/ || cp $PREFIX/bin/libportaudio-2.dll $DESTDIR/bin/libportaudio-2.xp
 rm -rf $DESTDIR/bin/libjack*.dll

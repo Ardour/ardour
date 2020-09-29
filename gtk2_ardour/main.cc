@@ -74,6 +74,10 @@
 #include <shellapi.h> // console
 #endif
 
+#ifdef HAVE_DRMINGW
+#include <exchndl.h>
+#endif
+
 #ifdef WAF_BUILD
 #include "gtk2ardour-version.h"
 #endif
@@ -335,6 +339,23 @@ int main (int argc, char *argv[])
 		     << _("under certain conditions; see the source for copying conditions.")
 		     << endl;
 	}
+
+#ifdef HAVE_DRMINGW
+	if (true) {
+		Glib::DateTime tm (g_date_time_new_now_local ());
+		string crash_dir = Glib::get_home_dir();
+		if (crash_dir.empty ()) {
+			crash_dir = Glib::get_user_data_dir ();
+		}
+
+		string crash_file = string_compose ("%1-crash-%2.txt", PROGRAM_NAME, tm.format ("%s"));
+		string crash_path = Glib::build_filename (crash_dir, crash_file);
+
+		ExcHndlInit ();
+		ExcHndlSetLogFileNameA (crash_path.c_str());
+		cout << "Crash Log: " << crash_path << endl;
+	}
+#endif
 
 	if (!ARDOUR::init (ARDOUR_COMMAND_LINE::use_vst, ARDOUR_COMMAND_LINE::try_hw_optimization, localedir.c_str(), true)) {
 		error << string_compose (_("could not initialize %1."), PROGRAM_NAME) << endmsg;

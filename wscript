@@ -773,6 +773,9 @@ def options(opt):
                     help='Directory/folder where dependency stack trees (gtk, a3) can be found (defaults to ~)')
     opt.add_option('--dist-target', type='string', default='auto', dest='dist_target',
                     help='Specify the target for cross-compiling [auto,none,x86,i386,i686,x86_64,tiger,leopard,mingw,msvc]')
+    opt.add_option('--dr-mingw', action='store_true', default=True, dest='drmingw',
+                    help='Write crashdumps using Dr.Mingw (Windows Only)')
+    opt.add_option('--no-dr-mingw', action='store_true', dest='drmingw')
     opt.add_option('--fpu-optimization', action='store_true', default=True, dest='fpu_optimization',
                     help='Build runtime checked assembler code (default)')
     opt.add_option('--no-fpu-optimization', action='store_false', dest='fpu_optimization')
@@ -1212,6 +1215,9 @@ int main () { return 0; }
     else:
         conf.define ('EXPORT_VISIBILITY_HIDDEN', False)
 
+    if Options.options.dist_target == 'mingw' and opts.drmingw:
+        conf.check_cc (function_name='ExcHndlInit', define_name='HAVE_DRMINGW', header_name='exchndl.h', lib=['exchndl', 'mgwhelp'], mandatory=True, uselib_store='DRMINGW')
+
     # Set up waf environment and C defines
     if opts.phone_home:
         conf.define('PHONE_HOME', 1)
@@ -1405,6 +1411,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Debug RT allocations',  conf.is_defined('DEBUG_RT_ALLOC'))
     write_config_text('Debug Symbols',         conf.is_defined('debug_symbols') or conf.env['DEBUG'])
     write_config_text('Denormal exceptions',   conf.is_defined('DEBUG_DENORMAL_EXCEPTION'))
+    write_config_text('Dr. Mingw',             conf.is_defined('HAVE_DRMINGW'))
     write_config_text('FLAC',                  conf.is_defined('HAVE_FLAC'))
     write_config_text('FPU optimization',      opts.fpu_optimization)
     write_config_text('Freedesktop files',     opts.freedesktop)
