@@ -116,6 +116,20 @@ timecnt_t::operator*(ratio_t const & r) const
 	return timecnt_t (v, _position);
 }
 
+ratio_t
+timecnt_t::operator/ (timecnt_t const & other) const
+{
+	if (time_domain() == other.time_domain()) {
+		return ratio_t (distance().val(), other.distance().val());
+	}
+
+	if (time_domain() == AudioTime) {
+		return ratio_t (distance().val(), other.samples());
+	}
+
+	return ratio_t (beats().to_ticks(), other.beats().to_ticks());
+}
+
 timecnt_t
 timecnt_t::operator/(ratio_t const & r) const
 {
@@ -392,6 +406,16 @@ timepos_t::earlier (timecnt_t const & distance) const
 }
 
 /* */
+
+timepos_t &
+timepos_t::shift_earlier (timepos_t const & d)
+{
+	if (d.time_domain() == AudioTime) {
+		return shift_earlier (d.superclocks());
+	}
+
+	return shift_earlier (d.beats());
+}
 
 timepos_t &
 timepos_t::shift_earlier (timecnt_t const & d)

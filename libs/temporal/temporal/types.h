@@ -72,6 +72,8 @@ class _ratio_t {
 	bool is_unity() const { return _numerator == _denominator; }
 	bool is_zero() const { return _numerator == 0; }
 
+	operator double() const { return (double) _numerator / _denominator; };
+
 	/* provide an easy way to multiply double by ratio_t. Note that this
 	   must be written as ratio_t * double, not the other way around. We
 	   are not trying to duplicate boost::rational here (which also doesn't

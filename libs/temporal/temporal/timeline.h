@@ -162,6 +162,7 @@ class LIBTEMPORAL_API timepos_t : public int62_t  {
 	timepos_t earlier (BBT_Offset const & d) const;
 
 	/* like ::earlier() but changes this. loosely equivalent to operator-= */
+	timepos_t & shift_earlier (timepos_t const & d);
 	timepos_t & shift_earlier (timecnt_t const & d);
 	timepos_t & shift_earlier (Temporal::Beats const &);
 	timepos_t & shift_earlier (Temporal::BBT_Offset const &);
@@ -350,6 +351,8 @@ class LIBTEMPORAL_API timecnt_t {
 
 	timecnt_t operator*(ratio_t const &) const;
 	timecnt_t operator/(ratio_t const &) const;
+
+	ratio_t operator/ (timecnt_t const &) const;
 
 	timecnt_t operator-() const;
 	timecnt_t operator- (timecnt_t const & t) const;
