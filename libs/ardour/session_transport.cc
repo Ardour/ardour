@@ -1298,7 +1298,9 @@ Session::non_realtime_locate ()
 
 		microseconds_t end = get_microseconds ();
 		int usecs_per_track = lrintf ((end - start) / (double) nt);
+#ifndef NDEBUG
 		std::cerr << "locate took " << (end - start) << " usecs for " << nt << " tracks = " << usecs_per_track << " per track\n";
+#endif
 		if (usecs_per_track > g_atomic_int_get (&current_usecs_per_track)) {
 			g_atomic_int_set (&current_usecs_per_track, usecs_per_track);
 		}
