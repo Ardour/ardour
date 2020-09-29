@@ -427,9 +427,9 @@ public:
 	void reset_zoom (samplecnt_t);
 	void reposition_and_zoom (samplepos_t, double);
 
-	samplepos_t get_preferred_edit_position (Editing::EditIgnoreOption = Editing::EDIT_IGNORE_NONE,
-	                                         bool use_context_click = false,
-	                                         bool from_outside_canvas = false);
+	Temporal::timepos_t get_preferred_edit_position (Editing::EditIgnoreOption = Editing::EDIT_IGNORE_NONE,
+	                                                 bool use_context_click = false,
+	                                                 bool from_outside_canvas = false);
 
 	bool update_mouse_speed ();
 	bool decelerate_mouse_speed ();
@@ -569,10 +569,10 @@ public:
 	void metric_get_minsec (std::vector<ArdourCanvas::Ruler::Mark>&, gdouble, gdouble, gint);
 
 	/* editing operations that need to be public */
-	void mouse_add_new_marker (samplepos_t where, bool is_cd=false);
-	void split_regions_at (ARDOUR::MusicSample, RegionSelection&);
+	void mouse_add_new_marker (Temporal::timepos_t const & where, bool is_cd=false);
+	void split_regions_at (Temporal::timepos_t const & , RegionSelection&);
 	void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret, bool select_new = false);
-	RegionSelection get_regions_from_selection_and_mouse (samplepos_t);
+	RegionSelection get_regions_from_selection_and_mouse (Temporal::timepos_t const &);
 	void do_remove_gaps ();
 	void remove_gaps (samplecnt_t threshold, samplecnt_t leave, bool markers_too);
 
@@ -1522,7 +1522,7 @@ private:
 	void set_selection_from_loop ();
 	void set_selection_from_region ();
 
-	void add_location_mark (samplepos_t where);
+	void add_location_mark (Temporal::timepos_t const & where);
 	void add_location_from_region ();
 	void add_locations_from_region ();
 	void add_location_from_selection ();
@@ -1537,8 +1537,8 @@ private:
 
 	void set_loop_from_region (bool play);
 
-	void set_loop_range (samplepos_t start, samplepos_t end, std::string cmd);
-	void set_punch_range (samplepos_t start, samplepos_t end, std::string cmd);
+	void set_loop_range (Temporal::timepos_t const & start, Temporal::timepos_t const & end, std::string cmd);
+	void set_punch_range (Temporal::timepos_t const & start, Temporal::timepos_t const & end, std::string cmd);
 
 	void toggle_location_at_playhead_cursor ();
 	void add_location_from_playhead_cursor ();
@@ -2230,10 +2230,10 @@ private:
 
 	void selected_marker_moved (ARDOUR::Location*);
 
-	bool get_edit_op_range (samplepos_t& start, samplepos_t& end) const;
+	bool get_edit_op_range (Temporal::timepos_t& start, samplepos_t& end) const;
 
-	void get_regions_at (RegionSelection&, samplepos_t where, const TrackViewList& ts) const;
-	void get_regions_after (RegionSelection&, samplepos_t where, const TrackViewList& ts) const;
+	void get_regions_at (RegionSelection&, Temporal::timepos_t const & where, const TrackViewList& ts) const;
+	void get_regions_after (RegionSelection&, Temporal::timepos_t const & where, const TrackViewList& ts) const;
 
 	RegionSelection get_regions_from_selection_and_edit_point (Editing::EditIgnoreOption = Editing::EDIT_IGNORE_NONE,
 	                                                           bool use_context_click = false,

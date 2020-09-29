@@ -668,7 +668,7 @@ Editor::LocationMarkers::setup_lines ()
 }
 
 void
-Editor::mouse_add_new_marker (samplepos_t where, bool is_cd)
+Editor::mouse_add_new_marker (timepos_t const & where, bool is_cd)
 {
 	string markername;
 	int flags = (is_cd ? Location::IsCDMarker|Location::IsMark : Location::IsMark);
@@ -712,7 +712,7 @@ Editor::mouse_add_new_loop (samplepos_t where)
 
 	samplepos_t const end = where + current_page_samples() / 8;
 
-	set_loop_range (where, end,  _("set loop range"));
+	set_loop_range (timepos_t (where), timepos_t (end),  _("set loop range"));
 }
 
 void
@@ -728,7 +728,7 @@ Editor::mouse_add_new_punch (samplepos_t where)
 
 	samplepos_t const end = where + current_page_samples() / 8;
 
-	set_punch_range (where, end,  _("set punch range"));
+	set_punch_range (timepos_t (where), timepos_t (end),  _("set punch range"));
 }
 
 void
@@ -1421,7 +1421,7 @@ Editor::marker_menu_loop_range ()
 	if ((l = find_location_from_marker (marker, is_start)) != 0) {
 		if (l != transport_loop_location()) {
 			cerr << "Set loop\n";
-			set_loop_range (l->start().samples(), l->end().samples(), _("loop range from marker"));
+			set_loop_range (l->start(), l->end(), _("loop range from marker"));
 		} else {
 			cerr << " at TL\n";
 		}
@@ -1442,9 +1442,9 @@ Editor::marker_menu_zoom_to_range ()
 		return;
 	}
 
-	timecnt_t const extra = l->length() * Temporal::ratio_t (5, 100);
+	timepos_t const extra = timepos_t (l->length() * Temporal::ratio_t (5, 100));
 	timepos_t a = l->start ();
-	if (a >= timepos_t (extra)) {
+	if (a >= extra) {
 		a.shift_earlier (extra);
 	}
 
@@ -1750,8 +1750,8 @@ Editor::update_loop_range_view ()
 
 	if (_session->get_play_loop() && ((tll = transport_loop_location()) != 0)) {
 
-		double x1 = sample_to_pixel (tll->start());
-		double x2 = sample_to_pixel (tll->end());
+		double x1 = sample_to_pixel (tll->start_sample());
+		double x2 = sample_to_pixel (tll->end_sample());
 
 		transport_loop_range_rect->set_x0 (x1);
 		transport_loop_range_rect->set_x1 (x2);
@@ -1778,12 +1778,12 @@ Editor::update_punch_range_view ()
 		double pixel_end;
 
 		if (_session->config.get_punch_in()) {
-			pixel_start = sample_to_pixel (tpl->start());
+			pixel_start = sample_to_pixel (tpl->start_sample());
 		} else {
 			pixel_start = 0;
 		}
 		if (_session->config.get_punch_out()) {
-			pixel_end = sample_to_pixel (tpl->end());
+			pixel_end = sample_to_pixel (tpl->end_sample());
 		} else {
 			pixel_end = sample_to_pixel (max_samplepos);
 		}
@@ -1836,7 +1836,7 @@ Editor::goto_nth_marker (int n)
 	for (Locations::LocationList::iterator i = ordered.begin(); n >= 0 && i != ordered.end(); ++i) {
 		if ((*i)->is_mark() && !(*i)->is_hidden() && !(*i)->is_session_range()) {
 			if (n == 0) {
-				_session->request_locate ((*i)->start());
+				_session->request_locate ((*i)->start_sample());
 				break;
 			}
 			--n;
@@ -1866,10 +1866,10 @@ Editor::toggle_marker_menu_glue ()
 	begin_reversible_command (_("change marker lock style"));
 	XMLNode &before = _session->locations()->get_state();
 
-	if (loc->position_lock_style() == MusicTime) {
-		loc->set_position_lock_style (AudioTime);
+	if (loc->position_time_domain() == Temporal::BeatTime) {
+		loc->set_position_time_domain (Temporal::AudioTime);
 	} else {
-		loc->set_position_lock_style (MusicTime);
+		loc->set_position_time_domain (Temporal::BeatTime);
 	}
 
 	XMLNode &after = _session->locations()->get_state();

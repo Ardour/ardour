@@ -73,8 +73,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 
 	void focus ();
 
-	virtual void set (samplepos_t, bool force = false, ARDOUR::samplecnt_t offset = 0);
-	void set_time (Temporal::timepos_t const &, bool force = false, Temporal::timecnt_t const & offset = Temporal::timecnt_t());
+	virtual void set (Temporal::timepos_t const &, bool force = false, Temporal::timecnt_t const & offset = Temporal::timecnt_t());
 	void set_duration (Temporal::timecnt_t const &, bool force = false, Temporal::timecnt_t const & offset = Temporal::timecnt_t());
 
 	void set_from_playhead ();
@@ -88,8 +87,8 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 
 	std::string name() const { return _name; }
 
-	samplepos_t current_time (samplepos_t position = 0) const;
-	samplepos_t current_duration (samplepos_t position = 0) const;
+	Temporal::timepos_t current_time () const;
+	Temporal::timecnt_t current_duration (Temporal::timepos_t position = Temporal::timepos_t()) const;
 	void set_session (ARDOUR::Session *s);
 	void set_negative_allowed (bool yn);
 
@@ -116,7 +115,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	protected:
 	void render (Cairo::RefPtr<Cairo::Context> const&, cairo_rectangle_t*);
 	bool get_is_duration () const { return is_duration; }
-	ARDOUR::samplecnt_t offset () const { return _offset; }
+	Temporal::timecnt_t offset () const { return _offset; }
 
 	virtual void build_ops_menu ();
 	Gtk::Menu  *ops_menu;
@@ -142,10 +141,10 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	bool             _negative_allowed;
 	bool             edit_is_negative;
 
-	samplepos_t       _limit_pos;
+	Temporal::timepos_t _limit_pos;
 	Temporal::timepos_t duration_position;
 
-	ARDOUR::samplecnt_t _offset;
+	Temporal::timecnt_t _offset;
 
 	Glib::RefPtr<Pango::Layout> _layout;
 
@@ -201,8 +200,8 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	std::string pre_edit_string;
 	std::string input_string;
 
-	samplepos_t bbt_reference_time;
-	samplepos_t last_when;
+	Temporal::timepos_t bbt_reference_time;
+	Temporal::timepos_t last_when;
 	bool last_pdelta;
 	bool last_sdelta;
 
@@ -222,25 +221,25 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	bool on_focus_out_event (GdkEventFocus*);
 
 	void set_slave_info ();
-	void set_timecode (samplepos_t, bool);
-	void set_bbt (samplepos_t, ARDOUR::samplecnt_t, bool);
-	void set_minsec (samplepos_t, bool);
-	void set_seconds (samplepos_t, bool);
-	void set_samples (samplepos_t, bool);
+	void set_timecode (Temporal::timepos_t const &, bool);
+	void set_bbt (Temporal::timepos_t const &, Temporal::timecnt_t const &, bool);
+	void set_minsec (Temporal::timepos_t const &, bool);
+	void set_seconds (Temporal::timepos_t const &, bool);
+	void set_samples (Temporal::timepos_t const &, bool);
 	void set_out_of_bounds (bool negative);
 	void finish_set (Temporal::timepos_t const &, bool);
 
 	void set_clock_dimensions (Gtk::Requisition&);
 
-	samplepos_t get_sample_step (Field, samplepos_t pos = 0, int dir = 1);
+	samplepos_t get_sample_step (Field, Temporal::timepos_t const & pos = Temporal::timepos_t (), int dir = 1);
 
 	bool timecode_validate_edit (const std::string&);
 	bool bbt_validate_edit (std::string&);
 	bool minsec_validate_edit (const std::string&);
 
 	samplepos_t samples_from_timecode_string (const std::string&) const;
-	samplepos_t samples_from_bbt_string (samplepos_t, const std::string&) const;
-	samplepos_t sample_duration_from_bbt_string (samplepos_t, const std::string&) const;
+	samplepos_t samples_from_bbt_string (Temporal::timepos_t const &, const std::string&) const;
+	samplepos_t sample_duration_from_bbt_string (Temporal::timepos_t const &, const std::string&) const;
 	samplepos_t samples_from_minsec_string (const std::string&) const;
 	samplepos_t samples_from_seconds_string (const std::string&) const;
 	samplepos_t samples_from_audiosamples_string (const std::string&) const;
@@ -254,13 +253,13 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	void end_edit (bool);
 	void end_edit_relative (bool);
 	void edit_next_field ();
-	ARDOUR::samplecnt_t parse_as_distance (const std::string&);
 
-	ARDOUR::samplecnt_t parse_as_timecode_distance (const std::string&);
-	ARDOUR::samplecnt_t parse_as_minsec_distance (const std::string&);
-	ARDOUR::samplecnt_t parse_as_bbt_distance (const std::string&);
-	ARDOUR::samplecnt_t parse_as_seconds_distance (const std::string&);
-	ARDOUR::samplecnt_t parse_as_samples_distance (const std::string&);
+	Temporal::timecnt_t parse_as_distance (const std::string&);
+	Temporal::timecnt_t parse_as_timecode_distance (const std::string&);
+	Temporal::timecnt_t parse_as_minsec_distance (const std::string&);
+	Temporal::timecnt_t parse_as_bbt_distance (const std::string&);
+	Temporal::timecnt_t parse_as_seconds_distance (const std::string&);
+	Temporal::timecnt_t parse_as_samples_distance (const std::string&);
 
 	void set_colors ();
 	void show_edit_status (int length);

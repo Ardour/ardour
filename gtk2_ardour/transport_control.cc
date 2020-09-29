@@ -106,12 +106,12 @@ TransportControlProvider::TransportControllable::get_value () const
 		return (!_session->transport_rolling() ? 1.0 : 0.0);
 	case GotoStart:
 		if ((rloc = _session->locations()->session_range_location()) != 0) {
-			return (_session->transport_sample() == rloc->start() ? 1.0 : 0.0);
+			return (_session->transport_sample() == rloc->start_sample() ? 1.0 : 0.0);
 		}
 		return 0.0;
 	case GotoEnd:
 		if ((rloc = _session->locations()->session_range_location()) != 0) {
-			return (_session->transport_sample() == rloc->end() ? 1.0 : 0.0);
+			return (_session->transport_sample() == rloc->end_sample() ? 1.0 : 0.0);
 		}
 		return 0.0;
 	case AutoLoop:

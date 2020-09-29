@@ -44,14 +44,14 @@ public:
 	RegionLayeringOrderEditor (PublicEditor&);
 	virtual ~RegionLayeringOrderEditor ();
 
-	void set_context (const std::string &, ARDOUR::Session *, TimeAxisView *, boost::shared_ptr<ARDOUR::Playlist>, ARDOUR::samplepos_t);
+	void set_context (const std::string &, ARDOUR::Session *, TimeAxisView *, boost::shared_ptr<ARDOUR::Playlist>, Temporal::timepos_t const &);
 	void maybe_present ();
 
 protected:
 	virtual bool on_key_press_event (GdkEventKey* event);
 
 private:
-	samplepos_t position;
+	Temporal::timepos_t position;
 	bool in_row_change;
 	uint32_t regions_at_position;
 

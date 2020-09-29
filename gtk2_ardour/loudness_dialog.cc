@@ -436,10 +436,9 @@ LoudnessDialog::analyze ()
 	/* These are ensured in Editor::measure_master_loudness () */
 	assert (_session->master_out ());
 	assert (_session->master_volume ());
-	assert (_session->master_out ()->output ());
-	assert (_session->master_out ()->output ()->n_ports ().n_audio () == 2);
-	assert (_range.start < _range.end);
-
+	assert (_session->master_out()->output());
+	assert (_session->master_out()->output()->n_ports().n_audio() == 2);
+	assert (_range.start() < _range.end());
 
 	ExportTimespanPtr tsp = _session->get_export_handler ()->add_timespan ();
 
@@ -458,7 +457,7 @@ LoudnessDialog::analyze ()
 	fmp->set_analyse (true);
 
 	/* setup range */
-	tsp->set_range (_range.start, _range.end);
+	tsp->set_range (_range.start().samples(), _range.end().samples());
 	tsp->set_range_id ("selection");
 	tsp->set_realtime (_rt_analysis_button.get_active ());
 	tsp->set_name ("master");

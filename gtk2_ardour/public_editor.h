@@ -229,11 +229,11 @@ public:
 	virtual void trigger_script (int nth) = 0;
 	virtual void add_location_from_playhead_cursor () = 0;
 	virtual void remove_location_at_playhead_cursor () = 0;
-	virtual void add_location_mark (samplepos_t where) = 0;
+	virtual void add_location_mark (Temporal::timepos_t const & where) = 0;
 	virtual void update_grid () = 0;
 	virtual void remove_tracks () = 0;
-	virtual void set_loop_range (samplepos_t start, samplepos_t end, std::string cmd) = 0;
-	virtual void set_punch_range (samplepos_t start, samplepos_t end, std::string cmd) = 0;
+	virtual void set_loop_range (Temporal::timepos_t const & start, Temporal::timepos_t const & end, std::string cmd) = 0;
+	virtual void set_punch_range (Temporal::timepos_t const & start, Temporal::timepos_t const & end, std::string cmd) = 0;
 
 	virtual void jump_forward_to_mark () = 0;
 	virtual void jump_backward_to_mark () = 0;
@@ -350,11 +350,11 @@ public:
 	virtual void remove_last_capture () = 0;
 	virtual void maximise_editing_space () = 0;
 	virtual void restore_editing_space () = 0;
-	virtual samplepos_t get_preferred_edit_position (Editing::EditIgnoreOption = Editing::EDIT_IGNORE_NONE, bool from_context_menu = false, bool from_outside_canvas = false) = 0;
+	virtual Temporal::timepos_t get_preferred_edit_position (Editing::EditIgnoreOption = Editing::EDIT_IGNORE_NONE, bool from_context_menu = false, bool from_outside_canvas = false) = 0;
 	virtual void toggle_meter_updating() = 0;
-	virtual void split_regions_at (ARDOUR::MusicSample, RegionSelection&) = 0;
+	virtual void split_regions_at (Temporal::timepos_t const &, RegionSelection&) = 0;
 	virtual void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret, bool select_new = false) = 0;
-	virtual void mouse_add_new_marker (samplepos_t where, bool is_cd=false) = 0;
+	virtual void mouse_add_new_marker (Temporal::timepos_t const & where, bool is_cd=false) = 0;
 	virtual void foreach_time_axis_view (sigc::slot<void,TimeAxisView&>) = 0;
 	virtual void add_to_idle_resize (TimeAxisView*, int32_t) = 0;
 	virtual Temporal::timecnt_t get_nudge_distance (Temporal::timepos_t const & pos, Temporal::timecnt_t& next) = 0;
@@ -503,9 +503,9 @@ public:
 
 	virtual void set_snapped_cursor_position (samplepos_t pos) = 0;
 
-	virtual void get_regions_at (RegionSelection &, samplepos_t where, TrackViewList const &) const = 0;
-	virtual void get_regions_after (RegionSelection&, samplepos_t where, const TrackViewList& ts) const = 0;
-	virtual RegionSelection get_regions_from_selection_and_mouse (samplepos_t) = 0;
+	virtual void get_regions_at (RegionSelection &, Temporal::timepos_t const & where, TrackViewList const &) const = 0;
+	virtual void get_regions_after (RegionSelection&, Temporal::timepos_t const & where, const TrackViewList& ts) const = 0;
+	virtual RegionSelection get_regions_from_selection_and_mouse (Temporal::timepos_t const &) = 0;
 	virtual void get_regionviews_by_id (PBD::ID const id, RegionSelection & regions) const = 0;
 	virtual void get_per_region_note_selection (std::list<std::pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Temporal::Beats> > > > >&) const = 0;
 

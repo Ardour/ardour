@@ -105,7 +105,7 @@ MainClock::absolute_time () const
 }
 
 void
-MainClock::set (samplepos_t when, bool force, ARDOUR::samplecnt_t /*offset*/)
+MainClock::set (timepos_t const & when, bool force, timecnt_t const & /*offset*/)
 {
 	ClockDeltaMode mode;
 	if (_primary) {
