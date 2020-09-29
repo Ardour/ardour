@@ -235,6 +235,8 @@ int nomain (int argc, char *argv[])
 int main (int argc, char *argv[])
 #endif
 {
+	console_madness_begin();
+
 	ARDOUR::check_for_old_configuration_files();
 
 	/* global init is not thread safe.*/
@@ -262,8 +264,6 @@ int main (int argc, char *argv[])
 		}
 	}
 #endif
-
-	console_madness_begin();
 
 #if (defined WINDOWS_VST_SUPPORT && !defined PLATFORM_WINDOWS)
 	/* this does some magic that is needed to make GTK and X11 client interact properly.
