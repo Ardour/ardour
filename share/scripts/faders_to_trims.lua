@@ -46,13 +46,13 @@ function factory (params)
 			
 			-- apply the trim
 			trim = t:nth_processor (fader_pos+1)
-			if (not trim:isnil() and trim:display_name () == "a-Amplifier") then
+			if (not trim:isnil() and trim:display_name () == "ACE Amplifier") then
 				--existing trim found; sum the trim and the fader gain, and set the trim to that value
 				cur_gain = ARDOUR.LuaAPI.get_processor_param (trim, 0)
 				ARDOUR.LuaAPI.set_processor_param (trim, 0, trim_gain+cur_gain)
 			else
 				--create a new Trim processor, and set its value to match the fader
-				local a = ARDOUR.LuaAPI.new_luaproc(Session, "a-Amplifier");
+				local a = ARDOUR.LuaAPI.new_luaproc(Session, "ACE Amplifier");
 				if (not a:isnil()) then
 					t:add_processor_by_index(a, fader_pos-1, nil, true)
 					ARDOUR.LuaAPI.set_processor_param (a, 0, trim_gain)

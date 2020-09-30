@@ -8,7 +8,7 @@
 
 <http://ardour.org/credits.html>
 	a foaf:Person ;
-	foaf:name "Ardour Team" ;
+	foaf:name "Ardour Community" ;
 	foaf:homepage <http://ardour.org/> .
 
 unit:hz0
@@ -303,7 +303,7 @@ unit:db1
 A basic 4 band EQ.
 """ ;
 
-    doap:name "a-EQ" ;
+    doap:name "ACE EQ" ;
     doap:license "GPL v2+" ;
     doap:maintainer <http://ardour.org/credits.html> ;
 

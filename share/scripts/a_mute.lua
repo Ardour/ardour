@@ -1,9 +1,9 @@
 ardour {
 	["type"]    = "dsp",
-	name        = "a-Mute",
+	name        = "ACE Mute",
 	category    = "Amplifier",
 	license     = "MIT",
-	author      = "Ardour Team",
+	author      = "Ardour Community",
 	description = [[Auotomatable Mute/Gate]]
 }
 

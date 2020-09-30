@@ -34,7 +34,7 @@ function factory (params)
 					-- get Nth Ardour::Processor
 					proc = t:nth_plugin (i)
 					-- check if it's a filter
-					if (not proc:isnil() and proc:display_name () == "a-High/Low Pass Filter") then
+					if (not proc:isnil() and proc:display_name () == "ACE High/Low Pass Filter") then
 						insert = false;
 					end
 					i = i + 1
@@ -43,7 +43,7 @@ function factory (params)
 
 			-- create a new processor and insert it
 			if insert then
-				local a = ARDOUR.LuaAPI.new_luaproc(Session, "a-High/Low Pass Filter");
+				local a = ARDOUR.LuaAPI.new_luaproc(Session, "ACE High/Low Pass Filter");
 				if (not a:isnil()) then
 					t:add_processor_by_index(a, pos, nil, true)
 					a = nil -- explicitly drop shared-ptr reference

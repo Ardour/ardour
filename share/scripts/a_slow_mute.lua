@@ -1,9 +1,9 @@
 ardour {
 	["type"]    = "dsp",
-	name        = "a-Slow-Mute",
+	name        = "ACE Slow-Mute",
 	category    = "Amplifier",
 	license     = "MIT",
-	author      = "Ardour Team",
+	author      = "Ardour Community",
 	description = [[Mute button with slow fade in/out (approx. 1sec exponential)]]
 }
 

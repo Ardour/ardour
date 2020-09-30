@@ -8,13 +8,13 @@
 
 <http://ardour.org/credits.html>
 	a foaf:Person ;
-	foaf:name "Ardour Team" ;
+	foaf:name "Ardour Community" ;
 	foaf:homepage <http://ardour.org/> .
 
 <urn:ardour:a-reverb>
 	a doap:Project, lv2:Plugin, lv2:ReverbPlugin ;
 
-	doap:name "a-Reverb" ;
+	doap:name "ACE Reverb" ;
 	rdfs:comment "A Schroeder Reverberator" ;
 
 	doap:maintainer <http://ardour.org/credits.html> ;

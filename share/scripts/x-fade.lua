@@ -1,9 +1,9 @@
 ardour {
 	["type"]    = "dsp",
-	name        = "a-Cross Fade",
+	name        = "ACE Cross Fade",
 	category    = "Amplifier",
 	license     = "MIT",
-	author      = "Ardour Team",
+	author      = "Ardour Community",
 	description = [[Auotomatable Crossfade. Channels are grouped:
 Mono out:  In 1/2 -> Out 1
 Stereo out: In 1/3 -> Out 1, In 2/4 -> Out 2

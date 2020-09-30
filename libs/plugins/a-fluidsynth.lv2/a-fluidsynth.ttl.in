@@ -14,7 +14,7 @@
 
 <http://ardour.org/credits.html>
   a foaf:Person ;
-  foaf:name "Ardour Team" ;
+  foaf:name "Ardour Community" ;
   foaf:homepage <http://ardour.org/> .
 
 <urn:ardour:a-fluidsynth:sf2file>
@@ -25,7 +25,7 @@
 <urn:ardour:a-fluidsynth>
   a doap:Project, lv2:InstrumentPlugin, lv2:Plugin ;
 
-  doap:name "a-Fluid Synth" ;
+  doap:name "ACE Fluid Synth" ;
   rdfs:comment "SF2 Synthesizer using Fluidsynth" ;
 
   doap:maintainer <http://ardour.org/credits.html> ;

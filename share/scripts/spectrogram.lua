@@ -1,9 +1,9 @@
 ardour {
 	["type"]    = "dsp",
-	name        = "a-Inline Spectrogram",
+	name        = "ACE Inline Spectrogram",
 	category    = "Visualization",
 	license     = "MIT",
-	author      = "Ardour Team",
+	author      = "Ardour Community",
 	description = [[Mixer strip inline spectrum display]]
 }
 

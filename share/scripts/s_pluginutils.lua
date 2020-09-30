@@ -45,8 +45,8 @@ function factory () return function ()
 		local pos = 0 -- insert at the top
 
 		-- the following two lines are equivalent
-		--local proc = ARDOUR.LuaAPI.new_luaproc(Session, "a-Inline Scope");
-		local proc = ARDOUR.LuaAPI.new_plugin (Session, "a-Inline Scope", ARDOUR.PluginType.Lua, "");
+		--local proc = ARDOUR.LuaAPI.new_luaproc(Session, "ACE Inline Scope");
+		local proc = ARDOUR.LuaAPI.new_plugin (Session, "ACE Inline Scope", ARDOUR.PluginType.Lua, "");
 		assert (not proc:isnil())
 
 		t:add_processor_by_index(proc, pos, nil, true)

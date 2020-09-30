@@ -1,9 +1,9 @@
 ardour {
 	["type"]    = "dsp",
-	name        = "a-Amplifier",
+	name        = "ACE Amplifier",
 	category    = "Amplifier",
 	license     = "MIT",
-	author      = "Ardour Team",
+	author      = "Ardour Community",
 	description = [[Versatile +/- 20dB multichannel amplifier]]
 }
 

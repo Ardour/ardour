@@ -1,9 +1,9 @@
 ardour {
 	["type"]    = "dsp",
-	name        = "a-Gain Ratio",
+	name        = "ACE Gain Ratio",
 	category    = "Amplifier",
 	license     = "MIT",
-	author      = "Ardour Team",
+	author      = "Ardour Community",
 	description = [[Multichannel amplifier with gain coefficient ratio (not dezippered). Beware this plugin allows for significant gain ratios, it's intended to academic purposes.]]
 }
 

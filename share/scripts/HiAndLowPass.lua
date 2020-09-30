@@ -1,9 +1,9 @@
 ardour {
 	["type"]    = "dsp",
-	name        = "a-High/Low Pass Filter",
+	name        = "ACE High/Low Pass Filter",
 	category    = "Filter",
 	license     = "GPLv2",
-	author      = "Ardour Team",
+	author      = "Ardour Community",
 	description = [[High and Low Pass Filter with de-zipped controls]]
 }
 

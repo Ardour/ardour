@@ -9,14 +9,14 @@
 
 <http://ardour.org/credits.html>
 	a foaf:Person ;
-	foaf:name "Ardour Team" ;
+	foaf:name "Ardour Community" ;
 	foaf:homepage <http://ardour.org/> .
 
 <https://community.ardour.org/node/7596>
 	a lv2:Plugin, lv2:InstrumentPlugin, doap:Project;
 	doap:license <http://usefulinc.com/doap/licenses/gpl> ;
 	doap:maintainer <http://ardour.org/credits.html> ;
-	doap:name "a-Reasonable Synth";
+	doap:name "ACE Reasonable Synth";
 	lv2:optionalFeature lv2:hardRTCapable ;
 	lv2:requiredFeature urid:map ;
 	rdfs:comment """A simple synthesizer with no controls at all but a reasonable sound instead. Note that this synth does not respond to any Control or Program Messages. Its main purpose is to act as sensible default on new installations until other plugins are installed.""" ;

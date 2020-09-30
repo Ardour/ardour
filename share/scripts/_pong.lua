@@ -1,6 +1,6 @@
 ardour {
 	["type"]    = "dsp",
-	name        = "a-Pong",
+	name        = "Pong",
 	category    = "Toy",
 	license     = "MIT",
 	author      = "Ardour Lua Task Force",

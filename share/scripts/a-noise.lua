@@ -1,9 +1,9 @@
 ardour {
 	["type"]    = "dsp",
-	name        = "a-Noise",
+	name        = "ACE Noise",
 	category    = "Utility",
 	license     = "MIT",
-	author      = "Ardour Team",
+	author      = "Ardour Community",
 	description = [[Noise Generator featuring either white noise with uniform or gaussian distribution, or pink-noise. The signal level can be customized.]]
 }
 

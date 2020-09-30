@@ -1,9 +1,9 @@
 ardour {
 	["type"]    = "dsp",
-	name        = "a-b Switch",
+	name        = "ACE A/B Switch",
 	category    = "Amplifier",
 	license     = "MIT",
-	author      = "Ardour Team",
+	author      = "Ardour Community",
 	description = [[Auotomatable A/B Input Select. Channels grouped:
 Mono out:  In 1/2 -> Out 1
 Stereo out: In 1/3 -> Out 1, In 2/4 -> Out 2

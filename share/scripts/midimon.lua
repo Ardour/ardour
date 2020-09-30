@@ -1,9 +1,9 @@
 ardour {
 	["type"]    = "dsp",
-	name        = "a-MIDI Monitor",
+	name        = "ACE MIDI Monitor",
 	category    = "Visualization",
 	license     = "GPLv2",
-	author      = "Ardour Team",
+	author      = "Ardour Community",
 	description = [[Display recent MIDI events inline in the mixer strip]]
 }
 

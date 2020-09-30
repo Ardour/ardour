@@ -7,7 +7,7 @@
 
 <http://ardour.org/credits.html>
 	a foaf:Person ;
-	foaf:name "Ardour Team" ;
+	foaf:name "Ardour Community" ;
 	foaf:homepage <http://ardour.org/> .
 
 unit:db-display
@@ -177,7 +177,7 @@ unit:db-display
 A powerful stereo compressor.
 """ ;
 
-    doap:name "a-Compressor stereo" ;
+    doap:name "ACE Compressor (stereo)" ;
     doap:license "GPL v2+" ;
     doap:maintainer <http://ardour.org/credits.html> ;
 

@@ -1,9 +1,9 @@
 ardour {
 	["type"]    = "dsp",
-	name        = "a-Inline Scope",
+	name        = "ACE Inline Scope",
 	category    = "Visualization",
 	license     = "MIT",
-	author      = "Ardour Team",
+	author      = "Ardour Community",
 	description = [[Mixer strip inline waveform display]]
 }
 
