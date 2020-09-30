@@ -1078,14 +1078,7 @@ VST3PI::VST3PI (boost::shared_ptr<ARDOUR::VST3PluginModule> m, std::string uniqu
 	synchronize_states ();
 
 	/* enable all MIDI busses */
-	int32 n_bus_in  = _component->getBusCount (Vst::kEvent, Vst::kInput);
-	int32 n_bus_out = _component->getBusCount (Vst::kEvent, Vst::kOutput);
-	for (int32 i = 0; i < n_bus_in; ++i) {
-		_component->activateBus (Vst::kEvent, Vst::kInput, i, true);
-	}
-	for (int32 i = 0; i < n_bus_out; ++i) {
-		_component->activateBus (Vst::kEvent, Vst::kOutput, i, true);
-	}
+	set_event_bus_state (true);
 }
 
 VST3PI::~VST3PI ()
@@ -1118,6 +1111,9 @@ VST3PI::unit_data ()
 void
 VST3PI::terminate ()
 {
+	/* disable all MIDI busses */
+	set_event_bus_state (false);
+
 	deactivate ();
 
 	_processor = 0;
@@ -1762,6 +1758,20 @@ VST3PI::add_event (Evoral::Event<samplepos_t> const& ev, int32_t bus)
 	e.ppqPosition  = _context.projectTimeMusic;
 	if (evoral_to_vst3 (e, ev, bus)) {
 		_input_events.addEvent (e);
+	}
+}
+
+
+void
+VST3PI::set_event_bus_state (bool enable)
+{
+	int32 n_bus_in  = _component->getBusCount (Vst::kEvent, Vst::kInput);
+	int32 n_bus_out = _component->getBusCount (Vst::kEvent, Vst::kOutput);
+	for (int32 i = 0; i < n_bus_in; ++i) {
+		_component->activateBus (Vst::kEvent, Vst::kInput, i, enable);
+	}
+	for (int32 i = 0; i < n_bus_out; ++i) {
+		_component->activateBus (Vst::kEvent, Vst::kOutput, i, enable);
 	}
 }
 

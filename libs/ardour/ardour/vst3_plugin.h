@@ -151,6 +151,7 @@ private:
 	VST3PI (const VST3PI&);
 
 	void terminate ();
+
 	bool connect_components ();
 	bool disconnect_components ();
 
@@ -164,6 +165,8 @@ private:
 
 	void set_parameter_by_id (Vst::ParamID id, float value, int32 sample_off);
 	void set_parameter_internal (Vst::ParamID id, float& value, int32 sample_off, bool normalized);
+
+	void set_event_bus_state (bool enabled);
 
 	bool midi_controller (int32_t, int16_t, Vst::CtrlNumber, Vst::ParamID &id);
 	bool live_midi_cc (int32_t, int16_t, Vst::CtrlNumber);
