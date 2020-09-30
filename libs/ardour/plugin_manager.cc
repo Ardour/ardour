@@ -1770,7 +1770,7 @@ PluginManager::vst3_discover (string const& path, bool cache_only)
 
 static void vst3_scanner_log (std::string msg, std::string bundle_path)
 {
-	PBD::error << string_compose ("VST<%1> scanner: %2", bundle_path, msg) << endmsg;
+	PBD::info << string_compose ("VST3<%1>: %2", bundle_path, msg) << endmsg;
 }
 
 bool

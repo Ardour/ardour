@@ -1676,7 +1676,7 @@ VST3PI::update_shadow_data ()
 	for (i = _ctrl_index_id.begin (); i != _ctrl_index_id.end (); ++i) {
 		Vst::ParamValue v = _controller->getParamNormalized (i->second);
 		if (_shadow_data[i->first] != v) {
-#ifndef NDEBUG
+#if 0 // DEBUG
 			printf ("VST3PI::update_shadow_data %d: %f -> %f\n", i->first,
 					_shadow_data[i->first], _controller->getParamNormalized (i->second));
 #endif
