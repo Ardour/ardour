@@ -1261,10 +1261,16 @@ VST3PI::restartComponent (int32 flags)
 	printf ("VST3PI::restartComponent %x\n", flags);
 #endif
 	if (flags & Vst::kReloadComponent) {
-		return kNotImplemented;
-	}
-	if (flags & Vst::kIoChanged) {
-		return kNotImplemented;
+		/* according to the spec, "The host has to unload completely
+		 * the plug-in (controller/processor) and reload it."
+		 *
+		 * However other implementations, in particular JUCE, only
+		 * re-activates the plugin. So let's follow their lead for
+		 * the time being.
+		 */
+		warning << "VST3: Vst::kReloadComponent (ignored)" << endmsg;
+		deactivate ();
+		activate ();
 	}
 	if (flags & Vst::kParamValuesChanged) {
 		update_shadow_data ();
@@ -1274,6 +1280,14 @@ VST3PI::restartComponent (int32 flags)
 		deactivate ();
 		activate ();
 		_plugin_latency.reset ();
+	}
+	if (flags & Vst::kIoChanged) {
+		warning << "VST3: Vst::kIoChanged (not implemented)" << endmsg;
+#if 0
+		update_processor ();
+		// TODO getBusArrangement(); enable_io()
+#endif
+		return kNotImplemented;
 	}
 	return kResultOk;
 }
