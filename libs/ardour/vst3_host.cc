@@ -474,7 +474,7 @@ RAMStream::RAMStream (uint8_t* data, size_t size)
 	, _pos (0)
 	, _readonly (true)
 {
-	if (reallocate_buffer (_size, true)) {
+	if (size > 0 && reallocate_buffer (_size, true)) {
 		memcpy (_data, data, _size);
 	} else {
 		_size = 0;
@@ -494,7 +494,7 @@ RAMStream::RAMStream (std::string const& fn)
 	if (!g_file_get_contents (fn.c_str (), &buf, &length, NULL)) {
 		return;
 	}
-	if (reallocate_buffer (length, true)) {
+	if (length > 0 && reallocate_buffer (length, true)) {
 		_size = length;
 		memcpy (_data, buf, _size);
 	}
