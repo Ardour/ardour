@@ -1848,7 +1848,8 @@ VST3PI::enable_io (std::vector<bool> const& ins, std::vector<bool> const& outs)
 		sa_out.push_back (0);
 	}
 
-	_processor->setBusArrangements (&sa_in[0], sa_in.size(), &sa_out[0], sa_out.size());
+	_processor->setBusArrangements (sa_in.size () > 0 ? &sa_in[0] : NULL, sa_in.size (),
+	                                sa_out.size () > 0 ? &sa_out[0] : NULL, sa_out.size ());
 
 #if 0
 	for (int32 i = 0; i < n_bus_in; ++i) {
