@@ -1,7 +1,7 @@
 ardour {
 	["type"]    = "EditorHook",
 	name        = "Varispeed Test - 100ms Callback",
-	author      = "Ardour Lua Task Force",
+	author      = "Ardour Team",
 	description = "An example script that invokes a callback a every 0.1sec and modifies the transport speed",
 }
 

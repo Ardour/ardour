@@ -1,7 +1,7 @@
 ardour {
 	["type"]    = "EditorAction",
 	name        = "Rewind",
-	author      = "Ardour Lua Task Force",
+	author      = "Ardour Team",
 	description = [[An Example Ardour Editor Action Script.]]
 }
 

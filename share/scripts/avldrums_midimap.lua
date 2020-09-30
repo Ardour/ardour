@@ -3,7 +3,7 @@ ardour {
     name        = "AVL Drumkit MIDI Map",
     category    = "Utility",
     license     = "MIT",
-    author      = "AVL and Friends", -- based on MIDI Note Mapper by Alby Musaelian
+    author      = "Ardour Community", -- based on MIDI Note Mapper by Alby Musaelian
     description = [[Map MIDI notes to drum-kit pcs of 'Black Pearl' or 'Red Zeppelin' AVL drumkit plugins. Unmapped notes are ignored. In case of duplicate assignments the later one is preferred.]]
 }
 

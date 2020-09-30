@@ -3,7 +3,7 @@ ardour {
 	name        = "MIDI Record Enable",
 	category    = "Example", -- "Utility"
 	license     = "MIT",
-	author      = "Ardour Lua Task Force",
+	author      = "Ardour Team",
 	description = [[An example script to start recording on note-on.]]
 }
 

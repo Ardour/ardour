@@ -1,7 +1,7 @@
 ardour {
 	["type"]    = "EditorHook",
 	name        = "Periodically Save Snapshot",
-	author      = "Ardour Lua Task Force",
+	author      = "Ardour Team",
 	description = "Save a session-snapshot periodically (every 15mins) named after the current date-time",
 }
 

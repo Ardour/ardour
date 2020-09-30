@@ -3,7 +3,7 @@ ardour {
 	name        = "Midi Filter",
 	category    = "Example", -- "Utility"
 	license     = "MIT",
-	author      = "Ardour Lua Task Force",
+	author      = "Ardour Team",
 	description = [[An Example Midi Filter for prototyping.]]
 }
 

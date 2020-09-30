@@ -1,7 +1,7 @@
 ardour {
 	["type"] = "EditorAction",
 	name = "File Name Test",
-	author = "Ardour Lua Taskforce",
+	author = "Ardour Team",
 	description = [[Example Plugin to show to to select a file and remember the most recently used file.]]
 }
 

@@ -3,7 +3,7 @@ ardour {
 	name        = "Simple Amp II",
 	category    = "Example",
 	license     = "MIT",
-	author      = "Ardour Lua Task Force",
+	author      = "Ardour Team",
 	description = [[
 	An Example DSP Plugin for processing audio, to
 	be used with Ardour's Lua scripting facility.]]

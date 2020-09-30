@@ -2,7 +2,7 @@ ardour {
 	["type"]    = "session",
 	name        = "Stop at Marker",
 	license     = "MIT",
-	author      = "Ardour Lua Task Force",
+	author      = "Ardour Team",
 	description = [[Stop the transport on every location marker when rolling forward.]]
 }
 

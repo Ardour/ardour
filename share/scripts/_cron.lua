@@ -1,7 +1,7 @@
 ardour {
 	["type"]    = "EditorHook",
 	name        = "Timed Event Example",
-	author      = "Ardour Lua Task Force",
+	author      = "Ardour Team",
 	description = "Perform actions at specific wallclock time, example record",
 }
 

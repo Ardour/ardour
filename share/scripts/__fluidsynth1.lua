@@ -3,7 +3,7 @@ ardour {
 	name        = "Lua Fluid Synth",
 	category    = "Instrument",
 	license     = "MIT",
-	author      = "Ardour Lua Task Force",
+	author      = "Ardour Team",
 	description = [[An Example Synth for Prototyping.]]
 }
 

@@ -16,7 +16,7 @@ ardour {
 	["type"]    = "session",
 	name        = "Modulate Plugin Parameter",
 	license     = "MIT",
-	author      = "Ardour Lua Task Force",
+	author      = "Ardour Team",
 	description = [[An example session to modulate a plugin parameter.]]
 }
 

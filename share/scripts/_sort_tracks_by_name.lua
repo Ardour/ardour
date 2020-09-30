@@ -1,7 +1,7 @@
 ardour {
 	["type"] = "EditorAction",
 	name = "Track Sort",
-	author = "Ardour Lua Taskforce",
+	author = "Ardour Team",
 	description = [[Sort tracks alphabetically by name]]
 }
 

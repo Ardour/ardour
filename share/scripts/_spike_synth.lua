@@ -3,7 +3,7 @@ ardour {
 	name        = "Spike Synth",
 	category    = "Instrument",
 	license     = "MIT",
-	author      = "Ardour Lua Task Force",
+	author      = "Ardour Team",
 	description = [[A debug and test-instrumentation synth. This plugin is useful with Ardour's "Dummy" backend "Engine-Pulse" mode to verify capture alignment. This plugin generate the exact same audio-signal from MIDI data that the backend also generates: Note-on: +1, Note-off: -1.]]
 }
 

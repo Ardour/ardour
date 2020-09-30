@@ -1,7 +1,7 @@
 ardour {
 	["type"]    = "EditorHook",
 	name        = "Save Extra Data (instruments)",
-	author      = "Ardour Lua Task Force",
+	author      = "Ardour Team",
 	description = "Export custom data when the session is saved",
 }
 

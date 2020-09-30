@@ -1,7 +1,7 @@
 ardour {
     ["type"] = "EditorAction",
     name = "Track Organizer",
-    author = "Mixbus Lua Taskforce",
+    author = "Mixbus Team",
     description = [[Easily modifiable session overview and track property editor]]
 }
 

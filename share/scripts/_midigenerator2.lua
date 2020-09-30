@@ -3,7 +3,7 @@ ardour {
 	name        = "MIDI Generator II",
 	category    = "Example",
 	license     = "MIT",
-	author      = "Ardour Lua Task Force",
+	author      = "Ardour Team",
 	description = [[An Example Midi Generator for prototyping.]]
 }
 

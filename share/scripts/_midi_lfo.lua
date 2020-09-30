@@ -3,7 +3,7 @@ ardour {
 	name        = "MIDI LFO",
 	category    = "Example", -- Utility
 	license     = "MIT",
-	author      = "Ardour Lua Task Force",
+	author      = "Ardour Team",
 	description = [[MIDI CC LFO Example -- Triangle full scale CC Parameter automation]]
 }
 

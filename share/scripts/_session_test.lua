@@ -1,7 +1,7 @@
 ardour {
 	["type"]    = "session",
 	name        = "Good Night",
-	author      = "Ardour Lua Task Force",
+	author      = "Ardour Team",
 	description = [[
 	Example Ardour Session Script.
 	Session scripts are called at the beginning of every process-callback (before doing any audio processing).

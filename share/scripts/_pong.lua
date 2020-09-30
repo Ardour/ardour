@@ -3,7 +3,7 @@ ardour {
 	name        = "Pong",
 	category    = "Toy",
 	license     = "MIT",
-	author      = "Ardour Lua Task Force",
+	author      = "Ardour Team",
 	description = [[A console classic for your console]]
 }
 

@@ -1,7 +1,7 @@
 ardour {
 	["type"] = "EditorAction",
 	name = "Mixer Store",
-	author = "Ardour Lua Taskforce",
+	author = "Ardour Team",
 	description = [[
 	Stores the current Mixer state as a file
 	that can be read and recalled arbitrarily.

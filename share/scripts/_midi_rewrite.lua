@@ -2,7 +2,7 @@ ardour {
 	["type"]    = "session",
 	name        = "Rewrite Midi",
 	license     = "MIT",
-	author      = "Ardour Lua Task Force",
+	author      = "Ardour Team",
 	description = [[An example session script preprocesses midi buffers.]]
 }
 

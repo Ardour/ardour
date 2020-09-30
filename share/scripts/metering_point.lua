@@ -1,7 +1,7 @@
 ardour {
     ["type"] = "EditorAction",
     name = "Meter Point",
-    author = "Ardour Lua Taskforce",
+    author = "Ardour Team",
     description = [[Batch change metering point for selected or tracks in the given session.]]
 }
 

@@ -1,7 +1,7 @@
 ardour {
 	["type"]    = "EditorHook",
 	name        = "Make all Regions Transparent",
-	author      = "Ardour Lua Task Force",
+	author      = "Ardour Team",
 	description = "While the transport is looping, all regions become transparent.",
 }
 

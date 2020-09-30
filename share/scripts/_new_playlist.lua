@@ -2,7 +2,7 @@ ardour {
 	["type"]    = "EditorAction",
 	name        = "New Playlists",
 	license     = "MIT",
-	author      = "Ardour Lua Taskforce",
+	author      = "Ardour Team",
 	description = [[Prompts and builds a new playlist for every track in the session. Beware the operation cannot be cancelled.]]
 }
 

@@ -1,7 +1,7 @@
 ardour {
 	["type"]    = "EditorHook",
 	name        = "Load Session Hook Example",
-	author      = "Ardour Lua Task Force",
+	author      = "Ardour Team",
 	description = "Display some dialogs during session load and execute actions",
 }
 

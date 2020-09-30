@@ -3,7 +3,7 @@ ardour {
 	name        = "Midi Passthru",
 	category    = "Example",
 	license     = "MIT",
-	author      = "Ardour Lua Task Force",
+	author      = "Ardour Team",
 	description = [[An Example Audio/MIDI Passthrough Plugin using Buffer Pointers]]
 }
 

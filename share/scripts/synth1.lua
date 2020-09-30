@@ -3,7 +3,7 @@ ardour {
 	name        = "Simple Synth",
 	category    = "Instrument",
 	license     = "MIT",
-	author      = "Ardour Lua Task Force",
+	author      = "Ardour Team",
 	description = [[An Example synth for prototyping: Sine-wave with a basic attack/sustain/release envelope, variable number of output channels.]]
 }
 

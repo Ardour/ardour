@@ -1,7 +1,7 @@
 ardour {
 	["type"]    = "EditorHook",
 	name        = "Callback Example",
-	author      = "Ardour Lua Task Force",
+	author      = "Ardour Team",
 	description = "Rewind On Solo Change, Write a file when regions are moved",
 }
 
