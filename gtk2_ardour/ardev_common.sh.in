@@ -1,6 +1,8 @@
 [ -z $TOP ] && echo "ardev_common.sh: TOP var must be set" >&2 && exit 1
 
-TOP=`realpath "$TOP"`
+if which realpath > /dev/null; then
+	TOP=`realpath "$TOP"`
+fi
 
 #export G_DEBUG=fatal_criticals
 
