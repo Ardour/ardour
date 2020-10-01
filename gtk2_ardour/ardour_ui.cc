@@ -2166,7 +2166,7 @@ ARDOUR_UI::update_clocks ()
 	if (!_session) return;
 
 	if (editor && !editor->dragging_playhead() && !editor->pending_locate_request()) {
-		Clock (_session->audible_sample()); /* EMIT_SIGNAL */
+		Clock (timepos_t (_session->audible_sample())); /* EMIT_SIGNAL */
 	}
 }
 

@@ -293,7 +293,7 @@ RegionSelection::start_time () const
 		return timepos_t ();
 	}
 
-	timepos_t s = timepos_t::max (front()->nt_position().time_domain());
+	timepos_t s = timepos_t::max (front()->region()->nt_position().time_domain());
 
 	for (RegionSelection::const_iterator i = begin(); i != end(); ++i) {
 		s = min (s, (*i)->region()->nt_position ());

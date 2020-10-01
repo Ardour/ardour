@@ -153,7 +153,7 @@ public:
 	 * ensure_snap overrides SnapOff and magnetic snap
 	 */
 	virtual void snap_to (Temporal::timepos_t & first,
-	                      ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
+	                      Temporal::RoundMode   direction = Temporal::RoundNearest,
 	                      ARDOUR::SnapPref    gpref = ARDOUR::SnapToAny_Visual,
 	                      bool                ensure_snap = false) = 0;
 
@@ -359,7 +359,7 @@ public:
 	virtual void add_to_idle_resize (TimeAxisView*, int32_t) = 0;
 	virtual Temporal::timecnt_t get_nudge_distance (Temporal::timepos_t const & pos, Temporal::timecnt_t& next) = 0;
 	virtual Temporal::timecnt_t get_paste_offset (Temporal::timepos_t const & pos, unsigned paste_count, Temporal::timecnt_t const & duration) = 0;
-	virtual unsigned get_grid_beat_divisions(Temporal::timepos_t const & position) = 0;
+	virtual unsigned get_grid_beat_divisions () = 0;
 	virtual Temporal::Beats get_grid_type_as_beats (bool& success, Temporal::timepos_t const & position) = 0;
 	virtual int32_t get_grid_music_divisions (uint32_t event_state) = 0;
 	virtual void edit_notes (MidiRegionView*) = 0;
@@ -498,7 +498,7 @@ public:
 
 	virtual void snap_to_with_modifier (Temporal::timepos_t & first,
 	                                    GdkEvent const*      ev,
-	                                    ARDOUR::RoundMode    direction = ARDOUR::RoundNearest,
+	                                    Temporal::RoundMode    direction = Temporal::RoundNearest,
 	                                    ARDOUR::SnapPref     gpref = ARDOUR::SnapToAny_Visual) = 0;
 
 	virtual void set_snapped_cursor_position (samplepos_t pos) = 0;

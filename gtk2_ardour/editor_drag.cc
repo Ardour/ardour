@@ -422,7 +422,7 @@ Drag::setup_snap_delta (MusicSample pos)
 {
 	TempoMap& map (_editor->session()->tempo_map());
 	MusicSample snap (pos);
-	_editor->snap_to (snap, ARDOUR::RoundNearest, ARDOUR::SnapToAny_Visual, true);
+	_editor->snap_to (snap, Temporal::RoundNearest, ARDOUR::SnapToAny_Visual, true);
 	_snap_delta = snap.sample - pos.sample;
 
 	_snap_delta_music = 0.0;

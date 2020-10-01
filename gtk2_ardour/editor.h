@@ -353,7 +353,7 @@ public:
 
 	Temporal::timecnt_t get_nudge_distance (Temporal::timepos_t const & pos, Temporal::timecnt_t& next);
 	Temporal::timecnt_t get_paste_offset (Temporal::timepos_t const & pos, unsigned paste_count, Temporal::timecnt_t const & duration);
-	unsigned get_grid_beat_divisions(Temporal::timepos_t const & position);
+	unsigned get_grid_beat_divisions ();
 	Temporal::Beats get_grid_type_as_beats (bool& success, Temporal::timepos_t const & position);
 
 	int32_t get_grid_music_divisions (uint32_t event_state);
@@ -476,13 +476,13 @@ public:
 	TrackViewList axis_views_from_routes (boost::shared_ptr<ARDOUR::RouteList>) const;
 
 	void snap_to (Temporal::timepos_t & first,
-	              ARDOUR::RoundMode    direction = ARDOUR::RoundNearest,
+	              Temporal::RoundMode    direction = Temporal::RoundNearest,
 	              ARDOUR::SnapPref     pref = ARDOUR::SnapToAny_Visual,
 	              bool                 ensure_snap = false);
 
 	void snap_to_with_modifier (Temporal::timepos_t & first,
 	                            GdkEvent const*      ev,
-	                            ARDOUR::RoundMode    direction = ARDOUR::RoundNearest,
+	                            Temporal::RoundMode    direction = Temporal::RoundNearest,
 	                            ARDOUR::SnapPref     gpref = ARDOUR::SnapToAny_Visual);
 
 	void set_snapped_cursor_position (samplepos_t pos);
@@ -1088,10 +1088,10 @@ private:
 	void    select_all_selectables_between (bool within);
 	void    select_range_between ();
 
-	boost::shared_ptr<ARDOUR::Region> find_next_region (ARDOUR::samplepos_t, ARDOUR::RegionPoint, int32_t dir, TrackViewList&, TimeAxisView** = 0);
-	ARDOUR::samplepos_t find_next_region_boundary (ARDOUR::samplepos_t, int32_t dir, const TrackViewList&);
+	boost::shared_ptr<ARDOUR::Region> find_next_region (Temporal::timepos_t const &, ARDOUR::RegionPoint, int32_t dir, TrackViewList&, TimeAxisView** = 0);
+	Temporal::timepos_t find_next_region_boundary (Temporal::timepos_t const &, int32_t dir, const TrackViewList&);
 
-	std::vector<ARDOUR::samplepos_t> region_boundary_cache;
+	std::vector<Temporal::timepos_t> region_boundary_cache;
 	void mark_region_boundary_cache_dirty () { _region_boundary_cache_dirty = true; }
 	void build_region_boundary_cache ();
 	bool	_region_boundary_cache_dirty;
@@ -2247,37 +2247,37 @@ private:
 	void select_next_stripable (bool routes_only = true);
 	void select_prev_stripable (bool routes_only = true);
 
-	ARDOUR::MusicSample snap_to_minsec (ARDOUR::MusicSample start,
-	                                    ARDOUR::RoundMode   direction,
+	Temporal::timepos_t snap_to_minsec (Temporal::timepos_t const & start,
+	                                    Temporal::RoundMode   direction,
 	                                    ARDOUR::SnapPref    gpref);
 
-	ARDOUR::MusicSample snap_to_cd_frames (ARDOUR::MusicSample start,
-	                                       ARDOUR::RoundMode   direction,
+	Temporal::timepos_t snap_to_cd_frames (Temporal::timepos_t const & start,
+	                                       Temporal::RoundMode   direction,
 	                                       ARDOUR::SnapPref    gpref);
 
-	ARDOUR::MusicSample snap_to_bbt (ARDOUR::MusicSample start,
-	                                 ARDOUR::RoundMode   direction,
+	Temporal::timepos_t snap_to_bbt (Temporal::timepos_t const & start,
+	                                 Temporal::RoundMode   direction,
 	                                 ARDOUR::SnapPref    gpref);
 
-	ARDOUR::MusicSample snap_to_timecode (ARDOUR::MusicSample start,
-	                                      ARDOUR::RoundMode   direction,
+	Temporal::timepos_t snap_to_timecode (Temporal::timepos_t const & start,
+	                                      Temporal::RoundMode   direction,
 	                                      ARDOUR::SnapPref    gpref);
 
-	ARDOUR::MusicSample snap_to_grid (ARDOUR::MusicSample start,
-	                                  ARDOUR::RoundMode   direction,
+	Temporal::timepos_t snap_to_grid (Temporal::timepos_t const & start,
+	                                  Temporal::RoundMode   direction,
 	                                  ARDOUR::SnapPref    gpref);
 
-	void snap_to_internal (Temporal::timepos_t & first,
-	                       Temporal::RoundMode   direction = Temporal::RoundNearest,
-	                       bool                for_mark  = false,
-			       bool                ensure_snap = false);
+	void snap_to_internal (Temporal::timepos_t& first,
+	                       Temporal::RoundMode    direction = Temporal::RoundNearest,
+	                       ARDOUR::SnapPref     gpref = ARDOUR::SnapToAny_Visual,
+	                       bool                 ensure_snap = false);
 
 	void timecode_snap_to_internal (Temporal::timepos_t & first,
 	                                Temporal::RoundMode   direction = Temporal::RoundNearest,
 	                                bool                for_mark  = false);
 
-	samplepos_t snap_to_marker (samplepos_t       presnap,
-	                            ARDOUR::RoundMode direction = ARDOUR::RoundNearest);
+	Temporal::timepos_t snap_to_marker (Temporal::timepos_t const & presnap,
+	                                    Temporal::RoundMode direction = Temporal::RoundNearest);
 
 	RhythmFerret* rhythm_ferret;
 

@@ -269,7 +269,7 @@ public:
 	 *
 	 *  (either RapidScreenUpdate || SuperRapidScreenUpdate - user-config)
 	 */
-	static sigc::signal<void, samplepos_t> Clock;
+	static sigc::signal<void, Temporal::timepos_t> Clock;
 
 	static void close_all_dialogs () { CloseAllDialogs(); }
 	static sigc::signal<void> CloseAllDialogs;

@@ -166,7 +166,7 @@ TimeInfoBox::clock_button_release_event (GdkEventButton* ev, AudioClock* src)
 
 	if (ev->button == 1) {
 		if (!src->off()) {
-			_session->request_locate (src->current_time ());
+			_session->request_locate (src->current_time ().samples());
 		}
 		return true;
 	}
@@ -237,13 +237,13 @@ TimeInfoBox::region_selection_changed ()
 	timepos_t s, e;
 	Selection& selection (Editor::instance().get_selection());
 	s = selection.regions.start_time();
-	e = selection.regions.end_sample_time();
+	e = selection.regions.end_time();
 	selection_start->set_off (false);
 	selection_end->set_off (false);
 	selection_length->set_off (false);
-	selection_start->set_time (s);
-	selection_end->set_time (e);
-	selection_length->set_duration (e, false, s);
+	selection_start->set (s);
+	selection_end->set (e);
+	selection_length->set_duration (timecnt_t (e), false, timecnt_t (s));
 }
 
 void
@@ -272,8 +272,8 @@ TimeInfoBox::selection_changed ()
 					selection_start->set_off (false);
 					selection_end->set_off (false);
 					selection_length->set_off (false);
-					selection_start->set_time (selection.time.start_time());
-					selection_end->set_time (selection.time.end_time());
+					selection_start->set (selection.time.start_time());
+					selection_end->set (selection.time.end_time());
 					selection_length->set_is_duration (true, selection.time.start_time());
 					selection_length->set_duration (selection.time.start_time().distance (selection.time.end_time()));
 				} else {
@@ -285,7 +285,7 @@ TimeInfoBox::selection_changed ()
 				s = max_samplepos;
 				e = 0;
 				for (PointSelection::iterator i = selection.points.begin(); i != selection.points.end(); ++i) {
-					samplepos_t const p = (*i)->line().session_position ((*i)->model ());
+					timepos_t const p = (*i)->line().session_position ((*i)->model ());
 					s = min (s, p);
 					e = max (e, p);
 				}
@@ -336,8 +336,8 @@ TimeInfoBox::selection_changed ()
 			selection_start->set_off (false);
 			selection_end->set_off (false);
 			selection_length->set_off (false);
-			selection_start->set_time (selection.time.start_time());
-			selection_end->set_time (selection.time.end_time());
+			selection_start->set (selection.time.start_time());
+			selection_end->set (selection.time.end_time());
 			selection_length->set_is_duration (true, selection.time.start_time());
 			selection_length->set_duration (selection.time.start_time().distance (selection.time.end_time()));
 		}
@@ -384,6 +384,6 @@ TimeInfoBox::punch_changed (Location* loc)
 	punch_start->set_off (false);
 	punch_end->set_off (false);
 
-	punch_start->set_time (loc->start());
-	punch_end->set_time (loc->end());
+	punch_start->set (loc->start());
+	punch_end->set (loc->end());
 }
