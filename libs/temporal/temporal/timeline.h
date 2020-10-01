@@ -217,6 +217,7 @@ class LIBTEMPORAL_API timepos_t : public int62_t  {
 	std::string to_string () const;
 
 	static timepos_t max (TimeDomain td) { return timepos_t (td != AudioTime, int62_t::max); }
+	static timepos_t smallest_step (TimeDomain td) { return timepos_t (td != AudioTime, 1); }
 
   private:
 	/* special private constructor for use when constructing timepos_t as a
