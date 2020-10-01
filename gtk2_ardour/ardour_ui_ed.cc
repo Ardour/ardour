@@ -745,6 +745,7 @@ ARDOUR_UI::build_menu_bar ()
 	sample_rate_label.set_use_markup ();
 	format_label.set_name ("Format");
 	session_path_label.set_name ("Path");
+	snapshot_name_label.set_name ("Name");
 	format_label.set_use_markup ();
 
 	ev_dsp->add (dsp_load_label);
@@ -774,6 +775,7 @@ ARDOUR_UI::build_menu_bar ()
 	hbox->pack_end (*ev_timecode, false, false, 6);
 	hbox->pack_end (*ev_format, false, false, 6);
 	hbox->pack_end (peak_thread_work_label, false, false, 6);
+	hbox->pack_end (snapshot_name_label, false, false, 6);
 	hbox->pack_end (*ev_path, false, false, 6);
 
 	menu_hbox.pack_end (*ev, true, true, 2);
@@ -782,6 +784,7 @@ ARDOUR_UI::build_menu_bar ()
 	menu_bar_base.add (menu_hbox);
 
 	_status_bar_visibility.add (&session_path_label    ,X_("Path"),      _("Path to Session"), false);
+	_status_bar_visibility.add (&snapshot_name_label   ,X_("Name"),      _("Snapshot Name and Modified Indicator"), false);
 	_status_bar_visibility.add (&peak_thread_work_label,X_("Peakfile"),  _("Active Peak-file Work"), false);
 	_status_bar_visibility.add (&format_label,          X_("Format"),    _("File Format"), false);
 	_status_bar_visibility.add (&timecode_format_label, X_("TCFormat"),  _("Timecode Format"), false);

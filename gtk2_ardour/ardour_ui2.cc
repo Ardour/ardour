@@ -971,6 +971,11 @@ ARDOUR_UI::toggle_follow_edits ()
 void
 ARDOUR_UI::update_title ()
 {
+	stringstream snap_label;
+	snap_label << X_("<span weight=\"ultralight\">")
+	           << _("Name")
+	           << X_("</span>: ");
+
 	if (_session) {
 		bool dirty = _session->dirty();
 
@@ -989,10 +994,13 @@ ARDOUR_UI::update_title ()
 		WindowTitle title (session_name);
 		title += Glib::get_application_name();
 		_main_window.set_title (title.get_string());
+
+		snap_label << Gtkmm2ext::markup_escape_text (session_name);
 	} else {
 		WindowTitle title (Glib::get_application_name());
 		_main_window.set_title (title.get_string());
+		snap_label << "-";
 	}
-
+	snapshot_name_label.set_markup (snap_label.str());
 }
 

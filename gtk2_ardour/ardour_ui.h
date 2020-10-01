@@ -624,6 +624,8 @@ private:
 	Gtk::Label session_path_label;
 	void update_path_label ();
 
+	Gtk::Label snapshot_name_label;
+
 	void every_second ();
 	void every_point_one_seconds ();
 	void every_point_zero_something_seconds ();
