@@ -1132,6 +1132,7 @@ VST3PI::terminate ()
 
 	if (_controller && controller_is_component == false) {
 		_controller->terminate ();
+		_controller->release ();
 	}
 
 	_component->release ();
