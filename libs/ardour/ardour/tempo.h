@@ -424,9 +424,9 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 
 	void replace_meter (const MeterSection&, const Meter&, const Temporal::BBT_Time& where, samplepos_t sample, PositionLockStyle pls);
 
-	MusicSample round_to_bar  (samplepos_t sample, RoundMode dir);
-	MusicSample round_to_beat (samplepos_t sample, RoundMode dir);
-	MusicSample round_to_quarter_note_subdivision (samplepos_t fr, int sub_num, RoundMode dir);
+	MusicSample round_to_bar  (samplepos_t sample, Temporal::RoundMode dir);
+	MusicSample round_to_beat (samplepos_t sample, Temporal::RoundMode dir);
+	MusicSample round_to_quarter_note_subdivision (samplepos_t fr, int sub_num, Temporal::RoundMode dir);
 
 	void set_length (samplepos_t samples);
 
@@ -611,7 +611,7 @@ private:
 	void recompute_meters (Metrics& metrics);
 	void recompute_map (Metrics& metrics, samplepos_t end = -1);
 
-	MusicSample round_to_type (samplepos_t fr, RoundMode dir, BBTPointType);
+	MusicSample round_to_type (samplepos_t fr, Temporal::RoundMode dir, BBTPointType);
 
 	const MeterSection& first_meter() const;
 	MeterSection&       first_meter();

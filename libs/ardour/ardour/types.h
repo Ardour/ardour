@@ -254,14 +254,6 @@ enum ColorMode {
 	TrackColor
 };
 
-enum RoundMode {
-	RoundDownMaybe  = -2,  ///< Round down only if necessary
-	RoundDownAlways = -1,  ///< Always round down, even if on a division
-	RoundNearest    = 0,   ///< Round to nearest
-	RoundUpAlways   = 1,   ///< Always round up, even if on a division
-	RoundUpMaybe    = 2    ///< Round up only if necessary
-};
-
 enum SnapPref {
 	SnapToAny_Visual    = 0, /**< Snap to the editor's visual snap
 	                          * (incoprorating snap prefs and the current zoom scaling)
