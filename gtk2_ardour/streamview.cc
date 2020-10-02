@@ -721,7 +721,7 @@ StreamView::setup_new_rec_layer_time (boost::shared_ptr<Region> region)
 	   top-layered region after the start of the region we are recording and make a note of it.
 	*/
 	if (_layer_display == Stacked) {
-		_new_rec_layer_time = _trackview.track()->playlist()->find_next_top_layer_position (region->start());
+		_new_rec_layer_time = _trackview.track()->playlist()->find_next_top_layer_position (region->position());
 	} else {
 		_new_rec_layer_time = max_samplepos;
 	}
