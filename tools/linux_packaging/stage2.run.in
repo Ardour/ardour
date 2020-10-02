@@ -705,13 +705,13 @@ fi
 # Allow to remove non-free stuff for purists
 ############################################
 
-if test "${PGM_VENDOR}" = "Ardour" -a -d "${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/LV2/Harrison.lv2"; then
+if test "${PGM_VENDOR}" = "Ardour" -a -d "${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/lib/LV2/Harrison.lv2"; then
 	ANSWER=$(VaildateYesNoEnterQuestion "Install Harrison XT plugins?" "y")
 
 	if test "n" = $ANSWER; then
-		${SUPER} rm -rf "${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/LV2/Harrison.lv2"
+		${SUPER} rm -rf "${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/lib/LV2/Harrison.lv2"
 	else
-		echo "Deploying Harrison plugins to ${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/LV2/Harrison.lv2"
+		echo "Deploying Harrison plugins to ${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/lib/LV2/Harrison.lv2"
 	fi
 fi
 
