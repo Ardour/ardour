@@ -77,6 +77,7 @@ public:
 	tresult PLUGIN_API resizeView (IPlugView* view, ViewRect* newSize) SMTG_OVERRIDE;
 
 	/* GUI */
+	bool has_editor () const;
 	IPlugView* view ();
 	void close_view ();
 	PBD::Signal2<void, int, int> OnResizeView;
@@ -151,6 +152,8 @@ private:
 	VST3PI (const VST3PI&);
 
 	void terminate ();
+
+	IPlugView* try_create_view () const;
 
 	bool connect_components ();
 	bool disconnect_components ();

@@ -226,17 +226,7 @@ VST3Plugin::possible_output () const
 bool
 VST3Plugin::has_editor () const
 {
-	IPlugView* view = const_cast<VST3PI*>(_plug)->view ();
-	if (view){
-#ifdef PLATFORM_WINDOWS
-		return kResultOk == view->isPlatformTypeSupported ("HWND");
-#elif defined (__APPLE__)
-		return kResultOk == view->isPlatformTypeSupported ("NSView");
-#else
-		return kResultOk == view->isPlatformTypeSupported ("X11EmbedWindowID");
-#endif
-	}
-	return false;
+	return _plug->has_editor ();
 }
 
 Steinberg::IPlugView*
@@ -1106,8 +1096,7 @@ VST3PI::unit_data ()
 void
 VST3PI::terminate ()
 {
-	close_view ();
-
+	assert (!_view);
 	/* disable all MIDI busses */
 	set_event_bus_state (false);
 
@@ -2210,16 +2199,26 @@ VST3PI::save_state (RAMStream& stream)
  */
 
 IPlugView*
+VST3PI::try_create_view () const
+{
+	IPlugView* view = _controller->createView (Vst::ViewType::kEditor);
+	if (!view) {
+		view = _controller->createView (0);
+	}
+	if (!view) {
+		view = FUnknownPtr<IPlugView> (_controller);
+		if (view) {
+			view->addRef ();
+		}
+	}
+	return view;
+}
+
+IPlugView*
 VST3PI::view ()
 {
 	if (!_view) {
-		_view = _controller->createView (Vst::ViewType::kEditor);
-		if (!_view) {
-			_view = _controller->createView (0);
-		}
-		if (!_view) {
-			_view = FUnknownPtr<IPlugView> (_controller);
-		}
+		_view = try_create_view ();
 		if (_view) {
 			_view->setFrame (this);
 		}
@@ -2237,6 +2236,30 @@ VST3PI::close_view ()
 	_view->setFrame (0);
 	_view->release ();
 	_view = 0;
+}
+
+bool
+VST3PI::has_editor () const
+{
+	IPlugView* view = _view;
+	if (!view){
+		view = try_create_view ();
+	}
+
+	bool rv = false;
+	if (view) {
+#ifdef PLATFORM_WINDOWS
+		rv = kResultOk == view->isPlatformTypeSupported (kPlatformTypeHWND);
+#elif defined (__APPLE__)
+		rv = kResultOk == view->isPlatformTypeSupported (kPlatformTypeNSView);
+#else
+		rv = kResultOk == view->isPlatformTypeSupported (kPlatformTypeX11EmbedWindowID);
+#endif
+		if (!_view) {
+			view->release ();
+		}
+	}
+	return rv;
 }
 
 #if SMTG_OS_LINUX
