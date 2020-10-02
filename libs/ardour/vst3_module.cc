@@ -16,6 +16,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#if (__cplusplus < 201103L)
+#  define nullptr 0
+#endif
+
 #ifdef __APPLE__
 #include <Carbon/Carbon.h>
 #elif defined PLATFORM_WINDOWS
