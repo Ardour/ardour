@@ -1106,6 +1106,8 @@ VST3PI::unit_data ()
 void
 VST3PI::terminate ()
 {
+	close_view ();
+
 	/* disable all MIDI busses */
 	set_event_bus_state (false);
 
