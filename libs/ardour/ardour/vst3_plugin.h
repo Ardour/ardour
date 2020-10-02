@@ -176,7 +176,6 @@ private:
 	std::vector <Vst::IConnectionPoint*> _connections;
 
 	FUID                  _fuid;
-	IPluginFactory*       _factory;
 	Vst::IComponent*      _component;
 	Vst::IEditController* _controller;
 	IPlugView*            _view;

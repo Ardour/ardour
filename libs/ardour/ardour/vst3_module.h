@@ -23,23 +23,34 @@
 
 #include "ardour/libardour_visibility.h"
 
+namespace Steinberg {
+	class IPluginFactory;
+}
+
 namespace ARDOUR {
 
 class LIBARDOUR_API VST3PluginModule
 {
 public:
 	static boost::shared_ptr<VST3PluginModule> load (std::string const& path);
-	VST3PluginModule () {}
+
+	VST3PluginModule () : _factory (0) {}
 	virtual ~VST3PluginModule () {}
 
-	virtual void* fn_ptr (const char* name) const = 0;
+	Steinberg::IPluginFactory* factory ();
 
 protected:
+	void release_factory ();
+
 	virtual bool init () = 0;
 	virtual bool exit () = 0;
+	virtual void* fn_ptr (const char* name) const = 0;
 
+private:
 	/* prevent copy construction */
 	VST3PluginModule (VST3PluginModule const&);
+
+	Steinberg::IPluginFactory* _factory;
 };
 
 } // namespace ARDOUR

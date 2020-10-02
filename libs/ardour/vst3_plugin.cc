@@ -941,7 +941,6 @@ VST3PluginInfo::is_instrument () const
 
 VST3PI::VST3PI (boost::shared_ptr<ARDOUR::VST3PluginModule> m, std::string unique_id)
 	: _module (m)
-	, _factory (0)
 	, _component (0)
 	, _controller (0)
 	, _view (0)
@@ -954,13 +953,9 @@ VST3PI::VST3PI (boost::shared_ptr<ARDOUR::VST3PluginModule> m, std::string uniqu
 	, _n_factory_presets (0)
 {
 	using namespace std;
+	IPluginFactory* factory = m->factory ();
 
-	GetFactoryProc fp = (GetFactoryProc)m->fn_ptr ("GetPluginFactory");
-	if (!fp) {
-		throw failed_constructor ();
-	}
-
-	if (!(_factory = fp ())) {
+	if (!factory) {
 		throw failed_constructor ();
 	}
 
@@ -968,7 +963,7 @@ VST3PI::VST3PI (boost::shared_ptr<ARDOUR::VST3PluginModule> m, std::string uniqu
 		throw failed_constructor ();
 	}
 
-	if (_factory->createInstance (_fuid.toTUID (), Vst::IComponent::iid, (void**)&_component) != kResultTrue) {
+	if (factory->createInstance (_fuid.toTUID (), Vst::IComponent::iid, (void**)&_component) != kResultTrue) {
 		throw failed_constructor ();
 	}
 
@@ -980,7 +975,7 @@ VST3PI::VST3PI (boost::shared_ptr<ARDOUR::VST3PluginModule> m, std::string uniqu
 	if (!_controller) {
 		TUID controllerCID;
 		if (_component->getControllerClassId (controllerCID) == kResultTrue) {
-			if (_factory->createInstance (controllerCID, Vst::IEditController::iid, (void**)&_controller) != kResultTrue) {
+			if (factory->createInstance (controllerCID, Vst::IEditController::iid, (void**)&_controller) != kResultTrue) {
 				throw failed_constructor ();
 			}
 			if (_controller && (_controller->initialize (HostApplication::getHostContext ()) != kResultOk)) {
@@ -1137,13 +1132,8 @@ VST3PI::terminate ()
 
 	_component->release ();
 
-	if (_factory) {
-		_factory->release ();
-	}
-
 	_controller = 0;
 	_component  = 0;
-	_factory  = 0;
 }
 
 bool

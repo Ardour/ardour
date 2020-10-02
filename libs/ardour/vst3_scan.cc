@@ -90,14 +90,7 @@ ARDOUR::discover_vst3 (boost::shared_ptr<VST3PluginModule> m, std::vector<VST3In
 {
 	using namespace std;
 
-	GetFactoryProc fp = (GetFactoryProc)m->fn_ptr ("GetPluginFactory");
-
-	if (!fp) {
-		cerr << "Failed to find 'GetPluginFactory' function\n";
-		return false;
-	}
-
-	IPluginFactory* factory = fp ();
+	IPluginFactory* factory = m->factory ();
 
 	if (!factory) {
 		cerr << "Failed to get VST3 plug-in factory\n";
@@ -199,7 +192,6 @@ ARDOUR::discover_vst3 (boost::shared_ptr<VST3PluginModule> m, std::vector<VST3In
 		}
 	}
 
-	factory->release ();
 	return true;
 }
 

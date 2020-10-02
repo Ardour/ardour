@@ -31,6 +31,7 @@
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
 
+#include "vst3/pluginterfaces/base/ipluginbase.h"
 #include "ardour/vst3_module.h"
 
 #include "pbd/i18n.h"
@@ -72,6 +73,7 @@ public:
 
 	~VST3MacModule ()
 	{
+		release_factory ();
 		if (_bundle) {
 			exit ();
 			CFRelease (_bundle);
@@ -126,6 +128,7 @@ public:
 
 	~VST3WindowsModule ()
 	{
+		release_factory ();
 		if (_handle) {
 			exit ();
 			FreeLibrary (_handle);
@@ -186,6 +189,7 @@ public:
 
 	~VST3LinuxModule ()
 	{
+		release_factory ();
 		if (_dll) {
 			exit ();
 			dlclose (_dll);
@@ -216,6 +220,26 @@ private:
 };
 
 #endif
+
+Steinberg::IPluginFactory*
+VST3PluginModule::factory ()
+{
+	if (!_factory) {
+		GetFactoryProc fp = (GetFactoryProc)fn_ptr ("GetPluginFactory");
+		if (fp) {
+			_factory = fp ();
+		}
+	}
+	return _factory;
+}
+
+void
+VST3PluginModule::release_factory ()
+{
+	if (_factory) {
+		_factory->release ();
+	}
+}
 
 boost::shared_ptr<VST3PluginModule>
 VST3PluginModule::load (std::string const& path)
