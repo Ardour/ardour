@@ -63,7 +63,7 @@ public:
 
 	void clear ();
 
-	void get_selectables (ARDOUR::samplepos_t, ARDOUR::samplepos_t, double, double, std::list<Selectable*> &, bool within = false);
+	void get_selectables (Temporal::timepos_t const &, Temporal::timepos_t const &, double, double, std::list<Selectable*> &, bool within = false);
 	void set_selected_points (PointSelection &);
 
 	std::list<boost::shared_ptr<AutomationLine> > get_lines () const;

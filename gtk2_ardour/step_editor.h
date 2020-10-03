@@ -82,7 +82,7 @@ public:
 	void stop_step_editing ();
 
 private:
-	ARDOUR::samplepos_t                    step_edit_insert_position;
+	Temporal::timepos_t                    step_edit_insert_position;
 	Temporal::Beats                        step_edit_beat_pos;
 	boost::shared_ptr<ARDOUR::MidiRegion>  step_edit_region;
 	MidiRegionView*                        step_edit_region_view;

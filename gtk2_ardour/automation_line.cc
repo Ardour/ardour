@@ -76,6 +76,10 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Editing;
 
+
+#define TIME_TO_SAMPLES(x) (_distance_measure (x, Temporal::AudioTime))
+#define SAMPLES_TO_TIME(x) (_distance_measure (x, alist->time_style()))
+
 /** @param converter A TimeConverter whose origin_b is the start time of the AutomationList in session samples.
  *  This will not be deleted by AutomationLine.
  */
@@ -83,16 +87,17 @@ AutomationLine::AutomationLine (const string&                              name,
                                 TimeAxisView&                              tv,
                                 ArdourCanvas::Item&                        parent,
                                 boost::shared_ptr<AutomationList>          al,
-                                const ParameterDescriptor&                 desc)
+                                const ParameterDescriptor&                 desc,
+                                DistanceMeasure const &                    m)
 	: trackview (tv)
 	, _name (name)
 	, alist (al)
-	, _time_converter (converter ? converter : new Evoral::IdentityConverter<double, samplepos_t>)
 	, _parent_group (parent)
 	, _offset (0)
 	, _maximum_time (timepos_t::max (al->time_domain()))
 	, _fill (false)
 	, _desc (desc)
+	, _distance_measure (m)
 {
 	if (converter) {
 		_our_time_converter = false;
@@ -782,11 +787,13 @@ AutomationLine::sync_model_with_view_point (ControlPoint& cp)
 
 	/* if xval has not changed, set it directly from the model to avoid rounding errors */
 
-	if (view_x == trackview.editor().sample_to_pixel_unrounded (_time_converter->to ((*cp.model())->when)) - _offset) {
-		view_x = (*cp.model())->when - _offset;
-	} else {
-		view_x = trackview.editor().pixel_to_sample (view_x);
-		view_x = _time_converter->from (view_x + _offset);
+	timepos_t model_x = alist->control_point_time (**(cp.model()));
+
+	if (view_x != trackview.editor().time_to_pixel_unrounded (model_x.earlier (_offset))) {
+		/* convert from view coordinates, via pixels->samples->timepos_t
+		 */
+		const timecnt_t p = timecnt_t (trackview.editor().pixel_to_sample (view_x), timepos_t()); /* samples */
+		model_x = SAMPLES_TO_TIME (p + _offset); /* correct time domain for list */
 	}
 
 	update_pending = true;
@@ -1380,9 +1387,15 @@ AutomationLine::get_point_x_range () const
 }
 
 samplepos_t
+AutomationLine::session_sample_position (AutomationList::const_iterator p) const
+{
+	return alist->control_point_time (ev).sample() + _offset.samples() + _distance_measure.origin().samples();
+}
+
+timepos_t
 AutomationLine::session_position (AutomationList::const_iterator p) const
 {
-	return _time_converter->to ((*p)->when) + _offset + _time_converter->origin_b ();
+	return alist->control_point_time (ev) + _offset + _distance_measure.origin();
 }
 
 void

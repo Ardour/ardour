@@ -104,7 +104,7 @@ public:
 	void         foreach_selected_regionview (sigc::slot<void,RegionView*> slot);
 
 	void set_selected_regionviews (RegionSelection&);
-	void get_selectables (ARDOUR::samplepos_t, ARDOUR::samplepos_t, double, double, std::list<Selectable* >&, bool within = false);
+	void get_selectables (Temporal::timepos_t const &, Temporal::timepos_t const &, double, double, std::list<Selectable* >&, bool within = false);
 	void get_inverted_selectables (Selection&, std::list<Selectable* >& results);
 	void get_regionviews_at_or_after (ARDOUR::samplepos_t, RegionSelection&);
 

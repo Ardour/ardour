@@ -98,7 +98,7 @@ public:
 	std::list<boost::shared_ptr<AutomationLine> > lines () const;
 
 	void set_selected_points (PointSelection&);
-	void get_selectables (ARDOUR::samplepos_t start, ARDOUR::samplepos_t end, double top, double bot, std::list<Selectable *>&, bool within = false);
+	void get_selectables (Temporal::timepos_t const &, Temporal::timepos_t const &, double top, double bot, std::list<Selectable *>&, bool within = false);
 	void get_inverted_selectables (Selection&, std::list<Selectable*>& results);
 
 	void show_timestretch (samplepos_t /*start*/, samplepos_t /*end*/, int /*layers*/, int /*layer*/) {}

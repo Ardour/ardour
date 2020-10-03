@@ -209,7 +209,7 @@ public:
 
 	void order_selection_trims (ArdourCanvas::Item *item, bool put_start_on_top);
 
-	virtual void get_selectables (ARDOUR::samplepos_t, ARDOUR::samplepos_t, double, double, std::list<Selectable*>&, bool within = false);
+	virtual void get_selectables (Temporal::timepos_t const &, Temporal::timepos_t  const &, double, double, std::list<Selectable*>&, bool within = false);
 	virtual void get_inverted_selectables (Selection&, std::list<Selectable *>& results);
 	virtual void get_regionviews_at_or_after (ARDOUR::samplepos_t, RegionSelection&) {}
 

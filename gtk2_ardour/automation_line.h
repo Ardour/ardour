@@ -37,6 +37,8 @@
 #include "pbd/statefuldestructible.h"
 #include "pbd/memento_command.h"
 
+#include "temporal/time_converter.h"
+
 #include "ardour/automation_list.h"
 #include "ardour/parameter_descriptor.h"
 #include "ardour/types.h"
@@ -79,7 +81,7 @@ public:
 	void set_fill (bool f) { _fill = f; } // owner needs to call set_height
 
 	void set_selected_points (PointSelection const &);
-	void get_selectables (ARDOUR::samplepos_t, ARDOUR::samplepos_t, double, double, std::list<Selectable*>&);
+	void get_selectables (Temporal::timepos_t const &, Temporal::timepos_t const &, double, double, std::list<Selectable*>&);
 	void get_inverted_selectables (Selection&, std::list<Selectable*>& results);
 
 	virtual void remove_point (ControlPoint&);
@@ -159,7 +161,11 @@ public:
 	Temporal::timecnt_t offset () { return _offset; }
 	void set_width (Temporal::timecnt_t const &);
 
-	samplepos_t session_position (ARDOUR::AutomationList::const_iterator) const;
+	samplepos_t session_sample_position (ARDOUR::AutomationList::const_iterator) const;
+	Temporal::timepos_t session_position (ARDOUR::AutomationList::const_iterator) const;
+
+	Temporal::DistanceMeasure const & distance_measure () const { return _distance_measure; }
+	void set_distance_measure_origin (Temporal::timepos_t const &);
 
 protected:
 
@@ -239,6 +245,7 @@ private:
 	bool _fill;
 
 	const ARDOUR::ParameterDescriptor _desc;
+	Temporal::DistanceMeasure _distance_measure;
 
 	friend class AudioRegionGainLine;
 };

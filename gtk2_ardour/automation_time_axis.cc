@@ -306,6 +306,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 				*_canvas_display,
 				_control->alist(),
 				_control->desc()
+				Temporal::DistanceMeasure (_session->tempo_map(), timepos_t()) /* default distance measure, origin at absolute zero */
 				)
 			);
 
@@ -853,22 +854,30 @@ AutomationTimeAxisView::paste_one (samplepos_t pos, unsigned paste_count, float 
 
 	/* add multi-paste offset if applicable */
 
-	AutomationType src_type = (AutomationType)(*p)->parameter().type ();
-	double len = (*p)->length();
 
-	if (parameter_is_midi (src_type)) {
-		// convert length to samples (incl tempo-ramps)
-		len = BeatsSamplesConverter (_session->tempo_map(), pos).to (Temporal::Beats::from_double (len * paste_count));
-		pos += _editor.get_paste_offset (pos, paste_count > 0 ? 1 : 0, len);
-	} else {
-		pos += _editor.get_paste_offset (pos, paste_count, len);
+	Temporal::timecnt_t len = (*p)->length();
+	Temporal::timepos_t tpos (pos);
+
+	assert (line()->the_list()->time_style() != Temporal::BarTime);
+
+	switch (line()->the_list()->time_style()) {
+	case Temporal::BeatTime:
+		tpos += _editor.get_paste_offset (pos, paste_count > 0 ? 1 : 0, len);
+		break;
+	case Temporal::AudioTime:
+		tpos += _editor.get_paste_offset (pos, paste_count, len);
+		break;
+	case Temporal::BarTime:
+		/*NOTREACHED*/
+		break;
 	}
 
-	/* convert sample-position to model's unit and position */
-	double const model_pos = _line->time_converter().from (pos - _line->time_converter().origin_b ());
+	/* convert position to model's unit and position */
+	Temporal::DistanceMeasure const & dm (_line->distance_measure());
+	Temporal::timepos_t model_pos = dm (_line->distance_measure().origin().distance (tpos), line()->the_list()->time_style());
 
 	XMLNode &before = alist->get_state();
-	alist->paste (**p, model_pos, BeatsSamplesConverter (_session->tempo_map(), pos));
+	alist->paste (**p, model_pos, _session->tempo_map());
 	_session->add_command (new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
 
 	return true;

@@ -249,7 +249,7 @@ TimeInfoBox::region_selection_changed ()
 void
 TimeInfoBox::selection_changed ()
 {
-	samplepos_t s, e;
+	timepos_t s, e;
 	Selection& selection (Editor::instance().get_selection());
 
 	region_property_connections.drop_connections();
@@ -282,8 +282,8 @@ TimeInfoBox::selection_changed ()
 					selection_length->set_off (true);
 				}
 			} else {
-				s = max_samplepos;
-				e = 0;
+				s = timepos_t::max (selection.points.front()->line().the_list()->time_domain());
+				e = timepos_t::zero (s.time_domain());
 				for (PointSelection::iterator i = selection.points.begin(); i != selection.points.end(); ++i) {
 					timepos_t const p = (*i)->line().session_position ((*i)->model ());
 					s = min (s, p);
@@ -294,7 +294,8 @@ TimeInfoBox::selection_changed ()
 				selection_length->set_off (false);
 				selection_start->set (s);
 				selection_end->set (e);
-				selection_length->set (e, false, s);
+				selection_length->set_is_duration (true, s);
+				selection_length->set (e, false, timecnt_t (s));
 			}
 		} else {
 			/* this is more efficient than tracking changes per region in large selections */
@@ -319,14 +320,15 @@ TimeInfoBox::selection_changed ()
 
 			if (tact->get_active() &&  !selection.regions.empty()) {
 				/* show selected regions */
-				s = selection.regions.start();
-				e = selection.regions.end_sample();
+				s = selection.regions.start_time();
+				e = selection.regions.end_time();
 				selection_start->set_off (false);
 				selection_end->set_off (false);
 				selection_length->set_off (false);
 				selection_start->set (s);
 				selection_end->set (e);
-				selection_length->set (e, false, s);
+				selection_length->set_is_duration (true, s);
+				selection_length->set (e, false, timecnt_t (s));
 			} else {
 				selection_start->set_off (true);
 				selection_end->set_off (true);

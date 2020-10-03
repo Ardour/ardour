@@ -115,13 +115,15 @@ StepEditor::prepare_step_edit_region ()
 
 	} else {
 
+#warning NUTEMPO new tempo map API
+#if 0
 		const Meter& m = _mtv.session()->tempo_map().meter_at_sample (step_edit_insert_position);
 		double baf = max (0.0, _mtv.session()->tempo_map().beat_at_sample (step_edit_insert_position));
 		double next_bar_in_beats =  baf + m.divisions_per_bar();
 		samplecnt_t next_bar_pos = _mtv.session()->tempo_map().sample_at_beat (next_bar_in_beats);
 		samplecnt_t len = next_bar_pos - step_edit_insert_position;
-
 		step_edit_region = _mtv.add_region (step_edit_insert_position, len, true);
+#endif
 
 		RegionView* rv = _mtv.midi_view()->find_view (step_edit_region);
 		step_edit_region_view = dynamic_cast<MidiRegionView*>(rv);
@@ -135,16 +137,17 @@ StepEditor::reset_step_edit_beat_pos ()
 	assert (step_edit_region);
 	assert (step_edit_region_view);
 
-	samplecnt_t samples_from_start = _editor.get_preferred_edit_position() - step_edit_region->position();
+	const timepos_t ep = _editor.get_preferred_edit_position();
+	timecnt_t distance_from_start (step_edit_region->nt_position().distance (ep));
 
-	if (samples_from_start < 0) {
+	if (distance_from_start < 0) {
 		/* this can happen with snap enabled, and the edit point == Playhead. we snap the
 		   position of the new region, and it can end up after the edit point.
 		*/
-		samples_from_start = 0;
+		distance_from_start = 0;
 	}
 
-	step_edit_beat_pos = step_edit_region_view->region_samples_to_region_beats (samples_from_start);
+	step_edit_beat_pos = distance_from_start.beats();
 	step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
 }
 
@@ -239,8 +242,7 @@ StepEditor::move_step_edit_beat_pos (Temporal::Beats beats)
 		return;
 	}
 	if (beats > 0.0) {
-		step_edit_beat_pos = min (step_edit_beat_pos + beats,
-		                          step_edit_region_view->region_samples_to_region_beats (step_edit_region->length()));
+		step_edit_beat_pos = min (step_edit_beat_pos + beats, step_edit_region->nt_length().beats());
 	} else if (beats < 0.0) {
 		if (-beats < step_edit_beat_pos) {
 			step_edit_beat_pos += beats; // its negative, remember
@@ -289,10 +291,10 @@ StepEditor::step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, Tem
 
 	/* make sure its visible on the horizontal axis */
 
-	samplepos_t fpos = step_edit_region_view->region_beats_to_absolute_samples (step_edit_beat_pos + beat_duration);
+	timepos_t fpos = step_edit_region_view->region()->region_beats_to_absolute_time (step_edit_beat_pos + beat_duration);
 
 	if (fpos >= (_editor.leftmost_sample() + _editor.current_page_samples())) {
-		_editor.reset_x_origin (fpos - (_editor.current_page_samples()/4));
+		_editor.reset_x_origin (fpos.samples() - (_editor.current_page_samples()/4));
 	}
 
 	Temporal::Beats at = step_edit_beat_pos;
@@ -415,9 +417,10 @@ StepEditor::step_edit_bar_sync ()
 		return;
 	}
 
-	samplepos_t fpos = step_edit_region_view->region_beats_to_absolute_samples (step_edit_beat_pos);
-	fpos = _session->tempo_map().round_to_bar (fpos, RoundUpAlways).sample;
-	step_edit_beat_pos = step_edit_region_view->region_samples_to_region_beats (fpos - step_edit_region->position()).round_up_to_beat();
+	timepos_t fpos = step_edit_region_view->region()->region_beats_to_absolute_time (step_edit_beat_pos);
+#warning NUTEMPO FIXME need way to get bbt from timepos_t
+	//fpos = fpos.bbt().round_up_to_bar ();
+	step_edit_beat_pos = step_edit_region->nt_position().distance (fpos).beats().round_up_to_beat();
 	step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
 }
 

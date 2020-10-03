@@ -1289,12 +1289,12 @@ Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& /*context*/,
 	} else {
 		try {
 			if (boost::dynamic_pointer_cast<AudioRegion> (region)) {
-				uint32_t output_chan = region->n_channels();
+				uint32_t output_chan = region->sources().size();
 				if ((Config->get_output_auto_connect() & AutoConnectMaster) && session()->master_out()) {
 					output_chan =  session()->master_out()->n_inputs().n_audio();
 				}
 				list<boost::shared_ptr<AudioTrack> > audio_tracks;
-				audio_tracks = session()->new_audio_track (region->n_channels(), output_chan, 0, 1, region->name(), PresentationInfo::max_order);
+				audio_tracks = session()->new_audio_track (region->sources().size(), output_chan, 0, 1, region->name(), PresentationInfo::max_order);
 				rtav = dynamic_cast<RouteTimeAxisView*> (time_axis_view_from_stripable (audio_tracks.front()));
 			} else if (boost::dynamic_pointer_cast<MidiRegion> (region)) {
 				ChanCount one_midi_port (DataType::MIDI, 1);

@@ -287,7 +287,7 @@ AutomationStreamView::clear ()
  *  confusing.
  */
 void
-AutomationStreamView::get_selectables (samplepos_t start, samplepos_t end, double botfrac, double topfrac, list<Selectable*>& results, bool /*within*/)
+AutomationStreamView::get_selectables (timepos_t const & start, timepos_t const & end, double botfrac, double topfrac, list<Selectable*>& results, bool /*within*/)
 {
 	for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		AutomationRegionView* arv = dynamic_cast<AutomationRegionView*> (*i);

@@ -331,8 +331,8 @@ ARDOUR_UI::setup_transport ()
 	set_size_request_to_display_given_text (io_latency_value, "1000 spl", 0, 0);
 
 	/* connect signals */
-	ARDOUR_UI::Clock.connect (sigc::bind (sigc::mem_fun (primary_clock, &MainClock::set), false, 0));
-	ARDOUR_UI::Clock.connect (sigc::bind (sigc::mem_fun (secondary_clock, &MainClock::set), false, 0));
+	ARDOUR_UI::Clock.connect (sigc::bind (sigc::mem_fun (primary_clock, &MainClock::set), false, timecnt_t::zero (Temporal::AudioTime)));
+	ARDOUR_UI::Clock.connect (sigc::bind (sigc::mem_fun (secondary_clock, &MainClock::set), false, timecnt_t::zero (Temporal::AudioTime)));
 
 	primary_clock->ValueChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::primary_clock_value_changed));
 	secondary_clock->ValueChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::secondary_clock_value_changed));

@@ -541,7 +541,7 @@ StreamView::set_selected_regionviews (RegionSelection& regions)
  *  @param result Filled in with selectable things.
  */
 void
-StreamView::get_selectables (samplepos_t start, samplepos_t end, double top, double bottom, list<Selectable*>& results, bool within)
+StreamView::get_selectables (timepos_t const & start, timepos_t const & end, double top, double bottom, list<Selectable*>& results, bool within)
 {
 	if (_trackview.editor().internal_editing()) {
 		return;  // Don't select regions with an internal tool
@@ -579,11 +579,11 @@ StreamView::get_selectables (samplepos_t start, samplepos_t end, double top, dou
 		}
 
 		if (within) {
-			if ((*i)->region()->coverage (start, end) == Evoral::OverlapExternal && layer_ok) {
+			if ((*i)->region()->coverage (start, end) == Temporal::OverlapExternal && layer_ok) {
 				results.push_back (*i);
 			}
 		} else {
-			if ((*i)->region()->coverage (start, end) != Evoral::OverlapNone && layer_ok) {
+			if ((*i)->region()->coverage (start, end) != Temporal::OverlapNone && layer_ok) {
 				results.push_back (*i);
 			}
 		}
@@ -719,7 +719,7 @@ StreamView::setup_new_rec_layer_time (boost::shared_ptr<Region> region)
 	   top-layered region after the start of the region we are recording and make a note of it.
 	*/
 	if (_layer_display == Stacked) {
-		_new_rec_layer_time = _trackview.track()->playlist()->find_next_top_layer_position (region->position());
+		_new_rec_layer_time = _trackview.track()->playlist()->find_next_top_layer_position (region->nt_position()).samples();
 	} else {
 		_new_rec_layer_time = max_samplepos;
 	}
