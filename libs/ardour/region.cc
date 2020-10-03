@@ -1973,6 +1973,56 @@ Region::latest_possible_sample () const
 	return position_sample() + (minlen - start_sample()) - 1;
 }
 
+Temporal::TimeDomain
+Region::position_time_domain() const
+{
+	return _position.val().time_domain();
+}
+
+timepos_t
+Region::nt_end() const
+{
+	return _position.val() + _length.val();
+}
+
+Temporal::Beats
+Region::region_distance_to_region_beats (timecnt_t const & region_relative_offset) const
+{
+	return timecnt_t (region_relative_offset, nt_position()).beats ();
+}
+
+Temporal::Beats
+Region::source_beats_to_absolute_beats (Temporal::Beats beats) const
+{
+	return source_position().beats() + beats;
+}
+
+Temporal::timepos_t
+Region::region_beats_to_absolute_time (Temporal::Beats beats) const
+{
+	/* beats is an additional offset to the start point of the region, from
+	   the effective start of the source on the timeline.
+	*/
+	return source_position() + nt_start () + beats;
+}
+
+Temporal::timepos_t
+Region::source_beats_to_absolute_time (Temporal::Beats beats) const
+{
+	/* return the time corresponding to `beats' relative to the start of
+	   the source. The start of the source is an implied position given by
+	   region->position - region->start
+	*/
+	return source_position() + beats;
+}
+
+Temporal::Beats
+Region::absolute_time_to_source_beats(timepos_t const & time) const
+{
+	const timepos_t s (source_position());
+	return time.earlier (timecnt_t (s, s)).beats();
+}
+
 timepos_t
 Region::source_position () const
 {
@@ -1990,4 +2040,3 @@ Region::region_relative_position (timepos_t const & p) const
 {
 	return p.earlier (_position.val());
 }
-
