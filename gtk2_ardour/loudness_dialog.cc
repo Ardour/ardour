@@ -499,6 +499,12 @@ LoudnessDialog::analyze ()
 
 	/* done */
   _status->finish (TRS_UI);
+
+	if (!_status->aborted() && _status->result_map.size () != 1) {
+		ArdourMessageDialog (_("Loudness measurement returned no results. Likely because the analyzed range is to short."), false, MESSAGE_ERROR).run ();
+		return 1;
+	}
+
   return _status->aborted() ? 1 : 0;
 }
 
@@ -575,6 +581,10 @@ LoudnessDialog::display_results ()
 	AnalysisResults const& ar (_status->result_map);
 	assert (ar.size () == 1);
 	ExportAnalysisPtr p = ar.begin()->second;
+
+	if (!p->have_loudness || !p->have_dbtp) {
+		ArdourMessageDialog (_("True-peak and loudness measurement failed. Likely Ardour's VAMP analysis plugin is missing from your installation. Please contact your vendor."), false, MESSAGE_ERROR).run ();
+	}
 
 	_dbfs   = accurate_coefficient_to_dB (p->peak);
 	_dbtp   = accurate_coefficient_to_dB (p->truepeak);
