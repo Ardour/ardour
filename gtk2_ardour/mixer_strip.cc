@@ -625,7 +625,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 			_volume_controller->show ();
 		}
 
-		if (monitor_section_button == 0) {
+		if (monitor_section_button == 0 && _mixer_owned) {
 			Glib::RefPtr<Action> act = ActionManager::get_action ("Mixer", "ToggleMonitorSection");
 			_session->MonitorChanged.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::monitor_changed, this), gui_context());
 			_session->MonitorBusAddedOrRemoved.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::monitor_section_added_or_removed, this), gui_context());
@@ -634,8 +634,6 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 			monitor_changed ();
 			monitor_section_button->set_related_action (act);
 			set_tooltip (monitor_section_button, _("Show/Hide Monitoring Section"));
-			mute_solo_table.attach (*monitor_section_button, 1, 2, 0, 1);
-			monitor_section_button->show();
 			monitor_section_button->unset_flags (Gtk::CAN_FOCUS);
 			monitor_section_added_or_removed ();
 		}
@@ -2358,7 +2356,7 @@ MixerStrip::set_button_names ()
 		monitor_input_button->set_text (S_("MonitorInput|I"));
 		monitor_disk_button->set_text (S_("MonitorDisk|D"));
 		if (monitor_section_button) {
-			monitor_section_button->set_text (S_("Mon|O"));
+			monitor_section_button->set_text (_("Mon"));
 		}
 
 		if ((_route && _route->solo_safe_control()->solo_safe()) || !solo_button->get_sensitive()) {
