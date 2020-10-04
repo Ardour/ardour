@@ -28,6 +28,7 @@
 #include "ardour/event_type_map.h"
 #include "ardour/midi_automation_list_binder.h"
 #include "ardour/midi_region.h"
+#include "ardour/midi_track.h"
 #include "ardour/session.h"
 
 #include "gtkmm2ext/keyboard.h"
@@ -181,18 +182,28 @@ AutomationRegionView::add_automation_event (GdkEvent *, samplepos_t when, double
 	AutomationTimeAxisView* const view = automation_view ();
 
 	/* compute vertical fractional position */
+	y = 1.0 - (y / _line->height());
 
-	const double h = trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 2;
-	y = 1.0 - (y / h);
+	/* snap sample, prepare conversion to double beats */
+	double when_d = snap_sample_to_sample (when - _region->start ()).sample + _region->start ();
 
-	/* snap sample */
-
-	when = snap_sample_to_sample (when - _region->start ()).sample + _region->start ();
-
-	/* map using line */
-
-	double when_d = when;
+	/* convert 'when' to music-time relative to the region and scale y from interface to internal */
 	_line->view_to_model_coord (when_d, y);
+
+	if (UIConfiguration::instance().get_new_automation_points_on_lane()) {
+		boost::shared_ptr<Evoral::Control> c = _region->control (_parameter, false);
+		assert (c);
+		if (c->list()->size () == 0) {
+			/* we need the MidiTrack::MidiControl, not the region's (midi model source) control */
+			boost::shared_ptr<ARDOUR::MidiTrack> mt = boost::dynamic_pointer_cast<ARDOUR::MidiTrack> (view->parent_stripable ());
+			assert (mt);
+			boost::shared_ptr<Evoral::Control> mc = mt->control(_parameter);
+			assert (mc);
+			y = mc->user_double ();
+		} else {
+			y = c->list()->eval (when_d);
+		}
+	}
 
 	XMLNode& before = _line->the_list()->get_state();
 
