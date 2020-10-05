@@ -63,6 +63,9 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<RegionView*> const & v)
 		views.push_back (ViewInterval (*r));
 	}
 
+	_minimum_length->set_is_duration (true, views.front().view->region()->nt_position());
+	_fade_length->set_is_duration (true, views.front().view->region()->nt_position());
+
 	Gtk::HBox* hbox = Gtk::manage (new Gtk::HBox);
 
 	Gtk::Table* table = Gtk::manage (new Gtk::Table (3, 3));
@@ -95,7 +98,7 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<RegionView*> const & v)
 
 	_minimum_length->set_session (s);
 	_minimum_length->set_mode (AudioClock::Samples);
-	_minimum_length->set (_minimum_length_value, true);
+	_minimum_length->set_duration (timecnt_t (_minimum_length_value), true);
 
 	table->attach (*Gtk::manage (new Gtk::Label (_("Fade length"), 1, 0.5)), 0, 1, n, n + 1, Gtk::FILL);
 	table->attach (*_fade_length, 1, 2, n, n + 1, Gtk::FILL);
@@ -103,7 +106,8 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<RegionView*> const & v)
 
 	_fade_length->set_session (s);
 	_fade_length->set_mode (AudioClock::Samples);
-	_fade_length->set (_fade_length_value, true);
+	_fade_length->set_is_duration (true);
+	_fade_length->set_duration (timecnt_t (_fade_length_value), true);
 
 	hbox->pack_start (*table);
 
@@ -341,13 +345,13 @@ StripSilenceDialog::threshold_changed ()
 samplecnt_t
 StripSilenceDialog::minimum_length () const
 {
-	return std::max((samplecnt_t)1, _minimum_length->current_duration (views.front().view->region()->position()));
+	return std::max((samplecnt_t)1, _minimum_length->current_duration (views.front().view->region()->nt_position()).samples());
 }
 
 samplecnt_t
 StripSilenceDialog::fade_length () const
 {
-	return std::max((samplecnt_t)0, _fade_length->current_duration (views.front().view->region()->position()));
+	return std::max((samplecnt_t)0, _fade_length->current_duration (views.front().view->region()->nt_position()).samples());
 }
 
 void

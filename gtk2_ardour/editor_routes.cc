@@ -1805,7 +1805,7 @@ EditorRoutes::solo_changed_so_update_mute ()
 void
 EditorRoutes::show_tracks_with_regions_at_playhead ()
 {
-	boost::shared_ptr<RouteList> const r = _session->get_routes_with_regions_at (_session->transport_sample ());
+	boost::shared_ptr<RouteList> const r = _session->get_routes_with_regions_at (timepos_t (_session->transport_sample ()));
 
 	set<TimeAxisView*> show;
 	for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {

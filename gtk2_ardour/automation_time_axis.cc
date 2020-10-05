@@ -41,7 +41,7 @@
 #include "pbd/unwind.h"
 
 #include "ardour/automation_control.h"
-#include "ardour/beats_samples_converter.h"
+#include "ardour/automation_list.h"
 #include "ardour/event_type_map.h"
 #include "ardour/parameter_types.h"
 #include "ardour/profile.h"
@@ -299,13 +299,15 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 
 		assert (_control);
 
+#warning NUTEMPO new tempo map API required
+#if 0
 		boost::shared_ptr<AutomationLine> line (
 			new AutomationLine (
 				ARDOUR::EventTypeMap::instance().to_symbol(_parameter),
 				*this,
 				*_canvas_display,
 				_control->alist(),
-				_control->desc()
+				_control->desc(),
 				Temporal::DistanceMeasure (_session->tempo_map(), timepos_t()) /* default distance measure, origin at absolute zero */
 				)
 			);
@@ -314,6 +316,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 		line->set_fill (true);
 		line->queue_reset ();
 		add_line (line);
+#endif 0
 	}
 
 	/* make sure labels etc. are correct */
@@ -768,14 +771,14 @@ AutomationTimeAxisView::add_automation_event (GdkEvent* event, samplepos_t sampl
 		return;
 	}
 
-	MusicSample when (sample, 0);
+	timepos_t when (sample);
 	_editor.snap_to_with_modifier (when, event);
 
 	if (UIConfiguration::instance().get_new_automation_points_on_lane()) {
 		if (_control->list()->size () == 0) {
 			y = _control->get_value ();
 		} else {
-			y = _control->list()->eval (when.sample);
+			y = _control->list()->eval (when);
 		}
 	} else {
 		double x = 0;
@@ -789,7 +792,7 @@ AutomationTimeAxisView::add_automation_event (GdkEvent* event, samplepos_t sampl
 	XMLNode& before = list->get_state();
 	std::list<Selectable*> results;
 
-	if (list->editor_add (when.sample, y, with_guard_points)) {
+	if (list->editor_add (when, y, with_guard_points)) {
 
 		if (_control->automation_state () == ARDOUR::Off) {
 			_control->set_automation_state (ARDOUR::Play);
@@ -802,7 +805,7 @@ AutomationTimeAxisView::add_automation_event (GdkEvent* event, samplepos_t sampl
 		_editor.begin_reversible_command (_("add automation event"));
 		_session->add_command (new MementoCommand<ARDOUR::AutomationList> (*list.get (), &before, &after));
 
-		_line->get_selectables (when.sample, when.sample, 0.0, 1.0, results);
+		_line->get_selectables (when, when, 0.0, 1.0, results);
 		_editor.get_selection ().set (results);
 
 		_editor.commit_reversible_command ();
@@ -811,7 +814,7 @@ AutomationTimeAxisView::add_automation_event (GdkEvent* event, samplepos_t sampl
 }
 
 bool
-AutomationTimeAxisView::paste (samplepos_t pos, const Selection& selection, PasteContext& ctx, const int32_t divisions)
+AutomationTimeAxisView::paste (timepos_t const & pos, const Selection& selection, PasteContext& ctx)
 {
 	if (_line) {
 		return paste_one (pos, ctx.count, ctx.times, selection, ctx.counts, ctx.greedy);
@@ -832,7 +835,7 @@ AutomationTimeAxisView::paste (samplepos_t pos, const Selection& selection, Past
 }
 
 bool
-AutomationTimeAxisView::paste_one (samplepos_t pos, unsigned paste_count, float times, const Selection& selection, ItemCounts& counts, bool greedy)
+AutomationTimeAxisView::paste_one (timepos_t const & pos, unsigned paste_count, float times, const Selection& selection, ItemCounts& counts, bool greedy)
 {
 	boost::shared_ptr<AutomationList> alist(_line->the_list());
 
@@ -858,33 +861,29 @@ AutomationTimeAxisView::paste_one (samplepos_t pos, unsigned paste_count, float 
 	Temporal::timecnt_t len = (*p)->length();
 	Temporal::timepos_t tpos (pos);
 
-	assert (line()->the_list()->time_style() != Temporal::BarTime);
-
-	switch (line()->the_list()->time_style()) {
+	switch (line()->the_list()->time_domain()) {
 	case Temporal::BeatTime:
 		tpos += _editor.get_paste_offset (pos, paste_count > 0 ? 1 : 0, len);
 		break;
 	case Temporal::AudioTime:
 		tpos += _editor.get_paste_offset (pos, paste_count, len);
 		break;
-	case Temporal::BarTime:
-		/*NOTREACHED*/
-		break;
 	}
 
 	/* convert position to model's unit and position */
 	Temporal::DistanceMeasure const & dm (_line->distance_measure());
-	Temporal::timepos_t model_pos = dm (_line->distance_measure().origin().distance (tpos), line()->the_list()->time_style());
+	Temporal::timepos_t model_pos = dm (_line->distance_measure().origin().distance (tpos), line()->the_list()->time_domain());
 
 	XMLNode &before = alist->get_state();
-	alist->paste (**p, model_pos, _session->tempo_map());
+#warning NUTEMPO FIX THIS ... WHY DOES the paste call get a type error from the compiler
+	//alist->paste (**p, model_pos, _session->tempo_map());
 	_session->add_command (new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
 
 	return true;
 }
 
 void
-AutomationTimeAxisView::get_selectables (samplepos_t start, samplepos_t end, double top, double bot, list<Selectable*>& results, bool /*within*/)
+AutomationTimeAxisView::get_selectables (timepos_t const & start, timepos_t const & end, double top, double bot, list<Selectable*>& results, bool /*within*/)
 {
 	if (!_line && !_view) {
 		return;
@@ -1148,9 +1147,9 @@ AutomationTimeAxisView::cut_copy_clear_one (AutomationLine& line, Selection& sel
 	XMLNode &before = alist->get_state();
 
 	/* convert time selection to automation list model coordinates */
-	const Evoral::TimeConverter<double, ARDOUR::samplepos_t>& tc = line.time_converter ();
-	double const start = tc.from (selection.time.front().start - tc.origin_b ());
-	double const end = tc.from (selection.time.front().end - tc.origin_b ());
+	/* convert time selection to automation list model coordinates */
+	timepos_t start = selection.time.front().start().earlier (line.distance_measure().origin());
+	timepos_t end = selection.time.front().end().earlier (line.distance_measure().origin());
 
 	switch (op) {
 	case Delete:
@@ -1181,9 +1180,9 @@ AutomationTimeAxisView::cut_copy_clear_one (AutomationLine& line, Selection& sel
 
 	if (what_we_got) {
 		for (AutomationList::iterator x = what_we_got->begin(); x != what_we_got->end(); ++x) {
-			double when = (*x)->when;
+			timepos_t when = (*x)->when;
 			double val  = (*x)->value;
-			line.model_to_view_coord (when, val);
+			line.model_to_view_coord (**x, val);
 			(*x)->when = when;
 			(*x)->value = val;
 		}

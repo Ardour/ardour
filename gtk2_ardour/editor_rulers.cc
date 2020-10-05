@@ -201,7 +201,7 @@ Editor::ruler_label_button_release (GdkEventButton* ev)
 }
 
 void
-Editor::popup_ruler_menu (samplepos_t where, ItemType t)
+Editor::popup_ruler_menu (timepos_t const & where, ItemType t)
 {
 	using namespace Menu_Helpers;
 

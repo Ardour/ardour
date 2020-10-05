@@ -1626,7 +1626,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			case SamplesRulerItem:
 			case MinsecRulerItem:
 			case BBTRulerItem:
-				popup_ruler_menu (where.sample, item_type);
+				popup_ruler_menu (timepos_t (where), item_type);
 				break;
 
 			case MarkerItem:

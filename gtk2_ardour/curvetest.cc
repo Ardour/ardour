@@ -36,7 +36,7 @@ curvetest (string filename)
 	stringstream line;
 	//Evoral::Parameter param(GainAutomation, -1.0, +1.0, 0.0);
 	Evoral::Parameter param(GainAutomation);
-	AutomationList al (param);
+	AutomationList al (param, Temporal::AudioTime);
 	double minx = DBL_MAX;
 	double maxx = DBL_MIN;
 
@@ -58,13 +58,13 @@ curvetest (string filename)
 			maxx = x;
 		}
 
-		al.add (x, y);
+		al.add (Temporal::timepos_t (x), y);
 	}
 
 
 	float foo[1024];
 
-	al.curve().get_vector (minx, maxx, foo, 1024);
+	al.curve().get_vector (timepos_t (minx), timepos_t (maxx), foo, 1024);
 
 	for (int i = 0; i < 1024; ++i) {
 	        cout << minx + (((double) i / 1024.0) * (maxx - minx)) << ' ' << foo[i] << endl;

@@ -128,8 +128,8 @@ public:
 	void resolve_note(uint8_t note_num, Temporal::Beats end_time);
 
 	void cut_copy_clear (Editing::CutCopyOp);
-	bool paste (samplepos_t pos, const ::Selection& selection, PasteContext& ctx, const int32_t sub_num);
-	void paste_internal (samplepos_t pos, unsigned paste_count, float times, const MidiCutBuffer&);
+	bool paste (Temporal::timepos_t const & pos, const ::Selection& selection, PasteContext& ctx);
+	void paste_internal (Temporal::timepos_t const & pos, unsigned paste_count, float times, const MidiCutBuffer&);
 
 	void add_canvas_patch_change (ARDOUR::MidiModel::PatchChangePtr patch);
 	void remove_canvas_patch_change (PatchChange* pc);
@@ -153,7 +153,7 @@ public:
 	void change_patch_change (PatchChange& old_patch, const MIDI::Name::PatchPrimaryKey& new_patch);
 	void change_patch_change (ARDOUR::MidiModel::PatchChangePtr, Evoral::PatchChange<Temporal::Beats> const &);
 
-	void add_patch_change (samplecnt_t, Evoral::PatchChange<Temporal::Beats> const &);
+	void add_patch_change (Temporal::timecnt_t const &, Evoral::PatchChange<Temporal::Beats> const &);
 	void move_patch_change (PatchChange &, Temporal::Beats);
 	void delete_patch_change (PatchChange *);
 	void edit_patch_change (PatchChange *);
@@ -205,12 +205,12 @@ public:
 	void   delete_note (boost::shared_ptr<NoteType>);
 	size_t selection_size() { return _selection.size(); }
 	void   select_all_notes ();
-	void   select_range(samplepos_t start, samplepos_t end);
+	void   select_range(Temporal::timepos_t const & start, Temporal::timepos_t const & end);
 	void   invert_selection ();
 	void   extend_selection ();
 
 	Temporal::Beats earliest_in_selection ();
-	void move_selection(double dx, double dy, double cumulative_dy);
+	void move_selection(Temporal::Beats const & dx, double dy, double cumulative_dy);
 	void note_dropped (NoteBase* ev, Temporal::Beats const & d_qn, int8_t d_note, bool copy);
 	NoteBase* copy_selection (NoteBase* primary);
 	void move_copies(Temporal::Beats const & dx_qn, double dy, double cumulative_dy);
@@ -450,10 +450,6 @@ public:
 	typedef boost::unordered_map<ARDOUR::MidiModel::constSysExPtr, boost::shared_ptr<SysEx> >        SysExes;
 	typedef std::vector<NoteBase*> CopyDragEvents;
 
-	ARDOUR::BeatsSamplesConverter _region_relative_time_converter;
-	ARDOUR::BeatsSamplesConverter _source_relative_time_converter;
-	ARDOUR::BeatsSamplesConverter _region_relative_time_converter_double;
-
 	boost::shared_ptr<ARDOUR::MidiModel> _model;
 	Events                               _events;
 	CopyDragEvents                       _copy_drag_events;
@@ -533,7 +529,7 @@ public:
 	void data_recorded (boost::weak_ptr<ARDOUR::MidiSource>);
 
 	/** Get grid type as beats, or default to 1 if not snapped to beats. */
-	Temporal::Beats get_grid_beats(samplepos_t pos) const;
+	Temporal::Beats get_grid_beats(Temporal::timepos_t const & pos) const;
 
 	void remove_ghost_note ();
 	void mouse_mode_changed ();
@@ -553,7 +549,7 @@ public:
 	Gtkmm2ext::Color _patch_change_outline;
 	Gtkmm2ext::Color _patch_change_fill;
 
-	Temporal::Beats snap_sample_to_grid_underneath (samplepos_t p, int32_t divisions, bool shift_snap) const;
+	Temporal::Beats snap_sample_to_grid_underneath (samplepos_t p, bool shift_snap) const;
 
 	PBD::ScopedConnection _mouse_mode_connection;
 

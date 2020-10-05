@@ -643,20 +643,20 @@ ClockOption::set_state_from_config ()
 	Timecode::Time TC;
 	samplepos_t when;
 	if (!Timecode::parse_timecode_format(_get(), TC)) {
-		_clock.set (0, true);
+		_clock.set (timepos_t (0), true);
 	}
 	TC.rate = _session->samples_per_timecode_frame();
 	TC.drop = _session->timecode_drop_frames();
 	_session->timecode_to_sample(TC, when, false, false);
 	if (TC.negative) { when=-when; }
-	_clock.set (when, true);
+	_clock.set (timepos_t (when), true);
 }
 
 void
 ClockOption::save_clock_time ()
 {
 	Timecode::Time TC;
-	_session->sample_to_timecode(_clock.current_time(), TC, false, false);
+	_session->sample_to_timecode (_clock.current_time().samples(), TC, false, false);
 	_set (Timecode::timecode_format_time(TC));
 }
 

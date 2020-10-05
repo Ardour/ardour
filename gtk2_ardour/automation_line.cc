@@ -50,6 +50,8 @@
 #include "ardour/parameter_types.h"
 #include "ardour/tempo.h"
 
+#include "temporal/range.h"
+
 #include "evoral/Curve.h"
 
 #include "canvas/debug.h"
@@ -78,7 +80,7 @@ using namespace Editing;
 
 
 #define TIME_TO_SAMPLES(x) (_distance_measure (x, Temporal::AudioTime))
-#define SAMPLES_TO_TIME(x) (_distance_measure (x, alist->time_style()))
+#define SAMPLES_TO_TIME(x) (_distance_measure (x, alist->time_domain()))
 
 /** @param converter A TimeConverter whose origin_b is the start time of the AutomationList in session samples.
  *  This will not be deleted by AutomationLine.
@@ -88,7 +90,7 @@ AutomationLine::AutomationLine (const string&                              name,
                                 ArdourCanvas::Item&                        parent,
                                 boost::shared_ptr<AutomationList>          al,
                                 const ParameterDescriptor&                 desc,
-                                DistanceMeasure const &                    m)
+                                Temporal::DistanceMeasure const &          m)
 	: trackview (tv)
 	, _name (name)
 	, alist (al)
@@ -99,12 +101,6 @@ AutomationLine::AutomationLine (const string&                              name,
 	, _desc (desc)
 	, _distance_measure (m)
 {
-	if (converter) {
-		_our_time_converter = false;
-	} else {
-		_our_time_converter = true;
-	}
-
 	_visible = Line;
 
 	update_pending = false;
@@ -141,10 +137,6 @@ AutomationLine::~AutomationLine ()
 		delete *i;
 	}
 	control_points.clear ();
-
-	if (_our_time_converter) {
-		delete _time_converter;
-	}
 }
 
 bool
@@ -302,13 +294,11 @@ AutomationLine::modify_point_y (ControlPoint& cp, double y)
 	y = min (1.0, y);
 	y = _height - (y * _height);
 
-	double const x = trackview.editor().sample_to_pixel_unrounded (_time_converter->to((*cp.model())->when) - _offset);
-
 	trackview.editor().begin_reversible_command (_("automation event move"));
 	trackview.editor().session()->add_command (
 		new MementoCommand<AutomationList> (memento_command_binder(), &get_state(), 0));
 
-	cp.move_to (x, y, ControlPoint::Full);
+	cp.move_to (cp.get_x(), y, ControlPoint::Full);
 
 	alist->freeze ();
 	sync_model_with_view_point (cp);
@@ -787,7 +777,7 @@ AutomationLine::sync_model_with_view_point (ControlPoint& cp)
 
 	/* if xval has not changed, set it directly from the model to avoid rounding errors */
 
-	timepos_t model_x = alist->control_point_time (**(cp.model()));
+	timepos_t model_x = (*cp.model())->when;
 
 	if (view_x != trackview.editor().time_to_pixel_unrounded (model_x.earlier (_offset))) {
 		/* convert from view coordinates, via pixels->samples->timepos_t
@@ -800,7 +790,7 @@ AutomationLine::sync_model_with_view_point (ControlPoint& cp)
 
 	view_to_model_coord_y (view_y);
 
-	alist->modify (cp.model(), view_x, view_y);
+	alist->modify (cp.model(), model_x, view_y);
 
 	/* convert back from model to view y for clamping position (for integer/boolean/etc) */
 	model_to_view_coord_y (view_y);
@@ -898,20 +888,15 @@ AutomationLine::remove_point (ControlPoint& cp)
  *  @param result Filled in with selectable things; in this case, ControlPoints.
  */
 void
-AutomationLine::get_selectables (samplepos_t start, samplepos_t end, double botfrac, double topfrac, list<Selectable*>& results)
+AutomationLine::get_selectables (timepos_t const & start, timepos_t const & end, double botfrac, double topfrac, list<Selectable*>& results)
 {
 	/* convert fractions to display coordinates with 0 at the top of the track */
 	double const bot_track = (1 - topfrac) * trackview.current_height ();
 	double const top_track = (1 - botfrac) * trackview.current_height ();
 
 	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
-		double const model_when = (*(*i)->model())->when;
 
-		/* model_when is relative to the start of the source, so we just need to add on the origin_b here
-		   (as it is the session sample position of the start of the source)
-		*/
-
-		samplepos_t const session_samples_when = _time_converter->to (model_when) + _time_converter->origin_b ();
+		timepos_t const session_samples_when = timepos_t (session_sample_position ((*i)->model()));
 
 		if (session_samples_when >= start && session_samples_when <= end && (*i)->get_y() >= bot_track && (*i)->get_y() <= top_track) {
 			results.push_back (*i);
@@ -994,20 +979,19 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 
 	for (AutomationList::iterator ai = e.begin(); ai != e.end(); ++ai, ++pi) {
 
-		double tx = (*ai)->when;
 		double ty = (*ai)->value;
 
 		/* convert from model coordinates to canonical view coordinates */
 
-		model_to_view_coord (tx, ty);
+		timepos_t tx = model_to_view_coord (**ai, ty);
 
-		if (isnan_local (tx) || isnan_local (ty)) {
+		if (isnan_local (ty)) {
 			warning << string_compose (_("Ignoring illegal points on AutomationLine \"%1\""),
 			                           _name) << endmsg;
 			continue;
 		}
 
-		if (tx >= max_samplepos || tx < 0 || tx >= _maximum_time) {
+		if (tx >= timepos_t::max (tx.time_domain()) || tx.negative() || tx >= _maximum_time) {
 			continue;
 		}
 
@@ -1015,7 +999,7 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 		 * zoom and scroll into account).
 		 */
 
-		tx = trackview.editor().sample_to_pixel_unrounded (tx);
+		double px = trackview.editor().time_to_pixel_unrounded (tx);
 
 		/* convert from canonical view height (0..1.0) to actual
 		 * height coordinates (using X11's top-left rooted system)
@@ -1023,7 +1007,7 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 
 		ty = _height - (ty * _height);
 
-		add_visible_control_point (vp, pi, tx, ty, ai, np);
+		add_visible_control_point (vp, pi, px, ty, ai, np);
 		vp++;
 	}
 
@@ -1187,18 +1171,20 @@ AutomationLine::set_state (const XMLNode &node, int version)
 Temporal::timepos_t
 AutomationLine::view_to_model_coord (double x, double& y) const
 {
-	assert (alist->time_style() != Temporal::BarTime);
+	assert (alist->time_domain() != Temporal::BarTime);
 
 	view_to_model_coord_y (y);
 
 	Temporal::timepos_t w;
 
-	switch (alist->time_style()) {
+#warning NUTEMPO FIX ME ... this accepts view coordinate as double and things it can infer beats etc
+
+	switch (alist->time_domain()) {
 	case Temporal::AudioTime:
 		return timepos_t (samplepos_t (x));
 		break;
 	case Temporal::BeatTime:
-		return timepos_t (Beats::from_double (x));
+		return timepos_t (Temporal::Beats::from_double (x));
 		break;
 	default:
 		/*NOTREACHED*/
@@ -1275,12 +1261,12 @@ AutomationLine::model_to_view_coord_y (double& y) const
 	y = _desc.to_interface (y);
 }
 
-double
+timepos_t
 AutomationLine::model_to_view_coord (Evoral::ControlEvent const & ev, double& y) const
 {
-	Temporal::timepos_t w (ev.when());
+	Temporal::timepos_t w (ev.when);
 	model_to_view_coord_y (y);
-	return (w).earlier (_offset).samples();
+	return (w).earlier (_offset);
 }
 
 /** Called when our list has announced that its interpolation style has changed */
@@ -1373,10 +1359,10 @@ AutomationLine::set_maximum_time (Temporal::timepos_t const & t)
 
 
 /** @return min and max x positions of points that are in the list, in session samples */
-pair<samplepos_t, samplepos_t>
+pair<timepos_t, timepos_t>
 AutomationLine::get_point_x_range () const
 {
-	pair<samplepos_t, samplepos_t> r (max_samplepos, 0);
+	pair<timepos_t, timepos_t> r (timepos_t::max (the_list()->time_domain()), timepos_t::zero (the_list()->time_domain()));
 
 	for (AutomationList::const_iterator i = the_list()->begin(); i != the_list()->end(); ++i) {
 		r.first = min (r.first, session_position (i));
@@ -1389,17 +1375,17 @@ AutomationLine::get_point_x_range () const
 samplepos_t
 AutomationLine::session_sample_position (AutomationList::const_iterator p) const
 {
-	return alist->control_point_time (ev).sample() + _offset.samples() + _distance_measure.origin().samples();
+	return (*p)->when.samples() + _offset.samples() + _distance_measure.origin().samples();
 }
 
 timepos_t
 AutomationLine::session_position (AutomationList::const_iterator p) const
 {
-	return alist->control_point_time (ev) + _offset + _distance_measure.origin();
+	return (*p)->when + _offset + _distance_measure.origin();
 }
 
 void
-AutomationLine::set_offset (samplepos_t off)
+AutomationLine::set_offset (timecnt_t const & off)
 {
 	if (_offset == off) {
 		return;

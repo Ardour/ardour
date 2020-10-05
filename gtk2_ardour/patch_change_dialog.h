@@ -42,7 +42,6 @@ class PatchChangeDialog : public ArdourDialog
 {
 public:
 	PatchChangeDialog (
-		const ARDOUR::BeatsSamplesConverter*,
 		ARDOUR::Session*,
 		Evoral::PatchChange<Temporal::Beats> const&,
 		ARDOUR::InstrumentInfo&,

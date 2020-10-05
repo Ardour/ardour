@@ -1,4 +1,4 @@
-/*
+n/*
  * Copyright (C) 2007-2015 David Robillard <d@drobilla.net>
  * Copyright (C) 2008-2017 Paul Davis <paul@linuxaudiosystems.com>
  * Copyright (C) 2009-2011 Carl Hetherington <carl@carlh.net>
@@ -208,8 +208,7 @@ AutomationRegionView::add_automation_event (GdkEvent *, timepos_t const & w, dou
 
 	XMLNode& before = _line->the_list()->get_state();
 
-<<<<<<< HEAD
-	if (_line->the_list()->editor_add (when_d, y, with_guard_points)) {
+n	if (_line->the_list()->editor_add (when, y, with_guard_points)) {
 
 		if (ac->automation_state () == ARDOUR::Off) {
 			ac->set_automation_state (ARDOUR::Play);
@@ -218,9 +217,6 @@ AutomationRegionView::add_automation_event (GdkEvent *, timepos_t const & w, dou
 			RouteTimeAxisView::signal_ctrl_touched (false);
 		}
 
-=======
-	if (_line->the_list()->editor_add (when, y, with_guard_points)) {
->>>>>>> intermediate, unfinished snapshot of ongoing timeline types work on GTK GUI
 		view->editor().begin_reversible_command (_("add automation event"));
 
 		XMLNode& after = _line->the_list()->get_state();

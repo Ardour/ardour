@@ -731,7 +731,7 @@ ExportVideoDialog::launch_export ()
 		end += av_offset;
 	}
 	else if (insnd_combo.get_active_row_number() == 2) {
-		start = ARDOUR_UI::instance()->video_timeline->quantify_samples_to_apv(export_range.start());
+		start = ARDOUR_UI::instance()->video_timeline->quantify_samples_to_apv(export_range.start_sample());
 		end   = ARDOUR_UI::instance()->video_timeline->quantify_samples_to_apv(export_range.end_sample());
 	}
 	if (end <= 0) {
@@ -954,7 +954,7 @@ ExportVideoDialog::encode_pass (int pass)
 		duration_s = (double)duration_f / (double)_session->nominal_sample_rate();
 	} else if (insnd_combo.get_active_row_number() == 2) {
 		/* selected range */
-		duration_s = export_range.length() / (double)_session->nominal_sample_rate();
+		duration_s = export_range.length_samples() / (double)_session->nominal_sample_rate();
 	} else {
 		/* video start to end */
 		samplecnt_t duration_f = ARDOUR_UI::instance()->video_timeline->get_duration();
@@ -975,7 +975,7 @@ ExportVideoDialog::encode_pass (int pass)
 			start = _session->current_start_sample();
 			snend = _session->current_end_sample();
 		} else {
-			start = export_range.start();
+			start = export_range.start_sample();
 			snend = export_range.end_sample();
 		}
 

@@ -668,7 +668,7 @@ Editor::LocationMarkers::setup_lines ()
 }
 
 void
-Editor::mouse_add_new_marker (timepos_t const & where, bool is_cd)
+Editor::mouse_add_new_marker (timepos_t where, bool is_cd)
 {
 	string markername;
 	int flags = (is_cd ? Location::IsCDMarker|Location::IsMark : Location::IsMark);
@@ -700,7 +700,7 @@ Editor::mouse_add_new_marker (timepos_t const & where, bool is_cd)
 }
 
 void
-Editor::mouse_add_new_loop (samplepos_t where)
+Editor::mouse_add_new_loop (timepos_t where)
 {
 	if (!_session) {
 		return;
@@ -710,13 +710,13 @@ Editor::mouse_add_new_loop (samplepos_t where)
 	   it's reasonably easy to manipulate after creation.
 	*/
 
-	samplepos_t const end = where + current_page_samples() / 8;
+	timepos_t const end = where + timecnt_t (current_page_samples() / 8);
 
-	set_loop_range (timepos_t (where), timepos_t (end),  _("set loop range"));
+	set_loop_range (where, timepos_t (end),  _("set loop range"));
 }
 
 void
-Editor::mouse_add_new_punch (samplepos_t where)
+Editor::mouse_add_new_punch (timepos_t where)
 {
 	if (!_session) {
 		return;
@@ -726,13 +726,13 @@ Editor::mouse_add_new_punch (samplepos_t where)
 	   it's reasonably easy to manipulate after creation.
 	*/
 
-	samplepos_t const end = where + current_page_samples() / 8;
+	timepos_t const end = where + timecnt_t (current_page_samples() / 8);
 
-	set_punch_range (timepos_t (where), timepos_t (end),  _("set punch range"));
+	set_punch_range (where, end,  _("set punch range"));
 }
 
 void
-Editor::mouse_add_new_range (samplepos_t where)
+Editor::mouse_add_new_range (timepos_t where)
 {
 	if (!_session) {
 		return;
@@ -742,7 +742,7 @@ Editor::mouse_add_new_range (samplepos_t where)
 	   it's reasonably easy to manipulate after creation.
 	*/
 
-	samplepos_t const end = where + current_page_samples() / 8;
+	timepos_t const end = where + timecnt_t (current_page_samples() / 8);
 
 	string name;
 	_session->locations()->next_available_name (name, _("range"));

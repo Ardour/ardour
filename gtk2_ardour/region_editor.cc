@@ -107,7 +107,7 @@ RegionEditor::RegionEditor (Session* s, boost::shared_ptr<Region> r)
 	start_label.set_text (_("File start:"));
 	_sources_label.set_name ("RegionEditorLabel");
 
-	if (_region->n_channels() > 1) {
+	if (_region->sources().size() > 1) {
 		_sources_label.set_text (_("Sources:"));
 	} else {
 		_sources_label.set_text (_("Source:"));
@@ -174,7 +174,7 @@ RegionEditor::RegionEditor (Session* s, boost::shared_ptr<Region> r)
 
 	set_title (string_compose (_("Region '%1'"), _region->name()));
 
-	for (uint32_t i = 0; i < _region->n_channels(); ++i) {
+	for (uint32_t i = 0; i < _region->sources().size(); ++i) {
 		_sources.append_text (_region->source(i)->name());
 	}
 
@@ -321,13 +321,13 @@ RegionEditor::end_clock_changed ()
 		PublicEditor::instance().commit_reversible_command ();
 	}
 
-	end_clock.set (_region->position() + _region->length() - 1, true);
+	end_clock.set (_region->nt_last(), true);
 }
 
 void
 RegionEditor::length_clock_changed ()
 {
-	samplecnt_t samples = length_clock.current_time();
+	timecnt_t len = length_clock.current_duration();
 	bool in_command = false;
 	boost::shared_ptr<Playlist> pl = _region->playlist();
 
@@ -336,7 +336,7 @@ RegionEditor::length_clock_changed ()
 		in_command = true;
 
 		_region->clear_changes ();
-		_region->trim_end (_region->position() + samples - 1);
+		_region->trim_end (_region->nt_position() + len.decrement());
 		_session->add_command(new StatefulDiffCommand (_region));
 	}
 
@@ -344,7 +344,7 @@ RegionEditor::length_clock_changed ()
 		PublicEditor::instance().commit_reversible_command ();
 	}
 
-	length_clock.set (_region->length());
+	length_clock.set_duration (_region->nt_length());
 }
 
 void
@@ -369,33 +369,33 @@ void
 RegionEditor::bounds_changed (const PropertyChange& what_changed)
 {
 	if (what_changed.contains (ARDOUR::Properties::position) && what_changed.contains (ARDOUR::Properties::length)) {
-		position_clock.set (_region->position(), true);
-		end_clock.set (_region->position() + _region->length() - 1, true);
-		length_clock.set (_region->length(), true);
+		position_clock.set (_region->nt_position(), true);
+		end_clock.set (_region->nt_last(), true);
+		length_clock.set_duration (_region->nt_length(), true);
 	} else if (what_changed.contains (ARDOUR::Properties::position)) {
-		position_clock.set (_region->position(), true);
-		end_clock.set (_region->position() + _region->length() - 1, true);
+		position_clock.set (_region->nt_position(), true);
+		end_clock.set (_region->nt_last(), true);
 	} else if (what_changed.contains (ARDOUR::Properties::length)) {
-		end_clock.set (_region->position() + _region->length() - 1, true);
-		length_clock.set (_region->length(), true);
+		end_clock.set (_region->nt_last(), true);
+		length_clock.set_duration (_region->nt_length(), true);
 	}
 
 	if (what_changed.contains (ARDOUR::Properties::sync_position) || what_changed.contains (ARDOUR::Properties::position)) {
 		int dir;
-		sampleoffset_t off = _region->sync_offset (dir);
+		timecnt_t off = _region->sync_offset (dir);
 		if (dir == -1) {
 			off = -off;
 		}
 
 		if (what_changed.contains (ARDOUR::Properties::sync_position)) {
-			sync_offset_relative_clock.set (off, true);
+			sync_offset_relative_clock.set_duration (off, true);
 		}
 
-		sync_offset_absolute_clock.set (off + _region->position (), true);
+		sync_offset_absolute_clock (_region->nt_position () + off, true);
 	}
 
 	if (what_changed.contains (ARDOUR::Properties::start)) {
-		start_clock.set (_region->start(), true);
+		start_clock.set (_region->nt_start(), true);
 	}
 }
 

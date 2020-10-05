@@ -6383,3 +6383,27 @@ Editor::use_own_window (bool and_fill_it)
 
 	return win;
 }
+
+double
+Editor::time_to_pixel (timepos_t const & pos) const
+{
+	return sample_to_pixel (pos.samples());
+}
+
+double
+Editor::time_to_pixel_unrounded (timepos_t const & pos) const
+{
+	return sample_to_pixel_unrounded (pos.samples());
+}
+
+double
+Editor::duration_to_pixels (timecnt_t const & dur) const
+{
+	return sample_to_pixel (dur.samples());
+}
+
+double
+Editor::duration_to_pixels_unrounded (timecnt_t const & dur) const
+{
+	return sample_to_pixel_unrounded (dur.samples());
+}

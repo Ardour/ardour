@@ -262,6 +262,12 @@ public:
 		return sample / (double) samples_per_pixel;
 	}
 
+	double time_to_pixel (Temporal::timepos_t const & pos) const;
+	double time_to_pixel_unrounded (Temporal::timepos_t const & pos) const;
+
+	double duration_to_pixels (Temporal::timecnt_t const & pos) const;
+	double duration_to_pixels_unrounded (Temporal::timecnt_t const & pos) const;
+
 	/* selection */
 
 	Selection& get_selection() const { return *selection; }
@@ -569,7 +575,7 @@ public:
 	void metric_get_minsec (std::vector<ArdourCanvas::Ruler::Mark>&, gdouble, gdouble, gint);
 
 	/* editing operations that need to be public */
-	void mouse_add_new_marker (Temporal::timepos_t const & where, bool is_cd=false);
+	void mouse_add_new_marker (Temporal::timepos_t where, bool is_cd=false);
 	void split_regions_at (Temporal::timepos_t const & , RegionSelection&);
 	void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret, bool select_new = false);
 	RegionSelection get_regions_from_selection_and_mouse (Temporal::timepos_t const &);
@@ -578,8 +584,8 @@ public:
 
 	void mouse_brush_insert_region (RegionView*, samplepos_t pos);
 
-	void mouse_add_new_tempo_event (samplepos_t where);
-	void mouse_add_new_meter_event (samplepos_t where);
+	void mouse_add_new_tempo_event (Temporal::timepos_t where);
+	void mouse_add_new_meter_event (Temporal::timepos_t where);
 	void edit_tempo_section (ARDOUR::TempoSection*);
 	void edit_meter_section (ARDOUR::MeterSection*);
 
@@ -755,9 +761,9 @@ private:
 
 	void hide_marker (ArdourCanvas::Item*, GdkEvent*);
 	void clear_marker_display ();
-	void mouse_add_new_range (samplepos_t);
-	void mouse_add_new_loop (samplepos_t);
-	void mouse_add_new_punch (samplepos_t);
+	void mouse_add_new_range (Temporal::timepos_t);
+	void mouse_add_new_loop (Temporal::timepos_t);
+	void mouse_add_new_punch (Temporal::timepos_t);
 	bool choose_new_marker_name(std::string &name, bool is_range=false);
 	void update_cd_marker_display ();
 	void ensure_cd_marker_updated (LocationMarkers* lam, ARDOUR::Location* location);
@@ -945,7 +951,7 @@ private:
 	void compute_fixed_ruler_scale (); //calculates the RulerScale of the fixed rulers
 	void update_fixed_rulers ();
 	void update_tempo_based_rulers ();
-	void popup_ruler_menu (samplepos_t where = 0, ItemType type = RegionItem);
+	void popup_ruler_menu (Temporal::timepos_t const & where = Temporal::timepos_t (), ItemType type = RegionItem);
 	void update_ruler_visibility ();
 	void toggle_ruler_visibility ();
 	void ruler_toggled (int);

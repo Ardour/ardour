@@ -112,7 +112,7 @@ Editor::time_stretch (RegionSelection& regions, float fraction)
 		stretch.run (*i);
 
 		playlist->replace_region (regions.front()->region(), stretch.results[0],
-		                          regions.front()->region()->position());
+		                          regions.front()->region()->nt_position());
 		midi_playlists_affected.insert (playlist);
 	}
 
@@ -168,9 +168,9 @@ Editor::time_fx (RegionList& regions, float val, bool pitching)
 		return 0;
 	}
 
-	const samplecnt_t oldlen = (samplecnt_t) (regions.front()->length());
-	const samplecnt_t newlen = (samplecnt_t) (regions.front()->length() * val);
-	const samplecnt_t pos = regions.front()->position ();
+	const timecnt_t oldlen = regions.front()->nt_length();
+	const timecnt_t newlen = regions.front()->nt_length() * val;
+	const timecnt_t pos = regions.front()->nt_position ();
 
 	current_timefx = new TimeFXDialog (*this, pitching, oldlen, newlen, pos);
 	current_timefx->regions = regions;

@@ -187,7 +187,7 @@ protected:
 	void build_display_menu ();
 
 	void cut_copy_clear_one (AutomationLine&, Selection&, Editing::CutCopyOp);
-	bool paste_one (ARDOUR::samplepos_t, unsigned, float times, const Selection&, ItemCounts& counts, bool greedy=false);
+	bool paste_one (Temporal::timepos_t const &, unsigned, float times, const Selection&, ItemCounts& counts, bool greedy=false);
 	void route_going_away ();
 
 	void set_automation_state (ARDOUR::AutoState);

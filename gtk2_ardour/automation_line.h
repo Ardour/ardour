@@ -71,7 +71,8 @@ public:
 	                TimeAxisView&                                      tv,
 	                ArdourCanvas::Item&                                parent,
 	                boost::shared_ptr<ARDOUR::AutomationList>          al,
-	                const ARDOUR::ParameterDescriptor&                 desc);
+	                const ARDOUR::ParameterDescriptor&                 desc,
+	                Temporal::DistanceMeasure const &);
 
 	virtual ~AutomationLine ();
 
@@ -125,7 +126,7 @@ public:
 	std::string fraction_to_string (double) const;
 	std::string delta_to_string (double) const;
 	double string_to_fraction (std::string const &) const;
-	Temporal::timepos_t view_to_model_coord (double& x, double& y) const;
+	Temporal::timepos_t view_to_model_coord (double x, double& y) const;
 	void   view_to_model_coord_y (double &) const;
 	Temporal::timepos_t model_to_view_coord (Evoral::ControlEvent const &, double& y) const;
 	void   model_to_view_coord_y (double &) const;
@@ -150,7 +151,7 @@ public:
 
 	virtual MementoCommandBinder<ARDOUR::AutomationList>* memento_command_binder ();
 
-	std::pair<ARDOUR::samplepos_t, ARDOUR::samplepos_t> get_point_x_range () const;
+	std::pair<Temporal::timepos_t, Temporal::timepos_t> get_point_x_range () const;
 
 	void set_maximum_time (Temporal::timepos_t const &);
 	Temporal::timepos_t maximum_time () const {

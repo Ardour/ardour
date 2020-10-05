@@ -402,15 +402,18 @@ Editor::maybe_draw_grid_lines ()
 }
 
 void
-Editor::mouse_add_new_tempo_event (samplepos_t sample)
+Editor::mouse_add_new_tempo_event (timepos_t pos)
 {
 	if (_session == 0) {
 		return;
 	}
 
+#warning NUTEMPO requires new tempo map API
+#if 0
 	TempoMap& map(_session->tempo_map());
 
 	begin_reversible_command (_("add tempo mark"));
+
 	const double pulse = map.exact_qn_at_sample (sample, get_grid_music_divisions (0)) / 4.0;
 
 	if (pulse > 0.0) {
@@ -422,20 +425,21 @@ Editor::mouse_add_new_tempo_event (samplepos_t sample)
 		_session->add_command(new MementoCommand<TempoMap>(map, &before, &after));
 		commit_reversible_command ();
 	}
-
+#endif
 	//map.dump (cerr);
 }
 
 void
-Editor::mouse_add_new_meter_event (samplepos_t sample)
+Editor::mouse_add_new_meter_event (timepos_t pos)
 {
 	if (_session == 0) {
 		return;
 	}
 
-
+#warning NUTEMPO requires new tempo map API
+#if 0
 	TempoMap& map(_session->tempo_map());
-	MeterDialog meter_dialog (map, sample, _("add"));
+	MeterDialog meter_dialog (map, pos, _("add"));
 
 	switch (meter_dialog.run ()) {
 	case RESPONSE_ACCEPT:
@@ -454,6 +458,7 @@ Editor::mouse_add_new_meter_event (samplepos_t sample)
 
 	const double al_sample = map.sample_at_bbt (requested);
 	begin_reversible_command (_("add meter mark"));
+
 	XMLNode &before = map.get_state();
 
 	if (meter_dialog.get_lock_style() == MusicTime) {
@@ -464,7 +469,7 @@ Editor::mouse_add_new_meter_event (samplepos_t sample)
 
 	_session->add_command(new MementoCommand<TempoMap>(map, &before, &map.get_state()));
 	commit_reversible_command ();
-
+#endif
 	//map.dump (cerr);
 }
 
