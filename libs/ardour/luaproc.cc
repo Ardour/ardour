@@ -186,6 +186,7 @@ void
 LuaProc::drop_references ()
 {
 	lua.collect_garbage ();
+	Plugin::drop_references ();
 }
 
 boost::weak_ptr<Route>

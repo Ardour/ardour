@@ -114,6 +114,9 @@ PluginInsert::~PluginInsert ()
 void
 PluginInsert::drop_references ()
 {
+	if (!_impulseAnalysisPlugin.expired()) {
+		_impulseAnalysisPlugin.lock()->drop_references ();
+	}
 	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
 		(*i)->drop_references ();
 	}
@@ -173,6 +176,7 @@ PluginInsert::set_count (uint32_t num)
 	} else if (num < _plugins.size()) {
 		uint32_t diff = _plugins.size() - num;
 		for (uint32_t n= 0; n < diff; ++n) {
+			_plugins.back()->drop_references ();
 			_plugins.pop_back();
 		}
 		PluginConfigChanged (); /* EMIT SIGNAL */

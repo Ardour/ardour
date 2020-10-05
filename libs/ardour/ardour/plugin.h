@@ -106,8 +106,6 @@ public:
 		activate ();
 	}
 
-	virtual void drop_references () {}
-
 	virtual std::set<Evoral::Parameter> automatable () const                   = 0;
 	virtual std::string                 describe_parameter (Evoral::Parameter) = 0;
 	virtual std::string                 state_node_name () const               = 0;
