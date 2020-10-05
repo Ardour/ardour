@@ -177,6 +177,9 @@ public:
 	void realtime_locate (bool);
 	void monitoring_changed ();
 
+	virtual void add_slave (boost::shared_ptr<Plugin>, bool realtime) {}
+	virtual void remove_slave (boost::shared_ptr<Plugin>) {}
+
 	struct UILayoutHint {
 		UILayoutHint () : x0 (-1), x1 (-1), y0 (-1), y1 (-1), knob (false) { }
 		int  x0;

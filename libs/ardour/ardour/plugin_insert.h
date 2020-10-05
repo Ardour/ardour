@@ -421,6 +421,7 @@ private:
 
 	boost::shared_ptr<Plugin> plugin_factory (boost::shared_ptr<Plugin>);
 	void add_plugin (boost::shared_ptr<Plugin>);
+	void plugin_removed (boost::weak_ptr<Plugin>);
 
 	void add_sidechain_from_xml (const XMLNode& node, int version);
 

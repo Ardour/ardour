@@ -3151,6 +3151,9 @@ PluginInsert::get_impulse_analysis_plugin()
 		ret->configure_io (internal_input_streams (), out);
 		ret->set_owner (_owner);
 		_impulseAnalysisPlugin = ret;
+
+		_plugins[0]->add_slave (ret, false);
+		ret->DropReferences.connect_same_thread (*this, boost::bind (&PluginInsert::plugin_removed, this, _impulseAnalysisPlugin));
 	} else {
 		ret = _impulseAnalysisPlugin.lock();
 	}
@@ -3212,6 +3215,21 @@ PluginInsert::add_plugin (boost::shared_ptr<Plugin> plugin)
 #endif
 
 	_plugins.push_back (plugin);
+
+	if (_plugins.size() > 1) {
+		_plugins[0]->add_slave (plugin, true);
+		plugin->DropReferences.connect_same_thread (*this, boost::bind (&PluginInsert::plugin_removed, this, boost::weak_ptr<Plugin> (plugin)));
+	}
+}
+
+void
+PluginInsert::plugin_removed (boost::weak_ptr<Plugin> wp)
+{
+	boost::shared_ptr<Plugin> plugin = wp.lock();
+	if (_plugins.size () == 0 || !plugin) {
+		return;
+	}
+	_plugins[0]->remove_slave (plugin);
 }
 
 void
