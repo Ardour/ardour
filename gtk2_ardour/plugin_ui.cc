@@ -891,7 +891,6 @@ PlugUIBase::toggle_plugin_analysis()
 
 		plugin_analysis_expander.add (*eqgui);
 		plugin_analysis_expander.show_all ();
-		eqgui->start_listening ();
 	}
 
 	if (!plugin_analysis_expander.get_expanded()) {
@@ -899,7 +898,6 @@ PlugUIBase::toggle_plugin_analysis()
 		const int child_height = plugin_analysis_expander.get_child ()->get_height ();
 
 		eqgui->hide ();
-		eqgui->stop_listening ();
 		plugin_analysis_expander.remove();
 
 		Gtk::Window *toplevel = (Gtk::Window*) plugin_analysis_expander.get_ancestor (GTK_TYPE_WINDOW);

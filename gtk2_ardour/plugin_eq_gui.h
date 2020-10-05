@@ -48,9 +48,6 @@ public:
 	PluginEqGui (boost::shared_ptr<ARDOUR::PluginInsert>);
 	~PluginEqGui ();
 
-	void start_listening ();
-	void stop_listening ();
-
 private:
 	// Setup
 	void set_buffer_size (uint32_t, uint32_t);
@@ -67,6 +64,9 @@ private:
 
 	void stop_updating ();
 	void start_updating ();
+
+	void start_listening ();
+	void stop_listening ();
 
 	void resize_analysis_area (Gtk::Allocation&);
 	void redraw_analysis_area ();

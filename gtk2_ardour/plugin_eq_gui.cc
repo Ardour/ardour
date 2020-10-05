@@ -160,6 +160,7 @@ PluginEqGui::PluginEqGui (boost::shared_ptr<ARDOUR::PluginInsert> pluginInsert)
 
 PluginEqGui::~PluginEqGui ()
 {
+	stop_updating ();
 	stop_listening ();
 
 	if (_analysis_scale_surface) {
@@ -201,13 +202,18 @@ void
 PluginEqGui::stop_listening ()
 {
 	analysis_connection.disconnect ();
-	_plugin->deactivate ();
+	if (_plugin) {
+		_plugin->deactivate ();
+		_plugin->drop_references ();
+		_plugin = 0;
+	}
 }
 
 void
 PluginEqGui::on_hide ()
 {
 	stop_updating ();
+	stop_listening ();
 	Gtk::Table::on_hide ();
 }
 
@@ -234,6 +240,7 @@ PluginEqGui::on_show ()
 	Gtk::Table::on_show ();
 
 	start_updating ();
+	start_listening ();
 
 	Gtk::Widget *toplevel = get_toplevel ();
 	if (toplevel) {
