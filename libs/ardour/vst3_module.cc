@@ -35,7 +35,7 @@
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
 
-#include "vst3/pluginterfaces/base/ipluginbase.h"
+#include "pluginterfaces/base/ipluginbase.h"
 #include "ardour/vst3_module.h"
 
 #include "pbd/i18n.h"
