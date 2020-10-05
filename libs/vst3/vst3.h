@@ -58,10 +58,17 @@
 #include "pluginterfaces/gui/iplugview.h"
 //#include "pluginterfaces/gui/iplugviewcontentscalesupport.h"
 
-
 //#include "pluginterfaces/base/conststringtable.cpp"
 //#include "pluginterfaces/base/funknown.cpp"
-//
+
+/* PSL Extensions */
+#include "pslextensions/ipslcontextinfo.h"
+#include "pslextensions/ipsleditcontroller.h"
+#include "pslextensions/ipslviewembedding.h"
+#include "pslextensions/ipslviewscaling.h"
+//#include "pslextensions/ipslgainreduction.h"
+//#include "pslextensions/ipslhostcommands.h"
+
 #if defined(__clang__)
 #    pragma clang diagnostic pop
 #elif __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)
