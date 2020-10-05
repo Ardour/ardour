@@ -60,6 +60,16 @@ DEF_CLASS_IID (Vst::IUnitData)
 DEF_CLASS_IID (Vst::IUnitInfo)
 DEF_CLASS_IID (Vst::ChannelContext::IInfoListener)
 
+DEF_CLASS_IID (Presonus::IContextInfoProvider)
+DEF_CLASS_IID (Presonus::IContextInfoProvider2)
+DEF_CLASS_IID (Presonus::IContextInfoProvider3)
+DEF_CLASS_IID (Presonus::IContextInfoHandler)
+DEF_CLASS_IID (Presonus::IContextInfoHandler2)
+DEF_CLASS_IID (Presonus::IEditControllerExtra)
+DEF_CLASS_IID (Presonus::ISlaveControllerHandler)
+DEF_CLASS_IID (Presonus::IPlugInViewEmbedding)
+DEF_CLASS_IID (Presonus::IPlugInViewScaling)
+
 #if SMTG_OS_LINUX
 DEF_CLASS_IID (Linux::IRunLoop);
 #endif

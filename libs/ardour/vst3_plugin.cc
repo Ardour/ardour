@@ -183,6 +183,15 @@ VST3Plugin::designated_bypass_port ()
 	return _plug->designated_bypass_port ();
 }
 
+void
+VST3Plugin::set_automation_control (uint32_t port, boost::shared_ptr<ARDOUR::AutomationControl> ac)
+{
+	if (!ac->alist () || !_plug->subscribe_to_automation_changes ()) {
+		return;
+	}
+	ac->alist()->automation_state_changed.connect_same_thread (_connections, boost::bind (&VST3PI::automation_state_changed, _plug, port, _1, boost::weak_ptr<AutomationList> (ac->alist ())));
+}
+
 std::set<Evoral::Parameter>
 VST3Plugin::automatable () const
 {
@@ -541,6 +550,24 @@ bool
 VST3Plugin::configure_io (ChanCount in, ChanCount out)
 {
 	return Plugin::configure_io (in, out);
+}
+
+void
+VST3Plugin::add_slave (boost::shared_ptr<Plugin> p, bool rt)
+{
+	boost::shared_ptr<VST3Plugin> vst = boost::dynamic_pointer_cast<VST3Plugin> (p);
+	if (vst) {
+		_plug->add_slave (vst->_plug->conroller (), rt);
+	}
+}
+
+void
+VST3Plugin::remove_slave (boost::shared_ptr<Plugin> p)
+{
+	boost::shared_ptr<VST3Plugin> vst = boost::dynamic_pointer_cast<VST3Plugin> (p);
+	if (vst) {
+		_plug->remove_slave (vst->_plug->conroller ());
+	}
 }
 
 int
@@ -1564,6 +1591,12 @@ VST3PI::get_parameter_descriptor (uint32_t port, ParameterDescriptor& desc) cons
 	} else if (p.unit == "Hz") {
 		desc.unit = ARDOUR::ParameterDescriptor::HZ;
 	}
+
+	FUnknownPtr<Presonus::IEditControllerExtra> extra_ctrl (_controller);
+	if (extra_ctrl) {
+		int32 flags = extra_ctrl->getParamExtraFlags (id);
+		desc.inline_ctrl = (flags & Presonus::kParamFlagMicroEdit) ? true : false;
+	}
 }
 
 std::string
@@ -2323,6 +2356,72 @@ VST3PI::setup_info_listener ()
 
 	/* send initial change */
 	stripable_property_changed (PropertyChange ());
+}
+
+/* ****************************************************************************
+ * PSL Extensions
+ */
+
+bool
+VST3PI::add_slave (Vst::IEditController* c, bool rt)
+{
+	FUnknownPtr<Presonus::ISlaveControllerHandler> slave_ctrl (_controller);
+	if (slave_ctrl) {
+		return slave_ctrl->addSlave (c, rt ? Presonus::kSlaveModeLowLatencyClone : Presonus::kSlaveModeNormal) == kResultOk;
+	}
+	return false;
+}
+
+bool
+VST3PI::remove_slave (Vst::IEditController* c)
+{
+	FUnknownPtr<Presonus::ISlaveControllerHandler> slave_ctrl (_controller);
+	if (slave_ctrl) {
+		return slave_ctrl->removeSlave (c) == kResultOk;
+	}
+	return false;
+}
+
+bool
+VST3PI::subscribe_to_automation_changes () const
+{
+	FUnknownPtr<Presonus::IEditControllerExtra> extra_ctrl (_controller);
+	return 0 != extra_ctrl ? true : false;
+}
+
+void
+VST3PI::automation_state_changed (uint32_t port, AutoState s, boost::weak_ptr <AutomationList> wal)
+{
+	Vst::ParamID id (index_to_id (port));
+	boost::shared_ptr<AutomationList> al = wal.lock ();
+	FUnknownPtr<Presonus::IEditControllerExtra> extra_ctrl (_controller);
+	assert (extra_ctrl);
+
+	Presonus::AutomationMode am;
+	switch (s) {
+		case ARDOUR::Off:
+			if (!al || al->empty ()) {
+				am = Presonus::kAutomationNone;
+			} else {
+				am = Presonus::kAutomationOff;
+			}
+			break;
+		case Write:
+				am = Presonus::kAutomationWrite;
+			break;
+		case Touch:
+				am = Presonus::kAutomationTouch;
+			break;
+		case Play:
+				am = Presonus::kAutomationRead;
+			break;
+		case Latch:
+				am = Presonus::kAutomationLatch;
+			break;
+		default:
+			assert (0);
+	}
+	extra_ctrl->setParamAutomationMode (id, am);
 }
 
 /* ****************************************************************************

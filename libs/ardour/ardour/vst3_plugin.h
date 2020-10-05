@@ -29,6 +29,7 @@
 
 namespace ARDOUR {
 class VST3PluginModule;
+class AutomationList;
 }
 
 #if defined(__clang__)
@@ -113,6 +114,9 @@ public:
 	std::string print_parameter (Vst::ParamID, Vst::ParamValue) const;
 	bool        set_program (int p, int32 sample_off);
 
+	bool subscribe_to_automation_changes () const;
+	void automation_state_changed (uint32_t, ARDOUR::AutoState, boost::weak_ptr<ARDOUR::AutomationList>);
+
 	ARDOUR::Plugin::IOPortDescription describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id) const;
 
 	uint32_t n_audio_inputs () const;
@@ -153,6 +157,11 @@ public:
 	void enable_io (std::vector<bool> const&, std::vector<bool> const&);
 
 	void process (float** ins, float** outs, uint32_t n_samples);
+
+	/* PSL Extension */
+	Vst::IEditController* conroller () const { return _controller; }
+	bool add_slave (Vst::IEditController*, bool);
+	bool remove_slave (Vst::IEditController*);
 
 private:
 	/* prevent copy construction */
@@ -287,6 +296,8 @@ public:
 	IOPortDescription describe_io_port (DataType dt, bool input, uint32_t id) const;
 	PluginOutputConfiguration possible_output () const;
 
+	void set_automation_control (uint32_t, boost::shared_ptr<ARDOUR::AutomationControl>);
+
 	std::string state_node_name () const { return "vst3"; }
 
 	void add_state (XMLNode*) const;
@@ -302,6 +313,9 @@ public:
 	int set_block_size (pframes_t);
 
 	void set_owner (ARDOUR::SessionObject* o);
+
+	void add_slave (boost::shared_ptr<Plugin>, bool);
+	void remove_slave (boost::shared_ptr<Plugin>);
 
 	int connect_and_run (BufferSet&  bufs,
 	                     samplepos_t start, samplepos_t end, double speed,
