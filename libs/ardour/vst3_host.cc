@@ -58,6 +58,7 @@ DEF_CLASS_IID (Vst::IProgramListData)
 DEF_CLASS_IID (Vst::IStreamAttributes)
 DEF_CLASS_IID (Vst::IUnitData)
 DEF_CLASS_IID (Vst::IUnitInfo)
+DEF_CLASS_IID (Vst::ChannelContext::IInfoListener)
 
 #if SMTG_OS_LINUX
 DEF_CLASS_IID (Linux::IRunLoop);
@@ -315,7 +316,9 @@ PlugInterfaceSupport::PlugInterfaceSupport ()
 	addPlugInterfaceSupported (INoteExpressionController::iid);
 
 	//---VST 3.6.5--------------------------------
+#endif
 	addPlugInterfaceSupported (ChannelContext::IInfoListener::iid);
+#if 0
 	addPlugInterfaceSupported (IPrefetchableSupport::iid);
 	addPlugInterfaceSupported (IAutomationState::iid);
 

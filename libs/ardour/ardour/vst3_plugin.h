@@ -181,6 +181,11 @@ private:
 	bool midi_controller (int32_t, int16_t, Vst::CtrlNumber, Vst::ParamID &id);
 	bool live_midi_cc (int32_t, int16_t, Vst::CtrlNumber);
 
+	void setup_info_listener ();
+	void stripable_property_changed (PBD::PropertyChange const&);
+
+	PBD::ScopedConnectionList _strip_connections;
+
 	boost::shared_ptr<ARDOUR::VST3PluginModule> _module;
 
 	std::vector <Vst::IConnectionPoint*> _connections;

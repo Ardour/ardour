@@ -35,6 +35,7 @@
 #include "ardour/audio_buffer.h"
 #include "ardour/audioengine.h"
 #include "ardour/session.h"
+#include "ardour/stripable.h"
 #include "ardour/tempo.h"
 #include "ardour/utils.h"
 #include "ardour/vst3_module.h"
@@ -1462,6 +1463,11 @@ void
 VST3PI::set_owner (SessionObject* o)
 {
 	_owner = o;
+	if (!o) {
+		_strip_connections.drop_connections ();
+		return;
+	}
+	setup_info_listener ();
 }
 
 int32
@@ -2252,6 +2258,71 @@ VST3PI::save_state (RAMStream& stream)
 	}
 
 	return entries.size () > 0;
+}
+
+/* ****************************************************************************/
+
+void
+VST3PI::stripable_property_changed (PBD::PropertyChange const&)
+{
+	FUnknownPtr<Vst::ChannelContext::IInfoListener> il (_controller);
+	Stripable* s = dynamic_cast<Stripable*> (_owner);
+	assert (il && s);
+
+	IPtr<HostAttributeList> al (new HostAttributeList ());
+
+	Vst::String128 tmp;
+	utf8_to_tchar (tmp, _owner->name(), 128);
+	al->setInt (Vst::ChannelContext::kChannelNameLengthKey, _owner->name().size());
+	al->setString (Vst::ChannelContext::kChannelNameKey, tmp);
+
+	utf8_to_tchar (tmp, _owner->id().to_s(), 128);
+	al->setInt (Vst::ChannelContext::kChannelNameLengthKey, _owner->id().to_s().size());
+	al->setString (Vst::ChannelContext::kChannelUIDKey, tmp);
+
+	std::string ns;
+	int order_key;
+	if (s->is_master ()) {
+		ns = _("Master");
+		order_key = 2;
+	} else if (s->is_monitor ()) {
+		ns = _("Monitor");
+		order_key = 3;
+	} else {
+		ns = _("Track");
+		order_key = 1;
+	}
+
+	al->setInt (Vst::ChannelContext::kChannelIndexNamespaceOrderKey, order_key);
+	al->setInt (Vst::ChannelContext::kChannelIndexKey, 1 + s->presentation_info ().order());
+
+	utf8_to_tchar (tmp, ns, 128);
+	al->setInt (Vst::ChannelContext::kChannelIndexNamespaceLengthKey, ns.size());
+	al->setString (Vst::ChannelContext::kChannelIndexNamespaceKey, tmp);
+
+	uint32_t rgba = s->presentation_info ().color();
+	Vst::ChannelContext::ColorSpec argb = ((rgba >> 8) & 0xffffff) | ((rgba & 0xff) << 24);
+	al->setInt (Vst::ChannelContext::kChannelColorKey, argb);
+
+	al->setInt (Vst::ChannelContext::kChannelPluginLocationKey, Vst::ChannelContext::kPreVolumeFader); // XXX
+
+	il->setChannelContextInfos (al);
+}
+
+void
+VST3PI::setup_info_listener ()
+{
+	FUnknownPtr<Vst::ChannelContext::IInfoListener> il (_controller);
+	if (!il) {
+		return;
+	}
+	Stripable* s = dynamic_cast<Stripable*> (_owner);
+
+	s->PropertyChanged.connect_same_thread (_strip_connections, boost::bind (&VST3PI::stripable_property_changed, this, _1));
+	s->presentation_info().PropertyChanged.connect_same_thread (_strip_connections, boost::bind (&VST3PI::stripable_property_changed, this, _1));
+
+	/* send initial change */
+	stripable_property_changed (PropertyChange ());
 }
 
 /* ****************************************************************************
