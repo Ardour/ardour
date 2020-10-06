@@ -24,6 +24,7 @@
 #include "gtkmm2ext/gui_thread.h"
 
 #include "timers.h"
+#include "ui_config.h"
 #include "vst3_plugin_ui.h"
 
 using namespace ARDOUR;
@@ -94,6 +95,13 @@ VST3PluginUI::package (Gtk::Window& win)
 {
 	win.signal_map_event().connect (sigc::mem_fun(*this, &VST3PluginUI::start_updating));
 	win.signal_unmap_event().connect (sigc::mem_fun(*this, &VST3PluginUI::stop_updating));
+
+	IPlugView* view = _vst3->view ();
+	FUnknownPtr<Presonus::IPlugInViewScaling> vs (view);
+	if (vs) {
+		vs->setContentScaleFactor (UIConfiguration::instance().get_ui_scale ());
+	}
+
 	return 0;
 }
 
