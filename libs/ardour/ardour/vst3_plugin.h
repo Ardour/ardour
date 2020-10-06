@@ -19,6 +19,10 @@
 #ifndef _ardour_vst3_plugin_h_
 #define _ardour_vst3_plugin_h_
 
+#include <map>
+#include <set>
+#include <vector>
+
 #include <boost/optional.hpp>
 
 #include "pbd/signals.h"
@@ -53,6 +57,7 @@ class LIBARDOUR_API VST3PI
 	, public Vst::IConnectionPoint
 	, public Vst::IUnitHandler
 	, public IPlugFrame
+	, public Presonus::IContextInfoProvider3
 {
 public:
 	VST3PI (boost::shared_ptr<ARDOUR::VST3PluginModule> m, std::string unique_id);
@@ -81,6 +86,16 @@ public:
 	/* IUnitHandler API */
 	tresult PLUGIN_API notifyUnitSelection (Vst::UnitID) SMTG_OVERRIDE;
 	tresult PLUGIN_API notifyProgramListChange (Vst::ProgramListID, int32) SMTG_OVERRIDE;
+
+	/* IContextInfoProvider3 API */
+	tresult PLUGIN_API getContextInfoValue (int32&, FIDString);
+	tresult PLUGIN_API getContextInfoString (Vst::TChar*, int32, FIDString);
+	tresult PLUGIN_API getContextInfoValue (double&, FIDString);
+	tresult PLUGIN_API setContextInfoValue (FIDString, double);
+	tresult PLUGIN_API setContextInfoValue (FIDString, int32);
+	tresult PLUGIN_API setContextInfoString (FIDString, Vst::TChar*);
+	tresult PLUGIN_API beginEditContextInfoValue (FIDString);
+	tresult PLUGIN_API endEditContextInfoValue (FIDString);
 
 	/* GUI */
 	bool has_editor () const;
@@ -193,7 +208,13 @@ private:
 	void setup_info_listener ();
 	void stripable_property_changed (PBD::PropertyChange const&);
 
-	PBD::ScopedConnectionList _strip_connections;
+	void setup_psl_info_handler ();
+	void psl_subscribe_to (boost::shared_ptr<ARDOUR::AutomationControl>, FIDString);
+	void psl_stripable_property_changed (PBD::PropertyChange const&);
+
+	PBD::ScopedConnectionList   _strip_connections;
+	PBD::ScopedConnectionList   _ac_connection_list;
+	std::set<Evoral::Parameter> _ac_subscriptions;
 
 	boost::shared_ptr<ARDOUR::VST3PluginModule> _module;
 

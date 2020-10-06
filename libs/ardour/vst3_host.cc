@@ -338,6 +338,11 @@ PlugInterfaceSupport::PlugInterfaceSupport ()
 	//---VST 3.6.12--------------------------------
 #endif
 	addPlugInterfaceSupported (IMidiLearn::iid);
+
+	//---PSL --------------------------------------
+	addPlugInterfaceSupported (Presonus::ISlaveControllerHandler::iid);
+	addPlugInterfaceSupported (Presonus::IEditControllerExtra::iid);
+	addPlugInterfaceSupported (Presonus::IContextInfoHandler2::iid);
 }
 
 tresult

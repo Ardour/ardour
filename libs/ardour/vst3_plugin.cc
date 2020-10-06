@@ -1492,9 +1492,12 @@ VST3PI::set_owner (SessionObject* o)
 	_owner = o;
 	if (!o) {
 		_strip_connections.drop_connections ();
+		_ac_connection_list.drop_connections ();
+		_ac_subscriptions.clear();
 		return;
 	}
 	setup_info_listener ();
+	setup_psl_info_handler ();
 }
 
 int32
@@ -2422,6 +2425,316 @@ VST3PI::automation_state_changed (uint32_t port, AutoState s, boost::weak_ptr <A
 			assert (0);
 	}
 	extra_ctrl->setParamAutomationMode (id, am);
+}
+
+/* ****************************************************************************/
+
+static
+boost::shared_ptr<AutomationControl>
+lookup_ac (SessionObject* o, FIDString id)
+{
+	Stripable* s = dynamic_cast<Stripable*> (o);
+	if (!s) {
+		return boost::shared_ptr<AutomationControl> ();
+	}
+
+	if (0 == strcmp (id, Presonus::ContextInfo::kMute)) {
+		return s->mute_control();
+	} else if (0 == strcmp (id, Presonus::ContextInfo::kSolo)) {
+		return s->solo_control();
+	} else if (0 == strcmp (id, Presonus::ContextInfo::kPan)) {
+		return s->pan_azimuth_control ();
+	} else if (0 == strcmp (id, Presonus::ContextInfo::kVolume)) {
+		return s->gain_control ();
+	} else if (0 == strncmp (id, Presonus::ContextInfo::kSendLevel, strlen (Presonus::ContextInfo::kSendLevel))) {
+		int send_id = atoi (id + strlen (Presonus::ContextInfo::kSendLevel));
+		return s->send_level_controllable (send_id);
+	}
+	return boost::shared_ptr<AutomationControl> ();
+}
+
+tresult
+VST3PI::getContextInfoValue (int32& value, FIDString id)
+{
+	Stripable* s = dynamic_cast<Stripable*> (_owner);
+	assert (s);
+
+	if (0 == strcmp (id, Presonus::ContextInfo::kIndexMode)) {
+		value = Presonus::ContextInfo::kPerTypeIndex;
+	} else if (0 == strcmp (id, Presonus::ContextInfo::kType)) {
+		if (s->is_master ()) {
+			value = Presonus::ContextInfo::kOut;
+		} else if (s->presentation_info().flags() & PresentationInfo::AudioTrack) {
+			value = Presonus::ContextInfo::kTrack;
+		} else if (s->presentation_info().flags() & PresentationInfo::MidiTrack) {
+			value = Presonus::ContextInfo::kSynth;
+		} else {
+			value = Presonus::ContextInfo::kBus;
+		}
+	} else if (0 == strcmp (id, Presonus::ContextInfo::kMain)) {
+		value = s->is_master() ? 1 : 0;
+	} else if (0 == strcmp (id, Presonus::ContextInfo::kIndex)) {
+		value = s->presentation_info ().order(); // XXX
+	} else if (0 == strcmp (id, Presonus::ContextInfo::kColor)) {
+		value = s->presentation_info ().color();
+#if BYTEORDER == kBigEndian
+		SWAP_32 (value) // RGBA32 -> ABGR32
+#endif
+	} else if (0 == strcmp (id, Presonus::ContextInfo::kVisibility)) {
+		value = s->is_hidden () ? 0 : 1;
+	} else if (0 == strcmp (id, Presonus::ContextInfo::kSelected)) {
+		value = s->is_selected () ? 1 : 0;
+	} else if (0 == strcmp (id, Presonus::ContextInfo::kFocused)) {
+		// consider ControlProtocol::first_selected_stripable () == s;
+		return kNotImplemented;
+	} else if (0 == strcmp (id, Presonus::ContextInfo::kSendCount)) {
+		value = 0;
+		while (s->send_enable_controllable (value)) {
+			++value;
+		}
+	} else if (0 == strcmp (id, Presonus::ContextInfo::kMute)) {
+		boost::shared_ptr<MuteControl> ac = s->mute_control ();
+		psl_subscribe_to (ac, id);
+		return ac->muted_by_self ();
+	} else if (0 == strcmp (id, Presonus::ContextInfo::kSolo)) {
+		boost::shared_ptr<SoloControl> ac = s->solo_control ();
+		if (ac) {
+			psl_subscribe_to (ac, id);
+			value = ac->self_soloed ();
+		}
+	} else {
+		return kNotImplemented;
+	}
+	return kResultOk;
+}
+
+tresult
+VST3PI::getContextInfoString (Vst::TChar* string, int32 max_len, FIDString id)
+{
+	if (!_owner) {
+		return kNotInitialized;
+	}
+
+	if (0 == strcmp (id, Presonus::ContextInfo::kID)) {
+		utf8_to_tchar (string, _owner->id().to_s (), max_len);
+		return kResultOk;
+	} else if (0 == strcmp (id, Presonus::ContextInfo::kName)) {
+		utf8_to_tchar (string, _owner->name (), max_len);
+		return kResultOk;
+	} else if (0 == strcmp (id, Presonus::ContextInfo::kActiveDocumentID)) {
+		return kNotImplemented; // XXX TODO
+	} else if (0 == strcmp (id, Presonus::ContextInfo::kDocumentID)) {
+		return kNotImplemented; // XXX TODO
+	} else if (0 == strcmp (id, Presonus::ContextInfo::kDocumentName)) {
+		return kNotImplemented; // XXX TODO
+	} else if (0 == strcmp (id, Presonus::ContextInfo::kDocumentFolder)) {
+		return kNotImplemented; // XXX TODO
+	} else if (0 == strcmp (id, Presonus::ContextInfo::kAudioFolder)) {
+		return kNotImplemented; // XXX TODO
+	} else {
+		boost::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
+		if (!ac) {
+			return kInvalidArgument;
+		}
+		utf8_to_tchar (string, ac->get_user_string (), max_len);
+	}
+	return kResultOk;
+}
+
+tresult
+VST3PI::getContextInfoValue (double& value, FIDString id)
+{
+	Stripable* s = dynamic_cast<Stripable*> (_owner);
+	if (!s) {
+		return kNotInitialized;
+	}
+	if (0 == strcmp (id, Presonus::ContextInfo::kMaxVolume)) {
+		value = 2.0; // Config->get_max_gain();
+	} else if (0 == strcmp (id, Presonus::ContextInfo::kMaxSendLevel)) {
+		value = 2.0; // Config->get_max_gain();
+	} else if (0 == strcmp (id, Presonus::ContextInfo::kVolume)) {
+		boost::shared_ptr<AutomationControl> ac = s->gain_control ();
+		value = ac->get_value(); // gain coefficient  0..2 (1.0 = 0dB)
+		psl_subscribe_to (ac, id);
+	} else if (0 == strcmp (id, Presonus::ContextInfo::kPan)) {
+		boost::shared_ptr<AutomationControl> ac = s->pan_azimuth_control ();
+		if (ac) {
+			value = ac->internal_to_interface (ac->get_value(), true);
+			psl_subscribe_to (ac, id);
+		} else {
+			value = 0.5; // center
+		}
+	} else if (0 == strncmp (id, Presonus::ContextInfo::kSendLevel, strlen (Presonus::ContextInfo::kSendLevel))) {
+		boost::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
+		if (ac) {
+			value = ac->get_value(); // gain cofficient
+			psl_subscribe_to (ac, id);
+		} else {
+			return kInvalidArgument; // send index out of bounds
+		}
+	} else {
+		return kInvalidArgument;
+	}
+	return kResultOk;
+}
+
+tresult
+VST3PI::setContextInfoValue (FIDString id, double value)
+{
+	if (!_owner) {
+		return kNotInitialized;
+	}
+	if (0 == strcmp (id, Presonus::ContextInfo::kVolume)) {
+		boost::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
+		ac->set_value (value, Controllable::NoGroup);
+	} else if (0 == strcmp (id, Presonus::ContextInfo::kPan)) {
+		boost::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
+		if (ac) {
+			ac->set_value (ac->interface_to_internal (value, true), PBD::Controllable::NoGroup);
+		}
+	} else if (0 == strncmp (id, Presonus::ContextInfo::kSendLevel, strlen (Presonus::ContextInfo::kSendLevel))) {
+		boost::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
+		if (ac) {
+			ac->set_value (value, Controllable::NoGroup);
+		} else {
+			return kInvalidArgument; // send index out of bounds
+		}
+	} else {
+		return kInvalidArgument;
+	}
+	return kResultOk;
+}
+
+tresult
+VST3PI::setContextInfoValue (FIDString id, int32 value)
+{
+	Stripable* s = dynamic_cast<Stripable*> (_owner);
+	if (!s) {
+		return kNotInitialized;
+	}
+	if (0 == strcmp (id, Presonus::ContextInfo::kColor)) {
+#if BYTEORDER == kBigEndian
+		SWAP_32 (value) // ABGR32 -> RGBA32
+#endif
+		s->presentation_info ().set_color(value);
+	} else if (0 == strcmp (id, Presonus::ContextInfo::kSelected)) {
+		return kNotImplemented;
+	} else if (0 == strcmp (id, Presonus::ContextInfo::kMultiSelect)) {
+		//_add_to_selection = value != 0;
+	} else if (0 == strcmp (id, Presonus::ContextInfo::kMute)) {
+		s->mute_control()->set_value (value != 0, Controllable::NoGroup);
+	} else if (0 == strcmp (id, Presonus::ContextInfo::kSolo)) {
+		s->solo_control()->set_value (value != 0, Controllable::NoGroup);
+	} else {
+		return kNotImplemented;
+	}
+	return kResultOk;
+}
+
+tresult
+VST3PI::setContextInfoString (FIDString id, Vst::TChar* string)
+{
+	if (!_owner) {
+		return kNotInitialized;
+	}
+	if (0 == strcmp (id, Presonus::ContextInfo::kName)) {
+		return _owner->set_name (tchar_to_utf8 (string)) ? kResultOk : kResultFalse;
+	}
+	return kInvalidArgument;
+}
+
+tresult
+VST3PI::beginEditContextInfoValue (FIDString id)
+{
+	if (!_owner) {
+		return kNotInitialized;
+	}
+	boost::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
+	if (!ac) {
+		return kInvalidArgument;
+	}
+	ac->start_touch (ac->session().transport_sample());
+	return kResultOk;
+}
+
+tresult
+VST3PI::endEditContextInfoValue (FIDString id)
+{
+	if (!_owner) {
+		return kNotInitialized;
+	}
+	boost::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
+	if (!ac) {
+		return kInvalidArgument;
+	}
+	ac->stop_touch (ac->session().transport_sample());
+	return kResultOk;
+}
+
+void
+VST3PI::psl_subscribe_to (boost::shared_ptr<ARDOUR::AutomationControl> ac, FIDString id)
+{
+	FUnknownPtr<Presonus::IContextInfoHandler2> nfo2 (_controller);
+	if (!nfo2) {
+		return;
+	}
+
+	std::pair<std::set<Evoral::Parameter>::iterator, bool> r = _ac_subscriptions.insert (ac->parameter ());
+
+	if (!r.second) {
+		return;
+	}
+
+	ac->Changed.connect_same_thread (_ac_connection_list, boost::bind (&Presonus::IContextInfoHandler2::notifyContextInfoChange, nfo2.get(), id));
+}
+
+void
+VST3PI::psl_stripable_property_changed (PBD::PropertyChange const& what_changed)
+{
+	FUnknownPtr<Presonus::IContextInfoHandler> nfo (_controller);
+	FUnknownPtr<Presonus::IContextInfoHandler2> nfo2 (_controller);
+	if (nfo && !nfo2) {
+		nfo->notifyContextInfoChange ();
+	}
+	if (!nfo2) {
+		return;
+	}
+
+	if (what_changed.contains (Properties::selected)) {
+		nfo2->notifyContextInfoChange ("Presonus::ContextInfo::kSelected");
+		//nfo2->notifyContextInfoChange ("Presonus::ContextInfo::kFocused");
+	}
+	if (what_changed.contains (Properties::hidden)) {
+		nfo2->notifyContextInfoChange ("Presonus::ContextInfo::kVisibility");
+	}
+	if (what_changed.contains (Properties::name)) {
+		nfo2->notifyContextInfoChange ("Presonus::ContextInfo::kName");
+	}
+	if (what_changed.contains (Properties::color)) {
+		nfo2->notifyContextInfoChange ("Presonus::ContextInfo::kColor");
+	}
+}
+
+void
+VST3PI::setup_psl_info_handler ()
+{
+	/* initial update */
+	FUnknownPtr<Presonus::IContextInfoHandler> nfo (_controller);
+	FUnknownPtr<Presonus::IContextInfoHandler2> nfo2 (_controller);
+	if (nfo2) {
+		nfo2->notifyContextInfoChange ("");
+	} else if (nfo) {
+		nfo->notifyContextInfoChange ();
+	}
+
+	if (!nfo && !nfo2) {
+		return;
+	}
+
+	Stripable* s = dynamic_cast<Stripable*> (_owner);
+	s->PropertyChanged.connect_same_thread (_strip_connections, boost::bind (&VST3PI::stripable_property_changed, this, _1));
+	s->presentation_info().PropertyChanged.connect_same_thread (_strip_connections, boost::bind (&VST3PI::stripable_property_changed, this, _1));
+
 }
 
 /* ****************************************************************************
