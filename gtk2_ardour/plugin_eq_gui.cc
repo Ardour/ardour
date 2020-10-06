@@ -205,7 +205,7 @@ PluginEqGui::stop_listening ()
 	if (_plugin) {
 		_plugin->deactivate ();
 		_plugin->drop_references ();
-		_plugin = 0;
+		_plugin.reset ();
 	}
 }
 
