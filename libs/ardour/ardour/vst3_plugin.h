@@ -148,6 +148,8 @@ public:
 
 	Vst::ProcessContext& context () { return _context; }
 
+	void set_owner (ARDOUR::SessionObject* o);
+
 	void enable_io (std::vector<bool> const&, std::vector<bool> const&);
 
 	void process (float** ins, float** outs, uint32_t n_samples);
@@ -233,6 +235,8 @@ private:
 
 	boost::optional<uint32_t> _plugin_latency;
 
+	ARDOUR::SessionObject* _owner;
+
 	int _n_inputs;
 	int _n_outputs;
 	int _n_aux_inputs;
@@ -291,6 +295,8 @@ public:
 	void deactivate () { _plug->deactivate (); }
 
 	int set_block_size (pframes_t);
+
+	void set_owner (ARDOUR::SessionObject* o);
 
 	int connect_and_run (BufferSet&  bufs,
 	                     samplepos_t start, samplepos_t end, double speed,

@@ -516,6 +516,13 @@ VST3Plugin::set_state (const XMLNode& node, int version)
 
 /* ****************************************************************************/
 
+void
+VST3Plugin::set_owner (ARDOUR::SessionObject* o)
+{
+	Plugin::set_owner (o);
+	_plug->set_owner (o);
+}
+
 int
 VST3Plugin::set_block_size (pframes_t n_samples)
 {
@@ -943,6 +950,7 @@ VST3PI::VST3PI (boost::shared_ptr<ARDOUR::VST3PluginModule> m, std::string uniqu
 	, _is_processing (false)
 	, _block_size (0)
 	, _port_id_bypass (UINT32_MAX)
+	, _owner (0)
 	, _n_factory_presets (0)
 {
 	using namespace std;
@@ -1448,6 +1456,12 @@ VST3PI::plugin_latency ()
 		_plugin_latency = _processor->getLatencySamples ();
 	}
 	return _plugin_latency.value ();
+}
+
+void
+VST3PI::set_owner (SessionObject* o)
+{
+	_owner = o;
 }
 
 int32
