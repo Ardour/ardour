@@ -245,6 +245,17 @@ ARDOUR::module_path_vst3 (string const& path)
 				vst3_bindir (), PBD::basename_nosuffix (path) + vst3_suffix ());
 	}
 	if (!Glib::file_test (module_path, Glib::FILE_TEST_IS_REGULAR)) {
+#ifdef __APPLE__
+		if (Glib::file_test (Glib::path_get_dirname (module_path), Glib::FILE_TEST_IS_DIR) &&
+		    Glib::file_test (Glib::build_filename (path, "Contents", "Info.plist"), Glib::FILE_TEST_IS_REGULAR)) {
+			/* Alternatively check for "Contents/MacOS" and an Info.plist file.
+			 * VST3MacModule calls CFBundleCreate() which handles Info.plist files.
+			 * (this is for plugins that use PACE, the MacOS folder usually
+			 * contains a file <basename> + "Protect").
+			 */
+			return module_path;
+		}
+#endif
 		cerr << "VST3 not a valid bundle: '" << module_path << "'\n";
 		return "";
 	}
