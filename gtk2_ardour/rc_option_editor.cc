@@ -3654,7 +3654,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Plugins/VST"),
 			new RcActionButton (_("Clear"),
 				sigc::mem_fun (*this, &RCOptionEditor::clear_vst2_cache),
-				_("VST 3 Cache:")));
+				_("VST 2 Cache:")));
 
 	add_option (_("Plugins/VST"),
 			new RcActionButton (_("Clear"),
