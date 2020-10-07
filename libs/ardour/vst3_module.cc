@@ -49,8 +49,7 @@ class VST3MacModule : public VST3PluginModule
 public:
 	VST3MacModule (std::string const& module_path)
 	{
-		std::string path = Glib::path_get_dirname (module_path); // MacOS
-		path = Glib::path_get_dirname (path); // Contents
+		std::string path = Glib::path_get_dirname (module_path); // Contents
 		path = Glib::path_get_dirname (path); // theVST.vst3
 		CFURLRef url = CFURLCreateFromFileSystemRepresentation (0, (const UInt8*)path.c_str (), (CFIndex)path.length (), true);
 		if (url) {
