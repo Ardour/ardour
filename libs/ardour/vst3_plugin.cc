@@ -1044,6 +1044,10 @@ VST3PI::VST3PI (boost::shared_ptr<ARDOUR::VST3PluginModule> m, std::string uniqu
 		p.read_only   = 0 != (pi.flags & Vst::ParameterInfo::kIsReadOnly);
 		p.automatable = 0 != (pi.flags & Vst::ParameterInfo::kCanAutomate);
 
+		if (pi.flags & /*Vst::ParameterInfo::kIsHidden*/ (1<<4)) {
+			p.label = X_("hidden");
+		}
+
 		uint32_t idx = _ctrl_params.size ();
 		_ctrl_params.push_back (p);
 
