@@ -98,7 +98,7 @@ MidiBuffer::copy(MidiBuffer const * const copy)
 
 
 void
-MidiBuffer::read_from (const Buffer& src, samplecnt_t nframes, sampleoffset_t dst_offset, sampleoffset_t /* src_offset*/)
+MidiBuffer::read_from (const Buffer& src, samplecnt_t nframes, sampleoffset_t dst_offset, sampleoffset_t src_offset)
 {
 	assert (src.type() == DataType::MIDI);
 	assert (&src != this);
@@ -106,7 +106,6 @@ MidiBuffer::read_from (const Buffer& src, samplecnt_t nframes, sampleoffset_t ds
 	const MidiBuffer& msrc = (const MidiBuffer&) src;
 
 	assert (_capacity >= msrc.size());
-	assert (dst_offset == 0); /* there is no known scenario in Nov 2019 where this should be false */
 
 	clear ();
 	assert (_size == 0);
@@ -114,10 +113,14 @@ MidiBuffer::read_from (const Buffer& src, samplecnt_t nframes, sampleoffset_t ds
 	for (MidiBuffer::const_iterator i = msrc.begin(); i != msrc.end(); ++i) {
 		const Evoral::Event<TimeType> ev(*i, false);
 
-		if (ev.time() >= 0 && ev.time() < nframes) {
-			push_back (ev.time(), ev.event_type (), ev.size(), ev.buffer());
+		if (ev.time() >= src_offset && ev.time() < nframes + src_offset) {
+			push_back (ev.time() + dst_offset - src_offset, ev.event_type (), ev.size(), ev.buffer());
 		} else {
-			cerr << "\t!!!! MIDI event @ " <<  ev.time() << " skipped, not within range 0 .. " << nframes << endl;
+			cerr << "\t!!!! MIDI event @ " <<  ev.time()
+			     << " skipped, not within range. nframes: " << nframes
+			     << " src_offset: " << src_offset
+			     << " dst_offset: " << dst_offset
+			     << "\n";
 			PBD::stacktrace (cerr, 30);
 		}
 	}
