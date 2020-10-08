@@ -1686,7 +1686,6 @@ PluginManager::vst3_discover (string const& path, bool cache_only)
 		return -1;
 	}
 
-	ARDOUR::PluginScanMessage(_("VST3"), module_path, !(cache_only || cancelled()));
 	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("VST3: discover %1 (%2)\n", path, module_path));
 
 	if (!cache_only && vst3_scanner_bin_path.empty ()) {
