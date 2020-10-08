@@ -343,7 +343,7 @@ protected:
 	std::vector<Vst::Event> _events;
 };
 
-class LIBARDOUR_LOCAL RAMStream : public IBStream
+class LIBARDOUR_LOCAL RAMStream : public IBStream, public ISizeableStream, public Vst::IStreamAttributes
 {
 public:
 	RAMStream ();
@@ -352,7 +352,7 @@ public:
 
 	virtual ~RAMStream ();
 
-	QUERY_INTERFACE_IMPL (IBStream)
+	tresult PLUGIN_API queryInterface (const TUID _iid, void** obj) SMTG_OVERRIDE;
 	uint32 PLUGIN_API addRef () SMTG_OVERRIDE { return 1; }
 	uint32 PLUGIN_API release () SMTG_OVERRIDE { return 1; }
 
@@ -361,6 +361,14 @@ public:
 	tresult PLUGIN_API write (void* buffer, int32 numBytes, int32* numBytesWritten) SMTG_OVERRIDE;
 	tresult PLUGIN_API seek  (int64 pos, int32 mode, int64* result) SMTG_OVERRIDE;
 	tresult PLUGIN_API tell  (int64* pos) SMTG_OVERRIDE;
+
+	/* ISizeableStream API */
+	tresult PLUGIN_API getStreamSize (int64&) SMTG_OVERRIDE;
+	tresult PLUGIN_API setStreamSize (int64) SMTG_OVERRIDE;
+
+	/* IStreamAttributes API */
+	tresult PLUGIN_API getFileName (Vst::String128 name) SMTG_OVERRIDE;
+	Vst::IAttributeList* PLUGIN_API getAttributes () SMTG_OVERRIDE;
 
 	/* convenience API for state I/O */
 	void rewind () { _pos = 0; }
@@ -404,6 +412,8 @@ private:
 	int64    _alloc;
 	int64    _pos;
 	bool     _readonly;
+
+	HostAttributeList attribute_list;
 };
 
 #if defined(__clang__)

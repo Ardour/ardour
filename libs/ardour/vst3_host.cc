@@ -35,6 +35,7 @@ DEF_CLASS_IID (IPluginFactory)
 DEF_CLASS_IID (IPluginFactory2)
 DEF_CLASS_IID (IPlugFrame)
 DEF_CLASS_IID (IPlugView)
+DEF_CLASS_IID (ISizeableStream)
 DEF_CLASS_IID (Vst::IAttributeList)
 DEF_CLASS_IID (Vst::IAudioProcessor)
 DEF_CLASS_IID (Vst::IAutomationState)
@@ -54,6 +55,7 @@ DEF_CLASS_IID (Vst::IParameterChanges)
 DEF_CLASS_IID (Vst::IParamValueQueue)
 DEF_CLASS_IID (Vst::IPlugInterfaceSupport)
 DEF_CLASS_IID (Vst::IProgramListData)
+DEF_CLASS_IID (Vst::IStreamAttributes)
 DEF_CLASS_IID (Vst::IUnitData)
 DEF_CLASS_IID (Vst::IUnitInfo)
 
@@ -510,6 +512,20 @@ RAMStream::~RAMStream ()
 	free (_data);
 }
 
+tresult
+RAMStream::queryInterface (const TUID _iid, void** obj)
+{
+  QUERY_INTERFACE (_iid, obj, FUnknown::iid, IBStream)
+  QUERY_INTERFACE (_iid, obj, IBStream::iid, IBStream)
+  QUERY_INTERFACE (_iid, obj, FUnknown::iid, ISizeableStream)
+  QUERY_INTERFACE (_iid, obj, ISizeableStream::iid, ISizeableStream)
+  QUERY_INTERFACE (_iid, obj, FUnknown::iid, Vst::IStreamAttributes)
+  QUERY_INTERFACE (_iid, obj, Vst::IStreamAttributes::iid, Vst::IStreamAttributes)
+
+  *obj = nullptr;
+  return kNoInterface;
+}
+
 bool
 RAMStream::reallocate_buffer (int64 size, bool exact)
 {
@@ -746,6 +762,34 @@ RAMStream::read_TUID (TUID& tuid)
 	}
 
 	return true;
+}
+
+tresult
+RAMStream::getStreamSize (int64& size)
+{
+	size = _alloc;
+	return kResultTrue;
+}
+
+tresult
+RAMStream::setStreamSize (int64 size)
+{
+	if (_readonly) {
+		return kResultFalse;
+	}
+	return reallocate_buffer (size, true) ? kResultOk : kOutOfMemory;
+}
+
+tresult
+RAMStream::getFileName (Vst::String128 name)
+{
+	return kNotImplemented;
+}
+
+Vst::IAttributeList*
+RAMStream::getAttributes ()
+{
+	return &attribute_list;
 }
 
 #ifndef NDEBUG
