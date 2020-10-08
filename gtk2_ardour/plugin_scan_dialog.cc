@@ -24,6 +24,8 @@
 
 #include <gtkmm/progressbar.h>
 
+#include "pbd/basename.h"
+
 #include "ardour/plugin_manager.h"
 
 #include "ardour_ui.h"
@@ -201,7 +203,7 @@ PluginScanDialog::message_handler (std::string type, std::string plugin, bool ca
 		hide();
 		connections.drop_connections ();
 	} else {
-		message.set_text (type + ": " + Glib::path_get_basename(plugin));
+		message.set_text (type + ": " + PBD::basename_nosuffix (plugin));
 		show();
 	}
 
