@@ -43,6 +43,8 @@ DEF_CLASS_IID (Vst::IComponentHandler)
 DEF_CLASS_IID (Vst::IComponentHandler2)
 DEF_CLASS_IID (Vst::IConnectionPoint)
 DEF_CLASS_IID (Vst::IEditController)
+DEF_CLASS_IID (Vst::IEditController2)
+DEF_CLASS_IID (Vst::IEditControllerHostEditing)
 DEF_CLASS_IID (Vst::IEventList)
 DEF_CLASS_IID (Vst::IHostApplication)
 DEF_CLASS_IID (Vst::IMessage)
@@ -291,10 +293,10 @@ PlugInterfaceSupport::PlugInterfaceSupport ()
 	//---VST 3.0.1--------------------------------
 	addPlugInterfaceSupported (IMidiMapping::iid);
 
-#if 0
 	//---VST 3.1----------------------------------
 	addPlugInterfaceSupported (IEditController2::iid);
 
+#if 0
 	//---VST 3.0.2--------------------------------
 	addPlugInterfaceSupported (IParameterFinder::iid);
 
@@ -304,7 +306,9 @@ PlugInterfaceSupport::PlugInterfaceSupport ()
 	//---VST 3.5----------------------------------
 	addPlugInterfaceSupported (IKeyswitchController::iid);
 	addPlugInterfaceSupported (IContextMenuTarget::iid);
+#endif
 	addPlugInterfaceSupported (IEditControllerHostEditing::iid);
+#if 0
 	addPlugInterfaceSupported (IXmlRepresentationController::iid);
 	addPlugInterfaceSupported (INoteExpressionController::iid);
 

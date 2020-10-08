@@ -108,6 +108,9 @@ VST3Plugin::parameter_change_handler (VST3PI::ParameterChange t, uint32_t param,
 		case VST3PI::InternalChange:
 			Plugin::state_changed ();
 			break;
+		case VST3PI::PresetChange:
+			PresetsChanged (unique_id (), this, false); /* EMIT SIGNAL */
+			break;
 	}
 }
 
@@ -1013,6 +1016,13 @@ VST3PI::VST3PI (boost::shared_ptr<ARDOUR::VST3PluginModule> m, std::string uniqu
 	memset (&_program_change_port, 0, sizeof (_program_change_port));
 	_program_change_port.id = Vst::kNoParamId;
 
+	FUnknownPtr<Vst::IEditControllerHostEditing> host_editing (_controller);
+
+	FUnknownPtr<Vst::IEditController2> controller2 (_controller);
+	if (controller2) {
+		controller2->setKnobMode (Vst::kRelativCircularMode);
+	}
+
 	int32 n_params = _controller->getParameterCount ();
 	for (int32 i = 0; i < n_params; ++i) {
 		Vst::ParameterInfo pi;
@@ -1023,7 +1033,8 @@ VST3PI::VST3PI (boost::shared_ptr<ARDOUR::VST3PluginModule> m, std::string uniqu
 			_program_change_port = pi;
 			continue;
 		}
-		if (0 == (pi.flags & Vst::ParameterInfo::kCanAutomate)) {
+		/* allow non-automatable parameters IFF IEditControllerHostEditing is available */
+		if (0 == (pi.flags & Vst::ParameterInfo::kCanAutomate) && !host_editing) {
 			/* but allow read-only, not automatable params (ctrl outputs) */
 			if (0 == (pi.flags & Vst::ParameterInfo::kIsReadOnly)) {
 				continue;
@@ -1275,6 +1286,19 @@ VST3PI::restartComponent (int32 flags)
 #endif
 		return kNotImplemented;
 	}
+	return kResultOk;
+}
+
+tresult
+VST3PI::notifyUnitSelection (Vst::UnitID unitId)
+{
+	return kResultFalse;
+}
+
+tresult
+VST3PI::notifyProgramListChange (Vst::ProgramListID, int32)
+{
+	OnParameterChange (PresetChange, 0, 0); /* EMIT SIGNAL */
 	return kResultOk;
 }
 
@@ -1679,13 +1703,22 @@ void
 VST3PI::update_contoller_param ()
 {
 	/* GUI thread */
+	FUnknownPtr<Vst::IEditControllerHostEditing> host_editing (_controller);
+
 	std::map<uint32_t, Vst::ParamID>::const_iterator i;
 	for (i = _ctrl_index_id.begin (); i != _ctrl_index_id.end (); ++i) {
 		if (!_update_ctrl[i->first]) {
 			continue;
 		}
 		_update_ctrl[i->first] = false;
+		if (!parameter_is_automatable (i->first) && !parameter_is_readonly (i->first)) {
+			assert (host_editing);
+			host_editing->beginEditFromHost (i->second);
+		}
 		_controller->setParamNormalized (i->second, _shadow_data[i->first]);
+		if (!parameter_is_automatable (i->first) && !parameter_is_readonly (i->first)) {
+			host_editing->endEditFromHost (i->second);
+		}
 	}
 }
 
@@ -1716,7 +1749,16 @@ VST3PI::get_parameter (uint32_t p) const
 	Vst::ParamID id = index_to_id (p);
 	if (_update_ctrl[p]) {
 		_update_ctrl[p] = false;
+
+		FUnknownPtr<Vst::IEditControllerHostEditing> host_editing (_controller);
+		if (!parameter_is_automatable (p) && !parameter_is_readonly (p)) {
+			assert (host_editing);
+			host_editing->beginEditFromHost (id);
+		}
 		_controller->setParamNormalized (id, _shadow_data[p]); // GUI thread only
+		if (!parameter_is_automatable (p) && !parameter_is_readonly (p)) {
+			host_editing->endEditFromHost (id);
+		}
 	}
 	return _controller->normalizedParamToPlain (id, _shadow_data[p]);
 }

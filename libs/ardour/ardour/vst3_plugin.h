@@ -50,6 +50,7 @@ class LIBARDOUR_API VST3PI
 	: public Vst::IComponentHandler
 	, public Vst::IComponentHandler2
 	, public Vst::IConnectionPoint
+	, public Vst::IUnitHandler
 	, public IPlugFrame
 {
 public:
@@ -75,6 +76,10 @@ public:
 
 	/* IPlugFrame */
 	tresult PLUGIN_API resizeView (IPlugView* view, ViewRect* newSize) SMTG_OVERRIDE;
+
+	/* IUnitHandler API */
+	tresult PLUGIN_API notifyUnitSelection (Vst::UnitID) SMTG_OVERRIDE;
+	tresult PLUGIN_API notifyProgramListChange (Vst::ProgramListID, int32) SMTG_OVERRIDE;
 
 	/* GUI */
 	bool has_editor () const;
@@ -128,7 +133,7 @@ public:
 	std::string  format_parameter (uint32_t p) const;
 	Vst::ParamID index_to_id (uint32_t) const;
 
-	enum ParameterChange { BeginGesture, EndGesture , ValueChange, InternalChange };
+	enum ParameterChange { BeginGesture, EndGesture , ValueChange, InternalChange, PresetChange };
 	PBD::Signal3<void, ParameterChange, uint32_t, float> OnParameterChange;
 
 	/* API for Ardour -- Setup/Processing */
