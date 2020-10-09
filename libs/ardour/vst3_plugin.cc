@@ -452,7 +452,7 @@ VST3Plugin::add_state (XMLNode* root) const
 {
 	XMLNode *child;
 	for (uint32_t i = 0; i < parameter_count (); ++i) {
-		if (!_plug->parameter_is_automatable (i)) {
+		if (!parameter_is_input (i)) {
 			continue;
 		}
 		child = new XMLNode("Port");
