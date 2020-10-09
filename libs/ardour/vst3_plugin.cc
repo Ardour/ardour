@@ -2692,7 +2692,14 @@ VST3PI::psl_subscribe_to (boost::shared_ptr<ARDOUR::AutomationControl> ac, FIDSt
 		return;
 	}
 
-	ac->Changed.connect_same_thread (_ac_connection_list, boost::bind (&IContextInfoHandler2::notifyContextInfoChange, nfo2.get(), id));
+	ac->Changed.connect_same_thread (_ac_connection_list, boost::bind (&VST3PI::foward_signal, this, nfo2.get(), id));
+}
+
+void
+VST3PI::foward_signal (IContextInfoHandler2* handler, FIDString id) const
+{
+	assert (handler);
+	handler->notifyContextInfoChange (id);
 }
 
 void

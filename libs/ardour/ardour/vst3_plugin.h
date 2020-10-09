@@ -212,6 +212,8 @@ private:
 	void psl_subscribe_to (boost::shared_ptr<ARDOUR::AutomationControl>, FIDString);
 	void psl_stripable_property_changed (PBD::PropertyChange const&);
 
+	void foward_signal (Presonus::IContextInfoHandler2*, FIDString) const;
+
 	PBD::ScopedConnectionList   _strip_connections;
 	PBD::ScopedConnectionList   _ac_connection_list;
 	std::set<Evoral::Parameter> _ac_subscriptions;
