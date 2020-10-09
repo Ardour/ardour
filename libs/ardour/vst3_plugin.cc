@@ -1210,8 +1210,8 @@ VST3PI::disconnect_components ()
 		return false;
 	}
 
-	bool res = componentCP->disconnect (this);
-	res &= controllerCP->disconnect (this);
+	bool res = kResultTrue == componentCP->disconnect (this);
+	res &= kResultTrue == controllerCP->disconnect (this);
 	return res;
 }
 
