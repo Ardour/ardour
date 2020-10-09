@@ -2214,10 +2214,15 @@ VST3PI::load_state (RAMStream& stream)
 			continue;
 		}
 		if (is_equal_ID (i->_id, Vst::getChunkID (Vst::kComponentState))) {
-			tresult res = _component->setState(&stream);
+			ROMStream s (stream, i->_offset, i->_size);
+			tresult res = _component->setState(&s);
+			tresult re2 = res;
 
-			stream.seek (i->_offset, IBStream::kIBSeekSet, &seek_result);
-			tresult re2 = _controller->setComponentState(&stream);
+			if (FUnknownPtr<Vst::IEditController> (_component) == 0) {
+				/* only if component and controller are not identical */
+				s.seek (0, IBStream::kIBSeekSet, NULL);
+				re2 = _controller->setComponentState(&s);
+			}
 
 			if (!(re2 == kResultOk || re2 == kNotImplemented || res == kResultOk || res == kNotImplemented)) {
 #ifndef NDEBUG
@@ -2227,7 +2232,8 @@ VST3PI::load_state (RAMStream& stream)
 			}
 		}
 		else if (is_equal_ID (i->_id, Vst::getChunkID (Vst::kControllerState))) {
-			tresult res = _controller->setState (&stream);
+			ROMStream s (stream, i->_offset, i->_size);
+			tresult res = _controller->setState (&s);
 			if (!(res == kResultOk || res == kNotImplemented)) {
 #ifndef NDEBUG
 				std::cerr << "VST3: failed to restore controller state\n";
@@ -2277,10 +2283,13 @@ VST3PI::save_state (RAMStream& stream)
 		entries.push_back (c);
 	}
 
-	c.start_chunk (getChunkID (Vst::kControllerState), stream);
-	if (_controller->getState (&stream) == kResultTrue) {
-		c.end_chunk (stream);
-		entries.push_back (c);
+	if (FUnknownPtr<Vst::IEditController> (_component) == 0) {
+		/* only if component and controller are not identical */
+		c.start_chunk (getChunkID (Vst::kControllerState), stream);
+		if (_controller->getState (&stream) == kResultTrue) {
+			c.end_chunk (stream);
+			entries.push_back (c);
+		}
 	}
 
 	/* update header */
