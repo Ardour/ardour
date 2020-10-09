@@ -106,10 +106,11 @@ class LIBARDOUR_API AUPlugin : public ARDOUR::Plugin
 
 	bool has_editor () const;
 
-	bool can_support_io_configuration (const ChanCount& in, ChanCount& out, ChanCount* imprecise);
+	bool match_variable_io (const ChanCount& in, ChanCount& out, ChanCount* imprecise);
+	bool reconfigure_io (ChanCount in, ChanCount out);
+
 	ChanCount output_streams() const;
 	ChanCount input_streams() const;
-	bool configure_io (ChanCount in, ChanCount out);
 	bool requires_fixed_size_buffers() const;
 
 	void set_fixed_size_buffers (bool yn) {

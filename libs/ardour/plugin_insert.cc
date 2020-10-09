@@ -442,7 +442,7 @@ PluginInsert::has_output_presets (ChanCount in, ChanCount out)
 {
 	if (!_configured && _plugins[0]->get_info ()->reconfigurable_io ()) {
 		// collect possible configurations, prefer given in/out
-		_plugins[0]->can_support_io_configuration (in, out);
+		_plugins[0]->match_variable_io (in, out);
 	}
 
 	PluginOutputConfiguration ppc (_plugins[0]->possible_output ());
@@ -1953,7 +1953,7 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 	switch (_match.method) {
 	case Split:
 	case Hide:
-		if (_plugins.front()->configure_io (natural_input_streams(), out) == false) {
+		if (_plugins.front()->reconfigure_io (natural_input_streams(), out) == false) {
 			PluginIoReConfigure (); /* EMIT SIGNAL */
 			_configured = false;
 			return false;
@@ -1976,14 +1976,14 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 			if (out.n_audio () == 0) { out.set (DataType::AUDIO, 1); }
 			ChanCount useins;
 			DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1: Delegate lookup : %2 %3\n", name(), din, dout));
-			bool const r = _plugins.front()->can_support_io_configuration (din, dout, &useins);
+			bool const r = _plugins.front()->match_variable_io (din, dout, &useins);
 			assert (r);
 			if (useins.n_audio() == 0) {
 				useins = din;
 			}
 			DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1: Delegate configuration: %2 %3\n", name(), useins, dout));
 
-			if (_plugins.front()->configure_io (useins, dout) == false) {
+			if (_plugins.front()->reconfigure_io (useins, dout) == false) {
 				PluginIoReConfigure (); /* EMIT SIGNAL */
 				_configured = false;
 				return false;
@@ -1994,7 +1994,7 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 		}
 		break;
 	default:
-		if (_plugins.front()->configure_io (in, out) == false) {
+		if (_plugins.front()->reconfigure_io (in, out) == false) {
 			PluginIoReConfigure (); /* EMIT SIGNAL */
 			_configured = false;
 			return false;
@@ -2261,7 +2261,7 @@ PluginInsert::internal_can_support_io_configuration (ChanCount const & inx, Chan
 		out = inx; // hint
 		if (out.n_midi () > 0 && out.n_audio () == 0) { out.set (DataType::AUDIO, 2); }
 		if (out.n_audio () == 0) { out.set (DataType::AUDIO, 1); }
-		bool const r = _plugins.front()->can_support_io_configuration (inx + sidechain_input_pins (), out, &useins);
+		bool const r = _plugins.front()->match_variable_io (inx + sidechain_input_pins (), out, &useins);
 		if (!r) {
 			// houston, we have a problem.
 			return Match (Impossible, 0);
@@ -2332,7 +2332,7 @@ PluginInsert::automatic_can_support_io_configuration (ChanCount const & inx, Cha
 		out = in; // hint
 		if (out.n_midi () > 0 && out.n_audio () == 0) { out.set (DataType::AUDIO, 2); }
 		if (out.n_audio () == 0) { out.set (DataType::AUDIO, 1); }
-		bool const r = _plugins.front()->can_support_io_configuration (in + sidechain_input_pins (), out);
+		bool const r = _plugins.front()->match_variable_io (in + sidechain_input_pins (), out);
 		if (!r) {
 			return Match (Impossible, 0);
 		}
@@ -3145,10 +3145,10 @@ PluginInsert::get_impulse_analysis_plugin()
 		if (ret->get_info ()->reconfigurable_io ()) {
 			// populate get_info ()->n_inputs and ->n_outputs
 			ChanCount useins;
-			ret->can_support_io_configuration (internal_input_streams (), out, &useins);
+			ret->match_variable_io (internal_input_streams (), out, &useins);
 			assert (out == internal_output_streams ());
 		}
-		ret->configure_io (internal_input_streams (), out);
+		ret->reconfigure_io (internal_input_streams (), out);
 		ret->set_owner (_owner);
 		_impulseAnalysisPlugin = ret;
 

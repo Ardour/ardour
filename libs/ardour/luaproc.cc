@@ -394,7 +394,7 @@ LuaProc::load_script ()
 }
 
 bool
-LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, ChanCount* imprecise)
+LuaProc::match_variable_io (const ChanCount& in, ChanCount& out, ChanCount* imprecise)
 {
 	// caller must hold process lock (no concurrent calls to interpreter
 	_output_configs.clear ();
@@ -591,7 +591,7 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 }
 
 bool
-LuaProc::configure_io (ChanCount in, ChanCount out)
+LuaProc::reconfigure_io (ChanCount in, ChanCount out)
 {
 	in.set (DataType::MIDI, _has_midi_input ? 1 : 0);
 	out.set (DataType::MIDI, _has_midi_output ? 1 : 0);
@@ -1270,7 +1270,7 @@ LuaPluginInfo::LuaPluginInfo (LuaScriptInfoPtr lsi) {
 	n_outputs.set (DataType::AUDIO, 1);
 	type = Lua;
 
-	// TODO, parse script, get 'dsp_ioconfig', see can_support_io_configuration()
+	// TODO, parse script, get 'dsp_ioconfig', see match_variable_io()
 	_max_outputs = 0;
 }
 

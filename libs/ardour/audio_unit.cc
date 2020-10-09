@@ -1088,7 +1088,7 @@ AUPlugin::set_block_size (pframes_t nframes)
 }
 
 bool
-AUPlugin::configure_io (ChanCount in, ChanCount out)
+AUPlugin::reconfigure_io (ChanCount in, ChanCount out)
 {
 	AudioStreamBasicDescription streamFormat;
 	bool was_initialized = initialized;
@@ -1267,7 +1267,7 @@ AUPlugin::output_streams() const
 }
 
 bool
-AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, ChanCount* imprecise)
+AUPlugin::match_variable_io (const ChanCount& in, ChanCount& out, ChanCount* imprecise)
 {
 	_output_configs.clear ();
 	const int32_t audio_in = in.n_audio();
@@ -2944,7 +2944,7 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 
 			   for now, if the plugin provides a wildcard, treat it as 1. we really
 			   don't care much, because whether we can handle an i/o configuration
-			   depends upon ::can_support_io_configuration(), not these counts.
+			   depends upon ::configure_variable_io(), not these counts.
 
 			   they exist because other parts of ardour try to present i/o configuration
 			   info to the user, which should perhaps be revisited.
