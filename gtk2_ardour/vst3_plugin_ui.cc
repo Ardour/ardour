@@ -30,6 +30,10 @@
 using namespace ARDOUR;
 using namespace Steinberg;
 
+#ifdef PLATFORM_WINDOWS
+DEF_CLASS_IID (Presonus::IPlugInViewScaling)
+#endif
+
 VST3PluginUI::VST3PluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<VST3Plugin> vst3)
 	: PlugUIBase (pi)
 	, _pi (pi)
