@@ -46,6 +46,7 @@
 using namespace PBD;
 using namespace ARDOUR;
 using namespace Steinberg;
+using namespace Presonus;
 
 VST3Plugin::VST3Plugin (AudioEngine& engine, Session& session, VST3PI* plug)
 	: Plugin (engine, session)
@@ -1589,10 +1590,10 @@ VST3PI::get_parameter_descriptor (uint32_t port, ParameterDescriptor& desc) cons
 		desc.unit = ARDOUR::ParameterDescriptor::HZ;
 	}
 
-	FUnknownPtr<Presonus::IEditControllerExtra> extra_ctrl (_controller);
+	FUnknownPtr<IEditControllerExtra> extra_ctrl (_controller);
 	if (extra_ctrl) {
 		int32 flags = extra_ctrl->getParamExtraFlags (id);
-		desc.inline_ctrl = (flags & Presonus::kParamFlagMicroEdit) ? true : false;
+		desc.inline_ctrl = (flags & kParamFlagMicroEdit) ? true : false;
 	}
 }
 
@@ -2362,9 +2363,9 @@ VST3PI::setup_info_listener ()
 bool
 VST3PI::add_slave (Vst::IEditController* c, bool rt)
 {
-	FUnknownPtr<Presonus::ISlaveControllerHandler> slave_ctrl (_controller);
+	FUnknownPtr<ISlaveControllerHandler> slave_ctrl (_controller);
 	if (slave_ctrl) {
-		return slave_ctrl->addSlave (c, rt ? Presonus::kSlaveModeLowLatencyClone : Presonus::kSlaveModeNormal) == kResultOk;
+		return slave_ctrl->addSlave (c, rt ? kSlaveModeLowLatencyClone : kSlaveModeNormal) == kResultOk;
 	}
 	return false;
 }
@@ -2372,7 +2373,7 @@ VST3PI::add_slave (Vst::IEditController* c, bool rt)
 bool
 VST3PI::remove_slave (Vst::IEditController* c)
 {
-	FUnknownPtr<Presonus::ISlaveControllerHandler> slave_ctrl (_controller);
+	FUnknownPtr<ISlaveControllerHandler> slave_ctrl (_controller);
 	if (slave_ctrl) {
 		return slave_ctrl->removeSlave (c) == kResultOk;
 	}
@@ -2382,7 +2383,7 @@ VST3PI::remove_slave (Vst::IEditController* c)
 bool
 VST3PI::subscribe_to_automation_changes () const
 {
-	FUnknownPtr<Presonus::IEditControllerExtra> extra_ctrl (_controller);
+	FUnknownPtr<IEditControllerExtra> extra_ctrl (_controller);
 	return 0 != extra_ctrl ? true : false;
 }
 
@@ -2391,29 +2392,29 @@ VST3PI::automation_state_changed (uint32_t port, AutoState s, boost::weak_ptr <A
 {
 	Vst::ParamID id (index_to_id (port));
 	boost::shared_ptr<AutomationList> al = wal.lock ();
-	FUnknownPtr<Presonus::IEditControllerExtra> extra_ctrl (_controller);
+	FUnknownPtr<IEditControllerExtra> extra_ctrl (_controller);
 	assert (extra_ctrl);
 
-	Presonus::AutomationMode am;
+	AutomationMode am;
 	switch (s) {
 		case ARDOUR::Off:
 			if (!al || al->empty ()) {
-				am = Presonus::kAutomationNone;
+				am = kAutomationNone;
 			} else {
-				am = Presonus::kAutomationOff;
+				am = kAutomationOff;
 			}
 			break;
 		case Write:
-				am = Presonus::kAutomationWrite;
+				am = kAutomationWrite;
 			break;
 		case Touch:
-				am = Presonus::kAutomationTouch;
+				am = kAutomationTouch;
 			break;
 		case Play:
-				am = Presonus::kAutomationRead;
+				am = kAutomationRead;
 			break;
 		case Latch:
-				am = Presonus::kAutomationLatch;
+				am = kAutomationLatch;
 			break;
 		default:
 			assert (0);
@@ -2432,16 +2433,16 @@ lookup_ac (SessionObject* o, FIDString id)
 		return boost::shared_ptr<AutomationControl> ();
 	}
 
-	if (0 == strcmp (id, Presonus::ContextInfo::kMute)) {
+	if (0 == strcmp (id, ContextInfo::kMute)) {
 		return s->mute_control();
-	} else if (0 == strcmp (id, Presonus::ContextInfo::kSolo)) {
+	} else if (0 == strcmp (id, ContextInfo::kSolo)) {
 		return s->solo_control();
-	} else if (0 == strcmp (id, Presonus::ContextInfo::kPan)) {
+	} else if (0 == strcmp (id, ContextInfo::kPan)) {
 		return s->pan_azimuth_control ();
-	} else if (0 == strcmp (id, Presonus::ContextInfo::kVolume)) {
+	} else if (0 == strcmp (id, ContextInfo::kVolume)) {
 		return s->gain_control ();
-	} else if (0 == strncmp (id, Presonus::ContextInfo::kSendLevel, strlen (Presonus::ContextInfo::kSendLevel))) {
-		int send_id = atoi (id + strlen (Presonus::ContextInfo::kSendLevel));
+	} else if (0 == strncmp (id, ContextInfo::kSendLevel, strlen (ContextInfo::kSendLevel))) {
+		int send_id = atoi (id + strlen (ContextInfo::kSendLevel));
 		return s->send_level_controllable (send_id);
 	}
 	return boost::shared_ptr<AutomationControl> ();
@@ -2453,44 +2454,44 @@ VST3PI::getContextInfoValue (int32& value, FIDString id)
 	Stripable* s = dynamic_cast<Stripable*> (_owner);
 	assert (s);
 
-	if (0 == strcmp (id, Presonus::ContextInfo::kIndexMode)) {
-		value = Presonus::ContextInfo::kPerTypeIndex;
-	} else if (0 == strcmp (id, Presonus::ContextInfo::kType)) {
+	if (0 == strcmp (id, ContextInfo::kIndexMode)) {
+		value = ContextInfo::kPerTypeIndex;
+	} else if (0 == strcmp (id, ContextInfo::kType)) {
 		if (s->is_master ()) {
-			value = Presonus::ContextInfo::kOut;
+			value = ContextInfo::kOut;
 		} else if (s->presentation_info().flags() & PresentationInfo::AudioTrack) {
-			value = Presonus::ContextInfo::kTrack;
+			value = ContextInfo::kTrack;
 		} else if (s->presentation_info().flags() & PresentationInfo::MidiTrack) {
-			value = Presonus::ContextInfo::kSynth;
+			value = ContextInfo::kSynth;
 		} else {
-			value = Presonus::ContextInfo::kBus;
+			value = ContextInfo::kBus;
 		}
-	} else if (0 == strcmp (id, Presonus::ContextInfo::kMain)) {
+	} else if (0 == strcmp (id, ContextInfo::kMain)) {
 		value = s->is_master() ? 1 : 0;
-	} else if (0 == strcmp (id, Presonus::ContextInfo::kIndex)) {
+	} else if (0 == strcmp (id, ContextInfo::kIndex)) {
 		value = s->presentation_info ().order(); // XXX
-	} else if (0 == strcmp (id, Presonus::ContextInfo::kColor)) {
+	} else if (0 == strcmp (id, ContextInfo::kColor)) {
 		value = s->presentation_info ().color();
 #if BYTEORDER == kBigEndian
 		SWAP_32 (value) // RGBA32 -> ABGR32
 #endif
-	} else if (0 == strcmp (id, Presonus::ContextInfo::kVisibility)) {
+	} else if (0 == strcmp (id, ContextInfo::kVisibility)) {
 		value = s->is_hidden () ? 0 : 1;
-	} else if (0 == strcmp (id, Presonus::ContextInfo::kSelected)) {
+	} else if (0 == strcmp (id, ContextInfo::kSelected)) {
 		value = s->is_selected () ? 1 : 0;
-	} else if (0 == strcmp (id, Presonus::ContextInfo::kFocused)) {
+	} else if (0 == strcmp (id, ContextInfo::kFocused)) {
 		// consider ControlProtocol::first_selected_stripable () == s;
 		return kNotImplemented;
-	} else if (0 == strcmp (id, Presonus::ContextInfo::kSendCount)) {
+	} else if (0 == strcmp (id, ContextInfo::kSendCount)) {
 		value = 0;
 		while (s->send_enable_controllable (value)) {
 			++value;
 		}
-	} else if (0 == strcmp (id, Presonus::ContextInfo::kMute)) {
+	} else if (0 == strcmp (id, ContextInfo::kMute)) {
 		boost::shared_ptr<MuteControl> ac = s->mute_control ();
 		psl_subscribe_to (ac, id);
 		return ac->muted_by_self ();
-	} else if (0 == strcmp (id, Presonus::ContextInfo::kSolo)) {
+	} else if (0 == strcmp (id, ContextInfo::kSolo)) {
 		boost::shared_ptr<SoloControl> ac = s->solo_control ();
 		if (ac) {
 			psl_subscribe_to (ac, id);
@@ -2509,21 +2510,21 @@ VST3PI::getContextInfoString (Vst::TChar* string, int32 max_len, FIDString id)
 		return kNotInitialized;
 	}
 
-	if (0 == strcmp (id, Presonus::ContextInfo::kID)) {
+	if (0 == strcmp (id, ContextInfo::kID)) {
 		utf8_to_tchar (string, _owner->id().to_s (), max_len);
 		return kResultOk;
-	} else if (0 == strcmp (id, Presonus::ContextInfo::kName)) {
+	} else if (0 == strcmp (id, ContextInfo::kName)) {
 		utf8_to_tchar (string, _owner->name (), max_len);
 		return kResultOk;
-	} else if (0 == strcmp (id, Presonus::ContextInfo::kActiveDocumentID)) {
+	} else if (0 == strcmp (id, ContextInfo::kActiveDocumentID)) {
 		return kNotImplemented; // XXX TODO
-	} else if (0 == strcmp (id, Presonus::ContextInfo::kDocumentID)) {
+	} else if (0 == strcmp (id, ContextInfo::kDocumentID)) {
 		return kNotImplemented; // XXX TODO
-	} else if (0 == strcmp (id, Presonus::ContextInfo::kDocumentName)) {
+	} else if (0 == strcmp (id, ContextInfo::kDocumentName)) {
 		return kNotImplemented; // XXX TODO
-	} else if (0 == strcmp (id, Presonus::ContextInfo::kDocumentFolder)) {
+	} else if (0 == strcmp (id, ContextInfo::kDocumentFolder)) {
 		return kNotImplemented; // XXX TODO
-	} else if (0 == strcmp (id, Presonus::ContextInfo::kAudioFolder)) {
+	} else if (0 == strcmp (id, ContextInfo::kAudioFolder)) {
 		return kNotImplemented; // XXX TODO
 	} else {
 		boost::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
@@ -2542,15 +2543,15 @@ VST3PI::getContextInfoValue (double& value, FIDString id)
 	if (!s) {
 		return kNotInitialized;
 	}
-	if (0 == strcmp (id, Presonus::ContextInfo::kMaxVolume)) {
+	if (0 == strcmp (id, ContextInfo::kMaxVolume)) {
 		value = 2.0; // Config->get_max_gain();
-	} else if (0 == strcmp (id, Presonus::ContextInfo::kMaxSendLevel)) {
+	} else if (0 == strcmp (id, ContextInfo::kMaxSendLevel)) {
 		value = 2.0; // Config->get_max_gain();
-	} else if (0 == strcmp (id, Presonus::ContextInfo::kVolume)) {
+	} else if (0 == strcmp (id, ContextInfo::kVolume)) {
 		boost::shared_ptr<AutomationControl> ac = s->gain_control ();
 		value = ac->get_value(); // gain coefficient  0..2 (1.0 = 0dB)
 		psl_subscribe_to (ac, id);
-	} else if (0 == strcmp (id, Presonus::ContextInfo::kPan)) {
+	} else if (0 == strcmp (id, ContextInfo::kPan)) {
 		boost::shared_ptr<AutomationControl> ac = s->pan_azimuth_control ();
 		if (ac) {
 			value = ac->internal_to_interface (ac->get_value(), true);
@@ -2558,7 +2559,7 @@ VST3PI::getContextInfoValue (double& value, FIDString id)
 		} else {
 			value = 0.5; // center
 		}
-	} else if (0 == strncmp (id, Presonus::ContextInfo::kSendLevel, strlen (Presonus::ContextInfo::kSendLevel))) {
+	} else if (0 == strncmp (id, ContextInfo::kSendLevel, strlen (ContextInfo::kSendLevel))) {
 		boost::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
 		if (ac) {
 			value = ac->get_value(); // gain cofficient
@@ -2578,15 +2579,15 @@ VST3PI::setContextInfoValue (FIDString id, double value)
 	if (!_owner) {
 		return kNotInitialized;
 	}
-	if (0 == strcmp (id, Presonus::ContextInfo::kVolume)) {
+	if (0 == strcmp (id, ContextInfo::kVolume)) {
 		boost::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
 		ac->set_value (value, Controllable::NoGroup);
-	} else if (0 == strcmp (id, Presonus::ContextInfo::kPan)) {
+	} else if (0 == strcmp (id, ContextInfo::kPan)) {
 		boost::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
 		if (ac) {
 			ac->set_value (ac->interface_to_internal (value, true), PBD::Controllable::NoGroup);
 		}
-	} else if (0 == strncmp (id, Presonus::ContextInfo::kSendLevel, strlen (Presonus::ContextInfo::kSendLevel))) {
+	} else if (0 == strncmp (id, ContextInfo::kSendLevel, strlen (ContextInfo::kSendLevel))) {
 		boost::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
 		if (ac) {
 			ac->set_value (value, Controllable::NoGroup);
@@ -2606,18 +2607,18 @@ VST3PI::setContextInfoValue (FIDString id, int32 value)
 	if (!s) {
 		return kNotInitialized;
 	}
-	if (0 == strcmp (id, Presonus::ContextInfo::kColor)) {
+	if (0 == strcmp (id, ContextInfo::kColor)) {
 #if BYTEORDER == kBigEndian
 		SWAP_32 (value) // ABGR32 -> RGBA32
 #endif
 		s->presentation_info ().set_color(value);
-	} else if (0 == strcmp (id, Presonus::ContextInfo::kSelected)) {
+	} else if (0 == strcmp (id, ContextInfo::kSelected)) {
 		return kNotImplemented;
-	} else if (0 == strcmp (id, Presonus::ContextInfo::kMultiSelect)) {
+	} else if (0 == strcmp (id, ContextInfo::kMultiSelect)) {
 		//_add_to_selection = value != 0;
-	} else if (0 == strcmp (id, Presonus::ContextInfo::kMute)) {
+	} else if (0 == strcmp (id, ContextInfo::kMute)) {
 		s->mute_control()->set_value (value != 0, Controllable::NoGroup);
-	} else if (0 == strcmp (id, Presonus::ContextInfo::kSolo)) {
+	} else if (0 == strcmp (id, ContextInfo::kSolo)) {
 		s->solo_control()->set_value (value != 0, Controllable::NoGroup);
 	} else {
 		return kNotImplemented;
@@ -2631,7 +2632,7 @@ VST3PI::setContextInfoString (FIDString id, Vst::TChar* string)
 	if (!_owner) {
 		return kNotInitialized;
 	}
-	if (0 == strcmp (id, Presonus::ContextInfo::kName)) {
+	if (0 == strcmp (id, ContextInfo::kName)) {
 		return _owner->set_name (tchar_to_utf8 (string)) ? kResultOk : kResultFalse;
 	}
 	return kInvalidArgument;
@@ -2668,7 +2669,7 @@ VST3PI::endEditContextInfoValue (FIDString id)
 void
 VST3PI::psl_subscribe_to (boost::shared_ptr<ARDOUR::AutomationControl> ac, FIDString id)
 {
-	FUnknownPtr<Presonus::IContextInfoHandler2> nfo2 (_controller);
+	FUnknownPtr<IContextInfoHandler2> nfo2 (_controller);
 	if (!nfo2) {
 		return;
 	}
@@ -2679,14 +2680,14 @@ VST3PI::psl_subscribe_to (boost::shared_ptr<ARDOUR::AutomationControl> ac, FIDSt
 		return;
 	}
 
-	ac->Changed.connect_same_thread (_ac_connection_list, boost::bind (&Presonus::IContextInfoHandler2::notifyContextInfoChange, nfo2.get(), id));
+	ac->Changed.connect_same_thread (_ac_connection_list, boost::bind (&IContextInfoHandler2::notifyContextInfoChange, nfo2.get(), id));
 }
 
 void
 VST3PI::psl_stripable_property_changed (PBD::PropertyChange const& what_changed)
 {
-	FUnknownPtr<Presonus::IContextInfoHandler> nfo (_controller);
-	FUnknownPtr<Presonus::IContextInfoHandler2> nfo2 (_controller);
+	FUnknownPtr<IContextInfoHandler> nfo (_controller);
+	FUnknownPtr<IContextInfoHandler2> nfo2 (_controller);
 	if (nfo && !nfo2) {
 		nfo->notifyContextInfoChange ();
 	}
@@ -2695,17 +2696,17 @@ VST3PI::psl_stripable_property_changed (PBD::PropertyChange const& what_changed)
 	}
 
 	if (what_changed.contains (Properties::selected)) {
-		nfo2->notifyContextInfoChange ("Presonus::ContextInfo::kSelected");
-		//nfo2->notifyContextInfoChange ("Presonus::ContextInfo::kFocused");
+		nfo2->notifyContextInfoChange ("ContextInfo::kSelected");
+		//nfo2->notifyContextInfoChange ("ContextInfo::kFocused");
 	}
 	if (what_changed.contains (Properties::hidden)) {
-		nfo2->notifyContextInfoChange ("Presonus::ContextInfo::kVisibility");
+		nfo2->notifyContextInfoChange ("ContextInfo::kVisibility");
 	}
 	if (what_changed.contains (Properties::name)) {
-		nfo2->notifyContextInfoChange ("Presonus::ContextInfo::kName");
+		nfo2->notifyContextInfoChange ("ContextInfo::kName");
 	}
 	if (what_changed.contains (Properties::color)) {
-		nfo2->notifyContextInfoChange ("Presonus::ContextInfo::kColor");
+		nfo2->notifyContextInfoChange ("ContextInfo::kColor");
 	}
 }
 
@@ -2713,8 +2714,8 @@ void
 VST3PI::setup_psl_info_handler ()
 {
 	/* initial update */
-	FUnknownPtr<Presonus::IContextInfoHandler> nfo (_controller);
-	FUnknownPtr<Presonus::IContextInfoHandler2> nfo2 (_controller);
+	FUnknownPtr<IContextInfoHandler> nfo (_controller);
+	FUnknownPtr<IContextInfoHandler2> nfo2 (_controller);
 	if (nfo2) {
 		nfo2->notifyContextInfoChange ("");
 	} else if (nfo) {
