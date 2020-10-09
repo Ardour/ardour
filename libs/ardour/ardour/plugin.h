@@ -294,7 +294,7 @@ public:
 	 */
 	PBD::Signal2<void, uint32_t, float> ParameterChangedExternally;
 
-	virtual bool reconfigure_io (ChanCount /*in*/, ChanCount /*out*/) { return false; }
+	virtual bool reconfigure_io (ChanCount /*in*/, ChanCount /*out*/) { return true; }
 	virtual bool match_variable_io (const ChanCount& /*in*/, ChanCount& /*out*/, ChanCount* imprecise = 0) { return false; }
 
 	virtual ChanCount output_streams () const;
