@@ -2755,8 +2755,8 @@ VST3PI::setup_psl_info_handler ()
 	}
 
 	Stripable* s = dynamic_cast<Stripable*> (_owner);
-	s->PropertyChanged.connect_same_thread (_strip_connections, boost::bind (&VST3PI::stripable_property_changed, this, _1));
-	s->presentation_info().PropertyChanged.connect_same_thread (_strip_connections, boost::bind (&VST3PI::stripable_property_changed, this, _1));
+	s->PropertyChanged.connect_same_thread (_strip_connections, boost::bind (&VST3PI::psl_stripable_property_changed, this, _1));
+	s->presentation_info().PropertyChanged.connect_same_thread (_strip_connections, boost::bind (&VST3PI::psl_stripable_property_changed, this, _1));
 
 }
 
