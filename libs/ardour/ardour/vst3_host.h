@@ -146,8 +146,8 @@ class LIBARDOUR_API RefObject : public FUnknown
 public:
 	RefObject ();
 	virtual ~RefObject () {}
-	uint32 PLUGIN_API addRef ();
-	uint32 PLUGIN_API release ();
+	uint32 PLUGIN_API addRef () SMTG_OVERRIDE;
+	uint32 PLUGIN_API release () SMTG_OVERRIDE;
 
 private:
 	gint _cnt; // atomic
@@ -415,6 +415,30 @@ private:
 
 	HostAttributeList attribute_list;
 };
+
+class LIBARDOUR_LOCAL ROMStream : public IBStream
+{
+public:
+	ROMStream (IBStream& src, TSize offset, TSize size);
+	virtual ~ROMStream ();
+
+	tresult PLUGIN_API queryInterface (const TUID _iid, void** obj) SMTG_OVERRIDE;
+	uint32 PLUGIN_API addRef () SMTG_OVERRIDE { return 1; }
+	uint32 PLUGIN_API release () SMTG_OVERRIDE { return 1; }
+
+	/* IBStream API */
+	tresult PLUGIN_API read  (void* buffer, int32 numBytes, int32* numBytesRead) SMTG_OVERRIDE;
+	tresult PLUGIN_API write (void* buffer, int32 numBytes, int32* numBytesWritten) SMTG_OVERRIDE;
+	tresult PLUGIN_API seek  (int64 pos, int32 mode, int64* result) SMTG_OVERRIDE;
+	tresult PLUGIN_API tell  (int64* pos) SMTG_OVERRIDE;
+
+protected:
+	IBStream& _stream;
+	int64     _offset;
+	int64     _size;
+	int64     _pos;
+};
+
 
 #if defined(__clang__)
 #    pragma clang diagnostic pop

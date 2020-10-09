@@ -608,6 +608,9 @@ RAMStream::read (void* buffer, int32 n_bytes, int32* n_read)
 tresult
 RAMStream::write (void* buffer, int32 n_bytes, int32* n_written)
 {
+	if (n_written) {
+		*n_written = 0;
+	}
 	if (_readonly) {
 		return kResultFalse;
 	}
@@ -853,3 +856,110 @@ RAMStream::hexdump (int64 max_len) const
 	std::cout << out.str ();
 }
 #endif
+
+ROMStream::ROMStream (IBStream& src, TSize offset, TSize size)
+	: _stream (src)
+	, _offset (offset)
+	, _size   (size)
+{
+	_stream.addRef ();
+}
+
+ROMStream::~ROMStream ()
+{
+	_stream.release ();
+}
+
+tresult
+ROMStream::queryInterface (const TUID _iid, void** obj)
+{
+  QUERY_INTERFACE (_iid, obj, FUnknown::iid, IBStream)
+  QUERY_INTERFACE (_iid, obj, IBStream::iid, IBStream)
+
+  *obj = nullptr;
+  return kNoInterface;
+}
+
+tresult
+ROMStream::read (void* buffer, int32 n_bytes, int32* n_read)
+{
+	int64 available = _size - _pos;
+
+	if (n_read) {
+		*n_read = 0;
+	}
+
+	if (n_bytes < 0 || available < 0) {
+		n_bytes = 0;
+		return kResultOk;
+	}
+
+	if (n_bytes > available) {
+		n_bytes = available;
+	}
+
+	tresult result = _stream.seek (_offset + _pos, kIBSeekSet);
+	if (result != kResultOk) {
+		return result;
+	}
+
+	int32 _n_read = 0;
+	result = _stream.read (buffer, n_bytes, &_n_read);
+
+  if (_n_read > 0) {
+    _pos += _n_read;
+	}
+  if (n_read) {
+    *n_read = _n_read;
+	}
+
+  return result;
+}
+
+tresult
+ROMStream::write (void* buffer, int32 n_bytes, int32* n_written)
+{
+	if (n_written) {
+		*n_written = 0;
+	}
+	return kNotImplemented;
+}
+
+tresult
+ROMStream::seek (int64 pos, int32 mode, int64* result)
+{
+	switch (mode) {
+		case kIBSeekSet:
+			_pos = pos;
+			break;
+		case kIBSeekCur:
+			_pos += pos;
+			break;
+		case kIBSeekEnd:
+			_pos = _size + pos;
+			break;
+		default:
+			return kInvalidArgument;
+	}
+	if (_pos < 0) {
+		_pos = 0;
+	}
+	if (_pos > _size) {
+		_pos = _size;
+	}
+
+	if (result) {
+		*result = _pos;
+	}
+	return kResultTrue;
+}
+
+tresult
+ROMStream::tell (int64* pos)
+{
+	if (!pos) {
+		return kInvalidArgument;
+	}
+	*pos = _pos;
+	return kResultTrue;
+}
