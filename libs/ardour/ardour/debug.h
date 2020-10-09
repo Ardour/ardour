@@ -100,6 +100,9 @@ namespace PBD {
 		LIBARDOUR_API extern DebugBits Transport;
 		LIBARDOUR_API extern DebugBits US2400;
 		LIBARDOUR_API extern DebugBits VCA;
+		LIBARDOUR_API extern DebugBits VST3Callbacks;
+		LIBARDOUR_API extern DebugBits VST3Config;
+		LIBARDOUR_API extern DebugBits VST3Process;
 		LIBARDOUR_API extern DebugBits VSTCallbacks;
 		LIBARDOUR_API extern DebugBits WiimoteControl;
 

@@ -22,6 +22,7 @@
 #include "pbd/basename.h"
 #include "pbd/compose.h"
 #include "pbd/convert.h"
+#include "pbd/debug.h"
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/file_utils.h"
@@ -34,6 +35,7 @@
 
 #include "ardour/audio_buffer.h"
 #include "ardour/audioengine.h"
+#include "ardour/debug.h"
 #include "ardour/session.h"
 #include "ardour/stripable.h"
 #include "ardour/tempo.h"
@@ -71,6 +73,7 @@ VST3Plugin::~VST3Plugin ()
 void
 VST3Plugin::init ()
 {
+	DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3 instantiating: %1\n", get_info()->unique_id));
 	Vst::ProcessContext& context (_plug->context ());
 	context.sampleRate = _session.nominal_sample_rate ();
 	_plug->set_block_size (_session.get_block_size ());
@@ -372,9 +375,7 @@ VST3PI::vst3_to_midi_buffers (BufferSet& bufs, ChanMapping const& out_map)
 		bool     valid = false;
 		uint32_t index = out_map.get (DataType::MIDI, e.busIndex, &valid);
 		if (!valid || bufs.count().n_midi() <= index) {
-#ifndef NDEBUG
-			printf ("VST3PI::vst3_to_midi_buffers - Invalid MIDI Bus %d\n", e.busIndex);
-#endif
+			DEBUG_TRACE (DEBUG::VST3Process, string_compose ("VST3PI::vst3_to_midi_buffers - Invalid MIDI Bus %1\n", e.busIndex));
 			continue;
 		}
 
@@ -571,7 +572,7 @@ VST3Plugin::connect_and_run (BufferSet&  bufs,
                              ChanMapping const& in_map, ChanMapping const& out_map,
                              pframes_t n_samples, samplecnt_t offset)
 {
-	//DEBUG_TRACE(DEBUG::VST3, string_compose("%1 run %2 offset %3\n", name(), nframes, offset));
+	DEBUG_TRACE (DEBUG::VST3Process, string_compose ("%1 run %2 offset %3\n", name(), n_samples, offset));
 	Plugin::connect_and_run (bufs, start, end, speed, in_map, out_map, n_samples, offset);
 
 	Vst::ProcessContext& context (_plug->context ());
@@ -714,9 +715,7 @@ VST3Plugin::load_preset (PresetRecord r)
 		int program = PBD::atoi (tmp[2]);
 		assert (!r.user);
 		if (!_plug->set_program (program, 0)) {
-#ifndef NDEBUG
-			std::cerr << "set_program failed\n";
-#endif
+			DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3Plugin::load_preset: set_program failed (pgm: %1 plug: %2)\n", program, name ()));
 			return false;
 		}
 		ok = true;
@@ -923,13 +922,8 @@ VST3PluginInfo::load (Session& session)
 {
 	try {
 		if (!m) {
-#ifndef NDEBUG
-			printf ("Loading %s\n", path.c_str ());
-#endif
+			DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3 Loading: %1\n", path));
 			m = VST3PluginModule::load (path);
-#ifndef NDEBUG
-			printf ("Loaded module\n");
-#endif
 		}
 		PluginPtr          plugin;
 		Steinberg::VST3PI* plug = new VST3PI (m, unique_id);
@@ -1194,9 +1188,7 @@ VST3PI::connect_components ()
 
 	res = controllerCP->connect (this);
 	if (!(res == kResultOk || res == kNotImplemented)) {
-#ifndef NDEBUG
-		std::cerr << "VST3: Cannot connect controller, ignored.\n";
-#endif
+		DEBUG_TRACE (DEBUG::VST3Config, "VST3PI::connect_components Cannot connect controller, ignored.\n");
 	}
 
 	return true;
@@ -1240,9 +1232,7 @@ VST3PI::disconnect (Vst::IConnectionPoint* other)
 tresult
 VST3PI::notify (Vst::IMessage* msg)
 {
-#ifndef NDEBUG
-	std::cerr << "VST3PI::notify\n";
-#endif
+	DEBUG_TRACE (DEBUG::VST3Callbacks, "VST3PI::notify.\n");
 	for (std::vector <Vst::IConnectionPoint*>::const_iterator i = _connections.begin(); i != _connections.end(); ++i) {
 		/* TODO delegate to GUI thread if available
 		 * see ./libs/pbd/pbd/event_loop.h ir->call_slot ()
@@ -1297,9 +1287,8 @@ VST3PI::queryInterface (const TUID _iid, void** obj)
 tresult
 VST3PI::restartComponent (int32 flags)
 {
-#ifndef NDEBUG
-	printf ("VST3PI::restartComponent %x\n", flags);
-#endif
+	DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::restartComponent %1%2\n", std::hex, flags));
+
 	if (flags & Vst::kReloadComponent) {
 		/* according to the spec, "The host has to unload completely
 		 * the plug-in (controller/processor) and reload it."
@@ -2039,9 +2028,7 @@ VST3PI::process (float** ins, float** outs, uint32_t n_samples)
 
 	/* and go */
 	if (_processor->process (data) != kResultOk) {
-#ifndef NDEBUG
-		std::cerr << "VST3: Process error\n"; // XXX
-#endif
+		DEBUG_TRACE (DEBUG::VST3Process, "VST3 process error\n");
 	}
 
 	/* handle output parameter changes */
@@ -2171,16 +2158,12 @@ VST3PI::load_state (RAMStream& stream)
 	      && list_offset > 0
 	     )
 	   ) {
-#ifndef NDEBUG
-		printf ("VST3PI::load_state: invalid header v%d s:%lld\n", version, list_offset);
-#endif
+		DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::load_state: invalid header vers: %1 off: %2\n", version, list_offset));
 		return false;
 	}
 
 	if (_fuid != FUID::fromTUID (class_id)) {
-#ifndef NDEBUG
-		std::cerr << "VST3PI::load_state: class ID mismatch\n";
-#endif
+		DEBUG_TRACE (DEBUG::VST3Config, "VST3PI::load_state: class ID mismatch\n");
 		return false;
 	}
 
@@ -2225,9 +2208,7 @@ VST3PI::load_state (RAMStream& stream)
 			}
 
 			if (!(re2 == kResultOk || re2 == kNotImplemented || res == kResultOk || res == kNotImplemented)) {
-#ifndef NDEBUG
-				std::cerr << "VST3: failed to restore component state\n";
-#endif
+				DEBUG_TRACE (DEBUG::VST3Config, "VST3PI::load_state: failed to restore component state\n");
 				rv = false;
 			}
 		}
@@ -2235,9 +2216,7 @@ VST3PI::load_state (RAMStream& stream)
 			ROMStream s (stream, i->_offset, i->_size);
 			tresult res = _controller->setState (&s);
 			if (!(res == kResultOk || res == kNotImplemented)) {
-#ifndef NDEBUG
-				std::cerr << "VST3: failed to restore controller state\n";
-#endif
+				DEBUG_TRACE (DEBUG::VST3Config, "VST3PI::load_state: failed to restore controller state\n");
 				rv = false;
 			}
 		}
@@ -2251,9 +2230,7 @@ VST3PI::load_state (RAMStream& stream)
 		}
 #endif
 		else {
-#ifndef NDEBUG
-			std::cerr << "VST3: ignored unsupported state chunk.\n";
-#endif
+			DEBUG_TRACE (DEBUG::VST3Config, "VST3PI::load_state: ignored unsupported state chunk.\n");
 		}
 	}
 
@@ -2321,6 +2298,8 @@ VST3PI::stripable_property_changed (PBD::PropertyChange const&)
 	Stripable* s = dynamic_cast<Stripable*> (_owner);
 	assert (il && s);
 
+	DEBUG_TRACE (DEBUG::VST3Callbacks, "VST3PI::stripable_property_changed\n");
+
 	IPtr<HostAttributeList> al (new HostAttributeList ());
 
 	Vst::String128 tmp;
@@ -2368,6 +2347,7 @@ VST3PI::setup_info_listener ()
 	if (!il) {
 		return;
 	}
+	DEBUG_TRACE (DEBUG::VST3Config, "VST3PI::setup_info_listener\n");
 	Stripable* s = dynamic_cast<Stripable*> (_owner);
 
 	s->PropertyChanged.connect_same_thread (_strip_connections, boost::bind (&VST3PI::stripable_property_changed, this, _1));
@@ -2475,6 +2455,7 @@ VST3PI::getContextInfoValue (int32& value, FIDString id)
 	Stripable* s = dynamic_cast<Stripable*> (_owner);
 	assert (s);
 
+	DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::getContextInfoValue<int> %1\n", id));
 	if (0 == strcmp (id, ContextInfo::kIndexMode)) {
 		value = ContextInfo::kPerTypeIndex;
 	} else if (0 == strcmp (id, ContextInfo::kType)) {
@@ -2519,6 +2500,7 @@ VST3PI::getContextInfoValue (int32& value, FIDString id)
 			value = ac->self_soloed ();
 		}
 	} else {
+		DEBUG_TRACE (DEBUG::VST3Callbacks, "VST3PI::getContextInfoValue<int>: unsupported ID\n");
 		return kNotImplemented;
 	}
 	return kResultOk;
@@ -2530,7 +2512,7 @@ VST3PI::getContextInfoString (Vst::TChar* string, int32 max_len, FIDString id)
 	if (!_owner) {
 		return kNotInitialized;
 	}
-
+	DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::getContextInfoValue<string> %1\n", id));
 	if (0 == strcmp (id, ContextInfo::kID)) {
 		utf8_to_tchar (string, _owner->id().to_s (), max_len);
 		return kResultOk;
@@ -2550,6 +2532,7 @@ VST3PI::getContextInfoString (Vst::TChar* string, int32 max_len, FIDString id)
 	} else {
 		boost::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
 		if (!ac) {
+			DEBUG_TRACE (DEBUG::VST3Callbacks, "VST3PI::getContextInfoValue<string>: unsupported ID\n");
 			return kInvalidArgument;
 		}
 		utf8_to_tchar (string, ac->get_user_string (), max_len);
@@ -2564,6 +2547,7 @@ VST3PI::getContextInfoValue (double& value, FIDString id)
 	if (!s) {
 		return kNotInitialized;
 	}
+	DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::getContextInfoValue<double> %1\n", id));
 	if (0 == strcmp (id, ContextInfo::kMaxVolume)) {
 		value = 2.0; // Config->get_max_gain();
 	} else if (0 == strcmp (id, ContextInfo::kMaxSendLevel)) {
@@ -2589,6 +2573,7 @@ VST3PI::getContextInfoValue (double& value, FIDString id)
 			return kInvalidArgument; // send index out of bounds
 		}
 	} else {
+		DEBUG_TRACE (DEBUG::VST3Callbacks, "VST3PI::getContextInfoValue<double>: unsupported ID\n");
 		return kInvalidArgument;
 	}
 	return kResultOk;
@@ -2600,6 +2585,7 @@ VST3PI::setContextInfoValue (FIDString id, double value)
 	if (!_owner) {
 		return kNotInitialized;
 	}
+	DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::setContextInfoValue<double> %1 to %2\n", id, value));
 	if (0 == strcmp (id, ContextInfo::kVolume)) {
 		boost::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
 		ac->set_value (value, Controllable::NoGroup);
@@ -2616,6 +2602,7 @@ VST3PI::setContextInfoValue (FIDString id, double value)
 			return kInvalidArgument; // send index out of bounds
 		}
 	} else {
+		DEBUG_TRACE (DEBUG::VST3Callbacks, "VST3PI::setContextInfoValue<double>: unsupported ID\n");
 		return kInvalidArgument;
 	}
 	return kResultOk;
@@ -2628,6 +2615,7 @@ VST3PI::setContextInfoValue (FIDString id, int32 value)
 	if (!s) {
 		return kNotInitialized;
 	}
+	DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::setContextInfoValue<int> %1 to %2\n", id, value));
 	if (0 == strcmp (id, ContextInfo::kColor)) {
 #if BYTEORDER == kBigEndian
 		SWAP_32 (value) // ABGR32 -> RGBA32
@@ -2642,6 +2630,7 @@ VST3PI::setContextInfoValue (FIDString id, int32 value)
 	} else if (0 == strcmp (id, ContextInfo::kSolo)) {
 		s->solo_control()->set_value (value != 0, Controllable::NoGroup);
 	} else {
+		DEBUG_TRACE (DEBUG::VST3Callbacks, "VST3PI::setContextInfoValue<int>: unsupported ID\n");
 		return kNotImplemented;
 	}
 	return kResultOk;
@@ -2653,9 +2642,11 @@ VST3PI::setContextInfoString (FIDString id, Vst::TChar* string)
 	if (!_owner) {
 		return kNotInitialized;
 	}
+	DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::setContextInfoValue<string> %1 to %2\n", id, tchar_to_utf8 (string)));
 	if (0 == strcmp (id, ContextInfo::kName)) {
 		return _owner->set_name (tchar_to_utf8 (string)) ? kResultOk : kResultFalse;
 	}
+	DEBUG_TRACE (DEBUG::VST3Callbacks, "VST3PI::setContextInfoValue<string>: unsupported ID\n");
 	return kInvalidArgument;
 }
 
@@ -2669,6 +2660,7 @@ VST3PI::beginEditContextInfoValue (FIDString id)
 	if (!ac) {
 		return kInvalidArgument;
 	}
+	DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::beginEditContextInfoValue %1\n", id));
 	ac->start_touch (ac->session().transport_sample());
 	return kResultOk;
 }
@@ -2683,6 +2675,7 @@ VST3PI::endEditContextInfoValue (FIDString id)
 	if (!ac) {
 		return kInvalidArgument;
 	}
+	DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::endEditContextInfoValue %1\n", id));
 	ac->stop_touch (ac->session().transport_sample());
 	return kResultOk;
 }
@@ -2701,6 +2694,7 @@ VST3PI::psl_subscribe_to (boost::shared_ptr<ARDOUR::AutomationControl> ac, FIDSt
 		return;
 	}
 
+	DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::psl_subscribe_to: %1\n", ac->name ()));
 	ac->Changed.connect_same_thread (_ac_connection_list, boost::bind (&VST3PI::foward_signal, this, nfo2.get(), id));
 }
 
@@ -2708,6 +2702,7 @@ void
 VST3PI::foward_signal (IContextInfoHandler2* handler, FIDString id) const
 {
 	assert (handler);
+	DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::psl_subscribtion AC changed %1\n", id));
 	handler->notifyContextInfoChange (id);
 }
 
@@ -2722,6 +2717,8 @@ VST3PI::psl_stripable_property_changed (PBD::PropertyChange const& what_changed)
 	if (!nfo2) {
 		return;
 	}
+
+	DEBUG_TRACE (DEBUG::VST3Callbacks, "VST3PI::psl_stripable_property_changed\n");
 
 	if (what_changed.contains (Properties::selected)) {
 		nfo2->notifyContextInfoChange ("ContextInfo::kSelected");
@@ -2749,6 +2746,8 @@ VST3PI::setup_psl_info_handler ()
 	} else if (nfo) {
 		nfo->notifyContextInfoChange ();
 	}
+
+	DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::setup_psl_info_handler: (%1) (%2)\n", nfo != 0, nfo2 !=0));
 
 	if (!nfo && !nfo2) {
 		return;
