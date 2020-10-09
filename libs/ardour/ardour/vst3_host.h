@@ -31,13 +31,13 @@
 #include "ardour/libardour_visibility.h"
 #include "vst3/vst3.h"
 
-#define QUERY_INTERFACE_IMPL(Interface)                         \
-tresult PLUGIN_API queryInterface (const TUID _iid, void** obj) \
-{                                                               \
-  QUERY_INTERFACE (_iid, obj, FUnknown::iid, Interface)         \
-  QUERY_INTERFACE (_iid, obj, Interface::iid, Interface)        \
-  *obj = nullptr;                                               \
-  return kNoInterface;                                          \
+#define QUERY_INTERFACE_IMPL(Interface)                                       \
+tresult PLUGIN_API queryInterface (const TUID _iid, void** obj) SMTG_OVERRIDE \
+{                                                                             \
+  QUERY_INTERFACE (_iid, obj, FUnknown::iid, Interface)                       \
+  QUERY_INTERFACE (_iid, obj, Interface::iid, Interface)                      \
+  *obj = nullptr;                                                             \
+  return kNoInterface;                                                        \
 }
 
 #if defined(__clang__)
@@ -317,11 +317,11 @@ public:
 	uint32 PLUGIN_API addRef () SMTG_OVERRIDE { return 1; }
 	uint32 PLUGIN_API release () SMTG_OVERRIDE { return 1; }
 
-	int32 PLUGIN_API PLUGIN_API getEventCount() {
+	int32 PLUGIN_API PLUGIN_API getEventCount() SMTG_OVERRIDE {
 		return _events.size ();
 	}
 
-	tresult PLUGIN_API getEvent (int32 index, Vst::Event& e) {
+	tresult PLUGIN_API getEvent (int32 index, Vst::Event& e) SMTG_OVERRIDE {
 		if (index >= 0 && index < (int32)_events.size ()) {
 			e = _events[index];
 			return kResultTrue;
@@ -330,7 +330,7 @@ public:
 		}
 	}
 
-	tresult PLUGIN_API addEvent (Vst::Event& e) {
+	tresult PLUGIN_API addEvent (Vst::Event& e) SMTG_OVERRIDE {
 		_events.push_back (e);
 		return kResultTrue;
 	}

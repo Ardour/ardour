@@ -88,14 +88,14 @@ public:
 	tresult PLUGIN_API notifyProgramListChange (Vst::ProgramListID, int32) SMTG_OVERRIDE;
 
 	/* IContextInfoProvider3 API */
-	tresult PLUGIN_API getContextInfoValue (int32&, FIDString);
-	tresult PLUGIN_API getContextInfoString (Vst::TChar*, int32, FIDString);
-	tresult PLUGIN_API getContextInfoValue (double&, FIDString);
-	tresult PLUGIN_API setContextInfoValue (FIDString, double);
-	tresult PLUGIN_API setContextInfoValue (FIDString, int32);
-	tresult PLUGIN_API setContextInfoString (FIDString, Vst::TChar*);
-	tresult PLUGIN_API beginEditContextInfoValue (FIDString);
-	tresult PLUGIN_API endEditContextInfoValue (FIDString);
+	tresult PLUGIN_API getContextInfoValue (int32&, FIDString) SMTG_OVERRIDE;
+	tresult PLUGIN_API getContextInfoString (Vst::TChar*, int32, FIDString) SMTG_OVERRIDE;
+	tresult PLUGIN_API getContextInfoValue (double&, FIDString) SMTG_OVERRIDE;
+	tresult PLUGIN_API setContextInfoValue (FIDString, double) SMTG_OVERRIDE;
+	tresult PLUGIN_API setContextInfoValue (FIDString, int32) SMTG_OVERRIDE;
+	tresult PLUGIN_API setContextInfoString (FIDString, Vst::TChar*) SMTG_OVERRIDE;
+	tresult PLUGIN_API beginEditContextInfoValue (FIDString) SMTG_OVERRIDE;
+	tresult PLUGIN_API endEditContextInfoValue (FIDString) SMTG_OVERRIDE;
 
 	/* GUI */
 	bool has_editor () const;
@@ -107,7 +107,7 @@ public:
 #endif
 	void update_contoller_param ();
 
-	tresult PLUGIN_API queryInterface (const TUID _iid, void** obj);
+	tresult PLUGIN_API queryInterface (const TUID _iid, void** obj) SMTG_OVERRIDE;
 	uint32  PLUGIN_API addRef () SMTG_OVERRIDE { return 1; }
 	uint32  PLUGIN_API release () SMTG_OVERRIDE { return 1; }
 
