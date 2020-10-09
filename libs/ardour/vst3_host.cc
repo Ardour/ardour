@@ -57,6 +57,7 @@ DEF_CLASS_IID (Vst::IPlugInterfaceSupport)
 DEF_CLASS_IID (Vst::IProgramListData)
 DEF_CLASS_IID (Vst::IStreamAttributes)
 DEF_CLASS_IID (Vst::IUnitData)
+DEF_CLASS_IID (Vst::IUnitHandler)
 DEF_CLASS_IID (Vst::IUnitInfo)
 DEF_CLASS_IID (Vst::ChannelContext::IInfoListener)
 
@@ -342,6 +343,7 @@ PlugInterfaceSupport::PlugInterfaceSupport ()
 	//---PSL --------------------------------------
 	addPlugInterfaceSupported (Presonus::ISlaveControllerHandler::iid);
 	addPlugInterfaceSupported (Presonus::IEditControllerExtra::iid);
+	addPlugInterfaceSupported (Presonus::IContextInfoHandler::iid);
 	addPlugInterfaceSupported (Presonus::IContextInfoHandler2::iid);
 }
 

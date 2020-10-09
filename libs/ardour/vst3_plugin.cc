@@ -1271,6 +1271,18 @@ VST3PI::queryInterface (const TUID _iid, void** obj)
 	QUERY_INTERFACE (_iid, obj, FUnknown::iid, Vst::IComponentHandler2)
 	QUERY_INTERFACE (_iid, obj, Vst::IComponentHandler2::iid, Vst::IComponentHandler2)
 
+	QUERY_INTERFACE (_iid, obj, FUnknown::iid, Vst::IConnectionPoint)
+	QUERY_INTERFACE (_iid, obj, Vst::IConnectionPoint::iid, Vst::IConnectionPoint)
+	QUERY_INTERFACE (_iid, obj, FUnknown::iid, Vst::IUnitHandler)
+	QUERY_INTERFACE (_iid, obj, Vst::IUnitHandler::iid, Vst::IUnitHandler)
+
+	QUERY_INTERFACE (_iid, obj, FUnknown::iid, Presonus::IContextInfoProvider)
+	QUERY_INTERFACE (_iid, obj, Presonus::IContextInfoProvider::iid, Presonus::IContextInfoProvider)
+	QUERY_INTERFACE (_iid, obj, FUnknown::iid, Presonus::IContextInfoProvider2)
+	QUERY_INTERFACE (_iid, obj, Presonus::IContextInfoProvider2::iid, Presonus::IContextInfoProvider2)
+	QUERY_INTERFACE (_iid, obj, FUnknown::iid, Presonus::IContextInfoProvider3)
+	QUERY_INTERFACE (_iid, obj, Presonus::IContextInfoProvider3::iid, Presonus::IContextInfoProvider3)
+
 #if SMTG_OS_LINUX
 	if (_run_loop && FUnknownPrivate::iidEqual (_iid, Linux::IRunLoop::iid)) {
 		*obj = _run_loop;
