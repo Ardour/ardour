@@ -34,7 +34,9 @@ namespace PBD {
 	namespace DEBUG {
 		LIBARDOUR_API extern DebugBits AudioEngine;
 		LIBARDOUR_API extern DebugBits AudioPlayback;
-		LIBARDOUR_API extern DebugBits AudioUnits;
+		LIBARDOUR_API extern DebugBits AudioUnitConfig;
+		LIBARDOUR_API extern DebugBits AudioUnitGUI;
+		LIBARDOUR_API extern DebugBits AudioUnitProcess;
 		LIBARDOUR_API extern DebugBits Automation;
 		LIBARDOUR_API extern DebugBits BackendAudio;
 		LIBARDOUR_API extern DebugBits BackendCallbacks;
