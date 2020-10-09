@@ -351,8 +351,6 @@ public:
 #endif
 	void update_contoller_param ();
 
-	bool configure_io (ChanCount in, ChanCount out);
-
 	PBD::Signal2<void, int, int> OnResizeView;
 
 private:

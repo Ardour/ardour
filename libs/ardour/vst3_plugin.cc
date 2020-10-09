@@ -546,12 +546,6 @@ VST3Plugin::plugin_latency () const
 	return _plug->plugin_latency ();
 }
 
-bool
-VST3Plugin::configure_io (ChanCount in, ChanCount out)
-{
-	return Plugin::configure_io (in, out);
-}
-
 void
 VST3Plugin::add_slave (boost::shared_ptr<Plugin> p, bool rt)
 {
