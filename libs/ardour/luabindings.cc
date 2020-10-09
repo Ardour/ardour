@@ -1497,6 +1497,11 @@ LuaBindings::common (lua_State* L)
 
 		.deriveWSPtrClass <InternalReturn, Return> ("InternalReturn")
 		.endClass ()
+		.endNamespace (); // end ARDOUR
+
+	/* take a breath */
+	luabridge::getGlobalNamespace (L)
+		.beginNamespace ("ARDOUR")
 
 		.beginNamespace ("Plugin")
 		.beginClass <Plugin::IOPortDescription> ("IOPortDescription")
@@ -1760,11 +1765,11 @@ LuaBindings::common (lua_State* L)
 		.beginStdMap <PBD::ID,boost::shared_ptr<Region> > ("RegionMap")
 		.endClass ()
 
-		// typedef std::list<boost::shared_ptr<Processor> > ProcessorList;
+		// typedef std::list<boost::shared_ptr<Processor> > ProcessorList
 		.beginStdList <boost::shared_ptr<Processor> > ("ProcessorList")
 		.endClass ()
 
-		//std::list<boost::shared_ptr<Port> > PortList;
+		//std::list<boost::shared_ptr<Port> > PortList
 		.beginConstStdList <boost::shared_ptr<Port> > ("PortList")
 		.endClass ()
 
@@ -1775,7 +1780,7 @@ LuaBindings::common (lua_State* L)
 		.beginConstStdCPtrList <Location> ("LocationList")
 		.endClass ()
 
-		// std::list<boost::shared_ptr<AutomationControl> > ControlList;
+		// std::list<boost::shared_ptr<AutomationControl> > ControlList
 		.beginStdList <boost::shared_ptr<AutomationControl> > ("ControlList")
 		.endClass ()
 
@@ -1790,7 +1795,7 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 #if 0  // depends on Evoal:: Note, Beats see note_fixer.h
-	// typedef Evoral::Note<Temporal::Beats> Note;
+	// typedef Evoral::Note<Temporal::Beats> Note
 	// std::set< boost::weak_ptr<Note> >
 		.beginStdSet <boost::weak_ptr<Note> > ("WeakNoteSet")
 		.endClass ()
