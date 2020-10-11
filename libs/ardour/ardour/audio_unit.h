@@ -106,8 +106,8 @@ class LIBARDOUR_API AUPlugin : public ARDOUR::Plugin
 
 	bool has_editor () const;
 
-	bool match_variable_io (const ChanCount& in, ChanCount& out, ChanCount* imprecise);
-	bool reconfigure_io (ChanCount in, ChanCount out);
+	bool match_variable_io (ChanCount& in, ChanCount& aux_in, ChanCount& out);
+	bool reconfigure_io (ChanCount in, ChanCount aux_in, ChanCount out);
 
 	ChanCount output_streams() const;
 	ChanCount input_streams() const;
@@ -203,6 +203,7 @@ class LIBARDOUR_API AUPlugin : public ARDOUR::Plugin
 	uint32_t configured_output_busses;
 
 	uint32_t *bus_inputs;
+	uint32_t *bus_inused;
 	uint32_t *bus_outputs;
 	std::vector <std::string> _bus_name_in;
 	std::vector <std::string> _bus_name_out;
@@ -219,7 +220,6 @@ class LIBARDOUR_API AUPlugin : public ARDOUR::Plugin
 	BufferSet* input_buffers;
 	ChanMapping const * input_map;
 	samplecnt_t samples_processed;
-	uint32_t   audio_input_cnt;
 
 	std::vector<AUParameterDescriptor> descriptors;
 	AUEventListenerRef _parameter_listener;

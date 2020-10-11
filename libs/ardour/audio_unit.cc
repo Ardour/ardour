@@ -443,6 +443,7 @@ AUPlugin::AUPlugin (AudioEngine& engine, Session& session, boost::shared_ptr<CAC
 	, configured_input_busses (0)
 	, configured_output_busses (0)
 	, bus_inputs (0)
+	, bus_inused (0)
 	, bus_outputs (0)
 	, input_maxbuf (0)
 	, input_offset (0)
@@ -450,7 +451,6 @@ AUPlugin::AUPlugin (AudioEngine& engine, Session& session, boost::shared_ptr<CAC
 	, input_buffers (0)
 	, input_map (0)
 	, samples_processed (0)
-	, audio_input_cnt (0)
 	, _parameter_listener (0)
 	, _parameter_listener_arg (0)
 	, transport_sample (0)
@@ -485,6 +485,7 @@ AUPlugin::AUPlugin (const AUPlugin& other)
 	, configured_input_busses (0)
 	, configured_output_busses (0)
 	, bus_inputs (0)
+	, bus_inused (0)
 	, bus_outputs (0)
 	, input_maxbuf (0)
 	, input_offset (0)
@@ -492,7 +493,6 @@ AUPlugin::AUPlugin (const AUPlugin& other)
 	, input_buffers (0)
 	, input_map (0)
 	, samples_processed (0)
-	, audio_input_cnt (0)
 	, _parameter_listener (0)
 	, _parameter_listener_arg (0)
 	, transport_sample (0)
@@ -526,6 +526,7 @@ AUPlugin::~AUPlugin ()
 
 	free (buffers);
 	free (bus_inputs);
+	free (bus_inused);
 	free (bus_outputs);
 	free (cb_offsets);
 }
@@ -618,9 +619,15 @@ AUPlugin::init ()
 	DEBUG_TRACE (DEBUG::AudioUnitConfig, "count output elements\n");
 	unit->GetElementCount (kAudioUnitScope_Output, output_elements);
 
-	cb_offsets = (samplecnt_t*) calloc (input_elements, sizeof(samplecnt_t));
-	bus_inputs = (uint32_t*) calloc (input_elements, sizeof(uint32_t));
-	bus_outputs = (uint32_t*) calloc (output_elements, sizeof(uint32_t));
+
+	if (input_elements > 0) {
+		cb_offsets = (samplecnt_t*) calloc (input_elements, sizeof(samplecnt_t));
+		bus_inputs = (uint32_t*) calloc (input_elements, sizeof(uint32_t));
+		bus_inused = (uint32_t*) calloc (input_elements, sizeof(uint32_t));
+	}
+	if (output_elements > 0) {
+		bus_outputs = (uint32_t*) calloc (output_elements, sizeof(uint32_t));
+	}
 
 	for (size_t i = 0; i < output_elements; ++i) {
 		unit->Reset (kAudioUnitScope_Output, i);
@@ -647,6 +654,7 @@ AUPlugin::init ()
 		err = unit->GetFormat (kAudioUnitScope_Input, i, fmt);
 		if (err == noErr) {
 			bus_inputs[i] = fmt.mChannelsPerFrame;
+			bus_inused[i] = bus_inputs[i];
 		}
 		CFStringRef name;
 		UInt32 sz = sizeof (CFStringRef);
@@ -1088,29 +1096,35 @@ AUPlugin::set_block_size (pframes_t nframes)
 }
 
 bool
-AUPlugin::reconfigure_io (ChanCount in, ChanCount out)
+AUPlugin::reconfigure_io (ChanCount in, ChanCount aux_in, ChanCount out)
 {
 	AudioStreamBasicDescription streamFormat;
 	bool was_initialized = initialized;
-	int32_t audio_out = out.n_audio();
-	if (audio_input_cnt > 0) {
-		in.set (DataType::AUDIO, audio_input_cnt);
-	}
-	const int32_t audio_in = in.n_audio();
 
-	DEBUG_TRACE (DEBUG::AudioUnitConfig, string_compose ("configure %1 for %2 in %3 out\n", name(), in, out));
+	DEBUG_TRACE (DEBUG::AudioUnitConfig, string_compose ("AUPlugin::reconfigure_io %1 for in: %2 aux-in %3 out: %4 out\n", name(), in, aux_in, out));
+
+	//TODO handle cases of no-input, only sidechain
+	// (needs special-casing of configured_input_busses)
+	if (input_elements == 1 || in.n_audio () == 0) {
+		in += aux_in;
+		aux_in.reset ();
+	}
+
+	const int32_t audio_in = in.n_audio();
+	const int32_t audio_out = out.n_audio();
+	assert (in.n_audio () > 0);
 
 	if (initialized) {
-		//if we are already running with the requested i/o config, bail out here
-		if ( (audio_in==input_channels) && (audio_out==output_channels) ) {
+		/* if we are already running with the requested i/o config, bail out here */
+		if ((audio_in + aux_in.n_audio () == input_channels) && (audio_out == output_channels)) {
 			return true;
 		} else {
 			deactivate ();
 		}
 	}
 
-	streamFormat.mSampleRate = _session.sample_rate();
-	streamFormat.mFormatID = kAudioFormatLinearPCM;
+	streamFormat.mSampleRate  = _session.sample_rate();
+	streamFormat.mFormatID    = kAudioFormatLinearPCM;
 	streamFormat.mFormatFlags = kAudioFormatFlagIsFloat|kAudioFormatFlagIsPacked|kAudioFormatFlagIsNonInterleaved;
 
 #ifdef __LITTLE_ENDIAN__
@@ -1128,13 +1142,15 @@ AUPlugin::reconfigure_io (ChanCount in, ChanCount out)
 	streamFormat.mBytesPerPacket = 4;
 	streamFormat.mBytesPerFrame = 4;
 
-	configured_input_busses = 0;
+	configured_input_busses  = 0;
 	configured_output_busses = 0;
+
 	/* reset busses */
 	for (size_t i = 0; i < output_elements; ++i) {
 		unit->Reset (kAudioUnitScope_Output, i);
 	}
 	for (size_t i = 0; i < input_elements; ++i) {
+		bus_inused[i] = 0;
 		unit->Reset (kAudioUnitScope_Input, i);
 		/* remove any input callbacks */
 		AURenderCallbackStruct renderCallbackInfo;
@@ -1147,32 +1163,62 @@ AUPlugin::reconfigure_io (ChanCount in, ChanCount out)
 	uint32_t used_in = 0;
 	uint32_t used_out = 0;
 
-	if (variable_inputs || input_elements == 1) {
-		// we only ever use the first bus
-		if (input_elements > 1) {
-			warning << string_compose (_("AU %1 has multiple input busses and variable port count."), name()) << endmsg;
+	if (input_elements == 0) {
+		configured_input_busses = 0;
+	} else if (variable_inputs || input_elements == 1 || audio_in < bus_inputs[0]) {
+		/* we only ever use the first bus and configure it to match */
+		if (variable_inputs && input_elements > 1) {
+			info << string_compose (_("AU %1 has multiple input busses and variable port count."), name()) << endmsg;
 		}
 		streamFormat.mChannelsPerFrame = audio_in;
 		if (set_stream_format (kAudioUnitScope_Input, 0, streamFormat) != 0) {
+			warning << string_compose (_("AU %1 failed to reconfigure input: %2"), name(), audio_in) << endmsg;
 			return false;
 		}
+		bus_inused[0] = audio_in;
 		configured_input_busses = 1;
 		used_in = audio_in;
 	} else {
+		/* more inputs than the first bus' channel-count: distribute sequentially */
 		configured_input_busses = 0;
-		uint32_t remain = audio_in;
+		uint32_t remain = audio_in + aux_in.n_audio ();
+		aux_in.reset (); /* now taken care of */
 		for (uint32_t bus = 0; remain > 0 && bus < input_elements; ++bus) {
 			uint32_t cnt = std::min (remain, bus_inputs[bus]);
-			if (cnt == 0) { continue; }
 			DEBUG_TRACE (DEBUG::AudioUnitConfig, string_compose ("%1 configure input bus: %2 chn: %3", name(), bus, cnt));
 
 			streamFormat.mChannelsPerFrame = cnt;
 			if (set_stream_format (kAudioUnitScope_Input, bus, streamFormat) != 0) {
-				return false;
+				if (cnt > 0) {
+					return false;
+				}
 			}
+			bus_inused[bus] = cnt;
 			used_in += cnt;
-			++configured_input_busses;
 			remain -= cnt;
+			if (cnt == 0) { continue; }
+			++configured_input_busses;
+		}
+	}
+
+	/* add additional busses, connect aux-inputs */
+	if (configured_input_busses == 1 && aux_in.n_audio () > 0 && input_elements > 1) {
+		uint32_t remain = aux_in.n_audio ();
+		for (uint32_t bus = 1; remain > 0 && bus < input_elements; ++bus) {
+			uint32_t cnt = std::min (remain, bus_inputs[bus]);
+			DEBUG_TRACE (DEBUG::AudioUnitConfig, string_compose ("%1 configure aux input bus: %2 chn: %3", name(), bus, cnt));
+
+			streamFormat.mChannelsPerFrame = cnt;
+			if (set_stream_format (kAudioUnitScope_Input, bus, streamFormat) != 0) {
+				if (cnt > 0) {
+					return false;
+				}
+			}
+			bus_inused[bus] = cnt;
+			used_in += cnt;
+			remain -= cnt;
+			if (cnt == 0) { continue; }
+			++configured_input_busses;
 		}
 	}
 
@@ -1183,6 +1229,7 @@ AUPlugin::reconfigure_io (ChanCount in, ChanCount out)
 
 		streamFormat.mChannelsPerFrame = audio_out;
 		if (set_stream_format (kAudioUnitScope_Output, 0, streamFormat) != 0) {
+			warning << string_compose (_("AU %1 failed to reconfigure output: %2"), name(), audio_out) << endmsg;
 			return false;
 		}
 		configured_output_busses = 1;
@@ -1213,20 +1260,22 @@ AUPlugin::reconfigure_io (ChanCount in, ChanCount out)
 		OSErr err;
 		if ((err = unit->SetProperty (kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input,
 						i, (void*) &renderCallbackInfo, sizeof(renderCallbackInfo))) != 0) {
-			error << string_compose (_("cannot install render callback (err = %1)"), err) << endmsg;
+			error << string_compose (_("AU: %1 cannot install render callback (err = %2)"), name(), err) << endmsg;
 		}
 	}
 
 	free (buffers);
-	buffers = (AudioBufferList *) malloc (offsetof(AudioBufferList, mBuffers) +
-					      used_out * sizeof(::AudioBuffer));
+	buffers = (AudioBufferList *) malloc (offsetof(AudioBufferList, mBuffers) + used_out * sizeof(::AudioBuffer));
 
 	input_channels = used_in;
 	output_channels = used_out;
-	/* reset plugin info to show currently configured state */
 
+	/* reset plugin info to show currently configured state */
 	_info->n_inputs = ChanCount (DataType::AUDIO, used_in) + ChanCount (DataType::MIDI, _has_midi_input ? 1 : 0);
 	_info->n_outputs = ChanCount (DataType::AUDIO, used_out);
+
+	DEBUG_TRACE (DEBUG::AudioUnitConfig, string_compose ("AUPlugin::configured %1 used-in: %2 used-out %3, in-bus: %4 out-bus: %5, I/O %6 %7\n",
+	             name(), used_in, used_out, configured_input_busses, configured_output_busses, _info->n_inputs, _info->n_outputs));
 
 	if (was_initialized) {
 		activate ();
@@ -1267,49 +1316,33 @@ AUPlugin::output_streams() const
 }
 
 bool
-AUPlugin::match_variable_io (const ChanCount& in, ChanCount& out, ChanCount* imprecise)
+AUPlugin::match_variable_io (ChanCount& in, ChanCount& aux_in, ChanCount& out)
 {
 	_output_configs.clear ();
-	const int32_t audio_in = in.n_audio();
+
+	/* if the plugin has no input busses, treat side-chain as normal input */
+	const int32_t audio_in = in.n_audio() + ((input_elements == 1) ? aux_in.n_audio() : 0);
+	/* preferred setting (provided by plugin_insert) */
+	const int32_t preferred_out = out.n_audio ();
+
 	AUPluginInfoPtr pinfo = boost::dynamic_pointer_cast<AUPluginInfo>(get_info());
-
-	/* lets check MIDI first */
-
-	if (in.n_midi() > 0 && !_has_midi_input && !imprecise) {
-		return false;
-	}
-
 	vector<pair<int,int> > io_configs = pinfo->cache.io_configs;
 
-#if 0
-	printf ("AU I/O Initial Config list for '%s' (%zu) n_in-bus: %d n_out-bus: %d\n", name(), io_configs.size(), input_elements, output_elements);
-	for (vector<pair<int,int> >::iterator i = io_configs.begin(); i != io_configs.end(); ++i) {
-		printf ("- I/O  %d / %d\n", i->first, i->second);
+#ifndef NDEBUG
+	if (DEBUG_ENABLED(DEBUG::AudioUnitConfig)) {
+		DEBUG_STR_DECL(a);
+		DEBUG_STR_APPEND(a, string_compose ("AU Initial I/O Config list for %1 n_cfg: %2, in-bus %4 out-bus: %5\n", name(), io_configs.size(), input_elements, output_elements));
+		for (vector<pair<int,int> >::iterator i = io_configs.begin(); i != io_configs.end(); ++i) {
+			DEBUG_STR_APPEND(a, string_compose (" - I/O  %1 / %2\n", i->first, i->second));
+		}
+		DEBUG_TRACE (DEBUG::AudioUnitConfig, DEBUG_STR(a).str());
 	}
 #endif
 
-	if (input_elements > 1) {
-		const vector<pair<int,int> >& ioc (pinfo->cache.io_configs);
-		for (vector<pair<int,int> >::const_iterator i = ioc.begin(); i != ioc.end(); ++i) {
-			int32_t possible_in = i->first;
-			int32_t possible_out = i->second;
-			if (possible_in < 0) {
-				continue;
-			}
-			for (uint32_t i = 1; i < input_elements; ++i) {
-				// can't use up-to bus_inputs[]
-				// waves' SC-C6(s) for example fails to configure with only 1 input
-				// on the 2nd bus.
-				io_configs.push_back (pair<int,int> (possible_in + bus_inputs[i], possible_out));
-			}
-			/* only add additional, optional busses to first available config.
-			 * AUPluginInfo::cached_io_configuration () already incrementally
-			 * adds busses (for instruments w/ multiple configurations)
-			 */
-			break;
-		}
-	}
-
+	/* add output busses as sum to possible outputs */
+#ifndef NDEBUG
+	bool outs_added = false;
+#endif
 	if (output_elements > 1) {
 		const vector<pair<int,int> >& ioc (pinfo->cache.io_configs);
 		for (vector<pair<int,int> >::const_iterator i = ioc.begin(); i != ioc.end(); ++i) {
@@ -1325,6 +1358,9 @@ AUPlugin::match_variable_io (const ChanCount& in, ChanCount& out, ChanCount* imp
 				}
 				io_configs.push_back (pair<int,int> (possible_in, possible_out + c));
 			}
+#ifndef NDEBUG
+			outs_added = true;
+#endif
 			/* only add additional, optional busses to first available config.
 			 * AUPluginInfo::cached_io_configuration () already incrementally
 			 * adds busses (for instruments w/ multiple configurations)
@@ -1333,18 +1369,18 @@ AUPlugin::match_variable_io (const ChanCount& in, ChanCount& out, ChanCount* imp
 		}
 	}
 
-	DEBUG_TRACE (DEBUG::AudioUnitConfig, string_compose ("%1 has %2 IO configurations, looking for %3 in, %4 out\n",
-							name(), io_configs.size(), in, out));
+	DEBUG_TRACE (DEBUG::AudioUnitConfig, string_compose ("%1 has %2 IO configurations, looking for in: %3 aux: %4 out: %5\n", name(), io_configs.size(), in, aux_in, out));
 
-#if 0
-	printf ("AU I/O Config list for '%s' (%zu)\n", name(), io_configs.size());
-	for (vector<pair<int,int> >::iterator i = io_configs.begin(); i != io_configs.end(); ++i) {
-		printf ("- I/O  %d / %d\n", i->first, i->second);
+#ifndef NDEBUG
+	if (DEBUG_ENABLED(DEBUG::AudioUnitConfig) && outs_added) {
+		DEBUG_STR_DECL(a);
+		DEBUG_STR_APPEND(a, string_compose ("AU Final I/O Config list for %1 n_cfg: %2\n", name(), io_configs.size()));
+		for (vector<pair<int,int> >::iterator i = io_configs.begin(); i != io_configs.end(); ++i) {
+			DEBUG_STR_APPEND(a, string_compose (" - I/O  %1 / %2\n", i->first, i->second));
+		}
+		DEBUG_TRACE (DEBUG::AudioUnitConfig, DEBUG_STR(a).str());
 	}
 #endif
-
-	// preferred setting (provided by plugin_insert)
-	const int32_t preferred_out = out.n_audio ();
 
 	/* kAudioUnitProperty_SupportedNumChannels
 	 * https://developer.apple.com/library/mac/documentation/MusicAudio/Conceptual/AudioUnitProgrammingGuide/TheAudioUnit/TheAudioUnit.html#//apple_ref/doc/uid/TP40003278-CH12-SW20
@@ -1376,50 +1412,44 @@ AUPlugin::match_variable_io (const ChanCount& in, ChanCount& out, ChanCount* imp
 	float penalty = 9999;
 	int32_t used_possible_in = 0;
 	bool found = false;
+
 #if defined (__clang__)
 # pragma clang diagnostic push
 # pragma clang diagnostic ignored "-Wtautological-compare"
 #endif
 
-#define FOUNDCFG_PENALTY(in, out, p) {             \
-  _output_configs.insert (out);                    \
-  if (p < penalty) {                               \
-    used_possible_in = possible_in;                \
-    audio_out = (out);                             \
-    if (imprecise) {                               \
-      imprecise->set (DataType::AUDIO, (in));      \
-    }                                              \
-    penalty = p;                                   \
-    found = true;                                  \
-    variable_inputs = possible_in < 0;             \
-    variable_outputs = possible_out < 0;           \
-  }                                                \
+#define FOUNDCFG_PENALTY(n_in, n_out, p) { \
+  _output_configs.insert (n_out);          \
+  if (p < penalty) {                       \
+    used_possible_in = possible_in;        \
+    audio_out = (n_out);                   \
+    in.set (DataType::AUDIO, (n_in));      \
+    penalty = p;                           \
+    found = true;                          \
+    variable_inputs = possible_in < 0;     \
+    variable_outputs = possible_out < 0;   \
+  }                                        \
 }
 
-#define FOUNDCFG_IMPRECISE(in, out) {              \
-  const float p =                                  \
-      fabsf ((float)(out) - preferred_out) *       \
-          (((out) > preferred_out) ? 1.1 : 1)      \
-      + fabsf ((float)(in) - audio_in) *           \
-          (((in) > audio_in) ? 275 : 250);         \
-  FOUNDCFG_PENALTY(in, out, p);                    \
+#define FOUNDCFG_IMPRECISE(n_in, n_out) {                   \
+  const float p = fabsf ((float)(n_out) - preferred_out) *  \
+                      (((n_out) > preferred_out) ? 1.1 : 1) \
+                + fabsf ((float)(n_in) - audio_in) *        \
+                      (((n_in) > audio_in) ? 275 : 250);    \
+  FOUNDCFG_PENALTY(n_in, n_out, p);                         \
 }
 
-#define FOUNDCFG(out)                              \
-  FOUNDCFG_IMPRECISE(audio_in, out)
+#define FOUNDCFG(n_out)              \
+  FOUNDCFG_IMPRECISE(audio_in, n_out)
 
-#define ANYTHINGGOES                               \
+#define ANYTHINGGOES         \
   _output_configs.insert (0);
 
-#define UPTO(nch) {                                \
-  for (int32_t n = 1; n <= nch; ++n) {             \
-    _output_configs.insert (n);                    \
-  }                                                \
+#define UPTO(nch) {                    \
+  for (int32_t n = 1; n <= nch; ++n) { \
+    _output_configs.insert (n);        \
+  }                                    \
 }
-
-	if (imprecise) {
-		*imprecise = in;
-	}
 
 	for (vector<pair<int,int> >::iterator i = io_configs.begin(); i != io_configs.end(); ++i) {
 
@@ -1478,11 +1508,7 @@ AUPlugin::match_variable_io (const ChanCount& in, ChanCount& out, ChanCount* imp
 				/* configuration can match up to -possible_in */
 				desired_in = min (-possible_in, audio_in);
 			}
-			if (!imprecise && audio_in != desired_in) {
-				/* skip that configuration, it cannot match
-				 * the required audio input count, and we
-				 * cannot ask for change via \imprecise */
-			} else if (possible_out == -1 || possible_out == -2) {
+			 if (possible_out == -1 || possible_out == -2) {
 				/* any output configuration possible
 				 * out == -2 is invalid, interpreted as out == -1
 				 * Really imprecise only if desired_in != audio_in */
@@ -1508,14 +1534,28 @@ AUPlugin::match_variable_io (const ChanCount& in, ChanCount& out, ChanCount* imp
 		return false;
 	}
 
-	if (used_possible_in < -2 && audio_in == 0) {
-		// input-port count cannot be zero, use as many ports
-		// as outputs, but at most abs(possible_in)
-		audio_input_cnt = max (1, min (audio_out, -used_possible_in));
+	if (used_possible_in < -2 && audio_in == 0 && aux_in.n_audio () == 0) {
+		/* input-port count cannot be zero, use as many ports
+		 * as outputs, but at most abs(possible_in) */
+		uint32_t n_in = max (1, min (audio_out, -used_possible_in));
+		in.set (DataType::AUDIO, n_in);
 	}
+
+#if 0
+	if (aux_in.n_audio () > 0 && input_elements > 1) {
+		in.set (DataType::AUDIO, in.n_audio() + aux_in.n_audio());
+	}
+#endif
+
 	out.set (DataType::MIDI, 0); /// XXX currently always zero
 	out.set (DataType::AUDIO, audio_out);
-	DEBUG_TRACE (DEBUG::AudioUnitConfig, string_compose ("\tCHOSEN: in %1 out %2\n", in, out));
+
+	if (input_elements == 1) {
+		/* subtract aux-ins that were treated as default inputs */
+		in.set (DataType::AUDIO, in.n_audio() - aux_in.n_audio());
+	}
+
+	DEBUG_TRACE (DEBUG::AudioUnitConfig, string_compose ("\tCHOSEN: in: %1 aux-in: %2 out: %3\n", in, aux_in, out));
 
 #if defined (__clang__)
 # pragma clang diagnostic pop
@@ -1559,7 +1599,7 @@ AUPlugin::render_callback(AudioUnitRenderActionFlags*,
 	assert (bus < input_elements);
 	uint32_t busoff = 0;
 	for (uint32_t i = 0; i < bus; ++i) {
-		busoff += bus_inputs[i];
+		busoff += bus_inused[i];
 	}
 
 	uint32_t limit = min ((uint32_t) ioData->mNumberBuffers, input_maxbuf);
@@ -1929,19 +1969,22 @@ AUPlugin::describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id) const
 	}
 
 	std::string busname;
+	bool is_sidechain = false;
 
 	if (dt == DataType::AUDIO) {
 		if (input) {
 			uint32_t pid = id;
 			for (uint32_t bus = 0; bus < input_elements; ++bus) {
-				if (pid < bus_inputs[bus]) {
+				if (pid < bus_inused[bus]) {
 					id = pid;
 					ss << _bus_name_in[bus];
 					ss << " / Bus " << (1 + bus);
 					busname = _bus_name_in[bus];
+					is_sidechain = bus > 0;
+					busname = _bus_name_in[bus];
 					break;
 				}
-				pid -= bus_inputs[bus];
+				pid -= bus_inused[bus];
 			}
 		}
 		else {
@@ -1968,6 +2011,7 @@ AUPlugin::describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id) const
 	ss << (id + 1);
 
 	Plugin::IOPortDescription iod (ss.str());
+	iod.is_sidechain = is_sidechain;
 	if (!busname.empty()) {
 		iod.group_name = busname;
 		iod.group_channel = id;

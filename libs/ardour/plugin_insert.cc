@@ -441,8 +441,9 @@ bool
 PluginInsert::has_output_presets (ChanCount in, ChanCount out)
 {
 	if (!_configured && _plugins[0]->get_info ()->reconfigurable_io ()) {
-		// collect possible configurations, prefer given in/out
-		_plugins[0]->match_variable_io (in, out);
+		/* collect possible configurations, prefer given in/out */
+		ChanCount aux_in;
+		_plugins[0]->match_variable_io (in, aux_in, out);
 	}
 
 	PluginOutputConfiguration ppc (_plugins[0]->possible_output ());
@@ -1916,6 +1917,8 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 	_configured_internal = in;
 	_configured_out = out;
 
+	ChanCount aux_in;
+
 	if (_sidechain) {
 		/* TODO hide midi-bypass, and custom outs. Best /fake/ "out" here.
 		 * (currently _sidechain->configure_io always succeeds
@@ -1926,13 +1929,14 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 			return false;
 		}
 		_configured_internal += _sidechain->input()->n_ports();
+		aux_in = _sidechain->input()->n_ports();
 
 		// include (static_cast<Route*>owner())->name() ??
 		_sidechain->input ()-> set_pretty_name (string_compose (_("SC %1"), name ()));
 	}
 
 	/* get plugin configuration */
-	_match = private_can_support_io_configuration (in, out);
+	_match = private_can_support_io_configuration (in, out); // sets out
 #ifndef NDEBUG
 	if (DEBUG_ENABLED(DEBUG::ChanMapping)) {
 		DEBUG_STR_DECL(a);
@@ -1953,7 +1957,7 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 	switch (_match.method) {
 	case Split:
 	case Hide:
-		if (_plugins.front()->reconfigure_io (natural_input_streams(), out) == false) {
+		if (_plugins.front()->reconfigure_io (natural_input_streams(), ChanCount (), out) == false) {
 			PluginIoReConfigure (); /* EMIT SIGNAL */
 			_configured = false;
 			return false;
@@ -1961,11 +1965,15 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 		break;
 	case Delegate:
 		{
-			ChanCount din (_configured_internal);
-			ChanCount dout (din); // hint
+			ChanCount din (in);
+			ChanCount daux (aux_in);
+			ChanCount dout (_configured_out);
 			if (_custom_cfg) {
 				if (_custom_sinks.n_total () > 0) {
-					din = _custom_sinks;
+					din = std::min (natural_input_streams(), _custom_sinks);
+					if (_custom_sinks > natural_input_streams()) {
+						daux = _custom_sinks - din;
+					}
 				}
 				dout = _custom_out;
 			} else if (_preset_out.n_audio () > 0) {
@@ -1973,17 +1981,12 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 			} else if (dout.n_midi () > 0 && dout.n_audio () == 0) {
 				dout.set (DataType::AUDIO, 2);
 			}
-			if (out.n_audio () == 0) { out.set (DataType::AUDIO, 1); }
-			ChanCount useins;
-			DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1: Delegate lookup : %2 %3\n", name(), din, dout));
-			bool const r = _plugins.front()->match_variable_io (din, dout, &useins);
+			//if (dout.n_audio () == 0) { dout.set (DataType::AUDIO, 1); } // XXX why?
+			DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1: Delegate lookup: %2 %3 %4\n", name(), din, daux, dout));
+			bool const r = _plugins.front()->match_variable_io (din, daux, dout);
 			assert (r);
-			if (useins.n_audio() == 0) {
-				useins = din;
-			}
-			DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1: Delegate configuration: %2 %3\n", name(), useins, dout));
-
-			if (_plugins.front()->reconfigure_io (useins, dout) == false) {
+			DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1: Delegate configuration: %2 %3 %4\n", name(), din, daux, dout));
+			if (_plugins.front()->reconfigure_io (din, daux, dout) == false) {
 				PluginIoReConfigure (); /* EMIT SIGNAL */
 				_configured = false;
 				return false;
@@ -1994,7 +1997,7 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 		}
 		break;
 	default:
-		if (_plugins.front()->reconfigure_io (in, out) == false) {
+		if (_plugins.front()->reconfigure_io (in, aux_in, out) == false) {
 			PluginIoReConfigure (); /* EMIT SIGNAL */
 			_configured = false;
 			return false;
@@ -2257,11 +2260,14 @@ PluginInsert::internal_can_support_io_configuration (ChanCount const & inx, Chan
 	DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1: resolving 'Impossible' match...\n", name()));
 
 	if (info->reconfigurable_io()) {
-		ChanCount useins;
-		out = inx; // hint
-		if (out.n_midi () > 0 && out.n_audio () == 0) { out.set (DataType::AUDIO, 2); }
-		if (out.n_audio () == 0) { out.set (DataType::AUDIO, 1); }
-		bool const r = _plugins.front()->match_variable_io (inx + sidechain_input_pins (), out, &useins);
+		//out = inx; // hint
+		ChanCount main_in = inx;
+		ChanCount aux_in = sidechain_input_pins ();
+		if (out.n_midi () > 0 && out.n_audio () == 0) {
+			out.set (DataType::AUDIO, 2);
+		}
+		//if (out.n_audio () == 0) { out.set (DataType::AUDIO, 1); } // why?
+		bool const r = _plugins.front()->match_variable_io (main_in, aux_in, out);
 		if (!r) {
 			// houston, we have a problem.
 			return Match (Impossible, 0);
@@ -2315,7 +2321,7 @@ PluginInsert::internal_can_support_io_configuration (ChanCount const & inx, Chan
 
 /* this is the original Ardour 3/4 behavior, mainly for backwards compatibility */
 PluginInsert::Match
-PluginInsert::automatic_can_support_io_configuration (ChanCount const & inx, ChanCount& out) const
+PluginInsert::automatic_can_support_io_configuration (ChanCount const& inx, ChanCount& out) const
 {
 	if (_plugins.empty()) {
 		return Match();
@@ -2329,10 +2335,11 @@ PluginInsert::automatic_can_support_io_configuration (ChanCount const & inx, Cha
 		/* Plugin has flexible I/O, so delegate to it
 		 * pre-seed outputs, plugin tries closest match
 		 */
-		out = in; // hint
+		//out = in; // hint
+		ChanCount aux_in = sidechain_input_pins ();
 		if (out.n_midi () > 0 && out.n_audio () == 0) { out.set (DataType::AUDIO, 2); }
 		if (out.n_audio () == 0) { out.set (DataType::AUDIO, 1); }
-		bool const r = _plugins.front()->match_variable_io (in + sidechain_input_pins (), out);
+		bool const r = _plugins.front()->match_variable_io (in, aux_in, out);
 		if (!r) {
 			return Match (Impossible, 0);
 		}
@@ -3141,14 +3148,15 @@ PluginInsert::get_impulse_analysis_plugin()
 		// not great.
 		ret = plugin_factory(_plugins[0]);
 		ret->use_for_impulse_analysis ();
+		ChanCount ins = internal_input_streams ();
 		ChanCount out (internal_output_streams ());
+		ChanCount aux_in;
 		if (ret->get_info ()->reconfigurable_io ()) {
 			// populate get_info ()->n_inputs and ->n_outputs
-			ChanCount useins;
-			ret->match_variable_io (internal_input_streams (), out, &useins);
+			ret->match_variable_io (ins, aux_in, out);
 			assert (out == internal_output_streams ());
 		}
-		ret->reconfigure_io (internal_input_streams (), out);
+		ret->reconfigure_io (ins, aux_in, out);
 		ret->set_owner (_owner);
 		_impulseAnalysisPlugin = ret;
 

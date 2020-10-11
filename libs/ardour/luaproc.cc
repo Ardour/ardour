@@ -394,9 +394,12 @@ LuaProc::load_script ()
 }
 
 bool
-LuaProc::match_variable_io (const ChanCount& in, ChanCount& out, ChanCount* imprecise)
+LuaProc::match_variable_io (ChanCount& in, ChanCount& aux_in, ChanCount& out)
 {
-	// caller must hold process lock (no concurrent calls to interpreter
+	/* Lua does not have dedicated sidechain busses */
+	in += aux_in;
+
+	/* caller must hold process lock (no concurrent calls to interpreter */
 	_output_configs.clear ();
 
 	lua_State* L = lua.getState ();
@@ -445,49 +448,43 @@ LuaProc::match_variable_io (const ChanCount& in, ChanCount& out, ChanCount* impr
 	float penalty = 9999;
 	bool found = false;
 
-#define FOUNDCFG_PENALTY(in, out, p) {                              \
-  _output_configs.insert (out);                                     \
-  if (p < penalty) {                                                \
-    audio_out = (out);                                              \
-    midi_out = possible_midiout;                                    \
-    if (imprecise) {                                                \
-      imprecise->set (DataType::AUDIO, (in));                       \
-      imprecise->set (DataType::MIDI, possible_midiin);             \
-    }                                                               \
-    _has_midi_input = (possible_midiin > 0);                        \
-    _has_midi_output = (possible_midiout > 0);                      \
-    penalty = p;                                                    \
-    found = true;                                                   \
-  }                                                                 \
+#define FOUNDCFG_PENALTY(n_in, n_out, p) {     \
+  _output_configs.insert (n_out);              \
+  if (p < penalty) {                           \
+    audio_out = (n_out);                       \
+    midi_out = possible_midiout;               \
+    in.set (DataType::AUDIO, (n_in));          \
+    in.set (DataType::MIDI, possible_midiin);  \
+    _has_midi_input = (possible_midiin > 0);   \
+    _has_midi_output = (possible_midiout > 0); \
+    penalty = p;                               \
+    found = true;                              \
+  }                                            \
 }
 
-#define FOUNDCFG_IMPRECISE(in, out) {                               \
-  const float p = fabsf ((float)(out) - preferred_out) *            \
-                      (((out) > preferred_out) ? 1.1 : 1)           \
+#define FOUNDCFG_IMPRECISE(n_in, n_out) {                                  \
+  const float p = fabsf ((float)(n_out) - preferred_out) *                 \
+                      (((n_out) > preferred_out) ? 1.1 : 1)                \
                 + fabsf ((float)possible_midiout - preferred_midiout) *    \
                       ((possible_midiout - preferred_midiout) ? 0.6 : 0.5) \
-                + fabsf ((float)(in) - audio_in) *                  \
-                      (((in) > audio_in) ? 275 : 250)               \
-                + fabsf ((float)possible_midiin - midi_in) *        \
-                      ((possible_midiin - midi_in) ? 100 : 110);    \
-  FOUNDCFG_PENALTY(in, out, p);                                     \
+                + fabsf ((float)(n_in) - audio_in) *                       \
+                      (((n_in) > audio_in) ? 275 : 250)                    \
+                + fabsf ((float)possible_midiin - midi_in) *               \
+                      ((possible_midiin - midi_in) ? 100 : 110);           \
+  FOUNDCFG_PENALTY(n_in, n_out, p);                                        \
 }
 
-#define FOUNDCFG(out)                                               \
-  FOUNDCFG_IMPRECISE(audio_in, out)
+#define FOUNDCFG(n_out)              \
+  FOUNDCFG_IMPRECISE(audio_in, n_out)
 
-#define ANYTHINGGOES                                                \
+#define ANYTHINGGOES          \
   _output_configs.insert (0);
 
-#define UPTO(nch) {                                                 \
-  for (int n = 1; n < nch; ++n) {                                   \
-    _output_configs.insert (n);                                     \
-  }                                                                 \
+#define UPTO(nch) {               \
+  for (int n = 1; n < nch; ++n) { \
+    _output_configs.insert (n);   \
+  }                               \
 }
-
-	if (imprecise) {
-		*imprecise = in;
-	}
 
 	for (luabridge::Iterator i (iotable); !i.isNil (); ++i) {
 		luabridge::LuaRef io (i.value ());
@@ -499,10 +496,6 @@ LuaProc::match_variable_io (const ChanCount& in, ChanCount& out, ChanCount* impr
 		int possible_out = io["audio_out"].isNumber() ? io["audio_out"] : -1;
 		int possible_midiin = io["midi_in"].isNumber() ? io["midi_in"] : 0;
 		int possible_midiout = io["midi_out"].isNumber() ? io["midi_out"] : 0;
-
-		if (midi_in != possible_midiin && !imprecise) {
-			continue;
-		}
 
 		// exact match
 		if ((possible_in == audio_in) && (possible_out == preferred_out)) {
@@ -548,11 +541,7 @@ LuaProc::match_variable_io (const ChanCount& in, ChanCount& out, ChanCount* impr
 				/* configuration can match up to -possible_in */
 				desired_in = std::min (-possible_in, audio_in);
 			}
-			if (!imprecise && audio_in != desired_in) {
-				/* skip that configuration, it cannot match
-				 * the required audio input count, and we
-				 * cannot ask for change via \imprecise */
-			} else if (possible_out == -1 || possible_out == -2) {
+			if (possible_out == -1 || possible_out == -2) {
 				/* any output configuration possible
 				 * out == -2 is invalid, interpreted as out == -1.
 				 * Really imprecise only if desired_in != audio_in */
@@ -577,22 +566,24 @@ LuaProc::match_variable_io (const ChanCount& in, ChanCount& out, ChanCount* impr
 		return false;
 	}
 
-	if (imprecise) {
-		_selected_in = *imprecise;
-	} else {
-		_selected_in = in;
-	}
-
 	out.set (DataType::MIDI, midi_out);
 	out.set (DataType::AUDIO, audio_out);
+
+	_selected_in = in;
 	_selected_out = out;
+
+	/* restore side-chain input count */
+	in -= aux_in;
 
 	return true;
 }
 
 bool
-LuaProc::reconfigure_io (ChanCount in, ChanCount out)
+LuaProc::reconfigure_io (ChanCount in, ChanCount out, ChanCount aux_in)
 {
+	in += aux_in;
+	assert (in == _selected_in && out ==_selected_out);
+
 	in.set (DataType::MIDI, _has_midi_input ? 1 : 0);
 	out.set (DataType::MIDI, _has_midi_output ? 1 : 0);
 

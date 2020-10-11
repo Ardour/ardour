@@ -117,8 +117,8 @@ public:
 
 	bool has_editor() const { return false; }
 
-	bool match_variable_io (const ChanCount& in, ChanCount& out, ChanCount* imprecise);
-	bool reconfigure_io (ChanCount in, ChanCount out);
+	bool match_variable_io (ChanCount& in, ChanCount& aux_in, ChanCount& out);
+	bool reconfigure_io (ChanCount in, ChanCount aux_in, ChanCount out);
 
 	ChanCount output_streams() const { return _configured_out; }
 	ChanCount input_streams() const { return _configured_in; }
