@@ -22,6 +22,7 @@
 
 #ifdef __APPLE__
 #include <Carbon/Carbon.h>
+#undef nil
 #elif defined PLATFORM_WINDOWS
 #include <windows.h>
 #include <glibmm.h>

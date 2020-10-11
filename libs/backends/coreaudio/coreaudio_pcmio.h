@@ -26,6 +26,8 @@
 #include <AudioUnit/AudioUnit.h>
 #include <AudioToolbox/AudioToolbox.h>
 
+#undef nil
+
 #include <map>
 #include <vector>
 #include <string>
