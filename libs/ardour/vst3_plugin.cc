@@ -73,7 +73,13 @@ VST3Plugin::~VST3Plugin ()
 void
 VST3Plugin::init ()
 {
-	DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3 instantiating: %1\n", get_info()->unique_id));
+#ifndef NDEBUG
+	if (DEBUG_ENABLED(DEBUG::VST3Config)) {
+		char fuid[33];
+		_plug->fuid().toString (fuid);
+		DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3 instantiating FUID: %1\n", fuid));
+	}
+#endif
 	Vst::ProcessContext& context (_plug->context ());
 	context.sampleRate = _session.nominal_sample_rate ();
 	_plug->set_block_size (_session.get_block_size ());
