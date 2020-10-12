@@ -2464,7 +2464,6 @@ VST3PI::getContextInfoValue (int32& value, FIDString id)
 	Stripable* s = dynamic_cast<Stripable*> (_owner);
 	assert (s);
 
-	DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::getContextInfoValue<int> %1\n", id));
 	if (0 == strcmp (id, ContextInfo::kIndexMode)) {
 		value = ContextInfo::kPerTypeIndex;
 	} else if (0 == strcmp (id, ContextInfo::kType)) {
@@ -2509,9 +2508,10 @@ VST3PI::getContextInfoValue (int32& value, FIDString id)
 			value = ac->self_soloed ();
 		}
 	} else {
-		DEBUG_TRACE (DEBUG::VST3Callbacks, "VST3PI::getContextInfoValue<int>: unsupported ID\n");
+		DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::getContextInfoValue<int> unsupported ID %1\n", id));
 		return kNotImplemented;
 	}
+	DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::getContextInfoValue<int> %1 = %2\n", id, value));
 	return kResultOk;
 }
 
@@ -2521,13 +2521,10 @@ VST3PI::getContextInfoString (Vst::TChar* string, int32 max_len, FIDString id)
 	if (!_owner) {
 		return kNotInitialized;
 	}
-	DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::getContextInfoValue<string> %1\n", id));
 	if (0 == strcmp (id, ContextInfo::kID)) {
 		utf8_to_tchar (string, _owner->id().to_s (), max_len);
-		return kResultOk;
 	} else if (0 == strcmp (id, ContextInfo::kName)) {
 		utf8_to_tchar (string, _owner->name (), max_len);
-		return kResultOk;
 	} else if (0 == strcmp (id, ContextInfo::kActiveDocumentID)) {
 		return kNotImplemented; // XXX TODO
 	} else if (0 == strcmp (id, ContextInfo::kDocumentID)) {
@@ -2541,11 +2538,12 @@ VST3PI::getContextInfoString (Vst::TChar* string, int32 max_len, FIDString id)
 	} else {
 		boost::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
 		if (!ac) {
-			DEBUG_TRACE (DEBUG::VST3Callbacks, "VST3PI::getContextInfoValue<string>: unsupported ID\n");
+			DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::getContextInfoValue<string> unsupported ID %1\n", id));
 			return kInvalidArgument;
 		}
 		utf8_to_tchar (string, ac->get_user_string (), max_len);
 	}
+	DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::getContextInfoValue<string> %1 = %2\n", id, tchar_to_utf8(string)));
 	return kResultOk;
 }
 
@@ -2556,7 +2554,6 @@ VST3PI::getContextInfoValue (double& value, FIDString id)
 	if (!s) {
 		return kNotInitialized;
 	}
-	DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::getContextInfoValue<double> %1\n", id));
 	if (0 == strcmp (id, ContextInfo::kMaxVolume)) {
 		value = 2.0; // Config->get_max_gain();
 	} else if (0 == strcmp (id, ContextInfo::kMaxSendLevel)) {
@@ -2579,12 +2576,14 @@ VST3PI::getContextInfoValue (double& value, FIDString id)
 			value = ac->get_value(); // gain cofficient
 			psl_subscribe_to (ac, id);
 		} else {
+			DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::getContextInfoValue<double> invalid AC %1\n", id));
 			return kInvalidArgument; // send index out of bounds
 		}
 	} else {
-		DEBUG_TRACE (DEBUG::VST3Callbacks, "VST3PI::getContextInfoValue<double>: unsupported ID\n");
+		DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::getContextInfoValue<double> unsupported ID %1\n", id));
 		return kInvalidArgument;
 	}
+	DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::getContextInfoValue<double> %1 = %2\n", id, value));
 	return kResultOk;
 }
 
@@ -2721,13 +2720,14 @@ VST3PI::psl_stripable_property_changed (PBD::PropertyChange const& what_changed)
 	FUnknownPtr<IContextInfoHandler> nfo (_controller);
 	FUnknownPtr<IContextInfoHandler2> nfo2 (_controller);
 	if (nfo && !nfo2) {
+		DEBUG_TRACE (DEBUG::VST3Callbacks, "VST3PI::psl_stripable_property_changed v1\n");
 		nfo->notifyContextInfoChange ();
 	}
 	if (!nfo2) {
 		return;
 	}
 
-	DEBUG_TRACE (DEBUG::VST3Callbacks, "VST3PI::psl_stripable_property_changed\n");
+	DEBUG_TRACE (DEBUG::VST3Callbacks, "VST3PI::psl_stripable_property_changed v2\n");
 
 	if (what_changed.contains (Properties::selected)) {
 		nfo2->notifyContextInfoChange ("ContextInfo::kSelected");
