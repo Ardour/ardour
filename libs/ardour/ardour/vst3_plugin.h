@@ -205,10 +205,10 @@ private:
 	bool midi_controller (int32_t, int16_t, Vst::CtrlNumber, Vst::ParamID &id);
 	bool live_midi_cc (int32_t, int16_t, Vst::CtrlNumber);
 
-	void setup_info_listener ();
+	bool setup_info_listener ();
 	void stripable_property_changed (PBD::PropertyChange const&);
 
-	void setup_psl_info_handler ();
+	bool setup_psl_info_handler ();
 	void psl_subscribe_to (boost::shared_ptr<ARDOUR::AutomationControl>, FIDString);
 	void psl_stripable_property_changed (PBD::PropertyChange const&);
 

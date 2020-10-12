@@ -1498,8 +1498,10 @@ VST3PI::set_owner (SessionObject* o)
 		_ac_subscriptions.clear();
 		return;
 	}
-	setup_info_listener ();
-	setup_psl_info_handler ();
+
+	if (!setup_psl_info_handler ()) {
+		setup_info_listener ();
+	}
 }
 
 int32
@@ -2346,12 +2348,12 @@ VST3PI::stripable_property_changed (PBD::PropertyChange const&)
 	il->setChannelContextInfos (al);
 }
 
-void
+bool
 VST3PI::setup_info_listener ()
 {
 	FUnknownPtr<Vst::ChannelContext::IInfoListener> il (_controller);
 	if (!il) {
-		return;
+		return false;
 	}
 	DEBUG_TRACE (DEBUG::VST3Config, "VST3PI::setup_info_listener\n");
 	Stripable* s = dynamic_cast<Stripable*> (_owner);
@@ -2361,6 +2363,7 @@ VST3PI::setup_info_listener ()
 
 	/* send initial change */
 	stripable_property_changed (PropertyChange ());
+	return true;
 }
 
 /* ****************************************************************************
@@ -2741,28 +2744,29 @@ VST3PI::psl_stripable_property_changed (PBD::PropertyChange const& what_changed)
 	}
 }
 
-void
+bool
 VST3PI::setup_psl_info_handler ()
 {
 	/* initial update */
 	FUnknownPtr<IContextInfoHandler> nfo (_controller);
 	FUnknownPtr<IContextInfoHandler2> nfo2 (_controller);
+	DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::setup_psl_info_handler: (%1) (%2)\n", nfo != 0, nfo2 !=0));
+
 	if (nfo2) {
 		nfo2->notifyContextInfoChange ("");
 	} else if (nfo) {
 		nfo->notifyContextInfoChange ();
 	}
 
-	DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::setup_psl_info_handler: (%1) (%2)\n", nfo != 0, nfo2 !=0));
-
 	if (!nfo && !nfo2) {
-		return;
+		return false;
 	}
 
 	Stripable* s = dynamic_cast<Stripable*> (_owner);
 	s->PropertyChanged.connect_same_thread (_strip_connections, boost::bind (&VST3PI::psl_stripable_property_changed, this, _1));
 	s->presentation_info().PropertyChanged.connect_same_thread (_strip_connections, boost::bind (&VST3PI::psl_stripable_property_changed, this, _1));
 
+	return true;
 }
 
 /* ****************************************************************************
