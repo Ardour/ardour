@@ -569,7 +569,7 @@ LuaProc::match_variable_io (ChanCount& in, ChanCount& aux_in, ChanCount& out)
 	out.set (DataType::MIDI, midi_out);
 	out.set (DataType::AUDIO, audio_out);
 
-	_selected_in = in;
+	_selected_in = in; // TODO remove after testing
 	_selected_out = out;
 
 	/* restore side-chain input count */
@@ -579,7 +579,7 @@ LuaProc::match_variable_io (ChanCount& in, ChanCount& aux_in, ChanCount& out)
 }
 
 bool
-LuaProc::reconfigure_io (ChanCount in, ChanCount out, ChanCount aux_in)
+LuaProc::reconfigure_io (ChanCount in, ChanCount aux_in, ChanCount out)
 {
 	in += aux_in;
 	assert (in == _selected_in && out ==_selected_out);
@@ -587,8 +587,8 @@ LuaProc::reconfigure_io (ChanCount in, ChanCount out, ChanCount aux_in)
 	in.set (DataType::MIDI, _has_midi_input ? 1 : 0);
 	out.set (DataType::MIDI, _has_midi_output ? 1 : 0);
 
-	_info->n_inputs = _selected_in;
-	_info->n_outputs = _selected_out;
+	_info->n_inputs = in;
+	_info->n_outputs = out;
 
 	// configure the DSP if needed
 	if (in != _configured_in || out != _configured_out || !_configured) {
@@ -598,8 +598,8 @@ LuaProc::reconfigure_io (ChanCount in, ChanCount out, ChanCount aux_in)
 			try {
 				luabridge::LuaRef io = lua_dsp_configure (in, out);
 				if (io.isTable ()) {
-					ChanCount lin (_selected_in);
-					ChanCount lout (_selected_out);
+					ChanCount lin (in);
+					ChanCount lout (out);
 
 					if (io["audio_in"].type() == LUA_TNUMBER) {
 						const int c = io["audio_in"].cast<int> ();
