@@ -2452,7 +2452,7 @@ lookup_ac (SessionObject* o, FIDString id)
 	} else if (0 == strcmp (id, ContextInfo::kVolume)) {
 		return s->gain_control ();
 	} else if (0 == strncmp (id, ContextInfo::kSendLevel, strlen (ContextInfo::kSendLevel))) {
-#ifndef MIXBUS
+#ifdef MIXBUS
 		/* This calls Route::nth_send(), which takes the _processor_lock.
 		 * which we may already hold during initialzation
 		 * (set_owner is called with process and processor locks held).
