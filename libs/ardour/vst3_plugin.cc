@@ -1600,7 +1600,7 @@ VST3PI::get_parameter_descriptor (uint32_t port, ParameterDescriptor& desc) cons
 	}
 
 	FUnknownPtr<IEditControllerExtra> extra_ctrl (_controller);
-	if (extra_ctrl) {
+	if (extra_ctrl && port != designated_bypass_port ()) {
 		int32 flags = extra_ctrl->getParamExtraFlags (id);
 		desc.inline_ctrl = (flags & kParamFlagMicroEdit) ? true : false;
 	}
