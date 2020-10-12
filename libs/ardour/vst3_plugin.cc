@@ -2452,8 +2452,20 @@ lookup_ac (SessionObject* o, FIDString id)
 	} else if (0 == strcmp (id, ContextInfo::kVolume)) {
 		return s->gain_control ();
 	} else if (0 == strncmp (id, ContextInfo::kSendLevel, strlen (ContextInfo::kSendLevel))) {
+#ifndef MIXBUS
+		/* This calls Route::nth_send(), which takes the _processor_lock.
+		 * which we may already hold during initialzation
+		 * (set_owner is called with process and processor locks held).
+		 *
+		 * NB "console 1" asks for 3 sends, even when we return
+		 * kSendCount == 0.
+		 *
+		 * In Mixbus it's fine, since Mixbus send lookup
+		 * does not take the _processor_lock
+		 */
 		int send_id = atoi (id + strlen (ContextInfo::kSendLevel));
 		return s->send_level_controllable (send_id);
+#endif
 	}
 	return boost::shared_ptr<AutomationControl> ();
 }
@@ -2490,8 +2502,8 @@ VST3PI::getContextInfoValue (int32& value, FIDString id)
 	} else if (0 == strcmp (id, ContextInfo::kSelected)) {
 		value = s->is_selected () ? 1 : 0;
 	} else if (0 == strcmp (id, ContextInfo::kFocused)) {
-		// consider ControlProtocol::first_selected_stripable () == s;
-		return kNotImplemented;
+		value = s->is_selected () ? 1 : 0; // XXX
+		//consider ControlProtocol::first_selected_stripable () == s;
 	} else if (0 == strcmp (id, ContextInfo::kSendCount)) {
 		value = 0;
 		while (s->send_enable_controllable (value)) {
@@ -2731,7 +2743,7 @@ VST3PI::psl_stripable_property_changed (PBD::PropertyChange const& what_changed)
 
 	if (what_changed.contains (Properties::selected)) {
 		nfo2->notifyContextInfoChange ("ContextInfo::kSelected");
-		//nfo2->notifyContextInfoChange ("ContextInfo::kFocused");
+		nfo2->notifyContextInfoChange ("ContextInfo::kFocused"); // XXX
 	}
 	if (what_changed.contains (Properties::hidden)) {
 		nfo2->notifyContextInfoChange ("ContextInfo::kVisibility");
