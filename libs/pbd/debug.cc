@@ -30,6 +30,7 @@
 #include <boost/tokenizer.hpp>
 
 #include "pbd/debug.h"
+#include "pbd/error.h"
 
 #include "pbd/i18n.h"
 
@@ -62,6 +63,7 @@ DebugBits PBD::DEBUG::Threads = PBD::new_debug_bit ("threads");
 DebugBits PBD::DEBUG::Locale = PBD::new_debug_bit ("locale");
 DebugBits PBD::DEBUG::StringConvert = PBD::new_debug_bit ("stringconvert");
 DebugBits PBD::DEBUG::DebugTimestamps = PBD::new_debug_bit ("debugtimestamps");
+DebugBits PBD::DEBUG::DebugLogToGUI = PBD::new_debug_bit ("debuglogtogui");
 
 /* These are debug bits that are used by backends. Since these are loaded dynamically,
    after command-line parsing, defining them in code that is part of the backend
@@ -104,6 +106,10 @@ PBD::debug_print (const char* prefix, string str)
 		printf ("%ld %s: %s", g_get_monotonic_time(), prefix, str.c_str());
 	} else {
 		printf ("%s: %s", prefix, str.c_str());
+	}
+	if ((PBD::debug_bits & DEBUG::DebugLogToGUI).any()) {
+		std::replace (str.begin (), str.end (), '\n', ' ');
+		debug << prefix << ": "  << str << endmsg;
 	}
 }
 

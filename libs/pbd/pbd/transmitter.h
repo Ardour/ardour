@@ -31,6 +31,7 @@ class LIBPBD_API Transmitter : public std::stringstream
 {
   public:
 	enum Channel {
+		Debug,
 		Info,
 		Error,
 		Warning,
@@ -54,6 +55,7 @@ class LIBPBD_API Transmitter : public std::stringstream
 	Channel channel;
 	PBD::Signal2<void, Channel, const char *> *send;
 
+	PBD::Signal2<void, Channel, const char *> debug;
 	PBD::Signal2<void, Channel, const char *> info;
 	PBD::Signal2<void, Channel, const char *> warning;
 	PBD::Signal2<void, Channel, const char *> error;

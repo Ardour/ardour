@@ -63,6 +63,7 @@ namespace PBD {
 		LIBPBD_API extern DebugBits Locale;
 		LIBPBD_API extern DebugBits StringConvert;
 		LIBPBD_API extern DebugBits DebugTimestamps;
+		LIBPBD_API extern DebugBits DebugLogToGUI;
 
 		/* See notes in ../debug.cc on why these are defined here */
 

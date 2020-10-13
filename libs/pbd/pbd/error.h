@@ -22,9 +22,10 @@
 #include "transmitter.h"
 
 namespace PBD {
-	LIBPBD_API extern Transmitter error;
+	LIBPBD_API extern Transmitter debug;
 	LIBPBD_API extern Transmitter info;
 	LIBPBD_API extern Transmitter warning;
+	LIBPBD_API extern Transmitter error;
 	LIBPBD_API extern Transmitter fatal;
 }
 

@@ -40,6 +40,9 @@ Transmitter::Transmitter (Channel c)
 	case Info:
 		send = &info;
 		break;
+	case Debug:
+		send = &debug;
+		break;
 	case Fatal:
 		send = &fatal;
 		break;

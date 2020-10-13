@@ -36,14 +36,16 @@ TextReceiver::receive (Transmitter::Channel chn, const char *str)
 	const char *prefix = "";
 
 	switch (chn) {
-	case Transmitter::Error:
-		prefix = ": [ERROR]: ";
-		break;
+	case Transmitter::Debug:
+		return;
 	case Transmitter::Info:
 		prefix = ": [INFO]: ";
 		break;
 	case Transmitter::Warning:
 		prefix = ": [WARNING]: ";
+		break;
+	case Transmitter::Error:
+		prefix = ": [ERROR]: ";
 		break;
 	case Transmitter::Fatal:
 		prefix = ": [FATAL]: ";
