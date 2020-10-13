@@ -2453,18 +2453,25 @@ lookup_ac (SessionObject* o, FIDString id)
 		return s->gain_control ();
 	} else if (0 == strncmp (id, ContextInfo::kSendLevel, strlen (ContextInfo::kSendLevel))) {
 #ifdef MIXBUS
-		/* This calls Route::nth_send(), which takes the _processor_lock.
-		 * which we may already hold during initialzation
-		 * (set_owner is called with process and processor locks held).
+		/* Only use mixbus sends, which are identified by providing a
+		 * send_enable_controllable().
 		 *
-		 * NB "console 1" asks for 3 sends, even when we return
-		 * kSendCount == 0.
+		 * The main reason is that the number of Mixbus sends
+		 * per route is fixed, but this also works around a crash:
 		 *
-		 * In Mixbus it's fine, since Mixbus send lookup
-		 * does not take the _processor_lock
+		 * For Ardour sends, send_level_controllable() calls
+		 * Route::nth_send() which takes the _processor_lock.
+		 *
+		 * However this callback can be triggered initially
+		 *   Route::add_processors () -> set_owner() ->
+		 *   setup_psl_info_handler() -> ..notify..
+		 * with process and processor locks held, leading to
+		 * recurive locks (deadlock, or double unlock crash).
 		 */
 		int send_id = atoi (id + strlen (ContextInfo::kSendLevel));
-		return s->send_level_controllable (send_id);
+		if (s->send_enable_controllable (send_id)) {
+			return s->send_level_controllable (send_id);
+		}
 #endif
 	}
 	return boost::shared_ptr<AutomationControl> ();
