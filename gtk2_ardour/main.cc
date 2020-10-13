@@ -290,10 +290,11 @@ int main (int argc, char *argv[])
 
 	// catch error message system signals ();
 
-	text_receiver.listen_to (error);
+	text_receiver.listen_to (debug);
 	text_receiver.listen_to (info);
-	text_receiver.listen_to (fatal);
 	text_receiver.listen_to (warning);
+	text_receiver.listen_to (error);
+	text_receiver.listen_to (fatal);
 
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
 	if (g_getenv ("BOOST_DEBUG")) {

@@ -66,14 +66,17 @@ LogReceiver::receive (Transmitter::Channel chn, const char * str)
 	const char *prefix = "";
 
 	switch (chn) {
-	case Transmitter::Error:
-		prefix = "[ERROR]: ";
-		break;
+	case Transmitter::Debug:
+		/* ignore */
+		return;
 	case Transmitter::Info:
 		prefix = "[INFO]: ";
 		break;
 	case Transmitter::Warning:
 		prefix = "[WARNING]: ";
+		break;
+	case Transmitter::Error:
+		prefix = "[ERROR]: ";
 		break;
 	case Transmitter::Fatal:
 		prefix = "[FATAL]: ";
@@ -275,10 +278,10 @@ int main (int argc, char **argv)
 
 	pthread_setcanceltype (PTHREAD_CANCEL_ASYNCHRONOUS, 0);
 
-	log_receiver.listen_to (error);
 	log_receiver.listen_to (info);
-	log_receiver.listen_to (fatal);
 	log_receiver.listen_to (warning);
+	log_receiver.listen_to (error);
+	log_receiver.listen_to (fatal);
 
 	setup_gtk_ardour_enums ();
 
