@@ -639,6 +639,15 @@ style "error_message" = "medium_text"
 	base[NORMAL] = @bases
 }
 
+style "warning_message" = "medium_text"
+{
+	fg[ACTIVE] = @bright_color
+	fg[NORMAL] = @bright_color
+	bg[ACTIVE]   = @bases
+	bg[NORMAL]   = @bases
+	base[NORMAL] = @bases
+}
+
 style "info_message" = "medium_text"
 {
 	fg[ACTIVE]   = @contrasting_indicator
@@ -648,10 +657,10 @@ style "info_message" = "medium_text"
 	base[NORMAL] = @bases
 }
 
-style "warning_message" = "medium_text"
+style "debug_message" = "medium_text"
 {
-	fg[ACTIVE] = @bright_color
-	fg[NORMAL] = @bright_color
+	fg[ACTIVE]   = @texts
+	fg[NORMAL]   = @texts
 	bg[ACTIVE]   = @bases
 	bg[NORMAL]   = @bases
 	base[NORMAL] = @bases
@@ -1094,10 +1103,11 @@ widget "*MixerAutomationModeButton.*" style:highest "very_small_button"
 widget "*MixerAutomationPlaybackButton*" style:highest "very_small_button"
 widget "*MixerAutomationPlaybackButton.*" style:highest "very_small_button"
 widget "*ShuttleControl" style:highest "shuttle_control"
-widget "*ErrorMessage" style:highest "error_message"
 widget "*FatalMessage" style:highest "fatal_message"
-widget "*InfoMessage" style:highest "info_message"
+widget "*ErrorMessage" style:highest "error_message"
 widget "*WarningMessage" style:highest "warning_message"
+widget "*InfoMessage" style:highest "info_message"
+widget "*DebugMessage" style:highest "debug_message"
 
 widget "*big clock" style:highest "massive_clock"
 widget "*selection clock" style:highest "small_clock"
