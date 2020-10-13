@@ -162,6 +162,7 @@ UI::load_rcfile (string path, bool themechange)
 	static Glib::RefPtr<Style>* error_style   = 0;
 	static Glib::RefPtr<Style>* warning_style = 0;
 	static Glib::RefPtr<Style>* info_style    = 0;
+	static Glib::RefPtr<Style>* debug_style    = 0;
 
 	if (path.length() == 0) {
 		return -1;
@@ -196,6 +197,7 @@ UI::load_rcfile (string path, bool themechange)
 	Label error_widget;
 	Label warning_widget;
 	Label info_widget;
+	Label debug_widget;
 	RefPtr<Gtk::Style> style;
 	RefPtr<TextBuffer> buffer (errors->text().get_buffer());
 
@@ -203,15 +205,18 @@ UI::load_rcfile (string path, bool themechange)
 	box.pack_start (error_widget);
 	box.pack_start (warning_widget);
 	box.pack_start (info_widget);
+	box.pack_start (debug_widget);
 
-	error_ptag = buffer->create_tag();
-	error_mtag = buffer->create_tag();
 	fatal_ptag = buffer->create_tag();
 	fatal_mtag = buffer->create_tag();
+	error_ptag = buffer->create_tag();
+	error_mtag = buffer->create_tag();
 	warning_ptag = buffer->create_tag();
 	warning_mtag = buffer->create_tag();
 	info_ptag = buffer->create_tag();
 	info_mtag = buffer->create_tag();
+	debug_ptag = buffer->create_tag();
+	debug_mtag = buffer->create_tag();
 
 	fatal_widget.set_name ("FatalMessage");
 	delete fatal_style;
@@ -270,15 +275,27 @@ UI::load_rcfile (string path, bool themechange)
 	info_mtag->property_foreground_gdk().set_value((*info_style)->get_fg(STATE_NORMAL));
 	info_mtag->property_background_gdk().set_value((*info_style)->get_bg(STATE_NORMAL));
 
+	debug_widget.set_name ("DebugMessage");
+	delete debug_style;
+	debug_style = new Glib::RefPtr<Style> (Glib::wrap (gtk_rc_get_style (reinterpret_cast<GtkWidget*> (debug_widget.gobj())), true));
+
+	debug_ptag->property_font_desc().set_value((*debug_style)->get_font());
+	debug_ptag->property_foreground_gdk().set_value((*debug_style)->get_fg(STATE_ACTIVE));
+	debug_ptag->property_background_gdk().set_value((*debug_style)->get_bg(STATE_ACTIVE));
+	debug_mtag->property_font_desc().set_value((*debug_style)->get_font());
+	debug_mtag->property_foreground_gdk().set_value((*debug_style)->get_fg(STATE_NORMAL));
+	debug_mtag->property_background_gdk().set_value((*debug_style)->get_bg(STATE_NORMAL));
+
 	return 0;
 }
 
 void
 UI::run (Receiver &old_receiver)
 {
-	_receiver.listen_to (error);
+	_receiver.listen_to (debug);
 	_receiver.listen_to (info);
 	_receiver.listen_to (warning);
+	_receiver.listen_to (error);
 	_receiver.listen_to (fatal);
 
 	/* stop the old receiver (text/console) once we hit the first idle */
@@ -572,6 +589,9 @@ UI::receive (Transmitter::Channel chn, const char *str)
 		case Transmitter::Info:
 			error_stack.push_back (string (X_("INFO: ")) + str);
 			break;
+		case Transmitter::Debug:
+			error_stack.push_back (string (X_("Debug: ")) + str);
+			break;
 		case Transmitter::Throw:
 			error_stack.push_back (string (X_("THROW: ")) + str);
 			break;
@@ -618,17 +638,23 @@ UI::process_error_message (Transmitter::Channel chn, const char *str)
 		mtag = error_mtag;
 		prefix_len = 9;
 		break;
+	case Transmitter::Warning:
+		prefix = "[WARNING]: ";
+		ptag = warning_ptag;
+		mtag = warning_mtag;
+		prefix_len = 11;
+		break;
 	case Transmitter::Info:
 		prefix = "[INFO]: ";
 		ptag = info_ptag;
 		mtag = info_mtag;
 		prefix_len = 8;
 		break;
-	case Transmitter::Warning:
-		prefix = "[WARNING]: ";
-		ptag = warning_ptag;
-		mtag = warning_mtag;
-		prefix_len = 11;
+	case Transmitter::Debug:
+		prefix = "[DEBUG]: ";
+		ptag = debug_ptag;
+		mtag = debug_mtag;
+		prefix_len = 9;
 		break;
 	default:
 		/* no choice but to use text/console output here */

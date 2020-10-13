@@ -33,6 +33,9 @@ protected:
 		case Transmitter::Error:
 			prefix = ": [ERROR]: ";
 			break;
+		case Transmitter::Debug:
+			/* ignore */
+			return;
 		case Transmitter::Info:
 			/* ignore */
 			return;

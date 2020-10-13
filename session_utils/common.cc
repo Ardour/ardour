@@ -20,11 +20,14 @@
 #include <cstdlib>
 #include <glibmm.h>
 
+
 #include "pbd/debug.h"
 #include "pbd/event_loop.h"
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/pthread_utils.h"
+#include "pbd/receiver.h"
+#include "pbd/transmitter.h"
 
 #include "ardour/audioengine.h"
 #include "ardour/filename_extensions.h"
@@ -37,41 +40,46 @@ using namespace ARDOUR;
 using namespace PBD;
 
 static const char* localedir = LOCALEDIR;
-TestReceiver test_receiver;
 
-void
-TestReceiver::receive (Transmitter::Channel chn, const char * str)
+class LogReceiver : public Receiver
 {
-	const char *prefix = "";
+protected:
+	void receive (Transmitter::Channel chn, const char * str) {
+		const char *prefix = "";
+		switch (chn) {
+			case Transmitter::Debug:
+				/* ignore */
+				return;
+			case Transmitter::Info:
+				/* ignore */
+				return;
+			case Transmitter::Warning:
+				prefix = ": [WARNING]: ";
+				break;
+			case Transmitter::Error:
+				prefix = ": [ERROR]: ";
+				break;
+			case Transmitter::Fatal:
+				prefix = ": [FATAL]: ";
+				break;
+			case Transmitter::Throw:
+				/* this isn't supposed to happen */
+				abort ();
+		}
 
-	switch (chn) {
-	case Transmitter::Error:
-		prefix = ": [ERROR]: ";
-		break;
-	case Transmitter::Info:
-		/* ignore */
-		return;
-	case Transmitter::Warning:
-		prefix = ": [WARNING]: ";
-		break;
-	case Transmitter::Fatal:
-		prefix = ": [FATAL]: ";
-		break;
-	case Transmitter::Throw:
-		/* this isn't supposed to happen */
-		abort ();
+		/* note: iostreams are already thread-safe: no external
+			 lock required.
+			 */
+
+		std::cout << prefix << str << std::endl;
+
+		if (chn == Transmitter::Fatal) {
+			::exit (9);
+		}
 	}
+};
 
-	/* note: iostreams are already thread-safe: no external
-	   lock required.
-	*/
-
-	std::cout << prefix << str << std::endl;
-
-	if (chn == Transmitter::Fatal) {
-		::exit (9);
-	}
-}
+LogReceiver log_receiver;
 
 /* temporarily required due to some code design confusion (Feb 2014) */
 
@@ -116,10 +124,9 @@ SessionUtils::init (bool print_log)
 	SessionEvent::create_per_thread_pool ("util", 512);
 
 	if (print_log) {
-		test_receiver.listen_to (error);
-		test_receiver.listen_to (info);
-		test_receiver.listen_to (fatal);
-		test_receiver.listen_to (warning);
+		log_receiver.listen_to (warning);
+		log_receiver.listen_to (error);
+		log_receiver.listen_to (fatal);
 	}
 }
 

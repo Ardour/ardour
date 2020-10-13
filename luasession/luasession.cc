@@ -67,14 +67,17 @@ protected:
 		const char* prefix = "";
 
 		switch (chn) {
-			case Transmitter::Error:
-				prefix = "[ERROR]: ";
-				break;
+			case Transmitter::Debug:
+				/* ignore */
+				return;
 			case Transmitter::Info:
 				/* ignore */
 				return;
 			case Transmitter::Warning:
 				prefix = "[WARNING]: ";
+				break;
+			case Transmitter::Error:
+				prefix = "[ERROR]: ";
 				break;
 			case Transmitter::Fatal:
 				prefix = "[FATAL]: ";
@@ -150,10 +153,9 @@ init ()
 
 	static LuaReceiver lua_receiver;
 
-	lua_receiver.listen_to (error);
-	lua_receiver.listen_to (info);
-	lua_receiver.listen_to (fatal);
 	lua_receiver.listen_to (warning);
+	lua_receiver.listen_to (error);
+	lua_receiver.listen_to (fatal);
 }
 
 static void

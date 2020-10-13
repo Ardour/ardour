@@ -61,10 +61,9 @@ load_session (string dir, string state)
 {
 	SessionEvent::create_per_thread_pool ("test", 512);
 
-	test_receiver.listen_to (error);
-	test_receiver.listen_to (info);
-	test_receiver.listen_to (fatal);
 	test_receiver.listen_to (warning);
+	test_receiver.listen_to (error);
+	test_receiver.listen_to (fatal);
 
 	AudioEngine* engine = AudioEngine::create ();
 

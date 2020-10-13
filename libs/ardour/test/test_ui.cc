@@ -43,10 +43,9 @@ TestUI::TestUI ()
 
 	SessionEvent::create_per_thread_pool ("test", 512);
 
-	m_test_receiver.listen_to (PBD::error);
-	m_test_receiver.listen_to (PBD::info);
-	m_test_receiver.listen_to (PBD::fatal);
 	m_test_receiver.listen_to (PBD::warning);
+	m_test_receiver.listen_to (PBD::error);
+	m_test_receiver.listen_to (PBD::fatal);
 
 	/* We can't use VSTs here as we have a stub instead of the
 	   required bits in gtk2_ardour.

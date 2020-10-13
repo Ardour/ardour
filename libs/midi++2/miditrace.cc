@@ -22,10 +22,12 @@
 #include "pbd/error.h"
 #include "pbd/textreceiver.h"
 
-Transmitter error (Transmitter::Error);
+Transmitter debug (Transmitter::Debug);
 Transmitter info (Transmitter::Info);
 Transmitter warning (Transmitter::Warning);
+Transmitter error (Transmitter::Error);
 Transmitter fatal (Transmitter::Fatal);
+
 TextReceiver text_receiver ("mmctest");
 
 #include "midi++/port.h"
@@ -58,10 +60,10 @@ main (int argc, char *argv[])
 {
 	byte buf[1];
 
-	text_receiver.listen_to (error);
 	text_receiver.listen_to (info);
-	text_receiver.listen_to (fatal);
 	text_receiver.listen_to (warning);
+	text_receiver.listen_to (error);
+	text_receiver.listen_to (fatal);
 
 	if (setup_midi ()) {
 		exit (1);

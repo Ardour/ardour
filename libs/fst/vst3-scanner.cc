@@ -52,14 +52,17 @@ protected:
 	void receive (Transmitter::Channel chn, const char * str) {
 		const char *prefix = "";
 		switch (chn) {
-			case Transmitter::Error:
-				prefix = "[ERROR]: ";
+			case Transmitter::Debug:
+				/* ignore */
 				break;
 			case Transmitter::Info:
 				prefix = "[Info]: ";
 				break;
 			case Transmitter::Warning:
 				prefix = "[WARNING]: ";
+				break;
+			case Transmitter::Error:
+				prefix = "[ERROR]: ";
 				break;
 			case Transmitter::Fatal:
 				prefix = "[FATAL]: ";
@@ -191,10 +194,10 @@ main (int argc, char **argv)
 	PBD::init();
 
 	if (print_log) {
-		log_receiver.listen_to (error);
 		log_receiver.listen_to (info);
-		log_receiver.listen_to (fatal);
 		log_receiver.listen_to (warning);
+		log_receiver.listen_to (error);
+		log_receiver.listen_to (fatal);
 	}
 
 	bool err = false;

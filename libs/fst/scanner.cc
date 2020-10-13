@@ -76,14 +76,17 @@ class DummyReceiver : public Receiver {
 		void receive (Transmitter::Channel chn, const char * str) {
 			const char *prefix = "";
 			switch (chn) {
-				case Transmitter::Error:
-					prefix = "[ERROR]: ";
-					break;
+				case Transmitter::Debug:
+					/* ignore */
+					return;
 				case Transmitter::Info:
 					/* ignore */
 					return;
 				case Transmitter::Warning:
 					prefix = "[WARNING]: ";
+					break;
+				case Transmitter::Error:
+					prefix = "[ERROR]: ";
 					break;
 				case Transmitter::Fatal:
 					prefix = "[FATAL]: ";
@@ -130,10 +133,9 @@ int main (int argc, char **argv) {
 
 	PBD::init();
 
-	dummy_receiver.listen_to (error);
-	dummy_receiver.listen_to (info);
-	dummy_receiver.listen_to (fatal);
 	dummy_receiver.listen_to (warning);
+	dummy_receiver.listen_to (error);
+	dummy_receiver.listen_to (fatal);
 
 	std::vector<VSTInfo *> *infos = 0;
 

@@ -18,10 +18,10 @@ main ()
 
 	if (!PBD::init ()) return 1;
 
-	text_receiver.listen_to (PBD::error);
 	text_receiver.listen_to (PBD::info);
-	text_receiver.listen_to (PBD::fatal);
 	text_receiver.listen_to (PBD::warning);
+	text_receiver.listen_to (PBD::error);
+	text_receiver.listen_to (PBD::fatal);
 
 	ScalarPropertiesTest::make_property_quarks ();
 

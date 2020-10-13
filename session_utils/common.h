@@ -19,17 +19,8 @@
 #ifndef _session_utils_common_h_
 #define _session_utils_common_h_
 
-#include "pbd/transmitter.h"
-#include "pbd/receiver.h"
-
 #include "ardour/ardour.h"
 #include "ardour/session.h"
-
-class TestReceiver : public Receiver
-{
-  protected:
-    void receive (Transmitter::Channel chn, const char * str);
-};
 
 namespace SessionUtils {
 

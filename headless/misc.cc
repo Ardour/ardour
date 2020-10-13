@@ -28,14 +28,17 @@ TestReceiver::receive (Transmitter::Channel chn, const char * str)
 	const char *prefix = "";
 
 	switch (chn) {
-	case Transmitter::Error:
-		prefix = ": [ERROR]: ";
-		break;
+	case Transmitter::Debug:
+		/* ignore */
+		return;
 	case Transmitter::Info:
 		/* ignore */
 		return;
 	case Transmitter::Warning:
 		prefix = ": [WARNING]: ";
+		break;
+	case Transmitter::Error:
+		prefix = ": [ERROR]: ";
 		break;
 	case Transmitter::Fatal:
 		prefix = ": [FATAL]: ";

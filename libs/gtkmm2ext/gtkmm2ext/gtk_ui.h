@@ -179,14 +179,16 @@ private:
 	Gtk::Tooltips *tips;
 #endif
 	TextViewer *errors;
-	Glib::RefPtr<Gtk::TextBuffer::Tag> error_ptag;
-	Glib::RefPtr<Gtk::TextBuffer::Tag> error_mtag;
 	Glib::RefPtr<Gtk::TextBuffer::Tag> fatal_ptag;
 	Glib::RefPtr<Gtk::TextBuffer::Tag> fatal_mtag;
-	Glib::RefPtr<Gtk::TextBuffer::Tag> info_ptag;
-	Glib::RefPtr<Gtk::TextBuffer::Tag> info_mtag;
+	Glib::RefPtr<Gtk::TextBuffer::Tag> error_ptag;
+	Glib::RefPtr<Gtk::TextBuffer::Tag> error_mtag;
 	Glib::RefPtr<Gtk::TextBuffer::Tag> warning_ptag;
 	Glib::RefPtr<Gtk::TextBuffer::Tag> warning_mtag;
+	Glib::RefPtr<Gtk::TextBuffer::Tag> info_ptag;
+	Glib::RefPtr<Gtk::TextBuffer::Tag> info_mtag;
+	Glib::RefPtr<Gtk::TextBuffer::Tag> debug_ptag;
+	Glib::RefPtr<Gtk::TextBuffer::Tag> debug_mtag;
 
 	static void signal_pipe_callback (void *, gint, GdkInputCondition);
 	void process_error_message (Transmitter::Channel, const char *);
