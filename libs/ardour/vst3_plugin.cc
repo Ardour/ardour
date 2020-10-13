@@ -2520,13 +2520,19 @@ VST3PI::getContextInfoValue (int32& value, FIDString id)
 		}
 	} else if (0 == strcmp (id, ContextInfo::kMute)) {
 		boost::shared_ptr<MuteControl> ac = s->mute_control ();
-		psl_subscribe_to (ac, id);
-		return ac->muted_by_self ();
+		if (ac) {
+			psl_subscribe_to (ac, id);
+			value = ac->muted_by_self ();
+		} else {
+			value = 0;
+		}
 	} else if (0 == strcmp (id, ContextInfo::kSolo)) {
 		boost::shared_ptr<SoloControl> ac = s->solo_control ();
 		if (ac) {
 			psl_subscribe_to (ac, id);
 			value = ac->self_soloed ();
+		} else {
+			value = 0;
 		}
 	} else {
 		DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::getContextInfoValue<int> unsupported ID %1\n", id));
@@ -2665,9 +2671,15 @@ VST3PI::setContextInfoValue (FIDString id, int32 value)
 	} else if (0 == strcmp (id, ContextInfo::kMultiSelect)) {
 		//_add_to_selection = value != 0;
 	} else if (0 == strcmp (id, ContextInfo::kMute)) {
-		s->mute_control()->set_value (value != 0, Controllable::NoGroup);
+		boost::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
+		if (ac) {
+			ac->set_value (value != 0 ? 1 : 0, Controllable::NoGroup);
+		}
 	} else if (0 == strcmp (id, ContextInfo::kSolo)) {
-		s->solo_control()->set_value (value != 0, Controllable::NoGroup);
+		boost::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
+		if (ac) {
+			ac->set_value (value != 0 ? 1 : 0, Controllable::NoGroup);
+		}
 	} else {
 		DEBUG_TRACE (DEBUG::VST3Callbacks, "VST3PI::setContextInfoValue<int>: unsupported ID\n");
 		return kNotImplemented;
@@ -2764,17 +2776,17 @@ VST3PI::psl_stripable_property_changed (PBD::PropertyChange const& what_changed)
 	DEBUG_TRACE (DEBUG::VST3Callbacks, "VST3PI::psl_stripable_property_changed v2\n");
 
 	if (what_changed.contains (Properties::selected)) {
-		nfo2->notifyContextInfoChange ("ContextInfo::kSelected");
-		nfo2->notifyContextInfoChange ("ContextInfo::kFocused"); // XXX
+		nfo2->notifyContextInfoChange (ContextInfo::kSelected);
+		nfo2->notifyContextInfoChange (ContextInfo::kFocused); // XXX
 	}
 	if (what_changed.contains (Properties::hidden)) {
-		nfo2->notifyContextInfoChange ("ContextInfo::kVisibility");
+		nfo2->notifyContextInfoChange (ContextInfo::kVisibility);
 	}
 	if (what_changed.contains (Properties::name)) {
-		nfo2->notifyContextInfoChange ("ContextInfo::kName");
+		nfo2->notifyContextInfoChange (ContextInfo::kName);
 	}
 	if (what_changed.contains (Properties::color)) {
-		nfo2->notifyContextInfoChange ("ContextInfo::kColor");
+		nfo2->notifyContextInfoChange (ContextInfo::kColor);
 	}
 }
 
