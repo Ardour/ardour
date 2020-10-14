@@ -239,7 +239,7 @@
     <ColorAlias name="midi sysex outline" alias="theme:contrasting alt"/>
     <ColorAlias name="midi track base" alias="widget:green darker"/>
     <ColorAlias name="mixer strip button: fill" alias="widget:bg"/>
-    <ColorAlias name="mixer strip button: fill active" alias="theme:bg1"/>
+    <ColorAlias name="mixer strip button: fill active" alias="alert:orange"/>
     <ColorAlias name="mixer strip button: led active" alias="alert:green"/>
     <ColorAlias name="mixer strip name button: fill active" alias="theme:bg2"/>
     <ColorAlias name="mixer strip name button: led active" alias="alert:green"/>
