@@ -117,7 +117,7 @@ FPUTest::avxTest ()
 	mix_buffers_no_gain   = x86_sse_avx_mix_buffers_no_gain;
 	copy_vector           = x86_sse_avx_copy_vector;
 
-	//run ();
+	run ();
 }
 
 void
