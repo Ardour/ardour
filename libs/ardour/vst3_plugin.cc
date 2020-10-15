@@ -2235,8 +2235,9 @@ VST3PI::load_state (RAMStream& stream)
 			}
 		}
 		else if (is_equal_ID (i->_id, Vst::getChunkID (Vst::kControllerState))) {
-			ROMStream s (stream, i->_offset, i->_size);
-			tresult res = _controller->setState (&s);
+			assert (FUnknownPtr<Vst::IEditController> (_component) == 0);
+			stream.seek (i->_offset, IBStream::kIBSeekSet, &seek_result);
+			tresult res = _controller->setState (&stream);
 			if (!(res == kResultOk || res == kNotImplemented)) {
 				DEBUG_TRACE (DEBUG::VST3Config, "VST3PI::load_state: failed to restore controller state\n");
 				rv = false;
