@@ -500,6 +500,8 @@ public:
 
 	int wipe ();
 
+	timepos_t current_end () const;
+	timepos_t current_start () const;
 	samplepos_t current_end_sample () const;
 	samplepos_t current_start_sample () const;
 	/** "actual" sample rate of session, set by current audioengine rate, pullup/down etc. */
@@ -1139,8 +1141,8 @@ public:
 	/* temporary hacks to allow selection to be pushed from GUI into backend.
 	   Whenever we move the selection object into libardour, these will go away.
 	 */
-	void set_range_selection (samplepos_t start, samplepos_t end);
-	void set_object_selection (samplepos_t start, samplepos_t end);
+	void set_range_selection (Temporal::timepos_t const & start, Temporal::timepos_t const & end);
+	void set_object_selection (Temporal::timepos_t const & start, Temporal::timepos_t const & end);
 	void clear_range_selection ();
 	void clear_object_selection ();
 

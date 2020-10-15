@@ -6511,6 +6511,18 @@ Session::current_end_sample () const
 	return _session_range_location ? _session_range_location->end().samples() : 0;
 }
 
+timepos_t
+Session::current_start () const
+{
+	return _session_range_location ? _session_range_location->start() : timepos_t::max (Temporal::AudioTime);
+}
+
+timepos_t
+Session::current_end () const
+{
+	return _session_range_location ? _session_range_location->end() : timepos_t::max (Temporal::AudioTime);
+}
+
 void
 Session::step_edit_status_change (bool yn)
 {
@@ -7097,15 +7109,15 @@ Session::reconnect_ltc_output ()
 }
 
 void
-Session::set_range_selection (samplepos_t start, samplepos_t end)
+Session::set_range_selection (timepos_t const & start, timepos_t const & end)
 {
-	_range_selection = Temporal::Range (timepos_t (start), timepos_t (end));
+	_range_selection = Temporal::Range (start, end);
 }
 
 void
-Session::set_object_selection (samplepos_t start, samplepos_t end)
+Session::set_object_selection (timepos_t const & start, timepos_t const & end)
 {
-	_object_selection = Temporal::Range (timepos_t (start), timepos_t (end));
+	_object_selection = Temporal::Range (start, end);
 }
 
 void
