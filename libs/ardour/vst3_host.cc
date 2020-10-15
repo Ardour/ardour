@@ -389,6 +389,19 @@ HostApplication::queryInterface (const char* _iid, void** obj)
 		return kResultOk;
 	}
 
+#if 1
+	/* Presonus specifies IContextInfoProvider as extension to IComponentHandler.
+	 * However softube's console queries support for this during initialize()
+	 * and tests host-application support.
+	 */
+	if (FUnknownPrivate::iidEqual (_iid, Presonus::IContextInfoProvider::iid) ||
+	    FUnknownPrivate::iidEqual (_iid, Presonus::IContextInfoProvider2::iid) ||
+	    FUnknownPrivate::iidEqual (_iid, Presonus::IContextInfoProvider3::iid)) {
+		*obj = NULL; // really IComponentHandler* (plugin->_plug)
+		return kResultOk;
+	}
+#endif
+
 #ifndef VST3_SCANNER_APP
 	if (DEBUG_ENABLED(PBD::DEBUG::VST3Config)) {
 		char fuid[33];
