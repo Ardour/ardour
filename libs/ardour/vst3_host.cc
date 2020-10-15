@@ -26,6 +26,11 @@
 
 #include "ardour/vst3_host.h"
 
+#ifndef VST3_SCANNER_APP
+#include "pbd/compose.h"
+#include "ardour/debug.h"
+#endif
+
 using namespace Steinberg;
 
 DEF_CLASS_IID (FUnknown)
@@ -383,6 +388,14 @@ HostApplication::queryInterface (const char* _iid, void** obj)
 	if (_plug_interface_support && _plug_interface_support->queryInterface (Vst::IHostApplication::iid, obj) == kResultTrue) {
 		return kResultOk;
 	}
+
+#ifndef VST3_SCANNER_APP
+	if (DEBUG_ENABLED(PBD::DEBUG::VST3Config)) {
+		char fuid[33];
+		FUID::fromTUID (_iid).toString (fuid);
+		DEBUG_TRACE (PBD::DEBUG::VST3Config, string_compose ("HostApplication::queryInterface not supported: %1\n", fuid));
+	}
+#endif
 
 	*obj = nullptr;
 	return kResultFalse;

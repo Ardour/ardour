@@ -45,6 +45,7 @@ def build(bld):
         obj.target    = 'ardour-vst3-scanner'
         obj.includes  = [ '../pbd/', '../ardour/', '../vst3/', '..' ]
         obj.defines   = [
+            'VST3_SCANNER_APP',
             'VERSIONSTRING="' + str(bld.env['VERSION']) + '"',
             'PACKAGE="' + I18N_PACKAGE + str(bld.env['MAJOR']) + '"',
             'LIBARDOUR="' + bld.env['lwrcase_dirname'] + '"',

@@ -987,6 +987,14 @@ VST3PI::VST3PI (boost::shared_ptr<ARDOUR::VST3PluginModule> m, std::string uniqu
 		throw failed_constructor ();
 	}
 
+#ifndef NDEBUG
+	if (DEBUG_ENABLED(DEBUG::VST3Config)) {
+		char fuid[33];
+		_fuid.toString (fuid);
+		DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI create instance %1\n", fuid));
+	}
+#endif
+
 	if (factory->createInstance (_fuid.toTUID (), Vst::IComponent::iid, (void**)&_component) != kResultTrue) {
 		throw failed_constructor ();
 	}
@@ -1285,6 +1293,12 @@ VST3PI::queryInterface (const TUID _iid, void** obj)
 		return kResultOk;
 	}
 #endif
+
+	if (DEBUG_ENABLED(DEBUG::VST3Config)) {
+		char fuid[33];
+		FUID::fromTUID (_iid).toString (fuid);
+		DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::queryInterface not supported: %1\n", fuid));
+	}
 
 	*obj = nullptr;
 	return kNoInterface;
