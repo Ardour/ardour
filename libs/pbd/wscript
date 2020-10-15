@@ -152,7 +152,7 @@ def build(bld):
                           'LIBPBD_MAJOR_VERSION' : LIBPBD_MAJOR_VERSION})
 
     # Make signals_generated.h using signals.py
-    bld(rule = sys.executable + ' ${SRC} ${TGT}', source = 'pbd/signals.py', target = 'pbd/signals_generated.h')
+    bld(rule = sys.executable + ' ${SRC} ${TGT}', source = 'pbd/signals.py', target = 'pbd/signals_generated.h', name="pbdsignals")
 
     # Library
     if bld.is_defined ('INTERNAL_SHARED_LIBS'):
@@ -171,6 +171,7 @@ def build(bld):
     obj.includes     = ['.']
     obj.name         = 'libpbd'
     obj.target       = 'pbd'
+    obj.use          = 'pbdsignals'
     obj.uselib       = 'GLIBMM SIGCPP XML UUID SNDFILE GIOMM ARCHIVE CURL XML'
     if sys.platform == 'darwin':
         TaskGen.task_gen.mappings['.mm'] = TaskGen.task_gen.mappings['.cc']
