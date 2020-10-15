@@ -616,7 +616,7 @@ def build(bld):
 
         load_save_session.includes  = obj.includes
         load_save_session.includes.append ('test')
-        load_save_session.uselib    = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD',
+        load_save_session.uselib    = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD', 'OSX',
                              'SAMPLERATE','XML','LRDF','COREAUDIO', 'FFTW3F']
         load_save_session.use       = ['libpbd','libmidipp','libardour']
         load_save_session.name      = 'libardour-load-save-session'
@@ -658,7 +658,7 @@ def create_ardour_test_program(bld, includes, name, target, sources):
     testobj              = bld(features = 'cxx cxxprogram')
     testobj.includes     = includes + ['test', '../pbd', '..']
     testobj.source       = sources
-    testobj.uselib       = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD', 'FFTW3F',
+    testobj.uselib       = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD', 'FFTW3F', 'OSX',
                             'SAMPLERATE','XML','LRDF','COREAUDIO','TAGLIB','VAMPSDK','VAMPHOSTSDK','RUBBERBAND']
     testobj.use          = ['libpbd','libmidipp','libevoral',
                             'libaudiographer','libardour','testcommon']
