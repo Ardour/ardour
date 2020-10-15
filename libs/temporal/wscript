@@ -30,6 +30,7 @@ temporal_sources = [
     'enums.cc',
     'tempo.cc',
     'time.cc',
+    'time_converter.cc',
     'timeline.cc',
     'superclock.cc'
 ]
