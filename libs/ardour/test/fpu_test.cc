@@ -74,8 +74,10 @@ FPUTest::run (size_t align_max)
 			compare (string_compose ("Copy Vector not aligned off: %1 cnt: %2", off, cnt), cnt);
 
 			/* find_peaks */
-			float pk_test_max;
-			float pk_comp_max;
+			pk_test = _test1[off];
+			pk_comp = _comp1[off];
+			float pk_test_max = _test1[off];
+			float pk_comp_max = _comp1[off];
 			find_peaks (&_test1[off], cnt, &pk_test, &pk_test_max);
 			default_find_peaks (&_comp1[off], cnt, &pk_comp, &pk_comp_max);
 			CPPUNIT_ASSERT_MESSAGE (string_compose ("Find peaks not aligned off: %1 cnt: %2", off, cnt), fabsf (pk_test - pk_comp) < 2e-6 && fabsf (pk_test_max - pk_comp_max) < 2e-6);
@@ -127,7 +129,7 @@ void
 FPUTest::sseTest ()
 {
 	PBD::FPU* fpu = PBD::FPU::instance ();
-	if (!fpu->has_avx ()) {
+	if (!fpu->has_sse ()) {
 		printf ("SSE is not available at run-time\n");
 		return;
 	}
