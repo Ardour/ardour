@@ -5198,7 +5198,7 @@ msgstr "Supprimer les régions inutilisées"
 
 #: editor_actions.cc:683
 msgid "Import PT session"
-msgstr "Importer une région PT"
+msgstr "Importer une session PT"
 
 #: editor_actions.cc:691
 msgid "Import to Source List..."
