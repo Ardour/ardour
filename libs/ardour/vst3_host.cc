@@ -385,7 +385,7 @@ HostApplication::queryInterface (const char* _iid, void** obj)
 	QUERY_INTERFACE (_iid, obj, FUnknown::iid, IHostApplication)
 	QUERY_INTERFACE (_iid, obj, IHostApplication::iid, IHostApplication)
 
-	if (_plug_interface_support && _plug_interface_support->queryInterface (Vst::IHostApplication::iid, obj) == kResultTrue) {
+	if (_plug_interface_support && _plug_interface_support->queryInterface (_iid, obj) == kResultTrue) {
 		return kResultOk;
 	}
 
