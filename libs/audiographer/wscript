@@ -127,6 +127,7 @@ def build(bld):
         obj.use          = 'libaudiographer'
         obj.uselib       = 'CPPUNIT GLIBMM SAMPLERATE SNDFILE FFTW3F VAMPSDK VAMPHOSTSDK'
         obj.target       = 'run-tests'
+        obj.name         = 'audiographer-unit-tests'
         obj.install_path = ''
 
 def shutdown():
