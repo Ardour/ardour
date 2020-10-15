@@ -211,8 +211,6 @@ static std::string vst3_bindir () {
 	return "i386-linux";
 # elif defined __aarch64__
 	return "aarch64-linux";
-# elif defined __arm__ && defined ARM_NEON_SUPPORT
-	return "armv7hl-linux";
 # elif defined __arm__
 	return "armv7l-linux";
 #else
