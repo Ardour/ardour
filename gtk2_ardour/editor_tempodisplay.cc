@@ -208,6 +208,8 @@ Editor::tempometric_position_changed (const PropertyChange& /*ignored*/)
 	double max_tempo = 0.0;
 	double min_tempo = DBL_MAX;
 
+#warning NUTEMPO needs new tempo map API
+#if 0
 	for (Marks::iterator x = metric_marks.begin(); x != metric_marks.end(); ++x) {
 		TempoMarker* tempo_marker;
 		MeterMarker* meter_marker;
@@ -282,6 +284,7 @@ Editor::tempometric_position_changed (const PropertyChange& /*ignored*/)
 	update_tempo_based_rulers ();
 
 	maybe_draw_grid_lines ();
+#endif
 }
 
 void
@@ -296,7 +299,7 @@ Editor::redisplay_grid (bool immediate_redraw)
 		update_tempo_based_rulers ();
 
 		update_grid();
-		
+
 	} else {
 		Glib::signal_idle().connect (sigc::bind_return (sigc::bind (sigc::mem_fun (*this, &Editor::redisplay_grid), true), false));
 	}

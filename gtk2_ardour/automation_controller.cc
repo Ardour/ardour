@@ -215,13 +215,13 @@ void
 AutomationController::start_touch()
 {
 	_grabbed = true;
-	_controllable->start_touch (_controllable->session().transport_sample());
+	_controllable->start_touch (timepos_t (_controllable->session().transport_sample()));
 }
 
 void
 AutomationController::end_touch ()
 {
-	_controllable->stop_touch (_controllable->session().transport_sample());
+	_controllable->stop_touch (timepos_t (_controllable->session().transport_sample()));
 	if (_grabbed) {
 		_grabbed = false;
 		display_effective_value ();

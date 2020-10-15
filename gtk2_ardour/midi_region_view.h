@@ -210,10 +210,10 @@ public:
 	void   extend_selection ();
 
 	Temporal::Beats earliest_in_selection ();
-	void move_selection(Temporal::Beats const & dx, double dy, double cumulative_dy);
-	void note_dropped (NoteBase* ev, Temporal::Beats const & d_qn, int8_t d_note, bool copy);
+	void move_selection(Temporal::timecnt_t const & dx, double dy, double cumulative_dy);
+	void note_dropped (NoteBase* ev, Temporal::timecnt_t const & d_qn, int8_t d_note, bool copy);
 	NoteBase* copy_selection (NoteBase* primary);
-	void move_copies(Temporal::Beats const & dx_qn, double dy, double cumulative_dy);
+	void move_copies(Temporal::timecnt_t const & dx_qn, double dy, double cumulative_dy);
 
 	void select_notes (std::list<Evoral::event_id_t>, bool allow_audition);
 	void select_matching_notes (uint8_t notenum, uint16_t channel_mask, bool add, bool extend);
@@ -429,7 +429,7 @@ public:
 	void trim_note(NoteBase* ev, ARDOUR::MidiModel::TimeType start_delta,
 	               ARDOUR::MidiModel::TimeType end_delta);
 
-	void update_drag_selection (samplepos_t start, samplepos_t end, double y0, double y1, bool extend);
+	void update_drag_selection (Temporal::timepos_t const & start, Temporal::timepos_t const & end, double y0, double y1, bool extend);
 	void update_vertical_drag_selection (double last_y, double y, bool extend);
 
 	void add_to_selection (NoteBase*);

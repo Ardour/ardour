@@ -110,13 +110,13 @@ public:
 	/** Called when a front trim is about to begin */
 	virtual void trim_front_starting () {}
 
-	bool trim_front (samplepos_t, bool, const int32_t sub_num);
+	bool trim_front (Temporal::timepos_t const &, bool);
 
 	/** Called when a start trim has finished */
 	virtual void trim_front_ending () {}
 
-	bool trim_end (samplepos_t, bool, const int32_t sub_num);
-	void move_contents (ARDOUR::sampleoffset_t);
+	bool trim_end (Temporal::timepos_t const &, bool);
+	void move_contents (Temporal::timecnt_t const &);
 	virtual void thaw_after_trim ();
 
 	void set_silent_frames (const ARDOUR::AudioIntervalResult&, double threshold);

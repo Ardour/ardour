@@ -505,7 +505,7 @@ public:
 	                                    Temporal::RoundMode    direction = Temporal::RoundNearest,
 	                                    ARDOUR::SnapPref     gpref = ARDOUR::SnapToAny_Visual) = 0;
 
-	virtual void set_snapped_cursor_position (samplepos_t pos) = 0;
+	virtual void set_snapped_cursor_position (Temporal::timepos_t const & pos) = 0;
 
 	virtual void get_regions_at (RegionSelection &, Temporal::timepos_t const & where, TrackViewList const &) const = 0;
 	virtual void get_regions_after (RegionSelection&, Temporal::timepos_t const & where, const TrackViewList& ts) const = 0;

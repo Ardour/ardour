@@ -44,13 +44,11 @@ using namespace ARDOUR;
 using namespace PBD;
 
 AudioRegionGainLine::AudioRegionGainLine (const string & name, AudioRegionView& r, ArdourCanvas::Container& parent, boost::shared_ptr<AutomationList> l)
-	: AutomationLine (name, r.get_time_axis_view(), parent, l, l->parameter(), Temporal::DistanceMeasure (r.get_time_axis_view().session()->tempo_map(), r.region()->position()))
+	: AutomationLine (name, r.get_time_axis_view(), parent, l, l->parameter(), Temporal::DistanceMeasure (r.region()->nt_position()))
 	, rv (r)
 {
 	// If this isn't true something is horribly wrong, and we'll get catastrophic gain values
 	assert(l->parameter().type() == EnvelopeAutomation);
-
-	_time_converter->set_origin_b (rv.region()->position());
 
 	r.region()->PropertyChanged.connect (_region_changed_connection, invalidator (*this), boost::bind (&AudioRegionGainLine::region_changed, this, _1), gui_context());
 
@@ -112,13 +110,9 @@ AudioRegionGainLine::region_changed (const PropertyChange& what_changed)
 	interesting_stuff.add (ARDOUR::Properties::start);
 	interesting_stuff.add (ARDOUR::Properties::position);
 
-	if (what_changed.contains (interesting_stuff)) {
-		_time_converter->set_origin_b (rv.region()->position());
+	if (what_changed.containts (ARDOUR::Properties::position)) {
+		set_distance_measure_origin (rv.region()->nt_position());
 	}
-
-	interesting_stuff.clear ();
-	interesting_stuff.add (ARDOUR::Properties::start);
-	interesting_stuff.add (ARDOUR::Properties::length);
 
 	if (what_changed.contains (interesting_stuff)) {
 		reset ();

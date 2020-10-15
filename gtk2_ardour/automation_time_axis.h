@@ -101,7 +101,7 @@ public:
 	void get_selectables (Temporal::timepos_t const &, Temporal::timepos_t const &, double top, double bot, std::list<Selectable *>&, bool within = false);
 	void get_inverted_selectables (Selection&, std::list<Selectable*>& results);
 
-	void show_timestretch (samplepos_t /*start*/, samplepos_t /*end*/, int /*layers*/, int /*layer*/) {}
+	void show_timestretch (Temporal::timepos_t const &/*start*/, Temporal::timepos_t const & /*end*/, int /*layers*/, int /*layer*/) {}
 	void hide_timestretch () {}
 
 	/* editing operations */

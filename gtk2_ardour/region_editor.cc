@@ -391,11 +391,11 @@ RegionEditor::bounds_changed (const PropertyChange& what_changed)
 			sync_offset_relative_clock.set_duration (off, true);
 		}
 
-		sync_offset_absolute_clock (_region->nt_position () + off, true);
+		sync_offset_absolute_clock.set (_region->nt_position () + off, true);
 	}
 
 	if (what_changed.contains (ARDOUR::Properties::start)) {
-		start_clock.set (_region->nt_start(), true);
+		start_clock.set (timepos_t (_region->nt_start()), true);
 	}
 }
 
@@ -441,7 +441,7 @@ RegionEditor::sync_offset_relative_clock_changed ()
 	PublicEditor::instance().begin_reversible_command (_("change region sync point"));
 
 	_region->clear_changes ();
-	_region->set_sync_position (sync_offset_relative_clock.current_time() + _region->position ());
+	_region->set_sync_position (sync_offset_relative_clock.current_time() + _region->nt_position ());
 	_session->add_command (new StatefulDiffCommand (_region));
 
 	PublicEditor::instance().commit_reversible_command ();

@@ -2368,14 +2368,14 @@ MidiRegionView::note_deselected(NoteBase* ev)
 }
 
 void
-MidiRegionView::update_drag_selection(samplepos_t start, samplepos_t end, double gy0, double gy1, bool extend)
+MidiRegionView::update_drag_selection(timepos_t const & start, timepos_t const & end, double gy0, double gy1, bool extend)
 {
 	PublicEditor& editor = trackview.editor();
 
 	// Convert to local coordinates
 	const double     y  = midi_view()->y_position();
-	const double     x0 = editor.time_to_pixel (max (timepos_t(), _region->region_relative_position (timepos_t (start))));
-	const double     x1 = editor.time_to_pixel (max (timepos_t(), _region->region_relative_position (timepos_t (end))));
+	const double     x0 = editor.time_to_pixel (max (timepos_t(), _region->region_relative_position (start)));
+	const double     x1 = editor.time_to_pixel (max (timepos_t(), _region->region_relative_position (end)));
 	const double     y0 = max(0.0, gy0 - y);
 	const double     y1 = max(0.0, gy1 - y);
 
@@ -2504,11 +2504,10 @@ MidiRegionView::earliest_in_selection ()
 }
 
 void
-MidiRegionView::move_selection(Temporal::Beats const & dx_qn, double dy, double cumulative_dy)
+MidiRegionView::move_selection(timecnt_t const & dx_qn, double dy, double cumulative_dy)
 {
 	typedef vector<boost::shared_ptr<NoteType> > PossibleChord;
 	Editor* editor = dynamic_cast<Editor*> (&trackview.editor());
-	TempoMap& tmap (editor->session()->tempo_map());
 	PossibleChord to_play;
 	Temporal::Beats earliest = earliest_in_selection();
 
@@ -2521,13 +2520,13 @@ MidiRegionView::move_selection(Temporal::Beats const & dx_qn, double dy, double 
 		double dx = 0.0;
 
 		if (midi_view()->note_mode() == Sustained) {
-			dx = editor->sample_to_pixel_unrounded (tmap.sample_at_quarter_note (note_time_qn + dx_qn))
+			dx = editor->time_to_pixel_unrounded ((note_time_qn + dx_qn))
 				- n->item()->item_to_canvas (ArdourCanvas::Duple (n->x0(), 0)).x;
 		} else {
 			/* Hit::x0() is offset by _position.x, unlike Note::x0() */
 			Hit* hit = dynamic_cast<Hit*>(n);
 			if (hit) {
-				dx = editor->sample_to_pixel_unrounded (tmap.sample_at_quarter_note (note_time_qn + dx_qn))
+				dx = editor->time_to_pixel_unrounded ((note_time_qn + dx_qn))
 					- n->item()->item_to_canvas (ArdourCanvas::Duple (((hit->x0() + hit->x1()) / 2.0) - hit->position().x, 0)).x;
 			}
 		}
@@ -2537,7 +2536,7 @@ MidiRegionView::move_selection(Temporal::Beats const & dx_qn, double dy, double 
 		/* update length */
 		if (midi_view()->note_mode() == Sustained) {
 			Note* sus = dynamic_cast<Note*> (*i);
-			double const len_dx = editor->sample_to_pixel_unrounded (tmap.sample_at_quarter_note (note_time_qn + dx_qn + n->note()->length()));
+			double const len_dx = editor->time_to_pixel_unrounded ((note_time_qn + dx_qn + n->note()->length()));
 
 			sus->set_x1 (n->item()->canvas_to_item (ArdourCanvas::Duple (len_dx, 0)).x);
 		}
@@ -2601,7 +2600,7 @@ MidiRegionView::copy_selection (NoteBase* primary)
 }
 
 void
-MidiRegionView::move_copies (Temporal::Beats const &  dx_qn, double dy, double cumulative_dy)
+MidiRegionView::move_copies (timecnt_t const & dx_qn, double dy, double cumulative_dy)
 {
 	typedef vector<boost::shared_ptr<NoteType> > PossibleChord;
 	Editor* editor = dynamic_cast<Editor*> (&trackview.editor());
@@ -2615,8 +2614,8 @@ MidiRegionView::move_copies (Temporal::Beats const &  dx_qn, double dy, double c
 			to_play.push_back (n->note());
 		}
 
-		Temporal::Beats const note_time_qn = _region->source_beats_to_absolute_beats (n->note()->time());
-		double dx = 0.0;
+		timepos_t const note_time_qn = _region->source_beats_to_absolute_beats (n->note()->time());
+		timecnt_t dx (dx_qn.time_domain());
 
 		if (midi_view()->note_mode() == Sustained) {
 			dx = editor->sample_to_pixel_unrounded (tmap.sample_at_quarter_note (note_time_qn + dx_qn))
@@ -2663,7 +2662,7 @@ MidiRegionView::move_copies (Temporal::Beats const &  dx_qn, double dy, double c
 }
 
 void
-MidiRegionView::note_dropped(NoteBase *, Temporal::Beats const & d_qn, int8_t dnote, bool copy)
+MidiRegionView::note_dropped(NoteBase *, timecnt_t const & d_qn, int8_t dnote, bool copy)
 {
 	uint8_t lowest_note_in_selection  = 127;
 	uint8_t highest_note_in_selection = 0;

@@ -883,7 +883,7 @@ RouteTimeAxisView::layer_display_menu_change (Gtk::MenuItem* item)
 }
 
 void
-RouteTimeAxisView::show_timestretch (samplepos_t start, samplepos_t end, int layers, int layer)
+RouteTimeAxisView::show_timestretch (timepos_t const & start, timepos_t const & end, int layers, int layer)
 {
 	TimeAxisView::show_timestretch (start, end, layers, layer);
 
@@ -920,8 +920,10 @@ RouteTimeAxisView::show_timestretch (samplepos_t start, samplepos_t end, int lay
 	timestretch_rect->show ();
 	timestretch_rect->raise_to_top ();
 
-	double const x1 = start / _editor.get_current_zoom();
-	double const x2 = (end - 1) / _editor.get_current_zoom();
+#warning NUTEMPO is it ok to just fudge this being in samples?
+
+	double const x1 = start.samples() / _editor.get_current_zoom();
+	double const x2 = (end.samples() - 1) / _editor.get_current_zoom();
 
 	timestretch_rect->set (ArdourCanvas::Rect (x1, current_height() * (layers - layer - 1) / layers,
 						   x2, current_height() * (layers - layer) / layers));

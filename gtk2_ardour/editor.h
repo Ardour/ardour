@@ -491,7 +491,7 @@ public:
 	                            Temporal::RoundMode    direction = Temporal::RoundNearest,
 	                            ARDOUR::SnapPref     gpref = ARDOUR::SnapToAny_Visual);
 
-	void set_snapped_cursor_position (samplepos_t pos);
+	void set_snapped_cursor_position (Temporal::timepos_t const & pos);
 
 	void begin_selection_op_history ();
 	void begin_reversible_selection_op (std::string cmd_name);
@@ -2016,7 +2016,7 @@ private:
 	void stop_canvas_autoscroll ();
 
 	/* trimming */
-	void point_trim (GdkEvent*, samplepos_t);
+	void point_trim (GdkEvent*, Temporal::timepos_t const &);
 
 	void trim_region_front();
 	void trim_region_back();

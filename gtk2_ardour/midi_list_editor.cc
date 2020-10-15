@@ -761,13 +761,13 @@ MidiListEditor::redisplay_model ()
 
 	if (_session) {
 
-		BeatsSamplesConverter conv (_session->tempo_map(), region->position());
 		boost::shared_ptr<MidiModel> m (region->midi_source(0)->model());
 		TreeModel::Row row;
 		stringstream ss;
 
-		MidiModel::Notes::const_iterator i = m->note_lower_bound(conv.from (region->start()));
-		Temporal::Beats end_time = conv.from (region->start()) + conv.from (region->length());
+		MidiModel::Notes::const_iterator i = m->note_lower_bound (region->nt_start().beats());
+		Temporal::Beats end_time = (region->nt_start() + region->nt_length()).beats();
+
 		for (; i != m->notes().end() && (*i)->time() < end_time; ++i) {
 			row = *(model->append());
 			row[columns.channel] = (*i)->channel() + 1;
@@ -775,7 +775,9 @@ MidiListEditor::redisplay_model ()
 			row[columns.note] = (*i)->note();
 			row[columns.velocity] = (*i)->velocity();
 
-			Temporal::BBT_Time bbt (_session->tempo_map().bbt_at_sample (region->position() - region->start() + conv.to ((*i)->time())));
+#warning NUTEMPO needs ::bbt() method for timeline types
+			// Temporal::BBT_Time bbt (((region->position() + (*i)->time()).earlier (start)).bbt());
+			Temporal::BBT_Time bbt;
 
 			ss.str ("");
 			ss << bbt;

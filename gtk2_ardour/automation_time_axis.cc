@@ -299,8 +299,6 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 
 		assert (_control);
 
-#warning NUTEMPO new tempo map API required
-#if 0
 		boost::shared_ptr<AutomationLine> line (
 			new AutomationLine (
 				ARDOUR::EventTypeMap::instance().to_symbol(_parameter),
@@ -308,7 +306,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 				*_canvas_display,
 				_control->alist(),
 				_control->desc(),
-				Temporal::DistanceMeasure (_session->tempo_map(), timepos_t()) /* default distance measure, origin at absolute zero */
+				Temporal::DistanceMeasure (timepos_t()) /* default distance measure, origin at absolute zero */
 				)
 			);
 
@@ -316,7 +314,6 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 		line->set_fill (true);
 		line->queue_reset ();
 		add_line (line);
-#endif 0
 	}
 
 	/* make sure labels etc. are correct */

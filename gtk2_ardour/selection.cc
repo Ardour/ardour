@@ -433,7 +433,7 @@ Selection::add (RegionView* r)
 }
 
 long
-Selection::add (samplepos_t start, samplepos_t end)
+Selection::add (timepos_t const & start, timepos_t const & end)
 {
 	clear_objects(); // enforce object/range exclusivity
 
@@ -451,7 +451,7 @@ Selection::add (samplepos_t start, samplepos_t end)
 }
 
 void
-Selection::move_time (samplecnt_t distance)
+Selection::move_time (timecnt_t const & distance)
 {
 	if (distance == 0) {
 		return;
@@ -466,14 +466,14 @@ Selection::move_time (samplecnt_t distance)
 }
 
 void
-Selection::replace (uint32_t sid, samplepos_t start, samplepos_t end)
+Selection::replace (uint32_t sid, timepos_t const & start, timepos_t const & end)
 {
 	clear_objects(); // enforce object/range exclusivity
 
 	for (list<TimelineRange>::iterator i = time.begin(); i != time.end(); ++i) {
 		if ((*i).id == sid) {
 			time.erase (i);
-			time.push_back (TimelineRange(start,end, sid));
+			time.push_back (TimelineRange (start,end, sid));
 
 			/* don't consolidate here */
 
@@ -1040,10 +1040,16 @@ Selection::add (const list<ArdourMarker*>& m)
 }
 
 void
-MarkerSelection::range (samplepos_t& s, samplepos_t& e)
+MarkerSelection::range (timepos_t& s, timepos_t& e)
 {
-	s = max_samplepos;
-	e = 0;
+	if (empty()) {
+		s = timepos_t::zero (Temporal::AudioTime);
+		e = timepos_t::zero (Temporal::AudioTime);
+		return;
+	}
+
+	s = timepos_t::max (front()->position().time_domain());
+	e = timepos_t::zero (front()->position().time_domain());
 
 	for (MarkerSelection::iterator i = begin(); i != end(); ++i) {
 

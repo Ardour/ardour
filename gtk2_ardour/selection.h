@@ -165,7 +165,7 @@ public:
 	void add (RegionView*);
 	void add (MidiCutBuffer*);
 	void add (std::vector<RegionView*>&);
-	long add (samplepos_t, samplepos_t);
+	long add (Temporal::timepos_t const &, Temporal::timepos_t const &);
 	void add (boost::shared_ptr<Evoral::ControlList>);
 	void add (boost::shared_ptr<ARDOUR::Playlist>);
 	void add (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
@@ -192,9 +192,9 @@ public:
 
 	void remove_regions (TimeAxisView *);
 
-	void move_time (samplecnt_t);
+	void move_time (Temporal::timecnt_t const &);
 
-	void replace (uint32_t time_index, samplepos_t start, samplepos_t end);
+	void replace (uint32_t time_index, Temporal::timepos_t const & start, Temporal::timepos_t const & end);
 
 	/*
 	 * A note about items in an editing Selection:

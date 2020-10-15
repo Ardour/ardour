@@ -828,7 +828,7 @@ TimeAxisView::set_samples_per_pixel (double fpp)
 }
 
 void
-TimeAxisView::show_timestretch (samplepos_t start, samplepos_t end, int layers, int layer)
+TimeAxisView::show_timestretch (timepos_t const & start, timepos_t const & end, int layers, int layer)
 {
 	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
 		(*i)->show_timestretch (start, end, layers, layer);

@@ -474,10 +474,10 @@ MidiStreamView::setup_rec_box ()
 
 				// handle multi
 
-				samplepos_t start = 0;
+				timepos_t start;
 				if (rec_regions.size() > 0) {
-					start = rec_regions.back().first->start()
-					        + _trackview.track()->get_captured_samples (rec_regions.size() - 1);
+					start = rec_regions.back().first->nt_start()
+						+ timepos_t (_trackview.track()->get_captured_samples (rec_regions.size() - 1));
 				}
 
 				if (!rec_regions.empty()) {
@@ -488,27 +488,26 @@ MidiStreamView::setup_rec_box ()
 				PropertyList plist;
 
 				plist.add (ARDOUR::Properties::start, start);
-				plist.add (ARDOUR::Properties::length, 1);
-				/* Just above we're setting this nascent region's length to 1.  I think this
-				   is so that the RegionView gets created with a non-zero width, as apparently
-				   creating a RegionView with a zero width causes it never to be displayed
-				   (there is a warning in TimeAxisViewItem::init about this).  However, we
-				   must also set length_beats to something non-zero, otherwise the sample length
-				   of 1 causes length_beats to be set to some small quantity << 1.  Then
-				   when the position is set up below, this length_beats is used to recompute
-				   length using BeatsSamplesConverter::to, which is slightly innacurate for small
-				   beats values because it converts floating point beats to bars, beats and
-				   integer ticks.  The upshot of which being that length gets set back to 0,
-				   meaning no region view is ever seen, meaning no MIDI notes during record (#3820).
+				plist.add (ARDOUR::Properties::length, timepos_t (Temporal::Beats::ticks (1)));
+				/* Just above we're setting this nascent region's length to 1 tick.  I think this is so
+				   that the RegionView gets created with a non-zero width, as apparently creating a
+				   RegionView with a zero width causes it never to be displayed (there is a warning in
+				   TimeAxisViewItem::init about this). We don't want to use 1 sample since that results
+				   in zero length musical time duration.
 				*/
-				plist.add (ARDOUR::Properties::length_beats, 1);
 				plist.add (ARDOUR::Properties::name, string());
 				plist.add (ARDOUR::Properties::layer, 0);
 
 				boost::shared_ptr<MidiRegion> region (boost::dynamic_pointer_cast<MidiRegion>
 				                                      (RegionFactory::create (sources, plist, false)));
 				if (region) {
-					region->set_position (_trackview.track()->current_capture_start ());
+
+					/* MIDI regions should likely not be positioned using audio time, but this is
+					 * just a rec-region, so we don't really care
+					 */
+					region->set_start (timecnt_t (_trackview.track()->current_capture_start()
+					                              - _trackview.track()->get_capture_start_sample (0)));
+					region->set_position (_trackview.track()->current_capture_start ().samples());
 
 					RegionView* rv = add_region_view_internal (region, false, true);
 					MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (rv);
@@ -675,12 +674,12 @@ MidiStreamView::resume_updates ()
 
 struct RegionPositionSorter {
 	bool operator() (RegionView* a, RegionView* b) {
-		return a->region()->position() < b->region()->position();
+		return a->region()->nt_position() < b->region()->nt_position();
 	}
 };
 
 bool
-MidiStreamView::paste (ARDOUR::samplepos_t pos, const Selection& selection, PasteContext& ctx, const int32_t sub_num)
+MidiStreamView::paste (timepos_t const & pos, const Selection& selection, PasteContext& ctx, const int32_t sub_num)
 {
 	/* Paste into the first region which starts on or before pos.  Only called when
 	   using an internal editing tool. */
@@ -694,7 +693,7 @@ MidiStreamView::paste (ARDOUR::samplepos_t pos, const Selection& selection, Past
 	list<RegionView*>::const_iterator prev = region_views.begin ();
 
 	for (list<RegionView*>::const_iterator i = region_views.begin(); i != region_views.end(); ++i) {
-		if ((*i)->region()->position() > pos) {
+		if ((*i)->region()->nt_position() > pos) {
 			break;
 		}
 		prev = i;

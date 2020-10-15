@@ -95,7 +95,7 @@ public:
 
 	void set_samples_per_pixel (double);
 	void set_height (uint32_t h, TrackHeightMode m = OnlySelf);
-	void show_timestretch (samplepos_t start, samplepos_t end, int layers, int layer);
+	void show_timestretch (Temporal::timepos_t const & start, Temporal::timepos_t const & end, int layers, int layer);
 	void hide_timestretch ();
 	void selection_click (GdkEventButton*);
 	void set_selected_points (PointSelection&);

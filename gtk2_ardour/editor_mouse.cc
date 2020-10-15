@@ -2427,7 +2427,7 @@ Editor::cancel_time_selection ()
 }
 
 void
-Editor::point_trim (GdkEvent* event, samplepos_t new_bound)
+Editor::point_trim (GdkEvent* event, timepos_t const & new_bound)
 {
 	RegionView* rv = clicked_regionview;
 
@@ -2530,7 +2530,7 @@ Editor::mouse_rename_region (ArdourCanvas::Item* /*item*/, GdkEvent* /*event*/)
 
 
 void
-Editor::mouse_brush_insert_region (RegionView* rv, samplepos_t pos)
+Editor::mouse_brush_insert_region (RegionView* rv, timepos_t const & pos)
 {
 	/* no brushing without a useful quantize setting */
 	if (_grid_type == GridTypeNone)
@@ -2538,7 +2538,7 @@ Editor::mouse_brush_insert_region (RegionView* rv, samplepos_t pos)
 
 	/* don't brush a copy over the original */
 
-	if (pos == rv->region()->position()) {
+	if (pos == rv->region()->nt_position()) {
 		return;
 	}
 

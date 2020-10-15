@@ -27,7 +27,7 @@
 class MarkerSelection : public std::list<ArdourMarker*>
 {
 	public:
-		void range (ARDOUR::samplepos_t& start, ARDOUR::samplepos_t& end);
+	void range (Temporal::timepos_t& start, Temporal::timepos_t& end);
 };
 
 #endif /* __ardour_gtk_marker_selection_h__ */

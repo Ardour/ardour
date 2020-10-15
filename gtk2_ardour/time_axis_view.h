@@ -177,7 +177,7 @@ public:
 	virtual void show_selection (TimeSelection&);
 	virtual void hide_selection ();
 	virtual void reshow_selection (TimeSelection&);
-	virtual void show_timestretch (samplepos_t start, samplepos_t end, int layers, int layer);
+	virtual void show_timestretch (Temporal::timepos_t const & start, Temporal::timepos_t const & end, int layers, int layer);
 	virtual void hide_timestretch ();
 
 	/* editing operations */
