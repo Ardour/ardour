@@ -11740,7 +11740,7 @@ msgstr ""
 #: plugin_selector.cc:279
 msgid "You can include dashes, colons or underscores in a Tag."
 msgstr ""
-"Vous pouvez inclure \"tiret du 6\" \"tiret du 8\" et \":\" dans une Étiquette."
+"Vous pouvez inclure \"tiret du 6\" \"tiret du 8\" et \":\" dans une étiquette."
 
 #: plugin_selector.cc:282
 msgid "Ex: \"dynamic de-esser vocal\" applies 3 Tags."
