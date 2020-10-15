@@ -164,6 +164,13 @@ FPUTest::neonTest ()
 	CPPUNIT_ASSERT_MESSAGE ("Aligned Malloc", (((intptr_t)_test1) % 128) == 0);
 	CPPUNIT_ASSERT_MESSAGE ("Aligned Malloc", (((intptr_t)_test2) % 128) == 0);
 
+	compute_peak          = arm_neon_compute_peak;
+	find_peaks            = arm_neon_find_peaks;
+	apply_gain_to_buffer  = arm_neon_apply_gain_to_buffer;
+	mix_buffers_with_gain = arm_neon_mix_buffers_with_gain;
+	mix_buffers_no_gain   = arm_neon_mix_buffers_no_gain;
+	copy_vector           = arm_neon_copy_vector;
+
 	run (128);
 }
 
