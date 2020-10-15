@@ -31,6 +31,8 @@ using namespace PBD;
 
 #if ( defined(__x86_64__) || defined(_M_X64) )
 static const int CPU_CACHE_ALIGN = 64;
+#elif defined ARM_NEON_SUPPORT
+static const int CPU_CACHE_ALIGN = 128; // sizeof(float32x4_t)
 #else
 static const int CPU_CACHE_ALIGN = 16; /* arguably 32 on most arches, but it matters less */
 #endif

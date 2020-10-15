@@ -34,7 +34,7 @@ public:
 #endif
 
 private:
-	void run ();
+	void run (size_t);
 	void compare (std::string, size_t);
 
 	ARDOUR::compute_peak_t          compute_peak;

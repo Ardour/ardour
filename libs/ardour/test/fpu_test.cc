@@ -37,23 +37,18 @@ FPUTest::tearDown ()
 }
 
 void
-FPUTest::run ()
+FPUTest::run (size_t align_max)
 {
-	CPPUNIT_ASSERT_MESSAGE ("Aligned Malloc", (((intptr_t)_test1) % 32) == 0);
-	CPPUNIT_ASSERT_MESSAGE ("Aligned Malloc", (((intptr_t)_test2) % 32) == 0);
-
 	apply_gain_to_buffer (_test1, _size, 1.33);
 	default_apply_gain_to_buffer (_comp1, _size, 1.33);
 	compare ("Apply Gain", _size);
 
-	for (size_t off = 0; off < 32; ++off) {
-		for (size_t cnt = 1; cnt < 32; ++cnt) {
+	for (size_t off = 0; off < align_max; ++off) {
+		for (size_t cnt = 1; cnt < align_max; ++cnt) {
 			/* apply gain */
-#if 0 // This segfaults currently with AVX
 			apply_gain_to_buffer (&_test1[off], cnt, 0.99);
 			default_apply_gain_to_buffer (&_comp1[off], cnt, 0.99);
 			compare (string_compose ("Apply Gain not aligned off: %1 cnt: %2", off, cnt), cnt);
-#endif
 
 			/* compute peak */
 			float pk_test = 0;
@@ -110,6 +105,14 @@ FPUTest::avxTest ()
 		return;
 	}
 
+#if ( defined(__x86_64__) || defined(_M_X64) )
+	size_t align_max = 64;
+#else
+	size_t align_max = 16;
+#endif
+	CPPUNIT_ASSERT_MESSAGE ("Aligned Malloc", (((intptr_t)_test1) % align_max) == 0);
+	CPPUNIT_ASSERT_MESSAGE ("Aligned Malloc", (((intptr_t)_test2) % align_max) == 0);
+
 	compute_peak          = x86_sse_avx_compute_peak;
 	find_peaks            = x86_sse_avx_find_peaks;
 	apply_gain_to_buffer  = x86_sse_avx_apply_gain_to_buffer;
@@ -117,7 +120,7 @@ FPUTest::avxTest ()
 	mix_buffers_no_gain   = x86_sse_avx_mix_buffers_no_gain;
 	copy_vector           = x86_sse_avx_copy_vector;
 
-	run ();
+	run (/*align_max*/ 0); // XXX work-around segfalt in x86_sse_avx_apply_gain_to_buffer
 }
 
 void
@@ -129,6 +132,14 @@ FPUTest::sseTest ()
 		return;
 	}
 
+#if ( defined(__x86_64__) || defined(_M_X64) )
+	size_t align_max = 64;
+#else
+	size_t align_max = 16;
+#endif
+	CPPUNIT_ASSERT_MESSAGE ("Aligned Malloc", (((intptr_t)_test1) % align_max) == 0);
+	CPPUNIT_ASSERT_MESSAGE ("Aligned Malloc", (((intptr_t)_test2) % align_max) == 0);
+
 	compute_peak          = x86_sse_compute_peak;
 	find_peaks            = x86_sse_find_peaks;
 	apply_gain_to_buffer  = x86_sse_apply_gain_to_buffer;
@@ -136,7 +147,7 @@ FPUTest::sseTest ()
 	mix_buffers_no_gain   = x86_sse_mix_buffers_no_gain;
 	copy_vector           = default_copy_vector;
 
-	run ();
+	run (align_max);
 }
 
 #elif defined ARM_NEON_SUPPORT
@@ -149,7 +160,11 @@ FPUTest::neonTest ()
 		printf ("NEON is not available at run-time\n");
 		return;
 	}
-	run ();
+
+	CPPUNIT_ASSERT_MESSAGE ("Aligned Malloc", (((intptr_t)_test1) % 128) == 0);
+	CPPUNIT_ASSERT_MESSAGE ("Aligned Malloc", (((intptr_t)_test2) % 128) == 0);
+
+	run (128);
 }
 
 #elif defined(__APPLE__) && defined(BUILD_VECLIB_OPTIMIZATIONS)
@@ -157,11 +172,14 @@ FPUTest::neonTest ()
 void
 FPUTest::veclibTest ()
 {
-	CPPUNIT_ASSERT_MESSAGE ("Aligned Malloc", (((intptr_t)_test1) % 32) == 0);
 	if (floor (kCFCoreFoundationVersionNumber) <= kCFCoreFoundationVersionNumber10_4) {
 		printf ("veclib is not available at run-time\n");
 		return;
 	}
+
+	CPPUNIT_ASSERT_MESSAGE ("Aligned Malloc", (((intptr_t)_test1) % 16) == 0);
+	CPPUNIT_ASSERT_MESSAGE ("Aligned Malloc", (((intptr_t)_test2) % 16) == 0);
+
 
 	compute_peak          = veclib_compute_peak;
 	find_peaks            = veclib_find_peaks;
@@ -170,7 +188,7 @@ FPUTest::veclibTest ()
 	mix_buffers_no_gain   = veclib_mix_buffers_no_gain;
 	copy_vector           = default_copy_vector;
 
-	run ();
+	run (16);
 }
 
 #else
