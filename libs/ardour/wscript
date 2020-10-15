@@ -502,6 +502,7 @@ def build(bld):
                 includes = [ '.' ],
                 definfes = obj.defines,
                 use = [ 'libpbd', 'libevoral'],
+                uselib = [ 'GLIBMM', 'XML' ],
                 target   = 'arm_neon_functions')
 
             obj.use += ['arm_neon_functions' ]
