@@ -11744,7 +11744,7 @@ msgstr ""
 
 #: plugin_selector.cc:282
 msgid "Ex: \"dynamic de-esser vocal\" applies 3 Tags."
-msgstr "Ex: \"dynamique de-esser vocal\" représente 3 Étiquettes."
+msgstr "Ex: \"dynamique de-esser vocal\" représente 3 étiquettes."
 
 #: plugin_selector.cc:293
 msgid "Tags for Selected Plugin"
