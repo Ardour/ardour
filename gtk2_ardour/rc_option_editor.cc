@@ -3666,8 +3666,13 @@ RCOptionEditor::RCOptionEditor ()
 #ifdef LXVST_SUPPORT
 	add_option (_("Plugins/VST"),
 			new RcActionButton (_("Edit"),
-				sigc::mem_fun (*this, &RCOptionEditor::edit_lxvst_path),
-			_("Linux VST Path:")));
+				sigc::bind (sigc::mem_fun (*this, &RCOptionEditor::edit_vst_path),
+					_("Set Linux VST2 Search Path"),
+					PluginManager::instance().get_default_lxvst_path (),
+					sigc::mem_fun (*_rc_config, &RCConfiguration::get_plugin_path_lxvst),
+					sigc::mem_fun (*_rc_config, &RCConfiguration::set_plugin_path_lxvst)
+					),
+				_("Linux VST2 Path:")));
 
 	add_option (_("Plugins/VST"),
 			new RcConfigDisplay (
@@ -3680,8 +3685,14 @@ RCOptionEditor::RCOptionEditor ()
 #ifdef WINDOWS_VST_SUPPORT
 	add_option (_("Plugins/VST"),
 			new RcActionButton (_("Edit"),
-				sigc::mem_fun (*this, &RCOptionEditor::edit_vst_path),
-			_("Windows VST Path:")));
+				sigc::bind (sigc::mem_fun (*this, &RCOptionEditor::edit_vst_path),
+					_("Set Windows VST2 Search Path"),
+					PluginManager::instance().get_default_windows_vst_path (),
+					sigc::mem_fun (*_rc_config, &RCConfiguration::get_plugin_path_vst),
+					sigc::mem_fun (*_rc_config, &RCConfiguration::set_plugin_path_vst)
+					),
+				_("Windows VST2 Path:")));
+
 	add_option (_("Plugins/VST"),
 			new RcConfigDisplay (
 				"plugin-path-vst",
@@ -4406,18 +4417,12 @@ void RCOptionEditor::clear_au_blacklist () {
 	PluginManager::instance().clear_au_blacklist();
 }
 
-void RCOptionEditor::edit_lxvst_path () {
-	Glib::RefPtr<Gdk::Window> win = get_parent_window ();
-	PathsDialog *pd = new PathsDialog (
-		*current_toplevel(), _("Set Linux VST Search Path"),
-		_rc_config->get_plugin_path_lxvst(),
-		PluginManager::instance().get_default_lxvst_path()
-		);
+void RCOptionEditor::edit_vst_path (std::string const& title, std::string const& dflt, sigc::slot<string> get, sigc::slot<bool, string> set) {
+	PathsDialog *pd = new PathsDialog (*current_toplevel(), title, get (), dflt);
 	ResponseType r = (ResponseType) pd->run ();
 	pd->hide();
 	if (r == RESPONSE_ACCEPT) {
-		_rc_config->set_plugin_path_lxvst(pd->get_serialized_paths());
-
+		set (pd->get_serialized_paths());
 		MessageDialog msg (_("Re-scan Plugins now?"),
 				false /*no markup*/, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_YES_NO, true /*modal*/);
 		msg.set_default_response (Gtk::RESPONSE_YES);
@@ -4429,26 +4434,6 @@ void RCOptionEditor::edit_lxvst_path () {
 	delete pd;
 }
 
-void RCOptionEditor::edit_vst_path () {
-	PathsDialog *pd = new PathsDialog (
-		*current_toplevel(), _("Set Windows VST Search Path"),
-		_rc_config->get_plugin_path_vst(),
-		PluginManager::instance().get_default_windows_vst_path()
-		);
-	ResponseType r = (ResponseType) pd->run ();
-	pd->hide();
-	if (r == RESPONSE_ACCEPT) {
-		_rc_config->set_plugin_path_vst(pd->get_serialized_paths());
-		MessageDialog msg (_("Re-scan Plugins now?"),
-				false /*no markup*/, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_YES_NO, true /*modal*/);
-		msg.set_default_response (Gtk::RESPONSE_YES);
-		if (msg.run() == Gtk::RESPONSE_YES) {
-			msg.hide ();
-			plugin_scan_refresh ();
-		}
-	}
-	delete pd;
-}
 
 Gtk::Window*
 RCOptionEditor::use_own_window (bool and_fill_it)
