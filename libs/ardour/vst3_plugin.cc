@@ -43,6 +43,8 @@
 #include "ardour/vst3_module.h"
 #include "ardour/vst3_plugin.h"
 
+#include "control_protocol/control_protocol.h"
+
 #include "pbd/i18n.h"
 
 using namespace PBD;
@@ -974,6 +976,7 @@ VST3PI::VST3PI (boost::shared_ptr<ARDOUR::VST3PluginModule> m, std::string uniqu
 	, _block_size (0)
 	, _port_id_bypass (UINT32_MAX)
 	, _owner (0)
+	, _add_to_selection (false)
 	, _n_factory_presets (0)
 {
 	using namespace std;
@@ -2520,8 +2523,8 @@ VST3PI::getContextInfoValue (int32& value, FIDString id)
 	} else if (0 == strcmp (id, ContextInfo::kSelected)) {
 		value = s->is_selected () ? 1 : 0;
 	} else if (0 == strcmp (id, ContextInfo::kFocused)) {
-		value = s->is_selected () ? 1 : 0; // XXX
-		//consider ControlProtocol::first_selected_stripable () == s;
+		boost::shared_ptr<Stripable> stripable = ControlProtocol::first_selected_stripable ();
+		value = stripable && stripable.get () == s ? 1 : 0;
 	} else if (0 == strcmp (id, ContextInfo::kSendCount)) {
 		value = 0;
 		while (s->send_enable_controllable (value)) {
@@ -2675,10 +2678,17 @@ VST3PI::setContextInfoValue (FIDString id, int32 value)
 #endif
 		s->presentation_info ().set_color(value);
 	} else if (0 == strcmp (id, ContextInfo::kSelected)) {
-		DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::setContextInfoValue<int>: NOT IMPLEMENTED (%1)\n", id));
-		return kNotImplemented;
+		boost::shared_ptr<Stripable> stripable = s->session().stripable_by_id (s->id ());
+		assert (stripable);
+		if (value == 0) {
+			ControlProtocol::RemoveStripableFromSelection (stripable);
+		} else if (_add_to_selection) {
+			ControlProtocol::AddStripableToSelection (stripable);
+		} else {
+			ControlProtocol::SetStripableSelection (stripable);
+		}
 	} else if (0 == strcmp (id, ContextInfo::kMultiSelect)) {
-		//_add_to_selection = value != 0;
+		_add_to_selection = value != 0;
 	} else if (0 == strcmp (id, ContextInfo::kMute)) {
 		boost::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
 		if (ac) {

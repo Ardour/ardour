@@ -214,10 +214,6 @@ private:
 
 	void foward_signal (Presonus::IContextInfoHandler2*, FIDString) const;
 
-	PBD::ScopedConnectionList   _strip_connections;
-	PBD::ScopedConnectionList   _ac_connection_list;
-	std::set<Evoral::Parameter> _ac_subscriptions;
-
 	boost::shared_ptr<ARDOUR::VST3PluginModule> _module;
 
 	std::vector <Vst::IConnectionPoint*> _connections;
@@ -270,9 +266,14 @@ private:
 	std::vector<bool> _enabled_audio_in;
 	std::vector<bool> _enabled_audio_out;
 
-	boost::optional<uint32_t> _plugin_latency;
+	/* PSL extensions, control protocol */
+	ARDOUR::SessionObject*      _owner;
+	PBD::ScopedConnectionList   _strip_connections;
+	PBD::ScopedConnectionList   _ac_connection_list;
+	std::set<Evoral::Parameter> _ac_subscriptions;
+	bool                        _add_to_selection;
 
-	ARDOUR::SessionObject* _owner;
+	boost::optional<uint32_t> _plugin_latency;
 
 	int _n_inputs;
 	int _n_outputs;
