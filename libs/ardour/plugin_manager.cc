@@ -288,6 +288,14 @@ PluginManager::PluginManager ()
 	if (Config->get_plugin_path_vst() == X_("@default@")) {
 		Config->set_plugin_path_vst(get_default_windows_vst_path());
 	}
+	if (Config->get_plugin_path_vst3() == X_("@default@")) {
+		/* This path is currently only added to the existing path */
+		if ((s = getenv ("VST3_PATH"))) {
+			Config->set_plugin_path_vst3 (s);
+		} else {
+			Config->set_plugin_path_vst3 ("");
+		}
+	}
 
 	if (_instance == 0) {
 		_instance = this;
@@ -1632,9 +1640,14 @@ PluginManager::vst3_discover_from_path (string const& path, bool cache_only)
 		return -1;
 	}
 
-	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("VST3: search along: [%1]\n", path));
-
 	Searchpath paths (path);
+	if (!Config->get_plugin_path_vst3().empty ()) {
+		Searchpath custom (Config->get_plugin_path_vst3 ());
+		paths += custom;
+	}
+
+	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("VST3: search along: [%1]\n", paths.to_string ()));
+
 	vector<string> plugin_objects;
 
 	find_paths_matching_filter (plugin_objects, paths, vst3_filter, 0, false, true, true);
