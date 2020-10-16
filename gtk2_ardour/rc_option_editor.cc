@@ -3713,6 +3713,16 @@ RCOptionEditor::RCOptionEditor ()
 				sigc::mem_fun (*this, &RCOptionEditor::clear_vst3_blacklist),
 				_("VST 3 Blacklist:")));
 
+	add_option (_("Plugins/VST"),
+			new RcActionButton (_("Edit"),
+				sigc::bind (sigc::mem_fun (*this, &RCOptionEditor::edit_vst_path),
+					_("Set Additional VST3 Search Path"),
+					PluginManager::instance().get_default_windows_vst_path (),
+					sigc::mem_fun (*_rc_config, &RCConfiguration::get_plugin_path_vst),
+					sigc::mem_fun (*_rc_config, &RCConfiguration::set_plugin_path_vst)
+					),
+				_("Additional VST3 Path:")));
+
 
 #if (defined WINDOWS_VST_SUPPORT || defined MACVST_SUPPORT || defined LXVST_SUPPORT)
 	add_option (_("Plugins/VST"), new OptionEditorHeading (_("VST2/VST3")));
