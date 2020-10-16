@@ -74,6 +74,7 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<uint64_t>          layering_index;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<std::string>	tags;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>		contents; // type doesn't matter here
+	LIBARDOUR_API extern PBD::PropertyDescriptor<Temporal::TimeDomain> time_domain;
 };
 
 class Playlist;
