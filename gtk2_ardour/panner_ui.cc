@@ -352,7 +352,7 @@ PannerUI::start_touch (boost::weak_ptr<AutomationControl> wac)
 	if (!ac) {
 		return;
 	}
-	ac->start_touch (ac->session().transport_sample());
+	ac->start_touch (timepos_t (ac->session().transport_sample()));
 }
 
 void
@@ -362,7 +362,7 @@ PannerUI::stop_touch (boost::weak_ptr<AutomationControl> wac)
 	if (!ac) {
 		return;
 	}
-	ac->stop_touch (ac->session().transport_sample());
+	ac->stop_touch (timepos_t (ac->session().transport_sample()));
 }
 
 bool

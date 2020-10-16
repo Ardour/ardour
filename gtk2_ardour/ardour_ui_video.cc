@@ -363,9 +363,9 @@ ARDOUR_UI::add_video (Gtk::Window* float_window)
 			}
 		}
 
-		_session->maybe_update_session_range(
-			std::max(video_timeline->get_offset(), (ARDOUR::sampleoffset_t) 0),
-			std::max(video_timeline->get_offset() + video_timeline->get_duration(), (ARDOUR::sampleoffset_t) 0));
+		_session->maybe_update_session_range (
+			timepos_t (std::max(video_timeline->get_offset(), (sampleoffset_t) 0)),
+			timepos_t (std::max(video_timeline->get_offset() + video_timeline->get_duration(), (sampleoffset_t) 0)));
 
 
 		if (add_video_dialog->launch_xjadeo() && local_file) {

@@ -110,7 +110,7 @@ AudioRegionGainLine::region_changed (const PropertyChange& what_changed)
 	interesting_stuff.add (ARDOUR::Properties::start);
 	interesting_stuff.add (ARDOUR::Properties::position);
 
-	if (what_changed.containts (ARDOUR::Properties::position)) {
+	if (what_changed.contains (ARDOUR::Properties::position)) {
 		set_distance_measure_origin (rv.region()->nt_position());
 	}
 

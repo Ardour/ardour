@@ -132,19 +132,19 @@ public:
 	sigc::signal<void,std::string,std::string,void*> NameChanged;
 
 	/** Emiited when the position of this item changes */
-	sigc::signal<void,samplepos_t,void*> PositionChanged;
+	sigc::signal<void,Temporal::timepos_t,void*> PositionChanged;
 
 	/** Emitted when the position lock of this item is changed */
 	sigc::signal<void,bool,void*> PositionLockChanged;
 
 	/** Emitted when the duration of this item changes */
-	sigc::signal<void,samplecnt_t,void*> DurationChanged;
+	sigc::signal<void,Temporal::timecnt_t,void*> DurationChanged;
 
 	/** Emitted when the maximum item duration is changed */
-	sigc::signal<void,samplecnt_t,void*> MaxDurationChanged;
+	sigc::signal<void,Temporal::timecnt_t,void*> MaxDurationChanged;
 
 	/** Emitted when the mionimum item duration is changed */
-	sigc::signal<void,samplecnt_t,void*> MinDurationChanged;
+	sigc::signal<void,Temporal::timecnt_t,void*> MinDurationChanged;
 
 	enum Visibility {
 		ShowFrame = 0x1,
@@ -161,11 +161,11 @@ public:
 
 protected:
 	TimeAxisViewItem (const std::string &, ArdourCanvas::Item&, TimeAxisView&, double, uint32_t fill_color,
-	                  samplepos_t, samplecnt_t, bool recording = false, bool automation = false, Visibility v = Visibility (0));
+	                  Temporal::timepos_t const &, Temporal::timecnt_t const &, bool recording = false, bool automation = false, Visibility v = Visibility (0));
 
 	TimeAxisViewItem (const TimeAxisViewItem&);
 
-	void init (ArdourCanvas::Item*, double, uint32_t, samplepos_t, samplepos_t, Visibility, bool, bool);
+	void init (ArdourCanvas::Item*, double, uint32_t, Temporal::timepos_t const &, Temporal::timecnt_t const &, Visibility, bool, bool);
 
 	virtual bool canvas_group_event (GdkEvent*);
 
@@ -186,16 +186,16 @@ protected:
 	bool position_locked;
 
 	/** position of this item on the timeline */
-	samplepos_t sample_position;
+	Temporal::timepos_t time_position;
 
 	/** duration of this item upon the timeline */
-	samplecnt_t item_duration;
+	Temporal::timecnt_t item_duration;
 
 	/** maximum duration that this item can have */
-	samplecnt_t max_item_duration;
+	Temporal::timecnt_t max_item_duration;
 
 	/** minimum duration that this item can have */
-	samplecnt_t min_item_duration;
+	Temporal::timecnt_t min_item_duration;
 
 	/** indicates whether the max duration constraint is active */
 	bool max_duration_active;

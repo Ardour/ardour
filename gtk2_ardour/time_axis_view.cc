@@ -881,17 +881,17 @@ TimeAxisView::show_selection (TimeSelection& ts)
 	}
 
 	for (list<TimelineRange>::iterator i = ts.begin(); i != ts.end(); ++i) {
-		samplepos_t start, end;
-		samplecnt_t cnt;
+		timepos_t start, end;
+		timecnt_t cnt;
 
-		start = (*i).start;
-		end = (*i).end;
-		cnt = end - start + 1;
+		start = (*i).start();
+		end = (*i).end();
+		cnt = start.distance (end); /* XXX NUTEMPO used to add 1 here */
 
 		rect = get_selection_rect ((*i).id);
 
-		x1 = _editor.sample_to_pixel (start);
-		x2 = _editor.sample_to_pixel (start + cnt - 1);
+		x1 = _editor.time_to_pixel (start);
+		x2 = _editor.time_to_pixel (end.decrement());
 		y2 = current_height() - 1;
 
 		if (dynamic_cast<AudioTimeAxisView*>(this)) {
@@ -1072,7 +1072,7 @@ TimeAxisView::remove_child (boost::shared_ptr<TimeAxisView> child)
  *  @param result Filled in with selectable things.
  */
 void
-TimeAxisView::get_selectables (samplepos_t start, samplepos_t end, double top, double bot, list<Selectable*>& results, bool within)
+TimeAxisView::get_selectables (timepos_t const & start, timepos_t const & end, double top, double bot, list<Selectable*>& results, bool within)
 {
 	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
 		if (!(*i)->hidden()) {
