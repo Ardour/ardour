@@ -98,14 +98,15 @@ Steinberg::utf8_to_tchar (Vst::TChar* rv, const char* s, size_t l)
 {
 	glong      len;
 	gunichar2* s16 = g_utf8_to_utf16 (s, -1, NULL, &len, NULL);
-	if (!s16 || len == 0) {
+	if (!s16 || len <= 0) {
 		memset (rv, 0, sizeof (Vst::TChar));
 		return false;
 	}
-	if (l > 0 && l < len) {
-		len = l;
+	if (l > 0 && l <= (size_t) len) {
+		len = l - 1;
 	}
 	memcpy (rv, s16, len * sizeof (Vst::TChar));
+	rv[len] = '\0';
 	g_free (s16);
 	return true;
 }
