@@ -540,8 +540,7 @@ def build(bld):
                                    'test/dummy_lxvst.cc', 'test/audio_region_test.cc', 'test/test_util.cc', 'test/test_ui.cc']
         testcommon.uselib       = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD', 'OSX', 'FFTW3F',
                                    'SAMPLERATE','XML','LRDF','COREAUDIO','TAGLIB','VAMPSDK','VAMPHOSTSDK','RUBBERBAND']
-        testcommon.use          = ['libpbd','libmidipp','libevoral',
-                                   'libaudiographer','libardour']
+        testcommon.use          = ['libpbd', 'libmidipp', 'libevoral', 'libaudiographer', 'libardour']
         if bld.is_defined('USE_EXTERNAL_LIBS'):
             testcommon.uselib.extend(['LIBLTC', 'LIBFLUIDSYNTH'])
         else:
@@ -660,13 +659,7 @@ def create_ardour_test_program(bld, includes, name, target, sources):
     testobj.source       = sources
     testobj.uselib       = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD', 'FFTW3F', 'OSX',
                             'SAMPLERATE','XML','LRDF','COREAUDIO','TAGLIB','VAMPSDK','VAMPHOSTSDK','RUBBERBAND']
-    testobj.use          = ['libpbd','libmidipp','libevoral',
-                            'libaudiographer','libardour','testcommon']
-    if bld.is_defined('USE_EXTERNAL_LIBS'):
-        testobj.uselib.extend(['LIBLTC', 'LIBFLUIDSYNTH'])
-    else:
-        testobj.use.extend(['libltc', 'libfluidsynth'])
-
+    testobj.use          = [ 'testcommon' ]
     testobj.name         = name
     testobj.target       = target
     # not sure about install path
