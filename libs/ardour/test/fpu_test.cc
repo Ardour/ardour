@@ -122,7 +122,7 @@ FPUTest::avxTest ()
 	mix_buffers_no_gain   = x86_sse_avx_mix_buffers_no_gain;
 	copy_vector           = x86_sse_avx_copy_vector;
 
-	run (/*align_max*/ 0); // XXX work-around segfalt in x86_sse_avx_apply_gain_to_buffer
+	run (align_max);
 }
 
 void
