@@ -243,55 +243,22 @@ x86_sse_avx_find_peaks(const float *src, uint32_t nframes, float *minf, float *m
 C_FUNC void
 x86_sse_avx_apply_gain_to_buffer(float *dst, uint32_t nframes, float gain)
 {
+	// Convert to signed integer to prevent any arithmetic overflow errors
+	int32_t frames = (int32_t)nframes;
 	// Load gain vector to all elements of YMM register
 	__m256 vgain = _mm256_set1_ps(gain);
 
-	if (nframes) {
+	do {
 		__m128 g0 = _mm256_castps256_ps128(vgain);
-		// Here comes the horror, poor-man's loop unrolling
-		switch (((intptr_t)dst) % 32) {
-		case 0:
-		default:
-			// Buffer is aligned, skip to the next section of aligned
-			break;
-		case 4:
-			_mm_store_ss(dst, _mm_mul_ss(g0, _mm_load_ss(dst)));
+		while (!IS_ALIGNED_TO(dst, sizeof(__m256)) && (frames > 0)) {
+			_mm_store_ss(dst, _mm_mul_ps(g0, _mm_load_ss(dst)));
 			++dst;
-			--nframes;
-		case 8:
-			_mm_store_ss(dst, _mm_mul_ss(g0, _mm_load_ss(dst)));
-			++dst;
-			--nframes;
-		case 12:
-			_mm_store_ss(dst, _mm_mul_ss(g0, _mm_load_ss(dst)));
-			++dst;
-			--nframes;
-		case 16:
-			// This is a special case where pointer is 16 byte aligned
-			// for a XMM load/store operation.
-			_mm_store_ps(dst, _mm_mul_ps(g0, _mm_load_ps(dst)));
-			dst += 4;
-			nframes -= 4;
-			break;
-		case 20:
-			_mm_store_ss(dst, _mm_mul_ss(g0, _mm_load_ss(dst)));
-			++dst;
-			--nframes;
-		case 24:
-			_mm_store_ss(dst, _mm_mul_ss(g0, _mm_load_ss(dst)));
-			++dst;
-			--nframes;
-		case 28:
-			_mm_store_ss(dst, _mm_mul_ss(g0, _mm_load_ss(dst)));
-			++dst;
-			--nframes;
+			--frames;
 		}
-	} else {
-		return;
-	}
+	} while (0);
 
 	// Process the remaining samples 16 at a time
-	while (nframes >= 16)
+	while (frames >= 16)
 	{
 #if defined(COMPILER_MSVC) || defined(COMPILER_MINGW)
 		_mm_prefetch(((char *)dst + (16 * sizeof(float))), _mm_hint(0));
@@ -299,24 +266,24 @@ x86_sse_avx_apply_gain_to_buffer(float *dst, uint32_t nframes, float gain)
 		__builtin_prefetch(dst + (16 * sizeof(float)), 0, 0);
 #endif
 		__m256 d0, d1;
-		d0 = _mm256_load_ps(dst + 0 );
-		d1 = _mm256_load_ps(dst + 8 );
+		d0 = _mm256_load_ps(dst + 0);
+		d1 = _mm256_load_ps(dst + 8);
 
 		d0 = _mm256_mul_ps(vgain, d0);
 		d1 = _mm256_mul_ps(vgain, d1);
 
-		_mm256_store_ps(dst + 0 , d0);
-		_mm256_store_ps(dst + 8 , d1);
+		_mm256_store_ps(dst + 0, d0);
+		_mm256_store_ps(dst + 8, d1);
 
 		dst += 16;
-		nframes -= 16;
+		frames -= 16;
 	}
 
 	// Process the remaining samples 8 at a time
-	while (nframes >= 8) {
+	while (frames >= 8) {
 		_mm256_store_ps(dst, _mm256_mul_ps(vgain, _mm256_load_ps(dst)));
 		dst += 8;
-		nframes -= 8;
+		frames -= 8;
 	}
 
 
@@ -329,10 +296,10 @@ x86_sse_avx_apply_gain_to_buffer(float *dst, uint32_t nframes, float gain)
 	// Process the remaining samples
 	do {
 		__m128 g0 = _mm256_castps256_ps128(vgain);
-		while (nframes > 0) {
-			_mm_store_ss(dst, _mm_mul_ss(g0, _mm_load_ss(dst)));
+		while (frames > 0) {
+			_mm_store_ss(dst, _mm_mul_ps(g0, _mm_load_ss(dst)));
 			++dst;
-			--nframes;
+			--frames;
 		}
 	} while (0);
 }
