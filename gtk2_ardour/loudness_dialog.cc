@@ -583,7 +583,9 @@ LoudnessDialog::display_results ()
 	ExportAnalysisPtr p = ar.begin()->second;
 
 	if (!p->have_loudness || !p->have_dbtp) {
-		ArdourMessageDialog (_("True-peak and loudness measurement failed. Likely Ardour's VAMP analysis plugin is missing from your installation. Please contact your vendor."), false, MESSAGE_ERROR).run ();
+		ArdourMessageDialog (
+				string_compose (_("True-peak and loudness measurement failed. %1-VAMP analysis plugin is missing on your system. Please contact your vendor."), PROGRAM_NAME),
+				false, MESSAGE_ERROR).run ();
 	}
 
 	_dbfs   = accurate_coefficient_to_dB (p->peak);

@@ -3719,7 +3719,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Plugins/VST"),
 	     new BoolOption (
 		     "conceal-vst2-if-vst3-exists",
-		     _("Conceal VST2 Plugins if matching VST3 exists"),
+		     _("Conceal VST2 Plugin if matching VST3 exists"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_conceal_vst2_if_vst3_exists),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_conceal_vst2_if_vst3_exists)
 		     ));
