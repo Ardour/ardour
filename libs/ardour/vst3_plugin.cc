@@ -2689,15 +2689,9 @@ VST3PI::setContextInfoValue (FIDString id, int32 value)
 	} else if (0 == strcmp (id, ContextInfo::kMultiSelect)) {
 		_add_to_selection = value != 0;
 	} else if (0 == strcmp (id, ContextInfo::kMute)) {
-		boost::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
-		if (ac) {
-			ac->set_value (value != 0 ? 1 : 0, Controllable::NoGroup);
-		}
+		s->session().set_control (lookup_ac (_owner, id), value != 0 ? 1 : 0, Controllable::NoGroup);
 	} else if (0 == strcmp (id, ContextInfo::kSolo)) {
-		boost::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
-		if (ac) {
-			ac->set_value (value != 0 ? 1 : 0, Controllable::NoGroup);
-		}
+		s->session().set_control (lookup_ac (_owner, id), value != 0 ? 1 : 0, Controllable::NoGroup);
 	} else {
 		DEBUG_TRACE (DEBUG::VST3Callbacks, "VST3PI::setContextInfoValue<int>: unsupported ID\n");
 		return kNotImplemented;

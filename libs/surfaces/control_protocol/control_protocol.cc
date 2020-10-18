@@ -287,8 +287,7 @@ ControlProtocol::route_set_soloed (uint32_t table_index, bool yn)
 	boost::shared_ptr<Route> r = route_table[table_index];
 
 	if (r != 0) {
-		r->solo_control()->set_value (yn ? 1.0 : 0.0, Controllable::UseGroup); // XXX does not propagate
-		//_session->set_control (r->solo_control(), yn ? 1.0 : 0.0, Controllable::UseGroup); // << correct way, needs a session ptr
+		session->set_control (r->solo_control(), yn ? 1.0 : 0.0, Controllable::UseGroup);
 	}
 }
 

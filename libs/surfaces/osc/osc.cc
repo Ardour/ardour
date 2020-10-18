@@ -4205,9 +4205,7 @@ OSC::route_solo (int ssid, int yn, lo_message msg)
 		if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
 			return float_message_with_id (X_("/strip/solo"), ssid, 0, sur->feedback[2], get_address (msg));
 		}
-		if (s->solo_control()) {
-			s->solo_control()->set_value (yn ? 1.0 : 0.0, sur->usegroup);
-		}
+		session->set_control (s->solo_control(), yn ? 1.0 : 0.0, sur->usegroup);
 	}
 
 	return float_message_with_id (X_("/strip/solo"), ssid, 0, sur->feedback[2], get_address (msg));

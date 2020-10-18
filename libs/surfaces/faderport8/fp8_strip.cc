@@ -411,7 +411,9 @@ FP8Strip::set_solo (bool on)
 		return;
 	}
 	_solo_ctrl->start_touch (_solo_ctrl->session().transport_sample());
-	_solo_ctrl->set_value (on ? 1.0 : 0.0, group_mode ());
+	PBD::Controllable::GroupControlDisposition gcd = group_mode ();
+	Session& s = const_cast<Session&> (_solo_ctrl->session());
+	s.set_control (_solo_ctrl, on ? 1.0 : 0.0, gcd);
 }
 
 void
