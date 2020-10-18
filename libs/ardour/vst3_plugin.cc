@@ -36,6 +36,7 @@
 #include "ardour/audio_buffer.h"
 #include "ardour/audioengine.h"
 #include "ardour/debug.h"
+#include "ardour/selection.h"
 #include "ardour/session.h"
 #include "ardour/stripable.h"
 #include "ardour/tempo.h"
@@ -2521,7 +2522,7 @@ VST3PI::getContextInfoValue (int32& value, FIDString id)
 	} else if (0 == strcmp (id, ContextInfo::kSelected)) {
 		value = s->is_selected () ? 1 : 0;
 	} else if (0 == strcmp (id, ContextInfo::kFocused)) {
-		boost::shared_ptr<Stripable> stripable; // = s->session().selection().first_selected_stripable ();
+		boost::shared_ptr<Stripable> stripable = s->session().selection().first_selected_stripable ();
 		value = stripable && stripable.get () == s ? 1 : 0;
 	} else if (0 == strcmp (id, ContextInfo::kSendCount)) {
 		value = 0;
@@ -2679,8 +2680,11 @@ VST3PI::setContextInfoValue (FIDString id, int32 value)
 		boost::shared_ptr<Stripable> stripable = s->session().stripable_by_id (s->id ());
 		assert (stripable);
 		if (value == 0) {
+			s->session().selection().remove (stripable, boost::shared_ptr<AutomationControl>());
 		} else if (_add_to_selection) {
+			s->session().selection().add (stripable, boost::shared_ptr<AutomationControl>());
 		} else {
+			s->session().selection().set (stripable, boost::shared_ptr<AutomationControl>());
 		}
 	} else if (0 == strcmp (id, ContextInfo::kMultiSelect)) {
 		_add_to_selection = value != 0;
