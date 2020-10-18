@@ -57,6 +57,8 @@ class LIBARDOUR_API CoreSelection : public PBD::Stateful {
 
 	void clear_stripables();
 
+	boost::shared_ptr<Stripable> first_selected_stripable () const;
+
 	bool selected (boost::shared_ptr<const Stripable>) const;
 	bool selected (boost::shared_ptr<const AutomationControl>) const;
 	uint32_t selected() const;
@@ -110,6 +112,8 @@ class LIBARDOUR_API CoreSelection : public PBD::Stateful {
 	};
 
 	typedef std::set<SelectedStripable> SelectedStripables;
+
+	boost::weak_ptr<ARDOUR::Stripable> _first_selected_stripable;
 
 	SelectedStripables _stripables;
 

@@ -255,6 +255,12 @@ CoreSelection::set (StripableList& sl)
 				DEBUG_TRACE (DEBUG::Selection, string_compose ("%1 already in s/c selection\n", (*s)->name()));
 			}
 		}
+
+		if (sl.size () > 0) {
+			_first_selected_stripable = sl.back ();
+		} else {
+			_first_selected_stripable.reset ();
+		}
 	}
 
 	if (send || !removed.empty()) {
@@ -295,6 +301,7 @@ CoreSelection::add (boost::shared_ptr<Stripable> s, boost::shared_ptr<Automation
 		} else {
 			DEBUG_TRACE (DEBUG::Selection, string_compose ("%1/%2 already in s/c selection\n", s->name(), c));
 		}
+		_first_selected_stripable = s;
 	}
 
 	if (send) {
@@ -325,6 +332,9 @@ CoreSelection::remove (boost::shared_ptr<Stripable> s, boost::shared_ptr<Automat
 			DEBUG_TRACE (DEBUG::Selection, string_compose ("removed %1/%2 from s/c selection\n", s, c));
 			send = true;
 		}
+		if (s == _first_selected_stripable.lock ()) {
+			_first_selected_stripable.reset ();
+		}
 	}
 
 	if (send) {
@@ -353,6 +363,7 @@ CoreSelection::set (boost::shared_ptr<Stripable> s, boost::shared_ptr<Automation
 
 		_stripables.clear ();
 		_stripables.insert (ss);
+		_first_selected_stripable = s;
 		DEBUG_TRACE (DEBUG::Selection, string_compose ("set s/c selection to %1/%2\n", s->name(), c));
 	}
 
@@ -393,6 +404,8 @@ CoreSelection::clear_stripables ()
 			send = true;
 			DEBUG_TRACE (DEBUG::Selection, "cleared s/c selection\n");
 		}
+
+		_first_selected_stripable.reset ();
 	}
 
 	if (send) {
@@ -405,6 +418,13 @@ CoreSelection::clear_stripables ()
 		}
 
 	}
+}
+
+boost::shared_ptr<Stripable>
+CoreSelection::first_selected_stripable () const
+{
+	Glib::Threads::RWLock::ReaderLock lm (_lock);
+  return _first_selected_stripable.lock();
 }
 
 bool
@@ -513,6 +533,12 @@ CoreSelection::remove_stripable_by_id (PBD::ID const & id)
 
 	for (SelectedStripables::iterator x = _stripables.begin(); x != _stripables.end(); ) {
 		if ((*x).stripable == id) {
+			if (_first_selected_stripable.lock ()) {
+				if (session.stripable_by_id (id) == _first_selected_stripable.lock ()) {
+					_first_selected_stripable.reset ();
+				}
+			}
+
 			_stripables.erase (x++);
 			/* keep going because there may be more than 1 pair of
 			   stripable/automation-control in the selection.
