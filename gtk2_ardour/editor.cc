@@ -814,12 +814,6 @@ Editor::Editor ()
 	ControlProtocol::VerticalZoomInSelected.connect (*this, invalidator (*this), boost::bind (&Editor::control_vertical_zoom_in_selected, this), gui_context());
 	ControlProtocol::VerticalZoomOutSelected.connect (*this, invalidator (*this), boost::bind (&Editor::control_vertical_zoom_out_selected, this), gui_context());
 
-	ControlProtocol::AddStripableToSelection.connect (*this, invalidator (*this), boost::bind (&Editor::control_select, this, _1, Selection::Add), gui_context());
-	ControlProtocol::RemoveStripableFromSelection.connect (*this, invalidator (*this), boost::bind (&Editor::control_select, this, _1, Selection::Toggle), gui_context());
-	ControlProtocol::SetStripableSelection.connect (*this, invalidator (*this), boost::bind (&Editor::control_select, this, _1, Selection::Set), gui_context());
-	ControlProtocol::ToggleStripableSelection.connect (*this, invalidator (*this), boost::bind (&Editor::control_select, this, _1, Selection::Toggle), gui_context());
-	ControlProtocol::ClearStripableSelection.connect (*this, invalidator (*this), boost::bind (&Editor::control_unselect, this), gui_context());
-
 	BasicUI::AccessAction.connect (*this, invalidator (*this), boost::bind (&Editor::access_action, this, _1, _2), gui_context());
 
 	/* handle escape */
@@ -1024,36 +1018,6 @@ void
 Editor::control_view (uint32_t view)
 {
 	goto_visual_state (view);
-}
-
-void
-Editor::control_unselect ()
-{
-	selection->clear_tracks ();
-}
-
-void
-Editor::control_select (boost::shared_ptr<Stripable> s, Selection::Operation op)
-{
-	TimeAxisView* tav = time_axis_view_from_stripable (s);
-
-	if (tav) {
-		switch (op) {
-		case Selection::Add:
-			selection->add (tav);
-			break;
-		case Selection::Toggle:
-			selection->toggle (tav);
-			break;
-		case Selection::Extend:
-			break;
-		case Selection::Set:
-			selection->set (tav);
-			break;
-		}
-	} else {
-		selection->clear_tracks ();
-	}
 }
 
 void

@@ -1117,8 +1117,6 @@ private:
 	void control_step_tracks_down ();
 	void control_view (uint32_t);
 	void control_scroll (float);
-	void control_select (boost::shared_ptr<ARDOUR::Stripable>, Selection::Operation);
-	void control_unselect ();
 	void access_action (const std::string&, const std::string&);
 	void set_toggleaction (const std::string&, const std::string&, bool);
 	bool deferred_control_scroll (samplepos_t);

@@ -224,12 +224,6 @@ Editor::set_selected_mixer_strip (TimeAxisView& view)
 		}
 	}
 
-	/* Typically this is set by changing the TAV selection but if for any
-	 * reason we decide to show a different strip for some reason, make
-	 * sure that control surfaces can find it.
-	 */
-	ARDOUR::ControlProtocol::set_first_selected_stripable (stripable);
-
 	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (X_("Editor"), X_("show-editor-mixer"));
 
 	if (act) {
