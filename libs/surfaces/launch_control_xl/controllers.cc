@@ -898,9 +898,9 @@ LaunchControlXL::button_track_focus(uint8_t n)
 
 	if (stripable[n]) {
 		if ( stripable[n]->is_selected() ) {
-			 ControlProtocol::RemoveStripableFromSelection (stripable[n]);
+			 ControlProtocol::remove_stripable_from_selection (stripable[n]);
 		} else {
-			ControlProtocol::AddStripableToSelection (stripable[n]);
+			ControlProtocol::add_stripable_to_selection (stripable[n]);
 		}
 	} else {
 		return;

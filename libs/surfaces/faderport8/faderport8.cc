@@ -1710,9 +1710,9 @@ FaderPort8::select_strip (boost::weak_ptr<Stripable> ws)
 # endif
 
 	if (shift_mod ()) {
-		ToggleStripableSelection (s);
+		toggle_stripable_selection (s);
 	} else {
-		SetStripableSelection (s);
+		set_stripable_selection (s);
 	}
 #else
 	/* tri-state selection: This allows to set the "first selected"
@@ -1721,9 +1721,9 @@ FaderPort8::select_strip (boost::weak_ptr<Stripable> ws)
 	 */
 	if (shift_mod ()) {
 		if (s->is_selected ()) {
-			RemoveStripableFromSelection (s);
+			remove_stripable_from_selection (s);
 		} else {
-			SetStripableSelection (s);
+			set_stripable_selection (s);
 		}
 		return;
 	}
@@ -1731,7 +1731,7 @@ FaderPort8::select_strip (boost::weak_ptr<Stripable> ws)
 		set_first_selected_stripable (s);
 		stripable_selection_changed ();
 	} else {
-		ToggleStripableSelection (s);
+		toggle_stripable_selection (s);
 	}
 #endif
 }
@@ -1975,9 +1975,9 @@ FaderPort8::select_prev_next (bool next)
 	if (!selected) {
 		if (strips.size() > 0) {
 			if (next) {
-				SetStripableSelection (strips.front ());
+				set_stripable_selection (strips.front ());
 			} else {
-				SetStripableSelection (strips.back ());
+				set_stripable_selection (strips.back ());
 			}
 		}
 		return;
@@ -2004,7 +2004,7 @@ FaderPort8::select_prev_next (bool next)
 	}
 
 	if (found && toselect) {
-		SetStripableSelection (toselect);
+		set_stripable_selection (toselect);
 	}
 }
 

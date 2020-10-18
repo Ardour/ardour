@@ -746,7 +746,7 @@ Push2::button_master ()
 	}
 
 	if (_current_layout != track_mix_layout) {
-		ControlProtocol::SetStripableSelection (main_out);
+		ControlProtocol::set_stripable_selection (main_out);
 		set_current_layout (track_mix_layout);
 	} else {
 		TrackMixLayout* tml = dynamic_cast<TrackMixLayout*> (_current_layout);
@@ -754,7 +754,7 @@ Push2::button_master ()
 			/* back to previous layout */
 			set_current_layout (_previous_layout);
 		} else {
-			ControlProtocol::SetStripableSelection (main_out);
+			ControlProtocol::set_stripable_selection (main_out);
 		}
 	}
 }

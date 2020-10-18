@@ -343,31 +343,31 @@ ControlProtocol::first_selected_stripable () const
 }
 
 void
-ControlProtocol::AddStripableToSelection (boost::shared_ptr<ARDOUR::Stripable> s)
+ControlProtocol::add_stripable_to_selection (boost::shared_ptr<ARDOUR::Stripable> s)
 {
 	session->selection().add (s, boost::shared_ptr<AutomationControl>());
 }
 
 void
-ControlProtocol::SetStripableSelection (boost::shared_ptr<ARDOUR::Stripable> s)
+ControlProtocol::set_stripable_selection (boost::shared_ptr<ARDOUR::Stripable> s)
 {
 	session->selection().select_stripable_and_maybe_group (s, true, true, 0);
 }
 
 void
-ControlProtocol::ToggleStripableSelection (boost::shared_ptr<ARDOUR::Stripable> s)
+ControlProtocol::toggle_stripable_selection (boost::shared_ptr<ARDOUR::Stripable> s)
 {
 	session->selection().toggle (s, boost::shared_ptr<AutomationControl>());
 }
 
 void
-ControlProtocol::RemoveStripableFromSelection (boost::shared_ptr<ARDOUR::Stripable> s)
+ControlProtocol::remove_stripable_from_selection (boost::shared_ptr<ARDOUR::Stripable> s)
 {
 	session->selection().remove (s, boost::shared_ptr<AutomationControl>());
 }
 
 void
-ControlProtocol::ClearStripableSelection ()
+ControlProtocol::clear_stripable_selection ()
 {
 	session->selection().clear_stripables ();
 }

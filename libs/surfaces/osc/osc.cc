@@ -3591,7 +3591,7 @@ OSC::master_select (lo_message msg)
 	sur->expand_enable = false;
 	boost::shared_ptr<Stripable> s = session->master_out();
 	if (s) {
-		SetStripableSelection (s);
+		set_stripable_selection (s);
 	}
 
 	return 0;
@@ -4839,7 +4839,7 @@ OSC::strip_gui_select (int ssid, int yn, lo_message msg)
 	boost::shared_ptr<Stripable> s = get_strip (ssid, get_address (msg));
 	if (s) {
 		sur->expand_enable = false;
-		SetStripableSelection (s);
+		set_stripable_selection (s);
 	} else {
 		if ((int) (sur->feedback.to_ulong())) {
 			float_message_with_id (X_("/strip/select"), ssid, 0, sur->feedback[2], get_address (msg));
@@ -4924,7 +4924,7 @@ OSC::sel_delta (int delta, lo_message msg)
 	}
 	if (new_sel) {
 		if (!sur->expand_enable) {
-			SetStripableSelection (new_sel);
+			set_stripable_selection (new_sel);
 		} else {
 			sur->expand_strip = new_sel;
 			_strip_select (new_sel, get_address (msg));

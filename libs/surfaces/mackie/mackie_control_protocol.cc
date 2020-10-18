@@ -1978,17 +1978,17 @@ MackieControlProtocol::select_range (uint32_t pressed)
 
 	if (stripables.size() == 1 && ControlProtocol::last_selected().size() == 1 && stripables.front()->is_selected()) {
 		/* cancel selection for one and only selected stripable */
-		ToggleStripableSelection (stripables.front());
+		toggle_stripable_selection (stripables.front());
 	} else {
 		for (StripableList::iterator s = stripables.begin(); s != stripables.end(); ++s) {
 
 			if (main_modifier_state() == MODIFIER_SHIFT) {
-				ToggleStripableSelection (*s);
+				toggle_stripable_selection (*s);
 			} else {
 				if (s == stripables.begin()) {
-					SetStripableSelection (*s);
+					set_stripable_selection (*s);
 				} else {
-					AddStripableToSelection (*s);
+					add_stripable_to_selection (*s);
 				}
 			}
 		}

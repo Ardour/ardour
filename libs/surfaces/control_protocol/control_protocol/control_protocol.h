@@ -82,11 +82,11 @@ public:
 	static PBD::Signal0<void> StepTracksDown;
 	static PBD::Signal0<void> StepTracksUp;
 
-	void AddStripableToSelection (boost::shared_ptr<ARDOUR::Stripable>);
-	void SetStripableSelection (boost::shared_ptr<ARDOUR::Stripable>);
-	void ToggleStripableSelection (boost::shared_ptr<ARDOUR::Stripable>);
-	void RemoveStripableFromSelection (boost::shared_ptr<ARDOUR::Stripable>);
-	void ClearStripableSelection ();
+	void add_stripable_to_selection (boost::shared_ptr<ARDOUR::Stripable>);
+	void set_stripable_selection (boost::shared_ptr<ARDOUR::Stripable>);
+	void toggle_stripable_selection (boost::shared_ptr<ARDOUR::Stripable>);
+	void remove_stripable_from_selection (boost::shared_ptr<ARDOUR::Stripable>);
+	void clear_stripable_selection ();
 
 	boost::shared_ptr<ARDOUR::Stripable> first_selected_stripable () const;
 
