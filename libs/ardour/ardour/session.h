@@ -317,7 +317,7 @@ public:
 
 	RouteList get_routelist (bool mixer_order = false, PresentationInfo::Flag fl = PresentationInfo::MixerRoutes) const;
 
-	CoreSelection& selection () { return *_selection; }
+	CoreSelection& selection () const { return *_selection; }
 
 	/* because the set of Stripables consists of objects managed
 	 * independently, in multiple containers within the Session (or objects

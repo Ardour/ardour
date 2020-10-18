@@ -40,6 +40,7 @@
 #include "ardour/midiport_manager.h"
 #include "ardour/midi_track.h"
 #include "ardour/midi_port.h"
+#include "ardour/selection.h"
 #include "ardour/session.h"
 #include "ardour/tempo.h"
 #include "ardour/utils.h"
@@ -387,7 +388,7 @@ MixLayout::show_vpot_mode ()
 void
 MixLayout::button_mute ()
 {
-	boost::shared_ptr<Stripable> s = ControlProtocol::first_selected_stripable();
+	boost::shared_ptr<Stripable> s = session.selection().first_selected_stripable();
 	if (s) {
 		boost::shared_ptr<AutomationControl> ac = s->mute_control();
 		if (ac) {
@@ -399,7 +400,7 @@ MixLayout::button_mute ()
 void
 MixLayout::button_solo ()
 {
-	boost::shared_ptr<Stripable> s = ControlProtocol::first_selected_stripable();
+	boost::shared_ptr<Stripable> s = session.selection().first_selected_stripable();
 	if (s) {
 		boost::shared_ptr<AutomationControl> ac = s->solo_control();
 		if (ac) {
@@ -415,7 +416,7 @@ MixLayout::button_lower (uint32_t n)
 		return;
 	}
 
-	ControlProtocol::SetStripableSelection (stripable[n]);
+	session.selection().set (stripable[n], boost::shared_ptr<AutomationControl>());
 }
 
 void
@@ -686,7 +687,7 @@ MixLayout::button_select_release ()
 		/* no visible track selected, select first (if any) */
 
 		if (stripable[0]) {
-			ControlProtocol::SetStripableSelection (stripable[0]);
+			session.selection().set (stripable[0], boost::shared_ptr<AutomationControl>());
 		}
 
 	} else {
@@ -699,10 +700,10 @@ MixLayout::button_select_release ()
 				   switch banks by one, and select leftmost
 				*/
 				if (bank_start != 0) {
-					ControlProtocol::ClearStripableSelection ();
+					session.selection().clear_stripables ();
 					switch_bank (bank_start-1);
 					if (stripable[0]) {
-						ControlProtocol::SetStripableSelection (stripable[0]);
+						session.selection().set (stripable[0], boost::shared_ptr<AutomationControl>());
 					}
 				}
 			} else {
@@ -712,7 +713,7 @@ MixLayout::button_select_release ()
 					--n;
 				}
 				if (n >= 0) {
-					ControlProtocol::SetStripableSelection (stripable[n]);
+					session.selection().set (stripable[n], boost::shared_ptr<AutomationControl>());
 				}
 			}
 
@@ -724,10 +725,10 @@ MixLayout::button_select_release ()
 				/* current selected is rightmost ... cancel selection,
 				   switch banks by one, and select righmost
 				*/
-				ControlProtocol::ToggleStripableSelection (stripable[selected]);
+				session.selection().toggle (stripable[selected], boost::shared_ptr<AutomationControl>());
 				switch_bank (bank_start+1);
 				if (stripable[7]) {
-					ControlProtocol::SetStripableSelection (stripable[7]);
+					session.selection().set (stripable[7], boost::shared_ptr<AutomationControl>());
 				}
 			} else {
 				/* select next, if any */
@@ -737,7 +738,7 @@ MixLayout::button_select_release ()
 				}
 
 				if (n != 8) {
-					ControlProtocol::SetStripableSelection (stripable[n]);
+					session.selection().set (stripable[n], boost::shared_ptr<AutomationControl>());
 				}
 			}
 		}

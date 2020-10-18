@@ -30,6 +30,7 @@
 #include "ardour/audio_track.h"
 #include "ardour/meter.h"
 #include "ardour/amp.h"
+#include "ardour/selection.h"
 #include "control_protocol/control_protocol.h"
 
 using namespace ARDOUR;
@@ -52,15 +53,6 @@ PBD::Signal0<void> ControlProtocol::VerticalZoomOutSelected;
 PBD::Signal0<void>          ControlProtocol::StepTracksDown;
 PBD::Signal0<void>          ControlProtocol::StepTracksUp;
 
-PBD::Signal1<void,boost::shared_ptr<ARDOUR::Stripable> > ControlProtocol::AddStripableToSelection;
-PBD::Signal1<void,boost::shared_ptr<ARDOUR::Stripable> > ControlProtocol::SetStripableSelection;
-PBD::Signal1<void,boost::shared_ptr<ARDOUR::Stripable> > ControlProtocol::ToggleStripableSelection;
-PBD::Signal1<void,boost::shared_ptr<ARDOUR::Stripable> > ControlProtocol::RemoveStripableFromSelection;
-PBD::Signal0<void>          ControlProtocol::ClearStripableSelection;
-
-Glib::Threads::Mutex ControlProtocol::special_stripable_mutex;
-boost::weak_ptr<Stripable> ControlProtocol::_first_selected_stripable;
-boost::weak_ptr<Stripable> ControlProtocol::_leftmost_mixer_stripable;
 StripableNotificationList ControlProtocol::_last_selected;
 PBD::ScopedConnection ControlProtocol::selection_connection;
 bool ControlProtocol::selection_connected = false;
@@ -345,49 +337,43 @@ ControlProtocol::set_state (XMLNode const & node, int /* version */)
 }
 
 boost::shared_ptr<Stripable>
-ControlProtocol::first_selected_stripable ()
+ControlProtocol::first_selected_stripable () const
 {
-	Glib::Threads::Mutex::Lock lm (special_stripable_mutex);
-	return _first_selected_stripable.lock();
-}
-
-boost::shared_ptr<Stripable>
-ControlProtocol::leftmost_mixer_stripable ()
-{
-	Glib::Threads::Mutex::Lock lm (special_stripable_mutex);
-	return _leftmost_mixer_stripable.lock();
+	return session->selection().first_selected_stripable ();
 }
 
 void
-ControlProtocol::set_leftmost_mixer_stripable (boost::shared_ptr<Stripable> s)
+ControlProtocol::AddStripableToSelection (boost::shared_ptr<ARDOUR::Stripable> s)
 {
-	Glib::Threads::Mutex::Lock lm (special_stripable_mutex);
-	_leftmost_mixer_stripable = s;
+	session->selection().add (s, boost::shared_ptr<AutomationControl>());
 }
 
 void
-ControlProtocol::set_first_selected_stripable (boost::shared_ptr<Stripable> s)
+ControlProtocol::SetStripableSelection (boost::shared_ptr<ARDOUR::Stripable> s)
 {
-	Glib::Threads::Mutex::Lock lm (special_stripable_mutex);
-	_first_selected_stripable = s;
+	session->selection().select_stripable_and_maybe_group (s, true, true, 0);
+}
+
+void
+ControlProtocol::ToggleStripableSelection (boost::shared_ptr<ARDOUR::Stripable> s)
+{
+	session->selection().toggle (s, boost::shared_ptr<AutomationControl>());
+}
+
+void
+ControlProtocol::RemoveStripableFromSelection (boost::shared_ptr<ARDOUR::Stripable> s)
+{
+	session->selection().remove (s, boost::shared_ptr<AutomationControl>());
+}
+
+void
+ControlProtocol::ClearStripableSelection ()
+{
+	session->selection().clear_stripables ();
 }
 
 void
 ControlProtocol::notify_stripable_selection_changed (StripableNotificationListPtr sp)
 {
-	bool had_selection = !_last_selected.empty();
-
 	_last_selected = *sp;
-
-	{
-		Glib::Threads::Mutex::Lock lm (special_stripable_mutex);
-
-		if (!_last_selected.empty()) {
-			if (!had_selection) {
-				_first_selected_stripable = _last_selected.front().lock();
-			}
-		} else {
-			_first_selected_stripable = boost::weak_ptr<Stripable>();
-		}
-	}
 }

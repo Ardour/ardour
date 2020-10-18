@@ -82,17 +82,13 @@ public:
 	static PBD::Signal0<void> StepTracksDown;
 	static PBD::Signal0<void> StepTracksUp;
 
-	static PBD::Signal1<void, boost::shared_ptr<ARDOUR::Stripable> > AddStripableToSelection;
-	static PBD::Signal1<void, boost::shared_ptr<ARDOUR::Stripable> > SetStripableSelection;
-	static PBD::Signal1<void, boost::shared_ptr<ARDOUR::Stripable> > ToggleStripableSelection;
-	static PBD::Signal1<void, boost::shared_ptr<ARDOUR::Stripable> > RemoveStripableFromSelection;
-	static PBD::Signal0<void> ClearStripableSelection;
+	void AddStripableToSelection (boost::shared_ptr<ARDOUR::Stripable>);
+	void SetStripableSelection (boost::shared_ptr<ARDOUR::Stripable>);
+	void ToggleStripableSelection (boost::shared_ptr<ARDOUR::Stripable>);
+	void RemoveStripableFromSelection (boost::shared_ptr<ARDOUR::Stripable>);
+	void ClearStripableSelection ();
 
-	static boost::shared_ptr<ARDOUR::Stripable> first_selected_stripable ();
-	static void set_first_selected_stripable (boost::shared_ptr<ARDOUR::Stripable>);
-
-	static boost::shared_ptr<ARDOUR::Stripable> leftmost_mixer_stripable ();
-	static void set_leftmost_mixer_stripable (boost::shared_ptr<ARDOUR::Stripable>);
+	boost::shared_ptr<ARDOUR::Stripable> first_selected_stripable () const;
 
 	/* the model here is as follows:
 
@@ -157,9 +153,6 @@ private:
 
 	bool _active;
 
-	static Glib::Threads::Mutex               special_stripable_mutex;
-	static boost::weak_ptr<ARDOUR::Stripable> _leftmost_mixer_stripable;
-	static boost::weak_ptr<ARDOUR::Stripable> _first_selected_stripable;
 	static StripableNotificationList          _last_selected;
 	static PBD::ScopedConnection              selection_connection;
 	static bool                               selection_connected;
