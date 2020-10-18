@@ -43,8 +43,6 @@
 #include "ardour/vst3_module.h"
 #include "ardour/vst3_plugin.h"
 
-#include "control_protocol/control_protocol.h"
-
 #include "pbd/i18n.h"
 
 using namespace PBD;
@@ -2523,7 +2521,7 @@ VST3PI::getContextInfoValue (int32& value, FIDString id)
 	} else if (0 == strcmp (id, ContextInfo::kSelected)) {
 		value = s->is_selected () ? 1 : 0;
 	} else if (0 == strcmp (id, ContextInfo::kFocused)) {
-		boost::shared_ptr<Stripable> stripable = ControlProtocol::first_selected_stripable ();
+		boost::shared_ptr<Stripable> stripable; // = s->session().selection().first_selected_stripable ();
 		value = stripable && stripable.get () == s ? 1 : 0;
 	} else if (0 == strcmp (id, ContextInfo::kSendCount)) {
 		value = 0;
@@ -2681,11 +2679,8 @@ VST3PI::setContextInfoValue (FIDString id, int32 value)
 		boost::shared_ptr<Stripable> stripable = s->session().stripable_by_id (s->id ());
 		assert (stripable);
 		if (value == 0) {
-			ControlProtocol::RemoveStripableFromSelection (stripable);
 		} else if (_add_to_selection) {
-			ControlProtocol::AddStripableToSelection (stripable);
 		} else {
-			ControlProtocol::SetStripableSelection (stripable);
 		}
 	} else if (0 == strcmp (id, ContextInfo::kMultiSelect)) {
 		_add_to_selection = value != 0;
