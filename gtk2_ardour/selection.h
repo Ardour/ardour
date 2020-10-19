@@ -137,7 +137,7 @@ public:
 	void set (RegionView*, bool also_clear_tracks = true);
 	void set (std::vector<RegionView*>&);
 	long set (Temporal::timepos_t const &, Temporal::timepos_t const &);
-	void set_preserving_all_ranges (samplepos_t, samplepos_t);
+	void set_preserving_all_ranges (Temporal::timepos_t const &, Temporal::timepos_t const &);
 	void set (boost::shared_ptr<Evoral::ControlList>);
 	void set (boost::shared_ptr<ARDOUR::Playlist>);
 	void set (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
@@ -151,7 +151,7 @@ public:
 	void toggle (RegionView*);
 	void toggle (MidiCutBuffer*);
 	void toggle (std::vector<RegionView*>&);
-	long toggle (samplepos_t, samplepos_t);
+	long toggle (Temporal::timepos_t const &, Temporal::timepos_t const &);
 	void toggle (ARDOUR::AutomationList*);
 	void toggle (boost::shared_ptr<ARDOUR::Playlist>);
 	void toggle (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);

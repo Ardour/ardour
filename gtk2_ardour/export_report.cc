@@ -171,7 +171,7 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 			clock = manage (new AudioClock ("sfboxLengthClock", true, "", false, false, true, false));
 			clock->set_session (_session);
 			clock->set_mode (AudioClock::MinSec);
-			clock->set (info.length * src_coef + 0.5, true);
+			clock->set_duration (timecnt_t (samplecnt_t (info.length * src_coef + 0.5)), true);
 			t->attach (*clock, 3, 4, 2, 3);
 
 			l = manage (new Label (_("Timecode:"), ALIGN_END));
@@ -179,7 +179,7 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 			clock = manage (new AudioClock ("sfboxTimecodeClock", true, "", false, false, false, false));
 			clock->set_session (_session);
 			clock->set_mode (AudioClock::Timecode);
-			clock->set (info.timecode * src_coef + 0.5, true);
+			clock->set_duration (timecnt_t (samplecnt_t (info.timecode * src_coef + 0.5)), true);
 			t->attach (*clock, 3, 4, 3, 4);
 		} else if (with_file) {
 			with_file = false;
@@ -918,13 +918,13 @@ ExportReport::audition (std::string path, unsigned n_chn, int page)
 	PBD::PropertyList plist;
 
 	plist.add (ARDOUR::Properties::start, 0);
-	plist.add (ARDOUR::Properties::length, srclist[0]->length(srclist[0]->natural_position()));
+	plist.add (ARDOUR::Properties::length, srclist[0]->length ());
 	plist.add (ARDOUR::Properties::name, rname);
 	plist.add (ARDOUR::Properties::layer, 0);
 
 	r = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (srclist, plist, false));
 
-	r->set_position(0);
+	r->set_position (timepos_t ());
 	_session->audition_region(r);
 	_audition_num = page;
 }

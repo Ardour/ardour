@@ -29,7 +29,7 @@ class MainClock : public AudioClock
 {
 public:
 	MainClock (const std::string& clock_name, const std::string& widget_name, bool primary);
-	samplepos_t absolute_time () const;
+	Temporal::timepos_t absolute_time () const;
 	void set_session (ARDOUR::Session *s);
 	void set (Temporal::timepos_t const &, bool force = false, Temporal::timecnt_t const & offset = Temporal::timecnt_t ());
 

@@ -58,7 +58,7 @@ using namespace PBD;
 
 struct TimelineRangeComparator {
 	bool operator()(TimelineRange a, TimelineRange b) {
-		return a.start < b.start;
+		return a.start() < b.start();
 	}
 };
 
@@ -302,7 +302,7 @@ Selection::toggle (vector<RegionView*>& r)
 }
 
 long
-Selection::toggle (samplepos_t start, samplepos_t end)
+Selection::toggle (timepos_t const & start, timepos_t const & end)
 {
 	clear_objects(); // enforce object/range exclusivity
 
@@ -453,13 +453,13 @@ Selection::add (timepos_t const & start, timepos_t const & end)
 void
 Selection::move_time (timecnt_t const & distance)
 {
-	if (distance == 0) {
+	if (distance.zero()) {
 		return;
 	}
 
 	for (list<TimelineRange>::iterator i = time.begin(); i != time.end(); ++i) {
-		(*i).start += distance;
-		(*i).end += distance;
+		(*i).start() += distance;
+		(*i).end() += distance;
 	}
 
 	TimeChanged ();
@@ -720,8 +720,8 @@ Selection::set (timepos_t const & start, timepos_t const & end)
 		while (time.size() > 1) {
 			time.pop_front();
 		}
-		time.front().start = start;
-		time.front().end = end;
+		time.front().start() = start;
+		time.front().end() = end;
 	}
 
 	time.consolidate ();
@@ -740,11 +740,11 @@ Selection::set (timepos_t const & start, timepos_t const & end)
  *  @param end New end time.
  */
 void
-Selection::set_preserving_all_ranges (samplepos_t start, samplepos_t end)
+Selection::set_preserving_all_ranges (timepos_t const & start, timepos_t const & end)
 {
 	clear_objects(); // enforce region/object exclusivity
 
-	if ((start == 0 && end == 0) || (end < start)) {
+	if ((start.zero() && end.zero()) || (end < start)) {
 		return;
 	}
 
@@ -752,8 +752,8 @@ Selection::set_preserving_all_ranges (samplepos_t start, samplepos_t end)
 		time.push_back (TimelineRange (start, end, ++next_time_id));
 	} else {
 		time.sort (TimelineRangeComparator ());
-		time.front().start = start;
-		time.back().end = end;
+		time.front().set_start (start);
+		time.back().set_end (end);
 	}
 
 	time.consolidate ();
@@ -1137,8 +1137,8 @@ Selection::get_state () const
 
 	for (TimeSelection::const_iterator i = time.begin(); i != time.end(); ++i) {
 		XMLNode* t = node->add_child (X_("TimelineRange"));
-		t->set_property (X_("start"), (*i).start);
-		t->set_property (X_("end"), (*i).end);
+		t->set_property (X_("start"), (*i).start());
+		t->set_property (X_("end"), (*i).end());
 	}
 
 	for (MarkerSelection::const_iterator i = markers.begin(); i != markers.end(); ++i) {
@@ -1304,8 +1304,8 @@ Selection::set_state (XMLNode const & node, int)
 			}
 
 		} else if ((*i)->name() == X_("TimelineRange")) {
-			samplepos_t start;
-			samplepos_t end;
+			timepos_t start;
+			timepos_t end;
 
 			if (!(*i)->get_property (X_("start"), start) || !(*i)->get_property (X_("end"), end)) {
 				assert(false);

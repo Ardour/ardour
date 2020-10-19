@@ -259,7 +259,7 @@ LocationEditRow::set_location (Location *loc)
 	}
 	hide_check_button.set_active (location->is_hidden());
 	lock_check_button.set_active (location->locked());
-	glue_check_button.set_active (location->position_lock_style() == MusicTime);
+	glue_check_button.set_active (location->position_time_domain() == Temporal::BeatTime);
 
 	if (location->is_auto_loop() || location-> is_auto_punch()) {
 		// use label instead of entry
@@ -315,7 +315,7 @@ LocationEditRow::set_location (Location *loc)
 		}
 
 		end_clock.set (location->end(), true);
-		length_clock.set (location->length(), true);
+		length_clock.set_duration (location->length(), true);
 
 		end_clock.show();
 		length_clock.show();
@@ -355,7 +355,7 @@ LocationEditRow::set_location (Location *loc)
 	location->Changed.connect (connections, invalidator (*this), boost::bind (&LocationEditRow::location_changed, this), gui_context());
 	location->FlagsChanged.connect (connections, invalidator (*this), boost::bind (&LocationEditRow::flags_changed, this), gui_context());
 	location->LockChanged.connect (connections, invalidator (*this), boost::bind (&LocationEditRow::lock_changed, this), gui_context());
-	location->PositionLockStyleChanged.connect (connections, invalidator (*this), boost::bind (&LocationEditRow::position_lock_style_changed, this), gui_context());
+	location->TimeDomainChanged.connect (connections, invalidator (*this), boost::bind (&LocationEditRow::time_domain_changed, this), gui_context());
 }
 
 void
@@ -422,14 +422,12 @@ LocationEditRow::to_playhead_button_pressed (LocationPart part)
 		return;
 	}
 
-	const int32_t divisions = PublicEditor::instance().get_grid_music_divisions (0);
-
 	switch (part) {
 		case LocStart:
-			location->set_start (_session->transport_sample (), false, true, divisions);
+			location->set_start (timepos_t (_session->transport_sample ()), false);
 			break;
 		case LocEnd:
-			location->set_end (_session->transport_sample (), false, true,divisions);
+			location->set_end (timepos_t (_session->transport_sample ()), false);
 			if (location->is_session_range()) {
 				_session->set_session_range_is_free (false);
 			}
@@ -444,10 +442,10 @@ LocationEditRow::locate_button_pressed (LocationPart part)
 {
 	switch (part) {
 		case LocStart:
-			_session->request_locate (start_clock.current_time());
+			_session->request_locate (start_clock.current_time().samples());
 			break;
 		case LocEnd:
-			_session->request_locate (end_clock.current_time());
+			_session->request_locate (end_clock.current_time().samples());
 			break;
 		default:
 			break;
@@ -458,7 +456,7 @@ bool
 LocationEditRow::locate_to_clock (GdkEventButton* ev, AudioClock* clock)
 {
 	if (Keyboard::is_button2_event (ev)) {
-		_session->request_locate (clock->current_time());
+		_session->request_locate (clock->current_time().samples());
 		return true;
 	}
 	return false;
@@ -471,20 +469,18 @@ LocationEditRow::clock_changed (LocationPart part)
 		return;
 	}
 
-	const int32_t divisions = PublicEditor::instance().get_grid_music_divisions (0);
-
 	switch (part) {
 		case LocStart:
-			location->set_start (start_clock.current_time(), false, true, divisions);
+			location->set_start (start_clock.current_time(), false);
 			break;
 		case LocEnd:
-			location->set_end (end_clock.current_time(), false, true, divisions);
+			location->set_end (end_clock.current_time(), false);
 			if (location->is_session_range()) {
 				_session->set_session_range_is_free (false);
 			}
 			break;
 		case LocLength:
-			location->set_end (location->start() + length_clock.current_duration(), false, true, divisions);
+			location->set_end (location->start() + length_clock.current_duration(), false);
 			if (location->is_session_range()) {
 				_session->set_session_range_is_free (false);
 			}
@@ -572,10 +568,10 @@ LocationEditRow::glue_toggled ()
 		return;
 	}
 
-	if (location->position_lock_style() == AudioTime) {
-		location->set_position_lock_style (MusicTime);
+	if (location->position_time_domain() == Temporal::AudioTime) {
+		location->set_position_time_domain (Temporal::BeatTime);
 	} else {
-		location->set_position_lock_style (AudioTime);
+		location->set_position_time_domain (Temporal::AudioTime);
 	}
 }
 
@@ -627,7 +623,7 @@ LocationEditRow::end_changed ()
 	i_am_the_modifier++;
 
 	end_clock.set (location->end());
-	length_clock.set (location->length());
+	length_clock.set_duration (location->length());
 
 	i_am_the_modifier--;
 }
@@ -670,7 +666,7 @@ LocationEditRow::location_changed ()
 
 	start_clock.set (location->start());
 	end_clock.set (location->end());
-	length_clock.set (location->length());
+	length_clock.set_duration (location->length());
 
 	set_clock_editable_status ();
 
@@ -689,7 +685,7 @@ LocationEditRow::flags_changed ()
 
 	cd_check_button.set_active (location->is_cd_marker());
 	hide_check_button.set_active (location->is_hidden());
-	glue_check_button.set_active (location->position_lock_style() == MusicTime);
+	glue_check_button.set_active (location->position_time_domain() == Temporal::BeatTime);
 
 	i_am_the_modifier--;
 }
@@ -711,7 +707,7 @@ LocationEditRow::lock_changed ()
 }
 
 void
-LocationEditRow::position_lock_style_changed ()
+LocationEditRow::time_domain_changed ()
 {
 	if (!location) {
 		return;
@@ -719,7 +715,7 @@ LocationEditRow::position_lock_style_changed ()
 
 	i_am_the_modifier++;
 
-	glue_check_button.set_active (location->position_lock_style() == MusicTime);
+	glue_check_button.set_active (location->position_time_domain() == Temporal::BeatTime);
 
 	i_am_the_modifier--;
 }
@@ -1040,7 +1036,7 @@ LocationUI::add_new_location()
 	string markername;
 
 	if (_session) {
-		samplepos_t where = _session->audible_sample();
+		timepos_t where (_session->audible_sample());
 		_session->locations()->next_available_name(markername,"mark");
 		Location *location = new Location (*_session, where, where, markername, Location::IsMark);
 		if (UIConfiguration::instance().get_name_new_markers()) {
@@ -1062,7 +1058,7 @@ LocationUI::add_new_range()
 	string rangename;
 
 	if (_session) {
-		samplepos_t where = _session->audible_sample();
+		timepos_t where (_session->audible_sample());
 		_session->locations()->next_available_name(rangename,"unnamed");
 		Location *location = new Location (*_session, where, where, rangename, Location::IsRangeMarker);
 		PublicEditor::instance().begin_reversible_command (_("add range marker"));

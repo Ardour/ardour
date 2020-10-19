@@ -753,7 +753,7 @@ AutomationTimeAxisView::build_display_menu ()
 }
 
 void
-AutomationTimeAxisView::add_automation_event (GdkEvent* event, samplepos_t sample, double y, bool with_guard_points)
+AutomationTimeAxisView::add_automation_event (GdkEvent* event, timepos_t const & pos, double y, bool with_guard_points)
 {
 	if (!_line) {
 		return;
@@ -768,7 +768,7 @@ AutomationTimeAxisView::add_automation_event (GdkEvent* event, samplepos_t sampl
 		return;
 	}
 
-	timepos_t when (sample);
+	timepos_t when (pos);
 	_editor.snap_to_with_modifier (when, event);
 
 	if (UIConfiguration::instance().get_new_automation_points_on_lane()) {

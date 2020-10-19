@@ -490,19 +490,25 @@ TempoDialog::tap_tempo_focus_out (GdkEventFocus* )
 MeterDialog::MeterDialog (TempoMap& map, samplepos_t sample, const string&)
 	: ArdourDialog (_("New Meter"))
 {
+#warning NUTEMPO needs new map API
+#if 0
 	sample = map.round_to_bar(sample, RoundNearest).sample;
 	Temporal::BBT_Time when (map.bbt_at_sample (sample));
 	Meter meter (map.meter_at_sample (sample));
 
 	init (when, meter.divisions_per_bar(), meter.note_divisor(), false, MusicTime);
+#endif
 }
 
 MeterDialog::MeterDialog (TempoMap& map, MeterSection& section, const string&)
 	: ArdourDialog (_("Edit Meter"))
 {
+#warning NUTEMPO needs new map API
+#if 0
 	Temporal::BBT_Time when (map.bbt_at_sample (section.sample()));
 
 	init (when, section.divisions_per_bar(), section.note_divisor(), section.initial(), section.position_lock_style());
+#endif
 }
 
 void

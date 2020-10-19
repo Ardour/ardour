@@ -39,7 +39,7 @@ TimeSelection::operator[] (uint32_t which)
 	}
 	fatal << string_compose (_("programming error: request for non-existent audio range (%1)!"), which) << endmsg;
 	abort(); /*NOTREACHED*/
-	return *(new ARDOUR::TimelineRange(0,0,0)); /* keep the compiler happy; never called */
+	return *(new ARDOUR::TimelineRange(timepos_t(),timepos_t(), 0)); /* keep the compiler happy; never called */
 }
 
 bool
@@ -71,13 +71,13 @@ TimeSelection::consolidate ()
 samplepos_t
 TimeSelection::start_sample () const
 {
-	return start_time().sample ();
+	return start_time().samples ();
 }
 
 samplepos_t
 TimeSelection::end_sample () const
 {
-	return end_time().sample ();
+	return end_time().samples ();
 }
 
 samplecnt_t
@@ -90,7 +90,7 @@ timepos_t
 TimeSelection::start_time () const
 {
 	if (empty()) {
-		return 0;
+		return timepos_t();
 	}
 
 	timepos_t first = std::numeric_limits<timepos_t>::max();
@@ -106,7 +106,7 @@ TimeSelection::start_time () const
 timepos_t
 TimeSelection::end_time() const
 {
-	timepos_t last = std::numeric_limits<timepos_t>::min();
+	timepos_t last;
 
 	for (std::list<TimelineRange>::const_iterator i = begin(); i != end(); ++i) {
 		if ((*i).end() > last) {

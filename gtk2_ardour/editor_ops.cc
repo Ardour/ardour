@@ -3776,7 +3776,7 @@ Editor::align_regions_relative (RegionPoint point)
 }
 
 void
-Editor::align_region (boost::shared_ptr<Region> region, RegionPoint point, samplepos_t position)
+Editor::align_region (boost::shared_ptr<Region> region, RegionPoint point, timepos_t const & position)
 {
 	begin_reversible_command (_("align region"));
 	align_region_internal (region, point, position);
@@ -3784,7 +3784,7 @@ Editor::align_region (boost::shared_ptr<Region> region, RegionPoint point, sampl
 }
 
 void
-Editor::align_region_internal (boost::shared_ptr<Region> region, RegionPoint point, samplepos_t position)
+Editor::align_region_internal (boost::shared_ptr<Region> region, RegionPoint point, timepos_t const & position)
 {
 	region->clear_changes ();
 

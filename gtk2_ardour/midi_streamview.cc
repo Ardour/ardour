@@ -507,7 +507,7 @@ MidiStreamView::setup_rec_box ()
 					 */
 					region->set_start (timecnt_t (_trackview.track()->current_capture_start()
 					                              - _trackview.track()->get_capture_start_sample (0)));
-					region->set_position (_trackview.track()->current_capture_start ().samples());
+					region->set_position (_trackview.track()->current_capture_start ());
 
 					RegionView* rv = add_region_view_internal (region, false, true);
 					MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (rv);
@@ -627,7 +627,7 @@ MidiStreamView::update_rec_box ()
 
 	/* Update the region being recorded to reflect where we currently are */
 	boost::shared_ptr<ARDOUR::Region> region = rec_regions.back().first;
-	region->set_length (_trackview.track()->current_capture_end () - _trackview.track()->current_capture_start(), 0);
+	region->set_length (timecnt_t (_trackview.track()->current_capture_end () - _trackview.track()->current_capture_start()));
 
 	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (rec_regions.back().second);
 	mrv->extend_active_notes ();
@@ -679,7 +679,7 @@ struct RegionPositionSorter {
 };
 
 bool
-MidiStreamView::paste (timepos_t const & pos, const Selection& selection, PasteContext& ctx, const int32_t sub_num)
+MidiStreamView::paste (timepos_t const & pos, const Selection& selection, PasteContext& ctx)
 {
 	/* Paste into the first region which starts on or before pos.  Only called when
 	   using an internal editing tool. */
@@ -702,12 +702,12 @@ MidiStreamView::paste (timepos_t const & pos, const Selection& selection, PasteC
 	boost::shared_ptr<Region> r = (*prev)->region ();
 
 	/* If *prev doesn't cover pos, it's no good */
-	if (r->position() > pos || ((r->position() + r->length()) < pos)) {
+	if (r->nt_position() > pos || ((r->nt_position() + r->nt_length()) < pos)) {
 		return false;
 	}
 
 	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (*prev);
-	return mrv ? mrv->paste(pos, selection, ctx, sub_num) : false;
+	return mrv ? mrv->paste(pos, selection, ctx) : false;
 }
 
 void

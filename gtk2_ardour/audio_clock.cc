@@ -2310,7 +2310,7 @@ AudioClock::set_mode (Mode m, bool noemit)
 }
 
 void
-AudioClock::set_bbt_reference (samplepos_t pos)
+AudioClock::set_bbt_reference (timepos_t const & pos)
 {
 	bbt_reference_time = pos;
 }

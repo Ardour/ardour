@@ -182,14 +182,14 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 	wide_enough_for_name = wide;
 	high_enough_for_name = high;
 
-	if (duration == 0) {
+	if (duration.zero ()) {
 		warning << "Time Axis Item Duration == 0" << endl;
 	}
 
 	if (visibility & ShowFrame) {
 		frame = new ArdourCanvas::Rectangle (group,
 		                                     ArdourCanvas::Rect (0.0, 0.0,
-		                                                         trackview.editor().sample_to_pixel(duration),
+		                                                         trackview.editor().duration_to_pixels (duration),
 		                                                         trackview.current_height()));
 
 		frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT));
@@ -287,7 +287,7 @@ TimeAxisViewItem::set_position(timepos_t const & pos, void* src, double* delta)
 		return false;
 	}
 
-	position = pos;
+	time_position = pos;
 
 	double new_unit_pos = trackview.editor().time_to_pixel (time_position);
 
@@ -327,14 +327,16 @@ bool
 TimeAxisViewItem::set_duration (timecnt_t const & dur, void* src)
 {
 	if ((dur > max_item_duration) || (dur < min_item_duration)) {
-		warning << string_compose (
-				P_("new duration %1 frame is out of bounds for %2", "new duration of %1 samples is out of bounds for %2", dur),
-				get_item_name(), dur)
-			<< endmsg;
+		// XXX NUTEMPO we do not have a plural i18n form that is type-safe (P_() requires integers)
+		//
+		//warning << string_compose (
+		//P_("new duration %1 is out of bounds for %2", "new duration of %1 samples is out of bounds for %2", dur),
+		// get_item_name(), dur)
+		//<< endmsg;
 		return false;
 	}
 
-	if (dur == 0) {
+	if (dur.zero()) {
 		group->hide();
 	}
 
@@ -363,7 +365,7 @@ TimeAxisViewItem::get_duration() const
  * @param src the identity of the object that initiated the change
  */
 void
-TimeAxisViewItem::set_max_duration(samplecnt_t dur, void* src)
+TimeAxisViewItem::set_max_duration(timecnt_t const & dur, void* src)
 {
 	max_item_duration = dur;
 	MaxDurationChanged(max_item_duration, src); /* EMIT_SIGNAL */
@@ -383,7 +385,7 @@ TimeAxisViewItem::get_max_duration() const
  * @param src the identity of the object that initiated the change
  */
 void
-TimeAxisViewItem::set_min_duration(samplecnt_t dur, void* src)
+TimeAxisViewItem::set_min_duration(timecnt_t const & dur, void* src)
 {
 	min_item_duration = dur;
 	MinDurationChanged(max_item_duration, src); /* EMIT_SIGNAL */
@@ -804,7 +806,7 @@ TimeAxisViewItem::set_samples_per_pixel (double fpp)
 	samples_per_pixel = fpp;
 	set_position (this->get_position(), this);
 
-	double end_pixel = trackview.editor().time_to_pixel (timeposition + get_duration());
+	double end_pixel = trackview.editor().time_to_pixel (time_position + get_duration());
 	double first_pixel = trackview.editor().time_to_pixel (time_position);
 
 	reset_width_dependent_items (end_pixel - first_pixel);

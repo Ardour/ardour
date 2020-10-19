@@ -97,7 +97,7 @@ ExportDialog::set_session (ARDOUR::Session* s)
 
 	TimeSelection const & time (editor.get_selection().time);
 	if (!time.empty()) {
-		profile_manager->set_selection_range (time.front().start, time.front().end);
+		profile_manager->set_selection_range (time.front().start().samples(), time.front().end().samples());
 	} else {
 		profile_manager->set_selection_range ();
 	}
@@ -584,7 +584,7 @@ ExportRegionDialog::init_gui ()
 void
 ExportRegionDialog::init_components ()
 {
-	string loc_id = profile_manager->set_single_range (region.nt_position(), region.nt_position() + region.nt_length(), region.name());
+	string loc_id = profile_manager->set_single_range (region.position_sample(), (region.nt_position() + region.nt_length()).samples(), region.name());
 
 	preset_selector.reset (new ExportPresetSelector ());
 	timespan_selector.reset (new ExportTimespanSelectorSingle (_session, profile_manager, loc_id));

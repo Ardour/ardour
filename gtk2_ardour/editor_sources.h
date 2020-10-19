@@ -82,7 +82,7 @@ private:
 		Gtk::TreeModelColumn<std::string> natural_pos;
 		Gtk::TreeModelColumn<std::string> path;
 		Gtk::TreeModelColumn<std::string> take_id;
-		Gtk::TreeModelColumn<samplepos_t> natural_s;
+		Gtk::TreeModelColumn<Temporal::timepos_t> natural_s;
 		Gtk::TreeModelColumn<size_t> captd_xruns;
 	};
 
@@ -121,7 +121,7 @@ private:
 
 	void show_context_menu (int button, int time);
 
-	void format_position (ARDOUR::samplepos_t pos, char* buf, size_t bufsize, bool onoff = true);
+	void format_position (Temporal::timepos_t const & pos, char* buf, size_t bufsize, bool onoff = true);
 
 	void add_source (boost::shared_ptr<ARDOUR::Region>);
 	void remove_source (boost::shared_ptr<ARDOUR::Source>);

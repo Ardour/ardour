@@ -142,7 +142,7 @@ ExportTimespanSelector::location_sorter(Gtk::TreeModel::iterator a, Gtk::TreeMod
 	if (l2 == ls)
 		return +1;
 
-	return l1->start() - l2->start();
+	return l2->start().distance (l1->start()).samples();
 }
 
 void
@@ -157,7 +157,7 @@ ExportTimespanSelector::add_range_to_selection (ARDOUR::Location const * loc, bo
 		id = loc->id().to_s();
 	}
 
-	span->set_range (loc->start(), loc->end());
+	span->set_range (loc->start().samples(), loc->end().samples());
 	span->set_name (loc->name());
 	span->set_range_id (id);
 	span->set_realtime (rt);
@@ -226,8 +226,8 @@ ExportTimespanSelector::construct_label (ARDOUR::Location const * location) cons
 	std::string start;
 	std::string end;
 
-	samplepos_t start_sample = location->start();
-	samplepos_t end_sample = location->end();
+	samplepos_t start_sample = location->start().samples();
+	samplepos_t end_sample = location->end().samples();
 
 	switch (state->time_format) {
 	  case ExportProfileManager::BBT:
@@ -269,23 +269,23 @@ ExportTimespanSelector::construct_length (ARDOUR::Location const * location) con
 
 	switch (state->time_format) {
 	case ExportProfileManager::BBT:
-		s << bbt_str (location->length ());
+		s << bbt_str (location->length ().samples());
 		break;
 
 	case ExportProfileManager::Timecode:
 	{
 		Timecode::Time tc;
-		_session->timecode_duration (location->length(), tc);
+		_session->timecode_duration (location->length().samples(), tc);
 		tc.print (s);
 		break;
 	}
 
 	case ExportProfileManager::MinSec:
-		s << ms_str (location->length ());
+		s << ms_str (location->length ().samples());
 		break;
 
 	case ExportProfileManager::Samples:
-		s << location->length ();
+		s << location->length ().samples();
 		break;
 	}
 
@@ -465,10 +465,10 @@ ExportTimespanSelectorSingle::fill_range_list ()
 			row[range_cols.label] = construct_label (*it);
 			row[range_cols.length] = construct_length (*it);
 			//the actual samplecnt_t for sorting
-			row[range_cols.length_actual] = (*it)->length();
+			row[range_cols.length_actual] = (*it)->length().samples();
 
 			//start samplecnt_t for sorting
-			row[range_cols.start] = (*it)->start();
+			row[range_cols.start] = (*it)->start().samples();
 
 			Glib::DateTime gdt(Glib::DateTime::create_now_local ((*it)->timestamp()));
 			row[range_cols.timestamp] = (*it)->timestamp();
@@ -578,10 +578,10 @@ ExportTimespanSelectorMultiple::fill_range_list ()
 		row[range_cols.label] = construct_label (*it);
 		row[range_cols.length] = construct_length (*it);
 		//the actual samplecnt_t for sorting
-		row[range_cols.length_actual] = (*it)->length();
+		row[range_cols.length_actual] = (*it)->length().samples();
 
 		//start samplecnt_t for sorting
-		row[range_cols.start] = (*it)->start();
+		row[range_cols.start] = (*it)->start().samples();
 
 		Glib::DateTime gdt(Glib::DateTime::create_now_local ((*it)->timestamp()));
 		row[range_cols.timestamp] = (*it)->timestamp();

@@ -193,7 +193,7 @@ EditorSources::EditorSources (Editor* e)
 		/* show path as the row tooltip */
 		_display.set_tooltip_column (6); /* path */
 	}
-	
+
 	/* set the color of the name field */
 	TreeViewColumn* tv_col = _display.get_column(0);
 	CellRendererText* renderer = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (0));
@@ -402,9 +402,9 @@ EditorSources::populate_row (TreeModel::Row row, boost::shared_ptr<ARDOUR::Regio
 	if (region->data_type() == DataType::MIDI) {
 		row[_columns.channels] = 0;  /*TODO: some better recognition of midi regions*/
 	} else {
-		row[_columns.channels] = region->n_channels();
+		row[_columns.channels] = region->sources().size();
 	}
-	
+
 	/* CAPTURED FOR */
 	row[_columns.captd_for] = source->captured_for();
 
@@ -552,10 +552,10 @@ EditorSources::selection_changed ()
 			if ((iter = _model->get_iter (*i))) {
 
 				/* highlight any regions in the editor that use this region's source */
- 				boost::shared_ptr<ARDOUR::Region> region = (*iter)[_columns.region];
- 				if (!region) continue;
+				boost::shared_ptr<ARDOUR::Region> region = (*iter)[_columns.region];
+				if (!region) continue;
 
- 				boost::shared_ptr<ARDOUR::Source> source = region->source();
+				boost::shared_ptr<ARDOUR::Source> source = region->source();
 				if (source) {
 
 					set<boost::shared_ptr<Region> > regions;
@@ -588,12 +588,12 @@ EditorSources::clock_format_changed ()
 }
 
 void
-EditorSources::format_position (samplepos_t pos, char* buf, size_t bufsize, bool onoff)
+EditorSources::format_position (timepos_t const & pos, char* buf, size_t bufsize, bool onoff)
 {
 	Temporal::BBT_Time bbt;
 	Timecode::Time timecode;
 
-	if (pos < 0) {
+	if (pos.negative()) {
 		error << string_compose (_("EditorSources::format_position: negative timecode position: %1"), pos) << endmsg;
 		snprintf (buf, bufsize, "invalid");
 		return;
@@ -601,12 +601,13 @@ EditorSources::format_position (samplepos_t pos, char* buf, size_t bufsize, bool
 
 	switch (ARDOUR_UI::instance()->primary_clock->mode ()) {
 	case AudioClock::BBT:
-		bbt = _session->tempo_map().bbt_at_sample (pos);
-		if (onoff) {
-			snprintf (buf, bufsize, "%03d|%02d|%04d" , bbt.bars, bbt.beats, bbt.ticks);
-		} else {
-			snprintf (buf, bufsize, "(%03d|%02d|%04d)" , bbt.bars, bbt.beats, bbt.ticks);
-		}
+#warning NUTEMPO needs tempo map BBT API
+		// bbt = _session->tempo_map().bbt_at_sample (pos);
+		// if (onoff) {
+		// snprintf (buf, bufsize, "%03d|%02d|%04d" , bbt.bars, bbt.beats, bbt.ticks);
+		// } else {
+		// snprintf (buf, bufsize, "(%03d|%02d|%04d)" , bbt.bars, bbt.beats, bbt.ticks);
+		// }
 		break;
 
 	case AudioClock::MinSec:
@@ -615,7 +616,7 @@ EditorSources::format_position (samplepos_t pos, char* buf, size_t bufsize, bool
 		int mins;
 		float secs;
 
-		left = pos;
+		left = pos.samples();
 		hrs = (int) floor (left / (_session->sample_rate() * 60.0f * 60.0f));
 		left -= (samplecnt_t) floor (hrs * _session->sample_rate() * 60.0f * 60.0f);
 		mins = (int) floor (left / (_session->sample_rate() * 60.0f));
@@ -630,23 +631,23 @@ EditorSources::format_position (samplepos_t pos, char* buf, size_t bufsize, bool
 
 	case AudioClock::Seconds:
 		if (onoff) {
-			snprintf (buf, bufsize, "%.1f", pos / (float)_session->sample_rate());
+			snprintf (buf, bufsize, "%.1f", pos.samples() / (float)_session->sample_rate());
 		} else {
-			snprintf (buf, bufsize, "(%.1f)", pos / (float)_session->sample_rate());
+			snprintf (buf, bufsize, "(%.1f)", pos.samples() / (float)_session->sample_rate());
 		}
 		break;
 
 	case AudioClock::Samples:
 		if (onoff) {
-			snprintf (buf, bufsize, "%" PRId64, pos);
+			snprintf (buf, bufsize, "%" PRId64, pos.samples());
 		} else {
-			snprintf (buf, bufsize, "(%" PRId64 ")", pos);
+			snprintf (buf, bufsize, "(%" PRId64 ")", pos.samples());
 		}
 		break;
 
 	case AudioClock::Timecode:
 	default:
-		_session->timecode_time (pos, timecode);
+		_session->timecode_time (pos.samples(), timecode);
 		if (onoff) {
 			snprintf (buf, bufsize, "%02d:%02d:%02d:%02d", timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
 		} else {
@@ -729,9 +730,9 @@ EditorSources::remove_selected_sources ()
 
 					boost::shared_ptr<ARDOUR::Region> region = (*iter)[_columns.region];
 
-	 				if (!region) continue;
+					if (!region) continue;
 
- 					boost::shared_ptr<ARDOUR::Source> source = region->source();
+					boost::shared_ptr<ARDOUR::Source> source = region->source();
 					if (source) {
 						set<boost::shared_ptr<Region> > regions;
 						RegionFactory::get_regions_using_source (source, regions);

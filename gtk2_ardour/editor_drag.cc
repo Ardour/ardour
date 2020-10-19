@@ -5185,7 +5185,7 @@ LineDrag::finished (GdkEvent* event, bool movement_occurred)
 		AutomationTimeAxisView* atv;
 
 		if ((atv = dynamic_cast<AutomationTimeAxisView*>(_editor->clicked_axisview)) != 0) {
-			samplepos_t where = grab_sample ();
+			timepos_t where = grab_time ();
 
 			double cx = 0;
 			double cy = _fixed_grab_y;

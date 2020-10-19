@@ -40,6 +40,8 @@ public:
 	Temporal::timepos_t end_time() const;
 	Temporal::timecnt_t length() const;
 
+	void set (Temporal::timepos_t const &, Temporal::timepos_t const &);
+
 	bool consolidate ();
 };
 

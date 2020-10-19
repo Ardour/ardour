@@ -50,7 +50,7 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	TransportMastersWidget ();
 	~TransportMastersWidget ();
 
-	void update (ARDOUR::samplepos_t);
+	void update (Temporal::timepos_t);
 	void set_transport_master (boost::shared_ptr<ARDOUR::TransportMaster>);
 
 	void set_session (ARDOUR::Session*);

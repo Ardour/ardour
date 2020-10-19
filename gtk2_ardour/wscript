@@ -100,7 +100,7 @@ gtk2_ardour_sources = [
         'editor_regions.cc',
         'editor_routes.cc',
         'editor_rulers.cc',
-        # 'editor_selection.cc',
+        'editor_selection.cc',
         'editor_snapshots.cc',
         'editor_sources.cc',
         'editor_summary.cc',

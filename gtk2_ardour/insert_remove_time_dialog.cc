@@ -74,16 +74,16 @@ InsertRemoveTimeDialog::InsertRemoveTimeDialog (PublicEditor& e, bool remove)
 
 	//if a Range is selected, assume the user wants to insert/remove the length of the range
 	if ( _editor.get_selection().time.length() != 0 ) {
-		position_clock.set ( _editor.get_selection().time.start(), true );
-		duration_clock.set ( _editor.get_selection().time.end_sample(), true,  _editor.get_selection().time.start() );
-		duration_clock.set_bbt_reference (_editor.get_selection().time.start());
+		position_clock.set (_editor.get_selection().time.start_time(), true);
+		duration_clock.set (_editor.get_selection().time.end_time(), true,  timecnt_t (_editor.get_selection().time.start_time()));
+		duration_clock.set_bbt_reference (_editor.get_selection().time.start_time());
 	} else {
-		samplepos_t const pos = _editor.get_preferred_edit_position (EDIT_IGNORE_MOUSE);
-		position_clock.set ( pos, true );
+		timepos_t const pos = _editor.get_preferred_edit_position (EDIT_IGNORE_MOUSE);
+		position_clock.set (pos, true);
 		duration_clock.set_bbt_reference (pos);
-		duration_clock.set (0);
+		duration_clock.set (timepos_t());
 	}
-	
+
 	if (!remove) {
 		Label* intersected_label = manage (new Label (_("Intersected regions should:")));
 		intersected_label->set_alignment (1, 0.5);
@@ -190,16 +190,16 @@ InsertRemoveTimeDialog::move_locked_markers () const
 	return _move_locked_markers.get_active ();
 }
 
-samplepos_t
+timepos_t
 InsertRemoveTimeDialog::position () const
 {
 	return position_clock.current_time();
 }
 
-samplepos_t
+timecnt_t
 InsertRemoveTimeDialog::distance () const
 {
-	return duration_clock.current_duration ( position_clock.current_time() );
+	return duration_clock.current_duration (position_clock.current_time());
 }
 
 void

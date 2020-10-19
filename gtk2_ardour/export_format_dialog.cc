@@ -994,7 +994,7 @@ void
 ExportFormatDialog::update_clock (AudioClock& clock, ARDOUR::AnyTime const& time)
 {
 	// TODO position
-	clock.set (_session->convert_to_samples (time), true);
+	clock.set (timepos_t (_session->convert_to_samples (time)), true);
 
 	AudioClock::Mode mode (AudioClock::Timecode);
 
@@ -1023,26 +1023,26 @@ ExportFormatDialog::update_time (AnyTime& time, AudioClock const& clock)
 		return;
 	}
 
-	samplecnt_t samples = clock.current_duration ();
+	samplecnt_t samples = clock.current_duration().samples();
 
 	switch (clock.mode ()) {
-		case AudioClock::Timecode:
-			time.type = AnyTime::Timecode;
-			_session->timecode_time (samples, time.timecode);
-			break;
-		case AudioClock::BBT:
-			time.type = AnyTime::BBT;
-			_session->bbt_time (samples, time.bbt);
-			break;
-		case AudioClock::Seconds:
-		case AudioClock::MinSec:
-			time.type    = AnyTime::Seconds;
-			time.seconds = (double)samples / _session->sample_rate ();
-			break;
-		case AudioClock::Samples:
-			time.type    = AnyTime::Samples;
-			time.samples = samples;
-			break;
+	case AudioClock::Timecode:
+		time.type = AnyTime::Timecode;
+		_session->timecode_time (samples, time.timecode);
+		break;
+	case AudioClock::BBT:
+		time.type = AnyTime::BBT;
+		_session->bbt_time (samples, time.bbt);
+		break;
+	case AudioClock::Seconds:
+	case AudioClock::MinSec:
+		time.type    = AnyTime::Seconds;
+		time.seconds = (double)samples / _session->sample_rate ();
+		break;
+	case AudioClock::Samples:
+		time.type    = AnyTime::Samples;
+		time.samples = samples;
+		break;
 	}
 }
 

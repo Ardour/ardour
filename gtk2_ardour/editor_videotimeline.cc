@@ -99,11 +99,14 @@ Editor::embed_audio_from_video (std::string path, samplepos_t n, bool lock_posit
 
 	boost::shared_ptr<ARDOUR::Track> track;
 	std::string const& gid = ARDOUR::Playlist::generate_pgroup_id ();
-	bool ok = (import_sndfiles (paths, Editing::ImportDistinctFiles, Editing::ImportAsTrack, ARDOUR::SrcBest, n, 1, 1, track, gid, false) == 0);
+	Temporal::timepos_t pos (n);
+
+	bool ok = (import_sndfiles (paths, Editing::ImportDistinctFiles, Editing::ImportAsTrack, ARDOUR::SrcBest, pos, 1, 1, track, gid, false) == 0);
+
 	if (ok && track) {
 		if (lock_position_to_video) {
 			boost::shared_ptr<ARDOUR::Playlist> pl = track->playlist();
-			pl->find_next_region (Temporal::timepos_t (n), ARDOUR::End, 0)->set_video_locked (true);
+			pl->find_next_region (pos, ARDOUR::End, 0)->set_video_locked (true);
 		}
 		_session->save_state ("", true);
 	}

@@ -94,7 +94,7 @@ MainClock::build_ops_menu ()
 	ops_items.push_back (MenuElem (_("Insert Meter Change"), sigc::mem_fun(*this, &MainClock::insert_new_meter)));
 }
 
-samplepos_t
+timepos_t
 MainClock::absolute_time () const
 {
 	if (get_is_duration ()) {
@@ -119,15 +119,15 @@ MainClock::set (timepos_t const & when, bool force, timecnt_t const & /*offset*/
 
 	switch (mode) {
 		case NoDelta:
-			AudioClock::set (when, force, 0);
+			AudioClock::set (when, force);
 			break;
 		case DeltaEditPoint:
-			AudioClock::set (when, force, PublicEditor::instance().get_preferred_edit_position (Editing::EDIT_IGNORE_PHEAD));
+			AudioClock::set (when, force, timecnt_t (PublicEditor::instance().get_preferred_edit_position (Editing::EDIT_IGNORE_PHEAD)));
 			break;
 		case DeltaOriginMarker:
 			{
 				Location* loc = PublicEditor::instance().session()->locations()->clock_origin_location ();
-				AudioClock::set (when, force, loc ? loc->start() : 0);
+				AudioClock::set (when, force, loc ? timecnt_t (loc->start()) : timecnt_t());
 			}
 			break;
 	}
@@ -150,16 +150,18 @@ void
 MainClock::edit_current_tempo ()
 {
 	if (!PublicEditor::instance().session()) return;
-	ARDOUR::TempoSection* ts = const_cast<ARDOUR::TempoSection*>(&PublicEditor::instance().session()->tempo_map().tempo_section_at_sample (absolute_time()));
-	PublicEditor::instance().edit_tempo_section (ts);
+#warning NUTEMPO needs new map API
+	//ARDOUR::TempoSection* ts = const_cast<ARDOUR::TempoSection*>(&PublicEditor::instance().session()->tempo_map().tempo_section_at_sample (absolute_time()));
+	//PublicEditor::instance().edit_tempo_section (ts);
 }
 
 void
 MainClock::edit_current_meter ()
 {
 	if (!PublicEditor::instance().session()) return;
-	ARDOUR::MeterSection* ms = const_cast<ARDOUR::MeterSection*>(&PublicEditor::instance().session()->tempo_map().meter_section_at_sample (absolute_time()));
-	PublicEditor::instance().edit_meter_section (ms);
+#warning NUTEMPO needs new map API
+	//ARDOUR::MeterSection* ms = const_cast<ARDOUR::MeterSection*>(&PublicEditor::instance().session()->tempo_map().meter_section_at_sample (absolute_time()));
+	//PublicEditor::instance().edit_meter_section (ms);
 }
 
 void

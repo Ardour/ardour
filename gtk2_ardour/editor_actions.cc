@@ -1042,15 +1042,17 @@ Editor::set_xjadeo_viewoption (int what)
 void
 Editor::edit_current_meter ()
 {
-	ARDOUR::MeterSection* ms = const_cast<ARDOUR::MeterSection*>(&_session->tempo_map().meter_section_at_sample (ARDOUR_UI::instance()->primary_clock->absolute_time()));
-	edit_meter_section (ms);
+#warning NUTEMPO needs new map API
+	//ARDOUR::MeterSection* ms = const_cast<ARDOUR::MeterSection*>(&_session->tempo_map().meter_section_at_sample (ARDOUR_UI::instance()->primary_clock->absolute_time()));
+	//edit_meter_section (ms);
 }
 
 void
 Editor::edit_current_tempo ()
 {
-	ARDOUR::TempoSection* ts = const_cast<ARDOUR::TempoSection*>(&_session->tempo_map().tempo_section_at_sample (ARDOUR_UI::instance()->primary_clock->absolute_time()));
-	edit_tempo_section (ts);
+#warning NUTEMPO needs new map API
+	// ARDOUR::TempoSection* ts = const_cast<ARDOUR::TempoSection*>(&_session->tempo_map().tempo_section_at_sample (ARDOUR_UI::instance()->primary_clock->absolute_time()));
+	// edit_tempo_section (ts);
 }
 
 RefPtr<RadioAction>

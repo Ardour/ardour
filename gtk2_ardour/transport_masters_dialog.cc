@@ -668,7 +668,7 @@ TransportMastersWidget::Row::update (Session* s, samplepos_t now)
 }
 
 void
-TransportMastersWidget::update (samplepos_t /* audible */)
+TransportMastersWidget::update (timepos_t /* audible */)
 {
 	samplepos_t now = AudioEngine::instance()->sample_time ();
 
