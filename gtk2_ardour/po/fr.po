@@ -12932,7 +12932,7 @@ msgstr "Cette option ne sera prise en compte qu'après un redémarrage d'%1."
 
 #: rc_option_editor.cc:2324
 msgid "Memory Usage"
-msgstr "Utilisation de la Mémoire"
+msgstr "Utilisation de la mémoire"
 
 #: rc_option_editor.cc:2327
 msgid "Waveform image cache size (megabytes)"
@@ -13420,7 +13420,7 @@ msgstr ""
 #: rc_option_editor.cc:2929 rc_option_editor.cc:2937 rc_option_editor.cc:2953
 #: rc_option_editor.cc:2966 rc_option_editor.cc:2975
 msgid "Signal Flow"
-msgstr "Flux du Signal"
+msgstr "Flux du signal"
 
 #: rc_option_editor.cc:2900
 msgid "Record monitoring handled by"
