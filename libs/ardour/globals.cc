@@ -654,6 +654,7 @@ ARDOUR::cleanup ()
 
 	delete &ControlProtocolManager::instance ();
 	ARDOUR::AudioEngine::destroy ();
+	ARDOUR::TransportMasterManager::destroy ();
 
 	delete Library;
 #ifdef HAVE_LRDF

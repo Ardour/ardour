@@ -47,7 +47,9 @@ TransportMasterManager::TransportMasterManager()
 
 TransportMasterManager::~TransportMasterManager ()
 {
-	clear ();
+	Glib::Threads::RWLock::WriterLock lm (lock);
+	_current_master.reset ();
+	_transport_masters.clear ();
 }
 
 TransportMasterManager&
@@ -137,6 +139,13 @@ TransportMasterManager::instance()
 		abort (); /* NOTREACHED */
 	}
 	return *_instance;
+}
+
+void
+TransportMasterManager::destroy()
+{
+	delete _instance;
+	_instance = 0;
 }
 
 // Called from AudioEngine::process_callback() BEFORE Session::process() is called. Each transport master has processed any incoming data for this cycle,

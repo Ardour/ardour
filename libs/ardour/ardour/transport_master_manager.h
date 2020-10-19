@@ -41,6 +41,7 @@ class LIBARDOUR_API TransportMasterManager : public boost::noncopyable
 	void engine_stopped ();
 
 	static TransportMasterManager& instance();
+	static void destroy();
 	/* this method is not thread-safe and is intended to be used only
 	 * very early in application-lifetime to check if the TMM has
 	 * been created yet. Do not use in other code.
