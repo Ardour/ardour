@@ -2497,7 +2497,7 @@ VST3PI::getContextInfoValue (int32& value, FIDString id)
 		return kNotInitialized;
 	}
 	if (0 == strcmp (id, ContextInfo::kIndexMode)) {
-		value = ContextInfo::kPerTypeIndex;
+		value = ContextInfo::kFlatIndex;
 	} else if (0 == strcmp (id, ContextInfo::kType)) {
 		if (s->is_master ()) {
 			value = ContextInfo::kOut;
@@ -2511,7 +2511,7 @@ VST3PI::getContextInfoValue (int32& value, FIDString id)
 	} else if (0 == strcmp (id, ContextInfo::kMain)) {
 		value = s->is_master() ? 1 : 0;
 	} else if (0 == strcmp (id, ContextInfo::kIndex)) {
-		value = s->presentation_info ().order(); // XXX
+		value = s->presentation_info ().order();
 	} else if (0 == strcmp (id, ContextInfo::kColor)) {
 		value = s->presentation_info ().color();
 #if BYTEORDER == kBigEndian
