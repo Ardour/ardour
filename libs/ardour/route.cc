@@ -1145,6 +1145,9 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 			if ((send = boost::dynamic_pointer_cast<Send> (*i))) {
 				send->SelfDestruct.connect_same_thread (**i,
 						boost::bind (&Route::processor_selfdestruct, this, boost::weak_ptr<Processor> (*i)));
+				if (send->output()) {
+					send->output()->changed.connect_same_thread (**i, boost::bind (&Route::output_change_handler, this, _1, _2));
+				}
 			}
 		}
 
@@ -3206,6 +3209,9 @@ Route::set_processor_state (XMLNode const& node, int version, XMLProperty const*
 			processor.reset (new Send (_session, _pannable, _mute_master, Delivery::Send, true));
 			boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send> (processor);
 			send->SelfDestruct.connect_same_thread (*send, boost::bind (&Route::processor_selfdestruct, this, boost::weak_ptr<Processor> (processor)));
+			if (send->output()) {
+				send->output()->changed.connect_same_thread (*send, boost::bind (&Route::output_change_handler, this, _1, _2));
+			}
 
 		} else {
 			warning << string_compose(_("unknown Processor type \"%1\"; ignored"), prop->value()) << endmsg;
