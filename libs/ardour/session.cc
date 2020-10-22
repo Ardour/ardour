@@ -3690,7 +3690,6 @@ Session::route_solo_changed (bool self_solo_changed, Controllable::GroupControlD
 	DEBUG_TRACE (DEBUG::Solo, string_compose ("%1\n", route->name()));
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		bool via_sends_only;
 		bool in_signal_flow;
 
 		if ((*i) == route) {
@@ -3718,16 +3717,12 @@ Session::route_solo_changed (bool self_solo_changed, Controllable::GroupControlD
 
 		DEBUG_TRACE (DEBUG::Solo, string_compose ("check feed from %1\n", (*i)->name()));
 
-		if ((*i)->feeds (route, &via_sends_only)) {
+		if ((*i)->feeds (route)) {
 			DEBUG_TRACE (DEBUG::Solo, string_compose ("\tthere is a feed from %1\n", (*i)->name()));
-			if (true /*!via_sends_only*/) {
-				if (!route->soloed_by_others_upstream()) {
-					(*i)->solo_control()->mod_solo_by_others_downstream (delta);
-				} else {
-					DEBUG_TRACE (DEBUG::Solo, "\talready soloed by others upstream\n");
-				}
+			if (!route->soloed_by_others_upstream()) {
+				(*i)->solo_control()->mod_solo_by_others_downstream (delta);
 			} else {
-				DEBUG_TRACE (DEBUG::Solo, string_compose ("\tthere is a send-only feed from %1\n", (*i)->name()));
+				DEBUG_TRACE (DEBUG::Solo, "\talready soloed by others upstream\n");
 			}
 			in_signal_flow = true;
 		} else {
@@ -3736,25 +3731,15 @@ Session::route_solo_changed (bool self_solo_changed, Controllable::GroupControlD
 
 		DEBUG_TRACE (DEBUG::Solo, string_compose ("check feed to %1\n", (*i)->name()));
 
-		if (route->feeds (*i, &via_sends_only)) {
-			/* propagate solo upstream only if routing other than
-			   sends is involved, but do consider the other route
-			   (*i) to be part of the signal flow even if only
-			   sends are involved.
-			*/
-			DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 feeds %2 via sends only %3 sboD %4 sboU %5\n",
+		if (route->feeds (*i)) {
+			DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 feeds %2 sboD %3 sboU %4\n",
 			                                          route->name(),
 			                                          (*i)->name(),
-			                                          via_sends_only,
 			                                          route->soloed_by_others_downstream(),
 			                                          route->soloed_by_others_upstream()));
-			if (true /*!via_sends_only*/) {
-				//NB. Triggers Invert Push, which handles soloed by downstream
-				DEBUG_TRACE (DEBUG::Solo, string_compose ("\tmod %1 by %2\n", (*i)->name(), delta));
-				(*i)->solo_control()->mod_solo_by_others_upstream (delta);
-			} else {
-				DEBUG_TRACE (DEBUG::Solo, string_compose ("\tfeed to %1 ignored, sends-only\n", (*i)->name()));
-			}
+			//NB. Triggers Invert Push, which handles soloed by downstream
+			DEBUG_TRACE (DEBUG::Solo, string_compose ("\tmod %1 by %2\n", (*i)->name(), delta));
+			(*i)->solo_control()->mod_solo_by_others_upstream (delta);
 			in_signal_flow = true;
 		} else {
 			DEBUG_TRACE (DEBUG::Solo, string_compose("\tno feed to %1\n", (*i)->name()) );

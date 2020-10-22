@@ -110,8 +110,7 @@ InternalSend::propagate_solo ()
 			if ((*i) == _send_to || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_auditioner()) {
 				continue;
 			}
-			bool sends_only;
-			bool does_feed = _send_to->feeds (*i, &sends_only);
+			bool does_feed = _send_to->feeds (*i);
 			if (does_feed && to_soloed_upstream) {
 				(*i)->solo_control()->mod_solo_by_others_upstream (-1);
 			}
@@ -129,9 +128,7 @@ InternalSend::propagate_solo ()
 			if (*i == _send_from || !(*i)->can_solo()) {
 				continue;
 			}
-			bool sends_only;
-			bool does_feed = (*i)->feeds (_send_from, &sends_only);
-			if (does_feed) {
+			if ((*i)->feeds (_send_from)) {
 				(*i)->solo_control()->mod_solo_by_others_downstream (-1);
 			}
 		}
