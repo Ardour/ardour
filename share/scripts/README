@@ -8,19 +8,19 @@ https://github.com/Ardour/ardour/tree/master/share/scripts
 
 Script Naming conventions:
 
-^_
+_
  A script filename with a leading underscore indicates an example script.
  These scripts are only available from ardour's git repository and not
  installed nor included with binary bundles.
 
-^__
+__
  Scripts with a filename starting with two underscores are excluded from
  unit-tests.  This is currently the case for convolver, fluidsynth and
  plugin-modulation.
  They depend on external files (soundfont, impulse-response) or a specific
  session-setup (plugin-modulation needs an automatable plugin).
 
-^s_
+s_
  A filename beginning with "s_" indicates a code snippet.
  These scripts can only be used in the interactive interpreter
  (Window > Scripting). They may be useful by themselves or handy for copy/edit
@@ -28,5 +28,5 @@ Script Naming conventions:
  The filename prefix is only for convenience, "type" = "Snippet" is used when
  scripts are listed at runtime.
 
-^_-*.lua
+_-*.lua
  git ignores those. Intended for local/custom dev scripts or work in progress.
