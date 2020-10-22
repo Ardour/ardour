@@ -170,10 +170,13 @@ cp -r build/libs/vamp-plugins/*ardourvampplugins*.dll $ALIBDIR/vamp/libardourvam
 cp -r build/libs/vamp-pyin/*ardourvamppyin*.dll $ALIBDIR/vamp/libardourvamppyin.dll
 cp $PREFIX/lib/suil-*/*.dll $ALIBDIR/suil/ || true
 
-# lv2 core, classifications etc - TODO check if we need the complete LV2 ontology
-if test -d $PREFIX/lib/lv2/lv2core.lv2 ; then
-	cp -R $PREFIX/lib/lv2/lv2core.lv2 $ALIBDIR/LV2/
-fi
+# lv2 core, classifications
+for file in $PREFIX/lib/lv2/*.lv2; do
+	BN=$(basename $file)
+	mkdir -p $ALIBDIR/LV2/$file
+	cp $PREFIX/lib/lv2/${file}/*.ttl $ALIBDIR/LV2/${file}.lv2/
+done
+
 
 mv $ALIBDIR/surfaces/ardourcp*.dll $DESTDIR/bin/
 

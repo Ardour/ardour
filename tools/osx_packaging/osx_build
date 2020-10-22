@@ -5,7 +5,6 @@ set -e
 # script for pulling together a MacOSX app bundle.
 
 GTKSTACK_ROOT=$HOME/gtk/inst
-ARDOURSTACK_ROOT=$HOME/a3/inst
 BUILD_ROOT=../../build
 
 # where harvid and xjadeo binaries are cached
@@ -390,11 +389,6 @@ if test -d $GTKSTACK_ROOT/lib/suil-0/ ; then
 	cp $GTKSTACK_ROOT/lib/suil-0/lib* $Frameworks
 fi
 
-# Suil modules (old dir 'build-ardour-stack')
-if test -d $ARDOURSTACK_ROOT/lib/suil-0/ ; then
-	cp $ARDOURSTACK_ROOT/lib/suil-0/lib* $Frameworks
-fi
-
 # VST scanner app and wrapper script, if they exist
 if test -d $BUILD_ROOT/libs/fst ; then
 	cp $BUILD_ROOT/libs/fst/ardour-vst-scanner* $Frameworks/ || true
@@ -457,7 +451,7 @@ while [ true ] ; do
 			strip -u -r -arch all $file &>/dev/null
 		fi
 
-		deps=`otool -L $file | awk '{print $1}' | egrep "($GTKSTACK_ROOT|$ARDOURSTACK_ROOT|/opt/|/local/|libs/$STDCPP)" | grep -v 'libjack\.' | grep -v "$(basename $file)"`
+		deps=`otool -L $file | awk '{print $1}' | egrep "($GTKSTACK_ROOT|/opt/|/local/|libs/$STDCPP)" | grep -v 'libjack\.' | grep -v "$(basename $file)"`
 		# echo -n "."
 		for dep in $deps ; do
 			base=`basename $dep`
@@ -529,12 +523,12 @@ fi
 # install bundled LV2s to <app>/Contents/lib/LV2/
 cp -R $BUILD_ROOT/libs/LV2 $Frameworks/
 
-# lv2 core, classifications etc - TODO check if we need the complete LV2 ontology
-if test -d $ARDOURSTACK_ROOT/lib/lv2/lv2core.lv2 ; then
-	cp -R $ARDOURSTACK_ROOT/lib/lv2/lv2core.lv2 $Frameworks/LV2/
-elif test -d $GTKSTACK_ROOT/lib/lv2/lv2core.lv2 ; then
-	cp -R $GTKSTACK_ROOT/lib/lv2/lv2core.lv2 $Frameworks/LV2/
-fi
+# lv2 core, classifications
+for file in $GTKSTACK_ROOT/lib/lv2/*.lv2; do
+	BN=$(basename $file)
+	mkdir -p $APPLIB/LV2/$file
+	cp $GTKSTACK_ROOT/lib/lv2/${file}/*.ttl $APPLIB/LV2/${file}.lv2/
+done
 
 
 # now fix up the executables
@@ -559,7 +553,7 @@ for exe in $executables; do
 	echo "Processing Executable: $exe"
 	EXE=$APPROOT/MacOS/$exe
 	changes=""
-	for lib in `otool -L $EXE | egrep "($GTKSTACK_ROOT|$ARDOURSTACK_ROOT|/opt/|/local/|libs/$STDCPP)" | awk '{print $1}' | grep -v 'libjack\.'` ; do
+	for lib in `otool -L $EXE | egrep "($GTKSTACK_ROOT|/opt/|/local/|libs/$STDCPP)" | awk '{print $1}' | grep -v 'libjack\.'` ; do
 		base=`basename $lib`
 		changes="$changes -change $lib @executable_path/../lib/$base"
 	done
@@ -585,7 +579,7 @@ for libdir in $Frameworks $Frameworks/modules $Surfaces $Panners $Backends $Fram
 		# change all the dependencies
 
 		changes=""
-		for lib in `otool -L $dylib | egrep "($GTKSTACK_ROOT|$ARDOURSTACK_ROOT|/opt/|/local/|libs/$STDCPP)" | awk '{print $1}' | grep -v 'libjack\.'` ; do
+		for lib in `otool -L $dylib | egrep "($GTKSTACK_ROOT|/opt/|/local/|libs/$STDCPP)" | awk '{print $1}' | grep -v 'libjack\.'` ; do
 			base=`basename $lib`
 			if echo $lib | grep -s libbase; then
 				changes="$changes -change $lib @executable_path/../$libbase/$base"
