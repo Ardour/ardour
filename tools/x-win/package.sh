@@ -173,8 +173,8 @@ cp $PREFIX/lib/suil-*/*.dll $ALIBDIR/suil/ || true
 # lv2 core, classifications
 for file in $PREFIX/lib/lv2/*.lv2; do
 	BN=$(basename $file)
-	mkdir -p $ALIBDIR/LV2/$file
-	cp $PREFIX/lib/lv2/${file}/*.ttl $ALIBDIR/LV2/${file}.lv2/
+	mkdir -p $ALIBDIR/LV2/$BN
+	cp $PREFIX/lib/lv2/${BN}/*.ttl $ALIBDIR/LV2/${BN}.lv2/
 done
 
 

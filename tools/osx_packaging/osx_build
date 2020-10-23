@@ -526,8 +526,8 @@ cp -R $BUILD_ROOT/libs/LV2 $Frameworks/
 # lv2 core, classifications
 for file in $GTKSTACK_ROOT/lib/lv2/*.lv2; do
 	BN=$(basename $file)
-	mkdir -p $APPLIB/LV2/$file
-	cp $GTKSTACK_ROOT/lib/lv2/${file}/*.ttl $APPLIB/LV2/${file}.lv2/
+	mkdir -p $APPLIB/LV2/$BN
+	cp $GTKSTACK_ROOT/lib/lv2/${BN}/*.ttl $APPLIB/LV2/${BN}.lv2/
 done
 
 
