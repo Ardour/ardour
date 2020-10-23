@@ -671,7 +671,7 @@ cp -R $BUILD_ROOT/libs/LV2 $APPLIB/
 for file in $GTKSTACK_ROOT/lib/lv2/*.lv2; do
 	BN=$(basename $file)
 	mkdir -p $APPLIB/LV2/$BN
-	cp $GTKSTACK_ROOT/lib/lv2/${BN}/*.ttl $APPLIB/LV2/${BN}.lv2/
+	cp $GTKSTACK_ROOT/lib/lv2/${BN}/*.ttl $APPLIB/LV2/${BN}/
 done
 
 # go through and recursively remove any .svn dirs in the bundle
