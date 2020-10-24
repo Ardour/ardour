@@ -19,8 +19,8 @@
 
 #include <shlobj.h>
 #include <winreg.h>
-#include <glib.h>
-#include "shlobj.h"
+#include <shlobj.h>
+#include <glibmm.h>
 
 #include "pbd/windows_special_dirs.h"
 
