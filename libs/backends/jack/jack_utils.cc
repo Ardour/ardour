@@ -34,6 +34,7 @@
 #ifdef PLATFORM_WINDOWS
 #include <shobjidl.h>  //  Needed for
 #include <shlguid.h>   // 'IShellLink'
+#include "pbd/windows_special_dirs.h"
 #endif
 
 #if (defined PLATFORM_WINDOWS && defined HAVE_PORTAUDIO)
@@ -605,6 +606,11 @@ ARDOUR::get_jack_server_dir_paths (vector<std::string>& server_dir_paths)
 
 	if (pISL)
 		pISL->Release();
+#else
+	std::string reg;
+	if (PBD::windows_query_registry ("Software\\JACK", "Location", reg)) {
+		sp.push_back (reg);
+	}
 #endif
 
 	gchar *install_dir = g_win32_get_package_installation_directory_of_module (NULL);
