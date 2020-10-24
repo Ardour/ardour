@@ -355,40 +355,42 @@ MIDIControllable::midi_sense_controller (Parser &, EventTwoBytes *msg)
 
 				last_controllable_value = new_value;
 			} else {
+				uint32_t cur_val = control_to_midi(_controllable->get_value ());
 				int offset = (msg->value & 0x3f);
 				switch (get_encoder()) {
 					case Enc_L:
-						if (msg->value > 0x40) {
-							_controllable->set_value (midi_to_control (last_value - offset + 1), Controllable::UseGroup);
+						if (msg->value & 0x40) {
+							_controllable->set_value (midi_to_control (cur_val - offset), Controllable::UseGroup);
 						} else {
-							_controllable->set_value (midi_to_control (last_value + offset + 1), Controllable::UseGroup);
+							_controllable->set_value (midi_to_control (cur_val + offset + 1), Controllable::UseGroup);
 						}
 						break;
 					case Enc_R:
-						if (msg->value > 0x40) {
-							_controllable->set_value (midi_to_control (last_value + offset + 1), Controllable::UseGroup);
+						if (msg->value & 0x40) {
+							_controllable->set_value (midi_to_control (cur_val + offset + 1), Controllable::UseGroup);
 						} else {
-							_controllable->set_value (midi_to_control (last_value - offset + 1), Controllable::UseGroup);
+							_controllable->set_value (midi_to_control (cur_val - offset), Controllable::UseGroup);
 						}
 						break;
 					case Enc_2:
+						// 0x40 is max pos offset
 						if (msg->value > 0x40) {
-							_controllable->set_value (midi_to_control (last_value - (0x7f - msg->value) + 1), Controllable::UseGroup);
+							_controllable->set_value (midi_to_control (cur_val - (0x7f - msg->value)), Controllable::UseGroup);
 						} else {
-							_controllable->set_value (midi_to_control (last_value + offset + 1), Controllable::UseGroup);
+							_controllable->set_value (midi_to_control (cur_val + msg->value + 1), Controllable::UseGroup);
 						}
 						break;
 					case Enc_B:
 						if (msg->value > 0x40) {
-							_controllable->set_value (midi_to_control (last_value + offset + 1), Controllable::UseGroup);
-						} else {
-							_controllable->set_value (midi_to_control (last_value - (0x41 - msg->value)), Controllable::UseGroup);
-						}
+							_controllable->set_value (midi_to_control (cur_val + offset + 1), Controllable::UseGroup);
+						} else if (msg->value < 0x40) {
+							_controllable->set_value (midi_to_control (cur_val - (0x40 - msg->value)), Controllable::UseGroup);
+						} // 0x40 = 0 do nothing
 						break;
 					default:
 						break;
 				}
-				DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI CC %1 value %2  %3\n", (int) msg->controller_number, (int) last_value, current_uri() ));
+				DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI CC %1 value %2  %3\n", (int) msg->controller_number, (int) cur_val, current_uri() ));
 
 			}
 		} else {
@@ -430,8 +432,6 @@ MIDIControllable::midi_sense_controller (Parser &, EventTwoBytes *msg)
 				}
 			}
 		}
-
-		last_value = (MIDI::byte) (control_to_midi(_controllable->get_value())); // to prevent feedback fights
 	}
 }
 
