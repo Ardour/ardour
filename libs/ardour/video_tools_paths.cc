@@ -48,33 +48,6 @@ using namespace PBD;
 
 namespace ARDOUR {
 
-#ifdef PLATFORM_WINDOWS
-static bool
-windows_install_dir (const char *regkey, std::string &rv) {
-	HKEY key;
-	DWORD size = PATH_MAX;
-	char tmp[PATH_MAX+1];
-
-	if (   (ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, regkey, 0, KEY_READ, &key))
-	    && (ERROR_SUCCESS == RegQueryValueExA (key, "Install_Dir", 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
-		 )
-	{
-		rv = Glib::locale_to_utf8(tmp);
-		return true;
-	}
-
-	if (   (ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, regkey, 0, KEY_READ | KEY_WOW64_32KEY, &key))
-	    && (ERROR_SUCCESS == RegQueryValueExA (key, "Install_Dir", 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
-			)
-	{
-		rv = Glib::locale_to_utf8(tmp);
-		return true;
-	}
-
-	return false;
-}
-#endif
-
 bool
 ArdourVideoToolPaths::harvid_exe (std::string &harvid_exe)
 {
@@ -91,11 +64,11 @@ ArdourVideoToolPaths::harvid_exe (std::string &harvid_exe)
 		harvid_exe = icsd_file_path;
 	}
 #ifdef PLATFORM_WINDOWS
-	else if ( windows_install_dir("Software\\" PROGRAM_NAME "\\v" PROGRAM_VERSION "\\video", reg))
+	else if (PBD::windows_query_registry ("Software\\" PROGRAM_NAME "\\v" PROGRAM_VERSION "\\video", "Install_Dir", reg))
 	{
 		harvid_exe = g_build_filename(reg.c_str(), "harvid", "harvid.exe", NULL);
 	}
-	else if ( windows_install_dir("Software\\RSS\\harvid", reg))
+	else if (PBD::windows_query_registry ("Software\\RSS\\harvid", "Install_Dir", reg))
 	{
 		harvid_exe = g_build_filename(reg.c_str(), "harvid.exe", NULL);
 	}
@@ -148,11 +121,11 @@ ArdourVideoToolPaths::xjadeo_exe (std::string &xjadeo_exe)
 	}
 #endif
 #ifdef PLATFORM_WINDOWS
-	else if ( windows_install_dir("Software\\" PROGRAM_NAME "\\v" PROGRAM_VERSION "\\video", reg))
+	else if (PBD::windows_query_registry ("Software\\" PROGRAM_NAME "\\v" PROGRAM_VERSION "\\video", "Install_Dir", reg))
 	{
 		xjadeo_exe = std::string(g_build_filename(reg.c_str(), "xjadeo", "xjadeo.exe", NULL));
 	}
-	else if ( windows_install_dir("Software\\RSS\\xjadeo", reg))
+	else if (PBD::windows_query_registry ("Software\\RSS\\xjadeo", "Install_Dir", reg))
 	{
 		xjadeo_exe = std::string(g_build_filename(reg.c_str(), "xjadeo.exe", NULL));
 	}
@@ -184,12 +157,12 @@ ArdourVideoToolPaths::transcoder_exe (std::string &ffmpeg_exe, std::string &ffpr
 		ffmpeg_exe = ff_file_path;
 	}
 #ifdef PLATFORM_WINDOWS
-	else if ( windows_install_dir("Software\\" PROGRAM_NAME "\\v" PROGRAM_VERSION "\\video", reg))
+	else if (PBD::windows_query_registry ("Software\\" PROGRAM_NAME "\\v" PROGRAM_VERSION "\\video", "Install_Dir", reg))
 	{
 		ffmpeg_exe = g_build_filename(reg.c_str(), X_("harvid"), X_("ffmpeg.exe"), NULL);
 		ffprobe_exe = g_build_filename(reg.c_str(), X_("harvid"), X_("ffprobe.exe"), NULL);
 	}
-	else if ( windows_install_dir("Software\\RSS\\harvid", reg))
+	else if (PBD::windows_query_registry ("Software\\RSS\\harvid", "Install_Dir", reg))
 	{
 		ffmpeg_exe = g_build_filename(reg.c_str(), X_("ffmpeg.exe"), NULL);
 		ffprobe_exe = g_build_filename(reg.c_str(), X_("ffprobe.exe"), NULL);
