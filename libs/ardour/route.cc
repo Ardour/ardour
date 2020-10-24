@@ -651,6 +651,8 @@ Route::bounce_get_output_streams (ChanCount &cc, boost::shared_ptr<Processor> en
 		return cc;
 	}
 
+	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+
 	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		if (!include_endpoint && (*i) == endpoint) {
 			break;
@@ -659,6 +661,8 @@ Route::bounce_get_output_streams (ChanCount &cc, boost::shared_ptr<Processor> en
 			break;
 		}
 		if (!(*i)->does_routing() && !boost::dynamic_pointer_cast<PeakMeter>(*i)) {
+			cc = (*i)->output_streams();
+		} else if (*i == _main_outs) {
 			cc = (*i)->output_streams();
 		}
 		if ((*i) == endpoint) {
