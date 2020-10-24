@@ -63,7 +63,7 @@ count_channels (Vst::IComponent* c, Vst::MediaType media, Vst::BusDirection dir,
 				/* For now allow we only support one main bus, and one aux-bus.
 				 * Also an aux-bus by itself is currently N/A.
 				 */
-				std::cerr << "VST3: Ignored extra bus\n";
+				std::cerr << "VST3: Ignored extra bus. type: " << type << " index: " << i << "\n";
 				continue;
 			}
 #endif
@@ -85,10 +85,11 @@ count_channels (Vst::IComponent* c, Vst::MediaType media, Vst::BusDirection dir,
 	return n_channels;
 }
 
-bool
-ARDOUR::discover_vst3 (boost::shared_ptr<VST3PluginModule> m, std::vector<VST3Info>& rv)
+static bool
+discover_vst3 (boost::shared_ptr<ARDOUR::VST3PluginModule> m, std::vector<ARDOUR::VST3Info>& rv, bool verbose)
 {
 	using namespace std;
+	using namespace ARDOUR;
 
 	IPluginFactory* factory = m->factory ();
 
@@ -350,7 +351,7 @@ vst3_save_cache_file (std::string const& module_path, XMLNode* root)
 }
 
 bool
-ARDOUR::vst3_scan_and_cache (std::string const& module_path, std::string const& bundle_path, boost::function<void (std::string const&, VST3Info const&)> cb)
+ARDOUR::vst3_scan_and_cache (std::string const& module_path, std::string const& bundle_path, boost::function<void (std::string const&, VST3Info const&)> cb, bool verbose)
 {
 	XMLNode* root = new XMLNode ("VST3Cache");
 	root->set_property ("version", 1);
@@ -360,7 +361,7 @@ ARDOUR::vst3_scan_and_cache (std::string const& module_path, std::string const& 
 	try {
 		boost::shared_ptr<VST3PluginModule> m = VST3PluginModule::load (module_path);
 		std::vector<VST3Info> nfo;
-		discover_vst3 (m, nfo);
+		discover_vst3 (m, nfo, verbose);
 		for (std::vector<VST3Info>::const_iterator i = nfo.begin(); i != nfo.end(); ++i) {
 			cb (module_path, *i);
 			root->add_child_nocopy (i->state ());
