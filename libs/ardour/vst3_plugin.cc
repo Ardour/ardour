@@ -1360,7 +1360,7 @@ VST3PI::notifyProgramListChange (Vst::ProgramListID, int32)
 	Vst::ParamID id = _program_change_port.id;
 	if (id != Vst::kNoParamId) {
 		v = _controller->getParamNormalized (id);
-		DEBUG_TRACE (DEBUG::VST3Config, "VST3PI::notifyProgramListChange: val: %1 (norm: %2)\n", v, _controller->normalizedParamToPlain (id, v));
+		DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::notifyProgramListChange: val: %1 (norm: %2)\n", v, _controller->normalizedParamToPlain (id, v)));
 	}
 	OnParameterChange (PresetChange, 0, v); /* EMIT SIGNAL */
 	return kResultOk;
@@ -1735,7 +1735,7 @@ VST3PI::set_program (int pgm, int32 sample_off)
 		value /= (_n_factory_presets - 1.f);
 	}
 #endif
-	DEBUG_TRACE (DEBUG::VST3Config, "VST3PI::set_program pgm: %1 val: %2 (norm: %3)\n", pgm, value, _controller->plainParamToNormalized (id, pgm));
+	DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::set_program pgm: %1 val: %2 (norm: %3)\n", pgm, value, _controller->plainParamToNormalized (id, pgm)));
 
 	int32 index;
 	_input_param_changes.addParameterData (id, index)->addPoint (sample_off, value, index);
