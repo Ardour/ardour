@@ -88,7 +88,7 @@ static void vst3_plugin (string const& module_path, VST3Info const& i)
 }
 
 static bool
-scan_vst3 (std::string const& bundle_path, bool force)
+scan_vst3 (std::string const& bundle_path, bool force, bool verbose)
 {
 	info << "Scanning: " << bundle_path << endmsg;
 	string module_path = module_path_vst3 (bundle_path);
@@ -96,14 +96,14 @@ scan_vst3 (std::string const& bundle_path, bool force)
 		return false;
 	}
 
-	if (!vst3_valid_cache_file (module_path, true).empty()) {
+	if (!vst3_valid_cache_file (module_path, verbose).empty()) {
 		if (!force) {
 			info << "Skipping scan." << endmsg;
 			return true;
 		}
 	}
 
-	if (vst3_scan_and_cache (module_path, bundle_path, sigc::ptr_fun (&vst3_plugin))) {
+	if (vst3_scan_and_cache (module_path, bundle_path, sigc::ptr_fun (&vst3_plugin)), verbose) {
 		info << string_compose (_("Saved VST3 plugin cache to %1"), vst3_cache_file (module_path)) << endmsg;
 	}
 
@@ -120,6 +120,7 @@ usage ()
   -f, --force          Force update ot cache file\n\
   -h, --help           Display this help and exit\n\
   -q, --quiet          Hide usual output, only print errors\n\
+  -v, --verbose        Give verbose output (unless quiet)\n\
   -V, --version        Print version information and exit\n\
 \n");
 
@@ -140,14 +141,16 @@ main (int argc, char **argv)
 	bool print_log = true;
 	bool stop_on_error = false;
 	bool force = false;
+	bool verbose = false;
 
-	const char* optstring = "fhqV";
+	const char* optstring = "fhqvV";
 
 	/* clang-format off */
 	const struct option longopts[] = {
 		{ "force",           no_argument,       0, 'f' },
 		{ "help",            no_argument,       0, 'h' },
 		{ "quiet",           no_argument,       0, 'q' },
+		{ "verbose",         no_argument,       0, 'v' },
 		{ "version",         no_argument,       0, 'V' },
 	};
 	/* clang-format on */
@@ -176,6 +179,10 @@ main (int argc, char **argv)
 				print_log = false;
 				break;
 
+			case 'v':
+				verbose = true;
+				break;
+
 			default:
 				std::cerr << "Error: unrecognized option. See --help for usage information.\n";
 				console_madness_end ();
@@ -198,12 +205,14 @@ main (int argc, char **argv)
 		log_receiver.listen_to (warning);
 		log_receiver.listen_to (error);
 		log_receiver.listen_to (fatal);
+	} else {
+		verbose = false;
 	}
 
 	bool err = false;
 
 	while (optind < argc) {
-		if (!scan_vst3 (argv[optind++], force)) {
+		if (!scan_vst3 (argv[optind++], force, verbose)) {
 			err = true;
 		}
 		if (stop_on_error) {

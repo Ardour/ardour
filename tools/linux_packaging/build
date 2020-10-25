@@ -9,8 +9,6 @@
 
 # where the GTK stack is installed
 GTKSTACK_ROOT=$HOME/gtk/inst
-# where the Ardour dependencies are installed
-ARDOURSTACK_ROOT=$HOME/a3/inst
 # the waf build tree to use when copying built/generated files
 BUILD_ROOT=../../build
 
@@ -436,11 +434,6 @@ if test -d $GTKSTACK_ROOT/lib/suil-0/ ; then
     cp $GTKSTACK_ROOT/lib/suil-0/lib* $Libraries
 fi
 
-# Suil modules (old dir 'build-ardour-stack')
-if test -d $ARDOURSTACK_ROOT/lib/suil-0/ ; then
-    cp $ARDOURSTACK_ROOT/lib/suil-0/lib* $Libraries
-fi
-
 # VST scanner app (both LXVST as well as WIN-VST, 2in1)
 # (if build with wine: ardour-vst-scanner is a wrapper
 #  script for ardour-vst-scanner.exe.so, if VST is disabled
@@ -674,14 +667,12 @@ fi
 # install bundled LV2s to <app>/lib/LV2/
 cp -R $BUILD_ROOT/libs/LV2 $APPLIB/
 
-# lv2 core, classifications etc - TODO check if we need the complete LV2 ontology
-if test -d $ARDOURSTACK_ROOT/lib/lv2/lv2core.lv2 ; then
-	mkdir -p $APPLIB/LV2/lv2core.lv2
-	cp -R $ARDOURSTACK_ROOT/lib/lv2/lv2core.lv2/*.ttl $APPLIB/LV2/lv2core.lv2/
-elif test -d $GTKSTACK_ROOT/lib/lv2/lv2core.lv2 ; then
-	mkdir -p $APPLIB/LV2/lv2core.lv2
-	cp -R $GTKSTACK_ROOT/lib/lv2/lv2core.lv2/*.ttl $APPLIB/LV2/lv2core.lv2/
-fi
+# lv2 core, classifications
+for file in $GTKSTACK_ROOT/lib/lv2/*.lv2; do
+	BN=$(basename $file)
+	mkdir -p $APPLIB/LV2/$BN
+	cp $GTKSTACK_ROOT/lib/lv2/${BN}/*.ttl $APPLIB/LV2/${BN}/
+done
 
 # go through and recursively remove any .svn dirs in the bundle
 for svndir in `find $APPDIR -name .svn -type d`; do

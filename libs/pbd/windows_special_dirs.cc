@@ -19,7 +19,8 @@
 
 #include <shlobj.h>
 #include <winreg.h>
-#include <glib.h>
+#include <shlobj.h>
+#include <glibmm.h>
 
 #include "pbd/windows_special_dirs.h"
 
@@ -47,3 +48,28 @@ PBD::get_win_special_folder_path (int csidl)
 	return std::string();
 }
 
+bool
+PBD::windows_query_registry (const char *regkey, const char *regval, std::string &rv)
+{
+	HKEY key;
+	DWORD size = PATH_MAX;
+	char tmp[PATH_MAX+1];
+
+	if (   (ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, regkey, 0, KEY_READ, &key))
+			&& (ERROR_SUCCESS == RegQueryValueExA (key, regval, 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
+		 )
+	{
+		rv = Glib::locale_to_utf8 (tmp);
+		return true;
+	}
+
+	if (   (ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, regkey, 0, KEY_READ | KEY_WOW64_32KEY, &key))
+			&& (ERROR_SUCCESS == RegQueryValueExA (key, regval, 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
+		 )
+	{
+		rv = Glib::locale_to_utf8 (tmp);
+		return true;
+	}
+
+	return false;
+}

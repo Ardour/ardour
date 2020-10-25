@@ -24,6 +24,7 @@
 #ifdef PLATFORM_WINDOWS
 #include <windows.h>
 #include <glibmm.h>
+#include "pbd/windows_special_dirs.h"
 #else
 #include <sys/utsname.h>
 #endif
@@ -51,34 +52,6 @@ struct ping_call {
     ping_call (const std::string& v, const std::string& a)
 	    : version (v), announce_path (a) {}
 };
-
-#ifdef PLATFORM_WINDOWS
-static bool
-_query_registry (const char *regkey, const char *regval, std::string &rv) {
-	HKEY key;
-	DWORD size = PATH_MAX;
-	char tmp[PATH_MAX+1];
-
-	if (   (ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, regkey, 0, KEY_READ, &key))
-	    && (ERROR_SUCCESS == RegQueryValueExA (key, regval, 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
-		 )
-	{
-		rv = Glib::locale_to_utf8 (tmp);
-		return true;
-	}
-
-	if (   (ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, regkey, 0, KEY_READ | KEY_WOW64_32KEY, &key))
-	    && (ERROR_SUCCESS == RegQueryValueExA (key, regval, 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
-		 )
-	{
-		rv = Glib::locale_to_utf8 (tmp);
-		return true;
-	}
-
-	return false;
-}
-#endif
-
 
 static void*
 _pingback (void *arg)
@@ -140,7 +113,7 @@ _pingback (void *arg)
 	h.free (query);
 #else
 	std::string val;
-	if (_query_registry("SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", "ProductName", val)) {
+	if (PBD::windows_query_registry ("SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", "ProductName", val)) {
 		char* query = h.escape (val.c_str(), strlen (val.c_str()));
 		url += "r=";
 		url += query;
@@ -150,7 +123,7 @@ _pingback (void *arg)
 		url += "r=&";
 	}
 
-	if (_query_registry("Hardware\\Description\\System\\CentralProcessor\\0", "Identifier", val)) {
+	if (PBD::windows_query_registry ("Hardware\\Description\\System\\CentralProcessor\\0", "Identifier", val)) {
 		// remove "Family X Model YY Stepping Z" tail
 		size_t cut = val.find (" Family ");
 		if (string::npos != cut) {

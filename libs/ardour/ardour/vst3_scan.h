@@ -65,10 +65,6 @@ struct VST3Info {
 	int n_midi_outputs;
 };
 
-LIBARDOUR_API extern bool
-discover_vst3 (boost::shared_ptr<VST3PluginModule>,
-               std::vector<VST3Info>&);
-
 LIBARDOUR_API extern std::string
 module_path_vst3 (std::string const& path);
 
@@ -79,7 +75,7 @@ LIBARDOUR_API extern std::string
 vst3_valid_cache_file (std::string const& module_path, bool verbose = false);
 
 LIBARDOUR_API extern bool
-vst3_scan_and_cache (std::string const& module_path, std::string const& bundle_path, boost::function<void (std::string const&, VST3Info const&)> cb);
+vst3_scan_and_cache (std::string const& module_path, std::string const& bundle_path, boost::function<void (std::string const&, VST3Info const&)> cb, bool verbose = false);
 
 } // namespace ARDOUR
 

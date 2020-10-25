@@ -38,6 +38,8 @@ namespace PBD {
 */
 LIBPBD_API std::string get_win_special_folder_path (int csidl);
 
+LIBPBD_API bool windows_query_registry (const char *regkey, const char *regval, std::string &rv);
+
 }
 
 #endif /* __libpbd_windows_special_dirs_h__ */

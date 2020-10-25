@@ -942,6 +942,7 @@ AudioEngine::drop_backend ()
 		Port::PortDrop (); /* EMIT SIGNAL */
 		TransportMasterManager& tmm (TransportMasterManager::instance());
 		tmm.engine_stopped ();
+		tmm.set_session (0); // unregister TMM ports
 
 		/* Stopped is needed for Graph to explicitly terminate threads */
 		Stopped (); /* EMIT SIGNAL */

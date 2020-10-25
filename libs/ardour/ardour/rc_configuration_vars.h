@@ -237,6 +237,7 @@ CONFIG_VARIABLE (uint32_t, limit_n_automatables, "limit-n-automatables", 512)
 /* custom user plugin paths */
 CONFIG_VARIABLE (std::string, plugin_path_vst, "plugin-path-vst", "@default@")
 CONFIG_VARIABLE (std::string, plugin_path_lxvst, "plugin-path-lxvst", "@default@")
+CONFIG_VARIABLE (std::string, plugin_path_vst3, "plugin-path-vst3", "@default@")
 
 /* denormal management */
 

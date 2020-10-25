@@ -4,7 +4,7 @@ Ardour Lua Scripts
 https://manual.ardour.org/lua-scripting/
 
 For upstream script addition, please file a pull-request at
-https://github.com/Ardour/ardour/tree/master/scripts
+https://github.com/Ardour/ardour/tree/master/share/scripts
 
 Script Naming conventions:
 

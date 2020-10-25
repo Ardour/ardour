@@ -2036,8 +2036,9 @@ ProcessorBox::object_drop (DnDVBox<ProcessorEntry>* source, ProcessorEntry* posi
 		assert (other->can_copy_state (position));
 		boost::shared_ptr<ARDOUR::Processor> otherproc = other->processor();
 		boost::shared_ptr<ARDOUR::Processor> proc = position->processor();
+		boost::shared_ptr<PluginInsert> opi = boost::dynamic_pointer_cast<PluginInsert> (otherproc);
 		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (proc);
-		assert (otherproc && proc && pi);
+		assert (otherproc && proc && pi && opi);
 
 		PBD::ID id = pi->id();
 		XMLNode& state = otherproc->get_state ();
@@ -2046,6 +2047,21 @@ ProcessorBox::object_drop (DnDVBox<ProcessorEntry>* source, ProcessorEntry* posi
 		 * (this needs a better solution which retains connections)
 		 */
 		state.remove_nodes_and_delete ("Processor");
+		state.remove_property ("count");
+
+		if (pi->get_count () != opi->get_count ()) {
+			state.remove_property ("custom");
+			state.remove_nodes_and_delete ("ConfiguredInput");
+			state.remove_nodes_and_delete ("CustomSinks");
+			state.remove_nodes_and_delete ("ConfiguredOutput");
+			state.remove_nodes_and_delete ("PresetOutput");
+			state.remove_nodes_and_delete ("ThruMap");
+			for (uint32_t i = 0; i < opi->get_count (); ++i) {
+				state.remove_nodes_and_delete (string_compose ("InputMap-%1", i));
+				state.remove_nodes_and_delete (string_compose ("OutputMap-%1", i));
+			}
+		}
+
 		/* Controllable and automation IDs should not be copied */
 		PBD::Stateful::ForceIDRegeneration force_ids;
 		proc->set_state (state, Stateful::loading_state_version);
@@ -3579,6 +3595,7 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 				 */
 				XMLNode state (**niter);
 				state.remove_nodes_and_delete ("Processor");
+				state.remove_property ("count");
 
 				/* Controllable and automation IDs should not be copied */
 				PBD::Stateful::ForceIDRegeneration force_ids;

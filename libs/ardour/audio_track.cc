@@ -265,6 +265,10 @@ AudioTrack::bounceable (boost::shared_ptr<Processor> endpoint, bool include_endp
 			continue;
 		}
 
+		if (boost::dynamic_pointer_cast<PeakMeter>(*r)) {
+			continue;
+		}
+
 		/* does the output from the last considered processor match the
 		 * input to this one?
 		 */
@@ -375,7 +379,7 @@ AudioTrack::freeze_me (InterThreadInfo& itt)
 			_freeze_record.processor_info.push_back (frii);
 
 			/* now deactivate the processor, */
-			if (!boost::dynamic_pointer_cast<Amp>(*r)) {
+			if (!boost::dynamic_pointer_cast<Amp>(*r) && *r != _disk_reader && *r != main_outs()) {
 				(*r)->deactivate ();
 			}
 

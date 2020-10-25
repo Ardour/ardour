@@ -74,7 +74,7 @@ TransportMaster::TransportMaster (SyncSource t, std::string const & name)
 	, _sclock_synced (Properties::sclock_synced, false)
 	, _collect (Properties::collect, true)
 	, _connected (Properties::connected, false)
-	, port_node (X_(""))
+	, port_node (X_("Port"))
 {
 	register_properties ();
 
@@ -243,6 +243,9 @@ void
 TransportMaster::set_session (Session* s)
 {
 	_session = s;
+	if (!_session) {
+		unregister_port ();
+	}
 }
 
 int
@@ -325,7 +328,10 @@ TransportMaster::get_state ()
 			}
 		}
 
+		port_node = *pnode;
 		node->add_child_nocopy (*pnode);
+	} else if (port_node.children (). size() > 0) {
+		node->add_child_copy (port_node);
 	}
 
 	return *node;
