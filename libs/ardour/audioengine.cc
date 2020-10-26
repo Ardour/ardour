@@ -301,7 +301,7 @@ AudioEngine::process_callback (pframes_t nframes)
 	if (_session && _init_countdown > 0) {
 		--_init_countdown;
 		/* Warm up caches */
-		PortManager::cycle_start (nframes);
+		PortManager::cycle_start (nframes, _session);
 		_session->process (nframes);
 		PortManager::silence (nframes);
 		PortManager::cycle_end (nframes);

@@ -42,11 +42,55 @@ class PortEngine;
 class AudioBackend;
 class Session;
 
+class CircularSampleBuffer;
+class CircularEventBuffer;
+
 class LIBARDOUR_API PortManager
 {
 public:
-	typedef std::map<std::string, boost::shared_ptr<Port> > Ports;
-	typedef std::list<boost::shared_ptr<Port> >             PortList;
+	struct DPM {
+		DPM ()
+		{
+			reset ();
+		}
+		void reset ()
+		{
+			level = 0;
+			peak  = 0;
+		}
+		Sample level;
+		Sample peak;
+	};
+
+	struct MPM {
+		MPM ()
+		{
+			reset ();
+		}
+		void reset ()
+		{
+			memset (chn_active, 0, sizeof (float) * 17);
+		}
+		bool active (int chn) const {
+			if (chn < 0 || chn > 16) {
+				return false;
+			}
+			return chn_active[chn] > 0.1;
+		}
+		/* 0..15: MIDI Channel Event, 16: System Common Message */
+		float chn_active[17];
+	};
+
+	typedef std::map<std::string, boost::shared_ptr<Port>> Ports;
+	typedef std::list<boost::shared_ptr<Port>>             PortList;
+
+	typedef boost::shared_ptr<CircularSampleBuffer> AudioPortScope;
+	typedef std::map<std::string, AudioPortScope>   AudioPortScopes;
+	typedef std::map<std::string, DPM>              AudioPortMeters;
+
+	typedef boost::shared_ptr<CircularEventBuffer> MIDIPortMonitor;
+	typedef std::map<std::string, MIDIPortMonitor> MIDIPortMonitors;
+	typedef std::map<std::string, MPM>             MIDIPortMeters;
 
 	PortManager ();
 	virtual ~PortManager () {}
@@ -199,6 +243,26 @@ public:
 	 */
 	PBD::Signal5<void, boost::weak_ptr<Port>, std::string, boost::weak_ptr<Port>, std::string, bool> PortConnectedOrDisconnected;
 
+	void reset_input_meters ();
+
+	AudioPortMeters const& input_meters () const
+	{
+		return _audio_port_meters;
+	}
+	AudioPortScopes const& input_scopes () const
+	{
+		return _audio_port_scopes;
+	}
+
+	MIDIPortMeters const& midi_meters () const
+	{
+		return _midi_port_meters;
+	}
+	MIDIPortMonitors const& midi_monitors () const
+	{
+		return _midi_port_monitors;
+	}
+
 protected:
 	boost::shared_ptr<AudioBackend> _backend;
 
@@ -245,6 +309,15 @@ protected:
 	void filter_midi_ports (std::vector<std::string>&, MidiPortFlags, MidiPortFlags);
 
 	void set_port_buffer_sizes (pframes_t);
+
+private:
+	void run_input_meters (pframes_t, samplecnt_t);
+
+	AudioPortMeters  _audio_port_meters;
+	AudioPortScopes  _audio_port_scopes;
+	MIDIPortMeters   _midi_port_meters;
+	MIDIPortMonitors _midi_port_monitors;
+	volatile gint    _reset_meters;
 };
 
 } // namespace ARDOUR

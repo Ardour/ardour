@@ -819,7 +819,7 @@ LuaBindings::common (lua_State* L)
 
 		.beginClass <PBD::PropertyChange> ("PropertyChange")
 		// TODO add special handling (std::set<PropertyID>), PropertyID is a GQuark.
-		// -> direct map to lua table  beginStdSet()A
+		// -> direct map to lua table  beginStdSet()
 		//
 		// expand templated PropertyDescriptor<T>
 		.addFunction ("containsBool", &PBD::PropertyChange::contains<bool>)
@@ -1396,6 +1396,19 @@ LuaBindings::common (lua_State* L)
 
 		.endNamespace () /* ARDOUR::MidiModel */
 
+		.beginClass <PortManager::DPM> ("DPM")
+		.addVoidConstructor ()
+		.addFunction ("reset", &PortManager::DPM::reset)
+		.addData ("level", &PortManager::DPM::level, false)
+		.addData ("peak", &PortManager::DPM::peak, false)
+		.endClass ()
+
+		.beginClass <PortManager::MPM> ("MPM")
+		.addVoidConstructor ()
+		.addFunction ("reset", &PortManager::MPM::reset)
+		.addFunction ("active", &PortManager::MPM::active)
+		.endClass ()
+
 		.beginClass <Plugin::PresetRecord> ("PresetRecord")
 		.addVoidConstructor ()
 		.addData ("uri", &Plugin::PresetRecord::uri, false)
@@ -1772,6 +1785,14 @@ LuaBindings::common (lua_State* L)
 
 		// RegionFactory::RegionMap
 		.beginStdMap <PBD::ID,boost::shared_ptr<Region> > ("RegionMap")
+		.endClass ()
+
+		// typedef std::map<std::string, DPM> PortManager::AudioPortMeters;
+		.beginStdMap <std::string, PortManager::DPM> ("AudioPortMeters")
+		.endClass ()
+
+		// typedef std::map<std::string, MPM> PortManager::MIDIPortMeters;
+		.beginStdMap <std::string, PortManager::MPM> ("MIDIPortMeters")
 		.endClass ()
 
 		// typedef std::list<boost::shared_ptr<Processor> > ProcessorList
@@ -2335,6 +2356,8 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("get_physical_inputs", &PortManager::get_physical_inputs)
 		.addFunction ("n_physical_outputs", &PortManager::n_physical_outputs)
 		.addFunction ("n_physical_inputs", &PortManager::n_physical_inputs)
+		.addFunction ("reset_input_meters", &PortManager::reset_input_meters)
+		.addFunction ("input_meters", &PortManager::input_meters)
 		.addRefFunction ("get_connections", &PortManager::get_connections)
 		.addRefFunction ("get_ports", (int (PortManager::*)(DataType, PortManager::PortList&))&PortManager::get_ports)
 		.addRefFunction ("get_backend_ports", (int (PortManager::*)(const std::string&, DataType, PortFlags, std::vector<std::string>&))&PortManager::get_ports)

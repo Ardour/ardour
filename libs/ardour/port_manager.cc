@@ -37,6 +37,7 @@
 #include "ardour/async_midi_port.h"
 #include "ardour/audio_backend.h"
 #include "ardour/audio_port.h"
+#include "ardour/circular_buffer.h"
 #include "ardour/debug.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/midi_port.h"
@@ -633,6 +634,12 @@ PortManager::reestablish_ports ()
 		return -1;
 	}
 
+	_audio_port_scopes.clear();
+	_audio_port_meters.clear();
+	_midi_port_monitors.clear();
+	_midi_port_meters.clear();
+	run_input_meters (0, 0);
+
 	return 0;
 }
 
@@ -821,6 +828,8 @@ PortManager::cycle_start (pframes_t nframes, Session* s)
 			}
 		}
 	}
+
+	run_input_meters (nframes, s ? s->nominal_sample_rate () : 0);
 }
 
 void
@@ -1402,4 +1411,153 @@ PortManager::check_for_ambiguous_latency (bool log) const
 		}
 	}
 	return rv;
+}
+
+void
+PortManager::reset_input_meters ()
+{
+	g_atomic_int_set (&_reset_meters, 1);
+}
+
+/* Cache dB -> coefficient calculation for dB/sec falloff.
+ * @n_samples engine-buffer-size
+ * @rate engine sample-rate
+ * @return coefficiant taking user preferences meter_falloff (dB/sec) into account
+ */
+struct FallOffCache
+{
+	FallOffCache ()
+		: _falloff (1.0)
+		, _cfg_db_s (0)
+		, _n_samples (0)
+		, _rate (0)
+	{}
+
+	float calc (pframes_t n_samples, samplecnt_t rate)
+	{
+		if (n_samples == 0 || rate == 0) {
+			return 1.0;
+		}
+
+		if (Config->get_meter_falloff () != _cfg_db_s || n_samples != _n_samples || rate != _rate) {
+			_cfg_db_s  = Config->get_meter_falloff ();
+			_n_samples = n_samples;
+			_rate      = rate;
+#ifdef _GNU_SOURCE
+			_falloff = exp10f (-0.05f * _cfg_db_s * _n_samples / _rate);
+#else
+			_falloff = powf (10.f, -0.05f * _cfg_db_s * _n_samples / _rate);
+#endif
+		}
+
+		return _falloff;
+	}
+
+	private:
+		float       _falloff;
+		float       _cfg_db_s;
+		pframes_t   _n_samples;
+		samplecnt_t _rate;
+};
+
+static FallOffCache falloff_cache;
+
+void
+PortManager::run_input_meters (pframes_t n_samples, samplecnt_t rate)
+{
+	const bool reset = g_atomic_int_compare_and_exchange (&_reset_meters, 1, 0);
+
+	const float falloff = falloff_cache.calc (n_samples, rate);
+
+	/* calculate peak of all physical inputs (readable ports) */
+	std::vector<std::string> port_names;
+	get_physical_inputs (DataType::AUDIO, port_names);
+	for (std::vector<std::string>::iterator p = port_names.begin(); p != port_names.end(); ++p) {
+		if (port_is_mine (*p)) {
+			continue;
+		}
+		PortEngine::PortHandle ph = _backend->get_port_by_name (*p);
+		if (!ph) {
+			continue;
+		}
+		if (n_samples == 0) {
+			/* allocate using default c'tor */
+			_audio_port_meters[*p];
+			_audio_port_scopes[*p] = AudioPortScope (new CircularSampleBuffer (524288)); // 2^19 ~ 1MB / port
+			continue;
+		}
+
+		if (reset) {
+			_audio_port_meters[*p].reset ();
+		}
+
+		Sample* buf = (Sample*) _backend->get_buffer (ph, n_samples);
+		if (!buf) {
+			continue;
+		}
+
+		_audio_port_scopes[*p]->write (buf, n_samples);
+
+
+		/* falloff */
+		if (_audio_port_meters[*p].level > 1e-10) {
+			_audio_port_meters[*p].level *= falloff;
+		} else {
+			_audio_port_meters[*p].level = 0;
+		}
+
+		_audio_port_meters[*p].level = compute_peak (buf, n_samples, reset ? 0 : _audio_port_meters[*p].level);
+		_audio_port_meters[*p].level = std::min (_audio_port_meters[*p].level, 100.f); // cut off at +40dBFS for falloff.
+		_audio_port_meters[*p].peak  = std::max (_audio_port_meters[*p].peak, _audio_port_meters[*p].level);
+	}
+
+	/* MIDI */
+	port_names.clear ();
+	get_physical_inputs (DataType::MIDI, port_names);
+	for (std::vector<std::string>::iterator p = port_names.begin(); p != port_names.end(); ++p) {
+		if (port_is_mine (*p)) {
+			continue;
+		}
+		PortEngine::PortHandle ph = _backend->get_port_by_name (*p);
+		if (!ph) {
+			continue;
+		}
+
+		if (n_samples == 0) {
+			/* allocate using default c'tor */
+			_midi_port_meters[*p];
+			_midi_port_monitors[*p] = MIDIPortMonitor (new CircularEventBuffer (32));
+			continue;
+		}
+
+		for (size_t i = 0; i < 17; ++i) {
+			/* falloff */
+			if (_midi_port_meters[*p].chn_active[i] > 1e-10) {
+				_midi_port_meters[*p].chn_active[i] *= falloff;
+			} else {
+				_midi_port_meters[*p].chn_active[i] = 0;
+			}
+		}
+
+		void* buffer = _backend->get_buffer (ph, n_samples);
+		const pframes_t event_count = _backend->get_midi_event_count (buffer);
+
+		for (pframes_t i = 0; i < event_count; ++i) {
+			pframes_t timestamp;
+			size_t size;
+			uint8_t const* buf;
+			_backend->midi_event_get (timestamp, size, &buf, buffer, i);
+			if (buf[0] == 0xfe) {
+				/* ignore active sensing */
+				continue;
+			}
+			if ((buf[0] & 0xf0) == 0xf0) {
+				_midi_port_meters[*p].chn_active[16] = 1.0;
+			} else {
+				int chn = (buf[0] & 0x0f);
+				_midi_port_meters[*p].chn_active[chn] = 1.0;
+			}
+			_midi_port_monitors[*p]->write (buf, size);
+		}
+	}
 }
