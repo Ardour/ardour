@@ -90,8 +90,9 @@ public:
 		: _size (size)
 		, _type (kString)
 	{
-		v.stringValue = new Vst::TChar[_size];
+		v.stringValue = new Vst::TChar[_size + 1];
 		memcpy (v.stringValue, value, _size * sizeof (Vst::TChar));
+		v.stringValue[size] = 0;
 	}
 
 	HostAttribute (const void* value, uint32 size)
