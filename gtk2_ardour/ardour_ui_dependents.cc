@@ -47,6 +47,7 @@
 #include "luainstance.h"
 #include "luawindow.h"
 #include "mixer_ui.h"
+#include "recorder_ui.h"
 #include "keyboard.h"
 #include "keyeditor.h"
 #include "splash.h"
@@ -118,6 +119,7 @@ ARDOUR_UI::we_have_dependents ()
 	tabbable_state_change (*rc_option_editor);
 	tabbable_state_change (*mixer);
 	tabbable_state_change (*editor);
+	tabbable_state_change (*recorder);
 
 	/* all actions are defined */
 
@@ -139,6 +141,7 @@ ARDOUR_UI::connect_dependents_to_session (ARDOUR::Session *s)
 	editor->set_session (s);
 	BootMessage (_("Setup Mixer"));
 	mixer->set_session (s);
+	recorder->set_session (s);
 	meterbridge->set_session (s);
 	luawindow->set_session (s);
 
@@ -182,6 +185,8 @@ ARDOUR_UI::tab_window_root_drop (GtkNotebook* src,
 		tabbable = mixer;
 	} else if (w == GTK_WIDGET(rc_option_editor->contents().gobj())) {
 		tabbable = rc_option_editor;
+	} else if (w == GTK_WIDGET(recorder->contents().gobj())) {
+		tabbable = recorder;
 	} else {
 		return 0;
 	}
@@ -268,6 +273,11 @@ ARDOUR_UI::setup_windows ()
 		return -1;
 	}
 
+	if (create_recorder ()) {
+		error << _("UI: cannot setup recorder") << endmsg;
+		return -1;
+	}
+
 	if (create_meterbridge ()) {
 		error << _("UI: cannot setup meterbridge") << endmsg;
 		return -1;
@@ -288,6 +298,7 @@ ARDOUR_UI::setup_windows ()
 	rc_option_editor->add_to_notebook (_tabs, _("Preferences"));
 	mixer->add_to_notebook (_tabs, _("Mixer"));
 	editor->add_to_notebook (_tabs, _("Editor"));
+	recorder->add_to_notebook (_tabs, _("Recorder"));
 
 	top_packer.pack_start (menu_bar_base, false, false);
 
@@ -382,6 +393,8 @@ ARDOUR_UI::setup_windows ()
 			_tabs.set_current_page (_tabs.page_num (mixer->contents()));
 		} else if (rc_option_editor && current_tab == "preferences") {
 			_tabs.set_current_page (_tabs.page_num (rc_option_editor->contents()));
+		} else if (recorder && current_tab == "recorder") {
+			_tabs.set_current_page (_tabs.page_num (recorder->contents()));
 		} else if (editor) {
 			_tabs.set_current_page (_tabs.page_num (editor->contents()));
 		}

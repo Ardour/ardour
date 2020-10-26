@@ -570,6 +570,12 @@
         <menuitem action='attach-mixer'/>
         <menuitem action='detach-mixer'/>
       </menu>
+      <menu action='RecorderMenu'>
+        <menuitem action='show-recorder'/>
+        <menuitem action='hide-recorder'/>
+        <menuitem action='attach-recorder'/>
+        <menuitem action='detach-recorder'/>
+      </menu>
       <menu action='PrefsMenu'>
         <menuitem action='show-preferences'/>
         <menuitem action='hide-preferences'/>
@@ -647,6 +653,13 @@
     <menuitem action='hide-mixer'/>
     <menuitem action='attach-mixer'/>
     <menuitem action='detach-mixer'/>
+  </popup>
+
+  <popup action="recorderTabbableButtonMenu" accelerators='true'>
+    <menuitem action='show-recorder'/>
+    <menuitem action='hide-recorder'/>
+    <menuitem action='attach-recorder'/>
+    <menuitem action='detach-recorder'/>
   </popup>
 
   <popup action="preferencesTabbableButtonMenu" accelerators='true'>
