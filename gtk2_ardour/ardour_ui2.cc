@@ -61,6 +61,7 @@
 #include "actions.h"
 #include "main_clock.h"
 #include "mixer_ui.h"
+#include "recorder_ui.h"
 #include "utils.h"
 #include "time_info_box.h"
 #include "midi_tracer.h"
@@ -314,6 +315,7 @@ ARDOUR_UI::setup_transport ()
 	editor_visibility_button.set_related_action (ActionManager::get_action (X_("Common"), X_("change-editor-visibility")));
 	mixer_visibility_button.set_related_action (ActionManager::get_action (X_("Common"), X_("change-mixer-visibility")));
 	prefs_visibility_button.set_related_action (ActionManager::get_action (X_("Common"), X_("change-preferences-visibility")));
+	recorder_visibility_button.set_related_action (ActionManager::get_action (X_("Common"), X_("change-recorder-visibility")));
 
 	act = ActionManager::get_action ("Transport", "ToggleAutoReturn");
 	auto_return_button.set_related_action (act);
@@ -356,12 +358,14 @@ ARDOUR_UI::setup_transport ()
 	editor_visibility_button.signal_drag_failed().connect (sigc::bind (sigc::ptr_fun (drag_failed), editor));
 	mixer_visibility_button.signal_drag_failed().connect (sigc::bind (sigc::ptr_fun (drag_failed), mixer));
 	prefs_visibility_button.signal_drag_failed().connect (sigc::bind (sigc::ptr_fun (drag_failed), rc_option_editor));
+	recorder_visibility_button.signal_drag_failed().connect (sigc::bind (sigc::ptr_fun (drag_failed), recorder));
 
 	/* catch context clicks so that we can show a menu on these buttons */
 
 	editor_visibility_button.signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::tabbable_visibility_button_press), X_("editor")), false);
 	mixer_visibility_button.signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::tabbable_visibility_button_press), X_("mixer")), false);
 	prefs_visibility_button.signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::tabbable_visibility_button_press), X_("preferences")), false);
+	recorder_visibility_button.signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::tabbable_visibility_button_press), X_("recorder")), false);
 
 	/* setup widget style/name */
 
@@ -384,6 +388,7 @@ ARDOUR_UI::setup_transport ()
 	editor_visibility_button.set_name (X_("page switch button"));
 	mixer_visibility_button.set_name (X_("page switch button"));
 	prefs_visibility_button.set_name (X_("page switch button"));
+	recorder_visibility_button.set_name (X_("page switch button"));
 
 	punch_in_button.set_name ("punch button");
 	punch_out_button.set_name ("punch button");
@@ -443,6 +448,10 @@ ARDOUR_UI::setup_transport ()
 	Gtkmm2ext::UI::instance()->set_tip (prefs_visibility_button,
 	                                    string_compose (_("Drag this tab to the desktop to show %1 in its own window\n\n"
 	                                                      "To re-attach the window, use the Window > %1 > Attach menu action"), rc_option_editor->name()));
+
+	Gtkmm2ext::UI::instance()->set_tip (recorder_visibility_button,
+	                                    string_compose (_("Drag this tab to the desktop to show %1 in its own window\n\n"
+	                                                      "To re-attach the window, use the Window > %1 > Attach menu action"), recorder->name()));
 
 	Gtkmm2ext::UI::instance()->set_tip (punch_in_button, _("Start recording at auto-punch start"));
 	Gtkmm2ext::UI::instance()->set_tip (punch_out_button, _("Stop recording at auto-punch end"));
@@ -523,8 +532,10 @@ ARDOUR_UI::setup_transport ()
 	button_height_size_group->add_widget (auto_return_button);
 
 	//tab selections
+	button_height_size_group->add_widget (recorder_visibility_button);
 	button_height_size_group->add_widget (editor_visibility_button);
 	button_height_size_group->add_widget (mixer_visibility_button);
+	button_height_size_group->add_widget (prefs_visibility_button);
 
 	//punch section
 	button_height_size_group->add_widget (punch_in_button);
@@ -659,8 +670,11 @@ ARDOUR_UI::setup_transport ()
 	}
 	col += MAX_LUA_ACTION_BUTTONS / 2;
 
-	transport_table.attach (editor_visibility_button, TCOL, 0, 1 , FILL, SHRINK, hpadding, vpadding);
-	transport_table.attach (mixer_visibility_button,  TCOL, 1, 2 , FILL, SHRINK, hpadding, vpadding);
+	transport_table.attach (recorder_visibility_button, TCOL, 0, 1 , FILL, SHRINK, hpadding, vpadding);
+	transport_table.attach (editor_visibility_button,   TCOL, 1, 2 , FILL, SHRINK, hpadding, vpadding);
+	++col;
+	transport_table.attach (mixer_visibility_button,    TCOL, 0, 1 , FILL, SHRINK, hpadding, vpadding);
+	transport_table.attach (prefs_visibility_button,    TCOL, 1, 2 , FILL, SHRINK, hpadding, vpadding);
 	++col;
 
 	/* initialize */

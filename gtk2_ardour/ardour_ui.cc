@@ -187,6 +187,7 @@ typedef uint64_t microseconds_t;
 #include "processor_box.h"
 #include "public_editor.h"
 #include "rc_option_editor.h"
+#include "recorder_ui.h"
 #include "route_time_axis.h"
 #include "route_params_ui.h"
 #include "save_as_dialog.h"
@@ -300,6 +301,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, main_window_visibility (0)
 	, editor (0)
 	, mixer (0)
+	, recorder (0)
 	, nsm (0)
 	, _was_dirty (false)
 	, _mixer_on_top (false)
@@ -357,7 +359,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, duplicate_routes_dialog (0)
 	, editor_visibility_button (S_("Window|Editor"))
 	, mixer_visibility_button (S_("Window|Mixer"))
-	, prefs_visibility_button (S_("Window|Preferences"))
+	, prefs_visibility_button (S_("Window|Prefs"))
+	, recorder_visibility_button (S_("Window|Rec"))
 {
 	Gtkmm2ext::init (localedir);
 
@@ -834,6 +837,11 @@ ARDOUR_UI::~ARDOUR_UI ()
 
 	stop_video_server();
 
+	/* unsubscribe from AudioEngine::Stopped */
+	if (recorder) {
+		recorder->cleanup ();
+	}
+
 	if (getenv ("ARDOUR_RUNNING_UNDER_VALGRIND")) {
 		// don't bother at 'real' exit. the OS cleans up for us.
 		delete big_clock; big_clock = 0;
@@ -843,6 +851,7 @@ ARDOUR_UI::~ARDOUR_UI ()
 		delete time_info_box; time_info_box = 0;
 		delete meterbridge; meterbridge = 0;
 		delete luawindow; luawindow = 0;
+		delete recorder; recorder = 0;
 		delete editor; editor = 0;
 		delete mixer; mixer = 0;
 		delete rc_option_editor; rc_option_editor = 0; // failed to wrap object warning
