@@ -13,10 +13,10 @@
     <Color name="theme:bg1" value="373737ff"/>  <!--gtk_audio_track-->
     <Color name="theme:bg2" value="101010ff"/>  <!--ruler base-->
     <Color name="theme:contrasting" value="0xf10000ff"/>  <!--play head-->
-    <Color name="theme:contrasting clock" value="4BCD2FFF"/>  <!--big clock: text-->
+    <Color name="theme:contrasting clock" value="4BCD2FFF"/>  <!--clock: text-->
     <Color name="theme:contrasting less" value="5697B3FF"/>  <!--gtk_bg_tooltip-->
     <Color name="theme:contrasting selection" value="5da3c1ff"/>  <!--gtk_bg_selected-->
-    <Color name="theme:contrasting alt" value="CCA336ff"/>  <!--secondary delta clock: text-->
+    <Color name="theme:contrasting alt" value="CCA336ff"/>  <!--delta clock , clock edit-->
     <Color name="neutral:backgroundest" value="000000ff"/>  <!--border color-->
     <Color name="neutral:background" value="202020ff"/>  <!--audio track base-->
     <Color name="neutral:background2" value="555555ff"/>  <!--range marker bar-->
@@ -58,19 +58,19 @@
     <ColorAlias name="automation line" alias="alert:green"/>
     <ColorAlias name="automation track outline" alias="theme:bg1"/>
     <ColorAlias name="big clock active: background" alias="neutral:backgroundest"/>
-    <ColorAlias name="big clock active: cursor" alias="theme:contrasting clock"/>
-    <ColorAlias name="big clock active: edited text" alias="theme:contrasting clock"/>
+    <ColorAlias name="big clock active: cursor" alias="theme:contrasting alt"/>
+    <ColorAlias name="big clock active: edited text" alias="theme:contrasting alt"/>
     <ColorAlias name="big clock active: text" alias="alert:red"/>
     <ColorAlias name="big clock: background" alias="theme:bg2"/>
-    <ColorAlias name="big clock: cursor" alias="theme:contrasting clock"/>
-    <ColorAlias name="big clock: edited text" alias="theme:contrasting clock"/>
+    <ColorAlias name="big clock: cursor" alias="theme:contrasting alt"/>
+    <ColorAlias name="big clock: edited text" alias="theme:contrasting alt"/>
     <ColorAlias name="big clock: text" alias="theme:contrasting clock"/>
     <ColorAlias name="border color" alias="neutral:backgroundest"/>
     <ColorAlias name="cd marker bar" alias="neutral:background2"/>
     <ColorAlias name="clipped waveform" alias="alert:red"/>
     <ColorAlias name="clock: background" alias="theme:bg2"/>
-    <ColorAlias name="clock: cursor" alias="theme:contrasting clock"/>
-    <ColorAlias name="clock: edited text" alias="theme:contrasting clock"/>
+    <ColorAlias name="clock: cursor" alias="theme:contrasting alt"/>
+    <ColorAlias name="clock: edited text" alias="theme:contrasting alt"/>
     <ColorAlias name="clock: text" alias="theme:contrasting clock"/>
     <ColorAlias name="comment button: fill" alias="widget:bg"/>
     <ColorAlias name="control point fill" alias="alert:green"/>
@@ -89,14 +89,14 @@
     <ColorAlias name="entered automation line" alias="widget:orange"/>
     <ColorAlias name="entered gain line" alias="widget:orange"/>
     <ColorAlias name="entered marker" alias="widget:orange"/>
+    <ColorAlias name="feedback alert: alt active" alias="alert:ruddy"/>
     <ColorAlias name="feedback alert: fill" alias="widget:bg"/>
     <ColorAlias name="feedback alert: fill active" alias="alert:red"/>
-    <ColorAlias name="feedback alert: alt active" alias="alert:ruddy"/>
     <ColorAlias name="feedback alert: led active" alias="alert:red"/>
     <ColorAlias name="foldback knob" alias="widget:bg"/>
-    <ColorAlias name="foldback knob: fill" alias="widget:bg"/>
     <ColorAlias name="foldback knob: arc end" alias="widget:blue"/>
     <ColorAlias name="foldback knob: arc start" alias="widget:blue"/>
+    <ColorAlias name="foldback knob: fill" alias="widget:bg"/>
     <ColorAlias name="frame handle" alias="theme:bg1"/>
     <ColorAlias name="gain line" alias="alert:green"/>
     <ColorAlias name="gain line inactive" alias="theme:bg1"/>
@@ -174,7 +174,6 @@
     <ColorAlias name="location range" alias="alert:green"/>
     <ColorAlias name="lock button: fill active" alias="widget:bg"/>
     <ColorAlias name="lock button: led active" alias="alert:red"/>
-    <ColorAlias name="lua action button: fill" alias="theme:bg"/>
     <ColorAlias name="lua action button: fill" alias="widget:bg"/>
     <ColorAlias name="marker bar" alias="neutral:background2"/>
     <ColorAlias name="marker bar separator" alias="theme:bg2"/>
@@ -283,15 +282,15 @@
     <ColorAlias name="nudge button: fill active" alias="widget:bg"/>
     <ColorAlias name="nudge button: led active" alias="alert:green"/>
     <ColorAlias name="nudge clock: background" alias="theme:bg2"/>
-    <ColorAlias name="nudge clock: cursor" alias="theme:contrasting clock"/>
-    <ColorAlias name="nudge clock: edited text" alias="theme:contrasting clock"/>
+    <ColorAlias name="nudge clock: cursor" alias="theme:contrasting alt"/>
+    <ColorAlias name="nudge clock: edited text" alias="theme:contrasting alt"/>
     <ColorAlias name="nudge clock: text" alias="theme:contrasting clock"/>
     <ColorAlias name="page switch button: fill" alias="widget:bg"/>
     <ColorAlias name="page switch button: fill active" alias="alert:green"/>
-    <ColorAlias name="patch change button: fill" alias="widget:bg"/>
-    <ColorAlias name="patch change button: fill active" alias="widget:blue"/>
     <ColorAlias name="patch change button unnamed: fill" alias="neutral:background2"/>
     <ColorAlias name="patch change button unnamed: fill active" alias="widget:blue"/>
+    <ColorAlias name="patch change button: fill" alias="widget:bg"/>
+    <ColorAlias name="patch change button: fill active" alias="widget:blue"/>
     <ColorAlias name="piano roll black" alias="theme:contrasting selection"/>
     <ColorAlias name="piano roll black outline" alias="neutral:foreground2"/>
     <ColorAlias name="piano roll white" alias="neutral:foreground2"/>
@@ -362,8 +361,8 @@
     <ColorAlias name="ruler base" alias="theme:bg2"/>
     <ColorAlias name="ruler text" alias="neutral:midground"/>
     <ColorAlias name="secondary clock: background" alias="theme:bg2"/>
-    <ColorAlias name="secondary clock: cursor" alias="theme:contrasting clock"/>
-    <ColorAlias name="secondary clock: edited text" alias="theme:contrasting clock"/>
+    <ColorAlias name="secondary clock: cursor" alias="theme:contrasting alt"/>
+    <ColorAlias name="secondary clock: edited text" alias="theme:contrasting alt"/>
     <ColorAlias name="secondary clock: text" alias="theme:contrasting clock"/>
     <ColorAlias name="secondary delta clock: background" alias="theme:bg2"/>
     <ColorAlias name="secondary delta clock: cursor" alias="theme:contrasting alt"/>
@@ -413,8 +412,8 @@
     <ColorAlias name="stereo panner rule" alias="theme:bg"/>
     <ColorAlias name="stereo panner text" alias="neutral:backgroundest"/>
     <ColorAlias name="stretch clock: background" alias="theme:bg2"/>
-    <ColorAlias name="stretch clock: cursor" alias="theme:contrasting clock"/>
-    <ColorAlias name="stretch clock: edited text" alias="theme:contrasting clock"/>
+    <ColorAlias name="stretch clock: cursor" alias="theme:contrasting alt"/>
+    <ColorAlias name="stretch clock: edited text" alias="theme:contrasting alt"/>
     <ColorAlias name="stretch clock: text" alias="theme:contrasting clock"/>
     <ColorAlias name="sync mark" alias="theme:contrasting clock"/>
     <ColorAlias name="tempo bar" alias="neutral:background2"/>
@@ -435,8 +434,8 @@
     <ColorAlias name="transport button: fill active" alias="alert:green"/>
     <ColorAlias name="transport button: led active" alias="alert:green"/>
     <ColorAlias name="transport clock: background" alias="theme:bg2"/>
-    <ColorAlias name="transport clock: cursor" alias="theme:contrasting clock"/>
-    <ColorAlias name="transport clock: edited text" alias="theme:contrasting clock"/>
+    <ColorAlias name="transport clock: cursor" alias="theme:contrasting alt"/>
+    <ColorAlias name="transport clock: edited text" alias="theme:contrasting alt"/>
     <ColorAlias name="transport clock: text" alias="theme:contrasting clock"/>
     <ColorAlias name="transport delta clock: background" alias="theme:bg2"/>
     <ColorAlias name="transport delta clock: cursor" alias="theme:contrasting alt"/>
@@ -465,7 +464,8 @@
     <ColorAlias name="zero line" alias="neutral:midground"/>
     <ColorAlias name="zoom button: fill" alias="widget:bg"/>
     <ColorAlias name="zoom button: fill active" alias="alert:green"/>
-    <ColorAlias name="zoom button: led active" alias="alert:green"/>  </ColorAliases>
+    <ColorAlias name="zoom button: led active" alias="alert:green"/>
+  </ColorAliases>
   <Modifiers>
     <Modifier name="audio bus base" modifier="= alpha:0.3"/>
     <Modifier name="audio track base" modifier="= alpha:0.3"/>
