@@ -1807,17 +1807,14 @@ PluginManager::run_vst3_scanner_app (std::string bundle_path) const
 	int timeout = Config->get_vst_scan_timeout(); // deciseconds
 	bool notime = (timeout <= 0);
 
-	ARDOUR::PluginScanTimeout (timeout);
 	while (scanner.is_running () && (notime || timeout > 0)) {
-
-		if (!notime && !no_timeout ()) {
-			if (timeout % 5 == 0) {
-				ARDOUR::PluginScanTimeout (timeout);
-			}
-			--timeout;
+		if (!notime && no_timeout ()) {
+			notime = true;
+			timeout = -1;
 		}
 
-		ARDOUR::GUIIdle ();
+		ARDOUR::PluginScanTimeout (timeout);
+		--timeout;
 		Glib::usleep (100000);
 
 		if (cancelled () || (!notime && timeout == 0)) {
