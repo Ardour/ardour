@@ -65,6 +65,7 @@ PluginScanDialog::PluginScanDialog (bool just_cached, bool v)
 	timeout_button.show();
 
 	pbar.set_orientation(Gtk::PROGRESS_RIGHT_TO_LEFT);
+	pbar.set_pulse_step (0.1);
 	pbar.set_text(_("Scan Timeout"));
 	pbar.show();
 
@@ -162,13 +163,19 @@ PluginScanDialog::plugin_scan_timeout (int timeout)
 	}
 
 	if (timeout > 0) {
-		pbar.set_sensitive (false);
+		pbar.set_sensitive (true);
 		timeout_button.set_sensitive (true);
 		pbar.set_fraction ((float) timeout / (float) Config->get_vst_scan_timeout());
+		tbox.show();
+	} else if (timeout < 0) {
+		pbar.set_sensitive (true);
+		pbar.pulse ();
+		timeout_button.set_sensitive (false);
 		tbox.show();
 	} else {
 		pbar.set_sensitive (false);
 		timeout_button.set_sensitive (false);
+		tbox.hide();
 	}
 
 	ARDOUR_UI::instance()->gui_idle_handler ();
