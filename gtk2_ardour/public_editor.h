@@ -216,7 +216,7 @@ public:
 	virtual double duration_to_pixels_unrounded (Temporal::timecnt_t const &) const = 0;
 
 	virtual Selection& get_selection () const = 0;
-	virtual bool get_selection_extents (samplepos_t &start, samplepos_t &end) const = 0;
+	virtual bool get_selection_extents (Temporal::timepos_t &start, Temporal::timepos_t &end) const = 0;
 	virtual Selection& get_cut_buffer () const = 0;
 
 	virtual void set_selection (std::list<Selectable*>, Selection::Operation) = 0;

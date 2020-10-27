@@ -271,7 +271,7 @@ public:
 	/* selection */
 
 	Selection& get_selection() const { return *selection; }
-	bool get_selection_extents (samplepos_t &start, samplepos_t &end) const;  // the time extents of the current selection, whether Range, Region(s), Control Points, or Notes
+	bool get_selection_extents (Temporal::timepos_t &start, Temporal::timepos_t &end) const;  // the time extents of the current selection, whether Range, Region(s), Control Points, or Notes
 	Selection& get_cut_buffer() const { return *cut_buffer; }
 
 	void get_regionviews_at_or_after (ARDOUR::samplepos_t, RegionSelection&);
@@ -1069,7 +1069,7 @@ private:
 
 	samplepos_t playhead_cursor_sample () const;
 
-	samplepos_t get_region_boundary (samplepos_t pos, int32_t dir, bool with_selection, bool only_onscreen);
+	Temporal::timepos_t get_region_boundary (Temporal::timepos_t const & pos, int32_t dir, bool with_selection, bool only_onscreen);
 
 	void    cursor_to_region_boundary (bool with_selection, int32_t dir);
 	void    cursor_to_next_region_boundary (bool with_selection);
@@ -1252,18 +1252,18 @@ private:
 
 	/* CUT/COPY/PASTE */
 
-	samplepos_t last_paste_pos;
+	Temporal::timepos_t last_paste_pos;
 	unsigned    paste_count;
 
 	void cut_copy (Editing::CutCopyOp);
 	bool can_cut_copy () const;
-	void cut_copy_points (Editing::CutCopyOp, Temporal::Beats earliest=Temporal::Beats(), bool midi=false);
+	void cut_copy_points (Editing::CutCopyOp, Temporal::timepos_t const & earliest);
 	void cut_copy_regions (Editing::CutCopyOp, RegionSelection&);
 	void cut_copy_ranges (Editing::CutCopyOp);
 	void cut_copy_midi (Editing::CutCopyOp);
 
 	void mouse_paste ();
-	void paste_internal (samplepos_t position, float times, const int32_t sub_num);
+	void paste_internal (Temporal::timepos_t const & position, float times);
 
 	/* EDITING OPERATIONS */
 
@@ -1293,8 +1293,8 @@ private:
 	void lower_region_to_bottom ();
 	void split_region_at_transients ();
 	void crop_region_to_selection ();
-	void crop_region_to (samplepos_t start, samplepos_t end);
-	void set_sync_point (samplepos_t, const RegionSelection&);
+	void crop_region_to (Temporal::timepos_t const & start, Temporal::timepos_t const & end);
+	void set_sync_point (Temporal::timepos_t const &, const RegionSelection&);
 	void set_region_sync_position ();
 	void remove_region_sync();
 	void align_regions (ARDOUR::RegionPoint);
@@ -1334,18 +1334,18 @@ private:
 	void fork_region ();
 
 	void do_insert_time ();
-	void insert_time (samplepos_t, samplecnt_t, Editing::InsertTimeOption, bool, bool, bool, bool, bool, bool);
+	void insert_time (Temporal::timepos_t const &, Temporal::timecnt_t const &, Editing::InsertTimeOption, bool, bool, bool, bool, bool, bool);
 
 	void do_remove_time ();
-	void remove_time (samplepos_t pos, samplecnt_t distance, Editing::InsertTimeOption opt, bool ignore_music_glue, bool markers_too,
-			bool glued_markers_too, bool locked_markers_too, bool tempo_too);
+	void remove_time (Temporal::timepos_t const & pos, Temporal::timecnt_t const & distance, Editing::InsertTimeOption opt, bool ignore_music_glue, bool markers_too,
+	                  bool glued_markers_too, bool locked_markers_too, bool tempo_too);
 
 	void tab_to_transient (bool forward);
 
 	void set_tempo_from_region ();
 	void use_range_as_bar ();
 
-	void define_one_bar (samplepos_t start, samplepos_t end);
+	void define_one_bar (Temporal::timepos_t const & start, Temporal::timepos_t const & end);
 
 	void audition_region_from_region_list ();
 

@@ -355,7 +355,7 @@ Editor::Editor ()
 	, cut_buffer_start (0)
 	, cut_buffer_length (0)
 	, button_bindings (0)
-	, last_paste_pos (-1)
+	, last_paste_pos (timepos_t::max (Temporal::AudioTime)) /* XXX NUTEMPO how to choose time domain */
 	, paste_count (0)
 	, sfbrowser (0)
 	, current_interthread_info (0)
