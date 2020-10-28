@@ -3678,7 +3678,7 @@ Route::realtime_handle_transport_stopped ()
 void
 Route::input_change_handler (IOChange change, void * /*src*/)
 {
-	if (_session.loading()) {
+	if (_initial_io_setup || _session.loading ()) {
 		return;
 	}
 
@@ -3757,7 +3757,7 @@ Route::input_change_handler (IOChange change, void * /*src*/)
 void
 Route::output_change_handler (IOChange change, void * /*src*/)
 {
-	if (_initial_io_setup) {
+	if (_initial_io_setup || _session.loading ()) {
 		return;
 	}
 
