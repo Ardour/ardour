@@ -168,6 +168,10 @@ HttpGet::HttpGet (bool p, bool ssl)
 	if (ssl && ca_path) {
 		curl_easy_setopt (_curl, CURLOPT_CAPATH, ca_path);
 	}
+
+	if (ssl && (ca_info || ca_path)) {
+		curl_easy_setopt (_curl, CURLOPT_SSL_VERIFYPEER, 1);
+	}
 }
 
 HttpGet::~HttpGet ()
