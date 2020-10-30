@@ -22,6 +22,7 @@
 #ifndef __libpbd_windows_special_dirs_h__
 #define __libpbd_windows_special_dirs_h__
 
+#include <windows.h>
 #include <string>
 
 #include "pbd/libpbd_visibility.h"
@@ -38,7 +39,11 @@ namespace PBD {
 */
 LIBPBD_API std::string get_win_special_folder_path (int csidl);
 
-LIBPBD_API bool windows_query_registry (const char *regkey, const char *regval, std::string &rv);
+/**
+ * Convenience function to query registry keys. Test for both native,
+ * as well as WindowsOnWindows 64/32 key and returns the value as UTF-8 string.
+ */
+LIBPBD_API bool windows_query_registry (const char* regkey, const char* regval, std::string &rv, HKEY root = HKEY_LOCAL_MACHINE);
 
 }
 
