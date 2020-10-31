@@ -560,14 +560,10 @@ PulseAudioBackend::control_app_name () const
 void
 PulseAudioBackend::launch_control_app ()
 {
-#ifdef NO_VFORK
-	(void) system ("pavucontrol");
-#else
 	if (::vfork () == 0) {
 		::execlp ("pavucontrol", "pavucontrol", (char*)NULL);
 		exit (EXIT_SUCCESS);
 	}
-#endif
 }
 
 /* State Control */

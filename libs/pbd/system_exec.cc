@@ -59,103 +59,6 @@ static void * interposer_thread (void *arg);
 static void close_fd (int& fd) { if (fd >= 0) ::close (fd); fd = -1; }
 #endif
 
-#if (!defined PLATFORM_WINDOWS && defined NO_VFORK)
-/*
- * This function was part of libasyncns.
- * LGPL v2.1
- * Copyright 2005-2008 Lennart Poettering
- */
-static int close_allv(const int except_fds[]) {
-	struct rlimit rl;
-	int fd;
-
-#ifdef __linux__
-
-	DIR *d;
-
-	assert(except_fds);
-
-	if ((d = opendir("/proc/self/fd"))) {
-		struct dirent *de;
-
-		while ((de = readdir(d))) {
-			int found;
-			long l;
-			char *e = NULL;
-			int i;
-
-			if (de->d_name[0] == '.')
-					continue;
-
-			errno = 0;
-			l = strtol(de->d_name, &e, 10);
-			if (errno != 0 || !e || *e) {
-				closedir(d);
-				errno = EINVAL;
-				return -1;
-			}
-
-			fd = (int) l;
-
-			if ((long) fd != l) {
-				closedir(d);
-				errno = EINVAL;
-				return -1;
-			}
-
-			if (fd < 3)
-				continue;
-
-			if (fd == dirfd(d))
-				continue;
-
-			found = 0;
-			for (i = 0; except_fds[i] >= 0; i++)
-				if (except_fds[i] == fd) {
-						found = 1;
-						break;
-				}
-
-			if (found) continue;
-
-			if (close(fd) < 0) {
-				int saved_errno;
-
-				saved_errno = errno;
-				closedir(d);
-				errno = saved_errno;
-
-				return -1;
-			}
-		}
-
-		closedir(d);
-		return 0;
-	}
-
-#endif
-
-	if (getrlimit(RLIMIT_NOFILE, &rl) < 0)
-		return -1;
-
-	for (fd = 0; fd < (int) rl.rlim_max; fd++) {
-		int i;
-
-		if (fd <= 3)
-				continue;
-
-		for (i = 0; except_fds[i] >= 0; i++)
-			if (except_fds[i] == fd)
-				continue;
-
-		if (close(fd) < 0 && errno != EBADF)
-			return -1;
-	}
-
-	return 0;
-}
-#endif /* not on windows, nor vfork */
-
 void
 SystemExec::init ()
 {
@@ -170,7 +73,7 @@ SystemExec::init ()
 	stdoutP[0] = stdoutP[1] = INVALID_HANDLE_VALUE;
 	stderrP[0] = stderrP[1] = INVALID_HANDLE_VALUE;
 	w_args = NULL;
-#elif !defined NO_VFORK
+#else
 	argx = NULL;
 #endif
 }
@@ -359,7 +262,7 @@ SystemExec::~SystemExec ()
 	}
 #ifdef PLATFORM_WINDOWS
 	if (w_args) free(w_args);
-#elif !defined NO_VFORK
+#else
 	if (argx) {
 		/* argx[0 .. 8] are fixed parameters to vfork-exec-wrapper */
 		for (int i = 0; i < 9; ++i) {
@@ -833,11 +736,7 @@ SystemExec::start (StdErrMode stderr_mode, const char *vfork_exec_wrapper)
 		return -1;
 	}
 
-#ifndef NO_VFORK
 	r = ::vfork();
-#else
-	r = ::fork();
-#endif
 	if (r < 0) {
 		/* failed to fork */
 		return -2;
@@ -887,58 +786,6 @@ SystemExec::start (StdErrMode stderr_mode, const char *vfork_exec_wrapper)
 		return 0; /* all systems go - return to main */
 	}
 
-#ifdef NO_VFORK
-	/* child process - exec external process */
-	close_fd (pok[0]);
-	::fcntl (pok[1], F_SETFD, FD_CLOEXEC);
-
-	close_fd (pin[1]);
-	if (pin[0] != STDIN_FILENO) {
-	  ::dup2 (pin[0], STDIN_FILENO);
-	}
-	close_fd (pin[0]);
-	close_fd (pout[0]);
-	if (pout[1] != STDOUT_FILENO) {
-		::dup2 (pout[1], STDOUT_FILENO);
-	}
-
-	if (stderr_mode == MergeWithStdin) {
-		/* merge STDERR into output */
-		if (pout[1] != STDERR_FILENO) {
-			::dup2(pout[1], STDERR_FILENO);
-		}
-	} else if (stderr_mode == IgnoreAndClose) {
-		/* ignore STDERR */
-		::close(STDERR_FILENO);
-	} else { /* stderr_mode == ShareWithParent */
-		/* keep STDERR */
-#if defined __APPLE__&& defined ASL_LOG_DESCRIPTOR_WRITE
-		::close(STDERR_FILENO);
-		stderr_mode = IgnoreAndClose; // for vfork
-#endif
-	}
-
-	if (pout[1] != STDOUT_FILENO && pout[1] != STDERR_FILENO) {
-		close_fd(pout[1]);
-	}
-
-	if (nicelevel !=0) {
-		::nice(nicelevel);
-	}
-
-#ifdef HAVE_SIGSET
-	sigset (SIGPIPE, SIG_DFL);
-#else
-	signal (SIGPIPE, SIG_DFL);
-#endif
-
-	int good_fds[2] = { pok[1],  -1 };
-	close_allv(good_fds);
-
-	::execve(argp[0], argp, envp);
-
-#else /* ! NO_VFORK */
-
 	/* XXX this should be done before vfork()
 	 * calling malloc here only increases the time vfork() blocks
 	 */
@@ -966,7 +813,6 @@ SystemExec::start (StdErrMode stderr_mode, const char *vfork_exec_wrapper)
 	argx[argn+9] = NULL;
 
 	::execve (argx[0], argx, envp);
-#endif
 
 	/* if we reach here something went wrong.. */
 	char buf = 0;
