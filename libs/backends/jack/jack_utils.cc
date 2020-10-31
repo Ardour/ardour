@@ -631,9 +631,16 @@ ARDOUR::get_jack_default_server_path (std::string& server_path)
 	return true;
 }
 
-string
-quote_string (const string& str)
+static string
+quote_string (string str)
 {
+	/* escape quotes in string */
+	size_t pos = 0;
+	while ((pos = str.find("\"", pos)) != std::string::npos) {
+		str.replace (pos, 1, "\\\"");
+		pos += 2;
+	}
+	/* and quote the whole string */
 	return "\"" + str + "\"";
 }
 

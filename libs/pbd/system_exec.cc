@@ -215,8 +215,11 @@ SystemExec::SystemExec (std::string command, const std::map<char, std::string> s
 		// ...but always quote all args
 		for (int i = 1; argp[i]; ++i) {
 			std::string tmp (argp[i]);
-			while (tmp.find("\"") != std::string::npos)
-				tmp.replace(tmp.find("\""), 1, "\\\"");
+			size_t start_pos = 0;
+			while ((start_pos = tmp.find("\"", start_pos)) != std::string::npos) {
+				tmp.replace (start_pos, 1, "\\\"");
+				start_pos += 2;
+			}
 			wa += " \"";
 			wa += tmp;
 			wa += '"';
