@@ -562,7 +562,7 @@ PulseAudioBackend::launch_control_app ()
 {
 	if (::vfork () == 0) {
 		::execlp ("pavucontrol", "pavucontrol", (char*)NULL);
-		exit (EXIT_SUCCESS);
+		_exit (EXIT_SUCCESS);
 	}
 }
 

@@ -72,7 +72,7 @@ PBD::open_uri (const char* uri)
 
 	if (::vfork () == 0) {
 		::execlp ("xdg-open", "xdg-open", s.c_str(), (char*)NULL);
-		exit (EXIT_SUCCESS);
+		_exit (EXIT_SUCCESS);
 	}
 
 #endif /* not PLATFORM_WINDOWS and not __APPLE__ */

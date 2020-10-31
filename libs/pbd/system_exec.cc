@@ -818,7 +818,7 @@ SystemExec::start (StdErrMode stderr_mode, const char *vfork_exec_wrapper)
 	char buf = 0;
 	(void) ::write (pok[1], &buf, 1);
 	close_fd (pok[1]);
-	exit (EXIT_FAILURE);
+	_exit (EXIT_FAILURE);
 	return -1;
 }
 
