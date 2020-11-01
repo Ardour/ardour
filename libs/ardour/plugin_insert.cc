@@ -2646,7 +2646,7 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		return -1;
 	}
 
-	XMLProperty const * prop = node.property ("unique-id");
+	XMLProperty const* prop = node.property ("unique-id");
 
 	if (prop == 0) {
 #ifdef WINDOWS_VST_SUPPORT
@@ -2664,95 +2664,97 @@ PluginInsert::set_state(const XMLNode& node, int version)
 #endif
 
 		/* recheck  */
-
 		if (prop == 0) {
 			error << _("Plugin has no unique ID field") << endmsg;
 			return -1;
 		}
 	}
 
-	boost::shared_ptr<Plugin> plugin = find_plugin (_session, prop->value(), type);
 	bool any_vst = false;
+	uint32_t count = 1;
+	node.get_property ("count", count);
 
-	/* treat VST plugins equivalent if they have the same uniqueID
-	 * allow to move sessions windows <> linux */
+	if (_plugins.empty()) {
+		/* Find and load plugin module */
+		boost::shared_ptr<Plugin> plugin = find_plugin (_session, prop->value(), type);
+
+		/* treat VST plugins equivalent if they have the same uniqueID
+		 * allow to move sessions windows <> linux */
 #ifdef LXVST_SUPPORT
-	if (plugin == 0 && (type == ARDOUR::Windows_VST || type == ARDOUR::MacVST)) {
-		type = ARDOUR::LXVST;
-		plugin = find_plugin (_session, prop->value(), type);
-		if (plugin) { any_vst = true; }
-	}
+		if (plugin == 0 && (type == ARDOUR::Windows_VST || type == ARDOUR::MacVST)) {
+			type = ARDOUR::LXVST;
+			plugin = find_plugin (_session, prop->value(), type);
+			if (plugin) { any_vst = true; }
+		}
 #endif
 
 #ifdef WINDOWS_VST_SUPPORT
-	if (plugin == 0 && (type == ARDOUR::LXVST || type == ARDOUR::MacVST)) {
-		type = ARDOUR::Windows_VST;
-		plugin = find_plugin (_session, prop->value(), type);
-		if (plugin) { any_vst = true; }
-	}
+		if (plugin == 0 && (type == ARDOUR::LXVST || type == ARDOUR::MacVST)) {
+			type = ARDOUR::Windows_VST;
+			plugin = find_plugin (_session, prop->value(), type);
+			if (plugin) { any_vst = true; }
+		}
 #endif
 
 #ifdef MACVST_SUPPORT
-	if (plugin == 0 && (type == ARDOUR::Windows_VST || type == ARDOUR::LXVST)) {
-		type = ARDOUR::MacVST;
-		plugin = find_plugin (_session, prop->value(), type);
-		if (plugin) { any_vst = true; }
-	}
+		if (plugin == 0 && (type == ARDOUR::Windows_VST || type == ARDOUR::LXVST)) {
+			type = ARDOUR::MacVST;
+			plugin = find_plugin (_session, prop->value(), type);
+			if (plugin) { any_vst = true; }
+		}
 #endif
 
-	if (plugin == 0 && type == ARDOUR::Lua) {
-		/* unique ID (sha1 of script) was not found,
-		 * load the plugin from the serialized version in the
-		 * session-file instead.
-		 */
-		boost::shared_ptr<LuaProc> lp (new LuaProc (_session.engine(), _session, ""));
-		XMLNode *ls = node.child (lp->state_node_name().c_str());
-		if (ls && lp) {
-			if (0 == lp->set_script_from_state (*ls)) {
-				plugin = lp;
+		if (plugin == 0 && type == ARDOUR::Lua) {
+			/* unique ID (sha1 of script) was not found,
+			 * load the plugin from the serialized version in the
+			 * session-file instead.
+			 */
+			boost::shared_ptr<LuaProc> lp (new LuaProc (_session.engine(), _session, ""));
+			XMLNode *ls = node.child (lp->state_node_name().c_str());
+			if (ls && lp) {
+				if (0 == lp->set_script_from_state (*ls)) {
+					plugin = lp;
+				}
 			}
 		}
-	}
 
-	if (plugin == 0) {
-		error << string_compose(
-			_("Found a reference to a plugin (\"%1\") that is unknown.\n"
-			  "Perhaps it was removed or moved since it was last used."),
-			prop->value())
-		      << endmsg;
-		return -1;
-	}
+		if (plugin == 0) {
+			error << string_compose(
+					_("Found a reference to a plugin (\"%1\") that is unknown.\n"
+						"Perhaps it was removed or moved since it was last used."),
+					prop->value())
+				<< endmsg;
+			return -1;
+		}
 
-	// The name of the PluginInsert comes from the plugin, nothing else
-	_name = plugin->get_info()->name;
+		/* The name of the PluginInsert comes from the plugin */
+		_name = plugin->get_info()->name;
 
-	uint32_t count = 1;
+		/* Processor::set_state() will set this, but too late
+		 * for it to be available when setting up plugin
+		 * state. We can't call Processor::set_state() until
+		 * the plugins themselves are created and added.
+		 */
 
-	// Processor::set_state() will set this, but too late
-	// for it to be available when setting up plugin
-	// state. We can't call Processor::set_state() until
-	// the plugins themselves are created and added.
+		set_id (node);
 
-	set_id (node);
-
-	if (_plugins.empty()) {
 		/* if we are adding the first plugin, we will need to set
 		 * up automatable controls.
-		*/
+		 */
 		add_plugin (plugin);
 		create_automatable_parameters ();
 		set_control_ids (node, version);
-	} else {
-		/* update controllable value only (copy plugin state) */
-		update_control_values (node, version);
-	}
 
-	node.get_property ("count", count);
-
-	if (_plugins.size() != count) {
-		for (uint32_t n = 1; n < count; ++n) {
-			add_plugin (plugin_factory (plugin));
+		if (_plugins.size() != count) {
+			for (uint32_t n = 1; n < count; ++n) {
+				add_plugin (plugin_factory (plugin));
+			}
 		}
+	} else {
+		assert (_plugins[0]->unique_id() == prop->value());
+		/* update controllable value only (copy plugin state) */
+		set_id (node);
+		update_control_values (node, version);
 	}
 
 	Processor::set_state (node, version);
@@ -2763,12 +2765,10 @@ PluginInsert::set_state(const XMLNode& node, int version)
 	node.get_property ("id", old_id);
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-
 		/* find the node with the type-specific node name ("lv2", "ladspa", etc)
-		   and set all plugins to the same state.
-		*/
-
-		if (   ((*niter)->name() == plugin->state_node_name())
+		 * and set all plugins to the same state.
+		 */
+		if ((*niter)->name() == _plugins[0]->state_node_name ()
 		    || (any_vst && ((*niter)->name() == "lxvst" || (*niter)->name() == "windows-vst" || (*niter)->name() == "mac-vst"))
 		   ) {
 

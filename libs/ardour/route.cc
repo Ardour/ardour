@@ -3678,7 +3678,7 @@ Route::realtime_handle_transport_stopped ()
 void
 Route::input_change_handler (IOChange change, void * /*src*/)
 {
-	if (_session.loading()) {
+	if (_session.loading ()) {
 		return;
 	}
 
@@ -3688,6 +3688,10 @@ Route::input_change_handler (IOChange change, void * /*src*/)
 		*/
 		configure_processors (0);
 		io_changed (); /* EMIT SIGNAL */
+	}
+
+	if (_initial_io_setup) {
+		return;
 	}
 
 	if (_solo_control->soloed_by_others_upstream() || _solo_isolate_control->solo_isolated_by_upstream()) {
@@ -3772,6 +3776,10 @@ Route::output_change_handler (IOChange change, void * /*src*/)
 		}
 
 		io_changed (); /* EMIT SIGNAL */
+	}
+
+	if (_session.loading ()) {
+		return;
 	}
 
 	if ((change.type & IOChange::ConnectionsChanged)) {

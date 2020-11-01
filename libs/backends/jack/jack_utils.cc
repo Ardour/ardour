@@ -554,71 +554,23 @@ ARDOUR::get_jack_server_dir_paths (vector<std::string>& server_dir_paths)
 	Searchpath sp(string(g_getenv("PATH")));
 
 #ifdef PLATFORM_WINDOWS
-// N.B. The #define (immediately below) can be safely removed once we know that this code builds okay with mingw
-#ifdef COMPILER_MSVC
-	IShellLinkA  *pISL = NULL;
-	IPersistFile *ppf  = NULL;
-
-	// Mixbus creates a Windows shortcut giving the location of its
-	// own (bundled) version of Jack. Let's see if that shortcut exists
-	if (SUCCEEDED (CoCreateInstance(CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER, IID_IShellLink, (void**)&pISL)))
-	{
-		if (SUCCEEDED (pISL->QueryInterface(IID_IPersistFile, (LPVOID*)&ppf)))
-		{
-			char  target_path[MAX_PATH];
-			char  shortcut_pathA[MAX_PATH];
-			WCHAR shortcut_pathW[MAX_PATH];
-
-			// Our Windows installer should have created a shortcut to the Jack
-			// server so let's start by finding out what drive it got installed on
-			if (char *env_path = getenv ("windir"))
-			{
-				strcpy (shortcut_pathA, env_path);
-				shortcut_pathA[2] = '\0'; // Gives us just the drive letter and colon
-			}
-			else // Assume 'C:'
-				strcpy (shortcut_pathA, "C:");
-
-			strcat (shortcut_pathA, "\\Program Files (x86)\\Jack\\Start Jack.lnk");
-
-			MultiByteToWideChar (CP_ACP, MB_PRECOMPOSED, shortcut_pathA, -1, shortcut_pathW, MAX_PATH);
-
-			// If it did, load the shortcut into our persistent file
-			if (SUCCEEDED (ppf->Load(shortcut_pathW, 0)))
-			{
-				// Read the target information from the shortcut object
-				if (S_OK == (pISL->GetPath (target_path, MAX_PATH, NULL, SLGP_UNCPRIORITY)))
-				{
-					char *p = strrchr (target_path, '\\');
-
-					if (p)
-					{
-						*p = NULL;
-						sp.push_back (target_path);
-					}
-				}
-			}
-		}
+	std::string reg;
+	
+	bool found = PBD::windows_query_registry ("Software\\JACK", "Location", reg);
+	if (!found) {
+		// If the newer style regkey wasn't found, check for one in the older style...
+		found = PBD::windows_query_registry ("Software\\Jack", "InstPath", reg, HKEY_CURRENT_USER);
 	}
 
-	if (ppf)
-		ppf->Release();
-
-	if (pISL)
-		pISL->Release();
-#else
-	std::string reg;
-	if (PBD::windows_query_registry ("Software\\JACK", "Location", reg)) {
+	if (found) {
 		sp.push_back (reg);
 	}
-#endif
 
 	gchar *install_dir = g_win32_get_package_installation_directory_of_module (NULL);
 	if (install_dir) {
 		sp.push_back (install_dir);
 		g_free (install_dir);
 	}
-	// don't try and use a system wide JACK install yet.
 #else
 	if (sp.empty()) {
 		sp.push_back ("/usr/bin");
@@ -679,9 +631,16 @@ ARDOUR::get_jack_default_server_path (std::string& server_path)
 	return true;
 }
 
-string
-quote_string (const string& str)
+static string
+quote_string (string str)
 {
+	/* escape quotes in string */
+	size_t pos = 0;
+	while ((pos = str.find("\"", pos)) != std::string::npos) {
+		str.replace (pos, 1, "\\\"");
+		pos += 2;
+	}
+	/* and quote the whole string */
 	return "\"" + str + "\"";
 }
 
@@ -919,8 +878,12 @@ ARDOUR::get_jack_command_line_string (JackCommandLineOptions& options, string& c
 	ostringstream oss;
 
 	for (vector<string>::const_iterator i = args.begin(); i != args.end();) {
-		if (i->find_first_of(' ') != string::npos) {
-			oss << "\"" << *i << "\"";
+		if ((i != args.begin()) && (i->find_first_of(' ') != string::npos)) {
+			// Be aware that (in Windows at least) Jack can't start if we supply a server path
+			// surrounded in quote marks (maybe Jack already does something similar imternally??)
+			// Fortunately, if it exists in our '.jackdrc' file, the server path will always be
+			// its very first entry - so we skip quoting that entry if it did contain spaces.
+			oss << quote_string (*i);
 		} else {
 			oss << *i;
 		}

@@ -49,13 +49,13 @@ PBD::get_win_special_folder_path (int csidl)
 }
 
 bool
-PBD::windows_query_registry (const char *regkey, const char *regval, std::string &rv)
+PBD::windows_query_registry (const char *regkey, const char *regval, std::string &rv, HKEY root)
 {
 	HKEY key;
 	DWORD size = PATH_MAX;
 	char tmp[PATH_MAX+1];
 
-	if (   (ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, regkey, 0, KEY_READ, &key))
+	if (   (ERROR_SUCCESS == RegOpenKeyExA (root, regkey, 0, KEY_READ, &key))
 			&& (ERROR_SUCCESS == RegQueryValueExA (key, regval, 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
 		 )
 	{
@@ -63,7 +63,7 @@ PBD::windows_query_registry (const char *regkey, const char *regval, std::string
 		return true;
 	}
 
-	if (   (ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, regkey, 0, KEY_READ | KEY_WOW64_32KEY, &key))
+	if (   (ERROR_SUCCESS == RegOpenKeyExA (root, regkey, 0, KEY_READ | KEY_WOW64_32KEY, &key))
 			&& (ERROR_SUCCESS == RegQueryValueExA (key, regval, 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
 		 )
 	{

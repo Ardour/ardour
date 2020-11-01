@@ -28,6 +28,10 @@
 #include <utime.h>
 #endif
 
+#ifndef PLATFORM_WINDOWS
+#include <sys/utsname.h>
+#endif
+
 #include "vst3/vst3.h"
 
 #include "pbd/basename.h"
@@ -205,6 +209,19 @@ static std::string vst3_bindir () {
 # else
 	return "x86-win";
 # endif
+#elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
+# warning VST3 bundle on *BSD is not defined in the spec
+	/* https://steinbergmedia.github.io/vst3_doc/vstinterfaces/vst3loc.html
+	 * does not mention BSD. The following follows the Linux convention:
+	 */
+	static std::string _vst3_bindir;
+	if (_vst3_bindir.empty ()) {
+		struct utsname utb;
+		if (uname (&utb) >= 0) {
+			_vst3_bindir = std::string (utb.machine) + "-bsd";
+		}
+	}
+	return _vst3_bindir;
 #else // Linux
 # if defined __x86_64__ || defined _M_X64
 	return "x86_64-linux";
@@ -212,12 +229,19 @@ static std::string vst3_bindir () {
 	return "i386-linux";
 # elif defined __aarch64__
 	return "aarch64-linux";
-# elif defined __arm__
-	return "armv7l-linux";
-#else
-	// other ARM, linux-PPC ?
-	return "*-linux"; // XXX
-#endif
+# else
+	/* generic fallback, mainly used for __arm__ to expand
+	 * to armv6l-linux, armv7l-linux, armv8l-linux.
+	 */
+	static std::string _vst3_bindir;
+	if (_vst3_bindir.empty ()) {
+		struct utsname utb;
+		if (uname (&utb) >= 0) {
+			_vst3_bindir = std::string (utb.machine) + "-linux";
+		}
+	}
+	return _vst3_bindir;
+# endif
 #endif
 	return "";
 }

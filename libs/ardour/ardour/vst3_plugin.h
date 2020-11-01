@@ -115,7 +115,8 @@ public:
 	Vst::IUnitInfo* unit_info ();
 	FUID const& fuid() const { return _fuid; }
 	Vst::ParameterInfo const& program_change_port() const { return  _program_change_port; }
-	void set_n_factory_presets (size_t n) { _n_factory_presets = n; }
+	void   set_n_factory_presets (size_t n) { _n_factory_presets = n; }
+	size_t n_factory_presets () const { return _n_factory_presets; }
 
 	/* API for Ardour -- Ports */
 	uint32_t    designated_bypass_port () const { return _port_id_bypass; }

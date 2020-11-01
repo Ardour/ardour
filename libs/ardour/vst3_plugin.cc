@@ -122,6 +122,16 @@ VST3Plugin::parameter_change_handler (VST3PI::ParameterChange t, uint32_t param,
 			break;
 		case VST3PI::PresetChange:
 			PresetsChanged (unique_id (), this, false); /* EMIT SIGNAL */
+			size_t n_presets = _plug->n_factory_presets (); // ths may be old, invalidated count
+			if (_plug->program_change_port ().id != Vst::kNoParamId) {
+				int pgm = value * (n_presets > 1 ? (n_presets - 1) : 1);
+				std::string uri = string_compose (X_("VST3-P:%1:%2"), unique_id (), std::setw(4), std::setfill('0'), pgm);
+				const Plugin::PresetRecord* pset = Plugin::preset_by_uri (uri);
+				if (pset && n_presets == _plug->n_factory_presets ()) {
+					Plugin::load_preset (*pset);
+					// XXX TODO notify replicated instances, unless plugin implements ISlaveControllerHandler
+				}
+			}
 			break;
 	}
 }
@@ -1346,7 +1356,13 @@ VST3PI::notifyUnitSelection (Vst::UnitID unitId)
 tresult
 VST3PI::notifyProgramListChange (Vst::ProgramListID, int32)
 {
-	OnParameterChange (PresetChange, 0, 0); /* EMIT SIGNAL */
+	float v = 0;
+	Vst::ParamID id = _program_change_port.id;
+	if (id != Vst::kNoParamId) {
+		v = _controller->getParamNormalized (id);
+		DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::notifyProgramListChange: val: %1 (norm: %2)\n", v, _controller->normalizedParamToPlain (id, v)));
+	}
+	OnParameterChange (PresetChange, 0, v); /* EMIT SIGNAL */
 	return kResultOk;
 }
 
@@ -1719,6 +1735,7 @@ VST3PI::set_program (int pgm, int32 sample_off)
 		value /= (_n_factory_presets - 1.f);
 	}
 #endif
+	DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::set_program pgm: %1 val: %2 (norm: %3)\n", pgm, value, _controller->plainParamToNormalized (id, pgm)));
 
 	int32 index;
 	_input_param_changes.addParameterData (id, index)->addPoint (sample_off, value, index);

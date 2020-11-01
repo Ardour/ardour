@@ -70,17 +70,10 @@ PBD::open_uri (const char* uri)
 	while (s.find("\"") != std::string::npos)
 		s.replace(s.find("\\"), 1, "\\\"");
 
-#ifdef NO_VFORK
-	std::string command = "xdg-open ";
-	command += '"' + s + '"';
-	command += " &";
-	(void) system (command.c_str());
-#else
 	if (::vfork () == 0) {
 		::execlp ("xdg-open", "xdg-open", s.c_str(), (char*)NULL);
-		exit (EXIT_SUCCESS);
+		_exit (EXIT_SUCCESS);
 	}
-#endif
 
 #endif /* not PLATFORM_WINDOWS and not __APPLE__ */
 	return true;

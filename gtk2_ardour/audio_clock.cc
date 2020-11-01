@@ -337,9 +337,9 @@ AudioClock::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t*
 					/* nothing entered yet, put cursor at the end
 					   of string
 					*/
-					cursor = _layout->get_cursor_strong_pos (edit_string.length() - 1);
+					cursor = _layout->get_cursor_strong_pos (edit_string.length());
 				} else {
-					cursor = _layout->get_cursor_strong_pos (insert_map[input_string.length()]);
+					cursor = _layout->get_cursor_strong_pos (1 + insert_map[input_string.length()]);
 				}
 
 				cairo_set_source_rgba (cr, cursor_r, cursor_g, cursor_b, cursor_a);

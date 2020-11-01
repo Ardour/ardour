@@ -212,7 +212,7 @@ tresult
 HostAttributeList::setString (AttrID aid, const Vst::TChar* string)
 {
 	removeAttrID (aid);
-	list[aid] = new HostAttribute (string, wcslen ((const wchar_t*)string));
+	list[aid] = new HostAttribute (string, Steinberg::strlen16 (string));
 	return kResultTrue;
 }
 
@@ -220,10 +220,13 @@ tresult
 HostAttributeList::getString (AttrID aid, Vst::TChar* string, uint32 size)
 {
 	std::map<std::string, HostAttribute*>::iterator it = list.find (aid);
-	if (it != list.end () && it->second) {
+	if (it != list.end () && it->second && size > 0) {
 		uint32            stringSize = 0;
 		const Vst::TChar* _string    = it->second->stringValue (stringSize);
-		memcpy (string, _string, std::min<uint32> (stringSize, size) * sizeof (Vst::TChar));
+
+		size = std::min<uint32> (stringSize, size - 1);
+		memcpy (string, _string, size * sizeof (Vst::TChar));
+		string[size] = 0;
 		return kResultTrue;
 	}
 	return kResultFalse;
