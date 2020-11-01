@@ -50,7 +50,7 @@ using namespace ArdourWidgets;
 
 TransportMastersWidget::TransportMastersWidget ()
 	: table (4, 13)
-	, add_button (_("Add a new Transport Master"))
+	, add_master_button (_("Add a new Transport Master"))
 	, lost_sync_button (_("Keep rolling if sync is lost"))
 	, ignore_active_change (false)
 {
@@ -61,7 +61,7 @@ TransportMastersWidget::TransportMastersWidget ()
 	update_ports ();
 
 	Gtk::Table *add_table = manage(new Gtk::Table(1,2));
-	add_table->attach(add_button, 0,1, 0,1, Gtk::SHRINK);
+	add_table->attach(add_master_button, 0,1, 0,1, Gtk::SHRINK);
 
 	pack_start (table, FALSE, FALSE, 12);
 	pack_start (*add_table, FALSE, FALSE);
@@ -73,7 +73,7 @@ TransportMastersWidget::TransportMastersWidget ()
 	set_tooltip (lost_sync_button, string_compose (_("<b>When enabled</b>, if the signal from a transport master is lost, %1 will keep rolling at its current speed.\n"
 	                                                 "<b>When disabled</b>, loss of transport master sync causes %1 to stop"), PROGRAM_NAME));
 
-	add_button.signal_button_press_event().connect (sigc::mem_fun (*this, &TransportMastersWidget::add_master));
+	add_master_button.signal_clicked.connect (sigc::mem_fun (*this, &TransportMastersWidget::add_master));
 
 	col_title[0].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Select")));               align[0]=0.0;
 	col_title[1].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Name")));                 align[1]=0.5;
@@ -138,9 +138,10 @@ TransportMastersWidget::current_changed (boost::shared_ptr<TransportMaster> old_
 	}
 }
 
-bool
-TransportMastersWidget::add_master (GdkEventButton* ev)
+void
+TransportMastersWidget::add_master ()
 {
+	printf ("TransportMastersWidget::add_master\n");
 	AddTransportMasterDialog d;
 
 	d.present ();
@@ -155,7 +156,7 @@ TransportMastersWidget::add_master (GdkEventButton* ev)
 			name = d.get_name();
 			break;
 		default:
-			return true;
+			return;
 		}
 	}
 
@@ -165,8 +166,6 @@ TransportMastersWidget::add_master (GdkEventButton* ev)
 		MessageDialog msg (_("New transport master not added - check error log for details"));
 		msg.run ();
 	}
-
-	return true;
 }
 
 void

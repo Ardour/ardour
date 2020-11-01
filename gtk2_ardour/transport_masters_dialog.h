@@ -134,7 +134,7 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	Gtk::Table table;
 	Gtk::Label col_title[14];
 	float align[14];
-	ArdourWidgets::ArdourButton add_button;
+	ArdourWidgets::ArdourButton add_master_button;
 	Gtk::CheckButton lost_sync_button;
 
 	sigc::connection update_connection;
@@ -166,7 +166,7 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	void rebuild ();
 	void clear ();
 	void current_changed (boost::shared_ptr<ARDOUR::TransportMaster> old_master, boost::shared_ptr<ARDOUR::TransportMaster> new_master);
-	bool add_master (GdkEventButton* ev);
+	void add_master ();
 	void update_usability ();
 	void allow_master_select (bool);
 
