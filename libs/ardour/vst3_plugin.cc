@@ -521,7 +521,7 @@ VST3Plugin::set_state (const XMLNode& node, int version)
 			continue;
 		}
 
-		if (!_plug->try_set_parameter_by_id ( param_id, value)) {
+		if (!_plug->try_set_parameter_by_id (param_id, value)) {
 			warning << string_compose (_("VST3<%1>: Invalid Vst::ParamID in VST3Plugin::set_state"), name ()) << endmsg;
 		}
 	}
@@ -570,7 +570,7 @@ VST3Plugin::add_slave (boost::shared_ptr<Plugin> p, bool rt)
 {
 	boost::shared_ptr<VST3Plugin> vst = boost::dynamic_pointer_cast<VST3Plugin> (p);
 	if (vst) {
-		_plug->add_slave (vst->_plug->conroller (), rt);
+		_plug->add_slave (vst->_plug->controller (), rt);
 	}
 }
 
@@ -579,7 +579,7 @@ VST3Plugin::remove_slave (boost::shared_ptr<Plugin> p)
 {
 	boost::shared_ptr<VST3Plugin> vst = boost::dynamic_pointer_cast<VST3Plugin> (p);
 	if (vst) {
-		_plug->remove_slave (vst->_plug->conroller ());
+		_plug->remove_slave (vst->_plug->controller ());
 	}
 }
 

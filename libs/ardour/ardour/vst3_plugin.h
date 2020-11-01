@@ -175,7 +175,7 @@ public:
 	void process (float** ins, float** outs, uint32_t n_samples);
 
 	/* PSL Extension */
-	Vst::IEditController* conroller () const { return _controller; }
+	Vst::IEditController* controller () const { return _controller; }
 	bool add_slave (Vst::IEditController*, bool);
 	bool remove_slave (Vst::IEditController*);
 
