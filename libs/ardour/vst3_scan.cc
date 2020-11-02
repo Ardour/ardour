@@ -52,7 +52,7 @@ count_channels (Vst::IComponent* c, Vst::MediaType media, Vst::BusDirection dir,
 	/* see also libs/ardour/vst3_plugin.cc VST3PI::count_channels */
 	int32 n_busses = c->getBusCount (media, dir);
 	if (verbose) {
-		PBD::info << "VST3: media: " << media << "dir: " << dir << "type: " << type << "n_busses: " << n_busses << endmsg;
+		PBD::info << "VST3: media: " << media << " dir: " << dir << " type: " << type << " n_busses: " << n_busses << endmsg;
 	}
 	int32 n_channels = 0;
 	for (int32 i = 0; i < n_busses; ++i) {
@@ -60,7 +60,7 @@ count_channels (Vst::IComponent* c, Vst::MediaType media, Vst::BusDirection dir,
 		tresult rv = c->getBusInfo (media, dir, i, bus);
 		if (rv == kResultTrue && bus.busType == type) {
 			if (verbose) {
-				PBD::info << "VST3: bus: " << i << "count: " << bus.channelCount << endmsg;
+				PBD::info << "VST3: bus: " << i << " count: " << bus.channelCount << endmsg;
 			}
 #if 1
 			if ((type == Vst::kMain && i != 0) || (type == Vst::kAux && i != 1)) {
@@ -108,22 +108,32 @@ discover_vst3 (boost::shared_ptr<ARDOUR::VST3PluginModule> m, std::vector<ARDOUR
 		return false;
 	}
 
-	//cout << "FactoryInfo: '" << fi.vendor << "' '" << fi.url << "' '" << fi.email << "'" << "\n";
+	if (verbose) {
+		PBD::info << "FactoryInfo: '" << fi.vendor << "' '" << fi.url << "' '" << fi.email << "'" << endmsg;
+	}
 
 	IPluginFactory2* factory2 = FUnknownPtr<IPluginFactory2> (factory);
 
 	int32 class_cnt = factory->countClasses ();
+	if (verbose) {
+		PBD::info << "Class count: " << class_cnt << endmsg;
+	}
 	for (int32 i = 0; i < class_cnt; ++i) {
 		PClassInfo ci;
 		if (factory->getClassInfo (i, &ci) == kResultTrue) {
 			if (strcmp (ci.category, kVstAudioEffectClass)) {
+				if (verbose) {
+					PBD::info << "Skipping non-effect class: " << ci.category << endmsg;
+				}
 				continue;
 			}
 
 			VST3Info nfo;
 			TUID     uid;
 
-			//cout << "FOUND: " << i << " '" << ci.name << "' '" << ci.category << "'" << "\n";
+			if (verbose) {
+				PBD::info << "Class: " << i << " '" << ci.name << "' '" << ci.category << "'" << endmsg;
+			}
 
 			/* pre-fill with factory settings */
 			nfo.vendor = strlen (fi.vendor) ==  0 ? "Unknown" : fi.vendor;
@@ -181,12 +191,12 @@ discover_vst3 (boost::shared_ptr<ARDOUR::VST3PluginModule> m, std::vector<ARDOUR
 				continue;
 			}
 
-			nfo.n_inputs       = count_channels (component, Vst::kAudio, Vst::kInput,  Vst::kMain);
-			nfo.n_aux_inputs   = count_channels (component, Vst::kAudio, Vst::kInput,  Vst::kAux);
-			nfo.n_outputs      = count_channels (component, Vst::kAudio, Vst::kOutput, Vst::kMain);
-			nfo.n_aux_outputs  = count_channels (component, Vst::kAudio, Vst::kOutput, Vst::kAux);
-			nfo.n_midi_inputs  = count_channels (component, Vst::kEvent, Vst::kInput,  Vst::kMain);
-			nfo.n_midi_outputs = count_channels (component, Vst::kEvent, Vst::kOutput, Vst::kMain);
+			nfo.n_inputs       = count_channels (component, Vst::kAudio, Vst::kInput,  Vst::kMain, verbose);
+			nfo.n_aux_inputs   = count_channels (component, Vst::kAudio, Vst::kInput,  Vst::kAux, verbose);
+			nfo.n_outputs      = count_channels (component, Vst::kAudio, Vst::kOutput, Vst::kMain, verbose);
+			nfo.n_aux_outputs  = count_channels (component, Vst::kAudio, Vst::kOutput, Vst::kAux, verbose);
+			nfo.n_midi_inputs  = count_channels (component, Vst::kEvent, Vst::kInput,  Vst::kMain, verbose);
+			nfo.n_midi_outputs = count_channels (component, Vst::kEvent, Vst::kOutput, Vst::kMain, verbose);
 
 			processor->setProcessing (false);
 			component->setActive (false);
@@ -359,7 +369,7 @@ touch_cachefile (std::string const& module_path, std::string const& cache_file)
 }
 
 static bool
-vst3_save_cache_file (std::string const& module_path, XMLNode* root)
+vst3_save_cache_file (std::string const& module_path, XMLNode* root, bool verbose)
 {
 	string const cache_file = ARDOUR::vst3_cache_file (module_path);
 
@@ -370,8 +380,11 @@ vst3_save_cache_file (std::string const& module_path, XMLNode* root)
 		return false;
 	} else {
 		touch_cachefile (module_path, cache_file);
-		return true;
 	}
+	if (verbose) {
+		root->dump (std::cout, "\t");
+	}
+	return true;
 }
 
 bool
@@ -397,7 +410,7 @@ ARDOUR::vst3_scan_and_cache (std::string const& module_path, std::string const& 
 		return false;
 	}
 
-	return vst3_save_cache_file (module_path, root);
+	return vst3_save_cache_file (module_path, root, verbose);
 }
 
 

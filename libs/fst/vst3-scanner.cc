@@ -103,7 +103,7 @@ scan_vst3 (std::string const& bundle_path, bool force, bool verbose)
 		}
 	}
 
-	if (vst3_scan_and_cache (module_path, bundle_path, sigc::ptr_fun (&vst3_plugin)), verbose) {
+	if (vst3_scan_and_cache (module_path, bundle_path, sigc::ptr_fun (&vst3_plugin), verbose)) {
 		info << string_compose (_("Saved VST3 plugin cache to %1"), vst3_cache_file (module_path)) << endmsg;
 	}
 
