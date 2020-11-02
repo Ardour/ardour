@@ -504,6 +504,24 @@ VST3Plugin::set_state (const XMLNode& node, int version)
 		return -1;
 	}
 
+	const Plugin::PresetRecord* r = 0;
+	std::string preset_uri;
+	if (node.get_property (X_("last-preset-uri"), preset_uri)) {
+		r = preset_by_uri (preset_uri);
+	}
+	if (r && _plug->program_change_port().id != Vst::kNoParamId) {
+		std::vector<std::string> tmp;
+		if (PBD::tokenize (r->uri, std::string(":"), std::back_inserter (tmp)) && tmp.size() == 3 && tmp[0] == "VST3-P") {
+			float value = PBD::atoi (tmp[2]);
+			size_t n_presets = _plug->n_factory_presets ();
+			if (n_presets > 1) {
+				value /= (n_presets - 1.f);
+			}
+			DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3Plugin::set_state: set_program (pgm: %1 plug: %2)\n", value, name ()));
+			_plug->controller ()->setParamNormalized (_plug->program_change_port().id, value);
+		}
+	}
+
 	XMLNodeList nodes = node.children ("Port");
 	for (iter = nodes.begin(); iter != nodes.end(); ++iter) {
 		XMLNode* child = *iter;
@@ -2220,6 +2238,7 @@ VST3PI::load_state (RAMStream& stream)
 		stream.read_int64 (c._offset);
 		stream.read_int64 (c._size);
 		entries.push_back (c);
+		DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::load_state: chunk: %1 off: %2 size: %3 type: %4\n", i, c._offset, c._size, c._id));
 	}
 
 	bool rv = true;
@@ -2248,7 +2267,6 @@ VST3PI::load_state (RAMStream& stream)
 			}
 		}
 		else if (is_equal_ID (i->_id, Vst::getChunkID (Vst::kControllerState))) {
-			assert (FUnknownPtr<Vst::IEditController> (_component) == 0);
 			stream.seek (i->_offset, IBStream::kIBSeekSet, &seek_result);
 			tresult res = _controller->setState (&stream);
 			if (!(res == kResultOk || res == kNotImplemented)) {
@@ -2296,13 +2314,10 @@ VST3PI::save_state (RAMStream& stream)
 		entries.push_back (c);
 	}
 
-	if (FUnknownPtr<Vst::IEditController> (_component) == 0) {
-		/* only if component and controller are not identical */
-		c.start_chunk (getChunkID (Vst::kControllerState), stream);
-		if (_controller->getState (&stream) == kResultTrue) {
-			c.end_chunk (stream);
-			entries.push_back (c);
-		}
+	c.start_chunk (getChunkID (Vst::kControllerState), stream);
+	if (_controller->getState (&stream) == kResultTrue) {
+		c.end_chunk (stream);
+		entries.push_back (c);
 	}
 
 	/* update header */
