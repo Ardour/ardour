@@ -601,30 +601,6 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 			master_volume_table.show ();
 		}
 
-		if (_volume_controller == 0) {
-			assert (_loudess_analysis_button == 0);
-			assert (route()->volume_control());
-			boost::shared_ptr<AutomationControl> ac = route()->volume_control ();
-
-			_volume_controller = AutomationController::create (ac->parameter (), ParameterDescriptor (ac->parameter ()), ac, false);
-			_volume_controller->set_name (X_("ProcessorControlSlider"));
-			_volume_controller->set_size_request (PX_SCALE(19), -1);
-			_volume_controller->disable_vertical_scroll ();
-
-			_loudess_analysis_button = manage (new ArdourButton (S_("Loudness|LAN")));
-			_loudess_analysis_button->signal_clicked.connect (mem_fun (*this, &MixerStrip::loudess_analysis_button_clicked));
-			_volume_controller->signal_button_press_event().connect (mem_fun (*this, &MixerStrip::volume_controller_button_pressed), false);
-
-			set_tooltip (*_volume_controller, _("Master output volume"));
-			set_tooltip (_loudess_analysis_button, _("Measure loudness of the session, normalize master output volume"));
-
-			master_volume_table.attach (*_loudess_analysis_button, 0, 2, 0, 1);
-			master_volume_table.attach (*_volume_controller, 0, 2, 1, 2);
-
-			_loudess_analysis_button->show ();
-			_volume_controller->show ();
-		}
-
 		if (monitor_section_button == 0 && _mixer_owned) {
 			Glib::RefPtr<Action> act = ActionManager::get_action ("Mixer", "ToggleMonitorSection");
 			_session->MonitorChanged.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::monitor_changed, this), gui_context());
@@ -644,6 +620,34 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		mute_button->show ();
 		solo_button->show ();
 		master_volume_table.hide ();
+	}
+
+	if (route()->is_master() && _volume_controller == 0) {
+		assert (_loudess_analysis_button == 0);
+		assert (route()->volume_control());
+		boost::shared_ptr<AutomationControl> ac = route()->volume_control ();
+
+		_volume_controller = AutomationController::create (ac->parameter (), ParameterDescriptor (ac->parameter ()), ac, false);
+		_volume_controller->set_name (X_("ProcessorControlSlider"));
+		_volume_controller->set_size_request (PX_SCALE(19), -1);
+		_volume_controller->disable_vertical_scroll ();
+
+		_loudess_analysis_button = manage (new ArdourButton (S_("Loudness|LAN")));
+		_loudess_analysis_button->signal_clicked.connect (mem_fun (*this, &MixerStrip::loudess_analysis_button_clicked));
+		_volume_controller->signal_button_press_event().connect (mem_fun (*this, &MixerStrip::volume_controller_button_pressed), false);
+
+		set_tooltip (*_volume_controller, _("Master output volume"));
+		set_tooltip (_loudess_analysis_button, _("Measure loudness of the session, normalize master output volume"));
+
+		master_volume_table.attach (*_loudess_analysis_button, 0, 2, 0, 1);
+		master_volume_table.attach (*_volume_controller, 0, 2, 1, 2);
+
+		_loudess_analysis_button->show ();
+		_volume_controller->show ();
+#ifdef MIXBUS
+	} else if (!route()->is_master()) {
+		master_volume_table.hide ();
+#endif
 	}
 
 	hide_master_spacer (false);
