@@ -1352,7 +1352,6 @@ VST3PI::restartComponent (int32 flags)
 		/* need to re-activate the plugin as per spec */
 		deactivate ();
 		activate ();
-		_plugin_latency.reset ();
 	}
 	if (flags & Vst::kIoChanged) {
 		warning << "VST3: Vst::kIoChanged (not implemented)" << endmsg;
@@ -1494,6 +1493,7 @@ VST3PI::activate ()
 		return false;
 	}
 
+	_plugin_latency.reset ();
 	_is_processing = true;
 	return true;
 }
