@@ -136,7 +136,7 @@ DefineSwitches()
 	// Switches for various tests that can be performed.
 	rec.switchText = "-rt";
 	rec.swOptionText = "";
-	rec.descriptionText = "Verfiy that the user can run tasks with realtime priority";
+	rec.descriptionText = "Verify that the user can run tasks with realtime priority";
 	rec.failureText = "";
 	rec.hasOption = false;
 	rec.functionPtr = &system_user_can_rtprio;
@@ -145,7 +145,7 @@ DefineSwitches()
 
 	rec.switchText = "-hasrtlimits";
 	rec.swOptionText = "";
-	rec.descriptionText = "Verfiy the system has a limits.conf and the audio group can use realtime";
+	rec.descriptionText = "Verify the system has a limits.conf and the audio group can use realtime";
 	rec.failureText = "";
 	rec.hasOption = false;
 	rec.functionPtr = &system_has_rtprio_limits_conf;
@@ -154,7 +154,7 @@ DefineSwitches()
 
 	rec.switchText = "-hasgroup";
 	rec.swOptionText = "<groupname>";
-	rec.descriptionText = "Verfiy that the system has a group named <groupname>";
+	rec.descriptionText = "Verify that the system has a group named <groupname>";
 	rec.failureText = "";
 	rec.hasOption = true;
 	rec.opFunctionPtr = &HasGroup;
@@ -163,7 +163,7 @@ DefineSwitches()
 
 	rec.switchText = "-hasaudiogroup";
 	rec.swOptionText = "";
-	rec.descriptionText = "Verfiy that the system has an audio group (audio or jackuser) defined";
+	rec.descriptionText = "Verify that the system has an audio group (audio or jackuser) defined";
 	rec.failureText = "";
 	rec.hasOption = false;
 	rec.functionPtr = &system_has_audiogroup;
@@ -172,7 +172,7 @@ DefineSwitches()
 
 	rec.switchText = "-memberofgroup";
 	rec.swOptionText = "<groupname>";
-	rec.descriptionText = "Verfiy that the user is a member of the group named <groupname>";
+	rec.descriptionText = "Verify that the user is a member of the group named <groupname>";
 	rec.failureText = "";
 	rec.hasOption = true;
 	rec.opFunctionPtr = &IsMemberOfGroup;
@@ -181,7 +181,7 @@ DefineSwitches()
 
 	rec.switchText = "-memberaudiogroup";
 	rec.swOptionText = "";
-	rec.descriptionText = "Verfiy that the user is a member of the audio group (audio or jackuser)";
+	rec.descriptionText = "Verify that the user is a member of the audio group (audio or jackuser)";
 	rec.failureText = "";
 	rec.hasOption = false;
 	rec.functionPtr = &system_user_in_audiogroup;
