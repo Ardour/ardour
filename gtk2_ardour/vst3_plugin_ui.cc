@@ -90,7 +90,7 @@ VST3PluginUI::resizable ()
 bool
 VST3PluginUI::non_gtk_gui() const
 {
-	// return true to enable forward_key_event
+	/* return true to enable forward_key_event */
 	return false;
 }
 
@@ -134,11 +134,14 @@ VST3PluginUI::parameter_update ()
 void
 VST3PluginUI::forward_key_event (GdkEventKey* ev)
 {
-#if 0
+	/* NB VST3NSViewPluginUI overrides this */
+#if 0 // -> non_gtk_gui () -> true
+	// TODO: map key-events
 	IPlugView* view = _vst3->view ();
 	switch (gdk_key->type) {
 		case GDK_KEY_PRESS:
-			/* key: unicode code of key
+			/* onKeyDown (char16 key, int16 keyCode, int16 modifiers)
+			 * key: unicode code of key
 			 * keyCode: virtual keycode for non ascii keys - see VirtualKeyCodes in keycodes.h
 			 * modifiers	: any combination of modifiers - see KeyModifier in keycodes.h
 			 */

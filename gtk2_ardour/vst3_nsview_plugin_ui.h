@@ -48,7 +48,9 @@ public:
 
 	bool on_window_show(const std::string&);
 	void on_window_hide ();
+	void forward_key_event (GdkEventKey*);
 	void grab_focus();
+	bool non_gtk_gui() const { return true; }
 
 private:
 	void view_realized ();

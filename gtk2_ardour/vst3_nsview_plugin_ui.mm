@@ -220,6 +220,25 @@ VST3NSViewPluginUI::on_window_hide ()
 }
 
 void
+VST3NSViewPluginUI::forward_key_event (GdkEventKey* ev)
+{
+	/* despite the VST3 spec mandating onKeyUp/Down, many
+	 * plugins (notably JUCE) reply on platform callbacks.
+	 */
+	NSEvent* nsevent = gdk_quartz_event_get_nsevent ((GdkEvent*)ev);
+	if (!nsevent) {
+		return;
+	}
+	if ([nsevent type] == NSKeyDown) {
+		[[[_ns_view window] firstResponder] keyDown:nsevent];
+	} else if ([nsevent type] == NSKeyUp) {
+		[[[_ns_view window] firstResponder] keyUp:nsevent];
+	} else if ([nsevent type] == NSFlagsChanged) {
+		[[[_ns_view window] firstResponder] flagsChanged:nsevent];
+	}
+}
+
+void
 VST3NSViewPluginUI::grab_focus ()
 {
 	[_ns_view becomeFirstResponder];
