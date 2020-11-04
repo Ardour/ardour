@@ -228,6 +228,15 @@ namespace ARDOUR { namespace LuaAPI {
 	 */
 	int timecode_to_sample_lua (lua_State *L);
 
+	/**
+	 * Delay execution until next prcess cycle starts.
+	 * @param n_cycles process-cycles to wait for.
+	 *        0: means wait until next cycle-start, otherwise skip given number of cycles.
+	 * @param timeout_ms wait at most this many milliseconds
+	 * @return true on success,  false if timeout was reached or engine was not running
+	 */
+	bool wait_for_process_callback (size_t n_cycles, int64_t timeout_ms);
+
 	class Vamp {
 	/** Vamp Plugin Interface
 	 *

@@ -25,8 +25,10 @@
 #include "pbd/failed_constructor.h"
 
 #include "ardour/analyser.h"
+#include "ardour/audioengine.h"
 #include "ardour/audiofilesource.h"
 #include "ardour/audiosource.h"
+#include "ardour/internal_send.h"
 #include "ardour/lua_api.h"
 #include "ardour/luaproc.h"
 #include "ardour/luascripting.h"
@@ -422,6 +424,46 @@ ARDOUR::LuaAPI::timecode_to_sample_lua (lua_State *L)
 
 	luabridge::Stack<int64_t>::push (L, sample);
 	return 1;
+}
+
+
+static
+void proc_cycle_start (size_t* cnt)
+{
+	++*cnt;
+}
+
+bool
+ARDOUR::LuaAPI::wait_for_process_callback (size_t n_cycles, int64_t timeout_ms)
+{
+	if (!AudioEngine::instance()->running()) {
+		return false;
+	}
+#if 0
+	if (AudioEngine::instance()->freewheeling()) {
+		return false;
+	}
+#endif
+	if (AudioEngine::instance()->measuring_latency() != AudioEngine::MeasureNone) {
+		return false;
+	}
+	if (!AudioEngine::instance()->session() ) {
+		return false;
+	}
+
+	size_t cnt = 0;
+	ScopedConnection c;
+
+	InternalSend::CycleStart.connect_same_thread (c, boost::bind (&proc_cycle_start, &cnt));
+	while (cnt <= n_cycles) {
+		Glib::usleep (1000);
+		if (timeout_ms > 0) {
+			if (--timeout_ms == 0) {
+				return cnt > n_cycles;
+			}
+		}
+	}
+	return true;
 }
 
 int

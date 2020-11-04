@@ -2554,6 +2554,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("note_list", ARDOUR::LuaAPI::note_list)
 		.addCFunction ("sample_to_timecode", ARDOUR::LuaAPI::sample_to_timecode)
 		.addCFunction ("timecode_to_sample", ARDOUR::LuaAPI::timecode_to_sample)
+		.addFunction ("wait_for_process_callback", ARDOUR::LuaAPI::wait_for_process_callback)
 
 		.beginNamespace ("FileTest")
 		.addConst ("IsRegular", Glib::FILE_TEST_IS_REGULAR)
