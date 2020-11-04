@@ -438,22 +438,8 @@ void Alsa_pcmi::initialise (const char *play_name, const char *capt_name, const 
 		}
 	}
 
+	/* devices opened, now perform hardware config */
 	_state = -2;
-	if (_play_handle)
-	{
-		if (snd_pcm_hw_params_malloc (&_play_hwpar) < 0)
-		{
-			if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi: can't allocate playback hw params\n");
-			return;
-		}
-		if (snd_pcm_sw_params_malloc (&_play_swpar) < 0)
-		{
-			if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi: can't allocate playback sw params\n");
-			return;
-		}
-		if (set_hwpar (_play_handle, _play_hwpar, "playback", _play_nfrag, &_play_nchan) < 0) return;
-		if (set_swpar (_play_handle, _play_swpar, "playback") < 0) return;
-	}
 
 	if (_capt_handle)
 	{
@@ -470,6 +456,24 @@ void Alsa_pcmi::initialise (const char *play_name, const char *capt_name, const 
 		if (set_hwpar (_capt_handle, _capt_hwpar, "capture", _capt_nfrag, &_capt_nchan) < 0) return;
 		if (set_swpar (_capt_handle, _capt_swpar, "capture") < 0) return;
 	}
+
+	if (_play_handle)
+	{
+		if (snd_pcm_hw_params_malloc (&_play_hwpar) < 0)
+		{
+			if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi: can't allocate playback hw params\n");
+			return;
+		}
+		if (snd_pcm_sw_params_malloc (&_play_swpar) < 0)
+		{
+			if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi: can't allocate playback sw params\n");
+			return;
+		}
+		if (set_hwpar (_play_handle, _play_hwpar, "playback", _play_nfrag, &_play_nchan) < 0) return;
+		if (set_swpar (_play_handle, _play_swpar, "playback") < 0) return;
+	}
+
+	/* devices are configured, now confirm settings and setup format conversion */
 
 	if (_play_handle)
 	{
