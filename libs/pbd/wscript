@@ -207,6 +207,7 @@ def build(bld):
                 test/convert_test.cc
                 test/filesystem_test.cc
                 test/natsort_test.cc
+                test/rcu_test.cc
                 test/reallocpool_test.cc
                 test/xml_test.cc
                 test/test_common.cc
