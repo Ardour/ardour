@@ -39,7 +39,13 @@ launch_writer(void* self)
 void
 RCUTest::race ()
 {
+#ifdef __APPLE__
+	pthread_mutex_init (&_mutex, NULL);
+	pthread_cond_init (&_cond, NULL);
+	_cnt = 0;
+#else
 	pthread_barrier_init (&_barrier, NULL, 2);
+#endif
 
 	pthread_t reader_thread;
 	pthread_t writer_thread;
@@ -51,7 +57,12 @@ RCUTest::race ()
 	CPPUNIT_ASSERT (pthread_join (writer_thread, &return_value) == 0);
 	CPPUNIT_ASSERT (pthread_join (reader_thread, &return_value) == 0);
 
+#ifdef __APPLE__
+	pthread_mutex_destroy (&_mutex);
+	pthread_cond_destroy (&_cond);
+#else
 	pthread_barrier_destroy (&_barrier);
+#endif
 }
 
 /* ****************************************************************************/
@@ -59,7 +70,18 @@ RCUTest::race ()
 void
 RCUTest::read_thread ()
 {
+#ifdef __APPLE__
+	pthread_mutex_lock (&_mutex);
+	if (++_cnt == 2) {
+		pthread_cond_broadcast (&_cond);
+		pthread_mutex_unlock (&_mutex);
+	} else {
+		pthread_cond_wait (&_cond, &_mutex);
+	}
+	pthread_mutex_unlock (&_mutex);
+#else
 	pthread_barrier_wait (&_barrier);
+#endif
 
 	for (int i = 0; i < 15000; ++i) {
 		boost::shared_ptr<Values> reader  = _values.reader ();
@@ -72,7 +94,18 @@ RCUTest::read_thread ()
 void
 RCUTest::write_thread ()
 {
+#ifdef __APPLE__
+	pthread_mutex_lock (&_mutex);
+	if (++_cnt == 2) {
+		pthread_cond_broadcast (&_cond);
+		pthread_mutex_unlock (&_mutex);
+	} else {
+		pthread_cond_wait (&_cond, &_mutex);
+	}
+	pthread_mutex_unlock (&_mutex);
+#else
 	pthread_barrier_wait (&_barrier);
+#endif
 
 	for (int i = 0; i < 10000; ++i) {
 		RCUWriter<Values> writer (_values);

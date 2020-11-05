@@ -31,5 +31,12 @@ private:
 	typedef std::map<std::string, boost::shared_ptr<Value> > Values;
 
 	SerializedRCUManager<Values> _values;
+
+#ifdef __APPLE__
+	pthread_mutex_t _mutex;
+	pthread_cond_t  _cond;
+	size_t          _cnt;
+#else
 	pthread_barrier_t _barrier;
+#endif
 };
