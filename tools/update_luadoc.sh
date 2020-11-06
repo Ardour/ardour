@@ -22,7 +22,7 @@ if test -f $AMANUAL/include/class-reference.html; then
 	php $DIR/fmt-luadoc.php -m > $AMANUAL/include/class-reference.html
 	ls -l $AMANUAL/include/class-reference.html
 	cd $AMANUAL/
-	./build.py --nopdf
+	./build.py
 else
 	php $DIR/fmt-luadoc.php > /tmp/luadoc.html
 	ls -l /tmp/luadoc.html

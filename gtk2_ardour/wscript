@@ -504,7 +504,6 @@ def build(bld):
         obj.source    = list(gtk2_ardour_sources)
         obj.target    = 'luadoc'
         obj.includes  = ['.', '../libs', '../libs/vst3']
-        obj.ldflags   = ['-no-undefined']
         obj.use       = [
                 'libpbd',
                 'libardour',
