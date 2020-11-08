@@ -9,8 +9,6 @@ function factory (params) return function ()
 
 -- when this script is called as an action, the output will be printed to the ardour log window
 	function print_help()
-		printf("See source for help.")
----[[
 		print("")
 		print("---------------------------------------------------------------------")
 		print("")
@@ -157,7 +155,6 @@ function factory (params) return function ()
 		print("See also: Lua Action Bounce+Replace Regions")
 		print("")
 		print("")
---]]
 	end -- print_help()
 
 	local n_paste  = 1
@@ -171,14 +168,16 @@ function factory (params) return function ()
 
 	-- make sure we have a loop, and the playhead (edit point) is after it
 	if not loop then
-		print_help();
+--		print_help();
 		print ("Error: A Loop range must be set.")
+		LuaDialog.Message ("Tom's Loop", "Error: A Loop range must be set.", LuaDialog.MessageType.Error, LuaDialog.ButtonType.Close):run ()
 		goto errorout
 	end
 	assert (loop:start () < loop:_end ())
 	if loop:_end () > playhead then
-		print_help();
+--		print_help();
 		print ("Error: The Playhead (paste point) needs to be after the loop.")
+		LuaDialog.Message ("Tom's Loop", "Error: The Playhead (paste point) needs to be after the loop.", LuaDialog.MessageType.Error, LuaDialog.ButtonType.Close):run ()
 		goto errorout
 	end
 
