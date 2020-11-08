@@ -511,7 +511,7 @@ LoudnessDialog::analyze ()
 void
 LoudnessDialog::display_report ()
 {
-	ExportReport er ("Export Loudness Report", _status->result_map);
+	ExportReport er (_("Export Loudness Report"), _status->result_map);
 	er.set_transient_for (*this);
 	er.run();
 }
