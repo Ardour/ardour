@@ -26,6 +26,7 @@
 #include <list>
 
 #include "pbd/libpbd_visibility.h"
+#include "pbd/spinlock.h"
 
 /** @file rcu.h
  * Define a set of classes to implement Read-Copy-Update.  We do not attempt to define RCU here - use google.
@@ -57,7 +58,26 @@ class /*LIBPBD_API*/ RCUManager
 
 	virtual ~RCUManager() { delete x.m_rcu_value; }
 
-	boost::shared_ptr<T> reader () const { return *((boost::shared_ptr<T> *) g_atomic_pointer_get (&x.gptr)); }
+	boost::shared_ptr<T> reader () const {
+		boost::shared_ptr<T> rv;
+		{
+			/* we take and hold this lock while setting up rv
+			   (notably increasing the reference count shared by
+			   all shared_ptr<T> that reference the same object as
+			   m_rcu_value. This prevents and update() call from
+			   deleting the shared_ptr<T> while we do this.
+
+			   The atomic pointer fetch only ensures that we can
+			   atomically read the ptr-to-shared-ptr. It does not
+			   protect the internal structure of the shared_ptr<T>
+			   which could otherwise be deleted by update() while
+			   we use it.
+			*/
+			PBD::SpinLock sl (_spinlock);
+			rv = *((boost::shared_ptr<T> *) g_atomic_pointer_get (&x.gptr));
+		}
+		return rv;
+	}
 
 	/* this is an abstract base class - how these are implemented depends on the assumptions
 	   that one can make about the users of the RCUManager. See SerializedRCUManager below
@@ -81,6 +101,8 @@ class /*LIBPBD_API*/ RCUManager
 	    boost::shared_ptr<T>* m_rcu_value;
 	    mutable volatile gpointer gptr;
 	} x;
+
+	mutable PBD::spinlock_t _spinlock;
 };
 
 
@@ -176,11 +198,21 @@ public:
 
 			m_dead_wood.push_back (*current_write_old);
 
-			// now delete it - this gets rid of the shared_ptr<T> but
-			// because dead_wood contains another shared_ptr<T> that
-			// references the same T, the underlying object lives on
+			/* now delete it - this gets rid of the shared_ptr<T> but
+			 * because dead_wood contains another shared_ptr<T> that
+			 * references the same T, the underlying object lives
+			 * on.
+			 *
+			 * We still need to use the spinlock to ensure that a
+			 * call to reader() that is in the middle of increasing
+			 * the reference count to the underlying T from
+			 * operating on a corrupted shared_ptr<T>
+			 */
 
-			delete current_write_old;
+			{
+				PBD::SpinLock sl (RCUManager<T>::_spinlock);
+				delete current_write_old;
+			}
 		}
 
 		/* unlock, allowing other writers to proceed */
@@ -196,7 +228,7 @@ public:
 	}
 
 private:
-	Glib::Threads::Mutex                      m_lock;
+	Glib::Threads::Mutex             m_lock;
 	boost::shared_ptr<T>*            current_write_old;
 	std::list<boost::shared_ptr<T> > m_dead_wood;
 };
