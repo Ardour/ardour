@@ -228,7 +228,7 @@ MidiBuffer::insert_event(const Evoral::Event<TimeType>& ev)
 			continue;
 		}
 		if ((*m).time() == t) {
-			const uint8_t our_midi_status_byte = *(_data + m.offset + sizeof (TimeType));
+			const uint8_t our_midi_status_byte = *(_data + m.offset + stamp_size + etype_size);
 			if (second_simultaneous_midi_byte_is_first (ev.type(), our_midi_status_byte)) {
 				continue;
 			}
