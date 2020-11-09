@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: Ardour 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-09-13 13:41+0200\n"
-"PO-Revision-Date: 2020-09-16 14:05+0200\n"
+"PO-Revision-Date: 2020-10-14 23:33+0200\n"
 "Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>\n"
 "Language-Team: French <>\n"
 "Language: fr\n"
@@ -4894,7 +4894,7 @@ msgstr "Lire les régions sélectionnées"
 
 #: editor_actions.cc:351 editor_actions.cc:1606
 msgid "Tag Selected Regions"
-msgstr "Marquer les régions sélectionnées"
+msgstr "Étiquetter les régions sélectionnées"
 
 #: editor_actions.cc:354
 msgid "Play from Edit Point and Return"
@@ -4982,7 +4982,7 @@ msgstr "Détruire le dernier enregistrement"
 
 #: editor_actions.cc:445 editor_ops.cc:5255
 msgid "Tag Last Capture"
-msgstr "Marquer la dernière capture"
+msgstr "Étiquetter la dernière capture"
 
 #: editor_actions.cc:447
 msgid "Stationary Playhead"
@@ -5198,7 +5198,7 @@ msgstr "Supprimer les régions inutilisées"
 
 #: editor_actions.cc:683
 msgid "Import PT session"
-msgstr "Importer une région PT"
+msgstr "Importer une session PT"
 
 #: editor_actions.cc:691
 msgid "Import to Source List..."
@@ -6974,7 +6974,7 @@ msgstr "# Canaux dans la région"
 #: editor_regions.cc:184 editor_sources.cc:161 plugin_selector.cc:100
 #: plugin_selector.cc:170
 msgid "Tags"
-msgstr "Marques"
+msgstr "Étiquettes"
 
 #: editor_regions.cc:185 editor_regions.cc:808 midi_list_editor.cc:106
 #: time_info_box.cc:86
@@ -8092,7 +8092,7 @@ msgstr ""
 
 #: export_format_dialog.cc:101
 msgid "Tag file with session's metadata"
-msgstr "Marquer le fichier avec les méta-données de session"
+msgstr "Étiquetter le fichier avec les méta-données de session"
 
 #: export_format_dialog.cc:139
 msgid "∧"
@@ -11734,21 +11734,21 @@ msgstr "Filtre"
 #: plugin_selector.cc:276
 msgid "Enter space-separated, one-word Tags for the selected plugin."
 msgstr ""
-"Entrer les marques (un seul mot pour chaque, séparées par un espace) pour le "
-"greffon sélectionné."
+"Entrer les étiquettes (un seul mot pour chaque, séparées par un espace) pour "
+"le greffon sélectionné."
 
 #: plugin_selector.cc:279
 msgid "You can include dashes, colons or underscores in a Tag."
 msgstr ""
-"Vous pouvez inclure \"tiret du 6\" \"tiret du 8\" et \":\" dans une Marque."
+"Vous pouvez inclure \"tiret du 6\" \"tiret du 8\" et \":\" dans une étiquette."
 
 #: plugin_selector.cc:282
 msgid "Ex: \"dynamic de-esser vocal\" applies 3 Tags."
-msgstr "Ex: \"dynamique de-esser vocal\" représente 3 Marques."
+msgstr "Ex: \"dynamique de-esser vocal\" représente 3 étiquettes."
 
 #: plugin_selector.cc:293
 msgid "Tags for Selected Plugin"
-msgstr "Marques du greffon sélectionné"
+msgstr "Étiquettes du greffon sélectionné"
 
 #: plugin_selector.cc:331
 msgid "Insert Plugin(s)"
@@ -12932,7 +12932,7 @@ msgstr "Cette option ne sera prise en compte qu'après un redémarrage d'%1."
 
 #: rc_option_editor.cc:2324
 msgid "Memory Usage"
-msgstr "Utilisation de la Mémoire"
+msgstr "Utilisation de la mémoire"
 
 #: rc_option_editor.cc:2327
 msgid "Waveform image cache size (megabytes)"
@@ -13420,7 +13420,7 @@ msgstr ""
 #: rc_option_editor.cc:2929 rc_option_editor.cc:2937 rc_option_editor.cc:2953
 #: rc_option_editor.cc:2966 rc_option_editor.cc:2975
 msgid "Signal Flow"
-msgstr "Flux du Signal"
+msgstr "Flux du signal"
 
 #: rc_option_editor.cc:2900
 msgid "Record monitoring handled by"
@@ -16156,7 +16156,7 @@ msgstr "Carte de tempo :"
 
 #: sfdb_ui.cc:222 sfdb_ui.cc:738
 msgid "Tags:"
-msgstr "Marques :"
+msgstr "Étiquettes :"
 
 #: sfdb_ui.cc:334
 msgid "<b>Midi File Information</b>"
@@ -16208,7 +16208,7 @@ msgstr "Chemins"
 
 #: sfdb_ui.cc:726
 msgid "Search Tags"
-msgstr "Recherche de Marques"
+msgstr "Recherche d'étiquettes"
 
 #: sfdb_ui.cc:743
 msgid "Sort:"
@@ -18538,7 +18538,7 @@ msgstr ""
 #~ msgstr "Lire les régions sélectionnées"
 
 #~ msgid "Tag selected Regions"
-#~ msgstr "Marquer les régions sélectionnées"
+#~ msgstr "Étiquetter les régions sélectionnées"
 
 #~ msgid ""
 #~ "One or more Audio Regions\n"
