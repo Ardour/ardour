@@ -556,7 +556,16 @@ ARDOUR::get_jack_server_dir_paths (vector<std::string>& server_dir_paths)
 #ifdef PLATFORM_WINDOWS
 	std::string reg;
 	
-	bool found = PBD::windows_query_registry ("Software\\JACK", "Location", reg);
+	/* since https://github.com/jackaudio/jack2/commit/ac62faa9c0268b89e3ea23c0318227612acd8079 */
+	bool found = PBD::windows_query_registry ("Software\\JACK", "InstallPath", reg);
+
+	if (!found) {
+		/* special-case jack 1.9.16, "Location" included jackd.exe */
+		found = PBD::windows_query_registry ("Software\\JACK", "Location", reg);
+		if (found) {
+			reg = Glib::path_get_dirname (reg);
+		}
+	}
 	if (!found) {
 		// If the newer style regkey wasn't found, check for one in the older style...
 		found = PBD::windows_query_registry ("Software\\Jack", "InstPath", reg, HKEY_CURRENT_USER);
