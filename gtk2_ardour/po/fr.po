@@ -14686,7 +14686,7 @@ msgid ""
 "\" for some.\n"
 "This may help with some window managers."
 msgstr ""
-"Étiquetter toutes les fenêtres flottantes pour être de type \"Dialogue\" plutôt "
+"Marquer toutes les fenêtres flottantes pour être de type \"Dialogue\" plutôt "
 "que d’utiliser \"Utilitaire\" pour certaines.\n"
 "Cela peut aider avec certains gestionnaires de fenêtre."
 
