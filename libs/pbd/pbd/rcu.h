@@ -52,7 +52,7 @@ class /*LIBPBD_API*/ RCUManager
 {
 public:
 	RCUManager (T* new_rcu_value)
-		: active_reads (0)
+		: _active_reads (0)
 	{
 		x.rcu_value = new boost::shared_ptr<T> (new_rcu_value);
 	}
@@ -70,9 +70,9 @@ public:
 		 * wait until rcu_value is no longer in use after an atomic exchange
 		 * before dropping it.
 		 */
-		g_atomic_int_inc (&active_reads);
+		g_atomic_int_inc (&_active_reads);
 		rv = *((boost::shared_ptr<T>*)g_atomic_pointer_get (&x.gptr));
-		g_atomic_int_dec_and_test (&active_reads);
+		g_atomic_int_dec_and_test (&_active_reads);
 
 		return rv;
 	}
@@ -100,7 +100,12 @@ protected:
 		mutable volatile gpointer gptr;
 	} x;
 
-	mutable volatile gint active_reads;
+	inline bool active_read () const {
+		return g_atomic_int_get (&_active_reads) != 0;
+	}
+
+private:
+	mutable volatile gint _active_reads;
 };
 
 /** Serialized RCUManager implements the RCUManager interface. It is based on the
@@ -196,7 +201,7 @@ public:
 			 * shared_ptr, and thus have had their reference count incremented.
 			 */
 
-			for (unsigned i = 0; g_atomic_int_get (&(RCUManager<T>::active_reads)) != 0; ++i) {
+			for (unsigned i = 0; RCUManager<T>::active_read (); ++i) {
 				// spin being nice to the scheduler/CPU
 				boost::detail::yield (i);
 			}
