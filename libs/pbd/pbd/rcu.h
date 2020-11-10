@@ -21,12 +21,12 @@
 #define __pbd_rcu_h__
 
 #include "boost/shared_ptr.hpp"
+#include "boost/smart_ptr/detail/yield_k.hpp"
 #include "glibmm/threads.h"
 
 #include <list>
 
 #include "pbd/libpbd_visibility.h"
-#include "pbd/spinlock.h"
 
 /** @file rcu.h
  * Define a set of classes to implement Read-Copy-Update.  We do not attempt to define RCU here - use google.
@@ -52,7 +52,7 @@ class /*LIBPBD_API*/ RCUManager
 {
   public:
 
-	RCUManager (T* new_rcu_value) {
+	RCUManager (T* new_rcu_value) : active_reads(0) {
 		x.m_rcu_value = new boost::shared_ptr<T> (new_rcu_value);
 	}
 
@@ -60,22 +60,14 @@ class /*LIBPBD_API*/ RCUManager
 
 	boost::shared_ptr<T> reader () const {
 		boost::shared_ptr<T> rv;
-		{
-			/* we take and hold this lock while setting up rv
-			   (notably increasing the reference count shared by
-			   all shared_ptr<T> that reference the same object as
-			   m_rcu_value. This prevents and update() call from
-			   deleting the shared_ptr<T> while we do this.
 
-			   The atomic pointer fetch only ensures that we can
-			   atomically read the ptr-to-shared-ptr. It does not
-			   protect the internal structure of the shared_ptr<T>
-			   which could otherwise be deleted by update() while
-			   we use it.
-			*/
-			PBD::SpinLock sl (_spinlock);
-			rv = *((boost::shared_ptr<T> *) g_atomic_pointer_get (&x.gptr));
-		}
+		// Keep count of any readers in this section of code, so writers can
+		// wait until m_rcu_value is no longer in use after an atomic exchange
+		// before dropping it.
+		g_atomic_int_inc(&active_reads);
+		rv = *((boost::shared_ptr<T> *) g_atomic_pointer_get (&x.gptr));
+		g_atomic_int_dec_and_test(&active_reads);
+
 		return rv;
 	}
 
@@ -102,7 +94,7 @@ class /*LIBPBD_API*/ RCUManager
 	    mutable volatile gpointer gptr;
 	} x;
 
-	mutable PBD::spinlock_t _spinlock;
+	mutable volatile gint active_reads;
 };
 
 
@@ -194,25 +186,31 @@ public:
 
 		if (ret) {
 
-			// successful update : put the old value into dead_wood,
+			// successful update
 
-			m_dead_wood.push_back (*current_write_old);
+			// wait until there are no active readers. This ensures that any
+			// references to the old value have been fully copied into a new
+			// shared_ptr, and thus have had their reference count incremented.
 
-			/* now delete it - this gets rid of the shared_ptr<T> but
-			 * because dead_wood contains another shared_ptr<T> that
-			 * references the same T, the underlying object lives
-			 * on.
-			 *
-			 * We still need to use the spinlock to ensure that a
-			 * call to reader() that is in the middle of increasing
-			 * the reference count to the underlying T from
-			 * operating on a corrupted shared_ptr<T>
-			 */
-
-			{
-				PBD::SpinLock sl (RCUManager<T>::_spinlock);
-				delete current_write_old;
+			for (unsigned i = 0; g_atomic_int_get(&(RCUManager<T>::active_reads)) != 0; ++i) {
+				// spin being nice to the scheduler/CPU
+				boost::detail::yield(i);
 			}
+
+			// if we are not the only user, put the old value into dead_wood.
+			// if we are the only user, then it is safe to drop it here.
+
+			if (!current_write_old->unique()) {
+				m_dead_wood.push_back (*current_write_old);
+			}
+
+			// now delete it - if we are the only user, this deletes the
+			// underlying object. if other users existed, then there will
+			// be an extra reference in m_dead_wood, ensuring that the
+			// underlying object lives on even when the other users
+			// are done with it
+
+			delete current_write_old;
 		}
 
 		/* unlock, allowing other writers to proceed */
