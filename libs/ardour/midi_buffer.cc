@@ -252,6 +252,7 @@ MidiBuffer::insert_event(const Evoral::Event<TimeType>& ev)
 	}
 
 	uint8_t* const write_loc = _data + insert_offset;
+	assert((insert_offset + stamp_size + etype_size + ev.size()) <= _capacity);
 	*(reinterpret_cast<TimeType*>((uintptr_t)write_loc)) = t;
 	*(reinterpret_cast<Evoral::EventType*>((uintptr_t)(write_loc + stamp_size))) = ev.event_type ();
 	memcpy(write_loc + stamp_size + etype_size, ev.buffer(), ev.size());
