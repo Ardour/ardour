@@ -136,7 +136,10 @@ MidiBuffer::merge_from (const Buffer& src, samplecnt_t /*nframes*/, sampleoffset
 	assert (mbuf != this);
 
 	/* XXX use nframes, and possible offsets */
-	merge_in_place (*mbuf);
+	if (!merge_in_place (*mbuf)) {
+		cerr << string_compose ("MidiBuffer::merge_in_place failed (buffer is full: size: %1 capacity %2 new bytes %3)", _size, _capacity, mbuf->size()) << endl;
+		PBD::stacktrace (cerr, 20);
+	}
 }
 
 /** Push an event into the buffer.
