@@ -21,6 +21,7 @@
 #define __pbd_rcu_h__
 
 #include "boost/shared_ptr.hpp"
+#include "boost/smart_ptr/detail/yield_k.hpp"
 #include "glibmm/threads.h"
 
 #include <list>
@@ -51,13 +52,24 @@ class /*LIBPBD_API*/ RCUManager
 {
   public:
 
-	RCUManager (T* new_rcu_value) {
+	RCUManager (T* new_rcu_value) : active_reads(0) {
 		x.m_rcu_value = new boost::shared_ptr<T> (new_rcu_value);
 	}
 
 	virtual ~RCUManager() { delete x.m_rcu_value; }
 
-	boost::shared_ptr<T> reader () const { return *((boost::shared_ptr<T> *) g_atomic_pointer_get (&x.gptr)); }
+	boost::shared_ptr<T> reader () const {
+		boost::shared_ptr<T> rv;
+
+		// Keep count of any readers in this section of code, so writers can
+		// wait until m_rcu_value is no longer in use after an atomic exchange
+		// before dropping it.
+		g_atomic_int_inc(&active_reads);
+		rv = *((boost::shared_ptr<T> *) g_atomic_pointer_get (&x.gptr));
+		g_atomic_int_dec_and_test(&active_reads);
+
+		return rv;
+	}
 
 	/* this is an abstract base class - how these are implemented depends on the assumptions
 	   that one can make about the users of the RCUManager. See SerializedRCUManager below
@@ -81,6 +93,8 @@ class /*LIBPBD_API*/ RCUManager
 	    boost::shared_ptr<T>* m_rcu_value;
 	    mutable volatile gpointer gptr;
 	} x;
+
+	mutable volatile gint active_reads;
 };
 
 
@@ -172,13 +186,29 @@ public:
 
 		if (ret) {
 
-			// successful update : put the old value into dead_wood,
+			// successful update
 
-			m_dead_wood.push_back (*current_write_old);
+			// wait until there are no active readers. This ensures that any
+			// references to the old value have been fully copied into a new
+			// shared_ptr, and thus have had their reference count incremented.
 
-			// now delete it - this gets rid of the shared_ptr<T> but
-			// because dead_wood contains another shared_ptr<T> that
-			// references the same T, the underlying object lives on
+			for (unsigned i = 0; g_atomic_int_get(&(RCUManager<T>::active_reads)) != 0; ++i) {
+				// spin being nice to the scheduler/CPU
+				boost::detail::yield(i);
+			}
+
+			// if we are not the only user, put the old value into dead_wood.
+			// if we are the only user, then it is safe to drop it here.
+
+			if (!current_write_old->unique()) {
+				m_dead_wood.push_back (*current_write_old);
+			}
+
+			// now delete it - if we are the only user, this deletes the
+			// underlying object. if other users existed, then there will
+			// be an extra reference in m_dead_wood, ensuring that the
+			// underlying object lives on even when the other users
+			// are done with it
 
 			delete current_write_old;
 		}
@@ -196,7 +226,7 @@ public:
 	}
 
 private:
-	Glib::Threads::Mutex                      m_lock;
+	Glib::Threads::Mutex             m_lock;
 	boost::shared_ptr<T>*            current_write_old;
 	std::list<boost::shared_ptr<T> > m_dead_wood;
 };
