@@ -442,13 +442,13 @@ MidiBuffer::merge_in_place (const MidiBuffer &other)
 		return true;
 	}
 
+	if (size() + other.size() > _capacity) {
+		return false;
+	}
+
 	if (size() == 0) {
 		copy (other);
 		return true;
-	}
-
-	if (size() + other.size() > _capacity) {
-		return false;
 	}
 
 	const_iterator them = other.begin();
