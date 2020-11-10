@@ -72,7 +72,7 @@ public:
 		 */
 		g_atomic_int_inc (&_active_reads);
 		rv = *((boost::shared_ptr<T>*)g_atomic_pointer_get (&x.gptr));
-		g_atomic_int_dec_and_test (&_active_reads);
+		g_atomic_int_add (&_active_reads, -1);
 
 		return rv;
 	}
