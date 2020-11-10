@@ -69,6 +69,10 @@ public:
 		/* Keep count of any readers in this section of code, so writers can
 		 * wait until rcu_value is no longer in use after an atomic exchange
 		 * before dropping it.
+		 *
+		 * rg: this is not great, 3 consecutive full compiler and hardware
+		 * memory barterers. For an edge-case lock that is not usually contended.
+		 * consider reverting f87de76b9fc8b3a5a.
 		 */
 		g_atomic_int_inc (&_active_reads);
 		rv = *((boost::shared_ptr<T>*)g_atomic_pointer_get (&x.gptr));
@@ -86,15 +90,14 @@ public:
 	virtual bool                 update (boost::shared_ptr<T> new_value) = 0;
 
 protected:
-	/* ordinarily this would simply be a declaration of a ptr to a shared_ptr<T>. however, the atomic
+	/* ordinarily this would simply be a declaration of a ptr to a shared_ptr<T>. However, the atomic
 	 * operations that we are using (from glib) have sufficiently strict typing that it proved hard
 	 * to get them to accept even a cast value of the ptr-to-shared-ptr() as the argument to get()
 	 * and comp_and_exchange(). Consequently, we play a litle trick here that relies on the fact
 	 * that sizeof(A*) == sizeof(B*) no matter what the types of A and B are. for most purposes
 	 * we will use x.rcu_value, but when we need to use an atomic op, we use x.gptr. Both expressions
 	 * evaluate to the same address.
-	*/
-
+	 */
 	union {
 		boost::shared_ptr<T>*     rcu_value;
 		mutable volatile gpointer gptr;
@@ -187,7 +190,7 @@ public:
 		 * value has not been changed.
 		 *
 		 * XXX but how could it? we hold the freakin' lock!
-		*/
+		 */
 
 		bool ret = g_atomic_pointer_compare_and_exchange (&RCUManager<T>::x.gptr,
 		                                                  (gpointer)_current_write_old,
@@ -202,7 +205,7 @@ public:
 			 */
 
 			for (unsigned i = 0; RCUManager<T>::active_read (); ++i) {
-				// spin being nice to the scheduler/CPU
+				/* spin being nice to the scheduler/CPU */
 				boost::detail::yield (i);
 			}
 
@@ -215,7 +218,7 @@ public:
 			}
 
 			/* now delete it - if we are the only user, this deletes the
-			 * underlying object. if other users existed, then there will
+			 * underlying object. If other users existed, then there will
 			 * be an extra reference in _dead_wood, ensuring that the
 			 * underlying object lives on even when the other users
 			 * are done with it
@@ -257,7 +260,7 @@ private:
  * } <= writer goes out of scope, update invoked
  * @endcode
  *
-*/
+ */
 template <class T>
 class /*LIBPBD_API*/ RCUWriter
 {
@@ -288,7 +291,7 @@ public:
 			 * update the manager's copy.
 			 *
 			 * XXX should we print a warning about this?
-			*/
+			 */
 		}
 	}
 
