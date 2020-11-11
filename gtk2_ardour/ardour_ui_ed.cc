@@ -726,6 +726,7 @@ ARDOUR_UI::build_menu_bar ()
 
 	EventBox* ev_dsp = manage (new EventBox);
 	EventBox* ev_path = manage (new EventBox);
+	EventBox* ev_name = manage (new EventBox);
 	EventBox* ev_audio = manage (new EventBox);
 	EventBox* ev_format = manage (new EventBox);
 	EventBox* ev_timecode = manage (new EventBox);
@@ -750,6 +751,7 @@ ARDOUR_UI::build_menu_bar ()
 
 	ev_dsp->add (dsp_load_label);
 	ev_path->add (session_path_label);
+	ev_name->add (snapshot_name_label);
 	ev_audio->add (sample_rate_label);
 	ev_format->add (format_label);
 	ev_timecode->add (timecode_format_label);
@@ -775,7 +777,7 @@ ARDOUR_UI::build_menu_bar ()
 	hbox->pack_end (*ev_timecode, false, false, 6);
 	hbox->pack_end (*ev_format, false, false, 6);
 	hbox->pack_end (peak_thread_work_label, false, false, 6);
-	hbox->pack_end (snapshot_name_label, false, false, 6);
+	hbox->pack_end (*ev_name, false, false, 6);
 	hbox->pack_end (*ev_path, false, false, 6);
 
 	menu_hbox.pack_end (*ev, true, true, 2);
@@ -801,6 +803,7 @@ ARDOUR_UI::build_menu_bar ()
 	ev_dsp->signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::xrun_button_press));
 	ev_dsp->signal_button_release_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::xrun_button_release));
 	ev_path->signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::path_button_press));
+	ev_name->signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::path_button_press));
 	ev_audio->signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::audio_button_press));
 	ev_format->signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::format_button_press));
 	ev_timecode->signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::timecode_button_press));
