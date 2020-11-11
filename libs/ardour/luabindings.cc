@@ -354,6 +354,7 @@ CLASSKEYS(LuaDialog::ProgressWindow);
  */
 
 using namespace ARDOUR;
+using namespace Temporal;
 
 /** Access libardour global configuration */
 static RCConfiguration* _libardour_config () {
@@ -1866,63 +1867,35 @@ LuaBindings::common (lua_State* L)
 
 		.beginClass <Tempo> ("Tempo")
 		.addConstructor <void (*) (double, double, double)> ()
-		.addFunction ("note_type", &Tempo::note_type)
-		.addFunction ("note_types_per_minute",  (double (Tempo::*)() const)&Tempo::note_types_per_minute)
-		.addFunction ("end_note_types_per_minute",  (double (Tempo::*)() const)&Tempo::end_note_types_per_minute)
-		.addFunction ("quarter_notes_per_minute", &Tempo::quarter_notes_per_minute)
-		.addFunction ("samples_per_quarter_note", &Tempo::samples_per_quarter_note)
-		.addFunction ("samples_per_note_type", &Tempo::samples_per_note_type)
+		.addFunction ("note_type", &Temporal::Tempo::note_type)
+		.addFunction ("note_types_per_minute",  (double (Temporal::Tempo::*)() const)&Temporal::Tempo::note_types_per_minute)
+		.addFunction ("quarter_notes_per_minute", &Temporal::Tempo::quarter_notes_per_minute)
+		.addFunction ("samples_per_quarter_note", &Temporal::Tempo::samples_per_quarter_note)
+		.addFunction ("samples_per_note_type", &Temporal::Tempo::samples_per_note_type)
 		.endClass ()
 
 		.beginClass <Meter> ("Meter")
 		.addConstructor <void (*) (double, double)> ()
 		.addFunction ("divisions_per_bar", &Meter::divisions_per_bar)
-		.addFunction ("note_divisor", &Meter::note_divisor)
-		.addFunction ("samples_per_bar", &Meter::samples_per_bar)
-		.addFunction ("samples_per_grid", &Meter::samples_per_grid)
+		.addFunction ("note_value", &Meter::note_value)
 		.endClass ()
 
+#warning NUTEMPO need to consider which methods to use here since ::add_* are private right now and many others have changed
+#if 0
 		.beginClass <TempoMap> ("TempoMap")
 		.addFunction ("add_tempo", &TempoMap::add_tempo)
 		.addFunction ("add_meter", &TempoMap::add_meter)
-		.addFunction ("tempo_section_at_sample", (TempoSection& (TempoMap::*)(samplepos_t))&TempoMap::tempo_section_at_sample)
-		.addFunction ("meter_section_at_sample", &TempoMap::meter_section_at_sample)
+		.addFunction ("tempo_section_at_frame", (TempoSection& (TempoMap::*)(samplepos_t))&TempoMap::tempo_section_at_sample)
+		.addFunction ("tempo_section_at_frame", (const TempoSection& (TempoMap::*)(samplepos_t) const)&TempoMap::tempo_section_at_sample)
+		.addFunction ("meter_section_at_frame", &TempoMap::meter_section_at_sample)
 		.addFunction ("meter_section_at_beat", &TempoMap::meter_section_at_beat)
-		.addFunction ("bbt_at_sample", &TempoMap::bbt_at_sample)
-		.addFunction ("exact_beat_at_sample", &TempoMap::exact_beat_at_sample)
-		.addFunction ("exact_qn_at_sample", &TempoMap::exact_qn_at_sample)
+		.addFunction ("bbt_at_frame", &TempoMap::bbt_at_sample)
+		.addFunction ("exact_beat_at_frame", &TempoMap::exact_beat_at_sample)
+		.addFunction ("exact_qn_at_frame", &TempoMap::exact_qn_at_sample)
 		.addFunction ("samplepos_plus_qn", &TempoMap::samplepos_plus_qn)
 		.addFunction ("framewalk_to_qn", &TempoMap::framewalk_to_qn)
-		.addFunction ("previous_tempo_section", &TempoMap::previous_tempo_section)
-		.addFunction ("next_tempo_section", &TempoMap::next_tempo_section)
 		.endClass ()
-
-		.beginClass <MetricSection> ("MetricSection")
-		.addFunction ("pulse", &MetricSection::pulse)
-		.addFunction ("set_pulse", &MetricSection::set_pulse)
-		.addFunction ("sample", &MetricSection::sample)
-		.addFunction ("minute", &MetricSection::minute)
-		.addFunction ("initial", &MetricSection::initial)
-		.addFunction ("is_tempo", &MetricSection::is_tempo)
-		.addFunction ("sample_at_minute", &MetricSection::sample_at_minute)
-		.addFunction ("minute_at_sample", &MetricSection::minute_at_sample)
-		.endClass ()
-
-		.deriveClass <TempoSection, MetricSection> ("TempoSection")
-		.addCast<Tempo> ("to_tempo")
-		.addFunction ("c", (double(TempoSection::*)()const)&TempoSection::c)
-		.addFunction ("active", &TempoSection::active)
-		.addFunction ("locked_to_meter", &TempoSection::locked_to_meter)
-		.addFunction ("clamped", &TempoSection::clamped)
-		.endClass ()
-
-		.deriveClass <MeterSection, MetricSection> ("MeterSection")
-		.addCast<Meter> ("to_meter")
-		.addFunction ("bbt", &MeterSection::bbt)
-		.addFunction ("beat", &MeterSection::beat)
-		.addFunction ("set_beat", (void(MeterSection::*)(double))&MeterSection::set_beat)
-		.endClass ()
-
+#endif
 		.beginClass <ChanCount> ("ChanCount")
 		.addConstructor <void (*) (DataType, uint32_t)> ()
 		.addFunction ("get", &ChanCount::get)
@@ -2099,19 +2072,25 @@ LuaBindings::common (lua_State* L)
 		.addConst ("SyncPoint", ARDOUR::RegionPoint(SyncPoint))
 		.endNamespace ()
 
+#warning NUTEMPO add timeline types here instead
+#if 0
 		.beginNamespace ("TempoSection")
 		.beginNamespace ("PositionLockStyle")
 		.addConst ("AudioTime", ARDOUR::PositionLockStyle(AudioTime))
 		.addConst ("MusicTime", ARDOUR::PositionLockStyle(MusicTime))
 		.endNamespace ()
 		.endNamespace ()
+#endif
 
+#warning NUTEMPO fix types here
+#if 0
 		.beginNamespace ("TempoSection")
 		.beginNamespace ("Type")
 		.addConst ("Ramp", ARDOUR::TempoSection::Type(TempoSection::Ramp))
 		.addConst ("Constant", ARDOUR::TempoSection::Type(TempoSection::Constant))
 		.endNamespace ()
 		.endNamespace ()
+#endif
 
 		.beginNamespace ("TrackMode")
 		.addConst ("Normal", ARDOUR::TrackMode(Start))

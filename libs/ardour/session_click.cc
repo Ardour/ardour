@@ -38,6 +38,7 @@
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
+using namespace Temporal;
 
 Pool Click::pool ("click", sizeof (Click), 1024);
 
@@ -48,7 +49,7 @@ Pool Click::pool ("click", sizeof (Click), 1024);
  * (session.h does not include tempo.h so making this
  *  a Session member variable is tricky.)
  */
-static vector<TempoMap::BBTPoint> _click_points;
+static TempoMapPoints _click_points;
 
 void
 Session::add_click (samplepos_t pos, bool emphasis)
@@ -123,7 +124,7 @@ Session::click (samplepos_t cycle_start, samplecnt_t nframes)
 		const samplepos_t end = start + move;
 
 		_click_points.clear ();
-		_tempo_map->get_grid (_click_points, start, end);
+		_tempo_map->get_grid (_click_points, samples_to_superclock (start, sample_rate()), samples_to_superclock (end, sample_rate()));
 
 		if (distance (_click_points.begin(), _click_points.end()) == 0) {
 			start += move;
@@ -131,17 +132,14 @@ Session::click (samplepos_t cycle_start, samplecnt_t nframes)
 			continue;
 		}
 
-		for (vector<TempoMap::BBTPoint>::iterator i = _click_points.begin(); i != _click_points.end(); ++i) {
-			assert ((*i).sample >= start && (*i).sample < end);
-			switch ((*i).beat) {
-				case 1:
-					add_click ((*i).sample, true);
-					break;
-				default:
-					if (click_emphasis_data == 0 || (Config->get_use_click_emphasis () == false) || (click_emphasis_data && (*i).beat != 1)) { // XXX why is this check needed ??  (*i).beat !=1 must be true here
-						add_click ((*i).sample, false);
-					}
-					break;
+		for (TempoMapPoints::iterator i = _click_points.begin(); i != _click_points.end(); ++i) {
+
+			assert (superclock_to_samples ((*i).sclock(), sample_rate()) >= start && superclock_to_samples ((*i).sclock(), sample_rate()) < end);
+
+			if (i->bbt().is_bar() && (click_emphasis_data && Config->get_use_click_emphasis())) {
+				add_click ((*i).sclock(), true);
+			} else {
+				add_click ((*i).sclock(), false);
 			}
 		}
 
@@ -313,7 +311,6 @@ Session::setup_click_sounds (Sample** data, Sample const * default_data, samplec
 void
 Session::setup_click_sounds (int which)
 {
-	_click_points.reserve (8);
 	clear_clicks ();
 
 	if (which == 0 || which == 1) {

@@ -116,6 +116,10 @@ namespace Evoral {
 class Curve;
 }
 
+namespace Temporal {
+class TempoMap;
+}
+
 namespace ARDOUR {
 
 class Amp;
@@ -168,7 +172,6 @@ class SessionPlaylists;
 class SoloMuteRelease;
 class Source;
 class Speakers;
-class TempoMap;
 class TransportMaster;
 struct TransportFSM;
 class Track;
@@ -782,7 +785,7 @@ public:
 
 	void sync_time_vars();
 
-	void bbt_time (samplepos_t when, Temporal::BBT_Time&);
+	void bbt_time (Temporal::timepos_t const & when, Temporal::BBT_Time&);
 	void timecode_to_sample(Timecode::Time& timecode, samplepos_t& sample, bool use_offset, bool use_subframes) const;
 	void sample_to_timecode(samplepos_t sample, Timecode::Time& timecode, bool use_offset, bool use_subframes) const;
 	void timecode_time (Timecode::Time &);
@@ -825,8 +828,8 @@ public:
 	bool loop_is_possible () const;
 	PBD::Signal0<void> PunchLoopConstraintChange;
 
-	TempoMap&       tempo_map()       { return *_tempo_map; }
-	const TempoMap& tempo_map() const { return *_tempo_map; }
+	Temporal::TempoMap&       tempo_map()       { return *_tempo_map; }
+	const Temporal::TempoMap& tempo_map() const { return *_tempo_map; }
 	void maybe_update_tempo_from_midiclock_tempo (float bpm);
 
 	unsigned int    get_xrun_count () const {return _xrun_count; }
@@ -1864,8 +1867,8 @@ private:
 	int  send_full_time_code (samplepos_t, pframes_t nframes);
 	void send_song_position_pointer (samplepos_t);
 
-	TempoMap    *_tempo_map;
-	void          tempo_map_changed (const PBD::PropertyChange&);
+	Temporal::TempoMap    *_tempo_map;
+	void          tempo_map_changed ();
 
 	/* edit/mix groups */
 

@@ -3717,7 +3717,7 @@ BBTRulerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 #warning NUTEMPO fixme needs new tempo map
 #if 0
 	TempoMap& map (_editor->session()->tempo_map());
-	_tempo = const_cast<TempoSection*> (&map.tempo_section_at_sample (raw_grab_sample()));
+	_tempo = const_cast<TempoSection*> (&map.metric_at (raw_grab_sample().tempo()));
 
 	if (adjusted_current_time (event, false) <= _tempo->time()) {
 		_drag_valid = false;
@@ -3748,7 +3748,7 @@ BBTRulerDrag::setup_pointer_offset ()
 	/* get current state */
 	_before_state = &map.get_state();
 
-	const double beat_at_sample = max (0.0, map.beat_at_sample (raw_grab_sample()));
+	const double beat_at_sample = max (0.0, map.beat_at (raw_grab_sample()));
 	const uint32_t divisions = _editor->get_grid_beat_divisions (0);
 	double beat = 0.0;
 
@@ -3762,7 +3762,7 @@ BBTRulerDrag::setup_pointer_offset ()
 		beat = floor (beat_at_sample) + (floor (((beat_at_sample - floor (beat_at_sample)) * 4)) / 4);
 	}
 
-	_grab_qn = map.quarter_note_at_beat (beat);
+	_grab_qn = map.quarter_note_at (beat);
 
 	_pointer_offset = raw_grab_sample() - map.sample_at_quarter_note (_grab_qn);
 

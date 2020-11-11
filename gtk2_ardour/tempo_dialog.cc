@@ -40,6 +40,7 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ARDOUR;
 using namespace PBD;
+using namespace Temporal;
 
 TempoDialog::TempoDialog (TempoMap& map, samplepos_t sample, const string&)
 	: ArdourDialog (_("New Tempo"))
@@ -55,16 +56,17 @@ TempoDialog::TempoDialog (TempoMap& map, samplepos_t sample, const string&)
 	, pulse_selector_label (_("Pulse:"), ALIGN_LEFT, ALIGN_CENTER)
 	, tap_tempo_button (_("Tap tempo"))
 {
-	Tempo tempo (map.tempo_at_sample (sample));
-	Temporal::BBT_Time when (map.bbt_at_sample (sample));
+	TempoMetric metric (map.metric_at (sample));
+	Temporal::BBT_Time when (metric.bbt_at (sample));
+	Tempo& tempo (metric.tempo());
 
-	init (when, tempo.note_types_per_minute(), tempo.end_note_types_per_minute(), tempo.note_type(), TempoSection::Constant, true, MusicTime);
+	init (when, tempo.note_types_per_minute(), tempo.end_note_types_per_minute(), tempo.note_type(), Tempo::Constant, true, BeatTime);
 }
 
-TempoDialog::TempoDialog (TempoMap& map, TempoSection& section, const string&)
+TempoDialog::TempoDialog (TempoMap& map, TempoPoint& point, const string&)
 	: ArdourDialog (_("Edit Tempo"))
 	, _map (&map)
-	, _section (&section)
+	, _section (&point)
 	, bpm_adjustment (60.0, 1.0, 999.9, 0.1, 1.0)
 	, bpm_spinner (bpm_adjustment)
 	, end_bpm_adjustment (60.0, 1.0, 999.9, 0.1, 1.0)
@@ -75,13 +77,13 @@ TempoDialog::TempoDialog (TempoMap& map, TempoSection& section, const string&)
 	, pulse_selector_label (_("Pulse:"), ALIGN_LEFT, ALIGN_CENTER)
 	, tap_tempo_button (_("Tap tempo"))
 {
-	Temporal::BBT_Time when (map.bbt_at_sample (section.sample()));
-	init (when, section.note_types_per_minute(), section.end_note_types_per_minute(), section.note_type(), section.type()
-	      , section.initial() || section.locked_to_meter(), section.position_lock_style());
+	Temporal::BBT_Time when (map.bbt_at (point.time()));
+	init (when, _section->note_types_per_minute(), _section->end_note_types_per_minute(), _section->note_type(), _section->type(),
+	      (map.is_initial (point) ||(map.time_domain() == Temporal::BarTime)), map.time_domain());
 }
 
 void
-TempoDialog::init (const Temporal::BBT_Time& when, double bpm, double end_bpm, double note_type, TempoSection::Type type, bool initial, PositionLockStyle style)
+TempoDialog::init (const Temporal::BBT_Time& when, double bpm, double end_bpm, double note_type, Tempo::Type type, bool initial, TimeDomain style)
 {
 	vector<string> strings;
 	NoteTypes::iterator x;

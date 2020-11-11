@@ -127,6 +127,7 @@ static const size_t NBUFS = 4;
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
+using namespace Temporal;
 
 bool          LV2Plugin::force_state_save      = false;
 int32_t       LV2Plugin::_ui_style_flat        = 0;
@@ -2573,7 +2574,7 @@ static bool
 write_position(LV2_Atom_Forge*     forge,
                LV2_Evbuf*          buf,
                const TempoMetric&  t,
-               Temporal::BBT_Time& bbt,
+               BBT_Time& bbt,
                double              speed,
                double              time_scale,
                double              bpm,
@@ -2596,7 +2597,7 @@ write_position(LV2_Atom_Forge*     forge,
 	lv2_atom_forge_key(forge, urids.time_bar);
 	lv2_atom_forge_long(forge, bbt.bars - 1);
 	lv2_atom_forge_key(forge, urids.time_beatUnit);
-	lv2_atom_forge_int(forge, t.meter().note_divisor());
+	lv2_atom_forge_int(forge, t.meter().note_value());
 	lv2_atom_forge_key(forge, urids.time_beatsPerBar);
 	lv2_atom_forge_float(forge, t.meter().divisions_per_bar());
 	lv2_atom_forge_key(forge, urids.time_beatsPerMinute);
@@ -2653,7 +2654,15 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 	}
 
 	if (_bpm_control_port) {
+
 		float bpm = tmap.tempo_at_sample (start0).note_types_per_minute();
+		TempoMapPoints tempo_map_points;
+		tmap.get_grid (tempo_map_points, start, end, 0);
+		TempoMapPoint first_tempo_map_point = tempo_map_points.front();
+
+		/* note that this is not necessarily quarter notes */
+		const double bpm = first_tempo_map_point.tempo().note_types_per_minute();
+
 		if (*_bpm_control_port != bpm) {
 			AutomationCtrlPtr c = get_automation_control (_bpm_control_port_index);
 			if (c && c->ac) {
@@ -2661,6 +2670,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 				c->ac->Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
 			}
 		}
+
 		*_bpm_control_port = bpm;
 	}
 
@@ -2735,14 +2745,14 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 
 			if (valid && (flags & PORT_INPUT)) {
 				if ((flags & PORT_POSITION)) {
-
-					Temporal::BBT_Time bbt (tmap.bbt_at_sample (start0));
+					const Temporal::TempoMetric& metric (tmap.metric_at (start0));
+					Temporal::BBT_Time bbt (metric.bbt_at (start0));
 					double time_scale = Port::speed_ratio ();
-					double bpm = tmap.tempo_at_sample (start0).note_types_per_minute();
-					double beatpos = (bbt.bars - 1) * tmetric.meter().divisions_per_bar()
+					double bpm = metric.tempo().note_types_per_minute();
+					double beatpos = (bbt.bars - 1) * metric.meter().divisions_per_bar()
 						+ (bbt.beats - 1)
 						+ (bbt.ticks / Temporal::ticks_per_beat);
-					beatpos *= tmetric.meter().note_divisor() / 4.0;
+					beatpos *= metric.note_value() / 4.0;
 					if (start != _next_cycle_start ||
 							speed != _next_cycle_speed ||
 							time_scale != _prev_time_scale ||
@@ -2750,7 +2760,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 							bpm != _current_bpm) {
 						// Transport or Tempo has changed, write position at cycle start
 						write_position(&_impl->forge, _ev_buffers[port_index],
-								tmetric, bbt, speed, time_scale, bpm, start, 0);
+						               metric, bbt, speed, time_scale,  bpm, start, 0);
 					}
 				}
 
@@ -2766,10 +2776,11 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 				const uint32_t     type = _uri_map.urids.midi_MidiEvent;
 				const samplepos_t  tend = end;
 				++metric_i;
-				while (m != m_end || (metric_i != tmap.metrics_end() &&
-				                      (*metric_i)->sample() < tend)) {
-					MetricSection* metric = (metric_i != tmap.metrics_end())
-						? *metric_i : NULL;
+
+				while (m != m_end || (metric_i != tmap.metrics_end() && (*metric_i)->sample() < tend)) {
+
+					MetricSection* metric = (metric_i != tmap.metrics_end()) ? *metric_i : NULL;
+
 					if (m != m_end && (!metric || metric->sample() > (*m).time())) {
 						const Evoral::Event<samplepos_t> ev(*m, false);
 						if (ev.time() < nframes) {
@@ -2779,12 +2790,11 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 						++m;
 					} else {
 						assert (metric);
-						tmetric.set_metric(metric);
-						Temporal::BBT_Time bbt;
-						bbt = tmap.bbt_at_sample (metric->sample());
-						double bpm = tmap.tempo_at_sample (start0 /*XXX metric->sample() */).note_types_per_minute();
+						bbt = metric.bbt();
+						double bpm = metric.tempo().note_types_per_minute();
+
 						write_position(&_impl->forge, _ev_buffers[port_index],
-						               tmetric, bbt, speed, Port::speed_ratio (),
+						               metric, bbt, speed, Port::speed_ratio (),
 						               bpm, metric->sample(),
 						               metric->sample() - start0);
 						++metric_i;

@@ -38,6 +38,7 @@
 
 using namespace ARDOUR;
 using namespace PBD;
+using namespace Temporal;
 
 MidiClockTicker::MidiClockTicker (Session* s)
 {
@@ -166,7 +167,8 @@ MidiClockTicker::tick (samplepos_t start_sample, samplepos_t end_sample, pframes
 			uint32_t    beat_pos;
 			samplepos_t clk_pos;
 
-			_session->tempo_map ().midi_clock_beat_at_of_after (start_sample + _mclk_out_latency.max, clk_pos, beat_pos);
+#warning NUTEMPO need to reimplement this in TempoMap
+			// _session->tempo_map ().midi_clock_beat_at_of_after (start_sample + _mclk_out_latency.max, clk_pos, beat_pos);
 
 			_beat_pos      = beat_pos;
 			_next_tick     = clk_pos - _mclk_out_latency.max;
@@ -213,8 +215,8 @@ out:
 double
 MidiClockTicker::one_ppqn_in_samples (samplepos_t transport_position) const
 {
-	const double samples_per_quarter_note = _session->tempo_map ().samples_per_quarter_note_at (transport_position, _session->nominal_sample_rate ());
-
+	Tempo const & tempo (_session->tempo_map().metric_at (transport_position).tempo());
+	const double samples_per_quarter_note = tempo.samples_per_quarter_note (_session->nominal_sample_rate());
 	return samples_per_quarter_note / 24.0;
 }
 

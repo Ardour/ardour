@@ -77,7 +77,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Editing;
-
+using namespace Temporal;
 
 #define TIME_TO_SAMPLES(x) (_distance_measure (x, Temporal::AudioTime))
 #define SAMPLES_TO_TIME(x) (_distance_measure (x, alist->time_domain()))
@@ -496,9 +496,8 @@ AutomationLine::ContiguousControlPoints::compute_x_bounds (PublicEditor& e)
 			before_x = line.nth (front()->view_index() - 1)->get_x();
 
 			const samplepos_t pos = e.pixel_to_sample(before_x);
-			const Meter& meter = map.meter_at_sample (pos);
-			const samplecnt_t len = ceil (meter.samples_per_bar (map.tempo_at_sample (pos), e.session()->sample_rate())
-			                              / (Temporal::ticks_per_beat * meter.divisions_per_bar()) );
+			const TempoMetric& metric = map.metric_at (pos);
+			const samplecnt_t len = ceil (metric.samples_per_bar (pos) / (Temporal::ticks_per_beat * metric.meter().divisions_per_bar()));
 			const double one_tick_in_pixels = e.sample_to_pixel_unrounded (len);
 
 			before_x += one_tick_in_pixels;
@@ -512,9 +511,8 @@ AutomationLine::ContiguousControlPoints::compute_x_bounds (PublicEditor& e)
 			after_x = line.nth (back()->view_index() + 1)->get_x();
 
 			const samplepos_t pos = e.pixel_to_sample(after_x);
-			const Meter& meter = map.meter_at_sample (pos);
-			const samplecnt_t len = ceil (meter.samples_per_bar (map.tempo_at_sample (pos), e.session()->sample_rate())
-			                              / (Temporal::ticks_per_beat * meter.divisions_per_bar()));
+			const TempoMetric& metric = map.metric_at (pos);
+			const samplecnt_t len = ceil (metric.samples_per_bar (pos) / (Temporal::ticks_per_beat * metric.meter().divisions_per_bar()));
 			const double one_tick_in_pixels = e.sample_to_pixel_unrounded (len);
 
 			after_x -= one_tick_in_pixels;

@@ -1805,9 +1805,9 @@ private:
 	Curves tempo_curves;
 
 	void remove_metric_marks ();
-	void draw_metric_marks (const ARDOUR::Metrics& metrics);
+	void draw_metric_marks (const Temporal::TempoMap::Metrics& metrics);
 
-	void compute_current_bbt_points (std::vector<ARDOUR::TempoMap::BBTPoint>& grid, samplepos_t left, samplepos_t right);
+	void compute_current_bbt_points (std::vector<Temporal::Point>& grid, samplepos_t left, samplepos_t right);
 
 	void tempo_map_changed (const PBD::PropertyChange&);
 	void tempometric_position_changed (const PBD::PropertyChange&);

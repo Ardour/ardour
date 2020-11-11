@@ -472,6 +472,10 @@ class LIBTEMPORAL_API TempoMetric {
 	BBT_Time bbt_at (superclock_t sc) const;
 	superclock_t superclock_at (BBT_Time const &) const;
 
+	samplepos_t samples_per_bar (samplecnt_t sr) const {
+		return superclock_to_samples (superclocks_per_bar (sr), sr);
+	}
+
   protected:
 	TempoPoint* _tempo;
 	MeterPoint* _meter;
@@ -723,7 +727,7 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 	TimeDomain time_domain() const { return _time_domain; }
 	void set_time_domain (TimeDomain td);
 
-	void get_grid (TempoMapPoints& points, superclock_t start, superclock_t end, uint32_t bar_mod);
+	void get_grid (TempoMapPoints& points, superclock_t start, superclock_t end, uint32_t bar_mod = 0);
 
 	typedef std::list<Point*> Metrics;
 

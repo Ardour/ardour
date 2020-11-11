@@ -42,6 +42,7 @@
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
+using namespace Temporal;
 
 #define SHOW_CALLBACK(MSG) DEBUG_TRACE (PBD::DEBUG::VSTCallbacks, string_compose (MSG " val = %1 idx = %2\n", index, value))
 
@@ -187,27 +188,27 @@ intptr_t Session::vst_callback (
 			timeinfo->sampleRate = session->sample_rate();
 
 			if (value & (kVstTempoValid)) {
-				const Tempo& t (session->tempo_map().tempo_at_sample (now));
+				const Tempo& t (session->tempo_map().metric_at (now).tempo());
 				timeinfo->tempo = t.quarter_notes_per_minute ();
 				newflags |= (kVstTempoValid);
 			}
 			if (value & (kVstTimeSigValid)) {
-				const MeterSection& ms (session->tempo_map().meter_section_at_sample (now));
+				const Meter& ms (session->tempo_map().metric_at (now).meter());
 				timeinfo->timeSigNumerator = ms.divisions_per_bar ();
-				timeinfo->timeSigDenominator = ms.note_divisor ();
+				timeinfo->timeSigDenominator = ms.note_value ();
 				newflags |= (kVstTimeSigValid);
 			}
 			if ((value & (kVstPpqPosValid)) || (value & (kVstBarsValid))) {
 				Temporal::BBT_Time bbt;
 
 				try {
-					bbt = session->tempo_map().bbt_at_sample_rt (now);
+					bbt = session->tempo_map().bbt_at (now);
 					bbt.beats = 1;
 					bbt.ticks = 0;
 					/* exact quarter note */
-					double ppqBar = session->tempo_map().quarter_note_at_bbt_rt (bbt);
+					double ppqBar = session->tempo_map().quarter_note_at (bbt);
 					/* quarter note at sample position (not rounded to note subdivision) */
-					double ppqPos = session->tempo_map().quarter_note_at_sample_rt (now);
+					double ppqPos = session->tempo_map().quarter_note_at (now);
 					if (value & (kVstPpqPosValid)) {
 						timeinfo->ppqPos = ppqPos;
 						newflags |= kVstPpqPosValid;
@@ -313,7 +314,7 @@ intptr_t Session::vst_callback (
 		SHOW_CALLBACK ("audioMasterTempoAt");
 		// returns tempo (in bpm * 10000) at sample sample location passed in <value>
 		if (session) {
-			const Tempo& t (session->tempo_map().tempo_at_sample (value));
+			const Tempo& t (session->tempo_map().metric_at (value).tempo());
 			return t.quarter_notes_per_minute() * 1000;
 		} else {
 			return 0;

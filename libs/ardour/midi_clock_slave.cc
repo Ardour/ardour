@@ -157,7 +157,8 @@ MIDIClock_TransportMaster::pre_process (MIDI::pframes_t nframes, samplepos_t now
 void
 MIDIClock_TransportMaster::calculate_one_ppqn_in_samples_at(samplepos_t time)
 {
-	const double samples_per_quarter_note = _session->tempo_map().samples_per_quarter_note_at (time, ENGINE->sample_rate());
+	const Temporal::TempoMetric& metric = _session->tempo_map().metric_at (time);
+	const double samples_per_quarter_note = metric.tempo().samples_per_quarter_note (ENGINE->sample_rate());
 
 	one_ppqn_in_samples = samples_per_quarter_note / double (ppqn);
 	// DEBUG_TRACE (DEBUG::MidiClock, string_compose ("at %1, one ppqn = %2 [spl] spqn = %3, ppqn = %4\n", time, one_ppqn_in_samples, samples_per_quarter_note, ppqn));

@@ -875,7 +875,7 @@ private:
 
 	bool _copy;
 	bool _movable;
-	ARDOUR::Tempo _grab_bpm;
+	Temporal::Tempo _grab_bpm;
 	double _grab_qn;
 	XMLNode* _before_state;
 };
@@ -931,9 +931,9 @@ public:
 
 private:
 	double _grab_qn;
-	ARDOUR::Tempo  _grab_tempo;
-	ARDOUR::TempoSection* _tempo;
-	ARDOUR::TempoSection* _next_tempo;
+	Temporal::Tempo  _grab_tempo;
+	Temporal::TempoPoint* _tempo;
+	Temporal::TempoPoint* _next_tempo;
 	bool _drag_valid;
 	XMLNode* _before_state;
 };
@@ -962,7 +962,7 @@ public:
 
 private:
 	double _grab_qn;
-	ARDOUR::TempoSection* _tempo;
+	Temporal::TempoPoint* _tempo;
 	XMLNode* _before_state;
 	bool _drag_valid;
 };

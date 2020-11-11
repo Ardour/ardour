@@ -40,7 +40,6 @@
 namespace ARDOUR {
 class Variant; /* Can stay since LV2 has no way to exchange beats as anything except double */
 /* these all need fixing to not use ::to_double() */
-class TempoMap;
 class Track;
 class MidiStretch;
 class MidiModel;
@@ -440,7 +439,6 @@ private:
 
 	/* almost nobody should ever be allowed to use this method */
 	friend class TempoPoint;
-	friend class ARDOUR::TempoMap;
 	friend class ARDOUR::Track;
 	friend class ARDOUR::Variant;
 	friend class ARDOUR::MidiStretch;

@@ -26,6 +26,8 @@
 #include "pbd/pthread_utils.h"
 #include "pbd/memento_command.h"
 
+#include "temporal/tempo.h"
+
 #include "ardour/session.h"
 #include "ardour/location.h"
 #include "ardour/tempo.h"
@@ -37,6 +39,7 @@
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
+using namespace Temporal;
 
 PBD::Signal2<void,std::string,std::string> BasicUI::AccessAction;
 
@@ -543,10 +546,10 @@ BasicUI::jump_by_seconds (double secs, LocateTransportDisposition ltd)
 }
 
 void
-BasicUI::jump_by_bars (double bars, LocateTransportDisposition ltd)
+BasicUI::jump_by_bars (int bars, LocateTransportDisposition ltd)
 {
 	TempoMap& tmap (session->tempo_map());
-	Temporal::BBT_Time bbt (tmap.bbt_at_sample (session->transport_sample()));
+	Temporal::BBT_Time bbt (tmap.bbt_at (session->transport_sample()));
 
 	bars += bbt.bars;
 	if (bars < 0) {
@@ -561,14 +564,14 @@ BasicUI::jump_by_bars (double bars, LocateTransportDisposition ltd)
 }
 
 void
-BasicUI::jump_by_beats (double beats, LocateTransportDisposition ltd)
+BasicUI::jump_by_beats (int beats, LocateTransportDisposition ltd)
 {
-	TempoMap& tmap (session->tempo_map ());
-	double qn_goal = tmap.quarter_note_at_sample (session->transport_sample ()) + beats;
-	if (qn_goal < 0.0) {
-		qn_goal = 0.0;
+	Beats qn_goal = timepos_t (session->transport_sample ()).beats() + Beats (beats, 0);
+
+	if (qn_goal < Beats()) {
+		qn_goal = Beats();
 	}
-	session->request_locate (tmap.sample_at_quarter_note (qn_goal), ltd);
+	session->request_locate (timepos_t (qn_goal).samples());
 }
 
 void

@@ -45,6 +45,7 @@ class Command;
 
 using namespace PBD;
 using namespace ARDOUR;
+using namespace Temporal;
 
 #include "pbd/i18n.h"
 

@@ -244,7 +244,7 @@ OSCGlobalObserver::tick ()
 		if (feedback[5]) { // Bar beat enabled
 			Temporal::BBT_Time bbt_time;
 
-			session->bbt_time (now_sample, bbt_time);
+			session->bbt_time (timepos_t (now_sample), bbt_time);
 
 			// semantics:  BBB/bb/tttt
 			ostringstream os;

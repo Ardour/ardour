@@ -144,6 +144,7 @@ class Speakers;
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
+using namespace Temporal;
 
 bool Session::_disable_all_loaded_plugins = false;
 bool Session::_bypass_all_loaded_plugins = false;
@@ -2194,9 +2195,8 @@ Session::preroll_samples (samplepos_t pos) const
 {
 	const float pr = Config->get_preroll_seconds();
 	if (pos >= 0 && pr < 0) {
-		const Tempo& tempo = _tempo_map->tempo_at_sample (pos);
-		const Meter& meter = _tempo_map->meter_at_sample (pos);
-		return meter.samples_per_bar (tempo, sample_rate()) * -pr;
+		Temporal::TempoMetric const & metric (_tempo_map->metric_at (pos));
+		return metric.samples_per_bar (sample_rate()) * -pr;
 	}
 	if (pr < 0) {
 		return 0;
@@ -5545,7 +5545,7 @@ Session::available_capture_duration ()
 }
 
 void
-Session::tempo_map_changed (const PropertyChange&)
+Session::tempo_map_changed ()
 {
 	clear_clicks ();
 
@@ -7428,10 +7428,9 @@ void
 Session::maybe_update_tempo_from_midiclock_tempo (float bpm)
 {
 	if (_tempo_map->n_tempos() == 1) {
-		TempoSection& ts (_tempo_map->tempo_section_at_sample (0));
-		if (fabs (ts.note_types_per_minute() - bpm) > (0.01 * ts.note_types_per_minute())) {
-			const Tempo tempo (bpm, 4.0, bpm);
-			_tempo_map->replace_tempo (ts, tempo, 0.0, 0.0, AudioTime);
+		Temporal::TempoMetric const & metric (_tempo_map->metric_at (0));
+		if (fabs (metric.tempo().note_types_per_minute() - bpm) > (0.01 * metric.tempo().note_types_per_minute())) {
+			_tempo_map->change_tempo (metric.tempo(), Tempo (bpm, 4.0, bpm));
 		}
 	}
 }

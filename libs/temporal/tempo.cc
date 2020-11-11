@@ -1683,7 +1683,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 	assert (!_tempos.empty());
 	assert (!_meters.empty());
 
-	DEBUG_TRACE (DEBUG::TemporalMap, string_compose (">>> GRID START %1 .. %2 (barmod = %3)\n", start, end, bar_mod));
+	DEBUG_TRACE (DEBUG::TemporalMap, string_compose (">>> GRID START %1 .. %2 (barmod = %3)\n", start, end, bar_mod))
 
 	Tempos::iterator t (_tempos.begin());
 	Meters::iterator m (_meters.begin());

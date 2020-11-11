@@ -115,8 +115,6 @@ setup_enum_writer ()
 	Source::Flag _Source_Flag;
 	DiskIOProcessor::Flag _DiskIOProcessor_Flag;
 	Location::Flags _Location_Flags;
-	PositionLockStyle _PositionLockStyle;
-	TempoSection::Type _TempoSection_Type;
 	Track::FreezeState _Track_FreezeState;
 	AutomationList::InterpolationStyle _AutomationList_InterpolationStyle;
 	AnyTime::Type _AnyTime_Type;
@@ -568,10 +566,6 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Location, IsClockOrigin);
 	REGISTER_BITS (_Location_Flags);
 
-	REGISTER_CLASS_ENUM (TempoSection, Ramp);
-	REGISTER_CLASS_ENUM (TempoSection, Constant);
-	REGISTER (_TempoSection_Type);
-
 	REGISTER_CLASS_ENUM (Track, NoFreeze);
 	REGISTER_CLASS_ENUM (Track, Frozen);
 	REGISTER_CLASS_ENUM (Track, UnFrozen);
@@ -735,10 +729,6 @@ setup_enum_writer ()
 	REGISTER_ENUM(InhibitWhileRecording);
 	REGISTER_ENUM(InhibitAlways);
 	REGISTER(_ScreenSaverMode);
-
-	REGISTER_ENUM(AudioTime);
-	REGISTER_ENUM(MusicTime);
-	REGISTER(_PositionLockStyle);
 
 	REGISTER_ENUM (Small);
 	REGISTER_ENUM (Medium);

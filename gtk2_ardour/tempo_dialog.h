@@ -43,18 +43,18 @@
 class TempoDialog : public ArdourDialog
 {
 public:
-	TempoDialog (ARDOUR::TempoMap&, samplepos_t, const std::string & action);
-	TempoDialog (ARDOUR::TempoMap&, ARDOUR::TempoSection&, const std::string & action);
+	TempoDialog (Temporal::TempoMap&, samplepos_t, const std::string & action);
+	TempoDialog (Temporal::TempoMap&, Temporal::TempoPoint&, const std::string & action);
 
 	double get_bpm ();
 	double get_end_bpm ();
 	double get_note_type ();
 	bool   get_bbt_time (Temporal::BBT_Time&);
-	ARDOUR::TempoSection::Type get_tempo_type ();
-	ARDOUR::PositionLockStyle get_lock_style ();
+	Temporal::Tempo::Type get_tempo_type ();
+	Temporal::TimeDomain get_lock_style ();
 
 private:
-	void init (const Temporal::BBT_Time& start, double bpm, double end_bpm, double note_type, ARDOUR::TempoSection::Type type, bool movable, ARDOUR::PositionLockStyle style);
+	void init (const Temporal::BBT_Time& start, double bpm, double end_bpm, double note_type, Temporal::TempoPoint::Type type, bool movable, Temporal::TimeDomain style);
 	bool is_user_input_valid() const;
 	void bpm_changed ();
 	bool bpm_button_press (GdkEventButton* );
@@ -72,10 +72,10 @@ private:
 	typedef std::map<std::string,float> NoteTypes;
 	NoteTypes note_types;
 
-	typedef std::map<std::string, ARDOUR::TempoSection::Type> TempoTypes;
+	typedef std::map<std::string, Temporal::Tempo::Type> TempoTypes;
 	TempoTypes tempo_types;
 
-	typedef std::map<std::string, ARDOUR::PositionLockStyle> LockStyles;
+	typedef std::map<std::string, Temporal::TimeDomain> LockStyles;
 	LockStyles lock_styles;
 
 	bool tapped;      // whether the tap-tempo button has been clicked
@@ -84,8 +84,8 @@ private:
 	double last_t;
 	gint64 first_t;
 
-	ARDOUR::TempoMap* _map;
-	ARDOUR::TempoSection* _section;
+	Temporal::TempoMap* _map;
+	Temporal::TempoPoint* _section;
 
 	Gtk::ComboBoxText pulse_selector;
 	Gtk::Adjustment   bpm_adjustment;
@@ -107,16 +107,16 @@ class MeterDialog : public ArdourDialog
 {
 public:
 
-	MeterDialog (ARDOUR::TempoMap&, samplepos_t, const std::string & action);
-	MeterDialog (ARDOUR::TempoMap&, ARDOUR::MeterSection&, const std::string & action);
+	MeterDialog (Temporal::TempoMap&, samplepos_t, const std::string & action);
+	MeterDialog (Temporal::TempoMap&, Temporal::MeterPoint&, const std::string & action);
 
 	double get_bpb ();
 	double get_note_type ();
-	ARDOUR::PositionLockStyle get_lock_style ();
+	Temporal::TimeDomain get_lock_style ();
 	bool   get_bbt_time (Temporal::BBT_Time&);
 
 private:
-	void init (const Temporal::BBT_Time&, double, double, bool, ARDOUR::PositionLockStyle style);
+	void init (const Temporal::BBT_Time&, double, double, bool, Temporal::TimeDomain style);
 	bool is_user_input_valid() const;
 	bool entry_key_press (GdkEventKey* );
 	bool entry_key_release (GdkEventKey* );
@@ -126,7 +126,7 @@ private:
 	typedef std::map<std::string,float> NoteTypes;
 	NoteTypes note_types;
 
-	typedef std::map<std::string, ARDOUR::PositionLockStyle> LockStyles;
+	typedef std::map<std::string, Temporal::TimeDomain> LockStyles;
 	LockStyles lock_styles;
 
 	Gtk::Entry   bpb_entry;

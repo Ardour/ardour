@@ -263,9 +263,8 @@ Session::post_engine_init ()
 		/* tempo map requires sample rate knowledge */
 
 		delete _tempo_map;
-		_tempo_map = new TempoMap (_current_sample_rate);
-		_tempo_map->PropertyChanged.connect_same_thread (*this, boost::bind (&Session::tempo_map_changed, this, _1));
-		_tempo_map->MetricPositionChanged.connect_same_thread (*this, boost::bind (&Session::tempo_map_changed, this, _1));
+		_tempo_map = new Temporal::TempoMap (Temporal::Tempo (120), Temporal::Meter (4, 4), _current_sample_rate);
+		_tempo_map->Changed.connect_same_thread (*this, boost::bind (&Session::tempo_map_changed, this));
 	} catch (std::exception const & e) {
 		error << _("Unexpected exception during session setup: ") << e.what() << endmsg;
 		return -2;

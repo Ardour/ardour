@@ -44,7 +44,6 @@
 
 namespace ARDOUR {
 
-class TempoMap;
 class Session;
 class AudioEngine;
 class Location;

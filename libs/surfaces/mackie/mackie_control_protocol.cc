@@ -1155,7 +1155,7 @@ MackieControlProtocol::format_bbt_timecode (samplepos_t now_sample)
 {
 	Temporal::BBT_Time bbt_time;
 
-	session->bbt_time (now_sample, bbt_time);
+	session->bbt_time (timepos_t (now_sample), bbt_time);
 
 	// The Mackie protocol spec is built around a BBT time display of
 	//

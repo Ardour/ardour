@@ -22,12 +22,13 @@
 
 using namespace ARDOUR;
 using namespace ArdourSurface;
+using namespace Temporal;
 
 double
 ArdourTransport::tempo () const
 {
-	Tempo tempo = session ().tempo_map ().tempo_at_sample (0);
-	return tempo.note_type () * tempo.pulses_per_minute ();
+	const Tempo& tempo (session ().tempo_map ().metric_at (0).tempo());
+	return tempo.note_types_per_minute ();
 }
 
 void
@@ -35,8 +36,9 @@ ArdourTransport::set_tempo (double bpm)
 {
 	bpm                 = std::max (0.01, bpm);
 	TempoMap& tempo_map = session ().tempo_map ();
-	Tempo     tempo (bpm, tempo_map.tempo_at_sample (0).note_type (), bpm);
-	tempo_map.add_tempo (tempo, 0.0, 0, AudioTime);
+	Tempo     tempo (bpm, tempo_map.metric_at (0).tempo().note_type ());
+#warning NUTEMPO need some API to do this
+	// tempo_map.add_tempo (tempo, 0.0, 0, AudioTime);
 }
 
 double

@@ -76,8 +76,8 @@ class LIBCONTROLCP_API BasicUI {
 	double transport_rolling () const;
 
 	void jump_by_seconds (double sec, ARDOUR::LocateTransportDisposition ltd = ARDOUR::RollIfAppropriate);
-	void jump_by_bars (double bars, ARDOUR::LocateTransportDisposition ltd = ARDOUR::RollIfAppropriate);
-	void jump_by_beats (double beats, ARDOUR::LocateTransportDisposition ltd = ARDOUR::RollIfAppropriate);
+	void jump_by_bars (int bars, ARDOUR::LocateTransportDisposition ltd = ARDOUR::RollIfAppropriate);
+	void jump_by_beats (int beats, ARDOUR::LocateTransportDisposition ltd = ARDOUR::RollIfAppropriate);
 
 	ARDOUR::samplepos_t transport_sample ();
 	void locate (ARDOUR::samplepos_t sample, ARDOUR::LocateTransportDisposition ltd);

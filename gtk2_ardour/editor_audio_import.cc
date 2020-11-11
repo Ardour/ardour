@@ -74,6 +74,8 @@ using namespace PBD;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace Editing;
+using namespace Temporal;
+
 using std::string;
 
 /* Functions supporting the incorporation of external (non-captured) audio material into ardour */
@@ -280,7 +282,9 @@ Editor::import_smf_tempo_map (Evoral::SMF const & smf, timepos_t const & pos)
 	}
 
 	const samplecnt_t sample_rate = _session->sample_rate ();
-	TempoMap new_map (sample_rate);
+#warning NUTEMPO need to be able to create a tempo map with no entries
+	// TempoMap new_map (sample_rate);
+	TempoMap new_map (Tempo (120), Meter (4, 4), sample_rate);
 	Meter last_meter (4.0, 4.0);
 	bool have_initial_meter = false;
 
@@ -294,10 +298,12 @@ Editor::import_smf_tempo_map (Evoral::SMF const & smf, timepos_t const & pos)
 		Temporal::BBT_Time bbt; /* 1|1|0 which is correct for the no-meter case */
 
 		if (have_initial_meter) {
-			new_map.add_tempo (tempo, t->time_pulses/ (double)smf.ppqn() / 4.0, 0, MusicTime);
+#warning NUTEMPO check API for this
+			// new_map.add_tempo (tempo, t->time_pulses/ (double)smf.ppqn() / 4.0, 0, BeatTime);
 			if (!(meter == last_meter)) {
-				bbt = new_map.bbt_at_quarter_note (t->time_pulses/(double)smf.ppqn());
-				new_map.add_meter (meter, bbt, 0, MusicTime);
+				bbt = new_map.bbt_at (Beats::from_double (t->time_pulses/(double)smf.ppqn()));
+#warning NUTEMPO check API for this
+				//new_map.add_meter (meter, bbt, 0, MusicTime);
 			}
 
 		} else {
@@ -311,7 +317,8 @@ Editor::import_smf_tempo_map (Evoral::SMF const & smf, timepos_t const & pos)
 		last_meter = meter;
 	}
 
-	_session->tempo_map() = new_map;
+#warning NUTEMPO need an assignment API for TempoMap
+	//_session->tempo_map() = new_map;
 }
 
 void

@@ -69,7 +69,7 @@
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
-
+using namespace Temporal;
 
 #ifdef NDEBUG
 # define ENSURE_PROCESS_THREAD do {} while (0)
@@ -527,15 +527,14 @@ Session::start_transport (bool after_loop)
 			 * - use [fixed] tempo/meter at _transport_sample
 			 * - calc duration of 1 bar + time-to-beat before or at transport_sample
 			 */
-			const Tempo& tempo = _tempo_map->tempo_at_sample (_transport_sample);
-			const Meter& meter = _tempo_map->meter_at_sample (_transport_sample);
+			TempoMetric const & tempometric = _tempo_map->metric_at (_transport_sample);
 
-			const double num = meter.divisions_per_bar ();
-			const double den = meter.note_divisor ();
-			const double barbeat = _tempo_map->exact_qn_at_sample (_transport_sample, 0) * den / (4. * num);
-			const double bar_fract = fmod (barbeat, 1.0); // fraction of bar elapsed.
+			const double num = tempometric.divisions_per_bar ();
+			/* XXX possible optimization: get meter and BBT time in one call */
+			const Temporal::BBT_Time bbt = _tempo_map->bbt_at (_transport_sample);
+			const double bar_fract = (double) bbt.beats / tempometric.divisions_per_bar();
 
-			_count_in_samples = meter.samples_per_bar (tempo, _current_sample_rate);
+			_count_in_samples = tempometric.samples_per_bar (_current_sample_rate);
 
 			double dt = _count_in_samples / num;
 			if (bar_fract == 0) {
