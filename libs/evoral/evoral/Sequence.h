@@ -278,6 +278,7 @@ public:
 		bool                               force_discrete = false,
 		const std::set<Evoral::Parameter>& f              = std::set<Evoral::Parameter>(),
 		const std::set<WeakNotePtr>*       active_notes   = NULL) const {
+		assert (t >= Time());
 		return const_iterator (*this, t, force_discrete, f, active_notes);
 	}
 

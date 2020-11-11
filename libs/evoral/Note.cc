@@ -34,6 +34,7 @@ Note<Time>::Note(uint8_t chan, Time t, Time l, uint8_t n, uint8_t v)
 	: _on_event (MIDI_EVENT, t, 3, NULL, true)
 	, _off_event (MIDI_EVENT, t + l, 3, NULL, true)
 {
+	assert(l >= Time());
 	assert(chan < 16);
 
 	_on_event.buffer()[0] = MIDI_CMD_NOTE_ON + chan;
