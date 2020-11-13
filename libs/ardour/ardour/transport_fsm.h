@@ -198,7 +198,7 @@ struct TransportFSM
 	void process_events ();
 	bool process_event (Event&, bool was_deferred, bool& deferred);
 
-	Event _last_locate;
+	mutable Event _last_locate;
 	Event last_speed_request;
 
 	TransportAPI* api;

@@ -557,6 +557,7 @@ TransportFSM::interrupt_locate (Event const & l) const
 	/* maintain original "with-roll" choice of initial locate, even though
 	 * we are interrupting the locate to start a new one.
 	 */
+	_last_locate = l;
 	api->locate (l.target, false, l.with_flush, l.for_loop_end, l.force);
 }
 
