@@ -224,18 +224,6 @@ Session::locate (samplepos_t target_sample, bool with_roll, bool with_flush, boo
 	*/
 	bool transport_was_stopped = !_transport_fsm->rolling();
 
-	/* Prevent rolling in the case of calling Session::goto_start while
-	 * SessionConfiguration::get_auto_play == false.
-	 *
-	 * Because _transport_fsm->motion_state == WaitingForLocate after
-	 * calling goto_start, we have to check for _transport_fsm->locating()
-	 * and with_roll here.
-	 */
-
-	if (!with_roll && _transport_fsm->locating()) {
-		transport_was_stopped = false;
-	}
-
 	if (!transport_was_stopped &&
 	    (!auto_play_legal || !config.get_auto_play()) &&
 	    !with_roll &&
