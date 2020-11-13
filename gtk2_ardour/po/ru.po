@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: Ardour 5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-11-08 21:02+0300\n"
-"PO-Revision-Date: 2020-11-12 00:49+0300\n"
+"PO-Revision-Date: 2020-11-13 23:52+0300\n"
 "Last-Translator: Alexandre Prokoudine <alexandre.prokoudine@gmail.com>\n"
 "Language-Team: русский <gnome-cyr@lists.gnome.org>\n"
 "Language: ru\n"
@@ -2347,7 +2347,7 @@ msgstr "Сэмплы"
 
 #: ardour_ui_ed.cc:452
 msgid "All Input"
-msgstr ""
+msgstr "Все входы"
 
 #: ardour_ui_ed.cc:459
 msgid "Punch In"
@@ -2486,7 +2486,7 @@ msgstr "Конец сессии по указателю воспроизведе
 
 #: ardour_ui_ed.cc:609
 msgid "Toggle Mark at Playhead"
-msgstr ""
+msgstr "Переключить маркер по указателю воспроизведения"
 
 #: ardour_ui_ed.cc:611 ardour_ui_ed.cc:613
 msgid "Add Mark from Playhead"
@@ -7891,7 +7891,7 @@ msgstr "Без названия"
 
 #: export_filename_selector.cc:53 session_dialog.cc:351
 msgid "Session Name"
-msgstr "Название сессии"
+msgstr "Название снимка"
 
 #: export_filename_selector.cc:54
 msgid "Snapshot Name"
