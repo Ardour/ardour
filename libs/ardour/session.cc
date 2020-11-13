@@ -188,6 +188,7 @@ Session::Session (AudioEngine &eng,
 	, _record_status (Disabled)
 	, _transport_sample (0)
 	, _seek_counter (0)
+	, _butler_seek_counter (0)
 	, _session_range_location (0)
 	, _session_range_is_free (true)
 	, _silent (false)

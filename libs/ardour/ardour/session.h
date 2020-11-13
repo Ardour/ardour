@@ -1328,6 +1328,7 @@ private:
 	mutable gint            _record_status;
 	samplepos_t             _transport_sample;
 	gint                    _seek_counter;
+	gint                    _butler_seek_counter;
 	Location*               _session_range_location; ///< session range, or 0 if there is nothing in the session yet
 	bool                    _session_range_is_free;
 	bool                    _silent;
