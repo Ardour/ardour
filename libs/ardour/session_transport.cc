@@ -1193,8 +1193,11 @@ Session::butler_transport_work ()
 		}
 	}
 
-	if (ptw & PostTransportLocate) {
-		DEBUG_TRACE (DEBUG::Transport, "nonrealtime locate invoked from BTW\n");
+	const int butler = g_atomic_int_get (&_butler_seek_counter);
+	const int rtlocates = g_atomic_int_get (&_seek_counter);
+
+	if (butler != rtlocates) {
+		DEBUG_TRACE (DEBUG::Transport, string_compose ("nonrealtime locate invoked from BTW (butler has done %1, rtlocs %2)\n", butler, rtlocates));
 		non_realtime_locate ();
 	}
 
@@ -1280,12 +1283,13 @@ Session::non_realtime_locate ()
 	uint32_t nt = 0;
 
 	samplepos_t tf;
+	gint sc;
 
 	{
 		boost::shared_ptr<RouteList> rl = routes.reader();
 
 	  restart:
-		gint sc = g_atomic_int_get (&_seek_counter);
+		sc = g_atomic_int_get (&_seek_counter);
 		tf = _transport_sample;
 		start = get_microseconds ();
 
@@ -1299,12 +1303,17 @@ Session::non_realtime_locate ()
 		microseconds_t end = get_microseconds ();
 		int usecs_per_track = lrintf ((end - start) / (double) nt);
 #ifndef NDEBUG
-		std::cerr << "locate took " << (end - start) << " usecs for " << nt << " tracks = " << usecs_per_track << " per track\n";
+		std::cerr << "locate to " << tf << " took " << (end - start) << " usecs for " << nt << " tracks = " << usecs_per_track << " per track\n";
 #endif
 		if (usecs_per_track > g_atomic_int_get (&current_usecs_per_track)) {
 			g_atomic_int_set (&current_usecs_per_track, usecs_per_track);
 		}
 	}
+
+	/* we've caught up with whatever the _seek_counter was when we did the
+	   non-realtime locates.
+	*/
+	g_atomic_int_set (&_butler_seek_counter, sc);
 
 	{
 		/* VCAs are quick to locate because they have no data (except
