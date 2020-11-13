@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: Ardour 5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-11-08 21:02+0300\n"
-"PO-Revision-Date: 2020-11-08 23:53+0300\n"
+"PO-Revision-Date: 2020-11-12 00:49+0300\n"
 "Last-Translator: Alexandre Prokoudine <alexandre.prokoudine@gmail.com>\n"
 "Language-Team: русский <gnome-cyr@lists.gnome.org>\n"
 "Language: ru\n"
@@ -1711,11 +1711,11 @@ msgstr "Задержка I/O:"
 
 #: ardour_ui2.cc:426
 msgid "Dim All"
-msgstr ""
+msgstr "Все тише"
 
 #: ardour_ui2.cc:428
 msgid "Mute All"
-msgstr "Приглушить все"
+msgstr "Все молча"
 
 #: ardour_ui2.cc:430
 msgid "Punch:"
@@ -2815,15 +2815,15 @@ msgstr "Сессия в режиме чтения"
 
 #: ardour_ui_session.cc:640
 msgid "Could not create session in \"%1\": %2%3%4"
-msgstr ""
+msgstr "Не удалось создать сессию в \"%1\": %2%3%4"
 
 #: ardour_ui_session.cc:653
 msgid "Could not create session in \"%1\"%2%3"
-msgstr ""
+msgstr "Не удалось создать сессию в \"%1\"%2%3"
 
 #: ardour_ui_session.cc:704
 msgid "Abort saving snapshot"
-msgstr ""
+msgstr "Прервать сохранение снимка"
 
 #: ardour_ui_session.cc:705
 msgid "Don't save now, just snapshot"
@@ -2841,6 +2841,11 @@ msgid ""
 "\n"
 "\"Don't save now\" option."
 msgstr ""
+"%1 не удалось сохранить сессию.\n"
+"\n"
+"Если все же хотите продолжить,\n"
+"\n"
+"нажмите кнопку «Не сохранять»."
 
 #: ardour_ui_session.cc:732
 msgid "Snapshot and switch"
@@ -2860,7 +2865,7 @@ msgstr "Название нового снимка"
 
 #: ardour_ui_session.cc:781
 msgid "Name Session"
-msgstr ""
+msgstr "Назовите сессию"
 
 #: ardour_ui_session.cc:782
 msgid "Session name"
@@ -3345,7 +3350,7 @@ msgstr "Очистить автоматизацию"
 
 #: automation_time_axis.cc:622
 msgid "Automation|Off"
-msgstr ""
+msgstr "Выкл"
 
 #: automation_time_axis.cc:625 gain_meter.cc:783
 msgid "Automation|Manual"
@@ -3738,7 +3743,7 @@ msgstr "Ресэмплировать, не сохраняя высоту тон�
 
 #: editor.cc:238
 msgid "Vocal"
-msgstr ""
+msgstr "Вокал"
 
 #: editor.cc:328
 msgid "Mins:Secs"
@@ -6829,7 +6834,7 @@ msgstr "Вы действительно хотите удалить %1 %2?"
 
 #: editor_ops.cc:7776
 msgid "This action cannot be undone, and the session file will be overwritten!"
-msgstr ""
+msgstr "Это действие не может быть отменено, файл сессии будет перезаписан!"
 
 #: editor_ops.cc:7780
 msgid "Yes, remove them."
@@ -6910,7 +6915,7 @@ msgstr "Перемещение встроенных файлов в папке �
 
 #: editor_regions.cc:182 editor_sources.cc:158
 msgid "Region name"
-msgstr ""
+msgstr "Название области"
 
 #: editor_regions.cc:183 editor_sources.cc:159
 msgid "# Ch"
@@ -7104,7 +7109,7 @@ msgstr "Скрыть все MIDI-дорожки"
 
 #: editor_routes.cc:566 mixer_ui.cc:1963
 msgid "Show All Busses"
-msgstr ""
+msgstr "Показать все шины"
 
 #: editor_routes.cc:567 mixer_ui.cc:1964
 msgid "Hide All Busses"
@@ -7228,7 +7233,7 @@ msgstr ""
 
 #: editor_sources.cc:648
 msgid "Remove the selected Sources"
-msgstr ""
+msgstr "Удалить выбранные источники"
 
 #: editor_sources.cc:682
 msgid ""
@@ -7240,15 +7245,15 @@ msgstr ""
 
 #: editor_sources.cc:687
 msgid "Only remove the Regions that use these Sources."
-msgstr ""
+msgstr "Удалить только области, использующие эти источники"
 
 #: editor_sources.cc:688
 msgid "Yes, remove the Regions and Sources (cannot be undone!)"
-msgstr ""
+msgstr "Да, удалить области и источники (не может быть отменено!)"
 
 #: editor_sources.cc:690
 msgid "Remove selected Sources"
-msgstr ""
+msgstr "Удалить выбранные источники"
 
 #: editor_summary.cc:479
 msgid "Reset Summary to Extents"
@@ -8478,7 +8483,7 @@ msgstr "Сохранить как шаблон..."
 
 #: foldback_strip.cc:1240
 msgid "Duplicate Foldback Bus"
-msgstr ""
+msgstr "Продублировать шину сценического монитора"
 
 #: foldback_strip.cc:1243 mixer_strip.cc:1777 route_group_dialog.cc:47
 #: route_time_axis.cc:834
@@ -8631,9 +8636,8 @@ msgid "Automation control"
 msgstr "Контроль автоматизации"
 
 #: generic_pluginui.cc:1043
-#, fuzzy
 msgid "This control cannot be automated"
-msgstr "Этот порт не может быть удалён."
+msgstr "Этот параметр нельзя автоматизировать"
 
 #: global_port_matrix.cc:160
 msgid "Audio Connection Manager"
@@ -10118,15 +10122,15 @@ msgstr "Показать или скрыть панель мониторинга
 
 #: mixer_strip.cc:635
 msgid "Loudness|LAN"
-msgstr ""
+msgstr "LAN"
 
 #: mixer_strip.cc:639
 msgid "Master output volume"
-msgstr ""
+msgstr "Громкость главного выхода"
 
 #: mixer_strip.cc:640
 msgid "Measure loudness of the session, normalize master output volume"
-msgstr ""
+msgstr "Измерить громкость сессии и нормировать громкость главного выхода"
 
 #: mixer_strip.cc:673
 msgid "Enable/Disable MIDI input"
@@ -10187,11 +10191,11 @@ msgstr "Порты плагина..."
 
 #: mixer_strip.cc:1817
 msgid "Fan out to Busses"
-msgstr ""
+msgstr "Раскидать по шинам"
 
 #: mixer_strip.cc:1818
 msgid "Fan out to Tracks"
-msgstr ""
+msgstr "Раскидать по дорожкам"
 
 #: mixer_strip.cc:1839 route_time_axis.cc:850
 msgid "Duplicate..."
@@ -10199,7 +10203,7 @@ msgstr "Продублировать..."
 
 #: mixer_strip.cc:2010 processor_box.cc:3968
 msgid "Custom LAN Amp Position"
-msgstr ""
+msgstr "Другое положение усилителя LAN"
 
 #: mixer_strip.cc:2137
 msgid "Pre"
@@ -10292,11 +10296,11 @@ msgstr "Избранные плагины"
 
 #: mixer_ui.cc:270 mixer_ui.cc:3026
 msgid "Recent Plugins"
-msgstr ""
+msgstr "Недавние плагины"
 
 #: mixer_ui.cc:271 mixer_ui.cc:3024
 msgid "Top-10 Plugins"
-msgstr ""
+msgstr "ТОП10 плагинов"
 
 #: mixer_ui.cc:688
 msgid "Error adding GUI elements for new tracks/busses %1"
@@ -10310,7 +10314,7 @@ msgstr ""
 
 #: mixer_ui.cc:983
 msgid "Instrument has only 1 output bus. Nothing to fan out."
-msgstr ""
+msgstr "У инструмента только одна шина выхода. Нечего раскидывать."
 
 #: mixer_ui.cc:2006
 msgid "track display list item for renamed strip not found!"
@@ -10418,11 +10422,11 @@ msgstr "Выбрать предыдущий канал микшера"
 
 #: mixer_ui.cc:3600
 msgid "Scroll Mixer Window to the left"
-msgstr "Список окон микшера влево"
+msgstr "Прокрутить окно микшера влево"
 
 #: mixer_ui.cc:3601
 msgid "Scroll Mixer Window to the right"
-msgstr ""
+msgstr "Прокрутить окно микшера вправо"
 
 #: mixer_ui.cc:3603
 msgid "Toggle MIDI Input Active for Mixer-Selected Tracks/Busses"
@@ -10450,11 +10454,11 @@ msgstr "Микшер: показывать канал сценического �
 
 #: mixer_ui.cc:3618
 msgid "Toggle Disk Monitoring"
-msgstr ""
+msgstr "Переключить мониторинг диска"
 
 #: mixer_ui.cc:3619
 msgid "Toggle Input Monitoring"
-msgstr ""
+msgstr "Переключить мониторинг входа"
 
 #: meter_strip.cc:171
 msgid "Reset Peak"
@@ -10880,6 +10884,8 @@ msgid ""
 "<small><i>This can later be changed in Preferences &gt; Appearance.</i></"
 "small>"
 msgstr ""
+"<small><i>Это впоследствии можно поменять в диалоге «Параметры» на странице "
+"«Внешний вид».</i></small>"
 
 #: new_user_wizard.cc:160 new_user_wizard.cc:164 rc_option_editor.cc:1110
 #: rc_option_editor.cc:2504
@@ -10888,15 +10894,15 @@ msgstr "100%"
 
 #: new_user_wizard.cc:161
 msgid "150%"
-msgstr ""
+msgstr "150%"
 
 #: new_user_wizard.cc:162
 msgid "200%"
-msgstr ""
+msgstr "200%"
 
 #: new_user_wizard.cc:163
 msgid "250%"
-msgstr ""
+msgstr "250%"
 
 #: new_user_wizard.cc:191
 msgid "Welcome to %1"
@@ -11447,7 +11453,7 @@ msgstr "Скопировать конфигурацию входа-выхода"
 
 #: plugin_setup_dialog.cc:36
 msgid "Fan out"
-msgstr ""
+msgstr "Раскидать"
 
 #: plugin_setup_dialog.cc:53
 msgid "An Instrument plugin is already present."
@@ -11594,7 +11600,7 @@ msgstr "Управление плагинами..."
 
 #: plugin_selector.cc:971
 msgid "By Popularity"
-msgstr ""
+msgstr "По популярности"
 
 #: plugin_selector.cc:974
 msgid "By Creator"
@@ -11683,7 +11689,7 @@ msgstr "Удалить текущий профиль"
 
 #: plugin_ui.cc:537
 msgid "Show Preset Browser Dialog"
-msgstr ""
+msgstr "Показать диалог просмотра профилей"
 
 #: plugin_ui.cc:538
 msgid ""
@@ -11780,15 +11786,15 @@ msgstr "Нет плагинов"
 
 #: port_group.cc:347
 msgid "%1 Busses"
-msgstr "Шины %1"
+msgstr "Шины: %1"
 
 #: port_group.cc:348
 msgid "%1 Tracks"
-msgstr "Дорожки %1"
+msgstr "Дорожки: %1"
 
 #: port_group.cc:349
 msgid "%1 Sidechains"
-msgstr "%1 боковых цепей"
+msgstr "Боковые цепи: %1"
 
 #: port_group.cc:350
 msgid "Hardware"
@@ -11808,7 +11814,7 @@ msgstr "LTC Out"
 
 #: port_group.cc:516
 msgid "Virtual MIDI"
-msgstr ""
+msgstr "Виртуальный MIDI"
 
 #: port_group.cc:543
 msgid "MMC in"
@@ -12212,11 +12218,11 @@ msgstr "Изменить с интерфейсом хоста..."
 
 #: processor_box.cc:4337
 msgid "%1: %2 (by %3) [%4]"
-msgstr ""
+msgstr "%1: %2 (автор %3) [%4]"
 
 #: processor_box.cc:4339
 msgid "%1 (by %2) [%3]"
-msgstr ""
+msgstr "%1 (автор %2) [%3]"
 
 #: patch_change_dialog.cc:52
 msgid "Patch Change"
@@ -12461,6 +12467,8 @@ msgid ""
 "Adjusting the scale requires an application restart for fully accurate re-"
 "layout."
 msgstr ""
+"Коррекция масштаба требует перезапуска приложения для корректной перерисовки "
+"окна."
 
 #: rc_option_editor.cc:1142
 msgid "Scan Time Out"
@@ -12650,21 +12658,21 @@ msgstr "Название (двойной щелчок для редактиро�
 
 #: rc_option_editor.cc:2118
 msgid "Music Data"
-msgstr ""
+msgstr "Муз. данные"
 
 #: rc_option_editor.cc:2119
 msgid ""
 "If ticked, %1 will consider this port to be a source of music performance "
 "data."
-msgstr ""
+msgstr "Когда влкючено, %1 считает этот порт источником музыкальных данных."
 
 #: rc_option_editor.cc:2126
 msgid "Control Data"
-msgstr ""
+msgstr "Упр. данные"
 
 #: rc_option_editor.cc:2127
 msgid "If ticked, %1 will consider this port to be a source of control data."
-msgstr ""
+msgstr "Когда влкючено, %1 считает этот порт источником управляющих данных."
 
 #: rc_option_editor.cc:2133 rc_option_editor.cc:2135
 msgid "Follow Selection"
@@ -12984,7 +12992,7 @@ msgstr "При одинаковой длительности, позиции и 
 
 #: rc_option_editor.cc:2622
 msgid "only if they have identical length, position and layer"
-msgstr ""
+msgstr "При одинаковой длительности, позиции, в одном и том же слое"
 
 #: rc_option_editor.cc:2628
 msgid "Layering model"
@@ -13316,7 +13324,7 @@ msgstr "Раскладка виртуальной клавиатуры"
 
 #: rc_option_editor.cc:3089
 msgid "Mouse-only (no keyboard)"
-msgstr ""
+msgstr "Только мышь (без клавиатуры)"
 
 #: rc_option_editor.cc:3090
 msgid "QWERTY"
@@ -13348,7 +13356,7 @@ msgstr "Параметры MIDI-портов"
 
 #: rc_option_editor.cc:3105
 msgid "MIDI input follows MIDI track selection"
-msgstr ""
+msgstr "Вход MIDI учитывает выбор MIDI-дорожек"
 
 #: rc_option_editor.cc:3121
 msgid "Enable metronome only while recording"
@@ -13593,7 +13601,7 @@ msgstr "1 такт"
 
 #: rc_option_editor.cc:3354
 msgid "0 (no pre-roll)"
-msgstr ""
+msgstr "0 (без подката)"
 
 #: rc_option_editor.cc:3355
 msgid "0.1 second"
@@ -14171,19 +14179,19 @@ msgstr "Показывать названия областей"
 
 #: rc_option_editor.cc:3959
 msgid "Track name ellipsize mode"
-msgstr ""
+msgstr "Режим пропуска букв в названиях дорожек"
 
 #: rc_option_editor.cc:3963
 msgid "Ellipsize start of name"
-msgstr ""
+msgstr "Сокращать начало названия"
 
 #: rc_option_editor.cc:3964
 msgid "Ellipsize middle of name"
-msgstr ""
+msgstr "Сокращать середину названия"
 
 #: rc_option_editor.cc:3965
 msgid "Ellipsize end of name"
-msgstr ""
+msgstr "Сокращать конец названия"
 
 #: rc_option_editor.cc:3967
 msgid ""
@@ -14191,9 +14199,14 @@ msgid ""
 "headers"
 msgstr ""
 
+# Примечания:
+# Добавить примечание
+#
+# Пути:
+# rc_option_editor.cc:3972
 #: rc_option_editor.cc:3972
 msgid "Add a visual gap below Audio Regions"
-msgstr ""
+msgstr "Величина интервала под звуковыми областями"
 
 #: rc_option_editor.cc:3981
 msgid "Waveforms"
@@ -14257,7 +14270,7 @@ msgstr "Показывать первый банк/программу MIDI ка�
 
 #: rc_option_editor.cc:4066
 msgid "Don't display periodic (MTC, MMC) SysEx messages in MIDI Regions"
-msgstr ""
+msgstr "Не показывать периодические (MTC, MMC) сообщения SysEx в MIDI-областях"
 
 #: rc_option_editor.cc:4075
 msgid "Show velocity horizontally inside notes"
@@ -14309,7 +14322,7 @@ msgstr "Показывать параметры записи и врезки"
 
 #: rc_option_editor.cc:4146
 msgid "Display Monitoring Options"
-msgstr ""
+msgstr "Показывать параметры мониторинга"
 
 #: rc_option_editor.cc:4154
 msgid "Display Latency Compensation Info"
@@ -14325,7 +14338,7 @@ msgstr "Показывать время выделения"
 
 #: rc_option_editor.cc:4180
 msgid "Display Monitor Section Info"
-msgstr ""
+msgstr "Показывать данные секции мониторинга"
 
 #: rc_option_editor.cc:4188
 msgid "Display Navigation Timeline"
@@ -14995,18 +15008,16 @@ msgid "Cannot create template directory %1"
 msgstr ""
 
 #: route_ui.cc:2064
-#, fuzzy
 msgid ""
 "Left-click to invert polarity of channel %1 of this track. Right-click to "
 "show menu."
 msgstr ""
-"Щелчком левой клавиши мыши инвертируется (инверсия фазы) \n"
-"канал %1 этой дорожки. По правой клавише вызывается меню."
+"Щелкните левой клавишей мыши, чтобы инвертировать полярность канала %1. "
+"Щелкните правой для вызова меню."
 
 #: route_ui.cc:2066
-#, fuzzy
 msgid "Click to show a menu of channels to invert polarity"
-msgstr "Кликните для проказа меню каналов для инверсии (реверс фазы)"
+msgstr "Кликните, чтобы открыть меню каналов для инверсии полярности сигнала"
 
 #: save_as_dialog.cc:36
 msgid "Switch to newly-saved version"
@@ -15695,7 +15706,7 @@ msgstr "Панель индикаторов"
 
 #: session_option_editor.cc:281
 msgid "Display Options"
-msgstr ""
+msgstr "Параметры отображения"
 
 #: session_option_editor.cc:285
 msgid "Show Midi Tracks"
@@ -15815,15 +15826,15 @@ msgstr "32-bit floating point"
 
 #: sfdb_ui.cc:106 sfdb_ui.cc:1826
 msgid "by track number"
-msgstr "по номеру дорожки"
+msgstr "По номеру дорожки"
 
 #: sfdb_ui.cc:108 sfdb_ui.cc:1827
 msgid "by track name"
-msgstr "по названию дорожки"
+msgstr "По названию дорожки"
 
 #: sfdb_ui.cc:110 sfdb_ui.cc:1828
 msgid "by instrument name"
-msgstr "по названию инструмента"
+msgstr "По названию инструмента"
 
 #: sfdb_ui.cc:114
 msgid "programming error: unknown midi track name source string %1"
@@ -15831,15 +15842,15 @@ msgstr ""
 
 #: sfdb_ui.cc:122 sfdb_ui.cc:140 sfdb_ui.cc:147
 msgid "as new tracks"
-msgstr "как новые дорожки"
+msgstr "Как новые дорожки"
 
 #: sfdb_ui.cc:124 sfdb_ui.cc:142
 msgid "to selected tracks"
-msgstr "в выделенные дорожки"
+msgstr "В выделенные дорожки"
 
 #: sfdb_ui.cc:126 sfdb_ui.cc:144
 msgid "to source list"
-msgstr ""
+msgstr "В список источников"
 
 #: sfdb_ui.cc:130
 msgid "programming error: unknown import mode string %1"
@@ -16070,7 +16081,7 @@ msgstr "Скопировать файлы в сессию"
 
 #: sfdb_ui.cc:1759
 msgid "Use MIDI Tempo Map (if defined)"
-msgstr ""
+msgstr "Использовать карту темпа MIDI (если определена)"
 
 #: sfdb_ui.cc:1774 sfdb_ui.cc:1929
 msgid "file timestamp"
@@ -16713,15 +16724,15 @@ msgstr ""
 
 #: template_dialog.cc:391
 msgid "Template of name \"%1\" already exists"
-msgstr ""
+msgstr "Шаблон с названием «%1» уже существует"
 
 #: template_dialog.cc:433 template_dialog.cc:733 template_dialog.cc:844
 msgid "Could not parse template file \"%1\"."
-msgstr ""
+msgstr "Не удалось разобрать файл шаблона \"%1\"."
 
 #: template_dialog.cc:490
 msgid "Could not make tmpdir: %1"
-msgstr ""
+msgstr "Не удалось создать временный каталог: %1"
 
 #: template_dialog.cc:497
 msgid "Save Exported Template Archive"
@@ -16729,7 +16740,7 @@ msgstr ""
 
 #: template_dialog.cc:506 template_dialog.cc:583
 msgid "Template archives"
-msgstr ""
+msgstr "Архивы шаблонов"
 
 #: template_dialog.cc:520
 msgid "File exists"
@@ -16737,7 +16748,7 @@ msgstr "Файл уже существует"
 
 #: template_dialog.cc:521
 msgid "The file %1 already exists."
-msgstr ""
+msgstr "Файл %1 уже существует."
 
 #: template_dialog.cc:524 utils.cc:850
 msgid "Overwrite"
@@ -16757,11 +16768,11 @@ msgstr "Импорт шаблонов"
 
 #: template_dialog.cc:752
 msgid "Could not write to new template file \"%1\"."
-msgstr ""
+msgstr "Не удалось записать в новый файл шаблона \"%1\"."
 
 #: template_dialog.cc:759
 msgid "Could not rename template directory from \"%1\" to \"%2\": %3"
-msgstr ""
+msgstr "Не удалось переименовать каталог с шаблонами \"%1\" в \"%2\": %3"
 
 #: template_dialog.cc:858
 msgid "Could not rename state dir \"%1\" to \"%2\": %3"
@@ -16769,15 +16780,15 @@ msgstr ""
 
 #: template_dialog.cc:867
 msgid "Could not write new template file \"%1\"."
-msgstr ""
+msgstr "Не удалось записать новый файл шаблона \"%1\"."
 
 #: template_dialog.cc:875
 msgid "Could not remove old template file \"%1\": %2"
-msgstr ""
+msgstr "Не удалось убрать старый файла шаблона \"%1\": %2"
 
 #: template_dialog.cc:892
 msgid "Could not delete template file \"%1\": %2"
-msgstr ""
+msgstr "Не удалось удалить старый файла шаблона \"%1\": %2"
 
 #: tempo_dialog.cc:52 tempo_dialog.cc:72
 msgid "End Beats per Minute:"
@@ -16915,15 +16926,14 @@ msgstr "Имя дорожки/шины (двойной клик для реда�
 
 #: time_axis_view.cc:163
 msgid "This track is inactive. (right-click to activate)"
-msgstr ""
+msgstr "Эта дорожка неактивна (щелкните правой клавишей мыши для активации)."
 
 #: time_axis_view_item.cc:334
-#, fuzzy
 msgid "new duration %1 frame is out of bounds for %2"
 msgid_plural "new duration of %1 samples is out of bounds for %2"
-msgstr[0] "Новая длительность размером %1 кадр находится за пределами %2"
-msgstr[1] "Новая длительность размером %1 кадра находится за пределами %2"
-msgstr[2] "Новая длительность размером %1 кадров находится за пределами %2"
+msgstr[0] "Новая длительность размером %1 сэмпл находится за пределами %2"
+msgstr[1] "Новая длительность размером %1 сэмпла находится за пределами %2"
+msgstr[2] "Новая длительность размером %1 сэмплов находится за пределами %2"
 
 #: time_fx_dialog.cc:63
 msgid "Quick but Ugly"
@@ -17268,7 +17278,7 @@ msgstr "Загрузка файла настройки пользователь�
 msgid ""
 "The current operation is not possible because of an error communicating with "
 "the audio hardware."
-msgstr ""
+msgstr "Операция невозможна из-за ошибки в работе со звуковым оборудованием."
 
 #: utils.cc:127
 msgid "Configure Hardware"
@@ -17391,7 +17401,7 @@ msgstr ""
 
 #: virtual_keyboard_window.cc:118
 msgid "Send MIDI Panic message for current channel"
-msgstr ""
+msgstr "Отправить сообщение MIDI Panic по текущему каналу"
 
 #: virtual_keyboard_window.cc:435
 msgid "CC-%1: "
