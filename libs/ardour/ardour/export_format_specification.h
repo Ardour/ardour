@@ -185,7 +185,7 @@ class LIBARDOUR_API ExportFormatSpecification : public ExportFormatBase {
 	bool analyse() const { return _analyse; }
 	int  codec_quality() const { return _codec_quality; }
 
-	bool tag () const { return _tag && supports_tagging; }
+	bool tag () const { return _tag && _supports_tagging; }
 
 	samplecnt_t silence_beginning_at (samplepos_t position, samplecnt_t samplerate) const
 		{ return _silence_beginning.get_samples_at (position, samplerate); }
@@ -208,11 +208,11 @@ class LIBARDOUR_API ExportFormatSpecification : public ExportFormatBase {
 	/* The variables below do not have setters (usually set via set_format) */
 
 	std::string  _format_name;
-	bool            has_sample_format;
-	bool            supports_tagging;
-	bool           _has_codec_quality;
-	bool           _has_broadcast_info;
-	uint32_t       _channel_limit;
+	bool         _has_sample_format;
+	bool         _supports_tagging;
+	bool         _has_codec_quality;
+	bool         _has_broadcast_info;
+	uint32_t     _channel_limit;
 
 	/* The variables below have getters and setters */
 

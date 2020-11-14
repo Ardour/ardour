@@ -30,25 +30,20 @@
 
 namespace ARDOUR
 {
-
 class SessionMetadata;
 
 /// Class with static functions for tagging audiofiles
 class LIBARDOUR_API AudiofileTagger
 {
-  public:
-
+public:
 	/* Tags file with metadata, return true on success */
 
-	static bool tag_file (std::string const & filename, SessionMetadata const & metadata);
+	static bool tag_file (std::string const& filename, SessionMetadata const& metadata);
 
-  private:
-
-	static bool tag_generic (TagLib::Tag & tag, SessionMetadata const & metadata);
-	static bool tag_vorbis_comment (TagLib::Ogg::XiphComment & tag, SessionMetadata const & metadata);
+private:
+	static bool tag_generic (TagLib::Tag& tag, SessionMetadata const& metadata);
+	static bool tag_vorbis_comment (TagLib::Ogg::XiphComment& tag, SessionMetadata const& metadata);
 };
-
-
 
 } // namespace ARDOUR
 

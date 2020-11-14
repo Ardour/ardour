@@ -38,33 +38,31 @@ using namespace PBD;
 
 namespace ARDOUR
 {
-
 bool
-AudiofileTagger::tag_file (std::string const & filename, SessionMetadata const & metadata)
+AudiofileTagger::tag_file (std::string const& filename, SessionMetadata const& metadata)
 {
 	/* see also SessionMetadata::av_export_tag () for ffmpeg/liblame */
 
-	TagLib::FileRef file (filename.c_str());
-	if (file.isNull()) {
-		std::cerr << "TagLib::FileRef is null for file" << filename  << std::endl;
+	TagLib::FileRef file (filename.c_str ());
+	if (file.isNull ()) {
+		std::cerr << "TagLib::FileRef is null for file" << filename << std::endl;
 		return true; // continue anyway?!
 	}
 
-	if (!file.tag()) {
-		std::cerr << "TagLib::Tag is null for file" << filename  << std::endl;
+	if (!file.tag ()) {
+		std::cerr << "TagLib::Tag is null for file" << filename << std::endl;
 		return true; // continue anyway?!
 	}
 
-	TagLib::Tag & tag (*file.tag());
+	TagLib::Tag& tag (*file.tag ());
 
 	tag_generic (tag, metadata);
 
 	/* FLAC */
-
-	TagLib::FLAC::File * flac_file;
-	if ((flac_file = dynamic_cast<TagLib::FLAC::File *> (file.file()))) {
-		TagLib::Ogg::XiphComment * vorbis_tag;
-		if ((vorbis_tag = dynamic_cast<TagLib::Ogg::XiphComment *> (flac_file->xiphComment (true)))) {
+	TagLib::FLAC::File* flac_file;
+	if ((flac_file = dynamic_cast<TagLib::FLAC::File*> (file.file ()))) {
+		TagLib::Ogg::XiphComment* vorbis_tag;
+		if ((vorbis_tag = dynamic_cast<TagLib::Ogg::XiphComment*> (flac_file->xiphComment (true)))) {
 			tag_vorbis_comment (*vorbis_tag, metadata);
 		} else {
 			std::cerr << "Could not get Xiph comment for FLAC file!" << std::endl;
@@ -72,55 +70,54 @@ AudiofileTagger::tag_file (std::string const & filename, SessionMetadata const &
 	}
 
 	/* Ogg */
-
-	TagLib::Ogg::File * ogg_file;
-	if ((ogg_file = dynamic_cast<TagLib::Ogg::File *> (file.file()))) {
-		TagLib::Ogg::XiphComment * vorbis_tag;
-		if ((vorbis_tag = dynamic_cast<TagLib::Ogg::XiphComment *> (ogg_file->tag()))) {
+	TagLib::Ogg::File* ogg_file;
+	if ((ogg_file = dynamic_cast<TagLib::Ogg::File*> (file.file ()))) {
+		TagLib::Ogg::XiphComment* vorbis_tag;
+		if ((vorbis_tag = dynamic_cast<TagLib::Ogg::XiphComment*> (ogg_file->tag ()))) {
 			tag_vorbis_comment (*vorbis_tag, metadata);
 		} else {
 			std::cerr << "Could not get Xiph comment for Ogg file!" << std::endl;
 		}
 	}
 
-	file.save();
+	file.save ();
 	return true;
 }
 
 bool
-AudiofileTagger::tag_generic (TagLib::Tag & tag, SessionMetadata const & metadata)
+AudiofileTagger::tag_generic (TagLib::Tag& tag, SessionMetadata const& metadata)
 {
-	tag.setTitle (TL_STR(metadata.title()));
-	tag.setArtist (TL_STR(metadata.artist()));
-	tag.setAlbum (TL_STR(metadata.album()));
-	tag.setComment (TL_STR(metadata.comment()));
-	tag.setGenre (TL_STR(metadata.genre()));
-	tag.setYear (metadata.year());
-	tag.setTrack (metadata.track_number());
+	tag.setTitle (TL_STR (metadata.title ()));
+	tag.setArtist (TL_STR (metadata.artist ()));
+	tag.setAlbum (TL_STR (metadata.album ()));
+	tag.setComment (TL_STR (metadata.comment ()));
+	tag.setGenre (TL_STR (metadata.genre ()));
+	tag.setYear (metadata.year ());
+	tag.setTrack (metadata.track_number ());
 
 	return true;
 }
 
 bool
-AudiofileTagger::tag_vorbis_comment (TagLib::Ogg::XiphComment & tag, SessionMetadata const & metadata)
+AudiofileTagger::tag_vorbis_comment (TagLib::Ogg::XiphComment& tag, SessionMetadata const& metadata)
 {
-	tag.addField ("COPYRIGHT", TL_STR(metadata.copyright()));
-	tag.addField ("ISRC", TL_STR(metadata.isrc()));
-	tag.addField ("GROUPING ", TL_STR(metadata.grouping()));
-	tag.addField ("SUBTITLE", TL_STR(metadata.subtitle()));
-	tag.addField ("ALBUMARTIST", TL_STR(metadata.album_artist()));
-	tag.addField ("LYRICIST", TL_STR(metadata.lyricist()));
-	tag.addField ("COMPOSER", TL_STR(metadata.composer()));
-	tag.addField ("CONDUCTOR", TL_STR(metadata.conductor()));
-	tag.addField ("REMIXER", TL_STR(metadata.remixer()));
-	tag.addField ("ARRANGER", TL_STR(metadata.arranger()));
-	tag.addField ("ENGINEER", TL_STR(metadata.engineer()));
-	tag.addField ("PRODUCER", TL_STR(metadata.producer()));
-	tag.addField ("DJMIXER", TL_STR(metadata.dj_mixer()));
-	tag.addField ("MIXER", TL_STR(metadata.mixer()));
-	tag.addField ("COMPILATION", TL_STR(metadata.compilation()));
-	tag.addField ("DISCSUBTITLE", TL_STR(metadata.disc_subtitle()));
-	tag.addField ("DISCNUMBER", to_string (metadata.disc_number()));
+	tag.addField ("COPYRIGHT", TL_STR (metadata.copyright ()));
+	tag.addField ("ISRC", TL_STR (metadata.isrc ()));
+	tag.addField ("GROUPING ", TL_STR (metadata.grouping ()));
+	tag.addField ("SUBTITLE", TL_STR (metadata.subtitle ()));
+	tag.addField ("ALBUMARTIST", TL_STR (metadata.album_artist ()));
+	tag.addField ("LYRICIST", TL_STR (metadata.lyricist ()));
+	tag.addField ("COMPOSER", TL_STR (metadata.composer ()));
+	tag.addField ("CONDUCTOR", TL_STR (metadata.conductor ()));
+	tag.addField ("REMIXER", TL_STR (metadata.remixer ()));
+	tag.addField ("ARRANGER", TL_STR (metadata.arranger ()));
+	tag.addField ("ENGINEER", TL_STR (metadata.engineer ()));
+	tag.addField ("PRODUCER", TL_STR (metadata.producer ()));
+	tag.addField ("DJMIXER", TL_STR (metadata.dj_mixer ()));
+	tag.addField ("MIXER", TL_STR (metadata.mixer ()));
+	tag.addField ("COMPILATION", TL_STR (metadata.compilation ()));
+	tag.addField ("DISCSUBTITLE", TL_STR (metadata.disc_subtitle ()));
+	tag.addField ("DISCNUMBER", to_string (metadata.disc_number ()));
 
 	// No field for total discs or tracks
 
@@ -129,4 +126,3 @@ AudiofileTagger::tag_vorbis_comment (TagLib::Ogg::XiphComment & tag, SessionMeta
 
 
 } // namespace ARDOUR
-
