@@ -1129,6 +1129,10 @@ ExportFormatDialog::show_linear_enconding_options (boost::shared_ptr<ARDOUR::Exp
 	encoding_options_table.attach (sample_format_view, 0, 1, 1, 2);
 	encoding_options_table.attach (dither_type_view, 1, 2, 1, 2);
 
+	if (ptr->supports_tagging ()) {
+		encoding_options_table.attach (tag_checkbox, 0, 1, 2, 3);
+	}
+
 	fill_sample_format_lists (boost::dynamic_pointer_cast<HasSampleFormat> (ptr));
 
 	show_all_children ();
