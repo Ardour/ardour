@@ -440,6 +440,8 @@ private:
 
 	PBD::TimingStats _timing_stats;
 	volatile gint _stat_reset;
+
+	volatile gint _flush;
 };
 
 } // namespace ARDOUR

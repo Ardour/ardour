@@ -91,6 +91,7 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug)
 	, _bypass_port (UINT32_MAX)
 	, _inverted_bypass_enable (false)
 	, _stat_reset (0)
+	, _flush (0)
 {
 	/* the first is the master */
 
@@ -714,9 +715,7 @@ PluginInsert::deactivate ()
 void
 PluginInsert::flush ()
 {
-	for (vector<boost::shared_ptr<Plugin> >::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
-		(*i)->flush ();
-	}
+	g_atomic_int_set (&_flush, 1);
 }
 
 void
@@ -1267,6 +1266,12 @@ PluginInsert::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 
 	if (g_atomic_int_compare_and_exchange (&_stat_reset, 1, 0)) {
 		_timing_stats.reset ();
+	}
+
+	if (g_atomic_int_compare_and_exchange (&_flush, 1, 0)) {
+		for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
+			(*i)->flush ();
+		}
 	}
 
 	if (_pending_active) {
