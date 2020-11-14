@@ -924,7 +924,7 @@ msgstr "Erakutsi"
 
 #: analysis_window.cc:110
 msgid "Re-analyze data"
-msgstr "Birranalaizatu datuak"
+msgstr "Birranalizatu datuak"
 
 #: ardour_http.cc:228 ardour_http.cc:231 ardour_http.cc:251
 msgid "HTTP request failed: (%1) %2"
