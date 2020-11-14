@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ExportFormatSpecification name="Wav (Tagged)" id="dd4f6f30-f054-4e0a-8d91-67eed5d79153" analyse="1">
+  <Encoding id="F_WAV" type="T_Sndfile" extension="wav" name="WAV" has-sample-format="true" channel-limit="256"/>
+  <SampleRate rate="SR_Session"/>
+  <SRCQuality quality="SRC_SincBest"/>
+  <EncodingOptions>
+    <Option name="sample-format" value="SF_16"/>
+    <Option name="dithering" value="D_Shaped"/>
+    <Option name="tag-metadata" value="true"/>
+    <Option name="tag-support" value="true"/>
+    <Option name="broadcast-info" value="false"/>
+  </EncodingOptions>
+  <Processing>
+    <Normalize enabled="false" loudness="no" dbfs="0" lufs="-23" dbtp="-1"/>
+    <Silence>
+      <Start>
+        <Trim enabled="false"/>
+        <Add enabled="false">
+          <Duration format="Timecode" hours="0" minutes="0" seconds="0" frames="0"/>
+        </Add>
+      </Start>
+      <End>
+        <Trim enabled="false"/>
+        <Add enabled="false">
+          <Duration format="Timecode" hours="0" minutes="0" seconds="0" frames="0"/>
+        </Add>
+      </End>
+    </Silence>
+  </Processing>
+</ExportFormatSpecification>
