@@ -7698,23 +7698,23 @@ msgstr "esportatu"
 
 #: export_dialog.cc:458
 msgid "Exporting '%3' (timespan %1 of %2)"
-msgstr "'%3' esportatzen (%1 %2tik gelditzen da)"
+msgstr "'%3' esportatzen (%1/%2 falta da)"
 
 #: export_dialog.cc:463
 msgid "Normalizing '%3' (timespan %1 of %2)"
-msgstr "'%3' normalizatzen (%1 %2tik gelditzen da)"
+msgstr "'%3' normalizatzen (%1/%2 falta da)"
 
 #: export_dialog.cc:468
 msgid "Encoding '%3' (timespan %1 of %2)"
-msgstr "'%3' kodetzen (%1 %2tik gelditzen da)"
+msgstr "'%3' kodetzen (%1/%2 falta da)"
 
 #: export_dialog.cc:473
 msgid "Tagging '%3' (timespan %1 of %2)"
-msgstr "'%3' etiketatzen (%1 %2tik gelditzen da)"
+msgstr "'%3' etiketatzen (%1/%2 falta da)"
 
 #: export_dialog.cc:477
 msgid "Uploading '%3' (timespan %1 of %2)"
-msgstr "'%3' igotzen (%1 %2tik gelditzen da)"
+msgstr "'%3' igotzen (%1/%2 falta da)"
 
 #: export_dialog.cc:481
 msgid "Running Post Export Command for '%1'"
