@@ -446,7 +446,12 @@ again:
 
 				/*Call the editor Idle function in the plugin*/
 
-				vstfx->plugin->dispatcher (vstfx->plugin, effEditIdle, 0, 0, NULL, 0);
+				if(vstfx->been_activated) {
+					/* some plugins have issues if effEditIdle is called w/o an editor.
+					 * This may happen due to async X11 requests, delaying the call to effEditOpen.
+					 */
+					vstfx->plugin->dispatcher (vstfx->plugin, effEditIdle, 0, 0, NULL, 0);
+				}
 
 				if (vstfx->wantIdle) {
 					vstfx->plugin->dispatcher (vstfx->plugin, 53, 0, 0, NULL, 0);
