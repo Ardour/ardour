@@ -15012,7 +15012,7 @@ msgstr "16-bit"
 
 #: session_dialog.cc:861 session_dialog.cc:920
 msgid "Last modified with: %1"
-msgstr "Azkenengoz aldatuta honekin: %1"
+msgstr "Azkenengoz honekin aldatuta: %1"
 
 #: session_dialog.cc:1055
 msgid "Remove session from recent list"
