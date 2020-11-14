@@ -1509,7 +1509,7 @@ LuaInstance::pre_seed_script (std::string const& name, int& id)
 			LuaScriptParamList lsp = LuaScriptParams::script_params (ls, spi->path, "action_params");
 			LuaScriptParamPtr lspp (new LuaScriptParam("x-script-origin", "", spi->path, false, true));
 			lsp.push_back (lspp);
-			set_lua_action (id++, "Mixer Screenshot", script, lsp);
+			set_lua_action (id++, name, script, lsp);
 		} catch (...) { }
 	}
 }
