@@ -27,6 +27,9 @@
 #include <taglib/fileref.h>
 #include <taglib/flacfile.h>
 #include <taglib/oggfile.h>
+#include <taglib/rifffile.h>
+#include <taglib/wavfile.h>
+#include <taglib/aifffile.h>
 #include <taglib/tag.h>
 #include <taglib/taglib.h>
 #include <taglib/xiphcomment.h>
@@ -80,6 +83,25 @@ AudiofileTagger::tag_file (std::string const& filename, SessionMetadata const& m
 		}
 	}
 
+	TagLib::RIFF::WAV::File* wav_file;
+	if ((wav_file = dynamic_cast<TagLib::RIFF::WAV::File*> (file.file ()))) {
+		TagLib::RIFF::Info::Tag* info_tag = dynamic_cast<TagLib::RIFF::Info::Tag*> (wav_file->InfoTag ());
+		assert (info_tag);
+		tag_riff_info (*info_tag, metadata);
+#if 1 // Also add id3v2 header to .wav
+		TagLib::ID3v2::Tag* id3v2_tag = dynamic_cast<TagLib::ID3v2::Tag*> (wav_file->tag ());
+		assert (id3v2_tag);
+		tag_id3v2 (*id3v2_tag, metadata);
+#endif
+	}
+
+	TagLib::RIFF::AIFF::File* aiff_file;
+	if ((aiff_file = dynamic_cast<TagLib::RIFF::AIFF::File*> (file.file ()))) {
+		TagLib::ID3v2::Tag* id3v2_tag = dynamic_cast<TagLib::ID3v2::Tag*> (aiff_file->tag ());
+		assert (id3v2_tag);
+		tag_id3v2 (*id3v2_tag, metadata);
+	}
+
 	file.save ();
 	return true;
 }
@@ -124,5 +146,22 @@ AudiofileTagger::tag_vorbis_comment (TagLib::Ogg::XiphComment& tag, SessionMetad
 	return true;
 }
 
+bool
+AudiofileTagger::tag_riff_info (TagLib::RIFF::Info::Tag& tag, SessionMetadata const& metadata)
+{
+	/* tag_generic() already takes care of all relevant fields:
+	 * https://taglib.org/api/classTagLib_1_1RIFF_1_1Info_1_1Tag.html#pub-methods
+	 */
+	return tag_generic (tag, metadata);
+}
+
+bool
+AudiofileTagger::tag_id3v2 (TagLib::ID3v2::Tag& tag, SessionMetadata const& metadata)
+{
+	/* TODO: consider adding custom frames
+	 * https://taglib.org/api/classTagLib_1_1ID3v2_1_1Frame.html
+	 */
+	return tag_generic (tag, metadata);
+}
 
 } // namespace ARDOUR

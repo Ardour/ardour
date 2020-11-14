@@ -122,7 +122,7 @@ ExportFormatManager::init_formats ()
 	ExportFormatPtr f_ptr;
 	ExportFormatLinear * fl_ptr;
 
-	f_ptr.reset (fl_ptr = new ExportFormatLinear ("AIFF", ExportFormatBase::F_AIFF));
+	f_ptr.reset (fl_ptr = new ExportFormatTaggedLinear ("AIFF", ExportFormatBase::F_AIFF));
 	fl_ptr->add_sample_format (ExportFormatBase::SF_U8);
 	fl_ptr->add_sample_format (ExportFormatBase::SF_8);
 	fl_ptr->add_sample_format (ExportFormatBase::SF_16);
@@ -158,7 +158,7 @@ ExportFormatManager::init_formats ()
 	fl_ptr->set_extension ("sf");
 	add_format (f_ptr);
 
-	f_ptr.reset (fl_ptr = new ExportFormatLinear ("WAV", ExportFormatBase::F_WAV));
+	f_ptr.reset (fl_ptr = new ExportFormatTaggedLinear ("WAV", ExportFormatBase::F_WAV));
 	fl_ptr->add_sample_format (ExportFormatBase::SF_U8);
 	fl_ptr->add_sample_format (ExportFormatBase::SF_16);
 	fl_ptr->add_sample_format (ExportFormatBase::SF_24);
@@ -170,7 +170,7 @@ ExportFormatManager::init_formats ()
 	fl_ptr->set_extension ("wav");
 	add_format (f_ptr);
 
-	f_ptr.reset (fl_ptr = new ExportFormatLinear ("W64", ExportFormatBase::F_W64));
+	f_ptr.reset (fl_ptr = new ExportFormatTaggedLinear ("W64", ExportFormatBase::F_W64));
 	fl_ptr->add_sample_format (ExportFormatBase::SF_U8);
 	fl_ptr->add_sample_format (ExportFormatBase::SF_16);
 	fl_ptr->add_sample_format (ExportFormatBase::SF_24);

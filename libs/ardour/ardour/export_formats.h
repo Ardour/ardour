@@ -269,6 +269,20 @@ protected:
 	SampleFormat _default_sample_format;
 };
 
+class LIBARDOUR_API ExportFormatTaggedLinear : public ExportFormatLinear
+{
+public:
+	ExportFormatTaggedLinear (std::string name, FormatId format_id)
+		: ExportFormatLinear (name, format_id)
+	{
+	}
+
+	virtual bool supports_tagging () const
+	{
+		return true;
+	}
+};
+
 class LIBARDOUR_API ExportFormatOggVorbis : public ExportFormat, public HasCodecQuality
 {
 public:

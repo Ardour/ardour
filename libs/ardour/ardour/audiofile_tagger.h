@@ -22,6 +22,8 @@
 
 #include <string>
 
+#include <taglib/id3v2tag.h>
+#include <taglib/infotag.h>
 #include <taglib/tag.h>
 #include <taglib/taglib.h>
 #include <taglib/xiphcomment.h>
@@ -43,6 +45,8 @@ public:
 private:
 	static bool tag_generic (TagLib::Tag& tag, SessionMetadata const& metadata);
 	static bool tag_vorbis_comment (TagLib::Ogg::XiphComment& tag, SessionMetadata const& metadata);
+	static bool tag_riff_info (TagLib::RIFF::Info::Tag& tag, SessionMetadata const& metadata);
+	static bool tag_id3v2 (TagLib::ID3v2::Tag& tag, SessionMetadata const& metadata);
 };
 
 } // namespace ARDOUR
