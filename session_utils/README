@@ -22,8 +22,9 @@ One C++ source per tool, see "example.cc" and "export.cc"
   ./waf
 
 The tool is automatically compiled and deployed when installing, using the
-program-name as prefix.  e.g.  "export.cc" becomes "ardour4-export".
-(or "mixbus3-export", depending on the project configuration)
+program-name as prefix.  e.g.  "export.cc" becomes "ardour4-export"
+(or "mixbus3-export", depending on the project configuration).
+Tool names must start with lower-case alphabetic letter [a-z].
 
 
 Test run from the source
