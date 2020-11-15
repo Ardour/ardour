@@ -1116,7 +1116,7 @@ def configure(conf):
     autowaf.check_pkg(conf, 'libcurl', uselib_store='CURL', atleast_version='7.0.0', mandatory=True)
     autowaf.check_pkg(conf, 'libarchive', uselib_store='ARCHIVE', atleast_version='3.0.0', mandatory=True)
     autowaf.check_pkg(conf, 'liblo', uselib_store='LO', atleast_version='0.26', mandatory=True)
-    autowaf.check_pkg(conf, 'taglib', uselib_store='TAGLIB', atleast_version='1.6', mandatory=True)
+    autowaf.check_pkg(conf, 'taglib', uselib_store='TAGLIB', atleast_version='1.9', mandatory=True)
     autowaf.check_pkg(conf, 'vamp-sdk', uselib_store='VAMPSDK', atleast_version='2.1', mandatory=True)
     autowaf.check_pkg(conf, 'vamp-hostsdk', uselib_store='VAMPHOSTSDK', atleast_version='2.1', mandatory=True)
     autowaf.check_pkg(conf, 'rubberband', uselib_store='RUBBERBAND', mandatory=True)
