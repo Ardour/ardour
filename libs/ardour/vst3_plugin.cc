@@ -2252,14 +2252,10 @@ VST3PI::load_state (RAMStream& stream)
 		}
 		if (is_equal_ID (i->_id, Vst::getChunkID (Vst::kComponentState))) {
 			ROMStream s (stream, i->_offset, i->_size);
-			tresult res = _component->setState(&s);
-			tresult re2 = res;
+			tresult res = _component->setState (&s);
 
-			if (FUnknownPtr<Vst::IEditController> (_component) == 0) {
-				/* only if component and controller are not identical */
-				s.seek (0, IBStream::kIBSeekSet, NULL);
-				re2 = _controller->setComponentState(&s);
-			}
+			s.rewind ();
+			tresult re2 = _controller->setComponentState (&s);
 
 			if (!(re2 == kResultOk || re2 == kNotImplemented || res == kResultOk || res == kNotImplemented)) {
 				DEBUG_TRACE (DEBUG::VST3Config, "VST3PI::load_state: failed to restore component state\n");
@@ -2277,10 +2273,13 @@ VST3PI::load_state (RAMStream& stream)
 #if 0
 		else if (is_equal_ID (i->_id, Vst::getChunkID (Vst::kProgramData))) {
 			Vst::IUnitInfo* unitInfo = unit_info ();
-			printf ("VST3: ignored unsupported kProgramData.\n");
-			// PresetFile::restoreProgramData
-			// RAMStream pgmstream (...) create substream
-			// unit_info->setUnitProgramData (unitProgramListID, programIndex, pgmstream)
+			stream.seek (i->_offset, IBStream::kIBSeekSet, &seek_result);
+			int32 id = -1;
+			if (stream.read_int32 (id)) {
+				ROMStream s (stream, i->_offset + sizeof (int32), i->_size - sizeof (int32));
+				unit_info->setUnitProgramData (id, programIndex, s);
+				//unit_data->setUnitData (id, programIndex, s)
+			}
 		}
 #endif
 		else {

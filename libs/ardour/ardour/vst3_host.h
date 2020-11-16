@@ -433,6 +433,7 @@ public:
 	tresult PLUGIN_API seek  (int64 pos, int32 mode, int64* result) SMTG_OVERRIDE;
 	tresult PLUGIN_API tell  (int64* pos) SMTG_OVERRIDE;
 
+	void rewind () { _pos = 0; }
 protected:
 	IBStream& _stream;
 	int64     _offset;
