@@ -4238,6 +4238,10 @@ ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
 	if (proxy) {
 		proxy->set_custom_ui_mode (true);
 		proxy->show_the_right_window ();
+
+		Gtk::Window* tlw = dynamic_cast<Gtk::Window*> (get_toplevel ());
+		assert (tlw && proxy->get (false));
+		proxy->get ()->set_transient_for (*tlw);
 	}
 }
 
@@ -4259,6 +4263,10 @@ ProcessorBox::generic_edit_processor (boost::shared_ptr<Processor> processor)
 	if (proxy) {
 		proxy->set_custom_ui_mode (false);
 		proxy->show_the_right_window ();
+
+		Gtk::Window* tlw = dynamic_cast<Gtk::Window*> (get_toplevel ());
+		assert (tlw && proxy->get (false));
+		proxy->get ()->set_transient_for (*tlw);
 	}
 }
 
@@ -4272,6 +4280,10 @@ ProcessorBox::manage_pins (boost::shared_ptr<Processor> processor)
 	if (proxy) {
 		proxy->get (true);
 		proxy->present();
+
+		Gtk::Window* tlw = dynamic_cast<Gtk::Window*> (get_toplevel ());
+		assert (tlw);
+		proxy->get ()->set_transient_for (*tlw);
 	}
 }
 
@@ -4557,6 +4569,11 @@ ProcessorWindowProxy::show_the_right_window (bool show_not_toggle)
 		return;
 	}
 	toggle ();
+
+	if (_window) {
+		/* clear any transients if window is toggled externally (ctrl surfaces) */
+		_window->unset_transient_for ();
+	}
 }
 
 
