@@ -369,7 +369,6 @@ private:
 	Steinberg::VST3PI* _plug;
 	PBD::ScopedConnectionList _connections;
 
-	int32_t _factory_preset_count;
 	std::map <std::string, std::string> _preset_uri_map;
 
 	std::vector<bool> _connected_inputs;
