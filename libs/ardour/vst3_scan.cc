@@ -272,6 +272,18 @@ ARDOUR::module_path_vst3 (string const& path)
 	string module_path;
 
 	if (!Glib::file_test (path, Glib::FILE_TEST_IS_DIR)) {
+#ifdef PLATFORM_WINDOWS
+		/* Until VST 3.6.10, the SDK allowed VST3 as a single dll file with the
+		 * vst3 extension. Since the folder is scanned recursively this leads to
+		 * an ambiguity (bundle and file):
+		 * ...\plugin.vst3
+		 * ...\plugin.vst3\Contents\x64_64-win\plugin.vst3
+		 */
+		if (Glib::path_get_basename (Glib::path_get_dirname (path)) == vst3_bindir ()) {
+			/* ignore *.vst3 files if they're part of a bundle, use the bundle instead. */
+			return "";
+		}
+#endif
 		module_path = path;
 	} else {
 		module_path = Glib::build_filename (path, "Contents",
