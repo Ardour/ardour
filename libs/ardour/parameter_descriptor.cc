@@ -47,6 +47,7 @@ ParameterDescriptor::ParameterDescriptor(const Evoral::Parameter& parameter)
 	, integer_step(parameter_is_midi (parameter.type ()))
 	, sr_dependent(false)
 	, enumeration(false)
+	, inline_ctrl(false)
 {
 	ScalePoints sp;
 
