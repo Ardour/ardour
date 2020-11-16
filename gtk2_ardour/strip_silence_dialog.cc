@@ -106,7 +106,7 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<RegionView*> const & v)
 
 	_fade_length->set_session (s);
 	_fade_length->set_mode (AudioClock::Samples);
-	_fade_length->set_is_duration (true);
+	_fade_length->set_is_duration (true, timepos_t());
 	_fade_length->set_duration (timecnt_t (_fade_length_value), true);
 
 	hbox->pack_start (*table);

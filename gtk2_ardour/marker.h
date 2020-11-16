@@ -35,9 +35,9 @@
 #include "canvas/fwd.h"
 #include "canvas/types.h"
 
-namespace ARDOUR {
-	class TempoSection;
-	class MeterSection;
+namespace Temporal {
+	class TempoPoint;
+	class MeterPoint;
 }
 
 class PublicEditor;
@@ -157,26 +157,26 @@ private:
 class TempoMarker : public ArdourMarker
 {
   public:
-	TempoMarker (PublicEditor& editor, ArdourCanvas::Container &, guint32 rgba, const std::string& text, ARDOUR::TempoSection&);
+	TempoMarker (PublicEditor& editor, ArdourCanvas::Container &, guint32 rgba, const std::string& text, Temporal::TempoPoint&);
 	~TempoMarker ();
 
-	ARDOUR::TempoSection& tempo() const { return _tempo; }
+	Temporal::TempoPoint& tempo() const { return _tempo; }
 
 	void update_height_mark (const double ratio);
   private:
-	ARDOUR::TempoSection& _tempo;
+	Temporal::TempoPoint& _tempo;
 };
 
 class MeterMarker : public ArdourMarker
 {
   public:
-	MeterMarker (PublicEditor& editor, ArdourCanvas::Container &, guint32 rgba, const std::string& text, ARDOUR::MeterSection&);
+	MeterMarker (PublicEditor& editor, ArdourCanvas::Container &, guint32 rgba, const std::string& text, Temporal::MeterPoint&);
 	~MeterMarker ();
 
-	ARDOUR::MeterSection& meter() const { return _meter; }
+	Temporal::MeterPoint& meter() const { return _meter; }
 
   private:
-	ARDOUR::MeterSection& _meter;
+	Temporal::MeterPoint& _meter;
 };
 
 #endif /* __gtk_ardour_marker_h__ */

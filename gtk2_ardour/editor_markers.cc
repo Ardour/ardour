@@ -30,6 +30,8 @@
 
 #include <gtkmm2ext/gtk_ui.h>
 
+#include "temporal/tempo.h"
+
 #include "ardour/session.h"
 #include "ardour/location.h"
 #include "ardour/profile.h"
@@ -57,6 +59,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
 using namespace Gtkmm2ext;
+using namespace Temporal;
 
 void
 Editor::clear_marker_display ()
@@ -880,14 +883,14 @@ Editor::tempo_or_meter_marker_context_menu (GdkEventButton* ev, ArdourCanvas::It
 	bool can_remove = false;
 
 	if (mm) {
-		can_remove = !mm->meter().initial ();
+		can_remove = !mm->meter().map().is_initial (mm->meter());
 		build_meter_marker_menu (mm, can_remove);
 		meter_marker_menu->popup (1, ev->time);
 	} else if (tm) {
 		if (!tm->tempo().active()) {
 			return;
 		}
-		can_remove = !tm->tempo().initial() && !tm->tempo().locked_to_meter();
+		can_remove = !tm->tempo().map().is_initial(tm->tempo()) && !tm->tempo().locked_to_meter();
 		build_tempo_marker_menu (tm, can_remove);
 		tempo_marker_menu->popup (1, ev->time);
 	} else {
@@ -1065,7 +1068,7 @@ Editor::build_tempo_marker_menu (TempoMarker* loc, bool can_remove)
 	MenuList& items = tempo_marker_menu->items();
 	tempo_marker_menu->set_name ("ArdourContextMenu");
 
-	if (!loc->tempo().initial()) {
+	if (!loc->tempo().map().is_initial(loc->tempo())) {
 		if (loc->tempo().clamped()) {
 			items.push_back (MenuElem (_("Don't Continue"), sigc::mem_fun(*this, &Editor::toggle_tempo_clamped)));
 		} else {
@@ -1073,21 +1076,13 @@ Editor::build_tempo_marker_menu (TempoMarker* loc, bool can_remove)
 		}
 	}
 
-	if (loc->tempo().type() == TempoSection::Ramp) {
+	if (loc->tempo().type() == Tempo::Ramped) {
 		items.push_back (MenuElem (_("Set Constant"), sigc::mem_fun(*this, &Editor::toggle_tempo_type)));
 	}
 
-	TempoSection* next_ts = _session->tempo_map().next_tempo_section (&loc->tempo());
+	Temporal::Tempo const * next_ts = _session->tempo_map().next_tempo (loc->tempo());
 	if (next_ts && next_ts->note_types_per_minute() != loc->tempo().end_note_types_per_minute()) {
 		items.push_back (MenuElem (_("Ramp to Next"), sigc::mem_fun(*this, &Editor::ramp_to_next_tempo)));
-	}
-
-	if (loc->tempo().position_lock_style() == AudioTime && can_remove) {
-		items.push_back (SeparatorElem());
-		items.push_back (MenuElem (_("Lock to Music"), sigc::mem_fun(*this, &Editor::toggle_marker_lock_style)));
-	} else if (can_remove) {
-		items.push_back (SeparatorElem());
-		items.push_back (MenuElem (_("Lock to Audio"), sigc::mem_fun(*this, &Editor::toggle_marker_lock_style)));
 	}
 
 	items.push_back (SeparatorElem());
@@ -1107,12 +1102,6 @@ Editor::build_meter_marker_menu (MeterMarker* loc, bool can_remove)
 
 	MenuList& items = meter_marker_menu->items();
 	meter_marker_menu->set_name ("ArdourContextMenu");
-
-	if (loc->meter().position_lock_style() == AudioTime && can_remove) {
-		items.push_back (MenuElem (_("Lock to Music"), sigc::mem_fun(*this, &Editor::toggle_marker_lock_style)));
-	} else if (can_remove) {
-		items.push_back (MenuElem (_("Lock to Audio"), sigc::mem_fun(*this, &Editor::toggle_marker_lock_style)));
-	}
 
 	items.push_back (MenuElem (_("Edit..."), sigc::mem_fun(*this, &Editor::marker_menu_edit)));
 	items.push_back (MenuElem (_("Remove"), sigc::mem_fun(*this, &Editor::marker_menu_remove)));
@@ -1499,45 +1488,6 @@ Editor::marker_menu_remove ()
 	}
 }
 
-void
-Editor::toggle_marker_lock_style ()
-{
-	MeterMarker* mm;
-	TempoMarker* tm;
-	dynamic_cast_marker_object (marker_menu_item->get_data ("marker"), &mm, &tm);
-
-	if (mm) {
-		begin_reversible_command (_("change meter lock style"));
-		XMLNode &before = _session->tempo_map().get_state();
-		MeterSection* msp = &mm->meter();
-
-		const Meter meter (msp->divisions_per_bar(), msp->note_divisor());
-		const Temporal::BBT_Time bbt (msp->bbt());
-		const PositionLockStyle pls = (msp->position_lock_style() == AudioTime) ? MusicTime : AudioTime;
-
-		_session->tempo_map().replace_meter (*msp, meter, bbt, msp->sample(), pls);
-
-		XMLNode &after = _session->tempo_map().get_state();
-		_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
-		commit_reversible_command ();
-	} else if (tm) {
-		TempoSection* tsp = &tm->tempo();
-
-		const double pulse = tsp->pulse();
-		const samplepos_t sample = tsp->sample();
-		const PositionLockStyle pls = (tsp->position_lock_style() == AudioTime) ? MusicTime : AudioTime;
-		const Tempo tempo (tsp->note_types_per_minute(), tsp->note_type(), tsp->end_note_types_per_minute());
-
-		begin_reversible_command (_("change tempo lock style"));
-		XMLNode &before = _session->tempo_map().get_state();
-
-		_session->tempo_map().replace_tempo (*tsp, tempo, pulse, sample, pls);
-
-		XMLNode &after = _session->tempo_map().get_state();
-		_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
-		commit_reversible_command ();
-	}
-}
 /* actally just resets the ts to constant using initial tempo */
 void
 Editor::toggle_tempo_type ()
@@ -1547,20 +1497,15 @@ Editor::toggle_tempo_type ()
 	dynamic_cast_marker_object (marker_menu_item->get_data ("marker"), &mm, &tm);
 
 	if (tm) {
-		TempoSection* tsp = &tm->tempo();
-
-		const Tempo tempo (tsp->note_types_per_minute(), tsp->note_type());
-		const double pulse = tsp->pulse();
-		const samplepos_t sample = tsp->sample();
-		const PositionLockStyle pls = tsp->position_lock_style();
+		Temporal::TempoPoint & tempo = tm->tempo();
 
 		begin_reversible_command (_("set tempo to constant"));
 		XMLNode &before = _session->tempo_map().get_state();
 
-		_session->tempo_map().replace_tempo (*tsp, tempo, pulse, sample, pls);
+		_session->tempo_map().set_ramped (tempo, !tempo.ramped());
 
 		XMLNode &after = _session->tempo_map().get_state();
-		_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
+		_session->add_command(new MementoCommand<Temporal::TempoMap>(_session->tempo_map(), &before, &after));
 		commit_reversible_command ();
 	}
 }
@@ -1576,48 +1521,38 @@ Editor::toggle_tempo_clamped ()
 		begin_reversible_command (_("Clamp Tempo"));
 		XMLNode &before = _session->tempo_map().get_state();
 
-		TempoSection* tsp = &tm->tempo();
-		TempoSection* prev = _session->tempo_map().previous_tempo_section (tsp);
+		Temporal::Tempo & tempo (tm->tempo());
+		if (tempo.set_clamped (!tempo.clamped())) {
 
-		if (prev) {
-			/* set to the end tempo of the previous section */
-			Tempo new_tempo (prev->end_note_types_per_minute(), prev->note_type(), tsp->end_note_types_per_minute());
-			_session->tempo_map().gui_change_tempo (tsp, new_tempo);
+			XMLNode &after = _session->tempo_map().get_state();
+			_session->add_command(new MementoCommand<Temporal::TempoMap>(_session->tempo_map(), &before, &after));
+			commit_reversible_command ();
+		} else {
+			abort_reversible_command ();
 		}
-
-		tsp->set_clamped (!tsp->clamped());
-
-		XMLNode &after = _session->tempo_map().get_state();
-		_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
-		commit_reversible_command ();
 	}
 }
 
 void
 Editor::ramp_to_next_tempo ()
 {
+
 	TempoMarker* tm;
 	MeterMarker* mm;
 	dynamic_cast_marker_object (marker_menu_item->get_data ("marker"), &mm, &tm);
 
 	if (tm) {
-		TempoMap& tmap (_session->tempo_map());
-		TempoSection* tsp = &tm->tempo();
-		TempoSection* next_ts = tmap.next_tempo_section (&tm->tempo());
-		if (next_ts) {
-			const Tempo tempo (tsp->note_types_per_minute(), tsp->note_type(), next_ts->note_types_per_minute());
-			const double pulse = tsp->pulse();
-			const samplepos_t sample = tsp->sample();
-			const PositionLockStyle pls = tsp->position_lock_style();
 
-			begin_reversible_command (_("ramp to next tempo"));
-			XMLNode &before = _session->tempo_map().get_state();
+		begin_reversible_command (_("ramp to next tempo"));
+		XMLNode &before = _session->tempo_map().get_state();
 
-			tmap.replace_tempo (*tsp, tempo, pulse, sample, pls);
-
+		Temporal::TempoPoint & tempo (tm->tempo());
+		if (_session->tempo_map().set_ramped (tempo, !tempo.ramped())) {
 			XMLNode &after = _session->tempo_map().get_state();
-			_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
+			_session->add_command(new MementoCommand<Temporal::TempoMap>(_session->tempo_map(), &before, &after));
 			commit_reversible_command ();
+		} else {
+			abort_reversible_command ();
 		}
 	}
 }

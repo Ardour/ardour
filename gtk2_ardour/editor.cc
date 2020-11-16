@@ -169,6 +169,7 @@ using namespace Gtk;
 using namespace Glib;
 using namespace Gtkmm2ext;
 using namespace Editing;
+using namespace Temporal;
 
 using PBD::internationalize;
 using PBD::atoi;
@@ -1372,8 +1373,8 @@ Editor::set_session (Session *t)
 	_session->vca_manager().VCAAdded.connect (_session_connections, invalidator (*this), boost::bind (&Editor::add_vcas, this, _1), gui_context());
 	_session->RouteAdded.connect (_session_connections, invalidator (*this), boost::bind (&Editor::add_routes, this, _1), gui_context());
 	_session->DirtyChanged.connect (_session_connections, invalidator (*this), boost::bind (&Editor::update_title, this), gui_context());
-	_session->tempo_map().PropertyChanged.connect (_session_connections, invalidator (*this), boost::bind (&Editor::tempo_map_changed, this, _1), gui_context());
-	_session->tempo_map().MetricPositionChanged.connect (_session_connections, invalidator (*this), boost::bind (&Editor::tempometric_position_changed, this, _1), gui_context());
+	_session->tempo_map().PropertyChanged.connect (_session_connections, invalidator (*this), boost::bind (&Editor::tempo_map_property_changed, this, _1), gui_context());
+	_session->tempo_map().Changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::tempo_map_changed, this), gui_context());
 	_session->Located.connect (_session_connections, invalidator (*this), boost::bind (&Editor::located, this), gui_context());
 	_session->config.ParameterChanged.connect (_session_connections, invalidator (*this), boost::bind (&Editor::parameter_changed, this, _1), gui_context());
 	_session->StateSaved.connect (_session_connections, invalidator (*this), boost::bind (&Editor::session_state_saved, this, _1), gui_context());
@@ -3967,10 +3968,14 @@ Editor::cycle_zoom_focus ()
 void
 Editor::update_grid ()
 {
+	if (!_session) {
+		return;
+	}
+
 	if (_grid_type == GridTypeNone) {
 		hide_grid_lines ();
 	} else if (grid_musical()) {
-		std::vector<TempoMap::BBTPoint> grid;
+		Temporal::TempoMapPoints grid;
 		if (bbt_ruler_scale != bbt_show_many) {
 			compute_current_bbt_points (grid, _leftmost_sample, _leftmost_sample + current_page_samples());
 		}

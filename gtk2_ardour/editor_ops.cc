@@ -137,6 +137,8 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ArdourWidgets;
 using namespace Editing;
+using namespace Temporal;
+
 using Gtkmm2ext::Keyboard;
 
 /***********************************************************************

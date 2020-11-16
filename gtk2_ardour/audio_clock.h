@@ -80,7 +80,6 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	void locate ();
 	void set_mode (Mode, bool noemit = false);
 	void set_bbt_reference (Temporal::timepos_t const &);
-	void set_is_duration (bool);
 	void set_is_duration (bool, Temporal::timepos_t const &);
 
 	void copy_text_to_clipboard () const;

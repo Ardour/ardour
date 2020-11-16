@@ -82,10 +82,8 @@ class LIBTEMPORAL_API Point {
 	superclock_t sclock() const  { return _sclock; }
 	Beats const & beats() const  { return _quarters; }
 	BBT_Time const & bbt() const { return _bbt; }
+	samplepos_t sample(samplecnt_t sr) const { return superclock_to_samples (sclock(), sr); }
 
-#if 0
-	samplepos_t sample() const;
-#endif
 	timepos_t time() const;
 
 	struct sclock_comparator {
@@ -383,11 +381,15 @@ class LIBTEMPORAL_API TempoPoint : public Tempo, public Point
 	Beats quarters_at (superclock_t sc) const;
 
 	superclock_t superclocks_per_note_type_at (timepos_t const &) const;
-#ifdef ALLOW_DOUBLE_TEMPO_MATH
-	double note_types_per_minute_at (timepos_t const & pos) const {
-		return Tempo::sc_to_double_npm (superclocks_per_note_type_at (pos));
+
+	/* This method should be used only for display purposes, and even
+	 * then, only when absolutely necessary. It returns a double
+	 * representation of the tempo, and we do not want to be using such
+	 * representations ever, if we could.
+	 */
+	double note_types_per_minute_at_DOUBLE (timepos_t const & pos) const {
+		return (superclock_ticks_per_second * 60.0) / superclocks_per_note_type_at (pos);
 	}
-#endif
 
 	XMLNode& get_state () const;
 	int set_state (XMLNode const&, int version);
@@ -688,14 +690,13 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 	Beats quarter_note_at (BBT_Time const &) const;
 	Beats quarter_note_at (timepos_t const &) const;
 
-#if 0
-	samplepos_t sample_at (Beats const &) const;
-	samplepos_t sample_at (BBT_Time const &) const;
-	samplepos_t sample_at (timepos_t const &) const;
-#endif
 	superclock_t superclock_at (Beats const &) const;
 	superclock_t superclock_at (BBT_Time const &) const;
 	superclock_t superclock_at (timepos_t const &) const;
+
+	samplepos_t sample_at (Beats const & b, samplecnt_t sr) const { return superclock_to_samples (superclock_at (b), sr); }
+	samplepos_t sample_at (BBT_Time const & b, samplecnt_t sr) const { return superclock_to_samples (superclock_at (b), sr); }
+	samplepos_t sample_at (timepos_t const & t, samplecnt_t sr) const { return superclock_to_samples (superclock_at (t), sr); }
 
 #if 0
 	int update_music_times (int gen, samplepos_t, Beats & b, BBT_Time & bbt, bool force);

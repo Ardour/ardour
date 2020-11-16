@@ -3994,7 +3994,7 @@ TempoEndDrag::TempoEndDrag (Editor* e, ArdourCanvas::Item* i)
 	DEBUG_TRACE (DEBUG::Drags, "New TempoEndDrag\n");
 	TempoMarker* marker = reinterpret_cast<TempoMarker*> (_item->get_data ("marker"));
 	_tempo = &marker->tempo();
-	_grab_qn = _tempo->pulse() * 4.0;
+	_grab_qn = _tempo->beats();
 }
 
 void

@@ -99,7 +99,6 @@ namespace ARDOUR {
 	class Region;
 	class RouteGroup;
 	class Session;
-	class TempoSection;
 	class Track;
 }
 
@@ -353,7 +352,7 @@ public:
 	void mixer_strip_width_changed ();
 	void hide_track_in_display (TimeAxisView* tv, bool apply_to_selection = false);
 	void show_track_in_display (TimeAxisView* tv, bool move_into_view = false);
-	void tempo_curve_selected (ARDOUR::TempoSection* ts, bool yn);
+	void tempo_curve_selected (Temporal::TempoPoint* ts, bool yn);
 
 	/* nudge is initiated by transport controls owned by ARDOUR_UI */
 
@@ -569,10 +568,10 @@ public:
 
 	/* Ruler metrics methods */
 
-	void metric_get_timecode (std::vector<ArdourCanvas::Ruler::Mark>&, gdouble, gdouble, gint);
-	void metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>&, gdouble, gdouble, gint);
-	void metric_get_samples (std::vector<ArdourCanvas::Ruler::Mark>&, gdouble, gdouble, gint);
-	void metric_get_minsec (std::vector<ArdourCanvas::Ruler::Mark>&, gdouble, gdouble, gint);
+	void metric_get_timecode (std::vector<ArdourCanvas::Ruler::Mark>&, int64_t, int64_t, gint);
+	void metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>&, int64_t, int64_t, gint);
+	void metric_get_samples (std::vector<ArdourCanvas::Ruler::Mark>&, int64_t, int64_t, gint);
+	void metric_get_minsec (std::vector<ArdourCanvas::Ruler::Mark>&, int64_t, int64_t, gint);
 
 	/* editing operations that need to be public */
 	void mouse_add_new_marker (Temporal::timepos_t where, bool is_cd=false);
@@ -586,8 +585,8 @@ public:
 
 	void mouse_add_new_tempo_event (Temporal::timepos_t where);
 	void mouse_add_new_meter_event (Temporal::timepos_t where);
-	void edit_tempo_section (ARDOUR::TempoSection*);
-	void edit_meter_section (ARDOUR::MeterSection*);
+	void edit_tempo_section (Temporal::TempoPoint*);
+	void edit_meter_section (Temporal::MeterPoint*);
 
 	bool should_ripple () const;
 	void do_ripple (boost::shared_ptr<ARDOUR::Playlist>, samplepos_t, samplecnt_t, ARDOUR::RegionList* exclude, bool add_to_command);
@@ -1740,8 +1739,8 @@ private:
 
 	void remove_tempo_marker (ArdourCanvas::Item*);
 	void remove_meter_marker (ArdourCanvas::Item*);
-	gint real_remove_tempo_marker (ARDOUR::TempoSection*);
-	gint real_remove_meter_marker (ARDOUR::MeterSection*);
+	gint real_remove_tempo_marker (Temporal::TempoPoint*);
+	gint real_remove_meter_marker (Temporal::MeterPoint*);
 
 	void edit_tempo_marker (TempoMarker&);
 	void edit_meter_marker (MeterMarker&);
@@ -1756,7 +1755,6 @@ private:
 	void marker_menu_remove ();
 	void marker_menu_rename ();
 	void rename_marker (ArdourMarker* marker);
-	void toggle_marker_lock_style ();
 	void toggle_tempo_clamped ();
 	void toggle_tempo_type ();
 	void ramp_to_next_tempo ();
@@ -1805,11 +1803,12 @@ private:
 	Curves tempo_curves;
 
 	void remove_metric_marks ();
-	void draw_metric_marks (const Temporal::TempoMap::Metrics& metrics);
+	void draw_metric_marks (Temporal::TempoMap::Metrics& metrics);
 
-	void compute_current_bbt_points (std::vector<Temporal::Point>& grid, samplepos_t left, samplepos_t right);
+	void compute_current_bbt_points (Temporal::TempoMapPoints& grid, samplepos_t left, samplepos_t right);
 
-	void tempo_map_changed (const PBD::PropertyChange&);
+	void tempo_map_property_changed (const PBD::PropertyChange&);
+	void tempo_map_changed ();
 	void tempometric_position_changed (const PBD::PropertyChange&);
 
 	void redisplay_grid (bool immediate_redraw);

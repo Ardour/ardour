@@ -41,6 +41,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace Temporal;
 
 VerboseCursor::VerboseCursor (Editor* editor)
 	: _editor (editor)
@@ -112,7 +113,7 @@ VerboseCursor::set_time (samplepos_t sample)
 
 	switch (m) {
 	case AudioClock::BBT:
-		_editor->_session->bbt_time (sample, bbt);
+		_editor->_session->bbt_time (timepos_t (sample), bbt);
 		snprintf (buf, sizeof (buf), "%02" PRIu32 "|%02" PRIu32 "|%02" PRIu32, bbt.bars, bbt.beats, bbt.ticks);
 		break;
 
@@ -144,7 +145,7 @@ VerboseCursor::set_duration (samplepos_t start, samplepos_t end)
 	Timecode::Time timecode;
 	Temporal::BBT_Time sbbt;
 	Temporal::BBT_Time ebbt;
-	Meter meter_at_start (_editor->_session->tempo_map().meter_at_sample (start));
+	Meter& meter_at_start (_editor->_session->tempo_map().metric_at (start).meter());
 
 	if (_editor->_session == 0) {
 		return;
@@ -155,8 +156,8 @@ VerboseCursor::set_duration (samplepos_t start, samplepos_t end)
 	switch (m) {
 	case AudioClock::BBT:
 	{
-		_editor->_session->bbt_time (start, sbbt);
-		_editor->_session->bbt_time (end, ebbt);
+		_editor->_session->bbt_time (timepos_t (start), sbbt);
+		_editor->_session->bbt_time (timepos_t (end), ebbt);
 
 		/* subtract */
 		/* XXX this computation won't work well if the

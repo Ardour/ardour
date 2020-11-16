@@ -32,15 +32,15 @@
 #include "canvas/framed_curve.h"
 #include "canvas/text.h"
 
-namespace ARDOUR {
-	class TempoSection;
+namespace Temporal {
+	class TempoPoint;
 }
 class PublicEditor;
 
 class TempoCurve : public sigc::trackable
 {
 public:
-	TempoCurve (PublicEditor& editor, ArdourCanvas::Container &, guint32 rgba, ARDOUR::TempoSection& temp, samplepos_t sample, bool handle_events);
+	TempoCurve (PublicEditor& editor, ArdourCanvas::Container &, guint32 rgba, Temporal::TempoPoint& temp, samplepos_t sample, bool handle_events);
 	~TempoCurve ();
 
 	static PBD::Signal1<void,TempoCurve*> CatchDeletion;
@@ -60,7 +60,7 @@ public:
 	void hide ();
 	void show ();
 
-	ARDOUR::TempoSection& tempo () const { return _tempo; }
+	Temporal::TempoPoint& tempo () const { return _tempo; }
 
 	void set_max_tempo (const double& max) { _max_tempo = max; }
 	void set_min_tempo (const double& min) { _min_tempo = min; }
@@ -91,7 +91,7 @@ private:
 	double _min_tempo;
 	double _max_tempo;
 
-	ARDOUR::TempoSection& _tempo;
+	Temporal::TempoPoint& _tempo;
 	ArdourCanvas::Text*   _start_text;
 	ArdourCanvas::Text*   _end_text;
 };

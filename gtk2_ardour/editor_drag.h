@@ -840,7 +840,7 @@ public:
 
 private:
 	MeterMarker* _marker;
-	ARDOUR::MeterSection* _real_section;
+	Temporal::MeterPoint* _real_section;
 
 	bool _copy;
 	Editing::GridType _old_grid_type;
@@ -871,7 +871,7 @@ public:
 
 private:
 	TempoMarker* _marker;
-	ARDOUR::TempoSection* _real_section;
+	Temporal::TempoPoint* _real_section;
 
 	bool _copy;
 	bool _movable;
@@ -903,7 +903,7 @@ public:
 
 private:
 	double _grab_qn;
-	ARDOUR::TempoSection* _tempo;
+	Temporal::TempoPoint* _tempo;
 	XMLNode* _before_state;
 	bool     _drag_valid;
 };

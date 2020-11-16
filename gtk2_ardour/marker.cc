@@ -632,7 +632,7 @@ ArdourMarker::set_right_label_limit (double p)
 /***********************************************************************/
 
 TempoMarker::TempoMarker (PublicEditor& editor, ArdourCanvas::Container& parent, guint32 rgba, const string& text,
-			  ARDOUR::TempoSection& temp)
+                          Temporal::TempoPoint& temp)
 #warning NUTEMPO needs new tempo map
 //	: ArdourMarker (editor, parent, rgba, text, Tempo, temp.sample(), false),
 	: ArdourMarker (editor, parent, rgba, text, Tempo, timepos_t (), false),
@@ -668,7 +668,7 @@ TempoMarker::update_height_mark (const double ratio)
 /***********************************************************************/
 
 MeterMarker::MeterMarker (PublicEditor& editor, ArdourCanvas::Container& parent, guint32 rgba, const string& text,
-			  ARDOUR::MeterSection& m)
+                          Temporal::MeterPoint& m)
 
 #warning NUTEMPO needs new tempo map
 //	: ArdourMarker (editor, parent, rgba, text, Meter, m.sample(), false),

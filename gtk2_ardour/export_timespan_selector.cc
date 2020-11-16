@@ -302,7 +302,7 @@ ExportTimespanSelector::bbt_str (samplepos_t samples) const
 
 	std::ostringstream oss;
 	Temporal::BBT_Time time;
-	_session->bbt_time (samples, time);
+	_session->bbt_time (timepos_t (samples), time);
 
 	time.print_padded (oss);
 
