@@ -82,6 +82,7 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<uint64_t> layering_index;
 		PBD::PropertyDescriptor<std::string> tags;
 		PBD::PropertyDescriptor<bool> contents;
+		PBD::PropertyDescriptor<Temporal::TimeDomain> time_domain;
 	}
 }
 
@@ -572,6 +573,20 @@ Region::special_set_position (timepos_t const & pos)
 }
 
 void
+Region::set_position_time_domain (Temporal::TimeDomain ps)
+{
+	if (_position.val().time_domain() != ps) {
+
+		boost::shared_ptr<Playlist> pl (playlist());
+
+#warning NUTEMPO are we going to allow this operation?
+		// _position.call().set_time_domain (ps);
+
+		send_change (Properties::time_domain);
+	}
+}
+
+void
 Region::recompute_position_from_time_domain ()
 {
 	/* XXX currently do nothing, but if we wanted to reduce lazy evaluation
@@ -598,7 +613,7 @@ Region::update_after_tempo_map_change (bool send)
 
 	PropertyChange what_changed;
 
-#warning NUTEMPO THINKME make this more nuanced ... nothing may have changed and maybe we don't need this at all
+#warning NUTEMPO THINKME make this more nuanced ... nothing may have changed and maybe we do not need this at all
 
 	what_changed.add (Properties::start);
 	what_changed.add (Properties::length);

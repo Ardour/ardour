@@ -219,6 +219,100 @@ timecnt_t::to_string () const
 	return ss.str();
 }
 
+timecnt_t
+timecnt_t::operator+ (timecnt_t const & other) const
+{
+	if (time_domain() == AudioTime) {
+		if (other.time_domain() == AudioTime) {
+			/* both audio, just add and use an arbitrary position */
+			return timecnt_t (_distance + other.distance(), _position);
+		} else {
+			return timecnt_t (_distance + other.samples(), _position);
+		}
+	}
+
+	return timecnt_t (beats() + other.beats(), _position);
+}
+
+timecnt_t
+timecnt_t::operator- (timecnt_t const & other) const
+{
+	if (time_domain() == AudioTime) {
+		if (other.time_domain() == AudioTime) {
+			return timecnt_t (_distance - other.distance(), _position);
+		} else {
+			return timecnt_t (_distance - other.samples(), _position);
+		}
+	}
+
+	return timecnt_t (beats() - other.beats(), _position);
+}
+
+timecnt_t &
+timecnt_t::operator+= (timecnt_t const & other)
+{
+	if (time_domain() == AudioTime) {
+		if (other.time_domain() == AudioTime) {
+			_distance += other.distance();
+		} else {
+			_distance += other.samples();
+		}
+	} else {
+		_distance += other.ticks ();
+	}
+
+	return *this;
+}
+
+timecnt_t
+timecnt_t::operator+ (timepos_t const & other) const
+{
+	if (time_domain() == AudioTime) {
+		if (other.time_domain() == AudioTime) {
+			/* both audio, just add and use an arbitrary position */
+			return timecnt_t (_distance + other.val(), _position);
+		} else {
+			return timecnt_t (_distance + other.samples(), _position);
+		}
+	}
+
+	return timecnt_t (beats() + other.beats(), _position);
+}
+
+timecnt_t
+timecnt_t::operator- (timepos_t const & other) const
+{
+	if (time_domain() == AudioTime) {
+		if (other.time_domain() == AudioTime) {
+			return timecnt_t (_distance - other.val(), _position);
+		} else {
+			return timecnt_t (_distance - other.samples(), _position);
+		}
+	}
+
+	return timecnt_t (beats() - other.beats(), _position);
+}
+
+timecnt_t &
+timecnt_t::operator-= (timecnt_t const & other)
+{
+	if (time_domain() == other.time_domain()) {
+		_distance -= other.distance();
+	} else if (time_domain() == AudioTime) {
+		_distance -= other.samples();
+	} else {
+		_distance -= other.ticks ();
+	}
+
+	return *this;
+}
+
+timecnt_t
+timecnt_t::operator- () const
+{
+	return timecnt_t (-_distance, _position);
+}
+
 /* timepos */
 
 timepos_t::timepos_t (timecnt_t const & t)
@@ -237,6 +331,46 @@ timepos_t::operator= (timecnt_t const & t)
 {
 	v = build (t.distance().flagged(), t.distance().val());
 	return *this;
+}
+
+bool
+timepos_t::operator< (timecnt_t const & t) const
+{
+	if (time_domain() == AudioTime) {
+		return superclocks() < t.superclocks();
+	}
+
+	return beats() < t.beats ();
+}
+
+bool
+timepos_t::operator> (timecnt_t const & t) const
+{
+	if (time_domain() == AudioTime) {
+		return superclocks() > t.superclocks();
+	}
+
+	return beats() > t.beats ();
+}
+
+bool
+timepos_t::operator<= (timecnt_t const & t) const
+{
+	if (time_domain() == AudioTime) {
+		return superclocks() <= t.superclocks();
+	}
+
+	return beats() <= t.beats ();
+}
+
+bool
+timepos_t::operator>= (timecnt_t const & t) const
+{
+	if (time_domain() == AudioTime) {
+		return superclocks() >= t.superclocks();
+	}
+
+	return beats() >= t.beats ();
 }
 
 void
@@ -387,6 +521,34 @@ timepos_t::earlier (Temporal::Beats const & b) const
 }
 
 timepos_t
+timepos_t::earlier (Temporal::BBT_Offset const & offset) const
+{
+	TempoMap::SharedPtr tm (TempoMap::use());
+
+	if (is_superclock()) {
+		return timepos_t (tm->superclock_at (tm->bbt_walk (tm->bbt_at (superclocks()), -offset)));
+	}
+
+	return timepos_t (tm->bbtwalk_to_quarters (beats(), -offset));
+}
+
+
+timepos_t &
+timepos_t::shift_earlier (Temporal::BBT_Offset const & offset)
+{
+	TempoMap::SharedPtr tm (TempoMap::use());
+
+	if (is_superclock()) {
+		v = build (false, (tm->superclock_at (tm->bbt_walk (tm->bbt_at (superclocks()), -offset))));
+	} else {
+		v = build (true, tm->bbtwalk_to_quarters (beats(), -offset).to_ticks());
+	}
+
+	return *this;
+}
+
+
+timepos_t
 timepos_t::earlier (timepos_t const & other) const
 {
 	if (other.is_superclock()) {
@@ -403,6 +565,46 @@ timepos_t::earlier (timecnt_t const & distance) const
 		return earlier (distance.superclocks());
 	}
 	return earlier (distance.beats());
+}
+
+bool
+timepos_t::expensive_lt (timepos_t const & other) const
+{
+	if (time_domain() == AudioTime) {
+		return superclocks() < other.superclocks();
+	}
+
+	return beats() < other.beats ();
+}
+
+bool
+timepos_t::expensive_gt (timepos_t const & other) const
+{
+	if (time_domain() == AudioTime) {
+		return superclocks() < other.superclocks();
+	}
+
+	return beats() > other.beats ();
+}
+
+bool
+timepos_t::expensive_lte (timepos_t const & other) const
+{
+	if (time_domain() == AudioTime) {
+		return superclocks() < other.superclocks();
+	}
+
+	return beats() <= other.beats ();
+}
+
+bool
+timepos_t::expensive_gte (timepos_t const & other) const
+{
+	if (time_domain() == AudioTime) {
+		return superclocks() < other.superclocks();
+	}
+
+	return beats() >= other.beats ();
 }
 
 /* */
@@ -445,6 +647,19 @@ timepos_t::shift_earlier (Temporal::Beats const & b)
 }
 
 /* */
+
+timepos_t &
+timepos_t::operator+= (Temporal::BBT_Offset const & offset)
+{
+	TempoMap::SharedPtr tm (TempoMap::use());
+	if (is_beats()) {
+		v = build (true, tm->bbtwalk_to_quarters (beats(), offset));
+	} else {
+		v = build (false, tm->superclock_at (tm->bbt_walk (tm->bbt_at (superclocks()), offset)));
+	}
+
+	return *this;
+}
 
 timepos_t &
 timepos_t::operator+=(Temporal::Beats const & b)

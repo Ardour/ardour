@@ -479,10 +479,10 @@ Editor::write_audio_range (AudioPlaylist& playlist, const ChanCount& count, list
 {
 	boost::shared_ptr<AudioFileSource> fs;
 	const samplepos_t chunk_size = 4096;
-	timecnt_t nframes;
+	samplecnt_t nframes;
 	Sample buf[chunk_size];
 	gain_t gain_buffer[chunk_size];
-	timepos_t pos;
+	samplepos_t pos;
 	char s[PATH_MAX+1];
 	uint32_t cnt;
 	string path;
@@ -531,18 +531,18 @@ Editor::write_audio_range (AudioPlaylist& playlist, const ChanCount& count, list
 
 	for (list<TimelineRange>::iterator i = range.begin(); i != range.end();) {
 
-		nframes = (*i).length();
-		pos = (*i).start();
+		nframes = (*i).length().samples();
+		pos = (*i).start().samples();
 
-		while (nframes.positive()) {
+		while (nframes) {
 
-			timecnt_t this_time = min (nframes, timecnt_t (chunk_size));
+			timecnt_t this_time = timecnt_t (min (nframes, chunk_size));
 
 			for (uint32_t n=0; n < channels; ++n) {
 
 				fs = sources[n];
 
-				if (playlist.read (buf, buf, gain_buffer, pos, this_time, n) != this_time) {
+				if (playlist.read (buf, buf, gain_buffer, timepos_t (pos), this_time, n) != this_time) {
 					break;
 				}
 
@@ -551,8 +551,8 @@ Editor::write_audio_range (AudioPlaylist& playlist, const ChanCount& count, list
 				}
 			}
 
-			nframes -= this_time;
-			pos += this_time;
+			nframes -= this_time.samples();
+			pos += this_time.samples();
 		}
 
 		list<TimelineRange>::iterator tmp = i;
@@ -562,11 +562,11 @@ Editor::write_audio_range (AudioPlaylist& playlist, const ChanCount& count, list
 
 			/* fill gaps with silence */
 
-			nframes = (*i).end().distance ((*tmp).start());
+			nframes = (*i).end().distance ((*tmp).start()).samples();
 
-			while (nframes.positive()) {
+			while (nframes) {
 
-				timecnt_t this_time = min (nframes, timecnt_t (chunk_size));
+				timecnt_t this_time = timecnt_t (min (nframes, chunk_size));
 				memset (buf, 0, sizeof (Sample) * this_time.samples());
 
 				for (uint32_t n=0; n < channels; ++n) {
@@ -577,7 +577,7 @@ Editor::write_audio_range (AudioPlaylist& playlist, const ChanCount& count, list
 					}
 				}
 
-				nframes -= this_time;
+				nframes -= this_time.samples();
 			}
 		}
 

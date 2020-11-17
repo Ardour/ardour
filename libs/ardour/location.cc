@@ -61,6 +61,7 @@ PBD::Signal1<void,Location*> Location::end_changed;
 PBD::Signal1<void,Location*> Location::start_changed;
 PBD::Signal1<void,Location*> Location::flags_changed;
 PBD::Signal1<void,Location*> Location::lock_changed;
+PBD::Signal1<void,Location*> Location::position_time_domain_changed;
 PBD::Signal1<void,Location*> Location::changed;
 
 Location::Location (Session& s)
