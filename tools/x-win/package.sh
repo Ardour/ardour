@@ -412,7 +412,7 @@ else
 
 	cat >> $NSISFILE << EOF
 !define MUI_FINISHPAGE_TITLE "Welcome to Ardour"
-!define MUI_FINISHPAGE_TEXT "This windows versions or Ardour is provided as-is.\$\\r\$\\nThe Ardour community currently has no expertise in supporting windows users, and there are no developers focusing on windows specific issues either.\$\\r\$\\nIf you like Ardour, please consider helping out."
+!define MUI_FINISHPAGE_TEXT "This Windows version of Ardour is provided as-is.\$\\r\$\\nThe Ardour community currently has no expertise in supporting Windows users, and there are no developers focusing on Windows-specific issues either.\$\\r\$\\nIf you like Ardour, please consider helping out."
 !define MUI_FINISHPAGE_LINK "Ardour Manual"
 !define MUI_FINISHPAGE_LINK_LOCATION "http://manual.ardour.org/"
 #this would run as admin - see http://forums.winamp.com/showthread.php?t=353366
