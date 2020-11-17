@@ -184,7 +184,7 @@ TempoCurve::set_position (samplepos_t sample, samplepos_t end_sample)
 	_curve->set (*points);
 
 	char buf[10];
-	snprintf (buf, sizeof (buf), "%.3f/%.0f", _tempo.note_types_per_minute(), _tempo.note_type());
+	snprintf (buf, sizeof (buf), "%.3f/%d", _tempo.note_types_per_minute(), _tempo.note_type());
 	_start_text->set (buf);
 	snprintf (buf, sizeof (buf), "%.3f", _tempo.end_note_types_per_minute());
 	_end_text->set (buf);
