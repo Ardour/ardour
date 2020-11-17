@@ -765,6 +765,7 @@ VST3Plugin::load_preset (PresetRecord r)
 		if (Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
 			RAMStream stream (fn);
 			ok = _plug->load_state (stream);
+			DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3Plugin::load_preset: file %1 status %2\n", fn, ok ? "OK" : "error"));
 		}
 	}
 
