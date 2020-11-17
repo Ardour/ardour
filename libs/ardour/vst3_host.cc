@@ -891,6 +891,7 @@ ROMStream::ROMStream (IBStream& src, TSize offset, TSize size)
 	: _stream (src)
 	, _offset (offset)
 	, _size   (size)
+	, _pos   (size)
 {
 	_stream.addRef ();
 }
