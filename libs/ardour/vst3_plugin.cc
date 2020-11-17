@@ -2632,8 +2632,13 @@ VST3PI::getContextInfoValue (double& value, FIDString id)
 		return kNotInitialized;
 	}
 	if (0 == strcmp (id, ContextInfo::kMaxVolume)) {
-		value = 2.0; // Config->get_max_gain();
+		value = s->gain_control ()->upper ();
 	} else if (0 == strcmp (id, ContextInfo::kMaxSendLevel)) {
+#ifdef MIXBUS
+		if (s->send_level_controllable (0)) {
+			value = s->send_level_controllable (0)->upper (); // pow (10.0, .05 *  15.0);
+		}
+#endif
 		value = 2.0; // Config->get_max_gain();
 	} else if (0 == strcmp (id, ContextInfo::kVolume)) {
 		boost::shared_ptr<AutomationControl> ac = s->gain_control ();
