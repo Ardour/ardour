@@ -2573,8 +2573,8 @@ LV2Plugin::allocate_atom_event_buffers()
 static bool
 write_position(LV2_Atom_Forge*     forge,
                LV2_Evbuf*          buf,
-               const TempoMetric&  t,
-               BBT_Time& bbt,
+               TempoMetric const & t,
+               BBT_Time const &    bbt,
                double              speed,
                double              time_scale,
                double              bpm,
@@ -2645,9 +2645,11 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 	speed = end > 0 ? speed : 0;
 	samplepos_t start0 = std::max (samplepos_t (0), start);
 
-	TempoMap&               tmap     = _session.tempo_map();
-	Metrics::const_iterator metric_i = tmap.metrics_end();
-	TempoMetric             tmetric  = tmap.metric_at(start0, &metric_i);
+	TempoMap&      tmap     = _session.tempo_map();
+	TempoMapPoints tempo_map_points;
+	tmap.get_grid (tempo_map_points, start, end, 0);
+	TempoMapPoints::const_iterator tempo_map_point = tempo_map_points.begin();
+	TempoMapPoint first_tempo_map_point = tempo_map_points.front();
 
 	if (_freewheel_control_port) {
 		*_freewheel_control_port = _session.engine().freewheeling() ? 1.f : 0.f;
@@ -2657,7 +2659,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 
 		float bpm = tmap.tempo_at_sample (start0).note_types_per_minute();
 		TempoMapPoints tempo_map_points;
-		tmap.get_grid (tempo_map_points, start, end, 0);
+		tmap.get_grid (tempo_map_points, start0, end, 0);
 		TempoMapPoint first_tempo_map_point = tempo_map_points.front();
 
 		/* note that this is not necessarily quarter notes */
@@ -2747,12 +2749,14 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 				if ((flags & PORT_POSITION)) {
 					const Temporal::TempoMetric& metric (tmap.metric_at (start0));
 					Temporal::BBT_Time bbt (metric.bbt_at (start0));
+					Temporal::BBT_Time bbt (first_tempo_map_point.bbt());
+					double bpm = first_tempo_map_point.tempo().note_types_per_minute();
+
 					double time_scale = Port::speed_ratio ();
-					double bpm = metric.tempo().note_types_per_minute();
-					double beatpos = (bbt.bars - 1) * metric.meter().divisions_per_bar()
+					double beatpos = (bbt.bars - 1) * first_tempo_map_point.divisions_per_bar()
 						+ (bbt.beats - 1)
 						+ (bbt.ticks / Temporal::ticks_per_beat);
-					beatpos *= metric.note_value() / 4.0;
+					beatpos *= first_tempo_map_point.note_value() / 4.0;
 					if (start != _next_cycle_start ||
 							speed != _next_cycle_speed ||
 							time_scale != _prev_time_scale ||
@@ -2760,7 +2764,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 							bpm != _current_bpm) {
 						// Transport or Tempo has changed, write position at cycle start
 						write_position(&_impl->forge, _ev_buffers[port_index],
-						               metric, bbt, speed, time_scale,  bpm, start, 0);
+						               *tempo_map_point, bbt, speed, time_scale,  bpm, start, 0);
 					}
 				}
 
@@ -2775,13 +2779,25 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 				// Now merge MIDI and any transport events into the buffer
 				const uint32_t     type = _uri_map.urids.midi_MidiEvent;
 				const samplepos_t  tend = end;
-				++metric_i;
 
-				while (m != m_end || (metric_i != tmap.metrics_end() && (*metric_i)->sample() < tend)) {
+				/* move to next explicit point
+				 * (if any)
+				 */
 
-					MetricSection* metric = (metric_i != tmap.metrics_end()) ? *metric_i : NULL;
+				while (tempo_map_point != tempo_map_points.end()) {
+					tempo_map_point++;
+					if (tempo_map_point != tempo_map_points.end()) {
+						if (tempo_map_point->is_explicit()) {
+							break;
+						}
+					}
+				}
 
-					if (m != m_end && (!metric || metric->sample() > (*m).time())) {
+				const samplepos_t sample = superclock_to_samples (tempo_map_point->sclock(), _session.sample_rate());
+
+				while (m != m_end || (tempo_map_point != tempo_map_points.end() && sample < tend)) {
+
+					if (m != m_end && ((tempo_map_point != tempo_map_points.end()) || sample > (*m).time())) {
 						const Evoral::Event<samplepos_t> ev(*m, false);
 						if (ev.time() < nframes) {
 							LV2_Evbuf_Iterator eend = lv2_evbuf_end(_ev_buffers[port_index]);
@@ -2789,16 +2805,26 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 						}
 						++m;
 					} else {
-						assert (metric);
-						bbt = metric.bbt();
-						double bpm = metric.tempo().note_types_per_minute();
-
+						const Temporal::BBT_Time bbt = tempo_map_point->bbt_at (sample);
+						double bpm = tempo_map_point->tempo().quarter_notes_per_minute ();
 						write_position(&_impl->forge, _ev_buffers[port_index],
-						               metric, bbt, speed, Port::speed_ratio (),
-						               bpm, metric->sample(),
-						               metric->sample() - start0);
-						++metric_i;
+						               *tempo_map_point, bbt, speed, Port::speed_ratio (),
+						               bpm, sample, sample - start);
 					}
+
+					/* move to next explicit point
+					 * (if any)
+					 */
+
+					while (tempo_map_point != tempo_map_points.end()) {
+						tempo_map_point++;
+						if (tempo_map_point != tempo_map_points.end()) {
+							if (tempo_map_point->is_explicit()) {
+								break;
+							}
+						}
+					}
+
 				}
 			} else if (!valid) {
 				/* Nothing we understand or care about, but we have
@@ -3097,15 +3123,13 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 		 * Note: for no-midi plugins, we only ever send information at cycle-start,
 		 * so it needs to be realative to that.
 		 */
-
-		TempoMetric t = tmap.metric_at(start);
-		_current_bpm = tmap.tempo_at_sample (start0).note_types_per_minute();
-		Temporal::BBT_Time bbt (tmap.bbt_at_sample (start0));
-
-		double beatpos = (bbt.bars - 1) * t.meter().divisions_per_bar()
-			+ (bbt.beats - 1)
-			+ (bbt.ticks / Temporal::ticks_per_beat);
-		beatpos *= tmetric.meter().note_divisor() / 4.0;
+		TempoMetric metric (tmap.metric_at (start));
+		_current_bpm = metric.tempo().note_types_per_minute();
+		Temporal::BBT_Time bbt (metric.bbt_at (start));
+		double beatpos = (bbt.bars - 1) * metric.divisions_per_bar()
+		               + (bbt.beats - 1)
+		               + (bbt.ticks / Temporal::ticks_per_beat);
+		beatpos *= metric.note_value() / 4.0;
 		_next_cycle_beat = beatpos + nframes * speed * _current_bpm / (60.f * _session.sample_rate());
 	}
 
