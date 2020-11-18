@@ -368,6 +368,21 @@ def enoify (major, minor):
             return "\\n\\\"Hybrid\\\"" # 1985 Collaborative
         elif minor == 4:
             return "\\n\\\"Old Land\\\"" # 1985 Compilation
+        elif minor == 5:
+            return "\\n\\\"Desert Island Selection\\\"" # 1986 Compilation
+    elif major == 7:
+        if minor == 0:
+            return "\\n\\\"More Blank Than Frank\\\"" # 1986 Compilation
+        if minor == 1:
+            return "\\n\\\"Music for Films III\\\"" # 1988 Collaborative
+        if minor == 2:
+            return "\\n\\\"Wrong Way Up\\\"" # 1990 Collaborative
+        if minor == 3:
+            return "\\n\\\"Nerve Net\\\"" # 1992
+        if minor == 4:
+            return "\\n\\\"The Shutov Assembly\\\"" # 1992
+        if minor == 5:
+            return "\\n\\\"Neroli\\\"" # 1993
     return "\\\"\\\""
 
 def options(opt):
