@@ -22,6 +22,7 @@
  */
 
 #include <gtkmm/stock.h>
+#include <gtkmm/frame.h>
 
 #include "ardour/session.h"
 #include "ardour/export_format_specification.h"
@@ -73,6 +74,7 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
   quality_label (_("Quality"), Gtk::ALIGN_LEFT),
   format_label (_("File format"), Gtk::ALIGN_LEFT),
   sample_rate_label (_("Sample rate"), Gtk::ALIGN_LEFT),
+
   src_quality_label (_("Sample rate conversion quality:"), Gtk::ALIGN_RIGHT),
 
   /* Watermarking */
@@ -100,16 +102,6 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
 
   tag_checkbox (_("Tag file with session's metadata"))
 {
-
-	/* Pack containers in dialog */
-
-	get_vbox()->pack_start (silence_table, false, false, 6);
-	get_vbox()->pack_start (format_table, false, false, 6);
-	get_vbox()->pack_start (watermark_options_table, false, false, 6);
-	get_vbox()->pack_start (encoding_options_vbox, false, false, 6);
-	get_vbox()->pack_start (cue_toc_vbox, false, false, 0);
-	get_vbox()->pack_start (name_hbox, false, false, 6);
-
 	/* Name, new and remove */
 
 	name_hbox.pack_start (name_label, false, false, 0);
@@ -162,10 +154,9 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
 	silence_table.attach (silence_end_checkbox, 1, 2, 2, 3);
 	silence_table.attach (silence_end_clock, 2, 3, 2, 3);
 
-	/* Post-export hook script */
-
-	get_vbox()->pack_start (command_label, false, false);
-	get_vbox()->pack_start (command_entry, false, false);
+	/* post export */
+	command_box.pack_start (command_label, false, false);
+	command_box.pack_start (command_entry, false, false, 6);
 
 	ArdourWidgets::set_tooltip (command_entry,
 			_(
@@ -198,6 +189,11 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
 
 	init_format_table();
 
+	/* SRC */
+
+	src_quality_box.pack_start (src_quality_label, true, true);
+	src_quality_box.pack_start (src_quality_combo, false, false);
+
 	/* Watermark */
 
 	watermark_options_table.attach (watermark_heading,          0, 3, 0, 1, Gtk::EXPAND|Gtk::FILL, Gtk::SHRINK);
@@ -215,6 +211,7 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
 
 	encoding_options_vbox.pack_start (encoding_options_label, false, false, 0);
 	encoding_options_vbox.pack_start (encoding_options_table, false, false, 12);
+	encoding_options_vbox.pack_end (src_quality_box, false, false);
 
 	Pango::AttrList bold;
 	Pango::Attribute b = Pango::Attribute::create_attr_weight (Pango::WEIGHT_BOLD);
@@ -242,9 +239,10 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
 	with_mp4chaps.signal_toggled().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_with_mp4chaps));
 	command_entry.signal_changed().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_command));
 
-	cue_toc_vbox.pack_start (with_cue, false, false);
-	cue_toc_vbox.pack_start (with_toc, false, false);
-	cue_toc_vbox.pack_start (with_mp4chaps, false, false);
+	metadata_table.attach (tag_checkbox,  0, 1, 0, 1);
+	metadata_table.attach (with_mp4chaps, 0, 1, 1, 2);
+	metadata_table.attach (with_cue,      1, 2, 0, 1);
+	metadata_table.attach (with_toc,      1, 2, 1, 2);
 
 	/* Load state before hooking up the rest of the signals */
 
@@ -295,6 +293,37 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
 	dither_type_view.get_selection()->signal_changed().connect (sigc::mem_fun(*this, &ExportFormatDialog::update_dither_type_selection));
 
 	tag_checkbox.signal_toggled().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_tagging_selection));
+
+	/* Pack containers in dialog */
+	Gtk::Frame* f;
+	Gtk::Table* g = manage (new Gtk::Table);
+	g->set_spacings (6);
+	get_vbox()->pack_start (*g);
+
+	g->attach (name_hbox, 0, 2, 0, 1, Gtk::EXPAND|Gtk::FILL, Gtk::SHRINK);
+
+	f = manage (new Gtk::Frame (_("Pre Process")));
+	f->add (silence_table);
+	g->attach (*f, 0, 1, 1, 2, Gtk::EXPAND|Gtk::FILL, Gtk::SHRINK);
+	f = manage (new Gtk::Frame (_("Watermark")));
+	f->add (watermark_options_table);
+	g->attach (*f, 1, 2, 1, 2, Gtk::EXPAND|Gtk::FILL, Gtk::FILL);
+
+	f = manage (new Gtk::Frame (_("Format")));
+	f->add (format_table);
+	g->attach (*f, 0, 1, 2, 3);
+
+	f = manage (new Gtk::Frame (_("Encoding")));
+	f->add (encoding_options_vbox);
+	g->attach (*f, 1, 2, 2, 3);
+
+	f = manage (new Gtk::Frame (_("Metadata")));
+	f->add (metadata_table);
+	g->attach (*f, 0, 2, 3, 4, Gtk::EXPAND|Gtk::FILL, Gtk::SHRINK);
+
+	f = manage (new Gtk::Frame (_("Post Export")));
+	f->add (command_box);
+	g->attach (*f, 0, 2, 4, 5, Gtk::EXPAND|Gtk::FILL, Gtk::SHRINK);
 
 	/* Finalize */
 
@@ -440,18 +469,15 @@ ExportFormatDialog::init_format_table ()
 
 	format_table.set_spacings (1);
 
-	format_table.attach (compatibility_label, 0, 1, 0, 1);
-	format_table.attach (quality_label, 1, 2, 0, 1);
-	format_table.attach (format_label, 2, 3, 0, 1);
-	format_table.attach (sample_rate_label, 3, 4, 0, 1);
+	format_table.attach (compatibility_label, 0, 1, 0, 1, Gtk::EXPAND|Gtk::FILL, Gtk::SHRINK);
+	format_table.attach (quality_label, 1, 2, 0, 1, Gtk::EXPAND|Gtk::FILL, Gtk::SHRINK);
+	format_table.attach (format_label, 2, 3, 0, 1, Gtk::EXPAND|Gtk::FILL, Gtk::SHRINK);
+	format_table.attach (sample_rate_label, 3, 4, 0, 1, Gtk::EXPAND|Gtk::FILL, Gtk::SHRINK);
 
 	format_table.attach (compatibility_view, 0, 1, 1, 2);
 	format_table.attach (quality_view, 1, 2, 1, 2);
 	format_table.attach (format_view, 2, 3, 1, 2);
 	format_table.attach (sample_rate_view, 3, 4, 1, 2);
-
-	format_table.attach (src_quality_label, 0, 3, 2, 3);
-	format_table.attach (src_quality_combo, 3, 4, 2, 3);
 
 	compatibility_view.set_headers_visible (false);
 	quality_view.set_headers_visible (false);
@@ -784,7 +810,7 @@ ExportFormatDialog::change_sample_rate_selection (bool select, WeakSampleRatePtr
 	if (select) {
 		ExportFormatManager::SampleRatePtr ptr = rate.lock();
 		if (ptr && _session) {
-			src_quality_combo.set_sensitive ((uint32_t) ptr->rate != _session->sample_rate());
+			src_quality_combo.set_sensitive ((uint32_t) ptr->rate != _session->sample_rate() &&  ptr->rate != ExportFormatBase::SR_Session);
 		}
 	}
 }
@@ -1102,6 +1128,8 @@ ExportFormatDialog::change_encoding_options (ExportFormatPtr ptr)
 	} else {
 		std::cout << "Unrecognized format!" << std::endl;
 	}
+
+	tag_checkbox.set_sensitive (ptr->supports_tagging ());
 }
 
 void
@@ -1129,10 +1157,6 @@ ExportFormatDialog::show_linear_enconding_options (boost::shared_ptr<ARDOUR::Exp
 	encoding_options_table.attach (sample_format_view, 0, 1, 1, 2);
 	encoding_options_table.attach (dither_type_view, 1, 2, 1, 2);
 
-	if (ptr->supports_tagging ()) {
-		encoding_options_table.attach (tag_checkbox, 0, 1, 2, 3);
-	}
-
 	fill_sample_format_lists (boost::dynamic_pointer_cast<HasSampleFormat> (ptr));
 
 	show_all_children ();
@@ -1145,7 +1169,6 @@ ExportFormatDialog::show_ogg_enconding_options (boost::shared_ptr<ARDOUR::Export
 
 	encoding_options_table.resize (2, 1);
 	encoding_options_table.attach (codec_quality_combo, 0, 1, 0, 1);
-	encoding_options_table.attach (tag_checkbox, 0, 1, 1, 2);
 	fill_codec_quality_lists (ptr);
 	show_all_children ();
 }
@@ -1160,7 +1183,6 @@ ExportFormatDialog::show_flac_enconding_options (boost::shared_ptr<ARDOUR::Expor
 	encoding_options_table.attach (dither_label, 1, 2, 0, 1);
 	encoding_options_table.attach (sample_format_view, 0, 1, 1, 2);
 	encoding_options_table.attach (dither_type_view, 1, 2, 1, 2);
-	encoding_options_table.attach (tag_checkbox, 0, 2, 2, 3);
 
 	fill_sample_format_lists (boost::dynamic_pointer_cast<HasSampleFormat> (ptr));
 
@@ -1189,7 +1211,6 @@ ExportFormatDialog::show_ffmpeg_enconding_options (boost::shared_ptr<ARDOUR::Exp
 	encoding_options_label.set_label (_("FFMPEG/MP3 options"));
 	encoding_options_table.resize (1, 1);
 	encoding_options_table.attach (codec_quality_combo, 0, 1, 0, 1);
-	encoding_options_table.attach (tag_checkbox, 0, 1, 1, 2);
 	fill_codec_quality_lists (ptr);
 	show_all_children ();
 }

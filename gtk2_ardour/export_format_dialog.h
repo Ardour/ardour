@@ -212,6 +212,7 @@ private:
 
 	/* Post-export hook */
 
+	Gtk::VBox        command_box;
 	Gtk::Label       command_label;
 	Gtk::Entry       command_entry;
 
@@ -294,6 +295,7 @@ private:
 	SRCQualityCols               src_quality_cols;
 	Glib::RefPtr<Gtk::ListStore> src_quality_list;
 
+	Gtk::HBox       src_quality_box;
 	Gtk::Label      src_quality_label;
 	Gtk::ComboBox   src_quality_combo;
 
@@ -374,7 +376,7 @@ private:
 	Gtk::CheckButton with_toc;
 	Gtk::CheckButton with_mp4chaps;
 
-	Gtk::VBox cue_toc_vbox;
+	Gtk::Table metadata_table;
 
 	void update_with_toc ();
 	void update_with_cue ();
