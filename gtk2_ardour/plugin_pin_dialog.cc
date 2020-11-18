@@ -2004,6 +2004,7 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 {
 	ppw.push_back (PluginPinWidgetPtr(new PluginPinWidget (pi)));
 	add (*ppw.back());
+	unset_transient_for ();
 }
 
 

@@ -110,6 +110,9 @@ LoudnessDialog::LoudnessDialog (Session* s, AudioRange const& ar, bool as)
 	, _ignore_preset (false)
 	, _ignore_change (false)
 {
+	/* Dialog can be displayed from the mixer, override global transient_parent */
+	unset_transient_for ();
+
 	/* query initial gain */
 	_gain_out = accurate_coefficient_to_dB (_session->master_volume()->get_value());
 

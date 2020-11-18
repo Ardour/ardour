@@ -189,6 +189,7 @@ PluginUIWindow::PluginUIWindow (
 	set_border_width (0);
 	set_default_size (w, h);
 	set_resizable (_pluginui->resizable());
+	unset_transient_for ();
 }
 
 PluginUIWindow::~PluginUIWindow ()
