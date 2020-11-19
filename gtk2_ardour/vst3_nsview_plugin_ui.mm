@@ -133,8 +133,7 @@ VST3NSViewPluginUI::view_size_allocate (Gtk::Allocation& allocation)
 		allocation.set_height (rect.bottom - rect.top);
 #endif
 		if (view->canResize() == kResultTrue) {
-			printf ("canResize\n");
-			//view->onSize (&rect); // crash here
+			view->onSize (&rect);
 		}
 	}
 
