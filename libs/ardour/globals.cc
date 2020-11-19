@@ -552,7 +552,6 @@ ARDOUR::init (bool try_optimization, const char* localedir, bool with_gui)
 	Operations::make_operations_quarks ();
 	SessionObject::make_property_quarks ();
 	Region::make_property_quarks ();
-	MidiRegion::make_property_quarks ();
 	AudioRegion::make_property_quarks ();
 	RouteGroup::make_property_quarks ();
 	Playlist::make_property_quarks ();

@@ -57,8 +57,6 @@ template<typename T> class MidiRingBuffer;
 class LIBARDOUR_API MidiRegion : public Region
 {
   public:
-	static void make_property_quarks ();
-
 	~MidiRegion();
 
 	bool do_export (std::string path) const;
