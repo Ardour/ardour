@@ -141,8 +141,6 @@ class LIBARDOUR_API MidiRegion : public Region
 
 	bool set_name (const std::string & str);
 
-	void set_start_internal (timecnt_t const &);
-
 	void model_changed ();
 	void model_contents_changed ();
 	void model_shifted (timecnt_t qn_distance);

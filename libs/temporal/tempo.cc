@@ -40,6 +40,7 @@ std::string Meter::xml_node_name = X_("Meter");
 
 superclock_t Temporal::superclock_ticks_per_second = 508032000; // 2^10 * 3^4 * 5^3 * 7^2
 
+SerializedRCUManager<TempoMap> TempoMap::_map_mgr (new TempoMap (Tempo (120.0), Meter (4, 4), 44100));
 thread_local TempoMap::SharedPtr TempoMap::_tempo_map_p;
 
 void
@@ -594,6 +595,22 @@ TempoMap::TempoMap (Tempo const & initial_tempo, Meter const & initial_meter, sa
 
 TempoMap::~TempoMap()
 {
+}
+
+TempoMap::TempoMap (TempoMap const & other)
+	: _sample_rate (other.sample_rate())
+	, _dirty (false)
+	, _generation (0)
+	, _time_domain (other.time_domain())
+	, _initial_tempo (other.metric_at (0).tempo())
+	, _initial_meter (other.metric_at (0).meter())
+	, _initial_music_time (*this)
+{
+#warning NUTEMPO since these lists are intrusive we must actually rebuild them
+	// _meters = other._meters;
+	// _bartimes = other._bartimes;
+	// _points = other._points;
+	// _tempos = other._tempos;
 }
 
 void

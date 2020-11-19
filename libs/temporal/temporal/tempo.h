@@ -625,6 +625,7 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 
    public:
 	TempoMap (Tempo const & initial_tempo, Meter const & initial_meter, samplecnt_t sr);
+	TempoMap (TempoMap const &);
 	~TempoMap();
 
 	void set_dirty (bool yn);
