@@ -862,6 +862,13 @@ AUPluginUI::cocoa_view_resized ()
             last_au_frame.origin.y != new_frame.origin.y) {
                 new_frame.origin = last_au_frame.origin;
                 [au_view setFrame:new_frame];
+
+		NSArray* subviews = [au_view subviews];
+		for (unsigned long i = 0; i < [subviews count]; ++i) {
+			NSView* subview = [subviews objectAtIndex:i];
+			[subview setFrame:NSMakeRect (0, 0, new_frame.size.width, new_frame.size.height)];
+		}
+
                 /* also be sure to redraw the topbox because this can
                    also go wrong.
                  */
@@ -1080,6 +1087,12 @@ AUPluginUI::parent_cocoa_window ()
 			GTK_WIDGET(low_box.get_parent()->gobj()),
 			0, 0, &xx, &yy);
 	[au_view setFrame:NSMakeRect(xx, yy, req_width, req_height)];
+
+	NSArray* subviews = [au_view subviews];
+	for (unsigned long i = 0; i < [subviews count]; ++i) {
+		NSView* subview = [subviews objectAtIndex:i];
+		[subview setFrame:NSMakeRect (0, 0, req_width, req_height)];
+	}
 
 	last_au_frame = [au_view frame];
 	// watch for size changes of the view
