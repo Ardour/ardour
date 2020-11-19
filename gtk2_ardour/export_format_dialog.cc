@@ -299,26 +299,26 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog)
 
 	g->attach (name_hbox, 0, 2, 0, 1, Gtk::EXPAND | Gtk::FILL, Gtk::SHRINK);
 
-	f = manage (new Gtk::Frame (_("Pre Process")));
+	f = Gtk::manage (new Gtk::Frame (_("Pre Process")));
 	f->add (silence_table);
 	g->attach (*f, 0, 1, 1, 2, Gtk::EXPAND | Gtk::FILL, Gtk::SHRINK);
-	f = manage (new Gtk::Frame (_("Watermark")));
+	f = Gtk::manage (new Gtk::Frame (_("Watermark")));
 	f->add (watermark_options_table);
 	g->attach (*f, 1, 2, 1, 2, Gtk::EXPAND | Gtk::FILL, Gtk::FILL);
 
-	f = manage (new Gtk::Frame (_("Format")));
+	f = Gtk::manage (new Gtk::Frame (_("Format")));
 	f->add (format_table);
 	g->attach (*f, 0, 1, 2, 3);
 
-	f = manage (new Gtk::Frame (_("Encoding")));
+	f = Gtk::manage (new Gtk::Frame (_("Encoding")));
 	f->add (encoding_options_vbox);
 	g->attach (*f, 1, 2, 2, 3);
 
-	f = manage (new Gtk::Frame (_("Metadata")));
+	f = Gtk::manage (new Gtk::Frame (_("Metadata")));
 	f->add (metadata_table);
 	g->attach (*f, 0, 2, 3, 4, Gtk::EXPAND | Gtk::FILL, Gtk::SHRINK);
 
-	f = manage (new Gtk::Frame (_("Post Export")));
+	f = Gtk::manage (new Gtk::Frame (_("Post Export")));
 	f->add (command_box);
 	g->attach (*f, 0, 2, 4, 5, Gtk::EXPAND | Gtk::FILL, Gtk::SHRINK);
 
