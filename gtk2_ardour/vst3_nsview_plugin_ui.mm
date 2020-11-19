@@ -106,7 +106,7 @@ void
 VST3NSViewPluginUI::view_size_allocate (Gtk::Allocation& allocation)
 {
 	IPlugView* view = _vst3->view ();
-	if (!view) {
+	if (!view || !_view_realized) {
 		return;
 	}
 
@@ -133,7 +133,8 @@ VST3NSViewPluginUI::view_size_allocate (Gtk::Allocation& allocation)
 		allocation.set_height (rect.bottom - rect.top);
 #endif
 		if (view->canResize() == kResultTrue) {
-			view->onSize (&rect);
+			printf ("canResize\n");
+			//view->onSize (&rect); // crash here
 		}
 	}
 
@@ -182,6 +183,7 @@ VST3NSViewPluginUI::view_realized ()
 
 	NSView* nsview = gdk_quartz_window_get_nsview (_gui_widget.get_window()->gobj());
 	[nsview addSubview:_ns_view];
+	_view_realized = true;
 	_gui_widget.queue_resize ();
 }
 

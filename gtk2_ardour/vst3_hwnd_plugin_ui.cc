@@ -65,6 +65,7 @@ VST3HWNDPluginUI::view_realized ()
 	if (kResultOk != view->attached (reinterpret_cast<void*> (hwnd), Steinberg::kPlatformTypeHWND)) {
 		assert (0);
 	}
+	_view_realized = true;
 
 	ViewRect rect;
 	if (view->getSize (&rect) == kResultOk) {
@@ -86,7 +87,7 @@ void
 VST3HWNDPluginUI::view_size_allocate (Gtk::Allocation& allocation)
 {
 	IPlugView* view = _vst3->view ();
-	if (!view) {
+	if (!view || !_view_realized) {
 		return;
 	}
 	PBD::Unwinder<bool> uw (_resize_in_progress, true);

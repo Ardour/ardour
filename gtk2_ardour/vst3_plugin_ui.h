@@ -58,6 +58,7 @@ protected:
 	int _req_height;
 
 	bool _resize_in_progress;
+	bool _view_realized;
 
 private:
 	void parameter_update ();

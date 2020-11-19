@@ -203,6 +203,7 @@ VST3X11PluginUI::view_realized ()
 	if (kResultOk != view->attached (reinterpret_cast<void*> (window), Steinberg::kPlatformTypeX11EmbedWindowID)) {
 		assert (0);
 	}
+	_view_realized = true;
 #if 0
 	_gui_widget.set_sensitive (true);
 	_gui_widget.set_can_focus (true);
@@ -228,7 +229,7 @@ void
 VST3X11PluginUI::view_size_allocate (Gtk::Allocation& allocation)
 {
 	IPlugView* view = _vst3->view ();
-	if (!view) {
+	if (!view || !_view_realized) {
 		return;
 	}
 	PBD::Unwinder<bool> uw (_resize_in_progress, true);
