@@ -132,7 +132,14 @@ VST3NSViewPluginUI::view_size_allocate (Gtk::Allocation& allocation)
 		allocation.set_width (rect.right - rect.left);
 		allocation.set_height (rect.bottom - rect.top);
 #endif
-		if (view->canResize() == kResultTrue) {
+		bool can_resize = true;
+#if 1 // quirks
+		/* Reason reports canResize() == kResultTrue, but crashes in onSize()
+		 * reported to reasonstudios.com on 2020-11-19 */
+		if (_vst3->unique_id() == "D75F65D1581F203A8D793B3C01583323" /* Reason Rack Plugin */) can_resize = false;
+		if (_vst3->unique_id() == "C64E2730B0614A6EAEFC432F9CF6151A" /* Reason Rack Plugin Effect */) can_resize = false;
+#endif
+		if (can_resize && view->canResize() == kResultTrue) {
 			view->onSize (&rect);
 		}
 	}
