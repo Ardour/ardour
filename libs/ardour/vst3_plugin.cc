@@ -1210,7 +1210,9 @@ VST3PI::terminate ()
 		_controller->release ();
 	}
 
-	_component->release ();
+	if (_component) {
+		_component->release ();
+	}
 
 	_controller = 0;
 	_component  = 0;
