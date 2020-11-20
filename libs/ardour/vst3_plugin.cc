@@ -623,13 +623,16 @@ VST3Plugin::connect_and_run (BufferSet&  bufs,
 	context.systemTime           = g_get_monotonic_time ();
 
 	{
-		TempoMap const&     tmap (_session.tempo_map ());
-		const Tempo&        t (tmap.tempo_at_sample (start));
-		const MeterSection& ms (tmap.meter_section_at_sample (start));
+		TempoMap const&            tmap (_session.tempo_map ());
+		const Tempo&               t (tmap.tempo_at_sample (start));
+		const Timecode::BBT_Time&  bbt (tmap.bbt_at_sample_rt (start));
+		const MeterSection&        ms (tmap.meter_section_at_sample (start));
+
 		context.tempo              = t.quarter_notes_per_minute ();
 		context.timeSigNumerator   = ms.divisions_per_bar ();
 		context.timeSigDenominator = ms.note_divisor ();
 		context.projectTimeMusic   = tmap.quarter_note_at_sample_rt (start);
+		context.barPositionMusic   = bbt.bars * 4; // PPQN, NOT tmap.metric_at(bbt).meter().divisions_per_bar()
 	}
 
 	const double tcfps                = _session.timecode_frames_per_second ();
