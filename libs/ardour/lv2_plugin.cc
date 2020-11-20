@@ -159,6 +159,7 @@ public:
 	LilvNode* ext_causesArtifacts;
 	LilvNode* ext_notAutomatic;
 	LilvNode* ext_rangeSteps;
+	LilvNode* ext_displayPriority;
 	LilvNode* groups_group;
 	LilvNode* groups_element;
 	LilvNode* lv2_AudioPort;
@@ -2278,7 +2279,8 @@ LV2Plugin::get_parameter_descriptor(uint32_t which, ParameterDescriptor& desc) c
 	lilv_port_get_range(_impl->plugin, port, &def, &min, &max);
 	portunits = lilv_port_get_value(_impl->plugin, port, _world.units_unit);
 
-	LilvNode* steps   = lilv_port_get(_impl->plugin, port, _world.ext_rangeSteps);
+	LilvNode* steps             = lilv_port_get(_impl->plugin, port, _world.ext_rangeSteps);
+	LilvNode* display_priority  = lilv_port_get(_impl->plugin, port, _world.ext_displayPriority);
 
 	// TODO: Once we can rely on lilv 0.18.0 being present,
 	// load_parameter_descriptor() can be used for ports as well
@@ -2291,6 +2293,7 @@ LV2Plugin::get_parameter_descriptor(uint32_t which, ParameterDescriptor& desc) c
 	desc.lower        = min ? lilv_node_as_float(min) : 0.0f;
 	desc.upper        = max ? lilv_node_as_float(max) : 1.0f;
 	load_parameter_descriptor_units(_world.world, desc, portunits);
+
 
 	if (desc.sr_dependent) {
 		desc.lower *= _session.sample_rate ();
@@ -2307,6 +2310,9 @@ LV2Plugin::get_parameter_descriptor(uint32_t which, ParameterDescriptor& desc) c
 	if (steps) {
 		desc.rangesteps = lilv_node_as_float (steps);
 	}
+	if (display_priority) {
+		desc.display_priority = lilv_node_as_int (display_priority);
+	}
 
 	desc.update_steps();
 
@@ -2314,6 +2320,7 @@ LV2Plugin::get_parameter_descriptor(uint32_t which, ParameterDescriptor& desc) c
 	lilv_node_free(min);
 	lilv_node_free(max);
 	lilv_node_free(steps);
+	lilv_node_free(display_priority);
 	lilv_nodes_free(portunits);
 
 	return 0;
@@ -3337,6 +3344,7 @@ LV2World::LV2World()
 	ext_causesArtifacts= lilv_new_uri(world, LV2_PORT_PROPS__causesArtifacts);
 	ext_notAutomatic   = lilv_new_uri(world, LV2_PORT_PROPS__notAutomatic);
 	ext_rangeSteps     = lilv_new_uri(world, LV2_PORT_PROPS__rangeSteps);
+	ext_displayPriority= lilv_new_uri(world, LV2_PORT_PROPS__displayPriority);
 	groups_group       = lilv_new_uri(world, LV2_PORT_GROUPS__group);
 	groups_element     = lilv_new_uri(world, LV2_PORT_GROUPS__element);
 	lv2_AudioPort      = lilv_new_uri(world, LILV_URI_AUDIO_PORT);
@@ -3445,6 +3453,7 @@ LV2World::~LV2World()
 	lilv_node_free(lv2_AudioPort);
 	lilv_node_free(groups_group);
 	lilv_node_free(groups_element);
+	lilv_node_free(ext_displayPriority);
 	lilv_node_free(ext_rangeSteps);
 	lilv_node_free(ext_notAutomatic);
 	lilv_node_free(ext_causesArtifacts);

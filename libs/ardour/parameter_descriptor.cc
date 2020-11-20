@@ -48,6 +48,7 @@ ParameterDescriptor::ParameterDescriptor(const Evoral::Parameter& parameter)
 	, sr_dependent(false)
 	, enumeration(false)
 	, inline_ctrl(false)
+	, display_priority(0)
 {
 	ScalePoints sp;
 
@@ -160,6 +161,7 @@ ParameterDescriptor::ParameterDescriptor()
 	, sr_dependent(false)
 	, enumeration(false)
 	, inline_ctrl(false)
+	, display_priority(0)
 {}
 
 void
