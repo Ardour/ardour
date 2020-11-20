@@ -629,6 +629,7 @@ VST3Plugin::connect_and_run (BufferSet&  bufs,
 		context.tempo              = t.quarter_notes_per_minute ();
 		context.timeSigNumerator   = ms.divisions_per_bar ();
 		context.timeSigDenominator = ms.note_divisor ();
+		context.projectTimeMusic   = tmap.quarter_note_at_sample_rt (start);
 	}
 
 	const double tcfps                = _session.timecode_frames_per_second ();
