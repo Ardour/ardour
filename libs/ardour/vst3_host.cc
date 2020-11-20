@@ -530,7 +530,7 @@ RAMStream::RAMStream (uint8_t* data, size_t size)
 	, _pos (0)
 	, _readonly (true)
 {
-	if (size > 0 && reallocate_buffer (_size, true)) {
+	if (_size > 0 && reallocate_buffer (_size, true)) {
 		memcpy (_data, data, _size);
 	} else {
 		_size = 0;
