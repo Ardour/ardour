@@ -950,7 +950,7 @@ AudioClock::set (samplepos_t when, bool force, samplecnt_t offset)
 void
 AudioClock::set_slave_info ()
 {
-	if (!_with_info) {
+	if (!_with_info || !_session) {
 		return;
 	}
 
