@@ -50,6 +50,7 @@
 #define ABSTRACT_UI_EXPORTS
 #endif
 #include "pbd/abstract_ui.h"
+#include "pbd/glib_event_source.h"
 #include "pbd/ringbufferNPT.h"
 #include "pbd/pool.h"
 #include "pbd/error.h"
@@ -170,6 +171,8 @@ protected:
 			Glib::RefPtr<Gtk::TextBuffer::Tag> ptag, Glib::RefPtr<Gtk::TextBuffer::Tag> mtag,
 			const char *msg);
 
+	virtual void event_loop_precall ();
+
 private:
 	static UI *theGtkUI;
 
@@ -203,6 +206,7 @@ private:
 
 	void do_request (UIRequest*);
 
+	GlibEventLoopCallback event_callback;
 };
 
 } /* namespace */

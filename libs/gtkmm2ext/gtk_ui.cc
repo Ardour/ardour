@@ -73,11 +73,17 @@ BaseUI::RequestType Gtkmm2ext::AddTimeout = BaseUI::new_request_type();
 
 template class AbstractUI<Gtkmm2ext::UIRequest>;
 
+void
+UI::event_loop_precall ()
+{
+}
+
 UI::UI (string application_name, string thread_name, int *argc, char ***argv)
 	: AbstractUI<UIRequest> (thread_name)
 	, _receiver (*this)
 	, global_bindings (0)
 	, errors (0)
+	, event_callback (boost::bind (&UI::event_loop_precall, this))
 {
 	theMain = new Main (argc, argv);
 
@@ -110,6 +116,12 @@ UI::UI (string application_name, string thread_name, int *argc, char ***argv)
 	/* we will be receiving requests */
 
 	EventLoop::register_request_buffer_factory ("gui", request_buffer_factory);
+
+	/*
+	 * every time the main loop runs (i.e. before any actual event handling
+	 */
+
+	event_callback.attach (MainContext::get_default());
 
 	/* attach our request source to the default main context */
 

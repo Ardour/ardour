@@ -85,6 +85,8 @@
 #include "pbd/scoped_file_descriptor.h"
 #include "pbd/xml++.h"
 
+#include "temporal/superclock.h"
+
 #include "gtkmm2ext/application.h"
 #include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/gtk_ui.h"
@@ -3110,4 +3112,16 @@ ARDOUR_UI::setup_toplevel_window (Gtk::Window& window, const string& name, void*
 	window.signal_window_state_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::tabbed_window_state_event_handler), owner));
 	window.signal_key_press_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::key_event_handler), &window), false);
 	window.signal_key_release_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::key_event_handler), &window), false);
+}
+
+void
+ARDOUR_UI::event_loop_precall ()
+{
+	std::cout << "ev precall\n";
+
+	if (_session) {
+		Temporal::_thread_sample_rate = _session->sample_rate ();
+	} else {
+		Temporal::_thread_sample_rate = 44100;
+	}
 }

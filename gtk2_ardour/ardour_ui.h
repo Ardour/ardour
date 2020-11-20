@@ -408,6 +408,8 @@ protected:
 	void toggle_rc_options_window ();
 	void toggle_session_options_window ();
 
+	void event_loop_precall ();
+
 private:
 
 	Gtk::Window   _main_window;
