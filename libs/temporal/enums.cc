@@ -21,6 +21,7 @@
 #include "pbd/enumwriter.h"
 
 #include "temporal/types.h"
+#include "temporal/tempo.h"
 
 using namespace PBD;
 using namespace Temporal;
@@ -35,6 +36,7 @@ setup_libtemporal_enums ()
 
 	Temporal::TimeDomain td;
 	Temporal::OverlapType _OverlapType;
+	Temporal::Tempo::Type _TempoType;
 
 #define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer.register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
@@ -53,10 +55,12 @@ setup_libtemporal_enums ()
 	REGISTER(_OverlapType);
 
 
+	REGISTER_ENUM (Tempo::Ramped);
+	REGISTER_ENUM (Tempo::Constant);
+	REGISTER (_TempoType);
 }
 
 void Temporal::init ()
 {
 	setup_libtemporal_enums ();
 }
-
