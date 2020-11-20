@@ -2250,7 +2250,7 @@ TempoMap::bbt_at_pulse_locked (const Metrics& metrics, const double& pulse) cons
  *
  */
 BBT_Time
-TempoMap::bbt_at_sample (samplepos_t sample)
+TempoMap::bbt_at_sample (samplepos_t sample) const
 {
 	if (sample < 0) {
 		BBT_Time bbt;
@@ -2271,7 +2271,7 @@ TempoMap::bbt_at_sample (samplepos_t sample)
 }
 
 BBT_Time
-TempoMap::bbt_at_sample_rt (samplepos_t sample)
+TempoMap::bbt_at_sample_rt (samplepos_t sample) const
 {
 	const double minute =  minute_at_sample (sample);
 

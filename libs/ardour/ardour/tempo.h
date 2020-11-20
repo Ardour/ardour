@@ -470,8 +470,8 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	/* bbt - it's nearly always better to use meter-based beat (above)
 	   unless tick resolution is desirable.
 	*/
-	Timecode::BBT_Time bbt_at_sample (samplepos_t when);
-	Timecode::BBT_Time bbt_at_sample_rt (samplepos_t when);
+	Timecode::BBT_Time bbt_at_sample (samplepos_t when) const;
+	Timecode::BBT_Time bbt_at_sample_rt (samplepos_t when) const;
 	samplepos_t sample_at_bbt (const Timecode::BBT_Time&);
 
 	double beat_at_bbt (const Timecode::BBT_Time& bbt);
