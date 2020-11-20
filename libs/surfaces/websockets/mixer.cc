@@ -243,7 +243,7 @@ ArdourMixerStrip::name () const
 bool
 ArdourMixerStrip::is_midi () const
 {
-	return _stripable->presentation_info ().flags () & PresentationInfo::Flag::MidiTrack;
+	return _stripable->presentation_info ().flags () & PresentationInfo::MidiTrack;
 }
 
 void
