@@ -18,8 +18,8 @@ function factory () return function ()
 	-- Range selection, individual ranges.
 	for ar in sel.time:iter () do
 		-- each of the items is a
-		-- http://manual.ardour.org/lua-scripting/class_reference/#ARDOUR:AudioRange
-		print ("Range:", ar.id, ar.start, ar._end)
+		-- http://manual.ardour.org/lua-scripting/class_reference/#ARDOUR:TimelineRange
+		print ("Range:", ar.id, ar.start_time, ar._end_time)
 	end
 
 	-- Track/Bus Selection
