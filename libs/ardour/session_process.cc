@@ -35,6 +35,8 @@
 
 #include <glibmm/threads.h>
 
+#include "temporal/superclock.h"
+
 #include "ardour/audioengine.h"
 #include "ardour/auditioner.h"
 #include "ardour/butler.h"
@@ -67,6 +69,12 @@ using namespace std;
 #define TFSM_LOCATE(target,ltd,loop,force) { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::Locate,target,ltd,loop,force)); }
 
 
+void
+Session::setup_thread_local_variables ()
+{
+	Temporal::_thread_sample_rate = sample_rate();
+}
+
 /** Called by the audio engine when there is work to be done with JACK.
  * @param nframes Number of samples to process.
  */
@@ -77,6 +85,8 @@ Session::process (pframes_t nframes)
 	TimerRAII tr (dsp_stats[OverallProcess]);
 
 	samplepos_t transport_at_start = _transport_sample;
+
+	setup_thread_local_variables ();
 
 	_silent = false;
 

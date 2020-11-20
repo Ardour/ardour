@@ -27,6 +27,8 @@
 #include "pbd/debug_rt_alloc.h"
 #include "pbd/pthread_utils.h"
 
+#include "temporal/superclock.h"
+
 #include "ardour/audioengine.h"
 #include "ardour/debug.h"
 #include "ardour/graph.h"
@@ -467,6 +469,7 @@ Graph::helper_thread ()
 	pt->get_buffers ();
 
 	while (!g_atomic_int_get (&_terminate)) {
+		setup_thread_local_variables ();
 		run_one ();
 	}
 
@@ -520,11 +523,18 @@ again:
 
 	/* After setup, the main-thread just becomes a normal worker */
 	while (!g_atomic_int_get (&_terminate)) {
+		setup_thread_local_variables ();
 		run_one ();
 	}
 
 	pt->drop_buffers ();
 	delete (pt);
+}
+
+void
+Graph::setup_thread_local_variables ()
+{
+	Temporal::_thread_sample_rate = _session.sample_rate ();
 }
 
 void
