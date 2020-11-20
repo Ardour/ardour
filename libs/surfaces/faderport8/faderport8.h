@@ -213,7 +213,10 @@ private:
 		{}
 		std::string name;
 		boost::shared_ptr<ARDOUR::AutomationControl> ac;
+
+		inline bool operator< (const ProcessorCtrl& other) const;
 	};
+
 	std::list <ProcessorCtrl> _proc_params;
 	boost::weak_ptr<ARDOUR::PluginInsert> _plugin_insert;
 	bool _show_presets;

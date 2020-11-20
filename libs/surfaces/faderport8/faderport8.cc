@@ -88,6 +88,17 @@ debug_2byte_msg (std::string const& msg, int b0, int b1)
 #endif
 }
 
+bool
+FaderPort8::ProcessorCtrl::operator< (const FaderPort8::ProcessorCtrl& other) const
+{
+	if (ac->desc().display_priority == other.ac->desc().display_priority) {
+		return ac->parameter () < other.ac->parameter ();
+	}
+	/* sort higher priority first */
+	return ac->desc().display_priority > other.ac->desc().display_priority;
+}
+
+
 FaderPort8::FaderPort8 (Session& s)
 #ifdef FADERPORT16
 	: ControlProtocol (s, _("PreSonus FaderPort16"))
@@ -1178,7 +1189,7 @@ FaderPort8::assign_processor_ctrls ()
 	std::vector <ProcessorCtrl*> toggle_params;
 	std::vector <ProcessorCtrl*> slider_params;
 
-	for ( std::list <ProcessorCtrl>::iterator i = _proc_params.begin(); i != _proc_params.end(); ++i) {
+	for (std::list<ProcessorCtrl>::iterator i = _proc_params.begin(); i != _proc_params.end(); ++i) {
 		if ((*i).ac->toggled()) {
 			toggle_params.push_back (&(*i));
 		} else {
@@ -1398,8 +1409,12 @@ FaderPort8::select_plugin (int num)
 		if (n == "hidden") {
 			continue;
 		}
+
 		_proc_params.push_back (ProcessorCtrl (n, proc->automation_control (*i)));
 	}
+
+	/* sort by display priority */
+	_proc_params.sort ();
 
 	// TODO: open plugin GUI  if (_proc_params.size() > 0)
 
