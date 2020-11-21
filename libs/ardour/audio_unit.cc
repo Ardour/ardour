@@ -2624,6 +2624,7 @@ AUPluginInfo::load (Session& session)
 
 		if (!comp->IsValid()) {
 			error << ("AudioUnit: not a valid Component") << endmsg;
+			return PluginPtr ();
 		} else {
 			plugin.reset (new AUPlugin (session.engine(), session, comp));
 		}

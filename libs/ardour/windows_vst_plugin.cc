@@ -85,6 +85,7 @@ WindowsVSTPluginInfo::load (Session& session)
 
 			if (!handle) {
 				error << string_compose(_("VST: cannot load module from \"%1\""), path) << endmsg;
+				return PluginPtr ((Plugin*) 0);
 			} else {
 				plugin.reset (new WindowsVSTPlugin (session.engine(), session, handle, PBD::atoi(unique_id)));
 			}
