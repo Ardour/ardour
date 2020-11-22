@@ -131,6 +131,7 @@ PortExportChannel::read (Sample const *& data, samplecnt_t samples) const
 		if (to_write > 0) {
 			mix_buffers_no_gain (&_buffer[vec.len[0]], vec.buf[1], to_write);
 		}
+		(*di)->increment_read_idx (samples);
 
 		++di;
 	}
