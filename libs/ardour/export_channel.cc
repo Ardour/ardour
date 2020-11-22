@@ -127,7 +127,8 @@ PortExportChannel::read (Sample const *& data, samplecnt_t samples) const
 
 		samplecnt_t to_write = std::min (samples, (samplecnt_t) vec.len[0]);
 		mix_buffers_no_gain (&_buffer[0], vec.buf[0], to_write);
-		to_write = std::min (to_write - samples, (samplecnt_t) vec.len[1]);
+
+		to_write = std::min (samples - to_write, (samplecnt_t) vec.len[1]);
 		if (to_write > 0) {
 			mix_buffers_no_gain (&_buffer[vec.len[0]], vec.buf[1], to_write);
 		}
