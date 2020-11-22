@@ -366,9 +366,9 @@ def enoify (major, minor):
             return "\\n\\\"Thursday Afternoon\\\"" # 1985
         elif minor == 3:
             return "\\n\\\"Hybrid\\\"" # 1985 Collaborative
-        elif minor == 4:
+        elif minor == 4 or minor == 5: # (there was on 6.4 release)
             return "\\n\\\"Old Land\\\"" # 1985 Compilation
-        elif minor == 5:
+        elif minor == 6:
             return "\\n\\\"Desert Island Selection\\\"" # 1986 Compilation
     elif major == 7:
         if minor == 0:
