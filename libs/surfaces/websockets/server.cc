@@ -150,6 +150,13 @@ WebsocketsServer::start ()
 	}
 #endif
 
+	PBD::info << "ArdourWebsockets: listening on: http://"
+	          << lws_canonical_hostname (_lws_context)
+	          << ":"
+	          << std::dec << (int) WEBSOCKET_LISTEN_PORT
+	          << "/"
+	          << endmsg;
+
 	return 0;
 }
 
