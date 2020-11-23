@@ -197,17 +197,21 @@ void
 RcActionButton::add_to_page (OptionEditorPage *p)
 {
 	int const n = p->table.property_n_rows();
-	const int m = n + 1;
+	int m = n + 1;
+	if (!_note.empty ()) {
+		++m;
+	}
 	p->table.resize (m, 3);
 	Alignment* a = manage (new Alignment (0, 0.5, 0, 1.0));
 	a->add (*_button);
 
 	if (_label) {
-		p->table.attach (*_label,  1, 2, n, m);
-		p->table.attach (*a, 2, 3, n, m, FILL|EXPAND);
+		p->table.attach (*_label,  1, 2, n, n + 1);
+		p->table.attach (*a, 2, 3, n, n + 1, FILL|EXPAND);
 	} else {
-		p->table.attach (*a, 1, 3, n, m, FILL|EXPAND);
+		p->table.attach (*a, 1, 3, n, n + 1, FILL|EXPAND);
 	}
+	maybe_add_note (p, n + 1);
 }
 
 /*--------------------------*/
