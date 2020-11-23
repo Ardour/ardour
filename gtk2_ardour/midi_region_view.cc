@@ -2931,10 +2931,8 @@ MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_
 				snapped_x = trackview.editor ().pixel_to_sample (current_x); /* samples */
 			}
 
-#warning NUTEMPO need new tempo map API
-			//TempoMap& tmap (trackview.session()->tempo_map());
-			//const timepos_t abs_beats (tmap.quarter_note_at (snapped_x));
-			const timepos_t abs_beats;
+			Temporal::TempoMap& tmap (trackview.session()->tempo_map());
+			const timepos_t abs_beats (tmap.quarter_note_at (snapped_x));
 			const Temporal::Beats beats = _region->absolute_time_to_source_beats (abs_beats);
 			Temporal::Beats len         = Temporal::Beats();
 

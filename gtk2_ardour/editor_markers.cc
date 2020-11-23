@@ -1466,9 +1466,9 @@ Editor::marker_menu_edit ()
 	dynamic_cast_marker_object (marker_menu_item->get_data ("marker"), &mm, &tm);
 
 	if (mm) {
-		edit_meter_section (&mm->meter());
+		edit_meter_section (mm->meter());
 	} else if (tm) {
-		edit_tempo_section (&tm->tempo());
+		edit_tempo_section (tm->tempo());
 	}
 }
 

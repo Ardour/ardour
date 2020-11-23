@@ -501,9 +501,9 @@ Editor::remove_tempo_marker (ArdourCanvas::Item* item)
 }
 
 void
-Editor::edit_meter_section (Temporal::MeterPoint* section)
+Editor::edit_meter_section (Temporal::MeterPoint& section)
 {
-	MeterDialog meter_dialog (_session->tempo_map(), *section, _("done"));
+	MeterDialog meter_dialog (_session->tempo_map(), section, _("done"));
 
 	switch (meter_dialog.run()) {
 	case RESPONSE_ACCEPT:
@@ -532,9 +532,9 @@ Editor::edit_meter_section (Temporal::MeterPoint* section)
 }
 
 void
-Editor::edit_tempo_section (TempoPoint* section)
+Editor::edit_tempo_section (TempoPoint& section)
 {
-	TempoDialog tempo_dialog (_session->tempo_map(), *section, _("done"));
+	TempoDialog tempo_dialog (_session->tempo_map(), section, _("done"));
 
 	switch (tempo_dialog.run ()) {
 	case RESPONSE_ACCEPT:
@@ -565,13 +565,13 @@ Editor::edit_tempo_section (TempoPoint* section)
 void
 Editor::edit_tempo_marker (TempoMarker& tm)
 {
-	edit_tempo_section (&tm.tempo());
+	edit_tempo_section (tm.tempo());
 }
 
 void
 Editor::edit_meter_marker (MeterMarker& mm)
 {
-	edit_meter_section (&mm.meter());
+	edit_meter_section (mm.meter());
 }
 
 gint

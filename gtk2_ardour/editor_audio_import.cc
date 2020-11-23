@@ -298,18 +298,16 @@ Editor::import_smf_tempo_map (Evoral::SMF const & smf, timepos_t const & pos)
 		Temporal::BBT_Time bbt; /* 1|1|0 which is correct for the no-meter case */
 
 		if (have_initial_meter) {
-#warning NUTEMPO check API for this
-			// new_map.add_tempo (tempo, t->time_pulses/ (double)smf.ppqn() / 4.0, 0, BeatTime);
+#warning NUTEMPO figure this out when i have a brain
+			// new_map.set_tempo (tempo, Temporal::Beats (t->time_pulses/ (double)smf.ppqn() / 4.0);
 			if (!(meter == last_meter)) {
 				bbt = new_map.bbt_at (Beats::from_double (t->time_pulses/(double)smf.ppqn()));
-#warning NUTEMPO check API for this
-				//new_map.add_meter (meter, bbt, 0, MusicTime);
+				new_map.set_meter (meter, bbt);
 			}
 
 		} else {
-#warning NUTEMPO needs new tempo map API
-			//new_map.replace_meter (new_map.meter_section_at_sample (0), meter, bbt, pos, AudioTime);
-			//new_map.replace_tempo (new_map.tempo_section_at_sample (0), tempo, 0.0, pos, AudioTime);
+				new_map.set_meter (meter, bbt);
+			new_map.set_tempo (tempo, bbt);
 			have_initial_meter = true;
 
 		}

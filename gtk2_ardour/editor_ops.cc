@@ -49,6 +49,8 @@
 #include "pbd/whitespace.h"
 #include "pbd/stateful_diff_command.h"
 
+#include "temporal/tempo.h"
+
 #include "gtkmm2ext/utils.h"
 
 #include "widgets/choice.h"
@@ -7080,9 +7082,7 @@ Editor::define_one_bar (timepos_t const & start, timepos_t const & end)
 {
 	timecnt_t length = start.distance (end);
 
-#warning NUTEMPO need new map API
-#if 0
-	const Meter& m (_session->tempo_map().meter_at_sample (start));
+	const Meter& m (_session->tempo_map().meter_at (start));
 
 	/* length = 1 bar */
 
@@ -7093,11 +7093,11 @@ Editor::define_one_bar (timepos_t const & start, timepos_t const & end)
 	*/
 
 	/* XXXX METER MATH */
-	double samples_per_beat = length / m.divisions_per_bar();
+	double superclocks_per_beat = length.superclocks() / m.divisions_per_bar();
 
 	/* beats per minute = */
 
-	double beats_per_minute = (_session->sample_rate() * 60.0) / samples_per_beat;
+	double beats_per_minute = (superclock_ticks_per_second * 60.0) / superclocks_per_beat;
 
 	/* now decide whether to:
 
@@ -7106,7 +7106,7 @@ Editor::define_one_bar (timepos_t const & start, timepos_t const & end)
 
 	*/
 
-	const TempoSection& t (_session->tempo_map().tempo_section_at_sample (start));
+	const TempoPoint& t (_session->tempo_map().tempo_at (start));
 
 	bool do_global = false;
 
@@ -7153,20 +7153,19 @@ Editor::define_one_bar (timepos_t const & start, timepos_t const & end)
 	XMLNode& before (_session->tempo_map().get_state());
 
 	if (do_global) {
-		_session->tempo_map().change_initial_tempo (beats_per_minute, t.note_type(), t.end_note_types_per_minute());
-	} else if (t.sample() == start) {
-		_session->tempo_map().change_existing_tempo_at (start, beats_per_minute, t.note_type(), t.end_note_types_per_minute());
+		_session->tempo_map().set_tempo (Tempo (beats_per_minute, t.end_note_types_per_minute(), t.note_type()), timepos_t());
+	} else if (t.time() == start) {
+		_session->tempo_map().set_tempo (Tempo (beats_per_minute, t.end_note_types_per_minute(), t.note_type()), start);
 	} else {
 		/* constant tempo */
 		const Tempo tempo (beats_per_minute, t.note_type());
-		_session->tempo_map().add_tempo (tempo, 0.0, start, Temporal::AudioTime);
+		_session->tempo_map().set_tempo (tempo, start);
 	}
 
 	XMLNode& after (_session->tempo_map().get_state());
 
 	_session->add_command (new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
 	commit_reversible_command ();
-#endif
 }
 
 void
