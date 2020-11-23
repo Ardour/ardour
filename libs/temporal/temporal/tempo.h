@@ -676,6 +676,18 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 	TempoMetric metric_at (Beats const &b) const;
 	TempoMetric metric_at (BBT_Time const & bbt) const;
 
+	/* essentially convenience methods */
+
+	MeterPoint& meter_at (timepos_t const & p) const { return metric_at (p).meter(); }
+	MeterPoint& meter_at (superclock_t sc) const { return metric_at (sc).meter(); }
+	MeterPoint& meter_at (Beats const &b) const { return metric_at (b).meter(); }
+	MeterPoint& meter_at (BBT_Time const & bbt) const { return metric_at (bbt).meter(); }
+
+	TempoPoint& tempo_at (timepos_t const & p) const { return metric_at (p).tempo(); }
+	TempoPoint& tempo_at (superclock_t sc) const { return metric_at (sc).tempo(); }
+	TempoPoint& tempo_at (Beats const &b) const { return metric_at (b).tempo(); }
+	TempoPoint& tempo_at (BBT_Time const & bbt) const { return metric_at (bbt).tempo(); }
+
 	TempoPoint const * previous_tempo (TempoPoint const &) const;
 
 	/* convenience function */
