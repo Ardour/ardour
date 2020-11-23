@@ -3713,15 +3713,19 @@ RCOptionEditor::RCOptionEditor ()
 				sigc::mem_fun (*this, &RCOptionEditor::clear_vst3_blacklist),
 				_("VST 3 Blacklist:")));
 
-	add_option (_("Plugins/VST"),
+	RcActionButton* vst3_path =
 			new RcActionButton (_("Edit"),
 				sigc::bind (sigc::mem_fun (*this, &RCOptionEditor::edit_vst_path),
 					_("Set Additional VST3 Search Path"),
 					PluginManager::instance().get_default_windows_vst_path (),
-					sigc::mem_fun (*_rc_config, &RCConfiguration::get_plugin_path_vst),
-					sigc::mem_fun (*_rc_config, &RCConfiguration::set_plugin_path_vst)
+					sigc::mem_fun (*_rc_config, &RCConfiguration::get_plugin_path_vst3),
+					sigc::mem_fun (*_rc_config, &RCConfiguration::set_plugin_path_vst3)
 					),
-				_("Additional VST3 Path:")));
+				_("Additional VST3 Path:"));
+
+	vst3_path->set_note (_("Customizing VST3 paths is discouraged. Note that default VST3 paths as per <a href=\"https://steinbergmedia.github.io/vst3_doc/vstinterfaces/vst3loc.html#pluginloc\">specification</a> are always searched, and need not be explicitly set."));
+	add_option (_("Plugins/VST"), vst3_path);
+
 
 
 #if (defined WINDOWS_VST_SUPPORT || defined MACVST_SUPPORT || defined LXVST_SUPPORT)
