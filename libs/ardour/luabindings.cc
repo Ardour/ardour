@@ -259,7 +259,8 @@ CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::PluginInfo> >); // PluginInfoList
 
 CLASSKEYS(std::list<ArdourMarker*>);
 CLASSKEYS(std::list<TimeAxisView*>);
-CLASSKEYS(std::list<ARDOUR::AudioRange>);
+CLASSKEYS(std::list<ARDOUR::TimelineRange>);
+
 CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Port> >);
 CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Region> >);
 CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Route> >);
