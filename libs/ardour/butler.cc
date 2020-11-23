@@ -31,6 +31,8 @@
 #include "pbd/error.h"
 #include "pbd/pthread_utils.h"
 
+#include "temporal/superclock.h"
+
 #include "ardour/butler.h"
 #include "ardour/debug.h"
 #include "ardour/disk_io.h"
@@ -208,6 +210,7 @@ Butler::thread_work ()
 			}
 		}
 
+		Temporal::_thread_sample_rate = _session.sample_rate ();
 
 	  restart:
 		DEBUG_TRACE (DEBUG::Butler, "at restart for disk work\n");
