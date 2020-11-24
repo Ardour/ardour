@@ -64,6 +64,7 @@ using namespace ArdourWidgets;
 using namespace PBD;
 using namespace Gtk;
 using namespace std;
+using namespace Temporal;
 
 using Gtkmm2ext::Keyboard;
 
@@ -1226,8 +1227,7 @@ AudioClock::set_bbt (timepos_t const & w, timecnt_t const & o, bool /*force*/)
 	}
 
 	/* handle a common case */
-#warning NUTEMPO FIXME new tempo map API
-#if 0
+
 	if (is_duration) {
 		if (when.zero()) {
 			BBT.bars = 0;
@@ -1240,15 +1240,15 @@ AudioClock::set_bbt (timepos_t const & w, timecnt_t const & o, bool /*force*/)
 				offset = timecnt_t (bbt_reference_time);
 			}
 
-			const double divisions = tmap.meter_section_at_sample (offset).divisions_per_bar();
+			const int divisions = tmap.meter_at (timepos_t (offset)).divisions_per_bar();
 			Temporal::BBT_Time sub_bbt;
 
 			if (negative) {
-				BBT = tmap.bbt_at_beat (tmap.beat_at_sample (offset));
-				sub_bbt = tmap.bbt_at_sample (offset - when);
+				BBT = tmap.bbt_at (tmap.quarter_note_at (timepos_t (offset)));
+				sub_bbt = tmap.bbt_at (timepos_t (offset - when));
 			} else {
-				BBT = tmap.bbt_at_beat (tmap.beat_at_sample (when + offset));
-				sub_bbt = tmap.bbt_at_sample (offset);
+				BBT = tmap.bbt_at (tmap.quarter_note_at (when + offset));
+				sub_bbt = tmap.bbt_at (timepos_t (offset));
 			}
 
 			BBT.bars -= sub_bbt.bars;
@@ -1273,9 +1273,9 @@ AudioClock::set_bbt (timepos_t const & w, timecnt_t const & o, bool /*force*/)
 			}
 		}
 	} else {
-		BBT = _session->tempo_map().bbt_at_sample (when);
+		BBT = _session->tempo_map().bbt_at (when);
 	}
-#endif
+
 	if (negative) {
 		snprintf (buf, sizeof (buf), "-%03" PRIu32 BBT_BAR_CHAR "%02" PRIu32 BBT_BAR_CHAR "%04" PRIu32,
 			  BBT.bars, BBT.beats, BBT.ticks);
@@ -1295,28 +1295,25 @@ AudioClock::set_bbt (timepos_t const & w, timecnt_t const & o, bool /*force*/)
 			pos = bbt_reference_time;
 		}
 
-#warning NUTEMPO FIXME new tempo map API
-#if 0
 		TempoMetric m (_session->tempo_map().metric_at (pos));
 
 #ifndef PLATFORM_WINDOWS
 		/* UTF8 1/4 note and 1/8 note ♩ (\u2669) and ♪ (\u266a) are n/a on Windows */
 		if (m.tempo().note_type() == 4) {
-			snprintf (buf, sizeof(buf), "\u2669 = %.3f", _session->tempo_map().tempo_at_sample (pos).note_types_per_minute());
+			snprintf (buf, sizeof(buf), "\u2669 = %.3f", m.tempo().note_types_per_minute());
 			_left_btn.set_text (string_compose ("%1", buf), false);
 		} else if (m.tempo().note_type() == 8) {
-			snprintf (buf, sizeof(buf), "\u266a = %.3f", _session->tempo_map().tempo_at_sample (pos).note_types_per_minute());
+			snprintf (buf, sizeof(buf), "\u266a = %.3f", m.tempo().note_types_per_minute());
 			_left_btn.set_text (string_compose ("%1", buf), false);
 		} else
 #endif
 		{
-			snprintf (buf, sizeof(buf), "1/%.0f = %.3f", m.tempo().note_type(), _session->tempo_map().tempo_at_sample (pos).note_types_per_minute());
+			snprintf (buf, sizeof(buf), "1/%.0f = %.3f", m.tempo().note_type(), m.tempo().note_types_per_minute());
 			_left_btn.set_text (buf, false);
 		}
 
-		snprintf (buf, sizeof(buf), "%g/%g", m.meter().divisions_per_bar(), m.meter().note_divisor());
+		snprintf (buf, sizeof(buf), "%d/%d", m.meter().divisions_per_bar(), m.meter().note_value());
 		_right_btn.set_text (string_compose ("%1: %2", S_("TimeSignature|TS"), buf), false);
-#endif
 	}
 }
 
@@ -1914,22 +1911,19 @@ AudioClock::get_sample_step (Field field, timepos_t const & pos, int dir)
 		BBT.bars = 1;
 		BBT.beats = 0;
 		BBT.ticks = 0;
-#warning NUTEMPO FIXME new tempo map API
-		//f = _session->tempo_map().bbt_duration_at (pos,BBT,dir);
+		f = _session->tempo_map().bbt_duration_at (pos,BBT).samples();
 		break;
 	case Beats:
 		BBT.bars = 0;
 		BBT.beats = 1;
 		BBT.ticks = 0;
-#warning NUTEMPO FIXME new tempo map API
-		//f = _session->tempo_map().bbt_duration_at(pos,BBT,dir);
+		f = _session->tempo_map().bbt_duration_at(pos,BBT).samples();
 		break;
 	case Ticks:
 		BBT.bars = 0;
 		BBT.beats = 0;
 		BBT.ticks = 1;
-#warning NUTEMPO FIXME new tempo map API
-		//f = _session->tempo_map().bbt_duration_at(pos,BBT,dir);
+		f = _session->tempo_map().bbt_duration_at(pos,BBT).samples();
 		break;
 	default:
 		error << string_compose (_("programming error: %1"), "attempt to get samples from non-text field!") << endmsg;
@@ -2111,21 +2105,18 @@ AudioClock::samples_from_bbt_string (timepos_t const & pos, const string& str) c
 		return 0;
 	}
 
-	AnyTime any;
-	any.type = AnyTime::BBT;
+	BBT_Time bbt;
 
-	if (sscanf (str.c_str(), BBT_SCANF_FORMAT, &any.bbt.bars, &any.bbt.beats, &any.bbt.ticks) != 3) {
+	if (sscanf (str.c_str(), BBT_SCANF_FORMAT, &bbt.bars, &bbt.beats, &bbt.ticks) != 3) {
 		return 0;
 	}
 
 	if (is_duration) {
-		any.bbt.bars++;
-		any.bbt.beats++;
-#warning NUTEMPO new tempo map/session API
-		//return _session->any_duration_to_samples (pos, any);
-		return 0;
+		bbt.bars++;
+		bbt.beats++;
+		return _session->tempo_map().bbt_duration_at (pos, bbt).samples();
 	} else {
-		return _session->convert_to_samples (any);
+		return _session->tempo_map().sample_at (bbt, _session->sample_rate());
 	}
 }
 
@@ -2144,9 +2135,7 @@ AudioClock::sample_duration_from_bbt_string (timepos_t const & pos, const string
 		return 0;
 	}
 
-#warning NUTEMPO new tempo map API
-	//return _session->tempo_map().bbt_duration_at(pos,bbt,1);
-	return 0;
+	return _session->tempo_map().bbt_duration_at(pos,bbt).samples();
 }
 
 samplepos_t

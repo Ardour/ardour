@@ -2466,18 +2466,21 @@ TempoMap::can_remove (MeterPoint const & m) const
 	return !is_initial (m);
 }
 
-/** returns the sample duration of the supplied BBT time at a specified sample position in the tempo map.
+/** returns the duration (using the domain of @param pos) of the supplied BBT time at a specified sample position in the tempo map.
  * @param pos the frame position in the tempo map.
  * @param bbt the distance in BBT time from pos to calculate.
  * @param dir the rounding direction..
- * @return the duration in superclocks between pos and bbt
+ * @return the timecnt_t that @param bbt represents when starting at @param pos, in
+ * the time domain of @param pos
 */
-superclock_t
-TempoMap::bbt_duration_at (superclock_t pos, const BBT_Time& bbt, int /* dir_ignored */ ) const
+timecnt_t
+TempoMap::bbt_duration_at (timepos_t const & pos, BBT_Offset const & dur) const
 {
-#warning paul maybe get rid of this
-	// return full_duration_at (pos, timecnt_t (bbt, pos), AudioTime).sclock();
-	return 0;
+	if (pos.time_domain() == AudioTime) {
+		return timecnt_t::from_superclock (superclock_at (bbt_walk (bbt_at (pos), dur)) - pos.superclocks(), pos);
+	}
+	return timecnt_t (bbtwalk_to_quarters (pos.beats(), dur) - pos.beats(), pos);
+
 }
 
 /** Takes a duration (in any time domain) and considers it as a distance from the given position.

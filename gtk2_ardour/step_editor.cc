@@ -34,6 +34,7 @@
 using namespace ARDOUR;
 using namespace Gtk;
 using namespace std;
+using namespace Temporal;
 
 StepEditor::StepEditor (PublicEditor& e, boost::shared_ptr<MidiTrack> t, MidiTimeAxisView& mtv)
 	: _editor (e)
@@ -115,15 +116,9 @@ StepEditor::prepare_step_edit_region ()
 
 	} else {
 
-#warning NUTEMPO new tempo map API
-#if 0
-		const Meter& m = _mtv.session()->tempo_map().meter_at_sample (step_edit_insert_position);
-		double baf = max (0.0, _mtv.session()->tempo_map().beat_at_sample (step_edit_insert_position));
-		double next_bar_in_beats =  baf + m.divisions_per_bar();
-		samplecnt_t next_bar_pos = _mtv.session()->tempo_map().sample_at_beat (next_bar_in_beats);
-		samplecnt_t len = next_bar_pos - step_edit_insert_position;
-		step_edit_region = _mtv.add_region (step_edit_insert_position, len, true);
-#endif
+		const Meter& m = _mtv.session()->tempo_map().meter_at (step_edit_insert_position);
+		/* 1 bar long region */
+		step_edit_region = _mtv.add_region (step_edit_insert_position, timecnt_t (Beats::beats (m.divisions_per_bar()), step_edit_insert_position), true);
 
 		RegionView* rv = _mtv.midi_view()->find_view (step_edit_region);
 		step_edit_region_view = dynamic_cast<MidiRegionView*>(rv);

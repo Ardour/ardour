@@ -729,7 +729,7 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 	superclock_t superclock_quarters_delta_as_superclock (superclock_t start, Beats const & distance) const;
 	superclock_t superclock_plus_bbt (superclock_t pos, BBT_Time op) const;
 
-	superclock_t bbt_duration_at (superclock_t pos, const BBT_Time& bbt, int dir) const;
+	timecnt_t bbt_duration_at (timepos_t const & pos, BBT_Offset const & bbt) const;
 	Beats bbtwalk_to_quarters (Beats const & start, BBT_Offset const & distance) const;
 
 	superclock_t superclock_per_quarter_note_at (superclock_t) const;

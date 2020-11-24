@@ -414,24 +414,22 @@ Editor::mouse_add_new_tempo_event (timepos_t pos)
 		return;
 	}
 
-#warning NUTEMPO requires new tempo map API
-#if 0
 	TempoMap& map(_session->tempo_map());
 
 	begin_reversible_command (_("add tempo mark"));
 
-	const double pulse = map.exact_qn_at_sample (sample, get_grid_music_divisions (0)) / 4.0;
+	const Beats qn = map.quarter_note_at (pos);
 
-	if (pulse > 0.0) {
+	if (qn > Beats()) {
 		XMLNode &before = map.get_state();
 		/* add music-locked ramped (?) tempo using the bpm/note type at sample*/
-		map.add_tempo (map.tempo_at_sample (sample), pulse, 0, MusicTime);
+		map.set_tempo (map.tempo_at (pos), qn);
 
 		XMLNode &after = map.get_state();
 		_session->add_command(new MementoCommand<TempoMap>(map, &before, &after));
 		commit_reversible_command ();
 	}
-#endif
+
 	//map.dump (cerr);
 }
 
