@@ -8275,8 +8275,6 @@ Editor::remove_time (timepos_t const & pos, timecnt_t const & duration, InsertTi
 	if (tempo_too) {
 		XMLNode& before (_session->tempo_map().get_state());
 
-#warning NUTEMPO need new map API
-#if 0
 		if (_session->tempo_map().remove_time (pos, duration)) {
 			if (!in_command) {
 				begin_reversible_command (_("remove time"));
@@ -8285,7 +8283,6 @@ Editor::remove_time (timepos_t const & pos, timecnt_t const & duration, InsertTi
 			XMLNode& after (_session->tempo_map().get_state());
 			_session->add_command (new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
 		}
-#endif
 	}
 
 	if (in_command) {

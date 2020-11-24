@@ -44,7 +44,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Temporal;
 
-TempoDialog::TempoDialog (TempoMap& map, samplepos_t sample, const string&)
+TempoDialog::TempoDialog (TempoMap& map, timepos_t const & pos, const string&)
 	: ArdourDialog (_("New Tempo"))
 	, _map (&map)
 	, _section (0)
@@ -58,9 +58,8 @@ TempoDialog::TempoDialog (TempoMap& map, samplepos_t sample, const string&)
 	, pulse_selector_label (_("Pulse:"), ALIGN_LEFT, ALIGN_CENTER)
 	, tap_tempo_button (_("Tap tempo"))
 {
-	TempoMetric metric (map.metric_at (sample));
-	Temporal::BBT_Time when (metric.bbt_at (sample));
-	Tempo& tempo (metric.tempo());
+	Temporal::BBT_Time when (_map->bbt_at (pos));
+	Tempo& tempo (_map->tempo_at (pos));
 
 	init (when, tempo.note_types_per_minute(), tempo.end_note_types_per_minute(), tempo.note_type(), Tempo::Constant, true, BeatTime);
 }
@@ -488,17 +487,13 @@ TempoDialog::tap_tempo_focus_out (GdkEventFocus* )
 	return false;
 }
 
-MeterDialog::MeterDialog (TempoMap& map, samplepos_t sample, const string&)
+MeterDialog::MeterDialog (TempoMap& map, timepos_t const & pos, const string&)
 	: ArdourDialog (_("New Meter"))
 {
-#warning NUTEMPO needs new map API
-#if 0
-	sample = map.round_to_bar(sample, RoundNearest).sample;
-	Temporal::BBT_Time when (map.bbt_at_sample (sample));
-	Meter meter (map.meter_at_sample (sample));
+	Temporal::BBT_Time when (map.round_to_bar (map.bbt_at (pos)));
+	Meter& meter (map.meter_at (when));
 
-	init (when, meter.divisions_per_bar(), meter.note_divisor(), false, MusicTime);
-#endif
+	init (when, meter.divisions_per_bar(), meter.note_value(), false, pos.time_domain());
 }
 
 MeterDialog::MeterDialog (TempoMap& map, Temporal::MeterPoint& section, const string&)

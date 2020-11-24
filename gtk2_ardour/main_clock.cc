@@ -150,18 +150,14 @@ void
 MainClock::edit_current_tempo ()
 {
 	if (!PublicEditor::instance().session()) return;
-#warning NUTEMPO needs new map API
-	//ARDOUR::TempoSection* ts = const_cast<ARDOUR::TempoSection*>(&PublicEditor::instance().session()->tempo_map().tempo_section_at_sample (absolute_time()));
-	//PublicEditor::instance().edit_tempo_section (ts);
+	PublicEditor::instance().edit_tempo_section (PublicEditor::instance().session()->tempo_map().tempo_at (absolute_time()));
 }
 
 void
 MainClock::edit_current_meter ()
 {
 	if (!PublicEditor::instance().session()) return;
-#warning NUTEMPO needs new map API
-	//ARDOUR::MeterSection* ms = const_cast<ARDOUR::MeterSection*>(&PublicEditor::instance().session()->tempo_map().meter_section_at_sample (absolute_time()));
-	//PublicEditor::instance().edit_meter_section (ms);
+	PublicEditor::instance().edit_meter_section (PublicEditor::instance().session()->tempo_map().meter_at (absolute_time()));
 }
 
 void

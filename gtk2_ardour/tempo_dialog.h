@@ -43,7 +43,7 @@
 class TempoDialog : public ArdourDialog
 {
 public:
-	TempoDialog (Temporal::TempoMap&, samplepos_t, const std::string & action);
+	TempoDialog (Temporal::TempoMap&, Temporal::timepos_t const & , const std::string & action);
 	TempoDialog (Temporal::TempoMap&, Temporal::TempoPoint&, const std::string & action);
 
 	double get_bpm ();
@@ -107,7 +107,7 @@ class MeterDialog : public ArdourDialog
 {
 public:
 
-	MeterDialog (Temporal::TempoMap&, samplepos_t, const std::string & action);
+	MeterDialog (Temporal::TempoMap&, Temporal::timepos_t const &, const std::string & action);
 	MeterDialog (Temporal::TempoMap&, Temporal::MeterPoint&, const std::string & action);
 
 	double get_bpb ();

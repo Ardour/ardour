@@ -2809,8 +2809,6 @@ Editor::snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode direction, S
 {
 	timepos_t ret(presnap);
 
-#warning NUTEMPO FIXME needs complete rethink for nutempo - prenap may be in beatime
-#if 0
 	if (gpref != SnapToGrid_Unscaled) { // use the visual grid lines which are limited by the zoom scale that the user selected
 
 		int divisor = 2;
@@ -2842,19 +2840,19 @@ Editor::snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode direction, S
 			case bbt_show_16:
 			case bbt_show_4:
 			case bbt_show_1:
-				ret = _session->tempo_map().round_to_bar (presnap.sample, direction);
+				ret = timepos_t (_session->tempo_map().quarter_note_at (_session->tempo_map().round_to_bar (_session->tempo_map().bbt_at (presnap))));
 				break;
 			case bbt_show_quarters:
-				ret = _session->tempo_map().round_to_beat (presnap.sample, direction);
+				ret = timepos_t (_session->tempo_map().quarter_note_at (presnap).round_to_beat ());
 				break;
 			case bbt_show_eighths:
-				ret = _session->tempo_map().round_to_quarter_note_subdivision (presnap.sample, 1 * divisor, direction);
+				ret = timepos_t (_session->tempo_map().quarter_note_at (presnap).round_to_subdivision (1 * divisor, direction));
 				break;
 			case bbt_show_sixteenths:
-				ret = _session->tempo_map().round_to_quarter_note_subdivision (presnap.sample, 2 * divisor, direction);
+				ret = timepos_t (_session->tempo_map().quarter_note_at (presnap).round_to_subdivision (2 * divisor, direction));
 				break;
 			case bbt_show_thirtyseconds:
-				ret = _session->tempo_map().round_to_quarter_note_subdivision (presnap.sample, 4 * divisor, direction);
+				ret = timepos_t (_session->tempo_map().quarter_note_at (presnap).round_to_subdivision (4 * divisor, direction));
 				break;
 			case bbt_show_sixtyfourths:
 				ret = _session->tempo_map().round_to_quarter_note_subdivision (presnap.sample, 8 * divisor, direction);
@@ -2864,10 +2862,9 @@ Editor::snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode direction, S
 				break;
 		}
 	} else {
-#warning NUTEMPO FIXME new tempo map API required
-		//ret = _session->tempo_map().round_to_quarter_note_subdivision (presnap.sample, get_grid_beat_divisions(_grid_type), direction);
+		ret = timepos_t (_session->tempo_map().quarter_note_at (presnap).round_to_subdivision (get_grid_beat_divisions(), direction));
 	}
-#endif
+
 	return ret;
 }
 
@@ -4158,8 +4155,6 @@ Editor::get_grid_type_as_beats (bool& success, timepos_t const & position)
 {
 	success = true;
 
-#warning NUTEMPO FIXME needs new tempo map API
-#if 0
 	const unsigned divisions = get_grid_beat_divisions ();
 	if (divisions) {
 		return Temporal::Beats::from_double (1.0 / (double) get_grid_beat_divisions ());
@@ -4167,18 +4162,18 @@ Editor::get_grid_type_as_beats (bool& success, timepos_t const & position)
 
 	switch (_grid_type) {
 	case GridTypeBeat:
-		return Temporal::Beats::from_double (4.0 / _session->tempo_map().meter_at_sample (position).note_divisor());
+		return Temporal::Beats::from_double (4.0 / _session->tempo_map().meter_at (position).note_value());
 	case GridTypeBar:
 		if (_session) {
-			const Meter& m = _session->tempo_map().meter_at_sample (position);
-			return Temporal::Beats::from_double ((4.0 * m.divisions_per_bar()) / m.note_divisor());
+			const Meter& m = _session->tempo_map().meter_at (position);
+			return Temporal::Beats::from_double ((4.0 * m.divisions_per_bar()) / m.note_value());
 		}
 		break;
 	default:
 		success = false;
 		break;
 	}
-#endif
+
 	return Temporal::Beats();
 }
 

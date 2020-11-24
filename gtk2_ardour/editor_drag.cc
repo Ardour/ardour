@@ -3395,8 +3395,7 @@ MeterMarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 void
 MeterMarkerDrag::setup_pointer_offset ()
 {
-#warning NUTEMPO fixme needs new tempo map API to get "time()" for meter
-	// _pointer_offset = raw_grab_time() - _marker->meter().time();
+	_pointer_offset =  _marker->meter().time().distance (raw_grab_time());
 }
 
 void
@@ -6883,8 +6882,6 @@ NoteCreateDrag::grid_aligned_beats (timepos_t const & pos, GdkEvent const * even
 {
 	Temporal::Beats beats;
 
-#warning NUTEMPO needs new tempo map API
-#if 0
 	TempoMap& map (_editor->session()->tempo_map());
 	const int32_t divisions = _editor->get_grid_music_divisions (event->button.state);
 
@@ -6894,14 +6891,12 @@ NoteCreateDrag::grid_aligned_beats (timepos_t const & pos, GdkEvent const * even
 		beats = pos.beats ();
 		break;
 	case -1: /* round to bar */
-#warning NUTEMPO need map/BBT API
-		//map.quarter_note_at (map.metric_at (pos).meter().round_to_bar (map.bbt_at (pos)));
+		beats = map.quarter_note_at (map.metric_at (pos).meter().round_to_bar (map.bbt_at (pos)));
 		break;
 	default: /* round to some beat subdivision */
 		beats = (pos).beats().round_to_subdivision (divisions, Temporal::RoundNearest);
 		break;
 	}
-#endif
 
 	return beats;
 }
