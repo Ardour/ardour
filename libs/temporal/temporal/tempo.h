@@ -646,25 +646,23 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 	void remove_bartime (MusicTimePoint const & tp);
 
 	TempoPoint & set_tempo (Tempo const &, BBT_Time const &);
-	TempoPoint & set_tempo (Tempo const &, Beats const &);
 	TempoPoint & set_tempo (Tempo const &, timepos_t const &);
 
-	void remove_tempo (TempoPoint const &);
-
 	MeterPoint & set_meter (Meter const &, BBT_Time const &);
-	MeterPoint & set_meter (Meter const &, Beats const &);
 	MeterPoint & set_meter (Meter const &, timepos_t const &);
 
+	void remove_tempo (TempoPoint const &);
 	void remove_meter (MeterPoint const &);
 
 	/* these are a convenience method that just wrap some odd semantics */
 	bool move_tempo (TempoPoint const & point, timepos_t const & destination, bool push = false);
 	bool move_meter (MeterPoint const & point, timepos_t const & destination, bool push = false);
 
-	TimeDomain time_domain() const { return _time_domain; }
 	void set_time_domain (TimeDomain td);
 
 	/* END OF MODIFYING METHODS */
+
+	TimeDomain time_domain() const { return _time_domain; }
 
 	typedef std::list<Point*> Metrics;
 
@@ -798,7 +796,6 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 	int set_meters_from_state (XMLNode const &);
 	int set_music_times_from_state (XMLNode const &);
 
-	TempoPoint & set_tempo (Tempo const &, superclock_t);
 	MeterPoint & set_meter (Meter const &, superclock_t);
 
 	void dump_locked (std::ostream&) const;

@@ -677,15 +677,40 @@ TempoMap::change_tempo (TempoPoint & p, Tempo const & t)
 }
 
 TempoPoint &
-TempoMap::set_tempo (Tempo const & t, superclock_t sc)
+TempoMap::set_tempo (Tempo const & t, BBT_Time const & bbt)
+{
+	return set_tempo (t, timepos_t (quarter_note_at (bbt)));
+}
+
+TempoPoint &
+TempoMap::set_tempo (Tempo const & t, timepos_t const & time)
 {
 	TempoPoint * ret;
 
-	{
-		DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("Set tempo @ %1 to %2\n", sc, t));
+	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("Set tempo @ %1 to %2\n", time, t));
+
+	if (time.is_beats()) {
+
+
+		/* tempo changes are required to be on-beat */
+
+		Beats on_beat = time.beats().round_to_beat();
+		superclock_t sc;
+		BBT_Time bbt;
+
+		TempoMetric metric (metric_at_locked (on_beat, false));
+
+		bbt = metric.bbt_at (on_beat);
+		sc = metric.superclock_at (on_beat);
+
+		TempoPoint tp (*this, t, sc, on_beat, bbt);
+		ret = add_tempo (tp);
+
+	} else {
 
 		Beats beats;
 		BBT_Time bbt;
+		superclock_t sc = time.superclocks();
 
 		TempoMetric tm (metric_at_locked (sc, false));
 
@@ -699,78 +724,12 @@ TempoMap::set_tempo (Tempo const & t, superclock_t sc)
 
 		TempoPoint tp (*this, t, sc, beats, bbt);
 		ret = add_tempo (tp);
+
 	}
 
 	Changed ();
 
 	return *ret;
-}
-
-TempoPoint &
-TempoMap::set_tempo (Tempo const & t, BBT_Time const & bbt)
-{
-	TempoPoint * ret = 0;
-
-	{
-		DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("Set tempo @ %1 to %2\n", bbt, t));
-
-		/* tempo changes are required to be on-beat */
-
-		BBT_Time on_beat = bbt.round_to_beat();
-		superclock_t sc;
-		Beats beats;
-
-		TempoMetric metric (metric_at_locked (on_beat, false));
-
-		beats = metric.quarters_at (on_beat);
-		sc = metric.superclock_at (on_beat);
-
-		TempoPoint tp (*this, t, sc, beats, on_beat);
-		ret = add_tempo (tp);
-	}
-
-	Changed ();
-
-	return *ret;
-}
-
-TempoPoint &
-TempoMap::set_tempo (Tempo const & t, Beats const & beats)
-{
-	TempoPoint * ret;
-
-	{
-
-		DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("Set tempo @ %1 to %2\n", beats, t));
-
-		/* tempo changes are required to be on-beat */
-
-		Beats on_beat = beats.round_to_beat();
-		superclock_t sc;
-		BBT_Time bbt;
-
-		TempoMetric metric (metric_at_locked (on_beat, false));
-
-		bbt = metric.bbt_at (on_beat);
-		sc = metric.superclock_at (on_beat);
-
-		TempoPoint tp (*this, t, sc, on_beat, bbt);
-		ret = add_tempo (tp);
-	}
-
-	Changed ();
-
-	return *ret;
-}
-
-TempoPoint &
-TempoMap::set_tempo (Tempo const & t, timepos_t const & time)
-{
-	if (time.is_beats()) {
-		return set_tempo (t, time.beats());
-	}
-
-	return set_tempo (t, time.superclocks());
 }
 
 TempoPoint*
@@ -1319,53 +1278,13 @@ TempoMap::move_tempo (TempoPoint const & tp, timepos_t const & when, bool push)
 MeterPoint &
 TempoMap::set_meter (Meter const & m, timepos_t const & time)
 {
+	MeterPoint * ret = 0;
+
+	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("Set meter @ %1 to %2\n", time, m));
+
 	if (time.is_beats()) {
-		return set_meter (m, time.beats());
-	}
 
-	return set_meter (m, time.superclocks());
-}
-
-
-MeterPoint &
-TempoMap::set_meter (Meter const & t, BBT_Time const & bbt)
-{
-	MeterPoint * ret = 0;
-
-	{
-		DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("Set meter @ %1 to %2\n", bbt, t));
-
-		TempoMetric metric (metric_at_locked (bbt));
-		superclock_t sc;
-		Beats beats;
-		BBT_Time rounded_bbt;
-
-		/* meter changes are required to be on-bar */
-
-		rounded_bbt = metric.round_to_bar (bbt);
-		beats = metric.quarters_at (rounded_bbt);
-		sc = metric.superclock_at (beats);
-
-		MeterPoint mp (*this, t, sc, beats, rounded_bbt);
-
-		ret = add_meter (mp);
-
-		reset_starting_at (mp.sclock());
-	}
-
-	Changed ();
-
-	return *ret;
-}
-
-MeterPoint &
-TempoMap::set_meter (Meter const & t, Beats const & beats)
-{
-	MeterPoint * ret = 0;
-
-	{
-		DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("Set meter @ %1 to %2\n", beats, t));
-
+		Beats beats (time.beats());
 		TempoMetric metric (metric_at_locked (beats));
 
 		/* meter changes are required to be on-bar */
@@ -1376,24 +1295,13 @@ TempoMap::set_meter (Meter const & t, Beats const & beats)
 		const Beats rounded_beats = metric.quarters_at (rounded_bbt);
 		const superclock_t sc = metric.superclock_at (rounded_beats);
 
-		MeterPoint mp (*this, t, sc, rounded_beats, rounded_bbt);
+		MeterPoint mp (*this, m, sc, rounded_beats, rounded_bbt);
 
 		ret = add_meter (mp);
-	}
 
-	Changed ();
+	} else {
 
-	return *ret;
-}
-
-MeterPoint &
-TempoMap::set_meter (Meter const & m, superclock_t sc)
-{
-	MeterPoint * ret = 0;
-
-	{
-		DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("Set meter @ %1 to %2\n", sc, m));
-
+		superclock_t sc (time.superclocks());
 		Beats beats;
 		BBT_Time bbt;
 
@@ -1417,6 +1325,12 @@ TempoMap::set_meter (Meter const & m, superclock_t sc)
 	Changed ();
 
 	return *ret;
+}
+
+MeterPoint &
+TempoMap::set_meter (Meter const & t, BBT_Time const & bbt)
+{
+	return set_meter (t, timepos_t (quarter_note_at (bbt)));
 }
 
 void

@@ -423,7 +423,7 @@ Editor::mouse_add_new_tempo_event (timepos_t pos)
 	if (qn > Beats()) {
 		XMLNode &before = map.get_state();
 		/* add music-locked ramped (?) tempo using the bpm/note type at sample*/
-		map.set_tempo (map.tempo_at (pos), qn);
+		map.set_tempo (map.tempo_at (pos), timepos_t (qn));
 
 		XMLNode &after = map.get_state();
 		_session->add_command(new MementoCommand<TempoMap>(map, &before, &after));
