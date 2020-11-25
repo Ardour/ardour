@@ -630,6 +630,11 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 
 	void sample_rate_changed (samplecnt_t new_sr);
 
+	/* methods which modify the map. These must all be called using
+	 * RCU-style semantics: get a writable copy, modify it, then update via
+	 * the RCU manager.
+	 */
+
 	bool set_ramped (TempoPoint&, bool);
 
 	void insert_time (timepos_t const & pos, timecnt_t const & duration);
@@ -655,6 +660,24 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 	/* these are a convenience method that just wrap some odd semantics */
 	bool move_tempo (TempoPoint const & point, timepos_t const & destination, bool push = false);
 	bool move_meter (MeterPoint const & point, timepos_t const & destination, bool push = false);
+
+	TimeDomain time_domain() const { return _time_domain; }
+	void set_time_domain (TimeDomain td);
+
+	/* END OF MODIFYING METHODS */
+
+	typedef std::list<Point*> Metrics;
+
+	template<class T> void apply_with_metrics (T& obj, void (T::*method)(Metrics const &)) {
+		Metrics metrics;
+		for (Tempos::iterator t = _tempos.begin(); t != _tempos.end(); ++t) {
+			metrics.push_back (&*t);
+		}
+		for (Meters::iterator m = _meters.begin(); m != _meters.end(); ++m) {
+			metrics.push_back (&*m);
+		}
+		(obj.*method)(metrics);
+	}
 
 	bool can_remove (TempoPoint const &) const;
 	bool can_remove (MeterPoint const &) const;
@@ -708,13 +731,6 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 	samplepos_t sample_at (BBT_Time const & b, samplecnt_t sr) const { return superclock_to_samples (superclock_at (b), sr); }
 	samplepos_t sample_at (timepos_t const & t, samplecnt_t sr) const { return superclock_to_samples (superclock_at (t), sr); }
 
-#if 0
-	int update_music_times (int gen, samplepos_t, Beats & b, BBT_Time & bbt, bool force);
-	int update_samples_and_beat_times (int gen, BBT_Time const & bbt, samplepos_t & pos, Beats & b, bool force);
-	int update_samples_and_bbt_times (int gen, Beats const & b, samplepos_t & pos, BBT_Time & bbt, bool force);
-	void update_one_domain_from_another (timepos_t const & src, void* dst, TimeDomain) const;
-#endif
-
 	/* ways to walk along the tempo map, measure distance between points,
 	 * etc.
 	 */
@@ -735,23 +751,7 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 
 	BBT_Time bbt_walk (BBT_Time const &, BBT_Offset const &) const;
 
-	TimeDomain time_domain() const { return _time_domain; }
-	void set_time_domain (TimeDomain td);
-
 	void get_grid (TempoMapPoints& points, superclock_t start, superclock_t end, uint32_t bar_mod = 0);
-
-	typedef std::list<Point*> Metrics;
-
-	template<class T> void apply_with_metrics (T& obj, void (T::*method)(Metrics &)) {
-		Metrics metrics;
-		for (Tempos::iterator t = _tempos.begin(); t != _tempos.end(); ++t) {
-			metrics.push_back (&*t);
-		}
-		for (Meters::iterator m = _meters.begin(); m != _meters.end(); ++m) {
-			metrics.push_back (&*m);
-		}
-		(obj.*method)(metrics);
-	}
 
 	struct EmptyTempoMapException : public std::exception {
 		virtual const char* what() const throw() { return "TempoMap is empty"; }

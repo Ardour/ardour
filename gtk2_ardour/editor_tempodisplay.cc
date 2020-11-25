@@ -89,7 +89,7 @@ struct CurveComparator {
 	}
 };
 void
-Editor::draw_metric_marks (TempoMap::Metrics& metrics)
+Editor::draw_metric_marks (TempoMap::Metrics const & metrics)
 {
 	char buf[64];
 	TempoPoint* prev_ts = 0;
@@ -99,7 +99,7 @@ Editor::draw_metric_marks (TempoMap::Metrics& metrics)
 
 	remove_metric_marks (); // also clears tempo curves
 
-	for (TempoMap::Metrics::iterator i = metrics.begin(); i != metrics.end(); ++i) {
+	for (TempoMap::Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
 		Temporal::MeterPoint *ms;
 		Temporal::TempoPoint *ts;
 

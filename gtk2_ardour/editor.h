@@ -1803,7 +1803,7 @@ private:
 	Curves tempo_curves;
 
 	void remove_metric_marks ();
-	void draw_metric_marks (Temporal::TempoMap::Metrics& metrics);
+	void draw_metric_marks (Temporal::TempoMap::Metrics const & metrics);
 
 	void compute_current_bbt_points (Temporal::TempoMapPoints& grid, samplepos_t left, samplepos_t right);
 
