@@ -314,12 +314,14 @@ PluginManager::~PluginManager()
 		delete _windows_vst_plugin_info;
 		delete _lxvst_plugin_info;
 		delete _mac_vst_plugin_info;
-		delete _vst3_plugin_info;
 		delete _ladspa_plugin_info;
 		delete _lv2_plugin_info;
 		delete _au_plugin_info;
 		delete _lua_plugin_info;
 	}
+
+	/* do drop VST3 Info in order to release any loaded modules */
+	delete _vst3_plugin_info;
 }
 
 struct PluginInfoPtrNameSorter {

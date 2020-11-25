@@ -381,7 +381,7 @@ class LIBARDOUR_API VST3PluginInfo : public PluginInfo
 {
 public:
 	VST3PluginInfo ();
-	~VST3PluginInfo (){};
+	~VST3PluginInfo () {}
 
 	PluginPtr                         load (Session& session);
 	std::vector<Plugin::PresetRecord> get_presets (bool user_only) const;
