@@ -604,8 +604,10 @@ main (int argc, char** argv)
 		lua_setglobal (L, "arg");
 	}
 
+	int res = 0;
+
 	if (argc > optind && 0 != strcmp (argv[optind], "-")) {
-		lua->do_file (argv[optind]);
+		res = lua->do_file (argv[optind]);
 		if (!interactive) {
 			keep_running = false;
 		}
@@ -616,7 +618,7 @@ main (int argc, char** argv)
 	} else if (is_tty () || interactive) {
 		interactive_interpreter ();
 	} else {
-		luaL_dofile (lua->getState (), NULL);
+		res = luaL_dofile (lua->getState (), NULL);
 	}
 
 	if (session) {
@@ -634,5 +636,5 @@ main (int argc, char** argv)
 	ARDOUR::cleanup ();
 	delete event_loop;
 	pthread_cancel_all ();
-	return 0;
+	return res;
 }
