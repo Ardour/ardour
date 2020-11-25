@@ -209,6 +209,7 @@ typedef uint64_t microseconds_t;
 #include "virtual_keyboard_window.h"
 #include "add_video_dialog.h"
 #include "transcode_video_dialog.h"
+#include "plugin_selector.h"
 
 #include "pbd/i18n.h"
 
@@ -851,7 +852,11 @@ ARDOUR_UI::~ARDOUR_UI ()
 		delete main_window_visibility;
 		FastMeter::flush_pattern_cache ();
 		ArdourFader::flush_pattern_cache ();
+	} else if (mixer) {
+		/* drop references to any PluginInfoPtr */
+		delete mixer->plugin_selector ();
 	}
+
 
 #ifndef NDEBUG
 	/* Small trick to flush main-thread event pool.

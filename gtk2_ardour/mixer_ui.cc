@@ -1223,6 +1223,7 @@ Mixer_UI::set_session (Session* sess)
 	_group_tabs->set_session (sess);
 
 	if (!_session) {
+		favorite_plugins_model->clear ();
 		_selection.clear ();
 		return;
 	}
