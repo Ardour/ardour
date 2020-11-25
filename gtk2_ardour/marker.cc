@@ -665,6 +665,13 @@ TempoMarker::update_height_mark (const double ratio)
 	mark->set (*points);
 }
 
+void
+TempoMarker::reset_tempo (Temporal::TempoPoint & t)
+{
+	_tempo = t;
+}
+
+
 /***********************************************************************/
 
 MeterMarker::MeterMarker (PublicEditor& editor, ArdourCanvas::Container& parent, guint32 rgba, const string& text,
@@ -680,4 +687,10 @@ MeterMarker::MeterMarker (PublicEditor& editor, ArdourCanvas::Container& parent,
 
 MeterMarker::~MeterMarker ()
 {
+}
+
+void
+MeterMarker::reset_meter (Temporal::MeterPoint & m)
+{
+	_meter = m;
 }

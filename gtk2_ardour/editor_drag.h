@@ -840,9 +840,9 @@ public:
 
 private:
 	MeterMarker* _marker;
-	Temporal::MeterPoint* _real_section;
 
 	bool _copy;
+	bool _movable;
 	Editing::GridType _old_grid_type;
 	Editing::SnapMode _old_snap_mode;
 	XMLNode* before_state;

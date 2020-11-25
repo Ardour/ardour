@@ -160,6 +160,8 @@ class TempoMarker : public ArdourMarker
 	TempoMarker (PublicEditor& editor, ArdourCanvas::Container &, guint32 rgba, const std::string& text, Temporal::TempoPoint&);
 	~TempoMarker ();
 
+	void reset_tempo (Temporal::TempoPoint & t);
+
 	Temporal::TempoPoint& tempo() const { return _tempo; }
 
 	void update_height_mark (const double ratio);
@@ -172,6 +174,8 @@ class MeterMarker : public ArdourMarker
   public:
 	MeterMarker (PublicEditor& editor, ArdourCanvas::Container &, guint32 rgba, const std::string& text, Temporal::MeterPoint&);
 	~MeterMarker ();
+
+	void reset_meter (Temporal::MeterPoint & m);
 
 	Temporal::MeterPoint& meter() const { return _meter; }
 

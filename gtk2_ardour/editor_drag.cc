@@ -3373,16 +3373,16 @@ TrimDrag::setup_pointer_offset ()
 
 MeterMarkerDrag::MeterMarkerDrag (Editor* e, ArdourCanvas::Item* i, bool c)
 	: Drag (e, i)
+	, _marker (reinterpret_cast<MeterMarker*> (_item->get_data ("marker")))
 	, _copy (c)
 	, _old_grid_type (e->grid_type())
 	, _old_snap_mode (e->snap_mode())
 	, before_state (0)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New MeterMarkerDrag\n");
-	_marker = reinterpret_cast<MeterMarker*> (_item->get_data ("marker"));
 	assert (_marker);
-	_real_section = &_marker->meter();
 
+	_movable = !e->session()->tempo_map().is_initial (_marker->meter());
 }
 
 void
@@ -3401,73 +3401,80 @@ MeterMarkerDrag::setup_pointer_offset ()
 void
 MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 {
-#warning NUTEMPO fixme needs new tempo map
-#if 0
+	TempoMap& map (_editor->session()->tempo_map());
 
 	if (first_move) {
 		// create a dummy marker to catch events, then hide it.
 
 		char name[64];
-		snprintf (name, sizeof(name), "%g/%g", _marker->meter().divisions_per_bar(), _marker->meter().note_divisor ());
+		snprintf (name, sizeof(name), "%d/%d", _marker->meter().divisions_per_bar(), _marker->meter().note_value ());
 
 		_marker = new MeterMarker (
 			*_editor,
 			*_editor->meter_group,
 			UIConfiguration::instance().color ("meter marker"),
 			name,
-			*new MeterSection (_marker->meter())
-		);
+			_marker->meter()
+			);
 
 		/* use the new marker for the grab */
 		swap_grab (&_marker->the_item(), 0, GDK_CURRENT_TIME);
 		_marker->hide();
 
-		TempoMap& map (_editor->session()->tempo_map());
 		/* get current state */
 		before_state = &map.get_state();
 		if (!_copy) {
 			_editor->begin_reversible_command (_("move meter mark"));
 		} else {
-			_editor->begin_reversible_command (_("copy meter mark"));
 
-			Temporal::BBT_Time bbt = _real_section->bbt();
+			timepos_t const pointer = adjusted_current_time (event, false);
+			BBT_Time pointer_bbt = map.bbt_at (pointer);
+			Temporal::MeterPoint const & meter = map.metric_at (pointer).meter();
+			BBT_Time bbt = meter.bbt();
 
 			/* we can't add a meter where one currently exists */
-			if (_real_section->time() < adjusted_current_time (event, false)) {
+			if (bbt < pointer_bbt) {
 				++bbt.bars;
 			} else {
 				--bbt.bars;
 			}
-			const samplepos_t sample = map.sample_at_bbt (bbt);
-			_real_section = map.add_meter (Meter (_marker->meter().divisions_per_bar(), _marker->meter().note_divisor())
-						       , bbt, sample, _real_section->position_time_domain());
-			if (!_real_section) {
-				aborted (true);
-				return;
+
+			_editor->begin_reversible_command (_("copy meter mark"));
+
+			timepos_t pos;
+
+			if (map.time_domain() == AudioTime) {
+				pos = timepos_t (map.sample_at (bbt, _editor->session()->sample_rate()));
+			} else {
+				pos = timepos_t (map.quarter_note_at (bbt));
 			}
-1		}
+
+			_marker->reset_meter (map.set_meter (meter, pos));
+		}
+
 		/* only snap to bars. leave snap mode alone for audio locked meters.*/
-		if (_real_section->position_time_domain() != AudioTime) {
+		if (map.time_domain() != AudioTime) {
 			_editor->set_grid_to (GridTypeBar);
 			_editor->set_snap_mode (SnapMagnetic);
 		}
 	}
 
-	timepos_t pf = adjusted_current_time (event);
+	if (_movable && (!first_move || !_copy)) {
 
-	if (_real_section->position_time_domain() == Temporal::AudioTime && _editor->grid_musical()) {
-		/* never snap to music for audio locked */
-		pf = adjusted_current_sample (event, false);
+		timepos_t pos;
+
+		if (_editor->grid_musical()) {
+			/* not useful to try to snap to a grid we're about to change */
+			pos = adjusted_current_time (event, false);
+		} else {
+			pos = adjusted_current_time (event);
+		}
+
+		map.move_meter (_marker->meter(), pos, false);
+
+		show_verbose_cursor_time (timepos_t (_marker->meter().beats()));
+		_editor->set_snapped_cursor_position (timepos_t (_marker->meter().sample(_editor->session()->sample_rate())));
 	}
-
-	_editor->session()->tempo_map().gui_set_meter_position (_real_section, pf);
-
-	/* fake marker meeds to stay under the mouse, unlike the real one. */
-	_marker->set_position (adjusted_current_time (event, false));
-
-	show_verbose_cursor_time (_real_section->time());
-	_editor->set_snapped_cursor_position(_real_section->sample());
-#endif
 }
 
 void
@@ -3484,14 +3491,11 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 	_editor->set_grid_to (_old_grid_type);
 	_editor->set_snap_mode (_old_snap_mode);
 
-#warning NUTEMPO fixme needs new tempo map
-#if 0
 	TempoMap& map (_editor->session()->tempo_map());
 
 	XMLNode &after = map.get_state();
 	_editor->session()->add_command(new MementoCommand<TempoMap>(map, before_state, &after));
 	_editor->commit_reversible_command ();
-#endif
 
 	// delete the dummy marker we used for visual representation while moving.
 	// a new visual marker will show up automatically.
@@ -3501,9 +3505,8 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 void
 MeterMarkerDrag::aborted (bool moved)
 {
-#warning NUTEMPO fixme needs new tempo map
-#if 0
-	_marker->set_position (_marker->meter().sample ());
+	_marker->set_position (_marker->meter().time());
+
 	if (moved) {
 		/* reinstate old snap setting */
 		_editor->set_grid_to (_old_grid_type);
@@ -3514,7 +3517,6 @@ MeterMarkerDrag::aborted (bool moved)
 		// a new visual marker will show up automatically.
 		delete _marker;
 	}
-#endif
 }
 
 TempoMarkerDrag::TempoMarkerDrag (Editor* e, ArdourCanvas::Item* i, bool c)
