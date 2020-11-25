@@ -284,7 +284,7 @@ Editor::import_smf_tempo_map (Evoral::SMF const & smf, timepos_t const & pos)
 	const samplecnt_t sample_rate = _session->sample_rate ();
 #warning NUTEMPO need to be able to create a tempo map with no entries
 	// TempoMap new_map (sample_rate);
-	TempoMap new_map (Tempo (120), Meter (4, 4), sample_rate);
+	TempoMap new_map (Tempo (120), Meter (4, 4));
 	Meter last_meter (4.0, 4.0);
 	bool have_initial_meter = false;
 

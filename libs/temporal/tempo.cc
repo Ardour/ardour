@@ -566,22 +566,11 @@ TempoMapPoint::end_float ()
 
 /* TEMPOMAP */
 
-struct TraceableWriterLock : public Glib::Threads::RWLock::WriterLock
-{
-	TraceableWriterLock (Glib::Threads::RWLock & lock) : Glib::Threads::RWLock::WriterLock (lock) { }
-	~TraceableWriterLock() { }
-};
-
-TempoMap::TempoMap (Tempo const & initial_tempo, Meter const & initial_meter, samplecnt_t sr)
-	: _sample_rate (sr)
-	, _dirty (false)
-	, _generation (0) // XXX needs to be reloaded from saved state??
-	, _initial_tempo (*this, initial_tempo, 0, Beats(), BBT_Time())
+TempoMap::TempoMap (Tempo const & initial_tempo, Meter const & initial_meter)
+	: _initial_tempo (*this, initial_tempo, 0, Beats(), BBT_Time())
 	, _initial_meter (*this, initial_meter, 0, Beats(), BBT_Time())
 	, _initial_music_time (*this)
 {
-	TraceableWriterLock lm (_lock);
-
 	_tempos.push_back   (_initial_tempo);
 	_meters.push_back   (_initial_meter);
 	_bartimes.push_back (_initial_music_time);
@@ -589,8 +578,6 @@ TempoMap::TempoMap (Tempo const & initial_tempo, Meter const & initial_meter, sa
 	_points.push_back (_initial_tempo);
 	_points.push_back (_initial_meter);
 	_points.push_back (_initial_music_time);
-
-	set_dirty (true);
 }
 
 TempoMap::~TempoMap()
@@ -598,10 +585,7 @@ TempoMap::~TempoMap()
 }
 
 TempoMap::TempoMap (TempoMap const & other)
-	: _sample_rate (other.sample_rate())
-	, _dirty (false)
-	, _generation (0)
-	, _time_domain (other.time_domain())
+	: _time_domain (other.time_domain())
 	, _initial_tempo (other.metric_at (0).tempo())
 	, _initial_meter (other.metric_at (0).meter())
 	, _initial_music_time (*this)
@@ -611,13 +595,6 @@ TempoMap::TempoMap (TempoMap const & other)
 	// _bartimes = other._bartimes;
 	// _points = other._points;
 	// _tempos = other._tempos;
-}
-
-void
-TempoMap::set_dirty (bool yn)
-{
-	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("tempo map @ %1 dirty set to %2\n", this, yn));
-	_dirty = yn;
 }
 
 void
@@ -650,7 +627,6 @@ TempoMap::set_time_domain (TimeDomain td)
 #endif
 
 	_time_domain = td;
-	set_dirty (true);
 }
 
 MeterPoint*
@@ -690,7 +666,6 @@ TempoMap::add_meter (MeterPoint & mp)
 	}
 
 	reset_starting_at (mp.sclock());
-	set_dirty (true);
 
 	return ret;
 }
@@ -698,11 +673,7 @@ TempoMap::add_meter (MeterPoint & mp)
 void
 TempoMap::change_tempo (TempoPoint & p, Tempo const & t)
 {
-	TraceableWriterLock lm (_lock);
-
 	*((Tempo*)&p) = t;
-
-	set_dirty (true);
 }
 
 TempoPoint &
@@ -711,8 +682,6 @@ TempoMap::set_tempo (Tempo const & t, superclock_t sc)
 	TempoPoint * ret;
 
 	{
-		TraceableWriterLock lm (_lock);
-
 		DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("Set tempo @ %1 to %2\n", sc, t));
 
 		Beats beats;
@@ -743,8 +712,6 @@ TempoMap::set_tempo (Tempo const & t, BBT_Time const & bbt)
 	TempoPoint * ret = 0;
 
 	{
-		TraceableWriterLock lm (_lock);
-
 		DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("Set tempo @ %1 to %2\n", bbt, t));
 
 		/* tempo changes are required to be on-beat */
@@ -773,7 +740,6 @@ TempoMap::set_tempo (Tempo const & t, Beats const & beats)
 	TempoPoint * ret;
 
 	{
-		TraceableWriterLock lm (_lock);
 
 		DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("Set tempo @ %1 to %2\n", beats, t));
 
@@ -856,12 +822,10 @@ TempoMap::add_tempo (TempoPoint & tp)
 
 	if (t->ramped() && nxt != _tempos.end()) {
 		DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("compute ramp over %1 .. %2 aka %3 .. %4\n", t->sclock(), nxt->sclock(), t->beats(), nxt->beats()));
-		t->compute_omega (_sample_rate, nxt->superclocks_per_quarter_note (), nxt->beats() - t->beats());
+		t->compute_omega (_thread_sample_rate, nxt->superclocks_per_quarter_note (), nxt->beats() - t->beats());
 	}
 
 	reset_starting_at (tp.sclock());
-
-	set_dirty (true);
 
 	return ret;
 }
@@ -870,7 +834,6 @@ void
 TempoMap::remove_tempo (TempoPoint const & tp)
 {
 	{
-		TraceableWriterLock lm (_lock);
 		superclock_t sc (tp.sclock());
 		Tempos::iterator t;
 		for (t = _tempos.begin(); t != _tempos.end() && t->sclock() < tp.sclock(); ++t);
@@ -880,7 +843,6 @@ TempoMap::remove_tempo (TempoPoint const & tp)
 		}
 		_tempos.erase (t);
 		reset_starting_at (sc);
-		set_dirty (true);
 	}
 
 	Changed ();
@@ -894,7 +856,6 @@ TempoMap::set_bartime (BBT_Time const & bbt, timepos_t const & pos)
 	assert (pos.time_domain() == AudioTime);
 
 	{
-		TraceableWriterLock lm (_lock);
 		superclock_t sc (pos.superclocks());
 
 		TempoMetric metric (metric_at_locked (sc));
@@ -945,8 +906,6 @@ TempoMap::add_or_replace_bartime (MusicTimePoint & tp)
 
 	reset_starting_at (tp.sclock());
 
-	set_dirty (true);
-
 	return ret;
 }
 
@@ -954,7 +913,6 @@ void
 TempoMap::remove_bartime (MusicTimePoint const & tp)
 {
 	{
-		TraceableWriterLock lm (_lock);
 		superclock_t sc (tp.sclock());
 		MusicTimes::iterator m;
 		for (m = _bartimes.begin(); m != _bartimes.end() && m->sclock() < tp.sclock(); ++m);
@@ -964,7 +922,6 @@ TempoMap::remove_bartime (MusicTimePoint const & tp)
 		}
 		_bartimes.erase (m);
 		reset_starting_at (sc);
-		set_dirty (true);
 	}
 
 	Changed ();
@@ -1020,7 +977,7 @@ TempoMap::reset_starting_at (superclock_t sc)
                /* UPDATE RAMP COEFFICIENTS WHEN NECESSARY */
 
 		if (t->ramped() && (nxt_tempo != _tempos.begin()) && (nxt_tempo != _tempos.end())) {
-		       t->compute_omega (_sample_rate, nxt_tempo->superclocks_per_quarter_note (), nxt_tempo->beats() - t->beats());
+		       t->compute_omega (_thread_sample_rate, nxt_tempo->superclocks_per_quarter_note (), nxt_tempo->beats() - t->beats());
 	       }
 
 	       /* figure out which of the 1, 2 or 3 possible iterators defines the next explicit point (we want the earliest on the timeline,
@@ -1108,8 +1065,6 @@ bool
 TempoMap::move_meter (MeterPoint const & mp, timepos_t const & when, bool push)
 {
 	{
-		TraceableWriterLock lm (_lock);
-
 		assert (time_domain() != BarTime);
 		assert (!_tempos.empty());
 		assert (!_meters.empty());
@@ -1124,15 +1079,6 @@ TempoMap::move_meter (MeterPoint const & mp, timepos_t const & when, bool push)
 		BBT_Time bbt;
 		TimeDomain td (time_domain());
 		bool round_up;
-
-		/* if time domains differ, then asking for the "when" value in
-		 * the map domain may involve a tempo map lookup. This requires
-		 * a lock, so we have to drop the lock while we do this.
-		 */
-
-		if (when.time_domain() != time_domain()) {
-			lm.release ();
-		}
 
 		switch (td) {
 		case AudioTime:
@@ -1151,10 +1097,6 @@ TempoMap::move_meter (MeterPoint const & mp, timepos_t const & when, bool push)
 				round_up = false;
 			}
 			break;
-		}
-
-		if (when.time_domain() != time_domain()) {
-			lm.acquire ();
 		}
 
 		/* Do not allow moving a meter marker to the same position as
@@ -1263,8 +1205,6 @@ bool
 TempoMap::move_tempo (TempoPoint const & tp, timepos_t const & when, bool push)
 {
 	{
-		TraceableWriterLock lm (_lock);
-
 		assert (time_domain() != BarTime);
 		assert (!_tempos.empty());
 		assert (!_meters.empty());
@@ -1279,15 +1219,6 @@ TempoMap::move_tempo (TempoPoint const & tp, timepos_t const & when, bool push)
 		BBT_Time bbt;
 		TimeDomain td (time_domain());
 
-		/* if time domains differ, then asking for the "when" value in
-		 * the map domain may involve a tempo map lookup. This requires
-		 * a lock, so we have to drop the lock while we do this.
-		 */
-
-		if (when.time_domain() != time_domain()) {
-			lm.release ();
-		}
-
 		switch (td) {
 		case AudioTime:
 			sc = when.superclocks();
@@ -1295,10 +1226,6 @@ TempoMap::move_tempo (TempoPoint const & tp, timepos_t const & when, bool push)
 		case BeatTime:
 			beats = when.beats ();
 			break;
-		}
-
-		if (when.time_domain() != time_domain()) {
-			lm.acquire ();
 		}
 
 		/* Do not allow moving a tempo marker to the same position as
@@ -1377,7 +1304,7 @@ TempoMap::move_tempo (TempoPoint const & tp, timepos_t const & when, bool push)
                /* Update ramp coefficients when necessary */
 
 	       if (current->ramped() && insert_before != _tempos.end()) {
-		       current->compute_omega (_sample_rate, insert_before->superclocks_per_quarter_note (), insert_before->beats() - current->beats());
+		       current->compute_omega (_thread_sample_rate, insert_before->superclocks_per_quarter_note (), insert_before->beats() - current->beats());
 	       }
 
 		/* recompute 3 domain positions for everything after this */
@@ -1406,8 +1333,6 @@ TempoMap::set_meter (Meter const & t, BBT_Time const & bbt)
 	MeterPoint * ret = 0;
 
 	{
-		TraceableWriterLock lm (_lock);
-
 		DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("Set meter @ %1 to %2\n", bbt, t));
 
 		TempoMetric metric (metric_at_locked (bbt));
@@ -1439,8 +1364,6 @@ TempoMap::set_meter (Meter const & t, Beats const & beats)
 	MeterPoint * ret = 0;
 
 	{
-		TraceableWriterLock lm (_lock);
-
 		DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("Set meter @ %1 to %2\n", beats, t));
 
 		TempoMetric metric (metric_at_locked (beats));
@@ -1469,8 +1392,6 @@ TempoMap::set_meter (Meter const & m, superclock_t sc)
 	MeterPoint * ret = 0;
 
 	{
-		TraceableWriterLock lm (_lock);
-
 		DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("Set meter @ %1 to %2\n", sc, m));
 
 		Beats beats;
@@ -1502,7 +1423,6 @@ void
 TempoMap::remove_meter (MeterPoint const & mp)
 {
 	{
-		TraceableWriterLock lm (_lock);
 		superclock_t sc = mp.sclock();
 		Meters::iterator m = std::upper_bound (_meters.begin(), _meters.end(), mp, Point::sclock_comparator());
 		if (m->sclock() != mp.sclock()) {
@@ -1511,7 +1431,6 @@ TempoMap::remove_meter (MeterPoint const & mp)
 		}
 		_meters.erase (m);
 		reset_starting_at (sc);
-		set_dirty (true);
 	}
 
 	Changed ();
@@ -1530,14 +1449,12 @@ TempoMap::bbt_at (timepos_t const & pos) const
 Temporal::BBT_Time
 TempoMap::bbt_at (superclock_t s) const
 {
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
 	return metric_at_locked (s).bbt_at (s);
 }
 
 Temporal::BBT_Time
 TempoMap::bbt_at (Temporal::Beats const & qn) const
 {
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
 	return metric_at_locked (qn).bbt_at (qn);
 }
 
@@ -1545,15 +1462,13 @@ TempoMap::bbt_at (Temporal::Beats const & qn) const
 samplepos_t
 TempoMap::sample_at (Temporal::Beats const & qn) const
 {
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
-	return superclock_to_samples (metric_at_locked (qn).superclock_at (qn), _sample_rate);
+	return superclock_to_samples (metric_at_locked (qn).superclock_at (qn), _thread_sample_rate);
 }
 
 samplepos_t
 TempoMap::sample_at (Temporal::BBT_Time const & bbt) const
 {
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
-	return samples_to_superclock (metric_at_locked (bbt).superclock_at (bbt), _sample_rate);
+	return samples_to_superclock (metric_at_locked (bbt).superclock_at (bbt), _thread_sample_rate);
 }
 
 samplepos_t
@@ -1572,14 +1487,12 @@ TempoMap::sample_at (timepos_t const & pos) const
 superclock_t
 TempoMap::superclock_at (Temporal::Beats const & qn) const
 {
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
 	return metric_at_locked (qn).superclock_at (qn);
 }
 
 superclock_t
 TempoMap::superclock_at (Temporal::BBT_Time const & bbt) const
 {
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
 	return metric_at_locked (bbt).superclock_at (bbt);
 }
 
@@ -1598,8 +1511,6 @@ TempoMap::superclock_at (timepos_t const & pos) const
 superclock_t
 TempoMap::superclock_plus_bbt (superclock_t pos, BBT_Time op) const
 {
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
-
 	BBT_Time pos_bbt = bbt_at (pos);
 
 	pos_bbt.ticks += op.ticks;
@@ -1620,8 +1531,8 @@ TempoMap::superclock_plus_bbt (superclock_t pos, BBT_Time op) const
 	return superclock_at (pos_bbt);
 }
 
-#define S2Sc(s) (samples_to_superclock ((s), _sample_rate))
-#define Sc2S(s) (superclock_to_samples ((s), _sample_rate))
+#define S2Sc(s) (samples_to_superclock ((s), _thread_sample_rate))
+#define Sc2S(s) (superclock_to_samples ((s), _thread_sample_rate))
 
 /** Count the number of beats that are equivalent to distance when going forward,
     starting at pos.
@@ -1629,7 +1540,6 @@ TempoMap::superclock_plus_bbt (superclock_t pos, BBT_Time op) const
 Temporal::Beats
 TempoMap::scwalk_to_quarters (superclock_t pos, superclock_t distance) const
 {
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
 	TempoMetric first (metric_at (pos));
 	TempoMetric last (metric_at (pos+distance));
 	Temporal::Beats a = first.quarters_at (pos);
@@ -1641,7 +1551,6 @@ Temporal::Beats
 TempoMap::scwalk_to_quarters (Temporal::Beats const & pos, superclock_t distance) const
 {
 	/* XXX this converts from beats to superclock and back to beats... which is OK (reversible) */
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
 	superclock_t s = metric_at_locked (pos).superclock_at (pos);
 	s += distance;
 	return metric_at_locked (s).quarters_at (s);
@@ -1655,10 +1564,9 @@ TempoMap::bbtwalk_to_quarters (Beats const & pos, BBT_Offset const & distance) c
 }
 
 void
-TempoMap::set_sample_rate (samplecnt_t new_sr)
+TempoMap::sample_rate_changed (samplecnt_t new_sr)
 {
-	TraceableWriterLock lm (_lock);
-	const double ratio = new_sr / (double) _sample_rate;
+	const double ratio = new_sr / (double) _thread_sample_rate;
 
 	for (Tempos::iterator t = _tempos.begin(); t != _tempos.end(); ++t) {
 		t->map_reset_set_sclock_for_sr_change (llrint (ratio * t->sclock()));
@@ -1676,7 +1584,6 @@ TempoMap::set_sample_rate (samplecnt_t new_sr)
 void
 TempoMap::dump (std::ostream& ostr) const
 {
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
 	dump_locked (ostr);
 }
 
@@ -1695,8 +1602,6 @@ TempoMap::dump_locked (std::ostream& ostr) const
 void
 TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, uint32_t bar_mod)
 {
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
-
 	assert (!_tempos.empty());
 	assert (!_meters.empty());
 
@@ -2071,7 +1976,6 @@ std::operator<<(std::ostream& str, TempoMapPoint const & tmp)
 superclock_t
 TempoMap::superclock_plus_quarters_as_superclock (superclock_t start, Temporal::Beats const & distance) const
 {
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
 	TempoMetric metric (metric_at_locked (start));
 
 	const Temporal::Beats start_qn = metric.quarters_at (start);
@@ -2079,103 +1983,32 @@ TempoMap::superclock_plus_quarters_as_superclock (superclock_t start, Temporal::
 
 	TempoMetric end_metric (metric_at (end_qn));
 
-	return superclock_to_samples (end_metric.superclock_at (end_qn), _sample_rate);
+	return superclock_to_samples (end_metric.superclock_at (end_qn), _thread_sample_rate);
 }
 
 Temporal::Beats
 TempoMap::superclock_delta_as_quarters (superclock_t start, superclock_t distance) const
 {
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
 	return quarter_note_at (start + distance) - quarter_note_at (start);
 }
 
 Temporal::superclock_t
 TempoMap::superclock_quarters_delta_as_superclock (superclock_t start, Temporal::Beats const & distance) const
 {
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
-
 	Temporal::Beats start_qn = metric_at_locked (start).quarters_at (start);
 	start_qn += distance;
 	return metric_at_locked (start_qn).superclock_at (start_qn);
 }
 
-#if 0
-void
-TempoMap::update_one_domain_from_another (timepos_t const & src, void* dst, TimeDomain target_domain) const
-{
-	switch (target_domain) {
-	case AudioTime:
-		*((samplepos_t*) dst) = sample_at (src);
-		break;
-	case BeatTime:
-		*((Beats*) dst) = quarter_note_at (src);
-		break;
-	case BarTime:
-		*((BBT_Time*) dst) = bbt_at (src);
-		break;
-	}
-}
-
-int
-TempoMap::update_music_times (int generation, samplepos_t pos, Temporal::Beats & b, Temporal::BBT_Time & bbt, bool force)
-{
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
-
-	if (force || (generation != _generation)) {
-
-		const superclock_t sc = S2Sc (pos);
-		TempoMetric tm (metric_at_locked (sc));
-
-		b = tm.quarters_at (sc);
-		bbt = tm.bbt_at (sc);
-	}
-
-	return _generation;
-}
-
-int
-TempoMap::update_samples_and_bbt_times (int generation, Temporal::Beats const & b, samplepos_t & pos, Temporal::BBT_Time & bbt, bool force)
-{
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
-
-	if (force || (generation != _generation)) {
-
-		TempoMetric metric (metric_at_locked (b));
-
-		pos = samples_to_superclock (metric.superclock_at (b), _sample_rate);
-		bbt = metric.bbt_at (b);
-	}
-
-	return _generation;
-}
-
-int
-TempoMap::update_samples_and_beat_times (int generation, Temporal::BBT_Time const & bbt, samplepos_t & pos, Temporal::Beats & b, bool force)
-{
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
-
-	if (force || (generation != _generation)) {
-		TempoMetric metric = metric_at_locked (bbt);
-
-		pos = superclock_to_samples (metric.superclock_at (bbt), _sample_rate);
-		b = metric.quarters_at (bbt);
-	}
-
-	return _generation;
-}
-#endif
-
 superclock_t
 TempoMap::superclock_per_quarter_note_at (superclock_t pos) const
 {
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
 	return metric_at_locked (pos).superclocks_per_quarter_note ();
 }
 
 BBT_Time
 TempoMap::bbt_walk (BBT_Time const & bbt, BBT_Offset const & o) const
 {
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
 	BBT_Offset offset (o);
 	Tempos::const_iterator t, prev_t, next_t;
 	Meters::const_iterator m, prev_m, next_m;
@@ -2278,7 +2111,7 @@ TempoMap::bbt_walk (BBT_Time const & bbt, BBT_Offset const & o) const
 	for (int32_t b = 0; b < offset.beats; ++b) {
 
 		TEMPO_CHECK_FOR_NEW_METRIC;
-		pos += metric.superclocks_per_grid (_sample_rate);
+		pos += metric.superclocks_per_grid (_thread_sample_rate);
 	}
 
 	/* add each bar, 1 by 1, rechecking to see if there's a new
@@ -2289,7 +2122,7 @@ TempoMap::bbt_walk (BBT_Time const & bbt, BBT_Offset const & o) const
 
 		TEMPO_CHECK_FOR_NEW_METRIC;
 
-		pos += metric.superclocks_per_bar (_sample_rate);
+		pos += metric.superclocks_per_bar (_thread_sample_rate);
 	}
 
 	return metric.bbt_at (pos);
@@ -2308,14 +2141,12 @@ TempoMap::quarter_note_at (timepos_t const & pos) const
 Temporal::Beats
 TempoMap::quarter_note_at (Temporal::BBT_Time const & bbt) const
 {
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
 	return metric_at_locked (bbt).quarters_at (bbt);
 }
 
 Temporal::Beats
 TempoMap::quarter_note_at (superclock_t pos) const
 {
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
 	return metric_at_locked (pos).quarters_at (pos);
 }
 
@@ -2323,8 +2154,6 @@ XMLNode&
 TempoMap::get_state ()
 {
 	XMLNode* node = new XMLNode (X_("TempoMap"));
-
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
 
 	node->set_property (X_("time-domain"), _time_domain);
 	node->set_property (X_("superclocks-per-second"), superclock_ticks_per_second);
@@ -2356,8 +2185,6 @@ int
 TempoMap::set_state (XMLNode const & node, int /*version*/)
 {
 	{
-		TraceableWriterLock lm (_lock);
-
 		/* global map properties */
 
 		/* XXX this should probably be at the global level in the session file because it affects a lot more than just the tempo map, potentially */
@@ -2572,8 +2399,6 @@ TempoMap::full_duration_at (timepos_t const & pos, timecnt_t const & duration, T
 Tempo const *
 TempoMap::next_tempo (Tempo const & t) const
 {
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
-
 	Tempos::const_iterator p = _tempos.begin();
 
 	while (p != _tempos.end()) {
@@ -2597,14 +2422,12 @@ TempoMap::next_tempo (Tempo const & t) const
 uint32_t
 TempoMap::n_meters () const
 {
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
 	return _meters.size();
 }
 
 uint32_t
 TempoMap::n_tempos () const
 {
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
 	return _tempos.size();
 }
 
@@ -2621,8 +2444,6 @@ TempoMap::insert_time (timepos_t const & pos, timecnt_t const & duration)
 	}
 
 	{
-		TraceableWriterLock lm (_lock);
-
 		Tempos::iterator     t (_tempos.begin());
 		Meters::iterator     m (_meters.begin());
 		MusicTimes::iterator b (_bartimes.begin());
@@ -2742,8 +2563,6 @@ TempoMap::insert_time (timepos_t const & pos, timecnt_t const & duration)
 		case BeatTime:
 			break;
 		}
-
-		set_dirty (true);
 	}
 
 	Changed ();
@@ -2793,21 +2612,18 @@ TempoMap::metric_at (timepos_t const & pos) const
 TempoMetric
 TempoMap::metric_at (superclock_t s) const
 {
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
 	return metric_at_locked (s);
 }
 
 TempoMetric
 TempoMap::metric_at (Beats const & b) const
 {
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
 	return metric_at_locked (b);
 }
 
 TempoMetric
 TempoMap::metric_at (BBT_Time const & bbt) const
 {
-	Glib::Threads::RWLock::ReaderLock lm (_lock);
 	return metric_at_locked (bbt);
 }
 
@@ -2948,7 +2764,6 @@ TempoMap::twist_tempi (TempoSection* ts, const Tempo& bpm, const framepos_t fram
 	framepos_t const min_dframe = 2;
 
 	{
-		Glib::Threads::RWLock::WriterLock lm (lock);
 		if (!ts) {
 			return false;
 		}

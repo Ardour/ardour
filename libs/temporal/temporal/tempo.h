@@ -624,16 +624,13 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 	/* and now on with the rest of the show ... */
 
    public:
-	TempoMap (Tempo const & initial_tempo, Meter const & initial_meter, samplecnt_t sr);
+	TempoMap (Tempo const & initial_tempo, Meter const & initial_meter);
 	TempoMap (TempoMap const &);
 	~TempoMap();
 
-	void set_dirty (bool yn);
+	void sample_rate_changed (samplecnt_t new_sr);
 
 	bool set_ramped (TempoPoint&, bool);
-
-	void set_sample_rate (samplecnt_t sr);
-	samplecnt_t sample_rate() const { return _sample_rate; }
 
 	void insert_time (timepos_t const & pos, timecnt_t const & duration);
 	bool remove_time (timepos_t const & pos, timecnt_t const & duration);
@@ -746,7 +743,6 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 	typedef std::list<Point*> Metrics;
 
 	template<class T> void apply_with_metrics (T& obj, void (T::*method)(Metrics &)) {
-		Glib::Threads::RWLock::ReaderLock lm (_lock);
 		Metrics metrics;
 		for (Tempos::iterator t = _tempos.begin(); t != _tempos.end(); ++t) {
 			metrics.push_back (&*t);
@@ -784,11 +780,7 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 	MusicTimes   _bartimes;
 	Points       _points;
 
-	samplecnt_t                   _sample_rate;
-	mutable Glib::Threads::RWLock _lock;
-	bool                          _dirty;
-	int                           _generation;
-	TimeDomain                     _time_domain;
+	TimeDomain _time_domain;
 	TempoPoint _initial_tempo;
 	MeterPoint _initial_meter;
 	MusicTimePoint _initial_music_time;
