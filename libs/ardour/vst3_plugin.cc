@@ -2002,7 +2002,7 @@ VST3PI::enable_io (std::vector<bool> const& ins, std::vector<bool> const& outs)
 		}
 		sa |= (uint64_t)1 << i;
 	}
-	if (_n_aux_inputs > 0) {
+	if (_n_aux_outputs > 0) {
 		_component->activateBus (Vst::kAudio, Vst::kOutput, 1, enable);
 		sa_out.push_back (sa);
 	}
