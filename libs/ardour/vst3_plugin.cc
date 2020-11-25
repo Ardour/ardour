@@ -1935,6 +1935,9 @@ VST3PI::enable_io (std::vector<bool> const& ins, std::vector<bool> const& outs)
 	if (_enabled_audio_in == ins && _enabled_audio_out == outs) {
 		return;
 	}
+
+	DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::enable_io: ins = %1 == %3 outs = %2 == %4\n", ins.size(), outs.size(), n_audio_inputs (), n_audio_outputs ()));
+
 	_enabled_audio_in = ins;
 	_enabled_audio_out = outs;
 
@@ -1943,6 +1946,8 @@ VST3PI::enable_io (std::vector<bool> const& ins, std::vector<bool> const& outs)
 
 	int32 n_bus_in  = _component->getBusCount (Vst::kAudio, Vst::kInput);
 	int32 n_bus_out = _component->getBusCount (Vst::kAudio, Vst::kOutput);
+
+	DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::enable_io: n_bus_in = %1 n_bus_in = %2\n", n_bus_in, n_bus_out));
 
 	std::vector<Vst::SpeakerArrangement> sa_in;
 	std::vector<Vst::SpeakerArrangement> sa_out;
@@ -1957,6 +1962,7 @@ VST3PI::enable_io (std::vector<bool> const& ins, std::vector<bool> const& outs)
 		sa |= (uint64_t)1 << i;
 	}
 	if (_n_inputs > 0) {
+		DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::enable_io: activateBus (kAudio, kInput, 0, %1)\n", enable));
 		_component->activateBus (Vst::kAudio, Vst::kInput, 0, enable);
 		sa_in.push_back (sa);
 	}
@@ -1970,12 +1976,14 @@ VST3PI::enable_io (std::vector<bool> const& ins, std::vector<bool> const& outs)
 		sa |= (uint64_t)1 << i;
 	}
 	if (_n_aux_inputs > 0) {
+		DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::enable_io: activateBus (kAudio, kInput, 1, %1)\n", enable));
 		_component->activateBus (Vst::kAudio, Vst::kInput, 1, enable);
 		sa_in.push_back (sa);
 	}
 
 	/* disable remaining input busses and set their speaker-count to zero */
 	while (sa_in.size() < n_bus_in) {
+		DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::enable_io: activateBus (kAudio, kInput, %1, false)\n", sa_in.size()));
 		_component->activateBus (Vst::kAudio, Vst::kInput, sa_in.size(), false);
 		sa_in.push_back (0);
 	}
@@ -1990,6 +1998,7 @@ VST3PI::enable_io (std::vector<bool> const& ins, std::vector<bool> const& outs)
 	}
 
 	if (_n_outputs > 0) {
+		DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::enable_io: activateBus (kAudio, kOutput, 0, %1)\n", enable));
 		_component->activateBus (Vst::kAudio, Vst::kOutput, 0, enable);
 		sa_out.push_back (sa);
 	}
@@ -2003,15 +2012,18 @@ VST3PI::enable_io (std::vector<bool> const& ins, std::vector<bool> const& outs)
 		sa |= (uint64_t)1 << i;
 	}
 	if (_n_aux_outputs > 0) {
+		DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::enable_io: activateBus (kAudio, kOutput, 1, %1)\n", enable));
 		_component->activateBus (Vst::kAudio, Vst::kOutput, 1, enable);
 		sa_out.push_back (sa);
 	}
 
 	while (sa_out.size() < n_bus_out) {
+		DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::enable_io: activateBus (kAudio, kOutput, %1, false)\n", sa_out.size()));
 		_component->activateBus (Vst::kAudio, Vst::kOutput, sa_out.size(), false);
 		sa_out.push_back (0);
 	}
 
+	DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::enable_io: setBusArrangements ins = %1 outs = %2\n", sa_in.size (), sa_out.size ()));
 	_processor->setBusArrangements (sa_in.size () > 0 ? &sa_in[0] : NULL, sa_in.size (),
 	                                sa_out.size () > 0 ? &sa_out[0] : NULL, sa_out.size ());
 
