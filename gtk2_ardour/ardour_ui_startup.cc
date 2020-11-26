@@ -685,6 +685,9 @@ ARDOUR_UI::load_from_application_api (const std::string& path)
 	   pathways active causes crashes. So, if the command line was already
 	   set, do nothing here. NSM also uses this code path.
 	*/
+#ifndef __APPLE__
+	printf ("ARDOUR_UI::load_from_application_api '%s'\n", path.c_str());
+#endif
 
 	if (!ARDOUR_COMMAND_LINE::session_name.empty()) {
 		return;
@@ -712,6 +715,7 @@ ARDOUR_UI::load_from_application_api (const std::string& path)
 	}
 
 	if (nsm) {
+		printf ("ARDOUR_UI::load_from_application_api use NSM\n");
 		if (!AudioEngine::instance()->set_backend("JACK", "", "")) {
 			error << _("NSM: The JACK backend is mandatory and can not be loaded.") << endmsg;
 			return;
@@ -740,6 +744,7 @@ ARDOUR_UI::load_from_application_api (const std::string& path)
 		psd.start ();
 
 		post_engine ();
+		printf ("ARDOUR_UI::load_from_application_api NSM connected to engine\n");
 	}
 
 	/* the mechanisms that can result is this being called are only
