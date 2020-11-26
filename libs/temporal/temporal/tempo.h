@@ -621,11 +621,15 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 	static SharedPtr use() { return _tempo_map_p; }
 	static SharedPtr fetch() { update_thread_tempo_map(); return use(); }
 
+	static SharedPtr write_copy() { return _map_mgr.write_copy(); }
+	static void update (SharedPtr m) { _map_mgr.update (m); _tempo_map_p = _map_mgr.reader(); }
+
 	/* and now on with the rest of the show ... */
 
    public:
 	TempoMap (Tempo const & initial_tempo, Meter const & initial_meter);
 	TempoMap (TempoMap const &);
+	TempoMap (XMLNode const &, int version);
 	~TempoMap();
 
 	void sample_rate_changed (samplecnt_t new_sr);
@@ -779,9 +783,6 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 	Points       _points;
 
 	TimeDomain _time_domain;
-	TempoPoint _initial_tempo;
-	MeterPoint _initial_meter;
-	MusicTimePoint _initial_music_time;
 
 	/* These return the TempoMetric in effect at the given time. If
 	   can_match is true, then the TempoMetric may refer to a Tempo or

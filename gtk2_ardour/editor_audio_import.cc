@@ -284,7 +284,7 @@ Editor::import_smf_tempo_map (Evoral::SMF const & smf, timepos_t const & pos)
 	const samplecnt_t sample_rate = _session->sample_rate ();
 #warning NUTEMPO need to be able to create a tempo map with no entries
 	// TempoMap new_map (sample_rate);
-	TempoMap new_map (Tempo (120), Meter (4, 4));
+	TempoMap::SharedPtr new_map (new TempoMap (Tempo (120), Meter (4, 4)));
 	Meter last_meter (4.0, 4.0);
 	bool have_initial_meter = false;
 
@@ -301,22 +301,20 @@ Editor::import_smf_tempo_map (Evoral::SMF const & smf, timepos_t const & pos)
 #warning NUTEMPO figure this out when i have a brain
 			// new_map.set_tempo (tempo, Temporal::Beats (t->time_pulses/ (double)smf.ppqn() / 4.0);
 			if (!(meter == last_meter)) {
-				bbt = new_map.bbt_at (Beats::from_double (t->time_pulses/(double)smf.ppqn()));
-				new_map.set_meter (meter, bbt);
+				bbt = new_map->bbt_at (Beats::from_double (t->time_pulses/(double)smf.ppqn()));
+				new_map->set_meter (meter, bbt);
 			}
 
 		} else {
-				new_map.set_meter (meter, bbt);
-			new_map.set_tempo (tempo, bbt);
+			new_map->set_meter (meter, bbt);
+			new_map->set_tempo (tempo, bbt);
 			have_initial_meter = true;
-
 		}
 
 		last_meter = meter;
 	}
 
-#warning NUTEMPO need an assignment API for TempoMap
-	//_session->tempo_map() = new_map;
+	TempoMap::update (new_map);
 }
 
 void

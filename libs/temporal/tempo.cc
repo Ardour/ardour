@@ -567,28 +567,31 @@ TempoMapPoint::end_float ()
 /* TEMPOMAP */
 
 TempoMap::TempoMap (Tempo const & initial_tempo, Meter const & initial_meter)
-	: _initial_tempo (*this, initial_tempo, 0, Beats(), BBT_Time())
-	, _initial_meter (*this, initial_meter, 0, Beats(), BBT_Time())
-	, _initial_music_time (*this)
 {
-	_tempos.push_back   (_initial_tempo);
-	_meters.push_back   (_initial_meter);
-	_bartimes.push_back (_initial_music_time);
+	TempoPoint* tp = new TempoPoint (*this, initial_tempo, 0, Beats(), BBT_Time());
+	MeterPoint* mp = new MeterPoint (*this, initial_meter, 0, Beats(), BBT_Time());
+	MusicTimePoint* mtp = new MusicTimePoint (*this);
 
-	_points.push_back (_initial_tempo);
-	_points.push_back (_initial_meter);
-	_points.push_back (_initial_music_time);
+	_tempos.push_back   (*tp);
+	_meters.push_back   (*mp);
+	_bartimes.push_back (*mtp);
+
+	_points.push_back (*tp);
+	_points.push_back (*mp);
+	_points.push_back (*mtp);
 }
 
 TempoMap::~TempoMap()
 {
 }
 
+TempoMap::TempoMap (XMLNode const & node, int version)
+{
+	set_state (node, version);
+}
+
 TempoMap::TempoMap (TempoMap const & other)
 	: _time_domain (other.time_domain())
-	, _initial_tempo (other.metric_at (0).tempo())
-	, _initial_meter (other.metric_at (0).meter())
-	, _initial_music_time (*this)
 {
 #warning NUTEMPO since these lists are intrusive we must actually rebuild them
 	// _meters = other._meters;

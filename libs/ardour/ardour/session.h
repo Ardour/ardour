@@ -828,8 +828,8 @@ public:
 	bool loop_is_possible () const;
 	PBD::Signal0<void> PunchLoopConstraintChange;
 
-	Temporal::TempoMap&       tempo_map()       { return *_tempo_map; }
-	const Temporal::TempoMap& tempo_map() const { return *_tempo_map; }
+	Temporal::TempoMap&       tempo_map()       { *Temporal::TempoMap::fetch(); }
+	const Temporal::TempoMap& tempo_map() const { return *Temporal::TempoMap::fetch(); }
 	void maybe_update_tempo_from_midiclock_tempo (float bpm);
 
 	unsigned int    get_xrun_count () const {return _xrun_count; }
@@ -1867,7 +1867,6 @@ private:
 	int  send_full_time_code (samplepos_t, pframes_t nframes);
 	void send_song_position_pointer (samplepos_t);
 
-	Temporal::TempoMap    *_tempo_map;
 	void          tempo_map_changed ();
 
 	/* edit/mix groups */
