@@ -404,11 +404,7 @@ ARDOUR_UI::nsm_init ()
 		}
 	}
 	if (i == 5000) {
-#if 0 // USE AFTER STRINGFREEZE 6.0
 		error << _("NSM server did not announce itself. Continuing without NSM.") << endmsg;
-#else
-		error << _("NSM server did not announce itself") << endmsg;
-#endif
 		delete nsm;
 		nsm = 0;
 		return 0;
