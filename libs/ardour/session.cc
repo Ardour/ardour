@@ -963,31 +963,7 @@ Session::remove_monitor_section ()
 	cancel_audition ();
 
 	if (!deletion_in_progress ()) {
-		/* Hold process lock while doing this so that we don't hear bits and
-		 * pieces of audio as we work on each route.
-		 */
-
-		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-
-		/* Connect tracks to monitor section. Note that in an
-		   existing session, the internal sends will already exist, but we want the
-		   routes to notice that they connect to the control out specifically.
-		*/
-
-
-		boost::shared_ptr<RouteList> r = routes.reader ();
-		ProcessorChangeBlocker  pcb (this, false);
-
-		for (RouteList::iterator x = r->begin(); x != r->end(); ++x) {
-
-			if ((*x)->is_monitor()) {
-				/* relax */
-			} else if ((*x)->is_master()) {
-				/* relax */
-			} else {
-				(*x)->remove_aux_or_listen (_monitor_out);
-			}
-		}
+		setup_route_monitor_sends (false, true);
 	}
 
 	remove_route (_monitor_out);
@@ -1073,8 +1049,7 @@ Session::add_monitor_section ()
 		}
 	}
 
-	/* if monitor section is not connected, connect it to physical outs
-	 */
+	/* if monitor section is not connected, connect it to physical outs */
 
 	if ((Config->get_auto_connect_standard_busses () || Profile->get_mixbus ()) && !_monitor_out->output()->connected ()) {
 
@@ -1131,30 +1106,40 @@ Session::add_monitor_section ()
 	 * pieces of audio as we work on each route.
 	 */
 
-	Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+	setup_route_monitor_sends (true, true);
 
-	/* Connect tracks to monitor section. Note that in an
-	   existing session, the internal sends will already exist, but we want the
-	   routes to notice that they connect to the control out specifically.
-	*/
+	MonitorBusAddedOrRemoved (); /* EMIT SIGNAL */
+}
 
+void
+Session::setup_route_monitor_sends (bool enable, bool need_process_lock)
+{
+	Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock (), Glib::Threads::NOT_LOCK);
+	if (need_process_lock) {
+		/* Hold process lock while doing this so that we don't hear bits and
+		 * pieces of audio as we work on each route.
+		 */
+		lx.acquire();
+	}
 
 	boost::shared_ptr<RouteList> rls = routes.reader ();
-
 	ProcessorChangeBlocker  pcb (this, false /* XXX */);
 
 	for (RouteList::iterator x = rls->begin(); x != rls->end(); ++x) {
 		if ((*x)->can_solo ()) {
-			(*x)->enable_monitor_send ();
+			if (enable) {
+				(*x)->enable_monitor_send ();
+			} else {
+				(*x)->remove_monitor_send ();
+			}
 		}
 	}
 
 	if (auditioner) {
 		auditioner->connect ();
 	}
-
-	MonitorBusAddedOrRemoved (); /* EMIT SIGNAL */
 }
+
 
 void
 Session::reset_monitor_section ()
@@ -1199,8 +1184,7 @@ Session::reset_monitor_section ()
 		}
 	}
 
-	/* connect monitor section to physical outs
-	 */
+	/* connect monitor section to physical outs */
 
 	if (Config->get_auto_connect_standard_busses()) {
 
@@ -1253,21 +1237,7 @@ Session::reset_monitor_section ()
 		}
 	}
 
-	/* Connect tracks to monitor section. Note that in an
-	   existing session, the internal sends will already exist, but we want the
-	   routes to notice that they connect to the control out specifically.
-	*/
-
-
-	boost::shared_ptr<RouteList> rls = routes.reader ();
-
-	ProcessorChangeBlocker pcb (this, false);
-
-	for (RouteList::iterator x = rls->begin(); x != rls->end(); ++x) {
-		if ((*x)->can_solo ()) {
-			(*x)->enable_monitor_send ();
-		}
-	}
+	setup_route_monitor_sends (true, false);
 }
 
 int
@@ -3437,10 +3407,10 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 			}
 
 			/* if the monitoring section had a pointer to this route, remove it */
-			if (_monitor_out && !(*iter)->is_master() && !(*iter)->is_monitor()) {
+			if (!deletion_in_progress () && _monitor_out && (*iter)->can_solo ()) {
 				Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 				ProcessorChangeBlocker pcb (this, false);
-				(*iter)->remove_aux_or_listen (_monitor_out);
+				(*iter)->remove_monitor_send ();
 			}
 
 			boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (*iter);

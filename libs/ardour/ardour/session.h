@@ -2069,6 +2069,8 @@ private:
 
 	void auto_connect_master_bus ();
 
+	void setup_route_monitor_sends (bool enable, bool need_process_lock);
+
 	int find_all_sources (std::string path, std::set<std::string>& result);
 	int find_all_sources_across_snapshots (std::set<std::string>& result, bool exclude_this_snapshot);
 

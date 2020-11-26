@@ -3437,57 +3437,15 @@ Route::add_foldback_send (boost::shared_ptr<Route> route, bool post_fader)
 }
 
 void
-Route::remove_aux_or_listen (boost::shared_ptr<Route> route)
+Route::remove_monitor_send ()
 {
+	/* caller needs to hold process lock */
+	if (!_monitor_send) {
+		return;
+	}
 	ProcessorStreams err;
-	ProcessorList::iterator tmp;
-	bool do_fb_signal = false;
-
-	{
-		Glib::Threads::RWLock::ReaderLock rl(_processor_lock);
-
-		/* have to do this early because otherwise processor reconfig
-		 * will put _monitor_send back in the list
-		 */
-
-		if (route == _session.monitor_out()) {
-			_monitor_send.reset ();
-		}
-
-	  again:
-		for (ProcessorList::iterator x = _processors.begin(); x != _processors.end(); ++x) {
-
-			boost::shared_ptr<InternalSend> d = boost::dynamic_pointer_cast<InternalSend>(*x);
-
-			if (d && d->target_route() == route) {
-				boost::shared_ptr<Send> snd = boost::dynamic_pointer_cast<Send>(d);
-				if (snd && snd->is_foldback()) {
-					do_fb_signal = true;
-				}
-
-				rl.release ();
-				if (remove_processor (*x, &err, false) > 0) {
-					rl.acquire ();
-					continue;
-				}
-				rl.acquire ();
-
-				/* list could have been demolished while we dropped the lock
-				   so start over.
-				*/
-				if (_session.engine().running()) {
-					/* i/o processors cannot be removed if the engine is not running
-					 * so don't live-loop in case the engine is N/A or dies
-					 */
-					goto again;
-				}
-			}
-		}
-	}
-	if (do_fb_signal) {
-		_session.FBSendsChanged ();
-	}
-
+	remove_processor (_monitor_send, &err, false);
+	_monitor_send.reset ();
 }
 
 void
