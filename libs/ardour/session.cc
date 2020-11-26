@@ -398,6 +398,7 @@ Session::Session (AudioEngine &eng,
 		}
 	}
 
+	/* apply the loaded state_tree */
 	int err = post_engine_init ();
 
 	if (err) {
@@ -419,6 +420,22 @@ Session::Session (AudioEngine &eng,
 			default:
 				throw SessionException (string_compose (_("Cannot initialize session/engine: %1"), _("Unexpected exception during session setup, possibly invalid audio/midi engine parameters. Please see stdout/stderr for details")));
 				break;
+		}
+	}
+
+	if (!mix_template.empty()) {
+		/* fixup monitor-sends */
+		if (Config->get_use_monitor_bus ()) {
+			/* Session::config_changed will have set use-monitor-bus to match the template.
+			 * search for want_ms, have_ms
+			 */
+			assert (_monitor_out);
+			/* ..but sends do not exist, since templated track bitslots are unset */
+			setup_route_monitor_sends (true, true);
+		} else {
+			/* remove any monitor-sends that may be in the template */
+			assert (!_monitor_out);
+			setup_route_monitor_sends (false, true);
 		}
 	}
 
@@ -3056,6 +3073,21 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 	}
 
 	IO::enable_connecting ();
+
+	if (!ret.empty()) {
+		/* set/unset monitor-send */
+		Glib::Threads::Mutex::Lock lm (_engine.process_lock());
+		for (RouteList::iterator x = ret.begin(); x != ret.end(); ++x) {
+			if ((*x)->can_solo ()) {
+				if (_monitor_out) {
+					(*x)->enable_monitor_send ();
+				} else {
+					/* this may happen with old templates */
+					(*x)->remove_monitor_send ();
+				}
+			}
+		}
+	}
 
 	return ret;
 }
