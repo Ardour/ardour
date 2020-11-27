@@ -2864,3 +2864,14 @@ TempoMap::twist_tempi (TempoSection* ts, const Tempo& bpm, const framepos_t fram
 }
 
 #endif
+
+void
+TempoMap::MementoBinder::set_state (XMLNode const & node, int version) const
+{
+	TempoMap::SharedPtr map (write_copy());
+	map->set_state (node, version);
+	update (map);
+	fetch ();
+}
+
+	
