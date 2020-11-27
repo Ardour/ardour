@@ -31,6 +31,7 @@
 
 #include "pbd/enum_convert.h"
 #include "pbd/integer_division.h"
+#include "pbd/memento_command.h"
 #include "pbd/rcu.h"
 #include "pbd/signals.h"
 #include "pbd/statefuldestructible.h"
@@ -765,6 +766,14 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 	PBD::Signal0<void> Changed;
 
 	XMLNode& get_state();
+
+	class MementoBinder : public MementoCommandBinder<SharedPtr> {
+		MementoBinder () {}
+		void set_state (XMLNode const & node, int version) const { TempoMap::use()->set_state (node, version); }
+		XMLNode& get_state () const { TempoMap::use()->get_state(); }
+		std::string type_name() const { return "Temporal::TempoMap"; }
+		void add_state (XMLNode*) {}
+	};
 
 	typedef boost::intrusive::member_hook<TempoPoint,boost::intrusive::list_member_hook<>, &TempoPoint::_tempo_hook> TempoHookOption;
 	typedef boost::intrusive::member_hook<MeterPoint,boost::intrusive::list_member_hook<>, &MeterPoint::_meter_hook> MeterHookOption;
