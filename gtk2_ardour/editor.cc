@@ -1373,7 +1373,8 @@ Editor::set_session (Session *t)
 	_session->vca_manager().VCAAdded.connect (_session_connections, invalidator (*this), boost::bind (&Editor::add_vcas, this, _1), gui_context());
 	_session->RouteAdded.connect (_session_connections, invalidator (*this), boost::bind (&Editor::add_routes, this, _1), gui_context());
 	_session->DirtyChanged.connect (_session_connections, invalidator (*this), boost::bind (&Editor::update_title, this), gui_context());
-	_session->tempo_map().Changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::tempo_map_changed, this), gui_context());
+#warning NUTEMPO how to catch tempo map changes
+	// _session->tempo_map().Changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::tempo_map_changed, this), gui_context());
 	_session->Located.connect (_session_connections, invalidator (*this), boost::bind (&Editor::located, this), gui_context());
 	_session->config.ParameterChanged.connect (_session_connections, invalidator (*this), boost::bind (&Editor::parameter_changed, this, _1), gui_context());
 	_session->StateSaved.connect (_session_connections, invalidator (*this), boost::bind (&Editor::session_state_saved, this, _1), gui_context());
@@ -1395,7 +1396,7 @@ Editor::set_session (Session *t)
 
 	restore_ruler_visibility ();
 	//tempo_map_changed (PropertyChange (0));
-	_session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks);
+	TempoMap::use()->apply_with_metrics (*this, &Editor::draw_metric_marks);
 
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		(static_cast<TimeAxisView*>(*i))->set_samples_per_pixel (samples_per_pixel);
@@ -2807,6 +2808,7 @@ timepos_t
 Editor::snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode direction, SnapPref gpref)
 {
 	timepos_t ret(presnap);
+	TempoMap::SharedPtr tmap (TempoMap::use());
 
 	if (gpref != SnapToGrid_Unscaled) { // use the visual grid lines which are limited by the zoom scale that the user selected
 
@@ -2839,19 +2841,19 @@ Editor::snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode direction, S
 			case bbt_show_16:
 			case bbt_show_4:
 			case bbt_show_1:
-				ret = timepos_t (_session->tempo_map().quarter_note_at (_session->tempo_map().round_to_bar (_session->tempo_map().bbt_at (presnap))));
+				ret = timepos_t (tmap->quarter_note_at (tmap->round_to_bar (tmap->bbt_at (presnap))));
 				break;
 			case bbt_show_quarters:
-				ret = timepos_t (_session->tempo_map().quarter_note_at (presnap).round_to_beat ());
+				ret = timepos_t (tmap->quarter_note_at (presnap).round_to_beat ());
 				break;
 			case bbt_show_eighths:
-				ret = timepos_t (_session->tempo_map().quarter_note_at (presnap).round_to_subdivision (1 * divisor, direction));
+				ret = timepos_t (tmap->quarter_note_at (presnap).round_to_subdivision (1 * divisor, direction));
 				break;
 			case bbt_show_sixteenths:
-				ret = timepos_t (_session->tempo_map().quarter_note_at (presnap).round_to_subdivision (2 * divisor, direction));
+				ret = timepos_t (tmap->quarter_note_at (presnap).round_to_subdivision (2 * divisor, direction));
 				break;
 			case bbt_show_thirtyseconds:
-				ret = timepos_t (_session->tempo_map().quarter_note_at (presnap).round_to_subdivision (4 * divisor, direction));
+				ret = timepos_t (tmap->quarter_note_at (presnap).round_to_subdivision (4 * divisor, direction));
 				break;
 			case bbt_show_sixtyfourths:
 				ret = _session->tempo_map().round_to_quarter_note_subdivision (presnap.sample, 8 * divisor, direction);
@@ -2861,7 +2863,7 @@ Editor::snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode direction, S
 				break;
 		}
 	} else {
-		ret = timepos_t (_session->tempo_map().quarter_note_at (presnap).round_to_subdivision (get_grid_beat_divisions(), direction));
+		ret = timepos_t (tmap->quarter_note_at (presnap).round_to_subdivision (get_grid_beat_divisions(), direction));
 	}
 
 	return ret;
@@ -4159,12 +4161,14 @@ Editor::get_grid_type_as_beats (bool& success, timepos_t const & position)
 		return Temporal::Beats::from_double (1.0 / (double) get_grid_beat_divisions ());
 	}
 
+	TempoMap::SharedPtr tmap (TempoMap::use());
+	
 	switch (_grid_type) {
 	case GridTypeBeat:
-		return Temporal::Beats::from_double (4.0 / _session->tempo_map().meter_at (position).note_value());
+		return Temporal::Beats::from_double (4.0 / tmap->meter_at (position).note_value());
 	case GridTypeBar:
 		if (_session) {
-			const Meter& m = _session->tempo_map().meter_at (position);
+			const Meter& m = tmap->meter_at (position);
 			return Temporal::Beats::from_double ((4.0 * m.divisions_per_bar()) / m.note_value());
 		}
 		break;

@@ -7082,7 +7082,8 @@ Editor::define_one_bar (timepos_t const & start, timepos_t const & end)
 {
 	timecnt_t length = start.distance (end);
 
-	const Meter& m (_session->tempo_map().meter_at (start));
+	TempoMap::SharedPtr tmap (TempoMap::use());
+	const Meter& m (tmap->meter_at (start));
 
 	/* length = 1 bar */
 
@@ -7106,11 +7107,11 @@ Editor::define_one_bar (timepos_t const & start, timepos_t const & end)
 
 	*/
 
-	const TempoPoint& t (_session->tempo_map().tempo_at (start));
+	const TempoPoint& t (tmap->tempo_at (start));
 
 	bool do_global = false;
 
-	if ((_session->tempo_map().n_tempos() == 1) && (_session->tempo_map().n_meters() == 1)) {
+	if ((tmap->n_tempos() == 1) && (tmap->n_meters() == 1)) {
 
 		/* only 1 tempo & 1 meter: ask if the user wants to set the tempo
 		   at the start, or create a new marker
@@ -7150,21 +7151,22 @@ Editor::define_one_bar (timepos_t const & start, timepos_t const & end)
 	}
 
 	begin_reversible_command (_("set tempo from region"));
-	XMLNode& before (_session->tempo_map().get_state());
+	XMLNode& before (tmap->get_state());
 
 	if (do_global) {
-		_session->tempo_map().set_tempo (Tempo (beats_per_minute, t.end_note_types_per_minute(), t.note_type()), timepos_t());
+		tmap->set_tempo (Tempo (beats_per_minute, t.end_note_types_per_minute(), t.note_type()), timepos_t());
 	} else if (t.time() == start) {
-		_session->tempo_map().set_tempo (Tempo (beats_per_minute, t.end_note_types_per_minute(), t.note_type()), start);
+		tmap->set_tempo (Tempo (beats_per_minute, t.end_note_types_per_minute(), t.note_type()), start);
 	} else {
 		/* constant tempo */
 		const Tempo tempo (beats_per_minute, t.note_type());
-		_session->tempo_map().set_tempo (tempo, start);
+		tmap->set_tempo (tempo, start);
 	}
 
-	XMLNode& after (_session->tempo_map().get_state());
+	XMLNode& after (tmap->get_state());
 
-	_session->add_command (new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
+#warning NUTEMPO memento command tempo map issues
+	// _session->add_command (new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
 	commit_reversible_command ();
 }
 
@@ -8098,11 +8100,13 @@ Editor::insert_time (
 			begin_reversible_command (_("insert time"));
 			in_command = true;
 		}
-		XMLNode& before (_session->tempo_map().get_state());
-#warning NUTEMPO need new map API
-		//_session->tempo_map().insert_time (pos, samples);
-		XMLNode& after (_session->tempo_map().get_state());
-		_session->add_command (new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
+		TempoMap::SharedPtr tmap (TempoMap::use());
+
+		XMLNode& before (tmap->get_state());
+		tmap->insert_time (pos, samples);
+		XMLNode& after (tmap->get_state());
+#warning NUTEMPO memento command tempo map issues
+		// _session->add_command (new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
 	}
 
 	if (in_command) {
@@ -8273,15 +8277,17 @@ Editor::remove_time (timepos_t const & pos, timecnt_t const & duration, InsertTi
 	}
 
 	if (tempo_too) {
-		XMLNode& before (_session->tempo_map().get_state());
+		TempoMap::SharedPtr tmap (TempoMap::use());
+		XMLNode& before (tmap->get_state());
 
-		if (_session->tempo_map().remove_time (pos, duration)) {
+		if (tmap->remove_time (pos, duration)) {
 			if (!in_command) {
 				begin_reversible_command (_("remove time"));
 				in_command = true;
 			}
-			XMLNode& after (_session->tempo_map().get_state());
-			_session->add_command (new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
+			XMLNode& after (tmap->get_state());
+#warning NUTEMPO memento command tempo map issue
+			//_session->add_command (new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
 		}
 	}
 

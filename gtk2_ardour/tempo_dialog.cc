@@ -44,9 +44,9 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Temporal;
 
-TempoDialog::TempoDialog (TempoMap& map, timepos_t const & pos, const string&)
+TempoDialog::TempoDialog (TempoMap::SharedPtr const & map, timepos_t const & pos, const string&)
 	: ArdourDialog (_("New Tempo"))
-	, _map (&map)
+	, _map (map)
 	, _section (0)
 	, bpm_adjustment (60.0, 1.0, 999.9, 0.1, 1.0)
 	, bpm_spinner (bpm_adjustment)
@@ -64,9 +64,9 @@ TempoDialog::TempoDialog (TempoMap& map, timepos_t const & pos, const string&)
 	init (when, tempo.note_types_per_minute(), tempo.end_note_types_per_minute(), tempo.note_type(), Tempo::Constant, true, BeatTime);
 }
 
-TempoDialog::TempoDialog (TempoMap& map, TempoPoint& point, const string&)
+TempoDialog::TempoDialog (TempoMap::SharedPtr const & map, TempoPoint& point, const string&)
 	: ArdourDialog (_("Edit Tempo"))
-	, _map (&map)
+	, _map (map)
 	, _section (&point)
 	, bpm_adjustment (60.0, 1.0, 999.9, 0.1, 1.0)
 	, bpm_spinner (bpm_adjustment)
@@ -78,9 +78,9 @@ TempoDialog::TempoDialog (TempoMap& map, TempoPoint& point, const string&)
 	, pulse_selector_label (_("Pulse:"), ALIGN_LEFT, ALIGN_CENTER)
 	, tap_tempo_button (_("Tap tempo"))
 {
-	Temporal::BBT_Time when (map.bbt_at (point.time()));
+	Temporal::BBT_Time when (map->bbt_at (point.time()));
 	init (when, _section->note_types_per_minute(), _section->end_note_types_per_minute(), _section->note_type(), _section->type(),
-	      (map.is_initial (point) ||(map.time_domain() == Temporal::BarTime)), map.time_domain());
+	      (map->is_initial (point) ||(map->time_domain() == Temporal::BarTime)), map->time_domain());
 }
 
 void
@@ -487,16 +487,16 @@ TempoDialog::tap_tempo_focus_out (GdkEventFocus* )
 	return false;
 }
 
-MeterDialog::MeterDialog (TempoMap& map, timepos_t const & pos, const string&)
+MeterDialog::MeterDialog (TempoMap::SharedPtr const & map, timepos_t const & pos, const string&)
 	: ArdourDialog (_("New Meter"))
 {
-	Temporal::BBT_Time when (map.round_to_bar (map.bbt_at (pos)));
-	Meter& meter (map.meter_at (when));
+	Temporal::BBT_Time when (map->round_to_bar (map->bbt_at (pos)));
+	Meter& meter (map->meter_at (when));
 
 	init (when, meter.divisions_per_bar(), meter.note_value(), false, pos.time_domain());
 }
 
-MeterDialog::MeterDialog (TempoMap& map, Temporal::MeterPoint& section, const string&)
+MeterDialog::MeterDialog (Temporal::MeterPoint& section, const string&)
 	: ArdourDialog (_("Edit Meter"))
 {
 	init (section.bbt(), section.divisions_per_bar(), section.note_value(), section.map().is_initial(section), section.map().time_domain());

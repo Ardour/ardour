@@ -1234,21 +1234,21 @@ AudioClock::set_bbt (timepos_t const & w, timecnt_t const & o, bool /*force*/)
 			BBT.beats = 0;
 			BBT.ticks = 0;
 		} else {
-			TempoMap& tmap (_session->tempo_map());
+			TempoMap::SharedPtr tmap (TempoMap::use());
 
 			if (offset.zero()) {
 				offset = timecnt_t (bbt_reference_time);
 			}
 
-			const int divisions = tmap.meter_at (timepos_t (offset)).divisions_per_bar();
+			const int divisions = tmap->meter_at (timepos_t (offset)).divisions_per_bar();
 			Temporal::BBT_Time sub_bbt;
 
 			if (negative) {
-				BBT = tmap.bbt_at (tmap.quarter_note_at (timepos_t (offset)));
-				sub_bbt = tmap.bbt_at (timepos_t (offset - when));
+				BBT = tmap->bbt_at (tmap->quarter_note_at (timepos_t (offset)));
+				sub_bbt = tmap->bbt_at (timepos_t (offset - when));
 			} else {
-				BBT = tmap.bbt_at (tmap.quarter_note_at (when + offset));
-				sub_bbt = tmap.bbt_at (timepos_t (offset));
+				BBT = tmap->bbt_at (tmap->quarter_note_at (when + offset));
+				sub_bbt = tmap->bbt_at (timepos_t (offset));
 			}
 
 			BBT.bars -= sub_bbt.bars;
@@ -1273,7 +1273,7 @@ AudioClock::set_bbt (timepos_t const & w, timecnt_t const & o, bool /*force*/)
 			}
 		}
 	} else {
-		BBT = _session->tempo_map().bbt_at (when);
+		BBT = TempoMap::use()->bbt_at (when);
 	}
 
 	if (negative) {
@@ -1295,7 +1295,7 @@ AudioClock::set_bbt (timepos_t const & w, timecnt_t const & o, bool /*force*/)
 			pos = bbt_reference_time;
 		}
 
-		TempoMetric m (_session->tempo_map().metric_at (pos));
+		TempoMetric m (TempoMap::use()->metric_at (pos));
 
 #ifndef PLATFORM_WINDOWS
 		/* UTF8 1/4 note and 1/8 note ♩ (\u2669) and ♪ (\u266a) are n/a on Windows */
@@ -1331,7 +1331,8 @@ AudioClock::set_session (Session *s)
 
 		Config->ParameterChanged.connect (_session_connections, invalidator (*this), boost::bind (&AudioClock::session_configuration_changed, this, _1), gui_context());
 		_session->config.ParameterChanged.connect (_session_connections, invalidator (*this), boost::bind (&AudioClock::session_configuration_changed, this, _1), gui_context());
-		_session->tempo_map().PropertyChanged.connect (_session_connections, invalidator (*this), boost::bind (&AudioClock::session_property_changed, this, _1), gui_context());
+#warning NUTEMPO probably need a static signal here, map object will change address etc
+		// TempoMap::use()->Changed.connect (_session_connections, invalidator (*this), boost::bind (&AudioClock::session_property_changed, this), gui_context());
 
 		XMLNode* node = _session->extra_xml (X_("ClockModes"));
 
@@ -1911,19 +1912,19 @@ AudioClock::get_sample_step (Field field, timepos_t const & pos, int dir)
 		BBT.bars = 1;
 		BBT.beats = 0;
 		BBT.ticks = 0;
-		f = _session->tempo_map().bbt_duration_at (pos,BBT).samples();
+		f = TempoMap::use()->bbt_duration_at (pos,BBT).samples();
 		break;
 	case Beats:
 		BBT.bars = 0;
 		BBT.beats = 1;
 		BBT.ticks = 0;
-		f = _session->tempo_map().bbt_duration_at(pos,BBT).samples();
+		f = TempoMap::use()->bbt_duration_at(pos,BBT).samples();
 		break;
 	case Ticks:
 		BBT.bars = 0;
 		BBT.beats = 0;
 		BBT.ticks = 1;
-		f = _session->tempo_map().bbt_duration_at(pos,BBT).samples();
+		f = TempoMap::use()->bbt_duration_at(pos,BBT).samples();
 		break;
 	default:
 		error << string_compose (_("programming error: %1"), "attempt to get samples from non-text field!") << endmsg;
@@ -2114,9 +2115,9 @@ AudioClock::samples_from_bbt_string (timepos_t const & pos, const string& str) c
 	if (is_duration) {
 		bbt.bars++;
 		bbt.beats++;
-		return _session->tempo_map().bbt_duration_at (pos, bbt).samples();
+		return TempoMap::use()->bbt_duration_at (pos, bbt).samples();
 	} else {
-		return _session->tempo_map().sample_at (bbt, _session->sample_rate());
+		return TempoMap::use()->sample_at (bbt, _session->sample_rate());
 	}
 }
 
@@ -2135,7 +2136,7 @@ AudioClock::sample_duration_from_bbt_string (timepos_t const & pos, const string
 		return 0;
 	}
 
-	return _session->tempo_map().bbt_duration_at(pos,bbt).samples();
+	return TempoMap::use()->bbt_duration_at(pos,bbt).samples();
 }
 
 samplepos_t

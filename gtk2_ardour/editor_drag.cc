@@ -3382,7 +3382,7 @@ MeterMarkerDrag::MeterMarkerDrag (Editor* e, ArdourCanvas::Item* i, bool c)
 	DEBUG_TRACE (DEBUG::Drags, "New MeterMarkerDrag\n");
 	assert (_marker);
 
-	_movable = !e->session()->tempo_map().is_initial (_marker->meter());
+	_movable = !TempoMap::use()->is_initial (_marker->meter());
 }
 
 void
@@ -3401,7 +3401,7 @@ MeterMarkerDrag::setup_pointer_offset ()
 void
 MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 {
-	TempoMap& map (_editor->session()->tempo_map());
+	TempoMap::SharedPtr map (TempoMap::use());
 
 	if (first_move) {
 		// create a dummy marker to catch events, then hide it.
@@ -3422,14 +3422,14 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 		_marker->hide();
 
 		/* get current state */
-		before_state = &map.get_state();
+		before_state = &map->get_state();
 		if (!_copy) {
 			_editor->begin_reversible_command (_("move meter mark"));
 		} else {
 
 			timepos_t const pointer = adjusted_current_time (event, false);
-			BBT_Time pointer_bbt = map.bbt_at (pointer);
-			Temporal::MeterPoint const & meter = map.metric_at (pointer).meter();
+			BBT_Time pointer_bbt = map->bbt_at (pointer);
+			Temporal::MeterPoint const & meter = map->metric_at (pointer).meter();
 			BBT_Time bbt = meter.bbt();
 
 			/* we can't add a meter where one currently exists */
@@ -3443,17 +3443,17 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 
 			timepos_t pos;
 
-			if (map.time_domain() == AudioTime) {
-				pos = timepos_t (map.sample_at (bbt, _editor->session()->sample_rate()));
+			if (map->time_domain() == AudioTime) {
+				pos = timepos_t (map->sample_at (bbt, _editor->session()->sample_rate()));
 			} else {
-				pos = timepos_t (map.quarter_note_at (bbt));
+				pos = timepos_t (map->quarter_note_at (bbt));
 			}
 
-			_marker->reset_meter (map.set_meter (meter, pos));
+			_marker->reset_meter (map->set_meter (meter, pos));
 		}
 
 		/* only snap to bars. leave snap mode alone for audio locked meters.*/
-		if (map.time_domain() != AudioTime) {
+		if (map->time_domain() != AudioTime) {
 			_editor->set_grid_to (GridTypeBar);
 			_editor->set_snap_mode (SnapMagnetic);
 		}
@@ -3470,7 +3470,7 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 			pos = adjusted_current_time (event);
 		}
 
-		map.move_meter (_marker->meter(), pos, false);
+		map->move_meter (_marker->meter(), pos, false);
 
 		show_verbose_cursor_time (timepos_t (_marker->meter().beats()));
 		_editor->set_snapped_cursor_position (timepos_t (_marker->meter().sample(_editor->session()->sample_rate())));
@@ -3491,10 +3491,11 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 	_editor->set_grid_to (_old_grid_type);
 	_editor->set_snap_mode (_old_snap_mode);
 
-	TempoMap& map (_editor->session()->tempo_map());
+	TempoMap::SharedPtr map (TempoMap::use());
 
-	XMLNode &after = map.get_state();
-	_editor->session()->add_command(new MementoCommand<TempoMap>(map, before_state, &after));
+	XMLNode &after = map->get_state();
+#warning NUTEMPO memento command issue
+	//_editor->session()->add_command(new MementoCommand<TempoMap>(map, before_state, &after));
 	_editor->commit_reversible_command ();
 
 	// delete the dummy marker we used for visual representation while moving.
@@ -3512,7 +3513,7 @@ MeterMarkerDrag::aborted (bool moved)
 		_editor->set_grid_to (_old_grid_type);
 		_editor->set_snap_mode (_old_snap_mode);
 
-		_editor->session()->tempo_map().set_state (*before_state, Stateful::current_state_version);
+		TempoMap::use()->set_state (*before_state, Stateful::current_state_version);
 		// delete the dummy marker we used for visual representation while moving.
 		// a new visual marker will show up automatically.
 		delete _marker;
@@ -4885,7 +4886,6 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	MarkerSelection::iterator i;
 	CopiedLocationInfo::iterator x;
-	const int32_t divisions = _editor->get_grid_music_divisions (event->button.state);
 	bool is_start;
 
 	for (i = _editor->selection->markers.begin(), x = _copied_locations.begin();
@@ -5517,7 +5517,6 @@ TimeFXDrag::finished (GdkEvent* event, bool movement_occurred)
 	*/
 
 	ratio_t fraction (1, 1);
-	float ffraction;
 
 	if (movement_occurred) {
 
@@ -6884,7 +6883,7 @@ NoteCreateDrag::grid_aligned_beats (timepos_t const & pos, GdkEvent const * even
 {
 	Temporal::Beats beats;
 
-	TempoMap& map (_editor->session()->tempo_map());
+	TempoMap::SharedPtr map (TempoMap::use());
 	const int32_t divisions = _editor->get_grid_music_divisions (event->button.state);
 
 	switch (divisions) {
@@ -6893,7 +6892,7 @@ NoteCreateDrag::grid_aligned_beats (timepos_t const & pos, GdkEvent const * even
 		beats = pos.beats ();
 		break;
 	case -1: /* round to bar */
-		beats = map.quarter_note_at (map.metric_at (pos).meter().round_to_bar (map.bbt_at (pos)));
+		beats = map->quarter_note_at (map->metric_at (pos).meter().round_to_bar (map->bbt_at (pos)));
 		break;
 	default: /* round to some beat subdivision */
 		beats = (pos).beats().round_to_subdivision (divisions, Temporal::RoundNearest);

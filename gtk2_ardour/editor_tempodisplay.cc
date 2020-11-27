@@ -192,7 +192,7 @@ Editor::tempo_map_changed ()
 
 	compute_bbt_ruler_scale (_leftmost_sample, _leftmost_sample + current_page_samples());
 
-	_session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks); // redraw metric markers
+	TempoMap::use()->apply_with_metrics (*this, &Editor::draw_metric_marks); // redraw metric markers
 	update_tempo_based_rulers ();
 
 	maybe_draw_grid_lines ();
@@ -334,8 +334,9 @@ Editor::compute_current_bbt_points (Temporal::TempoMapPoints& grid, samplepos_t 
 
 	/* prevent negative values of leftmost from creeping into tempomap
 	 */
-	const Beats lower_beat = max (Beats (), _session->tempo_map().quarter_note_at (leftmost)).round_down_to_beat() - Beats (1, 0);
+	const Beats lower_beat = max (Beats (), TempoMap::use()->quarter_note_at (leftmost)).round_down_to_beat() - Beats (1, 0);
 	const samplecnt_t sr (_session->sample_rate());
+	TempoMap::SharedPtr tmap (TempoMap::use());
 
 	switch (bbt_ruler_scale) {
 
@@ -345,28 +346,28 @@ Editor::compute_current_bbt_points (Temporal::TempoMapPoints& grid, samplepos_t 
 	case bbt_show_thirtyseconds:
 	case bbt_show_sixtyfourths:
 	case bbt_show_onetwentyeighths:
-		_session->tempo_map().get_grid (grid, max (_session->tempo_map().superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 0);
+		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 0);
 		break;
 
 	case bbt_show_1:
-		_session->tempo_map().get_grid (grid, max (_session->tempo_map().superclock_at (lower_beat), (superclock_t) 0), rightmost, 1);
+		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), rightmost, 1);
 		break;
 
 	case bbt_show_4:
-		_session->tempo_map().get_grid (grid, max (_session->tempo_map().superclock_at (lower_beat), (superclock_t) 0), rightmost, 4);
+		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), rightmost, 4);
 		break;
 
 	case bbt_show_16:
-		_session->tempo_map().get_grid (grid, max (_session->tempo_map().superclock_at (lower_beat), (superclock_t) 0), rightmost, 16);
+		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), rightmost, 16);
 		break;
 
 	case bbt_show_64:
-		_session->tempo_map().get_grid (grid, max (_session->tempo_map().superclock_at (lower_beat), (superclock_t) 0), rightmost, 64);
+		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), rightmost, 64);
 		break;
 
 	default:
 		/* bbt_show_many */
-		_session->tempo_map().get_grid (grid, max (_session->tempo_map().superclock_at (lower_beat), (superclock_t) 0), rightmost, 128);
+		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), rightmost, 128);
 		break;
 	}
 }
@@ -414,19 +415,21 @@ Editor::mouse_add_new_tempo_event (timepos_t pos)
 		return;
 	}
 
-	TempoMap& map(_session->tempo_map());
+	TempoMap::SharedPtr map (TempoMap::use());
 
 	begin_reversible_command (_("add tempo mark"));
 
-	const Beats qn = map.quarter_note_at (pos);
+	const Beats qn = map->quarter_note_at (pos);
 
 	if (qn > Beats()) {
-		XMLNode &before = map.get_state();
+		XMLNode &before = map->get_state();
 		/* add music-locked ramped (?) tempo using the bpm/note type at sample*/
-		map.set_tempo (map.tempo_at (pos), timepos_t (qn));
 
-		XMLNode &after = map.get_state();
-		_session->add_command(new MementoCommand<TempoMap>(map, &before, &after));
+		map->set_tempo (map->tempo_at (pos), timepos_t (qn));
+
+		XMLNode &after = map->get_state();
+#warning NUTEMPO uh-oh ... how to do this when the object may just go away
+		//_session->add_command(new MementoCommand<TempoMap>(map, &before, &after));
 		commit_reversible_command ();
 	}
 
@@ -442,7 +445,7 @@ Editor::mouse_add_new_meter_event (timepos_t pos)
 
 #warning NUTEMPO requires new tempo map API
 #if 0
-	TempoMap& map(_session->tempo_map());
+	TempoMap::SharedPtr map (TempoMap::use());
 	MeterDialog meter_dialog (map, pos, _("add"));
 
 	switch (meter_dialog.run ()) {
@@ -463,15 +466,16 @@ Editor::mouse_add_new_meter_event (timepos_t pos)
 	const double al_sample = map.sample_at_bbt (requested);
 	begin_reversible_command (_("add meter mark"));
 
-	XMLNode &before = map.get_state();
+	XMLNode &before = map->get_state();
 
 	if (meter_dialog.get_lock_style() == MusicTime) {
-		map.add_meter (Meter (bpb, note_type), requested, 0, MusicTime);
+		map->set_meter (Meter (bpb, note_type), requested);
 	} else {
-		map.add_meter (Meter (bpb, note_type), requested, al_sample, AudioTime);
+		map->set_meter (Meter (bpb, note_type), requested);
 	}
 
-	_session->add_command(new MementoCommand<TempoMap>(map, &before, &map.get_state()));
+#warning NUTEMPO uh-oh ... how to do this when the object may just go away
+	// _session->add_command(new MementoCommand<TempoMap>(map, &before, &map.get_state()));
 	commit_reversible_command ();
 #endif
 	//map.dump (cerr);
@@ -501,7 +505,7 @@ Editor::remove_tempo_marker (ArdourCanvas::Item* item)
 void
 Editor::edit_meter_section (Temporal::MeterPoint& section)
 {
-	MeterDialog meter_dialog (_session->tempo_map(), section, _("done"));
+	MeterDialog meter_dialog (section, _("done"));
 
 	switch (meter_dialog.run()) {
 	case RESPONSE_ACCEPT:
@@ -519,20 +523,23 @@ Editor::edit_meter_section (Temporal::MeterPoint& section)
 	Temporal::BBT_Time when;
 	meter_dialog.get_bbt_time (when);
 
+	TempoMap::SharedPtr tmap (TempoMap::use());
+
 	begin_reversible_command (_("replace meter mark"));
-	XMLNode &before = _session->tempo_map().get_state();
+	XMLNode &before = tmap->get_state();
 
-	_session->tempo_map().set_meter (meter, when);
+	tmap->set_meter (meter, when);
 
-	XMLNode &after = _session->tempo_map().get_state();
-	_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
+	XMLNode &after = tmap->get_state();
+#warning NUTEMPO uh-oh ... how to do this when the object may just go away
+	// _session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
 	commit_reversible_command ();
 }
 
 void
 Editor::edit_tempo_section (TempoPoint& section)
 {
-	TempoDialog tempo_dialog (_session->tempo_map(), section, _("done"));
+	TempoDialog tempo_dialog (TempoMap::use(), section, _("done"));
 
 	switch (tempo_dialog.run ()) {
 	case RESPONSE_ACCEPT:
@@ -547,16 +554,19 @@ Editor::edit_tempo_section (TempoPoint& section)
 	bpm = max (0.01, bpm);
 	const Tempo tempo (bpm, nt, end_bpm);
 
+	TempoMap::SharedPtr tmap (TempoMap::use());
+
 	Temporal::BBT_Time when;
 	tempo_dialog.get_bbt_time (when);
 
 	begin_reversible_command (_("replace tempo mark"));
-	XMLNode &before = _session->tempo_map().get_state();
+	XMLNode &before = tmap->get_state();
 
-	_session->tempo_map().set_tempo (tempo, when);
+	tmap->set_tempo (tempo, when);
 
-	XMLNode &after = _session->tempo_map().get_state();
-	_session->add_command (new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
+	XMLNode &after = tmap->get_state();
+#warning NUTEMPO uh-oh ... how to do this when the object may just go away
+	// _session->add_command (new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
 	commit_reversible_command ();
 }
 
@@ -576,10 +586,12 @@ gint
 Editor::real_remove_tempo_marker (TempoPoint *section)
 {
 	begin_reversible_command (_("remove tempo mark"));
-	XMLNode &before = _session->tempo_map().get_state();
-	_session->tempo_map().remove_tempo (*section);
-	XMLNode &after = _session->tempo_map().get_state();
-	_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
+	TempoMap::SharedPtr tmap (TempoMap::use());
+	XMLNode &before = tmap->get_state();
+	tmap->remove_tempo (*section);
+	XMLNode &after = tmap->get_state();
+#warning NUTEMPO uh-oh ... how to do this when the object may just go away
+	// _session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
 	commit_reversible_command ();
 
 	return FALSE;
@@ -610,10 +622,12 @@ gint
 Editor::real_remove_meter_marker (Temporal::MeterPoint *section)
 {
 	begin_reversible_command (_("remove tempo mark"));
-	XMLNode &before = _session->tempo_map().get_state();
-	_session->tempo_map().remove_meter (*section);
-	XMLNode &after = _session->tempo_map().get_state();
-	_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
+	TempoMap::SharedPtr tmap (TempoMap::use());
+	XMLNode &before = tmap->get_state();
+	tmap->remove_meter (*section);
+	XMLNode &after = tmap->get_state();
+#warning NUTEMPO uh-oh ... how to do this when the object may just go away
+	//_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
 	commit_reversible_command ();
 
 	return FALSE;

@@ -43,8 +43,8 @@
 class TempoDialog : public ArdourDialog
 {
 public:
-	TempoDialog (Temporal::TempoMap&, Temporal::timepos_t const & , const std::string & action);
-	TempoDialog (Temporal::TempoMap&, Temporal::TempoPoint&, const std::string & action);
+	TempoDialog (Temporal::TempoMap::SharedPtr const &, Temporal::timepos_t const & , const std::string & action);
+	TempoDialog (Temporal::TempoMap::SharedPtr const &, Temporal::TempoPoint&, const std::string & action);
 
 	double get_bpm ();
 	double get_end_bpm ();
@@ -84,7 +84,7 @@ private:
 	double last_t;
 	gint64 first_t;
 
-	Temporal::TempoMap* _map;
+	Temporal::TempoMap::SharedPtr _map;
 	Temporal::TempoPoint* _section;
 
 	Gtk::ComboBoxText pulse_selector;
@@ -106,9 +106,8 @@ private:
 class MeterDialog : public ArdourDialog
 {
 public:
-
-	MeterDialog (Temporal::TempoMap&, Temporal::timepos_t const &, const std::string & action);
-	MeterDialog (Temporal::TempoMap&, Temporal::MeterPoint&, const std::string & action);
+	MeterDialog (Temporal::TempoMap::SharedPtr const & , Temporal::timepos_t const &, const std::string & action);
+	MeterDialog (Temporal::MeterPoint&, const std::string & action);
 
 	double get_bpb ();
 	double get_note_type ();

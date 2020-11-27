@@ -2931,8 +2931,8 @@ MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_
 				snapped_x = trackview.editor ().pixel_to_sample (current_x); /* samples */
 			}
 
-			Temporal::TempoMap& tmap (trackview.session()->tempo_map());
-			const timepos_t abs_beats (tmap.quarter_note_at (snapped_x));
+			Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
+			const timepos_t abs_beats (tmap->quarter_note_at (snapped_x));
 			const Temporal::Beats beats = _region->absolute_time_to_source_beats (abs_beats);
 			Temporal::Beats len         = Temporal::Beats();
 
@@ -3027,9 +3027,7 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 		}
 
 		/* and then to beats */
-#warning NUTEMPO need new tempo map
-		//const timepos_t abs_beats (tmap.quarter_note_at (current_time));
-		const timepos_t abs_beats;
+		const timepos_t abs_beats (Temporal::TempoMap::use()->quarter_note_at (current_time));
 		const Temporal::Beats x_beats = _region->absolute_time_to_source_beats (abs_beats);
 
 		if (at_front && x_beats < canvas_note->note()->end_time()) {

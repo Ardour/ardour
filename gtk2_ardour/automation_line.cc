@@ -486,7 +486,7 @@ AutomationLine::ContiguousControlPoints::compute_x_bounds (PublicEditor& e)
 	uint32_t sz = size();
 
 	if (sz > 0 && sz < line.npoints()) {
-		const TempoMap& map (e.session()->tempo_map());
+		const TempoMap::SharedPtr map (TempoMap::use());
 
 		/* determine the limits on x-axis motion for this
 		   contiguous range of control points
@@ -496,7 +496,7 @@ AutomationLine::ContiguousControlPoints::compute_x_bounds (PublicEditor& e)
 			before_x = line.nth (front()->view_index() - 1)->get_x();
 
 			const samplepos_t pos = e.pixel_to_sample(before_x);
-			const TempoMetric& metric = map.metric_at (pos);
+			const TempoMetric& metric = map->metric_at (pos);
 			const samplecnt_t len = ceil (metric.samples_per_bar (pos) / (Temporal::ticks_per_beat * metric.meter().divisions_per_bar()));
 			const double one_tick_in_pixels = e.sample_to_pixel_unrounded (len);
 
@@ -511,7 +511,7 @@ AutomationLine::ContiguousControlPoints::compute_x_bounds (PublicEditor& e)
 			after_x = line.nth (back()->view_index() + 1)->get_x();
 
 			const samplepos_t pos = e.pixel_to_sample(after_x);
-			const TempoMetric& metric = map.metric_at (pos);
+			const TempoMetric& metric = map->metric_at (pos);
 			const samplecnt_t len = ceil (metric.samples_per_bar (pos) / (Temporal::ticks_per_beat * metric.meter().divisions_per_bar()));
 			const double one_tick_in_pixels = e.sample_to_pixel_unrounded (len);
 

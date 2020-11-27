@@ -617,7 +617,7 @@ EditorRegions::format_position (timepos_t const & p, char* buf, size_t bufsize, 
 
 	switch (ARDOUR_UI::instance ()->primary_clock->mode ()) {
 		case AudioClock::BBT:
-			bbt = _session->tempo_map ().bbt_at (pos);
+			bbt = Temporal::TempoMap::use()->bbt_at (pos);
 			if (onoff) {
 				snprintf (buf, bufsize, "%03d|%02d|%04d", bbt.bars, bbt.beats, bbt.ticks);
 			} else {
@@ -774,10 +774,9 @@ EditorRegions::populate_row_length (boost::shared_ptr<Region> region, TreeModel:
 	char buf[16];
 
 	if (ARDOUR_UI::instance ()->primary_clock->mode () == AudioClock::BBT) {
-		TempoMap&          map (_session->tempo_map ());
-#warning NUTEMPO we need TempoMap::full_duration() to work with BBT Time here
+		TempoMap::SharedPtr map (TempoMap::use());
 		Temporal::BBT_Time bbt; /* uninitialized until full duration works */
-		// Temporal::BBT_Time bbt = map.bbt_at_beat (map.beat_at_sample (region->last_sample ()) - map.beat_at_sample (region->first_sample ()));
+		// Temporal::BBT_Time bbt = map->bbt_duration_at (region->position(), region->length());
 		snprintf (buf, sizeof (buf), "%03d|%02d|%04d", bbt.bars, bbt.beats, bbt.ticks);
 	} else {
 		format_position (timepos_t (region->nt_length ()), buf, sizeof (buf));

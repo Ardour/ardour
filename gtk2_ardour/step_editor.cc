@@ -116,7 +116,7 @@ StepEditor::prepare_step_edit_region ()
 
 	} else {
 
-		const Meter& m = _mtv.session()->tempo_map().meter_at (step_edit_insert_position);
+		const Meter& m = Temporal::TempoMap::use()->meter_at (step_edit_insert_position);
 		/* 1 bar long region */
 		step_edit_region = _mtv.add_region (step_edit_insert_position, timecnt_t (Beats::beats (m.divisions_per_bar()), step_edit_insert_position), true);
 

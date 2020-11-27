@@ -1080,7 +1080,7 @@ Editor::build_tempo_marker_menu (TempoMarker* loc, bool can_remove)
 		items.push_back (MenuElem (_("Set Constant"), sigc::mem_fun(*this, &Editor::toggle_tempo_type)));
 	}
 
-	Temporal::Tempo const * next_ts = _session->tempo_map().next_tempo (loc->tempo());
+	Temporal::Tempo const * next_ts = Temporal::TempoMap::use()->next_tempo (loc->tempo());
 	if (next_ts && next_ts->note_types_per_minute() != loc->tempo().end_note_types_per_minute()) {
 		items.push_back (MenuElem (_("Ramp to Next"), sigc::mem_fun(*this, &Editor::ramp_to_next_tempo)));
 	}
@@ -1500,12 +1500,14 @@ Editor::toggle_tempo_type ()
 		Temporal::TempoPoint & tempo = tm->tempo();
 
 		begin_reversible_command (_("set tempo to constant"));
-		XMLNode &before = _session->tempo_map().get_state();
+		TempoMap::SharedPtr tmap (TempoMap::use());
+		XMLNode &before = tmap->get_state();
 
-		_session->tempo_map().set_ramped (tempo, !tempo.ramped());
+		tmap->set_ramped (tempo, !tempo.ramped());
 
-		XMLNode &after = _session->tempo_map().get_state();
-		_session->add_command(new MementoCommand<Temporal::TempoMap>(_session->tempo_map(), &before, &after));
+		XMLNode &after = tmap->get_state();
+#warning NUTEMPO map object may change
+		//_session->add_command(new MementoCommand<Temporal::TempoMap>(_session->tempo_map(), &before, &after));
 		commit_reversible_command ();
 	}
 }
@@ -1519,13 +1521,16 @@ Editor::toggle_tempo_clamped ()
 
 	if (tm) {
 		begin_reversible_command (_("Clamp Tempo"));
-		XMLNode &before = _session->tempo_map().get_state();
+
+		TempoMap::SharedPtr tmap (TempoMap::use());
+		XMLNode &before = tmap->get_state();
 
 		Temporal::Tempo & tempo (tm->tempo());
 		if (tempo.set_clamped (!tempo.clamped())) {
 
-			XMLNode &after = _session->tempo_map().get_state();
-			_session->add_command(new MementoCommand<Temporal::TempoMap>(_session->tempo_map(), &before, &after));
+			XMLNode &after = tmap->get_state();
+#warning NUTEMPO paul knows the drill by now
+			//_session->add_command(new MementoCommand<Temporal::TempoMap>(_session->tempo_map(), &before, &after));
 			commit_reversible_command ();
 		} else {
 			abort_reversible_command ();
@@ -1544,12 +1549,14 @@ Editor::ramp_to_next_tempo ()
 	if (tm) {
 
 		begin_reversible_command (_("ramp to next tempo"));
-		XMLNode &before = _session->tempo_map().get_state();
+		TempoMap::SharedPtr tmap (TempoMap::use());
+		XMLNode &before = tmap->get_state();
 
 		Temporal::TempoPoint & tempo (tm->tempo());
-		if (_session->tempo_map().set_ramped (tempo, !tempo.ramped())) {
-			XMLNode &after = _session->tempo_map().get_state();
-			_session->add_command(new MementoCommand<Temporal::TempoMap>(_session->tempo_map(), &before, &after));
+		if (tmap->set_ramped (tempo, !tempo.ramped())) {
+			XMLNode &after = tmap->get_state();
+#warning NUTEMPO see previous warning
+			// _session->add_command(new MementoCommand<Temporal::TempoMap>(_session->tempo_map(), &before, &after));
 			commit_reversible_command ();
 		} else {
 			abort_reversible_command ();

@@ -980,14 +980,15 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 
 	std::vector<Temporal::Point>::const_iterator i;
 	Temporal::BBT_Time lower_beat, upper_beat; // the beats at each end of the ruler
-	Beats floor_lower_beat = std::max (Beats(), _session->tempo_map().quarter_note_at (lower)).round_down_to_beat ();
+	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
+	Beats floor_lower_beat = std::max (Beats(), tmap->quarter_note_at (lower)).round_down_to_beat ();
 
 	if (floor_lower_beat < 0.0) {
 		floor_lower_beat = 0.0;
 	}
 
-	const samplepos_t beat_before_lower_pos = _session->tempo_map().sample_at (floor_lower_beat, _session->sample_rate());
-	const samplepos_t beat_after_upper_pos = _session->tempo_map().sample_at ((std::max (Beats(), _session->tempo_map().quarter_note_at  (upper)).round_down_to_beat()) + Beats (1, 0), _session->sample_rate());
+	const samplepos_t beat_before_lower_pos = tmap->sample_at (floor_lower_beat, _session->sample_rate());
+	const samplepos_t beat_after_upper_pos = tmap->sample_at ((std::max (Beats(), tmap->quarter_note_at  (upper)).round_down_to_beat()) + Beats (1, 0), _session->sample_rate());
 
 	_session->bbt_time (timepos_t (beat_before_lower_pos), lower_beat);
 	_session->bbt_time (timepos_t (beat_after_upper_pos), upper_beat);
@@ -1005,7 +1006,7 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 		return;
 	}
 
-	bbt_bars = _session->tempo_map().bbt_at (ceil_upper_beat).bars - _session->tempo_map().bbt_at (floor_lower_beat).bars;
+	bbt_bars = tmap->bbt_at (ceil_upper_beat).bars - tmap->bbt_at (floor_lower_beat).bars;
 
 	double ruler_line_granularity = UIConfiguration::instance().get_ruler_granularity ();  //in pixels
 	ruler_line_granularity = _visible_canvas_width / (ruler_line_granularity*5);  //fudge factor '5' probably related to (4+1 beats)/measure, I think
@@ -1375,7 +1376,7 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 				next_beat.beats = (*i).bbt().beats;
 				next_beat.bars = (*i).bbt().bars;
 				next_beat.ticks = tick;
-				pos = _session->tempo_map().sample_at (next_beat, sr);
+				pos = TempoMap::use()->sample_at (next_beat, sr);
 
 				if (t % bbt_accent_modulo == (bbt_accent_modulo - 1)) {
 					i_am_accented = true;
