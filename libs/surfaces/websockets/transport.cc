@@ -27,18 +27,21 @@ using namespace Temporal;
 double
 ArdourTransport::tempo () const
 {
-	const Tempo& tempo (session ().tempo_map ().metric_at (0).tempo());
+	const Tempo& tempo (TempoMap::use()->metric_at (0).tempo());
 	return tempo.note_types_per_minute ();
 }
 
 void
 ArdourTransport::set_tempo (double bpm)
 {
-	bpm                 = std::max (0.01, bpm);
-	TempoMap& tempo_map = session ().tempo_map ();
-	Tempo     tempo (bpm, tempo_map.metric_at (0).tempo().note_type ());
-#warning NUTEMPO need some API to do this
-	// tempo_map.add_tempo (tempo, 0.0, 0, AudioTime);
+	bpm = std::max (0.01, bpm);
+
+	TempoMap::SharedPtr tmap (TempoMap::write_copy());
+
+	Tempo tempo (bpm, tmap->metric_at (0).tempo().note_type ());
+
+	tmap->set_tempo (tempo, timepos_t());
+	TempoMap::update (tmap);
 }
 
 double

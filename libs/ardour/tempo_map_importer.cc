@@ -31,6 +31,7 @@
 using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
+using namespace Temporal;
 
 /**** Handler ***/
 TempoMapImportHandler::TempoMapImportHandler (XMLTree const & source, Session & session) :
@@ -98,5 +99,7 @@ TempoMapImporter::_cancel_move ()
 void
 TempoMapImporter::_move ()
 {
-	session.tempo_map().set_state (xml_tempo_map, Stateful::current_state_version);
+	TempoMap::SharedPtr tmap (TempoMap::write_copy());
+	tmap->set_state (xml_tempo_map, Stateful::current_state_version);
+	TempoMap::update (tmap);
 }

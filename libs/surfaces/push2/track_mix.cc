@@ -603,7 +603,7 @@ TrackMixLayout::update_clocks ()
 	}
 
 	char buf[16];
-	Temporal::BBT_Time BBT = session.tempo_map().bbt_at (pos);
+	Temporal::BBT_Time BBT = Temporal::TempoMap::use()->bbt_at (pos);
 
 #define BBT_BAR_CHAR "|"
 

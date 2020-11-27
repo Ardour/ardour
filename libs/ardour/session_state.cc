@@ -260,19 +260,7 @@ Session::post_engine_init ()
 	_engine.Halted.connect_same_thread (*this, boost::bind (&Session::engine_halted, this));
 	_engine.Xrun.connect_same_thread (*this, boost::bind (&Session::xrun_recovery, this));
 
-	try {
-		/* tempo map requires sample rate knowledge */
-
-		delete _tempo_map;
-		_tempo_map = new Temporal::TempoMap (Temporal::Tempo (120), Temporal::Meter (4, 4));
-		_tempo_map->Changed.connect_same_thread (*this, boost::bind (&Session::tempo_map_changed, this));
-	} catch (std::exception const & e) {
-		error << _("Unexpected exception during session setup: ") << e.what() << endmsg;
-		return -2;
-	} catch (...) {
-		error << _("Unknown exception during session setup") << endmsg;
-		return -3;
-	}
+#warning NUTEMPO does session need to know about tempo map changes?
 
 	try {
 		/* MidiClock requires a tempo map */

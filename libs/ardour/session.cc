@@ -272,7 +272,8 @@ Session::Session (AudioEngine &eng,
 	, ltc_timecode_offset (0)
 	, ltc_timecode_negative_offset (false)
 	, midi_control_ui (0)
-	, _tempo_map (0)
+	, _punch_or_loop (NoConstraint)
+	, current_usecs_per_track (1000)
 	, _all_route_group (new RouteGroup (*this, "all"))
 	, routes (new RouteList)
 	, _adding_routes_in_progress (false)
@@ -429,7 +430,6 @@ Session::Session (AudioEngine &eng,
 	midi_control_ui = 0;
 	_punch_or_loop = NoConstraint;
 	current_usecs_per_track = 1000;
-	_tempo_map = 0;
 	_all_route_group = new RouteGroup (*this, "all");
 	_adding_routes_in_progress = false;
 	_reconnecting_routes_in_progress = false;
@@ -915,7 +915,6 @@ Session::destroy ()
 	delete _locations; _locations = 0;
 
 	delete midi_clock;
-	delete _tempo_map;
 
 	/* clear event queue, the session is gone, nobody is interested in
 	 * those anymore, but they do leak memory if not removed
@@ -2195,7 +2194,7 @@ Session::preroll_samples (samplepos_t pos) const
 {
 	const float pr = Config->get_preroll_seconds();
 	if (pos >= 0 && pr < 0) {
-		Temporal::TempoMetric const & metric (_tempo_map->metric_at (pos));
+		Temporal::TempoMetric const & metric (TempoMap::use()->metric_at (pos));
 		return metric.samples_per_bar (sample_rate()) * -pr;
 	}
 	if (pr < 0) {
@@ -7427,10 +7426,12 @@ Session::listening () const
 void
 Session::maybe_update_tempo_from_midiclock_tempo (float bpm)
 {
-	if (_tempo_map->n_tempos() == 1) {
-		Temporal::TempoMetric const & metric (_tempo_map->metric_at (0));
+	TempoMap::SharedPtr tmap (TempoMap::use());
+
+	if (tmap->n_tempos() == 1) {
+		Temporal::TempoMetric const & metric (tmap->metric_at (0));
 		if (fabs (metric.tempo().note_types_per_minute() - bpm) > (0.01 * metric.tempo().note_types_per_minute())) {
-			_tempo_map->change_tempo (metric.tempo(), Tempo (bpm, 4.0, bpm));
+			tmap->change_tempo (metric.tempo(), Tempo (bpm, 4.0, bpm));
 		}
 	}
 }

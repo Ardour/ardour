@@ -229,8 +229,10 @@ ArdourFeedback::observe_transport ()
 	                                   boost::bind<void> (TransportObserver (), this), event_loop ());
 	sess.RecordStateChanged.connect (_transport_connections, MISSING_INVALIDATOR,
 	                                 boost::bind<void> (RecordStateObserver (), this), event_loop ());
-	sess.tempo_map ().PropertyChanged.connect (_transport_connections, MISSING_INVALIDATOR,
-	                                 boost::bind<void> (TempoObserver (), this), event_loop ());
+
+#warning NUTEMPO this is not right. the actual map can change. static signal?
+	Temporal::TempoMap::use()->Changed.connect (_signal_connections, MISSING_INVALIDATOR,
+	                                            boost::bind<void> (TempoObserver (), this), event_loop ());
 }
 
 void
@@ -252,7 +254,7 @@ ArdourFeedback::observe_mixer ()
 
 		stripable->mute_control ()->Changed.connect (*it->second, MISSING_INVALIDATOR,
 		                                         boost::bind<void> (StripMuteObserver (), this, strip_id), event_loop ());
-	
+
 		observe_strip_plugins (strip_id, strip->plugins ());
 	}
 }

@@ -548,8 +548,8 @@ BasicUI::jump_by_seconds (double secs, LocateTransportDisposition ltd)
 void
 BasicUI::jump_by_bars (int bars, LocateTransportDisposition ltd)
 {
-	TempoMap& tmap (session->tempo_map());
-	Temporal::BBT_Time bbt (tmap.bbt_at (session->transport_sample()));
+	TempoMap::SharedPtr tmap (TempoMap::use());
+	Temporal::BBT_Time bbt (tmap->bbt_at (session->transport_sample()));
 
 	bars += bbt.bars;
 	if (bars < 0) {

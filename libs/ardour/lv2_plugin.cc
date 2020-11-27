@@ -2645,9 +2645,9 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 	speed = end > 0 ? speed : 0;
 	samplepos_t start0 = std::max (samplepos_t (0), start);
 
-	TempoMap&      tmap     = _session.tempo_map();
+	TempoMap::SharedPtr tmap (TempoMap::use());
 	TempoMapPoints tempo_map_points;
-	tmap.get_grid (tempo_map_points, start, end, 0);
+	tmap->get_grid (tempo_map_points, start, end, 0);
 	TempoMapPoints::const_iterator tempo_map_point = tempo_map_points.begin();
 	TempoMapPoint first_tempo_map_point = tempo_map_points.front();
 
@@ -2659,7 +2659,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 
 		float bpm = tmap.tempo_at_sample (start0).note_types_per_minute();
 		TempoMapPoints tempo_map_points;
-		tmap.get_grid (tempo_map_points, start0, end, 0);
+		tmap->get_grid (tempo_map_points, start0, end, 0);
 		TempoMapPoint first_tempo_map_point = tempo_map_points.front();
 
 		/* note that this is not necessarily quarter notes */
@@ -3123,7 +3123,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 		 * Note: for no-midi plugins, we only ever send information at cycle-start,
 		 * so it needs to be realative to that.
 		 */
-		TempoMetric metric (tmap.metric_at (start));
+		TempoMetric metric (tmap->metric_at (start));
 		_current_bpm = metric.tempo().note_types_per_minute();
 		Temporal::BBT_Time bbt (metric.bbt_at (start));
 		double beatpos = (bbt.bars - 1) * metric.divisions_per_bar()

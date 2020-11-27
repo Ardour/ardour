@@ -41,6 +41,7 @@
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
+using namespace Temporal;
 
 #define TFSM_EVENT(evtype) { _transport_fsm->enqueue (new TransportFSM::Event (evtype)); }
 
@@ -49,7 +50,7 @@ using namespace PBD;
 void
 Session::bbt_time (timepos_t const & when, Temporal::BBT_Time& bbt)
 {
-	bbt = _tempo_map->bbt_at (when);
+	bbt = TempoMap::use()->bbt_at (when);
 }
 
 /* Timecode TIME */
@@ -241,7 +242,7 @@ Session::convert_to_samples (AnyTime const & position)
 
 	switch (position.type) {
 	case AnyTime::BBT:
-		return Temporal::superclock_to_samples (_tempo_map->superclock_at (position.bbt), _current_sample_rate);
+		return Temporal::superclock_to_samples (TempoMap::use()->superclock_at (position.bbt), _current_sample_rate);
 		break;
 
 	case AnyTime::Timecode:
@@ -277,7 +278,7 @@ Session::any_duration_to_samples (samplepos_t position, AnyTime const & duration
 
 	switch (duration.type) {
 	case AnyTime::BBT:
-		return Temporal::superclock_to_samples (_tempo_map->superclock_plus_bbt (Temporal::samples_to_superclock (position, _current_sample_rate), duration.bbt), _current_sample_rate) - position;
+		return Temporal::superclock_to_samples (TempoMap::use()->superclock_plus_bbt (Temporal::samples_to_superclock (position, _current_sample_rate), duration.bbt), _current_sample_rate) - position;
 		break;
 
 	case AnyTime::Timecode:

@@ -618,7 +618,7 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 	static SerializedRCUManager<TempoMap> _map_mgr;
   public:
 	static void update_thread_tempo_map() { _tempo_map_p = _map_mgr.reader(); }
-	static SharedPtr use() { return _tempo_map_p; }
+	static SharedPtr use() { assert (_tempo_map_p); return _tempo_map_p; }
 	static SharedPtr fetch() { update_thread_tempo_map(); return use(); }
 
 	static SharedPtr write_copy() { return _map_mgr.write_copy(); }
@@ -663,6 +663,7 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 	bool move_meter (MeterPoint const & point, timepos_t const & destination, bool push = false);
 
 	void set_time_domain (TimeDomain td);
+	int set_state (XMLNode const&, int version);
 
 	/* END OF MODIFYING METHODS */
 
@@ -764,7 +765,6 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 	PBD::Signal0<void> Changed;
 
 	XMLNode& get_state();
-	int set_state (XMLNode const&, int version);
 
 	typedef boost::intrusive::member_hook<TempoPoint,boost::intrusive::list_member_hook<>, &TempoPoint::_tempo_hook> TempoHookOption;
 	typedef boost::intrusive::member_hook<MeterPoint,boost::intrusive::list_member_hook<>, &MeterPoint::_meter_hook> MeterHookOption;

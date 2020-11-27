@@ -75,6 +75,7 @@ intptr_t Session::vst_callback (
 	static VstTimeInfo _timeinfo; // only uses as fallback
 	VstTimeInfo* timeinfo;
 	int32_t newflags = 0;
+	TempoMap::SharedPtr tmap (TempoMap::use());
 
 	if (effect && effect->ptr1) {
 		plug = (VSTPlugin *) (effect->ptr1);
@@ -188,12 +189,12 @@ intptr_t Session::vst_callback (
 			timeinfo->sampleRate = session->sample_rate();
 
 			if (value & (kVstTempoValid)) {
-				const Tempo& t (session->tempo_map().metric_at (now).tempo());
+				const Tempo& t (tmap->metric_at (now).tempo());
 				timeinfo->tempo = t.quarter_notes_per_minute ();
 				newflags |= (kVstTempoValid);
 			}
 			if (value & (kVstTimeSigValid)) {
-				const Meter& ms (session->tempo_map().metric_at (now).meter());
+				const Meter& ms (tmap->metric_at (now).meter());
 				timeinfo->timeSigNumerator = ms.divisions_per_bar ();
 				timeinfo->timeSigDenominator = ms.note_value ();
 				newflags |= (kVstTimeSigValid);
@@ -202,13 +203,13 @@ intptr_t Session::vst_callback (
 				Temporal::BBT_Time bbt;
 
 				try {
-					bbt = session->tempo_map().bbt_at (now);
+					bbt = tmap->bbt_at (now);
 					bbt.beats = 1;
 					bbt.ticks = 0;
 					/* exact quarter note */
-					double ppqBar = session->tempo_map().quarter_note_at (bbt);
+					double ppqBar = tmap->quarter_note_at (bbt);
 					/* quarter note at sample position (not rounded to note subdivision) */
-					double ppqPos = session->tempo_map().quarter_note_at (now);
+					double ppqPos = tmap->quarter_note_at (now);
 					if (value & (kVstPpqPosValid)) {
 						timeinfo->ppqPos = ppqPos;
 						newflags |= kVstPpqPosValid;
@@ -314,7 +315,7 @@ intptr_t Session::vst_callback (
 		SHOW_CALLBACK ("audioMasterTempoAt");
 		// returns tempo (in bpm * 10000) at sample sample location passed in <value>
 		if (session) {
-			const Tempo& t (session->tempo_map().metric_at (value).tempo());
+			const Tempo& t (tmap->metric_at (value).tempo());
 			return t.quarter_notes_per_minute() * 1000;
 		} else {
 			return 0;

@@ -115,7 +115,7 @@ JACKSession::timebase_callback (jack_transport_state_t /*state*/,
 				 int /*new_position*/)
 {
 	Temporal::BBT_Time bbt;
-	TempoMap& tempo_map (_session->tempo_map());
+	TempoMap::SharedPtr tempo_map (TempoMap::use());
 	samplepos_t tf;
 
 	/* see commit msg for e2c26e1b9 and Session::start_locate() for
@@ -126,10 +126,10 @@ JACKSession::timebase_callback (jack_transport_state_t /*state*/,
 
 	/* BBT info */
 
-	TempoMetric metric (tempo_map.metric_at (tf));
+	TempoMetric metric (tempo_map->metric_at (tf));
 
 	try {
-		bbt = tempo_map.bbt_at (tf);
+		bbt = tempo_map->bbt_at (tf);
 
 		pos->bar = bbt.bars;
 		pos->beat = bbt.beats;

@@ -522,16 +522,18 @@ Session::start_transport (bool after_loop)
 
 		if ((actively_recording () || (config.get_punch_in () && get_record_enabled ()))
 		    && click_data && (config.get_count_in () || _count_in_once)) {
+			TempoMap::SharedPtr tmap (TempoMap::use());
+
 			_count_in_once = false;
 			/* calculate count-in duration (in audio samples)
 			 * - use [fixed] tempo/meter at _transport_sample
 			 * - calc duration of 1 bar + time-to-beat before or at transport_sample
 			 */
-			TempoMetric const & tempometric = _tempo_map->metric_at (_transport_sample);
+			TempoMetric const & tempometric = tmap->metric_at (_transport_sample);
 
 			const double num = tempometric.divisions_per_bar ();
 			/* XXX possible optimization: get meter and BBT time in one call */
-			const Temporal::BBT_Time bbt = _tempo_map->bbt_at (_transport_sample);
+			const Temporal::BBT_Time bbt = tmap->bbt_at (_transport_sample);
 			const double bar_fract = (double) bbt.beats / tempometric.divisions_per_bar();
 
 			_count_in_samples = tempometric.samples_per_bar (_current_sample_rate);
