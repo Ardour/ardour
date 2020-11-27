@@ -55,13 +55,11 @@ template <class obj_T>
 class LIBPBD_TEMPLATE_API MementoCommandBinder : public PBD::Destructible
 {
 public:
-	/** @return Stateful object to operate on */
-	virtual obj_T* get () const = 0;
+	virtual void set_state (XMLNode const &, int version) const = 0;
+	virtual XMLNode& get_state () const = 0;
 
 	/** @return Name of our type */
-	virtual std::string type_name () const {
-		return PBD::demangled_name (*get ());
-	}
+	virtual std::string type_name () const = 0;
 
 	/** Add our own state to an XMLNode */
 	virtual void add_state (XMLNode *) = 0;
@@ -78,8 +76,10 @@ public:
 		_object.Destroyed.connect_same_thread (_object_death_connection, boost::bind (&SimpleMementoCommandBinder::object_died, this));
 	}
 
-	obj_T* get () const {
-		return &_object;
+	void set_state (XMLNode const & node , int version) const { _object.set_state (node, version); }
+	XMLNode& get_state () const { return _object.get_state(); }
+	std::string type_name() const {
+		return PBD::demangled_name (_object);
 	}
 
 	void add_state (XMLNode* node) {
@@ -131,13 +131,13 @@ public:
 
 	void operator() () {
 		if (after) {
-			_binder->get()->set_state(*after, Stateful::current_state_version);
+			_binder->set_state(*after, Stateful::current_state_version);
 		}
 	}
 
 	void undo() {
 		if (before) {
-			_binder->get()->set_state(*before, Stateful::current_state_version);
+			_binder->set_state(*before, Stateful::current_state_version);
 		}
 	}
 

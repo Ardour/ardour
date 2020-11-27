@@ -49,8 +49,8 @@ MidiAutomationListBinder::MidiAutomationListBinder (XMLNode* node, Session::Sour
 	_parameter = EventTypeMap::instance().from_symbol (parameter_str);
 }
 
-AutomationList*
-MidiAutomationListBinder::get () const
+void
+MidiAutomationListBinder::set_state (XMLNode const & node, int version) const
 {
 	boost::shared_ptr<MidiModel> model = _source->model ();
 	assert (model);
@@ -58,8 +58,33 @@ MidiAutomationListBinder::get () const
 	boost::shared_ptr<AutomationControl> control = model->automation_control (_parameter);
 	assert (control);
 
-	return control->alist().get();
+	control->alist().get()->set_state (node, version);
 }
+
+XMLNode&
+MidiAutomationListBinder::get_state () const
+{
+	boost::shared_ptr<MidiModel> model = _source->model ();
+	assert (model);
+
+	boost::shared_ptr<AutomationControl> control = model->automation_control (_parameter);
+	assert (control);
+
+	return control->alist().get()->get_state ();
+}
+
+std::string
+MidiAutomationListBinder::type_name() const
+{
+	boost::shared_ptr<MidiModel> model = _source->model ();
+	assert (model);
+
+	boost::shared_ptr<AutomationControl> control = model->automation_control (_parameter);
+	assert (control);
+
+	return PBD::demangled_name (*control->alist().get());
+}
+
 
 void
 MidiAutomationListBinder::add_state (XMLNode* node)
