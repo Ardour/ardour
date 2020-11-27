@@ -3494,8 +3494,7 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 	TempoMap::SharedPtr map (TempoMap::use());
 
 	XMLNode &after = map->get_state();
-#warning NUTEMPO memento command issue
-	//_editor->session()->add_command(new MementoCommand<TempoMap>(map, before_state, &after));
+	_editor->session()->add_command (new MementoCommand<Temporal::TempoMap> (new Temporal::TempoMap::MementoBinder(), before_state, &after));
 	_editor->commit_reversible_command ();
 
 	// delete the dummy marker we used for visual representation while moving.

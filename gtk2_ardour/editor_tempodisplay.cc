@@ -428,8 +428,7 @@ Editor::mouse_add_new_tempo_event (timepos_t pos)
 		map->set_tempo (map->tempo_at (pos), timepos_t (qn));
 
 		XMLNode &after = map->get_state();
-#warning NUTEMPO uh-oh ... how to do this when the object may just go away
-		//_session->add_command(new MementoCommand<TempoMap>(map, &before, &after));
+		_session->add_command (new MementoCommand<Temporal::TempoMap> (new Temporal::TempoMap::MementoBinder(), &before, &after));
 		commit_reversible_command ();
 	}
 
@@ -474,8 +473,7 @@ Editor::mouse_add_new_meter_event (timepos_t pos)
 		map->set_meter (Meter (bpb, note_type), requested);
 	}
 
-#warning NUTEMPO uh-oh ... how to do this when the object may just go away
-	// _session->add_command(new MementoCommand<TempoMap>(map, &before, &map.get_state()));
+	_session->add_command (new MementoCommand<Temporal::TempoMap> (new Temporal::TempoMap::MementoBinder(), &before, &after));
 	commit_reversible_command ();
 #endif
 	//map.dump (cerr);
@@ -531,8 +529,7 @@ Editor::edit_meter_section (Temporal::MeterPoint& section)
 	tmap->set_meter (meter, when);
 
 	XMLNode &after = tmap->get_state();
-#warning NUTEMPO uh-oh ... how to do this when the object may just go away
-	// _session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
+	_session->add_command (new MementoCommand<Temporal::TempoMap> (new Temporal::TempoMap::MementoBinder(), &before, &after));
 	commit_reversible_command ();
 }
 
@@ -565,8 +562,7 @@ Editor::edit_tempo_section (TempoPoint& section)
 	tmap->set_tempo (tempo, when);
 
 	XMLNode &after = tmap->get_state();
-#warning NUTEMPO uh-oh ... how to do this when the object may just go away
-	// _session->add_command (new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
+	_session->add_command (new MementoCommand<Temporal::TempoMap> (new Temporal::TempoMap::MementoBinder(), &before, &after));
 	commit_reversible_command ();
 }
 
@@ -590,8 +586,7 @@ Editor::real_remove_tempo_marker (TempoPoint *section)
 	XMLNode &before = tmap->get_state();
 	tmap->remove_tempo (*section);
 	XMLNode &after = tmap->get_state();
-#warning NUTEMPO uh-oh ... how to do this when the object may just go away
-	// _session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
+	_session->add_command (new MementoCommand<Temporal::TempoMap> (new Temporal::TempoMap::MementoBinder(), &before, &after));
 	commit_reversible_command ();
 
 	return FALSE;
@@ -626,8 +621,7 @@ Editor::real_remove_meter_marker (Temporal::MeterPoint *section)
 	XMLNode &before = tmap->get_state();
 	tmap->remove_meter (*section);
 	XMLNode &after = tmap->get_state();
-#warning NUTEMPO uh-oh ... how to do this when the object may just go away
-	//_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
+	_session->add_command (new MementoCommand<Temporal::TempoMap> (new Temporal::TempoMap::MementoBinder(), &before, &after));
 	commit_reversible_command ();
 
 	return FALSE;
