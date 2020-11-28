@@ -633,10 +633,8 @@ ArdourMarker::set_right_label_limit (double p)
 
 TempoMarker::TempoMarker (PublicEditor& editor, ArdourCanvas::Container& parent, guint32 rgba, const string& text,
                           Temporal::TempoPoint& temp)
-#warning NUTEMPO needs new tempo map
-//	: ArdourMarker (editor, parent, rgba, text, Tempo, temp.sample(), false),
-	: ArdourMarker (editor, parent, rgba, text, Tempo, timepos_t (), false),
-	  _tempo (temp)
+	: ArdourMarker (editor, parent, rgba, text, Tempo, temp.time(), false)
+	, _tempo (temp)
 {
 	group->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_tempo_marker_event), group, this));
 }
@@ -674,13 +672,9 @@ TempoMarker::reset_tempo (Temporal::TempoPoint & t)
 
 /***********************************************************************/
 
-MeterMarker::MeterMarker (PublicEditor& editor, ArdourCanvas::Container& parent, guint32 rgba, const string& text,
-                          Temporal::MeterPoint& m)
-
-#warning NUTEMPO needs new tempo map
-//	: ArdourMarker (editor, parent, rgba, text, Meter, m.sample(), false),
-	: ArdourMarker (editor, parent, rgba, text, Meter, timepos_t(), false),
-	  _meter (m)
+MeterMarker::MeterMarker (PublicEditor& editor, ArdourCanvas::Container& parent, guint32 rgba, const string& text, Temporal::MeterPoint& m)
+	: ArdourMarker (editor, parent, rgba, text, Meter, m.time(), false)
+	, _meter (m)
 {
 	group->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_meter_marker_event), group, this));
 }

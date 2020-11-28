@@ -3545,6 +3545,10 @@ TempoMarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	} else {
 		show_verbose_cursor_time (adjusted_current_time (event));
 	}
+
+	/* setup thread-local tempo map ptr as a writable copy */
+
+	TempoMap::fetch_writable ();
 }
 
 void
@@ -3674,6 +3678,12 @@ TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		if (was_double_click()) {
 			_editor->edit_tempo_marker (*_marker);
 		}
+
+		/* reset the per-thread tempo map ptr back to the current
+		 * official version
+		 */
+
+		TempoMap::fetch ();
 		return;
 	}
 
@@ -3695,9 +3705,13 @@ TempoMarkerDrag::aborted (bool moved)
 	// _point->end_float ();
 	_marker->set_position (timepos_t (_marker->tempo().beats()));
 
+	/* reset the per-thread tempo map ptr back to the current
+	 * official version
+	 */
+
+	TempoMap::fetch ();
+
 	if (moved) {
-		TempoMap::SharedPtr map (TempoMap::use());
-		map->set_state (*_before_state, Stateful::current_state_version);
 		// delete the dummy (hidden) marker we used for events while moving.
 		delete _marker;
 	}
