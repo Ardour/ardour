@@ -3528,15 +3528,12 @@ TempoMarkerDrag::TempoMarkerDrag (Editor* e, ArdourCanvas::Item* i, bool c)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New TempoMarkerDrag\n");
 
-#warning NUTEMPO fixme needs new tempo map
-#if 0
 	_marker = reinterpret_cast<TempoMarker*> (_item->get_data ("marker"));
 	_real_section = &_marker->tempo();
-	_movable = !_real_section->initial();
+	_movable = !TempoMap::use()->is_initial (_marker->tempo());
 	_grab_bpm = Tempo (_real_section->note_types_per_minute(), _real_section->note_type(), _real_section->end_note_types_per_minute());
-	_grab_qn = _real_section->pulse() * 4.0;
+	_grab_qn = _real_section->beats();
 	assert (_marker);
-#endif
 }
 
 void
@@ -3553,22 +3550,18 @@ TempoMarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 void
 TempoMarkerDrag::setup_pointer_offset ()
 {
-#warning NUTEMPO fixme needs new tempo map
-#if 0
-	_pointer_offset = raw_grab_time() - _real_section->time();
-#endif
+	_pointer_offset =  _marker->tempo().time().distance (raw_grab_time());
 }
 
 void
 TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 {
-	if (!_real_section->active()) {
+
+	if (!_marker->tempo().active()) {
 		return;
 	}
-#warning NUTEMPO fixme needs new tempo map
-#if 0
 
-	TempoMap& map (_editor->session()->tempo_map());
+	TempoMap::SharedPtr map (TempoMap::use());
 
 	if (first_move) {
 
@@ -3577,14 +3570,12 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 		char name[64];
 		snprintf (name, sizeof (name), "%.2f", _marker->tempo().note_types_per_minute());
 
-		TempoSection section (_marker->tempo());
-
 		_marker = new TempoMarker (
 			*_editor,
 			*_editor->tempo_group,
 			UIConfiguration::instance().color ("tempo marker"),
 			name,
-			*new TempoSection (_marker->tempo())
+			_marker->tempo()
 			);
 
 		/* use the new marker for the grab */
@@ -3592,36 +3583,54 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 		_marker->hide();
 
 		/* get current state */
-		_before_state = &map.get_state();
+		_before_state = &map->get_state();
 
 		if (!_copy) {
+
 			_editor->begin_reversible_command (_("move tempo mark"));
 
 		} else {
-			const Tempo tempo (_marker->tempo());
-			const samplepos_t sample = adjusted_current_sample (event) + 1;
+
+			timepos_t const pointer = adjusted_current_time (event, false);
+			BBT_Time pointer_bbt = map->bbt_at (pointer);
+			Temporal::TempoMetric metric = map->metric_at (pointer);
+			Temporal::MeterPoint const & meter = metric.meter();
+			Temporal::TempoPoint const & tempo = metric.tempo();
+			BBT_Time bbt = tempo.bbt();
+
+			/* we can't add a tempo where one currently exists */
+			if (bbt < pointer_bbt) {
+				bbt = meter.bbt_add (bbt, BBT_Offset (0, 1, 0));
+			} else {
+				bbt = meter.bbt_add (bbt, BBT_Offset (0, -1, 0));
+			}
 
 			_editor->begin_reversible_command (_("copy tempo mark"));
 
-			if (_real_section->position_time_domain() == BeatTime) {
-				const int32_t divisions = _editor->get_grid_music_divisions (event->button.state);
-				_real_section = map.add_tempo (tempo, map.exact_qn_at_sample (sample, divisions), 0, BeatTime);
+			timepos_t pos;
+
+			if (map->time_domain() == AudioTime) {
+				pos = timepos_t (map->sample_at (bbt, _editor->session()->sample_rate()));
 			} else {
-				_real_section = map.add_tempo (tempo, 0.0, sample, AudioTime);
+				pos = timepos_t (map->quarter_note_at (bbt));
 			}
 
-			if (!_real_section) {
+			_marker->reset_tempo (map->set_tempo (tempo, pos));
+
+#warning paul, need a return status from set_tempo
+#if 0
+			if (!) {
 				aborted (true);
 				return;
 			}
+#endif
 		}
-
 	}
 
 	if (ArdourKeyboard::indicates_constraint (event->button.state) && ArdourKeyboard::indicates_copy (event->button.state)) {
 		double new_bpm = max (1.5, _grab_bpm.end_note_types_per_minute() + ((grab_y() - min (-1.0, current_pointer_y())) / 5.0));
 		stringstream strs;
-		_editor->session()->tempo_map().gui_change_tempo (_real_section, Tempo (_real_section->note_types_per_minute(), _real_section->note_type(), new_bpm));
+		map->change_tempo (_marker->tempo(), Tempo (_marker->tempo().note_types_per_minute(), _marker->tempo().note_type(), new_bpm));
 		strs << "end:" << fixed << setprecision(3) << new_bpm;
 		show_verbose_cursor_text (strs.str());
 
@@ -3629,41 +3638,36 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 		/* use vertical movement to alter tempo .. should be log */
 		double new_bpm = max (1.5, _grab_bpm.note_types_per_minute() + ((grab_y() - min (-1.0, current_pointer_y())) / 5.0));
 		stringstream strs;
-		_editor->session()->tempo_map().gui_change_tempo (_real_section, Tempo (new_bpm, _real_section->note_type(), _real_section->end_note_types_per_minute()));
+		map->change_tempo (_marker->tempo(), Tempo (new_bpm, _marker->tempo().note_type(), _marker->tempo().end_note_types_per_minute()));
 		strs << "start:" << fixed << setprecision(3) << new_bpm;
 		show_verbose_cursor_text (strs.str());
 
-	} else if (_movable && !_real_section->locked_to_meter()) {
-		samplepos_t pf;
+	} else if (_movable) {
 
-		if (_editor->grid_musical()) {
-			/* we can't snap to a grid that we are about to move.
-			 * gui_move_tempo() will sort out snap using the supplied beat divisions.
-			*/
-			pf = adjusted_current_sample (event, false);
-		} else {
-			pf = adjusted_current_sample (event);
-		}
+		timepos_t pos = adjusted_current_time (event);
 
-		/* snap to beat is 1, snap to bar is -1 (sorry) */
-		const int sub_num = _editor->get_grid_music_divisions (event->button.state);
+		map->move_tempo (_marker->tempo(), pos, false);
 
-		map.gui_set_tempo_position (_real_section, pf, sub_num);
-
-		show_verbose_cursor_time (_real_section->sample());
-		_editor->set_snapped_cursor_position(_real_section->sample());
+		show_verbose_cursor_time (_marker->tempo().time());
 	}
 
-	_marker->set_position (adjusted_current_sample (event, false));
-#endif
+
+	if (_movable && (!first_move || !_copy)) {
+
+		timepos_t pos = adjusted_current_time (event);
+
+		map->move_tempo (_marker->tempo(), pos, false);
+
+		show_verbose_cursor_time (_marker->tempo().time());
+	}
 }
 
 void
 TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 {
-#warning NUTEMPO fixme needs new tempo map
-#if 0
-	if (!_real_section->active()) {
+	// _point->end_float ();
+
+	if (!_marker->tempo().active()) {
 		return;
 	}
 	if (!movement_occurred) {
@@ -3673,12 +3677,13 @@ TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		return;
 	}
 
-	TempoMap& map (_editor->session()->tempo_map());
+	TempoMap::SharedPtr map (TempoMap::use());
 
-	XMLNode &after = map.get_state();
-	_editor->session()->add_command (new MementoCommand<TempoMap>(map, _before_state, &after));
+	XMLNode &after = map->get_state();
+
+	_editor->session()->add_command (new MementoCommand<Temporal::TempoMap> (new Temporal::TempoMap::MementoBinder(), _before_state, &after));
 	_editor->commit_reversible_command ();
-#endif
+
 	// delete the dummy marker we used for visual representation while moving.
 	// a new visual marker will show up automatically.
 	delete _marker;
@@ -3687,16 +3692,15 @@ TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 void
 TempoMarkerDrag::aborted (bool moved)
 {
-#warning NUTEMPO fixme needs new tempo map
-#if 0
-	_marker->set_position (_marker->tempo().sample());
+	// _point->end_float ();
+	_marker->set_position (timepos_t (_marker->tempo().beats()));
+
 	if (moved) {
-		TempoMap& map (_editor->session()->tempo_map());
-		map.set_state (*_before_state, Stateful::current_state_version);
+		TempoMap::SharedPtr map (TempoMap::use());
+		map->set_state (*_before_state, Stateful::current_state_version);
 		// delete the dummy (hidden) marker we used for events while moving.
 		delete _marker;
 	}
-#endif
 }
 
 BBTRulerDrag::BBTRulerDrag (Editor* e, ArdourCanvas::Item* i)

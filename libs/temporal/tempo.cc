@@ -2877,5 +2877,3 @@ TempoMap::MementoBinder::set_state (XMLNode const & node, int version) const
 	/* now update this thread's view of the current tempo map */
 	fetch ();
 }
-
-	
