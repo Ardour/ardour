@@ -28,11 +28,12 @@ temporal_sources = [
     'debug.cc',
     'bbt_time.cc',
     'enums.cc',
+    'range.cc',
+    'superclock.cc',
     'tempo.cc',
     'time.cc',
     'time_converter.cc',
     'timeline.cc',
-    'superclock.cc'
 ]
 
 def options(opt):

@@ -96,7 +96,7 @@ Range::subtract (RangeList & sub) const
 	return result;
 }
 
-template<> OverlapType coverage_exclusive_ends<int64_t> (int64_t sa, int64_t eaE, int64_t sb, int64_t ebE)
+template<> OverlapType Temporal::coverage_exclusive_ends<int64_t> (int64_t sa, int64_t eaE, int64_t sb, int64_t ebE)
 {
 	/* convert end positions to inclusive */
 	return coverage_inclusive_ends (sa, eaE-1, sb, ebE-1);
