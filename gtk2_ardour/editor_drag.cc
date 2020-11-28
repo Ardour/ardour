@@ -3693,9 +3693,9 @@ TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	TempoMap::update (map);
 
-	/* fetch it back into our local copy */
+	/* fetch it back into thre thread-local and locally-scoped ptrs */
 
-	map = TempoMap::use();
+	map = TempoMap::fetch();
 
 	XMLNode &after = map->get_state();
 

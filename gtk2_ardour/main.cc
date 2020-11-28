@@ -49,6 +49,7 @@
 #endif
 
 #include "temporal/superclock.h"
+#include "temporal/tempo.h"
 
 #include "ardour/revision.h"
 #include "ardour/ardour.h"
@@ -384,13 +385,6 @@ int main (int argc, char *argv[])
 	}
 	SetErrorMode (prev_error_mode);
 #endif
-
-	/* this is the GUI thread. Normally this will be done by
-	 * Gtkmm2ext::UI::event_loop_precall() but we need to make sure that
-	 * things are set up for this thread before we get started
-	 */
-
-	Temporal::_thread_sample_rate = 44100;
 
 	if (!ARDOUR::init (ARDOUR_COMMAND_LINE::use_vst, ARDOUR_COMMAND_LINE::try_hw_optimization, localedir.c_str(), true)) {
 		error << string_compose (_("could not initialize %1."), PROGRAM_NAME) << endmsg;
