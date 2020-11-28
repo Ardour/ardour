@@ -28,6 +28,7 @@
 #include "pbd/pthread_utils.h"
 
 #include "temporal/superclock.h"
+#include "temporal/tempo.h"
 
 #include "ardour/audioengine.h"
 #include "ardour/debug.h"
@@ -535,6 +536,7 @@ void
 Graph::setup_thread_local_variables ()
 {
 	Temporal::_thread_sample_rate = _session.sample_rate ();
+	Temporal::TempoMap::fetch ();
 }
 
 void

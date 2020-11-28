@@ -144,9 +144,17 @@ template <class T>
 class /*LIBPBD_API*/ SerializedRCUManager : public RCUManager<T>
 {
 public:
-	SerializedRCUManager (T* new_rcu_value)
-	    : RCUManager<T> (new_rcu_value)
+	SerializedRCUManager(T* new_rcu_value)
+		: RCUManager<T>(new_rcu_value)
+		, current_write_old (0)
 	{
+	}
+
+	void init (boost::shared_ptr<T> new_rcu_value) {
+		assert  (*RCUManager<T>::x.m_rcu_value == boost::shared_ptr<T> ());
+
+		boost::shared_ptr<T>* new_spp = new boost::shared_ptr<T> (new_rcu_value);
+		g_atomic_pointer_set (&RCUManager<T>::x.gptr, new_spp);
 	}
 
 	boost::shared_ptr<T> write_copy ()

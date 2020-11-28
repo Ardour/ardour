@@ -27,6 +27,8 @@ using namespace PBD;
 using namespace Temporal;
 using namespace std;
 
+static bool libtemporal_initialized = false;
+
 void
 setup_libtemporal_enums ()
 {
@@ -62,5 +64,19 @@ setup_libtemporal_enums ()
 
 void Temporal::init ()
 {
-	setup_libtemporal_enums ();
+	if (!libtemporal_initialized) {
+		setup_libtemporal_enums ();
+
+
+		/* this should be the main (typically GUI) thread. Normally
+		 * this will be done by some
+		 * Gtkmm2ext::UI::event_loop_precall() but we need to make sure
+		 * that things are set up for this thread before we get started
+		 */
+
+		Temporal::_thread_sample_rate = 44100;
+		TempoMap::init ();
+
+		libtemporal_initialized = true;
+	}
 }

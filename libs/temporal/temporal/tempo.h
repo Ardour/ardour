@@ -619,6 +619,8 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 	static thread_local SharedPtr _tempo_map_p;
 	static SerializedRCUManager<TempoMap> _map_mgr;
   public:
+	static void init ();
+
 	static void update_thread_tempo_map() { _tempo_map_p = _map_mgr.reader(); }
 	static SharedPtr use() { assert (_tempo_map_p); return _tempo_map_p; }
 	static SharedPtr fetch() { update_thread_tempo_map(); return use(); }

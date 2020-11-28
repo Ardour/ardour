@@ -2877,3 +2877,11 @@ TempoMap::MementoBinder::set_state (XMLNode const & node, int version) const
 	/* now update this thread's view of the current tempo map */
 	fetch ();
 }
+
+void
+TempoMap::init ()
+{
+	SharedPtr new_map (new TempoMap (Tempo (120), Meter (4, 4)));
+	_map_mgr.init (new_map);
+	fetch ();
+}
