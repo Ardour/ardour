@@ -60,6 +60,7 @@ BaseUI::BaseUI (const string& loop_name)
 	, m_context(MainContext::get_default())
 	, run_loop_thread (0)
 	, request_channel (true)
+	, glib_event_callback (boost::bind (&BaseUI::event_loop_precall, this))
 {
 	base_ui_instance = this;
 	request_channel.set_receive_handler (sigc::mem_fun (*this, &BaseUI::request_handler));
@@ -120,6 +121,12 @@ BaseUI::run ()
 	_main_loop = MainLoop::create (m_context);
 	attach_request_source ();
 
+	/*
+	 * every time the main loop runs (i.e. before any actual event handling)
+	 */
+
+	glib_event_callback.attach (m_context);
+
 	Glib::Threads::Mutex::Lock lm (_run_lock);
 	run_loop_thread = Glib::Threads::Thread::create (mem_fun (*this, &BaseUI::main_thread));
 	_running.wait (_run_lock);
@@ -174,4 +181,9 @@ BaseUI::attach_request_source ()
 {
 	DEBUG_TRACE (DEBUG::EventLoop, string_compose ("%1: attach request source\n", event_loop_name()));
 	request_channel.attach (m_context);
+}
+
+void
+BaseUI::event_loop_precall ()
+{
 }

@@ -33,6 +33,7 @@
 #include "pbd/libpbd_visibility.h"
 #include "pbd/crossthread.h"
 #include "pbd/event_loop.h"
+#include "pbd/glib_event_source.h"
 #include "pbd/pthread_utils.h"
 
 /** A BaseUI is an abstraction designed to be used with any "user
@@ -74,6 +75,12 @@ class LIBPBD_API BaseUI : public sigc::trackable, public PBD::EventLoop
 	 *   until it exits)
 	 */
 	void quit ();
+
+	/* derived classes can override this in order to call code once per
+	   main loop iteration (i.e. before any event dispatching is done
+	   within the main loop)
+	*/
+	virtual void event_loop_precall ();
 
   protected:
 	bool _ok;
@@ -122,6 +129,8 @@ class LIBPBD_API BaseUI : public sigc::trackable, public PBD::EventLoop
 
 	int setup_request_pipe ();
 	void main_thread ();
+
+	GlibEventLoopCallback glib_event_callback;
 };
 
 #endif /* __pbd_base_ui_h__ */
