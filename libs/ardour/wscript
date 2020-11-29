@@ -249,7 +249,6 @@ libardour_sources = [
         'stripable.cc',
         'step_sequencer.cc',
         'strip_silence.cc',
-	'superclock.cc',
 	'system_exec.cc',
         'revision.cc',
         'rt_midibuffer.cc',
