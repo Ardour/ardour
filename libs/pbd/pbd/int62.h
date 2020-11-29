@@ -61,7 +61,7 @@ class alignas(16) int62_t {
 	int62_t  (bool bc, int64_t vc) : v (build (bc, vc)) {}
 	int62_t (int62_t const & other) { v.store (other.v.load()); }
 
-	static const int64_t max = 4611686018427387904;
+	static const int64_t max = 4611686018427387903; /* 2^62 - 1 */
 	static const int64_t min = -2305843009213693952;
 
 	bool    flagged() const { return flagged (v); }
