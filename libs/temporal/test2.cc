@@ -152,7 +152,7 @@ atomic_masks ()
 	cerr << "should be -1: " << x.val() << endl;
 
 	x  = int62_t::build (false, int62_t::min);
-	cerr << "should be " << int62_t::min << ' ' << x.val() << endl;
+	cerr << "should be " << int62_t::min << ' ' << x.val() << " flagged ? " << x.flagged() << endl;
 
 	x  = int62_t::build (true, int62_t::min);
 	cerr << "should still be " << int62_t::min << ' ' << x.val() << " and also flag: " << x.flagged() << endl;
