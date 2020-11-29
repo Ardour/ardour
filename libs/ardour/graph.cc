@@ -23,6 +23,9 @@
 #include <cmath>
 #include <stdio.h>
 
+#include <sys/syscall.h>
+#include <sys/types.h>
+
 #include "pbd/compose.h"
 #include "pbd/debug_rt_alloc.h"
 #include "pbd/pthread_utils.h"
@@ -470,6 +473,7 @@ Graph::helper_thread ()
 	pt->get_buffers ();
 
 	while (!g_atomic_int_get (&_terminate)) {
+		// printf ("HELPER %s %ld\n",  pthread_name(), syscall (SYS_gettid)); fflush (stdout);
 		setup_thread_local_variables ();
 		run_one ();
 	}
@@ -535,7 +539,7 @@ again:
 void
 Graph::setup_thread_local_variables ()
 {
-	Temporal::_thread_sample_rate = _session.sample_rate ();
+	Temporal::set_thread_sample_rate (_session.sample_rate ());
 	Temporal::TempoMap::fetch ();
 }
 

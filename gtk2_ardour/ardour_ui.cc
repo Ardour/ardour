@@ -3117,11 +3117,9 @@ ARDOUR_UI::setup_toplevel_window (Gtk::Window& window, const string& name, void*
 void
 ARDOUR_UI::event_loop_precall ()
 {
-	std::cout << "ev precall\n";
-
 	if (_session) {
-		Temporal::_thread_sample_rate = _session->sample_rate ();
+		Temporal::set_thread_sample_rate (_session->sample_rate ());
 	} else {
-		Temporal::_thread_sample_rate = 44100;
+		Temporal::set_thread_sample_rate (44100);
 	}
 }

@@ -72,7 +72,7 @@ using namespace std;
 void
 Session::setup_thread_local_variables ()
 {
-	Temporal::_thread_sample_rate = sample_rate();
+	Temporal::set_thread_sample_rate (sample_rate());
 }
 
 /** Called by the audio engine when there is work to be done with JACK.
