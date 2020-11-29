@@ -141,6 +141,8 @@ public:
 	static StripableNotificationList const& last_selected () { return _last_selected; }
 	static void notify_stripable_selection_changed (StripableNotificationListPtr);
 
+	void event_loop_precall ();
+
 protected:
 	void next_track (uint32_t initial_id);
 	void prev_track (uint32_t initial_id);

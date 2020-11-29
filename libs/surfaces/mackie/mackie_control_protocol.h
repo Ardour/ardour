@@ -276,6 +276,8 @@ class MackieControlProtocol
 
 	bool stripable_is_locked_to_strip (boost::shared_ptr<ARDOUR::Stripable>) const;
 
+	void event_loop_precall () { ControlProtocol::event_loop_precall(); }
+
   private:
 
 	struct ButtonHandlers {
