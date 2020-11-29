@@ -35,6 +35,7 @@ static inline superclock_t samples_to_superclock (int samples, int sr) { return 
 /* this needs to be updated per-thread at a suitable time */
 
 extern thread_local uint32_t _thread_sample_rate;
+void set_thread_sample_rate (uint32_t sr);
 
 }
 

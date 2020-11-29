@@ -16,9 +16,23 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <iostream>
+
+#include <sys/syscall.h>
+#include <sys/types.h>
+
+#include "pbd/pthread_utils.h"
+
 #include "temporal/superclock.h"
 
 namespace Temporal {
 	thread_local uint32_t _thread_sample_rate = 0;
+}
+
+void
+Temporal::set_thread_sample_rate (uint32_t sr)
+{
+	_thread_sample_rate = sr;
+	std::cout << pthread_name() << " 0x" << std::hex << pthread_self() << std::dec << " TID " << syscall(SYS_gettid) << " set TSR @ " << &_thread_sample_rate << " to " << sr << " = " << _thread_sample_rate << '\n';
 }
 
