@@ -450,14 +450,14 @@ struct numeric_limits<Temporal::timepos_t> {
 		return Temporal::timepos_t::from_superclock (0);
 	}
 	static Temporal::timepos_t max() {
-		return Temporal::timepos_t::from_superclock (4611686018427387904); /* pow (2,62) */
+		return Temporal::timepos_t::from_superclock (4611686018427387903); /* pow (2,62) - 1 */
 	}
 };
 
 template<>
 struct numeric_limits<Temporal::timecnt_t> {
 	static Temporal::timecnt_t min() { return Temporal::timecnt_t::from_superclock (0); }
-	static Temporal::timecnt_t max() { return Temporal::timecnt_t::from_superclock (4611686018427387904); /* pow (2,62) */ }
+	static Temporal::timecnt_t max() { return Temporal::timecnt_t::from_superclock (4611686018427387903); /* pow (2,62) - 1 */ }
 };
 
 }
