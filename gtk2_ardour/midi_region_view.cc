@@ -1250,7 +1250,7 @@ MidiRegionView::display_patch_changes_on_channel (uint8_t channel, bool active_c
 
 			const timepos_t region_time = _region->source_beats_to_region_time ((*i)->time());
 
-			if (region_time < timepos_t() || region_time >= _region->nt_length()) {
+			if (region_time < timepos_t() || region_time >= _region->length()) {
 				p->hide();
 			} else {
 				const double x = trackview.editor().time_to_pixel (region_time);
@@ -1341,7 +1341,7 @@ MidiRegionView::display_sysexes()
 		}
 
 		// Show unless message is beyond the region bounds
-		if (_region->source_relative_position (time) >= _region->nt_length() || time < _region->nt_start()) {
+		if (_region->source_relative_position (time) >= _region->length() || time < _region->start()) {
 			sysex->hide();
 		} else {
 			sysex->show();
@@ -1465,7 +1465,7 @@ MidiRegionView::apply_note_range (uint8_t min, uint8_t max, bool force)
 GhostRegion*
 MidiRegionView::add_ghost (TimeAxisView& tv)
 {
-	double unit_position = trackview.editor().time_to_pixel (_region->nt_position ());
+	double unit_position = trackview.editor().time_to_pixel (_region->position ());
 	MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*>(&tv);
 	MidiGhostRegion* ghost;
 
@@ -1480,7 +1480,7 @@ MidiRegionView::add_ghost (TimeAxisView& tv)
 
 	ghost->set_colors ();
 	ghost->set_height ();
-	ghost->set_duration (_region->nt_length().samples() / samples_per_pixel);
+	ghost->set_duration (_region->length().samples() / samples_per_pixel);
 
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
 		ghost->add_note(i->second);
@@ -1552,7 +1552,7 @@ MidiRegionView::extend_active_notes()
 
 	for (unsigned i = 0; i < 128; ++i) {
 		if (_active_notes[i]) {
-			_active_notes[i]->set_x1 (trackview.editor().duration_to_pixels (_region->nt_length()));
+			_active_notes[i]->set_x1 (trackview.editor().duration_to_pixels (_region->length()));
 		}
 	}
 }
@@ -1613,7 +1613,7 @@ MidiRegionView::note_in_region_range (const boost::shared_ptr<NoteType> note, bo
 	const boost::shared_ptr<ARDOUR::MidiRegion> midi_reg = midi_region();
 
 	/* must compare double explicitly as Beats::operator< rounds to ppqn */
-	const bool outside = (timepos_t (note->time()) < _region->nt_start()) || (timepos_t (note->time()) >= _region->nt_start() + _region->nt_length());
+	const bool outside = (timepos_t (note->time()) < _region->start()) || (timepos_t (note->time()) >= _region->start() + _region->length());
 
 	visible = (note->note() >= _current_range_min) &&
 		(note->note() <= _current_range_max);
@@ -1661,8 +1661,8 @@ MidiRegionView::update_sustained (Note* ev, bool update_ghost_regions)
 
 		timepos_t note_end (note->end_time());
 
-		if (note_end > mr->nt_start() + mr->nt_length()) {
-			note_end = mr->nt_start() + mr->nt_length();
+		if (note_end > mr->start() + mr->length()) {
+			note_end = mr->start() + mr->length();
 		}
 
 		x1 = std::max(1., trackview.editor().time_to_pixel (note_end)) - 1;
@@ -1671,7 +1671,7 @@ MidiRegionView::update_sustained (Note* ev, bool update_ghost_regions)
 
 		/* nascent note currently being recorded, noteOff has not yet arrived */
 
-		x1 = std::max(1., trackview.editor().duration_to_pixels (_region->nt_length())) - 1;
+		x1 = std::max(1., trackview.editor().duration_to_pixels (_region->length())) - 1;
 	}
 
 	y1 = y0 + std::max(1., floor(note_height()) - 1);
@@ -1812,7 +1812,7 @@ MidiRegionView::step_add_note (uint8_t channel, uint8_t number, uint8_t velocity
 	timepos_t region_end = _region->nt_last();
 
 	if (note_end > region_end) {
-		_region->set_length (timecnt_t (note_end.earlier (_region->nt_position()), timepos_t()));
+		_region->set_length (timecnt_t (note_end.earlier (_region->position()), timepos_t()));
 	}
 
 	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
@@ -1866,7 +1866,7 @@ MidiRegionView::add_canvas_patch_change (MidiModel::PatchChangePtr patch)
 
 	if (patch_change->item().width() < _pixel_width) {
 		// Show unless patch change is beyond the region bounds
-		if (patch_time < _region->nt_position() || patch_time >= _region->nt_last()) {
+		if (patch_time < _region->position() || patch_time >= _region->nt_last()) {
 			patch_change->hide();
 		} else {
 			patch_change->show();
@@ -2000,7 +2000,7 @@ MidiRegionView::add_patch_change (timecnt_t const & t, Evoral::PatchChange<Tempo
 
 	c->add (MidiModel::PatchChangePtr (
 		        new Evoral::PatchChange<Temporal::Beats>
-		        (_region->source_relative_position (_region->nt_position() + t).beats(),
+		        (_region->source_relative_position (_region->position() + t).beats(),
 		         patch.channel(), patch.program(), patch.bank())));
 
 	_model->apply_command (*trackview.session(), c);
@@ -2887,8 +2887,8 @@ MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_
 			 */
 			current_x = 0;
 		}
-		if (current_x > trackview.editor().duration_to_pixels (_region->nt_length())) {
-			current_x = trackview.editor().duration_to_pixels (_region->nt_length());
+		if (current_x > trackview.editor().duration_to_pixels (_region->length())) {
+			current_x = trackview.editor().duration_to_pixels (_region->length());
 		}
 
 		if (at_front) {
@@ -2917,9 +2917,9 @@ MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_
 
 			/* negative beat offsets aren't allowed */
 			if (snap_delta_samps > 0) {
-				snap_delta_beats = _region->region_distance_to_region_beats (timecnt_t (snap_delta_samps, _region->nt_position()));
+				snap_delta_beats = _region->region_distance_to_region_beats (timecnt_t (snap_delta_samps, _region->position()));
 			} else if (snap_delta_samps < 0) {
-				snap_delta_beats = _region->region_distance_to_region_beats (timecnt_t (-snap_delta_samps, _region->nt_position()));
+				snap_delta_beats = _region->region_distance_to_region_beats (timecnt_t (-snap_delta_samps, _region->position()));
 				sign = -1;
 			}
 
@@ -2956,7 +2956,7 @@ MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_
 
 			cursor_set = true;
 
-			trackview.editor().set_snapped_cursor_position (snapped_x + midi_region()->nt_position());
+			trackview.editor().set_snapped_cursor_position (snapped_x + midi_region()->position());
 		}
 
 	}
@@ -3002,8 +3002,8 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 			current_x = 0;
 		}
 
-		if (current_x > trackview.editor().duration_to_pixels (_region->nt_length())) {
-			current_x = trackview.editor().duration_to_pixels (_region->nt_length());
+		if (current_x > trackview.editor().duration_to_pixels (_region->length())) {
+			current_x = trackview.editor().duration_to_pixels (_region->length());
 		}
 
 		/* Convert snap delta from pixels to beats with sign. */
@@ -3012,9 +3012,9 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 		int sign = 1;
 
 		if (snap_delta_samps > 0) {
-			snap_delta_beats = _region->region_distance_to_region_beats (timecnt_t (snap_delta_samps, _region->nt_position()));
+			snap_delta_beats = _region->region_distance_to_region_beats (timecnt_t (snap_delta_samps, _region->position()));
 		} else if (snap_delta_samps < 0) {
-			snap_delta_beats = _region->region_distance_to_region_beats (timecnt_t (-snap_delta_samps, _region->nt_position()));
+			snap_delta_beats = _region->region_distance_to_region_beats (timecnt_t (-snap_delta_samps, _region->position()));
 			sign = -1;
 		}
 
@@ -3332,7 +3332,7 @@ MidiRegionView::change_note_lengths (bool fine, bool shorter, Temporal::Beats de
 			delta = Temporal::Beats::ticks (Temporal::ticks_per_beat / 128);
 		} else {
 			/* grab the current grid distance */
-			delta = get_grid_beats (_region->nt_position());
+			delta = get_grid_beats (_region->position());
 		}
 	}
 
@@ -3379,7 +3379,7 @@ MidiRegionView::nudge_notes (bool forward, bool fine)
 
 		timecnt_t       unused;
 		const timecnt_t distance = trackview.editor().get_nudge_distance (ref_point, unused);
-		delta = _region->region_distance_to_region_beats (timecnt_t (distance.beats(), _region->nt_position()));
+		delta = _region->region_distance_to_region_beats (timecnt_t (distance.beats(), _region->position()));
 
 	} else {
 
@@ -3686,7 +3686,7 @@ MidiRegionView::paste_internal (timepos_t const & pos, unsigned paste_count, flo
 	DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("Paste data spans from %1 to %2 (%3) ; paste pos beats = %4 (based on %5 - %6)\n",
 	                                               first_time,
 	                                               last_time,
-	                                               duration, pos, _region->nt_position(),
+	                                               duration, pos, _region->position(),
 	                                               quarter_note));
 
 	for (int n = 0; n < (int) times; ++n) {
@@ -3715,7 +3715,7 @@ MidiRegionView::paste_internal (timepos_t const & pos, unsigned paste_count, flo
 
 		_region->clear_changes ();
 		/* we probably need to get the snap modifier somehow to make this correct for non-musical use */
-		_region->set_length (_region->nt_position().distance (end));
+		_region->set_length (_region->position().distance (end));
 		trackview.session()->add_command (new StatefulDiffCommand (_region));
 	}
 
@@ -3876,7 +3876,7 @@ MidiRegionView::update_ghost_note (double x, double y, uint32_t state)
 	const Temporal::Beats snapped_beats = snap_sample_to_grid_underneath (unsnapped_sample, shift_snap);
 
 	/* prevent Percussive mode from displaying a ghost hit at region end */
-	if (!shift_snap && snapped_beats >= _region->nt_start().beats() + _region->nt_length().beats()) {
+	if (!shift_snap && snapped_beats >= _region->start().beats() + _region->length().beats()) {
 		_ghost_note->hide();
 		hide_verbose_cursor ();
 		return;
@@ -3895,7 +3895,7 @@ MidiRegionView::update_ghost_note (double x, double y, uint32_t state)
 	_ghost_note->show();
 
 	/* calculate time in beats relative to start of source */
-	const Temporal::Beats length = get_grid_beats (_region->nt_position() + timepos_t (unsnapped_sample));
+	const Temporal::Beats length = get_grid_beats (_region->position() + timepos_t (unsnapped_sample));
 
 	_ghost_note->note()->set_time (snapped_beats);
 	_ghost_note->note()->set_length (length);
@@ -4143,7 +4143,7 @@ MidiRegionView::trim_front_starting ()
 void
 MidiRegionView::trim_front_ending ()
 {
-	if (_region->nt_start().negative()) {
+	if (_region->start().negative()) {
 		/* Trim drag made start time -ve; fix this */
 		midi_region()->fix_negative_start ();
 	}

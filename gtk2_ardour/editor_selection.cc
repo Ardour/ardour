@@ -761,7 +761,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op)
 		/* 1. find the last selected regionview in the track that was clicked in */
 
 		last_pos = 0;
-		first_pos = timepos_t::max (selection->regions.empty() ? Temporal::AudioTime : selection->regions.front()->region()->nt_position().time_domain());
+		first_pos = timepos_t::max (selection->regions.empty() ? Temporal::AudioTime : selection->regions.front()->region()->position().time_domain());
 
 		for (RegionSelection::iterator x = selection->regions.begin(); x != selection->regions.end(); ++x) {
 			if (&(*x)->get_time_axis_view() == &clicked_regionview->get_time_axis_view()) {
@@ -770,8 +770,8 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op)
 					last_pos = (*x)->region()->nt_last();
 				}
 
-				if ((*x)->region()->nt_position() < first_pos) {
-					first_pos = (*x)->region()->nt_position();
+				if ((*x)->region()->position() < first_pos) {
+					first_pos = (*x)->region()->position();
 				}
 
 				same_track = true;
@@ -784,32 +784,32 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op)
 
 			switch (clicked_regionview->region()->coverage (first_pos, last_pos)) {
 			case Temporal::OverlapNone:
-				if (last_pos < clicked_regionview->region()->nt_position()) {
+				if (last_pos < clicked_regionview->region()->position()) {
 					first_pos = last_pos;
 					last_pos = clicked_regionview->region()->nt_last();
 				} else {
 					last_pos = first_pos;
-					first_pos = clicked_regionview->region()->nt_position();
+					first_pos = clicked_regionview->region()->position();
 				}
 				break;
 
 			case Temporal::OverlapExternal:
-				if (last_pos < clicked_regionview->region()->nt_position()) {
+				if (last_pos < clicked_regionview->region()->position()) {
 					first_pos = last_pos;
 					last_pos = clicked_regionview->region()->nt_last();
 				} else {
 					last_pos = first_pos;
-					first_pos = clicked_regionview->region()->nt_position();
+					first_pos = clicked_regionview->region()->position();
 				}
 				break;
 
 			case Temporal::OverlapInternal:
-				if (last_pos < clicked_regionview->region()->nt_position()) {
+				if (last_pos < clicked_regionview->region()->position()) {
 					first_pos = last_pos;
 					last_pos = clicked_regionview->region()->nt_last();
 				} else {
 					last_pos = first_pos;
-					first_pos = clicked_regionview->region()->nt_position();
+					first_pos = clicked_regionview->region()->position();
 				}
 				break;
 
@@ -829,14 +829,14 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op)
 			*/
 
 
-			first_pos = clicked_regionview->region()->nt_position();
+			first_pos = clicked_regionview->region()->position();
 			last_pos = clicked_regionview->region()->nt_last();
 
 			for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
-				if ((*i)->region()->nt_position() < first_pos) {
-					first_pos = (*i)->region()->nt_position();
+				if ((*i)->region()->position() < first_pos) {
+					first_pos = (*i)->region()->position();
 				}
-				if ((*i)->region()->nt_end() > last_pos) {
+				if ((*i)->region()->end() > last_pos) {
 					last_pos = (*i)->region()->nt_last();
 				}
 			}

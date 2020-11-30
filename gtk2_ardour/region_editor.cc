@@ -336,7 +336,7 @@ RegionEditor::length_clock_changed ()
 		in_command = true;
 
 		_region->clear_changes ();
-		_region->trim_end (_region->nt_position() + len.decrement());
+		_region->trim_end (_region->position() + len.decrement());
 		_session->add_command(new StatefulDiffCommand (_region));
 	}
 
@@ -344,7 +344,7 @@ RegionEditor::length_clock_changed ()
 		PublicEditor::instance().commit_reversible_command ();
 	}
 
-	length_clock.set_duration (_region->nt_length());
+	length_clock.set_duration (_region->length());
 }
 
 void
@@ -369,15 +369,15 @@ void
 RegionEditor::bounds_changed (const PropertyChange& what_changed)
 {
 	if (what_changed.contains (ARDOUR::Properties::position) && what_changed.contains (ARDOUR::Properties::length)) {
-		position_clock.set (_region->nt_position(), true);
+		position_clock.set (_region->position(), true);
 		end_clock.set (_region->nt_last(), true);
-		length_clock.set_duration (_region->nt_length(), true);
+		length_clock.set_duration (_region->length(), true);
 	} else if (what_changed.contains (ARDOUR::Properties::position)) {
-		position_clock.set (_region->nt_position(), true);
+		position_clock.set (_region->position(), true);
 		end_clock.set (_region->nt_last(), true);
 	} else if (what_changed.contains (ARDOUR::Properties::length)) {
 		end_clock.set (_region->nt_last(), true);
-		length_clock.set_duration (_region->nt_length(), true);
+		length_clock.set_duration (_region->length(), true);
 	}
 
 	if (what_changed.contains (ARDOUR::Properties::sync_position) || what_changed.contains (ARDOUR::Properties::position)) {
@@ -391,11 +391,11 @@ RegionEditor::bounds_changed (const PropertyChange& what_changed)
 			sync_offset_relative_clock.set_duration (off, true);
 		}
 
-		sync_offset_absolute_clock.set (_region->nt_position () + off, true);
+		sync_offset_absolute_clock.set (_region->position () + off, true);
 	}
 
 	if (what_changed.contains (ARDOUR::Properties::start)) {
-		start_clock.set (timepos_t (_region->nt_start()), true);
+		start_clock.set (timepos_t (_region->start()), true);
 	}
 }
 
@@ -441,7 +441,7 @@ RegionEditor::sync_offset_relative_clock_changed ()
 	PublicEditor::instance().begin_reversible_command (_("change region sync point"));
 
 	_region->clear_changes ();
-	_region->set_sync_position (sync_offset_relative_clock.current_time() + _region->nt_position ());
+	_region->set_sync_position (sync_offset_relative_clock.current_time() + _region->position ());
 	_session->add_command (new StatefulDiffCommand (_region));
 
 	PublicEditor::instance().commit_reversible_command ();

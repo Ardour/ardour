@@ -343,7 +343,7 @@ EditorSummary::render_region (RegionView* r, cairo_t* cr, double y) const
 		cairo_move_to (cr, 0, y);
 	}
 
-	if ((r->region()->nt_position() + r->region()->nt_length()) > _start) {
+	if ((r->region()->position() + r->region()->length()) > _start) {
 		cairo_line_to (cr, ((r->region()->position_sample() - _start + r->region()->length_samples())) * _x_scale, y);
 	} else {
 		cairo_line_to (cr, 0, y);

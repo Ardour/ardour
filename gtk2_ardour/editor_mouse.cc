@@ -1142,7 +1142,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 						if (!prev) {
 							_drags->set (new RegionCreateDrag (this, item, parent), event);
 						} else {
-							prev->set_length (prev->nt_position ().distance (t));
+							prev->set_length (prev->position ().distance (t));
 						}
 					}
 				} else {
@@ -2542,7 +2542,7 @@ Editor::mouse_brush_insert_region (RegionView* rv, timepos_t const & pos)
 
 	/* don't brush a copy over the original */
 
-	if (pos == rv->region()->nt_position()) {
+	if (pos == rv->region()->position()) {
 		return;
 	}
 

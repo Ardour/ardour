@@ -878,7 +878,7 @@ RegionMotionDrag::compute_x_delta (GdkEvent const * event, Temporal::timepos_t &
 		pending_region_position = _last_position;
 	}
 
-	if (pending_region_position > timepos_t::max (pending_region_position.time_domain()).earlier (_primary->region()->nt_length())) {
+	if (pending_region_position > timepos_t::max (pending_region_position.time_domain()).earlier (_primary->region()->length())) {
 		pending_region_position = _last_position;
 	}
 
@@ -900,7 +900,7 @@ RegionMotionDrag::compute_x_delta (GdkEvent const * event, Temporal::timepos_t &
 		timecnt_t total_dx = timecnt_t (samplepos_t (_editor->pixel_to_sample (_total_x_delta + dx)), grab_time());
 
 		for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
-			const timepos_t off = i->view->region()->nt_position() + total_dx;
+			const timepos_t off = i->view->region()->position() + total_dx;
 			if (off.negative()) {
 				dx = dx - _editor->time_to_pixel_unrounded (off);
 				pending_region_position = pending_region_position.earlier (timecnt_t (off, timepos_t (pending_region_position.time_domain())));
@@ -1613,7 +1613,7 @@ RegionMoveDrag::finished (GdkEvent* ev, bool movement_occurred)
 		i->view->get_canvas_group()->show ();
 	}
 
-	bool const changed_position = (_last_position != _primary->region()->nt_position());
+	bool const changed_position = (_last_position != _primary->region()->position());
 	bool changed_tracks;
 
 	if (_views.front().time_axis_view >= (int) _time_axis_views.size()) {
@@ -1711,6 +1711,7 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const /*changed
 	RegionSelection new_views;
 	PlaylistSet modified_playlists;
 	RouteTimeAxisView* new_time_axis_view = 0;
+
 	timecnt_t const drag_delta = _last_position.distance (_primary->region()->nt_position());
 	RegionList ripple_exclude;
 
@@ -1740,9 +1741,9 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const /*changed
 		timepos_t where;
 
 		if (changed_position && !_x_constrained) {
-			where = timepos_t (i->view->region()->nt_position().earlier (drag_delta));
+			where = timepos_t (i->view->region()->position().earlier (drag_delta));
 		} else {
-			where = timepos_t (i->view->region()->nt_position());
+			where = timepos_t (i->view->region()->position());
 		}
 
 		/* compute full extent of regions that we're going to insert */
@@ -1840,6 +1841,7 @@ RegionMoveDrag::finished_no_copy (
 	PlaylistSet frozen_playlists;
 	set<RouteTimeAxisView*> views_to_update;
 	RouteTimeAxisView* new_time_axis_view = 0;
+
 	timecnt_t const drag_delta = last_position.distance (_primary->region()->nt_position());
 	RegionList ripple_exclude;
 
@@ -1900,9 +1902,9 @@ RegionMoveDrag::finished_no_copy (
 		timepos_t where;
 
 		if (changed_position && !_x_constrained) {
-			where = rv->region()->nt_position().earlier (drag_delta);
+			where = rv->region()->position().earlier (drag_delta);
 		} else {
-			where = rv->region()->nt_position();
+			where = rv->region()->position();
 		}
 
 		/* compute full extent of regions that we're going to insert */
@@ -2189,7 +2191,7 @@ RegionMoveDrag::RegionMoveDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p,
 {
 	DEBUG_TRACE (DEBUG::Drags, "New RegionMoveDrag\n");
 
-	_last_position = _primary->region()->nt_position();
+	_last_position = _primary->region()->position();
 }
 
 void
@@ -2258,7 +2260,6 @@ RegionInsertDrag::aborted (bool)
 	_views.clear ();
 }
 
-
 /***
  * ripple mode...
  */
@@ -2272,7 +2273,7 @@ RegionRippleDrag::add_all_after_to_views(TimeAxisView *tav, timepos_t const & wh
 	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(tav);
 	RegionSelection to_ripple;
 	for (RegionList::iterator i = rl->begin(); i != rl->end(); ++i) {
-		if ((*i)->nt_position() >= where) {
+		if ((*i)->position() >= where) {
 			to_ripple.push_back (rtv->view()->find_view(*i));
 		}
 	}
@@ -2330,7 +2331,7 @@ RegionRippleDrag::remove_unselected_from_views(timecnt_t const & amount, bool mo
 			if (move_regions) {
 				thawlist.add (rv->region ());
 				// move the underlying region to match the view
-				rv->region()->set_position (rv->region()->nt_position() + amount);
+				rv->region()->set_position (rv->region()->position() + amount);
 			} else {
 				// restore the view to match the underlying region's original position
 #warning NUTEMPO ALERT paul test this code in 5.x /* how can this work ... amount used to be in samples but ::move() expect pixels */
@@ -2394,7 +2395,7 @@ RegionRippleDrag::RegionRippleDrag (Editor* e, ArdourCanvas::Item* i, RegionView
 		assert (first_selected_on_this_track); // we should always find the region in one of the playlists...
 		add_all_after_to_views (
 				&first_selected_on_this_track->get_time_axis_view(),
-				first_selected_on_this_track->region()->nt_position(),
+				first_selected_on_this_track->region()->position(),
 				selected_regions, false);
 	}
 
@@ -2527,7 +2528,7 @@ RegionRippleDrag::finished (GdkEvent* event, bool movement_occurred)
 					}
 				}
 				if (!found) {
-					const timepos_t pos_after = r->nt_position();
+					const timepos_t pos_after = r->position();
 					const timepos_t pos_before = pos_after + selection_length;
 					r->set_position(pos_before);
 					r->clear_changes();
@@ -3039,9 +3040,9 @@ TrimDrag::TrimDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<Region
 void
 TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 {
-	timepos_t const region_start = _primary->region()->nt_position();
-	timepos_t const region_end = _primary->region()->nt_end();
-	timecnt_t const region_length = _primary->region()->nt_length();
+	timepos_t const region_start = _primary->region()->position();
+	timepos_t const region_end = _primary->region()->end();
+	timecnt_t const region_length = _primary->region()->length();
 
 	timepos_t const pf = adjusted_current_time (event);
 	setup_snap_delta (region_start);
@@ -3237,13 +3238,13 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 
 	switch (_operation) {
 	case StartTrim:
-		show_verbose_cursor_time (rv->region()->nt_position());
+		show_verbose_cursor_time (rv->region()->position());
 		break;
 	case EndTrim:
-		show_verbose_cursor_duration (rv->region()->nt_position(), rv->region()->nt_end());
+		show_verbose_cursor_duration (rv->region()->position(), rv->region()->end());
 		break;
 	}
-	show_view_preview ((_operation == StartTrim ? rv->region()->nt_position() : rv->region()->nt_end()));
+	show_view_preview ((_operation == StartTrim ? rv->region()->position() : rv->region()->end()));
 }
 
 void
@@ -3286,7 +3287,7 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 					}
 				}
 				if (_jump_position_when_done) {
-					i->view->region()->set_position (timepos_t (i->initial_end).earlier (i->view->region()->nt_length()));
+					i->view->region()->set_position (timepos_t (i->initial_end).earlier (i->view->region()->length()));
 				}
 			}
 		}
@@ -4317,10 +4318,10 @@ FadeInDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 
 	AudioRegionView* arv = dynamic_cast<AudioRegionView*> (_primary);
 	boost::shared_ptr<AudioRegion> const r = arv->audio_region ();
-	setup_snap_delta (r->nt_position());
+	setup_snap_delta (r->position());
 
-	show_verbose_cursor_duration (r->nt_position(), r->nt_position() + r->fade_in()->back()->when, 32);
-	show_view_preview (r->nt_position() + r->fade_in()->back()->when);
+	show_verbose_cursor_duration (r->position(), r->position() + r->fade_in()->back()->when, 32);
+	show_view_preview (r->position() + r->fade_in()->back()->when);
 }
 
 void
@@ -4328,7 +4329,7 @@ FadeInDrag::setup_pointer_offset ()
 {
 	AudioRegionView* arv = dynamic_cast<AudioRegionView*> (_primary);
 	boost::shared_ptr<AudioRegion> const r = arv->audio_region ();
-	_pointer_offset = (r->fade_in()->back()->when + r->nt_position()).distance (raw_grab_time());
+	_pointer_offset = (r->fade_in()->back()->when + r->position()).distance (raw_grab_time());
 }
 
 void
@@ -4364,8 +4365,8 @@ FadeInDrag::motion (GdkEvent* event, bool)
 		tmp->reset_fade_in_shape_width (tmp->audio_region(), fade_length);
 	}
 
-	show_verbose_cursor_duration (region->nt_position(), region->nt_position() + timepos_t (fade_length), 32);
-	show_view_preview (region->nt_position() + timepos_t (fade_length));
+	show_verbose_cursor_duration (region->position(), region->position() + timepos_t (fade_length), 32);
+	show_view_preview (region->position() + timepos_t (fade_length));
 }
 
 void
@@ -4459,7 +4460,7 @@ FadeOutDrag::setup_pointer_offset ()
 {
 	AudioRegionView* arv = dynamic_cast<AudioRegionView*> (_primary);
 	boost::shared_ptr<AudioRegion> r = arv->audio_region ();
-	_pointer_offset = (r->nt_position() + (r->nt_length() - r->fade_out()->back()->when)).distance (raw_grab_time());
+	_pointer_offset = (r->position() + (r->length() - r->fade_out()->back()->when)).distance (raw_grab_time());
 }
 
 void
@@ -5506,8 +5507,8 @@ TimeFXDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	Drag::start_grab (event, cursor);
 
 	_editor->get_selection().add (_primary);
-	timepos_t where (_primary->region()->nt_position());
-	setup_snap_delta (_primary->region()->nt_position());
+	timepos_t where (_primary->region()->position());
+	setup_snap_delta (_primary->region()->position());
 
 	show_verbose_cursor_duration (where, adjusted_current_time (event), 0);
 }
@@ -5526,11 +5527,11 @@ TimeFXDrag::motion (GdkEvent* event, bool)
 	_editor->snap_to_with_modifier (pf, event);
 	pf.shift_earlier (snap_delta (event->button.state));
 
-	if (pf > rv->region()->nt_position()) {
-		rv->get_time_axis_view().show_timestretch (rv->region()->nt_position(), pf, layers, layer);
+	if (pf > rv->region()->position()) {
+		rv->get_time_axis_view().show_timestretch (rv->region()->position(), pf, layers, layer);
 	}
 
-	show_verbose_cursor_duration (_primary->region()->nt_position(), pf);
+	show_verbose_cursor_duration (_primary->region()->position(), pf);
 }
 
 void
@@ -5551,19 +5552,19 @@ TimeFXDrag::finished (GdkEvent* event, bool movement_occurred)
 
 		timepos_t adjusted_pos = adjusted_current_time (event);
 
-		if (adjusted_pos < _primary->region()->nt_position()) {
+		if (adjusted_pos < _primary->region()->position()) {
 			/* backwards drag of the left edge - not usable */
 			return;
 		}
 
-		timecnt_t newlen = _primary->region()->nt_position().distance (adjusted_pos);
+		timecnt_t newlen = _primary->region()->position().distance (adjusted_pos);
 
-		fraction = newlen / _primary->region()->nt_length();
+		fraction = newlen / _primary->region()->length();
 
 #ifndef USE_RUBBERBAND
 		// Soundtouch uses fraction / 100 instead of normal (/ 1)
 		if (_primary->region()->data_type() == DataType::AUDIO) {
-			fraction = ((newlen - _primary->region()->nt_length()) / newlen) * 100;
+			fraction = ((newlen - _primary->region()->length()) / newlen) * 100;
 		}
 #endif
 	}
@@ -6326,8 +6327,8 @@ NoteDrag::total_dx (GdkEvent * event) const
 	timecnt_t ret = timecnt_t (snap.earlier (n_qn).earlier (snap_delta (event->button.state)));
 
 	/* prevent the earliest note being dragged earlier than the region's start position */
-	if (ret + _earliest < _region->region()->nt_start()) {
-		ret -= (ret + _earliest) -  _region->region()->nt_start();
+	if (ret + _earliest < _region->region()->start()) {
+		ret -= (ret + _earliest) -  _region->region()->start();
 	}
 
 	return ret;
@@ -6744,8 +6745,8 @@ DraggingView::DraggingView (RegionView* v, RegionDrag* parent, TimeAxisView* ita
 	layer = v->region()->layer ();
 	initial_y = v->get_canvas_group()->position().y;
 	initial_playlist = v->region()->playlist ();
-	initial_position = v->region()->nt_position ();
-	initial_end = v->region()->nt_position () + v->region()->nt_length ();
+	initial_position = v->region()->position ();
+	initial_end = v->region()->position () + v->region()->length ();
 }
 
 PatchChangeDrag::PatchChangeDrag (Editor* e, PatchChange* i, MidiRegionView* r)
@@ -6764,7 +6765,7 @@ PatchChangeDrag::motion (GdkEvent* ev, bool)
 {
 	timepos_t f = adjusted_current_time (ev);
 	boost::shared_ptr<Region> r = _region_view->region ();
-	f = max (f, r->nt_position ());
+	f = max (f, r->position ());
 	f = min (f, r->nt_last ());
 
 	timecnt_t const dxf = grab_time().distance (f); // permitted dx
@@ -6785,7 +6786,7 @@ PatchChangeDrag::finished (GdkEvent* ev, bool movement_occurred)
 
 	boost::shared_ptr<Region> r (_region_view->region ());
 	timepos_t f = adjusted_current_time (ev);
-	f = max (f, r->nt_position ());
+	f = max (f, r->position ());
 	f = min (f, r->nt_last ());
 
 	_region_view->move_patch_change (*_patch_change, _region_view->region()->absolute_time_to_region_beats (f));
@@ -6992,7 +6993,7 @@ NoteCreateDrag::motion (GdkEvent* event, bool)
 		aligned_beats += grid_beats;
 	}
 
-	_note[1] = max (Temporal::Beats(), aligned_beats - _region_view->region()->nt_position ().beats());
+	_note[1] = max (Temporal::Beats(), aligned_beats - _region_view->region()->position ().beats());
 
 	double const x0 = _editor->time_to_pixel (_note[0]);
 	double const x1 = _editor->time_to_pixel (_note[1]);
@@ -7062,7 +7063,7 @@ HitCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 		return;
 	}
 
-	const Temporal::Beats start = beats - _region_view->region()->nt_position().beats ();
+	const Temporal::Beats start = beats - _region_view->region()->position().beats ();
 	Temporal::Beats length = _region_view->get_grid_beats (pos);
 
 	_editor->begin_reversible_command (_("Create Hit"));
@@ -7083,7 +7084,7 @@ HitCreateDrag::motion (GdkEvent* event, bool)
 	}
 
 	const Beats beats = pos.beats ();
-	const Temporal::Beats start = beats - _region_view->region()->nt_position ().beats();
+	const Temporal::Beats start = beats - _region_view->region()->position ().beats();
 
 	if (_last_pos == start) {
 		return;

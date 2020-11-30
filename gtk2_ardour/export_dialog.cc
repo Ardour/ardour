@@ -584,7 +584,7 @@ ExportRegionDialog::init_gui ()
 void
 ExportRegionDialog::init_components ()
 {
-	string loc_id = profile_manager->set_single_range (region.position_sample(), (region.nt_position() + region.nt_length()).samples(), region.name());
+	string loc_id = profile_manager->set_single_range (region.position_sample(), (region.position() + region.length()).samples(), region.name());
 
 	preset_selector.reset (new ExportPresetSelector ());
 	timespan_selector.reset (new ExportTimespanSelectorSingle (_session, profile_manager, loc_id));

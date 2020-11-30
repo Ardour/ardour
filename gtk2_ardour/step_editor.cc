@@ -133,7 +133,7 @@ StepEditor::reset_step_edit_beat_pos ()
 	assert (step_edit_region_view);
 
 	const timepos_t ep = _editor.get_preferred_edit_position();
-	timecnt_t distance_from_start (step_edit_region->nt_position().distance (ep));
+	timecnt_t distance_from_start (step_edit_region->position().distance (ep));
 
 	if (distance_from_start < 0) {
 		/* this can happen with snap enabled, and the edit point == Playhead. we snap the
@@ -237,7 +237,7 @@ StepEditor::move_step_edit_beat_pos (Temporal::Beats beats)
 		return;
 	}
 	if (beats > 0.0) {
-		step_edit_beat_pos = min (step_edit_beat_pos + beats, step_edit_region->nt_length().beats());
+		step_edit_beat_pos = min (step_edit_beat_pos + beats, step_edit_region->length().beats());
 	} else if (beats < 0.0) {
 		if (-beats < step_edit_beat_pos) {
 			step_edit_beat_pos += beats; // its negative, remember
@@ -415,7 +415,7 @@ StepEditor::step_edit_bar_sync ()
 	timepos_t fpos = step_edit_region_view->region()->region_beats_to_absolute_time (step_edit_beat_pos);
 #warning NUTEMPO FIXME need way to get bbt from timepos_t
 	//fpos = fpos.bbt().round_up_to_bar ();
-	step_edit_beat_pos = step_edit_region->nt_position().distance (fpos).beats().round_up_to_beat();
+	step_edit_beat_pos = step_edit_region->position().distance (fpos).beats().round_up_to_beat();
 	step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
 }
 

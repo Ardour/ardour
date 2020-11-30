@@ -77,7 +77,7 @@ RegionView::RegionView (ArdourCanvas::Container*          parent,
                         double                            spu,
                         uint32_t                          basic_color,
                         bool                              automation)
-	: TimeAxisViewItem (r->name(), *parent, tv, spu, basic_color, r->nt_position(), r->nt_length(), false, automation,
+	: TimeAxisViewItem (r->name(), *parent, tv, spu, basic_color, r->position(), r->length(), false, automation,
 			    (automation ? TimeAxisViewItem::ShowFrame :
 			     TimeAxisViewItem::Visibility ((UIConfiguration::instance().get_show_region_name() ? TimeAxisViewItem::ShowNameText : 0) |
 							   TimeAxisViewItem::ShowNameHighlight| TimeAxisViewItem::ShowFrame)))
@@ -157,7 +157,7 @@ RegionView::RegionView (ArdourCanvas::Container*          parent,
                         uint32_t                          basic_color,
                         bool                              recording,
                         TimeAxisViewItem::Visibility      visibility)
-	: TimeAxisViewItem (r->name(), *parent, tv, spu, basic_color, r->nt_position(), r->nt_length(), recording, false, visibility)
+	: TimeAxisViewItem (r->name(), *parent, tv, spu, basic_color, r->position(), r->length(), recording, false, visibility)
 	, _region (r)
 	, sync_mark(0)
 	, sync_line(0)
@@ -471,7 +471,7 @@ RegionView::region_resized (const PropertyChange& what_changed)
 	double unit_length;
 
 	if (what_changed.contains (ARDOUR::Properties::position)) {
-		set_position (_region->nt_position(), 0);
+		set_position (_region->position(), 0);
 	}
 
 	PropertyChange s_and_l;
@@ -480,7 +480,7 @@ RegionView::region_resized (const PropertyChange& what_changed)
 
 	if (what_changed.contains (s_and_l)) {
 
-		set_duration (_region->nt_length(), 0);
+		set_duration (_region->length(), 0);
 
 		unit_length = _region->length_samples() / samples_per_pixel;
 
@@ -863,7 +863,7 @@ RegionView::region_sync_changed ()
 
 	} else {
 
-		if ((sync_dir < 0) || ((sync_dir > 0) && (sync_offset > _region->nt_length()))) {
+		if ((sync_dir < 0) || ((sync_dir > 0) && (sync_offset > _region->length()))) {
 
 			/* no sync mark - its out of the bounds of the region */
 
@@ -998,7 +998,7 @@ RegionView::update_coverage_frame (LayerDisplay d)
 		return;
 	}
 
-	timepos_t const position = _region->nt_position ();
+	timepos_t const position = _region->position ();
 	timepos_t t (position);
 	timepos_t const end = _region->nt_last ();
 
@@ -1073,11 +1073,11 @@ RegionView::trim_front (timepos_t const & new_bound, bool no_overlap)
 		return false;
 	}
 
-	if (_region->nt_position() == new_bound) {
+	if (_region->position() == new_bound) {
 		return false;
 	}
 
-	timepos_t const pos = _region->nt_position();
+	timepos_t const pos = _region->position();
 
 	_region->trim_front (new_bound);
 
@@ -1088,19 +1088,19 @@ RegionView::trim_front (timepos_t const & new_bound, bool no_overlap)
 
 		bool regions_touching = false;
 
-		if (region_left != 0 && (pos == region_left->nt_end())) {
+		if (region_left != 0 && (pos == region_left->end())) {
 			regions_touching = true;
 		}
 
 		/* Only trim region on the left if the first sample has gone beyond the left region's last sample. */
-		if (region_left != 0 && (region_left->nt_last() > _region->nt_position() || regions_touching)) {
-			region_left->trim_end (_region->nt_position().decrement());
+		if (region_left != 0 && (region_left->nt_last() > _region->position() || regions_touching)) {
+			region_left->trim_end (_region->position().decrement());
 		}
 	}
 
 	region_changed (ARDOUR::bounds_change);
 
-	return (pos != _region->nt_position()); // return true if we actually changed something
+	return (pos != _region->position()); // return true if we actually changed something
 }
 
 bool
@@ -1121,13 +1121,13 @@ RegionView::trim_end (timepos_t const & new_bound, bool no_overlap)
 
 		bool regions_touching = false;
 
-		if (region_right != 0 && (last == region_right->nt_position().decrement())) {
+		if (region_right != 0 && (last == region_right->position().decrement())) {
 			regions_touching = true;
 		}
 
 		/* Only trim region on the right if the last sample has gone beyond the right region's first sample. */
-		if (region_right != 0 && (region_right->nt_position() < _region->nt_last() || regions_touching)) {
-			region_right->trim_front (_region->nt_end());
+		if (region_right != 0 && (region_right->position() < _region->nt_last() || regions_touching)) {
+			region_right->trim_front (_region->end());
 		}
 
 		region_changed (ARDOUR::bounds_change);
@@ -1173,14 +1173,14 @@ RegionView::snap_region_time_to_region_time (timepos_t const & x, bool ensure_sn
 {
 	PublicEditor& editor = trackview.editor();
 	/* x is region relative, convert it to global absolute time */
-	timepos_t const session_pos = _region->nt_position() + x;
+	timepos_t const session_pos = _region->position() + x;
 
 	/* try a snap in either direction */
 	timepos_t snapped = session_pos;
 	editor.snap_to (snapped, Temporal::RoundNearest, SnapToAny_Visual, ensure_snap);
 
 	/* if we went off the beginning of the region, snap forwards */
-	if (snapped < _region->nt_position ()) {
+	if (snapped < _region->position ()) {
 		snapped = session_pos;
 		editor.snap_to (snapped, Temporal::RoundUpAlways, SnapToAny_Visual, ensure_snap);
 	}

@@ -125,7 +125,7 @@ public:
 
 	struct PositionOrder {
 		bool operator()(const RegionView* a, const RegionView* b) {
-			return a->region()->nt_position() < b->region()->nt_position();
+			return a->region()->position() < b->region()->position();
 		}
 	};
 

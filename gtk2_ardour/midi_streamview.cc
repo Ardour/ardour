@@ -476,7 +476,7 @@ MidiStreamView::setup_rec_box ()
 
 				timepos_t start;
 				if (rec_regions.size() > 0) {
-					start = rec_regions.back().first->nt_start()
+					start = rec_regions.back().first->start()
 						+ timepos_t (_trackview.track()->get_captured_samples (rec_regions.size() - 1));
 				}
 
@@ -674,7 +674,7 @@ MidiStreamView::resume_updates ()
 
 struct RegionPositionSorter {
 	bool operator() (RegionView* a, RegionView* b) {
-		return a->region()->nt_position() < b->region()->nt_position();
+		return a->region()->position() < b->region()->position();
 	}
 };
 
@@ -693,7 +693,7 @@ MidiStreamView::paste (timepos_t const & pos, const Selection& selection, PasteC
 	list<RegionView*>::const_iterator prev = region_views.begin ();
 
 	for (list<RegionView*>::const_iterator i = region_views.begin(); i != region_views.end(); ++i) {
-		if ((*i)->region()->nt_position() > pos) {
+		if ((*i)->region()->position() > pos) {
 			break;
 		}
 		prev = i;
@@ -702,7 +702,7 @@ MidiStreamView::paste (timepos_t const & pos, const Selection& selection, PasteC
 	boost::shared_ptr<Region> r = (*prev)->region ();
 
 	/* If *prev doesn't cover pos, it's no good */
-	if (r->nt_position() > pos || ((r->nt_position() + r->nt_length()) < pos)) {
+	if (r->position() > pos || ((r->position() + r->length()) < pos)) {
 		return false;
 	}
 

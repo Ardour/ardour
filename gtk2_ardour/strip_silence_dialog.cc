@@ -63,8 +63,8 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<RegionView*> const & v)
 		views.push_back (ViewInterval (*r));
 	}
 
-	_minimum_length->set_is_duration (true, views.front().view->region()->nt_position());
-	_fade_length->set_is_duration (true, views.front().view->region()->nt_position());
+	_minimum_length->set_is_duration (true, views.front().view->region()->position());
+	_fade_length->set_is_duration (true, views.front().view->region()->position());
 
 	Gtk::HBox* hbox = Gtk::manage (new Gtk::HBox);
 
@@ -345,13 +345,13 @@ StripSilenceDialog::threshold_changed ()
 samplecnt_t
 StripSilenceDialog::minimum_length () const
 {
-	return std::max((samplecnt_t)1, _minimum_length->current_duration (views.front().view->region()->nt_position()).samples());
+	return std::max((samplecnt_t)1, _minimum_length->current_duration (views.front().view->region()->position()).samples());
 }
 
 samplecnt_t
 StripSilenceDialog::fade_length () const
 {
-	return std::max((samplecnt_t)0, _fade_length->current_duration (views.front().view->region()->nt_position()).samples());
+	return std::max((samplecnt_t)0, _fade_length->current_duration (views.front().view->region()->position()).samples());
 }
 
 void

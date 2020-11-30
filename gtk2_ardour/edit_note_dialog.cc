@@ -112,10 +112,10 @@ EditNoteDialog::EditNoteDialog (MidiRegionView* rv, set<NoteBase*> n)
 	_length_clock.set_mode (AudioClock::BBT);
 
 	dur = _region_view->region_relative_distance (timecnt_t ((*_events.begin())->note()->end_time (), timepos_t()), BarTime);
-	pos = _region_view->region()->nt_position() + dur;
+	pos = _region_view->region()->position() + dur;
 	timecnt_t offset;
 	dur = _region_view->region_relative_distance (timecnt_t ((*_events.begin())->note()->time (), timepos_t()), BarTime);
-	offset = timecnt_t (_region_view->region()->nt_position(), timepos_t()) + dur;
+	offset = timecnt_t (_region_view->region()->position(), timepos_t()) + dur;
 
 	_length_clock.set_is_duration (true, pos);
 	_length_clock.set_duration (offset, true);
@@ -208,7 +208,7 @@ EditNoteDialog::done (int r)
 		}
 	}
 
-	timepos_t source_start = _region_view->region()->nt_position().earlier (_region_view->region()->nt_start());
+	timepos_t source_start = _region_view->region()->position().earlier (_region_view->region()->start());
 
 	/* convert current clock time into an offset from the start of the source */
 

@@ -339,7 +339,7 @@ AutomationStreamView::paste (timepos_t const &                         pos,
 	list<RegionView*>::const_iterator prev = region_views.begin ();
 
 	for (list<RegionView*>::const_iterator i = region_views.begin(); i != region_views.end(); ++i) {
-		if ((*i)->region()->nt_position() > pos) {
+		if ((*i)->region()->position() > pos) {
 			break;
 		}
 		prev = i;
@@ -348,7 +348,7 @@ AutomationStreamView::paste (timepos_t const &                         pos,
 	boost::shared_ptr<Region> r = (*prev)->region ();
 
 	/* If *prev doesn't cover pos, it's no good */
-	if (r->nt_position() > pos || ((r->nt_position() + r->nt_length()) < pos)) {
+	if (r->position() > pos || ((r->position() + r->length()) < pos)) {
 		return false;
 	}
 

@@ -312,7 +312,7 @@ Editor::split_regions_at (timepos_t const & where, RegionSelection& regions)
 	//if the user wants newly-created regions to be selected, then select them:
 	if (mouse_mode == MouseObject) {
 		for (RegionSelection::iterator ri = latest_regionviews.begin(); ri != latest_regionviews.end(); ri++) {
-			if ((*ri)->region()->nt_position() < where) {
+			if ((*ri)->region()->position() < where) {
 				// new regions created before the split
 				if (rsas & NewlyCreatedLeft) {
 					selection->add (*ri);
@@ -418,14 +418,14 @@ Editor::nudge_forward (bool next, bool force_playhead)
 		for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
 			boost::shared_ptr<Region> r ((*i)->region());
 
-			distance = get_nudge_distance (r->nt_position(), next_distance);
+			distance = get_nudge_distance (r->position(), next_distance);
 
 			if (next) {
 				distance = next_distance;
 			}
 
 			r->clear_changes ();
-			r->set_position (r->nt_position() + distance);
+			r->set_position (r->position() + distance);
 			_session->add_command (new StatefulDiffCommand (r));
 		}
 
@@ -506,7 +506,7 @@ Editor::nudge_backward (bool next, bool force_playhead)
 		for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
 			boost::shared_ptr<Region> r ((*i)->region());
 
-			distance = get_nudge_distance (r->nt_position(), next_distance);
+			distance = get_nudge_distance (r->position(), next_distance);
 
 			if (next) {
 				distance = next_distance;
@@ -514,8 +514,8 @@ Editor::nudge_backward (bool next, bool force_playhead)
 
 			r->clear_changes ();
 
-			if (r->nt_position() > distance) {
-				r->set_position (r->nt_position().earlier (distance));
+			if (r->position() > distance) {
+				r->set_position (r->position().earlier (distance));
 			} else {
 				r->set_position (timepos_t());
 			}
@@ -602,7 +602,7 @@ Editor::nudge_forward_capture_offset ()
 		boost::shared_ptr<Region> r ((*i)->region());
 
 		r->clear_changes ();
-		r->set_position (r->nt_position() + timecnt_t (distance));
+		r->set_position (r->position() + timecnt_t (distance));
 		_session->add_command(new StatefulDiffCommand (r));
 	}
 
@@ -627,8 +627,8 @@ Editor::nudge_backward_capture_offset ()
 
 		r->clear_changes ();
 
-		if (r->nt_position() > distance) {
-			r->set_position (r->nt_position().earlier (distance));
+		if (r->position() > distance) {
+			r->set_position (r->position().earlier (distance));
 		} else {
 			r->set_position (timepos_t ());
 		}
@@ -640,7 +640,7 @@ Editor::nudge_backward_capture_offset ()
 
 struct RegionSelectionPositionSorter {
 	bool operator() (RegionView* a, RegionView* b) {
-		return a->region()->nt_position() < b->region()->nt_position();
+		return a->region()->position() < b->region()->position();
 	}
 };
 
@@ -688,7 +688,7 @@ Editor::sequence_regions ()
 			}
 			_session->add_command (new StatefulDiffCommand (r));
 
-			r_end=r->nt_position() + r->nt_length();
+			r_end=r->position() + r->length();
 
 			iCount++;
 		}
@@ -802,11 +802,11 @@ Editor::build_region_boundary_cache ()
 
 			switch (*p) {
 			case Start:
-				rpos = r->nt_position();
+				rpos = r->position();
 				break;
 
 			case End:
-				rpos = r->nt_end();
+				rpos = r->end();
 				break;
 
 			case SyncPoint:
@@ -871,11 +871,11 @@ Editor::find_next_region (timepos_t const & pos, RegionPoint point, int32_t dir,
 
 		switch (point) {
 		case Start:
-			rpos = r->nt_position ();
+			rpos = r->position ();
 			break;
 
 		case End:
-			rpos = r->nt_end ();
+			rpos = r->end ();
 			break;
 
 		case SyncPoint:
@@ -1039,7 +1039,7 @@ Editor::cursor_to_region_point (EditorCursor* cursor, RegionPoint point, int32_t
 
 	switch (point) {
 	case Start:
-		pos = r->nt_position ();
+		pos = r->position ();
 		break;
 
 	case End:
@@ -1227,7 +1227,7 @@ Editor::selected_marker_to_region_point (RegionPoint point, int32_t dir)
 		break;
 
 	case SyncPoint:
-		pos = r->adjust_to_sync (r->nt_position());
+		pos = r->adjust_to_sync (r->position());
 		break;
 	}
 
@@ -1955,12 +1955,12 @@ Editor::get_selection_extents (timepos_t &start, timepos_t &end) const
 
 		for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
 
-			if ((*i)->region()->nt_position() < start) {
-				start = (*i)->region()->nt_position();
+			if ((*i)->region()->position() < start) {
+				start = (*i)->region()->position();
 			}
 
-			if ((*i)->region()->nt_end() > end) {
-				end = (*i)->region()->nt_end();
+			if ((*i)->region()->end() > end) {
+				end = (*i)->region()->end();
 			}
 		}
 
@@ -2396,7 +2396,7 @@ Editor::add_locations_from_region ()
 
 		boost::shared_ptr<Region> region = (*i)->region ();
 
-		Location *location = new Location (*_session, region->nt_position(), region->nt_end(), region->name(), Location::IsRangeMarker);
+		Location *location = new Location (*_session, region->position(), region->end(), region->name(), Location::IsRangeMarker);
 
 		_session->locations()->add (location, true);
 		commit = true;
@@ -3029,11 +3029,11 @@ Editor::play_selected_region ()
 	}
 
 	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
-		if ((*i)->region()->nt_position() < start) {
-			start = (*i)->region()->nt_position();
+		if ((*i)->region()->position() < start) {
+			start = (*i)->region()->position();
 		}
-		if ((*i)->region()->nt_end() > end) {
-			end = (*i)->region()->nt_end();
+		if ((*i)->region()->end() > end) {
+			end = (*i)->region()->end();
 		}
 	}
 
@@ -3078,12 +3078,12 @@ Editor::region_from_selection ()
 			continue;
 		}
 
-		internal_start = current->nt_position().distance (start);
+		internal_start = current->position().distance (start);
 		RegionFactory::region_name (new_name, current->name(), true);
 
 		PropertyList plist;
 
-		plist.add (ARDOUR::Properties::start, current->nt_start() + internal_start);
+		plist.add (ARDOUR::Properties::start, current->start() + internal_start);
 		plist.add (ARDOUR::Properties::length, selection_cnt);
 		plist.add (ARDOUR::Properties::name, new_name);
 		plist.add (ARDOUR::Properties::layer, 0);
@@ -3125,12 +3125,12 @@ Editor::create_region_from_selection (vector<boost::shared_ptr<Region> >& new_re
 			continue;
 		}
 
-		internal_start = current->nt_position().distance (start);
+		internal_start = current->position().distance (start);
 		RegionFactory::region_name (new_name, current->name(), true);
 
 		PropertyList plist;
 
-		plist.add (ARDOUR::Properties::start, current->nt_start() + internal_start);
+		plist.add (ARDOUR::Properties::start, current->start() + internal_start);
 		plist.add (ARDOUR::Properties::length, start.distance (end));
 		plist.add (ARDOUR::Properties::name, new_name);
 
@@ -3424,10 +3424,10 @@ Editor::separate_under_selected_regions ()
 		}
 
 		//Partition on the region bounds
-		playlist->partition ((*rl)->nt_position().decrement(), (*rl)->nt_end(), true);
+		playlist->partition ((*rl)->position().decrement(), (*rl)->end(), true);
 
 		//Re-add region that was just removed due to the partition operation
-		playlist->add_region ((*rl), (*rl)->nt_position());
+		playlist->add_region ((*rl), (*rl)->position());
 	}
 
 	vector<PlaylistState>::iterator pl;
@@ -3525,10 +3525,10 @@ Editor::crop_region_to (timepos_t const & start, timepos_t const & end)
 		/* now adjust lengths */
 		for (vector<boost::shared_ptr<Region> >::iterator i = regions.begin(); i != regions.end(); ++i) {
 
-			pos = (*i)->nt_position();
+			pos = (*i)->position();
 			new_start = max (start, pos);
-			if (timepos_t::max (pos.time_domain()).earlier (pos) > (*i)->nt_length()) {
-				new_end = (*i)->nt_end();
+			if (timepos_t::max (pos.time_domain()).earlier (pos) > (*i)->length()) {
+				new_end = (*i)->end();
 			} else {
 				new_end = timepos_t::max (pos.time_domain());
 			}
@@ -3576,7 +3576,7 @@ Editor::region_fill_track ()
 		   Playlist::duplicate_until gets modified. Maybe change this to
 		   be more consistent with other APIs
 		*/
-		timepos_t position = end_time + start_time.distance (r->nt_position());
+		timepos_t position = end_time + start_time.distance (r->position());
 		playlist = (*i)->region()->playlist();
 		playlist->clear_changes ();
 		playlist->duplicate_until (r, position, gap, end);
@@ -3696,7 +3696,7 @@ Editor::align_regions (RegionPoint what)
 
 struct RegionSortByTime {
 	bool operator() (const RegionView* a, const RegionView* b) {
-		return a->region()->nt_position() < b->region()->nt_position();
+		return a->region()->position() < b->region()->position();
 	}
 };
 
@@ -3723,10 +3723,10 @@ Editor::align_regions_relative (RegionPoint point)
 	switch (point) {
 	case Start:
 		pos = position;
-		if (position > r->nt_position()) {
-			distance = r->nt_position().distance (position);
+		if (position > r->position()) {
+			distance = r->position().distance (position);
 		} else {
-			distance = position.distance (r->nt_position());
+			distance = position.distance (r->position());
 			dir = -1;
 		}
 		break;
@@ -3734,26 +3734,26 @@ Editor::align_regions_relative (RegionPoint point)
 	case End:
 		if (position > r->nt_last()) {
 			distance = r->nt_last().distance (position);
-			pos = r->nt_position() + distance;
+			pos = r->position() + distance;
 		} else {
 			distance = position.distance (r->nt_last());
-			pos = r->nt_position().earlier (distance);
+			pos = r->position().earlier (distance);
 			dir = -1;
 		}
 		break;
 
 	case SyncPoint:
 		pos = r->adjust_to_sync (position);
-		if (pos > r->nt_position()) {
-			distance = r->nt_position().distance (pos);
+		if (pos > r->position()) {
+			distance = r->position().distance (pos);
 		} else {
-			distance = pos.distance (r->nt_position());
+			distance = pos.distance (r->position());
 			dir = -1;
 		}
 		break;
 	}
 
-	if (pos == r->nt_position()) {
+	if (pos == r->position()) {
 		return;
 	}
 
@@ -3776,9 +3776,9 @@ Editor::align_regions_relative (RegionPoint point)
 		region->clear_changes ();
 
 		if (dir > 0) {
-			region->set_position (region->nt_position() + distance);
+			region->set_position (region->position() + distance);
 		} else {
-			region->set_position (region->nt_position().earlier (distance));
+			region->set_position (region->position().earlier (distance));
 		}
 
 		_session->add_command(new StatefulDiffCommand (region));
@@ -3807,8 +3807,8 @@ Editor::align_region_internal (boost::shared_ptr<Region> region, RegionPoint poi
 		break;
 
 	case End:
-		if (position > region->nt_length()) {
-			region->set_position (position.earlier (region->nt_length()));
+		if (position > region->length()) {
+			region->set_position (position.earlier (region->length()));
 		}
 		break;
 
@@ -3967,24 +3967,24 @@ Editor::trim_to_region(bool forward)
 
 		if (forward) {
 
-			next_region = playlist->find_next_region (region->nt_position(), Start, 1);
+			next_region = playlist->find_next_region (region->position(), Start, 1);
 
 			if (!next_region) {
 				continue;
 			}
 
-			region->trim_end (next_region->nt_position().decrement());
+			region->trim_end (next_region->position().decrement());
 			arv->region_changed (PropertyChange (ARDOUR::Properties::length));
 		}
 		else {
 
-			next_region = playlist->find_next_region (region->nt_position(), Start, 0);
+			next_region = playlist->find_next_region (region->position(), Start, 0);
 
 			if (!next_region) {
 				continue;
 			}
 
-			region->trim_front (next_region->nt_end());
+			region->trim_front (next_region->end());
 			arv->region_changed (ARDOUR::bounds_change);
 		}
 
@@ -4729,7 +4729,7 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 
 	for (RegionSelection::iterator x = rs.begin(); x != rs.end(); ++x) {
 
-		first_position = min ((*x)->region()->nt_position(), first_position);
+		first_position = min ((*x)->region()->position(), first_position);
 
 		if (op == Cut || op == Clear || op == Delete) {
 			boost::shared_ptr<Playlist> pl = (*x)->region()->playlist();
@@ -4816,28 +4816,28 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 		case Delete:
 			pl->remove_region (r);
 			if (should_ripple()) {
-				pl->ripple (r->position(), -r->length(), boost::shared_ptr<Region>());
+				do_ripple (pl, r->position(), -r->length(), boost::shared_ptr<Region>(), false);
 			}
 			break;
 
 		case Cut:
 			_xx = RegionFactory::create (r, false);
-			npl->add_region (_xx, timepos_t (first_position.distance (r->nt_position())));
+			npl->add_region (_xx, r->position() - first_position);
 			pl->remove_region (r);
 			if (should_ripple()) {
-				pl->ripple (r->position(), -r->length(), boost::shared_ptr<Region>());
+				do_ripple (pl, r->position(), -r->length(), boost::shared_ptr<Region>(), false);
 			}
 			break;
 
 		case Copy:
 			/* copy region before adding, so we're not putting same object into two different playlists */
-			npl->add_region (RegionFactory::create (r, false), timepos_t (first_position.distance (r->nt_position())));
+			npl->add_region (RegionFactory::create (r, false), r->position() - first_position);
 			break;
 
 		case Clear:
 			pl->remove_region (r);
 			if (should_ripple()) {
-				pl->ripple (r->position(), -r->length(), boost::shared_ptr<Region>());
+				do_ripple (pl, r->position(), -r->length(), boost::shared_ptr<Region>(), false);
 			}
 			break;
 		}
@@ -5098,7 +5098,7 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 		latest_regionviews.clear ();
 		sigc::connection c = rtv->view()->RegionViewAdded.connect (sigc::mem_fun(*this, &Editor::collect_new_region_view));
 
-		timepos_t position = end_sample + (start_sample.distance (r->nt_end()));
+		timepos_t position = end_sample + (start_sample.distance (r->end()));
 		playlist = (*i)->region()->playlist();
 
 		if (!should_ripple()) {
@@ -5709,7 +5709,7 @@ Editor::apply_midi_note_edit_op_to_region (MidiOperator& op, MidiRegionView& mrv
 	vector<Evoral::Sequence<Temporal::Beats>::Notes> v;
 	v.push_back (selected);
 
-	timepos_t pos = mrv.midi_region()->nt_position().earlier (mrv.midi_region()->nt_start ());
+	timepos_t pos = mrv.midi_region()->position().earlier (mrv.midi_region()->start ());
 
 #warning NUTEMPO triple check pos computation above to make sure we are doing this right
 
@@ -5777,7 +5777,7 @@ Editor::fork_region ()
 					in_command = true;
 				}
 				playlist->clear_changes ();
-				playlist->replace_region (mrv->region(), newregion, mrv->region()->nt_position());
+				playlist->replace_region (mrv->region(), newregion, mrv->region()->position());
 				_session->add_command(new StatefulDiffCommand (playlist));
 			} catch (...) {
 				error << string_compose (_("Could not unlink %1"), mrv->region()->name()) << endmsg;
@@ -5933,8 +5933,8 @@ Editor::insert_patch_change (bool from_context)
 	for (RegionSelection::iterator i = rs.begin (); i != rs.end(); ++i) {
 		MidiRegionView* const mrv = dynamic_cast<MidiRegionView*> (*i);
 		if (mrv) {
-			if (p >= mrv->region()->nt_position() && p <= mrv->region()->nt_last()) {
-				mrv->add_patch_change (mrv->region()->nt_position().distance (p), d.patch ());
+			if (p >= mrv->region()->position() && p <= mrv->region()->nt_last()) {
+				mrv->add_patch_change (mrv->region()->position().distance (p), d.patch ());
 			}
 		}
 	}
@@ -5989,12 +5989,12 @@ Editor::apply_filter (Filter& filter, string command, ProgressReporter* progress
 					std::vector<boost::shared_ptr<Region> >::iterator res = filter.results.begin ();
 
 					/* first region replaces the old one */
-					playlist->replace_region (arv->region(), *res, (*res)->nt_position());
+					playlist->replace_region (arv->region(), *res, (*res)->position());
 					++res;
 
 					/* add the rest */
 					while (res != filter.results.end()) {
-						playlist->add_region (*res, (*res)->nt_position());
+						playlist->add_region (*res, (*res)->position());
 						++res;
 					}
 
@@ -6388,11 +6388,11 @@ Editor::set_fade_length (bool in)
 	}
 
 	if (in) {
-		if (pos <= rv->region()->nt_position()) {
+		if (pos <= rv->region()->position()) {
 			/* can't do it */
 			return;
 		}
-		len = rv->region()->nt_position().distance (pos);
+		len = rv->region()->position().distance (pos);
 		cmd = _("set fade in length");
 	} else {
 		if (pos >= rv->region()->last_sample()) {
@@ -7065,7 +7065,7 @@ Editor::set_tempo_from_region ()
 
 	RegionView* rv = rs.front();
 
-	define_one_bar (rv->region()->nt_position(), rv->region()->nt_end());
+	define_one_bar (rv->region()->position(), rv->region()->end());
 }
 
 void
@@ -7271,7 +7271,7 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 
 	timepos_t pos;
 
-	const timepos_t rstart = r->nt_position ();
+	const timepos_t rstart = r->position ();
 	const samplepos_t start_sample = r->position_sample();
 	const samplepos_t end_sample = r->last_sample() + 1;
 
@@ -7286,7 +7286,7 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 
 		/* file start = original start + how far we from the initial position ?  */
 
-		timecnt_t file_start = r->nt_start() + pos;
+		timecnt_t file_start = r->start() + pos;
 
 		/* length = next position - current position */
 
@@ -7339,8 +7339,8 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 	/* Add the final region */
 	PropertyList plist;
 
-	plist.add (ARDOUR::Properties::start, r->nt_start() + pos);
-	plist.add (ARDOUR::Properties::length, (r->nt_position() + pos).distance (r->nt_end()));
+	plist.add (ARDOUR::Properties::start, r->start() + pos);
+	plist.add (ARDOUR::Properties::length, (r->position() + pos).distance (r->end()));
 	plist.add (ARDOUR::Properties::name, new_name);
 	plist.add (ARDOUR::Properties::layer, 0);
 
@@ -7349,7 +7349,7 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 	   RegionFactory map
 	*/
 	RegionFactory::map_add (nr);
-	pl->add_region (nr, r->nt_position() + pos);
+	pl->add_region (nr, r->position() + pos);
 
 	if (select_new) {
 		new_regions.push_front(nr);
@@ -7531,9 +7531,9 @@ Editor::close_region_gaps ()
 			pl->freeze();
 		}
 
-		timepos_t position = (*r)->region()->nt_position();
+		timepos_t position = (*r)->region()->position();
 
-		if (idx == 0 || position < last_region->nt_position()){
+		if (idx == 0 || position < last_region->position()){
 			last_region = (*r)->region();
 			idx++;
 			continue;
@@ -8783,7 +8783,7 @@ Editor::filter_to_unique_midi_region_views (RegionSelection const & ms) const
 			continue;
 		}
 
-		MapEntry entry = make_pair (mrv->midi_region()->midi_source(), mrv->region()->nt_start());
+		MapEntry entry = make_pair (mrv->midi_region()->midi_source(), mrv->region()->start());
 
 		if (single_region_set.insert (entry).second) {
 			views.push_back (mrv);

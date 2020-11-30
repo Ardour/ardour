@@ -765,8 +765,8 @@ MidiListEditor::redisplay_model ()
 		TreeModel::Row row;
 		stringstream ss;
 
-		MidiModel::Notes::const_iterator i = m->note_lower_bound (region->nt_start().beats());
-		Temporal::Beats end_time = (region->nt_start() + region->nt_length()).beats();
+		MidiModel::Notes::const_iterator i = m->note_lower_bound (region->start().beats());
+		Temporal::Beats end_time = (region->start() + region->length()).beats();
 
 		for (; i != m->notes().end() && (*i)->time() < end_time; ++i) {
 			row = *(model->append());

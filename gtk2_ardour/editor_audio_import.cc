@@ -281,9 +281,7 @@ Editor::import_smf_tempo_map (Evoral::SMF const & smf, timepos_t const & pos)
 		return;
 	}
 
-	const samplecnt_t sample_rate = _session->sample_rate ();
 #warning NUTEMPO need to be able to create a tempo map with no entries
-	// TempoMap new_map (sample_rate);
 	TempoMap::SharedPtr new_map (new TempoMap (Tempo (120), Meter (4, 4)));
 	Meter last_meter (4.0, 4.0);
 	bool have_initial_meter = false;
@@ -996,14 +994,14 @@ Editor::add_sources (vector<string>            paths,
 
 		finish_bringing_in_material (*r, input_chan, output_chan, pos, mode, track, track_names[n], pgroup_id, instrument);
 
-		rlen = (*r)->nt_length();
+		rlen = (*r)->length();
 
 		if (target_tracks != 1) {
 			track.reset ();
 		} else {
 			if (!use_timestamp || !ar) {
 				/* line each one up right after the other */
-				pos += (*r)->nt_length();
+				pos += (*r)->length();
 			}
 		}
 	}

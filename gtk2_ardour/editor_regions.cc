@@ -779,7 +779,7 @@ EditorRegions::populate_row_length (boost::shared_ptr<Region> region, TreeModel:
 		// Temporal::BBT_Time bbt = map->bbt_duration_at (region->position(), region->length());
 		snprintf (buf, sizeof (buf), "%03d|%02d|%04d", bbt.bars, bbt.beats, bbt.ticks);
 	} else {
-		format_position (timepos_t (region->nt_length ()), buf, sizeof (buf));
+		format_position (timepos_t (region->length ()), buf, sizeof (buf));
 	}
 
 	row[_columns.length] = buf;
@@ -804,10 +804,10 @@ EditorRegions::populate_row_end (boost::shared_ptr<Region> region, TreeModel::Ro
 void
 EditorRegions::populate_row_position (boost::shared_ptr<Region> region, TreeModel::Row const& row)
 {
-	row[_columns.position] = region->nt_position ();
+	row[_columns.position] = region->position ();
 
 	char buf[16];
-	format_position (region->nt_position (), buf, sizeof (buf));
+	format_position (region->position (), buf, sizeof (buf));
 	row[_columns.start] = buf;
 }
 
@@ -817,7 +817,7 @@ EditorRegions::populate_row_sync (boost::shared_ptr<Region> region, TreeModel::R
 #ifndef SHOW_REGION_EXTRAS
 	return;
 #endif
-	if (region->sync_position () == region->nt_position ()) {
+	if (region->sync_position () == region->position ()) {
 		row[_columns.sync] = _ ("Start");
 	} else if (region->sync_position () == (region->last_sample ())) {
 		row[_columns.sync] = _ ("End");

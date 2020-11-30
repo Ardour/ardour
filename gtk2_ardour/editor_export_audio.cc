@@ -347,7 +347,7 @@ Editor::write_region (string path, boost::shared_ptr<AudioRegion> region)
 
 	/* don't do duplicate of the entire source if that's what is going on here */
 
-	if (region->nt_start().zero() && region->nt_length() == region->source_length(0)) {
+	if (region->start().zero() && region->length() == region->source_length(0)) {
 		/* XXX should link(2) to create a new inode with "path" */
 		return true;
 	}

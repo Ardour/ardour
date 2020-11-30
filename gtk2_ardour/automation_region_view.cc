@@ -56,7 +56,7 @@ AutomationRegionView::AutomationRegionView (ArdourCanvas::Container*            
 	: RegionView(parent, time_axis, region, spu, basic_color, true)
 	, _parameter(param)
 {
-	TimeAxisViewItem::set_position (_region->nt_position(), this);
+	TimeAxisViewItem::set_position (_region->position(), this);
 
 	if (list) {
 		assert(list->parameter() == param);
@@ -104,8 +104,8 @@ AutomationRegionView::create_line (boost::shared_ptr<ARDOUR::AutomationList> lis
 	_line->set_colors();
 	_line->set_height ((uint32_t)rint(trackview.current_height() - 2.5 - NAME_HIGHLIGHT_SIZE));
 	_line->set_visibility (AutomationLine::VisibleAspects (AutomationLine::Line|AutomationLine::ControlPoints));
-	_line->set_maximum_time (timepos_t (_region->nt_length()));
-	_line->set_offset (_region->nt_start ());
+	_line->set_maximum_time (timepos_t (_region->length()));
+	_line->set_offset (_region->start ());
 }
 
 uint32_t
@@ -187,7 +187,7 @@ AutomationRegionView::add_automation_event (GdkEvent *, timepos_t const & w, dou
 
 	/* snap time */
 
-	when = snap_region_time_to_region_time (when.earlier (_region->nt_start()), false) + _region->nt_start ();
+	when = snap_region_time_to_region_time (when.earlier (_region->start()), false) + _region->start ();
 
 	/* map using line */
 
@@ -276,7 +276,7 @@ bool
 AutomationRegionView::set_position (timepos_t const & pos, void* src, double* ignored)
 {
 	if (_line) {
-		_line->set_maximum_time (timepos_t (_region->nt_length ()));
+		_line->set_maximum_time (timepos_t (_region->length ()));
 	}
 
 	return RegionView::set_position(pos, src, ignored);
@@ -304,11 +304,11 @@ AutomationRegionView::region_resized (const PBD::PropertyChange& what_changed)
 	}
 
 	if (what_changed.contains (ARDOUR::Properties::start)) {
-		_line->set_offset (_region->nt_start ());
+		_line->set_offset (_region->start ());
 	}
 
 	if (what_changed.contains (ARDOUR::Properties::length)) {
-		_line->set_maximum_time (timepos_t (_region->nt_length()));
+		_line->set_maximum_time (timepos_t (_region->length()));
 	}
 }
 
