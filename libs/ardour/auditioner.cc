@@ -335,7 +335,7 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 		_midi_audition = true;
 
 		the_region.reset();
-		_import_position = region->nt_position();
+		_import_position = region->position();
 
 		/* copy it */
 		midi_region = (boost::dynamic_pointer_cast<MidiRegion> (RegionFactory::create (region, false)));
@@ -384,10 +384,10 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 	timepos_t offset;
 
 	if (_midi_audition) {
-		length = midi_region->nt_length();
+		length = midi_region->length();
 		offset = _import_position + midi_region->sync_offset (dir);
 	} else {
-		length = the_region->nt_length();
+		length = the_region->length();
 		offset = the_region->sync_offset (dir);
 	}
 

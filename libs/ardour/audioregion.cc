@@ -1948,7 +1948,7 @@ AudioRegion::find_silence (Sample threshold, samplecnt_t min_length, samplecnt_t
 Temporal::Range
 AudioRegion::body_range () const
 {
-	return Temporal::Range ((nt_position() + _fade_in->back()->when).increment(), nt_end().earlier (_fade_out->back()->when));
+	return Temporal::Range ((position() + _fade_in->back()->when).increment(), end().earlier (_fade_out->back()->when));
 }
 
 boost::shared_ptr<Region>
@@ -1966,7 +1966,7 @@ AudioRegion::get_single_other_xfade_region (bool start) const
 	boost::shared_ptr<RegionList> rl;
 
 	if (start) {
-		rl = pl->regions_at (nt_position());
+		rl = pl->regions_at (position());
 	} else {
 		rl = pl->regions_at (nt_last());
 	}

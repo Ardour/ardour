@@ -4417,7 +4417,7 @@ Session::playlist_region_added (boost::weak_ptr<Region> w)
 
 	/* If so, update the session range markers */
 	if (!in.empty ()) {
-		maybe_update_session_range (r->nt_position (), r->nt_end ());
+		maybe_update_session_range (r->position (), r->end ());
 	}
 }
 

@@ -108,21 +108,21 @@ AudioPlaylist::AudioPlaylist (boost::shared_ptr<const AudioPlaylist> other, time
 		}
 
 		case Temporal::OverlapStart: {
-			if (timepos_t (end) > region->nt_position() + region->fade_in()->back()->when) {
+			if (timepos_t (end) > region->position() + region->fade_in()->back()->when) {
 				fade_in = region->fade_in()->back()->when.samples();  //end is after fade-in, preserve the fade-in
 			}
-			if (timepos_t (end) >= region->nt_end().earlier (region->fade_out()->back()->when)) {
+			if (timepos_t (end) >= region->end().earlier (region->fade_out()->back()->when)) {
 				fade_out = region->fade_out()->back()->when.earlier (timepos_t (region->last_sample() - end)).samples();  //end is inside the fadeout, preserve the fades endpoint
 			}
 			break;
 		}
 
 		case Temporal::OverlapEnd: {
-			if (start < region->nt_end().earlier (region->fade_out()->back()->when)) {  //start is before fade-out, preserve the fadeout
+			if (start < region->end().earlier (region->fade_out()->back()->when)) {  //start is before fade-out, preserve the fadeout
 				fade_out = region->fade_out()->back()->when.samples();
 			}
-			if (start < region->nt_position() + region->fade_in()->back()->when) {
-				fade_in = region->fade_in()->back()->when.earlier (start.distance (region->nt_position())).samples();  //end is inside the fade-in, preserve the fade-in endpoint
+			if (start < region->position() + region->fade_in()->back()->when) {
+				fade_in = region->fade_in()->back()->when.earlier (start.distance (region->position())).samples();  //end is inside the fade-in, preserve the fade-in endpoint
 			}
 			break;
 		}
@@ -153,7 +153,7 @@ struct ReadSorter {
 		    return a->layer() > b->layer();
 	    }
 
-	    return a->nt_position() < b->nt_position();
+	    return a->position() < b->position();
     }
 };
 
@@ -285,9 +285,9 @@ AudioPlaylist::dump () const
 	for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
 		r = *i;
 		cerr << "  " << r->name() << " @ " << r << " ["
-		     << r->nt_start() << "+" << r->nt_length()
+		     << r->start() << "+" << r->length()
 		     << "] at "
-		     << r->nt_position()
+		     << r->position()
 		     << " on layer "
 		     << r->layer ()
 		     << endl;
@@ -467,7 +467,7 @@ AudioPlaylist::pre_uncombine (vector<boost::shared_ptr<Region> >& originals, boo
 			   original region.
 			*/
 
-			if (cr->fade_in()->back()->when <= ar->nt_length()) {
+			if (cr->fade_in()->back()->when <= ar->length()) {
 				/* don't do this if the fade is longer than the
 				 * region
 				 */
@@ -481,7 +481,7 @@ AudioPlaylist::pre_uncombine (vector<boost::shared_ptr<Region> >& originals, boo
 			   original region.
 			*/
 
-			if (cr->fade_out()->back()->when <= ar->nt_length()) {
+			if (cr->fade_out()->back()->when <= ar->length()) {
 				/* don't do this if the fade is longer than the
 				 * region
 				 */

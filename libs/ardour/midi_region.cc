@@ -338,7 +338,7 @@ MidiRegion::render (Evoral::EventSink<samplepos_t>& dst,
 		lm, // source lock
 		dst, // destination buffer
 		this->source_position(), // start position of the source in session samples
-		this->nt_start() + internal_offset, // where to start reading in the source
+		this->start() + internal_offset, // where to start reading in the source
 		_length, // length to read
 		0,
 		cursor,
@@ -350,7 +350,7 @@ MidiRegion::render (Evoral::EventSink<samplepos_t>& dst,
 	 * Note-Off's get inserted at the end of the region
 	 */
 
-	const timepos_t end = source_position() + nt_start() + internal_offset + nt_length();
+	const timepos_t end = source_position() + start() + internal_offset + length();
 	tracker.resolve_notes (dst, end.samples());
 
 	return 0;

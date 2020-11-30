@@ -1233,7 +1233,7 @@ LuaAPI::Rubberband::finalize ()
 
 	ar->set_ancestral_data (timecnt_t (_read_start), timecnt_t (_read_len), _stretch_ratio, _pitch_ratio);
 	ar->set_master_sources (_region->master_sources ());
-	ar->set_length (ar->nt_length () * _stretch_ratio); // XXX
+	ar->set_length (ar->length () * _stretch_ratio); // XXX
 	if (_stretch_ratio != 1.0) {
 		// TODO: apply mapping
 		ar->envelope ()->x_scale (_stretch_ratio);

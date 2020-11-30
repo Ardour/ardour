@@ -2322,7 +2322,7 @@ Session::XMLAudioRegionFactory (const XMLNode& node, bool /*full*/)
 			for (SourceList::iterator sx = sources.begin(); sx != sources.end(); ++sx) {
 				boost::shared_ptr<SilentFileSource> sfp = boost::dynamic_pointer_cast<SilentFileSource> (*sx);
 				if (sfp) {
-					sfp->set_length (region->nt_length().samples());
+					sfp->set_length (region->length().samples());
 				}
 			}
 		}
@@ -2391,7 +2391,7 @@ Session::XMLMidiRegionFactory (const XMLNode& node, bool /*full*/)
 			for (SourceList::iterator sx = sources.begin(); sx != sources.end(); ++sx) {
 				boost::shared_ptr<SilentFileSource> sfp = boost::dynamic_pointer_cast<SilentFileSource> (*sx);
 				if (sfp) {
-					sfp->set_length (region->nt_length().samples());
+					sfp->set_length (region->length().samples());
 				}
 			}
 		}

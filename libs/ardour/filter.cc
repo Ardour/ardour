@@ -121,7 +121,7 @@ Filter::finish (boost::shared_ptr<Region> region, SourceList& nsrcs, string regi
 
 		boost::shared_ptr<SMFSource> smfs = boost::dynamic_pointer_cast<SMFSource>(*si);
 		if (smfs) {
-			smfs->set_natural_position (region->nt_position());
+			smfs->set_natural_position (region->position());
 			smfs->flush ();
 		}
 
@@ -140,10 +140,10 @@ Filter::finish (boost::shared_ptr<Region> region, SourceList& nsrcs, string regi
 	PropertyList plist;
 
 	plist.add (Properties::start, std::numeric_limits<timecnt_t>::min());
-	plist.add (Properties::length, region->nt_length());
+	plist.add (Properties::length, region->length());
 	plist.add (Properties::name, region_name);
 	plist.add (Properties::whole_file, true);
-	plist.add (Properties::position, region->nt_position());
+	plist.add (Properties::position, region->position());
 
 	boost::shared_ptr<Region> r = RegionFactory::create (nsrcs, plist);
 

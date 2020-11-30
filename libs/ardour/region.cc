@@ -539,7 +539,7 @@ Region::at_natural_position () const
 	boost::shared_ptr<Region> whole_file_region = get_parent();
 
 	if (whole_file_region) {
-		if (_position == whole_file_region->nt_position() + _start) {
+		if (_position == whole_file_region->position() + _start) {
 			return true;
 		}
 	}
@@ -559,7 +559,7 @@ Region::move_to_natural_position ()
 	boost::shared_ptr<Region> whole_file_region = get_parent();
 
 	if (whole_file_region) {
-		set_position (whole_file_region->nt_position() + _start);
+		set_position (whole_file_region->position() + _start);
 	}
 }
 
@@ -738,13 +738,13 @@ Region::nudge_position (timecnt_t const & n)
 	timepos_t new_position = _position;
 
 	if (n.positive()) {
-		if (nt_position() > timepos_t::max (n.time_domain()).earlier (n)) {
+		if (position() > timepos_t::max (n.time_domain()).earlier (n)) {
 			new_position = timepos_t::max (n.time_domain());
 		} else {
 			new_position += n;
 		}
 	} else {
-		if (nt_position() < -n) {
+		if (position() < -n) {
 			new_position = 0;
 		} else {
 			new_position += n;
@@ -808,7 +808,7 @@ Region::move_start (timecnt_t const & distance)
 		if (_start > timecnt_t::max() - distance) {
 			new_start = timecnt_t::max(); // makes no sense
 		} else {
-			new_start = nt_start() + distance;
+			new_start = start() + distance;
 		}
 
 		if (!verify_start (new_start)) {
@@ -820,7 +820,7 @@ Region::move_start (timecnt_t const & distance)
 		if (_start < -distance) {
 			new_start = 0;
 		} else {
-			new_start = nt_start() + distance;
+			new_start = start() + distance;
 		}
 	}
 
@@ -861,16 +861,16 @@ Region::modify_front (timepos_t const & new_position, bool reset_fade)
 		return;
 	}
 
-	timepos_t end = nt_end().decrement();
+	timepos_t last = end().decrement();
 	timepos_t source_zero;
 
-	if (nt_position() > nt_start()) {
+	if (position() > start()) {
 		source_zero = source_position ();
 	} else {
 		source_zero = 0; // its actually negative, but this will work for us
 	}
 
-	if (new_position < end) { /* can't trim it zero or negative length */
+	if (new_position < last) { /* can't trim it zero or negative length */
 
 		timecnt_t newlen (_length);
 		timepos_t np = new_position;
@@ -880,10 +880,10 @@ Region::modify_front (timepos_t const & new_position, bool reset_fade)
 			np = max (np, source_zero);
 		}
 
-		if (np > nt_position()) {
-			newlen = nt_length() - (nt_position().distance (np));
+		if (np > position()) {
+			newlen = length() - (position().distance (np));
 		} else {
-			newlen = nt_length() + (np.distance (nt_position()));
+			newlen = length() + (np.distance (position()));
 		}
 
 		trim_to_internal (np, newlen);
@@ -908,7 +908,7 @@ Region::modify_end (timepos_t const & new_endpoint, bool reset_fade)
 	}
 
 	if (new_endpoint > _position) {
-		trim_to_internal (_position, nt_position().distance (new_endpoint));
+		trim_to_internal (_position, position().distance (new_endpoint));
 		if (reset_fade) {
 			_left_of_split = true;
 		}
@@ -943,38 +943,38 @@ Region::trim_to (timepos_t const & position, timecnt_t const & length)
 }
 
 void
-Region::trim_to_internal (timepos_t const & position, timecnt_t const & length)
+Region::trim_to_internal (timepos_t const & pos, timecnt_t const & len)
 {
-	timecnt_t new_start (length.time_domain());
+	timecnt_t new_start (len.time_domain());
 
 	if (locked()) {
 		return;
 	}
 
-	timecnt_t const start_shift = nt_position().distance (position);
+	timecnt_t const start_shift = position().distance (pos);
 
 	if (start_shift.positive()) {
 
-		if (nt_start() > timecnt_t::max() - start_shift) {
+		if (start() > timecnt_t::max() - start_shift) {
 			new_start = timecnt_t::max();
 		} else {
-			new_start = nt_start() + start_shift;
+			new_start = start() + start_shift;
 		}
 
 	} else if (start_shift.negative()) {
 
-		if (nt_start() < -start_shift && !can_trim_start_before_source_start ()) {
+		if (start() < -start_shift && !can_trim_start_before_source_start ()) {
 			new_start = 0;
 		} else {
-			new_start = nt_start() + start_shift;
+			new_start = start() + start_shift;
 		}
 
 	} else {
-		new_start = nt_start();
+		new_start = start();
 	}
 
 	timecnt_t ns = new_start;
-	timecnt_t nl = length;
+	timecnt_t nl = len;
 
 	if (!verify_start_and_length (ns, nl)) {
 		return;
@@ -982,28 +982,28 @@ Region::trim_to_internal (timepos_t const & position, timecnt_t const & length)
 
 	PropertyChange what_changed;
 
-	if (nt_start() != ns) {
+	if (start() != ns) {
 		set_start_internal (ns);
 		what_changed.add (Properties::start);
 	}
 
 	/* Set position before length, otherwise for MIDI regions this bad thing happens:
-	 * 1. we call set_length_internal; length in beats is computed using the region's current
+	 * 1. we call set_length_internal; len in beats is computed using the region's current
 	 *    (soon-to-be old) position
 	 * 2. we call set_position_internal; position is set and length in samples re-computed using
 	 *    length in beats from (1) but at the new position, which is wrong if the region
 	 *    straddles a tempo/meter change.
 	 */
 
-	if (nt_position() != position) {
+	if (position() != pos) {
 		if (!property_changes_suspended()) {
 			_last_position = _position;
 		}
-		set_position_internal (position);
+		set_position_internal (pos);
 		what_changed.add (Properties::position);
 	}
 
-	if (nt_length() != nl) {
+	if (length() != nl) {
 		if (!property_changes_suspended()) {
 			_last_length = _length;
 		}
@@ -1102,7 +1102,7 @@ void
 Region::set_sync_position (timepos_t const & absolute_pos)
 {
 	/* position within our file */
-	const timecnt_t file_pos = nt_start() + nt_position().distance (absolute_pos);
+	const timecnt_t file_pos = start() + position().distance (absolute_pos);
 
 	if (file_pos != _sync_position) {
 		_sync_marked = true;
@@ -1178,7 +1178,7 @@ Region::sync_position() const
 		return source_position() + _sync_position;
 	} else {
 		/* if sync has not been marked, use the start of the region */
-		return nt_position();
+		return position();
 	}
 }
 
@@ -1340,8 +1340,8 @@ Region::_set_state (const XMLNode& node, int /*version*/, PropertyChange& what_c
 	 */
 
 	if (!_sources.empty() && _type == DataType::AUDIO) {
-		if ((nt_length().time_domain() == Temporal::AudioTime) && (nt_length() > _sources.front()->length())) {
-			_length = _sources.front()->length() - nt_start();
+		if ((length().time_domain() == Temporal::AudioTime) && (length() > _sources.front()->length())) {
+			_length = _sources.front()->length() - start();
 		 }
 	}
 
@@ -1430,14 +1430,14 @@ Region::send_change (const PropertyChange& what_changed)
 bool
 Region::overlap_equivalent (boost::shared_ptr<const Region> other) const
 {
-	return coverage (other->nt_position(), other->nt_last()) != Temporal::OverlapNone;
+	return coverage (other->position(), other->nt_last()) != Temporal::OverlapNone;
 }
 
 bool
 Region::enclosed_equivalent (boost::shared_ptr<const Region> other) const
 {
-	return ((nt_position() >= other->nt_position() && nt_end() <= other->nt_end()) ||
-	        (nt_position() <= other->nt_position() && nt_end() >= other->nt_end()));
+	return ((position() >= other->position() && end() <= other->end()) ||
+	        (position() <= other->position() && end() >= other->end()));
 }
 
 bool
@@ -1915,12 +1915,12 @@ Region::can_trim () const
 
 	ct = CanTrim (ct | FrontTrimLater | EndTrimEarlier);
 
-	if (nt_start() != 0 || can_trim_start_before_source_start ()) {
+	if (start() != 0 || can_trim_start_before_source_start ()) {
 		ct = CanTrim (ct | FrontTrimEarlier);
 	}
 
 	if (!_sources.empty()) {
-		if ((nt_start() + nt_length()) < _sources.front()->length ()) {
+		if ((start() + length()) < _sources.front()->length ()) {
 			ct = CanTrim (ct | EndTrimLater);
 		}
 	}
@@ -1955,7 +1955,7 @@ Region::set_start_internal (timecnt_t const & s)
 timepos_t
 Region::earliest_possible_position () const
 {
-	if (nt_start() > timecnt_t (_position, timepos_t())) {
+	if (start() > timecnt_t (_position, timepos_t())) {
 		return timepos_t::from_superclock (0);
 	} else {
 		return source_position();
@@ -1978,7 +1978,7 @@ Region::latest_possible_sample () const
 	 * position, plus the shortest source extent past _start.
 	 */
 
-	return (nt_position() + minlen).samples() - 1;
+	return (position() + minlen).samples() - 1;
 }
 
 Temporal::TimeDomain
@@ -1988,7 +1988,7 @@ Region::position_time_domain() const
 }
 
 timepos_t
-Region::nt_end() const
+Region::end() const
 {
 	return _position.val() + _length.val();
 }
@@ -1996,7 +1996,7 @@ Region::nt_end() const
 Temporal::Beats
 Region::region_distance_to_region_beats (timecnt_t const & region_relative_offset) const
 {
-	return timecnt_t (region_relative_offset, nt_position()).beats ();
+	return timecnt_t (region_relative_offset, position()).beats ();
 }
 
 Temporal::Beats
@@ -2011,7 +2011,7 @@ Region::region_beats_to_absolute_time (Temporal::Beats beats) const
 	/* beats is an additional offset to the start point of the region, from
 	   the effective start of the source on the timeline.
 	*/
-	return source_position() + nt_start () + beats;
+	return source_position() + start () + beats;
 }
 
 Temporal::timepos_t

@@ -118,11 +118,11 @@ public:
 	 * LENGTH:   number of samples the region represents
 	 */
 
-	timepos_t nt_position ()  const { return _position.val(); }
-	timecnt_t nt_start ()     const { return _start.val(); }
-	timecnt_t nt_length ()    const { return _length.val(); }
-	timepos_t nt_end()        const;
-	timepos_t nt_last()       const { return nt_end().decrement(); }
+	timepos_t position ()  const { return _position.val(); }
+	timecnt_t start ()     const { return _start.val(); }
+	timecnt_t length ()    const { return _length.val(); }
+	timepos_t end()        const;
+	timepos_t nt_last()       const { return end().decrement(); }
 
 	timepos_t source_position () const;
 	timepos_t source_relative_position (Temporal::timepos_t const &) const;
@@ -182,7 +182,7 @@ public:
 	}
 
 	Temporal::TimeRange range () const {
-		return Temporal::TimeRange (nt_position(), nt_position() + nt_length());
+		return Temporal::TimeRange (position(), position() + length());
 	}
 
 	bool hidden ()           const { return _hidden; }
@@ -212,7 +212,7 @@ public:
 	}
 
 	bool covers (timepos_t const & pos) const {
-		return nt_position() <= pos && pos <= nt_last();
+		return position() <= pos && pos <= nt_last();
 	}
 
 	/** @return coverage of this region with the given range;
@@ -282,11 +282,11 @@ public:
 	Temporal::timepos_t region_beats_to_absolute_time(Temporal::Beats beats) const;
 	/** Convert a timestamp in beats into timepos_t (both relative to region position) */
 	Temporal::timepos_t region_beats_to_region_time (Temporal::Beats beats) const {
-		return timepos_t (nt_position().distance (region_beats_to_absolute_time (beats)));
+		return timepos_t (position().distance (region_beats_to_absolute_time (beats)));
 	}
 	/** Convert a timestamp in beats relative to region position into beats relative to source start */
 	Temporal::Beats region_beats_to_source_beats (Temporal::Beats beats) const {
-		return nt_position().distance (region_beats_to_absolute_time (beats)).beats ();
+		return position().distance (region_beats_to_absolute_time (beats)).beats ();
 	}
 	/** Convert a distance within a region to beats relative to region position */
 	Temporal::Beats region_distance_to_region_beats (Temporal::timecnt_t const &) const;
@@ -299,13 +299,13 @@ public:
 
 	/** Convert a timestamp in beats measured from source start into region-relative samples */
 	Temporal::timepos_t source_beats_to_region_time(Temporal::Beats beats) const {
-		return timepos_t (nt_position().distance (source_beats_to_absolute_time (beats)));
+		return timepos_t (position().distance (source_beats_to_absolute_time (beats)));
 	}
 	/** Convert a timestamp in absolute time to beats measured from source start*/
 	Temporal::Beats absolute_time_to_source_beats(Temporal::timepos_t const &) const;
 
 	Temporal::Beats absolute_time_to_region_beats (Temporal::timepos_t const & b) const {
-		return b.distance (nt_position()).beats ();
+		return b.distance (position()).beats ();
 	}
 
 	int apply (Filter &, Progress* progress = 0);
