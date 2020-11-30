@@ -351,6 +351,12 @@ timecnt_t::expensive_gte (timecnt_t const & other) const
 	return Beats::ticks (_distance.val()) >= other.beats ();
 }
 
+std::ostream&
+std::operator<< (std::ostream & o, timecnt_t const & tc)
+{
+	return o << tc.to_string();
+}
+
 /* timepos */
 
 timepos_t::timepos_t (timecnt_t const & t)
