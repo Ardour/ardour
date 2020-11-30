@@ -113,8 +113,13 @@ class alignas(16) int62_t {
 	bool operator<= (int62_t const & other) const { if (flagged() != other.flagged()) throw flag_mismatch(); return val() <= other.val(); }
 	bool operator> (int62_t const & other) const { if (flagged() != other.flagged()) throw flag_mismatch(); return val() > other.val(); }
 	bool operator>= (int62_t const & other) const { if (flagged() != other.flagged()) throw flag_mismatch(); return val() >= other.val(); }
-	bool operator!= (int62_t const & other) const { if (flagged() != other.flagged()) throw flag_mismatch(); return val() != other.val(); }
-	bool operator== (int62_t const & other) const { if (flagged() != other.flagged()) throw flag_mismatch(); return val() == other.val(); }
+
+	/* don't throw flag_mismatch for explicit equality checks, since
+	 * the semantics are well defined and the computation cost is trivial
+	 */
+
+	bool operator!= (int62_t const & other) const { if (flagged() != other.flagged()) return false; return val() != other.val(); }
+	bool operator== (int62_t const & other) const { if (flagged() != other.flagged()) return true; return val() == other.val(); }
 
 	explicit operator int64_t() const { return int62(v); }
 
