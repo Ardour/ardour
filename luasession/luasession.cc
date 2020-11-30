@@ -17,6 +17,7 @@
 
 #include <glibmm.h>
 
+#include "pbd/basename.h"
 #include "pbd/debug.h"
 #include "pbd/error.h"
 #include "pbd/event_loop.h"
@@ -243,10 +244,17 @@ _create_session (string dir, string state, uint32_t rate) // throws
 }
 
 static Session*
-_load_session (string dir, string state) // throws
+_load_session (string const& dir, string state) // throws
 {
 	if (prepare_engine ()) {
 		return 0;
+	}
+
+	if (state.empty ()) {
+		state = Session::get_snapshot_from_instant (dir);
+	}
+	if (state.empty ()) {
+		state = PBD::basename_nosuffix (dir);
 	}
 
 	float        sr;
