@@ -77,8 +77,6 @@ timecnt_t::timecnt_t (timecnt_t const & tc, timepos_t const & pos)
 	}
 
 	_distance = tc.distance();
-
-	assert (_position.is_beats() == _distance.flagged());
 }
 
 void
@@ -311,6 +309,46 @@ timecnt_t
 timecnt_t::operator- () const
 {
 	return timecnt_t (-_distance, _position);
+}
+
+bool
+timecnt_t::expensive_lt (timecnt_t const & other) const
+{
+	if (!_distance.flagged()) { /* Audio */
+		return _distance.val() < other.superclocks();
+	}
+
+	return Beats::ticks (_distance.val()) < other.beats ();
+}
+
+bool
+timecnt_t::expensive_gt (timecnt_t const & other) const
+{
+	if (!_distance.flagged()) { /* Audio */
+		return _distance.val() > other.superclocks();
+	}
+
+	return Beats::ticks (_distance.val()) > other.beats ();
+}
+
+bool
+timecnt_t::expensive_lte (timecnt_t const & other) const
+{
+	if (!_distance.flagged()) { /* Audio */
+		return _distance.val() <= other.superclocks();
+	}
+
+	return Beats::ticks (_distance.val()) <= other.beats ();
+}
+
+bool
+timecnt_t::expensive_gte (timecnt_t const & other) const
+{
+	if (time_domain() == AudioTime) {
+		return _distance.val() >= other.superclocks();
+	}
+
+	return Beats::ticks (_distance.val()) >= other.beats ();
 }
 
 /* timepos */
@@ -581,7 +619,7 @@ bool
 timepos_t::expensive_gt (timepos_t const & other) const
 {
 	if (time_domain() == AudioTime) {
-		return superclocks() < other.superclocks();
+		return superclocks() > other.superclocks();
 	}
 
 	return beats() > other.beats ();
@@ -591,7 +629,7 @@ bool
 timepos_t::expensive_lte (timepos_t const & other) const
 {
 	if (time_domain() == AudioTime) {
-		return superclocks() < other.superclocks();
+		return superclocks() <= other.superclocks();
 	}
 
 	return beats() <= other.beats ();
@@ -601,7 +639,7 @@ bool
 timepos_t::expensive_gte (timepos_t const & other) const
 {
 	if (time_domain() == AudioTime) {
-		return superclocks() < other.superclocks();
+		return superclocks() >= other.superclocks();
 	}
 
 	return beats() >= other.beats ();

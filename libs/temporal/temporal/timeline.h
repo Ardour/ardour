@@ -296,14 +296,14 @@ class LIBTEMPORAL_API timecnt_t {
 
 	/* construct from timeline types */
 	explicit timecnt_t (timepos_t const & d) : _distance (d), _position (timepos_t::zero (d.flagged())) {}
-	explicit timecnt_t (timepos_t const & d, timepos_t const & p) : _distance (d), _position (p) { assert (p.is_beats() == d.is_beats()); }
+	explicit timecnt_t (timepos_t const & d, timepos_t const & p) : _distance (d), _position (p) { }
 	explicit timecnt_t (timecnt_t const &, timepos_t const & pos);
 
 	/* construct from int62_t (which will be flagged or not) and timepos_t */
-	explicit timecnt_t (int62_t d, timepos_t p) : _distance (d), _position (p) { assert (p.is_beats() == d.flagged()); }
+	explicit timecnt_t (int62_t d, timepos_t p) : _distance (d), _position (p) {}
 
 	/* construct from beats */
-	explicit timecnt_t (Temporal::Beats const & b, timepos_t const & pos) :  _distance (true, b.to_ticks()), _position (pos) { assert ( _distance.flagged() == _position.is_beats()); }
+	explicit timecnt_t (Temporal::Beats const & b, timepos_t const & pos) :  _distance (true, b.to_ticks()), _position (pos) {}
 
 	static timecnt_t zero (TimeDomain td) { return timecnt_t (timepos_t::zero (td), timepos_t::zero (td)); }
 
@@ -334,12 +334,12 @@ class LIBTEMPORAL_API timecnt_t {
 
 	timecnt_t abs() const;
 
-	Temporal::TimeDomain time_domain () const { return _position.time_domain (); }
+	Temporal::TimeDomain time_domain () const { return _distance.flagged() ? BeatTime : AudioTime; }
 
-	superclock_t    superclocks() const { if (_position.is_superclock()) return _distance.val(); return compute_superclocks(); }
+	superclock_t    superclocks() const { if (!_distance.flagged()) return _distance.val(); return compute_superclocks(); }
 	int64_t         samples() const { return superclock_to_samples (superclocks(), _thread_sample_rate); }
-	Temporal::Beats beats  () const { if (_position.is_beats()) return Beats::ticks (_distance.val()); return compute_beats(); }
-	int64_t         ticks  () const { if (_position.is_beats()) return _distance.val(); return compute_ticks(); }
+	Temporal::Beats beats  () const { if (_distance.flagged()) return Beats::ticks (_distance.val()); return compute_beats(); }
+	int64_t         ticks  () const { if (_distance.flagged()) return _distance.val(); return compute_ticks(); }
 
 	timecnt_t & operator= (superclock_t s) { _distance = int62_t (false, s); return *this; }
 	timecnt_t & operator= (Temporal::Beats const & b) { _distance = int62_t (true, b.to_ticks()); return *this; }
@@ -372,10 +372,11 @@ class LIBTEMPORAL_API timecnt_t {
 	//timecnt_t & operator-= (timepos_t);
 	//timecnt_t & operator+= (timepos_t);
 
-	bool operator> (timecnt_t const & other) const { return _distance > other.distance (); }
-	bool operator>= (timecnt_t const & other) const { return _distance >= other.distance(); }
-	bool operator< (timecnt_t const & other) const { return _distance < other.distance(); }
-	bool operator<= (timecnt_t const & other) const { return _distance <= other.distance(); }
+	bool operator> (timecnt_t const & other) const { if (_distance.flagged() == other.distance().flagged()) return _distance > other.distance (); else return expensive_gt (other); }
+	bool operator>= (timecnt_t const & other) const { if (_distance.flagged() == other.distance().flagged()) return _distance >= other.distance(); else return expensive_gte (other); }
+	bool operator< (timecnt_t const & other) const { if (_distance.flagged() == other.distance().flagged()) return _distance < other.distance(); else return expensive_lt (other); }
+	bool operator<= (timecnt_t const & other) const { if (_distance.flagged() == other.distance().flagged()) return _distance <= other.distance(); else return expensive_gte (other); }
+
 	timecnt_t & operator=(timecnt_t const & other) {
 		if (this != &other) {
 			if (_distance.flagged() == other.distance().flagged()) {
@@ -425,6 +426,11 @@ class LIBTEMPORAL_API timecnt_t {
 	superclock_t compute_superclocks () const;
 	Beats compute_beats () const;
 	int64_t compute_ticks () const;
+
+	bool expensive_lt (timecnt_t const & other) const;
+	bool expensive_lte (timecnt_t const & other) const;
+	bool expensive_gt (timecnt_t const & other) const;
+	bool expensive_gte (timecnt_t const & other) const;
 };
 
 } /* end namespace Temporal */
