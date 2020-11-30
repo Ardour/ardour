@@ -136,7 +136,7 @@ public:
 
 	void set_selected_for_solo(bool yn);
 
-	samplecnt_t source_length (uint32_t n) const;
+	timecnt_t source_length (uint32_t n) const;
 	uint32_t   max_source_level () const;
 
 	/* these two are valid ONLY during a StateChanged signal handler */

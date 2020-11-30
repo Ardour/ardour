@@ -461,7 +461,6 @@ Region::set_selected_for_solo(bool yn)
 void
 Region::set_length (timecnt_t const & len)
 {
-	//cerr << "Region::set_length() len = " << len << endl;
 	if (locked()) {
 		return;
 	}
@@ -500,6 +499,8 @@ Region::set_length (timecnt_t const & len)
 void
 Region::set_length_internal (timecnt_t const & len)
 {
+	std::cerr << "Region::set_length_internal() len = " << len << std::endl;
+
 	_last_length = _length;
 	_length = len;
 }
@@ -1339,10 +1340,9 @@ Region::_set_state (const XMLNode& node, int /*version*/, PropertyChange& what_c
 	 */
 
 	if (!_sources.empty() && _type == DataType::AUDIO) {
-#warning NUTEMPO FIXME do this better
-		// if ((nt_length().time_domain() == Temporal::AudioTime) && (length_samples() > _sources.front()->length(position_sample()))) {
-		//_length = Temporal::samples_to_superclock (_sources.front()->length(position_sample()) - start_sample(), Temporal::_thread_sample_rate);
-		//}
+		if ((nt_length().time_domain() == Temporal::AudioTime) && (nt_length() > _sources.front()->length())) {
+			_length = _sources.front()->length() - nt_start();
+		 }
 	}
 
 	set_id (node);
@@ -1655,13 +1655,11 @@ Region::uses_source (boost::shared_ptr<const Source> source, bool shallow) const
 }
 
 
-samplecnt_t
-Region::source_length(uint32_t n) const
+timecnt_t
+Region::source_length (uint32_t n) const
 {
 	assert (n < _sources.size());
-#warning NUTEMPO FIXME needs Source to use timeline types
-	// return _sources[n]->length (_position - _start);
-	return 0;
+	return _sources[n]->length ();
 }
 
 bool
@@ -1674,8 +1672,7 @@ Region::verify_length (timecnt_t& len)
 	timecnt_t maxlen;
 
 	for (uint32_t n = 0; n < _sources.size(); ++n) {
-#warning NUTEMPO FIXME source needs timeline types
-		// maxlen = max (maxlen, source_length(n) - _start);
+		maxlen = max (maxlen, source_length(n) - _start);
 	}
 
 	len = min (len, maxlen);
@@ -1693,8 +1690,7 @@ Region::verify_start_and_length (timecnt_t const & new_start, timecnt_t& new_len
 	timecnt_t maxlen;
 
 	for (uint32_t n = 0; n < _sources.size(); ++n) {
-#warning NUTEMPO FIXME source needs timeline types
-		// maxlen = max (maxlen, source_length(n) - new_start);
+		maxlen = max (maxlen, source_length(n) - new_start);
 	}
 
 	new_length = min (new_length, maxlen);
@@ -1710,10 +1706,9 @@ Region::verify_start (timecnt_t const & pos)
 	}
 
 	for (uint32_t n = 0; n < _sources.size(); ++n) {
-#warning NUTEMPO FIXME source needs timeline types
-		// if (pos > source_length(n) - _length) {
-		// return false;
-		// }
+		if (pos > source_length(n) - _length) {
+			return false;
+		}
 	}
 	return true;
 }
@@ -1726,11 +1721,11 @@ Region::verify_start_mutable (timecnt_t & new_start)
 	}
 
 	for (uint32_t n = 0; n < _sources.size(); ++n) {
-#warning NUTEMPO FIXME source needs timeline types
-		// if (new_start > source_length(n) - _length) {
-		// new_start = source_length(n) - _length;
-		// }
+		if (new_start > source_length(n) - _length) {
+			new_start = source_length(n) - _length;
+		}
 	}
+
 	return true;
 }
 
@@ -1925,10 +1920,9 @@ Region::can_trim () const
 	}
 
 	if (!_sources.empty()) {
-#warning NUTEMPO FIXME source needs timeline types
-		//if ((nt_start() + nt_length()) < _sources.front()->length (0)) {
-		// ct = CanTrim (ct | EndTrimLater);
-		//}
+		if ((nt_start() + nt_length()) < _sources.front()->length ()) {
+			ct = CanTrim (ct | EndTrimLater);
+		}
 	}
 
 	return ct;
@@ -1971,21 +1965,20 @@ Region::earliest_possible_position () const
 samplecnt_t
 Region::latest_possible_sample () const
 {
-	samplecnt_t minlen = max_samplecnt;
+	timecnt_t minlen = timecnt_t::max (Temporal::AudioTime);
 
 	for (SourceList::const_iterator i = _sources.begin(); i != _sources.end(); ++i) {
 		/* non-audio regions have a length that may vary based on their
 		 * position, so we have to pass it in the call.
 		 */
-#warning NUTEMPO FIXME source needs timeline types
-		// minlen = min (minlen, (*i)->length_samples ((*i)->timeline_position()));
+		minlen = min (minlen, (*i)->length ());
 	}
 
 	/* the latest possible last sample is determined by the current
 	 * position, plus the shortest source extent past _start.
 	 */
 
-	return position_sample() + (minlen - start_sample()) - 1;
+	return (nt_position() + minlen).samples() - 1;
 }
 
 Temporal::TimeDomain
