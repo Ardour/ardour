@@ -343,6 +343,7 @@ private:
 
 	/* no copy-construction */
 	EnumProperty (EnumProperty const &);
+	EnumProperty& operator= (EnumProperty const &);
 };
 
 /** A Property which holds a shared_ptr to a Stateful object,

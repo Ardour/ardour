@@ -746,17 +746,19 @@ enum MidiPortFlags {
 
 struct LatencyRange {
 	LatencyRange () : min (0), max (0) {}
+	LatencyRange (const LatencyRange& other) : min (other.min), max (other.max) {}
 
 	uint32_t min; //< samples
 	uint32_t max; //< samples
 
-	bool operator==(const LatencyRange& other) {
+	bool operator==(const LatencyRange& other) const {
 		return (min == other.min && max == other.max);
 	}
 
-	void operator=(const LatencyRange& other) {
+	LatencyRange& operator=(const LatencyRange& other) {
 		min = other.min;
 		max = other.max;
+		return *this;
 	}
 };
 

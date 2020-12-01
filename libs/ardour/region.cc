@@ -311,7 +311,7 @@ Region::Region (boost::shared_ptr<const Region> other)
 	use_sources (other->_sources);
 	set_master_sources (other->_master_sources);
 
-	_position_lock_style = other->_position_lock_style;
+	_position_lock_style = other->_position_lock_style.val();
 	_first_edit = other->_first_edit;
 
 	_start = other->_start;
