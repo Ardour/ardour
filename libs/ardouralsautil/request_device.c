@@ -57,7 +57,7 @@ static int stdin_available(void) {
 	return errno != EBADF;
 }
 
-static void print_version () {
+static void print_version (void) {
 	printf (ARD_PROG_NAME " " VERSION "\n\n");
 	printf (
 		"Copyright (C) 2014 Robin Gareus <robin@gareus.org>\n"
@@ -67,7 +67,7 @@ static void print_version () {
 	exit (EXIT_SUCCESS);
 }
 
-static void usage () {
+static void usage (void) {
 	printf (ARD_PROG_NAME " - DBus Audio Reservation Utility.\n");
 	printf ("Usage: " ARD_PROG_NAME " [ OPTIONS ] <Audio-Device-ID>\n");
 	printf ("Options:\n\
