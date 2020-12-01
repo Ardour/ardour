@@ -454,7 +454,7 @@ int main() { return 0; }''',
             elif re.search ("^16[.]", version) != None:
                 conf.env['build_target'] = 'sierra'
             elif re.search ("^17[.]", version) != None:
-                conf.env['build_target'] = 'high sierra'
+                conf.env['build_target'] = 'high_sierra'
             elif re.search ("^18[.]", version) != None:
                 conf.env['build_target'] = 'mojave'
             elif re.search ("^19[.]", version) != None:
