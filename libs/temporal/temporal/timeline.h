@@ -101,8 +101,7 @@ class LIBTEMPORAL_API timepos_t : public int62_t  {
 	bool operator>= (timepos_t const & other) const { if (is_beats() == other.is_beats()) return val() >= other.val(); return expensive_gte (other); }
 
 	timepos_t operator+(timecnt_t const & d) const;
-	timepos_t operator+(timepos_t const & d) const { if (is_beats() == d.is_beats()) return timepos_t (is_beats(), val() + d.val()); return expensive_add (d); }
-
+	timepos_t operator+(timepos_t const & d) const       { if (is_beats() == d.is_beats()) return timepos_t (is_beats(), val() + d.val()); return expensive_add (d); }
 	timepos_t operator+(Temporal::Beats const &b ) const { if (is_beats()) return timepos_t (true, ticks() + b.to_ticks()); return expensive_add (b); }
 
 	/* donn't provide operator+(samplepos_t) or operator+(superclock_t)
