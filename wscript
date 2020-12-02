@@ -617,21 +617,25 @@ int main() { return 0; }''',
         compiler_flags.extend(
                 ("-DMAC_OS_X_VERSION_MIN_REQUIRED=1060",
                  '-mmacosx-version-min=10.6'))
+        linker_flags.append("-mmacosx-version-min=10.6")
 
     elif conf.env['build_target'] in [ 'lion', 'mountainlion' ]:
         compiler_flags.extend(
                 ("-DMAC_OS_X_VERSION_MIN_REQUIRED=1070",
                  '-mmacosx-version-min=10.7'))
+        linker_flags.append("-mmacosx-version-min=10.7")
 
     elif conf.env['build_target'] in [ 'mavericks', 'yosemite' ]:
         compiler_flags.extend(
                 ("-DMAC_OS_X_VERSION_MAX_ALLOWED=1090",
                  "-mmacosx-version-min=10.8"))
+        linker_flags.append("-mmacosx-version-min=10.8")
 
     elif conf.env['build_target'] in ['el_capitan', 'sierra', 'high_sierra', 'mojave', 'catalina' ]:
         compiler_flags.extend(
                 ("-DMAC_OS_X_VERSION_MAX_ALLOWED=1090",
                  "-mmacosx-version-min=10.9"))
+        linker_flags.append("-mmacosx-version-min=10.9")
 
     #
     # save off CPU element in an env
