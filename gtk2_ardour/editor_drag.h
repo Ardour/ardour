@@ -565,6 +565,10 @@ public:
 	void finished (GdkEvent *, bool);
 	void aborted (bool);
 
+	bool allow_vertical_autoscroll () const {
+		return false;
+	}
+
 private:
 	MidiRegionView*     region;
 	bool                relative;
@@ -585,6 +589,11 @@ public:
 	void aborted (bool);
 
 	void setup_pointer_sample_offset ();
+
+	bool allow_vertical_autoscroll () const {
+		return false;
+	}
+
 private:
 
 	double total_dx (GdkEvent * event) const; // total movement in quarter notes
@@ -613,6 +622,10 @@ public:
 
 	bool active (Editing::MouseMode mode) {
 		return mode == Editing::MouseDraw || mode == Editing::MouseContent;
+	}
+
+	bool allow_vertical_autoscroll () const {
+		return false;
 	}
 
 	bool y_movement_matters () const {
@@ -681,6 +694,10 @@ public:
 		return false;
 	}
 
+	bool allow_vertical_autoscroll () const {
+		return false;
+	}
+
 	void setup_pointer_sample_offset ();
 
 private:
@@ -746,6 +763,10 @@ public:
 	void aborted (bool);
 
 	bool y_movement_matters () const {
+		return false;
+	}
+
+	bool allow_vertical_autoscroll () const {
 		return false;
 	}
 
@@ -957,6 +978,10 @@ public:
 		return false;
 	}
 
+	bool allow_vertical_autoscroll () const {
+		return false;
+	}
+
 	void setup_pointer_sample_offset ();
 };
 
@@ -972,6 +997,10 @@ public:
 	void aborted (bool);
 
 	bool y_movement_matters () const {
+		return false;
+	}
+
+	bool allow_vertical_autoscroll () const {
 		return false;
 	}
 
@@ -1031,6 +1060,11 @@ public:
 
 	bool active (Editing::MouseMode m);
 
+	bool allow_vertical_autoscroll () const {
+		return false;
+	}
+
+
 private:
 
 	ControlPoint* _point;
@@ -1053,6 +1087,10 @@ public:
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
 	void aborted (bool);
+
+	bool allow_vertical_autoscroll () const {
+		return false;
+	}
 
 private:
 
