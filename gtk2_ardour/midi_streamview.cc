@@ -73,6 +73,7 @@ MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 	, _data_note_max(71)
 	, _note_lines (0)
 	, _updates_suspended (false)
+	, _miditimeview (tv)
 {
 	/* use a group dedicated to MIDI underlays. Audio underlays are not in this group. */
 	midi_underlay_group = new ArdourCanvas::Container (_canvas_group);
@@ -349,17 +350,35 @@ MidiStreamView::draw_note_lines()
 		 * height of this note.
 		 */
 
-		switch (i % 12) {
-		case 1:
-		case 3:
-		case 6:
-		case 8:
-		case 10:
-			color = UIConfiguration::instance().color_mod ("piano roll black", "piano roll black");
-			break;
-		default:
-			color = UIConfiguration::instance().color_mod ("piano roll white", "piano roll white");
-			break;
+		if (_miditimeview.signature_scale() == NoScale ) 
+		{
+			switch (i % 12) {
+			case 1:
+			case 3:
+			case 6:
+			case 8:
+			case 10:
+				color = UIConfiguration::instance().color_mod ("piano roll black", "piano roll black");
+				break;
+			default:
+				color = UIConfiguration::instance().color_mod ("piano roll white", "piano roll white");
+				break;
+			}
+		} else {
+			int relative_note = (i - _miditimeview.signature_root()) % 12;
+			if (relative_note == 0) {
+				color = UIConfiguration::instance().color_mod ("piano roll in sig root", "piano roll in sig root");
+			} else {
+				for (int j = 0; j < 13; j++) {
+					if (_scale_notes[_miditimeview.signature_scale()][j] == relative_note) {
+						color = UIConfiguration::instance().color_mod ("piano roll in sig", "piano roll in sig");
+						break;
+					} else if (_scale_notes[_miditimeview.signature_scale()][j] == -1) {
+						color = UIConfiguration::instance().color_mod ("piano roll out sig", "piano roll out sig");
+						break;
+					}
+				}
+			}
 		}
 
 		double h = y - prev_y;

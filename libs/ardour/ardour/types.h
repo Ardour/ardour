@@ -819,6 +819,36 @@ enum LocateTransportDisposition {
 	RollIfAppropriate
 };
 
+enum SignatureScale {
+	NoScale,
+	Major,
+	MajorPentatonic,
+	MinorNatural,
+	MinorHarmonic,
+	MinorMelodic,
+	MinorPentatonic,
+	Dorian,
+	Phrygian,
+	Lydian,
+	Mixolydian,
+	Locrian	
+};
+
+enum SignatureRoot {
+	NoteC = 0,
+	NoteCs = 1,
+	NoteD = 2,
+	NoteDs = 3,
+	NoteE = 4,
+	NoteF = 5,
+	NoteFs = 6,
+	NoteG = 7,
+	NoteGs = 8,
+	NoteA = 9,
+	NoteAs = 10,
+	NoteB = 11
+};
+
 typedef std::vector<CaptureInfo*> CaptureInfos;
 
 } // namespace ARDOUR

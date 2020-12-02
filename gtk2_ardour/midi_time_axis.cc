@@ -126,6 +126,8 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess, ArdourCanva
 	, _piano_roll_header(0)
 	, _note_mode(Sustained)
 	, _note_mode_item(0)
+	, _sig_scale(NoScale)
+	, _sig_root(NoteC)
 	, _percussion_mode_item(0)
 	, _color_mode(MeterColors)
 	, _meter_color_mode_item(0)
@@ -287,6 +289,13 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		if (_percussion_mode_item) {
 			_percussion_mode_item->set_active (_note_mode == Percussive);
 		}
+	}
+
+	const string sig_scale = gui_property ("sig-scale");
+	const string sig_root = gui_property ("sig-root");
+	if (!sig_scale.empty()) {
+		_sig_scale = SignatureScale (string_2_enum (sig_scale, _sig_scale));
+		_sig_root = SignatureRoot (string_2_enum (sig_root, _sig_root));
 	}
 
 	/* Look for any GUI object state nodes that represent automation children
@@ -633,6 +642,7 @@ MidiTimeAxisView::append_extra_display_menu_items ()
 
 	items.push_back (MenuElem (_("Note Range"), *range_menu));
 	items.push_back (MenuElem (_("Note Mode"), *build_note_mode_menu()));
+	items.push_back (MenuElem (_("Signature"), *build_signature_menu()));
 	items.push_back (MenuElem (_("Channel Selector..."),
 				   sigc::mem_fun(*this, &MidiTimeAxisView::toggle_channel_selector)));
 
@@ -1111,6 +1121,174 @@ MidiTimeAxisView::build_note_mode_menu()
 }
 
 Gtk::Menu*
+MidiTimeAxisView::build_signature_menu()
+{
+	using namespace Menu_Helpers;
+
+	Menu* root_menu = manage (new Menu);
+	MenuList& root_items = root_menu->items();
+	root_menu->set_name("ArdourContextMenu");
+
+	RadioMenuItem::Group root_group;
+	root_items.push_back(
+		RadioMenuElem (root_group,_("C"),
+					   sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_signature),
+					   			   _sig_scale, NoteC, true)));
+	dynamic_cast<RadioMenuItem*>(&root_items.back())->set_active(_sig_root == NoteC);
+
+	root_items.push_back(
+		RadioMenuElem (root_group,_("C# / Db"),
+					   sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_signature),
+					   			   _sig_scale, NoteCs, true)));
+	dynamic_cast<RadioMenuItem*>(&root_items.back())->set_active(_sig_root == NoteCs);
+
+	root_items.push_back(
+		RadioMenuElem (root_group,_("D"),
+					   sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_signature),
+					   			   _sig_scale, NoteD, true)));
+	dynamic_cast<RadioMenuItem*>(&root_items.back())->set_active(_sig_root == NoteD);
+
+	root_items.push_back(
+		RadioMenuElem (root_group,_("D# / Eb"),
+					   sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_signature),
+					   			   _sig_scale, NoteDs, true)));
+	dynamic_cast<RadioMenuItem*>(&root_items.back())->set_active(_sig_root == NoteDs);
+
+	root_items.push_back(
+		RadioMenuElem (root_group,_("E"),
+					   sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_signature),
+					   			   _sig_scale, NoteE, true)));
+	dynamic_cast<RadioMenuItem*>(&root_items.back())->set_active(_sig_root == NoteE);
+
+	root_items.push_back(
+		RadioMenuElem (root_group,_("F"),
+					   sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_signature),
+					   			   _sig_scale, NoteF, true)));
+	dynamic_cast<RadioMenuItem*>(&root_items.back())->set_active(_sig_root == NoteF);
+
+	root_items.push_back(
+		RadioMenuElem (root_group,_("F# / Gb"),
+					   sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_signature),
+					   			   _sig_scale, NoteFs, true)));
+	dynamic_cast<RadioMenuItem*>(&root_items.back())->set_active(_sig_root == NoteFs);
+
+	root_items.push_back(
+		RadioMenuElem (root_group,_("G"),
+					   sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_signature),
+					   			   _sig_scale, NoteG, true)));
+	dynamic_cast<RadioMenuItem*>(&root_items.back())->set_active(_sig_root == NoteG);
+
+	root_items.push_back(
+		RadioMenuElem (root_group,_("G# / Ab"),
+					   sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_signature),
+					   			   _sig_scale, NoteGs, true)));
+	dynamic_cast<RadioMenuItem*>(&root_items.back())->set_active(_sig_root == NoteGs);
+
+	root_items.push_back(
+		RadioMenuElem (root_group,_("A"),
+					   sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_signature),
+					   			   _sig_scale, NoteA, true)));
+	dynamic_cast<RadioMenuItem*>(&root_items.back())->set_active(_sig_root == NoteA);
+
+	root_items.push_back(
+		RadioMenuElem (root_group,_("A# / Bb"),
+					   sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_signature),
+					   			   _sig_scale, NoteAs, true)));
+	dynamic_cast<RadioMenuItem*>(&root_items.back())->set_active(_sig_root == NoteAs);
+
+	root_items.push_back(
+		RadioMenuElem (root_group,_("B"),
+					   sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_signature),
+					   			   _sig_scale, NoteB, true)));
+	dynamic_cast<RadioMenuItem*>(&root_items.back())->set_active(_sig_root == NoteB);
+
+	Menu* scale_menu = manage (new Menu);
+	MenuList& scale_items = scale_menu->items();
+	scale_menu->set_name("ArdourContextMenu");
+
+	RadioMenuItem::Group scale_group;
+	scale_items.push_back(
+		RadioMenuElem (scale_group,_("No Scale"),
+					   sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_signature),
+					   			   NoScale, _sig_root, true)));
+	dynamic_cast<RadioMenuItem*>(&scale_items.back())->set_active(_sig_scale == NoScale);	
+
+	scale_items.push_back(
+		RadioMenuElem (scale_group,_("Major"),
+					   sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_signature),
+					   			   Major, _sig_root, true)));
+	dynamic_cast<RadioMenuItem*>(&scale_items.back())->set_active(_sig_scale == Major);	
+
+	scale_items.push_back(
+		RadioMenuElem (scale_group,_("Major Pentatonic"),
+					   sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_signature),
+					   			   MajorPentatonic, _sig_root, true)));
+	dynamic_cast<RadioMenuItem*>(&scale_items.back())->set_active(_sig_scale == MajorPentatonic);	
+
+	scale_items.push_back(
+		RadioMenuElem (scale_group,_("Natural Minor"),
+					   sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_signature),
+					   			   MinorNatural, _sig_root, true)));
+	dynamic_cast<RadioMenuItem*>(&scale_items.back())->set_active(_sig_scale == MinorNatural);	
+
+	scale_items.push_back(
+		RadioMenuElem (scale_group,_("Harmonic Minor"),
+					   sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_signature),
+					   			   MinorHarmonic, _sig_root, true)));
+	dynamic_cast<RadioMenuItem*>(&scale_items.back())->set_active(_sig_scale == MinorHarmonic);	
+
+	scale_items.push_back(
+		RadioMenuElem (scale_group,_("Melodic Minor"),
+					   sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_signature),
+					   			   MinorMelodic, _sig_root, true)));
+	dynamic_cast<RadioMenuItem*>(&scale_items.back())->set_active(_sig_scale == MinorMelodic);	
+
+	scale_items.push_back(
+		RadioMenuElem (scale_group,_("Minor Pentatonic"),
+					   sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_signature),
+					   			   MinorPentatonic, _sig_root, true)));
+	dynamic_cast<RadioMenuItem*>(&scale_items.back())->set_active(_sig_scale == MinorPentatonic);	
+
+	scale_items.push_back(
+		RadioMenuElem (scale_group,_("Dorian"),
+					   sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_signature),
+					   			   Dorian, _sig_root, true)));
+	dynamic_cast<RadioMenuItem*>(&scale_items.back())->set_active(_sig_scale == Dorian);	
+
+	scale_items.push_back(
+		RadioMenuElem (scale_group,_("Phrygian"),
+					   sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_signature),
+					   			   Phrygian, _sig_root, true)));
+	dynamic_cast<RadioMenuItem*>(&scale_items.back())->set_active(_sig_scale == Phrygian);	
+
+	scale_items.push_back(
+		RadioMenuElem (scale_group,_("Lydian"),
+					   sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_signature),
+					   			   Lydian, _sig_root, true)));
+	dynamic_cast<RadioMenuItem*>(&scale_items.back())->set_active(_sig_scale == Lydian);	
+
+	scale_items.push_back(
+		RadioMenuElem (scale_group,_("Mixolydian"),
+					   sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_signature),
+					   			   Mixolydian, _sig_root, true)));
+	dynamic_cast<RadioMenuItem*>(&scale_items.back())->set_active(_sig_scale == Mixolydian);	
+
+	scale_items.push_back(
+		RadioMenuElem (scale_group,_("Locrian"),
+					   sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_signature),
+					   			   NoScale, _sig_root, true)));
+	dynamic_cast<RadioMenuItem*>(&scale_items.back())->set_active(_sig_scale == Locrian);	
+
+	Menu* sig_menu = manage (new Menu);
+	MenuList& items = sig_menu->items();
+	sig_menu->set_name ("ArdourContextMenu");
+
+	items.push_back (MenuElem (_("Root"), *root_menu));
+	items.push_back (MenuElem (_("Scale"), *scale_menu));
+	return sig_menu;
+}
+
+Gtk::Menu*
 MidiTimeAxisView::build_color_mode_menu()
 {
 	using namespace Menu_Helpers;
@@ -1155,6 +1333,24 @@ MidiTimeAxisView::set_note_mode(NoteMode mode, bool apply_to_selection)
 			_note_mode = mode;
 			midi_track()->set_note_mode(mode);
 			set_gui_property ("note-mode", enum_2_string(_note_mode));
+			_view->redisplay_track();
+		}
+	}
+}
+
+void
+MidiTimeAxisView::set_signature(SignatureScale scale, SignatureRoot root, bool apply_to_selection)
+{
+	if (apply_to_selection) {
+		_editor.get_selection().tracks.foreach_midi_time_axis (
+			boost::bind (&MidiTimeAxisView::set_signature, _1, scale, root, false)
+		);
+	} else {
+		if (_sig_scale != scale || _sig_root != root) {
+			_sig_scale = scale;
+			_sig_root = root;
+			set_gui_property ("sig-root", enum_2_string(_sig_root));
+			set_gui_property ("sig-scale", enum_2_string(_sig_scale));
 			_view->redisplay_track();
 		}
 	}
