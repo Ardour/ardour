@@ -641,8 +641,8 @@ Editor::session_gui_extents (bool use_extra) const
 
 	/* add additional time to the ui extents (user-defined in config) */
 	if (use_extra) {
-		samplecnt_t const extra = UIConfiguration::instance().get_extra_ui_extents_time() * 60 * _session->nominal_sample_rate();
-		session_extent_end += extra;
+		timecnt_t const extra ((samplepos_t) (UIConfiguration::instance().get_extra_ui_extents_time() * 60 * _session->nominal_sample_rate()));
+		session_extent_end += timepos_t (extra);
 		session_extent_start.shift_earlier (extra);
 	}
 

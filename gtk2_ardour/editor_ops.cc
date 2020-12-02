@@ -353,7 +353,7 @@ Editor::move_range_selection_start_or_end_to_region_boundary (bool move_end, boo
 
 	/* so we don't find the current region again */
 	if (dir > 0 || pos.positive()) {
-		pos += dir;
+		pos.increment ();
 	}
 
 	timepos_t const target = get_region_boundary (pos, dir, true, false);
@@ -620,7 +620,7 @@ Editor::nudge_backward_capture_offset ()
 
 	begin_reversible_command (_("nudge backward"));
 
-	samplepos_t const distance = _session->worst_output_latency();
+	timepos_t const distance (_session->worst_output_latency());
 
 	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
 		boost::shared_ptr<Region> r ((*i)->region());
@@ -1202,7 +1202,7 @@ Editor::selected_marker_to_region_point (RegionPoint point, int32_t dir)
 
 	// so we don't find the current region again..
 	if (dir>0 || pos>0)
-		pos+=dir;
+		pos.increment();
 
 	if (!selection->tracks.empty()) {
 
@@ -7540,10 +7540,10 @@ Editor::close_region_gaps ()
 		}
 
 		(*r)->region()->clear_changes ();
-		(*r)->region()->trim_front (position.earlier (pull_back_samples));
+		(*r)->region()->trim_front (position.earlier (timecnt_t (pull_back_samples)));
 
 		last_region->clear_changes ();
-		last_region->trim_end (position.earlier (pull_back_samples + crossfade_len));
+		last_region->trim_end (position.earlier (timecnt_t (pull_back_samples + crossfade_len)));
 
 		_session->add_command (new StatefulDiffCommand ((*r)->region()));
 		_session->add_command (new StatefulDiffCommand (last_region));
@@ -7652,16 +7652,16 @@ Editor::playhead_forward_to_grid ()
 	timepos_t pos  (playhead_cursor->current_sample ());
 
 	if ( _grid_type == GridTypeNone) {
-		if (pos < timepos_t::max (pos.time_domain()).earlier (current_page_samples()*0.1)) {
-			pos += current_page_samples()*0.1;
+		if (pos < timepos_t::max (pos.time_domain()).earlier (timepos_t (samplepos_t (floor (current_page_samples()*0.1))))) {
+			pos += timepos_t (samplepos_t (floor (current_page_samples()*0.1)));
 			_session->request_locate (pos.samples());
 		} else {
 			_session->request_locate (0);
 		}
 	} else {
 
-		if (pos < timepos_t::max (pos.time_domain()).earlier (3)) {
-			pos += 2;
+		if (pos < timepos_t::max (pos.time_domain()).earlier (timepos_t (samplepos_t (3)))) {
+			pos += timepos_t (samplepos_t (2));
 			pos = snap_to_grid (pos, Temporal::RoundUpAlways, SnapToGrid_Scaled);
 			_session->request_locate (pos.samples());
 		}
@@ -7686,7 +7686,7 @@ Editor::playhead_backward_to_grid ()
 
 	if ( _grid_type == GridTypeNone) {
 		if (pos.samples() > current_page_samples()*0.1 ) {
-			pos.shift_earlier (current_page_samples()*0.1);
+			pos.shift_earlier (timepos_t (samplepos_t (floor (current_page_samples()*0.1))));
 			_session->request_locate (pos.samples());
 		} else {
 			_session->request_locate (0);
@@ -7694,7 +7694,7 @@ Editor::playhead_backward_to_grid ()
 	} else {
 
 		if (pos.samples() > 2) {
-			pos.shift_earlier (2);
+			pos.shift_earlier (timepos_t (samplepos_t (2)));
 			pos = snap_to_grid (pos, Temporal::RoundDownAlways, SnapToGrid_Scaled);
 		}
 
