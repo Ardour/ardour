@@ -89,7 +89,7 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	, _edit_by_click_field (false)
 	, _negative_allowed (false)
 	, edit_is_negative (false)
-	, _limit_pos (INT64_MAX - 1)
+	, _limit_pos (timepos_t::max (Temporal::AudioTime))
 	, _with_info (with_info)
 	, editing_attr (0)
 	, foreground_attr (0)
