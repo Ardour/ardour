@@ -38,8 +38,6 @@ using Temporal::superclock_t;
 std::string Tempo::xml_node_name = X_("Tempo");
 std::string Meter::xml_node_name = X_("Meter");
 
-superclock_t Temporal::superclock_ticks_per_second = 508032000; // 2^10 * 3^4 * 5^3 * 7^2
-
 SerializedRCUManager<TempoMap> TempoMap::_map_mgr (0);
 thread_local TempoMap::SharedPtr TempoMap::_tempo_map_p;
 

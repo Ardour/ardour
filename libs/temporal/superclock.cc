@@ -29,6 +29,8 @@ namespace Temporal {
 	thread_local uint32_t _thread_sample_rate = 0;
 }
 
+Temporal::superclock_t Temporal::superclock_ticks_per_second = 508032000; // 2^10 * 3^4 * 5^3 * 7^2
+
 void
 Temporal::set_thread_sample_rate (uint32_t sr)
 {
