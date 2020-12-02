@@ -827,7 +827,7 @@ Editor::add_sources (vector<string>            paths,
 
 		PropertyList plist;
 
-		plist.add (ARDOUR::Properties::start, 0);
+		plist.add (ARDOUR::Properties::start, timecnt_t());
 		plist.add (ARDOUR::Properties::length, sources[0]->length ());
 		plist.add (ARDOUR::Properties::name, region_name);
 		plist.add (ARDOUR::Properties::layer, 0);
