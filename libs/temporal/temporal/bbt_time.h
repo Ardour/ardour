@@ -146,7 +146,7 @@ struct LIBTEMPORAL_API BBT_Offset
 	BBT_Offset () : bars (0), beats (0), ticks (0) {}
 	BBT_Offset (int32_t ba, uint32_t be, uint32_t t) : bars (ba), beats (be), ticks (t) {}
 	BBT_Offset (BBT_Time const & bbt) : bars (bbt.bars), beats (bbt.beats), ticks (bbt.ticks) {}
-	BBT_Offset (double beats);
+	explicit BBT_Offset (double beats);
 
 	/* unlike BBT_Time, we can define +,-,* and / operators for BBT_Offset
 	 * because there is no requirement that the result is "well-formed" or

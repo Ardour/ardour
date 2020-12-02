@@ -255,7 +255,7 @@ SMFSource::read_unlocked (const Lock&                     lock,
 				_smf_last_read_end = start + duration;
 				return timecnt_t();
 			}
-			time += ev_delta_t; // accumulate delta time
+			time += timepos_t::from_ticks (ev_delta_t); // accumulate delta time
 		}
 	} else {
 		DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("SMF read_unlocked: set time to %1\n", _smf_last_read_time));
@@ -272,7 +272,7 @@ SMFSource::read_unlocked (const Lock&                     lock,
 			break;
 		}
 
-		time += ev_delta_t; // accumulate delta time
+		time += timepos_t::from_ticks (ev_delta_t); // accumulate delta time
 		_smf_last_read_time = time;
 
 		if (ret == 0) { // meta-event (skipped, just accumulate time)

@@ -2053,10 +2053,10 @@ ControlList::move_ranges (const list< RangeMove> & movements)
 
 					switch (_time_domain) {
 					case AudioTime:
-						ev->when += dx.samples();
+						ev->when += dx;
 						break;
 					case BeatTime:
-						ev->when += dx.beats().to_ticks();
+						ev->when += dx;
 						break;
 					default:
 						/*NOTREACHED*/

@@ -362,6 +362,7 @@ std::operator<< (std::ostream & o, timecnt_t const & tc)
 timepos_t::timepos_t (timecnt_t const & t)
 {
 	if (t.distance() < 0) {
+		std::cerr << "timecnt_t has negative distance distance " << " val " << t.distance().val() << " flagged " << t.distance().flagged() << std::endl;
 		throw  std::domain_error("negative value for timepos_t constructor");
 	}
 
@@ -577,48 +578,34 @@ timepos_t::earlier (Temporal::BBT_Offset const & offset) const
 }
 
 
-timepos_t &
-timepos_t::shift_earlier (Temporal::BBT_Offset const & offset)
-{
-	TempoMap::SharedPtr tm (TempoMap::use());
-
-	if (is_superclock()) {
-		v = build (false, (tm->superclock_at (tm->bbt_walk (tm->bbt_at (superclocks()), -offset))));
-	} else {
-		v = build (true, tm->bbtwalk_to_quarters (beats(), -offset).to_ticks());
-	}
-
-	return *this;
-}
-
-
 timepos_t
 timepos_t::earlier (timepos_t const & other) const
 {
-	if (other.is_superclock()) {
-		return earlier (other.superclocks());
+	if (is_superclock()) {
+		return timepos_t::from_superclock (val() - other.superclocks());
 	}
 
-	return earlier (other.beats());
+	return timepos_t::from_ticks (val() - other.ticks());
 }
 
 timepos_t
 timepos_t::earlier (timecnt_t const & distance) const
 {
-	if (distance.time_domain() == AudioTime) {
-		return earlier (distance.superclocks());
+	if (is_superclock()) {
+		return timepos_t::from_superclock (val() - distance.superclocks());
 	}
-	return earlier (distance.beats());
+
+	return timepos_t::from_ticks (val() - distance.ticks());
 }
 
 bool
 timepos_t::expensive_lt (timepos_t const & other) const
 {
 	if (time_domain() == AudioTime) {
-		return superclocks() < other.superclocks();
+		return val() < other.superclocks();
 	}
 
-	return beats() < other.beats ();
+	return ticks() < other.ticks ();
 }
 
 bool
@@ -656,21 +643,25 @@ timepos_t::expensive_gte (timepos_t const & other) const
 timepos_t &
 timepos_t::shift_earlier (timepos_t const & d)
 {
-	if (d.time_domain() == AudioTime) {
-		return shift_earlier (d.superclocks());
+	if (is_superclock()) {
+		v = build (false, val() - d.superclocks());
+	} else {
+		v = build (true, val() - d.ticks());
 	}
 
-	return shift_earlier (d.beats());
+	return *this;
 }
 
 timepos_t &
 timepos_t::shift_earlier (timecnt_t const & d)
 {
-	if (d.time_domain() == AudioTime) {
-		return shift_earlier (d.superclocks());
+	if (is_superclock()) {
+		v = build (false, val() - d.superclocks());
+	} else {
+		v = build (true, val() - d.ticks());
 	}
 
-	return shift_earlier (d.beats());
+	return *this;
 }
 
 timepos_t &
@@ -686,6 +677,20 @@ timepos_t::shift_earlier (Temporal::Beats const & b)
 	}
 
 	v = (bb - b).to_ticks();
+
+	return *this;
+}
+
+timepos_t &
+timepos_t::shift_earlier (Temporal::BBT_Offset const & offset)
+{
+	TempoMap::SharedPtr tm (TempoMap::use());
+
+	if (is_superclock()) {
+		v = build (false, (tm->superclock_at (tm->bbt_walk (tm->bbt_at (superclocks()), -offset))));
+	} else {
+		v = build (true, tm->bbtwalk_to_quarters (beats(), -offset).to_ticks());
+	}
 
 	return *this;
 }
