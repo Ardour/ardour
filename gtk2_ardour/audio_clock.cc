@@ -845,13 +845,13 @@ AudioClock::set (timepos_t const & w, bool force, timecnt_t const & offset)
 {
 	timepos_t when (w);
 
-	if ((!force && !is_visible()) || _session) {
+	if ((!force && !is_visible()) || !_session) {
 		return;
 	}
 
 	_offset = offset;
 	if (is_duration) {
-		when = timepos_t (offset - when);
+		when = when.earlier (offset);
 	}
 
 	if (when > _limit_pos) {
