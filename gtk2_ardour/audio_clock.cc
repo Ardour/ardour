@@ -1325,8 +1325,9 @@ AudioClock::set_session (Session *s)
 	if (_session) {
 
 		int64_t limit_sec = UIConfiguration::instance().get_clock_display_limit ();
+
 		if (limit_sec > 0) {
-			_limit_pos = (samplecnt_t) floor ((double)(limit_sec * _session->sample_rate()));
+			_limit_pos = timepos_t (limit_sec * _session->sample_rate());
 		}
 
 		Config->ParameterChanged.connect (_session_connections, invalidator (*this), boost::bind (&AudioClock::session_configuration_changed, this, _1), gui_context());
@@ -1853,7 +1854,7 @@ AudioClock::on_motion_notify_event (GdkEventMotion *ev)
 		samples = get_sample_step (drag_field, pos, dir);
 
 		if (samples  != 0 && timepos_t (samples * drag_accum) < current_time()) {
-			AudioClock::set (timepos_t (pos.earlier (drag_accum * samples)), false); // minus because up is negative in GTK
+			AudioClock::set (timepos_t (pos.earlier (timepos_t ((samplecnt_t) floor (drag_accum * samples)))), false); // minus because up is negative in GTK
 		} else {
 			AudioClock::set (timepos_t () , false);
 		}
