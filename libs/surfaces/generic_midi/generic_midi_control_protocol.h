@@ -204,6 +204,8 @@ private:
 	bool midi_input_handler (Glib::IOCondition ioc, boost::weak_ptr<ARDOUR::AsyncMIDIPort> port);
 	void start_midi_handling ();
 	void stop_midi_handling ();
+
+	void event_loop_precall () { ControlProtocol::event_loop_precall(); }
 };
 
 #endif /* ardour_generic_midi_control_protocol_h */
