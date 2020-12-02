@@ -883,8 +883,14 @@ if test $(sw_vers -productVersion | cut -d '.' -f 2) -gt 5; then
 echo "setting file icon ..."
 
 cp ${PRODUCT_PKG_DIR}/$Resources/appIcon.icns ${ICNSTMP}.icns
-sips -i ${ICNSTMP}.icns
-DeRez -only icns ${ICNSTMP}.icns > ${ICNSTMP}.rsrc
+if test $(sw_vers -productVersion | cut -d '.' -f 2) -lt 13; then
+	sips -i ${ICNSTMP}.icns
+	DeRez -only icns ${ICNSTMP}.icns > ${ICNSTMP}.rsrc
+else
+	ICNSBASE=`basename ${ICNSTMP}.icns`
+	echo "read 'icns' (-16455) \"${ICNSBASE}\";" > ${ICNSTMP}.rsrc
+fi
+
 Rez -append ${ICNSTMP}.rsrc -o "$UC_DMG"
 SetFile -a C "$UC_DMG"
 
