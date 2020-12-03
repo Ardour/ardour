@@ -587,7 +587,7 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 	   may need to mix with the existing data.
 	*/
 
-	if (read_from_sources (_sources, lsamples, mixdown_buffer, psamples, to_read, chan_n) != to_read) {
+	if (read_from_sources (_sources, lsamples, mixdown_buffer, position, to_read, chan_n) != to_read) {
 		return 0;
 	}
 
