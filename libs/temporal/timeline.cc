@@ -542,10 +542,16 @@ timepos_t::expensive_distance (Temporal::Beats const & b) const
 timecnt_t
 timepos_t::expensive_distance (timepos_t const & other) const
 {
+	/* Called when other's time domain does not match our own, requiring us
+	   to call either ::beats() or ::superclocks() on other to convert it to
+	   our time domain.
+	*/
 	if (is_beats()) {
-		return timecnt_t (other.beats() - beats(), *this);
+		/* we are known to use beat time: val() is ticks */
+		return timecnt_t::from_ticks (other.ticks() - val(), *this);
 	}
-	return timecnt_t::from_superclock (other.superclocks() - superclocks(), *this);
+	/* we known to be audio: val() is superclocks */
+	return timecnt_t::from_superclock (other.superclocks() - val(), *this);
 }
 
 /* */
