@@ -231,6 +231,13 @@ class LIBTEMPORAL_API timepos_t : public int62_t  {
 	 */
 
 	superclock_t _superclocks() const;
+
+	/* these two methods are to be called ONLY when we have already that
+	 * the time domain of this timepos_t does not match the desired return
+	 * type, and so we will need to go to the tempo map to convert
+	 * between domains, which could be expensive.
+	 */
+
 	int64_t _ticks() const;
 	Beats _beats() const;
 
