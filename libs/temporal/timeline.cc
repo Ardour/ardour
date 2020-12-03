@@ -523,13 +523,13 @@ timepos_t::distance (Beats const & b) const
 }
 
 timecnt_t
-timepos_t::distance (timepos_t const & d) const
+timepos_t::distance (timepos_t const & other) const
 {
-	if (d.is_beats()) {
-		return distance (d._beats());
+	if (time_domain() == other.time_domain()) {
+		return timecnt_t (int62_t (is_beats(), other.val() - val()), *this);
 	}
 
-	return expensive_distance (d);
+	return expensive_distance (other);
 }
 
 timecnt_t
@@ -540,12 +540,12 @@ timepos_t::expensive_distance (Temporal::Beats const & b) const
 
 
 timecnt_t
-timepos_t::expensive_distance (timepos_t const & p) const
+timepos_t::expensive_distance (timepos_t const & other) const
 {
 	if (is_beats()) {
-		return timecnt_t (beats() + p.beats(), *this);
+		return timecnt_t (other.beats() - beats(), *this);
 	}
-	return timecnt_t::from_superclock (superclocks() + p.superclocks(), *this);
+	return timecnt_t::from_superclock (other.superclocks() - superclocks(), *this);
 }
 
 /* */
