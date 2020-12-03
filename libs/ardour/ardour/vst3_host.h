@@ -198,6 +198,28 @@ protected:
 	boost::shared_ptr<HostAttributeList> _attribute_list;
 };
 
+class LIBARDOUR_API ConnectionProxy : public Vst::IConnectionPoint, public RefObject
+{
+public:
+	ConnectionProxy (IConnectionPoint* src);
+	~ConnectionProxy () SMTG_OVERRIDE;
+
+	QUERY_INTERFACE_IMPL (Vst::IConnectionPoint);
+	uint32 PLUGIN_API addRef () SMTG_OVERRIDE { return RefObject::addRef (); }
+	uint32 PLUGIN_API release () SMTG_OVERRIDE { return RefObject::release (); }
+
+	/* IConnectionPoint API */
+	tresult PLUGIN_API connect (Vst::IConnectionPoint*) SMTG_OVERRIDE;
+	tresult PLUGIN_API disconnect (Vst::IConnectionPoint*) SMTG_OVERRIDE;
+	tresult PLUGIN_API notify (Vst::IMessage*) SMTG_OVERRIDE;
+
+	bool disconnect ();
+
+protected:
+	IConnectionPoint* _src;
+	IConnectionPoint* _dst;
+};
+
 class LIBARDOUR_API PlugInterfaceSupport : public Vst::IPlugInterfaceSupport
 {
 public:

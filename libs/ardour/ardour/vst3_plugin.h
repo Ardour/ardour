@@ -54,7 +54,6 @@ namespace Steinberg {
 class LIBARDOUR_API VST3PI
 	: public Vst::IComponentHandler
 	, public Vst::IComponentHandler2
-	, public Vst::IConnectionPoint
 	, public Vst::IUnitHandler
 	, public IPlugFrame
 	, public Presonus::IContextInfoProvider3
@@ -74,11 +73,6 @@ public:
 	tresult PLUGIN_API requestOpenEditor (FIDString name) SMTG_OVERRIDE;
 	tresult PLUGIN_API startGroupEdit () SMTG_OVERRIDE;
 	tresult PLUGIN_API finishGroupEdit () SMTG_OVERRIDE;
-
-	/* IConnectionPoint API */
-	tresult PLUGIN_API connect (Vst::IConnectionPoint* other) SMTG_OVERRIDE;
-	tresult PLUGIN_API disconnect (Vst::IConnectionPoint* other) SMTG_OVERRIDE;
-	tresult PLUGIN_API notify (Vst::IMessage* message) SMTG_OVERRIDE;
 
 	/* IPlugFrame */
 	tresult PLUGIN_API resizeView (IPlugView* view, ViewRect* newSize) SMTG_OVERRIDE;
@@ -217,7 +211,8 @@ private:
 
 	boost::shared_ptr<ARDOUR::VST3PluginModule> _module;
 
-	std::vector <Vst::IConnectionPoint*> _connections;
+	boost::shared_ptr<ConnectionProxy> _component_cproxy;
+	boost::shared_ptr<ConnectionProxy> _controller_cproxy;
 
 	FUID                  _fuid;
 	Vst::IComponent*      _component;

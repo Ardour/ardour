@@ -299,6 +299,90 @@ HostMessage::getAttributes ()
 
 /* ****************************************************************************/
 
+ConnectionProxy::ConnectionProxy (Vst::IConnectionPoint* src)
+	: _src (src)
+	, _dst (0)
+{
+	if (_src) {
+		_src->addRef ();
+	}
+}
+
+ConnectionProxy::~ConnectionProxy ()
+{
+	if (_src) {
+		_src->release ();
+	}
+	if (_dst) {
+		_dst->release ();
+	}
+}
+
+tresult
+ConnectionProxy::connect (Vst::IConnectionPoint* dst)
+{
+	if (!dst) {
+		return kInvalidArgument;
+	}
+	if (_dst) {
+		return kResultFalse;
+	}
+
+	_dst = dst;
+	_dst->addRef ();
+
+	tresult res = _src->connect (this);
+
+	if (res != kResultTrue) {
+		_dst->release ();
+		_dst = 0;
+	}
+	return res;
+}
+
+tresult
+ ConnectionProxy::disconnect (Vst::IConnectionPoint* dst)
+{
+  if (!dst) {
+    return kInvalidArgument;
+	}
+
+  if (dst != _dst) {
+		return kInvalidArgument;
+	}
+
+	if (_src) {
+		_src->disconnect (this);
+	}
+
+	_dst->release ();
+	_dst = 0;
+	return kResultTrue;
+}
+
+
+tresult
+ConnectionProxy::notify (Vst::IMessage* message)
+{
+  if (!_dst) {
+		return kResultFalse;
+	}
+#if 0
+	if (strcmp ("ArdourGUI",  pthread_name ())) {
+		return kResultFalse;
+	}
+#endif
+	return _dst->notify (message);
+}
+
+bool
+ConnectionProxy::disconnect ()
+{
+  return kResultTrue == disconnect (_dst);
+}
+
+/* ****************************************************************************/
+
 PlugInterfaceSupport::PlugInterfaceSupport ()
 {
 	using namespace Vst;

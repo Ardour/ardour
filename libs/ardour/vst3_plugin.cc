@@ -1232,14 +1232,18 @@ VST3PI::connect_components ()
 		return true;
 	}
 
-	tresult res = componentCP->connect (this);
+	_component_cproxy = boost::shared_ptr<ConnectionProxy> (new ConnectionProxy (componentCP));
+	_controller_cproxy = boost::shared_ptr<ConnectionProxy> (new ConnectionProxy (controllerCP));
+
+	tresult res = _component_cproxy->connect (controllerCP);
 	if (!(res == kResultOk || res == kNotImplemented)) {
-		return false;
+		DEBUG_TRACE (DEBUG::VST3Config, "VST3PI::connect_components Cannot connect controller to component\n");
+		//return false;
 	}
 
-	res = controllerCP->connect (this);
+	res = _controller_cproxy->connect (componentCP);
 	if (!(res == kResultOk || res == kNotImplemented)) {
-		DEBUG_TRACE (DEBUG::VST3Config, "VST3PI::connect_components Cannot connect controller, ignored.\n");
+		DEBUG_TRACE (DEBUG::VST3Config, "VST3PI::connect_components Cannot connect component to controller\n");
 	}
 
 	return true;
@@ -1248,60 +1252,17 @@ VST3PI::connect_components ()
 bool
 VST3PI::disconnect_components ()
 {
-	FUnknownPtr<Vst::IConnectionPoint> componentCP (_component);
-	FUnknownPtr<Vst::IConnectionPoint> controllerCP (_controller);
-	if (!componentCP || !controllerCP) {
+	if (!_component_cproxy || !_controller_cproxy) {
 		return false;
 	}
 
-	bool res = kResultTrue == componentCP->disconnect (this);
-	res &= kResultTrue == controllerCP->disconnect (this);
-	return res;
-}
+	bool rv = _component_cproxy->disconnect ();
+	rv &= _controller_cproxy->disconnect ();
 
-tresult
-VST3PI::connect (Vst::IConnectionPoint* other)
-{
-	if (!other) {
-		return kInvalidArgument;
-	}
-	_connections.push_back (other);
-	return kResultTrue;
-}
+	_component_cproxy.reset ();
+	_controller_cproxy.reset ();
 
-tresult
-VST3PI::disconnect (Vst::IConnectionPoint* other)
-{
-	std::vector <Vst::IConnectionPoint*>::iterator i = std::find (_connections.begin(), _connections.end(), other);
-	if (i != _connections.end()) {
-		_connections.erase (i);
-		return kResultTrue;
-	}
-	return kInvalidArgument;
-}
-
-tresult
-VST3PI::notify (Vst::IMessage* msg)
-{
-	DEBUG_TRACE (DEBUG::VST3Callbacks, "VST3PI::notify.\n");
-	for (std::vector <Vst::IConnectionPoint*>::const_iterator i = _connections.begin(); i != _connections.end(); ++i) {
-		/* TODO delegate to GUI thread if available
-		 * see ./libs/pbd/pbd/event_loop.h ir->call_slot ()
-		 * and HostMessage()
-		 */
-		(*i)->notify (msg);
-	}
-
-	FUnknownPtr<Vst::IConnectionPoint> componentCP (_component);
-	FUnknownPtr<Vst::IConnectionPoint> controllerCP (_controller);
-	if (componentCP) {
-		componentCP->notify (msg);
-	}
-	if (controllerCP) {
-		controllerCP->notify (msg);
-	}
-
-	return kResultTrue;
+	return rv;
 }
 
 tresult
@@ -1311,7 +1272,6 @@ VST3PI::queryInterface (const TUID _iid, void** obj)
 	QUERY_INTERFACE (_iid, obj, Vst::IComponentHandler::iid, Vst::IComponentHandler)
 	QUERY_INTERFACE (_iid, obj, Vst::IComponentHandler2::iid, Vst::IComponentHandler2)
 
-	QUERY_INTERFACE (_iid, obj, Vst::IConnectionPoint::iid, Vst::IConnectionPoint)
 	QUERY_INTERFACE (_iid, obj, Vst::IUnitHandler::iid, Vst::IUnitHandler)
 
 	QUERY_INTERFACE (_iid, obj, Presonus::IContextInfoProvider::iid, Presonus::IContextInfoProvider)
