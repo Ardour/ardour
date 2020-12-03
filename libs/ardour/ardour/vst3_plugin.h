@@ -25,27 +25,27 @@
 
 #include <boost/optional.hpp>
 
-#include "pbd/signals.h"
 #include "pbd/search_path.h"
+#include "pbd/signals.h"
 
 #include "ardour/plugin.h"
 #include "ardour/vst3_host.h"
 
-namespace ARDOUR {
+namespace ARDOUR
+{
 class VST3PluginModule;
 class AutomationList;
 }
 
 #if defined(__clang__)
-#    pragma clang diagnostic push
-#    pragma clang diagnostic ignored "-Wnon-virtual-dtor"
+# pragma clang diagnostic push
+# pragma clang diagnostic ignored "-Wnon-virtual-dtor"
 #elif __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)
-#    pragma GCC diagnostic push
-#    pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
 #endif
 
 namespace Steinberg {
-
 /* VST3 hosted Plugin abstraction Implementation
  *
  * For convenience this is placed in the Steinberg namespace.
@@ -92,32 +92,35 @@ public:
 	tresult PLUGIN_API endEditContextInfoValue (FIDString) SMTG_OVERRIDE;
 
 	/* GUI */
-	bool has_editor () const;
+	bool       has_editor () const;
 	IPlugView* view ();
-	void close_view ();
-	PBD::Signal2<void, int, int> OnResizeView;
+	void       close_view ();
+	void       update_contoller_param ();
 #if SMTG_OS_LINUX
 	void set_runloop (Linux::IRunLoop*);
 #endif
-	void update_contoller_param ();
+	PBD::Signal2<void, int, int> OnResizeView;
 
 	tresult PLUGIN_API queryInterface (const TUID _iid, void** obj) SMTG_OVERRIDE;
 	uint32  PLUGIN_API addRef () SMTG_OVERRIDE { return 1; }
 	uint32  PLUGIN_API release () SMTG_OVERRIDE { return 1; }
 
+	FUID const& fuid () const { return _fuid; }
+
 	/* Ardour Preset Helpers */
 	Vst::IUnitInfo* unit_info ();
-	FUID const& fuid() const { return _fuid; }
-	Vst::ParameterInfo const& program_change_port() const { return  _program_change_port; }
-	void   set_n_factory_presets (size_t n) { _n_factory_presets = n; }
+	Vst::ParameterInfo const& program_change_port () const { return _program_change_port; }
+
+	void set_n_factory_presets (size_t n) { _n_factory_presets = n; }
 	size_t n_factory_presets () const { return _n_factory_presets; }
 
 	/* API for Ardour -- Ports */
-	uint32_t    designated_bypass_port () const { return _port_id_bypass; }
-	uint32_t    parameter_count () const { return _ctrl_params.size (); }
-	bool        parameter_is_automatable (uint32_t p) const { return _ctrl_params[p].automatable; }
-	bool        parameter_is_readonly (uint32_t p) const { return _ctrl_params[p].read_only; }
-	std::string parameter_label (uint32_t p) const { return _ctrl_params[p].label; }
+	uint32_t designated_bypass_port ()         const { return _port_id_bypass; }
+	uint32_t parameter_count ()                const { return _ctrl_params.size (); }
+	bool parameter_is_automatable (uint32_t p) const { return _ctrl_params[p].automatable; }
+	bool parameter_is_readonly (uint32_t p)    const { return _ctrl_params[p].read_only; }
+	std::string parameter_label (uint32_t p)   const { return _ctrl_params[p].label; }
+
 	float       default_value (uint32_t p) const;
 	void        get_parameter_descriptor (uint32_t, ARDOUR::ParameterDescriptor&) const;
 	std::string print_parameter (uint32_t p) const;
@@ -147,20 +150,28 @@ public:
 	std::string  format_parameter (uint32_t p) const;
 	Vst::ParamID index_to_id (uint32_t) const;
 
-	enum ParameterChange { BeginGesture, EndGesture , ValueChange, InternalChange, PresetChange };
+	enum ParameterChange { BeginGesture,
+	                       EndGesture,
+	                       ValueChange,
+	                       InternalChange,
+	                       PresetChange };
+
 	PBD::Signal3<void, ParameterChange, uint32_t, float> OnParameterChange;
 
 	/* API for Ardour -- Setup/Processing */
-	uint32_t  plugin_latency ();
-	bool      set_block_size (int32_t);
-	bool      activate ();
-	bool      deactivate ();
+	uint32_t plugin_latency ();
+	bool     set_block_size (int32_t);
+	bool     activate ();
+	bool     deactivate ();
 
 	/* State */
 	bool save_state (RAMStream& stream);
 	bool load_state (RAMStream& stream);
 
-	Vst::ProcessContext& context () { return _context; }
+	Vst::ProcessContext& context ()
+	{
+		return _context;
+	}
 
 	void set_owner (ARDOUR::SessionObject* o);
 
@@ -169,7 +180,10 @@ public:
 	void process (float** ins, float** outs, uint32_t n_samples);
 
 	/* PSL Extension */
-	Vst::IEditController* controller () const { return _controller; }
+	Vst::IEditController* controller () const
+	{
+		return _controller;
+	}
 	bool add_slave (Vst::IEditController*, bool);
 	bool remove_slave (Vst::IEditController*);
 
@@ -197,7 +211,7 @@ private:
 
 	void set_event_bus_state (bool enabled);
 
-	bool midi_controller (int32_t, int16_t, Vst::CtrlNumber, Vst::ParamID &id);
+	bool midi_controller (int32_t, int16_t, Vst::CtrlNumber, Vst::ParamID& id);
 	bool live_midi_cc (int32_t, int16_t, Vst::CtrlNumber);
 
 	bool setup_info_listener ();
@@ -304,21 +318,25 @@ public:
 	uint32_t nth_parameter (uint32_t port, bool& ok) const;
 	bool     print_parameter (uint32_t, std::string&) const;
 
-	bool parameter_is_audio (uint32_t) const { return false; }
+	bool parameter_is_audio (uint32_t)   const { return false; }
 	bool parameter_is_control (uint32_t) const { return true; }
+
 	bool parameter_is_input (uint32_t) const;
 	bool parameter_is_output (uint32_t) const;
 
 	uint32_t designated_bypass_port ();
 
 	std::set<Evoral::Parameter> automatable () const;
-	std::string describe_parameter (Evoral::Parameter);
-	IOPortDescription describe_io_port (DataType dt, bool input, uint32_t id) const;
-	PluginOutputConfiguration possible_output () const;
+	std::string                 describe_parameter (Evoral::Parameter);
+	IOPortDescription           describe_io_port (DataType dt, bool input, uint32_t id) const;
+	PluginOutputConfiguration   possible_output () const;
 
 	void set_automation_control (uint32_t, boost::shared_ptr<ARDOUR::AutomationControl>);
 
-	std::string state_node_name () const { return "vst3"; }
+	std::string state_node_name () const
+	{
+		return "vst3";
+	}
 
 	void add_state (XMLNode*) const;
 	int  set_state (const XMLNode&, int version);
@@ -327,8 +345,15 @@ public:
 	std::string do_save_preset (std::string);
 	void        do_remove_preset (std::string);
 
-	void activate ()   { _plug->activate (); }
-	void deactivate () { _plug->deactivate (); }
+	void activate ()
+	{
+		_plug->activate ();
+	}
+
+	void deactivate ()
+	{
+		_plug->deactivate ();
+	}
 
 	int set_block_size (pframes_t);
 
@@ -342,13 +367,13 @@ public:
 	                     ChanMapping const& in, ChanMapping const& out,
 	                     pframes_t nframes, samplecnt_t offset);
 
-	bool has_editor () const;
+	bool                  has_editor () const;
 	Steinberg::IPlugView* view ();
-	void close_view ();
+	void                  close_view ();
+	void                  update_contoller_param ();
 #if SMTG_OS_LINUX
 	void set_runloop (Steinberg::Linux::IRunLoop*);
 #endif
-	void update_contoller_param ();
 
 	PBD::Signal2<void, int, int> OnResizeView;
 
@@ -362,9 +387,10 @@ private:
 	PBD::Searchpath preset_search_path () const;
 
 	Steinberg::VST3PI* _plug;
+
 	PBD::ScopedConnectionList _connections;
 
-	std::map <std::string, std::string> _preset_uri_map;
+	std::map<std::string, std::string> _preset_uri_map;
 
 	std::vector<bool> _connected_inputs;
 	std::vector<bool> _connected_outputs;
@@ -380,7 +406,7 @@ public:
 
 	PluginPtr                         load (Session& session);
 	std::vector<Plugin::PresetRecord> get_presets (bool user_only) const;
-	bool is_instrument () const;
+	bool                              is_instrument () const;
 
 	boost::shared_ptr<VST3PluginModule> m;
 };

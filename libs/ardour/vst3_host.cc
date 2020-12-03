@@ -17,8 +17,8 @@
  *
  */
 
-#include <ctype.h>
 #include <algorithm>
+#include <ctype.h>
 
 #if (__cplusplus >= 201103L)
 #include <boost/make_unique.hpp>
@@ -27,8 +27,8 @@
 #include "ardour/vst3_host.h"
 
 #ifndef VST3_SCANNER_APP
-#include "pbd/compose.h"
 #include "ardour/debug.h"
+#include "pbd/compose.h"
 #endif
 
 using namespace Steinberg;
@@ -102,7 +102,7 @@ Steinberg::utf8_to_tchar (Vst::TChar* rv, const char* s, size_t l)
 		memset (rv, 0, sizeof (Vst::TChar));
 		return false;
 	}
-	if (l > 0 && l <= (size_t) len) {
+	if (l > 0 && l <= (size_t)len) {
 		len = l - 1;
 	}
 	memcpy (rv, s16, len * sizeof (Vst::TChar));
@@ -114,7 +114,7 @@ Steinberg::utf8_to_tchar (Vst::TChar* rv, const char* s, size_t l)
 bool
 Steinberg::utf8_to_tchar (Vst::TChar* rv, std::string const& s, size_t l)
 {
-	return utf8_to_tchar (rv, s.c_str(), l);
+	return utf8_to_tchar (rv, s.c_str (), l);
 }
 
 /* ****************************************************************************/
@@ -341,13 +341,13 @@ ConnectionProxy::connect (Vst::IConnectionPoint* dst)
 }
 
 tresult
- ConnectionProxy::disconnect (Vst::IConnectionPoint* dst)
+ConnectionProxy::disconnect (Vst::IConnectionPoint* dst)
 {
-  if (!dst) {
-    return kInvalidArgument;
+	if (!dst) {
+		return kInvalidArgument;
 	}
 
-  if (dst != _dst) {
+	if (dst != _dst) {
 		return kInvalidArgument;
 	}
 
@@ -360,15 +360,14 @@ tresult
 	return kResultTrue;
 }
 
-
 tresult
 ConnectionProxy::notify (Vst::IMessage* message)
 {
-  if (!_dst) {
+	if (!_dst) {
 		return kResultFalse;
 	}
 #if 0
-	if (strcmp ("ArdourGUI",  pthread_name ())) {
+	if (strcmp ("ArdourGUI", pthread_name ())) {
 		return kResultFalse;
 	}
 #endif
@@ -378,7 +377,7 @@ ConnectionProxy::notify (Vst::IMessage* message)
 bool
 ConnectionProxy::disconnect ()
 {
-  return kResultTrue == disconnect (_dst);
+	return kResultTrue == disconnect (_dst);
 }
 
 /* ****************************************************************************/
@@ -491,7 +490,7 @@ HostApplication::queryInterface (const char* _iid, void** obj)
 #endif
 
 #ifndef VST3_SCANNER_APP
-	if (DEBUG_ENABLED(PBD::DEBUG::VST3Config)) {
+	if (DEBUG_ENABLED (PBD::DEBUG::VST3Config)) {
 		char fuid[33];
 		FUID::fromTUID (_iid).toString (fuid);
 		DEBUG_TRACE (PBD::DEBUG::VST3Config, string_compose ("HostApplication::queryInterface not supported: %1\n", fuid));
@@ -530,14 +529,13 @@ HostApplication::createInstance (TUID cid, TUID _iid, void** obj)
 tresult
 Vst3ParamValueQueue::getPoint (int32 index, int32& sampleOffset, Vst::ParamValue& value)
 {
-	if (index >=0 && index < (int32)_values.size ()) {
+	if (index >= 0 && index < (int32)_values.size ()) {
 		const Value& v = _values[index];
-		sampleOffset = v.sampleOffset;
-		value        = v.value;
+		sampleOffset   = v.sampleOffset;
+		value          = v.value;
 		return kResultTrue;
 	}
 	return kResultFalse;
-
 }
 
 tresult
@@ -547,7 +545,7 @@ Vst3ParamValueQueue::addPoint (int32 sampleOffset, Vst::ParamValue value, int32&
 	for (uint32 i = 0; i < _values.size (); ++i) {
 		if (_values[i].sampleOffset == sampleOffset) {
 			_values[i].value = value;
-			index = i;
+			index            = i;
 			return kResultTrue;
 		} else if (_values[i].sampleOffset > sampleOffset) {
 			dest_index = i;
@@ -571,27 +569,27 @@ Vst3ParamValueQueue::addPoint (int32 sampleOffset, Vst::ParamValue value, int32&
 Vst::IParamValueQueue*
 Vst3ParameterChanges::getParameterData (int32 index)
 {
-  if (index < _used_queue_count) {
-    return &_queue[index];
+	if (index < _used_queue_count) {
+		return &_queue[index];
 	}
-  return 0;
+	return 0;
 }
 
 Vst::IParamValueQueue*
 Vst3ParameterChanges::addParameterData (Vst::ParamID const& pid, int32& index)
 {
-  for (int32 i = 0; i < _used_queue_count; ++i) {
-    if (_queue[i].getParameterId () == pid) {
-      index = i;
-      return &_queue[i];
-    }
-  }
+	for (int32 i = 0; i < _used_queue_count; ++i) {
+		if (_queue[i].getParameterId () == pid) {
+			index = i;
+			return &_queue[i];
+		}
+	}
 
-  if (_used_queue_count < (int32)_queue.size ()) {
+	if (_used_queue_count < (int32)_queue.size ()) {
 		index = _used_queue_count++;
 		_queue[index].setParameterId (pid);
 		return &_queue[index];
-  }
+	}
 	index = 0;
 	return 0;
 }
@@ -628,7 +626,7 @@ RAMStream::RAMStream (std::string const& fn)
 	, _pos (0)
 	, _readonly (true)
 {
-	gchar* buf = NULL;
+	gchar* buf    = NULL;
 	gsize  length = 0;
 
 	if (!g_file_get_contents (fn.c_str (), &buf, &length, NULL)) {
@@ -649,15 +647,15 @@ RAMStream::~RAMStream ()
 tresult
 RAMStream::queryInterface (const TUID _iid, void** obj)
 {
-  QUERY_INTERFACE (_iid, obj, FUnknown::iid, IBStream)
-  QUERY_INTERFACE (_iid, obj, IBStream::iid, IBStream)
-  QUERY_INTERFACE (_iid, obj, FUnknown::iid, ISizeableStream)
-  QUERY_INTERFACE (_iid, obj, ISizeableStream::iid, ISizeableStream)
-  QUERY_INTERFACE (_iid, obj, FUnknown::iid, Vst::IStreamAttributes)
-  QUERY_INTERFACE (_iid, obj, Vst::IStreamAttributes::iid, Vst::IStreamAttributes)
+	QUERY_INTERFACE (_iid, obj, FUnknown::iid, IBStream)
+	QUERY_INTERFACE (_iid, obj, IBStream::iid, IBStream)
+	QUERY_INTERFACE (_iid, obj, FUnknown::iid, ISizeableStream)
+	QUERY_INTERFACE (_iid, obj, ISizeableStream::iid, ISizeableStream)
+	QUERY_INTERFACE (_iid, obj, FUnknown::iid, Vst::IStreamAttributes)
+	QUERY_INTERFACE (_iid, obj, Vst::IStreamAttributes::iid, Vst::IStreamAttributes)
 
-  *obj = nullptr;
-  return kNoInterface;
+	*obj = nullptr;
+	return kNoInterface;
 }
 
 bool
@@ -665,7 +663,7 @@ RAMStream::reallocate_buffer (int64 size, bool exact)
 {
 	if (size <= 0) {
 		free (_data);
-		_data = 0;
+		_data  = 0;
 		_alloc = 0;
 		return true;
 	}
@@ -686,7 +684,7 @@ RAMStream::reallocate_buffer (int64 size, bool exact)
 		}
 	}
 
-	_data = (uint8_t*) realloc (_data, size);
+	_data = (uint8_t*)realloc (_data, size);
 
 	if (_data) {
 		_alloc = size;
@@ -710,7 +708,7 @@ RAMStream::read (void* buffer, int32 n_bytes, int32* n_read)
 	}
 
 	if (n_bytes > 0) {
-		memcpy(buffer, &_data[_pos], n_bytes);
+		memcpy (buffer, &_data[_pos], n_bytes);
 		_pos += n_bytes;
 	}
 	if (n_read) {
@@ -786,7 +784,8 @@ RAMStream::tell (int64* pos)
 }
 
 bool
-RAMStream::write_int32 (int32 i) {
+RAMStream::write_int32 (int32 i)
+{
 	/* pluginterfaces/base/ftypes.h */
 #if BYTEORDER == kBigEndian
 	SWAP_32 (i)
@@ -816,33 +815,34 @@ struct GUIDStruct {
 	uint32_t data1;
 	uint16_t data2;
 	uint16_t data3;
-	uint8_t data4[8];
+	uint8_t  data4[8];
 };
 #endif
 
 bool
 RAMStream::write_TUID (const TUID& tuid)
 {
-	int i = 0;
+	int   i       = 0;
 	int32 n_bytes = 0;
-	char buf[Vst::kClassIDSize + 1];
+	char  buf[Vst::kClassIDSize + 1];
 
 #if COM_COMPATIBLE
 	GUIDStruct guid;
-	memcpy (&guid, tuid, sizeof(GUIDStruct));
-	sprintf(buf, "%08X%04X%04X", guid.data1, guid.data2, guid.data3);
+	memcpy (&guid, tuid, sizeof (GUIDStruct));
+	sprintf (buf, "%08X%04X%04X", guid.data1, guid.data2, guid.data3);
 	i += 8;
 #endif
 
-	for (; i < (int)sizeof(TUID); ++i){
-		sprintf(buf + 2 * i, "%02X", (uint8_t)tuid[i]);
+	for (; i < (int)sizeof (TUID); ++i) {
+		sprintf (buf + 2 * i, "%02X", (uint8_t)tuid[i]);
 	}
 	write (buf, Vst::kClassIDSize, &n_bytes);
 	return n_bytes == Vst::kClassIDSize;
 }
 
 bool
-RAMStream::read_int32 (int32& i) {
+RAMStream::read_int32 (int32& i)
+{
 	if (!read_pod (i)) {
 		return false;
 	}
@@ -853,7 +853,8 @@ RAMStream::read_int32 (int32& i) {
 }
 
 bool
-RAMStream::read_int64 (int64& i) {
+RAMStream::read_int64 (int64& i)
+{
 	if (!read_pod (i)) {
 		return false;
 	}
@@ -872,11 +873,11 @@ RAMStream::read_ChunkID (Vst::ChunkID& id)
 bool
 RAMStream::read_TUID (TUID& tuid)
 {
-	int i = 0;
+	int   i       = 0;
 	int32 n_bytes = 0;
-	char buf[Vst::kClassIDSize+1];
+	char  buf[Vst::kClassIDSize + 1];
 
-	read((void *)buf, Vst::kClassIDSize, &n_bytes);
+	read ((void*)buf, Vst::kClassIDSize, &n_bytes);
 	if (n_bytes != Vst::kClassIDSize) {
 		return false;
 	}
@@ -885,14 +886,14 @@ RAMStream::read_TUID (TUID& tuid)
 
 #if COM_COMPATIBLE
 	GUIDStruct guid;
-	sscanf (buf,    "%08x",  &guid.data1);
-	sscanf (buf+8,  "%04hx", &guid.data2);
-	sscanf (buf+12, "%04hx", &guid.data3);
-	memcpy (tuid, &guid, sizeof(TUID) >> 1);
+	sscanf (buf,      "%08x",  &guid.data1);
+	sscanf (buf + 8,  "%04hx", &guid.data2);
+	sscanf (buf + 12, "%04hx", &guid.data3);
+	memcpy (tuid, &guid, sizeof (TUID) >> 1);
 	i += 16;
 #endif
 
-	for (; i < Vst::kClassIDSize; i += 2){
+	for (; i < Vst::kClassIDSize; i += 2) {
 		uint32_t temp;
 		sscanf (buf + i, "%02X", &temp);
 		tuid[i >> 1] = temp;
@@ -931,9 +932,9 @@ RAMStream::getAttributes ()
 
 #ifndef NDEBUG
 
+#include <iomanip>
 #include <iostream>
 #include <sstream>
-#include <iomanip>
 
 void
 RAMStream::hexdump (int64 max_len) const
@@ -941,14 +942,14 @@ RAMStream::hexdump (int64 max_len) const
 	std::ostringstream out;
 
 	size_t row_size = 16;
-	size_t length = max_len > 0 ? std::min (max_len, _size) : _size;
+	size_t length   = max_len > 0 ? std::min (max_len, _size) : _size;
 
-	out << std::setfill('0');
+	out << std::setfill ('0');
 	for (size_t i = 0; i < length; i += row_size) {
-		out << "0x" << std::setw(6) << std::hex << i << ": ";
+		out << "0x" << std::setw (6) << std::hex << i << ": ";
 		for (size_t j = 0; j < row_size; ++j) {
 			if (i + j < length) {
-				out << std::hex << std::setw(2) << static_cast<int>(_data[i + j]) << " ";
+				out << std::hex << std::setw (2) << static_cast<int> (_data[i + j]) << " ";
 			} else {
 				out << "   ";
 			}
@@ -957,8 +958,8 @@ RAMStream::hexdump (int64 max_len) const
 		if (true) {
 			for (size_t j = 0; j < row_size; ++j) {
 				if (i + j < length) {
-					if (isprint(_data[i + j])) {
-						out << static_cast<char>(_data[i + j]);
+					if (isprint (_data[i + j])) {
+						out << static_cast<char> (_data[i + j]);
 					} else {
 						out << ".";
 					}
@@ -975,7 +976,7 @@ ROMStream::ROMStream (IBStream& src, TSize offset, TSize size)
 	: _stream (src)
 	, _offset (offset)
 	, _size   (size)
-	, _pos   (0)
+	, _pos    (0)
 {
 	_stream.addRef ();
 }
@@ -988,11 +989,11 @@ ROMStream::~ROMStream ()
 tresult
 ROMStream::queryInterface (const TUID _iid, void** obj)
 {
-  QUERY_INTERFACE (_iid, obj, FUnknown::iid, IBStream)
-  QUERY_INTERFACE (_iid, obj, IBStream::iid, IBStream)
+	QUERY_INTERFACE (_iid, obj, FUnknown::iid, IBStream)
+	QUERY_INTERFACE (_iid, obj, IBStream::iid, IBStream)
 
-  *obj = nullptr;
-  return kNoInterface;
+	*obj = nullptr;
+	return kNoInterface;
 }
 
 tresult
@@ -1019,16 +1020,16 @@ ROMStream::read (void* buffer, int32 n_bytes, int32* n_read)
 	}
 
 	int32 _n_read = 0;
-	result = _stream.read (buffer, n_bytes, &_n_read);
+	result        = _stream.read (buffer, n_bytes, &_n_read);
 
-  if (_n_read > 0) {
-    _pos += _n_read;
+	if (_n_read > 0) {
+		_pos += _n_read;
 	}
-  if (n_read) {
-    *n_read = _n_read;
+	if (n_read) {
+		*n_read = _n_read;
 	}
 
-  return result;
+	return result;
 }
 
 tresult
