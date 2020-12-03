@@ -362,7 +362,7 @@ int Alsa_pcmi::capt_done (int len)
 
 void Alsa_pcmi::printinfo (void)
 {
-	fprintf (stdout, "playback :");
+	fprintf (stdout, "playback");
 	if (_play_handle)
 	{
 		fprintf (stdout, "\n  nchan  : %d\n", _play_nchan);
@@ -370,9 +370,11 @@ void Alsa_pcmi::printinfo (void)
 		fprintf (stdout, "  fsize  : %ld\n", _fsize);
 		fprintf (stdout, "  nfrag  : %d\n", _real_nfrag);
 		fprintf (stdout, "  format : %s\n", snd_pcm_format_name (_play_format));
+	} else {
+		fprintf (stdout, " : not enabled\n");
 	}
-	else fprintf (stdout, " not enabled\n");
-	fprintf (stdout, "capture  :");
+
+	fprintf (stdout, "capture");
 	if (_capt_handle)
 	{
 		fprintf (stdout, "\n  nchan  : %d\n", _capt_nchan);
@@ -381,8 +383,9 @@ void Alsa_pcmi::printinfo (void)
 		fprintf (stdout, "  nfrag  : %d\n", _capt_nfrag);
 		fprintf (stdout, "  format : %s\n", snd_pcm_format_name (_capt_format));
 		if (_play_handle) fprintf (stdout, "%s\n", _synced ? "synced" : "not synced");
+	} else {
+		fprintf (stdout, "  : not enabled\n");
 	}
-	else fprintf (stdout, " not enabled\n");
 }
 
 

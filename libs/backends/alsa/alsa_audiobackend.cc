@@ -903,11 +903,15 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 	}
 
 #ifndef NDEBUG
+	fprintf (stdout, " --[[ ALSA Device %s\n", alsa_device.c_str());
 	_pcmi->printinfo ();
+	fprintf (stdout, " --]]\n");
 #else
 	/* If any debug parameter is set, print info */
 	if (getenv ("ZITA_ALSA_PCMI_DEBUG")) {
+		fprintf (stdout, " --[[ ALSA Device %s\n", alsa_device.c_str());
 		_pcmi->printinfo ();
+		fprintf (stdout, " --]]\n");
 	}
 #endif
 
