@@ -180,13 +180,13 @@ Source::set_state (const XMLNode& node, int version)
 	}
 
 	if (node.get_property ("natural-position", ts)) {
-		_natural_position = ts;
+		_natural_position = timepos_t (ts);
 		_have_natural_position = true;
 	} else if (node.get_property ("timeline-position", ts)) {
 		/* some older versions of ardour might have stored this with
 		   this property name.
 		*/
-		_natural_position = ts;
+		_natural_position = timepos_t (ts);
 		_have_natural_position = true;
 	}
 

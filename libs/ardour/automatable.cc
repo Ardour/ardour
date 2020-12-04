@@ -641,7 +641,7 @@ Automatable::clear_controls ()
 bool
 Automatable::find_next_event (timepos_t const & start, timepos_t const & end, Evoral::ControlEvent& next_event, bool only_active) const
 {
-	next_event.when = start <= end ? std::numeric_limits<double>::max() : 0;
+	next_event.when = start <= end ? timepos_t::max (start.time_domain()) : timepos_t (start.time_domain());
 
 	if (only_active) {
 		boost::shared_ptr<ControlList> cl = _automated_controls.reader ();

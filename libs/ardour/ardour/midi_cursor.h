@@ -45,7 +45,8 @@ struct MidiCursor : public boost::noncopyable {
 
 	void invalidate(bool preserve_notes) {
 		iter.invalidate(preserve_notes ? &active_notes : NULL);
-		last_read_end = 0;
+#warning NUTEMPO this locks last_read_end to BeatTime which may not be good
+		last_read_end = Temporal::timepos_t (Temporal::BeatTime);
 	}
 
 	Evoral::Sequence<Temporal::Beats>::const_iterator        iter;

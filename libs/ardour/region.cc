@@ -745,7 +745,7 @@ Region::nudge_position (timecnt_t const & n)
 		}
 	} else {
 		if (position() < -n) {
-			new_position = 0;
+			new_position = timepos_t (_position.val().time_domain());
 		} else {
 			new_position += n;
 		}
@@ -867,7 +867,7 @@ Region::modify_front (timepos_t const & new_position, bool reset_fade)
 	if (position() > start()) {
 		source_zero = source_position ();
 	} else {
-		source_zero = 0; // its actually negative, but this will work for us
+		source_zero = timepos_t (source_position().time_domain()); // its actually negative, but this will work for us
 	}
 
 	if (new_position < last) { /* can't trim it zero or negative length */
@@ -1159,7 +1159,7 @@ Region::adjust_to_sync (timepos_t const & pos) const
 		if (pos > offset) {
 			p.shift_earlier (offset);
 		} else {
-			p = 0;
+			p = timepos_t (p.time_domain());
 		}
 	} else {
 		if (timepos_t::max (p.time_domain()).earlier (timecnt_t (p, p)) > offset) {
@@ -2011,7 +2011,7 @@ Region::region_beats_to_absolute_time (Temporal::Beats beats) const
 	/* beats is an additional offset to the start point of the region, from
 	   the effective start of the source on the timeline.
 	*/
-	return source_position() + start () + beats;
+	return source_position() + start () + timepos_t (beats);
 }
 
 Temporal::timepos_t
@@ -2021,7 +2021,7 @@ Region::source_beats_to_absolute_time (Temporal::Beats beats) const
 	   the source. The start of the source is an implied position given by
 	   region->position - region->start
 	*/
-	return source_position() + beats;
+	return source_position() + timepos_t (beats);
 }
 
 Temporal::Beats

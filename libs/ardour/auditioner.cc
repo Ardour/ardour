@@ -400,7 +400,7 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 	/* can't audition from a negative sync point */
 
 	if (dir < 0) {
-		offset = 0;
+		offset = timecnt_t (Temporal::AudioTime);
 	}
 
 	_disk_reader->seek (offset.samples(), true);
