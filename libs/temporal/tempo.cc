@@ -2263,7 +2263,7 @@ TempoMap::full_duration_at (timepos_t const & pos, timecnt_t const & duration, T
 				break;
 			case AudioTime:
 				/* Determine beats at sc pos, so that we can add beats */
-				p = metric_at (pos).quarters_at (pos.superclocks());
+				p = timepos_t (metric_at (pos).quarters_at (pos.superclocks()));
 				break;
 			}
 			/* add beats */
@@ -2287,7 +2287,7 @@ TempoMap::full_duration_at (timepos_t const & pos, timecnt_t const & duration, T
 				break;
 			case BeatTime:
 				/* determined sc at beat position so we can add superclocks */
-				p = metric_at (pos).superclock_at (pos.beats());
+				p = timepos_t (metric_at (pos).sample_at (pos.beats()));
 				break;
 			}
 			/* add superclocks */

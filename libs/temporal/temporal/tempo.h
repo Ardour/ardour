@@ -374,14 +374,16 @@ class LIBTEMPORAL_API TempoPoint : public Tempo, public Point
 		return *this;
 	}
 
+	/* Given that this tempo point controls tempo for the time indicated by
+	 * the argument of the following 4 functions, return information about
+	 * that time. The first 3 return convert between domains (with
+	 * ::sample_at() just being a convenience function); the fourth returns
+	 * information about the tempo at that time.
+	 */
+
 	superclock_t superclock_at (Beats const & qn) const;
-
-	void compute_omega (samplecnt_t sr, superclock_t end_superclocks_per_note_type, Beats const & duration);
-
-	bool actually_ramped () const { return Tempo::ramped() && (_omega != 0); }
-
-	Beats quarters_at (superclock_t sc) const;
-
+	samplepos_t  sample_at (Beats const & qn) const { return Temporal::superclock_to_samples (superclock_at (qn), _thread_sample_rate); }
+	Beats        quarters_at (superclock_t sc) const;
 	superclock_t superclocks_per_note_type_at (timepos_t const &) const;
 
 	/* This method should be used only for display purposes, and even
@@ -393,6 +395,10 @@ class LIBTEMPORAL_API TempoPoint : public Tempo, public Point
 		return (superclock_ticks_per_second * 60.0) / superclocks_per_note_type_at (pos);
 	}
 
+	double omega() const { return _omega; }
+	void compute_omega (samplecnt_t sr, superclock_t end_superclocks_per_note_type, Beats const & duration);
+	bool actually_ramped () const { return Tempo::ramped() && (_omega != 0); }
+
 	XMLNode& get_state () const;
 	int set_state (XMLNode const&, int version);
 
@@ -402,8 +408,6 @@ class LIBTEMPORAL_API TempoPoint : public Tempo, public Point
 	bool operator!= (TempoPoint const & other) const {
 		return Tempo::operator!= (other) || Point::operator!= (other);
 	}
-
-	double omega() const { return _omega; }
 
 	boost::intrusive::list_member_hook<> _tempo_hook;
 
@@ -439,9 +443,10 @@ class LIBTEMPORAL_API TempoMetric {
 	 */
 
 	superclock_t superclock_at (Beats const & qn) const { return _tempo->superclock_at (qn); }
-	Beats quarters_at (superclock_t sc) const { return _tempo->quarters_at (sc); }
-	Beats quarters_at (BBT_Time const & bbt) const { return _meter->quarters_at (bbt); }
-	BBT_Time bbt_at (Beats const & beats) const { return _meter->bbt_at (beats); }
+	samplepos_t  sample_at (Beats const & qn) const { return _tempo->sample_at (qn); }
+	Beats        quarters_at (superclock_t sc) const { return _tempo->quarters_at (sc); }
+	Beats        quarters_at (BBT_Time const & bbt) const { return _meter->quarters_at (bbt); }
+	BBT_Time     bbt_at (Beats const & beats) const { return _meter->bbt_at (beats); }
 
 	superclock_t superclocks_per_note_type () const { return _tempo->superclocks_per_note_type (); }
 	superclock_t end_superclocks_per_note_type () const {return _tempo->end_superclocks_per_note_type (); }

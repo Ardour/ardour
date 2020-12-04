@@ -51,8 +51,9 @@ class LIBTEMPORAL_API timepos_t : public int62_t  {
 	/* for now (Sept2020) do not allow implicit type conversions */
 
 	explicit timepos_t (samplepos_t s) : int62_t (false, samples_to_superclock (s, _thread_sample_rate)) {}
-	explicit timepos_t (timecnt_t const &); /* will throw() if val is negative */
 	explicit timepos_t (Temporal::Beats const & b) : int62_t (false, b.to_ticks()) {}
+
+	explicit timepos_t (timecnt_t const &); /* will throw() if val is negative */
 
 	/* superclock_t and samplepos_t are the same underlying primitive type,
 	 * which means we cannot use polymorphism to differentiate them. But it
@@ -75,13 +76,11 @@ class LIBTEMPORAL_API timepos_t : public int62_t  {
 	Temporal::TimeDomain time_domain () const { if (flagged()) return Temporal::BeatTime; return Temporal::AudioTime; }
 
 	superclock_t superclocks() const { if (is_superclock()) return val(); return _superclocks (); }
-	int64_t samples() const { return superclock_to_samples (superclocks(), _thread_sample_rate); }
-	int64_t ticks() const { if (is_beats()) return val(); return _ticks (); }
-	Beats beats() const { if (is_beats()) return Beats::ticks (val()); return _beats (); }
+	int64_t      samples() const { return superclock_to_samples (superclocks(), _thread_sample_rate); }
+	int64_t      ticks() const { if (is_beats()) return val(); return _ticks (); }
+	Beats        beats() const { if (is_beats()) return Beats::ticks (val()); return _beats (); }
 
 	timepos_t & operator= (timecnt_t const & t); /* will throw() if val is negative */
-	timepos_t & operator= (superclock_t s) { v = s; return *this; }
-	timepos_t & operator= (Temporal::Beats const & b) { operator= (build (true, b.to_ticks())); return *this; }
 
 	timepos_t operator-() const { return timepos_t (int62_t::operator-()); }
 
@@ -101,8 +100,7 @@ class LIBTEMPORAL_API timepos_t : public int62_t  {
 	bool operator>= (timepos_t const & other) const { if (is_beats() == other.is_beats()) return val() >= other.val(); return expensive_gte (other); }
 
 	timepos_t operator+(timecnt_t const & d) const;
-	timepos_t operator+(timepos_t const & d) const       { if (is_beats() == d.is_beats()) return timepos_t (is_beats(), val() + d.val()); return expensive_add (d); }
-	timepos_t operator+(Temporal::Beats const &b ) const { if (is_beats()) return timepos_t (true, ticks() + b.to_ticks()); return expensive_add (b); }
+	timepos_t operator+(timepos_t const & d) const { if (is_beats() == d.is_beats()) return timepos_t (is_beats(), val() + d.val()); return expensive_add (d); }
 
 	/* donn't provide operator+(samplepos_t) or operator+(superclock_t)
 	 * because the compiler can't disambiguate them and neither can we.
@@ -151,19 +149,18 @@ class LIBTEMPORAL_API timepos_t : public int62_t  {
 	*/
 
 	timecnt_t distance (timecnt_t const & p) const;
-	timecnt_t distance (Temporal::Beats const & b) const;
 	timecnt_t distance (timepos_t const & p) const;
 
 	/* computes a new position value that is @param d earlier than this */
 	timepos_t earlier (timepos_t const & d) const; /* treat d as distance measured from timeline origin */
 	timepos_t earlier (timecnt_t const & d) const;
-	timepos_t earlier (Beats const & d) const;
+
 	timepos_t earlier (BBT_Offset const & d) const;
 
 	/* like ::earlier() but changes this. loosely equivalent to operator-= */
 	timepos_t & shift_earlier (timepos_t const & d);
 	timepos_t & shift_earlier (timecnt_t const & d);
-	timepos_t & shift_earlier (Temporal::Beats const &);
+
 	timepos_t & shift_earlier (Temporal::BBT_Offset const &);
 
 	/* given the absence of operator- and thus also operator--, return a
@@ -179,7 +176,7 @@ class LIBTEMPORAL_API timepos_t : public int62_t  {
 
 	timepos_t & operator+=(timecnt_t const & d);
 	timepos_t & operator+=(timepos_t const & d);
-	timepos_t & operator+=(Temporal::Beats const &);
+
 	timepos_t & operator+=(Temporal::BBT_Offset const &);
 
 	timepos_t   operator% (timecnt_t const &) const;
@@ -190,22 +187,22 @@ class LIBTEMPORAL_API timepos_t : public int62_t  {
 	 * along the x (time) axis.
 	 */
 
-	timepos_t operator/(ratio_t const & n) const;
-	timepos_t operator*(ratio_t const & n) const;
-	timepos_t & operator/=(ratio_t const & n);
-	timepos_t & operator*=(ratio_t const & n);
+	timepos_t   operator/  (ratio_t const & n) const;
+	timepos_t   operator*  (ratio_t const & n) const;
+	timepos_t & operator/= (ratio_t const & n);
+	timepos_t & operator*= (ratio_t const & n);
 
-	bool operator<  (superclock_t s) { return v < s; }
+	bool operator<  (samplepos_t s) { return samples() < s; }
 	bool operator<  (Temporal::Beats const & b) { return beats() < b; }
-	bool operator<= (superclock_t s) { return v <= s; }
+	bool operator<= (samplepos_t s) { return samples() <= s; }
 	bool operator<= (Temporal::Beats const & b) { return beats() <= b; }
-	bool operator>  (superclock_t s) { return v > s; }
+	bool operator>  (samplepos_t s) { return samples() > s; }
 	bool operator>  (Temporal::Beats const & b) { return beats() > b; }
-	bool operator>= (superclock_t s) { return v >= s; }
+	bool operator>= (samplepos_t s) { return samples() >= s; }
 	bool operator>= (Temporal::Beats const & b) { return beats() >= b; }
-	bool operator== (superclock_t s) { return v == s; }
+	bool operator== (samplepos_t s) { return samples() == s; }
 	bool operator== (Temporal::Beats const & b) { return beats() == b; }
-	bool operator!= (superclock_t s) { return v != s; }
+	bool operator!= (samplepos_t s) { return samples() != s; }
 	bool operator!= (Temporal::Beats const & b) { return beats() != b; }
 
 	void set_superclock (superclock_t s);
@@ -230,16 +227,15 @@ class LIBTEMPORAL_API timepos_t : public int62_t  {
 	 * when this is using the audio time doamin
 	 */
 
-	superclock_t _superclocks() const;
-
-	/* these two methods are to be called ONLY when we have already that
+	/* these three methods are to be called ONLY when we have already that
 	 * the time domain of this timepos_t does not match the desired return
 	 * type, and so we will need to go to the tempo map to convert
 	 * between domains, which could be expensive.
 	 */
 
-	int64_t _ticks() const;
-	Beats _beats() const;
+	superclock_t _superclocks() const;
+	int64_t      _ticks() const;
+	Beats        _beats() const;
 
 	bool expensive_lt (timepos_t const &) const;
 	bool expensive_lte (timepos_t const &) const;
@@ -251,12 +247,9 @@ class LIBTEMPORAL_API timepos_t : public int62_t  {
 	bool expensive_gt (timecnt_t const &) const;
 	bool expensive_gte(timecnt_t const &) const;
 
-	/* used to compute distance when time domains do not match */
+	/* used to compute stuff when time domains do not match */
 
 	timecnt_t expensive_distance (timepos_t const & p) const;
-	timecnt_t expensive_distance (Beats const &) const;
-
-	timepos_t expensive_add (Temporal::Beats const &) const;
 	timepos_t expensive_add (timepos_t const & s) const;
 
 	int62_t operator- (int62_t) const { assert (0); }

@@ -487,23 +487,22 @@ timepos_t::operator*=(ratio_t const & n)
 }
 
 timepos_t
-timepos_t::expensive_add (Beats const & b) const
+timepos_t::expensive_add (timepos_t const & other) const
 {
-	assert (!is_beats());
+	/* Called when other's time domain does not match our own, requiring us
+	   to call either ::beats() or ::superclocks() on other to convert it to
+	   our time domain.
+	*/
 
-	return timepos_t (beats() + b);
-}
-
-timepos_t
-timepos_t::expensive_add (timepos_t const & t) const
-{
-	assert (is_beats() != t.is_beats ());
+	assert (is_beats() != other.is_beats ());
 
 	if (is_beats()) {
-		return timepos_t (beats() + t.beats());
+		/* we are known to use music time, so val() is in ticks */
+		return timepos_t::from_ticks (val() + other.ticks());
 	}
 
-	return timepos_t::from_superclock (superclocks() + t.superclocks());
+	/* we are known to use audio time, so val() is in superclocks */
+	return timepos_t::from_superclock (val() + other.superclocks());
 }
 
 /* */
@@ -511,16 +510,6 @@ timepos_t::expensive_add (timepos_t const & t) const
 /* ::distance() assumes that @param d is later on the timeline than this, and
  * thus returns a positive value if this condition is satisfied.
  */
-
-timecnt_t
-timepos_t::distance (Beats const & b) const
-{
-	if (is_beats()) {
-		return timecnt_t (b - _beats(), *this);
-	}
-
-	return expensive_distance (b);
-}
 
 timecnt_t
 timepos_t::distance (timepos_t const & other) const
@@ -533,19 +522,15 @@ timepos_t::distance (timepos_t const & other) const
 }
 
 timecnt_t
-timepos_t::expensive_distance (Temporal::Beats const & b) const
-{
-	return timecnt_t (b - beats(), *this);
-}
-
-
-timecnt_t
 timepos_t::expensive_distance (timepos_t const & other) const
 {
 	/* Called when other's time domain does not match our own, requiring us
 	   to call either ::beats() or ::superclocks() on other to convert it to
 	   our time domain.
 	*/
+
+	assert (is_beats() != other.is_beats ());
+
 	if (is_beats()) {
 		/* we are known to use beat time: val() is ticks */
 		return timecnt_t::from_ticks (other.ticks() - val(), *this);
@@ -555,21 +540,6 @@ timepos_t::expensive_distance (timepos_t const & other) const
 }
 
 /* */
-
-timepos_t
-timepos_t::earlier (Temporal::Beats const & b) const
-{
-	Beats bb;
-
-	if (is_superclock()) {
-		TempoMap::SharedPtr tm (TempoMap::use());
-		bb = tm->quarter_note_at (superclocks());
-	} else {
-		bb = beats ();
-	}
-
-	return timepos_t (bb - b);
-}
 
 timepos_t
 timepos_t::earlier (Temporal::BBT_Offset const & offset) const
@@ -671,23 +641,6 @@ timepos_t::shift_earlier (timecnt_t const & d)
 }
 
 timepos_t &
-timepos_t::shift_earlier (Temporal::Beats const & b)
-{
-	Beats bb;
-
-	if (is_superclock()) {
-		TempoMap::SharedPtr tm (TempoMap::use());
-		bb = tm->quarter_note_at (val());
-	} else {
-		bb = beats ();
-	}
-
-	v = (bb - b).to_ticks();
-
-	return *this;
-}
-
-timepos_t &
 timepos_t::shift_earlier (Temporal::BBT_Offset const & offset)
 {
 	TempoMap::SharedPtr tm (TempoMap::use());
@@ -716,19 +669,6 @@ timepos_t::operator+= (Temporal::BBT_Offset const & offset)
 	return *this;
 }
 
-timepos_t &
-timepos_t::operator+=(Temporal::Beats const & b)
-{
-	if (is_beats()) {
-		v += build (true, b.to_ticks());
-	} else {
-		TempoMap::SharedPtr tm (TempoMap::use());
-		v = tm->superclock_plus_quarters_as_superclock (val(), b);
-	}
-
-	return *this;
-}
-
 /* */
 
 timepos_t
@@ -738,7 +678,7 @@ timepos_t::operator+(timecnt_t const & d) const
 		return operator+ (timepos_t::from_superclock (d.superclocks()));
 	}
 
-	return operator+ (d.beats());
+	return operator+ (timepos_t::from_ticks (d.ticks()));
 }
 
 timepos_t &
@@ -747,7 +687,7 @@ timepos_t::operator+=(timecnt_t const & d)
 	if (d.time_domain() == AudioTime) {
 		return operator+= (timepos_t::from_superclock (d.superclocks()));
 	}
-	return operator+= (d.beats());
+	return operator+= (timepos_t::from_ticks (d.ticks()));
 }
 
 /* */
