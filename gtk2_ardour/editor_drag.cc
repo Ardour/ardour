@@ -5419,7 +5419,8 @@ RubberbandSelectDrag::do_select_things (GdkEvent* event, bool drag_in_progress)
 
 	if (!UIConfiguration::instance().get_rubberbanding_snaps_to_grid ()) {
 		grab = raw_grab_time ();
-		lpf = _editor->pixel_to_sample_from_event (last_pointer_x());
+#warning NUTEMPO how can this ever use BeatTime
+		lpf = timepos_t (_editor->pixel_to_sample_from_event (last_pointer_x()));
 	}
 
 	if (grab < lpf) {
@@ -6512,8 +6513,8 @@ AutomationRangeDrag::setup (list<boost::shared_ptr<AutomationLine> > const & lin
 		AudioRegionGainLine *argl = dynamic_cast<AudioRegionGainLine*> ((*i).get());
 		if (!argl) {
 			//in automation lanes, the EFFECTIVE range should be considered 0->max_samplepos (even if there is no line)
-			r.first = 0;
-			r.second = max_samplepos;
+			r.first = Temporal::timepos_t ((*i)->the_list()->time_domain());
+			r.second = Temporal::timepos_t::max ((*i)->the_list()->time_domain());
 		}
 
 		/* check this range against all the TimelineRanges that we are using */
@@ -6896,7 +6897,7 @@ NoteCreateDrag::NoteCreateDrag (Editor* e, ArdourCanvas::Item* i, MidiRegionView
 	, _region_view (rv)
 	, _drag_rect (0)
 {
-	_note[0] = _note[1] = 0;
+	_note[0] = _note[1] = timepos_t (Temporal::BeatTime);
 }
 
 NoteCreateDrag::~NoteCreateDrag ()
@@ -6954,9 +6955,9 @@ NoteCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 		}
 	}
 
-	_note[0] = grid_beats;
+	_note[0] = timepos_t (grid_beats);
 	/* minimum initial length is grid beats */
-	_note[1] = grid_beats + grid_beats;
+	_note[1] = timepos_t (grid_beats + grid_beats);
 
 	double const x0 = _editor->time_to_pixel (_note[0]);
 	double const x1 = _editor->time_to_pixel (_note[1]);
@@ -6993,7 +6994,7 @@ NoteCreateDrag::motion (GdkEvent* event, bool)
 		aligned_beats += grid_beats;
 	}
 
-	_note[1] = max (Temporal::Beats(), aligned_beats - _region_view->region()->position ().beats());
+	_note[1] = timepos_t (max (Temporal::Beats(), aligned_beats - _region_view->region()->position ().beats()));
 
 	double const x0 = _editor->time_to_pixel (_note[0]);
 	double const x1 = _editor->time_to_pixel (_note[1]);

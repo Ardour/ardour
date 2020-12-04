@@ -607,7 +607,7 @@ std::pair <timepos_t,timepos_t>
 Editor::session_gui_extents (bool use_extra) const
 {
 	if (!_session) {
-		return std::make_pair (timepos_t::max (Temporal::AudioTime), timepos_t (0));
+		return std::make_pair (timepos_t::max (Temporal::AudioTime), timepos_t (Temporal::AudioTime));
 	}
 
 	timepos_t session_extent_start (_session->current_start_sample());

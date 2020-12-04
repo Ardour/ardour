@@ -41,7 +41,7 @@ StepEditor::StepEditor (PublicEditor& e, boost::shared_ptr<MidiTrack> t, MidiTim
 	, _track (t)
 	, _mtv (mtv)
 {
-	step_edit_insert_position = 0;
+	step_edit_insert_position = timepos_t (Temporal::BeatTime);
 	_step_edit_triplet_countdown = 0;
 	_step_edit_within_chord = 0;
 	_step_edit_chord_duration = Temporal::Beats();

@@ -2536,7 +2536,7 @@ MidiRegionView::move_selection(timecnt_t const & dx_qn, double dy, double cumula
 		/* update length */
 		if (midi_view()->note_mode() == Sustained) {
 			Note* sus = dynamic_cast<Note*> (*i);
-			double const len_dx = editor->time_to_pixel_unrounded (timepos_t (note_time_qn) + dx_qn + n->note()->length());
+			double const len_dx = editor->time_to_pixel_unrounded (timepos_t (note_time_qn) + dx_qn + timecnt_t (n->note()->length()));
 
 			sus->set_x1 (n->item()->canvas_to_item (ArdourCanvas::Duple (len_dx, 0)).x);
 		}
@@ -2631,7 +2631,7 @@ MidiRegionView::move_copies (timecnt_t const & dx_qn, double dy, double cumulati
 
 		if (midi_view()->note_mode() == Sustained) {
 			Note* sus = dynamic_cast<Note*> (*i);
-			double const len_dx = editor->time_to_pixel_unrounded (timepos_t (note_time_qn) + dx_qn + n->note()->length());
+			double const len_dx = editor->time_to_pixel_unrounded (timepos_t (note_time_qn) + dx_qn + timecnt_t (n->note()->length()));
 
 			sus->set_x1 (n->item()->canvas_to_item (ArdourCanvas::Duple (len_dx, 0)).x);
 		}
@@ -2928,7 +2928,7 @@ MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_
 			if (with_snap) {
 				snapped_x = snap_pixel_to_time (current_x, ensure_snap); /* units depend on snap settings */
 			} else {
-				snapped_x = trackview.editor ().pixel_to_sample (current_x); /* samples */
+				snapped_x = timepos_t (trackview.editor ().pixel_to_sample (current_x)); /* probably samples */
 			}
 
 			Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
@@ -3023,7 +3023,7 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 		if (with_snap) {
 			current_time = snap_pixel_to_time (current_x, ensure_snap);
 		} else {
-			current_time = trackview.editor().pixel_to_sample (current_x);
+			current_time = timepos_t (trackview.editor().pixel_to_sample (current_x));
 		}
 
 		/* and then to beats */

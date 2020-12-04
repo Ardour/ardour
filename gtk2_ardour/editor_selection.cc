@@ -760,8 +760,9 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op)
 
 		/* 1. find the last selected regionview in the track that was clicked in */
 
-		last_pos = 0;
-		first_pos = timepos_t::max (selection->regions.empty() ? Temporal::AudioTime : selection->regions.front()->region()->position().time_domain());
+		const Temporal::TimeDomain time_domain = (selection->regions.empty() ? Temporal::AudioTime : selection->regions.front()->region()->position().time_domain());
+		last_pos = timepos_t (time_domain);
+		first_pos = timepos_t::max (time_domain);
 
 		for (RegionSelection::iterator x = selection->regions.begin(); x != selection->regions.end(); ++x) {
 			if (&(*x)->get_time_axis_view() == &clicked_regionview->get_time_axis_view()) {

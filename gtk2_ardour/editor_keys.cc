@@ -53,7 +53,7 @@ Editor::keyboard_selection_finish (bool /*add*/, Editing::EditIgnoreOption ign)
 	timepos_t start = selection->time.start_time();
 	timepos_t end;
 	if ((_edit_point == EditAtPlayhead) && _session->transport_rolling()) {
-		end = _session->audible_sample();
+		end = timepos_t (_session->audible_sample());
 	} else {
 		end = get_preferred_edit_position(ign);
 	}
@@ -82,7 +82,7 @@ Editor::keyboard_selection_begin (Editing::EditIgnoreOption ign)
 		timepos_t start;
 		timepos_t end (selection->time.end_time());
 		if ((_edit_point == EditAtPlayhead) && _session->transport_rolling()) {
-			start = _session->audible_sample();
+			start = timepos_t (_session->audible_sample());
 		} else {
 			start = get_preferred_edit_position(ign);
 		}

@@ -1219,11 +1219,11 @@ Editor::selected_marker_to_region_point (RegionPoint point, int32_t dir)
 
 	switch (point) {
 	case Start:
-		pos = r->first_sample ();
+		pos = timepos_t (r->first_sample ());
 		break;
 
 	case End:
-		pos = r->last_sample ();
+		pos = timepos_t (r->last_sample ());
 		break;
 
 	case SyncPoint:
@@ -4471,7 +4471,7 @@ Editor::cut_copy_points (Editing::CutCopyOp op, timepos_t const & earliest_time)
 		if (earliest != timepos_t::max (earliest.time_domain())) {
 			if (earliest.time_domain() == Temporal::BeatTime) {
 				/* always just round down to beat */
-				earliest = earliest.beats().round_down_to_beat();
+				earliest = timepos_t (earliest.beats().round_down_to_beat());
 			} else {
 				/* do actual snap */
 				snap_to (earliest, Temporal::RoundDownMaybe);
@@ -6863,7 +6863,7 @@ Editor::set_auto_punch_range ()
 			set_punch_range (begin, end, _("Auto Punch In/Out"));
 		} else {
 			// normal case for 2nd press - set the punch out
-			end = _playhead_cursor->current_sample ();
+			end = timepos_t (playhead_cursor->current_sample ());
 			set_punch_range (tpl->start(), now, _("Auto Punch In/Out"));
 			_session->config.set_punch_out(true);
 		}
