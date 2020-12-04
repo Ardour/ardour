@@ -3717,7 +3717,7 @@ RCOptionEditor::RCOptionEditor ()
 			new RcActionButton (_("Edit"),
 				sigc::bind (sigc::mem_fun (*this, &RCOptionEditor::edit_vst_path),
 					_("Set Additional VST3 Search Path"),
-					PluginManager::instance().get_default_windows_vst_path (),
+					"", /* default is blank */
 					sigc::mem_fun (*_rc_config, &RCConfiguration::get_plugin_path_vst3),
 					sigc::mem_fun (*_rc_config, &RCConfiguration::set_plugin_path_vst3)
 					),
