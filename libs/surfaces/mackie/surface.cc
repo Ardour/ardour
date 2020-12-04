@@ -93,9 +93,9 @@ static MidiByteArray mackie_sysex_hdr_xt  (5, MIDI::sysex, 0x0, 0x0, 0x66, 0x15)
 
 //QCON
 // The MCU sysex header for QCon Control surface
-static MidiByteArray mackie_sysex_hdr_qcon  (5, MIDI::sysex, 0x0, 0x0, 0x66, 0x14); 
+static MidiByteArray mackie_sysex_hdr_qcon  (5, MIDI::sysex, 0x0, 0x0, 0x66, 0x14);
 
-// The MCU sysex header for QCon Control - extender 
+// The MCU sysex header for QCon Control - extender
 // The extender differs from Mackie by 4th bit - it's same like for main control surface (for display)
 static MidiByteArray mackie_sysex_hdr_xt_qcon  (5, MIDI::sysex, 0x0, 0x0, 0x66, 0x14);
 
@@ -315,14 +315,14 @@ const MidiByteArray&
 Surface::sysex_hdr() const
 {
 	switch  (_stype) {
-	case mcu: 
+	case mcu:
 		if (_mcp.device_info().is_qcon()) {
 			return mackie_sysex_hdr_qcon;
 		} else {
 			return mackie_sysex_hdr;
 		}
 	case ext:
-		if(_mcp.device_info().is_qcon()) {		
+		if(_mcp.device_info().is_qcon()) {
 			return mackie_sysex_hdr_xt_qcon;
 		} else {
 			return mackie_sysex_hdr_xt;
@@ -853,9 +853,9 @@ Surface::handle_midi_sysex (MIDI::Parser &, MIDI::byte * raw_bytes, size_t count
 		if (_mcp.device_info().is_qcon()) {
 			mackie_sysex_hdr_qcon[4] = bytes[4];
 		} else {
-			mackie_sysex_hdr[4] = bytes[4]; 
+			mackie_sysex_hdr[4] = bytes[4];
 		}
-		
+
 	} else {
 		if (_mcp.device_info().is_qcon()) {
 			mackie_sysex_hdr_xt_qcon[4] = bytes[4];
