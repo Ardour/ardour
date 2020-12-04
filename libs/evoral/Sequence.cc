@@ -385,8 +385,8 @@ Sequence<Time>::const_iterator::operator++()
 			_control_iter->x = xtime;
 			_control_iter->y = y;
 		} else {
+			_control_iter->x = Temporal::timepos_t::max (_control_iter->list->time_domain());
 			_control_iter->list.reset();
-			_control_iter->x = std::numeric_limits<Time>::max();
 			_control_iter->y = DBL_MAX;
 		}
 

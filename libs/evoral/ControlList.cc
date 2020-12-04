@@ -72,16 +72,16 @@ ControlList::ControlList (const Parameter& id, const ParameterDescriptor& desc, 
 {
 	_frozen = 0;
 	_changed_when_thawed = false;
-	_lookup_cache.left = -1;
+	_lookup_cache.left = timepos_t::max (_time_domain);
 	_lookup_cache.range.first = _events.end();
 	_lookup_cache.range.second = _events.end();
-	_search_cache.left = -1;
+	_search_cache.left = timepos_t::max (_time_domain);
 	_search_cache.first = _events.end();
 	_sort_pending = false;
 	new_write_pass = true;
 	_in_write_pass = false;
 	did_write_during_pass = false;
-	insert_position = -1;
+	insert_position = timepos_t::max (_time_domain);
 	most_recent_insert_iterator = _events.end();
 }
 
@@ -101,7 +101,7 @@ ControlList::ControlList (const ControlList& other)
 	new_write_pass = true;
 	_in_write_pass = false;
 	did_write_during_pass = false;
-	insert_position = -1;
+	insert_position = timepos_t::max (_time_domain);
 	most_recent_insert_iterator = _events.end();
 
 	// XXX copy_events() emits Dirty, but this is just assignment copy/construction
@@ -134,7 +134,7 @@ ControlList::ControlList (const ControlList& other, timepos_t const & start, tim
 	new_write_pass = true;
 	_in_write_pass = false;
 	did_write_during_pass = false;
-	insert_position = -1;
+	insert_position = timepos_t::max (_time_domain);
 	most_recent_insert_iterator = _events.end();
 
 	mark_dirty ();
@@ -175,7 +175,7 @@ ControlList::operator= (const ControlList& other)
 		new_write_pass = true;
 		_in_write_pass = false;
 		did_write_during_pass = false;
-		insert_position = -1;
+		insert_position = timepos_t::max (_time_domain);
 
 		_parameter = other._parameter;
 		_desc = other._desc;
@@ -495,7 +495,7 @@ ControlList::start_write_pass (timepos_t const & time)
 	 */
 	if (_in_write_pass && !new_write_pass) {
 #if 1
-		add_guard_point (when, std::numeric_limits<timecnt_t>::min()); // also sets most_recent_insert_iterator
+		add_guard_point (when, timecnt_t (_time_domain)); // also sets most_recent_insert_iterator
 #else
 		const ControlEvent cp (when, 0.0);
 		most_recent_insert_iterator = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
@@ -525,7 +525,7 @@ ControlList::set_in_write_pass (bool yn, bool add_point, timepos_t when)
 
 	if (yn && add_point) {
 		Glib::Threads::RWLock::WriterLock lm (_lock);
-		add_guard_point (when, std::numeric_limits<timecnt_t>::min());
+		add_guard_point (when, timecnt_t (_time_domain));
 	}
 }
 
@@ -644,7 +644,7 @@ ControlList::editor_add (timepos_t const & time, double value, bool with_guard)
 			 */
 
 			if (when >= 1) {
-				_events.insert (_events.end(), new ControlEvent (std::numeric_limits<timepos_t>::min(), value));
+				_events.insert (_events.end(), new ControlEvent (timepos_t (_time_domain), value));
 				DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 added value %2 at zero\n", this, value));
 			}
 		}
@@ -771,11 +771,11 @@ ControlList::add (timepos_t const & time, double value, bool with_guards, bool w
 			if (when >= 1) {
 				if (_desc.toggled) {
 					const double opp_val = ((value >= 0.5) ? 1.0 : 0.0);
-					_events.insert (_events.end(), new ControlEvent (std::numeric_limits<timepos_t>::min(), opp_val));
+					_events.insert (_events.end(), new ControlEvent (timepos_t (_time_domain), opp_val));
 					DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 added toggled value %2 at zero\n", this, opp_val));
 
 				} else {
-					_events.insert (_events.end(), new ControlEvent (std::numeric_limits<timepos_t>::min(), value));
+					_events.insert (_events.end(), new ControlEvent (timepos_t (_time_domain), value));
 					DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 added default value %2 at zero\n", this, _desc.normal));
 				}
 			}
@@ -786,7 +786,7 @@ ControlList::add (timepos_t const & time, double value, bool with_guards, bool w
 			/* first write in a write pass: add guard point if requested */
 
 			if (with_guards) {
-				add_guard_point (insert_position, std::numeric_limits<timecnt_t>::min());
+				add_guard_point (insert_position, timecnt_t (_time_domain));
 				did_write_during_pass = true;
 			} else {
 				/* not adding a guard, but we need to set iterator appropriately */
@@ -1194,10 +1194,10 @@ ControlList::thaw ()
 void
 ControlList::mark_dirty () const
 {
-	_lookup_cache.left = std::numeric_limits<timepos_t>::max();
+	_lookup_cache.left = timepos_t::max (_time_domain);
 	_lookup_cache.range.first = _events.end();
 	_lookup_cache.range.second = _events.end();
-	_search_cache.left = std::numeric_limits<timepos_t>::max();
+	_search_cache.left = timepos_t::max (_time_domain);
 	_search_cache.first = _events.end();
 
 	if (_curve) {
@@ -1340,7 +1340,7 @@ ControlList::truncate_start (timecnt_t const & overall)
 			if (np < 2) {
 
 				/* less than 2 points: add a new point */
-				_events.push_front (new ControlEvent (std::numeric_limits<timepos_t>::min(), _events.front()->value));
+				_events.push_front (new ControlEvent (timepos_t (_time_domain), _events.front()->value));
 
 			} else {
 
@@ -1354,10 +1354,10 @@ ControlList::truncate_start (timecnt_t const & overall)
 
 				if (_events.front()->value == (*second)->value) {
 					/* first segment is flat, just move start point back to zero */
-					_events.front()->when = 0;
+					_events.front()->when = timepos_t (_time_domain);
 				} else {
 					/* leave non-flat segment in place, add a new leading point. */
-					_events.push_front (new ControlEvent (std::numeric_limits<timepos_t>::min(), _events.front()->value));
+					_events.push_front (new ControlEvent (timepos_t (_time_domain), _events.front()->value));
 				}
 			}
 
@@ -1400,7 +1400,7 @@ ControlList::truncate_start (timecnt_t const & overall)
 
 			/* add a new point for the interpolated new value */
 
-			_events.push_front (new ControlEvent (std::numeric_limits<timepos_t>::min(), first_legal_value));
+			_events.push_front (new ControlEvent (timepos_t (_time_domain), first_legal_value));
 		}
 
 		unlocked_invalidate_insert_iterator ();
@@ -1503,7 +1503,7 @@ ControlList::multipoint_eval (timepos_t const & xtime) const
 
 	/* Only do the range lookup if xtime is in a different range than last time
 	 * this was called (or if the lookup cache has been marked "dirty" (left<0) */
-	if ((_lookup_cache.left == std::numeric_limits<timepos_t>::max()) ||
+	if ((_lookup_cache.left == timepos_t::max (_time_domain)) ||
 	    ((_lookup_cache.left > xtime) ||
 	     (_lookup_cache.range.first == _events.end()) ||
 	     ((*_lookup_cache.range.second)->when < xtime))) {
@@ -1560,7 +1560,7 @@ ControlList::multipoint_eval (timepos_t const & xtime) const
 	}
 
 	/* x is a control point in the data */
-	_lookup_cache.left = std::numeric_limits<timepos_t>::max();
+	_lookup_cache.left = timepos_t::max (_time_domain);
 	return (*range.first)->value;
 }
 
@@ -1572,9 +1572,9 @@ ControlList::build_search_cache_if_necessary (timepos_t const & start_time) cons
 	if (_events.empty()) {
 		/* Empty, nothing to cache, move to end. */
 		_search_cache.first = _events.end();
-		_search_cache.left = timepos_t();
+		_search_cache.left = timepos_t::max (_time_domain);
 		return;
-	} else if ((_search_cache.left == std::numeric_limits<timepos_t>::max()) || (_search_cache.left > start)) {
+	} else if ((_search_cache.left == timepos_t::max (_time_domain)) || (_search_cache.left > start)) {
 		/* Marked dirty (left == max), or we're too far forward, re-search. */
 
 		const ControlEvent start_point (start, 0);
@@ -1850,7 +1850,7 @@ ControlList::cut_copy_clear (timepos_t const & start_time, timepos_t const & end
 			}
 
 			if (op != 2) { // ! clear
-				nal->_events.push_back (new ControlEvent (std::numeric_limits<timepos_t>::min(), val));
+				nal->_events.push_back (new ControlEvent (timepos_t (_time_domain), val));
 			}
 		}
 

@@ -390,7 +390,7 @@ Curve::multipoint_eval (Temporal::timepos_t const & x) const
 
 	ControlList::LookupCache& lookup_cache = _list.lookup_cache();
 
-	if ((lookup_cache.left < 0) ||
+	if ((lookup_cache.left == Temporal::timepos_t::max (_list.time_domain())) ||
 	    ((lookup_cache.left > x) ||
 	     (lookup_cache.range.first == _list.events().end()) ||
 	     ((*lookup_cache.range.second)->when < x))) {
@@ -468,7 +468,7 @@ Curve::multipoint_eval (Temporal::timepos_t const & x) const
 
 	/* x is a control point in the data */
 	/* invalidate the cached range because its not usable */
-	lookup_cache.left = -1;
+	lookup_cache.left = Temporal::timepos_t::max (_list.time_domain());
 	return (*range.first)->value;
 }
 
