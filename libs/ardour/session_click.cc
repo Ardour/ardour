@@ -137,9 +137,9 @@ Session::click (samplepos_t cycle_start, samplecnt_t nframes)
 			assert (superclock_to_samples ((*i).sclock(), sample_rate()) >= start && superclock_to_samples ((*i).sclock(), sample_rate()) < end);
 
 			if (i->bbt().is_bar() && (click_emphasis_data && Config->get_use_click_emphasis())) {
-				add_click ((*i).sclock(), true);
+				add_click ((*i).sample (sample_rate()), true);
 			} else {
-				add_click ((*i).sclock(), false);
+				add_click ((*i).sample (sample_rate()), false);
 			}
 		}
 
