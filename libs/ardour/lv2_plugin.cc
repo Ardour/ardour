@@ -2657,7 +2657,6 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 
 	if (_bpm_control_port) {
 
-		float bpm = tmap.tempo_at_sample (start0).note_types_per_minute();
 		TempoMapPoints tempo_map_points;
 		tmap->get_grid (tempo_map_points, start0, end, 0);
 		TempoMapPoint first_tempo_map_point = tempo_map_points.front();
@@ -2747,11 +2746,8 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 
 			if (valid && (flags & PORT_INPUT)) {
 				if ((flags & PORT_POSITION)) {
-					const Temporal::TempoMetric& metric (tmap.metric_at (start0));
-					Temporal::BBT_Time bbt (metric.bbt_at (start0));
 					Temporal::BBT_Time bbt (first_tempo_map_point.bbt());
 					double bpm = first_tempo_map_point.tempo().note_types_per_minute();
-
 					double time_scale = Port::speed_ratio ();
 					double beatpos = (bbt.bars - 1) * first_tempo_map_point.divisions_per_bar()
 						+ (bbt.beats - 1)
