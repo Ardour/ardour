@@ -202,7 +202,7 @@ AutomationRegionView::add_automation_event (GdkEvent *, timepos_t const & w, dou
 			assert (mc);
 			y = mc->user_double ();
 		} else {
-			y = c->list()->eval (when_d);
+			y = c->list()->eval (when);
 		}
 	}
 

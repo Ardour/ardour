@@ -627,7 +627,7 @@ public:
 	void finished (GdkEvent *, bool);
 	void aborted (bool);
 
-	void setup_pointer_sample_offset ();
+	void setup_pointer_offset ();
 
 	bool allow_vertical_autoscroll () const {
 		return false;
