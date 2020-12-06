@@ -1583,25 +1583,41 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 		 * in effect at that time.
 		 */
 
-		bbt = metric.meter().round_up_to_beat (bbt);
+		const BBT_Time new_bbt = metric.meter().round_up_to_beat (bbt);
 
-		for (Tempos::iterator tt = _tempos.begin(); tt != _tempos.end() && tt->sclock() < start; ++tt) { t = tt; }
-		for (Meters::iterator mm = _meters.begin(); mm != _meters.end() && mm->sclock() < start; ++mm) { m = mm; }
-		for (MusicTimes::iterator bb = _bartimes.begin(); bb != _bartimes.end() && bb->sclock() < start; ++bb) { b = bb; }
+		if (new_bbt != bbt) {
 
-		/* reset metric */
+			bbt = new_bbt;
 
-		metric = TempoMetric (*t, *m);
+			/* rounded up, determine new starting superclock position */
 
-		/* recompute superclock position */
+			DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("new bbt for start (rounded up) = %1\n", bbt));
 
-		superclock_t new_start = metric.superclock_at (bbt);
+			for (Tempos::iterator tt = _tempos.begin(); tt != _tempos.end() && tt->sclock() < start; ++tt) { t = tt; }
+			for (Meters::iterator mm = _meters.begin(); mm != _meters.end() && mm->sclock() < start; ++mm) { m = mm; }
+			for (MusicTimes::iterator bb = _bartimes.begin(); bb != _bartimes.end() && bb->sclock() < start; ++bb) { b = bb; }
 
-		if (new_start < start) {
-			abort ();
+			/* reset metric */
+
+			metric = TempoMetric (*t, *m);
+
+			DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("metric in effect at %1 = %2\n", start, metric));
+
+			/* recompute superclock position */
+
+			superclock_t new_start = metric.superclock_at (bbt);
+
+			DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("metric says that %1 is at %2\n", bbt, new_start));
+
+			if (new_start < start) {
+				abort ();
+			}
+
+			start = new_start;
+
+		} else {
+			DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("%1 was on a beat, no rounding up necessary\n", bbt));
 		}
-
-		start = new_start;
 
 	} else {
 
@@ -1616,20 +1632,26 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 			++bar.bars;
 		}
 
-		bbt = bar;
+		if (bar != bbt) {
 
-		for (Tempos::iterator tt = _tempos.begin(); tt != _tempos.end() && tt->bbt() < bbt; ++tt) { t = tt; }
-		for (Meters::iterator mm = _meters.begin(); mm != _meters.end() && mm->bbt() < bbt; ++mm) { m = mm; }
-		for (MusicTimes::iterator bb = _bartimes.begin(); bb != _bartimes.end() && bb->bbt() < bbt; ++bb) { b = bb; }
+			bbt = bar;
 
-		/* t, m and b are now all iterators for the tempo, meter and
-		 * position markers BEFORE pos. b may be _bartimes.end(), but
-		 * the other two are guaranteed to be valid references into
-		 * the tempos and meters
-		 */
+			for (Tempos::iterator tt = _tempos.begin(); tt != _tempos.end() && tt->bbt() < bbt; ++tt) { t = tt; }
+			for (Meters::iterator mm = _meters.begin(); mm != _meters.end() && mm->bbt() < bbt; ++mm) { m = mm; }
+			for (MusicTimes::iterator bb = _bartimes.begin(); bb != _bartimes.end() && bb->bbt() < bbt; ++bb) { b = bb; }
 
-		metric = TempoMetric (*t, *m);
-		start = metric.superclock_at (bbt);
+			/* t, m and b are now all iterators for the tempo, meter and
+			 * position markers BEFORE pos. b may be _bartimes.end(), but
+			 * the other two are guaranteed to be valid references into
+			 * the tempos and meters
+			 */
+
+			metric = TempoMetric (*t, *m);
+			start = metric.superclock_at (bbt);
+
+		} else {
+			DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("%1 was on a bar, no round down to bar necessary\n", bbt));
+		}
 	}
 
 	/* advance t, m and b so that the point to the *next*
