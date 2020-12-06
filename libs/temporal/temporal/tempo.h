@@ -266,6 +266,8 @@ class LIBTEMPORAL_API Tempo : public Rampable {
 			_type != other._type;
 	}
 
+	uint64_t super_note_type_per_second() const { return _super_note_type_per_second; }
+
   protected:
 	double       _npm;
 	double       _enpm;
