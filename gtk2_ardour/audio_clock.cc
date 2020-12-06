@@ -1949,7 +1949,7 @@ AudioClock::current_duration (timepos_t pos) const
 
 	switch (_mode) {
 	case BBT:
-		ret = sample_duration_from_bbt_string (pos, _layout->get_text());
+		ret = timecnt_t (sample_duration_from_bbt_string (pos, _layout->get_text()));
 		break;
 
 	case Timecode:

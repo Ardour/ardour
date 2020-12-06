@@ -2369,7 +2369,8 @@ RegionRippleDrag::RegionRippleDrag (Editor* e, ArdourCanvas::Item* i, RegionView
 	// Rippling accross tracks disabled. Rippling on all tracks is the way to go in the future.
 	allow_moves_across_tracks = false; // (selected_regions.playlists().size() == 1);
 	prev_tav = NULL;
-	prev_amount = 0;
+#warning NUTEMPO need to pick time domain here
+	prev_amount = timecnt_t ();
 	exclude = new RegionList;
 	for (RegionSelection::iterator i =selected_regions.begin(); i != selected_regions.end(); ++i) {
 		exclude->push_back((*i)->region());
@@ -2452,7 +2453,8 @@ RegionRippleDrag::motion (GdkEvent* event, bool first_move)
 			remove_unselected_from_views (prev_amount, false);
 			// ripple previous playlist according to the regions that have been removed onto the new playlist
 			prev_tav->playlist()->ripple(prev_position, -selection_length, exclude);
-			prev_amount = 0;
+#warning NUTEMPO need to pick time domain here
+			prev_amount = timecnt_t ();
 
 			// move just the selected regions
 			RegionMoveDrag::motion(event, first_move);
@@ -4714,7 +4716,7 @@ MarkerDrag::setup_pointer_offset ()
 void
 MarkerDrag::setup_video_offset ()
 {
-	_video_offset = 0;
+	_video_offset = timecnt_t (Temporal::AudioTime);
 	_preview_video = true;
 }
 
@@ -5691,7 +5693,8 @@ SelectionDrag::setup_pointer_offset ()
 {
 	switch (_operation) {
 	case CreateSelection:
-		_pointer_offset = 0;
+#warning NUTEMPO need to pick time domain here
+		_pointer_offset = timecnt_t ();
 		break;
 
 	case SelectionStartTrim:
@@ -7162,7 +7165,7 @@ CrossfadeEdgeDrag::motion (GdkEvent*, bool)
 
 	/* now check with the region that this is legal */
 
-	new_length = ar->verify_xfade_bounds (new_length.samples(), start);
+	new_length = timecnt_t (ar->verify_xfade_bounds (new_length.samples(), start));
 
 	if (start) {
 		arv->reset_fade_in_shape_width (ar, new_length.samples());
@@ -7188,7 +7191,10 @@ CrossfadeEdgeDrag::finished (GdkEvent*, bool)
 		len = timecnt_t (ar->fade_out()->back()->when);
 	}
 
-	new_length = ar->verify_xfade_bounds ((len + timecnt_t (_editor->pixel_to_sample (distance))).samples(), start);
+	samplecnt_t samples = _editor->pixel_to_sample (distance);
+	timecnt_t tdist = timecnt_t (samples);
+	timecnt_t newlen = len + tdist;
+	new_length = timecnt_t (ar->verify_xfade_bounds (newlen.samples(), start));
 
 	_editor->begin_reversible_command ("xfade trim");
 	ar->playlist()->clear_owned_changes ();
