@@ -126,7 +126,7 @@ Session::click (samplepos_t cycle_start, samplecnt_t nframes)
 		_click_points.clear ();
 		TempoMap::use()->get_grid (_click_points, samples_to_superclock (start, sample_rate()), samples_to_superclock (end, sample_rate()));
 
-		if (distance (_click_points.begin(), _click_points.end()) == 0) {
+		if (_click_points.empty()) {
 			start += move;
 			remain -= move;
 			continue;
