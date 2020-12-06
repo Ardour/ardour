@@ -1851,7 +1851,7 @@ std::operator<<(std::ostream& str, Meter const & m)
 std::ostream&
 std::operator<<(std::ostream& str, Tempo const & t)
 {
-	return str << t.note_types_per_minute() << " 1/" << t.note_type() << " notes per minute (" << t.superclocks_per_note_type() << " sc-per-1/" << t.note_type() << ')';
+	return str << t.note_types_per_minute() << " 1/" << t.note_type() << " notes per minute [" << t.super_note_type_per_second() << " sntpm] (" << t.superclocks_per_note_type() << " sc-per-1/" << t.note_type() << ')';
 }
 
 std::ostream&
