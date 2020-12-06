@@ -468,7 +468,9 @@ TempoPoint::quarters_at (superclock_t sc) const
 		/* convert sc into superbeats, given that sc represents some number of seconds */
 		const superclock_t whole_seconds = sc / superclock_ticks_per_second;
 		const superclock_t remainder = sc - (whole_seconds * superclock_ticks_per_second);
-		const superclock_t superbeats = ((_super_note_type_per_second/4) * whole_seconds) + int_div_round (superclock_t ((_super_note_type_per_second/4) * remainder), superclock_ticks_per_second);
+
+		const superclock_t supernotes = ((_super_note_type_per_second) * whole_seconds) + int_div_round (superclock_t ((_super_note_type_per_second) * remainder), superclock_ticks_per_second);
+		const superclock_t superbeats = int_div_round (supernotes * 4, (superclock_t) _note_type);
 
 		/* convert superbeats to beats:ticks */
 		int32_t b;
