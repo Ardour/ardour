@@ -818,7 +818,7 @@ Region::move_start (timecnt_t const & distance)
 	} else {
 
 		if (_start < -distance) {
-			new_start = 0;
+			new_start = timecnt_t (_start.val().time_domain());
 		} else {
 			new_start = start() + distance;
 		}
@@ -964,7 +964,7 @@ Region::trim_to_internal (timepos_t const & pos, timecnt_t const & len)
 	} else if (start_shift.negative()) {
 
 		if (start() < -start_shift && !can_trim_start_before_source_start ()) {
-			new_start = 0;
+			new_start = timecnt_t (start().time_domain());
 		} else {
 			new_start = start() + start_shift;
 		}

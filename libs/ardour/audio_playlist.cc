@@ -38,6 +38,10 @@ using namespace ARDOUR;
 using namespace std;
 using namespace PBD;
 
+#include "ardour/audioengine.h"
+#define S2SC(s) Temporal::samples_to_superclock (s, AudioEngine::instance()->sample_rate())
+#define SC2S(s) Temporal::superclock_to_samples (s, AudioEngine::instance()->sample_rate())
+
 AudioPlaylist::AudioPlaylist (Session& session, const XMLNode& node, bool hidden)
 	: Playlist (session, node, DataType::AUDIO, hidden)
 {

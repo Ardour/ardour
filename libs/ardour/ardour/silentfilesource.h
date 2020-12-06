@@ -34,7 +34,7 @@ public:
 	int flush_header () { return 0; }
 	float sample_rate () const { return _sample_rate; }
 
-	void set_length (samplecnt_t len) { _length = len; }
+	void set_length (samplecnt_t len) { _length = timecnt_t (len); }
 	void flush () {}
 
 	bool can_be_analysed() const { return false; }
@@ -50,7 +50,7 @@ protected:
 		, AudioFileSource (s, x, false)
 		, _sample_rate(srate)
 	{
-		_length = len;
+		_length = timecnt_t (len);
 	}
 
 	samplecnt_t read_unlocked (Sample *dst, samplepos_t start, samplecnt_t cnt) const {

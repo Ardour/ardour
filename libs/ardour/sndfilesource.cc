@@ -381,7 +381,8 @@ SndFileSource::open ()
 		return -1;
 	}
 
-	_length = _info.frames;
+
+	_length = timecnt_t (_info.frames);
 
 #ifdef HAVE_RF64_RIFF
 	if (_file_is_new && _length == 0 && writable()) {

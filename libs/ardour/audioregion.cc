@@ -64,6 +64,10 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
+#include "ardour/audioengine.h"
+#define S2SC(s) Temporal::samples_to_superclock (s, AudioEngine::instance()->sample_rate())
+#define SC2S(s) Temporal::superclock_to_samples (s, AudioEngine::instance()->sample_rate())
+
 namespace ARDOUR {
 	namespace Properties {
 		PBD::PropertyDescriptor<bool> envelope_active;
@@ -706,6 +710,7 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 	/* MIX OR COPY THE REGION BODY FROM mixdown_buffer INTO buf */
 
 	samplecnt_t const N = to_read - fade_in_limit - fade_out_limit;
+
 	if (N > 0) {
 		if (is_opaque) {
 			DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("Region %1 memcpy into buf @ %2 + %3, from mixdown buffer @ %4 + %5, len = %6 cnt was %7\n",
@@ -735,6 +740,7 @@ samplecnt_t
 AudioRegion::read_from_sources (SourceList const & srcs, samplecnt_t limit, Sample* buf, samplepos_t position, samplecnt_t cnt, uint32_t chan_n) const
 {
 	sampleoffset_t const internal_offset = position - _position.val().samples();
+
 	if (internal_offset >= limit) {
 		return 0;
 	}
@@ -747,6 +753,7 @@ AudioRegion::read_from_sources (SourceList const & srcs, samplecnt_t limit, Samp
 	if (chan_n < n_channels()) {
 
 		boost::shared_ptr<AudioSource> src = boost::dynamic_pointer_cast<AudioSource> (srcs[chan_n]);
+
 		if (src->read (buf, _start.val().samples() + internal_offset, to_read) != to_read) {
 			return 0; /* "read nothing" */
 		}

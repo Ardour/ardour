@@ -1295,8 +1295,6 @@ DiskReader::refill_audio (Sample* sum_buffer, Sample* mixdown_buffer, float* gai
 		to_read             = min (to_read, samples_to_read);
 		assert (to_read >= 0);
 
-		// cerr << owner()->name() << " to-read: " << to_read << endl;
-
 		if (to_read) {
 			ReaderChannelInfo* rci = dynamic_cast<ReaderChannelInfo*> (chan);
 

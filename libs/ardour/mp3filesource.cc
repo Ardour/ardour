@@ -37,7 +37,7 @@ Mp3FileSource::Mp3FileSource (Session& s, const string& path, int chn, Flag flag
 	, _mp3 (path)
 	, _channel (chn)
 {
-	_length = _mp3.length ();
+	_length = timecnt_t (_mp3.length ());
 
 	if (_channel >= (int) _mp3.channels ()) {
 		error << string_compose("Mp3FileSource: file only contains %1 channels; %2 is invalid as a channel number (%3)", _mp3.channels (), _channel, name()) << endmsg;

@@ -224,7 +224,7 @@ MidiRegion::_read_at (const SourceList&              /*srcs*/,
 
 	if (position < _position) {
 		/* we are starting the read from before the start of the region */
-		internal_offset = 0;
+		internal_offset = timecnt_t (Temporal::BeatTime);;
 		dur -= position.distance (_position);
 	} else {
 		/* we are starting the read from after the start of the region */
@@ -300,7 +300,7 @@ MidiRegion::render (Evoral::EventSink<samplepos_t>& dst,
 
 	if (!_position.val().zero()) {
 		/* we are starting the read from before the start of the region */
-		internal_offset = 0;
+		internal_offset = timecnt_t (Temporal::BeatTime);
 	} else {
 		/* we are starting the read from after the start of the region */
 		internal_offset = timecnt_t (-_position.val());
