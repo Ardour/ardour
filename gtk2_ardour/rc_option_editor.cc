@@ -3294,6 +3294,21 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_save_export_mixer_screenshot)
 		     ));
 
+	add_option (S_("Preferences|Metering"), new OptionEditorHeading (_("Input Meter Layout")));
+
+	ComboOption<InputMeterLayout>* iml = new ComboOption<InputMeterLayout> (
+		"input-meter-layout",
+		_("Input Meter Layout"),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_input_meter_layout),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_input_meter_layout)
+		);
+
+	iml->add (LayoutAutomatic,  _("Automatic"));
+	iml->add (LayoutHorizontal, _("Horizontal"));
+	iml->add (LayoutVertical,   _("Vertical"));
+
+	add_option (S_("Preferences|Metering"), iml);
+
 	/* TRANSPORT & Sync */
 
 	add_option (_("Transport"), new OptionEditorHeading (_("General")));
