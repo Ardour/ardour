@@ -1643,7 +1643,7 @@ ControlList::rt_safe_earliest_event_discrete_unlocked (timepos_t const & start_t
  * \return true if event is found (and \a x and \a y are valid).
  */
 bool
-ControlList::rt_safe_earliest_event_linear_unlocked (Temporal::timepos_t const & start_time, Temporal::timepos_t & x, double& y, bool inclusive, timepos_t const & min_x_delta) const
+ControlList::rt_safe_earliest_event_linear_unlocked (Temporal::timepos_t const & start_time, Temporal::timepos_t & x, double& y, bool inclusive, Temporal::timecnt_t min_x_delta) const
 {
 	timepos_t start = start_time;
 

@@ -308,7 +308,7 @@ public:
 	double unlocked_eval (Temporal::timepos_t const & x) const;
 
 	bool rt_safe_earliest_event_discrete_unlocked (Temporal::timepos_t const & start, Temporal::timepos_t & x, double& y, bool inclusive) const;
-	bool rt_safe_earliest_event_linear_unlocked (Temporal::timepos_t const & start, Temporal::timepos_t & x, double& y, bool inclusive, Temporal::timepos_t min_x_delta = Temporal::timepos_t ()) const;
+	bool rt_safe_earliest_event_linear_unlocked (Temporal::timepos_t const & start, Temporal::timepos_t & x, double& y, bool inclusive, Temporal::timecnt_t min_x_delta = Temporal::timecnt_t ()) const;
 
 	void create_curve();
 	void destroy_curve();

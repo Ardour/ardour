@@ -88,8 +88,8 @@ public:
 
 		// Work with positive beats and ticks to normalize
 		const int32_t sign  = _beats < 0 ? -1 : _ticks < 0 ? -1 : 1;
-		int32_t       beats = abs(_beats);
-		int32_t       ticks = abs(_ticks);
+		int32_t       beats = ::abs(_beats);
+		int32_t       ticks = ::abs(_ticks);
 
 		// Fix ticks greater than 1 beat
 		while (ticks >= PPQN) {

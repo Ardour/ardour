@@ -231,7 +231,7 @@ ArdourFeedback::observe_transport ()
 	                                 boost::bind<void> (RecordStateObserver (), this), event_loop ());
 
 #warning NUTEMPO this is not right. the actual map can change. static signal?
-	Temporal::TempoMap::use()->Changed.connect (_signal_connections, MISSING_INVALIDATOR,
+	Temporal::TempoMap::use()->Changed.connect (_transport_connections, MISSING_INVALIDATOR,
 	                                            boost::bind<void> (TempoObserver (), this), event_loop ());
 }
 

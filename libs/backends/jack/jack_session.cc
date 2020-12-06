@@ -140,8 +140,8 @@ JACKSession::timebase_callback (jack_transport_state_t /*state*/,
 		pos->ticks_per_beat = Temporal::ticks_per_beat;
 		pos->beats_per_minute = metric.tempo().note_types_per_minute();
 
-		double current_tick = tempo_map.quarter_note_at_bbt_rt (bbt) / 4 * pos->beat_type * pos->ticks_per_beat;
-		pos->bar_start_tick = current_tick - ((pos->beat - 1) * pos->ticks_per_beat + pos->tick);
+		Beats current_tick = metric.quarters_at (bbt) / 4 * pos->beat_type * pos->ticks_per_beat;
+		pos->bar_start_tick = current_tick.to_ticks() - ((pos->beat - 1) * pos->ticks_per_beat + pos->tick);
 
 		pos->valid = jack_position_bits_t (pos->valid | JackPositionBBT);
 
