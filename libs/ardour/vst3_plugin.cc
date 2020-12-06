@@ -49,6 +49,7 @@
 
 using namespace PBD;
 using namespace ARDOUR;
+using namespace Temporal;
 using namespace Steinberg;
 using namespace Presonus;
 
@@ -633,15 +634,14 @@ VST3Plugin::connect_and_run (BufferSet&  bufs,
 	context.systemTime           = g_get_monotonic_time ();
 
 	{
-		TempoMap const&           tmap (_session.tempo_map ());
-		const Tempo&              t (tmap.tempo_at_sample (start));
-		const Timecode::BBT_Time& bbt (tmap.bbt_at_sample_rt (start));
-		const MeterSection&       ms (tmap.meter_section_at_sample (start));
+		TempoMap::SharedPtr tmap (TempoMap::use());
+		const TempoMetric&  metric (tmap->metric_at (start));
+		const BBT_Time&     bbt (metric.bbt_at (start));
 
-		context.tempo              = t.quarter_notes_per_minute ();
-		context.timeSigNumerator   = ms.divisions_per_bar ();
-		context.timeSigDenominator = ms.note_divisor ();
-		context.projectTimeMusic   = tmap.quarter_note_at_sample_rt (start);
+		context.tempo              = metric.tempo().quarter_notes_per_minute ();
+		context.timeSigNumerator   = metric.meter().divisions_per_bar ();
+		context.timeSigDenominator = metric.meter().note_value ();
+		context.projectTimeMusic   = metric.tempo().quarters_at (start);
 		context.barPositionMusic   = bbt.bars * 4; // PPQN, NOT tmap.metric_at(bbt).meter().divisions_per_bar()
 	}
 
@@ -658,11 +658,13 @@ VST3Plugin::connect_and_run (BufferSet&  bufs,
 		Location* looploc = _session.locations ()->auto_loop_location ();
 		try {
 			/* loop start/end in quarter notes */
-			TempoMap const& tmap (_session.tempo_map ());
-			context.cycleStartMusic = tmap.quarter_note_at_sample_rt (looploc->start ());
-			context.cycleEndMusic   = tmap.quarter_note_at_sample_rt (looploc->end ());
-			context.state |= Vst::ProcessContext::kCycleValid;
-			context.state |= Vst::ProcessContext::kCycleActive;
+
+			TempoMap::SharedPtr tmap (TempoMap::use());
+#warning NUTEMPO remove superclock_t API for quarters_at and use samplepos_t
+			// context.cycleStartMusic = tmap->metric_at (looploc->start()).quarters_at (looploc->start ());
+			// context.cycleEndMusic   = tmap->metric_at (looploc->end()).quarters_at (looploc->end ());
+			// context.state |= Vst::ProcessContext::kCycleValid;
+			//context.state |= Vst::ProcessContext::kCycleActive;
 		} catch (...) {
 		}
 	}
@@ -2801,7 +2803,7 @@ VST3PI::beginEditContextInfoValue (FIDString id)
 		return kInvalidArgument;
 	}
 	DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::beginEditContextInfoValue %1\n", id));
-	ac->start_touch (ac->session ().transport_sample ());
+	ac->start_touch (timepos_t (ac->session ().transport_sample ()));
 	return kResultOk;
 }
 
@@ -2817,7 +2819,7 @@ VST3PI::endEditContextInfoValue (FIDString id)
 		return kInvalidArgument;
 	}
 	DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::endEditContextInfoValue %1\n", id));
-	ac->stop_touch (ac->session ().transport_sample ());
+	ac->stop_touch (timepos_t (ac->session ().transport_sample ()));
 	return kResultOk;
 }
 
