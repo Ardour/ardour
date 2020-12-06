@@ -46,7 +46,7 @@ LuaScriptTest::session_script_test ()
 		try {
 			LuaScriptParamList lsp = LuaScriptParams::script_params (spi, "sess_params");
 			_session->register_lua_function ("test", script, lsp);
-		} catch (SessionException e) {
+		} catch (...) {
 			CPPUNIT_FAIL (spi->name + ": Cannot add script to session");
 			continue;
 		}
