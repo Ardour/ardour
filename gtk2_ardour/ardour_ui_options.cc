@@ -499,8 +499,6 @@ ARDOUR_UI::parameter_changed (std::string p)
 		using namespace Temporal;
 		const samplecnt_t limit = (99*60*60) + (59*60) + (59); /* seconds */
 
-		std::cerr <<"\n\n\n CDL changed to " << UIConfiguration::instance().get_clock_display_limit() << " vs. " << limit << " \n\n";
-
 		if (UIConfiguration::instance().get_clock_display_limit() > limit) {
 			UIConfiguration::instance().set_clock_display_limit (limit);
 		}
