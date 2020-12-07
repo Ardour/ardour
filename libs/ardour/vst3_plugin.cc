@@ -641,7 +641,7 @@ VST3Plugin::connect_and_run (BufferSet&  bufs,
 		context.tempo              = metric.tempo().quarter_notes_per_minute ();
 		context.timeSigNumerator   = metric.meter().divisions_per_bar ();
 		context.timeSigDenominator = metric.meter().note_value ();
-		context.projectTimeMusic   = metric.tempo().quarters_at (start);
+		context.projectTimeMusic   = metric.tempo().quarters_at_sample (start);
 		context.barPositionMusic   = bbt.bars * 4; // PPQN, NOT tmap.metric_at(bbt).meter().divisions_per_bar()
 	}
 

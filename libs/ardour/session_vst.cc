@@ -207,9 +207,9 @@ intptr_t Session::vst_callback (
 					bbt.beats = 1;
 					bbt.ticks = 0;
 					/* exact quarter note */
-					double ppqBar = tmap->quarter_note_at (bbt);
+					double ppqBar = tmap->quarters_at (bbt);
 					/* quarter note at sample position (not rounded to note subdivision) */
-					double ppqPos = tmap->quarter_note_at (now);
+					double ppqPos = tmap->quarters_at_sample (now);
 					if (value & (kVstPpqPosValid)) {
 						timeinfo->ppqPos = ppqPos;
 						newflags |= kVstPpqPosValid;
@@ -270,10 +270,9 @@ intptr_t Session::vst_callback (
 				newflags |= kVstTransportCycleActive;
 				Location * looploc = session->locations ()->auto_loop_location ();
 				if (looploc) try {
-#warning NUTEMPO FIXME needs new session tempo map
-						//timeinfo->cycleStartPos = session->tempo_map ().quarter_note_at_sample_rt (looploc->start ());
-						//timeinfo->cycleEndPos = session->tempo_map ().quarter_note_at_sample_rt (looploc->end ());
-						// newflags |= kVstCyclePosValid;
+						timeinfo->cycleStartPos = tmap->quarters_at (looploc->start ());
+						timeinfo->cycleEndPos = tmap->quarters_at (looploc->end ());
+						 newflags |= kVstCyclePosValid;
 				} catch (...) { }
 			}
 

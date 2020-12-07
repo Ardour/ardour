@@ -704,7 +704,7 @@ MeterSection::get_state() const
   from Beats distance, or instead work in quarter-notes and/or beats and convert to samples last.
 
   The above pointless example could instead do:
-  beat_at_quarter_note (quarter_note_at_beat (beat)) to avoid rounding.
+  beat_at_quarter_note (quarters_at (beat)) to avoid rounding.
 
   The Shaggs - Things I Wonder
   https://www.youtube.com/watch?v=9wQK6zMJOoQ

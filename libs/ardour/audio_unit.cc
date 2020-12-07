@@ -1613,7 +1613,7 @@ AUPlugin::get_beat_and_tempo_callback (Float64* outCurrentBeat,
 	DEBUG_TRACE (DEBUG::AudioUnitProcess, "AU calls ardour beat&tempo callback\n");
 
 	if (outCurrentBeat) {
-		*outCurrentBeat = tmap.quarter_note_at_sample (transport_sample);
+		*outCurrentBeat = tmap.quarters_at_sample (transport_sample);
 	}
 
 	if (outCurrentTempo) {
@@ -1642,7 +1642,7 @@ AUPlugin::get_musical_time_location_callback (UInt32*   outDeltaSampleOffsetToNe
 			/* on the beat */
 			*outDeltaSampleOffsetToNextBeat = 0;
 		} else {
-			double const next_beat = ceil (tmap.quarter_note_at_sample (transport_sample));
+			double const next_beat = ceil (tmap.quarters_at_sample (transport_sample));
 			samplepos_t const next_beat_sample = tmap.sample_at_quarter_note (next_beat);
 
 			*outDeltaSampleOffsetToNextBeat = next_beat_sample - transport_sample;
@@ -1667,7 +1667,7 @@ AUPlugin::get_musical_time_location_callback (UInt32*   outDeltaSampleOffsetToNe
 		bbt.beats = 1;
 		bbt.ticks = 0;
 
-		*outCurrentMeasureDownBeat = tmap.quarter_note_at_bbt (bbt);
+		*outCurrentMeasureDownBeat = tmap.quarters_at (bbt);
 	}
 
 	return noErr;
@@ -1723,11 +1723,11 @@ AUPlugin::get_transport_state_callback (Boolean*  outIsPlaying,
 				Temporal::BBT_Time bbt;
 
 				if (outCycleStartBeat) {
-					*outCycleStartBeat = tmap.quarter_note_at_sample (loc->start());
+					*outCycleStartBeat = tmap.quarters_at_sample (loc->start());
 				}
 
 				if (outCycleEndBeat) {
-					*outCycleEndBeat = tmap.quarter_note_at_sample (loc->end());
+					*outCycleEndBeat = tmap.quarters_at_sample (loc->end());
 				}
 			}
 		}

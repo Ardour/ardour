@@ -73,9 +73,9 @@ TempoTest::recomputeMapTest48 ()
 	CPPUNIT_ASSERT_EQUAL (samplepos_t (96e3), map.sample_at_quarter_note (4.0));
 
 	/* sample - quarter note*/
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (12.0, map.quarter_note_at_sample (288e3), 1e-17);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (6.0, map.quarter_note_at_sample (144e3), 1e-17);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (4.0, map.quarter_note_at_sample (96e3), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (12.0, map.quarters_at_sample (288e3), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (6.0, map.quarters_at_sample (144e3), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (4.0, map.quarters_at_sample (96e3), 1e-17);
 
 	/* pulse - internal minute based interface */
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (0.1, map.minute_at_pulse_locked (map._metrics, 3.0), 1e-17);
@@ -94,8 +94,8 @@ TempoTest::recomputeMapTest48 ()
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (120.0, map.tempo_at_quarter_note (6.0).note_types_per_minute(), 1e-17);
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (120.0, map.tempo_at_quarter_note (0.0).note_types_per_minute(), 1e-17);
 
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (12.0, map.quarter_note_at_tempo (tempoB), 1e-17);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (0.0, map.quarter_note_at_tempo (tempoA), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (12.0, map.quarters_at_tempo (tempoB), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (0.0, map.quarters_at_tempo (tempoA), 1e-17);
 
 	/* tempo - internal minute interface  */
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (240.0, map.tempo_at_minute_locked (map._metrics, 0.1).note_types_per_minute(), 1e-17);
@@ -173,9 +173,9 @@ TempoTest::recomputeMapTest44 ()
 	CPPUNIT_ASSERT_EQUAL (samplepos_t (88200), map.sample_at_quarter_note (4.0));
 
 	/* sample - quarter note */
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (3.0 * 4.0, map.quarter_note_at_sample (264600), 1e-17);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (1.5 * 4.0, map.quarter_note_at_sample (132300), 1e-17);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (1.0 * 4.0, map.quarter_note_at_sample (88200), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (3.0 * 4.0, map.quarters_at_sample (264600), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (1.5 * 4.0, map.quarters_at_sample (132300), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (1.0 * 4.0, map.quarters_at_sample (88200), 1e-17);
 
 	/* pulse - internal minute based interface */
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (0.1, map.minute_at_pulse_locked (map._metrics, 3.0), 1e-17);
@@ -194,8 +194,8 @@ TempoTest::recomputeMapTest44 ()
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (120.0, map.tempo_at_quarter_note (6.0).note_types_per_minute(), 1e-17);
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (120.0, map.tempo_at_quarter_note (0.0).note_types_per_minute(), 1e-17);
 
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (12.0, map.quarter_note_at_tempo (tempoB), 1e-17);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL (0.0, map.quarter_note_at_tempo (tempoA), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (12.0, map.quarters_at_tempo (tempoB), 1e-17);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL (0.0, map.quarters_at_tempo (tempoA), 1e-17);
 
 	/* tempo - internal minute interface  */
 	CPPUNIT_ASSERT_DOUBLES_EQUAL (240.0, map.tempo_at_minute_locked (map._metrics, 0.1).note_types_per_minute(), 1e-17);
