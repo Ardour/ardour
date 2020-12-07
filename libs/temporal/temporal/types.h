@@ -104,7 +104,6 @@ enum TimeDomain {
 	/* simple ordinals, since these are mutually exclusive */
 	AudioTime = 0,
 	BeatTime = 1,
-	BarTime = 2,
 };
 
 enum Dirty {

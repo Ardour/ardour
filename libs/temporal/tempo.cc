@@ -74,19 +74,11 @@ Point::sample() const
 timepos_t
 Point::time() const
 {
-	switch (_map->time_domain()) {
-	case AudioTime:
+	if (_map->time_domain() == AudioTime) {
 		return timepos_t::from_superclock (sclock());
-	case BeatTime:
-		return timepos_t (beats());
-	case BarTime:
-		/*NOTREACHED*/
-		break;
 	}
-	/*NOTREACHED*/
-	abort();
-	/*NOTREACHED*/
-	return timepos_t (AudioTime);
+
+	return timepos_t (beats());
 }
 
 Tempo::Tempo (XMLNode const & node)
@@ -654,10 +646,6 @@ TempoMap::add_meter (MeterPoint & mp)
 	case BeatTime:
 		for (m = _meters.begin(); m != _meters.end() && m->beats() < mp.beats(); ++m);
 		break;
-	case BarTime:
-		for (m = _meters.begin(); m != _meters.end() && m->bbt() < mp.bbt(); ++m);
-		break;
-
 	}
 
 	bool replaced = false;
@@ -756,9 +744,6 @@ TempoMap::add_tempo (TempoPoint & tp)
 		break;
 	case BeatTime:
 		for (t = _tempos.begin(); t != _tempos.end() && t->beats() < tp.beats(); ++t);
-		break;
-	case BarTime:
-		for (t = _tempos.begin(); t != _tempos.end() && t->bbt() < tp.bbt(); ++t);
 		break;
 	}
 
@@ -1035,7 +1020,6 @@ bool
 TempoMap::move_meter (MeterPoint const & mp, timepos_t const & when, bool push)
 {
 	{
-		assert (time_domain() != BarTime);
 		assert (!_tempos.empty());
 		assert (!_meters.empty());
 
@@ -1175,7 +1159,6 @@ bool
 TempoMap::move_tempo (TempoPoint const & tp, timepos_t const & when, bool push)
 {
 	{
-		assert (time_domain() != BarTime);
 		assert (!_tempos.empty());
 		assert (!_meters.empty());
 
@@ -2270,10 +2253,6 @@ TempoMap::full_duration_at (timepos_t const & pos, timecnt_t const & duration, T
 	Beats b;
 	superclock_t s;
 
-	assert (pos.time_domain() != BarTime);
-	assert (duration.time_domain() != BarTime);
-	assert (return_domain != BarTime);
-
 	if (return_domain == duration.time_domain()) {
 		return duration;
 	}
@@ -2380,7 +2359,6 @@ TempoMap::n_tempos () const
 void
 TempoMap::insert_time (timepos_t const & pos, timecnt_t const & duration)
 {
-	assert (time_domain() != BarTime);
 	assert (!_tempos.empty());
 	assert (!_meters.empty());
 

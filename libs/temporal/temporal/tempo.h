@@ -52,8 +52,7 @@
 
    Beats increase monotonically throughout the tempo map (BBT may not).
 
-   The map has a single time domain at any time, and can only be using either
-   AudioTime or BeatTime. BarTime is not legal as a map time domain.
+   The map has a single time domain at any time.
 */
 
 namespace Temporal {
@@ -498,7 +497,7 @@ class LIBTEMPORAL_API TempoMetric {
 
 };
 
-/* A music time point is a place where BBT time (BarTime) is reset from
+/* A music time point is a place where BBT time is reset from
  * whatever it would be when just inferring from the usual counting. Its
  * position is given by a Point that might use superclock or Beats, and the
  * Point's BBT time member is overwritten.
