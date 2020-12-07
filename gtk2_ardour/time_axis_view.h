@@ -336,7 +336,6 @@ private:
 
 	void compute_heights ();
 	bool maybe_set_cursor (int y);
-	void set_name_ellipsize_mode ();
 
 }; /* class TimeAxisView */
 

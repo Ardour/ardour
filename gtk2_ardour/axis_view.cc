@@ -41,6 +41,7 @@
 #include "ardour_ui.h"
 #include "gui_object.h"
 #include "axis_view.h"
+#include "ui_config.h"
 #include "utils.h"
 
 #include "pbd/i18n.h"
@@ -144,4 +145,20 @@ AxisView::set_selected (bool yn)
 	}
 
 	Selectable::set_selected (yn);
+}
+
+void
+AxisView::set_name_ellipsize_mode ()
+{
+	switch (UIConfiguration::instance().get_time_axis_name_ellipsize_mode()) {
+	case -1:
+		name_label.set_ellipsize (Pango::ELLIPSIZE_START);
+		break;
+	case 1:
+		name_label.set_ellipsize (Pango::ELLIPSIZE_END);
+		break;
+	default:
+		name_label.set_ellipsize (Pango::ELLIPSIZE_MIDDLE);
+		break;
+	}
 }
