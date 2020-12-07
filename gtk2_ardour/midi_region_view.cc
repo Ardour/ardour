@@ -2932,7 +2932,7 @@ MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_
 			}
 
 			Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
-			const timepos_t abs_beats (tmap->quarter_note_at (snapped_x));
+			const timepos_t abs_beats (tmap->quarters_at (snapped_x));
 			const Temporal::Beats beats = _region->absolute_time_to_source_beats (abs_beats);
 			Temporal::Beats len         = Temporal::Beats();
 
@@ -3027,7 +3027,7 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 		}
 
 		/* and then to beats */
-		const timepos_t abs_beats (Temporal::TempoMap::use()->quarter_note_at (current_time));
+		const timepos_t abs_beats (Temporal::TempoMap::use()->quarters_at (current_time));
 		const Temporal::Beats x_beats = _region->absolute_time_to_source_beats (abs_beats);
 
 		if (at_front && x_beats < canvas_note->note()->end_time()) {
@@ -4268,11 +4268,11 @@ MidiRegionView::snap_sample_to_grid_underneath (samplepos_t p, bool shift_snap) 
 #warning NUTEMPO new tempo map API required
 #if 0
 	Temporal::TempoMap& map (trackview.session()->tempo_map());
-	Temporal::Beats eqaf = map.quarter_note_at (p + _region->position_sample());
+	Temporal::Beats eqaf = map.quarters_at (p + _region->position_sample());
 
 
 	if (shift_snap) {
-		const Temporal::Beats qaf = map.quarter_note_at (p + _region->position_sample());
+		const Temporal::Beats qaf = map.quarters_at (p + _region->position_sample());
 		/* Hack so that we always snap to the note that we are over, instead of snapping
 		   to the next one if we're more than halfway through the one we're over.
 		*/

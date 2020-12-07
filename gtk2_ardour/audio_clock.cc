@@ -1244,10 +1244,10 @@ AudioClock::set_bbt (timepos_t const & w, timecnt_t const & o, bool /*force*/)
 			Temporal::BBT_Time sub_bbt;
 
 			if (negative) {
-				BBT = tmap->bbt_at (tmap->quarter_note_at (timepos_t (offset)));
+				BBT = tmap->bbt_at (tmap->quarters_at (timepos_t (offset)));
 				sub_bbt = tmap->bbt_at (timepos_t (offset - when));
 			} else {
-				BBT = tmap->bbt_at (tmap->quarter_note_at (when + offset));
+				BBT = tmap->bbt_at (tmap->quarters_at (when + offset));
 				sub_bbt = tmap->bbt_at (timepos_t (offset));
 			}
 

@@ -981,14 +981,14 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 	std::vector<Temporal::Point>::const_iterator i;
 	Temporal::BBT_Time lower_beat, upper_beat; // the beats at each end of the ruler
 	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
-	Beats floor_lower_beat = std::max (Beats(), tmap->quarter_note_at (lower)).round_down_to_beat ();
+	Beats floor_lower_beat = std::max (Beats(), tmap->quarters_at_sample (lower)).round_down_to_beat ();
 
 	if (floor_lower_beat < 0.0) {
 		floor_lower_beat = 0.0;
 	}
 
 	const samplepos_t beat_before_lower_pos = tmap->sample_at (floor_lower_beat, _session->sample_rate());
-	const samplepos_t beat_after_upper_pos = tmap->sample_at ((std::max (Beats(), tmap->quarter_note_at  (upper)).round_down_to_beat()) + Beats (1, 0), _session->sample_rate());
+	const samplepos_t beat_after_upper_pos = tmap->sample_at ((std::max (Beats(), tmap->quarters_at_sample  (upper)).round_down_to_beat()) + Beats (1, 0), _session->sample_rate());
 
 	_session->bbt_time (timepos_t (beat_before_lower_pos), lower_beat);
 	_session->bbt_time (timepos_t (beat_after_upper_pos), upper_beat);
@@ -1000,7 +1000,77 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 
 	bbt_ruler_scale =  bbt_show_many;
 
-	const double ceil_upper_beat = floor (std::max (0.0, _session->tempo_map().beat_at_sample (upper))) + 1.0;
+	switch (_grid_type) {
+	case GridTypeBeatDiv2:
+		bbt_beat_subdivision = 2;
+		break;
+	case GridTypeBeatDiv3:
+		bbt_beat_subdivision = 3;
+		break;
+	case GridTypeBeatDiv4:
+		bbt_beat_subdivision = 4;
+		break;
+	case GridTypeBeatDiv5:
+		bbt_beat_subdivision = 5;
+		bbt_accent_modulo = 2; // XXX YIKES
+		break;
+	case GridTypeBeatDiv6:
+		bbt_beat_subdivision = 3;
+		bbt_accent_modulo = 2; // XXX YIKES
+		break;
+	case GridTypeBeatDiv7:
+		bbt_beat_subdivision = 7;
+		bbt_accent_modulo = 2; // XXX YIKES
+		break;
+	case GridTypeBeatDiv8:
+		bbt_beat_subdivision = 4;
+		bbt_accent_modulo = 2;
+		break;
+	case GridTypeBeatDiv10:
+		bbt_beat_subdivision = 5;
+		bbt_accent_modulo = 2; // XXX YIKES
+		break;
+	case GridTypeBeatDiv12:
+		bbt_beat_subdivision = 3;
+		bbt_accent_modulo = 3;
+		break;
+	case GridTypeBeatDiv14:
+		bbt_beat_subdivision = 7;
+		bbt_accent_modulo = 3; // XXX YIKES!
+		break;
+	case GridTypeBeatDiv16:
+		bbt_beat_subdivision = 4;
+		bbt_accent_modulo = 4;
+		break;
+	case GridTypeBeatDiv20:
+		bbt_beat_subdivision = 5;
+		bbt_accent_modulo = 5;
+		break;
+	case GridTypeBeatDiv24:
+		bbt_beat_subdivision = 6;
+		bbt_accent_modulo = 6;
+		break;
+	case GridTypeBeatDiv28:
+		bbt_beat_subdivision = 7;
+		bbt_accent_modulo = 7;
+		break;
+	case GridTypeBeatDiv32:
+		bbt_beat_subdivision = 4;
+		bbt_accent_modulo = 8;
+		break;
+	case GridTypeBar:
+	case GridTypeBeat:
+		bbt_beat_subdivision = 4;
+		break;
+	case GridTypeNone:
+	case GridTypeTimecode:
+	case GridTypeMinSec:
+	case GridTypeCDFrame:
+		bbt_beat_subdivision = 4;
+		break;
+	}
+
+	const Beats ceil_upper_beat = std::max (Beats(), tmap->quarters_at_sample (upper)).round_up_to_beat() + Beats (1, 0);
 
 	if (ceil_upper_beat == floor_lower_beat) {
 		return;

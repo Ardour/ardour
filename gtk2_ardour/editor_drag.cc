@@ -3449,7 +3449,7 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 			if (map->time_domain() == AudioTime) {
 				pos = timepos_t (map->sample_at (bbt, _editor->session()->sample_rate()));
 			} else {
-				pos = timepos_t (map->quarter_note_at (bbt));
+				pos = timepos_t (map->quarters_at (bbt));
 			}
 
 			_marker->reset_meter (map->set_meter (meter, pos));
@@ -3619,7 +3619,7 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 			if (map->time_domain() == AudioTime) {
 				pos = timepos_t (map->sample_at (bbt, _editor->session()->sample_rate()));
 			} else {
-				pos = timepos_t (map->quarter_note_at (bbt));
+				pos = timepos_t (map->quarters_at (bbt));
 			}
 
 			_marker->reset_tempo (map->set_tempo (tempo, pos));
@@ -3792,7 +3792,7 @@ BBTRulerDrag::setup_pointer_offset ()
 		beat = floor (beat_at_sample) + (floor (((beat_at_sample - floor (beat_at_sample)) * 4)) / 4);
 	}
 
-	_grab_qn = map.quarter_note_at (beat);
+	_grab_qn = map.quarters_at (beat);
 
 	_pointer_offset = raw_grab_sample() - map.sample_at_quarter_note (_grab_qn);
 
@@ -3823,7 +3823,7 @@ BBTRulerDrag::motion (GdkEvent* event, bool first_move)
 
 	if (ArdourKeyboard::indicates_constraint (event->button.state)) {
 		/* adjust previous tempo to match pointer sample */
-		_editor->session()->tempo_map().gui_stretch_tempo (_tempo, map.sample_at_quarter_note (_grab_qn), pf, _grab_qn, map.quarter_note_at_sample (pf));
+		_editor->session()->tempo_map().gui_stretch_tempo (_tempo, map.sample_at_quarter_note (_grab_qn), pf, _grab_qn, map.quarters_at_sample (pf));
 	}
 
 	ostringstream sstr;
@@ -3951,7 +3951,7 @@ TempoTwistDrag::setup_pointer_offset ()
 		beat = floor (beat_at_sample) + (floor (((beat_at_sample - floor (beat_at_sample)) * 4)) / 4);
 	}
 
-	_grab_qn = map.quarter_note_at_beat (beat);
+	_grab_qn = map.quarters_at_beat (beat);
 
 	_pointer_offset = raw_grab_sample() - map.sample_at_quarter_note (_grab_qn);
 
@@ -6922,7 +6922,7 @@ NoteCreateDrag::grid_aligned_beats (timepos_t const & pos, GdkEvent const * even
 		beats = pos.beats ();
 		break;
 	case -1: /* round to bar */
-		beats = map->quarter_note_at (map->metric_at (pos).meter().round_to_bar (map->bbt_at (pos)));
+		beats = map->quarters_at (map->metric_at (pos).meter().round_to_bar (map->bbt_at (pos)));
 		break;
 	default: /* round to some beat subdivision */
 		beats = (pos).beats().round_to_subdivision (divisions, Temporal::RoundNearest);
