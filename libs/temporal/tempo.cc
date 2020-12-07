@@ -2081,7 +2081,7 @@ TempoMap::quarters_at (timepos_t const & pos) const
 		/* a bit redundant */
 		return pos.beats();
 	}
-	return quarters_at (pos);
+	return quarters_at_superclock (pos.superclocks());
 }
 
 Temporal::Beats
