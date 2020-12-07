@@ -120,6 +120,9 @@ class /*LIBPBD_API*/ RingBufferNPT
 	size_t size;
 	mutable gint write_ptr;
 	mutable gint read_ptr;
+
+private:
+	RingBufferNPT (RingBufferNPT const&);
 };
 
 template<class T> /*LIBPBD_API*/ size_t

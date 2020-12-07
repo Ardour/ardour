@@ -125,6 +125,9 @@ protected:
 	mutable gint write_idx;
 	mutable gint read_idx;
 	guint size_mask;
+
+private:
+	RingBuffer (RingBuffer const&);
 };
 
 template<class T> /*LIBPBD_API*/ guint
