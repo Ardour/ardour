@@ -385,7 +385,6 @@ class LIBTEMPORAL_API TempoPoint : public Tempo, public Point
 
 	superclock_t superclock_at (Beats const & qn) const;
 	samplepos_t  sample_at (Beats const & qn) const { return Temporal::superclock_to_samples (superclock_at (qn), _thread_sample_rate); }
-	Beats        quarters_at (superclock_t sc) const;
 	superclock_t superclocks_per_note_type_at (timepos_t const &) const;
 
 	/* This method should be used only for display purposes, and even
@@ -413,8 +412,12 @@ class LIBTEMPORAL_API TempoPoint : public Tempo, public Point
 
 	boost::intrusive::list_member_hook<> _tempo_hook;
 
+	Beats quarters_at_sample (samplepos_t sc) const { return quarters_at_superclock (samples_to_superclock (sc, _thread_sample_rate)); }
+	Beats quarters_at_superclock (superclock_t sc) const;
+
   private:
 	double _omega;
+
 };
 
 /** Helper class to perform computations that require both Tempo and Meter
@@ -446,7 +449,6 @@ class LIBTEMPORAL_API TempoMetric {
 
 	superclock_t superclock_at (Beats const & qn) const { return _tempo->superclock_at (qn); }
 	samplepos_t  sample_at (Beats const & qn) const { return _tempo->sample_at (qn); }
-	Beats        quarters_at (superclock_t sc) const { return _tempo->quarters_at (sc); }
 	Beats        quarters_at (BBT_Time const & bbt) const { return _meter->quarters_at (bbt); }
 	BBT_Time     bbt_at (Beats const & beats) const { return _meter->bbt_at (beats); }
 
@@ -487,9 +489,13 @@ class LIBTEMPORAL_API TempoMetric {
 		return superclock_to_samples (superclocks_per_bar (sr), sr);
 	}
 
+	Beats quarters_at_sample (samplepos_t sc) const { return quarters_at_superclock (samples_to_superclock (sc, _thread_sample_rate)); }
+	Beats quarters_at_superclock (superclock_t sc) const { return _tempo->quarters_at_superclock (sc); }
+
   protected:
 	TempoPoint* _tempo;
 	MeterPoint* _meter;
+
 };
 
 /* A music time point is a place where BBT time (BarTime) is reset from
@@ -734,9 +740,8 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 	BBT_Time bbt_at (Beats const &) const;
 	BBT_Time bbt_at (timepos_t const &) const;
 
-	Beats quarter_note_at (superclock_t sc) const;
-	Beats quarter_note_at (BBT_Time const &) const;
-	Beats quarter_note_at (timepos_t const &) const;
+	Beats quarters_at (BBT_Time const &) const;
+	Beats quarters_at (timepos_t const &) const;
 
 	superclock_t superclock_at (Beats const &) const;
 	superclock_t superclock_at (BBT_Time const &) const;
@@ -759,8 +764,6 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 
 	timecnt_t bbt_duration_at (timepos_t const & pos, BBT_Offset const & bbt) const;
 	Beats bbtwalk_to_quarters (Beats const & start, BBT_Offset const & distance) const;
-
-	superclock_t superclock_per_quarter_note_at (superclock_t) const;
 
 	Temporal::timecnt_t full_duration_at (Temporal::timepos_t const &, Temporal::timecnt_t const & duration, Temporal::TimeDomain domain) const;
 
@@ -796,6 +799,9 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 	typedef boost::intrusive::list<MeterPoint,MeterHookOption> Meters;
 	typedef boost::intrusive::list<MusicTimePoint,BarTimeHookOption> MusicTimes;
 	typedef boost::intrusive::list<Point,PointHookOption> Points;
+
+	Beats quarters_at_sample (samplepos_t sc) const { return quarters_at_superclock (samples_to_superclock (sc, _thread_sample_rate)); }
+	Beats quarters_at_superclock (superclock_t sc) const;
 
    private:
 	Tempos       _tempos;

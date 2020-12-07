@@ -445,7 +445,7 @@ timepos_t::_beats () const
 	stats.audio_to_beats++;
 
 	TempoMap::SharedPtr tm (TempoMap::use());
-	return tm->quarter_note_at (v);
+	return tm->quarters_at_superclock (v);
 }
 
 int64_t

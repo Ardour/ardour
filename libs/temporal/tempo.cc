@@ -462,7 +462,7 @@ TempoPoint::superclocks_per_note_type_at (timepos_t const &pos) const
 }
 
 Temporal::Beats
-TempoPoint::quarters_at (superclock_t sc) const
+TempoPoint::quarters_at_superclock (superclock_t sc) const
 {
 	if (!actually_ramped()) {
 		/* convert sc into superbeats, given that sc represents some number of seconds */
@@ -530,9 +530,9 @@ MeterPoint::get_state () const
 Temporal::BBT_Time
 TempoMetric::bbt_at (superclock_t sc) const
 {
-	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("qn @ %1 = %2, meter @ %3\n", sc, _tempo->quarters_at (sc), _meter->beats()));
+	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("qn @ %1 = %2, meter @ %3\n", sc, _tempo->quarters_at_superclock (sc), _meter->beats()));
 
-	const Beats dq = _tempo->quarters_at (sc) - _meter->beats();
+	const Beats dq = _tempo->quarters_at_superclock (sc) - _meter->beats();
 	const BBT_Offset bbt_offset (0, dq.get_beats(), dq.get_ticks());
 
 	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("BBT offset from meter: %1\n", bbt_offset));
@@ -629,10 +629,10 @@ TempoMap::set_time_domain (TimeDomain td)
 
 	default:
 		for (Tempos::iterator t = _tempos.begin(); t != _tempos.end(); ++t) {
-			t->set_beats (t->quarters_at (t->sclock()));
+			t->set_beats (t->quarters_at_superclock (t->sclock()));
 		}
 		for (Meters::iterator m = _meters.begin(); m != _meters.end(); ++m) {
-			m->set_beats (m->quarters_at (m->sclock()));
+			m->set_beats (m->quarters_at_superclock (m->sclock()));
 		}
 	}
 #endif
@@ -690,7 +690,7 @@ TempoMap::change_tempo (TempoPoint & p, Tempo const & t)
 TempoPoint &
 TempoMap::set_tempo (Tempo const & t, BBT_Time const & bbt)
 {
-	return set_tempo (t, timepos_t (quarter_note_at (bbt)));
+	return set_tempo (t, timepos_t (quarters_at (bbt)));
 }
 
 TempoPoint &
@@ -727,7 +727,7 @@ TempoMap::set_tempo (Tempo const & t, timepos_t const & time)
 
 		/* tempo changes must be on beat */
 
-		beats = tm.quarters_at (sc).round_to_beat ();
+		beats = tm.quarters_at_superclock (sc).round_to_beat ();
 		bbt = tm.bbt_at (beats);
 
 		/* recompute superclock position of rounded beat */
@@ -830,7 +830,7 @@ TempoMap::set_bartime (BBT_Time const & bbt, timepos_t const & pos)
 
 		TempoMetric metric (metric_at_locked (sc));
 
-		MusicTimePoint tp (bbt, Point (*this, sc, metric.quarters_at (sc), bbt));
+		MusicTimePoint tp (bbt, Point (*this, sc, metric.quarters_at_superclock (sc), bbt));
 
 		ret = add_or_replace_bartime (tp);
 	}
@@ -1212,7 +1212,7 @@ TempoMap::move_tempo (TempoPoint const & tp, timepos_t const & when, bool push)
 			assert (prev_t != _tempos.end());
 			if (prev_m == _meters.end()) { prev_m = _meters.begin(); }
 			TempoMetric metric (*prev_t, *prev_m);
-			beats = metric.quarters_at (sc);
+			beats = metric.quarters_at_superclock (sc);
 			/* tempo changes must be on beat, so round and then
 			 * recompute superclock and BBT with rounded result
 			 */
@@ -1341,7 +1341,7 @@ TempoMap::set_meter (Meter const & m, timepos_t const & time)
 MeterPoint &
 TempoMap::set_meter (Meter const & t, BBT_Time const & bbt)
 {
-	return set_meter (t, timepos_t (quarter_note_at (bbt)));
+	return set_meter (t, timepos_t (quarters_at (bbt)));
 }
 
 void
@@ -1467,8 +1467,8 @@ TempoMap::scwalk_to_quarters (superclock_t pos, superclock_t distance) const
 {
 	TempoMetric first (metric_at (pos));
 	TempoMetric last (metric_at (pos+distance));
-	Temporal::Beats a = first.quarters_at (pos);
-	Temporal::Beats b = last.quarters_at (pos+distance);
+	Temporal::Beats a = first.quarters_at_superclock (pos);
+	Temporal::Beats b = last.quarters_at_superclock (pos+distance);
 	return b - a;
 }
 
@@ -1478,14 +1478,14 @@ TempoMap::scwalk_to_quarters (Temporal::Beats const & pos, superclock_t distance
 	/* XXX this converts from beats to superclock and back to beats... which is OK (reversible) */
 	superclock_t s = metric_at_locked (pos).superclock_at (pos);
 	s += distance;
-	return metric_at_locked (s).quarters_at (s);
+	return metric_at_locked (s).quarters_at_superclock (s);
 
 }
 
 Temporal::Beats
 TempoMap::bbtwalk_to_quarters (Beats const & pos, BBT_Offset const & distance) const
 {
-	return quarter_note_at (bbt_walk (bbt_at (pos), distance)) - pos;
+	return quarters_at (bbt_walk (bbt_at (pos), distance)) - pos;
 }
 
 void
@@ -1551,25 +1551,25 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 		DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("get grid between %1..%2 [ %4 .. %5 ] { %6 .. %7 } at bar_mod = %3\n",
 		                                                 start, end, bar_mod, start, end, bbt, ebbt));
 
-		if (metric.quarters_at (bbt).diff (metric.quarters_at (start)) > Beats::ticks (1)) {
-			cerr << "MM1: " << start << " / " << metric.quarters_at (start) << " vs. "
+		if (metric.quarters_at (bbt).diff (metric.quarters_at_superclock (start)) > Beats::ticks (1)) {
+			cerr << "MM1: " << start << " / " << metric.quarters_at_superclock (start) << " vs. "
 			     << metric.superclock_at (bbt) << " / " << metric.quarters_at (bbt)
 			     << " delta "
 			     << start - metric.superclock_at (bbt)
 			     << " dB "
-			     << metric.quarters_at (bbt).diff (metric.quarters_at (start))
+			     << metric.quarters_at (bbt).diff (metric.quarters_at_superclock (start))
 			     << "\n\tused " << metric
 			     << endl;
 			abort ();
 		}
 
-		if (emetric.quarters_at (ebbt).diff (emetric.quarters_at (end)) > Beats::ticks (1)) {
-			cerr << "MM2: " << end << " / " << emetric.quarters_at (end) << " vs. "
+		if (emetric.quarters_at (ebbt).diff (emetric.quarters_at_superclock (end)) > Beats::ticks (1)) {
+			cerr << "MM2: " << end << " / " << emetric.quarters_at_superclock (end) << " vs. "
 			     << emetric.superclock_at (ebbt) << " / " << emetric.quarters_at (ebbt)
 			     << " delta "
 			     << end - emetric.superclock_at (ebbt)
 			     << " dB "
-			     << emetric.quarters_at (ebbt).diff (emetric.quarters_at (end))
+			     << emetric.quarters_at (ebbt).diff (emetric.quarters_at_superclock (end))
 			     << "\n\tused " << emetric
 			     << endl;
 			abort ();
@@ -1739,7 +1739,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 			 * So now complete the triplet of (superclock,quarters,bbt)
 			 */
 
-			const Temporal::Beats beats = metric.quarters_at (start);
+			const Temporal::Beats beats = metric.quarters_at_superclock (start);
 
 			/* add point to grid */
 			ret.push_back (TempoMapPoint (*this, metric, start, beats, bbt));
@@ -1930,7 +1930,7 @@ TempoMap::superclock_plus_quarters_as_superclock (superclock_t start, Temporal::
 {
 	TempoMetric metric (metric_at_locked (start));
 
-	const Temporal::Beats start_qn = metric.quarters_at (start);
+	const Temporal::Beats start_qn = metric.quarters_at_superclock (start);
 	const Temporal::Beats end_qn = start_qn + distance;
 
 	TempoMetric end_metric (metric_at (end_qn));
@@ -1941,21 +1941,15 @@ TempoMap::superclock_plus_quarters_as_superclock (superclock_t start, Temporal::
 Temporal::Beats
 TempoMap::superclock_delta_as_quarters (superclock_t start, superclock_t distance) const
 {
-	return quarter_note_at (start + distance) - quarter_note_at (start);
+	return quarters_at_superclock (start + distance) - quarters_at_superclock (start);
 }
 
 Temporal::superclock_t
 TempoMap::superclock_quarters_delta_as_superclock (superclock_t start, Temporal::Beats const & distance) const
 {
-	Temporal::Beats start_qn = metric_at_locked (start).quarters_at (start);
+	Temporal::Beats start_qn = metric_at_locked (start).quarters_at_superclock (start);
 	start_qn += distance;
 	return metric_at_locked (start_qn).superclock_at (start_qn);
-}
-
-superclock_t
-TempoMap::superclock_per_quarter_note_at (superclock_t pos) const
-{
-	return metric_at_locked (pos).superclocks_per_quarter_note ();
 }
 
 BBT_Time
@@ -2081,25 +2075,25 @@ TempoMap::bbt_walk (BBT_Time const & bbt, BBT_Offset const & o) const
 }
 
 Temporal::Beats
-TempoMap::quarter_note_at (timepos_t const & pos) const
+TempoMap::quarters_at (timepos_t const & pos) const
 {
 	if (pos.is_beats()) {
 		/* a bit redundant */
 		return pos.beats();
 	}
-	return quarter_note_at (pos);
+	return quarters_at (pos);
 }
 
 Temporal::Beats
-TempoMap::quarter_note_at (Temporal::BBT_Time const & bbt) const
+TempoMap::quarters_at (Temporal::BBT_Time const & bbt) const
 {
 	return metric_at_locked (bbt).quarters_at (bbt);
 }
 
 Temporal::Beats
-TempoMap::quarter_note_at (superclock_t pos) const
+TempoMap::quarters_at_superclock (superclock_t pos) const
 {
-	return metric_at_locked (pos).quarters_at (pos);
+	return metric_at_locked (pos).quarters_at_superclock (pos);
 }
 
 XMLNode&
@@ -2299,7 +2293,7 @@ TempoMap::full_duration_at (timepos_t const & pos, timecnt_t const & duration, T
 				break;
 			case AudioTime:
 				/* Determine beats at sc pos, so that we can add beats */
-				p = timepos_t (metric_at (pos).quarters_at (pos.superclocks()));
+				p = timepos_t (metric_at (pos).quarters_at_superclock (pos.superclocks()));
 				break;
 			}
 			/* add beats */
@@ -2329,7 +2323,7 @@ TempoMap::full_duration_at (timepos_t const & pos, timecnt_t const & duration, T
 			/* add superclocks */
 			p += duration;
 			/* determine beats */
-			b = metric_at (p).quarters_at (p.superclocks());
+			b = metric_at (p).quarters_at_superclock (p.superclocks());
 			/* return duration in beats */
 			return timecnt_t (b - pos.beats(), pos);
 			break;
@@ -2469,7 +2463,7 @@ TempoMap::insert_time (timepos_t const & pos, timecnt_t const & duration)
 				if (t->sclock() < m->sclock() && t->sclock() < b->sclock()) {
 
 					sc = t->sclock() + duration.superclocks();
-					beats = current_tempo.quarters_at (sc);
+					beats = current_tempo.quarters_at_superclock (sc);
 					/* round tempo to beats */
 					beats = beats.round_to_beat ();
 					sc = current_tempo.superclock_at (beats);
@@ -2483,7 +2477,7 @@ TempoMap::insert_time (timepos_t const & pos, timecnt_t const & duration)
 				if (m->sclock() < t->sclock() && m->sclock() < b->sclock()) {
 
 					sc = m->sclock() + duration.superclocks();
-					beats = current_tempo.quarters_at (sc);
+					beats = current_tempo.quarters_at_superclock (sc);
 					/* round meter to bars */
 					bbt = current_meter.bbt_at (beats);
 					beats = current_meter.quarters_at (current_meter.round_to_bar(bbt));
@@ -2498,7 +2492,7 @@ TempoMap::insert_time (timepos_t const & pos, timecnt_t const & duration)
 				if (b->sclock() < t->sclock() && b->sclock() < m->sclock()) {
 
 					sc = b->sclock() + duration.superclocks();
-					beats = current_tempo.quarters_at (sc);
+					beats = current_tempo.quarters_at_superclock (sc);
 					/* round bartime to beats */
 					beats = beats.round_to_beat();
 					sc = current_tempo.superclock_at (beats);
