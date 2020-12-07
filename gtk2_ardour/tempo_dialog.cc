@@ -79,8 +79,7 @@ TempoDialog::TempoDialog (TempoMap::SharedPtr const & map, TempoPoint& point, co
 	, tap_tempo_button (_("Tap tempo"))
 {
 	Temporal::BBT_Time when (map->bbt_at (point.time()));
-	init (when, _section->note_types_per_minute(), _section->end_note_types_per_minute(), _section->note_type(), _section->type(),
-	      (map->is_initial (point) ||(map->time_domain() == Temporal::BarTime)), map->time_domain());
+	init (when, _section->note_types_per_minute(), _section->end_note_types_per_minute(), _section->note_type(), _section->type(), map->is_initial (point), map->time_domain());
 }
 
 void
