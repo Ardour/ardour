@@ -254,8 +254,7 @@ AutomationRegionView::paste (timepos_t const &                               pos
 	timepos_t model_pos = timepos_t (source_relative_distance (timecnt_t (p, timepos_t()), slist->time_domain()));
 
 	XMLNode& before = my_list->get_state();
-#warning NUTEMPO fixme needs new tempo map
-	//my_list->paste (*slist, model_pos, _region->session().tempo_map());
+	my_list->paste (*slist, model_pos);
 	view->session()->add_command(
 		new MementoCommand<ARDOUR::AutomationList>(_line->memento_command_binder(), &before, &my_list->get_state()));
 
