@@ -39,14 +39,13 @@ struct MidiCursor : public boost::noncopyable {
 
 	void connect(PBD::Signal1<void, bool>& invalidated) {
 		connections.drop_connections();
-		invalidated.connect_same_thread(
-			connections, boost::bind(&MidiCursor::invalidate, this, _1));
+		invalidated.connect_same_thread (connections, boost::bind(&MidiCursor::invalidate, this, _1));
 	}
 
 	void invalidate(bool preserve_notes) {
-		iter.invalidate(preserve_notes ? &active_notes : NULL);
-#warning NUTEMPO this locks last_read_end to BeatTime which may not be good
-		last_read_end = Temporal::timepos_t (Temporal::BeatTime);
+		iter.invalidate (preserve_notes ? &active_notes : NULL);
+		/* maintain time domain while resetting to zero */
+		last_read_end = Temporal::timepos_t (last_read_end.time_domain());
 	}
 
 	Evoral::Sequence<Temporal::Beats>::const_iterator        iter;

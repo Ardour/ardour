@@ -74,10 +74,10 @@ public:
 	time_t timestamp() const { return _timestamp; }
 	void stamp (time_t when) { _timestamp = when; }
 
-	timecnt_t length() const;
+	timecnt_t length() const { return _length; }
+	samplecnt_t length_samples () const { return _length.samples(); };
 
 	virtual bool        empty () const;
-	virtual samplecnt_t length_samples (timepos_t const & pos) const { return _length.samples(); };
 	virtual void        update_length (timecnt_t const & cnt) {}
 
 	void                 set_take_id (std::string id) { _take_id =id; }
