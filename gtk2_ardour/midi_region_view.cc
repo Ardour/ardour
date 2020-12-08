@@ -98,6 +98,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Editing;
 using namespace std;
+using namespace Temporal;
 using Gtkmm2ext::Keyboard;
 
 #define MIDI_BP_ZERO ((Config->get_first_midi_bank_is_zero())?0:1)
@@ -851,7 +852,8 @@ MidiRegionView::create_note_at (samplepos_t t, double y, Temporal::Beats length,
 	}
 
 	// Start of note in samples relative to region start
-	Temporal::Beats beat_time = snap_sample_to_grid_underneath (t, shift_snap);
+	const int32_t divisions = trackview.editor().get_grid_music_divisions (state);
+	Temporal::Beats beat_time = snap_sample_to_grid_underneath (t, divisions, shift_snap);
 
 	const double  note     = view->y_to_note(y);
 	const uint8_t chan     = mtv->get_channel_for_add();
@@ -3872,8 +3874,9 @@ MidiRegionView::update_ghost_note (double x, double y, uint32_t state)
 
 	samplepos_t const unsnapped_sample = editor.pixel_to_sample (x);
 
+	const int32_t divisions = editor.get_grid_music_divisions (state);
 	const bool shift_snap = midi_view()->note_mode() != Percussive;
-	const Temporal::Beats snapped_beats = snap_sample_to_grid_underneath (unsnapped_sample, shift_snap);
+	const Temporal::Beats snapped_beats = snap_sample_to_grid_underneath (unsnapped_sample, divisions, shift_snap);
 
 	/* prevent Percussive mode from displaying a ghost hit at region end */
 	if (!shift_snap && snapped_beats >= _region->start().beats() + _region->length().beats()) {
@@ -4263,32 +4266,27 @@ MidiRegionView::get_velocity_for_add (MidiModel::TimeType time) const
  *  @return beat duration of p snapped to the grid subdivision underneath it.
  */
 Temporal::Beats
-MidiRegionView::snap_sample_to_grid_underneath (samplepos_t p, bool shift_snap) const
+MidiRegionView::snap_sample_to_grid_underneath (samplepos_t p, int32_t divisions, bool shift_snap) const
 {
-#warning NUTEMPO new tempo map API required
-#if 0
-	Temporal::TempoMap& map (trackview.session()->tempo_map());
-	Temporal::Beats eqaf = map.quarters_at (p + _region->position_sample());
 
+	TempoMap::SharedPtr tmap (TempoMap::use());
+	timepos_t pos (_region->position() + timecnt_t (p));
+	Beats snapped_beats = tmap->quarters_at (pos).round_to_subdivision (divisions, RoundNearest);
 
 	if (shift_snap) {
-		const Temporal::Beats qaf = map.quarters_at (p + _region->position_sample());
+		const Beats raw_beats = tmap->quarters_at (pos);
 		/* Hack so that we always snap to the note that we are over, instead of snapping
 		   to the next one if we're more than halfway through the one we're over.
 		*/
-		const Temporal::Beats grid_beats = get_grid_beats (p + _region->position_sample());
-		const Temporal::Beats rem = eqaf - qaf;
+		const Beats rem = snapped_beats - raw_beats;
 
 		if (rem >= Temporal::Beats()) {
-			eqaf -= grid_beats;
+			const Beats grid_beats = get_grid_beats (pos);
+			snapped_beats -= grid_beats;
 		}
 	}
 
-	const timepos_t e (eqaf);
-
-	return _region->absolute_time_to_source_beats (e);
-#endif
-	return Temporal::Beats ();
+	return _region->absolute_time_to_source_beats (timepos_t (snapped_beats));
 }
 
 ChannelMode

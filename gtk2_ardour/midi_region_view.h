@@ -549,7 +549,7 @@ public:
 	Gtkmm2ext::Color _patch_change_outline;
 	Gtkmm2ext::Color _patch_change_fill;
 
-	Temporal::Beats snap_sample_to_grid_underneath (samplepos_t p, bool shift_snap) const;
+	Temporal::Beats snap_sample_to_grid_underneath (samplepos_t p, int32_t divisions, bool shift_snap) const;
 
 	PBD::ScopedConnection _mouse_mode_connection;
 
