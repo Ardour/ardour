@@ -138,7 +138,7 @@ ExportHandler::add_export_config (ExportTimespanPtr timespan, ExportChannelConfi
 	return true;
 }
 
-void
+int
 ExportHandler::do_export ()
 {
 	/* Count timespans */
@@ -164,10 +164,10 @@ ExportHandler::do_export ()
 	/* Start export */
 
 	Glib::Threads::Mutex::Lock l (export_status->lock());
-	start_timespan ();
+	return start_timespan ();
 }
 
-void
+int
 ExportHandler::start_timespan ()
 {
 	export_status->timespan++;
@@ -183,7 +183,7 @@ ExportHandler::start_timespan ()
 	if (config_map.empty()) {
 		// freewheeling has to be stopped from outside the process cycle
 		export_status->set_running (false);
-		return;
+		return -1;
 	}
 
 	/* finish_timespan pops the config_map entry that has been done, so
@@ -227,7 +227,7 @@ ExportHandler::start_timespan ()
 	session.ProcessExport.connect_same_thread (process_connection, boost::bind (&ExportHandler::process, this, _1));
 	process_position = current_timespan->get_start();
 	// TODO check if it's a RegionExport.. set flag to skip  process_without_events()
-	session.start_audio_export (process_position, realtime, region_export);
+	return session.start_audio_export (process_position, realtime, region_export);
 }
 
 void

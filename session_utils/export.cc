@@ -178,7 +178,10 @@ static int export_session (Session *session,
 	/* do audio export */
 	fmp->set_soundcloud_upload(false);
 	session->get_export_handler()->add_export_config (tsp, ccp, fmp, fnp, b);
-	session->get_export_handler()->do_export();
+
+	if (0 != session->get_export_handler()->do_export()) {
+		return -1;
+	}
 
 	boost::shared_ptr<ARDOUR::ExportStatus> status = session->get_export_status ();
 
