@@ -442,8 +442,6 @@ Editor::mouse_add_new_meter_event (timepos_t pos)
 		return;
 	}
 
-#warning NUTEMPO requires new tempo map API
-#if 0
 	TempoMap::SharedPtr map (TempoMap::use());
 	MeterDialog meter_dialog (map, pos, _("add"));
 
@@ -462,20 +460,21 @@ Editor::mouse_add_new_meter_event (timepos_t pos)
 	Temporal::BBT_Time requested;
 	meter_dialog.get_bbt_time (requested);
 
-	const double al_sample = map.sample_at_bbt (requested);
 	begin_reversible_command (_("add meter mark"));
 
 	XMLNode &before = map->get_state();
 
-	if (meter_dialog.get_lock_style() == MusicTime) {
-		map->set_meter (Meter (bpb, note_type), requested);
+	if (map->time_domain() == BeatTime) {
+		pos = timepos_t (map->quarters_at (requested));
 	} else {
-		map->set_meter (Meter (bpb, note_type), requested);
+		pos = timepos_t (map->sample_at (requested, _session->sample_rate()));
 	}
 
-	_session->add_command (new MementoCommand<Temporal::TempoMap> (new Temporal::TempoMap::MementoBinder(), &before, &after));
+	map->set_meter (Meter (bpb, note_type), pos);
+
+	_session->add_command (new MementoCommand<Temporal::TempoMap> (new Temporal::TempoMap::MementoBinder(), &before, &map->get_state()));
 	commit_reversible_command ();
-#endif
+
 	//map.dump (cerr);
 }
 
