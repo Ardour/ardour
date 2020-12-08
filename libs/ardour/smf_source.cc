@@ -287,8 +287,7 @@ SMFSource::read_unlocked (const Lock&                     lock,
 		/* Note that we add on the source start time (in session samples) here so that ev_sample_time
 		   is in session samples.
 		*/
-#warning NUTEMPO FIXME needs session to use Temporal:;TempoMap
-		const samplepos_t ev_sample_time = 0; // = _session.tempo_map().sample_at (Temporal::Beats::ticks (time) + source_start.beats()); /* convert from Beats to samples */
+		const samplepos_t ev_sample_time = (time + timepos_t (source_start.beats())).samples();
 		timepos_t est (ev_sample_time);
 
 		if (loop_range) {
@@ -475,10 +474,11 @@ SMFSource::append_event_samples (const Glib::Threads::Mutex::Lock& lock,
 		return;
 	}
 
-#warning NUTEMPO FIXME needs session to use new tempo map
-	// BeatsSamplesConverter converter(_session.tempo_map(), position);
-	//const Temporal::Beats  ev_time_beats = converter.from(ev.time());
-	const Temporal::Beats  ev_time_beats;
+	/* a distance measure that starts at @param position (audio time) and
+	   extends for ev.time() (audio time)
+	*/
+	const timecnt_t distance (timepos_t (ev.time()), timepos_t (position));
+	const Temporal::Beats  ev_time_beats = distance.beats ();
 	Evoral::event_id_t   event_id;
 
 	if (ev.id() < 0) {
@@ -497,13 +497,14 @@ SMFSource::append_event_samples (const Glib::Threads::Mutex::Lock& lock,
 
 	_length_beats = max(_length_beats, ev_time_beats);
 
-#warning NUTEMPO FIXME needs session to use new tempo map
-	//const Temporal::Beats last_time_beats  = converter.from (_last_ev_time_samples);
-	const Temporal::Beats last_time_beats;
-	const Temporal::Beats delta_time_beats = ev_time_beats - last_time_beats;
-	const uint32_t      delta_time_ticks = delta_time_beats.to_ticks(ppqn());
+	/* a distance measure that starts at @param _last_ev_time_samples (audio time) and
+	   extends for ev.time() (audio time)
+	*/
+	const timecnt_t       delta_distance (timepos_t (ev.time()), timepos_t (_last_ev_time_samples));
+	const Temporal::Beats delta_time_beats = delta_distance.beats ();
+	const uint32_t        delta_time_ticks = delta_time_beats.to_ticks(ppqn());
 
-	Evoral::SMF::append_event_delta(delta_time_ticks, ev.size(), ev.buffer(), event_id);
+	Evoral::SMF::append_event_delta (delta_time_ticks, ev.size(), ev.buffer(), event_id);
 	_last_ev_time_samples = ev.time();
 	_flags = Source::Flag (_flags & ~Empty);
 	_flags = Source::Flag (_flags & ~Missing);
