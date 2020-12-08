@@ -300,7 +300,7 @@ Session::process_export_fw (pframes_t nframes)
 		}
 
 		set_transport_speed (1.0, false, false, false);
-		butler_transport_work ();
+		butler_transport_work (true);
 		g_atomic_int_set (&_butler->should_do_transport_work, 0);
 		butler_completed_transport_work ();
 		/* Session::process_with_events () sets _remaining_latency_preroll = 0

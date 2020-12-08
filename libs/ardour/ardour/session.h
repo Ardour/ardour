@@ -304,7 +304,7 @@ public:
 
 	void refill_all_track_buffers ();
 	Butler* butler() { return _butler; }
-	void butler_transport_work ();
+	void butler_transport_work (bool have_process_lock = false);
 
 	void refresh_disk_space ();
 

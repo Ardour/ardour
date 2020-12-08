@@ -1099,7 +1099,7 @@ Session::solo_selection (StripableList &list, bool new_state)
 
 
 void
-Session::butler_transport_work ()
+Session::butler_transport_work (bool have_process_lock)
 {
 	/* Note: this function executes in the butler thread context */
 
@@ -1154,7 +1154,10 @@ Session::butler_transport_work ()
 	if (ptw & PostTransportAdjustPlaybackBuffering) {
 		/* need to prevent concurrency with ARDOUR::Reader::run(),
 		 * DiskWriter::adjust_buffering() re-allocates the ringbuffer */
-		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
+		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock (), Glib::Threads::NOT_LOCK);
+		if (!have_process_lock) {
+			lx.acquire ();
+		}
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 			if (tr) {
@@ -1172,7 +1175,10 @@ Session::butler_transport_work ()
 	if (ptw & PostTransportAdjustCaptureBuffering) {
 		/* need to prevent concurrency with ARDOUR::DiskWriter::run(),
 		 * DiskWriter::adjust_buffering() re-allocates the ringbuffer */
-		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
+		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock (), Glib::Threads::NOT_LOCK);
+		if (!have_process_lock) {
+			lx.acquire ();
+		}
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 			if (tr) {
