@@ -85,7 +85,7 @@
 #include "pbd/scoped_file_descriptor.h"
 #include "pbd/xml++.h"
 
-#include "temporal/superclock.h"
+#include "temporal/tempo.h"
 
 #include "gtkmm2ext/application.h"
 #include "gtkmm2ext/bindings.h"
@@ -3117,9 +3117,5 @@ ARDOUR_UI::setup_toplevel_window (Gtk::Window& window, const string& name, void*
 void
 ARDOUR_UI::event_loop_precall ()
 {
-	if (_session) {
-		Temporal::set_thread_sample_rate (_session->sample_rate ());
-	} else {
-		Temporal::set_thread_sample_rate (44100);
-	}
+	Temporal::TempoMap::fetch ();
 }
