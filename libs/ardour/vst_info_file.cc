@@ -535,6 +535,7 @@ bool vstfx_midi_input (VSTState* vstfx)
 
 	if ((plugin->flags & effFlagsIsSynth)
 			|| (plugin->dispatcher (plugin, effCanDo, 0, 0, const_cast<char*> ("receiveVstEvents"), 0.0f) > 0)
+			|| (plugin->dispatcher (plugin, effCanDo, 0, 0, const_cast<char*> ("receiveVstMidiEvent"), 0.0f) > 0)
 			|| (plugin->dispatcher (plugin, effCanDo, 0, 0, const_cast<char*> ("receiveVstMidiEvents"), 0.0f) > 0)
 		 ) {
 		return true;
@@ -555,6 +556,7 @@ bool vstfx_midi_output (VSTState* vstfx)
 
 		if (   (plugin->dispatcher (plugin, effCanDo, 0, 0, const_cast<char*> ("sendVstEvents"), 0.0f) > 0)
 		    || (plugin->dispatcher (plugin, effCanDo, 0, 0, const_cast<char*> ("sendVstMidiEvent"), 0.0f) > 0)
+		    || (plugin->dispatcher (plugin, effCanDo, 0, 0, const_cast<char*> ("sendVstMidiEvents"), 0.0f) > 0)
 		   ) {
 			return true;
 		}
@@ -578,7 +580,8 @@ simple_master_callback (AEffect *, int32_t opcode, int32_t, intptr_t, void *ptr,
 		"receiveVstMidiEvent",
 		"supportShell",
 		"shellCategory",
-		"shellCategorycurID"
+		"shellCategorycurID",
+		"sizeWindow"
 	};
 	const int vstfx_can_do_string_count = 9;
 
