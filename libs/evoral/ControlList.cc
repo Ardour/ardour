@@ -1954,7 +1954,20 @@ ControlList::paste (const ControlList& alist, timepos_t const &  time)
 				/* catch possible rounding errors */
 				value = std::min ((double)_desc.upper, std::max ((double)_desc.lower, value));
 			}
-			_events.insert (where, new ControlEvent((*i)->when + pos, value));
+
+			timepos_t adj_pos;
+
+			if (_time_domain == (*i)->when.time_domain()) {
+				adj_pos = (*i)->when + pos;
+			} else {
+				if (_time_domain == AudioTime) {
+					adj_pos = timepos_t (((*i)->when + pos).samples());
+				} else {
+					adj_pos = timepos_t (((*i)->when + pos).beats());
+				}
+			}
+
+			_events.insert (where, new ControlEvent (adj_pos, value));
 			end = (*i)->when + pos;
 		}
 
