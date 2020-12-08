@@ -383,7 +383,7 @@ class LIBTEMPORAL_API TempoPoint : public Tempo, public Point
 	 */
 
 	superclock_t superclock_at (Beats const & qn) const;
-	samplepos_t  sample_at (Beats const & qn) const { return Temporal::superclock_to_samples (superclock_at (qn), _thread_sample_rate); }
+	samplepos_t  sample_at (Beats const & qn) const { return Temporal::superclock_to_samples (superclock_at (qn), TEMPORAL_SAMPLE_RATE); }
 	superclock_t superclocks_per_note_type_at (timepos_t const &) const;
 
 	/* This method should be used only for display purposes, and even
@@ -411,7 +411,7 @@ class LIBTEMPORAL_API TempoPoint : public Tempo, public Point
 
 	boost::intrusive::list_member_hook<> _tempo_hook;
 
-	Beats quarters_at_sample (samplepos_t sc) const { return quarters_at_superclock (samples_to_superclock (sc, _thread_sample_rate)); }
+	Beats quarters_at_sample (samplepos_t sc) const { return quarters_at_superclock (samples_to_superclock (sc, TEMPORAL_SAMPLE_RATE)); }
 	Beats quarters_at_superclock (superclock_t sc) const;
 
   private:
@@ -488,7 +488,7 @@ class LIBTEMPORAL_API TempoMetric {
 		return superclock_to_samples (superclocks_per_bar (sr), sr);
 	}
 
-	Beats quarters_at_sample (samplepos_t sc) const { return quarters_at_superclock (samples_to_superclock (sc, _thread_sample_rate)); }
+	Beats quarters_at_sample (samplepos_t sc) const { return quarters_at_superclock (samples_to_superclock (sc, TEMPORAL_SAMPLE_RATE)); }
 	Beats quarters_at_superclock (superclock_t sc) const { return _tempo->quarters_at_superclock (sc); }
 
   protected:
@@ -799,7 +799,7 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 	typedef boost::intrusive::list<MusicTimePoint,BarTimeHookOption> MusicTimes;
 	typedef boost::intrusive::list<Point,PointHookOption> Points;
 
-	Beats quarters_at_sample (samplepos_t sc) const { return quarters_at_superclock (samples_to_superclock (sc, _thread_sample_rate)); }
+	Beats quarters_at_sample (samplepos_t sc) const { return quarters_at_superclock (samples_to_superclock (sc, TEMPORAL_SAMPLE_RATE)); }
 	Beats quarters_at_superclock (superclock_t sc) const;
 
    private:

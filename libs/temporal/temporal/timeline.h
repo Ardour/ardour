@@ -50,7 +50,7 @@ class LIBTEMPORAL_API timepos_t : public int62_t  {
 
 	/* for now (Sept2020) do not allow implicit type conversions */
 
-	explicit timepos_t (samplepos_t s) : int62_t (false, samples_to_superclock (s, _thread_sample_rate)) {}
+	explicit timepos_t (samplepos_t s) : int62_t (false, samples_to_superclock (s, TEMPORAL_SAMPLE_RATE)) {}
 	explicit timepos_t (Temporal::Beats const & b) : int62_t (false, b.to_ticks()) {}
 
 	explicit timepos_t (timecnt_t const &); /* will throw() if val is negative */
@@ -76,7 +76,7 @@ class LIBTEMPORAL_API timepos_t : public int62_t  {
 	Temporal::TimeDomain time_domain () const { if (flagged()) return Temporal::BeatTime; return Temporal::AudioTime; }
 
 	superclock_t superclocks() const { if (is_superclock()) return val(); return _superclocks (); }
-	int64_t      samples() const { return superclock_to_samples (superclocks(), _thread_sample_rate); }
+	int64_t      samples() const { return superclock_to_samples (superclocks(), TEMPORAL_SAMPLE_RATE); }
 	int64_t      ticks() const { if (is_beats()) return val(); return _ticks (); }
 	Beats        beats() const { if (is_beats()) return Beats::ticks (val()); return _beats (); }
 
@@ -290,8 +290,8 @@ class LIBTEMPORAL_API timecnt_t {
 	timecnt_t (timecnt_t const &other) : _distance (other.distance()), _position (other.position()) {}
 
 	/* construct from sample count (position doesn't matter due to linear nature * of audio time */
-	explicit timecnt_t (samplepos_t s, timepos_t const & pos) : _distance (int62_t (false, samples_to_superclock (s, _thread_sample_rate))), _position (pos) {}
-	explicit timecnt_t (samplepos_t s) : _distance (int62_t (false, samples_to_superclock (s, _thread_sample_rate))), _position (AudioTime) {}
+	explicit timecnt_t (samplepos_t s, timepos_t const & pos) : _distance (int62_t (false, samples_to_superclock (s, TEMPORAL_SAMPLE_RATE))), _position (pos) {}
+	explicit timecnt_t (samplepos_t s) : _distance (int62_t (false, samples_to_superclock (s, TEMPORAL_SAMPLE_RATE))), _position (AudioTime) {}
 
 	/* construct from timeline types */
 	explicit timecnt_t (timepos_t const & d) : _distance (d), _position (timepos_t::zero (d.flagged())) {}
@@ -315,7 +315,7 @@ class LIBTEMPORAL_API timecnt_t {
 	/* Construct from just a distance value - position is assumed to be zero */
 	explicit timecnt_t (Temporal::Beats const & b) :  _distance (true, b.to_ticks()), _position (Beats()) {}
 	static timecnt_t from_superclock (superclock_t s) { return timecnt_t (int62_t (false, s), timepos_t::from_superclock (0)); }
-	static timecnt_t from_samples (samplepos_t s) { return timecnt_t (int62_t (false, samples_to_superclock (s, _thread_sample_rate)), timepos_t::from_superclock (0)); }
+	static timecnt_t from_samples (samplepos_t s) { return timecnt_t (int62_t (false, samples_to_superclock (s, TEMPORAL_SAMPLE_RATE)), timepos_t::from_superclock (0)); }
 	static timecnt_t from_ticks (int64_t ticks) { return timecnt_t (int62_t (true, ticks), timepos_t::from_ticks (0)); }
 
 	int64_t magnitude() const { return _distance.val(); }
@@ -336,7 +336,7 @@ class LIBTEMPORAL_API timecnt_t {
 	Temporal::TimeDomain time_domain () const { return _distance.flagged() ? BeatTime : AudioTime; }
 
 	superclock_t    superclocks() const { if (!_distance.flagged()) return _distance.val(); return compute_superclocks(); }
-	int64_t         samples() const { return superclock_to_samples (superclocks(), _thread_sample_rate); }
+	int64_t         samples() const { return superclock_to_samples (superclocks(), TEMPORAL_SAMPLE_RATE); }
 	Temporal::Beats beats  () const { if (_distance.flagged()) return Beats::ticks (_distance.val()); return compute_beats(); }
 	int64_t         ticks  () const { if (_distance.flagged()) return _distance.val(); return compute_ticks(); }
 

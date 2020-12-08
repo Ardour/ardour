@@ -25,16 +25,12 @@
 
 #include "temporal/superclock.h"
 
-namespace Temporal {
-	thread_local uint32_t _thread_sample_rate = 0;
-}
-
 Temporal::superclock_t Temporal::superclock_ticks_per_second = 508032000; // 2^10 * 3^4 * 5^3 * 7^2
 
-void
-Temporal::set_thread_sample_rate (uint32_t sr)
-{
-	_thread_sample_rate = sr;
-	// std::cout << pthread_name() << " 0x" << std::hex << pthread_self() << std::dec << " TID " << syscall(SYS_gettid) << " set TSR @ " << &_thread_sample_rate << " to " << sr << " = " << _thread_sample_rate << '\n';
-}
+int (*Temporal::sample_rate_callback)() = 0;
 
+void
+Temporal::set_sample_rate_callback (int (*func)())
+{
+	sample_rate_callback = func;
+}

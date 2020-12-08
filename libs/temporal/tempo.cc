@@ -777,7 +777,7 @@ TempoMap::add_tempo (TempoPoint & tp)
 
 	if (t->ramped() && nxt != _tempos.end()) {
 		DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("compute ramp over %1 .. %2 aka %3 .. %4\n", t->sclock(), nxt->sclock(), t->beats(), nxt->beats()));
-		t->compute_omega (_thread_sample_rate, nxt->superclocks_per_quarter_note (), nxt->beats() - t->beats());
+		t->compute_omega (TEMPORAL_SAMPLE_RATE, nxt->superclocks_per_quarter_note (), nxt->beats() - t->beats());
 	}
 
 	reset_starting_at (tp.sclock());
@@ -924,7 +924,7 @@ TempoMap::reset_starting_at (superclock_t sc)
                /* UPDATE RAMP COEFFICIENTS WHEN NECESSARY */
 
 		if (t->ramped() && (nxt_tempo != _tempos.begin()) && (nxt_tempo != _tempos.end())) {
-		       t->compute_omega (_thread_sample_rate, nxt_tempo->superclocks_per_quarter_note (), nxt_tempo->beats() - t->beats());
+		       t->compute_omega (TEMPORAL_SAMPLE_RATE, nxt_tempo->superclocks_per_quarter_note (), nxt_tempo->beats() - t->beats());
 	       }
 
 	       /* figure out which of the 1, 2 or 3 possible iterators defines the next explicit point (we want the earliest on the timeline,
@@ -1246,7 +1246,7 @@ TempoMap::move_tempo (TempoPoint const & tp, timepos_t const & when, bool push)
 	/* Update ramp coefficients when necessary */
 
 	if (current->ramped() && insert_before != _tempos.end()) {
-		current->compute_omega (_thread_sample_rate, insert_before->superclocks_per_quarter_note (), insert_before->beats() - current->beats());
+		current->compute_omega (TEMPORAL_SAMPLE_RATE, insert_before->superclocks_per_quarter_note (), insert_before->beats() - current->beats());
 	}
 
 	/* recompute 3 domain positions for everything after this */
@@ -1356,13 +1356,13 @@ TempoMap::bbt_at (Temporal::Beats const & qn) const
 samplepos_t
 TempoMap::sample_at (Temporal::Beats const & qn) const
 {
-	return superclock_to_samples (metric_at_locked (qn).superclock_at (qn), _thread_sample_rate);
+	return superclock_to_samples (metric_at_locked (qn).superclock_at (qn), TEMPORAL_SAMPLE_RATE);
 }
 
 samplepos_t
 TempoMap::sample_at (Temporal::BBT_Time const & bbt) const
 {
-	return samples_to_superclock (metric_at_locked (bbt).superclock_at (bbt), _thread_sample_rate);
+	return samples_to_superclock (metric_at_locked (bbt).superclock_at (bbt), TEMPORAL_SAMPLE_RATE);
 }
 
 samplepos_t
@@ -1425,8 +1425,8 @@ TempoMap::superclock_plus_bbt (superclock_t pos, BBT_Time op) const
 	return superclock_at (pos_bbt);
 }
 
-#define S2Sc(s) (samples_to_superclock ((s), _thread_sample_rate))
-#define Sc2S(s) (superclock_to_samples ((s), _thread_sample_rate))
+#define S2Sc(s) (samples_to_superclock ((s), TEMPORAL_SAMPLE_RATE))
+#define Sc2S(s) (superclock_to_samples ((s), TEMPORAL_SAMPLE_RATE))
 
 /** Count the number of beats that are equivalent to distance when going forward,
     starting at pos.
@@ -1460,7 +1460,7 @@ TempoMap::bbtwalk_to_quarters (Beats const & pos, BBT_Offset const & distance) c
 void
 TempoMap::sample_rate_changed (samplecnt_t new_sr)
 {
-	const double ratio = new_sr / (double) _thread_sample_rate;
+	const double ratio = new_sr / (double) TEMPORAL_SAMPLE_RATE;
 
 	for (Tempos::iterator t = _tempos.begin(); t != _tempos.end(); ++t) {
 		t->map_reset_set_sclock_for_sr_change (llrint (ratio * t->sclock()));
@@ -1904,7 +1904,7 @@ TempoMap::superclock_plus_quarters_as_superclock (superclock_t start, Temporal::
 
 	TempoMetric end_metric (metric_at (end_qn));
 
-	return superclock_to_samples (end_metric.superclock_at (end_qn), _thread_sample_rate);
+	return superclock_to_samples (end_metric.superclock_at (end_qn), TEMPORAL_SAMPLE_RATE);
 }
 
 Temporal::Beats
@@ -2026,7 +2026,7 @@ TempoMap::bbt_walk (BBT_Time const & bbt, BBT_Offset const & o) const
 	for (int32_t b = 0; b < offset.beats; ++b) {
 
 		TEMPO_CHECK_FOR_NEW_METRIC;
-		pos += metric.superclocks_per_grid (_thread_sample_rate);
+		pos += metric.superclocks_per_grid (TEMPORAL_SAMPLE_RATE);
 	}
 
 	/* add each bar, 1 by 1, rechecking to see if there's a new
@@ -2037,7 +2037,7 @@ TempoMap::bbt_walk (BBT_Time const & bbt, BBT_Offset const & o) const
 
 		TEMPO_CHECK_FOR_NEW_METRIC;
 
-		pos += metric.superclocks_per_bar (_thread_sample_rate);
+		pos += metric.superclocks_per_bar (TEMPORAL_SAMPLE_RATE);
 	}
 
 	return metric.bbt_at (pos);
