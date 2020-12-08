@@ -198,6 +198,10 @@ class LIBARDOUR_API AudioEngine : public PortManager, public SessionHandlePtr
 
 	static AudioEngine* instance() { return _instance; }
 	static void destroy();
+
+	/* this method is intended only to be used as a "fast" callback from libtemporal */
+	static int static_sample_rate () { return _instance->sample_rate(); }
+
 	void died ();
 
 	/* The backend will cause these at the appropriate time(s) */

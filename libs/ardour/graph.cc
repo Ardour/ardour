@@ -538,7 +538,6 @@ again:
 void
 Graph::setup_thread_local_variables ()
 {
-	Temporal::set_thread_sample_rate (AudioEngine::instance()->sample_rate());
 	Temporal::TempoMap::fetch ();
 }
 

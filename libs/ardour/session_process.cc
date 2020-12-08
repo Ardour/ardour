@@ -35,7 +35,7 @@
 
 #include <glibmm/threads.h>
 
-#include "temporal/superclock.h"
+#include "temporal/tempo.h"
 
 #include "ardour/audioengine.h"
 #include "ardour/auditioner.h"
@@ -72,7 +72,7 @@ using namespace std;
 void
 Session::setup_thread_local_variables ()
 {
-	Temporal::set_thread_sample_rate (sample_rate());
+	Temporal::TempoMap::fetch ();
 }
 
 /** Called by the audio engine when there is work to be done with JACK.

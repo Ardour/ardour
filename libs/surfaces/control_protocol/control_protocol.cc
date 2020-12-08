@@ -383,7 +383,6 @@ ControlProtocol::notify_stripable_selection_changed (StripableNotificationListPt
 void
 ControlProtocol::event_loop_precall ()
 {
-	Temporal::set_thread_sample_rate (session->sample_rate());
 	Temporal::TempoMap::fetch ();
 }
 

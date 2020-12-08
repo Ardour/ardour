@@ -211,7 +211,6 @@ Butler::thread_work ()
 			}
 		}
 
-		Temporal::_thread_sample_rate = _session.sample_rate ();
 		Temporal::TempoMap::fetch ();
 
 	  restart:

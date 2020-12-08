@@ -288,8 +288,6 @@ AudioEngine::process_callback (pframes_t nframes)
 		thread_init_callback (NULL);
 	}
 
-#warning NUTEMPO session sample rate or backend sample rate?
-	Temporal::set_thread_sample_rate (sample_rate());
 	Temporal::TempoMap::fetch ();
 
 	/* This is for JACK, where the latency callback arrives in sync with
@@ -1433,7 +1431,6 @@ AudioEngine::thread_init_callback (void* arg)
 	PBD::notify_event_loops_about_thread_creation (pthread_self(), thread_name, 4096);
 	AsyncMIDIPort::set_process_thread (pthread_self());
 
-	Temporal::set_thread_sample_rate (44100); /* will change later as appropriate */
 	Temporal::TempoMap::fetch ();
 
 	if (arg) {
