@@ -87,7 +87,6 @@ public:
 	AutomationList& operator= (const AutomationList&);
 
 	void thaw ();
-	bool paste (const ControlList&, timepos_t const &, BeatsSamplesConverter const&);
 
 	void set_automation_state (AutoState);
 	AutoState automation_state() const;

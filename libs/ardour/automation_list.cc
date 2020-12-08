@@ -317,32 +317,6 @@ AutomationList::thaw ()
 	}
 }
 
-bool
-AutomationList::paste (const ControlList& alist, timepos_t const &  pos, BeatsSamplesConverter const& bfc)
-{
-	if (time_domain() == alist.time_domain()) {
-		return ControlList::paste (alist, pos);
-	}
-
-	/* time domains differ - need to map the time of all points in alist
-	 * into our time domain
-	 */
-
-	const bool to_sample = (time_domain() == Temporal::AudioTime);
-
-	ControlList cl (alist);
-	cl.clear ();
-
-	for (const_iterator i = alist.begin ();i != alist.end (); ++i) {
-		if (to_sample) {
-			cl.fast_simple_add (timepos_t ((*i)->when.samples()), (*i)->value);
-		} else {
-			cl.fast_simple_add (timepos_t ((*i)->when.beats ()), (*i)->value);
-		}
-	}
-	return ControlList::paste (cl, pos);
-}
-
 Command*
 AutomationList::memento_command (XMLNode* before, XMLNode* after)
 {
