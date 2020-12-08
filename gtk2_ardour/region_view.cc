@@ -30,6 +30,8 @@
 
 #include <gtkmm2ext/gtk_ui.h>
 
+#include "temporal/tempo.h"
+
 #include "ardour/playlist.h"
 #include "ardour/profile.h"
 #include "ardour/session.h"
@@ -1192,17 +1194,13 @@ RegionView::snap_region_time_to_region_time (timepos_t const & x, bool ensure_sn
 timecnt_t
 RegionView::region_relative_distance (timecnt_t const & duration, Temporal::TimeDomain domain)
 {
-#warning NUTEMPO fixme needs new tempo map
-	//return _region->session().tempo_map().full_duration_at (_region->position(), duration, domain);
-	return timecnt_t();
+	return Temporal::TempoMap::use()->full_duration_at (_region->position(), duration, domain);
 }
 
 timecnt_t
 RegionView::source_relative_distance (timecnt_t const & duration, Temporal::TimeDomain domain)
 {
-#warning NUTEMPO fixme needs new tempo map
-	//return _region->session().tempo_map().full_duration_at (_region->source_position(), duration, domain);
-	return timecnt_t();
+	return Temporal::TempoMap::use()->full_duration_at (_region->source_position(), duration, domain);
 }
 
 void
