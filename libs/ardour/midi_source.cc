@@ -344,10 +344,12 @@ MidiSource::mark_write_starting_now (samplecnt_t position,
 	_capture_length      = capture_length;
 	_capture_loop_length = loop_length;
 
-#warning NUTEMPO FIXME needs session to use tempo map
-	//TempoMap& map (_session.tempo_map());
-	//BeatsSamplesConverter converter(map, position);
-	//_length_beats = converter.from(capture_length);
+	/* currently prefer to compute length in beats, since that matches 6.x
+	 * and earlier behavior
+	 */
+
+	timecnt_t distance = timecnt_t (timepos_t (capture_length), timepos_t (position));
+	_length = timecnt_t (distance.beats(), timepos_t (position));
 }
 
 void
