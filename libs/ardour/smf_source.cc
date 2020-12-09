@@ -442,7 +442,7 @@ SMFSource::append_event_beats (const Glib::Threads::Mutex::Lock&   lock,
 		_model->append (ev, event_id);
 	}
 
-	_length_beats = max(_length_beats, time);
+	_length  = max (_length, timecnt_t (time));
 
 	const Temporal::Beats delta_time_beats = time - _last_ev_time_beats;
 	const uint32_t      delta_time_ticks = delta_time_beats.to_ticks(ppqn());
@@ -495,7 +495,7 @@ SMFSource::append_event_samples (const Glib::Threads::Mutex::Lock& lock,
 		_model->append (beat_ev, event_id);
 	}
 
-	_length_beats = max(_length_beats, ev_time_beats);
+	_length = max (_length, timecnt_t (ev_time_beats, timepos_t (position)));
 
 	/* a distance measure that starts at @param _last_ev_time_samples (audio time) and
 	   extends for ev.time() (audio time)
@@ -715,7 +715,7 @@ SMFSource::load_model (const Glib::Threads::Mutex::Lock& lock, bool force_reload
 				scratch_size = std::max(size, scratch_size);
 				size = scratch_size;
 
-				_length_beats = max(_length_beats, event_time);
+				_length = max (_length, timecnt_t (event_time));
 			}
 
 			/* event ID's must immediately precede the event they are for */
@@ -735,7 +735,7 @@ SMFSource::load_model (const Glib::Threads::Mutex::Lock& lock, bool force_reload
         // _playback_buf->dump (cerr);
         // cerr << "----------------\n";
 
-	_model->end_write (Evoral::Sequence<Temporal::Beats>::ResolveStuckNotes, _length_beats);
+	_model->end_write (Evoral::Sequence<Temporal::Beats>::ResolveStuckNotes, _length.beats());
 	_model->set_edited (false);
 	invalidate(lock);
 
@@ -753,7 +753,7 @@ SMFSource::destroy_model (const Glib::Threads::Mutex::Lock& lock)
 void
 SMFSource::flush_midi (const Lock& lock)
 {
-	if (!writable() || _length_beats == 0.0) {
+	if (!writable() || _length.zero()) {
 		return;
 	}
 

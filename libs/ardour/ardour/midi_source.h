@@ -172,9 +172,6 @@ class LIBARDOUR_API MidiSource : virtual public Source
 
 	bool length_mutable() const { return true; }
 
-	void     set_length_beats(TimeType l) { _length_beats = l; }
-	TimeType length_beats() const         { return _length_beats; }
-
 	virtual void load_model(const Glib::Threads::Mutex::Lock& lock, bool force_reload=false) = 0;
 	virtual void destroy_model(const Glib::Threads::Mutex::Lock& lock) = 0;
 
@@ -234,8 +231,6 @@ class LIBARDOUR_API MidiSource : virtual public Source
 
 	boost::shared_ptr<MidiModel> _model;
 	bool                         _writing;
-
-	Temporal::Beats _length_beats;
 
 	/** The total duration of the current capture. */
 	samplepos_t _capture_length;
