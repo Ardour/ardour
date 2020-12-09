@@ -279,8 +279,16 @@ ARDOUR::module_path_vst3 (string const& path)
 		 * ...\plugin.vst3
 		 * ...\plugin.vst3\Contents\x64_64-win\plugin.vst3
 		 */
-		if (Glib::path_get_basename (Glib::path_get_dirname (path)) == vst3_bindir ()) {
-			/* ignore *.vst3 files if they're part of a bundle, use the bundle instead. */
+		std::string p1 = Glib::path_get_dirname (path);
+		std::string p2 = Glib::path_get_dirname (p1);
+		std::string p3 = Glib::path_get_dirname (p2);
+		if (   Glib::path_get_basename (p1) == vst3_bindir ()
+		    && Glib::path_get_basename (p2) == "Contents"
+		    && Glib::path_get_basename (p3) == Glib::path_get_basename (path)
+		   ) {
+			/* Ignore *.vst3 dll if it resides inside a bundle with the same name.
+			 * Ardour will instead use the bundle.
+			 */
 			return "";
 		}
 #endif
