@@ -465,42 +465,41 @@ Region::set_length (timecnt_t const & len)
 		return;
 	}
 
-	if (_length != len && !len.zero()) {
-
-		/* check that the current _position wouldn't make the new
-		 * length impossible.
-		 */
-
-		if (timepos_t::max (len.time_domain()).earlier (len) < _position) {
-			return;
-		}
-
-		timecnt_t l = len;
-
-		if (!verify_length (l)) {
-			return;
-		}
-
-
-		set_length_internal (l);
-		_whole_file = false;
-		first_edit ();
-		maybe_uncopy ();
-		maybe_invalidate_transients ();
-
-		if (!property_changes_suspended()) {
-			recompute_at_end ();
-		}
-
-		send_change (Properties::length);
+	if (_length == len || len.zero()) {
+		return;
 	}
+
+	/* check that the current _position wouldn't make the new
+	 * length impossible.
+	 */
+
+	if (timepos_t::max (len.time_domain()).earlier (len) < _position) {
+		return;
+	}
+
+	timecnt_t l = len;
+
+	if (!verify_length (l)) {
+		return;
+	}
+
+
+	set_length_internal (l);
+	_whole_file = false;
+	first_edit ();
+	maybe_uncopy ();
+	maybe_invalidate_transients ();
+
+	if (!property_changes_suspended()) {
+		recompute_at_end ();
+	}
+
+	send_change (Properties::length);
 }
 
 void
 Region::set_length_internal (timecnt_t const & len)
 {
-	std::cerr << "Region::set_length_internal() len = " << len << std::endl;
-
 	_last_length = _length;
 	_length = len;
 }
