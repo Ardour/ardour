@@ -375,15 +375,10 @@ class LIBTEMPORAL_API timecnt_t {
 	bool operator< (timecnt_t const & other) const { if (_distance.flagged() == other.distance().flagged()) return _distance < other.distance(); else return expensive_lt (other); }
 	bool operator<= (timecnt_t const & other) const { if (_distance.flagged() == other.distance().flagged()) return _distance <= other.distance(); else return expensive_gte (other); }
 
-	timecnt_t & operator=(timecnt_t const & other) {
+	timecnt_t & operator= (timecnt_t const & other) {
 		if (this != &other) {
-			if (_distance.flagged() == other.distance().flagged()) {
-				_distance = other.distance();
-			} else {
-				/* unclear what to do here but we cannot allow
-				   inconsistent timecnt_t to be created
-				*/
-			}
+			_distance = other.distance();
+			_position = other.position();
 		}
 		return *this;
 	}
