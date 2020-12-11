@@ -418,7 +418,6 @@ class LIBTEMPORAL_API timecnt_t {
 
 	superclock_t compute_superclocks () const;
 	Beats compute_beats () const;
-	int64_t compute_ticks () const;
 
 	bool expensive_lt (timecnt_t const & other) const;
 	bool expensive_lte (timecnt_t const & other) const;
