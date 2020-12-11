@@ -51,7 +51,7 @@ class LIBTEMPORAL_API timepos_t : public int62_t  {
 	/* for now (Sept2020) do not allow implicit type conversions */
 
 	explicit timepos_t (samplepos_t s) : int62_t (false, samples_to_superclock (s, TEMPORAL_SAMPLE_RATE)) {}
-	explicit timepos_t (Temporal::Beats const & b) : int62_t (false, b.to_ticks()) {}
+	explicit timepos_t (Temporal::Beats const & b) : int62_t (true, b.to_ticks()) {}
 
 	explicit timepos_t (timecnt_t const &); /* will throw() if val is negative */
 
