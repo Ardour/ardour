@@ -428,39 +428,6 @@ class LIBTEMPORAL_API timecnt_t {
 } /* end namespace Temporal */
 
 
-/* because timepos_t is just a typedef here, C++ won't let this be redefined
- * (numeric_limits<uint64_t> are already implicitly defined.
- */
-
-namespace std {
-
-/* The utility of these two specializations of std::numeric_limits<> is not
- * clear, since both timepos_t and timecnt_t have a time domain, and comparing
- * across time domains, while possible, is expensive.
- *
- * To avoid hidden costs, it seems easier to use timepos_t::max and
- * timecnt_t::max although these have a similar fundamental problem.
- */
-
-template<>
-struct numeric_limits<Temporal::timepos_t> {
-	static Temporal::timepos_t min() {
-		return Temporal::timepos_t::from_superclock (0);
-	}
-	static Temporal::timepos_t max() {
-		return Temporal::timepos_t::from_superclock (4611686018427387903); /* pow (2,62) - 1 */
-	}
-};
-
-template<>
-struct numeric_limits<Temporal::timecnt_t> {
-	static Temporal::timecnt_t min() { return Temporal::timecnt_t::from_superclock (0); }
-	static Temporal::timecnt_t max() { return Temporal::timecnt_t::from_superclock (4611686018427387903); /* pow (2,62) - 1 */ }
-};
-
-}
-
-
 namespace std {
 std::ostream&  operator<< (std::ostream & o, Temporal::timecnt_t const & tc);
 std::ostream&  operator>> (std::istream & o, Temporal::timecnt_t const & tc);
