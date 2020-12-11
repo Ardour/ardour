@@ -3097,7 +3097,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 	pair<set<boost::shared_ptr<Playlist> >::iterator,bool> insert_result;
 	timecnt_t delta;
 	timepos_t adj_time = adjusted_time (_drags->current_pointer_time () + snap_delta (event->button.state), event, true);
-	timecnt_t dt = adj_time.distance (raw_grab_time ()) + _pointer_offset - snap_delta (event->button.state);
+	timecnt_t dt = raw_grab_time().distance (adj_time) + _pointer_offset - snap_delta (event->button.state);
 
 	if (first_move) {
 
