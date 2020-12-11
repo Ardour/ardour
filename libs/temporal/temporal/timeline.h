@@ -338,7 +338,7 @@ class LIBTEMPORAL_API timecnt_t {
 	superclock_t    superclocks() const { if (!_distance.flagged()) return _distance.val(); return compute_superclocks(); }
 	int64_t         samples() const { return superclock_to_samples (superclocks(), TEMPORAL_SAMPLE_RATE); }
 	Temporal::Beats beats  () const { if (_distance.flagged()) return Beats::ticks (_distance.val()); return compute_beats(); }
-	int64_t         ticks  () const { if (_distance.flagged()) return _distance.val(); return compute_ticks(); }
+	int64_t         ticks  () const { return beats().to_ticks(); }
 
 	timecnt_t & operator= (Temporal::Beats const & b) { _distance = int62_t (true, b.to_ticks()); return *this; }
 
