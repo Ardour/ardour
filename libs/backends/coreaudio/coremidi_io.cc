@@ -18,6 +18,7 @@
 
 #include <sstream>
 #include <CoreAudio/HostTime.h>
+#undef nil
 
 #include "coremidi_io.h"
 #include "coreaudio_backend.h"

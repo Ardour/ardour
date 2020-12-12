@@ -29,6 +29,7 @@
 #include <CoreFoundation/CFString.h>
 #include <sys/param.h>
 #include <mach-o/dyld.h>
+#undef nil
 #endif
 
 #ifdef PLATFORM_WINDOWS

@@ -24,6 +24,8 @@
 #include <mach/thread_policy.h>
 #include <mach/thread_act.h>
 
+#undef nil
+
 #include <glibmm.h>
 
 #include "coreaudio_backend.h"
