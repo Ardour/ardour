@@ -825,7 +825,7 @@ cp -vi ${DMGBACKGROUND}.png "${MNTPATH}/.background/dmgbg.png"
 
 echo "setting DMG background ..."
 
-if test $(sw_vers -productVersion | cut -d '.' -f 2) -lt 9; then
+if test $(sw_vers -productVersion | cut -d '.' -f 1) -lt 11 -a $(sw_vers -productVersion | cut -d '.' -f 2) -lt 9; then
 	# OSX ..10.8.X
 	DISKNAME=${VOLNAME}
 else
