@@ -201,7 +201,11 @@
 #define VERSION "2.0.6"
 
 /* Define to do all DSP in single floating point precision */
-/* #undef WITH_FLOAT */
+#ifdef __arm__
+#  define WITH_FLOAT
+#else
+#  undef WITH_FLOAT
+#endif
 
 /* Define to profile the DSP code */
 /* #undef WITH_PROFILING */
