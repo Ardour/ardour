@@ -76,6 +76,7 @@ while [ $# -gt 0 ] ; do
 	--no-nls) WITH_NLS= ; shift ;;
 	--nls) WITH_NLS=1 ; shift ;;
 	--chanstrip) HARRISONCHANNELSTRIP=$2 ; shift; shift ;;
+	--stack) GTKSTACK_ROOT=$2 ; shift; shift ;;
 	esac
 done
 
@@ -633,6 +634,9 @@ if file ${PRODUCT_PKG_DIR}/$APPROOT/MacOS/$MAIN_EXECUTABLE | grep -q x86_64; the
 elif file ${PRODUCT_PKG_DIR}/$APPROOT/MacOS/$MAIN_EXECUTABLE | grep -q ppc; then
 	OSX_ARCH=ppc
 	OSX_BENSID=osxppc
+elif file ${PRODUCT_PKG_DIR}/$APPROOT/MacOS/$MAIN_EXECUTABLE | grep -q arm64; then
+	OSX_ARCH=arm64
+	OSX_BENSID=macarm64
 else
 	OSX_ARCH=i386
 	OSX_BENSID=osx32
