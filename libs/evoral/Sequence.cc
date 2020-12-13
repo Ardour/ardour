@@ -378,7 +378,7 @@ Sequence<Time>::const_iterator::operator++()
 			ret = _control_iter->list->rt_safe_earliest_event_discrete_unlocked (_control_iter->x, xtime, y, false);
 		} else {
 			ret = _control_iter->list->rt_safe_earliest_event_linear_unlocked (
-				_control_iter->x, xtime, y, false, Temporal::timecnt_t::from_ticks (time_between_interpolated_controller_outputs));
+				_control_iter->x, xtime, y, false, Temporal::timecnt_t::from_ticks (time_between_interpolated_controller_outputs.to_ticks()));
 		}
 		assert(!ret || x > _control_iter->x);
 		if (ret) {
