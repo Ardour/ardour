@@ -714,7 +714,7 @@ if true; then
 	for proj in x42-gmsynth; do
 		X42_VERSION=$(curl -s -S http://${OSX_X42URI}/${proj}.latest.txt)
 		rsync -a -q --partial \
-			rsync://${OSX_X42ROOT}/${proj}-lv2-${OSX_X42ID}-${X42_VERSION}.zip \
+			rsync://${OSX_X42URI}/${proj}-lv2-${OSX_X42ID}-${X42_VERSION}.zip \
 			"$CACHEDIR/${proj}-lv2-${OSX_X42ID}-${X42_VERSION}.zip"
 		bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf \
 			"$CACHEDIR/${proj}-lv2-${OSX_X42ID}-${X42_VERSION}.zip"
@@ -728,7 +728,7 @@ if test x$WITH_COMMERCIAL_X42_LV2 != x ; then
 	for proj in x42-meters x42-eq x42-whirl; do
 		X42_VERSION=$(curl -s -S http://${OSX_X42URI}/${proj}.latest.txt)
 		rsync -a -q --partial \
-			rsync://${OSX_X42ROOT}/${proj}-lv2-${OSX_X42ID}-${X42_VERSION}.zip \
+			rsync://${OSX_X42URI}/${proj}-lv2-${OSX_X42ID}-${X42_VERSION}.zip \
 			"$CACHEDIR/${proj}-lv2-${OSX_X42ID}-${X42_VERSION}.zip"
 		bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf \
 			"$CACHEDIR/${proj}-lv2-${OSX_X42ID}-${X42_VERSION}.zip"
