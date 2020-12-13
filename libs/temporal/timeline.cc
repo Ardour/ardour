@@ -171,11 +171,11 @@ timecnt_t::string_to (std::string const & str)
 	switch (str[0]) {
 	case 'a':
 		ss >> s;
-		_distance = s;
+		_distance = int62_t (false, s);
 		break;
 	case 'b':
 		ss >> beats;
-		_distance = beats;
+		_distance = int62_t (true, beats.to_ticks());
 		break;
 	}
 
@@ -661,7 +661,7 @@ timepos_t::operator+= (Temporal::BBT_Offset const & offset)
 {
 	TempoMap::SharedPtr tm (TempoMap::use());
 	if (is_beats()) {
-		v = build (true, tm->bbtwalk_to_quarters (beats(), offset));
+		v = build (true, tm->bbtwalk_to_quarters (beats(), offset).to_ticks());
 	} else {
 		v = build (false, tm->superclock_at (tm->bbt_walk (tm->bbt_at (superclocks()), offset)));
 	}
