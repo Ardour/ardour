@@ -630,15 +630,24 @@ fi
 
 if file ${PRODUCT_PKG_DIR}/$APPROOT/MacOS/$MAIN_EXECUTABLE | grep -q x86_64; then
 	OSX_ARCH=x86_64
+	OSX_X42URI=x42-plugins.com/x42/osx
+	OSX_X42ID=osx
 	OSX_BENSID=osx64
 elif file ${PRODUCT_PKG_DIR}/$APPROOT/MacOS/$MAIN_EXECUTABLE | grep -q ppc; then
 	OSX_ARCH=ppc
+	OSX_X42URI=x42-plugins.com/x42/osx
+	OSX_X42ID=osx
 	OSX_BENSID=osxppc
 elif file ${PRODUCT_PKG_DIR}/$APPROOT/MacOS/$MAIN_EXECUTABLE | grep -q arm64; then
 	OSX_ARCH=arm64
+	OSX_X42URI=x42-plugins.com/x42/mac
+	OSX_X42ID="macOS-arm64"
+	JADEO_ARCH="-arm64"
 	OSX_BENSID=macarm64
 else
 	OSX_ARCH=i386
+	OSX_X42URI=x42-plugins.com/x42/osx
+	OSX_X42ID=osx
 	OSX_BENSID=osx32
 fi
 
@@ -663,22 +672,21 @@ if test x$WITH_HARVID != x ; then
 		HARVID_VERSION=$(curl -s -S http://ardour.org/files/video-tools/harvid_version.txt)
 		XJADEO_VERSION=$(curl -s -S http://ardour.org/files/video-tools/xjadeo_version.txt)
 	fi
-	MULTIARCH=osx
 	echo "copying harvid and xjadeo ..."
 
 	rsync -Pa \
-		rsync://ardour.org/video-tools/harvid-osx-${HARVID_VERSION}.tgz \
-		"$CACHEDIR/harvid-${MULTIARCH}-${HARVID_VERSION}.tgz"
+		rsync://ardour.org/video-tools/harvid-${OSX_X42ID}-${HARVID_VERSION}.tgz \
+		"$CACHEDIR/harvid-${OSX_X42ID}-${HARVID_VERSION}.tgz"
 
 	rsync -Pa \
-		rsync://ardour.org/video-tools/jadeo-${XJADEO_VERSION:1}.dmg \
-		"$CACHEDIR/jadeo-${XJADEO_VERSION:1}.dmg"
+		rsync://ardour.org/video-tools/jadeo${JADEO_ARCH}-${XJADEO_VERSION:1}.dmg \
+		"$CACHEDIR/jadeo${JADEO_ARCH}-${XJADEO_VERSION:1}.dmg"
 
 	tar -x -z \
 		-C $PRODUCT_PKG_DIR/$APPROOT \
-		-f "$CACHEDIR/harvid-${MULTIARCH}-${HARVID_VERSION}.tgz" || exit 1
+		-f "$CACHEDIR/harvid-${OSX_X42ID}-${HARVID_VERSION}.tgz" || exit 1
 
-	JADEO=$(hdiutil attach "$CACHEDIR/jadeo-${XJADEO_VERSION:1}.dmg" | grep Apple_HFS | grep dev/ | cut -f 3)
+	JADEO=$(hdiutil attach "$CACHEDIR/jadeo${JADEO_ARCH}-${XJADEO_VERSION:1}.dmg" | grep Apple_HFS | grep dev/ | cut -f 3)
 	cp -r "${JADEO}/Jadeo.app" "$PRODUCT_PKG_DIR/"
 	hdiutil detach "${JADEO}"
 
@@ -704,12 +712,12 @@ if true; then
 	mkdir -p "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2"
 
 	for proj in x42-gmsynth; do
-		X42_VERSION=$(curl -s -S http://x42-plugins.com/x42/osx/${proj}.latest.txt)
+		X42_VERSION=$(curl -s -S http://${OSX_X42URI}/${proj}.latest.txt)
 		rsync -a -q --partial \
-			rsync://x42-plugins.com/x42/osx/${proj}-lv2-osx-${X42_VERSION}.zip \
-			"$CACHEDIR/${proj}-lv2-osx-${X42_VERSION}.zip"
+			rsync://${OSX_X42ROOT}/${proj}-lv2-${OSX_X42ID}-${X42_VERSION}.zip \
+			"$CACHEDIR/${proj}-lv2-${OSX_X42ID}-${X42_VERSION}.zip"
 		bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf \
-			"$CACHEDIR/${proj}-lv2-osx-${X42_VERSION}.zip"
+			"$CACHEDIR/${proj}-lv2-${OSX_X42ID}-${X42_VERSION}.zip"
 	done
 fi
 
@@ -718,12 +726,12 @@ if test x$WITH_COMMERCIAL_X42_LV2 != x ; then
 	mkdir -p "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2"
 
 	for proj in x42-meters x42-eq x42-whirl; do
-		X42_VERSION=$(curl -s -S http://x42-plugins.com/x42/osx/${proj}.latest.txt)
+		X42_VERSION=$(curl -s -S http://${OSX_X42URI}/${proj}.latest.txt)
 		rsync -a -q --partial \
-			rsync://x42-plugins.com/x42/osx/${proj}-lv2-osx-${X42_VERSION}.zip \
-			"$CACHEDIR/${proj}-lv2-osx-${X42_VERSION}.zip"
+			rsync://${OSX_X42ROOT}/${proj}-lv2-${OSX_X42ID}-${X42_VERSION}.zip \
+			"$CACHEDIR/${proj}-lv2-${OSX_X42ID}-${X42_VERSION}.zip"
 		bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf \
-			"$CACHEDIR/${proj}-lv2-osx-${X42_VERSION}.zip"
+			"$CACHEDIR/${proj}-lv2-${OSX_X42ID}-${X42_VERSION}.zip"
 	done
 fi
 
@@ -732,12 +740,12 @@ if test x$WITH_GRATIS_X42_LV2 != x ; then
 	mkdir -p "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2"
 
 	for proj in x42-midifilter x42-stereoroute setBfree x42-avldrums x42-limiter x42-tuner; do
-		X42_VERSION=$(curl -s -S http://x42-plugins.com/x42/osx/${proj}.latest.txt)
+		X42_VERSION=$(curl -s -S http://${OSX_X42URI}/${proj}.latest.txt)
 		rsync -a -q --partial \
-			rsync://x42-plugins.com/x42/osx/${proj}-lv2-osx-${X42_VERSION}.zip \
-			"$CACHEDIR/${proj}-lv2-osx-${X42_VERSION}.zip"
+			rsync://${OSX_X42URI}/${proj}-lv2-${OSX_X42ID}-${X42_VERSION}.zip \
+			"$CACHEDIR/${proj}-lv2-${OSX_X42ID}-${X42_VERSION}.zip"
 		bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf \
-			"$CACHEDIR/${proj}-lv2-osx-${X42_VERSION}.zip"
+			"$CACHEDIR/${proj}-lv2-${OSX_X42ID}-${X42_VERSION}.zip"
 	done
 fi
 
