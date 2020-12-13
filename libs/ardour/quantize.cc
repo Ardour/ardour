@@ -57,6 +57,9 @@ Quantize::~Quantize ()
 static double
 swing_position (double pos, double grid, double swing, double offset)
 {
+
+#warning NUTEMPO rewrite this to use Beats and ratio_t
+
 	/* beats start out numbered at zero.
 	 *
 	 * every other position on the start-quantize-grid is
@@ -141,8 +144,8 @@ Quantize::operator () (boost::shared_ptr<MidiModel> model,
 
 			if (_swing) {
 
-				new_start = swing_position (new_start, _start_grid, _swing, offset);
-				new_end = swing_position (new_end, _end_grid, _swing, offset);
+				new_start = swing_position (new_start.to_double(), _start_grid, _swing, offset.to_double());
+				new_end = swing_position (new_end.to_double(), _end_grid, _swing, offset.to_double());
 
 			} else {
 

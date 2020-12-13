@@ -406,7 +406,7 @@ SMFSource::append_event_beats (const Glib::Threads::Mutex::Lock&   lock,
 		return;
 	}
 
-#if 0
+#if 1
 	printf("SMFSource: %s - append_event_beats ID = %d time = %lf, size = %u, data = ",
                name().c_str(), ev.id(), ev.time(), ev.size());
 	       for (size_t i = 0; i < ev.size(); ++i) printf("%X ", ev.buffer()[i]); printf("\n");
@@ -463,9 +463,9 @@ SMFSource::append_event_samples (const Glib::Threads::Mutex::Lock& lock,
 		return;
 	}
 
-	// printf("SMFSource: %s - append_event_samples ID = %d time = %u, size = %u, data = ",
-	// name().c_str(), ev.id(), ev.time(), ev.size());
-	// for (size_t i=0; i < ev.size(); ++i) printf("%X ", ev.buffer()[i]); printf("\n");
+	 printf("SMFSource: %s - append_event_samples ID = %d time = %u, size = %u, data = ",
+	 name().c_str(), ev.id(), ev.time(), ev.size());
+	 for (size_t i=0; i < ev.size(); ++i) printf("%X ", ev.buffer()[i]); printf("\n");
 
 	if (ev.time() < _last_ev_time_samples) {
 		warning << string_compose(_("Skipping event with unordered sample time %1 < %2"),

@@ -207,9 +207,11 @@ intptr_t Session::vst_callback (
 					bbt.beats = 1;
 					bbt.ticks = 0;
 					/* exact quarter note */
-					double ppqBar = tmap->quarters_at (bbt);
+#warning NUTEMPO need better conversion to double from Beats here
+					double ppqBar = 0; // tmap->quarters_at (bbt);
 					/* quarter note at sample position (not rounded to note subdivision) */
-					double ppqPos = tmap->quarters_at_sample (now);
+#warning NUTEMPO need better conversion to double from Beats here
+					double ppqPos = 0; // tmap->quarters_at_sample (now);
 					if (value & (kVstPpqPosValid)) {
 						timeinfo->ppqPos = ppqPos;
 						newflags |= kVstPpqPosValid;
@@ -270,8 +272,10 @@ intptr_t Session::vst_callback (
 				newflags |= kVstTransportCycleActive;
 				Location * looploc = session->locations ()->auto_loop_location ();
 				if (looploc) try {
-						timeinfo->cycleStartPos = tmap->quarters_at (looploc->start ());
-						timeinfo->cycleEndPos = tmap->quarters_at (looploc->end ());
+#warning NUTEMPO need better conversion to double from Beats here
+						timeinfo->cycleStartPos = 0; // tmap->quarters_at (looploc->start ());
+#warning NUTEMPO need better conversion to double from Beats here
+						timeinfo->cycleEndPos = 0; // tmap->quarters_at (looploc->end ());
 						 newflags |= kVstCyclePosValid;
 				} catch (...) { }
 			}

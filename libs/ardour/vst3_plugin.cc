@@ -641,7 +641,8 @@ VST3Plugin::connect_and_run (BufferSet&  bufs,
 		context.tempo              = metric.tempo().quarter_notes_per_minute ();
 		context.timeSigNumerator   = metric.meter().divisions_per_bar ();
 		context.timeSigDenominator = metric.meter().note_value ();
-		context.projectTimeMusic   = metric.tempo().quarters_at_sample (start);
+#warning NUTEMPO need better conversion to double from Beats here
+		context.projectTimeMusic   = 0; // metric.tempo().quarters_at_sample (start);
 		context.barPositionMusic   = bbt.bars * 4; // PPQN, NOT tmap.metric_at(bbt).meter().divisions_per_bar()
 	}
 
@@ -660,11 +661,12 @@ VST3Plugin::connect_and_run (BufferSet&  bufs,
 			/* loop start/end in quarter notes */
 
 			TempoMap::SharedPtr tmap (TempoMap::use());
-#warning NUTEMPO remove superclock_t API for quarters_at and use samplepos_t
-			// context.cycleStartMusic = tmap->metric_at (looploc->start()).quarters_at (looploc->start ());
-			// context.cycleEndMusic   = tmap->metric_at (looploc->end()).quarters_at (looploc->end ());
-			// context.state |= Vst::ProcessContext::kCycleValid;
-			//context.state |= Vst::ProcessContext::kCycleActive;
+#warning NUTEMPO need better conversion to double from Beats here
+			context.cycleStartMusic = 0; // tmap->metric_at (looploc->start()).quarters_at (looploc->start ());
+#warning NUTEMPO need better conversion to double from Beats here
+			context.cycleEndMusic   = 0; // tmap->metric_at (looploc->end()).quarters_at (looploc->end ());
+			 context.state |= Vst::ProcessContext::kCycleValid;
+			context.state |= Vst::ProcessContext::kCycleActive;
 		} catch (...) {
 		}
 	}
