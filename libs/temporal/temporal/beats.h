@@ -46,8 +46,7 @@ class MidiModel;
 class AutomationList;
 class MidiSource;
 class MidiRegion;
-/* these use ::to_double() but should be removed */
-class DoubleBeatsSamplesConverter;
+class Quantize;
 }
 
 namespace Evoral {
@@ -339,7 +338,7 @@ public:
 	}
 
 	bool operator!() const { return _beats == 0 && _ticks == 0; }
-	operator bool () const { return _beats != 0 || _ticks != 0; }
+	explicit operator bool () const { return _beats != 0 || _ticks != 0; }
 
 	static Beats one_tick() { return Beats(0, 1); }
 
@@ -356,7 +355,7 @@ private:
 	friend class ARDOUR::AutomationList;
 	friend class ARDOUR::MidiSource;
 	friend class ARDOUR::MidiRegion;
-	friend class ARDOUR::DoubleBeatsSamplesConverter;
+	friend class ARDOUR::Quantize;
 	friend class ::QuantizeDialog;
 	friend class ::NoteDrag;
 	friend class ::NoteCreateDrag;
