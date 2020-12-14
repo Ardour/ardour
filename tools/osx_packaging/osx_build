@@ -628,6 +628,7 @@ else
 
 fi
 
+DMG_ARCH=""
 if file ${PRODUCT_PKG_DIR}/$APPROOT/MacOS/$MAIN_EXECUTABLE | grep -q x86_64; then
 	OSX_ARCH=x86_64
 	OSX_X42URI=x42-plugins.com/x42/osx
@@ -642,7 +643,7 @@ elif file ${PRODUCT_PKG_DIR}/$APPROOT/MacOS/$MAIN_EXECUTABLE | grep -q arm64; th
 	OSX_ARCH=arm64
 	OSX_X42URI=x42-plugins.com/x42/mac
 	OSX_X42ID="macOS-arm64"
-	JADEO_ARCH="-arm64"
+	DMG_ARCH="-arm64"
 	OSX_BENSID=macarm64
 else
 	OSX_ARCH=i386
@@ -679,14 +680,14 @@ if test x$WITH_HARVID != x ; then
 		"$CACHEDIR/harvid-${OSX_X42ID}-${HARVID_VERSION}.tgz"
 
 	rsync -Pa \
-		rsync://ardour.org/video-tools/jadeo${JADEO_ARCH}-${XJADEO_VERSION:1}.dmg \
-		"$CACHEDIR/jadeo${JADEO_ARCH}-${XJADEO_VERSION:1}.dmg"
+		rsync://ardour.org/video-tools/jadeo${DMG_ARCH}-${XJADEO_VERSION:1}.dmg \
+		"$CACHEDIR/jadeo${DMG_ARCH}-${XJADEO_VERSION:1}.dmg"
 
 	tar -x -z \
 		-C $PRODUCT_PKG_DIR/$APPROOT \
 		-f "$CACHEDIR/harvid-${OSX_X42ID}-${HARVID_VERSION}.tgz" || exit 1
 
-	JADEO=$(hdiutil attach "$CACHEDIR/jadeo${JADEO_ARCH}-${XJADEO_VERSION:1}.dmg" | grep Apple_HFS | grep dev/ | cut -f 3)
+	JADEO=$(hdiutil attach "$CACHEDIR/jadeo${DMG_ARCH}-${XJADEO_VERSION:1}.dmg" | grep Apple_HFS | grep dev/ | cut -f 3)
 	cp -r "${JADEO}/Jadeo.app" "$PRODUCT_PKG_DIR/"
 	hdiutil detach "${JADEO}"
 
@@ -801,9 +802,9 @@ echo "Building DMG ..."
 # FINAL_DMG=$APPNAME-${release_version}.dmg
 
 if [ x$DEBUG = xT ]; then
-	UC_DMG=$APPNAME-$release_version-dbg.dmg
+	UC_DMG=$APPNAME-$release_version-dbg${DMG_ARCH}.dmg
 else
-	UC_DMG=$APPNAME-$release_version.dmg
+	UC_DMG=$APPNAME-$release_version${DMG_ARCH}.dmg
 fi
 VOLNAME=$APPNAME-$release_version
 
