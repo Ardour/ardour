@@ -56,8 +56,6 @@ VST3PluginUI::VST3PluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_pt
 
 VST3PluginUI::~VST3PluginUI ()
 {
-	assert (_view_realized);
-	_vst3->close_view ();
 }
 
 gint

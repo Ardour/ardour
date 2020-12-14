@@ -54,6 +54,8 @@ VST3HWNDPluginUI::VST3HWNDPluginUI (boost::shared_ptr<PluginInsert> pi, boost::s
 
 VST3HWNDPluginUI::~VST3HWNDPluginUI ()
 {
+	assert (_view_realized);
+	_vst3->close_view ();
 }
 
 void

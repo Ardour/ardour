@@ -190,6 +190,8 @@ VST3X11PluginUI::VST3X11PluginUI (boost::shared_ptr<PluginInsert> pi, boost::sha
 
 VST3X11PluginUI::~VST3X11PluginUI ()
 {
+	assert (_view_realized);
+	_vst3->close_view ();
 }
 
 void

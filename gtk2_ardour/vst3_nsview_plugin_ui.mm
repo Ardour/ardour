@@ -91,6 +91,8 @@ VST3NSViewPluginUI::VST3NSViewPluginUI (boost::shared_ptr<PluginInsert> pi, boos
 
 VST3NSViewPluginUI::~VST3NSViewPluginUI ()
 {
+	assert (_view_realized);
+	_vst3->close_view ();
 	[_ns_view removeFromSuperview];
 	[_ns_view release];
 }
