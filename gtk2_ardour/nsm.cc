@@ -55,8 +55,6 @@ NSM_Client::command_open(const char* name,
 	 * synchronous. However, there's no return value available.
 	 */
 
-	printf ("NSM_Client::command_open '%s'\n", name);
-
 	Gtkmm2ext::Application::instance()->ShouldLoad (name);
 
 	return r;
