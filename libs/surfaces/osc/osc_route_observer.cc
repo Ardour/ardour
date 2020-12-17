@@ -609,7 +609,7 @@ OSCRouteObserver::send_gain_message ()
 	if (gainmode) {
 		_osc.float_message_with_id (X_("/strip/fader"), ssid, _gain_control->internal_to_interface (_last_gain), in_line, addr);
 		if (gainmode == 1) {
-			_osc.text_message_with_id (X_("/strip/gain"), ssid, string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (_last_gain)), in_line, addr);
+			_osc.text_message_with_id (X_("/strip/name"), ssid, string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (_last_gain)), in_line, addr);
 			gain_timeout = 8;
 		}
 	}
