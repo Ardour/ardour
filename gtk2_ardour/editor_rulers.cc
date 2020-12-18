@@ -1081,8 +1081,8 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 	double ruler_line_granularity = UIConfiguration::instance().get_ruler_granularity ();  //in pixels
 	ruler_line_granularity = _visible_canvas_width / (ruler_line_granularity*5);  //fudge factor '5' probably related to (4+1 beats)/measure, I think
 
-	beats = (ceil_upper_beat - floor_lower_beat);
-	double beat_density = ((beats + 1) * ((double) (upper - lower) / (double) (1 + beat_after_upper_pos - beat_before_lower_pos))) / (float)ruler_line_granularity;
+	beats = (ceil_upper_beat - floor_lower_beat).get_beats(); // - bbt_bars;  possible thinko; this fixes the problem (for me) where measure lines alternately appear&disappear while playing at certain zoom scales
+	double beat_density = ((beats + 1) * ((double) (upper - lower) / (double) (1 + beat_after_upper_pos - beat_before_lower_pos))) / 5.0;
 
 	/* Only show the bar helper if there aren't many bars on the screen */
 	if ((bbt_bars < 2) || (beats < 5)) {
