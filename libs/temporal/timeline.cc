@@ -507,7 +507,7 @@ timepos_t::expensive_add (timepos_t const & other) const
 
 /* */
 
-/* ::distance() assumes that @param d is later on the timeline than this, and
+/* ::distance() assumes that @param other is later on the timeline than this, and
  * thus returns a positive value if this condition is satisfied.
  */
 
