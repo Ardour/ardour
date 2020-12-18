@@ -2018,7 +2018,7 @@ Region::source_beats_to_absolute_time (Temporal::Beats beats) const
 {
 	/* return the time corresponding to `beats' relative to the start of
 	   the source. The start of the source is an implied position given by
-	   region->position - region->start
+	   region->position - region->start aka ::source_position()
 	*/
 	return source_position() + timepos_t (beats);
 }
