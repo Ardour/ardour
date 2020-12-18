@@ -84,7 +84,6 @@ PBD::DebugBits PBD::DEBUG::Push2 = PBD::new_debug_bit ("push2");
 PBD::DebugBits PBD::DEBUG::Selection = PBD::new_debug_bit ("selection");
 PBD::DebugBits PBD::DEBUG::SessionEvents = PBD::new_debug_bit ("sessionevents");
 PBD::DebugBits PBD::DEBUG::Slave = PBD::new_debug_bit ("slave");
-PBD::DebugBits PBD::DEBUG::SnapBBT = PBD::new_debug_bit ("snapbbt");
 PBD::DebugBits PBD::DEBUG::Solo = PBD::new_debug_bit ("solo");
 PBD::DebugBits PBD::DEBUG::Soundcloud = PBD::new_debug_bit ("Soundcloud");
 PBD::DebugBits PBD::DEBUG::TFSMEvents = PBD::new_debug_bit ("tfsmevents");

@@ -23,3 +23,5 @@ using namespace std;
 
 PBD::DebugBits PBD::DEBUG::TemporalMap = PBD::new_debug_bit ("TemporalMap");
 PBD::DebugBits PBD::DEBUG::TemporalDomainConvert = PBD::new_debug_bit ("TemporalDomainConvert");
+PBD::DebugBits PBD::DEBUG::SnapBBT = PBD::new_debug_bit ("SnapBBT");
+
