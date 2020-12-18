@@ -312,8 +312,8 @@ Session::import_pt_rest (PTFFormat& ptf)
 						struct ptflookup rp;
 						PropertyList plist;
 
-						plist.add (ARDOUR::Properties::start, a->sampleoffset);
-						plist.add (ARDOUR::Properties::position, 0);
+						plist.add (ARDOUR::Properties::start, timepos_t (a->sampleoffset));
+						plist.add (ARDOUR::Properties::position, timepos_t (0));
 						plist.add (ARDOUR::Properties::length, a->length);
 						plist.add (ARDOUR::Properties::name, a->name);
 						plist.add (ARDOUR::Properties::layer, 0);

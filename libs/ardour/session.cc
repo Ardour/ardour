@@ -6107,6 +6107,8 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 
 	if (!itt.cancel) {
 
+		PropertyList plist;
+
 		time_t now;
 		struct tm* xnow;
 		time (&now);
@@ -6119,17 +6121,16 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 			if (afs) {
 				afs->update_header (position, *xnow, now);
 				afs->flush_header ();
+				plist.add (Properties::start, timepos_t (0));
 			} else if ((ms = boost::dynamic_pointer_cast<MidiSource>(*src))) {
 				Source::Lock lock(ms->mutex());
 				ms->mark_streaming_write_completed(lock);
-			}
+				plist.add (Properties::start, timepos_t (Beats()));
+		}
 		}
 
 		/* construct a whole-file region to represent the bounced material */
 
-		PropertyList plist;
-
-		plist.add (Properties::start, 0);
 		plist.add (Properties::whole_file, true);
 		plist.add (Properties::length, len); //ToDo: in nutempo, if the Range is snapped to bbt, this should be in bbt (?)
 		plist.add (Properties::name, region_name_from_path (srcs.front()->name(), true));

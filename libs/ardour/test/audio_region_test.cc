@@ -59,7 +59,7 @@ AudioRegionTest::setUp ()
 	s->write (staircase, signal_length);
 
 	PropertyList plist;
-	plist.add (Properties::start, 0);
+	plist.add (Properties::start, timepos_t (0));
 	plist.add (Properties::length, 100);
 	for (int i = 0; i < 16; ++i) {
 		_r[i] = RegionFactory::create (_source, plist);
