@@ -1655,11 +1655,14 @@ MidiTimeAxisView::add_region (timepos_t const & f, timecnt_t const & length, boo
 	boost::shared_ptr<Source> src = _session->create_midi_source_by_stealing_name (view()->trackview().track());
 	PropertyList plist;
 
-	plist.add (ARDOUR::Properties::start, 0);
+	const Temporal::timecnt_t start (Temporal::BeatTime); /* zero beats */
+
+	plist.add (ARDOUR::Properties::start, start);
 	plist.add (ARDOUR::Properties::length, length);
 	plist.add (ARDOUR::Properties::name, PBD::basename_nosuffix(src->name()));
 
 	boost::shared_ptr<Region> region = (RegionFactory::create (src, plist));
+
 	region->set_position (pos);
 	playlist()->add_region (region, pos, 1.0, false);
 	_session->add_command (new StatefulDiffCommand (playlist()));

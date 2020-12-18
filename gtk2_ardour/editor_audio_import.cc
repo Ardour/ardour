@@ -916,7 +916,7 @@ Editor::add_sources (vector<string>            paths,
 				len = timecnt_t (_session->sample_rate ()) / 2;
 			}
 
-			plist.add (ARDOUR::Properties::start, 0);
+			plist.add (ARDOUR::Properties::start, timepos_t (0));
 			plist.add (ARDOUR::Properties::length, len);
 			plist.add (ARDOUR::Properties::name, region_name);
 			plist.add (ARDOUR::Properties::layer, 0);

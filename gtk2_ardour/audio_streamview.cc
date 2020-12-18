@@ -233,7 +233,7 @@ AudioStreamView::setup_rec_box ()
 				PropertyList plist;
 
 				plist.add (Properties::start, start);
-				plist.add (Properties::length, 1);
+				plist.add (Properties::length, timepos_t (1));
 				plist.add (Properties::name, string());
 				plist.add (Properties::layer, 0);
 
