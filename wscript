@@ -644,6 +644,12 @@ int main() { return 0; }''',
                  "-mmacosx-version-min=10.9"))
         linker_flags.append("-mmacosx-version-min=10.9")
 
+    elif conf.env['build_target'] in ['bigsur']:
+        compiler_flags.extend(
+                ("-DMAC_OS_X_VERSION_MAX_ALLOWED=110000",
+                 "-mmacosx-version-min=11.0"))
+        linker_flags.append("-mmacosx-version-min=11.0")
+
     #
     # save off CPU element in an env
     #
