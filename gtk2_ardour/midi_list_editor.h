@@ -32,7 +32,6 @@
 
 namespace Evoral {
 	template<typename Time> class Note;
-	class                         Beats;
 };
 
 namespace ARDOUR {

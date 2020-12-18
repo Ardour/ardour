@@ -186,7 +186,7 @@ MidiListEditor::scroll_event (GdkEventScroll* ev)
 	int cellx;
 	int celly;
 	int idelta = 0;
-	double fdelta = 0;
+	Temporal::Beats beat_delta;
 	MidiModel::NoteDiffCommand::Property prop (MidiModel::NoteDiffCommand::NoteNumber);
 	bool apply = false;
 	bool was_selected = false;
@@ -209,12 +209,12 @@ MidiListEditor::scroll_event (GdkEventScroll* ev)
 	switch (colnum) {
 	case 0:
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
-			fdelta = 1/64.0;
+			beat_delta = Temporal::Beats::ticks (Temporal::ticks_per_beat / 64);
 		} else {
-			fdelta = 1/4.0;
+			beat_delta = Temporal::Beats (1, 0);
 		}
 		if (ev->direction == GDK_SCROLL_DOWN || ev->direction == GDK_SCROLL_LEFT) {
-			fdelta = -fdelta;
+			beat_delta = beat_delta;
 		}
 		prop = MidiModel::NoteDiffCommand::StartTime;
 		opname = _("edit note start");
@@ -252,12 +252,12 @@ MidiListEditor::scroll_event (GdkEventScroll* ev)
 
 	case 5:
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
-			fdelta = 1/64.0;
+			beat_delta = Temporal::Beats::ticks (Temporal::ticks_per_beat / 64);
 		} else {
-			fdelta = 1/4.0;
+			beat_delta = Temporal::Beats (1, 0);
 		}
 		if (ev->direction == GDK_SCROLL_DOWN || ev->direction == GDK_SCROLL_LEFT) {
-			fdelta = -fdelta;
+			beat_delta = -beat_delta;
 		}
 		prop = MidiModel::NoteDiffCommand::Length;
 		opname = _("edit note length");
@@ -293,8 +293,8 @@ MidiListEditor::scroll_event (GdkEventScroll* ev)
 
 					switch (prop) {
 					case MidiModel::NoteDiffCommand::StartTime:
-						if (note->time() + fdelta >= Temporal::Beats()) {
-							cmd->change (note, prop, note->time() + fdelta);
+						if (note->time() + beat_delta >= Temporal::Beats()) {
+							cmd->change (note, prop, note->time() + beat_delta);
 						} else {
 							cmd->change (note, prop, Temporal::Beats());
 						}
@@ -303,8 +303,8 @@ MidiListEditor::scroll_event (GdkEventScroll* ev)
 						cmd->change (note, prop, (uint8_t) (note->velocity() + idelta));
 						break;
 					case MidiModel::NoteDiffCommand::Length:
-						if (note->length() + fdelta >= Temporal::Beats::one_tick()) {
-							cmd->change (note, prop, note->length() + fdelta);
+						if (note->length() + beat_delta >= Temporal::Beats::one_tick()) {
+							cmd->change (note, prop, note->length() + beat_delta);
 						} else {
 							cmd->change (note, prop, Temporal::Beats::one_tick());
 						}
@@ -335,8 +335,8 @@ MidiListEditor::scroll_event (GdkEventScroll* ev)
 
 				switch (prop) {
 				case MidiModel::NoteDiffCommand::StartTime:
-					if (note->time() + fdelta >= Temporal::Beats()) {
-						cmd->change (note, prop, note->time() + fdelta);
+					if (note->time() + beat_delta >= Temporal::Beats()) {
+						cmd->change (note, prop, note->time() + beat_delta);
 					} else {
 						cmd->change (note, prop, Temporal::Beats());
 					}
@@ -345,8 +345,8 @@ MidiListEditor::scroll_event (GdkEventScroll* ev)
 					cmd->change (note, prop, (uint8_t) (note->velocity() + idelta));
 					break;
 				case MidiModel::NoteDiffCommand::Length:
-					if (note->length() + fdelta >= Temporal::Beats::one_tick()) {
-						cmd->change (note, prop, note->length() + fdelta);
+					if (note->length() + beat_delta >= Temporal::Beats::one_tick()) {
+						cmd->change (note, prop, note->length() + beat_delta);
 					} else {
 						cmd->change (note, prop, Temporal::Beats::one_tick());
 					}
@@ -587,7 +587,7 @@ MidiListEditor::edited (const std::string& path, const std::string& text)
 	boost::shared_ptr<NoteType> note = (*iter)[columns._note];
 	MidiModel::NoteDiffCommand::Property prop (MidiModel::NoteDiffCommand::NoteNumber);
 
-	double fval;
+	Temporal::Beats  bval;
 	int    ival;
 	bool   apply = false;
 	int    idelta = 0;
@@ -632,16 +632,13 @@ MidiListEditor::edited (const std::string& path, const std::string& text)
 		break;
 	case 5: // length
 
-		if (sscanf (text.c_str(), "%lf", &fval) == 1) {
 
-			/* numeric value entered */
+#warning NUTEMPO should likely use just Beats::operator>> and exceptions here
 
-			if (text.find ('.') == string::npos && text.find (',') == string::npos) {
-				/* integral => units are ticks */
-				fval = fval / Temporal::ticks_per_beat;
-			} else {
-				/* non-integral => beats, so use as-is */
-			}
+		if (strspn (text.c_str(), "0123456789:") == text.length()) {
+
+			stringstream ss (text);
+			ss >> bval;
 
 		} else {
 
@@ -666,12 +663,12 @@ MidiListEditor::edited (const std::string& path, const std::string& text)
 				}
 
 				if (x != note_length_map.end()) {
-					fval = x->first / Temporal::ticks_per_beat;
+					bval = x->first / Temporal::ticks_per_beat;
 				}
 
 			} else {
 
-				fval = -1.0;
+				bval = Temporal::Beats();
 
 				if (text != x->second) {
 
@@ -687,14 +684,14 @@ MidiListEditor::edited (const std::string& path, const std::string& text)
 
 					if (x != note_length_map.end()) {
 						/* convert to beats */
-						fval = (double) x->first / Temporal::ticks_per_beat;
+						bval = x->first / Temporal::ticks_per_beat;
 					}
 				}
 			}
 		}
 
-		if (fval > 0.0) {
-			delta = fval - note->length();
+		if (bval) {
+			delta = bval - note->length();
 			prop = MidiModel::NoteDiffCommand::Length;
 			opname = _("change note length");
 			apply = true;
