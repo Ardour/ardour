@@ -515,8 +515,11 @@ timecnt_t
 timepos_t::distance (timepos_t const & other) const
 {
 	if (time_domain() == other.time_domain()) {
+		// std::cerr << "\ncomputing distance in " << enum_2_string (time_domain()) << std::endl;
 		return timecnt_t (int62_t (is_beats(), other.val() - val()), *this);
 	}
+
+	// std::cerr << "\ncomputing distance on " << enum_2_string (time_domain()) << " w/other = " << enum_2_string (other.time_domain()) << std::endl;
 
 	return expensive_distance (other);
 }
@@ -536,6 +539,8 @@ timepos_t::expensive_distance (timepos_t const & other) const
 		return timecnt_t::from_ticks (other.ticks() - val(), *this);
 	}
 	/* we known to be audio: val() is superclocks */
+
+	// std::cerr << "other " << other << " SC = " << other.superclocks() << " vs. us @ " << val() << std::endl;
 	return timecnt_t::from_superclock (other.superclocks() - val(), *this);
 }
 
