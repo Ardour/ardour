@@ -16,9 +16,13 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "pbd/integer_division.h"
+
 #include "temporal/beats.h"
+#include "temporal/debug.h"
 #include "temporal/tempo.h"
 
+using namespace PBD;
 using namespace Temporal;
 
 Beats
@@ -53,6 +57,8 @@ Beats::round_to_subdivision (int subdivision, RoundMode dir) const {
 	uint32_t mod = ticks % ticks_one_subdivisions_worth;
 	uint32_t beats = _beats;
 
+	DEBUG_TRACE (DEBUG::SnapBBT, string_compose ("%4 => round-nearest, ticks %1 1 div of ticks %2 mod %3\n", ticks, ticks_one_subdivisions_worth, mod, *this));
+
 	if (dir > 0) {
 
 		if (mod == 0 && dir == RoundUpMaybe) {
@@ -78,63 +84,35 @@ Beats::round_to_subdivision (int subdivision, RoundMode dir) const {
 
 	} else if (dir < 0) {
 
-		/* round to previous (or same iff dir == RoundDownMaybe) */
+		/* round to previous (or same iff di == RoundDownMaybe) */
 
-		uint32_t difference = ticks % ticks_one_subdivisions_worth;
-
-		if (difference == 0 && dir == RoundDownAlways) {
+		if (mod == 0 && dir == RoundDownAlways) {
 			/* right on the subdivision, but force-rounding down,
-			   so the difference is just the subdivision ticks */
-			difference = ticks_one_subdivisions_worth;
+			   so the modulo (difference) is just the subdivision
+			   ticks
+			*/
+			mod = ticks_one_subdivisions_worth;
 		}
 
-		if (ticks < difference) {
+		if (ticks < mod) {
 			ticks = ticks_per_beat - ticks;
 		} else {
-			ticks -= difference;
+			ticks -= mod;
 		}
 
 	} else {
-		/* round to nearest */
-		double rem;
 
-		/* compute the distance to the previous and next subdivision */
+		/* round to nearest, which happens to be precisely what
+		 * PBD::int_div_round() does. Set beats to zero, since the
+		 * Beats normalization will set the values correctly in the
+		 * value we actually return
+		 */
 
-		if ((rem = fmod ((double) ticks, (double) ticks_one_subdivisions_worth)) > ticks_one_subdivisions_worth/2.0) {
+		ticks = int_div_round (ticks, ticks_one_subdivisions_worth) * ticks_one_subdivisions_worth;
+		beats = 0;
 
-			/* closer to the next subdivision, so shift forward */
-
-			ticks = lrint (ticks + (ticks_one_subdivisions_worth - rem));
-
-			//DEBUG_TRACE (DEBUG::SnapBBT, string_compose ("moved forward to %1\n", ticks));
-
-			if (ticks > ticks_per_beat) {
-				++beats;
-				ticks -= ticks_per_beat;
-				//DEBUG_TRACE (DEBUG::SnapBBT, string_compose ("fold beat to %1\n", beats));
-			}
-
-		} else if (rem > 0) {
-
-			/* closer to previous subdivision, so shift backward */
-
-			if (rem > ticks) {
-				if (beats == 0) {
-					/* can't go backwards past zero, so ... */
-					return *this;
-				}
-				/* step back to previous beat */
-				--beats;
-				ticks = lrint (ticks_per_beat - rem);
-				//DEBUG_TRACE (DEBUG::SnapBBT, string_compose ("step back beat to %1\n", beats));
-			} else {
-				ticks = lrint (ticks - rem);
-				//DEBUG_TRACE (DEBUG::SnapBBT, string_compose ("moved backward to %1\n", ticks));
-			}
-		} else {
-			/* on the subdivision, do nothing */
-		}
 	}
 
-	return Beats::ticks (ticks);
+	DEBUG_TRACE (DEBUG::SnapBBT, string_compose ("return %1 from %2 : %3\n", Beats (beats, ticks), beats, ticks));
+	return Beats (beats, ticks);
 }
