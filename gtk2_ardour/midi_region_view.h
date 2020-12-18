@@ -260,8 +260,8 @@ public:
 	MouseState mouse_state() const { return _mouse_state; }
 
 	struct NoteResizeData {
-		Note                     *note;
-		ArdourCanvas::Rectangle  *resize_rect;
+		::Note                  *note;
+		ArdourCanvas::Rectangle *resize_rect;
 	};
 
 	/** Snap a region relative pixel coordinate to pixel units.
@@ -312,7 +312,7 @@ public:
 	 * \param state the keyboard modifier mask for the canvas event (click).
 	 * \param shift_snap true alters snap behavior to round down always (false if the gui has already done that).
 	 */
-	void create_note_at (samplepos_t t, double y, Temporal::Beats length, uint32_t state, bool shift_snap);
+	void create_note_at (Temporal::timepos_t const & t, double y, Temporal::Beats length, uint32_t state, bool shift_snap);
 
 	/** An external request to clear the note selection, remove MRV from editor
 	 * selection.

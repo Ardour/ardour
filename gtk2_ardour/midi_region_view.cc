@@ -837,9 +837,9 @@ MidiRegionView::show_list_editor ()
  * \param snap_t true to snap t to the grid, otherwise false.
  */
 void
-MidiRegionView::create_note_at (samplepos_t t, double y, Temporal::Beats length, uint32_t state, bool shift_snap)
+MidiRegionView::create_note_at (timepos_t const & t, double y, Temporal::Beats length, uint32_t state, bool shift_snap)
 {
-	if (length < 2 * DBL_EPSILON) {
+	if (length < Temporal::Beats::one_tick()) {
 		return;
 	}
 
@@ -851,16 +851,15 @@ MidiRegionView::create_note_at (samplepos_t t, double y, Temporal::Beats length,
 		return;
 	}
 
-	// Start of note in samples relative to region start
-	const int32_t divisions = trackview.editor().get_grid_music_divisions (state);
-	Temporal::Beats beat_time = snap_sample_to_grid_underneath (t, divisions, shift_snap);
+	/* assume time is already region-relative and snapped */
+
+	Temporal::Beats region_start = t.beats();
 
 	const double  note     = view->y_to_note(y);
 	const uint8_t chan     = mtv->get_channel_for_add();
-	const uint8_t velocity = get_velocity_for_add(beat_time);
+	const uint8_t velocity = get_velocity_for_add (region_start);
 
-	const boost::shared_ptr<NoteType> new_note(
-		new NoteType (chan, beat_time, length, (uint8_t)note, velocity));
+	const boost::shared_ptr<NoteType> new_note (new NoteType (chan, region_start, length, (uint8_t)note, velocity));
 
 	if (_model->contains (new_note)) {
 		return;
@@ -1644,10 +1643,30 @@ MidiRegionView::update_sustained (Note* ev, bool update_ghost_regions)
 {
 	const boost::shared_ptr<ARDOUR::MidiRegion> mr = midi_region();
 	boost::shared_ptr<NoteType> note = ev->note();
-	const timepos_t note_start = _region->source_beats_to_absolute_time (note->time());
+	const timepos_t note_start (note->time());
+	timepos_t note_end (note->end_time());
 
-	const double x0 = trackview.editor().time_to_pixel (note_start);
+	/* The note is drawn as a child item of this region view, so its
+	 * coordinate system is relative to the region view. This means that x0
+	 * and x1 are pixel offsets relative to beginning of the region (view)
+	 */
+
+	/* compute absolute time where the start of the source is
+	 */
+
+	const timepos_t session_source_start = _region->source_position();
+
+	/* this computes the number of samples from the start of the region of the start of the
+	 * note. We add the source start to get to the absolute time of the
+	 * note, then subtract the start of the region
+	 */
+
+	const samplepos_t note_start_samples = (note_start + session_source_start).earlier ( _region->position()).samples();
+
+	const double x0 = trackview.editor().sample_to_pixel (note_start_samples);
 	double x1;
+
+
 	const double y0 = 1 + floor(note_to_y(note->note()));
 	double y1;
 
@@ -1661,13 +1680,15 @@ MidiRegionView::update_sustained (Note* ev, bool update_ghost_regions)
 
 		/* normal note */
 
-		timepos_t note_end (note->end_time());
+		const Temporal::Beats source_end ((_region->start() + _region->length()).beats());
 
-		if (note_end > mr->start() + mr->length()) {
-			note_end = mr->start() + mr->length();
+		if (note->end_time() > source_end) {
+			note_end = timepos_t (source_end);
 		}
 
-		x1 = std::max(1., trackview.editor().time_to_pixel (note_end)) - 1;
+		const samplepos_t note_end_samples = _region->position().distance ((note_end + session_source_start)).samples();
+
+		x1 = std::max(1., trackview.editor().sample_to_pixel (note_end_samples)) - 1;
 
 	} else {
 
@@ -2912,16 +2933,16 @@ MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_
 
 		if (!cursor_set) {
 			/* Convert snap delta from pixels to beats. */
-			samplepos_t snap_delta_samps = trackview.editor().pixel_to_sample (snap_delta);
-			double snap_delta_beats = 0.0;
+			timepos_t snap_delta_time = timepos_t (trackview.editor().pixel_to_sample (snap_delta));
+			Beats snap_delta_beats;
 			int sign = 1;
 
 
 			/* negative beat offsets aren't allowed */
-			if (snap_delta_samps > 0) {
-				snap_delta_beats = _region->region_distance_to_region_beats (timecnt_t (snap_delta_samps, _region->position()));
-			} else if (snap_delta_samps < 0) {
-				snap_delta_beats = _region->region_distance_to_region_beats (timecnt_t (-snap_delta_samps, _region->position()));
+			if (snap_delta_time > 0) {
+				snap_delta_beats = _region->region_distance_to_region_beats (timecnt_t (snap_delta_time, _region->position()));
+			} else if (snap_delta_time < 0) {
+				snap_delta_beats = _region->region_distance_to_region_beats (timecnt_t (-snap_delta_time, _region->position()));
 				sign = -1;
 			}
 
@@ -3009,14 +3030,14 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 		}
 
 		/* Convert snap delta from pixels to beats with sign. */
-		samplepos_t snap_delta_samps = trackview.editor().pixel_to_sample (snap_delta);
+		timepos_t snap_delta_time (trackview.editor().pixel_to_sample (snap_delta));
 		Temporal::Beats snap_delta_beats;
 		int sign = 1;
 
-		if (snap_delta_samps > 0) {
-			snap_delta_beats = _region->region_distance_to_region_beats (timecnt_t (snap_delta_samps, _region->position()));
-		} else if (snap_delta_samps < 0) {
-			snap_delta_beats = _region->region_distance_to_region_beats (timecnt_t (-snap_delta_samps, _region->position()));
+		if (snap_delta_time.positive()) {
+			snap_delta_beats = _region->region_distance_to_region_beats (timecnt_t (snap_delta_time, _region->position()));
+		} else if (snap_delta_time.negative()) {
+			snap_delta_beats = _region->region_distance_to_region_beats (timecnt_t (-snap_delta_time, _region->position()));
 			sign = -1;
 		}
 
@@ -3905,6 +3926,7 @@ MidiRegionView::update_ghost_note (double x, double y, uint32_t state)
 	_ghost_note->note()->set_note (y_to_note (y));
 	_ghost_note->note()->set_channel (mtv->get_channel_for_add ());
 	_ghost_note->note()->set_velocity (get_velocity_for_add (snapped_beats));
+
 	update_note (_ghost_note, false);
 
 	show_verbose_cursor (_ghost_note->note ());
@@ -4271,6 +4293,7 @@ MidiRegionView::snap_sample_to_grid_underneath (samplepos_t p, int32_t divisions
 
 	TempoMap::SharedPtr tmap (TempoMap::use());
 	timepos_t pos (_region->position() + timecnt_t (p));
+
 	Beats snapped_beats = tmap->quarters_at (pos).round_to_subdivision (divisions, RoundNearest);
 
 	if (shift_snap) {
@@ -4338,4 +4361,3 @@ MidiRegionView::note_to_y(uint8_t note) const
 {
 	return contents_height() - (note + 1 - _current_range_min) * note_height() + 1;
 }
-

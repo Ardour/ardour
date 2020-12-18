@@ -2597,7 +2597,6 @@ RegionCreateDrag::RegionCreateDrag (Editor* e, ArdourCanvas::Item* i, TimeAxisVi
 void
 RegionCreateDrag::motion (GdkEvent* event, bool first_move)
 {
-
 	if (first_move) {
 		_editor->begin_reversible_command (_("create region"));
 		_region = add_midi_region (_view, false);
@@ -2605,13 +2604,14 @@ RegionCreateDrag::motion (GdkEvent* event, bool first_move)
 	} else {
 
 		if (_region) {
-			timepos_t const pos = adjusted_current_time (event);
+			timepos_t const pos (adjusted_current_time (event).beats());
 			if (pos <= grab_time()) {
 				_region->set_initial_position (pos);
 			}
 
 			if (pos != grab_time()) {
-				timecnt_t const len = grab_time().distance (pos).abs();
+				/* Force MIDI regions to use Beats ... for now */
+				timecnt_t const len (grab_time().distance (pos).abs().beats());
 				_region->set_length (len);
 			}
 		}
@@ -3526,7 +3526,6 @@ TempoMarkerDrag::TempoMarkerDrag (Editor* e, ArdourCanvas::Item* i, bool c)
 	: Drag (e, i)
 	, _copy (c)
 	, _grab_bpm (120.0, 4.0)
-	, _grab_qn (0.0)
 	, _before_state (0)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New TempoMarkerDrag\n");
@@ -3730,7 +3729,6 @@ TempoMarkerDrag::aborted (bool moved)
 
 BBTRulerDrag::BBTRulerDrag (Editor* e, ArdourCanvas::Item* i)
 	: Drag (e, i)
-	, _grab_qn (0.0)
 	, _tempo (0)
 	, _before_state (0)
 	, _drag_valid (true)
@@ -6925,7 +6923,7 @@ NoteCreateDrag::grid_aligned_beats (timepos_t const & pos, GdkEvent const * even
 		beats = map->quarters_at (map->metric_at (pos).meter().round_to_bar (map->bbt_at (pos)));
 		break;
 	default: /* round to some beat subdivision */
-		beats = (pos).beats().round_to_subdivision (divisions, Temporal::RoundNearest);
+		beats = pos.beats().round_to_subdivision (divisions, Temporal::RoundNearest);
 		break;
 	}
 
@@ -6940,27 +6938,19 @@ NoteCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	_drag_rect = new ArdourCanvas::Rectangle (_region_view->get_canvas_group ());
 
 	const timepos_t pos = _drags->current_pointer_time ();
-	Temporal::Beats grid_beats = grid_aligned_beats (pos, event);
-	const int32_t divisions = _editor->get_grid_music_divisions (event->button.state);
+	timepos_t aligned_start (grid_aligned_beats (pos, event));
+	const timepos_t grid_beats (_region_view->get_grid_beats (aligned_start));
 
-	if (divisions != 0) {
-
-		const Temporal::Beats unaligned_beats = pos.beats ();
-
-		/* Hack so that we always snap to the note that we are over, instead of snapping
-		   to the next one if we're more than halfway through the one we're over.
-		*/
-
-		const Temporal::Beats rem = grid_beats - unaligned_beats;
-
-		if (rem >= std::numeric_limits<Temporal::Beats>::lowest ()) {
-			grid_beats = rem;
-		}
-	}
-
-	_note[0] = timepos_t (grid_beats);
+	_note[0] = aligned_start;
 	/* minimum initial length is grid beats */
-	_note[1] = timepos_t (grid_beats + grid_beats);
+	_note[1] = aligned_start + grid_beats;
+
+	/* Note: at this point we are drawing a rect for the dragging note in
+	 * absolute coordinates (it's not real note, there's no particular
+	 * connection to the position/start of the regionview/region. So we
+	 * just translate directly from absolute time (_note[0], _note[1]) to
+	 * pixels.
+	 */
 
 	double const x0 = _editor->time_to_pixel (_note[0]);
 	double const x1 = _editor->time_to_pixel (_note[1]);
@@ -6997,7 +6987,9 @@ NoteCreateDrag::motion (GdkEvent* event, bool)
 		aligned_beats += grid_beats;
 	}
 
-	_note[1] = timepos_t (max (Temporal::Beats(), aligned_beats - _region_view->region()->position ().beats()));
+	_note[1] = timepos_t (max (Temporal::Beats(), aligned_beats));
+
+	/* We continue to draw the dragging rect with absolute time/pixel coordinates */
 
 	double const x0 = _editor->time_to_pixel (_note[0]);
 	double const x1 = _editor->time_to_pixel (_note[1]);
@@ -7009,8 +7001,11 @@ void
 NoteCreateDrag::finished (GdkEvent* ev, bool had_movement)
 {
 	/* we create a note even if there was no movement */
-	Beats const start = (min (_note[0], _note[1])).beats ();
-	Beats length = max (Beats (1, 0), (_note[1].distance (_note[0]).abs().beats()));
+
+	/* Compute start within region, rather than absolute time start */
+
+	Beats const start = _region_view->region()->absolute_time_to_region_beats (min (_note[0], _note[1]));
+	Beats length = max (Beats (0, 1), (_note[0].distance (_note[1]).abs().beats()));
 
 	int32_t div = _editor->get_grid_music_divisions (ev->button.state);
 
@@ -7019,7 +7014,7 @@ NoteCreateDrag::finished (GdkEvent* ev, bool had_movement)
 	}
 
 	_editor->begin_reversible_command (_("Create Note"));
-	_region_view->create_note_at (start, _drag_rect->y0(), length, ev->button.state, false);
+	_region_view->create_note_at (timepos_t (start), _drag_rect->y0(), length, ev->button.state, false);
 	_editor->commit_reversible_command ();
 }
 
@@ -7040,7 +7035,7 @@ NoteCreateDrag::aborted (bool)
 HitCreateDrag::HitCreateDrag (Editor* e, ArdourCanvas::Item* i, MidiRegionView* rv)
 	: Drag (e, i)
 	, _region_view (rv)
-	, _last_pos (0)
+	, _last_pos (Temporal::Beats())
 	, _y (0.0)
 {
 }
@@ -7072,9 +7067,9 @@ HitCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 
 	_editor->begin_reversible_command (_("Create Hit"));
 	_region_view->clear_note_selection();
-	_region_view->create_note_at (start, _y, length, event->button.state, false);
+	_region_view->create_note_at (timepos_t (start), _y, length, event->button.state, false);
 
-	_last_pos = start;
+	_last_pos = timepos_t (start);
 }
 
 void
@@ -7102,9 +7097,9 @@ HitCreateDrag::motion (GdkEvent* event, bool)
 		return;
 	}
 
-	_region_view->create_note_at (start, _y, length, event->button.state, false);
+	_region_view->create_note_at (timepos_t (start), _y, length, event->button.state, false);
 
-	_last_pos = start;
+	_last_pos = timepos_t (start);
 }
 
 void
