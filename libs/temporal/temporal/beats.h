@@ -157,6 +157,10 @@ public:
 		return *this;
 	}
 
+	Beats snap_to (Temporal::Beats const & snap) const {
+		return (*this / snap) * snap;
+	}
+
 	Beats round_to_beat() const {
 		return (_ticks >= (PPQN/2)) ? Beats (_beats + 1, 0) : Beats (_beats, 0);
 	}
@@ -182,11 +186,6 @@ public:
 
 	Beats round_to_subdivision (int subdivision, RoundMode dir) const;
 
-	Beats snap_to (Temporal::Beats const & snap) const {
-		const double snap_time = snap.to_double();
-		return Beats::from_double (ceil(to_double() / snap_time) * snap_time);
-	}
-
 	Beats abs () const {
 		return Beats (::abs (_beats), ::abs (_ticks));
 	}
@@ -200,11 +199,6 @@ public:
 
 	inline bool operator==(const Beats& b) const {
 		return _beats == b._beats && _ticks == b._ticks;
-	}
-
-	inline bool operator==(double t) const {
-		/* Acceptable tolerance is 1 tick. */
-		return fabs(to_double() - t) <= (1.0 / PPQN);
 	}
 
 	inline bool operator==(int beats) const {
@@ -231,66 +225,12 @@ public:
 		return _beats > b._beats || (_beats == b._beats && _ticks >= b._ticks);
 	}
 
-	inline bool operator<(double b) const {
-		/* Acceptable tolerance is 1 tick. */
-		const double time = to_double();
-		if (fabs(time - b) <= (1.0 / PPQN)) {
-			return false;  /* Effectively identical. */
-		} else {
-			return time < b;
-		}
-	}
-
-	inline bool operator<=(double b) const {
-		return operator==(b) || operator<(b);
-	}
-
-	inline bool operator>(double b) const {
-		/* Acceptable tolerance is 1 tick. */
-		const double time = to_double();
-		if (fabs(time - b) <= (1.0 / PPQN)) {
-			return false;  /* Effectively identical. */
-		} else {
-			return time > b;
-		}
-	}
-
-	inline bool operator>=(double b) const {
-		return operator==(b) || operator>(b);
-	}
-
 	Beats operator+(const Beats& b) const {
 		return Beats(_beats + b._beats, _ticks + b._ticks);
 	}
 
 	Beats operator-(const Beats& b) const {
 		return Beats(_beats - b._beats, _ticks - b._ticks);
-	}
-
-	Beats operator+(double d) const {
-		return Beats(to_double() + d);
-	}
-
-	Beats operator-(double d) const {
-		return Beats(to_double() - d);
-	}
-
-	Beats operator+(int b) const {
-		return Beats (_beats + b, _ticks);
-	}
-
-	Beats operator-(int b) const {
-		return Beats (_beats - b, _ticks);
-	}
-
-	Beats& operator+=(int b) {
-		_beats += b;
-		return *this;
-	}
-
-	Beats& operator-=(int b) {
-		_beats -= b;
-		return *this;
 	}
 
 	Beats operator-() const {
@@ -317,10 +257,12 @@ public:
 		_ticks = B._ticks;
 		return *this;
 
-	/* avoids calling ::to_double() to compute ratios of two Beat distances
-	 */
-	double operator/ (Beats const & other) {
-		return (double) to_ticks() / (double) other.to_ticks();
+	Beats operator/ (Beats const & other) const {
+		return Beats::ticks (int_div_round (to_ticks(), other.to_ticks()));
+	}
+
+	Beats operator* (Beats const & other) const {
+		return Beats::ticks (to_ticks () * other.to_ticks());
 	}
 
 	Beats& operator+=(const Beats& b) {
@@ -342,24 +284,9 @@ public:
 
 	static Beats one_tick() { return Beats(0, 1); }
 
-private:
+  protected:
 	int32_t _beats;
 	int32_t _ticks;
-
-	/* almost nobody should ever be allowed to use this method */
-	friend class TempoPoint;
-	friend class ARDOUR::Track;
-	friend class ARDOUR::Variant;
-	friend class ARDOUR::MidiStretch;
-	friend class ARDOUR::MidiModel;
-	friend class ARDOUR::AutomationList;
-	friend class ARDOUR::MidiSource;
-	friend class ARDOUR::MidiRegion;
-	friend class ARDOUR::Quantize;
-	friend class ::QuantizeDialog;
-	friend class ::NoteDrag;
-	friend class ::NoteCreateDrag;
-	double  to_double()              const { return (double)_beats + (_ticks / (double)PPQN); }
 
 	/* this needs to exist because Evoral::Sequence is templated, and some
 	 * other possible template types cannot provide ::from_double
@@ -373,6 +300,17 @@ private:
 		_beats = whole;
 		_ticks = frac * PPQN;
 	}
+};
+
+/* Only contexts that really, absolutely need a floating point representation
+ * of a Beats value should ever use this.
+ */
+
+class DoubleableBeats : public Beats
+{
+     public:
+	DoubleableBeats (Beats const & b) : Beats (b) {}
+	double to_double() const { return (double)_beats + (_ticks / (double)PPQN); }
 };
 
 /*

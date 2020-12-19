@@ -422,9 +422,9 @@ TempoPoint::compute_omega (samplecnt_t sr, superclock_t end_scpqn, Temporal::Bea
 		return;
 	}
 
-	_omega = ((1.0/end_scpqn) - (1.0/superclocks_per_quarter_note())) / quarter_duration.to_double();
+	_omega = ((1.0/end_scpqn) - (1.0/superclocks_per_quarter_note())) / DoubleableBeats (quarter_duration).to_double();
 
-	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("computed omega = %1%2 dur was %3\n", std::setprecision(12),_omega, quarter_duration.to_double()));
+	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("computed omega = %1%2 dur was %3\n", std::setprecision(12),_omega, DoubleableBeats (quarter_duration).to_double()));
 }
 
 superclock_t
@@ -440,7 +440,7 @@ TempoPoint::superclock_at (Temporal::Beats const & qn) const
 		return (spqn * qn.get_beats()) + int_div_round ((spqn * qn.get_ticks()), superclock_t (Temporal::ticks_per_beat));
 	}
 
-	return _sclock + llrint (log1p (superclocks_per_quarter_note() * _omega * (qn - _quarters).to_double()) / _omega);
+	return _sclock + llrint (log1p (superclocks_per_quarter_note() * _omega * DoubleableBeats (qn - _quarters).to_double()) / _omega);
 }
 
 superclock_t
