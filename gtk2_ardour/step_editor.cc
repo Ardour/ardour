@@ -236,15 +236,19 @@ StepEditor::move_step_edit_beat_pos (Temporal::Beats beats)
 	if (!step_edit_region_view) {
 		return;
 	}
-	if (beats > 0.0) {
+
+	const Temporal::Beats zero;
+
+	if (beats > zero) {
 		step_edit_beat_pos = min (step_edit_beat_pos + beats, step_edit_region->length().beats());
-	} else if (beats < 0.0) {
+	} else if (beats < zero) {
 		if (-beats < step_edit_beat_pos) {
 			step_edit_beat_pos += beats; // its negative, remember
 		} else {
 			step_edit_beat_pos = Temporal::Beats();
 		}
 	}
+
 	step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
 }
 

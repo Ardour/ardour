@@ -983,8 +983,8 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
 	Beats floor_lower_beat = std::max (Beats(), tmap->quarters_at_sample (lower)).round_down_to_beat ();
 
-	if (floor_lower_beat < 0.0) {
-		floor_lower_beat = 0.0;
+	if (floor_lower_beat < Temporal::Beats()) {
+		floor_lower_beat = Temporal::Beats();
 	}
 
 	const samplepos_t beat_before_lower_pos = tmap->sample_at (floor_lower_beat, _session->sample_rate());

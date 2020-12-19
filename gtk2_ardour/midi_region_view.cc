@@ -3219,7 +3219,7 @@ MidiRegionView::change_note_time (NoteBase* event, Temporal::Beats delta, bool r
 	Temporal::Beats new_time;
 
 	if (relative) {
-		if (delta < 0.0) {
+		if (delta < Temporal::Beats()) {
 			if (event->note()->time() < -delta) {
 				new_time = Temporal::Beats();
 			} else {
@@ -4277,7 +4277,11 @@ MidiRegionView::get_velocity_for_add (MidiModel::TimeType time) const
 	MidiModel::Notes::const_iterator n = m;
 	--n;
 
-	const double frac = (time - (*n)->time()) / ((*m)->time() - (*n)->time());
+	const double t = DoubleableBeats (time).to_double();
+	const double next = DoubleableBeats ((*n)->time()).to_double ();
+	const double mmmm = DoubleableBeats ((*m)->time()).to_double ();
+
+	const double frac = (t - next) / (mmmm - next);
 
 	return (*n)->velocity() + (frac * ((*m)->velocity() - (*n)->velocity()));
 }
