@@ -81,6 +81,7 @@
 #include "edit_note_dialog.h"
 #include "mouse_cursors.h"
 #include "editor_cursors.h"
+#include "region_peak_cursor.h"
 #include "verbose_cursor.h"
 #include "note.h"
 
@@ -2216,12 +2217,27 @@ Editor::motion_handler (ArdourCanvas::Item* /*item*/, GdkEvent* event, bool from
 		//drags change the snapped_cursor location, because we are snapping the thing being dragged, not the actual mouse cursor
 		return _drags->motion_handler (event, from_autoscroll);
 	} else {
-		//the snapped_cursor shows where an operation (like Split) is going to occur
 		bool ignored;
+		bool peaks_visible = false;
 		MusicSample where (0, 0);
 		if (mouse_sample (where.sample, ignored)) {
+
+			/* display peaks */
+			if (mouse_mode == MouseContent || ArdourKeyboard::indicates_snap (event->motion.state)) {
+				AudioRegionView* arv = dynamic_cast<AudioRegionView*>(entered_regionview);
+				if (arv) {
+					_region_peak_cursor->set (arv, where.sample, samples_per_pixel);
+					peaks_visible = true;
+				}
+			}
+
+			/* the snapped_cursor shows where an operation (like Split) is going to occur */
 			snap_to_with_modifier (where, event);
 			set_snapped_cursor_position (where.sample);
+		}
+
+		if (!peaks_visible) {
+			_region_peak_cursor->hide ();
 		}
 	}
 

@@ -227,6 +227,7 @@ gtk2_ardour_sources = [
         'region_editor.cc',
         'region_gain_line.cc',
         'region_layering_order_editor.cc',
+        'region_peak_cursor.cc',
         'region_selection.cc',
         'region_view.cc',
         'return_ui.cc',

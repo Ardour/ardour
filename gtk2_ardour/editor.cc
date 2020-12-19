@@ -141,6 +141,7 @@
 #include "playlist_selector.h"
 #include "public_editor.h"
 #include "quantize_dialog.h"
+#include "region_peak_cursor.h"
 #include "region_layering_order_editor.h"
 #include "rgb_macros.h"
 #include "rhythm_ferret.h"
@@ -284,6 +285,7 @@ Editor::Editor ()
 	, _track_canvas_viewport (0)
 	, within_track_canvas (false)
 	, _verbose_cursor (0)
+	, _region_peak_cursor (0)
 	, tempo_group (0)
 	, meter_group (0)
 	, marker_group (0)
@@ -873,6 +875,7 @@ Editor::~Editor()
 	delete _drags;
 	delete nudge_clock;
 	delete _verbose_cursor;
+	delete _region_peak_cursor;
 	delete quantize_dialog;
 	delete _summary;
 	delete _group_tabs;
@@ -4714,6 +4717,7 @@ Editor::visual_changer (const VisualChange& vc)
 		update_video_timeline();
 	}
 
+	_region_peak_cursor->hide ();
 	_summary->set_overlays_dirty ();
 }
 

@@ -140,6 +140,7 @@ class PlaylistSelector;
 class PluginSelector;
 class ProgressReporter;
 class QuantizeDialog;
+class RegionPeakCursor;
 class RhythmFerret;
 class RulerDialog;
 class Selection;
@@ -847,6 +848,8 @@ private:
 
 	friend class VerboseCursor;
 	VerboseCursor* _verbose_cursor;
+
+	RegionPeakCursor* _region_peak_cursor;
 
 	void parameter_changed (std::string);
 	void ui_parameter_changed (std::string);

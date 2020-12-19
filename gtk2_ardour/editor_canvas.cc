@@ -58,6 +58,7 @@
 #include "editor_cursors.h"
 #include "mouse_cursors.h"
 #include "note_base.h"
+#include "region_peak_cursor.h"
 #include "ui_config.h"
 #include "verbose_cursor.h"
 
@@ -105,6 +106,7 @@ Editor::initialize_canvas ()
 	_track_canvas->add_scroller (*cg);
 
 	_verbose_cursor = new VerboseCursor (this);
+	_region_peak_cursor = new RegionPeakCursor (get_noscroll_group ());
 
 	/*a group to hold global rects like punch/loop indicators */
 	global_rect_group = new ArdourCanvas::Container (hv_scroll_group);
@@ -993,6 +995,7 @@ void
 Editor::tie_vertical_scrolling ()
 {
 	if (pending_visual_change.idle_handler_id < 0) {
+		_region_peak_cursor->hide ();
 		_summary->set_overlays_dirty ();
 	}
 }
