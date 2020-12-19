@@ -509,8 +509,8 @@ if test "$HAVE_SESSION_UTILS" = true ; then
 BIN_DIR=\$(dirname "\$0")
 BUNDLE_DIR=\$(dirname "\$BIN_DIR")
 
-export ARDOUR_DATA_PATH="\$BUNDLE_DIR/share"
-export ARDOUR_CONFIG_PATH="\$BUNDLE_DIR/etc"
+export ARDOUR_DATA_PATH="\$BUNDLE_DIR/Resources"
+export ARDOUR_CONFIG_PATH="\$BUNDLE_DIR/Resources"
 export ARDOUR_DLL_PATH="\$BUNDLE_DIR/lib"
 export VAMP_PATH="\$BUNDLE_DIR/lib"\${VAMP_PATH:+:\$VAMP_PATH}
 
