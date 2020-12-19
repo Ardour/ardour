@@ -93,7 +93,7 @@ public:
 			                                std::min(value, (double)INT64_MAX)));
 			break;
 		case BEATS:
-			_beats = Temporal::Beats(value);
+			_beats = Temporal::Beats::from_double (value);
 			break;
 		default:
 			_type = NOTHING;
@@ -109,7 +109,7 @@ public:
 		case FLOAT:  return _float;
 		case INT:    return _int;
 		case LONG:   return _long;
-		case BEATS:  return _beats.to_double();
+		case BEATS:  return Temporal::DoubleableBeats (_beats).to_double();
 		default:     return 0.0;
 		}
 	}

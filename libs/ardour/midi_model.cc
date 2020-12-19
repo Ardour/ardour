@@ -475,7 +475,7 @@ MidiModel::NoteDiffCommand::unmarshal_note (XMLNode *xml_note)
 		warning << "note information missing time" << endmsg;
 	}
 
-	MidiModel::TimeType length = MidiModel::TimeType(1);
+	MidiModel::TimeType length = MidiModel::TimeType();
 	if (!xml_note->get_property("length", length)) {
 		warning << "note information missing length" << endmsg;
 	}

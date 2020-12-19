@@ -143,9 +143,9 @@ Quantize::operator () (boost::shared_ptr<MidiModel> model,
 			Temporal::Beats new_end = (((*i)->end_time() - offset) / _end_grid) * _end_grid;
 
 			if (_swing) {
-
-				new_start = swing_position (new_start.to_double(), _start_grid, _swing, offset.to_double());
-				new_end = swing_position (new_end.to_double(), _end_grid, _swing, offset.to_double());
+				Temporal::DoubleableBeats doff (offset);
+				new_start = swing_position (Temporal::DoubleableBeats (new_start).to_double(), _start_grid, _swing, doff.to_double());
+				new_end = swing_position (Temporal::DoubleableBeats (new_end).to_double(), _end_grid, _swing, doff.to_double());
 
 			} else {
 

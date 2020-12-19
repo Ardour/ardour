@@ -207,11 +207,9 @@ intptr_t Session::vst_callback (
 					bbt.beats = 1;
 					bbt.ticks = 0;
 					/* exact quarter note */
-#warning NUTEMPO need better conversion to double from Beats here
-					double ppqBar = 0; // tmap->quarters_at (bbt);
+					double ppqBar = DoubleableBeats (tmap->quarters_at (bbt)).to_double ();
 					/* quarter note at sample position (not rounded to note subdivision) */
-#warning NUTEMPO need better conversion to double from Beats here
-					double ppqPos = 0; // tmap->quarters_at_sample (now);
+					double ppqPos = DoubleableBeats (tmap->quarters_at_sample (now)).to_double();
 					if (value & (kVstPpqPosValid)) {
 						timeinfo->ppqPos = ppqPos;
 						newflags |= kVstPpqPosValid;
