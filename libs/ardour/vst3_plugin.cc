@@ -660,8 +660,8 @@ VST3Plugin::connect_and_run (BufferSet&  bufs,
 			/* loop start/end in quarter notes */
 
 			TempoMap::SharedPtr tmap (TempoMap::use());
-			context.cycleStartMusic = DoubleableBeats (tmap->metric_at (looploc->start()).quarters_at (looploc->start ())).to_double ();
-			context.cycleEndMusic   = DoubleableBeats (tmap->metric_at (looploc->end()).quarters_at (looploc->end ())).to_double ();
+			context.cycleStartMusic = DoubleableBeats (tmap->quarters_at (looploc->start ())).to_double ();
+			context.cycleEndMusic   = DoubleableBeats (tmap->quarters_at (looploc->end ())).to_double ();
 			 context.state |= Vst::ProcessContext::kCycleValid;
 			context.state |= Vst::ProcessContext::kCycleActive;
 		} catch (...) {
