@@ -288,18 +288,6 @@ public:
 	int32_t _beats;
 	int32_t _ticks;
 
-	/* this needs to exist because Evoral::Sequence is templated, and some
-	 * other possible template types cannot provide ::from_double
-	 */
-
-	friend class Evoral::Sequence<Beats>;
-	explicit Beats (double beats) {
-		double       whole;
-		const double frac = modf (beats, &whole);
-
-		_beats = whole;
-		_ticks = frac * PPQN;
-	}
 };
 
 /* Only contexts that really, absolutely need a floating point representation
