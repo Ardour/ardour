@@ -50,6 +50,8 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Access Soundcard/Microphone input for recording</string>
 	@ENV@
 </dict>
 </plist>
