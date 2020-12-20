@@ -84,12 +84,16 @@ Point::time() const
 Tempo::Tempo (XMLNode const & node)
 {
 	assert (node.name() == xml_node_name);
-	if (!node.get_property (X_("scpnt-start"), _superclocks_per_note_type)) {
-		throw failed_constructor ();
-	}
-	if (!node.get_property (X_("scpnt-end"), _end_superclocks_per_note_type)) {
-		throw failed_constructor ();
-	}
+
+
+	node.get_property (X_("npm"), _npm);
+	node.get_property (X_("enpm"), _enpm);
+
+	_superclocks_per_note_type = double_npm_to_scpn (_npm);
+	_end_superclocks_per_note_type = double_npm_to_scpn (_enpm);
+	_super_note_type_per_second = double_npm_to_snps (_npm);
+	_end_super_note_type_per_second = double_npm_to_snps (_enpm);
+
 	if (!node.get_property (X_("note-type"), _note_type)) {
 		throw failed_constructor ();
 	}
@@ -99,6 +103,11 @@ Tempo::Tempo (XMLNode const & node)
 	if (!node.get_property (X_("active"), _active)) {
 		throw failed_constructor ();
 	}
+#warning NUTEMPO set these
+	// _locked_to_meter = ;
+	// _clamped = ;_
+
+	cerr << "Loaded Tempo from XML: " << *this << endl;
 }
 
 bool
@@ -120,11 +129,15 @@ Tempo::get_state () const
 {
 	XMLNode* node = new XMLNode (xml_node_name);
 
-	node->set_property (X_("scpnt-start"), superclocks_per_note_type());
-	node->set_property (X_("scpnt-end"), end_superclocks_per_note_type());
+	node->set_property (X_("npm"), note_types_per_minute());
+	node->set_property (X_("enpm"), end_note_types_per_minute());
 	node->set_property (X_("note-type"), note_type());
 	node->set_property (X_("type"), type());
 	node->set_property (X_("active"), active());
+
+	#warning NUTEMPO get these
+	// _locked_to_meter = ;
+	// _clamped = ;_
 
 	return *node;
 }
@@ -136,11 +149,23 @@ Tempo::set_state (XMLNode const & node, int /*version*/)
 		return -1;
 	}
 
-	node.get_property (X_("scpnt-start"), _superclocks_per_note_type);
-	node.get_property (X_("scpnt-end"), _end_superclocks_per_note_type);
+	node.get_property (X_("npm"), _npm);
+	node.get_property (X_("enpm"), _enpm);
+
+	_superclocks_per_note_type = double_npm_to_scpn (_npm);
+	_end_superclocks_per_note_type = double_npm_to_scpn (_enpm);
+	_super_note_type_per_second = double_npm_to_snps (_npm);
+	_end_super_note_type_per_second = double_npm_to_snps (_enpm);
+
 	node.get_property (X_("note-type"), _note_type);
 	node.get_property (X_("type"), _type);
 	node.get_property (X_("active"), _active);
+
+#warning NUTEMPO set these
+	// _locked_to_meter = ;
+	// _clamped = ;_
+
+	cerr << "Loaded Tempo from XML: " << *this << endl;
 
 	return 0;
 }
@@ -1484,6 +1509,7 @@ TempoMap::dump (std::ostream& ostr) const
 void
 TempoMap::dump_locked (std::ostream& ostr) const
 {
+	ostr << "\n\nTEMPO MAP:\n";
 	for (Tempos::const_iterator t = _tempos.begin(); t != _tempos.end(); ++t) {
 		ostr << &*t << ' ' << *t << endl;
 	}
@@ -1491,6 +1517,11 @@ TempoMap::dump_locked (std::ostream& ostr) const
 	for (Meters::const_iterator m = _meters.begin(); m != _meters.end(); ++m) {
 		ostr << &*m << ' ' << *m << endl;
 	}
+
+	for (MusicTimes::const_iterator m = _bartimes.begin(); m != _bartimes.end(); ++m) {
+		ostr << &*m << ' ' << *m << endl;
+	}
+	ostr << "------------\n\n\n";
 }
 
 void
@@ -1832,7 +1863,11 @@ std::operator<<(std::ostream& str, Meter const & m)
 std::ostream&
 std::operator<<(std::ostream& str, Tempo const & t)
 {
-	return str << t.note_types_per_minute() << " 1/" << t.note_type() << " notes per minute [" << t.super_note_type_per_second() << " sntpm] (" << t.superclocks_per_note_type() << " sc-per-1/" << t.note_type() << ')';
+	if (t.ramped()) {
+		return str << t.note_types_per_minute() << " 1/" << t.note_type() << " RAMPED notes per minute [" << t.super_note_type_per_second() << " sntpm] (" << t.superclocks_per_note_type() << " sc-per-1/" << t.note_type() << ')';
+	} else {
+		return str << t.note_types_per_minute() << " 1/" << t.note_type() << " notes per minute [" << t.super_note_type_per_second() << " sntpm] (" << t.superclocks_per_note_type() << " sc-per-1/" << t.note_type() << ')';
+	}
 }
 
 std::ostream&
@@ -2134,16 +2169,27 @@ TempoMap::set_state (XMLNode const & node, int /*version*/)
 }
 
 int
-TempoMap::set_music_times_from_state (XMLNode const& tempos_node)
+TempoMap::set_music_times_from_state (XMLNode const& mt_node)
 {
+	XMLNodeList const & children (mt_node.children());
+
+	try {
+		_bartimes.clear ();
+		for (XMLNodeList::const_iterator c = children.begin(); c != children.end(); ++c) {
+			MusicTimePoint* mp = new MusicTimePoint (*this, **c);
+			_bartimes.push_back (*mp);
+		}
+	} catch (...) {
+		_bartimes.clear (); /* remove any that were created */
+		return -1;
+	}
+
 	return 0;
 }
 
 int
 TempoMap::set_tempos_from_state (XMLNode const& tempos_node)
 {
-	/* CALLER MUST HOLD LOCK */
-
 	XMLNodeList const & children (tempos_node.children());
 
 	try {
@@ -2163,8 +2209,6 @@ TempoMap::set_tempos_from_state (XMLNode const& tempos_node)
 int
 TempoMap::set_meters_from_state (XMLNode const& meters_node)
 {
-	/* CALLER MUST HOLD LOCK */
-
 	XMLNodeList const & children (meters_node.children());
 
 	try {
