@@ -2868,7 +2868,6 @@ void
 TempoMap::init ()
 {
 	SharedPtr new_map (new TempoMap (Tempo (120), Meter (4, 4)));
-	cerr << "\n\n\n INITIALIZE TMP MGR " << &_map_mgr << " \n\n\n";
 	_map_mgr.init (new_map);
 	fetch ();
 }
