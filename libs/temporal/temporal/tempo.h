@@ -825,8 +825,6 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 
 	MeterPoint & set_meter (Meter const &, superclock_t);
 
-	void dump_locked (std::ostream&) const;
-
 	TempoPoint* add_tempo (TempoPoint &);
 	MeterPoint* add_meter (MeterPoint &);
 	MusicTimePoint* add_or_replace_bartime (MusicTimePoint &);

@@ -1028,7 +1028,7 @@ TempoMap::reset_starting_at (superclock_t sc)
 	DEBUG_TRACE (DEBUG::TemporalMap, "reset done\n");
 #ifndef NDEBUG
 	if (DEBUG_ENABLED (DEBUG::TemporalMap)) {
-		dump_locked (cerr);
+		dump (cerr);
 	}
 #endif
 }
@@ -1502,12 +1502,6 @@ TempoMap::sample_rate_changed (samplecnt_t new_sr)
 
 void
 TempoMap::dump (std::ostream& ostr) const
-{
-	dump_locked (ostr);
-}
-
-void
-TempoMap::dump_locked (std::ostream& ostr) const
 {
 	ostr << "\n\nTEMPO MAP:\n";
 	for (Tempos::const_iterator t = _tempos.begin(); t != _tempos.end(); ++t) {
