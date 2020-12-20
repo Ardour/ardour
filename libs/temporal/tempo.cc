@@ -2149,9 +2149,8 @@ TempoMap::set_tempos_from_state (XMLNode const& tempos_node)
 	try {
 		_tempos.clear ();
 		for (XMLNodeList::const_iterator c = children.begin(); c != children.end(); ++c) {
-			TempoPoint tp (*this, **c);
-			// _tempos.push_back (TempoPoint (*this, **c));
-			_tempos.push_back (tp);
+			TempoPoint* tp = new TempoPoint (*this, **c);
+			_tempos.push_back (*tp);
 		}
 	} catch (...) {
 		_tempos.clear (); /* remove any that were created */
@@ -2171,8 +2170,8 @@ TempoMap::set_meters_from_state (XMLNode const& meters_node)
 	try {
 		_meters.clear ();
 		for (XMLNodeList::const_iterator c = children.begin(); c != children.end(); ++c) {
-			MeterPoint mp (*this, **c);
-			_meters.push_back (mp);
+			MeterPoint* mp = new MeterPoint (*this, **c);
+			_meters.push_back (*mp);
 		}
 	} catch (...) {
 		_meters.clear (); /* remove any that were created */
@@ -2869,6 +2868,7 @@ void
 TempoMap::init ()
 {
 	SharedPtr new_map (new TempoMap (Tempo (120), Meter (4, 4)));
+	cerr << "\n\n\n INITIALIZE TMP MGR " << &_map_mgr << " \n\n\n";
 	_map_mgr.init (new_map);
 	fetch ();
 }
