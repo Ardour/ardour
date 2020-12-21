@@ -349,6 +349,48 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 				  double samples_per_visual_peak, samplecnt_t samples_per_file_peak) const
 {
 	Glib::Threads::Mutex::Lock lm (_lock);
+
+#if 0 // DEBUG ONLY
+	/* Bypass peak-file cache, compute peaks using raw data from source */
+	DEBUG_TRACE (DEBUG::Peaks, string_compose ("RP: npeaks = %1 start = %2 cnt = %3 spp = %4\n", npeaks, start, cnt, samples_per_visual_peak));
+	{
+		samplecnt_t scm = ceil (samples_per_visual_peak);
+		samplecnt_t peak = 0;
+
+#if 1 // direct read
+		boost::scoped_array<Sample> buf(new Sample[scm]);
+		while (peak < npeaks && cnt > 0) {
+			samplecnt_t samples_read = read_unlocked (buf.get(), start, scm);
+			if (samples_read == 0) {
+				break;
+			}
+			peaks[peak].min = peaks[peak].max = buf[0];
+			find_peaks (buf.get(), samples_read, &peaks[peak].min, &peaks[peak].max);
+
+			start += samples_read;
+			cnt -= samples_read;
+			++peak;
+		}
+#else // generate square wave / ramp
+		while (peak < npeaks && cnt > 0) {
+			samplecnt_t samples_read = std::min (cnt, scm);
+			samplecnt_t val = (start + samples_read / 2) % 24000;
+
+			peaks[peak].min = peaks[peak].max = .5 - val / 24000.0;
+
+			start += samples_read;
+			cnt -= samples_read;
+			++peak;
+		}
+#endif
+		while (peak < npeaks) {
+			peaks[peak].min = peaks[peak].max = 0;
+			++peak;
+		}
+		return 0;
+	}
+#endif
+
 	double scale;
 	double expected_peaks;
 	PeakData::PeakDatum xmax;
