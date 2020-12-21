@@ -52,7 +52,6 @@ AudioPlaylistSource::AudioPlaylistSource (Session& s, const ID& orig, const std:
 	, _playlist_channel (chn)
 {
 	AudioSource::_length = len;
-	ensure_buffers_for_level (_level, _session.sample_rate());
 }
 
 AudioPlaylistSource::AudioPlaylistSource (Session& s, const XMLNode& node)
@@ -117,16 +116,12 @@ AudioPlaylistSource::set_state (const XMLNode& node, int version, bool with_desc
 		throw failed_constructor ();
 	}
 
-	ensure_buffers_for_level (_level, _session.sample_rate());
-
 	return 0;
 }
 
 samplecnt_t
 AudioPlaylistSource::read_unlocked (Sample* dst, samplepos_t start, samplecnt_t cnt) const
 {
-	boost::shared_array<Sample> sbuf;
-	boost::shared_array<gain_t> gbuf;
 	samplecnt_t to_read;
 	samplecnt_t to_zero;
 
@@ -143,16 +138,8 @@ AudioPlaylistSource::read_unlocked (Sample* dst, samplepos_t start, samplecnt_t 
 		to_zero = 0;
 	}
 
-	{
-		/* Don't need to hold the lock for the actual read, and
-		   actually, we cannot, but we do want to interlock
-		   with any changes to the list of buffers caused
-		   by creating new nested playlists/sources
-		*/
-		Glib::Threads::Mutex::Lock lm (_level_buffer_lock);
-		sbuf = _mixdown_buffers[_level-1];
-		gbuf = _gain_buffers[_level-1];
-	}
+	boost::scoped_array<float> sbuf(new float[to_read]);
+	boost::scoped_array<gain_t> gbuf(new gain_t[to_read]);
 
 	boost::dynamic_pointer_cast<AudioPlaylist>(_playlist)->read (dst, sbuf.get(), gbuf.get(), start+_playlist_offset, to_read, _playlist_channel);
 

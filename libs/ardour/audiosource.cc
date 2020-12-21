@@ -72,9 +72,6 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-Glib::Threads::Mutex AudioSource::_level_buffer_lock;
-vector<boost::shared_array<Sample> > AudioSource::_mixdown_buffers;
-vector<boost::shared_array<gain_t> > AudioSource::_gain_buffers;
 bool AudioSource::_build_missing_peakfiles = false;
 
 /** true if we want peakfiles (e.g. if we are displaying a GUI) */
@@ -1136,51 +1133,5 @@ AudioSource::mark_streaming_write_completed (const Lock& lock)
 
 	if (_peaks_built) {
 		PeaksReady (); /* EMIT SIGNAL */
-	}
-}
-
-void
-AudioSource::allocate_working_buffers (samplecnt_t framerate)
-{
-	Glib::Threads::Mutex::Lock lm (_level_buffer_lock);
-
-
-	/* Note: we don't need any buffers allocated until
-	   a level 1 audiosource is created, at which
-	   time we'll call ::ensure_buffers_for_level()
-	   with the right value and do the right thing.
-	*/
-
-	if (!_mixdown_buffers.empty()) {
-		ensure_buffers_for_level_locked ( _mixdown_buffers.size(), framerate);
-	}
-}
-
-void
-AudioSource::ensure_buffers_for_level (uint32_t level, samplecnt_t sample_rate)
-{
-	Glib::Threads::Mutex::Lock lm (_level_buffer_lock);
-	ensure_buffers_for_level_locked (level, sample_rate);
-}
-
-void
-AudioSource::ensure_buffers_for_level_locked (uint32_t level, samplecnt_t sample_rate)
-{
-	samplecnt_t nframes = PlaybackBuffer<Sample>::power_of_two_size ((samplecnt_t) floor (Config->get_audio_playback_buffer_seconds() * sample_rate));
-
-	/* this may be called because either "level" or "sample_rate" have
-	 * changed. and it may be called with "level" smaller than the current
-	 * number of buffers, because a new compound region has been created at
-	 * a more shallow level than the deepest one we currently have.
-	 */
-
-	uint32_t limit = max ((size_t) level, _mixdown_buffers.size());
-
-	_mixdown_buffers.clear ();
-	_gain_buffers.clear ();
-
-	for (uint32_t n = 0; n < limit; ++n) {
-		_mixdown_buffers.push_back (boost::shared_array<Sample> (new Sample[nframes]));
-		_gain_buffers.push_back (boost::shared_array<gain_t> (new gain_t[nframes]));
 	}
 }

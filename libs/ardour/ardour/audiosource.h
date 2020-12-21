@@ -103,24 +103,9 @@ class LIBARDOUR_API AudioSource : virtual public Source,
 	/** @return true if the each source sample s must be clamped to -1 < s < 1 */
 	virtual bool clamped_at_unity () const = 0;
 
-	static void allocate_working_buffers (samplecnt_t framerate);
-
   protected:
 	static bool _build_missing_peakfiles;
 	static bool _build_peakfiles;
-
-	/* these collections of working buffers for supporting
-	   playlist's reading from potentially nested/recursive
-	   sources assume SINGLE THREADED reads by the butler
-	   thread, or a lock around calls that use them.
-	*/
-
-	static std::vector<boost::shared_array<Sample> > _mixdown_buffers;
-	static std::vector<boost::shared_array<gain_t> > _gain_buffers;
-	static Glib::Threads::Mutex    _level_buffer_lock;
-
-	static void ensure_buffers_for_level (uint32_t, samplecnt_t);
-	static void ensure_buffers_for_level_locked (uint32_t, samplecnt_t);
 
 	samplecnt_t           _length;
 	std::string         _peakpath;
