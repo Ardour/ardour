@@ -2632,6 +2632,8 @@ ARDOUR_UI::cleanup_peakfiles ()
 	// - setup peakfiles (background thread)
 	_session->cleanup_peakfiles ();
 
+	ArdourWaveView::WaveView::clear_cache ();
+
 	// re-add waves to ARV
 	for (list<RegionView*>::iterator i = views.begin(); i != views.end(); ++i) {
 		AudioRegionView* arv = dynamic_cast<AudioRegionView*> (*i);
