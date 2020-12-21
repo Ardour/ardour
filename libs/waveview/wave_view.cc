@@ -1324,6 +1324,12 @@ WaveView::set_global_logscaled (bool yn)
 	}
 }
 
+void
+WaveView::clear_cache ()
+{
+	WaveViewCache::get_instance()->clear_cache ();
+}
+
 samplecnt_t
 WaveView::region_length() const
 {
