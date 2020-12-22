@@ -349,7 +349,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 
 #if 0 // DEBUG ONLY
 	/* Bypass peak-file cache, compute peaks using raw data from source */
-	DEBUG_TRACE (DEBUG::Peaks, string_compose ("RP: npeaks = %1 start = %2 cnt = %3 spp = %4\n", npeaks, start, cnt, samples_per_visual_peak));
+	DEBUG_TRACE (DEBUG::Peaks, string_compose ("RP: npeaks = %1 start = %2 cnt = %3 spp = %4 pf = %5\n", npeaks, start, cnt, samples_per_visual_peak, _peakpath));
 	{
 		samplecnt_t scm = ceil (samples_per_visual_peak);
 		samplecnt_t peak = 0;
@@ -452,8 +452,8 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 	scale = npeaks/expected_peaks;
 
 
-	DEBUG_TRACE (DEBUG::Peaks, string_compose (" ======>RP: npeaks = %1 start = %2 cnt = %3 len = %4 samples_per_visual_peak = %5 expected was %6 ... scale =  %7 PD ptr = %8\n"
-			, npeaks, start, cnt, _length, samples_per_visual_peak, expected_peaks, scale, peaks));
+	DEBUG_TRACE (DEBUG::Peaks, string_compose (" ======>RP: npeaks = %1 start = %2 cnt = %3 len = %4 samples_per_visual_peak = %5 expected was %6 ... scale =  %7 PD ptr = %8 pf = %9\n"
+			, npeaks, start, cnt, _length, samples_per_visual_peak, expected_peaks, scale, peaks, _peakpath));
 
 	/* fix for near-end-of-file conditions */
 
@@ -878,14 +878,14 @@ AudioSource::done_with_peakfile_writes (bool done)
 		compute_and_write_peaks (0, 0, 0, true, false, _FPP);
 	}
 
+	close (_peakfile_fd);
+	_peakfile_fd = -1;
+
 	if (done) {
 		Glib::Threads::Mutex::Lock lm (_peaks_ready_lock);
 		_peaks_built = true;
 		PeaksReady (); /* EMIT SIGNAL */
 	}
-
-	close (_peakfile_fd);
-	_peakfile_fd = -1;
 }
 
 /** @param first_sample Offset from the source start of the first sample to
