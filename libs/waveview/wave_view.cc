@@ -1016,7 +1016,11 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 	Rect self;
 
 	if (!get_item_and_draw_rect_in_window_coords (area, self, draw)) {
-		assert(true);
+		assert(false);
+		return;
+	}
+
+	if (draw.height () < 2) {
 		return;
 	}
 
