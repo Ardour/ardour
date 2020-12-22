@@ -144,6 +144,16 @@ ArdourVideoToolPaths::xjadeo_exe (std::string &xjadeo_exe)
 bool
 ArdourVideoToolPaths::transcoder_exe (std::string &ffmpeg_exe, std::string &ffprobe_exe)
 {
+	static bool _cached = false;
+	static std::string _ffmpeg_exe;
+	static std::string _ffprobe_exe;
+
+	if (_cached) {
+		ffmpeg_exe  = _ffmpeg_exe;
+		ffprobe_exe = _ffprobe_exe;
+		return true;
+	}
+
 #ifdef PLATFORM_WINDOWS
 	std::string reg;
 	std::string program_files = PBD::get_win_special_folder_path (CSIDL_PROGRAM_FILES);
@@ -201,6 +211,11 @@ ArdourVideoToolPaths::transcoder_exe (std::string &ffmpeg_exe, std::string &ffpr
 	if (ffmpeg_exe.empty() || ffprobe_exe.empty()) {
 		return false;
 	}
+
+	_cached      = true;
+	_ffmpeg_exe  = ffmpeg_exe;
+	_ffprobe_exe = ffprobe_exe;
+
 	return true;
 }
 
