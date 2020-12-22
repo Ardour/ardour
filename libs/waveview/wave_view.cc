@@ -1020,7 +1020,17 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 		return;
 	}
 
-	if (draw.height () < 2) {
+	if (_props->height < 1) {
+			if (_props->channel % 2) {
+				return;
+			}
+			context->rectangle (draw.x0, draw.y0, draw.width (), draw.height ());
+			if (1 == (_props->channel % 3)) {
+				set_source_rgba (context, _props->zero_color);
+			} else {
+				set_source_rgba (context, _props->fill_color);
+			}
+			context->fill ();
 		return;
 	}
 
