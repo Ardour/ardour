@@ -558,30 +558,40 @@ AudioRegionView::set_height (gdouble height)
 	RegionView::set_height (height);
 	pending_peak_data->set_y1 (height);
 
-	uint32_t wcnt = waves.size();
+	RouteTimeAxisView& atv (*(dynamic_cast<RouteTimeAxisView*>(&trackview))); // ick
+	uint32_t nchans = atv.track()->n_channels().n_audio();
 
-	if (wcnt > 0) {
+	if (!tmp_waves.empty () || !waves.empty ()) {
 
 		gdouble ht;
 
 		if (!UIConfiguration::instance().get_show_name_highlight() || (height < NAME_HIGHLIGHT_THRESH)) {
-			ht = height / (double) wcnt;
+			ht = height / (double) nchans;
 		} else {
-			ht = (height - NAME_HIGHLIGHT_SIZE) / (double) wcnt;
+			ht = (height - NAME_HIGHLIGHT_SIZE) / (double) nchans;
 		}
 
+		uint32_t wcnt = waves.size();
 		for (uint32_t n = 0; n < wcnt; ++n) {
-
 			gdouble yoff = floor (ht * n);
-
 			waves[n]->set_height (ht);
 			waves[n]->set_y_position (yoff);
+		}
+
+		wcnt = tmp_waves.size();
+		for (uint32_t n = 0; n < wcnt; ++n) {
+			if (!tmp_waves[n]) {
+				continue;
+			}
+			gdouble yoff = floor (ht * n);
+			tmp_waves[n]->set_height (ht);
+			tmp_waves[n]->set_y_position (yoff);
 		}
 	}
 
 	if (gain_line) {
 
-		if ((height/wcnt) < NAME_HIGHLIGHT_THRESH) {
+		if ((height / nchans) < NAME_HIGHLIGHT_THRESH) {
 			gain_line->hide ();
 		} else {
 			update_envelope_visibility ();
@@ -1207,17 +1217,17 @@ AudioRegionView::create_waves ()
 
 		if (wait_for_data) {
 			if (audio_region()->audio_source(n)->peaks_ready (boost::bind (&AudioRegionView::peaks_ready_handler, this, n), &_data_ready_connections[n], gui_context())) {
-				// cerr << "\tData is ready\n";
+				// cerr << "\tData is ready for channel " << n << "\n";
 				create_one_wave (n, true);
 			} else {
-				// cerr << "\tdata is not ready\n";
+				// cerr << "\tdata is not ready for channel " << n << "\n";
 				// we'll get a PeaksReady signal from the source in the future
 				// and will call create_one_wave(n) then.
 				pending_peak_data->show ();
 			}
 
 		} else {
-			// cerr << "\tdon't delay, display today!\n";
+			// cerr << "\tdon't delay, display channel " << n << " today!\n";
 			create_one_wave (n, true);
 		}
 
@@ -1305,7 +1315,7 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 		}
 	}
 
-	if (n == nwaves && waves.empty()) {
+	if (n == nwaves) {
 		/* all waves are ready */
 		tmp_waves.resize(nwaves);
 
