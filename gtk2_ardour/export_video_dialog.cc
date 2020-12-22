@@ -292,6 +292,8 @@ ExportVideoDialog::ExportVideoDialog ()
 	cancel_button = add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	get_action_area()->pack_start (transcode_button, false, false);
 	show_all_children ();
+
+	progress_box->set_no_show_all();
 	progress_box->hide();
 }
 
