@@ -705,14 +705,20 @@ timepos_t::operator+=(timepos_t const & d)
 {
 	if (d.is_beats() == is_beats()) {
 
+		/* same time domain, keep flag bit, add values */
+
 		v = build (flagged(), val() + d.val());
 
 	} else {
 
+		/* different time domain, return a value in the same domain as
+		 * this one
+		 */
+
 		if (is_beats()) {
-			v = build (false, val() + d.ticks());
+			v = build (true, val() + d.ticks());
 		} else {
-			v = build (true, val() + d.superclocks());
+			v = build (false, val() + d.superclocks());
 		}
 	}
 
