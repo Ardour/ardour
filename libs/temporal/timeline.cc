@@ -220,13 +220,16 @@ timecnt_t::to_string () const
 timecnt_t
 timecnt_t::operator+ (timecnt_t const & other) const
 {
+	if (time_domain() == other.time_domain()) {
+		int62_t v (_distance.flagged(), _distance.val() + other.distance().val());
+		return timecnt_t (v, _position);
+	}
+
+	/* mismatched time domains */
+
 	if (time_domain() == AudioTime) {
-		if (other.time_domain() == AudioTime) {
-			/* both audio, just add and use an arbitrary position */
-			return timecnt_t (_distance + other.distance(), _position);
-		} else {
-			return timecnt_t (_distance + other.samples(), _position);
-		}
+		/* other must be beats */
+		return timecnt_t (_distance + other.superclocks(), _position);
 	}
 
 	return timecnt_t (beats() + other.beats(), _position);
