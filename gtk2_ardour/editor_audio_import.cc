@@ -827,7 +827,7 @@ Editor::add_sources (vector<string>            paths,
 
 		PropertyList plist;
 
-		plist.add (ARDOUR::Properties::start, timecnt_t());
+		plist.add (ARDOUR::Properties::start, timecnt_t (sources[0]->type() == DataType::AUDIO ? Temporal::AudioTime : Temporal::BeatTime));
 		plist.add (ARDOUR::Properties::length, sources[0]->length ());
 		plist.add (ARDOUR::Properties::name, region_name);
 		plist.add (ARDOUR::Properties::layer, 0);
@@ -912,11 +912,13 @@ Editor::add_sources (vector<string>            paths,
 			   round it back down to 0 again.
 			*/
 			timecnt_t len = (*x)->length ();
+			cerr << "for " << (*x)->name() << " source length appears to be " << len << endl;
 			if (len == 0) {
 				len = timecnt_t (_session->sample_rate ()) / 2;
+				cerr << " reset to use " << len << endl;
 			}
 
-			plist.add (ARDOUR::Properties::start, timepos_t (0));
+			plist.add (ARDOUR::Properties::start, timecnt_t ((*x)->type() == DataType::AUDIO ? Temporal::AudioTime : Temporal::BeatTime));
 			plist.add (ARDOUR::Properties::length, len);
 			plist.add (ARDOUR::Properties::name, region_name);
 			plist.add (ARDOUR::Properties::layer, 0);
