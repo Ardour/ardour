@@ -633,14 +633,11 @@ MidiListEditor::edited (const std::string& path, const std::string& text)
 	case 5: // length
 
 
-#warning NUTEMPO should likely use just Beats::operator>> and exceptions here
-
-		if (strspn (text.c_str(), "0123456789:") == text.length()) {
-
+		try {
 			stringstream ss (text);
 			ss >> bval;
 
-		} else {
+		} catch (...) {
 
 			/* assume its text from the combo. look for the map
 			 * entry for the actual note ticks
