@@ -2134,7 +2134,7 @@ private:
 	static void* timefx_thread (void* arg);
 	void do_timefx ();
 
-	int time_stretch (RegionSelection&, float fraction);
+	int time_stretch (RegionSelection&, Temporal::ratio_t const & fraction);
 	int pitch_shift (RegionSelection&, float cents);
 	void pitch_shift_region ();
 

@@ -66,7 +66,7 @@ using namespace Gtkmm2ext;
 
 /** @return -1 in case of error, 1 if operation was cancelled by the user, 0 if everything went ok */
 int
-Editor::time_stretch (RegionSelection& regions, float fraction)
+Editor::time_stretch (RegionSelection& regions, Temporal::ratio_t const & ratio)
 {
 	RegionList audio;
 	RegionList midi;
@@ -81,7 +81,7 @@ Editor::time_stretch (RegionSelection& regions, float fraction)
 		}
 	}
 
-	int aret = time_fx (audio, fraction, false);
+	int aret = time_fx (audio, ratio, false);
 	if (aret < 0) {
 		abort_reversible_command ();
 		return aret;
@@ -99,7 +99,7 @@ Editor::time_stretch (RegionSelection& regions, float fraction)
 	}
 
 	ARDOUR::TimeFXRequest request;
-	request.time_fraction = fraction;
+	request.time_fraction = ratio;
 
 	for (RegionList::iterator i = midi.begin(); i != midi.end(); ++i) {
 		boost::shared_ptr<Playlist> playlist = (*i)->playlist();

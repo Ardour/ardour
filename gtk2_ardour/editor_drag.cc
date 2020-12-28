@@ -5543,7 +5543,7 @@ TimeFXDrag::finished (GdkEvent* event, bool movement_occurred)
 	   parameters for the timestretch.
 	*/
 
-	ratio_t fraction (1, 1);
+	ratio_t ratio (1, 1);
 
 	if (movement_occurred) {
 
@@ -5560,12 +5560,17 @@ TimeFXDrag::finished (GdkEvent* event, bool movement_occurred)
 
 		timecnt_t newlen = _primary->region()->position().distance (adjusted_pos);
 
-		fraction = newlen / _primary->region()->length();
+		if (_primary->region()->length().time_domain() == Temporal::BeatTime) {
+			ratio = ratio_t (newlen.ticks(), _primary->region()->length().ticks());
+		} else {
+			ratio = ratio_t (newlen.samples(), _primary->region()->length().samples());
+		}
 
 #ifndef USE_RUBBERBAND
 		// Soundtouch uses fraction / 100 instead of normal (/ 1)
+#warning NUTEMPO timefx request now uses a rational type so this needs revisiting
 		if (_primary->region()->data_type() == DataType::AUDIO) {
-			fraction = ((newlen - _primary->region()->length()) / newlen) * 100;
+			ratio = ((newlen - _primary->region()->length()) / newlen) * 100;
 		}
 #endif
 	}
@@ -5577,7 +5582,7 @@ TimeFXDrag::finished (GdkEvent* event, bool movement_occurred)
 		   selection.
 		*/
 
-		if (_editor->time_stretch (_editor->get_selection().regions, fraction) == -1) {
+		if (_editor->time_stretch (_editor->get_selection().regions, ratio) == -1) {
 			error << _("An error occurred while executing time stretch operation") << endmsg;
 		}
 	}
@@ -6966,7 +6971,6 @@ void
 NoteCreateDrag::motion (GdkEvent* event, bool)
 {
 	const timepos_t pos = _drags->current_pointer_time ();
-	const int32_t divisions = _editor->get_grid_music_divisions (event->button.state);
 	Temporal::Beats aligned_beats = grid_aligned_beats (pos, event);
 
 	if (_editor->snap_mode() != SnapOff) {
