@@ -872,8 +872,7 @@ AutomationTimeAxisView::paste_one (timepos_t const & pos, unsigned paste_count, 
 	Temporal::timepos_t model_pos = dm (_line->distance_measure().origin().distance (tpos), line()->the_list()->time_domain());
 
 	XMLNode &before = alist->get_state();
-#warning NUTEMPO FIX THIS ... WHY DOES the paste call get a type error from the compiler
-	//alist->paste (**p, model_pos, _session->tempo_map());
+	alist->paste (**p, model_pos);
 	_session->add_command (new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
 
 	return true;
