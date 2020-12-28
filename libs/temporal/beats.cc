@@ -16,6 +16,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <stdexcept>
+
 #include "pbd/integer_division.h"
 
 #include "temporal/beats.h"
@@ -115,4 +117,40 @@ Beats::round_to_subdivision (int subdivision, RoundMode dir) const {
 
 	DEBUG_TRACE (DEBUG::SnapBBT, string_compose ("return %1 from %2 : %3\n", Beats (beats, ticks), beats, ticks));
 	return Beats (beats, ticks);
+}
+
+std::istream&
+Temporal::operator>>(std::istream& istr, Beats& b)
+{
+	int32_t beats, ticks;
+	char d; /* delimiter, whatever it is */
+
+	istr >> beats;
+
+	if (!istr) {
+		throw std::invalid_argument (_("illegal or missing value for beat count"));
+	}
+
+	istr >> d; /* we don't care what the delimiter is */
+
+	if (!istr) {
+		throw std::invalid_argument (_("illegal or missing delimiter for beat value"));
+	}
+
+	istr >> ticks;
+
+	if (!istr) {
+		throw std::invalid_argument (_("illegal or missing delimiter for tick count"));
+	}
+
+	b = Beats (beats, ticks);
+
+	return istr;
+}
+
+std::ostream&
+Temporal::operator<<(std::ostream& os, const Beats& t)
+{
+	os << t.get_beats() << ':' << t.get_ticks();
+	return os;
 }

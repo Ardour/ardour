@@ -311,22 +311,8 @@ class DoubleableBeats : public Beats
   virtual-method-in-a-template will bite you.
 */
 
-inline std::ostream&
-operator<<(std::ostream& os, const Beats& t)
-{
-	os << t.get_beats() << ':' << t.get_ticks();
-	return os;
-}
-
-inline std::istream&
-operator>>(std::istream& istr, Beats& b)
-{
-	int32_t beats, ticks;
-	char d; /* delimiter, whatever it is */
-	istr >> beats >> d >> ticks;
-	b = Beats (beats, ticks);
-	return istr;
-}
+std::ostream& operator<<(std::ostream& ostream, const Temporal::Beats& t);
+std::istream& operator>>(std::istream& istream, Temporal::Beats& b);
 
 } // namespace Temporal
 
