@@ -270,10 +270,10 @@ intptr_t Session::vst_callback (
 				newflags |= kVstTransportCycleActive;
 				Location * looploc = session->locations ()->auto_loop_location ();
 				if (looploc) try {
-#warning NUTEMPO need better conversion to double from Beats here
-						timeinfo->cycleStartPos = 0; // tmap->quarters_at (looploc->start ());
-#warning NUTEMPO need better conversion to double from Beats here
-						timeinfo->cycleEndPos = 0; // tmap->quarters_at (looploc->end ());
+						const DoubleableBeats sdb (looploc->start().beats());
+						const DoubleableBeats edb (looploc->end().beats());
+						timeinfo->cycleStartPos = sdb.to_double();
+						timeinfo->cycleEndPos = edb.to_double(); 
 						 newflags |= kVstCyclePosValid;
 				} catch (...) { }
 			}
