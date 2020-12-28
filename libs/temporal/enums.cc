@@ -72,3 +72,10 @@ void Temporal::init ()
 		libtemporal_initialized = true;
 	}
 }
+
+std::ostream&
+operator<< (std::ostream& o, Temporal::ratio_t const & r)
+{
+	return o << r.numerator() << '/' << r.denominator();
+}
+

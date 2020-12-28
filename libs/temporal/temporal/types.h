@@ -125,4 +125,7 @@ extern void setup_enum_writer ();
 
 }
 
+std::ostream& operator<< (std::ostream& o, Temporal::ratio_t const & r);
+
+
 #endif /* __libpbd_position_types_h__ */
