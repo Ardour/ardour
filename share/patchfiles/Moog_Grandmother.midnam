@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Clara Hobbs</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Moog</Manufacturer>
+    <Model>Grandmother</Model>
+    <CustomDeviceMode Name="Default">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Names"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Names">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1"/>
+        <AvailableChannel Channel="2"/>
+        <AvailableChannel Channel="3"/>
+        <AvailableChannel Channel="4"/>
+        <AvailableChannel Channel="5"/>
+        <AvailableChannel Channel="6"/>
+        <AvailableChannel Channel="7"/>
+        <AvailableChannel Channel="8"/>
+        <AvailableChannel Channel="9"/>
+        <AvailableChannel Channel="10"/>
+        <AvailableChannel Channel="11"/>
+        <AvailableChannel Channel="12"/>
+        <AvailableChannel Channel="13"/>
+        <AvailableChannel Channel="14"/>
+        <AvailableChannel Channel="15"/>
+        <AvailableChannel Channel="16"/>
+      </AvailableForChannels>
+      <UsesControlNameList Name="Controls"/>
+    </ChannelNameSet>
+    <ValueNameList Name="Switch">
+      <Value Number="0" Name="Off"/>
+      <Value Number="64" Name="On"/>
+    </ValueNameList>
+    <ValueNameList Name="ClockDivs">
+      <Value Number="0" Name="4 Whole Notes"/>
+      <Value Number="5" Name="3 Whole Notes"/>
+      <Value Number="11" Name="2 Whole Notes"/>
+      <Value Number="16" Name="Dotted Whole Note"/>
+      <Value Number="21" Name="Whole Note"/>
+      <Value Number="27" Name="Dotted Half Note"/>
+      <Value Number="32" Name="Whole Note Triplet"/>
+      <Value Number="37" Name="Half Note"/>
+      <Value Number="43" Name="Dotted Quarter Note"/>
+      <Value Number="48" Name="Half Note Triplet"/>
+      <Value Number="53" Name="Quarter Note"/>
+      <Value Number="59" Name="Dotted Eighth Note"/>
+      <Value Number="64" Name="Quarter Note Triplet"/>
+      <Value Number="69" Name="Eighth Note"/>
+      <Value Number="75" Name="Dotted Sixteenth Note"/>
+      <Value Number="80" Name="Eighth Note Triplet"/>
+      <Value Number="85" Name="Sixteenth Note"/>
+      <Value Number="91" Name="Dotted 32nd Note"/>
+      <Value Number="96" Name="Sixteenth Note Triplet"/>
+      <Value Number="101" Name="32nd Note"/>
+      <Value Number="107" Name="Dotted 64th Note"/>
+      <Value Number="102" Name="32nd Note Triplet"/>
+      <Value Number="117" Name="64th Note"/>
+      <Value Number="123" Name="64th Note Triplet"/>
+    </ValueNameList>
+    <ValueNameList Name="BendRange">
+      <Value Number="0" Name="0 (Off)"/>
+      <Value Number="5" Name="1"/>
+      <Value Number="10" Name="2"/>
+      <Value Number="15" Name="3"/>
+      <Value Number="20" Name="4"/>
+      <Value Number="26" Name="5"/>
+      <Value Number="31" Name="6"/>
+      <Value Number="36" Name="7"/>
+      <Value Number="41" Name="8"/>
+      <Value Number="46" Name="9"/>
+      <Value Number="51" Name="10"/>
+      <Value Number="56" Name="11"/>
+      <Value Number="61" Name="12 (One Octave)"/>
+      <Value Number="67" Name="13"/>
+      <Value Number="72" Name="14"/>
+      <Value Number="77" Name="15"/>
+      <Value Number="82" Name="16"/>
+      <Value Number="87" Name="17"/>
+      <Value Number="92" Name="18"/>
+      <Value Number="97" Name="19"/>
+      <Value Number="102" Name="20"/>
+      <Value Number="108" Name="21"/>
+      <Value Number="113" Name="22"/>
+      <Value Number="118" Name="23"/>
+      <Value Number="123" Name="24 (Two Octaves)"/>
+    </ValueNameList>
+    <ControlNameList Name="Controls">
+      <!-- Glide -->
+      <!-- Should actually be: <Control Type="14bit" Number="5" Name="Glide Time"/>-->
+      <Control Type="7bit" Number="5" Name="Glide Time (Coarse)"/>
+      <Control Type="7bit" Number="37" Name="Glide Time (Fine)"/>
+      <Control Type="7bit" Number="65" Name="Glide On/Off">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="Switch"/>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="85" Name="Glide Type">
+        <Values Min="0" Max="127">
+          <ValueNameList>
+            <Value Number="0" Name="Linear Constant Rate"/>
+            <Value Number="43" Name="Linear Constant Time"/>
+            <Value Number="85" Name="Exponential"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="94" Name="Legato Glide">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="Switch"/>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="103" Name="Gated Glide">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="Switch"/>
+        </Values>
+      </Control>
+      <!-- Modulation -->
+      <!-- Should actually be: <Control Type="14bit" Number="1" Name="Mod Wheel"/> -->
+      <Control Type="7bit" Number="1" Name="Mod Wheel (Coarse)"/>
+      <Control Type="7bit" Number="33" Name="Mod Wheel (Fine)"/>
+      <!-- Should actually be: <Control Type="14bit" Number="3" Name="Modulation Rate"/>-->
+      <Control Type="7bit" Number="3" Name="Modulation Rate (Coarse)"/>
+      <Control Type="7bit" Number="35" Name="Modulation Rate (Fine)"/>
+      <!-- Oscillators -->
+      <Control Type="7bit" Number="74" Name="Oscillator 1 Octave">
+        <Values Min="0" Max="127">
+          <ValueNameList>
+            <Value Number="0" Name="32'"/>
+            <Value Number="32" Name="16'"/>
+            <Value Number="64" Name="8'"/>
+            <Value Number="96" Name="4'"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="75" Name="Oscillator 2 Octave">
+        <Values Min="0" Max="127">
+          <ValueNameList>
+            <Value Number="0" Name="16'"/>
+            <Value Number="32" Name="8'"/>
+            <Value Number="64" Name="4'"/>
+            <Value Number="96" Name="2'"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="77" Name="Oscillator 2 Sync">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="Switch"/>
+        </Values>
+      </Control>
+      <!-- Should actually be: <Control Type="14bit" Number="12" Name="Oscillator 2 Frequency"/>-->
+      <Control Type="7bit" Number="12" Name="Oscillator 2 Frequency (Coarse)"/>
+      <Control Type="7bit" Number="44" Name="Oscillator 2 Frequency (Fine)"/>
+      <Control Type="7bit" Number="107" Name="Pitch Bend Up Amount">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="BendRange"/>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="108" Name="Pitch Bend Down Amount">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="BendRange"/>
+        </Values>
+      </Control>
+      <!-- Arpeggiator/Sequencer -->
+      <Control Type="7bit" Number="69" Name="ARP/SEQ Hold">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="Switch"/>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="73" Name="ARP/SEQ Play">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="Switch"/>
+        </Values>
+      </Control>
+      <!-- Should actually be: <Control Type="14bit" Number="8" Name="ARP/SEQ Rate"/> -->
+      <Control Type="7bit" Number="8" Name="ARP/SEQ Rate (Coarse)"/>
+      <Control Type="7bit" Number="40" Name="ARP/SEQ Rate (Fine)"/>
+      <Control Type="7bit" Number="90" Name="ARP/SEQ Clock Division">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="ClockDivs"/>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="91" Name="ARP/SEQ Mode">
+        <Values Min="0" Max="127">
+          <ValueNameList>
+            <Value Number="0" Name="ARP"/>
+            <Value Number="43" Name="SEQ"/>
+            <Value Number="86" Name="SEQ Record"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="92" Name="ARP/SEQ Pattern">
+        <Values Min="0" Max="127">
+          <ValueNameList>
+            <Value Number="0" Name="Order"/>
+	    <Value Number="43" Name="Forward/Backward"/>
+            <Value Number="85" Name="Random"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="93" Name="ARP Range/SEQ Number">
+        <Values Min="0" Max="127">
+          <ValueNameList>
+            <Value Number="0" Name="1"/>
+            <Value Number="43" Name="2"/>
+            <Value Number="85" Name="3"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="106" Name="ARP/SEQ Gate Length" />
+      <Control Type="7bit" Number="14" Name="ARP/SEQ Swing" />
+      <!-- Keyboard Response -->
+      <Control Type="7bit" Number="89" Name="Keyboard Octave">
+        <Values Min="0" Max="127">
+          <ValueNameList>
+            <Value Number="0" Name="-2"/>
+            <Value Number="26" Name="-1"/>
+            <Value Number="51" Name="0"/>
+            <Value Number="77" Name="+1"/>
+            <Value Number="102" Name="+2"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="95" Name="Multi-Trig">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="Switch"/>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="119" Name="Keyboard Transpose">
+        <Values Min="0" Max="127">
+          <ValueNameList>
+            <Value Number="0" Name="-12"/>
+            <Value Number="5" Name="-11"/>
+            <Value Number="10" Name="-10"/>
+            <Value Number="15" Name="-9"/>
+            <Value Number="20" Name="-8"/>
+            <Value Number="26" Name="-7"/>
+            <Value Number="31" Name="-6"/>
+            <Value Number="36" Name="-5"/>
+            <Value Number="41" Name="-4"/>
+            <Value Number="46" Name="-3"/>
+            <Value Number="51" Name="-2"/>
+            <Value Number="56" Name="-1"/>
+            <Value Number="61" Name="0 (Off)"/>
+            <Value Number="67" Name="+1"/>
+            <Value Number="72" Name="+2"/>
+            <Value Number="77" Name="+3"/>
+            <Value Number="82" Name="+4"/>
+            <Value Number="87" Name="+5"/>
+            <Value Number="92" Name="+6"/>
+            <Value Number="97" Name="+7"/>
+            <Value Number="102" Name="+8"/>
+            <Value Number="108" Name="+9"/>
+            <Value Number="113" Name="+10"/>
+            <Value Number="118" Name="+11"/>
+            <Value Number="123" Name="+12"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+    </ControlNameList>
+  </MasterDeviceNames>
+</MIDINameDocument>
