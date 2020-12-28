@@ -26,7 +26,7 @@ namespace ARDOUR {
 
 	struct TimeFXRequest : public InterThreadInfo {
 		TimeFXRequest()
-			: time_fraction(0,0)
+			: time_fraction(0,1)
 			, pitch_fraction(0)
 			, use_soundtouch(false)
 			, quick_seek(false)
