@@ -148,8 +148,8 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 	 * I hope this is clear.
 	 */
 
-	double stretch = tsr.time_fraction * region->stretch ();
-	double shift   = tsr.pitch_fraction * region->shift ();
+	double stretch = region->stretch() * tsr.time_fraction;
+	double shift   = region->shift() * tsr.pitch_fraction;
 
 	samplecnt_t read_start = region->ancestral_start_sample () +
 	                         samplecnt_t (region->start_sample () / (double)region->stretch ());
