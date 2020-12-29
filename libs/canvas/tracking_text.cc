@@ -61,13 +61,15 @@ TrackingText::pointer_motion (Duple const& winpos)
 
 	if (!track_x) {
 		pos.x = position ().x;
+	} else {
+		pos.x += offset.x;
 	}
 
 	if (!track_y) {
 		pos.y = position ().y;
+	} else {
+		pos.y += offset.y;
 	}
-
-	pos = pos.translate (offset);
 
 	/* keep inside the window */
 
