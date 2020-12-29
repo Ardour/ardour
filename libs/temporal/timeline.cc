@@ -421,18 +421,6 @@ timepos_t::operator>= (timecnt_t const & t) const
 	return beats() >= t.beats ();
 }
 
-void
-timepos_t::set_superclock (superclock_t s)
-{
-	v = build (false, s);
-}
-
-void
-timepos_t::set_beat (Beats const & b)
-{
-	v = build (true, b.to_ticks());
-}
-
 superclock_t
 timepos_t::_superclocks () const
 {
@@ -750,13 +738,15 @@ timepos_t::string_to (std::string const & str)
 	using std::endl;
 
 	superclock_t s;
+	samplepos_t sm;
+	int64_t ticks;
 	Beats beats;
 
 	if (isdigit (str[0])) {
 		/* old school position format: we assume samples */
 		std::stringstream ss (str);
-		ss >> s;
-		set_superclock (s);
+		ss >> sm;
+		v = build (false, samples_to_superclock (s, TEMPORAL_SAMPLE_RATE));
 		cerr << "deserialized timepos from older " << str << " as " << *this << endl;
 		return true;
 	}
@@ -766,12 +756,12 @@ timepos_t::string_to (std::string const & str)
 	switch (str[0]) {
 	case 'a':
 		ss >> s;
-		set_superclock (s);
+		v = build (false, s);
 		cerr << "deserialized timepos from " << str << " as " << *this << endl;
 		return true;
 	case 'b':
-		ss >> beats;
-		set_beat (beats);
+		ss >> ticks;
+		v = build (true, ticks);
 		cerr << "deserialized timepos from " << str << " as " << *this << endl;
 		return true;
 	}

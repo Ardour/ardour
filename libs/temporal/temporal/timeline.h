@@ -205,10 +205,6 @@ class LIBTEMPORAL_API timepos_t : public int62_t  {
 	bool operator!= (samplepos_t s) { return samples() != s; }
 	bool operator!= (Temporal::Beats const & b) { return beats() != b; }
 
-	void set_superclock (superclock_t s);
-	void set_beat (Temporal::Beats const &);
-	void set_bbt (Temporal::BBT_Time const &);
-
 	bool string_to (std::string const & str);
 	std::string to_string () const;
 
