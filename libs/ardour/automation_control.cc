@@ -254,10 +254,14 @@ AutomationControl::set_automation_state (AutoState as)
 		if (as == Write) {
 			AutomationWatch::instance().add_automation_watch (boost::dynamic_pointer_cast<AutomationControl>(shared_from_this()));
 		} else if (as & (Touch | Latch)) {
-#warning NUTEMPO fixme timestamps here are always in samples ... should match list time domain
 			if (alist()->empty()) {
-				Control::set_double (val, timepos_t (_session.current_start_sample ()), true);
-				Control::set_double (val, timepos_t (_session.current_end_sample ()), true);
+				if (alist()->time_domain() == Temporal::AudioTime) {
+					Control::set_double (val, timepos_t (_session.current_start ().samples()), true);
+					Control::set_double (val, timepos_t (_session.current_end ().samples()), true);
+				} else {
+					Control::set_double (val, timepos_t (_session.current_start ().beats()), true);
+					Control::set_double (val, timepos_t (_session.current_end ().beats()), true);
+				}
 				Changed (true, Controllable::NoGroup);
 			}
 			if (!touching()) {
