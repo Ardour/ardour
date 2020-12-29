@@ -5709,9 +5709,7 @@ Editor::apply_midi_note_edit_op_to_region (MidiOperator& op, MidiRegionView& mrv
 	vector<Evoral::Sequence<Temporal::Beats>::Notes> v;
 	v.push_back (selected);
 
-	timepos_t pos = mrv.midi_region()->position().earlier (mrv.midi_region()->start ());
-
-#warning NUTEMPO triple check pos computation above to make sure we are doing this right
+	timepos_t pos = mrv.midi_region()->source_position();
 
 	return op (mrv.midi_region()->model(), pos.beats(), v);
 }
