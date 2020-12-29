@@ -154,14 +154,17 @@ bool
 timecnt_t::string_to (std::string const & str)
 {
 	superclock_t s;
+	samplecnt_t sm;
+	int64_t ticks;
 	Beats beats;
 	char sep;
 
 	if (isdigit (str[0])) {
 		/* old school position format: we assume samples */
 		std::stringstream ss (str);
-		ss >> s;
-		_distance = s;
+		ss >> sm;
+		_distance = int62_t (false, samples_to_superclock (sm, TEMPORAL_SAMPLE_RATE));
+		_position = timepos_t (AudioTime);
 		std::cerr << "deserialized timecnt from older " << str << " as " << *this << std::endl;
 		return true;
 	}
@@ -174,8 +177,8 @@ timecnt_t::string_to (std::string const & str)
 		_distance = int62_t (false, s);
 		break;
 	case 'b':
-		ss >> beats;
-		_distance = int62_t (true, beats.to_ticks());
+		ss >> ticks;
+		_distance = int62_t (true, ticks);
 		break;
 	}
 
