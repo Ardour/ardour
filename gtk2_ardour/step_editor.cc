@@ -416,10 +416,15 @@ StepEditor::step_edit_bar_sync ()
 		return;
 	}
 
-	timepos_t fpos = step_edit_region_view->region()->region_beats_to_absolute_time (step_edit_beat_pos);
-#warning NUTEMPO FIXME need way to get bbt from timepos_t
-	//fpos = fpos.bbt().round_up_to_bar ();
-	step_edit_beat_pos = step_edit_region->position().distance (fpos).beats().round_up_to_beat();
+	timepos_t pos = step_edit_region_view->region()->region_beats_to_absolute_time (step_edit_beat_pos);
+
+	/* have to go to BBT to round up to bar, unfortunately */
+	TempoMap::SharedPtr tmap (TempoMap::use());
+	BBT_Time bbt (tmap->bbt_at (pos).round_up_to_bar ());
+
+	/* now back to beats */
+	pos = timepos_t (tmap->quarters_at (bbt));
+	step_edit_beat_pos = step_edit_region->position().distance (pos).beats().round_up_to_beat();
 	step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
 }
 
