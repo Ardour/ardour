@@ -1823,12 +1823,20 @@ PluginPinWidget::sc_input_press (GdkEventButton *ev, boost::weak_ptr<ARDOUR::Por
 		}
 #endif
 
-		RouteList copy = _session->get_routelist ();
-		copy.sort (Stripable::Sorter(true));
 		uint32_t added = 0;
-		for (ARDOUR::RouteList::const_iterator i = copy.begin (); i != copy.end (); ++i) {
-			added += maybe_add_route_to_input_menu (*i, p->type (), wp);
+
+		if (p) {
+			RouteList copy = _session->get_routelist ();
+			copy.sort (Stripable::Sorter (true));
+			for (ARDOUR::RouteList::const_iterator i = copy.begin (); i != copy.end (); ++i) {
+				added += maybe_add_route_to_input_menu (*i, p->type (), wp);
+			}
 		}
+#if 0
+		else {
+			queue_idle_update ():
+		}
+#endif
 
 		if (added > 0) {
 			citems.push_back (SeparatorElem ());
