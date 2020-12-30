@@ -2006,18 +2006,6 @@ VST3PI::enable_io (std::vector<bool> const& ins, std::vector<bool> const& outs)
 #endif
 }
 
-static int32
-used_bus_count (int auxes, int inputs)
-{
-	if (auxes > 0 && inputs > 0) {
-		return 2;
-	}
-	if (auxes == 0 && inputs == 0) {
-		return 0;
-	}
-	return 1;
-}
-
 void
 VST3PI::process (float** ins, float** outs, uint32_t n_samples)
 {
@@ -2050,8 +2038,8 @@ VST3PI::process (float** ins, float** outs, uint32_t n_samples)
 	data.numSamples         = n_samples;
 	data.processMode        = AudioEngine::instance ()->freewheeling () ? Vst::kOffline : Vst::kRealtime;
 	data.symbolicSampleSize = Vst::kSample32;
-	data.numInputs          = used_bus_count (_n_aux_inputs, _n_inputs);
-	data.numOutputs         = used_bus_count (_n_aux_outputs, _n_outputs);
+	data.numInputs          = n_bus_in;
+	data.numOutputs         = n_bus_out;
 	data.inputs             = inputs;
 	data.outputs            = outputs;
 
