@@ -2021,8 +2021,30 @@ used_bus_count (int auxes, int inputs)
 void
 VST3PI::process (float** ins, float** outs, uint32_t n_samples)
 {
-	Vst::AudioBusBuffers input[2]; // in-bus & aux-bus
-	Vst::AudioBusBuffers output[2];
+	/* TODO cache and pre-alloc std::vector */
+	int32 n_bus_in  = _component->getBusCount (Vst::kAudio, Vst::kInput);
+	int32 n_bus_out = _component->getBusCount (Vst::kAudio, Vst::kOutput);
+
+	Vst::AudioBusBuffers* inputs = NULL;
+	Vst::AudioBusBuffers* outputs = NULL;
+
+	if (n_bus_in > 0) {
+		/* TODO use default c'tor */
+		inputs = (Vst::AudioBusBuffers*)alloca (n_bus_in * sizeof (Vst::AudioBusBuffers));
+		for (int i = 0; i < n_bus_in; ++i) {
+			inputs[i].silenceFlags     = 0;
+			inputs[i].numChannels      = 0;
+			inputs[i].channelBuffers32 = 0;
+		}
+	}
+	if (n_bus_out > 0) {
+		outputs = (Vst::AudioBusBuffers*)alloca (n_bus_out * sizeof (Vst::AudioBusBuffers));
+		for (int i = 0; i < n_bus_out; ++i) {
+			outputs[i].silenceFlags     = 0;
+			outputs[i].numChannels      = 0;
+			outputs[i].channelBuffers32 = 0;
+		}
+	}
 
 	Vst::ProcessData data;
 	data.numSamples         = n_samples;
@@ -2030,8 +2052,8 @@ VST3PI::process (float** ins, float** outs, uint32_t n_samples)
 	data.symbolicSampleSize = Vst::kSample32;
 	data.numInputs          = used_bus_count (_n_aux_inputs, _n_inputs);
 	data.numOutputs         = used_bus_count (_n_aux_outputs, _n_outputs);
-	data.inputs             = input;
-	data.outputs            = output;
+	data.inputs             = inputs;
+	data.outputs            = outputs;
 
 	data.processContext = &_context;
 	data.inputEvents    = &_input_events;
@@ -2040,24 +2062,28 @@ VST3PI::process (float** ins, float** outs, uint32_t n_samples)
 	data.inputParameterChanges  = &_input_param_changes;
 	data.outputParameterChanges = &_output_param_changes;
 
-	input[0].silenceFlags     = 0;
-	input[0].numChannels      = _n_inputs;
-	input[0].channelBuffers32 = ins;
-
-	if (_n_aux_inputs > 0) {
-		input[1].silenceFlags     = 0;
-		input[1].numChannels      = _n_aux_inputs;
-		input[1].channelBuffers32 = &ins[_n_inputs];
+	if (n_bus_in > 0) {
+		inputs[0].silenceFlags     = 0;
+		inputs[0].numChannels      = _n_inputs;
+		inputs[0].channelBuffers32 = ins;
 	}
 
-	output[0].silenceFlags     = 0;
-	output[0].numChannels      = _n_outputs;
-	output[0].channelBuffers32 = outs;
+	if (n_bus_in > 1 && _n_aux_inputs > 0) {
+		inputs[1].silenceFlags     = 0;
+		inputs[1].numChannels      = _n_aux_inputs;
+		inputs[1].channelBuffers32 = &ins[_n_inputs];
+	}
 
-	if (_n_aux_outputs > 0) {
-		output[1].silenceFlags     = 0;
-		output[1].numChannels      = _n_outputs;
-		output[1].channelBuffers32 = &outs[_n_outputs];
+	if (n_bus_out > 0) {
+		outputs[0].silenceFlags     = 0;
+		outputs[0].numChannels      = _n_outputs;
+		outputs[0].channelBuffers32 = outs;
+	}
+
+	if (n_bus_out > 1 && _n_aux_outputs > 0) {
+		outputs[1].silenceFlags     = 0;
+		outputs[1].numChannels      = _n_outputs;
+		outputs[1].channelBuffers32 = &outs[_n_outputs];
 	}
 
 	/* and go */
