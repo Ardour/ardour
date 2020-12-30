@@ -481,6 +481,22 @@ TempoPoint::superclocks_per_note_type_at (timepos_t const &pos) const
 Temporal::Beats
 TempoPoint::quarters_at_superclock (superclock_t sc) const
 {
+	/* catch a special case. The maximum superclock_t value cannot be
+	   converted into a 32bit beat + 32 bit tick value for common tempos.
+	   Obviously, values less than this can also cause overflow, but are
+	   unlikely to be encountered.
+
+	   A longer term/big picture solution for this is likely required in
+	   order to deal with longer sessions. Still, even at 300bpm, a 32 bit
+	   integer should cover 165 days. The problem is that a 62 bit (int62_t)
+	   superclock counter can cover 105064 days, so the theoretical
+	   potential for errors here is real.
+	*/
+
+	if (sc >= int62_t::max) {
+		return std::numeric_limits<Beats>::max();
+	}
+
 	if (!actually_ramped()) {
 		/* convert sc into superbeats, given that sc represents some number of seconds */
 		const superclock_t whole_seconds = sc / superclock_ticks_per_second;
