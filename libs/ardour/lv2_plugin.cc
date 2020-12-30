@@ -216,6 +216,7 @@ public:
 	LilvNode* auto_automation_control; // atom:supports
 	LilvNode* auto_automation_controlled; // lv2:portProperty
 	LilvNode* auto_automation_controller; // lv2:portProperty
+	LilvNode* inline_display_interface; // lv2:extensionData
 	LilvNode* inline_display_in_gui; // lv2:optionalFeature
 	LilvNode* inline_mixer_control; // lv2:PortProperty
 #endif
@@ -462,6 +463,7 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 	_has_state_interface    = false;
 	_can_write_automation   = false;
 #ifdef LV2_EXTENDED
+	_display_interface      = 0;
 	_inline_display_in_gui  = false;
 #endif
 	_max_latency            = 0;
@@ -655,9 +657,6 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 	lilv_node_free(options_iface_uri);
 
 #ifdef LV2_EXTENDED
-	_display_interface = (const LV2_Inline_Display_Interface*)
-		extension_data (LV2_INLINEDISPLAY__interface);
-
 	_midname_interface = (const LV2_Midnam_Interface*)
 		extension_data (LV2_MIDNAM__interface);
 	if (_midname_interface) {
@@ -691,6 +690,14 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 	if (lilv_nodes_contains (optional_features, _world.auto_can_write_automatation)) {
 		_can_write_automation = true;
 	}
+	if (lilv_plugin_has_extension_data(plugin, _world.inline_display_interface)) {
+		_display_interface = (const LV2_Inline_Display_Interface*) extension_data (LV2_INLINEDISPLAY__interface);
+	}
+#ifndef NDEBUG
+	else if (extension_data (LV2_INLINEDISPLAY__interface)) {
+		warning << string_compose(_("LV2: Plugin '%1' has inline-display extension without lv2:extensionData meta-data "), name ()) << endmsg;
+	}
+#endif
 	if (lilv_nodes_contains (optional_features, _world.inline_display_in_gui)) {
 		_inline_display_in_gui = true;
 	}
@@ -3380,6 +3387,7 @@ LV2World::LV2World()
 	auto_automation_control     = lilv_new_uri(world, LV2_AUTOMATE_URI__control);
 	auto_automation_controlled  = lilv_new_uri(world, LV2_AUTOMATE_URI__controlled);
 	auto_automation_controller  = lilv_new_uri(world, LV2_AUTOMATE_URI__controller);
+	inline_display_interface    = lilv_new_uri(world, LV2_INLINEDISPLAY__interface);
 	inline_display_in_gui       = lilv_new_uri(world, LV2_INLINEDISPLAY__in_gui);
 	inline_mixer_control        = lilv_new_uri(world, "http://ardour.org/lv2/ext#inlineMixerControl");
 #endif
@@ -3405,6 +3413,7 @@ LV2World::~LV2World()
 	lilv_node_free(auto_automation_control);
 	lilv_node_free(auto_automation_controlled);
 	lilv_node_free(auto_automation_controller);
+	lilv_node_free(inline_display_interface);
 	lilv_node_free(inline_display_in_gui);
 	lilv_node_free(inline_mixer_control);
 #endif
