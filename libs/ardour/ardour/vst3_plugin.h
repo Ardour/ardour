@@ -285,6 +285,12 @@ private:
 
 	boost::optional<uint32_t> _plugin_latency;
 
+	int _n_bus_in;
+	int _n_bus_out;
+
+	std::vector<Vst::AudioBusBuffers> _busbuf_in;
+	std::vector<Vst::AudioBusBuffers> _busbuf_out;
+
 	int _n_inputs;
 	int _n_outputs;
 	int _n_aux_inputs;

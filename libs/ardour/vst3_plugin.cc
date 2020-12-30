@@ -1073,6 +1073,13 @@ VST3PI::VST3PI (boost::shared_ptr<ARDOUR::VST3PluginModule> m, std::string uniqu
 	/* prepare process context */
 	memset (&_context, 0, sizeof (Vst::ProcessContext));
 
+	/* bus-count for process-context */
+	_n_bus_in  = _component->getBusCount (Vst::kAudio, Vst::kInput);
+	_n_bus_out = _component->getBusCount (Vst::kAudio, Vst::kOutput);
+
+	_busbuf_in.reserve (_n_bus_in);
+	_busbuf_out.reserve (_n_bus_out);
+
 	/* do not re-order, _io_name is build in sequence */
 	_n_inputs       = count_channels (Vst::kAudio, Vst::kInput,  Vst::kMain);
 	_n_aux_inputs   = count_channels (Vst::kAudio, Vst::kInput,  Vst::kAux);
@@ -1882,6 +1889,9 @@ VST3PI::set_event_bus_state (bool enable)
 {
 	int32 n_bus_in  = _component->getBusCount (Vst::kEvent, Vst::kInput);
 	int32 n_bus_out = _component->getBusCount (Vst::kEvent, Vst::kOutput);
+
+	DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::set_event_bus_state: n_bus_in = %1 n_bus_in = %2 enable = %3\n", n_bus_in, n_bus_out, enable));
+
 	for (int32 i = 0; i < n_bus_in; ++i) {
 		_component->activateBus (Vst::kEvent, Vst::kInput, i, enable);
 	}
@@ -1904,11 +1914,11 @@ VST3PI::enable_io (std::vector<bool> const& ins, std::vector<bool> const& outs)
 
 	assert (_enabled_audio_in.size () == n_audio_inputs ());
 	assert (_enabled_audio_out.size () == n_audio_outputs ());
+	/* check that settings have not changed */
+	assert (_n_bus_in == _component->getBusCount (Vst::kAudio, Vst::kInput));
+	assert (_n_bus_out == _component->getBusCount (Vst::kAudio, Vst::kOutput));
 
-	int32 n_bus_in  = _component->getBusCount (Vst::kAudio, Vst::kInput);
-	int32 n_bus_out = _component->getBusCount (Vst::kAudio, Vst::kOutput);
-
-	DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::enable_io: n_bus_in = %1 n_bus_in = %2\n", n_bus_in, n_bus_out));
+	DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::enable_io: n_bus_in = %1 n_bus_in = %2\n", _n_bus_in, _n_bus_out));
 
 	std::vector<Vst::SpeakerArrangement> sa_in;
 	std::vector<Vst::SpeakerArrangement> sa_out;
@@ -1943,7 +1953,7 @@ VST3PI::enable_io (std::vector<bool> const& ins, std::vector<bool> const& outs)
 	}
 
 	/* disable remaining input busses and set their speaker-count to zero */
-	while (sa_in.size () < n_bus_in) {
+	while (sa_in.size () < _n_bus_in) {
 		DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::enable_io: activateBus (kAudio, kInput, %1, false)\n", sa_in.size ()));
 		_component->activateBus (Vst::kAudio, Vst::kInput, sa_in.size (), false);
 		sa_in.push_back (0);
@@ -1978,7 +1988,7 @@ VST3PI::enable_io (std::vector<bool> const& ins, std::vector<bool> const& outs)
 		sa_out.push_back (sa);
 	}
 
-	while (sa_out.size () < n_bus_out) {
+	while (sa_out.size () < _n_bus_out) {
 		DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::enable_io: activateBus (kAudio, kOutput, %1, false)\n", sa_out.size ()));
 		_component->activateBus (Vst::kAudio, Vst::kOutput, sa_out.size (), false);
 		sa_out.push_back (0);
@@ -1989,14 +1999,14 @@ VST3PI::enable_io (std::vector<bool> const& ins, std::vector<bool> const& outs)
 	                                sa_out.size () > 0 ? &sa_out[0] : NULL, sa_out.size ());
 
 #if 0
-	for (int32 i = 0; i < n_bus_in; ++i) {
+	for (int32 i = 0; i < _n_bus_in; ++i) {
 		Vst::SpeakerArrangement arr;
 		if (_processor->getBusArrangement (Vst::kInput, i, arr) == kResultOk) {
 			int cc = Vst::SpeakerArr::getChannelCount (arr);
 			std::cerr << "VST3: Input BusArrangements: " << i << " chan: " << cc << " bits: " << arr << "\n";
 		}
 	}
-	for (int32 i = 0; i < n_bus_out; ++i) {
+	for (int32 i = 0; i < _n_bus_out; ++i) {
 		Vst::SpeakerArrangement arr;
 		if (_processor->getBusArrangement (Vst::kOutput, i, arr) == kResultOk) {
 			int cc = Vst::SpeakerArr::getChannelCount (arr);
@@ -2006,40 +2016,30 @@ VST3PI::enable_io (std::vector<bool> const& ins, std::vector<bool> const& outs)
 #endif
 }
 
+static int32
+used_bus_count (int auxes, int inputs)
+{
+	if (auxes > 0 && inputs > 0) {
+		return 2;
+	}
+	if (auxes == 0 && inputs == 0) {
+		return 0;
+	}
+	return 1;
+}
+
 void
 VST3PI::process (float** ins, float** outs, uint32_t n_samples)
 {
-	/* TODO cache and pre-alloc std::vector */
-	int32 n_bus_in  = _component->getBusCount (Vst::kAudio, Vst::kInput);
-	int32 n_bus_out = _component->getBusCount (Vst::kAudio, Vst::kOutput);
-
-	Vst::AudioBusBuffers* inputs = NULL;
-	Vst::AudioBusBuffers* outputs = NULL;
-
-	if (n_bus_in > 0) {
-		/* TODO use default c'tor */
-		inputs = (Vst::AudioBusBuffers*)alloca (n_bus_in * sizeof (Vst::AudioBusBuffers));
-		for (int i = 0; i < n_bus_in; ++i) {
-			inputs[i].silenceFlags     = 0;
-			inputs[i].numChannels      = 0;
-			inputs[i].channelBuffers32 = 0;
-		}
-	}
-	if (n_bus_out > 0) {
-		outputs = (Vst::AudioBusBuffers*)alloca (n_bus_out * sizeof (Vst::AudioBusBuffers));
-		for (int i = 0; i < n_bus_out; ++i) {
-			outputs[i].silenceFlags     = 0;
-			outputs[i].numChannels      = 0;
-			outputs[i].channelBuffers32 = 0;
-		}
-	}
+	Vst::AudioBusBuffers* inputs  = _n_bus_in > 0 ? &_busbuf_in[0] : NULL;
+	Vst::AudioBusBuffers* outputs = _n_bus_out > 0 ? &_busbuf_out[0] : NULL;
 
 	Vst::ProcessData data;
 	data.numSamples         = n_samples;
 	data.processMode        = AudioEngine::instance ()->freewheeling () ? Vst::kOffline : Vst::kRealtime;
 	data.symbolicSampleSize = Vst::kSample32;
-	data.numInputs          = n_bus_in;
-	data.numOutputs         = n_bus_out;
+	data.numInputs          = used_bus_count (_n_aux_inputs, _n_inputs); // _n_bus_in;
+	data.numOutputs         = used_bus_count (_n_aux_outputs, _n_outputs); // _n_bus_out;
 	data.inputs             = inputs;
 	data.outputs            = outputs;
 
@@ -2050,28 +2050,47 @@ VST3PI::process (float** ins, float** outs, uint32_t n_samples)
 	data.inputParameterChanges  = &_input_param_changes;
 	data.outputParameterChanges = &_output_param_changes;
 
-	if (n_bus_in > 0) {
+	int used_ins = 0;
+	int used_outs = 0;
+
+	if (_n_bus_in > 0) {
 		inputs[0].silenceFlags     = 0;
 		inputs[0].numChannels      = _n_inputs;
 		inputs[0].channelBuffers32 = ins;
+		++used_ins;
 	}
 
-	if (n_bus_in > 1 && _n_aux_inputs > 0) {
+	if (_n_bus_in > 1 && _n_aux_inputs > 0) {
 		inputs[1].silenceFlags     = 0;
 		inputs[1].numChannels      = _n_aux_inputs;
 		inputs[1].channelBuffers32 = &ins[_n_inputs];
+		++used_ins;
 	}
 
-	if (n_bus_out > 0) {
+	if (_n_bus_out > 0) {
 		outputs[0].silenceFlags     = 0;
 		outputs[0].numChannels      = _n_outputs;
 		outputs[0].channelBuffers32 = outs;
+		++used_outs;
 	}
 
-	if (n_bus_out > 1 && _n_aux_outputs > 0) {
+	if (_n_bus_out > 1 && _n_aux_outputs > 0) {
 		outputs[1].silenceFlags     = 0;
 		outputs[1].numChannels      = _n_outputs;
 		outputs[1].channelBuffers32 = &outs[_n_outputs];
+		++used_outs;
+	}
+
+	for (int i = used_ins; i < _n_bus_in; ++i) {
+		inputs[i].silenceFlags     = 0;
+		inputs[i].numChannels      = 0;
+		inputs[i].channelBuffers32 = 0;
+	}
+
+	for (int i = used_outs; i < _n_bus_out; ++i) {
+		outputs[i].silenceFlags     = 0;
+		outputs[i].numChannels      = 0;
+		outputs[i].channelBuffers32 = 0;
 	}
 
 	/* and go */
