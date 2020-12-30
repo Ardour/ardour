@@ -20,10 +20,9 @@
 	doap:maintainer <http://ardour.org/credits.html> ;
 	doap:license <http://usefulinc.com/doap/licenses/gpl> ;
 
-	lv2:microVersion 2 ;
+	lv2:microVersion 4 ;
 	lv2:minorVersion 2 ;
 	lv2:optionalFeature lv2:hardRTCapable ;
-	lv2:optionalFeature <http://harrisonconsoles.com/lv2/inlinedisplay#queue_draw> ;
 
 	lv2:port
 	[

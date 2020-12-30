@@ -1,5 +1,6 @@
 @prefix doap: <http://usefulinc.com/ns/doap#> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix idpy: <http://harrisonconsoles.com/lv2/inlinedisplay#> .
 @prefix lv2:  <http://lv2plug.in/ns/lv2core#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix rsz:  <http://lv2plug.in/ns/ext/resize-port#> .
@@ -17,12 +18,15 @@ unit:db-display
 	unit:render "%4.1f" ;
 	unit:symbol "dB" .
 
+idpy:queue_draw a lv2:Feature .
+idpy:in_gui a lv2:Feature .
+idpy:interface a lv2:ExtensionData .
+
 <urn:ardour:a-comp>
     a lv2:Plugin, doap:Project, lv2:CompressorPlugin ;
 
-    lv2:optionalFeature <http://lv2plug.in/ns/lv2core#hardRTCapable> ;
-    lv2:optionalFeature <http://harrisonconsoles.com/lv2/inlinedisplay#queue_draw> ;
-    lv2:optionalFeature <http://harrisonconsoles.com/lv2/inlinedisplay#in_gui> ;
+		lv2:extensionData idpy:interface ;
+		lv2:optionalFeature lv2:hardRTCapable, idpy:queue_draw, idpy:in_gui;
 
     lv2:port [
         a lv2:InputPort, lv2:ControlPort ;
@@ -169,5 +173,5 @@ A powerful mono compressor.
 		doap:license <http://usefulinc.com/doap/licenses/gpl> ;
     doap:maintainer <http://ardour.org/credits.html> ;
 
-    lv2:microVersion 0 ;
+    lv2:microVersion 2 ;
     lv2:minorVersion 2 .
