@@ -60,12 +60,12 @@
         a lv2:OutputPort, lv2:AudioPort ;
         lv2:index 2 ;
         lv2:symbol "outL" ;
-        lv2:name "Out Left" ;
+        lv2:name "Left Output" ;
     ] , [
         a lv2:OutputPort, lv2:AudioPort ;
         lv2:index 3 ;
         lv2:symbol "outR" ;
-        lv2:name "Output Right" ;
+        lv2:name "Right Output" ;
     ] , [
         a lv2:InputPort, lv2:ControlPort ;
         lv2:index 4 ;
