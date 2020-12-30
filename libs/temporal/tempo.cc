@@ -512,7 +512,7 @@ TempoPoint::quarters_at_superclock (superclock_t sc) const
 
 		Tempo::superbeats_to_beats_ticks (superbeats, b, t);
 
-		DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("%7 => \nsc %1 = %2 secs rem = %3 rem sbeats = %4 => %5 : %6\n", sc, whole_seconds, remainder, superbeats, b , t, *this));
+		DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("%8 => \nsc %1 = %2 secs rem = %3 rem snotes %4 sbeats = %5 => %6 : %7\n", sc, whole_seconds, remainder, supernotes, superbeats, b , t, *this));
 
 		return Beats (b, t);
 	}
