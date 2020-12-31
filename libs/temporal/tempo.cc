@@ -17,6 +17,7 @@
 */
 
 #include <algorithm>
+#include <vector>
 
 #include "pbd/error.h"
 #include "pbd/i18n.h"
@@ -635,11 +636,49 @@ TempoMap::TempoMap (XMLNode const & node, int version)
 TempoMap::TempoMap (TempoMap const & other)
 	: _time_domain (other.time_domain())
 {
-#warning NUTEMPO since these lists are intrusive we must actually rebuild them
-	// _meters = other._meters;
-	// _bartimes = other._bartimes;
-	// _points = other._points;
-	// _tempos = other._tempos;
+	copy_points (other);
+}
+
+TempoMap&
+TempoMap::operator= (TempoMap const & other)
+{
+	_time_domain = other.time_domain();
+	copy_points (other);
+}
+
+void
+TempoMap::copy_points (TempoMap const & other)
+{
+	std::vector<Point*> p;
+
+	p.reserve (other._meters.size() + other._tempos.size() + other._bartimes.size());
+
+	for (Meters::const_iterator m = other._meters.begin(); m != other._meters.end(); ++m) {
+		MeterPoint* mp = new MeterPoint (*m);
+		_meters.push_back (*mp);
+		p.push_back (mp);
+	}
+
+	for (Tempos::const_iterator t = other._tempos.begin(); t != other._tempos.end(); ++t) {
+		TempoPoint* tp = new TempoPoint (*t);
+		_tempos.push_back (*tp);
+		p.push_back (tp);
+	}
+
+	for (MusicTimes::const_iterator mt = other._bartimes.begin(); mt != other._bartimes.end(); ++mt) {
+		MusicTimePoint* mtp = new MusicTimePoint (*mt);
+		_bartimes.push_back (*mtp);
+		p.push_back (mtp);
+	}
+
+	sort (p.begin(), p.end(), Point::ptr_sclock_comparator());
+
+	for (std::vector<Point*>::iterator pi = p.begin(); pi != p.end(); ++pi) {
+		_points.push_back (**pi);
+	}
+
+	std::cout << "POST COPY\n";
+	dump (std::cout);
 }
 
 void

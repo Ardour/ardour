@@ -93,6 +93,12 @@ class LIBTEMPORAL_API Point {
 		}
 	};
 
+  	struct ptr_sclock_comparator {
+		bool operator() (Point const * a, Point const * b) const {
+			return a->sclock() < b->sclock();
+		}
+	};
+
 	struct beat_comparator {
 		bool operator() (Point const & a, Point const & b) const {
 			return a.beats() < b.beats();
@@ -649,6 +655,8 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 	TempoMap (XMLNode const &, int version);
 	~TempoMap();
 
+	TempoMap& operator= (TempoMap const &);
+
 	void sample_rate_changed (samplecnt_t new_sr);
 
 	/* methods which modify the map. These must all be called using
@@ -833,6 +841,8 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 
 	void reset_starting_at (superclock_t);
 	void reset_starting_at (Beats const &);
+
+	void copy_points (TempoMap const & other);
 };
 
 } /* end of namespace Temporal */
