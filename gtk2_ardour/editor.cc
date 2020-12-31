@@ -579,6 +579,8 @@ Editor::Editor ()
 
 	_summary = new EditorSummary (this);
 
+	TempoMap::MapChanged.connect (_session_connections, invalidator (*this), boost::bind (&Editor::tempo_map_changed, this), gui_context());
+
 	selection->TimeChanged.connect (sigc::mem_fun(*this, &Editor::time_selection_changed));
 	selection->TracksChanged.connect (sigc::mem_fun(*this, &Editor::track_selection_changed));
 
@@ -1373,8 +1375,6 @@ Editor::set_session (Session *t)
 	_session->vca_manager().VCAAdded.connect (_session_connections, invalidator (*this), boost::bind (&Editor::add_vcas, this, _1), gui_context());
 	_session->RouteAdded.connect (_session_connections, invalidator (*this), boost::bind (&Editor::add_routes, this, _1), gui_context());
 	_session->DirtyChanged.connect (_session_connections, invalidator (*this), boost::bind (&Editor::update_title, this), gui_context());
-#warning NUTEMPO how to catch tempo map changes
-	// _session->tempo_map().Changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::tempo_map_changed, this), gui_context());
 	_session->Located.connect (_session_connections, invalidator (*this), boost::bind (&Editor::located, this), gui_context());
 	_session->config.ParameterChanged.connect (_session_connections, invalidator (*this), boost::bind (&Editor::parameter_changed, this, _1), gui_context());
 	_session->StateSaved.connect (_session_connections, invalidator (*this), boost::bind (&Editor::session_state_saved, this, _1), gui_context());
