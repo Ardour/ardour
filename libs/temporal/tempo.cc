@@ -41,6 +41,7 @@ std::string Meter::xml_node_name = X_("Meter");
 
 SerializedRCUManager<TempoMap> TempoMap::_map_mgr (0);
 thread_local TempoMap::SharedPtr TempoMap::_tempo_map_p;
+PBD::Signal0<void> TempoMap::MapChanged;
 
 void
 Point::add_state (XMLNode & node) const
@@ -807,7 +808,7 @@ TempoMap::set_tempo (Tempo const & t, timepos_t const & time)
 
 	}
 
-	Changed ();
+	MapChanged ();
 
 	return *ret;
 }
@@ -879,7 +880,7 @@ TempoMap::remove_tempo (TempoPoint const & tp)
 	_tempos.erase (t);
 	reset_starting_at (sc);
 
-	Changed ();
+	MapChanged ();
 }
 
 MusicTimePoint &
@@ -895,7 +896,7 @@ TempoMap::set_bartime (BBT_Time const & bbt, timepos_t const & pos)
 
 	ret = add_or_replace_bartime (tp);
 
-	Changed ();
+	MapChanged ();
 
 	return *ret;
 }
@@ -952,7 +953,7 @@ TempoMap::remove_bartime (MusicTimePoint const & tp)
 	_bartimes.erase (m);
 	reset_starting_at (sc);
 
-	Changed ();
+	MapChanged ();
 }
 
 void
@@ -1221,7 +1222,7 @@ TempoMap::move_meter (MeterPoint const & mp, timepos_t const & when, bool push)
 	/* recompute 3 domain positions for everything after this */
 	reset_starting_at (std::min (sc, old_sc));
 
-	Changed ();
+	MapChanged ();
 
 	return true;
 }
@@ -1333,7 +1334,7 @@ TempoMap::move_tempo (TempoPoint const & tp, timepos_t const & when, bool push)
 	/* recompute 3 domain positions for everything after this */
 	reset_starting_at (std::min (sc, old_sc));
 
-	Changed ();
+	MapChanged ();
 
 	return true;
 }
@@ -1385,7 +1386,7 @@ TempoMap::set_meter (Meter const & m, timepos_t const & time)
 		ret = add_meter (mp);
 	}
 
-	Changed ();
+	MapChanged ();
 
 	return *ret;
 }
@@ -1408,7 +1409,7 @@ TempoMap::remove_meter (MeterPoint const & mp)
 	_meters.erase (m);
 	reset_starting_at (sc);
 
-	Changed ();
+	MapChanged ();
 
 }
 
@@ -2213,7 +2214,7 @@ TempoMap::set_state (XMLNode const & node, int /*version*/)
 		}
 	}
 
-	Changed ();
+	MapChanged ();
 
 	return 0;
 }
@@ -2564,7 +2565,7 @@ TempoMap::insert_time (timepos_t const & pos, timecnt_t const & duration)
 		break;
 	}
 
-	Changed ();
+	MapChanged ();
 }
 
 bool
@@ -2573,7 +2574,7 @@ TempoMap::remove_time (timepos_t const & pos, timecnt_t const & duration)
 	bool moved = false;
 
 	if (moved) {
-		Changed ();
+		MapChanged ();
 	}
 
 	return moved;
