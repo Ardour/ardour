@@ -3393,6 +3393,10 @@ MeterMarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
 	Drag::start_grab (event, cursor);
 	show_verbose_cursor_time (adjusted_current_time (event));
+
+	/* setup thread-local tempo map ptr as a writable copy */
+
+	TempoMap::fetch_writable ();
 }
 
 void
@@ -3487,6 +3491,8 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		if (was_double_click()) {
 			_editor->edit_meter_marker (*_marker);
 		}
+		/* reset thread local tempo map to the original state */
+		TempoMap::fetch ();
 		return;
 	}
 
@@ -3495,10 +3501,13 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 	_editor->set_snap_mode (_old_snap_mode);
 
 	TempoMap::SharedPtr map (TempoMap::use());
+	TempoMap::update (map);
 
-	XMLNode &after = map->get_state();
+	XMLNode &after = TempoMap::use()->get_state();
 	_editor->session()->add_command (new MementoCommand<Temporal::TempoMap> (new Temporal::TempoMap::MementoBinder(), before_state, &after));
 	_editor->commit_reversible_command ();
+
+	TempoMap::update (map);
 
 	// delete the dummy marker we used for visual representation while moving.
 	// a new visual marker will show up automatically.
@@ -3508,6 +3517,9 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 void
 MeterMarkerDrag::aborted (bool moved)
 {
+	/* reset thread local tempo map to the original state */
+	TempoMap::fetch ();
+
 	_marker->set_position (_marker->meter().time());
 
 	if (moved) {
@@ -3515,11 +3527,11 @@ MeterMarkerDrag::aborted (bool moved)
 		_editor->set_grid_to (_old_grid_type);
 		_editor->set_snap_mode (_old_snap_mode);
 
-		TempoMap::use()->set_state (*before_state, Stateful::current_state_version);
 		// delete the dummy marker we used for visual representation while moving.
 		// a new visual marker will show up automatically.
 		delete _marker;
 	}
+
 }
 
 TempoMarkerDrag::TempoMarkerDrag (Editor* e, ArdourCanvas::Item* i, bool c)
@@ -3562,7 +3574,6 @@ TempoMarkerDrag::setup_pointer_offset ()
 void
 TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 {
-
 	if (!_marker->tempo().active()) {
 		return;
 	}
@@ -3676,6 +3687,7 @@ TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 	if (!_marker->tempo().active()) {
 		return;
 	}
+
 	if (!movement_occurred) {
 		if (was_double_click()) {
 			_editor->edit_tempo_marker (*_marker);
@@ -3692,14 +3704,9 @@ TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 	/* push the current state of our writable map copy */
 
 	TempoMap::SharedPtr map (TempoMap::use());
-
 	TempoMap::update (map);
 
-	/* fetch it back into thre thread-local and locally-scoped ptrs */
-
-	map = TempoMap::fetch();
-
-	XMLNode &after = map->get_state();
+	XMLNode &after = TempoMap::use()->get_state();
 
 	_editor->session()->add_command (new MementoCommand<Temporal::TempoMap> (new Temporal::TempoMap::MementoBinder(), _before_state, &after));
 	_editor->commit_reversible_command ();
@@ -3712,14 +3719,14 @@ TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 void
 TempoMarkerDrag::aborted (bool moved)
 {
-	// _point->end_float ();
-	_marker->set_position (timepos_t (_marker->tempo().beats()));
-
 	/* reset the per-thread tempo map ptr back to the current
 	 * official version
 	 */
 
 	TempoMap::fetch ();
+
+	// _point->end_float ();
+	_marker->set_position (timepos_t (_marker->tempo().beats()));
 
 	if (moved) {
 		// delete the dummy (hidden) marker we used for events while moving.
