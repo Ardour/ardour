@@ -1500,7 +1500,7 @@ Editor::toggle_tempo_type ()
 		Temporal::TempoPoint & tempo = tm->tempo();
 
 		begin_reversible_command (_("set tempo to constant"));
-		TempoMap::SharedPtr tmap (TempoMap::use());
+		TempoMap::SharedPtr tmap (TempoMap::write_copy());
 		XMLNode &before = tmap->get_state();
 
 		tmap->set_ramped (tempo, !tempo.ramped());
@@ -1508,6 +1508,8 @@ Editor::toggle_tempo_type ()
 		XMLNode &after = tmap->get_state();
 		_session->add_command (new MementoCommand<Temporal::TempoMap> (new Temporal::TempoMap::MementoBinder(), &before, &after));
 		commit_reversible_command ();
+
+		TempoMap::update (tmap);
 	}
 }
 /* clamped locks the previous section end tempo to the start tempo */
@@ -1521,7 +1523,7 @@ Editor::toggle_tempo_clamped ()
 	if (tm) {
 		begin_reversible_command (_("Clamp Tempo"));
 
-		TempoMap::SharedPtr tmap (TempoMap::use());
+		TempoMap::SharedPtr tmap (TempoMap::write_copy());
 		XMLNode &before = tmap->get_state();
 
 		Temporal::Tempo & tempo (tm->tempo());
@@ -1530,6 +1532,8 @@ Editor::toggle_tempo_clamped ()
 			XMLNode &after = tmap->get_state();
 			_session->add_command (new MementoCommand<Temporal::TempoMap> (new Temporal::TempoMap::MementoBinder(), &before, &after));
 			commit_reversible_command ();
+
+			TempoMap::update (tmap);
 		} else {
 			abort_reversible_command ();
 		}
@@ -1547,7 +1551,7 @@ Editor::ramp_to_next_tempo ()
 	if (tm) {
 
 		begin_reversible_command (_("ramp to next tempo"));
-		TempoMap::SharedPtr tmap (TempoMap::use());
+		TempoMap::SharedPtr tmap (TempoMap::write_copy());
 		XMLNode &before = tmap->get_state();
 
 		Temporal::TempoPoint & tempo (tm->tempo());
@@ -1555,6 +1559,8 @@ Editor::ramp_to_next_tempo ()
 			XMLNode &after = tmap->get_state();
 			_session->add_command (new MementoCommand<Temporal::TempoMap> (new Temporal::TempoMap::MementoBinder(), &before, &after));
 			commit_reversible_command ();
+
+			TempoMap::update (tmap);
 		} else {
 			abort_reversible_command ();
 		}
