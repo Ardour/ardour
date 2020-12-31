@@ -645,7 +645,7 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 
 	static SharedPtr write_copy() { return _map_mgr.write_copy(); }
 	static void fetch_writable() { _tempo_map_p = write_copy(); }
-	static void update (SharedPtr m) { _map_mgr.update (m); _tempo_map_p = _map_mgr.reader(); }
+	static void update (SharedPtr m);
 
 	/* and now on with the rest of the show ... */
 

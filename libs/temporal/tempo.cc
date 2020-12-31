@@ -2966,3 +2966,20 @@ TempoMap::init ()
 	_map_mgr.init (new_map);
 	fetch ();
 }
+
+void
+TempoMap::update (TempoMap::SharedPtr m)
+{
+	cerr << "SWITCHING TEMPO MAP FROM:\n";
+	TempoMap::SharedPtr old (_map_mgr.reader());
+	old->dump (cerr);
+	cerr << " TO\n";
+	m->dump (cerr);
+
+	_map_mgr.update (m);
+
+	/* update thread local map pointer in the calling thread */
+	_tempo_map_p = _map_mgr.reader();
+
+	MapChanged (); /* EMIT SIGNAL */
+}
