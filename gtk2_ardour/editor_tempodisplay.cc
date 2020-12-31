@@ -415,21 +415,22 @@ Editor::mouse_add_new_tempo_event (timepos_t pos)
 		return;
 	}
 
-	TempoMap::SharedPtr map (TempoMap::use());
+	if (pos.beats() > Beats()) {
 
-	begin_reversible_command (_("add tempo mark"));
+		begin_reversible_command (_("add tempo mark"));
 
-	const Beats qn = map->quarters_at (pos);
+		TempoMap::SharedPtr map (TempoMap::write_copy());
 
-	if (qn > Beats()) {
 		XMLNode &before = map->get_state();
+
 		/* add music-locked ramped (?) tempo using the bpm/note type at sample*/
 
-		map->set_tempo (map->tempo_at (pos), timepos_t (qn));
-
+		map->set_tempo (map->tempo_at (pos), pos);
 		XMLNode &after = map->get_state();
 		_session->add_command (new MementoCommand<Temporal::TempoMap> (new Temporal::TempoMap::MementoBinder(), &before, &after));
 		commit_reversible_command ();
+
+		TempoMap::update (map);
 	}
 
 	//map.dump (cerr);
