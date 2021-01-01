@@ -105,11 +105,12 @@ Tempo::Tempo (XMLNode const & node)
 	if (!node.get_property (X_("active"), _active)) {
 		throw failed_constructor ();
 	}
-#warning NUTEMPO set these
-	// _locked_to_meter = ;
-	// _clamped = ;_
-
-	cerr << "Loaded Tempo from XML: " << *this << endl;
+	if (!node.get_property (X_("locked-to-meter"), _locked_to_meter)) {
+		_locked_to_meter = true;
+	}
+	if (!node.get_property (X_("clamped"), _clamped)) {
+		_clamped = false;
+	}
 }
 
 bool
@@ -136,10 +137,8 @@ Tempo::get_state () const
 	node->set_property (X_("note-type"), note_type());
 	node->set_property (X_("type"), type());
 	node->set_property (X_("active"), active());
-
-	#warning NUTEMPO get these
-	// _locked_to_meter = ;
-	// _clamped = ;_
+	node->set_property (X_("locked-to-meter"), _locked_to_meter);
+	node->set_property (X_("clamped"), _clamped);
 
 	return *node;
 }
@@ -163,11 +162,13 @@ Tempo::set_state (XMLNode const & node, int /*version*/)
 	node.get_property (X_("type"), _type);
 	node.get_property (X_("active"), _active);
 
-#warning NUTEMPO set these
-	// _locked_to_meter = ;
-	// _clamped = ;_
+	if (!node.get_property (X_("locked-to-meter"), _locked_to_meter)) {
+		_locked_to_meter = true;
+	}
 
-	cerr << "Loaded Tempo from XML: " << *this << endl;
+	if (!node.get_property (X_("clamped"), _clamped)) {
+		_clamped = false;
+	}
 
 	return 0;
 }
@@ -677,9 +678,6 @@ TempoMap::copy_points (TempoMap const & other)
 	for (std::vector<Point*>::iterator pi = p.begin(); pi != p.end(); ++pi) {
 		_points.push_back (**pi);
 	}
-
-	std::cout << "POST COPY\n";
-	dump (std::cout);
 }
 
 void
@@ -808,8 +806,6 @@ TempoMap::set_tempo (Tempo const & t, timepos_t const & time)
 
 	}
 
-	MapChanged ();
-
 	return *ret;
 }
 
@@ -879,8 +875,6 @@ TempoMap::remove_tempo (TempoPoint const & tp)
 	}
 	_tempos.erase (t);
 	reset_starting_at (sc);
-
-	MapChanged ();
 }
 
 MusicTimePoint &
@@ -895,8 +889,6 @@ TempoMap::set_bartime (BBT_Time const & bbt, timepos_t const & pos)
 	MusicTimePoint tp (bbt, Point (*this, sc, metric.quarters_at_superclock (sc), bbt));
 
 	ret = add_or_replace_bartime (tp);
-
-	MapChanged ();
 
 	return *ret;
 }
@@ -952,8 +944,6 @@ TempoMap::remove_bartime (MusicTimePoint const & tp)
 	}
 	_bartimes.erase (m);
 	reset_starting_at (sc);
-
-	MapChanged ();
 }
 
 void
@@ -1222,8 +1212,6 @@ TempoMap::move_meter (MeterPoint const & mp, timepos_t const & when, bool push)
 	/* recompute 3 domain positions for everything after this */
 	reset_starting_at (std::min (sc, old_sc));
 
-	MapChanged ();
-
 	return true;
 }
 
@@ -1334,8 +1322,6 @@ TempoMap::move_tempo (TempoPoint const & tp, timepos_t const & when, bool push)
 	/* recompute 3 domain positions for everything after this */
 	reset_starting_at (std::min (sc, old_sc));
 
-	MapChanged ();
-
 	return true;
 }
 
@@ -1386,8 +1372,6 @@ TempoMap::set_meter (Meter const & m, timepos_t const & time)
 		ret = add_meter (mp);
 	}
 
-	MapChanged ();
-
 	return *ret;
 }
 
@@ -1408,9 +1392,6 @@ TempoMap::remove_meter (MeterPoint const & mp)
 	}
 	_meters.erase (m);
 	reset_starting_at (sc);
-
-	MapChanged ();
-
 }
 
 Temporal::BBT_Time
@@ -2214,8 +2195,6 @@ TempoMap::set_state (XMLNode const & node, int /*version*/)
 		}
 	}
 
-	MapChanged ();
-
 	return 0;
 }
 
@@ -2564,20 +2543,13 @@ TempoMap::insert_time (timepos_t const & pos, timecnt_t const & duration)
 	case BeatTime:
 		break;
 	}
-
-	MapChanged ();
 }
 
 bool
 TempoMap::remove_time (timepos_t const & pos, timecnt_t const & duration)
 {
-	bool moved = false;
-
-	if (moved) {
-		MapChanged ();
-	}
-
-	return moved;
+#warning NUTEMPO implement TempoMap::remove_time
+	return false;
 }
 
 TempoPoint const *
@@ -2970,16 +2942,13 @@ TempoMap::init ()
 void
 TempoMap::update (TempoMap::SharedPtr m)
 {
-	cerr << "SWITCHING TEMPO MAP FROM:\n";
-	TempoMap::SharedPtr old (_map_mgr.reader());
-	old->dump (cerr);
-	cerr << " TO\n";
-	m->dump (cerr);
-
 	_map_mgr.update (m);
 
 	/* update thread local map pointer in the calling thread */
 	_tempo_map_p = _map_mgr.reader();
+
+	cerr << "New tempo map:\n";
+	_tempo_map_p->dump (cerr);
 
 	MapChanged (); /* EMIT SIGNAL */
 }
