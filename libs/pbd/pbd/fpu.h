@@ -32,8 +32,8 @@ class LIBPBD_API FPU {
 		HasSSE = 0x4,
 		HasSSE2 = 0x8,
 		HasAVX = 0x10,
-		HasFMA = 0x20,
-		HasNEON = 0x40,
+		HasNEON = 0x20,
+		HasFMA = 0x40,
 	};
 
   public:
