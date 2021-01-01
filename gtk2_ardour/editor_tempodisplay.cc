@@ -83,14 +83,20 @@ Editor::remove_metric_marks ()
 	}
 	tempo_curves.clear ();
 }
+
 struct CurveComparator {
 	bool operator() (TempoCurve const * a, TempoCurve const * b) {
 		return a->tempo().sclock() < b->tempo().sclock();
 	}
 };
+
 void
 Editor::draw_metric_marks (TempoMap::Metrics const & metrics)
 {
+	if (!_session) {
+		return;
+	}
+
 	char buf[64];
 	TempoPoint* prev_ts = 0;
 	double max_tempo = 0.0;
@@ -111,7 +117,6 @@ Editor::draw_metric_marks (TempoMap::Metrics const & metrics)
 				metric_marks.push_back (new MeterMarker (*this, *meter_group, UIConfiguration::instance().color ("meter marker"), buf, *ms));
 			}
 		} else if ((ts = dynamic_cast<Temporal::TempoPoint*>(*i)) != 0) {
-
 			max_tempo = max (max_tempo, ts->note_types_per_minute());
 			max_tempo = max (max_tempo, ts->end_note_types_per_minute());
 			min_tempo = min (min_tempo, ts->note_types_per_minute());
@@ -176,110 +181,15 @@ Editor::draw_metric_marks (TempoMap::Metrics const & metrics)
 }
 
 void
-Editor::tempo_map_property_changed (const PropertyChange& /*ignored*/)
-{
-	tempo_map_changed ();
-}
-
-void
 Editor::tempo_map_changed ()
 {
+	PropertyChange pc;
+
 	if (!_session) {
 		return;
 	}
-
-	ENSURE_GUI_THREAD (*this, &Editor::tempo_map_changed, ignored);
-
-	compute_bbt_ruler_scale (_leftmost_sample, _leftmost_sample + current_page_samples());
 
 	TempoMap::use()->apply_with_metrics (*this, &Editor::draw_metric_marks); // redraw metric markers
-	update_tempo_based_rulers ();
-
-	maybe_draw_grid_lines ();
-}
-
-void
-Editor::tempometric_position_changed (const PropertyChange& /*ignored*/)
-{
-	if (!_session) {
-		return;
-	}
-
-	ENSURE_GUI_THREAD (*this, &Editor::tempo_map_changed);
-
-	Temporal::TempoPoint* prev_ts = 0;
-	double max_tempo = 0.0;
-	double min_tempo = DBL_MAX;
-	const samplecnt_t sr (_session->sample_rate());
-
-	for (Marks::iterator x = metric_marks.begin(); x != metric_marks.end(); ++x) {
-		TempoMarker* tempo_marker;
-		MeterMarker* meter_marker;
-		Temporal::TempoPoint *ts;
-		Temporal::MeterPoint *ms;
-
-		if ((tempo_marker = dynamic_cast<TempoMarker*> (*x)) != 0) {
-			if ((ts = &tempo_marker->tempo()) != 0) {
-
-				tempo_marker->set_position (timepos_t (ts->sample (sr)));
-
-				if (prev_ts && abs (prev_ts->end_note_types_per_minute() - ts->note_types_per_minute()) < 1.0) {
-					tempo_marker->set_points_color (UIConfiguration::instance().color ("tempo marker music"));
-				} else {
-					tempo_marker->set_points_color (UIConfiguration::instance().color ("tempo marker"));
-				}
-
-				max_tempo = max (max_tempo, ts->note_types_per_minute());
-				max_tempo = max (max_tempo, ts->end_note_types_per_minute());
-				min_tempo = min (min_tempo, ts->note_types_per_minute());
-				min_tempo = min (min_tempo, ts->end_note_types_per_minute());
-
-				prev_ts = ts;
-			}
-		}
-		if ((meter_marker = dynamic_cast<MeterMarker*> (*x)) != 0) {
-			if ((ms = &meter_marker->meter()) != 0) {
-				meter_marker->set_position (timepos_t (ms->sample (sr)));
-			}
-		}
-	}
-
-	tempo_curves.sort (CurveComparator());
-
-	const double min_tempo_range = 5.0;
-	const double tempo_delta = fabs (max_tempo - min_tempo);
-
-	if (tempo_delta < min_tempo_range) {
-		max_tempo += min_tempo_range - tempo_delta;
-		min_tempo += tempo_delta - min_tempo_range;
-	}
-
-	for (Curves::iterator x = tempo_curves.begin(); x != tempo_curves.end(); ) {
-		Curves::iterator tmp = x;
-		(*x)->set_max_tempo (max_tempo);
-		(*x)->set_min_tempo (min_tempo);
-		++tmp;
-		if (tmp != tempo_curves.end()) {
-			(*x)->set_position ((*x)->tempo().sample(sr), (*tmp)->tempo().sample(sr));
-		} else {
-			(*x)->set_position ((*x)->tempo().sample(sr), UINT32_MAX);
-		}
-
-		if (!(*x)->tempo().active()) {
-			(*x)->hide();
-		} else {
-			(*x)->show();
-		}
-
-		++x;
-	}
-
-	for (Marks::iterator x = metric_marks.begin(); x != metric_marks.end(); ++x) {
-		TempoMarker* tempo_marker;
-		if ((tempo_marker = dynamic_cast<TempoMarker*> (*x)) != 0) {
-			tempo_marker->update_height_mark ((tempo_marker->tempo().note_types_per_minute() - min_tempo) / max (max_tempo - min_tempo, 10.0));
-		}
-	}
 
 	compute_bbt_ruler_scale (_leftmost_sample, _leftmost_sample + current_page_samples());
 

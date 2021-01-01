@@ -1807,9 +1807,7 @@ private:
 
 	void compute_current_bbt_points (Temporal::TempoMapPoints& grid, samplepos_t left, samplepos_t right);
 
-	void tempo_map_property_changed (const PBD::PropertyChange&);
 	void tempo_map_changed ();
-	void tempometric_position_changed (const PBD::PropertyChange&);
 
 	void redisplay_grid (bool immediate_redraw);
 
@@ -2179,6 +2177,7 @@ private:
 	int playlist_deletion_dialog (boost::shared_ptr<ARDOUR::Playlist>);
 
 	PBD::ScopedConnectionList session_connections;
+	PBD::ScopedConnection tempo_map_connection;
 
 	/* tracking step changes of track height */
 

@@ -579,7 +579,7 @@ Editor::Editor ()
 
 	_summary = new EditorSummary (this);
 
-	TempoMap::MapChanged.connect (_session_connections, invalidator (*this), boost::bind (&Editor::tempo_map_changed, this), gui_context());
+	TempoMap::MapChanged.connect (tempo_map_connection, invalidator (*this), boost::bind (&Editor::tempo_map_changed, this), gui_context());
 
 	selection->TimeChanged.connect (sigc::mem_fun(*this, &Editor::time_selection_changed));
 	selection->TracksChanged.connect (sigc::mem_fun(*this, &Editor::track_selection_changed));
