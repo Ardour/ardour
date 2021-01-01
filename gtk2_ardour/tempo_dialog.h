@@ -48,7 +48,7 @@ public:
 
 	double get_bpm ();
 	double get_end_bpm ();
-	double get_note_type ();
+	int    get_note_type ();
 	bool   get_bbt_time (Temporal::BBT_Time&);
 	Temporal::Tempo::Type get_tempo_type ();
 	Temporal::TimeDomain get_lock_style ();
@@ -69,7 +69,7 @@ private:
 
 	void tap_tempo ();
 
-	typedef std::map<std::string,float> NoteTypes;
+	typedef std::map<std::string,int> NoteTypes;
 	NoteTypes note_types;
 
 	typedef std::map<std::string, Temporal::Tempo::Type> TempoTypes;
@@ -110,7 +110,7 @@ public:
 	MeterDialog (Temporal::MeterPoint&, const std::string & action);
 
 	double get_bpb ();
-	double get_note_type ();
+	int    get_note_type ();
 	Temporal::TimeDomain get_lock_style ();
 	bool   get_bbt_time (Temporal::BBT_Time&);
 

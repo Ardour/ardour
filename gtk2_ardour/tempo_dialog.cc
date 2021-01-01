@@ -102,23 +102,23 @@ TempoDialog::init (const Temporal::BBT_Time& when, double bpm, double end_bpm, d
 
 	Gtkmm2ext::set_size_request_to_display_given_text (pulse_selector, _("one-hundred-twenty-eighth"), 3, 6);
 
-	note_types.insert (make_pair (_("whole"), 1.0));
+	note_types.insert (make_pair (_("whole"), 1));
 	strings.push_back (_("whole"));
-	note_types.insert (make_pair (_("second"), 2.0));
+	note_types.insert (make_pair (_("second"), 2));
 	strings.push_back (_("second"));
-	note_types.insert (make_pair (_("third"), 3.0));
+	note_types.insert (make_pair (_("third"), 3));
 	strings.push_back (_("third"));
-	note_types.insert (make_pair (_("quarter"), 4.0));
+	note_types.insert (make_pair (_("quarter"), 4));
 	strings.push_back (_("quarter"));
-	note_types.insert (make_pair (_("eighth"), 8.0));
+	note_types.insert (make_pair (_("eighth"), 8));
 	strings.push_back (_("eighth"));
-	note_types.insert (make_pair (_("sixteenth"), 16.0));
+	note_types.insert (make_pair (_("sixteenth"), 16));
 	strings.push_back (_("sixteenth"));
-	note_types.insert (make_pair (_("thirty-second"), 32.0));
+	note_types.insert (make_pair (_("thirty-second"), 32));
 	strings.push_back (_("thirty-second"));
-	note_types.insert (make_pair (_("sixty-fourth"), 64.0));
+	note_types.insert (make_pair (_("sixty-fourth"), 64));
 	strings.push_back (_("sixty-fourth"));
-	note_types.insert (make_pair (_("one-hundred-twenty-eighth"), 128.0));
+	note_types.insert (make_pair (_("one-hundred-twenty-eighth"), 128));
 	strings.push_back (_("one-hundred-twenty-eighth"));
 
 	set_popdown_strings (pulse_selector, strings);
@@ -357,7 +357,7 @@ TempoDialog::get_bbt_time (Temporal::BBT_Time& requested)
 	return true;
 }
 
-double
+int
 TempoDialog::get_note_type ()
 {
 	NoteTypes::iterator x = note_types.find (pulse_selector.get_active_text());
@@ -513,23 +513,23 @@ MeterDialog::init (const Temporal::BBT_Time& when, double bpb, double divisor, b
 	bpb_entry.select_region (0, -1);
 	bpb_entry.set_alignment (1.0);
 
-	note_types.insert (make_pair (_("whole"), 1.0));
+	note_types.insert (make_pair (_("whole"), 1));
 	strings.push_back (_("whole"));
-	note_types.insert (make_pair (_("second"), 2.0));
+	note_types.insert (make_pair (_("second"), 2));
 	strings.push_back (_("second"));
-	note_types.insert (make_pair (_("third"), 3.0));
+	note_types.insert (make_pair (_("third"), 3));
 	strings.push_back (_("third"));
-	note_types.insert (make_pair (_("quarter"), 4.0));
+	note_types.insert (make_pair (_("quarter"), 4));
 	strings.push_back (_("quarter"));
-	note_types.insert (make_pair (_("eighth"), 8.0));
+	note_types.insert (make_pair (_("eighth"), 8));
 	strings.push_back (_("eighth"));
-	note_types.insert (make_pair (_("sixteenth"), 16.0));
+	note_types.insert (make_pair (_("sixteenth"), 16));
 	strings.push_back (_("sixteenth"));
-	note_types.insert (make_pair (_("thirty-second"), 32.0));
+	note_types.insert (make_pair (_("thirty-second"), 32));
 	strings.push_back (_("thirty-second"));
-	note_types.insert (make_pair (_("sixty-fourth"), 64.0));
+	note_types.insert (make_pair (_("sixty-fourth"), 64));
 	strings.push_back (_("sixty-fourth"));
-	note_types.insert (make_pair (_("one-hundred-twenty-eighth"), 128.0));
+	note_types.insert (make_pair (_("one-hundred-twenty-eighth"), 128));
 	strings.push_back (_("one-hundred-twenty-eighth"));
 
 	set_popdown_strings (note_type, strings);
@@ -697,7 +697,7 @@ MeterDialog::get_bpb ()
 	return bpb;
 }
 
-double
+int
 MeterDialog::get_note_type ()
 {
 	NoteTypes::iterator x = note_types.find (note_type.get_active_text());
