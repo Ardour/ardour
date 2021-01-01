@@ -551,9 +551,10 @@ Editor::edit_tempo_section (TempoPoint& section)
 
 	double bpm = tempo_dialog.get_bpm ();
 	double end_bpm = tempo_dialog.get_end_bpm ();
-	double nt = tempo_dialog.get_note_type ();
+	int nt = tempo_dialog.get_note_type ();
 	bpm = max (0.01, bpm);
-	const Tempo tempo (bpm, nt, end_bpm);
+
+	const Tempo tempo (bpm, end_bpm, nt);
 
 	TempoMap::SharedPtr tmap (TempoMap::write_copy());
 
