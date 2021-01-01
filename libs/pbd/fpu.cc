@@ -211,7 +211,12 @@ FPU::FPU ()
 		    (cpu_info[2] & (1<<28) /* AVX */) &&
 		    ((_xgetbv (_XCR_XFEATURE_ENABLED_MASK) & 0x6) == 0x6)) { /* OS really supports XSAVE */
 			info << _("AVX-capable processor") << endmsg;
-			_flags = Flags (_flags | (HasAVX) );
+			_flags = Flags (_flags | (HasAVX));
+		}
+
+		if (cpu_info[2] & (1<<12) /* FMA */) {
+			info << _("AVX with FMA capable processor") << endmsg;
+			_flags = Flags (_flags | (HasFMA));
 		}
 
 		if (cpu_info[3] & (1<<25)) {

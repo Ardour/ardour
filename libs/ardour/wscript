@@ -475,10 +475,10 @@ def build(bld):
     if Options.options.fpu_optimization:
         if (bld.env['build_target'] == 'i386' or bld.env['build_target'] == 'i686'):
             obj.source += [ 'sse_functions_xmm.cc', 'sse_functions.s', ]
-            avx_sources = [ 'sse_functions_avx_linux.cc' ]
+            avx_sources = [ 'sse_functions_avx_linux.cc', 'x86_functions_fma.cc' ]
         elif bld.env['build_target'] == 'x86_64':
             obj.source += [ 'sse_functions_xmm.cc', 'sse_functions_64bit.s', ]
-            avx_sources = [ 'sse_functions_avx_linux.cc' ]
+            avx_sources = [ 'sse_functions_avx_linux.cc', 'x86_functions_fma.cc' ]
         elif bld.env['build_target'] == 'mingw':
                 # usability of the 64 bit windows assembler depends on the compiler target,
                 # not the build host, which in turn can only be inferred from the name
@@ -486,7 +486,7 @@ def build(bld):
                 if re.search ('x86_64-w64', str(bld.env['CC'])):
                         obj.source += [ 'sse_functions_xmm.cc' ]
                         obj.source += [ 'sse_functions_64bit_win.s',  'sse_avx_functions_64bit_win.s' ]
-                        avx_sources = [ 'sse_functions_avx.cc' ]
+                        avx_sources = [ 'sse_functions_avx.cc', 'x86_functions_fma.cc' ]
         elif bld.env['build_target'] == 'aarch64':
             obj.source += ['arm_neon_functions.cc']
             obj.defines += [ 'ARM_NEON_SUPPORT' ]
@@ -512,6 +512,7 @@ def build(bld):
             # compile it with -mavx flag - append avx flag to the existing
             avx_cxxflags = list(bld.env['CXXFLAGS'])
             avx_cxxflags.append (bld.env['compiler_flags_dict']['avx'])
+            avx_cxxflags.append (bld.env['compiler_flags_dict']['fma'])
             avx_cxxflags.append (bld.env['compiler_flags_dict']['pic'])
             bld(features = 'cxx cxxstlib asm',
                 source   = avx_sources,
