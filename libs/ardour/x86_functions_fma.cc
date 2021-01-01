@@ -24,11 +24,7 @@
 #define IS_ALIGNED_TO(ptr, bytes) (((uintptr_t)ptr) % (bytes) == 0)
 
 /**
- * @brief x86-64 AVX optimized routine for mixing buffer with gain.
- *
- * This function may choose SSE over AVX if the pointers are aligned
- * to 16 byte boundary instead of 32 byte boundary to reduce time to
- * process.
+ * @brief x86-64 AVX/FMA optimized routine for mixing buffer with gain.
  *
  * @param[in,out] dst Pointer to destination buffer, which gets updated
  * @param[in] src Pointer to source buffer (not updated)
