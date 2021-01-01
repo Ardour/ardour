@@ -45,6 +45,9 @@ extern "C" {
 #endif
 }
 
+/* FMA functions */
+LIBARDOUR_API void  x86_fma_mix_buffers_with_gain (float * dst, const float * src, uint32_t nframes, float gain);
+
 LIBARDOUR_API void  x86_sse_find_peaks     (const float * buf, uint32_t nsamples, float *min, float *max);
 #ifdef PLATFORM_WINDOWS
 LIBARDOUR_API void  x86_sse_avx_find_peaks (const float * buf, uint32_t nsamples, float *min, float *max);

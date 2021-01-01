@@ -88,6 +88,8 @@ compiler_flags_dictionaries= {
         'attasm': '-masm=att',
         # Flags to make AVX instructions/intrinsics available
         'avx': '-mavx',
+        # Flags to make FMA instructions/intrinsics available
+        'fma': '-mfma',
         # Flags to make ARM/NEON instructions/intrinsics available
         'neon': '-mfpu=neon',
         # Flags to generate position independent code, when needed to build a shared object

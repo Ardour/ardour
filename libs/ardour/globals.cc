@@ -188,7 +188,20 @@ setup_hardware_optimization (bool try_optimization)
 #if defined(ARCH_X86) && defined(BUILD_SSE_OPTIMIZATIONS)
 
 		/* We have AVX-optimized code for Windows and Linux */
-		if (fpu->has_avx ()) {
+		if (fpu->has_fma ()) {
+			info << "Using AVX and FMA optimized routines" << endmsg;
+
+			// FMA SET (Shares a lot with AVX)
+			compute_peak          = x86_sse_avx_compute_peak;
+			find_peaks            = x86_sse_avx_find_peaks;
+			apply_gain_to_buffer  = x86_sse_avx_apply_gain_to_buffer;
+			mix_buffers_with_gain = x86_fma_mix_buffers_with_gain;
+			mix_buffers_no_gain   = x86_sse_avx_mix_buffers_no_gain;
+			copy_vector           = x86_sse_avx_copy_vector;
+
+			generic_mix_functions = false;
+
+		} else if (fpu->has_avx ()) {
 			info << "Using AVX optimized routines" << endmsg;
 
 			// AVX SET
