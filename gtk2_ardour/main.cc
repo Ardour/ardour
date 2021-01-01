@@ -331,7 +331,7 @@ int main (int argc, char *argv[])
 	}
 
 	if (no_splash) {
-		cout << _("Copyright (C) 1999-2020 Paul Davis") << endl
+		cout << _("Copyright (C) 1999-2021 Paul Davis") << endl
 		     << _("Some portions Copyright (C) Steve Harris, Ari Johnson, Brett Viren, Joel Baker, Robin Gareus") << endl
 		     << endl
 		     << string_compose (_("%1 comes with ABSOLUTELY NO WARRANTY"), PROGRAM_NAME) << endl
