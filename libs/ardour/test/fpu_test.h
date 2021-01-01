@@ -9,6 +9,7 @@ class FPUTest : public CppUnit::TestFixture
 #if defined(ARCH_X86) && defined(BUILD_SSE_OPTIMIZATIONS)
 	CPPUNIT_TEST (sseTest);
 	CPPUNIT_TEST (avxTest);
+	CPPUNIT_TEST (avxFmaTest);
 #elif defined ARM_NEON_SUPPORT
 	CPPUNIT_TEST (neonTest);
 #elif defined(__APPLE__) && defined(BUILD_VECLIB_OPTIMIZATIONS)
@@ -23,6 +24,7 @@ public:
 	void tearDown ();
 
 #if defined(ARCH_X86) && defined(BUILD_SSE_OPTIMIZATIONS)
+	void avxFmaTest ();
 	void avxTest ();
 	void sseTest ();
 #elif defined ARM_NEON_SUPPORT
