@@ -3492,7 +3492,7 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 			_editor->edit_meter_marker (*_marker);
 		}
 		/* reset thread local tempo map to the original state */
-		TempoMap::fetch ();
+		TempoMap::abort_update ();
 		return;
 	}
 
@@ -3501,7 +3501,6 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 	_editor->set_snap_mode (_old_snap_mode);
 
 	TempoMap::SharedPtr map (TempoMap::use());
-	TempoMap::update (map);
 
 	XMLNode &after = TempoMap::use()->get_state();
 	_editor->session()->add_command (new MementoCommand<Temporal::TempoMap> (new Temporal::TempoMap::MementoBinder(), before_state, &after));
@@ -3518,7 +3517,7 @@ void
 MeterMarkerDrag::aborted (bool moved)
 {
 	/* reset thread local tempo map to the original state */
-	TempoMap::fetch ();
+	TempoMap::abort_update ();
 
 	_marker->set_position (_marker->meter().time());
 
@@ -3697,7 +3696,7 @@ TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		 * official version
 		 */
 
-		TempoMap::fetch ();
+		TempoMap::abort_update ();
 		return;
 	}
 
@@ -3723,7 +3722,7 @@ TempoMarkerDrag::aborted (bool moved)
 	 * official version
 	 */
 
-	TempoMap::fetch ();
+	TempoMap::abort_update ();
 
 	// _point->end_float ();
 	_marker->set_position (timepos_t (_marker->tempo().beats()));
