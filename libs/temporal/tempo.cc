@@ -713,18 +713,20 @@ TempoMap::set_time_domain (TimeDomain td)
 }
 
 MeterPoint*
-TempoMap::add_meter (MeterPoint & mp)
+TempoMap::add_meter (MeterPoint* mp)
 {
 	/* CALLER MUST HOLD LOCK */
 
 	Meters::iterator m;
+	const superclock_t sclock_limit = mp->sclock();
+	const Beats beats_limit = mp->beats ();
 
 	switch (time_domain()) {
 	case AudioTime:
-		for (m = _meters.begin(); m != _meters.end() && m->sclock() < mp.sclock(); ++m);
+		for (m = _meters.begin(); m != _meters.end() && m->sclock() < sclock_limit; ++m);
 		break;
 	case BeatTime:
-		for (m = _meters.begin(); m != _meters.end() && m->beats() < mp.beats(); ++m);
+		for (m = _meters.begin(); m != _meters.end() && m->beats() < beats_limit; ++m);
 		break;
 	}
 
@@ -732,19 +734,20 @@ TempoMap::add_meter (MeterPoint & mp)
 	MeterPoint* ret = 0;
 
 	if (m != _meters.end()) {
-		if (m->sclock() == mp.sclock()) {
+		if (m->sclock() == sclock_limit) {
 			/* overwrite Meter part of this point */
-			*((Meter*)&(*m)) = mp;
+			*((Meter*)&(*m)) = *mp;
+			delete mp;
 			ret = &(*m);
 			replaced = true;
 		}
 	}
 
 	if (!replaced) {
-		ret = &(*(_meters.insert (m, mp)));
+		ret = &(*(_meters.insert (m, *mp)));
 	}
 
-	reset_starting_at (mp.sclock());
+	reset_starting_at (sclock_limit);
 
 	return ret;
 }
@@ -782,7 +785,7 @@ TempoMap::set_tempo (Tempo const & t, timepos_t const & time)
 		bbt = metric.bbt_at (on_beat);
 		sc = metric.superclock_at (on_beat);
 
-		TempoPoint tp (*this, t, sc, on_beat, bbt);
+		TempoPoint* tp = new TempoPoint (*this, t, sc, on_beat, bbt);
 		ret = add_tempo (tp);
 
 	} else {
@@ -801,7 +804,7 @@ TempoMap::set_tempo (Tempo const & t, timepos_t const & time)
 		/* recompute superclock position of rounded beat */
 		sc = tm.superclock_at (beats);
 
-		TempoPoint tp (*this, t, sc, beats, bbt);
+		TempoPoint* tp = new TempoPoint (*this, t, sc, beats, bbt);
 		ret = add_tempo (tp);
 
 	}
@@ -810,18 +813,20 @@ TempoMap::set_tempo (Tempo const & t, timepos_t const & time)
 }
 
 TempoPoint*
-TempoMap::add_tempo (TempoPoint & tp)
+TempoMap::add_tempo (TempoPoint * tp)
 {
 	/* CALLER MUST HOLD LOCK */
 
 	Tempos::iterator t;
+	const superclock_t sclock_limit = tp->sclock();
+	const Beats beats_limit = tp->beats ();
 
 	switch (time_domain()) {
 	case AudioTime:
-		for (t = _tempos.begin(); t != _tempos.end() && t->sclock() < tp.sclock(); ++t);
+		for (t = _tempos.begin(); t != _tempos.end() && t->sclock() < sclock_limit; ++t);
 		break;
 	case BeatTime:
-		for (t = _tempos.begin(); t != _tempos.end() && t->beats() < tp.beats(); ++t);
+		for (t = _tempos.begin(); t != _tempos.end() && t->beats() < beats_limit; ++t);
 		break;
 	}
 
@@ -829,9 +834,10 @@ TempoMap::add_tempo (TempoPoint & tp)
 	TempoPoint* ret = 0;
 
 	if (t != _tempos.end()) {
-		if (t->sclock() == tp.sclock()) {
+		if (t->sclock() == sclock_limit) {
 			/* overwrite Tempo part of this point */
-			*((Tempo*)&(*t)) = tp;
+			*((Tempo*)&(*t)) = *tp;
+			delete tp;
 			ret = &(*t);
 			DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("overwrote old tempo with %1\n", tp));
 			replaced = true;
@@ -839,7 +845,7 @@ TempoMap::add_tempo (TempoPoint & tp)
 	}
 
 	if (!replaced) {
-		t = _tempos.insert (t, tp);
+		t = _tempos.insert (t, *tp);
 		ret = &*t;
 		DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("inserted tempo %1\n", tp));
 	}
@@ -858,7 +864,7 @@ TempoMap::add_tempo (TempoPoint & tp)
 		t->compute_omega (TEMPORAL_SAMPLE_RATE, nxt->superclocks_per_quarter_note (), nxt->beats() - t->beats());
 	}
 
-	reset_starting_at (tp.sclock());
+	reset_starting_at (sclock_limit);
 
 	return ret;
 }
@@ -1345,7 +1351,7 @@ TempoMap::set_meter (Meter const & m, timepos_t const & time)
 		const Beats rounded_beats = metric.quarters_at (rounded_bbt);
 		const superclock_t sc = metric.superclock_at (rounded_beats);
 
-		MeterPoint mp (*this, m, sc, rounded_beats, rounded_bbt);
+		MeterPoint* mp = new MeterPoint (*this, m, sc, rounded_beats, rounded_bbt);
 
 		ret = add_meter (mp);
 
@@ -1368,7 +1374,7 @@ TempoMap::set_meter (Meter const & m, timepos_t const & time)
 		/* recompute superclock position of bar-rounded position */
 		sc = metric.superclock_at (beats);
 
-		MeterPoint mp (*this, m, sc, beats, bbt);
+		MeterPoint* mp = new MeterPoint (*this, m, sc, beats, bbt);
 
 		ret = add_meter (mp);
 	}
