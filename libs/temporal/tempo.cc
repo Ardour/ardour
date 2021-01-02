@@ -2952,3 +2952,16 @@ TempoMap::update (TempoMap::SharedPtr m)
 
 	MapChanged (); /* EMIT SIGNAL */
 }
+
+void
+TempoMap::abort_update ()
+{
+	/* drop lock taken by write_copy() */
+	_map_mgr.abort ();
+	/* update thread local map pointer in calling thread. Note that this
+	   will reset _tempo_map_p, which is (almost guaranteed to be) the only
+	   reference to the copy of the map made in ::write_copy(), so it will
+	   be destroyed here.
+	*/
+	TempoMap::fetch ();
+}
