@@ -186,8 +186,9 @@ setup_hardware_optimization (bool try_optimization)
 		FPU* fpu = FPU::instance ();
 
 #if defined(ARCH_X86) && defined(BUILD_SSE_OPTIMIZATIONS)
-
 		/* We have AVX-optimized code for Windows and Linux */
+
+#ifdef FPU_AVX_FMA_SUPPORT
 		if (fpu->has_fma ()) {
 			info << "Using AVX and FMA optimized routines" << endmsg;
 
@@ -201,7 +202,9 @@ setup_hardware_optimization (bool try_optimization)
 
 			generic_mix_functions = false;
 
-		} else if (fpu->has_avx ()) {
+		} else
+#endif
+		if (fpu->has_avx ()) {
 			info << "Using AVX optimized routines" << endmsg;
 
 			// AVX SET

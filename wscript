@@ -493,6 +493,18 @@ int main() { return 0; }''',
     if opt.fpu_optimization:
         if conf.env['build_target'] == 'armhf' or conf.env['build_target'] == 'aarch64':
             conf.define('ARM_NEON_SUPPORT', 1)
+        elif conf.env['build_target'] == 'aarch64':
+            conf.define ('FPU_AVX_FMA_SUPPORT', 1)
+        elif conf.env['build_target'] == 'i386' or conf.env['build_target'] == 'i686' or conf.env['build_target'] == 'x86_64':
+            conf.check_cxx(fragment = "#include <immintrin.h>\nint main(void) { __m128 a; _mm_fmadd_ss(a, a, a); return 0; }\n",
+                           features  = ['cxx'],
+                           cxxflags  = [ conf.env['compiler_flags_dict']['fma'], conf.env['compiler_flags_dict']['avx'] ],
+                           mandatory = False,
+                           execute   = False,
+                           msg       = 'Checking compiler for AVX/FMA intrinsics',
+                           okmsg     = 'Found',
+                           errmsg    = 'Not supported',
+                           define_name = 'FPU_AVX_FMA_SUPPORT')
 
     if opt.use_libcpp or conf.env['build_host'] in [ 'el_capitan', 'sierra', 'high_sierra', 'mojave', 'catalina' ]:
        cxx_flags.append('--stdlib=libc++')
@@ -1445,6 +1457,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Dr. Mingw',             conf.is_defined('HAVE_DRMINGW'))
     write_config_text('FLAC',                  conf.is_defined('HAVE_FLAC'))
     write_config_text('FPU optimization',      opts.fpu_optimization)
+    write_config_text('FPU AVX/FMA support',   conf.is_defined('FPU_AVX_FMA_SUPPORT'))
     write_config_text('Freedesktop files',     opts.freedesktop)
     write_config_text('Libjack linking',       conf.env['libjack_link'])
     write_config_text('Libjack metadata',      conf.is_defined ('HAVE_JACK_METADATA'))
