@@ -1359,7 +1359,7 @@ TempoMap::set_meter (Meter const & m, timepos_t const & time)
 
 		/* meter changes must be on bar */
 
-		bbt = metric.bbt_at (beats);
+		bbt = metric.bbt_at (sc);
 		bbt = metric.round_to_bar (bbt);
 
 		/* compute beat position */
@@ -1369,6 +1369,7 @@ TempoMap::set_meter (Meter const & m, timepos_t const & time)
 		sc = metric.superclock_at (beats);
 
 		MeterPoint mp (*this, m, sc, beats, bbt);
+
 		ret = add_meter (mp);
 	}
 
