@@ -184,9 +184,13 @@ public:
 
 		return new_copy;
 
-		/* notice that the write lock is still held: update() MUST
+		/* notice that the write lock is still held: update() or abort() MUST
 		 * be called or we will cause another writer to stall.
 		 */
+	}
+
+	void abort () {
+		_lock.unlock();
 	}
 
 	bool update (boost::shared_ptr<T> new_value)
