@@ -119,8 +119,6 @@ class LIBTEMPORAL_API Point {
 
 	TempoMap const & map() const { return *_map; }
 
-	boost::intrusive::list_member_hook<> _point_hook;
-
   protected:
 	superclock_t     _sclock;
 	Beats            _quarters;
@@ -801,12 +799,10 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 	typedef boost::intrusive::member_hook<TempoPoint,boost::intrusive::list_member_hook<>, &TempoPoint::_tempo_hook> TempoHookOption;
 	typedef boost::intrusive::member_hook<MeterPoint,boost::intrusive::list_member_hook<>, &MeterPoint::_meter_hook> MeterHookOption;
 	typedef boost::intrusive::member_hook<MusicTimePoint,boost::intrusive::list_member_hook<>, &MusicTimePoint::_bartime_hook> BarTimeHookOption;
-	typedef boost::intrusive::member_hook<Point,boost::intrusive::list_member_hook<>, &Point::_point_hook> PointHookOption;
 
 	typedef boost::intrusive::list<TempoPoint,TempoHookOption> Tempos;
 	typedef boost::intrusive::list<MeterPoint,MeterHookOption> Meters;
 	typedef boost::intrusive::list<MusicTimePoint,BarTimeHookOption> MusicTimes;
-	typedef boost::intrusive::list<Point,PointHookOption> Points;
 
 	Beats quarters_at_sample (samplepos_t sc) const { return quarters_at_superclock (samples_to_superclock (sc, TEMPORAL_SAMPLE_RATE)); }
 	Beats quarters_at_superclock (superclock_t sc) const;
@@ -815,7 +811,6 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 	Tempos       _tempos;
 	Meters       _meters;
 	MusicTimes   _bartimes;
-	Points       _points;
 
 	TimeDomain _time_domain;
 
