@@ -678,7 +678,6 @@ def build(bld):
     elif bld.env['build_target'] == 'mingw':
         obj.source += [ 'bundle_env_mingw.cc' ]
         obj.source += [ 'windows_icon.rc' ]
-        obj.uselib += ' DRMINGW '
     else:
         obj.source += [ 'bundle_env_linux.cc' ]
 

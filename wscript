@@ -816,7 +816,7 @@ def options(opt):
                     help='Specify the target for cross-compiling [auto,none,x86,i386,i686,x86_64,tiger,leopard,mingw,msvc]')
     opt.add_option('--dr-mingw', action='store_true', default=True, dest='drmingw',
                     help='Write crashdumps using Dr.Mingw (Windows Only)')
-    opt.add_option('--no-dr-mingw', action='store_true', dest='drmingw')
+    opt.add_option('--no-dr-mingw', action='store_false', dest='drmingw')
     opt.add_option('--fpu-optimization', action='store_true', default=True, dest='fpu_optimization',
                     help='Build runtime checked assembler code (default)')
     opt.add_option('--no-fpu-optimization', action='store_false', dest='fpu_optimization')
