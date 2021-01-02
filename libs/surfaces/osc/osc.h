@@ -402,7 +402,6 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK_MSG(refresh_surface);
 	PATH_CALLBACK_MSG(bank_up);
 	PATH_CALLBACK_MSG(bank_down);
-	PATH_CALLBACK_MSG(master_select);
 	PATH_CALLBACK_MSG(custom_clear);
 
 #define PATH_CALLBACK(name) \
@@ -491,17 +490,6 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 
 	PATH_CALLBACK1(jump_by_bars,f,);
 	PATH_CALLBACK1(jump_by_seconds,f,);
-	PATH_CALLBACK1(master_set_gain,f,);
-	PATH_CALLBACK1(master_set_fader,f,);
-	PATH_CALLBACK1(master_delta_gain,f,);
-	PATH_CALLBACK1(master_set_trim,f,);
-	PATH_CALLBACK1(master_set_mute,i,);
-	PATH_CALLBACK1(monitor_set_gain,f,);
-	PATH_CALLBACK1(monitor_set_fader,f,);
-	PATH_CALLBACK1(monitor_delta_gain,f,);
-	PATH_CALLBACK1(monitor_set_mute,i,);
-	PATH_CALLBACK1(monitor_set_dim,i,);
-	PATH_CALLBACK1(monitor_set_mono,i,);
 	PATH_CALLBACK1(click_level,f,);
 
 #define PATH_CALLBACK1_MSG(name,arg1type) \
@@ -528,35 +516,15 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		return 0; \
 	}
 
-	// pan position needs message info to send feedback
-	PATH_CALLBACK1_MSG(master_set_pan_stereo_position,f);
-
 	PATH_CALLBACK1_MSG(scrub,f);
 	PATH_CALLBACK1_MSG(jog,f);
 	PATH_CALLBACK1_MSG(jog_mode,f);
 	PATH_CALLBACK1_MSG(bank_delta,f);
 	PATH_CALLBACK1_MSG(use_group,f);
 	PATH_CALLBACK1_MSG_s(name_session,s);
-	PATH_CALLBACK1_MSG_s(sel_rename,s);
 	PATH_CALLBACK1_MSG_s(sel_comment,s);
 	PATH_CALLBACK1_MSG_s(sel_new_personal_send,s);
-	PATH_CALLBACK1_MSG(sel_recenable,i);
-	PATH_CALLBACK1_MSG(sel_recsafe,i);
-	PATH_CALLBACK1_MSG(sel_mute,i);
 	PATH_CALLBACK1_MSG(sel_master_send_enable,i);
-	PATH_CALLBACK1_MSG(sel_solo,i);
-	PATH_CALLBACK1_MSG(sel_solo_iso,i);
-	PATH_CALLBACK1_MSG(sel_solo_safe,i);
-	PATH_CALLBACK1_MSG(sel_monitor_input,i);
-	PATH_CALLBACK1_MSG(sel_monitor_disk,i);
-	PATH_CALLBACK1_MSG(sel_phase,i);
-	PATH_CALLBACK1_MSG(sel_gain,f);
-	PATH_CALLBACK1_MSG(sel_fader,f);
-	PATH_CALLBACK1_MSG(sel_dB_delta,f);
-	PATH_CALLBACK1_MSG(sel_trim,f);
-	PATH_CALLBACK1_MSG(sel_hide,i);
-	PATH_CALLBACK1_MSG(sel_pan_position,f);
-	PATH_CALLBACK1_MSG(sel_pan_width,f);
 	PATH_CALLBACK1_MSG(sel_pan_elevation,f);
 	PATH_CALLBACK1_MSG(sel_pan_frontback,f);
 	PATH_CALLBACK1_MSG(sel_pan_lfe,f);
@@ -650,26 +618,6 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 
 	PATH_CALLBACK2(locate,i,i);
 	PATH_CALLBACK2(loop_location,i,i);
-	PATH_CALLBACK2_MSG_s(route_rename,i,s);
-	PATH_CALLBACK2_MSG_s(strip_group,i,s);
-	PATH_CALLBACK2_MSG(route_mute,i,i);
-	PATH_CALLBACK2_MSG(route_solo,i,i);
-	PATH_CALLBACK2_MSG(route_solo_iso,i,i);
-	PATH_CALLBACK2_MSG(route_solo_safe,i,i);
-	PATH_CALLBACK2_MSG(route_recenable,i,i);
-	PATH_CALLBACK2_MSG(route_recsafe,i,i);
-	PATH_CALLBACK2_MSG(route_monitor_input,i,i);
-	PATH_CALLBACK2_MSG(route_monitor_disk,i,i);
-	PATH_CALLBACK2_MSG(strip_phase,i,i);
-	PATH_CALLBACK2_MSG(strip_expand,i,i);
-	PATH_CALLBACK2_MSG(strip_hide,i,i);
-	PATH_CALLBACK2_MSG(strip_gui_select,i,i);
-	PATH_CALLBACK2_MSG(route_set_gain_dB,i,f);
-	PATH_CALLBACK2_MSG(route_set_gain_fader,i,f);
-	PATH_CALLBACK2_MSG(strip_db_delta,i,f);
-	PATH_CALLBACK2_MSG(route_set_trim_dB,i,f);
-	PATH_CALLBACK2_MSG(route_set_pan_stereo_position,i,f);
-	PATH_CALLBACK2_MSG(route_set_pan_stereo_width,i,f);
 	PATH_CALLBACK3(route_set_send_gain_dB,i,i,f);
 	PATH_CALLBACK3(route_set_send_fader,i,i,f);
 	PATH_CALLBACK3(route_set_send_enable,i,i,f);
@@ -681,29 +629,13 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK2_MSG(route_plugin_descriptor,i,i);
 	PATH_CALLBACK2_MSG(route_plugin_reset,i,i);
 
-	int route_rename (int rid, char *s, lo_message msg);
-	int strip_group (int ssid, char *g, lo_message msg);
-	int strip_select_group (boost::shared_ptr<ARDOUR::Stripable> s, char *g);
-	int route_mute (int rid, int yn, lo_message msg);
-	int route_solo (int rid, int yn, lo_message msg);
-	int route_solo_iso (int rid, int yn, lo_message msg);
-	int route_solo_safe (int rid, int yn, lo_message msg);
-	int route_recenable (int rid, int yn, lo_message msg);
-	int route_recsafe (int ssid, int yn, lo_message msg);
-	int route_monitor_input (int rid, int yn, lo_message msg);
-	int route_monitor_disk (int rid, int yn, lo_message msg);
-	int strip_phase (int rid, int yn, lo_message msg);
-	int strip_expand (int rid, int yn, lo_message msg);
-	int strip_hide (int ssid, int yn, lo_message msg);
+	int strip_parse (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg);
+	int master_parse (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg);
+	int monitor_parse (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg);
+	int _strip_parse (const char *path, const char *sub_path, const char* types, lo_arg **argv, int argc, boost::shared_ptr<ARDOUR::Stripable> s, int param_1, bool strp, lo_message msg);
+	int strip_state (const char *path, boost::shared_ptr<ARDOUR::Stripable> s, bool strp, lo_message msg);
 	int _strip_select (boost::shared_ptr<ARDOUR::Stripable> s, lo_address addr);
-	int strip_gui_select (int rid, int yn, lo_message msg);
-	int route_set_gain_dB (int rid, float dB, lo_message msg);
-	int route_set_gain_fader (int rid, float pos, lo_message msg);
-	int strip_db_delta (int ssid, float delta, lo_message msg);
-	int route_set_trim_abs (int rid, float level, lo_message msg);
-	int route_set_trim_dB (int rid, float dB, lo_message msg);
-	int route_set_pan_stereo_position (int rid, float left_right_fraction, lo_message msg);
-	int route_set_pan_stereo_width (int rid, float percent, lo_message msg);
+	int _strip_select2 (boost::shared_ptr<ARDOUR::Stripable> s, OSCSurface *sur, lo_address addr);
 	int route_set_send_gain_dB (int rid, int sid, float val, lo_message msg);
 	int route_set_send_fader (int rid, int sid, float val, lo_message msg);
 	int route_set_send_enable (int rid, int sid, float val, lo_message msg);
@@ -736,6 +668,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int _custom_mode (uint32_t state, lo_address addr);
 	int name_session (char *n, lo_message msg);
 	// select
+	int select_parse (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg);
 	int sel_send_pagesize (uint32_t size, lo_message msg);
 	int sel_send_page (int page, lo_message msg);
 	int sel_plug_pagesize (uint32_t size, lo_message msg);
@@ -751,42 +684,11 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int jog_mode (float mode, lo_message msg);
 	int set_marker (const char* types, lo_arg **argv, int argc, lo_message msg);
 	int click_level (float position);
-	int master_set_gain (float dB);
-	int master_set_fader (float position);
-	int master_delta_gain (float delta);
-	int master_set_trim (float dB);
-	int master_set_pan_stereo_position (float position, lo_message msg);
-	int master_set_mute (uint32_t state);
-	int master_select (lo_message msg);
-	int monitor_set_gain (float dB);
-	int monitor_set_fader (float position);
-	int monitor_delta_gain (float delta);
-	int monitor_set_mute (uint32_t state);
-	int monitor_set_dim (uint32_t state);
-	int monitor_set_mono (uint32_t state);
-	int sel_group (char *g, lo_message msg);
-	int sel_rename (char *n, lo_message msg);
 	int sel_comment (char *c, lo_message msg);
-	int sel_recenable (uint32_t state, lo_message msg);
-	int sel_recsafe (uint32_t state, lo_message msg);
-	int sel_mute (uint32_t state, lo_message msg);
-	int sel_solo (uint32_t state, lo_message msg);
-	int sel_solo_iso (uint32_t state, lo_message msg);
-	int sel_solo_safe (uint32_t state, lo_message msg);
-	int sel_monitor_input (uint32_t state, lo_message msg);
-	int sel_monitor_disk (uint32_t state, lo_message msg);
-	int sel_phase (uint32_t state, lo_message msg);
-	int sel_gain (float state, lo_message msg);
-	int sel_fader (float state, lo_message msg);
-	int sel_dB_delta (float delta, lo_message msg);
-	int sel_trim (float val, lo_message msg);
-	int sel_hide (uint32_t state, lo_message msg);
 	int sel_previous (lo_message msg);
 	int sel_next (lo_message msg);
 	int sel_delta (int delta, lo_message msg);
 	boost::shared_ptr<ARDOUR::Send> get_send (boost::shared_ptr<ARDOUR::Stripable> st, lo_address addr);
-	int sel_pan_position (float val, lo_message msg);
-	int sel_pan_width (float val, lo_message msg);
 	int sel_sendgain (int id, float dB, lo_message msg);
 	int sel_sendfader (int id, float pos, lo_message msg);
 	int sel_sendenable (int id, float pos, lo_message msg);

@@ -424,13 +424,8 @@ OSC::register_callbacks()
 
 		REGISTER_CALLBACK (serv, X_("/refresh"), "", refresh_surface);
 		REGISTER_CALLBACK (serv, X_("/refresh"), "f", refresh_surface);
-		REGISTER_CALLBACK (serv, X_("/strip/list"), "", routes_list);
-		REGISTER_CALLBACK (serv, X_("/strip/list"), "f", routes_list);
 		REGISTER_CALLBACK (serv, X_("/group/list"), "", group_list);
 		REGISTER_CALLBACK (serv, X_("/group/list"), "f", group_list);
-		REGISTER_CALLBACK (serv, X_("/strip/custom/mode"), "f", custom_mode);
-		REGISTER_CALLBACK (serv, X_("/strip/custom/clear"), "f", custom_clear);
-		REGISTER_CALLBACK (serv, X_("/strip/custom/clear"), "", custom_clear);
 		REGISTER_CALLBACK (serv, X_("/surface/list"), "", surface_list);
 		REGISTER_CALLBACK (serv, X_("/surface/list"), "f", surface_list);
 		REGISTER_CALLBACK (serv, X_("/add_marker"), "", add_marker);
@@ -560,44 +555,12 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, X_("/bank_down"), "f", bank_down);
 		REGISTER_CALLBACK (serv, X_("/use_group"), "f", use_group);
 
-		// controls for "special" strips
-		REGISTER_CALLBACK (serv, X_("/master/gain"), "f", master_set_gain);
-		REGISTER_CALLBACK (serv, X_("/master/fader"), "f", master_set_fader);
-		REGISTER_CALLBACK (serv, X_("/master/db_delta"), "f", master_delta_gain);
-		REGISTER_CALLBACK (serv, X_("/master/mute"), "i", master_set_mute);
-		REGISTER_CALLBACK (serv, X_("/master/trimdB"), "f", master_set_trim);
-		REGISTER_CALLBACK (serv, X_("/master/pan_stereo_position"), "f", master_set_pan_stereo_position);
-		REGISTER_CALLBACK (serv, X_("/master/select"), "f", master_select);
-		REGISTER_CALLBACK (serv, X_("/monitor/gain"), "f", monitor_set_gain);
-		REGISTER_CALLBACK (serv, X_("/monitor/fader"), "f", monitor_set_fader);
-		REGISTER_CALLBACK (serv, X_("/monitor/db_delta"), "f", monitor_delta_gain);
-		REGISTER_CALLBACK (serv, X_("/monitor/mute"), "i", monitor_set_mute);
-		REGISTER_CALLBACK (serv, X_("/monitor/dim"), "i", monitor_set_dim);
-		REGISTER_CALLBACK (serv, X_("/monitor/mono"), "i", monitor_set_mono);
-
 		// Controls for the Selected strip
-		REGISTER_CALLBACK (serv, X_("/select/recenable"), "i", sel_recenable);
-		REGISTER_CALLBACK (serv, X_("/select/record_safe"), "i", sel_recsafe);
-		REGISTER_CALLBACK (serv, X_("/select/name"), "s", sel_rename);
 		REGISTER_CALLBACK (serv, X_("/select/comment"), "s", sel_comment);
-		REGISTER_CALLBACK (serv, X_("/select/mute"), "i", sel_mute);
-		REGISTER_CALLBACK (serv, X_("/select/solo"), "i", sel_solo);
-		REGISTER_CALLBACK (serv, X_("/select/solo_iso"), "i", sel_solo_iso);
-		REGISTER_CALLBACK (serv, X_("/select/solo_safe"), "i", sel_solo_safe);
-		REGISTER_CALLBACK (serv, X_("/select/monitor_input"), "i", sel_monitor_input);
-		REGISTER_CALLBACK (serv, X_("/select/monitor_disk"), "i", sel_monitor_disk);
-		REGISTER_CALLBACK (serv, X_("/select/polarity"), "i", sel_phase);
-		REGISTER_CALLBACK (serv, X_("/select/gain"), "f", sel_gain);
-		REGISTER_CALLBACK (serv, X_("/select/fader"), "f", sel_fader);
-		REGISTER_CALLBACK (serv, X_("/select/db_delta"), "f", sel_dB_delta);
-		REGISTER_CALLBACK (serv, X_("/select/trimdB"), "f", sel_trim);
-		REGISTER_CALLBACK (serv, X_("/select/hide"), "i", sel_hide);
 		REGISTER_CALLBACK (serv, X_("/select/previous"), "f", sel_previous);
 		REGISTER_CALLBACK (serv, X_("/select/previous"), "", sel_previous);
 		REGISTER_CALLBACK (serv, X_("/select/next"), "f", sel_next);
 		REGISTER_CALLBACK (serv, X_("/select/next"), "", sel_next);
-		REGISTER_CALLBACK (serv, X_("/select/pan_stereo_position"), "f", sel_pan_position);
-		REGISTER_CALLBACK (serv, X_("/select/pan_stereo_width"), "f", sel_pan_width);
 		REGISTER_CALLBACK (serv, X_("/select/send_gain"), "if", sel_sendgain);
 		REGISTER_CALLBACK (serv, X_("/select/send_fader"), "if", sel_sendfader);
 		REGISTER_CALLBACK (serv, X_("/select/send_enable"), "if", sel_sendenable);
@@ -630,24 +593,9 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, X_("/select/add_fldbck_send"), "s", sel_new_personal_send);
 
 		/* These commands require the route index in addition to the arg; TouchOSC (et al) can't use these  */
-		REGISTER_CALLBACK (serv, X_("/strip/mute"), "ii", route_mute);
-		REGISTER_CALLBACK (serv, X_("/strip/solo"), "ii", route_solo);
-		REGISTER_CALLBACK (serv, X_("/strip/solo_iso"), "ii", route_solo_iso);
-		REGISTER_CALLBACK (serv, X_("/strip/solo_safe"), "ii", route_solo_safe);
-		REGISTER_CALLBACK (serv, X_("/strip/recenable"), "ii", route_recenable);
-		REGISTER_CALLBACK (serv, X_("/strip/record_safe"), "ii", route_recsafe);
-		REGISTER_CALLBACK (serv, X_("/strip/monitor_input"), "ii", route_monitor_input);
-		REGISTER_CALLBACK (serv, X_("/strip/monitor_disk"), "ii", route_monitor_disk);
-		REGISTER_CALLBACK (serv, X_("/strip/expand"), "ii", strip_expand);
-		REGISTER_CALLBACK (serv, X_("/strip/hide"), "ii", strip_hide);
-		REGISTER_CALLBACK (serv, X_("/strip/select"), "ii", strip_gui_select);
-		REGISTER_CALLBACK (serv, X_("/strip/polarity"), "ii", strip_phase);
-		REGISTER_CALLBACK (serv, X_("/strip/gain"), "if", route_set_gain_dB);
-		REGISTER_CALLBACK (serv, X_("/strip/fader"), "if", route_set_gain_fader);
-		REGISTER_CALLBACK (serv, X_("/strip/db_delta"), "if", strip_db_delta);
-		REGISTER_CALLBACK (serv, X_("/strip/trimdB"), "if", route_set_trim_dB);
-		REGISTER_CALLBACK (serv, X_("/strip/pan_stereo_position"), "if", route_set_pan_stereo_position);
-		REGISTER_CALLBACK (serv, X_("/strip/pan_stereo_width"), "if", route_set_pan_stereo_width);
+		REGISTER_CALLBACK (serv, X_("/strip/custom/mode"), "f", custom_mode);
+		REGISTER_CALLBACK (serv, X_("/strip/custom/clear"), "f", custom_clear);
+		REGISTER_CALLBACK (serv, X_("/strip/custom/clear"), "", custom_clear);
 		REGISTER_CALLBACK (serv, X_("/strip/plugin/parameter"), "iiif", route_plugin_parameter);
 		// prints to cerr only
 		REGISTER_CALLBACK (serv, X_("/strip/plugin/parameter/print"), "iii", route_plugin_parameter_print);
@@ -656,23 +604,11 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, X_("/strip/send/gain"), "iif", route_set_send_gain_dB);
 		REGISTER_CALLBACK (serv, X_("/strip/send/fader"), "iif", route_set_send_fader);
 		REGISTER_CALLBACK (serv, X_("/strip/send/enable"), "iif", route_set_send_enable);
-		REGISTER_CALLBACK (serv, X_("/strip/name"), "is", route_rename);
-		REGISTER_CALLBACK (serv, X_("/strip/group"), "is", strip_group);
 		REGISTER_CALLBACK (serv, X_("/strip/sends"), "i", route_get_sends);
 		REGISTER_CALLBACK (serv, X_("/strip/receives"), "i", route_get_receives);
 		REGISTER_CALLBACK (serv, X_("/strip/plugin/list"), "i", route_plugin_list);
 		REGISTER_CALLBACK (serv, X_("/strip/plugin/descriptor"), "ii", route_plugin_descriptor);
 		REGISTER_CALLBACK (serv, X_("/strip/plugin/reset"), "ii", route_plugin_reset);
-
-		/* still not-really-standardized query interface */
-		//REGISTER_CALLBACK (serv, "/ardour/*/#current_value", "", current_value);
-		//REGISTER_CALLBACK (serv, "/ardour/set", "", set);
-
-		// un/register_update args= s:ctrl s:returl s:retpath
-		//lo_server_add_method(serv, "/register_update", "sss", OSC::global_register_update_handler, this);
-		//lo_server_add_method(serv, "/unregister_update", "sss", OSC::global_unregister_update_handler, this);
-		//lo_server_add_method(serv, "/register_auto_update", "siss", OSC::global_register_auto_update_handler, this);
-		//lo_server_add_method(serv, "/unregister_auto_update", "sss", OSC::_global_unregister_auto_update_handler, this);
 
 		/* this is a special catchall handler,
 		 * register at the end so this is only called if no
@@ -816,11 +752,6 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 	size_t len;
 	int ret = 1; /* unhandled */
 
-	//cerr << "Received a message, path = " << path << " types = \""
-	//     << (types ? types : "NULL") << '"' << endl;
-
-	/* 15 for /#current_value plus 2 for /<path> */
-
 	len = strlen (path);
 	OSCSurface *sur = get_surface(get_address (msg), true);
 	LinkSet *set;
@@ -931,125 +862,17 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 
 		ret = 0;
 	} else
-	if (strstr (path, X_("/strip")) && (argc != 1)) {
-		// All of the strip commands below require 1 parameter
-		PBD::warning << "OSC: Wrong number of parameters." << endmsg;
-	} else
-	if (!strncmp (path, X_("/strip/gain/"), 12) && strlen (path) > 12) {
-		// in dB
-		int ssid = atoi (&path[12]);
-		ret = route_set_gain_dB (ssid, argv[0]->f, msg);
+	if (strstr (path, X_("/strip"))) {
+		ret = strip_parse (path, types, argv, argc, msg);
 	}
-	else if (!strncmp (path, X_("/strip/fader/"), 13) && strlen (path) > 13) {
-		// in fader position
-		int ssid = atoi (&path[13]);
-		ret = route_set_gain_fader (ssid, argv[0]->f, msg);
+	else if (strstr (path, X_("/master"))) {
+		ret = master_parse (path, types, argv, argc, msg);
 	}
-	else if (!strncmp (path, X_("/strip/db_delta"), 15)) {
-		// in db delta
-		int ssid;
-		int ar_off = 0;
-		float delta;
-		if (strlen (path) > 15 && argc == 1) {
-			ssid = atoi (&path[16]);
-		} else if (argc == 2) {
-			if (types[0] == 'f') {
-				ssid = (int) argv[0]->f;
-			} else {
-				ssid = argv[0]->i;
-			}
-			ar_off = 1;
-		} else {
-			return -1;
-		}
-		if (types[ar_off] == 'f') {
-			delta = argv[ar_off]->f;
-		} else {
-			delta = (float) argv[ar_off]->i;
-		}
-		ret = strip_db_delta (ssid, delta, msg);
+	else if (strstr (path, X_("/monitor"))) {
+		ret = monitor_parse (path, types, argv, argc, msg);
 	}
-	else if (!strncmp (path, X_("/strip/trimdB/"), 14) && strlen (path) > 14) {
-		int ssid = atoi (&path[14]);
-		ret = route_set_trim_dB (ssid, argv[0]->f, msg);
-	}
-	else if (!strncmp (path, X_("/strip/pan_stereo_position/"), 27) && strlen (path) > 27) {
-		int ssid = atoi (&path[27]);
-		ret = route_set_pan_stereo_position (ssid, argv[0]->f, msg);
-	}
-	else if (!strncmp (path, X_("/strip/mute/"), 12) && strlen (path) > 12) {
-		int ssid = atoi (&path[12]);
-		ret = route_mute (ssid, argv[0]->i, msg);
-	}
-	else if (!strncmp (path, X_("/strip/solo/"), 12) && strlen (path) > 12) {
-		int ssid = atoi (&path[12]);
-		ret = route_solo (ssid, argv[0]->i, msg);
-	}
-	else if (!strncmp (path, X_("/strip/monitor_input/"), 21) && strlen (path) > 21) {
-		int ssid = atoi (&path[21]);
-		ret = route_monitor_input (ssid, argv[0]->i, msg);
-	}
-	else if (!strncmp (path, X_("/strip/monitor_disk/"), 20) && strlen (path) > 20) {
-		int ssid = atoi (&path[20]);
-		ret = route_monitor_disk (ssid, argv[0]->i, msg);
-	}
-	else if (!strncmp (path, X_("/strip/recenable/"), 17) && strlen (path) > 17) {
-		int ssid = atoi (&path[17]);
-		ret = route_recenable (ssid, argv[0]->i, msg);
-	}
-	else if (!strncmp (path, X_("/strip/record_safe/"), 19) && strlen (path) > 19) {
-		int ssid = atoi (&path[19]);
-		ret = route_recsafe (ssid, argv[0]->i, msg);
-	}
-	else if (!strncmp (path, X_("/strip/expand/"), 14) && strlen (path) > 14) {
-		int ssid = atoi (&path[14]);
-		ret = strip_expand (ssid, argv[0]->i, msg);
-	}
-	else if (!strncmp (path, X_("/strip/hide/"), 12) && strlen (path) > 12) {
-		int ssid = atoi (&path[12]);
-		ret = strip_hide (ssid, argv[0]->i, msg);
-	}
-	else if (!strncmp (path, X_("/strip/select/"), 14) && strlen (path) > 14) {
-		int ssid = atoi (&path[14]);
-		ret = strip_gui_select (ssid, argv[0]->i, msg);
-	}
-	else if (strstr (path, X_("/select/group"))) {
-		ret = parse_sel_group (path, types, argv, argc, msg);
-	}
-	else if (strstr (path, X_("/select/vca"))) {
-		ret = parse_sel_vca (path, types, argv, argc, msg);
-	}
-	else if (strstr (path, X_("/select")) && (argc != 1)) {
-		// All of the select commands below require 1 parameter
-		PBD::warning << "OSC: Wrong number of parameters." << endmsg;
-	}
-	else if (!strncmp (path, X_("/select/send_gain/"), 18) && strlen (path) > 18) {
-		int ssid = atoi (&path[18]);
-		ret = sel_sendgain (ssid, argv[0]->f, msg);
-	}
-	else if (!strncmp (path, X_("/select/send_fader/"), 19) && strlen (path) > 19) {
-		int ssid = atoi (&path[19]);
-		ret = sel_sendfader (ssid, argv[0]->f, msg);
-	}
-	else if (!strncmp (path, X_("/select/send_enable/"), 20) && strlen (path) > 20) {
-		int ssid = atoi (&path[20]);
-		ret = sel_sendenable (ssid, argv[0]->f, msg);
-	}
-	else if (!strncmp (path, X_("/select/eq_gain/"), 16) && strlen (path) > 16) {
-		int ssid = atoi (&path[16]);
-		ret = sel_eq_gain (ssid, argv[0]->f, msg);
-	}
-	else if (!strncmp (path, X_("/select/eq_freq/"), 16) && strlen (path) > 16) {
-		int ssid = atoi (&path[16]);
-		ret = sel_eq_freq (ssid, argv[0]->f , msg);
-	}
-	else if (!strncmp (path, X_("/select/eq_q/"), 13) && strlen (path) > 13) {
-		int ssid = atoi (&path[13]);
-		ret = sel_eq_q (ssid, argv[0]->f, msg);
-	}
-	else if (!strncmp (path, X_("/select/eq_shape/"), 17) && strlen (path) > 17) {
-		int ssid = atoi (&path[17]);
-		ret = sel_eq_shape (ssid, argv[0]->f, msg);
+	else if (strstr (path, X_("/select"))) {
+		ret = select_parse (path, types, argv, argc, msg);
 	}
 	else if (!strncmp (path, X_("/marker"), 7)) {
 		ret = set_marker (types, argv, argc, msg);
@@ -1792,55 +1615,46 @@ OSC::surface_parse (const char *path, const char* types, lo_arg **argv, int argc
 	int linkid = sur->linkid;
 	string host = lo_url_get_hostname(sur->remote_url.c_str());
 	int port = atoi (get_port (host).c_str());
+	int data = 0;
+
+	if (argc) {
+		if (types[0] == 'f') {
+			data = (int)argv[0]->f;
+		} else if (types[0] == 'i') {
+			data = argv[0]->i;
+		} else if (types[0] == 's') {
+			if (isdigit(argv[0]->s)) {
+				data = atoi (&(argv[0]->s));
+			} else {
+				PBD::warning << "OSC: Parameter is not numerical." << endmsg;
+				return 1;
+			}
+		} else {
+			PBD::warning << "OSC: Wrong parameter type." << endmsg;
+			return 1;
+		}
+	}
 
 	if (argc == 1 && !strncmp (path, X_("/set_surface/feedback"), 21)) {
-		if (types[0] == 'f') {
-			ret = set_surface_feedback ((int)argv[0]->f, msg);
-		} else {
-			ret = set_surface_feedback (argv[0]->i, msg);
-		}
+		ret = set_surface_feedback (data, msg);
 	}
 	else if (argc == 1 && !strncmp (path, X_("/set_surface/bank_size"), 22)) {
-		if (types[0] == 'f') {
-			ret = set_surface_bank_size ((int)argv[0]->f, msg);
-		} else {
-			ret = set_surface_bank_size (argv[0]->i, msg);
-		}
+		ret = set_surface_bank_size (data, msg);
 	}
 	else if (argc == 1 && !strncmp (path, X_("/set_surface/gainmode"), 21)) {
-		if (types[0] == 'f') {
-			ret = set_surface_gainmode ((int)argv[0]->f, msg);
-		} else {
-			ret = set_surface_gainmode (argv[0]->i, msg);
-		}
+		ret = set_surface_gainmode (data, msg);
 	}
 	else if (argc == 1 && !strncmp (path, X_("/set_surface/strip_types"), 24)) {
-		if (types[0] == 'f') {
-			ret = set_surface_strip_types ((int)argv[0]->f, msg);
-		} else {
-			ret = set_surface_strip_types (argv[0]->i, msg);
-		}
+		ret = set_surface_strip_types (data, msg);
 	}
 	else if (argc == 1 && !strncmp (path, X_("/set_surface/send_page_size"), 27)) {
-		if (types[0] == 'f') {
-			ret = sel_send_pagesize ((int)argv[0]->f, msg);
-		} else {
-			ret = sel_send_pagesize (argv[0]->i, msg);
-		}
+		ret = sel_send_pagesize (data, msg);
 	}
 	else if (argc == 1 && !strncmp (path, X_("/set_surface/plugin_page_size"), 29)) {
-		if (types[0] == 'f') {
-			ret = sel_plug_pagesize ((int)argv[0]->f, msg);
-		} else {
-			ret = sel_plug_pagesize (argv[0]->i, msg);
-		}
+		ret = sel_plug_pagesize (data, msg);
 	}
 	else if (argc == 1 && !strncmp (path, X_("/set_surface/port"), 17)) {
-		if (types[0] == 'f') {
-			ret = set_surface_port ((int)argv[0]->f, msg);
-		} else {
-			ret = set_surface_port (argv[0]->i, msg);
-		}
+		ret = set_surface_port (data, msg);
 	} else if (strlen(path) == 12) {
 
 		// command is in /set_surface iii form
@@ -1902,11 +1716,7 @@ OSC::surface_parse (const char *path, const char* types, lo_arg **argv, int argc
 				}
 				/* fallthrough */
 			case 1:
-				if (types[0] == 'f') {
-					bank_size = (int) argv[0]->f;
-				} else {
-					bank_size = argv[0]->i;
-				}
+				bank_size = data;
 				set_surface_port (port, msg);
 				ret = set_surface (bank_size, strip_types, feedback, fadermode, se_page, pi_page, msg);
 				if ((uint32_t) linkset != sur->linkset) {
@@ -2205,7 +2015,7 @@ OSC::check_surface (lo_message msg)
 	if (!session) {
 		return -1;
 	}
-	get_surface(get_address (msg));
+	get_surface (get_address (msg));
 	return 0;
 }
 
@@ -2265,8 +2075,8 @@ OSC::get_surface (lo_address addr , bool quiet)
 	if (!quiet) {
 		strip_feedback (&s, true);
 		global_feedback (&s);
-		_strip_select (boost::shared_ptr<ARDOUR::Stripable>(), addr);
 	}
+	_strip_select2 (boost::shared_ptr<ARDOUR::Stripable>(), &_surface[_surface.size() - 1], addr);
 
 	return &_surface[_surface.size() - 1];
 }
@@ -2641,14 +2451,8 @@ OSC::parse_sel_group (const char *path, const char* types, lo_arg **argv, int ar
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s = sur->select;
 	int ret = 1; /* unhandled */
+	/// these could be added to strip
 	if (s) {
-		if (!strncmp (path, X_("/select/group"), 13)) {
-			if (argc == 1) {
-				if (types[0] == 's') {
-					return strip_select_group (s, &argv[0]->s);
-				}
-			}
-		}
 		boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (s);
 		if (!rt) {
 			PBD::warning << "OSC: VCAs can not be part of a group." << endmsg;
@@ -3475,218 +3279,6 @@ OSC::click_level (float position)
 	return 0;
 }
 
-// master and monitor calls
-int
-OSC::master_set_gain (float dB)
-{
-	if (!session) return -1;
-	boost::shared_ptr<Stripable> s = session->master_out();
-	if (s) {
-		if (dB < -192) {
-			s->gain_control()->set_value (0.0, PBD::Controllable::NoGroup);
-		} else {
-			float abs = dB_to_coefficient (dB);
-			float top = s->gain_control()->upper();
-			if (abs > top) {
-				abs = top;
-			}
-			s->gain_control()->set_value (abs, PBD::Controllable::NoGroup);
-		}
-	}
-	return 0;
-}
-
-int
-OSC::master_delta_gain (float delta)
-{
-	if (!session) return -1;
-	boost::shared_ptr<Stripable> s = session->master_out();
-	if (s) {
-		float dB = accurate_coefficient_to_dB (s->gain_control()->get_value()) + delta;
-		if (dB < -192) {
-			s->gain_control()->set_value (0.0, PBD::Controllable::NoGroup);
-		} else {
-			float abs = dB_to_coefficient (dB);
-			float top = s->gain_control()->upper();
-			if (abs > top) {
-				abs = top;
-			}
-			s->gain_control()->set_value (abs, PBD::Controllable::NoGroup);
-		}
-	}
-	return 0;
-}
-
-int
-OSC::master_set_fader (float position)
-{
-	if (!session) return -1;
-	boost::shared_ptr<Stripable> s = session->master_out();
-	if (s) {
-		s->gain_control()->set_value (s->gain_control()->interface_to_internal (position), PBD::Controllable::NoGroup);
-	}
-	return 0;
-}
-
-int
-OSC::master_set_trim (float dB)
-{
-	if (!session) return -1;
-	boost::shared_ptr<Stripable> s = session->master_out();
-
-	if (s) {
-		s->trim_control()->set_value (dB_to_coefficient (dB), PBD::Controllable::NoGroup);
-	}
-
-	return 0;
-}
-
-int
-OSC::master_set_pan_stereo_position (float position, lo_message msg)
-{
-	if (!session) return -1;
-	OSCSurface *sur = get_surface(get_address (msg));
-
-	float endposition = .5;
-	boost::shared_ptr<Stripable> s = session->master_out();
-
-	if (s) {
-		if (s->pan_azimuth_control()) {
-			s->pan_azimuth_control()->set_value (s->pan_azimuth_control()->interface_to_internal (position), PBD::Controllable::NoGroup);
-			endposition = s->pan_azimuth_control()->internal_to_interface (s->pan_azimuth_control()->get_value ());
-		}
-	}
-
-	if (sur->feedback[4]) {
-		lo_message reply = lo_message_new ();
-		lo_message_add_float (reply, endposition);
-
-		lo_send_message (get_address (msg), X_("/master/pan_stereo_position"), reply);
-		lo_message_free (reply);
-	}
-
-	return 0;
-}
-
-int
-OSC::master_set_mute (uint32_t state)
-{
-	if (!session) return -1;
-
-	boost::shared_ptr<Stripable> s = session->master_out();
-
-	if (s) {
-		s->mute_control()->set_value (state, PBD::Controllable::NoGroup);
-	}
-
-	return 0;
-}
-
-int
-OSC::master_select (lo_message msg)
-{
-	if (!session) {
-		return -1;
-	}
-	OSCSurface *sur = get_surface(get_address (msg));
-	sur->expand_enable = false;
-	boost::shared_ptr<Stripable> s = session->master_out();
-	if (s) {
-		set_stripable_selection (s);
-	}
-
-	return 0;
-}
-
-int
-OSC::monitor_set_gain (float dB)
-{
-	if (!session) return -1;
-	boost::shared_ptr<Stripable> s = session->monitor_out();
-
-	if (s) {
-		if (dB < -192) {
-			s->gain_control()->set_value (0.0, PBD::Controllable::NoGroup);
-		} else {
-			float abs = dB_to_coefficient (dB);
-			float top = s->gain_control()->upper();
-			if (abs > top) {
-				abs = top;
-			}
-			s->gain_control()->set_value (abs, PBD::Controllable::NoGroup);
-		}
-	}
-	return 0;
-}
-
-int
-OSC::monitor_delta_gain (float delta)
-{
-	if (!session) return -1;
-	boost::shared_ptr<Stripable> s = session->monitor_out();
-	if (s) {
-		float dB = accurate_coefficient_to_dB (s->gain_control()->get_value()) + delta;
-		if (dB < -192) {
-			s->gain_control()->set_value (0.0, PBD::Controllable::NoGroup);
-		} else {
-			float abs = dB_to_coefficient (dB);
-			float top = s->gain_control()->upper();
-			if (abs > top) {
-				abs = top;
-			}
-			s->gain_control()->set_value (abs, PBD::Controllable::NoGroup);
-		}
-	}
-	return 0;
-}
-
-int
-OSC::monitor_set_fader (float position)
-{
-	if (!session) return -1;
-	boost::shared_ptr<Stripable> s = session->monitor_out();
-	if (s) {
-		s->gain_control()->set_value (s->gain_control()->interface_to_internal (position), PBD::Controllable::NoGroup);
-	}
-	return 0;
-}
-
-int
-OSC::monitor_set_mute (uint32_t state)
-{
-	if (!session) return -1;
-
-	if (session->monitor_out()) {
-		boost::shared_ptr<MonitorProcessor> mon = session->monitor_out()->monitor_control();
-		mon->set_cut_all (state);
-	}
-	return 0;
-}
-
-int
-OSC::monitor_set_dim (uint32_t state)
-{
-	if (!session) return -1;
-
-	if (session->monitor_out()) {
-		boost::shared_ptr<MonitorProcessor> mon = session->monitor_out()->monitor_control();
-		mon->set_dim_all (state);
-	}
-	return 0;
-}
-
-int
-OSC::monitor_set_mono (uint32_t state)
-{
-	if (!session) return -1;
-
-	if (session->monitor_out()) {
-		boost::shared_ptr<MonitorProcessor> mon = session->monitor_out()->monitor_control();
-		mon->set_mono (state);
-	}
-	return 0;
-}
-
 int
 OSC::route_get_sends(lo_message msg) {
 	if (!session) {
@@ -3800,6 +3392,755 @@ OSC::route_get_receives(lo_message msg) {
 }
 
 // strip calls
+
+int
+OSC::master_parse (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg)
+{
+	if (!session) return -1;
+	int ret = 1;
+	// set sub_path to null string if path is /master
+	const char* sub_path = &path[7];
+	if (strlen(path) > 8) {
+		// reset sub_path to char after /master/ if at least 1 char longer
+		sub_path = &path[8];
+	} else if (strlen(path) == 8) {
+		PBD::warning << "OSC: trailing / not valid." << endmsg;
+	}
+
+	//OSCSurface *sur = get_surface(get_address (msg));
+	boost::shared_ptr<Stripable> s = session->master_out();
+	if (s) {
+		ret = _strip_parse (path, sub_path, types, argv, argc, s, 0, false, msg);
+	} else {
+		PBD::warning << "OSC: No Master strip" << endmsg;
+	}
+	return ret;
+}
+
+int
+OSC::monitor_parse (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg)
+{
+	if (!session) return -1;
+	int ret = 1;
+	// set sub_path to null string if path is /monitor
+	const char* sub_path = &path[8];
+	if (strlen(path) > 9) {
+		// reset sub_path to char after /monitor/ if at least 1 char longer
+		sub_path = &path[9];
+	} else if (strlen(path) == 9) {
+		PBD::warning << "OSC: trailing / not valid." << endmsg;
+	}
+
+	//OSCSurface *sur = get_surface(get_address (msg));
+	boost::shared_ptr<Stripable> s = session->monitor_out();
+	if (s) {
+		boost::shared_ptr<MonitorProcessor> mon = session->monitor_out()->monitor_control();
+		int state = 0;
+		if (types[0] == 'f') {
+			state = (uint32_t) argv[0]->f;
+		} else if (types[0] == 'i') {
+			state = argv[0]->i;
+		}
+		// these are only in the monitor section
+		if (!strncmp (sub_path, X_("mute"), 4)) {
+			if (argc) {
+				mon->set_cut_all (state);
+			} else {
+				int_message (path, mon->cut_all (), get_address (msg));
+			}
+		} else if (!strncmp (sub_path, X_("dim"), 3)) {
+			if (argc) {
+				mon->set_dim_all (state);
+			} else {
+				int_message (path, mon->dim_all (), get_address (msg));
+			}
+		} else if (!strncmp (sub_path, X_("mono"), 4)) {
+			if (argc) {
+				mon->set_mono (state);
+			} else {
+				int_message (path, mon->mono (), get_address (msg));
+			}
+		} else {
+			ret = _strip_parse (path, sub_path, types, argv, argc, s, 0, false, msg);
+		}
+	} else {
+		PBD::warning << "OSC: No Monitor strip" << endmsg;
+	}
+	return ret;
+}
+
+int
+OSC::select_parse (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg)
+{
+	if (!session) return -1;
+	int ret = 1;
+	// set sub_path to null string if path is /select
+	const char* sub_path = &path[7];
+	if (strlen(path) > 8) {
+		// reset sub_path to char after /select/ if at least 1 char longer
+		sub_path = &path[8];
+	} else if (strlen(path) == 8) {
+		PBD::warning << "OSC: trailing / not valid." << endmsg;
+	}
+
+	OSCSurface *sur = get_surface(get_address (msg));
+
+	if (!strncmp (sub_path, X_("select"), 6)) {
+		PBD::warning << "OSC: select is already selected." << endmsg;
+		return 1;
+	}
+	if (!strncmp (path, X_("/select/group"), 13) && strlen (path) > 13) {
+		PBD::info << "OSC: select_parse /select/group/." << endmsg;
+		ret = parse_sel_group (path, types, argv, argc, msg);
+	}
+	else if (strstr (path, X_("/select/vca"))) {
+		ret = parse_sel_vca (path, types, argv, argc, msg);
+	}
+	else if (!strncmp (path, X_("/select/send_gain/"), 18) && strlen (path) > 18) {
+		int ssid = atoi (&path[18]);
+		ret = sel_sendgain (ssid, argv[0]->f, msg);
+	}
+	else if (!strncmp (path, X_("/select/send_fader/"), 19) && strlen (path) > 19) {
+		int ssid = atoi (&path[19]);
+		ret = sel_sendfader (ssid, argv[0]->f, msg);
+	}
+	else if (!strncmp (path, X_("/select/send_enable/"), 20) && strlen (path) > 20) {
+		int ssid = atoi (&path[20]);
+		ret = sel_sendenable (ssid, argv[0]->f, msg);
+	}
+	else if (!strncmp (path, X_("/select/eq_gain/"), 16) && strlen (path) > 16) {
+		int ssid = atoi (&path[16]);
+		ret = sel_eq_gain (ssid, argv[0]->f, msg);
+	}
+	else if (!strncmp (path, X_("/select/eq_freq/"), 16) && strlen (path) > 16) {
+		int ssid = atoi (&path[16]);
+		ret = sel_eq_freq (ssid, argv[0]->f , msg);
+	}
+	else if (!strncmp (path, X_("/select/eq_q/"), 13) && strlen (path) > 13) {
+		int ssid = atoi (&path[13]);
+		ret = sel_eq_q (ssid, argv[0]->f, msg);
+	}
+	else if (!strncmp (path, X_("/select/eq_shape/"), 17) && strlen (path) > 17) {
+		int ssid = atoi (&path[17]);
+		ret = sel_eq_shape (ssid, argv[0]->f, msg);
+	}
+	else {
+		boost::shared_ptr<Stripable> s = sur->select;
+		if (s) {
+			if (!strncmp (sub_path, X_("expand"), 6)) {
+				int yn = 0;
+				if (types[0] == 'f') {
+					yn = (int) argv[0]->f;
+				} else if (types[0] == 'i') {
+					yn = argv[0]->i;
+				} else {
+					return 1;
+				}
+				if (types[0] != 'f' && types[0] != 'i') {
+					return 1;
+				}
+				sur->expand_strip = s;
+				sur->expand_enable = (bool) yn;
+				boost::shared_ptr<Stripable> sel;
+				if (yn) {
+					sel = s;
+				} else {
+					sel = boost::shared_ptr<Stripable> ();
+				}
+
+				return _strip_select (sel, get_address (msg));
+			} else {
+				ret = _strip_parse (path, sub_path, types, argv, argc, s, 0, false, msg);
+			}
+		} else {
+			PBD::warning << "OSC: No selected strip" << endmsg;
+			ret = float_message (path, 0, get_address (msg));
+		}
+	}
+
+	return ret;
+
+}
+
+
+int
+OSC::strip_parse (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg)
+{
+	if (!session) return -1;
+	int ret = 1;
+	int ssid = 0;
+	int param_1 = 1;
+	uint32_t nparam = argc;
+	const char* sub_path = &path[6];
+	if (strlen(path) > 7) {
+		// reset sub_path to char after /strip/ if at least 1 char longer
+		sub_path = &path[7];
+	} else if (strlen(path) == 7) {
+		PBD::warning << "OSC: trailing / not valid." << endmsg;
+		return 1;
+	}
+
+	OSCSurface *sur = get_surface(get_address (msg));
+
+	// ssid may be in three places
+	 if (atoi(sub_path)) {
+		// test for /strip/<ssid>/subpath
+		ssid = atoi(sub_path);
+		nparam++;
+		param_1 = 0;
+		if (strchr(sub_path, (int) '/')) {
+			sub_path = &(strchr(sub_path, (int) '/')[1]);
+		} else {
+			sub_path = &(strchr(sub_path, 0)[1]);
+		}
+	} else if (atoi (&(strrchr(path, (int) '/')[1]))) {
+		// check for /path/<ssid>
+		ssid = atoi (&(strrchr(path, (int) '/')[1]));
+		nparam++;
+		param_1 = 0;
+	} else if (argc) {
+		if (types[0] == 'i') {
+			ssid = argv[0]->i;
+		}
+	}
+	if (!nparam && !ssid) {
+		// only list works here
+		if (!strcmp (path, X_("/strip/list")) || !strcmp (path, X_("/strip"))) {
+			// /strip/list is legacy
+			routes_list (msg);
+			ret = 0;
+		} else {
+			PBD::warning << "OSC: missing parameters." << endmsg;
+			return 1;
+		}
+	}
+	boost::shared_ptr<Stripable> s = get_strip (ssid, get_address (msg));
+	if (s) {
+		if (!strncmp (sub_path, X_("expand"), 6)) {
+			int yn = 0;
+			if (types[param_1] == 'f') {
+				yn = (int) argv[param_1]->f;
+			} else if (types[param_1] == 'i') {
+				yn = argv[param_1]->i;
+			} else {
+				return 1;
+			}
+			if (types[param_1] != 'f' && types[param_1] != 'i') {
+				return 1;
+			}
+			sur->expand_strip = s;
+			sur->expand_enable = (bool) yn;
+			sur->expand = ssid;
+			boost::shared_ptr<Stripable> sel;
+			if (yn) {
+				sel = s;
+			} else {
+				sel = boost::shared_ptr<Stripable> ();
+			}
+
+			return _strip_select (sel, get_address (msg));
+		} else {
+			ret = _strip_parse (path, sub_path, types, argv, argc, s, param_1, true, msg);
+		}
+	} else {
+		PBD::warning << "OSC: No such strip" << endmsg;
+	}
+
+	return ret;
+
+}
+
+int
+OSC::_strip_parse (const char *path, const char *sub_path, const char* types, lo_arg **argv, int argc, boost::shared_ptr<ARDOUR::Stripable> s, int param_1, bool strp, lo_message msg)
+{
+	int ret = 1;
+	int yn = 0;
+	float value = 0.0;
+	string strng = "";
+	char *text;
+	bool s_flt = false;
+	bool s_int = false;
+	if (types[param_1] == 'f') {
+		yn = (int) argv[param_1]->f;
+		s_int = true;
+		value = argv[param_1]->f;
+		s_flt = true;
+	} else if (types[param_1] == 'i') {
+		yn = argv[param_1]->i;
+		s_int = true;
+	} else if (types[param_1] == 's') {
+		text = &argv[param_1]->s;
+		strng = &argv[param_1]->s;
+		if (atoi(text) || text[0] == '0') {
+			yn = atoi(text);
+			s_int = true;
+		}
+		if (atof(text)) {
+			value = atof(text);
+			s_flt = true;
+		}
+	}
+	OSCSurface *sur = get_surface(get_address (msg));
+	bool send_active = strp && sur->temp_mode == BusOnly && get_send (s, get_address (msg));
+	bool control_disabled = strp && (sur->temp_mode == BusOnly) && (s != sur->temp_master);
+
+	if (!strlen(sub_path)) {
+		// send stripable info
+		ret = strip_state (path, s, strp, msg);
+	}
+	else if (!strncmp (sub_path, X_("gain"), 4) || !strncmp (sub_path, X_("fader"), 5) ||  !strncmp (sub_path, X_("db_delta"), 8)){
+		boost::shared_ptr<GainControl> gain_control;
+		gain_control = s->gain_control();
+		if (gain_control) {
+			if (argc > (param_1)) {
+				if (s_flt) {
+					//if (strp && sur->temp_mode == BusOnly && get_send (s, get_address (msg))) {
+					if (send_active) {
+						gain_control = get_send(s, get_address (msg))->gain_control();
+					}
+					float abs;
+					if (!strncmp (sub_path, X_("gain"), 4)) {
+						if (value < -192) {
+							abs = 0;
+						} else {
+							abs = dB_to_coefficient (value);
+						}
+					} else if (!strncmp (sub_path, X_("fader"), 5)) {
+						abs = gain_control->interface_to_internal (value);
+					} else if (!strncmp (sub_path, X_("db_delta"), 8)) {
+						float db = accurate_coefficient_to_dB (gain_control->get_value()) + value;
+						if (db < -192) {
+							abs = 0;
+						} else {
+							abs = dB_to_coefficient (db);
+						}
+					}
+					float top = gain_control->upper();
+					if (abs > top) {
+						abs = top;
+					}
+					fake_touch (gain_control);
+					gain_control->set_value (abs, sur->usegroup);
+					ret = 0;
+				}
+			} else {
+				float ret_v;
+				///gain_control->get_value ();
+				if (!strncmp (sub_path, X_("gain"), 4)) {
+					ret_v = fast_coefficient_to_dB (gain_control->get_value ());
+				} else if (!strncmp (sub_path, X_("fader"), 5)) {
+					ret_v = gain_control->internal_to_interface (gain_control->get_value ());
+				} else {
+					PBD::warning << "OSC: delta has no info" << endmsg;
+					return 1;
+				}
+				float_message (path, ret_v, get_address (msg));
+				ret = 0;
+			}
+		}
+	}
+	else if (!strncmp (sub_path, X_("trimdB"), 6)) {
+		if (!control_disabled && s->trim_control()) {
+			if (argc > (param_1)) {
+				if (s_flt) {
+					//if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
+					float abs = dB_to_coefficient (value);
+					s->trim_control()->set_value (abs, sur->usegroup);
+					fake_touch (s->trim_control());
+					ret = 0;
+				}
+			} else {
+				float_message (path, fast_coefficient_to_dB (s->trim_control()->get_value ()), get_address (msg));
+				ret = 0;
+			}
+		}
+	}
+	else if (!strncmp (sub_path, X_("pan_stereo_position"), 19)) {
+		boost::shared_ptr<PBD::Controllable> pan_control = boost::shared_ptr<PBD::Controllable>();
+		pan_control = s->pan_azimuth_control();
+		if (pan_control) {
+			if (argc > (param_1)) {
+				if (s_flt) {
+					if (send_active) {
+					//if (sur->temp_mode == BusOnly && get_send (s, get_address (msg))) {
+						boost::shared_ptr<ARDOUR::Send> send = get_send (s, get_address (msg));
+						if (send->pan_outs() > 1) {
+							pan_control = send->panner_shell()->panner()->pannable()->pan_azimuth_control;
+						} else {
+							pan_control = boost::shared_ptr<PBD::Controllable>();
+						}
+					}
+					if(pan_control) {
+						pan_control->set_value (s->pan_azimuth_control()->interface_to_internal (value), sur->usegroup);
+						boost::shared_ptr<AutomationControl>pan_automate = boost::dynamic_pointer_cast<AutomationControl> (pan_control);
+						fake_touch (pan_automate);
+						ret = 0;
+					}
+				}
+			} else {
+				float_message (path, pan_control->internal_to_interface (pan_control->get_value ()), get_address (msg));
+				ret = 0;
+			}
+		}
+	}
+	else if (!strncmp (sub_path, X_("pan_stereo_width"), 16)) {
+		if (!control_disabled && s->pan_width_control()) {
+			if (argc > (param_1)) {
+				if (s_flt) {
+					/// this should maybe be active in send mode (see above)
+					//if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
+					s->pan_width_control()->set_value (value, sur->usegroup);
+					fake_touch (s->pan_width_control());
+					ret = 0;
+				}
+			} else {
+				float_message (path, s->pan_width_control()->get_value (), get_address (msg));
+				ret = 0;
+			}
+		}
+	}
+	else if (!strncmp (sub_path, X_("mute"), 4)) {
+		//if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
+		if (!control_disabled && s->mute_control()) {
+			if (argc > (param_1)) {
+				if (s_int) {
+					s->mute_control()->set_value (yn ? 1.0 : 0.0, sur->usegroup);
+					fake_touch (s->mute_control());
+					ret = 0;
+				}
+			} else {
+				int_message (path, s->mute_control()->get_value (), get_address (msg));
+				ret = 0;
+			}
+		}
+	}
+	else if (!strncmp (sub_path, X_("solo_iso"), 8)) {
+		if (!control_disabled && s->solo_isolate_control()) {
+			//if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
+			if (argc > (param_1)) {
+				if (s_int) {
+					s->solo_isolate_control()->set_value (yn ? 1.0 : 0.0, sur->usegroup);
+					ret = 0;
+				}
+			} else {
+				int_message (path, s->solo_isolate_control()->get_value (), get_address (msg));
+				ret = 0;
+			}
+		}
+	}
+	else if (!strncmp (sub_path, X_("solo_safe"), 9)) {
+		//if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
+		if (!control_disabled && s->solo_safe_control()) {
+			if (argc > (param_1)) {
+				if (s_int) {
+					s->solo_safe_control()->set_value (yn ? 1.0 : 0.0, sur->usegroup);
+					ret = 0;
+				}
+			} else {
+				int_message (path, s->solo_safe_control()->get_value (), get_address (msg));
+				ret = 0;
+			}
+		}
+	}
+	else if (!strncmp (sub_path, X_("solo"), 4)) {
+		//if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
+		if (!control_disabled && s->solo_control() && !s->is_master() && !s->is_monitor()) {
+			if (argc > (param_1)) {
+				if (s_int) {
+					s->solo_control()->set_value (yn ? 1.0 : 0.0, sur->usegroup);
+					ret = 0;
+				}
+			} else {
+				int_message (path, s->solo_control()->get_value (), get_address (msg));
+				ret = 0;
+			}
+		}
+	}
+	else if (!strncmp (sub_path, X_("monitor_input"), 13)) {
+		boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (s);
+		if (!control_disabled && track && track->monitoring_control()) {
+			std::bitset<32> mon_bs = track->monitoring_control()->get_value ();
+			//if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
+			if (argc > (param_1)) {
+				if (s_int) {
+					mon_bs[0] = yn ? 1 : 0;
+					track->monitoring_control()->set_value (mon_bs.to_ulong(), sur->usegroup);
+					ret = 0;
+				}
+			} else {
+				int_message (path, (int) mon_bs[0], get_address (msg));
+				ret = 0;
+			}
+		}
+	}
+	else if (!strncmp (sub_path, X_("monitor_disk"), 12)) {
+		boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (s);
+		if (!control_disabled && track && track->monitoring_control()) {
+			std::bitset<32> mon_bs = track->monitoring_control()->get_value ();
+			//if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
+			if (argc > (param_1)) {
+				if (s_int) {
+					mon_bs[1] = yn ? 1 : 0;
+					track->monitoring_control()->set_value (mon_bs.to_ulong(), sur->usegroup);
+					ret = 0;
+				}
+			} else {
+				int_message (path, (int) mon_bs[1], get_address (msg));
+				ret = 0;
+			}
+		}
+	}
+	else if (!strncmp (sub_path, X_("recenable"), 9)) {
+		if (!control_disabled && s->rec_enable_control()) {
+			//if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
+			if (argc > (param_1)) {
+				if (s_int) {
+					s->rec_enable_control()->set_value (yn, sur->usegroup);
+					ret = 0;
+				}
+			} else {
+				int_message (path, s->rec_enable_control()->get_value (), get_address (msg));
+				ret = 0;
+			}
+		}
+	}
+	else if (!strncmp (sub_path, X_("record_safe"), 11)) {
+		if (!control_disabled && s->rec_safe_control()) {
+			//if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
+			if (argc > (param_1)) {
+				if (s_int) {
+					s->rec_safe_control()->set_value (yn, sur->usegroup);
+					ret = 0;
+				}
+			} else {
+				int_message (path, s->rec_safe_control()->get_value (), get_address (msg));
+				ret = 0;
+			}
+		}
+	}
+	else if (!strncmp (sub_path, X_("hide"), 4)) {
+		if (!control_disabled) {
+			//if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
+			if (argc > (param_1)) {
+				if (s_int && yn != s->is_hidden ()) {
+					s->presentation_info().set_hidden ((bool) yn);
+					ret = 0;
+				} else {
+					PBD::warning << string_compose("OSC: value already %1 not changed.", yn) << endmsg;
+				}
+			} else {
+				int_message (path, s->is_hidden (), get_address (msg));
+				ret = 0;
+			}
+		}
+	}
+	else if (!strncmp (sub_path, X_("select"), 6)) {
+		if (argc > (param_1)) {
+			if (s_int) {
+				//ignore button release
+				if (!yn) return 0;
+				sur->expand_enable = false;
+				set_stripable_selection (s);
+				ret = 0;
+			}
+		} else {
+			int_message (path, s->is_selected(), get_address (msg));
+			ret = 0;
+		}
+	}
+	else if (!strncmp (sub_path, X_("polarity"), 8)) {
+		if (!control_disabled && s->phase_control()) {
+			//if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
+			if (argc > (param_1)) {
+				if (s_int) {
+					for (uint64_t i = 0; i < s->phase_control()->size(); i++) {
+						s->phase_control()->set_phase_invert(i, yn ? 1.0 : 0.0);
+						/** maybe consider adding a param for which channel
+						 * polarity/1 for channel one for example
+						 * at that point maybe do in own call
+						 */
+					}
+					ret = 0;
+				}
+			} else {
+				int inv = 0;
+				for (uint64_t i = 0; i < s->phase_control()->size(); i++) {
+					if (s->phase_control()->inverted (i)) {
+						// just check if any are inverted
+						inv = 1;
+					}
+				}
+				int_message (path, inv, get_address (msg));
+				ret = 0;
+			}
+		}
+	}
+	else if (!strncmp (sub_path, X_("name"), 4)) {
+		if (argc > (param_1)) {
+			if (types[param_1] == 's') {
+				if (!control_disabled) {
+					s->set_name(strng);
+					ret = 0;
+				}
+			}
+		} else {
+			text_message (path, s->name(), get_address (msg));
+			ret = 0;
+		}
+	}
+	else if (!strncmp (sub_path, X_("group"), 5)) {
+		if (!control_disabled) {
+			boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (s);
+			if (rt) {
+				RouteGroup *rg = rt->route_group();
+				if (argc > (param_1)) {
+					if (types[param_1] == 's') {
+
+
+						if (strng == "" || strng == " ") {
+							strng = "none";
+						}
+
+						RouteGroup* new_rg = session->route_group_by_name (strng);
+						if (rg) {
+							string old_group = rg->name();
+							if (strng == "none") {
+								if (rg->size () == 1) {
+									session->remove_route_group (*rg);
+								} else {
+									rg->remove (rt);
+								}
+								ret = 0;
+							} else if (strng != old_group) {
+								if (new_rg) {
+									// group exists switch to it
+									if (rg->size () == 1) {
+										session->remove_route_group (rg);
+									} else {
+										rg->remove (rt);
+									}
+									new_rg->add (rt);
+								} else {
+									rg->set_name (strng);
+								}
+								ret = 0;
+							} else {
+								// asked for same group
+								ret = 1;
+							}
+						} else {
+							if (strng == "none") {
+								ret = 1;
+							} else if (new_rg) {
+								new_rg->add (rt);
+								ret = 0;
+							} else {
+								// create new group with this strip in it
+								RouteGroup* new_rg = new RouteGroup (*session, strng);
+								session->add_route_group (new_rg);
+								new_rg->add (rt);
+								ret = 0;
+							}
+						}
+					}
+				} else {
+					if (rg) {
+						text_message (path, rg->name(), get_address (msg));
+					} else {
+						text_message (path, "none", get_address (msg));
+					}
+					ret = 0;
+				}
+			} else {
+				PBD::warning << "OSC: VCAs can not be part of a group." << endmsg;
+				return -1;
+			}
+		}
+	}
+
+	return ret;
+
+	/*
+	 * for reference
+
+		REGISTER_CALLBACK (serv, X_("/strip/sends"), "i", route_get_sends);
+		REGISTER_CALLBACK (serv, X_("/strip/send/gain"), "iif", route_set_send_gain_dB);
+		REGISTER_CALLBACK (serv, X_("/strip/send/fader"), "iif", route_set_send_fader);
+		REGISTER_CALLBACK (serv, X_("/strip/send/enable"), "iif", route_set_send_enable);
+		REGISTER_CALLBACK (serv, X_("/strip/receives"), "i", route_get_receives);
+
+		REGISTER_CALLBACK (serv, X_("/strip/plugin/list"), "i", route_plugin_list);
+		REGISTER_CALLBACK (serv, X_("/strip/plugin/parameter"), "iiif", route_plugin_parameter);
+		// prints to cerr only
+		REGISTER_CALLBACK (serv, X_("/strip/plugin/parameter/print"), "iii", route_plugin_parameter_print);
+		REGISTER_CALLBACK (serv, X_("/strip/plugin/activate"), "ii", route_plugin_activate);
+		REGISTER_CALLBACK (serv, X_("/strip/plugin/deactivate"), "ii", route_plugin_deactivate);
+		REGISTER_CALLBACK (serv, X_("/strip/plugin/descriptor"), "ii", route_plugin_descriptor);
+		REGISTER_CALLBACK (serv, X_("/strip/plugin/reset"), "ii", route_plugin_reset);
+	*/
+
+}
+
+int
+OSC::strip_state (const char *path, boost::shared_ptr<ARDOUR::Stripable> s, bool strp, lo_message msg)
+{
+	PBD::info << string_compose("OSC: strip_state path:%1", path) << endmsg;
+	// some things need the route
+	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (s);
+
+	lo_message reply = lo_message_new ();
+
+	if (boost::dynamic_pointer_cast<AudioTrack>(s)) {
+		lo_message_add_string (reply, "AT");
+	} else if (boost::dynamic_pointer_cast<MidiTrack>(s)) {
+		lo_message_add_string (reply, "MT");
+	} else if (boost::dynamic_pointer_cast<VCA>(s)) {
+		lo_message_add_string (reply, "V");
+	} else if (s->is_master()) {
+		lo_message_add_string (reply, "MA");
+	} else if (s->is_monitor()) {
+		lo_message_add_string (reply, "MO");
+	} else if (boost::dynamic_pointer_cast<Route>(s) && !boost::dynamic_pointer_cast<Track>(s)) {
+		if (!(s->presentation_info().flags() & PresentationInfo::MidiBus)) {
+			if (s->is_foldbackbus()) {
+				lo_message_add_string (reply, "FB");
+			} else {
+				lo_message_add_string (reply, "B");
+			}
+		} else {
+			lo_message_add_string (reply, "MB");
+		}
+	}
+
+	lo_message_add_string (reply, s->name().c_str());
+	if (r) {
+		// routes have inputs and outputs
+		lo_message_add_int32 (reply, r->n_inputs().n_audio());
+		lo_message_add_int32 (reply, r->n_outputs().n_audio());
+	} else {
+		// non-routes like VCAs don't
+		lo_message_add_int32 (reply, -1);
+		lo_message_add_int32 (reply, -1);
+	}
+	if (s->mute_control()) {
+		lo_message_add_int32 (reply, s->mute_control()->get_value());
+	} else {
+		lo_message_add_int32 (reply, -1);
+	}
+	if (s->solo_control()) {
+		lo_message_add_int32 (reply, s->solo_control()->get_value());
+	} else {
+		lo_message_add_int32 (reply, -1);
+	}
+	if (s->rec_enable_control()) {
+		lo_message_add_int32 (reply, s->rec_enable_control()->get_value());
+	} else {
+		lo_message_add_int32 (reply, -1);
+	}
+	lo_send_message (get_address (msg), X_(path), reply);
+	lo_message_free (reply);
+	return 0;
+}
 
 int
 OSC::set_automation (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg)
@@ -4159,217 +4500,6 @@ OSC::spill (const char *path, const char* types, lo_arg **argv, int argc, lo_mes
 }
 
 int
-OSC::route_mute (int ssid, int yn, lo_message msg)
-{
-	if (!session) return -1;
-	boost::shared_ptr<Stripable> s = get_strip (ssid, get_address (msg));
-	OSCSurface *sur = get_surface(get_address (msg));
-
-	if (s) {
-		if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
-			return float_message_with_id (X_("/strip/mute"), ssid, 0, sur->feedback[2], get_address (msg));
-		}
-		if (s->mute_control()) {
-			s->mute_control()->set_value (yn ? 1.0 : 0.0, sur->usegroup);
-			fake_touch (s->mute_control());
-			return 0;
-		}
-	}
-
-	return float_message_with_id (X_("/strip/mute"), ssid, 0, sur->feedback[2], get_address (msg));
-}
-
-int
-OSC::sel_mute (uint32_t yn, lo_message msg)
-{
-	OSCSurface *sur = get_surface(get_address (msg));
-	boost::shared_ptr<Stripable> s;
-	s = sur->select;
-	if (s) {
-		if (s->mute_control()) {
-			s->mute_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
-			fake_touch (s->mute_control());
-			return 0;
-		}
-	}
-	return float_message(X_("/select/mute"), 0, get_address (msg));
-}
-
-int
-OSC::route_solo (int ssid, int yn, lo_message msg)
-{
-	if (!session) return -1;
-	boost::shared_ptr<Stripable> s = get_strip (ssid, get_address (msg));
-	OSCSurface *sur = get_surface(get_address (msg));
-
-	if (s) {
-		if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
-			return float_message_with_id (X_("/strip/solo"), ssid, 0, sur->feedback[2], get_address (msg));
-		}
-		session->set_control (s->solo_control(), yn ? 1.0 : 0.0, sur->usegroup);
-	}
-
-	return float_message_with_id (X_("/strip/solo"), ssid, 0, sur->feedback[2], get_address (msg));
-}
-
-int
-OSC::route_solo_iso (int ssid, int yn, lo_message msg)
-{
-	if (!session) return -1;
-	boost::shared_ptr<Stripable> s = get_strip (ssid, get_address (msg));
-	OSCSurface *sur = get_surface(get_address (msg));
-
-	if (s) {
-		if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
-			return float_message_with_id (X_("/strip/solo_iso"), ssid, 0, sur->feedback[2], get_address (msg));
-		}
-		if (s->solo_isolate_control()) {
-			s->solo_isolate_control()->set_value (yn ? 1.0 : 0.0, sur->usegroup);
-			return 0;
-		}
-	}
-
-	return float_message_with_id (X_("/strip/solo_iso"), ssid, 0, sur->feedback[2], get_address (msg));
-}
-
-int
-OSC::route_solo_safe (int ssid, int yn, lo_message msg)
-{
-	if (!session) return -1;
-	boost::shared_ptr<Stripable> s = get_strip (ssid, lo_message_get_source (msg));
-	OSCSurface *sur = get_surface(get_address (msg));
-
-	if (s) {
-		if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
-			return float_message_with_id (X_("/strip/solo_safe"), ssid, 0, sur->feedback[2], get_address (msg));
-		}
-		if (s->solo_safe_control()) {
-			s->solo_safe_control()->set_value (yn ? 1.0 : 0.0, sur->usegroup);
-			return 0;
-		}
-	}
-
-	return float_message_with_id (X_("/strip/solo_safe"), ssid, 0, sur->feedback[2], get_address (msg));
-}
-
-int
-OSC::sel_solo (uint32_t yn, lo_message msg)
-{
-	OSCSurface *sur = get_surface(get_address (msg));
-	boost::shared_ptr<Stripable> s;
-	s = sur->select;
-	if (s) {
-		if (s->solo_control()) {
-			session->set_control (s->solo_control(), yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
-		}
-	}
-	return float_message(X_("/select/solo"), 0, get_address (msg));
-}
-
-int
-OSC::sel_solo_iso (uint32_t yn, lo_message msg)
-{
-	OSCSurface *sur = get_surface(get_address (msg));
-	boost::shared_ptr<Stripable> s;
-	s = sur->select;
-	if (s) {
-		if (s->solo_isolate_control()) {
-			s->solo_isolate_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
-			return 0;
-		}
-	}
-	return float_message(X_("/select/solo_iso"), 0, get_address (msg));
-}
-
-int
-OSC::sel_solo_safe (uint32_t yn, lo_message msg)
-{
-	OSCSurface *sur = get_surface(get_address (msg));
-	boost::shared_ptr<Stripable> s;
-	s = sur->select;
-	if (s) {
-		if (s->solo_safe_control()) {
-			s->solo_safe_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
-			return 0;
-		}
-	}
-	return float_message(X_("/select/solo_safe"), 0, get_address (msg));
-}
-
-int
-OSC::sel_recenable (uint32_t yn, lo_message msg)
-{
-	OSCSurface *sur = get_surface(get_address (msg));
-	boost::shared_ptr<Stripable> s;
-	s = sur->select;
-	if (s) {
-		if (s->rec_enable_control()) {
-			s->rec_enable_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
-			if (s->rec_enable_control()->get_value()) {
-				return 0;
-			}
-		}
-	}
-	return float_message(X_("/select/recenable"), 0, get_address (msg));
-}
-
-int
-OSC::route_recenable (int ssid, int yn, lo_message msg)
-{
-	if (!session) return -1;
-	boost::shared_ptr<Stripable> s = get_strip (ssid, get_address (msg));
-	OSCSurface *sur = get_surface(get_address (msg));
-
-	if (s) {
-		if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
-			return float_message_with_id (X_("/strip/recenable"), ssid, 0, sur->feedback[2], get_address (msg));
-		}
-		if (s->rec_enable_control()) {
-			s->rec_enable_control()->set_value (yn, sur->usegroup);
-			if (s->rec_enable_control()->get_value()) {
-				return 0;
-			}
-		}
-	}
-	return float_message_with_id (X_("/strip/recenable"), ssid, 0, sur->feedback[2], get_address (msg));
-}
-
-int
-OSC::route_rename (int ssid, char *newname, lo_message msg) {
-	if (!session) {
-		return -1;
-	}
-	OSCSurface *sur = get_surface(get_address (msg));
-	boost::shared_ptr<Stripable> s = get_strip(ssid, get_address(msg));
-
-	if (s) {
-		if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
-			text_message_with_id (X_("/strip/name"), ssid, string_compose ("%1-Send", s->name()), sur->feedback[2], get_address(msg));
-			return 1;
-		}
-		s->set_name(std::string(newname));
-	}
-
-	return 0;
-}
-
-int
-OSC::sel_rename (char *newname, lo_message msg) {
-	if (!session) {
-		return -1;
-	}
-
-	OSCSurface *sur = get_surface(get_address (msg));
-	boost::shared_ptr<Stripable> s;
-	s = sur->select;
-	if (s) {
-		s->set_name(std::string(newname));
-	}
-
-	return 0;
-}
-
-int
 OSC::sel_comment (char *newcomment, lo_message msg) {
 	if (!session) {
 		return -1;
@@ -4452,287 +4582,19 @@ OSC::sel_new_personal_send (char *foldback, lo_message msg)
 }
 
 int
-OSC::strip_group (int ssid, char *group, lo_message msg) {
-	if (!session) {
-		return -1;
-	}
-	boost::shared_ptr<Stripable> s = get_strip(ssid, get_address(msg));
-	return strip_select_group (s, group);
-}
-
-int
-OSC::sel_group (char *group, lo_message msg) {
-	if (!session) {
-		return -1;
-	}
-	OSCSurface *sur = get_surface(get_address (msg));
-	boost::shared_ptr<Stripable> s;
-	s = sur->select;
-	return strip_select_group (s, group);
-}
-
-int
-OSC::strip_select_group (boost::shared_ptr<Stripable> s, char *group)
-{
-	string grp = group;
-	if (grp == "" || grp == " ") {
-			grp = "none";
-		}
-
-	if (s) {
-		boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (s);
-		if (!rt) {
-			PBD::warning << "OSC: VCAs can not be part of a group." << endmsg;
-			return -1;
-		}
-		RouteGroup *rg = rt->route_group();
-		RouteGroup* new_rg = session->route_group_by_name (grp);
-		if (rg) {
-			string old_group = rg->name();
-			if (grp == "none") {
-				if (rg->size () == 1) {
-					session->remove_route_group (*rg);
-				} else {
-					rg->remove (rt);
-				}
-			} else if (grp != old_group) {
-				if (new_rg) {
-					// group exists switch to it
-					if (rg->size () == 1) {
-						session->remove_route_group (rg);
-					} else {
-						rg->remove (rt);
-					}
-					new_rg->add (rt);
-				} else {
-					rg->set_name (grp);
-				}
-			} else {
-				return 0;
-			}
-		} else {
-			if (grp == "none") {
-				return 0;
-			} else if (new_rg) {
-				new_rg->add (rt);
-			} else {
-				// create new group with this strip in it
-				RouteGroup* new_rg = new RouteGroup (*session, grp);
-				session->add_route_group (new_rg);
-				new_rg->add (rt);
-			}
-		}
-	}
-	return 0;
-}
-
-int
-OSC::sel_recsafe (uint32_t yn, lo_message msg)
-{
-	OSCSurface *sur = get_surface(get_address (msg));
-	boost::shared_ptr<Stripable> s;
-	s = sur->select;
-	if (s) {
-		if (s->rec_safe_control()) {
-			s->rec_safe_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
-			if (s->rec_safe_control()->get_value()) {
-				return 0;
-			}
-		}
-	}
-	return float_message(X_("/select/record_safe"), 0, get_address (msg));
-}
-
-int
-OSC::route_recsafe (int ssid, int yn, lo_message msg)
-{
-	if (!session) return -1;
-	boost::shared_ptr<Stripable> s = get_strip (ssid, get_address (msg));
-	OSCSurface *sur = get_surface(get_address (msg));
-	if (s) {
-		if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
-			return float_message_with_id (X_("/strip/record_safe"), ssid, 0, sur->feedback[2], get_address (msg));
-		}
-		if (s->rec_safe_control()) {
-			s->rec_safe_control()->set_value (yn, sur->usegroup);
-			if (s->rec_safe_control()->get_value()) {
-				return 0;
-			}
-		}
-	}
-	return float_message_with_id (X_("/strip/record_safe"), ssid, 0, sur->feedback[2], get_address (msg));
-}
-
-int
-OSC::route_monitor_input (int ssid, int yn, lo_message msg)
-{
-	if (!session) return -1;
-	boost::shared_ptr<Stripable> s = get_strip (ssid, get_address (msg));
-	OSCSurface *sur = get_surface(get_address (msg));
-
-	if (s) {
-		if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
-			return float_message_with_id (X_("/strip/monitor_input"), ssid, 0, sur->feedback[2], get_address (msg));
-		}
-		boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (s);
-		if (track) {
-			if (track->monitoring_control()) {
-				std::bitset<32> value = track->monitoring_control()->get_value ();
-				value[0] = yn ? 1 : 0;
-				track->monitoring_control()->set_value (value.to_ulong(), sur->usegroup);
-				return 0;
-			}
-		}
-	}
-
-	return float_message_with_id (X_("/strip/monitor_input"), ssid, 0, sur->feedback[2], get_address (msg));
-}
-
-int
-OSC::sel_monitor_input (uint32_t yn, lo_message msg)
-{
-	OSCSurface *sur = get_surface(get_address (msg));
-	boost::shared_ptr<Stripable> s;
-	s = sur->select;
-	if (s) {
-		boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (s);
-		if (track) {
-			if (track->monitoring_control()) {
-				std::bitset<32> value = track->monitoring_control()->get_value ();
-				value[0] = yn ? 1 : 0;
-				track->monitoring_control()->set_value (value.to_ulong(), sur->usegroup);
-				return 0;
-			}
-		}
-	}
-	return float_message(X_("/select/monitor_input"), 0, get_address (msg));
-}
-
-int
-OSC::route_monitor_disk (int ssid, int yn, lo_message msg)
-{
-	if (!session) return -1;
-	boost::shared_ptr<Stripable> s = get_strip (ssid, get_address (msg));
-	OSCSurface *sur = get_surface(get_address (msg));
-
-	if (s) {
-		if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
-			return float_message_with_id (X_("/strip/monitor_disk"), ssid, 0, sur->feedback[2], get_address (msg));
-		}
-		boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (s);
-		if (track) {
-			if (track->monitoring_control()) {
-				std::bitset<32> value = track->monitoring_control()->get_value ();
-				value[1] = yn ? 1 : 0;
-				track->monitoring_control()->set_value (value.to_ulong(), sur->usegroup);
-				return 0;
-			}
-		}
-	}
-
-	return float_message_with_id (X_("/strip/monitor_disk"), ssid, 0, sur->feedback[2], get_address (msg));
-}
-
-int
-OSC::sel_monitor_disk (uint32_t yn, lo_message msg)
-{
-	OSCSurface *sur = get_surface(get_address (msg));
-	boost::shared_ptr<Stripable> s;
-	s = sur->select;
-	if (s) {
-		boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (s);
-		if (track) {
-			if (track->monitoring_control()) {
-				std::bitset<32> value = track->monitoring_control()->get_value ();
-				value[1] = yn ? 1 : 0;
-				track->monitoring_control()->set_value (value.to_ulong(), sur->usegroup);
-				return 0;
-			}
-		}
-	}
-	return float_message(X_("/select/monitor_disk"), 0, get_address (msg));
-}
-
-
-int
-OSC::strip_phase (int ssid, int yn, lo_message msg)
-{
-	if (!session) return -1;
-	boost::shared_ptr<Stripable> s = get_strip (ssid, get_address (msg));
-	OSCSurface *sur = get_surface(get_address (msg));
-
-	if (s) {
-		if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
-			return float_message_with_id (X_("/strip/polarity"), ssid, 0, sur->feedback[2], get_address (msg));
-		}
-		if (s->phase_control()) {
-			s->phase_control()->set_value (yn ? 1.0 : 0.0, sur->usegroup);
-			return 0;
-		}
-	}
-
-	return float_message_with_id (X_("/strip/polarity"), ssid, 0, sur->feedback[2], get_address (msg));
-}
-
-int
-OSC::sel_phase (uint32_t yn, lo_message msg)
-{
-	OSCSurface *sur = get_surface(get_address (msg));
-	boost::shared_ptr<Stripable> s;
-	s = sur->select;
-	if (s) {
-		if (s->phase_control()) {
-			s->phase_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
-			return 0;
-		}
-	}
-	return float_message(X_("/select/polarity"), 0, get_address (msg));
-}
-
-int
-OSC::strip_expand (int ssid, int yn, lo_message msg)
-{
-	OSCSurface *sur = get_surface(get_address (msg));
-	boost::shared_ptr<Stripable> s = get_strip (ssid, get_address (msg));
-	if (s) {
-		sur->expand_strip = s;
-	}
-	sur->expand_enable = (bool) yn;
-	sur->expand = ssid;
-	boost::shared_ptr<Stripable> sel;
-	if (yn) {
-		sel = get_strip (ssid, get_address (msg));
-	} else {
-		sel = boost::shared_ptr<Stripable> ();
-	}
-
-	return _strip_select (sel, get_address (msg));
-}
-
-int
-OSC::strip_hide (int ssid, int state, lo_message msg)
-{
-	boost::shared_ptr<Stripable> s = get_strip (ssid, get_address (msg));
-	OSCSurface *sur = get_surface(get_address (msg));
-
-	if (s) {
-		if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
-			return float_message_with_id (X_("/strip/hide"), ssid, 0, sur->feedback[2], get_address (msg));
-		}
-		if (state != s->is_hidden ()) {
-			s->presentation_info().set_hidden ((bool) state);
-		}
-	}
-	return 0;
-}
-
-int
 OSC::_strip_select (boost::shared_ptr<Stripable> s, lo_address addr)
 {
 	if (!session) {
 		return -1;
 	}
 	OSCSurface *sur = get_surface(addr, true);
+	return _strip_select2 (s, sur, addr);
+}
+
+int
+OSC::_strip_select2 (boost::shared_ptr<Stripable> s, OSCSurface *sur, lo_address addr)
+{
+	// this allows get_surface  to call this part without calling itself
 	boost::weak_ptr<Stripable> o_sel = sur->select;
 	boost::shared_ptr<Stripable> old_sel= o_sel.lock ();
 	boost::weak_ptr<Stripable> o_expand = sur->expand_strip;
@@ -4826,29 +4688,6 @@ OSC::processor_changed (string address)
 }
 
 int
-OSC::strip_gui_select (int ssid, int yn, lo_message msg)
-{
-	//ignore button release
-	if (!yn) return 0;
-
-	if (!session) {
-		return -1;
-	}
-	OSCSurface *sur = get_surface(get_address (msg));
-	boost::shared_ptr<Stripable> s = get_strip (ssid, get_address (msg));
-	if (s) {
-		sur->expand_enable = false;
-		set_stripable_selection (s);
-	} else {
-		if ((int) (sur->feedback.to_ulong())) {
-			float_message_with_id (X_("/strip/select"), ssid, 0, sur->feedback[2], get_address (msg));
-		}
-	}
-
-	return 0;
-}
-
-int
 OSC::sel_expand (uint32_t state, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
@@ -4931,313 +4770,6 @@ OSC::sel_delta (int delta, lo_message msg)
 		return 0;
 	}
 	return -1;
-}
-
-int
-OSC::route_set_gain_dB (int ssid, float dB, lo_message msg)
-{
-	if (!session) {
-		return -1;
-	}
-	OSCSurface *sur = get_surface(get_address (msg));
-	boost::shared_ptr<Stripable> s = get_strip (ssid, get_address (msg));
-	if (s) {
-		boost::shared_ptr<GainControl> gain_control;
-		if (sur->temp_mode == BusOnly && get_send (s, get_address (msg))) {
-			gain_control = get_send(s, get_address (msg))->gain_control();
-		} else {
-			gain_control = s->gain_control();
-		}
-		float abs;
-		if (gain_control) {
-			if (dB < -192) {
-				abs = 0;
-			} else {
-				abs = dB_to_coefficient (dB);
-				float top = gain_control->upper();
-				if (abs > top) {
-					abs = top;
-				}
-			}
-			fake_touch (gain_control);
-			gain_control->set_value (abs, sur->usegroup);
-			return 0;
-		}
-	}
-	return float_message_with_id (X_("/strip/gain"), ssid, -193, sur->feedback[2], get_address (msg));
-}
-
-int
-OSC::sel_gain (float val, lo_message msg)
-{
-	OSCSurface *sur = get_surface(get_address (msg));
-	boost::shared_ptr<Stripable> s;
-	s = sur->select;
-	if (s) {
-		float abs;
-		if (s->gain_control()) {
-			if (val < -192) {
-				abs = 0;
-			} else {
-				abs = dB_to_coefficient (val);
-				float top = s->gain_control()->upper();
-				if (abs > top) {
-					abs = top;
-				}
-			}
-			fake_touch (s->gain_control());
-			s->gain_control()->set_value (abs, PBD::Controllable::NoGroup);
-			return 0;
-		}
-	}
-	return float_message(X_("/select/gain"), -193, get_address (msg));
-}
-
-int
-OSC::sel_dB_delta (float delta, lo_message msg)
-{
-	OSCSurface *sur = get_surface(get_address (msg));
-	boost::shared_ptr<Stripable> s;
-	s = sur->select;
-	if (s) {
-		if (s->gain_control()) {
-			float dB = accurate_coefficient_to_dB (s->gain_control()->get_value()) + delta;
-			float abs;
-			if (dB < -192) {
-				abs = 0;
-			} else {
-				abs = dB_to_coefficient (dB);
-				float top = s->gain_control()->upper();
-				if (abs > top) {
-					abs = top;
-				}
-			}
-			fake_touch (s->gain_control());
-			s->gain_control()->set_value (abs, PBD::Controllable::NoGroup);
-			return 0;
-		}
-	}
-	return float_message(X_("/select/gain"), -193, get_address (msg));
-}
-
-int
-OSC::route_set_gain_fader (int ssid, float pos, lo_message msg)
-{
-	if (!session) {
-		return -1;
-	}
-	boost::shared_ptr<Stripable> s = get_strip (ssid, get_address (msg));
-	OSCSurface *sur = get_surface(get_address (msg));
-
-	if (s) {
-		boost::shared_ptr<GainControl> gain_control;
-		if (sur->temp_mode == BusOnly && get_send (s, get_address (msg))) {
-			gain_control = get_send(s, get_address (msg))->gain_control();
-		} else {
-			gain_control = s->gain_control();
-		}
-		if (gain_control) {
-			fake_touch (gain_control);
-			gain_control->set_value (gain_control->interface_to_internal (pos), sur->usegroup);
-		} else {
-			return float_message_with_id (X_("/strip/fader"), ssid, 0, sur->feedback[2], get_address (msg));
-		}
-	} else {
-		return float_message_with_id (X_("/strip/fader"), ssid, 0, sur->feedback[2], get_address (msg));
-	}
-	return 0;
-}
-
-int
-OSC::strip_db_delta (int ssid, float delta, lo_message msg)
-{
-	if (!session) return -1;
-	boost::shared_ptr<Stripable> s = get_strip (ssid, get_address (msg));
-	OSCSurface *sur = get_surface(get_address (msg));
-	if (s) {
-		boost::shared_ptr<GainControl> gain_control;
-		if (sur->temp_mode == BusOnly && get_send (s, get_address (msg))) {
-			gain_control = get_send(s, get_address (msg))->gain_control();
-		} else {
-			gain_control = s->gain_control();
-		}
-		float db = accurate_coefficient_to_dB (gain_control->get_value()) + delta;
-		float abs;
-		if (db < -192) {
-			abs = 0;
-		} else {
-			abs = dB_to_coefficient (db);
-			float top = gain_control->upper();
-			if (abs > top) {
-				abs = top;
-			}
-		}
-		gain_control->set_value (abs, sur->usegroup);
-		return 0;
-	}
-	return -1;
-}
-
-int
-OSC::sel_fader (float val, lo_message msg)
-{
-	OSCSurface *sur = get_surface(get_address (msg));
-	boost::shared_ptr<Stripable> s;
-	s = sur->select;
-	if (s) {
-		if (s->gain_control()) {
-			fake_touch (s->gain_control());
-			s->gain_control()->set_value (s->gain_control()->interface_to_internal (val), PBD::Controllable::NoGroup);
-			return 0;
-		}
-	}
-	return float_message(X_("/select/fader"), 0, get_address (msg));
-}
-
-int
-OSC::route_set_trim_abs (int ssid, float level, lo_message msg)
-{
-	if (!session) return -1;
-	boost::shared_ptr<Stripable> s = get_strip (ssid, get_address (msg));
-	OSCSurface *sur = get_surface(get_address (msg));
-
-	if (s) {
-		if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
-			return float_message_with_id (X_("/strip/trimdB"), ssid, 0, sur->feedback[2], get_address (msg));
-		}
-		if (s->trim_control()) {
-			s->trim_control()->set_value (level, sur->usegroup);
-			fake_touch (s->trim_control());
-			return 0;
-		}
-
-	}
-
-	return -1;
-}
-
-int
-OSC::route_set_trim_dB (int ssid, float dB, lo_message msg)
-{
-	OSCSurface *sur = get_surface(get_address (msg));
-	int ret;
-	ret = route_set_trim_abs(ssid, dB_to_coefficient (dB), msg);
-	if (ret != 0) {
-		return float_message_with_id (X_("/strip/trimdB"), ssid, 0, sur->feedback[2], get_address (msg));
-	}
-
-return 0;
-}
-
-int
-OSC::sel_trim (float val, lo_message msg)
-{
-	OSCSurface *sur = get_surface(get_address (msg));
-	boost::shared_ptr<Stripable> s;
-	s = sur->select;
-	if (s) {
-		if (s->trim_control()) {
-			s->trim_control()->set_value (dB_to_coefficient (val), PBD::Controllable::NoGroup);
-			fake_touch (s->trim_control());
-			return 0;
-		}
-	}
-	return float_message(X_("/select/trimdB"), 0, get_address (msg));
-}
-
-int
-OSC::sel_hide (uint32_t state, lo_message msg)
-{
-	OSCSurface *sur = get_surface(get_address (msg));
-	boost::shared_ptr<Stripable> s;
-	s = sur->select;
-	if (s) {
-		if (state != s->is_hidden ()) {
-			s->presentation_info().set_hidden ((bool) state);
-		}
-	}
-	return 0;
-}
-
-int
-OSC::sel_pan_position (float val, lo_message msg)
-{
-	OSCSurface *sur = get_surface(get_address (msg));
-	boost::shared_ptr<Stripable> s;
-	s = sur->select;
-	if (s) {
-		if(s->pan_azimuth_control()) {
-			s->pan_azimuth_control()->set_value (s->pan_azimuth_control()->interface_to_internal (val), PBD::Controllable::NoGroup);
-			fake_touch (s->pan_azimuth_control());
-			return 0;
-		}
-	}
-	return float_message(X_("/select/pan_stereo_position"), 0.5, get_address (msg));
-}
-
-int
-OSC::sel_pan_width (float val, lo_message msg)
-{
-	OSCSurface *sur = get_surface(get_address (msg));
-	boost::shared_ptr<Stripable> s;
-	s = sur->select;
-	if (s) {
-		if (s->pan_width_control()) {
-			s->pan_width_control()->set_value (s->pan_width_control()->interface_to_internal (val), PBD::Controllable::NoGroup);
-			fake_touch (s->pan_width_control());
-			return 0;
-		}
-	}
-	return float_message(X_("/select/pan_stereo_width"), 1, get_address (msg));
-}
-
-int
-OSC::route_set_pan_stereo_position (int ssid, float pos, lo_message msg)
-{
-	if (!session) return -1;
-	boost::shared_ptr<Stripable> s = get_strip (ssid, get_address (msg));
-	OSCSurface *sur = get_surface(get_address (msg));
-
-	if (s) {
-		boost::shared_ptr<PBD::Controllable> pan_control = boost::shared_ptr<PBD::Controllable>();
-		if (sur->temp_mode == BusOnly && get_send (s, get_address (msg))) {
-			boost::shared_ptr<ARDOUR::Send> send = get_send (s, get_address (msg));
-			if (send->pan_outs() > 1) {
-				pan_control = send->panner_shell()->panner()->pannable()->pan_azimuth_control;
-			}
-		} else {
-			pan_control = s->pan_azimuth_control();
-		}
-		if(pan_control) {
-			pan_control->set_value (s->pan_azimuth_control()->interface_to_internal (pos), sur->usegroup);
-			boost::shared_ptr<AutomationControl>pan_automate = boost::dynamic_pointer_cast<AutomationControl> (pan_control);
-			fake_touch (pan_automate);
-			return 0;
-		}
-	}
-
-	return float_message_with_id (X_("/strip/pan_stereo_position"), ssid, 0.5, sur->feedback[2], get_address (msg));
-}
-
-int
-OSC::route_set_pan_stereo_width (int ssid, float pos, lo_message msg)
-{
-	if (!session) return -1;
-	boost::shared_ptr<Stripable> s = get_strip (ssid, get_address (msg));
-	OSCSurface *sur = get_surface(get_address (msg));
-
-	if (s) {
-		if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
-			return float_message_with_id (X_("/strip/pan_stereo_width"), ssid, 1, sur->feedback[2], get_address (msg));
-		}
-		if (s->pan_width_control()) {
-			s->pan_width_control()->set_value (pos, sur->usegroup);
-			fake_touch (s->pan_width_control());
-			return 0;
-		}
-	}
-
-	return float_message_with_id (X_("/strip/pan_stereo_width"), ssid, 1, sur->feedback[2], get_address (msg));
 }
 
 int
