@@ -82,9 +82,9 @@ FoldbackSend::FoldbackSend (boost::shared_ptr<Send> snd, boost::shared_ptr<ARDOU
 	_button.set_led_left (true);
 	_button.signal_led_clicked.connect (sigc::mem_fun (*this, &FoldbackSend::led_clicked));
 	if (_send_proc->get_pre_fader ()) {
-		_button.set_name ("processor prefader");
+		_button.set_name ("foldback prefader");
 	} else {
-		_button.set_name ("processor postfader");
+		_button.set_name ("foldback postfader");
 	}
 	_button.set_layout_ellipsize_width (PX_SCALE (_width) * PANGO_SCALE);
 	_button.set_text_ellipsize (Pango::ELLIPSIZE_END);

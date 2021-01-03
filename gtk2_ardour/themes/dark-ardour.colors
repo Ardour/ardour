@@ -321,6 +321,14 @@
     <ColorAlias name="processor prefader: fill" alias="widget:ruddy"/>
     <ColorAlias name="processor prefader: fill active" alias="widget:ruddy"/>
     <ColorAlias name="processor prefader: led active" alias="alert:green"/>
+
+    <ColorAlias name="foldback postfader: fill" alias="widget:blue darker"/>
+    <ColorAlias name="foldback postfader: fill active" alias="widget:blue darker"/>
+    <ColorAlias name="foldback postfader: led active" alias="alert:green"/>
+    <ColorAlias name="foldback prefader: fill" alias="widget:blue darker"/>
+    <ColorAlias name="foldback prefader: fill active" alias="widget:blue darker"/>
+    <ColorAlias name="foldback prefader: led active" alias="alert:green"/>
+
     <ColorAlias name="processor sidechain: fill" alias="alert:orange"/>
     <ColorAlias name="processor sidechain: led active" alias="alert:green"/>
     <ColorAlias name="processor stub: fill" alias="neutral:background2"/>
