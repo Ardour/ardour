@@ -131,6 +131,7 @@ Editor::initialize_rulers ()
 	ruler_grabbed_widget = 0;
 
 	Pango::FontDescription font (UIConfiguration::instance().get_SmallerFont());
+	Pango::FontDescription larger_font (UIConfiguration::instance().get_SmallFont());
 
 	_timecode_metric = new TimecodeMetric (this);
 	_bbt_metric = new BBTMetric (this);
@@ -157,6 +158,7 @@ Editor::initialize_rulers ()
 	bbt_ruler = new ArdourCanvas::Ruler (_time_markers_group, *_bbt_metric,
 	                                     ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, timebar_height));
 	bbt_ruler->set_font_description (font);
+	bbt_ruler->set_second_font_description (larger_font);
 	CANVAS_DEBUG_NAME (bbt_ruler, "bbt ruler");
 	timecode_nmarks = 0;
 
