@@ -271,6 +271,7 @@ FoldbackSend::set_tooltip ()
 	std::string tt = ARDOUR::value_as_string (lc->desc (), lc->get_value ());
 	string      sm = Gtkmm2ext::markup_escape_text (tt);
 	_slider_persistant_tooltip.set_tip (sm);
+	_slider.set_text (sm);
 }
 
 Menu*
