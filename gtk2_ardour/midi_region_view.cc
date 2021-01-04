@@ -1105,9 +1105,6 @@ MidiRegionView::get_events (Events& e, Evoral::Sequence<Temporal::Beats>::NoteOp
 void
 MidiRegionView::redisplay_model()
 {
-	cerr << "REDISPLAY\n";
-	PBD::stacktrace (cout, 20);
-
 	if (_active_notes) {
 		// Currently recording
 		const samplecnt_t zoom = trackview.editor().get_current_zoom();
