@@ -87,8 +87,8 @@ RegionPeakCursor::set (AudioRegionView* arv, samplepos_t when, samplecnt_t sampl
 	assert (ar);
 	assert (ar->n_channels () > 0);
 
-	sampleoffset_t s = when - ar->position ();
-	if (s < 0 || s > ar->length ()) {
+	sampleoffset_t s = when - ar->position_sample ();
+	if (s < 0 || s > ar->length_samples ()) {
 		hide ();
 		return;
 	}
@@ -120,7 +120,7 @@ RegionPeakCursor::set (AudioRegionView* arv, samplepos_t when, samplecnt_t sampl
 
 	/* position relative to editor origin */
 	ArdourCanvas::Duple pos  = arv->get_canvas_group ()->item_to_window (_canvas_text->parent ()->position ());
-	double              xpos = pos.x + floor ((double)(when - ar->position ()) / samples_per_pixel);
+	double              xpos = pos.x + floor ((double)(when - ar->position_sample ()) / samples_per_pixel);
 
 	_canvas_text->set_x_position (xpos + 3);
 	_canvas_text->set_y_position (pos.y + 3);
