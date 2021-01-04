@@ -131,7 +131,7 @@ Editor::initialize_rulers ()
 	ruler_grabbed_widget = 0;
 
 	Pango::FontDescription font (UIConfiguration::instance().get_SmallerFont());
-	Pango::FontDescription larger_font (UIConfiguration::instance().get_SmallFont());
+	Pango::FontDescription larger_font (UIConfiguration::instance().get_SmallBoldFont());
 
 	_timecode_metric = new TimecodeMetric (this);
 	_bbt_metric = new BBTMetric (this);
