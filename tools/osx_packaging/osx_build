@@ -444,12 +444,18 @@ while [ true ] ; do
 			continue
 		fi
 		# libffi contains "S" (other section symbols) that should not be stripped.
-		if [[ $file == *"libffi"* ]] ; then
+		if [[ $file = *"libffi"* ]] ; then
 			continue
 		fi
 
 		if test x$STRIP != x ; then
-			strip -u -r -arch all $file &>/dev/null
+			# NSS is dynamically loaded, symbols cannot be stripped
+			if [[ $file = "libnspr4.dylib" -o $file = "libplds4.dylib" ]] ; then
+				# only remove debug and local symbols
+				strip -S -x -u -r -arch all $file &>/dev/null
+			else
+				strip -u -r -arch all $file &>/dev/null
+			fi
 		fi
 
 		deps=`otool -L $file | awk '{print $1}' | egrep "($GTKSTACK_ROOT|/opt/|/local/|libs/$STDCPP)" | grep -v 'libjack\.' | grep -v "$(basename $file)"`
