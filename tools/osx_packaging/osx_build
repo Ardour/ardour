@@ -450,7 +450,7 @@ while [ true ] ; do
 
 		if test x$STRIP != x ; then
 			# NSS is dynamically loaded, symbols cannot be stripped
-			if [[ $file = "libnspr4.dylib" -o $file = "libplds4.dylib" ]] ; then
+			if test "$file" = "libnspr4.dylib" -o "$file" = "libplds4.dylib"; then
 				# only remove debug and local symbols
 				strip -S -x -u -r -arch all $file &>/dev/null
 			else
