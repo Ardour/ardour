@@ -353,8 +353,7 @@ Editor::mouse_add_new_meter_event (timepos_t pos)
 		return;
 	}
 
-	TempoMap::SharedPtr map (TempoMap::write_copy());
-	MeterDialog meter_dialog (map, pos, _("add"));
+	MeterDialog meter_dialog (TempoMap::use(), pos, _("add"));
 
 	switch (meter_dialog.run ()) {
 	case RESPONSE_ACCEPT:
@@ -362,6 +361,8 @@ Editor::mouse_add_new_meter_event (timepos_t pos)
 	default:
 		return;
 	}
+
+	TempoMap::SharedPtr map (TempoMap::write_copy());
 
 	double bpb = meter_dialog.get_bpb ();
 	bpb = max (1.0, bpb); // XXX is this a reasonable limit?
