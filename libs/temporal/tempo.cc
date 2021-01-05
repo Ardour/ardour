@@ -1126,19 +1126,59 @@ TempoMap::move_meter (MeterPoint const & mp, timepos_t const & when, bool push)
 
 	switch (time_domain()) {
 	case AudioTime: {
+
+		/* Find TempoMetric *prior* to the intended new location, * using superclock position */
+
 		for (t = _tempos.begin(), prev_t = _tempos.end(); t != _tempos.end() && t->sclock() < sc; ++t) { prev_t = t; }
 		for (m = _meters.begin(), prev_m = _meters.end(); m != _meters.end() && m->sclock() < sc && *m != mp; ++m) { prev_m = m; }
 		assert (prev_m != _meters.end());
 		if (prev_t == _tempos.end()) { prev_t = _tempos.begin(); }
 		TempoMetric metric (*prev_t, *prev_m);
+
+		/* check the duration of 1 bar here. If we're not more than
+		 * half-way to the next bar (in whatever the appropriate
+		 * direction is), don't move
+		 */
+
+		const superclock_t one_bar = metric.superclocks_per_bar (TEMPORAL_SAMPLE_RATE);
+		if (abs (sc - mp.sclock()) < one_bar / 2) {
+			return false;
+		}
+
+		/* compute the BBT at the given superclock position, given the prior TempoMetric */
+
 		bbt = metric.bbt_at (sc);
-		bbt = metric.meter().round_to_bar (bbt);
+
+		/* meter changes must fall on a bar change */
+
+		if (round_up) {
+			bbt = metric.meter().round_up_to_bar (bbt);
+		} else {
+			bbt = metric.meter().round_down_to_bar (bbt);
+		}
+
+		/* Repeat using the computed (new) BBT location */
+
 		for (m = _meters.begin(), prev_m = _meters.end(); m != _meters.end() && m->bbt() < bbt && *m != mp; ++m) {prev_m = m; }
 		for (t = _tempos.begin(), prev_t = _tempos.end(); t != _tempos.end() && t->bbt() < bbt; ++t) { prev_t = t; }
-		assert (prev_m != _meters.end());
+		if (prev_m == _meters.end()) {
+			/* given position is going to put us over the initial
+			meter. Not allowed for a meter move.
+			*/
+			return false;
+		}
 		if (prev_t == _tempos.end()) { prev_t = _tempos.begin(); }
 		metric = TempoMetric (*prev_t, *prev_m);
+
+		/* recompute the superclock position of the new BBT position,
+		 * since this is what we'll use to set the meter point.
+		 */
+
+
 		sc = metric.superclock_at (bbt);
+
+		/* check to see if there's already a meter point at that location */
+
 		for (m = _meters.begin(), prev_m = _meters.end(); m != _meters.end(); ++m) {
 			if (&*m != &mp) {
 				if (m->sclock() == sc) {
