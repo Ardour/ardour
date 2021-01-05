@@ -572,9 +572,18 @@ TempoMetric::bbt_at (superclock_t sc) const
 	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("qn @ %1 = %2, meter @ %3\n", sc, _tempo->quarters_at_superclock (sc), _meter->beats()));
 
 	const Beats dq = _tempo->quarters_at_superclock (sc) - _meter->beats();
-	const BBT_Offset bbt_offset (0, dq.get_beats(), dq.get_ticks());
 
-	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("BBT offset from meter: %1\n", bbt_offset));
+	/* dq is delta in quarters (beats). Convert to delta in note types of
+	   the current meter, which we'll call "grid"
+	*/
+
+	const int64_t note_value_count = int_div_round (dq.get_beats() * _meter->note_value(), 4);
+
+	/* now construct a BBT_Offset using the count in grid units */
+
+	const BBT_Offset bbt_offset (0, note_value_count, dq.get_ticks());
+
+	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("BBT offset from meter @ %1: %2\n", _meter->bbt(), bbt_offset));
 	return _meter->bbt_add (_meter->bbt(), bbt_offset);
 }
 
