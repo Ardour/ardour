@@ -3477,8 +3477,10 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 			pos = adjusted_current_time (event);
 		}
 
-		map->move_meter (_marker->meter(), pos, false);
-
+		if (map->move_meter (_marker->meter(), pos, false)) {
+			/* it was moved */
+			_editor->tempo_map_changed ();
+		}
 		show_verbose_cursor_time (timepos_t (_marker->meter().beats()));
 		_editor->set_snapped_cursor_position (timepos_t (_marker->meter().sample(_editor->session()->sample_rate())));
 	}
@@ -3488,11 +3490,11 @@ void
 MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	if (!movement_occurred) {
+		/* reset thread local tempo map to the original state */
+		TempoMap::abort_update ();
 		if (was_double_click()) {
 			_editor->edit_meter_marker (*_marker);
 		}
-		/* reset thread local tempo map to the original state */
-		TempoMap::abort_update ();
 		return;
 	}
 
