@@ -343,12 +343,14 @@ Meter::bbt_subtract (Temporal::BBT_Time const & bbt, Temporal::BBT_Offset const 
 Temporal::BBT_Time
 Meter::round_to_bar (Temporal::BBT_Time const & bbt) const
 {
-	Temporal::BBT_Time b = bbt.round_to_beat ();
-	if (b.beats > _divisions_per_bar/2) {
-		b.bars++;
+	Beats b (bbt.beats, bbt.ticks);
+	Beats half (Beats::ticks (Beats::PPQN + ((_divisions_per_bar * Beats::PPQN / 2))));
+
+	if (b >= half) {
+		return BBT_Time (bbt.bars+1, 1, 0);
 	}
-	b.beats = 1;
-	return b;
+
+	return BBT_Time (bbt.bars, 1, 0);
 }
 
 Temporal::BBT_Time
