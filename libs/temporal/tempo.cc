@@ -653,6 +653,7 @@ TempoMap::operator= (TempoMap const & other)
 {
 	_time_domain = other.time_domain();
 	copy_points (other);
+	return *this;
 }
 
 void
