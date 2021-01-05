@@ -623,19 +623,19 @@ Editor::session_gui_extents (bool use_extra) const
 		boost::shared_ptr<RouteList> rl = _session->get_routes();
 		for (RouteList::iterator r = rl->begin(); r != rl->end(); ++r) {
 			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*r);
-			if (tr) {
-				boost::shared_ptr<Playlist> pl = tr->playlist();
-				if (pl && !pl->all_regions_empty()) {
-					pair<samplepos_t, samplepos_t> e;
-					e = pl->get_extent();
-					if (e.first < session_extent_start) {
-						session_extent_start = e.first;
-					}
-					if (e.second > session_extent_end) {
-						session_extent_end = e.second;
-					}
-				}
+			if (!tr) {
+				continue;
 			}
+			if (tr->presentation_info ().hidden ()) {
+				continue;
+			}
+			pair<samplepos_t, samplepos_t> e = tr->playlist()->get_extent ();
+			if (e.first == e.second) {
+				/* no regions present */
+				continue;
+			}
+			session_extent_start = std::min (session_extent_start, e.first);
+			session_extent_end   = std::max (session_extent_end, e.second);
 		}
 	}
 

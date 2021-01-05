@@ -480,6 +480,8 @@ public:
 
 	virtual void get_pointer_position (double &, double &) const = 0;
 
+	virtual std::pair <samplepos_t, samplepos_t> session_gui_extents (bool use_extra = true) const = 0;
+
 	virtual ARDOUR::Location* find_location_from_marker (ArdourMarker*, bool&) const = 0;
 	virtual ArdourMarker* find_marker_from_location_id (PBD::ID const&, bool) const = 0;
 
