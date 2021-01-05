@@ -743,7 +743,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 	switch (item_type) {
 	case PlayheadCursorItem:
-		_drags->set (new CursorDrag (this, *playhead_cursor, true), event);
+		_drags->set (new CursorDrag (this, *_playhead_cursor, true), event);
 		return true;
 
 	case MarkerItem:
@@ -806,7 +806,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	case BBTRulerItem:
 		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)
 		    && !ArdourKeyboard::indicates_constraint (event->button.state)) {
-			_drags->set (new CursorDrag (this, *playhead_cursor, false), event);
+			_drags->set (new CursorDrag (this, *_playhead_cursor, false), event);
 		} else if (ArdourKeyboard::indicates_constraint (event->button.state)
 		           && Keyboard::modifier_state_contains (event->button.state, Keyboard::PrimaryModifier)) {
 			_drags->set (new TempoTwistDrag (this, item), event);
@@ -823,14 +823,14 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		} else if (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
 			_drags->set (new RangeMarkerBarDrag (this, item, RangeMarkerBarDrag::CreateRangeMarker), event);
 		} else {
-			_drags->set (new CursorDrag (this, *playhead_cursor, false), event);
+			_drags->set (new CursorDrag (this, *_playhead_cursor, false), event);
 		}
 		return true;
 		break;
 
 	case CdMarkerBarItem:
 		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
-			_drags->set (new CursorDrag (this, *playhead_cursor, false), event);
+			_drags->set (new CursorDrag (this, *_playhead_cursor, false), event);
 		} else {
 			_drags->set (new RangeMarkerBarDrag (this, item, RangeMarkerBarDrag::CreateCDMarker), event);
 		}
@@ -839,7 +839,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 	case TransportMarkerBarItem:
 		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
-			_drags->set (new CursorDrag (this, *playhead_cursor, false), event);
+			_drags->set (new CursorDrag (this, *_playhead_cursor, false), event);
 		} else {
 			_drags->set (new RangeMarkerBarDrag (this, item, RangeMarkerBarDrag::CreateTransportMarker), event);
 		}

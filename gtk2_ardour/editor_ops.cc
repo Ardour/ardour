@@ -474,8 +474,8 @@ Editor::nudge_forward (bool next, bool force_playhead)
 			commit_reversible_command ();
 		}
 	} else {
-		distance = get_nudge_distance (playhead_cursor->current_sample (), next_distance);
-		_session->request_locate (playhead_cursor->current_sample () + distance);
+		distance = get_nudge_distance (_playhead_cursor->current_sample (), next_distance);
+		_session->request_locate (_playhead_cursor->current_sample () + distance);
 	}
 }
 
@@ -569,10 +569,10 @@ Editor::nudge_backward (bool next, bool force_playhead)
 
 	} else {
 
-		distance = get_nudge_distance (playhead_cursor->current_sample (), next_distance);
+		distance = get_nudge_distance (_playhead_cursor->current_sample (), next_distance);
 
-		if (playhead_cursor->current_sample () > distance) {
-			_session->request_locate (playhead_cursor->current_sample () - distance);
+		if (_playhead_cursor->current_sample () > distance) {
+			_session->request_locate (_playhead_cursor->current_sample () - distance);
 		} else {
 			_session->goto_start();
 		}
@@ -963,7 +963,7 @@ Editor::get_region_boundary (samplepos_t pos, int32_t dir, bool with_selection, 
 void
 Editor::cursor_to_region_boundary (bool with_selection, int32_t dir)
 {
-	samplepos_t pos = playhead_cursor->current_sample ();
+	samplepos_t pos = _playhead_cursor->current_sample ();
 	samplepos_t target;
 
 	if (!_session) {
@@ -1044,7 +1044,7 @@ Editor::cursor_to_region_point (EditorCursor* cursor, RegionPoint point, int32_t
 		break;
 	}
 
-	if (cursor == playhead_cursor) {
+	if (cursor == _playhead_cursor) {
 		_session->request_locate (pos);
 	} else {
 		cursor->set_position (pos);
@@ -1085,7 +1085,7 @@ Editor::cursor_to_selection_start (EditorCursor *cursor)
 		return;
 	}
 
-	if (cursor == playhead_cursor) {
+	if (cursor == _playhead_cursor) {
 		_session->request_locate (pos);
 	} else {
 		cursor->set_position (pos);
@@ -1114,7 +1114,7 @@ Editor::cursor_to_selection_end (EditorCursor *cursor)
 		return;
 	}
 
-	if (cursor == playhead_cursor) {
+	if (cursor == _playhead_cursor) {
 		_session->request_locate (pos);
 	} else {
 		cursor->set_position (pos);
@@ -1312,7 +1312,7 @@ Editor::selected_marker_to_selection_end ()
 void
 Editor::scroll_playhead (bool forward)
 {
-	samplepos_t pos = playhead_cursor->current_sample ();
+	samplepos_t pos = _playhead_cursor->current_sample ();
 	samplecnt_t delta = (samplecnt_t) floor (current_page_samples() / 0.8);
 
 	if (forward) {
@@ -1367,10 +1367,10 @@ Editor::cursor_align (bool playhead_to_edit)
 			Location* loc = find_location_from_marker (*i, ignored);
 
 			if (loc->is_mark()) {
-				loc->set_start (playhead_cursor->current_sample (), false, true, divisions);
+				loc->set_start (_playhead_cursor->current_sample (), false, true, divisions);
 			} else {
-				loc->set (playhead_cursor->current_sample (),
-					  playhead_cursor->current_sample () + loc->length(), true, divisions);
+				loc->set (_playhead_cursor->current_sample (),
+					  _playhead_cursor->current_sample () + loc->length(), true, divisions);
 			}
 		}
 	}
@@ -1836,7 +1836,7 @@ Editor::temporal_zoom (samplecnt_t spp)
 
 	case ZoomFocusPlayhead:
 		/* centre playhead */
-		l = playhead_cursor->current_sample () - (new_page_size * 0.5);
+		l = _playhead_cursor->current_sample () - (new_page_size * 0.5);
 
 		if (l < 0) {
 			leftmost_after_zoom = 0;
@@ -1868,7 +1868,7 @@ Editor::temporal_zoom (samplecnt_t spp)
 			}
 		} else {
 			/* use playhead instead */
-			where = playhead_cursor->current_sample ();
+			where = _playhead_cursor->current_sample ();
 
 			if (where < half_page_size) {
 				leftmost_after_zoom = 0;
@@ -2034,7 +2034,7 @@ Editor::temporal_zoom_session ()
 		samplecnt_t end = _session->current_end_sample();
 
 		if (_session->actively_recording ()) {
-			samplepos_t cur = playhead_cursor->current_sample ();
+			samplepos_t cur = _playhead_cursor->current_sample ();
 			if (cur > end) {
 				/* recording beyond the end marker; zoom out
 				 * by 5 seconds more so that if 'follow
@@ -2067,7 +2067,7 @@ Editor::temporal_zoom_extents ()
 		samplecnt_t end = ext.second;
 
 		if (_session->actively_recording ()) {
-			samplepos_t cur = playhead_cursor->current_sample ();
+			samplepos_t cur = _playhead_cursor->current_sample ();
 			if (cur > end) {
 				/* recording beyond the end marker; zoom out
 				 * by 5 seconds more so that if 'follow
@@ -2441,7 +2441,7 @@ Editor::jump_forward_to_mark ()
 		return;
 	}
 
-	samplepos_t pos = _session->locations()->first_mark_after (playhead_cursor->current_sample());
+	samplepos_t pos = _session->locations()->first_mark_after (_playhead_cursor->current_sample());
 
 	if (pos < 0) {
 		return;
@@ -2457,11 +2457,11 @@ Editor::jump_backward_to_mark ()
 		return;
 	}
 
-	samplepos_t pos = _session->locations()->first_mark_before (playhead_cursor->current_sample());
+	samplepos_t pos = _session->locations()->first_mark_before (_playhead_cursor->current_sample());
 
 	//handle the case where we are rolling, and we're less than one-half second past the mark, we want to go to the prior mark...
 	if (_session->transport_rolling()) {
-		if ((playhead_cursor->current_sample() - pos) < _session->sample_rate()/2) {
+		if ((_playhead_cursor->current_sample() - pos) < _session->sample_rate()/2) {
 			samplepos_t prior = _session->locations()->first_mark_before (pos);
 			pos = prior;
 		}
@@ -2733,7 +2733,7 @@ Editor::play_with_preroll ()
 		_session->request_play_range (&lar, true);
 		_session->set_requested_return_sample (ret);  //force auto-return to return to range start, without the preroll
 	} else {
-		samplepos_t ph = playhead_cursor->current_sample ();
+		samplepos_t ph = _playhead_cursor->current_sample ();
 		const samplepos_t preroll = _session->preroll_samples (ph);
 		samplepos_t start;
 		if (ph > preroll) {
@@ -2749,7 +2749,7 @@ Editor::play_with_preroll ()
 void
 Editor::rec_with_preroll ()
 {
-	samplepos_t ph = playhead_cursor->current_sample ();
+	samplepos_t ph = _playhead_cursor->current_sample ();
 	samplepos_t preroll = _session->preroll_samples (ph);
 	_session->request_preroll_record_trim (ph, preroll);
 }
@@ -5147,7 +5147,7 @@ void
 Editor::center_playhead ()
 {
 	float const page = _visible_canvas_width * samples_per_pixel;
-	center_screen_internal (playhead_cursor->current_sample (), page);
+	center_screen_internal (_playhead_cursor->current_sample (), page);
 }
 
 void
@@ -6739,7 +6739,7 @@ Editor::set_auto_punch_range ()
 	}
 
 	Location* tpl = transport_punch_location();
-	samplepos_t now = playhead_cursor->current_sample();
+	samplepos_t now = _playhead_cursor->current_sample();
 	samplepos_t begin = now;
 	samplepos_t end = _session->current_end_sample();
 
@@ -6755,7 +6755,7 @@ Editor::set_auto_punch_range ()
 			set_punch_range (begin, end, _("Auto Punch In/Out"));
 		} else {
 			// normal case for 2nd press - set the punch out
-			end = playhead_cursor->current_sample ();
+			end = _playhead_cursor->current_sample ();
 			set_punch_range (tpl->start(), now, _("Auto Punch In/Out"));
 			_session->config.set_punch_out(true);
 		}
@@ -7538,7 +7538,7 @@ Editor::playhead_forward_to_grid ()
 		return;
 	}
 
-	MusicSample pos  (playhead_cursor->current_sample (), 0);
+	MusicSample pos  (_playhead_cursor->current_sample (), 0);
 
 	if ( _grid_type == GridTypeNone) {
 		if (pos.sample < max_samplepos - current_page_samples()*0.1) {
@@ -7571,7 +7571,7 @@ Editor::playhead_backward_to_grid ()
 		return;
 	}
 
-	MusicSample pos  (playhead_cursor->current_sample (), 0);
+	MusicSample pos  (_playhead_cursor->current_sample (), 0);
 
 	if ( _grid_type == GridTypeNone) {
 		if ( pos.sample > current_page_samples()*0.1 ) {
@@ -7590,7 +7590,7 @@ Editor::playhead_backward_to_grid ()
 		//handle the case where we are rolling, and we're less than one-half second past the mark, we want to go to the prior mark...
 		//also see:  jump_backward_to_mark
 		if (_session->transport_rolling()) {
-			if ((playhead_cursor->current_sample() - pos.sample) < _session->sample_rate()/2) {
+			if ((_playhead_cursor->current_sample() - pos.sample) < _session->sample_rate()/2) {
 				pos = snap_to_grid (pos, RoundDownAlways, SnapToGrid_Scaled);
 			}
 		}

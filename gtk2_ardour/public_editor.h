@@ -83,6 +83,7 @@ class AutomationLine;
 class AutomationTimeAxisView;
 class ControlPoint;
 class DragManager;
+class EditorCursor;
 class ArdourMarker;
 class MeterMarker;
 class MixerStrip;
@@ -471,6 +472,9 @@ public:
 
 	virtual MouseCursors const* cursors () const = 0;
 	virtual VerboseCursor* verbose_cursor () const = 0;
+
+	virtual EditorCursor* playhead_cursor () const = 0;
+	virtual EditorCursor* snapped_cursor () const = 0;
 
 	virtual bool get_smart_mode () const = 0;
 

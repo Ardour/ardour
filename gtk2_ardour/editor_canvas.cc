@@ -223,9 +223,9 @@ Editor::initialize_canvas ()
 	range_marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_range_marker_bar_event), range_marker_bar));
 	transport_marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_transport_marker_bar_event), transport_marker_bar));
 
-	playhead_cursor = new EditorCursor (*this, &Editor::canvas_playhead_cursor_event);
+	_playhead_cursor = new EditorCursor (*this, &Editor::canvas_playhead_cursor_event);
 
-	snapped_cursor = new EditorCursor (*this);
+	_snapped_cursor = new EditorCursor (*this);
 
 	_canvas_drop_zone = new ArdourCanvas::Rectangle (hv_scroll_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, 0.0));
 	/* this thing is transparent */
@@ -1022,7 +1022,7 @@ Editor::color_handler()
 	bbt_ruler->set_fill_color (base);
 	bbt_ruler->set_outline_color (text);
 
-	playhead_cursor->set_color (UIConfiguration::instance().color ("play head"));
+	_playhead_cursor->set_color (UIConfiguration::instance().color ("play head"));
 
 	meter_bar->set_fill_color (UIConfiguration::instance().color_mod ("meter bar", "marker bar"));
 	meter_bar->set_outline_color (UIConfiguration::instance().color ("marker bar separator"));

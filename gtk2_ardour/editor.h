@@ -1030,11 +1030,9 @@ private:
 	int get_videotl_bar_height () const { return videotl_bar_height; }
 	void toggle_region_video_lock ();
 
-	friend class EditorCursor;
+	EditorCursor* playhead_cursor () const { return _playhead_cursor; }
+	EditorCursor* snapped_cursor () const { return _snapped_cursor; }
 
-	EditorCursor* snapped_cursor;
-
-	EditorCursor* playhead_cursor;
 	samplepos_t playhead_cursor_sample () const;
 
 	samplepos_t get_region_boundary (samplepos_t pos, int32_t dir, bool with_selection, bool only_onscreen);
@@ -1911,6 +1909,11 @@ private:
 	bool get_smart_mode() const;
 
 	bool audio_region_selection_covers (samplepos_t where);
+
+	/* playhead and edit cursor */
+
+	EditorCursor* _playhead_cursor;
+	EditorCursor* _snapped_cursor;
 
 	/* transport range select process */
 

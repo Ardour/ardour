@@ -4012,11 +4012,11 @@ CursorDrag::fake_locate (samplepos_t t)
 		return;
 	}
 
-	_editor->playhead_cursor->set_position (t);
+	_editor->playhead_cursor ()->set_position (t);
 
 	Session* s = _editor->session ();
 	if (s->timecode_transmission_suspended ()) {
-		samplepos_t const f = _editor->playhead_cursor->current_sample ();
+		samplepos_t const f = _editor->playhead_cursor ()->current_sample ();
 		/* This is asynchronous so it will be sent "now"
 		 */
 		s->send_mmc_locate (f);
@@ -4036,7 +4036,7 @@ CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 {
 	Drag::start_grab (event, c);
 
-	setup_snap_delta (MusicSample (_editor->playhead_cursor->current_sample(), 0));
+	setup_snap_delta (MusicSample (_editor->playhead_cursor ()->current_sample(), 0));
 
 	_grab_zoom = _editor->samples_per_pixel;
 
@@ -4145,7 +4145,7 @@ CursorDrag::finished (GdkEvent* event, bool movement_occurred)
 	Session* s = _editor->session ();
 	if (s) {
 		_editor->_pending_locate_request = true;
-		s->request_locate (_editor->playhead_cursor->current_sample (), _was_rolling ? MustRoll : RollIfAppropriate);
+		s->request_locate (_editor->playhead_cursor ()->current_sample (), _was_rolling ? MustRoll : RollIfAppropriate);
 		s->request_resume_timecode_transmission ();
 	}
 }
@@ -4160,7 +4160,7 @@ CursorDrag::aborted (bool)
 		_editor->_dragging_playhead = false;
 	}
 
-	_editor->playhead_cursor->set_position (adjusted_sample (grab_sample (), 0, false).sample);
+	_editor->playhead_cursor ()->set_position (adjusted_sample (grab_sample (), 0, false).sample);
 }
 
 FadeInDrag::FadeInDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v)
