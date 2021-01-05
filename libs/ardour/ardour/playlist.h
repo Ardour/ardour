@@ -33,6 +33,7 @@
 #include <list>
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
+#include <boost/optional.hpp>
 #include <boost/utility.hpp>
 
 #include <sys/stat.h>
@@ -431,6 +432,8 @@ private:
 	void setup_layering_indices (RegionList const &);
 	void coalesce_and_check_crossfades (std::list<Evoral::Range<samplepos_t> >);
 	boost::shared_ptr<RegionList> find_regions_at (samplepos_t);
+
+	mutable boost::optional<std::pair<samplepos_t, samplepos_t> > _cached_extent;
 
 	samplepos_t _end_space;  //this is used when we are pasting a range with extra space at the end
 	bool _playlist_shift_active;

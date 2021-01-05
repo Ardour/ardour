@@ -2238,6 +2238,8 @@ Playlist::find_next_region_boundary (samplepos_t sample, int dir)
 void
 Playlist::mark_session_dirty ()
 {
+	_cached_extent.reset ();
+
 	if (!in_set_state && !holding_state ()) {
 		_session.set_dirty();
 	}
@@ -2464,8 +2466,13 @@ Playlist::all_regions_empty() const
 pair<samplepos_t, samplepos_t>
 Playlist::get_extent () const
 {
+	if (_cached_extent) {
+		return _cached_extent.value ();
+	}
+
 	RegionReadLock rlock (const_cast<Playlist *>(this));
-	return _get_extent ();
+	_cached_extent = _get_extent ();
+	return _cached_extent.value ();
 }
 
 pair<samplepos_t, samplepos_t>
