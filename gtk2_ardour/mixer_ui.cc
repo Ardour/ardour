@@ -3915,6 +3915,11 @@ Mixer_UI::toggle_monitor_action (MonitorChoice monitor_choice, bool group_overri
 	for (AxisViewSelection::iterator i = _selection.axes.begin(); i != _selection.axes.end(); ++i) {
 		boost::shared_ptr<ARDOUR::Route> rt = boost::dynamic_pointer_cast<ARDOUR::Route> ((*i)->stripable());
 
+		if (!rt->monitoring_control ()) {
+			/* skip busses */
+			continue;
+		}
+
 		if (rt->monitoring_control()->monitoring_choice() & monitor_choice) {
 			mc = MonitorChoice (rt->monitoring_control()->monitoring_choice() & ~monitor_choice);
 		} else {
