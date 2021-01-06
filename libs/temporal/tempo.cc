@@ -1649,7 +1649,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 			abort ();
 		}
 
-		dump (cerr);
+		// dump (cerr);
 	}
 #endif
 
