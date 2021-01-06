@@ -1604,7 +1604,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 	assert (!_tempos.empty());
 	assert (!_meters.empty());
 
-	DEBUG_TRACE (DEBUG::TemporalMap, string_compose (">>> GRID START %1 .. %2 (barmod = %3)\n", start, end, bar_mod));
+	DEBUG_TRACE (DEBUG::Grid, string_compose (">>> GRID START %1 .. %2 (barmod = %3)\n", start, end, bar_mod));
 
 	Tempos::iterator t (_tempos.begin());
 	Meters::iterator m (_meters.begin());
@@ -1613,16 +1613,16 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 	TempoMetric metric = metric_at_locked (start, false);
 	BBT_Time bbt = metric.bbt_at (start);
 
-	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("start %1 is %2\n", start, bbt));
+	DEBUG_TRACE (DEBUG::Grid, string_compose ("start %1 is %2\n", start, bbt));
 
 #ifndef NDEBUG
 	/* Sanity Check */
 
-	if (DEBUG_ENABLED(PBD::DEBUG::TemporalMap)) {
+	if (DEBUG_ENABLED(PBD::DEBUG::Grid)) {
 		TempoMetric emetric = metric_at_locked (end, false);
 		BBT_Time ebbt = metric_at_locked (end).bbt_at (end);
 
-		DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("get grid between %1..%2 [ %4 .. %5 ] { %6 .. %7 } at bar_mod = %3\n",
+		DEBUG_TRACE (DEBUG::Grid, string_compose ("get grid between %1..%2 [ %4 .. %5 ] { %6 .. %7 } at bar_mod = %3\n",
 		                                                 start, end, bar_mod, start, end, bbt, ebbt));
 
 		if (metric.quarters_at (bbt).diff (metric.quarters_at_superclock (start)) > Beats::ticks (1)) {
@@ -1674,7 +1674,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 
 			/* rounded up, determine new starting superclock position */
 
-			DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("new bbt for start (rounded up) = %1\n", bbt));
+			DEBUG_TRACE (DEBUG::Grid, string_compose ("new bbt for start (rounded up) = %1\n", bbt));
 
 			for (Tempos::iterator tt = _tempos.begin(); tt != _tempos.end() && tt->sclock() < start; ++tt) { t = tt; }
 			for (Meters::iterator mm = _meters.begin(); mm != _meters.end() && mm->sclock() < start; ++mm) { m = mm; }
@@ -1684,13 +1684,13 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 
 			metric = TempoMetric (*t, *m);
 
-			DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("metric in effect at %1 = %2\n", start, metric));
+			DEBUG_TRACE (DEBUG::Grid, string_compose ("metric in effect at %1 = %2\n", start, metric));
 
 			/* recompute superclock position */
 
 			superclock_t new_start = metric.superclock_at (bbt);
 
-			DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("metric says that %1 is at %2\n", bbt, new_start));
+			DEBUG_TRACE (DEBUG::Grid, string_compose ("metric says that %1 is at %2\n", bbt, new_start));
 
 			if (new_start < start) {
 				abort ();
@@ -1699,7 +1699,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 			start = new_start;
 
 		} else {
-			DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("%1 was on a beat, no rounding up necessary\n", bbt));
+			DEBUG_TRACE (DEBUG::Grid, string_compose ("%1 was on a beat, no rounding up necessary\n", bbt));
 		}
 
 	} else {
@@ -1733,7 +1733,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 			start = metric.superclock_at (bbt);
 
 		} else {
-			DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("%1 was on a bar, no round down to bar necessary\n", bbt));
+			DEBUG_TRACE (DEBUG::Grid, string_compose ("%1 was on a bar, no round down to bar necessary\n", bbt));
 		}
 	}
 
@@ -1758,7 +1758,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 	 * Then run the inner loop to actually add grid points up until limit. Repeat till done.
 	 */
 
-	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("start filling points with start = %1 end = %2\n", start, end));
+	DEBUG_TRACE (DEBUG::Grid, string_compose ("start filling points with start = %1 end = %2\n", start, end));
 
 	while (start < end) {
 
@@ -1817,7 +1817,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 
 			/* add point to grid */
 			ret.push_back (TempoMapPoint (*this, metric, start, beats, bbt));
-			DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("G %1\t       %2\n", metric, ret.back()));
+			DEBUG_TRACE (DEBUG::Grid, string_compose ("G %1\t       %2\n", metric, ret.back()));
 
 			/* Advance by the meter note value size */
 
@@ -1827,7 +1827,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 
 				step = metric.superclocks_per_note_type_at_superclock (start);
 				start += step;
-				DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("step for note type was %1, now @ %2\n", step, start));
+				DEBUG_TRACE (DEBUG::Grid, string_compose ("step for note type was %1, now @ %2\n", step, start));
 
 			} else {
 
@@ -1925,7 +1925,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 		}
 	}
 
-	DEBUG_TRACE (DEBUG::TemporalMap, "<<< GRID DONE\n");
+	DEBUG_TRACE (DEBUG::Grid, "<<< GRID DONE\n");
 }
 
 std::ostream&
