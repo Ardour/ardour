@@ -67,17 +67,6 @@ struct midipair {
 	string trname;
 };
 
-typedef struct ptflookup {
-	uint16_t index1;
-	uint16_t index2;
-	PBD::ID  id;
-
-	bool operator ==(const struct ptflookup& other) {
-		return (this->index1 == other.index1);
-	}
-} ptflookup_t;
-
-
 bool
 Session::import_sndfile_as_region (string path, SrcQuality quality, samplepos_t& pos, SourceList& sources, ImportStatus& status)
 {
@@ -185,7 +174,7 @@ Session::import_sndfile_as_region (string path, SrcQuality quality, samplepos_t&
 
 
 void
-Session::import_pt (PTFFormat& ptf, ImportStatus& status)
+Session::import_pt_sources (PTFFormat& ptf, ImportStatus& status)
 {
 	vector<boost::shared_ptr<Region> > regions;
 	boost::shared_ptr<ARDOUR::Track> track;
@@ -195,22 +184,21 @@ Session::import_pt (PTFFormat& ptf, ImportStatus& status)
 	bool ok = false;
 	bool onefailed = false;
 	samplepos_t pos = -1;
-	uint32_t srate = sample_rate ();
 
-	vector<ptflookup_t> ptfwavpair;
-	vector<ptflookup_t> ptfregpair;
+	vector<struct ptflookup> ptfregpair;
 	vector<PTFFormat::wav_t>::const_iterator w;
 
 	SourceList just_one_src;
-	SourceList imported;
 
 	boost::shared_ptr<AudioTrack> existing_track;
-	uint16_t nth = 0;
-	vector<ptflookup_t> usedtracks;
-	ptflookup_t utr;
+	vector<struct ptflookup> usedtracks;
+	struct ptflookup utr;
+
+	ptfwavpair.clear();
+	pt_imported_sources.clear();
 
 	for (w = ptf.audiofiles ().begin (); w != ptf.audiofiles ().end () && !status.cancel; ++w) {
-		ptflookup_t p;
+		struct ptflookup p;
 		ok = false;
 		/* Try audio file */
 		fullpath = Glib::build_filename (Glib::path_get_dirname (ptf.path ()), "Audio Files");
@@ -244,7 +232,7 @@ Session::import_pt (PTFFormat& ptf, ImportStatus& status)
 					p.index1 = w->index;
 					p.id = source->id ();
 					ptfwavpair.push_back (p);
-					imported.push_back (source);
+					pt_imported_sources.push_back (source);
 					warning << string_compose (_("PT Import : MISSING `%1`, inserting ref to missing source"), fullpath) << endmsg;
 				} else {
 					warning << string_compose (_("PT Import : MISSING `%1`, please check Audio Files"), fullpath) << endmsg;
@@ -256,28 +244,54 @@ Session::import_pt (PTFFormat& ptf, ImportStatus& status)
 			p.id = just_one_src.back ()->id ();
 
 			ptfwavpair.push_back (p);
-			imported.push_back (just_one_src.back ());
+			pt_imported_sources.push_back (just_one_src.back ());
 		}
 	}
 
-	if (imported.empty ()) {
+	if (pt_imported_sources.empty ()) {
 		error << _("Failed to find any audio for PT import") << endmsg;
-		goto trymidi;
 	} else if (onefailed) {
 		warning << _("Failed to load one or more of the audio files for PT import, see above list") << endmsg;
 	} else {
 		info << _("All audio files found for PT import!") << endmsg;
 	}
 
+	status.progress = 1.0;
+	status.sources.clear ();
+	status.done = true;
+	status.all_done = true;
+}
+
+
+void
+Session::import_pt_rest (PTFFormat& ptf)
+{
+	vector<boost::shared_ptr<Region> > regions;
+	boost::shared_ptr<ARDOUR::Track> track;
+	ARDOUR::PluginInfoPtr instrument;
+	vector<string> to_import;
+	string fullpath;
+	uint32_t srate = sample_rate ();
+
+	vector<struct ptflookup> ptfregpair;
+	vector<PTFFormat::wav_t>::const_iterator w;
+
+	SourceList just_one_src;
+
+	boost::shared_ptr<AudioTrack> existing_track;
+	uint16_t nth = 0;
+	vector<struct ptflookup> usedtracks;
+	struct ptflookup utr;
+
 	for (vector<PTFFormat::region_t>::const_iterator a = ptf.regions ().begin ();
 			a != ptf.regions ().end (); ++a) {
-		for (vector<ptflookup_t>::iterator p = ptfwavpair.begin ();
+		for (vector<struct ptflookup>::iterator p = ptfwavpair.begin ();
 				p != ptfwavpair.end (); ++p) {
 			if ((p->index1 == a->wave.index) && (strcmp (a->wave.filename.c_str (), "") != 0)) {
-				for (SourceList::iterator x = imported.begin (); x != imported.end (); ++x) {
+				for (SourceList::iterator x = pt_imported_sources.begin (); x != pt_imported_sources.end (); ++x) {
 					if ((*x)->id () == p->id) {
 						/* Matched an uncreated ptf region to ardour region */
-						ptflookup_t rp;
+						struct ptflookup rp;
 						PropertyList plist;
 
 						plist.add (ARDOUR::Properties::start, a->sampleoffset);
@@ -304,7 +318,7 @@ Session::import_pt (PTFFormat& ptf, ImportStatus& status)
 	}
 
 	for (vector<PTFFormat::track_t>::const_iterator a = ptf.tracks ().begin (); a != ptf.tracks ().end (); ++a) {
-		for (vector<ptflookup_t>::iterator p = ptfregpair.begin ();
+		for (vector<struct ptflookup>::iterator p = ptfregpair.begin ();
 				p != ptfregpair.end (); ++p) {
 
 			if (p->index1 == a->reg.index)  {
@@ -314,8 +328,8 @@ Session::import_pt (PTFFormat& ptf, ImportStatus& status)
 				utr.index2 = nth;
 				utr.id = p->id;
 				boost::shared_ptr<Region> r = RegionFactory::region_by_id (p->id);
-				vector<ptflookup_t>::iterator lookuptr = usedtracks.begin ();
-				vector<ptflookup_t>::iterator found;
+				vector<struct ptflookup>::iterator lookuptr = usedtracks.begin ();
+				vector<struct ptflookup>::iterator found;
 				if ((found = std::find (lookuptr, usedtracks.end (), utr)) != usedtracks.end ()) {
 					DEBUG_TRACE (DEBUG::FileUtils, string_compose ("\twav(%1) reg(%2) ptf_tr(%3) ard_tr(%4)\n", a->reg.wave.filename.c_str (), a->reg.index, found->index1, found->index2));
 
@@ -367,16 +381,6 @@ Session::import_pt (PTFFormat& ptf, ImportStatus& status)
 		}
 	}
 
-trymidi:
-	status.paths.clear();
-	status.paths.push_back(ptf.path ());
-	status.current = 1;
-	status.total = 1;
-	status.freeze = false;
-	status.done = false;
-	status.cancel = false;
-	status.progress = 0;
-
 	/* MIDI - Find list of unique midi tracks first */
 
 	vector<midipair> uniquetr;
@@ -398,7 +402,7 @@ trymidi:
 	std::map <int, boost::shared_ptr<MidiTrack> > midi_tracks;
 	/* MIDI - Create unique midi tracks and a lookup table for used tracks */
 	for (vector<midipair>::iterator a = uniquetr.begin (); a != uniquetr.end (); ++a) {
-		ptflookup_t miditr;
+		struct ptflookup miditr;
 		list<boost::shared_ptr<MidiTrack> > mt (new_midi_track (
 				ChanCount (DataType::MIDI, 1),
 				ChanCount (DataType::MIDI, 1),
@@ -450,9 +454,4 @@ trymidi:
 		playlist->clear_changes ();
 		playlist->add_region (copy, f);
 	}
-
-	status.progress = 1.0;
-	status.done = true;
-	status.sources.clear ();
-	status.all_done = true;
 }
