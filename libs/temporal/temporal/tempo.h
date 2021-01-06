@@ -485,6 +485,10 @@ class LIBTEMPORAL_API TempoMetric {
 		return _tempo->superclocks_per_note_type() * exp (-_tempo->omega() * (sc - _tempo->sclock()));
 	}
 
+	superclock_t superclocks_per_grid_at (superclock_t sc) const {
+		return int_div_round (superclocks_per_note_type_at_superclock (sc) * _tempo->note_type(), (int64_t) _meter->note_value());
+	}
+
 	BBT_Time bbt_at (superclock_t sc) const;
 	superclock_t superclock_at (BBT_Time const &) const;
 

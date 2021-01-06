@@ -1825,7 +1825,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 
 			if (bar_mod == 0) {
 
-				step = metric.superclocks_per_note_type_at_superclock (start);
+				step = metric.superclocks_per_grid_at (start);
 				start += step;
 				DEBUG_TRACE (DEBUG::Grid, string_compose ("step for note type was %1, now @ %2\n", step, start));
 
