@@ -46,10 +46,6 @@ PTImportSelector::PTImportSelector (PTFFormat& ptf) :
 {
 	_ptf = &ptf;
 
-	if (!_session_rate) {
-		Gtk::Dialog::response(RESPONSE_CANCEL);
-	}
-
 	set_size_request (800, 450);
 	ptimport_import_button.set_size_request (90, 35);
 	ptimport_cancel_button.set_size_request (90, 35);

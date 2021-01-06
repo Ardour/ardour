@@ -76,8 +76,6 @@ using std::string;
 void
 Editor::external_pt_dialog ()
 {
-	std::string ptpath;
-
 	if (_session == 0) {
 		MessageDialog msg (_("You can't import a PT session until you have a session loaded."));
 		msg.run ();
