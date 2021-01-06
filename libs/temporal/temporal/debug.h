@@ -27,6 +27,7 @@ namespace PBD {
 	namespace DEBUG {
 		LIBTEMPORAL_API extern DebugBits TemporalDomainConvert;
 		LIBTEMPORAL_API extern DebugBits TemporalMap;
+		LIBTEMPORAL_API extern DebugBits Grid;
 		LIBTEMPORAL_API extern DebugBits SnapBBT;
 		LIBTEMPORAL_API extern DebugBits Beats;
 	}
