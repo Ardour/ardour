@@ -1140,7 +1140,7 @@ TempoMap::move_meter (MeterPoint const & mp, timepos_t const & when, bool push)
 		 * direction is), don't move
 		 */
 
-		const superclock_t one_bar = metric.superclocks_per_bar (TEMPORAL_SAMPLE_RATE);
+		const superclock_t one_bar = metric.superclocks_per_bar ();
 		if (abs (sc - mp.sclock()) < one_bar / 2) {
 			return false;
 		}
@@ -2135,7 +2135,7 @@ TempoMap::bbt_walk (BBT_Time const & bbt, BBT_Offset const & o) const
 	for (int32_t b = 0; b < offset.beats; ++b) {
 
 		TEMPO_CHECK_FOR_NEW_METRIC;
-		pos += metric.superclocks_per_grid (TEMPORAL_SAMPLE_RATE);
+		pos += metric.superclocks_per_grid ();
 	}
 
 	/* add each bar, 1 by 1, rechecking to see if there's a new
@@ -2146,7 +2146,7 @@ TempoMap::bbt_walk (BBT_Time const & bbt, BBT_Offset const & o) const
 
 		TEMPO_CHECK_FOR_NEW_METRIC;
 
-		pos += metric.superclocks_per_bar (TEMPORAL_SAMPLE_RATE);
+		pos += metric.superclocks_per_bar ();
 	}
 
 	return metric.bbt_at (pos);

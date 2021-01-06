@@ -471,11 +471,11 @@ class LIBTEMPORAL_API TempoMetric {
 
 	/* combination methods that require both tempo and meter information */
 
-	superclock_t superclocks_per_bar (samplecnt_t sr) const {
-		return superclocks_per_grid (sr) * _meter->divisions_per_bar();
+	superclock_t superclocks_per_bar () const {
+		return superclocks_per_grid () * _meter->divisions_per_bar();
 	}
-	superclock_t superclocks_per_grid (samplecnt_t sr) const {
-		return llrint (_tempo->superclocks_per_note_type() * ((double) _tempo->note_type() / _meter->note_value()));
+	superclock_t superclocks_per_grid () const {
+		return int_div_round (_tempo->superclocks_per_note_type() * _tempo->note_type(), (int64_t) _meter->note_value());
 	}
 
 	superclock_t superclocks_per_note_type_at_superclock (superclock_t sc) const {
@@ -489,7 +489,7 @@ class LIBTEMPORAL_API TempoMetric {
 	superclock_t superclock_at (BBT_Time const &) const;
 
 	samplepos_t samples_per_bar (samplecnt_t sr) const {
-		return superclock_to_samples (superclocks_per_bar (sr), sr);
+		return superclock_to_samples (superclocks_per_bar (), sr);
 	}
 
 	Beats quarters_at_sample (samplepos_t sc) const { return quarters_at_superclock (samples_to_superclock (sc, TEMPORAL_SAMPLE_RATE)); }
