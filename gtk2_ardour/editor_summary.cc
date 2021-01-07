@@ -931,7 +931,7 @@ EditorSummary::playhead_position_changed (samplepos_t p)
 	if (_session && o != n) {
 		int a = max(2, min (o, n));
 		int b = max (o, n);
-		set_overlays_dirty_rect (a - 2, 0, b + 2, get_height ());
+		set_overlays_dirty_rect (a - 2, 0, b - a + 4, get_height ());
 	}
 }
 
