@@ -1801,7 +1801,27 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 			limit = end;
 		}
 
-		if (start >= limit) {
+		if (start >= end) {
+			break;
+		}
+
+		if (start >= limit && nxt_t == _tempos.end() && nxt_m == _meters.end() && nxt_b == _bartimes.end()) {
+
+			/* reached the end, no more tempos, meters or bartimes
+			   to consider, so just finish up.
+			*/
+
+			const superclock_t step  = metric.superclocks_per_grid_at (start);
+
+			while (start < end) {
+				const Temporal::Beats beats = metric.quarters_at_superclock (start);
+				ret.push_back (TempoMapPoint (*this, metric, start, beats, bbt));
+				DEBUG_TRACE (DEBUG::Grid, string_compose ("G %1\t       %2\n", metric, ret.back()));
+				start += step;
+				bbt = metric.bbt_at (start);
+			}
+
+			/* all done, leave outer loop */
 			break;
 		}
 
