@@ -200,7 +200,7 @@ MidiPlaylist::destroy_region (boost::shared_ptr<Region> region)
 	return changed;
 }
 void
-MidiPlaylist::_split_region (boost::shared_ptr<Region> region, const MusicSample& playlist_position)
+MidiPlaylist::_split_region (boost::shared_ptr<Region> region, const MusicSample& playlist_position, ThawList& thawlist)
 {
 	if (!region->covers (playlist_position.sample)) {
 		return;
@@ -266,10 +266,10 @@ MidiPlaylist::_split_region (boost::shared_ptr<Region> region, const MusicSample
 		right = RegionFactory::create (region, before, plist, true);
 	}
 
-	add_region_internal (left, region->position(), 0, region->quarter_note(), true);
-	add_region_internal (right, region->position() + before.sample, before.division, region->quarter_note() + before_qn, true);
+	add_region_internal (left, region->position(), thawlist, 0, region->quarter_note(), true);
+	add_region_internal (right, region->position() + before.sample, thawlist, before.division, region->quarter_note() + before_qn, true);
 
-	remove_region_internal (region);
+	remove_region_internal (region, thawlist);
 
 	_splicing = old_sp;
 }

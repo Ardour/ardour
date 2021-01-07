@@ -271,6 +271,26 @@ protected:
 	friend class Session;
 
 protected:
+	class ThawList : public RegionList {
+		public:
+			void add (boost::shared_ptr<Region> r)
+			{
+				if (std::find (begin(), end(), r) != end ()) {
+					return;
+				}
+				r->suspend_property_changes ();
+				push_back (r);
+			}
+
+			void release ()
+			{
+				for (RegionList::iterator i = begin(); i != end(); ++i) {
+					(*i)->resume_property_changes ();
+				}
+				clear ();
+			}
+	};
+
 	class RegionReadLock : public Glib::Threads::RWLock::ReaderLock {
 		public:
 			RegionReadLock (Playlist *pl) : Glib::Threads::RWLock::ReaderLock (pl->region_lock) {}
@@ -293,7 +313,10 @@ protected:
 				if (block_notify) {
 					playlist->release_notifications ();
 				}
+				thawlist.release ();
 			}
+
+			ThawList thawlist;
 			Playlist *playlist;
 			bool block_notify;
 	};
@@ -376,27 +399,24 @@ protected:
 	void sort_regions ();
 
 	void possibly_splice (samplepos_t at, samplecnt_t distance, boost::shared_ptr<Region> exclude = boost::shared_ptr<Region>());
-	void possibly_splice_unlocked(samplepos_t at, samplecnt_t distance, boost::shared_ptr<Region> exclude = boost::shared_ptr<Region>());
+	void possibly_splice_unlocked (samplepos_t at, samplecnt_t distance, boost::shared_ptr<Region> exclude, ThawList& thawlist);
 
-	void core_splice (samplepos_t at, samplecnt_t distance, boost::shared_ptr<Region> exclude);
 	void splice_locked (samplepos_t at, samplecnt_t distance, boost::shared_ptr<Region> exclude);
-	void splice_unlocked (samplepos_t at, samplecnt_t distance, boost::shared_ptr<Region> exclude);
+	void splice_unlocked (samplepos_t at, samplecnt_t distance, boost::shared_ptr<Region> exclude, ThawList& thawlist);
 
-	void core_ripple (samplepos_t at, samplecnt_t distance, RegionList *exclude);
 	void ripple_locked (samplepos_t at, samplecnt_t distance, RegionList *exclude);
-	void ripple_unlocked (samplepos_t at, samplecnt_t distance, RegionList *exclude);
-
+	void ripple_unlocked (samplepos_t at, samplecnt_t distance, RegionList *exclude, ThawList& thawlist);
 
 	virtual void remove_dependents (boost::shared_ptr<Region> /*region*/) {}
 	virtual void region_going_away (boost::weak_ptr<Region> /*region*/) {}
 
 	virtual XMLNode& state (bool);
 
-	bool add_region_internal (boost::shared_ptr<Region>, samplepos_t position, int32_t sub_num = 0, double quarter_note = 0.0, bool for_music = false);
+	bool add_region_internal (boost::shared_ptr<Region>, samplepos_t position, ThawList& thawlist, int32_t sub_num = 0, double quarter_note = 0.0, bool for_music = false);
 
-	int remove_region_internal (boost::shared_ptr<Region>);
+	int remove_region_internal (boost::shared_ptr<Region>, ThawList& thawlist);
 	void copy_regions (RegionList&) const;
-	void partition_internal (samplepos_t start, samplepos_t end, bool cutting, RegionList& thawlist);
+	void partition_internal (samplepos_t start, samplepos_t end, bool cutting, ThawList& thawlist);
 
 	std::pair<samplepos_t, samplepos_t> _get_extent() const;
 
@@ -410,7 +430,7 @@ protected:
 	void begin_undo ();
 	void end_undo ();
 
-	virtual void _split_region (boost::shared_ptr<Region>, const MusicSample& position);
+	virtual void _split_region (boost::shared_ptr<Region>, const MusicSample& position, ThawList& thawlist);
 
 	typedef std::pair<boost::shared_ptr<Region>, boost::shared_ptr<Region> > TwoRegions;
 

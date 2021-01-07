@@ -172,13 +172,15 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, string namestr, boo
 	init (hide);
 
 	RegionList tmp;
+	ThawList thawlist;
 	other->copy_regions (tmp);
 
 	in_set_state++;
 
 	for (list<boost::shared_ptr<Region> >::iterator x = tmp.begin(); x != tmp.end(); ++x) {
-		add_region_internal( (*x), (*x)->position());
+		add_region_internal ((*x), (*x)->position(), thawlist);
 	}
+	thawlist.release ();
 
 	in_set_state--;
 
@@ -210,6 +212,7 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, samplepos_t start, 
 
 	in_set_state++;
 
+	ThawList thawlist;
 	for (RegionList::const_iterator i = other->regions.begin(); i != other->regions.end(); ++i) {
 
 		boost::shared_ptr<Region> region;
@@ -280,8 +283,10 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, samplepos_t start, 
 
 		new_region = RegionFactory::create (region, plist);
 
-		add_region_internal (new_region, position);
+		add_region_internal (new_region, position, thawlist);
 	}
+
+	thawlist.release ();
 
 	//keep track of any dead space at end (for pasting into Ripple or Splice mode)
 	//at the end of construction, any length of cnt beyond the extents of the regions is end_space
@@ -701,7 +706,7 @@ Playlist::add_region (boost::shared_ptr<Region> region, samplepos_t position, fl
 
 	if (times == 1 && auto_partition){
 		RegionList thawlist;
-		partition_internal (pos - 1, (pos + region->length()), true, thawlist);
+		partition_internal (pos - 1, (pos + region->length()), true, rlock.thawlist);
 		for (RegionList::iterator i = thawlist.begin(); i != thawlist.end(); ++i) {
 			(*i)->resume_property_changes ();
 			_session.add_command (new StatefulDiffCommand (*i));
@@ -709,7 +714,7 @@ Playlist::add_region (boost::shared_ptr<Region> region, samplepos_t position, fl
 	}
 
 	if (itimes >= 1) {
-		add_region_internal (region, pos, sub_num, quarter_note, for_music);
+		add_region_internal (region, pos, rlock.thawlist, sub_num, quarter_note, for_music);
 		set_layer (region, DBL_MAX);
 		pos += region->length();
 		--itimes;
@@ -721,7 +726,7 @@ Playlist::add_region (boost::shared_ptr<Region> region, samplepos_t position, fl
 
 	for (int i = 0; i < itimes; ++i) {
 		boost::shared_ptr<Region> copy = RegionFactory::create (region, true);
-		add_region_internal (copy, pos, sub_num);
+		add_region_internal (copy, pos, rlock.thawlist, sub_num);
 		set_layer (copy, DBL_MAX);
 		pos += region->length();
 	}
@@ -742,12 +747,12 @@ Playlist::add_region (boost::shared_ptr<Region> region, samplepos_t position, fl
 			plist.add (Properties::layer, region->layer());
 
 			boost::shared_ptr<Region> sub = RegionFactory::create (region, plist);
-			add_region_internal (sub, pos, sub_num);
+			add_region_internal (sub, pos, rlock.thawlist, sub_num);
 			set_layer (sub, DBL_MAX);
 		}
 	}
 
-	possibly_splice_unlocked (position, (pos + length) - position, region);
+	possibly_splice_unlocked (position, (pos + length) - position, region, rlock.thawlist);
 }
 
 void
@@ -763,11 +768,16 @@ Playlist::set_region_ownership ()
 }
 
 bool
-Playlist::add_region_internal (boost::shared_ptr<Region> region, samplepos_t position, int32_t sub_num, double quarter_note, bool for_music)
+Playlist::add_region_internal (boost::shared_ptr<Region> region, samplepos_t position, ThawList& thawlist, int32_t sub_num, double quarter_note, bool for_music)
 {
 	if (region->data_type() != _type) {
 		return false;
 	}
+
+	/* note, this will delay signal emission and trigger Playlist::region_changed_proxy
+	 * via PropertyChanged subsciption below :(
+	 */
+	thawlist.add (region);
 
 	RegionSortByPosition cmp;
 
@@ -784,7 +794,7 @@ Playlist::add_region_internal (boost::shared_ptr<Region> region, samplepos_t pos
 	regions.insert (upper_bound (regions.begin(), regions.end(), region, cmp), region);
 	all_regions.insert (region);
 
-	possibly_splice_unlocked (position, region->length(), region);
+	possibly_splice_unlocked (position, region->length(), region, thawlist);
 
 	if (!holding_state ()) {
 		/* layers get assigned from XML state, and are not reset during undo/redo */
@@ -809,24 +819,24 @@ Playlist::replace_region (boost::shared_ptr<Region> old, boost::shared_ptr<Regio
 	bool old_sp = _splicing;
 	_splicing = true;
 
-	remove_region_internal (old);
-	add_region_internal (newr, pos);
+	remove_region_internal (old, rlock.thawlist);
+	add_region_internal (newr, pos, rlock.thawlist);
 	set_layer (newr, old->layer ());
 
 	_splicing = old_sp;
 
-	possibly_splice_unlocked (pos, old->length() - newr->length());
+	possibly_splice_unlocked (pos, old->length() - newr->length(), boost::shared_ptr<Region>(), rlock.thawlist);
 }
 
 void
 Playlist::remove_region (boost::shared_ptr<Region> region)
 {
 	RegionWriteLock rlock (this);
-	remove_region_internal (region);
+	remove_region_internal (region, rlock.thawlist);
 }
 
 int
-Playlist::remove_region_internal (boost::shared_ptr<Region> region)
+Playlist::remove_region_internal (boost::shared_ptr<Region> region, ThawList& thawlist)
 {
 	RegionList::iterator i;
 
@@ -845,7 +855,7 @@ Playlist::remove_region_internal (boost::shared_ptr<Region> region)
 
 			regions.erase (i);
 
-			possibly_splice_unlocked (pos, -distance);
+			possibly_splice_unlocked (pos, -distance, boost::shared_ptr<Region>(), thawlist);
 
 			if (!holding_state ()) {
 				relayer ();
@@ -920,15 +930,8 @@ Playlist::get_source_equivalent_regions (boost::shared_ptr<Region> other, vector
 void
 Playlist::partition (samplepos_t start, samplepos_t end, bool cut)
 {
-	RegionList thawlist;
-	{
-		RegionWriteLock lock(this);
-		partition_internal (start, end, cut, thawlist);
-	}
-
-	for (RegionList::iterator i = thawlist.begin(); i != thawlist.end(); ++i) {
-		(*i)->resume_property_changes ();
-	}
+	RegionWriteLock lock(this);
+	partition_internal (start, end, cut, lock.thawlist);
 }
 
 /* If a MIDI region is locked to musical-time, Properties::start is ignored
@@ -950,7 +953,7 @@ static void maybe_add_start_beats (TempoMap const& tm, PropertyList& plist, boos
  *  removed.
  */
 void
-Playlist::partition_internal (samplepos_t start, samplepos_t end, bool cutting, RegionList& thawlist)
+Playlist::partition_internal (samplepos_t start, samplepos_t end, bool cutting, ThawList& thawlist)
 {
 	RegionList new_regions;
 
@@ -981,7 +984,7 @@ Playlist::partition_internal (samplepos_t start, samplepos_t end, bool cutting, 
 			if (current->first_sample() >= start && current->last_sample() < end) {
 
 				if (cutting) {
-					remove_region_internal (current);
+					remove_region_internal (current, thawlist);
 				}
 
 				continue;
@@ -1040,7 +1043,7 @@ Playlist::partition_internal (samplepos_t start, samplepos_t end, bool cutting, 
 					 * for MusicSample is needed to offset region-gain
 					 */
 					region = RegionFactory::create (current, MusicSample (pos2 - pos1, 0), plist);
-					add_region_internal (region, start);
+					add_region_internal (region, start, thawlist);
 					new_regions.push_back (region);
 				}
 
@@ -1061,14 +1064,13 @@ Playlist::partition_internal (samplepos_t start, samplepos_t end, bool cutting, 
 
 				region = RegionFactory::create (current, MusicSample (pos3 - pos1, 0), plist);
 
-				add_region_internal (region, end);
+				add_region_internal (region, end, thawlist);
 				new_regions.push_back (region);
 
 				/* "front" ***** */
 
 				current->clear_changes ();
-				current->suspend_property_changes ();
-				thawlist.push_back (current);
+				thawlist.add (current);
 				current->cut_end (pos2 - 1);
 
 			} else if (overlap == Evoral::OverlapEnd) {
@@ -1102,15 +1104,14 @@ Playlist::partition_internal (samplepos_t start, samplepos_t end, bool cutting, 
 
 					region = RegionFactory::create (current, MusicSample(pos2 - pos1, 0), plist);
 
-					add_region_internal (region, start);
+					add_region_internal (region, start, thawlist);
 					new_regions.push_back (region);
 				}
 
 				/* front ****** */
 
 				current->clear_changes ();
-				current->suspend_property_changes ();
-				thawlist.push_back (current);
+				thawlist.add (current);
 				current->cut_end (pos2 - 1);
 
 			} else if (overlap == Evoral::OverlapStart) {
@@ -1146,15 +1147,14 @@ Playlist::partition_internal (samplepos_t start, samplepos_t end, bool cutting, 
 
 					region = RegionFactory::create (current, plist);
 
-					add_region_internal (region, pos1);
+					add_region_internal (region, pos1, thawlist);
 					new_regions.push_back (region);
 				}
 
 				/* end */
 
 				current->clear_changes ();
-				current->suspend_property_changes ();
-				thawlist.push_back (current);
+				thawlist.add (current);
 				current->trim_front (pos3);
 			} else if (overlap == Evoral::OverlapExternal) {
 
@@ -1175,7 +1175,7 @@ Playlist::partition_internal (samplepos_t start, samplepos_t end, bool cutting, 
 				 */
 
 				if (cutting) {
-					remove_region_internal (current);
+					remove_region_internal (current, thawlist);
 				}
 
 				new_regions.push_back (current);
@@ -1241,7 +1241,6 @@ boost::shared_ptr<Playlist>
 Playlist::cut (samplepos_t start, samplecnt_t cnt, bool result_is_hidden)
 {
 	boost::shared_ptr<Playlist> the_copy;
-	RegionList thawlist;
 	char buf[32];
 
 	snprintf (buf, sizeof (buf), "%" PRIu32, ++subcnt);
@@ -1255,11 +1254,7 @@ Playlist::cut (samplepos_t start, samplecnt_t cnt, bool result_is_hidden)
 
 	{
 		RegionWriteLock rlock (this);
-		partition_internal (start, start+cnt-1, true, thawlist);
-	}
-
-	for (RegionList::iterator i = thawlist.begin(); i != thawlist.end(); ++i) {
-		(*i)->resume_property_changes();
+		partition_internal (start, start+cnt-1, true, rlock.thawlist);
 	}
 
 	return the_copy;
@@ -1303,7 +1298,7 @@ Playlist::paste (boost::shared_ptr<Playlist> other, samplepos_t position, float 
 					   the ordering they had in the original playlist.
 					*/
 
-					add_region_internal (copy_of_region, (*i)->position() + pos, sub_num);
+					add_region_internal (copy_of_region, (*i)->position() + pos, rl1.thawlist, sub_num);
 					set_layer (copy_of_region, copy_of_region->layer() + top);
 				}
 				pos += shift;
@@ -1332,7 +1327,7 @@ Playlist::duplicate (boost::shared_ptr<Region> region, samplepos_t position, sam
 
 	while (itimes--) {
 		boost::shared_ptr<Region> copy = RegionFactory::create (region, true);
-		add_region_internal (copy, position);
+		add_region_internal (copy, position, rl.thawlist);
 		set_layer (copy, DBL_MAX);
 		position += gap;
 	}
@@ -1350,7 +1345,7 @@ Playlist::duplicate (boost::shared_ptr<Region> region, samplepos_t position, sam
 			plist.add (Properties::name, name);
 
 			boost::shared_ptr<Region> sub = RegionFactory::create (region, plist);
-			add_region_internal (sub, position);
+			add_region_internal (sub, position, rl.thawlist);
 			set_layer (sub, DBL_MAX);
 		}
 	}
@@ -1365,7 +1360,7 @@ Playlist::duplicate_until (boost::shared_ptr<Region> region, samplepos_t positio
 
 	 while (position + region->length() - 1 < end) {
 		 boost::shared_ptr<Region> copy = RegionFactory::create (region, true);
-		 add_region_internal (copy, position);
+		 add_region_internal (copy, position, rl.thawlist);
 		 set_layer (copy, DBL_MAX);
 		 position += gap;
 	 }
@@ -1383,7 +1378,7 @@ Playlist::duplicate_until (boost::shared_ptr<Region> region, samplepos_t positio
 			 plist.add (Properties::name, name);
 
 			 boost::shared_ptr<Region> sub = RegionFactory::create (region, plist);
-			 add_region_internal (sub, position);
+			 add_region_internal (sub, position, rl.thawlist);
 			 set_layer (sub, DBL_MAX);
 		 }
 	 }
@@ -1458,6 +1453,7 @@ Playlist::shift (samplepos_t at, sampleoffset_t distance, bool move_intersected,
 			continue;
 		}
 
+		rlock.thawlist.add (*r);
 		(*r)->set_position ((*r)->position() + distance);
 	}
 
@@ -1476,7 +1472,7 @@ Playlist::split (const MusicSample& at)
 	/* use a copy since this operation can modify the region list */
 
 	for (RegionList::iterator r = copy.begin(); r != copy.end(); ++r) {
-		_split_region (*r, at);
+		_split_region (*r, at, rlock.thawlist);
 	}
 }
 
@@ -1484,11 +1480,11 @@ void
 Playlist::split_region (boost::shared_ptr<Region> region, const MusicSample& playlist_position)
 {
 	RegionWriteLock rl (this);
-	_split_region (region, playlist_position);
+	_split_region (region, playlist_position, rl.thawlist);
 }
 
 void
-Playlist::_split_region (boost::shared_ptr<Region> region, const MusicSample& playlist_position)
+Playlist::_split_region (boost::shared_ptr<Region> region, const MusicSample& playlist_position, ThawList& thawlist)
 {
 	if (!region->covers (playlist_position.sample)) {
 		return;
@@ -1545,10 +1541,10 @@ Playlist::_split_region (boost::shared_ptr<Region> region, const MusicSample& pl
 		right = RegionFactory::create (region, before, plist, true);
 	}
 
-	add_region_internal (left, region->position(), 0);
-	add_region_internal (right, region->position() + before.sample, before.division);
+	add_region_internal (left, region->position(), thawlist, 0);
+	add_region_internal (right, region->position() + before.sample, thawlist, before.division);
 
-	remove_region_internal (region);
+	remove_region_internal (region, thawlist);
 
 	_splicing = old_sp;
 }
@@ -1596,7 +1592,7 @@ Playlist::possibly_splice (samplepos_t at, samplecnt_t distance, boost::shared_p
 }
 
 void
-Playlist::possibly_splice_unlocked (samplepos_t at, samplecnt_t distance, boost::shared_ptr<Region> exclude)
+Playlist::possibly_splice_unlocked (samplepos_t at, samplecnt_t distance, boost::shared_ptr<Region> exclude, ThawList& thawlist)
 {
 	if (_splicing || in_set_state) {
 		/* don't respond to splicing moves or state setting */
@@ -1604,27 +1600,19 @@ Playlist::possibly_splice_unlocked (samplepos_t at, samplecnt_t distance, boost:
 	}
 
 	if (_edit_mode == Splice) {
-		splice_unlocked (at, distance, exclude);
+		splice_unlocked (at, distance, exclude, thawlist);
 	}
 }
 
 void
 Playlist::splice_locked (samplepos_t at, samplecnt_t distance, boost::shared_ptr<Region> exclude)
 {
-	{
-		RegionWriteLock rl (this);
-		core_splice (at, distance, exclude);
-	}
+	RegionWriteLock rl (this);
+	splice_unlocked (at, distance, exclude, rl.thawlist);
 }
 
 void
-Playlist::splice_unlocked (samplepos_t at, samplecnt_t distance, boost::shared_ptr<Region> exclude)
-{
-	core_splice (at, distance, exclude);
-}
-
-void
-Playlist::core_splice (samplepos_t at, samplecnt_t distance, boost::shared_ptr<Region> exclude)
+Playlist::splice_unlocked (samplepos_t at, samplecnt_t distance, boost::shared_ptr<Region> exclude, ThawList& thawlist)
 {
 	_splicing = true;
 
@@ -1642,6 +1630,7 @@ Playlist::core_splice (samplepos_t at, samplecnt_t distance, boost::shared_ptr<R
 				new_pos = max_samplepos - (*i)->length();
 			}
 
+			thawlist.add (*i);
 			(*i)->set_position (new_pos);
 		}
 	}
@@ -1654,20 +1643,12 @@ Playlist::core_splice (samplepos_t at, samplecnt_t distance, boost::shared_ptr<R
 void
 Playlist::ripple_locked (samplepos_t at, samplecnt_t distance, RegionList *exclude)
 {
-	{
-		RegionWriteLock rl (this);
-		core_ripple (at, distance, exclude);
-	}
+	RegionWriteLock rl (this);
+	ripple_unlocked (at, distance, exclude, rl.thawlist);
 }
 
 void
-Playlist::ripple_unlocked (samplepos_t at, samplecnt_t distance, RegionList *exclude)
-{
-	core_ripple (at, distance, exclude);
-}
-
-void
-Playlist::core_ripple (samplepos_t at, samplecnt_t distance, RegionList *exclude)
+Playlist::ripple_unlocked (samplepos_t at, samplecnt_t distance, RegionList *exclude, ThawList& thawlist)
 {
 	if (distance == 0) {
 		return;
@@ -1693,6 +1674,7 @@ Playlist::core_ripple (samplepos_t at, samplecnt_t distance, RegionList *exclude
 				new_pos = limit;
 			}
 
+			thawlist.add (*i);
 			(*i)->set_position (new_pos);
 		}
 	}
@@ -2266,13 +2248,16 @@ Playlist::update (const RegionListProperty::ChangeRecord& change)
 				name(), change.added.size(), change.removed.size()));
 
 	freeze ();
-	/* add the added regions */
-	for (RegionListProperty::ChangeContainer::const_iterator i = change.added.begin(); i != change.added.end(); ++i) {
-		add_region_internal ((*i), (*i)->position());
-	}
-	/* remove the removed regions */
-	for (RegionListProperty::ChangeContainer::const_iterator i = change.removed.begin(); i != change.removed.end(); ++i) {
-		remove_region (*i);
+	{
+		RegionWriteLock rlock (this);
+		/* add the added regions */
+		for (RegionListProperty::ChangeContainer::const_iterator i = change.added.begin(); i != change.added.end(); ++i) {
+			add_region_internal ((*i), (*i)->position(), rlock.thawlist);
+		}
+		/* remove the removed regions */
+		for (RegionListProperty::ChangeContainer::const_iterator i = change.removed.begin(); i != change.removed.end(); ++i) {
+			remove_region_internal (*i, rlock.thawlist);
+		}
 	}
 
 	thaw ();
@@ -2364,7 +2349,7 @@ Playlist::set_state (const XMLNode& node, int version)
 
 			{
 				RegionWriteLock rlock (this);
-				add_region_internal (region, region->position());
+				add_region_internal (region, region->position(), rlock.thawlist);
 			}
 
 			region->resume_property_changes ();
@@ -2778,6 +2763,7 @@ Playlist::nudge_after (samplepos_t start, samplecnt_t distance, bool forwards)
 					}
 				}
 
+				rlock.thawlist.add (*i);
 				(*i)->set_position (new_pos);
 				moved = true;
 			}
@@ -2952,6 +2938,9 @@ Playlist::shuffle (boost::shared_ptr<Region> region, int dir)
 							new_pos = region->position() + (*next)->length();
 						}
 
+						rlock.thawlist.add (*next);
+						rlock.thawlist.add (region);
+
 						(*next)->set_position (region->position());
 						region->set_position (new_pos);
 
@@ -2992,6 +2981,9 @@ Playlist::shuffle (boost::shared_ptr<Region> region, int dir)
 							 */
 							new_pos = (*prev)->position() + region->length();
 						}
+
+						rlock.thawlist.add (region);
+						rlock.thawlist.add (*prev);
 
 						region->set_position ((*prev)->position());
 						(*prev)->set_position (new_pos);
@@ -3047,6 +3039,7 @@ Playlist::update_after_tempo_map_change ()
 	freeze ();
 
 	for (RegionList::iterator i = copy.begin(); i != copy.end(); ++i) {
+		rlock.thawlist.add (*i);
 		(*i)->update_after_tempo_map_change ();
 	}
 	/* possibly causes a contents changed notification (flush_notifications()) */
