@@ -82,7 +82,17 @@ Location::Location (Session& s, timepos_t const & start, timepos_t const & end, 
 	, _locked (false)
 	, _timestamp (time (0))
 {
-#warning NUTEMPO FIXME drop this and ensure that timepos start/end use correct domain in caller for this constructor
+
+	/* it would be nice if the caller could ensure that the start and end
+	   values simply use the correct domain, but that would involve
+	   enforcing/checking that at every place where we create a
+	   Location. So instead we centralize this here.
+
+	   NUTEMPO: it might make sense to switch time domains when <something>
+	   happens, but it's not clear what the <something> might be? Maybe
+	   changing some setting of the tempo map.
+	*/
+
 	if (s.config.get_glue_new_markers_to_bars_and_beats()) {
 		set_position_time_domain (Temporal::BeatTime);
 	} else {
