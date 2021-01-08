@@ -33,6 +33,7 @@
 
 #include "pbd/i18n.h"
 
+#include "ardour/async_midi_port.h"
 #include "ardour/audioengine.h"
 #include "ardour/bundle.h"
 #include "ardour/session.h"
@@ -118,6 +119,12 @@ Session::setup_bundles ()
 		                    MidiPortFlags (0), /* no specific inclusions */
 		                    MidiPortFlags (MidiPortControl|MidiPortVirtual) /* exclude control & virtual ports */
 			);
+	}
+
+	/* now add virtual Vkeybd, compare to PortGroupList::gather */
+	if (_midi_ports) {
+		boost::shared_ptr<Port> ap = boost::dynamic_pointer_cast<Port> (vkbd_output_port ());
+		inputs[DataType::MIDI].push_back (AudioEngine::instance()->make_port_name_non_relative (ap->name ()));
 	}
 
 	/* Create a set of Bundle objects that map
