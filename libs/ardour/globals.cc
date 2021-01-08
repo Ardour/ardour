@@ -610,10 +610,10 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	   while for pure I/O (e.g. "Click") track/bus creation must always fail.
 	*/
 
-	reserved_io_names[_("Monitor")]          = true;
-	reserved_io_names[_("Master")]           = true;
-	reserved_io_names[X_("auditioner")]      = true; // auditioner.cc  Track (s, "auditioner",...)
-	reserved_io_names[_("Virtual Keyboard")] = false;
+	reserved_io_names[_("Monitor")]             = true;
+	reserved_io_names[_("Master")]              = true;
+	reserved_io_names[X_("auditioner")]         = true; // auditioner.cc  Track (s, "auditioner",...)
+	reserved_io_names[X_("x-virtual-keyboard")] = false;
 
 	/* pure I/O */
 	reserved_io_names[X_("Click")]           = false; // session.cc ClickIO (*this, X_("Click")

@@ -68,8 +68,9 @@ MidiPortManager::create_ports ()
 	_scene_in  = AudioEngine::instance()->register_input_port (DataType::MIDI, X_("Scene in"), true);
 	_scene_out = AudioEngine::instance()->register_output_port (DataType::MIDI, X_("Scene out"), true);
 
-	_vkbd_out = AudioEngine::instance()->register_output_port (DataType::MIDI, _("Virtual Keyboard"), true);
+	_vkbd_out = AudioEngine::instance()->register_output_port (DataType::MIDI, X_("x-virtual-keyboard"), true);
 	boost::dynamic_pointer_cast<AsyncMIDIPort>(_vkbd_out)->set_flush_at_cycle_start (true);
+	_vkbd_out->set_pretty_name (_("Virtual Keyboard"));
 
 	/* Now register ports used to send positional sync data (MTC and MIDI Clock) */
 

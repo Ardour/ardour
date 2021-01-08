@@ -1270,8 +1270,8 @@ PortManager::fill_midi_port_info_locked ()
 
 	for (vector<string>::iterator p = ports.begin(); p != ports.end(); ++p) {
 
-		/* ugly hack, ideally we'd use a port-flag, or at vkbd_output_port()->name() */
-		if (port_is_mine (*p) && *p != _backend->my_name() + ":" + _("Virtual Keyboard")) {
+		/* ugly hack, ideally we'd use a port-flag, or vkbd_output_port()->name() */
+		if (port_is_mine (*p) && *p != _backend->my_name() + ":x-virtual-keyboard") {
 			continue;
 		}
 
@@ -1281,7 +1281,7 @@ PortManager::fill_midi_port_info_locked ()
 
 			if (port_is_control_only (*p)) {
 				flags = MidiPortControl;
-			} else if (*p == _backend->my_name() + ":" + _("Virtual Keyboard")) {
+			} else if (*p == _backend->my_name() + ":x-virtual-keyboard") {
 				flags = MidiPortFlags(MidiPortSelection | MidiPortMusic);
 			}
 
