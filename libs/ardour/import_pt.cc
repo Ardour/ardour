@@ -336,7 +336,7 @@ Session::import_pt_rest (PTFFormat& ptf)
 					/* Use existing track if possible */
 					existing_track = get_nth_audio_track (found->index2 + 1);
 					if (!existing_track) {
-						list<boost::shared_ptr<AudioTrack> > at (new_audio_track (1, 2, 0, 1, "", PresentationInfo::max_order, Normal));
+						list<boost::shared_ptr<AudioTrack> > at (new_audio_track (1, 2, 0, 1, a->name.c_str(), PresentationInfo::max_order, Normal));
 						if (at.empty ()) {
 							return;
 						}
@@ -351,24 +351,11 @@ Session::import_pt_rest (PTFFormat& ptf)
 				} else {
 					/* Put on a new track */
 					DEBUG_TRACE (DEBUG::FileUtils, string_compose ("\twav(%1) reg(%2) new_tr(%3)\n", a->reg.wave.filename.c_str (), a->reg.index, nth));
-					list<boost::shared_ptr<AudioTrack> > at (new_audio_track (1, 2, 0, 1, "", PresentationInfo::max_order, Normal));
+					list<boost::shared_ptr<AudioTrack> > at (new_audio_track (1, 2, 0, 1, a->name.c_str(), PresentationInfo::max_order, Normal));
 					if (at.empty ()) {
 						return;
 					}
 					existing_track = at.back ();
-					std::string trackname;
-					try {
-						trackname = Glib::convert_with_fallback (a->name, "UTF-8", "UTF-8", "_");
-					} catch (Glib::ConvertError& err) {
-						trackname = string_compose ("Invalid %1", a->index);
-					}
-					/* generate a unique name by adding a number if needed */
-					uint32_t id = 0;
-					if (!find_route_name (trackname.c_str (), id, trackname, false)) {
-						fatal << _("PTImport: failed to generate unique Track ID!") << endmsg;
-						abort(); /*NOTREACHED*/
-					}
-					existing_track->set_name (trackname);
 					boost::shared_ptr<Playlist> playlist = existing_track->playlist();
 					boost::shared_ptr<Region> copy (RegionFactory::create (r, true));
 					playlist->clear_changes ();
