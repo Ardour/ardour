@@ -540,8 +540,7 @@ ControlList::add_guard_point (timepos_t const & time, timecnt_t const & offset)
 		return;
 	}
 
-#warning NUTEMPO FIXME this assertion should be possible to write
-	// assert (offset <= 0);
+	assert (offset <= timecnt_t());
 
 	if (!offset.zero()) {
 		/* check if there are points between when + offset .. when */
