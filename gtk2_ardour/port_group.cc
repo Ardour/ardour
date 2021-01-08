@@ -513,8 +513,8 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 	if (!inputs && (type == DataType::MIDI || type == DataType::NIL)) {
 		boost::shared_ptr<ARDOUR::Port> ap = boost::dynamic_pointer_cast<ARDOUR::Port> (session->vkbd_output_port());
 		AudioEngine* ae = AudioEngine::instance();
-		boost::shared_ptr<Bundle> vm (new Bundle (_("Virtual MIDI"), inputs));
-		vm->add_channel (_("Virtual Keyboard"), DataType::MIDI, ae->make_port_name_non_relative (ap->name()));
+		boost::shared_ptr<Bundle> vm (new Bundle (ap->pretty_name (), inputs));
+		vm->add_channel (ap->pretty_name (), DataType::MIDI, ae->make_port_name_non_relative (ap->name()));
 		program->add_bundle (vm);
 	}
 
