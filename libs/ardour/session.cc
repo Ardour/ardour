@@ -2390,7 +2390,7 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, bool s
                          boost::shared_ptr<PluginInfo> instrument, Plugin::PresetRecord* pset,
                          RouteGroup* route_group, uint32_t how_many,
                          string name_template, PresentationInfo::order_t order,
-                         TrackMode mode)
+                         TrackMode mode, bool input_auto_connect)
 {
 	string track_name;
 	uint32_t track_id = 0;
@@ -2463,7 +2463,7 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, bool s
 		ChanCount existing_outputs;
 		count_existing_track_channels (existing_inputs, existing_outputs);
 
-		add_routes (new_routes, true, !instrument, order);
+		add_routes (new_routes, input_auto_connect, !instrument, order);
 		load_and_connect_instruments (new_routes, strict_io, instrument, pset, existing_outputs);
 	}
 
