@@ -160,7 +160,9 @@ DragManager::start_grab (GdkEvent* e, Gdk::Cursor* c)
 	_current_pointer_sample = _editor->canvas_event_sample (e, &_current_pointer_x, &_current_pointer_y);
 
 	for (list<Drag*>::const_iterator i = _drags.begin(); i != _drags.end(); ++i) {
-		(*i)->start_grab (e, c);
+		if ((*i)->grab_button() < 0) {
+			(*i)->start_grab (e, c);
+		}
 	}
 }
 
@@ -173,19 +175,29 @@ DragManager::end_grab (GdkEvent* e)
 	_ending = true;
 
 	bool r = false;
-	for (list<Drag*>::iterator i = _drags.begin(); i != _drags.end(); ++i) {
-		bool const t = (*i)->end_grab (e);
-		if (t) {
-			r = true;
-		}
-		delete *i;
-	}
 
-	_drags.clear ();
+	for (list<Drag*>::iterator i = _drags.begin(); i != _drags.end(); ) {
+		list<Drag*>::iterator tmp = i;
+
+		if ((*i)->grab_button() == e->button.button) {
+			bool const t = (*i)->end_grab (e);
+			if (t) {
+				r = true;
+			}
+			delete *i;
+			tmp = _drags.erase (i);
+		} else {
+			++tmp;
+		}
+
+		i = tmp;
+	}
 
 	_ending = false;
 
-	_editor->set_follow_playhead (_old_follow_playhead, false);
+	if (_drags.empty()) {
+		_editor->set_follow_playhead (_old_follow_playhead, false);
+	}
 
 	return r;
 }
@@ -261,6 +273,7 @@ Drag::Drag (Editor* e, ArdourCanvas::Item* i, bool trackview_only)
 	, _snap_delta (0)
 	, _snap_delta_music (0.0)
 	, _constraint_pressed (false)
+	, _grab_button (-1)
 {
 
 }
@@ -288,6 +301,7 @@ Drag::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 	_constraint_pressed = ArdourKeyboard::indicates_constraint (event->button.state);
 
 	_raw_grab_sample = _editor->canvas_event_sample (event, &_grab_x, &_grab_y);
+	_grab_button = event->button.button;
 
 	setup_pointer_sample_offset ();
 	setup_video_sample_offset ();

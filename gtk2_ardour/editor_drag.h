@@ -231,6 +231,8 @@ public:
 		_preview_video = false;
 	}
 
+	int grab_button() const { return _grab_button; }
+
 protected:
 
 	double grab_x () const {
@@ -309,6 +311,7 @@ private:
 	double      _snap_delta_music;
 	CursorContext::Handle _cursor_ctx; ///< cursor change context
 	bool _constraint_pressed; ///< if the keyboard indicated constraint modifier was pressed on start_grab()
+	int _grab_button;
 };
 
 class RegionDrag;
