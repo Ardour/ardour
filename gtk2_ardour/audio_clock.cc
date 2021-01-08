@@ -136,6 +136,8 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 
 	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &AudioClock::set_colors));
 	UIConfiguration::instance().DPIReset.connect (sigc::mem_fun (*this, &AudioClock::dpi_reset));
+
+	TempoMap::MapChanged.connect (tempo_map_connection, invalidator (*this), boost::bind (&AudioClock::tempo_map_changed, this), gui_context());
 }
 
 AudioClock::~AudioClock ()
@@ -802,7 +804,7 @@ AudioClock::end_edit_relative (bool add)
 }
 
 void
-AudioClock::session_property_changed (const PropertyChange&)
+AudioClock::tempo_map_changed ()
 {
 	AudioClock::set (last_when, true);
 }
@@ -1332,8 +1334,6 @@ AudioClock::set_session (Session *s)
 
 		Config->ParameterChanged.connect (_session_connections, invalidator (*this), boost::bind (&AudioClock::session_configuration_changed, this, _1), gui_context());
 		_session->config.ParameterChanged.connect (_session_connections, invalidator (*this), boost::bind (&AudioClock::session_configuration_changed, this, _1), gui_context());
-#warning NUTEMPO probably need a static signal here, map object will change address etc
-		// TempoMap::use()->Changed.connect (_session_connections, invalidator (*this), boost::bind (&AudioClock::session_property_changed, this), gui_context());
 
 		XMLNode* node = _session->extra_xml (X_("ClockModes"));
 

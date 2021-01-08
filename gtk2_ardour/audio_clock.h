@@ -244,7 +244,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	samplepos_t samples_from_audiosamples_string (const std::string&) const;
 
 	void session_configuration_changed (std::string);
-	void session_property_changed (const PBD::PropertyChange&);
+	void tempo_map_changed ();
 
 	Field index_to_field () const;
 
@@ -273,6 +273,8 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 
 	double xscale;
 	double yscale;
+
+	PBD::ScopedConnection tempo_map_connection;
 };
 
 #endif /* __audio_clock_h__ */
