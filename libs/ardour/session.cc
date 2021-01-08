@@ -2371,11 +2371,11 @@ Session::default_track_name_pattern (DataType t)
 {
 	switch (t) {
 	case DataType::AUDIO:
-		return _("Audio ");
+		return _("Audio");
 		break;
 
 	case DataType::MIDI:
-		return _("MIDI ");
+		return _("MIDI");
 	}
 
 	return "";
