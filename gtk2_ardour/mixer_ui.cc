@@ -419,6 +419,7 @@ Mixer_UI::~Mixer_UI ()
 	foldback_strip = 0;
 	delete _plugin_selector;
 	delete track_menu;
+	delete _group_tabs;
 }
 
 struct MixerStripSorter {
