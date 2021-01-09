@@ -1278,7 +1278,7 @@ public:
 
 	void import_pt_sources (PTFFormat& ptf, ImportStatus& status);
 	void import_pt_rest (PTFFormat& ptf);
-	bool import_sndfile_as_region (std::string path, SrcQuality quality, samplepos_t& pos, SourceList& sources, ImportStatus& status);
+	bool import_sndfile_as_region (std::string path, SrcQuality quality, samplepos_t& pos, SourceList& sources, ImportStatus& status, uint32_t current, uint32_t total);
 
 	struct ptflookup {
 		uint16_t index1;

@@ -68,13 +68,13 @@ struct midipair {
 };
 
 bool
-Session::import_sndfile_as_region (string path, SrcQuality quality, samplepos_t& pos, SourceList& sources, ImportStatus& status)
+Session::import_sndfile_as_region (string path, SrcQuality quality, samplepos_t& pos, SourceList& sources, ImportStatus& status, uint32_t current, uint32_t total)
 {
 	/* Import the source */
 	status.paths.clear();
 	status.paths.push_back(path);
-	status.current = 1;
-	status.total = 1;
+	status.current = current;
+	status.total = total;
 	status.freeze = false;
 	status.quality = quality;
 	status.replace_existing_source = false;
@@ -83,16 +83,17 @@ Session::import_sndfile_as_region (string path, SrcQuality quality, samplepos_t&
 	status.cancel = false;
 
 	import_files(status);
+	status.progress = 1.0;
 	sources.clear();
 
 	/* FIXME: There is no way to tell if cancel button was pressed
 	 * or if the file failed to import, just that one of these occurred.
 	 * We want status.cancel to reflect the user's choice only
 	 */
-	if (status.cancel && status.current > 1) {
+	if (status.cancel && status.current > current) {
 		/* Succeeded to import file, assume user hit cancel */
 		return false;
-	} else if (status.cancel && status.current == 1) {
+	} else if (status.cancel && status.current == current) {
 		/* Failed to import file, assume user did not hit cancel */
 		status.cancel = false;
 		return false;
@@ -187,6 +188,7 @@ Session::import_pt_sources (PTFFormat& ptf, ImportStatus& status)
 
 	vector<struct ptflookup> ptfregpair;
 	vector<PTFFormat::wav_t>::const_iterator w;
+	uint32_t wth = 0;
 
 	SourceList just_one_src;
 
@@ -199,20 +201,21 @@ Session::import_pt_sources (PTFFormat& ptf, ImportStatus& status)
 
 	for (w = ptf.audiofiles ().begin (); w != ptf.audiofiles ().end () && !status.cancel; ++w) {
 		struct ptflookup p;
+		wth++;
 		ok = false;
 		/* Try audio file */
 		fullpath = Glib::build_filename (Glib::path_get_dirname (ptf.path ()), "Audio Files");
 		fullpath = Glib::build_filename (fullpath, w->filename);
 		if (Glib::file_test (fullpath, Glib::FILE_TEST_EXISTS)) {
 			just_one_src.clear();
-			ok = import_sndfile_as_region (fullpath, SrcBest, pos, just_one_src, status);
+			ok = import_sndfile_as_region (fullpath, SrcBest, pos, just_one_src, status, wth, ptf.audiofiles ().size ());
 		} else {
 			/* Try fade file */
 			fullpath = Glib::build_filename (Glib::path_get_dirname (ptf.path ()), "Fade Files");
 			fullpath = Glib::build_filename (fullpath, w->filename);
 			if (Glib::file_test (fullpath, Glib::FILE_TEST_EXISTS)) {
 				just_one_src.clear();
-				ok = import_sndfile_as_region (fullpath, SrcBest, pos, just_one_src, status);
+				ok = import_sndfile_as_region (fullpath, SrcBest, pos, just_one_src, status, wth, ptf.audiofiles ().size ());
 			} else {
 				onefailed = true;
 

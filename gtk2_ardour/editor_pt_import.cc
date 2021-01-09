@@ -110,8 +110,8 @@ Editor::external_pt_dialog ()
 		MessageDialog msg (_("PT import cancelled"));
 		msg.run ();
 	} else {
-		_session->import_pt_rest (import_ptf);
 		import_pt_status.progress = 1.0;
+		_session->import_pt_rest (import_ptf);
 		MessageDialog msg (_("PT import complete!"));
 		msg.run ();
 	}
