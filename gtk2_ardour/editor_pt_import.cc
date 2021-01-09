@@ -90,6 +90,7 @@ Editor::external_pt_dialog ()
 	}
 
 	import_pt_status.all_done = false;
+	import_pt_status.clear();
 
 	ImportProgressWindow ipw (&import_pt_status, _("PT Import"), _("Cancel Import"));
 	pthread_create_and_store ("import_pt", &import_pt_status.thread, _import_pt_thread, this);

@@ -177,27 +177,19 @@ Session::import_sndfile_as_region (string path, SrcQuality quality, samplepos_t&
 void
 Session::import_pt_sources (PTFFormat& ptf, ImportStatus& status)
 {
-	vector<boost::shared_ptr<Region> > regions;
-	boost::shared_ptr<ARDOUR::Track> track;
-	ARDOUR::PluginInfoPtr instrument;
-	vector<string> to_import;
 	string fullpath;
 	bool ok = false;
 	bool onefailed = false;
 	samplepos_t pos = -1;
 
-	vector<struct ptflookup> ptfregpair;
 	vector<PTFFormat::wav_t>::const_iterator w;
 	uint32_t wth = 0;
 
 	SourceList just_one_src;
 
-	boost::shared_ptr<AudioTrack> existing_track;
-	vector<struct ptflookup> usedtracks;
-	struct ptflookup utr;
-
 	ptfwavpair.clear();
 	pt_imported_sources.clear();
+	status.clear();
 
 	for (w = ptf.audiofiles ().begin (); w != ptf.audiofiles ().end () && !status.cancel; ++w) {
 		struct ptflookup p;
