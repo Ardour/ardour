@@ -81,8 +81,8 @@ public:
 		float chn_active[17];
 	};
 
-	typedef std::map<std::string, boost::shared_ptr<Port>> Ports;
-	typedef std::list<boost::shared_ptr<Port>>             PortList;
+	typedef std::map<std::string, boost::shared_ptr<Port> > Ports;
+	typedef std::list<boost::shared_ptr<Port> >             PortList;
 
 	typedef boost::shared_ptr<CircularSampleBuffer> AudioPortScope;
 	typedef std::map<std::string, AudioPortScope>   AudioPortScopes;
