@@ -29,6 +29,7 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "pbd/natsort.h"
 #include "pbd/rcu.h"
 #include "pbd/ringbuffer.h"
 
@@ -81,16 +82,22 @@ public:
 		float chn_active[17];
 	};
 
-	typedef std::map<std::string, boost::shared_ptr<Port> > Ports;
-	typedef std::list<boost::shared_ptr<Port> >             PortList;
+	struct SortByPortName {
+		bool operator() (std::string const& a, std::string const& b) const {
+			return PBD::naturally_less (a.c_str (), b.c_str ());
+		}
+	};
 
-	typedef boost::shared_ptr<CircularSampleBuffer> AudioPortScope;
-	typedef std::map<std::string, AudioPortScope>   AudioPortScopes;
-	typedef std::map<std::string, DPM>              AudioPortMeters;
+	typedef std::map<std::string, boost::shared_ptr<Port>, SortByPortName> Ports;
+	typedef std::list<boost::shared_ptr<Port> >                            PortList;
 
-	typedef boost::shared_ptr<CircularEventBuffer> MIDIPortMonitor;
-	typedef std::map<std::string, MIDIPortMonitor> MIDIPortMonitors;
-	typedef std::map<std::string, MPM>             MIDIPortMeters;
+	typedef boost::shared_ptr<CircularSampleBuffer>                 AudioPortScope;
+	typedef std::map<std::string, AudioPortScope, SortByPortName>   AudioPortScopes;
+	typedef std::map<std::string, DPM, SortByPortName>              AudioPortMeters;
+
+	typedef boost::shared_ptr<CircularEventBuffer>                 MIDIPortMonitor;
+	typedef std::map<std::string, MIDIPortMonitor, SortByPortName> MIDIPortMonitors;
+	typedef std::map<std::string, MPM, SortByPortName>             MIDIPortMeters;
 
 	PortManager ();
 	virtual ~PortManager () {}
