@@ -506,7 +506,7 @@ int main() { return 0; }''',
                            errmsg    = 'Not supported',
                            define_name = 'FPU_AVX_FMA_SUPPORT')
 
-    if opt.use_libcpp or conf.env['build_host'] in [ 'el_capitan', 'sierra', 'high_sierra', 'mojave', 'catalina' ]:
+    if opt.use_libcpp or conf.env['build_host'] in [ 'yosemite', 'el_capitan', 'sierra', 'high_sierra', 'mojave', 'catalina' ]:
        cxx_flags.append('--stdlib=libc++')
        linker_flags.append('--stdlib=libc++')
 
@@ -518,7 +518,7 @@ int main() { return 0; }''',
             # from requiring a full path to requiring just the header name.
             cxx_flags.append('-DCARBON_FLAT_HEADERS')
 
-            if not opt.use_libcpp and not conf.env['build_host'] in [ 'el_capitan', 'sierra', 'high_sierra', 'mojave', 'catalina', 'bigsur' ]:
+            if not opt.use_libcpp and not conf.env['build_host'] in [ 'yosemite', 'el_capitan', 'sierra', 'high_sierra', 'mojave', 'catalina', 'bigsur' ]:
                 cxx_flags.append('--stdlib=libstdc++')
                 linker_flags.append('--stdlib=libstdc++')
             # Prevents visibility issues in standard headers
@@ -646,13 +646,13 @@ int main() { return 0; }''',
                  '-mmacosx-version-min=10.7'))
         linker_flags.append("-mmacosx-version-min=10.7")
 
-    elif conf.env['build_target'] in [ 'mavericks', 'yosemite' ]:
+    elif conf.env['build_target'] in [ 'mavericks' ]:
         compiler_flags.extend(
                 ("-DMAC_OS_X_VERSION_MAX_ALLOWED=1090",
                  "-mmacosx-version-min=10.8"))
         linker_flags.append("-mmacosx-version-min=10.8")
 
-    elif conf.env['build_target'] in ['el_capitan', 'sierra', 'high_sierra', 'mojave', 'catalina' ]:
+    elif conf.env['build_target'] in ['yosemite', 'el_capitan', 'sierra', 'high_sierra', 'mojave', 'catalina' ]:
         compiler_flags.extend(
                 ("-DMAC_OS_X_VERSION_MAX_ALLOWED=1090",
                  "-mmacosx-version-min=10.9"))
