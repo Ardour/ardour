@@ -424,6 +424,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\circular_buffer.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\config_text.cc"
 				>
 			</File>
@@ -1683,6 +1687,10 @@
 			</File>
 			<File
 				RelativePath="..\ardour\chan_mapping.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\circular_buffer.h"
 				>
 			</File>
 			<File
