@@ -240,6 +240,8 @@ Session::import_pt_sources (PTFFormat& ptf, ImportStatus& status)
 
 			ptfwavpair.push_back (p);
 			pt_imported_sources.push_back (just_one_src.back ());
+		} else {
+			onefailed = true;
 		}
 	}
 

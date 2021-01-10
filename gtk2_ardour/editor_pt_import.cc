@@ -113,7 +113,7 @@ Editor::external_pt_dialog ()
 	} else {
 		import_pt_status.progress = 1.0;
 		_session->import_pt_rest (import_ptf);
-		MessageDialog msg (_("PT import complete!"));
+		MessageDialog msg (_("PT import completed!\nSee log for specifics"));
 		msg.run ();
 	}
 }
