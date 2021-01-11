@@ -1015,8 +1015,6 @@ AudioEngine::start (bool for_latency)
 
 	}
 
-	midi_info_dirty = true;
-
 	if (!for_latency) {
 		/* Call the library-wide ::init_post_engine() before emitting
 		 * running to ensure that its tasks are complete before any

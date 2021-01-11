@@ -136,6 +136,7 @@ public:
 	std::string             short_port_name_from_port_name (std::string const& full_name) const;
 	bool                    port_is_mine (const std::string& fullname) const;
 
+	static bool port_is_virtual_piano (std::string const&);
 	static bool port_is_control_only (std::string const&);
 
 	/* other Port management */
@@ -203,39 +204,19 @@ public:
 		return _port_remove_in_progress;
 	}
 
-	struct MidiPortInformation {
-		std::string   backend;
-		std::string   pretty_name;
-		bool          input;
-		MidiPortFlags properties;
-		bool          exists;
+	MidiPortFlags midi_port_metadata (std::string const&);
 
-		MidiPortInformation (std::string const& b, std::string const& pretty, bool input, MidiPortFlags flags, bool xists)
-			: backend (b)
-			, pretty_name (pretty)
-			, input (input)
-			, properties (flags)
-			, exists (xists)
-		{}
-
-		MidiPortInformation ()
-			: properties (MidiPortFlags (0))
-			, exists (false)
-		{}
-	};
-
-	void fill_midi_port_info ();
-
-	MidiPortInformation midi_port_information (std::string const&);
-	void                get_known_midi_ports (std::vector<std::string>&);
-	void                get_midi_selection_ports (std::vector<std::string>&);
-	void                add_midi_port_flags (std::string const&, MidiPortFlags);
-	void                remove_midi_port_flags (std::string const&, MidiPortFlags);
+	void get_configurable_midi_ports (std::vector<std::string>&, bool for_input);
+	void get_midi_selection_ports (std::vector<std::string>&);
+	void add_midi_port_flags (std::string const&, MidiPortFlags);
+	void remove_midi_port_flags (std::string const&, MidiPortFlags);
 
 	/** Emitted if the list of ports to be used for MIDI selection tracking changes */
 	PBD::Signal0<void> MidiSelectionPortsChanged;
 	/** Emitted if anything other than the selection property for a MIDI port changes */
 	PBD::Signal0<void> MidiPortInfoChanged;
+	/** Emitted if pretty-name of a port changed */
+	PBD::Signal1<void, std::string> PortPrettyNameChanged;
 
 	/** Emitted if the backend notifies us of a graph order event */
 	PBD::Signal0<void> GraphReordered;
@@ -302,16 +283,8 @@ protected:
 
 	void cycle_end_fade_out (gain_t, gain_t, pframes_t, Session* s = 0);
 
-	typedef std::map<std::string, MidiPortInformation> MidiPortInfo;
-
-	mutable Glib::Threads::Mutex midi_port_info_mutex;
-	MidiPortInfo                 midi_port_info;
-
+	static std::string port_info_file ();
 	static std::string midi_port_info_file ();
-	bool               midi_info_dirty;
-	void               save_midi_port_info ();
-	void               load_midi_port_info ();
-	void               fill_midi_port_info_locked ();
 
 	void filter_midi_ports (std::vector<std::string>&, MidiPortFlags, MidiPortFlags);
 
@@ -319,6 +292,72 @@ protected:
 
 private:
 	void run_input_meters (pframes_t, samplecnt_t);
+	void set_pretty_names (std::vector<std::string> const&, DataType, bool);
+	void fill_midi_port_info_locked ();
+	void load_port_info ();
+	void save_port_info ();
+
+	struct PortID {
+		PortID (boost::shared_ptr<AudioBackend>, DataType, bool, std::string const&);
+		PortID (XMLNode const&, bool old_midi_format = false);
+
+		std::string backend;
+		std::string device_name;
+		std::string port_name;
+		DataType    data_type;
+		bool        input;
+
+		XMLNode& state () const;
+
+		bool operator< (PortID const& o) const {
+			if (backend != o.backend) {
+				return backend < o.backend;
+			}
+			if (device_name != o.device_name) {
+				return device_name < o.device_name;
+			}
+			if (port_name != o.port_name) {
+				return PBD::naturally_less (port_name.c_str (), o.port_name.c_str ());
+			}
+			if (input != o.input) {
+				return input;
+			}
+			return (uint32_t) data_type < (uint32_t) o.data_type;
+		}
+
+		bool operator== (PortID const& o) const {
+			if (backend != o.backend) {
+				return false;
+			}
+			if (device_name != o.device_name) {
+				return false;
+			}
+			if (port_name != o.port_name) {
+				return false;
+			}
+			if (input != o.input) {
+				return false;
+			}
+			if (data_type != o.data_type) {
+				return false;
+			}
+			return true;
+		}
+	};
+
+	struct PortMetaData {
+		PortMetaData () : properties (MidiPortFlags (0)) {}
+		PortMetaData (XMLNode const&);
+
+		std::string pretty_name;
+		MidiPortFlags properties;
+	};
+
+	typedef std::map<PortID, PortMetaData> PortInfo;
+
+	mutable Glib::Threads::Mutex _port_info_mutex;
+	PortInfo                     _port_info;
+	bool                         _midi_info_dirty;
 
 	AudioPortMeters  _audio_port_meters;
 	AudioPortScopes  _audio_port_scopes;

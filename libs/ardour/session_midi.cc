@@ -741,7 +741,7 @@ Session::rewire_selected_midi (boost::shared_ptr<MidiTrack> new_midi_target)
 	if (!msp.empty()) {
 
 		for (vector<string>::const_iterator p = msp.begin(); p != msp.end(); ++p) {
-			PortManager::MidiPortInformation mpi (AudioEngine::instance()->midi_port_information (*p));
+			MidiPortFlags mpf = AudioEngine::instance()->midi_port_metadata (*p);
 
 			/* if a port is marked for control data, do not
 			 * disconnect it from everything since it may also be
@@ -749,7 +749,7 @@ Session::rewire_selected_midi (boost::shared_ptr<MidiTrack> new_midi_target)
 			 * functionality.
 			 */
 
-			if (0 == (mpi.properties & MidiPortControl)) {
+			if (0 == (mpf & MidiPortControl)) {
 				/* disconnect the port from everything */
 				AudioEngine::instance()->disconnect (*p);
 			} else {
