@@ -42,7 +42,7 @@ using namespace std;
 using namespace ARDOUR;
 
 PeakMeter::PeakMeter (Session& s, const std::string& name)
-    : Processor (s, string_compose ("meter-%1", name))
+	: Processor (s, string_compose ("meter-%1", name), Temporal::AudioTime)
 {
 	Kmeterdsp::init  (s.nominal_sample_rate ());
 	Iec1ppmdsp::init (s.nominal_sample_rate ());

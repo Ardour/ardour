@@ -35,13 +35,14 @@ using namespace PBD;
 using namespace ARDOUR;
 
 DelayLine::DelayLine (Session& s, const std::string& name)
-    : Processor (s, string_compose ("latcomp-%1-%2", name, this))
-		, _bsiz (0)
-		, _delay (0)
-		, _pending_delay (0)
-		, _roff (0)
-		, _woff (0)
-		, _pending_flush (false)
+#warning NUTEMPO why audio time when this processor can handle MIDI also
+	: Processor (s, string_compose ("latcomp-%1-%2", name, this), Temporal::AudioTime)
+	, _bsiz (0)
+	, _delay (0)
+	, _pending_delay (0)
+	, _roff (0)
+	, _woff (0)
+	, _pending_flush (false)
 {
 }
 

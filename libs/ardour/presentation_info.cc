@@ -120,6 +120,7 @@ const PresentationInfo::Flag PresentationInfo::AllRoutes = PresentationInfo::Fla
 const PresentationInfo::Flag PresentationInfo::MixerRoutes = PresentationInfo::Flag (PresentationInfo::Route|PresentationInfo::MasterOut|PresentationInfo::MonitorOut);
 const PresentationInfo::Flag PresentationInfo::AllStripables = PresentationInfo::Flag (PresentationInfo::AllRoutes|PresentationInfo::VCA);
 const PresentationInfo::Flag PresentationInfo::MixerStripables = PresentationInfo::Flag (PresentationInfo::MixerRoutes|PresentationInfo::VCA);
+const PresentationInfo::Flag PresentationInfo::MidiIndicatingFlags = PresentationInfo::Flag (PresentationInfo::MidiTrack|PresentationInfo::MidiBus);
 
 void
 PresentationInfo::make_property_quarks ()

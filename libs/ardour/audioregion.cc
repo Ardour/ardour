@@ -247,7 +247,7 @@ AudioRegion::AudioRegion (Session& s, timecnt_t const &  start, timecnt_t const 
 	: Region (s, start, len, name, DataType::AUDIO)
 	, AUDIOREGION_STATE_DEFAULT
 	, _envelope (Properties::envelope, boost::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter(EnvelopeAutomation), Temporal::AudioTime)))
-	, _automatable (s)
+	, _automatable (s, Temporal::AudioTime)
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
 {
@@ -260,7 +260,7 @@ AudioRegion::AudioRegion (const SourceList& srcs)
 	: Region (srcs)
 	, AUDIOREGION_STATE_DEFAULT
 	, _envelope (Properties::envelope, boost::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter(EnvelopeAutomation), Temporal::AudioTime)))
-	, _automatable(srcs[0]->session())
+	, _automatable(srcs[0]->session(), Temporal::AudioTime)
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
 {
@@ -275,7 +275,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other)
 		 * to do with sources (and hence _start).  So when we copy the envelope, we just use the supplied offset.
 		 */
 	, _envelope (Properties::envelope, boost::shared_ptr<AutomationList> (new AutomationList (*other->_envelope.val(), timepos_t (Temporal::AudioTime), timepos_t (other->_length))))
-	, _automatable (other->session())
+	, _automatable (other->session(), Temporal::AudioTime)
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
 {
@@ -297,7 +297,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, timecnt_t 
 	     to do with sources (and hence _start).  So when we copy the envelope, we just use the supplied offset.
 	  */
 	, _envelope (Properties::envelope, boost::shared_ptr<AutomationList> (new AutomationList (*other->_envelope.val(), timepos_t (offset.samples()), timepos_t (other->_length))))
-	, _automatable (other->session())
+	, _automatable (other->session(), Temporal::AudioTime)
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
 {
@@ -316,7 +316,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, const Sour
 	: Region (boost::static_pointer_cast<const Region>(other), srcs)
 	, AUDIOREGION_COPY_STATE (other)
 	, _envelope (Properties::envelope, boost::shared_ptr<AutomationList> (new AutomationList (*other->_envelope.val())))
-	, _automatable (other->session())
+	, _automatable (other->session(), Temporal::AudioTime)
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
 {
@@ -335,7 +335,7 @@ AudioRegion::AudioRegion (SourceList& srcs)
 	: Region (srcs)
 	, AUDIOREGION_STATE_DEFAULT
 	, _envelope (Properties::envelope, boost::shared_ptr<AutomationList> (new AutomationList(Evoral::Parameter(EnvelopeAutomation), Temporal::AudioTime)))
-	, _automatable(srcs[0]->session())
+	, _automatable(srcs[0]->session(), Temporal::AudioTime)
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
 {

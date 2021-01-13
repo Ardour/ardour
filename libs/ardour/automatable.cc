@@ -59,9 +59,11 @@ bool Automatable::skip_saving_automation = false;
 
 const string Automatable::xml_node_name = X_("Automation");
 
-Automatable::Automatable(Session& session)
-	: _a_session(session)
-	, _automated_controls (new ControlList)
+Automatable::Automatable(Session& session, Temporal::TimeDomain td)
+	: ControlSet ()
+	, _a_session(session)
+	, _automated_controls (new ControlList ())
+	, _time_domain (td)
 {
 }
 

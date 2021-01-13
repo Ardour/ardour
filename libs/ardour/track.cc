@@ -91,7 +91,7 @@ Track::init ()
 
 	DiskIOProcessor::Flag dflags = DiskIOProcessor::Recordable;
 
-	_disk_reader.reset (new DiskReader (_session, *this, name(), dflags));
+	_disk_reader.reset (new DiskReader (_session, *this, name(), Config->get_default_automation_time_domain(), dflags));
 	_disk_reader->set_block_size (_session.get_block_size ());
 	_disk_reader->set_owner (this);
 

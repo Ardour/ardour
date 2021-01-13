@@ -86,7 +86,7 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>&            
 	: _seq(&seq)
 	, _active_patch_change_message (0)
 	, _type(NIL)
-	, _is_end((t == DBL_MAX) || seq.empty())
+	, _is_end((t == std::numeric_limits<Time>::max()) || seq.empty())
 	, _note_iter(seq.notes().end())
 	, _sysex_iter(seq.sysexes().end())
 	, _patch_change_iter(seq.patch_changes().end())

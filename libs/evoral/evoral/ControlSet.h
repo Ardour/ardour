@@ -29,6 +29,8 @@
 #include <glibmm/threads.h>
 #include "pbd/signals.h"
 
+#include "temporal/types.h"
+
 #include "evoral/visibility.h"
 #include "evoral/Parameter.h"
 #include "evoral/ControlList.h"
@@ -40,7 +42,7 @@ class ControlEvent;
 
 class LIBEVORAL_API ControlSet : public boost::noncopyable {
 public:
-	ControlSet();
+	ControlSet ();
 	ControlSet (const ControlSet&);
         virtual ~ControlSet() {}
 

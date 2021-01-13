@@ -47,7 +47,7 @@ ARDOUR::samplecnt_t DiskWriter::_chunk_samples = DiskWriter::default_chunk_sampl
 PBD::Signal0<void> DiskWriter::Overrun;
 
 DiskWriter::DiskWriter (Session& s, Track& t, string const & str, DiskIOProcessor::Flag f)
-	: DiskIOProcessor (s, t, X_("recorder:") + str, f)
+        : DiskIOProcessor (s, t, X_("recorder:") + str, f, Config->get_default_automation_time_domain())
 	, _capture_captured (0)
 	, _was_recording (false)
 	, _xrun_flag (false)

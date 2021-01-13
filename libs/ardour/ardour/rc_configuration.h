@@ -24,6 +24,8 @@
 #include <map>
 #include <string>
 
+#include "temporal/types.h"
+
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/utils.h"

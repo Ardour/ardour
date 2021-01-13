@@ -30,9 +30,9 @@ namespace ARDOUR {
 template<typename T>
 class /*LIBARDOUR_API*/ AutomatableSequence : public Automatable, public Evoral::Sequence<T> {
 public:
-	AutomatableSequence(Session& s)
+	AutomatableSequence(Session& s, Temporal::TimeDomain td)
 		: Evoral::ControlSet()
-		, Automatable(s)
+		, Automatable(s, td)
 		, Evoral::Sequence<T>(EventTypeMap::instance())
 	{}
 

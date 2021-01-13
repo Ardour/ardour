@@ -30,11 +30,11 @@ using namespace std;
 namespace Evoral {
 
 
-ControlSet::ControlSet()
+ControlSet::ControlSet ()
 {
 }
 
-ControlSet::ControlSet (const ControlSet&)
+ControlSet::ControlSet (ControlSet const & other)
 	: noncopyable ()
 {
 	/* derived class must copy controls */

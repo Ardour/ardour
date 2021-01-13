@@ -51,7 +51,7 @@ class LIBARDOUR_API Processor : public SessionObject, public Automatable, public
   public:
 	static const std::string state_node_name;
 
-	Processor(Session&, const std::string& name);
+	Processor(Session&, const std::string& name, Temporal::TimeDomain);
 	Processor (const Processor& other);
 
 	virtual ~Processor();

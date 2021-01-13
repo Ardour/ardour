@@ -31,6 +31,8 @@
 #include "pbd/file_utils.h"
 #include "pbd/replace_all.h"
 
+#include "temporal/types_convert.h"
+
 #include "ardour/audioengine.h"
 #include "ardour/disk_reader.h"
 #include "ardour/disk_writer.h"

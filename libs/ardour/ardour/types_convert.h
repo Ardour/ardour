@@ -25,6 +25,7 @@
 #endif
 
 #include "pbd/enum_convert.h"
+#include "pbd/i18n.h"
 
 #include "ardour/types.h"
 #include "ardour/data_type.h"

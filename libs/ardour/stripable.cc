@@ -36,7 +36,7 @@ using std::string;
 
 Stripable::Stripable (Session& s, string const & name, PresentationInfo const & pi)
 	: SessionObject (s, name)
-	, Automatable (s)
+	, Automatable (s, (pi.flags() & PresentationInfo::MidiIndicatingFlags) ? Temporal::BeatTime : Temporal::AudioTime)
 	, _presentation_info (pi)
 	, _active_color_picker (0)
 {

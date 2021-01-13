@@ -39,8 +39,8 @@ using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
 
-Pannable::Pannable (Session& s)
-	: Automatable (s)
+Pannable::Pannable (Session& s, Temporal::TimeDomain td)
+	: Automatable (s, td)
 	, SessionHandleRef (s)
 	, pan_azimuth_control (new PanControllable (s, "", this, PanAzimuthAutomation))
 	, pan_elevation_control (new PanControllable (s, "", this, PanElevationAutomation))

@@ -59,7 +59,7 @@ using namespace ARDOUR;
 using namespace PBD;
 
 MidiModel::MidiModel (boost::shared_ptr<MidiSource> s)
-	: AutomatableSequence<TimeType>(s->session())
+	: AutomatableSequence<TimeType> (s->session(), Temporal::BeatTime)
 {
 	set_midi_source (s);
 }

@@ -39,7 +39,7 @@ class Panner;
 class LIBARDOUR_API Pannable : public PBD::Stateful, public Automatable, public SessionHandleRef
 {
 public:
-	Pannable (Session& s);
+	Pannable (Session& s, Temporal::TimeDomain);
 	~Pannable ();
 
 	boost::shared_ptr<AutomationControl> pan_azimuth_control;

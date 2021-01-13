@@ -27,7 +27,7 @@
 namespace ARDOUR {
 
 CapturingProcessor::CapturingProcessor (Session & session, samplecnt_t latency)
-	: Processor (session, X_("capture point"))
+	: Processor (session, X_("capture point"), Temporal::AudioTime)
 	, block_size (AudioEngine::instance()->samples_per_cycle())
 	, _latency (latency)
 {

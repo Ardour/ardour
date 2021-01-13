@@ -59,7 +59,8 @@ public:
 
 	static const std::string state_node_name;
 
-	DiskIOProcessor (Session&, Track&, const std::string& name, Flag f);
+	DiskIOProcessor (Session&, Track&, const std::string& name, Flag f, Temporal::TimeDomain td);
+
 	virtual ~DiskIOProcessor ();
 
 	static void set_buffering_parameters (BufferingPreset bp);

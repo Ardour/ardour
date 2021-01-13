@@ -34,7 +34,7 @@
     DO dump the config using cfgtool to system_config
     after modifying this file.
 
-    ./waf && gtk2_ardour/arcfg system_config
+S    ./waf && gtk2_ardour/arcfg system_config
 *****************************************************/
 
 /* IO connection */
@@ -225,6 +225,7 @@ CONFIG_VARIABLE (double, automation_thinning_factor, "automation-thinning-factor
 CONFIG_VARIABLE (std::string, freesound_download_dir, "freesound-download-dir", Glib::get_home_dir() + "/Freesound/snd")
 CONFIG_VARIABLE (samplecnt_t, range_location_minimum, "range-location-minimum", 128) /* samples */
 CONFIG_VARIABLE (EditMode, edit_mode, "edit-mode", Slide)
+CONFIG_VARIABLE (Temporal::TimeDomain, default_automation_time_domain, "default-automation-time-domain", Temporal::BeatTime)
 
 /* plugin related */
 

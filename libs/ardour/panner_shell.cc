@@ -66,7 +66,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-PannerShell::PannerShell (string name, Session& s, boost::shared_ptr<Pannable> p, bool is_send)
+PannerShell::PannerShell (string name, Session& s, boost::shared_ptr<Pannable> p, Temporal::TimeDomain td, bool is_send)
 	: SessionObject (s, name)
 	, _pannable_route (p)
 	, _is_send (is_send)
@@ -78,7 +78,7 @@ PannerShell::PannerShell (string name, Session& s, boost::shared_ptr<Pannable> p
 	, _force_reselect (false)
 {
 	if (is_send) {
-		_pannable_internal.reset(new Pannable (s));
+		_pannable_internal.reset(new Pannable (s, td));
 		if (Config->get_link_send_and_route_panner()) {
 			_panlinked = true;
 		} else {
