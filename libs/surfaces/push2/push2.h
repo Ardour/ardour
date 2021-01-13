@@ -549,7 +549,6 @@ class Push2 : public ARDOUR::ControlProtocol
 
 	boost::weak_ptr<ARDOUR::MidiTrack> current_pad_target;
 
-	PBD::ScopedConnection port_reg_connection;
 	void port_registration_handler ();
 
 	enum ConnectionState {
@@ -559,7 +558,7 @@ class Push2 : public ARDOUR::ControlProtocol
 
 	int connection_state;
 	bool connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boost::weak_ptr<ARDOUR::Port>, std::string name2, bool yn);
-	PBD::ScopedConnection port_connection;
+	PBD::ScopedConnectionList port_connections;
 	void connected ();
 
 	/* GUI */

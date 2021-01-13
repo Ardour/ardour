@@ -183,7 +183,7 @@ private:
 
 	int connection_state;
 	bool connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boost::weak_ptr<ARDOUR::Port>, std::string name2, bool yn);
-	PBD::ScopedConnection port_connection;
+	PBD::ScopedConnectionList port_connections;
 
 	std::string _current_binding;
 	uint32_t _bank_size;

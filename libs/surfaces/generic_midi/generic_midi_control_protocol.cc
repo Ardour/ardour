@@ -137,9 +137,10 @@ GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
 	PresentationInfo::Change.connect (*this, MISSING_INVALIDATOR, boost::bind (&GenericMidiControlProtocol::reset_controllables, this), this);
 
 	/* Catch port connections and disconnections (cross-thread) */
-	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connection, MISSING_INVALIDATOR,
+	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connections, MISSING_INVALIDATOR,
 	                                                                      boost::bind (&GenericMidiControlProtocol::connection_handler, this, _1, _2, _3, _4, _5),
 	                                                                      this);
+	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connections, MISSING_INVALIDATOR, boost::bind (&GenericMidiControlProtocol::ConnectionChange, this), this); /* notify GUI */
 
 	reload_maps ();
 }

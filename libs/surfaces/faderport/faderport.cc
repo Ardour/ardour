@@ -110,6 +110,7 @@ FaderPort::FaderPort (Session& s)
 
 	/* Catch port connections and disconnections */
 	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connection, MISSING_INVALIDATOR, boost::bind (&FaderPort::connection_handler, this, _1, _2, _3, _4, _5), this);
+	ARDOUR::AudioEngine::instance()->PortPrettyNameChanged.connect (port_connection, MISSING_INVALIDATOR, boost::bind (&FaderPort::ConnectionChange, this), this); /* notify GUI */
 
 	buttons.insert (std::make_pair (Mute, Button (*this, _("Mute"), Mute, 21)));
 	buttons.insert (std::make_pair (Solo, Button (*this, _("Solo"), Solo, 22)));
