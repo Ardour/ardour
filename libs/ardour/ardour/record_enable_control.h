@@ -36,7 +36,7 @@ class Session;
 class LIBARDOUR_API RecordEnableControl : public SlavableAutomationControl
 {
   public:
-	RecordEnableControl (Session& session, std::string const & name, Recordable& m);
+	RecordEnableControl (Session& session, std::string const & name, Recordable& m, Temporal::TimeDomain);
 	~RecordEnableControl() {}
 
 	/* Most (Slavable)AutomationControls do not override this, but we need
