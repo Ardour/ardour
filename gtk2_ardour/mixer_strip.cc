@@ -44,6 +44,7 @@
 #include "pbd/unwind.h"
 
 #include "ardour/amp.h"
+#include "ardour/async_midi_port.h"
 #include "ardour/audio_track.h"
 #include "ardour/audioengine.h"
 #include "ardour/internal_send.h"
@@ -1436,13 +1437,17 @@ MixerStrip::update_io_button (bool for_input)
 	/* Are all main-typed channels connected to the same (user) bundle ? */
 	if (!have_label) {
 		boost::shared_ptr<ARDOUR::BundleList> bundles = _session->bundles ();
+		boost::shared_ptr<ARDOUR::Port> ap = boost::dynamic_pointer_cast<ARDOUR::Port> (_session->vkbd_output_port());
+		std::string vkbd_portname = AudioEngine::instance ()->make_port_name_non_relative (ap->name ());
 		for (ARDOUR::BundleList::iterator bundle = bundles->begin();
 		                                  bundle != bundles->end();
 		                                  ++bundle) {
-			if (boost::dynamic_pointer_cast<UserBundle> (*bundle) == 0)
-				continue;
-			if (io->bundle()->connected_to(*bundle, _session->engine(),
-			                               dt, true)) {
+			if (boost::dynamic_pointer_cast<UserBundle> (*bundle) == 0) {
+				if (!(*bundle)->offers_port (vkbd_portname)) {
+					continue;
+				}
+			}
+			if (io->bundle()->connected_to (*bundle, _session->engine(), dt, true)) {
 				label << Gtkmm2ext::markup_escape_text ((*bundle)->name());
 				have_label = true;
 				break;
