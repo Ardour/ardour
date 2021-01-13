@@ -175,7 +175,7 @@ Route::init ()
 	_phase_control.reset (new PhaseControl (_session, X_("phase")));
 	add_control (_phase_control);
 
-	_solo_isolate_control.reset (new SoloIsolateControl (_session, X_("solo-iso"), *this));
+	_solo_isolate_control.reset (new SoloIsolateControl (_session, X_("solo-iso"), *this, time_domain()));
 	add_control (_solo_isolate_control);
 
 	_solo_safe_control.reset (new SoloSafeControl (_session, X_("solo-safe"), time_domain()));
