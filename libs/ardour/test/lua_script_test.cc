@@ -91,7 +91,7 @@ LuaScriptTest::dsp_script_test ()
 		PluginPtr p = (*i)->load (*_session);
 		CPPUNIT_ASSERT_MESSAGE ((*i)->name, p);
 
-		boost::shared_ptr<Processor> processor (new PluginInsert (*_session, p));
+		boost::shared_ptr<Processor> processor (new PluginInsert (*_session, r->time_domain(), p));
 		processor->enable (true);
 
 		int rv = r->add_processor (processor, boost::shared_ptr<Processor>(), 0);

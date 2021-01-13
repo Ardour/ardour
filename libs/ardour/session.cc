@@ -3432,7 +3432,7 @@ Session::load_and_connect_instruments (RouteList& new_routes, bool strict_io, bo
 			if (pset) {
 				plugin->load_preset (*pset);
 			}
-			boost::shared_ptr<PluginInsert> pi (new PluginInsert (*this, plugin));
+			boost::shared_ptr<PluginInsert> pi (new PluginInsert (*this, (*r)->time_domain(), plugin));
 			if (strict_io) {
 				pi->set_strict_io (true);
 			}

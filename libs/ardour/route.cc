@@ -945,7 +945,7 @@ Route::add_processor_from_xml_2X (const XMLNode& node, int version)
 					if (_session.get_disable_all_loaded_plugins ()) {
 						processor.reset (new UnknownProcessor (_session, node));
 					} else {
-						processor.reset (new PluginInsert (_session));
+						processor.reset (new PluginInsert (_session, time_domain()));
 						processor->set_owner (this);
 					}
 
@@ -3215,7 +3215,7 @@ Route::set_processor_state (XMLNode const& node, int version, XMLProperty const*
 			if (_session.get_disable_all_loaded_plugins ()) {
 				processor.reset (new UnknownProcessor (_session, node));
 			} else {
-				processor.reset (new PluginInsert (_session));
+				processor.reset (new PluginInsert (_session, time_domain()));
 				processor->set_owner (this);
 			}
 		} else if (prop->value() == "port") {

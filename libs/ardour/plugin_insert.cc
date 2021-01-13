@@ -75,9 +75,8 @@ using namespace PBD;
 
 const string PluginInsert::port_automation_node_name = "PortAutomation";
 
-PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug)
-#warning NUTEMPO why audio time when this processor can handle MIDI also
-	: Processor (s, (plug ? plug->name() : string ("toBeRenamed")), Temporal::AudioTime)
+PluginInsert::PluginInsert (Session& s, Temporal::TimeDomain td, boost::shared_ptr<Plugin> plug)
+	: Processor (s, (plug ? plug->name() : string ("toBeRenamed")), td)
 	, _sc_playback_latency (0)
 	, _sc_capture_latency (0)
 	, _plugin_signal_latency (0)

@@ -59,7 +59,7 @@ class Plugin;
 class LIBARDOUR_API PluginInsert : public Processor
 {
 public:
-	PluginInsert (Session&, boost::shared_ptr<Plugin> = boost::shared_ptr<Plugin>());
+	PluginInsert (Session&, Temporal::TimeDomain td, boost::shared_ptr<Plugin> = boost::shared_ptr<Plugin>());
 	~PluginInsert ();
 
 	void drop_references ();

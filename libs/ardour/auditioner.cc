@@ -78,7 +78,7 @@ Auditioner::init ()
 
 	if (!audition_synth_info) {
 		lookup_fallback_synth ();
-	} 
+	}
 
 	_output->changed.connect_same_thread (*this, boost::bind (&Auditioner::output_changed, this, _1, _2));
 
@@ -107,7 +107,7 @@ Auditioner::lookup_fallback_synth_plugin_info (std::string const& uri) const
 void
 Auditioner::lookup_fallback_synth ()
 {
-	
+
 	PluginInfoPtr nfo = lookup_fallback_synth_plugin_info ("http://gareus.org/oss/lv2/gmsynth");
 
 	//GMsynth not found: fallback to Reasonable Synth
@@ -138,10 +138,10 @@ Auditioner::load_synth (bool need_lock)
 	if (!audition_synth_info) {
 		return;
 	}
-	
+
 	boost::shared_ptr<Plugin> p = audition_synth_info->load (_session);
 	if (p) {
-		asynth = boost::shared_ptr<Processor> (new PluginInsert (_session, p));
+		asynth = boost::shared_ptr<Processor> (new PluginInsert (_session, time_domain(), p));
 	}
 }
 
@@ -608,4 +608,3 @@ Auditioner::monitoring_state () const
 {
 	return MonitoringDisk;
 }
-
