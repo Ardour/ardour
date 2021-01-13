@@ -37,7 +37,7 @@ class Muteable;
 class LIBARDOUR_API MuteControl : public SlavableAutomationControl
 {
 public:
-	MuteControl (Session& session, std::string const& name, Muteable&);
+	MuteControl (Session& session, std::string const& name, Muteable&, Temporal::TimeDomain td);
 
 	double get_value () const;
 	double get_save_value() const { return muted_by_self(); }

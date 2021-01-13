@@ -169,7 +169,7 @@ Route::init ()
 	add_control (_solo_control);
 	_solo_control->Changed.connect_same_thread (*this, boost::bind (&Route::solo_control_changed, this, _1, _2));
 
-	_mute_control.reset (new MuteControl (_session, X_("mute"), *this));
+	_mute_control.reset (new MuteControl (_session, X_("mute"), *this, time_domain()));
 	add_control (_mute_control);
 
 	_phase_control.reset (new PhaseControl (_session, X_("phase")));

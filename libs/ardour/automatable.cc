@@ -590,7 +590,7 @@ Automatable::control_factory(const Evoral::Parameter& param)
 	} else if (param.type() == MuteAutomation) {
 		Muteable* m = dynamic_cast<Muteable*>(this);
 		if (m) {
-			control = new MuteControl (_a_session, X_("mute"), *m);
+			control = new MuteControl (_a_session, X_("mute"), *m, time_domain());
 		}
 	}
 
