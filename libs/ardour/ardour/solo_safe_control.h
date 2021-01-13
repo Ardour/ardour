@@ -34,7 +34,7 @@ class Session;
 class LIBARDOUR_API SoloSafeControl : public SlavableAutomationControl
 {
   public:
-	SoloSafeControl (Session& session, std::string const & name);
+	SoloSafeControl (Session& session, std::string const & name, Temporal::TimeDomain);
 
 	double get_value () const;
 

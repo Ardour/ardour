@@ -178,7 +178,7 @@ Route::init ()
 	_solo_isolate_control.reset (new SoloIsolateControl (_session, X_("solo-iso"), *this));
 	add_control (_solo_isolate_control);
 
-	_solo_safe_control.reset (new SoloSafeControl (_session, X_("solo-safe")));
+	_solo_safe_control.reset (new SoloSafeControl (_session, X_("solo-safe"), time_domain()));
 	add_control (_solo_safe_control);
 
 	/* panning */

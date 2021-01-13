@@ -28,10 +28,9 @@ using namespace ARDOUR;
 using namespace std;
 using namespace PBD;
 
-#warning NUTEMPO QUESTION what time domain shoudl this really use?
-SoloSafeControl::SoloSafeControl (Session& session, std::string const & name)
+SoloSafeControl::SoloSafeControl (Session& session, std::string const & name, Temporal::TimeDomain td)
 	: SlavableAutomationControl (session, SoloSafeAutomation, ParameterDescriptor (SoloSafeAutomation),
-	                             boost::shared_ptr<AutomationList>(new AutomationList(Evoral::Parameter(SoloSafeAutomation), Temporal::AudioTime)),
+	                             boost::shared_ptr<AutomationList>(new AutomationList(Evoral::Parameter(SoloSafeAutomation), td)),
 	                             name)
 	, _solo_safe (false)
 {
