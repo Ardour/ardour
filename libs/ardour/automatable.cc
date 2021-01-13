@@ -567,7 +567,7 @@ Automatable::control_factory(const Evoral::Parameter& param)
 	} else if (param.type() == PanAzimuthAutomation || param.type() == PanWidthAutomation || param.type() == PanElevationAutomation) {
 		Pannable* pannable = dynamic_cast<Pannable*>(this);
 		if (pannable) {
-			control = new PanControllable (_a_session, describe_parameter (param), pannable, param);
+			control = new PanControllable (_a_session, describe_parameter (param), pannable, param, time_domain());
 		} else {
 			warning << "PanAutomation for non-Pannable" << endl;
 		}
