@@ -22,7 +22,7 @@
 using namespace ARDOUR;
 
 MidiCutBuffer::MidiCutBuffer (Session* s)
-	: AutomatableSequence<Temporal::Beats> (*s)
+	: AutomatableSequence<Temporal::Beats> (*s, Temporal::BeatTime)
 {
 
 }
