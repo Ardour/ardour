@@ -1967,7 +1967,7 @@ ProcessorBox::_drop_plugin_preset (Gtk::SelectionData const &data, Route::Proces
 				p->load_preset (ppp->_preset);
 			}
 
-			boost::shared_ptr<Processor> processor (new PluginInsert (*_session, p));
+			boost::shared_ptr<Processor> processor (new PluginInsert (*_session, _route->time_domain(), p));
 			if (Config->get_new_plugins_active ()) {
 				processor->enable (true);
 			}
@@ -1990,7 +1990,7 @@ ProcessorBox::_drop_plugin (Gtk::SelectionData const &data, Route::ProcessorList
 			if (!p) {
 				continue;
 			}
-			boost::shared_ptr<Processor> processor (new PluginInsert (*_session, p));
+			boost::shared_ptr<Processor> processor (new PluginInsert (*_session, _route->time_domain(), p));
 			if (Config->get_new_plugins_active ()) {
 				processor->enable (true);
 			}
@@ -2650,7 +2650,7 @@ ProcessorBox::use_plugins (const SelectedPlugins& plugins)
 {
 	for (SelectedPlugins::const_iterator p = plugins.begin(); p != plugins.end(); ++p) {
 
-		boost::shared_ptr<Processor> processor (new PluginInsert (*_session, *p));
+		boost::shared_ptr<Processor> processor (new PluginInsert (*_session, _route->time_domain(), *p));
 
 		Route::ProcessorStreams err_streams;
 
@@ -3615,7 +3615,7 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 				/* XXX its a bit limiting to assume that everything else
 				   is a plugin.
 				*/
-				p.reset (new PluginInsert (*_session));
+				p.reset (new PluginInsert (*_session, _route->time_domain()));
 				/* we can't use RAII Stateful::ForceIDRegeneration
 				 * because that'd void copying the state and wrongly bump
 				 * the state-version counter.
