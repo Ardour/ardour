@@ -2172,6 +2172,7 @@ MidiPortOptions::refill_midi_ports (bool for_input, Gtk::TreeView& view)
 {
 	using namespace ARDOUR;
 
+#if 0
 	std::vector<string> ports;
 
 	AudioEngine::instance()->get_known_midi_ports (ports);
@@ -2206,6 +2207,7 @@ MidiPortOptions::refill_midi_ports (bool for_input, Gtk::TreeView& view)
 	}
 
 	view.set_model (model);
+#endif
 
 	return true;
 }
