@@ -1213,7 +1213,7 @@ PortAudioBackend::register_system_audio_ports()
 		if (!p) return -1;
 		set_latency_range (p, false, lr);
 		boost::shared_ptr<PortAudioPort> audio_port = boost::dynamic_pointer_cast<PortAudioPort>(p);
-		audio_port->set_pretty_name (
+		audio_port->set_hw_port_name (
 		    _pcmio->get_input_channel_name (name_to_id (_input_audio_device), i));
 		_system_inputs.push_back (audio_port);
 	}
@@ -1226,7 +1226,7 @@ PortAudioBackend::register_system_audio_ports()
 		if (!p) return -1;
 		set_latency_range (p, true, lr);
 		boost::shared_ptr<PortAudioPort> audio_port = boost::dynamic_pointer_cast<PortAudioPort>(p);
-		audio_port->set_pretty_name (
+		audio_port->set_hw_port_name (
 		    _pcmio->get_output_channel_name (name_to_id (_output_audio_device), i));
 		_system_outputs.push_back(audio_port);
 	}
@@ -1263,7 +1263,7 @@ PortAudioBackend::register_system_midi_ports()
 		set_latency_range (p, false, lr);
 
 		boost::shared_ptr<PortMidiPort> midi_port = boost::dynamic_pointer_cast<PortMidiPort>(p);
-		midi_port->set_pretty_name ((*i)->name());
+		midi_port->set_hw_port_name ((*i)->name());
 		_system_midi_in.push_back (midi_port);
 		DEBUG_MIDI (string_compose ("Registered MIDI input port: %1\n", port_name));
 	}
@@ -1288,7 +1288,7 @@ PortAudioBackend::register_system_midi_ports()
 
 		boost::shared_ptr<PortMidiPort> midi_port = boost::dynamic_pointer_cast<PortMidiPort>(p);
 		midi_port->set_n_periods(2);
-		midi_port->set_pretty_name ((*i)->name());
+		midi_port->set_hw_port_name ((*i)->name());
 		_system_midi_out.push_back (midi_port);
 		DEBUG_MIDI (string_compose ("Registered MIDI output port: %1\n", port_name));
 	}

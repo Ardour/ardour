@@ -828,7 +828,7 @@ PulseAudioBackend::register_system_ports ()
 			return -1;
 		}
 		set_latency_range (p, true, lr);
-		//p->set_pretty_name ("")
+		//p->set_hw_port_name ("")
 		_system_outputs.push_back (p);
 	}
 	return 0;

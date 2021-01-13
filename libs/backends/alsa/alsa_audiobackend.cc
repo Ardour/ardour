@@ -1244,7 +1244,7 @@ AlsaAudioBackend::register_system_audio_ports()
 		if (!p) return -1;
 		set_latency_range (p, false, lr);
 		BackendPortPtr ap = boost::dynamic_pointer_cast<BackendPort>(p);
-		//ap->set_pretty_name ("")
+		//ap->set_hw_port_name ("")
 		_system_inputs.push_back (ap);
 	}
 
@@ -1256,7 +1256,7 @@ AlsaAudioBackend::register_system_audio_ports()
 		if (!p) return -1;
 		set_latency_range (p, true, lr);
 		BackendPortPtr ap = boost::dynamic_pointer_cast<BackendPort>(p);
-		//ap->set_pretty_name ("")
+		//ap->set_hw_port_name ("")
 		_system_outputs.push_back (ap);
 	}
 	return 0;
@@ -1518,7 +1518,7 @@ AlsaAudioBackend::register_system_midi_ports(const std::string device)
 					set_latency_range (p, true, lr);
 					boost::dynamic_pointer_cast<AlsaMidiPort>(p)->set_n_periods(_periods_per_cycle); // TODO check MIDI alignment
 					BackendPortPtr ap = boost::dynamic_pointer_cast<BackendPort>(p);
-					ap->set_pretty_name (replace_name_io (i->first, false));
+					ap->set_hw_port_name (replace_name_io (i->first, false));
 					pthread_mutex_lock (&_device_port_mutex);
 					_system_midi_out.push_back (ap);
 					pthread_mutex_unlock (&_device_port_mutex);
@@ -1565,7 +1565,7 @@ AlsaAudioBackend::register_system_midi_ports(const std::string device)
 				lr.min = lr.max = (_measure_latency ? 0 : nfo->systemic_input_latency);
 				set_latency_range (p, false, lr);
 				BackendPortPtr ap = boost::dynamic_pointer_cast<BackendPort>(p);
-				ap->set_pretty_name (replace_name_io (i->first, true));
+				ap->set_hw_port_name (replace_name_io (i->first, true));
 				pthread_mutex_lock (&_device_port_mutex);
 				_system_midi_in.push_back (ap);
 				pthread_mutex_unlock (&_device_port_mutex);

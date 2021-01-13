@@ -54,14 +54,22 @@ class LIBARDOUR_API BackendPort : public ProtoPort
 
 	const std::string& name ()        const { return _name; }
 	const std::string& pretty_name () const { return _pretty_name; }
+	const std::string& hw_port_name () const { return _hw_port_name; }
 
 	int set_name (const std::string& name) {
 		_name = name;
 		return 0;
 	}
 
+	/* called from PortEngineSharedImpl */
 	int set_pretty_name (const std::string& name) {
 		_pretty_name = name;
+		return 0;
+	}
+
+	/* called from backends only */
+	int set_hw_port_name (const std::string& name) {
+		_hw_port_name = name;
 		return 0;
 	}
 
@@ -102,6 +110,7 @@ protected:
 private:
 	std::string            _name;
 	std::string            _pretty_name;
+	std::string            _hw_port_name;
 	const PortFlags        _flags;
 	LatencyRange           _capture_latency_range;
 	LatencyRange           _playback_latency_range;

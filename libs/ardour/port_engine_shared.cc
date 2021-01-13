@@ -514,6 +514,10 @@ PortEngineSharedImpl::get_port_property (PortEngine::PortHandle port, const std:
 		if (!value.empty()) {
 			return 0;
 		}
+		value = boost::static_pointer_cast<BackendPort>(port)->hw_port_name ();
+		if (!value.empty()) {
+			return 0;
+		}
 	}
 	return -1;
 }

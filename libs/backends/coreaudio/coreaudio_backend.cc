@@ -948,7 +948,7 @@ CoreAudioBackend::register_system_audio_ports()
 		if (!p) return -1;
 		set_latency_range (p, false, lr);
 		BackendPortPtr cp = boost::dynamic_pointer_cast<BackendPort>(p);
-		cp->set_pretty_name (_pcmio->cached_port_name(i, true));
+		cp->set_hw_port_name (_pcmio->cached_port_name(i, true));
 		_system_inputs.push_back(cp);
 	}
 
@@ -960,7 +960,7 @@ CoreAudioBackend::register_system_audio_ports()
 		if (!p) return -1;
 		set_latency_range (p, true, lr);
 		BackendPortPtr cp = boost::dynamic_pointer_cast<BackendPort>(p);
-		cp->set_pretty_name (_pcmio->cached_port_name(i, false));
+		cp->set_hw_port_name (_pcmio->cached_port_name(i, false));
 		_system_outputs.push_back(cp);
 	}
 	return 0;
@@ -1032,7 +1032,7 @@ CoreAudioBackend::coremidi_rediscover()
 		lr.min = lr.max = _samples_per_period; // TODO add per-port midi-systemic latency
 		set_latency_range (p, false, lr);
 		BackendPortPtr pp = boost::dynamic_pointer_cast<BackendPort>(p);
-		pp->set_pretty_name(_midiio->port_name(i, true));
+		pp->set_hw_port_name(_midiio->port_name(i, true));
 		_system_midi_in.push_back(pp);
 		_port_change_flag = true;
 	}
@@ -1055,7 +1055,7 @@ CoreAudioBackend::coremidi_rediscover()
 		lr.min = lr.max = _samples_per_period; // TODO add per-port midi-systemic latency
 		set_latency_range (p, false, lr);
 		BackendPortPtr pp = boost::dynamic_pointer_cast<BackendPort>(p);
-		pp->set_pretty_name(_midiio->port_name(i, false));
+		pp->set_hw_port_name(_midiio->port_name(i, false));
 		_system_midi_out.push_back(pp);
 		_port_change_flag = true;
 	}
