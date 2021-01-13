@@ -260,6 +260,9 @@ PluginPinWidget::PluginPinWidget (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	AudioEngine::instance ()->PortConnectedOrDisconnected.connect (
 			_io_connection, invalidator (*this), boost::bind (&PluginPinWidget::port_connected_or_disconnected, this, _1, _3), gui_context ()
 			);
+	AudioEngine::instance ()->PortPrettyNameChanged.connect (
+			_io_connection, invalidator (*this), boost::bind (&PluginPinWidget::port_pretty_name_changed, this, _1), gui_context ()
+			);
 }
 
 PluginPinWidget::~PluginPinWidget ()
@@ -1902,6 +1905,15 @@ PluginPinWidget::port_connected_or_disconnected (boost::weak_ptr<ARDOUR::Port> w
 		queue_idle_update ();
 	}
 	else if (p1 && io->has_port (p1)) {
+		queue_idle_update ();
+	}
+}
+
+void
+PluginPinWidget::port_pretty_name_changed (std::string pn)
+{
+	boost::shared_ptr<IO> io = _pi->sidechain_input ();
+	if (io && io->connected_to (pn)) {
 		queue_idle_update ();
 	}
 }

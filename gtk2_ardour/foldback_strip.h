@@ -275,6 +275,7 @@ private:
 
 	void update_io_button ();
 	void port_connected_or_disconnected (boost::weak_ptr<ARDOUR::Port>, boost::weak_ptr<ARDOUR::Port>);
+	void port_pretty_name_changed (std::string);
 
 	bool mixer_strip_enter_event ( GdkEventCrossing * );
 	bool mixer_strip_leave_event ( GdkEventCrossing * );

@@ -1365,7 +1365,7 @@ private:
 	PortColumns       _port_columns;
 
 	Glib::RefPtr<Gtk::ListStore> _store;
-	PBD::ScopedConnection        _engine_connection;
+	PBD::ScopedConnectionList    _engine_connection;
 
 	void on_map ()
 	{
@@ -1374,11 +1374,17 @@ private:
 				invalidator (*this),
 				boost::bind (&LTCPortSelectOption::update_port_combo, this),
 				gui_context());
+
+		AudioEngine::instance()->PortPrettyNameChanged.connect (
+				_engine_connection,
+				invalidator (*this),
+				boost::bind (&LTCPortSelectOption::update_port_combo, this),
+				gui_context());
 	}
 
 	void on_unmap ()
 	{
-		_engine_connection.disconnect ();
+		_engine_connection.drop_connections ();
 	}
 
 	void port_changed ()

@@ -158,7 +158,7 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	Glib::RefPtr<Gtk::ListStore> midi_port_store;
 	Glib::RefPtr<Gtk::ListStore> audio_port_store;
 
-	PBD::ScopedConnection port_reg_connection;
+	PBD::ScopedConnectionList port_reg_connection;
 	void update_ports ();
 	bool ignore_active_change;
 	void build_port_model (Glib::RefPtr<Gtk::ListStore>, std::vector<std::string> const &);

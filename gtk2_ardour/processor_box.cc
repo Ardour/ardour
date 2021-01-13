@@ -628,6 +628,8 @@ ProcessorEntry::name (Width w) const
 		std::string send_name;
 		bool pretty_ok = true;
 
+		// TODO, subscribe to PortPrettyNameChanged
+
 		if (send->remove_on_disconnect ()) {
 			// assume it's a sidechain, find pretty name of connected port(s)
 			PortSet& ps (send->output ()->ports ());

@@ -538,6 +538,10 @@ FoldbackStrip::init ()
 		*this, invalidator (*this), boost::bind (&FoldbackStrip::port_connected_or_disconnected, this, _1, _3), gui_context ()
 		);
 
+	AudioEngine::instance()->PortPrettyNameChanged.connect (
+		*this, invalidator (*this), boost::bind (&FoldbackStrip::port_pretty_name_changed, this, _1), gui_context ()
+		);
+
 	//watch for mouse enter/exit so we can do some stuff
 	signal_enter_notify_event().connect (sigc::mem_fun(*this, &FoldbackStrip::mixer_strip_enter_event ));
 	signal_leave_notify_event().connect (sigc::mem_fun(*this, &FoldbackStrip::mixer_strip_leave_event ));
@@ -1170,6 +1174,14 @@ FoldbackStrip::port_connected_or_disconnected (boost::weak_ptr<Port> wa, boost::
 	boost::shared_ptr<Port> b = wb.lock ();
 
 	if ((a && _route->output()->has_port (a)) || (b && _route->output()->has_port (b))) {
+		update_output_display ();
+	}
+}
+
+void
+FoldbackStrip::port_pretty_name_changed (std::string pn)
+{
+	if (_route->output()->connected_to (pn)) {
 		update_output_display ();
 	}
 }

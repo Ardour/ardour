@@ -507,6 +507,9 @@ MonitorSection::MonitorSection ()
 	AudioEngine::instance()->PortConnectedOrDisconnected.connect (
 		*this, invalidator (*this), boost::bind (&MonitorSection::port_connected_or_disconnected, this, _1, _3), gui_context ()
 		);
+	AudioEngine::instance()->PortPrettyNameChanged.connect (
+		*this, invalidator (*this), boost::bind (&MonitorSection::port_pretty_name_changed, this, _1), gui_context ()
+		);
 	Config->ParameterChanged.connect (config_connection, invalidator (*this), boost::bind (&MonitorSection::parameter_changed, this, _1), gui_context());
 }
 
@@ -1589,6 +1592,18 @@ MonitorSection::port_connected_or_disconnected (boost::weak_ptr<Port> wa, boost:
 		update_output_display ();
 	}
 }
+
+void
+MonitorSection::port_pretty_name_changed (std::string pn)
+{
+	if (!_route) {
+		return;
+	}
+	if (_route->output()->connected_to (pn)) {
+		update_output_display ();
+	}
+}
+
 
 void
 MonitorSection::load_bindings ()

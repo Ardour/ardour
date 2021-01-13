@@ -170,6 +170,8 @@ PortMatrix::init ()
 	/* and also ports */
 	_session->engine().PortRegisteredOrUnregistered.connect (_session_connections, invalidator (*this), boost::bind (&PortMatrix::setup_global_ports, this), gui_context());
 
+	_session->engine().PortPrettyNameChanged.connect (_session_connections, invalidator (*this), boost::bind (&PortMatrix::setup_all_ports, this), gui_context());
+
 	/* watch for route order keys changing, which changes the order of things in our global ports list(s) */
 	PresentationInfo::Change.connect (_session_connections, invalidator (*this), boost::bind (&PortMatrix::setup_global_ports_proxy, this), gui_context());
 

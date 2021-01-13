@@ -415,6 +415,10 @@ MixerStrip::init ()
 		*this, invalidator (*this), boost::bind (&MixerStrip::port_connected_or_disconnected, this, _1, _3), gui_context ()
 		);
 
+	AudioEngine::instance()->PortPrettyNameChanged.connect (
+		*this, invalidator (*this), boost::bind (&MixerStrip::port_pretty_name_changed, this, _1), gui_context ()
+		);
+
 	/* Add the widgets under visibility control to the VisibilityGroup; the names used here
 	   must be the same as those used in RCOptionEditor so that the configuration changes
 	   are recognised when they occur.
@@ -1606,6 +1610,19 @@ MixerStrip::port_connected_or_disconnected (boost::weak_ptr<Port> wa, boost::wea
 	}
 
 	if ((a && _route->output()->has_port (a)) || (b && _route->output()->has_port (b))) {
+		update_output_display ();
+		set_width_enum (_width, this);
+	}
+}
+
+void
+MixerStrip::port_pretty_name_changed (std::string pn)
+{
+	if (_route->input()->connected_to (pn)) {
+		update_input_display ();
+		set_width_enum (_width, this);
+	}
+	if (_route->output()->connected_to (pn)) {
 		update_output_display ();
 		set_width_enum (_width, this);
 	}

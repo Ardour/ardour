@@ -58,6 +58,7 @@ TransportMastersWidget::TransportMastersWidget ()
 	audio_port_store = ListStore::create (port_columns);
 
 	AudioEngine::instance()->PortRegisteredOrUnregistered.connect (port_reg_connection, invalidator (*this),  boost::bind (&TransportMastersWidget::update_ports, this), gui_context());
+	AudioEngine::instance()->PortPrettyNameChanged.connect (port_reg_connection, invalidator (*this),  boost::bind (&TransportMastersWidget::update_ports, this), gui_context());
 	update_ports ();
 
 	Gtk::Table *add_table = manage(new Gtk::Table(1,2));
