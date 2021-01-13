@@ -2178,10 +2178,8 @@ MidiPortOptions::refill_midi_ports (bool for_input, Gtk::TreeView& view)
 {
 	using namespace ARDOUR;
 
-#if 0
 	std::vector<string> ports;
-
-	AudioEngine::instance()->get_known_midi_ports (ports);
+	AudioEngine::instance()->get_configurable_midi_ports (ports, for_input);
 
 	if (ports.empty()) {
 		view.hide ();
@@ -2192,28 +2190,19 @@ MidiPortOptions::refill_midi_ports (bool for_input, Gtk::TreeView& view)
 
 	for (vector<string>::const_iterator s = ports.begin(); s != ports.end(); ++s) {
 
-		PortManager::MidiPortInformation mpi (AudioEngine::instance()->midi_port_information (*s));
+		TreeModel::Row row  = *(model->append());
+		MidiPortFlags flags = AudioEngine::instance()->midi_port_metadata (*s);
+		std::string   pn    = AudioEngine::instance()->get_pretty_name_by_name (*s);
 
-		if (!mpi.exists) {
-			continue;
-		}
-
-		if (for_input != mpi.input) {
-			continue;
-		}
-
-		TreeModel::Row row = *(model->append());
-
-		row[midi_port_columns.pretty_name] = mpi.pretty_name;
-		row[midi_port_columns.music_data] = mpi.properties & MidiPortMusic;
-		row[midi_port_columns.control_data] = mpi.properties & MidiPortControl;
-		row[midi_port_columns.selection] = mpi.properties & MidiPortSelection;
-		row[midi_port_columns.fullname] = *s;
-		row[midi_port_columns.shortname] = AudioEngine::instance()->short_port_name_from_port_name (*s);
+		row[midi_port_columns.music_data]   = flags & MidiPortMusic;
+		row[midi_port_columns.control_data] = flags & MidiPortControl;
+		row[midi_port_columns.selection]    = flags & MidiPortSelection;
+		row[midi_port_columns.fullname]     = *s;
+		row[midi_port_columns.shortname]    = AudioEngine::instance()->short_port_name_from_port_name (*s);
+		row[midi_port_columns.pretty_name]  = pn.empty () ? row[midi_port_columns.shortname] : pn;
 	}
 
 	view.set_model (model);
-#endif
 
 	return true;
 }
