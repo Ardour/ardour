@@ -574,7 +574,7 @@ Automatable::control_factory(const Evoral::Parameter& param)
 	} else if (param.type() == RecEnableAutomation) {
 		Recordable* re = dynamic_cast<Recordable*> (this);
 		if (re) {
-			control = new RecordEnableControl (_a_session, X_("recenable"), *re);
+			control = new RecordEnableControl (_a_session, X_("recenable"), *re, time_domain());
 		}
 	} else if (param.type() == MonitoringAutomation) {
 		Monitorable* m = dynamic_cast<Monitorable*>(this);
@@ -595,8 +595,7 @@ Automatable::control_factory(const Evoral::Parameter& param)
 	}
 
 	if (make_list && !list) {
-#warning NUTEMPO what time domain to use here?
-		list = boost::shared_ptr<AutomationList>(new AutomationList(param, desc, Temporal::AudioTime));
+		list = boost::shared_ptr<AutomationList>(new AutomationList(param, desc, time_domain()));
 	}
 
 	if (!control) {
