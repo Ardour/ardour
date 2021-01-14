@@ -13,7 +13,6 @@
 
 unit:db-display
 	a unit:Unit ;
-	rdfs:label "decibels" ;
 	rdfs:label "dB" ;
 	unit:render "%4.1f" ;
 	unit:symbol "dB" .
