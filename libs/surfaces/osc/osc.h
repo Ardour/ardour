@@ -522,7 +522,6 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK1_MSG(bank_delta,f);
 	PATH_CALLBACK1_MSG(use_group,f);
 	PATH_CALLBACK1_MSG_s(name_session,s);
-	PATH_CALLBACK1_MSG_s(sel_comment,s);
 	PATH_CALLBACK1_MSG_s(sel_new_personal_send,s);
 	PATH_CALLBACK1_MSG(sel_master_send_enable,i);
 	PATH_CALLBACK1_MSG(sel_pan_elevation,f);
@@ -633,9 +632,11 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int master_parse (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg);
 	int monitor_parse (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg);
 	int _strip_parse (const char *path, const char *sub_path, const char* types, lo_arg **argv, int argc, boost::shared_ptr<ARDOUR::Stripable> s, int param_1, bool strp, lo_message msg);
-	int strip_state (const char *path, boost::shared_ptr<ARDOUR::Stripable> s, bool strp, lo_message msg);
+	int strip_state (const char *path, boost::shared_ptr<ARDOUR::Stripable> s, int ssid, lo_message msg);
+	int strip_list (lo_message msg);
 	int _strip_select (boost::shared_ptr<ARDOUR::Stripable> s, lo_address addr);
 	int _strip_select2 (boost::shared_ptr<ARDOUR::Stripable> s, OSCSurface *sur, lo_address addr);
+
 	int route_set_send_gain_dB (int rid, int sid, float val, lo_message msg);
 	int route_set_send_fader (int rid, int sid, float val, lo_message msg);
 	int route_set_send_enable (int rid, int sid, float val, lo_message msg);
@@ -684,7 +685,6 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int jog_mode (float mode, lo_message msg);
 	int set_marker (const char* types, lo_arg **argv, int argc, lo_message msg);
 	int click_level (float position);
-	int sel_comment (char *c, lo_message msg);
 	int sel_previous (lo_message msg);
 	int sel_next (lo_message msg);
 	int sel_delta (int delta, lo_message msg);
@@ -716,7 +716,6 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int sel_new_personal_send (char *n, lo_message msg);
 	int set_temp_mode (lo_address addr);
 	int parse_sel_group (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg);
-	int parse_sel_vca (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg);
 	boost::shared_ptr<ARDOUR::VCA> get_vca_by_name (std::string vname);
 
 	void listen_to_route (boost::shared_ptr<ARDOUR::Stripable>, lo_address);

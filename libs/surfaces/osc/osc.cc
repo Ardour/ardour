@@ -556,7 +556,6 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, X_("/use_group"), "f", use_group);
 
 		// Controls for the Selected strip
-		REGISTER_CALLBACK (serv, X_("/select/comment"), "s", sel_comment);
 		REGISTER_CALLBACK (serv, X_("/select/previous"), "f", sel_previous);
 		REGISTER_CALLBACK (serv, X_("/select/previous"), "", sel_previous);
 		REGISTER_CALLBACK (serv, X_("/select/next"), "f", sel_next);
@@ -596,6 +595,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, X_("/strip/custom/mode"), "f", custom_mode);
 		REGISTER_CALLBACK (serv, X_("/strip/custom/clear"), "f", custom_clear);
 		REGISTER_CALLBACK (serv, X_("/strip/custom/clear"), "", custom_clear);
+
 		REGISTER_CALLBACK (serv, X_("/strip/plugin/parameter"), "iiif", route_plugin_parameter);
 		// prints to cerr only
 		REGISTER_CALLBACK (serv, X_("/strip/plugin/parameter/print"), "iii", route_plugin_parameter_print);
@@ -861,8 +861,11 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 		}
 
 		ret = 0;
-	} else
-	if (strstr (path, X_("/strip"))) {
+	}
+	else if (!strncmp (path, X_("/set_surface"), 12)) {
+		ret = surface_parse (path, types, argv, argc, msg);
+	}
+	else if (strstr (path, X_("/strip"))) {
 		ret = strip_parse (path, types, argv, argc, msg);
 	}
 	else if (strstr (path, X_("/master"))) {
@@ -876,9 +879,6 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 	}
 	else if (!strncmp (path, X_("/marker"), 7)) {
 		ret = set_marker (types, argv, argc, msg);
-	}
-	else if (!strncmp (path, X_("/set_surface"), 12)) {
-		ret = surface_parse (path, types, argv, argc, msg);
 	}
 	else if (strstr (path, X_("/link"))) {
 		ret = parse_link (path, types, argv, argc, msg);
@@ -988,6 +988,7 @@ OSC::current_value (const char */*path*/, const char */*types*/, lo_arg **/*argv
 	lo_address addr = find_or_cache_addr (returl);
 
 	const char *retpath = argv[2]->s;
+	/** this call back looks wrong. It appears to send the same information for all queries */
 
 
 	if (strcmp (argv[0]->s, X_("transport_frame")) == 0) {
@@ -2574,67 +2575,6 @@ OSC::parse_sel_group (const char *path, const char* types, lo_arg **argv, int ar
 	return ret;
  }
 
-// this gets called for anything that starts with /select/vca
-int
-OSC::parse_sel_vca (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg)
-{
-	OSCSurface *sur = get_surface(get_address (msg));
-	boost::shared_ptr<Stripable> s;
-	s = sur->select;
-	int ret = 1; /* unhandled */
-	if (s) {
-		boost::shared_ptr<Slavable> slv = boost::dynamic_pointer_cast<Slavable> (s);
-		string svalue = "";
-		uint32_t ivalue = 1024;
-		if (strcmp (path, X_("/select/vca")) == 0) {
-			if (argc == 2) {
-				if (types[0] == 's') {
-					svalue = &argv[0]->s;
-					if (types[1] == 'i') {
-						ivalue = argv[1]->i;
-					} else if (types[1] == 'f') {
-						ivalue = (uint32_t) argv[1]->f;
-					} else {
-						return 1;
-					}
-					boost::shared_ptr<VCA> vca = get_vca_by_name (svalue);
-					if (vca) {
-						if (ivalue) {
-							slv->assign (vca);
-						} else {
-							slv->unassign (vca);
-						}
-						ret = 0;
-					}
-				}
-			} else {
-				PBD::warning << "OSC: setting a vca needs both the vca name and it's state" << endmsg;
-			}
-		}
-		else if (!strncmp (path, X_("/select/vca/toggle"), 18)) {
-			if (argc == 1) {
-				if (types[0] == 's') {
-					svalue = &argv[0]->s;
-					string v_name = svalue.substr (0, svalue.rfind (" ["));
-					boost::shared_ptr<VCA> vca = get_vca_by_name (v_name);
-					if (s->slaved_to (vca)) {
-						slv->unassign (vca);
-					} else {
-						slv->assign (vca);
-					}
-					ret = 0;
-				} else {
-					PBD::warning << "OSC: toggling needs the vca name as a string" << endmsg;
-				}
-			} else {
-				PBD::warning << "OSC: toggling a vca needs the vca name" << endmsg;
-			}
-
-		}
-	}
-	return ret;
-}
-
 boost::shared_ptr<VCA>
 OSC::get_vca_by_name (std::string vname)
 {
@@ -3490,11 +3430,9 @@ OSC::select_parse (const char *path, const char* types, lo_arg **argv, int argc,
 		return 1;
 	}
 	if (!strncmp (path, X_("/select/group"), 13) && strlen (path) > 13) {
+		/** this needs fixing as it blocks /group s name */
 		PBD::info << "OSC: select_parse /select/group/." << endmsg;
 		ret = parse_sel_group (path, types, argv, argc, msg);
-	}
-	else if (strstr (path, X_("/select/vca"))) {
-		ret = parse_sel_vca (path, types, argv, argc, msg);
 	}
 	else if (!strncmp (path, X_("/select/send_gain/"), 18) && strlen (path) > 18) {
 		int ssid = atoi (&path[18]);
@@ -3525,6 +3463,7 @@ OSC::select_parse (const char *path, const char* types, lo_arg **argv, int argc,
 		ret = sel_eq_shape (ssid, argv[0]->f, msg);
 	}
 	else {
+		/// this is in both strip and select
 		boost::shared_ptr<Stripable> s = sur->select;
 		if (s) {
 			if (!strncmp (sub_path, X_("expand"), 6)) {
@@ -3554,7 +3493,6 @@ OSC::select_parse (const char *path, const char* types, lo_arg **argv, int argc,
 			}
 		} else {
 			PBD::warning << "OSC: No selected strip" << endmsg;
-			ret = float_message (path, 0, get_address (msg));
 		}
 	}
 
@@ -3601,13 +3539,19 @@ OSC::strip_parse (const char *path, const char* types, lo_arg **argv, int argc, 
 	} else if (argc) {
 		if (types[0] == 'i') {
 			ssid = argv[0]->i;
+		} else if (types[0] == 'f') {
+			ssid = argv[0]->f;
 		}
 	}
 	if (!nparam && !ssid) {
 		// only list works here
-		if (!strcmp (path, X_("/strip/list")) || !strcmp (path, X_("/strip"))) {
+		if (!strcmp (path, X_("/strip/list"))) {
 			// /strip/list is legacy
 			routes_list (msg);
+			ret = 0;
+		}
+		else if (!strcmp (path, X_("/strip"))) {
+			strip_list (msg);
 			ret = 0;
 		} else {
 			PBD::warning << "OSC: missing parameters." << endmsg;
@@ -3617,6 +3561,7 @@ OSC::strip_parse (const char *path, const char* types, lo_arg **argv, int argc, 
 	boost::shared_ptr<Stripable> s = get_strip (ssid, get_address (msg));
 	if (s) {
 		if (!strncmp (sub_path, X_("expand"), 6)) {
+			/// this is in both strip and select should be in _parse_strip
 			int yn = 0;
 			if (types[param_1] == 'f') {
 				yn = (int) argv[param_1]->f;
@@ -3683,10 +3628,21 @@ OSC::_strip_parse (const char *path, const char *sub_path, const char* types, lo
 	OSCSurface *sur = get_surface(get_address (msg));
 	bool send_active = strp && sur->temp_mode == BusOnly && get_send (s, get_address (msg));
 	bool control_disabled = strp && (sur->temp_mode == BusOnly) && (s != sur->temp_master);
+	bool n_ma = !s->is_master();
+	bool n_mo = !s->is_monitor();
+	boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (s);
 
 	if (!strlen(sub_path)) {
 		// send stripable info
-		ret = strip_state (path, s, strp, msg);
+		int sid = 0;
+		if (param_1) {
+			if (types[0] == 'f') {
+				sid = (int) argv[0]->f;
+			} else if (types[0] == 'i') {
+				sid = argv[0]->i;
+			}
+		}
+		ret = strip_state (path, s, sid, msg);
 	}
 	else if (!strncmp (sub_path, X_("gain"), 4) || !strncmp (sub_path, X_("fader"), 5) ||  !strncmp (sub_path, X_("db_delta"), 8)){
 		boost::shared_ptr<GainControl> gain_control;
@@ -3694,7 +3650,6 @@ OSC::_strip_parse (const char *path, const char *sub_path, const char* types, lo
 		if (gain_control) {
 			if (argc > (param_1)) {
 				if (s_flt) {
-					//if (strp && sur->temp_mode == BusOnly && get_send (s, get_address (msg))) {
 					if (send_active) {
 						gain_control = get_send(s, get_address (msg))->gain_control();
 					}
@@ -3725,25 +3680,25 @@ OSC::_strip_parse (const char *path, const char *sub_path, const char* types, lo
 				}
 			} else {
 				float ret_v;
-				///gain_control->get_value ();
 				if (!strncmp (sub_path, X_("gain"), 4)) {
 					ret_v = fast_coefficient_to_dB (gain_control->get_value ());
+					ret = 0;
 				} else if (!strncmp (sub_path, X_("fader"), 5)) {
 					ret_v = gain_control->internal_to_interface (gain_control->get_value ());
+					ret = 0;
 				} else {
 					PBD::warning << "OSC: delta has no info" << endmsg;
-					return 1;
 				}
-				float_message (path, ret_v, get_address (msg));
-				ret = 0;
+				if (!ret) {
+					float_message (path, ret_v, get_address (msg));
+				}
 			}
 		}
 	}
 	else if (!strncmp (sub_path, X_("trimdB"), 6)) {
-		if (!control_disabled && s->trim_control()) {
+		if (!control_disabled && s->trim_control() && n_mo) {
 			if (argc > (param_1)) {
 				if (s_flt) {
-					//if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
 					float abs = dB_to_coefficient (value);
 					s->trim_control()->set_value (abs, sur->usegroup);
 					fake_touch (s->trim_control());
@@ -3758,11 +3713,10 @@ OSC::_strip_parse (const char *path, const char *sub_path, const char* types, lo
 	else if (!strncmp (sub_path, X_("pan_stereo_position"), 19)) {
 		boost::shared_ptr<PBD::Controllable> pan_control = boost::shared_ptr<PBD::Controllable>();
 		pan_control = s->pan_azimuth_control();
-		if (pan_control) {
+		if (n_mo && pan_control) {
 			if (argc > (param_1)) {
 				if (s_flt) {
 					if (send_active) {
-					//if (sur->temp_mode == BusOnly && get_send (s, get_address (msg))) {
 						boost::shared_ptr<ARDOUR::Send> send = get_send (s, get_address (msg));
 						if (send->pan_outs() > 1) {
 							pan_control = send->panner_shell()->panner()->pannable()->pan_azimuth_control;
@@ -3788,7 +3742,6 @@ OSC::_strip_parse (const char *path, const char *sub_path, const char* types, lo
 			if (argc > (param_1)) {
 				if (s_flt) {
 					/// this should maybe be active in send mode (see above)
-					//if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
 					s->pan_width_control()->set_value (value, sur->usegroup);
 					fake_touch (s->pan_width_control());
 					ret = 0;
@@ -3800,7 +3753,6 @@ OSC::_strip_parse (const char *path, const char *sub_path, const char* types, lo
 		}
 	}
 	else if (!strncmp (sub_path, X_("mute"), 4)) {
-		//if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
 		if (!control_disabled && s->mute_control()) {
 			if (argc > (param_1)) {
 				if (s_int) {
@@ -3816,7 +3768,6 @@ OSC::_strip_parse (const char *path, const char *sub_path, const char* types, lo
 	}
 	else if (!strncmp (sub_path, X_("solo_iso"), 8)) {
 		if (!control_disabled && s->solo_isolate_control()) {
-			//if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
 			if (argc > (param_1)) {
 				if (s_int) {
 					s->solo_isolate_control()->set_value (yn ? 1.0 : 0.0, sur->usegroup);
@@ -3829,7 +3780,6 @@ OSC::_strip_parse (const char *path, const char *sub_path, const char* types, lo
 		}
 	}
 	else if (!strncmp (sub_path, X_("solo_safe"), 9)) {
-		//if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
 		if (!control_disabled && s->solo_safe_control()) {
 			if (argc > (param_1)) {
 				if (s_int) {
@@ -3843,7 +3793,6 @@ OSC::_strip_parse (const char *path, const char *sub_path, const char* types, lo
 		}
 	}
 	else if (!strncmp (sub_path, X_("solo"), 4)) {
-		//if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
 		if (!control_disabled && s->solo_control() && !s->is_master() && !s->is_monitor()) {
 			if (argc > (param_1)) {
 				if (s_int) {
@@ -3860,7 +3809,6 @@ OSC::_strip_parse (const char *path, const char *sub_path, const char* types, lo
 		boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (s);
 		if (!control_disabled && track && track->monitoring_control()) {
 			std::bitset<32> mon_bs = track->monitoring_control()->get_value ();
-			//if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
 			if (argc > (param_1)) {
 				if (s_int) {
 					mon_bs[0] = yn ? 1 : 0;
@@ -3877,7 +3825,6 @@ OSC::_strip_parse (const char *path, const char *sub_path, const char* types, lo
 		boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (s);
 		if (!control_disabled && track && track->monitoring_control()) {
 			std::bitset<32> mon_bs = track->monitoring_control()->get_value ();
-			//if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
 			if (argc > (param_1)) {
 				if (s_int) {
 					mon_bs[1] = yn ? 1 : 0;
@@ -3892,7 +3839,6 @@ OSC::_strip_parse (const char *path, const char *sub_path, const char* types, lo
 	}
 	else if (!strncmp (sub_path, X_("recenable"), 9)) {
 		if (!control_disabled && s->rec_enable_control()) {
-			//if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
 			if (argc > (param_1)) {
 				if (s_int) {
 					s->rec_enable_control()->set_value (yn, sur->usegroup);
@@ -3906,7 +3852,6 @@ OSC::_strip_parse (const char *path, const char *sub_path, const char* types, lo
 	}
 	else if (!strncmp (sub_path, X_("record_safe"), 11)) {
 		if (!control_disabled && s->rec_safe_control()) {
-			//if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
 			if (argc > (param_1)) {
 				if (s_int) {
 					s->rec_safe_control()->set_value (yn, sur->usegroup);
@@ -3920,7 +3865,6 @@ OSC::_strip_parse (const char *path, const char *sub_path, const char* types, lo
 	}
 	else if (!strncmp (sub_path, X_("hide"), 4)) {
 		if (!control_disabled) {
-			//if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
 			if (argc > (param_1)) {
 				if (s_int && yn != s->is_hidden ()) {
 					s->presentation_info().set_hidden ((bool) yn);
@@ -3950,7 +3894,6 @@ OSC::_strip_parse (const char *path, const char *sub_path, const char* types, lo
 	}
 	else if (!strncmp (sub_path, X_("polarity"), 8)) {
 		if (!control_disabled && s->phase_control()) {
-			//if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
 			if (argc > (param_1)) {
 				if (s_int) {
 					for (uint64_t i = 0; i < s->phase_control()->size(); i++) {
@@ -3990,7 +3933,6 @@ OSC::_strip_parse (const char *path, const char *sub_path, const char* types, lo
 	}
 	else if (!strncmp (sub_path, X_("group"), 5)) {
 		if (!control_disabled) {
-			boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (s);
 			if (rt) {
 				RouteGroup *rg = rt->route_group();
 				if (argc > (param_1)) {
@@ -4053,9 +3995,123 @@ OSC::_strip_parse (const char *path, const char *sub_path, const char* types, lo
 				}
 			} else {
 				PBD::warning << "OSC: VCAs can not be part of a group." << endmsg;
-				return -1;
+				///return -1;
 			}
 		}
+	}
+	else if (!strncmp (sub_path, X_("comment"), 7)) {
+		if (!control_disabled && rt) {
+			if (argc > (param_1)) {
+				if (types[param_1] == 's') {
+					rt->set_comment (strng, this);
+					ret = 0;
+				}
+			} else {
+				text_message (path, rt->comment (), get_address (msg));
+				ret = 0;
+			}
+		}
+	}
+	else if (!strncmp (sub_path, X_("vca"), 3)) {
+		boost::shared_ptr<Slavable> slv = boost::dynamic_pointer_cast<Slavable> (s);
+		if (!control_disabled && slv) {
+			if (argc > (param_1)) {
+				string svalue = strng;
+				string v_name = svalue.substr (0, svalue.rfind (" ["));
+				boost::shared_ptr<VCA> vca = get_vca_by_name (v_name);
+				uint32_t ivalue = 0;
+				if (!strncmp (sub_path, X_("vca/toggle"), 10)) {
+					if (vca) {
+						if (s->slaved_to (vca)) {
+							slv->unassign (vca);
+						} else {
+							slv->assign (vca);
+						}
+						ret = 0;
+					}
+				}
+				else if (strcmp (sub_path, X_("vca")) == 0) {
+					if (argc > (param_1 + 1)) {
+						if (vca) {
+							bool p_good = false;
+							if (types[param_1 + 1] == 'i') {
+								ivalue = argv[1]->i;
+								p_good = true;
+							} else if (types[1] == 'f') {
+								ivalue = (uint32_t) argv[1]->f;
+								p_good = true;
+							}
+							if (vca && p_good) {
+								if (ivalue) {
+									slv->assign (vca);
+								} else {
+									slv->unassign (vca);
+								}
+								ret = 0;
+							} else {
+								PBD::warning << "OSC: setting a vca needs both the vca name and it's state" << endmsg;
+							}
+						}
+					}
+				}
+			} else {
+				/// put list of VCAs this strip is controlled by
+				_lo_lock.lock ();
+				lo_message rmsg = lo_message_new ();
+				if (param_1) {
+					int sid = 0;
+					if (types[0] == 'f') {
+						sid = (int) argv[0]->f;
+					} else if (types[0] == 'i') {
+						sid = argv[0]->i;
+					}
+					lo_message_add_int32 (rmsg, sid);
+				}
+				StripableList stripables;
+				session->get_stripables (stripables);
+				for (StripableList::iterator it = stripables.begin(); it != stripables.end(); ++it) {
+					boost::shared_ptr<Stripable> st = *it;
+					boost::shared_ptr<VCA> v = boost::dynamic_pointer_cast<VCA> (st);
+					if (v && s->slaved_to (v)) {
+						lo_message_add_string (rmsg, v->name().c_str());
+					}
+				}
+				lo_send_message (get_address (msg), path, rmsg);
+				lo_message_free (rmsg);
+				_lo_lock.unlock ();
+				ret = 0;
+			}
+		}
+	}
+
+
+	if (ret) {
+		int sid = 0;
+		_lo_lock.lock ();
+		lo_message rmsg = lo_message_new ();
+		if (param_1) {
+			if (types[0] == 'f') {
+				sid = (int) argv[0]->f;
+			} else if (types[0] == 'i') {
+				sid = argv[0]->i;
+			}
+			lo_message_add_int32 (rmsg, sid);
+		}
+		if (types[param_1] == 'f') {
+			if (!strncmp (sub_path, X_("gain"), 4)) {
+				lo_message_add_float (rmsg, -200);
+			} else {
+				lo_message_add_float (rmsg, 0);
+			}
+		} else if (types[param_1] == 'i') {
+			lo_message_add_int32 (rmsg, 0);
+		} else if (types[param_1] == 's') {
+			//lo_message_add_string (rmsg, val.c_str());
+			lo_message_add_string (rmsg, " ");
+		}
+		lo_send_message (get_address (msg), path, rmsg);
+		lo_message_free (rmsg);
+		_lo_lock.unlock ();
 	}
 
 	return ret;
@@ -4082,13 +4138,17 @@ OSC::_strip_parse (const char *path, const char *sub_path, const char* types, lo
 }
 
 int
-OSC::strip_state (const char *path, boost::shared_ptr<ARDOUR::Stripable> s, bool strp, lo_message msg)
+OSC::strip_state (const char *path, boost::shared_ptr<ARDOUR::Stripable> s, int ssid, lo_message msg)
 {
 	PBD::info << string_compose("OSC: strip_state path:%1", path) << endmsg;
 	// some things need the route
 	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (s);
 
 	lo_message reply = lo_message_new ();
+	if (ssid) {
+		// strip number not in path
+		lo_message_add_int32 (reply, ssid);
+	}
 
 	if (boost::dynamic_pointer_cast<AudioTrack>(s)) {
 		lo_message_add_string (reply, "AT");
@@ -4140,6 +4200,29 @@ OSC::strip_state (const char *path, boost::shared_ptr<ARDOUR::Stripable> s, bool
 	lo_send_message (get_address (msg), X_(path), reply);
 	lo_message_free (reply);
 	return 0;
+}
+
+int
+OSC::strip_list (lo_message msg)
+{
+	OSCSurface *sur = get_surface(get_address (msg), true);
+	string temppath = "/strip";
+	int ssid = 0;
+	for (int n = 0; n < (int) sur->nstrips; ++n) {
+		if (sur->feedback[2]) {
+			temppath = string_compose ("/strip/%1", n+1);
+		} else {
+			ssid = n + 1;
+		}
+
+		boost::shared_ptr<Stripable> s = get_strip (n + 1, get_address (msg));
+
+		if (s) {
+			strip_state (temppath.c_str(), s, ssid, msg);
+		}
+	}
+	return 0;
+
 }
 
 int
@@ -4497,27 +4580,6 @@ OSC::spill (const char *path, const char* types, lo_arg **argv, int argc, lo_mes
 
 	}
 	return ret;
-}
-
-int
-OSC::sel_comment (char *newcomment, lo_message msg) {
-	if (!session) {
-		return -1;
-	}
-
-	OSCSurface *sur = get_surface(get_address (msg));
-	boost::shared_ptr<Stripable> s;
-	s = sur->select;
-	if (s) {
-		boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (s);
-		if (!rt) {
-			PBD::warning << "OSC: can not set comment on VCAs." << endmsg;
-			return -1;
-		}
-		rt->set_comment (newcomment, this);
-	}
-
-	return 0;
 }
 
 int
