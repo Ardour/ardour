@@ -1208,12 +1208,30 @@ Playlist::cut_copy (boost::shared_ptr<Playlist> (Playlist::*pmf) (samplepos_t, s
 		return boost::shared_ptr<Playlist> ();
 	}
 
+<<<<<<< HEAD
 	start = ranges.front ().start;
+=======
+	start = ranges.front().start;
+<<<<<<< HEAD
+
+	for (list<AudioRange>::iterator i = ranges.begin(); i != ranges.end(); ++i) {
+
+		pl = (this->*pmf)((*i).start, (*i).length(), result_is_hidden);
+
+=======
+
+	for (list<AudioRange>::iterator i = ranges.begin(); i != ranges.end(); ++i) {
+>>>>>>> 0bbe6796b9 (Revert "NO-OP: code formatting and cleanup, thanks clang-format")
 
 	for (list<AudioRange>::iterator i = ranges.begin (); i != ranges.end (); ++i) {
 		pl = (this->*pmf) ((*i).start, (*i).length (), result_is_hidden);
 
+<<<<<<< HEAD
 		if (i == ranges.begin ()) {
+=======
+>>>>>>> Revert "NO-OP: code formatting and cleanup, thanks clang-format"
+		if (i == ranges.begin()) {
+>>>>>>> 0bbe6796b9 (Revert "NO-OP: code formatting and cleanup, thanks clang-format")
 			ret = pl;
 		} else {
 			/* paste the next section into the nascent playlist,
@@ -1296,8 +1314,21 @@ Playlist::paste (boost::shared_ptr<Playlist> other, samplepos_t position, float 
 		{
 			RegionWriteLock rl1 (this);
 			while (itimes--) {
+<<<<<<< HEAD
 				for (RegionList::iterator i = other->regions.begin (); i != other->regions.end (); ++i) {
 					boost::shared_ptr<Region> copy_of_region = RegionFactory::create (*i, true, false, &rl1.thawlist);
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+				for (RegionList::iterator i = other->regions.begin (); i != other->regions.end (); ++i) {
+					boost::shared_ptr<Region> copy_of_region = RegionFactory::create (*i, true, false, &rl1.thawlist);
+=======
+=======
+>>>>>>> Revert "NO-OP: code formatting and cleanup, thanks clang-format"
+				for (RegionList::iterator i = other->regions.begin(); i != other->regions.end(); ++i) {
+					boost::shared_ptr<Region> copy_of_region = RegionFactory::create (*i, true);
+>>>>>>> Revert "NO-OP: code formatting and cleanup, thanks clang-format"
+>>>>>>> 0bbe6796b9 (Revert "NO-OP: code formatting and cleanup, thanks clang-format")
 
 					/* put these new regions on top of all existing ones, but preserve
 					   the ordering they had in the original playlist.
@@ -1362,12 +1393,33 @@ Playlist::duplicate_until (boost::shared_ptr<Region> region, samplepos_t positio
 {
 	RegionWriteLock rl (this);
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> 0bbe6796b9 (Revert "NO-OP: code formatting and cleanup, thanks clang-format")
 	while (position + region->length () - 1 < end) {
 		boost::shared_ptr<Region> copy = RegionFactory::create (region, true, false, &rl.thawlist);
 		add_region_internal (copy, position, rl.thawlist);
 		set_layer (copy, DBL_MAX);
 		position += gap;
 	}
+<<<<<<< HEAD
+=======
+=======
+=======
+>>>>>>> Revert "NO-OP: code formatting and cleanup, thanks clang-format"
+	 while (position + region->length() - 1 < end) {
+		 boost::shared_ptr<Region> copy = RegionFactory::create (region, true);
+		 add_region_internal (copy, position, rl.thawlist);
+		 set_layer (copy, DBL_MAX);
+		 position += gap;
+	 }
+<<<<<<< HEAD
+>>>>>>> Revert "NO-OP: code formatting and cleanup, thanks clang-format"
+=======
+>>>>>>> Revert "NO-OP: code formatting and cleanup, thanks clang-format"
+>>>>>>> 0bbe6796b9 (Revert "NO-OP: code formatting and cleanup, thanks clang-format")
 
 	if (position < end) {
 		samplecnt_t length = min (region->length (), end - position);
@@ -1381,11 +1433,31 @@ Playlist::duplicate_until (boost::shared_ptr<Region> region, samplepos_t positio
 			plist.add (Properties::length, length);
 			plist.add (Properties::name, name);
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> 0bbe6796b9 (Revert "NO-OP: code formatting and cleanup, thanks clang-format")
 			boost::shared_ptr<Region> sub = RegionFactory::create (region, plist, false, &rl.thawlist);
 			add_region_internal (sub, position, rl.thawlist);
 			set_layer (sub, DBL_MAX);
 		}
 	}
+<<<<<<< HEAD
+=======
+=======
+=======
+>>>>>>> Revert "NO-OP: code formatting and cleanup, thanks clang-format"
+			 boost::shared_ptr<Region> sub = RegionFactory::create (region, plist);
+			 add_region_internal (sub, position, rl.thawlist);
+			 set_layer (sub, DBL_MAX);
+		 }
+	 }
+<<<<<<< HEAD
+>>>>>>> Revert "NO-OP: code formatting and cleanup, thanks clang-format"
+=======
+>>>>>>> Revert "NO-OP: code formatting and cleanup, thanks clang-format"
+>>>>>>> 0bbe6796b9 (Revert "NO-OP: code formatting and cleanup, thanks clang-format")
 }
 
 void
@@ -1430,12 +1502,28 @@ void
 Playlist::shift (samplepos_t at, sampleoffset_t distance, bool move_intersected, bool ignore_music_glue)
 {
 	PBD::Unwinder<bool> uw (_playlist_shift_active, true);
+<<<<<<< HEAD
 	RegionWriteLock     rlock (this);
 	RegionList          copy (regions.rlist ());
 	RegionList          fixup;
 
 	for (RegionList::iterator r = copy.begin (); r != copy.end (); ++r) {
 		if ((*r)->last_sample () < at) {
+=======
+	RegionWriteLock rlock (this);
+	RegionList copy (regions.rlist());
+	RegionList fixup;
+<<<<<<< HEAD
+
+	for (RegionList::iterator r = copy.begin(); r != copy.end(); ++r) {
+
+=======
+
+	for (RegionList::iterator r = copy.begin(); r != copy.end(); ++r) {
+
+>>>>>>> Revert "NO-OP: code formatting and cleanup, thanks clang-format"
+		if ((*r)->last_sample() < at) {
+>>>>>>> 0bbe6796b9 (Revert "NO-OP: code formatting and cleanup, thanks clang-format")
 			/* too early */
 			continue;
 		}
@@ -2031,6 +2119,7 @@ Playlist::find_next_region (samplepos_t sample, RegionPoint point, int dir)
 
 	bool end_iter = false;
 
+<<<<<<< HEAD
 	for (RegionList::iterator i = regions.begin (); i != regions.end (); ++i) {
 		if (end_iter)
 			break;
@@ -2038,6 +2127,21 @@ Playlist::find_next_region (samplepos_t sample, RegionPoint point, int dir)
 		sampleoffset_t            distance;
 		boost::shared_ptr<Region> r   = (*i);
 		samplepos_t               pos = 0;
+=======
+	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
+<<<<<<< HEAD
+
+		if(end_iter) break;
+
+=======
+
+		if(end_iter) break;
+
+>>>>>>> Revert "NO-OP: code formatting and cleanup, thanks clang-format"
+		sampleoffset_t distance;
+		boost::shared_ptr<Region> r = (*i);
+		samplepos_t pos = 0;
+>>>>>>> 0bbe6796b9 (Revert "NO-OP: code formatting and cleanup, thanks clang-format")
 
 		switch (point) {
 			case Start:
@@ -3043,12 +3147,32 @@ Playlist::find_next_top_layer_position (samplepos_t t) const
 boost::shared_ptr<Region>
 Playlist::combine (const RegionList& r)
 {
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> 0bbe6796b9 (Revert "NO-OP: code formatting and cleanup, thanks clang-format")
 	ThawList                           thawlist;
 	PropertyList                       plist;
 	uint32_t                           channels          = 0;
 	uint32_t                           layer             = 0;
 	samplepos_t                        earliest_position = max_samplepos;
 	vector<TwoRegions>                 old_and_new_regions;
+<<<<<<< HEAD
+=======
+=======
+=======
+>>>>>>> Revert "NO-OP: code formatting and cleanup, thanks clang-format"
+	PropertyList plist;
+	uint32_t channels = 0;
+	uint32_t layer = 0;
+	samplepos_t earliest_position = max_samplepos;
+	vector<TwoRegions> old_and_new_regions;
+<<<<<<< HEAD
+>>>>>>> Revert "NO-OP: code formatting and cleanup, thanks clang-format"
+=======
+>>>>>>> Revert "NO-OP: code formatting and cleanup, thanks clang-format"
+>>>>>>> 0bbe6796b9 (Revert "NO-OP: code formatting and cleanup, thanks clang-format")
 	vector<boost::shared_ptr<Region> > originals;
 	vector<boost::shared_ptr<Region> > copies;
 	string                             parent_name;
@@ -3087,7 +3211,19 @@ Playlist::combine (const RegionList& r)
 		/* copy the region */
 
 		boost::shared_ptr<Region> original_region = (*i);
+<<<<<<< HEAD
 		boost::shared_ptr<Region> copied_region   = RegionFactory::create (original_region, false, false, &thawlist);
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+		boost::shared_ptr<Region> copied_region   = RegionFactory::create (original_region, false, false, &thawlist);
+=======
+		boost::shared_ptr<Region> copied_region = RegionFactory::create (original_region, false);
+>>>>>>> Revert "NO-OP: code formatting and cleanup, thanks clang-format"
+=======
+		boost::shared_ptr<Region> copied_region = RegionFactory::create (original_region, false);
+>>>>>>> Revert "NO-OP: code formatting and cleanup, thanks clang-format"
+>>>>>>> 0bbe6796b9 (Revert "NO-OP: code formatting and cleanup, thanks clang-format")
 
 		old_and_new_regions.push_back (TwoRegions (original_region, copied_region));
 		originals.push_back (original_region);
@@ -3114,8 +3250,23 @@ Playlist::combine (const RegionList& r)
 
 	/* now create a new PlaylistSource for each channel in the new playlist */
 
+<<<<<<< HEAD
 	SourceList                     sources;
 	pair<samplepos_t, samplepos_t> extent = pl->_get_extent ();
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+	SourceList                     sources;
+	pair<samplepos_t, samplepos_t> extent = pl->_get_extent ();
+=======
+	SourceList sources;
+	pair<samplepos_t,samplepos_t> extent = pl->get_extent();
+>>>>>>> Revert "NO-OP: code formatting and cleanup, thanks clang-format"
+=======
+	SourceList sources;
+	pair<samplepos_t,samplepos_t> extent = pl->get_extent();
+>>>>>>> Revert "NO-OP: code formatting and cleanup, thanks clang-format"
+>>>>>>> 0bbe6796b9 (Revert "NO-OP: code formatting and cleanup, thanks clang-format")
 
 	for (uint32_t chn = 0; chn < channels; ++chn) {
 		sources.push_back (SourceFactory::createFromPlaylist (_type, _session, pl, id (), parent_name, chn, 0, extent.second, false, false));
@@ -3217,12 +3368,28 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 	   the original regions, and add them instead.
 	*/
 
+<<<<<<< HEAD
 	const bool need_copies = (boost::dynamic_pointer_cast<PlaylistSource> (pls)->owner () != target->id ()) ||
 	                         (pls->original () != id ());
+=======
+	const bool need_copies = (boost::dynamic_pointer_cast<PlaylistSource> (pls)->owner() != target->id()) ||
+		(pls->original() != id());
+
+	for (RegionList::const_iterator i = rl.begin(); i != rl.end(); ++i) {
+<<<<<<< HEAD
+>>>>>>> 0bbe6796b9 (Revert "NO-OP: code formatting and cleanup, thanks clang-format")
 
 	ThawList thawlist;
 
 	for (RegionList::const_iterator i = rl.begin (); i != rl.end (); ++i) {
+<<<<<<< HEAD
+=======
+=======
+>>>>>>> Revert "NO-OP: code formatting and cleanup, thanks clang-format"
+=======
+
+>>>>>>> Revert "NO-OP: code formatting and cleanup, thanks clang-format"
+>>>>>>> 0bbe6796b9 (Revert "NO-OP: code formatting and cleanup, thanks clang-format")
 		boost::shared_ptr<Region> current (*i);
 
 		RegionFactory::CompoundAssociations::iterator ca = cassocs.find (*i);
@@ -3241,10 +3408,26 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 			adjusted_end   = adjusted_start + target->length ();
 		}
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> 0bbe6796b9 (Revert "NO-OP: code formatting and cleanup, thanks clang-format")
 		if (!need_copies) {
 			thawlist.add (original);
 		} else {
 			samplepos_t pos = original->position ();
+<<<<<<< HEAD
+=======
+=======
+		if (need_copies) {
+			samplepos_t pos = original->position();
+>>>>>>> Revert "NO-OP: code formatting and cleanup, thanks clang-format"
+=======
+		if (need_copies) {
+			samplepos_t pos = original->position();
+>>>>>>> Revert "NO-OP: code formatting and cleanup, thanks clang-format"
+>>>>>>> 0bbe6796b9 (Revert "NO-OP: code formatting and cleanup, thanks clang-format")
 			/* make a copy, but don't announce it */
 			original = RegionFactory::create (original, false, false, &thawlist);
 			/* the pure copy constructor resets position() to zero, so fix that up.  */

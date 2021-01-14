@@ -303,6 +303,18 @@ protected:
 	friend class Session;
 
 protected:
+	class ThawList : public RegionList {
+		public:
+			void add (boost::shared_ptr<Region> r)
+			{
+				if (std::find (begin(), end(), r) != end ()) {
+					return;
+				}
+				r->suspend_property_changes ();
+				push_back (r);
+			}
+	};
+
 	class RegionReadLock : public Glib::Threads::RWLock::ReaderLock
 	{
 	public:
