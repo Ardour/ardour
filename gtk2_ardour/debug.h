@@ -31,7 +31,6 @@ namespace PBD {
                 extern DebugBits Accelerators;
                 extern DebugBits GUITiming;
                 extern DebugBits EngineControl;
-                extern DebugBits Selection;
 		extern DebugBits GuiStartup;
 	}
 }

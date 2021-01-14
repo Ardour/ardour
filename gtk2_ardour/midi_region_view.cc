@@ -41,6 +41,7 @@
 #include "pbd/stateful_diff_command.h"
 #include "pbd/unwind.h"
 
+#include "ardour/debug.h"
 #include "ardour/midi_model.h"
 #include "ardour/midi_playlist.h"
 #include "ardour/midi_region.h"
