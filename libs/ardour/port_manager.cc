@@ -1487,6 +1487,11 @@ PortManager::run_input_meters (pframes_t n_samples, samplecnt_t rate)
 			continue;
 		}
 
+		if (_audio_port_meters.find (*p) == _audio_port_meters.end () || _audio_port_scopes.find (*p) == _audio_port_scopes.end ()) {
+			/* do not allocate ports during normal operation */
+			continue;
+		}
+
 		if (reset) {
 			_audio_port_meters[*p].reset ();
 		}
@@ -1527,6 +1532,11 @@ PortManager::run_input_meters (pframes_t n_samples, samplecnt_t rate)
 			/* allocate using default c'tor */
 			_midi_port_meters[*p];
 			_midi_port_monitors[*p] = MIDIPortMonitor (new CircularEventBuffer (32));
+			continue;
+		}
+
+		if (_midi_port_meters.find (*p) == _midi_port_meters.end () || _midi_port_monitors.find (*p) == _midi_port_monitors.end ()) {
+			/* do not allocate ports during normal operation */
 			continue;
 		}
 
