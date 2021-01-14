@@ -196,7 +196,7 @@ MidiPlaylist::destroy_region (boost::shared_ptr<Region> region)
 	return changed;
 }
 void
-MidiPlaylist::_split_region (boost::shared_ptr<Region> region, timepos_t const & playlist_position, Thawlist& thawlist)
+MidiPlaylist::_split_region (boost::shared_ptr<Region> region, timepos_t const & playlist_position, ThawList& thawlist)
 {
 	if (!region->covers (playlist_position)) {
 		return;

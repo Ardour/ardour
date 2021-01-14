@@ -750,7 +750,7 @@ Playlist::set_region_ownership ()
 }
 
 bool
-Playlist::add_region_internal (boost::shared_ptr<Region> region, timepos_t const & position, Thawlist& thawlist)
+Playlist::add_region_internal (boost::shared_ptr<Region> region, timepos_t const & position, ThawList& thawlist)
 {
 	if (region->data_type () != _type) {
 		return false;
@@ -1466,7 +1466,7 @@ Playlist::split_region (boost::shared_ptr<Region> region, timepos_t const & play
 }
 
 void
-Playlist::_split_region (boost::shared_ptr<Region> region, timepos_t const &  playlist_position, Thawlist& thawlist)
+Playlist::_split_region (boost::shared_ptr<Region> region, timepos_t const &  playlist_position, ThawList& thawlist)
 {
 	if (!region->covers (playlist_position)) {
 		return;
@@ -1551,14 +1551,14 @@ Playlist::SoloSelectedActive ()
 }
 
 void
-Playlist::ripple_locked (timepos_t const & at, timecnt_t const & distance, RegionList *exclude, ThawList& thawlist)
+Playlist::ripple_locked (timepos_t const & at, timecnt_t const & distance, RegionList *exclude)
 {
 	RegionWriteLock rl (this);
 	ripple_unlocked (at, distance, exclude, rl.thawlist);
 }
 
 void
-Playlist::ripple_unlocked (samplepos_t at, samplecnt_t distance, RegionList* exclude, ThawList& thawlist, bool notify)
+Playlist::ripple_unlocked (timepos_t const & at, timecnt_t const & distance, RegionList *exclude, ThawList& thawlist, bool notify)
 {
 	if (distance.zero()) {
 		return;

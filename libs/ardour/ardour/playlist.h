@@ -434,14 +434,14 @@ protected:
 	void sort_regions ();
 
 	void ripple_locked (timepos_t const & at, timecnt_t const & distance, RegionList *exclude);
-	void ripple_unlocked (timepos_t const & at, timecnt_t const & distance, RegionList *exclude, Thawlist& thawlist);
+	void ripple_unlocked (timepos_t const & at, timecnt_t const & distance, RegionList *exclude, ThawList& thawlist);
 
 	virtual void remove_dependents (boost::shared_ptr<Region> /*region*/) {}
 	virtual void region_going_away (boost::weak_ptr<Region> /*region*/) {}
 
 	virtual XMLNode& state (bool);
 
-	bool add_region_internal (boost::shared_ptr<Region>, timepos_t const & position, Thawlist& thawlist);
+	bool add_region_internal (boost::shared_ptr<Region>, timepos_t const & position, ThawList& thawlist);
 
 	int  remove_region_internal (boost::shared_ptr<Region>, ThawList& thawlist);
 	void copy_regions (RegionList&) const;
@@ -460,7 +460,7 @@ protected:
 	void begin_undo ();
 	void end_undo ();
 
-	virtual void _split_region (boost::shared_ptr<Region>, timepos_t const & position, Thawlist& thawlist);
+	virtual void _split_region (boost::shared_ptr<Region>, timepos_t const & position, ThawList& thawlist);
 
 	typedef std::pair<boost::shared_ptr<Region>, boost::shared_ptr<Region> > TwoRegions;
 

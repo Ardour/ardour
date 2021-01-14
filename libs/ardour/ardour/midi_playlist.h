@@ -78,7 +78,7 @@ public:
 
 	bool destroy_region (boost::shared_ptr<Region>);
 
-	void _split_region (boost::shared_ptr<Region>, timepos_t const & position, Thawlist& thawlist);
+	void _split_region (boost::shared_ptr<Region>, timepos_t const & position, ThawList& thawlist);
 
 	void set_note_mode (NoteMode m) { _note_mode = m; }
 
