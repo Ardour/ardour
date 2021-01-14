@@ -2600,7 +2600,7 @@ void
 Editor::set_snapped_cursor_position (timepos_t const & pos)
 {
 	if (_edit_point == EditAtMouse) {
-		snapped_cursor->set_position (pos.samples());
+		_snapped_cursor->set_position (pos.samples());
 	}
 }
 
@@ -4849,7 +4849,7 @@ Editor::get_preferred_edit_position (EditIgnoreOption ignore, bool from_context_
 	case EditAtPlayhead:
 		if (_dragging_playhead) {
 			/* NOTE: since the user is dragging with the mouse, this operation will implicitly be Snapped */
-			where = timepos_t (playhead_cursor->current_sample());
+			where = timepos_t (_playhead_cursor->current_sample());
 		} else {
 			where = timepos_t (_session->audible_sample());
 		}
@@ -5957,8 +5957,8 @@ Editor::super_rapid_screen_update ()
 		if (!selection->markers.empty()) {
 			timepos_t ms (selection->markers.front()->position());
 			snap_to (ms); // should use snap_to_with_modifier?
-			snapped_cursor->set_position (ms.samples());
-			snapped_cursor->show ();
+			_snapped_cursor->set_position (ms.samples());
+			_snapped_cursor->show ();
 		}
 	} else if (_edit_point == EditAtMouse && mouse_sample (where.sample, ignored)) {
 		/* cursor is in the editing canvas. show it. */

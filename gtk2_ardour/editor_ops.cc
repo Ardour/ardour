@@ -482,8 +482,8 @@ Editor::nudge_forward (bool next, bool force_playhead)
 			commit_reversible_command ();
 		}
 	} else {
-		distance = get_nudge_distance (timepos_t (playhead_cursor->current_sample ()), next_distance);
-		_session->request_locate ((timepos_t (playhead_cursor->current_sample ()) + distance).samples());
+		distance = get_nudge_distance (timepos_t (playhead_cursor()->current_sample ()), next_distance);
+		_session->request_locate ((timepos_t (playhead_cursor()->current_sample ()) + distance).samples());
 	}
 }
 
@@ -577,8 +577,8 @@ Editor::nudge_backward (bool next, bool force_playhead)
 
 	} else {
 
-		if (playhead_cursor->current_sample () > distance.samples()) {
-			_session->request_locate ((timepos_t (playhead_cursor->current_sample ()).earlier (distance)).samples());
+		if (_playhead_cursor->current_sample () > distance.samples()) {
+			_session->request_locate ((timepos_t (_playhead_cursor->current_sample ()).earlier (distance)).samples());
 		} else {
 			_session->goto_start();
 		}
@@ -970,7 +970,7 @@ Editor::get_region_boundary (timepos_t const & pos, int32_t dir, bool with_selec
 void
 Editor::cursor_to_region_boundary (bool with_selection, int32_t dir)
 {
-	timepos_t pos (playhead_cursor->current_sample ());
+	timepos_t pos (_playhead_cursor->current_sample ());
 	timepos_t target;
 
 	if (!_session) {
@@ -1051,7 +1051,7 @@ Editor::cursor_to_region_point (EditorCursor* cursor, RegionPoint point, int32_t
 		break;
 	}
 
-	if (cursor == playhead_cursor) {
+	if (cursor == _playhead_cursor) {
 		_session->request_locate (pos.samples());
 	} else {
 		cursor->set_position (pos.samples());
@@ -1092,7 +1092,7 @@ Editor::cursor_to_selection_start (EditorCursor *cursor)
 		return;
 	}
 
-	if (cursor == playhead_cursor) {
+	if (cursor == _playhead_cursor) {
 		_session->request_locate (pos.samples());
 	} else {
 		cursor->set_position (pos.samples());
@@ -1121,7 +1121,7 @@ Editor::cursor_to_selection_end (EditorCursor *cursor)
 		return;
 	}
 
-	if (cursor == playhead_cursor) {
+	if (cursor == _playhead_cursor) {
 		_session->request_locate (pos.samples());
 	} else {
 		cursor->set_position (pos.samples());
@@ -1373,10 +1373,10 @@ Editor::cursor_align (bool playhead_to_edit)
 			Location* loc = find_location_from_marker (*i, ignored);
 
 			if (loc->is_mark()) {
-				loc->set_start (timepos_t (playhead_cursor->current_sample ()), false);
+				loc->set_start (timepos_t (_playhead_cursor->current_sample ()), false);
 			} else {
-				loc->set (timepos_t (playhead_cursor->current_sample ()),
-				          timepos_t (playhead_cursor->current_sample ()) + loc->length());
+				loc->set (timepos_t (_playhead_cursor->current_sample ()),
+				          timepos_t (_playhead_cursor->current_sample ()) + loc->length());
 			}
 		}
 	}
@@ -2455,7 +2455,7 @@ Editor::jump_forward_to_mark ()
 		return;
 	}
 
-	timepos_t pos = _session->locations()->first_mark_after (timepos_t (playhead_cursor->current_sample()));
+	timepos_t pos = _session->locations()->first_mark_after (timepos_t (_playhead_cursor->current_sample()));
 
 	if (pos == timepos_t::max (Temporal::AudioTime)) {
 		return;
@@ -2471,11 +2471,11 @@ Editor::jump_backward_to_mark ()
 		return;
 	}
 
-	timepos_t pos = _session->locations()->first_mark_before (timepos_t (playhead_cursor->current_sample()));
+	timepos_t pos = _session->locations()->first_mark_before (timepos_t (_playhead_cursor->current_sample()));
 
 	//handle the case where we are rolling, and we're less than one-half second past the mark, we want to go to the prior mark...
 	if (_session->transport_rolling()) {
-		if ((playhead_cursor->current_sample() - pos.samples()) < _session->sample_rate()/2) {
+		if ((_playhead_cursor->current_sample() - pos.samples()) < _session->sample_rate()/2) {
 			timepos_t prior = _session->locations()->first_mark_before (pos);
 			pos = prior;
 		}
@@ -6845,7 +6845,7 @@ Editor::set_auto_punch_range ()
 	}
 
 	Location* tpl = transport_punch_location();
-	timepos_t now (playhead_cursor->current_sample());
+	timepos_t now (_playhead_cursor->current_sample());
 	timepos_t begin = now;
 	timepos_t end (_session->current_end_sample());
 
@@ -6861,7 +6861,7 @@ Editor::set_auto_punch_range ()
 			set_punch_range (begin, end, _("Auto Punch In/Out"));
 		} else {
 			// normal case for 2nd press - set the punch out
-			end = timepos_t (playhead_cursor->current_sample ());
+			end = timepos_t (_playhead_cursor->current_sample ());
 			set_punch_range (tpl->start(), now, _("Auto Punch In/Out"));
 			_session->config.set_punch_out(true);
 		}
@@ -7649,7 +7649,7 @@ Editor::playhead_forward_to_grid ()
 		return;
 	}
 
-	timepos_t pos  (playhead_cursor->current_sample ());
+	timepos_t pos  (_playhead_cursor->current_sample ());
 
 	if ( _grid_type == GridTypeNone) {
 		if (pos < timepos_t::max (pos.time_domain()).earlier (timepos_t (samplepos_t (floor (current_page_samples()*0.1))))) {
@@ -7682,7 +7682,7 @@ Editor::playhead_backward_to_grid ()
 		return;
 	}
 
-	timepos_t pos  (playhead_cursor->current_sample ());
+	timepos_t pos  (_playhead_cursor->current_sample ());
 
 	if ( _grid_type == GridTypeNone) {
 		if (pos.samples() > current_page_samples()*0.1 ) {
@@ -7701,7 +7701,7 @@ Editor::playhead_backward_to_grid ()
 		//handle the case where we are rolling, and we're less than one-half second past the mark, we want to go to the prior mark...
 		//also see:  jump_backward_to_mark
 		if (_session->transport_rolling()) {
-			if ((playhead_cursor->current_sample() - pos.samples()) < _session->sample_rate()/2) {
+			if ((_playhead_cursor->current_sample() - pos.samples()) < _session->sample_rate()/2) {
 				pos = snap_to_grid (pos, Temporal::RoundDownAlways, SnapToGrid_Scaled);
 			}
 		}
