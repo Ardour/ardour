@@ -769,9 +769,7 @@ MidiListEditor::redisplay_model ()
 			row[columns.note] = (*i)->note();
 			row[columns.velocity] = (*i)->velocity();
 
-#warning NUTEMPO needs ::bbt() method for timeline types
-			// Temporal::BBT_Time bbt (((region->position() + (*i)->time()).earlier (start)).bbt());
-			Temporal::BBT_Time bbt;
+			Temporal::BBT_Time bbt = Temporal::TempoMap::use()->bbt_at ((region->position() + timepos_t ((*i)->time())).earlier (region->start()));
 
 			ss.str ("");
 			ss << bbt;
