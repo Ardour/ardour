@@ -2076,15 +2076,12 @@ LuaBindings::common (lua_State* L)
 		.addConst ("SyncPoint", ARDOUR::RegionPoint(SyncPoint))
 		.endNamespace ()
 
-#warning NUTEMPO add timeline types here instead
-#if 0
-		.beginNamespace ("TempoSection")
-		.beginNamespace ("PositionLockStyle")
-		.addConst ("AudioTime", ARDOUR::PositionLockStyle(AudioTime))
-		.addConst ("MusicTime", ARDOUR::PositionLockStyle(MusicTime))
+		.beginNamespace ("Temporal")
+		.beginNamespace ("TimeDomain")
+		.addConst ("AudioTime", Temporal::AudioTime)
+		.addConst ("BeatTime", Temporal::BeatTime)
 		.endNamespace ()
 		.endNamespace ()
-#endif
 
 #warning NUTEMPO fix types here
 #if 0
