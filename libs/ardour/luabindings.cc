@@ -2077,21 +2077,19 @@ LuaBindings::common (lua_State* L)
 		.endNamespace ()
 
 		.beginNamespace ("Temporal")
+
 		.beginNamespace ("TimeDomain")
 		.addConst ("AudioTime", Temporal::AudioTime)
 		.addConst ("BeatTime", Temporal::BeatTime)
 		.endNamespace ()
+
+		.beginNamespace ("Tempo")
+		.beginNamespace ("Type")
+		.addConst ("Ramp", Temporal::Tempo::Type(Tempo::Ramped))
+		.addConst ("Constant", Temporal::Tempo::Type(Tempo::Constant))
 		.endNamespace ()
 
-#warning NUTEMPO fix types here
-#if 0
-		.beginNamespace ("TempoSection")
-		.beginNamespace ("Type")
-		.addConst ("Ramp", ARDOUR::TempoSection::Type(TempoSection::Ramp))
-		.addConst ("Constant", ARDOUR::TempoSection::Type(TempoSection::Constant))
-		.endNamespace ()
-		.endNamespace ()
-#endif
+		.endNamespace () /* end of Temporal namespace */
 
 		.beginNamespace ("TrackMode")
 		.addConst ("Normal", ARDOUR::TrackMode(Start))
