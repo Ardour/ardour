@@ -208,6 +208,8 @@ void
 JACKAudioBackend::_registration_callback (jack_port_id_t /*id*/, int /*reg*/, void* arg)
 {
 	static_cast<JACKAudioBackend*> (arg)->manager.registration_callback ();
+	static_cast<JACKAudioBackend*> (arg)->engine.latency_callback (false);
+	static_cast<JACKAudioBackend*> (arg)->engine.latency_callback (true);
 }
 
 int
