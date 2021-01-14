@@ -2939,6 +2939,9 @@ EngineControl::set_desired_sample_rate (uint32_t sr)
 void
 EngineControl::on_switch_page (GtkNotebookPage*, guint page_num)
 {
+	if (ignore_changes) {
+		return;
+	}
 	if (page_num == 0) {
 		_measure_midi.reset();
 		update_sensitivity ();
