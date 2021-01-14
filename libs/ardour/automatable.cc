@@ -579,13 +579,13 @@ Automatable::control_factory(const Evoral::Parameter& param)
 	} else if (param.type() == MonitoringAutomation) {
 		Monitorable* m = dynamic_cast<Monitorable*>(this);
 		if (m) {
-			control = new MonitorControl (_a_session, X_("monitor"), *m);
+			control = new MonitorControl (_a_session, X_("monitor"), *m, time_domain());
 		}
 	} else if (param.type() == SoloAutomation) {
 		Soloable* s = dynamic_cast<Soloable*>(this);
 		Muteable* m = dynamic_cast<Muteable*>(this);
 		if (s && m) {
-			control = new SoloControl (_a_session, X_("solo"), *s, *m);
+			control = new SoloControl (_a_session, X_("solo"), *s, *m, time_domain());
 		}
 	} else if (param.type() == MuteAutomation) {
 		Muteable* m = dynamic_cast<Muteable*>(this);

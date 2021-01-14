@@ -25,9 +25,9 @@ using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
 
-PhaseControl::PhaseControl (Session& session, std::string const & name)
+PhaseControl::PhaseControl (Session& session, std::string const & name, Temporal::TimeDomain td)
 	: AutomationControl (session, PhaseAutomation, ParameterDescriptor (PhaseAutomation),
-	                     boost::shared_ptr<AutomationList>(new AutomationList(Evoral::Parameter(PhaseAutomation), Temporal::AudioTime)),
+	                     boost::shared_ptr<AutomationList>(new AutomationList(Evoral::Parameter(PhaseAutomation), td)),
 	                     name)
 {
 }
