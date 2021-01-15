@@ -5704,8 +5704,7 @@ SelectionDrag::setup_pointer_offset ()
 {
 	switch (_operation) {
 	case CreateSelection:
-#warning NUTEMPO need to pick time domain here
-		_pointer_offset = timecnt_t ();
+		_pointer_offset = timecnt_t (_editor->default_time_domain());
 		break;
 
 	case SelectionStartTrim:
