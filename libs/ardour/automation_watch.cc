@@ -26,6 +26,8 @@
 #include "pbd/compose.h"
 #include "pbd/pthread_utils.h"
 
+#include "temporal/tempo.h"
+
 #include "ardour/audioengine.h"
 #include "ardour/automation_control.h"
 #include "ardour/automation_watch.h"
@@ -87,8 +89,15 @@ AutomationWatch::add_automation_watch (boost::shared_ptr<AutomationControl> ac)
 		DEBUG_TRACE (DEBUG::Automation, string_compose ("\ttransport is rolling @ %1, audible = %2so enter write pass\n",
 								_session->transport_speed(), _session->audible_sample()));
 		/* add a guard point since we are already moving */
-#warning NUTEMPO QUESTION should the time be in the domain of the list ?
-		ac->list()->set_in_write_pass (true, true, timepos_t (_session->audible_sample()));
+		timepos_t pos;
+
+		if (ac->list()->time_domain() == Temporal::AudioTime) {
+			pos = timepos_t (_session->audible_sample());
+		} else {
+			pos = timepos_t (Temporal::TempoMap::use()->quarters_at_sample (_session->audible_sample()));
+		}
+
+		ac->list()->set_in_write_pass (true, true, pos);
 	}
 
 	/* we can't store shared_ptr<Destructible> in connections because it
