@@ -30,6 +30,8 @@
 
 #include "evoral/Curve.h"
 
+#include "temporal/tempo.h"
+
 #include "ardour/amp.h"
 #include "ardour/audio_buffer.h"
 #include "ardour/audio_track.h"
@@ -409,8 +411,16 @@ AudioTrack::freeze_me (InterThreadInfo& itt)
 	boost::shared_ptr<Region> region (RegionFactory::create (srcs, plist, false));
 
 	new_playlist->set_orig_track_id (id());
-#warning NUTEMPO fixme this probably should not use samples unconditionally
-	new_playlist->add_region (region, timepos_t (_session.current_start_sample()));
+
+	timepos_t pos;
+
+	if (time_domain() == Temporal::AudioTime) {
+		pos = timepos_t (_session.current_start_sample());
+	} else {
+		pos = timepos_t (Temporal::TempoMap::use()->quarters_at_sample (_session.current_start_sample()));
+	}
+
+	new_playlist->add_region (region, pos);
 	new_playlist->set_frozen (true);
 	region->set_locked (true);
 
