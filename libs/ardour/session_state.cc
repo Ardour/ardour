@@ -260,7 +260,6 @@ Session::post_engine_init ()
 	_engine.Halted.connect_same_thread (*this, boost::bind (&Session::engine_halted, this));
 	_engine.Xrun.connect_same_thread (*this, boost::bind (&Session::xrun_recovery, this));
 
-#warning NUTEMPO does session need to know about tempo map changes?
 
 	try {
 		/* MidiClock requires a tempo map */
