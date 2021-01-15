@@ -74,6 +74,7 @@ class LIBTEMPORAL_API timepos_t : public int62_t  {
 	bool zero ()     const { return val() == 0; }
 
 	Temporal::TimeDomain time_domain () const { if (flagged()) return Temporal::BeatTime; return Temporal::AudioTime; }
+	void set_time_domain (Temporal::TimeDomain);
 
 	superclock_t superclocks() const { if (is_superclock()) return val(); return _superclocks (); }
 	int64_t      samples() const { return superclock_to_samples (superclocks(), TEMPORAL_SAMPLE_RATE); }

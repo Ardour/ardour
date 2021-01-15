@@ -375,6 +375,20 @@ timepos_t::timepos_t (timecnt_t const & t)
 	v = build (t.distance().flagged(), t.distance ().val());
 }
 
+void
+timepos_t::set_time_domain (TimeDomain td)
+{
+	if (td == time_domain()) {
+		return;
+	}
+
+	if (td == AudioTime) {
+		v = build (false, superclock_to_samples (_superclocks(), TEMPORAL_SAMPLE_RATE));
+	} else {
+		v = build (true, _beats().to_ticks());
+	}
+}
+
 // timepos_t timepos_t::_max_timepos (Temporal::AudioTime);
 
 timepos_t &
