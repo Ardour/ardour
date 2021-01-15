@@ -601,13 +601,12 @@ EditorSources::format_position (timepos_t const & pos, char* buf, size_t bufsize
 
 	switch (ARDOUR_UI::instance()->primary_clock->mode ()) {
 	case AudioClock::BBT:
-#warning NUTEMPO needs tempo map BBT API
-		// bbt = _session->tempo_map().bbt_at_sample (pos);
-		// if (onoff) {
-		// snprintf (buf, bufsize, "%03d|%02d|%04d" , bbt.bars, bbt.beats, bbt.ticks);
-		// } else {
-		// snprintf (buf, bufsize, "(%03d|%02d|%04d)" , bbt.bars, bbt.beats, bbt.ticks);
-		// }
+		bbt = Temporal::TempoMap::use()->bbt_at (pos);
+		if (onoff) {
+			snprintf (buf, bufsize, "%03d|%02d|%04d" , bbt.bars, bbt.beats, bbt.ticks);
+		} else {
+			snprintf (buf, bufsize, "(%03d|%02d|%04d)" , bbt.bars, bbt.beats, bbt.ticks);
+		}
 		break;
 
 	case AudioClock::MinSec:
