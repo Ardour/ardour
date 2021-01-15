@@ -405,9 +405,8 @@ Automatable::non_realtime_locate (samplepos_t now)
 			 * compare to compare to non_realtime_transport_stop()
 			 */
 				const bool list_did_write = !l->in_new_write_pass ();
-#warning NUTEMPO check use of domain in arbitrary irrelevant time
-				c->stop_touch (timepos_t::zero (Temporal::AudioTime)); // time is irrelevant
-				l->stop_touch (timepos_t::zero (Temporal::AudioTime));
+				c->stop_touch (timepos_t::zero (time_domain())); // time is irrelevant
+				l->stop_touch (timepos_t::zero (time_domain()));
 				c->commit_transaction (list_did_write);
 				l->write_pass_finished (timepos_t (now), Config->get_automation_thinning_factor ());
 
