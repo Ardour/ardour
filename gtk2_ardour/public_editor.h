@@ -130,6 +130,11 @@ public:
 
 	virtual void setup_tooltips() = 0;
 
+	/* returns the time domain to be used when there's no other overriding
+	 * reason to choose one.
+	 */
+	virtual Temporal::TimeDomain default_time_domain() const = 0;
+
 	/** Attach this editor to a Session.
 	 * @param s Session to connect to.
 	 */

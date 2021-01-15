@@ -168,6 +168,8 @@ public:
 
 	bool pending_locate_request() const { return _pending_locate_request; }
 
+	Temporal::TimeDomain default_time_domain() const;
+
 	samplepos_t leftmost_sample() const { return _leftmost_sample; }
 
 	samplecnt_t current_page_samples() const {

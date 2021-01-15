@@ -6410,3 +6410,13 @@ Editor::duration_to_pixels_unrounded (timecnt_t const & dur) const
 {
 	return sample_to_pixel_unrounded (dur.samples());
 }
+
+Temporal::TimeDomain
+Editor::default_time_domain () const
+{
+	if (_grid_type == GridTypeNone || _snap_mode == SnapOff) {
+		return AudioTime;
+	}
+
+	return BeatTime;
+}
