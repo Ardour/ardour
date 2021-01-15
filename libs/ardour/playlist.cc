@@ -2404,14 +2404,22 @@ Playlist::get_extent_with_endspace () const
 pair<timepos_t, timepos_t>
 Playlist::_get_extent () const
 {
-#warning NUTEMPO domain should likely be a playlist property
-	Temporal::TimeDomain time_domain (_type == DataType::AUDIO ? Temporal::AudioTime : Temporal::BeatTime);
+	Temporal::TimeDomain time_domain = Temporal::AudioTime;
+
+	if (regions.empty()) {
+		/* use time domain guess based on data type */
+		time_domain = (_type == DataType::AUDIO ? Temporal::AudioTime : Temporal::BeatTime);
+	}
+
 	pair<timepos_t, timepos_t> ext (timepos_t::max (time_domain), timepos_t (time_domain));
 
 	if (regions.empty()) {
-		ext.first = timepos_t (time_domain);
 		return ext;
 	}
+
+	/* use time domain of first region's position */
+
+	time_domain = regions.front()->position().time_domain();
 
 	for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
 		pair<timepos_t, timepos_t> const e ((*i)->position(), (*i)->position() + (*i)->length());
