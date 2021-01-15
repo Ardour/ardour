@@ -579,8 +579,7 @@ Region::set_position_time_domain (Temporal::TimeDomain ps)
 
 		boost::shared_ptr<Playlist> pl (playlist());
 
-#warning NUTEMPO are we going to allow this operation?
-		// _position.call().set_time_domain (ps);
+		_position.call().set_time_domain (ps);
 
 		send_change (Properties::time_domain);
 	}
