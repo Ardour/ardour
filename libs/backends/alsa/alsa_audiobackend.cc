@@ -1244,7 +1244,7 @@ AlsaAudioBackend::register_system_audio_ports()
 		if (!p) return -1;
 		set_latency_range (p, false, lr);
 		BackendPortPtr ap = boost::dynamic_pointer_cast<BackendPort>(p);
-		//ap->set_hw_port_name ("")
+		ap->set_hw_port_name (string_compose (_("Main In %1"), i));
 		_system_inputs.push_back (ap);
 	}
 
@@ -1256,7 +1256,11 @@ AlsaAudioBackend::register_system_audio_ports()
 		if (!p) return -1;
 		set_latency_range (p, true, lr);
 		BackendPortPtr ap = boost::dynamic_pointer_cast<BackendPort>(p);
-		//ap->set_hw_port_name ("")
+		if (a_out == 2) {
+			ap->set_hw_port_name (i == 1 ? _("Out Left") : _("Out Right"));
+		} else {
+			ap->set_hw_port_name (string_compose (_("Main Out %1"), i));
+		}
 		_system_outputs.push_back (ap);
 	}
 	return 0;
@@ -2081,7 +2085,9 @@ AlsaAudioBackend::add_slave (const char*  device,
 		} while (1);
 		PortPtr p = add_port(std::string(tmp), DataType::AUDIO, static_cast<PortFlags>(IsOutput | IsPhysical | IsTerminal));
 		if (!p) goto errout;
-		s->inputs.push_back (boost::dynamic_pointer_cast<BackendPort>(p));
+		BackendPortPtr ap = boost::dynamic_pointer_cast<BackendPort>(p);
+		ap->set_hw_port_name (string_compose (_("Aux In %1"), n));
+		s->inputs.push_back (ap);
 	}
 
 	for (uint32_t i = 0, n = 1; i < s->nplay (); ++i) {
@@ -2096,7 +2102,9 @@ AlsaAudioBackend::add_slave (const char*  device,
 		} while (1);
 		PortPtr p = add_port(std::string(tmp), DataType::AUDIO, static_cast<PortFlags>(IsInput | IsPhysical | IsTerminal));
 		if (!p) goto errout;
-		s->outputs.push_back (boost::dynamic_pointer_cast<BackendPort> (p));
+		BackendPortPtr ap = boost::dynamic_pointer_cast<BackendPort>(p);
+		ap->set_hw_port_name (string_compose (_("Aux Out %1"), n));
+		s->outputs.push_back (ap);
 	}
 
 	if (!s->start ()) {
