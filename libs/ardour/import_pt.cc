@@ -359,8 +359,8 @@ Session::import_pt_rest (PTFFormat& ptf)
 					playlist->add_region (copy, a->reg.startpos);
 					//add_command (new StatefulDiffCommand (playlist));
 					nth++;
+					usedtracks.push_back (utr);
 				}
-				usedtracks.push_back (utr);
 			}
 		}
 	}
