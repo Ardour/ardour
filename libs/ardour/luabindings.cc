@@ -1396,19 +1396,6 @@ LuaBindings::common (lua_State* L)
 
 		.endNamespace () /* ARDOUR::MidiModel */
 
-		.beginClass <PortManager::DPM> ("DPM")
-		.addVoidConstructor ()
-		.addFunction ("reset", &PortManager::DPM::reset)
-		.addData ("level", &PortManager::DPM::level, false)
-		.addData ("peak", &PortManager::DPM::peak, false)
-		.endClass ()
-
-		.beginClass <PortManager::MPM> ("MPM")
-		.addVoidConstructor ()
-		.addFunction ("reset", &PortManager::MPM::reset)
-		.addFunction ("active", &PortManager::MPM::active)
-		.endClass ()
-
 		.beginClass <Plugin::PresetRecord> ("PresetRecord")
 		.addVoidConstructor ()
 		.addData ("uri", &Plugin::PresetRecord::uri, false)
@@ -2357,7 +2344,6 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("n_physical_outputs", &PortManager::n_physical_outputs)
 		.addFunction ("n_physical_inputs", &PortManager::n_physical_inputs)
 		.addFunction ("reset_input_meters", &PortManager::reset_input_meters)
-		.addFunction ("input_meters", &PortManager::input_meters)
 		.addRefFunction ("get_connections", &PortManager::get_connections)
 		.addRefFunction ("get_ports", (int (PortManager::*)(DataType, PortManager::PortList&))&PortManager::get_ports)
 		.addRefFunction ("get_backend_ports", (int (PortManager::*)(const std::string&, DataType, PortFlags, std::vector<std::string>&))&PortManager::get_ports)

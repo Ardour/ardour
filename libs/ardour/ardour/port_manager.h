@@ -91,13 +91,25 @@ public:
 	typedef std::map<std::string, boost::shared_ptr<Port>, SortByPortName> Ports;
 	typedef std::list<boost::shared_ptr<Port> >                            PortList;
 
-	typedef boost::shared_ptr<CircularSampleBuffer>                 AudioPortScope;
-	typedef std::map<std::string, AudioPortScope, SortByPortName>   AudioPortScopes;
-	typedef std::map<std::string, DPM, SortByPortName>              AudioPortMeters;
+	typedef boost::shared_ptr<CircularSampleBuffer> AudioPortScope;
+	typedef boost::shared_ptr<CircularEventBuffer>  MIDIPortMonitor;
+	typedef boost::shared_ptr<DPM>                  AudioPortMeter;
+	typedef boost::shared_ptr<MPM>                  MIDIPortMeter;
 
-	typedef boost::shared_ptr<CircularEventBuffer>                 MIDIPortMonitor;
-	typedef std::map<std::string, MIDIPortMonitor, SortByPortName> MIDIPortMonitors;
-	typedef std::map<std::string, MPM, SortByPortName>             MIDIPortMeters;
+	struct AudioInputPort {
+		AudioInputPort (samplecnt_t);
+		AudioPortScope scope;
+		AudioPortMeter meter;
+	};
+
+	struct MIDIInputPort {
+		MIDIInputPort (samplecnt_t);
+		MIDIPortMonitor monitor;
+		MIDIPortMeter   meter;
+	};
+
+	typedef std::map<std::string, AudioInputPort, SortByPortName> AudioInputPorts;
+	typedef std::map<std::string, MIDIInputPort, SortByPortName>  MIDIInputPorts;
 
 	PortManager ();
 	virtual ~PortManager () {}
@@ -231,25 +243,13 @@ public:
 	 */
 	PBD::Signal5<void, boost::weak_ptr<Port>, std::string, boost::weak_ptr<Port>, std::string, bool> PortConnectedOrDisconnected;
 
+	PBD::Signal3<void, DataType, std::vector<std::string>, bool> PhysInputChanged;
+
+	/* Input port meters and monitors */
 	void reset_input_meters ();
 
-	AudioPortMeters const& input_meters () const
-	{
-		return _audio_port_meters;
-	}
-	AudioPortScopes const& input_scopes () const
-	{
-		return _audio_port_scopes;
-	}
-
-	MIDIPortMeters const& midi_meters () const
-	{
-		return _midi_port_meters;
-	}
-	MIDIPortMonitors const& midi_monitors () const
-	{
-		return _midi_port_monitors;
-	}
+	AudioInputPorts audio_input_ports () const;
+	MIDIInputPorts  midi_input_ports () const;
 
 protected:
 	boost::shared_ptr<AudioBackend> _backend;
@@ -296,6 +296,7 @@ private:
 	void fill_midi_port_info_locked ();
 	void load_port_info ();
 	void save_port_info ();
+	void update_input_ports (bool);
 
 	struct PortID {
 		PortID (boost::shared_ptr<AudioBackend>, DataType, bool, std::string const&);
@@ -359,11 +360,9 @@ private:
 	PortInfo                     _port_info;
 	bool                         _midi_info_dirty;
 
-	AudioPortMeters  _audio_port_meters;
-	AudioPortScopes  _audio_port_scopes;
-	MIDIPortMeters   _midi_port_meters;
-	MIDIPortMonitors _midi_port_monitors;
-	volatile gint    _reset_meters;
+	SerializedRCUManager<AudioInputPorts> _audio_input_ports;
+	SerializedRCUManager<MIDIInputPorts>  _midi_input_ports;
+	volatile gint                         _reset_meters;
 };
 
 } // namespace ARDOUR

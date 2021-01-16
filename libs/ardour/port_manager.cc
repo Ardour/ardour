@@ -18,6 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <algorithm>
 #include <vector>
 
 #ifdef COMPILER_MSVC
@@ -54,6 +55,17 @@ using namespace ARDOUR;
 using namespace PBD;
 using std::string;
 using std::vector;
+
+PortManager::AudioInputPort::AudioInputPort (samplecnt_t sz)
+	: scope (AudioPortScope (new CircularSampleBuffer (sz)))
+	, meter (AudioPortMeter (new DPM))
+{}
+
+PortManager::MIDIInputPort::MIDIInputPort (samplecnt_t sz)
+	: monitor (MIDIPortMonitor (new CircularEventBuffer (sz)))
+	, meter (MIDIPortMeter (new MPM))
+{}
+
 
 PortManager::PortID::PortID (boost::shared_ptr<AudioBackend> b, DataType dt, bool in, std::string const& pn)
 	: backend (b->name ())
@@ -130,6 +142,9 @@ PortManager::PortManager ()
 	, _port_remove_in_progress (false)
 	, _port_deletions_pending (8192) /* ick, arbitrary sizing */
 	, _midi_info_dirty (true)
+	, _audio_input_ports (new AudioInputPorts)
+	, _midi_input_ports (new MIDIInputPorts)
+	, _reset_meters (0)
 {
 	load_port_info ();
 }
@@ -721,12 +736,7 @@ PortManager::reestablish_ports ()
 		set_pretty_names (port_names, DataType::MIDI, false);
 	}
 
-	_audio_port_scopes.clear();
-	_audio_port_meters.clear();
-	_midi_port_monitors.clear();
-	_midi_port_meters.clear();
-	run_input_meters (0, 0);
-
+	update_input_ports (true);
 	return 0;
 }
 
@@ -817,12 +827,119 @@ PortManager::registration_callback ()
 		return;
 	}
 
-	{
-		Glib::Threads::Mutex::Lock lm (_port_info_mutex);
-		_midi_info_dirty = true;
-	}
+	update_input_ports (false);
 
 	PortRegisteredOrUnregistered (); /* EMIT SIGNAL */
+}
+
+void
+PortManager::update_input_ports (bool clear)
+{
+	std::vector<std::string> audio_ports;
+	std::vector<std::string> midi_ports;
+
+	std::vector<std::string> new_audio;
+	std::vector<std::string> old_audio;
+	std::vector<std::string> new_midi;
+	std::vector<std::string> old_midi;
+
+	get_physical_inputs (DataType::AUDIO, audio_ports);
+	get_physical_inputs (DataType::MIDI, midi_ports);
+
+	if (clear) {
+		new_audio = audio_ports;
+		new_midi  = midi_ports;
+	} else {
+		boost::shared_ptr<AudioInputPorts> aip = _audio_input_ports.reader ();
+		/* find new audio ports */
+		for (std::vector<std::string>::iterator p = audio_ports.begin(); p != audio_ports.end(); ++p) {
+			if (port_is_mine (*p) || !_backend->get_port_by_name (*p)) {
+				continue;
+			}
+			if (aip->find (*p) == aip->end ()) {
+				new_audio.push_back (*p);
+			}
+		}
+
+		/* find stale audio ports */
+		for (AudioInputPorts::iterator p = aip->begin(); p != aip->end(); ++p) {
+			if (std::find (audio_ports.begin (), audio_ports.end (), p->first) == audio_ports.end ()) {
+				old_audio.push_back (p->first);
+			}
+		}
+
+		boost::shared_ptr<MIDIInputPorts> mip = _midi_input_ports.reader ();
+		/* find new MIDI ports */
+		for (std::vector<std::string>::iterator p = midi_ports.begin(); p != midi_ports.end(); ++p) {
+			if (port_is_mine (*p) || !_backend->get_port_by_name (*p)) {
+				continue;
+			}
+			if (mip->find (*p) == mip->end ()) {
+				new_midi.push_back (*p);
+			}
+		}
+
+		/* find stale audio ports */
+		for (MIDIInputPorts::iterator p = mip->begin(); p != mip->end(); ++p) {
+			if (std::find (midi_ports.begin (), midi_ports.end (), p->first) == midi_ports.end ()) {
+				old_midi.push_back (p->first);
+			}
+		}
+	}
+
+	if (!new_audio.empty () || !old_audio.empty () || clear) {
+		RCUWriter<AudioInputPorts> apwr (_audio_input_ports);
+		boost::shared_ptr<AudioInputPorts> apw = apwr.get_copy ();
+		if (clear) {
+			apw->clear ();
+		} else {
+			for (std::vector<std::string>::const_iterator p = old_audio.begin(); p != old_audio.end(); ++p) {
+				apw->erase (*p);
+			}
+		}
+		for (std::vector<std::string>::const_iterator p = new_audio.begin(); p != new_audio.end(); ++p) {
+			if (port_is_mine (*p) || !_backend->get_port_by_name (*p)) {
+				continue;
+			}
+			apw->insert (make_pair (*p, AudioInputPort (24288))); // 2^19 ~ 1MB / port
+		}
+	}
+
+	if (!new_midi.empty () || !old_midi.empty () || clear) {
+		RCUWriter<MIDIInputPorts> mpwr (_midi_input_ports);
+		boost::shared_ptr<MIDIInputPorts> mpw = mpwr.get_copy ();
+		if (clear) {
+			mpw->clear ();
+		} else {
+			for (std::vector<std::string>::const_iterator p = old_midi.begin(); p != old_midi.end(); ++p) {
+				mpw->erase (*p);
+			}
+		}
+		for (std::vector<std::string>::const_iterator p = new_midi.begin(); p != new_midi.end(); ++p) {
+			if (port_is_mine (*p) || !_backend->get_port_by_name (*p)) {
+				continue;
+			}
+			mpw->insert (make_pair (*p, MIDIInputPort (32)));
+		}
+	}
+
+	if (clear) {
+		/* don't send notifcation for initial setup */
+		return;
+	}
+
+	if (!old_audio.empty ()) {
+		PhysInputChanged (DataType::AUDIO, old_audio, false);
+	}
+	if (!old_midi.empty ()) {
+		PhysInputChanged (DataType::MIDI, old_midi, false);
+	}
+	if (!new_audio.empty ()) {
+		PhysInputChanged (DataType::AUDIO, new_audio, true);
+	}
+	if (!new_midi.empty ()) {
+		PhysInputChanged (DataType::MIDI, new_midi, true);
+	}
 }
 
 bool
@@ -1589,6 +1706,20 @@ PortManager::reset_input_meters ()
 	g_atomic_int_set (&_reset_meters, 1);
 }
 
+PortManager::AudioInputPorts
+PortManager::audio_input_ports () const
+{
+	boost::shared_ptr<AudioInputPorts> p = _audio_input_ports.reader ();
+	return *p;
+}
+
+PortManager::MIDIInputPorts
+PortManager::midi_input_ports () const
+{
+	boost::shared_ptr<MIDIInputPorts> p = _midi_input_ports.reader ();
+	return *p;
+}
+
 /* Cache dB -> coefficient calculation for dB/sec falloff.
  * @n_samples engine-buffer-size
  * @rate engine sample-rate
@@ -1635,6 +1766,9 @@ static FallOffCache falloff_cache;
 void
 PortManager::run_input_meters (pframes_t n_samples, samplecnt_t rate)
 {
+	if (n_samples == 0) {
+		return;
+	}
 	const bool reset = g_atomic_int_compare_and_exchange (&_reset_meters, 1, 0);
 
 	const float falloff = falloff_cache.calc (n_samples, rate);
@@ -1650,20 +1784,16 @@ PortManager::run_input_meters (pframes_t n_samples, samplecnt_t rate)
 		if (!ph) {
 			continue;
 		}
-		if (n_samples == 0) {
-			/* allocate using default c'tor */
-			_audio_port_meters[*p];
-			_audio_port_scopes[*p] = AudioPortScope (new CircularSampleBuffer (524288)); // 2^19 ~ 1MB / port
-			continue;
-		}
 
-		if (_audio_port_meters.find (*p) == _audio_port_meters.end () || _audio_port_scopes.find (*p) == _audio_port_scopes.end ()) {
+		boost::shared_ptr<AudioInputPorts> aip = _audio_input_ports.reader ();
+		AudioInputPorts::iterator ai = aip->find (*p);
+		if (ai == aip->end ()) {
 			/* do not allocate ports during normal operation */
 			continue;
 		}
 
 		if (reset) {
-			_audio_port_meters[*p].reset ();
+			ai->second.meter->reset ();
 		}
 
 		Sample* buf = (Sample*) _backend->get_buffer (ph, n_samples);
@@ -1671,19 +1801,19 @@ PortManager::run_input_meters (pframes_t n_samples, samplecnt_t rate)
 			continue;
 		}
 
-		_audio_port_scopes[*p]->write (buf, n_samples);
-
+		ai->second.scope->write (buf, n_samples);
 
 		/* falloff */
-		if (_audio_port_meters[*p].level > 1e-10) {
-			_audio_port_meters[*p].level *= falloff;
+		if (ai->second.meter->level > 1e-10) {
+			ai->second.meter->level *= falloff;
 		} else {
-			_audio_port_meters[*p].level = 0;
+			ai->second.meter->level = 0;
 		}
 
-		_audio_port_meters[*p].level = compute_peak (buf, n_samples, reset ? 0 : _audio_port_meters[*p].level);
-		_audio_port_meters[*p].level = std::min (_audio_port_meters[*p].level, 100.f); // cut off at +40dBFS for falloff.
-		_audio_port_meters[*p].peak  = std::max (_audio_port_meters[*p].peak, _audio_port_meters[*p].level);
+		float level = ai->second.meter->level;
+		level = compute_peak (buf, n_samples, reset ? 0 : level);
+		ai->second.meter->level = std::min (level, 100.f); // cut off at +40dBFS for falloff.
+		ai->second.meter->peak  = std::max (ai->second.meter->peak, level);
 	}
 
 	/* MIDI */
@@ -1698,24 +1828,19 @@ PortManager::run_input_meters (pframes_t n_samples, samplecnt_t rate)
 			continue;
 		}
 
-		if (n_samples == 0) {
-			/* allocate using default c'tor */
-			_midi_port_meters[*p];
-			_midi_port_monitors[*p] = MIDIPortMonitor (new CircularEventBuffer (32));
-			continue;
-		}
-
-		if (_midi_port_meters.find (*p) == _midi_port_meters.end () || _midi_port_monitors.find (*p) == _midi_port_monitors.end ()) {
+		boost::shared_ptr<MIDIInputPorts> mip = _midi_input_ports.reader ();
+		MIDIInputPorts::iterator mi = mip->find (*p);
+		if (mi == mip->end ()) {
 			/* do not allocate ports during normal operation */
 			continue;
 		}
 
 		for (size_t i = 0; i < 17; ++i) {
 			/* falloff */
-			if (_midi_port_meters[*p].chn_active[i] > 1e-10) {
-				_midi_port_meters[*p].chn_active[i] *= falloff;
+			if (mi->second.meter->chn_active[i] > 1e-10) {
+				mi->second.meter->chn_active[i] *= falloff;
 			} else {
-				_midi_port_meters[*p].chn_active[i] = 0;
+				mi->second.meter->chn_active[i] = 0;
 			}
 		}
 
@@ -1732,12 +1857,12 @@ PortManager::run_input_meters (pframes_t n_samples, samplecnt_t rate)
 				continue;
 			}
 			if ((buf[0] & 0xf0) == 0xf0) {
-				_midi_port_meters[*p].chn_active[16] = 1.0;
+				mi->second.meter->chn_active[16] = 1.0;
 			} else {
 				int chn = (buf[0] & 0x0f);
-				_midi_port_meters[*p].chn_active[chn] = 1.0;
+				mi->second.meter->chn_active[chn] = 1.0;
 			}
-			_midi_port_monitors[*p]->write (buf, size);
+			mi->second.monitor->write (buf, size);
 		}
 	}
 }
