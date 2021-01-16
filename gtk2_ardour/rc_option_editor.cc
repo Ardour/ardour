@@ -1992,32 +1992,32 @@ private:
 class MidiPortOptions : public OptionEditorMiniPage, public sigc::trackable
 {
 	public:
-		MidiPortOptions() : refill_id (-1) {
-
+		MidiPortOptions()
+			: input_heading (_("MIDI Inputs"))
+			, output_heading (_("MIDI Outputs"))
+		{
 			setup_midi_port_view (midi_output_view, false);
 			setup_midi_port_view (midi_input_view, true);
 
-			OptionEditorHeading* h = new OptionEditorHeading (_("MIDI Inputs"));
-			h->add_to_page (this);
+			input_heading.add_to_page (this);
 
-			Gtk::ScrolledWindow* scroller = manage (new Gtk::ScrolledWindow);
-			scroller->add (midi_input_view);
-			scroller->set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
-			scroller->set_size_request (-1, 180);
+			input_scroller.add (midi_input_view);
+			input_scroller.set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
+			input_scroller.set_size_request (-1, 180);
+			input_scroller.show ();
 
 			int n = table.property_n_rows();
-			table.attach (*scroller, 0, 3, n, n + 1, FILL | EXPAND);
+			table.attach (input_scroller, 0, 3, n, n + 1, FILL | EXPAND);
 
-			h = new OptionEditorHeading (_("MIDI Outputs"));
-			h->add_to_page (this);
+			output_heading.add_to_page (this);
 
-			scroller = manage (new Gtk::ScrolledWindow);
-			scroller->add (midi_output_view);
-			scroller->set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
-			scroller->set_size_request (-1, 180);
+			output_scroller.add (midi_output_view);
+			output_scroller.set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
+			output_scroller.set_size_request (-1, 180);
+			output_scroller.show ();
 
 			n = table.property_n_rows();
-			table.attach (*scroller, 0, 3, n, n + 1, FILL | EXPAND);
+			table.attach (output_scroller, 0, 3, n, n + 1, FILL | EXPAND);
 
 			midi_output_view.show ();
 			midi_input_view.show ();
@@ -2030,7 +2030,6 @@ class MidiPortOptions : public OptionEditorMiniPage, public sigc::trackable
 		void set_state_from_config() {}
 
 		void on_map () {
-
 			refill ();
 
 			AudioEngine::instance()->PortRegisteredOrUnregistered.connect (connections,
@@ -2052,19 +2051,20 @@ class MidiPortOptions : public OptionEditorMiniPage, public sigc::trackable
 		}
 
 		void refill () {
-
 			if (refill_midi_ports (true, midi_input_view)) {
-				input_label.show ();
+				input_heading.tip_widget ().show ();
+				input_scroller.show ();
 			} else {
-				input_label.hide ();
+				input_heading.tip_widget ().hide ();
+				input_scroller.hide ();
 			}
 			if (refill_midi_ports (false, midi_output_view)) {
-				output_label.show ();
+				output_heading.tip_widget ().show ();
+				output_scroller.show ();
 			} else {
-				output_label.hide ();
+				output_heading.tip_widget ().hide ();
+				output_scroller.hide ();
 			}
-
-			refill_id = -1;
 		}
 
 	private:
@@ -2095,9 +2095,11 @@ class MidiPortOptions : public OptionEditorMiniPage, public sigc::trackable
 		MidiPortColumns midi_port_columns;
 		Gtk::TreeView midi_input_view;
 		Gtk::TreeView midi_output_view;
-		Gtk::Label input_label;
-		Gtk::Label output_label;
-		int refill_id;
+
+		Gtk::ScrolledWindow input_scroller;
+		Gtk::ScrolledWindow output_scroller;
+		OptionEditorHeading input_heading;
+		OptionEditorHeading output_heading;
 
 		void setup_midi_port_view (Gtk::TreeView&, bool with_selection);
 		bool refill_midi_ports (bool for_input, Gtk::TreeView&);
@@ -2186,6 +2188,8 @@ MidiPortOptions::refill_midi_ports (bool for_input, Gtk::TreeView& view)
 		return false;
 	}
 
+	view.unset_model ();
+
 	Glib::RefPtr<ListStore> model = Gtk::ListStore::create (midi_port_columns);
 
 	for (vector<string>::const_iterator s = ports.begin(); s != ports.end(); ++s) {
@@ -2203,6 +2207,7 @@ MidiPortOptions::refill_midi_ports (bool for_input, Gtk::TreeView& view)
 	}
 
 	view.set_model (model);
+	view.show ();
 
 	return true;
 }
