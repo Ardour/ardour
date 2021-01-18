@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2020 Ayan Shafqat <ayan.x.shafqat@gmail.com>
+ * Copyright (C) 2021 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -82,8 +83,8 @@ x86_fma_mix_buffers_with_gain(
 			d1 = _mm256_load_ps(dst + 8);
 
 			// dst = dst + (src * gain)
-			d0 = _mm256_fmadd_ps(g0, d0, s0);
-			d1 = _mm256_fmadd_ps(g0, d1, s1);
+			d0 = _mm256_fmadd_ps(g0, s0, d0);
+			d1 = _mm256_fmadd_ps(g0, s1, d1);
 
 			// Store result
 			_mm256_store_ps(dst + 0, d0);
