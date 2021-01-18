@@ -2460,8 +2460,20 @@ MidiRegionView::add_to_selection (NoteBase* ev)
 {
 	if (_selection.empty()) {
 
+		/* we're about to select a note/some notes. Obey rule that only
+		 * 1 thing can be selected by clearing any current selection
+		 */
+
+		trackview.editor().get_selection().clear ();
+
 		/* first note selected in this region, force Editor region
 		 * selection to this region.
+		 *
+		 * this breaks the "only 1 type of thing selected" rule, but
+		 * having the region selected allows "operations applied to
+		 * selected MIDI regions" to work. And we can only select notes
+		 * when in internal edit mode, so we know that operations will
+		 * only apply to notes anyway, not regions.
 		 */
 
 		trackview.editor().set_selected_midi_region_view (*this);
