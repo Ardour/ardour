@@ -70,6 +70,7 @@ public:
 
 	boost::shared_ptr<Panner> panner() const { return _panner; }
 	boost::shared_ptr<Pannable> pannable() const { return _panlinked ? _pannable_route : _pannable_internal; }
+	boost::shared_ptr<Pannable> unlinked_pannable () const { return _pannable_internal; }
 
 	bool bypassed () const;
 	void set_bypassed (bool);
