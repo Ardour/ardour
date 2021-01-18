@@ -370,7 +370,7 @@ public:
   protected:
 	friend class Editor;
 
-	void clear_note_selection () { clear_selection_internal(); }
+	void clear_note_selection ();
 
 	void move_note_starts_earlier_fine () { change_note_lengths (true, false, Temporal::Beats(), true, false); }
 	void move_note_starts_earlier () { change_note_lengths (false, false, Temporal::Beats(), true, false); }

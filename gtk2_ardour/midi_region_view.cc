@@ -2133,9 +2133,7 @@ MidiRegionView::delete_note (boost::shared_ptr<NoteType> n)
 void
 MidiRegionView::clear_selection ()
 {
-	clear_selection_internal();
-	PublicEditor& editor(trackview.editor());
-	editor.get_selection().remove (this);
+	clear_note_selection ();
 	_mouse_state = None;
 }
 
@@ -2149,6 +2147,14 @@ MidiRegionView::clear_selection_internal ()
 		(*i)->hide_velocity();
 	}
 	_selection.clear();
+}
+
+void
+MidiRegionView::clear_note_selection ()
+{
+	clear_selection_internal ();
+	PublicEditor& editor(trackview.editor());
+	editor.get_selection().remove (this);
 }
 
 void
