@@ -1579,10 +1579,11 @@ PortManager::fill_midi_port_info_locked ()
 			flags = MidiPortFlags(MidiPortSelection | MidiPortMusic);
 		}
 
-		// TODO Linux only
+#ifdef HAVE_ALSA
 		if ((*p).find (X_("Midi Through")) != string::npos || (*p).find (X_("Midi-Through")) != string::npos) {
 			flags = MidiPortFlags (flags | MidiPortVirtual);
 		}
+#endif
 
 		if (flags != MidiPortFlags (0)) {
 			_port_info[pid].properties = flags;
@@ -1608,10 +1609,11 @@ PortManager::fill_midi_port_info_locked ()
 			flags = MidiPortControl;
 		}
 
-		// TODO Linux only
+#ifdef HAVE_ALSA
 		if ((*p).find (X_("Midi Through")) != string::npos || (*p).find (X_("Midi-Through")) != string::npos) {
 			flags = MidiPortFlags (flags | MidiPortVirtual);
 		}
+#endif
 
 		if (flags != MidiPortFlags (0)) {
 			_port_info[pid].properties = flags;
