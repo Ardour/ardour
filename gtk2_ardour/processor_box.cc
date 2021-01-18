@@ -3517,11 +3517,11 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 					continue;
 				}
 
-				boost::shared_ptr<Pannable> sendpan(new Pannable (*_session));
 				XMLNode n (**niter);
-				InternalSend* s = new InternalSend (*_session, sendpan, _route->mute_master(),
+				InternalSend* s = new InternalSend (*_session, _route->pannable(), _route->mute_master(),
 						_route, boost::shared_ptr<Route>(), Delivery::Aux);
 
+				PBD::Stateful::ForceIDRegeneration force_ids;
 				if (s->set_state (n, Stateful::loading_state_version)) {
 					delete s;
 					return;
@@ -3539,7 +3539,6 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 
 			} else if (type->value() == "send") {
 
-				boost::shared_ptr<Pannable> sendpan(new Pannable (*_session));
 				XMLNode n (**niter);
 
 				Send* s = new Send (*_session, _route->pannable(), _route->mute_master());
