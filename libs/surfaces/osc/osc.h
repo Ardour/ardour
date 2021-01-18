@@ -343,6 +343,10 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	void transport_speed (lo_message msg);
 	void record_enabled (lo_message msg);
 
+	void add_marker_name(const std::string &markername) {
+		add_marker(markername);
+	}
+
 	// cue
 	Sorted cue_get_sorted_stripables(boost::shared_ptr<ARDOUR::Stripable> aux, uint32_t id, lo_message msg);
 	int cue_parse (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg);
@@ -482,6 +486,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	}
 
 	PATH_CALLBACK1(set_transport_speed,f,);
+	PATH_CALLBACK1(add_marker_name,s,&);
 	PATH_CALLBACK1(access_action,s,&);
 
 	PATH_CALLBACK1(jump_by_bars,f,);

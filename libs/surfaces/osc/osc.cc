@@ -435,6 +435,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, X_("/surface/list"), "f", surface_list);
 		REGISTER_CALLBACK (serv, X_("/add_marker"), "", add_marker);
 		REGISTER_CALLBACK (serv, X_("/add_marker"), "f", add_marker);
+		REGISTER_CALLBACK (serv, X_("/add_marker"), "s", add_marker_name);
 		REGISTER_CALLBACK (serv, X_("/access_action"), "s", access_action);
 		REGISTER_CALLBACK (serv, X_("/loop_toggle"), "", loop_toggle);
 		REGISTER_CALLBACK (serv, X_("/loop_toggle"), "f", loop_toggle);
