@@ -1322,16 +1322,20 @@ Editor::marker_menu_set_from_playhead ()
 
 	if ((l = find_location_from_marker (marker, is_start)) != 0) {
 
-#warning NUTEMPO what if the user wants musical time here?
+		timepos_t pos (_session->audible_sample());
+
+		if (default_time_domain() == Temporal::BeatTime) {
+			pos = timepos_t (pos.beats());
+		}
 
 		if (l->is_mark()) {
-			l->set_start (timepos_t (_session->audible_sample ()), false);
+			l->set_start (pos, false);
 		}
 		else {
 			if (is_start) {
-				l->set_start (timepos_t (_session->audible_sample ()), false);
+				l->set_start (pos, false);
 			} else {
-				l->set_end (timepos_t (_session->audible_sample ()), false);
+				l->set_end (pos, false);
 			}
 		}
 	}
