@@ -783,7 +783,7 @@ AutomationTimeAxisView::add_automation_event (GdkEvent* event, samplepos_t sampl
 		/* compute vertical fractional position */
 		y = 1.0 - (y / _line->height());
 		/* map using line */
-		_line->view_to_model_coord (x, y);
+		_line->view_to_model_coord_y (y);
 	}
 
 	XMLNode& before = list->get_state();
