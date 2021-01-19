@@ -462,7 +462,7 @@ Curve::multipoint_eval (Temporal::timepos_t const & x) const
 					 * regions).
 					 *
 					 * This means that x is a relatively
-					 * small value (sample count into the
+					 * small value (an offset into the
 					 * fade) amd we do not need to worry
 					 * about the square overflowing.
 					 */
