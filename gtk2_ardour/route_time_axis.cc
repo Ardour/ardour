@@ -920,7 +920,10 @@ RouteTimeAxisView::show_timestretch (timepos_t const & start, timepos_t const & 
 	timestretch_rect->show ();
 	timestretch_rect->raise_to_top ();
 
-#warning NUTEMPO is it ok to just fudge this being in samples?
+	/* we use samples here since that is the canonical GUI<=>timeline
+	 * mapping (samples/pixels). This is just a dragging rect, it doesn't
+	 * by itself determine the parameters for the stretch.
+	 */
 
 	double const x1 = start.samples() / _editor.get_current_zoom();
 	double const x2 = (end.samples() - 1) / _editor.get_current_zoom();
