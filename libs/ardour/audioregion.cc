@@ -201,7 +201,6 @@ AudioRegion::register_properties ()
 	add_property (_envelope);
 }
 
-#warning NUTEMPO QUESTION what time domains should be used here?
 #define AUDIOREGION_STATE_DEFAULT \
 	_envelope_active (Properties::envelope_active, false) \
 	, _default_fade_in (Properties::default_fade_in, true) \
