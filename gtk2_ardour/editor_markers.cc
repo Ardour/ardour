@@ -749,7 +749,6 @@ Editor::mouse_add_new_range (timepos_t where)
 
 	string name;
 	_session->locations()->next_available_name (name, _("range"));
-#warning NUTEMPO how do we get music time here from a mouse event?
 	Location* loc = new Location (*_session, timepos_t (where), timepos_t (end), name, Location::IsRangeMarker);
 
 	begin_reversible_command (_("new range marker"));
