@@ -169,6 +169,20 @@ Editor::window_event_sample (GdkEvent const * event, double* pcx, double* pcy) c
 	return pixel_to_sample (d.x);
 }
 
+timepos_t
+Editor::canvas_event_time (GdkEvent const * event, double* pcx, double* pcy) const
+{
+	timepos_t pos (canvas_event_sample (event, pcx, pcy));
+
+	if (default_time_domain() == Temporal::AudioTime) {
+		cerr << "E::cet returns audio\n";
+		return pos;
+	}
+
+	cerr << "E::cet returns beats\n";
+	return timepos_t (pos.beats());
+}
+
 samplepos_t
 Editor::canvas_event_sample (GdkEvent const * event, double* pcx, double* pcy) const
 {
