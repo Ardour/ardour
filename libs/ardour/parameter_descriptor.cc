@@ -417,7 +417,7 @@ ParameterDescriptor::from_interface (float val, bool rotary) const
 					val = position_to_logscale (val, lower, upper);
 				}
 			} else if (toggled) {
-				val = val > 0 ? upper : lower;
+				val = val >= 0.5 ? upper : lower;
 			} else if (integer_step) {
 				/* upper and lower are inclusive. use evenly-divided steps
 				 * e.g. 5 integers 0,1,2,3,4 are mapped to a fader
