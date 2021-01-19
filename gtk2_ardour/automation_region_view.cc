@@ -156,8 +156,15 @@ AutomationRegionView::canvas_group_event (GdkEvent* ev)
 
 		/* guard points only if primary modifier is used */
 		bool with_guard_points = Gtkmm2ext::Keyboard::modifier_state_equals (ev->button.state, Gtkmm2ext::Keyboard::PrimaryModifier);
-#warning NUTEMPO what if this automation list is not using audio time?
-		add_automation_event (ev, timepos_t (e.pixel_to_sample (x) - _region->position_sample() + _region->start_sample()), y, with_guard_points);
+
+		/* the time domain doesn't matter here, because the automation
+		 * list will force the position to its own time domain when
+		 * adding the point.
+		 */
+
+		const timepos_t pos = timepos_t (e.pixel_to_sample (x) - _region->position_sample() + _region->start_sample());
+
+		add_automation_event (ev, pos, y, with_guard_points);
 		return true;
 	}
 
