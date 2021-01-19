@@ -681,7 +681,7 @@ Editor::mouse_add_new_marker (timepos_t where, bool is_cd)
 		if (!choose_new_marker_name(markername)) {
 			return;
 		}
-#warning NUTEMPO how do we make the position be in musical time from a mouse event?
+
 		Location *location = new Location (*_session, timepos_t (where), timepos_t (where), markername, (Location::Flags) flags);
 		begin_reversible_command (_("add marker"));
 
