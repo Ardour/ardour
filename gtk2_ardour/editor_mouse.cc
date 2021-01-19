@@ -1494,7 +1494,7 @@ Editor::button_release_dispatch (GdkEventButton* ev)
 bool
 Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
-	timepos_t where (canvas_event_sample (event));
+	timepos_t where (canvas_event_time (event));
 	AutomationTimeAxisView* atv = 0;
 
 	_press_cursor_ctx.reset();
