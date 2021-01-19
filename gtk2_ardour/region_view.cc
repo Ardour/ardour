@@ -693,7 +693,6 @@ RegionView::set_samples_per_pixel (double fpp)
 
 	for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
 		(*i)->set_samples_per_pixel (fpp);
-#warning NUTEMPO should GhostRegion really be using samples for length/duration?
 		(*i)->set_duration (_region->length_samples() / fpp);
 	}
 

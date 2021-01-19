@@ -456,7 +456,17 @@ Curve::multipoint_eval (Temporal::timepos_t const & x) const
 			case ControlList::Curved:
 				if (after->coeff) {
 					ControlEvent* ev = after;
-#warning NUTEMPO fixme possible overflow ... multiplyng two position types .. also, units?
+
+					/* As of Jan 2020, we only use Curved
+					 * for fade in/out curves (of audio
+					 * regions).
+					 *
+					 * This means that x is a relatively
+					 * small value (sample count into the
+					 * fade) amd we do not need to worry
+					 * about the square overflowing.
+					 */
+
 					double x2 = x.val() * x.val();
 					return ev->coeff[0] + (ev->coeff[1] * x.val()) + (ev->coeff[2] * x2) + (ev->coeff[3] * x2 * x.val());
 				}
