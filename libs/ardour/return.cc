@@ -46,14 +46,12 @@ Return::name_and_id_new_return (Session& s, uint32_t& bitslot)
 
 
 Return::Return (Session& s, bool internal)
-	: IOProcessor (s, (internal ? false : true), false,
-		       name_and_id_new_return (s, _bitslot), "", DataType::AUDIO, true)
+	: IOProcessor (s, (internal ? false : true), false, name_and_id_new_return (s, _bitslot), "", DataType::AUDIO, true)
 	, _metering (false)
 {
 	/* never muted */
 
-#warning NUTEMPO QUESTION what time domain shoudl this really use?
-	boost::shared_ptr<AutomationList> gl (new AutomationList (Evoral::Parameter (GainAutomation), Temporal::AudioTime));
+	boost::shared_ptr<AutomationList> gl (new AutomationList (Evoral::Parameter (GainAutomation), time_domain()));
 	_gain_control = boost::shared_ptr<GainControl> (new GainControl (_session, Evoral::Parameter (GainAutomation), gl));
 	add_control (_gain_control);
 
