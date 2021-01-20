@@ -493,8 +493,9 @@ int main() { return 0; }''',
     if opt.fpu_optimization:
         if conf.env['build_target'] == 'armhf' or conf.env['build_target'] == 'aarch64':
             conf.define('ARM_NEON_SUPPORT', 1)
-        elif conf.env['build_target'] == 'aarch64':
-            conf.define ('FPU_AVX_FMA_SUPPORT', 1)
+        elif conf.env['build_target'] == 'mingw':
+            if re.search ('x86_64-w64', str(conf.env['CC'])) != None:
+                conf.define ('FPU_AVX_FMA_SUPPORT', 1)
         elif conf.env['build_target'] == 'i386' or conf.env['build_target'] == 'i686' or conf.env['build_target'] == 'x86_64':
             conf.check_cxx(fragment = "#include <immintrin.h>\nint main(void) { __m128 a; _mm_fmadd_ss(a, a, a); return 0; }\n",
                            features  = ['cxx'],
