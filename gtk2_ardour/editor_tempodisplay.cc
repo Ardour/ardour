@@ -256,28 +256,34 @@ Editor::compute_current_bbt_points (Temporal::TempoMapPoints& grid, samplepos_t 
 	case bbt_show_thirtyseconds:
 	case bbt_show_sixtyfourths:
 	case bbt_show_onetwentyeighths:
+		cout  << "GG " << leftmost << " .. " << rightmost << " 0\n";
 		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 0);
 		break;
 
 	case bbt_show_1:
-		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), rightmost, 1);
+		cout  << "GG " << leftmost << " .. " << rightmost << " 1\n";
+		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 1);
 		break;
 
 	case bbt_show_4:
-		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), rightmost, 4);
+		cout  << "GG " << leftmost << " .. " << rightmost << " 4\n";
+		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 4);
 		break;
 
 	case bbt_show_16:
-		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), rightmost, 16);
+		cout  << "GG " << leftmost << " .. " << rightmost << " 16\n";
+		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 16);
 		break;
 
 	case bbt_show_64:
-		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), rightmost, 64);
+		cout  << "GG " << leftmost << " .. " << rightmost << " 64\n";
+		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 64);
 		break;
 
 	default:
 		/* bbt_show_many */
-		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), rightmost, 128);
+		cout  << "GG " << leftmost << " .. " << rightmost << " 128\n";
+		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 128);
 		break;
 	}
 }
