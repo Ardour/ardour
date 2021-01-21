@@ -972,6 +972,10 @@ ArdourButton::on_size_allocate (Allocation& alloc)
 {
 	CairoWidget::on_size_allocate (alloc);
 	setup_led_rect ();
+	if (_layout) {
+		/* re-center text */
+		_layout->get_pixel_size (_text_width, _text_height);
+	}
 }
 
 void
