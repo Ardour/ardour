@@ -402,7 +402,7 @@ def build(bld):
     obj.name         = 'libardour'
     obj.target       = 'ardour'
     obj.uselib       = ['GLIBMM','GTHREAD','AUBIO','SIGCPP','XML','UUID', 'LO',
-                        'SNDFILE','SAMPLERATE','LRDF','AUDIOUNITS', 'GIOMM',
+                        'SNDFILE','SAMPLERATE','LRDF','AUDIOUNITS', 'GIOMM', 'FFTW3F',
                         'OSX','BOOST','CURL','TAGLIB','VAMPSDK','VAMPHOSTSDK','RUBBERBAND']
     obj.use          = ['libpbd','libmidipp','libevoral',
                         'libaudiographer',
