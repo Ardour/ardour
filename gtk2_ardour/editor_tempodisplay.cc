@@ -261,28 +261,23 @@ Editor::compute_current_bbt_points (Temporal::TempoMapPoints& grid, samplepos_t 
 		break;
 
 	case bbt_show_1:
-		cout  << "GG " << leftmost << " .. " << rightmost << " 1\n";
 		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 1);
 		break;
 
 	case bbt_show_4:
-		cout  << "GG " << leftmost << " .. " << rightmost << " 4\n";
 		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 4);
 		break;
 
 	case bbt_show_16:
-		cout  << "GG " << leftmost << " .. " << rightmost << " 16\n";
 		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 16);
 		break;
 
 	case bbt_show_64:
-		cout  << "GG " << leftmost << " .. " << rightmost << " 64\n";
 		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 64);
 		break;
 
 	default:
 		/* bbt_show_many */
-		cout  << "GG " << leftmost << " .. " << rightmost << " 128\n";
 		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 128);
 		break;
 	}
