@@ -1620,45 +1620,6 @@ PortManager::fill_midi_port_info_locked ()
 		}
 	}
 
-#if 0
-	/* now check with backend about which ports are present and pull
-	 * pretty-name if it exists
-	 */
-	for (MidiPortInfo::iterator x = midi_port_info.begin(); x != midi_port_info.end(); ++x) {
-
-		if (x->second.backend != _backend->name()) {
-			/* this port (info) comes from a different
-			 * backend. While there's a reasonable chance that it
-			 * refers to the same physical (or virtual) endpoint, we
-			 * don't allow its use with this backend.
-			*/
-			x->second.exists = false;
-			continue;
-		}
-
-		PortEngine::PortHandle ph = _backend->get_port_by_name (x->first);
-
-		if (!ph) {
-			/* port info saved from some condition where this port
-			 * existed, but no longer does (i.e. device unplugged
-			 * at present). We don't remove it from midi_port_info.
-			 */
-			x->second.exists = false;
-
-		} else {
-			x->second.exists = true;
-
-			/* check with backend for pre-existing pretty name */
-
-			string value = AudioEngine::instance()->get_pretty_name_by_name (x->first);
-
-			if (!value.empty()) {
-				x->second.pretty_name = value;
-			}
-		}
-	}
-#endif
-
 	_midi_info_dirty = false;
 }
 
