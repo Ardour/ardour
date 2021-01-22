@@ -494,6 +494,7 @@ PortManager::register_port (DataType dtype, const string& portname, bool input, 
 									   portname, input));
 				newport.reset (new AsyncMIDIPort (portname, PortFlags ((input ? IsInput : IsOutput) | flags)),
 				               PortDeleter());
+				_midi_info_dirty = true;
 			} else {
 				DEBUG_TRACE (DEBUG::Ports, string_compose ("registering MIDI port %1, input %2\n",
 									   portname, input));
@@ -1466,6 +1467,10 @@ PortManager::save_port_info ()
 	{
 		Glib::Threads::Mutex::Lock lm (_port_info_mutex);
 		for (PortInfo::const_iterator i = _port_info.begin (); i != _port_info.end (); ++i) {
+			if (port_is_virtual_piano (i->first.port_name)) {
+				continue;
+			}
+
 			XMLNode& node = i->first.state ();
 			node.set_property ("pretty-name", i->second.pretty_name);
 			node.set_property ("properties", i->second.properties);
