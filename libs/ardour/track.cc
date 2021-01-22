@@ -964,9 +964,7 @@ Track::use_captured_midi_sources (SourceList& srcs, CaptureInfos const & capture
 	}
 
 	const samplepos_t preroll_off = _session.preroll_record_trim_len ();
-#warning NUTEMPO FIX needs session to use new tempo map
-	//const timepos_t cstart (_session.tempo_map().quarter_note_at (capture_info.front()->start));
-	const timepos_t cstart;
+	const timepos_t cstart (timepos_t (capture_info.front()->start).beats());
 
 	for (ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
 
