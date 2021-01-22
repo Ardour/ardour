@@ -414,10 +414,10 @@ AudioTrack::freeze_me (InterThreadInfo& itt)
 
 	timepos_t pos;
 
-	if (time_domain() == Temporal::AudioTime) {
-		pos = timepos_t (_session.current_start_sample());
-	} else {
-		pos = timepos_t (Temporal::TempoMap::use()->quarters_at_sample (_session.current_start_sample()));
+	pos = timepos_t (_session.current_start_sample());
+
+	if (time_domain() != Temporal::AudioTime) {
+		pos = timepos_t (pos.beats());
 	}
 
 	new_playlist->add_region (region, pos);
