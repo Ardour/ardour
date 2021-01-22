@@ -772,7 +772,7 @@ int Alsa_pcmi::set_hwpar (snd_pcm_t *handle,  snd_pcm_hw_params_t *hwpar, const 
 				sname, *nchan);
 		return -1;
 	}
-	if (snd_pcm_hw_params_set_period_size (handle, hwpar, _fsize, 0) < 0)
+	if (snd_pcm_hw_params_set_period_size_near (handle, hwpar, &_fsize, 0) < 0)
 	{
 		if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi: can't set %s period size to %lu.\n",
 				sname, _fsize);

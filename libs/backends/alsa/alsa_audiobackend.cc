@@ -935,7 +935,7 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 
 	if (_pcmi->fsize() != _samples_per_period) {
 		_samples_per_period = _pcmi->fsize();
-		PBD::warning << _("AlsaAudioBackend: samples per period does not match.") << endmsg;
+		PBD::warning << string_compose (_("AlsaAudioBackend: samples per period does not match, using %1."), _samples_per_period) << endmsg;
 	}
 
 	if (_pcmi->fsamp() != _samplerate) {
