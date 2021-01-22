@@ -148,12 +148,10 @@ class LIBARDOUR_API MidiSource : virtual public Source
 	 *
 	 * @param position The timeline position the source now starts at.
 	 * @param capture_length The current length of the capture, which may not
-	 * be zero if record is armed while rolling.
-	 * @param loop_length The loop length if looping, otherwise zero.
+	 * be zero if record is armed while rolling. In samples because we
+	 * record using timestamps derived from the audio engine.
 	 */
-	void mark_write_starting_now (samplecnt_t position,
-	                              samplecnt_t capture_length,
-	                              samplecnt_t loop_length);
+	void mark_write_starting_now (timepos_t const & position, samplecnt_t capture_length);
 
 	/* like ::mark_streaming_write_completed() but with more arguments to
 	 * allow control over MIDI-specific behaviour. Expected to be used only
@@ -233,10 +231,7 @@ class LIBARDOUR_API MidiSource : virtual public Source
 	bool                         _writing;
 
 	/** The total duration of the current capture. */
-	samplepos_t _capture_length;
-
-	/** Length of transport loop during current capture, or zero. */
-	samplepos_t _capture_loop_length;
+	samplecnt_t _capture_length;
 
 	/** Map of interpolation styles to use for Parameters; if they are not in this map,
 	 *  the correct interpolation style can be obtained from EventTypeMap::interpolation_of ()

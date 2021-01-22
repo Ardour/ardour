@@ -395,8 +395,16 @@ void
 DiskWriter::non_realtime_locate (samplepos_t position)
 {
 	if (_midi_write_source) {
-#warning NUTEMPO maybe fixme perhaps take sources time domain into account here e.g. beats
-		_midi_write_source->set_natural_position (timepos_t (position));
+		timepos_t pos;
+
+		if (time_domain() == Temporal::AudioTime) {
+			pos = timepos_t (position);
+		} else {
+			const timepos_t b (position);
+			pos = timepos_t (b.beats());
+		}
+
+		_midi_write_source->set_natural_position (pos);
 	}
 
 	DiskIOProcessor::non_realtime_locate (position);
@@ -524,7 +532,14 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 			if (_midi_write_source) {
 				assert (_capture_start_sample);
-				_midi_write_source->mark_write_starting_now (_capture_start_sample, _capture_captured, loop_length.samples());
+
+				timepos_t start (_capture_start_sample);
+
+				if (time_domain() != Temporal::AudioTime) {
+					start = timepos_t (start.beats());
+				}
+
+				_midi_write_source->mark_write_starting_now (start, _capture_captured);
 			}
 
 			g_atomic_int_set (&_samples_pending_write, 0);

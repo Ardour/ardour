@@ -67,7 +67,6 @@ MidiSource::MidiSource (Session& s, string name, Source::Flag flags)
 	: Source(s, DataType::MIDI, name, flags)
 	, _writing(false)
 	, _capture_length(0)
-	, _capture_loop_length(0)
 {
 }
 
@@ -75,7 +74,6 @@ MidiSource::MidiSource (Session& s, const XMLNode& node)
 	: Source(s, node)
 	, _writing(false)
 	, _capture_length(0)
-	, _capture_loop_length(0)
 {
 	if (set_state (node, Stateful::loading_state_version)) {
 		throw failed_constructor();
@@ -324,9 +322,7 @@ MidiSource::mark_streaming_midi_write_started (const Lock& lock, NoteMode mode)
 }
 
 void
-MidiSource::mark_write_starting_now (samplecnt_t position,
-                                     samplecnt_t capture_length,
-                                     samplecnt_t loop_length)
+MidiSource::mark_write_starting_now (timepos_t const & position, samplecnt_t capture_length)
 {
 	/* I'm not sure if this is the best way to approach this, but
 	   _capture_length needs to be set up with the transport sample
@@ -339,10 +335,9 @@ MidiSource::mark_write_starting_now (samplecnt_t position,
 	   because it is not RT-safe.
 	*/
 
-#warning NUTEMPO QUESTION should the time domain here reflect some setting for this source?
-	set_natural_position (timepos_t (position));
+	set_natural_position (position);
+
 	_capture_length      = capture_length;
-	_capture_loop_length = loop_length;
 
 	/* currently prefer to compute length in beats, since that matches 6.x
 	 * and earlier behavior
