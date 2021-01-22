@@ -1853,6 +1853,8 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 
 				bbt.bars += bar_mod;
 
+				DEBUG_TRACE (DEBUG::Grid, string_compose ("bar mod %1 moved to %2\n", bar_mod, bbt))
+
 				/* could have invalidated the current metric */
 
 				if (first_of_three && (bbt > first_of_three->bbt())) {
