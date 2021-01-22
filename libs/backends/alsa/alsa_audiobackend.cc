@@ -994,6 +994,8 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 
 	_midi_device_thread_active = listen_for_midi_device_changes ();
 
+	get_alsa_audio_device_names(devices, (AlsaDuplex)slave_duplex);
+
 	if (!slave_device.empty () && (di = devices.find (slave_device)) != devices.end ()) {
 		std::string dev = di->second;
 		if (add_slave (dev.c_str(), _samplerate, _samples_per_period, _periods_per_cycle, slave_duplex)) {
