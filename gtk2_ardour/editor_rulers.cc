@@ -1506,22 +1506,13 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 //	default:
 		bbt_nmarks = bbt_bars + 2;
 		for (n = 0,  i = grid.begin(); i != grid.end() && n < bbt_nmarks; ++i) {
-			if ((*i).is_bar()) {
-			  if ((*i).bar % 4 == 1) {
-					snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
-					mark.style = ArdourCanvas::Ruler::Mark::Major;
-			  } else {
-				  buf[0] = '\0';
-				  if ((*i).bar % 4 == 3)  {
-					  mark.style = ArdourCanvas::Ruler::Mark::Minor;
-				  } else {
-					  mark.style = ArdourCanvas::Ruler::Mark::Micro;
-				  }
-			  }
-			  mark.label = buf;
-			  mark.position = (*i).sample;
-			  marks.push_back (mark);
-			  ++n;
+			if ((*i).bbt().is_bar()) {
+				snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bbt().bars);
+				mark.style = ArdourCanvas::Ruler::Mark::Major;
+				mark.label = buf;
+				mark.position = (*i).sample (sr);
+				marks.push_back (mark);
+				++n;
 			}
 		}
 		break;
