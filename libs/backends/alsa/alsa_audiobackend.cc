@@ -236,6 +236,21 @@ AlsaAudioBackend::available_buffer_sizes (const std::string& device) const
 			bs.push_back (avail_sizes[i]);
 		}
 	}
+
+	if (!nfo) {
+		return bs;
+	}
+
+	static const unsigned long try_msec [] = { 2, 4, 5, 6, 8, 10, 15, 20, 25, 40};
+
+	for (size_t i = 0 ; i < sizeof(try_msec) / sizeof(unsigned long); ++i) {
+		unsigned int msbs = _samplerate * try_msec[i] / 1000;
+		if (msbs >= nfo->min_size && msbs <= nfo->max_size) {
+			bs.push_back (msbs);
+		}
+	}
+
+	std::sort (bs.begin (), bs.end ());
 	return bs;
 }
 
