@@ -413,6 +413,10 @@ Playlist::set_name (const string& str)
 		return false;
 	}
 
+	if (_session.playlists()->by_name (str)) {
+		return false;
+	}
+
 	bool ret = SessionObject::set_name (str);
 	if (ret) {
 		_set_sort_id ();
