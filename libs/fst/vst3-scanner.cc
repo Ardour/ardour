@@ -117,7 +117,7 @@ usage ()
 	printf ("ardour-vst3-scanner - load and index VST3 plugins.\n\n");
 	printf ("Usage: ardour-vst3-scanner [ OPTIONS ] <VST3-bundle> [<VST3-bundle>]*\n\n");
 	printf ("Options:\n\
-  -f, --force          Force update ot cache file\n\
+  -f, --force          Force update of cache file\n\
   -h, --help           Display this help and exit\n\
   -q, --quiet          Hide usual output, only print errors\n\
   -v, --verbose        Give verbose output (unless quiet)\n\
