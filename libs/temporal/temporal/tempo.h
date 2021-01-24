@@ -167,7 +167,7 @@ class LIBTEMPORAL_API Tempo : public Rampable {
 	 * @param npm Note Types per minute
 	 * @param note_type Note Type (default `4': quarter note)
 	 */
-	Tempo (double npm, int note_type = 4)
+	Tempo (double npm, int note_type)
 		: _npm (npm)
 		, _enpm (npm)
 		, _superclocks_per_note_type (double_npm_to_scpn (npm))
@@ -180,7 +180,7 @@ class LIBTEMPORAL_API Tempo : public Rampable {
 		, _clamped (false)
 		, _type (Tempo::Constant) {}
 
-	Tempo (double npm, double enpm, int note_type = 4)
+	Tempo (double npm, double enpm, int note_type)
 		: _npm (npm)
 		, _enpm (npm)
 		, _superclocks_per_note_type (double_npm_to_scpn (npm))
@@ -270,6 +270,7 @@ class LIBTEMPORAL_API Tempo : public Rampable {
 	}
 
 	uint64_t super_note_type_per_second() const { return _super_note_type_per_second; }
+	uint64_t end_super_note_type_per_second() const { return _end_super_note_type_per_second; }
 
   protected:
 	double       _npm;
