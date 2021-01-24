@@ -32,6 +32,7 @@
 
 #include <sndfile.h>
 
+#include "pbd/integer_division.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/basename.h"
 #include "pbd/shortpath.h"
@@ -303,14 +304,22 @@ Editor::import_smf_tempo_map (Evoral::SMF const & smf, timepos_t const & pos)
 		assert (t);
 
 		Tempo tempo (t->tempo(), 32.0 / (double) t->notes_per_note);
+
+		cerr << "new tempo from SMF : " << tempo << endl;
+
 		Meter meter (t->numerator, t->denominator);
+
+		cerr << "new meter from SMF : " << meter << endl;
+
+
 		Temporal::BBT_Time bbt; /* 1|1|0 which is correct for the no-meter case */
 
 		if (have_initial_meter) {
-#warning NUTEMPO figure this out when i have a brain
-			// new_map.set_tempo (tempo, Temporal::Beats (t->time_pulses/ (double)smf.ppqn() / 4.0);
+
+			bbt = new_map->bbt_at (Temporal::Beats (int_div_round (t->time_pulses * 4, (size_t) smf.ppqn()), 0));
+			new_map->set_tempo (tempo, bbt);
+
 			if (!(meter == last_meter)) {
-				bbt = new_map->bbt_at (Beats::from_double (t->time_pulses/(double)smf.ppqn()));
 				new_map->set_meter (meter, bbt);
 			}
 
