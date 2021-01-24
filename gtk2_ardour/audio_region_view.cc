@@ -1394,7 +1394,7 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev, b
 
 	/* map using gain line */
 
-	gain_line->view_to_model_coord (mx, y);
+	gain_line->view_to_model_coord_y (y);
 
 	/* XXX STATEFUL: can't convert to stateful diff until we
 	   can represent automation data with it.

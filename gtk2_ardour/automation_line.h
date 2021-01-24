@@ -126,7 +126,6 @@ public:
 	std::string fraction_to_string (double) const;
 	std::string delta_to_string (double) const;
 	double string_to_fraction (std::string const &) const;
-	Temporal::timepos_t view_to_model_coord (double x, double& y) const;
 	void   view_to_model_coord_y (double &) const;
 	Temporal::timepos_t model_to_view_coord (Evoral::ControlEvent const &, double& y) const;
 	void   model_to_view_coord_y (double &) const;

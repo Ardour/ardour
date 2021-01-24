@@ -1166,22 +1166,6 @@ AutomationLine::set_state (const XMLNode &node, int version)
 	return alist->set_state (node, version);
 }
 
-Temporal::timepos_t
-AutomationLine::view_to_model_coord (double x, double& y) const
-{
-	view_to_model_coord_y (y);
-
-	Temporal::timepos_t w;
-
-#warning NUTEMPO FIX ME ... this accepts view coordinate as double and things it can infer beats etc
-
-	if (alist->time_domain() == Temporal::AudioTime) {
-		return timepos_t (samplepos_t (x));
-	}
-
-	return timepos_t (Temporal::Beats::from_double (x));
-}
-
 void
 AutomationLine::view_to_model_coord_y (double& y) const
 {
