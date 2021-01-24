@@ -828,17 +828,21 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 
 	if (_input_audio_device != _output_audio_device) {
 		if (_input_audio_device != get_standard_device_name(DeviceNone) && _output_audio_device != get_standard_device_name(DeviceNone)) {
-#if 0 /* ideally we'd resample output ...*/
-			slave_device = _output_audio_device;
-			_output_audio_device = get_standard_device_name(DeviceNone);
-			slave_duplex = AudioSlave::HalfDuplexOut;
-#else
-			/*.. but input is usually a cheap USB device, and keeping
-			 * output does auto-connect master-out to the main device. */
-			slave_device = _input_audio_device;
-			_input_audio_device = get_standard_device_name(DeviceNone);
-			slave_duplex = AudioSlave::HalfDuplexIn;
-#endif
+			/* Different devices for In + Out.
+			 * Ideally use input as clock source, and resample output.
+			 * But when using separate devices, input is usually one (or more)
+			 * cheap USB mic. Also keeping output device as "main",
+			 * retains master-out connection.
+			 */
+			if (getenv ("ARDOUR_ALSA_CLK")) {
+				slave_device = _output_audio_device;
+				_output_audio_device = get_standard_device_name(DeviceNone);
+				slave_duplex = AudioSlave::HalfDuplexOut;
+			} else {
+				slave_device = _input_audio_device;
+				_input_audio_device = get_standard_device_name(DeviceNone);
+				slave_duplex = AudioSlave::HalfDuplexIn;
+			}
 		}
 		if (_input_audio_device != get_standard_device_name(DeviceNone)) {
 			get_alsa_audio_device_names(devices, HalfDuplexIn);
