@@ -1960,7 +1960,7 @@ std::ostream&
 std::operator<<(std::ostream& str, Tempo const & t)
 {
 	if (t.ramped()) {
-		return str << t.note_types_per_minute() << " 1/" << t.note_type() << " RAMPED notes per minute [" << t.super_note_type_per_second() << " sntpm] (" << t.superclocks_per_note_type() << " sc-per-1/" << t.note_type() << ')';
+		return str << t.note_types_per_minute() << " 1/" << t.note_type() << " RAMPED notes per minute [ " << t.super_note_type_per_second() << " => " << t.end_super_note_type_per_second() << " sntpm ] (" << t.superclocks_per_note_type() << " sc-per-1/" << t.note_type() << ')';
 	} else {
 		return str << t.note_types_per_minute() << " 1/" << t.note_type() << " notes per minute [" << t.super_note_type_per_second() << " sntpm] (" << t.superclocks_per_note_type() << " sc-per-1/" << t.note_type() << ')';
 	}
@@ -2998,7 +2998,7 @@ TempoMap::MementoBinder::set_state (XMLNode const & node, int version) const
 void
 TempoMap::init ()
 {
-	SharedPtr new_map (new TempoMap (Tempo (120), Meter (4, 4)));
+	SharedPtr new_map (new TempoMap (Tempo (120, 4), Meter (4, 4)));
 	_map_mgr.init (new_map);
 	fetch ();
 }

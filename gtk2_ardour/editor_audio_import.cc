@@ -281,8 +281,19 @@ Editor::import_smf_tempo_map (Evoral::SMF const & smf, timepos_t const & pos)
 		return;
 	}
 
-#warning NUTEMPO need to be able to create a tempo map with no entries
-	TempoMap::SharedPtr new_map (new TempoMap (Tempo (120), Meter (4, 4)));
+	/* we have to create this in order to start the update process, but
+	   we're going to throw it away by creating our own new map and
+	   populating it. This will go out of scope when we return from this
+	   method.
+	*/
+
+	TempoMap::SharedPtr ignore (TempoMap::write_copy());
+
+	/* cannot create an empty TempoMap, so create one with "default" single
+	   values for tempo and meter, then overwrite them.
+	*/
+
+	TempoMap::SharedPtr new_map (new TempoMap (Tempo (120, 4), Meter (4, 4)));
 	Meter last_meter (4.0, 4.0);
 	bool have_initial_meter = false;
 
