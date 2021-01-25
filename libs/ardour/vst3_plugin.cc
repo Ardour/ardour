@@ -140,16 +140,28 @@ VST3Plugin::parameter_change_handler (VST3PI::ParameterChange t, uint32_t param,
 /* ***************************************************************************/
 
 bool
+VST3Plugin::match_variable_io (ChanCount& in, ChanCount& aux_in, ChanCount& out)
+{
+	_plug->try_set_io (in.n_audio (), aux_in.n_audio (), out.n_audio ());
+
+	in.set_audio (_plug->n_audio_inputs (false));
+	aux_in.set_audio (_plug->n_audio_aux_in ());
+	out.set_audio (_plug->n_audio_outputs ());
+
+	in.set_midi (_plug->n_midi_inputs ());
+	out.set_midi (_plug->n_midi_outputs ());
+	return true;
+}
+
+bool
 VST3Plugin::reconfigure_io (ChanCount in, ChanCount aux_in, ChanCount out)
 {
 	std::cerr << "VST3Plugin::reconfigure_io: in: " << in << " aux_in: " << aux_in << " out: " << out << "\n";
 	_configured_in  = in + aux_in;
 	_configured_out = out;
 
-#if 0
 	_info->n_inputs  = in;
 	_info->n_outputs = out;
-#endif
 
 	/* apply new portlayout */
 	_connected_inputs.clear ();
@@ -161,16 +173,6 @@ VST3Plugin::reconfigure_io (ChanCount in, ChanCount aux_in, ChanCount out)
 	for (uint32_t i = 0; i < _configured_out.n_audio (); ++i) {
 		_connected_outputs.push_back (true);
 	}
-
-#if 1
-	while (_connected_inputs.size () < _plug->n_audio_inputs ()) {
-		_connected_inputs.push_back (false);
-	}
-	while (_connected_outputs.size () < _plug->n_audio_outputs ()) {
-		_connected_outputs.push_back (false);
-	}
-#endif
-
 	/* pre-configure from GUI thread */
 	_plug->enable_io (_connected_inputs, _connected_outputs);
 
@@ -1948,6 +1950,91 @@ VST3PI::set_event_bus_state (bool enable)
 	}
 	for (int32 i = 0; i < n_bus_out; ++i) {
 		_component->activateBus (Vst::kEvent, Vst::kOutput, i, enable);
+	}
+}
+
+void
+VST3PI::try_set_io (uint32_t in, uint32_t aux_in, uint32_t out)
+{
+	/* Try to set (host => plug-in) a wanted arrangement for inputs and outputs.
+	 * The host should always deliver the same number of input and output busses than the plug-in needs (see IComponent::getBusCount).
+	 * The plug-in has 3 possibilities to react on this setBusArrangements call:
+	 *
+	 * - The plug-in accepts these arrangements, then it should modify, if needed, its busses to match these new arrangements
+	 * (later on asked by the host with IComponent::getBusInfo () or IAudioProcessor::getBusArrangement ()) and then should return kResultTrue.
+	 *
+	 * - The plug-in does not accept or support these requested arrangements for all inputs/outputs or just for some or only one bus,
+	 * but the plug-in can try to adapt its current arrangements according to the requested ones (requested arrangements for kMain busses
+	 * should be handled with more priority than the ones for kAux busses), then it should modify its busses arrangements and should return kResultFalse.
+	 *
+	 * - Same than the point 2 above the plug-in does not support these requested arrangements but the plug-in cannot find corresponding arrangements,
+	 * the plug-in could keep its current arrangement or fall back to a default arrangement by modifying its busses arrangements and should return kResultFalse.
+	 */
+
+	std::vector<Vst::SpeakerArrangement> sa_in;
+	std::vector<Vst::SpeakerArrangement> sa_out;
+
+	if (_n_bus_in < 2 ) {
+		in += aux_in;
+	}
+
+	Vst::SpeakerArrangement sa = 0;
+	for (uint32_t i = 0; i < in; ++i) {
+		sa |= (uint64_t)1 << i;
+	}
+	if (_n_bus_in > 0) {
+		sa_in.push_back (sa);
+	}
+
+	if (_n_bus_in > 1) {
+		sa = 0;
+		for (uint32_t i = 0; i < aux_in; ++i) {
+			sa |= (uint64_t)1 << i;
+		}
+		sa_in.push_back (sa);
+	}
+
+	/* disable remaining input busses and set their speaker-count to zero */
+	while (sa_in.size () < _n_bus_in) {
+		sa_in.push_back (0);
+	}
+
+	/* try to max-out outs and aux-outs, but disable remaining output busses */
+	sa = 0;
+	for (uint32_t i = 0; i < out; ++i) {
+		sa |= (uint64_t)1 << i;
+	}
+	while (sa_out.size () < _n_bus_out) {
+		sa_out.push_back (sa_out.size () < 2 ? sa : 0);
+	}
+
+	DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::try_set_io: setBusArrangements ins = %1 outs = %2\n", sa_in.size (), sa_out.size ()));
+	tresult rv = _processor->setBusArrangements (sa_in.size () > 0 ? &sa_in[0] : NULL, sa_in.size (),
+	                                             sa_out.size () > 0 ? &sa_out[0] : NULL, sa_out.size ());
+
+	printf ("VST3PI::try_set_io: %d\n", rv);
+
+	update_channelcount ();
+
+	int32 n_bus_in = _component->getBusCount (Vst::kAudio, Vst::kInput);
+	Vst::SpeakerArrangement arr;
+
+	if (n_bus_in > 0) {
+		if (_processor->getBusArrangement (Vst::kInput, Vst::kMain, arr) == kResultOk) {
+			int cc = Vst::SpeakerArr::getChannelCount (arr);
+			std::cerr << "VST3: Input BusArrangements: " << Vst::kMain << " chan: " << cc << " bits: " << arr << "\n";
+			std::cerr << "VST3: overriding n_inputs: from: " << _n_inputs << " to: " << cc << "\n";
+			_n_inputs = cc;
+		}
+	}
+
+	if (n_bus_in > 1) {
+		if (_processor->getBusArrangement (Vst::kInput, Vst::kAux, arr) == kResultOk) {
+			int cc = Vst::SpeakerArr::getChannelCount (arr);
+			std::cerr << "VST3: Input BusArrangements: " << Vst::kAux << " chan: " << cc << " bits: " << arr << "\n";
+			std::cerr << "VST3: overriding n_aux_inputs: from: " << _n_aux_inputs << " to: " << cc << "\n";
+			_n_aux_inputs = cc;
+		}
 	}
 }
 

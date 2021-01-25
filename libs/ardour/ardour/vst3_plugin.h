@@ -180,6 +180,7 @@ public:
 	void set_owner (ARDOUR::SessionObject* o);
 
 	void enable_io (std::vector<bool> const&, std::vector<bool> const&);
+	void try_set_io (uint32_t in, uint32_t aux_in, uint32_t out);
 
 	void process (float** ins, float** outs, uint32_t n_samples);
 
@@ -335,7 +336,11 @@ public:
 	bool parameter_is_input (uint32_t) const;
 	bool parameter_is_output (uint32_t) const;
 
+	bool match_variable_io (ChanCount&, ChanCount&, ChanCount&);
 	bool reconfigure_io (ChanCount, ChanCount, ChanCount);
+
+	ChanCount output_streams () const { return _configured_out; }
+	ChanCount input_streams () const { return _configured_in; }
 
 	uint32_t designated_bypass_port ();
 
@@ -423,6 +428,7 @@ public:
 	PluginPtr                         load (Session& session);
 	std::vector<Plugin::PresetRecord> get_presets (bool user_only) const;
 	bool                              is_instrument () const;
+	bool                              reconfigurable_io() const { return true; }
 
 	boost::shared_ptr<VST3PluginModule> m;
 };
