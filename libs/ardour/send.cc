@@ -95,8 +95,7 @@ Send::Send (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMas
 {
 	//boost_debug_shared_ptr_mark_interesting (this, "send");
 
-#warning NUTEMPO question what time domain should this use?
-	boost::shared_ptr<AutomationList> gl (new AutomationList (Evoral::Parameter (BusSendLevel), Temporal::AudioTime));
+	boost::shared_ptr<AutomationList> gl (new AutomationList (Evoral::Parameter (BusSendLevel), time_domain()));
 	_gain_control = boost::shared_ptr<GainControl> (new GainControl (_session, Evoral::Parameter(BusSendLevel), gl));
 	_gain_control->set_flag (Controllable::InlineControl);
 	add_control (_gain_control);
