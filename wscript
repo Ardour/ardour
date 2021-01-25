@@ -526,6 +526,7 @@ int main() { return 0; }''',
             conf.define("_DARWIN_C_SOURCE", 1)
         else:
             cxx_flags.append('-DBOOST_NO_AUTO_PTR')
+            cxx_flags.append('-DBOOST_BIND_GLOBAL_PLACEHOLDERS')
 
 
     if (is_clang and platform == "darwin") or conf.env['build_host'] in [ 'mavericks', 'yosemite', 'el_capitan', 'sierra', 'high_sierra', 'mojave', 'catalina' , 'bigsur' ]:
