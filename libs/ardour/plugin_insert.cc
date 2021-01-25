@@ -516,8 +516,7 @@ PluginInsert::create_automatable_parameters ()
 
 		const bool automatable = a.find(param) != a.end();
 
-#warning NUTEMPO question : how to decide the right time domain here?
-		boost::shared_ptr<AutomationList> list(new AutomationList(param, desc, Temporal::AudioTime));
+		boost::shared_ptr<AutomationList> list(new AutomationList(param, desc, time_domain()));
 		boost::shared_ptr<AutomationControl> c (new PluginControl(this, param, desc, list));
 		if (!automatable || (limit_automatables > 0 && what_can_be_automated ().size() > limit_automatables)) {
 			c->set_flag (Controllable::NotAutomatable);
@@ -537,8 +536,7 @@ PluginInsert::create_automatable_parameters ()
 		if (desc.datatype != Variant::NOTHING) {
 			boost::shared_ptr<AutomationList> list;
 			if (Variant::type_is_numeric(desc.datatype)) {
-#warning NUTEMPO question : how to decide the right time domain here?
-				list = boost::shared_ptr<AutomationList>(new AutomationList(param, desc, Temporal::AudioTime));
+				list = boost::shared_ptr<AutomationList>(new AutomationList(param, desc, time_domain()));
 			}
 			boost::shared_ptr<AutomationControl> c (new PluginPropertyControl(this, param, desc, list));
 			if (!Variant::type_is_numeric(desc.datatype)) {
@@ -560,9 +558,10 @@ PluginInsert::create_automatable_parameters ()
 		desc.normal = 1;
 		desc.lower  = 0;
 		desc.upper  = 1;
-#warning NUTEMPO question : how to decide the right time domain here?
-		boost::shared_ptr<AutomationList> list(new AutomationList(param, desc, Temporal::AudioTime));
+
+		boost::shared_ptr<AutomationList> list(new AutomationList(param, desc, time_domain()));
 		boost::shared_ptr<AutomationControl> c (new PluginControl(this, param, desc, list));
+
 		add_control (c);
 	}
 
