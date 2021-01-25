@@ -70,10 +70,14 @@ namespace ARDOUR { namespace LuaAPI {
 
 	/** create a new Lua Processor (Plugin)
 	 *
-	 * @param s Session Handle
-	 * @param p Identifier or Name of the Processor
+	 * @param s  Session Handle
+	 * @param p  Identifier or Name of the Processor
+	 * @param td Time domain (audio or beats) for any automation data
 	 * @returns Processor object (may be nil)
 	 */
+	boost::shared_ptr<ARDOUR::Processor> new_luaproc_with_time_domain (ARDOUR::Session *s, const std::string& p, Temporal::TimeDomain td);
+
+	/* As above but uses default time domain for the session/application */
 	boost::shared_ptr<ARDOUR::Processor> new_luaproc (ARDOUR::Session *s, const std::string& p);
 
 	/** List all installed plugins */
@@ -98,8 +102,12 @@ namespace ARDOUR { namespace LuaAPI {
 	 * @param id Plugin Name, ID or URI
 	 * @param type Plugin Type
 	 * @param preset name of plugin-preset to load, leave empty "" to not load any preset after instantiation
+	 * @param td     Time domain for any automation data
 	 * @returns Processor or nil
 	 */
+	boost::shared_ptr<ARDOUR::Processor> new_plugin_with_time_domain (ARDOUR::Session *s, const std::string& id, ARDOUR::PluginType type, Temporal::TimeDomain td, const std::string& preset = "");
+
+	/* As above but uses default time domain for the session/application */
 	boost::shared_ptr<ARDOUR::Processor> new_plugin (ARDOUR::Session *s, const std::string& id, ARDOUR::PluginType type, const std::string& preset = "");
 
 	/** set a plugin control-input parameter value

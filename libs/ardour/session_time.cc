@@ -295,7 +295,7 @@ Session::any_duration_to_samples (samplepos_t position, AnyTime const & duration
 		break;
 
 	case AnyTime::Seconds:
-                return (samplecnt_t) floor (duration.seconds * sample_rate());
+                return (samplecnt_t) round (duration.seconds * sample_rate());
 		break;
 
 	case AnyTime::Samples:

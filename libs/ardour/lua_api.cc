@@ -81,6 +81,12 @@ ARDOUR::LuaAPI::nil_processor ()
 boost::shared_ptr<Processor>
 ARDOUR::LuaAPI::new_luaproc (Session *s, const string& name)
 {
+	return new_luaproc_with_time_domain (s, name, Config->get_default_automation_time_domain());
+}
+
+boost::shared_ptr<Processor>
+ARDOUR::LuaAPI::new_luaproc_with_time_domain (Session *s, const string& name, Temporal::TimeDomain td)
+{
 	if (!s) {
 		return boost::shared_ptr<Processor> ();
 	}
@@ -108,8 +114,7 @@ ARDOUR::LuaAPI::new_luaproc (Session *s, const string& name)
 		return boost::shared_ptr<Processor> ();
 	}
 
-#warning NUTEMPO caller should be able to control time domain
-	return boost::shared_ptr<Processor> (new PluginInsert (*s, Config->get_default_automation_time_domain(), p));
+	return boost::shared_ptr<Processor> (new PluginInsert (*s, td, p));
 }
 
 boost::shared_ptr<Processor>
@@ -210,6 +215,12 @@ ARDOUR::LuaAPI::new_plugin_info (const string& name, ARDOUR::PluginType type)
 boost::shared_ptr<Processor>
 ARDOUR::LuaAPI::new_plugin (Session *s, const string& name, ARDOUR::PluginType type, const string& preset)
 {
+	return new_plugin_with_time_domain (s, name, type, Config->get_default_automation_time_domain(), preset);
+}
+
+boost::shared_ptr<Processor>
+ARDOUR::LuaAPI::new_plugin_with_time_domain (Session *s, const string& name, ARDOUR::PluginType type, Temporal::TimeDomain td, const string& preset)
+{
 	if (!s) {
 		return boost::shared_ptr<Processor> ();
 	}
@@ -232,8 +243,7 @@ ARDOUR::LuaAPI::new_plugin (Session *s, const string& name, ARDOUR::PluginType t
 		}
 	}
 
-#warning NUTEMPO caller should be able to control time domain
-	return boost::shared_ptr<Processor> (new PluginInsert (*s, Config->get_default_automation_time_domain(), p));
+	return boost::shared_ptr<Processor> (new PluginInsert (*s, td, p));
 }
 
 bool
