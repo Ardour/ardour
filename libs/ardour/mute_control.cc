@@ -29,7 +29,6 @@ using namespace ARDOUR;
 using namespace std;
 
 
-#warning NUTEMPO QUESTION what time domain shoudl this really use?
 MuteControl::MuteControl (Session& session, std::string const & name, Muteable& m, Temporal::TimeDomain td)
 	: SlavableAutomationControl (session, MuteAutomation, ParameterDescriptor (MuteAutomation),
 	                             boost::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter (MuteAutomation), td)),
