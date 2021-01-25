@@ -211,6 +211,12 @@ public:
 	void build_mute_menu(void);
 	void init_mute_menu(ARDOUR::MuteMaster::MutePoint, Gtk::CheckMenuItem*);
 
+	/* The editor calls these when mapping an operation across multiple tracks */
+	void use_new_playlist (bool prompt, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &, bool copy);
+	void clear_playlist ();
+
+	std::string resolve_new_group_playlist_name(std::string const&, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const&);
+
 	int  set_color_from_route ();
 
 	void route_rename();
@@ -332,6 +338,14 @@ protected:
 	SoloMuteRelease* _mute_release;
 
 	ControlSlaveUI* csu;
+
+	std::string playlist_tip () const;
+	void build_playlist_menu ();
+	void use_playlist (Gtk::RadioMenuItem *item, boost::weak_ptr<ARDOUR::Playlist> wpl);
+	void show_playlist_selector ();
+	void rename_current_playlist ();
+
+	Gtk::Menu* playlist_action_menu;
 
 private:
 	void setup_invert_buttons ();

@@ -4329,12 +4329,12 @@ Editor::restore_editing_space ()
  */
 
 void
-Editor::new_playlists (TimeAxisView* v)
+Editor::new_playlists (RouteUI* rui)
 {
 	begin_reversible_command (_("new playlists"));
 	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
 	_session->playlists()->get (playlists);
-	mapover_tracks (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_new_playlist), playlists), v, ARDOUR::Properties::group_select.property_id);
+	mapover_routes (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_new_playlist), playlists), rui, ARDOUR::Properties::group_select.property_id);
 	commit_reversible_command ();
 }
 
@@ -4345,12 +4345,12 @@ Editor::new_playlists (TimeAxisView* v)
  */
 
 void
-Editor::copy_playlists (TimeAxisView* v)
+Editor::copy_playlists (RouteUI* rui)
 {
 	begin_reversible_command (_("copy playlists"));
 	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
 	_session->playlists()->get (playlists);
-	mapover_tracks (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_copy_playlist), playlists), v, ARDOUR::Properties::group_select.property_id);
+	mapover_routes (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_copy_playlist), playlists), rui, ARDOUR::Properties::group_select.property_id);
 	commit_reversible_command ();
 }
 
@@ -4360,31 +4360,31 @@ Editor::copy_playlists (TimeAxisView* v)
  */
 
 void
-Editor::clear_playlists (TimeAxisView* v)
+Editor::clear_playlists (RouteUI* rui)
 {
 	begin_reversible_command (_("clear playlists"));
 	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
 	_session->playlists()->get (playlists);
-	mapover_tracks (sigc::mem_fun (*this, &Editor::mapped_clear_playlist), v, ARDOUR::Properties::group_select.property_id);
+	mapover_routes (sigc::mem_fun (*this, &Editor::mapped_clear_playlist), rui, ARDOUR::Properties::group_select.property_id);
 	commit_reversible_command ();
 }
 
 void
-Editor::mapped_use_new_playlist (RouteTimeAxisView& atv, uint32_t sz, vector<boost::shared_ptr<ARDOUR::Playlist> > const & playlists)
+Editor::mapped_use_new_playlist (RouteUI& rui, uint32_t sz, vector<boost::shared_ptr<ARDOUR::Playlist> > const & playlists)
 {
-	atv.use_new_playlist (sz > 1 ? false : true, playlists, false);
+	rui.use_new_playlist (sz > 1 ? false : true, playlists, false);
 }
 
 void
-Editor::mapped_use_copy_playlist (RouteTimeAxisView& atv, uint32_t sz, vector<boost::shared_ptr<ARDOUR::Playlist> > const & playlists)
+Editor::mapped_use_copy_playlist (RouteUI& rui, uint32_t sz, vector<boost::shared_ptr<ARDOUR::Playlist> > const & playlists)
 {
-	atv.use_new_playlist (sz > 1 ? false : true, playlists, true);
+	rui.use_new_playlist (sz > 1 ? false : true, playlists, true);
 }
 
 void
-Editor::mapped_clear_playlist (RouteTimeAxisView& atv, uint32_t /*sz*/)
+Editor::mapped_clear_playlist (RouteUI& rui, uint32_t /*sz*/)
 {
-	atv.clear_playlist ();
+	rui.clear_playlist ();
 }
 
 double

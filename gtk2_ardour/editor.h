@@ -332,9 +332,9 @@ public:
 	PlaylistSelector& playlist_selector() const;
 	void clear_playlist (boost::shared_ptr<ARDOUR::Playlist>);
 
-	void new_playlists (TimeAxisView* v);
-	void copy_playlists (TimeAxisView* v);
-	void clear_playlists (TimeAxisView* v);
+	void new_playlists (RouteUI* v);
+	void copy_playlists (RouteUI* v);
+	void clear_playlists (RouteUI* v);
 
 	void get_onscreen_tracks (TrackViewList&);
 
@@ -763,14 +763,14 @@ private:
 	RegionView* regionview_from_region (boost::shared_ptr<ARDOUR::Region>) const;
 	RouteTimeAxisView* rtav_from_route (boost::shared_ptr<ARDOUR::Route>) const;
 
-	void mapover_tracks (sigc::slot<void,RouteTimeAxisView&,uint32_t> sl, TimeAxisView*, PBD::PropertyID) const;
-	void mapover_tracks_with_unique_playlists (sigc::slot<void,RouteTimeAxisView&,uint32_t> sl, TimeAxisView*, PBD::PropertyID) const;
 
-	/* functions to be passed to mapover_tracks(), possibly with sigc::bind()-supplied arguments */
+	void mapover_tracks_with_unique_playlists (sigc::slot<void,RouteTimeAxisView&,uint32_t> sl, TimeAxisView*, PBD::PropertyID) const;
 	void mapped_get_equivalent_regions (RouteTimeAxisView&, uint32_t, RegionView*, std::vector<RegionView*>*) const;
-	void mapped_use_new_playlist (RouteTimeAxisView&, uint32_t, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
-	void mapped_use_copy_playlist (RouteTimeAxisView&, uint32_t, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
-	void mapped_clear_playlist (RouteTimeAxisView&, uint32_t);
+
+	void mapover_routes (sigc::slot<void, RouteUI&, uint32_t> sl, RouteUI*, PBD::PropertyID) const;
+	void mapped_use_new_playlist (RouteUI&, uint32_t, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
+	void mapped_use_copy_playlist (RouteUI&, uint32_t, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
+	void mapped_clear_playlist (RouteUI&, uint32_t);
 
 	void button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type);
 	bool button_release_can_deselect;

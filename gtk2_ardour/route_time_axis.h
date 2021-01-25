@@ -118,15 +118,6 @@ public:
 	void toggle_automation_track (const Evoral::Parameter& param);
 	void fade_range (TimeSelection&);
 
-	/* The editor calls these when mapping an operation across multiple tracks */
-	void use_new_playlist (bool prompt, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &, bool copy);
-	void clear_playlist ();
-
-	/* group playlist name resolving */
-	std::string resolve_new_group_playlist_name(std::string &, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
-
-	void build_playlist_menu ();
-
 	void add_underlay (StreamView*, bool update_xml = true);
 	void remove_underlay (StreamView*);
 	void build_underlay_menu(Gtk::Menu*);
@@ -231,10 +222,7 @@ protected:
 	void set_align_choice (Gtk::RadioMenuItem*, ARDOUR::AlignChoice, bool apply_to_selection = false);
 
 	bool         playlist_click (GdkEventButton *);
-	void         show_playlist_selector ();
 	void         playlist_changed ();
-
-	void rename_current_playlist ();
 
 	bool         automation_click (GdkEventButton *);
 
@@ -263,11 +251,8 @@ protected:
 	Gtk::Menu*          automation_action_menu;
 	Gtk::MenuItem*      plugins_submenu_item;
 	RouteGroupMenu*     route_group_menu;
-	Gtk::Menu*          playlist_action_menu;
 	Gtk::MenuItem*      overlaid_menu_item;
 	Gtk::MenuItem*      stacked_menu_item;
-
-	void use_playlist (Gtk::RadioMenuItem *item, boost::weak_ptr<ARDOUR::Playlist> wpl);
 
 	ArdourCanvas::Rectangle* timestretch_rect;
 

@@ -56,6 +56,7 @@
 #include "ardour/send.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
+#include "ardour/session_playlists.h"
 #include "ardour/template_utils.h"
 
 #include "gtkmm2ext/gtk_ui.h"
@@ -79,6 +80,7 @@
 #include "mixer_strip.h"
 #include "mixer_ui.h"
 #include "patch_change_widget.h"
+#include "playlist_selector.h"
 #include "plugin_pin_dialog.h"
 #include "rgb_macros.h"
 #include "route_time_axis.h"
@@ -114,6 +116,7 @@ RouteUI::RouteUI (ARDOUR::Session* sess)
 	, comment_area(0)
 	, input_selector (0)
 	, output_selector (0)
+	, playlist_action_menu (0)
 	, _invert_menu(0)
 {
 	if (program_port_prefix.empty()) {
@@ -148,6 +151,7 @@ RouteUI::~RouteUI()
 	delete output_selector;
 	delete monitor_input_button;
 	delete monitor_disk_button;
+	delete playlist_action_menu;
 	delete _invert_menu;
 
 	send_blink_connection.disconnect ();
@@ -2355,5 +2359,338 @@ RouteUI::set_disk_io_point (DiskIOPoint diop)
 {
 	if (_route && is_track()) {
 		track()->set_disk_io_point (diop);
+	}
+}
+
+
+std::string
+RouteUI::playlist_tip () const
+{
+	if (!is_track()) {
+		return "";
+	}
+
+	RouteGroup* rg = route_group ();
+	if (rg && rg->is_active() && rg->enabled_property (ARDOUR::Properties::group_select.property_id)) {
+		string group_string = "." + rg->name() + ".";
+
+		string take_name = track()->playlist()->name();
+		string::size_type idx = take_name.find(group_string);
+
+		if (idx != string::npos) {
+			/* find the bit containing the take number / name */
+			take_name = take_name.substr (idx + group_string.length());
+
+			/* set the playlist button tooltip to the take name */
+				return string_compose(_("Take: %1.%2"),
+					Gtkmm2ext::markup_escape_text (rg->name()),
+					Gtkmm2ext::markup_escape_text (take_name));
+		}
+	}
+
+	/* set the playlist button tooltip to the playlist name */
+	return  _("Playlist") + std::string(": ") + Gtkmm2ext::markup_escape_text (track()->playlist()->name());
+}
+
+std::string
+RouteUI::resolve_new_group_playlist_name (std::string const& basename, vector<boost::shared_ptr<Playlist> > const& playlists)
+{
+	std::string ret (basename);
+
+	std::string const group_string = "." + route_group()->name() + ".";
+
+	// iterate through all playlists
+	int maxnumber = 0;
+	for (vector<boost::shared_ptr<Playlist> >::const_iterator i = playlists.begin(); i != playlists.end(); ++i) {
+		std::string tmp = (*i)->name();
+
+		std::string::size_type idx = tmp.find(group_string);
+		// find those which belong to this group
+		if (idx != string::npos) {
+			tmp = tmp.substr(idx + group_string.length());
+
+			// and find the largest current number
+			int x = atoi(tmp);
+			if (x > maxnumber) {
+				maxnumber = x;
+			}
+		}
+	}
+
+	maxnumber++;
+
+	char buf[32];
+	snprintf (buf, sizeof(buf), "%d", maxnumber);
+
+	ret = _route->name() + "." + route_group()->name () + "." + buf;
+
+	return ret;
+}
+
+void
+RouteUI::use_new_playlist (bool prompt, vector<boost::shared_ptr<Playlist> > const& playlists_before_op, bool copy)
+{
+	string name;
+
+	boost::shared_ptr<Track> tr = track ();
+	if (!tr) {
+		return;
+	}
+
+	boost::shared_ptr<const Playlist> pl = tr->playlist();
+	if (!pl) {
+		return;
+	}
+
+	name = pl->name();
+
+	if (route_group() && route_group()->is_active() && route_group()->enabled_property (ARDOUR::Properties::group_select.property_id)) {
+		name = resolve_new_group_playlist_name (name, playlists_before_op);
+	}
+
+	while (_session->playlists()->by_name(name)) {
+		name = Playlist::bump_name (name, *_session);
+	}
+
+	if (prompt) {
+		// TODO: The prompter "new" button should be de-activated if the user
+		// specifies a playlist name which already exists in the session.
+
+		Prompter prompter (true);
+
+		if (copy) {
+			prompter.set_title (_("New Copy Playlist"));
+			prompter.set_prompt (_("Name for playlist copy:"));
+		} else {
+			prompter.set_title (_("New Playlist"));
+			prompter.set_prompt (_("Name for new playlist:"));
+		}
+		prompter.set_initial_text (name);
+		prompter.add_button (Gtk::Stock::NEW, Gtk::RESPONSE_ACCEPT);
+		prompter.set_response_sensitive (Gtk::RESPONSE_ACCEPT, true);
+		prompter.show_all ();
+
+		while (true) {
+			if (prompter.run () != Gtk::RESPONSE_ACCEPT) {
+				return;
+			}
+			prompter.get_result (name);
+			if (name.length()) {
+				if (_session->playlists()->by_name (name)) {
+					MessageDialog msg (_("Given playlist name is not unique."));
+					msg.run ();
+					prompter.set_initial_text (Playlist::bump_name (name, *_session));
+				} else {
+					break;
+				}
+			}
+		}
+	}
+
+	if (name.length()) {
+		if (copy) {
+			tr->use_copy_playlist ();
+		} else {
+			tr->use_default_new_playlist ();
+		}
+		tr->playlist()->set_name (name);
+	}
+}
+
+void
+RouteUI::clear_playlist ()
+{
+	boost::shared_ptr<Track> tr = track ();
+	if (!tr) {
+		return;
+	}
+
+	boost::shared_ptr<Playlist> pl = tr->playlist();
+	if (!pl) {
+		return;
+	}
+
+	ARDOUR_UI::instance()->the_editor().clear_playlist (pl);
+}
+
+
+struct PlaylistSorter {
+	bool operator() (boost::shared_ptr<Playlist> a, boost::shared_ptr<Playlist> b) const {
+		return a->sort_id() < b->sort_id();
+	}
+};
+
+void
+RouteUI::build_playlist_menu ()
+{
+	using namespace Menu_Helpers;
+
+	if (!is_track()) {
+		return;
+	}
+
+	PublicEditor* editor = &ARDOUR_UI::instance()->the_editor();
+
+	delete playlist_action_menu;
+	playlist_action_menu = new Menu;
+	playlist_action_menu->set_name ("ArdourContextMenu");
+
+	MenuList& playlist_items = playlist_action_menu->items();
+	playlist_action_menu->set_name ("ArdourContextMenu");
+	playlist_items.clear();
+
+	RadioMenuItem::Group playlist_group;
+	boost::shared_ptr<Track> tr = track ();
+
+	vector<boost::shared_ptr<Playlist> > playlists_tr = _session->playlists()->playlists_for_track (tr);
+
+	/* sort the playlists */
+	PlaylistSorter cmp;
+	sort (playlists_tr.begin(), playlists_tr.end(), cmp);
+
+	/* add the playlists to the menu */
+	for (vector<boost::shared_ptr<Playlist> >::iterator i = playlists_tr.begin(); i != playlists_tr.end(); ++i) {
+		playlist_items.push_back (RadioMenuElem (playlist_group, (*i)->name()));
+		RadioMenuItem *item = static_cast<RadioMenuItem*>(&playlist_items.back());
+		item->signal_toggled().connect(sigc::bind (sigc::mem_fun (*this, &RouteUI::use_playlist), item, boost::weak_ptr<Playlist> (*i)));
+
+		if (tr->playlist()->id() == (*i)->id()) {
+			item->set_active();
+		}
+	}
+
+	playlist_items.push_back (SeparatorElem());
+	playlist_items.push_back (MenuElem (_("Rename..."), sigc::mem_fun(*this, &RouteUI::rename_current_playlist)));
+	playlist_items.push_back (SeparatorElem());
+
+	if (!route_group() || !route_group()->is_active() || !route_group()->enabled_property (ARDOUR::Properties::group_select.property_id)) {
+		playlist_items.push_back (MenuElem (_("New..."), sigc::bind(sigc::mem_fun(editor, &PublicEditor::new_playlists), this)));
+		playlist_items.push_back (MenuElem (_("New Copy..."), sigc::bind(sigc::mem_fun(editor, &PublicEditor::copy_playlists), this)));
+
+	} else {
+		// Use a label which tells the user what is happening
+		playlist_items.push_back (MenuElem (_("New Take"), sigc::bind(sigc::mem_fun(editor, &PublicEditor::new_playlists), this)));
+		playlist_items.push_back (MenuElem (_("Copy Take"), sigc::bind(sigc::mem_fun(editor, &PublicEditor::copy_playlists), this)));
+
+	}
+
+	playlist_items.push_back (SeparatorElem());
+	playlist_items.push_back (MenuElem (_("Clear Current"), sigc::bind(sigc::mem_fun(editor, &PublicEditor::clear_playlists), this)));
+	playlist_items.push_back (SeparatorElem());
+
+	playlist_items.push_back (MenuElem(_("Select from All..."), sigc::mem_fun(*this, &RouteUI::show_playlist_selector)));
+}
+
+void
+RouteUI::use_playlist (RadioMenuItem *item, boost::weak_ptr<Playlist> wpl)
+{
+	assert (is_track());
+
+	// exit if we were triggered by deactivating the old playlist
+	if (!item->get_active()) {
+		return;
+	}
+
+	boost::shared_ptr<Playlist> pl (wpl.lock());
+
+	if (!pl) {
+		return;
+	}
+
+	if (track()->playlist() == pl) {
+		// exit when use_playlist is called by the creation of the playlist menu
+		// or the playlist choice is unchanged
+		return;
+	}
+
+	track()->use_playlist (track()->data_type(), pl);
+
+	RouteGroup* rg = route_group();
+
+	if (rg && rg->is_active() && rg->enabled_property (ARDOUR::Properties::group_select.property_id)) {
+		std::string group_string = "." + rg->name() + ".";
+
+		std::string take_name = pl->name();
+		std::string::size_type idx = take_name.find(group_string);
+
+		if (idx == std::string::npos)
+			return;
+
+		take_name = take_name.substr(idx + group_string.length()); // find the bit containing the take number / name
+
+		boost::shared_ptr<RouteList> rl (rg->route_list());
+
+		for (RouteList::const_iterator i = rl->begin(); i != rl->end(); ++i) {
+			if ((*i) == this->route()) {
+				continue;
+			}
+
+			std::string playlist_name = (*i)->name()+group_string+take_name;
+
+			boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track>(*i);
+			if (!track) {
+				continue;
+			}
+
+			if (track->freeze_state() == Track::Frozen) {
+				/* Don't change playlists of frozen tracks */
+				continue;
+			}
+
+			boost::shared_ptr<Playlist> ipl = session()->playlists()->by_name(playlist_name);
+			if (!ipl) {
+				// No playlist for this track for this take yet, make it
+				track->use_default_new_playlist();
+				track->playlist()->set_name(playlist_name);
+			} else {
+				track->use_playlist(track->data_type(), ipl);
+			}
+		}
+	}
+}
+
+void
+RouteUI::show_playlist_selector ()
+{
+	ARDOUR_UI::instance()->the_editor().playlist_selector().show_for (this);
+}
+
+void
+RouteUI::rename_current_playlist ()
+{
+	Prompter prompter (true);
+	string name;
+
+	boost::shared_ptr<Track> tr = track();
+	if (!tr) {
+		return;
+	}
+
+	boost::shared_ptr<Playlist> pl = tr->playlist();
+	if (!pl) {
+		return;
+	}
+
+	prompter.set_title (_("Rename Playlist"));
+	prompter.set_prompt (_("New name for playlist:"));
+	prompter.add_button (_("Rename"), Gtk::RESPONSE_ACCEPT);
+	prompter.set_initial_text (pl->name());
+	prompter.set_response_sensitive (Gtk::RESPONSE_ACCEPT, false);
+
+	while (true) {
+		if (prompter.run () != Gtk::RESPONSE_ACCEPT) {
+			break;
+		}
+		prompter.get_result (name);
+		if (name.length()) {
+			if (_session->playlists()->by_name (name)) {
+				MessageDialog msg (_("Given playlist name is not unique."));
+				msg.run ();
+				prompter.set_initial_text (Playlist::bump_name (name, *_session));
+			} else {
+				pl->set_name (name);
+				break;
+			}
+		}
 	}
 }
