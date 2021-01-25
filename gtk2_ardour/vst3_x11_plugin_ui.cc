@@ -90,11 +90,11 @@ public:
 
 	void clear () {
 		Glib::Threads::Mutex::Lock lm (_lock);
-		for (boost::unordered_map<FileDescriptor, EventHandler>::iterator it = _event_handlers.begin (); it != _event_handlers.end (); ++it) {
+		for (boost::unordered_map<FileDescriptor, EventHandler>::const_iterator it = _event_handlers.begin (); it != _event_handlers.end (); ++it) {
 			g_source_remove (it->second._source_id);
 			g_io_channel_unref (it->second._gio_channel);
 		}
-		for (boost::unordered_map<guint, Linux::ITimerHandler*>::iterator it = _timer_handlers.begin (); it != _timer_handlers.end (); ++it) {
+		for (boost::unordered_map<guint, Linux::ITimerHandler*>::const_iterator it = _timer_handlers.begin (); it != _timer_handlers.end (); ++it) {
 			g_source_remove (it->first);
 		}
 		_event_handlers.clear ();
@@ -118,9 +118,8 @@ public:
 		}
 
 		tresult rv = false;
-
 		Glib::Threads::Mutex::Lock lm (_lock);
-		for (boost::unordered_map<FileDescriptor, EventHandler>::iterator it = _event_handlers.begin (); it != _event_handlers.end ();) {
+		for (boost::unordered_map<FileDescriptor, EventHandler>::const_iterator it = _event_handlers.begin (); it != _event_handlers.end ();) {
 			if (it->second._handler == handler) {
 				g_source_remove (it->second._source_id);
 				g_io_channel_unref (it->second._gio_channel);
@@ -151,15 +150,18 @@ public:
 			return kInvalidArgument;
 		}
 
+		tresult rv = false;
 		Glib::Threads::Mutex::Lock lm (_lock);
-		for (boost::unordered_map<guint, Linux::ITimerHandler*>::iterator it = _timer_handlers.begin (); it != _timer_handlers.end (); ++it) {
+		for (boost::unordered_map<guint, Linux::ITimerHandler*>::const_iterator it = _timer_handlers.begin (); it != _timer_handlers.end ();) {
 			if (it->second == handler) {
 				g_source_remove (it->first);
-				_timer_handlers.erase (it);
-				return kResultTrue;
+				it = _timer_handlers.erase (it);
+				rv = kResultTrue;
+			} else {
+				++it;
 			}
 		}
-		return kResultFalse;
+		return rv;
 	}
 
 	uint32 PLUGIN_API addRef () SMTG_OVERRIDE { return 1; }
