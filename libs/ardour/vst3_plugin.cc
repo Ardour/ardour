@@ -137,6 +137,46 @@ VST3Plugin::parameter_change_handler (VST3PI::ParameterChange t, uint32_t param,
 	}
 }
 
+/* ***************************************************************************/
+
+bool
+VST3Plugin::reconfigure_io (ChanCount in, ChanCount aux_in, ChanCount out)
+{
+	std::cerr << "VST3Plugin::reconfigure_io: in: " << in << " aux_in: " << aux_in << " out: " << out << "\n";
+	_configured_in  = in + aux_in;
+	_configured_out = out;
+
+#if 0
+	_info->n_inputs  = in;
+	_info->n_outputs = out;
+#endif
+
+	/* apply new portlayout */
+	_connected_inputs.clear ();
+	_connected_outputs.clear ();
+	/* assume all I/O is connected by default */
+	for (uint32_t i = 0; i < _configured_in.n_audio (); ++i) {
+		_connected_inputs.push_back (true);
+	}
+	for (uint32_t i = 0; i < _configured_out.n_audio (); ++i) {
+		_connected_outputs.push_back (true);
+	}
+
+#if 1
+	while (_connected_inputs.size () < _plug->n_audio_inputs ()) {
+		_connected_inputs.push_back (false);
+	}
+	while (_connected_outputs.size () < _plug->n_audio_outputs ()) {
+		_connected_outputs.push_back (false);
+	}
+#endif
+
+	/* pre-configure from GUI thread */
+	_plug->enable_io (_connected_inputs, _connected_outputs);
+
+	return true;
+}
+
 /* ****************************************************************************
  * Parameter API
  */
@@ -1080,13 +1120,7 @@ VST3PI::VST3PI (boost::shared_ptr<ARDOUR::VST3PluginModule> m, std::string uniqu
 	_busbuf_in.reserve (_n_bus_in);
 	_busbuf_out.reserve (_n_bus_out);
 
-	/* do not re-order, _io_name is build in sequence */
-	_n_inputs       = count_channels (Vst::kAudio, Vst::kInput,  Vst::kMain);
-	_n_aux_inputs   = count_channels (Vst::kAudio, Vst::kInput,  Vst::kAux);
-	_n_outputs      = count_channels (Vst::kAudio, Vst::kOutput, Vst::kMain);
-	_n_aux_outputs  = count_channels (Vst::kAudio, Vst::kOutput, Vst::kAux);
-	_n_midi_inputs  = count_channels (Vst::kEvent, Vst::kInput,  Vst::kMain);
-	_n_midi_outputs = count_channels (Vst::kEvent, Vst::kOutput, Vst::kMain);
+	update_channelcount ();
 
 	if (!connect_components ()) {
 		//_controller->terminate(); // XXX ?
@@ -1575,6 +1609,23 @@ VST3PI::count_channels (Vst::MediaType media, Vst::BusDirection dir, Vst::BusTyp
 	return n_channels;
 }
 
+void
+VST3PI::update_channelcount ()
+{
+	_io_name[Vst::kAudio][0].clear();
+	_io_name[Vst::kAudio][1].clear();
+	_io_name[Vst::kEvent][0].clear();
+	_io_name[Vst::kEvent][1].clear();
+
+	/* do not re-order, _io_name is build in sequence */
+	_n_inputs       = count_channels (Vst::kAudio, Vst::kInput,  Vst::kMain);
+	_n_aux_inputs   = count_channels (Vst::kAudio, Vst::kInput,  Vst::kAux);
+	_n_outputs      = count_channels (Vst::kAudio, Vst::kOutput, Vst::kMain);
+	_n_aux_outputs  = count_channels (Vst::kAudio, Vst::kOutput, Vst::kAux);
+	_n_midi_inputs  = count_channels (Vst::kEvent, Vst::kInput,  Vst::kMain);
+	_n_midi_outputs = count_channels (Vst::kEvent, Vst::kOutput, Vst::kMain);
+}
+
 Vst::ParamID
 VST3PI::index_to_id (uint32_t p) const
 {
@@ -1645,15 +1696,15 @@ VST3PI::print_parameter (Vst::ParamID id, Vst::ParamValue value) const
 }
 
 uint32_t
-VST3PI::n_audio_inputs () const
+VST3PI::n_audio_inputs (bool with_aux) const
 {
-	return _n_inputs + _n_aux_inputs;
+	return _n_inputs + (with_aux ? _n_aux_inputs : 0);
 }
 
 uint32_t
-VST3PI::n_audio_outputs () const
+VST3PI::n_audio_outputs (bool with_aux) const
 {
-	return _n_outputs + _n_aux_outputs;
+	return _n_outputs +(with_aux ?  _n_aux_outputs : 0);
 }
 
 uint32_t

@@ -2001,6 +2001,11 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 			}
 		}
 		break;
+
+	case Replicate:
+		assert (get_count () > 1);
+		break;
+
 	default:
 		if (_plugins.front()->reconfigure_io (in, aux_in, out) == false) {
 			PluginIoReConfigure (); /* EMIT SIGNAL */

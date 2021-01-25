@@ -132,8 +132,12 @@ public:
 
 	ARDOUR::Plugin::IOPortDescription describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id) const;
 
-	uint32_t n_audio_inputs () const;
-	uint32_t n_audio_outputs () const;
+	uint32_t n_audio_inputs (bool with_aux = true) const;
+	uint32_t n_audio_outputs (bool with_aux = true) const;
+
+	uint32_t n_audio_aux_in () const { return _n_aux_inputs; }
+	uint32_t n_audio_aux_out () const { return _n_aux_outputs; }
+
 
 	/* MIDI/Event interface */
 	void cycle_start ();
@@ -199,6 +203,7 @@ private:
 	bool disconnect_components ();
 
 	bool  update_processor ();
+	void  update_channelcount ();
 	int32 count_channels (Vst::MediaType, Vst::BusDirection, Vst::BusType);
 
 	bool evoral_to_vst3 (Vst::Event&, Evoral::Event<samplepos_t> const&, int32_t);
@@ -330,6 +335,8 @@ public:
 	bool parameter_is_input (uint32_t) const;
 	bool parameter_is_output (uint32_t) const;
 
+	bool reconfigure_io (ChanCount, ChanCount, ChanCount);
+
 	uint32_t designated_bypass_port ();
 
 	std::set<Evoral::Parameter> automatable () const;
@@ -400,6 +407,9 @@ private:
 
 	std::vector<bool> _connected_inputs;
 	std::vector<bool> _connected_outputs;
+
+	ChanCount _configured_in;
+	ChanCount _configured_out;
 };
 
 /* ****************************************************************************/
