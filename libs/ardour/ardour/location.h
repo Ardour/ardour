@@ -130,7 +130,6 @@ public:
 	static PBD::Signal1<void,Location*> start_changed;
 	static PBD::Signal1<void,Location*> flags_changed;
 	static PBD::Signal1<void,Location*> lock_changed;
-	static PBD::Signal1<void,Location*> position_time_domain_changed;
 
 	/* this is sent only when both start and end change at the same time */
 	static PBD::Signal1<void,Location*> changed;

@@ -61,7 +61,6 @@ PBD::Signal1<void,Location*> Location::end_changed;
 PBD::Signal1<void,Location*> Location::start_changed;
 PBD::Signal1<void,Location*> Location::flags_changed;
 PBD::Signal1<void,Location*> Location::lock_changed;
-PBD::Signal1<void,Location*> Location::position_time_domain_changed;
 PBD::Signal1<void,Location*> Location::changed;
 
 Location::Location (Session& s)
@@ -650,15 +649,9 @@ Location::set_position_time_domain (TimeDomain domain)
 		return;
 	}
 
-	if (domain == Temporal::BeatTime) {
-		_start = timepos_t (_start.beats());
-		_end = timepos_t (_end.beats());
-	} else {
-		_start = timepos_t (_start.samples());
-		_end = timepos_t (_end.samples());
-	}
+	_start.set_time_domain (domain);
+	_end.set_time_domain (domain);
 
-	position_time_domain_changed (this); /* EMIT SIGNAL */
 	TimeDomainChanged (); /* EMIT SIGNAL */
 }
 
