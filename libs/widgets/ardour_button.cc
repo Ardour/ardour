@@ -682,7 +682,7 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 		req->height = std::max(req->height, _pixbuf->get_height() + 4);
 	}
 
-	if (_elements & Indicator) {
+	if ((_elements & Indicator) || (_tweaks & OccasionalLED)) {
 		req->width += ceil (_diameter + char_pixel_width());
 		req->height = std::max (req->height, (int) lrint (_diameter) + 4);
 	}
