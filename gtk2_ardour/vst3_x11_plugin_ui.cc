@@ -117,16 +117,22 @@ public:
 			return kInvalidArgument;
 		}
 
+		std::vector<boost::unordered_map<FileDescriptor, EventHandler>::iterator> to_erase;
+
+		tresult rv = false;
+
 		Glib::Threads::Mutex::Lock lm (_lock);
-		for (boost::unordered_map<FileDescriptor, EventHandler>::iterator it = _event_handlers.begin (); it != _event_handlers.end (); ++it) {
+		for (boost::unordered_map<FileDescriptor, EventHandler>::iterator it = _event_handlers.begin (); it != _event_handlers.end ();) {
 			if (it->second._handler == handler) {
 				g_source_remove (it->second._source_id);
 				g_io_channel_unref (it->second._gio_channel);
-				_event_handlers.erase (it);
-				return kResultTrue;
+				it = _event_handlers.erase (it);
+				rv = kResultTrue;
+			} else {
+				++it;
 			}
 		}
-		return kResultFalse;
+		return rv;
 	}
 
 	tresult registerTimer (Linux::ITimerHandler* handler, TimerInterval milliseconds) SMTG_OVERRIDE
