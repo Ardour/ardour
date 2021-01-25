@@ -117,8 +117,6 @@ public:
 			return kInvalidArgument;
 		}
 
-		std::vector<boost::unordered_map<FileDescriptor, EventHandler>::iterator> to_erase;
-
 		tresult rv = false;
 
 		Glib::Threads::Mutex::Lock lm (_lock);
