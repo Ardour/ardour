@@ -2214,8 +2214,6 @@ private:
 	/** true if timecode transmission by the transport is suspended, otherwise false */
 	mutable GATOMIC_QUAL gint _suspend_timecode_transmission;
 
-	void update_locations_after_tempo_map_change (const Locations::LocationList &);
-
 	void start_time_changed (samplepos_t);
 	void end_time_changed (samplepos_t);
 

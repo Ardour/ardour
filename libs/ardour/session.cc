@@ -5549,18 +5549,7 @@ Session::tempo_map_changed ()
 
 	_playlists->update_after_tempo_map_change ();
 
-	_locations->apply (*this, &Session::update_locations_after_tempo_map_change);
-
 	set_dirty ();
-}
-
-void
-Session::update_locations_after_tempo_map_change (const Locations::LocationList& loc)
-{
-#warning NUTEMPO this is probably unnecessary now
-	// for (Locations::LocationList::const_iterator i = loc.begin(); i != loc.end(); ++i) {
-	// (*i)->recompute_samples_from_beat ();
-	// }
 }
 
 /** Ensures that all buffers (scratch, send, silent, etc) are allocated for
