@@ -80,8 +80,7 @@ TrackRecordAxis::TrackRecordAxis (Session* s, boost::shared_ptr<ARDOUR::Route> r
 	, RouteUI (s)
 	, _clear_meters (true)
 	, _route_ops_menu (0)
-	, _route_group_menu (0)
-	, _route_group_button (S_("RTAV|G"))
+	, _playlist_button (S_("RTAV|P"))
 	, _hseparator (1.0)
 	, _vseparator (1.0)
 	, _ctrls_button_size_group (Gtk::SizeGroup::create (Gtk::SIZE_GROUP_BOTH))
@@ -120,10 +119,9 @@ TrackRecordAxis::TrackRecordAxis (Session* s, boost::shared_ptr<ARDOUR::Route> r
 	PropertyList* plist = new PropertyList();
 	plist->add (ARDOUR::Properties::group_mute, true);
 	plist->add (ARDOUR::Properties::group_solo, true);
-	_route_group_menu = new RouteGroupMenu (_session, plist);
 
-	_route_group_button.set_name ("route button");
-	_route_group_button.signal_button_press_event().connect (sigc::mem_fun(*this, &TrackRecordAxis::route_group_click), false);
+	_playlist_button.set_name ("route button");
+	_playlist_button.signal_button_press_event().connect (sigc::mem_fun(*this, &TrackRecordAxis::playlist_click), false);
 
 	_level_meter = new LevelMeterVBox (s);
 	_level_meter->set_meter (_route->shared_peak_meter ().get ());
@@ -140,7 +138,7 @@ TrackRecordAxis::TrackRecordAxis (Session* s, boost::shared_ptr<ARDOUR::Route> r
 	_ctrls.attach (_hseparator,           0, 9, 0, 1, Gtk::EXPAND|FILL, Gtk::SHRINK, 0, 0);
 	_ctrls.attach (_number_label,         0, 1, 1, 2, Gtk::SHRINK,      Gtk::FILL,   4, 2);
 	_ctrls.attach (*rec_enable_button,    1, 2, 1, 2, Gtk::SHRINK,      Gtk::SHRINK, 0, 2);
-	_ctrls.attach (_route_group_button,   2, 3, 1, 2, Gtk::SHRINK,      Gtk::SHRINK, 2, 2);
+	_ctrls.attach (_playlist_button,      2, 3, 1, 2, Gtk::SHRINK,      Gtk::SHRINK, 2, 2);
 	_ctrls.attach (name_label,            3, 4, 1, 2, Gtk::FILL,        Gtk::SHRINK, 4, 2);
 	_ctrls.attach (*monitor_input_button, 4, 5, 1, 2, Gtk::SHRINK,      Gtk::SHRINK, 1, 2);
 	_ctrls.attach (*monitor_disk_button,  5, 6, 1, 2, Gtk::SHRINK,      Gtk::SHRINK, 1, 2);
@@ -150,7 +148,7 @@ TrackRecordAxis::TrackRecordAxis (Session* s, boost::shared_ptr<ARDOUR::Route> r
 
 	set_tooltip (*mute_button, _("Mute"));
 	set_tooltip (*rec_enable_button, _("Record"));
-	set_tooltip (_route_group_button, _("Group"));
+	set_tooltip (_playlist_button, _("Playlist")); // playlist_tip ()
 
 	set_name_label ();
 	update_sensitivity ();
@@ -158,7 +156,7 @@ TrackRecordAxis::TrackRecordAxis (Session* s, boost::shared_ptr<ARDOUR::Route> r
 	_track_number_size_group->add_widget (_number_label);
 	_ctrls_button_size_group->add_widget (*rec_enable_button);
 	_ctrls_button_size_group->add_widget (*mute_button);
-	_ctrls_button_size_group->add_widget (_route_group_button);
+	_ctrls_button_size_group->add_widget (_playlist_button);
 	_monitor_ctrl_size_group->add_widget (*monitor_input_button);
 	_monitor_ctrl_size_group->add_widget (*monitor_disk_button);
 
@@ -169,7 +167,7 @@ TrackRecordAxis::TrackRecordAxis (Session* s, boost::shared_ptr<ARDOUR::Route> r
 	monitor_disk_button->show ();
 	mute_button->show ();
 	_level_meter->show ();
-	_route_group_button.show();
+	_playlist_button.show();
 	_number_label.show ();
 	name_label.show ();
 	_track_summary.show ();
@@ -181,7 +179,6 @@ TrackRecordAxis::TrackRecordAxis (Session* s, boost::shared_ptr<ARDOUR::Route> r
 TrackRecordAxis::~TrackRecordAxis ()
 {
 	delete _level_meter;
-	delete _route_group_menu;
 	delete _route_ops_menu;
 	CatchDeletion (this);
 }
@@ -317,12 +314,33 @@ TrackRecordAxis::route_active_changed ()
 }
 
 void
+TrackRecordAxis::map_frozen ()
+{
+	RouteUI::map_frozen ();
+
+	switch (track()->freeze_state()) {
+		case Track::Frozen:
+			_playlist_button.set_sensitive (false);
+			break;
+		default:
+			_playlist_button.set_sensitive (true);
+			break;
+	}
+
+	update_sensitivity ();
+}
+
+void
 TrackRecordAxis::update_sensitivity ()
 {
 	bool en = _route->active ();
 	monitor_input_button->set_sensitive (en);
 	monitor_disk_button->set_sensitive (en);
 	_ctrls.set_sensitive (en);
+
+	if (!is_track() || track()->mode() != ARDOUR::Normal) {
+		_playlist_button.set_sensitive (false);
+	}
 }
 
 void
@@ -383,20 +401,15 @@ TrackRecordAxis::reset_peak_display ()
 }
 
 bool
-TrackRecordAxis::route_group_click (GdkEventButton* ev)
+TrackRecordAxis::playlist_click (GdkEventButton* ev)
 {
-	if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-		if (_route->route_group()) {
-			_route->route_group()->remove (_route);
-		}
-		return false;
+	if (ev->button != 1) {
+		return true;
 	}
 
-	WeakRouteList r;
-	r.push_back (route ());
-	_route_group_menu->build (r);
-
-	Gtkmm2ext::anchored_menu_popup (_route_group_menu->menu(), &_route_group_button, "", 1, ev->time);
+	build_playlist_menu ();
+	_route->session ().selection().select_stripable_and_maybe_group (_route, false, true, 0);
+	Gtkmm2ext::anchored_menu_popup (playlist_action_menu, &_playlist_button, "", 1, ev->time);
 
 	return true;
 }

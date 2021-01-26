@@ -89,6 +89,7 @@ protected:
 	void set_button_names ();
 	void blink_rec_display (bool onoff);
 	void route_active_changed ();
+	void map_frozen ();
 
 private:
 	void on_theme_changed ();
@@ -100,7 +101,7 @@ private:
 	void reset_route_peak_display (ARDOUR::Route*);
 	void reset_group_peak_display (ARDOUR::RouteGroup*);
 
-	bool route_group_click (GdkEventButton*);
+	bool playlist_click (GdkEventButton*);
 	bool route_ops_click (GdkEventButton*);
 	void build_route_ops_menu ();
 
@@ -116,8 +117,7 @@ private:
 
 	LevelMeterVBox*              _level_meter;
 	ArdourWidgets::ArdourButton  _number_label;
-	RouteGroupMenu*              _route_group_menu;
-	ArdourWidgets::ArdourButton  _route_group_button;
+	ArdourWidgets::ArdourButton  _playlist_button;
 	ArdourWidgets::ArdourHSpacer _hseparator;
 	ArdourWidgets::ArdourVSpacer _vseparator;
 
