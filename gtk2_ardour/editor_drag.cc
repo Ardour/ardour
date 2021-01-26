@@ -2369,8 +2369,7 @@ RegionRippleDrag::RegionRippleDrag (Editor* e, ArdourCanvas::Item* i, RegionView
 	// Rippling accross tracks disabled. Rippling on all tracks is the way to go in the future.
 	allow_moves_across_tracks = false; // (selected_regions.playlists().size() == 1);
 	prev_tav = NULL;
-#warning NUTEMPO need to pick time domain here
-	prev_amount = timecnt_t ();
+
 	exclude = new RegionList;
 	for (RegionSelection::iterator i =selected_regions.begin(); i != selected_regions.end(); ++i) {
 		exclude->push_back((*i)->region());
@@ -2383,6 +2382,8 @@ RegionRippleDrag::RegionRippleDrag (Editor* e, ArdourCanvas::Item* i, RegionView
 	std::set<boost::shared_ptr<ARDOUR::Playlist> > playlists = copy.playlists();
 	std::set<boost::shared_ptr<ARDOUR::Playlist> >::const_iterator pi;
 
+	bool need_time_domain = true;
+
 	for (pi = playlists.begin(); pi != playlists.end(); ++pi) {
 		// find ripple start point on each applicable playlist
 		RegionView *first_selected_on_this_track = NULL;
@@ -2393,11 +2394,18 @@ RegionRippleDrag::RegionRippleDrag (Editor* e, ArdourCanvas::Item* i, RegionView
 				break;
 			}
 		}
+
 		assert (first_selected_on_this_track); // we should always find the region in one of the playlists...
-		add_all_after_to_views (
-				&first_selected_on_this_track->get_time_axis_view(),
-				first_selected_on_this_track->region()->position(),
-				selected_regions, false);
+
+		TimeAxisView* tav = &first_selected_on_this_track->get_time_axis_view();
+
+		if (need_time_domain) {
+			RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*> (tav);
+			prev_amount = timecnt_t (rtav->route()->time_domain());
+			need_time_domain = false;
+		}
+
+		add_all_after_to_views (tav, first_selected_on_this_track->region()->position(), selected_regions, false);
 	}
 
 	if (allow_moves_across_tracks) {
@@ -2453,8 +2461,7 @@ RegionRippleDrag::motion (GdkEvent* event, bool first_move)
 			remove_unselected_from_views (prev_amount, false);
 			// ripple previous playlist according to the regions that have been removed onto the new playlist
 			prev_tav->playlist()->ripple(prev_position, -selection_length, exclude);
-#warning NUTEMPO need to pick time domain here
-			prev_amount = timecnt_t ();
+			prev_amount = timecnt_t (tv->route()->time_domain());
 
 			// move just the selected regions
 			RegionMoveDrag::motion(event, first_move);
