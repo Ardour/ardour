@@ -623,7 +623,7 @@ ShuttleControl::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangl
 	cairo_set_source_rgba (cr, 0, 0, 0, 1);
 	cairo_fill(cr);
 	rounded_rectangle (cr, x + 1, 1, marker_size - 2, get_height() - 2, 3.5);
-	if (_flat_buttons) {
+	if (flat_buttons ()) {
 		uint32_t col = UIConfiguration::instance().color ("shuttle");
 		Gtkmm2ext::set_source_rgba (cr, col);
 	} else {
