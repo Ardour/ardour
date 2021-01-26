@@ -262,7 +262,7 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	uint32_t text_color;
 	uint32_t led_color;
 
-	const float corner_radius = _boxy_buttons ? 0 : std::max(2.f, _corner_radius * UIConfigurationBase::instance().get_ui_scale());
+	const float corner_radius = boxy_buttons () ? 0 : std::max(2.f, _corner_radius * UIConfigurationBase::instance().get_ui_scale());
 
 	if (_update_colors) {
 		set_colors ();
@@ -337,7 +337,7 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	}
 
 	//show the "convex" or "concave" gradient
-	if (!_flat_buttons && (_elements & Body)==Body) {
+	if (!flat_buttons () && (_elements & Body)==Body) {
 		if ( active_state() == Gtkmm2ext::ExplicitActive && ( !((_elements & Indicator)==Indicator) || use_custom_led_color) ) {
 			//concave
 			cairo_set_source (cr, concave_pattern);
@@ -521,7 +521,7 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 		}
 
 		//inset
-		if (!_flat_buttons) {
+		if (!flat_buttons ()) {
 			cairo_arc (cr, 0, 0, _diameter * .5, 0, 2 * M_PI);
 			cairo_set_source (cr, led_inset_pattern);
 			cairo_fill (cr);

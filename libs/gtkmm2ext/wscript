@@ -28,6 +28,7 @@ gtkmm2ext_sources = [
         'application.cc',
         'bindings.cc',
         'cairo_packer.cc',
+        'cairo_theme.cc',
         'cairo_widget.cc',
         'cell_renderer_color_selector.cc',
         'cell_renderer_pixbuf_multi.cc',
