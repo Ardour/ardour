@@ -39,6 +39,7 @@ widgets_sources = [
         'eventboxext.cc',
         'choice.cc',
         'fastmeter.cc',
+        'frame.cc',
         'focus_entry.cc',
         'pane.cc',
         'paths_dialog.cc',
