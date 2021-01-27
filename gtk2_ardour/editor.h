@@ -354,7 +354,7 @@ public:
 	void mixer_strip_width_changed ();
 	void hide_track_in_display (TimeAxisView* tv, bool apply_to_selection = false);
 	void show_track_in_display (TimeAxisView* tv, bool move_into_view = false);
-	void tempo_curve_selected (Temporal::TempoPoint* ts, bool yn);
+	void tempo_curve_selected (Temporal::TempoPoint const * ts, bool yn);
 
 	/* nudge is initiated by transport controls owned by ARDOUR_UI */
 

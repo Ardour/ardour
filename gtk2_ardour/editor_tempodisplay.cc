@@ -216,7 +216,7 @@ Editor::redisplay_grid (bool immediate_redraw)
 	}
 }
 void
-Editor::tempo_curve_selected (Temporal::TempoPoint* ts, bool yn)
+Editor::tempo_curve_selected (Temporal::TempoPoint const * ts, bool yn)
 {
 	if (ts == 0) {
 		return;

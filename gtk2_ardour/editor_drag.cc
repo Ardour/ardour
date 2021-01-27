@@ -3391,8 +3391,6 @@ MeterMarkerDrag::MeterMarkerDrag (Editor* e, ArdourCanvas::Item* i, bool c)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New MeterMarkerDrag\n");
 	assert (_marker);
-
-	_movable = !TempoMap::use()->is_initial (_marker->meter());
 }
 
 void
@@ -3458,7 +3456,7 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 			timepos_t pos;
 
 			if (map->time_domain() == AudioTime) {
-				pos = timepos_t (map->sample_at (bbt, _editor->session()->sample_rate()));
+				pos = timepos_t (map->sample_at (bbt, AudioEngine::instance()->sample_rate()));
 			} else {
 				pos = timepos_t (map->quarters_at (bbt));
 			}
@@ -3757,10 +3755,10 @@ BBTRulerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
 	Drag::start_grab (event, cursor);
 
-#warning NUTEMPO fixme needs new tempo map
-#if 0
-	TempoMap& map (_editor->session()->tempo_map());
-	_tempo = const_cast<TempoSection*> (&map.metric_at (raw_grab_sample().tempo()));
+	TempoMap::fetch_writable ();
+
+	TempoMap::SharedPtr map (TempoMap::use());
+	_tempo = const_cast<TempoPoint*> (&map->metric_at (raw_grab_time().beats()).tempo());
 
 	if (adjusted_current_time (event, false) <= _tempo->time()) {
 		_drag_valid = false;
@@ -3771,7 +3769,7 @@ BBTRulerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 
 	ostringstream sstr;
 	if (_tempo->clamped()) {
-		TempoSection* prev = map.previous_tempo_section (_tempo);
+		TempoPoint const * prev = map->previous_tempo (*_tempo);
 		if (prev) {
 			sstr << "end: " << fixed << setprecision(3) << prev->end_note_types_per_minute() << "\n";
 		}
@@ -3779,37 +3777,26 @@ BBTRulerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 
 	sstr << "start: " << fixed << setprecision(3) << _tempo->note_types_per_minute();
 	show_verbose_cursor_text (sstr.str());
-#endif
 }
 
 void
 BBTRulerDrag::setup_pointer_offset ()
 {
-#warning NUTEMPO fixme needs new tempo map
-#if 0
-	TempoMap& map (_editor->session()->tempo_map());
+	TempoMap::SharedPtr map (TempoMap::use());
 	/* get current state */
-	_before_state = &map.get_state();
+	_before_state = &map->get_state();
 
-	const double beat_at_sample = max (0.0, map.beat_at (raw_grab_sample()));
-	const uint32_t divisions = _editor->get_grid_beat_divisions (0);
-	double beat = 0.0;
+	_grab_qn = max (Beats(), raw_grab_time().beats());
 
-	if (divisions > 0) {
-		beat = floor (beat_at_sample) + (floor (((beat_at_sample - floor (beat_at_sample)) * divisions)) / divisions);
-	} else {
-		/* while it makes some sense for the user to determine the division to 'grab',
-		   grabbing a bar often leads to confusing results wrt the actual tempo section being altered
-		   and the result over steep tempo curves. Use sixteenths.
-		*/
-		beat = floor (beat_at_sample) + (floor (((beat_at_sample - floor (beat_at_sample)) * 4)) / 4);
+	const uint32_t divisions = _editor->get_grid_beat_divisions ();
+
+	if (divisions == 0) {
+		divisions == 4;
 	}
 
-	_grab_qn = map.quarters_at (beat);
+	_grab_qn = _grab_qn.round_to_subdivision (divisions, Temporal::RoundDownAlways);
 
-	_pointer_offset = raw_grab_sample() - map.sample_at_quarter_note (_grab_qn);
-
-#endif
+	_pointer_offset = timepos_t (_grab_qn).distance (raw_grab_time());
 }
 
 void
@@ -3823,25 +3810,24 @@ BBTRulerDrag::motion (GdkEvent* event, bool first_move)
 		_editor->begin_reversible_command (_("stretch tempo"));
 	}
 
-#warning NUTEMPO fixme needs new tempo map
-#if 0
-	TempoMap& map (_editor->session()->tempo_map());
-	samplepos_t pf;
+	TempoMap::SharedPtr map (TempoMap::use());
+	timepos_t pf;
 
 	if (_editor->grid_musical()) {
-		pf = adjusted_current_sample (event, false);
+		pf = adjusted_current_time (event, false);
 	} else {
-		pf = adjusted_current_sample (event);
+		pf = adjusted_current_time (event);
 	}
 
 	if (ArdourKeyboard::indicates_constraint (event->button.state)) {
 		/* adjust previous tempo to match pointer sample */
-		_editor->session()->tempo_map().gui_stretch_tempo (_tempo, map.sample_at_quarter_note (_grab_qn), pf, _grab_qn, map.quarters_at_sample (pf));
+#warning NUTEMPO need to implement this
+		// _editor->session()->tempo_map().gui_stretch_tempo (_tempo, map.sample_at (_grab_qn), pf, _grab_qn, map.quarters_at_sample (pf));
 	}
 
 	ostringstream sstr;
 	if (_tempo->clamped()) {
-		TempoSection* prev = map.previous_tempo_section (_tempo);
+		TempoPoint const * prev = map->previous_tempo (*_tempo);
 		if (prev) {
 			_editor->tempo_curve_selected (prev, true);
 			sstr << "end: " << fixed << setprecision(3) << prev->end_note_types_per_minute() << "\n";
@@ -3849,49 +3835,45 @@ BBTRulerDrag::motion (GdkEvent* event, bool first_move)
 	}
 	sstr << "start: " << fixed << setprecision(3) << _tempo->note_types_per_minute();
 	show_verbose_cursor_text (sstr.str());
-#endif
 }
 
 void
 BBTRulerDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	if (!movement_occurred) {
+		TempoMap::abort_update ();
 		return;
 	}
 
-#warning NUTEMPO fixme needs new tempo map
-#if 0
-	TempoMap& map (_editor->session()->tempo_map());
+	TempoMap::SharedPtr map (TempoMap::use());
 
 	_editor->tempo_curve_selected (_tempo, false);
+
 	if (_tempo->clamped()) {
-		TempoSection* prev_tempo = map.previous_tempo_section (_tempo);
+
+		TempoPoint const * prev_tempo = map->previous_tempo (*_tempo);
+
 		if (prev_tempo) {
 			_editor->tempo_curve_selected (prev_tempo, false);
 		}
 	}
 
 	if (!movement_occurred || !_drag_valid) {
+		TempoMap::abort_update ();
 		return;
 	}
 
-	XMLNode &after = map.get_state();
-	_editor->session()->add_command(new MementoCommand<TempoMap>(map, _before_state, &after));
+	XMLNode &after = TempoMap::use()->get_state();
+
+	_editor->session()->add_command(new MementoCommand<TempoMap>(new Temporal::TempoMap::MementoBinder(), _before_state, &after));
 	_editor->commit_reversible_command ();
-#endif
 }
 
 void
 BBTRulerDrag::aborted (bool moved)
 {
-#warning NUTEMPO fixme needs new tempo map
-#if 0
-	if (moved) {
-		_editor->session()->tempo_map().set_state (*_before_state, Stateful::current_state_version);
-	}
-#endif
+	TempoMap::abort_update ();
 }
-
 
 #warning NUTEMPO fixme no tempo twist drag for now
 #if 0
@@ -4044,12 +4026,13 @@ void
 TempoEndDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
 	Drag::start_grab (event, cursor);
-#warning NUTEMPO fixme needs new tmepo map
-#if 0
-	TempoMap& tmap (_editor->session()->tempo_map());
+
+	TempoMap::fetch_writable();
+
+	TempoMap::SharedPtr tmap (TempoMap::use());
 
 	/* get current state */
-	_before_state = &tmap.get_state();
+	_before_state = &tmap->get_state();
 	if (_tempo->locked_to_meter()) {
 		_drag_valid = false;
 		return;
@@ -4057,10 +4040,11 @@ TempoEndDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 
 	ostringstream sstr;
 
-	TempoSection* prev = 0;
-	if ((prev = tmap.previous_tempo_section (_tempo)) != 0) {
-		_editor->tempo_curve_selected (tmap.previous_tempo_section (_tempo), true);
-		sstr << "end: " << fixed << setprecision(3) << tmap.tempo_section_at_sample (_tempo->sample() - 1).end_note_types_per_minute() << "\n";
+	TempoPoint const * prev = 0;
+	if ((prev = tmap->previous_tempo (*_tempo)) != 0) {
+		_editor->tempo_curve_selected (prev, true);
+		const samplecnt_t sr = AudioEngine::instance()->sample_rate();
+		sstr << "end: " << fixed << setprecision(3) << tmap->tempo_at (samples_to_superclock (_tempo->sample (sr) - 1, sr)).end_note_types_per_minute() << "\n";
 	}
 
 	if (_tempo->clamped()) {
@@ -4069,14 +4053,12 @@ TempoEndDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	}
 
 	show_verbose_cursor_text (sstr.str());
-#endif
 }
 
 void
 TempoEndDrag::setup_pointer_offset ()
 {
-#warning NUTEMPO grab_qn should be timepos_t
-	// _pointer_offset = _grab_qn.distance (raw_grab_time());
+	_pointer_offset = timepos_t (_grab_qn).distance (raw_grab_time());
 }
 
 void
@@ -4086,45 +4068,48 @@ TempoEndDrag::motion (GdkEvent* event, bool first_move)
 		return;
 	}
 
-#warning NUTEMPO fixme needs new tempo map
-#if 0
-	TempoMap& map (_editor->session()->tempo_map());
+	TempoMap::SharedPtr map (TempoMap::use());
 
 	if (first_move) {
 		_editor->begin_reversible_command (_("stretch end tempo"));
 	}
 
-	samplepos_t const pf = adjusted_current_sample (event, false);
-	map.gui_stretch_tempo_end (&map.tempo_section_at_sample (_tempo->sample() - 1), map.sample_at_quarter_note (_grab_qn), pf);
+	timepos_t const pos = adjusted_current_time (event, false);
+#warning NUTEMPO implement this
+	// map->gui_stretch_tempo_end (&map->tempo_section_at_sample (_tempo->sample() - 1), map.sample_at_quarter_note (_grab_qn), pf);
 
 	ostringstream sstr;
-	sstr << "end: " << fixed << setprecision(3) << map.tempo_section_at_sample (_tempo->sample() - 1).end_note_types_per_minute() << "\n";
+	const samplecnt_t sr = AudioEngine::instance()->sample_rate();
+	sstr << "end: " << fixed << setprecision(3) << map->tempo_at (samples_to_superclock (_tempo->sample (sr) - 1, sr)).end_note_types_per_minute() << "\n";
 
 	if (_tempo->clamped()) {
 		sstr << "start: " << fixed << setprecision(3) << _tempo->note_types_per_minute();
 	}
 
 	show_verbose_cursor_text (sstr.str());
-#endif
 }
 
 void
 TempoEndDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	if (!movement_occurred || !_drag_valid) {
+		TempoMap::abort_update ();
 		return;
 	}
 
-#warning NUTEMPO fixme needs new tempo map
-#if 0
-	TempoMap& tmap (_editor->session()->tempo_map());
+	TempoMap::SharedPtr tmap (TempoMap::use());
 
-	XMLNode &after = tmap.get_state();
-	_editor->session()->add_command(new MementoCommand<TempoMap>(tmap, _before_state, &after));
+	TempoMap::update (tmap);
+
+	tmap = TempoMap::use ();
+
+	XMLNode &after = tmap->get_state();
+	_editor->session()->add_command(new MementoCommand<TempoMap>(new Temporal::TempoMap::MementoBinder(), _before_state, &after));
 	_editor->commit_reversible_command ();
 
-	TempoSection* prev = 0;
-	if ((prev = tmap.previous_tempo_section (_tempo)) != 0) {
+	TempoPoint const * prev = 0;
+
+	if ((prev = tmap->previous_tempo (*_tempo)) != 0) {
 		_editor->tempo_curve_selected (prev, false);
 	}
 
@@ -4132,18 +4117,12 @@ TempoEndDrag::finished (GdkEvent* event, bool movement_occurred)
 		_editor->tempo_curve_selected (_tempo, false);
 
 	}
-#endif
 }
 
 void
 TempoEndDrag::aborted (bool moved)
 {
-#warning NUTEMPO fixme needs new tempo map
-#if 0
-	if (moved) {
-		_editor->session()->tempo_map().set_state (*_before_state, Stateful::current_state_version);
-	}
-#endif
+	TempoMap::abort_update ();
 }
 
 CursorDrag::CursorDrag (Editor* e, EditorCursor& c, bool s)
