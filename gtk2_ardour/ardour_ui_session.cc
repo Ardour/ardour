@@ -295,10 +295,6 @@ ARDOUR_UI::session_dialog_response_handler (int response, SessionDialog* session
 void
 ARDOUR_UI::close_session()
 {
-	if (!check_audioengine (_main_window)) {
-		return;
-	}
-
 	if (unload_session (true)) {
 		return;
 	}

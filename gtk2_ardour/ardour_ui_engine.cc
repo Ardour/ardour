@@ -151,7 +151,7 @@ ARDOUR_UI::check_audioengine (Gtk::Window& parent)
 	if (!AudioEngine::instance()->running()) {
 		ArdourMessageDialog msg (parent, string_compose (
 		                                 _("%1 is not connected to any audio backend.\n"
-		                                 "You cannot open or close sessions in this condition"),
+		                                 "You cannot open sessions in this condition"),
 		                                 PROGRAM_NAME));
 		msg.run ();
 		return false;
