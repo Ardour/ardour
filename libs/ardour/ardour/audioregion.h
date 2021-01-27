@@ -132,6 +132,8 @@ class LIBARDOUR_API AudioRegion : public Region
 
 	bool fade_in_is_default () const;
 	bool fade_out_is_default () const;
+	double fade_in_length ();
+	double fade_out_length ();
 
 	void set_fade_in_active (bool yn);
 	void set_fade_in_shape (FadeShape);

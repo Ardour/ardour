@@ -1244,6 +1244,18 @@ AudioRegion::fade_out_is_default () const
 	return _fade_out->size() == 2 && _fade_out->when(true) == 0 && _fade_out->when(false) == 64;
 }
 
+double
+AudioRegion::fade_in_length ()
+{
+	return _fade_in->when(false);
+}
+
+double
+AudioRegion::fade_out_length()
+{
+	return _fade_out->when(false);
+}
+
 void
 AudioRegion::set_default_fade_in ()
 {
