@@ -429,7 +429,7 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 
 		cairo_new_path (cr);
 		Gtkmm2ext::set_source_rgba (cr, text_color);
-		const double text_ypos = (get_height() - _text_height) * .5;
+		const double text_ypos = round ((get_height() - _text_height) * .5);
 
 		if (_elements & Menu) {
 			// always left align (dropdown)
@@ -438,7 +438,7 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 		} else if ( (_elements & Indicator)  == Indicator) {
 			// left/right align depending on LED position
 			if (_led_left) {
-				cairo_move_to (cr, text_margin + _diameter + .5 * char_pixel_width(), text_ypos);
+				cairo_move_to (cr, round (text_margin + _diameter + .5 * char_pixel_width()), text_ypos);
 			} else {
 				cairo_move_to (cr, text_margin, text_ypos);
 			}
@@ -474,7 +474,7 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 			 */
 			if (_xalign < 0) xa = ceil(.5 + (ww * fabs(_xalign) + text_margin));
 
-			cairo_move_to (cr, xa + m1.x0, ya + m1.y0);
+			cairo_move_to (cr, round (xa + m1.x0), round (ya + m1.y0));
 			pango_cairo_update_layout(cr, _layout->gobj());
 			pango_cairo_show_layout (cr, _layout->gobj());
 		}
