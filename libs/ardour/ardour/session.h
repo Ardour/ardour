@@ -409,6 +409,8 @@ public:
 	*/
 	PBD::Signal0<void> RecordArmStateChanged; /* signals changes in recording arming */
 
+	PBD::Signal0<void> UpdateRouteRecordState; /* signals potential change in route recording arming */
+
 	/* Emited when session is loaded */
 	PBD::Signal0<void> SessionLoaded;
 

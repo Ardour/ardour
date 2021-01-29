@@ -6143,6 +6143,7 @@ Session::update_route_record_state ()
 		RecordArmStateChanged ();
 	}
 
+	UpdateRouteRecordState ();
 }
 
 void
