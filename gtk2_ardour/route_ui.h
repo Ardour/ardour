@@ -122,7 +122,6 @@ public:
 
 	void select_midi_patch ();
 
-	bool ignore_toggle;
 	bool wait_for_release;
 	bool multiple_mute_change;
 	bool multiple_solo_change;

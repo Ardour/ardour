@@ -178,8 +178,6 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	timestretch_rect = 0;
 	no_redraw = false;
 
-	ignore_toggle = false;
-
 	route_group_button.set_name ("route button");
 	playlist_button.set_name ("route button");
 	automation_button.set_name ("route button");

@@ -1750,10 +1750,6 @@ RouteUI::route_rename ()
 void
 RouteUI::toggle_comment_editor ()
 {
-//	if (ignore_toggle) {
-//		return;
-//	}
-
 	if (comment_window && comment_window->is_visible ()) {
 		comment_window->hide ();
 	} else {

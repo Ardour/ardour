@@ -176,7 +176,6 @@ MixerStrip::init ()
 	group_menu = 0;
 	route_ops_menu = 0;
 	ignore_comment_edit = false;
-	ignore_toggle = false;
 	comment_area = 0;
 	_width_owner = 0;
 
@@ -1124,20 +1123,12 @@ MixerStrip::input_press (GdkEventButton *ev)
 void
 MixerStrip::bundle_input_chosen (boost::shared_ptr<ARDOUR::Bundle> c)
 {
-	if (ignore_toggle) {
-		return;
-	}
-
 	_route->input()->connect_ports_to_bundle (c, true, this);
 }
 
 void
 MixerStrip::bundle_output_chosen (boost::shared_ptr<ARDOUR::Bundle> c)
 {
-	if (ignore_toggle) {
-		return;
-	}
-
 	_route->output()->connect_ports_to_bundle (c, true, true, this);
 }
 

@@ -367,7 +367,6 @@ FoldbackStrip::init ()
 {
 	_entered_foldback_strip= 0;
 	ignore_comment_edit = false;
-	ignore_toggle = false;
 	comment_area = 0;
 
 	_previous_button.set_name ("mixer strip button");
@@ -844,10 +843,6 @@ FoldbackStrip::output_press (GdkEventButton *ev)
 void
 FoldbackStrip::bundle_output_chosen (boost::shared_ptr<ARDOUR::Bundle> c)
 {
-	if (ignore_toggle) {
-		return;
-	}
-
 	_route->output()->connect_ports_to_bundle (c, true, true, this);
 }
 
