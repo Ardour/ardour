@@ -262,7 +262,6 @@ private:
 	void bundle_input_chosen (boost::shared_ptr<ARDOUR::Bundle>);
 	void bundle_output_chosen (boost::shared_ptr<ARDOUR::Bundle>);
 
-	void diskstream_changed ();
 	void io_changed_proxy ();
 
 	Gtk::Menu *send_action_menu;

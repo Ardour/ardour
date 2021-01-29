@@ -344,18 +344,6 @@ StreamView::playlist_switched (boost::weak_ptr<Track> wtr)
 
 
 void
-StreamView::diskstream_changed ()
-{
-	boost::shared_ptr<Track> t;
-
-	if ((t = _trackview.track()) != 0) {
-		Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&StreamView::display_track, this, t));
-	} else {
-		Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&StreamView::undisplay_track, this));
-	}
-}
-
-void
 StreamView::apply_color (Gdk::Color const& c, ColorTarget target)
 {
 	return apply_color (gdk_color_to_rgba (c), target);

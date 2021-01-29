@@ -389,14 +389,6 @@ MixerStrip::init ()
 
 	_width = (Width) -1;
 
-	/* start off as a passthru strip. we'll correct this, if necessary,
-	   in update_diskstream_display().
-	*/
-
-	/* start off as a passthru strip. we'll correct this, if necessary,
-	   in update_diskstream_display().
-	*/
-
 	if (is_midi_track()) {
 		set_name ("MidiTrackStripBase");
 	} else {
@@ -765,7 +757,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		panners.hide_all ();
 	}
 
-	update_diskstream_display ();
+	route_color_changed ();
 	update_input_display ();
 	update_output_display ();
 
@@ -892,7 +884,6 @@ MixerStrip::set_packed (bool yn)
 	_packed = yn;
 	set_gui_property ("visible", _packed);
 }
-
 
 struct RouteCompareByName {
 	bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
@@ -1196,16 +1187,6 @@ MixerStrip::maybe_add_bundle_to_output_menu (boost::shared_ptr<Bundle> b, ARDOUR
 
 	MenuList& citems = output_menu.items();
 	citems.push_back (MenuElemNoMnemonic (b->name (), sigc::bind (sigc::mem_fun(*this, &MixerStrip::bundle_output_chosen), b)));
-}
-
-void
-MixerStrip::update_diskstream_display ()
-{
-	if (is_track() && input_selector) {
-		input_selector->hide_all ();
-	}
-
-	route_color_changed ();
 }
 
 void
@@ -1579,12 +1560,6 @@ void
 MixerStrip::fast_update ()
 {
 	gpm.update_meters ();
-}
-
-void
-MixerStrip::diskstream_changed ()
-{
-	Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&MixerStrip::update_diskstream_display, this));
 }
 
 void
