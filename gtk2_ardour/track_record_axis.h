@@ -37,6 +37,7 @@
 #include "widgets/ardour_button.h"
 #include "widgets/ardour_spacer.h"
 
+#include "io_button.h"
 #include "level_meter.h"
 #include "route_ui.h"
 
@@ -116,6 +117,7 @@ private:
 	Gtk::Menu* _route_ops_menu;
 
 	LevelMeterVBox*              _level_meter;
+	IOButton                     _input_button;
 	ArdourWidgets::ArdourButton  _number_label;
 	ArdourWidgets::ArdourButton  _playlist_button;
 	ArdourWidgets::ArdourHSpacer _hseparator;

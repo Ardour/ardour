@@ -80,6 +80,7 @@ TrackRecordAxis::TrackRecordAxis (Session* s, boost::shared_ptr<ARDOUR::Route> r
 	, RouteUI (s)
 	, _clear_meters (true)
 	, _route_ops_menu (0)
+	, _input_button (true)
 	, _playlist_button (S_("RTAV|P"))
 	, _hseparator (1.0)
 	, _vseparator (1.0)
@@ -132,19 +133,23 @@ TrackRecordAxis::TrackRecordAxis (Session* s, boost::shared_ptr<ARDOUR::Route> r
 	name_label.set_alignment (0.0, 0.5);
 	name_label.set_width_chars (12);
 
+	_input_button.set_sizing_text ("Capture_8888");
+	_input_button.set_route (rt, this);
+
 	parameter_changed ("editor-stereo-only-meters");
 	parameter_changed ("time-axis-name-ellipsize-mode");
 
-	_ctrls.attach (_hseparator,           0, 9, 0, 1, Gtk::EXPAND|FILL, Gtk::SHRINK, 0, 0);
-	_ctrls.attach (_number_label,         0, 1, 1, 2, Gtk::SHRINK,      Gtk::FILL,   4, 2);
-	_ctrls.attach (*rec_enable_button,    1, 2, 1, 2, Gtk::SHRINK,      Gtk::SHRINK, 0, 2);
-	_ctrls.attach (_playlist_button,      2, 3, 1, 2, Gtk::SHRINK,      Gtk::SHRINK, 2, 2);
-	_ctrls.attach (name_label,            3, 4, 1, 2, Gtk::FILL,        Gtk::SHRINK, 4, 2);
-	_ctrls.attach (*monitor_input_button, 4, 5, 1, 2, Gtk::SHRINK,      Gtk::SHRINK, 1, 2);
-	_ctrls.attach (*monitor_disk_button,  5, 6, 1, 2, Gtk::SHRINK,      Gtk::SHRINK, 1, 2);
-	_ctrls.attach (*_level_meter,         6, 7, 1, 2, Gtk::SHRINK,      Gtk::SHRINK, 2, 2);
-	_ctrls.attach (_vseparator,           7, 8, 1, 2, Gtk::SHRINK,      Gtk::FILL,   2, 0);
-	_ctrls.attach (_track_summary,        8, 9, 1, 2, Gtk::EXPAND|FILL, Gtk::FILL,   1, 0);
+	_ctrls.attach (_hseparator,           0, 10, 0, 1, Gtk::EXPAND|FILL, Gtk::SHRINK, 0, 0);
+	_ctrls.attach (_number_label,         0,  1, 1, 2, Gtk::SHRINK,      Gtk::FILL,   4, 2);
+	_ctrls.attach (_input_button,         1,  2, 1, 2, Gtk::SHRINK,      Gtk::SHRINK, 0, 2);
+	_ctrls.attach (*rec_enable_button,    2,  3, 1, 2, Gtk::SHRINK,      Gtk::SHRINK, 2, 2);
+	_ctrls.attach (_playlist_button,      3,  4, 1, 2, Gtk::SHRINK,      Gtk::SHRINK, 2, 2);
+	_ctrls.attach (name_label,            4,  5, 1, 2, Gtk::FILL,        Gtk::SHRINK, 4, 2);
+	_ctrls.attach (*monitor_input_button, 5,  6, 1, 2, Gtk::SHRINK,      Gtk::SHRINK, 1, 2);
+	_ctrls.attach (*monitor_disk_button,  6,  7, 1, 2, Gtk::SHRINK,      Gtk::SHRINK, 1, 2);
+	_ctrls.attach (*_level_meter,         7,  8, 1, 2, Gtk::SHRINK,      Gtk::SHRINK, 2, 2);
+	_ctrls.attach (_vseparator,           8,  9, 1, 2, Gtk::SHRINK,      Gtk::FILL,   2, 0);
+	_ctrls.attach (_track_summary,        9, 10, 1, 2, Gtk::EXPAND|FILL, Gtk::FILL,   1, 0);
 
 	set_tooltip (*mute_button, _("Mute"));
 	set_tooltip (*rec_enable_button, _("Record"));
@@ -170,6 +175,7 @@ TrackRecordAxis::TrackRecordAxis (Session* s, boost::shared_ptr<ARDOUR::Route> r
 	_playlist_button.show();
 	_number_label.show ();
 	name_label.show ();
+	_input_button.show ();
 	_track_summary.show ();
 	_hseparator.show ();
 	_vseparator.show ();
@@ -336,6 +342,7 @@ TrackRecordAxis::update_sensitivity ()
 	bool en = _route->active ();
 	monitor_input_button->set_sensitive (en);
 	monitor_disk_button->set_sensitive (en);
+	_input_button.set_sensitive (en);
 	_ctrls.set_sensitive (en);
 
 	if (!is_track() || track()->mode() != ARDOUR::Normal) {
