@@ -130,6 +130,7 @@ gtk2_ardour_sources = [
         'insert_remove_time_dialog.cc',
         'instrument_selector.cc',
         'interthread_progress_window.cc',
+        'io_button.cc',
         'io_selector.cc',
         'hit.cc',
         'keyboard.cc',

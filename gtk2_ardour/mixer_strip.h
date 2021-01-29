@@ -54,6 +54,7 @@
 
 #include "axis_view.h"
 #include "control_slave_ui.h"
+#include "io_button.h"
 #include "route_ui.h"
 #include "gain_meter.h"
 #include "panner_ui.h"
@@ -201,13 +202,11 @@ private:
 	void monitor_changed ();
 	void monitor_section_added_or_removed ();
 
-	ArdourWidgets::ArdourButton input_button;
-	ArdourWidgets::ArdourButton output_button;
+	IOButton input_button;
+	IOButton output_button;
 
 	ArdourWidgets::ArdourButton* monitor_section_button;
 
-	void input_button_resized (Gtk::Allocation&);
-	void output_button_resized (Gtk::Allocation&);
 	void comment_button_resized (Gtk::Allocation&);
 
 	ArdourWidgets::ArdourButton* midi_input_enable_button;
@@ -243,24 +242,6 @@ private:
 
 	ArdourWidgets::ArdourButton group_button;
 	RouteGroupMenu*             group_menu;
-
-	gint input_press (GdkEventButton *);
-	gint input_release (GdkEventButton *);
-
-	gint output_press (GdkEventButton *);
-	gint output_release (GdkEventButton *);
-
-	Gtk::Menu input_menu;
-	std::list<boost::shared_ptr<ARDOUR::Bundle> > input_menu_bundles;
-	void maybe_add_bundle_to_input_menu (boost::shared_ptr<ARDOUR::Bundle>, ARDOUR::BundleList const &);
-
-	Gtk::Menu output_menu;
-	std::list<boost::shared_ptr<ARDOUR::Bundle> > output_menu_bundles;
-	void maybe_add_bundle_to_output_menu (boost::shared_ptr<ARDOUR::Bundle>, ARDOUR::BundleList const &,
-	                                      ARDOUR::DataType type = ARDOUR::DataType::NIL);
-
-	void bundle_input_chosen (boost::shared_ptr<ARDOUR::Bundle>);
-	void bundle_output_chosen (boost::shared_ptr<ARDOUR::Bundle>);
 
 	void io_changed_proxy ();
 
@@ -314,12 +295,6 @@ private:
 
 	void reset_strip_style ();
 	void update_sensitivity ();
-
-	ARDOUR::DataType guess_main_type(bool for_input, bool favor_connected = true) const;
-
-	void update_io_button (bool input_button);
-	void port_connected_or_disconnected (boost::weak_ptr<ARDOUR::Port>, boost::weak_ptr<ARDOUR::Port>);
-	void port_pretty_name_changed (std::string);
 
 	bool mixer_strip_enter_event ( GdkEventCrossing * );
 	bool mixer_strip_leave_event ( GdkEventCrossing * );
