@@ -105,6 +105,22 @@ PBD::Signal1<void, boost::shared_ptr<Route> > RouteUI::BusSendDisplayChanged;
 boost::weak_ptr<Route> RouteUI::_showing_sends_to;
 std::string RouteUI::program_port_prefix;
 
+RouteUI::IOSelectorMap RouteUI::input_selectors;
+RouteUI::IOSelectorMap RouteUI::output_selectors;
+
+void
+RouteUI::delete_ioselector (IOSelectorMap& m, boost::shared_ptr<ARDOUR::Route> r)
+{
+	if (!r) {
+		return;
+	}
+	IOSelectorMap::const_iterator i = m.find (r->id ());
+	if (i != m.end ()) {
+		delete i->second;
+		m.erase (i);
+	}
+}
+
 RouteUI::RouteUI (ARDOUR::Session* sess)
 	: monitor_input_button (0)
 	, monitor_disk_button (0)
@@ -114,8 +130,6 @@ RouteUI::RouteUI (ARDOUR::Session* sess)
 	, record_menu(0)
 	, comment_window(0)
 	, comment_area(0)
-	, input_selector (0)
-	, output_selector (0)
 	, playlist_action_menu (0)
 	, _invert_menu(0)
 {
@@ -139,6 +153,9 @@ RouteUI::~RouteUI()
 
 	delete_patch_change_dialog ();
 
+	delete_ioselector (input_selectors, _route);
+	delete_ioselector (output_selectors, _route);
+
 	_route.reset (); /* drop reference to route, so that it can be cleaned up */
 	route_connections.drop_connections ();
 
@@ -147,8 +164,6 @@ RouteUI::~RouteUI()
 	delete sends_menu;
 	delete record_menu;
 	delete comment_window;
-	delete input_selector;
-	delete output_selector;
 	delete monitor_input_button;
 	delete monitor_disk_button;
 	delete playlist_action_menu;
@@ -184,9 +199,6 @@ RouteUI::init ()
 	multiple_solo_change = false;
 	_i_am_the_modifier = 0;
 	_n_polarity_invert = 0;
-
-	input_selector = 0;
-	output_selector = 0;
 
 	setup_invert_buttons ();
 
@@ -280,6 +292,24 @@ RouteUI::self_delete ()
 }
 
 void
+RouteUI::set_session (ARDOUR::Session*s)
+{
+	SessionHandlePtr::set_session (s);
+
+	/* This is needed to clean out IDs of sends, when using output selector
+	 * with MixerStrip::_current_delivery
+	 */
+	if (!s) {
+		assert (input_selectors.empty ());
+		for (IOSelectorMap::const_iterator i = output_selectors.begin(); i != output_selectors.end() ; ++i) {
+			delete i->second;
+		}
+		input_selectors.clear ();
+		output_selectors.clear ();
+	}
+}
+
+void
 RouteUI::set_route (boost::shared_ptr<Route> rp)
 {
 	reset ();
@@ -328,12 +358,6 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	if (self_destruct) {
 		rp->DropReferences.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::self_delete, this), gui_context());
 	}
-
-	delete input_selector;
-	input_selector = 0;
-
-	delete output_selector;
-	output_selector = 0;
 
 	mute_button->set_controllable (_route->mute_control());
 	solo_button->set_controllable (_route->solo_control());
@@ -547,47 +571,44 @@ RouteUI::mute_release (GdkEventButton* /*ev*/)
 void
 RouteUI::edit_output_configuration ()
 {
-	if (output_selector == 0) {
-
-		boost::shared_ptr<Send> send;
-		boost::shared_ptr<IO> output;
-
-		if ((send = boost::dynamic_pointer_cast<Send>(_current_delivery)) != 0) {
-			if (!boost::dynamic_pointer_cast<InternalSend>(send)) {
-				output = send->output();
-			} else {
-				output = _route->output ();
-			}
-		} else {
-			output = _route->output ();
-		}
-
-		output_selector = new IOSelectorWindow (_session, output);
+	boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send>(_current_delivery);
+	if (send && !boost::dynamic_pointer_cast<InternalSend>(send)) {
+		send.reset ();
 	}
 
-	if (output_selector->is_visible()) {
-		output_selector->get_toplevel()->get_window()->raise();
+	PBD::ID id = send ? send->id () : _route->id ();
+
+	if (output_selectors.find (id) == output_selectors.end ()) {
+		output_selectors[_route->id ()] =  new IOSelectorWindow (_session, send ? send->output () : _route->output ());
+	}
+
+	IOSelectorWindow* w = output_selectors[id];
+
+	if (w->is_visible()) {
+		w->get_toplevel()->get_window()->raise();
 	} else {
-		output_selector->present ();
+		w->present ();
 	}
 
-	//output_selector->set_keep_above (true);
+	//w->set_keep_above (true);
 }
 
 void
 RouteUI::edit_input_configuration ()
 {
-	if (input_selector == 0) {
-		input_selector = new IOSelectorWindow (_session, _route->input());
+	if (input_selectors.find (_route->id ()) == input_selectors.end ()) {
+		input_selectors[_route->id ()] = new IOSelectorWindow (_session, _route->input());
 	}
 
-	if (input_selector->is_visible()) {
-		input_selector->get_toplevel()->get_window()->raise();
+	IOSelectorWindow* w = input_selectors[_route->id ()];
+
+	if (w->is_visible()) {
+		w->get_toplevel()->get_window()->raise();
 	} else {
-		input_selector->present ();
+		w->present ();
 	}
 
-	//input_selector->set_keep_above (true);
+	//w->set_keep_above (true);
 }
 
 bool

@@ -96,6 +96,7 @@ public:
 
 	boost::shared_ptr<ARDOUR::Stripable> stripable() const;
 
+	virtual void set_session (ARDOUR::Session*);
 	virtual void set_route (boost::shared_ptr<ARDOUR::Route>);
 	virtual void set_button_names () = 0;
 
@@ -278,8 +279,13 @@ protected:
 
 	ArdourWindow*  comment_window;
 	Gtk::TextView* comment_area;
-	IOSelectorWindow *input_selector;
-	IOSelectorWindow *output_selector;
+
+	typedef std::map <PBD::ID, IOSelectorWindow*> IOSelectorMap;
+
+	static IOSelectorMap input_selectors;
+	static IOSelectorMap output_selectors;
+
+	static void delete_ioselector (IOSelectorMap&, boost::shared_ptr<ARDOUR::Route>);
 
 	PBD::ScopedConnectionList route_connections;
 	bool self_destruct;
