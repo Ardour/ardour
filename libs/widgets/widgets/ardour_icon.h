@@ -52,6 +52,7 @@ namespace ArdourWidgets { namespace ArdourIcon {
 		StripWidth,
 		CloseCross,
 		HideEye,
+		PlusSign,
 		ScrollLeft,
 		ScrollRight,
 		NudgeLeft,

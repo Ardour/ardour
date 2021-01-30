@@ -907,6 +907,20 @@ static void icon_nudge_right (cairo_t *cr, const int width, const int height, co
 
 }
 
+static void icon_plus_sign (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
+{
+	const double lw = DEFAULT_LINE_WIDTH;
+	const double lc = fmod (lw * .5, 1.0);
+	const double xc = rint (width * .5) - lc;
+	const double yc = rint (height * .5) - lc;
+	const double ln = rint (std::min (width, height) * .2);
+
+	cairo_rectangle (cr, xc - lw * .5, yc - ln, lw,  ln * 2);
+	cairo_rectangle (cr, xc - ln, yc - lw * .5, ln * 2,  lw);
+
+  Gtkmm2ext::set_source_rgba (cr, fg_color);
+  cairo_fill (cr);
+}
 /** mixer strip narrow/wide */
 static void icon_strip_width (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
 {
@@ -985,7 +999,7 @@ static void icon_din_midi (cairo_t *cr, const int width, const int height, const
  * Plugin Window Buttons
  */
 
-static void icon_plus_sign (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
+static void icon_add_sign (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
 {
 	const double lw = DEFAULT_LINE_WIDTH;
 	const double lc = fmod (lw * .5, 1.0);
@@ -1282,6 +1296,9 @@ ArdourWidgets::ArdourIcon::render (cairo_t *cr,
 		case HideEye:
 			icon_hide_eye (cr, width, height, fg_color);
 			break;
+		case PlusSign:
+			icon_plus_sign (cr, width, height, fg_color);
+			break;
 		case StripWidth:
 			icon_strip_width (cr, width, height, fg_color);
 			break;
@@ -1339,7 +1356,7 @@ ArdourWidgets::ArdourIcon::render (cairo_t *cr,
 			icon_tool_content (cr, width, height);
 			break;
 		case PsetAdd:
-			icon_plus_sign (cr, width, height, fg_color);
+			icon_add_sign (cr, width, height, fg_color);
 			break;
 		case PsetSave:
 			icon_save_arrow_box (cr, width, height, fg_color);
