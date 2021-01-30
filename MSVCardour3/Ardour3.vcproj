@@ -720,6 +720,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\io_button.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\io_selector.cc"
 				>
 			</File>
@@ -1815,6 +1819,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\interthread_progress_window.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\io_button.h"
 				>
 			</File>
 			<File
