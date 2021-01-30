@@ -66,6 +66,7 @@ ArdourButton::ArdourButton (Element e, bool toggle)
 	, _char_pixel_width (0)
 	, _char_pixel_height (0)
 	, _char_avg_pixel_width (0)
+	, _custom_font_set (false)
 	, _text_width (0)
 	, _text_height (0)
 	, _diameter (0)
@@ -113,6 +114,7 @@ ArdourButton::ArdourButton (const std::string& str, Element e, bool toggle)
 	, _char_pixel_width (0)
 	, _char_pixel_height (0)
 	, _char_avg_pixel_width (0)
+	, _custom_font_set (false)
 	, _text_width (0)
 	, _text_height (0)
 	, _diameter (0)
@@ -179,6 +181,7 @@ ArdourButton::set_layout_font (const Pango::FontDescription& fd)
 		queue_resize ();
 		_char_pixel_width = 0;
 		_char_pixel_height = 0;
+		_custom_font_set = true;
 	}
 }
 
@@ -974,7 +977,7 @@ ArdourButton::on_size_allocate (Allocation& alloc)
 	setup_led_rect ();
 	if (_layout) {
 		/* re-center text */
-		_layout->get_pixel_size (_text_width, _text_height);
+		//_layout->get_pixel_size (_text_width, _text_height);
 	}
 }
 
@@ -1047,13 +1050,20 @@ ArdourButton::action_toggled ()
 }
 
 void
-ArdourButton::on_style_changed (const RefPtr<Gtk::Style>&)
+ArdourButton::on_style_changed (const RefPtr<Gtk::Style>& style)
 {
-	_update_colors = true;
+	CairoWidget::on_style_changed (style);
+	Glib::RefPtr<Gtk::Style> const& new_style = get_style();
+
 	CairoWidget::set_dirty ();
+	_update_colors = true;
 	_char_pixel_width = 0;
 	_char_pixel_height = 0;
-	if (is_realized()) {
+
+	if (!_custom_font_set && _layout && _layout->get_font_description () != new_style->get_font ()) {
+		_layout->set_font_description (new_style->get_font ());
+		queue_resize ();
+	} else if (is_realized()) {
 		queue_resize ();
 	}
 }
@@ -1288,6 +1298,7 @@ ArdourButton::ensure_layout ()
 	if (!_layout) {
 		ensure_style ();
 		_layout = Pango::Layout::create (get_pango_context());
+		_layout->set_font_description (get_style()->get_font());
 		_layout->set_ellipsize(_ellipsis);
 		if (_layout_ellipsize_width > 3 * PANGO_SCALE) {
 			_layout->set_width (_layout_ellipsize_width - 3* PANGO_SCALE);
