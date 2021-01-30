@@ -33,6 +33,7 @@
 #include "ardour/profile.h"
 #include "ardour/region.h"
 #include "ardour/session.h"
+#include "ardour/session_playlist.h"
 
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/keyboard.h"
@@ -70,6 +71,7 @@ RecorderUI::RecorderUI ()
 	, _btn_rec_all (_("Rec Arm All"))
 	, _btn_rec_none (_("Rec Arm None"))
 	, _btn_rec_forget (_("Stop and Forget Capture"))
+	, _btn_new_take (_("New Take"))
 	, _btn_peak_reset (_("Reset Peak Hold"))
 	, _meter_box_width (50)
 	, _meter_area_cols (2)
@@ -133,6 +135,10 @@ RecorderUI::RecorderUI ()
 	_btn_rec_forget.show ();
 	_btn_rec_forget.set_related_action (ActionManager::get_action (X_("Transport"), X_("ToggleRollForgetCapture")));
 
+	_btn_new_take.set_name ("generic button");
+	_btn_new_take.show ();
+	_btn_new_take.signal_clicked.connect (sigc::mem_fun (*this, &RecorderUI::new_take));
+
 	_btn_peak_reset.set_name ("generic button");
 	_btn_peak_reset.show ();
 	_btn_peak_reset.signal_clicked.connect (sigc::mem_fun (*this, &RecorderUI::peak_reset));
@@ -141,12 +147,15 @@ RecorderUI::RecorderUI ()
 	_toolbar.pack_start (_btn_rec_all, false, false, 2);
 	_toolbar.pack_start (_btn_rec_none, false, false);
 	_toolbar.pack_start (*manage (new ArdourVSpacer), false, false);
+	_toolbar.pack_start (_btn_new_take, false, false);
+	_toolbar.pack_start (*manage (new ArdourVSpacer), false, false);
 	_toolbar.pack_start (_btn_peak_reset, false, false);
 	_toolbar.pack_start (*manage (new ArdourVSpacer), false, false);
 	_toolbar.pack_start (_btn_rec_forget, false, false);
 
 	set_tooltip (_btn_rec_all, _("Record enable all tracks"));
 	set_tooltip (_btn_rec_none, _("Disable recording of all tracks"));
+	set_tooltip (_btn_new_take, _("Create new playlists for all rec-armed tracks"));
 	set_tooltip (_btn_peak_reset, _("Reset peak-hold indicator of all input meters"));
 
 	update_title ();
@@ -339,6 +348,7 @@ RecorderUI::update_sensitivity ()
 
 	_btn_rec_all.set_sensitive (en);
 	_btn_rec_none.set_sensitive (en);
+	_btn_new_take.set_sensitive (en && !_session->actively_recording ());
 
 	for (InputPortMap::const_iterator i = _input_ports.begin (); i != _input_ports.end (); ++i) {
 		i->second->set_sensitive (en);
@@ -980,6 +990,35 @@ RecorderUI::arm_none ()
 	if (_session) {
 		_session->set_all_tracks_record_enabled (false);
 	}
+}
+
+void
+RecorderUI::new_take ()
+{
+	if (!_session || _session->actively_recording()) {
+		return;
+	}
+
+	set<RouteUI*> routes;
+
+	for (list<TrackRecordAxis*>::const_iterator i = _recorders.begin (); i != _recorders.end (); ++i) {
+		assert ((*i)->track ());
+		if ((*i)->track ()->rec_enable_control ()->get_value ()) {
+			routes.insert (*i);
+		}
+	}
+
+	if (routes.empty ()) {
+		return;
+	}
+
+	//_session->begin_reversible_command (_("new playlists"));
+	vector<boost::shared_ptr<Playlist> > playlists;
+	_session->playlists()->get (playlists);
+	for (set<RouteUI*>::iterator i = routes.begin(); i != routes.end(); ++i) {
+		(*i)->use_new_playlist (false, playlists, false);
+	}
+	//_session->commit_reversible_command ();
 }
 
 void
