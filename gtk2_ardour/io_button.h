@@ -62,12 +62,12 @@ private:
 	boost::shared_ptr<ARDOUR::Track> track () const;
 	ARDOUR::DataType                 guess_main_type (bool favor_connected = true) const;
 
-	bool                                         _input;
-	boost::shared_ptr<ARDOUR::Route>             _route;
-	RouteUI*                                     _route_ui;
-	Gtk::Menu                                    _menu;
-	std::list<boost::shared_ptr<ARDOUR::Bundle>> _menu_bundles;
-	PBD::ScopedConnectionList                    _connections;
+	bool                                          _input;
+	boost::shared_ptr<ARDOUR::Route>              _route;
+	RouteUI*                                      _route_ui;
+	Gtk::Menu                                     _menu;
+	std::list<boost::shared_ptr<ARDOUR::Bundle> > _menu_bundles;
+	PBD::ScopedConnectionList                     _connections;
 };
 
 #endif
