@@ -58,7 +58,7 @@
 using Temporal::max_samplepos;
 using Temporal::max_samplecnt;
 
-#if __GNUC__ < 3
+#if defined (__GNUC__) && (__GNUC__ < 3)
 typedef int intptr_t;
 #endif
 

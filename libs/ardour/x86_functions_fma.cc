@@ -17,6 +17,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#ifdef FPU_AVX_FMA_SUPPORT
+
 #include "ardour/mix.h"
 
 #include <immintrin.h>
@@ -135,3 +137,5 @@ x86_fma_mix_buffers_with_gain(
 		}
 	} while (0);
 }
+
+#endif // FPU_AVX_FMA_SUPPORT

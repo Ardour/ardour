@@ -753,7 +753,7 @@ bool bValidPath = false;
 #if (_WIN32_WINNT >= 0x0500)
 				if (0 == strRootFileSystemType.compare("NTFS"))
 				{
-					if (TestForMinimumSpecOS()) // Hard links were only available from Win2K onwards
+					if (TestForMinimumSpecOS(NULL)) // Hard links were only available from Win2K onwards
 						if (0 == CreateHardLinkA(link_filepath, existing_filepath, NULL))
 						{	// Note that the above API call cannot create a link to a directory, so
 							// should we also be checking that the supplied path was actually a file?
@@ -882,7 +882,7 @@ bool bValidPath = false;
 				std::transform(strRootFileSystemType.begin(), strRootFileSystemType.end(), strRootFileSystemType.begin(), ::toupper);
 #if (_WIN32_WINNT >= 0x0500)
 				if (0 == strRootFileSystemType.compare("NTFS"))
-					if (TestForMinimumSpecOS()) // Hard links were only available from Win2K onwards
+					if (TestForMinimumSpecOS(NULL)) // Hard links were only available from Win2K onwards
 						if (0 == DeleteFileA(link_filepath))
 							ret = GetLastError();
 						else

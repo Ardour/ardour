@@ -217,18 +217,22 @@ LIBPBD_API double   PBD_APICALLTYPE trunc(double x);
 
 namespace PBD {
 
-LIBPBD_API bool     PBD_APICALLTYPE TestForMinimumSpecOS(char *revision="currently ignored");
-LIBPBD_API char*    PBD_APICALLTYPE realpath    (const char *original_path, char resolved_path[_MAX_PATH+1]);
-LIBPBD_API int      PBD_APICALLTYPE mkstemp     (char *template_name);
-LIBPBD_API int      PBD_APICALLTYPE ntfs_link   (const char *existing_filepath, const char *link_filepath);
-LIBPBD_API int      PBD_APICALLTYPE ntfs_unlink (const char *link_filepath);
-
 // These are used to replicate 'dirent.h' functionality
 LIBPBD_API DIR*           PBD_APICALLTYPE opendir  (const char *szPath);
 LIBPBD_API struct dirent* PBD_APICALLTYPE readdir  (DIR *pDir);
 LIBPBD_API int            PBD_APICALLTYPE closedir (DIR *pDir);
 
-}  // namespace PBD
+#if defined(_MSC_VER) && (_MSC_VER < 1900)
+LIBPBD_API char*    PBD_APICALLTYPE realpath    (const char *original_path, char resolved_path[_MAX_PATH+1]);
+LIBPBD_API int      PBD_APICALLTYPE mkstemp     (char *template_name);
+
+// JE - 30-01-2021 (AFAICT these ones aren't needed any more) 
+LIBPBD_API bool     PBD_APICALLTYPE TestForMinimumSpecOS(char *revision="currently ignored");
+LIBPBD_API int      PBD_APICALLTYPE ntfs_link   (const char *existing_filepath, const char *link_filepath);
+LIBPBD_API int      PBD_APICALLTYPE ntfs_unlink (const char *link_filepath);
+#endif
+
+}  // namespace PBD */
 
 #ifdef __cplusplus
 } /* extern "C" */
