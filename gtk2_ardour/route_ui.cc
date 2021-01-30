@@ -114,7 +114,7 @@ RouteUI::delete_ioselector (IOSelectorMap& m, boost::shared_ptr<ARDOUR::Route> r
 	if (!r) {
 		return;
 	}
-	IOSelectorMap::const_iterator i = m.find (r->id ());
+	IOSelectorMap::iterator i = m.find (r->id ());
 	if (i != m.end ()) {
 		delete i->second;
 		m.erase (i);
