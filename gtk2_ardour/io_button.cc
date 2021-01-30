@@ -608,7 +608,7 @@ IOButton::maybe_add_bundle_to_menu (boost::shared_ptr<Bundle> b, ARDOUR::BundleL
 	}
 
 	/* Avoid adding duplicates */
-	list<boost::shared_ptr<Bundle>>::iterator i = _menu_bundles.begin ();
+	list<boost::shared_ptr<Bundle> >::iterator i = _menu_bundles.begin ();
 	while (i != _menu_bundles.end () && b->has_same_ports (*i) == false) {
 		++i;
 	}
