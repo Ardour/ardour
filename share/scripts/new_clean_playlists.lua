@@ -26,6 +26,17 @@ function factory (params) return function ()
 			is_audio = true
 		end
 
+		local main_pl_name = track:name() .. "._MAIN_"
+		local main_pl_ex_name = track:name() .. "_ExMAIN_"
+
+		-- find the playlist name track_name._MAIN_
+		for pl in Session:playlists():playlists_for_track (track):iter() do
+			if pl:name() == main_pl_name then
+				pl:set_name(main_pl_ex_name)
+				break
+			end
+		end
+
 		-- copy current playlist, get new playlist and rename it
 		-- http://manual.ardour.org/lua-scripting/class_reference/#ARDOUR:Playlist
         track:use_copy_playlist()
@@ -53,11 +64,11 @@ function factory (params) return function ()
 				local ra = r:to_audioregion()
 
 				if ra:fade_in_active() then
-					r_no_cut_before = r_front + math.floor(ra:fade_in_length()) + 64
+					r_no_cut_before = r_front + ra:fade_in_length() + 64
 				end
 
 				if ra:fade_out_active() then
-					r_no_cut_after = r_end - math.floor(ra:fade_out_length()) - 64
+					r_no_cut_after = r_end - ra:fade_out_length() - 64
 				end
 			end
 
@@ -78,11 +89,11 @@ function factory (params) return function ()
 					cut_point_right = cut_point_right - 64
 
 					if rga:fade_in_active() then
-						cut_point_left = cut_point_left + math.floor(rga:fade_in_length())
+						cut_point_left = cut_point_left + rga:fade_in_length()
 					end
 
 					if rga:fade_out_active() then
-						cut_point_right = cut_point_right - math.floor(rga:fade_out_length())
+						cut_point_right = cut_point_right - rga:fade_out_length()
 					end
 				end
 

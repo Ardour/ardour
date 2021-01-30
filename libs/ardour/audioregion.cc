@@ -1244,16 +1244,18 @@ AudioRegion::fade_out_is_default () const
 	return _fade_out->size() == 2 && _fade_out->when(true) == 0 && _fade_out->when(false) == 64;
 }
 
-double
+samplecnt_t
 AudioRegion::fade_in_length ()
 {
-	return _fade_in->when(false);
+	samplecnt_t fade_in_length = (samplecnt_t) _fade_in->when(false);
+	return fade_in_length;
 }
 
-double
-AudioRegion::fade_out_length()
+samplecnt_t
+AudioRegion::fade_out_length ()
 {
-	return _fade_out->when(false);
+	samplecnt_t fade_out_length = (samplecnt_t) _fade_out->when(false);
+	return fade_out_length;
 }
 
 void
