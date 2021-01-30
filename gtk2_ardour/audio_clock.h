@@ -256,7 +256,6 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	ARDOUR::samplecnt_t parse_as_seconds_distance (const std::string&);
 	ARDOUR::samplecnt_t parse_as_samples_distance (const std::string&);
 
-	void set_font (Pango::FontDescription);
 	void set_colors ();
 	void show_edit_status (int length);
 	int  merge_input_and_edit_string ();

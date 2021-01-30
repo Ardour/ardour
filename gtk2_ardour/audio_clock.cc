@@ -173,37 +173,7 @@ AudioClock::on_realize ()
 	first_width = req.width;
 	first_height = req.height;
 
-	// XXX FIX ME: define font based on ... ???
-	// set_font ();
 	set_colors ();
-}
-
-void
-AudioClock::set_font (Pango::FontDescription font)
-{
-	Glib::RefPtr<Gtk::Style> style = get_style ();
-	Pango::AttrFontDesc* font_attr;
-
-	font_size = font.get_size();
-	font_attr = new Pango::AttrFontDesc (Pango::Attribute::create_attr_font_desc (font));
-
-	normal_attributes.change (*font_attr);
-	editing_attributes.change (*font_attr);
-	delete font_attr;
-
-	/* get the figure width for the font. This doesn't have to super
-	 * accurate since we only use it to measure the (roughly 1 character)
-	 * offset from the position Pango tells us for the "cursor"
-	 */
-
-	Glib::RefPtr<Pango::Layout> tmp = Pango::Layout::create (get_pango_context());
-	int ignore_height;
-
-	tmp->set_text ("8");
-	tmp->get_pixel_size (em_width, ignore_height);
-
-	/* force redraw of markup with new font-size */
-	AudioClock::set (last_when, true);
 }
 
 void
@@ -2280,11 +2250,18 @@ AudioClock::on_style_changed (const Glib::RefPtr<Gtk::Style>& old_style)
 {
 	CairoWidget::on_style_changed (old_style);
 
+	Glib::RefPtr<Gtk::Style> const& new_style = get_style ();
+	if (_layout && (_layout->get_font_description ().gobj () == 0 || _layout->get_font_description () != new_style->get_font ())) {
+		_layout->set_font_description (new_style->get_font ());
+		queue_resize ();
+	} else if (is_realized ()) {
+		queue_resize ();
+	}
+
 	Gtk::Requisition req;
 	set_clock_dimensions (req);
 
-	/* XXXX fix me ... we shouldn't be using GTK styles anyway */
-	// set_font ();
+	/* set-colors also sets up font-attributes */
 	set_colors ();
 }
 
