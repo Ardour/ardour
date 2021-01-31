@@ -79,6 +79,7 @@ setup_enum_writer ()
 	MeterHold _MeterHold;
 	VUMeterStandard _VUMeterStandard;
 	MeterLineUp _MeterLineUp;
+	InputMeterLayout _InputMeterLayout;
 	EditMode _EditMode;
 	RegionPoint _RegionPoint;
 	Placement _Placement;
@@ -297,6 +298,11 @@ setup_enum_writer ()
 	REGISTER_ENUM (MeteringLineUp18);
 	REGISTER_ENUM (MeteringLineUp15);
 	REGISTER (_MeterLineUp);
+
+	REGISTER_ENUM (LayoutVertical);
+	REGISTER_ENUM (LayoutHorizontal);
+	REGISTER_ENUM (LayoutAutomatic);
+	REGISTER (_InputMeterLayout);
 
 	REGISTER_ENUM (Slide);
 	REGISTER_ENUM (Splice);
