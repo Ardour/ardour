@@ -786,6 +786,7 @@ private:
 	bool set_selected_control_point_from_click (bool press, Selection::Operation op = Selection::Set);
 	void set_selected_track_from_click (bool press, Selection::Operation op = Selection::Set, bool no_remove=false);
 	void set_selected_track_as_side_effect (Selection::Operation op);
+	bool selection_contains_isolated_equivalent_region ();
 	bool set_selected_regionview_from_click (bool press, Selection::Operation op = Selection::Set);
 
 	bool set_selected_regionview_from_map_event (GdkEventAny*, StreamView*, boost::weak_ptr<ARDOUR::Region>);
