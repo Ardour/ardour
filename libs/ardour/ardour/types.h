@@ -484,6 +484,12 @@ enum MeterLineUp {
 	MeteringLineUp15
 };
 
+enum InputMeterLayout {
+	LayoutVertical,
+	LayoutHorizontal,
+	LayoutAutomatic,
+};
+
 enum PFLPosition {
 	/** PFL signals come from before pre-fader processors */
 	PFLFromBeforeProcessors,
