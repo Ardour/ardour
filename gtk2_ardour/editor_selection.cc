@@ -639,13 +639,10 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op)
 	}
 
 	if (op == Selection::Toggle || op == Selection::Set) {
-// 		bool isolate_region = (selection->regions.empty() || selection_contains_isolated_equivalent_region());
-		
 		switch (op) {
 		case Selection::Toggle:
-			
-			
 			if (selection->selected (clicked_regionview)) {
+
 				if (press) {
 
 					/* whatever was clicked was selected already; do nothing here but allow
@@ -655,12 +652,13 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op)
 					button_release_can_deselect = true;
 
 				} else {
+
 					if (button_release_can_deselect) {
-						
+
 						if (selection->regions.empty() || selection_contains_isolated_equivalent_region()) {
 							/* just remove this one region, but only on a permitted button release */
 							selection->remove (clicked_regionview);
-							
+
 						} else {
 							/* remove all equivalents regions, but only on a permitted button release */
 							get_equivalent_regions (clicked_regionview, all_equivalent_regions, ARDOUR::Properties::group_select.property_id);
@@ -669,7 +667,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op)
 								selection->remove((*r));
 							}
 						}
-						
+
 						commit = true;
 
 						/* no more deselect action on button release till a new press
@@ -683,15 +681,15 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op)
 			} else {
 
 				if (press) {
-					
+
 					if (selection->regions.empty() || selection_contains_isolated_equivalent_region()) {
-						
+
 						all_equivalent_regions.push_back (clicked_regionview);
-						
+
 					} else {
 						
 						get_equivalent_regions (clicked_regionview, all_equivalent_regions, ARDOUR::Properties::group_select.property_id);
-						
+
 					}
 
 					/* add all the equivalent regions, but only on button press */
@@ -707,14 +705,20 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op)
 
 		case Selection::Set:
 			if (!selection->selected (clicked_regionview)) {
+
 				get_equivalent_regions (clicked_regionview, all_equivalent_regions, ARDOUR::Properties::group_select.property_id);
 				selection->set (all_equivalent_regions);
 				commit = true;
+
 			} else {
 				/* clicked on an already selected region */
+
 				if (press)
+
 					goto out;
+
 				else {
+
 					if (selection->regions.size() > 1) {
 						/* collapse region selection down to just this one region (and its equivalents) */
 						get_equivalent_regions(clicked_regionview, all_equivalent_regions, ARDOUR::Properties::group_select.property_id);
