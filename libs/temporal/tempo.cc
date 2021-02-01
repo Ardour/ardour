@@ -1768,6 +1768,13 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 		Point* first_of_three = 0;
 		superclock_t limit = INT64_MAX;
 
+		DEBUG_TRACE (DEBUG::Grid, string_compose ("start %5 end %6 bbt %7 find first/limit with limit = %1 next_t %2 next_m %3 next_b %4\n",
+		                                          limit,
+		                                          (nxt_t != _tempos.end()   ? nxt_t->sclock() : -1),
+		                                          (nxt_m != _meters.end()   ? nxt_m->sclock() : -1),
+		                                          (nxt_b != _bartimes.end() ? nxt_b->sclock() : -1),
+		                                          start, end, bbt));
+
 		if (nxt_t != _tempos.end() && limit >= nxt_t->sclock()) {
 			first_of_three = &*nxt_t;
 			limit = first_of_three->sclock();
@@ -1783,12 +1790,16 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 			limit = first_of_three->sclock();
 		}
 
+		DEBUG_TRACE (DEBUG::Grid, string_compose ("after checking fo3 = %1\n", (first_of_three ? first_of_three->sclock() : -1)));
+
 		if (first_of_three) {
 			if (nxt_m != _meters.end() && nxt_m->sclock() == first_of_three->sclock()) {
+				DEBUG_TRACE (DEBUG::Grid, "will advance to next meter\n");
 				advance_meter = true;
 			}
 
 			if (nxt_t != _tempos.end() && nxt_t->sclock() == first_of_three->sclock()) {
+				DEBUG_TRACE (DEBUG::Grid, "will advance to next tempo\n");
 				advance_tempo = true;
 			}
 
@@ -1812,12 +1823,14 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 			   to consider, so just finish up.
 			*/
 
+			DEBUG_TRACE (DEBUG::Grid, string_compose ("reached end, no more t/m/b, finish between %1 .. %2\n", start, end));
+
 			const superclock_t step  = metric.superclocks_per_grid_at (start);
 
 			while (start < end) {
 				const Temporal::Beats beats = metric.quarters_at_superclock (start);
 				ret.push_back (TempoMapPoint (*this, metric, start, beats, bbt));
-				DEBUG_TRACE (DEBUG::Grid, string_compose ("G %1\t       %2\n", metric, ret.back()));
+				DEBUG_TRACE (DEBUG::Grid, string_compose ("Gend %1\t       %2\n", metric, ret.back()));
 				start += step;
 				bbt = metric.bbt_at (start);
 			}
@@ -1883,6 +1896,8 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 
 		/* back in outer loop. Check to see if we passed a marker */
 
+		DEBUG_TRACE (DEBUG::Grid, string_compose ("pass-marker-check fo3 %1 start %2 fo2->sc %3\n", first_of_three, start, (first_of_three ? first_of_three->sclock() : -1)));
+
 		if (first_of_three && (start >= first_of_three->sclock())) {
 
 			if (advance_tempo) {
@@ -1918,6 +1933,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 				 */
 
 				bbt = first_of_three->bbt ();
+				DEBUG_TRACE (DEBUG::Grid, string_compose ("reset bbt to %1\n", bbt));
 
 				if (bar_mod != 0) {
 
@@ -2016,6 +2032,7 @@ std::ostream&
 std::operator<<(std::ostream& str, TempoMapPoint const & tmp)
 {
 	str << '@' << std::setw (12) << tmp.sclock() << ' ' << tmp.sclock() / (double) superclock_ticks_per_second
+	    << " secs " << tmp.sample (TEMPORAL_SAMPLE_RATE) << " samples"
 	    << (tmp.is_explicit_tempo() ? " EXP-T" : " imp-t")
 	    << (tmp.is_explicit_meter() ? " EXP-M" : " imp-m")
 	    << (tmp.is_explicit_position() ? " EXP-P" : " imp-p")
