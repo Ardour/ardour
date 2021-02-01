@@ -307,6 +307,7 @@ Drag::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 	if (! UIConfiguration::instance ().get_preview_video_frame_on_drag ()) {
 		_preview_video = false;
 	}
+
 	_grab_time = adjusted_time (_raw_grab_time, event);
 	_last_pointer_time = _grab_time;
 	_last_pointer_x = _grab_x;
@@ -3795,7 +3796,6 @@ BBTRulerDrag::setup_pointer_offset ()
 	}
 
 	_grab_qn = _grab_qn.round_to_subdivision (divisions, Temporal::RoundDownAlways);
-
 	_pointer_offset = timepos_t (_grab_qn).distance (raw_grab_time());
 }
 
