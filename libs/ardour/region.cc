@@ -602,6 +602,10 @@ Region::update_after_tempo_map_change (bool send)
 		return;
 	}
 
+	/* a region using AudioTime is never going to move after a tempo map
+	 * change
+	 */
+
 	if (_position.val().time_domain() == Temporal::AudioTime) {
 		return;
 	}
@@ -612,7 +616,15 @@ Region::update_after_tempo_map_change (bool send)
 
 	PropertyChange what_changed;
 
-#warning NUTEMPO THINKME make this more nuanced ... nothing may have changed and maybe we do not need this at all
+	/* any or none of these may have changed due to a tempo map change,
+	   but we have no way to establish which have changed and which have
+	   not. So we have to mention all 3 to be certain that listeners pay
+	   attention. We can't verify because we have no cache of our old
+	   start/length/position values in the audio domain, so we can't
+	   compare the new values in the audio domain. The beat domain values
+	   haven't changed (just the tempo map that connects beat and audio
+	   time)
+	*/
 
 	what_changed.add (Properties::start);
 	what_changed.add (Properties::length);
@@ -799,7 +811,7 @@ Region::move_start (timecnt_t const & distance)
 		return;
 	}
 
-	timecnt_t new_start (_start); 
+	timecnt_t new_start (_start);
 
 	if (distance.positive()) {
 
