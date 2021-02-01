@@ -725,9 +725,15 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 	Meter const * next_meter (Meter const &) const;
 
 	TempoMetric metric_at (timepos_t const &) const;
-	TempoMetric metric_at (superclock_t sc) const;
-	TempoMetric metric_at (Beats const &b) const;
-	TempoMetric metric_at (BBT_Time const & bbt) const;
+
+	/* These return the TempoMetric in effect at the given time. If
+	   can_match is true, then the TempoMetric may refer to a Tempo or
+	   Meter at the given time. If can_match is false, the TempoMetric will
+	   only refer to the Tempo or Metric preceding the given time.
+	*/
+	TempoMetric metric_at (superclock_t, bool can_match = true) const;
+	TempoMetric metric_at (Beats const &, bool can_match = true) const;
+	TempoMetric metric_at (BBT_Time const &, bool can_match = true) const;
 
 	/* essentially convenience methods */
 
@@ -819,15 +825,6 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 	MusicTimes   _bartimes;
 
 	TimeDomain _time_domain;
-
-	/* These return the TempoMetric in effect at the given time. If
-	   can_match is true, then the TempoMetric may refer to a Tempo or
-	   Meter at the given time. If can_match is false, the TempoMetric will
-	   only refer to the Tempo or Metric preceding the given time.
-	*/
-	TempoMetric metric_at_locked (superclock_t, bool can_match = true) const;
-	TempoMetric metric_at_locked (Beats const &, bool can_match = true) const;
-	TempoMetric metric_at_locked (BBT_Time const &, bool can_match = true) const;
 
 	int set_tempos_from_state (XMLNode const &);
 	int set_meters_from_state (XMLNode const &);

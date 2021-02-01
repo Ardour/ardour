@@ -775,7 +775,7 @@ TempoMap::set_tempo (Tempo const & t, timepos_t const & time)
 		superclock_t sc;
 		BBT_Time bbt;
 
-		TempoMetric metric (metric_at_locked (on_beat, false));
+		TempoMetric metric (metric_at (on_beat, false));
 
 		bbt = metric.bbt_at (on_beat);
 		sc = metric.superclock_at (on_beat);
@@ -789,7 +789,7 @@ TempoMap::set_tempo (Tempo const & t, timepos_t const & time)
 		BBT_Time bbt;
 		superclock_t sc = time.superclocks();
 
-		TempoMetric tm (metric_at_locked (sc, false));
+		TempoMetric tm (metric_at (sc, false));
 
 		/* tempo changes must be on beat */
 
@@ -886,7 +886,7 @@ TempoMap::set_bartime (BBT_Time const & bbt, timepos_t const & pos)
 	assert (pos.time_domain() == AudioTime);
 
 	superclock_t sc (pos.superclocks());
-	TempoMetric metric (metric_at_locked (sc));
+	TempoMetric metric (metric_at (sc));
 	MusicTimePoint* tp = new MusicTimePoint (bbt, Point (*this, sc, metric.quarters_at_superclock (sc), bbt));
 
 	ret = add_or_replace_bartime (*tp);
@@ -1376,7 +1376,7 @@ TempoMap::set_meter (Meter const & m, timepos_t const & time)
 	if (time.is_beats()) {
 
 		Beats beats (time.beats());
-		TempoMetric metric (metric_at_locked (beats));
+		TempoMetric metric (metric_at (beats));
 
 		/* meter changes are required to be on-bar */
 
@@ -1396,7 +1396,7 @@ TempoMap::set_meter (Meter const & m, timepos_t const & time)
 		Beats beats;
 		BBT_Time bbt;
 
-		TempoMetric metric (metric_at_locked (sc));
+		TempoMetric metric (metric_at (sc));
 
 		/* meter changes must be on bar */
 
@@ -1448,26 +1448,26 @@ TempoMap::bbt_at (timepos_t const & pos) const
 Temporal::BBT_Time
 TempoMap::bbt_at (superclock_t s) const
 {
-	return metric_at_locked (s).bbt_at (s);
+	return metric_at (s).bbt_at (s);
 }
 
 Temporal::BBT_Time
 TempoMap::bbt_at (Temporal::Beats const & qn) const
 {
-	return metric_at_locked (qn).bbt_at (qn);
+	return metric_at (qn).bbt_at (qn);
 }
 
 #if 0
 samplepos_t
 TempoMap::sample_at (Temporal::Beats const & qn) const
 {
-	return superclock_to_samples (metric_at_locked (qn).superclock_at (qn), TEMPORAL_SAMPLE_RATE);
+	return superclock_to_samples (metric_at (qn).superclock_at (qn), TEMPORAL_SAMPLE_RATE);
 }
 
 samplepos_t
 TempoMap::sample_at (Temporal::BBT_Time const & bbt) const
 {
-	return samples_to_superclock (metric_at_locked (bbt).superclock_at (bbt), TEMPORAL_SAMPLE_RATE);
+	return samples_to_superclock (metric_at (bbt).superclock_at (bbt), TEMPORAL_SAMPLE_RATE);
 }
 
 samplepos_t
@@ -1486,13 +1486,13 @@ TempoMap::sample_at (timepos_t const & pos) const
 superclock_t
 TempoMap::superclock_at (Temporal::Beats const & qn) const
 {
-	return metric_at_locked (qn).superclock_at (qn);
+	return metric_at (qn).superclock_at (qn);
 }
 
 superclock_t
 TempoMap::superclock_at (Temporal::BBT_Time const & bbt) const
 {
-	return metric_at_locked (bbt).superclock_at (bbt);
+	return metric_at (bbt).superclock_at (bbt);
 }
 
 superclock_t
@@ -1519,10 +1519,10 @@ TempoMap::superclock_plus_bbt (superclock_t pos, BBT_Time op) const
 	}
 	pos_bbt.beats += op.beats;
 
-	double divisions_per_bar = metric_at_locked (pos_bbt).divisions_per_bar();
+	double divisions_per_bar = metric_at (pos_bbt).divisions_per_bar();
 	while (pos_bbt.beats >= divisions_per_bar + 1) {
 		++pos_bbt.bars;
-		divisions_per_bar = metric_at_locked (pos_bbt).divisions_per_bar();
+		divisions_per_bar = metric_at (pos_bbt).divisions_per_bar();
 		pos_bbt.beats -= divisions_per_bar;
 	}
 	pos_bbt.bars += op.bars;
@@ -1550,9 +1550,9 @@ Temporal::Beats
 TempoMap::scwalk_to_quarters (Temporal::Beats const & pos, superclock_t distance) const
 {
 	/* XXX this converts from beats to superclock and back to beats... which is OK (reversible) */
-	superclock_t s = metric_at_locked (pos).superclock_at (pos);
+	superclock_t s = metric_at (pos).superclock_at (pos);
 	s += distance;
-	return metric_at_locked (s).quarters_at_superclock (s);
+	return metric_at (s).quarters_at_superclock (s);
 
 }
 
@@ -1610,7 +1610,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 	Meters::iterator m (_meters.begin());
 	MusicTimes::iterator b (_bartimes.begin());
 
-	TempoMetric metric = metric_at_locked (start, false);
+	TempoMetric metric = metric_at (start, false);
 	BBT_Time bbt = metric.bbt_at (start);
 
 	DEBUG_TRACE (DEBUG::Grid, string_compose ("start %1 is %2\n", start, bbt));
@@ -1619,8 +1619,8 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 	/* Sanity Check */
 
 	if (DEBUG_ENABLED(PBD::DEBUG::Grid)) {
-		TempoMetric emetric = metric_at_locked (end, false);
-		BBT_Time ebbt = metric_at_locked (end).bbt_at (end);
+		TempoMetric emetric = metric_at (end, false);
+		BBT_Time ebbt = metric_at (end).bbt_at (end);
 
 		DEBUG_TRACE (DEBUG::Grid, string_compose ("get grid between %1..%2 [ %4 .. %5 ] { %6 .. %7 } at bar_mod = %3\n",
 		                                                 start, end, bar_mod, start, end, bbt, ebbt));
@@ -1861,35 +1861,27 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 
 				step = metric.superclocks_per_grid_at (start);
 				start += step;
+				bbt = metric.bbt_at (start);
 				DEBUG_TRACE (DEBUG::Grid, string_compose ("step for note type was %1, now @ %2\n", step, start));
 
 			} else {
 
 				bbt.bars += bar_mod;
 				start = metric.superclock_at (bbt);
-
 				DEBUG_TRACE (DEBUG::Grid, string_compose ("bar mod %1 moved to %2\n", bar_mod, bbt))
+			}
 
-				/* could have just passed the current metric */
 
-				if (first_of_three && (start > first_of_three->sclock ())) {
-					start = first_of_three->sclock();
-					break;
-				}
+			/* could have just passed the current metric */
 
-				/* move superclock time forward to next (included) bar. Note that we know that metric is still
-				   valid because we just checked above if we crossed a marker.
-				*/
-
+			if (first_of_three && (start > first_of_three->sclock ())) {
+				start = first_of_three->sclock();
+				break;
 			}
 
 			if (start >= limit) {
 				/* go back to outer loop to advance iterators and get a new metric */
 				break;
-			}
-
-			if (bar_mod == 0) {
-				bbt = metric.bbt_at (start);
 			}
 
 		} while (true);
@@ -2058,7 +2050,7 @@ std::operator<<(std::ostream& str, TempoMapPoint const & tmp)
 superclock_t
 TempoMap::superclock_plus_quarters_as_superclock (superclock_t start, Temporal::Beats const & distance) const
 {
-	TempoMetric metric (metric_at_locked (start));
+	TempoMetric metric (metric_at (start));
 
 	const Temporal::Beats start_qn = metric.quarters_at_superclock (start);
 	const Temporal::Beats end_qn = start_qn + distance;
@@ -2077,9 +2069,9 @@ TempoMap::superclock_delta_as_quarters (superclock_t start, superclock_t distanc
 Temporal::superclock_t
 TempoMap::superclock_quarters_delta_as_superclock (superclock_t start, Temporal::Beats const & distance) const
 {
-	Temporal::Beats start_qn = metric_at_locked (start).quarters_at_superclock (start);
+	Temporal::Beats start_qn = metric_at (start).quarters_at_superclock (start);
 	start_qn += distance;
-	return metric_at_locked (start_qn).superclock_at (start_qn);
+	return metric_at (start_qn).superclock_at (start_qn);
 }
 
 BBT_Time
@@ -2139,7 +2131,7 @@ TempoMap::bbt_walk (BBT_Time const & bbt, BBT_Offset const & o) const
 		prev_m = m;
 	}
 
-	/* see ::metric_at_locked() for comments about the use of const_cast here
+	/* see ::metric_at() for comments about the use of const_cast here
 	 */
 
 	TempoMetric metric (*const_cast<TempoPoint*>(&*prev_t), *const_cast<MeterPoint*>(&*prev_m));
@@ -2217,13 +2209,13 @@ TempoMap::quarters_at (timepos_t const & pos) const
 Temporal::Beats
 TempoMap::quarters_at (Temporal::BBT_Time const & bbt) const
 {
-	return metric_at_locked (bbt).quarters_at (bbt);
+	return metric_at (bbt).quarters_at (bbt);
 }
 
 Temporal::Beats
 TempoMap::quarters_at_superclock (superclock_t pos) const
 {
-	return metric_at_locked (pos).quarters_at_superclock (pos);
+	return metric_at (pos).quarters_at_superclock (pos);
 }
 
 XMLNode&
@@ -2676,25 +2668,7 @@ TempoMap::metric_at (timepos_t const & pos) const
 }
 
 TempoMetric
-TempoMap::metric_at (superclock_t s) const
-{
-	return metric_at_locked (s);
-}
-
-TempoMetric
-TempoMap::metric_at (Beats const & b) const
-{
-	return metric_at_locked (b);
-}
-
-TempoMetric
-TempoMap::metric_at (BBT_Time const & bbt) const
-{
-	return metric_at_locked (bbt);
-}
-
-TempoMetric
-TempoMap::metric_at_locked (superclock_t sc, bool can_match) const
+TempoMap::metric_at (superclock_t sc, bool can_match) const
 {
 	Tempos::const_iterator t, prev_t;
 	Meters::const_iterator m, prev_m;
@@ -2732,7 +2706,7 @@ TempoMap::metric_at_locked (superclock_t sc, bool can_match) const
 }
 
 TempoMetric
-TempoMap::metric_at_locked (Beats const & b, bool can_match) const
+TempoMap::metric_at (Beats const & b, bool can_match) const
 {
 	Tempos::const_iterator t, prev_t;
 	Meters::const_iterator m, prev_m;
@@ -2769,7 +2743,7 @@ TempoMap::metric_at_locked (Beats const & b, bool can_match) const
 }
 
 TempoMetric
-TempoMap::metric_at_locked (BBT_Time const & bbt, bool can_match) const
+TempoMap::metric_at (BBT_Time const & bbt, bool can_match) const
 {
 	Tempos::const_iterator t, prev_t;
 	Meters::const_iterator m, prev_m;
