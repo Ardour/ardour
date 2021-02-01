@@ -3221,6 +3221,12 @@ OSC::click_level (float position)
 	return 0;
 }
 
+void
+OSC::loop_location (int start, int end)
+{
+	BasicUI::loop_location (timepos_t (start), timepos_t (end));
+}
+
 int
 OSC::route_get_sends(lo_message msg) {
 	if (!session) {
@@ -4454,11 +4460,11 @@ OSC::touch_detect (const char *path, const char* types, lo_arg **argv, int argc,
 		if (control) {
 			if (touch) {
 				//start touch
-				control->start_touch (control->session().transport_sample());
+				control->start_touch (timepos_t (control->session().transport_sample()));
 				ret = 0;
 			} else {
 				// end touch
-				control->stop_touch (control->session().transport_sample());
+				control->stop_touch (timepos_t (control->session().transport_sample()));
 				ret = 0;
 			}
 			// just in case some crazy surface starts sending control values before touch
@@ -4478,8 +4484,8 @@ OSC::fake_touch (boost::shared_ptr<ARDOUR::AutomationControl> ctrl)
 	if (ctrl) {
 		//start touch
 		if (ctrl->automation_state() == Touch && !ctrl->touching ()) {
-		ctrl->start_touch (ctrl->session().transport_sample());
-		_touch_timeout[ctrl] = 10;
+			ctrl->start_touch (timepos_t (ctrl->session().transport_sample()));
+			_touch_timeout[ctrl] = 10;
 		}
 	}
 

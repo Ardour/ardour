@@ -637,6 +637,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int _strip_select (boost::shared_ptr<ARDOUR::Stripable> s, lo_address addr);
 	int _strip_select2 (boost::shared_ptr<ARDOUR::Stripable> s, OSCSurface *sur, lo_address addr);
 
+	void loop_location (int start, int end);
+
 	int route_set_send_gain_dB (int rid, int sid, float val, lo_message msg);
 	int route_set_send_fader (int rid, int sid, float val, lo_message msg);
 	int route_set_send_enable (int rid, int sid, float val, lo_message msg);
