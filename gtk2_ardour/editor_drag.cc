@@ -3840,28 +3840,33 @@ BBTRulerDrag::motion (GdkEvent* event, bool first_move)
 void
 BBTRulerDrag::finished (GdkEvent* event, bool movement_occurred)
 {
-	if (!movement_occurred) {
+	if (!_drag_valid) {
 		TempoMap::abort_update ();
 		return;
 	}
 
 	TempoMap::SharedPtr map (TempoMap::use());
 
-	_editor->tempo_curve_selected (_tempo, false);
+	if (!movement_occurred) {
 
-	if (_tempo->clamped()) {
+		_editor->begin_reversible_command (_("add BBT marker"));
+		map->set_bartime (BBT_Time (3, 2, 0), grab_time());
 
-		TempoPoint const * prev_tempo = map->previous_tempo (*_tempo);
+	} else {
 
-		if (prev_tempo) {
-			_editor->tempo_curve_selected (prev_tempo, false);
+		_editor->tempo_curve_selected (_tempo, false);
+
+		if (_tempo->clamped()) {
+
+			TempoPoint const * prev_tempo = map->previous_tempo (*_tempo);
+
+			if (prev_tempo) {
+				_editor->tempo_curve_selected (prev_tempo, false);
+			}
 		}
 	}
 
-	if (!movement_occurred || !_drag_valid) {
-		TempoMap::abort_update ();
-		return;
-	}
+	TempoMap::update (map);
 
 	XMLNode &after = TempoMap::use()->get_state();
 
