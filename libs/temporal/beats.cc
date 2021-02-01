@@ -57,7 +57,6 @@ Beats::round_to_subdivision (int subdivision, RoundMode dir) const {
 	uint32_t ticks = to_ticks();
 	const uint32_t ticks_one_subdivisions_worth = ticks_per_beat / subdivision;
 	uint32_t mod = ticks % ticks_one_subdivisions_worth;
-	uint32_t beats = _beats;
 
 	DEBUG_TRACE (DEBUG::SnapBBT, string_compose ("%4 => round-nearest, ticks %1 1 div of ticks %2 mod %3\n", ticks, ticks_one_subdivisions_worth, mod, *this));
 
@@ -111,12 +110,11 @@ Beats::round_to_subdivision (int subdivision, RoundMode dir) const {
 		 */
 
 		ticks = int_div_round (ticks, ticks_one_subdivisions_worth) * ticks_one_subdivisions_worth;
-		beats = 0;
 
 	}
 
-	DEBUG_TRACE (DEBUG::SnapBBT, string_compose ("return %1 from %2 : %3\n", Beats (beats, ticks), beats, ticks));
-	return Beats (beats, ticks);
+	DEBUG_TRACE (DEBUG::SnapBBT, string_compose ("return %1 from %2 : %3\n", Beats (0, ticks), ticks));
+	return Beats (0, ticks);
 }
 
 std::istream&
