@@ -30,10 +30,12 @@
 #include "ardour/audio_track.h"
 #include "ardour/midi_port.h"
 #include "ardour/midi_track.h"
+#include "ardour/monitor_return.h"
 #include "ardour/profile.h"
 #include "ardour/region.h"
 #include "ardour/session.h"
 #include "ardour/session_playlist.h"
+#include "ardour/solo_mute_release.h"
 
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/keyboard.h"
@@ -344,13 +346,15 @@ RecorderUI::update_title ()
 void
 RecorderUI::update_sensitivity ()
 {
-	const bool en = _session ? true : false;
+	const bool en      = _session ? true : false;
+	const bool have_ms = Config->get_use_monitor_bus();
 
 	_btn_rec_all.set_sensitive (en);
 	_btn_rec_none.set_sensitive (en);
 	_btn_new_take.set_sensitive (en && !_session->actively_recording ());
 
 	for (InputPortMap::const_iterator i = _input_ports.begin (); i != _input_ports.end (); ++i) {
+		i->second->allow_monitoring (have_ms && en);
 		i->second->set_sensitive (en);
 		if (!en) {
 			i->second->clear ();
@@ -367,10 +371,24 @@ RecorderUI::update_recordstate ()
 }
 
 void
+RecorderUI::update_monitorstate (std::string pn, bool en)
+{
+	InputPortMap::iterator im = _input_ports.find (pn);
+	if (im != _input_ports.end()) {
+		im->second->update_monitorstate (en);
+	}
+}
+
+void
 RecorderUI::parameter_changed (string const& p)
 {
 	if (p == "input-meter-layout") {
 		start_updating ();
+	} else if (p == "use-monitor-bus") {
+		bool have_ms = Config->get_use_monitor_bus();
+		for (InputPortMap::const_iterator i = _input_ports.begin (); i != _input_ports.end (); ++i) {
+			i->second->allow_monitoring (have_ms);
+		}
 	} else if (p == "show-group-tabs") {
 		bool const s = _session ? _session->config.get_show_group_tabs () : true;
 		if (s) {
@@ -437,6 +455,18 @@ RecorderUI::start_updating ()
 	meter_area_layout ();
 	_meter_area.queue_resize ();
 
+	MonitorPort& mp (AudioEngine::instance()->monitor_port ());
+	mp.MonitorInputChanged.connect (_monitor_connection, invalidator (*this), boost::bind (&RecorderUI::update_monitorstate, this, _1, _2), gui_context());
+	
+	const bool en      = _session ? true : false;
+	const bool have_ms = Config->get_use_monitor_bus();
+
+	for (InputPortMap::const_iterator i = _input_ports.begin (); i != _input_ports.end (); ++i) {
+		i->second->update_monitorstate (mp.monitoring (i->first));
+		i->second->allow_monitoring (have_ms && en);
+		i->second->set_sensitive (en);
+	}
+
 	_fast_screen_update_connection.disconnect ();
 	_fast_screen_update_connection = Timers::super_rapid_connect (sigc::mem_fun (*this, &RecorderUI::update_meters));
 }
@@ -445,6 +475,7 @@ void
 RecorderUI::stop_updating ()
 {
 	_fast_screen_update_connection.disconnect ();
+	_monitor_connection.disconnect ();
 	container_clear (_meter_table);
 	_input_ports.clear ();
 }
@@ -468,6 +499,7 @@ RecorderUI::add_or_remove_io (DataType dt, vector<string> ports, bool add)
 	}
 
 	update_io_widget_labels ();
+	update_sensitivity ();
 	meter_area_layout ();
 	_meter_area.queue_resize ();
 
@@ -708,6 +740,9 @@ RecorderUI::set_connections (string const& p)
 void
 RecorderUI::add_track (string const& p)
 {
+	if (!_session) {
+		return;
+	}
 	new_track_for_port (_input_ports[p]->data_type (), p);
 }
 
@@ -1034,8 +1069,7 @@ RecorderUI::peak_reset ()
 bool RecorderUI::InputPort::_size_groups_initialized = false;
 
 Glib::RefPtr<Gtk::SizeGroup> RecorderUI::InputPort::_name_size_group;
-Glib::RefPtr<Gtk::SizeGroup> RecorderUI::InputPort::_spill_size_group;
-Glib::RefPtr<Gtk::SizeGroup> RecorderUI::InputPort::_button_size_group;
+Glib::RefPtr<Gtk::SizeGroup> RecorderUI::InputPort::_ctrl_size_group;
 Glib::RefPtr<Gtk::SizeGroup> RecorderUI::InputPort::_monitor_size_group;
 
 RecorderUI::InputPort::InputPort (string const& name, DataType dt, RecorderUI* parent, bool vertical)
@@ -1044,36 +1078,41 @@ RecorderUI::InputPort::InputPort (string const& name, DataType dt, RecorderUI* p
 	, _alignment (0.5, 0.5, 0, 0)
 	, _frame (vertical ? ArdourWidgets::Frame::Vertical : ArdourWidgets::Frame::Horizontal)
 	, _spill_button ("", ArdourButton::default_elements, true)
+	, _monitor_button (_("PFL"), ArdourButton::default_elements)
 	, _name_button (name)
 	, _name_label ("", ALIGN_CENTER, ALIGN_CENTER, false)
 	, _add_button ("+")
 	, _port_name (name)
+	, _solo_release (0)
 {
 	if (!_size_groups_initialized) {
 		_size_groups_initialized = true;
 		_name_size_group = Gtk::SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL);
-		_spill_size_group = Gtk::SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL);
-		_button_size_group = Gtk::SizeGroup::create (Gtk::SIZE_GROUP_VERTICAL);
+		_ctrl_size_group = Gtk::SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL);
 		_monitor_size_group = Gtk::SizeGroup::create (Gtk::SIZE_GROUP_BOTH);
 	}
 
-	Box* box_t;
-	Box* box_c;
-	Box* box_n;
+	Box*   box_t;
+	Box*   box_n;
+	Table* ctrls = manage (new Table);
 
 	if (vertical) {
 		box_t = manage (new VBox);
-		box_c = manage (new HBox);
 		box_n = manage (new VBox);
 	} else {
 		box_t = manage (new HBox);
-		box_c = manage (new VBox);
 		box_n = manage (new VBox);
 	}
 
 	_spill_button.set_name ("generic button");
 	_spill_button.set_sizing_text(_("(none)"));
 	_spill_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*parent, &RecorderUI::spill_port), name));
+
+	_monitor_button.set_name ("solo button");
+	//_monitor_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*parent, &RecorderUI::monitor_port), name));
+	_monitor_button.signal_button_press_event().connect (sigc::mem_fun(*this, &InputPort::monitor_press), false);
+	_monitor_button.signal_button_release_event().connect (sigc::mem_fun(*this, &InputPort::monitor_release), false);
+	set_tooltip (_monitor_button, _("Solo/Listen to this input"));
 
 	_add_button.set_name ("generic button");
 	_add_button.set_icon (ArdourIcon::PlusSign);
@@ -1089,9 +1128,13 @@ RecorderUI::InputPort::InputPort (string const& name, DataType dt, RecorderUI* p
 
 	setup_name ();
 
-	box_c->set_spacing (2);
-	box_c->pack_start (_spill_button, true, true);
-	box_c->pack_start (_add_button, true, true);
+	ctrls->attach (_spill_button,     0, 2, 0, 1, EXPAND|FILL, EXPAND|FILL, 1, 1);
+	if (dt == DataType::AUDIO) {
+		ctrls->attach (_add_button,     0, 1, 1, 2, SHRINK|FILL, EXPAND|FILL, 1, 1);
+		ctrls->attach (_monitor_button, 1, 2, 1, 2, SHRINK|FILL, EXPAND|FILL, 1, 1);
+	} else {
+		ctrls->attach (_add_button,     0, 2, 1, 2, EXPAND|FILL, EXPAND|FILL, 1, 1);
+	}
 
 	box_n->pack_start (_name_button, true, true);
 #if 0 // MIXBUS ?
@@ -1102,12 +1145,12 @@ RecorderUI::InputPort::InputPort (string const& name, DataType dt, RecorderUI* p
 	if (vertical) {
 		nh = 64 * UIConfiguration::instance ().get_ui_scale ();
 		box_t->pack_start (_monitor, false, false);
-		box_t->pack_start (*box_c, false, false, 1);
+		box_t->pack_start (*ctrls, false, false, 1);
 		box_t->pack_start (*box_n, false, false, 1);
 		_name_label.set_max_width_chars (9);
 	} else {
 		nh = 120 * UIConfiguration::instance ().get_ui_scale ();
-		box_t->pack_start (*box_c, false, false, 1);
+		box_t->pack_start (*ctrls, false, false, 1);
 		box_t->pack_start (*box_n, false, false, 1);
 		box_t->pack_start (_monitor, false, false);
 		_name_label.set_max_width_chars (18);
@@ -1117,13 +1160,9 @@ RecorderUI::InputPort::InputPort (string const& name, DataType dt, RecorderUI* p
 	if (!vertical) {
 		/* match width of all name labels */
 		_name_size_group->add_widget (*box_n);
-		/* match width of all spill labels */
-		_spill_size_group->add_widget (*box_c);
+		/* match width of control boxes */
+		_ctrl_size_group->add_widget (*ctrls);
 	}
-
-	/* match height of spill + name buttons */
-	_button_size_group->add_widget (_spill_button);
-	_button_size_group->add_widget (_name_button);
 
 	/* equal size for all meters + event monitors */
 	_monitor_size_group->add_widget (_monitor);
@@ -1148,11 +1187,14 @@ RecorderUI::InputPort::InputPort (string const& name, DataType dt, RecorderUI* p
 
 RecorderUI::InputPort::~InputPort ()
 {
+	delete _solo_release;
 }
 
 void
 RecorderUI::InputPort::clear ()
 {
+	delete _solo_release;
+	_solo_release = 0;
 	_monitor.clear ();
 }
 
@@ -1293,6 +1335,106 @@ bool
 RecorderUI::InputPort::spilled () const
 {
 	return _spill_button.get_active ();
+}
+
+void
+RecorderUI::InputPort::allow_monitoring (bool en)
+{
+	if (_dt != DataType::AUDIO) {
+		en = false;
+	}
+	if (!en && _monitor_button.get_active ()) {
+		_monitor_button.set_active (false);
+	}
+	_monitor_button.set_sensitive (en);
+}
+
+void
+RecorderUI::InputPort::update_monitorstate (bool en)
+{
+	if (_dt == DataType::AUDIO) {
+		_monitor_button.set_active (en);
+	}
+}
+
+bool
+RecorderUI::InputPort::monitor_press (GdkEventButton* ev)
+{
+	if (ev->type == GDK_2BUTTON_PRESS || ev->type == GDK_3BUTTON_PRESS ) {
+		return true;
+	}
+	if (Keyboard::is_context_menu_event (ev)) {
+		return false;
+	}
+	if (ev->button != 1 && !Keyboard::is_button2_event (ev)) {
+		return false;
+	}
+
+	MonitorPort& mp (AudioEngine::instance()->monitor_port ());
+	Session* s = AudioEngine::instance()->session ();
+	assert (s);
+
+	if (Keyboard::is_button2_event (ev)) {
+		/* momentary */
+		_solo_release = new SoloMuteRelease (mp.monitoring (_port_name));
+	}
+
+	if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
+		/* Primary-Tertiary-click applies change to all */
+		if (_solo_release) {
+			s->prepare_momentary_solo (_solo_release);
+		}
+
+		if (!_monitor_button.get_active ()) {
+			std::vector<std::string> ports;
+			AudioEngine::instance()->get_physical_inputs (DataType::AUDIO, ports);
+			std::list<std::string> portlist;
+			std::copy (ports.begin (), ports.end (), std::back_inserter (portlist));
+			mp.set_active_monitors (portlist);
+		} else {
+			mp.clear_ports (false);
+		}
+
+	} else if (Keyboard::modifier_state_contains (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::SecondaryModifier)) || (!_monitor_button.get_active () && Config->get_exclusive_solo ())) {
+		/* Primary-Secondary-click: exclusive solo */
+		if (_solo_release) {
+			s->prepare_momentary_solo (_solo_release, true);
+		} else {
+			/* clear solo state */
+			s->prepare_momentary_solo (0, true);
+		}
+		/* exclusively solo */
+		if (!_monitor_button.get_active ()) {
+			mp.add_port (_port_name);
+		} else {
+			delete _solo_release;
+			_solo_release = 0;
+		}
+	} else {
+		if (_solo_release) {
+			s->prepare_momentary_solo (_solo_release);
+		}
+
+		/* Toggle Port Listen */
+		if (!_monitor_button.get_active ()) {
+			mp.add_port (_port_name);
+		} else {
+			mp.remove_port (_port_name);
+		}
+	}
+
+	return false;
+}
+
+bool
+RecorderUI::InputPort::monitor_release (GdkEventButton* ev)
+{
+	if (_solo_release) {
+		_solo_release->release (AudioEngine::instance()->session (), false);
+		delete _solo_release;
+		_solo_release = 0;
+	}
+	return false;
 }
 
 string const&
