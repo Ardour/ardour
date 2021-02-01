@@ -345,6 +345,7 @@ class LIBTEMPORAL_API MeterPoint : public Meter, public Point
   public:
 	MeterPoint (TempoMap const & map, Meter const & m, superclock_t sc, Beats const & b, BBT_Time const & bbt) : Meter (m), Point (map, sc, b, bbt) {}
 	MeterPoint (TempoMap const & map, XMLNode const &);
+	MeterPoint (Meter const & m, Point const & p) : Meter (m), Point (p) {}
 
 	Beats quarters_at (BBT_Time const & bbt) const;
 	BBT_Time bbt_at (Beats const & beats) const;
@@ -514,7 +515,7 @@ class LIBTEMPORAL_API TempoMetric {
 class LIBTEMPORAL_API MusicTimePoint : public Point
 {
   public:
-	MusicTimePoint (TempoMap const & map) : Point (map, 0, Beats(), BBT_Time()) {}
+	MusicTimePoint (TempoMap const & map, superclock_t sc, Beats const & b, BBT_Time const & bbt) : Point (map, sc, b, bbt) {}
 	MusicTimePoint (BBT_Time const & bbt_time, Point const & p) : Point (p) { _bbt = bbt_time; }
 	MusicTimePoint (TempoMap const & map, XMLNode const &);
 
