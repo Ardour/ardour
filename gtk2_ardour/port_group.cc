@@ -638,7 +638,10 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 
 					PortFlags flags (AudioEngine::instance()->port_engine().get_port_flags (ph));
 
-					if (port_has_prefix (p, lpnc)) {
+					if (flags & Hidden ) {
+						++s;
+						continue;
+					} else if (port_has_prefix (p, lpnc)) {
 
 						/* we own this port (named after the program) */
 
