@@ -273,12 +273,11 @@ Session::convert_to_samples (AnyTime const & position)
 ARDOUR::samplecnt_t
 Session::any_duration_to_samples (samplepos_t position, AnyTime const & duration)
 {
-#warning NUTEMPO THIS NEEDS A COMPLETE REVISION TO USE IMPLICIT CONVERSIONS ETC.
 	double secs;
 
 	switch (duration.type) {
 	case AnyTime::BBT:
-		return Temporal::superclock_to_samples (TempoMap::use()->superclock_plus_bbt (Temporal::samples_to_superclock (position, _current_sample_rate), duration.bbt), _current_sample_rate) - position;
+		return TempoMap::use()->bbt_duration_at (timepos_t (position), duration.bbt).samples();
 		break;
 
 	case AnyTime::Timecode:
