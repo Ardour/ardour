@@ -72,6 +72,7 @@
 #include "ardour/midi_track.h"
 #include "ardour/monitor_control.h"
 #include "ardour/monitor_processor.h"
+#include "ardour/monitor_return.h"
 #include "ardour/pannable.h"
 #include "ardour/panner.h"
 #include "ardour/panner_shell.h"
@@ -267,7 +268,7 @@ Route::init ()
 
 	if (is_monitor()) {
 		/* where we listen to tracks */
-		_intreturn.reset (new InternalReturn (_session));
+		_intreturn.reset (new MonitorReturn (_session));
 		_intreturn->activate ();
 
 		/* the thing that provides proper control over a control/monitor/listen bus
@@ -3079,9 +3080,19 @@ Route::set_processor_state (const XMLNode& node, int version)
 			// skip -- internal
 		} else if (prop->value() == "main-outs") {
 			_main_outs->set_state (**niter, version);
+		} else if (prop->value() == "monreturn") {
+			if (!_intreturn) {
+				_intreturn.reset (new MonitorReturn (_session));
+				must_configure = true;
+			}
+			_intreturn->set_state (**niter, version);
 		} else if (prop->value() == "intreturn") {
 			if (!_intreturn) {
-				_intreturn.reset (new InternalReturn (_session));
+				if (is_monitor ()) {
+					_intreturn.reset (new MonitorReturn (_session));
+				} else {
+					_intreturn.reset (new InternalReturn (_session));
+				}
 				must_configure = true;
 			}
 			_intreturn->set_state (**niter, version);
