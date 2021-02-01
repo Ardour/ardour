@@ -626,7 +626,7 @@ TempoMap::TempoMap (Tempo const & initial_tempo, Meter const & initial_meter)
 {
 	TempoPoint* tp = new TempoPoint (*this, initial_tempo, 0, Beats(), BBT_Time());
 	MeterPoint* mp = new MeterPoint (*this, initial_meter, 0, Beats(), BBT_Time());
-	MusicTimePoint* mtp = new MusicTimePoint (*this);
+	MusicTimePoint* mtp = new MusicTimePoint (*this, 0, Beats(), BBT_Time());
 
 	_tempos.push_back   (*tp);
 	_meters.push_back   (*mp);
@@ -887,9 +887,9 @@ TempoMap::set_bartime (BBT_Time const & bbt, timepos_t const & pos)
 
 	superclock_t sc (pos.superclocks());
 	TempoMetric metric (metric_at_locked (sc));
-	MusicTimePoint tp (bbt, Point (*this, sc, metric.quarters_at_superclock (sc), bbt));
+	MusicTimePoint* tp = new MusicTimePoint (bbt, Point (*this, sc, metric.quarters_at_superclock (sc), bbt));
 
-	ret = add_or_replace_bartime (tp);
+	ret = add_or_replace_bartime (*tp);
 
 	return *ret;
 }
@@ -1792,7 +1792,8 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 				advance_tempo = true;
 			}
 
-			if ((nxt_b != _bartimes.end()) && (b->sclock() == first_of_three->sclock())) {
+			if ((nxt_b != _bartimes.end()) && (nxt_b->sclock() == first_of_three->sclock())) {
+				DEBUG_TRACE (DEBUG::Grid, "will advance to next bartime\n");
 				advance_bartime = true;
 			}
 
@@ -1852,12 +1853,13 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 			} else {
 
 				bbt.bars += bar_mod;
+				start = metric.superclock_at (bbt);
 
 				DEBUG_TRACE (DEBUG::Grid, string_compose ("bar mod %1 moved to %2\n", bar_mod, bbt))
 
-				/* could have invalidated the current metric */
+				/* could have just passed the current metric */
 
-				if (first_of_three && (bbt > first_of_three->bbt())) {
+				if (first_of_three && (start > first_of_three->sclock ())) {
 					start = first_of_three->sclock();
 					break;
 				}
@@ -1866,7 +1868,6 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 				   valid because we just checked above if we crossed a marker.
 				*/
 
-				start = metric.superclock_at (bbt);
 			}
 
 			if (start >= limit) {
@@ -1939,8 +1940,20 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 					}
 				}
 
-				metric = TempoMetric (*t, *m);
-				start = metric.superclock_at (bbt);
+				/* Now build a new metric that uses the correct
+				 * tempo/meter (computed above), but the
+				 * position of the marker we've just arrived
+				 * at. The idea is that time after this marker
+				 * is defined by the tempo/meter in effect
+				 * there, combined with its own time (in all 3
+				 * time domains, superclock, quarters, bbt).
+				 */
+
+				TempoPoint tp (*t, *first_of_three);
+				MeterPoint mp (*m, *first_of_three);
+
+				metric = TempoMetric (tp, mp);
+				start = first_of_three->sclock();
 
 				/* ready to loop because metric, start and bbt are all set correctly, as they were when entering the outer loop */
 			}
@@ -2494,7 +2507,7 @@ TempoMap::insert_time (timepos_t const & pos, timecnt_t const & duration)
 
 	TempoPoint current_tempo = *t;
 	MeterPoint current_meter = *m;
-	MusicTimePoint current_time_point (*this);
+	MusicTimePoint current_time_point (*this, 0, Beats(), BBT_Time());
 
 	if (_bartimes.size() > 0) {
 		current_time_point = *b;
