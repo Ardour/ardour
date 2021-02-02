@@ -2637,10 +2637,12 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 	samplepos_t start0 = std::max (samplepos_t (0), start);
 
 	TempoMap::SharedPtr tmap (TempoMap::use());
+	TempoMetric metric (tmap->metric_at (samples_to_superclock (start0, AudioEngine::instance()->sample_rate())));
+
 	TempoMapPoints tempo_map_points;
-	tmap->get_grid (tempo_map_points, start, end, 0);
-	TempoMapPoints::const_iterator tempo_map_point = tempo_map_points.begin();
-	TempoMapPoint first_tempo_map_point = tempo_map_points.front();
+	tmap->get_grid (tempo_map_points,
+	                samples_to_superclock (start0, AudioEngine::instance()->sample_rate()),
+	                samples_to_superclock (end, AudioEngine::instance()->sample_rate()), 0);
 
 	if (_freewheel_control_port) {
 		*_freewheel_control_port = _session.engine().freewheeling() ? 1.f : 0.f;
@@ -2648,12 +2650,8 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 
 	if (_bpm_control_port) {
 
-		TempoMapPoints tempo_map_points;
-		tmap->get_grid (tempo_map_points, start0, end, 0);
-		TempoMapPoint first_tempo_map_point = tempo_map_points.front();
-
 		/* note that this is not necessarily quarter notes */
-		const double bpm = first_tempo_map_point.tempo().note_types_per_minute();
+		const double bpm = tmap->tempo_at (timepos_t (start0)).note_types_per_minute();
 
 		if (*_bpm_control_port != bpm) {
 			AutomationCtrlPtr c = get_automation_control (_bpm_control_port_index);
@@ -2737,13 +2735,13 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 
 			if (valid && (flags & PORT_INPUT)) {
 				if ((flags & PORT_POSITION)) {
-					Temporal::BBT_Time bbt (first_tempo_map_point.bbt());
-					double bpm = first_tempo_map_point.tempo().note_types_per_minute();
+					Temporal::BBT_Time bbt (metric.bbt_at (start0));
+					double bpm = metric.tempo().note_types_per_minute();
 					double time_scale = Port::speed_ratio ();
-					double beatpos = (bbt.bars - 1) * first_tempo_map_point.divisions_per_bar()
+					double beatpos = (bbt.bars - 1) * metric.meter().divisions_per_bar()
 						+ (bbt.beats - 1)
 						+ (bbt.ticks / Temporal::ticks_per_beat);
-					beatpos *= first_tempo_map_point.note_value() / 4.0;
+					beatpos *= metric.tempo().note_type() / 4.0;
 					if (start != _next_cycle_start ||
 							speed != _next_cycle_speed ||
 							time_scale != _prev_time_scale ||
@@ -2751,7 +2749,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 							bpm != _current_bpm) {
 						// Transport or Tempo has changed, write position at cycle start
 						write_position(&_impl->forge, _ev_buffers[port_index],
-						               *tempo_map_point, bbt, speed, time_scale,  bpm, start, 0);
+						               metric, bbt, speed, time_scale,  bpm, start, 0);
 					}
 				}
 
@@ -2771,6 +2769,8 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 				 * (if any)
 				 */
 
+				TempoMapPoints::const_iterator tempo_map_point (tempo_map_points.begin());
+
 				while (tempo_map_point != tempo_map_points.end()) {
 					tempo_map_point++;
 					if (tempo_map_point != tempo_map_points.end()) {
@@ -2780,39 +2780,44 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 					}
 				}
 
-				const samplepos_t sample = superclock_to_samples (tempo_map_point->sclock(), _session.sample_rate());
+				while (m != m_end || ((tempo_map_point != tempo_map_points.end()) && ((*tempo_map_point).sample(AudioEngine::instance()->sample_rate()) < tend))) {
 
-				while (m != m_end || (tempo_map_point != tempo_map_points.end() && sample < tend)) {
+					if (m != m_end && ((tempo_map_point == tempo_map_points.end()) || (*tempo_map_point).sample(AudioEngine::instance()->sample_rate()) > (*m).time())) {
 
-					if (m != m_end && ((tempo_map_point != tempo_map_points.end()) || sample > (*m).time())) {
-						const Evoral::Event<samplepos_t> ev(*m, false);
+						const Evoral::Event<samplepos_t> ev (*m, false);
+
 						if (ev.time() < nframes) {
 							LV2_Evbuf_Iterator eend = lv2_evbuf_end(_ev_buffers[port_index]);
 							lv2_evbuf_write(&eend, ev.time(), 0, type, ev.size(), ev.buffer());
 						}
+
 						++m;
+
 					} else {
+						assert (tempo_map_point != tempo_map_points.end());
+						const samplepos_t sample = tempo_map_point->sample (AudioEngine::instance()->sample_rate());
 						const Temporal::BBT_Time bbt = tempo_map_point->bbt_at (sample);
 						double bpm = tempo_map_point->tempo().quarter_notes_per_minute ();
 						write_position(&_impl->forge, _ev_buffers[port_index],
 						               *tempo_map_point, bbt, speed, Port::speed_ratio (),
 						               bpm, sample, sample - start);
-					}
 
-					/* move to next explicit point
-					 * (if any)
-					 */
+						/* move to next explicit point
+						 * (if any)
+						 */
 
-					while (tempo_map_point != tempo_map_points.end()) {
-						tempo_map_point++;
-						if (tempo_map_point != tempo_map_points.end()) {
-							if (tempo_map_point->is_explicit()) {
-								break;
+						while (tempo_map_point != tempo_map_points.end()) {
+							tempo_map_point++;
+							if (tempo_map_point != tempo_map_points.end()) {
+								if (tempo_map_point->is_explicit()) {
+									break;
+								}
 							}
 						}
 					}
 
 				}
+
 			} else if (!valid) {
 				/* Nothing we understand or care about, but we have
 				 * to provide valid buffers for DSP/UI communication.
@@ -3110,7 +3115,6 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 		 * Note: for no-midi plugins, we only ever send information at cycle-start,
 		 * so it needs to be realative to that.
 		 */
-		TempoMetric metric (tmap->metric_at (start));
 		_current_bpm = metric.tempo().note_types_per_minute();
 		Temporal::BBT_Time bbt (metric.bbt_at (start));
 		double beatpos = (bbt.bars - 1) * metric.divisions_per_bar()
