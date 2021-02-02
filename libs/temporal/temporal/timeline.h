@@ -38,6 +38,8 @@ namespace Temporal {
 
 class timecnt_t;
 
+void dump_stats (std::ostream&);
+
 /* 62 bit positional time value. Theoretically signed, but the intent is for to
  * always be positive. If the flag bit is set (i.e. ::flagged() is true), the
  * numerical value counts musical ticks; otherwise it counts superclocks.

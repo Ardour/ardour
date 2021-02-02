@@ -53,17 +53,19 @@ struct TemporalStatistics
 
 	void dump (std::ostream & str) {
 		str << "TemporalStatistics\n"
-		    << "Audio => Beats " << audio_to_beats
-		    << "Audio => Bars " << audio_to_bars
-		    << "Beats => Audio " << beats_to_audio
-		    << "Beats => Bars " << beats_to_bars
-		    << "Bars => Audio " << bars_to_audio
+		    << "Audio => Beats " << audio_to_beats << ' '
+		    << "Audio => Bars " << audio_to_bars << ' '
+		    << "Beats => Audio " << beats_to_audio << ' '
+		    << "Beats => Bars " << beats_to_bars << ' '
+		    << "Bars => Audio " << bars_to_audio << ' '
 		    << "Bars => Beats " << bars_to_beats
 		    << std::endl;
 	}
 };
 
 static TemporalStatistics stats;
+
+void Temporal::dump_stats (std::ostream& o) { stats.dump (o); }
 
 /* timecnt */
 
