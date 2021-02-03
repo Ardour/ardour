@@ -79,7 +79,7 @@ compiler_flags_dictionaries= {
         # Flags used for "strict" compilation, C only (i.e. compiler will warn about language issues)
         'c-strict' : ['-std=c99', '-pedantic', '-Wshadow'],
         # Flags used for "strict" compilation, C++ only (i.e. compiler will warn about language issues)
-        'cxx-strict' : [ '-ansi', '-Wnon-virtual-dtor', '-Woverloaded-virtual', '-fstrict-overflow' ],
+        'cxx-strict' : [ '-Wnon-virtual-dtor', '-Woverloaded-virtual', '-fstrict-overflow' ],
         # Flags required for whatever consider the strictest possible compilation
         'ultra-strict' : ['-Wredundant-decls', '-Wstrict-prototypes', '-Wmissing-prototypes'],
         # Flag to turn on C99 compliance by itself
