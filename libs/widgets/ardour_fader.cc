@@ -716,11 +716,11 @@ void
 ArdourFader::on_style_changed (const Glib::RefPtr<Gtk::Style>& style)
 {
 	CairoWidget::on_style_changed (style);
-	Glib::RefPtr<Gtk::Style> const& new_style = get_style ();
-	if (_layout && (_layout->get_font_description ().gobj () == 0 || _layout->get_font_description () != new_style->get_font ())) {
-		_layout->set_font_description (new_style->get_font ());
-		queue_resize ();
-	} else if (is_realized ()) {
+	if (_layout) {
+		std::string txt = _layout->get_text();
+		_layout.clear (); // drop reference to existing layout
+		_text = "";
+		set_text (txt, _centered_text, false);
 		queue_resize ();
 	}
 	/* patterns are cached and re-created as needed
