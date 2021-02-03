@@ -2686,6 +2686,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 	uint32_t midi_in_index   = 0;
 	uint32_t midi_out_index  = 0;
 	uint32_t atom_port_index = 0;
+
 	for (uint32_t port_index = 0; port_index < num_ports; ++port_index) {
 		void*     buf   = NULL;
 		uint32_t  index = nil_index;
@@ -2735,7 +2736,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 
 			if (valid && (flags & PORT_INPUT)) {
 				if ((flags & PORT_POSITION)) {
-					Temporal::BBT_Time bbt (metric.bbt_at (start0));
+					Temporal::BBT_Time bbt (metric.bbt_at (samples_to_superclock (start0, AudioEngine::instance()->sample_rate())));
 					double bpm = metric.tempo().note_types_per_minute();
 					double time_scale = Port::speed_ratio ();
 					double beatpos = (bbt.bars - 1) * metric.meter().divisions_per_bar()
@@ -2796,8 +2797,9 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 					} else {
 						assert (tempo_map_point != tempo_map_points.end());
 						const samplepos_t sample = tempo_map_point->sample (AudioEngine::instance()->sample_rate());
-						const Temporal::BBT_Time bbt = tempo_map_point->bbt_at (sample);
+						const Temporal::BBT_Time bbt = tempo_map_point->bbt();
 						double bpm = tempo_map_point->tempo().quarter_notes_per_minute ();
+
 						write_position(&_impl->forge, _ev_buffers[port_index],
 						               *tempo_map_point, bbt, speed, Port::speed_ratio (),
 						               bpm, sample, sample - start);
