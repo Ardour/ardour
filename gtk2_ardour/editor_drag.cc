@@ -4495,7 +4495,6 @@ FadeOutDrag::motion (GdkEvent* event, bool)
 		tmp->reset_fade_out_shape_width (tmp->audio_region(), fade_length);
 	}
 
-#warning NUTEMPO the mix of timepos_t and duration does not seem correct
 	show_verbose_cursor_duration (timepos_t (region->last_sample() - fade_length), region->nt_last());
 	show_view_preview (timepos_t (region->last_sample() - fade_length));
 }
