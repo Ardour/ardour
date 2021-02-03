@@ -1049,6 +1049,7 @@ PortManager::cycle_start (pframes_t nframes, Session* s)
 				tl.push_back (boost::bind (&Port::cycle_start, p->second, nframes));
 			}
 		}
+		tl.push_back (boost::bind (&PortManager::run_input_meters, this, nframes, s ? s->nominal_sample_rate () : 0));
 		s->rt_tasklist()->process (tl);
 	} else {
 		for (Ports::iterator p = _cycle_ports->begin(); p != _cycle_ports->end(); ++p) {
@@ -1056,6 +1057,7 @@ PortManager::cycle_start (pframes_t nframes, Session* s)
 				p->second->cycle_start (nframes);
 			}
 		}
+		run_input_meters (nframes, s ? s->nominal_sample_rate () : 0);
 	}
 }
 
