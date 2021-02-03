@@ -1112,7 +1112,6 @@ AUPlugin::reconfigure_io (ChanCount in, ChanCount aux_in, ChanCount out)
 
 	const int32_t audio_in = in.n_audio();
 	const int32_t audio_out = out.n_audio();
-	assert (in.n_audio () > 0);
 
 	if (initialized) {
 		/* if we are already running with the requested i/o config, bail out here */
@@ -1163,7 +1162,7 @@ AUPlugin::reconfigure_io (ChanCount in, ChanCount aux_in, ChanCount out)
 	uint32_t used_in = 0;
 	uint32_t used_out = 0;
 
-	if (input_elements == 0) {
+	if (input_elements == 0 || audio_in == 0) {
 		configured_input_busses = 0;
 	} else if (variable_inputs || input_elements == 1 || audio_in < bus_inputs[0]) {
 		/* we only ever use the first bus and configure it to match */
