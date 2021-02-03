@@ -114,9 +114,6 @@ class LIBARDOUR_API AudioSource : virtual public Source, public ARDOUR::AudioRea
 	static std::vector<boost::shared_array<gain_t> > _gain_buffers;
 	static Glib::Threads::Mutex    _level_buffer_lock;
 
-	static void ensure_buffers_for_level (uint32_t, samplecnt_t);
-	static void ensure_buffers_for_level_locked (uint32_t, samplecnt_t);
-
 	std::string         _peakpath;
 
 	int initialize_peakfile (const std::string& path, const bool in_session = false);

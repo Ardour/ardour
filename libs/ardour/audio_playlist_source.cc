@@ -52,7 +52,6 @@ AudioPlaylistSource::AudioPlaylistSource (Session& s, const ID& orig, const std:
 	, _playlist_channel (chn)
 {
 	AudioSource::_length = timecnt_t (len);
-	ensure_buffers_for_level (_level, _session.sample_rate());
 }
 
 AudioPlaylistSource::AudioPlaylistSource (Session& s, const XMLNode& node)
