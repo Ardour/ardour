@@ -149,6 +149,7 @@ libardour_sources = [
         'mix.cc',
         'mode.cc',
         'monitor_control.cc',
+        'monitor_port.cc',
         'monitor_processor.cc',
         'mp3fileimportable.cc',
         'mp3filesource.cc',
