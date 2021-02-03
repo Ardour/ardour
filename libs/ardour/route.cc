@@ -131,6 +131,7 @@ Route::Route (Session& sess, string name, PresentationInfo::Flag flag, DataType 
 	, _in_configure_processors (false)
 	, _initial_io_setup (false)
 	, _in_sidechain_setup (false)
+	, _monitor_gain (0)
 	, _custom_meter_position_noted (false)
 	, _pinmgr_proxy (0)
 	, _patch_selector_dialog (0)
@@ -696,14 +697,13 @@ Route::run_route (samplepos_t start_sample, samplepos_t end_sample, pframes_t nf
 	/* filter captured data before meter sees it */
 	filter_input (bufs);
 
-	if (is_monitor() && _session.listening() && !_session.is_auditioning()) {
-
+	if (is_monitor()) {
 		/* control/monitor bus ignores input ports when something is
-		   feeding the listen "stream". data will "arrive" into the
-		   route from the intreturn processor element.
-		*/
-
-		bufs.silence (nframes, 0);
+		 * feeding the listen "stream". data will "arrive" into the
+		 * route from the intreturn processor element.
+		 */
+		gain_t monitor_target_gain = _session.listening() && !_session.is_auditioning() ? 0. : 1.;
+		_monitor_gain = Amp::apply_gain (bufs, _session.nominal_sample_rate (), nframes, _monitor_gain, monitor_target_gain);
 	}
 
 	snapshot_out_of_band_data (nframes);

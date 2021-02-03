@@ -789,6 +789,7 @@ private:
 	bool    _in_configure_processors;
 	bool    _initial_io_setup;
 	bool    _in_sidechain_setup;
+	gain_t  _monitor_gain;
 
 	/** true if we've made a note of a custom meter position in these variables */
 	bool _custom_meter_position_noted;
