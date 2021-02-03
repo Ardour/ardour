@@ -365,6 +365,16 @@ std::operator<< (std::ostream & o, timecnt_t const & tc)
 	return o << tc.to_string();
 }
 
+std::istream&
+std::operator>> (std::istream & o, timecnt_t & tc)
+{
+	std::string str;
+	o >> str; /* will break at whitespace */
+	tc.string_to (str);
+	return o;
+}
+
+
 /* timepos */
 
 timepos_t::timepos_t (timecnt_t const & t)
@@ -737,6 +747,15 @@ std::ostream&
 std::operator<< (std::ostream & o, timepos_t const & tp)
 {
 	return o << tp.to_string();
+}
+
+std::istream&
+std::operator>> (std::istream & o, timepos_t & tp)
+{
+	std::string str;
+	o >> str; /* should break on whitespace */
+	tp.string_to (str);
+	return o;
 }
 
 std::string
