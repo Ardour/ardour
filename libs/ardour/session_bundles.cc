@@ -125,6 +125,7 @@ Session::setup_bundles ()
 	if (_midi_ports) {
 		boost::shared_ptr<Port> ap = boost::dynamic_pointer_cast<Port> (vkbd_output_port ());
 		inputs[DataType::MIDI].push_back (AudioEngine::instance()->make_port_name_non_relative (ap->name ()));
+		ap->set_pretty_name (_("Virtual Keyboard"));
 	}
 
 	/* Create a set of Bundle objects that map
