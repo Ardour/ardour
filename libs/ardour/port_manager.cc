@@ -772,7 +772,9 @@ PortManager::reconnect_ports ()
 	DEBUG_TRACE (DEBUG::Ports, string_compose ("reconnect %1 ports\n", p->size()));
 
 	for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
-		i->second->reconnect ();
+		if (i->second->reconnect ()) {
+			PortConnectedOrDisconnected (i->second, i->first, boost::weak_ptr<Port>(), "", false);
+		}
 	}
 
 	return 0;

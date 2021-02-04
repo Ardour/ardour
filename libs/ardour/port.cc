@@ -566,6 +566,7 @@ Port::reconnect ()
 
 	for (std::set<string>::iterator i = _connections.begin(); i != _connections.end(); ++i) {
 		if (connect (*i)) {
+			_connections.clear ();
 			return -1;
 		}
 	}
