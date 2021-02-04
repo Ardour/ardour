@@ -57,6 +57,7 @@
 #include "ardour/route.h"
 #include "ardour/session.h"
 #include "ardour/session_playlists.h"
+#include "ardour/solo_mute_release.h"
 #include "ardour/template_utils.h"
 
 #include "gtkmm2ext/gtk_ui.h"
@@ -497,7 +498,7 @@ RouteUI::mute_press (GdkEventButton* ev)
 				}
 
 				if (_mute_release) {
-					_mute_release->routes = copy;
+					_mute_release->set (copy);
 				}
 
 				_session->set_controls (route_list_to_control_list (copy, &Stripable::mute_control), _route->muted_by_self() ? 0.0 : 1.0, Controllable::UseGroup);
@@ -525,7 +526,7 @@ RouteUI::mute_press (GdkEventButton* ev)
 					rl->push_back (_route);
 
 					if (_mute_release) {
-						_mute_release->routes = rl;
+						_mute_release->set (rl);
 					}
 
 					boost::shared_ptr<MuteControl> mc = _route->mute_control();
@@ -541,7 +542,7 @@ RouteUI::mute_press (GdkEventButton* ev)
 				rl->push_back (_route);
 
 				if (_mute_release) {
-					_mute_release->routes = rl;
+					_mute_release->set (rl);
 				}
 
 				boost::shared_ptr<MuteControl> mc = _route->mute_control();
@@ -557,8 +558,8 @@ RouteUI::mute_press (GdkEventButton* ev)
 bool
 RouteUI::mute_release (GdkEventButton* /*ev*/)
 {
-	if (_mute_release){
-		_session->set_controls (route_list_to_control_list (_mute_release->routes, &Stripable::mute_control), _mute_release->active, Controllable::UseGroup);
+	if (_mute_release) {
+		_mute_release->release (_session, true);
 		delete _mute_release;
 		_mute_release = 0;
 	}
@@ -653,49 +654,21 @@ RouteUI::solo_press(GdkEventButton* ev)
 				/* Primary-Tertiary-click applies change to all routes */
 
 				if (_solo_release) {
-					_solo_release->routes = _session->get_routes ();
+					_solo_release->set (_session->get_routes ());
 				}
 
 				_session->set_controls (route_list_to_control_list (_session->get_routes(), &Stripable::solo_control), !_route->solo_control()->get_value(), Controllable::UseGroup);
 
-			} else if (Keyboard::modifier_state_contains (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::SecondaryModifier))) {
+			} else if (Keyboard::modifier_state_contains (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::SecondaryModifier)) || (!_route->self_soloed() && Config->get_exclusive_solo ())) {
 
 				/* Primary-Secondary-click: exclusively solo this track */
 
 				if (_solo_release) {
-					_solo_release->exclusive = true;
-
-					_solo_release->routes_on.reset (new RouteList);
-					_solo_release->routes_off.reset (new RouteList);
-
-					boost::shared_ptr<RouteList> routes = _session->get_routes();
-					for (RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
-#ifdef MIXBUS
-						if ((0 == _route->mixbus()) != (0 == (*i)->mixbus ())) {
-							continue;
-						}
-#endif
-						if ((*i)->soloed ()) {
-							_solo_release->routes_on->push_back (*i);
-						} else {
-							_solo_release->routes_off->push_back (*i);
-						}
-					}
+					_session->prepare_momentary_solo (_solo_release, true, _route);
+				} else {
+					/* clear solo state */
+					_session->prepare_momentary_solo (0, true, _route);
 				}
-
-				boost::shared_ptr<RouteList> rl (new RouteList);
-				boost::shared_ptr<RouteList> routes = _session->get_routes();
-				for (RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
-#ifdef MIXBUS
-					if ((0 == _route->mixbus()) != (0 == (*i)->mixbus ())) {
-						continue;
-					}
-#endif
-					if ((*i)->soloed ()) {
-						rl->push_back (*i);
-					}
-				}
-				_session->set_controls (route_list_to_control_list (rl, &Stripable::solo_control), false, Controllable::UseGroup);
 
 				if (Config->get_solo_control_is_listen_control()) {
 					/* ??? we need a just_one_listen() method */
@@ -742,9 +715,11 @@ RouteUI::solo_press(GdkEventButton* ev)
 					rl.reset (new RouteList);
 					rl->push_back (_route);
 
+#if 0 // XX why? _solo_release is deleted below
 					if (_solo_release) {
-						_solo_release->routes = rl;
+						_solo_release->set (rl);
 					}
+#endif
 
 					_session->set_controls (route_list_to_control_list (rl, &Stripable::solo_control), !_route->self_soloed(), Controllable::InverseGroup);
 				}
@@ -760,7 +735,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 				rl->push_back (route());
 
 				if (_solo_release) {
-					_solo_release->routes = rl;
+					_solo_release->set (rl);
 				}
 
 				_session->set_controls (route_list_to_control_list (rl, &Stripable::solo_control), !_route->self_soloed(), Controllable::UseGroup);
@@ -775,13 +750,7 @@ bool
 RouteUI::solo_release (GdkEventButton* /*ev*/)
 {
 	if (_solo_release) {
-		if (_solo_release->exclusive) {
-			_session->set_controls (route_list_to_control_list (_solo_release->routes_off, &Stripable::solo_control), 0.0, Controllable::NoGroup);
-			_session->set_controls (route_list_to_control_list (_solo_release->routes_on, &Stripable::solo_control), 1.0, Controllable::NoGroup);
-		} else {
-			_session->set_controls (route_list_to_control_list (_solo_release->routes, &Stripable::solo_control), _solo_release->active ? 1.0 : 0.0, Controllable::UseGroup);
-		}
-
+		_solo_release->release (_session, false);
 		delete _solo_release;
 		_solo_release = 0;
 	}

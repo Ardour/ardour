@@ -52,6 +52,7 @@
 namespace ARDOUR {
 	class AudioTrack;
 	class MidiTrack;
+	class SoloMuteRelease;
 }
 
 namespace Gtk {
@@ -325,22 +326,8 @@ private:
 	std::string route_state_id () const;
 
 protected:
-	struct SoloMuteRelease {
-		SoloMuteRelease (bool was_active)
-			: active (was_active)
-			, exclusive (false)
-		{}
-
-		boost::shared_ptr<ARDOUR::RouteList> routes;
-		boost::shared_ptr<ARDOUR::RouteList> routes_on;
-		boost::shared_ptr<ARDOUR::RouteList> routes_off;
-		boost::shared_ptr<ARDOUR::Route> route;
-		bool active;
-		bool exclusive;
-	};
-
-	SoloMuteRelease* _solo_release;
-	SoloMuteRelease* _mute_release;
+	ARDOUR::SoloMuteRelease* _solo_release;
+	ARDOUR::SoloMuteRelease* _mute_release;
 
 	ControlSlaveUI* csu;
 
