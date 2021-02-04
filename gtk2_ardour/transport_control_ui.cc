@@ -160,6 +160,8 @@ TransportControlUI::setup (TransportControlProvider* ui)
 
 	stop_button.set_active (true);
 
+	show_all ();
+
 	Timers::blink_connect (sigc::mem_fun (*this, &TransportControlUI::blink_rec_enable));
 }
 

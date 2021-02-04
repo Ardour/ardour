@@ -84,6 +84,12 @@ RecorderUI::RecorderUI ()
 	load_bindings ();
 	register_actions ();
 
+	_transport_ctrl.setup (ARDOUR_UI::instance ());
+	_transport_ctrl.map_actions ();
+	_transport_ctrl.set_no_show_all ();
+
+	signal_tabbed_changed.connect (sigc::mem_fun (*this, &RecorderUI::tabbed_changed));
+
 	_meter_area.set_spacing (0);
 	_meter_area.pack_start (_meter_table, true, true);
 	_meter_area.signal_size_request().connect (sigc::mem_fun (*this, &RecorderUI::meter_area_size_request));
@@ -99,25 +105,30 @@ RecorderUI::RecorderUI ()
 	_rec_area.pack_end (_scroller_base, true, true);
 	_rec_area.pack_end (_ruler_sep, false, false, 1);
 
-	/* HBox groups | tracks */
+	/* HBox [ groups | tracks] */
 	_rec_group_tabs = new RecorderGroupTabs (this);
 	_rec_groups.pack_start (*_rec_group_tabs, false, false);
 	_rec_groups.pack_start (_rec_area, true, true);
 
-	/* vertical scroll, all tracks */
+	/* Vertical scroll, all tracks */
 	_rec_scroller.add (_rec_groups);
 	_rec_scroller.set_shadow_type(SHADOW_NONE);
 	_rec_scroller.set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
 
-	/* HBox, ruler on top */
+	/* HBox, ruler on top  [ space above headers | time-ruler ] */
 	_ruler_box.pack_start (_space, false, false);
 	_ruler_box.pack_start (_ruler, true, true);
 
-	/* VBox, toplevel of upper pane */
+	/* VBox, ruler + scroll-area for tracks */
 	_rec_container.pack_start (_ruler_box, false, false);
 	_rec_container.pack_start (_rec_scroller, true, true);
 
-	_pane.add (_rec_container);
+	/* HBox, toplevel of upper pane [Info | recarea ] */
+	_rec_container.pack_start (_ruler_box, false, false);
+	_rec_top.pack_start (_rec_info_box, false, false, 4);
+	_rec_top.pack_start (_rec_container, true, true);
+
+	_pane.add (_rec_top);
 	_pane.add (_meter_scroller);
 
 	_content.pack_start (_toolbar_sep, false, false, 1);
@@ -154,6 +165,7 @@ RecorderUI::RecorderUI ()
 	_toolbar.pack_start (_btn_peak_reset, false, false);
 	_toolbar.pack_start (*manage (new ArdourVSpacer), false, false);
 	_toolbar.pack_start (_btn_rec_forget, false, false);
+	_toolbar.pack_start (_transport_ctrl, false, false);
 
 	set_tooltip (_btn_rec_all, _("Record enable all tracks"));
 	set_tooltip (_btn_rec_none, _("Disable recording of all tracks"));
@@ -172,6 +184,7 @@ RecorderUI::RecorderUI ()
 	_rec_groups.show ();
 	_rec_group_tabs->show ();
 	_rec_container.show ();
+	_rec_top.show ();
 	_meter_table.show ();
 	_meter_area.show ();
 	_meter_scroller.show ();
@@ -235,6 +248,16 @@ RecorderUI::use_own_window (bool and_fill_it)
 	return win;
 }
 
+void
+RecorderUI::tabbed_changed (bool tabbed)
+{
+	if (tabbed) {
+		_transport_ctrl.hide ();
+	} else {
+		_transport_ctrl.show ();
+	}
+}
+
 XMLNode&
 RecorderUI::get_state ()
 {
@@ -268,6 +291,8 @@ RecorderUI::set_session (Session* s)
 	SessionHandlePtr::set_session (s);
 
 	_ruler.set_session (s);
+	_rec_info_box.set_session (s);
+	_transport_ctrl.set_session (s);
 	_rec_group_tabs->set_session (s);
 
 	update_sensitivity ();

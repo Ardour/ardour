@@ -226,6 +226,7 @@ gtk2_ardour_sources = [
         'public_editor.cc',
         'quantize_dialog.cc',
         'rc_option_editor.cc',
+        'rec_info_box.cc',
         'recorder_group_tabs.cc',
         'recorder_ui.cc',
         'region_editor.cc',

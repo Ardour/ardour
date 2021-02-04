@@ -45,6 +45,8 @@
 #include "widgets/tabbable.h"
 
 #include "input_port_monitor.h"
+#include "rec_info_box.h"
+#include "transport_control_ui.h"
 
 namespace ARDOUR {
 	class SoloMuteRelease;
@@ -90,6 +92,7 @@ private:
 	void remove_route (TrackRecordAxis*);
 	void update_rec_table_layout ();
 	void update_spacer_width (Gtk::Allocation&, TrackRecordAxis*);
+	void tabbed_changed (bool);
 
 	void set_connections (std::string const&);
 	void port_connected_or_disconnected (std::string, std::string);
@@ -116,6 +119,7 @@ private:
 	Gtkmm2ext::Bindings*  bindings;
 	Gtk::VBox            _content;
 	Gtk::HBox            _toolbar;
+	Gtk::HBox            _rec_top;
 	ArdourWidgets::VPane _pane;
 	Gtk::ScrolledWindow  _rec_scroller;
 	Gtk::VBox            _rec_container;
@@ -132,6 +136,8 @@ private:
 	ArdourWidgets::ArdourButton  _btn_rec_forget;
 	ArdourWidgets::ArdourButton  _btn_new_take;
 	ArdourWidgets::ArdourButton  _btn_peak_reset;
+	RecInfoBox                   _rec_info_box;
+	TransportControlUI           _transport_ctrl;
 
 	int  _meter_box_width;
 	int  _meter_area_cols;
