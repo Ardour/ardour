@@ -164,6 +164,7 @@ class SceneChanger;
 class SessionDirectory;
 class SessionMetadata;
 class SessionPlaylists;
+class SoloMuteRelease;
 class Source;
 class Speakers;
 class TempoMap;
@@ -935,6 +936,7 @@ public:
 	static const SessionEvent::RTeventCallback rt_cleanup;
 
 	void clear_all_solo_state (boost::shared_ptr<RouteList>);
+	void prepare_momentary_solo (SoloMuteRelease* smr = NULL, bool exclusive = false, boost::shared_ptr<Route> route = boost::shared_ptr<Route> ());
 
 	/* Control-based methods */
 
