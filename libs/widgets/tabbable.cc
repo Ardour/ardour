@@ -151,7 +151,7 @@ Gtk::Notebook*
 Tabbable::tab_root_drop ()
 {
 	/* This is called after a drop of a tab onto the root window. Its
-	 * responsibility xois to return the notebook that this Tabbable's
+	 * responsibility is to return the notebook that this Tabbable's
 	 * contents should be packed into before the drop handling is
 	 * completed. It is not responsible for actually taking care of this
 	 * packing.
@@ -226,6 +226,7 @@ void
 Tabbable::detach ()
 {
 	show_own_window (true);
+	signal_tabbed_changed (false);
 }
 
 void
@@ -260,6 +261,9 @@ Tabbable::attach ()
 	_parent_notebook->set_tab_detachable (_contents);
 	_parent_notebook->set_tab_reorderable (_contents);
 	_parent_notebook->set_current_page (_parent_notebook->page_num (_contents));
+
+	signal_tabbed_changed (true);
+
 	_contents.show ();
 
 	/* have to force this on, which is semantically correct, since
@@ -355,6 +359,7 @@ Tabbable::set_state (const XMLNode& node, int version)
 
 	if (_visible) {
 		show_own_window (true);
+		signal_tabbed_changed (false);
 	}
 
 	XMLNodeList children = node.children ();
@@ -370,6 +375,7 @@ Tabbable::set_state (const XMLNode& node, int version)
 		} else {
 			/* this does nothing if not tabbed */
 			hide_tab ();
+			signal_tabbed_changed (false);
 		}
 	}
 

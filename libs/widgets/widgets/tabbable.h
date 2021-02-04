@@ -68,6 +68,7 @@ public:
 	bool tabbed() const;
 	bool tabbed_by_default () const;
 
+
 	Gtk::Window* current_toplevel () const;
 
 	Gtk::Notebook* tab_root_drop ();
@@ -81,6 +82,8 @@ public:
 
 protected:
 	bool delete_event_handler (GdkEventAny *ev);
+
+	sigc::signal1<void, bool> signal_tabbed_changed;
 
 private:
 	Gtk::Widget&   _contents;
