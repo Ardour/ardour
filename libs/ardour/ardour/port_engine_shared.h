@@ -183,7 +183,8 @@ protected:
 
 	std::vector<PortConnectData *> _port_connection_queue;
 	pthread_mutex_t _port_callback_mutex;
-	bool _port_change_flag;
+
+	gint _port_change_flag; /* atomic */
 
 	void port_connect_callback (const std::string& a, const std::string& b, bool conn) {
 		pthread_mutex_lock (&_port_callback_mutex);
@@ -192,9 +193,7 @@ protected:
 	}
 
 	void port_connect_add_remove_callback () {
-		pthread_mutex_lock (&_port_callback_mutex);
-		_port_change_flag = true;
-		pthread_mutex_unlock (&_port_callback_mutex);
+		g_atomic_int_set (&_port_change_flag, 1);
 	}
 
 	virtual void update_system_port_latencies ();
