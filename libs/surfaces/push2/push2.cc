@@ -130,9 +130,6 @@ Push2::Push2 (ARDOUR::Session& s)
 	/* Catch port connections and disconnections */
 	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connections, MISSING_INVALIDATOR, boost::bind (&Push2::connection_handler, this, _1, _2, _3, _4, _5), this);
 
-	/* Catch name changes, notify GUI */
-	ARDOUR::AudioEngine::instance()->PortPrettyNameChanged.connect (port_connections, MISSING_INVALIDATOR, boost::bind (&Push2::ConnectionChange, this), this);
-
 	/* Push 2 ports might already be there */
 	port_registration_handler ();
 }

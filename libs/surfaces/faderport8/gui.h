@@ -61,7 +61,7 @@ private:
 
 	void update_port_combos ();
 	void connection_handler ();
-	PBD::ScopedConnection connection_change_connection;
+	PBD::ScopedConnectionList _port_connections;
 
 	struct MidiPortColumns : public Gtk::TreeModel::ColumnRecord {
 		MidiPortColumns() {

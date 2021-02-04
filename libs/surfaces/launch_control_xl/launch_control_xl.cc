@@ -103,8 +103,7 @@ LaunchControlXL::LaunchControlXL (ARDOUR::Session& s)
 	ports_acquire ();
 
 	/* Catch port connections and disconnections */
-	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::connection_handler, this, _1, _2, _3, _4, _5), this);
-	ARDOUR::AudioEngine::instance()->PortPrettyNameChanged.connect (port_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::ConnectionChange, this), this); /* notify GUI */
+	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connection, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::connection_handler, this, _1, _2, _3, _4, _5), this);
 
 	session->RouteAdded.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::stripables_added, this), lcxl);
 	session->vca_manager().VCAAdded.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::stripables_added, this), lcxl);
@@ -115,8 +114,7 @@ LaunchControlXL::~LaunchControlXL ()
 	DEBUG_TRACE (DEBUG::LaunchControlXL, "Launch Control XL  control surface object being destroyed\n");
 
 	/* do this before stopping the event loop, so that we don't get any notifications */
-	port_reg_connection.disconnect ();
-	port_connections.drop_connections ();
+	port_connection.disconnect ();
 	session_connections.drop_connections ();
 	stripable_connections.drop_connections ();
 

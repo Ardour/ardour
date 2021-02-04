@@ -69,7 +69,7 @@ private:
 	Gtk::ComboBox foot_combo[3];
 
 	void update_port_combos ();
-	PBD::ScopedConnection connection_change_connection;
+	PBD::ScopedConnectionList _port_connections;
 	void connection_handler ();
 
 	struct MidiPortColumns : public Gtk::TreeModel::ColumnRecord {

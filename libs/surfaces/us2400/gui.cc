@@ -107,7 +107,9 @@ US2400ProtocolGUI::US2400ProtocolGUI (US2400Protocol& p)
 	table.set_homogeneous (false);
 
 	_cp.DeviceChanged.connect (device_change_connection, invalidator (*this), boost::bind (&US2400ProtocolGUI::device_changed, this), gui_context());
-	_cp.ConnectionChange.connect (connection_change_connection, invalidator (*this), boost::bind (&US2400ProtocolGUI::connection_handler, this), gui_context());
+	_cp.ConnectionChange.connect (_port_connections, invalidator (*this), boost::bind (&US2400ProtocolGUI::connection_handler, this), gui_context());
+	ARDOUR::AudioEngine::instance()->PortRegisteredOrUnregistered.connect (_port_connections, invalidator (*this), boost::bind (&US2400ProtocolGUI::connection_handler, this), gui_context());
+	ARDOUR::AudioEngine::instance()->PortPrettyNameChanged.connect (_port_connections, invalidator (*this), boost::bind (&US2400ProtocolGUI::connection_handler, this), gui_context());
 
 	/* device-dependent part */
 

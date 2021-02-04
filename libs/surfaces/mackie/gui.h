@@ -140,7 +140,7 @@ class MackieControlProtocolGUI : public Gtk::Notebook
 	                         Gtk::ComboBox* output_combo,
 	                         boost::shared_ptr<Mackie::Surface> surface);
 
-	PBD::ScopedConnection connection_change_connection;
+	PBD::ScopedConnectionList _port_connections;
 	void connection_handler ();
 
 	Glib::RefPtr<Gtk::ListStore> build_midi_port_list (std::vector<std::string> const & ports, bool for_input);
