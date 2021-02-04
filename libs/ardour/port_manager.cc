@@ -1055,8 +1055,6 @@ PortManager::cycle_start (pframes_t nframes, Session* s)
 			}
 		}
 	}
-
-	run_input_meters (nframes, s ? s->nominal_sample_rate () : 0);
 }
 
 void
