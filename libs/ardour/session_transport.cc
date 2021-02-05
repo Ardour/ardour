@@ -1875,16 +1875,20 @@ Session::xrun_recovery ()
 
 	Xrun (_transport_sample); /* EMIT SIGNAL */
 
-	if (Config->get_stop_recording_on_xrun() && actively_recording()) {
+	if (actively_recording ()) {
+		++_capture_xruns;
 
-		/* it didn't actually halt, but we need
-		 * to handle things in the same way.
-		 */
+		if (Config->get_stop_recording_on_xrun()) {
 
-		engine_halted();
+			/* it didn't actually halt, but we need
+			 * to handle things in the same way.
+			 */
 
-		/* ..and start the FSM engine again */
-		_transport_fsm->start ();
+			engine_halted();
+
+			/* ..and start the FSM engine again */
+			_transport_fsm->start ();
+		}
 	}
 }
 
