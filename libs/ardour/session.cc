@@ -208,6 +208,8 @@ Session::Session (AudioEngine &eng,
 	, _worst_route_latency (0)
 	, _send_latency_changes (0)
 	, _have_captured (false)
+	, _capture_duration (0)
+	, _capture_xruns (0)
 	, _non_soloed_outs_muted (false)
 	, _listening (false)
 	, _listen_cnt (0)
@@ -1889,6 +1891,9 @@ Session::enable_record ()
 			if (Config->get_monitoring_model() == HardwareMonitoring && config.get_auto_input()) {
 				set_track_monitor_input_status (true);
 			}
+
+			_capture_duration = 0;
+			_capture_xruns = 0;
 
 			RecordStateChanged ();
 			break;

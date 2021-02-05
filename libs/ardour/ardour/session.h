@@ -303,6 +303,9 @@ public:
 
 	bool have_captured() const { return _have_captured; }
 
+	samplecnt_t capture_duration () const { return _capture_duration; }
+	unsigned int capture_xruns () const { return _capture_xruns; }
+
 	void refill_all_track_buffers ();
 	Butler* butler() { return _butler; }
 	void butler_transport_work (bool have_process_lock = false);
@@ -1370,6 +1373,8 @@ private:
 	samplecnt_t             _worst_route_latency;
 	uint32_t                _send_latency_changes;
 	bool                    _have_captured;
+	samplecnt_t             _capture_duration;
+	unsigned int            _capture_xruns;
 	bool                    _non_soloed_outs_muted;
 	bool                    _listening;
 	uint32_t                _listen_cnt;

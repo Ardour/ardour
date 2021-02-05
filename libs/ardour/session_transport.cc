@@ -1876,6 +1876,8 @@ Session::xrun_recovery ()
 	Xrun (_transport_sample); /* EMIT SIGNAL */
 
 	if (actively_recording ()) {
+		++_capture_xruns;
+
 		if (Config->get_stop_recording_on_xrun()) {
 
 			/* it didn't actually halt, but we need

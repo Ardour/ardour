@@ -216,6 +216,10 @@ Session::process_routes (pframes_t nframes, bool& need_butler)
 	const samplepos_t start_sample = _transport_sample;
 	const samplepos_t end_sample = _transport_sample + floor (nframes * _transport_speed);
 
+	if (actively_recording ()) {
+		_capture_duration += nframes;
+	}
+
 	VCAList v = _vca_manager->vcas ();
 	for (VCAList::const_iterator i = v.begin(); i != v.end(); ++i) {
 		(*i)->automation_run (start_sample, nframes);
