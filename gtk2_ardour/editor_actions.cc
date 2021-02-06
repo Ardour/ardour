@@ -1428,7 +1428,7 @@ Editor::parameter_changed (std::string p)
 		}
 	} else if (p == "show-group-tabs") {
 
-		bool const s = _session->config.get_show_group_tabs ();
+		bool const s = _session ? _session->config.get_show_group_tabs () : true;
 		if (s) {
 			_group_tabs->show ();
 		} else {

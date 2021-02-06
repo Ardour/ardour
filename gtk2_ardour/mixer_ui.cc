@@ -2784,7 +2784,7 @@ void
 Mixer_UI::parameter_changed (string const & p)
 {
 	if (p == "show-group-tabs") {
-		bool const s = _session->config.get_show_group_tabs ();
+		bool const s = _session ? _session->config.get_show_group_tabs () : true;
 		if (s) {
 			_group_tabs->show ();
 		} else {
