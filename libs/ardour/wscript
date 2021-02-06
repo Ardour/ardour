@@ -236,6 +236,7 @@ libardour_sources = [
         'sndfilesource.cc',
         'solo_control.cc',
         'solo_isolate_control.cc',
+        'solo_mute_release.cc',
         'solo_safe_control.cc',
         'soundcloud_upload.cc',
         'source.cc',
