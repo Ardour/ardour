@@ -99,15 +99,6 @@ Session::realtime_stop (bool abort, bool clear_state)
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("realtime stop @ %1 speed = %2\n", _transport_sample, _transport_speed));
 	PostTransportWork todo = PostTransportStop;
 
-	/* this resets the speed we will start at if just requested to roll
-	 * again. Don't do it if we are stopping to locate ... in those
-	 * conditions, keep the current default speed so that when we start
-	 * again we resume that speed
-	 */
-	if (!_transport_fsm->declicking_for_locate()) {
-		_default_transport_speed = 1.0;
-	}
-
 	/* call routes */
 
 	boost::shared_ptr<RouteList> r = routes.reader ();
@@ -143,7 +134,6 @@ Session::realtime_stop (bool abort, bool clear_state)
 	reset_punch_loop_constraint ();
 
 	_transport_speed = 0;
-	_engine_speed = 1.0;
 
 	g_atomic_int_set (&_playback_load, 100);
 	g_atomic_int_set (&_capture_load, 100);
@@ -189,7 +179,7 @@ Session::locate (samplepos_t target_sample, bool with_roll, bool with_flush, boo
 		*/
 
 		if (with_roll) {
-			set_transport_speed (1.0, false, false, false);
+			set_transport_speed (_default_transport_speed, false, false, false);
 		}
 		TFSM_EVENT (TransportFSM::LocateDone);
 		Located (); /* EMIT SIGNAL */
@@ -362,8 +352,8 @@ void
 Session::set_transport_speed (double speed, bool abort, bool clear_state, bool as_default)
 {
 	ENSURE_PROCESS_THREAD;
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("@ %5 Set transport speed to %1 from %4 (es = %7), abort = %2 clear_state = %3, as_default %6\n",
-	                                               speed, abort, clear_state, _transport_speed, _transport_sample, as_default, _engine_speed));
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("@ %5 Set transport speed to %1 from %4 (es = %7) (def %8), abort = %2 clear_state = %3, as_default %6\n",
+	                                               speed, abort, clear_state, _transport_speed, _transport_sample, as_default, _engine_speed, _default_transport_speed));
 
 	if ((_engine_speed != 1) && (_engine_speed == fabs (speed)) && (speed * _transport_speed) >= 0) {
 		/* engine speed is not changing and no direction change, do nothing */
@@ -392,6 +382,7 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state, bool a
 	if (_transport_speed == speed && new_engine_speed == _engine_speed) {
 		if (as_default && speed == 0.0) { // => reset default transport speed. hacky or what?
 			_default_transport_speed = 1.0;
+			_default_engine_speed = 1.0;
 		}
 		return;
 	}
@@ -406,6 +397,9 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state, bool a
 #endif
 
 	_engine_speed = new_engine_speed;
+	if (as_default) {
+		_default_engine_speed = new_engine_speed;
+	}
 
 	if (transport_rolling() && speed == 0.0) {
 
@@ -587,6 +581,7 @@ Session::start_transport ()
 	maybe_allow_only_punch ();
 
 	_transport_speed = _default_transport_speed;
+	_engine_speed = _default_engine_speed;
 
 	if (!_engine.freewheeling()) {
 		Timecode::Time time;

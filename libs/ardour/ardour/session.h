@@ -1354,6 +1354,7 @@ private:
 	double                  _engine_speed;
 	double                  _transport_speed; // only: -1, 0, +1
 	double                  _default_transport_speed;
+	double                  _default_engine_speed;
 	double                  _last_transport_speed;
 	double                  _signalled_varispeed;
 
