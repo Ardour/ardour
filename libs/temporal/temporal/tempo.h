@@ -132,6 +132,10 @@ class LIBTEMPORAL_API Point {
 	void map_reset_set_sclock_for_sr_change (superclock_t sc) { _sclock = sc; }
 };
 
+/* this exists only to give the TempoMap the only access to ::set_ramped() in a
+ * derived class
+ */
+
 class LIBTEMPORAL_API Rampable {
   protected:
 	virtual ~Rampable() {}
@@ -340,12 +344,12 @@ class LIBTEMPORAL_API Meter {
 
 /* A MeterPoint is literally just the combination of a Meter with a Point
  */
-class LIBTEMPORAL_API MeterPoint : public Meter, public Point
+class LIBTEMPORAL_API MeterPoint : public Meter, public virtual Point
 {
   public:
-	MeterPoint (TempoMap const & map, Meter const & m, superclock_t sc, Beats const & b, BBT_Time const & bbt) : Meter (m), Point (map, sc, b, bbt) {}
+	MeterPoint (TempoMap const & map, Meter const & m, superclock_t sc, Beats const & b, BBT_Time const & bbt) : Point (map, sc, b, bbt), Meter (m) {}
 	MeterPoint (TempoMap const & map, XMLNode const &);
-	MeterPoint (Meter const & m, Point const & p) : Meter (m), Point (p) {}
+	MeterPoint (Meter const & m, Point const & p) : Point (p), Meter (m) {}
 
 	Beats quarters_at (BBT_Time const & bbt) const;
 	BBT_Time bbt_at (Beats const & beats) const;
@@ -368,11 +372,11 @@ class LIBTEMPORAL_API MeterPoint : public Meter, public Point
  * time-at-quarter-note on demand.
  */
 
-class LIBTEMPORAL_API TempoPoint : public Tempo, public Point
+class LIBTEMPORAL_API TempoPoint : public Tempo, public virtual Point
 {
   public:
-	TempoPoint (TempoMap const & map, Tempo const & t, superclock_t sc, Beats const & b, BBT_Time const & bbt) : Tempo (t), Point (map, sc, b, bbt), _omega (0.0) {}
-	TempoPoint (Tempo const & t, Point const & p) : Tempo (t), Point (p), _omega (0) {}
+	TempoPoint (TempoMap const & map, Tempo const & t, superclock_t sc, Beats const & b, BBT_Time const & bbt) : Point (map, sc, b, bbt), Tempo (t), _omega (0.0) {}
+	TempoPoint (Tempo const & t, Point const & p) : Point (p), Tempo (t), _omega (0) {}
 	TempoPoint (TempoMap const & map, XMLNode const &);
 
 	/* just change the tempo component, without moving */
@@ -512,7 +516,7 @@ class LIBTEMPORAL_API TempoMetric {
  * position is given by a Point that might use superclock or Beats, and the
  * Point's BBT time member is overwritten.
  */
-class LIBTEMPORAL_API MusicTimePoint : public Point
+class LIBTEMPORAL_API MusicTimePoint : public virtual Point
 {
   public:
 	MusicTimePoint (TempoMap const & map, superclock_t sc, Beats const & b, BBT_Time const & bbt) : Point (map, sc, b, bbt) {}
