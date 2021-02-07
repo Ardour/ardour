@@ -1058,7 +1058,7 @@ AudioClock::set_seconds (samplepos_t when, bool /*force*/)
 }
 
 void
-AudioClock::print_minsec (samplepos_t when, char* buf, size_t bufsize, float sample_rate)
+AudioClock::print_minsec (samplepos_t when, char* buf, size_t bufsize, float sample_rate, int decimals)
 {
 	samplecnt_t left;
 	int hrs;
@@ -1074,6 +1074,20 @@ AudioClock::print_minsec (samplepos_t when, char* buf, size_t bufsize, float sam
 		negative = false;
 	}
 
+	float dmult;
+	switch (decimals) {
+		case 1:
+			dmult = 10.f;
+			break;
+		case 2:
+			dmult = 100.f;
+			break;
+		default:
+		case 3:
+			dmult = 1000.f;
+			break;
+	}
+
 	left = when;
 	hrs = (int) floor (left / (sample_rate * 60.0f * 60.0f));
 	left -= (samplecnt_t) floor (hrs * sample_rate * 60.0f * 60.0f);
@@ -1081,14 +1095,23 @@ AudioClock::print_minsec (samplepos_t when, char* buf, size_t bufsize, float sam
 	left -= (samplecnt_t) floor (mins * sample_rate * 60.0f);
 	secs = (int) floor (left / (float) sample_rate);
 	left -= (samplecnt_t) floor ((double)(secs * sample_rate));
-	millisecs = floor (left * 1000.0 / (float) sample_rate);
+	millisecs = floor (left * dmult / (float) sample_rate);
 
-	if (negative) {
-		snprintf (buf, bufsize, "-%02" PRId32 ":%02" PRId32 ":%02" PRId32 ".%03" PRId32, hrs, mins, secs, millisecs);
-	} else {
-		snprintf (buf, bufsize, " %02" PRId32 ":%02" PRId32 ":%02" PRId32 ".%03" PRId32, hrs, mins, secs, millisecs);
+	switch (decimals) {
+		case 0:
+			snprintf (buf, bufsize, "%c%02" PRId32 ":%02" PRId32 ":%02" PRId32, negative ? '-' : ' ', hrs, mins, secs);
+			break;
+		case 1:
+			snprintf (buf, bufsize, "%c%02" PRId32 ":%02" PRId32 ":%02" PRId32 ".%01" PRId32, negative ? '-' : ' ', hrs, mins, secs, millisecs);
+			break;
+		case 2:
+			snprintf (buf, bufsize, "%c%02" PRId32 ":%02" PRId32 ":%02" PRId32 ".%02" PRId32, negative ? '-' : ' ', hrs, mins, secs, millisecs);
+			break;
+		default:
+		case 3:
+			snprintf (buf, bufsize, "%c%02" PRId32 ":%02" PRId32 ":%02" PRId32 ".%03" PRId32, negative ? '-' : ' ', hrs, mins, secs, millisecs);
+			break;
 	}
-
 }
 
 void
