@@ -850,6 +850,8 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 	void reset_starting_at (superclock_t);
 	void reset_starting_at (Beats const &);
 
+	void remove_point (Point const &);
+
 	void copy_points (TempoMap const & other);
 };
 

@@ -903,6 +903,7 @@ TempoMap::remove_tempo (TempoPoint const & tp)
 		return;
 	}
 	_tempos.erase (t);
+	remove_point (tp);
 	reset_starting_at (sc);
 }
 
@@ -972,12 +973,30 @@ TempoMap::remove_bartime (MusicTimePoint const & tp)
 	superclock_t sc (tp.sclock());
 	MusicTimes::iterator m;
 	for (m = _bartimes.begin(); m != _bartimes.end() && m->sclock() < tp.sclock(); ++m);
+
 	if (m->sclock() != tp.sclock()) {
-		/* error ... no tempo point at the time of tp */
+		/* error ... no music time point at the time of tp */
 		return;
 	}
+
 	_bartimes.erase (m);
+	remove_point (tp);
 	reset_starting_at (sc);
+}
+
+void
+TempoMap::remove_point (Point const & point)
+{
+	Points::iterator p;
+	Point const * tpp (&point);
+
+	for (p = _points.begin(); p != _points.end(); ++p) {
+		if (&(*p) == tpp) {
+			// XXX need to fix this leak delete tpp;
+			_points.erase (p);
+			break;
+		}
+	}
 }
 
 void
@@ -1466,6 +1485,7 @@ TempoMap::remove_meter (MeterPoint const & mp)
 		return;
 	}
 	_meters.erase (m);
+	remove_point (mp);
 	reset_starting_at (sc);
 }
 
