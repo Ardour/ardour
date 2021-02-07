@@ -516,11 +516,11 @@ class LIBTEMPORAL_API TempoMetric {
  * position is given by a Point that might use superclock or Beats, and the
  * Point's BBT time member is overwritten.
  */
-class LIBTEMPORAL_API MusicTimePoint : public virtual Point
+class LIBTEMPORAL_API MusicTimePoint : public virtual TempoPoint, public virtual MeterPoint
 {
   public:
-	MusicTimePoint (TempoMap const & map, superclock_t sc, Beats const & b, BBT_Time const & bbt) : Point (map, sc, b, bbt) {}
-	MusicTimePoint (BBT_Time const & bbt_time, Point const & p) : Point (p) { _bbt = bbt_time; }
+	MusicTimePoint (TempoMap const & map, superclock_t sc, Beats const & b, BBT_Time const & bbt, Tempo const & t, Meter const & m) : Point (map, sc, b, bbt), TempoPoint (t, *this), MeterPoint (m, *this)  {}
+	// MusicTimePoint (BBT_Time const & bbt_time, Point const & p) : Point (p), TempoPoint (p.map().tempo_at (p.sclock()), p), MeterPoint (p.map().meter_at (p.sclock()), p) { _bbt = bbt_time; }
 	MusicTimePoint (TempoMap const & map, XMLNode const &);
 
 	boost::intrusive::list_member_hook<> _bartime_hook;
@@ -867,6 +867,7 @@ std::ostream& operator<<(std::ostream& str, Temporal::Meter const &);
 std::ostream& operator<<(std::ostream& str, Temporal::Point const &);
 std::ostream& operator<<(std::ostream& str, Temporal::TempoPoint const &);
 std::ostream& operator<<(std::ostream& str, Temporal::MeterPoint const &);
+std::ostream& operator<<(std::ostream& str, Temporal::MusicTimePoint const &);
 std::ostream& operator<<(std::ostream& str, Temporal::TempoMetric const &);
 }
 

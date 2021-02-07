@@ -435,8 +435,8 @@ TempoPoint::get_state () const
 }
 
 TempoPoint::TempoPoint (TempoMap const & map, XMLNode const & node)
-	: Tempo (node)
-	, Point (map, node)
+	: Point (map, node)
+	, Tempo (node)
 	, _omega (0)
 {
 }
@@ -527,8 +527,8 @@ TempoPoint::quarters_at_superclock (superclock_t sc) const
 }
 
 MeterPoint::MeterPoint (TempoMap const & map, XMLNode const & node)
-	: Meter (node)
-	, Point (map, node)
+	: Point (map, node)
+	, Meter (node)
 {
 }
 
@@ -596,6 +596,8 @@ TempoMetric::superclock_at (BBT_Time const & bbt) const
 
 MusicTimePoint::MusicTimePoint (TempoMap const & map, XMLNode const & node)
 	: Point (map, node)
+	, TempoPoint (map, node)
+	, MeterPoint (map, node)
 {
 }
 
@@ -626,7 +628,7 @@ TempoMap::TempoMap (Tempo const & initial_tempo, Meter const & initial_meter)
 {
 	TempoPoint* tp = new TempoPoint (*this, initial_tempo, 0, Beats(), BBT_Time());
 	MeterPoint* mp = new MeterPoint (*this, initial_meter, 0, Beats(), BBT_Time());
-	MusicTimePoint* mtp = new MusicTimePoint (*this, 0, Beats(), BBT_Time());
+	MusicTimePoint* mtp = new MusicTimePoint (*this, 0, Beats(), BBT_Time(), *tp, *mp);
 
 	_tempos.push_back   (*tp);
 	_meters.push_back   (*mp);
@@ -887,7 +889,7 @@ TempoMap::set_bartime (BBT_Time const & bbt, timepos_t const & pos)
 
 	superclock_t sc (pos.superclocks());
 	TempoMetric metric (metric_at (sc));
-	MusicTimePoint* tp = new MusicTimePoint (bbt, Point (*this, sc, metric.quarters_at_superclock (sc), bbt));
+	MusicTimePoint* tp = new MusicTimePoint (*this, sc, metric.quarters_at_superclock (sc), bbt, metric.tempo(), metric.meter());
 
 	ret = add_or_replace_bartime (*tp);
 
@@ -2015,6 +2017,16 @@ std::operator<<(std::ostream& str, TempoPoint const & t)
 }
 
 std::ostream&
+std::operator<<(std::ostream& str, MusicTimePoint const & p)
+{
+	str << "MP@";
+	str << *((Point*) &p);
+	str << *((Tempo*) &p);
+	str << *((Meter*) &p);
+	return str;
+}
+
+std::ostream&
 std::operator<<(std::ostream& str, TempoMetric const & tm)
 {
 	return str << tm.tempo() << ' '  << tm.meter();
@@ -2516,7 +2528,7 @@ TempoMap::insert_time (timepos_t const & pos, timecnt_t const & duration)
 
 	TempoPoint current_tempo = *t;
 	MeterPoint current_meter = *m;
-	MusicTimePoint current_time_point (*this, 0, Beats(), BBT_Time());
+	MusicTimePoint current_time_point (*this, 0, Beats(), BBT_Time(), current_tempo, current_meter);
 
 	if (_bartimes.size() > 0) {
 		current_time_point = *b;
