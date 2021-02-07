@@ -119,6 +119,18 @@ Session::prepare_momentary_solo (SoloMuteRelease* smr, bool exclusive, boost::sh
 	if (smr) {
 		smr->set (routes_on, routes_off);
 	}
+
+	if (_monitor_out) {
+		if (smr) {
+			boost::shared_ptr<std::list<std::string> > pml (new std::list<std::string>);
+			_engine.monitor_port().active_monitors (*pml);
+			smr->set (pml);
+		}
+		if (exclusive) {
+			/* unset any input monitors */
+			_engine.monitor_port().clear_ports (false);
+		}
+	}
 }
 
 void

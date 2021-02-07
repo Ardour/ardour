@@ -852,6 +852,7 @@ PortManager::update_input_ports (bool clear)
 	if (clear) {
 		new_audio = audio_ports;
 		new_midi  = midi_ports;
+		_monitor_port.clear_ports (true);
 	} else {
 		boost::shared_ptr<AudioInputPorts> aip = _audio_input_ports.reader ();
 		/* find new audio ports */
@@ -898,6 +899,7 @@ PortManager::update_input_ports (bool clear)
 		} else {
 			for (std::vector<std::string>::const_iterator p = old_audio.begin(); p != old_audio.end(); ++p) {
 				apw->erase (*p);
+				_monitor_port.remove_port (*p, true);
 			}
 		}
 		for (std::vector<std::string>::const_iterator p = new_audio.begin(); p != new_audio.end(); ++p) {
@@ -1631,12 +1633,12 @@ PortManager::fill_midi_port_info_locked ()
 void
 PortManager::set_port_buffer_sizes (pframes_t n)
 {
-
 	boost::shared_ptr<Ports> all = ports.reader();
 
 	for (Ports::iterator p = all->begin(); p != all->end(); ++p) {
 		p->second->set_buffer_size (n);
 	}
+	_monitor_port.set_buffer_size (n);
 }
 
 bool
@@ -1741,6 +1743,9 @@ PortManager::run_input_meters (pframes_t n_samples, samplecnt_t rate)
 
 	const float falloff = falloff_cache.calc (n_samples, rate);
 
+	std::set<std::string> monitor_portset;
+	_monitor_port.prepare (monitor_portset);
+
 	/* calculate peak of all physical inputs (readable ports) */
 	std::vector<std::string> port_names;
 	get_physical_inputs (DataType::AUDIO, port_names);
@@ -1769,6 +1774,10 @@ PortManager::run_input_meters (pframes_t n_samples, samplecnt_t rate)
 			continue;
 		}
 
+		if (monitor_portset.find (*p) != monitor_portset.end ()) {
+			_monitor_port.monitor (buf, n_samples, *p);
+		}
+
 		ai->second.scope->write (buf, n_samples);
 
 		/* falloff */
@@ -1783,6 +1792,8 @@ PortManager::run_input_meters (pframes_t n_samples, samplecnt_t rate)
 		ai->second.meter->level = std::min (level, 100.f); // cut off at +40dBFS for falloff.
 		ai->second.meter->peak  = std::max (ai->second.meter->peak, level);
 	}
+
+	_monitor_port.finalize (n_samples);
 
 	/* MIDI */
 	port_names.clear ();

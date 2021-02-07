@@ -922,21 +922,21 @@ public:
 
 	/* session-wide solo/mute/rec-enable */
 
-	bool muted() const;
+	bool muted () const;
 	std::vector<boost::weak_ptr<AutomationControl> > cancel_all_mute ();
 
-	bool soloing() const { return _non_soloed_outs_muted; }
-	bool listening() const { return _listen_cnt > 0; }
-	bool solo_isolated() const { return _solo_isolated_cnt > 0; }
+	bool soloing () const { return _non_soloed_outs_muted; }
+	bool listening () const;
+	bool solo_isolated () const { return _solo_isolated_cnt > 0; }
 	void cancel_all_solo ();
 
-	bool solo_selection_active();
-	void solo_selection( StripableList&, bool );
-
-	static const SessionEvent::RTeventCallback rt_cleanup;
+	bool solo_selection_active ();
+	void solo_selection (StripableList&, bool);
 
 	void clear_all_solo_state (boost::shared_ptr<RouteList>);
 	void prepare_momentary_solo (SoloMuteRelease* smr = NULL, bool exclusive = false, boost::shared_ptr<Route> route = boost::shared_ptr<Route> ());
+
+	static const SessionEvent::RTeventCallback rt_cleanup;
 
 	/* Control-based methods */
 
