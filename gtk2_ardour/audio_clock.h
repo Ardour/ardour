@@ -100,7 +100,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	 */
 	void set_scale (double x, double y);
 
-	static void print_minsec (samplepos_t, char* buf, size_t bufsize, float sample_rate);
+	static void print_minsec (samplepos_t, char* buf, size_t bufsize, float sample_rate, int decimals = 3);
 
 	sigc::signal<void> ValueChanged;
 	sigc::signal<void> mode_changed;
