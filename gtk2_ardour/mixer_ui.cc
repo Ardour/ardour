@@ -1236,6 +1236,14 @@ Mixer_UI::set_session (Session* sess)
 
 	update_title ();
 
+#if 0
+	/* skip mapping all session-config vars, we only need one */
+	boost::function<void (string)> pc (boost::bind (&Mixer_UI::parameter_changed, this, _1));
+	_session->config.map_parameters (pc);
+#else
+	parameter_changed ("show-group-tabs");
+#endif
+
 	initial_track_display ();
 
 	_session->RouteAdded.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::add_routes, this, _1), gui_context());
