@@ -732,15 +732,18 @@ TempoMap::add_meter (MeterPoint* mp)
 	/* CALLER MUST HOLD LOCK */
 
 	Meters::iterator m;
+	Points::iterator p;
 	const superclock_t sclock_limit = mp->sclock();
 	const Beats beats_limit = mp->beats ();
 
 	switch (time_domain()) {
 	case AudioTime:
 		for (m = _meters.begin(); m != _meters.end() && m->sclock() < sclock_limit; ++m);
+		for (p = _points.begin(); p != _points.end() && p->sclock() < sclock_limit; ++p);
 		break;
 	case BeatTime:
 		for (m = _meters.begin(); m != _meters.end() && m->beats() < beats_limit; ++m);
+		for (p = _points.begin(); p != _points.end() && p->beats() < beats_limit; ++p);
 		break;
 	}
 
@@ -759,6 +762,7 @@ TempoMap::add_meter (MeterPoint* mp)
 
 	if (!replaced) {
 		ret = &(*(_meters.insert (m, *mp)));
+		_points.insert (p, *mp);
 	}
 
 	reset_starting_at (sclock_limit);
@@ -832,15 +836,18 @@ TempoMap::add_tempo (TempoPoint * tp)
 	/* CALLER MUST HOLD LOCK */
 
 	Tempos::iterator t;
+	Points::iterator p;
 	const superclock_t sclock_limit = tp->sclock();
 	const Beats beats_limit = tp->beats ();
 
 	switch (time_domain()) {
 	case AudioTime:
 		for (t = _tempos.begin(); t != _tempos.end() && t->sclock() < sclock_limit; ++t);
+		for (p = _points.begin(); p != _points.end() && p->sclock() < sclock_limit; ++p);
 		break;
 	case BeatTime:
 		for (t = _tempos.begin(); t != _tempos.end() && t->beats() < beats_limit; ++t);
+		for (p = _points.begin(); p != _points.end() && p->beats() < beats_limit; ++p);
 		break;
 	}
 
@@ -860,6 +867,7 @@ TempoMap::add_tempo (TempoPoint * tp)
 
 	if (!replaced) {
 		t = _tempos.insert (t, *tp);
+		p = _points.insert (p, *tp);
 		ret = &*t;
 		DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("inserted tempo %1\n", tp));
 	}
@@ -869,6 +877,7 @@ TempoMap::add_tempo (TempoPoint * tp)
 	 */
 
 	assert (t != _tempos.end());
+	assert (p != _points.end());
 
 	Tempos::iterator nxt = t;
 	++nxt;
@@ -919,8 +928,11 @@ TempoMap::add_or_replace_bartime (MusicTimePoint & tp)
 	/* CALLER MUST HOLD LOCK */
 
 	MusicTimes::iterator m;
+	Points::iterator p;
+	superclock_t sclock_limit = tp.sclock();
 
-	for (m = _bartimes.begin(); m != _bartimes.end() && m->sclock() < tp.sclock(); ++m);
+	for (m = _bartimes.begin(); m != _bartimes.end() && m->sclock() < sclock_limit; ++m);
+	for (p = _points.begin(); p != _points.end() && p->sclock() < sclock_limit; ++p);
 
 	bool replaced = false;
 	MusicTimePoint* ret = 0;
@@ -937,6 +949,8 @@ TempoMap::add_or_replace_bartime (MusicTimePoint & tp)
 
 	if (!replaced) {
 		m = _bartimes.insert (m, tp);
+		_points.insert (p, tp);
+
 		ret = &*m;
 		DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("inserted bartime %1\n", tp));
 	}
@@ -2037,9 +2051,9 @@ std::ostream&
 std::operator<<(std::ostream& str, MusicTimePoint const & p)
 {
 	str << "MP@";
-	str << *((Point*) &p);
-	str << *((Tempo*) &p);
-	str << *((Meter*) &p);
+	str << *((Point const *) &p);
+	str << *((Tempo const *) &p);
+	str << *((Meter const *) &p);
 	return str;
 }
 
