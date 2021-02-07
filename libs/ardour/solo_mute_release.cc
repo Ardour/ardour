@@ -83,5 +83,9 @@ SoloMuteRelease::release (Session* s, bool mute) const
 	} else {
 		s->set_controls (route_list_to_control_list (routes_off, &Stripable::solo_control), 0.0, exclusive ? Controllable::NoGroup : Controllable::UseGroup);
 		s->set_controls (route_list_to_control_list (routes_on,  &Stripable::solo_control), 1.0, exclusive ? Controllable::NoGroup : Controllable::UseGroup);
+
+		if (port_monitors && s->monitor_out ()) {
+			s->engine().monitor_port().set_active_monitors (*port_monitors);
+		}
 	}
 }

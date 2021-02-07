@@ -35,6 +35,7 @@
 
 #include "ardour/chan_count.h"
 #include "ardour/midiport_manager.h"
+#include "ardour/monitor_port.h"
 #include "ardour/port.h"
 
 namespace ARDOUR {
@@ -251,6 +252,10 @@ public:
 	AudioInputPorts audio_input_ports () const;
 	MIDIInputPorts  midi_input_ports () const;
 
+	MonitorPort& monitor_port () {
+		return _monitor_port;
+	}
+
 protected:
 	boost::shared_ptr<AudioBackend> _backend;
 
@@ -297,6 +302,8 @@ private:
 	void load_port_info ();
 	void save_port_info ();
 	void update_input_ports (bool);
+
+	MonitorPort _monitor_port;
 
 	struct PortID {
 		PortID (boost::shared_ptr<AudioBackend>, DataType, bool, std::string const&);
