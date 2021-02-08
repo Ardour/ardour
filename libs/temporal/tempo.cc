@@ -1086,13 +1086,13 @@ TempoMap::reset_starting_at (superclock_t sc)
 
                TempoMetric metric (*current_tempo, *current_meter);
 
-               if (m->sclock() == first_of_three->sclock()) {
+               if (m != _meters.end() && m->sclock() == first_of_three->sclock()) {
                        advance_meter = true;
                        current_meter = &*m;
                        DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("\tcurrent point defines meter %1\n", *current_meter));
                }
 
-               if (t->sclock() == first_of_three->sclock()) {
+               if (t != _tempos.end() && t->sclock() == first_of_three->sclock()) {
                        advance_tempo = true;
                        current_tempo = &*t;
                        DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("\tcurrent point defines tempo %1\n", *current_tempo));
