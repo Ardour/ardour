@@ -446,6 +446,8 @@ Editor::register_actions ()
 
 	ActionManager::register_toggle_action (editor_actions, "toggle-stationary-playhead", _("Stationary Playhead"), (mem_fun(*this, &Editor::toggle_stationary_playhead)));
 
+	ActionManager::register_toggle_action (editor_actions, "show-touched-automation", _("Show Automation Lane on Touch"), (mem_fun(*this, &Editor::toggle_show_touched_automation)));
+
 	act = reg_sens (editor_actions, "insert-time", _("Insert Time"), (sigc::mem_fun(*this, &Editor::do_insert_time)));
 	ActionManager::track_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "remove-time", _("Remove Time"), (mem_fun(*this, &Editor::do_remove_time)));

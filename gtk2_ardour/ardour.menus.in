@@ -276,6 +276,7 @@
         <menuitem action='set-tempo-from-edit-range'/>
       </menu>
       <menuitem action='set-mouse-mode-object-range'/>
+      <menuitem action='show-touched-automation'/>
       <separator/>
       <menu action="LuaScripts">
         <menuitem action='toggle-script-manager'/>

@@ -386,6 +386,9 @@ public:
 	/* returns the left-most and right-most time that the gui should allow the user to scroll to */
 	std::pair <samplepos_t,samplepos_t> session_gui_extents (bool use_extra = true) const;
 
+	/* RTAV Automation display option */
+	bool show_touched_automation () const;
+
 	/* fades */
 
 	void toggle_region_fades (int dir);
@@ -2308,6 +2311,11 @@ private:
 
 	void follow_mixer_selection ();
 	bool _following_mixer_selection;
+
+	/* RTAV Automation display option */
+	void toggle_show_touched_automation ();
+	void set_show_touched_automation (bool);
+	bool _show_touched_automation;
 
 	int time_fx (ARDOUR::RegionList&, float val, bool pitching);
 	void note_edit_done (int, EditNoteDialog*);

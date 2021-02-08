@@ -455,6 +455,7 @@ Editor::Editor ()
 	, _region_selection_change_updates_region_list (true)
 	, _cursors (0)
 	, _following_mixer_selection (false)
+	, _show_touched_automation (false)
 	, _control_point_toggled_on_press (false)
 	, _stepping_axis_view (0)
 	, quantize_dialog (0)
@@ -2471,6 +2472,15 @@ Editor::set_state (const XMLNode& node, int version)
 		tact->set_active (yn);
 	}
 
+	yn = false;
+	node.get_property (X_("show-touched-automation"), yn);
+	{
+		Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), X_("show-touched-automation"));
+		/* do it twice to force the change */
+		tact->set_active (!yn);
+		tact->set_active (yn);
+	}
+
 	XMLNodeList children = node.children ();
 	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
 		selection->set_state (**i, Stateful::current_state_version);
@@ -2569,6 +2579,7 @@ Editor::get_state ()
 	}
 
 	node->set_property (X_("show-marker-lines"), _show_marker_lines);
+	node->set_property (X_("show-touched-automation"), _show_touched_automation);
 
 	node->add_child_nocopy (selection->get_state ());
 	node->add_child_nocopy (_regions->get_state ());
@@ -4025,6 +4036,32 @@ Editor::set_stationary_playhead (bool yn)
 		}
 		instant_save ();
 	}
+}
+
+bool
+Editor::show_touched_automation () const
+{
+	if (!contents().is_mapped()) {
+		return false;
+	}
+	return _show_touched_automation;
+}
+
+void
+Editor::toggle_show_touched_automation ()
+{
+	RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), X_("show-touched-automation"));
+	set_show_touched_automation (tact->get_active());
+}
+
+void
+Editor::set_show_touched_automation (bool yn)
+{
+	if (_show_touched_automation == yn) {
+		return;
+	}
+	_show_touched_automation = yn;
+	instant_save ();
 }
 
 PlaylistSelector&

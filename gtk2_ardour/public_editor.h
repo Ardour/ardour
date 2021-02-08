@@ -365,6 +365,7 @@ public:
 	virtual void embed_audio_from_video (std::string, samplepos_t n = 0, bool lock_position_to_video = true) = 0;
 
 	virtual bool track_selection_change_without_scroll () const = 0;
+	virtual bool show_touched_automation () const = 0;
 
 	virtual StripableTimeAxisView* get_stripable_time_axis_by_id (const PBD::ID& id) const = 0;
 

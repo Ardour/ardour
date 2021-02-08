@@ -1602,11 +1602,9 @@ RouteTimeAxisView::show_touched_automation (boost::weak_ptr<PBD::Controllable> w
 		return;
 	}
 
-#if 0
-	if (!_editor.show_touched_automation_lane ()) {
+	if (!_editor.show_touched_automation ()) {
 		return;
 	}
-#endif
 
 	ProcessorAutomationNode* pan = find_processor_automation_node (ac);
 	if (!pan) {
