@@ -284,6 +284,8 @@ AutomationControl::start_touch (double when)
 		return;
 	}
 
+	ControlTouched (boost::dynamic_pointer_cast<PBD::Controllable>(shared_from_this())); /* EMIT SIGNAL */
+
 	if (alist()->automation_state() & (Touch | Latch)) {
 		/* subtle. aligns the user value with the playback and
 		 * use take actual value (incl masters).

@@ -462,6 +462,8 @@ Session::Session (AudioEngine &eng,
 	LatentSend::ChangedLatency.connect_same_thread (*this, boost::bind (&Session::send_latency_compensation_change, this));
 	Latent::DisableSwitchChanged.connect_same_thread (*this, boost::bind (&Session::queue_latency_recompute, this));
 
+	Controllable::ControlTouched.connect_same_thread (*this, boost::bind (&Session::controllable_touched, this, _1));
+
 	emit_thread_start ();
 	auto_connect_thread_start ();
 
@@ -6848,6 +6850,18 @@ Session::notify_presentation_info_change ()
 	}
 
 	reassign_track_numbers();
+}
+
+void
+Session::controllable_touched (boost::weak_ptr<PBD::Controllable> c)
+{
+	_recently_touched_controllable = c;
+}
+
+boost::shared_ptr<PBD::Controllable>
+Session::recently_touched_controllable () const
+{
+	return _recently_touched_controllable.lock ();
 }
 
 bool

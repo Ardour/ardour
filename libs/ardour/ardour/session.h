@@ -1154,6 +1154,7 @@ public:
 	void add_controllable (boost::shared_ptr<PBD::Controllable>);
 
 	boost::shared_ptr<PBD::Controllable> solo_cut_control() const;
+	boost::shared_ptr<PBD::Controllable> recently_touched_controllable () const;
 
 	SessionConfiguration config;
 
@@ -2096,6 +2097,9 @@ private:
 	Controllables controllables;
 
 	boost::shared_ptr<PBD::Controllable> _solo_cut_control;
+
+	void controllable_touched (boost::weak_ptr<PBD::Controllable>);
+	boost::weak_ptr<PBD::Controllable> _recently_touched_controllable;
 
 	void reset_native_file_format();
 	bool first_file_data_format_reset;
