@@ -105,6 +105,8 @@ using namespace Editing;
 using namespace std;
 using std::list;
 
+sigc::signal<void> RouteTimeAxisView::signal_ctrl_touched;
+
 RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, ArdourCanvas::Canvas& canvas)
 	: RouteUI(sess)
 	, StripableTimeAxisView(ed, sess, canvas)
@@ -129,6 +131,10 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, ArdourCan
 
 	sess->config.ParameterChanged.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::parameter_changed, this, _1), gui_context());
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &RouteTimeAxisView::parameter_changed));
+
+	Controllable::ControlTouched.connect (
+			ctrl_touched_connection, invalidator (*this), boost::bind (&RouteTimeAxisView::show_touched_automation, this, _1), gui_context ()
+    );
 
 	parameter_changed ("editor-stereo-only-meters");
 }
@@ -381,8 +387,20 @@ RouteTimeAxisView::setup_processor_menu_and_curves ()
 {
 	_subplugin_menu_map.clear ();
 	subplugin_menu.items().clear ();
+	ctrl_node_map.clear ();
 	_route->foreach_processor (sigc::mem_fun (*this, &RouteTimeAxisView::add_processor_to_subplugin_menu));
 	_route->foreach_processor (sigc::mem_fun (*this, &RouteTimeAxisView::add_existing_processor_automation_curves));
+
+	/* update controllable LUT */
+	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
+		if (!(*i)->valid) {
+			continue;
+		}
+		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
+			boost::shared_ptr<PBD::Controllable> c = boost::dynamic_pointer_cast <PBD::Controllable>((*i)->processor->control((*ii)->what));
+			ctrl_node_map[c] = *ii;
+		}
+	}
 }
 
 bool
@@ -1563,6 +1581,57 @@ RouteTimeAxisView::show_existing_automation (bool apply_to_selection)
 }
 
 void
+RouteTimeAxisView::maybe_hide_automation (boost::weak_ptr<PBD::Controllable> wctrl)
+{
+	ctrl_autohide_connection.disconnect ();
+	boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl> (wctrl.lock ());
+  if (!ac) {
+		return;
+	}
+	ProcessorAutomationNode* pan = find_processor_automation_node (ac);
+	if (pan) {
+		pan->menu_item->set_active (false);
+	}
+}
+
+void
+RouteTimeAxisView::show_touched_automation (boost::weak_ptr<PBD::Controllable> wctrl)
+{
+	boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl> (wctrl.lock ());
+	if (!ac) {
+		return;
+	}
+
+#if 0
+	if (!_editor.show_touched_automation_lane ()) {
+		return;
+	}
+#endif
+
+	ProcessorAutomationNode* pan = find_processor_automation_node (ac);
+	if (!pan) {
+		return;
+	}
+
+	/* hide any lanes */
+	signal_ctrl_touched ();
+
+	if (!pan->menu_item->get_active ()) {
+		pan->menu_item->set_active (true);
+		ctrl_autohide_connection = signal_ctrl_touched.connect (sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::maybe_hide_automation), wctrl));
+	}
+
+	/* now scroll to the ctrl */
+	for (Children::iterator j = children.begin(); j != children.end(); ++j) {
+		boost::shared_ptr<AutomationTimeAxisView> atv = boost::dynamic_pointer_cast<AutomationTimeAxisView> (*j);
+		if (atv && atv->control () == ac) {
+			_editor.ensure_time_axis_view_is_visible (*atv, false);
+			break;
+		}
+	}
+}
+
+void
 RouteTimeAxisView::hide_all_automation (bool apply_to_selection)
 {
 	if (apply_to_selection) {
@@ -1636,6 +1705,17 @@ RouteTimeAxisView::find_processor_automation_node (boost::shared_ptr<Processor> 
 		}
 	}
 
+	return 0;
+}
+
+RouteTimeAxisView::ProcessorAutomationNode*
+RouteTimeAxisView::find_processor_automation_node (boost::shared_ptr<AutomationControl> ac)
+{
+	std::map<boost::shared_ptr<PBD::Controllable>, ProcessorAutomationNode*>::const_iterator i;
+	i = ctrl_node_map.find (ac);
+	if (i != ctrl_node_map.end ()) {
+		return i->second;
+	}
 	return 0;
 }
 

@@ -194,6 +194,9 @@ protected:
 	ProcessorAutomationNode*
 	find_processor_automation_node (boost::shared_ptr<ARDOUR::Processor> i, Evoral::Parameter);
 
+	ProcessorAutomationNode*
+	find_processor_automation_node (boost::shared_ptr<ARDOUR::AutomationControl>);
+
 	boost::shared_ptr<AutomationLine>
 	find_processor_automation_curve (boost::shared_ptr<ARDOUR::Processor> i, Evoral::Parameter);
 
@@ -261,6 +264,8 @@ protected:
 	 */
 	std::list<ProcessorAutomationInfo*> processor_automation;
 
+	std::map<boost::shared_ptr<PBD::Controllable>, ProcessorAutomationNode*> ctrl_node_map;
+
 	typedef std::vector<boost::shared_ptr<AutomationLine> > ProcessorAutomationCurves;
 	ProcessorAutomationCurves processor_automation_curves;
 	/** parameter -> menu item map for the plugin automation menu */
@@ -299,10 +304,17 @@ private:
 	void update_playlist_tip ();
 	void parameter_changed (std::string const & p);
 	void update_track_number_visibility();
+	void show_touched_automation (boost::weak_ptr<PBD::Controllable>);
+	void maybe_hide_automation (boost::weak_ptr<PBD::Controllable>);
 
 	void drop_instrument_ref ();
 	void reread_midnam ();
 	PBD::ScopedConnectionList midnam_connection;
+
+	static sigc::signal<void> signal_ctrl_touched;
+
+	PBD::ScopedConnection ctrl_touched_connection;
+	sigc::connection      ctrl_autohide_connection;
 };
 
 #endif /* __ardour_route_time_axis_h__ */
