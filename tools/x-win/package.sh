@@ -394,6 +394,7 @@ RequestExecutionLevel admin
 InstallDir "\$${PGF}\\${PRODUCT_ID}"
 InstallDirRegKey HKLM "Software\\${PRODUCT_NAME}\\${PRODUCT_ID}\\$WARCH" "Install_Dir"
 !define MUI_ICON "share\\${PRODUCT_ICON}"
+!define MUI_UNICON "share\\${PRODUCT_ICON}"
 
 EOF
 
