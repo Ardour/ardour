@@ -2688,28 +2688,43 @@ TempoMap::metric_at (timepos_t const & pos) const
 TempoMetric
 TempoMap::metric_at (superclock_t sc, bool can_match) const
 {
-	Tempos::const_iterator t, prev_t;
-	Meters::const_iterator m, prev_m;
-
 	assert (!_tempos.empty());
 	assert (!_meters.empty());
+	assert (!_points.empty());
 
-	/* Yes, linear search because the typical size of _tempos and _meters
-	 * is 1, and extreme sizes are on the order of 10
+	TempoPoint const * tpp = 0;
+	MeterPoint const * mpp = 0;
+
+	TempoPoint const * prev_t = &_tempos.front();
+	MeterPoint const * prev_m = &_meters.front();
+
+	/* Yes, linear search because the typical size of _points
+	 * is 2, and extreme sizes are on the order of 10-100
 	 */
 
-	for (t = _tempos.begin(), prev_t = t; t != _tempos.end() && t->sclock() < sc; ++t) { prev_t = t; }
-	for (m = _meters.begin(), prev_m = m; m != _meters.end() && m->sclock() < sc; ++m) { prev_m = m; }
+	Points::const_iterator p;
+
+	for (p = _points.begin(); p != _points.end() && p->sclock() < sc; ++p) {
+		if ((tpp = dynamic_cast<TempoPoint const *> (&(*p)))) {
+			prev_t = tpp;
+		}
+		if ((mpp = dynamic_cast<MeterPoint const *> (&(*p)))) {
+			prev_m = mpp;
+		}
+	}
 
 	if (can_match || sc == 0) {
 		/* may have found tempo and/or meter precisely at @param sc */
 
-		if (t != _tempos.end() && t->sclock() == sc) {
-			prev_t = t;
-		}
+		if (p != _points.end() && p->sclock() == sc) {
 
-		if (m != _meters.end() && m->sclock() == sc) {
-			prev_m = m;
+			if ((tpp = dynamic_cast<TempoPoint const *> (&(*p)))) {
+				prev_t = tpp;
+			}
+
+			if ((mpp = dynamic_cast<MeterPoint const *> (&(*p)))) {
+				prev_m = mpp;
+			}
 		}
 	}
 
@@ -2720,33 +2735,49 @@ TempoMap::metric_at (superclock_t sc, bool can_match) const
 	 * worse.
 	 */
 
-	return TempoMetric (*const_cast<TempoPoint*>(&*prev_t), *const_cast<MeterPoint*> (&*prev_m));
+	return TempoMetric (*const_cast<TempoPoint*>(prev_t), *const_cast<MeterPoint*> (prev_m));
 }
 
 TempoMetric
 TempoMap::metric_at (Beats const & b, bool can_match) const
 {
-	Tempos::const_iterator t, prev_t;
-	Meters::const_iterator m, prev_m;
-
 	assert (!_tempos.empty());
 	assert (!_meters.empty());
+	assert (!_points.empty());
 
-	/* Yes, linear search because the typical size of _tempos and _meters
-	 * is 1, and extreme sizes are on the order of 10
+	TempoPoint const * tpp = 0;
+	MeterPoint const * mpp = 0;
+
+	TempoPoint const * prev_t = &_tempos.front();
+	MeterPoint const * prev_m = &_meters.front();
+
+	/* Yes, linear search because the typical size of _points
+	 * is 2, and extreme sizes are on the order of 10-100
 	 */
 
-	for (t = _tempos.begin(), prev_t = t; t != _tempos.end() && t->beats() < b; ++t) { prev_t = t; }
-	for (m = _meters.begin(), prev_m = m; m != _meters.end() && m->beats() < b; ++m) { prev_m = m; }
+	Points::const_iterator p;
+
+	for (p = _points.begin(); p != _points.end() && p->beats() < b; ++p) {
+		if ((tpp = dynamic_cast<TempoPoint const *> (&(*p)))) {
+			prev_t = tpp;
+		}
+		if ((mpp = dynamic_cast<MeterPoint const *> (&(*p)))) {
+			prev_m = mpp;
+		}
+	}
 
 	if (can_match || b == Beats()) {
-		/* may have found tempo and/or meter precisely at @param b */
-		if (t != _tempos.end() && t->beats() == b) {
-			prev_t = t;
-		}
+		/* may have found tempo and/or meter precisely at @param sc */
 
-		if (m != _meters.end() && m->beats() == b) {
-			prev_m = m;
+		if (p != _points.end() && p->beats() == b) {
+
+			if ((tpp = dynamic_cast<TempoPoint const *> (&(*p)))) {
+				prev_t = tpp;
+			}
+
+			if ((mpp = dynamic_cast<MeterPoint const *> (&(*p)))) {
+				prev_m = mpp;
+			}
 		}
 	}
 
@@ -2757,34 +2788,49 @@ TempoMap::metric_at (Beats const & b, bool can_match) const
 	 * worse.
 	 */
 
-	return TempoMetric (*const_cast<TempoPoint*>(&*prev_t), *const_cast<MeterPoint*> (&*prev_m));
+	return TempoMetric (*const_cast<TempoPoint*>(prev_t), *const_cast<MeterPoint*> (prev_m));
 }
 
 TempoMetric
 TempoMap::metric_at (BBT_Time const & bbt, bool can_match) const
 {
-	Tempos::const_iterator t, prev_t;
-	Meters::const_iterator m, prev_m;
-
 	assert (!_tempos.empty());
 	assert (!_meters.empty());
+	assert (!_points.empty());
 
-	/* Yes, linear search because the typical size of _tempos and _meters
-	 * is 1, and extreme sizes are on the order of 10
+	TempoPoint const * tpp = 0;
+	MeterPoint const * mpp = 0;
+
+	TempoPoint const * prev_t = &_tempos.front();
+	MeterPoint const * prev_m = &_meters.front();
+
+	/* Yes, linear search because the typical size of _points
+	 * is 2, and extreme sizes are on the order of 10-100
 	 */
 
-	for (t = _tempos.begin(), prev_t = t; t != _tempos.end() && t->bbt() < bbt; ++t) { prev_t = t; }
-	for (m = _meters.begin(), prev_m = m; m != _meters.end() && m->bbt() < bbt; ++m) { prev_m = m; }
+	Points::const_iterator p;
+
+	for (p = _points.begin(); p != _points.end() && p->bbt() < bbt; ++p) {
+		if ((tpp = dynamic_cast<TempoPoint const *> (&(*p)))) {
+			prev_t = tpp;
+		}
+		if ((mpp = dynamic_cast<MeterPoint const *> (&(*p)))) {
+			prev_m = mpp;
+		}
+	}
 
 	if (can_match || bbt == BBT_Time()) {
-		/* may have found tempo and/or meter precisely at @param bbt */
+		/* may have found tempo and/or meter precisely at @param sc */
 
-		if (t != _tempos.end() && t->bbt() == bbt) {
-			prev_t = t;
-		}
+		if (p != _points.end() && p->bbt() == bbt) {
 
-		if (m != _meters.end() && m->bbt() == bbt) {
-			prev_m = m;
+			if ((tpp = dynamic_cast<TempoPoint const *> (&(*p)))) {
+				prev_t = tpp;
+			}
+
+			if ((mpp = dynamic_cast<MeterPoint const *> (&(*p)))) {
+				prev_m = mpp;
+			}
 		}
 	}
 
@@ -2795,7 +2841,7 @@ TempoMap::metric_at (BBT_Time const & bbt, bool can_match) const
 	 * worse.
 	 */
 
-	return TempoMetric (*const_cast<TempoPoint*>(&*prev_t), *const_cast<MeterPoint*> (&*prev_m));
+	return TempoMetric (*const_cast<TempoPoint*>(prev_t), *const_cast<MeterPoint*> (prev_m));
 }
 
 bool
