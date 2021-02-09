@@ -1900,7 +1900,7 @@ RouteTimeAxisView::add_processor_to_subplugin_menu (boost::weak_ptr<Processor> p
 		boost::shared_ptr<AutomationTimeAxisView> atav = pan->view;
 		bool visible;
 		if (atav && atav->get_gui_property ("visible", visible)) {
-			mitem->set_active(true);
+			mitem->set_active(visible);
 		} else {
 			mitem->set_active(false);
 		}
@@ -1934,7 +1934,8 @@ RouteTimeAxisView::processor_menu_item_toggled (RouteTimeAxisView::ProcessorAuto
 		redraw = true;
 	}
 
-	if (pan->view && pan->view->set_marked_for_display (showit)) {
+	boost::shared_ptr<AutomationTimeAxisView> atav = pan->view;
+	if (atav && atav->set_marked_for_display (showit)) {
 		redraw = true;
 	}
 
