@@ -3851,7 +3851,7 @@ BBTRulerDrag::finished (GdkEvent* event, bool movement_occurred)
 	if (!movement_occurred) {
 
 		_editor->begin_reversible_command (_("add BBT marker"));
-		map->set_bartime (BBT_Time (3, 2, 0), grab_time());
+		map->set_bartime (BBT_Time (3, 1, 0), grab_time());
 
 	} else {
 
