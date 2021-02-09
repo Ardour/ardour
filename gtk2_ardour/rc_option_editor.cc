@@ -3322,6 +3322,16 @@ RCOptionEditor::RCOptionEditor ()
 			_("<b>When enabled</b> master record will remain engaged when the transport transitions to stop.\n<b>When disabled</b> master record will be disabled when the transport transitions to stop."));
 
 	bo = new BoolOption (
+		     "reset-default-speed-on-stop",
+		     _("Reset default speed on stop"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_reset_default_speed_on_stop),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_reset_default_speed_on_stop)
+		     );
+	add_option (_("Transport"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+			_("<b>When enabled</b>, stopping the transport will reset the default speed to normal.\n<b>When disabled</b> any current default speed will remain in effect across transport stops."));
+
+	bo = new BoolOption (
 		     "disable-disarm-during-roll",
 		     _("Disable per-track record disarm while rolling"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_disable_disarm_during_roll),
