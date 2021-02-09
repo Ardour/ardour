@@ -174,6 +174,7 @@ CONFIG_VARIABLE (float, shuttle_max_speed, "shuttle-max-speed", 8.0f)
 CONFIG_VARIABLE (bool, locate_while_waiting_for_sync, "locate-while-waiting-for-sync", false)
 CONFIG_VARIABLE (bool, disable_disarm_during_roll, "disable-disarm-during-roll", false)
 CONFIG_VARIABLE (AutoReturnTarget, auto_return_target_list, "auto-return-target-list", AutoReturnTarget(LastLocate|RangeSelectionStart|Loop|RegionSelectionStart))
+CONFIG_VARIABLE (bool, reset_default_speed_on_stop, "reset-default-speed-on-stop", false)
 
 /* metering */
 
