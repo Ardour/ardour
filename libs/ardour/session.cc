@@ -7147,11 +7147,11 @@ Session::auto_connect_thread_run ()
 			}
 		}
 
-		{
+		if (_engine.port_deletions_pending ().read_space () > 0) {
 			// this may call ARDOUR::Port::drop ... jack_port_unregister ()
 			// jack1 cannot cope with removing ports while processing
 			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-			AudioEngine::instance()->clear_pending_port_deletions ();
+			_engine.clear_pending_port_deletions ();
 		}
 
 		lx.acquire ();
