@@ -596,8 +596,8 @@ TempoMetric::superclock_at (BBT_Time const & bbt) const
 
 MusicTimePoint::MusicTimePoint (TempoMap const & map, XMLNode const & node)
 	: Point (map, node)
-	, TempoPoint (map, node)
-	, MeterPoint (map, node)
+	, TempoPoint (map, *node.child (Tempo::xml_node_name.c_str()))
+	, MeterPoint (map, *node.child (Meter::xml_node_name.c_str()))
 {
 }
 
@@ -605,7 +605,12 @@ XMLNode&
 MusicTimePoint::get_state () const
 {
 	XMLNode* node = new XMLNode (X_("MusicTime"));
+
 	Point::add_state (*node);
+
+	node->add_child_nocopy (Tempo::get_state());
+	node->add_child_nocopy (Meter::get_state());
+
 	return *node;
 }
 
