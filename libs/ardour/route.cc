@@ -270,7 +270,7 @@ Route::init ()
 
 	if (is_monitor()) {
 		/* where we listen to tracks */
-		_intreturn.reset (new MonitorReturn (_session));
+		_intreturn.reset (new MonitorReturn (_session, time_domain()));
 		_intreturn->activate ();
 
 		/* the thing that provides proper control over a control/monitor/listen bus
@@ -3097,11 +3097,13 @@ Route::set_processor_state (const XMLNode& node, int version)
 			_intreturn->set_state (**niter, version);
 		} else if (prop->value() == "intreturn") {
 			if (!_intreturn) {
+
 				if (is_monitor ()) {
-					_intreturn.reset (new MonitorReturn (_session));
+					_intreturn.reset (new MonitorReturn (_session, time_domain()));
 				} else {
-					_intreturn.reset (new InternalReturn (_session));
+					_intreturn.reset (new InternalReturn (_session, time_domain()));
 				}
+
 				must_configure = true;
 			}
 			_intreturn->set_state (**niter, version);
@@ -3315,7 +3317,7 @@ void
 Route::add_internal_return ()
 {
 	if (!_intreturn) {
-		_intreturn.reset (new InternalReturn (_session));
+		_intreturn.reset (new InternalReturn (_session, time_domain()));
 		add_processor (_intreturn, PreFader);
 	}
 }
