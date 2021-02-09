@@ -1603,6 +1603,9 @@ RouteTimeAxisView::show_touched_automation (boost::weak_ptr<PBD::Controllable> w
 	}
 
 	if (!_editor.show_touched_automation ()) {
+		if (ctrl_autohide_connection.connected ()) {
+			signal_ctrl_touched ();
+		}
 		return;
 	}
 

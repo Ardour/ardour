@@ -4061,6 +4061,9 @@ Editor::set_show_touched_automation (bool yn)
 		return;
 	}
 	_show_touched_automation = yn;
+	if (!yn) {
+		RouteTimeAxisView::signal_ctrl_touched ();
+	}
 	instant_save ();
 }
 

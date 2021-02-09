@@ -141,6 +141,8 @@ public:
 	void meter_changed ();
 	void effective_gain_display () { gm.effective_gain_display(); }
 
+	static sigc::signal<void> signal_ctrl_touched;
+
 	std::string state_id() const;
 
 	void show_all_automation (bool apply_to_selection = false);
@@ -310,8 +312,6 @@ private:
 	void drop_instrument_ref ();
 	void reread_midnam ();
 	PBD::ScopedConnectionList midnam_connection;
-
-	static sigc::signal<void> signal_ctrl_touched;
 
 	PBD::ScopedConnection ctrl_touched_connection;
 	sigc::connection      ctrl_autohide_connection;
