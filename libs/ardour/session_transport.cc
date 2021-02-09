@@ -99,6 +99,11 @@ Session::realtime_stop (bool abort, bool clear_state)
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("realtime stop @ %1 speed = %2\n", _transport_sample, _transport_speed));
 	PostTransportWork todo = PostTransportStop;
 
+	if (Config->get_reset_default_speed_on_stop() && !_transport_fsm->declicking_for_locate()) {
+		_default_transport_speed = 1.0;
+		_default_engine_speed = 1.0;
+	}
+
 	/* call routes */
 
 	boost::shared_ptr<RouteList> r = routes.reader ();
