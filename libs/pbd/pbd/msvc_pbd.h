@@ -161,38 +161,6 @@ typedef _ssize_t ssize_t;
 #endif
 #endif /* ! _SSIZE_T_ */
 
-struct dirent
-{
-	long            d_ino;                // Always zero
-	unsigned short  d_reclen;             // Always zero
-	unsigned short  d_namlen;             // Length of name in d_name
-	char            d_name[FILENAME_MAX]; // File name
-};
-
-// This is an internal data structure. Do not use it
-// except as an argument to one of the functions below.
-typedef struct
-{
-	// Disk transfer area for this dir
-	struct _finddata_t dd_dta;
-
-	// 'dirent' struct to return from dir (NOTE: this
-	// is not thread safe).
-	struct dirent dd_dir;
-
-	// '_findnext()' handle
-	long dd_handle;
-
-	// Current status of search:
-	//  0 = not started yet (next entry to read is first entry)
-	// -1 = off the end
-	//  Otherwise - positive (0 based) index of next entry
-	int dd_stat;
-
-	// Full path for dir with search pattern (struct will be extended)
-	char dd_name[1];
-} DIR;
-
 typedef unsigned int nfds_t;
 
 #ifdef __cplusplus
@@ -217,20 +185,56 @@ LIBPBD_API double   PBD_APICALLTYPE trunc(double x);
 
 namespace PBD {
 
-// These are used to replicate 'dirent.h' functionality
-LIBPBD_API DIR*           PBD_APICALLTYPE opendir  (const char *szPath);
-LIBPBD_API struct dirent* PBD_APICALLTYPE readdir  (DIR *pDir);
-LIBPBD_API int            PBD_APICALLTYPE closedir (DIR *pDir);
-
 #if defined(_MSC_VER) && (_MSC_VER < 1900)
 LIBPBD_API char*    PBD_APICALLTYPE realpath    (const char *original_path, char resolved_path[_MAX_PATH+1]);
 LIBPBD_API int      PBD_APICALLTYPE mkstemp     (char *template_name);
 
-// JE - 30-01-2021 (AFAICT these ones aren't needed any more) 
+/* JE - 30-01-2021 (AFAICT these ones aren't needed any more) */ 
 LIBPBD_API bool     PBD_APICALLTYPE TestForMinimumSpecOS(char *revision="currently ignored");
 LIBPBD_API int      PBD_APICALLTYPE ntfs_link   (const char *existing_filepath, const char *link_filepath);
 LIBPBD_API int      PBD_APICALLTYPE ntfs_unlink (const char *link_filepath);
 #endif
+
+}  // namespace PBD */
+
+struct dirent
+{
+	long            d_ino;                // Always zero
+	unsigned short  d_reclen;             // Always zero
+	unsigned short  d_namlen;             // Length of name in d_name
+	char            d_name[FILENAME_MAX]; // File name
+};
+
+// This is an internal data structure. Do not use it
+// except as an argument to one of the functions below.
+typedef struct
+{
+	// Disk transfer area for this dir
+	struct _finddata_t dd_dta;
+
+	// 'dirent' struct to return from dir (NOTE: this
+	// is not thread safe).
+	struct dirent dd_dir;
+
+	// '_findnext()' handle
+	intptr_t dd_handle;
+
+	// Current status of search:
+	//  0 = not started yet (next entry to read is first entry)
+	// -1 = off the end
+	//  Otherwise - positive (0 based) index of next entry
+	int dd_stat;
+
+	// Full path for dir with search pattern (struct will be extended)
+	char dd_name[1];
+} DIR;
+
+namespace PBD {
+
+// These are used to replicate 'dirent.h' functionality
+LIBPBD_API DIR*           PBD_APICALLTYPE opendir  (const char *szPath);
+LIBPBD_API struct dirent* PBD_APICALLTYPE readdir  (DIR *pDir);
+LIBPBD_API int            PBD_APICALLTYPE closedir (DIR *pDir);
 
 }  // namespace PBD */
 
