@@ -327,6 +327,7 @@ Session::Session (AudioEngine &eng,
 	, _selection (new CoreSelection (*this))
 	, _global_locate_pending (false)
 	, _had_destructive_tracks (false)
+	, _update_pretty_names (0)
 {
 	created_with = string_compose ("%1 %2", PROGRAM_NAME, revision);
 
@@ -7145,6 +7146,15 @@ Session::auto_connect_thread_run ()
 					Glib::usleep (1000);
 				}
 			}
+		}
+
+
+		if (_midi_ports && g_atomic_int_get (&_update_pretty_names)) {
+			boost::shared_ptr<Port> ap = boost::dynamic_pointer_cast<Port> (vkbd_output_port ());
+			if (ap->pretty_name () != _("Virtual Keyboard")) {
+				ap->set_pretty_name (_("Virtual Keyboard"));
+			}
+			g_atomic_int_set (&_update_pretty_names, 0);
 		}
 
 		if (_engine.port_deletions_pending ().read_space () > 0) {
