@@ -3075,7 +3075,7 @@ TempoMap::update (TempoMap::SharedPtr m)
 	_map_mgr.update (m);
 
 	/* update thread local map pointer in the calling thread */
-	_tempo_map_p = _map_mgr.reader();
+	update_thread_tempo_map ();
 
 	cerr << "New tempo map:\n";
 	_tempo_map_p->dump (cerr);
