@@ -5314,6 +5314,7 @@ RubberbandSelectDrag::finished (GdkEvent* event, bool movement_occurred)
 
 		bool do_deselect = true;
 		MidiTimeAxisView* mtv;
+		AutomationTimeAxisView* atv;
 
 		if ((mtv = dynamic_cast<MidiTimeAxisView*>(_editor->clicked_axisview)) != 0) {
 			/* MIDI track */
@@ -5322,6 +5323,10 @@ RubberbandSelectDrag::finished (GdkEvent* event, bool movement_occurred)
 				add_midi_region (mtv, true);
 				do_deselect = false;
 			}
+		} else if ((atv = dynamic_cast<AutomationTimeAxisView*>(_editor->clicked_axisview)) != 0) {
+			samplepos_t where = grab_sample ();
+			atv->add_automation_event (event, where, event->button.y, false);
+			do_deselect = false;
 		}
 
 		/* do not deselect if Primary or Tertiary (toggle-select or
