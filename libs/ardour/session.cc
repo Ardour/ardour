@@ -1,4 +1,4 @@
-s/*
+/*
  * Copyright (C) 1999-2019 Paul Davis <paul@linuxaudiosystems.com>
  * Copyright (C) 2006-2007 Jesse Chappell <jesse@essej.net>
  * Copyright (C) 2006-2009 Sampo Savolainen <v2@iki.fi>
@@ -181,7 +181,6 @@ Session::Session (AudioEngine &eng,
 	: _playlists (new SessionPlaylists)
 	, _engine (eng)
 	, process_function (&Session::process_with_events)
-#if 1
 	, _bounce_processing_active (false)
 	, waiting_for_sync_offset (false)
 	, _base_sample_rate (0)
@@ -477,7 +476,6 @@ Session::Session (AudioEngine &eng,
 	_global_locate_pending = false;
 	_had_destructive_tracks = false;
 #endif
->>>>>>> libardour: conversion to use timeline types (mega-commit)
 
 	created_with = string_compose ("%1 %2", PROGRAM_NAME, revision);
 
