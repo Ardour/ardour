@@ -790,6 +790,13 @@ AutomationTimeAxisView::add_automation_event (GdkEvent* event, samplepos_t sampl
 	std::list<Selectable*> results;
 
 	if (list->editor_add (when.sample, y, with_guard_points)) {
+
+		if (_control == _session->recently_touched_controllable ()) {
+			if (_control->automation_state () == ARDOUR::Off) {
+				_control->set_automation_state (ARDOUR::Touch);
+			}
+		}
+
 		XMLNode& after = list->get_state();
 		_editor.begin_reversible_command (_("add automation event"));
 		_session->add_command (new MementoCommand<ARDOUR::AutomationList> (*list.get (), &before, &after));
