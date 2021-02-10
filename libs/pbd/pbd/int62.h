@@ -48,7 +48,7 @@ class alignas(16) int62_t {
 	/* the "flagbit" follows 2's complement logic. It is "set" if the value is positive and the bit is 1; it is also set if the
 	 * value is negative and bit is 0.
 	*/
-	static int64_t int62 (int64_t v) { if (v >= 0) { return v & ~flagbit_mask; } return (v | flagbit_mask); }
+	static int64_t int62 (int64_t v)   { if (v >= 0) { return v & ~flagbit_mask; } return (v | flagbit_mask); }
 	static bool    flagged (int64_t v) { if (v >= 0) { return v & flagbit_mask; } return ((v & flagbit_mask) == 0); }
 
   public:
@@ -85,21 +85,21 @@ class alignas(16) int62_t {
 	   rather than two separate loads for each "part".
 	*/
 
-	int62_t operator- () const      { int64_t tmp = v; return int62_t (flagged (tmp), -int62(tmp)); }
+	int62_t operator- () const          { const int64_t vv = v.load(); return int62_t (flagged (vv), -int62(vv)); }
 
-	int62_t operator+ (int64_t n) const { int64_t tmp = v; return int62_t (flagged (tmp), int62 (tmp) + n); }
-	int62_t operator- (int64_t n) const { int64_t tmp = v; return int62_t (flagged (tmp), int62 (tmp) - n); }
-	int62_t operator* (int64_t n) const { int64_t tmp = v; return int62_t (flagged (tmp), int62 (tmp) * n); }
-	int62_t operator/ (int64_t n) const { int64_t tmp = v; return int62_t (flagged (tmp), int62 (tmp) / n); }
-	int62_t operator% (int64_t n) const { int64_t tmp = v; return int62_t (flagged (tmp), int62 (tmp) % n); }
+	int62_t operator+ (int64_t n) const { const int64_t vv = v.load(); return int62_t (flagged (vv), int62 (vv) + n); }
+	int62_t operator- (int64_t n) const { const int64_t vv = v.load(); return int62_t (flagged (vv), int62 (vv) - n); }
+	int62_t operator* (int64_t n) const { const int64_t vv = v.load(); return int62_t (flagged (vv), int62 (vv) * n); }
+	int62_t operator/ (int64_t n) const { const int64_t vv = v.load(); return int62_t (flagged (vv), int62 (vv) / n); }
+	int62_t operator% (int64_t n) const { const int64_t vv = v.load(); return int62_t (flagged (vv), int62 (vv) % n); }
 
-	int62_t operator+ (int62_t n) const { int64_t tmp = v; return int62_t (flagged (tmp), int62 (tmp) + n.val()); }
-	int62_t operator- (int62_t n) const { int64_t tmp = v; return int62_t (flagged (tmp), int62 (tmp) - n.val()); }
-	int62_t operator* (int62_t n) const { int64_t tmp = v; return int62_t (flagged (tmp), int62 (tmp) * n.val()); }
-	int62_t operator/ (int62_t n) const { int64_t tmp = v; return int62_t (flagged (tmp), int62 (tmp) / n.val()); }
-	int62_t operator% (int62_t n) const { int64_t tmp = v; return int62_t (flagged (tmp), int62 (tmp) % n.val()); }
+	int62_t operator+ (int62_t n) const { const int64_t vv = v.load(); return int62_t (flagged (vv), int62 (vv) + n.val()); }
+	int62_t operator- (int62_t n) const { const int64_t vv = v.load(); return int62_t (flagged (vv), int62 (vv) - n.val()); }
+	int62_t operator* (int62_t n) const { const int64_t vv = v.load(); return int62_t (flagged (vv), int62 (vv) * n.val()); }
+	int62_t operator/ (int62_t n) const { const int64_t vv = v.load(); return int62_t (flagged (vv), int62 (vv) / n.val()); }
+	int62_t operator% (int62_t n) const { const int64_t vv = v.load(); return int62_t (flagged (vv), int62 (vv) % n.val()); }
 
-	/* comparison operators .. will throw if the two objects have different
+ 	/* comparison operators .. will throw if the two objects have different
 	 * flag settings (which is assumed to indicate that they differ in some
 	 * important respect, and thus should not have their values compared)
 	 */
@@ -118,8 +118,8 @@ class alignas(16) int62_t {
 	 * the semantics are well defined and the computation cost is trivial
 	 */
 
-	bool operator!= (int62_t const & other) const { if (flagged() != other.flagged()) return true; return val() != other.val(); }
-	bool operator== (int62_t const & other) const { if (flagged() != other.flagged()) return false; return val() == other.val(); }
+	bool operator!= (int62_t const & other) const { const int64_t vv = v.load(); if (flagged (vv) != other.flagged()) return true; return int62 (vv) != other.val(); }
+	bool operator== (int62_t const & other) const { const int64_t vv = v.load(); if (flagged (vv) != other.flagged()) return false; return int62 (vv) == other.val(); }
 
 	explicit operator int64_t() const { return int62(v); }
 
@@ -130,7 +130,7 @@ class alignas(16) int62_t {
 	bool operator!= (int64_t n) const { return val() != n; }
 	bool operator== (int64_t n) const { return val() == n; }
 
-	int62_t abs() const { int64_t tmp = v; return int62_t (flagged(tmp), ::abs(int62(tmp))); }
+	int62_t abs() const { const int64_t tmp = v; return int62_t (flagged(tmp), ::abs(int62(tmp))); }
 
 	int62_t& operator+= (int64_t n) {
 		while (1) {
