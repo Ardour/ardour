@@ -3057,10 +3057,8 @@ TempoMap::MementoBinder::set_state (XMLNode const & node, int version) const
 	TempoMap::SharedPtr map (write_copy());
 	/* change the state of the copy */
 	map->set_state (node, version);
-	/* do the update step of RCU */
+	/* do the update step of RCU. This will also update this thread's map pointer */
 	update (map);
-	/* now update this thread's view of the current tempo map */
-	fetch ();
 }
 
 void
