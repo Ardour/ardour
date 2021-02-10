@@ -1435,6 +1435,7 @@ Editor::which_canvas_cursor(ItemType type) const
 
 		/* These items use the grabber cursor at all times */
 	case MeterMarkerItem:
+	case BBTMarkerItem:
 	case TempoMarkerItem:
 	case MeterBarItem:
 	case TempoBarItem:

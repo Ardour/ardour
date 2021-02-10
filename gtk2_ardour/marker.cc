@@ -688,3 +688,22 @@ MeterMarker::reset_meter (Temporal::MeterPoint & m)
 {
 	_meter = m;
 }
+
+/***********************************************************************/
+
+BBTMarker::BBTMarker (PublicEditor& editor, ArdourCanvas::Container& parent, guint32 rgba, const string& text, Temporal::MusicTimePoint& p)
+	: ArdourMarker (editor, parent, rgba, text, BBTPosition, p.time(), false)
+	, _point (p)
+{
+	group->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_bbt_marker_event), group, this));
+}
+
+BBTMarker::~BBTMarker ()
+{
+}
+
+void
+BBTMarker::reset_point (Temporal::MusicTimePoint & p)
+{
+	_point = p;
+}

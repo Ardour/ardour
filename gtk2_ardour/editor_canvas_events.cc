@@ -1027,6 +1027,12 @@ Editor::canvas_meter_marker_event (GdkEvent *event, ArdourCanvas::Item* item, Me
 }
 
 bool
+Editor::canvas_bbt_marker_event (GdkEvent *event, ArdourCanvas::Item* item, BBTMarker* /*marker*/)
+{
+	return typed_event (item, event, BBTMarkerItem);
+}
+
+bool
 Editor::canvas_ruler_event (GdkEvent *event, ArdourCanvas::Item* item, ItemType type)
 {
 	bool handled = false;

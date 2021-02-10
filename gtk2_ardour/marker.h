@@ -38,6 +38,7 @@
 namespace Temporal {
 	class TempoPoint;
 	class MeterPoint;
+	class MusicTimePoint;
 }
 
 class PublicEditor;
@@ -54,6 +55,7 @@ public:
 		Mark,
 		Tempo,
 		Meter,
+		BBTPosition,
 		SessionStart, ///< session start
 		SessionEnd,   ///< session end
 		RangeStart,
@@ -181,6 +183,20 @@ class MeterMarker : public ArdourMarker
 
   private:
 	Temporal::MeterPoint& _meter;
+};
+
+class BBTMarker : public ArdourMarker
+{
+  public:
+	BBTMarker (PublicEditor& editor, ArdourCanvas::Container &, guint32 rgba, const std::string& text, Temporal::MusicTimePoint&);
+	~BBTMarker ();
+
+	void reset_point (Temporal::MusicTimePoint &);
+
+	Temporal::MusicTimePoint& point() const { return _point; }
+
+  private:
+	Temporal::MusicTimePoint& _point;
 };
 
 #endif /* __gtk_ardour_marker_h__ */

@@ -1660,6 +1660,7 @@ private:
 	bool canvas_tempo_marker_event (GdkEvent* event,ArdourCanvas::Item*, TempoMarker*);
 	bool canvas_tempo_curve_event (GdkEvent* event,ArdourCanvas::Item*, TempoCurve*);
 	bool canvas_meter_marker_event (GdkEvent* event,ArdourCanvas::Item*, MeterMarker*);
+	bool canvas_bbt_marker_event (GdkEvent* event,ArdourCanvas::Item*, BBTMarker*);
 	bool canvas_automation_track_event(GdkEvent* event, ArdourCanvas::Item*, AutomationTimeAxisView*);
 	bool canvas_note_event (GdkEvent* event, ArdourCanvas::Item*);
 
