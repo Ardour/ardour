@@ -42,6 +42,7 @@
 
 #include "widgets/tooltips.h"
 
+#include "ardour_message.h"
 #include "ardour_window.h"
 #include "context_menu_helper.h"
 #include "editor_cursors.h"
@@ -69,6 +70,7 @@ using namespace Gtkmm2ext;
 using namespace std;
 
 PBD::Signal1<void, TrackRecordAxis*> TrackRecordAxis::CatchDeletion;
+PBD::Signal2<void, TrackRecordAxis*, bool> TrackRecordAxis::EditNextName;
 
 #define PX_SCALE(pxmin, dflt) rint (std::max ((double)pxmin, (double)dflt* UIConfiguration::instance ().get_ui_scale ()))
 
@@ -80,6 +82,7 @@ TrackRecordAxis::TrackRecordAxis (Session* s, boost::shared_ptr<ARDOUR::Route> r
 	, RouteUI (s)
 	, _clear_meters (true)
 	, _route_ops_menu (0)
+	, _renaming (false)
 	, _input_button (true)
 	, _playlist_button (S_("RTAV|P"))
 	, _hseparator (1.0)
@@ -133,6 +136,10 @@ TrackRecordAxis::TrackRecordAxis (Session* s, boost::shared_ptr<ARDOUR::Route> r
 	name_label.set_alignment (0.0, 0.5);
 	name_label.set_width_chars (12);
 
+	_namebox.add (name_label);
+	_namebox.add_events (Gdk::BUTTON_PRESS_MASK);
+	_namebox.signal_button_press_event ().connect (sigc::mem_fun (*this, &TrackRecordAxis::namebox_button_press));
+
 	_input_button.set_sizing_text ("Capture_8888");
 	_input_button.set_route (rt, this);
 
@@ -144,7 +151,7 @@ TrackRecordAxis::TrackRecordAxis (Session* s, boost::shared_ptr<ARDOUR::Route> r
 	_ctrls.attach (_input_button,         1,  2, 1, 2, Gtk::SHRINK,      Gtk::SHRINK, 0, 2);
 	_ctrls.attach (*rec_enable_button,    2,  3, 1, 2, Gtk::SHRINK,      Gtk::SHRINK, 2, 2);
 	_ctrls.attach (_playlist_button,      3,  4, 1, 2, Gtk::SHRINK,      Gtk::SHRINK, 2, 2);
-	_ctrls.attach (name_label,            4,  5, 1, 2, Gtk::FILL,        Gtk::SHRINK, 4, 2);
+	_ctrls.attach (_namebox,              4,  5, 1, 2, Gtk::FILL,        Gtk::SHRINK, 4, 2);
 	_ctrls.attach (*monitor_input_button, 5,  6, 1, 2, Gtk::SHRINK,      Gtk::SHRINK, 1, 2);
 	_ctrls.attach (*monitor_disk_button,  6,  7, 1, 2, Gtk::SHRINK,      Gtk::SHRINK, 1, 2);
 	_ctrls.attach (*_level_meter,         7,  8, 1, 2, Gtk::SHRINK,      Gtk::SHRINK, 2, 2);
@@ -174,6 +181,7 @@ TrackRecordAxis::TrackRecordAxis (Session* s, boost::shared_ptr<ARDOUR::Route> r
 	_level_meter->show ();
 	_playlist_button.show();
 	_number_label.show ();
+	_namebox.show ();
 	name_label.show ();
 	_input_button.show ();
 	_track_summary.show ();
@@ -203,6 +211,17 @@ TrackRecordAxis::set_session (Session* s)
 		return;
 	}
 	s->config.ParameterChanged.connect (*this, invalidator (*this), ui_bind (&TrackRecordAxis::parameter_changed, this, _1), gui_context ());
+}
+
+void
+TrackRecordAxis::route_rec_enable_changed ()
+{
+	if (_route->rec_enable_control()->get_value()) {
+		/* end renaming when rec-arm engages
+		 * (due to modal grab this can only be triggered by ctrl surfaces) */
+		end_rename (true);
+	}
+	RouteUI::route_rec_enable_changed ();
 }
 
 void
@@ -312,6 +331,22 @@ TrackRecordAxis::set_name_label ()
 	_number_label.set_text (PBD::to_string (track_number));
 }
 
+bool
+TrackRecordAxis::namebox_button_press (GdkEventButton* ev)
+{
+	if (_renaming) {
+		return false;
+	}
+	if ((ev->button == 1 && ev->type == GDK_2BUTTON_PRESS) || Keyboard::is_edit_event (ev)) {
+		if (!start_rename ()) {
+			ArdourMessageDialog msg (_("Inactive and record-armed tracks cannot be renamed"));
+			msg.run ();
+		}
+		return true;
+	}
+	return false;
+}
+
 void
 TrackRecordAxis::route_active_changed ()
 {
@@ -344,6 +379,10 @@ TrackRecordAxis::update_sensitivity ()
 	monitor_disk_button->set_sensitive (en);
 	_input_button.set_sensitive (en);
 	_ctrls.set_sensitive (en);
+
+	if (!en) {
+		end_rename (true);
+	}
 
 	if (!is_track() || track()->mode() != ARDOUR::Normal) {
 		_playlist_button.set_sensitive (false);
@@ -458,6 +497,123 @@ TrackRecordAxis::build_route_ops_menu ()
 	/* do not allow rename if the track is record-enabled */
 	items.back().set_sensitive (!is_track() || !track()->rec_enable_control()->get_value());
 }
+
+/* ****************************************************************************/
+
+bool
+TrackRecordAxis::start_rename ()
+{
+	if (_renaming || _route->rec_enable_control()->get_value() || !_route->active ()) {
+		return false;
+	}
+	assert (_entry_connections.empty ());
+
+	GtkRequisition r (name_label.size_request ());
+	_nameentry.set_size_request (r.width, -1);
+	_nameentry.set_text (_route->name ());
+	_namebox.remove ();
+	_namebox.add (_nameentry);
+	_nameentry.show ();
+	_nameentry.grab_focus ();
+	_nameentry.add_modal_grab ();
+	_renaming = true;
+
+	_entry_connections.push_back (_nameentry.signal_changed().connect (sigc::mem_fun (*this, &TrackRecordAxis::entry_changed)));
+	_entry_connections.push_back (_nameentry.signal_activate().connect (sigc::mem_fun (*this, &TrackRecordAxis::entry_activated)));
+	_entry_connections.push_back (_nameentry.signal_key_press_event().connect (sigc::mem_fun (*this, &TrackRecordAxis::entry_key_press), false));
+	_entry_connections.push_back (_nameentry.signal_key_release_event().connect (sigc::mem_fun (*this, &TrackRecordAxis::entry_key_release), false));
+	_entry_connections.push_back (_nameentry.signal_focus_out_event ().connect (sigc::mem_fun (*this, &TrackRecordAxis::entry_focus_out)));
+	return true;
+}
+
+void
+TrackRecordAxis::end_rename (bool ignore_change)
+{
+	if (!_renaming) {
+		return;
+	}
+	std::string result = _nameentry.get_text ();
+	disconnect_entry_signals ();
+	_nameentry.remove_modal_grab ();
+	_namebox.remove ();
+	_namebox.add (name_label);
+	name_label.show ();
+	_renaming = false;
+
+	if (ignore_change) {
+		return;
+	}
+
+	if (verify_new_route_name (result)) {
+		_route->set_name (result);
+	}
+}
+
+void
+TrackRecordAxis::entry_changed ()
+{
+}
+
+void
+TrackRecordAxis::entry_activated ()
+{
+	end_rename (false);
+}
+
+bool
+TrackRecordAxis::entry_focus_out (GdkEventFocus*)
+{
+	end_rename (false);
+	return false;
+}
+
+bool
+TrackRecordAxis::entry_key_press (GdkEventKey* ev)
+{
+	switch (ev->keyval) {
+		case GDK_Escape:
+			/* fallthrough */
+		case GDK_ISO_Left_Tab:
+			/* fallthrough */
+		case GDK_Tab:
+			/* fallthrough */
+			return true;
+		default:
+			break;
+	}
+	return false;
+}
+
+bool
+TrackRecordAxis::entry_key_release (GdkEventKey* ev)
+{
+	switch (ev->keyval) {
+		case GDK_Escape:
+			end_rename (true);
+			return true;
+		case GDK_ISO_Left_Tab:
+			end_rename (false);
+			EditNextName (this, false); /* EMIT SIGNAL */
+			return true;
+		case GDK_Tab:
+			end_rename (false);
+			EditNextName (this, true); /* EMIT SIGNAL */
+			return true;
+		default:
+			break;
+	}
+	return false;
+}
+
+void
+TrackRecordAxis::disconnect_entry_signals ()
+{
+	for (std::list<sigc::connection>::iterator i = _entry_connections.begin(); i != _entry_connections.end(); ++i) {
+		i->disconnect ();
+	}
+	_entry_connections.clear ();
+}
+
 
 /* ****************************************************************************/
 

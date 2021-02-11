@@ -311,6 +311,7 @@ RecorderUI::set_session (Session* s)
 
 	_session->RouteAdded.connect (_session_connections, invalidator (*this), boost::bind (&RecorderUI::add_routes, this, _1), gui_context ());
 	TrackRecordAxis::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&RecorderUI::remove_route, this, _1), gui_context ());
+	TrackRecordAxis::EditNextName.connect (*this, invalidator (*this), boost::bind (&RecorderUI::tra_name_edit, this, _1, _2), gui_context ());
 
 	_session->config.ParameterChanged.connect (_session_connections, invalidator (*this), boost::bind (&RecorderUI::parameter_changed, this, _1), gui_context ());
 
@@ -829,6 +830,20 @@ RecorderUI::remove_route (TrackRecordAxis* ra)
 	_rec_area.remove (**i);
 	_recorders.erase (i);
 	update_rec_table_layout ();
+}
+
+void
+RecorderUI::tra_name_edit (TrackRecordAxis* tra, bool next)
+{
+	list<TrackRecordAxis*>::iterator i = find (_visible_recorders.begin (), _visible_recorders.end (), tra);
+	if (i == _visible_recorders.end ()) {
+		return;
+	}
+	if (next && ++i != _visible_recorders.end ()) {
+		(*i)->start_rename ();
+	} else if (!next && i != _visible_recorders.begin ()) {
+		(*--i)->start_rename ();
+	}
 }
 
 struct TrackRecordAxisSorter {
