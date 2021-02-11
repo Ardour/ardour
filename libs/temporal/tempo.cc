@@ -1562,29 +1562,6 @@ TempoMap::superclock_at (timepos_t const & pos) const
 	return pos.superclocks();
 }
 
-superclock_t
-TempoMap::superclock_plus_bbt (superclock_t pos, BBT_Time op) const
-{
-	BBT_Time pos_bbt = bbt_at (pos);
-
-	pos_bbt.ticks += op.ticks;
-	if (pos_bbt.ticks >= ticks_per_beat) {
-		++pos_bbt.beats;
-		pos_bbt.ticks -= ticks_per_beat;
-	}
-	pos_bbt.beats += op.beats;
-
-	double divisions_per_bar = metric_at (pos_bbt).divisions_per_bar();
-	while (pos_bbt.beats >= divisions_per_bar + 1) {
-		++pos_bbt.bars;
-		divisions_per_bar = metric_at (pos_bbt).divisions_per_bar();
-		pos_bbt.beats -= divisions_per_bar;
-	}
-	pos_bbt.bars += op.bars;
-
-	return superclock_at (pos_bbt);
-}
-
 #define S2Sc(s) (samples_to_superclock ((s), TEMPORAL_SAMPLE_RATE))
 #define Sc2S(s) (superclock_to_samples ((s), TEMPORAL_SAMPLE_RATE))
 
@@ -1661,7 +1638,6 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 	assert (!_points.empty());
 
 	DEBUG_TRACE (DEBUG::Grid, string_compose (">>> GRID START %1 .. %2 (barmod = %3)\n", start, end, bar_mod));
-	dump (cout);
 
 	TempoPoint* tp = 0;
 	MeterPoint* mp = 0;
@@ -2079,33 +2055,6 @@ std::operator<<(std::ostream& str, TempoMapPoint const & tmp)
 	}
 
 	return str;
-}
-
-superclock_t
-TempoMap::superclock_plus_quarters_as_superclock (superclock_t start, Temporal::Beats const & distance) const
-{
-	TempoMetric metric (metric_at (start));
-
-	const Temporal::Beats start_qn = metric.quarters_at_superclock (start);
-	const Temporal::Beats end_qn = start_qn + distance;
-
-	TempoMetric end_metric (metric_at (end_qn));
-
-	return superclock_to_samples (end_metric.superclock_at (end_qn), TEMPORAL_SAMPLE_RATE);
-}
-
-Temporal::Beats
-TempoMap::superclock_delta_as_quarters (superclock_t start, superclock_t distance) const
-{
-	return quarters_at_superclock (start + distance) - quarters_at_superclock (start);
-}
-
-Temporal::superclock_t
-TempoMap::superclock_quarters_delta_as_superclock (superclock_t start, Temporal::Beats const & distance) const
-{
-	Temporal::Beats start_qn = metric_at (start).quarters_at_superclock (start);
-	start_qn += distance;
-	return metric_at (start_qn).superclock_at (start_qn);
 }
 
 BBT_Time
