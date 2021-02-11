@@ -709,11 +709,8 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 
 	template<class T> void apply_with_metrics (T& obj, void (T::*method)(Metrics const &)) {
 		Metrics metrics;
-		for (Tempos::iterator t = _tempos.begin(); t != _tempos.end(); ++t) {
+		for (Points::iterator t = _points.begin(); t != _points.end(); ++t) {
 			metrics.push_back (&*t);
-		}
-		for (Meters::iterator m = _meters.begin(); m != _meters.end(); ++m) {
-			metrics.push_back (&*m);
 		}
 		(obj.*method)(metrics);
 	}
