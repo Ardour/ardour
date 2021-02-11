@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Ardour 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-02-11 21:39+0800\n"
-"PO-Revision-Date: 2021-02-11 21:53+0800\n"
+"PO-Revision-Date: 2021-02-12 01:20+0800\n"
 "Last-Translator: 一善鱼 <YQ-YSY@163.com>\n"
 "Language-Team: 一善鱼 YQ-YSY@163.com\n"
 "Language: zh\n"
@@ -55,11 +55,11 @@ msgstr "窗口"
 
 #: bindings.cc:840
 msgid " (Categorized)"
-msgstr "（分类）"
+msgstr " （分类）"
 
 #: bindings.cc:842
 msgid " (Alphabetical)"
-msgstr "（按字母顺序）"
+msgstr " （按字母顺序）"
 
 #: bindings.cc:858
 msgid "Uncategorized"
@@ -85,7 +85,7 @@ msgid ""
 msgstr ""
 "\n"
 "\n"
-"快捷键："
+"快捷键： "
 
 #: gtk_ui.cc:720
 msgid "Press To Exit"
