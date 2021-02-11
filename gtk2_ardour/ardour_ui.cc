@@ -1824,7 +1824,7 @@ ARDOUR_UI::transport_roll ()
 	}
 
 	if (!rolling) {
-		_session->request_transport_speed (1.0f);
+		_session->request_transport_speed (1.0f, false);
 	}
 }
 
@@ -2018,7 +2018,7 @@ ARDOUR_UI::transport_ffwd_rewind (int option, int dir)
 		target_speed = current_transport_speed * 1.5f;
 	}
 
-	_session->request_transport_speed (target_speed);
+	_session->request_transport_speed (target_speed, false);
 }
 
 void
