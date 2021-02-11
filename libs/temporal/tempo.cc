@@ -1661,6 +1661,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 	assert (!_points.empty());
 
 	DEBUG_TRACE (DEBUG::Grid, string_compose (">>> GRID START %1 .. %2 (barmod = %3)\n", start, end, bar_mod));
+	dump (cout);
 
 	TempoPoint* tp = 0;
 	MeterPoint* mp = 0;
@@ -1827,12 +1828,17 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 
 			/* add point to grid, perhaps */
 
-			if ((bar_mod != 0) && bbt.is_bar() && (bbt.bars % bar_mod != 0))  {
-				ret.push_back (TempoMapPoint (*this, metric, start, beats, bbt));
+			if (bar_mod != 0) {
+				if (bbt.is_bar() && (bar_mod == 1 || ((bbt.bars % bar_mod == 0)))) {
+					ret.push_back (TempoMapPoint (*this, metric, start, beats, bbt));
+					DEBUG_TRACE (DEBUG::Grid, string_compose ("G %1\t       %2\n", metric, ret.back()));
+				} else {
+					DEBUG_TRACE (DEBUG::Grid, string_compose ("-- skip %1 not on bar_mod %2\n", bbt, bar_mod));
+				}
 			} else {
 				ret.push_back (TempoMapPoint (*this, metric, start, beats, bbt));
+				DEBUG_TRACE (DEBUG::Grid, string_compose ("G %1\t       %2\n", metric, ret.back()));
 			}
-
 
 			superclock_t step;
 
@@ -1851,7 +1857,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 
 				bbt.bars += bar_mod;
 				start = metric.superclock_at (bbt);
-				DEBUG_TRACE (DEBUG::Grid, string_compose ("bar mod %1 moved to %2\n", bar_mod, bbt))
+				DEBUG_TRACE (DEBUG::Grid, string_compose ("bar mod %1 moved to %2 (start %3)\n", bar_mod, bbt, start))
 			}
 		}
 
@@ -1861,6 +1867,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 			break;
 		}
 
+		DEBUG_TRACE (DEBUG::Grid, string_compose ("stopped fill with start %1 and point at %2\n", start, (p == _points.end() ? -1 : p->sclock())));
 
 		while ((p != _points.end()) && (start >= p->sclock())) {
 
@@ -1874,10 +1881,16 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 			bbt = p->bbt();
 			beats = p->beats();
 
-			if ((bar_mod != 0) && bbt.is_bar() && (bbt.bars % bar_mod != 0))  {
-				ret.push_back (TempoMapPoint (*this, metric, start, beats, bbt));
+			if (bar_mod != 0) {
+				if (bbt.is_bar() && (bar_mod == 1 || ((bbt.bars % bar_mod == 0)))) {
+					ret.push_back (TempoMapPoint (*this, metric, start, beats, bbt));
+					DEBUG_TRACE (DEBUG::Grid, string_compose ("G %1\t       %2\n", metric, ret.back()));
+				} else {
+					DEBUG_TRACE (DEBUG::Grid, string_compose ("-- skip %1 not on bar_mod %2\n", bbt, bar_mod));
+				}
 			} else {
 				ret.push_back (TempoMapPoint (*this, metric, start, beats, bbt));
+				DEBUG_TRACE (DEBUG::Grid, string_compose ("G %1\t       %2\n", metric, ret.back()));
 			}
 
 			/* But there may be multiple points here, and we have
@@ -1926,9 +1939,6 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 			 */
 
 			metric = TempoMetric (*tp, *mp);
-
-			DEBUG_TRACE (DEBUG::Grid, string_compose ("G %1\t       %2\n", metric, ret.back()));
-
 			p = nxt;
 		}
 
@@ -1957,8 +1967,17 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 
 		do {
 			const Temporal::Beats beats = metric.quarters_at_superclock (start);
-			ret.push_back (TempoMapPoint (*this, metric, start, beats, bbt));
-			DEBUG_TRACE (DEBUG::Grid, string_compose ("Gend %1\t       %2\n", metric, ret.back()));
+
+			if (bar_mod != 0) {
+				if (bbt.is_bar() && (bar_mod == 1 || ((bbt.bars % bar_mod == 0)))) {
+					ret.push_back (TempoMapPoint (*this, metric, start, beats, bbt));
+					DEBUG_TRACE (DEBUG::Grid, string_compose ("Gend %1\t       %2\n", metric, ret.back()));
+				}
+			} else {
+				ret.push_back (TempoMapPoint (*this, metric, start, beats, bbt));
+				DEBUG_TRACE (DEBUG::Grid, string_compose ("Gend %1\t       %2\n", metric, ret.back()));
+			}
+
 			start += step;
 			bbt = metric.bbt_at (start);
 
