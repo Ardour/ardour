@@ -326,14 +326,14 @@ struct MarkerComparator {
 void
 Editor::update_marker_labels ()
 {
-	for (std::map<ArdourCanvas::Container *, std::list<ArdourMarker *> >::iterator i = _sorted_marker_lists.begin(); i != _sorted_marker_lists.end(); ++i) {
+	for (std::map<ArdourCanvas::Item *, std::list<ArdourMarker *> >::iterator i = _sorted_marker_lists.begin(); i != _sorted_marker_lists.end(); ++i) {
 		update_marker_labels (i->first);
 	}
 }
 
 /** Look at all markers in a group and update label widths */
 void
-Editor::update_marker_labels (ArdourCanvas::Container* group)
+Editor::update_marker_labels (ArdourCanvas::Item* group)
 {
 	list<ArdourMarker*>& sorted = _sorted_marker_lists[group];
 
@@ -1838,7 +1838,7 @@ Editor::toggle_marker_lines ()
 void
 Editor::remove_sorted_marker (ArdourMarker* m)
 {
-	for (std::map<ArdourCanvas::Container *, std::list<ArdourMarker *> >::iterator i = _sorted_marker_lists.begin(); i != _sorted_marker_lists.end(); ++i) {
+	for (std::map<ArdourCanvas::Item *, std::list<ArdourMarker *> >::iterator i = _sorted_marker_lists.begin(); i != _sorted_marker_lists.end(); ++i) {
 		i->second.remove (m);
 	}
 }

@@ -234,6 +234,8 @@ Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
 
 	}
 
+	render_children (area, cr);
+
 	/* done! */
 }
 

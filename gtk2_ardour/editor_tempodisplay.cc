@@ -108,8 +108,20 @@ Editor::draw_metric_marks (TempoMap::Metrics const & metrics)
 	for (TempoMap::Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
 		Temporal::MeterPoint *ms;
 		Temporal::TempoPoint *ts;
+		Temporal::MusicTimePoint *mtp;
 
-		if ((ms = dynamic_cast<Temporal::MeterPoint*>(*i)) != 0) {
+		/* must check MusicTimePoint first, since it IS-A TempoPoint
+		 * and MeterPoint.
+		 */
+
+		if ((mtp = dynamic_cast<Temporal::MusicTimePoint*>(*i)) != 0) {
+
+			if (ms->map().time_domain() == BeatTime) {
+				metric_marks.push_back (new BBTMarker (*this, *bbt_ruler, UIConfiguration::instance().color ("meter marker music"), "bar!", *mtp));
+			} else {
+				metric_marks.push_back (new BBTMarker (*this, *bbt_ruler, UIConfiguration::instance().color ("meter marker"), "foo!", *mtp));
+			}
+		} else if ((ms = dynamic_cast<Temporal::MeterPoint*>(*i)) != 0) {
 			snprintf (buf, sizeof(buf), "%d/%d", ms->divisions_per_bar(), ms->note_value ());
 			if (ms->map().time_domain() == BeatTime) {
 				metric_marks.push_back (new MeterMarker (*this, *meter_group, UIConfiguration::instance().color ("meter marker music"), buf, *ms));

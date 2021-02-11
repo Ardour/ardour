@@ -748,7 +748,7 @@ private:
 	LocationMarkerMap location_markers;
 
 	void update_marker_labels ();
-	void update_marker_labels (ArdourCanvas::Container*);
+	void update_marker_labels (ArdourCanvas::Item*);
 	void check_marker_label (ArdourMarker*);
 
 	/** A set of lists of Markers that are in each of the canvas groups
@@ -757,7 +757,7 @@ private:
 	 *  a marker has moved we can decide whether we need to update the labels
 	 *  for all markers or for just a few.
 	 */
-	std::map<ArdourCanvas::Container*, std::list<ArdourMarker*> > _sorted_marker_lists;
+	std::map<ArdourCanvas::Item*, std::list<ArdourMarker*> > _sorted_marker_lists;
 	void remove_sorted_marker (ArdourMarker*);
 
 	void hide_marker (ArdourCanvas::Item*, GdkEvent*);
