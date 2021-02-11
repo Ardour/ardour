@@ -633,15 +633,12 @@ TempoMap::TempoMap (Tempo const & initial_tempo, Meter const & initial_meter)
 {
 	TempoPoint* tp = new TempoPoint (*this, initial_tempo, 0, Beats(), BBT_Time());
 	MeterPoint* mp = new MeterPoint (*this, initial_meter, 0, Beats(), BBT_Time());
-	MusicTimePoint* mtp = new MusicTimePoint (*this, 0, Beats(), BBT_Time(), *tp, *mp);
 
 	_tempos.push_back   (*tp);
 	_meters.push_back   (*mp);
-	_bartimes.push_back (*mtp);
 
 	_points.push_back (*tp);
 	_points.push_back (*mp);
-	_points.push_back (*mtp);
 }
 
 TempoMap::~TempoMap()
