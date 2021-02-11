@@ -466,6 +466,13 @@ ARDOUR::LuaAPI::wait_for_process_callback (size_t n_cycles, int64_t timeout_ms)
 	return true;
 }
 
+void
+ARDOUR::LuaAPI::segfault ()
+{
+	int* p = NULL;
+	*p = 0;
+}
+
 int
 ARDOUR::LuaOSC::Address::send (lua_State *L)
 {
