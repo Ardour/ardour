@@ -1357,6 +1357,7 @@ private:
 	double                  _default_transport_speed;
 	double                  _default_engine_speed;
 	double                  _last_transport_speed;
+	double                  _requested_transport_speed;
 	double                  _signalled_varispeed;
 
 	bool                     auto_play_legal;
