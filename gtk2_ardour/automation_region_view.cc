@@ -1,4 +1,4 @@
-n/*
+/*
  * Copyright (C) 2007-2015 David Robillard <d@drobilla.net>
  * Copyright (C) 2008-2017 Paul Davis <paul@linuxaudiosystems.com>
  * Copyright (C) 2009-2011 Carl Hetherington <carl@carlh.net>
@@ -215,7 +215,7 @@ AutomationRegionView::add_automation_event (GdkEvent *, timepos_t const & w, dou
 
 	XMLNode& before = _line->the_list()->get_state();
 
-n	if (_line->the_list()->editor_add (when, y, with_guard_points)) {
+	if (_line->the_list()->editor_add (when, y, with_guard_points)) {
 
 		if (ac->automation_state () == ARDOUR::Off) {
 			ac->set_automation_state (ARDOUR::Play);

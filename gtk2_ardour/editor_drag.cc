@@ -5468,7 +5468,7 @@ RubberbandSelectDrag::finished (GdkEvent* event, bool movement_occurred)
 				do_deselect = false;
 			}
 		} else if ((atv = dynamic_cast<AutomationTimeAxisView*>(_editor->clicked_axisview)) != 0) {
-			samplepos_t where = grab_sample ();
+			timepos_t where = grab_time ();
 			atv->add_automation_event (event, where, event->button.y, false);
 			do_deselect = false;
 		}
