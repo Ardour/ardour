@@ -188,13 +188,13 @@ BasicUI::remove_marker_at_playhead ()
 void
 BasicUI::rewind ()
 {
-	session->request_transport_speed (get_transport_speed() - 1.5);
+	session->request_transport_speed (get_transport_speed() - 1.5, false);
 }
 
 void
 BasicUI::ffwd ()
 {
-	session->request_transport_speed (get_transport_speed() + 1.5);
+	session->request_transport_speed (get_transport_speed() + 1.5, false);
 }
 
 void
@@ -283,7 +283,7 @@ BasicUI::transport_play (bool from_last_start)
 	}
 
 	if (!rolling) {
-		session->request_transport_speed (1.0f);
+		session->request_transport_speed (1.0f, false);
 	}
 }
 
