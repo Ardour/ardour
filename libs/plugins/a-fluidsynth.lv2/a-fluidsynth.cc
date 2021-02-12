@@ -120,6 +120,8 @@ typedef struct {
 	LV2_URID atom_Object;
 	LV2_URID atom_URID;
 	LV2_URID atom_Path;
+	LV2_URID atom_Vector;
+	LV2_URID atom_Double;
 	LV2_URID midi_MidiEvent;
 	LV2_URID patch_Get;
 	LV2_URID patch_Set;
@@ -127,6 +129,7 @@ typedef struct {
 	LV2_URID patch_value;
 	LV2_URID state_Changed;
 	LV2_URID afs_sf2file;
+	LV2_URID afs_tuning;
 
 	/* lv2 extensions */
 	LV2_Log_Log*         log;
@@ -152,6 +155,9 @@ typedef struct {
 	char queue_sf2_file_path[1024];
 	bool reinit_in_progress; // set in run, cleared in work_response
 	bool queue_reinit; // set in restore, cleared in work_response
+
+	bool   queue_retune;
+	double queue_tuning[128];
 
 	BankProgram program_state[16];
 
@@ -260,6 +266,79 @@ db_to_coeff (float db)
 	if (db <= -80) { return 0; }
 	else if (db >=  20) { return 10; }
 	return powf (10.f, .05f * db);
+}
+
+static void
+parse_mts (AFluidSynth* self, const uint8_t* data, uint32_t len)
+{
+	assert (data[0] == 0xf0 && data [3] == 0x08 && len > 11);
+	if (data[4] == 0x01 && len == 408) {
+		/* bulk transfer
+		 * 0xf0, 0x7e,    -- non-realtime sysex
+		 * 0xXX,          -- target-id
+		 * 0x08, 0x01,    -- tuning, bulk dump reply
+		 * 0x7X,          -- tuning program number 0 to 127
+		 * TEXT * 16      -- 16 chars name (zero padded)
+		 * TUNE * 3 * 128 -- tuning for all notes (base, MSB, LSB)
+		 * 0xXX           -- checksum
+		 * 0xf7           -- 408 bytes in total
+		 */
+		int    prog = 0; // data[2]
+		int    off = 22;
+		int    key[128];
+		double pitch[128];
+		for (int i = 0; i < 128; ++i) {
+			const uint32_t note  = data [off];
+			const uint32_t fract = (data [off + 1] << 7) | data[off + 2];
+			key[i]   = i;
+			pitch[i] = note * 100.f + fract / 163.83;
+			off += 3;
+		}
+		if (data[off + 1] == 0xf7) {
+			int rv = fluid_synth_tune_notes (self->synth,
+					/* tuning bank */ 0,
+					/* tuning prog */ prog,
+					128, key, pitch,
+					/* apply */1 );
+			if (rv == FLUID_OK) {
+				for (int c = 0; c < 16; ++c) {
+					fluid_synth_activate_tuning (self->synth, c, 0, prog, 0);
+				}
+				self->inform_ui = true; // StateChanged
+			}
+		}
+	} else if (data[4] == 0x02 && len == 12) {
+		/* single note tuning
+		 * 0xf0, 0x7f, -- realtime sysex
+		 * 0xXX,       -- target-id
+		 * 0x08, 0x02, -- tuning, note change request
+		 * 0x7X,       -- tuning program number 0 to 127
+		 * 0x7X        -- Note to re-tune
+		 * base,       -- semitone (MIDI note number to retune to, unit is 100 cents)
+		 * cent_msb,   -- MSB of fractional part (1/128 semitone = 100/128 cents = .78125 cent units)
+		 * cent_lsb,   -- LSB of fractional part (1/16384 semitone = 100/16384 cents = .0061 cent units
+		 * 0xf7        -- 12 bytesin total
+		 */
+		const uint32_t note  = data [8];
+		const uint32_t fract = (data [9] << 7) | data[10];
+
+		int    prog  = 0; // data[2]
+		int    key   = data[7];
+		double pitch = note * 100.f + fract / 163.83;
+		if (data[11] == 0xf7) {
+			int rv = fluid_synth_tune_notes (self->synth,
+					/* tuning bank */ 0,
+					/* tuning prog */ prog,
+					1, &key, &pitch,
+					/* apply */1 );
+			if (rv == FLUID_OK) {
+				for (int c = 0; c < 16; ++c) {
+					fluid_synth_activate_tuning (self->synth, c, 0, prog, 0);
+				}
+				self->inform_ui = true; // StateChanged
+			}
+		}
+	}
 }
 
 /* *****************************************************************************
@@ -371,6 +450,7 @@ instantiate (const LV2_Descriptor*     descriptor,
 	self->initialized = false;
 	self->reinit_in_progress = false;
 	self->queue_reinit = false;
+	self->queue_retune = false;
 	for (int chn = 0; chn < 16; ++chn) {
 		self->program_state[chn].program = -1;
 	}
@@ -381,6 +461,8 @@ instantiate (const LV2_Descriptor*     descriptor,
 	self->atom_Blank         = map->map (map->handle, LV2_ATOM__Blank);
 	self->atom_Object        = map->map (map->handle, LV2_ATOM__Object);
 	self->atom_Path          = map->map (map->handle, LV2_ATOM__Path);
+	self->atom_Vector        = map->map (map->handle, LV2_ATOM__Vector);
+	self->atom_Double        = map->map (map->handle, LV2_ATOM__Double);
 	self->atom_URID          = map->map (map->handle, LV2_ATOM__URID);
 	self->midi_MidiEvent     = map->map (map->handle, LV2_MIDI__MidiEvent);
 	self->patch_Get          = map->map (map->handle, LV2_PATCH__Get);
@@ -389,6 +471,7 @@ instantiate (const LV2_Descriptor*     descriptor,
 	self->patch_value        = map->map (map->handle, LV2_PATCH__value);
 	self->state_Changed      = map->map (map->handle, "http://lv2plug.in/ns/ext/state#StateChanged");
 	self->afs_sf2file        = map->map (map->handle, AFS_URN ":sf2file");
+	self->afs_tuning         = map->map (map->handle, AFS_URN ":tuning");
 
 	return (LV2_Handle)self;
 }
@@ -514,7 +597,16 @@ run (LV2_Handle instance, uint32_t n_samples)
 			}
 		}
 		else if (ev->body.type == self->midi_MidiEvent) {
-			if (ev->body.size > 3 || ev->time.frames >= n_samples || self->reinit_in_progress) {
+			if (ev->time.frames >= n_samples || self->reinit_in_progress) {
+				continue;
+			}
+			if (ev->body.size > 3) {
+				if (ev->body.size > 11) {
+					const uint8_t* const data = (const uint8_t*)(ev + 1);
+					if (data[0] == 0xf0 && (data[1] & 0x7e) == 0x7e && data [3] == 0x08) {
+						parse_mts (self, data, ev->body.size);
+					}
+				}
 				continue;
 			}
 
@@ -664,6 +756,11 @@ work (LV2_Handle                  instance,
 	return LV2_WORKER_SUCCESS;
 }
 
+struct VectorOfDouble {
+  LV2_Atom_Vector_Body vb;
+	double pitch[128];
+};
+
 static LV2_Worker_Status
 work_response (LV2_Handle  instance,
                uint32_t    size,
@@ -702,6 +799,17 @@ work_response (LV2_Handle  instance,
 				self->program_state[chn].program = program;
 			}
 		}
+		if (self->queue_retune) {
+			int rv = fluid_synth_activate_key_tuning (self->synth, 
+					/* tuning bank */ 0,
+					/* tuning prog */ 0,
+					"ACE", self->queue_tuning, 0);
+			if (rv == FLUID_OK) {
+				for (int c = 0; c < 16; ++c) {
+					fluid_synth_activate_tuning (self->synth, c, 0, 0, 0);
+				}
+			}
+		}
 
 	} else {
 		self->current_sf2_file_path[0] = 0;
@@ -710,6 +818,7 @@ work_response (LV2_Handle  instance,
 	self->reinit_in_progress = false;
 	self->inform_ui = true;
 	self->send_bankpgm = true;
+	self->queue_retune = false;
 	self->queue_reinit = false;
 	return LV2_WORKER_SUCCESS;
 }
@@ -757,6 +866,19 @@ save (LV2_Handle                instance,
 #endif
 	}
 
+	int tbank, tprog;
+	fluid_synth_tuning_iteration_start (self->synth);
+	if (0 != fluid_synth_tuning_iteration_next (self->synth, &tbank, &tprog)) {
+		VectorOfDouble vod;
+		vod.vb.child_type = self->atom_Double;
+		vod.vb.child_size = sizeof(double);
+		fluid_synth_tuning_dump (self->synth, tbank, tprog, NULL, 0, vod.pitch);
+		store (handle, self->afs_tuning,
+				(void*) &vod, sizeof(LV2_Atom_Vector_Body) + 128 * sizeof(double),
+				self->atom_Vector,
+				LV2_STATE_IS_POD);
+	}
+
 	return LV2_STATE_SUCCESS;
 }
 
@@ -798,22 +920,33 @@ restore (LV2_Handle                  instance,
   uint32_t valflags;
 
   const void* value = retrieve (handle, self->afs_sf2file, &size, &type, &valflags);
-	if (value) {
-		char* apath = map_path->absolute_path (map_path->handle, (const char*) value);
-		strncpy (self->queue_sf2_file_path, apath, 1023);
-		self->queue_sf2_file_path[1023] = '\0';
-		self->queue_reinit = true;
-#ifdef LV2_STATE__freePath
-		if (free_path) {
-			free_path->free_path (free_path->handle, apath);
-		} else
-#endif
-		{
-#ifndef _WIN32 // https://github.com/drobilla/lilv/issues/14
-			free (apath);
-#endif
-		}
+	if (!value) {
+		return LV2_STATE_ERR_NO_PROPERTY;
 	}
+
+	char* apath = map_path->absolute_path (map_path->handle, (const char*) value);
+	strncpy (self->queue_sf2_file_path, apath, 1023);
+	self->queue_sf2_file_path[1023] = '\0';
+	self->queue_reinit = true;
+#ifdef LV2_STATE__freePath
+	if (free_path) {
+		free_path->free_path (free_path->handle, apath);
+	} else
+#endif
+	{
+#ifndef _WIN32 // https://github.com/drobilla/lilv/issues/14
+		free (apath);
+#endif
+	}
+
+	value = retrieve (handle, self->afs_tuning, &size, &type, &valflags);
+	if (value
+			&& size == sizeof(LV2_Atom_Vector_Body) + 128 * sizeof(double)
+			&& type == self->atom_Vector) {
+		memcpy(self->queue_tuning, LV2_ATOM_BODY(value), 128 * sizeof(double));
+		self->queue_retune = true;
+	}
+
 	return LV2_STATE_SUCCESS;
 }
 
