@@ -291,6 +291,10 @@ function factory () return function ()
 	-- hide modal progress dialog and destroy it
 	pdialog:done ();
 
+	tx = nil
+	parser = nil
+	collectgarbage () -- and release any references
+
 	--dump:close ()
 
 end end
