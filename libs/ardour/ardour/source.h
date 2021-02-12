@@ -106,6 +106,10 @@ public:
 	std::string get_transients_path() const;
 	int load_transients (const std::string&);
 
+	size_t n_captured_xruns () const { return _xruns.size (); }
+	XrunPositions const& captured_xruns () const { return _xruns; }
+	void set_captured_xruns (XrunPositions const& xruns) { _xruns = xruns; }
+
 	virtual samplepos_t natural_position() const { return _natural_position; }
 	virtual void set_natural_position (samplepos_t pos);
 	bool have_natural_position() const { return _have_natural_position; }
@@ -144,6 +148,7 @@ public:
 	uint32_t            _level; /* how deeply nested is this source w.r.t a disk file */
 	std::string         _ancestor_name;
 	std::string        _captured_for;
+	XrunPositions      _xruns;
 
   private:
 	void fix_writable_flags ();

@@ -621,6 +621,7 @@ enum SrcQuality {
 };
 
 typedef std::list<samplepos_t> AnalysisFeatureList;
+typedef std::vector<samplepos_t> XrunPositions;
 
 typedef std::list<boost::shared_ptr<Route> > RouteList;
 typedef std::list<boost::shared_ptr<Stripable> > StripableList;
@@ -794,9 +795,10 @@ enum MidiTempoMapDisposition {
 };
 
 struct CaptureInfo {
-	samplepos_t start;
-	samplecnt_t samples;
-	samplecnt_t loop_offset;
+	samplepos_t   start;
+	samplecnt_t   samples;
+	samplecnt_t   loop_offset;
+	XrunPositions xruns;
 };
 
 enum LoopFadeChoice {

@@ -1875,16 +1875,27 @@ Session::xrun_recovery ()
 
 	Xrun (_transport_sample); /* EMIT SIGNAL */
 
-	if (Config->get_stop_recording_on_xrun() && actively_recording()) {
+	if (actively_recording ()) {
+		if (Config->get_stop_recording_on_xrun()) {
 
-		/* it didn't actually halt, but we need
-		 * to handle things in the same way.
-		 */
+			/* it didn't actually halt, but we need
+			 * to handle things in the same way.
+			 */
 
-		engine_halted();
+			engine_halted();
 
-		/* ..and start the FSM engine again */
-		_transport_fsm->start ();
+			/* ..and start the FSM engine again */
+			_transport_fsm->start ();
+		} else {
+			boost::shared_ptr<RouteList> rl = routes.reader();
+			for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+				boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+				if (tr) {
+					tr->mark_capture_xrun ();
+				}
+			}
+
+		}
 	}
 }
 

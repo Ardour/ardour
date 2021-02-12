@@ -562,6 +562,14 @@ Track::transport_stopped_wallclock (struct tm & n, time_t t, bool g)
 	_disk_writer->transport_stopped_wallclock (n, t, g);
 }
 
+void
+Track::mark_capture_xrun ()
+{
+	if (_disk_writer->record_enabled ()) {
+		_disk_writer->mark_capture_xrun ();
+	}
+}
+
 bool
 Track::pending_overwrite () const
 {

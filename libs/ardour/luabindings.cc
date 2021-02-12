@@ -244,6 +244,7 @@ CLASSKEYS(std::vector<float>);
 CLASSKEYS(std::vector<float*>);
 CLASSKEYS(std::vector<double>);
 CLASSKEYS(std::list<int64_t>);
+CLASSKEYS(std::vector<samplepos_t>);
 
 CLASSKEYS(std::list<Evoral::ControlEvent*>);
 
@@ -1253,6 +1254,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("covers", &Region::covers)
 		.addFunction ("at_natural_position", &Region::at_natural_position)
 		.addFunction ("is_compound", &Region::is_compound)
+		.addFunction ("captured_xruns", &Region::captured_xruns)
 
 		.addFunction ("has_transients", &Region::has_transients)
 		.addFunction ("transients", (AnalysisFeatureList (Region::*)())&Region::transients)
@@ -1330,6 +1332,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("use_count", &Source::use_count)
 		.addFunction ("used", &Source::used)
 		.addFunction ("ancestor_name", &Source::ancestor_name)
+		.addFunction ("captured_xruns", &Source::captured_xruns)
 		.endClass ()
 
 		.deriveWSPtrClass <FileSource, Source> ("FileSource")
@@ -1762,6 +1765,10 @@ LuaBindings::common (lua_State* L)
 
 		// typedef std::vector<boost::shared_ptr<Region> > RegionVector
 		.beginStdVector <boost::shared_ptr<Region> > ("RegionVector")
+		.endClass ()
+
+		// typedef std::vector<samplepos_t> XrunPositions
+		.beginStdVector <samplepos_t> ("XrunPositions")
 		.endClass ()
 
 		// typedef std::list<boost::shared_ptr<Region> > RegionList

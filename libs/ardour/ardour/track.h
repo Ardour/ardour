@@ -147,6 +147,7 @@ public:
 	samplecnt_t get_captured_samples (uint32_t n = 0) const;
 	void transport_looped (samplepos_t);
 	void transport_stopped_wallclock (struct tm &, time_t, bool);
+	void mark_capture_xrun ();
 	bool pending_overwrite () const;
 	void set_slaved (bool);
 	ChanCount n_channels ();

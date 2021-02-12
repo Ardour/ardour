@@ -94,6 +94,7 @@ public:
 
 	void set_record_enabled (bool yn);
 	void set_record_safe (bool yn);
+	void mark_capture_xrun ();
 
 	/** @return Start position of currently-running capture (in session samples) */
 	samplepos_t current_capture_start () const { return _capture_start_sample; }
@@ -177,6 +178,8 @@ private:
 	samplepos_t   _capture_start_sample;
 	samplecnt_t   _capture_captured;
 	bool          _was_recording;
+	bool          _xrun_flag;
+	XrunPositions _xruns;
 	samplepos_t   _first_recordable_sample;
 	samplepos_t   _last_recordable_sample;
 	int           _last_possibly_recording;

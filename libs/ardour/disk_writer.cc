@@ -53,6 +53,7 @@ DiskWriter::DiskWriter (Session& s, string const & str, DiskIOProcessor::Flag f)
 	, _capture_start_sample (0)
 	, _capture_captured (0)
 	, _was_recording (false)
+	, _xrun_flag (false)
 	, _first_recordable_sample (max_samplepos)
 	, _last_recordable_sample (max_samplepos)
 	, _last_possibly_recording (0)
@@ -66,6 +67,7 @@ DiskWriter::DiskWriter (Session& s, string const & str, DiskIOProcessor::Flag f)
 	, _gui_feed_buffer(AudioEngine::instance()->raw_buffer_size (DataType::MIDI))
 {
 	DiskIOProcessor::init ();
+	_xruns.reserve (128);
 }
 
 DiskWriter::~DiskWriter ()
@@ -370,6 +372,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
                  double speed, pframes_t nframes, bool result_required)
 {
 	if (!_active && !_pending_active) {
+		_xrun_flag = false;
 		return;
 	}
 	_active = _pending_active;
@@ -421,6 +424,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	check_record_status (start_sample, speed, can_record);
 
 	if (nframes == 0) {
+		_xrun_flag = false;
 		return;
 	}
 
@@ -444,6 +448,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 		if (rec_nframes && !_was_recording) {
 			_capture_captured = 0;
+			_xrun_flag = false;
 
 			if (loop_loc) {
 				/* Loop recording, so pretend the capture started at the loop
@@ -520,6 +525,8 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 					DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 overrun in %2, rec_nframes = %3 total space = %4\n",
 					                                            DEBUG_THREAD_SELF, name(), rec_nframes, total));
 					Overrun ();
+					_xruns.push_back (_capture_captured);
+					_xrun_flag = false;
 					return;
 				}
 
@@ -623,6 +630,12 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			}
 		}
 
+		if (_xrun_flag) {
+			/* There still are `Port::resampler_quality () -1` samples in the resampler
+			 * buffer from before the x-run. */
+			_xruns.push_back (_capture_captured + Port::resampler_quality () - 1);
+		}
+
 		_capture_captured += rec_nframes;
 		DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1 now captured %2 (by %3)\n", name(), _capture_captured, rec_nframes));
 
@@ -635,6 +648,9 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			_accumulated_capture_offset = 0;
 		}
 	}
+
+	/* clear xrun flag */
+	_xrun_flag = false;
 
 	/* AUDIO BUTLER REQUIRED CODE */
 
@@ -657,6 +673,7 @@ void
 DiskWriter::finish_capture (boost::shared_ptr<ChannelList> c)
 {
 	_was_recording = false;
+	_xrun_flag = false;
 	_first_recordable_sample = max_samplepos;
 	_last_recordable_sample = max_samplepos;
 
@@ -664,10 +681,12 @@ DiskWriter::finish_capture (boost::shared_ptr<ChannelList> c)
 		return;
 	}
 
-	CaptureInfo* ci = new CaptureInfo;
+	CaptureInfo* ci = new CaptureInfo ();
 
 	ci->start =  _capture_start_sample;
 	ci->samples = _capture_captured;
+	ci->xruns = _xruns;
+	_xruns.clear ();
 
 	if (_loop_location) {
 		samplepos_t loop_start  = 0;
@@ -705,6 +724,12 @@ DiskWriter::get_gui_feed_buffer () const
 	Glib::Threads::Mutex::Lock lm (_gui_feed_buffer_mutex);
 	b->copy (_gui_feed_buffer);
 	return b;
+}
+
+void
+DiskWriter::mark_capture_xrun ()
+{
+	_xrun_flag = true;
 }
 
 void
@@ -1098,6 +1123,7 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 	}
 
 	if (abort_capture) {
+		_xruns.clear ();
 
 		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
 
@@ -1152,6 +1178,7 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 		}
 
 		(*chan)->write_source->stamp (twhen);
+		(*chan)->write_source->set_captured_xruns (capture_info.front()->xruns);
 
 		/* "re-announce the source to the world */
 		Source::SourcePropertyChanged ((*chan)->write_source);
