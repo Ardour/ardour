@@ -380,7 +380,8 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state, bool a
 
 	if (speed != 0) {
 		new_engine_speed = fabs (speed);
-		if (speed < 0) speed = -1;
+		_requested_transport_speed = speed;
+ 		if (speed < 0) speed = -1;
 		if (speed > 0) speed = 1;
 	}
 
@@ -425,6 +426,10 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state, bool a
 			}
 		}
 
+		/* we are immediately honoring the speed request, there's nothing to keep track of. */
+
+		_requested_transport_speed = 0;
+
 		TFSM_STOP (abort, false);
 
 	} else if (transport_stopped() && speed == 1.0) {
@@ -456,6 +461,10 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state, bool a
 		if (Config->get_monitoring_model() == HardwareMonitoring && config.get_auto_input()) {
 			set_track_monitor_input_status (false);
 		}
+
+		/* we are immediately honoring the speed request, there's nothing to keep track of. */
+
+		_requested_transport_speed = 0;
 
 		TFSM_EVENT (TransportFSM::StartTransport);
 
@@ -489,10 +498,6 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state, bool a
 		}
 
 		clear_clicks ();
-
-		/* if we are reversing relative to the current speed, or relative to the speed
-		   before the last stop, then we have to do extra work.
-		*/
 
 		_transport_speed = speed;
 
@@ -585,8 +590,14 @@ Session::start_transport ()
 	maybe_allow_only_loop ();
 	maybe_allow_only_punch ();
 
-	_transport_speed = _default_transport_speed;
-	_engine_speed = _default_engine_speed;
+	if (_requested_transport_speed) {
+		_engine_speed = fabs (_requested_transport_speed);
+		_transport_speed = _requested_transport_speed > 0 ? 1 : -1;
+		_requested_transport_speed = 0;
+	} else {
+		_transport_speed = _default_transport_speed;
+		_engine_speed = _default_engine_speed;
+	}
 
 	if (!_engine.freewheeling()) {
 		Timecode::Time time;
