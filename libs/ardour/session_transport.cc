@@ -360,7 +360,21 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state, bool a
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("@ %5 Set transport speed to %1 from %4 (es = %7) (def %8), abort = %2 clear_state = %3, as_default %6\n",
 	                                               speed, abort, clear_state, _transport_speed, _transport_sample, as_default, _engine_speed, _default_transport_speed));
 
-	if ((_engine_speed != 1) && (_engine_speed == fabs (speed)) && (speed * _transport_speed) >= 0) {
+	/* the logic:
+
+	   a) engine speed is not 1.0 (normal speed)
+	   b) engine speed matches the requested speed (sign ignored)
+	   c) speed and transport speed have the same sign (no direction change)
+
+	   For (c) the correct arithmetical test is >= 0, but we care about the
+	   case where at least one of them is zero. That would generate an
+	   equality with zero, but if only one of them is zero, we still need
+	   to change speed. So we check that the product is > 0, which implies
+	   that neither of them are zero, and they have the same sign.
+
+	*/
+
+	if ((_engine_speed != 1) && (_engine_speed == fabs (speed)) && ((speed * _transport_speed) > 0)) {
 		/* engine speed is not changing and no direction change, do nothing */
 		DEBUG_TRACE (DEBUG::Transport, "no reason to change speed, do nothing\n");
 		return;
@@ -381,7 +395,7 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state, bool a
 	if (speed != 0) {
 		new_engine_speed = fabs (speed);
 		_requested_transport_speed = speed;
- 		if (speed < 0) speed = -1;
+		if (speed < 0) speed = -1;
 		if (speed > 0) speed = 1;
 	}
 
