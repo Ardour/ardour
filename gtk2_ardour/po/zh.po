@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: Ardour 6.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-02-11 21:39+0800\n"
-"PO-Revision-Date: 2021-02-12 01:03+0800\n"
+"PO-Revision-Date: 2021-02-12 10:02+0800\n"
 "Last-Translator: \n"
 "Language-Team: 一善鱼 YQ-YSY@163.com\n"
 "Language: zh\n"
@@ -1520,9 +1520,9 @@ msgid ""
 "what you would like to do.\n"
 msgstr ""
 "该会话似乎已被修改且尚未保存，\n"
-"或者在％1或计算机关闭时正在进行录制。\n"
+"或者在%1或计算机关闭时正在进行录制。\n"
 "\n"
-"％1可以为您恢复所有的更改，也可以将其忽略。 \n"
+"%1可以为您恢复所有的更改，也可以将其忽略。 \n"
 "请决定您想做什么。\n"
 
 #: ardour_ui.cc:2887
@@ -2756,13 +2756,13 @@ msgid ""
 "If you need to continue using tape tracks/destructive recording\n"
 "please use an older version of %1 to work on this session"
 msgstr ""
-"此会话（来自％1的较旧版本）\n"
+"此会话（来自%1的较旧版本）\n"
 "至少使用了一个“磁带音轨”（又名“破坏性记录”）。\n"
 "\n"
 "该程序不再支持此功能。 磁带音轨已设置为普通音轨。\n"
 "\n"
 "如果您需要继续使用磁带音轨/破坏性录音\n"
-"请使用旧版本的％1进行此会话的工作"
+"请使用旧版本的%1进行此会话的工作"
 
 #: ardour_ui_session.cc:468
 msgid "Tape Tracks No Longer Supported"
@@ -2784,11 +2784,11 @@ msgstr "只读会话"
 
 #: ardour_ui_session.cc:636
 msgid "Could not create session in \"%1\": %2%3%4"
-msgstr "无法在“％1”中创建会话： %2%3%4"
+msgstr "无法在“%1”中创建会话： %2%3%4"
 
 #: ardour_ui_session.cc:649
 msgid "Could not create session in \"%1\"%2%3"
-msgstr "无法在“％1”中创建会话： %2%3"
+msgstr "无法在“%1”中创建会话： %2%3"
 
 #: ardour_ui_session.cc:700
 msgid "Abort saving snapshot"
@@ -2810,7 +2810,7 @@ msgid ""
 "\n"
 "\"Don't save now\" option."
 msgstr ""
-"％1无法保存您的会话。\n"
+"%1无法保存您的会话。\n"
 "\n"
 "如果您仍然希望继续，\n"
 "\n"
@@ -7186,7 +7186,7 @@ msgstr "（缺失） "
 
 #: editor_sources.cc:576
 msgid "EditorSources::format_position: negative timecode position: %1"
-msgstr "编辑器来源:: format_position（格式位置）：负时间码位置：％1"
+msgstr "编辑器来源:: format_position（格式位置）：负时间码位置：%1"
 
 #: editor_sources.cc:645
 msgid "Recover the selected Sources to their original Track & Position"
@@ -7359,7 +7359,7 @@ msgstr "延迟"
 #: engine_dialog.cc:317
 msgid ""
 "Always try these settings when starting %1, if the same device is available"
-msgstr "如果同一设备可用，请在启动％1时始终尝试这些设置"
+msgstr "如果同一设备可用，请在启动%1时始终尝试这些设置"
 
 #: engine_dialog.cc:483
 msgid "Could not configure Audio/MIDI engine with given settings."
@@ -7720,11 +7720,11 @@ msgstr "停止导出"
 
 #: export_dialog.cc:420
 msgid "Writing Mixer Screenshot: %1."
-msgstr "正在写入混音器屏幕截图：％1。"
+msgstr "正在写入混音器屏幕截图：%1。"
 
 #: export_dialog.cc:426
 msgid "Copying Mixer Screenshot: %1."
-msgstr "正在复制混音器屏幕截图：％1。"
+msgstr "正在复制混音器屏幕截图：%1。"
 
 #: export_dialog.cc:444
 msgid "export"
@@ -8887,7 +8887,7 @@ msgid ""
 "\n"
 "You can replace the existing binding or cancel this action."
 msgstr ""
-"按键序列已绑定到 '％1'。\n"
+"按键序列已绑定到 '%1'。\n"
 "\n"
 "您可以替换已存在的绑定或取消此动作。"
 
@@ -9254,7 +9254,7 @@ msgstr "处理器菜单"
 
 #: luainstance.cc:1352
 msgid "Loading user ui scripts file %1"
-msgstr "加载用户界面脚本文件 ％1"
+msgstr "加载用户界面脚本文件 %1"
 
 #: luainstance.cc:1355
 msgid "cannot read ui scripts file \"%1\""
@@ -9322,11 +9322,11 @@ msgstr "Lua除外：%1"
 
 #: luawindow.cc:301 luawindow.cc:325
 msgid "Glib Exception: %1"
-msgstr "Glib 异常：％1"
+msgstr "Glib 异常：%1"
 
 #: luawindow.cc:303 luawindow.cc:305 luawindow.cc:327 luawindow.cc:329
 msgid "C++ Exception: %1"
-msgstr "C++ 异常：％1"
+msgstr "C++ 异常：%1"
 
 #: luawindow.cc:380
 msgid "Deleted %1"
@@ -10048,7 +10048,7 @@ msgid ""
 "They have been replaced with silence:\n"
 "\n"
 msgstr ""
-"该会话缺失以下 ％1 文件。\n"
+"该会话缺失以下 %1 文件。\n"
 "它们已被静音取代：\n"
 
 #: missing_filesource_dialog.cc:57
@@ -11944,7 +11944,7 @@ msgid ""
 "This plugin has been replicated %1 times."
 msgstr ""
 "\n"
-"此插件已被复制 ％1 次。"
+"此插件已被复制 %1 次。"
 
 #: processor_box.cc:553 processor_box.cc:1673
 msgid ""
@@ -12257,13 +12257,13 @@ msgstr ""
 "会话信息：\n"
 "\n"
 "\n"
-"PT v％1 会话 @ ％2Hz（赫兹）\n"
+"PT v%1 会话 @ %2Hz（赫兹）\n"
 "\n"
-"％3 个音频文件\n"
-"％4 个音频区域\n"
-"％5 个活动音频区域\n"
-"％6 个 midi 区域\n"
-"％7 个活跃的 midi 区域\n"
+"%3 个音频文件\n"
+"%4 个音频区域\n"
+"%5 个活动音频区域\n"
+"%6 个 midi 区域\n"
+"%7 个活跃的 midi 区域\n"
 "\n"
 
 #: pt_import_selector.cc:138
@@ -12273,7 +12273,7 @@ msgid ""
 "Sample rate mismatch,\n"
 "will be resampling\n"
 msgstr ""
-"％1 警告：\n"
+"%1 警告：\n"
 "\n"
 "采样率不匹配，\n"
 "将重新采样\n"
@@ -12634,7 +12634,7 @@ msgstr "设置可执行的视频监控"
 
 #: rc_option_editor.cc:1876
 msgid "Column %1 (Actions %2 + %3)"
-msgstr "列 ％1（动作 ％2 + ％3 ）"
+msgstr "列 %1（动作 %2 + %3 ）"
 
 #: rc_option_editor.cc:1996
 msgid "MIDI Inputs"
@@ -12787,7 +12787,7 @@ msgstr "录音时禁止"
 
 #: rc_option_editor.cc:2409
 msgid "Inhibit while %1 is running"
-msgstr "％1 正在运行时禁止"
+msgstr "%1 正在运行时禁止"
 
 #: rc_option_editor.cc:2416 rc_option_editor.cc:2418 rc_option_editor.cc:2420
 #: rc_option_editor.cc:2428 rc_option_editor.cc:2430 rc_option_editor.cc:2438
@@ -13200,7 +13200,7 @@ msgid ""
 "<b>When enabled</b>, and Transport->Auto-Input is enabled, %1 will always "
 "monitor audio inputs when transport is stopped, even if tracks aren't armed."
 msgstr ""
-"<b>启用时</b> 并且启用“播送”->“自动输入”后，即使音轨未配备，当播送停止时 ％1 "
+"<b>启用时</b> 并且启用“播送”->“自动输入”后，即使音轨未配备，当播送停止时 %1 "
 "将始终监控音频输入。"
 
 #: rc_option_editor.cc:2931
@@ -14420,7 +14420,7 @@ msgstr ""
 "\n"
 "您可以在下方调整选项，以更改应用程序窗口和对话框的行为。\n"
 "\n"
-"这些设置仅在 ％1 重新启动后才生效。 "
+"这些设置仅在 %1 重新启动后才生效。 "
 
 #: rc_option_editor.cc:4300 rc_option_editor.cc:4310 rc_option_editor.cc:4321
 #: rc_option_editor.cc:4331 rc_option_editor.cc:4343 rc_option_editor.cc:4346
@@ -15191,7 +15191,7 @@ msgstr "打开"
 
 #: session_dialog.cc:548
 msgid "Untitled-%1"
-msgstr "无标题—％1"
+msgstr "无标题—%1"
 
 #: session_dialog.cc:602
 msgid "Empty Template"
@@ -16219,7 +16219,7 @@ msgstr "方位角："
 
 #: startup_fsm.cc:147 startup_fsm.cc:148
 msgid "Programming error: %1"
-msgstr "程序设计错误：％1"
+msgstr "程序设计错误：%1"
 
 #: startup_fsm.cc:326
 msgid ""
@@ -16231,7 +16231,7 @@ msgstr ""
 
 #: startup_fsm.cc:557
 msgid "Cannot get existing session information from %1"
-msgstr "无法从 ％1 获取已有的会话信息"
+msgstr "无法从 %1 获取已有的会话信息"
 
 #: startup_fsm.cc:875
 msgid "Pre-Release Warning"
@@ -16267,8 +16267,7 @@ msgid ""
 "\n"
 "                http://ardour.org/support</span>\n"
 msgstr ""
-"<span size=\"x-large\" weight=\"bold\">欢迎使用此 ％1 ％2 的预发布版本</"
-"span>\n"
+"<span size=\"x-large\" weight=\"bold\">欢迎使用此 %1 %2 的预发布版本</span>\n"
 "\n"
 "<span size=\"large\">还有许多问题和错误需要解决，\n"
 "以及通用的工作流程改进后，才可以考虑发布软件。\n"
@@ -16281,7 +16280,7 @@ msgstr ""
 "4）<b>请不要在本时间点提交 Alpha 开发版本的错误</b>。\n"
 "   在初始开发结束之前不会进行错误分类，\n"
 "   并且报告的问题不完整，对于正在进行的工作几乎没有用。\n"
-"5）<b>请您</b>在 IRC 上加入我们，以进行有关 ％1 ％2 的实时讨论。\n"
+"5）<b>请您</b>在 IRC 上加入我们，以进行有关 %1 %2 的实时讨论。\n"
 "   您可以通过程序中的“帮助”->“聊天”菜单选项直接到达那里。\n"
 "6）在 IRC 上讨论过问题后，<b>请您</b>提交问题补丁。\n"
 "\n"
@@ -16744,7 +16743,7 @@ msgid ""
 "yet.\n"
 "Do you want to save it?"
 msgstr ""
-"模板“％1”的描述说明已被修改，但尚未保存。\n"
+"模板“%1”的描述说明已被修改，但尚未保存。\n"
 "您打算保存它吗？"
 
 #: template_dialog.cc:391
@@ -17142,8 +17141,8 @@ msgid ""
 "keep rolling at its current speed.\n"
 "<b>When disabled</b>, loss of transport master sync causes %1 to stop"
 msgstr ""
-"<b>启用时</b> 如果播送主控发出的信号丢失，％1 将继续以当前速度滚动。\n"
-"<b>禁用时</b> 播送主控同步丢失将会导致 ％1 停止"
+"<b>启用时</b> 如果播送主控发出的信号丢失，%1 将继续以当前速度滚动。\n"
+"<b>禁用时</b> 播送主控同步丢失将会导致 %1 停止"
 
 #: transport_masters_dialog.cc:84
 msgid "Sync Position + Delta"
@@ -17208,8 +17207,7 @@ msgid ""
 "<b>When enabled</b> the external timecode source is assumed to be sample-"
 "clock synced to the audio interface\n"
 "being used by %1."
-msgstr ""
-"<b>启用时</b> 假定外部时间码源被采样计时器同步到被 ％1 使用的音频接口。"
+msgstr "<b>启用时</b> 假定外部时间码源被采样计时器同步到被 %1 使用的音频接口。"
 
 #: transport_masters_dialog.cc:167
 msgid "New transport master not added - check error log for details"
@@ -17309,7 +17307,7 @@ msgstr "在搜索路径 %2 下找不到用户界面样式文件 %1。%3 看起�
 
 #: ui_config.cc:787
 msgid "Loading ui configuration file %1"
-msgstr "加载用户界面配置文件 ％1"
+msgstr "加载用户界面配置文件 %1"
 
 #: utils.cc:121
 msgid ""
@@ -17459,7 +17457,7 @@ msgstr ""
 
 #: virtual_keyboard_window.cc:527
 msgid "Modulation: %1"
-msgstr "调制方式：％1"
+msgstr "调制方式：%1"
 
 #: add_video_dialog.cc:59
 msgid "Set Video Track"
