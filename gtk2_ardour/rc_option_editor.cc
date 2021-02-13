@@ -2573,6 +2573,14 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_region_gain)
 		     ));
 
+	add_option (_("Editor"),
+			new BoolOption (
+		     "show-region-xrun-markers",
+		     _("Show xrun markers in regions"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_region_xrun_markers),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_region_xrun_markers)
+		     ));
+
 	add_option (_("Editor"), new OptionEditorHeading (_("Editor Behavior")));
 
 	add_option (_("Editor"),

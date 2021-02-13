@@ -36,6 +36,7 @@
 
 #include "gtkmm2ext/colors.h"
 
+#include "canvas/arrow.h"
 #include "canvas/polygon.h"
 #include "canvas/debug.h"
 #include "canvas/pixbuf.h"
@@ -90,14 +91,18 @@ RegionView::RegionView (ArdourCanvas::Container*          parent,
 	, in_destructor(false)
 	, wait_for_data(false)
 	, _silence_text (0)
+	, _xrun_markers_visible (false)
 {
+	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &RegionView::parameter_changed));
 }
 
 RegionView::RegionView (const RegionView& other)
 	: sigc::trackable(other)
 	, TimeAxisViewItem (other)
 	, _silence_text (0)
+	, _xrun_markers_visible (false)
 {
+	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &RegionView::parameter_changed));
 	/* derived concrete type will call init () */
 
 	_region = other._region;
@@ -110,7 +115,10 @@ RegionView::RegionView (const RegionView& other, boost::shared_ptr<Region> other
 	: sigc::trackable(other)
 	, TimeAxisViewItem (other)
 	, _silence_text (0)
+	, _xrun_markers_visible (false)
 {
+	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &RegionView::parameter_changed));
+	/* derived concrete type will call init () */
 	/* this is a pseudo-copy constructor used when dragging regions
 	   around on the canvas.
 	*/
@@ -143,6 +151,7 @@ RegionView::RegionView (ArdourCanvas::Container*          parent,
 	, wait_for_data(false)
 	, _silence_text (0)
 {
+	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &RegionView::parameter_changed));
 }
 
 void
@@ -181,6 +190,26 @@ RegionView::init (bool wfd)
 		name_text->Event.connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_region_view_name_event), name_text, this));
 	}
 
+	XrunPositions xrp;
+	_region->captured_xruns (xrp, true);
+	int arrow_size = (int)(7.0 * UIConfiguration::instance ().get_ui_scale ()) & ~1;
+	for (XrunPositions::const_iterator x = xrp.begin (); x != xrp.end (); ++x) {
+		ArdourCanvas::Arrow* canvas_item = new ArdourCanvas::Arrow(group);
+		canvas_item->set_color (UIConfiguration::instance().color ("neutral:background"));
+		canvas_item->set_show_head (1, true);
+		canvas_item->set_show_head (0, false);
+		canvas_item->set_head_width (1, arrow_size);
+		canvas_item->set_head_height (1, arrow_size);
+		canvas_item->set_y0 (arrow_size);
+		canvas_item->set_y1 (arrow_size);
+		canvas_item->raise_to_top ();
+		canvas_item->hide ();
+		_xrun_markers.push_back (make_pair(*x, canvas_item));
+	}
+
+	_xrun_markers_visible = false;
+	update_xrun_markers ();
+
 	if (wfd) {
 		_enable_display = true;
 	}
@@ -207,6 +236,10 @@ RegionView::~RegionView ()
 
 	for (list<ArdourCanvas::Rectangle*>::iterator i = _coverage_frame.begin (); i != _coverage_frame.end (); ++i) {
 		delete *i;
+	}
+
+	for (list<std::pair<samplepos_t, ArdourCanvas::Arrow*> >::iterator i = _xrun_markers.begin(); i != _xrun_markers.end(); ++i) {
+		delete ((*i).second);
 	}
 
 	drop_silent_frames ();
@@ -421,10 +454,10 @@ RegionView::region_resized (const PropertyChange& what_changed)
 		unit_length = _region->length() / samples_per_pixel;
 
 		for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
-
 			(*i)->set_duration (unit_length);
-
 		}
+
+		update_xrun_markers ();
 	}
 }
 
@@ -433,6 +466,36 @@ RegionView::reset_width_dependent_items (double pixel_width)
 {
 	TimeAxisViewItem::reset_width_dependent_items (pixel_width);
 	_pixel_width = pixel_width;
+
+	if (_xrun_markers_visible) {
+		const samplepos_t start = _region->start();
+		for (list<std::pair<samplepos_t, ArdourCanvas::Arrow*> >::iterator i = _xrun_markers.begin(); i != _xrun_markers.end(); ++i) {
+			float x_pos = trackview.editor().sample_to_pixel (i->first - start);
+			i->second->set_x (x_pos);
+		}
+	}
+}
+
+void
+RegionView::update_xrun_markers ()
+{
+	const bool show_xruns_markers = UIConfiguration::instance().get_show_region_xrun_markers();
+	if (_xrun_markers_visible == show_xruns_markers && !_xrun_markers_visible) {
+		return;
+	}
+
+	const samplepos_t start = _region->start();
+	const samplepos_t length = _region->length();
+	for (list<std::pair<samplepos_t, ArdourCanvas::Arrow*> >::iterator i = _xrun_markers.begin(); i != _xrun_markers.end(); ++i) {
+		float x_pos = trackview.editor().sample_to_pixel (i->first - start);
+		i->second->set_x (x_pos);
+		if (show_xruns_markers && (i->first >= start && i->first < start + length)) {
+			i->second->show ();
+		} else  {
+			i->second->hide ();
+		}
+	}
+	_xrun_markers_visible = show_xruns_markers;
 }
 
 void
@@ -515,6 +578,14 @@ RegionView::set_colors ()
 {
 	TimeAxisViewItem::set_colors ();
 	set_sync_mark_color ();
+}
+
+void
+RegionView::parameter_changed (std::string const& p)
+{
+	if (p == "show-region-xrun-markers") {
+		update_xrun_markers ();
+	}
 }
 
 void
