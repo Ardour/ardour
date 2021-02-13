@@ -65,6 +65,8 @@ class LIBWIDGETS_API ArdourButton : public CairoWidget , public Gtkmm2ext::Activ
 		TrackHeader = 0x2,
 		OccasionalText = 0x4,
 		OccasionalLED = 0x8,
+		ForceBoxy = 0x10,
+		ForceFlat = 0x20,
 	};
 
 	Tweaks tweaks() const { return _tweaks; }
