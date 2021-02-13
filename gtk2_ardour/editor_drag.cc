@@ -3748,7 +3748,6 @@ BBTRulerDrag::BBTRulerDrag (Editor* e, ArdourCanvas::Item* i)
 	, _tempo (0)
 	, _before_state (0)
 	, _drag_valid (true)
-	, marker_dialog (0)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New BBTRulerDrag\n");
 
@@ -3841,51 +3840,6 @@ BBTRulerDrag::motion (GdkEvent* event, bool first_move)
 }
 
 void
-BBTRulerDrag::begin_position_marker_creation (timepos_t const & pos)
-{
-	marker_dialog = new BBTMarkerDialog (pos);
-
-	/* run this modally since we are finishing a drag and the drag object
-	 * will be destroyed when we return from here
-	 */
-
-	int response = marker_dialog->run ();
-	finish_position_marker_creation (response);
-}
-
-void
-BBTRulerDrag::finish_position_marker_creation (int result)
-{
-	BBT_Time bbt;
-	bool commit = false;
-	TempoMap::SharedPtr map (TempoMap::use());
-
-	switch (result) {
-	case RESPONSE_ACCEPT:
-	case RESPONSE_OK:
-		bbt = marker_dialog->bbt_value ();
-		map->set_bartime (bbt, marker_dialog->position());
-		commit = true;
-		break;
-	default:
-		break;
-	}
-
-	delete marker_dialog;
-	marker_dialog = 0;
-
-	if (commit) {
-		TempoMap::update (map);
-		XMLNode &after = TempoMap::use()->get_state();
-
-		_editor->session()->add_command(new MementoCommand<TempoMap>(new Temporal::TempoMap::MementoBinder(), _before_state, &after));
-		_editor->commit_reversible_command ();
-	} else {
-		TempoMap::abort_update ();
-	}
-}
-
-void
 BBTRulerDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	if (!_drag_valid) {
@@ -3899,8 +3853,30 @@ BBTRulerDrag::finished (GdkEvent* event, bool movement_occurred)
 
 		_editor->begin_reversible_command (_("add BBT marker"));
 		/* position markers must always be positioned using audio time */
-		begin_position_marker_creation (timepos_t (grab_sample()));
-		return;
+
+		BBTMarkerDialog* marker_dialog = new BBTMarkerDialog (timepos_t (grab_sample()));
+
+		/* run this modally since we are finishing a drag and the drag object
+		 * will be destroyed when we return from here
+		 */
+
+		int result = marker_dialog->run ();
+		BBT_Time bbt;
+
+		switch (result) {
+		case RESPONSE_ACCEPT:
+		case RESPONSE_OK:
+			bbt = marker_dialog->bbt_value ();
+			map->set_bartime (bbt, marker_dialog->position());
+			delete marker_dialog;
+			break;
+		default:
+			delete marker_dialog;
+			TempoMap::abort_update ();
+			return;
+		}
+
+		/* the map change is committed below */
 
 	} else {
 

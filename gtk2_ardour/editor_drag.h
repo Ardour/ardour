@@ -58,7 +58,6 @@ namespace PBD {
 	class StatefulDiffCommand;
 }
 
-class BBTMarkerDialog;
 class PatchChange;
 class Editor;
 class EditorCursor;
@@ -907,10 +906,6 @@ private:
 	Temporal::TempoPoint* _tempo;
 	XMLNode* _before_state;
 	bool     _drag_valid;
-	BBTMarkerDialog* marker_dialog;
-
-	void begin_position_marker_creation (Temporal::timepos_t const &);
-	void finish_position_marker_creation (int response);
 };
 
 #warning NUTEMPO may or may not need this in the new world
