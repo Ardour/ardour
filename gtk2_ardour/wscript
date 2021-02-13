@@ -61,6 +61,7 @@ gtk2_ardour_sources = [
         'automation_time_axis.cc',
         'axis_view.cc',
         'beatbox_gui.cc',
+        'bbt_marker_dialog.cc',
         'big_clock_window.cc',
         'big_transport_window.cc',
         'bundle_manager.cc',

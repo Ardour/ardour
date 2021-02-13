@@ -56,6 +56,7 @@
 
 #include "editor.h"
 #include "pbd/i18n.h"
+#include "bbt_marker_dialog.h"
 #include "keyboard.h"
 #include "audio_region_view.h"
 #include "automation_region_view.h"
@@ -3747,6 +3748,7 @@ BBTRulerDrag::BBTRulerDrag (Editor* e, ArdourCanvas::Item* i)
 	, _tempo (0)
 	, _before_state (0)
 	, _drag_valid (true)
+	, marker_dialog (0)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New BBTRulerDrag\n");
 
@@ -3755,9 +3757,9 @@ BBTRulerDrag::BBTRulerDrag (Editor* e, ArdourCanvas::Item* i)
 void
 BBTRulerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
-	Drag::start_grab (event, cursor);
-
 	TempoMap::fetch_writable ();
+
+	Drag::start_grab (event, cursor);
 
 	TempoMap::SharedPtr map (TempoMap::use());
 	_tempo = const_cast<TempoPoint*> (&map->metric_at (raw_grab_time().beats()).tempo());
@@ -3839,6 +3841,51 @@ BBTRulerDrag::motion (GdkEvent* event, bool first_move)
 }
 
 void
+BBTRulerDrag::begin_position_marker_creation (timepos_t const & pos)
+{
+	marker_dialog = new BBTMarkerDialog (pos);
+
+	/* run this modally since we are finishing a drag and the drag object
+	 * will be destroyed when we return from here
+	 */
+
+	int response = marker_dialog->run ();
+	finish_position_marker_creation (response);
+}
+
+void
+BBTRulerDrag::finish_position_marker_creation (int result)
+{
+	BBT_Time bbt;
+	bool commit = false;
+	TempoMap::SharedPtr map (TempoMap::use());
+
+	switch (result) {
+	case RESPONSE_ACCEPT:
+	case RESPONSE_OK:
+		bbt = marker_dialog->bbt_value ();
+		map->set_bartime (bbt, marker_dialog->position());
+		commit = true;
+		break;
+	default:
+		break;
+	}
+
+	delete marker_dialog;
+	marker_dialog = 0;
+
+	if (commit) {
+		TempoMap::update (map);
+		XMLNode &after = TempoMap::use()->get_state();
+
+		_editor->session()->add_command(new MementoCommand<TempoMap>(new Temporal::TempoMap::MementoBinder(), _before_state, &after));
+		_editor->commit_reversible_command ();
+	} else {
+		TempoMap::abort_update ();
+	}
+}
+
+void
 BBTRulerDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	if (!_drag_valid) {
@@ -3851,7 +3898,9 @@ BBTRulerDrag::finished (GdkEvent* event, bool movement_occurred)
 	if (!movement_occurred) {
 
 		_editor->begin_reversible_command (_("add BBT marker"));
-		map->set_bartime (BBT_Time (3, 1, 0), grab_time());
+		/* position markers must always be positioned using audio time */
+		begin_position_marker_creation (timepos_t (grab_sample()));
+		return;
 
 	} else {
 
