@@ -106,7 +106,7 @@ x86_fma_mix_buffers_with_gain(
 			// Load destinations
 			d0 = _mm256_load_ps(dst + 0 );
 			// dst = dst + (src * gain)
-			d0 = _mm256_fmadd_ps(g0, d0, s0);
+			d0 = _mm256_fmadd_ps(g0, s0, d0);
 			// Store result
 			_mm256_store_ps(dst, d0);
 			// Update pointers and counters
