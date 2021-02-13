@@ -20,6 +20,7 @@
 #define __canvas_canvas_fwd_h__
 
 namespace ArdourCanvas {
+	class Arrow;
 	class Line;
 	class LineSet;
 	class Rectangle;
