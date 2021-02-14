@@ -2000,7 +2000,17 @@ Region::position_time_domain() const
 timepos_t
 Region::end() const
 {
+	/* one day we might want to enforce _position, _start and _length (or
+	   some combination thereof) all being in the same time domain.
+	*/
 	return _position.val() + _length.val();
+}
+
+timepos_t
+Region::source_position () const
+{
+	/* this is the position of the start of the source, in absolute time */
+	return _position.val().earlier (_start.val());
 }
 
 Temporal::Beats
@@ -2018,10 +2028,7 @@ Region::source_beats_to_absolute_beats (Temporal::Beats beats) const
 Temporal::timepos_t
 Region::region_beats_to_absolute_time (Temporal::Beats beats) const
 {
-	/* beats is an additional offset to the start point of the region, from
-	   the effective start of the source on the timeline.
-	*/
-	return source_position() + start () + timepos_t (beats);
+	return _position.val() + timepos_t (beats);
 }
 
 Temporal::timepos_t
@@ -2037,24 +2044,42 @@ Region::source_beats_to_absolute_time (Temporal::Beats beats) const
 Temporal::Beats
 Region::absolute_time_to_source_beats(timepos_t const & time) const
 {
-	const timepos_t s (source_position());
-	return time.earlier (timecnt_t (s, s)).beats();
-}
+	/* measure the distance between the absolute time and the position of
+	   the source start, in beats. positive if time is later than source
+	   position.
+	*/
 
-timepos_t
-Region::source_position () const
-{
-	return _position.val().earlier (_start.val());
+	return source_position().distance (time).beats();
 }
 
 timepos_t
 Region::source_relative_position (timepos_t const & p) const
 {
+	/* p is an absolute time, return the time with the source position as
+	   the origin.
+
+	   Note that conventionally we would return a timecnt_t, expressing a
+	   distance from the source position. But we return timepos_t for which
+	   the origin is implicit, and in this case, the origin is the region
+	   position, not zero.
+
+	   XXX this seems likely to cause problems.
+	*/
 	return p.earlier (source_position());
 }
 
 timepos_t
 Region::region_relative_position (timepos_t const & p) const
 {
+	/* p is an absolute time, return the time with the region position as
+	   the origin.
+
+	   Note that conventionally we would return a timecnt_t, expressing a
+	   distance from the region position. But we return timepos_t for which
+	   the origin is implicit, and in this case, the origin is the region
+	   position, not zero.
+
+	   XXX this seems likely to cause problems.
+	*/
 	return p.earlier (_position.val());
 }
