@@ -278,7 +278,6 @@ protected:
 	}
 
 	Temporal::timecnt_t snap_delta (guint const) const;
-	Temporal::Beats     snap_delta_music (guint const) const;
 
 	double current_pointer_x () const;
 	double current_pointer_y () const;
@@ -323,7 +322,6 @@ private:
 	 *  samplepos. used for relative snap.
 	 */
 	Temporal::timecnt_t _snap_delta;
-	Temporal::Beats _snap_delta_music;
 	CursorContext::Handle _cursor_ctx; ///< cursor change context
 	bool _constraint_pressed; ///< if the keyboard indicated constraint modifier was pressed on start_grab()
 	int _grab_button;

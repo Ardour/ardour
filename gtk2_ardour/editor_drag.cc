@@ -387,17 +387,7 @@ Drag::snap_delta (guint state) const
 		return _snap_delta;
 	}
 
-	return timecnt_t();
-}
-
-Beats
-Drag::snap_delta_music (guint state) const
-{
-	if (ArdourKeyboard::indicates_snap_delta (state)) {
-		return _snap_delta_music;
-	}
-
-	return Beats();
+	return timecnt_t (_editor->default_time_domain());
 }
 
 double
@@ -422,12 +412,6 @@ Drag::setup_snap_delta (timepos_t const & pos)
 	timepos_t snap (pos);
 	_editor->snap_to (snap, Temporal::RoundNearest, ARDOUR::SnapToAny_Visual, true);
 	_snap_delta = pos.distance (snap);
-
-	_snap_delta_music = Temporal::Beats();
-
-	if (_snap_delta != 0) {
-		_snap_delta_music = snap.beats() - pos.beats();
-	}
 }
 
 bool
