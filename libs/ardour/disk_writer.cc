@@ -46,8 +46,8 @@ using namespace std;
 ARDOUR::samplecnt_t DiskWriter::_chunk_samples = DiskWriter::default_chunk_samples ();
 PBD::Signal0<void> DiskWriter::Overrun;
 
-DiskWriter::DiskWriter (Session& s, string const & str, DiskIOProcessor::Flag f)
-	: DiskIOProcessor (s, str, f)
+DiskWriter::DiskWriter (Session& s, Track& t, string const & str, DiskIOProcessor::Flag f)
+	: DiskIOProcessor (s, t, str, f)
 	, _record_enabled (0)
 	, _record_safe (0)
 	, _capture_start_sample (0)
@@ -547,7 +547,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 			// Pump entire port buffer into the ring buffer (TODO: split cycles?)
 			MidiBuffer& buf    = bufs.get_midi (0);
-			boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack>(_track);
+			MidiTrack* mt = dynamic_cast<MidiTrack*>(&_track);
 			MidiChannelFilter* filter = mt ? &mt->capture_filter() : 0;
 
 			assert (buf.size() == 0 || _midi_buf);
@@ -1159,7 +1159,7 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 		if (as) {
 			audio_srcs.push_back (as);
 			as->update_header (capture_info.front()->start, when, twhen);
-			as->set_captured_for (_track->name());
+			as->set_captured_for (_track.name());
 			as->mark_immutable ();
 
 			Glib::DateTime tm (Glib::DateTime::create_now_local (mktime (&when)));
@@ -1174,7 +1174,7 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 
 		if (_midi_write_source) {
 			midi_srcs.push_back (_midi_write_source);
-			_midi_write_source->set_captured_for (_track->name());
+			_midi_write_source->set_captured_for (_track.name());
 		}
 
 		(*chan)->write_source->stamp (twhen);
@@ -1234,10 +1234,8 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 	_last_capture_sources.insert (_last_capture_sources.end(), midi_srcs.begin(), midi_srcs.end());
 
 
-	if (_track) {
-		_track->use_captured_sources (audio_srcs, capture_info);
-		_track->use_captured_sources (midi_srcs, capture_info);
-	}
+	_track.use_captured_sources (audio_srcs, capture_info);
+	_track.use_captured_sources (midi_srcs, capture_info);
 
 	mark_write_completed = true;
 

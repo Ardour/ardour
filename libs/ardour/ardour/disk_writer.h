@@ -35,7 +35,7 @@ class MidiSource;
 class LIBARDOUR_API DiskWriter : public DiskIOProcessor
 {
 public:
-	DiskWriter (Session&, std::string const& name,
+	DiskWriter (Session&, Track&, std::string const& name,
 	            DiskIOProcessor::Flag f = DiskIOProcessor::Flag (0));
 	~DiskWriter ();
 

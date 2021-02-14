@@ -57,8 +57,8 @@ DiskReader::Declicker DiskReader::loop_declick_in;
 DiskReader::Declicker DiskReader::loop_declick_out;
 samplecnt_t           DiskReader::loop_fade_length (0);
 
-DiskReader::DiskReader (Session& s, string const& str, DiskIOProcessor::Flag f)
-	: DiskIOProcessor (s, str, f)
+DiskReader::DiskReader (Session& s, Track& t, string const& str, DiskIOProcessor::Flag f)
+	: DiskIOProcessor (s, t, str, f)
 	, overwrite_sample (0)
 	, run_must_resolve (false)
 	, _declick_amp (s.nominal_sample_rate ())
@@ -197,7 +197,7 @@ void
 DiskReader::realtime_locate (bool for_loop_end)
 {
 	if (!for_loop_end) {
-		boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (_track);
+		MidiTrack* mt = dynamic_cast<MidiTrack*> (&_track);
 		_tracker.resolve_notes (mt->immediate_events (), 0);
 	}
 }
@@ -239,7 +239,7 @@ DiskReader::adjust_buffering ()
 void
 DiskReader::playlist_modified ()
 {
-	_session.request_overwrite_buffer (_track, PlaylistModified);
+	_session.request_overwrite_buffer (_track.shared_ptr (), PlaylistModified);
 }
 
 int
@@ -260,7 +260,7 @@ DiskReader::use_playlist (DataType dt, boost::shared_ptr<Playlist> playlist)
 	 * take care of the buffer refill. */
 
 	if (!(g_atomic_int_get (&_pending_overwrite) & PlaylistChanged) || prior_playlist) {
-		_session.request_overwrite_buffer (_track, PlaylistChanged);
+		_session.request_overwrite_buffer (_track.shared_ptr (), PlaylistChanged);
 	}
 
 	return 0;
@@ -273,7 +273,7 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	boost::shared_ptr<ChannelList> c = channels.reader ();
 	ChannelList::iterator          chan;
 	sampleoffset_t                 disk_samples_to_consume;
-	MonitorState                   ms = _track->monitoring_state ();
+	MonitorState                   ms = _track.monitoring_state ();
 	const bool                     midi_only = (c->empty() || !_playlists[DataType::AUDIO]);
 
 	if (_active) {
@@ -544,7 +544,7 @@ DiskReader::configuration_changed ()
 			return;
 		}
 	}
-	_session.request_overwrite_buffer (_track, LoopDisabled);
+	_session.request_overwrite_buffer (_track.shared_ptr (), LoopDisabled);
 }
 
 bool
@@ -765,8 +765,8 @@ DiskReader::overwrite_existing_midi ()
 	RTMidiBuffer* mbuf = rt_midibuffer ();
 
 	if (mbuf) {
-		boost::shared_ptr<MidiTrack> mt     = boost::dynamic_pointer_cast<MidiTrack> (_track);
-		MidiChannelFilter*           filter = mt ? &mt->playback_filter () : 0;
+		MidiTrack* mt = dynamic_cast<MidiTrack*> (&_track);
+		MidiChannelFilter* filter = mt ? &mt->playback_filter () : 0;
 
 		PBD::Timing minsert;
 		minsert.start ();
@@ -1358,7 +1358,7 @@ DiskReader::playlist_ranges_moved (list<Evoral::RangeMove<samplepos_t> > const& 
 		return;
 	}
 
-	if (!_track || Config->get_automation_follows_regions () == false) {
+	if (Config->get_automation_follows_regions () == false) {
 		return;
 	}
 
@@ -1371,7 +1371,7 @@ DiskReader::playlist_ranges_moved (list<Evoral::RangeMove<samplepos_t> > const& 
 	}
 
 	/* move panner automation */
-	boost::shared_ptr<Pannable>   pannable = _track->pannable ();
+	boost::shared_ptr<Pannable>   pannable = _track.pannable ();
 	Evoral::ControlSet::Controls& c (pannable->controls ());
 
 	for (Evoral::ControlSet::Controls::iterator ci = c.begin (); ci != c.end (); ++ci) {
@@ -1391,7 +1391,7 @@ DiskReader::playlist_ranges_moved (list<Evoral::RangeMove<samplepos_t> > const& 
 		}
 	}
 	/* move processor automation */
-	_track->foreach_processor (boost::bind (&DiskReader::move_processor_automation, this, _1, movements_samples));
+	_track.foreach_processor (boost::bind (&DiskReader::move_processor_automation, this, _1, movements_samples));
 }
 
 void

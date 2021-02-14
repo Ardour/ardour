@@ -128,6 +128,13 @@ public:
 
 	void set_block_size (pframes_t);
 
+	/* used by DiskReader request_overwrite_buffer(), to create
+	 * a SessionEvent with weak_ptr<> reference
+	 */
+	boost::shared_ptr<Track> shared_ptr () {
+		return boost::dynamic_pointer_cast<Track> (shared_from_this());
+	}
+
 	boost::shared_ptr<Playlist> playlist ();
 	void request_input_monitoring (bool);
 	void ensure_input_monitoring (bool);
