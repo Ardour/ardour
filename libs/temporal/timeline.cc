@@ -105,8 +105,7 @@ Beats
 timecnt_t::compute_beats() const
 {
 	assert (!_distance.flagged());
-	TempoMap::SharedPtr tm (TempoMap::use());
-	return tm->full_duration_at (_position, *this, BeatTime).beats();
+	return TempoMap::use()->full_duration_at (_position, *this, BeatTime).beats();
 }
 
 timecnt_t
