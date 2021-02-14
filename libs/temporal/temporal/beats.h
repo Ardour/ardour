@@ -119,8 +119,9 @@ public:
 	}
 
 	/** Create from ticks at the standard PPQN. */
-	static Beats ticks(int32_t ticks) {
-		return Beats(0, ticks);
+	static Beats ticks(int64_t ticks) {
+		assert (ticks/PPQN < std::numeric_limits<int32_t>::max());
+		return Beats (ticks / PPQN, ticks % PPQN);
 	}
 
 	/** Create from ticks at a given rate.
