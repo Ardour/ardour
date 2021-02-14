@@ -143,9 +143,15 @@ EditorSources::EditorSources (Editor* e)
 	col_path->set_sizing (TREE_VIEW_COLUMN_FIXED);
 	col_path->set_sort_column(6);
 
+	TreeViewColumn* captd_xruns = manage (new TreeViewColumn ("", _columns.captd_xruns));
+	captd_xruns->set_fixed_width (chan_width * 1.25);
+	captd_xruns->set_sizing (TREE_VIEW_COLUMN_FIXED);
+	captd_xruns->set_sort_column(10);
+
 	_display.append_column (*col_name);
 	_display.append_column (*col_chans);
 	_display.append_column (*captd_for);
+	_display.append_column (*captd_xruns);
 	_display.append_column (*col_tags);
 	_display.append_column (*col_take_id);
 	_display.append_column (*col_nat_pos);
@@ -155,20 +161,21 @@ EditorSources::EditorSources (Editor* e)
 	Gtk::Label* l;
 
 	ColumnInfo ci[] = {
-		{ 0,   _("Name"),      _("Region name") },
-		{ 1,   _("# Ch"),      _("# Channels") },
+		{ 0,   _("Name"),         _("Region name") },
+		{ 1,   _("# Ch"),         _("# Channels") },
 		{ 2,   _("Captured For"), _("Original Track this was recorded on") },
-		{ 3,   _("Tags"),      _("Tags") },
-		{ 4,   _("Take ID"),   _("Take ID") },
-		{ 5,   _("Orig Pos"),  _("Original Position of the file on timeline, when it was recorded") },
-		{ 6,   _("Path"),      _("Path (folder) of the file location") },
+		{ 3,   _("# Xruns"),      _("Number of dropouts that occured during recording") },
+		{ 4,   _("Tags"),         _("Tags") },
+		{ 5,   _("Take ID"),      _("Take ID") },
+		{ 6,   _("Orig Pos"),     _("Original Position of the file on timeline, when it was recorded") },
+		{ 7,   _("Path"),         _("Path (folder) of the file location") },
 		{ -1, 0, 0 }
 	};
 
 	/* make Name and Path columns manually resizable */
 
 	_display.get_column (0)->set_resizable (true);
-	_display.get_column (4)->set_resizable (true);
+	_display.get_column (5)->set_resizable (true);
 
 	for (int i = 0; ci[i].index >= 0; ++i) {
 		col = _display.get_column (ci[i].index);
@@ -200,22 +207,22 @@ EditorSources::EditorSources (Editor* e)
 	region_name_cell->signal_editing_started().connect (sigc::mem_fun (*this, &EditorSources::name_editing_started));
 
 	/* Tags cell: make editable */
-	CellRendererText* region_tags_cell = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (3));
+	CellRendererText* region_tags_cell = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (4));
 	region_tags_cell->property_editable() = true;
 	region_tags_cell->signal_edited().connect (sigc::mem_fun (*this, &EditorSources::tag_edit));
 	region_tags_cell->signal_editing_started().connect (sigc::mem_fun (*this, &EditorSources::tag_editing_started));
 
 	/* right-align the Natural Pos column */
-	TreeViewColumn* nat_col = _display.get_column(5);
+	TreeViewColumn* nat_col = _display.get_column(6);
 	nat_col->set_alignment (ALIGN_RIGHT);
-	renderer = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (5));
+	renderer = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (6));
 	if (renderer) {
 		renderer->property_xalign() = 1.0;
 	}
 
 	/* the PATH field should expand when the pane is opened wider */
-	tv_col = _display.get_column(6);
-	renderer = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (6));
+	tv_col = _display.get_column(7);
+	renderer = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (7));
 	tv_col->add_attribute(renderer->property_text(), _columns.path);
 	tv_col->set_expand (true);
 
@@ -400,6 +407,9 @@ EditorSources::populate_row (TreeModel::Row row, boost::shared_ptr<ARDOUR::Regio
 	
 	/* CAPTURED FOR */
 	row[_columns.captd_for] = source->captured_for();
+
+	/* CAPTURED DROPOUTS */
+	row[_columns.captd_xruns] = source->n_captured_xruns();
 
 	/* TAGS */
 	row[_columns.tags] = region->tags();

@@ -70,6 +70,7 @@ private:
 			add (color_);
 			add (region);
 			add (natural_s);
+			add (captd_xruns);
 		}
 
 		Gtk::TreeModelColumn<std::string> name;
@@ -82,6 +83,7 @@ private:
 		Gtk::TreeModelColumn<std::string> path;
 		Gtk::TreeModelColumn<std::string> take_id;
 		Gtk::TreeModelColumn<samplepos_t> natural_s;
+		Gtk::TreeModelColumn<size_t> captd_xruns;
 	};
 
 	Columns _columns;
