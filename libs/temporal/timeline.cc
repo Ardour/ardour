@@ -453,24 +453,34 @@ timepos_t::operator>= (timecnt_t const & t) const
 superclock_t
 timepos_t::_superclocks () const
 {
+	assert (time_domain() == BeatTime);
 	stats.beats_to_audio++;
 
-	TempoMap::SharedPtr tm (TempoMap::use());
-	return tm->superclock_at (beats ());
+	return TempoMap::use()->superclock_at (beats ());
 }
 
 Temporal::Beats
 timepos_t::_beats () const
 {
+	assert (time_domain() == AudioTime);
 	stats.audio_to_beats++;
 
-	TempoMap::SharedPtr tm (TempoMap::use());
-	return tm->quarters_at_superclock (v);
+	/* see notes in Temporal::TempoPoint::quarters_at_superclock() for
+	 * more. Basically, specially case "max-superclocks" and return
+	 * "max-beats"
+	 */
+
+	if (val() == int62_t::max) {
+		return std::numeric_limits<Beats>::max ();
+	}
+
+	return TempoMap::use()->quarters_at_superclock (v);
 }
 
 int64_t
 timepos_t::_ticks () const
 {
+	assert (time_domain() == AudioTime);
 	return _beats().to_ticks();
 }
 
