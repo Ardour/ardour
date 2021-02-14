@@ -4162,7 +4162,7 @@ Editor::get_grid_type_as_beats (bool& success, timepos_t const & position)
 	}
 
 	TempoMap::SharedPtr tmap (TempoMap::use());
-	
+
 	switch (_grid_type) {
 	case GridTypeBeat:
 		return Temporal::Beats::from_double (4.0 / tmap->meter_at (position).note_value());

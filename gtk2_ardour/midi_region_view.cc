@@ -2956,25 +2956,28 @@ MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_
 
 			Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
 			const timepos_t abs_beats (tmap->quarters_at (snapped_x));
-			const Temporal::Beats beats = _region->absolute_time_to_source_beats (abs_beats);
+			const Temporal::Beats src_beats = _region->absolute_time_to_source_beats (abs_beats);
 			Temporal::Beats len         = Temporal::Beats();
 
 			if (at_front) {
-				if (beats < canvas_note->note()->end_time()) {
-					len = canvas_note->note()->time() - beats + (snap_delta_beats * sign);
+				if (src_beats < canvas_note->note()->end_time()) {
+					len = canvas_note->note()->time() - src_beats + (snap_delta_beats * sign);
 					len += canvas_note->note()->length();
 				}
 			} else {
-				if (beats >= canvas_note->note()->time()) {
-					len = beats - canvas_note->note()->time() - (snap_delta_beats * sign);
+				if (src_beats >= canvas_note->note()->time()) {
+					len = src_beats - canvas_note->note()->time() - (snap_delta_beats * sign);
 				}
 			}
 
-			len = std::max (Temporal::Beats::from_double (1 / 512.0), len);
+			/* drawn notes must be at least 1/512th note (1/4 note
+			   divided by 128
+			*/
+			len = std::max (Temporal::Beats (0, 128), len);
 
 			char buf[16];
 			/* represent as float frac to help out the user */
-			snprintf (buf, sizeof (buf), "%.3g beats", len.get_beats() + (len.get_ticks()/(double)Temporal::ticks_per_beat));
+			snprintf (buf, sizeof (buf), "%.3f beats", len.get_beats() + (len.get_ticks()/(double)Temporal::ticks_per_beat));
 			show_verbose_cursor (buf, 0, 0);
 
 			cursor_set = true;
@@ -3064,7 +3067,8 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 		}
 
 		if (!at_front) {
-			Temporal::Beats len = std::max (Temporal::Beats (0, 1), x_beats - canvas_note->note()->time() - (snap_delta_beats * sign));
+			Temporal::Beats llen = x_beats - canvas_note->note()->time() - (snap_delta_beats * sign);
+			Temporal::Beats len = std::max (Temporal::Beats (0, 1), llen);
 			note_diff_add_change (canvas_note, MidiModel::NoteDiffCommand::Length, len);
 		}
 
@@ -3900,7 +3904,7 @@ MidiRegionView::update_ghost_note (double x, double y, uint32_t state)
 	const Temporal::Beats snapped_beats = snap_sample_to_grid_underneath (unsnapped_sample, divisions, shift_snap);
 
 	/* prevent Percussive mode from displaying a ghost hit at region end */
-	if (!shift_snap && snapped_beats >= _region->start().beats() + _region->length().beats()) {
+	if (!shift_snap && snapped_beats >= _region->end().beats()) {
 		_ghost_note->hide();
 		hide_verbose_cursor ();
 		return;

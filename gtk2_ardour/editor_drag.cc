@@ -6967,17 +6967,13 @@ NoteCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 
 	_note[0] = aligned_start;
 	/* minimum initial length is grid beats */
-	_note[1] = aligned_start + grid_beats;
+	_note[1] = _note[0] + grid_beats;
 
-	/* Note: at this point we are drawing a rect for the dragging note in
-	 * absolute coordinates (it's not real note, there's no particular
-	 * connection to the position/start of the regionview/region. So we
-	 * just translate directly from absolute time (_note[0], _note[1]) to
-	 * pixels.
-	 */
+	const timepos_t rrp1 (_region_view->region()->region_relative_position (_note[0]));
+	const timepos_t rrp2 (_region_view->region()->region_relative_position (_note[1]));
 
-	double const x0 = _editor->time_to_pixel (_note[0]);
-	double const x1 = _editor->time_to_pixel (_note[1]);
+	double const x0 = _editor->time_to_pixel (rrp1);
+	double const x1 = _editor->time_to_pixel (rrp2);
 	double const y = _region_view->note_to_y (_region_view->y_to_note (y_to_region (event->button.y)));
 
 	_drag_rect->set (ArdourCanvas::Rect (x0, y, x1, y + floor (_region_view->midi_stream_view()->note_height ())));
@@ -7012,10 +7008,11 @@ NoteCreateDrag::motion (GdkEvent* event, bool)
 
 	_note[1] = timepos_t (max (Temporal::Beats(), aligned_beats));
 
-	/* We continue to draw the dragging rect with absolute time/pixel coordinates */
+	const timepos_t rrp1 (_region_view->region()->region_relative_position (_note[0]));
+	const timepos_t rrp2 (_region_view->region()->region_relative_position (_note[1]));
 
-	double const x0 = _editor->time_to_pixel (_note[0]);
-	double const x1 = _editor->time_to_pixel (_note[1]);
+	double const x0 = _editor->time_to_pixel (rrp1);
+	double const x1 = _editor->time_to_pixel (rrp2);
 	_drag_rect->set_x0 (std::min(x0, x1));
 	_drag_rect->set_x1 (std::max(x0, x1));
 }
