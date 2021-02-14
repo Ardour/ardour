@@ -300,7 +300,14 @@ Drag::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 	/* we set up x/y dragging constraints on first move */
 	_constraint_pressed = ArdourKeyboard::indicates_constraint (event->button.state);
 
-	_raw_grab_time = timepos_t (_editor->canvas_event_sample (event, &_grab_x, &_grab_y));
+	const samplepos_t pos = _editor->canvas_event_sample (event, &_grab_x, &_grab_y);
+
+	if (_editor->default_time_domain() == Temporal::AudioTime) {
+		_raw_grab_time = timepos_t (pos);
+	} else {
+		_raw_grab_time = timepos_t (timepos_t (pos).beats());
+	}
+
 	_grab_button = event->button.button;
 
 	setup_pointer_offset ();
@@ -2598,6 +2605,7 @@ RegionCreateDrag::motion (GdkEvent* event, bool first_move)
 
 		if (_region) {
 			timepos_t const pos (adjusted_current_time (event).beats());
+
 			if (pos <= grab_time()) {
 				_region->set_initial_position (pos);
 			}
@@ -5016,8 +5024,13 @@ ControlPointDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 	_fixed_grab_x = _point->get_x() + _editor->time_to_pixel_unrounded (timepos_t (_point->line().offset()));
 	_fixed_grab_y = _point->get_y();
 
-#warning NUTEMPO is it right that this forced to be samples?
-	setup_snap_delta (timepos_t (_editor->pixel_to_sample (_fixed_grab_x)));
+	samplepos_t s = _editor->pixel_to_sample (_fixed_grab_x);
+
+	if (_editor->default_time_domain() == Temporal::AudioTime) {
+		setup_snap_delta (timepos_t (s));
+	} else {
+		setup_snap_delta (timepos_t (timepos_t (s).beats()));
+	}
 
 	float const fraction = 1 - (_point->get_y() / _point->line().height());
 	show_verbose_cursor_text (_point->line().get_verbose_cursor_string (fraction));
@@ -5530,8 +5543,7 @@ TimeFXDrag::motion (GdkEvent* event, bool)
 	pair<TimeAxisView*, double> const tv = _editor->trackview_by_y_position (grab_y());
 	int layer = tv.first->layer_display() == Overlaid ? 0 : tv.second;
 	int layers = tv.first->layer_display() == Overlaid ? 1 : cv->layers();
-#warning NUTEMPO should this really be in samples always
-	timepos_t pf (timepos_t (_editor->canvas_event_sample (event)) + snap_delta (event->button.state));
+	timepos_t pf (_editor->canvas_event_time (event) + snap_delta (event->button.state));
 
 	_editor->snap_to_with_modifier (pf, event);
 	pf.shift_earlier (snap_delta (event->button.state));
