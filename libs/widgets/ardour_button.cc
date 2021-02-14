@@ -545,7 +545,7 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 
 	// a transparent overlay to indicate insensitivity
 	if ((visual_state() & Gtkmm2ext::Insensitive)) {
-		rounded_function (cr, 0, 0, get_width(), get_height(), corner_radius);
+		rounded_function (cr, 1, 1, get_width() - 2, get_height() - 2, corner_radius);
 		uint32_t ins_color = UIConfigurationBase::instance().color ("gtk_background");
 		Gtkmm2ext::set_source_rgb_a (cr, ins_color, 0.6);
 		cairo_fill (cr);

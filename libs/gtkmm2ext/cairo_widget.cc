@@ -297,7 +297,7 @@ CairoWidget::get_parent_bg ()
 				_current_parent = parent;
 				_parent_style_change = parent->signal_style_changed().connect (mem_fun (*this, &CairoWidget::on_style_changed));
 			}
-			return style->get_bg (get_state());
+			return style->get_bg (Gtk::STATE_NORMAL);
 		}
 
 		if (!parent->get_has_window()) {
@@ -313,7 +313,7 @@ CairoWidget::get_parent_bg ()
 			_current_parent = parent;
 			_parent_style_change = parent->signal_style_changed().connect (mem_fun (*this, &CairoWidget::on_style_changed));
 		}
-		return parent->get_style ()->get_bg (parent->get_state());
+		return parent->get_style ()->get_bg (Gtk::STATE_NORMAL);
 	}
 
 	return get_style ()->get_bg (get_state());
