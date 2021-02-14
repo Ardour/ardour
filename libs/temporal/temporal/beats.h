@@ -324,12 +324,22 @@ namespace std {
 			return Temporal::Beats(std::numeric_limits<int32_t>::min(), std::numeric_limits<int32_t>::min());
 		}
 
-		/* We don't define min() since this has different behaviour for integral and floating point types,
-		   but Beats is used as both.  Better to avoid providing a min at all
-		   than a confusing one. */
+		/* We don't define min() since this has different behaviour for
+		   integral and floating point types, but Beats is used as both
+		   an integral and "fractional" value, so the semantics of
+		   min() would be unclear.
+
+		   Better to avoid providing a min at all than a confusing one.
+		*/
+
+		/* We must make the number of beats be 1 less than INT32_MAX,
+		 * because otherwise adding the PPQN-1 ticks would cause
+		 * overflow (the value would be INT32_MAX+((PPQN-1)/PPQN) which
+		 * exceeds INT32_MAX.
+		 */
 
 		static Temporal::Beats max() {
-			return Temporal::Beats(std::numeric_limits<int32_t>::max(), Temporal::Beats::PPQN-1);
+			return Temporal::Beats(std::numeric_limits<int32_t>::max() - 1, Temporal::Beats::PPQN - 1);
 		}
 	};
 
