@@ -6969,6 +6969,11 @@ NoteCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	/* minimum initial length is grid beats */
 	_note[1] = _note[0] + grid_beats;
 
+	/* the note positions we've just computed are in absolute beats, but
+	 * the drag rect is a member of the region view group, so we need
+	 * coordinates relative to the region in order to draw it correctly.
+	 */
+
 	const timepos_t rrp1 (_region_view->region()->region_relative_position (_note[0]));
 	const timepos_t rrp2 (_region_view->region()->region_relative_position (_note[1]));
 
