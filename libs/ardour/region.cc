@@ -2024,6 +2024,9 @@ Region::region_distance_to_region_beats (timecnt_t const & region_relative_offse
 Temporal::Beats
 Region::source_beats_to_absolute_beats (Temporal::Beats beats) const
 {
+	/* since the return type must be beats, force source_position() to
+	   beats before adding, rather than after.
+	*/
 	return source_position().beats() + beats;
 }
 
