@@ -86,7 +86,6 @@ ARDOUR_UI::setup_tooltips ()
 
 	set_tip (auto_return_button, _("Return to last playback start when stopped"));
 	set_tip (follow_edits_button, _("Playhead follows Range tool clicks, and Range selections"));
-	set_tip (auto_input_button, _("Track Input Monitoring automatically follows transport state"));
 	parameter_changed("click-gain");
 	set_tip (solo_alert_button, _("When active, something is soloed.\nClick to de-solo everything"));
 	set_tip (auditioning_alert_button, _("When active, auditioning is taking place.\nClick to stop the audition"));
@@ -206,19 +205,6 @@ ARDOUR_UI::repack_transport_hbox ()
 		}
 	}
 
-	bool show_mon = UIConfiguration::instance().get_show_toolbar_monitoring ();
-	if (show_mon) {
-		monitor_in_button.show ();
-		monitor_disk_button.show ();
-		auto_input_button.show ();
-		monitoring_spacer.show ();
-	} else {
-		monitor_in_button.hide ();
-		monitor_disk_button.hide ();
-		auto_input_button.hide ();
-		monitoring_spacer.hide ();
-	}
-
 	bool show_rec = UIConfiguration::instance().get_show_toolbar_recpunch ();
 	if (show_rec) {
 		punch_label.show ();
@@ -319,18 +305,11 @@ ARDOUR_UI::setup_transport ()
 	auto_return_button.set_related_action (act);
 	act = ActionManager::get_action (X_("Transport"), X_("ToggleFollowEdits"));
 	follow_edits_button.set_related_action (act);
-	act = ActionManager::get_action ("Transport", "ToggleAutoInput");
-	auto_input_button.set_related_action (act);
 
 	act = ActionManager::get_action ("Transport", "TogglePunchIn");
 	punch_in_button.set_related_action (act);
 	act = ActionManager::get_action ("Transport", "TogglePunchOut");
 	punch_out_button.set_related_action (act);
-
-	act = ActionManager::get_action ("Transport", "SessionMonitorIn");
-	monitor_in_button.set_related_action (act);
-	act = ActionManager::get_action ("Transport", "SessionMonitorDisk");
-	monitor_disk_button.set_related_action (act);
 
 	act = ActionManager::get_action (X_("Monitor Section"), X_("monitor-dim-all"));
 	monitor_dim_button.set_related_action (act);
@@ -389,10 +368,6 @@ ARDOUR_UI::setup_transport ()
 	punch_out_button.set_name ("punch button");
 	layered_button.set_name (("layered button"));
 
-	monitor_in_button.set_name ("monitor button");
-	monitor_disk_button.set_name ("monitor button");
-	auto_input_button.set_name ("transport option button");
-
 	latency_disable_button.set_name ("latency button");
 
 	monitor_dim_button.set_name ("monitor section dim");
@@ -415,10 +390,6 @@ ARDOUR_UI::setup_transport ()
 	punch_in_button.set_text (_("In"));
 	punch_out_button.set_text (_("Out"));
 	layered_button.set_text (_("Non-Layered"));
-
-	monitor_in_button.set_text (_("All In"));
-	monitor_disk_button.set_text (_("All Disk"));
-	auto_input_button.set_text (_("Auto-Input"));
 
 	latency_disable_button.set_text (_("Disable PDC"));
 	io_latency_label.set_text (_("I/O Latency:"));
@@ -447,9 +418,6 @@ ARDOUR_UI::setup_transport ()
 	Gtkmm2ext::UI::instance()->set_tip (punch_in_button, _("Start recording at auto-punch start"));
 	Gtkmm2ext::UI::instance()->set_tip (punch_out_button, _("Stop recording at auto-punch end"));
 
-	Gtkmm2ext::UI::instance()->set_tip (monitor_in_button, _("Force all tracks to monitor Input, unless they are explicitly set to monitor Disk"));
-	Gtkmm2ext::UI::instance()->set_tip (monitor_disk_button, _("Force all tracks to monitor Disk playback, unless they are explicitly set to Input"));
-
 	/* monitor section */
 	Gtkmm2ext::UI::instance()->set_tip (monitor_dim_button, _("Monitor section dim output"));
 	Gtkmm2ext::UI::instance()->set_tip (monitor_mono_button, _("Monitor section mono output"));
@@ -460,10 +428,6 @@ ARDOUR_UI::setup_transport ()
 	Glib::RefPtr<SizeGroup> punch_button_size_group = SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL);
 	punch_button_size_group->add_widget (punch_in_button);
 	punch_button_size_group->add_widget (punch_out_button);
-
-	Glib::RefPtr<SizeGroup> monitoring_button_size_group = SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL);
-	monitoring_button_size_group->add_widget (monitor_in_button);
-	monitoring_button_size_group->add_widget (monitor_disk_button);
 
 	Glib::RefPtr<SizeGroup> monitor_button_size_group = SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL);
 	monitor_button_size_group->add_widget (monitor_dim_button);
@@ -531,11 +495,6 @@ ARDOUR_UI::setup_transport ()
 	button_height_size_group->add_widget (punch_out_button);
 	button_height_size_group->add_widget (layered_button);
 
-	//input monitoring section
-	button_height_size_group->add_widget (monitor_in_button);
-	button_height_size_group->add_widget (monitor_disk_button);
-	button_height_size_group->add_widget (auto_input_button);
-
 	// PDC
 	button_height_size_group->add_widget (latency_disable_button);
 
@@ -584,16 +543,6 @@ ARDOUR_UI::setup_transport ()
 
 	transport_table.attach (recpunch_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 	++col;
-
-	transport_table.attach (auto_input_button,   col,     col + 3, 0, 1 , FILL, SHRINK, hpadding, vpadding);
-	transport_table.attach (monitor_in_button,   col,     col + 1, 1, 2 , FILL, SHRINK, hpadding, vpadding);
-	transport_table.attach (mon_space,           col + 1, col + 2, 1, 2 , FILL, SHRINK, 2, vpadding);
-	transport_table.attach (monitor_disk_button, col + 2, col + 3, 1, 2 , FILL, SHRINK, hpadding, vpadding);
-	col += 3;
-
-	transport_table.attach (monitoring_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
-	++col;
-
 
 	transport_table.attach (latency_disable_button, TCOL, 0, 1 , FILL, SHRINK, hpadding, vpadding);
 	transport_table.attach (io_latency_label, TCOL, 1, 2 , SHRINK, EXPAND|FILL, hpadding, 0);

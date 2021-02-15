@@ -502,13 +502,8 @@ private:
 	ArdourWidgets::ArdourButton layered_button;
 
 	ArdourWidgets::ArdourVSpacer recpunch_spacer;
-	ArdourWidgets::ArdourVSpacer monitoring_spacer;
 	ArdourWidgets::ArdourVSpacer latency_spacer;
 	ArdourWidgets::ArdourVSpacer monitor_spacer;
-
-	ArdourWidgets::ArdourButton monitor_in_button;
-	ArdourWidgets::ArdourButton monitor_disk_button;
-	ArdourWidgets::ArdourButton auto_input_button;
 
 	ArdourWidgets::ArdourButton monitor_dim_button;
 	ArdourWidgets::ArdourButton monitor_mono_button;
@@ -518,7 +513,6 @@ private:
 	Gtk::Label   layered_label;
 
 	Gtk::Label   punch_space;
-	Gtk::Label   mon_space;
 
 	void toggle_external_sync ();
 	void toggle_time_master ();
