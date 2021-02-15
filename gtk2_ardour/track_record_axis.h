@@ -36,6 +36,7 @@
 
 #include "widgets/ardour_button.h"
 #include "widgets/ardour_spacer.h"
+#include "widgets/frame.h"
 
 #include "io_button.h"
 #include "level_meter.h"
@@ -70,12 +71,15 @@ public:
 	void set_session (ARDOUR::Session* s);
 
 	void fast_update ();
+	bool start_rename ();
 	void set_gui_extents (samplepos_t, samplepos_t);
+
 	bool rec_extent (samplepos_t&, samplepos_t&) const;
 	int  summary_xpos () const;
 	int  summary_width () const;
 
 	static PBD::Signal1<void, TrackRecordAxis*> CatchDeletion;
+	static PBD::Signal2<void, TrackRecordAxis*, bool> EditNextName;
 
 protected:
 	void self_delete ();
@@ -88,6 +92,7 @@ protected:
 
 	/* route UI */
 	void set_button_names ();
+	void route_rec_enable_changed ();
 	void blink_rec_display (bool onoff);
 	void route_active_changed ();
 	void map_frozen ();
@@ -101,10 +106,20 @@ private:
 	void reset_peak_display ();
 	void reset_route_peak_display (ARDOUR::Route*);
 	void reset_group_peak_display (ARDOUR::RouteGroup*);
+	bool namebox_button_press (GdkEventButton*);
 
 	bool playlist_click (GdkEventButton*);
 	bool route_ops_click (GdkEventButton*);
 	void build_route_ops_menu ();
+
+	/* name editing */
+	void end_rename (bool);
+	void entry_changed ();
+	void entry_activated ();
+	bool entry_focus_out (GdkEventFocus*);
+	bool entry_key_press (GdkEventKey*);
+	bool entry_key_release (GdkEventKey*);
+	void disconnect_entry_signals ();
 
 	/* RouteUI */
 	void route_property_changed (const PBD::PropertyChange&);
@@ -116,10 +131,15 @@ private:
 	Gtk::Table _ctrls;
 	Gtk::Menu* _route_ops_menu;
 
+	bool          _renaming;
+	Gtk::EventBox _namebox;
+	Gtk::Entry    _nameentry;
+
 	LevelMeterVBox*              _level_meter;
 	IOButton                     _input_button;
 	ArdourWidgets::ArdourButton  _number_label;
 	ArdourWidgets::ArdourButton  _playlist_button;
+	ArdourWidgets::Frame         _name_frame;
 	ArdourWidgets::ArdourVSpacer _vseparator;
 
 	Glib::RefPtr<Gtk::SizeGroup> _ctrls_button_size_group;
@@ -128,7 +148,8 @@ private:
 	static bool                         _size_group_initialized;
 	static Glib::RefPtr<Gtk::SizeGroup> _track_number_size_group;
 
-	PBD::ScopedConnectionList _route_connections;
+	PBD::ScopedConnectionList   _route_connections;
+	std::list<sigc::connection> _entry_connections;
 
 	struct RecInfo {
 		RecInfo (samplepos_t s, samplepos_t e)

@@ -90,6 +90,7 @@ private:
 	void initial_track_display ();
 	void add_routes (ARDOUR::RouteList&);
 	void remove_route (TrackRecordAxis*);
+	void tra_name_edit (TrackRecordAxis*, bool);
 	void update_rec_table_layout ();
 	void update_spacer_width (Gtk::Allocation&, TrackRecordAxis*);
 	void tabbed_changed (bool);
