@@ -1826,11 +1826,13 @@ Region::captured_xruns (XrunPositions& xruns, bool abs) const
 	bool was_empty = xruns.empty ();
 	for (SourceList::const_iterator i = _sources.begin (); i != _sources.end(); ++i) {
 		XrunPositions const& x = (*i)->captured_xruns ();
+		const samplepos_t ss = start_sample();
+		const samplecnt_t ll = length_samples();
 		for (XrunPositions::const_iterator p = x.begin (); p != x.end (); ++p) {
 			if (abs) {
 				xruns.push_back (*p);
-			} else if (*p >= _start && *p < _start + _length) {
-				xruns.push_back (*p - _start);
+			} else if (*p >= ss && *p < ss + ll) {
+				xruns.push_back (*p - ss);
 			}
 		}
 	}
