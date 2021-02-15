@@ -2971,7 +2971,9 @@ MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_
 			}
 
 			/* drawn notes must be at least 1/512th note (1/4 note
-			   divided by 128
+			 * divided by 128. But notice that we're not *setting*
+			 * note length here, this is just telling the user how
+			 * long it will be if the drag completes.
 			*/
 			len = std::max (Temporal::Beats (0, 128), len);
 
@@ -3044,7 +3046,7 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 			sign = -1;
 		}
 
-		/* Convert the new x position to a sample within the source */
+		/* Convert the new x position to a position within the source */
 		timepos_t current_time;
 		if (with_snap) {
 			current_time = snap_pixel_to_time (current_x, ensure_snap);
@@ -3053,12 +3055,11 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 		}
 
 		/* and then to beats */
-		const timepos_t abs_beats (Temporal::TempoMap::use()->quarters_at (current_time));
-		const Temporal::Beats x_beats = _region->absolute_time_to_source_beats (abs_beats);
+		const Temporal::Beats src_beats = _region->absolute_time_to_source_beats (_region->position() + current_time);
 
-		if (at_front && x_beats < canvas_note->note()->end_time()) {
-			note_diff_add_change (canvas_note, MidiModel::NoteDiffCommand::StartTime, x_beats - (snap_delta_beats * sign));
-			Temporal::Beats len = canvas_note->note()->time() - x_beats + (snap_delta_beats * sign);
+		if (at_front && src_beats < canvas_note->note()->end_time()) {
+			note_diff_add_change (canvas_note, MidiModel::NoteDiffCommand::StartTime, src_beats - (snap_delta_beats * sign));
+			Temporal::Beats len = canvas_note->note()->time() - src_beats + (snap_delta_beats * sign);
 			len += canvas_note->note()->length();
 
 			if (!!len) {
@@ -3067,7 +3068,7 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 		}
 
 		if (!at_front) {
-			Temporal::Beats llen = x_beats - canvas_note->note()->time() - (snap_delta_beats * sign);
+			Temporal::Beats llen = src_beats - canvas_note->note()->time() - (snap_delta_beats * sign);
 			Temporal::Beats len = std::max (Temporal::Beats (0, 1), llen);
 			note_diff_add_change (canvas_note, MidiModel::NoteDiffCommand::Length, len);
 		}
