@@ -305,8 +305,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 				*this,
 				*_canvas_display,
 				_control->alist(),
-				_control->desc(),
-				Temporal::DistanceMeasure (timepos_t()) /* default distance measure, origin at absolute zero */
+				_control->desc()
 				)
 			);
 
@@ -868,8 +867,7 @@ AutomationTimeAxisView::paste_one (timepos_t const & pos, unsigned paste_count, 
 	}
 
 	/* convert position to model's unit and position */
-	Temporal::DistanceMeasure const & dm (_line->distance_measure());
-	Temporal::timepos_t model_pos = dm (_line->distance_measure().origin().distance (tpos), line()->the_list()->time_domain());
+	Temporal::timepos_t model_pos (_line->get_origin().distance (tpos));
 
 	XMLNode &before = alist->get_state();
 	alist->paste (**p, model_pos);
@@ -1143,9 +1141,8 @@ AutomationTimeAxisView::cut_copy_clear_one (AutomationLine& line, Selection& sel
 	XMLNode &before = alist->get_state();
 
 	/* convert time selection to automation list model coordinates */
-	/* convert time selection to automation list model coordinates */
-	timepos_t start = selection.time.front().start().earlier (line.distance_measure().origin());
-	timepos_t end = selection.time.front().end().earlier (line.distance_measure().origin());
+	timepos_t start = selection.time.front().start().earlier (line.get_origin());
+	timepos_t end = selection.time.front().end().earlier (line.get_origin());
 
 	switch (op) {
 	case Delete:

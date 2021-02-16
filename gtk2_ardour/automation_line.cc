@@ -79,8 +79,7 @@ using namespace PBD;
 using namespace Editing;
 using namespace Temporal;
 
-#define TIME_TO_SAMPLES(x) (_distance_measure (x, Temporal::AudioTime))
-#define SAMPLES_TO_TIME(x) (_distance_measure (x, alist->time_domain()))
+#define SAMPLES_TO_TIME(x) (get_origin().distance (x))
 
 /** @param converter A TimeConverter whose origin_b is the start time of the AutomationList in session samples.
  *  This will not be deleted by AutomationLine.
@@ -89,8 +88,7 @@ AutomationLine::AutomationLine (const string&                              name,
                                 TimeAxisView&                              tv,
                                 ArdourCanvas::Item&                        parent,
                                 boost::shared_ptr<AutomationList>          al,
-                                const ParameterDescriptor&                 desc,
-                                Temporal::DistanceMeasure const &          m)
+                                const ParameterDescriptor&                 desc)
 	: trackview (tv)
 	, _name (name)
 	, alist (al)
@@ -99,7 +97,6 @@ AutomationLine::AutomationLine (const string&                              name,
 	, _maximum_time (timepos_t::max (al->time_domain()))
 	, _fill (false)
 	, _desc (desc)
-	, _distance_measure (m)
 {
 	_visible = Line;
 
@@ -137,6 +134,15 @@ AutomationLine::~AutomationLine ()
 		delete *i;
 	}
 	control_points.clear ();
+}
+
+timepos_t
+AutomationLine::get_origin() const
+{
+	/* this is the default for all non-derived AutomationLine classes: the
+	   origin is zero, in whatever time domain the list we represent uses.
+	*/
+	return timepos_t (the_list()->time_domain());
 }
 
 bool
@@ -762,6 +768,14 @@ AutomationLine::end_drag (bool with_push, uint32_t final_index)
 	contiguous_points.clear ();
 }
 
+/**
+ *
+ * get model coordinates synced with (possibly changed) view coordinates.
+ *
+ * For example, we call this in ::end_drag(), when we have probably moved a
+ * point in the view, and now want to "push" that change back into the
+ * corresponding model point.
+ */
 bool
 AutomationLine::sync_model_with_view_point (ControlPoint& cp)
 {
@@ -773,22 +787,49 @@ AutomationLine::sync_model_with_view_point (ControlPoint& cp)
 	double view_x = cp.get_x();
 	double view_y = 1.0 - cp.get_y() / (double)_height;
 
-	/* if xval has not changed, set it directly from the model to avoid rounding errors */
+	timepos_t model_time = (*cp.model())->when;
 
-	timepos_t model_x = (*cp.model())->when;
+	/* convert to absolute time by taking the origin of the line into
+	 * account.
+	 */
 
-	if (view_x != trackview.editor().time_to_pixel_unrounded (model_x.earlier (_offset))) {
-		/* convert from view coordinates, via pixels->samples->timepos_t
+	const timepos_t absolute_time = model_time + get_origin();
+
+	/* convert the absolute time of the model event into unrounded pixels,
+	 * taking _offset into account.
+	 */
+
+	const double model_x = trackview.editor().time_to_pixel_unrounded (absolute_time.earlier (_offset));
+
+	if (view_x != model_x) {
+
+		/* convert the current position in the view (units: pixels)
+		 * into samples, then use that to create a timecnt_t that
+		 * measures the distance from the origin for this line.
 		 */
-		const timecnt_t p = timecnt_t (trackview.editor().pixel_to_sample (view_x), timepos_t()); /* samples */
-		model_x = SAMPLES_TO_TIME (p + _offset); /* correct time domain for list */
+
+		const timecnt_t view_samples (trackview.editor().pixel_to_sample (view_x)); /* implicit zero origin */
+
+		/* adjust to measure distance from origin (this preserves time domain) */
+		const timecnt_t distance_from_origin = get_origin().distance (timepos_t (view_samples));
+
+		/* now convert to relevant time domain, and use _offset.
+		 */
+
+		if (model_time.time_domain() == Temporal::AudioTime) {
+			model_time = timepos_t (distance_from_origin.samples()) + _offset;
+		} else {
+			model_time = timepos_t (distance_from_origin.beats()) + _offset;
+		}
+	} else {
+		model_time = model_time.earlier (_offset);
 	}
 
 	update_pending = true;
 
 	view_to_model_coord_y (view_y);
 
-	alist->modify (cp.model(), model_x, view_y);
+	alist->modify (cp.model(), model_time, view_y);
 
 	/* convert back from model to view y for clamping position (for integer/boolean/etc) */
 	model_to_view_coord_y (view_y);
@@ -1346,13 +1387,13 @@ AutomationLine::get_point_x_range () const
 samplepos_t
 AutomationLine::session_sample_position (AutomationList::const_iterator p) const
 {
-	return (*p)->when.samples() + _offset.samples() + _distance_measure.origin().samples();
+	return (*p)->when.samples() + _offset.samples() + get_origin().samples();
 }
 
 timepos_t
 AutomationLine::session_position (AutomationList::const_iterator p) const
 {
-	return (*p)->when + _offset + _distance_measure.origin();
+	return (*p)->when + _offset + get_origin();
 }
 
 void
@@ -1364,10 +1405,4 @@ AutomationLine::set_offset (timecnt_t const & off)
 
 	_offset = off;
 	reset ();
-}
-
-void
-AutomationLine::set_distance_measure_origin (timepos_t const & pos)
-{
-	_distance_measure.set_origin (pos);
 }

@@ -38,7 +38,7 @@ MidiAutomationLine::MidiAutomationLine (
 	boost::shared_ptr<ARDOUR::AutomationList>               list,
 	boost::shared_ptr<ARDOUR::MidiRegion>                   region,
 	Evoral::Parameter                                       parameter)
-	: AutomationLine (name, tav, parent, list, parameter, Temporal::DistanceMeasure (Temporal::timepos_t()))
+	: AutomationLine (name, tav, parent, list, parameter)
 	, _region (region)
 	, _parameter (parameter)
 {
@@ -49,6 +49,17 @@ MementoCommandBinder<ARDOUR::AutomationList>*
 MidiAutomationLine::memento_command_binder ()
 {
 	return new ARDOUR::MidiAutomationListBinder (_region->midi_source(), _parameter);
+}
+
+Temporal::timepos_t
+MidiAutomationLine::get_origin() const
+{
+	/* Events in the automation list are relative to the start of the
+	   source, not the start of the region, so we need to use the
+	   position-of-the-start-of-the-source, rather than just the
+	   position-of-the-region.
+	*/
+	return _region->source_position();
 }
 
 string

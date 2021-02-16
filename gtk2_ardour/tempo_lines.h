@@ -21,7 +21,6 @@
 #ifndef __ardour_tempo_lines_h__
 #define __ardour_tempo_lines_h__
 
-#include "ardour/beats_samples_converter.h"
 #include "ardour/tempo.h"
 
 #include "canvas/line_set.h"

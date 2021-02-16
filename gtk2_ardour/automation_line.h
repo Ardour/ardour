@@ -37,8 +37,6 @@
 #include "pbd/statefuldestructible.h"
 #include "pbd/memento_command.h"
 
-#include "temporal/time_converter.h"
-
 #include "ardour/automation_list.h"
 #include "ardour/parameter_descriptor.h"
 #include "ardour/types.h"
@@ -71,10 +69,12 @@ public:
 	                TimeAxisView&                                      tv,
 	                ArdourCanvas::Item&                                parent,
 	                boost::shared_ptr<ARDOUR::AutomationList>          al,
-	                const ARDOUR::ParameterDescriptor&                 desc,
-	                Temporal::DistanceMeasure const &);
+	                const ARDOUR::ParameterDescriptor&                 desc);
+
 
 	virtual ~AutomationLine ();
+
+	virtual Temporal::timepos_t get_origin () const;
 
 	void queue_reset ();
 	void reset ();
@@ -164,9 +164,6 @@ public:
 	samplepos_t session_sample_position (ARDOUR::AutomationList::const_iterator) const;
 	Temporal::timepos_t session_position (ARDOUR::AutomationList::const_iterator) const;
 
-	Temporal::DistanceMeasure const & distance_measure () const { return _distance_measure; }
-	void set_distance_measure_origin (Temporal::timepos_t const &);
-
 protected:
 
 	std::string    _name;
@@ -245,7 +242,6 @@ private:
 	bool _fill;
 
 	const ARDOUR::ParameterDescriptor _desc;
-	Temporal::DistanceMeasure _distance_measure;
 
 	friend class AudioRegionGainLine;
 };

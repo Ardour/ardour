@@ -44,7 +44,7 @@ using namespace ARDOUR;
 using namespace PBD;
 
 AudioRegionGainLine::AudioRegionGainLine (const string & name, AudioRegionView& r, ArdourCanvas::Container& parent, boost::shared_ptr<AutomationList> l)
-	: AutomationLine (name, r.get_time_axis_view(), parent, l, l->parameter(), Temporal::DistanceMeasure (r.region()->position()))
+	: AutomationLine (name, r.get_time_axis_view(), parent, l, l->parameter())
 	, rv (r)
 {
 	// If this isn't true something is horribly wrong, and we'll get catastrophic gain values
@@ -56,6 +56,13 @@ AudioRegionGainLine::AudioRegionGainLine (const string & name, AudioRegionView& 
 	group->set_y_position (2);
 	terminal_points_can_slide = false;
 }
+
+timepos_t
+AudioRegionGainLine::get_origin() const
+{
+	return rv.region()->position();
+}
+
 
 void
 AudioRegionGainLine::start_drag_single (ControlPoint* cp, double x, float fraction)
@@ -109,10 +116,6 @@ AudioRegionGainLine::region_changed (const PropertyChange& what_changed)
 
 	interesting_stuff.add (ARDOUR::Properties::start);
 	interesting_stuff.add (ARDOUR::Properties::position);
-
-	if (what_changed.contains (ARDOUR::Properties::position)) {
-		set_distance_measure_origin (rv.region()->position());
-	}
 
 	if (what_changed.contains (interesting_stuff)) {
 		reset ();

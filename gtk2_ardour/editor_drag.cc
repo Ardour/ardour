@@ -6537,7 +6537,7 @@ AutomationRangeDrag::setup (list<boost::shared_ptr<AutomationLine> > const & lin
 		//TODO:  if we implement automation regions, this check can probably be removed
 		AudioRegionGainLine *argl = dynamic_cast<AudioRegionGainLine*> ((*i).get());
 		if (!argl) {
-			//in automation lanes, the EFFECTIVE range should be considered 0->max_samplepos (even if there is no line)
+			//in automation lanes, the EFFECTIVE range should be considered 0->max_position (even if there is no line)
 			r.first = Temporal::timepos_t ((*i)->the_list()->time_domain());
 			r.second = Temporal::timepos_t::max ((*i)->the_list()->time_domain());
 		}
@@ -6702,6 +6702,23 @@ AutomationRangeDrag::motion (GdkEvent*, bool first_move)
 					/* here's a control point on this line */
 					ControlPoint* p = i->line->nth (j);
 #warning NUTEMPO figure out what this code is/was doing and replace it
+					/*
+					  convert is <double,samplepos_t> ... double meant beats
+					  so origin_b is the origin in samplepos_t (since a=double b=samplepos_t)
+
+					  so ->to() returns samples
+
+					  so to (p->model->when) is the beat time (as dobule)
+					  we convert to samples
+					  then add the originin samples
+
+					  BUT ... mostly used IdentityConverter, except MIDI
+
+					  where the time_converter() is a source-relative converter
+					  source-relative uses the the source_position() as the origin
+
+					 */
+
 					//double const w = i->line->time_converter().to ((*p->model())->when) + i->line->time_converter().origin_b ();
 					double const w = 0;;
 

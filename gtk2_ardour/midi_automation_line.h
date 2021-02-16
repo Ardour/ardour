@@ -38,6 +38,7 @@ public:
 	MementoCommandBinder<ARDOUR::AutomationList>* memento_command_binder ();
 
 	virtual std::string get_verbose_cursor_string (double) const;
+	Temporal::timepos_t get_origin() const;
 
 private:
 	boost::shared_ptr<ARDOUR::MidiRegion> _region;
