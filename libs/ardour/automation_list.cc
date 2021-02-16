@@ -451,7 +451,7 @@ AutomationList::set_state (const XMLNode& node, int version)
 	Temporal::TimeDomain time_domain;
 
 	if (node.get_property ("time-domain", time_domain)) {
-		set_time_domain (time_domain);
+		set_time_domain_empty (time_domain);
 	}
 
 	if (node.name() == X_("events")) {
