@@ -380,6 +380,8 @@ public:
 
 	virtual void maybe_signal_changed ();
 
+	void set_time_domain_empty (Temporal::TimeDomain td);
+
 	void _x_scale (Temporal::ratio_t const &);
 
 	mutable LookupCache   _lookup_cache;

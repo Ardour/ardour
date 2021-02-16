@@ -2181,8 +2181,18 @@ ControlList::dump (ostream& o)
 void
 ControlList::set_time_domain (Temporal::TimeDomain td)
 {
-	/* can only do this on an emtpy list */
 	assert (_events.empty());
+	_time_domain = td;
+	/* XXX: TODO: apply to all points */
+}
+
+void
+ControlList::set_time_domain_empty (Temporal::TimeDomain td)
+{
+	/* the event list may or may not be empty, but we act as if it is. This
+	   is used in e.g. ::set_state(), since we do not need to modify the
+	   event time domains there.
+	*/
 	_time_domain = td;
 }
 
