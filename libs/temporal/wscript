@@ -33,7 +33,6 @@ temporal_sources = [
     'superclock.cc',
     'tempo.cc',
     'time.cc',
-    'time_converter.cc',
     'timeline.cc',
 ]
 
