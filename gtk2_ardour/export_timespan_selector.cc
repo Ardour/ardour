@@ -375,6 +375,7 @@ ExportTimespanSelector::update_range_name (std::string const & path, std::string
 	Gtk::TreeStore::iterator it = range_list->get_iter (path);
 	it->get_value (range_cols.location)->set_name (new_text);
 
+	update_timespans ();
 	CriticalSelectionChanged();
 }
 
