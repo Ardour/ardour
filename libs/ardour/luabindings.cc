@@ -44,7 +44,6 @@
 #include "ardour/audiorom.h"
 #include "ardour/buffer_set.h"
 #include "ardour/bundle.h"
-#include "ardour/beats_samples_converter.h"
 #include "ardour/chan_mapping.h"
 #include "ardour/convolver.h"
 #include "ardour/dB.h"

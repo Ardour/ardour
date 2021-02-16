@@ -39,7 +39,6 @@
 #include "ardour/buffer.h"
 #include "ardour/midi_cursor.h"
 #include "ardour/source.h"
-#include "ardour/beats_samples_converter.h"
 
 namespace ARDOUR {
 

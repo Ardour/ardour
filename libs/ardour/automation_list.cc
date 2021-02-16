@@ -31,7 +31,6 @@
 #include "temporal/types_convert.h"
 
 #include "ardour/automation_list.h"
-#include "ardour/beats_samples_converter.h"
 #include "ardour/event_type_map.h"
 #include "ardour/parameter_descriptor.h"
 #include "ardour/parameter_types.h"
