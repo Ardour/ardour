@@ -360,7 +360,6 @@ Sequence<Time>::const_iterator::operator++()
 	}
 
 	Temporal::timepos_t x (Temporal::AudioTime);
-	Temporal::timepos_t xtime (Temporal::AudioTime);
 	double    y   = 0.0;
 	bool      ret = false;
 
@@ -375,14 +374,14 @@ Sequence<Time>::const_iterator::operator++()
 	case CONTROL:
 		// Increment current controller iterator
 		if (_force_discrete || _control_iter->list->interpolation() == ControlList::Discrete) {
-			ret = _control_iter->list->rt_safe_earliest_event_discrete_unlocked (_control_iter->x, xtime, y, false);
+			ret = _control_iter->list->rt_safe_earliest_event_discrete_unlocked (_control_iter->x, x, y, false);
 		} else {
 			ret = _control_iter->list->rt_safe_earliest_event_linear_unlocked (
-				_control_iter->x, xtime, y, false, Temporal::timecnt_t::from_ticks (time_between_interpolated_controller_outputs.to_ticks()));
+				_control_iter->x, x, y, false, Temporal::timecnt_t::from_ticks (time_between_interpolated_controller_outputs.to_ticks()));
 		}
 		assert(!ret || x > _control_iter->x);
 		if (ret) {
-			_control_iter->x = xtime;
+			_control_iter->x = x;
 			_control_iter->y = y;
 		} else {
 			_control_iter->x = Temporal::timepos_t::max (_control_iter->list->time_domain());
