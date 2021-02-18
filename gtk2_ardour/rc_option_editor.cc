@@ -2302,6 +2302,10 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("General"), new OptionEditorHeading (_("Audio/MIDI Setup")));
 
+	add_option (_("General"),
+			new RcActionButton (_("Show Audio/MIDI Setup Window"),
+				sigc::mem_fun (*this, &RCOptionEditor::show_audio_setup)));
+
 	bo = new BoolOption (
 		     "try-autostart-engine",
 		     _("Try to auto-launch audio/midi engine"),
@@ -3448,6 +3452,10 @@ These settings will only take effect after %1 is restarted.\n\
 
 	add_option (_("Transport/Chase"), new OptionEditorHeading (_("Transport Masters")));
 
+	add_option (_("Transport/Chase"),
+			new RcActionButton (_("Show Transport Masters Window"),
+				sigc::mem_fun (*this, &RCOptionEditor::show_transport_masters)));
+
 	_sync_framerate = new BoolOption (
 		     "timecode-sync-frame-rate",
 		     _("Match session video frame rate to external timecode"),
@@ -4447,6 +4455,16 @@ RCOptionEditor::parameter_changed (string const & p)
 	} else if (p == "conceal-vst2-if-vst3-exists") {
 		plugin_scan_refresh ();
 	}
+}
+
+void RCOptionEditor::show_audio_setup () {
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action ("Window", "toggle-audio-midi-setup");
+	tact->set_active();
+}
+
+void RCOptionEditor::show_transport_masters () {
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action ("Window", "toggle-transport-masters");
+	tact->set_active();
 }
 
 void RCOptionEditor::plugin_scan_refresh () {

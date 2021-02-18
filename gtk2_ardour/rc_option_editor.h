@@ -63,6 +63,9 @@ private:
 	PBD::ScopedConnection parameter_change_connection;
 	PBD::ScopedConnection engine_started_connection;
 
+	void show_audio_setup ();
+	void show_transport_masters ();
+
 	/* plugin actions */
 	void plugin_scan_refresh ();
 	void plugin_reset_stats ();
