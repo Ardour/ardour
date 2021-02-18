@@ -136,7 +136,8 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>&            
 	_control_iters.reserve(seq._controls.size());
 	bool   found                  = false;
 	size_t earliest_control_index = 0;
-	Temporal::timepos_t earliest_control_x = std::numeric_limits<Temporal::timepos_t>::max();
+#warning NUTEMPO the time domain for max should depend to the template type "Time"
+	Temporal::timepos_t earliest_control_x = Temporal::timepos_t::max (Temporal::BeatTime);
 
 	for (Controls::const_iterator i = seq._controls.begin(); i != seq._controls.end(); ++i) {
 
@@ -268,7 +269,8 @@ Sequence<Time>::const_iterator::choose_next(Time earliest_t)
 	/* Use the next earliest controller iff it's earlier or coincident with the note-on
 	 * or patch-change. Bank-select (CC0, CC32) needs to be sent before the PGM. */
 	if (_control_iter != _control_iters.end() &&
-	    _control_iter->list && _control_iter->x != std::numeric_limits<Temporal::timepos_t>::max()) {
+#warning NUTEMPO the time domain for max should depend to the template type "Time"
+	    _control_iter->list && _control_iter->x != Temporal::timepos_t::max(Temporal::BeatTime)) {
 		if (_type == NIL || _control_iter->x <= earliest_t) {
 			_type      = CONTROL;
 			earliest_t = _control_iter->x.beats();
