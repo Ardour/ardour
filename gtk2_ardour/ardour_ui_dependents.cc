@@ -295,10 +295,10 @@ ARDOUR_UI::setup_windows ()
 
 	/* order of addition affects order seen in initial window display */
 
-	rc_option_editor->add_to_notebook (_tabs, _("Preferences"));
-	mixer->add_to_notebook (_tabs, _("Mixer"));
-	editor->add_to_notebook (_tabs, _("Editor"));
-	recorder->add_to_notebook (_tabs, _("Recorder"));
+	rc_option_editor->add_to_notebook (_tabs);
+	mixer->add_to_notebook (_tabs);
+	editor->add_to_notebook (_tabs);
+	recorder->add_to_notebook (_tabs);
 
 	top_packer.pack_start (menu_bar_base, false, false);
 
