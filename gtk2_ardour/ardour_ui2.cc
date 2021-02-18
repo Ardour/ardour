@@ -894,7 +894,7 @@ ARDOUR_UI::show_mixer_prefs ()
 {
 	if (rc_option_editor) {
 		show_tabbable (rc_option_editor);
-		rc_option_editor->set_current_page (_("Mixer"));
+		rc_option_editor->set_current_page (_("Signal Flow"));
 	}
 }
 
@@ -919,8 +919,8 @@ ARDOUR_UI::sync_button_clicked (GdkEventButton* ev)
 		return false;
 	}
 
-	show_tabbable (rc_option_editor);
-	rc_option_editor->set_current_page (_("Transport"));
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action ("Window", "toggle-transport-masters");
+	tact->set_active();
 	return true;
 }
 
