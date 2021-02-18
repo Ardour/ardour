@@ -99,6 +99,8 @@ This mode provides many different operations on both regions and control points,
 
 %notes MIDI Note Editing
 
+%rec Recorder Recorder Page
+
 ;; END GROUP DEFINITIONS
 
 ;; punctuation
@@ -463,3 +465,5 @@ This mode provides many different operations on both regions and control points,
 @notes|Notes/alt-add-select-previous|<@PRIMARY@><@TERTIARY@>ISO_Left_Tab|Select previous note
 
 
+@rec|Recorder/arm-all|<@PRIMARY@>r|record arm all tracks
+@rec|Recorder/arm-none|<@PRIMARY@><@TERTIARY@>r|disable record arm of all tracks

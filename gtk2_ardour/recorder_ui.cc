@@ -107,16 +107,16 @@ RecorderUI::RecorderUI ()
 	/* rec all/none */
 	_recs_label.set_text(_("Arm Tracks:"));
 	_btn_rec_all.set_name ("generic button");
-	_btn_rec_all.signal_clicked.connect (sigc::mem_fun (*this, &RecorderUI::arm_all));
+	_btn_rec_all.set_related_action (ActionManager::get_action (X_("Recorder"), X_("arm-all")));
 
 	_btn_rec_none.set_name ("generic button");
-	_btn_rec_none.signal_clicked.connect (sigc::mem_fun (*this, &RecorderUI::arm_none));
+	_btn_rec_none.set_related_action (ActionManager::get_action (X_("Recorder"), X_("arm-none")));
 
 	_btn_rec_forget.set_name ("generic button");
 	_btn_rec_forget.set_related_action (ActionManager::get_action (X_("Editor"), X_("remove-last-capture")));
 
 	_btn_peak_reset.set_name ("generic button");
-	_btn_peak_reset.signal_clicked.connect (sigc::mem_fun (*this, &RecorderUI::peak_reset));
+	_btn_peak_reset.set_related_action (ActionManager::get_action (X_("Recorder"), X_("reset-input-peak-hold")));
 
 	/* standardize some button width. */
 	_toolbar_recarm_width->add_widget (_btn_rec_none);
@@ -349,6 +349,9 @@ void
 RecorderUI::register_actions ()
 {
 	Glib::RefPtr<ActionGroup> group = ActionManager::create_action_group (bindings, X_("Recorder"));
+	ActionManager::register_action (group, "reset-input-peak-hold", _("Reset Input Peak Hold"), sigc::mem_fun (*this, &RecorderUI::peak_reset));
+	ActionManager::register_action (group, "arm-all", _("Record Arm All Tracks"), sigc::mem_fun (*this, &RecorderUI::arm_all));
+	ActionManager::register_action (group, "arm-none", _("Disable Record Arm of All Tracks"), sigc::mem_fun (*this, &RecorderUI::arm_none));
 }
 
 void
@@ -443,8 +446,8 @@ RecorderUI::update_sensitivity ()
 	const bool en      = _session ? true : false;
 	const bool have_ms = Config->get_use_monitor_bus();
 
-	_btn_rec_all.set_sensitive (en);
-	_btn_rec_none.set_sensitive (en);
+	ActionManager::get_action (X_("Recorder"), X_("arm-all"))->set_sensitive (en);
+	ActionManager::get_action (X_("Recorder"), X_("arm-none"))->set_sensitive (en);
 
 	for (InputPortMap::const_iterator i = _input_ports.begin (); i != _input_ports.end (); ++i) {
 		i->second->allow_monitoring (have_ms && en);
