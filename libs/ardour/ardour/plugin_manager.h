@@ -76,6 +76,9 @@ public:
 	const std::string get_default_windows_vst_path() const { return windows_vst_path; }
 	const std::string get_default_lxvst_path() const { return lxvst_path; }
 
+	static uint32_t cache_version ();
+	bool cache_valid () const;
+
 	/* always return LXVST for any VST subtype */
 	static PluginType to_generic_vst (const PluginType);
 

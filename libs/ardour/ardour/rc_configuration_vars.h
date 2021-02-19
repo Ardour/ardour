@@ -234,6 +234,7 @@ CONFIG_VARIABLE (bool, discover_audio_units, "discover-audio-units", false)
 CONFIG_VARIABLE (bool, ask_replace_instrument, "ask-replace-instrument", true)
 CONFIG_VARIABLE (bool, ask_setup_instrument, "ask-setup-instrument", true)
 CONFIG_VARIABLE (uint32_t, limit_n_automatables, "limit-n-automatables", 512)
+CONFIG_VARIABLE (uint32_t, plugin_cache_version, "plugin-cache-version", 0)
 
 /* custom user plugin paths */
 CONFIG_VARIABLE (std::string, plugin_path_vst, "plugin-path-vst", "@default@")

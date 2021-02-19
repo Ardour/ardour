@@ -324,6 +324,19 @@ PluginManager::~PluginManager()
 	delete _vst3_plugin_info;
 }
 
+bool
+PluginManager::cache_valid () const
+{
+	return Config->get_plugin_cache_version () >= cache_version ();
+}
+
+uint32_t
+PluginManager::cache_version ()
+{
+	/* see ARDOUR::vst3_scan_and_cache  VST3Cache version = +1 */
+	return 1000 * atoi (X_(PROGRAM_VERSION)) + 1;
+}
+
 struct PluginInfoPtrNameSorter {
 	bool operator () (PluginInfoPtr const& a, PluginInfoPtr const& b) const {
 		return PBD::downcase (a->name) < PBD::downcase (b->name);
@@ -519,6 +532,11 @@ PluginManager::refresh (bool cache_only)
 #else
 	bool conceal_vst2 = false;
 #endif
+
+	if (!cache_only && !cache_valid ()) {
+		Config->set_plugin_cache_version (cache_version ());
+		Config->save_state();
+	}
 
 #ifdef AUDIOUNIT_SUPPORT
 	if (cache_only) {
