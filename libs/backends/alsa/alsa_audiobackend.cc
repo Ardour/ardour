@@ -982,7 +982,6 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 		return PortReconnectError;
 	}
 
-	engine.reconnect_ports ();
 	_run = true;
 	g_atomic_int_set (&_port_change_flag, 0);
 
@@ -1059,6 +1058,8 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 		}
 	}
 #endif
+
+	engine.reconnect_ports ();
 
 	return NoError;
 }
