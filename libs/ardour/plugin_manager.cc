@@ -689,6 +689,8 @@ PluginManager::clear_vst_cache ()
 			::g_unlink(i->c_str());
 		}
 	}
+	Config->set_plugin_cache_version (0);
+	Config->save_state();
 #endif
 }
 
@@ -743,6 +745,8 @@ PluginManager::clear_au_cache ()
 {
 #ifdef AUDIOUNIT_SUPPORT
 	AUPluginInfo::clear_cache ();
+	Config->set_plugin_cache_version (0);
+	Config->save_state();
 #endif
 }
 
@@ -1558,6 +1562,8 @@ PluginManager::clear_vst3_cache ()
 	for (vector<string>::iterator i = v3i_files.begin(); i != v3i_files.end (); ++i) {
 		::g_unlink(i->c_str());
 	}
+	Config->set_plugin_cache_version (0);
+	Config->save_state();
 #endif
 }
 
