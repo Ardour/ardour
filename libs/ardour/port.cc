@@ -433,8 +433,8 @@ Port::private_latency_range (bool playback) const
 LatencyRange
 Port::public_latency_range (bool /*playback*/) const
 {
+	/*Note: this method is no longer used. It exists purely for debugging reasons */
 	LatencyRange r;
-
 
 	if (_port_handle) {
 		r = port_engine.get_latency_range (_port_handle, sends_output() ? true : false);
@@ -443,10 +443,13 @@ Port::public_latency_range (bool /*playback*/) const
 			r.min /= _speed_ratio;
 			r.max /= _speed_ratio;
 #endif
+#if 0
+			/* use value as set by set_public_latency_range */
 			if (type () == DataType::AUDIO) {
 				r.min += (_resampler_quality - 1);
 				r.max += (_resampler_quality - 1);
 			}
+#endif
 		}
 
 		DEBUG_TRACE (DEBUG::LatencyIO, string_compose (

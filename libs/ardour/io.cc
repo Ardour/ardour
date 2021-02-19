@@ -1289,6 +1289,7 @@ IO::latency () const
 	return max_latency;
 }
 
+#if 0 // not used, but may some day be handy for debugging
 samplecnt_t
 IO::public_latency () const
 {
@@ -1312,6 +1313,7 @@ IO::public_latency () const
 	                                               ((_direction == Output) ? "PLAYBACK" : "CAPTURE")));
 	return max_latency;
 }
+#endif
 
 samplecnt_t
 IO::connected_latency (bool for_playback) const
