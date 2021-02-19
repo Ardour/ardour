@@ -136,8 +136,7 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>&            
 	_control_iters.reserve(seq._controls.size());
 	bool   found                  = false;
 	size_t earliest_control_index = 0;
-#warning NUTEMPO the time domain for max should depend to the template type "Time"
-	Temporal::timepos_t earliest_control_x = Temporal::timepos_t::max (Temporal::BeatTime);
+	Temporal::timepos_t earliest_control_x = Temporal::timepos_t::max (typeid(Time) == typeid (Temporal::Beats) ? Temporal::BeatTime : Temporal::AudioTime);
 
 	for (Controls::const_iterator i = seq._controls.begin(); i != seq._controls.end(); ++i) {
 
@@ -147,7 +146,7 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>&            
 		}
 
 		DEBUG_TRACE (DEBUG::Sequence, string_compose ("Iterator: control: %1\n", seq._type_map.to_symbol(i->first)));
-		Temporal::timepos_t xtime (Temporal::AudioTime); /* domain may change */
+		Temporal::timepos_t xtime (Temporal::BeatTime); /* domain may change */
 		double y;
 		bool ret;
 		if (_force_discrete || i->second->list()->interpolation() == ControlList::Discrete) {
@@ -269,8 +268,7 @@ Sequence<Time>::const_iterator::choose_next(Time earliest_t)
 	/* Use the next earliest controller iff it's earlier or coincident with the note-on
 	 * or patch-change. Bank-select (CC0, CC32) needs to be sent before the PGM. */
 	if (_control_iter != _control_iters.end() &&
-#warning NUTEMPO the time domain for max should depend to the template type "Time"
-	    _control_iter->list && _control_iter->x != Temporal::timepos_t::max(Temporal::BeatTime)) {
+	    _control_iter->list && _control_iter->x != Temporal::timepos_t::max (typeid(Time) == typeid (Temporal::Beats) ? Temporal::BeatTime : Temporal::AudioTime)) {
 		if (_type == NIL || _control_iter->x <= earliest_t) {
 			_type      = CONTROL;
 			earliest_t = _control_iter->x.beats();
@@ -361,7 +359,7 @@ Sequence<Time>::const_iterator::operator++()
 		     << int(ev.buffer()[0]) << int(ev.buffer()[1]) << int(ev.buffer()[2]) << endl;
 	}
 
-	Temporal::timepos_t x (Temporal::AudioTime);
+	Temporal::timepos_t x (typeid(Time) == typeid (Temporal::Beats) ? Temporal::BeatTime : Temporal::AudioTime);
 	double    y   = 0.0;
 	bool      ret = false;
 
@@ -386,7 +384,7 @@ Sequence<Time>::const_iterator::operator++()
 			_control_iter->x = x;
 			_control_iter->y = y;
 		} else {
-			_control_iter->x = Temporal::timepos_t::max (_control_iter->list->time_domain());
+			_control_iter->x = Temporal::timepos_t::max (typeid(Time) == typeid (Temporal::Beats) ? Temporal::BeatTime : Temporal::AudioTime);
 			_control_iter->list.reset();
 			_control_iter->y = DBL_MAX;
 		}
@@ -415,7 +413,7 @@ Sequence<Time>::const_iterator::operator++()
 	}
 
 	// Choose the earliest event overall to point to
-	choose_next(std::numeric_limits<Time>::max());
+	choose_next (std::numeric_limits<Time>::max());
 
 	// Set event from chosen sub-iterator
 	set_event();
