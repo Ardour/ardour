@@ -288,13 +288,27 @@ AudioEngine::process_callback (pframes_t nframes)
 	 * port registration (usually while ardour holds the process-lock
 	 * or with _adding_routes_in_progress or _route_deletion_in_progress set,
 	 * potentially while processing in parallel.
+	 *
+	 * Note: this must be done without holding the _process_lock
 	 */
 	if (_session) {
+		bool lp = false;
+		bool lc = false;
 		if (g_atomic_int_compare_and_exchange (&_pending_playback_latency_callback, 1, 0)) {
-			_session->update_latency (true);
+			lp = true;
 		}
 		if (g_atomic_int_compare_and_exchange (&_pending_capture_latency_callback, 1, 0)) {
-			_session->update_latency (false);
+			lc = true;
+		}
+		if (lp || lc) {
+			tm.release ();
+			if (lp) {
+				_session->update_latency (true);
+			}
+			if (lc) {
+				_session->update_latency (false);
+			}
+			tm.acquire ();
 		}
 	}
 

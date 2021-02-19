@@ -4861,6 +4861,8 @@ Route::update_port_latencies (PortSet& from, PortSet& to, bool playback, samplec
 		p->set_private_latency_range (all_connections, playback);
 	}
 
+	DEBUG_TRACE (DEBUG::LatencyRoute, string_compose ("%1: priv. port L(%2) = (%3, %4) + %5\n", _name, playback ? "playback" : "capture", all_connections.min, all_connections.max, our_latency));
+
 	/* set the ports "in the direction of the flow" to the same value as above plus our own signal latency */
 
 	all_connections.min += our_latency;
