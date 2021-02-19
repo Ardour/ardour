@@ -47,7 +47,7 @@ ARDOUR::samplecnt_t DiskWriter::_chunk_samples = DiskWriter::default_chunk_sampl
 PBD::Signal0<void> DiskWriter::Overrun;
 
 DiskWriter::DiskWriter (Session& s, Track& t, string const & str, DiskIOProcessor::Flag f)
-	: DiskIOProcessor (s, t, str, f)
+	: DiskIOProcessor (s, t, X_("recorder:") + str, f)
 	, _record_enabled (0)
 	, _record_safe (0)
 	, _capture_start_sample (0)
@@ -90,7 +90,7 @@ DiskWriter::default_chunk_samples ()
 std::string
 DiskWriter::display_name () const
 {
-	return std::string (_ ("recorder"));
+	return std::string (_("Recorder"));
 }
 
 void

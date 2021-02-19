@@ -58,7 +58,7 @@ DiskReader::Declicker DiskReader::loop_declick_out;
 samplecnt_t           DiskReader::loop_fade_length (0);
 
 DiskReader::DiskReader (Session& s, Track& t, string const& str, DiskIOProcessor::Flag f)
-	: DiskIOProcessor (s, t, str, f)
+	: DiskIOProcessor (s, t, X_("player:") + str, f)
 	, overwrite_sample (0)
 	, run_must_resolve (false)
 	, _declick_amp (s.nominal_sample_rate ())
@@ -79,7 +79,7 @@ DiskReader::~DiskReader ()
 std::string
 DiskReader::display_name () const
 {
-	return std::string (_("player"));
+	return std::string (_("Player"));
 }
 
 void
