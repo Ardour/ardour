@@ -49,7 +49,10 @@
 #include "pbd/tokenizer.h"
 
 #include "ardour/utils.h"
+#include "ardour/rc_configuration.h"
 
+#include "ardour_message.h"
+#include "plugin_scan_dialog.h"
 #include "plugin_selector.h"
 #include "plugin_utils.h"
 #include "gui_thread.h"
@@ -1223,6 +1226,34 @@ PluginSelector::hidden_changed (const std::string& path)
 void
 PluginSelector::show_manager ()
 {
+	bool scan_now = false;
+	if (!manager.cache_valid ()) {
+		ArdourMessageDialog q (
+#ifdef __APPLE__
+				_("Scan VST2/3 and AudioUnit plugins now?")
+#else
+				_("Scan VST2/3 Plugins now?")
+#endif
+				, false, MESSAGE_QUESTION, BUTTONS_YES_NO);
+
+#ifdef __APPLE__
+		q.set_title (_("Discover VST/AU Plugins?"));
+    q.set_secondary_text (_("Third party plugins have not yet been indexed. AudioUnit and VST plugins have to be scanned before they can be used. This can also be done manually from Preferences > Plugins. Depending on the number of installed plugins the process can take several minutes."));
+#else
+		q.set_title (_("Discover VST Plugins?"));
+    q.set_secondary_text (_("Third party plugins have not yet been indexed. VST plugins have to be scanned before they can be used. This can also be done manually from Preferences > Plugins. Depending on the number of installed plugins the process can take several minutes."));
+#endif
+
+    if (q.run () == RESPONSE_YES) {
+			scan_now = true;
+		}
+	}
+
+	if (scan_now) {
+		PluginScanDialog psd (false, true);
+		psd.start ();
+	}
+
 	show_all();
 	run ();
 }
