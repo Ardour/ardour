@@ -2881,6 +2881,12 @@ Editor::snap_to_bbt (MusicSample presnap, RoundMode direction, SnapPref gpref)
 			case bbt_show_thirtyseconds:
 				ret = _session->tempo_map().round_to_quarter_note_subdivision (presnap.sample, 4 * divisor, direction);
 				break;
+			case bbt_show_sixtyfourths:
+				ret = _session->tempo_map().round_to_quarter_note_subdivision (presnap.sample, 8 * divisor, direction);
+				break;
+			case bbt_show_onetwentyeighths:
+				ret = _session->tempo_map().round_to_quarter_note_subdivision (presnap.sample, 16 * divisor, direction);
+				break;
 		}
 	} else {
 		ret = _session->tempo_map().round_to_quarter_note_subdivision (presnap.sample, get_grid_beat_divisions(_grid_type), direction);

@@ -1086,7 +1086,7 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 
 	if (beat_density > 2048) {
 		bbt_ruler_scale = bbt_show_many;
-	} else if (beat_density > 512) {
+	} else if (beat_density > 1024) {
 		bbt_ruler_scale = bbt_show_64;
 	} else if (beat_density > 256) {
 		bbt_ruler_scale = bbt_show_16;
@@ -1100,8 +1100,12 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 		bbt_ruler_scale =  bbt_show_eighths;
 	} else  if (beat_density > 1) {
 		bbt_ruler_scale =  bbt_show_sixteenths;
-	} else {
+	} else  if (beat_density > 0.5) {
 		bbt_ruler_scale =  bbt_show_thirtyseconds;
+	} else  if (beat_density > 0.25) {
+		bbt_ruler_scale =  bbt_show_sixtyfourths;
+	} else {
+		bbt_ruler_scale =  bbt_show_onetwentyeighths;
 	}
 
 	/* Now that we know how fine a grid (Ruler) is allowable on this screen, limit it to the coarseness selected by the user */
@@ -1117,7 +1121,11 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 		suggested_scale = std::min(suggested_scale, (int) bbt_show_sixteenths);
 	} else if (_grid_type == GridTypeBeatDiv8) {
 		suggested_scale = std::min(suggested_scale, (int) bbt_show_thirtyseconds);
-	} //ToDo:  implement Rulers for 64ths and 128ths?
+	} else if (_grid_type == GridTypeBeatDiv16) {
+		suggested_scale = std::min(suggested_scale, (int) bbt_show_sixtyfourths);
+	} else if (_grid_type == GridTypeBeatDiv32) {
+		suggested_scale = std::min(suggested_scale, (int) bbt_show_onetwentyeighths);
+	}
 
 	bbt_ruler_scale = (Editor::BBTRulerScale) suggested_scale;
 }
@@ -1270,6 +1278,9 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 	  break;
 
 	case bbt_show_sixteenths:
+	case bbt_show_thirtyseconds:
+	case bbt_show_sixtyfourths:
+	case bbt_show_onetwentyeighths:
 
 		beats = distance (grid.begin(), grid.end());
 		bbt_nmarks = (beats + 2) * bbt_beat_subdivision;

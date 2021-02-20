@@ -972,7 +972,9 @@ private:
 		bbt_show_quarters,
 		bbt_show_eighths,
 		bbt_show_sixteenths,
-		bbt_show_thirtyseconds
+		bbt_show_thirtyseconds,
+		bbt_show_sixtyfourths,
+		bbt_show_onetwentyeighths
 	};
 
 	BBTRulerScale bbt_ruler_scale;
