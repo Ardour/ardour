@@ -1084,23 +1084,6 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 		bbt_bar_helper_on = true;
 	}
 
-	//set upper limits on the beat_density based on the user's grid selection
-	if (_grid_type == GridTypeBar) {
-		beat_density = fmax (beat_density, 16.01);
-	} else if (_grid_type == GridTypeBeat) {
-		beat_density = fmax (beat_density, 4.01);
-	}  else if (_grid_type == GridTypeBeatDiv2) {
-		beat_density = fmax (beat_density, 2.01);
-	}  else if (_grid_type == GridTypeBeatDiv4) {
-		beat_density = fmax (beat_density, 1.001);
-	} else if (_grid_type == GridTypeBeatDiv8) {
-		beat_density = fmax (beat_density, 0.501);
-	} else if (_grid_type == GridTypeBeatDiv16) {
-		beat_density = fmax (beat_density, 0.2501);
-	} else if (_grid_type == GridTypeBeatDiv32) {
-		beat_density = fmax (beat_density, 0.12501);
-	}
-
 	if (beat_density > 2048) {
 		bbt_ruler_scale = bbt_show_many;
 	} else if (beat_density > 512) {
@@ -1120,6 +1103,23 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 	} else {
 		bbt_ruler_scale =  bbt_show_thirtyseconds;
 	}
+
+	/* Now that we know how fine a grid (Ruler) is allowable on this screen, limit it to the coarseness selected by the user */
+	/* note: GridType and RulerScale are not the same enums, so it's not a simple mathematical operation */
+	int suggested_scale = (int) bbt_ruler_scale;
+	if (_grid_type == GridTypeBar) {
+		suggested_scale = std::min(suggested_scale, (int) bbt_show_1);
+	} else if (_grid_type == GridTypeBeat) {
+		suggested_scale = std::min(suggested_scale, (int) bbt_show_quarters);
+	}  else if (_grid_type == GridTypeBeatDiv2) {
+		suggested_scale = std::min(suggested_scale, (int) bbt_show_eighths);
+	}  else if (_grid_type == GridTypeBeatDiv4) {
+		suggested_scale = std::min(suggested_scale, (int) bbt_show_sixteenths);
+	} else if (_grid_type == GridTypeBeatDiv8) {
+		suggested_scale = std::min(suggested_scale, (int) bbt_show_thirtyseconds);
+	} //ToDo:  implement Rulers for 64ths and 128ths?
+
+	bbt_ruler_scale = (Editor::BBTRulerScale) suggested_scale;
 }
 
 static void
