@@ -989,82 +989,11 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 	_session->bbt_time (beat_after_upper_pos, upper_beat);
 	uint32_t beats = 0;
 
-	bbt_accent_modulo = 1;
 	bbt_bar_helper_on = false;
 	bbt_bars = 0;
 	bbt_nmarks = 1;
 
 	bbt_ruler_scale =  bbt_show_many;
-
-	switch (_grid_type) {
-	case GridTypeBeatDiv2:
-		bbt_beat_subdivision = 2;
-		break;
-	case GridTypeBeatDiv3:
-		bbt_beat_subdivision = 3;
-		break;
-	case GridTypeBeatDiv4:
-		bbt_beat_subdivision = 4;
-		break;
-	case GridTypeBeatDiv5:
-		bbt_beat_subdivision = 5;
-		bbt_accent_modulo = 2; // XXX YIKES
-		break;
-	case GridTypeBeatDiv6:
-		bbt_beat_subdivision = 3;
-		bbt_accent_modulo = 2; // XXX YIKES
-		break;
-	case GridTypeBeatDiv7:
-		bbt_beat_subdivision = 7;
-		bbt_accent_modulo = 2; // XXX YIKES
-		break;
-	case GridTypeBeatDiv8:
-		bbt_beat_subdivision = 4;
-		bbt_accent_modulo = 2;
-		break;
-	case GridTypeBeatDiv10:
-		bbt_beat_subdivision = 5;
-		bbt_accent_modulo = 2; // XXX YIKES
-		break;
-	case GridTypeBeatDiv12:
-		bbt_beat_subdivision = 3;
-		bbt_accent_modulo = 3;
-		break;
-	case GridTypeBeatDiv14:
-		bbt_beat_subdivision = 7;
-		bbt_accent_modulo = 3; // XXX YIKES!
-		break;
-	case GridTypeBeatDiv16:
-		bbt_beat_subdivision = 4;
-		bbt_accent_modulo = 4;
-		break;
-	case GridTypeBeatDiv20:
-		bbt_beat_subdivision = 5;
-		bbt_accent_modulo = 5;
-		break;
-	case GridTypeBeatDiv24:
-		bbt_beat_subdivision = 6;
-		bbt_accent_modulo = 6;
-		break;
-	case GridTypeBeatDiv28:
-		bbt_beat_subdivision = 7;
-		bbt_accent_modulo = 7;
-		break;
-	case GridTypeBeatDiv32:
-		bbt_beat_subdivision = 4;
-		bbt_accent_modulo = 8;
-		break;
-	case GridTypeBar:
-	case GridTypeBeat:
-		bbt_beat_subdivision = 4;
-		break;
-	case GridTypeNone:
-	case GridTypeTimecode:
-	case GridTypeMinSec:
-	case GridTypeCDFrame:
-		bbt_beat_subdivision = 4;
-		break;
-	}
 
 	const double ceil_upper_beat = floor (std::max (0.0, _session->tempo_map().beat_at_sample (upper))) + 1.0;
 	if (ceil_upper_beat == floor_lower_beat) {
@@ -1169,7 +1098,176 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 		return;
 	}
 
+	/* we can accent certain lines depending on the user's Grid choice */
+	/* for example, even in a 4/4 meter we can draw a grid with triplet-feel */
+	/* and in this case you will want the accents on '3s' not '2s' */
+	uint32_t bbt_accent_modulo = 2;
+	switch (_grid_type) {
+	case GridTypeBeatDiv5:
+		bbt_accent_modulo = 1; // XXX YIKES
+		break;
+	case GridTypeBeatDiv6:
+		bbt_accent_modulo = 3;
+		break;
+	case GridTypeBeatDiv7:
+		bbt_accent_modulo = 1;
+		break;
+	case GridTypeBeatDiv8:
+		bbt_accent_modulo = 2;
+		break;
+	case GridTypeBeatDiv10:
+		bbt_accent_modulo = 5;
+		break;
+	case GridTypeBeatDiv12:
+		bbt_accent_modulo = 3;
+		break;
+	case GridTypeBeatDiv14:
+		bbt_accent_modulo = 7;
+		break;
+	case GridTypeBeatDiv16:
+		bbt_accent_modulo = 4;
+		break;
+	case GridTypeBeatDiv20:
+		bbt_accent_modulo = 5;
+		break;
+	case GridTypeBeatDiv24:
+		bbt_accent_modulo = 6;
+		break;
+	case GridTypeBeatDiv28:
+		bbt_accent_modulo = 7;
+		break;
+	case GridTypeBeatDiv32:
+		bbt_accent_modulo = 8;
+		break;
+	default:
+		bbt_accent_modulo = 2;
+		break;
+	}
+
+	uint32_t bbt_beat_subdivision = 1;
 	switch (bbt_ruler_scale) {
+	case bbt_show_quarters:
+		bbt_beat_subdivision = 1;
+		break;
+	case bbt_show_eighths:
+		bbt_beat_subdivision = 2;
+		break;
+	case bbt_show_sixteenths:
+		bbt_beat_subdivision = 4;
+		break;
+	case bbt_show_thirtyseconds:
+		bbt_beat_subdivision = 8;
+		break;
+	case bbt_show_sixtyfourths:
+		bbt_beat_subdivision = 16;
+		break;
+	case bbt_show_onetwentyeighths:
+		bbt_beat_subdivision = 32;
+		break;
+	default:
+		bbt_beat_subdivision = 1;
+		break;
+	}
+
+	switch (bbt_ruler_scale) {
+
+	case bbt_show_many:
+		bbt_nmarks = 1;
+		snprintf (buf, sizeof(buf), "cannot handle %" PRIu32 " bars", bbt_bars);
+		mark.style = ArdourCanvas::Ruler::Mark::Major;
+		mark.label = buf;
+		mark.position = lower;
+		marks.push_back (mark);
+		break;
+
+	case bbt_show_64:
+			bbt_nmarks = (gint) (bbt_bars / 64) + 1;
+			for (n = 0, i = grid.begin(); i != grid.end() && n < bbt_nmarks; i++) {
+				if ((*i).is_bar()) {
+					if ((*i).bar % 64 == 1) {
+						if ((*i).bar % 256 == 1) {
+							snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
+							mark.style = ArdourCanvas::Ruler::Mark::Major;
+						} else {
+							buf[0] = '\0';
+							if ((*i).bar % 256 == 129)  {
+								mark.style = ArdourCanvas::Ruler::Mark::Minor;
+							} else {
+								mark.style = ArdourCanvas::Ruler::Mark::Micro;
+							}
+						}
+						mark.label = buf;
+						mark.position = (*i).sample;
+						marks.push_back (mark);
+						++n;
+					}
+				}
+			}
+			break;
+
+	case bbt_show_16:
+		bbt_nmarks = (bbt_bars / 16) + 1;
+		for (n = 0,  i = grid.begin(); i != grid.end() && n < bbt_nmarks; i++) {
+			if ((*i).is_bar()) {
+			  if ((*i).bar % 16 == 1) {
+				if ((*i).bar % 64 == 1) {
+					snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
+					mark.style = ArdourCanvas::Ruler::Mark::Major;
+				} else {
+					buf[0] = '\0';
+					if ((*i).bar % 64 == 33)  {
+						mark.style = ArdourCanvas::Ruler::Mark::Minor;
+					} else {
+						mark.style = ArdourCanvas::Ruler::Mark::Micro;
+					}
+				}
+				mark.label = buf;
+				mark.position = (*i).sample;
+				marks.push_back (mark);
+				++n;
+			  }
+			}
+		}
+	  break;
+
+	case bbt_show_4:
+		bbt_nmarks = (bbt_bars / 4) + 1;
+		for (n = 0, i = grid.begin(); i != grid.end() && n < bbt_nmarks; ++i) {
+			if ((*i).is_bar()) {
+				if ((*i).bar % 4 == 1) {
+					if ((*i).bar % 16 == 1) {
+						snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
+						mark.style = ArdourCanvas::Ruler::Mark::Major;
+					} else {
+						buf[0] = '\0';
+						if ((*i).bar % 16 == 9)  {
+							mark.style = ArdourCanvas::Ruler::Mark::Minor;
+						} else {
+							mark.style = ArdourCanvas::Ruler::Mark::Micro;
+						}
+					}
+					mark.label = buf;
+					mark.position = (*i).sample;
+					marks.push_back (mark);
+					++n;
+				}
+			}
+		}
+	  break;
+
+	case bbt_show_1:
+		bbt_nmarks = bbt_bars + 2;
+		for (n = 0,  i = grid.begin(); i != grid.end() && n < bbt_nmarks; ++i) {
+			if ((*i).is_bar()) {
+				snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bbt().bars);
+				mark.style = ArdourCanvas::Ruler::Mark::Major;
+				mark.label = buf;
+				mark.position = (*i).sample;
+				marks.push_back (mark);
+				++n;
+			}
+		}
+	break;
 
 	case bbt_show_quarters:
 
@@ -1355,181 +1453,6 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 		}
 
 	  break;
-
-	case bbt_show_thirtyseconds:
-
-		beats = distance (grid.begin(), grid.end());
-		bbt_nmarks = (beats + 2) * bbt_beat_subdivision;
-
-		bbt_position_of_helper = lower + (3 * Editor::get_current_zoom ());
-
-		mark.label = "";
-		mark.position = lower;
-		mark.style = ArdourCanvas::Ruler::Mark::Micro;
-		marks.push_back (mark);
-
-		for (n = 1, i = grid.begin(); n < bbt_nmarks && i != grid.end(); ++i) {
-
-			if ((*i).sample < lower && (bbt_bar_helper_on)) {
-				  snprintf (buf, sizeof(buf), "<%" PRIu32 "|%" PRIu32, (*i).bar, (*i).beat);
-				  edit_last_mark_label (marks, buf);
-				  helper_active = true;
-			} else {
-
-				  if ((*i).is_bar()) {
-					  mark.style = ArdourCanvas::Ruler::Mark::Major;
-					  snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
-				  } else {
-					  mark.style = ArdourCanvas::Ruler::Mark::Minor;
-					  snprintf (buf, sizeof(buf), "%" PRIu32, (*i).beat);
-				  }
-				  if (((*i).sample < bbt_position_of_helper) && helper_active) {
-					  buf[0] = '\0';
-				  }
-				  mark.label =  buf;
-				  mark.position = (*i).sample;
-				  marks.push_back (mark);
-				  n++;
-			}
-
-			/* Add the tick marks */
-			skip = Timecode::BBT_Time::ticks_per_beat / bbt_beat_subdivision;
-
-			next_beat.beats = (*i).beat;
-			next_beat.bars = (*i).bar;
-			tick = skip; // the first non-beat tick
-			t = 0;
-			while (tick < Timecode::BBT_Time::ticks_per_beat && (n < bbt_nmarks)) {
-
-				next_beat.ticks = tick;
-				pos = _session->tempo_map().sample_at_bbt (next_beat);
-				if (t % bbt_accent_modulo == (bbt_accent_modulo - 1)) {
-					i_am_accented = true;
-				}
-
-				if (pos > bbt_position_of_helper) {
-					snprintf (buf, sizeof(buf), "%" PRIu32, tick);
-				} else {
-					buf[0] = '\0';
-				}
-
-				mark.label = buf;
-				mark.position = pos;
-
-				if ((bbt_beat_subdivision > 4) && i_am_accented) {
-					mark.style = ArdourCanvas::Ruler::Mark::Minor;
-				} else {
-					mark.style = ArdourCanvas::Ruler::Mark::Micro;
-				}
-				i_am_accented = false;
-				marks.push_back (mark);
-
-				tick += skip;
-				++t;
-				++n;
-			}
-		}
-
-	  break;
-
-	case bbt_show_many:
-		bbt_nmarks = 1;
-		snprintf (buf, sizeof(buf), "cannot handle %" PRIu32 " bars", bbt_bars);
-		mark.style = ArdourCanvas::Ruler::Mark::Major;
-		mark.label = buf;
-		mark.position = lower;
-		marks.push_back (mark);
-		break;
-
-	case bbt_show_64:
-			bbt_nmarks = (gint) (bbt_bars / 64) + 1;
-			for (n = 0, i = grid.begin(); i != grid.end() && n < bbt_nmarks; i++) {
-				if ((*i).is_bar()) {
-					if ((*i).bar % 64 == 1) {
-						if ((*i).bar % 256 == 1) {
-							snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
-							mark.style = ArdourCanvas::Ruler::Mark::Major;
-						} else {
-							buf[0] = '\0';
-							if ((*i).bar % 256 == 129)  {
-								mark.style = ArdourCanvas::Ruler::Mark::Minor;
-							} else {
-								mark.style = ArdourCanvas::Ruler::Mark::Micro;
-							}
-						}
-						mark.label = buf;
-						mark.position = (*i).sample;
-						marks.push_back (mark);
-						++n;
-					}
-				}
-			}
-			break;
-
-	case bbt_show_16:
-		bbt_nmarks = (bbt_bars / 16) + 1;
-		for (n = 0,  i = grid.begin(); i != grid.end() && n < bbt_nmarks; i++) {
-			if ((*i).is_bar()) {
-			  if ((*i).bar % 16 == 1) {
-				if ((*i).bar % 64 == 1) {
-					snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
-					mark.style = ArdourCanvas::Ruler::Mark::Major;
-				} else {
-					buf[0] = '\0';
-					if ((*i).bar % 64 == 33)  {
-						mark.style = ArdourCanvas::Ruler::Mark::Minor;
-					} else {
-						mark.style = ArdourCanvas::Ruler::Mark::Micro;
-					}
-				}
-				mark.label = buf;
-				mark.position = (*i).sample;
-				marks.push_back (mark);
-				++n;
-			  }
-			}
-		}
-	  break;
-
-	case bbt_show_4:
-		bbt_nmarks = (bbt_bars / 4) + 1;
-		for (n = 0, i = grid.begin(); i != grid.end() && n < bbt_nmarks; ++i) {
-			if ((*i).is_bar()) {
-				if ((*i).bar % 4 == 1) {
-					if ((*i).bar % 16 == 1) {
-						snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
-						mark.style = ArdourCanvas::Ruler::Mark::Major;
-					} else {
-						buf[0] = '\0';
-						if ((*i).bar % 16 == 9)  {
-							mark.style = ArdourCanvas::Ruler::Mark::Minor;
-						} else {
-							mark.style = ArdourCanvas::Ruler::Mark::Micro;
-						}
-					}
-					mark.label = buf;
-					mark.position = (*i).sample;
-					marks.push_back (mark);
-					++n;
-				}
-			}
-		}
-	  break;
-
-	case bbt_show_1:
-//	default:
-		bbt_nmarks = bbt_bars + 2;
-		for (n = 0,  i = grid.begin(); i != grid.end() && n < bbt_nmarks; ++i) {
-			if ((*i).is_bar()) {
-				snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bbt().bars);
-				mark.style = ArdourCanvas::Ruler::Mark::Major;
-				mark.label = buf;
-				mark.position = (*i).sample;
-				marks.push_back (mark);
-				++n;
-			}
-		}
-		break;
 
 	}
 }

@@ -982,7 +982,6 @@ private:
 	uint32_t bbt_bars;
 	gint bbt_nmarks;
 	uint32_t bbt_bar_helper_on;
-	uint32_t bbt_accent_modulo;
 	void compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper);
 
 	ArdourCanvas::Ruler* timecode_ruler;
@@ -1772,8 +1771,6 @@ private:
 	void tempometric_position_changed (const PBD::PropertyChange&);
 
 	void redisplay_grid (bool immediate_redraw);
-
-	uint32_t bbt_beat_subdivision;
 
 	/* toolbar */
 
