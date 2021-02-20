@@ -2688,6 +2688,16 @@ RCOptionEditor::RCOptionEditor ()
 			    ));
 
 	add_option (_("Editor/Snap"),
+		    new SpinOption<uint32_t> (
+			    "ruler-granularity",
+			    _("Approximate Grid/Ruler granularity (pixels)"),
+			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_ruler_granularity),
+			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_ruler_granularity),
+			    1, 100,
+			    1, 10
+			    ));
+
+	add_option (_("Editor/Snap"),
 	     new BoolOption (
 		     "show-snapped-cursor",
 		     _("Show \"snapped cursor\""),

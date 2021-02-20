@@ -116,6 +116,7 @@ UI_CONFIG_VARIABLE (bool, use_note_bars_for_velocity, "use-note-bars-for-velocit
 UI_CONFIG_VARIABLE (bool, use_note_color_for_velocity, "use-note-color-for-velocity", true)
 UI_CONFIG_VARIABLE (bool, show_snapped_cursor, "show-snapped-cursor", true)
 UI_CONFIG_VARIABLE (uint32_t, snap_threshold, "snap-threshold", 25)
+UI_CONFIG_VARIABLE (uint32_t, ruler_granularity, "ruler-granularity", 25)
 UI_CONFIG_VARIABLE (bool, snap_to_marks, "snap-to-marks", true)
 UI_CONFIG_VARIABLE (bool, snap_to_region_sync, "snap-to-region-sync", true)
 UI_CONFIG_VARIABLE (bool, snap_to_region_start, "snap-to-region-start", true)
