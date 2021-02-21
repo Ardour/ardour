@@ -337,6 +337,7 @@ Editor::compute_current_bbt_points (std::vector<TempoMap::BBTPoint>& grid, sampl
 	case bbt_show_eighths:
 	case bbt_show_sixteenths:
 	case bbt_show_thirtyseconds:
+	case bbt_show_sixtyfourths:
 		_session->tempo_map().get_grid (grid, max (_session->tempo_map().sample_at_beat (lower_beat), (samplepos_t) 0), rightmost);
 		break;
 
