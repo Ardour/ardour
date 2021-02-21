@@ -1103,45 +1103,57 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 	/* we can accent certain lines depending on the user's Grid choice */
 	/* for example, even in a 4/4 meter we can draw a grid with triplet-feel */
 	/* and in this case you will want the accents on '3s' not '2s' */
+	uint32_t bbt_divisor = 2;
 	uint32_t bbt_accent_modulo = 2;
 	switch (_grid_type) {
+	case GridTypeBeatDiv3:
+		bbt_divisor = 3;
+		bbt_accent_modulo = 3;
+		break;
 	case GridTypeBeatDiv5:
-		bbt_accent_modulo = 1; // XXX YIKES
+		bbt_divisor = 5;
+		bbt_accent_modulo = 5;
 		break;
 	case GridTypeBeatDiv6:
+		bbt_divisor = 3;
 		bbt_accent_modulo = 3;
 		break;
 	case GridTypeBeatDiv7:
-		bbt_accent_modulo = 1;
-		break;
-	case GridTypeBeatDiv8:
-		bbt_accent_modulo = 2;
+		bbt_divisor = 7;
+		bbt_accent_modulo = 7;
 		break;
 	case GridTypeBeatDiv10:
+		bbt_divisor = 5;
 		bbt_accent_modulo = 5;
 		break;
 	case GridTypeBeatDiv12:
+		bbt_divisor = 3;
 		bbt_accent_modulo = 3;
 		break;
 	case GridTypeBeatDiv14:
+		bbt_divisor = 7;
 		bbt_accent_modulo = 7;
 		break;
 	case GridTypeBeatDiv16:
 		bbt_accent_modulo = 4;
 		break;
 	case GridTypeBeatDiv20:
+		bbt_divisor = 5;
 		bbt_accent_modulo = 5;
 		break;
 	case GridTypeBeatDiv24:
+		bbt_divisor = 6;
 		bbt_accent_modulo = 6;
 		break;
 	case GridTypeBeatDiv28:
+		bbt_divisor = 7;
 		bbt_accent_modulo = 7;
 		break;
 	case GridTypeBeatDiv32:
 		bbt_accent_modulo = 8;
 		break;
 	default:
+		bbt_divisor = 2;
 		bbt_accent_modulo = 2;
 		break;
 	}
@@ -1152,24 +1164,26 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 		bbt_beat_subdivision = 1;
 		break;
 	case bbt_show_eighths:
-		bbt_beat_subdivision = 2;
+		bbt_beat_subdivision = 1;
 		break;
 	case bbt_show_sixteenths:
-		bbt_beat_subdivision = 4;
+		bbt_beat_subdivision = 2;
 		break;
 	case bbt_show_thirtyseconds:
-		bbt_beat_subdivision = 8;
+		bbt_beat_subdivision = 4;
 		break;
 	case bbt_show_sixtyfourths:
-		bbt_beat_subdivision = 16;
+		bbt_beat_subdivision = 8;
 		break;
 	case bbt_show_onetwentyeighths:
-		bbt_beat_subdivision = 32;
+		bbt_beat_subdivision = 16;
 		break;
 	default:
 		bbt_beat_subdivision = 1;
 		break;
 	}
+
+	bbt_beat_subdivision *= bbt_divisor;
 
 	switch (bbt_ruler_scale) {
 
@@ -1307,76 +1321,6 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 		break;
 
 	case bbt_show_eighths:
-
-		beats = distance (grid.begin(), grid.end());
-		bbt_nmarks = (beats + 2) * bbt_beat_subdivision;
-
-		bbt_position_of_helper = lower + (30 * Editor::get_current_zoom ());
-
-		// could do marks.assign() here to preallocate
-
-		mark.label = "";
-		mark.position = lower;
-		mark.style = ArdourCanvas::Ruler::Mark::Micro;
-		marks.push_back (mark);
-
-		for (n = 1, i = grid.begin(); n < bbt_nmarks && i != grid.end(); ++i) {
-
-			if ((*i).sample < lower && (bbt_bar_helper_on)) {
-				snprintf (buf, sizeof(buf), "<%" PRIu32 "|%" PRIu32, (*i).bar, (*i).beat);
-				edit_last_mark_label (marks, buf);
-				helper_active = true;
-			} else {
-
-				if ((*i).is_bar()) {
-					mark.style = ArdourCanvas::Ruler::Mark::Major;
-					snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
-				} else {
-					mark.style = ArdourCanvas::Ruler::Mark::Minor;
-					snprintf (buf, sizeof(buf), "%" PRIu32, (*i).beat);
-				}
-				if (((*i).sample < bbt_position_of_helper) && helper_active) {
-					buf[0] = '\0';
-				}
-				mark.label =  buf;
-				mark.position = (*i).sample;
-				marks.push_back (mark);
-				n++;
-			}
-
-			/* Add the tick marks */
-			skip = Timecode::BBT_Time::ticks_per_beat / bbt_beat_subdivision;
-			tick = skip; // the first non-beat tick
-			t = 0;
-			while (tick < Timecode::BBT_Time::ticks_per_beat && (n < bbt_nmarks)) {
-
-				next_beat.beats = (*i).beat;
-				next_beat.bars = (*i).bar;
-				next_beat.ticks = tick;
-				pos = _session->tempo_map().sample_at_bbt (next_beat);
-
-				if (t % bbt_accent_modulo == (bbt_accent_modulo - 1)) {
-					i_am_accented = true;
-				}
-				mark.label = "";
-				mark.position = pos;
-
-				if ((bbt_beat_subdivision > 4) && i_am_accented) {
-					mark.style = ArdourCanvas::Ruler::Mark::Minor;
-				} else {
-					mark.style = ArdourCanvas::Ruler::Mark::Micro;
-				}
-				i_am_accented = false;
-				marks.push_back (mark);
-
-				tick += skip;
-				++t;
-				++n;
-			}
-		}
-
-	  break;
-
 	case bbt_show_sixteenths:
 	case bbt_show_thirtyseconds:
 	case bbt_show_sixtyfourths:
