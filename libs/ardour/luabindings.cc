@@ -564,6 +564,7 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.beginWSPtrClass <Evoral::ControlList> ("ControlList")
+		.addCast<AutomationList> ("to_automationlist")
 		.addFunction ("add", &Evoral::ControlList::add)
 		.addFunction ("editor_add", &Evoral::ControlList::editor_add)
 		.addFunction ("thin", &Evoral::ControlList::thin)
