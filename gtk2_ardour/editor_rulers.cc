@@ -679,6 +679,8 @@ Editor::update_tempo_based_rulers ()
 
 	_bbt_metric->units_per_pixel = samples_per_pixel;
 
+	compute_bbt_ruler_scale (_leftmost_sample, _leftmost_sample + current_page_samples());
+
 	if (ruler_bbt_action->get_active()) {
 		bbt_ruler->set_range (_leftmost_sample, _leftmost_sample+current_page_samples());
 	}

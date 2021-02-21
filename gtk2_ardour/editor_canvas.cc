@@ -313,6 +313,7 @@ Editor::track_canvas_viewport_size_allocated ()
 	}
 
 	update_fixed_rulers();
+	update_tempo_based_rulers ();
 	redisplay_grid (false);
 	_summary->set_overlays_dirty ();
 }
