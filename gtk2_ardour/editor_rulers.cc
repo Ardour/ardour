@@ -1042,19 +1042,20 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 	/* Now that we know how fine a grid (Ruler) is allowable on this screen, limit it to the coarseness selected by the user */
 	/* note: GridType and RulerScale are not the same enums, so it's not a simple mathematical operation */
 	int suggested_scale = (int) bbt_ruler_scale;
+	int divs = get_grid_music_divisions(_grid_type);
 	if (_grid_type == GridTypeBar) {
 		suggested_scale = std::min(suggested_scale, (int) bbt_show_1);
 	} else if (_grid_type == GridTypeBeat) {
 		suggested_scale = std::min(suggested_scale, (int) bbt_show_quarters);
-	}  else if (_grid_type == GridTypeBeatDiv2) {
+	}  else if ( divs < 4 ) {
 		suggested_scale = std::min(suggested_scale, (int) bbt_show_eighths);
-	}  else if (_grid_type == GridTypeBeatDiv4) {
+	}  else if ( divs < 8 ) {
 		suggested_scale = std::min(suggested_scale, (int) bbt_show_sixteenths);
-	} else if (_grid_type == GridTypeBeatDiv8) {
+	} else if ( divs < 16 ) {
 		suggested_scale = std::min(suggested_scale, (int) bbt_show_thirtyseconds);
-	} else if (_grid_type == GridTypeBeatDiv16) {
+	} else if ( divs < 32 ) {
 		suggested_scale = std::min(suggested_scale, (int) bbt_show_sixtyfourths);
-	} else if (_grid_type == GridTypeBeatDiv32) {
+	} else {
 		suggested_scale = std::min(suggested_scale, (int) bbt_show_onetwentyeighths);
 	}
 
