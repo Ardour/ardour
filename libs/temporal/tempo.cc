@@ -3034,10 +3034,12 @@ TempoMap::init ()
 	fetch ();
 }
 
-void
+int
 TempoMap::update (TempoMap::SharedPtr m)
 {
-	_map_mgr.update (m);
+	if (!_map_mgr.update (m)) {
+		return -1;
+	}
 
 	/* update thread local map pointer in the calling thread */
 	update_thread_tempo_map ();
@@ -3046,6 +3048,8 @@ TempoMap::update (TempoMap::SharedPtr m)
 	_tempo_map_p->dump (cerr);
 
 	MapChanged (); /* EMIT SIGNAL */
+
+	return 0;
 }
 
 void
