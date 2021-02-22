@@ -82,7 +82,12 @@ InputPortMonitor::InputPortMonitor (ARDOUR::DataType dt, samplecnt_t sample_rate
 		_audio_scope = new InputScope (sample_rate, PX_SCALE (200), 25, o);
 
 		_audio_meter->show ();
-		_audio_scope->show ();
+
+		if (UIConfiguration::instance ().get_input_meter_scopes ()) {
+			_audio_scope->show ();
+		} else {
+			_audio_scope->set_no_show_all ();
+		}
 
 		ArdourWidgets::set_tooltip (_audio_scope, _("5 second history waveform"));
 
@@ -93,7 +98,12 @@ InputPortMonitor::InputPortMonitor (ARDOUR::DataType dt, samplecnt_t sample_rate
 		_midi_meter   = new EventMeter (o);
 		_midi_monitor = new EventMonitor (o);
 		_midi_meter->show ();
-		_midi_monitor->show ();
+
+		if (UIConfiguration::instance ().get_input_meter_scopes ()) {
+			_midi_monitor->show ();
+		} else {
+			_midi_monitor->set_no_show_all ();
+		}
 
 		ArdourWidgets::set_tooltip (_midi_meter, _("Highlight incoming MIDI data per MIDI channel"));
 		ArdourWidgets::set_tooltip (_midi_monitor, _("Display most recently received MIDI messages"));

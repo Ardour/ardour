@@ -480,6 +480,8 @@ RecorderUI::parameter_changed (string const& p)
 {
 	if (p == "input-meter-layout") {
 		start_updating ();
+	} else if (p == "input-meter-scopes") {
+		start_updating ();
 	} else if (p == "use-monitor-bus") {
 		bool have_ms = Config->get_use_monitor_bus();
 		for (InputPortMap::const_iterator i = _input_ports.begin (); i != _input_ports.end (); ++i) {

@@ -3327,6 +3327,14 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (S_("Preferences|Metering"), iml);
 
+	add_option (S_("Preferences|Metering"),
+	     new BoolOption (
+		     "input-meter-scopes",
+		     _("Show waveform display for each input-meter"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_input_meter_scopes),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_input_meter_scopes)
+		     ));
+
 	/* TRANSPORT & Sync */
 
 	add_option (_("Transport"), new OptionEditorHeading (_("General")));

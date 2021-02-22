@@ -85,6 +85,7 @@ UI_CONFIG_VARIABLE (ARDOUR::VUMeterStandard, meter_vu_standard, "meter-vu-standa
 UI_CONFIG_VARIABLE (ARDOUR::MeterLineUp, meter_line_up_level, "meter-line-up-level", ARDOUR::MeteringLineUp18)
 UI_CONFIG_VARIABLE (ARDOUR::MeterLineUp, meter_line_up_din, "meter-line-up-din", ARDOUR::MeteringLineUp15)
 UI_CONFIG_VARIABLE (ARDOUR::InputMeterLayout, input_meter_layout, "input-meter-layout", ARDOUR::LayoutAutomatic)
+UI_CONFIG_VARIABLE (bool, input_meter_scopes, "input-meter-scopes", true)
 UI_CONFIG_VARIABLE (float, meter_peak, "meter-peak", 0.0f)
 UI_CONFIG_VARIABLE (bool, meter_style_led, "meter-style-led", false)
 UI_CONFIG_VARIABLE (bool, show_editor_meter, "show-editor-meter", true)
