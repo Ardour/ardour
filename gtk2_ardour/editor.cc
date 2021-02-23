@@ -2856,10 +2856,10 @@ Editor::snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode direction, S
 				ret = timepos_t (tmap->quarters_at (presnap).round_to_subdivision (4 * divisor, direction));
 				break;
 			case bbt_show_sixtyfourths:
-				ret = _session->tempo_map().round_to_quarter_note_subdivision (presnap.sample, 8 * divisor, direction);
+				ret = timepos_t (tmap->quarters_at (presnap).round_to_subdivision (8 * divisor, direction));
 				break;
 			case bbt_show_onetwentyeighths:
-				ret = _session->tempo_map().round_to_quarter_note_subdivision (presnap.sample, 16 * divisor, direction);
+				ret = timepos_t (tmap->quarters_at (presnap).round_to_subdivision (16 * divisor, direction));
 				break;
 		}
 	} else {

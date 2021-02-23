@@ -978,7 +978,6 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 		return;
 	}
 
-	std::vector<Temporal::Point>::const_iterator i;
 	Temporal::BBT_Time lower_beat, upper_beat; // the beats at each end of the ruler
 	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
 	Beats floor_lower_beat = std::max (Beats(), tmap->quarters_at_sample (lower)).round_down_to_beat ();
@@ -1000,89 +999,20 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 
 	bbt_ruler_scale =  bbt_show_many;
 
-	switch (_grid_type) {
-	case GridTypeBeatDiv2:
-		bbt_beat_subdivision = 2;
-		break;
-	case GridTypeBeatDiv3:
-		bbt_beat_subdivision = 3;
-		break;
-	case GridTypeBeatDiv4:
-		bbt_beat_subdivision = 4;
-		break;
-	case GridTypeBeatDiv5:
-		bbt_beat_subdivision = 5;
-		bbt_accent_modulo = 2; // XXX YIKES
-		break;
-	case GridTypeBeatDiv6:
-		bbt_beat_subdivision = 3;
-		bbt_accent_modulo = 2; // XXX YIKES
-		break;
-	case GridTypeBeatDiv7:
-		bbt_beat_subdivision = 7;
-		bbt_accent_modulo = 2; // XXX YIKES
-		break;
-	case GridTypeBeatDiv8:
-		bbt_beat_subdivision = 4;
-		bbt_accent_modulo = 2;
-		break;
-	case GridTypeBeatDiv10:
-		bbt_beat_subdivision = 5;
-		bbt_accent_modulo = 2; // XXX YIKES
-		break;
-	case GridTypeBeatDiv12:
-		bbt_beat_subdivision = 3;
-		bbt_accent_modulo = 3;
-		break;
-	case GridTypeBeatDiv14:
-		bbt_beat_subdivision = 7;
-		bbt_accent_modulo = 3; // XXX YIKES!
-		break;
-	case GridTypeBeatDiv16:
-		bbt_beat_subdivision = 4;
-		bbt_accent_modulo = 4;
-		break;
-	case GridTypeBeatDiv20:
-		bbt_beat_subdivision = 5;
-		bbt_accent_modulo = 5;
-		break;
-	case GridTypeBeatDiv24:
-		bbt_beat_subdivision = 6;
-		bbt_accent_modulo = 6;
-		break;
-	case GridTypeBeatDiv28:
-		bbt_beat_subdivision = 7;
-		bbt_accent_modulo = 7;
-		break;
-	case GridTypeBeatDiv32:
-		bbt_beat_subdivision = 4;
-		bbt_accent_modulo = 8;
-		break;
-	case GridTypeBar:
-	case GridTypeBeat:
-		bbt_beat_subdivision = 4;
-		break;
-	case GridTypeNone:
-	case GridTypeTimecode:
-	case GridTypeMinSec:
-	case GridTypeCDFrame:
-		bbt_beat_subdivision = 4;
-		break;
-	}
-
 	const Beats ceil_upper_beat = std::max (Beats(), tmap->quarters_at_sample (upper)).round_up_to_beat() + Beats (1, 0);
 
 	if (ceil_upper_beat == floor_lower_beat) {
 		return;
 	}
 
+#warning NUTEMPO implement a count of bars between two positions (taking position markers into account)
 	bbt_bars = tmap->bbt_at (ceil_upper_beat).bars - tmap->bbt_at (floor_lower_beat).bars;
 
 	double ruler_line_granularity = UIConfiguration::instance().get_ruler_granularity ();  //in pixels
 	ruler_line_granularity = _visible_canvas_width / (ruler_line_granularity*5);  //fudge factor '5' probably related to (4+1 beats)/measure, I think
 
-	beats = (ceil_upper_beat - floor_lower_beat).get_beats(); // - bbt_bars;  possible thinko; this fixes the problem (for me) where measure lines alternately appear&disappear while playing at certain zoom scales
-	double beat_density = ((beats + 1) * ((double) (upper - lower) / (double) (1 + beat_after_upper_pos - beat_before_lower_pos))) / 5.0;
+	beats = (ceil_upper_beat - floor_lower_beat).get_beats();
+	double beat_density = ((beats + 1) * ((double) (upper - lower) / (double) (1 + beat_after_upper_pos - beat_before_lower_pos))) / (float)ruler_line_granularity;
 
 	/* Only show the bar helper if there aren't many bars on the screen */
 	if ((bbt_bars < 2) || (beats < 5)) {
@@ -1275,21 +1205,22 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 	case bbt_show_64:
 			bbt_nmarks = (gint) (bbt_bars / 64) + 1;
 			for (n = 0, i = grid.begin(); i != grid.end() && n < bbt_nmarks; i++) {
-				if ((*i).is_bar()) {
-					if ((*i).bar % 64 == 1) {
-						if ((*i).bar % 256 == 1) {
-							snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
+				BBT_Time bbt ((*i).bbt());
+				if (bbt.is_bar()) {
+					if (bbt.bars % 64 == 1) {
+						if (bbt.bars % 256 == 1) {
+							snprintf (buf, sizeof(buf), "%" PRIu32, bbt.bars);
 							mark.style = ArdourCanvas::Ruler::Mark::Major;
 						} else {
 							buf[0] = '\0';
-							if ((*i).bar % 256 == 129)  {
+							if (bbt.bars % 256 == 129)  {
 								mark.style = ArdourCanvas::Ruler::Mark::Minor;
 							} else {
 								mark.style = ArdourCanvas::Ruler::Mark::Micro;
 							}
 						}
 						mark.label = buf;
-						mark.position = (*i).sample;
+						mark.position = (*i).sample (sr);
 						marks.push_back (mark);
 						++n;
 					}
@@ -1300,14 +1231,15 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 	case bbt_show_16:
 		bbt_nmarks = (bbt_bars / 16) + 1;
 		for (n = 0,  i = grid.begin(); i != grid.end() && n < bbt_nmarks; i++) {
-			if ((*i).is_bar()) {
-			  if ((*i).bar % 16 == 1) {
-				if ((*i).bar % 64 == 1) {
-					snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
+			BBT_Time bbt ((*i).bbt());
+			if (bbt.is_bar()) {
+			  if (bbt.bars % 16 == 1) {
+				if (bbt.bars % 64 == 1) {
+					snprintf (buf, sizeof(buf), "%" PRIu32, bbt.bars);
 					mark.style = ArdourCanvas::Ruler::Mark::Major;
 				} else {
 					buf[0] = '\0';
-					if ((*i).bar % 64 == 33)  {
+					if (bbt.bars % 64 == 33)  {
 						mark.style = ArdourCanvas::Ruler::Mark::Minor;
 					} else {
 						mark.style = ArdourCanvas::Ruler::Mark::Micro;
@@ -1325,21 +1257,22 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 	case bbt_show_4:
 		bbt_nmarks = (bbt_bars / 4) + 1;
 		for (n = 0, i = grid.begin(); i != grid.end() && n < bbt_nmarks; ++i) {
-			if ((*i).is_bar()) {
-				if ((*i).bar % 4 == 1) {
-					if ((*i).bar % 16 == 1) {
-						snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
+			BBT_Time bbt ((*i).bbt());
+			if (bbt.is_bar()) {
+				if (bbt.bars % 4 == 1) {
+					if (bbt.bars % 16 == 1) {
+						snprintf (buf, sizeof(buf), "%" PRIu32, bbt.bars);
 						mark.style = ArdourCanvas::Ruler::Mark::Major;
 					} else {
 						buf[0] = '\0';
-						if ((*i).bar % 16 == 9)  {
+						if (bbt.bars % 16 == 9)  {
 							mark.style = ArdourCanvas::Ruler::Mark::Minor;
 						} else {
 							mark.style = ArdourCanvas::Ruler::Mark::Micro;
 						}
 					}
 					mark.label = buf;
-					mark.position = (*i).sample;
+					mark.position = (*i).sample (sr);
 					marks.push_back (mark);
 					++n;
 				}
@@ -1350,11 +1283,12 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 	case bbt_show_1:
 		bbt_nmarks = bbt_bars + 2;
 		for (n = 0,  i = grid.begin(); i != grid.end() && n < bbt_nmarks; ++i) {
-			if ((*i).is_bar()) {
-				snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bbt().bars);
+			BBT_Time bbt ((*i).bbt());
+			if (bbt.is_bar()) {
+				snprintf (buf, sizeof(buf), "%" PRIu32, bbt.bars);
 				mark.style = ArdourCanvas::Ruler::Mark::Major;
 				mark.label = buf;
-				mark.position = (*i).sample;
+				mark.position = (*i).sample (sr);
 				marks.push_back (mark);
 				++n;
 			}
@@ -1373,15 +1307,17 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 
 		for (n = 1, i = grid.begin(); n < bbt_nmarks && i != grid.end(); ++i) {
 
+			BBT_Time bbt ((*i).bbt());
+
 			if ((*i).sample (sr) < lower && (bbt_bar_helper_on)) {
-				snprintf (buf, sizeof(buf), "<%" PRIu32 "|%" PRIu32, (*i).bbt().bars, (*i).bbt().beats);
+				snprintf (buf, sizeof(buf), "<%" PRIu32 "|%" PRIu32, bbt.bars, bbt.beats);
 				edit_last_mark_label (marks, buf);
 			} else {
 
-				if ((*i).bbt().is_bar()) {
+				if (bbt.is_bar()) {
 					mark.style = ArdourCanvas::Ruler::Mark::Major;
-					snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
-				} else if (((*i).beat % 2 == 1)) {
+					snprintf (buf, sizeof(buf), "%" PRIu32, bbt.bars);
+				} else if ((bbt.beats % 2) == 1) {
 					mark.style = ArdourCanvas::Ruler::Mark::Minor;
 					buf[0] = '\0';
 				} else {
@@ -1389,7 +1325,7 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 					buf[0] = '\0';
 				}
 				mark.label = buf;
-				mark.position = (*i).sample;
+				mark.position = (*i).sample (sr);
 				marks.push_back (mark);
 				n++;
 			}
@@ -1414,18 +1350,20 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 
 		for (n = 1, i = grid.begin(); n < bbt_nmarks && i != grid.end(); ++i) {
 
+			BBT_Time bbt ((*i).bbt());
+
 			if ((*i).sample (sr) < lower && (bbt_bar_helper_on)) {
-				snprintf (buf, sizeof(buf), "<%" PRIu32 "|%" PRIu32, (*i).bbt().bars, (*i).bbt().beats);
+				snprintf (buf, sizeof(buf), "<%" PRIu32 "|%" PRIu32, bbt.bars, bbt.beats);
 				edit_last_mark_label (marks, buf);
 				helper_active = true;
 			} else {
 
-				if ((*i).bbt().is_bar()) {
+				if (bbt.is_bar()) {
 					mark.style = ArdourCanvas::Ruler::Mark::Major;
-					snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bbt().bars);
+					snprintf (buf, sizeof(buf), "%" PRIu32, bbt.bars);
 				} else {
 					mark.style = ArdourCanvas::Ruler::Mark::Minor;
-					snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bbt().beats);
+					snprintf (buf, sizeof(buf), "%" PRIu32, bbt.beats);
 				}
 				if (((*i).sample(sr) < bbt_position_of_helper) && helper_active) {
 					buf[0] = '\0';
@@ -1443,8 +1381,10 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 			t = 0;
 			while (tick < Temporal::ticks_per_beat && (n < bbt_nmarks)) {
 
-				next_beat.beats = (*i).bbt().beats;
-				next_beat.bars = (*i).bbt().bars;
+				BBT_Time bbt ((*i).bbt());
+
+				next_beat.beats = bbt.beats;
+				next_beat.bars = bbt.bars;
 				next_beat.ticks = tick;
 				pos = TempoMap::use()->sample_at (next_beat, sr);
 
