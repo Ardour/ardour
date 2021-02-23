@@ -47,7 +47,7 @@ public:
 	Tabbable (Gtk::Widget&, const std::string& user_visible_name, std::string const & untranslated_name, bool tabbed_by_default = true);
 	~Tabbable ();
 
-	void add_to_notebook (Gtk::Notebook& notebook, const std::string& tab_title);
+	void add_to_notebook (Gtk::Notebook& notebook, const std::string& tab_title = "");
 	void make_visible ();
 	void make_invisible ();
 	void change_visibility ();
