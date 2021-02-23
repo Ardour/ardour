@@ -6222,7 +6222,10 @@ Route::monitoring_state () const
 		case MonitorInput:
 			return MonitoringInput;
 			break;
+		case MonitorCue:
+			return MonitoringCue;
 		default:
+			/* MonitorAuto */
 			break;
 	}
 
