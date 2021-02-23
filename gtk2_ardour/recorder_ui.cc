@@ -849,26 +849,29 @@ RecorderUI::regions_changed (boost::shared_ptr<ARDOUR::RegionList>, PBD::Propert
 void
 RecorderUI::gui_extents_changed ()
 {
-	pair<samplepos_t, samplepos_t> ext = PublicEditor::instance().session_gui_extents ();
+	pair<timepos_t, timepos_t> ext = PublicEditor::instance().session_gui_extents ();
 
-	if (ext.first == max_samplepos || ext.first >= ext.second) {
+	if (ext.first == timepos_t::max (ext.first.time_domain()) || ext.first >= ext.second) {
 		return;
 	}
 
+	samplepos_t start = ext.first.samples();
+	samplepos_t end = ext.second.samples();
+
 	for (list<TrackRecordAxis*>::const_iterator i = _recorders.begin (); i != _recorders.end (); ++i) {
-		(*i)->rec_extent (ext.first, ext.second);
+		(*i)->rec_extent (start, end);
 	}
 
 	/* round to the next minute */
 	if (_session) {
 		const samplecnt_t one_minute = 60 * _session->nominal_sample_rate ();
-		ext.first  = (ext.first / one_minute) * one_minute;
-		ext.second = ((ext.second / one_minute) + 1) * one_minute;
+		start  = (start / one_minute) * one_minute;
+		end = ((end / one_minute) + 1) * one_minute;
 	}
 
-	_ruler.set_gui_extents (ext.first, ext.second);
+	_ruler.set_gui_extents (start, end);
 	for (list<TrackRecordAxis*>::const_iterator i = _recorders.begin (); i != _recorders.end (); ++i) {
-		(*i)->set_gui_extents (ext.first, ext.second);
+		(*i)->set_gui_extents (start, end);
 	}
 }
 

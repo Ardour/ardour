@@ -28,7 +28,7 @@ class AudioPort;
 class LIBARDOUR_API MonitorReturn : public InternalReturn
 {
 public:
-	MonitorReturn (Session&);
+	MonitorReturn (Session&, Temporal::TimeDomain);
 	~MonitorReturn ();
 
 	void run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool);

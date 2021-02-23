@@ -749,8 +749,8 @@ TrackRecordAxis::TrackSummary::render (Cairo::RefPtr<Cairo::Context> const& cr, 
 void
 TrackRecordAxis::TrackSummary::render_region (boost::shared_ptr<ARDOUR::Region> r, Cairo::RefPtr<Cairo::Context> const& cr, double y)
 {
-	const samplepos_t rp = r->position ();
-	const samplecnt_t rl = r->length ();
+	const samplepos_t rp = r->position_sample ();
+	const samplecnt_t rl = r->length_samples ();
 
 	 if (rp > _start) {
 		 cr->move_to (sample_to_xpos (rp), y);

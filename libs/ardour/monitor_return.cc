@@ -26,8 +26,8 @@
 
 using namespace ARDOUR;
 
-MonitorReturn::MonitorReturn (Session& s)
-	: InternalReturn (s, "Monitor Return")
+MonitorReturn::MonitorReturn (Session& s, Temporal::TimeDomain td)
+	: InternalReturn (s, td, "Monitor Return")
 	, _nch (0)
 	, _gain (1.f)
 {

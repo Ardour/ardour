@@ -3091,7 +3091,7 @@ Route::set_processor_state (const XMLNode& node, int version)
 			_main_outs->set_state (**niter, version);
 		} else if (prop->value() == "monreturn") {
 			if (!_intreturn) {
-				_intreturn.reset (new MonitorReturn (_session));
+				_intreturn.reset (new MonitorReturn (_session, time_domain()));
 				must_configure = true;
 			}
 			_intreturn->set_state (**niter, version);
