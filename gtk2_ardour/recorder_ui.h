@@ -46,6 +46,10 @@
 
 #include "input_port_monitor.h"
 
+namespace ARDOUR {
+	class SoloMuteRelease;
+}
+
 class TrackRecordAxis;
 class RecorderGroupTabs;
 
@@ -103,6 +107,7 @@ private:
 
 	void update_sensitivity ();
 	void update_recordstate ();
+	void update_monitorstate (std::string, bool);
 	void new_track_for_port (ARDOUR::DataType, std::string const&);
 
 	static int calc_columns (int child_width, int parent_width);
@@ -143,6 +148,7 @@ private:
 	sigc::connection          _fast_screen_update_connection;
 	sigc::connection          _ruler_width_update_connection;
 	PBD::ScopedConnectionList _engine_connections;
+	PBD::ScopedConnection     _monitor_connection;
 
 	class RecRuler : public CairoWidget , public ARDOUR::SessionHandlePtr
 	{
@@ -178,6 +184,8 @@ private:
 			void setup_name ();
 			bool spill (bool);
 			bool spilled () const;
+			void allow_monitoring (bool);
+			void update_monitorstate (bool);
 			void update_rec_stat ();
 
 			ARDOUR::DataType data_type () const;
@@ -198,22 +206,25 @@ private:
 
 		private:
 			void rename_port ();
+			bool monitor_press (GdkEventButton*);
+			bool monitor_release (GdkEventButton*);
 
 			ARDOUR::DataType            _dt;
 			InputPortMonitor            _monitor;
 			Gtk::Alignment              _alignment;
 			ArdourWidgets::Frame        _frame;
 			ArdourWidgets::ArdourButton _spill_button;
+			ArdourWidgets::ArdourButton _monitor_button;
 			ArdourWidgets::ArdourButton _name_button;
 			Gtk::Label                  _name_label;
 			ArdourWidgets::ArdourButton _add_button;
 			std::string                 _port_name;
 			ARDOUR::WeakRouteList       _connected_routes;
+			ARDOUR::SoloMuteRelease*    _solo_release;
 
 			static bool                         _size_groups_initialized;
 			static Glib::RefPtr<Gtk::SizeGroup> _name_size_group;
-			static Glib::RefPtr<Gtk::SizeGroup> _spill_size_group;
-			static Glib::RefPtr<Gtk::SizeGroup> _button_size_group;
+			static Glib::RefPtr<Gtk::SizeGroup> _ctrl_size_group;
 			static Glib::RefPtr<Gtk::SizeGroup> _monitor_size_group;
 	};
 
