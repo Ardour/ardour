@@ -128,6 +128,7 @@ private:
 	Gtk::ScrolledWindow  _meter_scroller;
 	Gtk::VBox            _meter_area;
 	Gtk::Table           _meter_table;
+	Gtk::Button          _add_route_button;
 	Gtk::EventBox        _scroller_base;
 
 	ArdourWidgets::ArdourHSpacer _toolbar_sep;

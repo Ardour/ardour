@@ -144,10 +144,16 @@ RecorderUI::RecorderUI ()
 	_scroller_base.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	_scroller_base.signal_button_release_event().connect (sigc::mem_fun(*this, &RecorderUI::scroller_button_release));
 
+	/* create a button to add mixer strips */
+	_add_route_button.add (*manage (new Image (Stock::ADD, ICON_SIZE_BUTTON)));
+	_add_route_button.set_can_focus(false);
+	_add_route_button.signal_clicked().connect (sigc::mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::add_route));
+
 	/* LAYOUT */
 
 	_rec_area.set_spacing (0);
 	_rec_area.pack_end (_scroller_base, true, true);
+	_rec_area.pack_end (_add_route_button, false, true);
 	_rec_area.pack_end (_ruler_sep, false, false, 0);
 
 	/* HBox [ groups | tracks] */
@@ -234,6 +240,8 @@ RecorderUI::RecorderUI ()
 	_space.show ();
 	_ruler_box.show ();
 	_ruler_sep.show ();
+	_add_route_button.show_all ();
+	_scroller_base.show ();
 	_toolbar_sep.show ();
 	_rec_area.show ();
 	_rec_scroller.show ();
