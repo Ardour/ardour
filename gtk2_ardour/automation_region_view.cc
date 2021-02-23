@@ -207,10 +207,8 @@ AutomationRegionView::add_automation_event (GdkEvent *, samplepos_t when, double
 
 	if (_line->the_list()->editor_add (when_d, y, with_guard_points)) {
 
-		if (ac == view->session()->recently_touched_controllable ()) {
-			if (ac->automation_state () == ARDOUR::Off) {
-				ac->set_automation_state (ARDOUR::Touch);
-			}
+		if (ac->automation_state () == ARDOUR::Off) {
+			ac->set_automation_state (ARDOUR::Play);
 		}
 
 		view->editor().begin_reversible_command (_("add automation event"));

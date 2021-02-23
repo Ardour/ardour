@@ -791,10 +791,8 @@ AutomationTimeAxisView::add_automation_event (GdkEvent* event, samplepos_t sampl
 
 	if (list->editor_add (when.sample, y, with_guard_points)) {
 
-		if (_control == _session->recently_touched_controllable ()) {
-			if (_control->automation_state () == ARDOUR::Off) {
-				_control->set_automation_state (ARDOUR::Touch);
-			}
+		if (_control->automation_state () == ARDOUR::Off) {
+			_control->set_automation_state (ARDOUR::Play);
 		}
 
 		XMLNode& after = list->get_state();
