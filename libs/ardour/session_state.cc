@@ -1207,6 +1207,20 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool only_used_ass
 		node->set_property ("name", _name);
 		node->set_property ("sample-rate", _base_sample_rate);
 
+		/* store the last engine device we we can avoid autostarting on a different device with wrong i/o count */
+		boost::shared_ptr<AudioBackend> backend = _engine.current_backend();
+		if (_engine.running () && backend) {
+			child = node->add_child ("EngineHints");
+			child->set_property ("backend", backend-> name ());
+			if (backend->use_separate_input_and_output_devices()) {
+				child->set_property ("input-device", backend->input_device_name ());
+				child->set_property ("output-device", backend->output_device_name ());
+			} else {
+				child->set_property ("input-device", backend->device_name ());
+				child->set_property ("output-device", backend->device_name ());
+			}
+		}
+
 		if (session_dirs.size() > 1) {
 
 			string p;
@@ -4564,7 +4578,7 @@ Session::parse_stateful_loading_version (const std::string& version)
 }
 
 int
-Session::get_info_from_path (const string& xmlpath, float& sample_rate, SampleFormat& data_format, std::string& program_version)
+Session::get_info_from_path (const string& xmlpath, float& sample_rate, SampleFormat& data_format, std::string& program_version, XMLNode* engine_hints)
 {
 	bool found_sr = false;
 	bool found_data_format = false;
@@ -4630,6 +4644,24 @@ Session::get_info_from_path (const string& xmlpath, float& sample_rate, SampleFo
 			 }
 			 xmlFree (val);
 		 }
+		 if (engine_hints && strcmp((const char*) node->name, "EngineHints") == 0)  {
+			 xmlChar* val = xmlGetProp (node, (const xmlChar*)"backend");
+			 if (val) {
+				 engine_hints->set_property ("backend", (const char*)val);
+			 }
+			 xmlFree (val);
+			 val = xmlGetProp (node, (const xmlChar*)"input-device");
+			 if (val) {
+				 engine_hints->set_property ("input-device", (const char*)val);
+			 }
+			 xmlFree (val);
+			 val = xmlGetProp (node, (const xmlChar*)"output-device");
+			 if (val) {
+				 engine_hints->set_property ("output-device", (const char*)val);
+			 }
+			 xmlFree (val);
+		 }
+
 		 if (strcmp((const char*) node->name, "Config")) {
 			 node = node->next;
 			 continue;

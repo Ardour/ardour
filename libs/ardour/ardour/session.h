@@ -213,7 +213,7 @@ public:
 
 	virtual ~Session ();
 
-	static int get_info_from_path (const std::string& xmlpath, float& sample_rate, SampleFormat& data_format, std::string& program_version);
+	static int get_info_from_path (const std::string& xmlpath, float& sample_rate, SampleFormat& data_format, std::string& program_version, XMLNode* engine_hints = 0);
 	static std::string get_snapshot_from_instant (const std::string& session_dir);
 
 	/** a monotonic counter used for naming user-visible things uniquely
