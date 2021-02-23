@@ -28,6 +28,7 @@
 #include "pbd/file_utils.h"
 
 #include "ardour/audioengine.h"
+#include "ardour/audio_backend.h"
 #include "ardour/filename_extensions.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/profile.h"
@@ -69,6 +70,7 @@ using std::vector;
 
 StartupFSM::StartupFSM (EngineControl& amd)
 	: session_existing_sample_rate (0)
+	, session_engine_hints ("Engine Hints")
 	, session_is_new (false)
 	, session_name_edited (false)
 	, new_user (NewUserWizard::required())
@@ -437,7 +439,8 @@ StartupFSM::start_audio_midi_setup ()
 {
 	bool setup_required = false;
 
-	if (AudioEngine::instance()->current_backend() == 0) {
+	boost::shared_ptr<AudioBackend> backend = AudioEngine::instance()->current_backend();
+	if (!backend) {
 		/* backend is unknown ... */
 		setup_required = true;
 
@@ -457,10 +460,41 @@ StartupFSM::start_audio_midi_setup ()
 		}
 	}
 
+	bool try_autostart = (Config->get_try_autostart_engine () || g_getenv ("ARDOUR_TRY_AUTOSTART_ENGINE"));
+	if (session_is_new) {
+		try_autostart = false;
+	} else if (!backend) {
+		try_autostart = false;
+	} else if (try_autostart) {
+		/* if user has selected auto-start, check if autostart is possible */
+		bool ok = true;
+		std::string backend_name;
+		std::string input_device;
+		std::string output_device;
+		ok &= session_engine_hints.get_property ("backend", backend_name);
+		ok &= session_engine_hints.get_property ("input-device", input_device);
+		ok &= session_engine_hints.get_property ("output-device", output_device);
+		ok &= backend->name () == backend_name;
+		if (backend->use_separate_input_and_output_devices()) {
+			ok &= input_device == backend->input_device_name ();
+			ok &= output_device == backend->output_device_name ();
+		} else {
+			ok &= input_device == backend->device_name ();
+			ok &= output_device == backend->device_name ();
+		}
+		if (!ok) {
+			try_autostart = false;
+			ArdourMessageDialog msg (
+					_("Engine I/O device has changed since you last opened this session.\n"
+					  "Please verify that the new device has enough ports, or you may lose some i/o connections."),
+					false, Gtk::MESSAGE_WARNING, Gtk::BUTTONS_OK, true);
+			msg.run ();
+		}
+
+	}
+
 	if (setup_required) {
-
-		if (!session_is_new && (Config->get_try_autostart_engine () || g_getenv ("ARDOUR_TRY_AUTOSTART_ENGINE"))) {
-
+		if (try_autostart) {
 			AudioEngine::instance()->set_sample_rate(session_existing_sample_rate);
 			if (!AudioEngine::instance()->start ()) {
 				if (ARDOUR::AudioEngine::instance()->running()) {
@@ -552,7 +586,7 @@ StartupFSM::get_session_parameters_from_path (string const & path, string const 
 		string program_version;
 
 		const string statefile_path = Glib::build_filename (session_path, session_name + ARDOUR::statefile_suffix);
-		if (Session::get_info_from_path (statefile_path, sr, fmt, program_version)) {
+		if (Session::get_info_from_path (statefile_path, sr, fmt, program_version, &session_engine_hints)) {
 			/* exists but we can't read it correctly */
 			error << string_compose (_("Cannot get existing session information from %1"), statefile_path) << endmsg;
 			return false;
@@ -786,7 +820,7 @@ StartupFSM::check_session_parameters (bool must_be_new)
 
 	if (!session_is_new) {
 
-		if (Session::get_info_from_path (statefile_path, sr, fmt, program_version)) {
+		if (Session::get_info_from_path (statefile_path, sr, fmt, program_version, &session_engine_hints)) {
 			/* exists but we can't read it */
 			return -1;
 		}
