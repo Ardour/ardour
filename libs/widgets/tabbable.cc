@@ -54,7 +54,7 @@ Tabbable::~Tabbable ()
 }
 
 void
-Tabbable::add_to_notebook (Notebook& notebook, const string& tab_title)
+Tabbable::add_to_notebook (Notebook& notebook)
 {
 	_parent_notebook = &notebook;
 
@@ -312,7 +312,7 @@ Tabbable::show_tab ()
 	if (!window_visible() && _parent_notebook) {
 		if (_contents.get_parent() == 0) {
 			tab_requested_by_state = true;
-			add_to_notebook (*_parent_notebook, _tab_title);
+			add_to_notebook (*_parent_notebook);
 		}
 		_parent_notebook->set_current_page (_parent_notebook->page_num (_contents));
 		_contents.show ();
