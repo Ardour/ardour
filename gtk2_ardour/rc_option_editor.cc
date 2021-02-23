@@ -63,6 +63,8 @@
 #include "widgets/paths_dialog.h"
 #include "widgets/tooltips.h"
 
+#include "actions.h"
+#include "ardour_ui.h"
 #include "ardour_dialog.h"
 #include "ardour_ui.h"
 #include "ardour_window.h"
@@ -2294,95 +2296,92 @@ RCOptionEditor::RCOptionEditor ()
 	, _mixer_strip_visibility ("mixer-element-visibility")
 {
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &RCOptionEditor::parameter_changed));
-
-	/* MISC */
-
-	uint32_t hwcpus = hardware_concurrency ();
 	BoolOption* bo;
 
-	if (hwcpus > 1) {
-		add_option (_("General"), new OptionEditorHeading (_("DSP CPU Utilization")));
+	/* GENERAL *****************************************************************/
 
-		ComboOption<int32_t>* procs = new ComboOption<int32_t> (
-				"processor-usage",
-				_("Signal processing uses"),
-				sigc::mem_fun (*_rc_config, &RCConfiguration::get_processor_usage),
-				sigc::mem_fun (*_rc_config, &RCConfiguration::set_processor_usage)
-				);
+	add_option (_("General"), new OptionEditorHeading (_("Audio/MIDI Setup")));
 
-		procs->add (-1, _("all but one processor"));
-		procs->add (0, _("all available processors"));
-
-		for (uint32_t i = 1; i <= hwcpus; ++i) {
-			procs->add (i, string_compose (P_("%1 processor", "%1 processors", i), i));
-		}
-
-		procs->set_note (string_compose (_("This setting will only take effect when %1 is restarted."), PROGRAM_NAME));
-
-		add_option (_("General"), procs);
-	}
-
-	/* Image cache size */
-	add_option (_("General"), new OptionEditorHeading (_("Memory Usage")));
-
-	HSliderOption *sics = new HSliderOption ("waveform-cache-size",
-			_("Waveform image cache size (megabytes)"),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_waveform_cache_size),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_waveform_cache_size),
-			1, 1024, 10 /* 1 MB to 1GB in steps of 10MB */
-			);
-	sics->scale().set_digits (0);
-	Gtkmm2ext::UI::instance()->set_tip (
-			sics->tip_widget(),
-		 _("Increasing the cache size uses more memory to store waveform images, which can improve graphical performance."));
-	add_option (_("General"), sics);
-
-	add_option (_("General"), new OptionEditorHeading (_("Engine")));
-
-	add_option (_("General"),
-	     new BoolOption (
+	bo = new BoolOption (
 		     "try-autostart-engine",
 		     _("Try to auto-launch audio/midi engine"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_try_autostart_engine),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_try_autostart_engine)
-		     ));
+		     );
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+					    _("When opening an existing session, if the most recent audio engine is available and can open the session's sample rate, the audio engine dialog may be skipped."));
+	add_option (_("General"), bo );
 
-	add_option (_("General"), new OptionEditorHeading (_("Automation")));
+	add_option (_("General"), new OptionEditorHeading (S_("Options|Editor Undo")));
+
+	add_option (_("General"), new UndoOptions (_rc_config));
 
 	add_option (_("General"),
-	     new SpinOption<double> (
-		     "automation-thinning-factor",
-		     _("Thinning factor (larger value => less data)"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_automation_thinning_factor),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_automation_thinning_factor),
+	     new BoolOption (
+		     "verify-remove-last-capture",
+		     _("Verify removal of last capture"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_verify_remove_last_capture),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_verify_remove_last_capture)
+		     ));
+
+	add_option (_("General"), new OptionEditorHeading (_("Session Management")));
+
+	add_option (_("General"),
+	     new BoolOption (
+		     "periodic-safety-backups",
+		     _("Make periodic backups of the session file"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_periodic_safety_backups),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_periodic_safety_backups)
+		     ));
+
+	add_option (_("General"), new DirectoryOption (
+			    X_("default-session-parent-dir"),
+			    _("Default folder for new sessions:"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_default_session_parent_dir),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_default_session_parent_dir)
+			    ));
+
+	add_option (_("General"),
+	     new SpinOption<uint32_t> (
+		     "max-recent-sessions",
+		     _("Maximum number of recent sessions"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_max_recent_sessions),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_max_recent_sessions),
 		     0, 1000, 1, 20
 		     ));
 
+	add_option (_("General"), new OptionEditorHeading (_("Import")));
+
 	add_option (_("General"),
-	     new SpinOption<double> (
-		     "automation-interval-msecs",
-		     _("Automation sampling interval (milliseconds)"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_automation_interval_msecs),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_automation_interval_msecs),
-		     1, 1000, 1, 20
+	     new BoolOption (
+		     "only-copy-imported-files",
+		     _("Drag and drop import always copies files to session"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_only_copy_imported_files),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_only_copy_imported_files)
 		     ));
 
-	add_option (_("General"), new OptionEditorHeading (_("Tempo")));
+	add_option (_("General"), new OptionEditorHeading (_("Export")));
 
-	bo = new BoolOption (
-		"allow-non-quarter-pulse",
-		_("Allow non quarter-note pulse"),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_allow_non_quarter_pulse),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_allow_non_quarter_pulse)
-		);
-	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
-					    string_compose (_("<b>When enabled</b> %1 will allow tempo to be expressed in divisions per minute\n"
-							      "<b>When disabled</b> %1 will only allow tempo to be expressed in quarter notes per minute"),
-							    PROGRAM_NAME));
-	add_option (_("General"), bo);
+	add_option (_("General"),
+	     new BoolOption (
+		     "save-export-analysis-image",
+		     _("Save loudness analysis as image file after export"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_save_export_analysis_image),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_save_export_analysis_image)
+		     ));
+
+	add_option (_("General"),
+	     new BoolOption (
+		     "save-export-mixer-screenshot",
+		     _("Save Mixer screenshot after export"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_save_export_mixer_screenshot),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_save_export_mixer_screenshot)
+		     ));
+
+	/* APPEARANCE ***************************************************************/
 
 	if (!ARDOUR::Profile->get_mixbus()) {
-		add_option (_("General"), new OptionEditorHeading (_("GUI Lock")));
+		add_option (_("Appearance"), new OptionEditorHeading (_("GUI Lock")));
 		/* Lock GUI timeout */
 
 		HSliderOption *slts = new HSliderOption("lock-gui-after-seconds",
@@ -2395,7 +2394,7 @@ RCOptionEditor::RCOptionEditor ()
 		Gtkmm2ext::UI::instance()->set_tip (
 				slts->tip_widget(),
 				_("Lock GUI after this many idle seconds (zero to never lock)"));
-		add_option (_("General"), slts);
+		add_option (_("Appearance"), slts);
 
 		ComboOption<ScreenSaverMode>* scsvr = new ComboOption<ScreenSaverMode> (
 				"screen-saver-mode",
@@ -2408,61 +2407,505 @@ RCOptionEditor::RCOptionEditor ()
 		scsvr->add (InhibitWhileRecording, _("Inhibit while Recording"));
 		scsvr->add (InhibitAlways, string_compose (_("Inhibit while %1 is running"), PROGRAM_NAME));
 
-		add_option (_("General"), scsvr);
+		add_option (_("Appearance"), scsvr);
 
 
 	} // !mixbus
 
-	add_option (_("General/Session"), new OptionEditorHeading (S_("Options|Undo")));
+	add_option (_("Appearance"), new OptionEditorHeading (_("Theme")));
 
-	add_option (_("General/Session"), new UndoOptions (_rc_config));
+	add_option (_("Appearance"), new BoolOption (
+				"flat-buttons",
+				_("Draw \"flat\" buttons"),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_flat_buttons),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_flat_buttons)
+				));
 
-	add_option (_("General/Session"),
+	add_option (_("Appearance"), new BoolOption (
+				"boxy-buttons",
+				_("Draw \"boxy\" buttons"),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_boxy_buttons),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_boxy_buttons)
+				));
+
+	add_option (_("Appearance"), new BoolOption (
+				"meter-style-led",
+				_("LED meter style"),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_meter_style_led),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_meter_style_led)
+				));
+
+	if (!Profile->get_mixbus()) {
+		HSliderOption *gui_hs;
+		gui_hs = new HSliderOption(
+				"timeline-item-gradient-depth",
+				_("Waveforms color gradient depth"),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_waveform_gradient_depth),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_waveform_gradient_depth),
+				0, 1.0, 0.05
+				);
+		gui_hs->scale().set_update_policy (Gtk::UPDATE_DELAYED);
+		add_option (_("Appearance"), gui_hs);
+	}
+
+	if (!Profile->get_mixbus()) {
+		vector<string> icon_sets = ::get_icon_sets ();
+		if (icon_sets.size() > 1) {
+			ComboOption<std::string>* io = new ComboOption<std::string> (
+					"icon-set", _("Icon Set"),
+					sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_icon_set),
+					sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_icon_set)
+					);
+			for (vector<string>::const_iterator i = icon_sets.begin (); i != icon_sets.end (); ++i) {
+				io->add (*i, *i);
+			}
+			add_option (_("Appearance"), io);
+		}
+	}
+
+	add_option (_("Appearance"), new OptionEditorHeading (_("Graphical User Interface")));
+
+	add_option (_("Appearance"),
 	     new BoolOption (
-		     "verify-remove-last-capture",
-		     _("Verify removal of last capture"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_verify_remove_last_capture),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_verify_remove_last_capture)
+		     "widget-prelight",
+		     _("Highlight widgets on mouseover"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_widget_prelight),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_widget_prelight)
 		     ));
 
-	add_option (_("General/Session"), new OptionEditorHeading (_("Session Management")));
-
-	add_option (_("General/Session"),
+	add_option (_("Appearance"),
 	     new BoolOption (
-		     "periodic-safety-backups",
-		     _("Make periodic backups of the session file"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_periodic_safety_backups),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_periodic_safety_backups)
+		     "use-tooltips",
+		     _("Show tooltips if mouse hovers over a control"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_tooltips),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_tooltips)
 		     ));
 
-	add_option (_("General/Session"),
+	bo = new BoolOption (
+			"super-rapid-clock-update",
+			_("Update clocks at TC Frame rate"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_super_rapid_clock_update),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_super_rapid_clock_update)
+			);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+			_("<b>When enabled</b> clock displays are updated every Timecode Frame (fps).\n\n"
+				"<b>When disabled</b> clock displays are updated only every 100ms."
+			 ));
+	add_option (_("Appearance"), bo);
+
+	add_option (_("Appearance"),
+			new BoolOption (
+				"blink-rec-arm",
+				_("Blink Rec-Arm buttons"),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_blink_rec_arm),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_blink_rec_arm)
+				));
+
+	add_option (_("Appearance"),
+			new BoolOption (
+				"blink-alert-indicators",
+				_("Blink Alert Indicators"),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_blink_alert_indicators),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_blink_alert_indicators)
+				));
+
+	add_option (_("Appearance/Recorder"), new OptionEditorHeading (_("Input Meter Layout")));
+
+	ComboOption<InputMeterLayout>* iml = new ComboOption<InputMeterLayout> (
+		"input-meter-layout",
+		_("Input Meter Layout"),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_input_meter_layout),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_input_meter_layout)
+		);
+
+	iml->add (LayoutAutomatic,  _("Automatic"));
+	iml->add (LayoutHorizontal, _("Horizontal"));
+	iml->add (LayoutVertical,   _("Vertical"));
+
+	add_option (S_("Appearance/Recorder"), iml);
+
+
+	add_option (_("Appearance/Editor"), new OptionEditorHeading (_("General")));
+	add_option (_("Appearance/Editor"),
 	     new BoolOption (
-		     "only-copy-imported-files",
-		     _("Drag and drop import always copies files to session"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_only_copy_imported_files),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_only_copy_imported_files)
+		     "show-name-highlight",
+		     _("Use name highlight bars in region displays (requires a restart)"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_name_highlight),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_name_highlight)
 		     ));
 
-	add_option (_("General/Session"), new DirectoryOption (
-			    X_("default-session-parent-dir"),
-			    _("Default folder for new sessions:"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_default_session_parent_dir),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_default_session_parent_dir)
+	add_option (_("Appearance/Editor"),
+			new BoolOption (
+			"color-regions-using-track-color",
+			_("Region color follows track color"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_color_regions_using_track_color),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_color_regions_using_track_color)
+			));
+
+	add_option (_("Appearance/Editor"),
+			new BoolOption (
+			"show-region-names",
+			_("Show Region Names"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_region_name),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_region_name)
+			));
+
+
+	ComboOption<int>* emode = new ComboOption<int> (
+			"time-axis-name-ellipsize-mode",
+			_("Track name ellipsize mode"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_time_axis_name_ellipsize_mode),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_time_axis_name_ellipsize_mode)
+		);
+	emode->add (-1, _("Ellipsize start of name"));
+	emode->add (0, _("Ellipsize middle of name"));
+	emode->add (1, _("Ellipsize end of name"));
+
+	Gtkmm2ext::UI::instance()->set_tip (emode->tip_widget(), _("Choose which part of long track names are hidden in the editor's track headers"));
+	add_option (_("Appearance/Editor"), emode);
+
+	ComboOption<uint32_t>* gap = new ComboOption<uint32_t> (
+		     "vertical-region-gap",
+		     _("Add a visual gap below Audio Regions"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_vertical_region_gap),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_vertical_region_gap)
+		     );
+	gap->add (0, _("None"));
+	gap->add (2, _("Small"));
+	gap->add (4, _("Large"));
+	add_option (_("Appearance/Editor"), gap);
+
+	add_option (_("Appearance/Editor"), new OptionEditorHeading (_("Waveforms")));
+
+	if (!Profile->get_mixbus()) {
+		add_option (_("Appearance/Editor"),
+				new BoolOption (
+					"show-waveforms",
+					_("Show waveforms in regions"),
+					sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_waveforms),
+					sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_waveforms)
+					));
+	}  // !mixbus
+
+	add_option (_("Appearance/Editor"),
+	     new BoolOption (
+		     "show-waveforms-while-recording",
+		     _("Show waveforms while recording"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_waveforms_while_recording),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_waveforms_while_recording)
+		     ));
+
+	add_option (_("Appearance/Editor"),
+			new BoolOption (
+			"show-waveform-clipping",
+			_("Show waveform clipping"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_waveform_clipping),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_waveform_clipping)
+			));
+
+	add_option (_("Appearance/Editor"), new ClipLevelOptions ());
+
+	ComboOption<WaveformScale>* wfs = new ComboOption<WaveformScale> (
+		"waveform-scale",
+		_("Waveform scale"),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_waveform_scale),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_waveform_scale)
+		);
+
+	wfs->add (Linear, _("linear"));
+	wfs->add (Logarithmic, _("logarithmic"));
+
+	add_option (_("Appearance/Editor"), wfs);
+
+	ComboOption<WaveformShape>* wfsh = new ComboOption<WaveformShape> (
+		"waveform-shape",
+		_("Waveform shape"),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_waveform_shape),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_waveform_shape)
+		);
+
+	wfsh->add (Traditional, _("traditional"));
+	wfsh->add (Rectified, _("rectified"));
+
+	add_option (_("Appearance/Editor"), wfsh);
+
+	add_option (_("Appearance/Editor"), new OptionEditorHeading (_("Editor Meters")));
+
+	add_option (_("Appearance/Editor"),
+	     new BoolOption (
+		     "show-track-meters",
+		     _("Show meters in track headers"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_track_meters),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_track_meters)
+		     ));
+
+	add_option (_("Appearance/Editor"),
+	     new BoolOption (
+		     "editor-stereo-only-meters",
+		     _("Limit track header meters to stereo"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_editor_stereo_only_meters),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_editor_stereo_only_meters)
+		     ));
+
+	add_option (_("Appearance/Editor"), new OptionEditorHeading (_("MIDI Regions")));
+
+	add_option (_("Appearance/Editor"),
+		    new BoolOption (
+			    "display-first-midi-bank-as-zero",
+			    _("Display first MIDI bank/program as 0"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_first_midi_bank_is_zero),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_first_midi_bank_is_zero)
 			    ));
 
-	add_option (_("General/Session"),
-	     new SpinOption<uint32_t> (
-		     "max-recent-sessions",
-		     _("Maximum number of recent sessions"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_max_recent_sessions),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_max_recent_sessions),
-		     0, 1000, 1, 20
+	add_option (_("Appearance/Editor"),
+	     new BoolOption (
+		     "never-display-periodic-midi",
+		     _("Don't display periodic (MTC, MMC) SysEx messages in MIDI Regions"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_never_display_periodic_midi),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_never_display_periodic_midi)
 		     ));
 
+
+	add_option (_("Appearance/Editor"),
+	            new BoolOption (
+		            "use-note-bars-for-velocity",
+		            _("Show velocity horizontally inside notes"),
+		            sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_note_bars_for_velocity),
+		            sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_note_bars_for_velocity)
+		            ));
+
+	add_option (_("Appearance/Editor"),
+	            new BoolOption (
+		            "use-note-color-for-velocity",
+		            _("Use colors to show note velocity"),
+		            sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_note_color_for_velocity),
+		            sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_note_color_for_velocity)
+		            ));
+
+	add_option (_("Appearance/Editor"), new OptionEditorBlank ());
+
+	/* The names of these controls must be the same as those given in MixerStrip
+	   for the actual widgets being controlled.
+	*/
+	_mixer_strip_visibility.add (0, X_("Input"), _("Input"));
+	_mixer_strip_visibility.add (0, X_("PhaseInvert"), _("Phase Invert"));
+	_mixer_strip_visibility.add (0, X_("RecMon"), _("Record & Monitor"));
+	_mixer_strip_visibility.add (0, X_("SoloIsoLock"), _("Solo Iso / Lock"));
+	_mixer_strip_visibility.add (0, X_("Output"), _("Output"));
+	_mixer_strip_visibility.add (0, X_("Comments"), _("Comments"));
+	_mixer_strip_visibility.add (0, X_("VCA"), _("VCA Assigns"));
+
+#ifndef MIXBUS
+	add_option (_("Appearance/Mixer"),
+		new VisibilityOption (
+			_("Mixer Strip"),
+			&_mixer_strip_visibility,
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_mixer_strip_visibility),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_mixer_strip_visibility)
+			)
+		);
+#else
+	add_option (_("Appearance/Mixer"), new OptionEditorHeading (_("Mixer Strip")));
+#endif
+
+#ifndef MIXBUS32C
+	add_option (_("Appearance/Mixer"),
+	     new BoolOption (
+		     "default-narrow_ms",
+		     _("Use narrow strips in the mixer for new strips by default"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_default_narrow_ms),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_default_narrow_ms)
+		     ));
+#endif
+
+	ComboOption<uint32_t>* mic = new ComboOption<uint32_t> (
+		     "max-inline-controls",
+		     _("Limit inline-mixer-strip controls per plugin"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_max_inline_controls),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_max_inline_controls)
+		     );
+	mic->add (0, _("Unlimited"));
+	mic->add (16,  _("16 parameters"));
+	mic->add (32,  _("32 parameters"));
+	mic->add (64,  _("64 parameters"));
+	mic->add (128, _("128 parameters"));
+	add_option (_("Appearance/Mixer"), mic);
+
+	add_option (_("Appearance/Mixer"), new OptionEditorBlank ());
+
+	add_option (_("Appearance/Toolbar"), new OptionEditorHeading (_("Main Transport Toolbar Items")));
+
+	add_option (_("Appearance/Toolbar"),
+	     new BoolOption (
+		     "show-toolbar-recpunch",
+		     _("Display Record/Punch Options"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_toolbar_recpunch),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_toolbar_recpunch)
+		     ));
+
+	add_option (_("Appearance/Toolbar"),
+	     new BoolOption (
+		     "show-toolbar-latency",
+		     _("Display Latency Compensation Info"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_toolbar_latency),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_toolbar_latency)
+		     ));
+
+	if (!ARDOUR::Profile->get_small_screen()) {
+		add_option (_("Appearance/Toolbar"),
+				new BoolOption (
+					"show-secondary-clock",
+					_("Display Secondary Clock"),
+					sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_secondary_clock),
+					sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_secondary_clock)
+					));
+	}
+
+	add_option (_("Appearance/Toolbar"),
+	     new BoolOption (
+		     "show-toolbar-selclock",
+		     _("Display Selection Clock"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_toolbar_selclock),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_toolbar_selclock)
+		     ));
+
+	add_option (_("Appearance/Toolbar"),
+	     new BoolOption (
+		     "show-toolbar-monitor-info",
+		     _("Display Monitor Section Info"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_toolbar_monitor_info),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_toolbar_monitor_info)
+		     ));
+
+	add_option (_("Appearance/Toolbar"),
+	     new BoolOption (
+		     "show-mini-timeline",
+		     _("Display Navigation Timeline"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_mini_timeline),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_mini_timeline)
+		     ));
+
+	add_option (_("Appearance/Toolbar"),
+	     new BoolOption (
+		     "show-editor-meter",
+		     _("Display Master Level Meter"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_editor_meter),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_editor_meter)
+		     ));
+
+	add_option (_("Appearance/Toolbar"),
+			new ColumVisibilityOption (
+				"action-table-columns", _("Display Action-Buttons"), MAX_LUA_ACTION_BUTTONS / 2,
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_action_table_columns),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_action_table_columns)
+				)
+			);
+	add_option (_("Appearance/Toolbar"), new OptionEditorBlank ());
+
+	/* size and scale */
+
+#if (!defined __APPLE__ || defined MIXBUS)
+	add_option (_("Appearance/Size and Scale"), new OptionEditorHeading (_("User Interface Size and Scale")));
+#endif
+
+#ifndef __APPLE__
+	/* font scaling does nothing with GDK/Quartz */
+	add_option (_("Appearance/Size and Scale"), new FontScalingOptions ());
+#endif
+
+	add_option (_("Appearance/Colors"), new OptionEditorHeading (_("Colors")));
+	add_option (_("Appearance/Colors"), new ColorThemeManager);
+	add_option (_("Appearance/Colors"), new OptionEditorBlank ());
+
+	/* Quirks */
+
+	OptionEditorHeading* quirks_head = new OptionEditorHeading (_("Various Workarounds for Windowing Systems"));
+
+	quirks_head->set_note (string_compose (_("Rules for closing, minimizing, maximizing, and stay-on-top can vary \
+with each version of your OS, and the preferences that you've set in your OS.\n\n\
+You can adjust the options, below, to change how application windows and dialogs behave.\n\n\
+These settings will only take effect after %1 is restarted.\n\
+	"), PROGRAM_NAME));
+
+	add_option (_("Appearance/Quirks"), quirks_head);
+
+	bo = new BoolOption (
+		     "use-wm-visibility",
+		     _("Use visibility information provided by your Window Manager/Desktop"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_wm_visibility),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_wm_visibility)
+		     );
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget (),
+				_("If you have trouble toggling between hidden Editor and Mixer windows, try changing this setting."));
+	add_option (_("Appearance/Quirks"), bo);
+
+#ifndef __APPLE__
+	bo = new BoolOption (
+			"all-floating-windows-are-dialogs",
+			_("All floating windows are dialogs"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_all_floating_windows_are_dialogs),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_all_floating_windows_are_dialogs)
+			);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget (),
+			_("Mark all floating windows to be type \"Dialog\" rather than using \"Utility\" for some.\nThis may help with some window managers."));
+	add_option (_("Appearance/Quirks"), bo);
+
+	bo = new BoolOption (
+			"transients-follow-front",
+			_("Transient windows follow front window."),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_transients_follow_front),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_transients_follow_front)
+			);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget (),
+				_("Make transient windows follow the front window when toggling between the editor and mixer."));
+	add_option (_("Appearance/Quirks"), bo);
+#endif
+
+	if (!Profile->get_mixbus()) {
+		bo = new BoolOption (
+				"floating-monitor-section",
+				_("Float detached monitor-section window"),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_floating_monitor_section),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_floating_monitor_section)
+				);
+		Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget (),
+					_("When detaching the monitoring section, mark it as \"Utility\" window to stay in front."));
+		add_option (_("Appearance/Quirks"), bo);
+	}
+
+	add_option (_("Appearance/Quirks"), new OptionEditorBlank ());
+#if (!defined USE_CAIRO_IMAGE_SURFACE || defined CAIRO_SUPPORTS_FORCE_BUGGY_GRADIENTS_ENVIRONMENT_VARIABLE)
+	add_option (_("Appearance"), new OptionEditorHeading (_("Graphics Acceleration")));
+#endif
+
+#ifndef USE_CAIRO_IMAGE_SURFACE
+	BoolOption* bgc = new BoolOption (
+		"cairo-image-surface",
+		_("Disable Graphics Hardware Acceleration (requires restart)"),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_cairo_image_surface),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_cairo_image_surface)
+		);
+
+	Gtkmm2ext::UI::instance()->set_tip (bgc->tip_widget(), string_compose (
+				_("Render large parts of the application user-interface in software, instead of using 2D-graphics acceleration.\nThis requires restarting %1 before having an effect"), PROGRAM_NAME));
+	add_option (_("Appearance"), bgc);
+#endif
+
+#ifdef CAIRO_SUPPORTS_FORCE_BUGGY_GRADIENTS_ENVIRONMENT_VARIABLE
+	BoolOption* bgo = new BoolOption (
+		"buggy-gradients",
+		_("Possibly improve slow graphical performance (requires restart)"),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_buggy_gradients),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_buggy_gradients)
+		);
+
+	Gtkmm2ext::UI::instance()->set_tip (bgo->tip_widget(), string_compose (_("Disables hardware gradient rendering on buggy video drivers (\"buggy gradients patch\").\nThis requires restarting %1 before having an effect"), PROGRAM_NAME));
+	add_option (_("Appearance"), bgo);
+#endif
 
 #if ENABLE_NLS
 
-	add_option (_("General/Translation"), new OptionEditorHeading (_("Internationalization")));
+	add_option (_("Appearance/Translation"), new OptionEditorHeading (_("Internationalization")));
 
 	bo = new BoolOption (
 			"enable-translation",
@@ -2473,52 +2916,35 @@ RCOptionEditor::RCOptionEditor ()
 
 	bo->set_note (string_compose (_("These settings will only take effect after %1 is restarted (if available for your language preferences)."), PROGRAM_NAME));
 
-	add_option (_("General/Translation"), bo);
+	add_option (_("Appearance/Translation"), bo);
 
 	parameter_changed ("enable-translation");
 #endif // ENABLE_NLS
 
 
-	/* EDITOR */
+	/* EDITOR *******************************************************************/
 
-	add_option (_("Editor"), new OptionEditorHeading (_("General")));
+	add_option (_("Editor"), new OptionEditorHeading (_("Region Information")));
 
-	bo = new BoolOption (
-		     "name-new-markers",
-		     _("Prompt for new marker names"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_name_new_markers),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_name_new_markers)
-		);
-	add_option (_("Editor"), bo);
-	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(), _("If enabled, popup a dialog when a new marker is created to allow its name to be set as it is created."
-								"\n\nYou can always rename markers by right-clicking on them"));
+	add_option (_("Editor"),
+			new BoolOption (
+		     "show-region-xrun-markers",
+		     _("Show xrun markers in regions"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_region_xrun_markers),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_region_xrun_markers)
+		     ));
 
-	ComboOption<float>* dps = new ComboOption<float> (
-		     "draggable-playhead-speed",
-		     _("Auto-scroll speed when dragging playhead"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_draggable_playhead_speed),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_draggable_playhead_speed)
-		     );
-	dps->add (0.05, _("5%"));
-	dps->add (0.1, _("10%"));
-	dps->add (0.25, _("25%"));
-	dps->add (0.5, _("50%"));
-	dps->add (1.0, _("100%"));
-	add_option (_("Editor"), dps);
+	add_option (_("Editor"),
+	     new BoolComboOption (
+		     "show-region-gain-envelopes",
+		     _("Show gain envelopes in audio regions"),
+		     _("in all modes"),
+		     _("only in Draw and Internal Edit modes"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_region_gain),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_region_gain)
+		     ));
 
-	ComboOption<float>* eet = new ComboOption<float> (
-		     "extra-ui-extents-time",
-		     _("Limit zooming & summary view to X minutes beyond session extents"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_extra_ui_extents_time),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_extra_ui_extents_time)
-		     );
-	eet->add (1, _("1 minute"));
-	eet->add (2, _("2 minutes"));
-	eet->add (20, _("20 minutes"));
-	eet->add (60, _("1 hour"));
-	eet->add (60*2, _("2 hours"));
-	eet->add (60*24, _("24 hours"));
-	add_option (_("Editor"), eet);
+	add_option (_("Editor"), new OptionEditorHeading (_("Scroll and Zoom Behaviors")));
 
 	if (!Profile->get_mixbus()) {
 
@@ -2563,23 +2989,32 @@ RCOptionEditor::RCOptionEditor ()
 		    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_autoscroll_editor)
 		    ));
 
-	add_option (_("Editor"),
-	     new BoolComboOption (
-		     "show-region-gain-envelopes",
-		     _("Show gain envelopes in audio regions"),
-		     _("in all modes"),
-		     _("only in Draw and Internal Edit modes"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_region_gain),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_region_gain)
-		     ));
+	ComboOption<float>* dps = new ComboOption<float> (
+		     "draggable-playhead-speed",
+		     _("Auto-scroll speed when dragging playhead"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_draggable_playhead_speed),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_draggable_playhead_speed)
+		     );
+	dps->add (0.05, _("5%"));
+	dps->add (0.1, _("10%"));
+	dps->add (0.25, _("25%"));
+	dps->add (0.5, _("50%"));
+	dps->add (1.0, _("100%"));
+	add_option (_("Editor"), dps);
 
-	add_option (_("Editor"),
-			new BoolOption (
-		     "show-region-xrun-markers",
-		     _("Show xrun markers in regions"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_region_xrun_markers),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_region_xrun_markers)
-		     ));
+	ComboOption<float>* eet = new ComboOption<float> (
+		     "extra-ui-extents-time",
+		     _("Limit zooming & summary view to X minutes beyond session extents"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_extra_ui_extents_time),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_extra_ui_extents_time)
+		     );
+	eet->add (1, _("1 minute"));
+	eet->add (2, _("2 minutes"));
+	eet->add (20, _("20 minutes"));
+	eet->add (60, _("1 hour"));
+	eet->add (60*2, _("2 hours"));
+	eet->add (60*24, _("24 hours"));
+	add_option (_("Editor"), eet);
 
 	add_option (_("Editor"), new OptionEditorHeading (_("Editor Behavior")));
 
@@ -2777,306 +3212,21 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Editor/Modifiers"), new OptionEditorBlank ());
 
 
-	/* MIXER -- SOLO AND MUTE */
-
-	add_option (_("Mixer"), new OptionEditorHeading (_("Solo")));
-
-	_solo_control_is_listen_control = new BoolOption (
-		"solo-control-is-listen-control",
-		_("Solo controls are Listen controls"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_solo_control_is_listen_control),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_solo_control_is_listen_control)
-		);
-
-	add_option (_("Mixer"), _solo_control_is_listen_control);
-
-	add_option (_("Mixer"),
-	     new BoolOption (
-		     "exclusive-solo",
-		     _("Exclusive solo"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_exclusive_solo),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_exclusive_solo)
-		     ));
-
-	add_option (_("Mixer"),
-	     new BoolOption (
-		     "show-solo-mutes",
-		     _("Show solo muting"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_show_solo_mutes),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_solo_mutes)
-		     ));
-
-	add_option (_("Mixer"),
-	     new BoolOption (
-		     "solo-mute-override",
-		     _("Soloing overrides muting"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_solo_mute_override),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_solo_mute_override)
-		     ));
-
-	add_option (_("Mixer"),
-	     new FaderOption (
-		     "solo-mute-gain",
-		     _("Solo-in-place mute cut (dB)"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_solo_mute_gain),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_solo_mute_gain)
-		     ));
-
-	_listen_position = new ComboOption<ListenPosition> (
-		"listen-position",
-		_("Listen Position"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_listen_position),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_listen_position)
-		);
-
-	_listen_position->add (AfterFaderListen, _("after-fader (AFL)"));
-	_listen_position->add (PreFaderListen, _("pre-fader (PFL)"));
-
-	add_option (_("Mixer"), _listen_position);
-
-	ComboOption<PFLPosition>* pp = new ComboOption<PFLPosition> (
-		"pfl-position",
-		_("PFL signals come from"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_pfl_position),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_pfl_position)
-		);
-
-	pp->add (PFLFromBeforeProcessors, _("before pre-fader processors"));
-	pp->add (PFLFromAfterProcessors, _("pre-fader but after pre-fader processors"));
-
-	add_option (_("Mixer"), pp);
-
-	ComboOption<AFLPosition>* pa = new ComboOption<AFLPosition> (
-		"afl-position",
-		_("AFL signals come from"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_afl_position),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_afl_position)
-		);
-
-	pa->add (AFLFromBeforeProcessors, _("immediately post-fader"));
-	pa->add (AFLFromAfterProcessors, _("after post-fader processors (before pan)"));
-
-	add_option (_("Mixer"), pa);
-
-	add_option (_("Mixer"), new OptionEditorHeading (_("Master")));
-	add_option (_("Mixer"),
-			new BoolOption (
-				"use-master-volume",
-				_("Enable master-bus output gain control"),
-				sigc::mem_fun (*_rc_config, &RCConfiguration::get_use_master_volume),
-				sigc::mem_fun (*_rc_config, &RCConfiguration::set_use_master_volume)
-				));
-
-	add_option (_("Mixer"), new OptionEditorHeading (_("Default Track / Bus Muting Options")));
-
-	add_option (_("Mixer"),
-	     new BoolOption (
-		     "mute-affects-pre-fader",
-		     _("Mute affects pre-fader sends"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mute_affects_pre_fader),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mute_affects_pre_fader)
-		     ));
-
-	add_option (_("Mixer"),
-	     new BoolOption (
-		     "mute-affects-post-fader",
-		     _("Mute affects post-fader sends"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mute_affects_post_fader),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mute_affects_post_fader)
-		     ));
-
-	add_option (_("Mixer"),
-	     new BoolOption (
-		     "mute-affects-control-outs",
-		     _("Mute affects control outputs"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mute_affects_control_outs),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mute_affects_control_outs)
-		     ));
-
-	add_option (_("Mixer"),
-	     new BoolOption (
-		     "mute-affects-main-outs",
-		     _("Mute affects main outputs"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mute_affects_main_outs),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mute_affects_main_outs)
-		     ));
-
-
-	add_option (_("Mixer"), new OptionEditorHeading (_("Send Routing")));
-	add_option (_("Mixer"),
-			new BoolOption (
-				"link-send-and-route-panner",
-				_("Link panners of Aux and External Sends with main panner by default"),
-				sigc::mem_fun (*_rc_config, &RCConfiguration::get_link_send_and_route_panner),
-				sigc::mem_fun (*_rc_config, &RCConfiguration::set_link_send_and_route_panner)
-				));
-
-	/* Signal Flow */
-
-	add_option (_("Signal Flow"), new OptionEditorHeading (_("Monitoring")));
-
-	ComboOption<MonitorModel>* mm = new ComboOption<MonitorModel> (
-		"monitoring-model",
-		_("Record monitoring handled by"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_monitoring_model),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_monitoring_model)
-		);
-
-	if (AudioEngine::instance()->port_engine().can_monitor_input()) {
-		mm->add (HardwareMonitoring, _("via Audio Driver"));
-	}
-
-	string prog (PROGRAM_NAME);
-	boost::algorithm::to_lower (prog);
-	mm->add (SoftwareMonitoring, string_compose (_("%1"), prog));
-	mm->add (ExternalMonitoring, _("audio hardware"));
-
-	add_option (_("Signal Flow"), mm);
-
-	bo = new BoolOption (
-		     "auto-input-does-talkback",
-		     _("Auto Input does 'talkback'"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_auto_input_does_talkback),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_auto_input_does_talkback)
-		     );
-	add_option (_("Signal Flow"), bo);
-	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
-			string_compose (_("<b>When enabled</b>, and Transport->Auto-Input is enabled, %1 will always monitor audio inputs when transport is stopped, even if tracks aren't armed."),
-					PROGRAM_NAME));
-
-	if (!Profile->get_mixbus()) {
-
-		add_option (_("Signal Flow"), new OptionEditorHeading (_("Track and Bus Connections")));
-
-		bo = new BoolOption (
-					"auto-connect-standard-busses",
-					_("Auto-connect main output (master or monitor) bus to physical ports"),
-					sigc::mem_fun (*_rc_config, &RCConfiguration::get_auto_connect_standard_busses),
-					sigc::mem_fun (*_rc_config, &RCConfiguration::set_auto_connect_standard_busses)
-					);
-		add_option (_("Signal Flow"), bo);
-		Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
-			_("<b>When enabled</b> the main output bus is auto-connected to the first N physical ports. "
-				"If the session has a monitor-section, the monitor-bus output is connected to the hardware playback ports, "
-				"otherwise the master-bus output is directly used for playback."));
-
-		ComboOption<AutoConnectOption>* iac = new ComboOption<AutoConnectOption> (
-				"input-auto-connect",
-				_("Connect track inputs"),
-				sigc::mem_fun (*_rc_config, &RCConfiguration::get_input_auto_connect),
-				sigc::mem_fun (*_rc_config, &RCConfiguration::set_input_auto_connect)
-				);
-
-		iac->add (AutoConnectPhysical, _("automatically to physical inputs"));
-		iac->add (ManualConnect, _("manually"));
-
-		add_option (_("Signal Flow"), iac);
-
-		ComboOption<AutoConnectOption>* oac = new ComboOption<AutoConnectOption> (
-				"output-auto-connect",
-				_("Connect track and bus outputs"),
-				sigc::mem_fun (*_rc_config, &RCConfiguration::get_output_auto_connect),
-				sigc::mem_fun (*_rc_config, &RCConfiguration::set_output_auto_connect)
-				);
-
-		oac->add (AutoConnectPhysical, _("automatically to physical outputs"));
-		oac->add (AutoConnectMaster, _("automatically to master bus"));
-		oac->add (ManualConnect, _("manually"));
-
-		add_option (_("Signal Flow"), oac);
-
-		bo = new BoolOption (
-				"strict-io",
-				_("Use 'Strict-I/O' for new tracks or busses"),
-				sigc::mem_fun (*_rc_config, &RCConfiguration::get_strict_io),
-				sigc::mem_fun (*_rc_config, &RCConfiguration::set_strict_io)
-				);
-
-		add_option (_("Signal Flow"), bo);
-		Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
-				_("With strict-i/o enabled, Effect Processors will not modify the number of channels on a track. The number of output channels will always match the number of input channels."));
-
-	}  // !mixbus
-
-
-	/* AUDIO */
-
-	add_option (_("Audio"), new OptionEditorHeading (_("Buffering")));
-
-	add_option (_("Audio"), new BufferingOptions (_rc_config));
-
-	add_option (_("Audio"), new OptionEditorHeading (_("Denormals")));
-
-	add_option (_("Audio"),
-	     new BoolOption (
-		     "denormal-protection",
-		     _("Use DC bias to protect against denormals"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_denormal_protection),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_denormal_protection)
-		     ));
-
-	ComboOption<DenormalModel>* dm = new ComboOption<DenormalModel> (
-		"denormal-model",
-		_("Processor handling"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_denormal_model),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_denormal_model)
-		);
-
-	int dmsize = 1;
-	dm->add (DenormalNone, _("no processor handling"));
-
-	FPU* fpu = FPU::instance();
-
-	if (fpu->has_flush_to_zero()) {
-		++dmsize;
-		dm->add (DenormalFTZ, _("use FlushToZero"));
-	} else if (_rc_config->get_denormal_model() == DenormalFTZ) {
-		_rc_config->set_denormal_model(DenormalNone);
-	}
-
-	if (fpu->has_denormals_are_zero()) {
-		++dmsize;
-		dm->add (DenormalDAZ, _("use DenormalsAreZero"));
-	} else if (_rc_config->get_denormal_model() == DenormalDAZ) {
-		_rc_config->set_denormal_model(DenormalNone);
-	}
-
-	if (fpu->has_flush_to_zero() && fpu->has_denormals_are_zero()) {
-		++dmsize;
-		dm->add (DenormalFTZDAZ, _("use FlushToZero and DenormalsAreZero"));
-	} else if (_rc_config->get_denormal_model() == DenormalFTZDAZ) {
-		_rc_config->set_denormal_model(DenormalNone);
-	}
-
-	if (dmsize == 1) {
-		dm->set_sensitive(false);
-	}
-
-	dm->set_note (_("Changes may not be effective until audio-engine restart."));
-
-	add_option (_("Audio"), dm);
-
-	add_option (_("Audio"), new OptionEditorHeading (_("Regions")));
-
-	add_option (_("Audio"),
-	     new BoolOption (
-		     "auto-analyse-audio",
-		     _("Enable automatic analysis of audio"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_auto_analyse_audio),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_auto_analyse_audio)
-		     ));
-
-	add_option (_("Audio"),
-	     new BoolOption (
-		     "replicate-missing-region-channels",
-		     _("Replicate missing region channels"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_replicate_missing_region_channels),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_replicate_missing_region_channels)
-		     ));
-
-	/* MIDI */
+	/* MIDI *********************************************************************/
 
 	add_option (_("MIDI"), new OptionEditorHeading (_("Session")));
+
+	bo = new BoolOption (
+		"allow-non-quarter-pulse",
+		_("Allow non quarter-note pulse"),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_allow_non_quarter_pulse),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_allow_non_quarter_pulse)
+		);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+					    string_compose (_("<b>When enabled</b> %1 will allow tempo to be expressed in divisions per minute\n"
+							      "<b>When disabled</b> %1 will only allow tempo to be expressed in quarter notes per minute"),
+							    PROGRAM_NAME));
+	add_option (_("MIDI"), bo);
 
 	add_option (_("MIDI"),
 	     new SpinOption<int32_t> (
@@ -3127,217 +3277,24 @@ RCOptionEditor::RCOptionEditor ()
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_input_follows_selection)
 			    ));
 
-	add_option (_("MIDI"), new MidiPortOptions ());
+	add_option (_("MIDI/MIDI Port Config"), new OptionEditorBlank ());
+	add_option (_("MIDI/MIDI Port Config"), new MidiPortOptions ());
+
 	add_option (_("MIDI"), new OptionEditorBlank ());
 
-	/* Click */
-
-	add_option (_("Metronome"), new OptionEditorHeading (_("Metronome")));
-	add_option (_("Metronome"), new ClickOptions (_rc_config));
-	add_option (_("Metronome"), new OptionEditorHeading (_("Options")));
-
-	bo = new BoolOption (
-			"click-record-only",
-			_("Enable metronome only while recording"),
-			sigc::mem_fun (*_rc_config, &RCConfiguration::get_click_record_only),
-			sigc::mem_fun (*_rc_config, &RCConfiguration::set_click_record_only)
-			);
-
-	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
-			string_compose (_("<b>When enabled</b> the metronome will remain silent if %1 is <b>not recording</b>."), PROGRAM_NAME));
-	add_option (_("Metronome"), bo);
-	add_option (_("Metronome"), new OptionEditorBlank ());
-
-
-	/* Meters */
-
-	add_option (S_("Preferences|Metering"), new OptionEditorHeading (_("Metering")));
-
-	ComboOption<float>* mht = new ComboOption<float> (
-		"meter-hold",
-		_("Peak hold time"),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_meter_hold),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_meter_hold)
-		);
-
-	mht->add (MeterHoldOff, _("off"));
-	mht->add (MeterHoldShort, _("short"));
-	mht->add (MeterHoldMedium, _("medium"));
-	mht->add (MeterHoldLong, _("long"));
-
-	add_option (S_("Preferences|Metering"), mht);
-
-	ComboOption<float>* mfo = new ComboOption<float> (
-		"meter-falloff",
-		_("DPM fall-off"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_falloff),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_falloff)
-		);
-
-	mfo->add (METER_FALLOFF_OFF,      _("off"));
-	mfo->add (METER_FALLOFF_SLOWEST,  _("slowest [6.6dB/sec]"));
-	mfo->add (METER_FALLOFF_SLOW,     _("slow [8.6dB/sec] (BBC PPM, EBU PPM)"));
-	mfo->add (METER_FALLOFF_SLOWISH,  _("moderate [12.0dB/sec] (DIN)"));
-	mfo->add (METER_FALLOFF_MODERATE, _("medium [13.3dB/sec] (EBU Digi PPM, IRT Digi PPM)"));
-	mfo->add (METER_FALLOFF_MEDIUM,   _("fast [20dB/sec]"));
-	mfo->add (METER_FALLOFF_FAST,     _("very fast [32dB/sec]"));
-
-	add_option (S_("Preferences|Metering"), mfo);
-
-	ComboOption<MeterLineUp>* mlu = new ComboOption<MeterLineUp> (
-		"meter-line-up-level",
-		_("Meter line-up level; 0dBu"),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_meter_line_up_level),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_meter_line_up_level)
-		);
-
-	mlu->add (MeteringLineUp24, _("-24dBFS (SMPTE US: 4dBu = -20dBFS)"));
-	mlu->add (MeteringLineUp20, _("-20dBFS (SMPTE RP.0155)"));
-	mlu->add (MeteringLineUp18, _("-18dBFS (EBU, BBC)"));
-	mlu->add (MeteringLineUp15, _("-15dBFS (DIN)"));
-
-	Gtkmm2ext::UI::instance()->set_tip (mlu->tip_widget(), _("Configure meter-marks and color-knee point for dBFS scale DPM, set reference level for IEC1/Nordic, IEC2 PPM and VU meter."));
-
-	add_option (S_("Preferences|Metering"), mlu);
-
-	ComboOption<MeterLineUp>* mld = new ComboOption<MeterLineUp> (
-		"meter-line-up-din",
-		_("IEC1/DIN Meter line-up level; 0dBu"),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_meter_line_up_din),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_meter_line_up_din)
-		);
-
-	mld->add (MeteringLineUp24, _("-24dBFS (SMPTE US: 4dBu = -20dBFS)"));
-	mld->add (MeteringLineUp20, _("-20dBFS (SMPTE RP.0155)"));
-	mld->add (MeteringLineUp18, _("-18dBFS (EBU, BBC)"));
-	mld->add (MeteringLineUp15, _("-15dBFS (DIN)"));
-
-	Gtkmm2ext::UI::instance()->set_tip (mld->tip_widget(), _("Reference level for IEC1/DIN meter."));
-
-	add_option (S_("Preferences|Metering"), mld);
-
-	ComboOption<VUMeterStandard>* mvu = new ComboOption<VUMeterStandard> (
-		"meter-vu-standard",
-		_("VU Meter standard"),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_meter_vu_standard),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_meter_vu_standard)
-		);
-
-	mvu->add (MeteringVUfrench,   _("0VU = -2dBu (France)"));
-	mvu->add (MeteringVUamerican, _("0VU = 0dBu (North America, Australia)"));
-	mvu->add (MeteringVUstandard, _("0VU = +4dBu (standard)"));
-	mvu->add (MeteringVUeight,    _("0VU = +8dBu"));
-
-	add_option (S_("Preferences|Metering"), mvu);
-
-	HSliderOption *mpks = new HSliderOption("meter-peak",
-			_("Peak indicator threshold [dBFS]"),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_meter_peak),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_meter_peak),
-			-10, 0, .1, .1
-			);
-
-	Gtkmm2ext::UI::instance()->set_tip (
-			mpks->tip_widget(),
-			_("Specify the audio signal level in dBFS at and above which the meter-peak indicator will flash red."));
-
-	add_option (S_("Preferences|Metering"), mpks);
-
-	OptionEditorHeading* default_meter_head = new OptionEditorHeading (_("Default Meter Types"));
-	default_meter_head->set_note (_("These settings apply to newly created tracks and busses. For the Master bus, this will be when a new session is created."));
-
-	add_option (S_("Preferences|Metering"), default_meter_head);
-
-	ComboOption<MeterType>* mtm = new ComboOption<MeterType> (
-		"meter-type-master",
-		_("Default Meter Type for Master Bus"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_type_master),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_type_master)
-		);
-	mtm->add (MeterPeak,    ArdourMeter::meter_type_string(MeterPeak));
-	mtm->add (MeterK20,     ArdourMeter::meter_type_string(MeterK20));
-	mtm->add (MeterK14,     ArdourMeter::meter_type_string(MeterK14));
-	mtm->add (MeterK12,     ArdourMeter::meter_type_string(MeterK12));
-	mtm->add (MeterIEC1DIN, ArdourMeter::meter_type_string(MeterIEC1DIN));
-	mtm->add (MeterIEC1NOR, ArdourMeter::meter_type_string(MeterIEC1NOR));
-	mtm->add (MeterIEC2BBC, ArdourMeter::meter_type_string(MeterIEC2BBC));
-	mtm->add (MeterIEC2EBU, ArdourMeter::meter_type_string(MeterIEC2EBU));
-
-	add_option (S_("Preferences|Metering"), mtm);
-
-
-	ComboOption<MeterType>* mtb = new ComboOption<MeterType> (
-		"meter-type-bus",
-		_("Default meter type for busses"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_type_bus),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_type_bus)
-		);
-	mtb->add (MeterPeak,    ArdourMeter::meter_type_string(MeterPeak));
-	mtb->add (MeterK20,     ArdourMeter::meter_type_string(MeterK20));
-	mtb->add (MeterK14,     ArdourMeter::meter_type_string(MeterK14));
-	mtb->add (MeterK12,     ArdourMeter::meter_type_string(MeterK12));
-	mtb->add (MeterIEC1DIN, ArdourMeter::meter_type_string(MeterIEC1DIN));
-	mtb->add (MeterIEC1NOR, ArdourMeter::meter_type_string(MeterIEC1NOR));
-	mtb->add (MeterIEC2BBC, ArdourMeter::meter_type_string(MeterIEC2BBC));
-	mtb->add (MeterIEC2EBU, ArdourMeter::meter_type_string(MeterIEC2EBU));
-
-	add_option (S_("Preferences|Metering"), mtb);
-
-	ComboOption<MeterType>* mtt = new ComboOption<MeterType> (
-		"meter-type-track",
-		_("Default meter type for tracks"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_type_track),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_type_track)
-		);
-	mtt->add (MeterPeak,    ArdourMeter::meter_type_string(MeterPeak));
-	mtt->add (MeterPeak0dB, ArdourMeter::meter_type_string(MeterPeak0dB));
-
-	add_option (S_("Preferences|Metering"), mtt);
-
-	add_option (S_("Preferences|Metering"), new OptionEditorHeading (_("Post Export Analysis")));
-
-	add_option (S_("Preferences|Metering"),
-	     new BoolOption (
-		     "save-export-analysis-image",
-		     _("Save loudness analysis as image file after export"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_save_export_analysis_image),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_save_export_analysis_image)
-		     ));
-
-	add_option (S_("Preferences|Metering"),
-	     new BoolOption (
-		     "save-export-mixer-screenshot",
-		     _("Save Mixer screenshot after export"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_save_export_mixer_screenshot),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_save_export_mixer_screenshot)
-		     ));
-
-	add_option (S_("Preferences|Metering"), new OptionEditorHeading (_("Input Meter Layout")));
-
-	ComboOption<InputMeterLayout>* iml = new ComboOption<InputMeterLayout> (
-		"input-meter-layout",
-		_("Input Meter Layout"),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_input_meter_layout),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_input_meter_layout)
-		);
-
-	iml->add (LayoutAutomatic,  _("Automatic"));
-	iml->add (LayoutHorizontal, _("Horizontal"));
-	iml->add (LayoutVertical,   _("Vertical"));
-
-	add_option (S_("Preferences|Metering"), iml);
-
-	add_option (S_("Preferences|Metering"),
-	     new BoolOption (
-		     "input-meter-scopes",
-		     _("Show waveform display for each input-meter"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_input_meter_scopes),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_input_meter_scopes)
-		     ));
-
-	/* TRANSPORT & Sync */
+	/* TRANSPORT & SYNC *********************************************************/
 
 	add_option (_("Transport"), new OptionEditorHeading (_("General")));
+
+	bo = new BoolOption (
+		     "name-new-markers",
+		     _("Prompt for new marker names"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_name_new_markers),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_name_new_markers)
+		);
+	add_option (_("Transport"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(), _("If enabled, popup a dialog when a new marker is created to allow its name to be set as it is created."
+								"\n\nYou can always rename markers by right-clicking on them."));
 
 	bo = new BoolOption (
 		     "stop-at-session-end",
@@ -3470,10 +3427,26 @@ RCOptionEditor::RCOptionEditor ()
 		     );
 	add_option (_("Transport"), bo);
 
+	add_option (_("Transport/Chase"), new OptionEditorHeading (_("MIDI Machine Control (MMC)")));
 
-	add_option (_("Transport"), new OptionEditorHeading (_("Transport Masters")));
+	add_option (_("Transport/Chase"),
+		    new BoolOption (
+			    "mmc-control",
+			    _("Respond to MMC commands"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_mmc_control),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_mmc_control)
+			    ));
 
-	add_option (_("Transport"), new WidgetOption (X_("foo"), X_("Transport Masters"), _transport_masters_widget));
+	add_option (_("Transport/Chase"),
+	     new SpinOption<uint8_t> (
+		     "mmc-receive-device-id",
+		     _("Inbound MMC device ID"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mmc_receive_device_id),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mmc_receive_device_id),
+		     0, 127, 1, 10
+		     ));
+
+	add_option (_("Transport/Chase"), new OptionEditorHeading (_("Transport Masters")));
 
 	_sync_framerate = new BoolOption (
 		     "timecode-sync-frame-rate",
@@ -3488,12 +3461,11 @@ RCOptionEditor::RCOptionEditor ()
 				   "<b>When disabled</b> the session video frame rate will not be changed to match that of the selected external timecode source."
 				   "Instead the frame rate indication in the main clock will flash red and %1 will convert between the external "
 				   "timecode standard and the session standard."), PROGRAM_NAME));
+	add_option (_("Transport/Chase"), _sync_framerate);
 
-	add_option (_("Transport"), _sync_framerate);
+	add_option (_("Transport/Generate"), new OptionEditorHeading (_("Linear Timecode (LTC) Generator")));
 
-	add_option (_("Transport/LTC"), new OptionEditorHeading (_("Linear Timecode (LTC) Generator")));
-
-	add_option (_("Transport/LTC"),
+	add_option (_("Transport/Generate"),
 		    new BoolOption (
 			    "send-ltc",
 			    _("Enable LTC generator"),
@@ -3510,7 +3482,7 @@ RCOptionEditor::RCOptionEditor ()
 	Gtkmm2ext::UI::instance()->set_tip
 		(_ltc_send_continuously->tip_widget(),
 		 string_compose (_("<b>When enabled</b> %1 will continue to send LTC information even when the transport (playhead) is not moving"), PROGRAM_NAME));
-	add_option (_("Transport/LTC"), _ltc_send_continuously);
+	add_option (_("Transport/Generate"), _ltc_send_continuously);
 
 	_ltc_volume_slider = new HSliderOption("ltcvol", _("LTC generator level [dBFS]"),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_ltc_output_volume),
@@ -3522,23 +3494,13 @@ RCOptionEditor::RCOptionEditor ()
 		(_ltc_volume_slider->tip_widget(),
 		 _("Specify the Peak Volume of the generated LTC signal in dBFS. A good value is  0dBu ^= -18dBFS in an EBU calibrated system"));
 
-	add_option (_("Transport/LTC"), _ltc_volume_slider);
+	add_option (_("Transport/Generate"), _ltc_volume_slider);
 
-	add_option (_("Transport/LTC"), new LTCPortSelectOption (_rc_config, this));
+	add_option (_("Transport/Generate"), new LTCPortSelectOption (_rc_config, this));
 
-	add_option (_("Transport/MIDI"), new OptionEditorHeading (_("MIDI Beat Clock (Mclk) Generator")));
+	add_option (_("Transport/Generate"), new OptionEditorHeading (_("MIDI Time Code (MTC) Generator")));
 
-	add_option (_("Transport/MIDI"),
-		    new BoolOption (
-			    "send-midi-clock",
-			    _("Enable Mclk generator"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_send_midi_clock),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_midi_clock)
-			    ));
-
-	add_option (_("Transport/MIDI"), new OptionEditorHeading (_("MIDI Time Code (MTC) Generator")));
-
-	add_option (_("Transport/MIDI"),
+	add_option (_("Transport/Generate"),
 		    new BoolOption (
 			    "send-mtc",
 			    _("Enable MTC Generator"),
@@ -3546,7 +3508,7 @@ RCOptionEditor::RCOptionEditor ()
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_mtc)
 			    ));
 
-	add_option (_("Transport/MIDI"),
+	add_option (_("Transport/Generate"),
 		    new SpinOption<int> (
 			    "mtc-qf-speed-tolerance",
 			    _("Percentage either side of normal transport speed to transmit MTC"),
@@ -3555,17 +3517,9 @@ RCOptionEditor::RCOptionEditor ()
 			    0, 20, 1, 5
 			    ));
 
-	add_option (_("Transport/MIDI"), new OptionEditorHeading (_("MIDI Machine Control (MMC)")));
+	add_option (_("Transport/Generate"), new OptionEditorHeading (_("MIDI Machine Control (MMC)")));
 
-	add_option (_("Transport/MIDI"),
-		    new BoolOption (
-			    "mmc-control",
-			    _("Respond to MMC commands"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_mmc_control),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_mmc_control)
-			    ));
-
-	add_option (_("Transport/MIDI"),
+	add_option (_("Transport/Generate"),
 		    new BoolOption (
 			    "send-mmc",
 			    _("Send MMC commands"),
@@ -3573,16 +3527,7 @@ RCOptionEditor::RCOptionEditor ()
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_mmc)
 			    ));
 
-	add_option (_("Transport/MIDI"),
-	     new SpinOption<uint8_t> (
-		     "mmc-receive-device-id",
-		     _("Inbound MMC device ID"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mmc_receive_device_id),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mmc_receive_device_id),
-		     0, 127, 1, 10
-		     ));
-
-	add_option (_("Transport/MIDI"),
+	add_option (_("Transport/Generate"),
 	     new SpinOption<uint8_t> (
 		     "mmc-send-device-id",
 		     _("Outbound MMC device ID"),
@@ -3591,14 +3536,28 @@ RCOptionEditor::RCOptionEditor ()
 		     0, 127, 1, 10
 		     ));
 
+	add_option (_("Transport/Generate"), new OptionEditorHeading (_("MIDI Beat Clock (Mclk) Generator")));
 
-	/* Control Surfaces */
+	add_option (_("Transport/Generate"),
+		    new BoolOption (
+			    "send-midi-clock",
+			    _("Enable Mclk generator"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_send_midi_clock),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_midi_clock)
+			    ));
 
-	add_option (_("Control Surfaces"), new OptionEditorHeading (_("Control Surfaces")));
-	add_option (_("Control Surfaces"), new ControlSurfacesOptions ());
+	add_option (_("Transport"), new OptionEditorHeading (_("Plugins")));
+	bo = new BoolOption (
+		"plugins-stop-with-transport",
+		_("Silence plugins when the transport is stopped"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_plugins_stop_with_transport),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_plugins_stop_with_transport)
+		);
+	add_option (_("Transport"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+					    _("<b>When enabled</b> plugins will be reset at transport stop. When disabled plugins will be left unchanged at transport stop.\n\nThis mostly affects plugins with a \"tail\" like Reverbs."));
 
-
-	/* PLUGINS */
+	/* PLUGINS ******************************************************************/
 
 #if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT || defined AUDIOUNIT_SUPPORT || defined VST3_SUPPORT)
 	add_option (_("Plugins"), new OptionEditorHeading (_("Scan/Discover")));
@@ -3623,16 +3582,6 @@ RCOptionEditor::RCOptionEditor ()
 #endif
 
 	bo = new BoolOption (
-		"plugins-stop-with-transport",
-		_("Silence plugins when the transport is stopped"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_plugins_stop_with_transport),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_plugins_stop_with_transport)
-		);
-	add_option (_("Plugins"), bo);
-	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
-					    _("<b>When enabled</b> plugins will be reset at transport stop. When disabled plugins will be left unchanged at transport stop.\n\nThis mostly affects plugins with a \"tail\" like Reverbs."));
-
-	bo = new BoolOption (
 		"new-plugins-active",
 			_("Make new plugins active"),
 			sigc::mem_fun (*_rc_config, &RCConfiguration::get_new_plugins_active),
@@ -3641,22 +3590,6 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Plugins"), bo);
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
 					    _("<b>When enabled</b> plugins will be activated when they are added to tracks/busses. When disabled plugins will be left inactive when they are added to tracks/busses"));
-
-	ComboOption<uint32_t>* lna = new ComboOption<uint32_t> (
-		     "limit-n-automatables",
-		     _("Limit automatable parameters per plugin"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_limit_n_automatables),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_limit_n_automatables)
-		     );
-	lna->add (0, _("Unlimited"));
-	lna->add (64,  _("64 parameters"));
-	lna->add (128, _("128 parameters"));
-	lna->add (256, _("256 parameters"));
-	lna->add (512, _("512 parameters"));
-	lna->add (999, _("999 parameters"));
-	add_option (_("Plugins"), lna);
-	Gtkmm2ext::UI::instance()->set_tip (lna->tip_widget(),
-					    _("Some Plugins expose an unreasonable amount of control-inputs. This option limits the number of parameters that can are listed as automatable without restricting the number of total controls.\n\nThis reduces lag in the GUI and shortens excessively long drop-down lists for plugins with a large number of control ports.\n\nNote: This only affects newly added plugins and is applied to plugin on session-reload. Already automated parameters are retained."));
 
 #if (defined WINDOWS_VST_SUPPORT || defined MACVST_SUPPORT || defined LXVST_SUPPORT || defined VST3_SUPPORT)
 	add_option (_("Plugins/VST"), new OptionEditorHeading (_("VST")));
@@ -3905,478 +3838,552 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Plugins"), new OptionEditorBlank ());
 
-	/* INTERFACE */
-#if (!defined USE_CAIRO_IMAGE_SURFACE || defined CAIRO_SUPPORTS_FORCE_BUGGY_GRADIENTS_ENVIRONMENT_VARIABLE)
-	add_option (_("Appearance"), new OptionEditorHeading (_("Graphics Acceleration")));
-#endif
+	/* SIGNAL FLOW (MONITORING, SOLO) *******************************************/
 
-#ifndef USE_CAIRO_IMAGE_SURFACE
-	BoolOption* bgc = new BoolOption (
-		"cairo-image-surface",
-		_("Disable Graphics Hardware Acceleration (requires restart)"),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_cairo_image_surface),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_cairo_image_surface)
+	add_option (_("Signal Flow"), new OptionEditorHeading (_("Monitoring")));
+
+	ComboOption<MonitorModel>* mm = new ComboOption<MonitorModel> (
+		"monitoring-model",
+		_("Record monitoring handled by"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_monitoring_model),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_monitoring_model)
 		);
 
-	Gtkmm2ext::UI::instance()->set_tip (bgc->tip_widget(), string_compose (
-				_("Render large parts of the application user-interface in software, instead of using 2D-graphics acceleration.\nThis requires restarting %1 before having an effect"), PROGRAM_NAME));
-	add_option (_("Appearance"), bgc);
-#endif
+	if (AudioEngine::instance()->port_engine().can_monitor_input()) {
+		mm->add (HardwareMonitoring, _("via Audio Driver"));
+	}
 
-#ifdef CAIRO_SUPPORTS_FORCE_BUGGY_GRADIENTS_ENVIRONMENT_VARIABLE
-	BoolOption* bgo = new BoolOption (
-		"buggy-gradients",
-		_("Possibly improve slow graphical performance (requires restart)"),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_buggy_gradients),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_buggy_gradients)
-		);
+	string prog (PROGRAM_NAME);
+	boost::algorithm::to_lower (prog);
+	mm->add (SoftwareMonitoring, string_compose (_("%1"), prog));
+	mm->add (ExternalMonitoring, _("audio hardware"));
 
-	Gtkmm2ext::UI::instance()->set_tip (bgo->tip_widget(), string_compose (_("Disables hardware gradient rendering on buggy video drivers (\"buggy gradients patch\").\nThis requires restarting %1 before having an effect"), PROGRAM_NAME));
-	add_option (_("Appearance"), bgo);
-#endif
-	add_option (_("Appearance"), new OptionEditorHeading (_("Graphical User Interface")));
-
-	add_option (_("Appearance"),
-	     new BoolOption (
-		     "widget-prelight",
-		     _("Highlight widgets on mouseover"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_widget_prelight),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_widget_prelight)
-		     ));
-
-	add_option (_("Appearance"),
-	     new BoolOption (
-		     "use-tooltips",
-		     _("Show tooltips if mouse hovers over a control"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_tooltips),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_tooltips)
-		     ));
+	add_option (_("Signal Flow"), mm);
 
 	bo = new BoolOption (
-			"super-rapid-clock-update",
-			_("Update clocks at TC Frame rate"),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_super_rapid_clock_update),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_super_rapid_clock_update)
-			);
+		     "auto-input-does-talkback",
+		     _("Auto Input does 'talkback'"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_auto_input_does_talkback),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_auto_input_does_talkback)
+		     );
+	add_option (_("Signal Flow"), bo);
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
-			_("<b>When enabled</b> clock displays are updated every Timecode Frame (fps).\n\n"
-				"<b>When disabled</b> clock displays are updated only every 100ms."
-			 ));
-	add_option (_("Appearance"), bo);
+			string_compose (_("<b>When enabled</b>, and Transport->Auto-Input is enabled, %1 will always monitor audio inputs when transport is stopped, even if tracks aren't armed."),
+					PROGRAM_NAME));
 
-	add_option (_("Appearance"),
-			new BoolOption (
-				"blink-rec-arm",
-				_("Blink Rec-Arm buttons"),
-				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_blink_rec_arm),
-				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_blink_rec_arm)
-				));
+	add_option (_("Signal Flow"), new OptionEditorHeading (_("Solo")));
 
-	add_option (_("Appearance"),
-			new BoolOption (
-				"blink-alert-indicators",
-				_("Blink Alert Indicators"),
-				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_blink_alert_indicators),
-				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_blink_alert_indicators)
-				));
+	_solo_control_is_listen_control = new BoolOption (
+		"solo-control-is-listen-control",
+		_("Solo controls are Listen controls"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_solo_control_is_listen_control),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_solo_control_is_listen_control)
+		);
 
+	add_option (_("Signal Flow"), _solo_control_is_listen_control);
 
-#ifndef __APPLE__
-	/* font scaling does nothing with GDK/Quartz */
-	add_option (_("Appearance"), new FontScalingOptions ());
-#endif
-	add_option (_("Appearance/Editor"), new OptionEditorHeading (_("General")));
-	add_option (_("Appearance/Editor"),
+	add_option (_("Signal Flow"),
 	     new BoolOption (
-		     "show-name-highlight",
-		     _("Use name highlight bars in region displays (requires a restart)"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_name_highlight),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_name_highlight)
+		     "exclusive-solo",
+		     _("Exclusive solo"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_exclusive_solo),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_exclusive_solo)
 		     ));
 
-	add_option (_("Appearance/Editor"),
-			new BoolOption (
-			"color-regions-using-track-color",
-			_("Region color follows track color"),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_color_regions_using_track_color),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_color_regions_using_track_color)
-			));
+	add_option (_("Signal Flow"),
+	     new BoolOption (
+		     "show-solo-mutes",
+		     _("Show solo muting"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_show_solo_mutes),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_solo_mutes)
+		     ));
 
-	add_option (_("Appearance/Editor"),
-			new BoolOption (
-			"show-region-names",
-			_("Show Region Names"),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_region_name),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_region_name)
-			));
+	add_option (_("Signal Flow"),
+	     new BoolOption (
+		     "solo-mute-override",
+		     _("Soloing overrides muting"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_solo_mute_override),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_solo_mute_override)
+		     ));
 
+	add_option (_("Signal Flow"),
+	     new FaderOption (
+		     "solo-mute-gain",
+		     _("Solo-in-place mute cut (dB)"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_solo_mute_gain),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_solo_mute_gain)
+		     ));
 
-	ComboOption<int>* emode = new ComboOption<int> (
-			"time-axis-name-ellipsize-mode",
-			_("Track name ellipsize mode"),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_time_axis_name_ellipsize_mode),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_time_axis_name_ellipsize_mode)
+	_listen_position = new ComboOption<ListenPosition> (
+		"listen-position",
+		_("Listen Position"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_listen_position),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_listen_position)
 		);
-	emode->add (-1, _("Ellipsize start of name"));
-	emode->add (0, _("Ellipsize middle of name"));
-	emode->add (1, _("Ellipsize end of name"));
 
-	Gtkmm2ext::UI::instance()->set_tip (emode->tip_widget(), _("Choose which part of long track names are hidden in the editor's track headers"));
-	add_option (_("Appearance/Editor"), emode);
+	_listen_position->add (AfterFaderListen, _("after-fader (AFL)"));
+	_listen_position->add (PreFaderListen, _("pre-fader (PFL)"));
 
-	ComboOption<uint32_t>* gap = new ComboOption<uint32_t> (
-		     "vertical-region-gap",
-		     _("Add a visual gap below Audio Regions"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_vertical_region_gap),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_vertical_region_gap)
-		     );
-	gap->add (0, _("None"));
-	gap->add (2, _("Small"));
-	gap->add (4, _("Large"));
-	add_option (_("Appearance/Editor"), gap);
+	add_option (_("Signal Flow"), _listen_position);
 
-	add_option (_("Appearance/Editor"), new OptionEditorHeading (_("Waveforms")));
+	ComboOption<PFLPosition>* pp = new ComboOption<PFLPosition> (
+		"pfl-position",
+		_("PFL signals come from"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_pfl_position),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_pfl_position)
+		);
+
+	pp->add (PFLFromBeforeProcessors, _("before pre-fader processors"));
+	pp->add (PFLFromAfterProcessors, _("pre-fader but after pre-fader processors"));
+
+	add_option (_("Signal Flow"), pp);
+
+	ComboOption<AFLPosition>* pa = new ComboOption<AFLPosition> (
+		"afl-position",
+		_("AFL signals come from"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_afl_position),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_afl_position)
+		);
+
+	pa->add (AFLFromBeforeProcessors, _("immediately post-fader"));
+	pa->add (AFLFromAfterProcessors, _("after post-fader processors (before pan)"));
+
+	add_option (_("Signal Flow"), pa);
+
+	add_option (_("Signal Flow"), new OptionEditorHeading (_("Master")));
+	add_option (_("Signal Flow"),
+			new BoolOption (
+				"use-master-volume",
+				_("Enable master-bus output gain control"),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::get_use_master_volume),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::set_use_master_volume)
+				));
+
+	add_option (_("Signal Flow"), new OptionEditorHeading (_("Default Track / Bus Muting Options")));
+
+	add_option (_("Signal Flow"),
+	     new BoolOption (
+		     "mute-affects-pre-fader",
+		     _("Mute affects pre-fader sends"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mute_affects_pre_fader),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mute_affects_pre_fader)
+		     ));
+
+	add_option (_("Signal Flow"),
+	     new BoolOption (
+		     "mute-affects-post-fader",
+		     _("Mute affects post-fader sends"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mute_affects_post_fader),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mute_affects_post_fader)
+		     ));
+
+	add_option (_("Signal Flow"),
+	     new BoolOption (
+		     "mute-affects-control-outs",
+		     _("Mute affects control outputs"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mute_affects_control_outs),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mute_affects_control_outs)
+		     ));
+
+	add_option (_("Signal Flow"),
+	     new BoolOption (
+		     "mute-affects-main-outs",
+		     _("Mute affects main outputs"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mute_affects_main_outs),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mute_affects_main_outs)
+		     ));
+
+
+	add_option (_("Signal Flow"), new OptionEditorHeading (_("Send Routing")));
+	add_option (_("Signal Flow"),
+			new BoolOption (
+				"link-send-and-route-panner",
+				_("Link panners of Aux and External Sends with main panner by default"),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::get_link_send_and_route_panner),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::set_link_send_and_route_panner)
+				));
+
+	add_option (_("Signal Flow"), new OptionEditorHeading (_("Audio Regions")));
+
+	add_option (_("Signal Flow"),
+	     new BoolOption (
+		     "replicate-missing-region-channels",
+		     _("Replicate missing region channels"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_replicate_missing_region_channels),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_replicate_missing_region_channels)
+		     ));
 
 	if (!Profile->get_mixbus()) {
-		add_option (_("Appearance/Editor"),
-				new BoolOption (
-					"show-waveforms",
-					_("Show waveforms in regions"),
-					sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_waveforms),
-					sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_waveforms)
-					));
+
+		add_option (_("Signal Flow"), new OptionEditorHeading (_("Track and Bus Connections")));
+
+		bo = new BoolOption (
+					"auto-connect-standard-busses",
+					_("Auto-connect main output (master or monitor) bus to physical ports"),
+					sigc::mem_fun (*_rc_config, &RCConfiguration::get_auto_connect_standard_busses),
+					sigc::mem_fun (*_rc_config, &RCConfiguration::set_auto_connect_standard_busses)
+					);
+		add_option (_("Signal Flow"), bo);
+		Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+			_("<b>When enabled</b> the main output bus is auto-connected to the first N physical ports. "
+				"If the session has a monitor-section, the monitor-bus output is connected to the hardware playback ports, "
+				"otherwise the master-bus output is directly used for playback."));
+
+		ComboOption<AutoConnectOption>* iac = new ComboOption<AutoConnectOption> (
+				"input-auto-connect",
+				_("Connect track inputs"),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::get_input_auto_connect),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::set_input_auto_connect)
+				);
+
+		iac->add (AutoConnectPhysical, _("automatically to physical inputs"));
+		iac->add (ManualConnect, _("manually"));
+
+		add_option (_("Signal Flow"), iac);
+
+		ComboOption<AutoConnectOption>* oac = new ComboOption<AutoConnectOption> (
+				"output-auto-connect",
+				_("Connect track and bus outputs"),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::get_output_auto_connect),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::set_output_auto_connect)
+				);
+
+		oac->add (AutoConnectPhysical, _("automatically to physical outputs"));
+		oac->add (AutoConnectMaster, _("automatically to master bus"));
+		oac->add (ManualConnect, _("manually"));
+
+		add_option (_("Signal Flow"), oac);
+
+		bo = new BoolOption (
+				"strict-io",
+				_("Use 'Strict-I/O' for new tracks or busses"),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::get_strict_io),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::set_strict_io)
+				);
+
+		add_option (_("Signal Flow"), bo);
+		Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+				_("With strict-i/o enabled, Effect Processors will not modify the number of channels on a track. The number of output channels will always match the number of input channels."));
+
 	}  // !mixbus
 
-	add_option (_("Appearance/Editor"),
-	     new BoolOption (
-		     "show-waveforms-while-recording",
-		     _("Show waveforms while recording"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_waveforms_while_recording),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_waveforms_while_recording)
-		     ));
+	/* Click */
 
-	add_option (_("Appearance/Editor"),
-			new BoolOption (
-			"show-waveform-clipping",
-			_("Show waveform clipping"),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_waveform_clipping),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_waveform_clipping)
-			));
+	add_option (_("Metronome"), new OptionEditorHeading (_("Metronome")));
+	add_option (_("Metronome"), new ClickOptions (_rc_config));
 
-	add_option (_("Appearance/Editor"), new ClipLevelOptions ());
+	add_option (_("Metronome"), new OptionEditorHeading (_("Options")));
 
-	ComboOption<WaveformScale>* wfs = new ComboOption<WaveformScale> (
-		"waveform-scale",
-		_("Waveform scale"),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_waveform_scale),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_waveform_scale)
-		);
+	bo = new BoolOption (
+			"click-record-only",
+			_("Enable metronome only while recording"),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::get_click_record_only),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::set_click_record_only)
+			);
 
-	wfs->add (Linear, _("linear"));
-	wfs->add (Logarithmic, _("logarithmic"));
-
-	add_option (_("Appearance/Editor"), wfs);
-
-	ComboOption<WaveformShape>* wfsh = new ComboOption<WaveformShape> (
-		"waveform-shape",
-		_("Waveform shape"),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_waveform_shape),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_waveform_shape)
-		);
-
-	wfsh->add (Traditional, _("traditional"));
-	wfsh->add (Rectified, _("rectified"));
-
-	add_option (_("Appearance/Editor"), wfsh);
-
-	add_option (_("Appearance/Editor"), new OptionEditorHeading (_("Editor Meters")));
-
-	add_option (_("Appearance/Editor"),
-	     new BoolOption (
-		     "show-track-meters",
-		     _("Show meters in track headers"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_track_meters),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_track_meters)
-		     ));
-
-	add_option (_("Appearance/Editor"),
-	     new BoolOption (
-		     "editor-stereo-only-meters",
-		     _("Limit track header meters to stereo"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_editor_stereo_only_meters),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_editor_stereo_only_meters)
-		     ));
-
-	add_option (_("Appearance/Editor"), new OptionEditorHeading (_("MIDI Regions")));
-
-	add_option (_("Appearance/Editor"),
-		    new BoolOption (
-			    "display-first-midi-bank-as-zero",
-			    _("Display first MIDI bank/program as 0"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_first_midi_bank_is_zero),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_first_midi_bank_is_zero)
-			    ));
-
-	add_option (_("Appearance/Editor"),
-	     new BoolOption (
-		     "never-display-periodic-midi",
-		     _("Don't display periodic (MTC, MMC) SysEx messages in MIDI Regions"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_never_display_periodic_midi),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_never_display_periodic_midi)
-		     ));
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+			string_compose (_("<b>When enabled</b> the metronome will remain silent if %1 is <b>not recording</b>."), PROGRAM_NAME));
+	add_option (_("Metronome"), bo);
+	add_option (_("Metronome"), new OptionEditorBlank ());
 
 
-	add_option (_("Appearance/Editor"),
-	            new BoolOption (
-		            "use-note-bars-for-velocity",
-		            _("Show velocity horizontally inside notes"),
-		            sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_note_bars_for_velocity),
-		            sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_note_bars_for_velocity)
-		            ));
+	/* CONTROL SURFACES *********************************************************/
 
-	add_option (_("Appearance/Editor"),
-	            new BoolOption (
-		            "use-note-color-for-velocity",
-		            _("Use colors to show note velocity"),
-		            sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_note_color_for_velocity),
-		            sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_note_color_for_velocity)
-		            ));
+	add_option (_("Control Surfaces"), new OptionEditorHeading (_("Control Surfaces")));
+	add_option (_("Control Surfaces"), new ControlSurfacesOptions ());
 
-	add_option (_("Appearance/Editor"), new OptionEditorBlank ());
 
-	/* The names of these controls must be the same as those given in MixerStrip
-	   for the actual widgets being controlled.
-	*/
-	_mixer_strip_visibility.add (0, X_("Input"), _("Input"));
-	_mixer_strip_visibility.add (0, X_("PhaseInvert"), _("Phase Invert"));
-	_mixer_strip_visibility.add (0, X_("RecMon"), _("Record & Monitor"));
-	_mixer_strip_visibility.add (0, X_("SoloIsoLock"), _("Solo Iso / Lock"));
-	_mixer_strip_visibility.add (0, X_("Output"), _("Output"));
-	_mixer_strip_visibility.add (0, X_("Comments"), _("Comments"));
-	_mixer_strip_visibility.add (0, X_("VCA"), _("VCA Assigns"));
+	/* METERS *******************************************************************/
 
-	add_option (_("Appearance/Mixer"),
-		new VisibilityOption (
-			_("Mixer Strip"),
-			&_mixer_strip_visibility,
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_mixer_strip_visibility),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_mixer_strip_visibility)
-			)
-		);
-
-	add_option (_("Appearance/Mixer"),
-	     new BoolOption (
-		     "default-narrow_ms",
-		     _("Use narrow strips in the mixer for new strips by default"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_default_narrow_ms),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_default_narrow_ms)
-		     ));
-
-	ComboOption<uint32_t>* mic = new ComboOption<uint32_t> (
-		     "max-inline-controls",
-		     _("Limit inline-mixer-strip controls per plugin"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_max_inline_controls),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_max_inline_controls)
-		     );
-	mic->add (0, _("Unlimited"));
-	mic->add (16,  _("16 parameters"));
-	mic->add (32,  _("32 parameters"));
-	mic->add (64,  _("64 parameters"));
-	mic->add (128, _("128 parameters"));
-	add_option (_("Appearance/Mixer"), mic);
-
-	add_option (_("Appearance/Mixer"), new OptionEditorBlank ());
-
-	add_option (_("Appearance/Toolbar"), new OptionEditorHeading (_("Main Transport Toolbar Items")));
-
-	add_option (_("Appearance/Toolbar"),
-	     new BoolOption (
-		     "show-toolbar-recpunch",
-		     _("Display Record/Punch Options"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_toolbar_recpunch),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_toolbar_recpunch)
-		     ));
-
-	add_option (_("Appearance/Toolbar"),
-	     new BoolOption (
-		     "show-toolbar-latency",
-		     _("Display Latency Compensation Info"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_toolbar_latency),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_toolbar_latency)
-		     ));
-
-	if (!ARDOUR::Profile->get_small_screen()) {
-		add_option (_("Appearance/Toolbar"),
-				new BoolOption (
-					"show-secondary-clock",
-					_("Display Secondary Clock"),
-					sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_secondary_clock),
-					sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_secondary_clock)
-					));
+	if (Profile->get_mixbus()) {
+		add_option (S_("Preferences|Metering"), new OptionEditorHeading (_("Meterbridge meters")));
+	} else {
+		add_option (S_("Preferences|Metering"), new OptionEditorHeading (_("Metering")));
 	}
 
-	add_option (_("Appearance/Toolbar"),
-	     new BoolOption (
-		     "show-toolbar-selclock",
-		     _("Display Selection Clock"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_toolbar_selclock),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_toolbar_selclock)
-		     ));
+	ComboOption<float>* mht = new ComboOption<float> (
+		"meter-hold",
+		_("Peak hold time"),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_meter_hold),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_meter_hold)
+		);
 
-	add_option (_("Appearance/Toolbar"),
-	     new BoolOption (
-		     "show-toolbar-monitor-info",
-		     _("Display Monitor Section Info"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_toolbar_monitor_info),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_toolbar_monitor_info)
-		     ));
+	mht->add (MeterHoldOff, _("off"));
+	mht->add (MeterHoldShort, _("short"));
+	mht->add (MeterHoldMedium, _("medium"));
+	mht->add (MeterHoldLong, _("long"));
 
-	add_option (_("Appearance/Toolbar"),
-	     new BoolOption (
-		     "show-mini-timeline",
-		     _("Display Navigation Timeline"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_mini_timeline),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_mini_timeline)
-		     ));
+	add_option (S_("Preferences|Metering"), mht);
 
-	add_option (_("Appearance/Toolbar"),
-	     new BoolOption (
-		     "show-editor-meter",
-		     _("Display Master Level Meter"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_editor_meter),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_editor_meter)
-		     ));
+	ComboOption<float>* mfo = new ComboOption<float> (
+		"meter-falloff",
+		_("DPM fall-off"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_falloff),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_falloff)
+		);
 
-	add_option (_("Appearance/Toolbar"),
-			new ColumVisibilityOption (
-				"action-table-columns", _("Display Action-Buttons"), MAX_LUA_ACTION_BUTTONS / 2,
-				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_action_table_columns),
-				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_action_table_columns)
-				)
+	mfo->add (METER_FALLOFF_OFF,      _("off"));
+	mfo->add (METER_FALLOFF_SLOWEST,  _("slowest [6.6dB/sec]"));
+	mfo->add (METER_FALLOFF_SLOW,     _("slow [8.6dB/sec] (BBC PPM, EBU PPM)"));
+	mfo->add (METER_FALLOFF_SLOWISH,  _("moderate [12.0dB/sec] (DIN)"));
+	mfo->add (METER_FALLOFF_MODERATE, _("medium [13.3dB/sec] (EBU Digi PPM, IRT Digi PPM)"));
+	mfo->add (METER_FALLOFF_MEDIUM,   _("fast [20dB/sec]"));
+	mfo->add (METER_FALLOFF_FAST,     _("very fast [32dB/sec]"));
+
+	add_option (S_("Preferences|Metering"), mfo);
+
+	ComboOption<MeterLineUp>* mlu = new ComboOption<MeterLineUp> (
+		"meter-line-up-level",
+		_("Meter line-up level; 0dBu"),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_meter_line_up_level),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_meter_line_up_level)
+		);
+
+	mlu->add (MeteringLineUp24, _("-24dBFS (SMPTE US: 4dBu = -20dBFS)"));
+	mlu->add (MeteringLineUp20, _("-20dBFS (SMPTE RP.0155)"));
+	mlu->add (MeteringLineUp18, _("-18dBFS (EBU, BBC)"));
+	mlu->add (MeteringLineUp15, _("-15dBFS (DIN)"));
+
+	Gtkmm2ext::UI::instance()->set_tip (mlu->tip_widget(), _("Configure meter-marks and color-knee point for dBFS scale DPM, set reference level for IEC1/Nordic, IEC2 PPM and VU meter."));
+
+	add_option (S_("Preferences|Metering"), mlu);
+
+	ComboOption<MeterLineUp>* mld = new ComboOption<MeterLineUp> (
+		"meter-line-up-din",
+		_("IEC1/DIN Meter line-up level; 0dBu"),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_meter_line_up_din),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_meter_line_up_din)
+		);
+
+	mld->add (MeteringLineUp24, _("-24dBFS (SMPTE US: 4dBu = -20dBFS)"));
+	mld->add (MeteringLineUp20, _("-20dBFS (SMPTE RP.0155)"));
+	mld->add (MeteringLineUp18, _("-18dBFS (EBU, BBC)"));
+	mld->add (MeteringLineUp15, _("-15dBFS (DIN)"));
+
+	Gtkmm2ext::UI::instance()->set_tip (mld->tip_widget(), _("Reference level for IEC1/DIN meter."));
+
+	add_option (S_("Preferences|Metering"), mld);
+
+	ComboOption<VUMeterStandard>* mvu = new ComboOption<VUMeterStandard> (
+		"meter-vu-standard",
+		_("VU Meter standard"),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_meter_vu_standard),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_meter_vu_standard)
+		);
+
+	mvu->add (MeteringVUfrench,   _("0VU = -2dBu (France)"));
+	mvu->add (MeteringVUamerican, _("0VU = 0dBu (North America, Australia)"));
+	mvu->add (MeteringVUstandard, _("0VU = +4dBu (standard)"));
+	mvu->add (MeteringVUeight,    _("0VU = +8dBu"));
+
+	add_option (S_("Preferences|Metering"), mvu);
+
+	HSliderOption *mpks = new HSliderOption("meter-peak",
+			_("Peak indicator threshold [dBFS]"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_meter_peak),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_meter_peak),
+			-10, 0, .1, .1
 			);
-	add_option (_("Appearance/Toolbar"), new OptionEditorBlank ());
 
+	Gtkmm2ext::UI::instance()->set_tip (
+			mpks->tip_widget(),
+			_("Specify the audio signal level in dBFS at and above which the meter-peak indicator will flash red."));
 
-	/* and now the theme manager */
+	add_option (S_("Preferences|Metering"), mpks);
 
-	add_option (_("Appearance/Theme"), new OptionEditorHeading (_("Theme")));
+	OptionEditorHeading* default_meter_head = new OptionEditorHeading (_("Default Meter Types"));
+	default_meter_head->set_note (_("These settings apply to newly created tracks and busses. For the Master bus, this will be when a new session is created."));
 
-	add_option (_("Appearance/Theme"), new BoolOption (
-				"flat-buttons",
-				_("Draw \"flat\" buttons"),
-				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_flat_buttons),
-				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_flat_buttons)
-				));
+	add_option (S_("Preferences|Metering"), default_meter_head);
 
-	add_option (_("Appearance/Theme"), new BoolOption (
-				"boxy-buttons",
-				_("Draw \"boxy\" buttons"),
-				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_boxy_buttons),
-				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_boxy_buttons)
-				));
+	ComboOption<MeterType>* mtm = new ComboOption<MeterType> (
+		"meter-type-master",
+		_("Default Meter Type for Master Bus"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_type_master),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_type_master)
+		);
+	mtm->add (MeterPeak,    ArdourMeter::meter_type_string(MeterPeak));
+	mtm->add (MeterK20,     ArdourMeter::meter_type_string(MeterK20));
+	mtm->add (MeterK14,     ArdourMeter::meter_type_string(MeterK14));
+	mtm->add (MeterK12,     ArdourMeter::meter_type_string(MeterK12));
+	mtm->add (MeterIEC1DIN, ArdourMeter::meter_type_string(MeterIEC1DIN));
+	mtm->add (MeterIEC1NOR, ArdourMeter::meter_type_string(MeterIEC1NOR));
+	mtm->add (MeterIEC2BBC, ArdourMeter::meter_type_string(MeterIEC2BBC));
+	mtm->add (MeterIEC2EBU, ArdourMeter::meter_type_string(MeterIEC2EBU));
 
-	add_option (_("Appearance/Theme"), new BoolOption (
-				"meter-style-led",
-				_("LED meter style"),
-				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_meter_style_led),
-				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_meter_style_led)
-				));
+	add_option (S_("Preferences|Metering"), mtm);
 
+	ComboOption<MeterType>* mtb = new ComboOption<MeterType> (
+		"meter-type-bus",
+		_("Default meter type for busses"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_type_bus),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_type_bus)
+		);
+	mtb->add (MeterPeak,    ArdourMeter::meter_type_string(MeterPeak));
+	mtb->add (MeterK20,     ArdourMeter::meter_type_string(MeterK20));
+	mtb->add (MeterK14,     ArdourMeter::meter_type_string(MeterK14));
+	mtb->add (MeterK12,     ArdourMeter::meter_type_string(MeterK12));
+	mtb->add (MeterIEC1DIN, ArdourMeter::meter_type_string(MeterIEC1DIN));
+	mtb->add (MeterIEC1NOR, ArdourMeter::meter_type_string(MeterIEC1NOR));
+	mtb->add (MeterIEC2BBC, ArdourMeter::meter_type_string(MeterIEC2BBC));
+	mtb->add (MeterIEC2EBU, ArdourMeter::meter_type_string(MeterIEC2EBU));
 
-	HSliderOption *gui_hs = new HSliderOption(
-			"timeline-item-gradient-depth",
-			_("Waveforms color gradient depth"),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_waveform_gradient_depth),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_waveform_gradient_depth),
-			0, 1.0, 0.05
-			);
-	gui_hs->scale().set_update_policy (Gtk::UPDATE_DELAYED);
-	add_option (_("Appearance/Theme"), gui_hs);
+	add_option (S_("Preferences|Metering"), mtb);
 
-	gui_hs = new HSliderOption(
-			"timeline-item-gradient-depth",
-			_("Timeline item gradient depth"),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_timeline_item_gradient_depth),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_timeline_item_gradient_depth),
-			0, 1.0, 0.05
-			);
-	gui_hs->scale().set_update_policy (Gtk::UPDATE_DELAYED);
-	add_option (_("Appearance/Theme"), gui_hs);
+	ComboOption<MeterType>* mtt = new ComboOption<MeterType> (
+		"meter-type-track",
+		_("Default meter type for tracks"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_type_track),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_type_track)
+		);
+	mtt->add (MeterPeak,    ArdourMeter::meter_type_string(MeterPeak));
+	mtt->add (MeterPeak0dB, ArdourMeter::meter_type_string(MeterPeak0dB));
 
-	vector<string> icon_sets = ::get_icon_sets ();
-	if (icon_sets.size() > 1) {
-		ComboOption<std::string>* io = new ComboOption<std::string> (
-				"icon-set", _("Icon Set"),
-				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_icon_set),
-				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_icon_set)
+	add_option (S_("Preferences|Metering"), mtt);
+
+	/* PERFORMANCE **************************************************************/
+
+	uint32_t hwcpus = hardware_concurrency ();
+
+	if (hwcpus > 1) {
+		add_option (_("Performance"), new OptionEditorHeading (_("DSP CPU Utilization")));
+
+		ComboOption<int32_t>* procs = new ComboOption<int32_t> (
+				"processor-usage",
+				_("Signal processing uses"),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::get_processor_usage),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::set_processor_usage)
 				);
-		for (vector<string>::const_iterator i = icon_sets.begin (); i != icon_sets.end (); ++i) {
-			io->add (*i, *i);
+
+		procs->add (-1, _("all but one processor"));
+		procs->add (0, _("all available processors"));
+
+		for (uint32_t i = 1; i <= hwcpus; ++i) {
+			procs->add (i, string_compose (P_("%1 processor", "%1 processors", i), i));
 		}
-		add_option (_("Appearance/Theme"), io);
+
+		procs->set_note (string_compose (_("This setting will only take effect when %1 is restarted."), PROGRAM_NAME));
+
+		add_option (_("Performance"), procs);
 	}
 
-	add_option (_("Appearance/Colors"), new OptionEditorHeading (_("Colors")));
-	add_option (_("Appearance/Colors"), new ColorThemeManager);
-	add_option (_("Appearance/Colors"), new OptionEditorBlank ());
+	add_option (_("Performance"), new OptionEditorHeading (_("Disk I/O Buffering"))); //ToDo: this changed, needs translation.  disambiguated from soundcard i/o buffering
 
-	/* Quirks */
+	add_option (_("Performance"), new BufferingOptions (_rc_config));
 
-	OptionEditorHeading* quirks_head = new OptionEditorHeading (_("Various Workarounds for Windowing Systems"));
+	/* Image cache size */
+	add_option (_("Performance"), new OptionEditorHeading (_("Memory Usage")));
 
-	quirks_head->set_note (string_compose (_("Rules for closing, minimizing, maximizing, and stay-on-top can vary \
-with each version of your OS, and the preferences that you've set in your OS.\n\n\
-You can adjust the options, below, to change how application windows and dialogs behave.\n\n\
-These settings will only take effect after %1 is restarted.\n\
-	"), PROGRAM_NAME));
+	HSliderOption *sics = new HSliderOption ("waveform-cache-size",
+			_("Waveform image cache size (megabytes)"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_waveform_cache_size),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_waveform_cache_size),
+			1, 1024, 10 /* 1 MB to 1GB in steps of 10MB */
+			);
+	sics->scale().set_digits (0);
+	Gtkmm2ext::UI::instance()->set_tip (
+			sics->tip_widget(),
+		 _("Increasing the cache size uses more memory to store waveform images, which can improve graphical performance."));
+	add_option (_("Performance"), sics);
 
-	add_option (_("Appearance/Quirks"), quirks_head);
+	add_option (_("Performance"), new OptionEditorHeading (_("Automation")));
 
-	bo = new BoolOption (
-		     "use-wm-visibility",
-		     _("Use visibility information provided by your Window Manager/Desktop"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_wm_visibility),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_wm_visibility)
+	add_option (_("Performance"),
+	     new SpinOption<double> (
+		     "automation-thinning-factor",
+		     _("Thinning factor (larger value => less data)"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_automation_thinning_factor),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_automation_thinning_factor),
+		     0, 1000, 1, 20
+		     ));
+
+	add_option (_("Performance"),
+	     new SpinOption<double> (
+		     "automation-interval-msecs",
+		     _("Automation sampling interval (milliseconds)"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_automation_interval_msecs),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_automation_interval_msecs),
+		     1, 1000, 1, 20
+		     ));
+
+	add_option (_("Performance"), new OptionEditorHeading (_("Automatables")));
+
+	ComboOption<uint32_t>* lna = new ComboOption<uint32_t> (
+		     "limit-n-automatables",
+		     _("Limit automatable parameters per plugin"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_limit_n_automatables),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_limit_n_automatables)
 		     );
-	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget (),
-				_("If you have trouble toggling between hidden Editor and Mixer windows, try changing this setting."));
-	add_option (_("Appearance/Quirks"), bo);
+	lna->add (0, _("Unlimited"));
+	lna->add (64,  _("64 parameters"));
+	lna->add (128, _("128 parameters"));
+	lna->add (256, _("256 parameters"));
+	lna->add (512, _("512 parameters"));
+	lna->add (999, _("999 parameters"));
+	add_option (_("Performance"), lna);
+	Gtkmm2ext::UI::instance()->set_tip (lna->tip_widget(),
+					    _("Some Plugins expose an unreasonable amount of control-inputs. This option limits the number of parameters that can are listed as automatable without restricting the number of total controls.\n\nThis reduces lag in the GUI and shortens excessively long drop-down lists for plugins with a large number of control ports.\n\nNote: This only affects newly added plugins and is applied to plugin on session-reload. Already automated parameters are retained."));
 
-#ifndef __APPLE__
-	bo = new BoolOption (
-			"all-floating-windows-are-dialogs",
-			_("All floating windows are dialogs"),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_all_floating_windows_are_dialogs),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_all_floating_windows_are_dialogs)
-			);
-	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget (),
-			_("Mark all floating windows to be type \"Dialog\" rather than using \"Utility\" for some.\nThis may help with some window managers."));
-	add_option (_("Appearance/Quirks"), bo);
+	add_option (_("Performance"), new OptionEditorHeading (_("Denormals")));
 
-	bo = new BoolOption (
-			"transients-follow-front",
-			_("Transient windows follow front window."),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_transients_follow_front),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_transients_follow_front)
-			);
-	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget (),
-				_("Make transient windows follow the front window when toggling between the editor and mixer."));
-	add_option (_("Appearance/Quirks"), bo);
-#endif
+	add_option (_("Performance"),
+	     new BoolOption (
+		     "denormal-protection",
+		     _("Use DC bias to protect against denormals"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_denormal_protection),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_denormal_protection)
+		     ));
 
-	if (!Profile->get_mixbus()) {
-		bo = new BoolOption (
-				"floating-monitor-section",
-				_("Float detached monitor-section window"),
-				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_floating_monitor_section),
-				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_floating_monitor_section)
-				);
-		Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget (),
-					_("When detaching the monitoring section, mark it as \"Utility\" window to stay in front."));
-		add_option (_("Appearance/Quirks"), bo);
+	ComboOption<DenormalModel>* dm = new ComboOption<DenormalModel> (
+		"denormal-model",
+		_("Processor handling"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_denormal_model),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_denormal_model)
+		);
+
+	int dmsize = 1;
+	dm->add (DenormalNone, _("no processor handling"));
+
+	FPU* fpu = FPU::instance();
+
+	if (fpu->has_flush_to_zero()) {
+		++dmsize;
+		dm->add (DenormalFTZ, _("use FlushToZero"));
+	} else if (_rc_config->get_denormal_model() == DenormalFTZ) {
+		_rc_config->set_denormal_model(DenormalNone);
 	}
 
-	add_option (_("Appearance/Quirks"), new OptionEditorBlank ());
+	if (fpu->has_denormals_are_zero()) {
+		++dmsize;
+		dm->add (DenormalDAZ, _("use DenormalsAreZero"));
+	} else if (_rc_config->get_denormal_model() == DenormalDAZ) {
+		_rc_config->set_denormal_model(DenormalNone);
+	}
+
+	if (fpu->has_flush_to_zero() && fpu->has_denormals_are_zero()) {
+		++dmsize;
+		dm->add (DenormalFTZDAZ, _("use FlushToZero and DenormalsAreZero"));
+	} else if (_rc_config->get_denormal_model() == DenormalFTZDAZ) {
+		_rc_config->set_denormal_model(DenormalNone);
+	}
+
+	if (dmsize == 1) {
+		dm->set_sensitive(false);
+	}
+
+	dm->set_note (_("Changes may not be effective until audio-engine restart."));
+
+	add_option (_("Performance"), dm);
+
+	add_option (_("Performance"), new OptionEditorHeading (_("Region Analysis")));  //needs translation
+
+	add_option (_("Performance"),
+	     new BoolOption (
+		     "auto-analyse-audio",
+		     _("Enable automatic analysis of audio"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_auto_analyse_audio),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_auto_analyse_audio)
+		     ));
 
 	/* VIDEO Timeline */
 	add_option (_("Video"), new OptionEditorHeading (_("Video Server")));
