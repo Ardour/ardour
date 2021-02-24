@@ -3006,9 +3006,10 @@ These settings will only take effect after %1 is restarted.\n\
 	dps->add (1.0, _("100%"));
 	add_option (_("Editor"), dps);
 
+	// XXX Long label, pushes other ComboBoxes to the right
 	ComboOption<float>* eet = new ComboOption<float> (
 		     "extra-ui-extents-time",
-		     _("Limit zooming & summary view to X minutes beyond session extents"),
+		     _("Limit zoom & summary view beyond session extents to"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_extra_ui_extents_time),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_extra_ui_extents_time)
 		     );
@@ -3032,13 +3033,13 @@ These settings will only take effect after %1 is restarted.\n\
 
 	bo = new BoolOption (
 		     "new-automation-points-on-lane",
-		     _("Ignore Y-axis click position when adding new automation-points"),
+		     _("Ignore Y-axis when adding new automation-points"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_new_automation_points_on_lane),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_new_automation_points_on_lane)
 		     );
 	add_option (_("Editor"), bo);
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
-			_("<b>When enabled</b> the new points drawn in any automation lane will be placed on the existing line, regardless of mouse y-axis position."));
+			_("<b>When enabled</b> new points drawn in any automation lane will be placed on the existing line, regardless of mouse y-axis position."));
 
 	ComboOption<FadeShape>* fadeshape = new ComboOption<FadeShape> (
 			"default-fade-shape",
@@ -3058,19 +3059,21 @@ These settings will only take effect after %1 is restarted.\n\
 
 	add_option (_("Editor"), fadeshape);
 
+#if 1 // XXX wide ComboBox
 	ComboOption<RegionEquivalence> *eqv = new ComboOption<RegionEquivalence> (
 		     "region-equivalency",
-		     _("Regions in active edit groups are edited together"),
+		     _("Regions in edit groups are edited together"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_region_equivalence),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_region_equivalence)
 		     );
 
-	eqv->add (Overlap, _("whenever they overlap in time"));
-	eqv->add (Enclosed, _("if either encloses the other"));
-	eqv->add (Exact, _("only if they have identical length, position and origin"));
-	eqv->add (LayerTime, _("only if they have identical length, position and layer"));
+	eqv->add (Overlap,   _("whenever they overlap in time"));
+	eqv->add (Enclosed,  _("if either encloses the other"));
+	eqv->add (Exact,     _("if they have identical length, position and origin"));
+	eqv->add (LayerTime, _("if they have identical length, position and layer"));
 
 	add_option (_("Editor"), eqv);
+#endif
 
 	ComboOption<LayerModel>* lm = new ComboOption<LayerModel> (
 		"layer-model",
@@ -3091,11 +3094,12 @@ These settings will only take effect after %1 is restarted.\n\
 		    sigc::mem_fun (*_rc_config, &RCConfiguration::get_range_selection_after_split),
 		    sigc::mem_fun (*_rc_config, &RCConfiguration::set_range_selection_after_split));
 
-	rras->add(ClearSel, _("Clear the Range Selection"));
+	rras->add(ClearSel,    _("Clear the Range Selection"));
 	rras->add(PreserveSel, _("Preserve the Range Selection"));
-	rras->add(ForceSel, _("Force-Select the regions under the range. (this might cause a tool change)"));
+	rras->add(ForceSel,    _("Select the regions under the range."));
 	add_option (_("Editor"), rras);
 
+#if 1 // XXX very wide ComboBox
 	ComboOption<RegionSelectionAfterSplit> *rsas = new ComboOption<RegionSelectionAfterSplit> (
 		    "region-selection-after-split",
 		    _("After a Split operation, in Object mode"),
@@ -3103,16 +3107,19 @@ These settings will only take effect after %1 is restarted.\n\
 		    sigc::mem_fun (*_rc_config, &RCConfiguration::set_region_selection_after_split));
 
 	// TODO: decide which of these modes are really useful
-	rsas->add(None, _("Clear the Region Selection"));
-	rsas->add(NewlyCreatedLeft, _("Select only the newly-created regions BEFORE the split point"));
-	rsas->add(NewlyCreatedRight, _("Select only the newly-created regions AFTER the split point"));
-	rsas->add(NewlyCreatedBoth, _("Select the newly-created regions"));
-	// rsas->add(Existing, _("unmodified regions in the existing selection"));
-	// rsas->add(ExistingNewlyCreatedLeft, _("existing selection and newly-created regions before the split"));
-	// rsas->add(ExistingNewlyCreatedRight, _("existing selection and newly-created regions after the split"));
-	rsas->add(ExistingNewlyCreatedBoth, _("Preserve the existing selection, AND select all newly-created regions"));
+	rsas->add (None,                     _("Clear the Region Selection"));
+	rsas->add (NewlyCreatedLeft,         _("Select the newly-created regions BEFORE the split point"));
+	rsas->add (NewlyCreatedRight,        _("Select only the newly-created regions AFTER the split point"));
+	rsas->add (NewlyCreatedBoth,         _("Select the newly-created regions"));
+#if 0
+	rsas->add(Existing,                  _("unmodified regions in the existing selection"));
+	rsas->add(ExistingNewlyCreatedLeft,  _("existing selection and newly-created regions before the split"));
+	rsas->add(ExistingNewlyCreatedRight, _("existing selection and newly-created regions after the split"));
+#endif
+	rsas->add(ExistingNewlyCreatedBoth,  _("Preserve existing selection, and select newly-created regions"));
 
 	add_option (_("Editor"), rsas);
+#endif
 
 	add_option (_("Editor/Snap"), new OptionEditorHeading (_("General Snap options:")));
 
@@ -3516,14 +3523,16 @@ These settings will only take effect after %1 is restarted.\n\
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_mtc)
 			    ));
 
-	add_option (_("Transport/Generate"),
-		    new SpinOption<int> (
+
+	SpinOption<int>* soi = new SpinOption<int> (
 			    "mtc-qf-speed-tolerance",
-			    _("Percentage either side of normal transport speed to transmit MTC"),
+			    _("Max MTC varispeed (%)"),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_mtc_qf_speed_tolerance),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_mtc_qf_speed_tolerance),
 			    0, 20, 1, 5
-			    ));
+			    );
+	Gtkmm2ext::UI::instance()->set_tip (soi->tip_widget(), _("Percentage either side of normal transport speed to transmit MTC."));
+	add_option (_("Transport/Generate"), soi);
 
 	add_option (_("Transport/Generate"), new OptionEditorHeading (_("MIDI Machine Control (MMC)")));
 
