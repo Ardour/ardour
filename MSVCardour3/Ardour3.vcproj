@@ -708,6 +708,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\input_port_monitor.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\insert_remove_time_dialog.cc"
 				>
 			</File>
@@ -1100,6 +1104,18 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\rec_info_box.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\recorder_group_tabs.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\recorder_ui.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\region_editor.cc"
 				>
 			</File>
@@ -1313,6 +1329,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\timers.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\track_record_axis.cc"
 				>
 			</File>
 			<File
@@ -1810,6 +1830,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\input_port_monitor.h"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\insert_remove_time_dialog.h"
 				>
 			</File>
@@ -2246,6 +2270,18 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\rec_info_box.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\recorder_group_tabs.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\recorder_ui.h"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\region_editor.h"
 				>
 			</File>
@@ -2487,6 +2523,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\timers.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\track_record_axis.h"
 				>
 			</File>
 			<File
