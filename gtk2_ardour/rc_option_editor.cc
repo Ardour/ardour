@@ -3846,9 +3846,9 @@ These settings will only take effect after %1 is restarted.\n\
 
 	add_option (_("Plugins"), new OptionEditorBlank ());
 
-	/* SIGNAL FLOW (MONITORING, SOLO) *******************************************/
+	/* MONITORING, SOLO) ********************************************************/
 
-	add_option (_("Signal Flow"), new OptionEditorHeading (_("Monitoring")));
+	add_option (_("Monitoring"), new OptionEditorHeading (_("Monitoring")));
 
 	ComboOption<MonitorModel>* mm = new ComboOption<MonitorModel> (
 		"monitoring-model",
@@ -3866,7 +3866,7 @@ These settings will only take effect after %1 is restarted.\n\
 	mm->add (SoftwareMonitoring, string_compose (_("%1"), prog));
 	mm->add (ExternalMonitoring, _("audio hardware"));
 
-	add_option (_("Signal Flow"), mm);
+	add_option (_("Monitoring"), mm);
 
 	bo = new BoolOption (
 		     "auto-input-does-talkback",
@@ -3874,12 +3874,12 @@ These settings will only take effect after %1 is restarted.\n\
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_auto_input_does_talkback),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_auto_input_does_talkback)
 		     );
-	add_option (_("Signal Flow"), bo);
+	add_option (_("Monitoring"), bo);
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
 			string_compose (_("<b>When enabled</b>, and Transport->Auto-Input is enabled, %1 will always monitor audio inputs when transport is stopped, even if tracks aren't armed."),
 					PROGRAM_NAME));
 
-	add_option (_("Signal Flow"), new OptionEditorHeading (_("Solo")));
+	add_option (_("Monitoring"), new OptionEditorHeading (_("Solo")));
 
 	_solo_control_is_listen_control = new BoolOption (
 		"solo-control-is-listen-control",
@@ -3888,9 +3888,9 @@ These settings will only take effect after %1 is restarted.\n\
 		sigc::mem_fun (*_rc_config, &RCConfiguration::set_solo_control_is_listen_control)
 		);
 
-	add_option (_("Signal Flow"), _solo_control_is_listen_control);
+	add_option (_("Monitoring"), _solo_control_is_listen_control);
 
-	add_option (_("Signal Flow"),
+	add_option (_("Monitoring"),
 	     new BoolOption (
 		     "exclusive-solo",
 		     _("Exclusive solo"),
@@ -3898,7 +3898,7 @@ These settings will only take effect after %1 is restarted.\n\
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_exclusive_solo)
 		     ));
 
-	add_option (_("Signal Flow"),
+	add_option (_("Monitoring"),
 	     new BoolOption (
 		     "show-solo-mutes",
 		     _("Show solo muting"),
@@ -3906,7 +3906,7 @@ These settings will only take effect after %1 is restarted.\n\
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_solo_mutes)
 		     ));
 
-	add_option (_("Signal Flow"),
+	add_option (_("Monitoring"),
 	     new BoolOption (
 		     "solo-mute-override",
 		     _("Soloing overrides muting"),
@@ -3914,7 +3914,7 @@ These settings will only take effect after %1 is restarted.\n\
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_solo_mute_override)
 		     ));
 
-	add_option (_("Signal Flow"),
+	add_option (_("Monitoring"),
 	     new FaderOption (
 		     "solo-mute-gain",
 		     _("Solo-in-place mute cut (dB)"),
@@ -3932,7 +3932,7 @@ These settings will only take effect after %1 is restarted.\n\
 	_listen_position->add (AfterFaderListen, _("after-fader (AFL)"));
 	_listen_position->add (PreFaderListen, _("pre-fader (PFL)"));
 
-	add_option (_("Signal Flow"), _listen_position);
+	add_option (_("Monitoring"), _listen_position);
 
 	ComboOption<PFLPosition>* pp = new ComboOption<PFLPosition> (
 		"pfl-position",
@@ -3944,7 +3944,7 @@ These settings will only take effect after %1 is restarted.\n\
 	pp->add (PFLFromBeforeProcessors, _("before pre-fader processors"));
 	pp->add (PFLFromAfterProcessors, _("pre-fader but after pre-fader processors"));
 
-	add_option (_("Signal Flow"), pp);
+	add_option (_("Monitoring"), pp);
 
 	ComboOption<AFLPosition>* pa = new ComboOption<AFLPosition> (
 		"afl-position",
@@ -3956,7 +3956,9 @@ These settings will only take effect after %1 is restarted.\n\
 	pa->add (AFLFromBeforeProcessors, _("immediately post-fader"));
 	pa->add (AFLFromAfterProcessors, _("after post-fader processors (before pan)"));
 
-	add_option (_("Signal Flow"), pa);
+	add_option (_("Monitoring"), pa);
+
+	/* SIGNAL FLOW **************************************************************/
 
 	add_option (_("Signal Flow"), new OptionEditorHeading (_("Master")));
 	add_option (_("Signal Flow"),
@@ -4249,6 +4251,17 @@ These settings will only take effect after %1 is restarted.\n\
 
 	add_option (S_("Preferences|Metering"), mtt);
 
+	add_option (S_("Preferences|Metering"), new OptionEditorHeading (_("Region Analysis")));  //needs translation
+
+	add_option (S_("Preferences|Metering"),
+	     new BoolOption (
+		     "auto-analyse-audio",
+		     _("Enable automatic analysis of audio"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_auto_analyse_audio),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_auto_analyse_audio)
+		     ));
+
+
 	/* PERFORMANCE **************************************************************/
 
 	uint32_t hwcpus = hardware_concurrency ();
@@ -4274,6 +4287,58 @@ These settings will only take effect after %1 is restarted.\n\
 
 		add_option (_("Performance"), procs);
 	}
+
+	add_option (_("Performance"), new OptionEditorHeading (_("CPU/FPU Denormals")));
+
+	add_option (_("Performance"),
+	     new BoolOption (
+		     "denormal-protection",
+		     _("Use DC bias to protect against denormals"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_denormal_protection),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_denormal_protection)
+		     ));
+
+	ComboOption<DenormalModel>* dm = new ComboOption<DenormalModel> (
+		"denormal-model",
+		_("Processor handling"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_denormal_model),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_denormal_model)
+		);
+
+	int dmsize = 1;
+	dm->add (DenormalNone, _("no processor handling"));
+
+	FPU* fpu = FPU::instance();
+
+	if (fpu->has_flush_to_zero()) {
+		++dmsize;
+		dm->add (DenormalFTZ, _("use FlushToZero"));
+	} else if (_rc_config->get_denormal_model() == DenormalFTZ) {
+		_rc_config->set_denormal_model(DenormalNone);
+	}
+
+	if (fpu->has_denormals_are_zero()) {
+		++dmsize;
+		dm->add (DenormalDAZ, _("use DenormalsAreZero"));
+	} else if (_rc_config->get_denormal_model() == DenormalDAZ) {
+		_rc_config->set_denormal_model(DenormalNone);
+	}
+
+	if (fpu->has_flush_to_zero() && fpu->has_denormals_are_zero()) {
+		++dmsize;
+		dm->add (DenormalFTZDAZ, _("use FlushToZero and DenormalsAreZero"));
+	} else if (_rc_config->get_denormal_model() == DenormalFTZDAZ) {
+		_rc_config->set_denormal_model(DenormalNone);
+	}
+
+	if (dmsize == 1) {
+		dm->set_sensitive(false);
+	}
+
+	dm->set_note (_("Changes may not be effective until audio-engine restart."));
+
+	add_option (_("Performance"), dm);
+
 
 	add_option (_("Performance"), new OptionEditorHeading (_("Disk I/O Buffering"))); //ToDo: this changed, needs translation.  disambiguated from soundcard i/o buffering
 
@@ -4331,67 +4396,6 @@ These settings will only take effect after %1 is restarted.\n\
 	add_option (_("Performance"), lna);
 	Gtkmm2ext::UI::instance()->set_tip (lna->tip_widget(),
 					    _("Some Plugins expose an unreasonable amount of control-inputs. This option limits the number of parameters that can are listed as automatable without restricting the number of total controls.\n\nThis reduces lag in the GUI and shortens excessively long drop-down lists for plugins with a large number of control ports.\n\nNote: This only affects newly added plugins and is applied to plugin on session-reload. Already automated parameters are retained."));
-
-	add_option (_("Performance"), new OptionEditorHeading (_("Denormals")));
-
-	add_option (_("Performance"),
-	     new BoolOption (
-		     "denormal-protection",
-		     _("Use DC bias to protect against denormals"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_denormal_protection),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_denormal_protection)
-		     ));
-
-	ComboOption<DenormalModel>* dm = new ComboOption<DenormalModel> (
-		"denormal-model",
-		_("Processor handling"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_denormal_model),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_denormal_model)
-		);
-
-	int dmsize = 1;
-	dm->add (DenormalNone, _("no processor handling"));
-
-	FPU* fpu = FPU::instance();
-
-	if (fpu->has_flush_to_zero()) {
-		++dmsize;
-		dm->add (DenormalFTZ, _("use FlushToZero"));
-	} else if (_rc_config->get_denormal_model() == DenormalFTZ) {
-		_rc_config->set_denormal_model(DenormalNone);
-	}
-
-	if (fpu->has_denormals_are_zero()) {
-		++dmsize;
-		dm->add (DenormalDAZ, _("use DenormalsAreZero"));
-	} else if (_rc_config->get_denormal_model() == DenormalDAZ) {
-		_rc_config->set_denormal_model(DenormalNone);
-	}
-
-	if (fpu->has_flush_to_zero() && fpu->has_denormals_are_zero()) {
-		++dmsize;
-		dm->add (DenormalFTZDAZ, _("use FlushToZero and DenormalsAreZero"));
-	} else if (_rc_config->get_denormal_model() == DenormalFTZDAZ) {
-		_rc_config->set_denormal_model(DenormalNone);
-	}
-
-	if (dmsize == 1) {
-		dm->set_sensitive(false);
-	}
-
-	dm->set_note (_("Changes may not be effective until audio-engine restart."));
-
-	add_option (_("Performance"), dm);
-
-	add_option (_("Performance"), new OptionEditorHeading (_("Region Analysis")));  //needs translation
-
-	add_option (_("Performance"),
-	     new BoolOption (
-		     "auto-analyse-audio",
-		     _("Enable automatic analysis of audio"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_auto_analyse_audio),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_auto_analyse_audio)
-		     ));
 
 	/* VIDEO Timeline */
 	add_option (_("Video"), new OptionEditorHeading (_("Video Server")));
