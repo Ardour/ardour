@@ -130,7 +130,7 @@ TrackRecordAxis::TrackRecordAxis (Session* s, boost::shared_ptr<ARDOUR::Route> r
 	_level_meter = new LevelMeterVBox (s);
 	_level_meter->set_meter (_route->shared_peak_meter ().get ());
 	_level_meter->clear_meters ();
-	_level_meter->setup_meters (120, 12);
+	_level_meter->setup_meters (120, 10, 3);
 
 	name_label.set_name (X_("TrackNameEditor"));
 	name_label.set_alignment (0.0, 0.5);
@@ -179,7 +179,6 @@ TrackRecordAxis::TrackRecordAxis (Session* s, boost::shared_ptr<ARDOUR::Route> r
 	update_sensitivity ();
 
 	_track_number_size_group->add_widget (_number_label);
-	_ctrls_button_size_group->add_widget (*rec_enable_button);
 	_ctrls_button_size_group->add_widget (*mute_button);
 	_ctrls_button_size_group->add_widget (_playlist_button);
 	_monitor_ctrl_size_group->add_widget (*monitor_input_button);
