@@ -243,7 +243,8 @@ private:
 		}
 	};
 
-	typedef std::map<std::string, boost::shared_ptr<InputPort> > InputPortMap;
+	typedef std::map<std::string, boost::shared_ptr<InputPort> >     InputPortMap;
+	typedef std::set<boost::shared_ptr<InputPort>, InputPortPtrSort> InputPortSet;
 
 	RecRuler                     _ruler;
 	Gtk::EventBox                _space;

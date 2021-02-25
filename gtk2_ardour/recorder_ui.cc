@@ -625,11 +625,11 @@ RecorderUI::update_io_widget_labels ()
 	uint32_t n_audio = 0;
 	uint32_t n_midi = 0;
 
-	std::set <boost::shared_ptr<InputPort>, InputPortPtrSort> ips;
+	InputPortSet ips;
 	for (InputPortMap::const_iterator i = _input_ports.begin (); i != _input_ports.end (); ++i) {
 		ips.insert (i->second);
 	}
-	for (set<boost::shared_ptr<InputPort> >::const_iterator i = ips.begin (); i != ips.end (); ++i) {
+	for (InputPortSet::const_iterator i = ips.begin (); i != ips.end (); ++i) {
 		boost::shared_ptr<InputPort> const& ip = *i;
 		switch (ip->data_type ()) {
 			case DataType::AUDIO:
@@ -708,14 +708,14 @@ RecorderUI::meter_area_layout ()
 	int row = 0;
 	int spc = 2;
 
-	std::set <boost::shared_ptr<InputPort>, InputPortPtrSort> ips;
+	InputPortSet ips;
 	for (InputPortMap::const_iterator i = _input_ports.begin (); i != _input_ports.end (); ++i) {
 		boost::shared_ptr<InputPort> const& ip = i->second;
 		ip->show ();
 		ips.insert (ip);
 	}
 
-	for (set<boost::shared_ptr<InputPort> >::const_iterator i = ips.begin (); i != ips.end (); ++i) {
+	for (InputPortSet::const_iterator i = ips.begin (); i != ips.end (); ++i) {
 		boost::shared_ptr<InputPort> const& ip = *i;
 		_meter_table.attach (*ip, col, col + 1, row, row + 1, SHRINK|FILL, SHRINK, spc, spc);
 
