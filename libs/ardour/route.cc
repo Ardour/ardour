@@ -2140,14 +2140,14 @@ Route::apply_processor_order (const ProcessorList& new_order)
 	 */
 	bool need_latency_recompute = false;
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		if (boost::shared_ptr<PortInsert> pi = boost::dynamic_pointer_cast<PortInsert> (*i)) {
+		if (boost::dynamic_pointer_cast<PortInsert> (*i)) {
 			need_latency_recompute = true;
 			break;
-		} else if (boost::shared_ptr<LatentSend> snd = boost::dynamic_pointer_cast<LatentSend> (*i)) {
+		} else if (boost::dynamic_pointer_cast<LatentSend> (*i)) {
 			need_latency_recompute = true;
 			break;
 		} else if (boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (*i)) {
-			if (boost::shared_ptr<IO> pio = pi->sidechain_input ()) {
+			if (pi->sidechain_input ()) {
 				need_latency_recompute = true;
 				break;
 			}
