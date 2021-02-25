@@ -457,6 +457,11 @@ ARDOUR_UI::parameter_changed (std::string p)
 				action_script_call_btn[i].hide();
 			}
 		}
+		if (cols == 0) {
+			scripts_spacer.hide ();
+		} else {
+			scripts_spacer.show ();
+		}
 	} else if (p == "layered-record-mode") {
 		layered_button.set_active (_session->config.get_layered_record_mode ());
 	} else if (p == "flat-buttons") {

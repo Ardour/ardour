@@ -619,6 +619,9 @@ ARDOUR_UI::setup_transport ()
 	}
 	col += MAX_LUA_ACTION_BUTTONS / 2;
 
+	transport_table.attach (scripts_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
+	++col;
+
 	transport_table.attach (recorder_visibility_button, TCOL,         0, 1 , FILL, SHRINK, hpadding, vpadding);
 	transport_table.attach (mixer_visibility_button,    col, col + 2, 1, 2 , FILL, SHRINK, hpadding, vpadding);
 	++col;
