@@ -80,6 +80,8 @@ public:
 	void set_import_position(Editing::ImportPosition p) { _import_position = p; }
 
 protected:
+	void on_size_request (Gtk::Requisition*);
+
 	std::string path;
 
 	ARDOUR::SoundFileInfo sf_info;

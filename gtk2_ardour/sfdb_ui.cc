@@ -160,7 +160,6 @@ SoundFileBox::SoundFileBox (bool /*persistent*/)
 
 {
 	set_name (X_("SoundFileBox"));
-	set_size_request (300, -1);
 
 	preview_label.set_markup (_("<b>Sound File Information</b>"));
 
@@ -255,6 +254,13 @@ SoundFileBox::SoundFileBox (bool /*persistent*/)
 
 	channels_value.set_alignment (0.0f, 0.5f);
 	samplerate_value.set_alignment (0.0f, 0.5f);
+}
+
+void
+SoundFileBox::on_size_request (Gtk::Requisition* req)
+{
+	VBox::on_size_request (req);
+	req->width = std::max<gint> (req->width, 300 * UIConfiguration::instance().get_ui_scale ());
 }
 
 void
