@@ -1209,7 +1209,7 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool only_used_ass
 
 		/* store the last engine device we we can avoid autostarting on a different device with wrong i/o count */
 		boost::shared_ptr<AudioBackend> backend = _engine.current_backend();
-		if (_engine.running () && backend) {
+		if (_engine.running () && backend && _engine.setup_required ()) {
 			child = node->add_child ("EngineHints");
 			child->set_property ("backend", backend-> name ());
 			if (backend->use_separate_input_and_output_devices()) {
@@ -4584,6 +4584,11 @@ Session::get_info_from_path (const string& xmlpath, float& sample_rate, SampleFo
 	bool found_data_format = false;
 	std::string version;
 	program_version = "";
+
+	if (engine_hints) {
+		/* clear existing properties */
+		*engine_hints = XMLNode ("EngineHints");
+	}
 
 	if (!Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
 		return -1;
