@@ -1591,7 +1591,7 @@ RecorderUI::RecRuler::render (Cairo::RefPtr<Cairo::Context> const& cr, cairo_rec
 
 	const int         n_labels         = floor (width / (_time_width * 1.75));
 	const samplecnt_t time_span        = _right - _left;
-	const samplecnt_t time_granularity = ceil ((double)(time_span / n_labels / _session->sample_rate ())) * _session->sample_rate ();
+	const samplecnt_t time_granularity = ceil ((double)time_span / n_labels / _session->sample_rate ()) * _session->sample_rate ();
 	const double      px_per_sample    = width / (double) time_span;
 
 	const samplepos_t lower = (_left / time_granularity) * time_granularity;
