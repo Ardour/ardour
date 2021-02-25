@@ -6638,10 +6638,18 @@ AutomationRangeDrag::motion (GdkEvent*, bool first_move)
 					if (a > half) {
 						a = half;
 					}
-#warning NUTEMPO figure out what this code is/was doing and replace it
-#if 0
-					double const p = j->line->time_converter().from (i->start - j->line->time_converter().origin_b ());
-					double const q = j->line->time_converter().from (a - j->line->time_converter().origin_b ());
+
+					/* convert from absolute time into time
+					 * relative to the line origin
+					*/
+
+					timepos_t p (j->line->get_origin().distance (i->start()).beats());
+					timepos_t q (j->line->get_origin().distance (a).beats());
+
+					/* XXX arguably ControlList::editor_add() should do this */
+
+					p.set_time_domain (the_list->time_domain());
+					q.set_time_domain (the_list->time_domain());
 
 					XMLNode &before = the_list->get_state();
 					bool const add_p = the_list->editor_add (p, value (the_list, p), false);
@@ -6651,7 +6659,6 @@ AutomationRangeDrag::motion (GdkEvent*, bool first_move)
 						_editor->session()->add_command (
 							new MementoCommand<AutomationList>(*the_list.get (), &before, &the_list->get_state()));
 					}
-#endif
 				}
 
 				/* same thing for the end */
@@ -6672,10 +6679,13 @@ AutomationRangeDrag::motion (GdkEvent*, bool first_move)
 						b = half;
 					}
 
-#warning NUTEMPO figure out what this code is/was doing and replace it
-#if 0
-					double const p = j->line->time_converter().from (b - j->line->time_converter().origin_b ());
-					double const q = j->line->time_converter().from (i->end - j->line->time_converter().origin_b ());
+					timepos_t p (j->line->get_origin().distance (b));
+					timepos_t q (j->line->get_origin().distance (i->end()));
+
+					/* XXX arguably ControlList::editor_add() should do this */
+
+					p.set_time_domain (the_list->time_domain());
+					q.set_time_domain (the_list->time_domain());
 
 					XMLNode &before = the_list->get_state();
 					bool const add_p = the_list->editor_add (p, value (the_list, p), false);
@@ -6685,7 +6695,6 @@ AutomationRangeDrag::motion (GdkEvent*, bool first_move)
 						_editor->session()->add_command (
 							new MementoCommand<AutomationList>(*the_list.get (), &before, &the_list->get_state()));
 					}
-#endif
 				}
 			}
 
@@ -6701,26 +6710,12 @@ AutomationRangeDrag::motion (GdkEvent*, bool first_move)
 
 					/* here's a control point on this line */
 					ControlPoint* p = i->line->nth (j);
-#warning NUTEMPO figure out what this code is/was doing and replace it
-					/*
-					  convert is <double,samplepos_t> ... double meant beats
-					  so origin_b is the origin in samplepos_t (since a=double b=samplepos_t)
 
-					  so ->to() returns samples
-
-					  so to (p->model->when) is the beat time (as dobule)
-					  we convert to samples
-					  then add the originin samples
-
-					  BUT ... mostly used IdentityConverter, except MIDI
-
-					  where the time_converter() is a source-relative converter
-					  source-relative uses the the source_position() as the origin
-
+					/* convert point time (which is relative to line
+					 * origin) into absolute time
 					 */
 
-					//double const w = i->line->time_converter().to ((*p->model())->when) + i->line->time_converter().origin_b ();
-					double const w = 0;;
+					timepos_t const w = i->line->get_origin() + (*p->model())->when;
 
 					/* see if it's inside a range */
 					list<TimelineRange>::const_iterator k = _ranges.begin ();
