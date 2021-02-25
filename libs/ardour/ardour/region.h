@@ -118,7 +118,7 @@ public:
 	 * LENGTH:   number of samples the region represents
 	 */
 
-	timepos_t position ()  const { return _position.val(); }
+	timepos_t position ()  const { return _length.val().position(); }
 	timecnt_t start ()     const { return _start.val(); }
 	timecnt_t length ()    const { return _length.val(); }
 	timepos_t end()        const;
@@ -128,7 +128,7 @@ public:
 	timepos_t source_relative_position (Temporal::timepos_t const &) const;
 	timepos_t region_relative_position (Temporal::timepos_t const &) const;
 
-	samplepos_t position_sample ()  const { return _position.val().samples(); }
+	samplepos_t position_sample ()  const { return position().samples(); }
 	samplecnt_t start_sample ()     const { return _start.val().samples(); }
 	samplecnt_t length_samples ()    const { return _length.val().samples(); }
 
@@ -161,7 +161,7 @@ public:
 
 	/* first_sample() is an alias; last_sample() just hides some math */
 
-	samplepos_t first_sample () const { return _position.val().samples(); }
+	samplepos_t first_sample () const { return position().samples(); }
 	samplepos_t last_sample ()  const { return first_sample() + length_samples() - 1; }
 
 	/** Return the earliest possible value of _position given the
@@ -222,7 +222,7 @@ public:
 	 *  OverlapExternal: the range overlaps all of this region.
 	 */
 	Temporal::OverlapType coverage (timepos_t const & start, timepos_t const & end) const {
-		return Temporal::coverage_exclusive_ends (_position.val(), nt_last(), start, end);
+		return Temporal::coverage_exclusive_ends (position(), nt_last(), start, end);
 	}
 
 	bool exact_equivalent (boost::shared_ptr<const Region>) const;
@@ -463,7 +463,6 @@ protected:
 	PBD::Property<bool>      _valid_transients;
 	PBD::Property<timecnt_t> _start;
 	PBD::Property<timecnt_t> _length;
-	PBD::Property<timepos_t> _position;
 	/** Sync position relative to the start of our file */
 	PBD::Property<timecnt_t> _sync_position;
 

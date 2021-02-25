@@ -71,9 +71,9 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<bool> valid_transients;
 		PBD::PropertyDescriptor<timecnt_t> start;
 		PBD::PropertyDescriptor<timecnt_t> length;
-		PBD::PropertyDescriptor<timepos_t> position;
 		PBD::PropertyDescriptor<double> beat;
 		PBD::PropertyDescriptor<timecnt_t> sync_position;
+		PBD::PropertyDescriptor<timepos_t> position;
 		PBD::PropertyDescriptor<layer_t> layer;
 		PBD::PropertyDescriptor<timecnt_t> ancestral_start;
 		PBD::PropertyDescriptor<timecnt_t> ancestral_length;
@@ -123,10 +123,10 @@ Region::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for start = %1\n", Properties::start.property_id));
 	Properties::length.property_id = g_quark_from_static_string (X_("length"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for length = %1\n", Properties::length.property_id));
-	Properties::position.property_id = g_quark_from_static_string (X_("position"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for position = %1\n", Properties::position.property_id));
 	Properties::beat.property_id = g_quark_from_static_string (X_("beat"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for beat = %1\n", Properties::beat.property_id));
+	Properties::position.property_id = g_quark_from_static_string (X_("position"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for position = %1\n", Properties::position.property_id));
 	Properties::sync_position.property_id = g_quark_from_static_string (X_("sync-position"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for sync-position = %1\n", Properties::sync_position.property_id));
 	Properties::layer.property_id = g_quark_from_static_string (X_("layer"));
@@ -168,7 +168,6 @@ Region::register_properties ()
 	add_property (_valid_transients);
 	add_property (_start);
 	add_property (_length);
-	add_property (_position);
 	add_property (_sync_position);
 	add_property (_ancestral_start);
 	add_property (_ancestral_length);
@@ -186,7 +185,6 @@ Region::register_properties ()
 	, _valid_transients (Properties::valid_transients, false) \
 	, _start (Properties::start, timecnt_t (s, _type == DataType::MIDI ? timepos_t (Temporal::Beats()) : timepos_t::from_superclock (0))) \
 	, _length (Properties::length, timecnt_t (l, timepos_t (s))) \
-	, _position (Properties::position, _type == DataType::MIDI ? timepos_t (Temporal::Beats()) : timepos_t::from_superclock (0)) \
 	, _sync_position (Properties::sync_position, timecnt_t (s, _type == DataType::MIDI ? timepos_t (Temporal::Beats()) : timepos_t::from_superclock (0))) \
 	, _transient_user_start (0) \
 	, _transient_analysis_start (0) \
@@ -217,7 +215,6 @@ Region::register_properties ()
 	, _valid_transients (Properties::valid_transients, other->_valid_transients) \
 	, _start(Properties::start, other->_start) \
 	, _length(Properties::length, other->_length) \
-	, _position(Properties::position, other->_position) \
 	, _sync_position(Properties::sync_position, other->_sync_position) \
 	, _user_transients (other->_user_transients) \
 	, _transient_user_start (other->_transient_user_start) \
@@ -297,7 +294,6 @@ Region::Region (boost::shared_ptr<const Region> other)
 	/* override state that may have been incorrectly inherited from the other region
 	 */
 
-	_position = other->_position;
 	_locked = false;
 	_whole_file = false;
 	_hidden = false;
@@ -364,7 +360,7 @@ Region::Region (boost::shared_ptr<const Region> other, timecnt_t const & offset)
 	use_sources (other->_sources);
 	set_master_sources (other->_master_sources);
 
-	_position = other->_position.val() + offset;
+	_length.call().set_position (other->position() + offset);
 	_start = other->_start.val() + offset;
 
 	/* if the other region had a distinct sync point
@@ -473,7 +469,7 @@ Region::set_length (timecnt_t const & len)
 	 * length impossible.
 	 */
 
-	if (timepos_t::max (len.time_domain()).earlier (len) < _position) {
+	if (timepos_t::max (len.time_domain()).earlier (len) < position()) {
 		return;
 	}
 
@@ -538,7 +534,7 @@ Region::at_natural_position () const
 	boost::shared_ptr<Region> whole_file_region = get_parent();
 
 	if (whole_file_region) {
-		if (_position == whole_file_region->position() + _start) {
+		if (position() == whole_file_region->position() + _start) {
 			return true;
 		}
 	}
@@ -569,17 +565,18 @@ Region::special_set_position (timepos_t const & pos)
 	 * a way to store its "natural" or "captured" position.
 	 */
 
-	_position = pos;
+	_length.call().set_position (pos);
 }
 
 void
 Region::set_position_time_domain (Temporal::TimeDomain ps)
 {
-	if (_position.val().time_domain() != ps) {
+	if (_length.val().time_domain() != ps) {
 
 		boost::shared_ptr<Playlist> pl (playlist());
 
-		_position.call().set_time_domain (ps);
+#warning NUTEMPO need to set ALL of length to new TD
+		//_length.val().set_time_domain (ps);
 
 		send_change (Properties::time_domain);
 	}
@@ -606,7 +603,7 @@ Region::update_after_tempo_map_change (bool send)
 	 * change
 	 */
 
-	if (_position.val().time_domain() == Temporal::AudioTime) {
+	if (_length.val().time_domain() == Temporal::AudioTime) {
 		return;
 	}
 
@@ -675,11 +672,11 @@ Region::set_position_internal (timepos_t const & pos)
 	 * (see Region::set_position), so we must always set this up so that
 	 * e.g. Playlist::notify_region_moved doesn't use an out-of-date last_position.
 	 */
-	_last_position = _position;
-	_last_length.set_position (_position);
+	_last_position = position();
+	_last_length.set_position (_last_position);
 
-	if (_position != pos) {
-		_position = pos;
+	if (position() != pos) {
+#warning NUTEMPO is this correct? why would set position set the position of the start (duration)?
 		_start.call().set_position (pos);
 		_length.call().set_position (pos);
 
@@ -688,9 +685,9 @@ Region::set_position_internal (timepos_t const & pos)
 		 *
 		 * XXX is this the right thing to do?
 		 */
-		if (timepos_t::max (_length.val().time_domain()).earlier (_length) < _position) {
+		if (timepos_t::max (_length.val().time_domain()).earlier (_length) < position()) {
 			_last_length = _length;
-			_length = _position.call().distance (timepos_t::max(_position.val().time_domain()));
+			_length = position().distance (timepos_t::max (position().time_domain()));
 		}
 	}
 }
@@ -707,8 +704,9 @@ Region::set_initial_position (timepos_t const & pos)
 		return;
 	}
 
-	if (_position != pos) {
-		_position = pos;
+	if (position() != pos) {
+
+		_length.call().set_position (pos);
 
 		/* check that the new _position wouldn't make the current
 		 * length impossible - if so, change the length.
@@ -716,15 +714,15 @@ Region::set_initial_position (timepos_t const & pos)
 		 * XXX is this the right thing to do?
 		 */
 
-		if (timepos_t::max (_length.val().time_domain()).earlier (_length) < _position) {
+		if (timepos_t::max (_length.val().time_domain()).earlier (_length) < position()) {
 			_last_length = _length;
-			_length = _position.call().distance (timepos_t::max (_position.val().time_domain()));
+			_length = position().distance (timepos_t::max (position().time_domain()));
 		}
 
 		recompute_position_from_time_domain ();
 		/* ensure that this move doesn't cause a range move */
-		_last_position = _position;
-		_last_length.set_position (_position);
+		_last_position = position();
+		_last_length.set_position (position());
 	}
 
 
@@ -745,7 +743,7 @@ Region::nudge_position (timecnt_t const & n)
 		return;
 	}
 
-	timepos_t new_position = _position;
+	timepos_t new_position = position();
 
 	if (n.positive()) {
 		if (position() > timepos_t::max (n.time_domain()).earlier (n)) {
@@ -755,7 +753,7 @@ Region::nudge_position (timecnt_t const & n)
 		}
 	} else {
 		if (position() < -n) {
-			new_position = timepos_t (_position.val().time_domain());
+			new_position = timepos_t (position().time_domain());
 		} else {
 			new_position += n;
 		}
@@ -917,8 +915,8 @@ Region::modify_end (timepos_t const & new_endpoint, bool reset_fade)
 		return;
 	}
 
-	if (new_endpoint > _position) {
-		trim_to_internal (_position, position().distance (new_endpoint));
+	if (new_endpoint > position()) {
+		trim_to_internal (position(), position().distance (new_endpoint));
 		if (reset_fade) {
 			_left_of_split = true;
 		}
@@ -1007,7 +1005,7 @@ Region::trim_to_internal (timepos_t const & pos, timecnt_t const & len)
 
 	if (position() != pos) {
 		if (!property_changes_suspended()) {
-			_last_position = _position;
+			_last_position = position();
 		}
 		set_position_internal (pos);
 		what_changed.add (Properties::position);
@@ -1393,7 +1391,7 @@ Region::suspend_property_changes ()
 {
 	Stateful::suspend_property_changes ();
 	_last_length = _length;
-	_last_position = _position;
+	_last_position = position();
 }
 
 void
@@ -1454,7 +1452,7 @@ bool
 Region::layer_and_time_equivalent (boost::shared_ptr<const Region> other) const
 {
 	return _layer == other->_layer &&
-		_position == other->_position &&
+		position() == other->position() &&
 		_length == other->_length;
 }
 
@@ -1462,7 +1460,7 @@ bool
 Region::exact_equivalent (boost::shared_ptr<const Region> other) const
 {
 	return _start == other->_start &&
-		_position == other->_position &&
+		position() == other->position() &&
 		_length == other->_length;
 }
 
@@ -1967,7 +1965,7 @@ Region::set_start_internal (timecnt_t const & s)
 timepos_t
 Region::earliest_possible_position () const
 {
-	if (start() > timecnt_t (_position, timepos_t())) {
+	if (start() > timecnt_t (position(), timepos_t())) {
 		return timepos_t::from_superclock (0);
 	} else {
 		return source_position();
@@ -1996,7 +1994,7 @@ Region::latest_possible_sample () const
 Temporal::TimeDomain
 Region::position_time_domain() const
 {
-	return _position.val().time_domain();
+	return position().time_domain();
 }
 
 timepos_t
@@ -2005,14 +2003,14 @@ Region::end() const
 	/* one day we might want to enforce _position, _start and _length (or
 	   some combination thereof) all being in the same time domain.
 	*/
-	return _position.val() + _length.val();
+	return position() + _length.val();
 }
 
 timepos_t
 Region::source_position () const
 {
 	/* this is the position of the start of the source, in absolute time */
-	return _position.val().earlier (_start.val());
+	return position().earlier (_start.val());
 }
 
 Temporal::Beats
@@ -2033,7 +2031,7 @@ Region::source_beats_to_absolute_beats (Temporal::Beats beats) const
 Temporal::timepos_t
 Region::region_beats_to_absolute_time (Temporal::Beats beats) const
 {
-	return _position.val() + timepos_t (beats);
+	return position() + timepos_t (beats);
 }
 
 Temporal::timepos_t
@@ -2086,5 +2084,5 @@ Region::region_relative_position (timepos_t const & p) const
 
 	   XXX this seems likely to cause problems.
 	*/
-	return p.earlier (_position.val());
+	return p.earlier (position());
 }

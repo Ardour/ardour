@@ -164,7 +164,6 @@ MidiRegion::clone (boost::shared_ptr<MidiSource> newsrc, ThawList* tl) const
 	plist.add (Properties::whole_file, true);
 	plist.add (Properties::start, _start);
 	plist.add (Properties::length, _length);
-	plist.add (Properties::position, _position);
 	plist.add (Properties::layer, 0);
 
 	boost::shared_ptr<MidiRegion> ret (boost::dynamic_pointer_cast<MidiRegion> (RegionFactory::create (newsrc, plist, true, tl)));
@@ -201,7 +200,7 @@ MidiRegion::master_read_at (MidiRingBuffer<samplepos_t>& out,
 timecnt_t
 MidiRegion::_read_at (const SourceList&              /*srcs*/,
                       Evoral::EventSink<samplepos_t>& dst,
-                      timepos_t const &               position,
+                      timepos_t const &               pos,
                       timecnt_t const &               xdur,
                       Temporal::Range*                loop_range,
                       MidiCursor&                     cursor,
@@ -222,13 +221,13 @@ MidiRegion::_read_at (const SourceList&              /*srcs*/,
 		return timecnt_t(); /* read nothing */
 	}
 
-	if (position < _position) {
+	if (pos < position()) {
 		/* we are starting the read from before the start of the region */
 		internal_offset = timecnt_t (Temporal::BeatTime);;
-		dur -= position.distance (_position);
+		dur -= pos.distance (position());
 	} else {
 		/* we are starting the read from after the start of the region */
-		internal_offset = _position.val().distance (position);
+		internal_offset = position().distance (pos);
 	}
 
 	if (internal_offset >= _length) {
@@ -246,11 +245,11 @@ MidiRegion::_read_at (const SourceList&              /*srcs*/,
 	src->set_note_mode(lm, mode);
 
 #if 0
-	cerr << "MR " << name () << " read @ " << position << " + " << to_read
+	cerr << "MR " << name () << " read @ " << pos << " + " << to_read
 	     << " dur was " << dur
 	     << " len " << _length
 	     << " l-io " << (_length - internal_offset)
-	     << " _position = " << _position
+	     << " position = " << position()
 	     << " _start = " << _start
 	     << " intoffset = " << internal_offset
 	     << " quarter_note = " << quarter_note()
@@ -263,7 +262,7 @@ MidiRegion::_read_at (const SourceList&              /*srcs*/,
 	if (src->midi_read (
 		    lm, // source lock
 		    dst, // destination buffer
-		    _position.val().earlier (_start.val()), // start position of the source on timeline
+		    position().earlier (_start.val()), // start position of the source on timeline
 		    _start.val() + internal_offset, // where to start reading in the source
 		    to_read, // read duration in samples
 		    loop_range,
@@ -298,12 +297,12 @@ MidiRegion::render (Evoral::EventSink<samplepos_t>& dst,
 
 	/* dump pulls from zero to infinity ... */
 
-	if (!_position.val().zero()) {
+	if (!position().zero()) {
 		/* we are starting the read from before the start of the region */
 		internal_offset = timecnt_t (Temporal::BeatTime);
 	} else {
 		/* we are starting the read from after the start of the region */
-		internal_offset = timecnt_t (-_position.val());
+		internal_offset = timecnt_t (-position());
 	}
 
 	if (internal_offset >= _length) {

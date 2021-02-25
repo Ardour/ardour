@@ -461,7 +461,7 @@ samplecnt_t
 AudioRegion::read (Sample* buf, samplepos_t pos, samplecnt_t cnt, int channel) const
 {
 	/* raw read, no fades, no gain, nada */
-	return read_from_sources (_sources, _length.val().samples(), buf, _position.val().samples() + pos, cnt, channel);
+	return read_from_sources (_sources, _length.val().samples(), buf, position().samples() + pos, cnt, channel);
 }
 
 samplecnt_t
@@ -477,13 +477,13 @@ AudioRegion::master_read_at (Sample *buf, Sample* /*mixdown_buffer*/, float* /*g
 /** @param buf Buffer to mix data into.
  *  @param mixdown_buffer Scratch buffer for audio data.
  *  @param gain_buffer Scratch buffer for gain data.
- *  @param position Position within the session to read from.
+ *  @param pos Position within the session to read from.
  *  @param cnt Number of samples to read.
  *  @param chan_n Channel number to read.
  */
 samplecnt_t
 AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
-		      samplepos_t position,
+		      samplepos_t pos,
 		      samplecnt_t cnt,
 		      uint32_t chan_n) const
 {
@@ -504,11 +504,11 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 	/* WORK OUT WHERE TO GET DATA FROM */
 
 	samplecnt_t to_read;
-	const samplepos_t psamples = _position.val().samples();
+	const samplepos_t psamples = position().samples();
 	const samplecnt_t lsamples = _length.val().samples();
 
-	assert (position >= psamples);
-	sampleoffset_t const internal_offset = position - psamples;
+	assert (pos >= psamples);
+	sampleoffset_t const internal_offset = pos - psamples;
 
 	if (internal_offset >= lsamples) {
 		return 0; /* read nothing */
@@ -590,7 +590,7 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 	   may need to mix with the existing data.
 	*/
 
-	if (read_from_sources (_sources, lsamples, mixdown_buffer, position, to_read, chan_n) != to_read) {
+	if (read_from_sources (_sources, lsamples, mixdown_buffer, pos, to_read, chan_n) != to_read) {
 		return 0;
 	}
 
@@ -729,16 +729,16 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
  *  @param srcs Source list to get our source from.
  *  @param limit Furthest that we should read, as an offset from the region position.
  *  @param buf Buffer to write data into (existing contents of the buffer will be overwritten)
- *  @param position Position to read from, in session samples.
+ *  @param pos Position to read from, in session samples.
  *  @param cnt Number of samples to read.
  *  @param chan_n Channel to read from.
  *  @return Number of samples read.
  */
 
 samplecnt_t
-AudioRegion::read_from_sources (SourceList const & srcs, samplecnt_t limit, Sample* buf, samplepos_t position, samplecnt_t cnt, uint32_t chan_n) const
+AudioRegion::read_from_sources (SourceList const & srcs, samplecnt_t limit, Sample* buf, samplepos_t pos, samplecnt_t cnt, uint32_t chan_n) const
 {
-	sampleoffset_t const internal_offset = position - _position.val().samples();
+	sampleoffset_t const internal_offset = pos - position().samples();
 
 	if (internal_offset >= limit) {
 		return 0;
@@ -978,14 +978,14 @@ AudioRegion::fade_range (samplepos_t start, samplepos_t end)
 	switch (coverage (timepos_t (start), timepos_t (end))) {
 	case Temporal::OverlapStart:
 		trim_front (timepos_t (start));
-		s = _position.val().samples();
+		s = position().samples();
 		e = end;
 		set_fade_in (FadeConstantPower, e - s);
 		break;
 	case Temporal::OverlapEnd:
 		trim_end(timepos_t (end));
 		s = start;
-		e = (_position.val() + timepos_t (_length)).samples();
+		e = (position() + timepos_t (_length)).samples();
 		set_fade_out (FadeConstantPower, e - s);
 		break;
 	case Temporal::OverlapInternal:
