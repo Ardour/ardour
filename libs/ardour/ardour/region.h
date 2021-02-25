@@ -141,7 +141,7 @@ public:
 
 	/* these two are valid ONLY during a StateChanged signal handler */
 
-	timepos_t last_position () const { return _last_position; }
+	timepos_t last_position () const { return _last_length.position(); }
 	timecnt_t last_length ()   const { return _last_length; }
 
 	samplecnt_t ancestral_start_sample ()  const { return _ancestral_start.val().samples(); }
@@ -174,7 +174,7 @@ public:
 	samplepos_t latest_possible_sample () const;
 
 	Temporal::TimeRange last_range () const {
-		return Temporal::TimeRange (_last_position, _last_position + _last_length);
+		return Temporal::TimeRange (last_position(), last_position() + _last_length);
 	}
 
 	Temporal::TimeRange range_samples () const {
@@ -522,7 +522,6 @@ private:
 	PBD::Property<bool>        _contents; // type is irrelevant
 
 	timecnt_t             _last_length;
-	timepos_t             _last_position;
 	mutable RegionEditState _first_edit;
 	layer_t                 _layer;
 
