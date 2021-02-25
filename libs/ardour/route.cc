@@ -814,7 +814,7 @@ Route::before_processor_for_placement (Placement p)
 }
 
 /** Supposing that we want to insert a Processor at a given index, return
- *  the processor to add the new one before (or 0 to add at the end).
+ *  the processor to add the new one before (or -1 to add at the end).
  */
 boost::shared_ptr<Processor>
 Route::before_processor_for_index (int index)
@@ -827,7 +827,7 @@ Route::before_processor_for_index (int index)
 
 	ProcessorList::iterator i = _processors.begin ();
 	int j = 0;
-	while (i != _processors.end() && j < index) {
+	while (i != _processors.end() && (!(*i)->display_to_user() || j < index)) {
 		if ((*i)->display_to_user()) {
 			++j;
 		}
