@@ -112,6 +112,17 @@ BundleEditorMatrix::can_add_channels (boost::shared_ptr<Bundle> b) const
 	return PortMatrix::can_add_channels (b);
 }
 
+bool
+BundleEditorMatrix::can_add_port (boost::shared_ptr<Bundle> b, DataType t) const
+{
+#if 1
+	return true; // anything goes
+#else
+	/* Do not allow to mix datatypes */
+	return _bundle->nchannels().get (t) > 0;
+#endif
+}
+
 void
 BundleEditorMatrix::add_channel (boost::shared_ptr<Bundle> b, DataType t)
 {
@@ -136,11 +147,10 @@ BundleEditorMatrix::add_channel (boost::shared_ptr<Bundle> b, DataType t)
 bool
 BundleEditorMatrix::can_remove_channels (boost::shared_ptr<Bundle> b) const
 {
-	if (b == _bundle) {
-		return true;
+	if (b != _bundle) {
+		return false;
 	}
-
-	return PortMatrix::can_remove_channels (b);
+	return _bundle->n_total () > 1;
 }
 
 void
