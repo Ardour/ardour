@@ -104,6 +104,10 @@ public:
 	/* VST3 IRunLoop interface */
 	tresult registerEventHandler (Linux::IEventHandler* handler, FileDescriptor fd) SMTG_OVERRIDE
 	{
+		if (!handler || _event_handlers.find(fd) != _event_handlers.end()) {
+			return kInvalidArgument;
+		}
+
 		Glib::Threads::Mutex::Lock lm (_lock);
 		GIOChannel* gio_channel = g_io_channel_unix_new (fd);
 		guint id = g_io_add_watch (gio_channel, (GIOCondition) (G_IO_IN /*| G_IO_OUT*/ | G_IO_ERR | G_IO_HUP), event, handler);
