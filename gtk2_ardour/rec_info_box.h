@@ -57,6 +57,7 @@ public:
 protected:
 	void render (Cairo::RefPtr<Cairo::Context> const&, cairo_rectangle_t*);
 	void dpi_reset ();
+	virtual void update ();
 
 private:
 	void rec_state_changed ();
@@ -67,6 +68,7 @@ class XrunInfoBox : public RecInfoBox
 {
 public:
 	virtual void set_session (ARDOUR::Session*);
+	virtual void update ();
 
 protected:
 	void render (Cairo::RefPtr<Cairo::Context> const&, cairo_rectangle_t*);
@@ -81,6 +83,8 @@ public:
 protected:
 	void render (Cairo::RefPtr<Cairo::Context> const&, cairo_rectangle_t*);
 	void dpi_reset ();
+	virtual void update ();
+
 private:
 	void count_recenabled_streams (ARDOUR::Route&);
 	uint32_t         _rec_enabled_streams;

@@ -168,6 +168,12 @@ DurationInfoBox::render (Cairo::RefPtr<Cairo::Context> const& cr, cairo_rectangl
 	_layout_value->show_in_cairo_context (cr);
 }
 
+void
+DurationInfoBox::update ()
+{
+	RecInfoBox::update ();
+}
+
 /* ****************************************************************************/
 
 void
@@ -244,6 +250,12 @@ XrunInfoBox::render (Cairo::RefPtr<Cairo::Context> const& cr, cairo_rectangle_t*
 	_layout_value->get_pixel_size (w, h);
 	cr->move_to (.5 * (ww - w), .5 * (hh - h));
 	_layout_value->show_in_cairo_context (cr);
+}
+
+void
+XrunInfoBox::update ()
+{
+	RecInfoBox::update ();
 }
 
 /* ****************************************************************************/
@@ -362,4 +374,10 @@ RemainInfoBox::render (Cairo::RefPtr<Cairo::Context> const& cr, cairo_rectangle_
 	_layout_value->get_pixel_size (w, h);
 	cr->move_to (.5 * (ww - w), hh - 4 - h);
 	_layout_value->show_in_cairo_context (cr);
+}
+
+void
+RemainInfoBox::update ()
+{
+	RecInfoBox::update ();
 }
