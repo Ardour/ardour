@@ -1870,7 +1870,7 @@ AlsaAudioBackend::main_process_thread ()
 			if (no_proc_errors > bailout) {
 				PBD::error
 					<< string_compose (
-							_("AlsaAudioBackend: Audio Process Terminated after %1 consecutive x-runs."),
+							_("AlsaAudioBackend: Audio Process Terminated after %1 consecutive xruns."),
 							no_proc_errors)
 					<< endmsg;
 				break;
@@ -1985,7 +1985,7 @@ AlsaAudioBackend::main_process_thread ()
 				engine.Xrun ();
 				reset_dll = true;
 #if 0
-				fprintf(stderr, "ALSA x-run read: %.2f ms, write: %.2f ms\n",
+				fprintf(stderr, "ALSA xrun read: %.2f ms, write: %.2f ms\n",
 						_pcmi->capt_xrun() * 1000.0, _pcmi->play_xrun() * 1000.0);
 #endif
 			}

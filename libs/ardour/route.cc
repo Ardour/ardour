@@ -2066,8 +2066,8 @@ Route::apply_processor_order (const ProcessorList& new_order)
 	 * (note though that  ::processors_reorder_needs_configure() ensured that
 	 * this function will only ever be called from the rt-thread if no processor were removed)
 	 *
-	 * either way, I can't proove it, but an x-run due to re-order here is less likley
-	 * than an x-run-less 'ardour-silent cycle' both of which effectively "click".
+	 * either way, I can't proove it, but an xrun due to re-order here is less likley
+	 * than an xrun-less 'ardour-silent cycle' both of which effectively "click".
 	 */
 
 	ProcessorList as_it_will_be;
@@ -4047,7 +4047,7 @@ Route::emit_pending_signals ()
 	 * OTOH its more efficient (less overhead for summoning the butler and
 	 * telling her what do do) and signal emission is called
 	 * directly after the process callback, which decreases the chance
-	 * of x-runs when taking the locks.
+	 * of xruns when taking the locks.
 	 */
 	while (!selfdestruct_sequence.empty ()) {
 		Glib::Threads::Mutex::Lock lx (selfdestruct_lock);

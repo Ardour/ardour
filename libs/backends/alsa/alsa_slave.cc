@@ -207,7 +207,7 @@ AlsaAudioSlave::process_thread ()
 		}
 
 		if (no_proc_errors > bailout) {
-			PBD::error << _("AlsaAudioBackend: Slave terminated due to continuous x-runs.") << endmsg;
+			PBD::error << _("AlsaAudioBackend: Slave terminated due to continuous xruns.") << endmsg;
 			break;
 		}
 

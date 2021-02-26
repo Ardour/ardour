@@ -632,7 +632,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 		if (_xrun_flag) {
 			/* There still are `Port::resampler_quality () -1` samples in the resampler
-			 * buffer from before the x-run. */
+			 * buffer from before the xrun. */
 			_xruns.push_back (_capture_captured + Port::resampler_quality () - 1);
 		}
 
