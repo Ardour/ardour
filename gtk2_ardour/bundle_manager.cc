@@ -59,8 +59,8 @@ BundleEditorMatrix::setup_ports (int dim)
 		_ports[OTHER].suspend_signals ();
 
 		/* when we gather, allow the matrix to contain bundles with duplicate port sets,
-		   otherwise in some cases the basic system IO ports may be hidden, making
-		   the bundle editor useless */
+		 * otherwise ports already associated with this bundle will be hidden, making
+		 * the bundle editor useless */
 
 		_ports[OTHER].gather (_session, DataType::NIL, _bundle->ports_are_inputs(), true, show_only_bundles ());
 		_ports[OTHER].remove_bundle (_bundle);
