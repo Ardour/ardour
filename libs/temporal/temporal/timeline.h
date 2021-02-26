@@ -324,6 +324,9 @@ class LIBTEMPORAL_API timecnt_t {
 	int62_t const & distance() const { return _distance; }
 	timepos_t const & position() const { return _position; }
 	timepos_t const & origin() const { return _position; } /* alias */
+	timepos_t end (TimeDomain) const;
+	timepos_t end () const { return end (time_domain()); }
+
 	void set_position (timepos_t const &pos);
 
 	bool positive() const { return _distance.val() > 0; }
@@ -336,6 +339,7 @@ class LIBTEMPORAL_API timecnt_t {
 	timecnt_t abs() const;
 
 	Temporal::TimeDomain time_domain () const { return _distance.flagged() ? BeatTime : AudioTime; }
+	void set_time_domain (Temporal::TimeDomain);
 
 	superclock_t    superclocks() const { if (!_distance.flagged()) return _distance.val(); return compute_superclocks(); }
 	int64_t         samples() const { return superclock_to_samples (superclocks(), TEMPORAL_SAMPLE_RATE); }

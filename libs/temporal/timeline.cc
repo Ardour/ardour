@@ -81,6 +81,77 @@ timecnt_t::timecnt_t (timecnt_t const & tc, timepos_t const & pos)
 	_distance = tc.distance();
 }
 
+
+timepos_t
+timecnt_t::end (TimeDomain return_domain) const
+{
+	if (_distance.flagged() && _position.time_domain() == BeatTime && return_domain == BeatTime) {
+		/* everything in BeatTime, so just add */
+		return timepos_t (_position.beats() + Beats::ticks (magnitude()));
+	}
+
+	if (!_distance.flagged() && _position.time_domain() == AudioTime && return_domain == AudioTime) {
+		/* everything in AudioTime, so just add */
+		return timepos_t::from_superclock (_position.superclocks() + magnitude());
+	}
+
+	if (_distance.flagged()) { /* _distance in beats */
+
+		if (_position.time_domain() == BeatTime) {
+
+			/* distance & position in beats, so return must be audio (all 3 as beats is handled above) */
+			return timepos_t::from_superclock (TempoMap::use()->superclock_at ( _position.beats() + Beats::ticks (magnitude())));
+
+		} else if (_position.time_domain() == AudioTime) {
+
+			const Beats b = TempoMap::use()->quarters_at_superclock (_position.superclocks() + magnitude());
+
+			if (return_domain == BeatTime) {
+				return timepos_t (b);
+			} else {
+				return timepos_t::from_superclock (TempoMap::use()->superclock_at (b));
+			}
+		}
+
+	} else { /* _distance in audio time */
+
+		if (_position.time_domain() == AudioTime) {
+			/* distance & position in audio, so return must be beats (all 3 as audio is handled above) */
+			return timepos_t (TempoMap::use()->quarters_at_superclock (_position.superclocks() + magnitude()));
+
+		} else if (_position.time_domain() == BeatTime) {
+
+			const superclock_t sc = TempoMap::use()->superclock_at (_position.beats()) + magnitude();
+
+			if (return_domain == AudioTime) {
+				return timepos_t::from_superclock (sc);
+			} else {
+				return timepos_t (TempoMap::use()->quarters_at_superclock (sc));
+			}
+		}
+	}
+
+	/*NOTREACHED*/
+}
+
+void
+timecnt_t::set_time_domain (TimeDomain td)
+{
+	if (time_domain() == td) {
+		return;
+	}
+
+	_position.set_time_domain (td);
+
+	if (_distance.flagged()) {
+		/* beats -> superclock */
+		_distance = int62_t (false, TempoMap::use()->superclock_at (Beats::ticks (magnitude())));
+	} else {
+		/* superclock -> beats */
+		_distance = int62_t (true, TempoMap::use()->quarters_at_superclock (magnitude()).to_ticks());
+	}
+}
+
 void
 timecnt_t::set_position (timepos_t const & pos)
 {
