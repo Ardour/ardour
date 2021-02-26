@@ -209,9 +209,9 @@ BundleEditor::BundleEditor (Session* session, boost::shared_ptr<UserBundle> bund
 	_input_or_output.append_text (_("Source"));
 
 	if (bundle->ports_are_inputs()) {
-		_input_or_output.set_active_text (_("Source"));
-	} else {
 		_input_or_output.set_active_text (_("Destination"));
+	} else {
+		_input_or_output.set_active_text (_("Source"));
 	}
 
 	_input_or_output.signal_changed().connect (sigc::mem_fun (*this, &BundleEditor::input_or_output_changed));
