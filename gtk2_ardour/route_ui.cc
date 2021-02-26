@@ -297,11 +297,15 @@ RouteUI::set_session (ARDOUR::Session*s)
 {
 	SessionHandlePtr::set_session (s);
 
-	/* This is needed to clean out IDs of sends, when using output selector
-	 * with MixerStrip::_current_delivery
-	 */
 	if (!s) {
-		assert (input_selectors.empty ());
+		/* This is needed to clean out IDs of sends, when using output selector
+		 * with MixerStrip::_current_delivery.
+		 * It's also prudent to hide/destroy input-selectors early, before delayed
+		 * self_delete() can do that in the ~RouteUI.
+		 */
+		for (IOSelectorMap::const_iterator i = input_selectors.begin(); i != input_selectors.end() ; ++i) {
+			delete i->second;
+		}
 		for (IOSelectorMap::const_iterator i = output_selectors.begin(); i != output_selectors.end() ; ++i) {
 			delete i->second;
 		}

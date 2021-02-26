@@ -297,7 +297,7 @@ protected:
 	virtual void blink_rec_display (bool onoff);
 	virtual void map_frozen ();
 
-	void self_delete ();
+	virtual void self_delete ();
 	virtual void start_step_editing () {}
 	virtual void stop_step_editing() {}
 

@@ -98,8 +98,6 @@ TrackRecordAxis::TrackRecordAxis (Session* s, boost::shared_ptr<ARDOUR::Route> r
 
 	RouteUI::set_route (rt);
 
-	_route->DropReferences.connect (_route_connections, invalidator (*this), boost::bind (&TrackRecordAxis::self_delete, this), gui_context ());
-
 	UI::instance ()->theme_changed.connect (sigc::mem_fun (*this, &TrackRecordAxis::on_theme_changed));
 	UIConfiguration::instance ().ColorsChanged.connect (sigc::mem_fun (*this, &TrackRecordAxis::on_theme_changed));
 	UIConfiguration::instance ().DPIReset.connect (sigc::mem_fun (*this, &TrackRecordAxis::on_theme_changed));
