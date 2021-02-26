@@ -1193,13 +1193,13 @@ RegionView::snap_region_time_to_region_time (timepos_t const & x, bool ensure_sn
 timecnt_t
 RegionView::region_relative_distance (timecnt_t const & duration, Temporal::TimeDomain domain)
 {
-	return Temporal::TempoMap::use()->full_duration_at (_region->position(), duration, domain);
+	return Temporal::TempoMap::use()->convert_duration (duration, _region->position(), domain);
 }
 
 timecnt_t
 RegionView::source_relative_distance (timecnt_t const & duration, Temporal::TimeDomain domain)
 {
-	return Temporal::TempoMap::use()->full_duration_at (_region->source_position(), duration, domain);
+	return Temporal::TempoMap::use()->convert_duration (duration, _region->source_position(), domain);
 }
 
 void

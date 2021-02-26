@@ -169,14 +169,14 @@ timecnt_t::compute_superclocks() const
 {
 	assert (_distance.flagged());
 	TempoMap::SharedPtr tm (TempoMap::use());
-	return tm->full_duration_at (_position, *this, AudioTime).superclocks();
+	return tm->convert_duration (*this, _position, AudioTime).superclocks();
 }
 
 Beats
 timecnt_t::compute_beats() const
 {
 	assert (!_distance.flagged());
-	return TempoMap::use()->full_duration_at (_position, *this, BeatTime).beats();
+	return TempoMap::use()->convert_duration (*this, _position, BeatTime).beats();
 }
 
 timecnt_t

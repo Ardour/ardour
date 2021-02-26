@@ -2385,7 +2385,7 @@ TempoMap::bbt_duration_at (timepos_t const & pos, BBT_Offset const & dur) const
  */
 
 timecnt_t
-TempoMap::full_duration_at (timepos_t const & pos, timecnt_t const & duration, TimeDomain return_domain) const
+TempoMap::convert_duration (timecnt_t const & duration, timepos_t const & new_position, TimeDomain return_domain) const
 {
 	timepos_t p (return_domain);
 	Beats b;
@@ -2393,7 +2393,7 @@ TempoMap::full_duration_at (timepos_t const & pos, timecnt_t const & duration, T
 
 	if (return_domain == duration.time_domain()) {
 		/* new timecnt_t: same distance, but new position */
-		return timecnt_t (duration.distance(), pos);
+		return timecnt_t (duration.distance(), new_position);
 	}
 
 	switch (return_domain) {
@@ -2404,14 +2404,14 @@ TempoMap::full_duration_at (timepos_t const & pos, timecnt_t const & duration, T
 			break;
 		case BeatTime:
 			/* duration is in beats but we're asked to return superclocks */
-			switch (pos.time_domain()) {
+			switch (new_position.time_domain()) {
 			case BeatTime:
-				/* pos is already in beats */
-				p = pos;
+				/* new_position is already in beats */
+				p = new_position;
 				break;
 			case AudioTime:
 				/* Determine beats at sc pos, so that we can add beats */
-				p = timepos_t (metric_at (pos).quarters_at_superclock (pos.superclocks()));
+				p = timepos_t (metric_at (new_position).quarters_at_superclock (new_position.superclocks()));
 				break;
 			}
 			/* add beats */
@@ -2419,7 +2419,7 @@ TempoMap::full_duration_at (timepos_t const & pos, timecnt_t const & duration, T
 			/* determine superclocks */
 			s = metric_at (p).superclock_at (p.beats());
 			/* return duration in sc */
-			return timecnt_t::from_superclock (s - pos.superclocks(), pos);
+			return timecnt_t::from_superclock (s - new_position.superclocks(), new_position);
 			break;
 		}
 		break;
@@ -2428,14 +2428,14 @@ TempoMap::full_duration_at (timepos_t const & pos, timecnt_t const & duration, T
 		switch (duration.time_domain()) {
 		case AudioTime:
 			/* duration is in superclocks but we're asked to return beats */
-			switch (pos.time_domain ()) {
+			switch (new_position.time_domain ()) {
 			case AudioTime:
 				/* pos is already in superclocks */
-				p = pos;
+				p = new_position;
 				break;
 			case BeatTime:
 				/* determined sc at beat position so we can add superclocks */
-				p = timepos_t (metric_at (pos).sample_at (pos.beats()));
+				p = timepos_t (metric_at (new_position).sample_at (new_position.beats()));
 				break;
 			}
 			/* add superclocks */
@@ -2443,7 +2443,7 @@ TempoMap::full_duration_at (timepos_t const & pos, timecnt_t const & duration, T
 			/* determine beats */
 			b = metric_at (p).quarters_at_superclock (p.superclocks());
 			/* return duration in beats */
-			return timecnt_t (b - pos.beats(), pos);
+			return timecnt_t (b - new_position.beats(), new_position);
 			break;
 		case BeatTime:
 			/*NOTREACHED*/
