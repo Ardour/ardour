@@ -5915,7 +5915,7 @@ Editor::super_rapid_screen_update ()
 	}
 
 	if (err > 8192 || latent_locate) {
-		// in case of x-runs or freewheeling
+		// in case of xruns or freewheeling
 		_last_update_time = 0;
 		sample = _session->audible_sample ();
 	} else {

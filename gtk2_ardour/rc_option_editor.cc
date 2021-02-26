@@ -3432,7 +3432,7 @@ These settings will only take effect after %1 is restarted.\n\
 
 	bo = new BoolOption (
 		     "recording-resets-xrun-count",
-		     _("Reset x-run counter when starting to record"),
+		     _("Reset xrun counter when starting to record"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_recording_resets_xrun_count),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_recording_resets_xrun_count)
 		     );
