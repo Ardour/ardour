@@ -2392,7 +2392,8 @@ TempoMap::full_duration_at (timepos_t const & pos, timecnt_t const & duration, T
 	superclock_t s;
 
 	if (return_domain == duration.time_domain()) {
-		return duration;
+		/* new timecnt_t: same distance, but new position */
+		return timecnt_t (duration.distance(), pos);
 	}
 
 	switch (return_domain) {
