@@ -68,6 +68,7 @@ private:
 	Gtk::Menu                                     _menu;
 	std::list<boost::shared_ptr<ARDOUR::Bundle> > _menu_bundles;
 	PBD::ScopedConnectionList                     _connections;
+	PBD::ScopedConnectionList                     _bundle_connections;
 };
 
 #endif

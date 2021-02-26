@@ -61,6 +61,7 @@ void
 IOButton::set_route (boost::shared_ptr<ARDOUR::Route> rt, RouteUI* routeui)
 {
 	_connections.drop_connections ();
+	_bundle_connections.drop_connections ();
 
 	_route    = rt;
 	_route_ui = routeui;
@@ -71,10 +72,11 @@ IOButton::set_route (boost::shared_ptr<ARDOUR::Route> rt, RouteUI* routeui)
 	}
 
 	AudioEngine::instance ()->PortConnectedOrDisconnected.connect (_connections, invalidator (*this), boost::bind (&IOButton::port_connected_or_disconnected, this, _1, _3), gui_context ());
-
 	AudioEngine::instance ()->PortPrettyNameChanged.connect (_connections, invalidator (*this), boost::bind (&IOButton::port_pretty_name_changed, this, _1), gui_context ());
 
 	io ()->changed.connect (_connections, invalidator (*this), boost::bind (&IOButton::update, this), gui_context ());
+	/* We're really only interested in BundleRemoved when connected to that bundle */
+	_route->session ().BundleAddedOrRemoved.connect (_connections, invalidator (*this), boost::bind (&IOButton::update, this), gui_context ());
 
 	update ();
 }
@@ -385,6 +387,8 @@ IOButton::update ()
 	DataType              dt = guess_main_type ();
 	boost::shared_ptr<IO> io = _input ? _route->input () : _route->output ();
 
+	_bundle_connections.drop_connections ();
+
 	/* Fill in the tooltip. Also count:
 	 *  - The total number of connections.
 	 *  - The number of main-typed connections.
@@ -472,6 +476,7 @@ IOButton::update ()
 			if (io->bundle ()->connected_to (*bundle, _route->session ().engine (), dt, true)) {
 				label << Gtkmm2ext::markup_escape_text ((*bundle)->name ());
 				have_label = true;
+				(*bundle)->Changed.connect (_bundle_connections, invalidator (*this), boost::bind (&IOButton::update, this), gui_context ());
 				break;
 			}
 		}
