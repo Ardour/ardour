@@ -2365,11 +2365,23 @@ TempoMap::bbt_duration_at (timepos_t const & pos, BBT_Offset const & dur) const
 
 }
 
-/** Takes a duration (in any time domain) and considers it as a distance from the given position.
- *  Returns a distance in the requested domain, taking tempo changes into account.
+/** Takes a position and distance (both in any time domain), and returns a timecnt_t
+ * that describes that distance from that position in a specified time domain.
  *
- *  Obviously, if the given distance is in the same time domain as the requested domain,
- *  the returned distance is identical to the given one.
+ * This method is used when converting a (distance,pos) pair (a timecnt_t) into
+ * (distance,pos') in a different time domain. For an english example: "given a
+ * distance of N beats from position P, what is that same distance measured in
+ * superclocks from P' ?"
+ *
+ * A different example: "given a distance N superclocks from position P, what
+ * is that same distance measured in beats from P' ?"
+ *
+ * There is a trivial case in which the requested return domain is the same as
+ * the domain for the distance. In english: "given a distance of N beats from
+ * P, what is the same distance measured in beats from P' ?" In this case, we
+ * can simply construct a new timecnt_t that uses P' instead of P, since the
+ * distance component must necessarily be same. Notice that this true no matter
+ * what domain is used.
  */
 
 timecnt_t
