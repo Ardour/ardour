@@ -161,7 +161,7 @@ MonitorPort::finalize (pframes_t n_samples)
 	_cycle_ports.reset ();
 }
 
-AudioBuffer&
+ARDOUR::AudioBuffer&
 MonitorPort::get_audio_buffer (pframes_t n_samples)
 {
 	/* caller must hold process lock */
