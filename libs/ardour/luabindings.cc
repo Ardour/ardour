@@ -43,6 +43,7 @@
 #include "ardour/audioplaylist.h"
 #include "ardour/audiorom.h"
 #include "ardour/buffer_set.h"
+#include "ardour/bundle.h"
 #include "ardour/beats_samples_converter.h"
 #include "ardour/chan_mapping.h"
 #include "ardour/convolver.h"
@@ -93,6 +94,7 @@
 #include "ardour/stripable.h"
 #include "ardour/track.h"
 #include "ardour/tempo.h"
+#include "ardour/user_bundle.h"
 #include "ardour/vca.h"
 #include "ardour/vca_manager.h"
 
@@ -260,8 +262,10 @@ CLASSKEYS(std::list<ARDOUR::AudioRange>);
 CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Port> >);
 CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Region> >);
 CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Route> >);
+CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Route> >);
 CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Stripable> >);
 CLASSKEYS(boost::shared_ptr<std::list<boost::shared_ptr<ARDOUR::Route> > >);
+CLASSKEYS(boost::shared_ptr<std::vector<boost::shared_ptr<ARDOUR::Bundle> > >);
 
 CLASSKEYS(boost::shared_ptr<ARDOUR::AudioRegion>);
 CLASSKEYS(boost::shared_ptr<ARDOUR::AudioRom>);
@@ -1170,6 +1174,19 @@ LuaBindings::common (lua_State* L)
 #endif
 		.endClass ()
 
+		.beginWSPtrClass <Bundle> ("Bundle")
+		.addCast<UserBundle> ("to_userbundle")
+		.addFunction ("name", &Bundle::name)
+		.addFunction ("n_total", &Bundle::n_total)
+		.addFunction ("nchannels", &Bundle::nchannels)
+		.addFunction ("channel_name", &Bundle::channel_name)
+		.addFunction ("ports_are_inputs", &Bundle::ports_are_inputs)
+		.addFunction ("ports_are_outputs", &Bundle::ports_are_outputs)
+		.endClass ()
+
+		.deriveWSPtrClass <UserBundle, Bundle> ("UserBundle")
+		.endClass ()
+
 		.deriveWSPtrClass <AudioPlaylist, Playlist> ("AudioPlaylist")
 		.addFunction ("read", &AudioPlaylist::read)
 		.endClass ()
@@ -1738,6 +1755,11 @@ LuaBindings::common (lua_State* L)
 		// boost::shared_ptr<RouteList>
 		.beginPtrStdList <boost::shared_ptr<Route> > ("RouteListPtr")
 		.addVoidPtrConstructor<std::list<boost::shared_ptr <Route> > > ()
+		.endClass ()
+
+		// boost::shared_ptr<BundleList>
+		.beginPtrStdVector <boost::shared_ptr<Bundle> > ("BundleListPtr")
+		.addVoidPtrConstructor<std::vector<boost::shared_ptr <Bundle> > > ()
 		.endClass ()
 
 		// typedef std::list<boost::weak_ptr <Route> > WeakRouteList
@@ -2476,6 +2498,8 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("get_stripables", (StripableList (Session::*)() const)&Session::get_stripables)
 		.addFunction ("get_routelist", &Session::get_routelist)
 		.addFunction ("plot_process_graph", &Session::plot_process_graph)
+
+		.addFunction ("bundles", &Session::bundles)
 
 		.addFunction ("name", &Session::name)
 		.addFunction ("path", &Session::path)
