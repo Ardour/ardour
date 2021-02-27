@@ -187,9 +187,14 @@ VST3X11PluginUI::VST3X11PluginUI (boost::shared_ptr<PluginInsert> pi, boost::sha
 	pack_start (_gui_widget, true, true);
 
 	_gui_widget.signal_realize().connect (mem_fun (this, &VST3X11PluginUI::view_realized));
-	_gui_widget.signal_size_request ().connect (mem_fun (this, &VST3X11PluginUI::view_size_request));
-	_gui_widget.signal_size_allocate ().connect (mem_fun (this, &VST3X11PluginUI::view_size_allocate));
 	_gui_widget.signal_scroll_event ().connect (sigc::mem_fun (*this, &VST3X11PluginUI::forward_scroll_event), false);
+
+	IPlugView* view = _vst3->view ();
+	if (view->canResize() == kResultFalse) {
+		// We only need to connect the resize signals if the plugin is NOT resizable on its own.
+		_gui_widget.signal_size_request ().connect (mem_fun (this, &VST3X11PluginUI::view_size_request));
+		_gui_widget.signal_size_allocate ().connect (mem_fun (this, &VST3X11PluginUI::view_size_allocate));
+	}
 
 #if 0
 	_gui_widget.add_events (Gdk::POINTER_MOTION_HINT_MASK | Gdk::SCROLL_MASK | Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK | Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK|Gdk::SCROLL_MASK);
