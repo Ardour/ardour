@@ -70,7 +70,7 @@ using std::vector;
 
 StartupFSM::StartupFSM (EngineControl& amd)
 	: session_existing_sample_rate (0)
-	, session_engine_hints ("Engine Hints")
+	, session_engine_hints ("EngineHints")
 	, session_is_new (false)
 	, session_name_edited (false)
 	, new_user (NewUserWizard::required())
@@ -469,18 +469,23 @@ StartupFSM::start_audio_midi_setup ()
 		/* if user has selected auto-start, check if autostart is possible */
 		bool ok = true;
 		std::string backend_name;
-		std::string input_device;
-		std::string output_device;
-		ok &= session_engine_hints.get_property ("backend", backend_name);
-		ok &= session_engine_hints.get_property ("input-device", input_device);
-		ok &= session_engine_hints.get_property ("output-device", output_device);
-		ok &= backend->name () == backend_name;
-		if (backend->use_separate_input_and_output_devices()) {
-			ok &= input_device == backend->input_device_name ();
-			ok &= output_device == backend->output_device_name ();
-		} else {
-			ok &= input_device == backend->device_name ();
-			ok &= output_device == backend->device_name ();
+		/* Allow auto-start if there is no backend information for the
+		 * given session. This can happen when loading an old (v6) session,
+		 * of if the user has been using externally started JACK.
+		 */
+		if (session_engine_hints.get_property ("backend", backend_name)) {
+			std::string input_device;
+			std::string output_device;
+			ok &= session_engine_hints.get_property ("input-device", input_device);
+			ok &= session_engine_hints.get_property ("output-device", output_device);
+			ok &= backend->name () == backend_name;
+			if (backend->use_separate_input_and_output_devices()) {
+				ok &= input_device == backend->input_device_name ();
+				ok &= output_device == backend->output_device_name ();
+			} else {
+				ok &= input_device == backend->device_name ();
+				ok &= output_device == backend->device_name ();
+			}
 		}
 		if (!ok) {
 			try_autostart = false;
@@ -490,7 +495,6 @@ StartupFSM::start_audio_midi_setup ()
 					false, Gtk::MESSAGE_WARNING, Gtk::BUTTONS_OK, true);
 			msg.run ();
 		}
-
 	}
 
 	if (setup_required) {
