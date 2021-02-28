@@ -3628,7 +3628,6 @@ OSC::_strip_parse (const char *path, const char *sub_path, const char* types, lo
 	OSCSurface *sur = get_surface(get_address (msg));
 	bool send_active = strp && sur->temp_mode == BusOnly && get_send (s, get_address (msg));
 	bool control_disabled = strp && (sur->temp_mode == BusOnly) && (s != sur->temp_master);
-	bool n_ma = !s->is_master();
 	bool n_mo = !s->is_monitor();
 	boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (s);
 
@@ -3669,6 +3668,8 @@ OSC::_strip_parse (const char *path, const char *sub_path, const char* types, lo
 						} else {
 							abs = dB_to_coefficient (db);
 						}
+					} else {
+						abs = 0;
 					}
 					float top = gain_control->upper();
 					if (abs > top) {
