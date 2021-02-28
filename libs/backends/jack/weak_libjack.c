@@ -53,7 +53,7 @@ static void* lib_symbol(void* const lib, const char* const sym) {
 #endif
 }
 
-#ifdef COMPILER_MSVC
+#if defined _MSC_VER  && ! defined __INTEL_COMPILER
 typedef void * pvoid_t;
 #define MAPSYM(SYM, FAIL) _j._ ## SYM = (func_t)lib_symbol(lib, "jack_" # SYM); \
 	if (!_j._ ## SYM) err |= FAIL;
@@ -92,8 +92,9 @@ static struct WeakJack {
 } _j;
 
 static int _status = -1;
-
+#if !defined _MSC_VER || defined __INTEL_COMPILER
 __attribute__((constructor))
+#endif
 static void init_weak_jack(void)
 {
 	void* lib;
@@ -110,7 +111,7 @@ static void init_weak_jack(void)
 		lib = lib_open("/usr/local/lib/libjack.dylib");
 	}
 #elif (defined PLATFORM_WINDOWS)
-# if ( defined(__x86_64__) || defined(_M_X64) )
+# if defined(__x86_64__) || defined(_M_X64) || defined(__amd64__)
 	lib = lib_open("libjack64.dll");
 # else
 	lib = lib_open("libjack.dll");
