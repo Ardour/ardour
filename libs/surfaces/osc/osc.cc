@@ -741,9 +741,9 @@ OSC::send_current_value (const char* path, lo_arg** argv, int argc, lo_message m
 }
 
 int
-OSC::_catchall (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data)
+OSC::_catchall (const char *path, const char *types, lo_arg **argv, int argc, lo_message msg, void *user_data)
 {
-	return ((OSC*)user_data)->catchall (path, types, argv, argc, data);
+	return ((OSC*)user_data)->catchall (path, types, argv, argc, msg);
 }
 
 int
@@ -975,7 +975,7 @@ OSC::session_exported (std::string path, std::string name)
 /* path callbacks */
 
 int
-OSC::current_value (const char */*path*/, const char */*types*/, lo_arg **/*argv*/, int /*argc*/, void */*data*/, void* /*user_data*/)
+OSC::current_value (const char */*path*/, const char */*types*/, lo_arg **/*argv*/, int /*argc*/, lo_message /*msg*/, void* /*user_data*/)
 {
 #if 0
 	const char* returl;
