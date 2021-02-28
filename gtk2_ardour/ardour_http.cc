@@ -180,7 +180,7 @@ HttpGet::~HttpGet ()
 		curl_easy_cleanup (_curl);
 	}
 	if (!persist) {
-		free (mem.data);
+		::free (mem.data);
 	}
 }
 
@@ -212,7 +212,7 @@ HttpGet::get (const char* url, bool with_error_logging)
 	}
 
 	if (!persist) {
-		free (mem.data);
+		::free (mem.data);
 	} // otherwise caller is expected to have free()d or re-used it.
 
 	error_buffer[0] = 0;
