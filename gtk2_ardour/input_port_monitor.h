@@ -20,6 +20,7 @@
 #define __gtk_ardour_input_port_monitor_h__
 
 #include <gtkmm/box.h>
+#include <gtkmm/alignment.h>
 
 #include "gtkmm2ext/cairo_widget.h"
 
@@ -55,6 +56,7 @@ private:
 		InputScope (ARDOUR::samplecnt_t, int length , int gauge, Orientation);
 		void update (ARDOUR::CircularSampleBuffer&);
 		void clear ();
+		void parameter_changed (std::string const&);
 
 	protected:
 		void render (Cairo::RefPtr<Cairo::Context> const&, cairo_rectangle_t*);
@@ -62,7 +64,6 @@ private:
 		void on_size_allocate (Gtk::Allocation&);
 
 	private:
-		void parameter_changed (std::string const&);
 
 		int                 _pos;
 		ARDOUR::samplecnt_t _rate;
@@ -118,12 +119,18 @@ private:
 		Orientation                            _orientation;
 	};
 
+	void setup_audio_meter ();
+	void color_handler ();
+	void parameter_changed (std::string const&);
+
 	Gtk::Box*                 _box;
+	Gtk::Alignment            _bin;
 	ARDOUR::DataType          _dt;
 	ArdourWidgets::FastMeter* _audio_meter;
 	InputScope*               _audio_scope;
 	EventMeter*               _midi_meter;
 	EventMonitor*             _midi_monitor;
+	Orientation               _orientation;
 };
 
 #endif

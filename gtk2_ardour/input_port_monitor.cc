@@ -46,6 +46,7 @@ InputPortMonitor::InputPortMonitor (ARDOUR::DataType dt, samplecnt_t sample_rate
 	, _audio_scope (0)
 	, _midi_meter (0)
 	, _midi_monitor (0)
+	, _orientation (o)
 {
 	if (o == Vertical) {
 		_box = new Gtk::HBox;
@@ -54,34 +55,9 @@ InputPortMonitor::InputPortMonitor (ARDOUR::DataType dt, samplecnt_t sample_rate
 	}
 
 	if (_dt == DataType::AUDIO) {
-		_audio_meter = new FastMeter (
-		    (uint32_t)floor (UIConfiguration::instance ().get_meter_hold ()),
-		    18,
-				o == Vertical ? FastMeter::Vertical : FastMeter::Horizontal,
-				PX_SCALE (200),
-		    UIConfiguration::instance ().color ("meter color0"),
-		    UIConfiguration::instance ().color ("meter color1"),
-		    UIConfiguration::instance ().color ("meter color2"),
-		    UIConfiguration::instance ().color ("meter color3"),
-		    UIConfiguration::instance ().color ("meter color4"),
-		    UIConfiguration::instance ().color ("meter color5"),
-		    UIConfiguration::instance ().color ("meter color6"),
-		    UIConfiguration::instance ().color ("meter color7"),
-		    UIConfiguration::instance ().color ("meter color8"),
-		    UIConfiguration::instance ().color ("meter color9"),
-		    UIConfiguration::instance ().color ("meter background bottom"),
-		    UIConfiguration::instance ().color ("meter background top"),
-		    0x991122ff, // red highlight gradient Bot
-		    0x551111ff, // red highlight gradient Top
-		    (115.0 * log_meter0dB (-18)),
-		    89.125,  // 115.0 * log_meter0dB(-9);
-		    106.375, // 115.0 * log_meter0dB(-3);
-		    115.0,   // 115.0 * log_meter0dB(0);
-		    (UIConfiguration::instance ().get_meter_style_led () ? 3 : 1));
+		setup_audio_meter ();
 
 		_audio_scope = new InputScope (sample_rate, PX_SCALE (200), 25, o);
-
-		_audio_meter->show ();
 
 		if (UIConfiguration::instance ().get_input_meter_scopes ()) {
 			_audio_scope->show ();
@@ -91,8 +67,11 @@ InputPortMonitor::InputPortMonitor (ARDOUR::DataType dt, samplecnt_t sample_rate
 
 		ArdourWidgets::set_tooltip (_audio_scope, _("5 second history waveform"));
 
-		_box->pack_start (*_audio_meter, false, false);
+		_box->pack_start (_bin, false, false);
 		_box->pack_start (*_audio_scope, true, true, 1);
+
+		UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &InputPortMonitor::parameter_changed));
+		UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &InputPortMonitor::color_handler));
 
 	} else if (_dt == DataType::MIDI) {
 		_midi_meter   = new EventMeter (o);
@@ -125,6 +104,29 @@ InputPortMonitor::~InputPortMonitor ()
 }
 
 void
+InputPortMonitor::parameter_changed (std::string const& p)
+{
+	if (_audio_scope) {
+		_audio_scope->parameter_changed (p);
+	}
+	if (_audio_meter) {
+		if (p == "meter-hold") {
+			_audio_meter->set_hold_count ((uint32_t) floor(UIConfiguration::instance().get_meter_hold()));
+		} else if (p == "meter-style-led") {
+			setup_audio_meter ();
+		}
+	}
+}
+
+void
+InputPortMonitor::color_handler ()
+{
+	if (_audio_meter) {
+		setup_audio_meter ();
+	}
+}
+
+void
 InputPortMonitor::clear ()
 {
 	if (_audio_meter) {
@@ -140,6 +142,43 @@ InputPortMonitor::clear ()
 		_midi_monitor->clear ();
 	}
 }
+
+void
+InputPortMonitor::setup_audio_meter ()
+{
+	_bin.remove ();
+	delete _audio_meter;
+
+	_audio_meter = new FastMeter (
+			(uint32_t)floor (UIConfiguration::instance ().get_meter_hold ()),
+			18,
+			_orientation == Vertical ? FastMeter::Vertical : FastMeter::Horizontal,
+			PX_SCALE (200),
+			UIConfiguration::instance ().color ("meter color0"),
+			UIConfiguration::instance ().color ("meter color1"),
+			UIConfiguration::instance ().color ("meter color2"),
+			UIConfiguration::instance ().color ("meter color3"),
+			UIConfiguration::instance ().color ("meter color4"),
+			UIConfiguration::instance ().color ("meter color5"),
+			UIConfiguration::instance ().color ("meter color6"),
+			UIConfiguration::instance ().color ("meter color7"),
+			UIConfiguration::instance ().color ("meter color8"),
+			UIConfiguration::instance ().color ("meter color9"),
+			UIConfiguration::instance ().color ("meter background bottom"),
+			UIConfiguration::instance ().color ("meter background top"),
+			0x991122ff, // red highlight gradient Bot
+			0x551111ff, // red highlight gradient Top
+			(115.0 * log_meter0dB (-18)),
+			89.125,  // 115.0 * log_meter0dB(-9);
+			106.375, // 115.0 * log_meter0dB(-3);
+			115.0,   // 115.0 * log_meter0dB(0);
+			(UIConfiguration::instance ().get_meter_style_led () ? 3 : 1));
+
+	_bin.add (*_audio_meter);
+	_bin.show ();
+	_audio_meter->show ();
+}
+
 
 void
 InputPortMonitor::update (float l, float p)
@@ -181,7 +220,6 @@ InputPortMonitor::InputScope::InputScope (samplecnt_t rate, int l, int g, Orient
 	_surface = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, l, g);
 	use_image_surface (false); /* we already use a surface */
 
-	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &InputScope::parameter_changed));
 	parameter_changed ("waveform-clip-level");
 	parameter_changed ("show-waveform-clipping");
 	parameter_changed ("waveform-scale");
