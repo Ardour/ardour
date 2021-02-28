@@ -100,7 +100,14 @@ protected:
 	 */
 	union {
 		boost::shared_ptr<T>*     rcu_value;
+	/* Atomic fails to build with GCC 11 if it's volatile,
+	 * see https://developer.gnome.org/glib/2.67/glib-Atomic-Operations.html#g-atomic-pointer-compare-and-exchange
+	 * */
+#if __GNUC__ > 10
+		mutable gpointer gptr;
+#else
 		mutable volatile gpointer gptr;
+#endif
 	} x;
 
 	inline bool active_read () const {
@@ -108,7 +115,11 @@ protected:
 	}
 
 private:
+#if __GNUC__ > 10
+	mutable gint _active_reads;
+#else
 	mutable volatile gint _active_reads;
+#endif
 };
 
 /** Serialized RCUManager implements the RCUManager interface. It is based on the
