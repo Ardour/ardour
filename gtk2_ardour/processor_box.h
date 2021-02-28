@@ -150,13 +150,13 @@ public:
 	bool drag_data_get (Glib::RefPtr<Gdk::DragContext> const, Gtk::SelectionData &);
 	bool can_copy_state (Gtkmm2ext::DnDVBoxChild*) const;
 
-	enum Position {
+	enum ProcessorPosition {
 		PreFader,
 		Fader,
 		PostFader
 	};
 
-	void set_position (Position, uint32_t);
+	void set_position (ProcessorPosition, uint32_t);
 	bool unknown_processor () const { return _unknown_processor; } ;
 	boost::shared_ptr<ARDOUR::Processor> processor () const;
 	void set_enum_width (Width);
@@ -176,7 +176,7 @@ public:
 protected:
 	ArdourWidgets::ArdourButton _button;
 	Gtk::VBox _vbox;
-	Position _position;
+	ProcessorPosition _position;
 	uint32_t _position_num;
 	ProcessorBox* _parent;
 

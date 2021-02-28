@@ -389,7 +389,7 @@ ProcessorEntry::drag_data_get (Glib::RefPtr<Gdk::DragContext> const, Gtk::Select
 }
 
 void
-ProcessorEntry::set_position (Position p, uint32_t num)
+ProcessorEntry::set_position (ProcessorPosition p, uint32_t num)
 {
 	_position = p;
 	_position_num = num;
