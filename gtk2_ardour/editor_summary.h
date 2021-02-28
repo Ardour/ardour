@@ -49,7 +49,7 @@ private:
 	void parameter_changed (std::string);
 	void on_size_allocate (Gtk::Allocation& alloc);
 
-	enum Position {
+	enum SummaryPosition {
 		LEFT,
 		RIGHT,
 		BOTTOM,
@@ -79,8 +79,8 @@ private:
 	void set_editor_x (std::pair<double, double>);
 	void playhead_position_changed (samplepos_t);
 	double editor_y_to_summary (double) const;
-	Position get_position (double, double) const;
-	void set_cursor (Position);
+	SummaryPosition get_position (double, double) const;
+	void set_cursor (SummaryPosition);
 	void route_gui_changed (PBD::PropertyChange const&);
 	bool suspending_editor_updates () const;
 	double playhead_sample_to_position (samplepos_t) const;
@@ -103,7 +103,7 @@ private:
 	double _start_mouse_x;
 	double _start_mouse_y;
 
-	Position _start_position;
+	SummaryPosition _start_position;
 
 	bool _move_dragging;
 
@@ -125,7 +125,7 @@ private:
 	bool _pending_editor_changed;
 
 	bool _zoom_trim_dragging;
-	Position _zoom_trim_position;
+	SummaryPosition _zoom_trim_position;
 
 	bool _old_follow_playhead;
 	cairo_surface_t* _image;

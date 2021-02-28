@@ -581,7 +581,7 @@ EditorSummary::get_editor (pair<double, double>* x, pair<double, double>* y) con
 }
 
 /** Get an expression of the position of a point with respect to the view rectangle */
-EditorSummary::Position
+EditorSummary::SummaryPosition
 EditorSummary::get_position (double x, double y) const
 {
 	/* how close the mouse has to be to the edge of the view rectangle to be considered `on it',
@@ -619,7 +619,7 @@ EditorSummary::reset_to_extents()
 
 
 void
-EditorSummary::set_cursor (Position p)
+EditorSummary::set_cursor (SummaryPosition p)
 {
 	switch (p) {
 	case LEFT:
