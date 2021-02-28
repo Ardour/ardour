@@ -5080,7 +5080,7 @@ OSC::select_plugin_parameter (const char *path, const char* types, lo_arg **argv
 		const char * par = strstr (&path[25], "/");
 		if (par) {
 			piid = atoi (&path[25]);
-			_sel_plugin (piid, msg);
+			_sel_plugin (piid, get_address (msg));
 			paid = atoi (&par[1]);
 			value = argv[0]->f;
 			// we have plugin id too
@@ -6220,7 +6220,6 @@ OSC::cue_parse (const char *path, const char* types, lo_arg **argv, int argc, lo
 int
 OSC::cue_set (uint32_t aux, lo_message msg)
 {
-
 	return _cue_set (aux, get_address (msg));
 }
 
@@ -6604,7 +6603,7 @@ OSC::text_message_with_id (std::string path, uint32_t ssid, std::string val, boo
 // we have to have a sorted list of stripables that have sends pointed at our aux
 // we can use the one in osc.cc to get an aux list
 OSC::Sorted
-OSC::cue_get_sorted_stripables(boost::shared_ptr<Stripable> aux, uint32_t id, lo_message msg)
+OSC::cue_get_sorted_stripables(boost::shared_ptr<Stripable> aux, uint32_t id, lo_address addr)
 {
 	Sorted sorted;
 
@@ -6614,7 +6613,7 @@ OSC::cue_get_sorted_stripables(boost::shared_ptr<Stripable> aux, uint32_t id, lo
 		if (i->sends_only) {
 			boost::shared_ptr<Stripable> s (i->r.lock());
 			sorted.push_back (s);
-			s->DropReferences.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::cue_set, this, id, msg), this);
+			s->DropReferences.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::_cue_set, this, id, addr), this);
 		}
 	}
 	sort (sorted.begin(), sorted.end(), StripableByPresentationOrder());

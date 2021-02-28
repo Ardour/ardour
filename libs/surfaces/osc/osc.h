@@ -348,7 +348,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	}
 
 	// cue
-	Sorted cue_get_sorted_stripables(boost::shared_ptr<ARDOUR::Stripable> aux, uint32_t id, lo_message msg);
+	Sorted cue_get_sorted_stripables(boost::shared_ptr<ARDOUR::Stripable> aux, uint32_t id, lo_address);
 	int cue_parse (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg);
 	int cue_set (uint32_t aux, lo_message msg);
 	int _cue_set (uint32_t aux, lo_address addr);
