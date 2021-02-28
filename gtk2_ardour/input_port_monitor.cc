@@ -114,6 +114,8 @@ InputPortMonitor::parameter_changed (std::string const& p)
 			_audio_meter->set_hold_count ((uint32_t) floor(UIConfiguration::instance().get_meter_hold()));
 		} else if (p == "meter-style-led") {
 			setup_audio_meter ();
+		} else if (p == "meter-line-up-level") {
+			setup_audio_meter ();
 		}
 	}
 }
@@ -149,6 +151,22 @@ InputPortMonitor::setup_audio_meter ()
 	_bin.remove ();
 	delete _audio_meter;
 
+	float stp;
+	switch (UIConfiguration::instance().get_meter_line_up_level()) {
+		case MeteringLineUp24:
+			stp = 115.0 * log_meter0dB(-24);
+			break;
+		case MeteringLineUp20:
+			stp = 115.0 * log_meter0dB(-20);
+			break;
+		default:
+		case MeteringLineUp18:
+			stp = 115.0 * log_meter0dB(-18);
+			break;
+		case MeteringLineUp15:
+			stp = 115.0 * log_meter0dB(-15);
+	}
+
 	_audio_meter = new FastMeter (
 			(uint32_t)floor (UIConfiguration::instance ().get_meter_hold ()),
 			18,
@@ -168,7 +186,7 @@ InputPortMonitor::setup_audio_meter ()
 			UIConfiguration::instance ().color ("meter background top"),
 			0x991122ff, // red highlight gradient Bot
 			0x551111ff, // red highlight gradient Top
-			(115.0 * log_meter0dB (-18)),
+			stp,
 			89.125,  // 115.0 * log_meter0dB(-9);
 			106.375, // 115.0 * log_meter0dB(-3);
 			115.0,   // 115.0 * log_meter0dB(0);
