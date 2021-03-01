@@ -636,6 +636,7 @@ PlugUIBase::~PlugUIBase()
 void
 PlugUIBase::plugin_going_away ()
 {
+	drop_connections ();
 	/* drop references to the plugin/insert */
 	insert.reset ();
 	plugin.reset ();
