@@ -1754,10 +1754,10 @@ VST3PI::synchronize_states ()
 			std::cerr << "Failed to synchronize VST3 component <> controller state\n";
 			stream.hexdump (0);
 #endif
-			return false;
 		}
+		return res == kResultOk;
 	}
-	return true;
+	return false;
 }
 
 void
@@ -2259,6 +2259,7 @@ VST3PI::load_state (RAMStream& stream)
 	}
 
 	bool rv = true;
+	bool synced = false;
 
 	/* parse chunks */
 	for (ChunkEntryVector::const_iterator i = entries.begin (); i != entries.end (); ++i) {
@@ -2274,6 +2275,10 @@ VST3PI::load_state (RAMStream& stream)
 			s.rewind ();
 			tresult re2 = _controller->setComponentState (&s);
 
+			if (re2 == kResultOk) {
+				synced = true;
+			}
+
 			if (!(re2 == kResultOk || re2 == kNotImplemented || res == kResultOk || res == kNotImplemented)) {
 				DEBUG_TRACE (DEBUG::VST3Config, "VST3PI::load_state: failed to restore component state\n");
 				rv = false;
@@ -2281,6 +2286,10 @@ VST3PI::load_state (RAMStream& stream)
 		} else if (is_equal_ID (i->_id, Vst::getChunkID (Vst::kControllerState))) {
 			stream.seek (i->_offset, IBStream::kIBSeekSet, &seek_result);
 			tresult res = _controller->setState (&stream);
+			if (res == kResultOk) {
+				synced = true;
+			}
+
 			if (!(res == kResultOk || res == kNotImplemented)) {
 				DEBUG_TRACE (DEBUG::VST3Config, "VST3PI::load_state: failed to restore controller state\n");
 				rv = false;
@@ -2302,8 +2311,11 @@ VST3PI::load_state (RAMStream& stream)
 			DEBUG_TRACE (DEBUG::VST3Config, "VST3PI::load_state: ignored unsupported state chunk.\n");
 		}
 	}
+	if (rv && !synced) {
+		synced = synchronize_states ();
+	}
 
-	if (rv) {
+	if (rv && synced) {
 		update_shadow_data ();
 	}
 	return rv;
