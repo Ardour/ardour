@@ -141,7 +141,7 @@ public:
 	void meter_changed ();
 	void effective_gain_display () { gm.effective_gain_display(); }
 
-	static sigc::signal<void> signal_ctrl_touched;
+	static sigc::signal<void, bool> signal_ctrl_touched;
 
 	std::string state_id() const;
 
@@ -307,7 +307,7 @@ private:
 	void parameter_changed (std::string const & p);
 	void update_track_number_visibility();
 	void show_touched_automation (boost::weak_ptr<PBD::Controllable>);
-	void maybe_hide_automation (boost::weak_ptr<PBD::Controllable>);
+	void maybe_hide_automation (bool, boost::weak_ptr<PBD::Controllable>);
 
 	void drop_instrument_ref ();
 	void reread_midnam ();

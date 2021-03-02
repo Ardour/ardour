@@ -794,6 +794,9 @@ AutomationTimeAxisView::add_automation_event (GdkEvent* event, samplepos_t sampl
 		if (_control->automation_state () == ARDOUR::Off) {
 			_control->set_automation_state (ARDOUR::Play);
 		}
+		if (UIConfiguration::instance().get_automation_edit_cancels_auto_hide () && _control == _session->recently_touched_controllable ()) {
+			RouteTimeAxisView::signal_ctrl_touched (false);
+		}
 
 		XMLNode& after = list->get_state();
 		_editor.begin_reversible_command (_("add automation event"));

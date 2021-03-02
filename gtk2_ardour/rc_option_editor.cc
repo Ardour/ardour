@@ -3041,6 +3041,19 @@ These settings will only take effect after %1 is restarted.\n\
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
 			_("<b>When enabled</b> new points drawn in any automation lane will be placed on the existing line, regardless of mouse y-axis position."));
 
+	bo = new BoolOption (
+		     "automation-edit-cancels-auto-hide",
+		     _("Automation edit_cancels_auto_hide"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_automation_edit_cancels_auto_hide),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_automation_edit_cancels_auto_hide)
+		     );
+	add_option (_("Editor"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+			_("<b>When enabled</b> automatically displayed automation lanes remain visible if events are added to the lane.\n"
+			  "<b>When disabled</b>, spilled automation lanes are unconditionally hidden when a different control is touched.\n"
+			  "This setting only has effect if 'Show Automation Lane on Touch' is used.")
+			);
+
 	ComboOption<FadeShape>* fadeshape = new ComboOption<FadeShape> (
 			"default-fade-shape",
 			_("Default fade shape"),

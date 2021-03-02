@@ -105,7 +105,7 @@ using namespace Editing;
 using namespace std;
 using std::list;
 
-sigc::signal<void> RouteTimeAxisView::signal_ctrl_touched;
+sigc::signal<void, bool> RouteTimeAxisView::signal_ctrl_touched;
 
 RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, ArdourCanvas::Canvas& canvas)
 	: RouteUI(sess)
@@ -1581,9 +1581,13 @@ RouteTimeAxisView::show_existing_automation (bool apply_to_selection)
 }
 
 void
-RouteTimeAxisView::maybe_hide_automation (boost::weak_ptr<PBD::Controllable> wctrl)
+RouteTimeAxisView::maybe_hide_automation (bool hide, boost::weak_ptr<PBD::Controllable> wctrl)
 {
 	ctrl_autohide_connection.disconnect ();
+	if (!hide) {
+		/* disconnect only, leave lane visible */
+		return;
+	}
 	boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl> (wctrl.lock ());
   if (!ac) {
 		return;
@@ -1604,7 +1608,7 @@ RouteTimeAxisView::show_touched_automation (boost::weak_ptr<PBD::Controllable> w
 
 	if (!_editor.show_touched_automation ()) {
 		if (ctrl_autohide_connection.connected ()) {
-			signal_ctrl_touched ();
+			signal_ctrl_touched (true);
 		}
 		return;
 	}
@@ -1615,7 +1619,7 @@ RouteTimeAxisView::show_touched_automation (boost::weak_ptr<PBD::Controllable> w
 	}
 
 	/* hide any lanes */
-	signal_ctrl_touched ();
+	signal_ctrl_touched (true);
 
 	if (!pan->menu_item->get_active ()) {
 		pan->menu_item->set_active (true);

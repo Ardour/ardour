@@ -210,6 +210,9 @@ AutomationRegionView::add_automation_event (GdkEvent *, samplepos_t when, double
 		if (ac->automation_state () == ARDOUR::Off) {
 			ac->set_automation_state (ARDOUR::Play);
 		}
+		if (UIConfiguration::instance().get_automation_edit_cancels_auto_hide () && ac == view->session()->recently_touched_controllable ()) {
+			RouteTimeAxisView::signal_ctrl_touched (false);
+		}
 
 		view->editor().begin_reversible_command (_("add automation event"));
 
