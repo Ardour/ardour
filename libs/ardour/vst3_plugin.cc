@@ -1077,8 +1077,8 @@ VST3PI::VST3PI (boost::shared_ptr<ARDOUR::VST3PluginModule> m, std::string uniqu
 	_n_bus_in  = _component->getBusCount (Vst::kAudio, Vst::kInput);
 	_n_bus_out = _component->getBusCount (Vst::kAudio, Vst::kOutput);
 
-	_busbuf_in.reserve (_n_bus_in);
-	_busbuf_out.reserve (_n_bus_out);
+	_busbuf_in.resize (_n_bus_in);
+	_busbuf_out.resize (_n_bus_out);
 
 	/* do not re-order, _io_name is build in sequence */
 	_n_inputs       = count_channels (Vst::kAudio, Vst::kInput,  Vst::kMain);
