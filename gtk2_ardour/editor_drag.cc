@@ -6344,16 +6344,25 @@ NoteDrag::total_dx (GdkEvent * event) const
 	/* primary note time in quarter notes */
 	timepos_t const n_qn = _region->region()->source_beats_to_absolute_time (_primary->note()->time());
 
-	/* new session relative time of the primary note (will be in beats) */
+	/* new session relative time of the primary note (will be in beats)
+
+	 * start from the note position, add the distance the drag has covered,
+	 * and then the required (if any) snap distance
+	 */
 	timepos_t snap = n_qn + dx + snap_delta (event->button.state);
 
 	/* possibly snap and return corresponding delta (will be in beats) */
 	_editor->snap_to_with_modifier (snap, event);
 
-	timecnt_t ret = timecnt_t (snap.earlier (n_qn).earlier (snap_delta (event->button.state)));
+	/* we are trying to return the delta on the x-axis (almost certain in
+	 * beats), So now, having snapped etc., subtract the original note
+	 * position and the snap delta, and we'll know the current dx.
+	 */
+
+	timecnt_t ret (snap.earlier (n_qn).earlier (snap_delta (event->button.state)), n_qn);
 
 	/* prevent the earliest note being dragged earlier than the region's start position */
-	if (ret + _earliest < _region->region()->start()) {
+	if (_earliest + ret < _region->region()->start()) {
 		ret -= (ret + _earliest) -  _region->region()->start();
 	}
 

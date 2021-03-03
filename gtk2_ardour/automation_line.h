@@ -157,8 +157,8 @@ public:
 		return _maximum_time;
 	}
 
-	void set_offset (Temporal::timecnt_t const &);
-	Temporal::timecnt_t offset () { return _offset; }
+	void set_offset (Temporal::timepos_t const &);
+	Temporal::timepos_t offset () { return _offset; }
 	void set_width (Temporal::timecnt_t const &);
 
 	samplepos_t session_sample_position (ARDOUR::AutomationList::const_iterator) const;
@@ -224,7 +224,7 @@ private:
 	/** offset from the start of the automation list to the start of the line, so that
 	 *  a +ve offset means that the 0 on the line is at _offset in the list
 	 */
-	Temporal::timecnt_t _offset;
+	Temporal::timepos_t _offset;
 
 	bool is_stepped() const;
 	void update_visibility ();

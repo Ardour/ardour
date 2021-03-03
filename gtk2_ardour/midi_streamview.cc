@@ -505,8 +505,8 @@ MidiStreamView::setup_rec_box ()
 					/* MIDI regions should likely not be positioned using audio time, but this is
 					 * just a rec-region, so we don't really care
 					 */
-					region->set_start (timecnt_t (_trackview.track()->current_capture_start()
-					                              - _trackview.track()->get_capture_start_sample (0)));
+
+					region->set_start (timepos_t (_trackview.track()->current_capture_start() - _trackview.track()->get_capture_start_sample (0)));
 					region->set_position (_trackview.track()->current_capture_start ());
 
 					RegionView* rv = add_region_view_internal (region, false, true);

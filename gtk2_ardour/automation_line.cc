@@ -1397,7 +1397,7 @@ AutomationLine::session_position (AutomationList::const_iterator p) const
 }
 
 void
-AutomationLine::set_offset (timecnt_t const & off)
+AutomationLine::set_offset (timepos_t const & off)
 {
 	if (_offset == off) {
 		return;

@@ -7286,7 +7286,7 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 
 		/* file start = original start + how far we from the initial position ?  */
 
-		timecnt_t file_start = r->start() + pos;
+		timepos_t file_start = r->start() + pos;
 
 		/* length = next position - current position */
 
@@ -8765,7 +8765,7 @@ Editor::launch_playlist_selector ()
 vector<MidiRegionView*>
 Editor::filter_to_unique_midi_region_views (RegionSelection const & ms) const
 {
-	typedef std::pair<boost::shared_ptr<MidiSource>,timecnt_t> MapEntry;
+	typedef std::pair<boost::shared_ptr<MidiSource>,timepos_t> MapEntry;
 	std::set<MapEntry> single_region_set;
 
 	vector<MidiRegionView*> views;
