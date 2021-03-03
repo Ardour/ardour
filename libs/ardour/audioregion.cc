@@ -242,7 +242,7 @@ AudioRegion::init ()
 }
 
 /** Constructor for use by derived types only */
-AudioRegion::AudioRegion (Session& s, timecnt_t const &  start, timecnt_t const & len, std::string name)
+AudioRegion::AudioRegion (Session& s, timepos_t const &  start, timecnt_t const & len, std::string name)
 	: Region (s, start, len, name, DataType::AUDIO)
 	, AUDIOREGION_STATE_DEFAULT
 	, _envelope (Properties::envelope, boost::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter(EnvelopeAutomation), Temporal::AudioTime)))

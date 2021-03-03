@@ -176,7 +176,7 @@ timecnt_t
 MidiSource::midi_read (const Lock&                        lm,
                        Evoral::EventSink<samplepos_t>&    dst,
                        timepos_t const &                  source_start,
-                       timecnt_t const &                  start,
+                       timepos_t const &                  start,
                        timecnt_t const &                  cnt,
                        Temporal::Range*                   loop_range,
                        MidiCursor&                        cursor,
@@ -189,7 +189,7 @@ MidiSource::midi_read (const Lock&                        lm,
 	                             source_start, start, cnt, tracker, name()));
 
 	if (!_model) {
-		return timecnt_t (read_unlocked (lm, dst, source_start, start, cnt, loop_range, tracker, filter), start.position());
+		return timecnt_t (read_unlocked (lm, dst, source_start, start, cnt, loop_range, tracker, filter), start);
 	}
 
 	// Find appropriate model iterator

@@ -69,13 +69,13 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<bool> hidden;
 		PBD::PropertyDescriptor<bool> position_locked;
 		PBD::PropertyDescriptor<bool> valid_transients;
-		PBD::PropertyDescriptor<timecnt_t> start;
+		PBD::PropertyDescriptor<timepos_t> start;
 		PBD::PropertyDescriptor<timecnt_t> length;
 		PBD::PropertyDescriptor<double> beat;
-		PBD::PropertyDescriptor<timecnt_t> sync_position;
+		PBD::PropertyDescriptor<timepos_t> sync_position;
 		PBD::PropertyDescriptor<timepos_t> position;
 		PBD::PropertyDescriptor<layer_t> layer;
-		PBD::PropertyDescriptor<timecnt_t> ancestral_start;
+		PBD::PropertyDescriptor<timepos_t> ancestral_start;
 		PBD::PropertyDescriptor<timecnt_t> ancestral_length;
 		PBD::PropertyDescriptor<float> stretch;
 		PBD::PropertyDescriptor<float> shift;
@@ -183,9 +183,9 @@ Region::register_properties ()
 	, _left_of_split (Properties::left_of_split, false) \
 	, _right_of_split (Properties::right_of_split, false) \
 	, _valid_transients (Properties::valid_transients, false) \
-	, _start (Properties::start, timecnt_t (s, _type == DataType::MIDI ? timepos_t (Temporal::Beats()) : timepos_t::from_superclock (0))) \
-	, _length (Properties::length, timecnt_t (l, timepos_t (s))) \
-	, _sync_position (Properties::sync_position, timecnt_t (s, _type == DataType::MIDI ? timepos_t (Temporal::Beats()) : timepos_t::from_superclock (0))) \
+	, _start (Properties::start, (s)) \
+	, _length (Properties::length, (l)) \
+	, _sync_position (Properties::sync_position, (s)) \
 	, _transient_user_start (0) \
 	, _transient_analysis_start (0) \
 	, _transient_analysis_end (0) \
@@ -200,7 +200,7 @@ Region::register_properties ()
 	, _external (Properties::external, false) \
 	, _hidden (Properties::hidden, false) \
 	, _position_locked (Properties::position_locked, false) \
-	, _ancestral_start (Properties::ancestral_start, timecnt_t (s, _type == DataType::MIDI ? timepos_t (Temporal::Beats()) : timepos_t::from_superclock (0))) \
+	, _ancestral_start (Properties::ancestral_start, (s)) \
 	, _ancestral_length (Properties::ancestral_length, (l)) \
 	, _stretch (Properties::stretch, 1.0) \
 	, _shift (Properties::shift, 1.0) \
@@ -241,10 +241,10 @@ Region::register_properties ()
 	, _contents (Properties::contents, other->_contents)
 
 /* derived-from-derived constructor (no sources in constructor) */
-Region::Region (Session& s, timecnt_t const & start, timecnt_t const & length, const string& name, DataType type)
+Region::Region (Session& s, timepos_t const & start, timecnt_t const & length, const string& name, DataType type)
 	: SessionObject(s, name)
-	, _type(type)
-        , REGION_DEFAULT_STATE(start,length)
+	, _type (type)
+        , REGION_DEFAULT_STATE (start,length)
 	, _last_length (length)
 	, _first_edit (EditChangesNothing)
 	, _layer (0)
@@ -259,7 +259,7 @@ Region::Region (Session& s, timecnt_t const & start, timecnt_t const & length, c
 Region::Region (const SourceList& srcs)
 	: SessionObject(srcs.front()->session(), "toBeRenamed")
 	, _type (srcs.front()->type())
-	, REGION_DEFAULT_STATE(_type == DataType::MIDI ? timecnt_t (Temporal::Beats()) : timecnt_t::from_superclock (0),
+	, REGION_DEFAULT_STATE(_type == DataType::MIDI ? timepos_t (Temporal::Beats()) : timepos_t::from_superclock (0),
 	                       _type == DataType::MIDI ? timecnt_t (Temporal::Beats()) : timecnt_t::from_superclock (0))
 	, _last_length (_type == DataType::MIDI ? timecnt_t (Temporal::Beats()) : timecnt_t::from_superclock (0))
 	, _first_edit (EditChangesNothing)
@@ -316,7 +316,7 @@ Region::Region (boost::shared_ptr<const Region> other)
 	if (other->sync_marked()) {
 		if (other->_start < other->_sync_position) {
 			/* sync pos was after the start point of the other region */
-			_sync_position = other->_sync_position - other->_start;
+			_sync_position = timepos_t (other->start().distance (other->_sync_position));
 		} else {
 			/* sync pos was before the start point of the other region. not possible here. */
 			_sync_marked = false;
@@ -670,8 +670,6 @@ Region::set_position_internal (timepos_t const & pos)
 	_last_length.set_position (position());
 
 	if (position() != pos) {
-#warning NUTEMPO is this correct? why would set position set the position of the start (duration)?
-		_start.call().set_position (pos);
 		_length.call().set_position (pos);
 
 		/* check that the new _position wouldn't make the current
@@ -759,7 +757,7 @@ Region::nudge_position (timecnt_t const & n)
 }
 
 void
-Region::set_ancestral_data (timecnt_t const & s, timecnt_t const & l, float st, float sh)
+Region::set_ancestral_data (timepos_t const & s, timecnt_t const & l, float st, float sh)
 {
 	_ancestral_length = l;
 	_ancestral_start = s;
@@ -768,7 +766,7 @@ Region::set_ancestral_data (timecnt_t const & s, timecnt_t const & l, float st, 
 }
 
 void
-Region::set_start (timecnt_t const & pos)
+Region::set_start (timepos_t const & pos)
 {
 	if (locked() || position_locked() || video_locked()) {
 		return;
@@ -780,7 +778,7 @@ Region::set_start (timecnt_t const & pos)
 
 	if (_start != pos) {
 
-		timecnt_t p = pos;
+		timepos_t p = pos;
 
 		if (!verify_start (p)) {
 			return;
@@ -802,14 +800,15 @@ Region::move_start (timecnt_t const & distance)
 		return;
 	}
 
-	timecnt_t new_start (_start);
-
+	timepos_t new_start (_start);
+	timepos_t current_start (_start);
+	
 	if (distance.positive()) {
 
-		if (_start > timecnt_t::max() - distance) {
-			new_start = timecnt_t::max(); // makes no sense
+		if (current_start > timepos_t::max (current_start.time_domain()).earlier (distance)) {
+			new_start = timecnt_t::max(current_start.time_domain()); // makes no sense
 		} else {
-			new_start = start() + distance;
+			new_start = current_start + distance;
 		}
 
 		if (!verify_start (new_start)) {
@@ -818,10 +817,10 @@ Region::move_start (timecnt_t const & distance)
 
 	} else {
 
-		if (_start < -distance) {
-			new_start = timecnt_t (_start.val().time_domain());
+		if (current_start < -distance) {
+			new_start = timecnt_t (current_start.time_domain());
 		} else {
-			new_start = start() + distance;
+			new_start = current_start + distance;
 		}
 	}
 
@@ -946,7 +945,7 @@ Region::trim_to (timepos_t const & position, timecnt_t const & length)
 void
 Region::trim_to_internal (timepos_t const & pos, timecnt_t const & len)
 {
-	timecnt_t new_start (len.time_domain());
+	timepos_t new_start (len.time_domain());
 
 	if (locked()) {
 		return;
@@ -957,7 +956,7 @@ Region::trim_to_internal (timepos_t const & pos, timecnt_t const & len)
 	if (start_shift.positive()) {
 
 		if (start() > timecnt_t::max() - start_shift) {
-			new_start = timecnt_t::max();
+			new_start = timepos_t::max (start().time_domain());
 		} else {
 			new_start = start() + start_shift;
 		}
@@ -974,7 +973,7 @@ Region::trim_to_internal (timepos_t const & pos, timecnt_t const & len)
 		new_start = start();
 	}
 
-	timecnt_t ns = new_start;
+	timepos_t ns = new_start;
 	timecnt_t nl = len;
 
 	if (!verify_start_and_length (ns, nl)) {
@@ -1103,7 +1102,7 @@ void
 Region::set_sync_position (timepos_t const & absolute_pos)
 {
 	/* position within our file */
-	const timecnt_t file_pos = start() + position().distance (absolute_pos);
+	const timepos_t file_pos = start() + position().distance (absolute_pos);
 
 	if (file_pos != _sync_position) {
 		_sync_marked = true;
@@ -1129,21 +1128,21 @@ Region::clear_sync_position ()
 	}
 }
 
-/* @return the sync point relative the first sample of the region */
+/* @return the sync point relative the position of the region */
 timecnt_t
 Region::sync_offset (int& dir) const
 {
 	if (sync_marked()) {
 		if (_sync_position > _start) {
 			dir = 1;
-			return _sync_position - _start;
+			return start().distance (_sync_position);
 		} else {
 			dir = -1;
-			return _start - _sync_position;
+			return sync_position().distance (start());
 		}
 	} else {
 		dir = 0;
-		return timecnt_t ();
+		return timecnt_t::zero (start().time_domain());
 	}
 }
 
@@ -1681,7 +1680,7 @@ Region::verify_length (timecnt_t& len)
 }
 
 bool
-Region::verify_start_and_length (timecnt_t const & new_start, timecnt_t& new_length)
+Region::verify_start_and_length (timepos_t const & new_start, timecnt_t& new_length)
 {
 	if (source() && source()->length_mutable()) {
 		return true;
@@ -1699,7 +1698,7 @@ Region::verify_start_and_length (timecnt_t const & new_start, timecnt_t& new_len
 }
 
 bool
-Region::verify_start (timecnt_t const & pos)
+Region::verify_start (timepos_t const & pos)
 {
 	if (source() && source()->length_mutable()) {
 		return true;
@@ -1949,7 +1948,7 @@ Region::is_compound () const
 }
 
 void
-Region::set_start_internal (timecnt_t const & s)
+Region::set_start_internal (timepos_t const & s)
 {
 	_start = s;
 }

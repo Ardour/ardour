@@ -1243,7 +1243,7 @@ LuaAPI::Rubberband::finalize ()
 	ar->set_fade_out (_region->fade_out ());
 	*(ar->envelope ()) = *(_region->envelope ());
 
-	ar->set_ancestral_data (timecnt_t (_read_start), timecnt_t (_read_len), _stretch_ratio, _pitch_ratio);
+	ar->set_ancestral_data (timepos_t (_read_start), timecnt_t (_read_len), _stretch_ratio, _pitch_ratio);
 	ar->set_master_sources (_region->master_sources ());
 	ar->set_length (ar->length () * _stretch_ratio); // XXX
 	if (_stretch_ratio != 1.0) {

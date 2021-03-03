@@ -490,7 +490,7 @@ MidiRegion::model_shifted (timecnt_t distance)
 
 	if (!_ignore_shift) {
 		PropertyChange what_changed;
-		_start += distance;
+		_start.call().operator+= (distance);
 		what_changed.add (Properties::start);
 		what_changed.add (Properties::contents);
 		send_change (what_changed);
@@ -532,9 +532,9 @@ MidiRegion::fix_negative_start ()
 {
 	_ignore_shift = true;
 
-	model()->insert_silence_at_start (-_start.val().beats());
+	model()->insert_silence_at_start (-start().beats());
 
-	_start = timecnt_t::zero (_start.val().time_domain());
+	_start = timepos_t::zero (start().time_domain());
 }
 
 bool

@@ -352,7 +352,7 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 	/* now reset ancestral data for each new region */
 
 	for (vector<boost::shared_ptr<Region> >::iterator x = results.begin (); x != results.end (); ++x) {
-		(*x)->set_ancestral_data (timecnt_t (read_start),
+		(*x)->set_ancestral_data (timepos_t (read_start),
 		                          timecnt_t (read_duration, timepos_t (read_start)),
 		                          stretch,
 		                          shift);

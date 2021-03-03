@@ -247,7 +247,7 @@ class LIBARDOUR_API AudioRegion : public Region, public AudioReadable
   protected:
 	/* default constructor for derived (compound) types */
 
-	AudioRegion (Session& s, timecnt_t const &, timecnt_t const &, std::string name);
+	AudioRegion (Session& s, timepos_t const &, timecnt_t const &, std::string name);
 
 	int _set_state (const XMLNode&, int version, PBD::PropertyChange& what_changed, bool send_signal);
 };
