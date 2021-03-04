@@ -70,7 +70,7 @@ using namespace ARDOUR_PLUGIN_UTILS;
 static const uint32_t MAX_CREATOR_LEN = 24;
 
 PluginSelector::PluginSelector (PluginManager& mgr)
-	: ArdourDialog (_("Plugin Manager"), true, false)
+	: ArdourDialog (_("Plugin Selector"), true, false)
 	, search_clear_button (Stock::CLEAR)
 	, manager (mgr)
 	, _need_tag_save (false)
@@ -967,7 +967,7 @@ PluginSelector::build_plugin_menu ()
 	Gtk::Menu* favs = create_favs_menu(all_plugs);
 	items.push_back (MenuElem (_("Favorites"), *manage (favs)));
 
-	items.push_back (MenuElem (_("Plugin Manager..."), sigc::mem_fun (*this, &PluginSelector::show_manager)));
+	items.push_back (MenuElem (_("Plugin Selector..."), sigc::mem_fun (*this, &PluginSelector::show_manager)));
 	items.push_back (SeparatorElem ());
 
 	Menu* charts = create_charts_menu(all_plugs);
