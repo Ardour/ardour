@@ -1899,7 +1899,10 @@ public:
   {
     typedef std::list<T> LT;
     return beginConstStdList<T> (name)
+#if !defined(_MSC_VER) || (_MSC_VER < 1900)
+	  /* std::list::unique() got broken in later versions of MSVC */
       .addFunction ("unique", (void (LT::*)())&LT::unique)
+#endif
       .addFunction ("push_back", (void (LT::*)(const T&))&LT::push_back)
       .addExtCFunction ("add", &CFunc::tableToList<T, LT>);
   }
@@ -1926,7 +1929,10 @@ public:
     typedef T* TP;
     typedef std::list<TP> LT;
     return beginConstStdCPtrList<T> (name)
+#if !defined(_MSC_VER) || (_MSC_VER < 1900)
+	  /* std::list::unique() got broken in later versions of MSVC */
       .addFunction ("unique", (void (LT::*)())&LT::unique)
+#endif
       .addExtCFunction ("push_back", &CFunc::pushbackptr<T, LT>);
   }
 
@@ -1970,7 +1976,10 @@ public:
       .addPtrFunction ("empty", &LT::empty)
       .addPtrFunction ("size", &LT::size)
       .addPtrFunction ("reverse", &LT::reverse)
+#if !defined(_MSC_VER) || (_MSC_VER < 1900)
+	  /* std::list::unique() got broken in later versions of MSVC */
       .addPtrFunction ("unique", (void (LT::*)())&LT::unique)
+#endif
       .addPtrFunction ("push_back", (void (LT::*)(const T&))&LT::push_back)
       .addExtCFunction ("add", &CFunc::ptrTableToList<T, LT>)
       .addExtCFunction ("iter", &CFunc::ptrListIter<T, LT>)
