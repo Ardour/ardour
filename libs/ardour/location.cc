@@ -1503,33 +1503,29 @@ Locations::range_starts_at(samplepos_t pos, samplecnt_t slop, bool incl) const
 	Glib::Threads::Mutex::Lock lm(lock);
 	Location *closest = 0;
 	sampleoffset_t mindelta = max_samplepos;
-	sampleoffset_t delta;
 
-	for (LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i)
-	{
+	for (LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
+		if (!(*i)->is_range_marker()) {
+			continue;
+		}
 
-		if ((*i)->is_range_marker())
-		{
-			if (incl && (pos < (*i)->start() || pos > (*i)->end())) {
-				continue;
-			}
+		if (incl && (pos < (*i)->start() || pos > (*i)->end())) {
+			continue;
+		}
 
-			delta = std::abs(pos - (*i)->start());
+		sampleoffset_t delta = std::abs(pos - (*i)->start());
 
-			if (delta == 0)
-			{
-				return *i;
-			}
+		if (delta == 0) {
+			return *i;
+		}
 
-			if (delta > slop) {
-				continue;
-			}
+		if (delta > slop) {
+			continue;
+		}
 
-			if (delta < mindelta)
-			{
-				closest = *i;
-				mindelta = delta;
-			}
+		if (delta < mindelta) {
+			closest = *i;
+			mindelta = delta;
 		}
 	}
 
