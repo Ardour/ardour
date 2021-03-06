@@ -690,6 +690,22 @@
 			<File
 				RelativePath="..\luabindings.cc"
 				>
+				<FileConfiguration
+					Name="Debug 32|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalOptions="/bigobj"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release 32 with Debugging Capability|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalOptions="/bigobj"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\luaproc.cc"
