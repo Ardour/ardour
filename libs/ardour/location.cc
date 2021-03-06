@@ -1017,6 +1017,18 @@ Locations::add (Location *loc, bool make_current)
 	}
 }
 
+Location*
+Locations::add_range(samplepos_t start, samplepos_t end)
+{
+	string name;
+	next_available_name(name, _("range"));
+
+	Location* loc = new Location(_session, start, end, name, Location::IsRangeMarker);
+	add(loc, false);
+
+	return loc;
+}
+
 void
 Locations::remove (Location *loc)
 {
@@ -1483,4 +1495,43 @@ Locations::find_all_between (samplepos_t start, samplepos_t end, LocationList& l
 			ll.push_back (*i);
 		}
 	}
+}
+
+Location *
+Locations::range_starts_at(samplepos_t pos, samplecnt_t slop, bool incl) const
+{
+	Glib::Threads::Mutex::Lock lm(lock);
+	Location *closest = 0;
+	sampleoffset_t mindelta = max_samplepos;
+	sampleoffset_t delta;
+
+	for (LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i)
+	{
+
+		if ((*i)->is_range_marker())
+		{
+			if (incl && (pos < (*i)->start() || pos > (*i)->end())) {
+				continue;
+			}
+
+			delta = std::abs(pos - (*i)->start());
+
+			if (delta == 0)
+			{
+				return *i;
+			}
+
+			if (delta > slop) {
+				continue;
+			}
+
+			if (delta < mindelta)
+			{
+				closest = *i;
+				mindelta = delta;
+			}
+		}
+	}
+
+	return closest;
 }
