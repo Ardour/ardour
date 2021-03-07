@@ -52,6 +52,16 @@ VST3PluginUI::VST3PluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_pt
 
 	pack_start (_ardour_buttons_box, false, false);
 	_ardour_buttons_box.show_all ();
+
+    // determine minimum size
+    IPlugView* view = _vst3->view ();
+    ViewRect rect;
+    if (view->checkSizeConstraint (&rect) != kResultTrue) {
+        view->getSize (&rect);
+    }
+
+    // set minimum size
+    set_size_request(rect.right - rect.left, rect.bottom - rect.top);
 }
 
 VST3PluginUI::~VST3PluginUI ()
