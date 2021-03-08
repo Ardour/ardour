@@ -908,9 +908,10 @@ RecorderUI::remove_route (TrackRecordAxis* ra)
 		return;
 	}
 	list<TrackRecordAxis*>::iterator i = find (_recorders.begin (), _recorders.end (), ra);
-	assert (i != _recorders.end ());
-	_rec_area.remove (**i);
-	_recorders.erase (i);
+	if (i != _recorders.end ()) {
+		_rec_area.remove (**i);
+		_recorders.erase (i);
+	}
 	update_rec_table_layout ();
 }
 
