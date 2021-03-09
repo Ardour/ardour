@@ -751,6 +751,13 @@ ARDOUR_UI::build_menu_bar ()
 	EventBox* ev_format = manage (new EventBox);
 	EventBox* ev_timecode = manage (new EventBox);
 
+	ev_dsp->set_name ("MainMenuBar");
+	ev_path->set_name ("MainMenuBar");
+	ev_name->set_name ("MainMenuBar");
+	ev_audio->set_name ("MainMenuBar");
+	ev_format->set_name ("MainMenuBar");
+	ev_timecode->set_name ("MainMenuBar");
+
 	Gtk::HBox* hbox = manage (new Gtk::HBox);
 	hbox->show ();
 	hbox->set_border_width (2);
