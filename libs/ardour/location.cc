@@ -1513,7 +1513,7 @@ Locations::range_starts_at(samplepos_t pos, samplecnt_t slop, bool incl) const
 			continue;
 		}
 
-		sampleoffset_t delta = std::abs(pos - (*i)->start());
+		sampleoffset_t delta = std::abs((double)(pos - (*i)->start()));
 
 		if (delta == 0) {
 			return *i;
