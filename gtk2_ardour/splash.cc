@@ -165,6 +165,7 @@ Splash::pop_front ()
 		show ();
 #else
 		gdk_window_restack(get_window()->gobj(), NULL, true);
+		set_keep_above (true);
 #endif
 	}
 }
@@ -259,7 +260,9 @@ Splash::display ()
 	present ();
 
 	if (!was_mapped) {
-		while (!expose_done && gtk_events_pending()) {
+		int timeout = 50;
+		darea.queue_draw ();
+		while (!expose_done && --timeout) {
 			gtk_main_iteration ();
 		}
 		gdk_display_flush (gdk_display_get_default());
