@@ -398,7 +398,6 @@ fi
 
 # vfork wrapper
 if test -f $BUILD_ROOT/libs/vfork/ardour-exec-wrapper ; then
-	mkdir -p $Frameworks/vfork
 	cp $BUILD_ROOT/libs/vfork/ardour-exec-wrapper $Frameworks/
 fi
 
