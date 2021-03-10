@@ -36,6 +36,7 @@
 #include "ardour/audio_buffer.h"
 #include "ardour/audioengine.h"
 #include "ardour/debug.h"
+#include "ardour/rc_configuration.h"
 #include "ardour/selection.h"
 #include "ardour/session.h"
 #include "ardour/stripable.h"
@@ -1623,7 +1624,9 @@ VST3PI::get_parameter_descriptor (uint32_t port, ParameterDescriptor& desc) cons
 	FUnknownPtr<IEditControllerExtra> extra_ctrl (_controller);
 	if (extra_ctrl && port != designated_bypass_port ()) {
 		int32 flags      = extra_ctrl->getParamExtraFlags (id);
-		desc.inline_ctrl = (flags & kParamFlagMicroEdit) ? true : false;
+		if (Config->get_show_vst3_micro_edit_inline ()) {
+			desc.inline_ctrl = (flags & kParamFlagMicroEdit) ? true : false;
+		}
 	}
 }
 
