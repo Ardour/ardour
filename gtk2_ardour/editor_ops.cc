@@ -285,6 +285,11 @@ Editor::split_regions_at (MusicSample where, RegionSelection& regions)
 		EditorThaw(); /* Emit Signal */
 	}
 
+	if (_session->abort_empty_reversible_command ()) {
+		/* no change was made */
+		return;
+	}
+
 	RegionSelectionAfterSplit rsas = Config->get_region_selection_after_split();
 
 	//if the user has "Clear Selection" as their post-split behavior, then clear the selection
