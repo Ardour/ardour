@@ -1075,6 +1075,28 @@ public:
 
 	bool operation_in_progress (GQuark) const;
 
+	/**
+	 * Test if any undo commands were added since the
+	 * call to begin_reversible_command ()
+	 *
+	 * This is is useful to determine if an undoable
+	 * action was performed before adding additional
+	 * information (e.g. selection changes) to the
+	 * undo transaction.
+	 *
+	 * @return true if undo operation is valid but empty
+	 */
+	bool collected_undo_commands () const {
+		return _current_trans && !_current_trans->empty ();
+	}
+
+	/**
+	 * Abort reversible commend IFF no undo changes
+	 * have been collected.
+	 * @return true if undo operation was aborted.
+	 */
+	bool abort_empty_reversible_command ();
+
 	void add_commands (std::vector<Command*> const & cmds);
 
 	std::map<PBD::ID,PBD::StatefulDestructible*> registry;

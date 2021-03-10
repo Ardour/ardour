@@ -3093,6 +3093,16 @@ Session::abort_reversible_command ()
 	}
 }
 
+bool
+Session::abort_empty_reversible_command ()
+{
+	if (!collected_undo_commands ()) {
+		abort_reversible_command ();
+		return true;
+	}
+	return false;
+}
+
 void
 Session::commit_reversible_command (Command *cmd)
 {
