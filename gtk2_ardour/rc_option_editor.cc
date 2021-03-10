@@ -3742,7 +3742,14 @@ These settings will only take effect after %1 is restarted.\n\
 	vst3_path->set_note (_("Customizing VST3 paths is discouraged. Note that default VST3 paths as per <a href=\"https://steinbergmedia.github.io/vst3_doc/vstinterfaces/vst3loc.html#pluginloc\">specification</a> are always searched, and need not be explicitly set."));
 	add_option (_("Plugins/VST"), vst3_path);
 
-
+	// -> Appearance/Mixer ?
+	add_option (_("Plugins/VST"),
+	     new BoolOption (
+		     "show-vst3-micro-edit-inline",
+		     _("Automatically show 'Micro Edit' tagged controls on the mixer-strip"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_show_vst3_micro_edit_inline),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_vst3_micro_edit_inline)
+		     ));
 
 #if (defined WINDOWS_VST_SUPPORT || defined MACVST_SUPPORT || defined LXVST_SUPPORT)
 	add_option (_("Plugins/VST"), new OptionEditorHeading (_("VST2/VST3")));
