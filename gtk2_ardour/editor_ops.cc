@@ -3190,6 +3190,11 @@ Editor::separate_regions_between (const TimeSelection& ts)
 
 			for (list<AudioRange>::const_iterator t = ts.begin(); t != ts.end(); ++t) {
 
+				if (!in_command) {
+					begin_reversible_command (_("separate"));
+					in_command = true;
+				}
+
 				sigc::connection c = rtv->view()->RegionViewAdded.connect (
 					sigc::mem_fun(*this, &Editor::collect_new_region_view));
 
@@ -3205,19 +3210,13 @@ Editor::separate_regions_between (const TimeSelection& ts)
 					                                             sigc::ptr_fun (add_if_covered),
 					                                             &(*t), &new_selection));
 
-					if (!in_command) {
-						begin_reversible_command (_("separate"));
-						in_command = true;
-					}
-
 					/* pick up changes to existing regions */
 
 					vector<Command*> cmds;
 					playlist->rdiff (cmds);
 					_session->add_commands (cmds);
 
-					/* pick up changes to the playlist itself (adds/removes)
-					 */
+					/* pick up changes to the playlist itself (adds/removes) */
 
 					_session->add_command(new StatefulDiffCommand (playlist));
 				}
@@ -3226,6 +3225,9 @@ Editor::separate_regions_between (const TimeSelection& ts)
 	}
 
 	if (in_command) {
+		if (_session->abort_empty_reversible_command ()) {
+			return;
+		}
 
 		RangeSelectionAfterSplit rsas = Config->get_range_selection_after_split();
 
