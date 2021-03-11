@@ -247,7 +247,9 @@ VST3X11PluginUI::view_size_allocate (Gtk::Allocation& allocation)
 	PBD::Unwinder<bool> uw (_resize_in_progress, true);
 
 	ViewRect rect;
-	if (view->getSize (&rect) == kResultOk) {
+	if (view->getSize (&rect) == kResultOk
+	    && ! (rect.right - rect.left == allocation.get_width () && rect.bottom - rect.top ==  allocation.get_height ()))
+	{
 		rect.right = rect.left + allocation.get_width ();
 		rect.bottom = rect.top + allocation.get_height ();
 #if 0
