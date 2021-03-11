@@ -208,14 +208,14 @@ inflate_session (const std::string& zipfile, const std::string& target_dir, stri
 
 		if (files.size () == 0) {
 			error << _("Archive is empty") << endmsg;
-			return 2;
+			return -2;
 		}
 
 		/* session archives are expected to be named after the archive */
 		std::string bn = Glib::path_get_dirname (files.front());
 		if (bn.empty ()) {
 			error << _("Archive does not contain a session folder") << endmsg;
-			return 3;
+			return -3;
 		}
 
 		size_t sep = bn.find_first_of ('/');
@@ -226,13 +226,13 @@ inflate_session (const std::string& zipfile, const std::string& target_dir, stri
 
 		if (bn.empty ()) {
 			error << _("Archive does not contain a valid session structure") << endmsg;
-			return 4;
+			return -4;
 		}
 
 		string sn = bn + "/" + bn + statefile_suffix;
 		if (std::find (files.begin(), files.end(), sn) == files.end()) {
 			error << _("Archive does not contain a session file") << endmsg;
-			return 5;
+			return -5;
 		}
 
 		/* check if target folder exists */
@@ -251,11 +251,11 @@ inflate_session (const std::string& zipfile, const std::string& target_dir, stri
 
 	} catch (...) {
 		error << _("Error reading file-archive") << endmsg;
-		return 6;
+		return -6;
 	}
 
 	error << _("Error extracting file-archive") << endmsg;
-	return -2;
+	return -7;
 }
 
 string inflate_error (int e) {
@@ -264,20 +264,20 @@ string inflate_error (int e) {
 			return _("No Error");
 		case 1:
 			return string_compose (_("File extension is not %1"), session_archive_suffix);
-		case 2:
+		case -2:
 			return _("Archive is empty");
-		case 3:
+		case -3:
 			return _("Archive does not contain a session folder");
-		case 4:
+		case -4:
 			return _("Archive does not contain a valid session structure");
-		case 5:
+		case -5:
 			return _("Archive does not contain a session file");
-		case 6:
+		case -6:
 			return _("Error reading file-archive");
+		case -7:
+			return _("Error extracting file-archive");
 		case -1:
 			return _("Destination folder already exists.");
-		case -2:
-			return _("Error extracting file-archive");
 		default:
 			assert (0);
 			break;
