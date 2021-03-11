@@ -706,10 +706,9 @@ StartupFSM::check_session_parameters (bool must_be_new)
 		/* See if the specified session is a session archive */
 
 		int rv = ARDOUR::inflate_session (session_name, Config->get_default_session_parent_dir(), session_path, session_name);
-		if (rv < 0) {
+		if (rv != 0) {
 			ArdourMessageDialog msg (*session_dialog, string_compose (_("Extracting session-archive failed: %1"), inflate_error (rv)));
 			msg.run ();
-
 			return 1;
 		} else if (rv == 0) {
 			/* names are good (and session is unarchived/inflated */
