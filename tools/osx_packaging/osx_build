@@ -139,7 +139,7 @@ if [ x$PRINT_SYSDEPS != x ] ; then
 # print system dependencies
 #
 
-for file in $APPROOT/MacOS/* $Frameworks/* $Frameworks/modules/* ; do
+for file in $APPROOT/MacOS/* $Frameworks/* ; do
 	if ! file $file | grep -qs Mach-O ; then
 	    continue
 	fi
@@ -163,7 +163,6 @@ mkdir -p $Panners
 mkdir -p $Backends
 mkdir -p $MidiMaps
 mkdir -p $ExportFormats
-mkdir -p $Frameworks/modules
 mkdir -p $Etc
 mkdir -p $MackieControl
 mkdir -p $OSC
@@ -299,8 +298,8 @@ fi
 # Copy stuff that may be dynamically loaded
 #
 
-cp -R $GTKSTACK_ROOT/etc/* $Etc
-cp -R $GTKSTACK_ROOT/lib/charset.alias $Resources
+#cp -R $GTKSTACK_ROOT/etc/* $Etc
+#cp -R $GTKSTACK_ROOT/lib/charset.alias $Resources
 
 # We rely on clearlooks, so include a version from our own build tree
 # this one is special - we will set GTK_PATH to $Frameworks/gtkengines
@@ -309,12 +308,7 @@ GTK_ENGINE_DIR=$Frameworks/gtkengines/engines
 mkdir -p $GTK_ENGINE_DIR
 
 echo "Copying GTK engines ..."
-cp $BUILD_ROOT/libs/clearlooks-newer/libclearlooks.dylib $Frameworks
-(cd $GTK_ENGINE_DIR && ln -s ../../libclearlooks.dylib . && ln -s ../../libclearlooks.dylib libclearlooks.so)
-
-cp $GTKSTACK_ROOT/lib/gtk-2.0/2.10.0/engines/libpixmap.so $Frameworks
-(cd $GTK_ENGINE_DIR && ln -s ../../libpixmap.so)
-
+cp $BUILD_ROOT/libs/clearlooks-newer/libclearlooks.dylib $GTK_ENGINE_DIR
 
 # Control Surface shared libraries
 cp $BUILD_ROOT/libs/surfaces/*/libardour_*.dylib $Surfaces
@@ -332,10 +326,10 @@ for f in $BUILD_ROOT/../share/export/*.preset $BUILD_ROOT/../share/export/*.form
 done
 
 #Session templates
-cp -av $BUILD_ROOT/../share/templates $Templates
+cp -a $BUILD_ROOT/../share/templates $Templates
 
 # PluginMetadata
-cp -av $BUILD_ROOT/../share/plugin_metadata $PluginMetadata
+cp -a $BUILD_ROOT/../share/plugin_metadata $PluginMetadata
 
 # MidiMaps
 # got to be careful with names here
@@ -401,32 +395,49 @@ if test -f $BUILD_ROOT/libs/vfork/ardour-exec-wrapper ; then
 	cp $BUILD_ROOT/libs/vfork/ardour-exec-wrapper $Frameworks/
 fi
 
+# session utils start script (temp file)
+cat >> $Frameworks/ardour-util.sh << EOF
+#!/bin/sh
+
+BIN_DIR=\$(dirname "\$0")
+BUNDLE_DIR=\$(dirname "\$BIN_DIR")
+
+export ARDOUR_DATA_PATH="\$BUNDLE_DIR/Resources"
+export ARDOUR_CONFIG_PATH="\$BUNDLE_DIR/Resources"
+export ARDOUR_DLL_PATH="\$BUNDLE_DIR/lib"
+export VAMP_PATH="\$BUNDLE_DIR/lib"\${VAMP_PATH:+:\$VAMP_PATH}
+
+SELF=\$(basename "\$0")
+exec "\$BUNDLE_DIR/lib/\$SELF" "\$@"
+EOF
+chmod +x $Frameworks/ardour-util.sh
+
 # session-utils
 HAVE_SESSION_UTILS=false
 for file in $BUILD_ROOT/session_utils/${lower_case_appname}${major_version}-*; do
 	BN=$(basename $file)
-	cp -v $file $Frameworks/
+	cp $file $Frameworks/
 	if test x$STRIP = xall ; then
 		strip -s $Frameworks/${BN}
 	fi
-	ln -s ../lib/ardour-util.sh ${APPROOT}/MacOS/${BN}
+	cp -a $Frameworks/ardour-util.sh ${APPROOT}/MacOS/${BN}
 	HAVE_SESSION_UTILS=true
 done
 
 if test -x $BUILD_ROOT/luasession/luasession; then
 	BN=${lower_case_appname}${major_version}-lua
-	cp -v $BUILD_ROOT/luasession/luasession $Frameworks/$BN
+	cp $BUILD_ROOT/luasession/luasession $Frameworks/$BN
 	if test x$STRIP = xall ; then
 		strip -s $Frameworks/${BN}
 	fi
-	ln -s ../lib/ardour-util.sh ${APPROOT}/MacOS/${BN}
+	cp -a $Frameworks/ardour-util.sh ${APPROOT}/MacOS/${BN}
 	HAVE_SESSION_UTILS=true
 fi
 
 # dynamically loaded NSS/SSL libs
 nsslibs="libsoftokn3.dylib libnsspem.dylib libnssckbi.dylib libfreebl3.dylib libnssdbm3.dylib libplds4.dylib"
 for nsslib in $nsslibs; do
-	cp $GTKSTACK_ROOT/lib/$nsslib $Frameworks/ || true
+	cp $GTKSTACK_ROOT/lib/$nsslib $Frameworks/ 2>/dev/null || true
 done
 
 # TODO check if this is still needed, even when building on 10.5
@@ -438,7 +449,7 @@ fi
 
 while [ true ] ; do
 	missing=false
-	for file in $APPROOT/MacOS/* $Frameworks/* $Frameworks/modules/* $Panners/*.dylib $Backends/*.dylib $Surfaces/*.dylib ; do
+	for file in $APPROOT/MacOS/* $Frameworks/* $Panners/*.dylib $Backends/*.dylib $Surfaces/*.dylib $GTK_ENGINE_DIR/*.dylib ; do
 		if ! file $file | grep -qs Mach-O ; then
 			continue
 		fi
@@ -506,25 +517,8 @@ for svndir in `find $APPDIR -name .svn -type dir`; do
 	rm -rf $svndir
 done
 
-# session utils start script
-if test "$HAVE_SESSION_UTILS" = true ; then
-	cat >> $Frameworks/ardour-util.sh << EOF
-#!/bin/sh
-
-BIN_DIR=\$(dirname "\$0")
-BUNDLE_DIR=\$(dirname "\$BIN_DIR")
-
-export ARDOUR_DATA_PATH="\$BUNDLE_DIR/Resources"
-export ARDOUR_CONFIG_PATH="\$BUNDLE_DIR/Resources"
-export ARDOUR_DLL_PATH="\$BUNDLE_DIR/lib"
-export VAMP_PATH="\$BUNDLE_DIR/lib"\${VAMP_PATH:+:\$VAMP_PATH}
-
-SELF=\$(basename "\$0")
-exec "\$BUNDLE_DIR/lib/\$SELF" "\$@"
-EOF
-	chmod +x $Frameworks/ardour-util.sh
-fi
-
+# remove temp session utils start script
+rm $Frameworks/ardour-util.sh 
 
 # install bundled LV2s to <app>/Contents/lib/LV2/
 cp -R $BUILD_ROOT/libs/LV2 $Frameworks/
@@ -570,15 +564,18 @@ done
 
 echo "Fixing up library names ..."
 # now do the same for all the libraries we include
-for libdir in $Frameworks $Frameworks/modules $Surfaces $Panners $Backends $Frameworks/LV2/* ; do
+for libdir in $Frameworks $Surfaces $Panners $Backends $Frameworks/LV2/* $GTK_ENGINE_DIR; do
 
-	libbase=`basename $libdir`
+	libbase=`echo "$libdir" | sed 's#^'$Frameworks'##'`
 
 	for dylib in $libdir/*.dylib $libdir/*.so ; do
 
 		# skip symlinks
-
 		if test -L $dylib ; then
+			echo "FOUND SYMLINK"
+			exit
+		fi
+		if ! test -f $dylib ; then
 			continue
 		fi
 
@@ -587,9 +584,7 @@ for libdir in $Frameworks $Frameworks/modules $Surfaces $Panners $Backends $Fram
 		changes=""
 		for lib in `otool -L $dylib | egrep "($GTKSTACK_ROOT|/opt/|/local/|libs/$STDCPP)" | awk '{print $1}' | grep -v 'libjack\.'` ; do
 			base=`basename $lib`
-			if echo $lib | grep -s libbase; then
-				changes="$changes -change $lib @executable_path/../$libbase/$base"
-			else
+			if test -f $Frameworks/$base ; then
 				changes="$changes -change $lib @executable_path/../lib/$base"
 			fi
 		done
@@ -605,7 +600,7 @@ for libdir in $Frameworks $Frameworks/modules $Surfaces $Panners $Backends $Fram
 		# now the change what the library thinks its own name is
 
 		base=`basename $dylib`
-		install_name_tool -id @executable_path/../$libbase/$base $dylib
+		install_name_tool -id @executable_path/../lib$libbase/$base $dylib
 	done
 done
 
@@ -700,7 +695,7 @@ if test x$WITH_HARVID != x ; then
 	HVLIBS=${PRODUCT_PKG_DIR}/$APPROOT/lib/harvid
 
 	for file in ${XJCONTENT}/MacOS/Jadeo-bin ${XJCONTENT}/Frameworks/*.dylib ${HVLIBS}/*.dylib ${PRODUCT_PKG_DIR}/$APPROOT/MacOS/*harvid* ; do
-		lipo -extract_family ${OSX_ARCH} ${file} -output ${file}.thin && \
+		lipo -extract_family ${OSX_ARCH} ${file} -output ${file}.thin 2>/dev/null && \
 		mv ${file}.thin ${file}
 	done
 
@@ -758,7 +753,7 @@ fi
 if test -d ${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/; then
 	echo "Removing unused achitectures from LV plugins"
 	for file in ${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/*/*.dylib ; do
-		lipo -extract_family ${OSX_ARCH} ${file} -output ${file}.thin
+		lipo -extract_family ${OSX_ARCH} ${file} -output ${file}.thin 2>/dev/null && \
 		mv ${file}.thin ${file}
 	done
 fi
@@ -835,7 +830,7 @@ mount -t hfs -o nobrowse "${DiskDevice}" "${MNTPATH}"
 
 cp -r ${PRODUCT_PKG_DIR}/* "${MNTPATH}" || exit
 mkdir "${MNTPATH}/.background"
-cp -vi ${DMGBACKGROUND}.png "${MNTPATH}/.background/dmgbg.png"
+cp ${DMGBACKGROUND}.png "${MNTPATH}/.background/dmgbg.png"
 
 echo "setting DMG background ..."
 
