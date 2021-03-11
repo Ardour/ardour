@@ -260,6 +260,7 @@ StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_i
 					 * retry. Errors were addressed by
 					 * ::check_session_parameters()
 					 */
+					session_dialog->present ();
 					break;
 				}
 				break;
