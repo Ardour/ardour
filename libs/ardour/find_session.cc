@@ -229,8 +229,7 @@ inflate_session (const std::string& zipfile, const std::string& target_dir, stri
 			return 4;
 		}
 
-		string sn = Glib::build_filename (bn, bn + statefile_suffix);
-
+		string sn = bn + "/" + bn + statefile_suffix;
 		if (std::find (files.begin(), files.end(), sn) == files.end()) {
 			error << _("Archive does not contain a session file") << endmsg;
 			return 5;
