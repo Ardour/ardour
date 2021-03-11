@@ -182,7 +182,7 @@ ARDOUR_UI::session_dialog_response_handler (int response, SessionDialog* session
 	if (!likely_new) {
 		int rv = ARDOUR::inflate_session (session_name, Config->get_default_session_parent_dir(), session_path, session_name);
 
-		if (rv != 0) {
+		if (rv < 0) {
 			ArdourMessageDialog msg (*session_dialog, string_compose (_("Extracting session-archive failed: %1"), inflate_error (rv)));
 			msg.run ();
 			return; /* back to main event loop */
