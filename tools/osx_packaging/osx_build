@@ -308,7 +308,7 @@ GTK_ENGINE_DIR=$Frameworks/gtkengines/engines
 mkdir -p $GTK_ENGINE_DIR
 
 echo "Copying GTK engines ..."
-cp $BUILD_ROOT/libs/clearlooks-newer/libclearlooks.dylib $GTK_ENGINE_DIR
+cp $BUILD_ROOT/libs/clearlooks-newer/libclearlooks.dylib $GTK_ENGINE_DIR/libclearlooks.so
 
 # Control Surface shared libraries
 cp $BUILD_ROOT/libs/surfaces/*/libardour_*.dylib $Surfaces
