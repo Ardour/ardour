@@ -326,10 +326,10 @@ for f in $BUILD_ROOT/../share/export/*.preset $BUILD_ROOT/../share/export/*.form
 done
 
 #Session templates
-cp -a $BUILD_ROOT/../share/templates $Templates
+cp -R $BUILD_ROOT/../share/templates $Templates
 
 # PluginMetadata
-cp -a $BUILD_ROOT/../share/plugin_metadata $PluginMetadata
+cp -R $BUILD_ROOT/../share/plugin_metadata $PluginMetadata
 
 # MidiMaps
 # got to be careful with names here
@@ -354,7 +354,7 @@ for x in $BUILD_ROOT/../share/scripts/*.lua ; do
 done
 
 # recusively copy web-surface html/js
-cp -a $BUILD_ROOT/../share/web_surfaces $WebSurfaces
+cp -R $BUILD_ROOT/../share/web_surfaces $WebSurfaces
 rm $WebSurfaces/wscript
 
 # MackieControl data
@@ -420,7 +420,7 @@ for file in $BUILD_ROOT/session_utils/${lower_case_appname}${major_version}-*; d
 	if test x$STRIP = xall ; then
 		strip -s $Frameworks/${BN}
 	fi
-	cp -a $Frameworks/ardour-util.sh ${APPROOT}/MacOS/${BN}
+	cp -R $Frameworks/ardour-util.sh ${APPROOT}/MacOS/${BN}
 	HAVE_SESSION_UTILS=true
 done
 
@@ -430,7 +430,7 @@ if test -x $BUILD_ROOT/luasession/luasession; then
 	if test x$STRIP = xall ; then
 		strip -s $Frameworks/${BN}
 	fi
-	cp -a $Frameworks/ardour-util.sh ${APPROOT}/MacOS/${BN}
+	cp -R $Frameworks/ardour-util.sh ${APPROOT}/MacOS/${BN}
 	HAVE_SESSION_UTILS=true
 fi
 
