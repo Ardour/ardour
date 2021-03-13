@@ -569,8 +569,11 @@ Drag::add_midi_region (MidiTimeAxisView* view, bool commit)
 		/* not that the frame rate used here can be affected by pull up/down which
 		   might be wrong.
 		*/
+
+		timepos_t beats = timepos_t (grab_time().beats());
+		cerr << "Adding region based on grab @ " << grab_time() << " = " << beats << " aka " << beats.beats() << endl;
 		timecnt_t len = pos.distance (max (timepos_t::zero (Temporal::BeatTime), timepos_t (pos.beats() + Beats (1, 0))));
-		return view->add_region (grab_time(), len, commit);
+		return view->add_region (beats, len, commit);
 	}
 
 	return boost::shared_ptr<Region>();
