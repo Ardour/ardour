@@ -3043,7 +3043,7 @@ These settings will only take effect after %1 is restarted.\n\
 
 	bo = new BoolOption (
 		     "automation-edit-cancels-auto-hide",
-		     _("Automation edit_cancels_auto_hide"),
+		     _("Automation edit cancels auto hide"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_automation_edit_cancels_auto_hide),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_automation_edit_cancels_auto_hide)
 		     );
