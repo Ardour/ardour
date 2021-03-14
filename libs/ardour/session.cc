@@ -570,6 +570,7 @@ Session::immediately_post_engine ()
 	/* TODO, connect in different thread. (PortRegisteredOrUnregistered may be in RT context)
 	 * can we do that? */
 	 _engine.PortRegisteredOrUnregistered.connect_same_thread (*this, boost::bind (&Session::setup_bundles, this));
+	 _engine.PortPrettyNameChanged.connect_same_thread (*this, boost::bind (&Session::setup_bundles, this));
 
 	// set samplerate for plugins added early
 	// e.g from templates or MB channelstrip
