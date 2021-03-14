@@ -130,7 +130,7 @@ class alignas(16) int62_t {
 	bool operator!= (int64_t n) const { return val() != n; }
 	bool operator== (int64_t n) const { return val() == n; }
 
-	int62_t abs() const { const int64_t tmp = v; return int62_t (flagged(tmp), ::abs(int62(tmp))); }
+	int62_t abs() const { const int64_t tmp = v; return int62_t (flagged(tmp), ::llabs(int62(tmp))); }
 
 	int62_t& operator+= (int64_t n) {
 		while (1) {
