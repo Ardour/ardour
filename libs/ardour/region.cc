@@ -491,8 +491,12 @@ Region::set_length (timecnt_t const & len)
 void
 Region::set_length_internal (timecnt_t const & len)
 {
-	_last_length = _length;
-	_length = len;
+	timecnt_t l (len);
+
+	l.set_position (position());
+
+	_last_length = l;
+	_length = l;
 }
 
 void
