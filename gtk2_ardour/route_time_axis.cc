@@ -387,7 +387,7 @@ RouteTimeAxisView::setup_processor_menu_and_curves ()
 {
 	_subplugin_menu_map.clear ();
 	subplugin_menu.items().clear ();
-	ctrl_node_map.clear ();
+	ctrl_item_map.clear ();
 	_route->foreach_processor (sigc::mem_fun (*this, &RouteTimeAxisView::add_processor_to_subplugin_menu));
 	_route->foreach_processor (sigc::mem_fun (*this, &RouteTimeAxisView::add_existing_processor_automation_curves));
 
@@ -398,7 +398,7 @@ RouteTimeAxisView::setup_processor_menu_and_curves ()
 		}
 		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
 			boost::shared_ptr<PBD::Controllable> c = boost::dynamic_pointer_cast <PBD::Controllable>((*i)->processor->control((*ii)->what));
-			ctrl_node_map[c] = *ii;
+			ctrl_item_map[c] = (*ii)->menu_item;
 		}
 	}
 }
@@ -1592,9 +1592,17 @@ RouteTimeAxisView::maybe_hide_automation (bool hide, boost::weak_ptr<PBD::Contro
   if (!ac) {
 		return;
 	}
-	ProcessorAutomationNode* pan = find_processor_automation_node (ac);
-	if (pan) {
-		pan->menu_item->set_active (false);
+
+	Gtk::CheckMenuItem* cmi = find_menu_item_by_ctrl (ac);
+	if (cmi) {
+		cmi->set_active (false);
+		return;
+	}
+
+	boost::shared_ptr<AutomationTimeAxisView> atav = find_atav_by_ctrl (ac);
+	if (atav) {
+		atav->set_marked_for_display (false);
+		request_redraw ();
 	}
 }
 
@@ -1613,26 +1621,32 @@ RouteTimeAxisView::show_touched_automation (boost::weak_ptr<PBD::Controllable> w
 		return;
 	}
 
-	ProcessorAutomationNode* pan = find_processor_automation_node (ac);
-	if (!pan) {
-		return;
+	boost::shared_ptr<AutomationTimeAxisView> atav;
+	Gtk::CheckMenuItem* cmi = find_menu_item_by_ctrl (ac);
+	if (!cmi) {
+		atav = find_atav_by_ctrl (ac);
+		if (!atav) {
+			return;
+		}
 	}
 
 	/* hide any lanes */
 	signal_ctrl_touched (true);
 
-	if (!pan->menu_item->get_active ()) {
-		pan->menu_item->set_active (true);
+	if (cmi && !cmi->get_active ()) {
+		cmi->set_active (true);
 		ctrl_autohide_connection = signal_ctrl_touched.connect (sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::maybe_hide_automation), wctrl));
+		/* search ctrl to scroll to */
+		atav = find_atav_by_ctrl (ac, false);
+	} else if (atav && ! string_to<bool>(atav->gui_property ("visible"))) {
+		atav->set_marked_for_display (true);
+		ctrl_autohide_connection = signal_ctrl_touched.connect (sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::maybe_hide_automation), wctrl));
+		request_redraw ();
 	}
 
-	/* now scroll to the ctrl */
-	for (Children::iterator j = children.begin(); j != children.end(); ++j) {
-		boost::shared_ptr<AutomationTimeAxisView> atv = boost::dynamic_pointer_cast<AutomationTimeAxisView> (*j);
-		if (atv && atv->control () == ac) {
-			_editor.ensure_time_axis_view_is_visible (*atv, false);
-			break;
-		}
+	if (atav) {
+		_editor.ensure_time_axis_view_is_visible (*atav, false);
+		return;
 	}
 }
 
@@ -1713,16 +1727,52 @@ RouteTimeAxisView::find_processor_automation_node (boost::shared_ptr<Processor> 
 	return 0;
 }
 
-RouteTimeAxisView::ProcessorAutomationNode*
-RouteTimeAxisView::find_processor_automation_node (boost::shared_ptr<AutomationControl> ac)
+Gtk::CheckMenuItem*
+RouteTimeAxisView::find_menu_item_by_ctrl (boost::shared_ptr<AutomationControl> ac)
 {
-	std::map<boost::shared_ptr<PBD::Controllable>, ProcessorAutomationNode*>::const_iterator i;
-	i = ctrl_node_map.find (ac);
-	if (i != ctrl_node_map.end ()) {
+	std::map<boost::shared_ptr<PBD::Controllable>, Gtk::CheckMenuItem*>::const_iterator i;
+	i = ctrl_item_map.find (ac);
+	if (i != ctrl_item_map.end ()) {
 		return i->second;
 	}
 	return 0;
 }
+
+boost::shared_ptr<AutomationTimeAxisView>
+RouteTimeAxisView::find_atav_by_ctrl (boost::shared_ptr<ARDOUR::AutomationControl> ac, bool route_owned_only)
+{
+	if (gain_track && gain_track->control () == ac) {
+		return gain_track;
+	}
+	else if (trim_track && trim_track->control () == ac) {
+		return trim_track;
+	}
+	else if (mute_track && mute_track->control () == ac) {
+		return mute_track;
+	}
+
+	if (!pan_tracks.empty() && !ARDOUR::Profile->get_mixbus()) {
+		// XXX this can lead to inconsistent CheckMenuItem state (azimith, width are treated separately)
+		for (list<boost::shared_ptr<AutomationTimeAxisView> >::iterator i = pan_tracks.begin(); i != pan_tracks.end(); ++i) {
+			if ((*i)->control () == ac) {
+				return *i;
+			}
+		}
+	}
+
+	if (route_owned_only) {
+		return boost::shared_ptr<AutomationTimeAxisView> ();
+	}
+
+	for (Children::iterator j = children.begin(); j != children.end(); ++j) {
+		boost::shared_ptr<AutomationTimeAxisView> atv = boost::dynamic_pointer_cast<AutomationTimeAxisView> (*j);
+		if (atv && atv->control () == ac) {
+			return atv;
+		}
+	}
+	return boost::shared_ptr<AutomationTimeAxisView> ();
+}
+
 
 /** Add an AutomationTimeAxisView to display automation for a processor's parameter */
 void

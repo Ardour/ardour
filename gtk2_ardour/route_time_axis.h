@@ -196,8 +196,13 @@ protected:
 	ProcessorAutomationNode*
 	find_processor_automation_node (boost::shared_ptr<ARDOUR::Processor> i, Evoral::Parameter);
 
-	ProcessorAutomationNode*
-	find_processor_automation_node (boost::shared_ptr<ARDOUR::AutomationControl>);
+	/* O(log(N)) lookup of menu-item by AC */
+	Gtk::CheckMenuItem*
+	find_menu_item_by_ctrl (boost::shared_ptr<ARDOUR::AutomationControl>);
+
+	/* O(1) IFF route_owned_only == true, O(N) otherwise */
+	boost::shared_ptr<AutomationTimeAxisView>
+	find_atav_by_ctrl (boost::shared_ptr<ARDOUR::AutomationControl>, bool route_owned_only = true);
 
 	boost::shared_ptr<AutomationLine>
 	find_processor_automation_curve (boost::shared_ptr<ARDOUR::Processor> i, Evoral::Parameter);
@@ -266,7 +271,7 @@ protected:
 	 */
 	std::list<ProcessorAutomationInfo*> processor_automation;
 
-	std::map<boost::shared_ptr<PBD::Controllable>, ProcessorAutomationNode*> ctrl_node_map;
+	std::map<boost::shared_ptr<PBD::Controllable>, Gtk::CheckMenuItem*> ctrl_item_map;
 
 	typedef std::vector<boost::shared_ptr<AutomationLine> > ProcessorAutomationCurves;
 	ProcessorAutomationCurves processor_automation_curves;
