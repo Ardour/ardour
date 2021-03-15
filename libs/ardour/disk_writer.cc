@@ -129,6 +129,20 @@ DiskWriter::set_write_source_name (string const & str)
 	return true;
 }
 
+std::string
+DiskWriter::write_source_name () const
+{
+	if (!_write_source_name.empty ()) {
+		return _write_source_name;
+	}
+
+	std::string const& n (name ());
+	if (n.find (X_("recorder:")) == 0 && n.size () > 9) {
+		return n.substr (9);
+	}
+	return n;
+}
+
 void
 DiskWriter::check_record_status (samplepos_t transport_sample, double speed, bool can_record)
 {

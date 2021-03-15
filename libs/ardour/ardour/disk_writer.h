@@ -58,13 +58,7 @@ public:
 
 	bool set_write_source_name (const std::string& str);
 
-	std::string write_source_name () const {
-		if (_write_source_name.empty ()) {
-			return name ();
-		} else {
-			return _write_source_name;
-		}
-	}
+	std::string write_source_name () const;
 
 	boost::shared_ptr<AudioFileSource> audio_write_source (uint32_t n = 0) {
 		boost::shared_ptr<ChannelList> c = channels.reader ();
