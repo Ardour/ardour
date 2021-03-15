@@ -46,6 +46,7 @@ while [ $# -gt 0 ] ; do
 		APPNAME=Mixbus ;
 		BUNDLENAME=Mixbus${major_version} ;
 		lower_case_appname=mixbus;
+		BUNDLE_ID_BASE=com.harrisonconsoles
 		shift ;;
 	--mixbus32c) MIXBUS=1;
 		MIXBUS32C=1;
@@ -55,6 +56,7 @@ while [ $# -gt 0 ] ; do
 		STRIP= ;
 		PRODUCT_PKG_DIR=Mixbus32C;
 		lower_case_appname=mixbus32c;
+		BUNDLE_ID_BASE=com.harrisonconsoles
 		APPNAME=Mixbus32C ;
 		BUNDLENAME=Mixbus32C-${major_version} ;
 		shift ;;
@@ -64,6 +66,7 @@ while [ $# -gt 0 ] ; do
 		APPNAME=Ardour ;
 		BUNDLENAME=Ardour${major_version} ;
 		lower_case_appname=ardour;
+		BUNDLE_ID_BASE=org.ardour
 		shift ;;
 
 	#
@@ -190,6 +193,7 @@ env="<key>LSEnvironment</key><dict>$env<key>ARDOUR_BUNDLED</key><string>true</st
 sed -e "s?@ENV@?$env?g" \
     -e "s?@VERSION@?$release_version?g" \
     -e "s?@INFOSTRING@?$info_string?g" \
+    -e "s?@IDBASE@?$BUNDLE_ID_BASE?g" \
     -e "s?@IDSUFFIX@?$EXECUTABLE?g" \
     -e "s?@BUNDLENAME@?$BUNDLENAME?g" \
     -e "s?@EXECUTABLE@?$EXECUTABLE?g" < Info.plist.in > Info.plist
@@ -794,6 +798,145 @@ fi
 
 ################################################################################
 
+
+
+##### App Signing ##############################################################
+
+checkForSuccess() {
+	xcrun altool \
+		--notarization-info $1 \
+		-u ${ALTOOL_USERNAME} \
+		--password "@keychain:ALTOOL_PASSWORD" \
+		2>&1 | grep -o "Status: success";
+}
+
+if test $(sw_vers -productVersion | cut -d '.' -f 1) -lt 11 -a $(sw_vers -productVersion | cut -d '.' -f 2) -lt 14 -a $(sw_vers -productVersion | cut -d '.' -f 2) -lt 7; then
+	#less than 10.13.6 does not support notariztion
+	HARDENED_OPTIONS=
+else
+	HARDENED_OPTIONS="--options runtime --entitlements entitlements.plist"
+fi
+
+echo "checking for signing credentials"
+
+if test -n "${APPLE_DEVELOPER_ID_FOR_APPLICATION}"; then
+	####################
+	## Sign the main APP
+
+	echo "signing the main app"
+
+	# Sign everything from inside level working out.
+	find ${PRODUCT_PKG_DIR}/${APPROOT}/Resources -type f -exec codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" "{}" \;
+	find ${PRODUCT_PKG_DIR}/${APPROOT}/lib -type f -exec codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" "{}" \;
+
+	find ${PRODUCT_PKG_DIR}/${APPROOT}/MacOS -name "${lower_case_appname}${major_version}-*" -exec codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" "{}" \;
+	codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" ${PRODUCT_PKG_DIR}/${APPROOT}/MacOS/ffmpeg_harvid
+	codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" ${PRODUCT_PKG_DIR}/${APPROOT}/MacOS/ffprobe_harvid
+	codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" ${PRODUCT_PKG_DIR}/${APPROOT}/MacOS/harvid
+
+	codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" ${PRODUCT_PKG_DIR}/${APPROOT}/MacOS/${MAIN_EXECUTABLE}
+
+	codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" ${PRODUCT_PKG_DIR}/${APPDIR}
+
+	# Notarize
+	if test -n "${HARDENED_OPTIONS}"; then
+		echo "Notarizing the main app"
+		OK=0
+
+		ZIP_PATH=${PRODUCT_PKG_DIR}/${BUNDLENAME}.zip
+		/usr/bin/ditto -c -k --keepParent ${PRODUCT_PKG_DIR}/${APPDIR} $ZIP_PATH
+
+		notarize_output=$(xcrun altool --notarize-app --primary-bundle-id "${BUNDLE_ID_BASE}.${lower_case_appname}${major_version}.zip" --username ${ALTOOL_USERNAME} --password "@keychain:ALTOOL_PASSWORD" --file $ZIP_PATH 2>&1 | grep -o "RequestUUID = .*")
+
+		if [ $? = 0 ]; then
+			REQUEST_ID=$(echo ${notarize_output} | awk '{print $3}')
+			echo "Main app waiting on RequestUUID=${REQUEST_ID}"
+
+			count=360
+			while [ "$count" != 0 -a "$OK" == 0 ]
+			do
+				echo -n .
+				sleep 60
+				count=$((count - 1))
+
+				if checkForSuccess ${REQUEST_ID}; then
+					OK=1;
+				fi
+			done
+
+			if [ "$OK" == 1 ]; then
+				echo "Main app notarize success"
+				xcrun stapler staple ${PRODUCT_PKG_DIR}/${APPDIR}
+			else
+				echo "ERROR: Main app notarize not approved after 6 hours"
+			fi
+
+		else
+			echo "ERROR: Notarize upload failed"
+			exit 1;
+		fi
+		rm $ZIP_PATH
+	fi
+
+	#############
+	## Sign Jadeo
+
+	echo "signing the Jadeo app"
+
+	# Sign everything from inside level working out.
+	find ${PRODUCT_PKG_DIR}/Jadeo.app/Contents/Resources -type f -exec codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" "{}" \;
+	find ${PRODUCT_PKG_DIR}/Jadeo.app/Contents/Frameworks -type f -exec codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" "{}" \;
+
+	codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" ${PRODUCT_PKG_DIR}/Jadeo.app/Contents/MacOS/Jadeo-bin
+	codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" ${PRODUCT_PKG_DIR}/Jadeo.app/Contents/MacOS/xjremote
+
+	codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" ${PRODUCT_PKG_DIR}/Jadeo.app/Contents/MacOS/Jadeo
+
+	codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" ${PRODUCT_PKG_DIR}/Jadeo.app
+
+	# Notarize
+	if test -n "${HARDENED_OPTIONS}"; then
+		echo "notarizing Jadeo app"
+		OK=0
+
+		ZIP_PATH=${PRODUCT_PKG_DIR}/Jadeo.zip
+		/usr/bin/ditto -c -k --keepParent ${PRODUCT_PKG_DIR}/Jadeo.app $ZIP_PATH
+
+		notarize_output=$(xcrun altool --notarize-app --primary-bundle-id "${BUNDLE_ID_BASE}.jadeo.zip" --username ${ALTOOL_USERNAME} --password "@keychain:ALTOOL_PASSWORD" --file $ZIP_PATH 2>&1 | grep -o "RequestUUID = .*")
+
+		if [ $? = 0 ]; then
+			REQUEST_ID=$(echo ${notarize_output}  | awk '{print $3}')
+			echo "Jadeo waiting on RequestUUID=${REQUEST_ID}"
+
+			count=360
+			while [ "$count" != 0 -a "$OK" == 0 ]
+			do
+				echo -n .
+				sleep 60
+				count=$((count - 1))
+
+				if checkForSuccess ${REQUEST_ID}; then
+					OK=1;
+				fi
+			done
+
+			if [ "$OK" == 1 ]; then
+				echo "Jadeo notarize success"
+				xcrun stapler staple ${PRODUCT_PKG_DIR}/Jadeo.app
+			else
+				echo "ERROR: Jadeo notarize not approved after 6 hours"
+			fi
+
+		else
+			echo "ERROR: Notarize upload failed"
+			exit 1;
+		fi
+		rm $ZIP_PATH
+	fi
+fi
+
+################################################################################
+
 ( cd $PRODUCT_PKG_DIR ; find . ) > file_list.txt
 
 echo "Building DMG ..."
@@ -915,6 +1058,50 @@ rm -rf ${PRODUCT_PKG_DIR}
 echo
 echo "packaging suceeded."
 ls -l "$UC_DMG"
+
+echo "dmg: checking for signing credentials"
+
+if test -n "${APPLE_DEVELOPER_ID_FOR_APPLICATION}"; then
+	echo "dmg: signing"
+
+	codesign --verbose --timestamp --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" ${UC_DMG}
+
+	if test -n "${HARDENED_OPTIONS}"; then
+		echo "dmg: notarizing"
+		OK=0
+
+		notarize_output=$(xcrun altool --notarize-app --primary-bundle-id "${BUNDLE_ID_BASE}.${lower_case_appname}${major_version}.dmg" --username ${ALTOOL_USERNAME} --password "@keychain:ALTOOL_PASSWORD" --file ${UC_DMG} 2>&1 | grep -o "RequestUUID = .*")
+
+		if [ $? = 0 ]; then
+			REQUEST_ID=$(echo ${notarize_output}  | awk '{print $3}')
+			echo "dmg: waiting on RequestUUID=${REQUEST_ID}"
+
+			count=360
+			while [ "$count" != 0 -a "$OK" == 0 ]
+			do
+				echo -n .
+				sleep 60
+				count=$((count - 1))
+
+				if checkForSuccess ${REQUEST_ID}; then
+					OK=1;
+				fi
+			done
+
+			if [ "$OK" == 1 ]; then
+				echo "dmg: notarize success"
+				xcrun stapler staple ${UC_DMG}
+			else
+				echo "ERROR: dmg notarize not approved after 6 hours"
+			fi
+
+		else
+			echo "ERROR: Notarize upload failed"
+			exit 1;
+		fi
+	fi
+fi
+
 
 echo "Done."
 exit
