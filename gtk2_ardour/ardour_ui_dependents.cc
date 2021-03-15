@@ -112,15 +112,6 @@ ARDOUR_UI::we_have_dependents ()
 	editor->setup_tooltips ();
 	editor->UpdateAllTransportClocks.connect (sigc::mem_fun (*this, &ARDOUR_UI::update_transport_clocks));
 
-	/* catch up on tabbable state, in the right order to leave the editor
-	 * selected by default
-	 */
-
-	tabbable_state_change (*rc_option_editor);
-	tabbable_state_change (*mixer);
-	tabbable_state_change (*editor);
-	tabbable_state_change (*recorder);
-
 	/* all actions are defined */
 
 	ActionManager::load_menus (ARDOUR_COMMAND_LINE::menus_file);

@@ -467,19 +467,19 @@ ARDOUR_UI::step_up_through_tabs ()
 
 	/* this list must match the order of visibility buttons */
 
-	if (!recorder->window_visible()) {
+	if (recorder->tabbed()) {
 		candidates.push_back (recorder);
 	}
 
-	if (!editor->window_visible()) {
+	if (editor->tabbed()) {
 		candidates.push_back (editor);
 	}
 
-	if (!mixer->window_visible()) {
+	if (mixer->tabbed()) {
 		candidates.push_back (mixer);
 	}
 
-	if (!rc_option_editor->window_visible()) {
+	if (rc_option_editor->tabbed()) {
 		candidates.push_back (rc_option_editor);
 	}
 
@@ -512,19 +512,19 @@ ARDOUR_UI::step_down_through_tabs ()
 
 	/* this list must match the order of visibility buttons */
 
-	if (!recorder->window_visible()) {
+	if (recorder->tabbed()) {
 		candidates.push_back (recorder);
 	}
 
-	if (!editor->window_visible()) {
+	if (editor->tabbed()) {
 		candidates.push_back (editor);
 	}
 
-	if (!mixer->window_visible()) {
+	if (mixer->tabbed()) {
 		candidates.push_back (mixer);
 	}
 
-	if (!rc_option_editor->window_visible()) {
+	if (rc_option_editor->tabbed()) {
 		candidates.push_back (rc_option_editor);
 	}
 
@@ -823,48 +823,37 @@ ARDOUR_UI::tabbable_state_change (Tabbable& t)
 	}
 
 	ArdourButton* vis_button = 0;
-	std::vector<ArdourButton*> other_vis_buttons;
 
 	if (&t == editor) {
 		vis_button = &editor_visibility_button;
-		other_vis_buttons.push_back (&mixer_visibility_button);
-		other_vis_buttons.push_back (&prefs_visibility_button);
-		other_vis_buttons.push_back (&recorder_visibility_button);
 	} else if (&t == mixer) {
 		vis_button = &mixer_visibility_button;
-		other_vis_buttons.push_back (&editor_visibility_button);
-		other_vis_buttons.push_back (&prefs_visibility_button);
-		other_vis_buttons.push_back (&recorder_visibility_button);
 	} else if (&t == rc_option_editor) {
 		vis_button = &prefs_visibility_button;
-		other_vis_buttons.push_back (&editor_visibility_button);
-		other_vis_buttons.push_back (&mixer_visibility_button);
-		other_vis_buttons.push_back (&recorder_visibility_button);
 	} else if (&t == recorder) {
 		vis_button = &recorder_visibility_button;
-		other_vis_buttons.push_back (&editor_visibility_button);
-		other_vis_buttons.push_back (&mixer_visibility_button);
-		other_vis_buttons.push_back (&prefs_visibility_button);
 	}
 
 	if (!vis_button) {
+		assert (0);
 		return;
 	}
 
-	switch (vs) {
-	case Tabbed:
-		vis_button->set_active_state (Gtkmm2ext::ImplicitActive);
-		break;
-	case Windowed:
-		vis_button->set_active_state (Gtkmm2ext::ExplicitActive);
-		break;
-	case Hidden:
-		vis_button->set_active_state (Gtkmm2ext::Off);
-		break;
-	}
+	/* First update button states for (other) tabbed windows.
+	 * (Gtkmm2ext::Off or Gtkmm2ext::ImplicitActive)
+	 */
+	tabs_switch (NULL, _tabs.get_current_page ());
 
-	for (std::vector<ArdourButton*>::iterator b = other_vis_buttons.begin(); b != other_vis_buttons.end(); ++b) {
-		(*b)->set_active_state (Gtkmm2ext::Off);
+	switch (vs) {
+		case Tabbed:
+			/* nothing to do */
+			break;
+		case Windowed:
+			vis_button->set_active_state (Gtkmm2ext::ExplicitActive);
+			break;
+		case Hidden:
+			vis_button->set_active_state (Gtkmm2ext::Off);
+			break;
 	}
 }
 
