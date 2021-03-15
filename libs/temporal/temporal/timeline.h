@@ -170,7 +170,7 @@ class LIBTEMPORAL_API timepos_t : public int62_t  {
 	 * timepos_t that is the previous (earlier) possible position given
 	 * this one
 	 */
-	timepos_t decrement () const { return timepos_t (false, val() > 0 ? val() - 1 : val()); /* cannot go negative */ }
+	timepos_t decrement () const { return timepos_t (flagged(), val() > 0 ? val() - 1 : 0); /* cannot go negative */ }
 
 	/* purely for reasons of symmetry with ::decrement(), return a
 	 * timepos_t that is the next (later) possible position given this one
