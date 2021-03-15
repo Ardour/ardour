@@ -1752,7 +1752,7 @@ RouteTimeAxisView::find_atav_by_ctrl (boost::shared_ptr<ARDOUR::AutomationContro
 	}
 
 	if (!pan_tracks.empty() && !ARDOUR::Profile->get_mixbus()) {
-		// XXX this can lead to inconsistent CheckMenuItem state (azimith, width are treated separately)
+		// XXX this can lead to inconsistent CheckMenuItem state (azimuth, width are treated separately)
 		for (list<boost::shared_ptr<AutomationTimeAxisView> >::iterator i = pan_tracks.begin(); i != pan_tracks.end(); ++i) {
 			if ((*i)->control () == ac) {
 				return *i;
