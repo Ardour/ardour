@@ -211,6 +211,7 @@ AudioTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool
 
 	} else if (param.type() == BusSendLevel) {
 
+		// XXX this does not seem correct
 		create_trim_automation_child (param, show);
 
 	} else if (param.type() == TrimAutomation) {
