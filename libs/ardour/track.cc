@@ -64,6 +64,7 @@ Track::Track (Session& sess, string name, PresentationInfo::Flag flag, TrackMode
 	, _saved_meter_point (_meter_point)
 	, _mode (mode)
 	, _alignment_choice (Automatic)
+	, _pending_name_change (false)
 {
 	_freeze_record.state = NoFreeze;
 }
@@ -100,14 +101,6 @@ Track::init ()
 
 	set_align_choice_from_io ();
 
-	if (!name().empty()) {
-		/* an empty name means that we are being constructed via
-		 * serialized state (XML). Don't create a playlist, because one
-		 * will be created or discovered during ::set_state().
-		 */
-		use_new_playlist (data_type());
-	}
-
 	boost::shared_ptr<Route> rp (boost::dynamic_pointer_cast<Route> (shared_from_this()));
 	boost::shared_ptr<Track> rt = boost::dynamic_pointer_cast<Track> (rp);
 
@@ -119,6 +112,16 @@ Track::init ()
 
 	_monitoring_control.reset (new MonitorControl (_session, EventTypeMap::instance().to_symbol (MonitoringAutomation), *this));
 	add_control (_monitoring_control);
+
+	if (!name().empty()) {
+		/* an empty name means that we are being constructed via
+		 * serialized state (XML). Don't create a playlist, because one
+		 * will be created or discovered during ::set_state().
+		 */
+		use_new_playlist (data_type());
+		/* set disk-I/O and diskstream name */
+		set_name (name ());
+	}
 
 	_session.config.ParameterChanged.connect_same_thread (*this, boost::bind (&Track::parameter_changed, this, _1));
 
@@ -344,34 +347,28 @@ void
 Track::parameter_changed (string const & p)
 {
 	if (p == "track-name-number") {
-		resync_track_name ();
+		resync_take_name ();
 	}
 	else if (p == "track-name-take") {
-		resync_track_name ();
+		resync_take_name ();
 	}
 	else if (p == "take-name") {
 		if (_session.config.get_track_name_take()) {
-			resync_track_name ();
+			resync_take_name ();
 		}
 	}
 }
 
-void
-Track::resync_track_name ()
+int
+Track::resync_take_name (std::string n)
 {
-	set_name(name());
-}
-
-bool
-Track::set_name (const string& str)
-{
-	if (str.empty ()) {
-		return false;
+	if (n.empty ()) {
+		n = name ();
 	}
 
-	if (_record_enable_control->get_value()) {
-		/* when re-arm'ed the file (named after the track) is already ready to rolll */
-		return false;
+	if (_record_enable_control->get_value() && _session.actively_recording ()) {
+		_pending_name_change = true;
+		return -1;
 	}
 
 	string diskstream_name = "";
@@ -388,14 +385,33 @@ Track::set_name (const string& str)
 		diskstream_name += num;
 		diskstream_name += "_";
 	}
-	diskstream_name += str;
+
+	diskstream_name += n;
 
 	if (diskstream_name == _diskstream_name) {
-		return true;
+		return 1;
 	}
-	_diskstream_name = diskstream_name;
 
+	_diskstream_name = diskstream_name;
 	_disk_writer->set_write_source_name (diskstream_name);
+	return 0;
+}
+
+bool
+Track::set_name (const string& str)
+{
+	if (str.empty ()) {
+		return false;
+	}
+
+	switch (resync_take_name (str)) {
+		case -1:
+			return false;
+		case 1:
+			return true;
+		default:
+			break;
+	}
 
 	boost::shared_ptr<Track> me = boost::dynamic_pointer_cast<Track> (shared_from_this ());
 
@@ -556,6 +572,11 @@ void
 Track::transport_stopped_wallclock (struct tm & n, time_t t, bool g)
 {
 	_disk_writer->transport_stopped_wallclock (n, t, g);
+
+	if (_pending_name_change) {
+		resync_take_name ();
+		_pending_name_change = false;
+	}
 }
 
 void

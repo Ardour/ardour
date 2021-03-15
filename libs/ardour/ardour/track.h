@@ -60,7 +60,7 @@ public:
 	int init ();
 
 	bool set_name (const std::string& str);
-	void resync_track_name ();
+	int resync_take_name (std::string newname = "");
 
 	TrackMode mode () const { return _mode; }
 
@@ -238,6 +238,7 @@ private:
 	void chan_count_changed ();
 
 	std::string _diskstream_name;
+	bool        _pending_name_change;
 };
 
 }; /* namespace ARDOUR*/

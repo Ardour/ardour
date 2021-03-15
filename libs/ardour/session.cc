@@ -4212,7 +4212,7 @@ Session::reassign_track_numbers ()
 		for (RouteList::iterator i = r.begin(); i != r.end(); ++i) {
 			boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (*i);
 			if (t) {
-				t->resync_track_name();
+				t->resync_take_name ();
 			}
 		}
 		// trigger GUI re-layout
