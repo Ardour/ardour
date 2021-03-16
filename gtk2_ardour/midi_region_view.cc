@@ -3897,11 +3897,9 @@ MidiRegionView::update_ghost_note (double x, double y, uint32_t state)
 
 	PublicEditor& editor = trackview.editor ();
 
-	samplepos_t const unsnapped_sample = editor.pixel_to_sample (x);
-
-	const int32_t divisions = editor.get_grid_music_divisions (state);
-	const bool shift_snap = midi_view()->note_mode() != Percussive;
-	const Temporal::Beats snapped_beats = snap_sample_to_grid_underneath (unsnapped_sample, divisions, shift_snap);
+	samplepos_t const unsnapped_sample = editor.pixel_to_sample (global_x);
+	const Temporal::timepos_t snapped_pos = editor.snap_to_bbt (timepos_t (unsnapped_sample), RoundDownAlways, SnapToGrid_Unscaled);
+	const Temporal::Beats snapped_beats = _region->position().distance (snapped_pos).beats ();
 
 	/* prevent Percussive mode from displaying a ghost hit at region end */
 	if (!shift_snap && snapped_beats >= _region->end().beats()) {
@@ -4288,36 +4286,6 @@ MidiRegionView::get_velocity_for_add (MidiModel::TimeType time) const
 	const double frac = (t - next) / (mmmm - next);
 
 	return (*n)->velocity() + (frac * ((*m)->velocity() - (*n)->velocity()));
-}
-
-/** @param p A session samplepos.
- *  @param divisions beat division to snap given by Editor::get_grid_music_divisions() where
- *  bar is -1, 0 is audio samples and a positive integer is beat subdivisions.
- *  @return beat duration of p snapped to the grid subdivision underneath it.
- */
-Temporal::Beats
-MidiRegionView::snap_sample_to_grid_underneath (samplepos_t p, int32_t divisions, bool shift_snap) const
-{
-
-	TempoMap::SharedPtr tmap (TempoMap::use());
-	timepos_t pos (_region->position() + timecnt_t (p));
-
-	Beats snapped_beats = tmap->quarters_at (pos).round_to_subdivision (divisions, RoundNearest);
-
-	if (shift_snap) {
-		const Beats raw_beats = tmap->quarters_at (pos);
-		/* Hack so that we always snap to the note that we are over, instead of snapping
-		   to the next one if we're more than halfway through the one we're over.
-		*/
-		const Beats rem = snapped_beats - raw_beats;
-
-		if (rem >= Temporal::Beats()) {
-			const Beats grid_beats = get_grid_beats (pos);
-			snapped_beats -= grid_beats;
-		}
-	}
-
-	return _region->absolute_time_to_source_beats (timepos_t (snapped_beats));
 }
 
 ChannelMode
