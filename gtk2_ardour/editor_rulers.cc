@@ -219,6 +219,7 @@ Editor::popup_ruler_menu (samplepos_t where, ItemType t)
 	case MarkerBarItem:
 		ruler_items.push_back (MenuElem (_("New location marker"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, false)));
 		ruler_items.push_back (MenuElem (_("Clear all locations"), sigc::mem_fun(*this, &Editor::clear_markers)));
+		ruler_items.push_back (MenuElem (_("Clear all xruns"), sigc::mem_fun(*this, &Editor::clear_xrun_markers)));
 		ruler_items.push_back (MenuElem (_("Unhide locations"), sigc::mem_fun(*this, &Editor::unhide_markers)));
 		break;
 

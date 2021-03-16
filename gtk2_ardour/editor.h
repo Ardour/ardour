@@ -1471,6 +1471,7 @@ private:
 	void scroll_tracks_up ();
 	void set_mark ();
 	void clear_markers ();
+	void clear_xrun_markers ();
 	void clear_ranges ();
 	void clear_locations ();
 	void unhide_markers ();

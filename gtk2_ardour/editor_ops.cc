@@ -2510,6 +2510,21 @@ Editor::clear_markers ()
 }
 
 void
+Editor::clear_xrun_markers ()
+{
+	if (_session) {
+		begin_reversible_command (_("clear xrun markers"));
+
+		XMLNode &before = _session->locations()->get_state();
+		_session->locations()->clear_xrun_markers ();
+		XMLNode &after = _session->locations()->get_state();
+		_session->add_command(new MementoCommand<Locations>(*(_session->locations()), &before, &after));
+
+		commit_reversible_command ();
+	}
+}
+
+void
 Editor::clear_ranges ()
 {
 	if (_session) {
