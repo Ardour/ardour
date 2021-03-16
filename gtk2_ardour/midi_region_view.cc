@@ -3888,11 +3888,14 @@ MidiRegionView::update_ghost_note (double x, double y, uint32_t state)
 	assert (_ghost_note);
 	x = std::max(0.0, x);
 
+	const double global_x (x);
+
 	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
 
 	_last_ghost_x = x;
 	_last_ghost_y = y;
 
+	/* we need the y value only */
 	_note_group->canvas_to_item (x, y);
 
 	PublicEditor& editor = trackview.editor ();
@@ -3902,18 +3905,15 @@ MidiRegionView::update_ghost_note (double x, double y, uint32_t state)
 	const Temporal::Beats snapped_beats = _region->position().distance (snapped_pos).beats ();
 
 	/* prevent Percussive mode from displaying a ghost hit at region end */
-	if (!shift_snap && snapped_beats >= _region->end().beats()) {
+	if ((midi_view()->note_mode() == Percussive) && (snapped_beats >= _region->length().beats())) {
 		_ghost_note->hide();
 		hide_verbose_cursor ();
 		return;
 	}
 
 	/* ghost note may have been snapped before region */
-<<<<<<< HEAD
-	if (snapped_beats.to_double() < 0.0) {
-=======
-	if (_ghost_note && snapped_beats < Temporal::Beats()) {
->>>>>>> 5ec97dc85c (updated Temporal::Beats ... GUI edition)
+
+	if (snapped_beats < Temporal::Beats()) {
 		_ghost_note->hide();
 		return;
 	}
@@ -3922,6 +3922,9 @@ MidiRegionView::update_ghost_note (double x, double y, uint32_t state)
 
 	/* calculate time in beats relative to start of source */
 	const Temporal::Beats length = get_grid_beats (_region->position() + timepos_t (unsnapped_sample));
+
+	/* calculate time in of a single grid units worth of beats, at the start of source */
+	const Temporal::Beats length = get_grid_beats (_region->source_position() + timepos_t (snapped_beats));
 
 	_ghost_note->note()->set_time (snapped_beats);
 	_ghost_note->note()->set_length (length);
