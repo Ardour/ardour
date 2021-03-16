@@ -200,10 +200,10 @@ public:
 	Location* add_range (samplepos_t start, samplepos_t end);
 
 	void remove (Location *);
-	void clear ();
-	void clear_markers ();
-	void clear_xrun_markers ();
-	void clear_ranges ();
+	bool clear ();
+	bool clear_markers ();
+	bool clear_xrun_markers ();
+	bool clear_ranges ();
 
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&, int version);

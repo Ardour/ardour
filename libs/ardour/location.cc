@@ -903,9 +903,11 @@ Locations::set_current_unlocked (Location *loc)
 	return 0;
 }
 
-void
+bool
 Locations::clear ()
 {
+	bool deleted = false;
+
 	{
 		Glib::Threads::Mutex::Lock lm (lock);
 
@@ -917,6 +919,7 @@ Locations::clear ()
 			if (!(*i)->is_session_range()) {
 				delete *i;
 				locations.erase (i);
+				deleted = true;
 			}
 
 			i = tmp;
@@ -924,14 +927,19 @@ Locations::clear ()
 
 		current_location = 0;
 	}
+	if (deleted) {
+		changed (); /* EMIT SIGNAL */
+		current_changed (0); /* EMIT SIGNAL */
+	}
 
-	changed (); /* EMIT SIGNAL */
-	current_changed (0); /* EMIT SIGNAL */
+	return deleted;
 }
 
-void
+bool
 Locations::clear_markers ()
 {
+	bool deleted = false;
+
 	{
 		Glib::Threads::Mutex::Lock lm (lock);
 		LocationList::iterator tmp;
@@ -943,18 +951,25 @@ Locations::clear_markers ()
 			if ((*i)->is_mark() && !(*i)->is_session_range()) {
 				delete *i;
 				locations.erase (i);
+				deleted = true;
 			}
 
 			i = tmp;
 		}
 	}
 
-	changed (); /* EMIT SIGNAL */
+	if (deleted) {
+		changed (); /* EMIT SIGNAL */
+	}
+
+	return deleted;
 }
 
-void
+bool
 Locations::clear_xrun_markers ()
 {
+	bool deleted = false;
+
 	{
 		Glib::Threads::Mutex::Lock lm (lock);
 		LocationList::iterator tmp;
@@ -966,18 +981,25 @@ Locations::clear_xrun_markers ()
 			if ((*i)->is_xrun()) {
 				delete *i;
 				locations.erase (i);
+				deleted = true;
 			}
 
 			i = tmp;
 		}
 	}
 
-	changed (); /* EMIT SIGNAL */
+	if (deleted) {
+		changed (); /* EMIT SIGNAL */
+	}
+
+	return deleted;
 }
 
-void
+bool
 Locations::clear_ranges ()
 {
+	bool deleted = false;
+
 	{
 		Glib::Threads::Mutex::Lock lm (lock);
 		LocationList::iterator tmp;
@@ -1001,7 +1023,7 @@ Locations::clear_ranges ()
 			if (!(*i)->is_mark()) {
 				delete *i;
 				locations.erase (i);
-
+				deleted = true;
 			}
 
 			i = tmp;
@@ -1010,8 +1032,12 @@ Locations::clear_ranges ()
 		current_location = 0;
 	}
 
-	changed ();
-	current_changed (0); /* EMIT SIGNAL */
+	if (deleted) {
+		changed (); /* EMIT SIGNAL */
+		current_changed (0); /* EMIT SIGNAL */
+	}
+
+	return deleted;
 }
 
 void
