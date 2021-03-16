@@ -1735,7 +1735,7 @@ MidiRegionView::update_hit (Hit* ev, bool update_ghost_regions)
 	boost::shared_ptr<NoteType> note = ev->note();
 	const timepos_t note_time = _region->source_beats_to_absolute_time (note->time());
 
-	const double x = trackview.editor().time_to_pixel(note_time);
+	const double x = trackview.editor().time_to_pixel(note_time) - trackview.editor().time_to_pixel (_region->position());
 	const double diamond_size = std::max(1., floor(note_height()) - 2.);
 	const double y = 1.5 + floor(note_to_y(note->note())) + diamond_size * .5;
 
