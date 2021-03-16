@@ -6957,25 +6957,7 @@ NoteCreateDrag::~NoteCreateDrag ()
 Temporal::Beats
 NoteCreateDrag::grid_aligned_beats (timepos_t const & pos, GdkEvent const * event) const
 {
-	Temporal::Beats beats;
-
-	TempoMap::SharedPtr map (TempoMap::use());
-	const int32_t divisions = _editor->get_grid_music_divisions (event->button.state);
-
-	switch (divisions) {
-	case 0:  /* no rounding */
-	case 1:  /* round to beat */
-		beats = pos.beats ();
-		break;
-	case -1: /* round to bar */
-		beats = map->quarters_at (map->metric_at (pos).meter().round_to_bar (map->bbt_at (pos)));
-		break;
-	default: /* round to some beat subdivision */
-		beats = pos.beats().round_to_subdivision (divisions, Temporal::RoundNearest);
-		break;
-	}
-
-	return beats;
+	return _editor->snap_to_bbt (pos, RoundNearest, SnapToGrid_Unscaled).beats ();
 }
 
 void
