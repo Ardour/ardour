@@ -1368,7 +1368,7 @@ Locations::marks_either_side (samplepos_t const sample, samplepos_t& before, sam
 	std::list<samplepos_t> positions;
 
 	for (LocationList::const_iterator i = locs.begin(); i != locs.end(); ++i) {
-		if (((*i)->is_auto_loop() || (*i)->is_auto_punch())) {
+		if (((*i)->is_auto_loop() || (*i)->is_auto_punch()) || (*i)->is_xrun()) {
 			continue;
 		}
 
