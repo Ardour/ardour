@@ -195,7 +195,7 @@ public:
 	 *
 	 * @return New location object
 	 */
-	Location* add_range (samplepos_t start, samplepos_t end);
+	Location* add_range (timepos_t const & start, timepos_t const & end);
 
 	void remove (Location *);
 	bool clear ();
@@ -237,7 +237,7 @@ public:
 	 *
 	 * @return Location object or nil
 	 */
-	Location* range_starts_at(samplepos_t, samplecnt_t slop = 0, bool incl = false) const;
+	Location* range_starts_at (timepos_t const &, timecnt_t const & slop = timecnt_t (Temporal::AudioTime), bool incl = false) const;
 
 	void find_all_between (timepos_t const & start, timepos_t const & end, LocationList&, Location::Flags);
 
