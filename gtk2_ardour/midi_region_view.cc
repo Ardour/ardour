@@ -627,8 +627,7 @@ MidiRegionView::motion (GdkEventMotion* ev)
 
 			if (_ghost_note) {
 				update_ghost_note (ev->x, ev->y, ev->state);
-			}
-			else {
+			} else {
 				create_ghost_note (ev->x, ev->y, ev->state);
 			}
 		}
