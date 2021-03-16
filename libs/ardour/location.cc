@@ -953,6 +953,29 @@ Locations::clear_markers ()
 }
 
 void
+Locations::clear_xrun_markers ()
+{
+	{
+		Glib::Threads::Mutex::Lock lm (lock);
+		LocationList::iterator tmp;
+
+		for (LocationList::iterator i = locations.begin(); i != locations.end(); ) {
+			tmp = i;
+			++tmp;
+
+			if ((*i)->is_xrun()) {
+				delete *i;
+				locations.erase (i);
+			}
+
+			i = tmp;
+		}
+	}
+
+	changed (); /* EMIT SIGNAL */
+}
+
+void
 Locations::clear_ranges ()
 {
 	{

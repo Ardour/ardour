@@ -202,6 +202,7 @@ public:
 	void remove (Location *);
 	void clear ();
 	void clear_markers ();
+	void clear_xrun_markers ();
 	void clear_ranges ();
 
 	XMLNode& get_state (void);
