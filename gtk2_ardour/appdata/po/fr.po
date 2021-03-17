@@ -1,13 +1,14 @@
 # French translation of appdata.
 # This file is distributed under the same license as the ardour package.
 #
-# Olivier Humbert <trebmuh@tuxfamily.org>, 2016.
+# Fred Rech <fred_rech@laposte.net>, 2016
+# Olivier Humbert <trebmuh@tuxfamily.org>, 2016, 2021
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2016-12-01 01:22+0100\n"
+"POT-Creation-Date: 2021-03-17 15:41+0200\n"
 "PO-Revision-Date: 2020-04-13 13:00+0200\n"
-"Last-Translator: stratojaune <fred_rech@laposte.net>\n"
+"Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>\n"
 "Language-Team: \n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
@@ -25,7 +26,7 @@ msgstr ""
 #. (itstool) path: component/summary
 #: gtk2_ardour/ardour.appdata.xml.in.in:10
 msgid "Digital Audio Workstation"
-msgstr "Station de Travail AudioNumérique"
+msgstr "Station de Travail Audio-Numérique"
 
 #. (itstool) path: description/p
 #: gtk2_ardour/ardour.appdata.xml.in.in:12
