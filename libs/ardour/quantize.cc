@@ -38,7 +38,7 @@ using namespace ARDOUR;
  */
 
 Quantize::Quantize (bool snap_start, bool snap_end,
-		    int start_grid, int end_grid,
+                    Temporal::Beats start_grid, Temporal::Beats end_grid,
                     float strength, float swing, Temporal::Beats const & threshold)
 	: _snap_start (snap_start)
 	, _snap_end (snap_end)
@@ -54,11 +54,9 @@ Quantize::~Quantize ()
 {
 }
 
-static double
-swing_position (double pos, double grid, double swing, double offset)
+static Temporal::Beats
+swing_position (Temporal::Beats pos, Temporal::Beats grid, double swing_strength, Temporal::Beats offset)
 {
-
-#warning NUTEMPO rewrite this to use Beats and ratio_t
 
 	/* beats start out numbered at zero.
 	 *
@@ -79,33 +77,37 @@ swing_position (double pos, double grid, double swing, double offset)
 	 * whether or not ((possible_grid_position / grid) % 2) != 0
 	 */
 
-	const bool swing_quantize_grid_position = pos > 0.0 && fmod ((pos/grid), 2.0) != 0;
-	const bool swing_previous_grid_position = pos > grid && fmod ((pos-grid)/grid, 2.0) != 0;
+	using namespace Temporal;
+
+	const bool swing_quantize_grid_position = pos > Beats() && ((pos/grid) % Beats (2, 0)) != Beats();
+	const bool swing_previous_grid_position = pos > grid && (((pos-grid)/grid) % Beats (2, 0)) != Beats();
 
 	/* one of these will not be subject to swing */
 
-	double swung_pos = pos;
-	double swung_previous_grid_position;
+	Beats swung_pos = pos;
+	Beats swung_previous_grid_position;
 
 	if (pos > grid) {
 		swung_previous_grid_position = pos - grid;
 	} else {
-		swung_previous_grid_position = 0.0;
+		swung_previous_grid_position = Beats();
 	}
 
+	const ratio_t r (2 * swing_strength, 3);
+
 	if (swing_previous_grid_position) {
-		swung_previous_grid_position = swung_previous_grid_position + (2.0/3.0 * swing * grid);
+		swung_previous_grid_position = swung_previous_grid_position + (grid * r);
 	}
 
 	if (swing_quantize_grid_position) {
-		swung_pos = swung_pos + (2.0/3.0 * swing * grid);
+		swung_pos = swung_pos + (grid * r);
 	}
 
 	/* now correct for start-of-model offset */
 
 	pos += offset;
 
-	if (fabs (pos - swung_pos) > fabs (pos - swung_previous_grid_position)) {
+	if ((pos - swung_pos).abs() > (pos - swung_previous_grid_position).abs()) {
 		pos = swung_previous_grid_position;
 	} else {
 		pos = swung_pos;
@@ -143,9 +145,8 @@ Quantize::operator () (boost::shared_ptr<MidiModel> model,
 			Temporal::Beats new_end = (((*i)->end_time() - offset) / _end_grid) * _end_grid;
 
 			if (_swing) {
-				Temporal::DoubleableBeats doff (offset);
-				new_start = swing_position (Temporal::DoubleableBeats (new_start).to_double(), _start_grid, _swing, doff.to_double());
-				new_end = swing_position (Temporal::DoubleableBeats (new_end).to_double(), _end_grid, _swing, doff.to_double());
+				new_start = swing_position (new_start, _start_grid, _swing, offset);
+				new_end = swing_position (new_end, _end_grid, _swing, offset);
 
 			} else {
 
@@ -170,10 +171,10 @@ Quantize::operator () (boost::shared_ptr<MidiModel> model,
 
 				if (delta.abs() >= _threshold) {
 
-					Temporal::Beats new_dur(new_end - new_start);
+					Temporal::Beats new_dur (new_end - new_start);
 
 					if (!new_dur) {
-						new_dur = Temporal::Beats::from_double (_end_grid);
+						new_dur = Temporal::Beats (_end_grid);
 					}
 
 					cmd->change ((*i), MidiModel::NoteDiffCommand::Length, new_dur);
