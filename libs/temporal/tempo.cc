@@ -3077,3 +3077,21 @@ TempoMap::abort_update ()
 	*/
 	TempoMap::fetch ();
 }
+
+void
+TempoMap::midi_clock_beat_at_or_after (samplepos_t const pos, samplepos_t& clk_pos, uint32_t& clk_beat)
+{
+	/* Sequences are always assumed to start on a MIDI Beat of 0 (ie, the downbeat).
+	 *
+	 * There are 24 MIDI clock per quarter note (1 Temporal::Beat)
+	 *
+	 * from http://midi.teragonaudio.com/tech/midispec/seq.htm
+	 */
+
+	Temporal::Beats b = (quarters_at_sample (pos)).round_up_to_beat ();
+
+	clk_pos = sample_at (b, TEMPORAL_SAMPLE_RATE);
+	clk_beat = b.get_beats () * 24;
+
+	assert (clk_pos >= pos);
+}

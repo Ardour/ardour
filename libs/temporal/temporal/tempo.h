@@ -820,6 +820,8 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 	Beats quarters_at_sample (samplepos_t sc) const { return quarters_at_superclock (samples_to_superclock (sc, TEMPORAL_SAMPLE_RATE)); }
 	Beats quarters_at_superclock (superclock_t sc) const;
 
+	void midi_clock_beat_at_or_after (samplepos_t const pos, samplepos_t& clk_pos, uint32_t& clk_beat);
+
    private:
 	Tempos       _tempos;
 	Meters       _meters;
