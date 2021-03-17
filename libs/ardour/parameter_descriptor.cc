@@ -340,13 +340,13 @@ ParameterDescriptor::to_interface (float val, bool rotary) const
 			break;
 		case PanAzimuthAutomation:
 			if (rotary) {
-				val = val;
+				; // val = val;
 			} else {
 				val = 1.0 - val;
 			}
 			break;
 		case PanElevationAutomation:
-			val = val;
+			; // val = val;
 			break;
 		case PanWidthAutomation:
 			val = .5f + val * .5f;
