@@ -5336,29 +5336,16 @@ Session::archive_session (const std::string& dest,
 	}
 
 	/* create temporary dir to save session to */
-#ifdef PLATFORM_WINDOWS
-	char tmp[256] = "C:\\TEMP\\";
-	GetTempPath (sizeof (tmp), tmp);
-#else
-	char const* tmp = getenv("TMPDIR");
-	if (!tmp) {
-		tmp = "/tmp/";
-	}
-#endif
-	if ((strlen (tmp) + 21) > 1024) {
+	GError* err = NULL;
+	char* td = g_dir_make_tmp ("ardourarchive-XXXXXX", &err);
+
+	if (!td) {
+		error << string_compose(_("Could not make tmpdir: %1"), err->message) << endmsg;
 		return -1;
 	}
-
-	char tmptpl[1024];
-	strcpy (tmptpl, tmp);
-	strcat (tmptpl, "ardourarchive-XXXXXX");
-	char*  tmpdir = g_mkdtemp (tmptpl);
-
-	if (!tmpdir) {
-		return -1;
-	}
-
-	std::string to_dir = std::string (tmpdir);
+	const string to_dir = PBD::canonical_path (td);
+	g_free (td);
+	g_clear_error (&err);
 
 	/* switch session directory temporarily */
 	(*_session_dir) = to_dir;
