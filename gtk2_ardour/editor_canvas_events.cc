@@ -666,13 +666,6 @@ Editor::canvas_control_point_event (GdkEvent *event, ArdourCanvas::Item* item, C
 		clicked_routeview = dynamic_cast<RouteTimeAxisView*>(clicked_axisview);
 		clicked_regionview = 0;
 		break;
-
-	case GDK_SCROLL_UP:
-		break;
-
-	case GDK_SCROLL_DOWN:
-		break;
-
 	default:
 		break;
 	}
