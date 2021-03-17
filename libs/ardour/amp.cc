@@ -219,7 +219,7 @@ Amp::apply_gain (BufferSet& bufs, samplecnt_t sample_rate, samplecnt_t nframes, 
 				Evoral::Event<MidiBuffer::TimeType> ev = *m;
 
 				if (ev.is_note_on() || ev.is_note_off()) {
-					const gain_t scale = fabsf (initial + delta * (ev.time() / (double) nframes));
+					const gain_t scale = fabsf (initial + delta * (ev.time() / (float) nframes));
 					if (scale < GAIN_COEFF_SMALL) {
 						m = mb.erase (m);
 						continue;
