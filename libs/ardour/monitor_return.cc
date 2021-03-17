@@ -56,7 +56,7 @@ MonitorReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_s
 
 	uint32_t nch = bufs.count().n_audio ();
 	if (_nch != nch) {
-		_nch = _nch;
+		_nch = nch;
 		_gain = nch > 0 ? (1.f / sqrtf (nch)) : 1.f;
 	}
 
