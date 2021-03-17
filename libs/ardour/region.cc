@@ -568,14 +568,11 @@ Region::special_set_position (timepos_t const & pos)
 }
 
 void
-Region::set_position_time_domain (Temporal::TimeDomain ps)
+Region::set_position_time_domain (Temporal::TimeDomain td)
 {
-	if (_length.val().time_domain() != ps) {
+	if (_length.val().time_domain() != td) {
 
-		boost::shared_ptr<Playlist> pl (playlist());
-
-#warning NUTEMPO need to set ALL of length to new TD
-		//_length.val().set_time_domain (ps);
+		_length.call().set_time_domain (td);
 
 		send_change (Properties::time_domain);
 	}
