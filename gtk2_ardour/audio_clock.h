@@ -230,7 +230,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 
 	void set_clock_dimensions (Gtk::Requisition&);
 
-	samplepos_t get_sample_step (Field, Temporal::timepos_t const & pos = Temporal::timepos_t (), int dir = 1);
+	Temporal::timepos_t get_incremental_step (Field, Temporal::timepos_t const & pos = Temporal::timepos_t (), int dir = 1);
 
 	bool timecode_validate_edit (const std::string&);
 	bool bbt_validate_edit (std::string&);

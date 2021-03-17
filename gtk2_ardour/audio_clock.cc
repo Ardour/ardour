@@ -674,7 +674,7 @@ AudioClock::parse_as_timecode_distance (const std::string& str)
 		sscanf (str.c_str(), "%" PRId32, &samples);
 		ret = llrint ((samples/(float)fps) * sr);
 		break;
-		
+
 	case 3:
 		sscanf (str.c_str(), "%1" PRId32 "%" PRId32, &secs, &samples);
 		ret = (secs * sr) + llrint ((samples/(float)fps) * sr);
@@ -1777,34 +1777,32 @@ AudioClock::on_scroll_event (GdkEventScroll *ev)
 	}
 
 	Field f = index_to_field (index);
-	samplepos_t samples = 0;
+	timepos_t step;
 
 	switch (ev->direction) {
 
-#warning NUTEMPO THIS SHOULD BE REVISITED FOR BeatTime
-
 	case GDK_SCROLL_UP:
-		samples = get_sample_step (f, current_time(), 1);
-		if (samples != 0) {
+		step = get_incremental_step (f, current_time(), 1);
+		if (!step.zero()) {
 			if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-				samples *= 10;
+				step *= 10;
 			}
-			AudioClock::set (current_time() + timepos_t (samples), true);
+			AudioClock::set (current_time() + step, true);
 			ValueChanged (); /* EMIT_SIGNAL */
 		}
 		break;
 
 	case GDK_SCROLL_DOWN:
-		samples = get_sample_step (f, current_time(), -1);
-		if (samples != 0) {
+		step = get_incremental_step (f, current_time(), -1);
+		if (!step.zero()) {
 			if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-				samples *= 10;
+				step *= 10;
 			}
 
-			if (!_negative_allowed && current_time().samples() < samples) {
+			if (!_negative_allowed && current_time() < step) {
 				AudioClock::set (timepos_t (), true);
 			} else {
-				AudioClock::set (current_time().earlier (timepos_t (samples)), true);
+				AudioClock::set (current_time().earlier (step), true);
 			}
 
 			ValueChanged (); /* EMIT_SIGNAL */
@@ -1846,15 +1844,15 @@ AudioClock::on_motion_notify_event (GdkEventMotion *ev)
 
 	if (floor (drag_accum) != 0) {
 
-		samplepos_t samples;
+		timepos_t step;
 		timepos_t pos;
 		int dir;
 		dir = (drag_accum < 0 ? 1:-1);
 		pos = current_time();
-		samples = get_sample_step (drag_field, pos, dir);
+		step = get_incremental_step (drag_field, pos, dir);
 
-		if (samples  != 0 && timepos_t (samples * drag_accum) < current_time()) {
-			AudioClock::set (timepos_t (pos.earlier (timepos_t ((samplecnt_t) floor (drag_accum * samples)))), false); // minus because up is negative in GTK
+		if (!step.zero() && timepos_t (step * drag_accum) < current_time()) {
+			AudioClock::set (pos.earlier (step * drag_accum), false); // minus/earlier because up is negative in GTK
 		} else {
 			AudioClock::set (timepos_t () , false);
 		}
@@ -1866,70 +1864,65 @@ AudioClock::on_motion_notify_event (GdkEventMotion *ev)
 	return true;
 }
 
-samplepos_t
-AudioClock::get_sample_step (Field field, timepos_t const & pos, int dir)
+timepos_t
+AudioClock::get_incremental_step (Field field, timepos_t const & pos, int dir)
 {
-	samplecnt_t f = 0;
+	timepos_t f;
 	Temporal::BBT_Time BBT;
+
 	switch (field) {
 	case Timecode_Hours:
-		f = (samplecnt_t) floor (3600.0 * _session->sample_rate());
+		f = timepos_t (floor (3600.0 * _session->sample_rate()));
 		break;
 	case Timecode_Minutes:
-		f = (samplecnt_t) floor (60.0 * _session->sample_rate());
+		f = timepos_t (floor (60.0 * _session->sample_rate()));
 		break;
 	case Timecode_Seconds:
-		f = _session->sample_rate();
+		f = timepos_t (_session->sample_rate());
 		break;
 	case Timecode_frames:
-		f = (samplecnt_t) floor (_session->sample_rate() / _session->timecode_frames_per_second());
+		f = timepos_t (floor (_session->sample_rate() / _session->timecode_frames_per_second()));
 		break;
 
 	case S_Samples:
-		f = 1;
+		f = timepos_t (1);
 		break;
 
 	case SS_Seconds:
-		f = (samplecnt_t) _session->sample_rate();
+		f = timepos_t (_session->sample_rate());
 		break;
 	case SS_Deciseconds:
-		f = (samplecnt_t) _session->sample_rate() / 10.f;
+		f = timepos_t (_session->sample_rate() / 10.f);
 		break;
 
 	case MS_Hours:
-		f = (samplecnt_t) floor (3600.0 * _session->sample_rate());
+		f = timepos_t (floor (3600.0 * _session->sample_rate()));
 		break;
 	case MS_Minutes:
-		f = (samplecnt_t) floor (60.0 * _session->sample_rate());
+		f = timepos_t (floor (60.0 * _session->sample_rate()));
 		break;
 	case MS_Seconds:
-		f = (samplecnt_t) _session->sample_rate();
+		f = timepos_t (_session->sample_rate());
 		break;
 	case MS_Milliseconds:
-		f = (samplecnt_t) floor (_session->sample_rate() / 1000.0);
+		f = timepos_t (floor (_session->sample_rate() / 1000.0));
 		break;
 
 	case Bars:
 		BBT.bars = 1;
 		BBT.beats = 0;
 		BBT.ticks = 0;
-		f = TempoMap::use()->bbt_duration_at (pos,BBT).samples();
+		f = TempoMap::use()->bbt_duration_at (pos,BBT);
 		break;
 	case Beats:
-		BBT.bars = 0;
-		BBT.beats = 1;
-		BBT.ticks = 0;
-		f = TempoMap::use()->bbt_duration_at(pos,BBT).samples();
+		f = timepos_t (Temporal::Beats (1, 0));
 		break;
 	case Ticks:
-		BBT.bars = 0;
-		BBT.beats = 0;
-		BBT.ticks = 1;
-		f = TempoMap::use()->bbt_duration_at(pos,BBT).samples();
+		f = timepos_t (Temporal::Beats (0, 1));
 		break;
 	default:
 		error << string_compose (_("programming error: %1"), "attempt to get samples from non-text field!") << endmsg;
-		f = 0;
+		f = timepos_t (0);
 		break;
 	}
 
