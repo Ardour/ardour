@@ -3203,7 +3203,7 @@ Editor::separate_regions_between (const TimeSelection& ts)
 
 	for (TrackSelection::iterator i = tmptracks.begin(); i != tmptracks.end(); ++i) {
 
-		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> ((*i));
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
 
 		if (!rtv) {
 			continue;
