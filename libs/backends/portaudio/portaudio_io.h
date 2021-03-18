@@ -128,7 +128,9 @@ private: // Methods
 	PaErrorCode pre_stream_open(int device_input,
 	                          PaStreamParameters& inputParam,
 	                          int device_output,
-	                          PaStreamParameters& outputParam);
+	                          PaStreamParameters& outputParam,
+	                          uint32_t sample_rate,
+	                          uint32_t samples_per_period);
 
 	void reset_stream_dependents ();
 
