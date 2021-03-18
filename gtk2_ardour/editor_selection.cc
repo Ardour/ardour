@@ -1683,15 +1683,14 @@ Editor::select_all_internal_edit (Selection::Operation)
 {
 	bool selected = false;
 
-	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ) {
-		RegionSelection::iterator tmp = i;
-		++tmp;
+	RegionSelection copy (selection->regions);
+
+	for (RegionSelection::iterator i = copy.begin(); i != copy.end(); ++i) {
 		MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*i);
 		if (mrv) {
 			mrv->select_all_notes ();
 			selected = true;
 		}
-		i = tmp;
 	}
 
 	MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(entered_regionview);
