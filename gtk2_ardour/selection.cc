@@ -64,8 +64,7 @@ struct AudioRangeComparator {
 };
 
 Selection::Selection (const PublicEditor* e, bool mls)
-	: tracks (e)
-	, editor (e)
+	: editor (e)
 	, next_time_id (0)
 	, manage_libardour_selection (mls)
 {

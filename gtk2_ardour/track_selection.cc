@@ -18,25 +18,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <algorithm>
-
-#include "ardour/route_group.h"
-#include "control_protocol/control_protocol.h"
-
 #include "track_selection.h"
-#include "time_axis_view.h"
-#include "public_editor.h"
-#include "vca_time_axis.h"
 
-using namespace std;
-
-TrackSelection::TrackSelection (PublicEditor const * e, TrackViewList const &t)
+TrackSelection::TrackSelection (TrackViewList const& t)
 	: TrackViewList (t)
-	, _editor (e)
 {
 }
-
-TrackSelection::~TrackSelection ()
-{
-}
-

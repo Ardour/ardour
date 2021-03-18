@@ -5481,7 +5481,6 @@ SelectionDrag::SelectionDrag (Editor* e, ArdourCanvas::Item* i, Operation o)
 	: Drag (e, i)
 	, _operation (o)
 	, _add (false)
-	, _track_selection_at_start (e)
 	, _time_selection_at_start (!_editor->get_selection().time.empty())
 {
 	DEBUG_TRACE (DEBUG::Drags, "New SelectionDrag\n");
