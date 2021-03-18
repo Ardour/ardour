@@ -268,7 +268,6 @@ Editor::compute_current_bbt_points (Temporal::TempoMapPoints& grid, samplepos_t 
 	case bbt_show_thirtyseconds:
 	case bbt_show_sixtyfourths:
 	case bbt_show_onetwentyeighths:
-		cout  << "GG " << leftmost << " .. " << rightmost << " 0\n";
 		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 0);
 		break;
 
