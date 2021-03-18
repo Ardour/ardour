@@ -1782,7 +1782,7 @@ AudioClock::on_scroll_event (GdkEventScroll *ev)
 	switch (ev->direction) {
 
 	case GDK_SCROLL_UP:
-		step = get_incremental_step (f, current_time(), 1);
+		step = get_incremental_step (f, current_time());
 		if (!step.zero()) {
 			if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 				step *= 10;
@@ -1793,7 +1793,7 @@ AudioClock::on_scroll_event (GdkEventScroll *ev)
 		break;
 
 	case GDK_SCROLL_DOWN:
-		step = get_incremental_step (f, current_time(), -1);
+		step = get_incremental_step (f, current_time());
 		if (!step.zero()) {
 			if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 				step *= 10;
@@ -1824,48 +1824,46 @@ AudioClock::on_motion_notify_event (GdkEventMotion *ev)
 		return false;
 	}
 
-	float pixel_sample_scale_factor = 0.2f;
+	const double y_delta = ev->y - drag_y;
 
-	if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier))  {
-		pixel_sample_scale_factor = 0.1f;
-	}
-
-
-	if (Keyboard::modifier_state_contains (ev->state,
-	                                       Keyboard::PrimaryModifier|Keyboard::SecondaryModifier)) {
-		pixel_sample_scale_factor = 0.025f;
-	}
-
-	double y_delta = ev->y - drag_y;
-
-	drag_accum +=  y_delta*pixel_sample_scale_factor;
-
+	drag_accum += y_delta;
 	drag_y = ev->y;
 
-	if (floor (drag_accum) != 0) {
+	if (drag_accum) {
 
-		timepos_t step;
-		timepos_t pos;
-		int dir;
-		dir = (drag_accum < 0 ? 1:-1);
-		pos = current_time();
-		step = get_incremental_step (drag_field, pos, dir);
 
-		if (!step.zero() && timepos_t (step * drag_accum) < current_time()) {
-			AudioClock::set (pos.earlier (step * drag_accum), false); // minus/earlier because up is negative in GTK
-		} else {
-			AudioClock::set (timepos_t () , false);
+		timepos_t pos = current_time ();
+		timepos_t step = get_incremental_step (drag_field, pos);
+
+		cerr << "step " << step;
+
+		step *= fabs (drag_accum);
+
+		cerr << " via DA " << drag_accum << " actual " << step << endl;
+
+		if (drag_accum > 0) { /* positive, so downward motion ... decrement clock */
+
+			if (!step.zero() && (step < pos)) {
+				AudioClock::set (pos.earlier (step), false);
+			} else {
+				AudioClock::set (timepos_t () , false);
+			}
+
+		} else { /* negative so upward motion .. increment clock */
+			AudioClock::set (pos + step, false);
 		}
 
-		drag_accum= 0;
+
+		drag_accum = 0;
 		ValueChanged();	 /* EMIT_SIGNAL */
+
 	}
 
 	return true;
 }
 
 timepos_t
-AudioClock::get_incremental_step (Field field, timepos_t const & pos, int dir)
+AudioClock::get_incremental_step (Field field, timepos_t const & pos)
 {
 	timepos_t f;
 	Temporal::BBT_Time BBT;
