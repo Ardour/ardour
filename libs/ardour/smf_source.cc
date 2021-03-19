@@ -254,7 +254,7 @@ SMFSource::read_unlocked (const Lock&                    lock,
 		DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("SMF read_unlocked: seek to %1\n", start));
 		Evoral::SMF::seek_to_start();
 		while (time < start_ticks) {
-			gint ignored;
+			Evoral::event_id_t ignored;
 
 			ret = read_event(&ev_delta_t, &ev_size, &ev_buffer, &ignored);
 			if (ret == -1) { // EOF
@@ -271,7 +271,7 @@ SMFSource::read_unlocked (const Lock&                    lock,
 	_smf_last_read_end = start + duration;
 
 	while (true) {
-		gint ignored; /* XXX don't ignore note id's ??*/
+		Evoral::event_id_t ignored; /* XXX don't ignore note id's ??*/
 
 		ret = read_event(&ev_delta_t, &ev_size, &ev_buffer, &ignored);
 		if (ret == -1) { // EOF
@@ -657,7 +657,7 @@ SMFSource::load_model (const Glib::Threads::Mutex::Lock& lock, bool force_reload
 	uint32_t size    = 0;
 	uint8_t* buf     = NULL;
 	int ret;
-	gint event_id;
+	Evoral::event_id_t event_id;
 	bool have_event_id;
 
 	// TODO simplify event allocation
