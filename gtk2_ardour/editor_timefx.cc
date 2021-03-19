@@ -159,7 +159,7 @@ Editor::pitch_shift (RegionSelection& regions, float fraction)
  *  @param pitching true to pitch shift, false to time stretch.
  *  @return -1 in case of error, otherwise number of regions processed */
 int
-Editor::time_fx (RegionList& regions, float val, bool pitching)
+Editor::time_fx (RegionList& regions, Temporal::ratio_t ratio, bool pitching)
 {
 	delete current_timefx;
 
@@ -169,7 +169,7 @@ Editor::time_fx (RegionList& regions, float val, bool pitching)
 	}
 
 	const timecnt_t oldlen = regions.front()->length();
-	const timecnt_t newlen = regions.front()->length() * val;
+	const timecnt_t newlen = regions.front()->length() * ratio;
 	const timepos_t pos = regions.front()->position ();
 
 	current_timefx = new TimeFXDialog (*this, pitching, oldlen, newlen, pos);

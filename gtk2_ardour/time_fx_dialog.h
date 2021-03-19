@@ -71,7 +71,7 @@ public:
 	void cancel_in_progress ();
 	gint delete_in_progress (GdkEventAny*);
 
-	float get_time_fraction () const;
+	Temporal::ratio_t get_time_fraction () const;
 	float get_pitch_fraction () const;
 
 	void start_updates ();

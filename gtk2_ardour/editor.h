@@ -2369,7 +2369,7 @@ private:
 	void set_show_touched_automation (bool);
 	bool _show_touched_automation;
 
-	int time_fx (ARDOUR::RegionList&, float val, bool pitching);
+	int time_fx (ARDOUR::RegionList&, Temporal::ratio_t ratio, bool pitching);
 	void note_edit_done (int, EditNoteDialog*);
 	void toggle_sound_midi_notes ();
 

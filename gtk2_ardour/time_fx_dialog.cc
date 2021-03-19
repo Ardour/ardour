@@ -147,8 +147,7 @@ TimeFXDialog::TimeFXDialog (Editor& e, bool pitch, timecnt_t const & oldlen, tim
 		duration_clock->set_session (e.session());
 		duration_clock->set (timepos_t (new_length), true);
 		duration_clock->set_mode (AudioClock::BBT);
-#warning NUTEMPO FIXME figure out what we are doing here
-		// duration_clock->set_bbt_reference (position);
+		duration_clock->set_bbt_reference (position);
 
 		Gtk::Alignment* clock_align = manage (new Gtk::Alignment);
 		clock_align->add (*duration_clock);
@@ -260,14 +259,14 @@ TimeFXDialog::delete_in_progress (GdkEventAny*)
 	return TRUE;
 }
 
-float
+Temporal::ratio_t
 TimeFXDialog::get_time_fraction () const
 {
 	if (pitching) {
-		return 1.0;
+		return Temporal::ratio_t (1, 1);
 	}
 
-	return duration_adjustment.get_value() / 100.0;
+	return Temporal::ratio_t (duration_adjustment.get_value(), 100);
 }
 
 float
