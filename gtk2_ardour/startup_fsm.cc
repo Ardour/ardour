@@ -713,6 +713,15 @@ StartupFSM::check_session_parameters (bool must_be_new)
 			return 1;
 		} else if (rv == 0) {
 			/* names are good (and session is unarchived/inflated */
+			float sr;
+			SampleFormat fmt;
+			string program_version;
+			const string statefile_path = Glib::build_filename (session_path, session_name + ARDOUR::statefile_suffix);
+			if (Session::get_info_from_path (statefile_path, sr, fmt, program_version, &session_engine_hints)) {
+				/* exists but we can't read it */
+				return -1;
+			}
+			session_existing_sample_rate = sr;
 			return 0;
 		}
 	}
