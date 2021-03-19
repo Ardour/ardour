@@ -45,7 +45,6 @@ AlsaAudioSlave::AlsaAudioSlave (
 	, _samples_since_dll_reset (0)
 	, _ratio (1.0)
 	, _slave_speed (1.0)
-	, _draining (1)
 	, _rb_capture (4 * /* AlsaAudioBackend::_max_buffer_size */ 8192 * _pcmi.ncapt ())
 	, _rb_playback (4 * /* AlsaAudioBackend::_max_buffer_size */ 8192 * _pcmi.nplay ())
 	, _samples_per_period (master_samples_per_period)
@@ -53,6 +52,8 @@ AlsaAudioSlave::AlsaAudioSlave (
 	, _play_buff (0)
 	, _src_buff (0)
 {
+	g_atomic_int_set (&_draining, 1);
+
 	if (0 != _pcmi.state()) {
 		return;
 	}
@@ -266,7 +267,7 @@ AlsaAudioSlave::process_thread ()
 				_rb_capture.increment_write_idx (spp * nchn);
 #endif
 			} else {
-				g_atomic_int_set(&_draining, 1);
+				g_atomic_int_set (&_draining, 1);
 			}
 			_pcmi.capt_done (spp);
 
@@ -341,7 +342,7 @@ AlsaAudioSlave::process_thread ()
 		if (xrun && (_pcmi.capt_xrun() > 0 || _pcmi.play_xrun() > 0)) {
 			reset_dll = true;
 			_samples_since_dll_reset = 0;
-			g_atomic_int_set(&_draining, 1);
+			g_atomic_int_set (&_draining, 1);
 		}
 	}
 
@@ -372,7 +373,7 @@ AlsaAudioSlave::cycle_start (double tme, double mst_speed, bool drain)
 	}
 
 	if (drain) {
-		g_atomic_int_set(&_draining, 1);
+		g_atomic_int_set (&_draining, 1);
 		return;
 	}
 
@@ -501,11 +502,11 @@ AlsaAudioSlave::cycle_end ()
 #ifndef NDEBUG
 		std::cerr << "ALSA Slave: Playback Ringbuffer Overflow\n"; // XXX DEBUG
 #endif
-		g_atomic_int_set(&_draining, 1);
+		g_atomic_int_set (&_draining, 1);
 		return;
 	}
 	if (drain_done) {
-		g_atomic_int_set(&_draining, 0);
+		g_atomic_int_set (&_draining, 0);
 	}
 }
 
@@ -513,7 +514,7 @@ void
 AlsaAudioSlave::freewheel (bool onoff)
 {
 	if (onoff) {
-		g_atomic_int_set(&_draining, 1);
+		g_atomic_int_set (&_draining, 1);
 	}
 }
 

@@ -254,9 +254,9 @@ WaveViewCache::set_image_cache_threshold (uint64_t sz)
 
 /*-------------------------------------------------*/
 
-WaveViewDrawRequest::WaveViewDrawRequest () : stop (0)
+WaveViewDrawRequest::WaveViewDrawRequest ()
 {
-
+	g_atomic_int_set (&_stop, 0);
 }
 
 WaveViewDrawRequest::~WaveViewDrawRequest ()
@@ -407,8 +407,8 @@ WaveViewThreads::stop_threads ()
 
 WaveViewDrawingThread::WaveViewDrawingThread ()
 		: _thread(0)
-		, _quit(0)
 {
+	g_atomic_int_set (&_quit, 0);
 	start ();
 }
 

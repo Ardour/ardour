@@ -420,7 +420,7 @@ Graph::run_one ()
 	while (!to_run) {
 		/* Wait for work, fall asleep */
 		g_atomic_int_inc (&_idle_thread_cnt);
-		assert (g_atomic_uint_get (&_idle_thread_cnt) <= _n_workers);
+		assert (g_atomic_uint_get (&_idle_thread_cnt) <= g_atomic_uint_get (&_n_workers));
 
 		DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("%1 goes to sleep\n", pthread_name ()));
 		_execution_sem.wait ();

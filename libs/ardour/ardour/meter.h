@@ -25,6 +25,7 @@
 #include <vector>
 
 #include "pbd/fastlog.h"
+#include "pbd/g_atomic_compat.h"
 
 #include "ardour/libardour_visibility.h"
 #include "ardour/processor.h"
@@ -99,8 +100,8 @@ private:
 	 */
 	ChanCount current_meters;
 
-	volatile gint _reset_dpm;
-	volatile gint _reset_max;
+	GATOMIC_QUAL gint _reset_dpm;
+	GATOMIC_QUAL gint _reset_max;
 
 	uint32_t           _bufcnt;
 	std::vector<float> _peak_buffer;     // internal, integrate

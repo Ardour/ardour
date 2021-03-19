@@ -45,6 +45,7 @@
 #include "pbd/stateful.h"
 #include "pbd/statefuldestructible.h"
 #include "pbd/undo.h"
+#include "pbd/g_atomic_compat.h"
 
 #include "evoral/Range.h"
 
@@ -343,8 +344,8 @@ protected:
 	PBD::ScopedConnectionList            region_drop_references_connections;
 	DataType                             _type;
 	uint32_t                             _sort_id;
-	mutable gint                         block_notifications;
-	mutable gint                         ignore_state_changes;
+	mutable GATOMIC_QUAL gint            block_notifications;
+	mutable GATOMIC_QUAL gint            ignore_state_changes;
 	std::set<boost::shared_ptr<Region> > pending_adds;
 	std::set<boost::shared_ptr<Region> > pending_removes;
 	RegionList                           pending_bounds;

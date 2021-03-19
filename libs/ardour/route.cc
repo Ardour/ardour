@@ -115,9 +115,6 @@ Route::Route (Session& sess, string name, PresentationInfo::Flag flag, DataType 
 	, _active (true)
 	, _signal_latency (0)
 	, _disk_io_point (DiskIOPreFader)
-	, _pending_process_reorder (0)
-	, _pending_listen_change (0)
-	, _pending_signals (0)
 	, _meter_point (MeterPostFader)
 	, _pending_meter_point (MeterPostFader)
 	, _denormal_protection (false)
@@ -138,6 +135,10 @@ Route::Route (Session& sess, string name, PresentationInfo::Flag flag, DataType 
 	, _patch_selector_dialog (0)
 {
 	processor_max_streams.reset();
+
+	g_atomic_int_set (&_pending_process_reorder, 0);
+	g_atomic_int_set (&_pending_listen_change, 0);
+	g_atomic_int_set (&_pending_signals, 0);
 }
 
 boost::weak_ptr<Route>

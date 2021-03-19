@@ -37,6 +37,7 @@
 #include "pbd/xml++.h"
 #include "pbd/statefuldestructible.h"
 #include "pbd/properties.h"
+#include "pbd/g_atomic_compat.h"
 
 #include "ardour/ardour.h"
 
@@ -107,9 +108,10 @@ public:
 
 	void start_touch (double when);
 	void stop_touch (double when);
-	bool touching() const { return g_atomic_int_get (const_cast<gint*>(&_touching)); }
-	bool writing() const { return _state == Write; }
-	bool touch_enabled() const { return _state & (Touch | Latch); }
+
+	bool touching () const { return g_atomic_int_get (&_touching) != 0; }
+	bool writing () const { return _state == Write; }
+	bool touch_enabled () const { return _state & (Touch | Latch); }
 
 	XMLNode& get_state ();
 	int set_state (const XMLNode &, int version);
@@ -133,8 +135,8 @@ private:
 
 	void maybe_signal_changed ();
 
-	AutoState    _state;
-	gint         _touching;
+	AutoState         _state;
+	GATOMIC_QUAL gint _touching;
 
 	PBD::ScopedConnection _writepass_connection;
 

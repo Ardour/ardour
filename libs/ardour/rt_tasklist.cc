@@ -30,10 +30,10 @@
 using namespace ARDOUR;
 
 RTTaskList::RTTaskList ()
-	: _threads_active (0)
-	, _task_run_sem ("rt_task_run", 0)
+	: _task_run_sem ("rt_task_run", 0)
 	, _task_end_sem ("rt_task_done", 0)
 {
+	g_atomic_int_set (&_threads_active, 0);
 	reset_thread_list ();
 }
 

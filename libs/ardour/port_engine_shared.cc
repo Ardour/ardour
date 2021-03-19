@@ -190,10 +190,10 @@ BackendPort::update_connected_latency (bool for_playback)
 
 PortEngineSharedImpl::PortEngineSharedImpl (PortManager& mgr, std::string const & str)
 	: _instance_name (str)
-	, _port_change_flag (0)
 	, _portmap (new PortMap)
 	, _ports (new PortIndex)
 {
+	g_atomic_int_set (&_port_change_flag, 0);
 	pthread_mutex_init (&_port_callback_mutex, 0);
 }
 

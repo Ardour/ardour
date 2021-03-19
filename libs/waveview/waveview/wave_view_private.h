@@ -202,8 +202,8 @@ public:
 	WaveViewDrawRequest ();
 	~WaveViewDrawRequest ();
 
-	bool stopped() const { return (bool) g_atomic_int_get (const_cast<gint*>(&stop)); }
-	void cancel() { g_atomic_int_set (&stop, 1); }
+	bool stopped() const { return (bool) g_atomic_int_get (&_stop); }
+	void cancel() { g_atomic_int_set (&_stop, 1); }
 	bool finished() { return image->finished(); }
 
 	boost::shared_ptr<WaveViewImage> image;
@@ -213,7 +213,7 @@ public:
 	}
 
 private:
-	gint stop; /* intended for atomic access */
+	GATOMIC_QUAL gint _stop; /* intended for atomic access */
 };
 
 class WaveViewCache;
@@ -320,7 +320,7 @@ private:
 
 private:
 	Glib::Threads::Thread* _thread;
-	gint _quit;
+	GATOMIC_QUAL gint _quit;
 };
 
 class WaveViewThreads {

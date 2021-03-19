@@ -144,8 +144,8 @@ PortManager::PortManager ()
 	, _midi_info_dirty (true)
 	, _audio_input_ports (new AudioInputPorts)
 	, _midi_input_ports (new MIDIInputPorts)
-	, _reset_meters (0)
 {
+	g_atomic_int_set (&_reset_meters, 1);
 	load_port_info ();
 }
 

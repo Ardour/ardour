@@ -435,7 +435,6 @@ AUPlugin::AUPlugin (AudioEngine& engine, Session& session, boost::shared_ptr<CAC
 	, unit (new CAAudioUnit)
 	, initialized (false)
 	, _last_nframes (0)
-	, _current_latency (UINT_MAX)
 	, _requires_fixed_size_buffers (false)
 	, buffers (0)
 	, variable_inputs (false)
@@ -477,7 +476,6 @@ AUPlugin::AUPlugin (const AUPlugin& other)
 	, unit (new CAAudioUnit)
 	, initialized (false)
 	, _last_nframes (0)
-	, _current_latency (UINT_MAX)
 	, _requires_fixed_size_buffers (false)
 	, buffers (0)
 	, variable_inputs (false)
@@ -571,6 +569,8 @@ AUPlugin::discover_factory_presets ()
 void
 AUPlugin::init ()
 {
+	g_atomic_int_set (&_current_latency, UINT_MAX);
+
 	OSErr err;
 	CFStringRef itemName;
 

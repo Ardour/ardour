@@ -31,7 +31,9 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/utility.hpp>
+
 #include "pbd/statefuldestructible.h"
+#include "pbd/g_atomic_compat.h"
 
 #include "ardour/ardour.h"
 #include "ardour/session_object.h"
@@ -121,7 +123,7 @@ public:
 
 	virtual void inc_use_count ();
 	virtual void dec_use_count ();
-	int  use_count() const { return g_atomic_int_get (const_cast<gint*>(&_use_count)); }
+	int  use_count() const { return g_atomic_int_get (&_use_count); }
 	bool used() const { return use_count() > 0; }
 
 	uint32_t level() const { return _level; }
@@ -135,20 +137,21 @@ public:
 	static PBD::Signal1<void,boost::shared_ptr<ARDOUR::Source> > SourcePropertyChanged;
 
   protected:
-	DataType            _type;
-	Flag                _flags;
-	time_t              _timestamp;
-	std::string         _take_id;
-	samplepos_t          _natural_position;
-	samplepos_t          _have_natural_position;
-	bool                _analysed;
-        mutable Glib::Threads::Mutex _lock;
-        mutable Glib::Threads::Mutex _analysis_lock;
-	gint                _use_count; /* atomic */
-	uint32_t            _level; /* how deeply nested is this source w.r.t a disk file */
-	std::string         _ancestor_name;
-	std::string        _captured_for;
-	XrunPositions      _xruns;
+	DataType          _type;
+	Flag              _flags;
+	time_t            _timestamp;
+	std::string       _take_id;
+	samplepos_t       _natural_position;
+	samplepos_t       _have_natural_position;
+	bool              _analysed;
+	GATOMIC_QUAL gint _use_count; /* atomic */
+	uint32_t          _level; /* how deeply nested is this source w.r.t a disk file */
+	std::string       _ancestor_name;
+	std::string       _captured_for;
+	XrunPositions     _xruns;
+
+	mutable Glib::Threads::Mutex _lock;
+	mutable Glib::Threads::Mutex _analysis_lock;
 
   private:
 	void fix_writable_flags ();

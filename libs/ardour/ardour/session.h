@@ -62,6 +62,7 @@
 #include "pbd/statefuldestructible.h"
 #include "pbd/signals.h"
 #include "pbd/undo.h"
+#include "pbd/g_atomic_compat.h"
 
 #include "lua/luastate.h"
 
@@ -1361,7 +1362,6 @@ private:
 	typedef void (Session::*process_function_type)(pframes_t);
 
 	AudioEngine&            _engine;
-	mutable gint             processing_prohibited;
 	process_function_type    process_function;
 	process_function_type    last_process_function;
 	bool                    _bounce_processing_active;
@@ -1369,10 +1369,9 @@ private:
 	samplecnt_t             _base_sample_rate;     // sample-rate of the session at creation time, "native" SR
 	samplecnt_t             _nominal_sample_rate;  // overridden by audioengine setting
 	samplecnt_t             _current_sample_rate;  // this includes video pullup offset
-	mutable gint            _record_status;
 	samplepos_t             _transport_sample;
-	gint                    _seek_counter;
-	gint                    _butler_seek_counter;
+	GATOMIC_QUAL gint       _seek_counter;
+	GATOMIC_QUAL gint       _butler_seek_counter;
 	Location*               _session_range_location; ///< session range, or 0 if there is nothing in the session yet
 	bool                    _session_range_is_free;
 	bool                    _silent;
@@ -1408,6 +1407,9 @@ private:
 
 	std::string             _missing_file_replacement;
 
+	mutable GATOMIC_QUAL gint _processing_prohibited;
+	mutable GATOMIC_QUAL gint _record_status;
+
 	void add_monitor_section ();
 	void remove_monitor_section ();
 
@@ -1430,9 +1432,9 @@ private:
 
 	samplecnt_t calc_preroll_subcycle (samplecnt_t) const;
 
-	void block_processing() { g_atomic_int_set (&processing_prohibited, 1); }
-	void unblock_processing() { g_atomic_int_set (&processing_prohibited, 0); }
-	bool processing_blocked() const { return g_atomic_int_get (&processing_prohibited); }
+	void block_processing() { g_atomic_int_set (&_processing_prohibited, 1); }
+	void unblock_processing() { g_atomic_int_set (&_processing_prohibited, 0); }
+	bool processing_blocked() const { return g_atomic_int_get (&_processing_prohibited); }
 
 	static const samplecnt_t bounce_chunk_size;
 
@@ -1535,9 +1537,9 @@ private:
 	StateOfTheState _state_of_the_state;
 
 	friend class    StateProtector;
-	gint            _suspend_save; /* atomic */
-	volatile bool   _save_queued;
-	volatile bool   _save_queued_pending;
+	GATOMIC_QUAL gint  _suspend_save;
+	volatile bool      _save_queued;
+	volatile bool      _save_queued_pending;
 
 	Glib::Threads::Mutex save_state_lock;
 	Glib::Threads::Mutex save_source_lock;
@@ -1576,8 +1578,8 @@ private:
 
 	static const PostTransportWork ProcessCannotProceedMask = PostTransportWork (PostTransportAudition);
 
-	gint _post_transport_work; /* accessed only atomic ops */
-	PostTransportWork post_transport_work() const        { return (PostTransportWork) g_atomic_int_get (const_cast<gint*>(&_post_transport_work)); }
+	GATOMIC_QUAL gint _post_transport_work; /* accessed only atomic ops */
+	PostTransportWork post_transport_work() const        { return (PostTransportWork) g_atomic_int_get (&_post_transport_work); }
 	void set_post_transport_work (PostTransportWork ptw) { g_atomic_int_set (&_post_transport_work, (gint) ptw); }
 	void add_post_transport_work (PostTransportWork ptw);
 
@@ -1694,9 +1696,9 @@ private:
 	Glib::Threads::Mutex  _update_latency_lock;
 
 	typedef std::queue<AutoConnectRequest> AutoConnectQueue;
-	Glib::Threads::Mutex  _auto_connect_queue_lock;
-	AutoConnectQueue _auto_connect_queue;
-	guint _latency_recompute_pending;
+	Glib::Threads::Mutex _auto_connect_queue_lock;
+	AutoConnectQueue     _auto_connect_queue;
+	GATOMIC_QUAL guint   _latency_recompute_pending;
 
 	void get_physical_ports (std::vector<std::string>& inputs, std::vector<std::string>& outputs, DataType type,
 	                         MidiPortFlags include = MidiPortFlags (0),
@@ -1817,8 +1819,8 @@ private:
 		OnlyLoop,
 	};
 
-	volatile gint _punch_or_loop; // enum PunchLoopLock
-	gint current_usecs_per_track;
+	GATOMIC_QUAL gint _punch_or_loop; // enum PunchLoopLock
+	GATOMIC_QUAL gint _current_usecs_per_track;
 
 	bool punch_active () const;
 	void unset_punch ();
@@ -2024,8 +2026,8 @@ private:
 
 	std::string get_best_session_directory_for_new_audio ();
 
-	mutable gint _playback_load;
-	mutable gint _capture_load;
+	mutable GATOMIC_QUAL gint _playback_load;
+	mutable GATOMIC_QUAL gint _capture_load;
 
 	/* I/O bundles */
 
@@ -2147,8 +2149,8 @@ private:
 	mutable bool have_looped; ///< Used in \ref audible_sample
 
 	void update_route_record_state ();
-	gint _have_rec_enabled_track;
-	gint _have_rec_disabled_track;
+	GATOMIC_QUAL gint _have_rec_enabled_track;
+	GATOMIC_QUAL gint _have_rec_disabled_track;
 
 	static int ask_about_playlist_deletion (boost::shared_ptr<Playlist>);
 
@@ -2195,7 +2197,7 @@ private:
 	uint32_t _step_editors;
 
 	/** true if timecode transmission by the transport is suspended, otherwise false */
-	mutable gint _suspend_timecode_transmission;
+	mutable GATOMIC_QUAL gint _suspend_timecode_transmission;
 
 	void update_locations_after_tempo_map_change (const Locations::LocationList &);
 
@@ -2215,9 +2217,9 @@ private:
 
 	void ensure_route_presentation_info_gap (PresentationInfo::order_t, uint32_t gap_size);
 
-	friend class    ProcessorChangeBlocker;
-	gint            _ignore_route_processor_changes; /* atomic */
-	gint            _ignored_a_processor_change;
+	friend class ProcessorChangeBlocker;
+	GATOMIC_QUAL gint _ignore_route_processor_changes;
+	GATOMIC_QUAL gint _ignored_a_processor_change;
 
 	MidiClockTicker* midi_clock;
 
@@ -2265,7 +2267,7 @@ private:
 
 	std::string unnamed_file_name () const;
 
-	gint _update_pretty_names;
+	GATOMIC_QUAL gint _update_pretty_names;
 };
 
 

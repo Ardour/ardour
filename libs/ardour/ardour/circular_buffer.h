@@ -20,6 +20,7 @@
 #define _ardour_circular_buffer_h_
 
 #include "pbd/ringbuffer.h"
+#include "pbd/g_atomic_compat.h"
 
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
@@ -70,8 +71,9 @@ private:
 	Event* _buf;
 	guint  _size;
 	guint  _size_mask;
-	gint   _idx;
-	gint   _ack;
+
+	GATOMIC_QUAL gint _idx;
+	GATOMIC_QUAL gint _ack;
 };
 
 }

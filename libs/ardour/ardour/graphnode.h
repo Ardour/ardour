@@ -27,6 +27,8 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "pbd/g_atomic_compat.h"
+
 namespace ARDOUR
 {
 class Graph;
@@ -68,8 +70,7 @@ private:
 	void process ();
 
 	boost::shared_ptr<Graph> _graph;
-
-	gint _refcount;
+	GATOMIC_QUAL gint        _refcount;
 };
 }
 

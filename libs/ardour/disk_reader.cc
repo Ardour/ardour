@@ -52,7 +52,7 @@ PBD::Signal0<void>    DiskReader::Underrun;
 Sample*               DiskReader::_sum_buffer     = 0;
 Sample*               DiskReader::_mixdown_buffer = 0;
 gain_t*               DiskReader::_gain_buffer    = 0;
-gint                  DiskReader::_no_disk_output (0);
+GATOMIC_QUAL gint     DiskReader::_no_disk_output (0);
 DiskReader::Declicker DiskReader::loop_declick_in;
 DiskReader::Declicker DiskReader::loop_declick_out;
 samplecnt_t           DiskReader::loop_fade_length (0);
@@ -275,6 +275,7 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	sampleoffset_t                 disk_samples_to_consume;
 	MonitorState                   ms = _track.monitoring_state ();
 	const bool                     midi_only = (c->empty() || !_playlists[DataType::AUDIO]);
+	bool                           no_disk_output = g_atomic_int_get (&_no_disk_output) != 0;
 
 	if (_active) {
 		if (!_pending_active) {
@@ -358,10 +359,10 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		_declick_offs = 0;
 	}
 
-	if (!result_required || ((ms & MonitoringDisk) == 0) || still_locating || _no_disk_output) {
+	if (!result_required || ((ms & MonitoringDisk) == 0) || still_locating || no_disk_output) {
 		/* no need for actual disk data, just advance read pointer */
 
-		if (!still_locating || _no_disk_output) {
+		if (!still_locating || no_disk_output) {
 			for (ChannelList::iterator chan = c->begin (); chan != c->end (); ++chan) {
 				assert ((*chan)->rbuf);
 				(*chan)->rbuf->increment_read_ptr (disk_samples_to_consume);
@@ -370,7 +371,7 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 		/* if monitoring disk but locating put silence in the buffers */
 
-		if ((_no_disk_output || still_locating) && (ms == MonitoringDisk)) {
+		if ((no_disk_output || still_locating) && (ms == MonitoringDisk)) {
 			bufs.silence (nframes, 0);
 		}
 
@@ -473,7 +474,7 @@ midi:
 			run_must_resolve = false;
 		}
 
-		if (!_no_disk_output && !declick_in_progress () && (ms & MonitoringDisk) && !still_locating && no_playlist_modification_pending && speed) {
+		if (!no_disk_output && !declick_in_progress () && (ms & MonitoringDisk) && !still_locating && no_playlist_modification_pending && speed) {
 			get_midi_playback (dst, start_sample, end_sample, ms, scratch_bufs, speed, disk_samples_to_consume);
 		}
 	}
@@ -1468,7 +1469,7 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 		target = &dst;
 	}
 
-	if (!_no_disk_output) {
+	if (!g_atomic_int_get (&_no_disk_output)) {
 		const samplecnt_t nframes = abs (end_sample - start_sample);
 
 		if (ms & MonitoringDisk) {

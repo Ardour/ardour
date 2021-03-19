@@ -1323,8 +1323,8 @@ Session::non_realtime_locate ()
 #ifndef NDEBUG
 		std::cerr << "locate to " << tf << " took " << (end - start) << " usecs for " << nt << " tracks = " << usecs_per_track << " per track\n";
 #endif
-		if (usecs_per_track > g_atomic_int_get (&current_usecs_per_track)) {
-			g_atomic_int_set (&current_usecs_per_track, usecs_per_track);
+		if (usecs_per_track > g_atomic_int_get (&_current_usecs_per_track)) {
+			g_atomic_int_set (&_current_usecs_per_track, usecs_per_track);
 		}
 	}
 

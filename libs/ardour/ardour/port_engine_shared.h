@@ -184,7 +184,7 @@ protected:
 	std::vector<PortConnectData *> _port_connection_queue;
 	pthread_mutex_t _port_callback_mutex;
 
-	gint _port_change_flag; /* atomic */
+	GATOMIC_QUAL gint _port_change_flag; /* atomic */
 
 	void port_connect_callback (const std::string& a, const std::string& b, bool conn) {
 		pthread_mutex_lock (&_port_callback_mutex);

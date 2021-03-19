@@ -24,8 +24,9 @@
 namespace ARDOUR {
 
 MidiChannelFilter::MidiChannelFilter()
-	: _mode_mask(0x0000FFFF)
-{}
+{
+	g_atomic_int_set (&_mode_mask, 0x0000FFFF);
+}
 
 void
 MidiChannelFilter::filter(BufferSet& bufs)
@@ -114,7 +115,7 @@ MidiChannelFilter::set_channel_mode(ChannelMode mode, uint16_t mask)
 
 	if (old_mode != mode || old_mask != mask) {
 		mask = force_mask(mode, mask);
-		g_atomic_int_set(&_mode_mask, (uint32_t(mode) << 16) | uint32_t(mask));
+		g_atomic_int_set (&_mode_mask, (uint32_t(mode) << 16) | uint32_t(mask));
 		ChannelModeChanged();
 		return true;
 	}
@@ -131,7 +132,7 @@ MidiChannelFilter::set_channel_mask(uint16_t mask)
 
 	if (old_mask != mask) {
 		mask = force_mask(mode, mask);
-		g_atomic_int_set(&_mode_mask, (uint32_t(mode) << 16) | uint32_t(mask));
+		g_atomic_int_set (&_mode_mask, (uint32_t(mode) << 16) | uint32_t(mask));
 		ChannelMaskChanged();
 		return true;
 	}

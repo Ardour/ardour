@@ -32,6 +32,7 @@
 #include "pbd/natsort.h"
 #include "pbd/rcu.h"
 #include "pbd/ringbuffer.h"
+#include "pbd/g_atomic_compat.h"
 
 #include "ardour/chan_count.h"
 #include "ardour/midiport_manager.h"
@@ -369,7 +370,7 @@ private:
 
 	SerializedRCUManager<AudioInputPorts> _audio_input_ports;
 	SerializedRCUManager<MIDIInputPorts>  _midi_input_ports;
-	volatile gint                         _reset_meters;
+	GATOMIC_QUAL gint                     _reset_meters;
 };
 
 } // namespace ARDOUR

@@ -178,7 +178,7 @@ Session::pre_engine_init (string fullpath)
 	*/
 
 	timerclear (&last_mmc_step);
-	g_atomic_int_set (&processing_prohibited, 0);
+	g_atomic_int_set (&_processing_prohibited, 0);
 	g_atomic_int_set (&_record_status, Disabled);
 	g_atomic_int_set (&_playback_load, 100);
 	g_atomic_int_set (&_capture_load, 100);

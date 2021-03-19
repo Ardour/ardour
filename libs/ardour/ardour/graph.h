@@ -32,6 +32,7 @@
 
 #include "pbd/mpmc_queue.h"
 #include "pbd/semutils.h"
+#include "pbd/g_atomic_compat.h"
 
 #include "ardour/audio_backend.h"
 #include "ardour/libardour_visibility.h"
@@ -91,38 +92,38 @@ private:
 	node_list_t _init_trigger_list[2];
 
 	PBD::MPMCQueue<GraphNode*> _trigger_queue;      ///< nodes that can be processed
-	volatile guint             _trigger_queue_size; ///< number of entries in trigger-queue
+	GATOMIC_QUAL guint         _trigger_queue_size; ///< number of entries in trigger-queue
 
 	/** Start worker threads */
 	PBD::Semaphore _execution_sem;
 
 	/** The number of processing threads that are asleep */
-	volatile guint _idle_thread_cnt;
+	GATOMIC_QUAL guint _idle_thread_cnt;
 
 	/** Signalled to start a run of the graph for a process callback */
 	PBD::Semaphore _callback_start_sem;
 	PBD::Semaphore _callback_done_sem;
 
 	/** The number of unprocessed nodes that do not feed any other node; updated during processing */
-	volatile guint _terminal_refcnt;
+	GATOMIC_QUAL guint _terminal_refcnt;
 
 	/** The initial number of nodes that do not feed any other node (for each chain) */
 	guint _n_terminal_nodes[2];
 	bool  _graph_empty;
 
 	/* number of background worker threads >= 0 */
-	volatile guint _n_workers;
+	GATOMIC_QUAL guint _n_workers;
 
 	/* flag to terminate background threads */
-	volatile gint _terminate;
+	GATOMIC_QUAL gint _terminate;
 
 	/* chain swapping */
 	Glib::Threads::Cond  _cleanup_cond;
 	mutable Glib::Threads::Mutex _swap_mutex;
 
-	volatile int _current_chain;
-	volatile int _pending_chain;
-	volatile int _setup_chain;
+	GATOMIC_QUAL gint _current_chain;
+	GATOMIC_QUAL gint _pending_chain;
+	GATOMIC_QUAL gint _setup_chain;
 
 	/* parameter caches */
 	pframes_t   _process_nframes;

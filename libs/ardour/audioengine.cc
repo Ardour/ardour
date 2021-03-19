@@ -73,7 +73,7 @@ using namespace PBD;
 
 AudioEngine* AudioEngine::_instance = 0;
 
-static gint audioengine_thread_cnt = 1;
+static GATOMIC_QUAL gint audioengine_thread_cnt = 1;
 
 #ifdef SILENCE_AFTER
 #define SILENCE_AFTER_SECONDS 600
@@ -99,15 +99,9 @@ AudioEngine::AudioEngine ()
 	, _in_destructor (false)
 	, _last_backend_error_string(AudioBackend::get_error_string(AudioBackend::NoError))
 	, _hw_reset_event_thread(0)
-	, _hw_reset_request_count(0)
-	, _stop_hw_reset_processing(0)
 	, _hw_devicelist_update_thread(0)
-	, _hw_devicelist_update_count(0)
-	, _stop_hw_devicelist_processing(0)
 	, _start_cnt (0)
 	, _init_countdown (0)
-	, _pending_playback_latency_callback (0)
-	, _pending_capture_latency_callback (0)
 #ifdef SILENCE_AFTER_SECONDS
 	, _silence_countdown (0)
 	, _silence_hit_cnt (0)
@@ -116,6 +110,13 @@ AudioEngine::AudioEngine ()
 	reset_silence_countdown ();
 	start_hw_event_processing();
 	discover_backends ();
+
+	g_atomic_int_set (&_hw_reset_request_count, 0);
+	g_atomic_int_set (&_pending_playback_latency_callback, 0);
+	g_atomic_int_set (&_pending_capture_latency_callback, 0);
+	g_atomic_int_set (&_hw_devicelist_update_count, 0);
+	g_atomic_int_set (&_stop_hw_reset_processing, 0);
+	g_atomic_int_set (&_stop_hw_devicelist_processing, 0);
 }
 
 AudioEngine::~AudioEngine ()
@@ -639,7 +640,7 @@ AudioEngine::do_reset_backend()
 
 	Glib::Threads::Mutex::Lock guard (_reset_request_lock);
 
-	while (!_stop_hw_reset_processing) {
+	while (!g_atomic_int_get (&_stop_hw_reset_processing)) {
 
 		if (g_atomic_int_get (&_hw_reset_request_count) != 0 && _backend) {
 
@@ -724,14 +725,14 @@ void
 AudioEngine::start_hw_event_processing()
 {
 	if (_hw_reset_event_thread == 0) {
-		g_atomic_int_set(&_hw_reset_request_count, 0);
-		g_atomic_int_set(&_stop_hw_reset_processing, 0);
+		g_atomic_int_set (&_hw_reset_request_count, 0);
+		g_atomic_int_set (&_stop_hw_reset_processing, 0);
 		_hw_reset_event_thread = Glib::Threads::Thread::create (boost::bind (&AudioEngine::do_reset_backend, this));
 	}
 
 	if (_hw_devicelist_update_thread == 0) {
-		g_atomic_int_set(&_hw_devicelist_update_count, 0);
-		g_atomic_int_set(&_stop_hw_devicelist_processing, 0);
+		g_atomic_int_set (&_hw_devicelist_update_count, 0);
+		g_atomic_int_set (&_stop_hw_devicelist_processing, 0);
 		_hw_devicelist_update_thread = Glib::Threads::Thread::create (boost::bind (&AudioEngine::do_devicelist_update, this));
 	}
 }
@@ -741,16 +742,16 @@ void
 AudioEngine::stop_hw_event_processing()
 {
 	if (_hw_reset_event_thread) {
-		g_atomic_int_set(&_stop_hw_reset_processing, 1);
-		g_atomic_int_set(&_hw_reset_request_count, 0);
+		g_atomic_int_set (&_stop_hw_reset_processing, 1);
+		g_atomic_int_set (&_hw_reset_request_count, 0);
 		_hw_reset_condition.signal ();
 		_hw_reset_event_thread->join ();
 		_hw_reset_event_thread = 0;
 	}
 
 	if (_hw_devicelist_update_thread) {
-		g_atomic_int_set(&_stop_hw_devicelist_processing, 1);
-		g_atomic_int_set(&_hw_devicelist_update_count, 0);
+		g_atomic_int_set (&_stop_hw_devicelist_processing, 1);
+		g_atomic_int_set (&_hw_devicelist_update_count, 0);
 		_hw_devicelist_update_condition.signal ();
 		_hw_devicelist_update_thread->join ();
 		_hw_devicelist_update_thread = 0;

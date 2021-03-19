@@ -56,11 +56,11 @@ Butler::Butler(Session& s)
 	, pool_trash(16)
 	, _xthread (true)
 {
-	g_atomic_int_set(&should_do_transport_work, 0);
+	g_atomic_int_set (&should_do_transport_work, 0);
 	SessionEvent::pool->set_trash (&pool_trash);
 
-        /* catch future changes to parameters */
-        Config->ParameterChanged.connect_same_thread (*this, boost::bind (&Butler::config_changed, this, _1));
+	/* catch future changes to parameters */
+	Config->ParameterChanged.connect_same_thread (*this, boost::bind (&Butler::config_changed, this, _1));
 }
 
 Butler::~Butler()
@@ -466,7 +466,7 @@ Butler::wait_until_finished ()
 bool
 Butler::transport_work_requested () const
 {
-	return g_atomic_int_get(&should_do_transport_work);
+	return g_atomic_int_get (&should_do_transport_work);
 }
 
 void

@@ -20,10 +20,11 @@
 #ifndef PBD_ATOMIC_COUNTER_H
 #define PBD_ATOMIC_COUNTER_H
 
-#include <glib.h>
+#include "pbd/g_atomic_compat.h"
 
 namespace PBD {
 
+#include <glib.h>
 class atomic_counter
 {
 	/**
@@ -35,13 +36,13 @@ class atomic_counter
 public:
 
 	atomic_counter (gint value = 0)
-		:
-			m_value(value)
-	{ }
+	{
+		g_atomic_int_set (&m_value, value);
+	}
 
 	gint get() const
 	{
-		return g_atomic_int_get (const_cast<gint*>(&m_value));
+		return g_atomic_int_get (&m_value);
 	}
 
 	void set (gint new_value)
@@ -88,10 +89,7 @@ public:
 	}
 
 private:
-
-	// Has to be mutable when using the apple version of gcc.
-	gint m_value;
-
+	mutable GATOMIC_QUAL gint m_value;
 };
 
 } // namespace PBD

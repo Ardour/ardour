@@ -54,8 +54,8 @@ Stateful::Stateful ()
 	: _extra_xml (0)
 	, _instant_xml (0)
 	, _properties (new OwnedPropertyList)
-	, _stateful_frozen (0)
 {
+	g_atomic_int_set (&_stateful_frozen, 0);
 }
 
 Stateful::~Stateful ()

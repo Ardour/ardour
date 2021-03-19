@@ -48,8 +48,6 @@ PBD::Signal0<void> DiskWriter::Overrun;
 
 DiskWriter::DiskWriter (Session& s, Track& t, string const & str, DiskIOProcessor::Flag f)
 	: DiskIOProcessor (s, t, X_("recorder:") + str, f)
-	, _record_enabled (0)
-	, _record_safe (0)
 	, _capture_start_sample (0)
 	, _capture_captured (0)
 	, _was_recording (false)
@@ -59,8 +57,6 @@ DiskWriter::DiskWriter (Session& s, Track& t, string const & str, DiskIOProcesso
 	, _last_possibly_recording (0)
 	, _alignment_style (ExistingMaterial)
 	, _note_mode (Sustained)
-	, _samples_pending_write (0)
-	, _num_captured_loops (0)
 	, _accumulated_capture_offset (0)
 	, _transport_looped (false)
 	, _transport_loop_sample (0)
@@ -68,6 +64,11 @@ DiskWriter::DiskWriter (Session& s, Track& t, string const & str, DiskIOProcesso
 {
 	DiskIOProcessor::init ();
 	_xruns.reserve (128);
+
+	g_atomic_int_set (&_record_enabled, 0);
+	g_atomic_int_set (&_record_safe, 0);
+	g_atomic_int_set (&_samples_pending_write, 0);
+	g_atomic_int_set (&_num_captured_loops, 0);
 }
 
 DiskWriter::~DiskWriter ()
@@ -337,7 +338,7 @@ DiskWriter::state ()
 {
 	XMLNode& node (DiskIOProcessor::state ());
 	node.set_property (X_("type"), X_("diskwriter"));
-	node.set_property (X_("record-safe"), (_record_safe ? X_("yes" : "no")));
+	node.set_property (X_("record-safe"), record_safe ());
 	return node;
 }
 
@@ -348,9 +349,9 @@ DiskWriter::set_state (const XMLNode& node, int version)
 		return -1;
 	}
 
-	if (!node.get_property (X_("record-safe"), _record_safe)) {
-		_record_safe = false;
-	}
+	int rec_safe = 0;
+	node.get_property (X_("record-safe"), rec_safe);
+	g_atomic_int_set (&_record_safe, rec_safe);
 
 	reset_write_sources (false, true);
 
@@ -490,8 +491,8 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				_midi_write_source->mark_write_starting_now (_capture_start_sample, _capture_captured, loop_length);
 			}
 
-			g_atomic_int_set (const_cast<gint*> (&_samples_pending_write), 0);
-			g_atomic_int_set (const_cast<gint*> (&_num_captured_loops), 0);
+			g_atomic_int_set (&_samples_pending_write, 0);
+			g_atomic_int_set (&_num_captured_loops, 0);
 
 			_was_recording = true;
 
@@ -595,7 +596,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				   reconstruct their actual time; future clever MIDI looping should
 				   probably be implemented in the source instead of here.
 				*/
-				const samplecnt_t loop_offset = _num_captured_loops * loop_length;
+				const samplecnt_t loop_offset = g_atomic_int_get (&_num_captured_loops) * loop_length;
 				const samplepos_t event_time = start_sample + loop_offset - _accumulated_capture_offset + ev.time();
 				if (event_time < 0 || event_time < _first_recordable_sample) {
 					/* Event out of range, skip */
@@ -621,7 +622,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				}
 			}
 
-			g_atomic_int_add (const_cast<gint*>(&_samples_pending_write), nframes);
+			g_atomic_int_add (&_samples_pending_write, nframes);
 
 			if (buf.size() != 0) {
 				Glib::Threads::Mutex::Lock lm (_gui_feed_buffer_mutex, Glib::Threads::TRY_LOCK);
@@ -707,7 +708,7 @@ DiskWriter::finish_capture (boost::shared_ptr<ChannelList> c)
 		samplepos_t loop_end    = 0;
 		samplepos_t loop_length = 0;
 		get_location_times (_loop_location, &loop_start, &loop_end, &loop_length);
-		ci->loop_offset = _num_captured_loops * loop_length;
+		ci->loop_offset = g_atomic_int_get (&_num_captured_loops) * loop_length;
 	} else {
 		ci->loop_offset = 0;
 	}
@@ -945,7 +946,7 @@ DiskWriter::do_flush (RunContext ctxt, bool force_flush)
 
 	if (_midi_write_source && _midi_buf) {
 
-		const samplecnt_t total = g_atomic_int_get(const_cast<gint*> (&_samples_pending_write));
+		const samplecnt_t total = g_atomic_int_get(&_samples_pending_write);
 
 		if (total == 0 ||
 		    _midi_buf->read_space() == 0 ||
@@ -981,7 +982,7 @@ DiskWriter::do_flush (RunContext ctxt, bool force_flush)
 				error << string_compose(_("MidiDiskstream %1: cannot write to disk"), id()) << endmsg;
 				return -1;
 			}
-			g_atomic_int_add(const_cast<gint*> (&_samples_pending_write), -to_write);
+			g_atomic_int_add(&_samples_pending_write, -to_write);
 		}
 	}
 
@@ -1300,7 +1301,7 @@ DiskWriter::loop (samplepos_t transport_sample)
 	   the Source and/or entirely after the capture is finished.
 	*/
 	if (_was_recording) {
-		g_atomic_int_add(const_cast<gint*> (&_num_captured_loops), 1);
+		g_atomic_int_add (&_num_captured_loops, 1);
 	}
 }
 

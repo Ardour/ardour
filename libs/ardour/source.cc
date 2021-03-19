@@ -67,11 +67,12 @@ Source::Source (Session& s, DataType type, const string& name, Flag flags)
 	, _flags(flags)
 	, _natural_position(0)
 	, _have_natural_position (false)
-	, _use_count (0)
 	, _level (0)
 {
+	g_atomic_int_set (&_use_count, 0);
 	_analysed = false;
 	_timestamp = 0;
+
 	fix_writable_flags ();
 }
 
@@ -81,11 +82,11 @@ Source::Source (Session& s, const XMLNode& node)
 	, _flags (Flag (Writable|CanRename))
 	, _natural_position(0)
 	, _have_natural_position (false)
-        , _use_count (0)
 	, _level (0)
 {
-	_timestamp = 0;
+	g_atomic_int_set (&_use_count, 0);
 	_analysed = false;
+	_timestamp = 0;
 
 	if (set_state (node, Stateful::loading_state_version) || _type == DataType::NIL) {
 		throw failed_constructor();

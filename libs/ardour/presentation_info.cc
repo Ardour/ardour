@@ -48,7 +48,7 @@ string PresentationInfo::state_node_name = X_("PresentationInfo");
 
 PBD::Signal1<void,PropertyChange const &> PresentationInfo::Change;
 Glib::Threads::Mutex PresentationInfo::static_signal_lock;
-int PresentationInfo::_change_signal_suspended = 0;
+GATOMIC_QUAL gint PresentationInfo::_change_signal_suspended = 0;
 PBD::PropertyChange PresentationInfo::_pending_static_changes;
 int PresentationInfo::selection_counter= 0;
 
@@ -71,7 +71,7 @@ PresentationInfo::unsuspend_change_signal ()
 {
 	Glib::Threads::Mutex::Lock lm (static_signal_lock);
 
-	if (g_atomic_int_get (const_cast<gint*> (&_change_signal_suspended)) == 1) {
+	if (g_atomic_int_get (&_change_signal_suspended) == 1) {
 
 		/* atomically grab currently pending flags */
 
@@ -93,7 +93,7 @@ PresentationInfo::unsuspend_change_signal ()
 		}
 	}
 
-	g_atomic_int_add (const_cast<gint*>(&_change_signal_suspended), -1);
+	g_atomic_int_add (&_change_signal_suspended, -1);
 }
 
 void

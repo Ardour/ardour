@@ -28,6 +28,7 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "pbd/g_atomic_compat.h"
 #include "ardour/libardour_visibility.h"
 #include "vst3/vst3.h"
 
@@ -151,7 +152,7 @@ public:
 	uint32 PLUGIN_API release () SMTG_OVERRIDE;
 
 private:
-	gint _cnt; // atomic
+	GATOMIC_QUAL gint _cnt; // atomic
 };
 
 class LIBARDOUR_API HostAttributeList : public Vst::IAttributeList, public RefObject

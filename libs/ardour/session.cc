@@ -185,10 +185,7 @@ Session::Session (AudioEngine &eng,
 	, _base_sample_rate (0)
 	, _nominal_sample_rate (0)
 	, _current_sample_rate (0)
-	, _record_status (Disabled)
 	, _transport_sample (0)
-	, _seek_counter (0)
-	, _butler_seek_counter (0)
 	, _session_range_location (0)
 	, _session_range_is_free (true)
 	, _silent (false)
@@ -238,7 +235,6 @@ Session::Session (AudioEngine &eng,
 	, state_tree (0)
 	, state_was_pending (false)
 	, _state_of_the_state (StateOfTheState (CannotSave | InitialConnecting | Loading))
-	, _suspend_save (0)
 	, _save_queued (false)
 	, _save_queued_pending (false)
 	, _last_roll_location (0)
@@ -250,13 +246,11 @@ Session::Session (AudioEngine &eng,
 	, _n_lua_scripts (0)
 	, _butler (new Butler (*this))
 	, _transport_fsm (new TransportFSM (*this))
-	, _post_transport_work (0)
 	, _locations (new Locations (*this))
 	, _ignore_skips_updates (false)
 	, _rt_thread_active (false)
 	, _rt_emit_pending (false)
 	, _ac_thread_active (0)
-	, _latency_recompute_pending (0)
 	, step_speed (0)
 	, outbound_mtc_timecode_frame (0)
 	, next_quarter_frame_to_send (-1)
@@ -280,8 +274,6 @@ Session::Session (AudioEngine &eng,
 	, ltc_timecode_offset (0)
 	, ltc_timecode_negative_offset (false)
 	, midi_control_ui (0)
-	, _punch_or_loop (NoConstraint)
-	, current_usecs_per_track (1000)
 	, _tempo_map (0)
 	, _all_route_group (new RouteGroup (*this, "all"))
 	, routes (new RouteList)
@@ -294,8 +286,6 @@ Session::Session (AudioEngine &eng,
 	, _total_free_4k_blocks (0)
 	, _total_free_4k_blocks_uncertain (false)
 	, no_questions_about_missing_files (false)
-	, _playback_load (0)
-	, _capture_load (0)
 	, _bundles (new BundleList)
 	, _bundle_xml_node (0)
 	, _current_trans (0)
@@ -316,10 +306,7 @@ Session::Session (AudioEngine &eng,
 	, first_file_data_format_reset (true)
 	, first_file_header_format_reset (true)
 	, have_looped (false)
-	, _have_rec_enabled_track (false)
-	, _have_rec_disabled_track (true)
 	, _step_editors (0)
-	, _suspend_timecode_transmission (0)
 	,  _speakers (new Speakers)
 	, _ignore_route_processor_changes (0)
 	, _ignored_a_processor_change (0)
@@ -331,8 +318,23 @@ Session::Session (AudioEngine &eng,
 	, _selection (new CoreSelection (*this))
 	, _global_locate_pending (false)
 	, _had_destructive_tracks (false)
-	, _update_pretty_names (0)
 {
+	g_atomic_int_set (&_suspend_save, 0);
+	g_atomic_int_set (&_playback_load, 0);
+	g_atomic_int_set (&_capture_load, 0);
+	g_atomic_int_set (&_post_transport_work, 0);
+	g_atomic_int_set (&_processing_prohibited, Disabled);
+	g_atomic_int_set (&_record_status, Disabled);
+	g_atomic_int_set (&_punch_or_loop, NoConstraint);
+	g_atomic_int_set (&_current_usecs_per_track, 1000);
+	g_atomic_int_set (&_have_rec_enabled_track, 0);
+	g_atomic_int_set (&_have_rec_disabled_track, 1);
+	g_atomic_int_set (&_latency_recompute_pending, 0);
+	g_atomic_int_set (&_suspend_timecode_transmission, 0);
+	g_atomic_int_set (&_update_pretty_names, 0);
+	g_atomic_int_set (&_seek_counter, 0);
+	g_atomic_int_set (&_butler_seek_counter, 0);
+
 	created_with = string_compose ("%1 %2", PROGRAM_NAME, revision);
 
 	pthread_mutex_init (&_rt_emit_mutex, 0);
@@ -6111,13 +6113,13 @@ Session::add_automation_list(AutomationList *al)
 bool
 Session::have_rec_enabled_track () const
 {
-	return g_atomic_int_get (const_cast<gint*>(&_have_rec_enabled_track)) == 1;
+	return g_atomic_int_get (&_have_rec_enabled_track) == 1;
 }
 
 bool
 Session::have_rec_disabled_track () const
 {
-	return g_atomic_int_get (const_cast<gint*>(&_have_rec_disabled_track)) == 1;
+	return g_atomic_int_get (&_have_rec_disabled_track) == 1;
 }
 
 /** Update the state of our rec-enabled tracks flag */
@@ -7159,7 +7161,6 @@ Session::auto_connect_thread_run ()
 				}
 			}
 		}
-
 
 		if (_midi_ports && g_atomic_int_get (&_update_pretty_names)) {
 			boost::shared_ptr<Port> ap = boost::dynamic_pointer_cast<Port> (vkbd_output_port ());

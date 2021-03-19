@@ -31,6 +31,7 @@
 #include <vector>
 #include <map>
 
+#include "pbd/g_atomic_compat.h"
 #include "ardour/plugin.h"
 
 #include <AudioUnit/AudioUnit.h>
@@ -172,7 +173,7 @@ class LIBARDOUR_API AUPlugin : public ARDOUR::Plugin
 	int32_t output_channels;
 	std::vector<std::pair<int,int> > io_configs;
 	samplecnt_t _last_nframes;
-	mutable volatile guint _current_latency;
+	mutable GATOMIC_QUAL guint _current_latency;
 	bool _requires_fixed_size_buffers;
 	AudioBufferList* buffers;
 	bool _has_midi_input;

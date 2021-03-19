@@ -24,9 +24,9 @@
 #define ringbuffer_h
 
 #include <cstring>
-#include <glib.h>
 
 #include "pbd/libpbd_visibility.h"
+#include "pbd/g_atomic_compat.h"
 
 namespace PBD {
 
@@ -122,9 +122,9 @@ public:
 protected:
 	T *buf;
 	guint size;
-	mutable gint write_idx;
-	mutable gint read_idx;
 	guint size_mask;
+	mutable GATOMIC_QUAL gint write_idx;
+	mutable GATOMIC_QUAL gint read_idx;
 
 private:
 	RingBuffer (RingBuffer const&);
@@ -139,7 +139,7 @@ RingBuffer<T>::read (T *dest, guint cnt)
 	guint n1, n2;
 	guint priv_read_idx;
 
-	priv_read_idx=g_atomic_int_get(&read_idx);
+	priv_read_idx = g_atomic_int_get (&read_idx);
 
 	if ((free_cnt = read_space ()) == 0) {
 		return 0;
@@ -165,7 +165,7 @@ RingBuffer<T>::read (T *dest, guint cnt)
 		priv_read_idx = n2;
 	}
 
-	g_atomic_int_set(&read_idx, priv_read_idx);
+	g_atomic_int_set (&read_idx, priv_read_idx);
 	return to_read;
 }
 
@@ -179,7 +179,7 @@ RingBuffer<T>::write (T const *src, guint cnt)
 	guint n1, n2;
 	guint priv_write_idx;
 
-	priv_write_idx=g_atomic_int_get(&write_idx);
+	priv_write_idx = g_atomic_int_get (&write_idx);
 
 	if ((free_cnt = write_space ()) == 0) {
 		return 0;
@@ -205,7 +205,7 @@ RingBuffer<T>::write (T const *src, guint cnt)
 		priv_write_idx = n2;
 	}
 
-	g_atomic_int_set(&write_idx, priv_write_idx);
+	g_atomic_int_set (&write_idx, priv_write_idx);
 	return to_write;
 }
 

@@ -23,6 +23,8 @@
 #include <list>
 #include <vector>
 
+#include "pbd/g_atomic_compat.h"
+
 #include "ardour/disk_io.h"
 #include "ardour/midi_buffer.h"
 
@@ -83,8 +85,8 @@ public:
 
 	std::list<boost::shared_ptr<Source> >& last_capture_sources () { return _last_capture_sources; }
 
-	bool record_enabled () const { return g_atomic_int_get (const_cast<gint*> (&_record_enabled)); }
-	bool record_safe () const { return g_atomic_int_get (const_cast<gint*> (&_record_safe)); }
+	bool record_enabled () const { return g_atomic_int_get (&_record_enabled); }
+	bool record_safe () const { return g_atomic_int_get (&_record_safe); }
 
 	void set_record_enabled (bool yn);
 	void set_record_safe (bool yn);
@@ -167,8 +169,6 @@ private:
 	CaptureInfos                 capture_info;
 	mutable Glib::Threads::Mutex capture_info_lock;
 
-	gint          _record_enabled;
-	gint          _record_safe;
 	samplepos_t   _capture_start_sample;
 	samplecnt_t   _capture_captured;
 	bool          _was_recording;
@@ -180,12 +180,15 @@ private:
 	AlignStyle    _alignment_style;
 	std::string   _write_source_name;
 	NoteMode      _note_mode;
-	volatile gint _samples_pending_write;
-	volatile gint _num_captured_loops;
 	samplepos_t   _accumulated_capture_offset;
 
 	bool          _transport_looped;
 	samplepos_t   _transport_loop_sample;
+
+	GATOMIC_QUAL gint _record_enabled;
+	GATOMIC_QUAL gint _record_safe;
+	GATOMIC_QUAL gint _samples_pending_write;
+	GATOMIC_QUAL gint _num_captured_loops;
 
 	boost::shared_ptr<SMFSource> _midi_write_source;
 

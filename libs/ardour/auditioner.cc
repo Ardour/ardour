@@ -51,7 +51,6 @@ using namespace PBD;
 Auditioner::Auditioner (Session& s)
 	: Track (s, "auditioner", PresentationInfo::Auditioner)
 	, current_sample (0)
-	, _auditioning (0)
 	, length (0)
 	, _seek_sample (-1)
 	, _seeking (false)
@@ -61,6 +60,7 @@ Auditioner::Auditioner (Session& s)
 	, _queue_panic (false)
 	, _import_position (0)
 {
+	g_atomic_int_set (&_auditioning, 0);
 }
 
 int
