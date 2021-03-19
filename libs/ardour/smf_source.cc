@@ -212,7 +212,9 @@ SMFSource::open_for_write ()
 void
 SMFSource::close ()
 {
-	/* nothing to do: file descriptor is never kept open */
+	/* nothing to do: file descriptor is never kept open.
+	 * Note, keep `_open = true` regardless.
+	 */
 }
 
 extern PBD::Timing minsert;

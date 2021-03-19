@@ -1348,18 +1348,23 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool only_used_ass
 					const std::string base          = PBD::basename_nosuffix(ancestor_name);
 					const string path               = new_midi_source_path (base, false);
 
+					/* Session::save_state() will already have called
+					 * ms->session_saved ();
+					 */
+
 					/* use SMF-API to clone data (use the midi_model, not data on disk) */
-					boost::shared_ptr<SMFSource> newsrc (new SMFSource (*this, path, SndFileSource::default_writable_flags));
+					boost::shared_ptr<SMFSource> newsrc (new SMFSource (*this, path, ms->flags()));
 					Source::Lock lm (ms->mutex());
 
-					// TODO special-case empty, removable() files: just create a new removable.
-					// (load + write flushes the model and creates the file)
 					if (!ms->model()) {
 						ms->load_model (lm);
 					}
+					/* write_to() calls newsrc->flush_midi () to write the file to disk */
 					if (ms->write_to (lm, newsrc, Temporal::Beats(), std::numeric_limits<Temporal::Beats>::max())) {
 						error << string_compose (_("Session-Save: Failed to copy MIDI Source '%1' for snapshot"), ancestor_name) << endmsg;
 					} else {
+						newsrc->session_saved (); /*< this sohuld be a no-op */
+
 						if (snapshot_type == SnapshotKeep) {
 							/* keep working on current session.
 							 *
@@ -1370,7 +1375,7 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool only_used_ass
 						}
 
 						/* swap file-paths.
-						 * ~SMFSource  unlinks removable() files.
+						 * ~SMFSource unlinks removable() files.
 						 */
 						std::string npath (ms->path ());
 						ms->replace_file (newsrc->path ());
@@ -1384,11 +1389,10 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool only_used_ass
 							 */
 							child->add_child_nocopy (ms->get_state());
 						}
-						continue;
 					}
+					continue;
 				}
 			}
-
 			child->add_child_nocopy (siter->second->get_state());
 		}
 	}
