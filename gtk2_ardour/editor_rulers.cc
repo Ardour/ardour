@@ -1005,8 +1005,7 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 		return;
 	}
 
-#warning NUTEMPO implement a count of bars between two positions (taking position markers into account)
-	bbt_bars = tmap->bbt_at (ceil_upper_beat).bars - tmap->bbt_at (floor_lower_beat).bars;
+	bbt_bars = tmap->count_bars (floor_lower_beat, ceil_upper_beat);
 
 	double ruler_line_granularity = UIConfiguration::instance().get_ruler_granularity ();  //in pixels
 	ruler_line_granularity = _visible_canvas_width / (ruler_line_granularity*5);  //fudge factor '5' probably related to (4+1 beats)/measure, I think
