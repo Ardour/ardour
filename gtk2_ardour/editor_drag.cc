@@ -5443,8 +5443,14 @@ RubberbandSelectDrag::do_select_things (GdkEvent* event, bool drag_in_progress)
 
 	if (!UIConfiguration::instance().get_rubberbanding_snaps_to_grid ()) {
 		grab = raw_grab_time ();
-#warning NUTEMPO how can this ever use BeatTime
-		lpf = timepos_t (_editor->pixel_to_sample_from_event (last_pointer_x()));
+
+		timepos_t pos (_editor->pixel_to_sample_from_event (last_pointer_x()));
+
+		if (_editor->default_time_domain() == Temporal::AudioTime) {
+			lpf = pos;
+		} else {
+			lpf = timepos_t (pos.beats());
+		}
 	}
 
 	if (grab < lpf) {
