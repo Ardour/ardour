@@ -53,7 +53,6 @@ MidiTracer::MidiTracer ()
 	, autoscroll (true)
 	, show_hex (true)
 	, show_delta_time (false)
-	, _update_queued (0)
 	, fifo (1024)
 	, buffer_pool ("miditracer", buffer_size, 1024) // 1024 256 byte buffers
 	, autoscroll_button (_("Auto-Scroll"))
@@ -61,6 +60,8 @@ MidiTracer::MidiTracer ()
 	, collect_button (_("Enabled"))
 	, delta_time_button (_("Delta times"))
 {
+	g_atomic_int_set (&_update_queued, 0);
+
 	ARDOUR::AudioEngine::instance()->PortRegisteredOrUnregistered.connect
 		(_manager_connection, invalidator (*this), boost::bind (&MidiTracer::ports_changed, this), gui_context());
 
@@ -407,9 +408,8 @@ MidiTracer::tracer (Parser&, byte* msg, size_t len, samplecnt_t now)
 
 	fifo.write (&buf, 1);
 
-	if (g_atomic_int_get (const_cast<gint*> (&_update_queued)) == 0) {
+	if (g_atomic_int_compare_and_exchange (&_update_queued, 0, 1)) {
 		gui_context()->call_slot (invalidator (*this), boost::bind (&MidiTracer::update, this));
-		g_atomic_int_inc (const_cast<gint*> (&_update_queued));
 	}
 }
 
@@ -417,7 +417,7 @@ void
 MidiTracer::update ()
 {
 	bool updated = false;
-	g_atomic_int_dec_and_test (const_cast<gint*> (&_update_queued));
+	g_atomic_int_set (&_update_queued, 0);
 
 	RefPtr<TextBuffer> buf (text.get_buffer());
 

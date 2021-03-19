@@ -44,6 +44,7 @@
 #include <sigc++/signal.h>
 
 #include "pbd/statefuldestructible.h"
+#include "pbd/g_atomic_compat.h"
 
 #include "temporal/beats.h"
 
@@ -523,13 +524,14 @@ protected:
 	friend class DisplaySuspender;
 	virtual void suspend_route_redisplay () = 0;
 	virtual void resume_route_redisplay () = 0;
-	gint _suspend_route_redisplay_counter;
+
+	GATOMIC_QUAL gint _suspend_route_redisplay_counter;
 };
 
 class DisplaySuspender {
 	public:
 		DisplaySuspender() {
-			if (g_atomic_int_add(&PublicEditor::instance()._suspend_route_redisplay_counter, 1) == 0) {
+			if (g_atomic_int_add (&PublicEditor::instance()._suspend_route_redisplay_counter, 1) == 0) {
 				PublicEditor::instance().suspend_route_redisplay ();
 			}
 		}
