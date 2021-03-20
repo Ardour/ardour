@@ -1670,7 +1670,7 @@ AudioRegion::remove_transient (samplepos_t where)
 	if (!_onsets.empty ()) {
 		const samplepos_t p = where - _position;
 		AnalysisFeatureList::iterator i = std::find (_onsets.begin (), _onsets.end (), p);
-		if (i != _transients.end ()) {
+		if (i != _onsets.end ()) {
 			_onsets.erase (i);
 			changed = true;
 		}
