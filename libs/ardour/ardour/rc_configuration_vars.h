@@ -247,8 +247,6 @@ CONFIG_VARIABLE (std::string, plugin_path_vst3, "plugin-path-vst3", "@default@")
 CONFIG_VARIABLE (bool, denormal_protection, "denormal-protection", false)
 CONFIG_VARIABLE (DenormalModel, denormal_model, "denormal-model", DenormalFTZDAZ)
 
-/* visibility of various things */
-
 
 /* web addresses used in the program */
 
@@ -272,5 +270,6 @@ CONFIG_VARIABLE (std::string, video_server_docroot, "video-server-docroot", "C:\
 CONFIG_VARIABLE (bool, show_video_export_info, "show-video-export-info", true)
 CONFIG_VARIABLE (bool, show_video_server_dialog, "show-video-server-dialog", false)
 
+/* export */
 CONFIG_VARIABLE (float, export_preroll, "export-preroll", 2.0) // seconds
 CONFIG_VARIABLE (float, export_silence_threshold, "export-silence-threshold", -INFINITY) // dB
