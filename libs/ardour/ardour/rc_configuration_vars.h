@@ -47,6 +47,12 @@ CONFIG_VARIABLE (AutoConnectOption, output_auto_connect, "output-auto-connect", 
 CONFIG_VARIABLE (AutoConnectOption, input_auto_connect, "input-auto-connect", AutoConnectPhysical)
 CONFIG_VARIABLE (bool, strict_io, "strict-io", true)
 
+/* Connect all physical inputs to a dummy port, this makes raw input data available.
+ * `jack_port_get_buffer (jack_port_by_name (c, "system:capture_1") , n_samples);`
+ * nees to work for input-monitoring (recorder page).
+ */
+CONFIG_VARIABLE (bool, work_around_jack_no_copy_optimization, "work-around-jack-no-copy-optimization", true)
+
 /* Naming */
 CONFIG_VARIABLE (TracksAutoNamingRule, tracks_auto_naming, "tracks-auto-naming", UseDefaultNames)
 

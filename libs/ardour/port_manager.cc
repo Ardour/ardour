@@ -737,6 +737,16 @@ PortManager::reestablish_ports ()
 		set_pretty_names (port_names, DataType::MIDI, false);
 	}
 
+
+	if (Config->get_work_around_jack_no_copy_optimization () && AudioEngine::instance()->current_backend_name() == X_("JACK")) {
+		PortEngine::PortHandle ph = port_engine().register_port (X_("physical_input_monitor_enable"), DataType::AUDIO, ARDOUR::PortFlags (IsInput|IsTerminal|Hidden));
+		std::vector<std::string> audio_ports;
+		get_physical_inputs (DataType::AUDIO, audio_ports);
+		for (std::vector<std::string>::iterator p = audio_ports.begin(); p != audio_ports.end(); ++p) {
+			port_engine().connect (ph, *p);
+		}
+	}
+
 	update_input_ports (true);
 	return 0;
 }
