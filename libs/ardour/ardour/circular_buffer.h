@@ -36,6 +36,7 @@ class LIBARDOUR_API CircularSampleBuffer
 public:
 	CircularSampleBuffer (samplecnt_t size);
 
+	void silence (samplecnt_t);
 	void write (Sample const*, samplecnt_t);
 	bool read (Sample& s_min, Sample& s_max, samplecnt_t n_samples);
 

@@ -1773,6 +1773,9 @@ PortManager::run_input_meters (pframes_t n_samples, samplecnt_t rate)
 
 		Sample* buf = (Sample*) _backend->get_buffer (ph, n_samples);
 		if (!buf) {
+			/* can this happen? */
+			ai->second.meter->level = 0;
+			ai->second.scope->silence (n_samples);
 			continue;
 		}
 
