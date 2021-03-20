@@ -56,13 +56,19 @@ AnalysisGraph::~AnalysisGraph ()
 void
 AnalysisGraph::analyze_region (boost::shared_ptr<AudioRegion> region)
 {
+	int n_channels = region->n_channels();
+	if (n_channels == 0 || n_channels > _max_chunksize) {
+		return;
+	}
+	samplecnt_t n_samples = _max_chunksize - (_max_chunksize % n_channels);
+
 	interleaver.reset (new Interleaver<Sample> ());
-	interleaver->init (region->n_channels(), _max_chunksize);
-	chunker.reset (new Chunker<Sample> (_max_chunksize));
+	interleaver->init (n_channels, _max_chunksize);
+	chunker.reset (new Chunker<Sample> (n_samples));
 	analyser.reset (new Analyser (
 				_session->nominal_sample_rate(),
-				region->n_channels(),
-				_max_chunksize,
+				n_channels,
+				n_samples,
 				region->length()));
 
 	interleaver->add_output(chunker);
@@ -101,13 +107,20 @@ void
 AnalysisGraph::analyze_range (boost::shared_ptr<Route> route, boost::shared_ptr<AudioPlaylist> pl, const std::list<AudioRange>& range)
 {
 	const uint32_t n_audio = route->n_inputs().n_audio();
+	if (n_audio == 0 || n_audio > _max_chunksize) {
+		return;
+	}
+	const samplecnt_t n_samples = _max_chunksize - (_max_chunksize % n_audio);
 
 	for (std::list<AudioRange>::const_iterator j = range.begin(); j != range.end(); ++j) {
 
 		interleaver.reset (new Interleaver<Sample> ());
 		interleaver->init (n_audio, _max_chunksize);
-		chunker.reset (new Chunker<Sample> (_max_chunksize));
-		analyser.reset (new Analyser (48000.f,  n_audio, _max_chunksize, (*j).length()));
+
+		chunker.reset (new Chunker<Sample> (n_samples));
+		analyser.reset (new Analyser (
+					_session->nominal_sample_rate(),
+					n_audio, n_samples, (*j).length()));
 
 		interleaver->add_output(chunker);
 		chunker->add_output (analyser);
