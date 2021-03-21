@@ -326,10 +326,10 @@ protected:
 		~RegionWriteLock ()
 		{
 			Glib::Threads::RWLock::WriterLock::release ();
+			thawlist.release ();
 			if (block_notify) {
 				playlist->release_notifications ();
 			}
-			thawlist.release ();
 		}
 
 		ThawList  thawlist;
