@@ -573,9 +573,9 @@ MeterPoint::get_state () const
 Temporal::BBT_Time
 TempoMetric::bbt_at (superclock_t sc) const
 {
-	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("qn @ %1 = %2, meter @ %3\n", sc, _tempo->quarters_at_superclock (sc), _meter->beats()));
-
 	const Beats dq = _tempo->quarters_at_superclock (sc) - _meter->beats();
+
+	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("qn @ %1 = %2, meter @ %3 , delta %4\n", sc, _tempo->quarters_at_superclock (sc), _meter->beats(), dq));
 
 	/* dq is delta in quarters (beats). Convert to delta in note types of
 	   the current meter, which we'll call "grid"
@@ -1662,11 +1662,15 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 		TempoPoint* tpp;
 		MeterPoint* mpp;
 
+		DEBUG_TRACE (DEBUG::Grid, string_compose ("Looking at a point %1\n", *p));
+
 		if ((tpp = dynamic_cast<TempoPoint*> (&(*p))) != 0) {
+			DEBUG_TRACE (DEBUG::Grid, "set tempo with that\n");
 			tp = tpp;
 		}
 
 		if ((mpp = dynamic_cast<MeterPoint*> (&(*p))) != 0) {
+			DEBUG_TRACE (DEBUG::Grid, "set meter with that\n");
 			mp = mpp;
 		}
 
@@ -1728,9 +1732,10 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 
 			superclock_t new_start = metric.superclock_at (bbt);
 
-			DEBUG_TRACE (DEBUG::Grid, string_compose ("metric says that %1 is at %2\n", bbt, new_start));
+			DEBUG_TRACE (DEBUG::Grid, string_compose ("metric %1 says that %2 is at %3\n", metric, bbt, new_start));
 
 			if (new_start < start) {
+				DEBUG_TRACE (DEBUG::Grid, string_compose ("we've gone backwards, new is %1 start is %2\n", new_start, start));
 				abort ();
 			}
 
