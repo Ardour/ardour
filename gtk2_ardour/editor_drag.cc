@@ -3562,11 +3562,11 @@ TempoMarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 		show_verbose_cursor_text (_("inactive"));
 	} else {
 		show_verbose_cursor_time (adjusted_current_time (event));
+
+		/* setup thread-local tempo map ptr as a writable copy */
+
+		TempoMap::fetch_writable ();
 	}
-
-	/* setup thread-local tempo map ptr as a writable copy */
-
-	TempoMap::fetch_writable ();
 }
 
 void
@@ -3686,22 +3686,21 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 void
 TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 {
-	// _point->end_float ();
-
 	if (!_marker->tempo().active()) {
 		return;
 	}
 
 	if (!movement_occurred) {
-		if (was_double_click()) {
-			_editor->edit_tempo_marker (*_marker);
-		}
-
 		/* reset the per-thread tempo map ptr back to the current
 		 * official version
 		 */
 
 		TempoMap::abort_update ();
+
+		if (was_double_click()) {
+			_editor->edit_tempo_marker (*_marker);
+		}
+
 		return;
 	}
 
