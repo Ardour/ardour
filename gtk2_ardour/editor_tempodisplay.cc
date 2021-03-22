@@ -254,11 +254,14 @@ Editor::compute_current_bbt_points (Temporal::TempoMapPoints& grid, samplepos_t 
 		return;
 	}
 
+	TempoMap::SharedPtr tmap (TempoMap::use());
+
 	/* prevent negative values of leftmost from creeping into tempomap
 	 */
-	const Beats lower_beat = max (Beats (), TempoMap::use()->quarters_at_sample (leftmost)).round_down_to_beat() - Beats (1, 0);
+
+	const Beats left = tmap->quarters_at_sample (leftmost).round_down_to_beat();
+	const Beats lower_beat = (left < Beats() ? Beats() : left);
 	const samplecnt_t sr (_session->sample_rate());
-	TempoMap::SharedPtr tmap (TempoMap::use());
 
 	switch (bbt_ruler_scale) {
 
@@ -486,6 +489,7 @@ Editor::edit_tempo_section (TempoPoint& section)
 
 	begin_reversible_command (_("replace tempo mark"));
 	XMLNode &before = tmap->get_state();
+
 
 	tmap->set_tempo (tempo, when);
 
