@@ -983,9 +983,25 @@ Track::use_captured_midi_sources (SourceList& srcs, CaptureInfos const & capture
 
 			/* start of this region is the offset between the start of its capture and the start of the whole pass */
 			samplecnt_t start_off = (*ci)->start - initial_capture + (*ci)->loop_offset;
-#warning NUTEMPO thinkme MIDI region with start & length in samples
-			plist.add (Properties::start, timecnt_t (start_off, timepos_t::zero (false)));
-			plist.add (Properties::length, timecnt_t ((*ci)->samples, timepos_t::zero (false)));
+			timepos_t s;
+			timecnt_t l;
+
+			if (time_domain() == Temporal::BeatTime) {
+
+				const timepos_t ss (start_off);
+				const timecnt_t ll ((*ci)->samples, ss);
+
+				s = timepos_t (ss.beats());
+				l = timecnt_t (ll.beats(), s);
+
+			} else {
+
+				s = timepos_t (start_off);
+				l = timecnt_t ((*ci)->samples, s);
+			}
+
+			plist.add (Properties::start, s);
+			plist.add (Properties::length, l);
 			plist.add (Properties::name, region_name);
 
 			boost::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
@@ -996,15 +1012,16 @@ Track::use_captured_midi_sources (SourceList& srcs, CaptureInfos const & capture
 		}
 
 		catch (failed_constructor& err) {
-			error << _("MidiDiskstream: could not create region for captured midi!") << endmsg;
+			error << string_compose (_("%1: could not create region for captured data!"), name()) << endmsg;
 			continue; /* XXX is this OK? */
 		}
 
-#ifndef NDEBUG
-		cerr << "add new region, len = " << (*ci)->samples << " @ " << (*ci)->start << endl;
-#endif
-
-		pl->add_region (midi_region, timepos_t ((*ci)->start + preroll_off), 1, _session.config.get_layered_record_mode ());
+		if (time_domain() == Temporal::BeatTime) {
+			const timepos_t b ((*ci)->start + preroll_off);
+			pl->add_region (midi_region, timepos_t (b.beats()), 1, _session.config.get_layered_record_mode ());
+		} else {
+			pl->add_region (midi_region, timepos_t ((*ci)->start + preroll_off), 1, _session.config.get_layered_record_mode ());
+		}
 	}
 
 	pl->thaw ();
