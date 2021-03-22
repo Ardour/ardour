@@ -503,9 +503,13 @@ TempoPoint::quarters_at_superclock (superclock_t sc) const
 	}
 
 	if (!actually_ramped()) {
+
+		assert (sc >= _sclock);
+		superclock_t sc_delta = sc - _sclock;
+
 		/* convert sc into superbeats, given that sc represents some number of seconds */
-		const superclock_t whole_seconds = sc / superclock_ticks_per_second;
-		const superclock_t remainder = sc - (whole_seconds * superclock_ticks_per_second);
+		const superclock_t whole_seconds = sc_delta / superclock_ticks_per_second;
+		const superclock_t remainder = sc_delta - (whole_seconds * superclock_ticks_per_second);
 
 		const int64_t supernotes = ((_super_note_type_per_second) * whole_seconds) + int_div_round (superclock_t ((_super_note_type_per_second) * remainder), superclock_ticks_per_second);
 		/* multiply after divide to reduce overflow risk */
@@ -517,9 +521,9 @@ TempoPoint::quarters_at_superclock (superclock_t sc) const
 
 		Tempo::superbeats_to_beats_ticks (superbeats, b, t);
 
-		DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("%8 => \nsc %1 = %2 secs rem = %3 rem snotes %4 sbeats = %5 => %6 : %7\n", sc, whole_seconds, remainder, supernotes, superbeats, b , t, *this));
+		DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("%8 => \nsc %1 delta %9 = %2 secs rem = %3 rem snotes %4 sbeats = %5 => %6 : %7\n", sc, whole_seconds, remainder, supernotes, superbeats, b , t, *this, sc_delta));
 
-		return Beats (b, t);
+		return _quarters + Beats (b, t);
 	}
 
 	const double b = (exp (_omega * (sc - _sclock)) - 1) / (superclocks_per_quarter_note() * _omega);
