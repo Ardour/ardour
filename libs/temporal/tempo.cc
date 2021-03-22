@@ -464,8 +464,10 @@ TempoPoint::superclock_at (Temporal::Beats const & qn) const
 
 	if (!actually_ramped()) {
 		/* not ramped, use linear */
+		assert (qn >= _quarters);
+		const Beats delta = qn - _quarters;
 		const superclock_t spqn = superclocks_per_quarter_note ();
-		return (spqn * qn.get_beats()) + int_div_round ((spqn * qn.get_ticks()), superclock_t (Temporal::ticks_per_beat));
+		return _sclock + (spqn * delta.get_beats()) + int_div_round ((spqn * delta.get_ticks()), superclock_t (Temporal::ticks_per_beat));
 	}
 
 	return _sclock + llrint (log1p (superclocks_per_quarter_note() * _omega * DoubleableBeats (qn - _quarters).to_double()) / _omega);
