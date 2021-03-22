@@ -2640,8 +2640,68 @@ TempoMap::insert_time (timepos_t const & pos, timecnt_t const & duration)
 bool
 TempoMap::remove_time (timepos_t const & pos, timecnt_t const & duration)
 {
-#warning NUTEMPO implement TempoMap::remove_time
-	return false;
+	superclock_t start (pos.superclocks());
+	superclock_t end ((pos + duration).superclocks());
+	superclock_t shift (duration.superclocks());
+
+	TempoPoint* last_tempo = 0;
+	MeterPoint* last_meter = 0;
+	TempoPoint* tempo_after = 0;
+	MeterPoint* meter_after = 0;
+
+	bool moved = false;
+
+	for (Tempos::iterator t = _tempos.begin(); t != _tempos.end(); ) {
+
+		if (t->sclock() >= start && t->sclock() < end) {
+
+			last_tempo = &*t;
+			t = _tempos.erase (t);
+			moved = true;
+
+		} else if (t->sclock() >= start) {
+			t->set (t->sclock() - shift, t->beats(), t->bbt());
+			moved = true;
+			if (t->sclock() == start) {
+				tempo_after = &*t;
+			}
+			++t;
+		}
+	}
+
+	for (Meters::iterator m = _meters.begin(); m != _meters.end(); ) {
+
+		if (m->sclock() >= start && m->sclock() < end) {
+
+			last_meter = &*m;
+			m = _meters.erase (m);
+			moved = true;
+
+		} else if (m->sclock() >= start) {
+			m->set (m->sclock() - shift, m->beats(), m->bbt());
+			moved = true;
+			if (m->sclock() == start) {
+				meter_after = &*m;
+			}
+			++m;
+		}
+	}
+
+	if (last_tempo && !tempo_after) {
+		last_tempo->set (start, last_tempo->beats(), last_tempo->bbt());
+		moved = true;
+	}
+
+	if (last_meter && !meter_after) {
+		last_tempo->set (start, last_meter->beats(), last_meter->bbt());
+		moved = true;
+	}
+
+	if (moved) {
+		reset_starting_at (start);
+	}
+
+	return moved;
 }
 
 TempoPoint const *
