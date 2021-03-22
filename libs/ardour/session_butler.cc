@@ -81,7 +81,7 @@ void
 Session::request_overwrite_buffer (boost::shared_ptr<Track> t, OverwriteReason why)
 {
 	assert (t);
-	SessionEvent *ev = new SessionEvent (SessionEvent::Overwrite, SessionEvent::Add, SessionEvent::Immediate, 0, 0, 0.0);
+	SessionEvent *ev = new SessionEvent (SessionEvent::Overwrite, SessionEvent::Replace, SessionEvent::Immediate, 0, 0, 0.0);
 	ev->set_track (t);
 	ev->overwrite = why;
 	queue_event (ev);

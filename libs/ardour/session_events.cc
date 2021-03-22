@@ -253,7 +253,13 @@ SessionEventManager::_replace_event (SessionEvent* ev)
 	/* private, used only for events that can only exist once in the queue */
 
 	for (i = events.begin(); i != events.end(); ++i) {
-		if ((*i)->type == ev->type) {
+		if ((*i)->type == ev->type && ev->type == SessionEvent::Overwrite && (*i)->track.lock() == ev->track.lock()) {
+			ret = true;
+			delete ev;
+			break;
+		}
+		else if ((*i)->type == ev->type && ev->type != SessionEvent::Overwrite) {
+			assert (ev->type == SessionEvent::PunchIn || ev->type == SessionEvent::PunchOut ||  ev->type == SessionEvent::AutoLoop);
 			(*i)->action_sample = ev->action_sample;
 			(*i)->target_sample = ev->target_sample;
 			if ((*i) == ev) {
