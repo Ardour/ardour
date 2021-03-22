@@ -3112,6 +3112,12 @@ TempoMap::init ()
 	fetch ();
 }
 
+TempoMap::SharedPtr
+TempoMap::write_copy()
+{
+	return _map_mgr.write_copy();
+}
+
 int
 TempoMap::update (TempoMap::SharedPtr m)
 {
