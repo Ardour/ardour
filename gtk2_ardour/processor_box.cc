@@ -2047,6 +2047,8 @@ ProcessorBox::object_drop (DnDVBox<ProcessorEntry>* source, ProcessorEntry* posi
 		/* strip side-chain state (processor inside processor must be a side-chain)
 		 * otherwise we'll end up with duplicate ports-names.
 		 * (this needs a better solution which retains connections)
+		 *
+		 * see also ProcessorBox::paste_processor_state
 		 */
 		state.remove_nodes_and_delete ("Processor");
 		state.remove_property ("count");
@@ -3590,13 +3592,29 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 				 * only then update the ID)
 				 */
 				PBD::ID id = p->id();
+				XMLNode state (**niter);
 				/* strip side-chain state (processor inside processor must be a side-chain)
 				 * otherwise we'll end up with duplicate ports-names.
 				 * (this needs a better solution which retains connections)
+				 *
+				 * see also ProcessorBox::object_drop
 				 */
-				XMLNode state (**niter);
 				state.remove_nodes_and_delete ("Processor");
+
+				uint32_t count = 0;
+				state.get_property ("count", count);
 				state.remove_property ("count");
+
+				state.remove_property ("custom");
+				state.remove_nodes_and_delete ("ConfiguredInput");
+				state.remove_nodes_and_delete ("CustomSinks");
+				state.remove_nodes_and_delete ("ConfiguredOutput");
+				state.remove_nodes_and_delete ("PresetOutput");
+				state.remove_nodes_and_delete ("ThruMap");
+				for (uint32_t i = 0; i < count; ++i) {
+					state.remove_nodes_and_delete (string_compose ("InputMap-%1", i));
+					state.remove_nodes_and_delete (string_compose ("OutputMap-%1", i));
+				}
 
 				/* Controllable and automation IDs should not be copied */
 				PBD::Stateful::ForceIDRegeneration force_ids;
