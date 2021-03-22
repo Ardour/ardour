@@ -113,18 +113,16 @@ Tempo::Tempo (XMLNode const & node)
 	}
 }
 
-bool
+void
 Tempo::set_ramped (bool yn)
 {
 	_type = (yn ? Ramped : Constant);
-	return true;
 }
 
-bool
-Tempo::set_clamped (bool)
+void
+Tempo::set_clamped (bool yn)
 {
-#warning implement Tempo::set_clamped
-	return true;
+	_clamped = yn;
 }
 
 XMLNode&
@@ -1115,7 +1113,7 @@ TempoMap::reset_starting_at (superclock_t sc)
                }
 
                if (advance_meter && (m != _meters.end())) {
-                       ++m;
+                       ++m; 
                }
                if (advance_tempo && (t != _tempos.end())) {
                        ++t;
@@ -2892,15 +2890,12 @@ TempoMap::metric_at (BBT_Time const & bbt, bool can_match) const
 	return TempoMetric (*const_cast<TempoPoint*>(prev_t), *const_cast<MeterPoint*> (prev_m));
 }
 
-bool
+void
 TempoMap::set_ramped (TempoPoint & tp, bool yn)
 {
 	Rampable & r (tp);
-	bool ret = r.set_ramped (yn);
-	if (ret) {
-		reset_starting_at (tp.sclock());
-	}
-	return ret;
+	r.set_ramped (yn);
+	reset_starting_at (tp.sclock());
 }
 
 #if 0

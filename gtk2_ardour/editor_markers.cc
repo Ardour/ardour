@@ -1530,16 +1530,13 @@ Editor::toggle_tempo_clamped ()
 		XMLNode &before = tmap->get_state();
 
 		Temporal::Tempo & tempo (tm->tempo());
-		if (tempo.set_clamped (!tempo.clamped())) {
+		tempo.set_clamped (!tempo.clamped());
 
-			XMLNode &after = tmap->get_state();
-			_session->add_command (new MementoCommand<Temporal::TempoMap> (new Temporal::TempoMap::MementoBinder(), &before, &after));
-			commit_reversible_command ();
+		XMLNode &after = tmap->get_state();
+		_session->add_command (new MementoCommand<Temporal::TempoMap> (new Temporal::TempoMap::MementoBinder(), &before, &after));
+		commit_reversible_command ();
 
-			TempoMap::update (tmap);
-		} else {
-			abort_reversible_command ();
-		}
+		TempoMap::update (tmap);
 	}
 }
 
@@ -1558,15 +1555,12 @@ Editor::ramp_to_next_tempo ()
 		XMLNode &before = tmap->get_state();
 
 		Temporal::TempoPoint & tempo (tm->tempo());
-		if (tmap->set_ramped (tempo, !tempo.ramped())) {
-			XMLNode &after = tmap->get_state();
-			_session->add_command (new MementoCommand<Temporal::TempoMap> (new Temporal::TempoMap::MementoBinder(), &before, &after));
-			commit_reversible_command ();
+		tmap->set_ramped (tempo, !tempo.ramped());
+		XMLNode &after = tmap->get_state();
+		_session->add_command (new MementoCommand<Temporal::TempoMap> (new Temporal::TempoMap::MementoBinder(), &before, &after));
+		commit_reversible_command ();
 
-			TempoMap::update (tmap);
-		} else {
-			abort_reversible_command ();
-		}
+		TempoMap::update (tmap);
 	}
 }
 

@@ -144,7 +144,7 @@ class LIBTEMPORAL_API Rampable {
 
   private:
 	friend class TempoMap;
-	virtual bool set_ramped (bool yn) = 0;
+	virtual void set_ramped (bool yn) = 0;
 };
 
 /** Tempo, the speed at which musical time progresses (BPM).
@@ -246,7 +246,7 @@ class LIBTEMPORAL_API Tempo : public Rampable {
 	void set_locked_to_meter (bool yn) { _locked_to_meter = yn; }
 
 	bool clamped() const { return _clamped; }
-	bool set_clamped (bool yn);
+	void set_clamped (bool yn);
 
 	Type type() const { return _type; }
 
@@ -295,7 +295,7 @@ class LIBTEMPORAL_API Tempo : public Rampable {
 	static inline superclock_t double_npm_to_scpn (double npm) { return (superclock_t) llround ((60./npm) * superclock_ticks_per_second); }
 
   private:
-	bool set_ramped (bool yn);
+	void set_ramped (bool yn);
 };
 
 /** Meter, or time signature (subdivisions per bar, and which note type is a single subdivision). */
@@ -675,7 +675,7 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 	 * the RCU manager.
 	 */
 
-	bool set_ramped (TempoPoint&, bool);
+	void set_ramped (TempoPoint&, bool);
 
 	void insert_time (timepos_t const & pos, timecnt_t const & duration);
 	bool remove_time (timepos_t const & pos, timecnt_t const & duration);
