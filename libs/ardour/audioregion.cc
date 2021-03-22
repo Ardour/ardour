@@ -1390,14 +1390,6 @@ AudioRegion::set_scale_amplitude (gain_t g)
 
 	_scale_amplitude = g;
 
-	/* tell the diskstream we're in */
-
-	if (pl) {
-		pl->ContentsChanged();
-	}
-
-	/* tell everybody else */
-
 	send_change (PropertyChange (Properties::scale_amplitude));
 }
 
