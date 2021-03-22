@@ -5516,6 +5516,12 @@ Editor::adjust_region_gain (bool up)
 	}
 
 	bool in_command = false;
+	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ++r) {
+		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*r);
+		if (arv) {
+			arv->region()->playlist()->freeze ();
+		}
+	}
 
 	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ++r) {
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*r);
@@ -5544,6 +5550,13 @@ Editor::adjust_region_gain (bool up)
 
 	if (in_command) {
 		commit_reversible_command ();
+	}
+
+	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ++r) {
+		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*r);
+		if (arv) {
+			arv->region()->playlist()->thaw ();
+		}
 	}
 }
 
