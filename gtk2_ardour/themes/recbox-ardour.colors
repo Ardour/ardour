@@ -109,7 +109,7 @@
     <ColorAlias name="ghost track wave clip" alias="neutral:background"/>
     <ColorAlias name="ghost track wave fill" alias="neutral:foregroundest"/>
     <ColorAlias name="ghost track zero line" alias="neutral:foreground2"/>
-    <ColorAlias name="grid line major" alias="neutral:foregroundest"/>
+    <ColorAlias name="grid line major" alias="neutral:foreground"/>
     <ColorAlias name="grid line micro" alias="neutral:midground"/>
     <ColorAlias name="grid line minor" alias="neutral:midground"/>
     <ColorAlias name="gtk_arm" alias="alert:red"/>
