@@ -19,6 +19,8 @@
 #include <algorithm>
 #include <vector>
 
+#include <inttypes.h>
+
 #include "pbd/error.h"
 #include "pbd/i18n.h"
 #include "pbd/compose.h"
@@ -1119,7 +1121,7 @@ TempoMap::reset_starting_at (superclock_t sc)
                }
 
                if (advance_meter && (m != _meters.end())) {
-                       ++m; 
+                       ++m;
                }
                if (advance_tempo && (t != _tempos.end())) {
                        ++t;
@@ -2252,8 +2254,12 @@ TempoMap::get_state ()
 }
 
 int
-TempoMap::set_state (XMLNode const & node, int /*version*/)
+TempoMap::set_state (XMLNode const & node, int version)
 {
+	if (version <= 3000) {
+		return set_state_3x (node);
+	}
+
 	/* global map properties */
 
 	/* XXX this should probably be at the global level in the session file because it affects a lot more than just the tempo map, potentially */
@@ -3177,3 +3183,372 @@ TempoMap::midi_clock_beat_at_or_after (samplepos_t const pos, samplepos_t& clk_p
 
 	assert (clk_pos >= pos);
 }
+
+/******** OLD STATE LOADING CODE SECTION *************/
+
+static bool
+bbt_time_to_string (const BBT_Time& bbt, std::string& str)
+{
+	char buf[256];
+	int retval = snprintf (buf, sizeof(buf), "%" PRIu32 "|%" PRIu32 "|%" PRIu32, bbt.bars, bbt.beats,
+	                       bbt.ticks);
+
+	if (retval <= 0 || retval >= (int)sizeof(buf)) {
+		return false;
+	}
+
+	str = buf;
+	return true;
+}
+
+static bool
+string_to_bbt_time (const std::string& str, BBT_Time& bbt)
+{
+	if (sscanf (str.c_str (), "%" PRIu32 "|%" PRIu32 "|%" PRIu32, &bbt.bars, &bbt.beats,
+	            &bbt.ticks) == 3) {
+		return true;
+	}
+	return false;
+}
+
+int
+TempoMap::parse_tempo_state_3x (const XMLNode& node, LegacyTempoState& lts)
+{
+	BBT_Time bbt;
+	std::string start_bbt;
+
+	// _legacy_bbt.bars = 0; // legacy session check compars .bars != 0; default BBT_Time c'tor uses 1.
+
+	if (node.get_property ("start", start_bbt)) {
+		if (string_to_bbt_time (start_bbt, bbt)) {
+			/* legacy session - start used to be in bbt*/
+			// _legacy_bbt = bbt;
+			// set_pulse(-1.0);
+			info << _("Legacy session detected. TempoSection XML node will be altered.") << endmsg;
+		}
+	}
+
+	/* position is the only data we extract from older XML */
+
+	if (node.get_property ("frame", lts.sample)) {
+		error << _("Legacy tempo section XML does not have a \"frame\" node - map will be ignored") << endmsg;
+		return -1;
+	}
+
+	if (node.get_property ("beats-per-minute", lts.note_types_per_minute)) {
+		if (lts.note_types_per_minute < 0.0) {
+			error << _("TempoSection XML node has an illegal \"beats_per_minute\" value") << endmsg;
+			return -1;
+		}
+	}
+
+	if (node.get_property ("note-type", lts.note_type)) {
+		if (lts.note_type < 1.0) {
+			error << _("TempoSection XML node has an illegal \"note-type\" value") << endmsg;
+			return -1;
+		}
+	} else {
+		/* older session, make note type be quarter by default */
+		lts.note_type = 4.0;
+	}
+
+	if (!node.get_property ("clamped", lts.clamped)) {
+		lts.clamped = false;
+	}
+
+	if (node.get_property ("end-beats-per-minute", lts.end_note_types_per_minute)) {
+		if (lts.end_note_types_per_minute < 0.0) {
+			info << _("TempoSection XML node has an illegal \"end-beats-per-minute\" value") << endmsg;
+			return -1;
+		}
+	}
+
+	Tempo::Type old_type;
+	if (node.get_property ("tempo-type", old_type)) {
+		/* sessions with a tempo-type node contain no end-beats-per-minute.
+		   if the legacy node indicates a constant tempo, simply fill this in with the
+		   start tempo. otherwise we need the next neighbour to know what it will be.
+		*/
+
+		if (old_type == Tempo::Constant) {
+			lts.end_note_types_per_minute = lts.note_types_per_minute;
+		} else {
+			lts.end_note_types_per_minute = -1.0;
+		}
+	}
+
+	if (!node.get_property ("active", lts.active)) {
+		warning << _("TempoSection XML node has no \"active\" property") << endmsg;
+		lts.active = true;
+	}
+
+	return 0;
+}
+
+int
+TempoMap::parse_meter_state_3x (const XMLNode& node, LegacyMeterState& lms)
+{
+	std::string bbt_str;
+	if (node.get_property ("start", bbt_str)) {
+		if (string_to_bbt_time (bbt_str, lms.bbt)) {
+			/* legacy session - start used to be in bbt*/
+			info << _("Legacy session detected - MeterSection XML node will be altered.") << endmsg;
+			// set_pulse (-1.0);
+		} else {
+			error << _("MeterSection XML node has an illegal \"start\" value") << endmsg;
+		}
+	}
+
+	/* position is the only data we extract from older XML */
+
+	if (node.get_property ("frame", lms.sample)) {
+		error << _("Legacy tempo section XML does not have a \"frame\" node - map will be ignored") << endmsg;
+		return -1;
+	}
+
+	if (node.get_property ("beat", lms.beat)) {
+		lms.beat = 0.0;
+	}
+
+	if (node.get_property ("bbt", bbt_str)) {
+		if (!string_to_bbt_time (bbt_str, lms.bbt)) {
+			error << _("MeterSection XML node has an illegal \"bbt\" value") << endmsg;
+			return -1;
+		}
+	} else {
+		warning << _("MeterSection XML node has no \"bbt\" property") << endmsg;
+	}
+
+	/* beats-per-bar is old; divisions-per-bar is new */
+
+	if (!node.get_property ("divisions-per-bar", lms.divisions_per_bar)) {
+		if (!node.get_property ("beats-per-bar", lms.divisions_per_bar)) {
+			error << _("MeterSection XML node has no \"beats-per-bar\" or \"divisions-per-bar\" property") << endmsg;
+			return -1;
+		}
+	}
+
+	if (lms.divisions_per_bar < 0.0) {
+		error << _("MeterSection XML node has an illegal \"divisions-per-bar\" value") << endmsg;
+		return -1;
+	}
+
+	if (!node.get_property ("note-type", lms.note_type)) {
+		error << _("MeterSection XML node has no \"note-type\" property") << endmsg;
+		return -1;
+	}
+
+	if (lms.note_type < 0.0) {
+		error << _("MeterSection XML node has an illegal \"note-type\" value") << endmsg;
+		return -1;
+	}
+
+	return 0;
+}
+
+int
+TempoMap::set_state_3x (const XMLNode& node)
+{
+	XMLNodeList nlist;
+	XMLNodeConstIterator niter;
+
+	_tempos.clear ();
+	_meters.clear ();
+	_points.clear ();
+
+	nlist = node.children();
+
+	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+		XMLNode* child = *niter;
+
+		if (child->name() == Tempo::xml_node_name) {
+
+			LegacyTempoState lts;
+
+			if (parse_tempo_state_3x (*child, lts)) {
+				error << _("Tempo map: could not set new state, restoring old one.") << endmsg;
+				break;
+			}
+
+			Tempo t (lts.note_types_per_minute,
+			         lts.end_note_types_per_minute,
+			         lts.note_type);
+
+			set_tempo (t, timepos_t (lts.sample));
+
+		} else if (child->name() == Meter::xml_node_name) {
+
+			LegacyMeterState lms;
+
+			if (parse_meter_state_3x (*child, lms)) {
+				error << _("Tempo map: could not set new state, restoring old one.") << endmsg;
+				break;
+			}
+
+			Meter m (lms.divisions_per_bar, lms.note_type);
+			set_meter (m, timepos_t (lms.sample));
+		}
+	}
+
+#if 0
+	/* check for legacy sessions where bbt was the base musical unit for tempo */
+	for (Metrics::const_iterator i = _metrics.begin(); i != _metrics.end(); ++i) {
+		TempoSection* t;
+		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
+			if (t->legacy_bbt().bars != 0) {
+				fix_legacy_session();
+				break;
+			}
+
+			if (t->end_note_types_per_minute() < 0.0) {
+				fix_legacy_end_session();
+				break;
+			}
+		}
+	}
+
+	if (niter == nlist.end()) {
+		MetricSectionSorter cmp;
+		_metrics.sort (cmp);
+	}
+#endif
+#if 0
+
+	/* check for multiple tempo/meters at the same location, which
+	   ardour2 somehow allowed.
+	*/
+
+	{
+		Tempos::iterator prev = _tempos.end();
+		for (Tempos::iterator i = _tempos.begin(); i != _tempos.end(); ++i) {
+			if (prev != _tempos.end()) {
+			MeterSection* ms;
+			MeterSection* prev_m;
+			TempoSection* ts;
+			TempoSection* prev_t;
+			if ((prev_m = dynamic_cast<MeterSection*>(*prev)) != 0 && (ms = dynamic_cast<MeterSection*>(*i)) != 0) {
+				if (prev_m->beat() == ms->beat()) {
+					cerr << string_compose (_("Multiple meter definitions found at %1"), prev_m->beat()) << endmsg;
+					error << string_compose (_("Multiple meter definitions found at %1"), prev_m->beat()) << endmsg;
+					return -1;
+				}
+			} else if ((prev_t = dynamic_cast<TempoSection*>(*prev)) != 0 && (ts = dynamic_cast<TempoSection*>(*i)) != 0) {
+				if (prev_t->pulse() == ts->pulse()) {
+					cerr << string_compose (_("Multiple tempo definitions found at %1"), prev_t->pulse()) << endmsg;
+					error << string_compose (_("Multiple tempo definitions found at %1"), prev_t->pulse()) << endmsg;
+					return -1;
+				}
+			}
+		}
+		prev = i;
+	}
+#endif
+
+	return 0;
+}
+#if 0
+void
+TempoMap::fix_legacy_session ()
+{
+	MeterSection* prev_m = 0;
+	TempoSection* prev_t = 0;
+	bool have_initial_t = false;
+
+	for (Metrics::iterator i = _metrics.begin(); i != _metrics.end(); ++i) {
+		MeterSection* m;
+		TempoSection* t;
+
+		if ((m = dynamic_cast<MeterSection*>(*i)) != 0) {
+			if (m->initial()) {
+				pair<double, BBT_Time> bbt = make_pair (0.0, BBT_Time (1, 1, 0));
+				m->set_beat (bbt);
+				m->set_pulse (0.0);
+				m->set_minute (0.0);
+				m->set_position_lock_style (AudioTime);
+				prev_m = m;
+				continue;
+			}
+			if (prev_m) {
+				pair<double, BBT_Time> start = make_pair (((m->bbt().bars - 1) * prev_m->note_divisor())
+									  + (m->bbt().beats - 1)
+									  + (m->bbt().ticks / BBT_Time::ticks_per_beat)
+									  , m->bbt());
+				m->set_beat (start);
+				const double start_beat = ((m->bbt().bars - 1) * prev_m->note_divisor())
+					+ (m->bbt().beats - 1)
+					+ (m->bbt().ticks / BBT_Time::ticks_per_beat);
+				m->set_pulse (start_beat / prev_m->note_divisor());
+			}
+			prev_m = m;
+		} else if ((t = dynamic_cast<TempoSection*>(*i)) != 0) {
+
+			if (!t->active()) {
+				continue;
+			}
+			/* Ramp type never existed in the era of this tempo section */
+			t->set_end_note_types_per_minute (t->note_types_per_minute());
+
+			if (t->initial()) {
+				t->set_pulse (0.0);
+				t->set_minute (0.0);
+				t->set_position_lock_style (AudioTime);
+				prev_t = t;
+				have_initial_t = true;
+				continue;
+			}
+
+			if (prev_t) {
+				/* some 4.x sessions have no initial (non-movable) tempo. */
+				if (!have_initial_t) {
+					prev_t->set_pulse (0.0);
+					prev_t->set_minute (0.0);
+					prev_t->set_position_lock_style (AudioTime);
+					prev_t->set_initial (true);
+					prev_t->set_locked_to_meter (true);
+					have_initial_t = true;
+				}
+
+				const double beat = ((t->legacy_bbt().bars - 1) * ((prev_m) ? prev_m->note_divisor() : 4.0))
+					+ (t->legacy_bbt().beats - 1)
+					+ (t->legacy_bbt().ticks / BBT_Time::ticks_per_beat);
+				if (prev_m) {
+					t->set_pulse (beat / prev_m->note_divisor());
+				} else {
+					/* really shouldn't happen but.. */
+					t->set_pulse (beat / 4.0);
+				}
+			}
+			prev_t = t;
+		}
+	}
+}
+void
+TempoMap::fix_legacy_end_session ()
+{
+	TempoSection* prev_t = 0;
+
+	for (Metrics::iterator i = _metrics.begin(); i != _metrics.end(); ++i) {
+		TempoSection* t;
+
+		if ((t = dynamic_cast<TempoSection*>(*i)) != 0) {
+
+			if (!t->active()) {
+				continue;
+			}
+
+			if (prev_t) {
+				if (prev_t->end_note_types_per_minute() < 0.0) {
+					prev_t->set_end_note_types_per_minute (t->note_types_per_minute());
+				}
+			}
+
+			prev_t = t;
+		}
+	}
+
+	if (prev_t) {
+		prev_t->set_end_note_types_per_minute (prev_t->note_types_per_minute());
+	}
+}
+
+#endif

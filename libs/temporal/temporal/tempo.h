@@ -93,7 +93,7 @@ class LIBTEMPORAL_API Point {
 		}
 	};
 
-  	struct ptr_sclock_comparator {
+	struct ptr_sclock_comparator {
 		bool operator() (Point const * a, Point const * b) const {
 			return a->sclock() < b->sclock();
 		}
@@ -849,6 +849,31 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 	void remove_point (Point const &);
 
 	void copy_points (TempoMap const & other);
+
+	/* parsing legacy tempo maps */
+
+	struct LegacyTempoState
+	{
+		samplepos_t sample;
+		double note_types_per_minute;
+		double end_note_types_per_minute;
+		double note_type;
+		bool clamped;
+		bool active;
+	};
+
+	struct LegacyMeterState
+	{
+		samplepos_t sample;
+		BBT_Time bbt;
+		double beat;
+		double divisions_per_bar;
+		double note_type;
+	};
+
+	int parse_tempo_state_3x (const XMLNode& node, LegacyTempoState& lts);
+	int parse_meter_state_3x (const XMLNode& node, LegacyMeterState& lts);
+	int set_state_3x (XMLNode const &);
 };
 
 } /* end of namespace Temporal */
