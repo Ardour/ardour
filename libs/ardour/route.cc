@@ -3349,7 +3349,6 @@ Route::enable_monitor_send ()
 	/* master never sends to monitor section via the normal mechanism */
 	assert (!is_master ());
 	assert (!is_monitor ());
-	assert (!is_foldbackbus ());
 
 	/* make sure we have one */
 	if (!_monitor_send) {

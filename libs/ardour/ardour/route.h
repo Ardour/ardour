@@ -184,6 +184,9 @@ public:
 	bool is_safe () const {
 		return _solo_safe_control->get_value();
 	}
+	bool can_monitor () const {
+		return can_solo() || is_foldbackbus ();
+	}
 	void enable_monitor_send ();
 
 	void set_denormal_protection (bool yn);

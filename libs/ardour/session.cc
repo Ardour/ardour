@@ -1155,7 +1155,7 @@ Session::setup_route_monitor_sends (bool enable, bool need_process_lock)
 	ProcessorChangeBlocker  pcb (this, false /* XXX */);
 
 	for (RouteList::iterator x = rls->begin(); x != rls->end(); ++x) {
-		if ((*x)->can_solo ()) {
+		if ((*x)->can_monitor ()) {
 			if (enable) {
 				(*x)->enable_monitor_send ();
 			} else {
@@ -3093,7 +3093,7 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 		/* set/unset monitor-send */
 		Glib::Threads::Mutex::Lock lm (_engine.process_lock());
 		for (RouteList::iterator x = ret.begin(); x != ret.end(); ++x) {
-			if ((*x)->can_solo ()) {
+			if ((*x)->can_monitor ()) {
 				if (_monitor_out) {
 					(*x)->enable_monitor_send ();
 				} else {
@@ -3258,7 +3258,7 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 		Glib::Threads::Mutex::Lock lm (_engine.process_lock());
 
 		for (RouteList::iterator x = new_routes.begin(); x != new_routes.end(); ++x) {
-			if ((*x)->can_solo ()) {
+			if ((*x)->can_monitor ()) {
 				(*x)->enable_monitor_send ();
 			}
 		}
@@ -3454,7 +3454,7 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 			}
 
 			/* if the monitoring section had a pointer to this route, remove it */
-			if (!deletion_in_progress () && _monitor_out && (*iter)->can_solo ()) {
+			if (!deletion_in_progress () && _monitor_out && (*iter)->can_monitor ()) {
 				Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 				ProcessorChangeBlocker pcb (this, false);
 				(*iter)->remove_monitor_send ();
@@ -3571,7 +3571,7 @@ Session::route_listen_changed (Controllable::GroupControlDisposition group_overr
 					continue;
 				}
 
-				if ((*i)->solo_isolate_control()->solo_isolated() || !(*i)->can_solo()) {
+				if ((*i)->solo_isolate_control()->solo_isolated() || !(*i)->can_monitor()) {
 					/* route does not get solo propagated to it */
 					continue;
 				}
@@ -3801,17 +3801,15 @@ Session::update_route_solo_state (boost::shared_ptr<RouteList> r)
 	}
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if ((*i)->can_solo()) {
-			if (Config->get_solo_control_is_listen_control()) {
-				if ((*i)->solo_control()->soloed_by_self_or_masters()) {
-					listeners++;
-					something_listening = true;
-				}
-			} else {
-				(*i)->set_listen (false);
-				if ((*i)->can_solo() && (*i)->solo_control()->soloed_by_self_or_masters()) {
-					something_soloed = true;
-				}
+		if ((*i)->can_monitor() && Config->get_solo_control_is_listen_control()) {
+			if ((*i)->solo_control()->soloed_by_self_or_masters()) {
+				listeners++;
+				something_listening = true;
+			}
+		} else if ((*i)->can_solo()) {
+			(*i)->set_listen (false);
+			if ((*i)->can_solo() && (*i)->solo_control()->soloed_by_self_or_masters()) {
+				something_soloed = true;
 			}
 		}
 
