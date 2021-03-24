@@ -113,25 +113,21 @@ timecnt_t::end (TimeDomain return_domain) const
 			}
 		}
 
-	} else { /* _distance in audio time */
+	} /* else _distance in audio time */
 
-		if (_position.time_domain() == AudioTime) {
-			/* distance & position in audio, so return must be beats (all 3 as audio is handled above) */
-			return timepos_t (TempoMap::use()->quarters_at_superclock (_position.superclocks() + magnitude()));
+	if (_position.time_domain() == AudioTime) {
+		/* distance & position in audio, so return must be beats (all 3 as audio is handled above) */
+		return timepos_t (TempoMap::use()->quarters_at_superclock (_position.superclocks() + magnitude()));
 
-		} else if (_position.time_domain() == BeatTime) {
+	}  /* else if (_position.time_domain() == BeatTime) { */
 
-			const superclock_t sc = TempoMap::use()->superclock_at (_position.beats()) + magnitude();
+	const superclock_t sc = TempoMap::use()->superclock_at (_position.beats()) + magnitude();
 
-			if (return_domain == AudioTime) {
-				return timepos_t::from_superclock (sc);
-			} else {
-				return timepos_t (TempoMap::use()->quarters_at_superclock (sc));
-			}
-		}
+	if (return_domain == AudioTime) {
+		return timepos_t::from_superclock (sc);
 	}
 
-	/*NOTREACHED*/
+	return timepos_t (TempoMap::use()->quarters_at_superclock (sc));
 }
 
 void
