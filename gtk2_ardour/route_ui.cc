@@ -675,8 +675,6 @@ RouteUI::solo_press(GdkEventButton* ev)
 				}
 
 				if (Config->get_solo_control_is_listen_control()) {
-					/* ??? we need a just_one_listen() method */
-				} else {
 					DisplaySuspender ds;
 					_route->solo_control()->set_value (1.0, Controllable::NoGroup);
 				}
