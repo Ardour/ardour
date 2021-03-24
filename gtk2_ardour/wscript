@@ -941,7 +941,7 @@ def build(bld):
     # NATIVE ARDOUR BINDING FILES
     # explicitly state the use of perl here so that it works on windows too
     #
-    a_rule = 'perl %s/tools/fmt-bindings --platform="%s" --winkey="%s" --accelmap ${SRC[0].abspath()} >${TGT}' % (bld.top_dir, sys.platform, bld.env['WINDOWS_KEY'] )
+    a_rule = 'perl %s/tools/fmt-bindings --platform="%s" --winkey="%s" --accelmap 1 ${SRC[0].abspath()} >${TGT}' % (bld.top_dir, sys.platform, bld.env['WINDOWS_KEY'] )
     for b in [ 'ardour' ] :
         obj = bld(
             target = b + '.keys',
