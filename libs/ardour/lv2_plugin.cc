@@ -3118,7 +3118,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 		 * so it needs to be realative to that.
 		 */
 		_current_bpm = metric.tempo().note_types_per_minute();
-		Temporal::BBT_Time bbt (metric.bbt_at (start));
+		Temporal::BBT_Time bbt (metric.bbt_at (start0));
 		double beatpos = (bbt.bars - 1) * metric.divisions_per_bar()
 		               + (bbt.beats - 1)
 		               + (bbt.ticks / Temporal::ticks_per_beat);
