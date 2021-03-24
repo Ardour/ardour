@@ -101,7 +101,7 @@ Session::prepare_momentary_solo (SoloMuteRelease* smr, bool exclusive, boost::sh
 
 	for (RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
 #ifdef MIXBUS
-		if ((0 == route->mixbus()) != (0 == (*i)->mixbus ())) {
+		if (route && (0 == route->mixbus()) != (0 == (*i)->mixbus ())) {
 			continue;
 		}
 #endif
