@@ -495,6 +495,7 @@ FoldbackStrip::init ()
 	global_vpacker.pack_end (output_button, Gtk::PACK_SHRINK);
 	global_vpacker.pack_end (master_box, Gtk::PACK_SHRINK);
 	global_vpacker.pack_end (*_meter, false, false);
+	global_vpacker.pack_end (*solo_button, false, false);
 	global_vpacker.pack_end (*insert_box, Gtk::PACK_SHRINK);
 	global_vpacker.pack_end (panners, Gtk::PACK_SHRINK);
 
@@ -619,10 +620,6 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 		RouteUI::self_delete ();
 
 		return;
-	}
-	if (_route) {
-		// just in case
-		_route->solo_control()->set_value (0.0, Controllable::NoGroup);
 	}
 
 	RouteUI::set_route (rt);
@@ -1576,8 +1573,15 @@ FoldbackStrip::revert_to_default_display ()
 void
 FoldbackStrip::set_button_names ()
 {
-	// This is called by various places, so it has to be here even if we don't need it
-	return;
+	solo_button->set_sensitive (Config->get_solo_control_is_listen_control());
+	switch (Config->get_listen_position()) {
+		case AfterFaderListen:
+			solo_button->set_text (_("AFL"));
+			break;
+		case PreFaderListen:
+			solo_button->set_text (_("PFL"));
+			break;
+	}
 }
 
 PluginSelector*
