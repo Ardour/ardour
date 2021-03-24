@@ -860,8 +860,8 @@ timepos_t::string_to (std::string const & str)
 		/* old school position format: we assume samples */
 		std::stringstream ss (str);
 		ss >> sm;
-		v = build (false, samples_to_superclock (s, TEMPORAL_SAMPLE_RATE));
-		cerr << "deserialized timepos from older " << str << " as " << *this << endl;
+		v = build (false, samples_to_superclock (sm, TEMPORAL_SAMPLE_RATE));
+		cerr << "deserialized timepos from older " << str << " as " << *this << " with sm = " << sm << " and sr = " << TEMPORAL_SAMPLE_RATE << " s2sc " << endl;
 		return true;
 	}
 
