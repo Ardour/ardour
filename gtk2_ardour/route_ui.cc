@@ -209,7 +209,6 @@ RouteUI::init ()
 
 	solo_button = manage (new ArdourButton);
 	solo_button->set_name ("solo button");
-	UI::instance()->set_tip (solo_button, _("Mute other (non-soloed) tracks"), "");
 	solo_button->set_no_show_all (true);
 
 	rec_enable_button = manage (new ArdourButton);
@@ -240,7 +239,7 @@ RouteUI::init ()
 	_session->SoloChanged.connect (_session_connections, invalidator (*this), boost::bind (&RouteUI::solo_changed_so_update_mute, this), gui_context());
 	_session->TransportStateChange.connect (_session_connections, invalidator (*this), boost::bind (&RouteUI::check_rec_enable_sensitivity, this), gui_context());
 	_session->RecordStateChanged.connect (_session_connections, invalidator (*this), boost::bind (&RouteUI::session_rec_enable_changed, this), gui_context());
-	_session->MonitorBusAddedOrRemoved.connect (_session_connections, invalidator (*this), boost::bind (&RouteUI::set_button_names, this), gui_context());
+	_session->MonitorBusAddedOrRemoved.connect (_session_connections, invalidator (*this), boost::bind (&RouteUI::update_solo_button, this), gui_context());
 
 	_session->config.ParameterChanged.connect (*this, invalidator (*this), boost::bind (&RouteUI::parameter_changed, this, _1), gui_context());
 	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&RouteUI::parameter_changed, this, _1), gui_context());
@@ -435,6 +434,7 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 
 	update_mute_display ();
 	update_solo_display ();
+	update_solo_button ();
 
 	if (!UIConfiguration::instance().get_blink_rec_arm()) {
 		blink_rec_display(true); // set initial rec-en button state
@@ -1984,6 +1984,18 @@ RouteUI::check_rec_enable_sensitivity ()
 }
 
 void
+RouteUI::update_solo_button ()
+{
+	set_button_names ();
+
+	if (Config->get_solo_control_is_listen_control()) {
+		UI::instance()->set_tip (solo_button, _("Listen to this track"), "");
+	} else {
+		UI::instance()->set_tip (solo_button, _("Mute other (non-soloed) tracks"), "");
+	}
+}
+
+void
 RouteUI::parameter_changed (string const & p)
 {
 	/* this handles RC and per-session parameter changes */
@@ -1991,7 +2003,7 @@ RouteUI::parameter_changed (string const & p)
 	if (p == "disable-disarm-during-roll") {
 		check_rec_enable_sensitivity ();
 	} else if (p == "solo-control-is-listen-control" || p == "listen-position") {
-		set_button_names ();
+		update_solo_button ();
 	} else if (p == "session-monitoring") {
 		update_monitoring_display ();
 	} else if (p == "auto-input") {

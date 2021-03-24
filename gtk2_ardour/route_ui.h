@@ -348,6 +348,7 @@ private:
 	void update_solo_display ();
 	void update_mute_display ();
 	void update_polarity_display ();
+	void update_solo_button ();
 
 	int _i_am_the_modifier;
 	std::vector<ArdourWidgets::ArdourButton*> _invert_buttons;
