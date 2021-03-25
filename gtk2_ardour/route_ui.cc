@@ -674,10 +674,8 @@ RouteUI::solo_press(GdkEventButton* ev)
 					_session->prepare_momentary_solo (0, true, _route);
 				}
 
-				if (Config->get_solo_control_is_listen_control()) {
-					DisplaySuspender ds;
-					_route->solo_control()->set_value (1.0, Controllable::NoGroup);
-				}
+				DisplaySuspender ds;
+				_route->solo_control()->set_value (1.0, Controllable::NoGroup);
 
 			} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
 
