@@ -316,7 +316,7 @@ Editor::import_smf_tempo_map (Evoral::SMF const & smf, timepos_t const & pos)
 
 		if (have_initial_meter) {
 
-			bbt = new_map->bbt_at (Temporal::Beats (int_div_round (t->time_pulses * 4, (size_t) smf.ppqn()), 0));
+			bbt = new_map->bbt_at (timepos_t (Temporal::Beats (int_div_round (t->time_pulses * 4, (size_t) smf.ppqn()), 0)));
 			new_map->set_tempo (tempo, bbt);
 
 			if (!(meter == last_meter)) {
