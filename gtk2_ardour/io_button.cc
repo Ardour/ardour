@@ -235,12 +235,33 @@ IOButton::button_press (GdkEventButton* ev)
 	RouteList                            copy   = *routes;
 	copy.sort (RouteCompareByName ());
 
-	for (ARDOUR::RouteList::const_iterator i = copy.begin (); i != copy.end (); ++i) {
-		maybe_add_bundle_to_menu ((*i)->output ()->bundle (), current);
-	}
-
-	if (!_input) {
+	if (_input) {
+		/* other routes outputs */
+		for (ARDOUR::RouteList::const_iterator i = copy.begin (); i != copy.end (); ++i) {
+			if ((*i)->is_foldbackbus ()) {
+				continue;
+			}
+			if (_route->feeds_according_to_graph (*i)) {
+				/* do not offer connections that would cause feedback */
+				continue;
+			}
+			maybe_add_bundle_to_menu ((*i)->output ()->bundle (), current);
+		}
+	} else {
 		DataType intended_type = guess_main_type ();
+
+		/* other routes inputs */
+		for (ARDOUR::RouteList::const_iterator i = copy.begin(); i != copy.end(); ++i) {
+			if ((*i)->is_foldbackbus ()) {
+				continue;
+			}
+			if ((*i)->feeds_according_to_graph (_route)) {
+				/* do not offer connections that would cause feedback */
+				continue;
+			}
+			maybe_add_bundle_to_menu ((*i)->input()->bundle(), current, intended_type);
+		}
+
 		/* then try adding user output bundles, often labeled/grouped physical inputs */
 		for (ARDOUR::BundleList::iterator i = b->begin (); i != b->end (); ++i) {
 			if (boost::dynamic_pointer_cast<UserBundle> (*i)) {
