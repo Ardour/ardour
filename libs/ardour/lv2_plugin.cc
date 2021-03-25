@@ -2736,7 +2736,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 
 			if (valid && (flags & PORT_INPUT)) {
 				if ((flags & PORT_POSITION)) {
-					Temporal::BBT_Time bbt (metric.bbt_at (samples_to_superclock (start0, AudioEngine::instance()->sample_rate())));
+					Temporal::BBT_Time bbt (metric.bbt_at (timepos_t (start0)));
 					double bpm = metric.tempo().note_types_per_minute();
 					double time_scale = Port::speed_ratio ();
 					double beatpos = (bbt.bars - 1) * metric.meter().divisions_per_bar()
@@ -3118,7 +3118,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 		 * so it needs to be realative to that.
 		 */
 		_current_bpm = metric.tempo().note_types_per_minute();
-		Temporal::BBT_Time bbt (metric.bbt_at (start0));
+		Temporal::BBT_Time bbt (metric.bbt_at (timepos_t (start0)));
 		double beatpos = (bbt.bars - 1) * metric.divisions_per_bar()
 		               + (bbt.beats - 1)
 		               + (bbt.ticks / Temporal::ticks_per_beat);

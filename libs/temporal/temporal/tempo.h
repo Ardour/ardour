@@ -497,7 +497,7 @@ class LIBTEMPORAL_API TempoMetric {
 		return int_div_round (superclocks_per_note_type_at_superclock (sc) * _tempo->note_type(), (int64_t) _meter->note_value());
 	}
 
-	BBT_Time bbt_at (superclock_t sc) const;
+	BBT_Time bbt_at (timepos_t const &) const;
 	superclock_t superclock_at (BBT_Time const &) const;
 
 	samplepos_t samples_per_bar (samplecnt_t sr) const {
@@ -757,8 +757,6 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 		return metric_at (bbt).meter().round_to_bar (bbt);
 	}
 
-	BBT_Time bbt_at (superclock_t sc) const;
-	BBT_Time bbt_at (Beats const &) const;
 	BBT_Time bbt_at (timepos_t const &) const;
 
 	Beats quarters_at (BBT_Time const &) const;
@@ -849,6 +847,9 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 	void remove_point (Point const &);
 
 	void copy_points (TempoMap const & other);
+
+	BBT_Time bbt_at (Beats const &) const;
+	BBT_Time bbt_at (superclock_t sc) const;
 
 	/* parsing legacy tempo maps */
 

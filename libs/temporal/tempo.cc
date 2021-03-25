@@ -573,8 +573,14 @@ MeterPoint::get_state () const
 }
 
 Temporal::BBT_Time
-TempoMetric::bbt_at (superclock_t sc) const
+TempoMetric::bbt_at (timepos_t const & pos) const
 {
+	if (pos.is_beats()) {
+		return bbt_at (pos.beats());
+	}
+
+	superclock_t sc = pos.superclocks();
+
 	const Beats dq = _tempo->quarters_at_superclock (sc) - _meter->beats();
 
 	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("qn @ %1 = %2, meter @ %3 , delta %4\n", sc, _tempo->quarters_at_superclock (sc), _meter->beats(), dq));
@@ -1207,7 +1213,7 @@ TempoMap::move_meter (MeterPoint const & mp, timepos_t const & when, bool push)
 
 		/* compute the BBT at the given superclock position, given the prior TempoMetric */
 
-		bbt = metric.bbt_at (sc);
+		bbt = metric.bbt_at (timepos_t::from_superclock (sc));
 
 		/* meter changes must fall on a bar change */
 
@@ -1460,7 +1466,7 @@ TempoMap::set_meter (Meter const & m, timepos_t const & time)
 
 		/* meter changes must be on bar */
 
-		bbt = metric.bbt_at (sc);
+		bbt = metric.bbt_at (time);
 		bbt = metric.round_to_bar (bbt);
 
 		/* compute beat position */
@@ -1509,7 +1515,7 @@ TempoMap::bbt_at (timepos_t const & pos) const
 Temporal::BBT_Time
 TempoMap::bbt_at (superclock_t s) const
 {
-	return metric_at (s).bbt_at (s);
+	return metric_at (s).bbt_at (timepos_t::from_superclock (s));
 }
 
 Temporal::BBT_Time
@@ -1691,7 +1697,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 
 	/* determine the BBT at start */
 
-	BBT_Time bbt = metric.bbt_at (start);
+	BBT_Time bbt = metric.bbt_at (timepos_t::from_superclock (start));
 
 	DEBUG_TRACE (DEBUG::Grid, string_compose ("start %1 is %2\n", start, bbt));
 
@@ -1835,7 +1841,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 
 				step = metric.superclocks_per_grid_at (start);
 				start += step;
-				bbt = metric.bbt_at (start);
+				bbt = metric.bbt_at (timepos_t::from_superclock (start));
 				DEBUG_TRACE (DEBUG::Grid, string_compose ("step for note type was %1, now @ %2\n", step, start));
 
 			} else {
@@ -1966,7 +1972,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 			}
 
 			start += step;
-			bbt = metric.bbt_at (start);
+			bbt = metric.bbt_at (timepos_t::from_superclock (start));
 
 		} while (start < end);
 
@@ -2197,7 +2203,7 @@ TempoMap::bbt_walk (BBT_Time const & bbt, BBT_Offset const & o) const
 		pos += metric.superclocks_per_bar ();
 	}
 
-	return metric.bbt_at (pos);
+	return metric.bbt_at (timepos_t::from_superclock (pos));
 }
 
 Temporal::Beats

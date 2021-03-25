@@ -203,7 +203,7 @@ intptr_t Session::vst_callback (
 				Temporal::BBT_Time bbt;
 
 				try {
-					bbt = tmap->bbt_at (now);
+					bbt = tmap->bbt_at (timepos_t (now));
 					bbt.beats = 1;
 					bbt.ticks = 0;
 					/* exact quarter note */

@@ -549,7 +549,7 @@ void
 BasicUI::jump_by_bars (int bars, LocateTransportDisposition ltd)
 {
 	TempoMap::SharedPtr tmap (TempoMap::use());
-	Temporal::BBT_Time bbt (tmap->bbt_at (session->transport_sample()));
+	Temporal::BBT_Time bbt (tmap->bbt_at (timepos_t (session->transport_sample())));
 
 	bars += bbt.bars;
 	if (bars < 0) {

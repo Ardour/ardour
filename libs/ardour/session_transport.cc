@@ -533,7 +533,7 @@ Session::start_transport (bool after_loop)
 
 			const double num = tempometric.divisions_per_bar ();
 			/* XXX possible optimization: get meter and BBT time in one call */
-			const Temporal::BBT_Time bbt = tmap->bbt_at (_transport_sample);
+			const Temporal::BBT_Time bbt = tmap->bbt_at (timepos_t (_transport_sample));
 			const double bar_fract = (double) bbt.beats / tempometric.divisions_per_bar();
 
 			_count_in_samples = tempometric.samples_per_bar (_current_sample_rate);
