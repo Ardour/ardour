@@ -1665,20 +1665,26 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 	 * grid, depending on whether or not it is a multiple of bar_mod.
 	 */
 
-	for (tp = &_tempos.front(), mp = &_meters.front(), p = _points.begin(); p != _points.end() && p->sclock() < start; ++p) {
+	for (tp = &_tempos.front(), p = _points.begin(); p != _points.end() && p->sclock() < start; ++p) {
 
 		TempoPoint* tpp;
-		MeterPoint* mpp;
 
-		DEBUG_TRACE (DEBUG::Grid, string_compose ("Looking at a point %1\n", *p));
+		DEBUG_TRACE (DEBUG::Grid, string_compose ("Looking at a point tempo %1\n", *p));
 
 		if ((tpp = dynamic_cast<TempoPoint*> (&(*p))) != 0) {
-			DEBUG_TRACE (DEBUG::Grid, "set tempo with that\n");
+			DEBUG_TRACE (DEBUG::Grid, string_compose ("set tempo with that (check: %1 < %2)\n", p->sclock(), start));
 			tp = tpp;
 		}
+	}
+
+	for (mp = &_meters.front(), p = _points.begin(); p != _points.end() && p->sclock() < start; ++p) {
+
+		MeterPoint* mpp;
+
+		DEBUG_TRACE (DEBUG::Grid, string_compose ("Looking at a point for meter %1\n", *p));
 
 		if ((mpp = dynamic_cast<MeterPoint*> (&(*p))) != 0) {
-			DEBUG_TRACE (DEBUG::Grid, "set meter with that\n");
+			DEBUG_TRACE (DEBUG::Grid, string_compose ("set meter with that (check: %1 < %2)\n", p->sclock(), start));
 			mp = mpp;
 		}
 
@@ -1717,14 +1723,17 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 
 			DEBUG_TRACE (DEBUG::Grid, string_compose ("new bbt for start (rounded up) = %1\n", bbt));
 
-			for (tp = &_tempos.front(), mp = &_meters.front(), p = _points.begin(); p != _points.end() && p->sclock() < start; ++p) {
+			for (tp = &_tempos.front(), p = _points.begin(); p != _points.end() && p->bbt() < bbt; ++p) {
 
 				TempoPoint* tpp;
-				MeterPoint* mpp;
 
 				if ((tpp = dynamic_cast<TempoPoint*> (&(*p))) != 0) {
 					tp = tpp;
 				}
+			}
+
+			for (mp = &_meters.front(), p = _points.begin(); p != _points.end() && p->bbt() < bbt; ++p) {
+				MeterPoint* mpp;
 
 				if ((mpp = dynamic_cast<MeterPoint*> (&(*p))) != 0) {
 					mp = mpp;
@@ -1735,6 +1744,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 			/* reset metric */
 
 			metric = TempoMetric (*tp, *mp);
+			DEBUG_TRACE (DEBUG::Grid, string_compose ("metric in effect(2) at %1 = %2\n", start, metric));
 
 			/* recompute superclock position */
 
@@ -1776,7 +1786,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 
 			bbt = bar;
 
-			for (tp = &_tempos.front(), mp = &_meters.front(), p = _points.begin(); p != _points.end() && p->sclock() < start; ++p) {
+			for (tp = &_tempos.front(), p = _points.begin(); p != _points.end() && p->bbt() < bbt; ++p) {
 
 				TempoPoint* tpp;
 				MeterPoint* mpp;
@@ -1784,17 +1794,20 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 				if ((tpp = dynamic_cast<TempoPoint*> (&(*p))) != 0) {
 					tp = tpp;
 				}
+			}
+
+			for (mp = &_meters.front(), p = _points.begin(); p != _points.end() && p->bbt() < bbt; ++p) {
+				MeterPoint* mpp;
 
 				if ((mpp = dynamic_cast<MeterPoint*> (&(*p))) != 0) {
 					mp = mpp;
 				}
-
 			}
 
 			/* reset metric */
 
 			metric = TempoMetric (*tp, *mp);
-
+			DEBUG_TRACE (DEBUG::Grid, string_compose ("metric in effect(3) at %1 = %2\n", start, metric));
 			start = metric.superclock_at (bbt);
 
 		} else {
@@ -2765,7 +2778,6 @@ TempoMap::metric_at (superclock_t sc, bool can_match) const
 	MeterPoint const * mpp = 0;
 
 	TempoPoint const * prev_t = &_tempos.front();
-	MeterPoint const * prev_m = &_meters.front();
 
 	/* Yes, linear search because the typical size of _points
 	 * is 2, and extreme sizes are on the order of 10-100
@@ -2777,6 +2789,11 @@ TempoMap::metric_at (superclock_t sc, bool can_match) const
 		if ((tpp = dynamic_cast<TempoPoint const *> (&(*p)))) {
 			prev_t = tpp;
 		}
+	}
+
+	MeterPoint const * prev_m = &_meters.front();
+
+	for (p = _points.begin(); p != _points.end() && p->sclock() < sc; ++p) {
 		if ((mpp = dynamic_cast<MeterPoint const *> (&(*p)))) {
 			prev_m = mpp;
 		}
@@ -2818,7 +2835,6 @@ TempoMap::metric_at (Beats const & b, bool can_match) const
 	MeterPoint const * mpp = 0;
 
 	TempoPoint const * prev_t = &_tempos.front();
-	MeterPoint const * prev_m = &_meters.front();
 
 	/* Yes, linear search because the typical size of _points
 	 * is 2, and extreme sizes are on the order of 10-100
@@ -2830,6 +2846,11 @@ TempoMap::metric_at (Beats const & b, bool can_match) const
 		if ((tpp = dynamic_cast<TempoPoint const *> (&(*p)))) {
 			prev_t = tpp;
 		}
+	}
+
+	MeterPoint const * prev_m = &_meters.front();
+
+	for (p = _points.begin(); p != _points.end() && p->beats() < b; ++p) {
 		if ((mpp = dynamic_cast<MeterPoint const *> (&(*p)))) {
 			prev_m = mpp;
 		}
@@ -2871,7 +2892,6 @@ TempoMap::metric_at (BBT_Time const & bbt, bool can_match) const
 	MeterPoint const * mpp = 0;
 
 	TempoPoint const * prev_t = &_tempos.front();
-	MeterPoint const * prev_m = &_meters.front();
 
 	/* Yes, linear search because the typical size of _points
 	 * is 2, and extreme sizes are on the order of 10-100
@@ -2883,6 +2903,11 @@ TempoMap::metric_at (BBT_Time const & bbt, bool can_match) const
 		if ((tpp = dynamic_cast<TempoPoint const *> (&(*p)))) {
 			prev_t = tpp;
 		}
+	}
+
+	MeterPoint const * prev_m = &_meters.front();
+
+	for (p = _points.begin(); p != _points.end() && p->bbt() < bbt; ++p) {
 		if ((mpp = dynamic_cast<MeterPoint const *> (&(*p)))) {
 			prev_m = mpp;
 		}
