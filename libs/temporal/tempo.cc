@@ -3411,7 +3411,7 @@ TempoMap::set_state_3x (const XMLNode& node)
 		}
 	}
 
-	if (!have_initial_tempo || !have_initial_tempo) {
+	if (!have_initial_meter || !have_initial_tempo) {
 		error << _("Old tempo map information is missing either tempo or meter information - ignored") << endmsg;
 		return -1;
 	}
