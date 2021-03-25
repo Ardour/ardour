@@ -123,18 +123,18 @@ public:
 
 	std::string name()  const;
 
-	boost::shared_ptr<ARDOUR::Stripable> stripable() const { return RouteUI::stripable(); }
-
-	PannerUI&       panner_ui()       { return panners; }
+	PannerUI&       panner_ui() { return panners; }
 	PluginSelector* plugin_selector();
 
 	void set_embedded (bool);
-
 	void fast_update ();
-
 	void set_route (boost::shared_ptr<ARDOUR::Route>);
 	void set_button_names ();
 	void revert_to_default_display ();
+
+	boost::shared_ptr<ARDOUR::Stripable> stripable() const {
+		return RouteUI::stripable();
+	}
 
 	/** @return the delivery that is being edited using our fader; it will be the
 	 *  last send passed to show_send(), or our route's main out delivery.
@@ -221,8 +221,7 @@ private:
 
 	Gtk::Menu output_menu;
 	std::list<boost::shared_ptr<ARDOUR::Bundle> > output_menu_bundles;
-	void maybe_add_bundle_to_output_menu (boost::shared_ptr<ARDOUR::Bundle>, ARDOUR::BundleList const &,
-										  ARDOUR::DataType type = ARDOUR::DataType::NIL);
+	void maybe_add_bundle_to_output_menu (boost::shared_ptr<ARDOUR::Bundle>, ARDOUR::BundleList const &, ARDOUR::DataType type = ARDOUR::DataType::NIL);
 
 	void bundle_output_chosen (boost::shared_ptr<ARDOUR::Bundle>);
 
@@ -243,9 +242,9 @@ private:
 	Gtk::Menu* build_route_ops_menu ();
 	Gtk::Menu* build_route_select_menu ();
 
-	void previous_button_clicked ();
-	void next_button_clicked ();
-	void prev_next_changed ();
+	void cycle_foldbacks (bool next);
+	void update_sensitivity ();
+	void spill_change (boost::shared_ptr<ARDOUR::Stripable>);
 	void show_sends_clicked ();
 	void send_blink (bool);
 

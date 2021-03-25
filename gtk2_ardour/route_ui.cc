@@ -320,7 +320,11 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 
 	_route = rp;
 
-	if ( !_route->presentation_info().color_set() ) {
+	if (!_route) {
+		return;
+	}
+
+	if (!_route->presentation_info().color_set()) {
 		/* deal with older 4.x color, which was stored in the GUI object state */
 
 		string p = ARDOUR_UI::instance()->gui_object_state->get_string (route_state_id(), X_("color"));

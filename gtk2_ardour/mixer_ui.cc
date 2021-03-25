@@ -632,7 +632,6 @@ Mixer_UI::add_stripables (StripableList& slist)
 					if (foldback_strip) {
 						// last strip created is shown
 						foldback_strip->set_route (route);
-						foldback_strip->prev_next_changed();
 					} else {
 						foldback_strip = new FoldbackStrip (*this, _session, route);
 						out_packer.pack_start (*foldback_strip, false, false);

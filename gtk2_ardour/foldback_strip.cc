@@ -128,8 +128,6 @@ FoldbackSend::FoldbackSend (boost::shared_ptr<Send> snd, \
 	_send_route->PropertyChanged.connect (_connections, invalidator (*this), boost::bind (&FoldbackSend::route_property_changed, this, _1), gui_context());
 
 	show ();
-
-
 }
 
 FoldbackSend::~FoldbackSend ()
@@ -519,8 +517,8 @@ FoldbackStrip::init ()
 	output_button.signal_button_release_event().connect (sigc::mem_fun(*this, &FoldbackStrip::output_release), false);
 
 	name_button.signal_button_press_event().connect (sigc::mem_fun(*this, &FoldbackStrip::name_button_button_press), false);
-	_previous_button.signal_clicked.connect (sigc::mem_fun (*this, &FoldbackStrip::previous_button_clicked));
-	_next_button.signal_clicked.connect (sigc::mem_fun (*this, &FoldbackStrip::next_button_clicked));
+	_previous_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &FoldbackStrip::cycle_foldbacks), false));
+	_next_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &FoldbackStrip::cycle_foldbacks), true));
 	_hide_button.signal_clicked.connect (sigc::mem_fun(*this, &FoldbackStrip::hide_clicked));
 	_show_sends_button.signal_clicked.connect (sigc::mem_fun(*this, &FoldbackStrip::show_sends_clicked));
 	send_scroller.signal_button_press_event().connect (sigc::mem_fun (*this, &FoldbackStrip::send_button_press_event));
@@ -546,6 +544,7 @@ FoldbackStrip::init ()
 	signal_enter_notify_event().connect (sigc::mem_fun(*this, &FoldbackStrip::mixer_strip_enter_event ));
 	signal_leave_notify_event().connect (sigc::mem_fun(*this, &FoldbackStrip::mixer_strip_leave_event ));
 
+	Mixer_UI::instance()->show_spill_change.connect (sigc::mem_fun (*this, &FoldbackStrip::spill_change));
 }
 
 FoldbackStrip::~FoldbackStrip ()
@@ -604,31 +603,25 @@ FoldbackStrip::update_fb_level_control ()
 void
 FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 {
-	bool sh_snd = _showing_sends;
-	if (_route) {
-		// before we do anything unset show sends
-		Mixer_UI::instance()->show_spill (boost::shared_ptr<ARDOUR::Stripable>());
-		BusSendDisplayChanged (boost::shared_ptr<Route> ()); /* EMIT SIGNAL */
-		_showing_sends = false;
-		_show_sends_button.set_active (false);
-		send_blink_connection.disconnect ();
-	}
+	RouteUI::set_route (rt);
 
-	/// FIX NO route
 	if (!rt) {
 		clear_send_box ();
+		update_sensitivity ();
+		if (_showing_sends) {
+			Mixer_UI::instance()->show_spill (boost::shared_ptr<ARDOUR::Stripable>());
+			_showing_sends = false;
+			send_blink_connection.disconnect ();
+		}
+		RouteUI::set_route (rt);
 		RouteUI::self_delete ();
-
 		return;
 	}
-
-	RouteUI::set_route (rt);
 
 	insert_box->set_route (_route);
 	revert_to_default_display ();
 	update_fb_level_control();
 
-	BusSendDisplayChanged (boost::shared_ptr<Route> ());
 	_showing_sends = false;
 	_show_sends_button.set_active (false);
 	send_blink_connection.disconnect ();
@@ -661,7 +654,7 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 	update_output_display ();
 
 	add_events (Gdk::BUTTON_RELEASE_MASK);
-	prev_next_changed ();
+	update_sensitivity ();
 	_previous_button.show();
 	_next_button.show();
 	_hide_button.show();
@@ -682,16 +675,6 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 	map_frozen();
 
 	show ();
-
-	if (sh_snd) {
-		// if last route had shows sends let it remain active
-		Mixer_UI::instance()->show_spill (_route);
-		BusSendDisplayChanged (_route); /* EMIT SIGNAL */
-		_showing_sends = true;
-		_show_sends_button.set_active (true);
-		send_blink_connection = Timers::blink_connect (sigc::mem_fun (*this, &FoldbackStrip::send_blink));
-	}
-
 }
 
 // predicate for sort call in get_sorted_stripables
@@ -1307,68 +1290,33 @@ FoldbackStrip::name_button_button_press (GdkEventButton* ev)
 }
 
 void
-FoldbackStrip::previous_button_clicked ()
+FoldbackStrip::cycle_foldbacks (bool next)
 {
-	bool past_current = false;
-	boost::shared_ptr<Route> previous = boost::shared_ptr<Route> ();
-	RouteList fb_list;
-	fb_list = _session->get_routelist (true, PresentationInfo::FoldbackBus);
-
-	if (fb_list.size () > 1) {
-		for (RouteList::iterator s = fb_list.begin(); s != fb_list.end(); ++s) {
-			if ((*s) == _route) {
-				past_current = true;
-			}
-			if (!past_current) {
-				previous = boost::dynamic_pointer_cast<Route> (*s);
-			}
-		}
-	} else {
-		// only one route do nothing
+	RouteList rl  (_session->get_routelist (true, PresentationInfo::FoldbackBus));
+	if (rl.size () < 2) {
 		return;
 	}
-	//use previous to set route
-	if (previous) {
-		set_route (previous);
-		if (_showing_sends) {
-			Mixer_UI::instance()->show_spill (_route);
-		}
-	}
-}
+	RouteList::iterator i = find (rl.begin (), rl.end (), _route);
+	assert (i != rl.end ());
 
-void
-FoldbackStrip::next_button_clicked ()
-{
-	bool past_current = false;
-	boost::shared_ptr<Route> next = boost::shared_ptr<Route> ();
-	RouteList fb_list;
-	fb_list = _session->get_routelist (true, PresentationInfo::FoldbackBus);
-
-	if (fb_list.size () > 1) {
-		for (RouteList::iterator s = fb_list.begin(); s != fb_list.end(); ++s) {
-			if (past_current) {
-				next = boost::dynamic_pointer_cast<Route> (*s);
-				break;
-			}
-			if ((*s) == _route) {
-				past_current = true;
-			}
-		}
-	} else {
-		// only one route do nothing
-		return;
-	}
-	//use next to set route
 	if (next) {
-		set_route (next);
-		if (_showing_sends) {
-			Mixer_UI::instance()->show_spill (_route);
+		if (++i == rl.end ()) {
+			i = rl.begin ();
 		}
+	} else {
+		if (i == rl.begin ()) {
+			i = rl.end ();
+		}
+		--i;
+	}
+	set_route (*i);
+	if (_showing_sends) {
+		Mixer_UI::instance()->show_spill (_route);
 	}
 }
 
 void
-FoldbackStrip::prev_next_changed ()
+FoldbackStrip::update_sensitivity ()
 {
 	RouteList fb_list;
 	fb_list = _session->get_routelist (true, PresentationInfo::FoldbackBus);
@@ -1394,20 +1342,27 @@ FoldbackStrip::hide_clicked()
 }
 
 void
-FoldbackStrip::show_sends_clicked ()
+FoldbackStrip::spill_change (boost::shared_ptr<Stripable> s)
 {
-	if (_showing_sends) {
-		Mixer_UI::instance()->show_spill (boost::shared_ptr<ARDOUR::Stripable>());
-		BusSendDisplayChanged (boost::shared_ptr<Route> ()); /* EMIT SIGNAL */
+	if (s == _route) {
+		_showing_sends = true;
+		_show_sends_button.set_active (true);
+		send_blink_connection.disconnect ();
+		send_blink_connection = Timers::blink_connect (sigc::mem_fun (*this, &FoldbackStrip::send_blink));
+	} else {
 		_showing_sends = false;
 		_show_sends_button.set_active (false);
 		send_blink_connection.disconnect ();
+	}
+}
+
+void
+FoldbackStrip::show_sends_clicked ()
+{
+	if (_showing_sends) {
+		Mixer_UI::instance()->show_spill (boost::shared_ptr<Stripable>());
 	} else {
 		Mixer_UI::instance()->show_spill (_route);
-		BusSendDisplayChanged (_route); /* EMIT SIGNAL */
-		_showing_sends = true;
-		_show_sends_button.set_active (true);
-		send_blink_connection = Timers::blink_connect (sigc::mem_fun (*this, &FoldbackStrip::send_blink));
 	}
 }
 
@@ -1759,13 +1714,7 @@ FoldbackStrip::remove_current_fb ()
 			}
 		}
 	}
-	if (next) {
-		set_route (next);
-		_session->remove_route (old_route);
-		prev_next_changed ();
-	} else {
-		clear_send_box ();
-		RouteUI::self_delete ();
-		_session->remove_route (old_route);
-	}
+
+	set_route (next);
+	_session->remove_route (old_route);
 }
