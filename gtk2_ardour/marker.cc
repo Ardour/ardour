@@ -271,10 +271,7 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Container& parent, g
 
 	_position = pos;
 	unit_position = editor.sample_to_pixel (pos.samples());
-	std::cerr << "1marker @ " << unit_position << " from sample " << pos.samples() << std::endl;
 	unit_position -= _shift;
-
-	std::cerr << "2marker @ " << unit_position << " from sample " << pos.samples() << " shift was " << _shift << std::endl;
 
 	group = new ArdourCanvas::Container (&parent, ArdourCanvas::Duple (unit_position, 1));
 #ifdef CANVAS_DEBUG
