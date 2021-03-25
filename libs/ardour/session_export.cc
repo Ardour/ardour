@@ -140,9 +140,11 @@ Session::start_audio_export (samplepos_t position, bool realtime, bool region_ex
 	 * to wait for it to wake up and call
 	 * non_realtime_stop ().
 	 */
-	int timeout = std::max (10, (int)(8 * nominal_sample_rate () / get_block_size ()));
+	int sleeptm = std::max (40000, engine().usecs_per_cycle ());
+	int timeout = std::max (100, 8000000 / sleeptm);
 	do {
-		Glib::usleep (engine().usecs_per_cycle ());
+		Glib::usleep (sleeptm);
+		sched_yield ();
 	} while (_transport_fsm->waiting_for_butler() && --timeout > 0);
 
 	if (timeout == 0) {
