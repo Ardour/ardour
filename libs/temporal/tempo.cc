@@ -2256,7 +2256,7 @@ TempoMap::get_state ()
 int
 TempoMap::set_state (XMLNode const & node, int version)
 {
-	if (version <= 3000) {
+	if (version <= 6000) {
 		return set_state_3x (node);
 	}
 
@@ -3230,8 +3230,9 @@ TempoMap::parse_tempo_state_3x (const XMLNode& node, LegacyTempoState& lts)
 
 	/* position is the only data we extract from older XML */
 
-	if (node.get_property ("frame", lts.sample)) {
+	if (!node.get_property ("frame", lts.sample)) {
 		error << _("Legacy tempo section XML does not have a \"frame\" node - map will be ignored") << endmsg;
+		cerr << _("Legacy tempo section XML does not have a \"frame\" node - map will be ignored") << endl;
 		return -1;
 	}
 
@@ -3242,9 +3243,10 @@ TempoMap::parse_tempo_state_3x (const XMLNode& node, LegacyTempoState& lts)
 		}
 	}
 
-	if (node.get_property ("note-type", lts.note_type)) {
+	if (!node.get_property ("note-type", lts.note_type)) {
 		if (lts.note_type < 1.0) {
 			error << _("TempoSection XML node has an illegal \"note-type\" value") << endmsg;
+			cerr << _("TempoSection XML node has an illegal \"note-type\" value") << endl;
 			return -1;
 		}
 	} else {
@@ -3259,6 +3261,7 @@ TempoMap::parse_tempo_state_3x (const XMLNode& node, LegacyTempoState& lts)
 	if (node.get_property ("end-beats-per-minute", lts.end_note_types_per_minute)) {
 		if (lts.end_note_types_per_minute < 0.0) {
 			info << _("TempoSection XML node has an illegal \"end-beats-per-minute\" value") << endmsg;
+			cerr << _("TempoSection XML node has an illegal \"end-beats-per-minute\" value") << endl;
 			return -1;
 		}
 	}
@@ -3301,12 +3304,12 @@ TempoMap::parse_meter_state_3x (const XMLNode& node, LegacyMeterState& lms)
 
 	/* position is the only data we extract from older XML */
 
-	if (node.get_property ("frame", lms.sample)) {
+	if (!node.get_property ("frame", lms.sample)) {
 		error << _("Legacy tempo section XML does not have a \"frame\" node - map will be ignored") << endmsg;
 		return -1;
 	}
 
-	if (node.get_property ("beat", lms.beat)) {
+	if (!node.get_property ("beat", lms.beat)) {
 		lms.beat = 0.0;
 	}
 
@@ -3358,6 +3361,61 @@ TempoMap::set_state_3x (const XMLNode& node)
 
 	nlist = node.children();
 
+	/* Need initial tempo & meter points, because subsequent ones will use
+	 * set_tempo() and set_meter() which require pre-existing data
+	 */
+
+	bool have_initial_tempo = false;
+	bool have_initial_meter = false;
+
+	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+		XMLNode* child = *niter;
+
+		if (!have_initial_tempo && (child->name() == Tempo::xml_node_name)) {
+
+			LegacyTempoState lts;
+
+			if (parse_tempo_state_3x (*child, lts)) {
+				error << _("Tempo map: could not set new state, restoring old one.") << endmsg;
+				break;
+			}
+
+			Tempo t (lts.note_types_per_minute,
+			         lts.end_note_types_per_minute,
+			         lts.note_type);
+			TempoPoint* tp = new TempoPoint (*this, t, samples_to_superclock (0, TEMPORAL_SAMPLE_RATE), Beats(), BBT_Time());
+			_tempos.push_back (*tp);
+			_points.push_back (*tp);
+			have_initial_tempo = true;
+
+		}
+
+		if (!have_initial_meter && (child->name() == Meter::xml_node_name)) {
+
+			LegacyMeterState lms;
+
+			if (parse_meter_state_3x (*child, lms)) {
+				error << _("Tempo map: could not use old meter state, restoring old one.") << endmsg;
+				break;
+			}
+
+			Meter m (lms.divisions_per_bar, lms.note_type);
+			MeterPoint *mp = new MeterPoint (*this, m, 0, Beats(), BBT_Time());
+			_meters.push_back (*mp);
+			_points.push_back (*mp);
+			have_initial_meter = true;
+		}
+
+		if (have_initial_meter && have_initial_tempo) {
+			break;
+		}
+	}
+
+	if (!have_initial_tempo || !have_initial_tempo) {
+		error << _("Old tempo map information is missing either tempo or meter information - ignored") << endmsg;
+		return -1;
+	}
+
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		XMLNode* child = *niter;
 
@@ -3373,7 +3431,6 @@ TempoMap::set_state_3x (const XMLNode& node)
 			Tempo t (lts.note_types_per_minute,
 			         lts.end_note_types_per_minute,
 			         lts.note_type);
-
 			set_tempo (t, timepos_t (lts.sample));
 
 		} else if (child->name() == Meter::xml_node_name) {
@@ -3381,7 +3438,7 @@ TempoMap::set_state_3x (const XMLNode& node)
 			LegacyMeterState lms;
 
 			if (parse_meter_state_3x (*child, lms)) {
-				error << _("Tempo map: could not set new state, restoring old one.") << endmsg;
+				error << _("Tempo map: could not use old meter state, restoring old one.") << endmsg;
 				break;
 			}
 
