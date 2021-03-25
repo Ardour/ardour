@@ -1330,6 +1330,9 @@ FoldbackStrip::previous_button_clicked ()
 	//use previous to set route
 	if (previous) {
 		set_route (previous);
+		if (_showing_sends) {
+			Mixer_UI::instance()->show_spill (_route);
+		}
 	}
 }
 
@@ -1358,6 +1361,9 @@ FoldbackStrip::next_button_clicked ()
 	//use next to set route
 	if (next) {
 		set_route (next);
+		if (_showing_sends) {
+			Mixer_UI::instance()->show_spill (_route);
+		}
 	}
 }
 
