@@ -147,7 +147,7 @@ RecorderUI::RecorderUI ()
 	_scroller_base.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	_scroller_base.signal_button_release_event().connect (sigc::mem_fun(*this, &RecorderUI::scroller_button_release));
 	_scroller_base.set_size_request (-1, PX_SCALE (20));
-	_scroller_base.signal_expose_event().connect (sigc::bind (sigc::ptr_fun(&ArdourWidgets::ArdourIcon::expose), &_scroller_base, ArdourWidgets::ArdourIcon::ShadedPlusSign,));
+	_scroller_base.signal_expose_event().connect (sigc::bind (sigc::ptr_fun(&ArdourWidgets::ArdourIcon::expose), &_scroller_base, ArdourWidgets::ArdourIcon::ShadedPlusSign));
 
 	/* LAYOUT */
 
