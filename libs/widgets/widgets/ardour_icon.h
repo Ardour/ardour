@@ -21,6 +21,7 @@
 
 #include <stdint.h>
 #include <cairo.h>
+#include <gtkmm/widget.h>
 
 #include "gtkmm2ext/widget_state.h"
 #include "widgets/visibility.h"
@@ -77,6 +78,11 @@ namespace ArdourWidgets { namespace ArdourIcon {
 	                            const int width, const int height,
 	                            const Gtkmm2ext::ActiveState state,
 	                            const uint32_t fg_color);
+
+	LIBWIDGETS_API bool expose (GdkEventExpose* ev,
+	                            Gtk::Widget* w,
+	                            const enum Icon icon);
+
 }; } /* end namespace */
 
 #endif

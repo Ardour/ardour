@@ -21,6 +21,7 @@
 #include <algorithm> // std:min
 
 #include "gtkmm2ext/colors.h"
+#include "gtkmm2ext/rgb_macros.h"
 #include "widgets/ardour_icon.h"
 
 using namespace ArdourWidgets::ArdourIcon;
@@ -1394,4 +1395,22 @@ ArdourWidgets::ArdourIcon::render (cairo_t *cr,
 	}
 	cairo_restore (cr);
 	return rv;
+}
+
+bool
+ArdourWidgets::ArdourIcon::expose (GdkEventExpose* ev, Gtk::Widget* w, const enum ArdourIcon::Icon icon)
+{
+	Glib::RefPtr<Gdk::Window> win (w->get_window());
+  cairo_t* cr = gdk_cairo_create (win->gobj());
+	gdk_cairo_rectangle (cr, &ev->area);
+	cairo_clip (cr);
+
+	Glib::RefPtr<Gtk::Style> style = w->get_style();
+	Gdk::Color fg (style->get_fg (Gtk::STATE_NORMAL));
+
+	ArdourIcon::render (cr, icon, win->get_width (), win->get_height (), Gtkmm2ext::ExplicitActive, 
+	                    RGBA_TO_UINT (fg.get_red() / 255., fg.get_green() / 255, fg.get_blue() / 255, 255));
+	cairo_destroy (cr);
+
+  return true;
 }

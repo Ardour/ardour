@@ -3,7 +3,7 @@ ICONFLAGS?=-g
 AD = ../..
 CXXFLAGS = -Wall
 CPPFLAGS = -I $(AD)/libs/gtkmm2ext -I $(AD)/libs/widgets -I $(AD)/libs/pbd -I $(AD)/build/libs/pbd
-CPPFLAGS += `pkg-config --cflags cairo cairomm-1.0 libxml-2.0 glibmm-2.4`
+CPPFLAGS += `pkg-config --cflags cairo cairomm-1.0 libxml-2.0 glibmm-2.4 gtkmm-2.4`
 
 LDFLAGS = -L$(AD)/build/libs/pbd -Wl,-rpath=$(AD)/build/libs/pbd
 LDFLAGS += -L$(AD)/build/libs/gtkmm2ext -Wl,-rpath=$(AD)/build/libs/gtkmm2ext
