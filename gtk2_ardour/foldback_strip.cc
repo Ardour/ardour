@@ -516,9 +516,6 @@ FoldbackStrip::init ()
 	_packed   = false;
 	_embedded = false;
 
-	_session->engine ().Stopped.connect (*this, invalidator (*this), boost::bind (&FoldbackStrip::engine_stopped, this), gui_context ());
-	_session->engine ().Running.connect (*this, invalidator (*this), boost::bind (&FoldbackStrip::engine_running, this), gui_context ());
-
 	name_button.signal_button_press_event ().connect (sigc::mem_fun (*this, &FoldbackStrip::name_button_button_press), false);
 	_previous_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &FoldbackStrip::cycle_foldbacks), false));
 	_next_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &FoldbackStrip::cycle_foldbacks), true));
@@ -615,22 +612,33 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 	output_button.set_route (_route, this);
 
 	insert_box->set_route (_route);
-	revert_to_default_display ();
 	update_fb_level_control ();
 
 	_showing_sends = false;
 	_show_sends_button.set_active (false);
 	send_blink_connection.disconnect ();
 
+
+	/* setup panners */
+	panner_ui ().set_panner (_route->main_outs ()->panner_shell (), _route->main_outs ()->panner ());
+	update_panner_choices ();
+	panner_ui ().setup_pan ();
+	panner_ui ().set_send_drawing_mode (false);
+
+	if (has_audio_outputs ()) {
+		panners.show_all ();
+	} else {
+		panners.hide_all ();
+	}
+
 	if (_route->panner_shell ()) {
 		update_panner_choices ();
 		_route->panner_shell ()->Changed.connect (route_connections, invalidator (*this), boost::bind (&FoldbackStrip::connect_to_pan, this), gui_context ());
 	}
 
-	// set up metering
+	/* set up metering */
 	_peak_meter = _route->shared_peak_meter ().get ();
 	_route->set_meter_point (MeterPostFader);
-	// _route->set_meter_point (MeterPreFader);
 	_route->set_meter_type (MeterPeak0dB);
 
 	_route->output ()->changed.connect (*this, invalidator (*this), boost::bind (&FoldbackStrip::update_output_display, this), gui_context ());
@@ -648,6 +656,7 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 	panners.setup_pan ();
 	panners.show_all ();
 	update_output_display ();
+	reset_strip_style ();
 
 	add_events (Gdk::BUTTON_RELEASE_MASK);
 	update_sensitivity ();
@@ -1063,27 +1072,6 @@ FoldbackStrip::map_frozen ()
 }
 
 void
-FoldbackStrip::hide_redirect_editors ()
-{
-	_route->foreach_processor (sigc::mem_fun (*this, &FoldbackStrip::hide_processor_editor));
-}
-
-void
-FoldbackStrip::hide_processor_editor (boost::weak_ptr<Processor> p)
-{
-	boost::shared_ptr<Processor> processor (p.lock ());
-	if (!processor) {
-		return;
-	}
-
-	Gtk::Window* w = insert_box->get_processor_ui (processor);
-
-	if (w) {
-		w->hide ();
-	}
-}
-
-void
 FoldbackStrip::reset_strip_style ()
 {
 	if (_route->active ()) {
@@ -1091,60 +1079,6 @@ FoldbackStrip::reset_strip_style ()
 	} else {
 		set_name ("AudioBusStripBaseInactive");
 	}
-}
-
-void
-FoldbackStrip::engine_stopped ()
-{
-}
-
-void
-FoldbackStrip::engine_running ()
-{
-}
-
-void
-FoldbackStrip::drop_send ()
-{
-	boost::shared_ptr<Send> current_send;
-
-	if (_current_delivery && ((current_send = boost::dynamic_pointer_cast<Send> (_current_delivery)) != 0)) {
-		current_send->set_metering (false);
-	}
-
-	send_gone_connection.disconnect ();
-	output_button.set_sensitive (true);
-	set_invert_sensitive (true);
-	_comment_button.set_sensitive (true);
-	fb_level_control->set_sensitive (true);
-}
-
-void
-FoldbackStrip::set_current_delivery (boost::shared_ptr<Delivery> d)
-{
-	_current_delivery = d;
-	DeliveryChanged (_current_delivery);
-}
-
-void
-FoldbackStrip::revert_to_default_display ()
-{
-	drop_send ();
-
-	set_current_delivery (_route->main_outs ());
-
-	panner_ui ().set_panner (_route->main_outs ()->panner_shell (), _route->main_outs ()->panner ());
-	update_panner_choices ();
-	panner_ui ().setup_pan ();
-	panner_ui ().set_send_drawing_mode (false);
-
-	if (has_audio_outputs ()) {
-		panners.show_all ();
-	} else {
-		panners.hide_all ();
-	}
-
-	reset_strip_style ();
 }
 
 void

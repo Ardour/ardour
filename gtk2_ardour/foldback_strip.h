@@ -129,7 +129,6 @@ public:
 	void fast_update ();
 	void set_route (boost::shared_ptr<ARDOUR::Route>);
 	void set_button_names ();
-	void revert_to_default_display ();
 
 	PannerUI& panner_ui ()
 	{
@@ -155,7 +154,7 @@ public:
 	}
 
 	/** The delivery that we are handling the level for with our fader has changed */
-	PBD::Signal1<void, boost::weak_ptr<ARDOUR::Delivery>> DeliveryChanged;
+	PBD::Signal1<void, boost::weak_ptr<ARDOUR::Delivery> > DeliveryChanged;
 
 	static PBD::Signal1<void, FoldbackStrip*> CatchDeletion;
 
@@ -209,12 +208,6 @@ private:
 	void route_property_changed (const PBD::PropertyChange&);
 	void name_changed ();
 	void map_frozen ();
-	void hide_processor_editor (boost::weak_ptr<ARDOUR::Processor> processor);
-	void hide_redirect_editors ();
-	void engine_running ();
-	void engine_stopped ();
-	void set_current_delivery (boost::shared_ptr<ARDOUR::Delivery>);
-	void drop_send ();
 
 	Gtk::Menu* build_route_ops_menu ();
 	Gtk::Menu* build_route_select_menu ();
