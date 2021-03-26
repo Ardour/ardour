@@ -145,14 +145,7 @@ public:
 
 	void route_active_changed ();
 
-	void copy_processors ();
-	void cut_processors ();
-	void paste_processors ();
-	void select_all_processors ();
 	void deselect_all_processors ();
-	bool delete_processors (); //note: returns false if nothing was deleted
-	void toggle_processors ();
-	void ab_plugins ();
 
 private:
 	void init ();

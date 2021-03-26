@@ -693,6 +693,9 @@ Mixer_UI::deselect_all_strip_processors ()
 	for (list<MixerStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
 		(*i)->deselect_all_processors();
 	}
+	if (foldback_strip) {
+		foldback_strip->deselect_all_processors ();
+	}
 }
 
 void

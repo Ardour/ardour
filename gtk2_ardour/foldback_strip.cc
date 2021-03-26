@@ -1006,51 +1006,9 @@ FoldbackStrip::route_active_changed ()
 }
 
 void
-FoldbackStrip::copy_processors ()
-{
-	insert_box->processor_operation (ProcessorBox::ProcessorsCopy);
-}
-
-void
-FoldbackStrip::cut_processors ()
-{
-	insert_box->processor_operation (ProcessorBox::ProcessorsCut);
-}
-
-void
-FoldbackStrip::paste_processors ()
-{
-	insert_box->processor_operation (ProcessorBox::ProcessorsPaste);
-}
-
-void
-FoldbackStrip::select_all_processors ()
-{
-	insert_box->processor_operation (ProcessorBox::ProcessorsSelectAll);
-}
-
-void
 FoldbackStrip::deselect_all_processors ()
 {
 	insert_box->processor_operation (ProcessorBox::ProcessorsSelectNone);
-}
-
-bool
-FoldbackStrip::delete_processors ()
-{
-	return insert_box->processor_operation (ProcessorBox::ProcessorsDelete);
-}
-
-void
-FoldbackStrip::toggle_processors ()
-{
-	insert_box->processor_operation (ProcessorBox::ProcessorsToggleActive);
-}
-
-void
-FoldbackStrip::ab_plugins ()
-{
-	insert_box->processor_operation (ProcessorBox::ProcessorsAB);
 }
 
 void
