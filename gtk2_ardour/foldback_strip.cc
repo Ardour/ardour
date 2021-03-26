@@ -342,21 +342,20 @@ FoldbackSend::remove_me ()
 	_send_route->remove_processor (send_proc);
 }
 
-FoldbackStrip*                     FoldbackStrip::_entered_foldback_strip;
+/* ****************************************************************************/
+
 PBD::Signal1<void, FoldbackStrip*> FoldbackStrip::CatchDeletion;
 
 FoldbackStrip::FoldbackStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt)
 	: SessionHandlePtr (sess)
 	, RouteUI (sess)
 	, _mixer (mx)
-	, _mixer_owned (true)
 	, _showing_sends (false)
 	, _width (80)
 	, _peak_meter (0)
 	, _pr_selection ()
 	, panners (sess)
 	, output_button (false)
-	, _plugin_insert_cnt (0)
 	, _comment_button (_("Comments"))
 	, fb_level_control (0)
 	, _meter (0)
@@ -369,7 +368,6 @@ FoldbackStrip::FoldbackStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Rou
 void
 FoldbackStrip::init ()
 {
-	_entered_foldback_strip = 0;
 	ignore_comment_edit     = false;
 	comment_area            = 0;
 
@@ -505,16 +503,8 @@ FoldbackStrip::init ()
 
 	global_frame.add (global_vpacker);
 	global_frame.set_shadow_type (Gtk::SHADOW_IN);
-	global_frame.set_name ("BaseFrame");
-
+	global_frame.set_name ("MixerStripFrame");
 	add (global_frame);
-
-	/* force setting of visible selected status */
-
-	_selected = true;
-	set_selected (false);
-	_packed   = false;
-	_embedded = false;
 
 	name_button.signal_button_press_event ().connect (sigc::mem_fun (*this, &FoldbackStrip::name_button_button_press), false);
 	_previous_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &FoldbackStrip::cycle_foldbacks), false));
@@ -526,15 +516,12 @@ FoldbackStrip::init ()
 
 	add_events (Gdk::BUTTON_RELEASE_MASK |
 	            Gdk::ENTER_NOTIFY_MASK |
-	            Gdk::LEAVE_NOTIFY_MASK |
 	            Gdk::KEY_PRESS_MASK |
 	            Gdk::KEY_RELEASE_MASK);
 
 	set_flags (get_flags () | Gtk::CAN_FOCUS);
 
-	//watch for mouse enter/exit so we can do some stuff
 	signal_enter_notify_event ().connect (sigc::mem_fun (*this, &FoldbackStrip::mixer_strip_enter_event));
-	signal_leave_notify_event ().connect (sigc::mem_fun (*this, &FoldbackStrip::mixer_strip_leave_event));
 
 	Mixer_UI::instance ()->show_spill_change.connect (sigc::mem_fun (*this, &FoldbackStrip::spill_change));
 }
@@ -543,35 +530,14 @@ FoldbackStrip::~FoldbackStrip ()
 {
 	CatchDeletion (this);
 	delete fb_level_control;
-	fb_level_control = 0;
-	_connections.drop_connections ();
 	clear_send_box ();
 	send_blink_connection.disconnect ();
-
-	if (this == _entered_foldback_strip)
-		_entered_foldback_strip = NULL;
 }
 
 bool
 FoldbackStrip::mixer_strip_enter_event (GdkEventCrossing* /*ev*/)
 {
-	_entered_foldback_strip = this;
-
-	//although we are triggering on the "enter", to the user it will appear that it is happenin on the "leave"
-	//because the FoldbackStrip control is a parent that encompasses the strip
 	deselect_all_processors ();
-
-	return false;
-}
-
-bool
-FoldbackStrip::mixer_strip_leave_event (GdkEventCrossing* ev)
-{
-	//if we have moved outside our strip, but not into a child view, then deselect ourselves
-	if (!(ev->detail == GDK_NOTIFY_INFERIOR)) {
-		_entered_foldback_strip = 0;
-	}
-
 	return false;
 }
 
@@ -621,7 +587,6 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 
 	/* setup panners */
 	panner_ui ().set_panner (_route->main_outs ()->panner_shell (), _route->main_outs ()->panner ());
-	update_panner_choices ();
 	panner_ui ().setup_pan ();
 	panner_ui ().set_send_drawing_mode (false);
 
@@ -643,14 +608,13 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 
 	_route->output ()->changed.connect (*this, invalidator (*this), boost::bind (&FoldbackStrip::update_output_display, this), gui_context ());
 	_route->io_changed.connect (route_connections, invalidator (*this), boost::bind (&FoldbackStrip::io_changed_proxy, this), gui_context ());
-
 	_route->comment_changed.connect (route_connections, invalidator (*this), boost::bind (&FoldbackStrip::setup_comment_button, this), gui_context ());
 
+	_session->FBSendsChanged.connect (route_connections, invalidator (*this), boost::bind (&FoldbackStrip::update_send_box, this), gui_context ());
 	/* now force an update of all the various elements */
 
 	name_changed ();
 	update_send_box ();
-	_session->FBSendsChanged.connect (route_connections, invalidator (*this), boost::bind (&FoldbackStrip::update_send_box, this), gui_context ());
 	comment_changed ();
 	connect_to_pan ();
 	panners.setup_pan ();
@@ -676,8 +640,6 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 	spacer.show ();
 	global_frame.show ();
 	global_vpacker.show ();
-
-	map_frozen ();
 
 	show ();
 }
@@ -717,7 +679,7 @@ FoldbackStrip::update_send_box ()
 			FoldbackSend* fb_s = new FoldbackSend (snd, s_rt, _route, _width);
 			send_display.pack_start (*fb_s, Gtk::PACK_SHRINK);
 			fb_s->show ();
-			s_rt->processors_changed.connect (_connections, invalidator (*this), boost::bind (&FoldbackStrip::processors_changed, this, _1), gui_context ());
+			s_rt->processors_changed.connect (_send_connections, invalidator (*this), boost::bind (&FoldbackStrip::processors_changed, this, _1), gui_context ());
 		}
 	}
 }
@@ -726,7 +688,7 @@ void
 FoldbackStrip::clear_send_box ()
 {
 	std::vector<Widget*> snd_list = send_display.get_children ();
-	_connections.drop_connections ();
+	_send_connections.drop_connections ();
 	for (uint32_t i = 0; i < snd_list.size (); i++) {
 		send_display.remove (*(snd_list[i]));
 		delete snd_list[i];
@@ -735,24 +697,15 @@ FoldbackStrip::clear_send_box ()
 }
 
 void
-    FoldbackStrip::processors_changed (RouteProcessorChange)
+FoldbackStrip::processors_changed (RouteProcessorChange)
 {
 	update_send_box ();
-}
-
-void
-FoldbackStrip::set_packed (bool yn)
-{
-	_packed = yn;
 }
 
 void
 FoldbackStrip::connect_to_pan ()
 {
 	ENSURE_GUI_THREAD (*this, &FoldbackStrip::connect_to_pan)
-
-	panstate_connection.disconnect ();
-	panstyle_connection.disconnect ();
 
 	if (!_route->panner ()) {
 		return;
@@ -818,24 +771,6 @@ FoldbackStrip::setup_comment_button ()
 		_comment_button.set_text (_("Comments"));
 	} else {
 		_comment_button.set_text (comment);
-	}
-}
-
-void
-FoldbackStrip::help_count_plugins (boost::weak_ptr<Processor> p)
-{
-	boost::shared_ptr<Processor> processor (p.lock ());
-	if (!processor || !processor->display_to_user ()) {
-		return;
-	}
-	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (processor);
-#ifdef MIXBUS
-	if (pi && pi->is_channelstrip ()) {
-		return;
-	}
-#endif
-	if (pi) {
-		++_plugin_insert_cnt;
 	}
 }
 
@@ -966,9 +901,7 @@ FoldbackStrip::update_sensitivity ()
 void
 FoldbackStrip::hide_clicked ()
 {
-	_hide_button.set_sensitive (false);
 	ActionManager::get_toggle_action (X_("Mixer"), X_("ToggleFoldbackStrip"))->set_active (false);
-	_hide_button.set_sensitive (true);
 }
 
 void
@@ -999,22 +932,11 @@ FoldbackStrip::show_sends_clicked ()
 void
 FoldbackStrip::fast_update ()
 {
-	/*
-	 * As this is the output level to a DAC, peak level is what is important
+	/* As this is the output level to a DAC, peak level is what is important
 	 * So, much like the mackie control, we just want the highest peak from
 	 * all channels in the route.
 	 */
-
-	float    meter_level = -199.0;
-	uint32_t mn          = _peak_meter->input_streams ().n_audio ();
-
-	for (uint32_t n = 0; n != mn; ++n) {
-		const float peak = _peak_meter->meter_level (n, MeterPeak0dB);
-		if (peak > meter_level) {
-			meter_level = peak;
-		}
-	}
-
+	const float meter_level = _peak_meter->meter_level (0, MeterMCP);
 	_meter->set (log_meter0dB (meter_level));
 }
 
@@ -1033,15 +955,6 @@ FoldbackStrip::send_blink (bool onoff)
 }
 
 void
-FoldbackStrip::set_selected (bool yn)
-{
-	global_frame.set_shadow_type (Gtk::SHADOW_IN);
-	global_frame.set_name ("MixerStripFrame");
-
-	global_frame.queue_draw ();
-}
-
-void
 FoldbackStrip::route_property_changed (const PropertyChange& what_changed)
 {
 	if (what_changed.contains (ARDOUR::Properties::name)) {
@@ -1053,22 +966,7 @@ void
 FoldbackStrip::name_changed ()
 {
 	name_button.set_text (_route->name ());
-
 	set_tooltip (name_button, Gtkmm2ext::markup_escape_text (_route->name ()));
-}
-
-void
-FoldbackStrip::set_embedded (bool yn)
-{
-	_embedded = yn;
-}
-
-void
-FoldbackStrip::map_frozen ()
-{
-	ENSURE_GUI_THREAD (*this, &FoldbackStrip::map_frozen)
-
-	RouteUI::map_frozen ();
 }
 
 void

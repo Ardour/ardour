@@ -625,7 +625,6 @@ Mixer_UI::add_stripables (StripableList& slist)
 						out_packer.pack_start (*foldback_strip, false, false);
 						// change 0 to 1 below for foldback to right of master
 						out_packer.reorder_child (*foldback_strip, 0);
-						foldback_strip->set_packed (true);
 					}
 					/* config from last run is set before there are any foldback strips
 					 * this takes that setting and applies it after at least one foldback
@@ -760,11 +759,9 @@ Mixer_UI::remove_foldback (FoldbackStrip* strip)
 		/* its all being taken care of */
 		return;
 	}
+	assert (strip == foldback_strip);
 	Glib::RefPtr<ToggleAction> act = ActionManager::get_toggle_action ("Mixer", "ToggleFoldbackStrip");
 	act->set_sensitive (false);
-	if (foldback_strip) {
-		foldback_strip->destroy_();
-	}
 	foldback_strip = 0;
 }
 

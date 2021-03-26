@@ -122,10 +122,8 @@ public:
 
 	std::string name () const;
 
-
 	PluginSelector* plugin_selector ();
 
-	void set_embedded (bool);
 	void fast_update ();
 	void set_route (boost::shared_ptr<ARDOUR::Route>);
 	void set_button_names ();
@@ -138,19 +136,6 @@ public:
 	boost::shared_ptr<ARDOUR::Stripable> stripable () const
 	{
 		return RouteUI::stripable ();
-	}
-
-	/** @return the delivery that is being edited using our fader; it will be the
-	 *  last send passed to show_send(), or our route's main out delivery.
-	 */
-	boost::shared_ptr<ARDOUR::Delivery> current_delivery () const
-	{
-		return _current_delivery;
-	}
-
-	bool mixer_owned () const
-	{
-		return _mixer_owned;
 	}
 
 	/** The delivery that we are handling the level for with our fader has changed */
@@ -168,21 +153,6 @@ public:
 	bool delete_processors (); //note: returns false if nothing was deleted
 	void toggle_processors ();
 	void ab_plugins ();
-	void duplicate_current_fb ();
-	void set_selected (bool yn);
-
-	static FoldbackStrip* entered_foldback_strip ()
-	{
-		return _entered_foldback_strip;
-	}
-
-protected:
-	friend class Mixer_UI;
-	void set_packed (bool yn);
-	bool packed ()
-	{
-		return _packed;
-	}
 
 private:
 	void init ();
@@ -207,18 +177,16 @@ private:
 	void create_selected_sends (bool include_buses);
 	void route_property_changed (const PBD::PropertyChange&);
 	void name_changed ();
-	void map_frozen ();
+	void duplicate_current_fb ();
+	void reset_strip_style ();
+	bool mixer_strip_enter_event (GdkEventCrossing*);
 
 	Gtk::Menu* build_route_ops_menu ();
 	Gtk::Menu* build_route_select_menu ();
 	Gtk::Menu* build_sends_menu ();
 
-
 	Mixer_UI& _mixer;
 
-	bool               _embedded;
-	bool               _packed;
-	bool               _mixer_owned;
 	ARDOUR::Session*   _session;
 	bool               _showing_sends;
 	uint32_t           _width;
@@ -238,9 +206,6 @@ private:
 
 	IOButton output_button;
 
-	void     help_count_plugins (boost::weak_ptr<ARDOUR::Processor>);
-	uint32_t _plugin_insert_cnt;
-
 	ArdourWidgets::ArdourButton name_button;
 	ArdourWidgets::ArdourButton _show_sends_button;
 	ArdourWidgets::ArdourButton _previous_button;
@@ -250,18 +215,7 @@ private:
 	ArdourWidgets::ArdourKnob*  fb_level_control;
 	ArdourWidgets::FastMeter*   _meter;
 
-	PBD::ScopedConnection panstate_connection;
-	PBD::ScopedConnection panstyle_connection;
-	static FoldbackStrip* _entered_foldback_strip;
-
-	PBD::ScopedConnection send_gone_connection;
-
-	void reset_strip_style ();
-
-	bool mixer_strip_enter_event (GdkEventCrossing*);
-	bool mixer_strip_leave_event (GdkEventCrossing*);
-
-	PBD::ScopedConnectionList _connections;
+	PBD::ScopedConnectionList _send_connections;
 };
 
 #endif
