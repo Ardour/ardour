@@ -16,16 +16,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_foldback_strip__
-#define __ardour_foldback_strip__
-
-#include <vector>
+#ifndef _gtkardour_foldback_strip_
+#define _gtkardour_foldback_strip_
 
 #include <cmath>
+#include <vector>
 
 #include <gtkmm/adjustment.h>
-#include <gtkmm/button.h>
 #include <gtkmm/box.h>
+#include <gtkmm/button.h>
 #include <gtkmm/eventbox.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/label.h>
@@ -37,10 +36,10 @@
 
 #include "pbd/stateful.h"
 
-#include "ardour/types.h"
 #include "ardour/ardour.h"
-#include "ardour/processor.h"
 #include "ardour/meter.h"
+#include "ardour/processor.h"
+#include "ardour/types.h"
 
 #include "pbd/fastlog.h"
 
@@ -65,6 +64,7 @@ namespace ARDOUR {
 	class Plugin;
 	class PeakMeter;
 }
+
 namespace Gtk {
 	class Window;
 	class Style;
@@ -78,40 +78,40 @@ class ArdourWindow;
 class FoldbackSend : public Gtk::VBox
 {
 public:
-	FoldbackSend (boost::shared_ptr<ARDOUR::Send>, \
-		boost::shared_ptr<ARDOUR::Route> sr, boost::shared_ptr<ARDOUR::Route> fr, uint32_t wd);
+	FoldbackSend (boost::shared_ptr<ARDOUR::Send>, boost::shared_ptr<ARDOUR::Route> sr, boost::shared_ptr<ARDOUR::Route> fr, uint32_t wd);
 	~FoldbackSend ();
 
 private:
-	ArdourWidgets::ArdourButton _button;
-	boost::shared_ptr<ARDOUR::Send> _send;
-	boost::shared_ptr<ARDOUR::Route> _send_route;
-	boost::shared_ptr<ARDOUR::Route> _foldback_route;
-	boost::shared_ptr<ARDOUR::Processor> _send_proc;
-	boost::shared_ptr<ARDOUR::Delivery> _send_del;
-	uint32_t _width;
-
-	void led_clicked(GdkEventButton *);
+	void led_clicked (GdkEventButton*);
 	bool button_press (GdkEventButton*);
 	bool button_release (GdkEventButton*);
-	Gtk::Menu* build_send_menu ();
 	void set_gain (float new_gain);
 	void set_send_position (bool post);
 	void remove_me ();
-
 	void route_property_changed (const PBD::PropertyChange&);
 	void name_changed ();
 	void send_state_changed ();
 	void level_adjusted ();
 	void level_changed ();
 	void set_tooltip ();
-	ArdourWidgets::ArdourKnob   pan_control;
-	Gtk::Adjustment _adjustment;
-	ArdourWidgets::HSliderController _slider;
-	bool _ignore_ui_adjustment;
-	Gtkmm2ext::PersistentTooltip _slider_persistant_tooltip;
 
-	PBD::ScopedConnectionList _connections;
+
+	Gtk::Menu* build_send_menu ();
+
+
+	ArdourWidgets::ArdourButton          _button;
+	boost::shared_ptr<ARDOUR::Send>      _send;
+	boost::shared_ptr<ARDOUR::Route>     _send_route;
+	boost::shared_ptr<ARDOUR::Route>     _foldback_route;
+	boost::shared_ptr<ARDOUR::Processor> _send_proc;
+	boost::shared_ptr<ARDOUR::Delivery>  _send_del;
+	uint32_t                             _width;
+	ArdourWidgets::ArdourKnob            _pan_control;
+	Gtk::Adjustment                      _adjustment;
+	ArdourWidgets::HSliderController     _slider;
+	bool                                 _ignore_ui_adjustment;
+	Gtkmm2ext::PersistentTooltip         _slider_persistant_tooltip;
+	PBD::ScopedConnectionList            _connections;
 };
 
 class FoldbackStrip : public RouteUI, public Gtk::EventBox
@@ -120,10 +120,10 @@ public:
 	FoldbackStrip (Mixer_UI&, ARDOUR::Session*, boost::shared_ptr<ARDOUR::Route>);
 	~FoldbackStrip ();
 
-	std::string name()  const;
+	std::string name () const;
 
-	PannerUI&       panner_ui() { return panners; }
-	PluginSelector* plugin_selector();
+
+	PluginSelector* plugin_selector ();
 
 	void set_embedded (bool);
 	void fast_update ();
@@ -131,25 +131,33 @@ public:
 	void set_button_names ();
 	void revert_to_default_display ();
 
-	boost::shared_ptr<ARDOUR::Stripable> stripable() const {
-		return RouteUI::stripable();
+	PannerUI& panner_ui ()
+	{
+		return panners;
+	}
+
+	boost::shared_ptr<ARDOUR::Stripable> stripable () const
+	{
+		return RouteUI::stripable ();
 	}
 
 	/** @return the delivery that is being edited using our fader; it will be the
 	 *  last send passed to show_send(), or our route's main out delivery.
 	 */
-	boost::shared_ptr<ARDOUR::Delivery> current_delivery () const {
+	boost::shared_ptr<ARDOUR::Delivery> current_delivery () const
+	{
 		return _current_delivery;
 	}
 
-	bool mixer_owned () const {
+	bool mixer_owned () const
+	{
 		return _mixer_owned;
 	}
 
 	/** The delivery that we are handling the level for with our fader has changed */
-	PBD::Signal1<void, boost::weak_ptr<ARDOUR::Delivery> > DeliveryChanged;
+	PBD::Signal1<void, boost::weak_ptr<ARDOUR::Delivery>> DeliveryChanged;
 
-	static PBD::Signal1<void,FoldbackStrip*> CatchDeletion;
+	static PBD::Signal1<void, FoldbackStrip*> CatchDeletion;
 
 	void route_active_changed ();
 
@@ -158,49 +166,86 @@ public:
 	void paste_processors ();
 	void select_all_processors ();
 	void deselect_all_processors ();
-	bool delete_processors ();  //note: returns false if nothing was deleted
+	bool delete_processors (); //note: returns false if nothing was deleted
 	void toggle_processors ();
 	void ab_plugins ();
 	void duplicate_current_fb ();
 	void set_selected (bool yn);
 
-	static FoldbackStrip* entered_foldback_strip() { return _entered_foldback_strip; }
+	static FoldbackStrip* entered_foldback_strip ()
+	{
+		return _entered_foldback_strip;
+	}
 
 protected:
 	friend class Mixer_UI;
 	void set_packed (bool yn);
-	bool packed () { return _packed; }
+	bool packed ()
+	{
+		return _packed;
+	}
 
 private:
-	Mixer_UI& _mixer;
 	void init ();
+	void setup_comment_button ();
+	void hide_clicked ();
+	void io_changed_proxy ();
+	void connect_to_pan ();
+	void update_panner_choices ();
+	void update_fb_level_control ();
+	void update_output_display ();
+	void update_send_box ();
+	void processors_changed (ARDOUR::RouteProcessorChange);
+	void remove_current_fb ();
+	void clear_send_box ();
+	void cycle_foldbacks (bool next);
+	void update_sensitivity ();
+	void spill_change (boost::shared_ptr<ARDOUR::Stripable>);
+	void show_sends_clicked ();
+	void send_blink (bool);
+	bool name_button_button_press (GdkEventButton*);
+	bool send_button_press_event (GdkEventButton* ev);
+	void create_selected_sends (bool include_buses);
+	void route_property_changed (const PBD::PropertyChange&);
+	void name_changed ();
+	void map_frozen ();
+	void hide_processor_editor (boost::weak_ptr<ARDOUR::Processor> processor);
+	void hide_redirect_editors ();
+	void engine_running ();
+	void engine_stopped ();
+	void set_current_delivery (boost::shared_ptr<ARDOUR::Delivery>);
+	void drop_send ();
 
-	bool  _embedded;
-	bool  _packed;
-	bool  _mixer_owned;
-	ARDOUR::Session* _session;
-	bool _showing_sends;
-	uint32_t _width;
+	Gtk::Menu* build_route_ops_menu ();
+	Gtk::Menu* build_route_select_menu ();
+	Gtk::Menu* build_sends_menu ();
+
+
+	Mixer_UI& _mixer;
+
+	bool               _embedded;
+	bool               _packed;
+	bool               _mixer_owned;
+	ARDOUR::Session*   _session;
+	bool               _showing_sends;
+	uint32_t           _width;
 	ARDOUR::PeakMeter* _peak_meter;
 
-	Gtk::EventBox		spacer;
-	Gtk::VBox			send_display;
-	Gtk::ScrolledWindow	send_scroller;
-
+	Gtk::EventBox       spacer;
+	Gtk::VBox           send_display;
+	Gtk::ScrolledWindow send_scroller;
 	Gtk::Frame          global_frame;
 	Gtk::VBox           global_vpacker;
+	Gtk::HBox           master_box;
+	Gtk::HBox           prev_next_box;
 
-	ProcessorBox* insert_box;
+	ProcessorBox*      insert_box;
 	ProcessorSelection _pr_selection;
-	PannerUI     panners;
-
-	Gtk::HBox master_box;
+	PannerUI           panners;
 
 	IOButton output_button;
 
-	Gtk::HBox prev_next_box;
-
-	void help_count_plugins (boost::weak_ptr<ARDOUR::Processor>);
+	void     help_count_plugins (boost::weak_ptr<ARDOUR::Processor>);
 	uint32_t _plugin_insert_cnt;
 
 	ArdourWidgets::ArdourButton name_button;
@@ -209,64 +254,21 @@ private:
 	ArdourWidgets::ArdourButton _next_button;
 	ArdourWidgets::ArdourButton _hide_button;
 	ArdourWidgets::ArdourButton _comment_button;
-	ArdourWidgets::ArdourKnob*   fb_level_control;
+	ArdourWidgets::ArdourKnob*  fb_level_control;
 	ArdourWidgets::FastMeter*   _meter;
-
-	void setup_comment_button ();
-	void hide_clicked();
-
-	void io_changed_proxy ();
 
 	PBD::ScopedConnection panstate_connection;
 	PBD::ScopedConnection panstyle_connection;
-	void connect_to_pan ();
-	void update_panner_choices ();
-	void update_fb_level_control ();
-
-	void update_output_display ();
-	void update_send_box ();
-	void processors_changed (ARDOUR::RouteProcessorChange);
-	void clear_send_box ();
-
-	gboolean name_button_button_press (GdkEventButton*);
-	Gtk::Menu* build_route_ops_menu ();
-	Gtk::Menu* build_route_select_menu ();
-
-	void cycle_foldbacks (bool next);
-	void update_sensitivity ();
-	void spill_change (boost::shared_ptr<ARDOUR::Stripable>);
-	void show_sends_clicked ();
-	void send_blink (bool);
-
-	bool send_button_press_event (GdkEventButton *ev);
-	Gtk::Menu* build_sends_menu ();
-
-	void create_selected_sends (bool include_buses);
-	void remove_current_fb ();
-
-	void route_property_changed (const PBD::PropertyChange&);
-	void name_changed ();
-	void map_frozen ();
-	void hide_processor_editor (boost::weak_ptr<ARDOUR::Processor> processor);
-	void hide_redirect_editors ();
-
 	static FoldbackStrip* _entered_foldback_strip;
 
-	void engine_running();
-	void engine_stopped();
-
-	void set_current_delivery (boost::shared_ptr<ARDOUR::Delivery>);
-
-	void drop_send ();
 	PBD::ScopedConnection send_gone_connection;
 
 	void reset_strip_style ();
 
-	bool mixer_strip_enter_event ( GdkEventCrossing * );
-	bool mixer_strip_leave_event ( GdkEventCrossing * );
+	bool mixer_strip_enter_event (GdkEventCrossing*);
+	bool mixer_strip_leave_event (GdkEventCrossing*);
 
 	PBD::ScopedConnectionList _connections;
-
 };
 
-#endif /* __ardour_foldback_strip__ */
+#endif

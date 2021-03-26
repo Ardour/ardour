@@ -17,22 +17,22 @@
  */
 
 #include "ardour/audioengine.h"
+#include "ardour/logmeter.h"
+#include "ardour/meter.h"
 #include "ardour/pannable.h"
-#include "ardour/panner_shell.h"
 #include "ardour/panner_manager.h"
+#include "ardour/panner_shell.h"
 #include "ardour/profile.h"
 #include "ardour/route.h"
 #include "ardour/send.h"
 #include "ardour/session.h"
 #include "ardour/user_bundle.h"
 #include "ardour/value_as_string.h"
-#include "ardour/meter.h"
-#include "ardour/logmeter.h"
 
+#include "gtkmm2ext/doi.h"
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/menu_elems.h"
 #include "gtkmm2ext/utils.h"
-#include "gtkmm2ext/doi.h"
 #include "pbd/fastlog.h"
 
 #include "widgets/tooltips.h"
@@ -40,15 +40,15 @@
 #include "ardour_window.h"
 #include "enums_convert.h"
 #include "foldback_strip.h"
-#include "mixer_ui.h"
+#include "gui_thread.h"
+#include "io_selector.h"
 #include "keyboard.h"
+#include "mixer_ui.h"
 #include "public_editor.h"
 #include "send_ui.h"
 #include "timers.h"
-#include "io_selector.h"
-#include "utils.h"
-#include "gui_thread.h"
 #include "ui_config.h"
+#include "utils.h"
 
 #include "pbd/i18n.h"
 
@@ -59,10 +59,9 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace std;
 
-#define PX_SCALE(px) std::max((float)px, rintf((float)px * UIConfiguration::instance().get_ui_scale()))
+#define PX_SCALE(px) std::max ((float)px, rintf ((float)px* UIConfiguration::instance ().get_ui_scale ()))
 
-FoldbackSend::FoldbackSend (boost::shared_ptr<Send> snd, \
-	boost::shared_ptr<ARDOUR::Route> sr,  boost::shared_ptr<ARDOUR::Route> fr, uint32_t wd)
+FoldbackSend::FoldbackSend (boost::shared_ptr<Send> snd, boost::shared_ptr<ARDOUR::Route> sr, boost::shared_ptr<ARDOUR::Route> fr, uint32_t wd)
 	: _button (ArdourButton::led_default_elements)
 	, _send (snd)
 	, _send_route (sr)
@@ -70,18 +69,16 @@ FoldbackSend::FoldbackSend (boost::shared_ptr<Send> snd, \
 	, _send_proc (snd)
 	, _send_del (snd)
 	, _width (wd)
-	, pan_control (ArdourKnob::default_elements, ArdourKnob::Flags (ArdourKnob::Detent | ArdourKnob::ArcToZero))
-	, _adjustment (gain_to_slider_position_with_max (1.0, Config->get_max_gain()), 0, 1, 0.01, 0.1)
-	, _slider (&_adjustment, boost::shared_ptr<PBD::Controllable>(), 0, max(13.f, rintf(13.f * UIConfiguration::instance().get_ui_scale())))
+	, _pan_control (ArdourKnob::default_elements, ArdourKnob::Flags (ArdourKnob::Detent | ArdourKnob::ArcToZero))
+	, _adjustment (gain_to_slider_position_with_max (1.0, Config->get_max_gain ()), 0, 1, 0.01, 0.1)
+	, _slider (&_adjustment, boost::shared_ptr<PBD::Controllable> (), 0, max (13.f, rintf (13.f * UIConfiguration::instance ().get_ui_scale ())))
 	, _ignore_ui_adjustment (true)
 	, _slider_persistant_tooltip (&_slider)
-
 {
-
-	HBox * snd_but_pan = new HBox ();
+	HBox* snd_but_pan = new HBox ();
 
 	_button.set_distinct_led_click (true);
-	_button.set_fallthrough_to_parent(true);
+	_button.set_fallthrough_to_parent (true);
 	_button.set_led_left (true);
 	_button.signal_led_clicked.connect (sigc::mem_fun (*this, &FoldbackSend::led_clicked));
 	if (_send_proc->get_pre_fader ()) {
@@ -89,59 +86,58 @@ FoldbackSend::FoldbackSend (boost::shared_ptr<Send> snd, \
 	} else {
 		_button.set_name ("processor postfader");
 	}
-	_button.set_layout_ellipsize_width (PX_SCALE(_width) * PANGO_SCALE);
+	_button.set_layout_ellipsize_width (PX_SCALE (_width) * PANGO_SCALE);
 	_button.set_text_ellipsize (Pango::ELLIPSIZE_END);
 	name_changed ();
 	snd_but_pan->pack_start (_button, true, true);
 	_button.set_active (_send_proc->enabled ());
 	_button.show ();
 
-	if (_foldback_route->input()->n_ports().n_audio() == 2) {
-		_button.set_layout_ellipsize_width (PX_SCALE(_width - 19) * PANGO_SCALE);
-		boost::shared_ptr<Pannable> pannable = _send_del->panner()->pannable();
+	if (_foldback_route->input ()->n_ports ().n_audio () == 2) {
+		_button.set_layout_ellipsize_width (PX_SCALE (_width - 19) * PANGO_SCALE);
+		boost::shared_ptr<Pannable>          pannable = _send_del->panner ()->pannable ();
 		boost::shared_ptr<AutomationControl> ac;
 		ac = pannable->pan_azimuth_control;
-		pan_control.set_size_request (PX_SCALE(19), PX_SCALE(19));
-		pan_control.set_tooltip_prefix (_("Pan: "));
-		pan_control.set_name ("trim knob");
-		pan_control.set_no_show_all (true);
-		snd_but_pan->pack_start (pan_control, false, false);
-		pan_control.show ();
-		pan_control.set_controllable (ac);
+		_pan_control.set_size_request (PX_SCALE (19), PX_SCALE (19));
+		_pan_control.set_tooltip_prefix (_("Pan: "));
+		_pan_control.set_name ("trim knob");
+		_pan_control.set_no_show_all (true);
+		snd_but_pan->pack_start (_pan_control, false, false);
+		_pan_control.show ();
+		_pan_control.set_controllable (ac);
 	}
 	boost::shared_ptr<AutomationControl> lc;
-	lc = _send->gain_control();
+	lc = _send->gain_control ();
 	_slider.set_controllable (lc);
 	_slider.set_name ("ProcessorControlSlider");
 	_slider.set_text (_("Level"));
 
 	pack_start (*snd_but_pan, Gtk::PACK_SHRINK);
-	snd_but_pan->show();
+	snd_but_pan->show ();
 	pack_start (_slider, true, true);
 	_slider.show ();
 	level_changed ();
 
-	_adjustment.signal_value_changed().connect (sigc::mem_fun (*this,  &FoldbackSend::level_adjusted));
+	_adjustment.signal_value_changed ().connect (sigc::mem_fun (*this, &FoldbackSend::level_adjusted));
 	lc->Changed.connect (_connections, invalidator (*this), boost::bind (&FoldbackSend::level_changed, this), gui_context ());
 	_send_proc->ActiveChanged.connect (_connections, invalidator (*this), boost::bind (&FoldbackSend::send_state_changed, this), gui_context ());
-	_button.signal_button_press_event().connect (sigc::mem_fun (*this, &FoldbackSend::button_press));
-	_button.signal_button_release_event().connect (sigc::mem_fun (*this, &FoldbackSend::button_release));
-	_send_route->PropertyChanged.connect (_connections, invalidator (*this), boost::bind (&FoldbackSend::route_property_changed, this, _1), gui_context());
+	_button.signal_button_press_event ().connect (sigc::mem_fun (*this, &FoldbackSend::button_press));
+	_button.signal_button_release_event ().connect (sigc::mem_fun (*this, &FoldbackSend::button_release));
+	_send_route->PropertyChanged.connect (_connections, invalidator (*this), boost::bind (&FoldbackSend::route_property_changed, this, _1), gui_context ());
 
 	show ();
 }
 
 FoldbackSend::~FoldbackSend ()
 {
-	_connections.drop_connections();
+	_connections.drop_connections ();
 	_slider.set_controllable (boost::shared_ptr<AutomationControl> ());
-	pan_control.set_controllable (boost::shared_ptr<AutomationControl> ());
-	_send = boost::shared_ptr<Send> ();
-	_send_route = boost::shared_ptr<Route> ();
+	_pan_control.set_controllable (boost::shared_ptr<AutomationControl> ());
+	_send           = boost::shared_ptr<Send> ();
+	_send_route     = boost::shared_ptr<Route> ();
 	_foldback_route = boost::shared_ptr<Route> ();
-	_send_proc = boost::shared_ptr<Processor> ();
-	_send_del = boost::shared_ptr<Delivery> ();
-
+	_send_proc      = boost::shared_ptr<Processor> ();
+	_send_del       = boost::shared_ptr<Delivery> ();
 }
 
 void
@@ -157,11 +153,11 @@ FoldbackSend::name_changed ()
 {
 	_button.set_text (_send_route->name ());
 
-	ArdourWidgets::set_tooltip (_button, Gtkmm2ext::markup_escape_text(_send_route->name()));
+	ArdourWidgets::set_tooltip (_button, Gtkmm2ext::markup_escape_text (_send_route->name ()));
 }
 
 void
-FoldbackSend::led_clicked (GdkEventButton *ev)
+FoldbackSend::led_clicked (GdkEventButton* ev)
 {
 	if (!_send_proc) {
 		return;
@@ -178,7 +174,7 @@ FoldbackSend::button_press (GdkEventButton* ev)
 {
 	if (ev->button == 1 && ev->type == GDK_BUTTON_PRESS) {
 		Menu* menu = build_send_menu ();
-		Gtkmm2ext::anchored_menu_popup(menu, &_button, "", ev->button, ev->time);
+		Gtkmm2ext::anchored_menu_popup (menu, &_button, "", ev->button, ev->time);
 		return true;
 	}
 	return false;
@@ -195,9 +191,9 @@ FoldbackSend::button_release (GdkEventButton* ev)
 		remove_me ();
 	} else if (Keyboard::is_button2_event (ev)
 #ifndef __APPLE__
-		   && (Keyboard::no_modifier_keys_pressed (ev) && ((ev->state & Gdk::BUTTON2_MASK) == Gdk::BUTTON2_MASK))
+	           && (Keyboard::no_modifier_keys_pressed (ev) && ((ev->state & Gdk::BUTTON2_MASK) == Gdk::BUTTON2_MASK))
 #endif
-		) {
+	) {
 		_send_proc->enable (!_send_proc->enabled ());
 	}
 	return false;
@@ -207,7 +203,6 @@ void
 FoldbackSend::send_state_changed ()
 {
 	_button.set_active (_send_proc->enabled ());
-
 }
 
 void
@@ -216,20 +211,20 @@ FoldbackSend::level_adjusted ()
 	if (_ignore_ui_adjustment) {
 		return;
 	}
-	boost::shared_ptr<AutomationControl> lc = _send->gain_control();
+	boost::shared_ptr<AutomationControl> lc = _send->gain_control ();
 
 	if (!lc) {
 		return;
 	}
 
-	lc->set_value ( lc->interface_to_internal(_adjustment.get_value ()) , Controllable::NoGroup);
+	lc->set_value (lc->interface_to_internal (_adjustment.get_value ()), Controllable::NoGroup);
 	set_tooltip ();
 }
 
 void
 FoldbackSend::level_changed ()
 {
-	boost::shared_ptr<AutomationControl> lc = _send->gain_control();
+	boost::shared_ptr<AutomationControl> lc = _send->gain_control ();
 	if (!lc) {
 		return;
 	}
@@ -237,7 +232,7 @@ FoldbackSend::level_changed ()
 	_ignore_ui_adjustment = true;
 
 	const double nval = lc->internal_to_interface (lc->get_value ());
-	if (_adjustment.get_value() != nval) {
+	if (_adjustment.get_value () != nval) {
 		_adjustment.set_value (nval);
 		set_tooltip ();
 	}
@@ -248,13 +243,13 @@ FoldbackSend::level_changed ()
 void
 FoldbackSend::set_tooltip ()
 {
-	boost::shared_ptr<AutomationControl> lc = _send->gain_control();
+	boost::shared_ptr<AutomationControl> lc = _send->gain_control ();
 
 	if (!lc) {
 		return;
 	}
-	std::string tt = ARDOUR::value_as_string (lc->desc(), lc->get_value ());
-	string sm = Gtkmm2ext::markup_escape_text (tt);
+	std::string tt = ARDOUR::value_as_string (lc->desc (), lc->get_value ());
+	string      sm = Gtkmm2ext::markup_escape_text (tt);
 	_slider_persistant_tooltip.set_tip (sm);
 }
 
@@ -267,29 +262,24 @@ FoldbackSend::build_send_menu ()
 		return NULL;
 	}
 
-	Menu* menu = manage (new Menu);
+	Menu*     menu  = manage (new Menu);
 	MenuList& items = menu->items ();
 	menu->set_name ("ArdourContextMenu");
 
 	items.push_back (
-		MenuElem(_("Copy track/bus gain to send"), sigc::bind (sigc::mem_fun (*this, &FoldbackSend::set_gain), -0.1))
-		);
+	    MenuElem (_("Copy track/bus gain to send"), sigc::bind (sigc::mem_fun (*this, &FoldbackSend::set_gain), -0.1)));
 	items.push_back (
-		MenuElem(_("Set send gain to -inf"), sigc::bind (sigc::mem_fun (*this, &FoldbackSend::set_gain), 0.0))
-		);
+	    MenuElem (_("Set send gain to -inf"), sigc::bind (sigc::mem_fun (*this, &FoldbackSend::set_gain), 0.0)));
 	items.push_back (
-		MenuElem(_("Set send gain to 0dB"), sigc::bind (sigc::mem_fun (*this, &FoldbackSend::set_gain), 1.0))
-		);
+	    MenuElem (_("Set send gain to 0dB"), sigc::bind (sigc::mem_fun (*this, &FoldbackSend::set_gain), 1.0)));
 	if (_send_proc->get_pre_fader ()) {
 		items.push_back (
-			MenuElem(_("Set send post fader"), sigc::bind (sigc::mem_fun (*this, &FoldbackSend::set_send_position), true))
-			);
+		    MenuElem (_("Set send post fader"), sigc::bind (sigc::mem_fun (*this, &FoldbackSend::set_send_position), true)));
 	} else {
 		items.push_back (
-			MenuElem(_("Set send pre fader"), sigc::bind (sigc::mem_fun (*this, &FoldbackSend::set_send_position), false))
-			);
+		    MenuElem (_("Set send pre fader"), sigc::bind (sigc::mem_fun (*this, &FoldbackSend::set_send_position), false)));
 	}
-	items.push_back (MenuElem(_("Remove This Send"), sigc::mem_fun (*this, &FoldbackSend::remove_me)));
+	items.push_back (MenuElem (_("Remove This Send"), sigc::mem_fun (*this, &FoldbackSend::remove_me)));
 
 	return menu;
 }
@@ -301,30 +291,29 @@ FoldbackSend::set_gain (float new_gain)
 		// get level from sending route
 		new_gain = _send_route->gain_control ()->get_value ();
 	}
-	boost::shared_ptr<AutomationControl> lc = _send->gain_control();
+	boost::shared_ptr<AutomationControl> lc = _send->gain_control ();
 
 	if (!lc) {
 		return;
 	}
 	lc->set_value (new_gain, Controllable::NoGroup);
-
 }
 
 void
 FoldbackSend::set_send_position (bool post)
 {
 	boost::shared_ptr<Route> new_snd_rt = _send_route;
-	boost::shared_ptr<Route> new_fb_rt = _foldback_route;
-	float new_level = _send->gain_control()->get_value();
-	bool new_enable = _send_proc->enabled ();
-	bool is_pan = false;
-	float new_pan = 0.0;
-	if (_foldback_route->input()->n_ports().n_audio() == 2) {
-		is_pan = true;
-		boost::shared_ptr<Pannable> pannable = _send_del->panner()->pannable();
+	boost::shared_ptr<Route> new_fb_rt  = _foldback_route;
+	float                    new_level  = _send->gain_control ()->get_value ();
+	bool                     new_enable = _send_proc->enabled ();
+	bool                     is_pan     = false;
+	float                    new_pan    = 0.0;
+	if (_foldback_route->input ()->n_ports ().n_audio () == 2) {
+		is_pan                                   = true;
+		boost::shared_ptr<Pannable>     pannable = _send_del->panner ()->pannable ();
 		boost::shared_ptr<Controllable> ac;
-		ac = pannable->pan_azimuth_control;
-		new_pan = ac->get_value();
+		ac      = pannable->pan_azimuth_control;
+		new_pan = ac->get_value ();
 	}
 
 	remove_me ();
@@ -332,15 +321,15 @@ FoldbackSend::set_send_position (bool post)
 
 	boost::shared_ptr<Send> snd = new_snd_rt->internal_send_for (new_fb_rt);
 	if (snd) {
-		snd->gain_control()->set_value(new_level, Controllable::NoGroup);
+		snd->gain_control ()->set_value (new_level, Controllable::NoGroup);
 		boost::shared_ptr<Processor> snd_proc = boost::dynamic_pointer_cast<Processor> (snd);
 		snd_proc->enable (new_enable);
 		if (is_pan) {
-			boost::shared_ptr<Delivery> new_del = boost::dynamic_pointer_cast<Delivery> (snd);
-			boost::shared_ptr<Pannable> pannable = new_del->panner()->pannable();
+			boost::shared_ptr<Delivery>     new_del  = boost::dynamic_pointer_cast<Delivery> (snd);
+			boost::shared_ptr<Pannable>     pannable = new_del->panner ()->pannable ();
 			boost::shared_ptr<Controllable> ac;
 			ac = pannable->pan_azimuth_control;
-			ac->set_value(new_pan, Controllable::NoGroup);
+			ac->set_value (new_pan, Controllable::NoGroup);
 		}
 	}
 }
@@ -349,18 +338,17 @@ void
 FoldbackSend::remove_me ()
 {
 	boost::shared_ptr<Processor> send_proc = boost::dynamic_pointer_cast<Processor> (_send);
-	_connections.drop_connections();
+	_connections.drop_connections ();
 	_send_route->remove_processor (send_proc);
 }
 
-
-FoldbackStrip* FoldbackStrip::_entered_foldback_strip;
-PBD::Signal1<void,FoldbackStrip*> FoldbackStrip::CatchDeletion;
+FoldbackStrip*                     FoldbackStrip::_entered_foldback_strip;
+PBD::Signal1<void, FoldbackStrip*> FoldbackStrip::CatchDeletion;
 
 FoldbackStrip::FoldbackStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt)
 	: SessionHandlePtr (sess)
 	, RouteUI (sess)
-	, _mixer(mx)
+	, _mixer (mx)
 	, _mixer_owned (true)
 	, _showing_sends (false)
 	, _width (80)
@@ -381,20 +369,20 @@ FoldbackStrip::FoldbackStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Rou
 void
 FoldbackStrip::init ()
 {
-	_entered_foldback_strip= 0;
-	ignore_comment_edit = false;
-	comment_area = 0;
+	_entered_foldback_strip = 0;
+	ignore_comment_edit     = false;
+	comment_area            = 0;
 
 	_previous_button.set_name ("mixer strip button");
 	_previous_button.set_icon (ArdourIcon::ScrollLeft);
 	_previous_button.set_tweaks (ArdourButton::Square);
-	UI::instance()->set_tip (&_previous_button, _("Previous foldback bus"), "");
+	UI::instance ()->set_tip (&_previous_button, _("Previous foldback bus"), "");
 	_previous_button.set_sensitive (false);
 
 	_next_button.set_name ("mixer strip button");
 	_next_button.set_icon (ArdourIcon::ScrollRight);
 	_next_button.set_tweaks (ArdourButton::Square);
-	UI::instance()->set_tip (&_next_button, _("Next foldback bus"), "");
+	UI::instance ()->set_tip (&_next_button, _("Next foldback bus"), "");
 	_next_button.set_sensitive (false);
 
 	_hide_button.set_name ("mixer strip button");
@@ -408,20 +396,20 @@ FoldbackStrip::init ()
 
 	name_button.set_name ("mixer strip button");
 	name_button.set_text_ellipsize (Pango::ELLIPSIZE_END);
-	name_button.set_layout_ellipsize_width (PX_SCALE(_width) * PANGO_SCALE);
+	name_button.set_layout_ellipsize_width (PX_SCALE (_width) * PANGO_SCALE);
 
 	// invertbuttons and box in route_ui
 
 	_show_sends_button.set_name ("send alert button");
 	_show_sends_button.set_text (_("Show Sends"));
-	UI::instance()->set_tip (&_show_sends_button, _("Show the strips that send to this bus, and control them from the faders"), "");
+	UI::instance ()->set_tip (&_show_sends_button, _("Show the strips that send to this bus, and control them from the faders"), "");
 
 	send_display.set_flags (CAN_FOCUS);
 	send_display.set_spacing (4);
 
 	send_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 	send_scroller.add (send_display);
-	send_scroller.get_child()->set_name ("FoldbackBusStripBase");
+	send_scroller.get_child ()->set_name ("FoldbackBusStripBase");
 
 	// panners from route_ui
 	panners.set_width (Wide);
@@ -431,31 +419,31 @@ FoldbackStrip::init ()
 	insert_box->show ();
 	insert_box->set_session (_session);
 	insert_box->set_width (Wide);
-	insert_box->set_size_request (PX_SCALE(_width + 34), PX_SCALE(160));
+	insert_box->set_size_request (PX_SCALE (_width + 34), PX_SCALE (160));
 
-	_meter = new FastMeter ((uint32_t) floor (UIConfiguration::instance().get_meter_hold()),
-		8, FastMeter::Horizontal, PX_SCALE(100),
-		UIConfiguration::instance().color ("meter color0"),
-		UIConfiguration::instance().color ("meter color1"),
-		UIConfiguration::instance().color ("meter color2"),
-		UIConfiguration::instance().color ("meter color3"),
-		UIConfiguration::instance().color ("meter color4"),
-		UIConfiguration::instance().color ("meter color5"),
-		UIConfiguration::instance().color ("meter color6"),
-		UIConfiguration::instance().color ("meter color7"),
-		UIConfiguration::instance().color ("meter color8"),
-		UIConfiguration::instance().color ("meter color9"),
-		UIConfiguration::instance().color ("meter background bottom"),
-		UIConfiguration::instance().color ("meter background top"),
-		0x991122ff, 0x551111ff,
-		(115.0 * log_meter0dB(-15)),
-		89.125,
-		106.375,
-		115.0,
-		(UIConfiguration::instance().get_meter_style_led() ? 3 : 1));
+	_meter = new FastMeter ((uint32_t)floor (UIConfiguration::instance ().get_meter_hold ()),
+	                        8, FastMeter::Horizontal, PX_SCALE (100),
+	                        UIConfiguration::instance ().color ("meter color0"),
+	                        UIConfiguration::instance ().color ("meter color1"),
+	                        UIConfiguration::instance ().color ("meter color2"),
+	                        UIConfiguration::instance ().color ("meter color3"),
+	                        UIConfiguration::instance ().color ("meter color4"),
+	                        UIConfiguration::instance ().color ("meter color5"),
+	                        UIConfiguration::instance ().color ("meter color6"),
+	                        UIConfiguration::instance ().color ("meter color7"),
+	                        UIConfiguration::instance ().color ("meter color8"),
+	                        UIConfiguration::instance ().color ("meter color9"),
+	                        UIConfiguration::instance ().color ("meter background bottom"),
+	                        UIConfiguration::instance ().color ("meter background top"),
+	                        0x991122ff, 0x551111ff,
+	                        (115.0 * log_meter0dB (-15)),
+	                        89.125,
+	                        106.375,
+	                        115.0,
+	                        (UIConfiguration::instance ().get_meter_style_led () ? 3 : 1));
 
 	fb_level_control = new ArdourKnob (ArdourKnob::default_elements, ArdourKnob::Detent);
-	fb_level_control->set_size_request (PX_SCALE(50), PX_SCALE(50));
+	fb_level_control->set_size_request (PX_SCALE (50), PX_SCALE (50));
 	fb_level_control->set_tooltip_prefix (_("Level: "));
 	fb_level_control->set_name ("foldback knob");
 	fb_level_control->set_no_show_all (true);
@@ -463,18 +451,18 @@ FoldbackStrip::init ()
 	VBox* level_box = manage (new VBox);
 	level_box->pack_start (*fb_level_control, true, false);
 	master_box.pack_start (*level_box, true, false);
-	master_box.set_size_request (PX_SCALE(_width + 34), PX_SCALE(80));
+	master_box.set_size_request (PX_SCALE (_width + 34), PX_SCALE (80));
 	master_box.set_name ("FoldbackBusStripBase");
 	level_box->show ();
 
 	output_button.set_text (_("Output"));
 	output_button.set_name ("mixer strip button");
 	output_button.set_text_ellipsize (Pango::ELLIPSIZE_MIDDLE);
-	output_button.set_layout_ellipsize_width (PX_SCALE(_width) * PANGO_SCALE);
+	output_button.set_layout_ellipsize_width (PX_SCALE (_width) * PANGO_SCALE);
 
 	_comment_button.set_name (X_("mixer strip button"));
 	_comment_button.set_text_ellipsize (Pango::ELLIPSIZE_END);
-	_comment_button.set_layout_ellipsize_width (PX_SCALE(_width) * PANGO_SCALE);
+	_comment_button.set_layout_ellipsize_width (PX_SCALE (_width) * PANGO_SCALE);
 
 	global_vpacker.set_border_width (1);
 	global_vpacker.set_spacing (2);
@@ -497,11 +485,11 @@ FoldbackStrip::init ()
 	int scrollbar_height = 0;
 	{
 		Gtk::Window window (WINDOW_TOPLEVEL);
-		HScrollbar scrollbar;
+		HScrollbar  scrollbar;
 		window.add (scrollbar);
 		scrollbar.set_name ("MixerWindow");
-		scrollbar.ensure_style();
-		Gtk::Requisition requisition(scrollbar.size_request ());
+		scrollbar.ensure_style ();
+		Gtk::Requisition requisition (scrollbar.size_request ());
 		scrollbar_height = requisition.height;
 	}
 	spacer.set_size_request (-1, scrollbar_height);
@@ -525,33 +513,33 @@ FoldbackStrip::init ()
 
 	_selected = true;
 	set_selected (false);
-	_packed = false;
+	_packed   = false;
 	_embedded = false;
 
-	_session->engine().Stopped.connect (*this, invalidator (*this), boost::bind (&FoldbackStrip::engine_stopped, this), gui_context());
-	_session->engine().Running.connect (*this, invalidator (*this), boost::bind (&FoldbackStrip::engine_running, this), gui_context());
+	_session->engine ().Stopped.connect (*this, invalidator (*this), boost::bind (&FoldbackStrip::engine_stopped, this), gui_context ());
+	_session->engine ().Running.connect (*this, invalidator (*this), boost::bind (&FoldbackStrip::engine_running, this), gui_context ());
 
-	name_button.signal_button_press_event().connect (sigc::mem_fun(*this, &FoldbackStrip::name_button_button_press), false);
+	name_button.signal_button_press_event ().connect (sigc::mem_fun (*this, &FoldbackStrip::name_button_button_press), false);
 	_previous_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &FoldbackStrip::cycle_foldbacks), false));
 	_next_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &FoldbackStrip::cycle_foldbacks), true));
-	_hide_button.signal_clicked.connect (sigc::mem_fun(*this, &FoldbackStrip::hide_clicked));
-	_show_sends_button.signal_clicked.connect (sigc::mem_fun(*this, &FoldbackStrip::show_sends_clicked));
-	send_scroller.signal_button_press_event().connect (sigc::mem_fun (*this, &FoldbackStrip::send_button_press_event));
+	_hide_button.signal_clicked.connect (sigc::mem_fun (*this, &FoldbackStrip::hide_clicked));
+	_show_sends_button.signal_clicked.connect (sigc::mem_fun (*this, &FoldbackStrip::show_sends_clicked));
+	send_scroller.signal_button_press_event ().connect (sigc::mem_fun (*this, &FoldbackStrip::send_button_press_event));
 	_comment_button.signal_clicked.connect (sigc::mem_fun (*this, &RouteUI::toggle_comment_editor));
 
-	add_events (Gdk::BUTTON_RELEASE_MASK|
-			Gdk::ENTER_NOTIFY_MASK|
-			Gdk::LEAVE_NOTIFY_MASK|
-			Gdk::KEY_PRESS_MASK|
-			Gdk::KEY_RELEASE_MASK);
+	add_events (Gdk::BUTTON_RELEASE_MASK |
+	            Gdk::ENTER_NOTIFY_MASK |
+	            Gdk::LEAVE_NOTIFY_MASK |
+	            Gdk::KEY_PRESS_MASK |
+	            Gdk::KEY_RELEASE_MASK);
 
-	set_flags (get_flags() | Gtk::CAN_FOCUS);
+	set_flags (get_flags () | Gtk::CAN_FOCUS);
 
 	//watch for mouse enter/exit so we can do some stuff
-	signal_enter_notify_event().connect (sigc::mem_fun(*this, &FoldbackStrip::mixer_strip_enter_event ));
-	signal_leave_notify_event().connect (sigc::mem_fun(*this, &FoldbackStrip::mixer_strip_leave_event ));
+	signal_enter_notify_event ().connect (sigc::mem_fun (*this, &FoldbackStrip::mixer_strip_enter_event));
+	signal_leave_notify_event ().connect (sigc::mem_fun (*this, &FoldbackStrip::mixer_strip_leave_event));
 
-	Mixer_UI::instance()->show_spill_change.connect (sigc::mem_fun (*this, &FoldbackStrip::spill_change));
+	Mixer_UI::instance ()->show_spill_change.connect (sigc::mem_fun (*this, &FoldbackStrip::spill_change));
 }
 
 FoldbackStrip::~FoldbackStrip ()
@@ -559,11 +547,11 @@ FoldbackStrip::~FoldbackStrip ()
 	CatchDeletion (this);
 	delete fb_level_control;
 	fb_level_control = 0;
-	_connections.drop_connections();
+	_connections.drop_connections ();
 	clear_send_box ();
 	send_blink_connection.disconnect ();
 
-	if (this ==_entered_foldback_strip)
+	if (this == _entered_foldback_strip)
 		_entered_foldback_strip = NULL;
 }
 
@@ -574,37 +562,36 @@ FoldbackStrip::mixer_strip_enter_event (GdkEventCrossing* /*ev*/)
 
 	//although we are triggering on the "enter", to the user it will appear that it is happenin on the "leave"
 	//because the FoldbackStrip control is a parent that encompasses the strip
-	deselect_all_processors();
+	deselect_all_processors ();
 
 	return false;
 }
 
 bool
-FoldbackStrip::mixer_strip_leave_event (GdkEventCrossing *ev)
+FoldbackStrip::mixer_strip_leave_event (GdkEventCrossing* ev)
 {
 	//if we have moved outside our strip, but not into a child view, then deselect ourselves
-	if ( !(ev->detail == GDK_NOTIFY_INFERIOR) ) {
-		_entered_foldback_strip= 0;
-
+	if (!(ev->detail == GDK_NOTIFY_INFERIOR)) {
+		_entered_foldback_strip = 0;
 	}
 
 	return false;
 }
 
 string
-FoldbackStrip::name() const
+FoldbackStrip::name () const
 {
 	if (_route) {
-		return _route->name();
+		return _route->name ();
 	}
-	return string();
+	return string ();
 }
 
 void
 FoldbackStrip::update_fb_level_control ()
 {
 	fb_level_control->show ();
-	fb_level_control->set_controllable (_route->gain_control());
+	fb_level_control->set_controllable (_route->gain_control ());
 }
 
 void
@@ -616,7 +603,7 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 		clear_send_box ();
 		update_sensitivity ();
 		if (_showing_sends) {
-			Mixer_UI::instance()->show_spill (boost::shared_ptr<ARDOUR::Stripable>());
+			Mixer_UI::instance ()->show_spill (boost::shared_ptr<ARDOUR::Stripable> ());
 			_showing_sends = false;
 			send_blink_connection.disconnect ();
 		}
@@ -629,33 +616,33 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 
 	insert_box->set_route (_route);
 	revert_to_default_display ();
-	update_fb_level_control();
+	update_fb_level_control ();
 
 	_showing_sends = false;
 	_show_sends_button.set_active (false);
 	send_blink_connection.disconnect ();
 
-	if (_route->panner_shell()) {
-		update_panner_choices();
-		_route->panner_shell()->Changed.connect (route_connections, invalidator (*this), boost::bind (&FoldbackStrip::connect_to_pan, this), gui_context());
+	if (_route->panner_shell ()) {
+		update_panner_choices ();
+		_route->panner_shell ()->Changed.connect (route_connections, invalidator (*this), boost::bind (&FoldbackStrip::connect_to_pan, this), gui_context ());
 	}
 
 	// set up metering
-	_peak_meter = _route->shared_peak_meter().get();
+	_peak_meter = _route->shared_peak_meter ().get ();
 	_route->set_meter_point (MeterPostFader);
 	// _route->set_meter_point (MeterPreFader);
 	_route->set_meter_type (MeterPeak0dB);
 
-	_route->output()->changed.connect (*this, invalidator (*this), boost::bind (&FoldbackStrip::update_output_display, this), gui_context());
+	_route->output ()->changed.connect (*this, invalidator (*this), boost::bind (&FoldbackStrip::update_output_display, this), gui_context ());
 	_route->io_changed.connect (route_connections, invalidator (*this), boost::bind (&FoldbackStrip::io_changed_proxy, this), gui_context ());
 
-	_route->comment_changed.connect (route_connections, invalidator (*this), boost::bind (&FoldbackStrip::setup_comment_button, this), gui_context());
+	_route->comment_changed.connect (route_connections, invalidator (*this), boost::bind (&FoldbackStrip::setup_comment_button, this), gui_context ());
 
 	/* now force an update of all the various elements */
 
 	name_changed ();
 	update_send_box ();
-	_session->FBSendsChanged.connect (route_connections, invalidator (*this), boost::bind (&FoldbackStrip::update_send_box, this), gui_context());
+	_session->FBSendsChanged.connect (route_connections, invalidator (*this), boost::bind (&FoldbackStrip::update_send_box, this), gui_context ());
 	comment_changed ();
 	connect_to_pan ();
 	panners.setup_pan ();
@@ -664,34 +651,33 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 
 	add_events (Gdk::BUTTON_RELEASE_MASK);
 	update_sensitivity ();
-	_previous_button.show();
-	_next_button.show();
-	_hide_button.show();
+	_previous_button.show ();
+	_next_button.show ();
+	_hide_button.show ();
 	prev_next_box.show ();
-	name_button.show();
+	name_button.show ();
 	send_display.show ();
 	send_scroller.show ();
-	_show_sends_button.show();
+	_show_sends_button.show ();
 	insert_box->show ();
 	_meter->show ();
-	master_box.show();
-	output_button.show();
-	_comment_button.show();
-	spacer.show();
-	global_frame.show();
-	global_vpacker.show();
+	master_box.show ();
+	output_button.show ();
+	_comment_button.show ();
+	spacer.show ();
+	global_frame.show ();
+	global_vpacker.show ();
 
-	map_frozen();
+	map_frozen ();
 
 	show ();
 }
 
 // predicate for sort call in get_sorted_stripables
-struct StripableByPresentationOrder
-{
-	bool operator () (const boost::shared_ptr<Stripable> & a, const boost::shared_ptr<Stripable> & b) const
+struct StripableByPresentationOrder {
+	bool operator() (const boost::shared_ptr<Stripable>& a, const boost::shared_ptr<Stripable>& b) const
 	{
-		return a->presentation_info().order() < b->presentation_info().order();
+		return a->presentation_info ().order () < b->presentation_info ().order ();
 	}
 };
 
@@ -705,22 +691,21 @@ FoldbackStrip::update_send_box ()
 	StripableList stripables;
 	stripables.clear ();
 
-	Route::FedBy fed_by = _route->fed_by();
-	for (Route::FedBy::iterator i = fed_by.begin(); i != fed_by.end(); ++i) {
+	Route::FedBy fed_by = _route->fed_by ();
+	for (Route::FedBy::iterator i = fed_by.begin (); i != fed_by.end (); ++i) {
 		if (i->sends_only) {
-			boost::shared_ptr<Route> rt (i->r.lock());
+			boost::shared_ptr<Route>     rt (i->r.lock ());
 			boost::shared_ptr<Stripable> s = boost::dynamic_pointer_cast<Stripable> (rt);
 			stripables.push_back (s);
 		}
 	}
-	stripables.sort (StripableByPresentationOrder());
-	for (StripableList::iterator it = stripables.begin(); it != stripables.end(); ++it) {
-
+	stripables.sort (StripableByPresentationOrder ());
+	for (StripableList::iterator it = stripables.begin (); it != stripables.end (); ++it) {
 		boost::shared_ptr<Stripable> s_sp = *it;
-		boost::shared_ptr<Route> s_rt = boost::dynamic_pointer_cast<Route> (s_sp);
-		boost::shared_ptr<Send> snd = s_rt->internal_send_for (_route);
+		boost::shared_ptr<Route>     s_rt = boost::dynamic_pointer_cast<Route> (s_sp);
+		boost::shared_ptr<Send>      snd  = s_rt->internal_send_for (_route);
 		if (snd) {
-			FoldbackSend * fb_s = new FoldbackSend (snd, s_rt, _route, _width);
+			FoldbackSend* fb_s = new FoldbackSend (snd, s_rt, _route, _width);
 			send_display.pack_start (*fb_s, Gtk::PACK_SHRINK);
 			fb_s->show ();
 			s_rt->processors_changed.connect (_connections, invalidator (*this), boost::bind (&FoldbackStrip::processors_changed, this, _1), gui_context ());
@@ -731,17 +716,17 @@ FoldbackStrip::update_send_box ()
 void
 FoldbackStrip::clear_send_box ()
 {
-	std::vector< Widget* > snd_list = send_display.get_children ();
+	std::vector<Widget*> snd_list = send_display.get_children ();
 	_connections.drop_connections ();
-	for (uint32_t i = 0; i < snd_list.size(); i++) {
+	for (uint32_t i = 0; i < snd_list.size (); i++) {
 		send_display.remove (*(snd_list[i]));
 		delete snd_list[i];
 	}
-	snd_list.clear();
+	snd_list.clear ();
 }
 
 void
-FoldbackStrip::processors_changed (RouteProcessorChange)
+    FoldbackStrip::processors_changed (RouteProcessorChange)
 {
 	update_send_box ();
 }
@@ -760,26 +745,28 @@ FoldbackStrip::connect_to_pan ()
 	panstate_connection.disconnect ();
 	panstyle_connection.disconnect ();
 
-	if (!_route->panner()) {
+	if (!_route->panner ()) {
 		return;
 	}
 
-	update_panner_choices();
+	update_panner_choices ();
 }
 
 void
 FoldbackStrip::update_panner_choices ()
 {
 	ENSURE_GUI_THREAD (*this, &FoldbackStrip::update_panner_choices)
-	if (!_route->panner_shell()) { return; }
-
-	uint32_t in = _route->output()->n_ports().n_audio();
-	uint32_t out = in;
-	if (_route->panner()) {
-		in = _route->panner()->in().n_audio();
+	if (!_route->panner_shell ()) {
+		return;
 	}
 
-	panners.set_available_panners(PannerManager::instance().PannerManager::get_available_panners(in, out));
+	uint32_t in  = _route->output ()->n_ports ().n_audio ();
+	uint32_t out = in;
+	if (_route->panner ()) {
+		in = _route->panner ()->in ().n_audio ();
+	}
+
+	panners.set_available_panners (PannerManager::instance ().PannerManager::get_available_panners (in, out));
 }
 
 void
@@ -796,15 +783,15 @@ FoldbackStrip::update_output_display ()
 void
 FoldbackStrip::io_changed_proxy ()
 {
-	Glib::signal_idle().connect_once (sigc::mem_fun (*this, &FoldbackStrip::update_panner_choices));
+	Glib::signal_idle ().connect_once (sigc::mem_fun (*this, &FoldbackStrip::update_panner_choices));
 }
 
 void
 FoldbackStrip::setup_comment_button ()
 {
-	std::string comment = _route->comment();
+	std::string comment = _route->comment ();
 
-	set_tooltip (_comment_button, comment.empty() ? _("Click to add/edit comments") : _route->comment());
+	set_tooltip (_comment_button, comment.empty () ? _("Click to add/edit comments") : _route->comment ());
 
 	if (comment.empty ()) {
 		_comment_button.set_name ("generic button");
@@ -818,7 +805,7 @@ FoldbackStrip::setup_comment_button ()
 	if (pos != string::npos) {
 		comment = comment.substr (0, pos);
 	}
-	if (comment.empty()) {
+	if (comment.empty ()) {
 		_comment_button.set_text (_("Comments"));
 	} else {
 		_comment_button.set_text (comment);
@@ -829,7 +816,7 @@ void
 FoldbackStrip::help_count_plugins (boost::weak_ptr<Processor> p)
 {
 	boost::shared_ptr<Processor> processor (p.lock ());
-	if (!processor || !processor->display_to_user()) {
+	if (!processor || !processor->display_to_user ()) {
 		return;
 	}
 	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (processor);
@@ -848,7 +835,7 @@ FoldbackStrip::build_route_ops_menu ()
 {
 	using namespace Menu_Helpers;
 
-	Menu* menu = manage (new Menu);
+	Menu*     menu  = manage (new Menu);
 	MenuList& items = menu->items ();
 	menu->set_name ("ArdourContextMenu");
 
@@ -856,28 +843,28 @@ FoldbackStrip::build_route_ops_menu ()
 
 	items.push_back (MenuElem (_("Outputs..."), sigc::mem_fun (*this, &RouteUI::edit_output_configuration)));
 
-	items.push_back (SeparatorElem());
+	items.push_back (SeparatorElem ());
 
-	items.push_back (MenuElem (_("Save As Template..."), sigc::mem_fun(*this, &RouteUI::save_as_template)));
+	items.push_back (MenuElem (_("Save As Template..."), sigc::mem_fun (*this, &RouteUI::save_as_template)));
 
-	items.push_back (MenuElem (_("Rename..."), sigc::mem_fun(*this, &RouteUI::route_rename)));
+	items.push_back (MenuElem (_("Rename..."), sigc::mem_fun (*this, &RouteUI::route_rename)));
 
-	items.push_back (MenuElem (_("Duplicate Foldback Bus"), sigc::mem_fun(*this, &FoldbackStrip::duplicate_current_fb)));
+	items.push_back (MenuElem (_("Duplicate Foldback Bus"), sigc::mem_fun (*this, &FoldbackStrip::duplicate_current_fb)));
 
-	items.push_back (SeparatorElem());
+	items.push_back (SeparatorElem ());
 	items.push_back (CheckMenuElem (_("Active")));
-	Gtk::CheckMenuItem* i = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
-	i->set_active (_route->active());
-	i->set_sensitive(! _session->transport_rolling());
-	i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::set_route_active), !_route->active(), false));
+	Gtk::CheckMenuItem* i = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
+	i->set_active (_route->active ());
+	i->set_sensitive (!_session->transport_rolling ());
+	i->signal_activate ().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::set_route_active), !_route->active (), false));
 
-	items.push_back (SeparatorElem());
+	items.push_back (SeparatorElem ());
 	items.push_back (CheckMenuElem (_("Protect Against Denormals"), sigc::mem_fun (*this, &RouteUI::toggle_denormal_protection)));
-	denormal_menu_item = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
-	denormal_menu_item->set_active (_route->denormal_protection());
+	denormal_menu_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
+	denormal_menu_item->set_active (_route->denormal_protection ());
 
-	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Remove"), sigc::mem_fun(*this, &FoldbackStrip::remove_current_fb)));
+	items.push_back (SeparatorElem ());
+	items.push_back (MenuElem (_("Remove"), sigc::mem_fun (*this, &FoldbackStrip::remove_current_fb)));
 	return menu;
 }
 
@@ -886,15 +873,14 @@ FoldbackStrip::build_route_select_menu ()
 {
 	using namespace Menu_Helpers;
 
-	Menu* menu = manage (new Menu);
+	Menu*     menu  = manage (new Menu);
 	MenuList& items = menu->items ();
 	menu->set_name ("ArdourContextMenu");
 
 	RouteList fb_list;
 	fb_list = _session->get_routelist (true, PresentationInfo::FoldbackBus);
 
-	for (RouteList::iterator s = fb_list.begin(); s != fb_list.end(); ++s) {
-
+	for (RouteList::iterator s = fb_list.begin (); s != fb_list.end (); ++s) {
 		boost::shared_ptr<Route> route = (*s);
 		if (route == _route) {
 			continue;
@@ -904,16 +890,16 @@ FoldbackStrip::build_route_select_menu ()
 	return menu;
 }
 
-gboolean
+bool
 FoldbackStrip::name_button_button_press (GdkEventButton* ev)
 {
 	if (ev->button == 1 && ev->type == GDK_BUTTON_PRESS) {
-		StripableList slist;
+		StripableList            slist;
 		boost::shared_ptr<Route> previous = boost::shared_ptr<Route> ();
 		_session->get_stripables (slist, PresentationInfo::FoldbackBus);
 		if (slist.size () > 1) {
 			Menu* menu = build_route_select_menu ();
-			Gtkmm2ext::anchored_menu_popup(menu, &name_button, "", ev->button, ev->time);
+			Gtkmm2ext::anchored_menu_popup (menu, &name_button, "", ev->button, ev->time);
 		}
 		return true;
 	} else if (Keyboard::is_context_menu_event (ev)) {
@@ -927,7 +913,7 @@ FoldbackStrip::name_button_button_press (GdkEventButton* ev)
 void
 FoldbackStrip::cycle_foldbacks (bool next)
 {
-	RouteList rl  (_session->get_routelist (true, PresentationInfo::FoldbackBus));
+	RouteList rl (_session->get_routelist (true, PresentationInfo::FoldbackBus));
 	if (rl.size () < 2) {
 		return;
 	}
@@ -946,7 +932,7 @@ FoldbackStrip::cycle_foldbacks (bool next)
 	}
 	set_route (*i);
 	if (_showing_sends) {
-		Mixer_UI::instance()->show_spill (_route);
+		Mixer_UI::instance ()->show_spill (_route);
 	}
 }
 
@@ -956,12 +942,12 @@ FoldbackStrip::update_sensitivity ()
 	RouteList fb_list;
 	fb_list = _session->get_routelist (true, PresentationInfo::FoldbackBus);
 
-	if ((fb_list.size() < 2) || (_route == *(fb_list.begin()))) {
+	if ((fb_list.size () < 2) || (_route == *(fb_list.begin ()))) {
 		_previous_button.set_sensitive (false);
 	} else {
 		_previous_button.set_sensitive (true);
 	}
-	if ((fb_list.size () < 2) || _route == *(--fb_list.end())) {
+	if ((fb_list.size () < 2) || _route == *(--fb_list.end ())) {
 		_next_button.set_sensitive (false);
 	} else {
 		_next_button.set_sensitive (true);
@@ -969,11 +955,11 @@ FoldbackStrip::update_sensitivity ()
 }
 
 void
-FoldbackStrip::hide_clicked()
+FoldbackStrip::hide_clicked ()
 {
-	_hide_button.set_sensitive(false);
+	_hide_button.set_sensitive (false);
 	ActionManager::get_toggle_action (X_("Mixer"), X_("ToggleFoldbackStrip"))->set_active (false);
-	_hide_button.set_sensitive(true);
+	_hide_button.set_sensitive (true);
 }
 
 void
@@ -995,9 +981,9 @@ void
 FoldbackStrip::show_sends_clicked ()
 {
 	if (_showing_sends) {
-		Mixer_UI::instance()->show_spill (boost::shared_ptr<Stripable>());
+		Mixer_UI::instance ()->show_spill (boost::shared_ptr<Stripable> ());
 	} else {
-		Mixer_UI::instance()->show_spill (_route);
+		Mixer_UI::instance ()->show_spill (_route);
 	}
 }
 
@@ -1010,18 +996,17 @@ FoldbackStrip::fast_update ()
 	 * all channels in the route.
 	 */
 
-	float meter_level = -199.0;
-	uint32_t mn = _peak_meter->input_streams().n_audio();
+	float    meter_level = -199.0;
+	uint32_t mn          = _peak_meter->input_streams ().n_audio ();
 
 	for (uint32_t n = 0; n != mn; ++n) {
-		const float peak = _peak_meter->meter_level(n, MeterPeak0dB);
+		const float peak = _peak_meter->meter_level (n, MeterPeak0dB);
 		if (peak > meter_level) {
 			meter_level = peak;
 		}
 	}
 
 	_meter->set (log_meter0dB (meter_level));
-
 }
 
 void
@@ -1041,12 +1026,10 @@ FoldbackStrip::send_blink (bool onoff)
 void
 FoldbackStrip::set_selected (bool yn)
 {
-
 	global_frame.set_shadow_type (Gtk::SHADOW_IN);
 	global_frame.set_name ("MixerStripFrame");
 
 	global_frame.queue_draw ();
-
 }
 
 void
@@ -1060,9 +1043,9 @@ FoldbackStrip::route_property_changed (const PropertyChange& what_changed)
 void
 FoldbackStrip::name_changed ()
 {
-	name_button.set_text (_route->name());
+	name_button.set_text (_route->name ());
 
-	set_tooltip (name_button, Gtkmm2ext::markup_escape_text(_route->name()));
+	set_tooltip (name_button, Gtkmm2ext::markup_escape_text (_route->name ()));
 }
 
 void
@@ -1075,7 +1058,6 @@ void
 FoldbackStrip::map_frozen ()
 {
 	ENSURE_GUI_THREAD (*this, &FoldbackStrip::map_frozen)
-
 
 	RouteUI::map_frozen ();
 }
@@ -1104,12 +1086,11 @@ FoldbackStrip::hide_processor_editor (boost::weak_ptr<Processor> p)
 void
 FoldbackStrip::reset_strip_style ()
 {
-			if (_route->active()) {
-				set_name ("FoldbackBusStripBase");
-			} else {
-				set_name ("AudioBusStripBaseInactive");
-			}
-
+	if (_route->active ()) {
+		set_name ("FoldbackBusStripBase");
+	} else {
+		set_name ("AudioBusStripBaseInactive");
+	}
 }
 
 void
@@ -1127,7 +1108,7 @@ FoldbackStrip::drop_send ()
 {
 	boost::shared_ptr<Send> current_send;
 
-	if (_current_delivery && ((current_send = boost::dynamic_pointer_cast<Send>(_current_delivery)) != 0)) {
+	if (_current_delivery && ((current_send = boost::dynamic_pointer_cast<Send> (_current_delivery)) != 0)) {
 		current_send->set_metering (false);
 	}
 
@@ -1152,10 +1133,10 @@ FoldbackStrip::revert_to_default_display ()
 
 	set_current_delivery (_route->main_outs ());
 
-	panner_ui().set_panner (_route->main_outs()->panner_shell(), _route->main_outs()->panner());
-	update_panner_choices();
-	panner_ui().setup_pan ();
-	panner_ui().set_send_drawing_mode (false);
+	panner_ui ().set_panner (_route->main_outs ()->panner_shell (), _route->main_outs ()->panner ());
+	update_panner_choices ();
+	panner_ui ().setup_pan ();
+	panner_ui ().set_send_drawing_mode (false);
 
 	if (has_audio_outputs ()) {
 		panners.show_all ();
@@ -1169,8 +1150,8 @@ FoldbackStrip::revert_to_default_display ()
 void
 FoldbackStrip::set_button_names ()
 {
-	solo_button->set_sensitive (Config->get_solo_control_is_listen_control());
-	switch (Config->get_listen_position()) {
+	solo_button->set_sensitive (Config->get_solo_control_is_listen_control ());
+	switch (Config->get_listen_position ()) {
 		case AfterFaderListen:
 			solo_button->set_text (_("AFL"));
 			break;
@@ -1181,9 +1162,9 @@ FoldbackStrip::set_button_names ()
 }
 
 PluginSelector*
-FoldbackStrip::plugin_selector()
+FoldbackStrip::plugin_selector ()
 {
-	return _mixer.plugin_selector();
+	return _mixer.plugin_selector ();
 }
 
 void
@@ -1244,22 +1225,21 @@ void
 FoldbackStrip::create_selected_sends (bool post_fader)
 {
 	boost::shared_ptr<StripableList> slist (new StripableList);
-	PresentationInfo::Flag fl = PresentationInfo::MixerRoutes;
+	PresentationInfo::Flag           fl = PresentationInfo::MixerRoutes;
 	_session->get_stripables (*slist, fl);
 
-	for (StripableList::iterator i = (*slist).begin(); i != (*slist).end(); ++i) {
-		if ((*i)->is_selected() && !(*i)->is_master() && !(*i)->is_monitor()) {
-			boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route>(*i);
+	for (StripableList::iterator i = (*slist).begin (); i != (*slist).end (); ++i) {
+		if ((*i)->is_selected () && !(*i)->is_master () && !(*i)->is_monitor ()) {
+			boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (*i);
 			if (rt) {
 				rt->add_foldback_send (_route, post_fader);
 			}
 		}
 	}
-
 }
 
 bool
-FoldbackStrip::send_button_press_event (GdkEventButton *ev)
+FoldbackStrip::send_button_press_event (GdkEventButton* ev)
 {
 	if (Keyboard::is_context_menu_event (ev)) {
 		Menu* menu = build_sends_menu ();
@@ -1274,20 +1254,19 @@ FoldbackStrip::build_sends_menu ()
 {
 	using namespace Menu_Helpers;
 
-	Menu* menu = manage (new Menu);
+	Menu*     menu  = manage (new Menu);
 	MenuList& items = menu->items ();
 	menu->set_name ("ArdourContextMenu");
 
 	items.push_back (
-		MenuElem(_("Assign selected tracks and buses (prefader)"), sigc::bind (sigc::mem_fun (*this, &FoldbackStrip::create_selected_sends), false))
-		);
+	    MenuElem (_("Assign selected tracks and buses (prefader)"), sigc::bind (sigc::mem_fun (*this, &FoldbackStrip::create_selected_sends), false)));
 
 	items.push_back (
-		MenuElem(_("Assign selected tracks and buses (postfader)"), sigc::bind (sigc::mem_fun (*this, &FoldbackStrip::create_selected_sends), true)));
+	    MenuElem (_("Assign selected tracks and buses (postfader)"), sigc::bind (sigc::mem_fun (*this, &FoldbackStrip::create_selected_sends), true)));
 
-	items.push_back (MenuElem(_("Copy track/bus gains to sends"), sigc::mem_fun (*this, &RouteUI::set_sends_gain_from_track)));
-	items.push_back (MenuElem(_("Set sends gain to -inf"), sigc::mem_fun (*this, &RouteUI::set_sends_gain_to_zero)));
-	items.push_back (MenuElem(_("Set sends gain to 0dB"), sigc::mem_fun (*this, &RouteUI::set_sends_gain_to_unity)));
+	items.push_back (MenuElem (_("Copy track/bus gains to sends"), sigc::mem_fun (*this, &RouteUI::set_sends_gain_from_track)));
+	items.push_back (MenuElem (_("Set sends gain to -inf"), sigc::mem_fun (*this, &RouteUI::set_sends_gain_to_zero)));
+	items.push_back (MenuElem (_("Set sends gain to 0dB"), sigc::mem_fun (*this, &RouteUI::set_sends_gain_to_unity)));
 
 	return menu;
 }
@@ -1295,34 +1274,34 @@ FoldbackStrip::build_sends_menu ()
 void
 FoldbackStrip::duplicate_current_fb ()
 {
-	RouteList new_rt_lst;
+	RouteList                new_rt_lst;
 	boost::shared_ptr<Route> new_fb;
-	boost::shared_ptr<Route> old_fb = _route;
-	string new_name_tp = "Foldback";
+	boost::shared_ptr<Route> old_fb      = _route;
+	string                   new_name_tp = "Foldback";
 	// get number of io so long as it is 1 or 2
 	uint32_t io = 1;
-	if (old_fb->n_outputs().n_audio() && (old_fb->n_outputs().n_audio() > 1)) {
+	if (old_fb->n_outputs ().n_audio () && (old_fb->n_outputs ().n_audio () > 1)) {
 		io = 2;
 	}
 
-	new_rt_lst = _session->new_audio_route (io, io, 0, 1, new_name_tp, PresentationInfo::FoldbackBus, (uint32_t) -1);
-	new_fb = *(new_rt_lst.begin());
+	new_rt_lst = _session->new_audio_route (io, io, 0, 1, new_name_tp, PresentationInfo::FoldbackBus, (uint32_t)-1);
+	new_fb     = *(new_rt_lst.begin ());
 	if (new_fb) {
-		double oldgain = old_fb->gain_control()->get_value();
-		new_fb->gain_control()->set_value (oldgain * 0.25,  PBD::Controllable::NoGroup);
+		double oldgain = old_fb->gain_control ()->get_value ();
+		new_fb->gain_control ()->set_value (oldgain * 0.25, PBD::Controllable::NoGroup);
 
-		Route::FedBy fed_by = old_fb->fed_by();
-		for (Route::FedBy::iterator i = fed_by.begin(); i != fed_by.end(); ++i) {
+		Route::FedBy fed_by = old_fb->fed_by ();
+		for (Route::FedBy::iterator i = fed_by.begin (); i != fed_by.end (); ++i) {
 			if (i->sends_only) {
-				boost::shared_ptr<Route> rt (i->r.lock());
-				boost::shared_ptr<Send> old_snd = rt->internal_send_for (old_fb);
+				boost::shared_ptr<Route>     rt (i->r.lock ());
+				boost::shared_ptr<Send>      old_snd  = rt->internal_send_for (old_fb);
 				boost::shared_ptr<Processor> old_proc = old_snd;
-				bool old_pre = old_proc->get_pre_fader ();
+				bool                         old_pre  = old_proc->get_pre_fader ();
 				rt->add_foldback_send (new_fb, !old_pre);
 				if (old_snd) {
-					float old_gain = old_snd->gain_control()->get_value ();
-					boost::shared_ptr<Send> new_snd = rt->internal_send_for (new_fb);
-					new_snd->gain_control()->set_value (old_gain, PBD::Controllable::NoGroup);
+					float                   old_gain = old_snd->gain_control ()->get_value ();
+					boost::shared_ptr<Send> new_snd  = rt->internal_send_for (new_fb);
+					new_snd->gain_control ()->set_value (old_gain, PBD::Controllable::NoGroup);
 				}
 			}
 		}
@@ -1337,12 +1316,12 @@ void
 FoldbackStrip::remove_current_fb ()
 {
 	clear_send_box ();
-	StripableList slist;
-	boost::shared_ptr<Route> next = boost::shared_ptr<Route> ();
+	StripableList            slist;
+	boost::shared_ptr<Route> next      = boost::shared_ptr<Route> ();
 	boost::shared_ptr<Route> old_route = _route;
 	_session->get_stripables (slist, PresentationInfo::FoldbackBus);
 	if (slist.size ()) {
-		for (StripableList::iterator s = slist.begin(); s != slist.end(); ++s) {
+		for (StripableList::iterator s = slist.begin (); s != slist.end (); ++s) {
 			if ((*s) != _route) {
 				next = boost::dynamic_pointer_cast<Route> (*s);
 				break;
