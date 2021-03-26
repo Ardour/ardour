@@ -888,6 +888,11 @@ PortManager::update_input_ports (bool clear)
 			if (port_is_mine (*p) || !_backend->get_port_by_name (*p)) {
 				continue;
 			}
+#ifdef HAVE_ALSA
+			if ((*p).find (X_("Midi Through")) != string::npos || (*p).find (X_("Midi-Through")) != string::npos) {
+				continue;
+			}
+#endif
 			if (mip->find (*p) == mip->end ()) {
 				new_midi.push_back (*p);
 			}
@@ -934,6 +939,11 @@ PortManager::update_input_ports (bool clear)
 			if (port_is_mine (*p) || !_backend->get_port_by_name (*p)) {
 				continue;
 			}
+#ifdef HAVE_ALSA
+			if ((*p).find (X_("Midi Through")) != string::npos || (*p).find (X_("Midi-Through")) != string::npos) {
+				continue;
+			}
+#endif
 			mpw->insert (make_pair (*p, MIDIInputPort (32)));
 		}
 	}
