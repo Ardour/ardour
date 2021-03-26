@@ -125,6 +125,7 @@ FoldbackSend::FoldbackSend (boost::shared_ptr<Send> snd, \
 	lc->Changed.connect (_connections, invalidator (*this), boost::bind (&FoldbackSend::level_changed, this), gui_context ());
 	_send_proc->ActiveChanged.connect (_connections, invalidator (*this), boost::bind (&FoldbackSend::send_state_changed, this), gui_context ());
 	_button.signal_button_press_event().connect (sigc::mem_fun (*this, &FoldbackSend::button_press));
+	_button.signal_button_release_event().connect (sigc::mem_fun (*this, &FoldbackSend::button_release));
 	_send_route->PropertyChanged.connect (_connections, invalidator (*this), boost::bind (&FoldbackSend::route_property_changed, this, _1), gui_context());
 
 	show ();
@@ -160,26 +161,44 @@ FoldbackSend::name_changed ()
 }
 
 void
-FoldbackSend::led_clicked(GdkEventButton *ev)
+FoldbackSend::led_clicked (GdkEventButton *ev)
 {
-	if (_send_proc) {
-		if (_button.get_active ()) {
-			_send_proc->enable (false);
-
-		} else {
-			_send_proc->enable (true);
-		}
+	if (!_send_proc) {
+		return;
+	}
+	if (_button.get_active ()) {
+		_send_proc->enable (false);
+	} else {
+		_send_proc->enable (true);
 	}
 }
 
-gboolean
+bool
 FoldbackSend::button_press (GdkEventButton* ev)
 {
-	if (ev->button == 1) {
+	if (ev->button == 1 && ev->type == GDK_BUTTON_PRESS) {
 		Menu* menu = build_send_menu ();
-
-		Gtkmm2ext::anchored_menu_popup(menu, &_button, "", 1, ev->time);
+		Gtkmm2ext::anchored_menu_popup(menu, &_button, "", ev->button, ev->time);
 		return true;
+	}
+	return false;
+}
+
+bool
+FoldbackSend::button_release (GdkEventButton* ev)
+{
+	if (!_send_proc) {
+		return false;
+	}
+
+	if (Keyboard::is_delete_event (ev)) {
+		remove_me ();
+	} else if (Keyboard::is_button2_event (ev)
+#ifndef __APPLE__
+		   && (Keyboard::no_modifier_keys_pressed (ev) && ((ev->state & Gdk::BUTTON2_MASK) == Gdk::BUTTON2_MASK))
+#endif
+		) {
+		_send_proc->enable (!_send_proc->enabled ());
 	}
 	return false;
 }
@@ -273,7 +292,6 @@ FoldbackSend::build_send_menu ()
 	items.push_back (MenuElem(_("Remove This Send"), sigc::mem_fun (*this, &FoldbackSend::remove_me)));
 
 	return menu;
-
 }
 
 void
@@ -333,7 +351,6 @@ FoldbackSend::remove_me ()
 	boost::shared_ptr<Processor> send_proc = boost::dynamic_pointer_cast<Processor> (_send);
 	_connections.drop_connections();
 	_send_route->remove_processor (send_proc);
-
 }
 
 
@@ -746,12 +763,9 @@ FoldbackStrip::set_packed (bool yn)
 gint
 FoldbackStrip::output_release (GdkEventButton *ev)
 {
-	switch (ev->button) {
-	case 3:
+	if (Keyboard::is_context_menu_event (ev)) {
 		edit_output_configuration ();
-		break;
 	}
-
 	return false;
 }
 
@@ -764,13 +778,12 @@ FoldbackStrip::output_press (GdkEventButton *ev)
 	}
 
 	MenuList& citems = output_menu.items();
-	switch (ev->button) {
 
-	case 3:
+	if (Keyboard::is_context_menu_event (ev)) {
 		return false;  //wait for the mouse-up to pop the dialog
+	}
 
-	case 1:
-	{
+	if (ev->button == 1) {
 		output_menu.set_name ("ArdourContextMenu");
 		citems.clear ();
 		output_menu_bundles.clear ();
@@ -808,16 +821,9 @@ FoldbackStrip::output_press (GdkEventButton *ev)
 		citems.push_back (SeparatorElem());
 		citems.push_back (MenuElem (_("Routing Grid"), sigc::mem_fun (*(static_cast<RouteUI*>(this)), &RouteUI::edit_output_configuration)));
 
-		Gtkmm2ext::anchored_menu_popup(&output_menu, &output_button, "",
-									   1, ev->time);
-
-		break;
+		Gtkmm2ext::anchored_menu_popup(&output_menu, &output_button, "", ev->button, ev->time);
 	}
-
-	default:
-		break;
-	}
-	return TRUE;
+	return true;
 }
 
 void
@@ -1270,20 +1276,18 @@ FoldbackStrip::build_route_select_menu ()
 gboolean
 FoldbackStrip::name_button_button_press (GdkEventButton* ev)
 {
-	if (ev->button == 1) {
+	if (ev->button == 1 && ev->type == GDK_BUTTON_PRESS) {
 		StripableList slist;
 		boost::shared_ptr<Route> previous = boost::shared_ptr<Route> ();
 		_session->get_stripables (slist, PresentationInfo::FoldbackBus);
 		if (slist.size () > 1) {
 			Menu* menu = build_route_select_menu ();
-
-			Gtkmm2ext::anchored_menu_popup(menu, &name_button, "",
-										   1, ev->time);
+			Gtkmm2ext::anchored_menu_popup(menu, &name_button, "", ev->button, ev->time);
 		}
 		return true;
-	} else if (ev->button == 3) {
+	} else if (Keyboard::is_context_menu_event (ev)) {
 		Menu* r_menu = build_route_ops_menu ();
-		r_menu->popup (3, ev->time);
+		r_menu->popup (ev->button, ev->time);
 		return true;
 	}
 	return false;
@@ -1626,7 +1630,7 @@ FoldbackStrip::create_selected_sends (bool post_fader)
 bool
 FoldbackStrip::send_button_press_event (GdkEventButton *ev)
 {
-	if (ev->button == 3) {
+	if (Keyboard::is_context_menu_event (ev)) {
 		Menu* menu = build_sends_menu ();
 		menu->popup (3, ev->time);
 		return true;

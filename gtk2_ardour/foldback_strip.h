@@ -91,7 +91,8 @@ private:
 	uint32_t _width;
 
 	void led_clicked(GdkEventButton *);
-	gboolean button_press (GdkEventButton*);
+	bool button_press (GdkEventButton*);
+	bool button_release (GdkEventButton*);
 	Gtk::Menu* build_send_menu ();
 	void set_gain (float new_gain);
 	void set_send_position (bool post);
