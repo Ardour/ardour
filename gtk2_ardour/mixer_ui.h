@@ -202,8 +202,6 @@ private:
 	Gtk::EventBox         vca_scroller_base;
 	Gtk::HBox             out_packer;
 	ArdourWidgets::HPane  list_hpane;
-	Gtk::Button           add_button; // should really be an ArdourButton
-	Gtk::Button           add_vca_button;
 
 	MixerGroupTabs* _group_tabs;
 

@@ -66,6 +66,8 @@ using namespace ArdourWidgets;
 using namespace Gtk;
 using namespace std;
 
+#define PX_SCALE(px) std::max ((float)px, rintf ((float)px* UIConfiguration::instance ().get_ui_scale ()))
+
 RecorderUI::RecorderUI ()
 	: Tabbable (_content, _("Recorder"), X_("recorder"))
 	, _toolbar_sep (1.0)
@@ -143,17 +145,12 @@ RecorderUI::RecorderUI ()
 	_scroller_base.set_flags (CAN_FOCUS);
 	_scroller_base.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	_scroller_base.signal_button_release_event().connect (sigc::mem_fun(*this, &RecorderUI::scroller_button_release));
-
-	/* create a button to add mixer strips */
-	_add_route_button.add (*manage (new Image (Stock::ADD, ICON_SIZE_BUTTON)));
-	_add_route_button.set_can_focus(false);
-	_add_route_button.signal_clicked().connect (sigc::mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::add_route));
+	_scroller_base.set_size_request (-1, PX_SCALE (20));
 
 	/* LAYOUT */
 
 	_rec_area.set_spacing (0);
 	_rec_area.pack_end (_scroller_base, true, true);
-	_rec_area.pack_end (_add_route_button, false, true);
 	_rec_area.pack_end (_ruler_sep, false, false, 0);
 
 	/* HBox [ groups | tracks] */
@@ -240,7 +237,6 @@ RecorderUI::RecorderUI ()
 	_space.show ();
 	_ruler_box.show ();
 	_ruler_sep.show ();
-	_add_route_button.show_all ();
 	_scroller_base.show ();
 	_toolbar_sep.show ();
 	_rec_area.show ();
@@ -1158,7 +1154,6 @@ RecorderUI::peak_reset ()
 
 /* ****************************************************************************/
 
-#define PX_SCALE(px) std::max ((float)px, rintf ((float)px* UIConfiguration::instance ().get_ui_scale ()))
 
 bool RecorderUI::InputPort::_size_groups_initialized = false;
 

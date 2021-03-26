@@ -89,6 +89,8 @@
 
 #include "pbd/i18n.h"
 
+#define PX_SCALE(px) std::max ((float)px, rintf ((float)px* UIConfiguration::instance ().get_ui_scale ()))
+
 using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
 using namespace ARDOUR_PLUGIN_UTILS;
@@ -157,23 +159,9 @@ Mixer_UI::Mixer_UI ()
 	scroller_base.drag_dest_set (target_table);
 	scroller_base.signal_drag_data_received().connect (sigc::mem_fun(*this, &Mixer_UI::scroller_drag_data_received));
 
-	/* create a button to add VCA strips ... will get packed in redisplay_track_list() */
-	Widget* w = manage (new Image (Stock::ADD, ICON_SIZE_BUTTON));
-	w->show ();
-	add_vca_button.add (*w);
-	add_vca_button.set_can_focus(false);
-	add_vca_button.signal_clicked().connect (sigc::mem_fun (*this, &Mixer_UI::new_track_or_bus));
-
-	/* create a button to add mixer strips */
-	w = manage (new Image (Stock::ADD, ICON_SIZE_BUTTON));
-	w->show ();
-	add_button.add (*w);
-	add_button.set_can_focus(false);
-	add_button.signal_clicked().connect (sigc::mem_fun (*this, &Mixer_UI::new_track_or_bus));
-
 	/* add as last item of strip packer */
 	strip_packer.pack_end (scroller_base, true, true);
-	strip_packer.pack_end (add_button, false, false);
+	scroller_base.set_size_request (PX_SCALE (20), -1);
 
 #ifdef MIXBUS
 	/* create a drop-shadow at the end of the mixer strips */
@@ -383,7 +371,6 @@ Mixer_UI::Mixer_UI ()
 	list_hpane.show();
 	group_display.show();
 	favorite_plugins_display.show();
-	add_button.show ();
 
 	XMLNode* mnode = ARDOUR_UI::instance()->tearoff_settings (X_("monitor-section"));
 	if (mnode) {
@@ -1687,9 +1674,8 @@ Mixer_UI::redisplay_track_list ()
 	container_clear (vca_hpacker);
 
 	vca_hpacker.pack_end (vca_scroller_base, true, true);
-	vca_hpacker.pack_end (add_vca_button, false, false);
+	vca_scroller_base.set_size_request (PX_SCALE (20), -1);
 
-	add_vca_button.show ();
 	vca_scroller_base.show();
 
 	for (i = rows.begin(); i != rows.end(); ++i) {
@@ -2628,7 +2614,7 @@ Mixer_UI::scroll_left ()
 	using namespace Gtk::Box_Helpers;
 	const BoxList& strips = strip_packer.children();
 	for (BoxList::const_iterator i = strips.begin(); i != strips.end(); ++i) {
-		if (i->get_widget() == & add_button) {
+		if (i->get_widget() == &scroller_base) {
 			continue;
 		}
 #ifdef MIXBUS
@@ -2660,7 +2646,7 @@ Mixer_UI::scroll_right ()
 	using namespace Gtk::Box_Helpers;
 	const BoxList& strips = strip_packer.children();
 	for (BoxList::const_iterator i = strips.begin(); i != strips.end(); ++i) {
-		if (i->get_widget() == & add_button) {
+		if (i->get_widget() == &scroller_base) {
 			continue;
 		}
 #ifdef MIXBUS
@@ -2720,7 +2706,7 @@ Mixer_UI::vca_scroll_left ()
 	using namespace Gtk::Box_Helpers;
 	const BoxList& strips = vca_hpacker.children();
 	for (BoxList::const_iterator i = strips.begin(); i != strips.end(); ++i) {
-		if (i->get_widget() == &add_vca_button) {
+		if (i->get_widget() == &vca_scroller_base) {
 			continue;
 		}
 		lm += i->get_widget()->get_width ();
@@ -2747,7 +2733,7 @@ Mixer_UI::vca_scroll_right ()
 	using namespace Gtk::Box_Helpers;
 	const BoxList& strips = vca_hpacker.children();
 	for (BoxList::const_iterator i = strips.begin(); i != strips.end(); ++i) {
-		if (i->get_widget() == &add_vca_button) {
+		if (i->get_widget() == &vca_scroller_base) {
 			continue;
 		}
 		lm += i->get_widget()->get_width ();
@@ -3855,7 +3841,6 @@ Mixer_UI::screenshot (std::string const& filename)
 	strip_group_box.remove (strip_packer);
 	b.pack_start (strip_packer, false, false);
 	/* hide extra elements inside strip_packer */
-	add_button.hide ();
 	scroller_base.hide ();
 #ifdef MIXBUS
 	mb_shadow.hide();
@@ -3867,7 +3852,6 @@ Mixer_UI::screenshot (std::string const& filename)
 		viewport->remove (); // << vca_hpacker
 		b.pack_start (vca_hpacker, false, false);
 		/* hide some growing widgets */
-		add_vca_button.hide ();
 		vca_scroller_base.hide();
 	}
 
@@ -3896,14 +3880,12 @@ Mixer_UI::screenshot (std::string const& filename)
 	osw.remove ();
 
 	/* now re-pack the widgets into the main mixer window */
-	add_button.show ();
 	scroller_base.show ();
 #ifdef MIXBUS
 	mb_shadow.show();
 #endif
 	strip_group_box.pack_start (strip_packer);
 	if (with_vca) {
-		add_vca_button.show ();
 		vca_scroller_base.show();
 		vca_scroller.add (vca_hpacker);
 	}
