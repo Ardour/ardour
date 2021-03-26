@@ -41,6 +41,7 @@
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/window_title.h"
 
+#include "widgets/ardour_icon.h"
 #include "widgets/prompter.h"
 #include "widgets/tooltips.h"
 
@@ -146,6 +147,7 @@ RecorderUI::RecorderUI ()
 	_scroller_base.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	_scroller_base.signal_button_release_event().connect (sigc::mem_fun(*this, &RecorderUI::scroller_button_release));
 	_scroller_base.set_size_request (-1, PX_SCALE (20));
+	_scroller_base.signal_expose_event().connect (sigc::bind (sigc::ptr_fun(&ArdourWidgets::ArdourIcon::expose), &_scroller_base, ArdourWidgets::ArdourIcon::ShadedPlusSign,));
 
 	/* LAYOUT */
 
@@ -1153,7 +1155,6 @@ RecorderUI::peak_reset ()
 }
 
 /* ****************************************************************************/
-
 
 bool RecorderUI::InputPort::_size_groups_initialized = false;
 
