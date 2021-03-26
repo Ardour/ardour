@@ -922,6 +922,23 @@ static void icon_plus_sign (cairo_t *cr, const int width, const int height, cons
   Gtkmm2ext::set_source_rgba (cr, fg_color);
   cairo_fill (cr);
 }
+
+static void icon_shaded_plus_sign (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
+{
+	const double lw = std::min (12., ceil (std::min (width, height) * .035));
+	const double ln = std::min (68., rint (std::min (width, height) * .2));
+	const double lc = fmod (lw * .5, 1.0);
+	const double xc = rint (width * .5) - lc;
+	const double yc = rint (height * .5) - lc;
+
+	cairo_rectangle (cr, xc - lw * .5, yc - ln, lw,  ln * 2);
+	cairo_rectangle (cr, xc - ln, yc - lw * .5, ln * 2,  lw);
+
+	int alpha = lw == 1 ? 0x80 : 0x20;
+	Gtkmm2ext::set_source_rgba (cr, (fg_color & 0xffffff00) | alpha);
+	cairo_fill (cr);
+}
+
 /** mixer strip narrow/wide */
 static void icon_strip_width (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
 {
@@ -1299,6 +1316,9 @@ ArdourWidgets::ArdourIcon::render (cairo_t *cr,
 			break;
 		case PlusSign:
 			icon_plus_sign (cr, width, height, fg_color);
+			break;
+		case ShadedPlusSign:
+			icon_shaded_plus_sign (cr, width, height, fg_color);
 			break;
 		case StripWidth:
 			icon_strip_width (cr, width, height, fg_color);

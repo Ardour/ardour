@@ -70,6 +70,7 @@ namespace ArdourWidgets { namespace ArdourIcon {
 		Config,
 		ConfigReset,
 		PowerOnOff,
+		ShadedPlusSign,
 		NoIcon //< Last
 	};
 
