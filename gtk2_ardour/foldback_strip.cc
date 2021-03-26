@@ -367,6 +367,7 @@ FoldbackStrip::FoldbackStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Rou
 	, _peak_meter (0)
 	, _pr_selection ()
 	, panners (sess)
+	, output_button (false)
 	, _plugin_insert_cnt (0)
 	, _comment_button (_("Comments"))
 	, fb_level_control (0)
@@ -530,9 +531,6 @@ FoldbackStrip::init ()
 	_session->engine().Stopped.connect (*this, invalidator (*this), boost::bind (&FoldbackStrip::engine_stopped, this), gui_context());
 	_session->engine().Running.connect (*this, invalidator (*this), boost::bind (&FoldbackStrip::engine_running, this), gui_context());
 
-	output_button.signal_button_press_event().connect (sigc::mem_fun(*this, &FoldbackStrip::output_press), false);
-	output_button.signal_button_release_event().connect (sigc::mem_fun(*this, &FoldbackStrip::output_release), false);
-
 	name_button.signal_button_press_event().connect (sigc::mem_fun(*this, &FoldbackStrip::name_button_button_press), false);
 	_previous_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &FoldbackStrip::cycle_foldbacks), false));
 	_next_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &FoldbackStrip::cycle_foldbacks), true));
@@ -548,14 +546,6 @@ FoldbackStrip::init ()
 			Gdk::KEY_RELEASE_MASK);
 
 	set_flags (get_flags() | Gtk::CAN_FOCUS);
-
-	AudioEngine::instance()->PortConnectedOrDisconnected.connect (
-		*this, invalidator (*this), boost::bind (&FoldbackStrip::port_connected_or_disconnected, this, _1, _3), gui_context ()
-		);
-
-	AudioEngine::instance()->PortPrettyNameChanged.connect (
-		*this, invalidator (*this), boost::bind (&FoldbackStrip::port_pretty_name_changed, this, _1), gui_context ()
-		);
 
 	//watch for mouse enter/exit so we can do some stuff
 	signal_enter_notify_event().connect (sigc::mem_fun(*this, &FoldbackStrip::mixer_strip_enter_event ));
@@ -634,6 +624,8 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 		RouteUI::self_delete ();
 		return;
 	}
+
+	output_button.set_route (_route, this);
 
 	insert_box->set_route (_route);
 	revert_to_default_display ();
@@ -760,115 +752,6 @@ FoldbackStrip::set_packed (bool yn)
 	_packed = yn;
 }
 
-gint
-FoldbackStrip::output_release (GdkEventButton *ev)
-{
-	if (Keyboard::is_context_menu_event (ev)) {
-		edit_output_configuration ();
-	}
-	return false;
-}
-
-gint
-FoldbackStrip::output_press (GdkEventButton *ev)
-{
-	using namespace Menu_Helpers;
-	if (!ARDOUR_UI_UTILS::engine_is_running ()) {
-		return true;
-	}
-
-	MenuList& citems = output_menu.items();
-
-	if (Keyboard::is_context_menu_event (ev)) {
-		return false;  //wait for the mouse-up to pop the dialog
-	}
-
-	if (ev->button == 1) {
-		output_menu.set_name ("ArdourContextMenu");
-		citems.clear ();
-		output_menu_bundles.clear ();
-
-		citems.push_back (MenuElem (_("Disconnect"), sigc::mem_fun (*(static_cast<RouteUI*>(this)), &RouteUI::disconnect_output)));
-
-		citems.push_back (SeparatorElem());
-		uint32_t const n_with_separator = citems.size ();
-
-		ARDOUR::BundleList current = _route->output()->bundles_connected ();
-
-		boost::shared_ptr<ARDOUR::BundleList> b = _session->bundles ();
-
-		DataType intended_type = DataType::AUDIO;
-
-		/* then try adding user bundles, often labeled/grouped physical inputs */
-		for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
-			if (boost::dynamic_pointer_cast<UserBundle> (*i)) {
-				maybe_add_bundle_to_output_menu (*i, current, intended_type);
-			}
-		}
-
-		/* then all other bundles, including physical outs or other sofware */
-		for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
-			if (boost::dynamic_pointer_cast<UserBundle> (*i) == 0) {
-				maybe_add_bundle_to_output_menu (*i, current, intended_type);
-			}
-		}
-
-		if (citems.size() == n_with_separator) {
-			/* no routes added; remove the separator */
-			citems.pop_back ();
-		}
-
-		citems.push_back (SeparatorElem());
-		citems.push_back (MenuElem (_("Routing Grid"), sigc::mem_fun (*(static_cast<RouteUI*>(this)), &RouteUI::edit_output_configuration)));
-
-		Gtkmm2ext::anchored_menu_popup(&output_menu, &output_button, "", ev->button, ev->time);
-	}
-	return true;
-}
-
-void
-FoldbackStrip::bundle_output_chosen (boost::shared_ptr<ARDOUR::Bundle> c)
-{
-	_route->output()->connect_ports_to_bundle (c, true, true, this);
-}
-
-void
-FoldbackStrip::maybe_add_bundle_to_output_menu (boost::shared_ptr<Bundle> b, ARDOUR::BundleList const& /*current*/,
-											 DataType type)
-{
-	using namespace Menu_Helpers;
-
-	/* The bundle should be an input one, but not ours */
-	if (b->ports_are_inputs() == false || *b == *_route->input()->bundle()) {
-		return;
-	}
-
-	/* Don't add the monitor input */
-	boost::shared_ptr<Route> monitor = _session->monitor_out();
-	if (monitor && b->has_same_ports (monitor->input()->bundle()))
-		return;
-
-	/* It should have the same number of |type| channels as our outputs. */
-	if (b->nchannels().n(type) != _route->n_outputs().n(type)) {
-		return;
-	}
-
-	/* Avoid adding duplicates */
-	list<boost::shared_ptr<Bundle> >::iterator i = output_menu_bundles.begin ();
-	while (i != output_menu_bundles.end() && b->has_same_ports (*i) == false) {
-		++i;
-	}
-	if (i != output_menu_bundles.end()) {
-		return;
-	}
-
-	/* Now add the bundle to the menu */
-	output_menu_bundles.push_back (b);
-
-	MenuList& citems = output_menu.items();
-	citems.push_back (MenuElemNoMnemonic (b->name (), sigc::bind (sigc::mem_fun(*this, &FoldbackStrip::bundle_output_chosen), b)));
-}
-
 void
 FoldbackStrip::connect_to_pan ()
 {
@@ -899,242 +782,10 @@ FoldbackStrip::update_panner_choices ()
 	panners.set_available_panners(PannerManager::instance().PannerManager::get_available_panners(in, out));
 }
 
-/*
- * Output port labelling
- *
- * Case 1: Each output has one connection, all connections are to system:playback_%i
- *   out 1 -> system:playback_1
- *   out 2 -> system:playback_2
- *   out 3 -> system:playback_3
- *   Display as: 1/2/3
- *
- * Case 2: Each output has one connection, all connections are to ardour:track_x/in 1
- *   out 1 -> ardour:track_x/in 1
- *   out 2 -> ardour:track_x/in 2
- *   Display as: track_x
- *
- * Case 3: Each output has one connection, all connections are to Jack client "program x"
- *   out 1 -> program x:foo
- *   out 2 -> program x:foo
- *   Display as: program x
- *
- * Case 4: No connections (Disconnected)
- *   Display as: -
- *
- * Default case (unusual routing):
- *   Display as: *number of connections*
- *
- *
- * Tooltips
- *
- * .-----------------------------------------------.
- * | Mixdown                                       |
- * | out 1 -> ardour:master/in 1, jamin:input/in 1 |
- * | out 2 -> ardour:master/in 2, jamin:input/in 2 |
- * '-----------------------------------------------'
- * .-----------------------------------------------.
- * | Guitar SM58                                   |
- * | Disconnected                                  |
- * '-----------------------------------------------'
- */
-
-void
-FoldbackStrip::update_io_button ()
-{
-	ostringstream tooltip;
-	ostringstream label;
-	bool have_label = false;
-
-	uint32_t total_connection_count = 0;
-	uint32_t typed_connection_count = 0;
-	bool each_typed_port_has_one_connection = true;
-
-	DataType dt = DataType::AUDIO;
-	boost::shared_ptr<IO> io = _route->output();
-
-	/* Fill in the tooltip. Also count:
-	 *  - The total number of connections.
-	 *  - The number of main-typed connections.
-	 *  - Whether each main-typed port has exactly one connection. */
-
-	tooltip << string_compose (_("<b>OUTPUT</b> from %1"),
-			Gtkmm2ext::markup_escape_text (_route->name()));
-
-	string arrow = Gtkmm2ext::markup_escape_text(" -> ");
-	vector<string> port_connections;
-	for (PortSet::iterator port = io->ports().begin();
-						   port != io->ports().end();
-						   ++port) {
-		port_connections.clear();
-		port->get_connections(port_connections);
-
-		uint32_t port_connection_count = 0;
-
-		for (vector<string>::iterator i = port_connections.begin();
-									  i != port_connections.end();
-									  ++i) {
-			++port_connection_count;
-
-			if (port_connection_count == 1) {
-				tooltip << endl << Gtkmm2ext::markup_escape_text (
-						port->name().substr(port->name().find("/") + 1));
-				tooltip << arrow;
-			} else {
-				tooltip << ", ";
-			}
-
-			tooltip << Gtkmm2ext::markup_escape_text(*i);
-		}
-
-		total_connection_count += port_connection_count;
-		if (port->type() == dt) {
-			typed_connection_count += port_connection_count;
-			each_typed_port_has_one_connection &= (port_connection_count == 1);
-		}
-
-	}
-
-	if (total_connection_count == 0) {
-		tooltip << endl << _("Disconnected");
-	}
-
-	if (typed_connection_count == 0) {
-		label << "-";
-		have_label = true;
-	}
-
-	/* Are all main-typed channels connected to the same route ? */
-	if (!have_label) {
-		boost::shared_ptr<ARDOUR::RouteList> routes = _session->get_routes ();
-		for (ARDOUR::RouteList::const_iterator route = routes->begin();
-											   route != routes->end();
-											   ++route) {
-			boost::shared_ptr<IO> dest_io = (*route)->output();
-			if (io->bundle()->connected_to(dest_io->bundle(),
-										   _session->engine(),
-										   dt, true)) {
-				label << Gtkmm2ext::markup_escape_text ((*route)->name());
-				have_label = true;
-				break;
-			}
-		}
-	}
-
-	/* Are all main-typed channels connected to the same (user) bundle ? */
-	if (!have_label) {
-		boost::shared_ptr<ARDOUR::BundleList> bundles = _session->bundles ();
-		for (ARDOUR::BundleList::iterator bundle = bundles->begin();
-										  bundle != bundles->end();
-										  ++bundle) {
-			if (boost::dynamic_pointer_cast<UserBundle> (*bundle) == 0)
-				continue;
-			if (io->bundle()->connected_to(*bundle, _session->engine(),
-										   dt, true)) {
-				label << Gtkmm2ext::markup_escape_text ((*bundle)->name());
-				have_label = true;
-				break;
-			}
-		}
-	}
-
-	/* Is each main-typed channel only connected to a physical output ? */
-	if (!have_label && each_typed_port_has_one_connection) {
-		ostringstream temp_label;
-		vector<string> phys;
-		string playorcapture;
-
-		_session->engine().get_physical_outputs(dt, phys);
-		playorcapture = "playback_";
-		for (PortSet::iterator port = io->ports().begin(dt);
-							   port != io->ports().end(dt);
-							   ++port) {
-			string pn = "";
-			for (vector<string>::iterator s = phys.begin();
-										  s != phys.end();
-										  ++s) {
-				if (!port->connected_to(*s))
-					continue;
-				pn = AudioEngine::instance()->get_pretty_name_by_name(*s);
-				if (pn.empty()) {
-					string::size_type start = (*s).find(playorcapture);
-					if (start != string::npos) {
-						pn = (*s).substr(start + playorcapture.size());
-					}
-				}
-				break;
-			}
-			if (pn.empty()) {
-				temp_label.str(""); /* erase the failed attempt */
-				break;
-			}
-			if (port != io->ports().begin(dt))
-				temp_label << "/";
-			temp_label << pn;
-		}
-
-		if (!temp_label.str().empty()) {
-			label << temp_label.str();
-			have_label = true;
-		}
-	}
-
-	/* Is each main-typed channel connected to a single and different port with
-	 * the same client name (e.g. another JACK client) ? */
-	if (!have_label && each_typed_port_has_one_connection) {
-		string maybe_client = "";
-		vector<string> connections;
-		for (PortSet::iterator port = io->ports().begin(dt);
-							   port != io->ports().end(dt);
-							   ++port) {
-			port_connections.clear();
-			port->get_connections(port_connections);
-			string connection = port_connections.front();
-
-			vector<string>::iterator i = connections.begin();
-			while (i != connections.end() && *i != connection) {
-				++i;
-			}
-			if (i != connections.end())
-				break; /* duplicate connection */
-			connections.push_back(connection);
-
-			connection = connection.substr(0, connection.find(":"));
-			if (maybe_client.empty())
-				maybe_client = connection;
-			if (maybe_client != connection)
-				break;
-		}
-		if (connections.size() == io->n_ports().n(dt)) {
-			label << maybe_client;
-			have_label = true;
-		}
-	}
-
-	/* Odd configuration */
-	if (!have_label) {
-		label << "*" << total_connection_count << "*";
-	}
-
-	if (total_connection_count > typed_connection_count) {
-		label << "\u2295"; /* circled plus */
-	}
-
-	/* Actually set the properties of the button */
-	char * cstr = new char[tooltip.str().size() + 1];
-	strcpy(cstr, tooltip.str().c_str());
-
-	output_button.set_text (label.str());
-	set_tooltip (&output_button, cstr);
-
-	delete [] cstr;
-}
-
 void
 FoldbackStrip::update_output_display ()
 {
-	update_io_button ();
 	panners.setup_pan ();
-
 	if (has_audio_outputs ()) {
 		panners.show_all ();
 	} else {
@@ -1146,25 +797,6 @@ void
 FoldbackStrip::io_changed_proxy ()
 {
 	Glib::signal_idle().connect_once (sigc::mem_fun (*this, &FoldbackStrip::update_panner_choices));
-}
-
-void
-FoldbackStrip::port_connected_or_disconnected (boost::weak_ptr<Port> wa, boost::weak_ptr<Port> wb)
-{
-	boost::shared_ptr<Port> a = wa.lock ();
-	boost::shared_ptr<Port> b = wb.lock ();
-
-	if ((a && _route->output()->has_port (a)) || (b && _route->output()->has_port (b))) {
-		update_output_display ();
-	}
-}
-
-void
-FoldbackStrip::port_pretty_name_changed (std::string pn)
-{
-	if (_route->output()->connected_to (pn)) {
-		update_output_display ();
-	}
 }
 
 void
@@ -1271,7 +903,6 @@ FoldbackStrip::build_route_select_menu ()
 	}
 	return menu;
 }
-
 
 gboolean
 FoldbackStrip::name_button_button_press (GdkEventButton* ev)

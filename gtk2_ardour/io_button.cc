@@ -252,7 +252,7 @@ IOButton::button_press (GdkEventButton* ev)
 
 		/* other routes inputs */
 		for (ARDOUR::RouteList::const_iterator i = copy.begin(); i != copy.end(); ++i) {
-			if ((*i)->is_foldbackbus ()) {
+			if ((*i)->is_foldbackbus () || _route->is_foldbackbus ()) {
 				continue;
 			}
 			if ((*i)->feeds_according_to_graph (_route)) {

@@ -48,11 +48,12 @@
 #include "widgets/ardour_knob.h"
 #include "widgets/fastmeter.h"
 
-#include "route_ui.h"
-#include "panner_ui.h"
 #include "enums.h"
+#include "io_button.h"
+#include "panner_ui.h"
 #include "processor_box.h"
 #include "processor_selection.h"
+#include "route_ui.h"
 
 namespace ARDOUR {
 	class Route;
@@ -111,9 +112,6 @@ private:
 	Gtkmm2ext::PersistentTooltip _slider_persistant_tooltip;
 
 	PBD::ScopedConnectionList _connections;
-
-
-
 };
 
 class FoldbackStrip : public RouteUI, public Gtk::EventBox
@@ -198,7 +196,7 @@ private:
 
 	Gtk::HBox master_box;
 
-	ArdourWidgets::ArdourButton output_button;
+	IOButton output_button;
 
 	Gtk::HBox prev_next_box;
 
@@ -216,15 +214,6 @@ private:
 
 	void setup_comment_button ();
 	void hide_clicked();
-
-	gint output_press (GdkEventButton *);
-	gint output_release (GdkEventButton *);
-
-	Gtk::Menu output_menu;
-	std::list<boost::shared_ptr<ARDOUR::Bundle> > output_menu_bundles;
-	void maybe_add_bundle_to_output_menu (boost::shared_ptr<ARDOUR::Bundle>, ARDOUR::BundleList const &, ARDOUR::DataType type = ARDOUR::DataType::NIL);
-
-	void bundle_output_chosen (boost::shared_ptr<ARDOUR::Bundle>);
 
 	void io_changed_proxy ();
 
@@ -272,10 +261,6 @@ private:
 	PBD::ScopedConnection send_gone_connection;
 
 	void reset_strip_style ();
-
-	void update_io_button ();
-	void port_connected_or_disconnected (boost::weak_ptr<ARDOUR::Port>, boost::weak_ptr<ARDOUR::Port>);
-	void port_pretty_name_changed (std::string);
 
 	bool mixer_strip_enter_event ( GdkEventCrossing * );
 	bool mixer_strip_leave_event ( GdkEventCrossing * );
