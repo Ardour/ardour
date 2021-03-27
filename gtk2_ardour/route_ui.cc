@@ -1040,36 +1040,44 @@ RouteUI::build_sends_menu ()
 	sends_menu->set_name ("ArdourContextMenu");
 	MenuList& items = sends_menu->items();
 
-	items.push_back (
-		MenuElem(_("Assign all tracks (prefader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_sends), PreFader, false))
-		);
+	if (!is_foldbackbus ()) {
+		items.push_back (
+				MenuElem(_("Assign all tracks (prefader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_sends), PreFader, false))
+				);
 
-	items.push_back (
-		MenuElem(_("Assign all tracks and busses (prefader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_sends), PreFader, true))
-		);
+		items.push_back (
+				MenuElem(_("Assign all tracks and busses (prefader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_sends), PreFader, true))
+				);
 
-	items.push_back (
-		MenuElem(_("Assign all tracks (postfader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_sends), PostFader, false))
-		);
+		items.push_back (
+				MenuElem(_("Assign all tracks (postfader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_sends), PostFader, false))
+				);
 
-	items.push_back (
-		MenuElem(_("Assign all tracks and busses (postfader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_sends), PostFader, true))
-		);
+		items.push_back (
+				MenuElem(_("Assign all tracks and busses (postfader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_sends), PostFader, true))
+				);
+	}
 
 	items.push_back (
 		MenuElem(_("Assign selected tracks (prefader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_selected_sends), PreFader, false))
 		);
 
-	items.push_back (
-		MenuElem(_("Assign selected tracks and busses (prefader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_selected_sends), PreFader, true)));
+	if (!is_foldbackbus ()) {
+		items.push_back (
+				MenuElem(_("Assign selected tracks and busses (prefader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_selected_sends), PreFader, true)));
+	}
 
 	items.push_back (
 		MenuElem(_("Assign selected tracks (postfader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_selected_sends), PostFader, false))
 		);
 
-	items.push_back (
-		MenuElem(_("Assign selected tracks and busses (postfader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_selected_sends), PostFader, true))
-		);
+	if (!is_foldbackbus ()) {
+		items.push_back (
+				MenuElem(_("Assign selected tracks and busses (postfader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_selected_sends), PostFader, true))
+				);
+	}
+
+	items.push_back (SeparatorElem());
 
 	items.push_back (MenuElem(_("Copy track/bus gains to sends"), sigc::mem_fun (*this, &RouteUI::set_sends_gain_from_track)));
 	items.push_back (MenuElem(_("Set sends gain to -inf"), sigc::mem_fun (*this, &RouteUI::set_sends_gain_to_zero)));
@@ -1125,7 +1133,7 @@ RouteUI::set_sends_gain_to_unity ()
 bool
 RouteUI::show_sends_press(GdkEventButton* ev)
 {
-	if (ev->type == GDK_2BUTTON_PRESS || ev->type == GDK_3BUTTON_PRESS ) {
+	if (ev->type == GDK_2BUTTON_PRESS || ev->type == GDK_3BUTTON_PRESS) {
 		return true;
 	}
 
@@ -1144,7 +1152,7 @@ RouteUI::show_sends_press(GdkEventButton* ev)
 
 			sends_menu->popup (0, ev->time);
 
-		} else {
+		} else if (ev->button == 1) {
 
 			boost::shared_ptr<Route> s = _showing_sends_to.lock ();
 
@@ -1156,9 +1164,10 @@ RouteUI::show_sends_press(GdkEventButton* ev)
 				Mixer_UI::instance()->show_spill (_route);
 			}
 		}
+		return true;
 	}
 
-	return true;
+	return false;
 }
 
 bool
@@ -1869,6 +1878,12 @@ bool
 RouteUI::is_master () const
 {
 	return _route && _route->is_master ();
+}
+
+bool
+RouteUI::is_foldbackbus () const
+{
+	return _route && _route->is_foldbackbus ();
 }
 
 boost::shared_ptr<Track>

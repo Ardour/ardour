@@ -189,12 +189,14 @@ FoldbackSend::button_release (GdkEventButton* ev)
 
 	if (Keyboard::is_delete_event (ev)) {
 		remove_me ();
+		return true;
 	} else if (Keyboard::is_button2_event (ev)
 #ifndef __APPLE__
 	           && (Keyboard::no_modifier_keys_pressed (ev) && ((ev->state & Gdk::BUTTON2_MASK) == Gdk::BUTTON2_MASK))
 #endif
 	) {
 		_send_proc->enable (!_send_proc->enabled ());
+		return true;
 	}
 	return false;
 }
@@ -396,12 +398,6 @@ FoldbackStrip::init ()
 	name_button.set_text_ellipsize (Pango::ELLIPSIZE_END);
 	name_button.set_layout_ellipsize_width (PX_SCALE (_width) * PANGO_SCALE);
 
-	// invertbuttons and box in route_ui
-
-	_show_sends_button.set_name ("send alert button");
-	_show_sends_button.set_text (_("Show Sends"));
-	UI::instance ()->set_tip (&_show_sends_button, _("Show the strips that send to this bus, and control them from the faders"), "");
-
 	send_display.set_flags (CAN_FOCUS);
 	send_display.set_spacing (4);
 
@@ -473,7 +469,7 @@ FoldbackStrip::init ()
 	// or hides.
 	global_vpacker.pack_start (prev_next_box, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (name_button, Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (_show_sends_button, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (*show_sends_button, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (_invert_button_box, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (send_scroller, true, true);
 #ifndef MIXBUS
@@ -510,8 +506,7 @@ FoldbackStrip::init ()
 	_previous_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &FoldbackStrip::cycle_foldbacks), false));
 	_next_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &FoldbackStrip::cycle_foldbacks), true));
 	_hide_button.signal_clicked.connect (sigc::mem_fun (*this, &FoldbackStrip::hide_clicked));
-	_show_sends_button.signal_clicked.connect (sigc::mem_fun (*this, &FoldbackStrip::show_sends_clicked));
-	send_scroller.signal_button_press_event ().connect (sigc::mem_fun (*this, &FoldbackStrip::send_button_press_event));
+	send_scroller.signal_button_press_event ().connect (sigc::mem_fun (*this, &RouteUI::show_sends_press));
 	_comment_button.signal_clicked.connect (sigc::mem_fun (*this, &RouteUI::toggle_comment_editor));
 
 	add_events (Gdk::BUTTON_RELEASE_MASK |
@@ -521,7 +516,7 @@ FoldbackStrip::init ()
 
 	set_flags (get_flags () | Gtk::CAN_FOCUS);
 
-	signal_enter_notify_event ().connect (sigc::mem_fun (*this, &FoldbackStrip::mixer_strip_enter_event));
+	signal_enter_notify_event ().connect (sigc::mem_fun (*this, &FoldbackStrip::fb_strip_enter_event));
 
 	Mixer_UI::instance ()->show_spill_change.connect (sigc::mem_fun (*this, &FoldbackStrip::spill_change));
 }
@@ -535,7 +530,7 @@ FoldbackStrip::~FoldbackStrip ()
 }
 
 bool
-FoldbackStrip::mixer_strip_enter_event (GdkEventCrossing* /*ev*/)
+FoldbackStrip::fb_strip_enter_event (GdkEventCrossing* /*ev*/)
 {
 	deselect_all_processors ();
 	return false;
@@ -564,13 +559,6 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 
 	if (!rt) {
 		clear_send_box ();
-		update_sensitivity ();
-		if (_showing_sends) {
-			Mixer_UI::instance ()->show_spill (boost::shared_ptr<ARDOUR::Stripable> ());
-			_showing_sends = false;
-			send_blink_connection.disconnect ();
-		}
-		RouteUI::set_route (rt);
 		RouteUI::self_delete ();
 		return;
 	}
@@ -579,11 +567,6 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 
 	insert_box->set_route (_route);
 	update_fb_level_control ();
-
-	_showing_sends = false;
-	_show_sends_button.set_active (false);
-	send_blink_connection.disconnect ();
-
 
 	/* setup panners */
 	panner_ui ().set_panner (_route->main_outs ()->panner_shell (), _route->main_outs ()->panner ());
@@ -621,6 +604,7 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 	panners.show_all ();
 	update_output_display ();
 	reset_strip_style ();
+	setup_comment_button ();
 
 	add_events (Gdk::BUTTON_RELEASE_MASK);
 	update_sensitivity ();
@@ -631,7 +615,7 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 	name_button.show ();
 	send_display.show ();
 	send_scroller.show ();
-	_show_sends_button.show ();
+	show_sends_button->show ();
 	insert_box->show ();
 	_meter->show ();
 	master_box.show ();
@@ -875,7 +859,9 @@ FoldbackStrip::cycle_foldbacks (bool next)
 		--i;
 	}
 	set_route (*i);
+
 	if (_showing_sends) {
+		set_showing_sends_to (_route);
 		Mixer_UI::instance ()->show_spill (_route);
 	}
 }
@@ -909,23 +895,8 @@ FoldbackStrip::spill_change (boost::shared_ptr<Stripable> s)
 {
 	if (s == _route) {
 		_showing_sends = true;
-		_show_sends_button.set_active (true);
-		send_blink_connection.disconnect ();
-		send_blink_connection = Timers::blink_connect (sigc::mem_fun (*this, &FoldbackStrip::send_blink));
 	} else {
 		_showing_sends = false;
-		_show_sends_button.set_active (false);
-		send_blink_connection.disconnect ();
-	}
-}
-
-void
-FoldbackStrip::show_sends_clicked ()
-{
-	if (_showing_sends) {
-		Mixer_UI::instance ()->show_spill (boost::shared_ptr<Stripable> ());
-	} else {
-		Mixer_UI::instance ()->show_spill (_route);
 	}
 }
 
@@ -938,20 +909,6 @@ FoldbackStrip::fast_update ()
 	 */
 	const float meter_level = _peak_meter->meter_level (0, MeterMCP);
 	_meter->set (log_meter0dB (meter_level));
-}
-
-void
-FoldbackStrip::send_blink (bool onoff)
-{
-	if (!(&_show_sends_button)) {
-		return;
-	}
-
-	if (onoff) {
-		_show_sends_button.set_active_state (Gtkmm2ext::ExplicitActive);
-	} else {
-		_show_sends_button.unset_active_state ();
-	}
 }
 
 void
@@ -982,6 +939,8 @@ FoldbackStrip::reset_strip_style ()
 void
 FoldbackStrip::set_button_names ()
 {
+	show_sends_button->set_text (_("Show Sends"));
+
 	solo_button->set_sensitive (Config->get_solo_control_is_listen_control ());
 	switch (Config->get_listen_position ()) {
 		case AfterFaderListen:
@@ -1012,7 +971,7 @@ FoldbackStrip::deselect_all_processors ()
 }
 
 void
-FoldbackStrip::create_selected_sends (bool post_fader)
+FoldbackStrip::create_selected_sends (ARDOUR::Placement p, bool)
 {
 	boost::shared_ptr<StripableList> slist (new StripableList);
 	PresentationInfo::Flag           fl = PresentationInfo::MixerRoutes;
@@ -1022,43 +981,10 @@ FoldbackStrip::create_selected_sends (bool post_fader)
 		if ((*i)->is_selected () && !(*i)->is_master () && !(*i)->is_monitor ()) {
 			boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (*i);
 			if (rt) {
-				rt->add_foldback_send (_route, post_fader);
+				rt->add_foldback_send (_route, p == PostFader);
 			}
 		}
 	}
-}
-
-bool
-FoldbackStrip::send_button_press_event (GdkEventButton* ev)
-{
-	if (Keyboard::is_context_menu_event (ev)) {
-		Menu* menu = build_sends_menu ();
-		menu->popup (3, ev->time);
-		return true;
-	}
-	return false;
-}
-
-Gtk::Menu*
-FoldbackStrip::build_sends_menu ()
-{
-	using namespace Menu_Helpers;
-
-	Menu*     menu  = manage (new Menu);
-	MenuList& items = menu->items ();
-	menu->set_name ("ArdourContextMenu");
-
-	items.push_back (
-	    MenuElem (_("Assign selected tracks and buses (prefader)"), sigc::bind (sigc::mem_fun (*this, &FoldbackStrip::create_selected_sends), false)));
-
-	items.push_back (
-	    MenuElem (_("Assign selected tracks and buses (postfader)"), sigc::bind (sigc::mem_fun (*this, &FoldbackStrip::create_selected_sends), true)));
-
-	items.push_back (MenuElem (_("Copy track/bus gains to sends"), sigc::mem_fun (*this, &RouteUI::set_sends_gain_from_track)));
-	items.push_back (MenuElem (_("Set sends gain to -inf"), sigc::mem_fun (*this, &RouteUI::set_sends_gain_to_zero)));
-	items.push_back (MenuElem (_("Set sends gain to 0dB"), sigc::mem_fun (*this, &RouteUI::set_sends_gain_to_unity)));
-
-	return menu;
 }
 
 void

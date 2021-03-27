@@ -147,6 +147,10 @@ public:
 
 	void deselect_all_processors ();
 
+protected:
+	void create_sends (ARDOUR::Placement, bool) {}
+	void create_selected_sends (ARDOUR::Placement, bool);
+
 private:
 	void init ();
 	void setup_comment_button ();
@@ -163,20 +167,15 @@ private:
 	void cycle_foldbacks (bool next);
 	void update_sensitivity ();
 	void spill_change (boost::shared_ptr<ARDOUR::Stripable>);
-	void show_sends_clicked ();
-	void send_blink (bool);
 	bool name_button_button_press (GdkEventButton*);
-	bool send_button_press_event (GdkEventButton* ev);
-	void create_selected_sends (bool include_buses);
 	void route_property_changed (const PBD::PropertyChange&);
 	void name_changed ();
 	void duplicate_current_fb ();
 	void reset_strip_style ();
-	bool mixer_strip_enter_event (GdkEventCrossing*);
+	bool fb_strip_enter_event (GdkEventCrossing*);
 
 	Gtk::Menu* build_route_ops_menu ();
 	Gtk::Menu* build_route_select_menu ();
-	Gtk::Menu* build_sends_menu ();
 
 	Mixer_UI& _mixer;
 
@@ -200,7 +199,6 @@ private:
 	IOButton output_button;
 
 	ArdourWidgets::ArdourButton name_button;
-	ArdourWidgets::ArdourButton _show_sends_button;
 	ArdourWidgets::ArdourButton _previous_button;
 	ArdourWidgets::ArdourButton _next_button;
 	ArdourWidgets::ArdourButton _hide_button;

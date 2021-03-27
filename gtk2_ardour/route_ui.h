@@ -103,6 +103,7 @@ public:
 
 	bool is_track() const;
 	bool is_master() const;
+	bool is_foldbackbus() const;
 	bool is_audio_track() const;
 	bool is_midi_track() const;
 	bool has_audio_outputs () const;
@@ -174,13 +175,6 @@ public:
 
 	void edit_input_configuration ();
 	void edit_output_configuration ();
-
-	void build_sends_menu ();
-	void set_sends_gain_from_track ();
-	void set_sends_gain_to_zero ();
-	void set_sends_gain_to_unity ();
-	void create_sends (ARDOUR::Placement, bool);
-	void create_selected_sends (ARDOUR::Placement, bool);
 
 	void solo_changed(bool, void*);
 	void solo_changed_so_update_mute ();
@@ -301,6 +295,13 @@ protected:
 	virtual void start_step_editing () {}
 	virtual void stop_step_editing() {}
 
+	void build_sends_menu ();
+	void set_sends_gain_from_track ();
+	void set_sends_gain_to_zero ();
+	void set_sends_gain_to_unity ();
+	virtual void create_sends (ARDOUR::Placement, bool);
+	virtual void create_selected_sends (ARDOUR::Placement, bool);
+
 	void set_invert_sensitive (bool);
 	bool verify_new_route_name (const std::string& name);
 
@@ -339,6 +340,8 @@ protected:
 
 	Gtk::Menu* playlist_action_menu;
 
+	static void set_showing_sends_to (boost::shared_ptr<ARDOUR::Route>);
+
 private:
 	void setup_invert_buttons ();
 	void invert_menu_toggled (uint32_t);
@@ -357,7 +360,6 @@ private:
 
 	StripableColorDialog _color_picker;
 
-	static void set_showing_sends_to (boost::shared_ptr<ARDOUR::Route>);
 	static boost::weak_ptr<ARDOUR::Route> _showing_sends_to;
 
 	static uint32_t _max_invert_buttons;
