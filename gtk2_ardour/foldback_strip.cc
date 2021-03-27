@@ -500,7 +500,7 @@ FoldbackStrip::init ()
 	_previous_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &FoldbackStrip::cycle_foldbacks), false));
 	_next_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &FoldbackStrip::cycle_foldbacks), true));
 	_hide_button.signal_clicked.connect (sigc::mem_fun (*this, &FoldbackStrip::hide_clicked));
-	_send_scroller.signal_button_press_event ().connect (sigc::mem_fun (*this, &RouteUI::show_sends_press));
+	_send_scroller.signal_button_press_event ().connect (sigc::mem_fun (*this, &FoldbackStrip::send_scroller_press));
 	_comment_button.signal_clicked.connect (sigc::mem_fun (*this, &RouteUI::toggle_comment_editor));
 
 	add_events (Gdk::BUTTON_RELEASE_MASK |
@@ -819,6 +819,16 @@ FoldbackStrip::name_button_button_press (GdkEventButton* ev)
 		return true;
 	}
 	return false;
+}
+
+bool
+FoldbackStrip::send_scroller_press (GdkEventButton* ev)
+{
+	if (Keyboard::is_context_menu_event (ev)) {
+		/* Show context menu, identical to send button right-click */
+		return RouteUI::show_sends_press (ev);
+	}
+	return true;
 }
 
 void

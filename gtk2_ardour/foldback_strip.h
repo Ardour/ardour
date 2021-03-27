@@ -165,6 +165,7 @@ private:
 	void update_sensitivity ();
 	void spill_change (boost::shared_ptr<ARDOUR::Stripable>);
 	bool name_button_button_press (GdkEventButton*);
+	bool send_scroller_press (GdkEventButton*);
 	void route_property_changed (const PBD::PropertyChange&);
 	void name_changed ();
 	void duplicate_current_fb ();
