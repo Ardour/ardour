@@ -362,7 +362,6 @@ FoldbackStrip::FoldbackStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Rou
 	, fb_level_control (0)
 	, _meter (0)
 {
-	_session = sess;
 	init ();
 	set_route (rt);
 }

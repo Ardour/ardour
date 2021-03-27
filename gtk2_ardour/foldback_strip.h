@@ -179,7 +179,6 @@ private:
 
 	Mixer_UI& _mixer;
 
-	ARDOUR::Session*   _session;
 	bool               _showing_sends;
 	uint32_t           _width;
 	ARDOUR::PeakMeter* _peak_meter;
