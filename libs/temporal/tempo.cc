@@ -743,8 +743,6 @@ TempoMap::set_time_domain (TimeDomain td)
 MeterPoint*
 TempoMap::add_meter (MeterPoint* mp)
 {
-	/* CALLER MUST HOLD LOCK */
-
 	Meters::iterator m;
 	Points::iterator p;
 	const superclock_t sclock_limit = mp->sclock();
@@ -847,8 +845,6 @@ TempoMap::set_tempo (Tempo const & t, timepos_t const & time)
 TempoPoint*
 TempoMap::add_tempo (TempoPoint * tp)
 {
-	/* CALLER MUST HOLD LOCK */
-
 	Tempos::iterator t;
 	Points::iterator p;
 	const superclock_t sclock_limit = tp->sclock();
@@ -940,8 +936,6 @@ TempoMap::set_bartime (BBT_Time const & bbt, timepos_t const & pos)
 MusicTimePoint*
 TempoMap::add_or_replace_bartime (MusicTimePoint & tp)
 {
-	/* CALLER MUST HOLD LOCK */
-
 	MusicTimes::iterator m;
 	Points::iterator p;
 	superclock_t sclock_limit = tp.sclock();
@@ -1016,8 +1010,6 @@ TempoMap::remove_point (Point const & point)
 void
 TempoMap::reset_starting_at (superclock_t sc)
 {
-	/* CALLER MUST HOLD LOCK */
-
 	Tempos::iterator t;
 	Meters::iterator m;
 	MusicTimes::iterator b;
