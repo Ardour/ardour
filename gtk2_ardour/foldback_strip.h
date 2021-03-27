@@ -160,12 +160,14 @@ private:
 	void hide_clicked ();
 	void cycle_foldbacks (bool next);
 	bool name_button_button_press (GdkEventButton*);
+	bool number_button_press (GdkEventButton*);
 	bool send_scroller_press (GdkEventButton*);
 	bool fb_strip_enter_event (GdkEventCrossing*);
 
 	void clear_send_box ();
 	void update_send_box ();
 	void name_changed ();
+	void route_color_changed ();
 	void connect_to_pan ();
 	void io_changed_proxy ();
 	void reset_strip_style ();
@@ -195,6 +197,7 @@ private:
 	PannerUI            _panners;
 	IOButton            _output_button;
 
+	ArdourWidgets::ArdourButton _number_label;
 	ArdourWidgets::ArdourButton _name_button;
 	ArdourWidgets::ArdourButton _previous_button;
 	ArdourWidgets::ArdourButton _next_button;

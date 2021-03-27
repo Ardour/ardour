@@ -389,8 +389,16 @@ FoldbackStrip::init ()
 	_hide_button.set_tweaks (ArdourButton::Square);
 	set_tooltip (&_hide_button, _("Hide Foldback strip"));
 
+	_number_label.set_elements((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::Text|ArdourButton::Inactive));
+	_number_label.set_no_show_all ();
+	_number_label.set_name ("generic button");
+	_number_label.set_alignment (.5, .5);
+	_number_label.set_fallthrough_to_parent (true);
+
+	_prev_next_box.set_spacing (2);
 	_prev_next_box.pack_start (_previous_button, false, true);
 	_prev_next_box.pack_start (_next_button, false, true);
+	_prev_next_box.pack_start (_number_label, true, true);
 	_prev_next_box.pack_end (_hide_button, false, true);
 
 	_name_button.set_name ("mixer strip button");
@@ -501,6 +509,7 @@ FoldbackStrip::init ()
 	_global_frame.set_name ("MixerStripFrame");
 	add (_global_frame);
 
+	_number_label.signal_button_release_event().connect (sigc::mem_fun (*this, &FoldbackStrip::number_button_press), false);
 	_name_button.signal_button_press_event ().connect (sigc::mem_fun (*this, &FoldbackStrip::name_button_button_press), false);
 	_previous_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &FoldbackStrip::cycle_foldbacks), false));
 	_next_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &FoldbackStrip::cycle_foldbacks), true));
@@ -556,9 +565,21 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 
 	_output_button.set_route (_route, this);
 
+	size_t number = 0;
+	{
+		RouteList rl (_session->get_routelist (true, PresentationInfo::FoldbackBus));
+		RouteList::iterator i = find (rl.begin (), rl.end (), _route);
+		assert (i != rl.end ());
+		number = 1 + std::distance (rl.begin (), i);
+	}
+
 	_insert_box->set_route (_route);
 	_level_control.set_controllable (_route->gain_control ());
 	_level_control.show ();
+
+	_number_label.set_inactive_color (_route->presentation_info().color ());
+	_number_label.set_text (PBD::to_string (number));
+	_number_label.show ();
 
 	/* setup panners */
 	panner_ui ().set_panner (_route->main_outs ()->panner_shell (), _route->main_outs ()->panner ());
@@ -750,31 +771,45 @@ FoldbackStrip::build_route_ops_menu ()
 	MenuList& items = menu->items ();
 	menu->set_name ("ArdourContextMenu");
 
-	items.push_back (MenuElem (_("Comments..."), sigc::mem_fun (*this, &RouteUI::open_comment_editor)));
+	bool active = _route->active ();
 
-	items.push_back (MenuElem (_("Outputs..."), sigc::mem_fun (*this, &RouteUI::edit_output_configuration)));
+	if (active) {
+		items.push_back (MenuElem (_("Color..."), sigc::mem_fun (*this, &RouteUI::choose_color)));
+		items.push_back (MenuElem (_("Comments..."), sigc::mem_fun (*this, &RouteUI::open_comment_editor)));
 
-	items.push_back (SeparatorElem ());
+		items.push_back (MenuElem (_("Outputs..."), sigc::mem_fun (*this, &RouteUI::edit_output_configuration)));
 
-	items.push_back (MenuElem (_("Save As Template..."), sigc::mem_fun (*this, &RouteUI::save_as_template)));
+		items.push_back (SeparatorElem ());
 
-	items.push_back (MenuElem (_("Rename..."), sigc::mem_fun (*this, &RouteUI::route_rename)));
+		items.push_back (MenuElem (_("Save As Template..."), sigc::mem_fun (*this, &RouteUI::save_as_template)));
 
-	items.push_back (MenuElem (_("Duplicate Foldback Bus"), sigc::mem_fun (*this, &FoldbackStrip::duplicate_current_fb)));
+		items.push_back (MenuElem (_("Rename..."), sigc::mem_fun (*this, &RouteUI::route_rename)));
 
-	items.push_back (SeparatorElem ());
+		items.push_back (SeparatorElem ());
+	}
+
 	items.push_back (CheckMenuElem (_("Active")));
 	Gtk::CheckMenuItem* i = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
 	i->set_active (_route->active ());
 	i->set_sensitive (!_session->transport_rolling ());
 	i->signal_activate ().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::set_route_active), !_route->active (), false));
 
-	items.push_back (SeparatorElem ());
-	items.push_back (CheckMenuElem (_("Protect Against Denormals"), sigc::mem_fun (*this, &RouteUI::toggle_denormal_protection)));
-	denormal_menu_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
-	denormal_menu_item->set_active (_route->denormal_protection ());
+	if (active && !Profile->get_mixbus ()) {
+		items.push_back (SeparatorElem ());
+		items.push_back (CheckMenuElem (_("Protect Against Denormals"), sigc::mem_fun (*this, &RouteUI::toggle_denormal_protection)));
+		denormal_menu_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
+		denormal_menu_item->set_active (_route->denormal_protection ());
+	}
+
+	if (active) {
+		items.push_back (SeparatorElem ());
+
+		items.push_back (MenuElem (_("Duplicate Foldback Bus"), sigc::mem_fun (*this, &FoldbackStrip::duplicate_current_fb)));
+
+	}
 
 	items.push_back (SeparatorElem ());
+
 	items.push_back (MenuElem (_("Remove"), sigc::mem_fun (*this, &FoldbackStrip::remove_current_fb)));
 	return menu;
 }
@@ -817,6 +852,15 @@ FoldbackStrip::name_button_button_press (GdkEventButton* ev)
 		Menu* r_menu = build_route_ops_menu ();
 		r_menu->popup (ev->button, ev->time);
 		return true;
+	}
+	return false;
+}
+
+bool
+FoldbackStrip::number_button_press (GdkEventButton* ev)
+{
+	if (Keyboard::is_context_menu_event (ev)) {
+		return name_button_button_press (ev);
 	}
 	return false;
 }
@@ -922,6 +966,12 @@ FoldbackStrip::route_property_changed (const PropertyChange& what_changed)
 }
 
 void
+FoldbackStrip::route_color_changed ()
+{
+	_number_label.set_inactive_color (_route->presentation_info().color ());
+}
+
+void
 FoldbackStrip::name_changed ()
 {
 	_name_button.set_text (_route->name ());
@@ -931,11 +981,19 @@ FoldbackStrip::name_changed ()
 void
 FoldbackStrip::reset_strip_style ()
 {
-	if (_route->active ()) {
+	bool active = _route->active ();
+	if (active) {
 		set_name ("FoldbackBusStripBase");
 	} else {
 		set_name ("AudioBusStripBaseInactive");
 	}
+
+	set_invert_sensitive (active);
+	_comment_button.set_sensitive (active);
+	_output_button.set_sensitive (active);
+	_level_control.set_sensitive (active);
+	_insert_box->set_sensitive (active);
+	solo_button->set_sensitive (active && Config->get_solo_control_is_listen_control ());
 }
 
 void
@@ -943,7 +1001,8 @@ FoldbackStrip::set_button_names ()
 {
 	show_sends_button->set_text (_("Show Sends"));
 
-	solo_button->set_sensitive (Config->get_solo_control_is_listen_control ());
+	solo_button->set_sensitive (_route && _route->active () && Config->get_solo_control_is_listen_control ());
+
 	switch (Config->get_listen_position ()) {
 		case AfterFaderListen:
 			solo_button->set_text (_("AFL"));
