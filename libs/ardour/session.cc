@@ -272,7 +272,6 @@ Session::Session (AudioEngine &eng,
 	, ltc_timecode_negative_offset (false)
 	, midi_control_ui (0)
 	, _punch_or_loop (NoConstraint)
-	, current_usecs_per_track (1000)
 	, _all_route_group (new RouteGroup (*this, "all"))
 	, routes (new RouteList)
 	, _adding_routes_in_progress (false)

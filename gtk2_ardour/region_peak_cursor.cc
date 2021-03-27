@@ -94,7 +94,7 @@ RegionPeakCursor::set (AudioRegionView* arv, samplepos_t when, samplecnt_t sampl
 	}
 
 	/* read_peaks() offset is relative to the region's source */
-	s += ar->start ();
+	s += ar->start_sample ();
 
 	PeakData p;
 	for (uint32_t chn = 0; chn < ar->n_channels (); ++chn) {
