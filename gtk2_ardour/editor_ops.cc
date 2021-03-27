@@ -7676,10 +7676,10 @@ Editor::toggle_tracks_active ()
 
 		if (rtv) {
 			if (first) {
-				target = !rtv->_route->active();
+				target = !rtv->route()->active();
 				first = false;
 			}
-			rtv->_route->set_active (target, this);
+			rtv->route()->set_active (target, this);
 		}
 	}
 }
@@ -7743,7 +7743,7 @@ Editor::_remove_tracks ()
 		} else {
 			++nbusses;
 		}
-		routes.push_back (rtv->_route);
+		routes.push_back (rtv->route());
 
 		if (rtv->route()->is_master() || rtv->route()->is_monitor()) {
 			special_bus = true;

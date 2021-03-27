@@ -128,12 +128,11 @@ RouteUI::RouteUI (ARDOUR::Session* sess)
 	, mute_menu(0)
 	, solo_menu(0)
 	, sends_menu(0)
-	, record_menu(0)
-	, comment_window(0)
-	, comment_area(0)
 	, playlist_action_menu (0)
+	, _record_menu(0)
+	, _comment_window(0)
+	, _comment_area(0)
 	, _invert_menu(0)
-	, _ignore_comment_edit (false)
 {
 	if (program_port_prefix.empty()) {
 		// compare to gtk2_ardour/port_group.cc
@@ -164,11 +163,11 @@ RouteUI::~RouteUI()
 	delete solo_menu;
 	delete mute_menu;
 	delete sends_menu;
-	delete record_menu;
-	delete comment_window;
 	delete monitor_input_button;
 	delete monitor_disk_button;
 	delete playlist_action_menu;
+	delete _record_menu;
+	delete _comment_window;
 	delete _invert_menu;
 
 	send_blink_connection.disconnect ();
@@ -182,7 +181,7 @@ RouteUI::init ()
 	mute_menu = 0;
 	solo_menu = 0;
 	sends_menu = 0;
-	record_menu = 0;
+	_record_menu = 0;
 	_invert_menu = 0;
 	pre_fader_mute_check = 0;
 	post_fader_mute_check = 0;
@@ -195,10 +194,9 @@ RouteUI::init ()
 	_solo_release = 0;
 	_mute_release = 0;
 	denormal_menu_item = 0;
-	step_edit_item = 0;
-	rec_safe_item = 0;
-	multiple_mute_change = false;
-	multiple_solo_change = false;
+	_step_edit_item = 0;
+	_rec_safe_item = 0;
+	_ignore_comment_edit = false;
 	_i_am_the_modifier = 0;
 	_n_polarity_invert = 0;
 
@@ -462,8 +460,6 @@ RouteUI::mute_press (GdkEventButton* ev)
 	if (BindingProxy::is_bind_action(ev) )
 		return false;
 
-	multiple_mute_change = false;
-
 	if (Keyboard::is_context_menu_event (ev)) {
 
 		if (mute_menu == 0){
@@ -633,8 +629,6 @@ RouteUI::solo_press(GdkEventButton* ev)
 	//if this is a binding action, let the ArdourButton handle it
 	if (BindingProxy::is_bind_action(ev) )
 		return false;
-
-	multiple_solo_change = false;
 
 	if (Keyboard::is_context_menu_event (ev)) {
 
@@ -932,31 +926,31 @@ RouteUI::monitor_release (GdkEventButton* ev, MonitorChoice monitor_choice)
 void
 RouteUI::build_record_menu ()
 {
-	if (!record_menu) {
-		record_menu = new Menu;
-		record_menu->set_name ("ArdourContextMenu");
+	if (!_record_menu) {
+		_record_menu = new Menu;
+		_record_menu->set_name ("ArdourContextMenu");
 		using namespace Menu_Helpers;
-		MenuList& items = record_menu->items();
+		MenuList& items = _record_menu->items();
 
 		items.push_back (CheckMenuElem (_("Rec-Safe"), sigc::mem_fun (*this, &RouteUI::toggle_rec_safe)));
-		rec_safe_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back());
+		_rec_safe_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back());
 
 		if (is_midi_track()) {
 			items.push_back (SeparatorElem());
 			items.push_back (CheckMenuElem (_("Step Entry"), sigc::mem_fun (*this, &RouteUI::toggle_step_edit)));
-			step_edit_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back());
+			_step_edit_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back());
 		}
 	}
 
-	if (step_edit_item) {
+	if (_step_edit_item) {
 		if (track()->rec_enable_control()->get_value()) {
-			step_edit_item->set_sensitive (false);
+			_step_edit_item->set_sensitive (false);
 		}
-		step_edit_item->set_active (midi_track()->step_editing());
+		_step_edit_item->set_active (midi_track()->step_editing());
 	}
-	if (rec_safe_item) {
-		rec_safe_item->set_sensitive (!_route->rec_enable_control()->get_value());
-		rec_safe_item->set_active (_route->rec_safe_control()->get_value());
+	if (_rec_safe_item) {
+		_rec_safe_item->set_sensitive (!_route->rec_enable_control()->get_value());
+		_rec_safe_item->set_active (_route->rec_safe_control()->get_value());
 	}
 }
 
@@ -967,7 +961,7 @@ RouteUI::toggle_step_edit ()
 		return;
 	}
 
-	midi_track()->set_step_editing (step_edit_item->get_active());
+	midi_track()->set_step_editing (_step_edit_item->get_active());
 }
 
 void
@@ -987,7 +981,7 @@ RouteUI::toggle_rec_safe ()
 		return;
 	}
 
-	rs->set_value (rec_safe_item->get_active (), Controllable::UseGroup);
+	rs->set_value (_rec_safe_item->get_active (), Controllable::UseGroup);
 }
 
 void
@@ -1000,8 +994,8 @@ RouteUI::step_edit_changed (bool yn)
 
 		start_step_editing ();
 
-		if (step_edit_item) {
-			step_edit_item->set_active (true);
+		if (_step_edit_item) {
+			_step_edit_item->set_active (true);
 		}
 
 	} else {
@@ -1012,8 +1006,8 @@ RouteUI::step_edit_changed (bool yn)
 
 		stop_step_editing ();
 
-		if (step_edit_item) {
-			step_edit_item->set_active (false);
+		if (_step_edit_item) {
+			_step_edit_item->set_active (false);
 		}
 	}
 }
@@ -1023,8 +1017,8 @@ RouteUI::rec_enable_release (GdkEventButton* ev)
 {
 	if (Keyboard::is_context_menu_event (ev)) {
 		build_record_menu ();
-		if (record_menu) {
-			record_menu->popup (1, ev->time);
+		if (_record_menu) {
+			_record_menu->popup (1, ev->time);
 		}
 		return false;
 	}
@@ -1398,15 +1392,15 @@ RouteUI::blink_rec_display (bool blinkOn)
 				break;
 		}
 
-		if (step_edit_item) {
-			step_edit_item->set_sensitive (false);
+		if (_step_edit_item) {
+			_step_edit_item->set_sensitive (false);
 		}
 
 	} else {
 		rec_enable_button->unset_active_state ();
 
-		if (step_edit_item) {
-			step_edit_item->set_sensitive (true);
+		if (_step_edit_item) {
+			_step_edit_item->set_sensitive (true);
 		}
 	}
 
@@ -1754,8 +1748,8 @@ RouteUI::route_rename ()
 void
 RouteUI::toggle_comment_editor ()
 {
-	if (comment_window && comment_window->is_visible ()) {
-		comment_window->hide ();
+	if (_comment_window && _comment_window->is_visible ()) {
+		_comment_window->hide ();
 	} else {
 		open_comment_editor ();
 	}
@@ -1765,7 +1759,7 @@ RouteUI::toggle_comment_editor ()
 void
 RouteUI::open_comment_editor ()
 {
-	if (comment_window == 0) {
+	if (_comment_window == 0) {
 		setup_comment_editor ();
 	}
 
@@ -1773,34 +1767,34 @@ RouteUI::open_comment_editor ()
 	title = _route->name();
 	title += _(": comment editor");
 
-	comment_window->set_title (title);
-	comment_window->present();
+	_comment_window->set_title (title);
+	_comment_window->present();
 }
 
 void
 RouteUI::setup_comment_editor ()
 {
-	comment_window = new ArdourWindow (""); // title will be reset to show route
-	comment_window->set_skip_taskbar_hint (true);
-	comment_window->signal_hide().connect (sigc::mem_fun(*this, &MixerStrip::comment_editor_done_editing));
-	comment_window->set_default_size (400, 200);
+	_comment_window = new ArdourWindow (""); // title will be reset to show route
+	_comment_window->set_skip_taskbar_hint (true);
+	_comment_window->signal_hide().connect (sigc::mem_fun(*this, &MixerStrip::comment_editor_done_editing));
+	_comment_window->set_default_size (400, 200);
 
-	comment_area = manage (new TextView());
-	comment_area->set_name ("MixerTrackCommentArea");
-	comment_area->set_wrap_mode (WRAP_WORD);
-	comment_area->set_editable (true);
-	comment_area->get_buffer()->set_text (_route->comment());
-	comment_area->show ();
+	_comment_area = manage (new TextView());
+	_comment_area->set_name ("MixerTrackCommentArea");
+	_comment_area->set_wrap_mode (WRAP_WORD);
+	_comment_area->set_editable (true);
+	_comment_area->get_buffer()->set_text (_route->comment());
+	_comment_area->show ();
 
-	comment_window->add (*comment_area);
+	_comment_window->add (*_comment_area);
 }
 
 void
 RouteUI::comment_changed ()
 {
 	_ignore_comment_edit = true;
-	if (comment_area) {
-		comment_area->get_buffer()->set_text (_route->comment());
+	if (_comment_area) {
+		_comment_area->get_buffer()->set_text (_route->comment());
 	}
 	_ignore_comment_edit = false;
 }
@@ -1810,7 +1804,7 @@ RouteUI::comment_editor_done_editing ()
 {
 	ENSURE_GUI_THREAD (*this, &MixerStrip::comment_editor_done_editing, src)
 
-	string const str = comment_area->get_buffer()->get_text();
+	string const str = _comment_area->get_buffer()->get_text();
 	if (str == _route->comment ()) {
 		return;
 	}
@@ -2055,7 +2049,7 @@ RouteUI::setup_invert_buttons ()
 
 	/* remove old invert buttons */
 	for (vector<ArdourButton*>::iterator i = _invert_buttons.begin(); i != _invert_buttons.end(); ++i) {
-		_invert_button_box.remove (**i);
+		invert_button_box.remove (**i);
 	}
 
 	_invert_buttons.clear ();
@@ -2089,11 +2083,11 @@ RouteUI::setup_invert_buttons ()
 		}
 
 		_invert_buttons.push_back (b);
-		_invert_button_box.pack_start (*b);
+		invert_button_box.pack_start (*b);
 	}
 
-	_invert_button_box.set_spacing (1);
-	_invert_button_box.show_all ();
+	invert_button_box.set_spacing (1);
+	invert_button_box.show_all ();
 
 	update_polarity_display ();
 }

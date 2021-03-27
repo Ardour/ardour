@@ -179,7 +179,6 @@ MixerStrip::init ()
 	_entered_mixer_strip= 0;
 	group_menu = 0;
 	route_ops_menu = 0;
-	comment_area = 0;
 	_width_owner = 0;
 
 	/* the length of this string determines the width of the mixer strip when it is set to `wide' */
@@ -322,7 +321,7 @@ MixerStrip::init ()
 	global_vpacker.pack_start (width_hide_box, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (name_button, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (input_button_box, Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (_invert_button_box, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (invert_button_box, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (processor_box, true, true);
 	global_vpacker.pack_start (panners, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (rec_mon_table, Gtk::PACK_SHRINK);
@@ -394,7 +393,7 @@ MixerStrip::init ()
 	   are recognised when they occur.
 	*/
 	_visibility.add (&input_button_box, X_("Input"), _("Input"), false);
-	_visibility.add (&_invert_button_box, X_("PhaseInvert"), _("Phase Invert"), false);
+	_visibility.add (&invert_button_box, X_("PhaseInvert"), _("Phase Invert"), false);
 	_visibility.add (&rec_mon_table, X_("RecMon"), _("Record & Monitor"), false, boost::bind (&MixerStrip::override_rec_mon_visibility, this));
 	_visibility.add (&solo_iso_table, X_("SoloIsoLock"), _("Solo Iso / Lock"), false);
 	_visibility.add (&output_button, X_("Output"), _("Output"), false);

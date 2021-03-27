@@ -370,8 +370,6 @@ FoldbackStrip::FoldbackStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Rou
 void
 FoldbackStrip::init ()
 {
-	comment_area            = 0;
-
 	_previous_button.set_name ("mixer strip button");
 	_previous_button.set_icon (ArdourIcon::ScrollLeft);
 	_previous_button.set_tweaks (ArdourButton::Square);
@@ -469,7 +467,7 @@ FoldbackStrip::init ()
 	global_vpacker.pack_start (prev_next_box, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (name_button, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (*show_sends_button, Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (_invert_button_box, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (invert_button_box, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (send_scroller, true, true);
 #ifndef MIXBUS
 	//add a spacer underneath the foldback bus;
