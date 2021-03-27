@@ -7418,7 +7418,7 @@ Session::maybe_update_tempo_from_midiclock_tempo (float bpm)
 	if (tmap->n_tempos() == 1) {
 		Temporal::TempoMetric const & metric (tmap->metric_at (0));
 		if (fabs (metric.tempo().note_types_per_minute() - bpm) > (0.01 * metric.tempo().note_types_per_minute())) {
-			tmap->change_tempo (metric.tempo(), Tempo (bpm, 4.0, bpm));
+			tmap->change_tempo (metric.get_editable_tempo(), Tempo (bpm, 4.0, bpm));
 		}
 	}
 }

@@ -1642,6 +1642,53 @@ TempoMap::dump (std::ostream& ostr) const
 	ostr << "------------\n\n\n";
 }
 
+template<typename T>  TempoMap::Points::const_iterator
+TempoMap::_get_tempo_and_meter (TempoPoint const *& tp, MeterPoint const *& mp, T (Point::*method)() const, T arg, bool can_match) const
+{
+	Points::const_iterator p;
+	bool tempo_done = false;
+	bool meter_done = false;
+
+	assert (!_tempos.empty());
+	assert (!_meters.empty());
+	assert (!_points.empty());
+
+	tp = 0;
+	mp = 0;
+
+	for (tp = &_tempos.front(), mp = &_meters.front(), p = _points.begin(); p != _points.end(); ++p) {
+
+		TempoPoint const * tpp;
+		MeterPoint const * mpp;
+
+		if (!tempo_done && (tpp = dynamic_cast<TempoPoint const *> (&(*p))) != 0) {
+			if ((can_match && (((*p).*method)() > arg)) || (((*p).*method)() >= arg)) {
+				tempo_done = true;
+			} else {
+				tp = tpp;
+			}
+		}
+
+		if (!meter_done && (mpp = dynamic_cast<MeterPoint const *> (&(*p))) != 0) {
+			if ((can_match && (((*p).*method)() > arg)) || (((*p).*method)() >= arg)) {
+				meter_done = true;
+			} else {
+				mp = mpp;
+			}
+		}
+
+		if (meter_done && tempo_done) {
+			break;
+		}
+	}
+
+	if (!tp || !mp) {
+		return _points.end();
+	}
+
+	return p;
+}
+
 void
 TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, uint32_t bar_mod)
 {
@@ -1651,9 +1698,9 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 
 	DEBUG_TRACE (DEBUG::Grid, string_compose (">>> GRID START %1 .. %2 (barmod = %3)\n", start, end, bar_mod));
 
-	TempoPoint* tp = 0;
-	MeterPoint* mp = 0;
-	Points::iterator p;
+	TempoPoint const * tp = 0;
+	MeterPoint const * mp = 0;
+	Points::const_iterator p;
 
 	/* initial values required, but will be reset before we begin */
 	TempoMetric metric (_tempos.front(), _meters.front());
@@ -1665,34 +1712,10 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 	 * grid, depending on whether or not it is a multiple of bar_mod.
 	 */
 
-	for (tp = &_tempos.front(), p = _points.begin(); p != _points.end() && p->sclock() < start; ++p) {
-
-		TempoPoint* tpp;
-
-		DEBUG_TRACE (DEBUG::Grid, string_compose ("Looking at a point tempo %1\n", *p));
-
-		if ((tpp = dynamic_cast<TempoPoint*> (&(*p))) != 0) {
-			DEBUG_TRACE (DEBUG::Grid, string_compose ("set tempo with that (check: %1 < %2)\n", p->sclock(), start));
-			tp = tpp;
-		}
-	}
-
-	for (mp = &_meters.front(), p = _points.begin(); p != _points.end() && p->sclock() < start; ++p) {
-
-		MeterPoint* mpp;
-
-		DEBUG_TRACE (DEBUG::Grid, string_compose ("Looking at a point for meter %1\n", *p));
-
-		if ((mpp = dynamic_cast<MeterPoint*> (&(*p))) != 0) {
-			DEBUG_TRACE (DEBUG::Grid, string_compose ("set meter with that (check: %1 < %2)\n", p->sclock(), start));
-			mp = mpp;
-		}
-
-	}
-
-	/* reset metric */
+	p = get_tempo_and_meter (tp, mp, start, false);
 
 	metric = TempoMetric (*tp, *mp);
+
 	DEBUG_TRACE (DEBUG::Grid, string_compose ("metric in effect at %1 = %2\n", start, metric));
 
 	/* p now points to either the point *after* start, or the end of the
@@ -1721,29 +1744,10 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 
 			/* rounded up, determine new starting superclock position */
 
-			DEBUG_TRACE (DEBUG::Grid, string_compose ("new bbt for start (rounded up) = %1\n", bbt));
-
-			for (tp = &_tempos.front(), p = _points.begin(); p != _points.end() && p->bbt() < bbt; ++p) {
-
-				TempoPoint* tpp;
-
-				if ((tpp = dynamic_cast<TempoPoint*> (&(*p))) != 0) {
-					tp = tpp;
-				}
-			}
-
-			for (mp = &_meters.front(), p = _points.begin(); p != _points.end() && p->bbt() < bbt; ++p) {
-				MeterPoint* mpp;
-
-				if ((mpp = dynamic_cast<MeterPoint*> (&(*p))) != 0) {
-					mp = mpp;
-				}
-
-			}
-
-			/* reset metric */
+			p = get_tempo_and_meter (tp, mp, bbt);
 
 			metric = TempoMetric (*tp, *mp);
+
 			DEBUG_TRACE (DEBUG::Grid, string_compose ("metric in effect(2) at %1 = %2\n", start, metric));
 
 			/* recompute superclock position */
@@ -1786,27 +1790,9 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 
 			bbt = bar;
 
-			for (tp = &_tempos.front(), p = _points.begin(); p != _points.end() && p->bbt() < bbt; ++p) {
-
-				TempoPoint* tpp;
-				MeterPoint* mpp;
-
-				if ((tpp = dynamic_cast<TempoPoint*> (&(*p))) != 0) {
-					tp = tpp;
-				}
-			}
-
-			for (mp = &_meters.front(), p = _points.begin(); p != _points.end() && p->bbt() < bbt; ++p) {
-				MeterPoint* mpp;
-
-				if ((mpp = dynamic_cast<MeterPoint*> (&(*p))) != 0) {
-					mp = mpp;
-				}
-			}
-
-			/* reset metric */
-
+			p = get_tempo_and_meter (tp, mp, bbt);
 			metric = TempoMetric (*tp, *mp);
+
 			DEBUG_TRACE (DEBUG::Grid, string_compose ("metric in effect(3) at %1 = %2\n", start, metric));
 			start = metric.superclock_at (bbt);
 
@@ -1907,19 +1893,19 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 
 			const superclock_t pos = p->sclock();
 
-			Points::iterator nxt = p;
+			Points::const_iterator nxt = p;
 			++nxt;
 
-			TempoPoint* tpp;
-			MeterPoint* mpp;
+			TempoPoint const * tpp;
+			MeterPoint const * mpp;
 
 			/* use this point */
 
-			if ((tpp = dynamic_cast<TempoPoint*> (&(*p))) != 0) {
+			if ((tpp = dynamic_cast<TempoPoint const *> (&(*p))) != 0) {
 				tp = tpp;
 			}
 
-			if ((mpp = dynamic_cast<MeterPoint*> (&(*p))) != 0) {
+			if ((mpp = dynamic_cast<MeterPoint const *> (&(*p))) != 0) {
 				mp = mpp;
 			}
 
@@ -1929,11 +1915,11 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 
 				/* Set up the new metric given the new point */
 
-				if ((tpp = dynamic_cast<TempoPoint*> (&(*nxt))) != 0) {
+				if ((tpp = dynamic_cast<TempoPoint const *> (&(*nxt))) != 0) {
 					tp = tpp;
 				}
 
-				if ((mpp = dynamic_cast<MeterPoint*> (&(*nxt))) != 0) {
+				if ((mpp = dynamic_cast<MeterPoint const *> (&(*nxt))) != 0) {
 					mp = mpp;
 				}
 
@@ -2770,172 +2756,34 @@ TempoMap::metric_at (timepos_t const & pos) const
 TempoMetric
 TempoMap::metric_at (superclock_t sc, bool can_match) const
 {
-	assert (!_tempos.empty());
-	assert (!_meters.empty());
-	assert (!_points.empty());
+	TempoPoint const * tp = 0;
+	MeterPoint const * mp = 0;
 
-	TempoPoint const * tpp = 0;
-	MeterPoint const * mpp = 0;
+	(void) get_tempo_and_meter (tp, mp, sc, can_match);
 
-	TempoPoint const * prev_t = &_tempos.front();
-
-	/* Yes, linear search because the typical size of _points
-	 * is 2, and extreme sizes are on the order of 10-100
-	 */
-
-	Points::const_iterator p;
-
-	for (p = _points.begin(); p != _points.end() && p->sclock() < sc; ++p) {
-		if ((tpp = dynamic_cast<TempoPoint const *> (&(*p)))) {
-			prev_t = tpp;
-		}
-	}
-
-	MeterPoint const * prev_m = &_meters.front();
-
-	for (p = _points.begin(); p != _points.end() && p->sclock() < sc; ++p) {
-		if ((mpp = dynamic_cast<MeterPoint const *> (&(*p)))) {
-			prev_m = mpp;
-		}
-	}
-
-	if (can_match || sc == 0) {
-		/* may have found tempo and/or meter precisely at @param sc */
-
-		if (p != _points.end() && p->sclock() == sc) {
-
-			if ((tpp = dynamic_cast<TempoPoint const *> (&(*p)))) {
-				prev_t = tpp;
-			}
-
-			if ((mpp = dynamic_cast<MeterPoint const *> (&(*p)))) {
-				prev_m = mpp;
-			}
-		}
-	}
-
-	/* I hate doing this const_cast<>, but making this method non-const
-	 * propagates into everything that just calls metric_at(), and that's a
-	 * bit ridiculous. Yes, the TempoMetric returned here can be used to
-	 * change the map, and that's bad, but the non-const propagation is
-	 * worse.
-	 */
-
-	return TempoMetric (*const_cast<TempoPoint*>(prev_t), *const_cast<MeterPoint*> (prev_m));
+	return TempoMetric (*tp,* mp);
 }
 
 TempoMetric
 TempoMap::metric_at (Beats const & b, bool can_match) const
 {
-	assert (!_tempos.empty());
-	assert (!_meters.empty());
-	assert (!_points.empty());
+	TempoPoint const * tp = 0;
+	MeterPoint const * mp = 0;
 
-	TempoPoint const * tpp = 0;
-	MeterPoint const * mpp = 0;
+	(void) get_tempo_and_meter (tp, mp, b, can_match);
 
-	TempoPoint const * prev_t = &_tempos.front();
-
-	/* Yes, linear search because the typical size of _points
-	 * is 2, and extreme sizes are on the order of 10-100
-	 */
-
-	Points::const_iterator p;
-
-	for (p = _points.begin(); p != _points.end() && p->beats() < b; ++p) {
-		if ((tpp = dynamic_cast<TempoPoint const *> (&(*p)))) {
-			prev_t = tpp;
-		}
-	}
-
-	MeterPoint const * prev_m = &_meters.front();
-
-	for (p = _points.begin(); p != _points.end() && p->beats() < b; ++p) {
-		if ((mpp = dynamic_cast<MeterPoint const *> (&(*p)))) {
-			prev_m = mpp;
-		}
-	}
-
-	if (can_match || b == Beats()) {
-		/* may have found tempo and/or meter precisely at @param sc */
-
-		if (p != _points.end() && p->beats() == b) {
-
-			if ((tpp = dynamic_cast<TempoPoint const *> (&(*p)))) {
-				prev_t = tpp;
-			}
-
-			if ((mpp = dynamic_cast<MeterPoint const *> (&(*p)))) {
-				prev_m = mpp;
-			}
-		}
-	}
-
-	/* I hate doing this const_cast<>, but making this method non-const
-	 * propagates into everything that just calls metric_at(), and that's a
-	 * bit ridiculous. Yes, the TempoMetric returned here can be used to
-	 * change the map, and that's bad, but the non-const propagation is
-	 * worse.
-	 */
-
-	return TempoMetric (*const_cast<TempoPoint*>(prev_t), *const_cast<MeterPoint*> (prev_m));
+	return TempoMetric (*tp, *mp);
 }
 
 TempoMetric
 TempoMap::metric_at (BBT_Time const & bbt, bool can_match) const
 {
-	assert (!_tempos.empty());
-	assert (!_meters.empty());
-	assert (!_points.empty());
+	TempoPoint const * tp = 0;
+	MeterPoint const * mp = 0;
 
-	TempoPoint const * tpp = 0;
-	MeterPoint const * mpp = 0;
+	(void) get_tempo_and_meter (tp, mp, bbt);
 
-	TempoPoint const * prev_t = &_tempos.front();
-
-	/* Yes, linear search because the typical size of _points
-	 * is 2, and extreme sizes are on the order of 10-100
-	 */
-
-	Points::const_iterator p;
-
-	for (p = _points.begin(); p != _points.end() && p->bbt() < bbt; ++p) {
-		if ((tpp = dynamic_cast<TempoPoint const *> (&(*p)))) {
-			prev_t = tpp;
-		}
-	}
-
-	MeterPoint const * prev_m = &_meters.front();
-
-	for (p = _points.begin(); p != _points.end() && p->bbt() < bbt; ++p) {
-		if ((mpp = dynamic_cast<MeterPoint const *> (&(*p)))) {
-			prev_m = mpp;
-		}
-	}
-
-	if (can_match || bbt == BBT_Time()) {
-		/* may have found tempo and/or meter precisely at @param sc */
-
-		if (p != _points.end() && p->bbt() == bbt) {
-
-			if ((tpp = dynamic_cast<TempoPoint const *> (&(*p)))) {
-				prev_t = tpp;
-			}
-
-			if ((mpp = dynamic_cast<MeterPoint const *> (&(*p)))) {
-				prev_m = mpp;
-			}
-		}
-	}
-
-	/* I hate doing this const_cast<>, but making this method non-const
-	 * propagates into everything that just calls metric_at(), and that's a
-	 * bit ridiculous. Yes, the TempoMetric returned here can be used to
-	 * change the map, and that's bad, but the non-const propagation is
-	 * worse.
-	 */
-
-	return TempoMetric (*const_cast<TempoPoint*>(prev_t), *const_cast<MeterPoint*> (prev_m));
+	return TempoMetric (*tp, *mp);
 }
 
 void
