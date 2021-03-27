@@ -27,21 +27,21 @@
 
 #include <list>
 
-#include "pbd/xml++.h"
 #include "pbd/signals.h"
+#include "pbd/xml++.h"
 
-#include <gtkmm/textview.h>
 #include <gtkmm/colorselection.h>
+#include <gtkmm/textview.h>
 
 #include "gtkmm2ext/widget_state.h"
 
 #include "ardour/ardour.h"
 #include "ardour/mute_master.h"
+#include "ardour/route.h"
+#include "ardour/route_group.h"
 #include "ardour/session.h"
 #include "ardour/session_event.h"
 #include "ardour/session_handle.h"
-#include "ardour/route.h"
-#include "ardour/route_group.h"
 #include "ardour/track.h"
 
 #include "axis_view.h"
@@ -74,16 +74,16 @@ class SaveTemplateDialog;
 class RoutePinWindowProxy : public WM::ProxyBase
 {
 public:
-	RoutePinWindowProxy (std::string const &, boost::shared_ptr<ARDOUR::Route>);
-	~RoutePinWindowProxy();
+	RoutePinWindowProxy (std::string const&, boost::shared_ptr<ARDOUR::Route>);
+	~RoutePinWindowProxy ();
 
-	Gtk::Window* get (bool create = false);
-	ARDOUR::SessionHandlePtr* session_handle();
+	Gtk::Window*              get (bool create = false);
+	ARDOUR::SessionHandlePtr* session_handle ();
 
 private:
 	boost::weak_ptr<ARDOUR::Route> _route;
 
-	void route_going_away ();
+	void                  route_going_away ();
 	PBD::ScopedConnection going_away_connection;
 };
 
@@ -92,27 +92,30 @@ class RouteUI : public virtual Selectable, public virtual ARDOUR::SessionHandleP
 public:
 	RouteUI (ARDOUR::Session*);
 
-	virtual ~RouteUI();
+	virtual ~RouteUI ();
 
-	boost::shared_ptr<ARDOUR::Stripable> stripable() const;
+	boost::shared_ptr<ARDOUR::Stripable> stripable () const;
 
 	virtual void set_session (ARDOUR::Session*);
 	virtual void set_route (boost::shared_ptr<ARDOUR::Route>);
 	virtual void set_button_names () = 0;
 
-	bool is_track() const;
-	bool is_master() const;
-	bool is_foldbackbus() const;
-	bool is_audio_track() const;
-	bool is_midi_track() const;
+	bool is_track () const;
+	bool is_master () const;
+	bool is_foldbackbus () const;
+	bool is_audio_track () const;
+	bool is_midi_track () const;
 	bool has_audio_outputs () const;
 
-	boost::shared_ptr<ARDOUR::Route> route() const { return _route; }
-	ARDOUR::RouteGroup* route_group() const;
+	boost::shared_ptr<ARDOUR::Route> route () const
+	{
+		return _route;
+	}
+	ARDOUR::RouteGroup* route_group () const;
 
-	boost::shared_ptr<ARDOUR::Track>      track() const;
-	boost::shared_ptr<ARDOUR::AudioTrack> audio_track() const;
-	boost::shared_ptr<ARDOUR::MidiTrack>  midi_track() const;
+	boost::shared_ptr<ARDOUR::Track>      track () const;
+	boost::shared_ptr<ARDOUR::AudioTrack> audio_track () const;
+	boost::shared_ptr<ARDOUR::MidiTrack>  midi_track () const;
 
 	Gdk::Color route_color () const;
 
@@ -127,25 +130,25 @@ public:
 	void manage_pins ();
 	void duplicate_selected_routes ();
 	void toggle_step_edit ();
-	void toggle_denormal_protection();
+	void toggle_denormal_protection ();
 	void save_as_template ();
 
-	bool mute_press(GdkEventButton*);
-	bool mute_release(GdkEventButton*);
-	bool solo_press(GdkEventButton*);
-	bool solo_release(GdkEventButton*);
-	bool rec_enable_press(GdkEventButton*);
-	bool rec_enable_release(GdkEventButton*);
-	bool show_sends_press(GdkEventButton*);
-	bool show_sends_release(GdkEventButton*);
+	bool mute_press (GdkEventButton*);
+	bool mute_release (GdkEventButton*);
+	bool solo_press (GdkEventButton*);
+	bool solo_release (GdkEventButton*);
+	bool rec_enable_press (GdkEventButton*);
+	bool rec_enable_release (GdkEventButton*);
+	bool show_sends_press (GdkEventButton*);
+	bool show_sends_release (GdkEventButton*);
 	bool solo_isolate_button_release (GdkEventButton*);
 	bool solo_safe_button_release (GdkEventButton*);
 
-	bool monitor_release(GdkEventButton*, ARDOUR::MonitorChoice);
-	bool monitor_input_press(GdkEventButton*);
-	bool monitor_input_release(GdkEventButton*);
-	bool monitor_disk_press(GdkEventButton*);
-	bool monitor_disk_release(GdkEventButton*);
+	bool monitor_release (GdkEventButton*, ARDOUR::MonitorChoice);
+	bool monitor_input_press (GdkEventButton*);
+	bool monitor_input_release (GdkEventButton*);
+	bool monitor_disk_press (GdkEventButton*);
+	bool monitor_disk_release (GdkEventButton*);
 	void update_monitoring_display ();
 	void open_comment_editor ();
 	void toggle_comment_editor ();
@@ -155,7 +158,7 @@ public:
 	void fan_out (bool to_busses = true, bool group = true);
 
 	/* The editor calls these when mapping an operation across multiple tracks */
-	void use_new_playlist (bool prompt, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &, bool copy);
+	void use_new_playlist (bool prompt, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const&, bool copy);
 	void clear_playlist ();
 
 	/* used by EditorRoutes */
@@ -163,7 +166,6 @@ public:
 	static Gtkmm2ext::ActiveState solo_isolate_active_state (boost::shared_ptr<ARDOUR::Stripable>);
 	static Gtkmm2ext::ActiveState solo_safe_active_state (boost::shared_ptr<ARDOUR::Stripable>);
 	static Gtkmm2ext::ActiveState mute_active_state (ARDOUR::Session*, boost::shared_ptr<ARDOUR::Stripable>);
-
 
 protected:
 	virtual void set_color (uint32_t c);
@@ -191,7 +193,7 @@ protected:
 	Gtk::Menu* solo_menu;
 	Gtk::Menu* sends_menu;
 
-	boost::shared_ptr<ARDOUR::Route> _route;
+	boost::shared_ptr<ARDOUR::Route>    _route;
 	boost::shared_ptr<ARDOUR::Delivery> _current_delivery;
 
 	Gtk::CheckMenuItem* pre_fader_mute_check;
@@ -200,10 +202,10 @@ protected:
 	Gtk::CheckMenuItem* main_mute_check;
 	Gtk::CheckMenuItem* solo_safe_check;
 	Gtk::CheckMenuItem* solo_isolated_check;
-	int  set_color_from_route ();
+	int                 set_color_from_route ();
 
 protected:
-	typedef std::map <PBD::ID, IOSelectorWindow*> IOSelectorMap;
+	typedef std::map<PBD::ID, IOSelectorWindow*> IOSelectorMap;
 
 	static IOSelectorMap input_selectors;
 	static IOSelectorMap output_selectors;
@@ -211,7 +213,7 @@ protected:
 	static void delete_ioselector (IOSelectorMap&, boost::shared_ptr<ARDOUR::Route>);
 
 	PBD::ScopedConnectionList route_connections;
-	bool self_destruct;
+	bool                      self_destruct;
 
 	void init ();
 	void reset ();
@@ -222,7 +224,7 @@ protected:
 	virtual void route_rec_enable_changed ();
 	virtual void route_color_changed () {}
 	virtual void start_step_editing () {}
-	virtual void stop_step_editing() {}
+	virtual void stop_step_editing () {}
 	virtual void create_sends (ARDOUR::Placement, bool);
 	virtual void create_selected_sends (ARDOUR::Placement, bool);
 	virtual void bus_send_display_changed (boost::shared_ptr<ARDOUR::Route>);
@@ -236,13 +238,13 @@ protected:
 	PatchChangeGridDialog* patch_change_dialog () const;
 
 	std::string playlist_tip () const;
-	void build_playlist_menu ();
-	void use_playlist (Gtk::RadioMenuItem *item, boost::weak_ptr<ARDOUR::Playlist> wpl);
-	Gtk::Menu* playlist_action_menu;
+	void        build_playlist_menu ();
+	void        use_playlist (Gtk::RadioMenuItem* item, boost::weak_ptr<ARDOUR::Playlist> wpl);
+	Gtk::Menu*  playlist_action_menu;
 
-	Gtk::CheckMenuItem *denormal_menu_item;
+	Gtk::CheckMenuItem* denormal_menu_item;
 
-	static void set_showing_sends_to (boost::shared_ptr<ARDOUR::Route>);
+	static void        set_showing_sends_to (boost::shared_ptr<ARDOUR::Route>);
 	static std::string program_port_prefix;
 
 	ARDOUR::SoloMuteRelease* _solo_release;
@@ -251,11 +253,11 @@ protected:
 private:
 	void setup_invert_buttons ();
 	void invert_menu_toggled (uint32_t);
-	bool invert_press (GdkEventButton *);
-	bool invert_release (GdkEventButton *, uint32_t i);
+	bool invert_press (GdkEventButton*);
+	bool invert_release (GdkEventButton*, uint32_t i);
 
 	void toggle_solo_safe (Gtk::CheckMenuItem*);
-	void toggle_mute_menu(ARDOUR::MuteMaster::MutePoint, Gtk::CheckMenuItem*);
+	void toggle_mute_menu (ARDOUR::MuteMaster::MutePoint, Gtk::CheckMenuItem*);
 	void toggle_solo_isolated (Gtk::CheckMenuItem*);
 
 	void update_solo_display ();
@@ -324,6 +326,7 @@ private:
 	 *  to, or 0 if no route is now in this mode.
 	 */
 	static PBD::Signal1<void, boost::shared_ptr<ARDOUR::Route> > BusSendDisplayChanged;
+
 	static boost::weak_ptr<ARDOUR::Route> _showing_sends_to;
 
 	static uint32_t _max_invert_buttons;
