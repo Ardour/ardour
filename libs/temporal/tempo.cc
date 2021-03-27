@@ -1642,7 +1642,7 @@ TempoMap::dump (std::ostream& ostr) const
 	ostr << "------------\n\n\n";
 }
 
-template<typename T>  TempoMap::Points::const_iterator
+template<typename T, typename T1>  TempoMap::Points::const_iterator
 TempoMap::_get_tempo_and_meter (TempoPoint const *& tp, MeterPoint const *& mp, T (Point::*method)() const, T arg, bool can_match) const
 {
 	Points::const_iterator p;
@@ -1655,6 +1655,17 @@ TempoMap::_get_tempo_and_meter (TempoPoint const *& tp, MeterPoint const *& mp, 
 
 	tp = 0;
 	mp = 0;
+
+	/* if the starting position is the beginning of the timeline (indicated
+	 * by the default constructor value for T1, then we are always allowed
+	 * to use the tempo & meter at that position. Without this, it would be
+	 * necessary to special case "can_match" in the caller if the start is
+	 * "zero". Instead we do that here, since common cases
+	 * (e.g. ::get_grid()) will use can_match = false, but may pass in a
+	 * zero start point.
+	 */
+
+	can_match = (can_match || arg == T1());
 
 	for (tp = &_tempos.front(), mp = &_meters.front(), p = _points.begin(); p != _points.end(); ++p) {
 

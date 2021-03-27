@@ -854,11 +854,11 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 	BBT_Time bbt_at (Beats const &) const;
 	BBT_Time bbt_at (superclock_t sc) const;
 
-	template<typename T> Points::const_iterator _get_tempo_and_meter (TempoPoint const *& tp, MeterPoint const *& mp, T (Point::*method)() const, T arg, bool can_match) const;
+	template<typename T, typename T1> Points::const_iterator _get_tempo_and_meter (TempoPoint const *& tp, MeterPoint const *& mp, T (Point::*method)() const, T arg, bool can_match) const;
 
-	Points::const_iterator  get_tempo_and_meter (TempoPoint const *& t, MeterPoint const *& m, BBT_Time const & bbt, bool can_match = true) const { return _get_tempo_and_meter<BBT_Time const &> (t, m, &Point::bbt, bbt, can_match); }
-	Points::const_iterator  get_tempo_and_meter (TempoPoint const *& t, MeterPoint const *& m, superclock_t sc, bool can_match = true) const { return _get_tempo_and_meter<superclock_t> (t, m, &Point::sclock, sc, can_match); }
-	Points::const_iterator  get_tempo_and_meter (TempoPoint const *& t, MeterPoint const *& m, Beats const & b, bool can_match = true) const { return _get_tempo_and_meter<Beats const &> (t, m, &Point::beats, b, can_match); }
+	Points::const_iterator  get_tempo_and_meter (TempoPoint const *& t, MeterPoint const *& m, BBT_Time const & bbt, bool can_match = true) const { return _get_tempo_and_meter<BBT_Time const &, BBT_Time> (t, m, &Point::bbt, bbt, can_match); }
+	Points::const_iterator  get_tempo_and_meter (TempoPoint const *& t, MeterPoint const *& m, superclock_t sc, bool can_match = true) const { return _get_tempo_and_meter<superclock_t,superclock_t> (t, m, &Point::sclock, sc, can_match); }
+	Points::const_iterator  get_tempo_and_meter (TempoPoint const *& t, MeterPoint const *& m, Beats const & b, bool can_match = true) const { return _get_tempo_and_meter<Beats const &, Beats> (t, m, &Point::beats, b, can_match); }
 
 	/* parsing legacy tempo maps */
 
