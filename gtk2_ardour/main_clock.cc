@@ -150,14 +150,14 @@ void
 MainClock::edit_current_tempo ()
 {
 	if (!PublicEditor::instance().session()) return;
-	PublicEditor::instance().edit_tempo_section (Temporal::TempoMap::use()->tempo_at (absolute_time()));
+	PublicEditor::instance().edit_tempo_section (Temporal::TempoMap::use()->metric_at (absolute_time()).get_editable_tempo());
 }
 
 void
 MainClock::edit_current_meter ()
 {
 	if (!PublicEditor::instance().session()) return;
-	PublicEditor::instance().edit_meter_section (Temporal::TempoMap::use()->meter_at (absolute_time()));
+	PublicEditor::instance().edit_meter_section (Temporal::TempoMap::use()->metric_at (absolute_time()).get_editable_meter());
 }
 
 void
