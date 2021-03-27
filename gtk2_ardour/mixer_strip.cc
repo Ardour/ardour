@@ -179,7 +179,6 @@ MixerStrip::init ()
 	_entered_mixer_strip= 0;
 	group_menu = 0;
 	route_ops_menu = 0;
-	ignore_comment_edit = false;
 	comment_area = 0;
 	_width_owner = 0;
 

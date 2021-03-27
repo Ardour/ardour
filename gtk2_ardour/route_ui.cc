@@ -133,6 +133,7 @@ RouteUI::RouteUI (ARDOUR::Session* sess)
 	, comment_area(0)
 	, playlist_action_menu (0)
 	, _invert_menu(0)
+	, _ignore_comment_edit (false)
 {
 	if (program_port_prefix.empty()) {
 		// compare to gtk2_ardour/port_group.cc
@@ -1797,11 +1798,11 @@ RouteUI::setup_comment_editor ()
 void
 RouteUI::comment_changed ()
 {
-	ignore_comment_edit = true;
+	_ignore_comment_edit = true;
 	if (comment_area) {
 		comment_area->get_buffer()->set_text (_route->comment());
 	}
-	ignore_comment_edit = false;
+	_ignore_comment_edit = false;
 }
 
 void

@@ -370,7 +370,6 @@ FoldbackStrip::FoldbackStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Rou
 void
 FoldbackStrip::init ()
 {
-	ignore_comment_edit     = false;
 	comment_area            = 0;
 
 	_previous_button.set_name ("mixer strip button");

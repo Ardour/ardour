@@ -266,7 +266,6 @@ public:
 	gint comment_key_release_handler (GdkEventKey*);
 	void comment_changed ();
 	void comment_edited ();
-	bool ignore_comment_edit;
 
 	void set_disk_io_point (ARDOUR::DiskIOPoint);
 
@@ -357,6 +356,8 @@ private:
 	std::vector<ArdourWidgets::ArdourButton*> _invert_buttons;
 	Gtk::Menu* _invert_menu;
 	uint32_t   _n_polarity_invert;
+
+	bool _ignore_comment_edit;
 
 	StripableColorDialog _color_picker;
 
