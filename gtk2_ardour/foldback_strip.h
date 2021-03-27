@@ -152,25 +152,29 @@ protected:
 private:
 	void init ();
 	void setup_comment_button ();
-	void hide_clicked ();
-	void io_changed_proxy ();
-	void connect_to_pan ();
-	void update_panner_choices ();
-	void update_output_display ();
-	void update_send_box ();
-	void processors_changed (ARDOUR::RouteProcessorChange);
-	void remove_current_fb ();
-	void clear_send_box ();
-	void cycle_foldbacks (bool next);
 	void update_sensitivity ();
-	void spill_change (boost::shared_ptr<ARDOUR::Stripable>);
+
+	void remove_current_fb ();
+	void duplicate_current_fb ();
+
+	void hide_clicked ();
+	void cycle_foldbacks (bool next);
 	bool name_button_button_press (GdkEventButton*);
 	bool send_scroller_press (GdkEventButton*);
-	void route_property_changed (const PBD::PropertyChange&);
-	void name_changed ();
-	void duplicate_current_fb ();
-	void reset_strip_style ();
 	bool fb_strip_enter_event (GdkEventCrossing*);
+
+	void clear_send_box ();
+	void update_send_box ();
+	void name_changed ();
+	void connect_to_pan ();
+	void io_changed_proxy ();
+	void reset_strip_style ();
+	void update_panner_choices ();
+	void update_output_display ();
+
+	void spill_change (boost::shared_ptr<ARDOUR::Stripable>);
+	void route_property_changed (const PBD::PropertyChange&);
+	void presentation_info_changed (PBD::PropertyChange const&);
 
 	Gtk::Menu* build_route_ops_menu ();
 	Gtk::Menu* build_route_select_menu ();

@@ -172,7 +172,7 @@ FoldbackSend::led_clicked (GdkEventButton* ev)
 bool
 FoldbackSend::button_press (GdkEventButton* ev)
 {
-	if (ev->button == 1 && ev->type == GDK_BUTTON_PRESS) {
+	if (Keyboard::is_context_menu_event (ev)) {
 		Menu* menu = build_send_menu ();
 		Gtkmm2ext::anchored_menu_popup (menu, &_button, "", ev->button, ev->time);
 		return true;
@@ -274,6 +274,9 @@ FoldbackSend::build_send_menu ()
 	    MenuElem (_("Set send gain to -inf"), sigc::bind (sigc::mem_fun (*this, &FoldbackSend::set_gain), 0.0)));
 	items.push_back (
 	    MenuElem (_("Set send gain to 0dB"), sigc::bind (sigc::mem_fun (*this, &FoldbackSend::set_gain), 1.0)));
+
+	items.push_back (SeparatorElem());
+
 	if (_send_proc->get_pre_fader ()) {
 		items.push_back (
 		    MenuElem (_("Set send post fader"), sigc::bind (sigc::mem_fun (*this, &FoldbackSend::set_send_position), true)));
@@ -281,6 +284,8 @@ FoldbackSend::build_send_menu ()
 		items.push_back (
 		    MenuElem (_("Set send pre fader"), sigc::bind (sigc::mem_fun (*this, &FoldbackSend::set_send_position), false)));
 	}
+
+	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Remove This Send"), sigc::mem_fun (*this, &FoldbackSend::remove_me)));
 
 	return menu;
@@ -488,8 +493,8 @@ FoldbackStrip::init ()
 	_global_vpacker.pack_end (_level_box, Gtk::PACK_SHRINK);
 	_global_vpacker.pack_end (*_meter, false, false);
 	_global_vpacker.pack_end (*solo_button, false, false);
-	_global_vpacker.pack_end (*_insert_box, Gtk::PACK_SHRINK);
 	_global_vpacker.pack_end (_panners, Gtk::PACK_SHRINK);
+	_global_vpacker.pack_end (*_insert_box, Gtk::PACK_SHRINK);
 
 	_global_frame.add (_global_vpacker);
 	_global_frame.set_shadow_type (Gtk::SHADOW_IN);
@@ -513,6 +518,7 @@ FoldbackStrip::init ()
 	signal_enter_notify_event ().connect (sigc::mem_fun (*this, &FoldbackStrip::fb_strip_enter_event));
 
 	Mixer_UI::instance ()->show_spill_change.connect (sigc::mem_fun (*this, &FoldbackStrip::spill_change));
+	PresentationInfo::Change.connect (*this, invalidator (*this), boost::bind (&FoldbackStrip::presentation_info_changed, this, _1), gui_context ());
 }
 
 FoldbackStrip::~FoldbackStrip ()
@@ -574,13 +580,13 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 	_route->set_meter_point (MeterPostFader);
 	_route->set_meter_type (MeterPeak0dB);
 
-	_route->output ()->changed.connect (*this, invalidator (*this), boost::bind (&FoldbackStrip::update_output_display, this), gui_context ());
+	_route->output ()->changed.connect (route_connections, invalidator (*this), boost::bind (&FoldbackStrip::update_output_display, this), gui_context ());
 	_route->io_changed.connect (route_connections, invalidator (*this), boost::bind (&FoldbackStrip::io_changed_proxy, this), gui_context ());
 	_route->comment_changed.connect (route_connections, invalidator (*this), boost::bind (&FoldbackStrip::setup_comment_button, this), gui_context ());
 
 	_session->FBSendsChanged.connect (route_connections, invalidator (*this), boost::bind (&FoldbackStrip::update_send_box, this), gui_context ());
-	/* now force an update of all the various elements */
 
+	/* now force an update of all the various elements */
 	name_changed ();
 	update_send_box ();
 	comment_changed ();
@@ -646,7 +652,7 @@ FoldbackStrip::update_send_box ()
 			FoldbackSend* fb_s = new FoldbackSend (snd, s_rt, _route, _width);
 			_send_display.pack_start (*fb_s, Gtk::PACK_SHRINK);
 			fb_s->show ();
-			s_rt->processors_changed.connect (_send_connections, invalidator (*this), boost::bind (&FoldbackStrip::processors_changed, this, _1), gui_context ());
+			s_rt->processors_changed.connect (_send_connections, invalidator (*this), boost::bind (&FoldbackStrip::update_send_box, this), gui_context ());
 		}
 	}
 }
@@ -661,12 +667,6 @@ FoldbackStrip::clear_send_box ()
 		delete snd_list[i];
 	}
 	snd_list.clear ();
-}
-
-void
-FoldbackStrip::processors_changed (RouteProcessorChange)
-{
-	update_send_box ();
 }
 
 void
@@ -881,6 +881,14 @@ void
 FoldbackStrip::hide_clicked ()
 {
 	ActionManager::get_toggle_action (X_("Mixer"), X_("ToggleFoldbackStrip"))->set_active (false);
+}
+
+void
+FoldbackStrip::presentation_info_changed (PropertyChange const& what_changed)
+{
+	if (what_changed.contains (Properties::order)) {
+		update_send_box ();
+	}
 }
 
 void
