@@ -95,9 +95,7 @@ private:
 	void level_changed ();
 	void set_tooltip ();
 
-
 	Gtk::Menu* build_send_menu ();
-
 
 	ArdourWidgets::ArdourButton          _button;
 	boost::shared_ptr<ARDOUR::Send>      _send;
@@ -130,7 +128,7 @@ public:
 
 	PannerUI& panner_ui ()
 	{
-		return panners;
+		return _panners;
 	}
 
 	boost::shared_ptr<ARDOUR::Stripable> stripable () const
@@ -158,7 +156,6 @@ private:
 	void io_changed_proxy ();
 	void connect_to_pan ();
 	void update_panner_choices ();
-	void update_fb_level_control ();
 	void update_output_display ();
 	void update_send_box ();
 	void processors_changed (ARDOUR::RouteProcessorChange);
@@ -178,31 +175,27 @@ private:
 	Gtk::Menu* build_route_select_menu ();
 
 	Mixer_UI& _mixer;
+	bool      _showing_sends;
+	uint32_t  _width;
 
-	bool               _showing_sends;
-	uint32_t           _width;
-	ARDOUR::PeakMeter* _peak_meter;
+	Gtk::EventBox       _spacer;
+	Gtk::VBox           _send_display;
+	Gtk::ScrolledWindow _send_scroller;
+	Gtk::Frame          _global_frame;
+	Gtk::VBox           _global_vpacker;
+	Gtk::HBox           _prev_next_box;
+	Gtk::HBox           _level_box;
+	ProcessorBox*       _insert_box;
+	ProcessorSelection  _pr_selection;
+	PannerUI            _panners;
+	IOButton            _output_button;
 
-	Gtk::EventBox       spacer;
-	Gtk::VBox           send_display;
-	Gtk::ScrolledWindow send_scroller;
-	Gtk::Frame          global_frame;
-	Gtk::VBox           global_vpacker;
-	Gtk::HBox           master_box;
-	Gtk::HBox           prev_next_box;
-
-	ProcessorBox*      insert_box;
-	ProcessorSelection _pr_selection;
-	PannerUI           panners;
-
-	IOButton output_button;
-
-	ArdourWidgets::ArdourButton name_button;
+	ArdourWidgets::ArdourButton _name_button;
 	ArdourWidgets::ArdourButton _previous_button;
 	ArdourWidgets::ArdourButton _next_button;
 	ArdourWidgets::ArdourButton _hide_button;
 	ArdourWidgets::ArdourButton _comment_button;
-	ArdourWidgets::ArdourKnob*  fb_level_control;
+	ArdourWidgets::ArdourKnob   _level_control;
 	ArdourWidgets::FastMeter*   _meter;
 
 	PBD::ScopedConnectionList _send_connections;
