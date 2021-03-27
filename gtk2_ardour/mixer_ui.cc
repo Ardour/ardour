@@ -1617,8 +1617,13 @@ Mixer_UI::spill_redisplay (boost::shared_ptr<Stripable> s)
 			}
 		}
 
+#ifdef MIXBUS
+		if (r && r->mixbus()) {
+			feeds = strip->route()->mb_feeds (r);
+		} else
+#endif
 		if (r) {
-			feeds = strip->route()->feeds (r);
+			feeds = strip->route()->direct_feeds_according_to_graph (r);
 		}
 
 		bool should_show = visible && (slaved || feeds);
