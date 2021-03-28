@@ -565,7 +565,7 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 
 	_output_button.set_route (_route, this);
 
-	size_t number = 0;
+	int number = 0;
 	{
 		RouteList rl (_session->get_routelist (true, PresentationInfo::FoldbackBus));
 		RouteList::iterator i = find (rl.begin (), rl.end (), _route);
