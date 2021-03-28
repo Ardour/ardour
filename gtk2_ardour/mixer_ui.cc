@@ -3554,9 +3554,9 @@ Mixer_UI::show_spill (boost::shared_ptr<Stripable> s)
 
 	if (s) {
 		s->DropReferences.connect (_spill_gone_connection, invalidator (*this), boost::bind (&Mixer_UI::spill_nothing, this), gui_context());
-		_group_tabs->hide ();
+		_group_tabs->set_sensitive (false);
 	} else {
-		_group_tabs->show ();
+		_group_tabs->set_sensitive (true);
 	}
 	redisplay_track_list ();
 }
