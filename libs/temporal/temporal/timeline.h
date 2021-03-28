@@ -254,8 +254,8 @@ class LIBTEMPORAL_API timepos_t : public int62_t  {
 	timecnt_t expensive_distance (timepos_t const & p) const;
 	timepos_t expensive_add (timepos_t const & s) const;
 
-	int62_t operator- (int62_t) const { assert (0); }
-	int62_t operator- (int64_t) const { assert (0); }
+	int62_t operator- (int62_t) const { assert (0); return int62_t (false, 0); }
+	int62_t operator- (int64_t) const { assert (0); return int62_t (false, 0); }
 
 	using int62_t::operator int64_t;
 	using int62_t::operator-=;
