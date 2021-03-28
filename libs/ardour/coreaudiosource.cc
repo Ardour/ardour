@@ -86,7 +86,7 @@ CoreAudioSource::init_cafile ()
 			throw failed_constructor();
 		}
 
-		_length = af.GetNumberFrames();
+		_length = timecnt_t (af.GetNumberFrames());
 
 		CAStreamBasicDescription client_format (file_format);
 
@@ -140,7 +140,7 @@ CoreAudioSource::safe_read (Sample* dst, samplepos_t start, samplecnt_t cnt, Aud
 
 		if (new_cnt == 0) {
 			/* EOF */
-			if (start+cnt == _length) {
+			if (start+cnt == _length.samples()) {
 				/* we really did hit the end */
 				nread = cnt;
 			}
@@ -167,17 +167,17 @@ CoreAudioSource::read_unlocked (Sample *dst, samplepos_t start, samplecnt_t cnt)
 	abl.mNumberBuffers = 1;
 	abl.mBuffers[0].mNumberChannels = n_channels;
 
-	if (start > _length) {
+	if (start > _length.samples()) {
 
 		/* read starts beyond end of data, just memset to zero */
 
 		file_cnt = 0;
 
-	} else if (start + cnt > _length) {
+	} else if (start + cnt > _length.samples()) {
 
 		/* read ends beyond end of data, read some, memset the rest */
 
-		file_cnt = _length - start;
+		file_cnt = _length.samples() - start;
 
 	} else {
 

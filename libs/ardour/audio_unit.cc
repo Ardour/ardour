@@ -1608,16 +1608,18 @@ OSStatus
 AUPlugin::get_beat_and_tempo_callback (Float64* outCurrentBeat,
 				       Float64* outCurrentTempo)
 {
-	TempoMap& tmap (_session.tempo_map());
+	using namespace Temporal;
+	TempoMap::SharedPtr tmap (TempoMap::use());
 
 	DEBUG_TRACE (DEBUG::AudioUnitProcess, "AU calls ardour beat&tempo callback\n");
 
 	if (outCurrentBeat) {
-		*outCurrentBeat = tmap.quarters_at_sample (transport_sample);
+		DoubleableBeats db (tmap->quarters_at_sample (transport_sample));
+		*outCurrentBeat = db.to_double();
 	}
 
 	if (outCurrentTempo) {
-		*outCurrentTempo = tmap.tempo_at_sample (transport_sample).quarter_notes_per_minute();
+		*outCurrentTempo = tmap->tempo_at (transport_sample).quarter_notes_per_minute();
 	}
 
 	return noErr;
@@ -1630,20 +1632,21 @@ AUPlugin::get_musical_time_location_callback (UInt32*   outDeltaSampleOffsetToNe
 					      UInt32*   outTimeSig_Denominator,
 					      Float64*  outCurrentMeasureDownBeat)
 {
-	TempoMap& tmap (_session.tempo_map());
+	using namespace Temporal;
+	TempoMap::SharedPtr tmap (TempoMap::use());
 
 	DEBUG_TRACE (DEBUG::AudioUnitProcess, "AU calls ardour music time location callback\n");
 
-	TempoMetric metric = tmap.metric_at (transport_sample + input_offset);
-	Temporal::BBT_Time bbt = _session.tempo_map().bbt_at_sample (transport_sample);
+	TempoMetric metric = tmap->metric_at (timepos_t (transport_sample + input_offset));
+	BBT_Time bbt = tmap->bbt_at (timepos_t (transport_sample));
 
 	if (outDeltaSampleOffsetToNextBeat) {
 		if (bbt.ticks == 0) {
 			/* on the beat */
 			*outDeltaSampleOffsetToNextBeat = 0;
 		} else {
-			double const next_beat = ceil (tmap.quarters_at_sample (transport_sample));
-			samplepos_t const next_beat_sample = tmap.sample_at_quarter_note (next_beat);
+			const Beats next_beat = tmap->quarters_at_sample (transport_sample).round_up_to_beat ();
+			samplepos_t const next_beat_sample = metric.tempo().sample_at (next_beat);
 
 			*outDeltaSampleOffsetToNextBeat = next_beat_sample - transport_sample;
 		}
@@ -1653,7 +1656,7 @@ AUPlugin::get_musical_time_location_callback (UInt32*   outDeltaSampleOffsetToNe
 		*outTimeSig_Numerator = (UInt32) lrintf (metric.meter().divisions_per_bar());
 	}
 	if (outTimeSig_Denominator) {
-		*outTimeSig_Denominator = (UInt32) lrintf (metric.meter().note_divisor());
+		*outTimeSig_Denominator = (UInt32) lrintf (metric.meter().note_value());
 	}
 
 	if (outCurrentMeasureDownBeat) {
@@ -1667,7 +1670,8 @@ AUPlugin::get_musical_time_location_callback (UInt32*   outDeltaSampleOffsetToNe
 		bbt.beats = 1;
 		bbt.ticks = 0;
 
-		*outCurrentMeasureDownBeat = tmap.quarters_at (bbt);
+		DoubleableBeats db = tmap->quarters_at (bbt);
+		*outCurrentMeasureDownBeat = db.to_double ();
 	}
 
 	return noErr;
@@ -1681,6 +1685,8 @@ AUPlugin::get_transport_state_callback (Boolean*  outIsPlaying,
 					Float64*  outCycleStartBeat,
 					Float64*  outCycleEndBeat)
 {
+	using namespace Temporal;
+
 	const bool rolling = (transport_speed != 0);
 	const bool last_transport_rolling = (last_transport_speed != 0);
 
@@ -1718,16 +1724,18 @@ AUPlugin::get_transport_state_callback (Boolean*  outIsPlaying,
 
 			if (outCycleStartBeat || outCycleEndBeat) {
 
-				TempoMap& tmap (_session.tempo_map());
+				TempoMap::SharedPtr tmap (TempoMap::use());
 
 				Temporal::BBT_Time bbt;
 
 				if (outCycleStartBeat) {
-					*outCycleStartBeat = tmap.quarters_at_sample (loc->start());
+					DoubleableBeats db (tmap->quarters_at (loc->start()));
+					*outCycleStartBeat = db.to_double ();
 				}
 
 				if (outCycleEndBeat) {
-					*outCycleEndBeat = tmap.quarters_at_sample (loc->end());
+					DoubleableBeats db (tmap->quarters_at (loc->end()));
+					*outCycleEndBeat = db.to_double ();
 				}
 			}
 		}
