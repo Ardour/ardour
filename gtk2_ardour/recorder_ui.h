@@ -103,7 +103,7 @@ private:
 	void meter_area_size_request (GtkRequisition*);
 	void meter_area_layout ();
 
-	bool scroller_button_release (GdkEventButton*);
+	bool scroller_button_event (GdkEventButton*);
 
 	void arm_all ();
 	void arm_none ();

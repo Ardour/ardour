@@ -145,7 +145,8 @@ RecorderUI::RecorderUI ()
 
 	_scroller_base.set_flags (CAN_FOCUS);
 	_scroller_base.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-	_scroller_base.signal_button_release_event().connect (sigc::mem_fun(*this, &RecorderUI::scroller_button_release));
+	_scroller_base.signal_button_press_event().connect (sigc::mem_fun(*this, &RecorderUI::scroller_button_event));
+	_scroller_base.signal_button_release_event().connect (sigc::mem_fun(*this, &RecorderUI::scroller_button_event));
 	_scroller_base.set_size_request (-1, PX_SCALE (20));
 	_scroller_base.signal_expose_event().connect (sigc::bind (sigc::ptr_fun(&ArdourWidgets::ArdourIcon::expose), &_scroller_base, ArdourWidgets::ArdourIcon::ShadedPlusSign));
 
@@ -504,9 +505,9 @@ RecorderUI::parameter_changed (string const& p)
 }
 
 bool
-RecorderUI::scroller_button_release (GdkEventButton* ev)
+RecorderUI::scroller_button_event (GdkEventButton* ev)
 {
-	if (Keyboard::is_context_menu_event (ev)) {
+	if ((ev->type == GDK_2BUTTON_PRESS && ev->button == 1) || (ev->type == GDK_BUTTON_RELEASE && Keyboard::is_context_menu_event (ev))) {
 		ARDOUR_UI::instance()->add_route ();
 		return true;
 	}
