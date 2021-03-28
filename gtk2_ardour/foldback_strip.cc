@@ -676,6 +676,7 @@ FoldbackStrip::update_send_box ()
 			s_rt->processors_changed.connect (_send_connections, invalidator (*this), boost::bind (&FoldbackStrip::update_send_box, this), gui_context ());
 		}
 	}
+	update_sensitivity ();
 }
 
 void
@@ -906,8 +907,7 @@ FoldbackStrip::cycle_foldbacks (bool next)
 void
 FoldbackStrip::update_sensitivity ()
 {
-	RouteList fb_list;
-	fb_list = _session->get_routelist (true, PresentationInfo::FoldbackBus);
+	RouteList fb_list (_session->get_routelist (true, PresentationInfo::FoldbackBus));
 
 	if ((fb_list.size () < 2) || (_route == *(fb_list.begin ()))) {
 		_previous_button.set_sensitive (false);
@@ -919,6 +919,10 @@ FoldbackStrip::update_sensitivity ()
 	} else {
 		_next_button.set_sensitive (true);
 	}
+
+	bool active = _route && _route->active ();
+	show_sends_button->set_sensitive (active && _send_display.get_children ().size () > 0);
+	solo_button->set_sensitive (active && Config->get_solo_control_is_listen_control ());
 }
 
 void
@@ -989,6 +993,8 @@ FoldbackStrip::reset_strip_style ()
 	}
 
 	set_invert_sensitive (active);
+	update_sensitivity ();
+
 	_comment_button.set_sensitive (active);
 	_output_button.set_sensitive (active);
 	_level_control.set_sensitive (active);
@@ -1001,14 +1007,14 @@ FoldbackStrip::set_button_names ()
 {
 	show_sends_button->set_text (_("Show Sends"));
 
-	solo_button->set_sensitive (_route && _route->active () && Config->get_solo_control_is_listen_control ());
-
 	switch (Config->get_listen_position ()) {
 		case AfterFaderListen:
 			solo_button->set_text (_("AFL"));
+			update_sensitivity ();
 			break;
 		case PreFaderListen:
 			solo_button->set_text (_("PFL"));
+			update_sensitivity ();
 			break;
 	}
 }
@@ -1046,6 +1052,7 @@ FoldbackStrip::create_selected_sends (ARDOUR::Placement p, bool)
 			}
 		}
 	}
+	update_sensitivity ();
 }
 
 void
@@ -1110,4 +1117,5 @@ FoldbackStrip::remove_current_fb ()
 
 	set_route (next);
 	_session->remove_route (old_route);
+	update_sensitivity ();
 }
