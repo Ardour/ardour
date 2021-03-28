@@ -390,9 +390,9 @@ Editor::track_canvas_drag_data_received (const RefPtr<Gdk::DragContext>& context
 }
 
 bool
-Editor::idle_drop_paths (vector<string> paths, timepos_t sample, double ypos, bool copy)
+Editor::idle_drop_paths (vector<string> paths, timepos_t pos, double ypos, bool copy)
 {
-	drop_paths_part_two (paths, sample, ypos, copy);
+	drop_paths_part_two (paths, pos, ypos, copy);
 	return false;
 }
 
@@ -482,7 +482,7 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 		   the main event loop with GTK/Quartz. Since import/embed wants
 		   to push up a progress dialog, defer all this till we go idle.
 		*/
-		Glib::signal_idle().connect (sigc::bind (sigc::mem_fun (*this, &Editor::idle_drop_paths), paths, when.sample, cy, copy));
+		Glib::signal_idle().connect (sigc::bind (sigc::mem_fun (*this, &Editor::idle_drop_paths), paths, when, cy, copy));
 #else
 		drop_paths_part_two (paths, when, cy, copy);
 #endif
