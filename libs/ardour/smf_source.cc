@@ -406,7 +406,7 @@ SMFSource::append_event_beats (const Glib::Threads::Mutex::Lock&   lock,
 		return;
 	}
 
-#if 1
+#if 0
 	printf("SMFSource: %s - append_event_beats ID = %d time = %lf, size = %u, data = ",
                name().c_str(), ev.id(), ev.time(), ev.size());
 	       for (size_t i = 0; i < ev.size(); ++i) printf("%X ", ev.buffer()[i]); printf("\n");
