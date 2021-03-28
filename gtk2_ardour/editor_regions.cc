@@ -72,14 +72,6 @@ using namespace Glib;
 using namespace Editing;
 using Gtkmm2ext::Keyboard;
 
-struct ColumnInfo {
-	int                index;
-	int                sort_idx;
-	Gtk::AlignmentEnum al;
-	const char*        label;
-	const char*        tooltip;
-};
-
 //#define SHOW_REGION_EXTRAS
 
 EditorRegions::EditorRegions (Editor* e)
@@ -177,8 +169,14 @@ EditorRegions::EditorRegions (Editor* e)
 	TreeViewColumn* col;
 	Gtk::Label*     l;
 
+	struct ColumnInfo {
+		int                index;
+		int                sort_idx;
+		Gtk::AlignmentEnum al;
+		const char*        label;
+		const char*        tooltip;
+	} ci[] = {
 	/* clang-format off */
-	ColumnInfo ci[] = {
 		{ 0,  0,  ALIGN_LEFT,    _("Name"),      _("Region name") },
 		{ 1,  1,  ALIGN_LEFT,    _("# Ch"),      _("# Channels in the region") },
 		{ 2,  2,  ALIGN_LEFT,    _("Tags"),      _("Tags") },
