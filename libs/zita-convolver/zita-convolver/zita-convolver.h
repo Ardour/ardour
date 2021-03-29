@@ -116,8 +116,9 @@ public:
 	{
 		pthread_mutex_lock (&_mutex);
 		_count++;
-		if (_count == 1)
+		if (_count == 1) {
 			pthread_cond_signal (&_cond);
+		}
 		pthread_mutex_unlock (&_mutex);
 		return 0;
 	}
@@ -125,8 +126,9 @@ public:
 	int wait (void)
 	{
 		pthread_mutex_lock (&_mutex);
-		while (_count < 1)
+		while (_count < 1) {
 			pthread_cond_wait (&_cond, &_mutex);
+		}
 		_count--;
 		pthread_mutex_unlock (&_mutex);
 		return 0;
@@ -134,8 +136,9 @@ public:
 
 	int trywait (void)
 	{
-		if (pthread_mutex_trylock (&_mutex))
+		if (pthread_mutex_trylock (&_mutex)) {
 			return -1;
+		}
 		if (_count < 1) {
 			pthread_mutex_unlock (&_mutex);
 			return -1;
