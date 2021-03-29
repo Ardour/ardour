@@ -2287,8 +2287,8 @@ VST3PI::load_state (RAMStream& stream)
 				rv = false;
 			}
 		} else if (is_equal_ID (i->_id, Vst::getChunkID (Vst::kControllerState))) {
-			stream.seek (i->_offset, IBStream::kIBSeekSet, &seek_result);
-			tresult res = _controller->setState (&stream);
+			ROMStream s (stream, i->_offset, i->_size);
+			tresult res = _controller->setState (&s);
 			if (res == kResultOk) {
 				synced = true;
 			}
