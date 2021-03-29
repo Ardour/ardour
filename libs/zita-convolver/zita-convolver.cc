@@ -265,6 +265,16 @@ Convproc::start_process (int abspri, int policy)
 	for (k = (_minpart == _quantum) ? 1 : 0; k < _nlevels; k++) {
 		_convlev[k]->start (abspri, policy);
 	}
+
+	while (!check_started ((_minpart == _quantum) ? 1 : 0)) {
+#ifdef _MSC_VER
+		Sleep (40);
+#else
+		usleep (40000);
+#endif
+		sched_yield ();
+	}
+
 	_state = ST_PROC;
 	return 0;
 }
@@ -352,10 +362,11 @@ Convproc::cleanup (void)
 
 	while (!check_stop ()) {
 #ifdef _MSC_VER
-		Sleep (100);
+		Sleep (40);
 #else
-		usleep (100000);
+		usleep (40000);
 #endif
+		sched_yield ();
 	}
 	for (k = 0; k < _ninp; k++) {
 		delete[] _inpbuff[k];
@@ -383,13 +394,18 @@ Convproc::cleanup (void)
 }
 
 bool
+Convproc::check_started (uint32_t k)
+{
+	for (; (k < _nlevels) && (_convlev[k]->_stat == Convlevel::ST_PROC); k++) ;
+	return (k == _nlevels) ? true : false;
+}
+
+bool
 Convproc::check_stop (void)
 {
 	uint32_t k;
 
-	for (k = 0; (k < _nlevels) && (_convlev[k]->_stat == Convlevel::ST_IDLE); k++) {
-		;
-	}
+	for (k = 0; (k < _nlevels) && (_convlev[k]->_stat == Convlevel::ST_IDLE); k++) ;
 	if (k == _nlevels) {
 		_state = ST_STOP;
 		return true;
