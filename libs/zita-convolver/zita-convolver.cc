@@ -758,9 +758,9 @@ void
 Convlevel::process (bool skip)
 {
 	uint32_t       i, i1, j, k, n1, n2, opi1, opi2;
-	Inpnode*       X;
-	Macnode*       M;
-	Outnode*       Y;
+	Inpnode const* X;
+	Macnode const* M;
+	Outnode const* Y;
 	fftwf_complex* ffta;
 	fftwf_complex* fftb;
 	float*         inpd;
@@ -865,9 +865,9 @@ Convlevel::process (bool skip)
 int
 Convlevel::readout (bool sync, uint32_t skipcnt)
 {
-	uint32_t i;
-	float *  p, *q;
-	Outnode* Y;
+	uint32_t       i;
+	float *        p, *q;
+	Outnode const* Y;
 
 	_outoffs += _outsize;
 	if (_outoffs == _parsize) {
