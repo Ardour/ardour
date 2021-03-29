@@ -42,8 +42,9 @@ struct MidiCursor : public boost::noncopyable {
 		invalidated.connect_same_thread (connections, boost::bind(&MidiCursor::invalidate, this, _1));
 	}
 
+
 	void invalidate(bool preserve_notes) {
-		iter.invalidate (preserve_notes ? &active_notes : NULL);
+		iter.invalidate (preserve_notes);
 		/* maintain time domain while resetting to zero */
 		last_read_end = Temporal::timepos_t (last_read_end.time_domain());
 	}
@@ -51,7 +52,7 @@ struct MidiCursor : public boost::noncopyable {
 	Evoral::Sequence<Temporal::Beats>::const_iterator        iter;
 	std::set<Evoral::Sequence<Temporal::Beats>::WeakNotePtr> active_notes;
 	timepos_t                                                last_read_end;
-	PBD::ScopedConnectionList                                connections;
+ 	PBD::ScopedConnectionList                                connections;
 };
 
 }
