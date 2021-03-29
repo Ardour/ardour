@@ -28,7 +28,6 @@
 #include <iostream>
 #include <limits>
 
-#include "pbd/compose.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/integer_division.h"
 #include "pbd/string_convert.h"
