@@ -555,13 +555,12 @@ FoldbackStrip::name () const
 void
 FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 {
-	RouteUI::set_route (rt);
-
 	if (!rt) {
 		clear_send_box ();
-		RouteUI::self_delete ();
 		return;
 	}
+
+	RouteUI::set_route (rt);
 
 	_output_button.set_route (_route, this);
 
@@ -1117,5 +1116,4 @@ FoldbackStrip::remove_current_fb ()
 
 	set_route (next);
 	_session->remove_route (old_route);
-	update_sensitivity ();
 }

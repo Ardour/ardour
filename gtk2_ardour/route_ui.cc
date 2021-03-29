@@ -319,10 +319,6 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 
 	_route = rp;
 
-	if (!_route) {
-		return;
-	}
-
 	if (!_route->presentation_info().color_set()) {
 		/* deal with older 4.x color, which was stored in the GUI object state */
 
