@@ -262,11 +262,6 @@ private:
 	void impdata_clear (uint32_t inp,
 	                    uint32_t out);
 
-	void impdata_link (uint32_t inp1,
-	                   uint32_t out1,
-	                   uint32_t inp2,
-	                   uint32_t out2);
-
 	void reset (uint32_t inpsize,
 	            uint32_t outsize,
 	            float**  inpbuff,
@@ -274,9 +269,9 @@ private:
 
 	void start (int absprio, int policy);
 
-	void process (bool sync);
+	void process ();
 
-	int readout (bool sync, uint32_t skipcnt);
+	int readout ();
 
 	void stop (void);
 
@@ -390,36 +385,13 @@ public:
 	int impdata_clear (uint32_t inp,
 	                   uint32_t out);
 
-	int impdata_update (uint32_t inp,
-	                    uint32_t out,
-	                    int32_t  step,
-	                    float*   data,
-	                    int32_t  ind0,
-	                    int32_t  ind1);
-
-	int impdata_link (uint32_t inp1,
-	                  uint32_t out1,
-	                  uint32_t inp2,
-	                  uint32_t out2);
-
-	// Deprecated, use impdata_link() instead.
-	int impdata_copy (uint32_t inp1,
-	                  uint32_t out1,
-	                  uint32_t inp2,
-	                  uint32_t out2)
-	{
-		return impdata_link (inp1, out1, inp2, out2);
-	}
-
 	void set_options (uint32_t options);
-
-	void set_skipcnt (uint32_t skipcnt);
 
 	int reset (void);
 
 	int start_process (int abspri, int policy);
 
-	int process (bool sync = false);
+	int process ();
 
 	int stop_process (void);
 
@@ -436,7 +408,6 @@ private:
 	uint32_t   _inpoffs;         // current offset in input buffers
 	uint32_t   _outoffs;         // current offset in output buffers
 	uint32_t   _options;         // option bits
-	uint32_t   _skipcnt;         // number of frames to skip
 	uint32_t   _ninp;            // number of inputs
 	uint32_t   _nout;            // number of outputs
 	uint32_t   _quantum;         // processing block size
