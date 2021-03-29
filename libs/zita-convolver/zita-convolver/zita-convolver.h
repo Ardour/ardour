@@ -272,6 +272,7 @@ private:
 	void process ();
 
 	int readout ();
+	int readtail (uint32_t n_samples);
 
 	void stop (void);
 
@@ -392,6 +393,7 @@ public:
 	int start_process (int abspri, int policy);
 
 	int process ();
+	int tailonly (uint32_t n_samples);
 
 	int stop_process (void);
 

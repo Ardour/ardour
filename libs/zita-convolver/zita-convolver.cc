@@ -308,6 +308,29 @@ Convproc::process ()
 }
 
 int
+Convproc::tailonly (uint32_t n_samples)
+{
+	uint32_t k;
+	int      f = 0;
+
+	if (_state != ST_PROC) {
+		return 0;
+	}
+
+	uint32_t outoffs = _outoffs;
+	outoffs += _quantum;
+	if (outoffs == _minpart) {
+		for (k = 0; k < _nout; k++) {
+			memset (_outbuff[k], 0, n_samples * sizeof (float));
+		}
+		for (k = 0; k < _nlevels; k++) {
+			f |= _convlev[k]->readtail (n_samples);
+		}
+	}
+	return f;
+}
+
+int
 Convproc::stop_process (void)
 {
 	uint32_t k;
@@ -808,6 +831,36 @@ Convlevel::readout ()
 	}
 
 	return (_wait > 1) ? _bits : 0;
+}
+
+int
+Convlevel::readtail (uint32_t n_samples)
+{
+	Outnode const* Y;
+
+	uint32_t opind   = _opind;
+	uint32_t outoffs = _outoffs + _outsize;
+	if (outoffs == _parsize) {
+
+		while (_wait) {
+			_done.wait ();
+			_wait--;
+		}
+
+		outoffs = 0;
+		if (++opind == 3) {
+			opind = 0;
+		}
+	}
+
+	for (Y = _out_list; Y; Y = Y->_next) {
+		float const* const p = Y->_buff[opind] + outoffs;
+		float* const       q = _outbuff[Y->_out];
+		for (uint32_t i = 0; i < n_samples; i++) {
+			q[i] += p[i];
+		}
+	}
+	return 0;
 }
 
 void
