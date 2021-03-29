@@ -8,8 +8,9 @@ function dsp_ioconfig () return
 	}
 end
 
-local conv, mode, ir_file
+local conv, mode, ir_file, buffered
 
+buffered = false
 ir_file = "/tmp/reverbs/St Nicolaes Church.wav"
 ir_file = "/tmp/reverbs/Large Wide Echo Hall.wav"
 
@@ -33,7 +34,7 @@ function dsp_configure (ins, outs)
 end
 
 function dsp_latency ()
-	if conv then
+	if conv and buffered then
 		return conv:latency()
 	else
 		return 0
@@ -51,9 +52,17 @@ function dsp_run (ins, outs, n_samples)
 		end
 	end
 
-	if #outs == 1 then
-		conv:run_mono (outs[1], n_samples)
+	if buffered then
+		if #outs == 1 then
+			conv:run_mono_buffered (outs[1], n_samples)
+		else
+			conv:run_stereo_buffered (outs[1], outs[2], n_samples)
+		end
 	else
-		conv:run_stereo (outs[1], outs[2], n_samples)
+		if #outs == 1 then
+			conv:run_mono_no_latency (outs[1], n_samples)
+		else
+			conv:run_stereo_no_latency (outs[1], outs[2], n_samples)
+		end
 	end
 end

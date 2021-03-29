@@ -2724,8 +2724,10 @@ LuaBindings::common (lua_State* L)
 
 		.deriveClass <DSP::Convolver, DSP::Convolution> ("Convolver")
 		.addConstructor <void (*) (Session&, std::string const&, DSP::Convolver::IRChannelConfig, DSP::Convolver::IRSettings)> ()
-		.addFunction ("run_mono", &ARDOUR::DSP::Convolver::run_mono)
-		.addFunction ("run_stereo", &ARDOUR::DSP::Convolver::run_stereo)
+		.addFunction ("run_mono_buffered", &ARDOUR::DSP::Convolver::run_mono_buffered)
+		.addFunction ("run_stereo_buffered", &ARDOUR::DSP::Convolver::run_stereo_buffered)
+		.addFunction ("run_mono_no_latency", &ARDOUR::DSP::Convolver::run_mono_no_latency)
+		.addFunction ("run_stereo_no_latency", &ARDOUR::DSP::Convolver::run_stereo_no_latency)
 		.endClass ()
 
 		/* DSP enums */

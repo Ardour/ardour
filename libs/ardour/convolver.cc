@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2020 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2018-2021 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,6 +45,7 @@ Convolution::Convolution (Session& session, uint32_t n_in, uint32_t n_out)
     , _max_size (0)
     , _offset (0)
     , _configured (false)
+    , _threaded (false)
     , _n_inputs (n_in)
     , _n_outputs (n_out)
 {
@@ -86,19 +87,25 @@ Convolution::restart ()
 	_convproc.cleanup ();
 	_convproc.set_options (0);
 
+	uint32_t n_part;
+
+	if (_threaded) {
+		_n_samples = 64;
+		n_part     = Convproc::MAXPART;
+	} else {
+		_n_samples = _session.get_block_size ();
+		uint32_t power_of_two;
+		for (power_of_two = 1; 1U << power_of_two < _n_samples; ++power_of_two) ;
+		_n_samples = 1 << power_of_two;
+		n_part     = std::min ((uint32_t)Convproc::MAXPART, _n_samples);
+	}
+
 	_offset    = 0;
 	_max_size  = 0;
-	_n_samples = _session.get_block_size ();
 
 	for (std::vector<ImpData>::const_iterator i = _impdata.begin (); i != _impdata.end (); ++i) {
 		_max_size = std::max (_max_size, (uint32_t)i->readable_length ());
 	}
-
-	uint32_t power_of_two;
-	for (power_of_two = 1; 1U << power_of_two < _n_samples; ++power_of_two) ;
-	_n_samples = 1 << power_of_two;
-
-	int n_part = std::min ((uint32_t)Convproc::MAXPART, 4 * _n_samples);
 
 	int rv = _convproc.configure (
 	    /*in*/ _n_inputs,
@@ -226,6 +233,8 @@ Convolver::Convolver (
     , _irc (irc)
     , _ir_settings (irs)
 {
+	_threaded = true;
+
 	std::vector<boost::shared_ptr<Readable> > readables = Readable::load (_session, path);
 
 	if (readables.empty ()) {
@@ -305,7 +314,7 @@ Convolver::Convolver (
 }
 
 void
-Convolver::run_mono (float* buf, uint32_t n_samples)
+Convolver::run_mono_buffered (float* buf, uint32_t n_samples)
 {
 	assert (_convproc.state () == Convproc::ST_PROC);
 	assert (_irc == Mono);
@@ -334,7 +343,7 @@ Convolver::run_mono (float* buf, uint32_t n_samples)
 }
 
 void
-Convolver::run_stereo (float* left, float* right, uint32_t n_samples)
+Convolver::run_stereo_buffered (float* left, float* right, uint32_t n_samples)
 {
 	assert (_convproc.state () == Convproc::ST_PROC);
 	assert (_irc != Mono);
@@ -360,5 +369,74 @@ Convolver::run_stereo (float* left, float* right, uint32_t n_samples)
 			_convproc.process ();
 			_offset = 0;
 		}
+	}
+}
+
+void
+Convolver::run_mono_no_latency (float* buf, uint32_t n_samples)
+{
+	assert (_convproc.state () == Convproc::ST_PROC);
+	assert (_irc == Mono);
+
+	uint32_t done   = 0;
+	uint32_t remain = n_samples;
+
+	while (remain > 0) {
+		uint32_t ns = std::min (remain, _n_samples - _offset);
+
+		float* const in  = _convproc.inpdata (/*channel*/ 0);
+		float* const out = _convproc.outdata (/*channel*/ 0);
+
+		memcpy (&in[_offset], &buf[done], sizeof (float) * ns);
+
+		if (_offset + ns == _n_samples) {
+			_convproc.process ();
+			memcpy (&buf[done], &out[_offset], sizeof (float) * ns);
+			_offset = 0;
+		} else {
+			assert (remain == ns);
+			_convproc.tailonly (_offset + ns);
+			memcpy (&buf[done], &out[_offset], sizeof (float) * ns);
+			_offset += ns;
+		}
+		done   += ns;
+		remain -= ns;
+	}
+}
+
+void
+Convolver::run_stereo_no_latency (float* left, float* right, uint32_t n_samples)
+{
+	assert (_convproc.state () == Convproc::ST_PROC);
+	assert (_irc != Mono);
+
+	uint32_t done   = 0;
+	uint32_t remain = n_samples;
+
+	float* const outL = _convproc.outdata (0);
+	float* const outR = _convproc.outdata (1);
+
+	while (remain > 0) {
+		uint32_t ns = std::min (remain, _n_samples - _offset);
+
+		memcpy (&_convproc.inpdata (0)[_offset], &left[done], sizeof (float) * ns);
+		if (_irc >= Stereo) {
+			memcpy (&_convproc.inpdata (1)[_offset], &right[done], sizeof (float) * ns);
+		}
+
+		if (_offset + ns == _n_samples) {
+			_convproc.process ();
+			memcpy (&left[done],  &outL[_offset], sizeof (float) * ns);
+			memcpy (&right[done], &outR[_offset], sizeof (float) * ns);
+			_offset = 0;
+		} else {
+			assert (remain == ns);
+			_convproc.tailonly (_offset + ns);
+			memcpy (&left[done],  &outL[_offset], sizeof (float) * ns);
+			memcpy (&right[done], &outR[_offset], sizeof (float) * ns);
+			_offset += ns;
+		}
+		done   += ns;
+		remain -= ns;
 	}
 }
