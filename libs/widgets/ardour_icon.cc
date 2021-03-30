@@ -925,8 +925,8 @@ static void icon_plus_sign (cairo_t *cr, const int width, const int height, cons
 
 static void icon_shaded_plus_sign (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
 {
-	const double lw = std::min (12., ceil (std::min (width, height) * .035));
-	const double ln = std::min (68., rint (std::min (width, height) * .2));
+	const double lw = std::min (10., ceil (std::min (width, height) * .035));
+	const double ln = std::min (57., rint (std::min (width, height) * .2));
 	const double lc = fmod (lw * .5, 1.0);
 	const double xc = rint (width * .5) - lc;
 	const double yc = rint (height * .5) - lc;
