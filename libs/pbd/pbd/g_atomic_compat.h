@@ -30,7 +30,7 @@
  * Older versions of glib and older compilers still expect a volatile qualifier and print
  * "cast from type 'volatile long int*' to type 'long int*' casts away qualifiers [-Wcast-qual]"
  */
-#if defined __GNUC__ && __GNUC__ > 10
+#if defined HAVE_GLIB_2_68 && (defined(__cplusplus) && __cplusplus >= 201103L)
 #  define GATOMIC_QUAL
 #else
 #  define GATOMIC_QUAL volatile
