@@ -857,6 +857,7 @@ private:
 
 	void successful_graph_sort ();
 	bool _feedback_exists;
+	bool _ambiguous_latency;
 
 	enum ArdourLogLevel {
 		LogLevelNone = 0,

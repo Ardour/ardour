@@ -90,7 +90,7 @@ ARDOUR_UI::setup_tooltips ()
 	parameter_changed("click-gain");
 	set_tip (solo_alert_button, _("When active, something is soloed.\nClick to de-solo everything"));
 	set_tip (auditioning_alert_button, _("When active, auditioning is taking place.\nClick to stop the audition"));
-	set_tip (feedback_alert_button, _("When active, there is a feedback loop."));
+	set_tip (feedback_alert_button, _("When lit, there is a ports connection issue, leading to feedback loop or ambiguous alignment.\nThis is caused by connecting an output back to some input (feedback), or by multiple connections from a source to the same output via different paths (ambiguous latency, record alignment)."));
 	set_tip (primary_clock, _("<b>Primary Clock</b> right-click to set display mode. Click to edit, click+drag a digit or mouse-over+scroll wheel to modify.\nText edits: right-to-left overwrite <tt>Esc</tt>: cancel; <tt>Enter</tt>: confirm; postfix the edit with '+' or '-' to enter delta times.\n"));
 	set_tip (secondary_clock, _("<b>Secondary Clock</b> right-click to set display mode. Click to edit, click+drag a digit or mouse-over+scroll wheel to modify.\nText edits: right-to-left overwrite <tt>Esc</tt>: cancel; <tt>Enter</tt>: confirm; postfix the edit with '+' or '-' to enter delta times.\n"));
 	set_tip (editor_meter_peak_display, _("Reset All Peak Meters"));
@@ -363,6 +363,8 @@ ARDOUR_UI::setup_transport ()
 	solo_alert_button.set_layout_font (UIConfiguration::instance().get_SmallerFont());
 	auditioning_alert_button.set_layout_font (UIConfiguration::instance().get_SmallerFont());
 	feedback_alert_button.set_layout_font (UIConfiguration::instance().get_SmallerFont());
+
+	feedback_alert_button.set_sizing_text (_("Facdbeek")); //< longest of "Feedback" and "No Align"
 
 	editor_visibility_button.set_name (X_("page switch button"));
 	mixer_visibility_button.set_name (X_("page switch button"));
@@ -678,8 +680,10 @@ ARDOUR_UI::session_latency_updated (bool for_playback)
 		route_latency_value.set_text (samples_as_time_string (wrl, rate));
 
 		if (_session->engine().check_for_ambiguous_latency (true)) {
+			_ambiguous_latency = true;
 			io_latency_value.set_markup ("<span background=\"red\" foreground=\"white\">ambiguous</span>");
 		} else {
+			_ambiguous_latency = false;
 			io_latency_value.set_text (samples_as_time_string (wpl, rate));
 		}
 	}
@@ -809,12 +813,22 @@ ARDOUR_UI::feedback_blink (bool onoff)
 {
 	if (_feedback_exists) {
 		feedback_alert_button.set_active (true);
+		feedback_alert_button.set_text (_("Feedback"));
+		if (onoff) {
+			feedback_alert_button.reset_fixed_colors ();
+		} else {
+			feedback_alert_button.set_active_color (UIConfigurationBase::instance().color ("feedback alert: alt active", NULL));
+		}
+	} else if (_ambiguous_latency && !UIConfiguration::instance().get_show_toolbar_latency ()) {
+		feedback_alert_button.set_text (_("No Align"));
+		feedback_alert_button.set_active (true);
 		if (onoff) {
 			feedback_alert_button.reset_fixed_colors ();
 		} else {
 			feedback_alert_button.set_active_color (UIConfigurationBase::instance().color ("feedback alert: alt active", NULL));
 		}
 	} else {
+		feedback_alert_button.set_text ("Feedback");
 		feedback_alert_button.reset_fixed_colors ();
 		feedback_alert_button.set_active (false);
 	}
