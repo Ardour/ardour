@@ -783,19 +783,7 @@ Track::set_align_choice_from_io ()
 				break;
 			}
 		}
-
-		/* Special case bouncing the Metronome.
-		 * Click-out is aligned to output and hence
-		 * equivalent to a physical round-trip alike
-		 * ExistingMaterial.
-		 */
-		if (!have_physical && _session.click_io ()) {
-			if (_session.click_io ()->connected_to (_input)) {
-				have_physical = true;
-			}
-		}
 	}
-
 
 #ifdef MIXBUS
 	// compensate for latency when bouncing from master or mixbus.
