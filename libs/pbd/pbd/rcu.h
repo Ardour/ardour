@@ -193,7 +193,7 @@ public:
 		 * XXX but how could it? we hold the freakin' lock!
 		 */
 
-		bool ret = g_atomic_pointer_compare_and_exchange (&RCUManager<T>::x.gptr,
+		bool ret = g_atomic_pointer_compare_and_exchange ((gpointer*)&RCUManager<T>::x.gptr,
 		                                                  (gpointer)_current_write_old,
 		                                                  (gpointer)new_spp);
 
