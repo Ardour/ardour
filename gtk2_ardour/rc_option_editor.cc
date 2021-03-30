@@ -2440,19 +2440,6 @@ RCOptionEditor::RCOptionEditor ()
 				));
 
 	if (!Profile->get_mixbus()) {
-		HSliderOption *gui_hs;
-		gui_hs = new HSliderOption(
-				"timeline-item-gradient-depth",
-				_("Waveforms color gradient depth"),
-				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_waveform_gradient_depth),
-				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_waveform_gradient_depth),
-				0, 1.0, 0.05
-				);
-		gui_hs->scale().set_update_policy (Gtk::UPDATE_DELAYED);
-		add_option (_("Appearance"), gui_hs);
-	}
-
-	if (!Profile->get_mixbus()) {
 		vector<string> icon_sets = ::get_icon_sets ();
 		if (icon_sets.size() > 1) {
 			ComboOption<std::string>* io = new ComboOption<std::string> (
@@ -2554,6 +2541,30 @@ RCOptionEditor::RCOptionEditor ()
 			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_region_name)
 			));
 
+
+	HSliderOption *gui_hs;
+
+	if (!Profile->get_mixbus()) {
+		gui_hs = new HSliderOption(
+				"waveform-gradient-depth",
+				_("Waveforms color gradient depth"),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_waveform_gradient_depth),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_waveform_gradient_depth),
+				0, 1.0, 0.05
+				);
+		gui_hs->scale().set_update_policy (Gtk::UPDATE_DELAYED);
+		add_option (_("Appearance/Editor"), gui_hs);
+	}
+
+	gui_hs = new HSliderOption(
+			"timeline-item-gradient-depth",
+			_("Timeline item gradient depth"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_timeline_item_gradient_depth),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_timeline_item_gradient_depth),
+			0, 1.0, 0.05
+			);
+	gui_hs->scale().set_update_policy (Gtk::UPDATE_DELAYED);
+	add_option (_("Appearance/Editor"), gui_hs);
 
 	ComboOption<int>* emode = new ComboOption<int> (
 			"time-axis-name-ellipsize-mode",
