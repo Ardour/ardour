@@ -25,7 +25,7 @@
 			<Tool
 				Name="VCPreBuildEventTool"
 				Description="Prepare configuration file(s)"
-				CommandLine="cd ..&#x0D;&#x0A;del gtk2_ardour\ardour.keys&#x0D;&#x0A;perl msvc32-fixup.pl&#x0D;&#x0A;perl tools/fmt-bindings --platform=&quot;windows&quot; --winkey=&quot;Win&quot; --accelmap  gtk2_ardour/ardour.keys.in &gt; gtk2_ardour/ardour.keys&#x0D;&#x0A;"
+				CommandLine="cd ..&#x0D;&#x0A;del gtk2_ardour\ardour.keys&#x0D;&#x0A;perl msvc32-fixup.pl&#x0D;&#x0A;perl tools/fmt-bindings --platform=&quot;windows&quot; --winkey=&quot;Win&quot; --accelmap 1  gtk2_ardour/ardour.keys.in &gt; gtk2_ardour/ardour.keys&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -112,7 +112,7 @@
 			<Tool
 				Name="VCPreBuildEventTool"
 				Description="Prepare configuration file(s)"
-				CommandLine="cd ..&#x0D;&#x0A;del gtk2_ardour\ardour.keys&#x0D;&#x0A;perl msvc32-fixup.pl&#x0D;&#x0A;perl tools/fmt-bindings --platform=&quot;windows&quot; --winkey=&quot;Win&quot; --accelmap  gtk2_ardour/ardour.keys.in &gt; gtk2_ardour/ardour.keys&#x0D;&#x0A;"
+				CommandLine="cd ..&#x0D;&#x0A;del gtk2_ardour\ardour.keys&#x0D;&#x0A;perl msvc32-fixup.pl&#x0D;&#x0A;perl tools/fmt-bindings --platform=&quot;windows&quot; --winkey=&quot;Win&quot; --accelmap 1  gtk2_ardour/ardour.keys.in &gt; gtk2_ardour/ardour.keys&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -196,7 +196,7 @@
 			<Tool
 				Name="VCPreBuildEventTool"
 				Description="Prepare configuration file(s)"
-				CommandLine="cd ..&#x0D;&#x0A;del gtk2_ardour\ardour.keys&#x0D;&#x0A;perl msvc32-fixup.pl&#x0D;&#x0A;perl tools/fmt-bindings --platform=&quot;windows&quot; --winkey=&quot;Win&quot; --accelmap  gtk2_ardour/ardour.keys.in &gt; gtk2_ardour/ardour.keys&#x0D;&#x0A;"
+				CommandLine="cd ..&#x0D;&#x0A;del gtk2_ardour\ardour.keys&#x0D;&#x0A;perl msvc32-fixup.pl&#x0D;&#x0A;perl tools/fmt-bindings --platform=&quot;windows&quot; --winkey=&quot;Win&quot; --accelmap 1  gtk2_ardour/ardour.keys.in &gt; gtk2_ardour/ardour.keys&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
