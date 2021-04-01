@@ -131,7 +131,14 @@ class M2Contols
 			EncoderWheel, // multi-purpose
 			MasterVolume,
 			MasterTempo,
-			Solo, Mute,
+			Scene,
+			Pattern,
+			PadMode,
+			Navigate,
+			Duplicate,
+			Select,
+			Solo,
+			Mute,
 			Panic
 		} SemanticButtonId;
 
