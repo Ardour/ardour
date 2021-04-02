@@ -72,6 +72,7 @@ libardour_sources = [
         'disk_reader.cc',
         'disk_writer.cc',
         'dsp_filter.cc',
+        'dsp_limiter.cc',
         'ebur128_analysis.cc',
         'element_import_handler.cc',
         'element_importer.cc',
