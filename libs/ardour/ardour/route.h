@@ -75,6 +75,7 @@ class Delivery;
 class DiskReader;
 class DiskWriter;
 class IOProcessor;
+class Limiter;
 class Panner;
 class PannerShell;
 class PolarityProcessor;
@@ -506,6 +507,7 @@ public:
 	boost::shared_ptr<GainControl> trim_control() const;
 	boost::shared_ptr<GainControl> volume_control() const;
 	boost::shared_ptr<PhaseControl> phase_control() const;
+	boost::shared_ptr<Limiter> main_out_limiter() const;
 
 	void set_volume_applies_to_output (bool);
 

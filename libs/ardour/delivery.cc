@@ -31,6 +31,7 @@
 #include "ardour/buffer_set.h"
 #include "ardour/debug.h"
 #include "ardour/delivery.h"
+#include "ardour/dsp_limiter.h"
 #include "ardour/io.h"
 #include "ardour/mute_master.h"
 #include "ardour/pannable.h"
@@ -227,6 +228,11 @@ Delivery::configure_io (ChanCount in, ChanCount out)
 
 	}
 
+	if (_limiter) {
+		/* pre-panner, operate on input buffers */
+		_limiter->configure_io (in, in);
+	}
+
 	if (!Processor::configure_io (in, out)) {
 		return false;
 	}
@@ -234,6 +240,16 @@ Delivery::configure_io (ChanCount in, ChanCount out)
 	reset_panner ();
 
 	return true;
+}
+
+samplecnt_t
+Delivery::signal_latency () const
+{
+	samplecnt_t l = IOProcessor::signal_latency ();
+	if (_limiter) {
+		l += _limiter->signal_latency();
+	}
+	return l;
 }
 
 void
@@ -291,8 +307,12 @@ Delivery::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample
 		Amp::apply_simple_gain (bufs, nframes, tgain);
 	}
 
-	// Speed quietning
+	/* Limiter */
+	if (_limiter) {
+		_limiter->run (bufs, start_sample, end_sample, 1.0, nframes, result_required);
+	}
 
+	/* Speed quietning */
 	if (fabs (_session.transport_speed()) > 1.5 && Config->get_quieten_at_speed ()) {
 		Amp::apply_simple_gain (bufs, nframes, speed_quietning, false);
 	}
@@ -380,6 +400,10 @@ Delivery::state ()
 		}
 	}
 
+	if (_limiter) {
+		node.add_child_nocopy (_limiter->get_state ());
+	}
+
 	return node;
 }
 
@@ -410,7 +434,32 @@ Delivery::set_state (const XMLNode& node, int version)
 		_panshell->unlinked_pannable()->set_state (*pannnode, version);
 	}
 
+	XMLNode* procnode = node.child (X_("Processor"));
+	if (_limiter && procnode) {
+		_limiter->set_state (*procnode, version);
+	}
+
 	return 0;
+}
+
+void
+Delivery::add_gain (boost::shared_ptr<GainControl> gc)
+{
+	_gain_control = gc;
+
+	if (!gc) {
+		_limiter.reset ();
+	} else if (gc && !_limiter) {
+		_limiter = boost::shared_ptr<ARDOUR::Limiter> (new Limiter (_session));
+		_limiter->LatencyChanged.connect_same_thread (_limiter_connection, boost::bind (&Delivery::limiter_latency_changed, this));
+	}
+}
+
+void
+Delivery::limiter_latency_changed ()
+{
+	assert (owner ());
+	static_cast<Route*>(owner ())->processor_latency_changed (); /* EMIT SIGNAL */
 }
 
 void

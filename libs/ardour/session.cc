@@ -968,6 +968,15 @@ Session::master_volume () const
 	return boost::shared_ptr<GainControl> ();
 }
 
+boost::shared_ptr<Limiter>
+Session::master_limiter () const
+{
+	if (_master_out) {
+		return _master_out->main_out_limiter ();
+	}
+	return boost::shared_ptr<Limiter> ();
+}
+
 void
 Session::remove_monitor_section ()
 {

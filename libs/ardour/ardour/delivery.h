@@ -25,16 +25,17 @@
 
 #include <string>
 
+#include "ardour/chan_count.h"
+#include "ardour/gain_control.h"
+#include "ardour/io_processor.h"
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
-#include "ardour/chan_count.h"
-#include "ardour/io_processor.h"
-#include "ardour/gain_control.h"
 
 namespace ARDOUR {
 
 class BufferSet;
 class IO;
+class Limiter;
 class MuteMaster;
 class PannerShell;
 class Panner;
@@ -61,6 +62,8 @@ public:
 	static bool role_requires_output_ports (Role r) { return r == Main || r == Send || r == Insert; }
 
 	bool does_routing() const { return true; }
+
+	samplecnt_t signal_latency () const;
 
 	/* Delivery to an existing output */
 
@@ -100,10 +103,9 @@ public:
 
 	boost::shared_ptr<PannerShell> panner_shell() const { return _panshell; }
 	boost::shared_ptr<Panner> panner() const;
+	boost::shared_ptr<Limiter> limiter() const { return _limiter; }
 
-	void add_gain (boost::shared_ptr<GainControl> gc) {
-		_gain_control = gc;
-	}
+	void add_gain (boost::shared_ptr<GainControl> gc);
 
 	void unpan ();
 	void reset_panner ();
@@ -128,6 +130,7 @@ private:
 
 	boost::shared_ptr<MuteMaster>  _mute_master;
 	boost::shared_ptr<GainControl> _gain_control;
+	boost::shared_ptr<Limiter>     _limiter;
 
 	static bool panners_legal;
 	static PBD::Signal0<void> PannersLegal;
@@ -135,6 +138,9 @@ private:
 	void panners_became_legal ();
 	PBD::ScopedConnection panner_legal_c;
 	void output_changed (IOChange, void*);
+
+	void limiter_latency_changed ();
+	PBD::ScopedConnection _limiter_connection;
 
 	bool _no_panner_reset;
 };

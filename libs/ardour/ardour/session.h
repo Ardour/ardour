@@ -139,6 +139,7 @@ class Graph;
 class IO;
 class IOProcessor;
 class ImportStatus;
+class Limiter;
 class MidiClockTicker;
 class MidiControlUI;
 class MidiPortManager;
@@ -967,6 +968,7 @@ public:
 	boost::shared_ptr<Route> monitor_out() const { return _monitor_out; }
 	boost::shared_ptr<Route> master_out() const { return _master_out; }
 	boost::shared_ptr<GainControl>  master_volume () const;
+	boost::shared_ptr<Limiter> master_limiter () const;
 
 	PresentationInfo::order_t master_order_key () const { return _master_out ? _master_out->presentation_info ().order () : -1; }
 	bool ensure_stripable_sort_order ();
