@@ -123,6 +123,7 @@ Analyser::process (ProcessContext<float> const & ctx)
 	for (s = 0; s < n_samples; ++s) {
 		_fft_data_in[s] = 0;
 		const samplecnt_t pbin = (_pos + s) / _spp;
+		assert (pbin >= 0 && pbin < (sizeof (_result.peaks) / sizeof (ARDOUR::PeakData::PeakDatum) / 4));
 		for (unsigned int c = 0; c < _channels; ++c) {
 			const float v = *d;
 			if (fabsf(v) > _result.peak) { _result.peak = fabsf(v); }
@@ -145,7 +146,18 @@ Analyser::process (ProcessContext<float> const & ctx)
 	}
 
 	if (_ebur_plugin) {
-		_ebur_plugin->process (_bufs, Vamp::RealTime::fromSeconds ((double) _pos / _sample_rate));
+		Vamp::Plugin::FeatureSet features = _ebur_plugin->process (_bufs, Vamp::RealTime::fromSeconds ((double) _pos / _sample_rate));
+		if (!features.empty ()) {
+			const samplecnt_t p0 = _pos / _spp;
+			const samplecnt_t p1 = (_pos + n_samples -1) / _spp;
+			for (samplecnt_t p = p0; p <= p1; ++p) {
+				assert (p >= 0 && p < (sizeof (_result.lgraph_i) / sizeof(float)));
+				_result.lgraph_i[p] = features[0][0].values[0];
+				_result.lgraph_s[p] = features[0][1].values[0];
+				_result.lgraph_m[p] = features[0][2].values[0];
+			}
+			_result.have_lufs_graph = true;
+		}
 	}
 
 	float const * const data = ctx.data ();
@@ -208,6 +220,8 @@ Analyser::result ()
 		return ARDOUR::ExportAnalysisPtr ();
 	}
 
+	_result.n_samples = _pos;
+
 	if (_pos + 1 < _n_samples) {
 		// crude re-bin (silence stripped version)
 		const size_t peaks = sizeof (_result.peaks) / sizeof (ARDOUR::PeakData::PeakDatum) / 4;
@@ -228,6 +242,15 @@ Analyser::result ()
 			for (unsigned int y = 0; y < height; ++y) {
 				_result.spectrum[b][y] = _result.spectrum[sb][y];
 			}
+		}
+
+		/* re-scale loudnes graphs */
+		const size_t lw = sizeof (_result.lgraph_i) / sizeof (float);
+		for (samplecnt_t b = lw - 1; b > 0; --b) {
+			const samplecnt_t sb = b * _pos / _n_samples;
+			_result.lgraph_i[b] = _result.lgraph_i[sb];
+			_result.lgraph_s[b] = _result.lgraph_s[sb];
+			_result.lgraph_m[b] = _result.lgraph_m[sb];
 		}
 	}
 
