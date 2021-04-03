@@ -2844,13 +2844,9 @@ Mixer_UI::setup_track_display ()
 	track_display_scroller.add (track_display);
 	track_display_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
-	VBox* v = manage (new VBox);
-	v->show ();
-	v->pack_start (track_display_scroller, true, true);
-
 	track_display_frame.set_name("BaseFrame");
 	track_display_frame.set_shadow_type (Gtk::SHADOW_IN);
-	track_display_frame.add (*v);
+	track_display_frame.add (track_display_scroller);
 
 	track_display_scroller.show();
 	track_display_frame.show();

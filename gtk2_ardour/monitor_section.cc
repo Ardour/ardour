@@ -426,6 +426,7 @@ MonitorSection::MonitorSection ()
 		scrollbar.ensure_style();
 		Gtk::Requisition requisition(scrollbar.size_request ());
 		scrollbar_height = requisition.height;
+		scrollbar_height += 3; // track_display_frame border/shadow
 	}
 
 	// output port select

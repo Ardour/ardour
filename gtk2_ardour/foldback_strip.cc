@@ -491,6 +491,7 @@ FoldbackStrip::init ()
 		scrollbar.ensure_style ();
 		Gtk::Requisition requisition (scrollbar.size_request ());
 		scrollbar_height = requisition.height;
+		scrollbar_height += 3; // track_display_frame border/shadow
 	}
 	_spacer.set_size_request (-1, scrollbar_height);
 	_global_vpacker.pack_end (_spacer, false, false);
