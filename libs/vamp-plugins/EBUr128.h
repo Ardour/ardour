@@ -1,5 +1,3 @@
-/* -*- c-basic-offset: 4 indent-tabs-mode: nil -*-  vi:set ts=8 sts=4 sw=4: */
-
 /*
     Vamp
 
@@ -32,42 +30,50 @@
 #define _EBUR128_PLUGIN_H_
 
 #include <vamp-sdk/Plugin.h>
+
 #include "ebu_r128_proc.h"
 
 class VampEBUr128 : public Vamp::Plugin
 {
 public:
-    VampEBUr128(float inputSampleRate);
-    virtual ~VampEBUr128();
+	VampEBUr128 (float inputSampleRate);
+	virtual ~VampEBUr128 ();
 
-    size_t getMinChannelCount() const { return 1; }
-    size_t getMaxChannelCount() const { return 2; }
-    bool initialise(size_t channels, size_t stepSize, size_t blockSize);
-    void reset();
+	size_t getMinChannelCount () const
+	{
+		return 1;
+	}
+	size_t getMaxChannelCount () const
+	{
+		return 2;
+	}
+	bool initialise (size_t channels, size_t stepSize, size_t blockSize);
+	void reset ();
 
-    InputDomain getInputDomain() const { return TimeDomain; }
+	InputDomain getInputDomain () const
+	{
+		return TimeDomain;
+	}
 
-    std::string getIdentifier() const;
-    std::string getName() const;
-    std::string getDescription() const;
-    std::string getMaker() const;
-    int getPluginVersion() const;
-    std::string getCopyright() const;
+	std::string getIdentifier () const;
+	std::string getName () const;
+	std::string getDescription () const;
+	std::string getMaker () const;
+	int         getPluginVersion () const;
+	std::string getCopyright () const;
 
-    OutputList getOutputDescriptors() const;
+	OutputList getOutputDescriptors () const;
 
-    FeatureSet process(const float *const *inputBuffers,
-                       Vamp::RealTime timestamp);
+	FeatureSet process (const float* const* inputBuffers, Vamp::RealTime timestamp);
 
-    FeatureSet getRemainingFeatures();
+	FeatureSet getRemainingFeatures ();
 
 protected:
-    size_t m_stepSize;
-    size_t m_channels;
+	size_t m_stepSize;
+	size_t m_channels;
 
 private:
-    Fons::Ebu_r128_proc ebu;
+	FonsEBU::Ebu_r128_proc ebu;
 };
-
 
 #endif
