@@ -134,7 +134,11 @@ Session::click (samplepos_t cycle_start, samplecnt_t nframes)
 
 		for (TempoMapPoints::iterator i = _click_points.begin(); i != _click_points.end(); ++i) {
 
-			assert (superclock_to_samples ((*i).sclock(), sample_rate()) >= start && superclock_to_samples ((*i).sclock(), sample_rate()) < end);
+			if (superclock_to_samples ((*i).sclock(), sample_rate()) < start) {
+				continue;
+			}
+
+			assert (superclock_to_samples ((*i).sclock(), sample_rate()) < end);
 
 			if (i->bbt().is_bar() && (click_emphasis_data && Config->get_use_click_emphasis())) {
 				add_click ((*i).sample (sample_rate()), true);
