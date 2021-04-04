@@ -8,7 +8,7 @@ import subprocess
 import sys
 
 # default state file version for this build
-CURRENT_SESSION_FILE_VERSION = 6000
+CURRENT_SESSION_FILE_VERSION = 7000
 
 I18N_PACKAGE = 'ardour'
 
