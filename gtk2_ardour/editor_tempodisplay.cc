@@ -91,6 +91,66 @@ struct CurveComparator {
 };
 
 void
+Editor::reassociate_metric_markers (TempoMap::SharedPtr const & tmap)
+{
+	TempoMap::Metrics metrics;
+	tmap->get_metrics (metrics);
+
+	TempoMarker* tm;
+	MeterMarker* mm;
+	BBTMarker* bm;
+
+	Temporal::TempoPoint* tp;
+	Temporal::MeterPoint* mp;
+	Temporal::MusicTimePoint* mtp;
+
+	for (Marks::iterator x = metric_marks.begin(); x != metric_marks.end(); ++x) {
+
+		if ((tm = dynamic_cast<TempoMarker*> (*x)) != 0) {
+
+			for (TempoMap::Metrics::iterator m = metrics.begin(); m != metrics.end(); ++m) {
+				if ((mtp = dynamic_cast<Temporal::MusicTimePoint*>(*m)) != 0) {
+					/* do nothing .. but we had to catch
+					   this first because MusicTimePoint
+					   IS-A TempoPoint
+					*/
+				} else if ((tp = dynamic_cast<Temporal::TempoPoint*>(*m)) != 0) {
+					if (tm->tempo() == *tp) {
+						tm->reset_tempo (*tp);
+						break;
+					}
+				}
+			}
+		} else if ((mm = dynamic_cast<MeterMarker*> (*x)) != 0) {
+			for (TempoMap::Metrics::iterator m = metrics.begin(); m != metrics.end(); ++m) {
+				if ((mtp = dynamic_cast<Temporal::MusicTimePoint*>(*m)) != 0) {
+					/* do nothing .. but we had to catch
+					   this first because MusicTimePoint
+					   IS-A TempoPoint
+					*/
+
+				} else if ((mp = dynamic_cast<Temporal::MeterPoint*>(*m)) != 0) {
+					if (mm->meter() == *mp) {
+						mm->reset_meter (*mp);
+						break;
+					}
+				}
+			}
+		} else if ((bm = dynamic_cast<BBTMarker*> (*x)) != 0) {
+
+			for (TempoMap::Metrics::iterator m = metrics.begin(); m != metrics.end(); ++m) {
+				if ((mtp = dynamic_cast<Temporal::MusicTimePoint*>(*m)) != 0) {
+					if (bm->point() == *mtp) {
+						bm->reset_point (*mtp);
+						break;
+					}
+				}
+			}
+		}
+	}
+}
+
+void
 Editor::draw_metric_marks (TempoMap::Metrics const & metrics)
 {
 	if (!_session) {
@@ -195,18 +255,12 @@ Editor::draw_metric_marks (TempoMap::Metrics const & metrics)
 void
 Editor::tempo_map_changed ()
 {
-	PropertyChange pc;
+	TempoMap::Metrics metrics;
+	TempoMap::use()->get_metrics (metrics);
 
-	if (!_session) {
-		return;
-	}
-
-	TempoMap::use()->apply_with_metrics (*this, &Editor::draw_metric_marks); // redraw metric markers
-
+	draw_metric_marks (metrics);
 	compute_bbt_ruler_scale (_leftmost_sample, _leftmost_sample + current_page_samples());
-
 	update_tempo_based_rulers ();
-
 	maybe_draw_grid_lines ();
 }
 
@@ -451,6 +505,8 @@ Editor::edit_meter_section (Temporal::MeterPoint& section)
 
 	TempoMap::SharedPtr tmap (TempoMap::write_copy());
 
+	reassociate_metric_markers (tmap);
+
 	begin_reversible_command (_("replace meter mark"));
 	XMLNode &before = tmap->get_state();
 
@@ -483,13 +539,13 @@ Editor::edit_tempo_section (TempoPoint& section)
 	const Tempo tempo (bpm, end_bpm, nt);
 
 	TempoMap::SharedPtr tmap (TempoMap::write_copy());
+	reassociate_metric_markers (tmap);
 
 	Temporal::BBT_Time when;
 	tempo_dialog.get_bbt_time (when);
 
 	begin_reversible_command (_("replace tempo mark"));
 	XMLNode &before = tmap->get_state();
-
 
 	tmap->set_tempo (tempo, when);
 

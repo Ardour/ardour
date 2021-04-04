@@ -1813,6 +1813,7 @@ private:
 
 	void compute_current_bbt_points (Temporal::TempoMapPoints& grid, samplepos_t left, samplepos_t right);
 
+	void reassociate_metric_markers (Temporal::TempoMap::SharedPtr const &);
 	void tempo_map_changed ();
 
 	void redisplay_grid (bool immediate_redraw);

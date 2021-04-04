@@ -164,11 +164,11 @@ class TempoMarker : public ArdourMarker
 
 	void reset_tempo (Temporal::TempoPoint & t);
 
-	Temporal::TempoPoint& tempo() const { return _tempo; }
+	Temporal::TempoPoint& tempo() const { return *_tempo; }
 
 	void update_height_mark (const double ratio);
   private:
-	Temporal::TempoPoint& _tempo;
+	Temporal::TempoPoint* _tempo;
 };
 
 class MeterMarker : public ArdourMarker
@@ -179,10 +179,10 @@ class MeterMarker : public ArdourMarker
 
 	void reset_meter (Temporal::MeterPoint & m);
 
-	Temporal::MeterPoint& meter() const { return _meter; }
+	Temporal::MeterPoint& meter() const { return *_meter; }
 
   private:
-	Temporal::MeterPoint& _meter;
+	Temporal::MeterPoint* _meter;
 };
 
 class BBTMarker : public ArdourMarker
@@ -193,10 +193,10 @@ class BBTMarker : public ArdourMarker
 
 	void reset_point (Temporal::MusicTimePoint &);
 
-	Temporal::MusicTimePoint& point() const { return _point; }
+	Temporal::MusicTimePoint& point() const { return *_point; }
 
   private:
-	Temporal::MusicTimePoint& _point;
+	Temporal::MusicTimePoint* _point;
 };
 
 #endif /* __gtk_ardour_marker_h__ */
