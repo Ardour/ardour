@@ -145,6 +145,7 @@ class LIBTEMPORAL_API Rampable {
   private:
 	friend class TempoMap;
 	virtual void set_ramped (bool yn) = 0;
+	virtual void set_end (uint64_t, superclock_t) = 0;
 };
 
 /** Tempo, the speed at which musical time progresses (BPM).
@@ -296,6 +297,7 @@ class LIBTEMPORAL_API Tempo : public Rampable {
 
   private:
 	void set_ramped (bool yn);
+	void set_end (uint64_t snps, superclock_t espn);
 };
 
 /** Meter, or time signature (subdivisions per bar, and which note type is a single subdivision). */
@@ -408,7 +410,7 @@ class LIBTEMPORAL_API TempoPoint : public Tempo, public virtual Point
 	}
 
 	double omega() const { return _omega; }
-	void compute_omega (samplecnt_t sr, superclock_t end_superclocks_per_note_type, Beats const & duration);
+	void compute_omega (TempoPoint const & next);
 	bool actually_ramped () const { return Tempo::ramped() && (_omega != 0); }
 
 	XMLNode& get_state () const;
@@ -454,7 +456,7 @@ class LIBTEMPORAL_API TempoMetric {
 	TempoPoint const & tempo() const { return *_tempo; }
 	MeterPoint const & meter() const { return *_meter; }
 
-  	TempoPoint & get_editable_tempo() const { return *const_cast<TempoPoint*> (_tempo); }
+	TempoPoint & get_editable_tempo() const { return *const_cast<TempoPoint*> (_tempo); }
 	MeterPoint & get_editable_meter() const { return *const_cast<MeterPoint*> (_meter); }
 
 	/* even more convenient wrappers for individual aspects of a
@@ -529,6 +531,10 @@ class LIBTEMPORAL_API MusicTimePoint : public virtual TempoPoint, public virtual
 	MusicTimePoint (TempoMap const & map, XMLNode const &);
 
 	boost::intrusive::list_member_hook<> _bartime_hook;
+
+	bool operator== (MusicTimePoint const & other) const {
+		return TempoPoint::operator== (other) && MeterPoint::operator== (other);
+	}
 
 	XMLNode & get_state () const;
 };
@@ -708,14 +714,16 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 
 	TimeDomain time_domain() const { return _time_domain; }
 
+	/* rather than giving direct access to the intrusive list members,
+	 * offer one that uses an STL container instead.
+	 */
+
 	typedef std::list<Point*> Metrics;
 
-	template<class T> void apply_with_metrics (T& obj, void (T::*method)(Metrics const &)) {
-		Metrics metrics;
+	void get_metrics (Metrics& m) {
 		for (Points::iterator t = _points.begin(); t != _points.end(); ++t) {
-			metrics.push_back (&*t);
+			m.push_back (&*t);
 		}
-		(obj.*method)(metrics);
 	}
 
 	bool can_remove (TempoPoint const &) const;
@@ -854,11 +862,30 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 	BBT_Time bbt_at (Beats const &) const;
 	BBT_Time bbt_at (superclock_t sc) const;
 
-	template<typename T, typename T1> Points::const_iterator _get_tempo_and_meter (TempoPoint const *& tp, MeterPoint const *& mp, T (Point::*method)() const, T arg, bool can_match) const;
+	/* fetch const tempo/meter pairs */
 
-	Points::const_iterator  get_tempo_and_meter (TempoPoint const *& t, MeterPoint const *& m, BBT_Time const & bbt, bool can_match = true) const { return _get_tempo_and_meter<BBT_Time const &, BBT_Time> (t, m, &Point::bbt, bbt, can_match); }
-	Points::const_iterator  get_tempo_and_meter (TempoPoint const *& t, MeterPoint const *& m, superclock_t sc, bool can_match = true) const { return _get_tempo_and_meter<superclock_t,superclock_t> (t, m, &Point::sclock, sc, can_match); }
-	Points::const_iterator  get_tempo_and_meter (TempoPoint const *& t, MeterPoint const *& m, Beats const & b, bool can_match = true) const { return _get_tempo_and_meter<Beats const &, Beats> (t, m, &Point::beats, b, can_match); }
+	template<typename T, typename T1> Points::const_iterator _get_tempo_and_meter (TempoPoint const *& tp, MeterPoint const *& mp, T (Point::*method)() const, T arg, bool can_match, bool ret_iterator_after_not_at) const;
+
+	Points::const_iterator  get_tempo_and_meter (TempoPoint const *& t, MeterPoint const *& m, BBT_Time const & bbt, bool can_match, bool ret_iterator_after_not_at) const {
+		return _get_tempo_and_meter<BBT_Time const &, BBT_Time> (t, m, &Point::bbt, bbt, can_match, ret_iterator_after_not_at);
+	}
+	Points::const_iterator  get_tempo_and_meter (TempoPoint const *& t, MeterPoint const *& m, superclock_t sc, bool can_match, bool ret_iterator_after_not_at) const {
+		return _get_tempo_and_meter<superclock_t,superclock_t> (t, m, &Point::sclock, sc, can_match, ret_iterator_after_not_at);
+	}
+	Points::const_iterator  get_tempo_and_meter (TempoPoint const *& t, MeterPoint const *& m, Beats const & b, bool can_match, bool ret_iterator_after_not_at) const {
+		return _get_tempo_and_meter<Beats const &, Beats> (t, m, &Point::beats, b, can_match, ret_iterator_after_not_at);
+	}
+
+	/* fetch non-const tempo/meter pairs. As of March 2020, we only need
+	 * the superclock variant, but leave the templated design in place,
+	 * just in case.
+	 */
+
+	template<typename T, typename T1> Points::iterator _get_tempo_and_meter (TempoPoint *& tp, MeterPoint *& mp, T (Point::*method)() const, T arg, bool can_match, bool ret_iterator_after_not_at);
+
+	Points::iterator  get_tempo_and_meter (TempoPoint *& t, MeterPoint *& m, superclock_t sc, bool can_match, bool ret_iterator_after_not_at) {
+		return _get_tempo_and_meter<superclock_t,superclock_t> (t, m, &Point::sclock, sc, can_match, ret_iterator_after_not_at);
+	}
 
 	/* parsing legacy tempo maps */
 
