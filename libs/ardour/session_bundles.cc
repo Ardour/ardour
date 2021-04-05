@@ -53,9 +53,8 @@ Session::add_bundle (boost::shared_ptr<Bundle> bundle, bool emit_signal)
 
 	if (emit_signal) {
 		BundleAddedOrRemoved (); /* EMIT SIGNAL */
+		set_dirty();
 	}
-
-	set_dirty();
 }
 
 void
