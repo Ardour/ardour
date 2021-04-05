@@ -39,6 +39,7 @@
 #include "ardour/midi_ring_buffer.h"
 #include "ardour/midi_state_tracker.h"
 #include "ardour/parameter_descriptor.h"
+#include "ardour/readonly_control.h"
 #include "ardour/types.h"
 #include "ardour/variant.h"
 
@@ -70,7 +71,7 @@ typedef std::set<uint32_t>            PluginOutputConfiguration;
  *
  * Plugins are not used directly in Ardour but always wrapped by a PluginInsert.
  */
-class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public HasLatency
+class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public HasLatency, public HasReadableCtrl
 {
 public:
 	Plugin (ARDOUR::AudioEngine&, ARDOUR::Session&);
@@ -89,7 +90,6 @@ public:
 	virtual const char* maker () const                       = 0;
 	virtual uint32_t    parameter_count () const             = 0;
 	virtual float       default_value (uint32_t port)        = 0;
-	virtual float       get_parameter (uint32_t which) const = 0;
 
 	virtual std::string get_docs () const { return ""; }
 	virtual std::string get_parameter_docs (uint32_t /*which*/) const { return ""; }
@@ -107,7 +107,6 @@ public:
 	}
 
 	virtual std::set<Evoral::Parameter> automatable () const                   = 0;
-	virtual std::string                 describe_parameter (Evoral::Parameter) = 0;
 	virtual std::string                 state_node_name () const               = 0;
 
 	virtual bool print_parameter (uint32_t, std::string&) const { return false; }

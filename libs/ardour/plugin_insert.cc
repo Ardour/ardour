@@ -494,7 +494,7 @@ PluginInsert::create_automatable_parameters ()
 		plugin->get_parameter_descriptor(i, desc);
 
 		if (!plugin->parameter_is_input (i)) {
-			_control_outputs[i] = boost::shared_ptr<ReadOnlyControl> (new ReadOnlyControl (plugin, desc, i));
+			_control_outputs[i] = boost::shared_ptr<ReadOnlyControl> (new ReadOnlyControl (plugin.get(), desc, i));
 			continue;
 		}
 		Evoral::Parameter param (PluginAutomation, 0, i);

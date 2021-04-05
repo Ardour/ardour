@@ -20,25 +20,33 @@
 #define __ardour_readonly_control_h__
 
 #include <boost/weak_ptr.hpp>
+
 #include "ardour/parameter_descriptor.h"
+#include "evoral/Parameter.h"
 
 namespace ARDOUR {
 
-class Plugin;
+class LIBARDOUR_API HasReadableCtrl
+{
+public:
+	virtual ~HasReadableCtrl() {}
+	virtual float       get_parameter (uint32_t which) const = 0;
+	virtual std::string describe_parameter (Evoral::Parameter) = 0;
+};
 
 class LIBARDOUR_API ReadOnlyControl : public PBD::Destructible
 {
 public:
-	ReadOnlyControl (boost::shared_ptr<Plugin>, const ParameterDescriptor&, uint32_t pnum);
+	ReadOnlyControl (HasReadableCtrl*, const ParameterDescriptor&, uint32_t pnum);
 
 	double get_parameter () const;
 	std::string describe_parameter ();
 	const ParameterDescriptor& desc() const { return _desc; }
 
 private:
-	boost::weak_ptr<Plugin> _plugin;
+	HasReadableCtrl*          _ctrl;
 	const ParameterDescriptor _desc;
-	uint32_t _parameter_num;
+	uint32_t                  _parameter_num;
 };
 
 } // namespace ARDOUR
