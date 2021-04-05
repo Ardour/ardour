@@ -286,13 +286,13 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 
 			if (channels > 0 && file_length > 0 && sample_rate > 0) {
 				layout->set_font_description (UIConfiguration::instance ().get_SmallMonospaceFont ());
-				layout->set_text (_("00:00:00.000"));
+				layout->set_text (X_("00:00:00.0"));
 				layout->get_pixel_size (w, h);
 				int height = h * 1.75;
 				ann_h = 4 + height /* Time Axis */;
 
 				layout->set_font_description (UIConfiguration::instance ().get_SmallFont ());
-				layout->set_text (_("0|A8"));
+				layout->set_text (X_("0|A8"));
 				layout->get_pixel_size (w, h);
 				linesp = h * 1.5;
 				ann_h += 4 + 3 * linesp; /* File Info */;
@@ -674,6 +674,7 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 			layout->set_text (_("00:00:00.000"));
 			layout->get_pixel_size (w, h);
 			int height = h * 1.75;
+			int n_labels = width / (w * 1.75);
 			Cairo::RefPtr<Cairo::ImageSurface> ytme = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, m_l + width, height);
 			Cairo::RefPtr<Cairo::Context> cr = Cairo::Context::create (ytme);
 			cr->set_operator (Cairo::OPERATOR_SOURCE);
@@ -685,16 +686,16 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 			cr->set_operator (Cairo::OPERATOR_OVER);
 
 			cr->set_line_width (1.0);
-			for (int i = 0; i <= 4; ++i) {
-				const float fract = (float) i / 4.0;
-				// " XX:XX:XX.XXX"  [space/minus] 12 chars = 13.
-				const float xalign = (i == 4) ? 1.0 : (i == 0) ? 1.0 / 13.0 : 7.0 / 13.0;
+
+			for (int i = 0; i <= n_labels; ++i) {
+				const float fract = (float) i / n_labels;
+				const float xalign = (i == n_labels) ? 1.0 : (i == 0) ? 0 : .5;
 
 				char buf[16];
 				AudioClock::print_minsec (start_off + file_length * fract,
-						buf, sizeof (buf), sample_rate);
+						buf, sizeof (buf), sample_rate, 1);
 
-				layout->set_text (buf);
+				layout->set_text (&buf[1]);
 				layout->get_pixel_size (w, h);
 				cr->move_to (rint (m_l + width * fract - w * xalign), rint (.5 * (height - h)));
 				cr->set_source_rgba (.9, .9, .9, 1.0);
