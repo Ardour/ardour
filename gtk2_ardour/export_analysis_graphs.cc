@@ -499,3 +499,399 @@ ArdourGraphs::time_axis (Glib::RefPtr<Pango::Context> pctx, int width, int m_l, 
 	ytme->flush ();
 	return ytme;
 }
+
+Cairo::RefPtr<Cairo::ImageSurface>
+ArdourGraphs::plot_loudness (Glib::RefPtr<Pango::Context> pctx, ExportAnalysisPtr p, int height, int margin_left, samplecnt_t sample_rate)
+{
+	int w, h, anw;
+	Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (pctx);
+	layout->set_font_description (UIConfiguration::instance ().get_SmallMonospaceFont ());
+	layout->set_text ("-888");
+	layout->get_pixel_size (anw, h);
+	layout->set_text ("00:00:00.0");
+	layout->get_pixel_size (w, h);
+
+	const size_t width    = sizeof (p->lgraph_i) / sizeof (float); // 800
+	const int    n_labels = width / (w * 1.75);
+
+	if (height < 0) {
+		height = width / 3;
+	}
+
+	int m_top    = h;
+	int m_right  = h;
+	int m_bottom = h * 1.75;
+
+	layout->set_text ("-89");
+	layout->get_pixel_size (w, h);
+	int m_left = w * 1.75;
+
+	bool render_for_export = false;
+	if (margin_left > 0) {
+		m_left = margin_left - 1;
+		m_right = 0;
+		m_top = 0;
+		m_bottom = 0;
+		render_for_export = true;
+	} else {
+		margin_left = m_left;
+	}
+
+	float x0 = m_left + .5;
+	float y0 = m_top + .5;
+
+	Cairo::RefPtr<Cairo::ImageSurface> ls = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, width + margin_left + m_right, height + m_top + m_bottom);
+
+	Cairo::RefPtr<Cairo::Context> cr = Cairo::Context::create (ls);
+
+	/* background */
+	cr->set_source_rgb (0, 0, 0);
+	cr->paint ();
+
+	if (render_for_export) {
+		cr->set_operator (Cairo::OPERATOR_SOURCE);
+		cr->rectangle (0, 0, margin_left - 1, height + m_top);
+		cr->set_source_rgba (0, 0, 0, 0);
+		cr->fill ();
+		cr->set_operator (Cairo::OPERATOR_OVER);
+	} else {
+		/* border (left, bottom) */
+		cr->set_source_rgba (.7, .7, .7, 1.0);
+		cr->set_line_width (1.0);
+
+		cr->move_to (x0, y0 + height);
+		cr->line_to (x0 + width, y0 + height);
+		cr->stroke ();
+
+		cr->move_to (x0, y0);
+		cr->line_to (x0, y0 + height);
+		cr->stroke ();
+	}
+
+	/* determine y-axis range */
+	bool  have_data = false;
+	float v_max     = -10;
+	float v_min     = -40;
+
+	/* determine y-axis range */
+	for (size_t x = 0; x < width; ++x) {
+		if (p->lgraph_i[x] > -110) {
+			v_max     = std::max (v_max, p->lgraph_i[x]);
+			v_min     = std::min (v_min, p->lgraph_i[x]);
+			have_data = true;
+		}
+		if (p->lgraph_s[x] > -110) {
+			v_max     = std::max (v_max, p->lgraph_s[x]);
+			v_min     = std::min (v_min, p->lgraph_s[x]);
+			have_data = true;
+		}
+		if (p->lgraph_m[x] > -110) {
+			v_max     = std::max (v_max, p->lgraph_m[x]);
+			v_min     = std::min (v_min, p->lgraph_m[x]);
+			have_data = true;
+		}
+	}
+
+	if (render_for_export) {
+		v_max = ceilf ((v_max - 5.f) / 10.f) * 10.f + 5.f;
+		v_min = floorf ((v_min + 5.f) / 10.f) * 10.f - 5.f;
+	} else {
+		v_max = ceilf (v_max / 10.f) * 10.f;
+		v_min = floorf ((v_min + 5.f) / 10.f) * 10.f - 5.f;
+	}
+
+	v_min = std::max (-95.f, v_min);
+
+	std::vector<double> dashes;
+	dashes.push_back (3.0);
+	dashes.push_back (5.0);
+	cr->set_line_cap (Cairo::LINE_CAP_ROUND);
+
+	/* time axis labels */
+	cr->set_line_width (1.0);
+
+	for (int i = 0; i <= n_labels; ++i) {
+		const float fract  = (float)i / n_labels;
+		const float xalign = (i == n_labels) ? 1 : (i == 0) ? 0 : 0.5;
+
+		if (!render_for_export) {
+			char buf[16];
+			AudioClock::print_minsec (p->n_samples * fract, buf, sizeof (buf), sample_rate, 1);
+
+			layout->set_text (&buf[1]);
+			layout->get_pixel_size (w, h);
+			cr->move_to (rint (m_left + width * fract - w * xalign), height + m_top + m_bottom - h - 1);
+			cr->set_source_rgba (.9, .9, .9, 1.0);
+			layout->show_in_cairo_context (cr);
+
+			cr->set_source_rgba (.7, .7, .7, 1.0);
+			cr->move_to (rint (m_left + width * fract) + .5, m_top + height + .5);
+			cr->line_to (rint (m_left + width * fract) + .5, floor (height + m_top * 1.5) + .5);
+			cr->stroke ();
+		} else {
+			cr->set_source_rgba (.7, .7, .7, 1.0);
+		}
+
+		if (i == 0 && !render_for_export) {
+			continue;
+		}
+
+		cr->move_to (rint (m_left + width * fract) + .5, m_top + .5);
+		cr->line_to (rint (m_left + width * fract) + .5, m_top + height + .5);
+		cr->set_source_rgba (.5, .5, .5, 1.0);
+		cr->set_dash (dashes, 2.0);
+		cr->stroke ();
+		cr->unset_dash ();
+	}
+
+#define YPOS(val) (height * std::min (1.f, std::max<float> (0.f, (v_max - (val)) / (v_max - v_min))))
+
+	layout->set_font_description (UIConfiguration::instance ().get_SmallerFont ());
+	layout->set_text (_("LUFS"));
+	layout->get_pixel_size (w, h);
+	if (render_for_export) {
+		cr->move_to (rint (margin_left - h - anw - 10), rint ((height + w) * .5));
+	} else {
+		cr->move_to (m_left - h - 5, m_top + height + rint ((m_bottom + w) * .5) - 3);
+	}
+
+	cr->save ();
+	cr->set_source_rgba (.9, .9, .9, 1.0);
+	cr->rotate (M_PI / -2.f);
+	layout->show_in_cairo_context (cr);
+	cr->restore ();
+
+	layout->set_font_description (UIConfiguration::instance ().get_SmallMonospaceFont ());
+	for (float v = v_min + 5; v <= v_max; v += 10.f) {
+		char buf[16];
+		snprintf (buf, sizeof (buf), "%.0f", v);
+
+		float y = YPOS (v);
+
+		cr->save ();
+		layout->set_text (buf);
+		layout->get_pixel_size (w, h);
+		cr->move_to (m_left - h - 5, m_top + rint (y + w * .5));
+		cr->set_source_rgba (.9, .9, .9, 1.0);
+		cr->rotate (M_PI / -2.f);
+		layout->show_in_cairo_context (cr);
+		cr->restore ();
+
+		y = y0 + rintf (y);
+
+		cr->set_source_rgba (.7, .7, .7, 1.0);
+		cr->move_to (m_left - 3.5, y);
+		cr->line_to (m_left + 0.5, y);
+		cr->stroke ();
+
+		cr->set_source_rgba (.5, .5, .5, 1.0);
+		cr->move_to (m_left, y);
+		cr->line_to (m_left + width, y);
+		cr->set_dash (dashes, 2.0);
+		cr->stroke ();
+		cr->unset_dash ();
+	}
+
+	if (!have_data) {
+		layout->set_font_description (UIConfiguration::instance ().get_HugerItalicFont ());
+		layout->set_text ("Silence");
+		layout->get_pixel_size (w, h);
+		cr->set_source_rgba (.7, .7, .7, 0.7);
+		cr->move_to (m_left + rint ((width - w) * .5), m_top + rint ((height - h) * .5));
+		layout->show_in_cairo_context (cr);
+		ls->flush ();
+		return ls;
+	}
+
+	cr->rectangle (m_left, m_top, width, height);
+	cr->clip ();
+
+	/* plot data */
+	bool  first = true;
+	int   skip  = 0;
+	float yp;
+
+	/* values */
+	cr->set_line_width (3);
+	dashes.clear ();
+	dashes.push_back (6.0);
+	dashes.push_back (6.0);
+
+	if (p->max_loudness_momentary >= v_min) {
+		cr->set_dash (dashes, 2.0);
+		cr->set_source_rgba (.1, .4, 1, 0.4);
+		float y = y0 + YPOS (p->max_loudness_momentary);
+		cr->move_to (x0, y);
+		cr->line_to (x0 + width, y);
+		cr->stroke ();
+	}
+
+	if (p->max_loudness_short >= v_min) {
+		cr->set_dash (dashes, 8.0);
+		cr->set_source_rgba (1, .2, .1, 0.25);
+		float y = y0 + YPOS (p->max_loudness_short);
+		cr->move_to (x0, y);
+		cr->line_to (x0 + width, y);
+		cr->stroke ();
+	}
+
+	cr->set_line_width (6);
+	cr->unset_dash ();
+
+	if (p->integrated_loudness >= v_min) {
+		cr->set_source_rgba (.3, 1, .3, 0.3);
+		float y = y0 + YPOS (p->integrated_loudness);
+		cr->move_to (x0, y);
+		cr->line_to (x0 + width, y);
+		cr->stroke ();
+	}
+
+	/* integrated */
+	cr->set_source_rgba (.1, 1, .1, 1.0);
+	cr->set_line_width (1.5);
+
+	for (size_t x = 0; x < width; ++x) {
+		if (p->lgraph_i[x] < v_min && first) {
+			continue;
+		}
+		float y = y0 + YPOS (p->lgraph_i[x]);
+		if (first) {
+			cr->move_to (x0 + x, y);
+			yp    = y;
+			first = false;
+		} else if ((x == width - 1) || fabsf (yp - y) > 0.5) {
+			if (skip > 9 && fabsf (yp - y) > 9) {
+				cr->line_to (x0 + x - 1, yp);
+			}
+			yp = y;
+			cr->line_to (x0 + x, y);
+			skip = 0;
+		} else {
+			++skip;
+		}
+	}
+	cr->stroke ();
+
+	/* short */
+	cr->set_source_rgba (1, .2, .1, 1.0);
+	cr->set_line_width (1.0);
+	first = true;
+	skip  = 0;
+
+	for (size_t x = 0; x < width; ++x) {
+		if (p->lgraph_s[x] <= v_min && first) {
+			continue;
+		}
+		float y = y0 + YPOS (p->lgraph_s[x]);
+		if (first) {
+			yp = y;
+			cr->move_to (x0 + x, y);
+			first = false;
+		} else if ((x == width - 1) || fabsf (yp - y) > 0.5) {
+			if (skip > 5 && fabsf (yp - y) > 5) {
+				cr->line_to (x0 + x - 1, yp);
+			}
+			yp = y;
+			cr->line_to (x0 + x, y);
+			skip = 0;
+		} else {
+			++skip;
+		}
+	}
+	cr->stroke ();
+
+	/* momentary */
+	cr->set_source_rgba (.1, .4, 1, 1.0);
+	first = true;
+	skip  = 0;
+
+	for (size_t x = 0; x < width; ++x) {
+		if (p->lgraph_m[x] <= v_min && first) {
+			continue;
+		}
+		float y = y0 + YPOS (p->lgraph_m[x]);
+		if (first) {
+			cr->move_to (x0 + x, y);
+			yp    = y;
+			first = false;
+		} else if ((x == width - 1) || fabsf (yp - y) > 0.5) {
+			if (skip > 5 && fabsf (yp - y) > 5) {
+				cr->line_to (x0 + x - 1, yp);
+			}
+			yp = y;
+			cr->line_to (x0 + x, y);
+			skip = 0;
+		} else {
+			++skip;
+		}
+	}
+	cr->stroke ();
+
+	/* legend */
+
+	float xl = m_left + 10;
+	float yl = height + m_top - 8;
+
+	int lw = 0;
+	int lh = 0;
+
+	layout->set_text ("Integrated");
+	layout->get_pixel_size (w, h);
+	lw = w;
+	lh = h;
+
+	layout->set_text ("Short");
+	layout->get_pixel_size (w, h);
+	lw = std::max (lw, w);
+	lh = std::max (lh, h);
+
+	layout->set_text ("Momentary");
+	layout->get_pixel_size (w, h);
+	lw = std::max (lw, w);
+	h  = std::max (lh, h);
+
+	lh = ceil (3.6 * h);
+
+	Gtkmm2ext::rounded_rectangle (cr, xl - 4, yl - lh, lw + 20, lh, 5);
+	cr->set_source_rgba (.3, .3, .3, .75);
+	cr->fill ();
+	yl -= h * .7;
+
+	cr->set_line_width (2);
+
+	float yy = rint (yl);
+	cr->move_to (xl + 0.5, yy);
+	cr->line_to (xl + 7.5, yy);
+	cr->set_source_rgba (.1, .4, 1, 1.0);
+	cr->stroke ();
+	cr->move_to (xl + 11, rint (yl - h * .5));
+	cr->set_source_rgba (.9, .9, .9, 1.0);
+	layout->show_in_cairo_context (cr);
+	yl -= h * 1.1;
+
+	layout->set_text ("Short");
+	layout->get_pixel_size (w, h);
+	yy = rint (yl);
+	cr->move_to (xl + 0.5, yy);
+	cr->line_to (xl + 7.5, yy);
+	cr->set_source_rgba (1, .2, .1, 1.0);
+	cr->stroke ();
+	cr->move_to (xl + 11, rint (yl - h * .5));
+	cr->set_source_rgba (.9, .9, .9, 1.0);
+	layout->show_in_cairo_context (cr);
+	yl -= h * 1.1;
+
+	layout->set_text ("Integrated");
+	layout->get_pixel_size (w, h);
+	yy = rint (yl);
+	cr->move_to (xl + 0.5, yy);
+	cr->line_to (xl + 7.5, yy);
+	cr->set_source_rgba (.1, 1, .1, 1.0);
+	cr->stroke ();
+	cr->move_to (xl + 11, rint (yl - h * .5));
+	cr->set_source_rgba (.9, .9, .9, 1.0);
+	layout->show_in_cairo_context (cr);
+
+	ls->flush ();
+	return ls;
+}

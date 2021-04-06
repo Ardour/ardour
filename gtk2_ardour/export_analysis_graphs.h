@@ -39,4 +39,7 @@ loudness_histogram (Glib::RefPtr<Pango::Context>, ARDOUR::ExportAnalysisPtr, int
 Cairo::RefPtr<Cairo::ImageSurface>
 time_axis (Glib::RefPtr<Pango::Context>, int width, int margin_left, ARDOUR::samplepos_t start, ARDOUR::samplecnt_t len, ARDOUR::samplecnt_t rate);
 
+Cairo::RefPtr<Cairo::ImageSurface>
+plot_loudness (Glib::RefPtr<Pango::Context>, ARDOUR::ExportAnalysisPtr, int height, int margin_left, ARDOUR::samplecnt_t rate);
+
 }; // namespace ArdourGraphs
