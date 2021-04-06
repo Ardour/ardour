@@ -270,6 +270,7 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 		/* calc heights & alignment of png-image */
 		const float specth = sizeof (p->spectrum[0]) / sizeof (float);
 		const float waveh2 = std::min (100, 8 * lin[0] / (int) p->n_channels);
+		const float loudnh = 180;
 
 		Cairo::RefPtr<Cairo::ImageSurface> png_surface;
 		int png_w = 0;
@@ -296,7 +297,7 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 				ann_h += 4 + 3 * linesp; /* File Info */;
 			}
 
-			const int png_h = hh + 4 + p->n_channels * (2 * waveh2 + 4) + ann_h + specth + 4;
+			const int png_h = hh + 4 + p->n_channels * (2 * waveh2 + 4) + ann_h + specth + 4 + loudnh + 4;
 			png_w = std::max (std::max (top_w, wav_w), spc_w);
 
 			png_surface = Cairo::ImageSurface::create (Cairo::FORMAT_RGB24, png_w, png_h);
@@ -597,6 +598,24 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 				pcx->paint ();
 				pcx->set_source (scale, png_w - m_r, png_y0);
 				pcx->paint ();
+				png_y0 += spec->get_height() + 4;
+			}
+		}
+
+		if (p->have_loudness && p->have_dbtp && p->have_lufs_graph && sample_rate > 0) {
+			/* Loudness */
+			Cairo::RefPtr<Cairo::ImageSurface> las = ArdourGraphs::plot_loudness (get_pango_context (), p, loudnh, m_l, sample_rate);
+			CimgPlayheadArea *lp = manage (new CimgPlayheadArea (las, m_l, las->get_width () - m_l));
+			playhead_widgets.push_back (lp);
+			lp->seek_playhead.connect (sigc::bind<0> (sigc::mem_fun (*this, &ExportReport::audition_seek), page));
+			wtbl->attach (*lp, 0, 1, wrow, wrow + 1, SHRINK, SHRINK);
+			++wrow;
+
+			if (png_surface) {
+				Cairo::RefPtr<Cairo::Context> pcx = Cairo::Context::create (png_surface);
+				pcx->set_source (las, 0, png_y0);
+				pcx->paint ();
+				png_y0 += las->get_height() + 4;
 			}
 		}
 
