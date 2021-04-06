@@ -195,8 +195,6 @@ public:
 
 private:
 	void init (const ARDOUR::AnalysisResults &, bool);
-	void draw_waveform (Cairo::RefPtr<Cairo::ImageSurface>& wave,
-			ARDOUR::ExportAnalysisPtr, uint32_t, int, size_t, int, int, bool, bool);
 
 	void open_folder (std::string);
 	void audition (std::string, unsigned int, int);
