@@ -1615,11 +1615,19 @@ TempoMap::dump (std::ostream& ostr) const
 	ostr << "------------\n\n\n";
 }
 
-template<typename T, typename T1>  TempoMap::Points::const_iterator
-TempoMap::_get_tempo_and_meter (TempoPoint const *& tp, MeterPoint const *& mp, T (Point::*method)() const, T arg, bool can_match, bool ret_iterator_after_not_at) const
+template<class const_traits_t>  typename const_traits_t::iterator_type
+TempoMap::_get_tempo_and_meter (typename const_traits_t::tempo_point_type & tp,
+                                typename const_traits_t::meter_point_type & mp,
+                                typename const_traits_t::time_reference (Point::*method)() const,
+                                typename const_traits_t::time_type arg,
+                                typename const_traits_t::iterator_type begini,
+                                typename const_traits_t::iterator_type endi,
+                                typename const_traits_t::tempo_point_type tstart,
+                                typename const_traits_t::meter_point_type mstart,
+                                bool can_match, bool ret_iterator_after_not_at) const
 {
-	Points::const_iterator p;
-	Points::const_iterator last_used = _points.end();
+	typename const_traits_t::iterator_type p;
+	typename const_traits_t::iterator_type last_used = endi;
 	bool tempo_done = false;
 	bool meter_done = false;
 
@@ -1630,23 +1638,25 @@ TempoMap::_get_tempo_and_meter (TempoPoint const *& tp, MeterPoint const *& mp, 
 	tp = 0;
 	mp = 0;
 
-	/* if the starting position is the beginning of the timeline (indicated
-	 * by the default constructor value for T1, then we are always allowed
-	 * to use the tempo & meter at that position. Without this, it would be
-	 * necessary to special case "can_match" in the caller if the start is
-	 * "zero". Instead we do that here, since common cases
-	 * (e.g. ::get_grid()) will use can_match = false, but may pass in a
-	 * zero start point.
+	/* If the starting position is the beginning of the timeline (indicated
+	 * by the default constructor value for the time_type (superclock_t,
+	 * Beats, BBT_Time), then we are always allowed to use the tempo &
+	 * meter at that position.
+	 *
+	 * Without this, it would be necessary to special case "can_match" in
+	 * the caller if the start is "zero". Instead we do that here, since
+	 * common cases (e.g. ::get_grid()) will use can_match = false, but may
+	 * pass in a zero start point.
 	 */
 
-	can_match = (can_match || arg == T1());
+	can_match = (can_match || arg == typename const_traits_t::time_type ());
 
-	for (tp = &_tempos.front(), mp = &_meters.front(), p = _points.begin(); p != _points.end(); ++p) {
+	for (tp = tstart, mp = mstart, p = begini; p != endi; ++p) {
 
-		TempoPoint const * tpp;
-		MeterPoint const * mpp;
+		typename const_traits_t::tempo_point_type tpp;
+		typename const_traits_t::meter_point_type mpp;
 
-		if (!tempo_done && (tpp = dynamic_cast<TempoPoint const *> (&(*p))) != 0) {
+		if (!tempo_done && (tpp = dynamic_cast<typename const_traits_t::tempo_point_type> (&(*p))) != 0) {
 			if ((can_match && (((*p).*method)() > arg)) || (!can_match && (((*p).*method)() >= arg))) {
 				tempo_done = true;
 			} else {
@@ -1655,7 +1665,7 @@ TempoMap::_get_tempo_and_meter (TempoPoint const *& tp, MeterPoint const *& mp, 
 			}
 		}
 
-		if (!meter_done && (mpp = dynamic_cast<MeterPoint const *> (&(*p))) != 0) {
+		if (!meter_done && (mpp = dynamic_cast<typename const_traits_t::meter_point_type> (&(*p))) != 0) {
 			if ((can_match && (((*p).*method)() > arg)) || (!can_match && (((*p).*method)() >= arg))) {
 				meter_done = true;
 			} else {
@@ -1670,7 +1680,7 @@ TempoMap::_get_tempo_and_meter (TempoPoint const *& tp, MeterPoint const *& mp, 
 	}
 
 	if (!tp || !mp) {
-		return _points.end();
+		return endi;
 	}
 
 	if (ret_iterator_after_not_at) {
@@ -1678,9 +1688,9 @@ TempoMap::_get_tempo_and_meter (TempoPoint const *& tp, MeterPoint const *& mp, 
 		p = last_used;
 
 		if (can_match) {
-			while (((*p).*method)() <= arg && p != _points.end()) ++p;
+			while (((*p).*method)() <= arg && p != endi) ++p;
 		} else {
-			while (((*p).*method)() < arg && p != _points.end()) ++p;
+			while (((*p).*method)() < arg && p != endi) ++p;
 		}
 
 		return p;
@@ -1688,82 +1698,6 @@ TempoMap::_get_tempo_and_meter (TempoPoint const *& tp, MeterPoint const *& mp, 
 
 	return last_used;
 }
-
-template<typename T, typename T1>  TempoMap::Points::iterator
-TempoMap::_get_tempo_and_meter (TempoPoint *& tp, MeterPoint *& mp, T (Point::*method)() const, T arg, bool can_match, bool ret_iterator_after_not_at)
-{
-	Points::iterator p;
-	Points::iterator last_used = _points.end();
-	bool tempo_done = false;
-	bool meter_done = false;
-
-	assert (!_tempos.empty());
-	assert (!_meters.empty());
-	assert (!_points.empty());
-
-	tp = 0;
-	mp = 0;
-
-	/* if the starting position is the beginning of the timeline (indicated
-	 * by the default constructor value for T1, then we are always allowed
-	 * to use the tempo & meter at that position. Without this, it would be
-	 * necessary to special case "can_match" in the caller if the start is
-	 * "zero". Instead we do that here, since common cases
-	 * (e.g. ::get_grid()) will use can_match = false, but may pass in a
-	 * zero start point.
-	 */
-
-	can_match = (can_match || arg == T1());
-
-	for (tp = &_tempos.front(), mp = &_meters.front(), p = _points.begin(); p != _points.end(); ++p) {
-
-		TempoPoint * tpp;
-		MeterPoint * mpp;
-
-		if (!tempo_done && (tpp = dynamic_cast<TempoPoint*> (&(*p))) != 0) {
-			if ((can_match && (((*p).*method)() > arg)) || (!can_match && (((*p).*method)() >= arg))) {
-				tempo_done = true;
-			} else {
-				tp = tpp;
-				last_used = p;
-			}
-		}
-
-		if (!meter_done && (mpp = dynamic_cast<MeterPoint*> (&(*p))) != 0) {
-			if ((can_match && (((*p).*method)() > arg)) || (!can_match && (((*p).*method)() >= arg))) {
-				meter_done = true;
-			} else {
-				mp = mpp;
-				last_used = p;
-			}
-		}
-
-		if (meter_done && tempo_done) {
-			break;
-		}
-	}
-
-
-	if (!tp || !mp) {
-		return _points.end();
-	}
-
-	if (ret_iterator_after_not_at) {
-
-		p = last_used;
-
-		if (can_match) {
-			while (((*p).*method)() <= arg && p != _points.end()) ++p;
-		} else {
-			while (((*p).*method)() < arg && p != _points.end()) ++p;
-		}
-
-		return p;
-	}
-
-	return last_used;
-}
-
 
 void
 TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, uint32_t bar_mod)

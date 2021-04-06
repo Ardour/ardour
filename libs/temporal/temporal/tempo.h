@@ -862,29 +862,107 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 	BBT_Time bbt_at (Beats const &) const;
 	BBT_Time bbt_at (superclock_t sc) const;
 
-	/* fetch const tempo/meter pairs */
+	template<typename T, typename T1> struct const_traits {
+		typedef Points::const_iterator iterator_type;
+		typedef TempoPoint const * tempo_point_type;
+		typedef MeterPoint const * meter_point_type;
+		using time_reference = T;
+		using time_type = T1;
+	};
 
-	template<typename T, typename T1> Points::const_iterator _get_tempo_and_meter (TempoPoint const *& tp, MeterPoint const *& mp, T (Point::*method)() const, T arg, bool can_match, bool ret_iterator_after_not_at) const;
+	template<typename T, typename T1> struct non_const_traits {
+		typedef Points::iterator iterator_type;
+		typedef TempoPoint * tempo_point_type;
+		typedef MeterPoint * meter_point_type;
+		using time_reference = T;
+		using time_type = T1;
+	};
 
-	Points::const_iterator  get_tempo_and_meter (TempoPoint const *& t, MeterPoint const *& m, BBT_Time const & bbt, bool can_match, bool ret_iterator_after_not_at) const {
-		return _get_tempo_and_meter<BBT_Time const &, BBT_Time> (t, m, &Point::bbt, bbt, can_match, ret_iterator_after_not_at);
-	}
-	Points::const_iterator  get_tempo_and_meter (TempoPoint const *& t, MeterPoint const *& m, superclock_t sc, bool can_match, bool ret_iterator_after_not_at) const {
-		return _get_tempo_and_meter<superclock_t,superclock_t> (t, m, &Point::sclock, sc, can_match, ret_iterator_after_not_at);
-	}
-	Points::const_iterator  get_tempo_and_meter (TempoPoint const *& t, MeterPoint const *& m, Beats const & b, bool can_match, bool ret_iterator_after_not_at) const {
-		return _get_tempo_and_meter<Beats const &, Beats> (t, m, &Point::beats, b, can_match, ret_iterator_after_not_at);
-	}
-
-	/* fetch non-const tempo/meter pairs. As of March 2020, we only need
-	 * the superclock variant, but leave the templated design in place,
-	 * just in case.
+	/* A somewhat complex method that sets a TempoPoint* and MeterPoint* to
+	 * refer to the correct tempo and meter points for the given start
+	 * time.
+	 *
+	 * It also returns an iterator which may point at the latter of the two
+	 * points (tempo & meter; always the meter point if they are at the
+	 * same time) OR may point at the iterator *after* the latter of the
+	 * two, depending on whether or not @param ret_iterator_after_not_at is
+	 * true or false.
+	 *
+	 * If @param can_match is true, the points used can be located at the
+	 * given time. If false, they must be before it. Setting it to false is
+	 * useful when you need to know the TempoMetric in effect at a given
+	 * time if there was no tempo or meter point at that time.
+	 *
+	 * The templated structure here is to avoid code duplication in 2
+	 * separate versions of this method, one that would be const, and one
+	 * that would be non-const. This is a challenging problem in C++, and
+	 * seems best solved by using a "traits" object as shown here.
+	 *
+	 * The begini, endi, tstart and mstart arguments are an additional
+	 * complication. If we try to use e.g. _points.begin() inside the
+	 * method, which is labelled const, we will always get the const
+	 * version of the iterator. This const iterator type will conflict with
+	 * the non-const iterator type defined by the "non_const_traits"
+	 * type. The same happens with _tempos.front() etc. This problem is
+	 * addressed by calling these methods in the caller method, which maybe
+	 * const or non-const, and will provide appropriate versions based on that.
 	 */
 
-	template<typename T, typename T1> Points::iterator _get_tempo_and_meter (TempoPoint *& tp, MeterPoint *& mp, T (Point::*method)() const, T arg, bool can_match, bool ret_iterator_after_not_at);
+	template<class constness_traits_t> typename constness_traits_t::iterator_type
+		_get_tempo_and_meter (typename constness_traits_t::tempo_point_type &,
+		                      typename constness_traits_t::meter_point_type &,
+		                      typename constness_traits_t::time_reference (Point::*)() const,
+		                      typename constness_traits_t::time_type,
+		                      typename constness_traits_t::iterator_type begini,
+		                      typename constness_traits_t::iterator_type endi,
+		                      typename constness_traits_t::tempo_point_type tstart,
+		                      typename constness_traits_t::meter_point_type mstart,
+		                      bool can_match,
+		                      bool ret_iterator_after_not_at) const;
+
+	/* fetch non-const tempo/meter pairs and iterator (used in
+	 * ::reset_starting_at() in which we will modify points.
+	 */
 
 	Points::iterator  get_tempo_and_meter (TempoPoint *& t, MeterPoint *& m, superclock_t sc, bool can_match, bool ret_iterator_after_not_at) {
-		return _get_tempo_and_meter<superclock_t,superclock_t> (t, m, &Point::sclock, sc, can_match, ret_iterator_after_not_at);
+
+		/* because @param this is non-const (because the method is not
+		 * marked const), the following:
+
+		   _points.begin()
+		   _points.end()
+		   _tempos.front()
+		   _meters.front()
+
+		   will all be the non-const versions of these methods.
+		*/
+
+		return _get_tempo_and_meter<non_const_traits<superclock_t,superclock_t> > (t, m, &Point::sclock, sc, _points.begin(), _points.end(), &_tempos.front(), &_meters.front(), can_match, ret_iterator_after_not_at);
+	}
+
+	/* fetch const tempo/meter pairs and iterator (used in metric_at() and
+	 * other similar call sites where we do not modify the map
+	 */
+
+	Points::const_iterator  get_tempo_and_meter (TempoPoint const *& t, MeterPoint const *& m, BBT_Time const & bbt, bool can_match, bool ret_iterator_after_not_at) const {
+
+		/* because @param this is const (because the method is marked
+		 * const), the following:
+
+		   _points.begin()
+		   _points.end()
+		   _tempos.front()
+		   _meters.front()
+
+		   will all be the const versions of these methods.
+		*/
+		return _get_tempo_and_meter<const_traits<BBT_Time const  &, BBT_Time> > (t, m, &Point::bbt, bbt, _points.begin(), _points.end(), &_tempos.front(), &_meters.front(), can_match, ret_iterator_after_not_at);
+	}
+	Points::const_iterator  get_tempo_and_meter (TempoPoint const *& t, MeterPoint const *& m, superclock_t sc, bool can_match, bool ret_iterator_after_not_at) const {
+		return _get_tempo_and_meter<const_traits<superclock_t,superclock_t> > (t, m, &Point::sclock, sc, _points.begin(), _points.end(), &_tempos.front(), &_meters.front(), can_match, ret_iterator_after_not_at);
+	}
+	Points::const_iterator  get_tempo_and_meter (TempoPoint const *& t, MeterPoint const *& m, Beats const & b, bool can_match, bool ret_iterator_after_not_at) const {
+		return _get_tempo_and_meter<const_traits<Beats const &, Beats> > (t, m, &Point::beats, b, _points.begin(), _points.end(), &_tempos.front(), &_meters.front(), can_match, ret_iterator_after_not_at);
 	}
 
 	/* parsing legacy tempo maps */
