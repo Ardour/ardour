@@ -276,6 +276,9 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double end_bpm, d
 
 	tempo_type_change();
 
+	bpm_spinner.select_region (0, -1);
+	bpm_spinner.grab_focus ();
+
 	tapped = false;
 }
 
