@@ -608,6 +608,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\export_analysis_graphs.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\export_channel_selector.cc"
 				>
 			</File>
@@ -1715,6 +1719,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\enums_convert.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\export_analysis_graphs.h"
 				>
 			</File>
 			<File
