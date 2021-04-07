@@ -35,6 +35,7 @@ namespace AudioGrapher {
 	class PeakReader;
 	class LoudnessReader;
 	class Normalizer;
+	class Limiter;
 	class Analyser;
 	class DemoNoiseAdder;
 	template <typename T> class Chunker;
@@ -127,26 +128,32 @@ class LIBARDOUR_API ExportGraphBuilder
 
 	// sample format converter
 	class SFC {
-            public:
+	public:
 		// This constructor so that this can be constructed like a Normalizer
 		SFC (ExportGraphBuilder &, FileSpec const & new_config, samplecnt_t max_samples);
 		FloatSinkPtr sink ();
 		void add_child (FileSpec const & new_config);
 		void remove_children (bool remove_out_files);
 		bool operator== (FileSpec const & other_config) const;
-		void set_peak (float);
 
-	                                        private:
+		void set_peak_dbfs (float, bool force = false);
+		void set_peak_lufs (AudioGrapher::LoudnessReader const&);
+
+	private:
 		typedef boost::shared_ptr<AudioGrapher::Chunker<float> > ChunkerPtr;
 		typedef boost::shared_ptr<AudioGrapher::DemoNoiseAdder> DemoNoisePtr;
+		typedef boost::shared_ptr<AudioGrapher::Normalizer> NormalizerPtr;
+		typedef boost::shared_ptr<AudioGrapher::Limiter> LimiterPtr;
 		typedef boost::shared_ptr<AudioGrapher::SampleFormatConverter<Sample> > FloatConverterPtr;
 		typedef boost::shared_ptr<AudioGrapher::SampleFormatConverter<int> >   IntConverterPtr;
 		typedef boost::shared_ptr<AudioGrapher::SampleFormatConverter<short> > ShortConverterPtr;
 
 		FileSpec           config;
-		boost::ptr_list<Encoder> children;
 		int                data_width;
+		boost::ptr_list<Encoder> children;
 
+		NormalizerPtr   normalizer;
+		LimiterPtr      limiter;
 		DemoNoisePtr    demo_noise_adder;
 		ChunkerPtr      chunker;
 		AnalysisPtr     analyser;
@@ -158,7 +165,7 @@ class LIBARDOUR_API ExportGraphBuilder
 	};
 
 	class Intermediate {
-	                                        public:
+	public:
 		Intermediate (ExportGraphBuilder & parent, FileSpec const & new_config, samplecnt_t max_samples);
 		FloatSinkPtr sink ();
 		void add_child (FileSpec const & new_config);
@@ -170,10 +177,9 @@ class LIBARDOUR_API ExportGraphBuilder
 		/// Returns true when finished
 		bool process ();
 
-	                                        private:
+	private:
 		typedef boost::shared_ptr<AudioGrapher::PeakReader> PeakReaderPtr;
 		typedef boost::shared_ptr<AudioGrapher::LoudnessReader> LoudnessReaderPtr;
-		typedef boost::shared_ptr<AudioGrapher::Normalizer> NormalizerPtr;
 		typedef boost::shared_ptr<AudioGrapher::TmpFile<Sample> > TmpFilePtr;
 		typedef boost::shared_ptr<AudioGrapher::Threader<Sample> > ThreaderPtr;
 		typedef boost::shared_ptr<AudioGrapher::AllocatingProcessContext<Sample> > BufferPtr;
@@ -190,7 +196,6 @@ class LIBARDOUR_API ExportGraphBuilder
 		BufferPtr       buffer;
 		PeakReaderPtr   peak_reader;
 		TmpFilePtr      tmp_file;
-		NormalizerPtr   normalizer;
 		ThreaderPtr     threader;
 
 		LoudnessReaderPtr    loudness_reader;
