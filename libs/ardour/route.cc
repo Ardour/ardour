@@ -152,6 +152,7 @@ Route::init ()
 	/* default master bus to use strict i/o */
 	if (is_master() || is_monitor ()) {
 		_strict_io = true;
+		_meter_point = _pending_meter_point = MeterOutput;
 	}
 
 	/* add standard controls */
