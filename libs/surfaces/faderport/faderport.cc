@@ -196,7 +196,7 @@ FaderPort::~FaderPort ()
 {
 	cerr << "~FP\n";
 
-	all_lights_out ();
+	close ();
 
 	if (_input_port) {
 		DEBUG_TRACE (DEBUG::FaderPort, string_compose ("unregistering input port %1\n", boost::shared_ptr<ARDOUR::Port>(_input_port)->name()));
@@ -633,6 +633,7 @@ FaderPort::close ()
 	blink_connection.disconnect ();
 	selection_connection.disconnect ();
 	stripable_connections.drop_connections ();
+	periodic_connection.disconnect ();
 
 #if 0
 	stripable_connections.drop_connections ();
