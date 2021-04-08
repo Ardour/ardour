@@ -369,6 +369,10 @@ ExportHandler::finish_timespan ()
 
 	while (config_map.begin() != timespan_bounds.second) {
 
+		// XXX single timespan+format may produce multiple files
+		// e.g export selection == session
+		// -> TagLib::FileRef is null
+
 		ExportFormatSpecPtr fmt = config_map.begin()->second.format;
 		std::string filename = config_map.begin()->second.filename->get_path(fmt);
 		if (fmt->with_cue()) {

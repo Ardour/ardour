@@ -48,7 +48,7 @@ AudiofileTagger::tag_file (std::string const& filename, SessionMetadata const& m
 
 	TagLib::FileRef file (filename.c_str ());
 	if (file.isNull ()) {
-		std::cerr << "TagLib::FileRef is null for file" << filename << std::endl;
+		std::cerr << "TagLib::FileRef is null for file '" << filename << "'" << std::endl;
 		return true; // continue anyway?!
 	}
 
