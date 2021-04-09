@@ -460,6 +460,7 @@ ExportGraphBuilder::SFC::SFC (ExportGraphBuilder &parent, FileSpec const & new_c
 
 		config.filename->set_channel_config (config.channel_config);
 		parent.add_analyser (config.filename->get_path (config.format), analyser);
+		limiter->set_result (analyser->result (true));
 
 		chunker->add_output (analyser);
 		intermediate->add_output (chunker);
@@ -509,6 +510,9 @@ ExportGraphBuilder::SFC::set_duration (samplecnt_t n_samples)
 	/* update after silence trim */
 	if (analyser) {
 		analyser->set_duration (n_samples);
+	}
+	if (limiter) {
+		limiter->set_duration (n_samples);
 	}
 }
 

@@ -25,6 +25,9 @@ Limiter::Limiter (float sample_rate, unsigned int channels, samplecnt_t size)
 	: _enabled (false)
 	, _buf (0)
 	, _size (0)
+	, _cnt (0)
+	, _spp (0)
+	, _pos (0)
 	{
 
 	_limiter.init (sample_rate, channels);
@@ -63,6 +66,38 @@ Limiter::set_release (float s)
 	_limiter.set_release (s);
 }
 
+void
+Limiter::set_duration (samplecnt_t s)
+{
+	if (_pos != 0 || !_result) {
+		return;
+	}
+	const size_t n_data = sizeof (ARDOUR::ExportAnalysis::limiter_pk) / sizeof (float);
+	_spp = ceilf (s / (float) n_data);
+}
+
+void
+Limiter::set_result (ARDOUR::ExportAnalysisPtr r)
+{
+	_result = r;
+}
+
+void
+Limiter::stats (samplecnt_t n_samples)
+{
+	if (!_result || _spp == 0) {
+		return;
+	}
+	_cnt += n_samples;
+	while (_cnt >= _spp) {
+		float peak, gmax, gmin;
+		_limiter.get_stats (&peak, &gmax, &gmin);
+		_cnt -= _spp;
+		assert (_pos < sizeof (ARDOUR::ExportAnalysis::limiter_pk) / sizeof (float));
+		_result->limiter_pk[_pos++] = peak;
+	}
+}
+
 void Limiter::process (ProcessContext<float> const& ctx)
 {
 	const samplecnt_t n_samples  = ctx.samples_per_channel ();
@@ -75,6 +110,7 @@ void Limiter::process (ProcessContext<float> const& ctx)
 	}
 
 	_limiter.process (n_samples, ctx.data (), _buf);
+	stats (n_samples);
 
 	if (_latency > 0) {
 		samplecnt_t ns = n_samples > _latency ? n_samples - _latency : 0;
@@ -101,6 +137,7 @@ void Limiter::process (ProcessContext<float> const& ctx)
 			memset (_buf, 0, _size * sizeof (float));
 			samplecnt_t ns = _latency > bs ? bs : _latency;
 			_limiter.process (ns, _buf, _buf);
+			//stats (ns);
 			ProcessContext<float> ctx_out (ctx, _buf, ns * n_channels);
 			if (_latency == ns) {
 				ctx_out.set_flag (ProcessContext<float>::EndOfInput);

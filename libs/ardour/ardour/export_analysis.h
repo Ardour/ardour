@@ -49,6 +49,7 @@ namespace ARDOUR {
 			memset (spectrum, 0, sizeof(spectrum));
 			memset (loudness_hist, 0, sizeof(loudness_hist));
 			memset (freq, 0, sizeof(freq));
+			memset (limiter_pk, 0, sizeof(limiter_pk));
 			assert (sizeof(lgraph_i) == sizeof(lgraph_s));
 			assert (sizeof(lgraph_i) == sizeof(lgraph_m));
 			for (size_t i = 0; i < sizeof(lgraph_i) / sizeof (float); ++i) {
@@ -84,6 +85,7 @@ namespace ARDOUR {
 			memcpy (lgraph_i, other.lgraph_i, sizeof(lgraph_i));
 			memcpy (lgraph_s, other.lgraph_s, sizeof(lgraph_s));
 			memcpy (lgraph_m, other.lgraph_m, sizeof(lgraph_m));
+			memcpy (limiter_pk, other.limiter_pk, sizeof(limiter_pk));
 		}
 
 		float peak;
@@ -109,6 +111,7 @@ namespace ARDOUR {
 		float lgraph_i[800];
 		float lgraph_s[800];
 		float lgraph_m[800];
+		float limiter_pk[800];
 		std::set<samplecnt_t> truepeakpos[2]; // bins with >= -1dBTB
 	};
 

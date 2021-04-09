@@ -25,9 +25,12 @@ const float Analyser::fft_range_db (120); // dB
 
 Analyser::Analyser (float sample_rate, unsigned int channels, samplecnt_t bufsize, samplecnt_t n_samples)
 	: LoudnessReader (sample_rate, channels, bufsize)
+	, _rp (ARDOUR::ExportAnalysisPtr (new ARDOUR::ExportAnalysis))
+	, _result (*_rp)
 	, _n_samples (n_samples)
 	, _pos (0)
 {
+
 	//printf ("NEW ANALYSER %p r:%.1f c:%d f:%ld l%ld\n", this, sample_rate, channels, bufsize, n_samples);
 	assert (bufsize % channels == 0);
 	assert (bufsize > 1);
@@ -223,8 +226,12 @@ Analyser::process (ProcessContext<float> const & ctx)
 }
 
 ARDOUR::ExportAnalysisPtr
-Analyser::result ()
+Analyser::result (bool ptr_only)
 {
+	if (ptr_only) {
+		return _rp;
+	}
+
 	//printf ("PROCESSED %ld / %ld samples\n", _pos, _n_samples);
 	if (_pos == 0 || _pos > _n_samples + 1) {
 		return ARDOUR::ExportAnalysisPtr ();
@@ -300,7 +307,7 @@ Analyser::result ()
 		}
 	}
 
-	return ARDOUR::ExportAnalysisPtr (new ARDOUR::ExportAnalysis (_result));
+	return _rp;
 }
 
 float
