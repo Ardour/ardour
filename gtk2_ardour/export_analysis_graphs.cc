@@ -620,12 +620,12 @@ ArdourGraphs::plot_loudness (Glib::RefPtr<Pango::Context> pctx, ExportAnalysisPt
 	if (render_for_export) {
 		v_max = ceilf ((v_max - 5.f) / 10.f) * 10.f + 5.f;
 		v_min = floorf ((v_min + 5.f) / 10.f) * 10.f - 5.f;
+		v_min = std::max (v_min, v_max - 60);
 	} else {
 		v_max = ceilf (v_max / 10.f) * 10.f;
 		v_min = floorf ((v_min + 5.f) / 10.f) * 10.f - 5.f;
+		v_min = std::max (v_min, v_max - 65);
 	}
-
-	v_min = std::max (-95.f, v_min);
 
 	std::vector<double> dashes;
 	dashes.push_back (3.0);
@@ -797,20 +797,19 @@ ArdourGraphs::plot_loudness (Glib::RefPtr<Pango::Context> pctx, ExportAnalysisPt
 	}
 	cr->stroke ();
 
-	/* short */
-	cr->set_source_rgba (1, .2, .1, 1.0);
-	cr->set_line_width (1.0);
+	/* momentary */
+	cr->set_source_rgba (.1, .4, 1, 1.0);
 	first = true;
 	skip  = 0;
 
 	for (size_t x = 0; x < width; ++x) {
-		if (p->lgraph_s[x] <= v_min && first) {
+		if (p->lgraph_m[x] <= v_min && first) {
 			continue;
 		}
-		float y = y0 + YPOS (p->lgraph_s[x]);
+		float y = y0 + YPOS (p->lgraph_m[x]);
 		if (first) {
-			yp = y;
 			cr->move_to (x0 + x, y);
+			yp    = y;
 			first = false;
 		} else if ((x == width - 1) || fabsf (yp - y) > 0.5) {
 			if (skip > 5 && fabsf (yp - y) > 5) {
@@ -825,19 +824,20 @@ ArdourGraphs::plot_loudness (Glib::RefPtr<Pango::Context> pctx, ExportAnalysisPt
 	}
 	cr->stroke ();
 
-	/* momentary */
-	cr->set_source_rgba (.1, .4, 1, 1.0);
+	/* short */
+	cr->set_source_rgba (1, .2, .1, 1.0);
+	cr->set_line_width (1.0);
 	first = true;
 	skip  = 0;
 
 	for (size_t x = 0; x < width; ++x) {
-		if (p->lgraph_m[x] <= v_min && first) {
+		if (p->lgraph_s[x] <= v_min && first) {
 			continue;
 		}
-		float y = y0 + YPOS (p->lgraph_m[x]);
+		float y = y0 + YPOS (p->lgraph_s[x]);
 		if (first) {
+			yp = y;
 			cr->move_to (x0 + x, y);
-			yp    = y;
 			first = false;
 		} else if ((x == width - 1) || fabsf (yp - y) > 0.5) {
 			if (skip > 5 && fabsf (yp - y) > 5) {
