@@ -437,20 +437,34 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 				layout->show_in_cairo_context (cr);
 			}
 			else if (p->integrated_loudness == -200 && p->loudness_range == 0) {
-				layout->set_alignment (Pango::ALIGN_CENTER);
-				layout->set_font_description (UIConfiguration::instance ().get_LargeFont ());
-				layout->set_text (_("Not\nAvailable"));
-				layout->get_pixel_size (w, h);
-				cr->move_to (rint (nw2 - w * .5), rint (hh * .5 - h * .66));
-				layout->show_in_cairo_context (cr);
-				int yy = h * .5;
-
 				layout->set_font_description (UIConfiguration::instance ().get_SmallFont ());
+				layout->set_alignment (Pango::ALIGN_LEFT);
+				layout->set_text (_("Integrated Loudness:"));
+				layout->get_pixel_size (w, h);
+				cr->move_to (rint (nw2 - w * .5), y0[0]);
+				layout->show_in_cairo_context (cr);
+
+				layout->set_text (_("Not available"));
+				layout->get_pixel_size (w, h);
+				cr->move_to (rint (nw2 - w * .5), y0[1]);
+				layout->show_in_cairo_context (cr);
+
 				layout->set_text (_("(too short integration time)"));
 				layout->get_pixel_size (w, h);
-				cr->move_to (rint (nw2 - w * .5), rint (hh * .5 + yy));
+				cr->move_to (rint (nw2 - w * .5), y0[2]);
 				layout->show_in_cairo_context (cr);
 
+				if (p->max_loudness_short > -200 && p->max_loudness_momentary > -200) {
+					layout->set_text (_("Max Short/Momentary:"));
+					layout->get_pixel_size (w, h);
+					cr->move_to (rint (nw2 - w * .5), y0[4]);
+					layout->show_in_cairo_context (cr);
+
+					layout->set_text (string_compose (_("%1/%2 LUFS"), std::setprecision (1), std::fixed, p->max_loudness_short, p->max_loudness_momentary));
+					layout->get_pixel_size (w, h);
+					cr->move_to (rint (nw2 - w * .5), y0[5]);
+					layout->show_in_cairo_context (cr);
+				}
 			} else {
 				layout->set_font_description (UIConfiguration::instance ().get_SmallFont ());
 				layout->set_alignment (Pango::ALIGN_LEFT);
@@ -487,8 +501,6 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 				layout->get_pixel_size (w, h);
 				cr->move_to (rint (nw2 - w * .5), y0[5]);
 				layout->show_in_cairo_context (cr);
-
-				layout->set_font_description (UIConfiguration::instance ().get_LargeFont ());
 			}
 			ebur->flush ();
 
