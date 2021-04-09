@@ -155,6 +155,31 @@ ArdourGraphs::draw_waveform (Glib::RefPtr<Pango::Context> pctx, ExportAnalysisPt
 		cr->stroke ();
 	}
 
+	/* redux */
+	cr->set_source_rgba (0.1, 0.4, 1.0, 0.7);
+	for (size_t x = 0; x < width; ++x) {
+		if (p->limiter_pk[x] > 1.0) {
+			float y = p->limiter_pk[x];
+			if (log) {
+				y = alt_log_meter (fast_coefficient_to_dB (1.f / p->limiter_pk[x]));
+			} else {
+				y = 1.f / p->limiter_pk[x];
+			}
+			if (rect) {
+				y = ht * (1.f - y);
+				cr->move_to (m_l + x - .5, 0);
+				cr->line_to (m_l + x - .5, y);
+			} else {
+				y = height_2 * y;
+				cr->move_to (m_l + x - .5, 0);
+				cr->line_to (m_l + x - .5, height_2 - y);
+				cr->move_to (m_l + x - .5, ht);
+				cr->line_to (m_l + x - .5, height_2 + y);
+			}
+			cr->stroke ();
+		}
+	}
+
 	if (!rect) {
 		// zero line
 		cr->set_source_rgba (.3, .3, .3, 0.7);
