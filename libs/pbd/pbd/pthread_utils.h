@@ -48,12 +48,7 @@
 #include "pbd/libpbd_visibility.h"
 #include "pbd/signals.h"
 
-#ifdef __APPLE__
-# define PBD_RT_STACKSIZE_PROC 0x80000 // 512kB
-#else
-# define PBD_RT_STACKSIZE_PROC 0x20000 // 128kB
-#endif
-
+#define PBD_RT_STACKSIZE_PROC 0x80000 // 512kB
 #define PBD_RT_STACKSIZE_HELP 0x08000 // 32kB
 
 /* these are relative to sched_get_priority_max()
