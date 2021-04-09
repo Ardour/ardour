@@ -34,6 +34,8 @@ class LIBAUDIOGRAPHER_API Analyser : public LoudnessReader
 	void process (ProcessContext<float> const & c);
 	ARDOUR::ExportAnalysisPtr result ();
 
+	void set_duration (samplecnt_t n_samples);
+
 	void set_normalization_gain (float gain) {
 		_result.normalized = true;
 		_result.norm_gain_factor = gain;

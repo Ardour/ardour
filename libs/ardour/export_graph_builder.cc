@@ -452,6 +452,7 @@ ExportGraphBuilder::SFC::SFC (ExportGraphBuilder &parent, FileSpec const & new_c
 		samplecnt_t sb = config.format->silence_beginning_at (parent.timespan->get_start(), sample_rate);
 		samplecnt_t se = config.format->silence_end_at (parent.timespan->get_end(), sample_rate);
 		samplecnt_t duration = parent.timespan->get_length () + sb + se;
+
 		max_samples = std::min ((samplecnt_t) 8192 * channels, std::max ((samplecnt_t) 4096 * channels, max_samples));
 		chunker.reset (new Chunker<Sample> (max_samples));
 		analyser.reset (new Analyser (config.format->sample_rate(), channels, max_samples,
@@ -499,6 +500,15 @@ ExportGraphBuilder::SFC::SFC (ExportGraphBuilder &parent, FileSpec const & new_c
 		float_converter->init (max_samples, config.format->dither_type(), actual_data_width);
 		add_child (config);
 		intermediate->add_output (float_converter);
+	}
+}
+
+void
+ExportGraphBuilder::SFC::set_duration (samplecnt_t n_samples)
+{
+	/* update after silence trim */
+	if (analyser) {
+		analyser->set_duration (n_samples);
 	}
 }
 
@@ -704,14 +714,13 @@ ExportGraphBuilder::Intermediate::process()
 void
 ExportGraphBuilder::Intermediate::prepare_post_processing()
 {
-	if (use_loudness || use_peak) {
-		for (boost::ptr_list<SFC>::iterator i = children.begin(); i != children.end(); ++i) {
-			if (use_peak) {
-				(*i).set_peak_dbfs (peak_reader->get_peak());
-			}
-			if (use_loudness) {
-				(*i).set_peak_lufs (*loudness_reader);
-			}
+	for (boost::ptr_list<SFC>::iterator i = children.begin(); i != children.end(); ++i) {
+		(*i).set_duration (tmp_file->get_samples_written() / config.channel_config->get_n_chans());
+		if (use_peak) {
+			(*i).set_peak_dbfs (peak_reader->get_peak());
+		}
+		if (use_loudness) {
+			(*i).set_peak_lufs (*loudness_reader);
 		}
 	}
 

@@ -33,15 +33,7 @@ Analyser::Analyser (float sample_rate, unsigned int channels, samplecnt_t bufsiz
 	assert (bufsize > 1);
 	assert (_bufsize > 0);
 
-
-
-	const size_t peaks = sizeof (_result.peaks) / sizeof (ARDOUR::PeakData::PeakDatum) / 4;
-	_spp = ceil ((_n_samples + 2.f) / (float) peaks);
-
-	const size_t swh = sizeof (_result.spectrum) / sizeof (float);
-	const size_t height = sizeof (_result.spectrum[0]) / sizeof (float);
-	const size_t width = swh / height;
-	_fpp = ceil ((_n_samples + 2.f) / (float) width);
+	set_duration (n_samples);
 
 	_fft_data_size   = _bufsize / 2;
 	_fft_freq_per_bin = sample_rate / _fft_data_size / 2.f;
@@ -57,6 +49,7 @@ Analyser::Analyser (float sample_rate, unsigned int channels, samplecnt_t bufsiz
 		_fft_data_out[i] = 0;
 	}
 
+	const size_t height = sizeof (_result.spectrum[0]) / sizeof (float);
 	const float nyquist = (sample_rate * .5);
 #if 0 // linear
 #define YPOS(FREQ) rint (height * (1.0 - FREQ / nyquist))
@@ -99,6 +92,23 @@ Analyser::~Analyser ()
 	fftwf_free (_fft_data_out);
 	free (_fft_power);
 	free (_hann_window);
+}
+
+void
+Analyser::set_duration (samplecnt_t n_samples)
+{
+	if (_pos != 0) {
+		return;
+	}
+	_n_samples = n_samples;
+
+	const size_t peaks = sizeof (_result.peaks) / sizeof (ARDOUR::PeakData::PeakDatum) / 4;
+	_spp = ceil ((_n_samples + 2.f) / (float) peaks);
+
+	const size_t swh = sizeof (_result.spectrum) / sizeof (float);
+	const size_t height = sizeof (_result.spectrum[0]) / sizeof (float);
+	const size_t width = swh / height;
+	_fpp = ceil ((_n_samples + 2.f) / (float) width);
 }
 
 void

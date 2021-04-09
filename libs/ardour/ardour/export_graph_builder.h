@@ -136,6 +136,7 @@ class LIBARDOUR_API ExportGraphBuilder
 		void remove_children (bool remove_out_files);
 		bool operator== (FileSpec const & other_config) const;
 
+		void set_duration (samplecnt_t);
 		void set_peak_dbfs (float, bool force = false);
 		void set_peak_lufs (AudioGrapher::LoudnessReader const&);
 
