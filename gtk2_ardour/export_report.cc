@@ -44,6 +44,7 @@
 #include "audio_clock.h"
 #include "export_analysis_graphs.h"
 #include "export_report.h"
+#include "loudness_settings.h"
 #include "ui_config.h"
 
 #include "pbd/i18n.h"
@@ -297,7 +298,15 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 				ann_h += 4 + 3 * linesp; /* File Info */;
 			}
 
-			const int png_h = hh + 4 + p->n_channels * (2 * waveh2 + 4) + ann_h + specth + 4 + loudnh + 4;
+			int png_h = hh + 4 + p->n_channels * (2 * waveh2 + 4) + ann_h + specth + 4;
+
+			if (p->have_loudness && p->have_dbtp && p->have_lufs_graph && sample_rate > 0) {
+				png_h += loudnh + 4;
+			}
+			if (p->have_loudness && p->have_dbtp && p->integrated_loudness > -180) {
+				png_h += lin[0] * 4 + 4;
+			}
+
 			png_w = std::max (std::max (top_w, wav_w), spc_w);
 
 			png_surface = Cairo::ImageSurface::create (Cairo::FORMAT_RGB24, png_w, png_h);
@@ -628,6 +637,92 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 				pcx->set_source (las, 0, png_y0);
 				pcx->paint ();
 				png_y0 += las->get_height() + 4;
+			}
+		}
+
+		if (p->have_loudness && p->have_dbtp && p->integrated_loudness > -180) {
+
+			const float lufs = rint (p->integrated_loudness * 10.f) / 10.f;
+			const float dbfs = rint (accurate_coefficient_to_dB (p->peak) * 10.f) / 10.f;
+			const float dbtp = rint (accurate_coefficient_to_dB (p->truepeak) * 10.f) / 10.f;
+
+			int cw = 800 + m_l;
+			int ch = 3.25 * lin[0];
+			Cairo::RefPtr<Cairo::ImageSurface> conf = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, cw, ch);
+			Cairo::RefPtr<Cairo::Context> cr = Cairo::Context::create (conf);
+			cr->set_source_rgba (0, 0, 0, 1.0);
+			cr->paint ();
+
+			cr->set_operator (Cairo::OPERATOR_SOURCE);
+			cr->rectangle (0, 0, m_l - 1, ch);
+			cr->set_source_rgba (0, 0, 0, 0);
+			cr->fill ();
+			cr->set_operator (Cairo::OPERATOR_OVER);
+
+			layout->set_font_description (UIConfiguration::instance ().get_SmallerFont ());
+			layout->set_alignment (Pango::ALIGN_RIGHT);
+			cr->set_source_rgba (.9, .9, .9, 1.0);
+			layout->set_text (_("Conformity\nAnalysis"));
+			layout->get_pixel_size (w, h);
+			cr->move_to (rint (m_l - w - 6), rint ((ch - h) * .5));
+			layout->show_in_cairo_context (cr);
+			layout->set_alignment (Pango::ALIGN_LEFT);
+
+			int yl = lin[0] / 2;
+
+			int i = 0;
+			ALoudnessPresets alp (false);
+			std::vector<ALoudnessPreset> const& lp = alp.presets ();
+			std::vector<ALoudnessPreset>::const_iterator pi;
+
+			for (pi = lp.begin (); pi != lp.end () && i < 10; ++pi) {
+				if (!pi->report) {
+					continue;
+				}
+				int xl = m_l + 10 + (i % 5) * (cw - 20) / 5;
+
+				layout->set_font_description (UIConfiguration::instance ().get_SmallFont ());
+				cr->set_source_rgba (.9, .9, .9, 1.0);
+				layout->set_text (pi->label);
+				cr->move_to (xl, yl);
+				layout->get_pixel_size (w, h);
+				layout->show_in_cairo_context (cr);
+				cr->move_to (xl + w + 5, yl);
+
+				layout->set_font_description (UIConfiguration::instance ().get_LargeMonospaceFont ());
+				cr->set_source_rgba (.9, .9, .9, 1.0);
+				if (lufs > pi->LUFS_range[0]
+						|| (pi->enable[0] && dbfs > pi->level[0])
+						|| (pi->enable[1] && dbtp > pi->level[1])
+					 ) {
+					cr->set_source_rgba (1, 0, .0, 1.0);
+					layout->set_text ("\u274C"); // cross mark
+				} else if (lufs < pi->LUFS_range[1]) {
+					cr->set_source_rgba (.6, .7, 0, 1.0);
+					layout->set_text ("\u2714\u26A0"); // warning sign
+				} else {
+					cr->set_source_rgba (.1, 1, .1, 1.0);
+					layout->set_text ("\u2714"); // heavy check mark
+				}
+				int ww, hh;
+				layout->get_pixel_size (ww, hh);
+				cr->move_to (xl + w + 4, yl - (hh - h) * .5);
+				layout->show_in_cairo_context (cr);
+
+				if (i % 5 == 4) {
+					yl += lin[0] * 1.3;
+				}
+				++i;
+			}
+			CimgArea *ci = manage (new CimgArea (conf));
+			wtbl->attach (*ci, 0, 1, wrow, wrow + 1, SHRINK, SHRINK);
+			++wrow;
+
+			if (png_surface) {
+				Cairo::RefPtr<Cairo::Context> pcx = Cairo::Context::create (png_surface);
+				pcx->set_source (conf, 0, png_y0);
+				pcx->paint ();
+				png_y0 += conf->get_height() + 4;
 			}
 		}
 
