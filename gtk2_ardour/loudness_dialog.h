@@ -16,6 +16,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#ifndef _gtkardour_loudness_dialog_h_
+#define _gtkardour_loudness_dialog_h_
+
 #include <gtkmm/box.h>
 #include <gtkmm/expander.h>
 #include <gtkmm/label.h>
@@ -144,3 +147,5 @@ private:
 	bool  _ignore_preset;
 	bool  _ignore_change;
 };
+
+#endif
