@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- 2021-4-10 Mathias Wøbbe: Map file creation -->
 <ArdourMIDIBindings version="1.0.0" name="Alesis VI25">
   <DeviceInfo bank-size="24"/>
 	
