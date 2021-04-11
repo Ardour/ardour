@@ -1227,7 +1227,7 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 		midi_srcs.push_back (_midi_write_source);
 
 		_midi_write_source->set_natural_position (capture_info.front()->start);
-		_midi_write_source->set_captured_for (_name);
+		_midi_write_source->set_captured_for (_track.name ());
 
 		Glib::DateTime tm (Glib::DateTime::create_now_local (mktime (&when)));
 		_midi_write_source->set_take_id (tm.format ("%F %H.%M.%S"));
@@ -1347,7 +1347,7 @@ DiskWriter::steal_write_source_name ()
 		 */
 
 		try {
-			string new_path = _session.new_midi_source_path (name());
+			string new_path = _session.new_midi_source_path (write_source_name ());
 
 			if (_midi_write_source->rename (new_path)) {
 				return string();
