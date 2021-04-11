@@ -142,6 +142,7 @@ gtk2_ardour_sources = [
         'level_meter.cc',
         'location_ui.cc',
         'loudness_dialog.cc',
+        'loudness_settings.cc',
         'lua_script_manager.cc',
         'luadialog.cc',
         'luainstance.cc',
