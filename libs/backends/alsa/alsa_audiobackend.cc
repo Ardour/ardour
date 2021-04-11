@@ -506,12 +506,12 @@ AlsaAudioBackend::update_systemic_audio_latencies ()
 	const uint32_t lcpp = (_periods_per_cycle - 2) * _samples_per_period;
 	LatencyRange lr;
 
-	lr.min = lr.max = lcpp + (_measure_latency ? 0 : _systemic_audio_input_latency);
+	lr.min = lr.max = (_measure_latency ? 0 : _systemic_audio_output_latency);
 	for (std::vector<BackendPortPtr>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it) {
 		set_latency_range (*it, true, lr);
 	}
 
-	lr.min = lr.max = (_measure_latency ? 0 : _systemic_audio_output_latency);
+	lr.min = lr.max = lcpp + (_measure_latency ? 0 : _systemic_audio_input_latency);
 	for (std::vector<BackendPortPtr>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
 		set_latency_range (*it, false, lr);
 	}
