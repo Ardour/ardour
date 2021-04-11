@@ -178,9 +178,6 @@ DiskWriter::check_record_status (samplepos_t transport_sample, double speed, boo
 
 		if (_alignment_style == ExistingMaterial) {
 			_first_recordable_sample += _capture_offset + _playback_offset;
-			if (_accumulated_capture_offset == 0) {
-				_accumulated_capture_offset = _playback_offset;
-			}
 		}
 
 		if  (_session.config.get_punch_out () && 0 != (loc = _session.locations()->auto_punch_location ())) {
