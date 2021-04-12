@@ -173,6 +173,9 @@
     <ColorAlias name="location range" alias="alert:blue"/>
     <ColorAlias name="lock button: fill active" alias="widget:bg"/>
     <ColorAlias name="lock button: led active" alias="alert:red"/>
+    <ColorAlias name="loudness button: fill" alias="widget:bg"/>
+    <ColorAlias name="loudness button: fill active" alias="theme:bg"/>
+    <ColorAlias name="loudness button: led active" alias="alert:green"/>
     <ColorAlias name="lua action button: fill" alias="widget:bg"/>
     <ColorAlias name="marker bar" alias="neutral:background2"/>
     <ColorAlias name="marker bar separator" alias="theme:bg2"/>

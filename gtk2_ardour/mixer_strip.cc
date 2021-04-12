@@ -47,6 +47,7 @@
 #include "ardour/async_midi_port.h"
 #include "ardour/audio_track.h"
 #include "ardour/audioengine.h"
+#include "ardour/dsp_limiter.h"
 #include "ardour/internal_send.h"
 #include "ardour/io.h"
 #include "ardour/meter.h"
@@ -127,6 +128,8 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	, trim_control (ArdourKnob::default_elements, ArdourKnob::Flags (ArdourKnob::Detent | ArdourKnob::ArcToZero))
 	, _master_volume_menu (0)
 	, _loudess_analysis_button (0)
+	, _loudess_limiter_button (0)
+	, _lm_redux_meter (0)
 	, _visibility (X_("mixer-element-visibility"))
 	, _suspend_menu_callbacks (false)
 	, control_slave_ui (sess)
@@ -165,6 +168,8 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt
 	, trim_control (ArdourKnob::default_elements, ArdourKnob::Flags (ArdourKnob::Detent | ArdourKnob::ArcToZero))
 	, _master_volume_menu (0)
 	, _loudess_analysis_button (0)
+	, _loudess_limiter_button (0)
+	, _lm_redux_meter (0)
 	, _visibility (X_("mixer-element-visibility"))
 	, _suspend_menu_callbacks (false)
 	, control_slave_ui (sess)
@@ -326,6 +331,7 @@ MixerStrip::init ()
 	global_vpacker.pack_start (panners, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (rec_mon_table, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (master_volume_table, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (master_limiter_vbox, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (solo_iso_table, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (mute_solo_table, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (gpm, Gtk::PACK_SHRINK);
@@ -594,33 +600,89 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		mute_button->show ();
 		solo_button->show ();
 		master_volume_table.hide ();
+		master_limiter_vbox.hide ();
 	}
 
 	if (route()->is_master() && _volume_controller == 0) {
 		assert (_loudess_analysis_button == 0);
+		assert (_loudess_limiter_button == 0);
 		assert (route()->volume_control());
+		assert (route()->main_out_limiter());
+
 		boost::shared_ptr<AutomationControl> ac = route()->volume_control ();
+		boost::shared_ptr<Limiter> limiter = route()->main_out_limiter ();
 
 		_volume_controller = AutomationController::create (ac->parameter (), ParameterDescriptor (ac->parameter ()), ac, false);
 		_volume_controller->set_name (X_("ProcessorControlSlider"));
 		_volume_controller->set_size_request (PX_SCALE(19), -1);
 		_volume_controller->disable_vertical_scroll ();
 
+		ac = limiter->threshold_ctrl ();
+		_lm_threshold_controller = AutomationController::create (ac->parameter (), ac->desc (), ac, false);
+		_lm_threshold_controller->set_name (X_("ProcessorControlSlider"));
+		_lm_threshold_controller->disable_vertical_scroll ();
+
+		ac = limiter->release_ctrl ();
+		_lm_release_controller = AutomationController::create (ac->parameter (), ac->desc (), ac, false);
+		_lm_release_controller->set_name (X_("ProcessorControlSlider"));
+		_lm_release_controller->disable_vertical_scroll ();
+
+		ac = limiter->truepeak_ctrl ();
+		_lm_truepeak_controller = AutomationController::create (ac->parameter (), ac->desc (), ac, false);
+		ArdourButton* but = dynamic_cast<ArdourButton*> (_lm_truepeak_controller->widget ());
+		but->set_name ("pluginui toggle");
+		but->set_text ("True Peak");
+
+		_lm_redux_meter = manage (new FastMeter (100, 8, FastMeter::Horizontal, 0,
+          0xff0000ff, 0xff0000ff, 0xff0000ff, 0xff0000ff, 0xff0000ff,
+					0xff0000ff, 0xff0000ff, 0xff0000ff, 0xff0000ff, 0xff0000ff,
+          UIConfiguration::instance().color ("meter background bottom"),
+          UIConfiguration::instance().color ("meter background top")
+          ));
+
 		_loudess_analysis_button = manage (new ArdourButton (S_("Loudness|LAN")));
+		_loudess_analysis_button->set_name ("loudness button");
 		_loudess_analysis_button->signal_clicked.connect (mem_fun (*this, &MixerStrip::loudess_analysis_button_clicked));
 		_volume_controller->signal_button_press_event().connect (mem_fun (*this, &MixerStrip::volume_controller_button_pressed), false);
 
-		set_tooltip (*_volume_controller, _("Master output volume"));
-		set_tooltip (_loudess_analysis_button, _("Measure loudness of the session, normalize master output volume"));
+		_loudess_limiter_button = manage (new ArdourButton (S_("Limiter|Lim"), ArdourButton::led_default_elements));
+		_loudess_limiter_button->set_name ("loudness button");
+		_loudess_limiter_button->set_active (limiter->enabled());
+		_loudess_limiter_button->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &MixerStrip::limter_button_release), boost::weak_ptr<Processor>(limiter)), false);
+		limiter->ActiveChanged.connect (*this, invalidator (*this), boost::bind (&MixerStrip::limiter_active_changed, this, boost::weak_ptr<Processor>(limiter)), gui_context());
 
-		master_volume_table.attach (*_loudess_analysis_button, 0, 2, 0, 1);
+		set_tooltip (_loudess_analysis_button, _("Measure loudness of the session, normalize master output volume"));
+		set_tooltip (_loudess_limiter_button, _("Enable limiter, right-click to toggle limiter controls"));
+		set_tooltip (*_volume_controller, _("Master output volume"));
+		set_tooltip (*_lm_threshold_controller, _("Limiter Threshold: maximum signal level at the output"));
+		set_tooltip (*_lm_release_controller, _("Limiter release time: minimum recovery time"));
+		set_tooltip (*_lm_truepeak_controller, _("Limiter true-peak mode. When enabled, the threshold unit is dBTP, otherwise dBFS."));
+
+		master_volume_table.attach (*_loudess_analysis_button, 0, 1, 0, 1);
+		master_volume_table.attach (*_loudess_limiter_button, 1, 2, 0, 1);
 		master_volume_table.attach (*_volume_controller, 0, 2, 1, 2);
 
+		Gtk::Table* mlt = manage (new Gtk::Table);
+		mlt->set_homogeneous (true);
+		mlt->set_row_spacings (2);
+		mlt->set_col_spacings (2);
+
+		mlt->attach (*_lm_truepeak_controller, 0, 2, 0, 1);
+		mlt->attach (*_lm_threshold_controller, 0, 1, 1, 2);
+		mlt->attach (*_lm_release_controller, 1, 2, 1, 2);
+
+		master_limiter_vbox.pack_start (*mlt);
+		master_limiter_vbox.pack_start (*_lm_redux_meter);
+
+		_lm_redux_meter->show ();
 		_loudess_analysis_button->show ();
+		_loudess_limiter_button->show ();
 		_volume_controller->show ();
+		mlt->show_all ();
 #ifdef MIXBUS
 	} else if (!route()->is_master()) {
 		master_volume_table.hide ();
+		master_limiter_vbox.hide ();
 #endif
 	}
 
@@ -941,6 +1003,13 @@ void
 MixerStrip::fast_update ()
 {
 	gpm.update_meters ();
+
+	if (_lm_redux_meter) {
+		boost::shared_ptr<ReadOnlyControl> c = _route->master_limiter_mtr_controllable ();
+		if (c) {
+			_lm_redux_meter->set (c->desc().to_interface (c->get_parameter ()));
+		}
+	}
 }
 
 void
@@ -1343,6 +1412,29 @@ MixerStrip::volume_controller_button_pressed (GdkEventButton* ev)
 		return true;
 	}
 	return false;
+}
+
+bool
+MixerStrip::limter_button_release (GdkEventButton* ev, boost::weak_ptr<Processor> wp)
+{
+	boost::shared_ptr<Processor> p (wp.lock());
+	if (p && ev->button == 1) {
+		p->enable (!p->enabled ());
+		return true;
+	} else if (Keyboard::is_context_menu_event (ev)) {
+		master_limiter_vbox.set_visible (!master_limiter_vbox.get_visible ());
+		return true;
+	}
+	return false;
+}
+
+void
+MixerStrip::limiter_active_changed (boost::weak_ptr<Processor> wp)
+{
+	boost::shared_ptr<Processor> p (wp.lock());
+	if (p && _loudess_limiter_button) {
+		_loudess_limiter_button->set_active (p->enabled ());
+	}
 }
 
 void
