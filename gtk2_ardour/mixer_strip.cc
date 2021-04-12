@@ -1321,7 +1321,7 @@ MixerStrip::width_button_pressed (GdkEventButton* ev)
 void
 MixerStrip::loudess_analysis_button_clicked ()
 {
-	PublicEditor::instance().measure_master_loudness (false);
+	PublicEditor::instance().loudness_assistant (false);
 }
 
 bool

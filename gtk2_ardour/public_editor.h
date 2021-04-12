@@ -280,7 +280,7 @@ public:
 	/** Open export dialog with current range pre-selected */
 	virtual void export_range () = 0;
 
-	virtual void measure_master_loudness (bool) = 0;
+	virtual void loudness_assistant (bool) = 0;
 
 	virtual void register_actions () = 0;
 	virtual void set_zoom_focus (Editing::ZoomFocus) = 0;

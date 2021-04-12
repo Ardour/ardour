@@ -95,7 +95,40 @@ Editor::export_selection ()
 }
 
 void
-Editor::measure_master_loudness (bool range_selection)
+Editor::loudness_assistant_marker ()
+{
+	ArdourMarker* marker;
+
+	if ((marker = reinterpret_cast<ArdourMarker *> (marker_menu_item->get_data ("marker"))) == 0) {
+		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
+		abort(); /*NOTREACHED*/
+	}
+
+	Location* l;
+	bool is_start;
+
+	if (((l = find_location_from_marker (marker, is_start)) != 0) && (l->end() > l->start())) {
+		measure_master_loudness (l->start(), l->end(), true);
+	}
+}
+
+void
+Editor::loudness_assistant (bool range_selection)
+{
+	samplepos_t start, end;
+	TimeSelection const& ts (get_selection().time);
+	if (range_selection && !ts.empty ()) {
+		start = ts.start();
+		end = ts.end_sample();
+	} else {
+		start = _session->current_start_sample();
+		end   = _session->current_end_sample();
+	}
+	measure_master_loudness (start, end, range_selection);
+}
+
+void
+Editor::measure_master_loudness (samplepos_t start, samplepos_t end, bool is_range_selection)
 {
 	if (!Config->get_use_master_volume ()) {
 		ArdourMessageDialog md (_("Master bus output gain control is disabled.\nVisit preferences to enable it?"), false,
@@ -106,18 +139,8 @@ Editor::measure_master_loudness (bool range_selection)
 		return;
 	}
 
-	samplepos_t start, end;
-	TimeSelection const& ts (get_selection().time);
-	if (range_selection && !ts.empty ()) {
-		start = ts.start();
-		end = ts.end_sample();
-	} else {
-		start = _session->current_start_sample();
-		end   = _session->current_end_sample();
-	}
-
 	if (start >= end) {
-		if (range_selection) {
+		if (is_range_selection) {
 			ArdourMessageDialog (_("Loudness Analysis requires a session-range or range-selection."), false, MESSAGE_ERROR).run ();
 		} else {
 			ArdourMessageDialog (_("Loudness Analysis requires a session-range."), false, MESSAGE_ERROR).run ();
@@ -137,7 +160,7 @@ Editor::measure_master_loudness (bool range_selection)
 
 	ARDOUR::AudioRange ar (start, end, 0);
 
-	LoudnessDialog ld (_session, ar, range_selection);
+	LoudnessDialog ld (_session, ar, is_range_selection);
 
 	if (own_window ()) {
 		ld.set_transient_for (*own_window ());
