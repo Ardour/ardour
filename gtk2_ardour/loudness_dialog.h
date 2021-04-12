@@ -69,6 +69,7 @@ private:
 	void load_preset (size_t);
 	void apply_preset ();
 	void peak_radio (bool);
+	void setting_changed ();
 	void update_settings ();
 	void check_preset ();
 	void update_sensitivity ();
@@ -106,6 +107,7 @@ private:
 	ArdourWidgets::ArdourButton _lufs_i_btn;
 	ArdourWidgets::ArdourButton _lufs_s_btn;
 	ArdourWidgets::ArdourButton _lufs_m_btn;
+	ArdourWidgets::ArdourButton _limiter_btn;
 
 	Gtk::Label _dbfs_label;
 	Gtk::Label _dbtp_label;
@@ -124,6 +126,8 @@ private:
 	Gtk::Label _gain_norm_label;
 	Gtk::Label _gain_total_label;
 	Gtk::Label _gain_exceeds_label;
+	Gtk::Label _limiter_redux_label;
+	Gtk::Label _limiter_redux_heading;
 
 	Gtk::DrawingArea _loudness_graph;
 
