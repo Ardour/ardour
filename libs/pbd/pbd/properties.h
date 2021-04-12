@@ -405,9 +405,10 @@ public:
 	}
 
 	bool changed () const {
-		/* Expensive, but, hey; this requires operator!= in
-		   our T
-		*/
+		if (!_old) {
+			return false;
+		}
+		/* Expensive, but, hey; this requires operator!= in our T */
 		return (*_old != *_current);
 	}
 
