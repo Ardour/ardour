@@ -689,28 +689,28 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 				layout->show_in_cairo_context (cr);
 				cr->move_to (xl + w + 5, yl);
 
-				layout->set_font_description (UIConfiguration::instance ().get_LargeMonospaceFont ());
+				layout->set_font_description (UIConfiguration::instance ().get_LargeFont ());
 				cr->set_source_rgba (.9, .9, .9, 1.0);
 				if (lufs > pi->LUFS_range[0]
 						|| (pi->enable[0] && dbfs > pi->level[0])
 						|| (pi->enable[1] && dbtp > pi->level[1])
 					 ) {
 					cr->set_source_rgba (1, 0, .0, 1.0);
+#ifdef PLATFORM_WINDOWS
+					layout->set_text ("X");
+#else
 					layout->set_text ("\u274C"); // cross mark
+#endif
 				} else if (lufs < pi->LUFS_range[1]) {
 					cr->set_source_rgba (.6, .7, 0, 1.0);
 #ifdef PLATFORM_WINDOWS
 					layout->set_text ("\u2713"); // check mark
 #else
-					layout->set_text ("\u2714\u26A0"); // warning sign
+					layout->set_text ("\u2713\u26A0"); // check mark + warning sign
 #endif
 				} else {
 					cr->set_source_rgba (.1, 1, .1, 1.0);
-#ifdef PLATFORM_WINDOWS
-					layout->set_text ("\u2713"); // check mark
-#else
 					layout->set_text ("\u2714"); // heavy check mark
-#endif
 				}
 				int ww, hh;
 				layout->get_pixel_size (ww, hh);
