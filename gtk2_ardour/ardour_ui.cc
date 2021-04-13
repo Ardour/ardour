@@ -1833,7 +1833,7 @@ ARDOUR_UI::transport_roll ()
 	}
 
 	if (!rolling) {
-		_session->request_transport_speed (1.0f, false);
+		_session->request_roll ();
 	}
 }
 
@@ -1911,7 +1911,7 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 					_session->set_requested_return_sample (range.front().start);  //force an auto-return here
 				}
 			}
-			_session->request_transport_speed (1.0f, false);
+			_session->request_roll ();
 		}
 	}
 }
