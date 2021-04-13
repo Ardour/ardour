@@ -699,10 +699,18 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 					layout->set_text ("\u274C"); // cross mark
 				} else if (lufs < pi->LUFS_range[1]) {
 					cr->set_source_rgba (.6, .7, 0, 1.0);
+#ifdef PLATFORM_WINDOWS
+					layout->set_text ("\u2713"); // check mark
+#else
 					layout->set_text ("\u2714\u26A0"); // warning sign
+#endif
 				} else {
 					cr->set_source_rgba (.1, 1, .1, 1.0);
+#ifdef PLATFORM_WINDOWS
+					layout->set_text ("\u2713"); // check mark
+#else
 					layout->set_text ("\u2714"); // heavy check mark
+#endif
 				}
 				int ww, hh;
 				layout->get_pixel_size (ww, hh);

@@ -825,20 +825,28 @@ LoudnessDialog::test_conformity ()
 			l = manage (new Label ("\u274C", ALIGN_CENTER)); // cross mark
 			l->modify_font (UIConfiguration::instance ().get_NormalMonospaceFont ());
 			l->modify_fg (Gtk::STATE_NORMAL, color_fail);
-			Gtkmm2ext::set_size_request_to_display_given_text (*l, "\u274C\u2714", 0, 0);
+			Gtkmm2ext::set_size_request_to_display_given_text (*l, "\u274C\u2713", 0, 0);
 			set_tooltip (*l, "The signal is too loud.");
 		} else if (lufs_i < preset.LUFS_range[1]) {
+#ifdef PLATFORM_WINDOWS
+			l = manage (new Label ("\u2713", ALIGN_CENTER)); // check mark
+#else
 			l = manage (new Label ("\u2714", ALIGN_CENTER)); // heavy check mark
+#endif
 			l->modify_font (UIConfiguration::instance ().get_NormalMonospaceFont ());
 			l->modify_fg (Gtk::STATE_NORMAL, color_warn);
-			Gtkmm2ext::set_size_request_to_display_given_text (*l, "\u274C\u2714", 0, 0);
+			Gtkmm2ext::set_size_request_to_display_given_text (*l, "\u274C\u2713", 0, 0);
 			set_tooltip (*l, "The signal is too quiet, but satisfies the max. loudness spec.");
 		} else {
-			l = manage (new Label ("\u2714", ALIGN_CENTER)); // heavy check mark
+#ifdef PLATFORM_WINDOWS
+			l = manage (new Label ("\u2714", ALIGN_CENTER)); // check mark
+#else
+			l = manage (new Label ("\u2713", ALIGN_CENTER)); // heavy check mark
+#endif
 			l->modify_font (UIConfiguration::instance ().get_NormalMonospaceFont ());
 			l->modify_fg (Gtk::STATE_NORMAL, color_good);
 			set_tooltip (*l, "Signal loudness is within the spec.");
-			Gtkmm2ext::set_size_request_to_display_given_text (*l, "\u274C\u2714", 0, 0);
+			Gtkmm2ext::set_size_request_to_display_given_text (*l, "\u274C\u2713", 0, 0);
 		}
 
 		t->attach (*l, col + 1, col + 2, row, row + 1, SHRINK, SHRINK, 2, 0);
