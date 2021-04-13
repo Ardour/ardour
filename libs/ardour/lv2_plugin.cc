@@ -81,7 +81,9 @@
 #include "lv2/lv2plug.in/ns/ext/atom/atom.h"
 #include "lv2/lv2plug.in/ns/ext/atom/forge.h"
 #include "lv2/lv2plug.in/ns/ext/buf-size/buf-size.h"
+#include "lv2/lv2plug.in/ns/ext/event/event.h"
 #include "lv2/lv2plug.in/ns/ext/log/log.h"
+#include "lv2/lv2plug.in/ns/ext/midi/midi.h"
 #include "lv2/lv2plug.in/ns/ext/midi/midi.h"
 #include "lv2/lv2plug.in/ns/ext/options/options.h"
 #include "lv2/lv2plug.in/ns/ext/parameters/parameters.h"
@@ -3336,7 +3338,7 @@ LV2World::LV2World()
 	atom_bufferType    = lilv_new_uri(world, LV2_ATOM__bufferType);
 	atom_supports      = lilv_new_uri(world, LV2_ATOM__supports);
 	atom_eventTransfer = lilv_new_uri(world, LV2_ATOM__eventTransfer);
-	ev_EventPort       = lilv_new_uri(world, LILV_URI_EVENT_PORT);
+	ev_EventPort       = lilv_new_uri(world, LV2_EVENT__EventPort);
 	ext_logarithmic    = lilv_new_uri(world, LV2_PORT_PROPS__logarithmic);
 	ext_notOnGUI       = lilv_new_uri(world, LV2_PORT_PROPS__notOnGUI);
 	ext_expensive      = lilv_new_uri(world, LV2_PORT_PROPS__expensive);
@@ -3346,10 +3348,10 @@ LV2World::LV2World()
 	ext_displayPriority= lilv_new_uri(world, LV2_PORT_PROPS__displayPriority);
 	groups_group       = lilv_new_uri(world, LV2_PORT_GROUPS__group);
 	groups_element     = lilv_new_uri(world, LV2_PORT_GROUPS__element);
-	lv2_AudioPort      = lilv_new_uri(world, LILV_URI_AUDIO_PORT);
-	lv2_ControlPort    = lilv_new_uri(world, LILV_URI_CONTROL_PORT);
-	lv2_InputPort      = lilv_new_uri(world, LILV_URI_INPUT_PORT);
-	lv2_OutputPort     = lilv_new_uri(world, LILV_URI_OUTPUT_PORT);
+	lv2_AudioPort      = lilv_new_uri(world, LV2_CORE__AudioPort);
+	lv2_ControlPort    = lilv_new_uri(world, LV2_CORE__ControlPort);
+	lv2_InputPort      = lilv_new_uri(world, LV2_CORE__InputPort);
+	lv2_OutputPort     = lilv_new_uri(world, LV2_CORE__OutputPort);
 	lv2_inPlaceBroken  = lilv_new_uri(world, LV2_CORE__inPlaceBroken);
 	lv2_isSideChain    = lilv_new_uri(world, LV2_CORE_PREFIX "isSideChain");
 	lv2_index          = lilv_new_uri(world, LV2_CORE__index);
@@ -3363,7 +3365,7 @@ LV2World::LV2World()
 	lv2_designation    = lilv_new_uri(world, LV2_CORE__designation);
 	lv2_enumeration    = lilv_new_uri(world, LV2_CORE__enumeration);
 	lv2_freewheeling   = lilv_new_uri(world, LV2_CORE__freeWheeling);
-	midi_MidiEvent     = lilv_new_uri(world, LILV_URI_MIDI_EVENT);
+	midi_MidiEvent     = lilv_new_uri(world, LV2_MIDI__MidiEvent);
 	rdfs_comment       = lilv_new_uri(world, LILV_NS_RDFS "comment");
 	rdfs_label         = lilv_new_uri(world, LILV_NS_RDFS "label");
 	rdfs_range         = lilv_new_uri(world, LILV_NS_RDFS "range");
