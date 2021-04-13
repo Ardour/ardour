@@ -26,27 +26,28 @@
  */
 
 #include <cctype>
+#include <limits>
 #include <string>
 #include <vector>
-#include <limits>
 
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
 
 #include "pbd/gstdio_compat.h"
+
 #include <glib/gprintf.h>
 #include <glibmm.h>
 
 #include <boost/utility.hpp>
 
-#include "pbd/file_utils.h"
-#include "pbd/stl_delete.h"
 #include "pbd/compose.h"
 #include "pbd/error.h"
+#include "pbd/file_utils.h"
 #include "pbd/locale_guard.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/replace_all.h"
+#include "pbd/stl_delete.h"
 #include "pbd/xml++.h"
 
 #ifdef PLATFORM_WINDOWS
@@ -60,39 +61,40 @@
 
 #include "ardour/audio_buffer.h"
 #include "ardour/audioengine.h"
-#include "ardour/directory_names.h"
 #include "ardour/debug.h"
+#include "ardour/directory_names.h"
 #include "ardour/lv2_plugin.h"
 #include "ardour/midi_patch_manager.h"
+#include "ardour/search_paths.h"
 #include "ardour/session.h"
 #include "ardour/tempo.h"
 #include "ardour/types.h"
 #include "ardour/utils.h"
 #include "ardour/worker.h"
-#include "ardour/search_paths.h"
 
 #include "pbd/i18n.h"
+
 #include <locale.h>
 
 #include <lilv/lilv.h>
 
 #include "lv2/lv2plug.in/ns/ext/atom/atom.h"
 #include "lv2/lv2plug.in/ns/ext/atom/forge.h"
+#include "lv2/lv2plug.in/ns/ext/buf-size/buf-size.h"
 #include "lv2/lv2plug.in/ns/ext/log/log.h"
 #include "lv2/lv2plug.in/ns/ext/midi/midi.h"
+#include "lv2/lv2plug.in/ns/ext/options/options.h"
+#include "lv2/lv2plug.in/ns/ext/parameters/parameters.h"
+#include "lv2/lv2plug.in/ns/ext/patch/patch.h"
+#include "lv2/lv2plug.in/ns/ext/port-groups/port-groups.h"
 #include "lv2/lv2plug.in/ns/ext/port-props/port-props.h"
 #include "lv2/lv2plug.in/ns/ext/presets/presets.h"
+#include "lv2/lv2plug.in/ns/ext/resize-port/resize-port.h"
 #include "lv2/lv2plug.in/ns/ext/state/state.h"
 #include "lv2/lv2plug.in/ns/ext/time/time.h"
 #include "lv2/lv2plug.in/ns/ext/worker/worker.h"
-#include "lv2/lv2plug.in/ns/ext/resize-port/resize-port.h"
 #include "lv2/lv2plug.in/ns/extensions/ui/ui.h"
 #include "lv2/lv2plug.in/ns/extensions/units/units.h"
-#include "lv2/lv2plug.in/ns/ext/patch/patch.h"
-#include "lv2/lv2plug.in/ns/ext/port-groups/port-groups.h"
-#include "lv2/lv2plug.in/ns/ext/parameters/parameters.h"
-#include "lv2/lv2plug.in/ns/ext/buf-size/buf-size.h"
-#include "lv2/lv2plug.in/ns/ext/options/options.h"
 
 #include "lv2_evbuf.h"
 
