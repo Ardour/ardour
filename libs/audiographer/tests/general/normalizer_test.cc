@@ -27,7 +27,7 @@ class NormalizerTest : public CppUnit::TestFixture
 		float target = 0.0;
 		random_data = TestUtils::init_random_data(samples, 0.5);
 
-		normalizer.reset (new Normalizer(target));
+		normalizer.reset (new Normalizer(target, samples));
 		peak_reader.reset (new PeakReader());
 		sink.reset (new VectorSink<float>());
 
@@ -35,7 +35,6 @@ class NormalizerTest : public CppUnit::TestFixture
 		peak_reader->process (c);
 
 		float peak = peak_reader->get_peak();
-		normalizer->alloc_buffer (samples);
 		normalizer->set_peak (peak);
 		normalizer->add_output (sink);
 		normalizer->process (c);
