@@ -39,6 +39,7 @@
 #include "lv2/lv2plug.in/ns/extensions/ui/ui.h"
 
 #include <lilv/lilv.h>
+#include <serd/serd.h>
 #include <suil/suil.h>
 
 #include "pbd/i18n.h"
@@ -398,8 +399,8 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 	const LilvUI*   ui     = (const LilvUI*)_lv2->c_ui();
 	const LilvNode* bundle = lilv_ui_get_bundle_uri(ui);
 	const LilvNode* binary = lilv_ui_get_binary_uri(ui);
-	char* ui_bundle_path = lilv_file_uri_parse(lilv_node_as_uri(bundle), NULL);
-	char* ui_binary_path = lilv_file_uri_parse(lilv_node_as_uri(binary), NULL);
+	char* ui_bundle_path = serd_parse_file_uri(lilv_node_as_uri(bundle), NULL);
+	char* ui_binary_path = serd_parse_file_uri(lilv_node_as_uri(binary), NULL);
 	if (!ui_bundle_path || !ui_binary_path) {
 		error << _("failed to get path for UI bindle or binary") << endmsg;
 		free(ui_bundle_path);
