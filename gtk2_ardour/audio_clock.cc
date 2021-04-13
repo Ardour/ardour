@@ -1274,7 +1274,7 @@ AudioClock::set_bbt (samplepos_t when, samplecnt_t offset, bool /*force*/)
 #endif
 		{
 			snprintf (buf, sizeof(buf), "1/%.0f = %.3f", m.tempo().note_type(), _session->tempo_map().tempo_at_sample (pos).note_types_per_minute());
-			_right_btn.set_text (buf, false);
+			_left_btn.set_text (buf, false);
 		}
 
 		snprintf (buf, sizeof(buf), "%g/%g", m.meter().divisions_per_bar(), m.meter().note_divisor());
