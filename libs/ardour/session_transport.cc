@@ -899,6 +899,23 @@ Session::request_transport_speed_nonzero (double speed, bool as_default, Transpo
 }
 
 void
+Session::request_roll (TransportRequestSource origin)
+{
+	if (synced_to_engine()) {
+		_engine.transport_stop ();
+		return;
+	}
+
+	if (should_ignore_transport_request (origin, TR_StartStop)) {
+		return;
+	}
+
+	SessionEvent* ev = new SessionEvent (SessionEvent::SetTransportSpeed, SessionEvent::Add, SessionEvent::Immediate, audible_sample(), _default_engine_speed * _default_transport_speed);
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request transport roll, requested %1 from %2 * %3 transport @ %4\n", _default_engine_speed * _default_transport_speed, _default_engine_speed, _default_transport_speed, _transport_sample));
+	queue_event (ev);
+}
+
+void
 Session::request_stop (bool abort, bool clear_state, TransportRequestSource origin)
 {
 	if (synced_to_engine()) {
