@@ -221,4 +221,4 @@ def build(bld):
         testobj.name         = 'libpbd-tests'
         testobj.defines      = [ 'PACKAGE="' + I18N_PACKAGE + '"' ]
         if sys.platform != 'darwin' and bld.env['build_target'] != 'mingw':
-            testobj.lib      = ['rt']
+            testobj.lib      = ['rt', 'dl']
