@@ -206,7 +206,7 @@ ALoudnessPresets::push_back (CLoudnessPreset const& clp)
 bool
 ALoudnessPresets::erase (CLoudnessPreset const& clp)
 {
-	std::vector <ALoudnessPreset>::const_iterator i;
+	std::vector <ALoudnessPreset>::iterator i;
 	i = std::find (_p.begin (), _p.end(), clp);
 	if (i == _p.end ()) {
 		return false;
