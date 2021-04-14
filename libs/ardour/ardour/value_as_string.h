@@ -54,7 +54,15 @@ value_as_string(const ARDOUR::ParameterDescriptor& desc,
 	if (desc.unit == ARDOUR::ParameterDescriptor::MIDI_NOTE) {
 		snprintf(buf, sizeof(buf), "%s", ParameterDescriptor::midi_note_name (rint(v)).c_str());
 	} else if (desc.type == GainAutomation || desc.type == BusSendLevel || desc.type == TrimAutomation || desc.type == EnvelopeAutomation || desc.type == MainOutVolume) {
+#ifdef PLATFORM_WINDOWS
+		if (v < GAIN_COEFF_SMALL) {
+			snprintf(buf, sizeof(buf), "-inf dB");
+		} else {
+			snprintf(buf, sizeof(buf), "%.2f dB", accurate_coefficient_to_dB (v));
+		}
+#else
 		snprintf(buf, sizeof(buf), "%.2f dB", accurate_coefficient_to_dB (v));
+#endif
 	} else if (desc.type == PanWidthAutomation) {
 		snprintf (buf, sizeof (buf), "%d%%", (int) floor (100.0 * v));
 	} else if (!desc.print_fmt.empty()) {
