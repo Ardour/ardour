@@ -371,14 +371,26 @@ CoreAudioBackend::set_output_channels (uint32_t cc)
 int
 CoreAudioBackend::set_systemic_input_latency (uint32_t sl)
 {
+	if (_systemic_audio_input_latency == sl) {
+		return 0;
+	}
 	_systemic_audio_input_latency = sl;
+	if (_run) {
+		update_systemic_audio_latencies();
+	}
 	return 0;
 }
 
 int
 CoreAudioBackend::set_systemic_output_latency (uint32_t sl)
 {
+	if (_systemic_audio_output_latency == sl) {
+		return 0;
+	}
 	_systemic_audio_output_latency = sl;
+	if (_run) {
+		update_systemic_audio_latencies ();
+	}
 	return 0;
 }
 
@@ -489,6 +501,122 @@ CoreAudioBackend::midi_option () const
 	return _midi_driver_option;
 }
 
+std::vector<AudioBackend::DeviceStatus>
+CoreAudioBackend::enumerate_midi_devices () const {
+	std::vector<AudioBackend::DeviceStatus> mds;
+	std::map <std::string, int> duplexdevs;
+	for (size_t i = 0; i < _midiio->n_midi_inputs(); ++i) {
+		++duplexdevs[_midiio->port_name(i, true)];
+	}
+	for (size_t i = 0; i < _midiio->n_midi_outputs(); ++i) {
+		++duplexdevs[_midiio->port_name(i, false)];
+	}
+	std::map <std::string, int>::iterator i;
+	for (i = duplexdevs.begin(); i != duplexdevs.end (); ++i) {
+		if (i->second < 2) {
+			continue;
+		}
+		mds.push_back (AudioBackend::DeviceStatus (i->first, true));
+	}
+	return mds;
+}
+
+int
+CoreAudioBackend::set_midi_device_enabled (std::string const n, bool en)
+{
+	struct CoreMIDIDeviceInfo& nfo = _midi_devices[n];
+	if (nfo.enabled == en) {
+		return true;
+	}
+#if 0
+	nfo.enabled = false;
+	coremidi_rediscover ();
+#endif
+	return true;
+}
+
+bool
+CoreAudioBackend::midi_device_enabled (std::string const n) const
+{
+	return _midi_devices[n].enabled;;
+}
+
+uint32_t
+CoreAudioBackend::systemic_midi_input_latency (std::string const n) const
+{
+	return _midi_devices[n].systemic_input_latency;
+}
+
+uint32_t
+CoreAudioBackend::systemic_midi_output_latency (std::string const n) const
+{
+	return _midi_devices[n].systemic_output_latency;
+}
+
+int
+CoreAudioBackend::set_systemic_midi_input_latency (std::string const n, uint32_t l)
+{
+	struct CoreMIDIDeviceInfo& nfo = _midi_devices[n];
+	nfo.systemic_input_latency = l;
+	//_midi_devices[n].systemic_input_latency = l;
+	if (_run && nfo.enabled) {
+		update_systemic_midi_latencies ();
+	}
+	return 0;
+}
+
+int
+CoreAudioBackend::set_systemic_midi_output_latency (std::string const n, uint32_t l)
+{
+	struct CoreMIDIDeviceInfo& nfo = _midi_devices[n];
+	nfo.systemic_output_latency = l;
+	//_midi_devices[n].systemic_output_latency = l;
+	if (_run && nfo.enabled) {
+		update_systemic_midi_latencies ();
+	}
+	return 0;
+}
+
+void
+CoreAudioBackend::update_systemic_audio_latencies ()
+{
+	LatencyRange lr;
+
+	lr.min = lr.max = _measure_latency ? 0 : _systemic_audio_input_latency;
+	for (std::vector<BackendPortPtr>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it) {
+		set_latency_range (*it, true, lr);
+	}
+
+	lr.min = lr.max = (_measure_latency ? 0 : _systemic_audio_output_latency);
+	for (std::vector<BackendPortPtr>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
+		set_latency_range (*it, false, lr);
+	}
+	update_latencies ();
+}
+
+void
+CoreAudioBackend::update_systemic_midi_latencies ()
+{
+	pthread_mutex_lock (&_process_callback_mutex);
+	uint32_t i = 0;
+	for (std::vector<BackendPortPtr>::iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it, ++i) {
+		LatencyRange lr;
+		uint32_t sl = _midi_devices[_midiio->port_name(i, false)].systemic_output_latency;
+		lr.min = lr.max = _measure_latency ? 0 : sl;
+		set_latency_range (*it, true, lr);
+	}
+
+	i = 0;
+	for (std::vector<BackendPortPtr>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it, ++i) {
+		LatencyRange lr;
+		uint32_t sl = _midi_devices[_midiio->port_name(i, true)].systemic_input_latency;
+		lr.min = lr.max = _measure_latency ? 0 : sl;
+		set_latency_range (*it, false, lr);
+	}
+	pthread_mutex_unlock (&_process_callback_mutex);
+	update_latencies ();
+}
+
 void
 CoreAudioBackend::launch_control_app ()
 {
@@ -528,6 +656,13 @@ CoreAudioBackend::_start (bool for_latency_measurement)
 	}
 
 	if (_active_ca || _active_fw || _run) {
+		if (for_latency_measurement != _measure_latency) {
+			_measure_latency = for_latency_measurement;
+			update_systemic_audio_latencies();
+			update_systemic_midi_latencies ();
+			PBD::info << _("AlsaAudioBackend: reload latencies.") << endmsg;
+			return NoError;
+		}
 		PBD::error << _("CoreAudioBackend: already active.") << endmsg;
 		return BackendReinitializationError;
 	}
@@ -646,6 +781,7 @@ CoreAudioBackend::_start (bool for_latency_measurement)
 		_midiio->set_enabled(true);
 		_midiio->set_port_changed_callback(midi_port_change, this);
 		_midiio->start(); // triggers port discovery, callback coremidi_rediscover()
+		engine.request_device_list_update();
 	}
 
 	if (register_system_audio_ports()) {
@@ -1029,7 +1165,8 @@ CoreAudioBackend::coremidi_rediscover()
 			continue;
 		}
 		LatencyRange lr;
-		lr.min = lr.max = _samples_per_period; // TODO add per-port midi-systemic latency
+		uint32_t sl = _midi_devices[_midiio->port_name(i, true)].systemic_input_latency;
+		lr.min = lr.max = _measure_latency ? 0 : sl;
 		set_latency_range (p, false, lr);
 		BackendPortPtr pp = boost::dynamic_pointer_cast<BackendPort>(p);
 		pp->set_hw_port_name(_midiio->port_name(i, true));
@@ -1052,8 +1189,9 @@ CoreAudioBackend::coremidi_rediscover()
 			continue;
 		}
 		LatencyRange lr;
-		lr.min = lr.max = _samples_per_period; // TODO add per-port midi-systemic latency
-		set_latency_range (p, false, lr);
+		uint32_t sl = _midi_devices[_midiio->port_name(i, false)].systemic_output_latency;
+		lr.min = lr.max = _measure_latency ? 0 : sl;
+		set_latency_range (p, true, lr);
 		BackendPortPtr pp = boost::dynamic_pointer_cast<BackendPort>(p);
 		pp->set_hw_port_name(_midiio->port_name(i, false));
 		_system_midi_out.push_back(pp);

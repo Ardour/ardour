@@ -179,6 +179,7 @@ class CoreAudioBackend : public AudioBackend, public PortEngineSharedImpl {
 	bool can_change_sample_rate_when_running () const;
 	bool can_change_buffer_size_when_running () const;
 	bool can_measure_systemic_latency () const { return true; }
+	bool can_change_systemic_latency_when_running () const { return true; }
 
 	int set_device_name (const std::string&);
 	int set_input_device_name (const std::string&);
@@ -190,8 +191,8 @@ class CoreAudioBackend : public AudioBackend, public PortEngineSharedImpl {
 	int set_output_channels (uint32_t);
 	int set_systemic_input_latency (uint32_t);
 	int set_systemic_output_latency (uint32_t);
-	int set_systemic_midi_input_latency (std::string const, uint32_t) { return 0; }
-	int set_systemic_midi_output_latency (std::string const, uint32_t) { return 0; }
+	int set_systemic_midi_input_latency (std::string const, uint32_t);
+	int set_systemic_midi_output_latency (std::string const, uint32_t);
 
 	int reset_device () { return 0; };
 
@@ -206,13 +207,13 @@ class CoreAudioBackend : public AudioBackend, public PortEngineSharedImpl {
 	uint32_t     output_channels () const;
 	uint32_t     systemic_input_latency () const;
 	uint32_t     systemic_output_latency () const;
-	uint32_t     systemic_midi_input_latency (std::string const) const { return 0; }
-	uint32_t     systemic_midi_output_latency (std::string const) const { return 0; }
+	uint32_t     systemic_midi_input_latency (std::string const) const;
+	uint32_t     systemic_midi_output_latency (std::string const) const;
 
 	uint32_t systemic_hw_input_latency () const;
 	uint32_t systemic_hw_output_latency () const;
 
-	bool can_set_systemic_midi_latencies () const { return false; /* XXX */}
+	bool can_set_systemic_midi_latencies () const { return true; }
 
 	/* External control app */
 	std::string control_app_name () const { return std::string ("Apple"); }
@@ -223,15 +224,9 @@ class CoreAudioBackend : public AudioBackend, public PortEngineSharedImpl {
 	int set_midi_option (const std::string&);
 	std::string midi_option () const;
 
-	std::vector<DeviceStatus> enumerate_midi_devices () const {
-		return std::vector<AudioBackend::DeviceStatus> ();
-	}
-	int set_midi_device_enabled (std::string const, bool) {
-		return true;
-	}
-	bool midi_device_enabled (std::string const) const {
-		return false;
-	}
+	std::vector<DeviceStatus> enumerate_midi_devices () const;
+	int set_midi_device_enabled (std::string const, bool);
+	bool midi_device_enabled (std::string const) const;
 
 	// really private, but needing static access:
 	int process_callback(uint32_t, uint64_t);
@@ -373,6 +368,21 @@ class CoreAudioBackend : public AudioBackend, public PortEngineSharedImpl {
 	enum DeviceFilter { All, Input, Output, Duplex };
 	uint32_t name_to_id(std::string, DeviceFilter filter = All) const;
 
+	/* midi settings */
+	struct CoreMIDIDeviceInfo {
+		bool     enabled;
+		uint32_t systemic_input_latency;
+		uint32_t systemic_output_latency;
+		CoreMIDIDeviceInfo (bool en = true)
+			: enabled (en)
+			  , systemic_input_latency (0)
+			  , systemic_output_latency (0)
+		{}
+	};
+
+	mutable std::map<std::string, struct CoreMIDIDeviceInfo> _midi_devices;
+
+
 	/* processing */
 	float  _dsp_load;
 	ARDOUR::DSPLoadCalculator  _dsp_load_calc;
@@ -396,6 +406,9 @@ class CoreAudioBackend : public AudioBackend, public PortEngineSharedImpl {
 
 	/* port engine */
 	int register_system_audio_ports ();
+
+	void update_systemic_audio_latencies ();
+	void update_systemic_midi_latencies ();
 
 	BackendPortPtr find_port_in (std::vector<BackendPortPtr> const & plist, const std::string& port_name) const {
 		for (std::vector<BackendPortPtr>::const_iterator it = plist.begin (); it != plist.end (); ++it) {
