@@ -2976,7 +2976,7 @@ EngineControl::on_switch_page (GtkNotebookPage*, guint page_num)
 			/* save any existing latency values */
 
 			uint32_t il = (uint32_t) input_latency.get_value ();
-			uint32_t ol = (uint32_t) input_latency.get_value ();
+			uint32_t ol = (uint32_t) output_latency.get_value ();
 
 			/* reset to zero so that our new test instance
 			   will be clean of any existing latency measures.
