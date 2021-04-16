@@ -74,7 +74,6 @@ Auditioner::init ()
 		return -1;
 	}
 
-	_output->add_port ("", this, DataType::MIDI);
 	use_new_playlist (DataType::MIDI);
 
 	if (!audition_synth_info) {
