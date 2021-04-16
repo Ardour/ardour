@@ -83,7 +83,7 @@ Session::pre_export ()
 	realtime_stop (true, true);
 
 	if (get_record_enabled()) {
-		disable_record (false);
+		disable_record (false, true);
 	}
 
 	unset_play_loop ();
