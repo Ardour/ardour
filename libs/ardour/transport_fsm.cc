@@ -60,6 +60,7 @@ TransportFSM::TransportFSM (TransportAPI& tapi)
 	, last_speed_request (SetSpeed, 0, false, false, false) /* ditto */
 	, api (&tapi)
 	, processing (0)
+	, most_recently_requested_speed (std::numeric_limits<double>::max())
 {
 	init ();
 }
@@ -360,17 +361,11 @@ TransportFSM::process_event (Event& ev, bool already_deferred, bool& deferred)
 					transition (Backwards);
 				}
 
-				if (fabs (most_recently_requested_speed) > 0.) {
-
-					transition (Rolling);
-
-					api->set_transport_speed (last_speed_request.speed, last_speed_request.abort_capture, last_speed_request.clear_state, last_speed_request.as_default);
-
-					if (most_recently_requested_speed != 0.0) {
-						roll_after_locate ();
-					}
-				} else {
+				if (should_roll_after_locate()) {
 					transition (Stopped);
+				} else {
+					transition (Rolling);
+					roll_after_locate ();
 				}
 
 			} else {
@@ -635,46 +630,40 @@ TransportFSM::enqueue (Event* ev)
 void
 TransportFSM::set_speed (Event const & ev)
 {
-	if ((rolling() && ev.speed * most_recently_requested_speed < 0.0) ||
-	    (stopped() && ev.speed < 0.0) ||
-	    (rolling() && most_recently_requested_speed < 0.0 && ev.speed == 0.0)) {
+	bool initial_reverse = false;
 
-		/* Transport was rolling, and new speed has opposite sign to
-		 * the last requested speed.
-		 *
-		 * OR
-		 *
-		 * Transport was stopped, and new speed is negative.
-		 *
-		 * OR
-		 *
-		 * new speed is zero, last requested speed was negative
-		 *
-		 * SO ... we need to reverse.
-		 *
-		 * The plan: stop normally (with a declick, and schedule a
-		 * locate to our current position, with "force" set to true,
-		 * and roll right after it is complete.
-		 */
+	assert (ev.speed != 0.0);
 
-		most_recently_requested_speed = ev.speed;
+	DEBUG_TRACE (DEBUG::TFSMState, string_compose ("%1, target speed %2 MRRS %3 state %4\n", (ev.speed == 0.0 ? "stopping" : "continue"), ev.speed, most_recently_requested_speed, current_state()));
+	api->set_transport_speed (ev.speed, ev.as_default);
+
+	const double mrrs = most_recently_requested_speed;
+
+	/* corner case: first call to ::set_speed() has a negative
+	 * speed
+	 */
+
+	if (most_recently_requested_speed == std::numeric_limits<double>::max()) {
+		/* have never rolled yet */
+		initial_reverse = true;
+	}
+
+	most_recently_requested_speed = ev.speed;
+
+	if (ev.speed * mrrs < 0.0 || initial_reverse) {
+
+		/* direction change */
+
+		DEBUG_TRACE (DEBUG::TFSMState, string_compose ("switch-directions, target speed %1 MRRS %2 state %3 IR %4\n", ev.speed, mrrs, current_state(), initial_reverse));
+
 		last_speed_request = ev;
 		transition (Reversing);
 
-		DEBUG_TRACE (DEBUG::TFSMState, string_compose ("reverse, target speed %1 MRRS %2 state %3\n", ev.speed, most_recently_requested_speed, current_state()));
-
-		Event lev (Locate, api->position(), MustRoll, true, false, true);
+		Event lev (Locate, api->position(), RollIfAppropriate, false, false, true);
 
 		transition (DeclickToLocate);
 		start_declick_for_locate (lev);
-
-	} else {
-
-		most_recently_requested_speed = ev.speed;
-		api->set_transport_speed (ev.speed, ev.abort_capture, ev.clear_state, ev.as_default);
-
 	}
-
 }
 
 bool
