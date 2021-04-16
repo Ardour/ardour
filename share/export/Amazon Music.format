@@ -6,7 +6,7 @@
   <Watermark level="-20" duration="0" interval="0"/>
   <EncodingOptions>
     <Option name="sample-format" value="SF_16"/>
-    <Option name="dithering" value="D_Rect"/>
+    <Option name="dithering" value="D_Tri"/>
     <Option name="tag-metadata" value="1"/>
     <Option name="tag-support" value="1"/>
     <Option name="broadcast-info" value="0"/>
