@@ -130,6 +130,14 @@ void
 Auditioner::load_synth (bool need_lock)
 {
 	unload_synth(need_lock);
+
+	if (!audition_synth_info) {
+		lookup_fallback_synth ();
+	}
+
+	if (!audition_synth_info) {
+		return;
+	}
 	
 	boost::shared_ptr<Plugin> p = audition_synth_info->load (_session);
 	if (p) {
