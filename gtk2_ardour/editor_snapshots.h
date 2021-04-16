@@ -61,7 +61,6 @@ private:
 	Gtk::Menu _menu;
 
 	bool button_press (GdkEventButton *);
-	void selection_changed ();
 	void popup_context_menu (int, int32_t, std::string);
 	void remove (std::string);
 	void rename (std::string);
