@@ -99,9 +99,25 @@ Session::realtime_stop (bool abort, bool clear_state)
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("realtime stop @ %1 speed = %2\n", _transport_sample, _transport_speed));
 	PostTransportWork todo = PostTransportStop;
 
-	if (Config->get_reset_default_speed_on_stop() && !_transport_fsm->declicking_for_locate()) {
-		_default_transport_speed = 1.0;
-		_default_engine_speed = 1.0;
+	/* we are rolling and we want to stop */
+
+	if (Config->get_monitoring_model() == HardwareMonitoring) {
+		set_track_monitor_input_status (true);
+	}
+
+	if (synced_to_engine ()) {
+		if (clear_state) {
+			/* do this here because our response to the slave won't
+			   take care of it.
+			*/
+			_play_range = false;
+			_count_in_once = false;
+			unset_play_loop ();
+		}
+	}
+
+	if (Config->get_reset_default_speed_on_stop() && _default_transport_speed != 1.0 && !_transport_fsm->declicking_for_locate()) {
+		_transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::SetSpeed, 1.0, false, true, true));
 	}
 
 	/* call routes */
@@ -508,6 +524,28 @@ Session::start_transport ()
 {
 	ENSURE_PROCESS_THREAD;
 	DEBUG_TRACE (DEBUG::Transport, "start_transport\n");
+
+	if (Config->get_loop_is_mode() && get_play_loop ()) {
+
+		Location *location = _locations->auto_loop_location();
+
+		if (location != 0) {
+			if (_transport_sample != location->start()) {
+
+				/* force tracks to do their thing */
+				set_track_loop (true);
+
+				/* jump to start and then roll from there */
+
+				request_locate (location->start(), MustRoll);
+				return;
+			}
+		}
+	}
+
+	if (Config->get_monitoring_model() == HardwareMonitoring && config.get_auto_input()) {
+		set_track_monitor_input_status (false);
+	}
 
 	_last_roll_location = _transport_sample;
 	_last_roll_or_reversal_location = _transport_sample;
