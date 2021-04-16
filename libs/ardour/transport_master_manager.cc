@@ -197,7 +197,7 @@ TransportMasterManager::pre_process_transport_masters (pframes_t nframes, sample
 
 	if (!_current_master->ok()) {
 		/* stop */
-		_session->request_transport_speed (0.0, false, _current_master->request_type());
+		_session->request_stop (false, false, _current_master->request_type());
 		DEBUG_TRACE (DEBUG::Slave, "no roll2 - master has failed\n");
 		_master_invalid_this_cycle = true;
 		return 1.0;
