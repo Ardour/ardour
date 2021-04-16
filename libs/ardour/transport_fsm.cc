@@ -83,6 +83,7 @@ TransportFSM::process_events ()
 
 		MotionState oms = _motion_state;
 		ButlerState obs = _butler_state;
+		DirectionState ods = _direction_state;
 
 		Event* ev = &queued_events.front();
 		bool deferred;
@@ -98,23 +99,30 @@ TransportFSM::process_events ()
 
 		if (process_event (*ev, false, deferred)) { /* event processed successfully */
 
-			if (oms != _motion_state || obs != _butler_state) {
+			if (oms != _motion_state || obs != _butler_state || ods != _direction_state) {
 
 				/* state changed, so now check deferred events
 				 * to see if they can be processed now
 				 */
 
 				if (!deferred_events.empty() ){
+
 					DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("processing %1 deferred events\n", deferred_events.size()));
 
 					for (EventList::iterator e = deferred_events.begin(); e != deferred_events.end(); ) {
 						Event* deferred_ev = &(*e);
 						bool deferred2;
-						if (process_event (*e, true, deferred2)) { /* event processed, remove from deferred */
-							e = deferred_events.erase (e);
-							delete deferred_ev;
-						} else {
+
+						if (process_event (*e, true, deferred2)) {
+							if (!deferred2) { /* event processed and not deferred again, remove from deferred */
+								e = deferred_events.erase (e);
+								delete deferred_ev;
+							} else {
+								++e;
+							}
+						} else { /* process error or deferred (again) */
 							++e;
+							delete deferred_ev;
 						}
 					}
 				}
@@ -210,8 +218,8 @@ TransportFSM::process_event (Event& ev, bool already_deferred, bool& deferred)
 		case Reversing:
 			if (!already_deferred) {
 				defer (ev);
-				deferred = true;
 			}
+			deferred = true;
 			break;
 		default:
 			switch (_motion_state) {
@@ -222,8 +230,8 @@ TransportFSM::process_event (Event& ev, bool already_deferred, bool& deferred)
 			default:
 				if (!already_deferred) {
 					defer (ev);
-					deferred = true;
 				}
+				deferred = true;
 			}
 			break;
 		}
@@ -241,14 +249,14 @@ TransportFSM::process_event (Event& ev, bool already_deferred, bool& deferred)
 		case WaitingForLocate:
 			if (!already_deferred) {
 				defer (ev);
-				deferred = true;
 			}
+			deferred = true;
 			break;
 		case DeclickToStop:
 			if (!already_deferred) {
 				defer (ev);
-				deferred = true;
 			}
+			deferred = true;
 			break;
 		default:
 			bad_transition (ev); return false;
@@ -268,8 +276,8 @@ TransportFSM::process_event (Event& ev, bool already_deferred, bool& deferred)
 		case WaitingForLocate:
 			if (!already_deferred) {
 				defer (ev);
-				deferred = true;
 			}
+			deferred = true;
 			break;
 		case DeclickToStop:
 			/* already doing it */
