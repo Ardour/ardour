@@ -857,6 +857,12 @@ Session::request_sync_source (boost::shared_ptr<TransportMaster> tm)
 }
 
 void
+Session::reset_transport_speed (TransportRequestSource origin)
+{
+	request_transport_speed (1.0, true, origin);
+}
+
+void
 Session::request_transport_speed (double speed, bool as_default, TransportRequestSource origin)
 {
 	if (synced_to_engine()) {

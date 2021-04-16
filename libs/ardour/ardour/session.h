@@ -477,6 +477,8 @@ public:
 	void goto_start (bool and_roll = false);
 	void use_rf_shuttle_speed ();
 	void allow_auto_play (bool yn);
+
+	void reset_transport_speed (TransportRequestSource origin = TRS_UI);
 	void request_transport_speed (double speed, bool as_default = true, TransportRequestSource origin = TRS_UI);
 	void request_transport_speed_nonzero (double, bool as_default = true, TransportRequestSource origin = TRS_UI);
 	void request_overwrite_buffer (boost::shared_ptr<Track>, OverwriteReason);
@@ -1343,7 +1345,7 @@ protected:
 	bool should_roll_after_locate () const;
 	double speed() const { return _transport_speed; }
 	samplepos_t position() const { return _transport_sample; }
-	void set_transport_speed (double speed, bool abort, bool clear_state, bool as_default);
+	void set_transport_speed (double speed, bool as_default);
 	bool need_declick_before_locate () const;
 
 private:
