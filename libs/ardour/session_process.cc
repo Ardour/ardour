@@ -61,6 +61,7 @@ using namespace PBD;
 using namespace std;
 
 #define TFSM_EVENT(evtype) { _transport_fsm->enqueue (new TransportFSM::Event (evtype)); }
+#define TFSM_ROLL() { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::StartTransport)); }
 #define TFSM_STOP(abort,clear) { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::StopTransport,abort,clear)); }
 #define TFSM_SPEED(speed,abort,clear_state,as_default) { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::SetSpeed,speed,abort,clear_state,as_default)); }
 #define TFSM_LOCATE(target,ltd,flush,loop,force) { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::Locate,target,ltd,flush,loop,force)); }
@@ -912,6 +913,14 @@ Session::process_event (SessionEvent* ev)
 
 	case SessionEvent::SetTransportSpeed:
 		TFSM_SPEED (ev->speed, ev->yes_or_no, ev->second_yes_or_no, ev->third_yes_or_no);
+		break;
+
+	case SessionEvent::StartRoll:
+		TFSM_ROLL ();
+		break;
+
+	case SessionEvent::EndRoll:
+		TFSM_STOP (ev->yes_or_no, ev->second_yes_or_no);
 		break;
 
 	case SessionEvent::SetTransportMaster:
