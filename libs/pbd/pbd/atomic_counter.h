@@ -20,11 +20,12 @@
 #ifndef PBD_ATOMIC_COUNTER_H
 #define PBD_ATOMIC_COUNTER_H
 
+#include <glib.h>
+
 #include "pbd/g_atomic_compat.h"
 
 namespace PBD {
 
-#include <glib.h>
 class atomic_counter
 {
 	/**
