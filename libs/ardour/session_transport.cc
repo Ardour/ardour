@@ -898,7 +898,7 @@ Session::request_roll (TransportRequestSource origin)
 		return;
 	}
 
-	SessionEvent* ev = new SessionEvent (SessionEvent::SetTransportSpeed, SessionEvent::Add, SessionEvent::Immediate, audible_sample(), _default_engine_speed * _default_transport_speed);
+	SessionEvent* ev = new SessionEvent (SessionEvent::StartRoll, SessionEvent::Add, SessionEvent::Immediate, audible_sample(), _default_engine_speed * _default_transport_speed);
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request transport roll, requested %1 from %2 * %3 transport @ %4\n", _default_engine_speed * _default_transport_speed, _default_engine_speed, _default_transport_speed, _transport_sample));
 	queue_event (ev);
 }
@@ -920,7 +920,7 @@ Session::request_stop (bool abort, bool clear_state, TransportRequestSource orig
 		solo_selection ( _soloSelection, false );
 	}
 
-	SessionEvent* ev = new SessionEvent (SessionEvent::SetTransportSpeed, SessionEvent::Add, SessionEvent::Immediate, audible_sample(), 0.0, abort, clear_state);
+	SessionEvent* ev = new SessionEvent (SessionEvent::EndRoll, SessionEvent::Add, SessionEvent::Immediate, audible_sample(), 0.0, abort, clear_state);
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request transport stop, audible %3 transport %4 abort = %1, clear state = %2\n", abort, clear_state, audible_sample(), _transport_sample));
 	queue_event (ev);
 }
