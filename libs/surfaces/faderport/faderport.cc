@@ -94,16 +94,16 @@ FaderPort::FaderPort (Session& s)
 	}
 
 	_input_bundle.reset (new ARDOUR::Bundle (_("Faderport Support (Receive)"), true));
-	_output_bundle.reset (new ARDOUR::Bundle (_("Faderport Support (Send) "), false));
+	_output_bundle.reset (new ARDOUR::Bundle (_("Faderport Support (Send)"), false));
 
 	_input_bundle->add_channel (
-		inp->name(),
+		"",
 		ARDOUR::DataType::MIDI,
 		session->engine().make_port_name_non_relative (inp->name())
 		);
 
 	_output_bundle->add_channel (
-		outp->name(),
+		"",
 		ARDOUR::DataType::MIDI,
 		session->engine().make_port_name_non_relative (outp->name())
 		);

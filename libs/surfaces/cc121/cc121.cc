@@ -103,13 +103,13 @@ CC121::CC121 (Session& s)
 	_output_bundle.reset (new ARDOUR::Bundle (_("CC121 Support (Send) "), false));
 
 	_input_bundle->add_channel (
-		inp->name(),
+		"",
 		ARDOUR::DataType::MIDI,
 		session->engine().make_port_name_non_relative (inp->name())
 		);
 
 	_output_bundle->add_channel (
-		outp->name(),
+		"",
 		ARDOUR::DataType::MIDI,
 		session->engine().make_port_name_non_relative (outp->name())
 		);
