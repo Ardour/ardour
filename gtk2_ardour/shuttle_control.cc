@@ -602,12 +602,12 @@ ShuttleControl::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangl
 	cairo_stroke (cr);
 
 	float speed = 0.0;
-	float acutal_speed = 0.0;
+	float actual_speed = 0.0;
 	char buf[32];
 
 	if (_session) {
 		speed = _session->actual_speed ();
-		acutal_speed = speed;
+		actual_speed = speed;
 		if (shuttle_grabbed) {
 			speed = requested_speed;
 		}
@@ -636,20 +636,20 @@ ShuttleControl::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangl
 	cairo_fill(cr);
 
 	/* text */
-	if (acutal_speed != 0) {
+	if (actual_speed != 0) {
 		if (Config->get_shuttle_units() == Percentage) {
-			if (acutal_speed == 1.0) {
+			if (actual_speed == 1.0) {
 				snprintf (buf, sizeof (buf), "%s", _("Play"));
 			} else {
-				if (acutal_speed < 0.0) {
-					snprintf (buf, sizeof (buf), "< %.1f%%", -acutal_speed * 100.f);
+				if (actual_speed < 0.0) {
+					snprintf (buf, sizeof (buf), "< %.1f%%", -actual_speed * 100.f);
 				} else {
-					snprintf (buf, sizeof (buf), "> %.1f%%", acutal_speed * 100.f);
+					snprintf (buf, sizeof (buf), "> %.1f%%", actual_speed * 100.f);
 				}
 			}
 		} else {
 			bool reversed;
-			int semi = speed_as_semitones (acutal_speed, reversed);
+			int semi = speed_as_semitones (actual_speed, reversed);
 			if (reversed) {
 				snprintf (buf, sizeof (buf), _("< %+2d st"), semi);
 			} else {
@@ -660,7 +660,7 @@ ShuttleControl::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangl
 		snprintf (buf, sizeof (buf), "%s", _("Stop"));
 	}
 
-	last_speed_displayed = acutal_speed;
+	last_speed_displayed = actual_speed;
 
 	_info_button.set_text (buf);
 
