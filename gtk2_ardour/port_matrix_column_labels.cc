@@ -313,16 +313,16 @@ PortMatrixColumnLabels::render_bundle_name (
 		}
 		cairo_move_to (
 			cr,
-			xoff + grid_spacing() - q * sin (angle ()) + rl * cos (angle()),
-			yoff + _height - q * cos (angle ()) - rl * sin (angle())
+			rint (xoff + grid_spacing() - q * sin (angle ()) + rl * cos (angle())),
+			rint (yoff + _height - q * cos (angle ()) - rl * sin (angle()))
 			);
 
 	} else {
 
 		cairo_move_to (
 			cr,
-			xoff + grid_spacing() - q * sin (angle ()),
-			yoff + _height - q * cos (angle ())
+			rint (xoff + grid_spacing() - q * sin (angle ())),
+			rint (yoff + _height - q * cos (angle ()))
 			);
 	}
 
@@ -361,8 +361,8 @@ PortMatrixColumnLabels::render_channel_name (
 
 		cairo_move_to (
 			cr,
-			xoff + grid_spacing() - q * sin (angle ()),
-			yoff + _height - q * cos (angle ())
+			rint (xoff + grid_spacing() - q * sin (angle ())),
+			rint (yoff + _height - q * cos (angle ()))
 			);
 
 
@@ -371,8 +371,8 @@ PortMatrixColumnLabels::render_channel_name (
 		double const rl = 3 * name_pad() + _longest_bundle_name;
 		cairo_move_to (
 			cr,
-			xoff + grid_spacing() - q * sin (angle ()) + rl * cos (angle ()),
-			yoff + _height - q * cos (angle ()) - rl * sin (angle())
+			rint (xoff + grid_spacing() - q * sin (angle ()) + rl * cos (angle ())),
+			rint (yoff + _height - q * cos (angle ()) - rl * sin (angle()))
 			);
 	}
 

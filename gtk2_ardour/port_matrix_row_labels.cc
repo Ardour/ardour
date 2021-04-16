@@ -251,7 +251,7 @@ PortMatrixRowLabels::render_bundle_name (
 	Gdk::Color textcolor;
 	ARDOUR_UI_UTILS::set_color_from_rgba(textcolor, Gtkmm2ext::contrasting_text_color(ARDOUR_UI_UTILS::gdk_color_to_rgba(bg_colour)));
 	set_source_rgb (cr, textcolor);
-	cairo_move_to (cr, xoff + x + name_pad(), yoff + name_pad() + off);
+	cairo_move_to (cr, rint (xoff + x + name_pad()), rint (yoff + name_pad() + off));
 	cairo_show_text (cr, b->name().c_str());
 }
 
@@ -279,7 +279,7 @@ PortMatrixRowLabels::render_channel_name (
 		Gdk::Color textcolor;
 		ARDOUR_UI_UTILS::set_color_from_rgba(textcolor, Gtkmm2ext::contrasting_text_color(ARDOUR_UI_UTILS::gdk_color_to_rgba(bg_colour)));
 		set_source_rgb (cr, textcolor);
-		cairo_move_to (cr, port_name_x() + xoff + name_pad(), yoff + name_pad() + off);
+		cairo_move_to (cr, rint (port_name_x() + xoff + name_pad()), rint (yoff + name_pad() + off));
 		cairo_show_text (cr, bc.bundle->channel_name(bc.channel).c_str());
 	}
 }
