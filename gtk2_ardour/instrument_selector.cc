@@ -29,9 +29,10 @@
 using namespace Gtk;
 using namespace ARDOUR;
 
-InstrumentSelector::InstrumentSelector()
-	: _reasonable_synth_id(0)
-	, _gmsynth_id(UINT32_MAX)
+InstrumentSelector::InstrumentSelector (bool allow_none)
+	: _reasonable_synth_id (0)
+	, _gmsynth_id (UINT32_MAX)
+	, _allow_none (allow_none)
 {
 	refill ();
 
@@ -121,11 +122,13 @@ InstrumentSelector::build_instrument_list()
 
 	_instrument_list = ListStore::create(_instrument_list_columns);
 
-	TreeModel::Row row = *(_instrument_list->append());
-	row[_instrument_list_columns.info_ptr] = PluginInfoPtr();
-	row[_instrument_list_columns.name]     = _("-none-");
+	if (_allow_none) {
+		TreeModel::Row row = *(_instrument_list->append());
+		row[_instrument_list_columns.info_ptr] = PluginInfoPtr();
+		row[_instrument_list_columns.name]     = _("-none-");
+	}
 
-	uint32_t n = 1;
+	uint32_t n = _allow_none ? 1 : 0;
 	std::string prev;
 	for (PluginInfoList::const_iterator i = all_plugs.begin(); i != all_plugs.end(); ++i, ++n) {
 		PluginInfoPtr p = *i;
@@ -169,7 +172,7 @@ InstrumentSelector::build_instrument_list()
 			name += " (" + suffix + ")";
 		}
 
-		row = *(_instrument_list->append());
+		TreeModel::Row row = *(_instrument_list->append());
 		row[_instrument_list_columns.name] = name;
 
 		row[_instrument_list_columns.info_ptr] = p;

@@ -39,7 +39,7 @@ class Editor;
 class InstrumentSelector : public Gtk::ComboBox
 {
 public:
-	InstrumentSelector();
+	InstrumentSelector (bool allow_none = true);
 
 	ARDOUR::PluginInfoPtr selected_instrument () const;
 	std::string selected_instrument_name () const;
@@ -61,6 +61,7 @@ private:
 	InstrumentListColumns        _instrument_list_columns;
 	uint32_t                     _reasonable_synth_id;
 	uint32_t                     _gmsynth_id;
+	bool                         _allow_none;
 	PBD::ScopedConnection        _update_connection;
 };
 
