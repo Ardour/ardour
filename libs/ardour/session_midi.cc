@@ -625,7 +625,7 @@ Session::mmc_step_timeout ()
 
 	if (diff_usecs > 1000000.0 || fabs (_transport_speed) < 0.0000001) {
 		/* too long or too slow, stop transport */
-		request_transport_speed (0.0);
+		request_stop ();
 		step_queued = false;
 		return false;
 	}
