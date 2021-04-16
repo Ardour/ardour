@@ -5467,7 +5467,7 @@ ScrubDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 {
 	if (movement_occurred && _editor->session()) {
 		/* make sure we stop */
-		_editor->session()->request_transport_speed (0.0);
+		_editor->session()->request_stop ();
 	}
 }
 

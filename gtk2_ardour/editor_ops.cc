@@ -4012,7 +4012,7 @@ Editor::freeze_route ()
 	}
 
 	/* stop transport before we start. this is important */
-	_session->request_transport_speed (0.0);
+	_session->request_stop();
 
 	/* wait for just a little while, because the above call is asynchronous */
 	int timeout = 10;

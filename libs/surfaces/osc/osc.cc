@@ -3022,7 +3022,7 @@ OSC::scrub (float delta, lo_message msg)
 			session->request_transport_speed (-1);
 		}
 	} else {
-		session->request_transport_speed (0);
+		session->request_stop ();
 	}
 
 	return 0;
@@ -5896,7 +5896,6 @@ OSC::periodic (void)
 		int64_t diff = now - scrub_time;
 		if (diff > 120000) {
 			scrub_speed = 0;
-			session->request_transport_speed (0);
 			// locate to the place PH was at last tick
 			session->request_locate (scrub_place, MustStop);
 		}

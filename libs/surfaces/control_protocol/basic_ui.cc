@@ -200,7 +200,7 @@ BasicUI::ffwd ()
 void
 BasicUI::transport_stop ()
 {
-	session->request_transport_speed (0.0);
+	session->request_stop ();
 }
 
 bool
@@ -283,7 +283,7 @@ BasicUI::transport_play (bool from_last_start)
 	}
 
 	if (!rolling) {
-		session->request_transport_speed (1.0f, false);
+		session->request_roll ();
 	}
 }
 

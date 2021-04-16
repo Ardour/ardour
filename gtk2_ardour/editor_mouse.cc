@@ -313,7 +313,8 @@ Editor::mouse_mode_toggled (MouseMode m)
 	if (_session && mouse_mode == MouseAudition) {
 		/* stop transport and reset default speed to avoid oddness with
 		   auditioning */
-		_session->request_transport_speed (0.0, true);
+		_session->request_stop ();
+		_session->request_transport_speed (1.0);
 	}
 
 	const bool was_internal = internal_editing();
@@ -1788,7 +1789,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				}
 			} else if (_session) {
 				/* make sure we stop */
-				_session->request_transport_speed (0.0);
+				_session->request_stop ();
 			}
 			break;
 

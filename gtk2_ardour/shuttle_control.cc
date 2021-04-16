@@ -269,11 +269,7 @@ ShuttleControl::reset_speed ()
 		return;
 	}
 
-	if (_session->transport_rolling()) {
-		_session->request_transport_speed (1.0, true);
-	} else {
-		_session->request_transport_speed (0.0, true);
-	}
+	_session->reset_transport_speed ();
 }
 
 void
@@ -307,7 +303,7 @@ ShuttleControl::on_button_press_event (GdkEventButton* ev)
 	case 1:
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
 			if (_session->transport_rolling()) {
-				_session->request_transport_speed (1.0);
+				_session->reset_transport_speed ();
 			}
 		} else {
 			add_modal_grab ();
@@ -345,11 +341,7 @@ ShuttleControl::on_button_release_event (GdkEventButton* ev)
 			gdk_pointer_ungrab (GDK_CURRENT_TIME);
 
 			if (Config->get_shuttle_behaviour() == Sprung) {
-				if (shuttle_speed_on_grab == 0 ) {
-					_session->request_stop ();
-				} else {
-					_session->request_transport_speed (shuttle_speed_on_grab);
-				}
+				_session->reset_transport_speed();
 			} else {
 				mouse_shuttle (ev->x, true);
 			}
@@ -567,6 +559,12 @@ ShuttleControl::use_shuttle_fract (bool force, bool zero_ok)
 		} else {
 			_session->request_transport_speed_nonzero (speed, Config->get_shuttle_behaviour() == Wheel);
 		}
+
+		if (speed != 0 && !_session->transport_state_rolling()) {
+			_session->request_roll ();
+		} else if (speed == 0 && zero_ok && _session->transport_state_rolling()) {
+			_session->request_stop ();
+		}
 	}
 }
 
@@ -721,7 +719,7 @@ ShuttleControl::parameter_changed (std::string p)
 						/* reset current speed and
 						   revert to 1.0 as the default
 						*/
-						_session->request_transport_speed (1.0);
+						_session->reset_transport_speed ();
 						/* redraw when speed changes */
 					}
 				} else {

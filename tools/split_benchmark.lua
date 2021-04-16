@@ -22,7 +22,7 @@ s:maybe_enable_record()
 
 s:request_transport_speed(1.0, true, 4)
 ARDOUR.LuaAPI.usleep (1000000 * reclen)
-s:request_transport_speed(0.0, false, 4)
+s:request_stop (false, false, 4);
 
 for t in s:get_tracks():iter() do
 	t:rec_enable_control():set_value(0, PBD.GroupControlDisposition.UseGroup)
