@@ -351,6 +351,19 @@ PortMatrixColumnLabels::render_channel_name (
 	cairo_set_line_width (cr, label_border_width());
 	cairo_stroke (cr);
 
+	if (_matrix->count_of_our_type (bc.bundle->nchannels()) < 2) {
+		if (bc.bundle->channel_name (bc.channel) == bc.bundle->name()) {
+			/* single channel bundle named after port */
+			return;
+		}
+		/* the name of a single channel is assumed to be redundant,
+		 * unless it has a dedicated pretty-name.
+		 * e.g bundle="system" port="Oxygen 32 MIDI" */
+		if (bc.bundle->channel_name (bc.channel).empty ()) {
+			return;
+		}
+	}
+
 	Gdk::Color textcolor;
 	ARDOUR_UI_UTILS::set_color_from_rgba(textcolor, Gtkmm2ext::contrasting_text_color(ARDOUR_UI_UTILS::gdk_color_to_rgba(bg_colour)));
 	set_source_rgb (cr, textcolor);
