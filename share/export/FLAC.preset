@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ExportPreset id="e379c6d0-9761-413a-86fd-91bf19655dbd" name="FLAC (tagged)">
+<ExportPreset id="e379c6d0-9761-413a-86fd-91bf19655dbd" name="FLAC">
   <ExportFormat id="0627662f-f190-468d-9bb8-db0cca42eac5"/>
   <ExportFilename>
     <Folder relative="true" path="/export"/>

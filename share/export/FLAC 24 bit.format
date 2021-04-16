@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ExportFormatSpecification name="FLAC 24 bit (tagged)" id="0627662f-f190-468d-9bb8-db0cca42eac5">
+<ExportFormatSpecification name="FLAC 24 bit" id="0627662f-f190-468d-9bb8-db0cca42eac5">
   <Encoding id="F_FLAC" type="T_Sndfile" extension="flac" name="FLAC" has-sample-format="true" channel-limit="8"/>
   <SampleRate rate="1"/>
   <SRCQuality quality="SRC_SincBest"/>

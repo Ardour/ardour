@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ExportFormatSpecification name="Ogg/Vorbis (tagged)" id="f6bc67b9-558d-4788-a7de-57ed763c6227">
+<ExportFormatSpecification name="Ogg/Vorbis" id="f6bc67b9-558d-4788-a7de-57ed763c6227">
   <Encoding id="F_Ogg" type="T_Sndfile" extension="ogg" name="Ogg Vorbis" has-sample-format="false" channel-limit="256"/>
   <SampleRate rate="1"/>
   <SRCQuality quality="SRC_SincBest"/>
