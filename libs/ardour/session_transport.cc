@@ -184,7 +184,7 @@ Session::locate (samplepos_t target_sample, bool with_roll, bool with_flush, boo
 		*/
 
 		if (with_roll) {
-			set_transport_speed (_default_transport_speed, false, false, false);
+			set_transport_speed (_default_transport_speed, false);
 		}
 		TFSM_EVENT (TransportFSM::LocateDone);
 		Located (); /* EMIT SIGNAL */
@@ -354,11 +354,10 @@ Session::post_locate ()
  *  @param speed New speed
  */
 void
-Session::set_transport_speed (double speed, bool abort, bool clear_state, bool as_default)
+Session::set_transport_speed (double speed, bool as_default)
 {
 	ENSURE_PROCESS_THREAD;
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("@ %5 Set transport speed to %1 from %4 (es = %7) (def %8), abort = %2 clear_state = %3, as_default %6\n",
-	                                               speed, abort, clear_state, _transport_speed, _transport_sample, as_default, _engine_speed, _default_transport_speed));
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("@ %1 Set transport speed to %2 from %3 (es = %4) (def %5), as_default %6\n", _transport_sample, speed, _transport_speed, _engine_speed, _default_transport_speed, as_default));
 
 	/* the logic:
 
@@ -419,129 +418,74 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state, bool a
 	_engine_speed = new_engine_speed;
 	if (as_default) {
 		_default_engine_speed = new_engine_speed;
+		_default_transport_speed = speed;
 	}
 
-	if (transport_rolling() && speed == 0.0) {
 
-		/* we are rolling and we want to stop */
+	if (speed == 1.0 || speed == -1.0) {
+		TransportStateChange (); /* EMIT SIGNAL */
 
-		if (Config->get_monitoring_model() == HardwareMonitoring) {
-			set_track_monitor_input_status (true);
-		}
+		/* non-varispeed, we can return here */
 
-		if (synced_to_engine ()) {
-			if (clear_state) {
-				/* do this here because our response to the slave won't
-				   take care of it.
-				*/
-				_play_range = false;
-				_count_in_once = false;
-				unset_play_loop ();
-			}
-		}
+		return;
+	}
 
-		/* we are immediately honoring the speed request, there's nothing to keep track of. */
+	// TODO handled transport start..  _remaining_latency_preroll
+	// and reversal of playback direction.
 
-		_requested_transport_speed = 0;
 
-		TFSM_STOP (abort, false);
-
-	} else if (transport_stopped() && speed == 1.0) {
-
-		if (as_default) {
-			_default_transport_speed = speed;
-		}
-
-		/* we are stopped and we want to start rolling at speed 1 */
-
-		if (Config->get_loop_is_mode() && get_play_loop ()) {
-
-			Location *location = _locations->auto_loop_location();
-
-			if (location != 0) {
-				if (_transport_sample != location->start()) {
-
-					/* force tracks to do their thing */
-					set_track_loop (true);
-
-					/* jump to start and then roll from there */
-
-					request_locate (location->start(), MustRoll);
-					return;
-				}
-			}
-		}
-
-		if (Config->get_monitoring_model() == HardwareMonitoring && config.get_auto_input()) {
-			set_track_monitor_input_status (false);
-		}
-
-		/* we are immediately honoring the speed request, there's nothing to keep track of. */
-
-		_requested_transport_speed = 0;
-
-		TFSM_EVENT (TransportFSM::StartTransport);
-
-	} else {
-
-		/* not zero, not 1.0 ... varispeed */
-
-		// TODO handled transport start..  _remaining_latency_preroll
-		// and reversal of playback direction.
-
-		if ((synced_to_engine()) && speed != 0.0 && speed != 1.0) {
-			warning << string_compose (
-				_("Global varispeed cannot be supported while %1 is connected to JACK transport control"),
-				PROGRAM_NAME)
-				<< endmsg;
-			return;
-		}
+	if ((synced_to_engine()) && speed != 0.0 && speed != 1.0) {
+		warning << string_compose (
+			_("Global varispeed cannot be supported while %1 is connected to JACK transport control"),
+			PROGRAM_NAME)
+		        << endmsg;
+		return;
+	}
 
 #if 0
-		if (actively_recording()) {
-			return;
-		}
+	if (actively_recording()) {
+		return;
+	}
 #endif
 
-		if (speed > 0.0 && _transport_sample == current_end_sample()) {
-			return;
-		}
+	if (speed > 0.0 && _transport_sample == current_end_sample()) {
+		return;
+	}
 
-		if (speed < 0.0 && _transport_sample == 0) {
-			return;
-		}
+	if (speed < 0.0 && _transport_sample == 0) {
+		return;
+	}
 
-		clear_clicks ();
+	clear_clicks ();
 
-		_transport_speed = speed;
+	_transport_speed = speed;
 
-		if (as_default) {
-			_default_transport_speed = speed;
-		}
+	if (as_default) {
+		_default_transport_speed = speed;
+	}
 
-		DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC3 with speed = %1\n", _transport_speed));
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC3 with speed = %1\n", _transport_speed));
 
-		/* throttle signal emissions.
-		 * when slaved [_last]_transport_speed
-		 * usually changes every cycle (tiny amounts due to DLL).
-		 * Emitting a signal every cycle is overkill and unwarranted.
-		 *
-		 * Using _transport_speed is not acceptable,
-		 * since it allows for large changes over a long period
-		 * of time. Hence we introduce a dedicated variable to keep track
-		 *
-		 * The 0.2% dead-zone is somewhat arbitrary. Main use-case
-		 * for TransportStateChange() here is the ShuttleControl display.
-		 */
-		if (fabs (_signalled_varispeed - actual_speed ()) > .002
-		    // still, signal hard changes to 1.0 and 0.0:
-		    || (actual_speed () == 1.0 && _signalled_varispeed != 1.0)
-		    || (actual_speed () == 0.0 && _signalled_varispeed != 0.0)
-		   )
-		{
-			TransportStateChange (); /* EMIT SIGNAL */
-			_signalled_varispeed = actual_speed ();
-		}
+	/* throttle signal emissions.
+	 * when slaved [_last]_transport_speed
+	 * usually changes every cycle (tiny amounts due to DLL).
+	 * Emitting a signal every cycle is overkill and unwarranted.
+	 *
+	 * Using _transport_speed is not acceptable,
+	 * since it allows for large changes over a long period
+	 * of time. Hence we introduce a dedicated variable to keep track
+	 *
+	 * The 0.2% dead-zone is somewhat arbitrary. Main use-case
+	 * for TransportStateChange() here is the ShuttleControl display.
+	 */
+	if (fabs (_signalled_varispeed - actual_speed ()) > .002
+	    // still, signal hard changes to 1.0 and 0.0:
+	    || (actual_speed () == 1.0 && _signalled_varispeed != 1.0)
+	    || (actual_speed () == 0.0 && _signalled_varispeed != 0.0)
+		)
+	{
+		TransportStateChange (); /* EMIT SIGNAL */
+		_signalled_varispeed = actual_speed ();
 	}
 }
 
