@@ -598,6 +598,7 @@ ExportGraphBuilder::SFC::operator== (FileSpec const& other_config) const
 
 	if (a.normalize_loudness () == b.normalize_loudness ()) {
 		id &= a.normalize_lufs () == b.normalize_lufs ();
+		id &= a.normalize_dbtp () == b.normalize_dbtp ();
 	} else {
 		return false;
 	}
