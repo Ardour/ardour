@@ -1305,7 +1305,7 @@ OSC::osc_toggle_roll (bool ret2strt)
 		if (session->get_play_loop() && Config->get_loop_is_mode()) {
 			session->request_locate (session->locations()->auto_loop_location()->start(), MustRoll);
 		} else {
-			session->request_transport_speed (1.0f);
+			session->request_roll (TRS_UI);
 		}
 	}
 	return 0;

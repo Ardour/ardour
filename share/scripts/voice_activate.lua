@@ -44,7 +44,7 @@ function dsp_runmap (bufs, in_map, out_map, n_samples, offset)
 		if b ~= ARDOUR.ChanMapping.Invalid then -- check if channel is mapped
 			local a = ARDOUR.DSP.compute_peak(bufs:get_audio(b):data(offset), n_samples, 0) -- compute digital peak
 			if a > threshold then
-					Session:request_transport_speed (1.0, true, ARDOUR.TransportRequestSource.TRS_UI)
+					Session:request_roll (ARDOUR.TransportRequestSource.TRS_UI)
 			end
 			if a > level then level = a end -- max level of all channels
 		end

@@ -20,7 +20,7 @@ ARDOUR.LuaAPI.usleep (100000)
 s:goto_start()
 s:maybe_enable_record()
 
-s:request_transport_speed(1.0, true, 4)
+s:request_roll (4)
 ARDOUR.LuaAPI.usleep (1000000 * reclen)
 s:request_stop (false, false, 4);
 

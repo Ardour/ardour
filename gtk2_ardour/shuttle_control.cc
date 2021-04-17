@@ -302,9 +302,7 @@ ShuttleControl::on_button_press_event (GdkEventButton* ev)
 	switch (ev->button) {
 	case 1:
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
-			if (_session->transport_rolling()) {
-				_session->reset_transport_speed ();
-			}
+			_session->reset_transport_speed ();
 		} else {
 			add_modal_grab ();
 			shuttle_grabbed = true;
@@ -319,6 +317,7 @@ ShuttleControl::on_button_press_event (GdkEventButton* ev)
 
 	case 2:
 	case 3:
+	default:
 		return true;
 		break;
 	}
@@ -349,11 +348,6 @@ ShuttleControl::on_button_release_event (GdkEventButton* ev)
 		return true;
 
 	case 2:
-		if (_session->transport_rolling()) {
-			_session->request_transport_speed (1.0, Config->get_shuttle_behaviour() == Wheel);
-		}
-		return true;
-
 	case 3:
 	default:
 		return true;

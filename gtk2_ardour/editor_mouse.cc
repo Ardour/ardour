@@ -314,7 +314,7 @@ Editor::mouse_mode_toggled (MouseMode m)
 		/* stop transport and reset default speed to avoid oddness with
 		   auditioning */
 		_session->request_stop ();
-		_session->request_transport_speed (1.0);
+		_session->reset_transport_speed ();
 	}
 
 	const bool was_internal = internal_editing();

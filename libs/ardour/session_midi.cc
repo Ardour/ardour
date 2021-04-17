@@ -99,7 +99,7 @@ void
 Session::spp_start ()
 {
 	if (Config->get_mmc_control ()) {
-		request_transport_speed (1.0);
+		request_roll (TRS_MIDIClock);
 	}
 }
 
@@ -121,7 +121,7 @@ void
 Session::mmc_deferred_play (MIDI::MachineControl &/*mmc*/)
 {
 	if (Config->get_mmc_control ()) {
-		request_transport_speed (1.0);
+		request_roll (TRS_MMC);
 	}
 }
 
@@ -154,7 +154,7 @@ Session::mmc_record_strobe (MIDI::MachineControl &/*mmc*/)
 		g_atomic_int_set (&_record_status, Enabled);
 		RecordStateChanged (); /* EMIT SIGNAL */
 
-		request_transport_speed (1.0);
+		request_roll (TRS_MMC);
 
 	} else {
 

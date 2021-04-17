@@ -273,7 +273,7 @@ main (int argc, char* argv[])
 	signal (SIGTERM, wearedone);
 #endif
 
-	s->request_transport_speed (1.0);
+	s->request_roll ();
 
 	char msg;
 	do {

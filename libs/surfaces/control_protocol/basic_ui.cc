@@ -189,12 +189,14 @@ void
 BasicUI::rewind ()
 {
 	session->request_transport_speed (get_transport_speed() - 1.5, false);
+	session->request_roll ();
 }
 
 void
 BasicUI::ffwd ()
 {
 	session->request_transport_speed (get_transport_speed() + 1.5, false);
+	session->request_roll ();
 }
 
 void
@@ -588,7 +590,7 @@ BasicUI::toggle_roll (bool roll_out_of_bounded_mode)
 		if (session->get_play_loop() && Config->get_loop_is_mode()) {
 			session->request_locate (session->locations()->auto_loop_location()->start(), MustRoll);
 		} else {
-			session->request_transport_speed (1.0f);
+			session->request_roll (TRS_UI);
 		}
 	}
 }
