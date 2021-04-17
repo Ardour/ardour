@@ -764,6 +764,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\loudness_settings.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\lua_script_manager.cc"
 				>
 			</File>
@@ -1891,6 +1895,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\loudness_dialog.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\loudness_settings.h"
 				>
 			</File>
 			<File
