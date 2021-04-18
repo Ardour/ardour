@@ -27,6 +27,7 @@
 typedef struct _fluid_gen_info_t
 {
     char num;		/* Generator number */
+    char const *name;
     char init;		/* Does the generator need to be initialized (not used) */
     char nrpn_scale;	/* The scale to convert from NRPN (cfr. fluid_gen_map_nrpn()) */
     float min;		/* The minimum value */
@@ -60,6 +61,7 @@ enum fluid_gen_flags
 fluid_real_t fluid_gen_scale(int gen, float value);
 fluid_real_t fluid_gen_scale_nrpn(int gen, int nrpn);
 void fluid_gen_init(fluid_gen_t *gen, fluid_channel_t *channel);
+const char *fluid_gen_name(int gen);
 
 
 #endif /* _FLUID_GEN_H */

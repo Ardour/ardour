@@ -187,6 +187,7 @@ enum midi_sysex_manuf
 /* SYSEX sub-ID #1 which follows device ID */
 #define MIDI_SYSEX_MIDI_TUNING_ID       0x08    /**< Sysex sub-ID #1 for MIDI tuning messages */
 #define MIDI_SYSEX_GM_ID                0x09    /**< Sysex sub-ID #1 for General MIDI messages */
+#define MIDI_SYSEX_GS_ID                0x42    /**< Model ID (GS) serving as sub-ID #1 for GS messages*/
 
 /**
  * SYSEX tuning message IDs.
@@ -208,6 +209,7 @@ enum midi_sysex_tuning_msg_id
 /* General MIDI sub-ID #2 */
 #define MIDI_SYSEX_GM_ON                0x01    /**< Enable GM mode */
 #define MIDI_SYSEX_GM_OFF               0x02    /**< Disable GM mode */
+#define MIDI_SYSEX_GS_DT1               0x12    /**< GS DT1 command */
 
 enum fluid_driver_status
 {
@@ -267,12 +269,19 @@ typedef struct
     size_t buffer_len;  /** Number of bytes in buffer; 0 if filename */
 } fluid_playlist_item;
 
+/* range of tempo values */
+#define MIN_TEMPO_VALUE (1.0f)
+#define MAX_TEMPO_VALUE (60000000.0f)
+/* range of tempo multiplier values */
+#define MIN_TEMPO_MULTIPLIER (0.001f)
+#define MAX_TEMPO_MULTIPLIER (1000.0f)
+
 /*
  * fluid_player
  */
 struct _fluid_player_t
 {
-    int status;
+    fluid_atomic_int_t status;
     int ntracks;
     fluid_track_t *track[MAX_NUMBER_OF_TRACKS];
     fluid_synth_t *synth;
@@ -283,21 +292,35 @@ struct _fluid_player_t
     fluid_list_t *playlist; /* List of fluid_playlist_item* objects */
     fluid_list_t *currentfile; /* points to an item in files, or NULL if not playing */
 
-    char send_program_change; /* should we ignore the program changes? */
     char use_system_timer;   /* if zero, use sample timers, otherwise use system clock timer */
     char reset_synth_between_songs; /* 1 if system reset should be sent to the synth between songs. */
-    int seek_ticks;           /* new position in tempo ticks (midi ticks) for seeking */
+    fluid_atomic_int_t seek_ticks; /* new position in tempo ticks (midi ticks) for seeking */
     int start_ticks;          /* the number of tempo ticks passed at the last tempo change */
     int cur_ticks;            /* the number of tempo ticks passed */
+    int last_callback_ticks;  /* the last tick number that was passed to player->tick_callback */
     int begin_msec;           /* the time (msec) of the beginning of the file */
     int start_msec;           /* the start time of the last tempo change */
     int cur_msec;             /* the current time */
-    int miditempo;            /* as indicated by MIDI SetTempo: n 24th of a usec per midi-clock. bravo! */
-    double deltatime;         /* milliseconds per midi tick. depends on set-tempo */
+    /* sync mode: indicates the tempo mode the player is driven by (see fluid_player_set_tempo()):
+       1, the player is driven by internal tempo (miditempo). This is the default.
+       0, the player is driven by external tempo (exttempo)
+    */
+    int sync_mode;
+    /* miditempo: internal tempo comming from MIDI file tempo change events
+      (in micro seconds per quarter note)
+    */
+    int miditempo;     /* as indicated by MIDI SetTempo: n 24th of a usec per midi-clock. bravo! */
+    /* exttempo: external tempo set by fluid_player_set_tempo() (in micro seconds per quarter note) */
+    int exttempo;
+    /* multempo: tempo multiplier set by fluid_player_set_tempo() */
+    float multempo;
+    float deltatime;   /* milliseconds per midi tick. depends on current tempo mode (see sync_mode) */
     unsigned int division;
 
     handle_midi_event_func_t playback_callback; /* function fired on each midi event as it is played */
     void *playback_userdata; /* pointer to user-defined data passed to playback_callback function */
+    handle_midi_tick_func_t tick_callback; /* function fired on each tick change */
+    void *tick_userdata; /* pointer to user-defined data passed to tick_callback function */
 };
 
 void fluid_player_settings(fluid_settings_t *settings);

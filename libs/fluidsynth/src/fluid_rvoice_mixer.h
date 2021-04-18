@@ -37,16 +37,38 @@ int fluid_rvoice_mixer_get_bufcount(fluid_rvoice_mixer_t *mixer);
 int fluid_rvoice_mixer_get_active_voices(fluid_rvoice_mixer_t *mixer);
 #endif
 fluid_rvoice_mixer_t *new_fluid_rvoice_mixer(int buf_count, int fx_buf_count, int fx_units,
-        fluid_real_t sample_rate, fluid_rvoice_eventhandler_t *, int, int);
+        fluid_real_t sample_rate_max, fluid_real_t sample_rate,
+        fluid_rvoice_eventhandler_t *, int, int);
 
 void delete_fluid_rvoice_mixer(fluid_rvoice_mixer_t *);
+
+void
+fluid_rvoice_mixer_set_reverb_full(const fluid_rvoice_mixer_t *mixer,
+                                   int fx_group, int set, const double values[]);
+
+double
+fluid_rvoice_mixer_reverb_get_param(const fluid_rvoice_mixer_t *mixer,
+                                    int fx_group, int param);
+void
+fluid_rvoice_mixer_set_chorus_full(const fluid_rvoice_mixer_t *mixer,
+                                   int fx_group, int set, const double values[]);
+double
+fluid_rvoice_mixer_chorus_get_param(const fluid_rvoice_mixer_t *mixer,
+                                    int fx_group, int param);
 
 
 DECLARE_FLUID_RVOICE_FUNCTION(fluid_rvoice_mixer_add_voice);
 DECLARE_FLUID_RVOICE_FUNCTION(fluid_rvoice_mixer_set_samplerate);
 DECLARE_FLUID_RVOICE_FUNCTION(fluid_rvoice_mixer_set_polyphony);
+
+/* @deprecated */
 DECLARE_FLUID_RVOICE_FUNCTION(fluid_rvoice_mixer_set_chorus_enabled);
+/* @deprecated */
 DECLARE_FLUID_RVOICE_FUNCTION(fluid_rvoice_mixer_set_reverb_enabled);
+
+DECLARE_FLUID_RVOICE_FUNCTION(fluid_rvoice_mixer_reverb_enable);
+DECLARE_FLUID_RVOICE_FUNCTION(fluid_rvoice_mixer_chorus_enable);
+
 DECLARE_FLUID_RVOICE_FUNCTION(fluid_rvoice_mixer_set_chorus_params);
 DECLARE_FLUID_RVOICE_FUNCTION(fluid_rvoice_mixer_set_reverb_params);
 

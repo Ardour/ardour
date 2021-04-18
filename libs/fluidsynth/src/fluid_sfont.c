@@ -22,7 +22,7 @@
 #include "fluid_sys.h"
 
 
-void *default_fopen(const char *path)
+static void *default_fopen(const char *path)
 {
     const char* msg;
     FILE* handle = fluid_file_open(path, &msg);
@@ -35,23 +35,23 @@ void *default_fopen(const char *path)
     return handle;
 }
 
-int default_fclose(void *handle)
+static int default_fclose(void *handle)
 {
     return FLUID_FCLOSE((FILE *)handle) == 0 ? FLUID_OK : FLUID_FAILED;
 }
 
-long default_ftell(void *handle)
+static fluid_long_long_t default_ftell(void *handle)
 {
     return FLUID_FTELL((FILE *)handle);
 }
 
-int safe_fread(void *buf, int count, void *fd)
+static int safe_fread(void *buf, fluid_long_long_t count, void *fd)
 {
-    if(FLUID_FREAD(buf, count, 1, (FILE *)fd) != 1)
+    if(FLUID_FREAD(buf, (size_t)count, 1, (FILE *)fd) != 1)
     {
         if(feof((FILE *)fd))
         {
-            FLUID_LOG(FLUID_ERR, "EOF while attemping to read %d bytes", count);
+            FLUID_LOG(FLUID_ERR, "EOF while attempting to read %lld bytes", count);
         }
         else
         {
@@ -64,11 +64,11 @@ int safe_fread(void *buf, int count, void *fd)
     return FLUID_OK;
 }
 
-int safe_fseek(void *fd, long ofs, int whence)
+static int safe_fseek(void *fd, fluid_long_long_t ofs, int whence)
 {
     if(FLUID_FSEEK((FILE *)fd, ofs, whence) != 0)
     {
-        FLUID_LOG(FLUID_ERR, "File seek failed with offset = %ld and whence = %d", ofs, whence);
+        FLUID_LOG(FLUID_ERR, "File seek failed with offset = %lld and whence = %d", ofs, whence);
         return FLUID_FAILED;
     }
 
@@ -156,8 +156,6 @@ void *fluid_sfloader_get_data(fluid_sfloader_t *loader)
 /**
  * Set custom callbacks to be used upon soundfont loading.
  *
- * Useful for loading a soundfont from memory, see \a doc/fluidsynth_sfload_mem.c as an example.
- *
  * @param loader The SoundFont loader instance.
  * @param open A function implementing #fluid_sfloader_callback_open_t.
  * @param read A function implementing #fluid_sfloader_callback_read_t.
@@ -165,6 +163,9 @@ void *fluid_sfloader_get_data(fluid_sfloader_t *loader)
  * @param tell A function implementing #fluid_sfloader_callback_tell_t.
  * @param close A function implementing #fluid_sfloader_callback_close_t.
  * @return #FLUID_OK if the callbacks have been successfully set, #FLUID_FAILED otherwise.
+ *
+ * Useful for loading a soundfont from memory, see \a doc/fluidsynth_sfload_mem.c as an example.
+ *
  */
 int fluid_sfloader_set_callbacks(fluid_sfloader_t *loader,
                                  fluid_sfloader_callback_open_t open,
@@ -196,6 +197,7 @@ int fluid_sfloader_set_callbacks(fluid_sfloader_t *loader,
 
 /**
  * Creates a new virtual SoundFont instance structure.
+ *
  * @param get_name A function implementing #fluid_sfont_get_name_t.
  * @param get_preset A function implementing #fluid_sfont_get_preset_t.
  * @param iter_start A function implementing #fluid_sfont_iteration_start_t, or NULL if preset iteration not needed.
@@ -285,8 +287,8 @@ const char *fluid_sfont_get_name(fluid_sfont_t *sfont)
 }
 
 /**
- * Retrieve the preset assigned the a SoundFont instance
- * for the given bank and preset number.
+ * Retrieve the preset assigned the a SoundFont instance for the given bank and preset number.
+ *
  * @param sfont The SoundFont instance.
  * @param bank bank number of the preset
  * @param prenum program number of the preset
@@ -300,6 +302,7 @@ fluid_preset_t *fluid_sfont_get_preset(fluid_sfont_t *sfont, int bank, int prenu
 
 /**
  * Starts / re-starts virtual preset iteration in a SoundFont.
+ *
  * @param sfont Virtual SoundFont instance
  */
 void fluid_sfont_iteration_start(fluid_sfont_t *sfont)
@@ -329,10 +332,11 @@ fluid_preset_t *fluid_sfont_iteration_next(fluid_sfont_t *sfont)
 /**
  * Destroys a SoundFont instance created with new_fluid_sfont().
  *
- * Implements #fluid_sfont_free_t.
- *
  * @param sfont The SoundFont instance to destroy.
  * @return Always returns 0.
+ *
+ * Implements #fluid_sfont_free_t.
+ *
  */
 int delete_fluid_sfont(fluid_sfont_t *sfont)
 {
@@ -467,9 +471,10 @@ fluid_sfont_t *fluid_preset_get_sfont(fluid_preset_t *preset)
 /**
  * Destroys a SoundFont preset instance created with new_fluid_preset().
  *
+ * @param preset The SoundFont preset instance to destroy.
+ *
  * Implements #fluid_preset_free_t.
  *
- * @param preset The SoundFont preset instance to destroy.
  */
 void delete_fluid_preset(fluid_preset_t *preset)
 {
@@ -480,6 +485,7 @@ void delete_fluid_preset(fluid_preset_t *preset)
 
 /**
  * Create a new sample instance.
+ *
  * @return  The sample on success, NULL otherwise.
  */
 fluid_sample_t *
@@ -502,6 +508,7 @@ new_fluid_sample()
 
 /**
  * Destroy a sample instance previously created with new_fluid_sample().
+ *
  * @param sample The sample to destroy.
  */
 void
@@ -521,9 +528,9 @@ delete_fluid_sample(fluid_sample_t *sample)
 /**
  * Returns the size of the fluid_sample_t structure.
  *
- * Useful in low latency scenarios e.g. to allocate a pool of samples.
- *
  * @return Size of fluid_sample_t in bytes
+ *
+ * Useful in low latency scenarios e.g. to allocate a pool of samples.
  *
  * @note It is recommend to zero initialize the memory before using the object.
  *
@@ -536,6 +543,7 @@ size_t fluid_sample_sizeof()
 
 /**
  * Set the name of a SoundFont sample.
+ *
  * @param sample SoundFont sample
  * @param name Name to assign to sample (20 chars in length + zero terminator)
  * @return #FLUID_OK on success, #FLUID_FAILED otherwise
@@ -551,6 +559,7 @@ int fluid_sample_set_name(fluid_sample_t *sample, const char *name)
 
 /**
  * Assign sample data to a SoundFont sample.
+ *
  * @param sample SoundFont sample
  * @param data Buffer containing 16 bit (mono-)audio sample data
  * @param data24 If not NULL, pointer to the least significant byte counterparts of each sample data point in order to create 24 bit audio samples
@@ -700,11 +709,36 @@ int fluid_sample_set_pitch(fluid_sample_t *sample, int root_key, int fine_tune)
  */
 int fluid_sample_validate(fluid_sample_t *sample, unsigned int buffer_size)
 {
+#define EXCLUSIVE_FLAGS (FLUID_SAMPLETYPE_MONO | FLUID_SAMPLETYPE_RIGHT | FLUID_SAMPLETYPE_LEFT)
+    static const unsigned int supported_flags = EXCLUSIVE_FLAGS | FLUID_SAMPLETYPE_LINKED | FLUID_SAMPLETYPE_OGG_VORBIS | FLUID_SAMPLETYPE_ROM;
+
     /* ROM samples are unusable for us by definition */
     if(sample->sampletype & FLUID_SAMPLETYPE_ROM)
     {
         FLUID_LOG(FLUID_WARN, "Sample '%s': ROM sample ignored", sample->name);
         return FLUID_FAILED;
+    }
+
+    if(sample->sampletype & ~supported_flags)
+    {
+        FLUID_LOG(FLUID_WARN, "Sample '%s' has unknown flags, possibly using an unsupported compression; sample ignored", sample->name);
+        return FLUID_FAILED;
+    }
+
+    if((sample->sampletype & EXCLUSIVE_FLAGS) & ((sample->sampletype & EXCLUSIVE_FLAGS) - 1))
+    {
+        FLUID_LOG(FLUID_INFO, "Sample '%s' should be either mono or left or right; using it anyway", sample->name);
+    }
+
+    if((sample->sampletype & FLUID_SAMPLETYPE_LINKED) && (sample->sampletype & EXCLUSIVE_FLAGS))
+    {
+        FLUID_LOG(FLUID_INFO, "Linked sample '%s' should not be mono, left or right at the same time; using it anyway", sample->name);
+    }
+
+    if((sample->sampletype & EXCLUSIVE_FLAGS) == 0)
+    {
+        FLUID_LOG(FLUID_INFO, "Sample '%s' has no flags set, assuming mono", sample->name);
+        sample->sampletype = FLUID_SAMPLETYPE_MONO;
     }
 
     /* Ogg vorbis compressed samples in the SF3 format use byte indices for
@@ -729,6 +763,7 @@ int fluid_sample_validate(fluid_sample_t *sample, unsigned int buffer_size)
     }
 
     return FLUID_OK;
+#undef EXCLUSIVE_FLAGS
 }
 
 /* Check the sample loop pointers and optionally convert them to something

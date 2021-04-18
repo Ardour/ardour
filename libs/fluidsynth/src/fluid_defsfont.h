@@ -148,12 +148,13 @@ struct _fluid_defpreset_t
     unsigned int num;                     /* the preset number */
     fluid_preset_zone_t *global_zone;        /* the global zone of the preset */
     fluid_preset_zone_t *zone;               /* the chained list of preset zones */
+    int pinned;                           /* preset samples pinned to sample cache? */
 };
 
 fluid_defpreset_t *new_fluid_defpreset(void);
 void delete_fluid_defpreset(fluid_defpreset_t *defpreset);
 fluid_defpreset_t *fluid_defpreset_next(fluid_defpreset_t *defpreset);
-int fluid_defpreset_import_sfont(fluid_defpreset_t *defpreset, SFPreset *sfpreset, fluid_defsfont_t *defsfont);
+int fluid_defpreset_import_sfont(fluid_defpreset_t *defpreset, SFPreset *sfpreset, fluid_defsfont_t *defsfont, SFData *sfdata);
 int fluid_defpreset_set_global_zone(fluid_defpreset_t *defpreset, fluid_preset_zone_t *zone);
 int fluid_defpreset_add_zone(fluid_defpreset_t *defpreset, fluid_preset_zone_t *zone);
 fluid_preset_zone_t *fluid_defpreset_get_zone(fluid_defpreset_t *defpreset);
@@ -181,7 +182,7 @@ fluid_preset_zone_t *new_fluid_preset_zone(char *name);
 void delete_fluid_list_mod(fluid_mod_t *mod);
 void delete_fluid_preset_zone(fluid_preset_zone_t *zone);
 fluid_preset_zone_t *fluid_preset_zone_next(fluid_preset_zone_t *zone);
-int fluid_preset_zone_import_sfont(fluid_preset_zone_t *zone, SFZone *sfzone, fluid_defsfont_t *defssfont);
+int fluid_preset_zone_import_sfont(fluid_preset_zone_t *zone, SFZone *sfzone, fluid_defsfont_t *defssfont, SFData *sfdata);
 fluid_inst_t *fluid_preset_zone_get_inst(fluid_preset_zone_t *zone);
 
 /*
@@ -196,7 +197,7 @@ struct _fluid_inst_t
 };
 
 fluid_inst_t *new_fluid_inst(void);
-fluid_inst_t *fluid_inst_import_sfont(SFInst *sfinst, fluid_defsfont_t *defsfont);
+fluid_inst_t *fluid_inst_import_sfont(int inst_idx, fluid_defsfont_t *defsfont, SFData *sfdata);
 void delete_fluid_inst(fluid_inst_t *inst);
 int fluid_inst_set_global_zone(fluid_inst_t *inst, fluid_inst_zone_t *zone);
 int fluid_inst_add_zone(fluid_inst_t *inst, fluid_inst_zone_t *zone);
@@ -220,7 +221,7 @@ struct _fluid_inst_zone_t
 fluid_inst_zone_t *new_fluid_inst_zone(char *name);
 void delete_fluid_inst_zone(fluid_inst_zone_t *zone);
 fluid_inst_zone_t *fluid_inst_zone_next(fluid_inst_zone_t *zone);
-int fluid_inst_zone_import_sfont(fluid_inst_zone_t *inst_zone, SFZone *sfzone, fluid_defsfont_t *defsfont);
+int fluid_inst_zone_import_sfont(fluid_inst_zone_t *inst_zone, SFZone *sfzone, fluid_defsfont_t *defsfont, SFData *sfdata);
 fluid_sample_t *fluid_inst_zone_get_sample(fluid_inst_zone_t *zone);
 
 

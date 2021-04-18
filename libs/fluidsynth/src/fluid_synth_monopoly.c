@@ -86,7 +86,7 @@
   note 'tokey'. Portamento fromkey note choice is determined at noteOn by
   fluid_synth_get_fromkey_portamento_legato() (see below).
 
-  More informations in FluidPolyMono-0004.pdf chapter 4 (Appendices).
+  More information in FluidPolyMono-0004.pdf chapter 4 (Appendices).
 ******************************************************************************/
 
 
@@ -95,7 +95,7 @@
 ******************************************************************************/
 
 /**
- * fluid_synth_get_fromkey_portamento_legato returns two informations:
+ * fluid_synth_get_fromkey_portamento_legato returns two information:
  *    - fromkey note for portamento.
  *    - fromkey note for legato.
  *                                                 +-----> fromkey_portamento
@@ -120,7 +120,7 @@
  *       - default_fromkey if valid
  *       - otherwise prev_note(prev_note is the note prior the most recent
  *         note played).
- *       Then portamento mode is applied to validate the value choosen.
+ *       Then portamento mode is applied to validate the value chosen.
  *       Where portamento mode is:
  *       - each note, a portamento occurs on each note.
  *       - legato only, portamento only on notes played legato.
@@ -143,7 +143,7 @@
  *
  * On input
  * @param chan  fluid_channel_t.
- * @param defaultFromkey, the defaut 'fromkey portamento' note or 'fromkey legato'
+ * @param defaultFromkey, the default 'fromkey portamento' note or 'fromkey legato'
  *       note (see description above).
  *
  * @return
@@ -254,7 +254,7 @@ static char fluid_synth_get_fromkey_portamento_legato(fluid_channel_t *chan,
  *  polyphonic mode and legato pedal is On during the playing.
  *  When a channel is in "monophonic playing" state, only one note at a time can be
  *  played in a staccato or legato manner (with or without portamento).
- *  More informations in FluidPolyMono-0004.pdf chapter 4 (Appendices).
+ *  More information in FluidPolyMono-0004.pdf chapter 4 (Appendices).
  *                                           _______________
  *                 ________________         |    noteon     |
  *                | legato detector|    O-->| mono_staccato |--*-> preset_noteon
@@ -521,7 +521,7 @@ fluid_synth_noteon_mono_staccato(fluid_synth_t *synth, int chan, int key, int ve
  *
  * The function has the same behaviour when the noteoff is poly of mono, except
  * that for mono noteoff, if any pedal (sustain or sostenuto ) is depressed, the
- * key is memorized. This is neccessary when the next mono note will be played
+ * key is memorized. This is necessary when the next mono note will be played
  * staccato, as any current mono note currently sustained will need to be released
  * (see fluid_synth_noteon_mono_staccato()).
  * Note also that for a monophonic legato passage, the function is called only when
@@ -647,7 +647,7 @@ int fluid_synth_noteoff_monopoly(fluid_synth_t *synth, int chan, int key,
  * When key tokey is outside the current Instrument Zone, Preset Zone,
  * current 'fromkey' voices are released. If necessary new voices
  * are restarted when tokey enters inside new Instrument(s) Zones,Preset Zone(s).
- * More informations in FluidPolyMono-0004.pdf chapter 4.7 (Appendices).
+ * More information in FluidPolyMono-0004.pdf chapter 4.7 (Appendices).
  */
 int fluid_synth_noteon_monopoly_legato(fluid_synth_t *synth, int chan,
                                        int fromkey, int tokey, int vel)

@@ -71,7 +71,8 @@ struct _fluid_voice_t
     fluid_channel_t *channel;
     fluid_rvoice_eventhandler_t *eventhandler;
     fluid_zone_range_t *zone_range;  /* instrument zone range*/
-    fluid_sample_t *sample;         /* Pointer to sample (dupe in rvoice) */
+    fluid_sample_t *sample;          /* Pointer to sample (dupe in rvoice) */
+    fluid_sample_t *overflow_sample; /* Pointer to sample (dupe in overflow_rvoice) */
 
     unsigned int start_time;
     int mod_count;

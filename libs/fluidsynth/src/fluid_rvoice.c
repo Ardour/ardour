@@ -493,7 +493,8 @@ fluid_rvoice_buffers_check_bufnum(fluid_rvoice_buffers_t *buffers, unsigned int 
 
     for(i = buffers->count; i <= bufnum; i++)
     {
-        buffers->bufs[i].amp = 0.0f;
+        buffers->bufs[i].target_amp = 0.0f;
+        buffers->bufs[i].current_amp = 0.0f;
     }
 
     buffers->count = bufnum + 1;
@@ -512,7 +513,7 @@ DECLARE_FLUID_RVOICE_FUNCTION(fluid_rvoice_buffers_set_amp)
         return;
     }
 
-    buffers->bufs[bufnum].amp = value;
+    buffers->bufs[bufnum].target_amp = value;
 }
 
 DECLARE_FLUID_RVOICE_FUNCTION(fluid_rvoice_buffers_set_mapping)
