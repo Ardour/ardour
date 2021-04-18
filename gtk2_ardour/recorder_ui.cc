@@ -592,6 +592,12 @@ RecorderUI::add_or_remove_io (DataType dt, vector<string> ports, bool add)
 	_fast_screen_update_connection.disconnect ();
 	bool spill_changed = false;
 
+	if (_input_ports.empty () && add) {
+		_monitor_connection.disconnect ();
+		MonitorPort& mp (AudioEngine::instance()->monitor_port ());
+		mp.MonitorInputChanged.connect (_monitor_connection, invalidator (*this), boost::bind (&RecorderUI::update_monitorstate, this, _1, _2), gui_context());
+	}
+
 	if (add) {
 		for (vector<string>::const_iterator i = ports.begin (); i != ports.end (); ++i) {
 			_input_ports[*i] = boost::shared_ptr<RecorderUI::InputPort> (new InputPort (*i, dt, this, _vertical));
