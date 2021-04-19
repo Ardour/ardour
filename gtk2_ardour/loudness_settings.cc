@@ -16,7 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <glib.h>
+#include <glibmm.h>
 #include "pbd/gstdio_compat.h"
 
 #include <glibmm/miscutils.h>
@@ -131,7 +131,7 @@ ALoudnessPresets::ALoudnessPresets (bool built_in_only)
 	}
 	std::string fn = Glib::build_filename (ARDOUR::user_config_directory (), "loudness-presets");
 	XMLTree tree;
-	if (tree.read (fn)) {
+	if (Glib::file_test (fn, Glib::FILE_TEST_EXISTS) && tree.read (fn)) {
 		XMLNodeList nlist = tree.root()->children();
 		XMLNodeConstIterator i;
 		for (i = nlist.begin(); i != nlist.end(); ++i) {
