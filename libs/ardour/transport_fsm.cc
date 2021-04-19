@@ -57,7 +57,7 @@ TransportFSM::Event::operator delete (void *ptr, size_t /*size*/)
 
 TransportFSM::TransportFSM (TransportAPI& tapi)
 	: _last_locate (Locate, 0, MustRoll, false, false, false) /* all but first argument don't matter */
-	, last_speed_request (SetSpeed, 0, false, false, false) /* ditto */
+	, last_speed_request (0, false) /* SetSpeed request */
 	, api (&tapi)
 	, processing (0)
 	, most_recently_requested_speed (std::numeric_limits<double>::max())
