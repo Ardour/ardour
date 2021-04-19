@@ -86,6 +86,7 @@ using namespace PBD;
 #define TFSM_EVENT(evtype) { _transport_fsm->enqueue (new TransportFSM::Event (evtype)); }
 #define TFSM_STOP(abort,clear) { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::StopTransport,abort,clear)); }
 #define TFSM_LOCATE(target,ltd,flush,loop,force) { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::Locate,target,ltd,flush,loop,force)); }
+#define TFSM_SPEED(speed,as_default) { _transport_fsm->enqueue (new TransportFSM::Event (speed,as_default)); }
 
 /* *****************************************************************************
  * REALTIME ACTIONS (to be called on state transitions)
@@ -116,8 +117,32 @@ Session::realtime_stop (bool abort, bool clear_state)
 		}
 	}
 
-	if (Config->get_reset_default_speed_on_stop() && _default_transport_speed != 1.0 && !_transport_fsm->declicking_for_locate()) {
-		_transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::SetSpeed, 1.0, false, true, true));
+	if (!_transport_fsm->declicking_for_locate()) {
+
+		if (Config->get_reset_default_speed_on_stop()) {
+			if (_engine_speed != 1.0) {
+			    TFSM_SPEED (1.0, true);
+			}
+		} else {
+			/* We're not resetting back to 1.0, but we may need to handle a
+			 * speed change from whatever we have been rolling at to
+			 * whatever the current default is. We could have been
+			 * rewinding at -4.5 ... when we restart, we need to play at
+			 * the current _default_transport_speed
+			 *
+			 * don't do this is there's already a requested transport speed waiting
+			 */
+
+			if (_requested_transport_speed == std::numeric_limits<double>::max()) {
+				/* no pending speed request */
+
+				const double dts = (_default_transport_speed < 0) ? -1 : 1;
+
+				if (_engine_speed != _default_engine_speed || dts != _transport_speed) {
+					TFSM_SPEED (_default_transport_speed, false);
+				}
+			}
+		}
 	}
 
 	/* call routes */
