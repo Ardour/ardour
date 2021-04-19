@@ -574,6 +574,8 @@ Session::start_transport ()
 		_engine_speed = _default_engine_speed;
 	}
 
+	clear_clicks ();
+
 	if (!_engine.freewheeling()) {
 		Timecode::Time time;
 		timecode_time_subframes (_transport_sample, time);
