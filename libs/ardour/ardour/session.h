@@ -1345,7 +1345,7 @@ protected:
 	bool should_roll_after_locate () const;
 	double speed() const { return _transport_speed; }
 	samplepos_t position() const { return _transport_sample; }
-	void set_transport_speed (double speed, bool as_default);
+	void set_transport_speed (double speed, bool as_default, bool at_next_start);
 	bool need_declick_before_locate () const;
 
 private:

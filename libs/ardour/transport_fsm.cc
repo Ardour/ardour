@@ -638,36 +638,57 @@ TransportFSM::enqueue (Event* ev)
 void
 TransportFSM::set_speed (Event const & ev)
 {
-	bool initial_reverse = false;
-
 	assert (ev.speed != 0.0);
 
-	DEBUG_TRACE (DEBUG::TFSMState, string_compose ("%1, target speed %2 MRRS %3 state %4\n", (ev.speed == 0.0 ? "stopping" : "continue"), ev.speed, most_recently_requested_speed, current_state()));
-	api->set_transport_speed (ev.speed, ev.as_default);
+	bool initial_reverse = false;
+	bool must_reverse = false;
 
-	const double mrrs = most_recently_requested_speed;
+	DEBUG_TRACE (DEBUG::TFSMState, string_compose ("::set_speed(): target speed %1 MRRS %2 state %3\n", ev.speed, most_recently_requested_speed, current_state()));
 
-	/* corner case: first call to ::set_speed() has a negative
-	 * speed
-	 */
+	/* This "must_roll" value is a bit complicated to explain. If we were moving at anything other than normal speed+direction,
+	   and then stop, and reset-default-speed-on-stop is enabled, Session::stop_transport() will queue a SetSpeed
+	   request to restore the default speed to 1.0. However, because of the stop in progress, the SetSpeed event
+	   will be deferred during the stop. Eventually, we will handle it, and call this method. If we need to reverse
+	   direction, the locate will end up using compute_should_roll(), with rolling state already set to DeclickToLocate.
+
+	   If we pass in RollIfAppropriate as the after-locate roll disposition, the logic there will conclude that we should roll.
+	   This logic is correct in cases where we do a normal locate, but not for a locate-for-reverse when stopping.
+
+	   So, instead of using RollIfAppropriate, determine here is our after-locate state should be rolling or stopped, and pass
+	   MustRoll or MustStop to the locate request. This will get compute_should_roll() to do the right thing, and once the locate
+	   is complete, we will be in the correct state.
+	*/
+
+
+	const bool must_roll = rolling();
 
 	if (most_recently_requested_speed == std::numeric_limits<double>::max()) {
 		/* have never rolled yet */
 		initial_reverse = true;
 	}
 
+	if (ev.speed * most_recently_requested_speed < 0.0 || initial_reverse) {
+		must_reverse = true;
+	}
+
+	api->set_transport_speed (ev.speed, ev.as_default, !rolling() || must_reverse);
+
+	/* corner case: first call to ::set_speed() has a negative
+	 * speed
+	 */
+
 	most_recently_requested_speed = ev.speed;
 
-	if (ev.speed * mrrs < 0.0 || initial_reverse) {
+	if (must_reverse) {
 
 		/* direction change */
 
-		DEBUG_TRACE (DEBUG::TFSMState, string_compose ("switch-directions, target speed %1 MRRS %2 state %3 IR %4\n", ev.speed, mrrs, current_state(), initial_reverse));
+		DEBUG_TRACE (DEBUG::TFSMState, string_compose ("switch-directions, target speed %1 state %2 IR %3\n", ev.speed, current_state(), initial_reverse));
 
 		last_speed_request = ev;
 		transition (Reversing);
 
-		Event lev (Locate, api->position(), RollIfAppropriate, false, false, true);
+		Event lev (Locate, api->position(), must_roll ? MustRoll : MustStop, false, false, true);
 
 		transition (DeclickToLocate);
 		start_declick_for_locate (lev);

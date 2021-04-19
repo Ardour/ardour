@@ -41,7 +41,7 @@ class LIBARDOUR_API TransportAPI
 	virtual void schedule_butler_for_transport_work () = 0;
 	virtual bool should_roll_after_locate () const = 0;
 	virtual double speed() const = 0;
-	virtual void set_transport_speed (double speed, bool as_default) = 0;
+	virtual void set_transport_speed (double speed, bool as_default, bool at_next_start) = 0;
 	virtual samplepos_t position() const = 0;
    	virtual bool need_declick_before_locate () const = 0;
 };

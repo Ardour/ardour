@@ -370,7 +370,7 @@ Session::post_locate ()
  *  @param speed New speed
  */
 void
-Session::set_transport_speed (double speed, bool as_default)
+Session::set_transport_speed (double speed, bool as_default, bool at_next_start)
 {
 	ENSURE_PROCESS_THREAD;
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("@ %1 Set transport speed to %2 from %3 (es = %4) (def %5), as_default %6\n", _transport_sample, speed, _transport_speed, _engine_speed, _default_transport_speed, as_default));
