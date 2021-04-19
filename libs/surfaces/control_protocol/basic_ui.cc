@@ -188,14 +188,22 @@ BasicUI::remove_marker_at_playhead ()
 void
 BasicUI::rewind ()
 {
-	session->request_transport_speed (get_transport_speed() - 1.5, false);
+	if (session->transport_speed() < 0) {
+		session->request_transport_speed (get_transport_speed() - 1.5, false);
+	} else {
+		session->request_transport_speed (-1.5, false);
+	}
 	session->request_roll ();
 }
 
 void
 BasicUI::ffwd ()
 {
-	session->request_transport_speed (get_transport_speed() + 1.5, false);
+	if (session->transport_speed() > 0) {
+		session->request_transport_speed (get_transport_speed() + 1.5, false);
+	} else {
+		session->request_transport_speed (1.5, false);
+	}
 	session->request_roll ();
 }
 
@@ -284,7 +292,9 @@ BasicUI::transport_play (bool from_last_start)
 		session->request_play_range (0, true);
 	}
 
-	if (!rolling) {
+	if (rolling) {
+		session->request_transport_speed (1.0, TRS_UI);
+	} else {
 		session->request_roll ();
 	}
 }
