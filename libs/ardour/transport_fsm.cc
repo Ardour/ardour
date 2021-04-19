@@ -115,12 +115,15 @@ TransportFSM::process_events ()
 
 						if (process_event (*e, true, deferred2)) {
 							if (!deferred2) { /* event processed and not deferred again, remove from deferred */
+								DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("processed deferred event %1, now deleting\n", enum_2_string (deferred_ev->type)));
 								e = deferred_events.erase (e);
 								delete deferred_ev;
 							} else {
+								DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("deferred event %1 re-deferred\n", enum_2_string (deferred_ev->type)));
 								++e;
 							}
-						} else { /* process error or deferred (again) */
+						} else { /* process error */
+							DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("deferred event %1 failed, deleting\n", enum_2_string (deferred_ev->type)));
 							++e;
 							delete deferred_ev;
 						}
