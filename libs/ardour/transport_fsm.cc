@@ -369,7 +369,7 @@ TransportFSM::process_event (Event& ev, bool already_deferred, bool& deferred)
 					transition (Backwards);
 				}
 
-				if (should_roll_after_locate()) {
+				if (should_not_roll_after_locate()) {
 					transition (Stopped);
 				} else {
 					transition (Rolling);
