@@ -586,10 +586,10 @@ Session::start_transport ()
 	maybe_allow_only_loop ();
 	maybe_allow_only_punch ();
 
-	if (_requested_transport_speed) {
+	if (_requested_transport_speed != std::numeric_limits<double>::max()) {
 		_engine_speed = fabs (_requested_transport_speed);
 		_transport_speed = _requested_transport_speed > 0 ? 1 : -1;
-		_requested_transport_speed = 0;
+		_requested_transport_speed = std::numeric_limits<double>::max();;
 	} else {
 		_transport_speed = _default_transport_speed;
 		_engine_speed = _default_engine_speed;
