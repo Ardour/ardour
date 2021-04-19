@@ -95,14 +95,16 @@ struct TransportFSM
 		{
 			assert (t == Locate);
 		}
-		Event (EventType t, double sp, bool ab, bool cs, bool ad)
-			: type (t)
-			, abort_capture (ab)
-			, clear_state (cs)
+		/* here we drop the event type as the first argument in order
+		   disambiguate from the StopTransport case above (compiler can
+		   cast double-to-bool and complains. C++11 would allow "=
+		   delete" as an alternate fix, but this is fine.
+		*/
+		Event (double sp, bool ad)
+			: type (SetSpeed)
 			, speed (sp)
 			, as_default (ad)
 		{
-			assert (t == SetSpeed);
 		}
 
 		void* operator new (size_t);
