@@ -400,6 +400,8 @@ Session::set_transport_speed (double speed, bool as_default, bool at_next_start)
 	ENSURE_PROCESS_THREAD;
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("@ %1 Set transport speed to %2 from %3 (es = %4) (def %5), as_default %6\n", _transport_sample, speed, _transport_speed, _engine_speed, _default_transport_speed, as_default));
 
+	assert (speed != 0.0);
+
 	/* the logic:
 
 	   a) engine speed is not 1.0 (normal speed)
@@ -430,50 +432,8 @@ Session::set_transport_speed (double speed, bool as_default, bool at_next_start)
 		speed = max ((double) -Config->get_max_transport_speed(), speed);
 	}
 
-	double new_engine_speed = 1.0;
-
-	if (speed != 0) {
-		new_engine_speed = fabs (speed);
-		_requested_transport_speed = speed;
-		if (speed < 0) speed = -1;
-		if (speed > 0) speed = 1;
-	}
-
-	if (_transport_speed == speed && new_engine_speed == _engine_speed) {
-		if (as_default && speed == 0.0) { // => reset default transport speed. hacky or what?
-			_default_transport_speed = 1.0;
-			_default_engine_speed = 1.0;
-		}
-		return;
-	}
-
-#if 0 // TODO pref: allow vari-speed recording
-	if (actively_recording() && speed != 1.0 && speed != 0.0) {
-		/* no varispeed during recording */
-		DEBUG_TRACE (DEBUG::Transport, string_compose ("No varispeed during recording cur_speed %1, sample %2\n",
-						       _transport_speed, _transport_sample));
-		return;
-	}
-#endif
-
-	_engine_speed = new_engine_speed;
-	if (as_default) {
-		_default_engine_speed = new_engine_speed;
-		_default_transport_speed = speed;
-	}
-
-
-	if (speed == 1.0 || speed == -1.0) {
-		TransportStateChange (); /* EMIT SIGNAL */
-
-		/* non-varispeed, we can return here */
-
-		return;
-	}
-
-	// TODO handled transport start..  _remaining_latency_preroll
-	// and reversal of playback direction.
-
+	double new_engine_speed = fabs (speed);
+	double new_transport_speed = (speed < 0) ? -1 : 1;
 
 	if ((synced_to_engine()) && speed != 0.0 && speed != 1.0) {
 		warning << string_compose (
@@ -483,26 +443,17 @@ Session::set_transport_speed (double speed, bool as_default, bool at_next_start)
 		return;
 	}
 
-#if 0
-	if (actively_recording()) {
-		return;
+	if (at_next_start) {
+		_requested_transport_speed = speed;
+	} else {
+		clear_clicks ();
+		_transport_speed = new_transport_speed;
+		_engine_speed = new_engine_speed;
 	}
-#endif
-
-	if (speed > 0.0 && _transport_sample == current_end_sample()) {
-		return;
-	}
-
-	if (speed < 0.0 && _transport_sample == 0) {
-		return;
-	}
-
-	clear_clicks ();
-
-	_transport_speed = speed;
 
 	if (as_default) {
-		_default_transport_speed = speed;
+		_default_engine_speed = new_engine_speed;
+		_default_transport_speed = new_transport_speed;
 	}
 
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC3 with speed = %1\n", _transport_speed));
@@ -519,14 +470,17 @@ Session::set_transport_speed (double speed, bool as_default, bool at_next_start)
 	 * The 0.2% dead-zone is somewhat arbitrary. Main use-case
 	 * for TransportStateChange() here is the ShuttleControl display.
 	 */
-	if (fabs (_signalled_varispeed - actual_speed ()) > .002
+
+	const double act_speed = actual_speed ();
+
+	if (fabs (_signalled_varispeed - act_speed) > .002
 	    // still, signal hard changes to 1.0 and 0.0:
-	    || (actual_speed () == 1.0 && _signalled_varispeed != 1.0)
-	    || (actual_speed () == 0.0 && _signalled_varispeed != 0.0)
+	    || (act_speed == 1.0 && _signalled_varispeed != 1.0)
+	    || (act_speed == 0.0 && _signalled_varispeed != 0.0)
 		)
 	{
 		TransportStateChange (); /* EMIT SIGNAL */
-		_signalled_varispeed = actual_speed ();
+		_signalled_varispeed = act_speed;
 	}
 }
 
@@ -892,7 +846,7 @@ Session::request_transport_speed (double speed, bool as_default, TransportReques
 	}
 
 	SessionEvent* ev = new SessionEvent (SessionEvent::SetTransportSpeed, SessionEvent::Add, SessionEvent::Immediate, 0, speed);
-	ev->third_yes_or_no = as_default; // as_default
+	ev->yes_or_no = as_default; // as_default
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request transport speed = %1 as default = %2\n", speed, as_default));
 	queue_event (ev);
 }
