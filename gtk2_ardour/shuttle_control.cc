@@ -26,6 +26,8 @@
 
 #include <cairo.h>
 
+#include "pbd/unwind.h"
+
 #include "ardour/ardour.h"
 #include "ardour/audioengine.h"
 #include "ardour/rc_configuration.h"
@@ -80,6 +82,7 @@ ShuttleControl::ShuttleControl ()
 	shuttle_max_speed = Config->get_max_transport_speed();
 	shuttle_context_menu = 0;
 	_hovering = false;
+	_ignore_change = false;
 
 	set_flags (CAN_FOCUS);
 	add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::POINTER_MOTION_MASK|Gdk::SCROLL_MASK);
@@ -191,13 +194,12 @@ ShuttleControl::map_transport_state ()
 void
 ShuttleControl::build_shuttle_context_menu ()
 {
+	PBD::Unwinder<bool> uw (_ignore_change, true);
+
 	using namespace Menu_Helpers;
 
 	shuttle_context_menu = new Menu();
 	MenuList& items = shuttle_context_menu->items();
-
-	Menu* speed_menu = manage (new Menu());
-	MenuList& speed_items = speed_menu->items();
 
 	Menu* units_menu = manage (new Menu);
 	MenuList& units_items = units_menu->items();
@@ -228,36 +230,40 @@ ShuttleControl::build_shuttle_context_menu ()
 
 	items.push_back (MenuElem (_("Mode"), *style_menu));
 
-	RadioMenuItem::Group speed_group;
+	if (Config->get_shuttle_units() == Percentage) {
+		RadioMenuItem::Group speed_group;
 
-	/* XXX this code assumes that Config->get_max_transport_speed() returns 8 */
+		/* XXX this code assumes that Config->get_max_transport_speed() returns 8 */
+		Menu* speed_menu = manage (new Menu());
+		MenuList& speed_items = speed_menu->items();
 
-	speed_items.push_back (RadioMenuElem (speed_group, "8", sigc::bind (sigc::mem_fun (*this, &ShuttleControl::set_shuttle_max_speed), 8.0f)));
-	if (shuttle_max_speed == 8.0) {
-		static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();
-	}
-	speed_items.push_back (RadioMenuElem (speed_group, "6", sigc::bind (sigc::mem_fun (*this, &ShuttleControl::set_shuttle_max_speed), 6.0f)));
-	if (shuttle_max_speed == 6.0) {
-		static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();
-	}
-	speed_items.push_back (RadioMenuElem (speed_group, "4", sigc::bind (sigc::mem_fun (*this, &ShuttleControl::set_shuttle_max_speed), 4.0f)));
-	if (shuttle_max_speed == 4.0) {
-		static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();
-	}
-	speed_items.push_back (RadioMenuElem (speed_group, "3", sigc::bind (sigc::mem_fun (*this, &ShuttleControl::set_shuttle_max_speed), 3.0f)));
-	if (shuttle_max_speed == 3.0) {
-		static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();
-	}
-	speed_items.push_back (RadioMenuElem (speed_group, "2", sigc::bind (sigc::mem_fun (*this, &ShuttleControl::set_shuttle_max_speed), 2.0f)));
-	if (shuttle_max_speed == 2.0) {
-		static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();
-	}
-	speed_items.push_back (RadioMenuElem (speed_group, "1.5", sigc::bind (sigc::mem_fun (*this, &ShuttleControl::set_shuttle_max_speed), 1.5f)));
-	if (shuttle_max_speed == 1.5) {
-		static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();
-	}
+		speed_items.push_back (RadioMenuElem (speed_group, "8", sigc::bind (sigc::mem_fun (*this, &ShuttleControl::set_shuttle_max_speed), 8.0f)));
+		if (shuttle_max_speed == 8.0) {
+			static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();
+		}
+		speed_items.push_back (RadioMenuElem (speed_group, "6", sigc::bind (sigc::mem_fun (*this, &ShuttleControl::set_shuttle_max_speed), 6.0f)));
+		if (shuttle_max_speed == 6.0) {
+			static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();
+		}
+		speed_items.push_back (RadioMenuElem (speed_group, "4", sigc::bind (sigc::mem_fun (*this, &ShuttleControl::set_shuttle_max_speed), 4.0f)));
+		if (shuttle_max_speed == 4.0) {
+			static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();
+		}
+		speed_items.push_back (RadioMenuElem (speed_group, "3", sigc::bind (sigc::mem_fun (*this, &ShuttleControl::set_shuttle_max_speed), 3.0f)));
+		if (shuttle_max_speed == 3.0) {
+			static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();
+		}
+		speed_items.push_back (RadioMenuElem (speed_group, "2", sigc::bind (sigc::mem_fun (*this, &ShuttleControl::set_shuttle_max_speed), 2.0f)));
+		if (shuttle_max_speed == 2.0) {
+			static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();
+		}
+		speed_items.push_back (RadioMenuElem (speed_group, "1.5", sigc::bind (sigc::mem_fun (*this, &ShuttleControl::set_shuttle_max_speed), 1.5f)));
+		if (shuttle_max_speed == 1.5) {
+			static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();
+		}
 
-	items.push_back (MenuElem (_("Maximum speed"), *speed_menu));
+		items.push_back (MenuElem (_("Maximum speed"), *speed_menu));
+	}
 
 	items.push_back (SeparatorElem ());
 	items.push_back (MenuElem (_("Reset to 100%"), sigc::mem_fun (*this, &ShuttleControl::reset_speed)));
@@ -276,6 +282,9 @@ ShuttleControl::reset_speed ()
 void
 ShuttleControl::set_shuttle_max_speed (float speed)
 {
+	if (_ignore_change) {
+		return;
+	}
 	Config->set_shuttle_max_speed (speed);
 }
 
@@ -657,12 +666,18 @@ ShuttleControl::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangl
 void
 ShuttleControl::set_shuttle_style (ShuttleBehaviour s)
 {
+	if (_ignore_change) {
+		return;
+	}
 	Config->set_shuttle_behaviour (s);
 }
 
 void
 ShuttleControl::set_shuttle_units (ShuttleUnits s)
 {
+	if (_ignore_change) {
+		return;
+	}
 	Config->set_shuttle_units (s);
 }
 
@@ -723,6 +738,8 @@ ShuttleControl::parameter_changed (std::string p)
 		last_speed_displayed = -99999999;
 		map_transport_state ();
 		use_shuttle_fract (true);
+		delete shuttle_context_menu;
+		shuttle_context_menu = 0;
 	}
 }
 

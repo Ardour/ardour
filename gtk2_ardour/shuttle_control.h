@@ -109,6 +109,8 @@ protected:
 
 	float semitones_as_speed (int, bool);
 	float semitones_as_fract (int, bool);
+
+	bool _ignore_change;
 };
 
 #endif /* __gtk2_ardour_shuttle_control_h__ */
