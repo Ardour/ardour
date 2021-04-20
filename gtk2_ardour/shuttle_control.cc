@@ -381,11 +381,16 @@ ShuttleControl::on_scroll_event (GdkEventScroll* ev)
 	case GDK_SCROLL_RIGHT:
 		if (semis) {
 			if (shuttle_fract == 0) {
-				shuttle_fract = semitones_as_fract (1, false);
+				shuttle_fract = semitones_as_fract (-24, false);
 			} else {
 				bool rev;
 				int st = fract_as_semitones (shuttle_fract, rev);
-				shuttle_fract = semitones_as_fract (st + 1, rev);
+				st += (rev ? -1 : 1);
+				if (st < -24) {
+					st = -24;
+					rev = !rev;
+				}
+				shuttle_fract = semitones_as_fract (st, rev);
 			}
 		} else {
 			shuttle_fract += 0.00125;
@@ -395,11 +400,16 @@ ShuttleControl::on_scroll_event (GdkEventScroll* ev)
 	case GDK_SCROLL_LEFT:
 		if (semis) {
 			if (shuttle_fract == 0) {
-				shuttle_fract = semitones_as_fract (1, true);
+				shuttle_fract = semitones_as_fract (-24, true);
 			} else {
 				bool rev;
 				int st = fract_as_semitones (shuttle_fract, rev);
-				shuttle_fract = semitones_as_fract (st - 1, rev);
+				st += (rev ? 1 : -1);
+				if (st < -24) {
+					st = -24;
+					rev = !rev;
+				}
+				shuttle_fract = semitones_as_fract (st, rev);
 			}
 		} else {
 			shuttle_fract -= 0.00125;
@@ -407,32 +417,6 @@ ShuttleControl::on_scroll_event (GdkEventScroll* ev)
 		break;
 	default:
 		return false;
-	}
-
-	if (semis) {
-
-		float lower_side_of_dead_zone = semitones_as_fract (-24, true);
-		float upper_side_of_dead_zone = semitones_as_fract (-24, false);
-
-		/* if we entered the "dead zone" (-24 semitones in forward or reverse), jump
-		   to the far side of it.
-		*/
-
-		if (shuttle_fract > lower_side_of_dead_zone && shuttle_fract < upper_side_of_dead_zone) {
-			switch (ev->direction) {
-			case GDK_SCROLL_UP:
-			case GDK_SCROLL_RIGHT:
-				shuttle_fract = upper_side_of_dead_zone;
-				break;
-			case GDK_SCROLL_DOWN:
-			case GDK_SCROLL_LEFT:
-				shuttle_fract = lower_side_of_dead_zone;
-				break;
-			default:
-				/* impossible, checked above */
-				return false;
-			}
-		}
 	}
 
 	use_shuttle_fract (true);
