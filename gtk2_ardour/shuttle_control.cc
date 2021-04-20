@@ -178,9 +178,10 @@ ShuttleControl::map_transport_state ()
 		if (Config->get_shuttle_units() == Semitones) {
 			bool reverse;
 			int semi = speed_as_semitones (speed, reverse);
+			semi = std::max (-24, std::min (24, semi));
 			shuttle_fract = semitones_as_fract (semi, reverse);
 		} else {
-			shuttle_fract = speed/shuttle_max_speed;
+			shuttle_fract = speed / shuttle_max_speed;
 		}
 	}
 
@@ -276,8 +277,6 @@ void
 ShuttleControl::set_shuttle_max_speed (float speed)
 {
 	Config->set_shuttle_max_speed (speed);
-	shuttle_max_speed = speed;
-	last_speed_displayed = -99999999;
 }
 
 bool
@@ -716,9 +715,14 @@ ShuttleControl::parameter_changed (std::string p)
 		}
 
 	} else if (p == "shuttle-max-speed") {
-		queue_draw ();
+		shuttle_max_speed = Config->get_shuttle_max_speed ();
+		last_speed_displayed = -99999999;
+		map_transport_state ();
+		use_shuttle_fract (true);
 	} else if (p == "shuttle-units") {
-		queue_draw ();
+		last_speed_displayed = -99999999;
+		map_transport_state ();
+		use_shuttle_fract (true);
 	}
 }
 
