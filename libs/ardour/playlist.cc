@@ -690,7 +690,7 @@ Playlist::add_region (boost::shared_ptr<Region> region, timepos_t const & positi
 	timepos_t pos = position;
 
 	if (times == 1 && auto_partition) {
-		partition_internal (pos - 1, (pos + region->length ()), true, rlock.thawlist);
+		partition_internal (pos.decrement(), (pos + region->length ()), true, rlock.thawlist);
 		for (RegionList::iterator i = rlock.thawlist.begin (); i != rlock.thawlist.end (); ++i) {
 			_session.add_command (new StatefulDiffCommand (*i));
 		}
