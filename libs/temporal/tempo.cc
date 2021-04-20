@@ -1635,9 +1635,6 @@ TempoMap::_get_tempo_and_meter (typename const_traits_t::tempo_point_type & tp,
 	assert (!_meters.empty());
 	assert (!_points.empty());
 
-	tp = 0;
-	mp = 0;
-
 	/* If the starting position is the beginning of the timeline (indicated
 	 * by the default constructor value for the time_type (superclock_t,
 	 * Beats, BBT_Time), then we are always allowed to use the tempo &
