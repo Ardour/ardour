@@ -455,14 +455,14 @@ Session::start_transport (bool after_loop)
 		Location *location = _locations->auto_loop_location();
 
 		if (location != 0) {
-			if (_transport_sample != location->start()) {
+			if (_transport_sample != location->start_sample()) {
 
 				/* force tracks to do their thing */
 				set_track_loop (true);
 
 				/* jump to start and then roll from there */
 
-				request_locate (location->start(), MustRoll);
+				request_locate (location->start_sample(), MustRoll);
 				return;
 			}
 		}
