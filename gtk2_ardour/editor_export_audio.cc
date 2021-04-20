@@ -108,7 +108,7 @@ Editor::loudness_assistant_marker ()
 	bool is_start;
 
 	if (((l = find_location_from_marker (marker, is_start)) != 0) && (l->end() > l->start())) {
-		measure_master_loudness (l->start(), l->end(), true);
+		measure_master_loudness (l->start().samples(), l->end().samples(), true);
 	}
 }
 
