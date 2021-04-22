@@ -1019,6 +1019,7 @@ DiskReader::audio_read (Sample*            sum_buffer,
 
 	if (reversed) {
 		start -= cnt;
+		start = max (samplepos_t (0), start);
 	}
 
 	/* We need this while loop in case we hit a loop boundary, in which case our read from
