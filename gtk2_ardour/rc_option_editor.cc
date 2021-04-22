@@ -3750,7 +3750,9 @@ These settings will only take effect after %1 is restarted.\n\
 					),
 				_("Additional VST3 Path:"));
 
-	vst3_path->set_note (_("Customizing VST3 paths is discouraged. Note that default VST3 paths as per <a href=\"https://steinbergmedia.github.io/vst3_doc/vstinterfaces/vst3loc.html#pluginloc\">specification</a> are always searched, and need not be explicitly set."));
+	vst3_path->set_note (_("Customizing VST3 paths is discouraged. Note that default VST3 paths as per "
+	                       "<a href=\"https://developer.steinberg.help/display/VST/Plug-in+Locations\">specification</a>"
+	                       "are always searched, and need not be explicitly set."));
 	add_option (_("Plugins/VST"), vst3_path);
 
 	// -> Appearance/Mixer ?
