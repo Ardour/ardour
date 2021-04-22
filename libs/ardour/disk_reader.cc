@@ -1015,9 +1015,9 @@ DiskReader::audio_read (Sample*            sum_buffer,
 			const Evoral::Range<samplepos_t> loop_range (loop_start, loop_end - 1);
 			start = loop_range.squish (start);
 		}
-	}
 
-	if (reversed) {
+	} else {
+
 		start -= cnt;
 		start = max (samplepos_t (0), start);
 	}
