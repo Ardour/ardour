@@ -525,7 +525,11 @@ Route::process_output_buffers (BufferSet& bufs,
 		 */
 
 		if ((*i)->active ()) {
-			latency += (*i)->effective_latency ();
+			if (speed < 0) {
+				latency -= (*i)->effective_latency ();
+			} else {
+				latency += (*i)->effective_latency ();
+			}
 		}
 
 		if (speed < 0) {
