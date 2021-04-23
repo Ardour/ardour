@@ -2028,6 +2028,7 @@ ARDOUR_UI::transport_ffwd_rewind (int option, int dir)
 	}
 
 	_session->request_transport_speed (target_speed, false);
+	_session->request_roll ();
 }
 
 void
