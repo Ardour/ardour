@@ -3873,8 +3873,13 @@ Route::latency_preroll (pframes_t nframes, samplepos_t& start_sample, samplepos_
 		return nframes;
 	}
 	if (!_disk_reader) {
-		start_sample -= latency_preroll;
-		end_sample   -= latency_preroll;
+		if (_session.transport_speed() < 0) {
+			start_sample += latency_preroll;
+			end_sample   += latency_preroll;
+		} else {
+			start_sample -= latency_preroll;
+			end_sample   -= latency_preroll;
+		}
 		return nframes;
 	}
 
@@ -3883,8 +3888,13 @@ Route::latency_preroll (pframes_t nframes, samplepos_t& start_sample, samplepos_
 		return 0;
 	}
 
-	start_sample -= latency_preroll;
-	end_sample -= latency_preroll;
+	if (_session.transport_speed() < 0) {
+		start_sample += latency_preroll;
+		end_sample   += latency_preroll;
+	} else {
+		start_sample -= latency_preroll;
+		end_sample -= latency_preroll;
+	}
 	return nframes;
 }
 
