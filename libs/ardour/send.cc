@@ -288,6 +288,11 @@ Send::set_state (const XMLNode& node, int version)
 	}
 
 	XMLNode* gain_node;
+
+	if ((gain_node = node.child (Controllable::xml_node_name.c_str ())) != 0) {
+		_gain_control->set_state (*gain_node, version);
+	}
+
 	if (version <= 6000) {
 		XMLNode const* nn = &node;
 
