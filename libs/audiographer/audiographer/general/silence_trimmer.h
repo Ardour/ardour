@@ -41,7 +41,7 @@ class /*LIBAUDIOGRAPHER_API*/ SilenceTrimmer
   public:
 
 	/// Constructor, \see reset() \n Not RT safe
-	SilenceTrimmer(samplecnt_t silence_buffer_size_ = 1024, float thresh_dB = -90.0f)
+	SilenceTrimmer(samplecnt_t silence_buffer_size_ = 1024, float thresh_dB = -INFINITY)
 	  : silence_buffer_size (0)
 	  , silence_buffer (0)
 	  , tester (thresh_dB)
