@@ -278,4 +278,4 @@ CONFIG_VARIABLE (bool, show_video_server_dialog, "show-video-server-dialog", fal
 
 /* export */
 CONFIG_VARIABLE (float, export_preroll, "export-preroll", 2.0) // seconds
-CONFIG_VARIABLE (float, export_silence_threshold, "export-silence-threshold", -INFINITY) // dB
+CONFIG_VARIABLE (float, export_silence_threshold, "export-silence-threshold", -90) // dB
