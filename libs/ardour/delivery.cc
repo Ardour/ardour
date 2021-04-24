@@ -375,7 +375,7 @@ Delivery::state ()
 
 	if (_panshell) {
 		node.add_child_nocopy (_panshell->get_state ());
-		if (_panshell->unlinked_pannable ()) {
+		if (_panshell->unlinked_pannable () && _role != Listen) {
 			node.add_child_nocopy (_panshell->unlinked_pannable()->get_state ());
 		}
 	}
