@@ -922,11 +922,13 @@ def build(bld):
         obj.chmod        = Utils.O644
         obj.dict         = freedesktop_subst_dict
         set_subst_dict(obj, freedesktop_subst_dict)
+        bld.install_files (os.path.join (bld.env['PREFIX'], 'share/applications'), obj.target)
 
         obj              = bld(features = 'subst')
         obj.source       = 'ardour-mime-info.xml'
         obj.target       = 'ardour.xml'
         obj.chmod        = Utils.O644
+        bld.install_files (os.path.join (bld.env['PREFIX'], 'share/mime/application'), 'ardour' + '.xml')
 
         # build appdata with translations
         appdata_i18n_mo(bld)
@@ -937,6 +939,7 @@ def build(bld):
         obj.chmod        = Utils.O644
         obj.dict         = freedesktop_subst_dict
         set_subst_dict(obj, freedesktop_subst_dict)
+        bld.install_files (os.path.join (bld.env['PREFIX'], 'share/appdata'), obj.target)
 
     # Keybindings
 
