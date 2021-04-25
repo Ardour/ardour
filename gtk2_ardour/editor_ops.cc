@@ -3871,10 +3871,10 @@ Editor::trim_region_to_location (const Location& loc, const char* str)
 
 		/* require region to span proposed trim */
 		switch (rv->region()->coverage (loc.start(), loc.end())) {
-		case Evoral::OverlapInternal:
-			break;
-		default:
+		case Evoral::OverlapNone:
 			continue;
+		default:
+			break;
 		}
 
 		RouteTimeAxisView* tav = dynamic_cast<RouteTimeAxisView*> (&rv->get_time_axis_view());
@@ -3885,8 +3885,8 @@ Editor::trim_region_to_location (const Location& loc, const char* str)
 		samplepos_t start;
 		samplepos_t end;
 
-		start = loc.start();
-		end = loc.end();
+		start = max (loc.start(), rv->region()->position());
+		end = min (loc.end(), rv->region()->position() + rv->region()->length());
 
 		rv->region()->clear_changes ();
 		rv->region()->trim_to (start, (end - start));
