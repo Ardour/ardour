@@ -1274,6 +1274,7 @@ private:
 	void align_region (boost::shared_ptr<ARDOUR::Region>, ARDOUR::RegionPoint point, samplepos_t position);
 	void align_region_internal (boost::shared_ptr<ARDOUR::Region>, ARDOUR::RegionPoint point, samplepos_t position);
 	void recover_regions (ARDOUR::RegionList);
+	void remove_list_of_regions (const RegionSelection rs);
 	void remove_selected_regions ();
 	void remove_clicked_region ();
 	void show_region_properties ();

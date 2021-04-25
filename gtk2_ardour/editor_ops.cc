@@ -3864,16 +3864,16 @@ void
 Editor::trim_region_to_location (const Location& loc, const char* str)
 {
 	RegionSelection rs = get_regions_from_selection_and_entered ();
+	if (rs.empty()) {
+		return;
+	}
 	bool in_command = false;
-
+	RegionSelection out_of_location;
+	
 	for (RegionSelection::iterator x = rs.begin(); x != rs.end(); ++x) {
 		RegionView* rv = (*x);
 
-		/* require region to span proposed trim */
-		switch (rv->region()->coverage (loc.start(), loc.end())) {
-		case Evoral::OverlapInternal:
-			break;
-		default:
+		if (rv->region()->coverage (loc.start(), loc.end()) == Evoral::OverlapExternal) {
 			continue;
 		}
 
@@ -3882,25 +3882,34 @@ Editor::trim_region_to_location (const Location& loc, const char* str)
 			return;
 		}
 
+		rv->region()->clear_changes ();
+		
 		samplepos_t start;
 		samplepos_t end;
 
-		start = loc.start();
-		end = loc.end();
-
-		rv->region()->clear_changes ();
-		rv->region()->trim_to (start, (end - start));
-
+		start = max(loc.start(),rv->region()->first_sample());
+		end = min(loc.end(),rv->region()->last_sample());
+		if (start >= end) {
+			out_of_location.add(rv);
+		} else {
+			rv->region()->trim_to (start, (end-start));
+		}
+		
 		if (!in_command) {
 			begin_reversible_command (str);
 			in_command = true;
 		}
 		_session->add_command(new StatefulDiffCommand (rv->region()));
 	}
-
+	
+	remove_list_of_regions(out_of_location);
+	
 	if (in_command) {
 		commit_reversible_command ();
 	}
+	
+	
+	
 }
 
 void
@@ -4621,16 +4630,10 @@ Editor::recover_regions (ARDOUR::RegionList regions)
 }
 
 
-/** Remove the selected regions */
+/** Remove a list of regions */
 void
-Editor::remove_selected_regions ()
+Editor::remove_list_of_regions (RegionSelection rs)
 {
-	RegionSelection rs = get_regions_from_selection_and_entered ();
-
-	if (!_session || rs.empty()) {
-		return;
-	}
-
 	list<boost::shared_ptr<Region> > regions_to_remove;
 
 	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
@@ -4698,6 +4701,21 @@ Editor::remove_selected_regions ()
 		commit_reversible_command ();
 	}
 }
+
+
+/** Remove the selected regions */
+void
+Editor::remove_selected_regions ()
+{
+	RegionSelection rs = get_regions_from_selection_and_entered ();
+
+	if (!_session || rs.empty()) {
+		return;
+	} else {
+		remove_list_of_regions(rs);
+	}
+}
+
 
 /** Cut, copy or clear selected regions.
  * @param op Operation (Cut, Copy or Clear)
