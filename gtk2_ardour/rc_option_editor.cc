@@ -37,6 +37,7 @@
 #include <gtkmm/stock.h>
 #include <gtkmm/scale.h>
 
+#include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/window_title.h"
@@ -4459,6 +4460,19 @@ These settings will only take effect after %1 is restarted.\n\
 	}
 
 	set_current_page (_("General"));
+}
+
+bool
+RCOptionEditor::on_key_release_event (GdkEventKey* event)
+{
+	if (Keyboard::modifier_state_equals (event->state, Keyboard::close_window_modifier)) {
+		if (event->keyval == Keyboard::close_window_key) {
+			WindowProxy::hide ();
+			return true;
+		}
+	}
+
+	return false;
 }
 
 void
