@@ -121,6 +121,9 @@ Keyboard*    Keyboard::_the_keyboard = 0;
 Gtk::Window* Keyboard::current_window = 0;
 bool         Keyboard::_some_magic_widget_has_focus = false;
 
+const int    Keyboard::close_window_key = GDK_w;
+guint  Keyboard::close_window_modifier = Keyboard::PrimaryModifier;
+
 std::string Keyboard::user_keybindings_path;
 bool Keyboard::can_save_keybindings = false;
 bool Keyboard::bindings_changed_after_save_became_legal = false;
@@ -309,9 +312,10 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 			*/
 
 			switch (event->keyval) {
-			case GDK_w:
-				close_current_dialog ();
-				ret = true;
+			case close_window_key:
+				if (close_current_dialog ()) {
+					ret = true;
+				}
 				break;
 			}
 		}
@@ -339,7 +343,7 @@ Keyboard::reset_relevant_modifier_key_mask ()
 	RelevantModifierKeysChanged(); /* EMIT SIGNAL */
 }
 
-void
+bool
 Keyboard::close_current_dialog ()
 {
 	if (current_window) {
@@ -353,7 +357,11 @@ Keyboard::close_current_dialog ()
                         pre_dialog_active_window->present ();
                         pre_dialog_active_window = 0;
                 }
+
+                return true;
 	}
+
+	return false;
 }
 
 bool
