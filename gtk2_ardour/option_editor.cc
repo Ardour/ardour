@@ -942,7 +942,7 @@ DirectoryOption::selection_changed ()
 
 /*--------------------------*/
 
-OptionEditorContainer::OptionEditorContainer (PBD::Configuration* c, string const& str)
+OptionEditorContainer::OptionEditorContainer (PBD::Configuration* c)
 	: OptionEditor (c)
 {
 	set_border_width (4);

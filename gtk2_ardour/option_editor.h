@@ -742,7 +742,7 @@ private:
 class OptionEditorContainer : public OptionEditor, public Gtk::VBox
 {
 public:
-	OptionEditorContainer (PBD::Configuration *, std::string const &);
+	OptionEditorContainer (PBD::Configuration *);
 	~OptionEditorContainer() {}
 private:
 	Gtk::HBox hpacker;
