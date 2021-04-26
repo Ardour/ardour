@@ -1086,7 +1086,7 @@ msgstr "Écoute de contrôle"
 
 #: globals.cc:593 session.cc:1267
 msgid "Master"
-msgstr "Général"
+msgstr "Master"
 
 #: globals.cc:595 midiport_manager.cc:71 port_manager.cc:1273
 #: port_manager.cc:1283
