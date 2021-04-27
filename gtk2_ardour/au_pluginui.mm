@@ -867,6 +867,7 @@ AUPluginUI::cocoa_view_resized ()
 		for (unsigned long i = 0; i < [subviews count]; ++i) {
 			NSView* subview = [subviews objectAtIndex:i];
 			[subview setFrame:NSMakeRect (0, 0, new_frame.size.width, new_frame.size.height)];
+			break; /* only resize first subview */
 		}
 
 		/* also be sure to redraw the topbox because this can
@@ -1092,6 +1093,7 @@ AUPluginUI::parent_cocoa_window ()
 	for (unsigned long i = 0; i < [subviews count]; ++i) {
 		NSView* subview = [subviews objectAtIndex:i];
 		[subview setFrame:NSMakeRect (0, 0, req_width, req_height)];
+		break; /* only resize first subview */
 	}
 
 	last_au_frame = [au_view frame];

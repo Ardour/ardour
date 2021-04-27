@@ -222,6 +222,7 @@ MacVSTPluginUI::lower_box_size_allocate (Gtk::Allocation& allocation)
 	for (unsigned long i = 0; i < [subviews count]; ++i) {
 		NSView* subview = [subviews objectAtIndex:i];
 		[subview setFrame:NSMakeRect (0, 0, allocation.get_width (), allocation.get_height ())];
+		break; /* only resize first subview */
 	}
 }
 
