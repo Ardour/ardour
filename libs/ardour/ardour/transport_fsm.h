@@ -151,6 +151,8 @@ struct TransportFSM
 
 	std::string current_state () const;
 
+	int transport_speed () const;
+
   private:
 	MotionState _motion_state;
 	ButlerState _butler_state;

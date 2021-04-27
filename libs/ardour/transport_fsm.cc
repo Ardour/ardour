@@ -638,6 +638,20 @@ TransportFSM::enqueue (Event* ev)
 	}
 }
 
+int
+TransportFSM::transport_speed() const
+{
+	if (_motion_state == Stopped || _direction_state == Reversing) {
+		return 0;
+	}
+
+	if (_direction_state == Backwards) {
+		return -1;
+	}
+
+	return 1;
+}
+
 void
 TransportFSM::set_speed (Event const & ev)
 {
