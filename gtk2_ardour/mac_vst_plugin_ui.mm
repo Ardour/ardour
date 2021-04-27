@@ -95,12 +95,12 @@ MacVSTPluginUI::MacVSTPluginUI (boost::shared_ptr<PluginInsert> pi, boost::share
 		object:_ns_view];
 
 	NSArray* subviews = [_ns_view subviews];
-	assert ([subviews count] < 2);
 	for (unsigned long i = 0; i < [subviews count]; ++i) {
 		NSView* subview = [subviews objectAtIndex:i];
 		[[NSNotificationCenter defaultCenter] addObserver:_resize_notifier
 			selector:@selector(viewResized:) name:NSViewFrameDidChangeNotification
 			object:subview];
+		break; /* only watch first subview (if any) */
 	}
 }
 
