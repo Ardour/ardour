@@ -437,7 +437,7 @@ EditorSummary::on_key_press_event (GdkEventKey* key)
 		if (key->keyval == set_playhead_accel.accel_key && (int) key->state == set_playhead_accel.accel_mods) {
 			if (_session) {
 				get_pointer (x, y);
-				_session->request_locate (_start + (samplepos_t) x / _x_scale, RollIfAppropriate);
+				_session->request_locate (_start + (samplepos_t) x / _x_scale);
 				return true;
 			}
 		}

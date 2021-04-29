@@ -2181,7 +2181,7 @@ AudioClock::locate ()
 		return;
 	}
 
-	_session->request_locate (current_time(), RollIfAppropriate);
+	_session->request_locate (current_time());
 }
 
 void

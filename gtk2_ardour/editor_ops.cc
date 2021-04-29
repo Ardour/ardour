@@ -1360,7 +1360,7 @@ Editor::cursor_align (bool playhead_to_edit)
 			return;
 		}
 
-		_session->request_locate (selection->markers.front()->position(), RollIfAppropriate);
+		_session->request_locate (selection->markers.front()->position());
 
 	} else {
 		const int32_t divisions = get_grid_music_divisions (0);
@@ -2452,7 +2452,7 @@ Editor::jump_forward_to_mark ()
 		return;
 	}
 
-	_session->request_locate (pos, RollIfAppropriate);
+	_session->request_locate (pos);
 }
 
 void
@@ -2476,7 +2476,7 @@ Editor::jump_backward_to_mark ()
 		return;
 	}
 
-	_session->request_locate (pos, RollIfAppropriate);
+	_session->request_locate (pos);
 }
 
 void
@@ -6632,7 +6632,7 @@ void
 Editor::set_playhead_cursor ()
 {
 	if (entered_marker) {
-		_session->request_locate (entered_marker->position(), RollIfAppropriate);
+		_session->request_locate (entered_marker->position());
 	} else {
 		MusicSample where (0, 0);
 		bool ignored;
@@ -6644,7 +6644,7 @@ Editor::set_playhead_cursor ()
 		snap_to (where);
 
 		if (_session) {
-			_session->request_locate (where.sample, RollIfAppropriate);
+			_session->request_locate (where.sample);
 		}
 	}
 
@@ -7642,7 +7642,7 @@ Editor::playhead_backward_to_grid ()
 			}
 		}
 
-		_session->request_locate (pos.sample, RollIfAppropriate);
+		_session->request_locate (pos.sample);
 	}
 
 	/* keep PH visible in window */

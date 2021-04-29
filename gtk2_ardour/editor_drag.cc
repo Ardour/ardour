@@ -6054,7 +6054,7 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 
 			/* didn't drag, so just locate */
 
-			_editor->session()->request_locate (grab_sample(), RollIfAppropriate);
+			_editor->session()->request_locate (grab_sample());
 
 		} else if (_operation == CreateCDMarker) {
 

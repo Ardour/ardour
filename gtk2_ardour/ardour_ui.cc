@@ -1684,7 +1684,7 @@ ARDOUR_UI::transport_goto_wallclock ()
 		samples += tmnow.tm_min * (60 * sample_rate);
 		samples += tmnow.tm_sec * sample_rate;
 
-		_session->request_locate (samples, RollIfAppropriate);
+		_session->request_locate (samples);
 
 		/* force displayed area in editor to start no matter
 		   what "follow playhead" setting is.
