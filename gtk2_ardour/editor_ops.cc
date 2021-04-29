@@ -4191,6 +4191,11 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 			continue;
 		}
 
+		if (!in_command) {
+			begin_reversible_command (_("bounce range"));
+			in_command = true;
+		}
+
 		if (replace) {
 			/*remove the edxisting regions under the edit range*/
 			list<AudioRange> ranges;
@@ -4205,10 +4210,6 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 			playlist->add_region (copy, start);
 		}
 
-		if (!in_command) {
-			begin_reversible_command (_("bounce range"));
-			in_command = true;
-		}
 		vector<Command*> cmds;
 		playlist->rdiff (cmds);
 		_session->add_commands (cmds);
@@ -4216,7 +4217,7 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 		_session->add_command (new StatefulDiffCommand (playlist));
 	}
 
-	if (in_command) {
+	if (in_command && !_session->abort_empty_reversible_command ()) {
 		commit_reversible_command ();
 	}
 }
