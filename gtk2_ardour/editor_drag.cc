@@ -2079,9 +2079,20 @@ RegionInsertDrag::finished (GdkEvent * event, bool)
 
 	// Mixbus doesn't seem to ripple when inserting regions from the list: should we? yes, probably
 	if (Config->get_edit_mode() == Ripple) {
-		playlist->ripple (_last_position.sample, _primary->region()->length(), _primary->region());
-	}
+		boost::shared_ptr<RegionList> rl = playlist->regions_with_start_within (Evoral::Range<samplepos_t>(_last_position.sample, max_samplepos));
+		for (RegionList::iterator i = rl->begin(); i != rl->end(); ++i) {
+			(*i)->clear_changes ();
+		}
 
+		playlist->ripple (_last_position.sample, _primary->region()->length(), _primary->region());
+
+		samplepos_t where = _last_position.sample + _primary->region()->length();
+		for (RegionList::iterator i = rl->begin(); i != rl->end(); ++i) {
+			if ((*i)->position() >= where) {
+				_editor->session()->add_command (new StatefulDiffCommand (*i));
+			}
+		}
+	}
 	_editor->session()->add_command (new StatefulDiffCommand (playlist));
 	_editor->commit_reversible_command ();
 
