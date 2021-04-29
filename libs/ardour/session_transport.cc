@@ -85,7 +85,7 @@ using namespace PBD;
 
 #define TFSM_EVENT(evtype) { _transport_fsm->enqueue (new TransportFSM::Event (evtype)); }
 #define TFSM_STOP(abort,clear) { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::StopTransport,abort,clear)); }
-#define TFSM_LOCATE(target,ltd,flush,loop,force) { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::Locate,target,ltd,flush,loop,force)); }
+#define TFSM_LOCATE(target,ltd,loop,force) { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::Locate,target,ltd,loop,force)); }
 #define TFSM_SPEED(speed,as_default) { _transport_fsm->enqueue (new TransportFSM::Event (speed,as_default)); }
 
 /* *****************************************************************************
@@ -195,7 +195,7 @@ Session::realtime_stop (bool abort, bool clear_state)
 
 /** @param with_mmc true to send a MMC locate command when the locate is done */
 void
-Session::locate (samplepos_t target_sample, bool with_roll, bool with_flush, bool for_loop_end, bool force, bool with_mmc)
+Session::locate (samplepos_t target_sample, bool with_roll, bool for_loop_end, bool force, bool with_mmc)
 {
 	ENSURE_PROCESS_THREAD;
 
@@ -214,8 +214,8 @@ Session::locate (samplepos_t target_sample, bool with_roll, bool with_flush, boo
 	 * changes in the value of _transport_sample.
 	 */
 
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("rt-locate to %1 ts = %7, roll %2 flush %3 for loop end %4 force %5 mmc %6\n",
-	                                               target_sample, with_roll, with_flush, for_loop_end, force, with_mmc, _transport_sample));
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("rt-locate to %1 ts = %7, roll %2 for loop end %3 force %4 mmc %5\n",
+	                                               target_sample, with_roll, for_loop_end, force, with_mmc, _transport_sample));
 
 	if (!force && (_transport_sample == target_sample) && !for_loop_end) {
 
@@ -1639,12 +1639,12 @@ Session::set_play_loop (bool yn, bool change_transport_state)
 				/* set loop_changing to ensure that non_realtime_stop does not unset_play_loop */
 				loop_changing = true;
 			}
-			/* args: position, disposition, flush=true, for_loop_end=false, force=true */
-			TFSM_LOCATE (loc->start(), MustRoll, true, false, true);
+			/* args: position, disposition, for_loop_end=false, force=true */
+			TFSM_LOCATE (loc->start(), MustRoll, false, true);
 		} else {
 			if (!transport_rolling()) {
 				/* loop-is-mode: not rolling, just locate to loop start */
-				TFSM_LOCATE (loc->start(), MustStop, true, false, true);
+				TFSM_LOCATE (loc->start(), MustStop, false, true);
 			}
 		}
 		TransportStateChange (); /* EMIT SIGNAL */

@@ -50,7 +50,6 @@ struct TransportFSM
 		bool clear_state;
 		/* for locate */
 		LocateTransportDisposition ltd;
-		bool with_flush;
 		samplepos_t target;
 		bool for_loop_end;
 		bool force;
@@ -63,7 +62,6 @@ struct TransportFSM
 			, abort_capture (false)
 			, clear_state (false)
 			, ltd (MustStop)
-			, with_flush (false)
 			, target (0)
 			, for_loop_end (false)
 			, force (false)
@@ -76,19 +74,17 @@ struct TransportFSM
 			, abort_capture (ab)
 			, clear_state (cl)
 			, ltd (MustStop)
-			, with_flush (false)
 			, target (0)
 			, for_loop_end (false)
 			, force (false)
 		{
 			assert (t == StopTransport);
 		}
-		Event (EventType t, samplepos_t pos, LocateTransportDisposition l, bool fl, bool lp, bool f4c)
+		Event (EventType t, samplepos_t pos, LocateTransportDisposition l, bool lp, bool f4c)
 			: type (t)
 			, abort_capture (false)
 			, clear_state (false)
 			, ltd (l)
-			, with_flush (fl)
 			, target (pos)
 			, for_loop_end (lp)
 			, force (f4c)

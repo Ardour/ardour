@@ -1337,7 +1337,7 @@ protected:
 
 	/* transport API */
 
-	void locate (samplepos_t, bool with_roll, bool with_flush, bool for_loop_end=false, bool force=false, bool with_mmc=true);
+	void locate (samplepos_t, bool with_roll, bool for_loop_end=false, bool force=false, bool with_mmc=true);
 	void stop_transport (bool abort = false, bool clear_state = false);
 	void start_transport ();
 	void butler_completed_transport_work ();

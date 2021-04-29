@@ -64,7 +64,7 @@ using namespace std;
 #define TFSM_ROLL() { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::StartTransport)); }
 #define TFSM_STOP(abort,clear) { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::StopTransport,abort,clear)); }
 #define TFSM_SPEED(speed,as_default) { _transport_fsm->enqueue (new TransportFSM::Event (speed,as_default)); }
-#define TFSM_LOCATE(target,ltd,flush,loop,force) { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::Locate,target,ltd,flush,loop,force)); }
+#define TFSM_LOCATE(target,ltd,loop,force) { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::Locate,target,ltd,loop,force)); }
 
 
 /** Called by the audio engine when there is work to be done with JACK.
@@ -873,9 +873,9 @@ Session::process_event (SessionEvent* ev)
 		   loop range.
 		*/
 		if (play_loop) {
-			/* roll after locate, do not flush, set "for loop end" true
+			/* roll after locate, set "for loop end" true
 			*/
-			TFSM_LOCATE (ev->target_sample, MustRoll, false, true, false);
+			TFSM_LOCATE (ev->target_sample, MustRoll, true, false);
 		}
 		remove = false;
 		del = false;
@@ -884,19 +884,19 @@ Session::process_event (SessionEvent* ev)
 	case SessionEvent::Locate:
 		/* args: do not roll after locate, clear state, not for loop, force */
 		DEBUG_TRACE (DEBUG::Transport, string_compose ("sending locate to %1 to tfsm\n", ev->target_sample));
-		TFSM_LOCATE (ev->target_sample, ev->locate_transport_disposition, true, false, ev->yes_or_no);
+		TFSM_LOCATE (ev->target_sample, ev->locate_transport_disposition, false, ev->yes_or_no);
 		_send_timecode_update = true;
 		break;
 
 	case SessionEvent::LocateRoll:
 		/* args: roll after locate, clear state if not looping, not for loop, force */
-		TFSM_LOCATE (ev->target_sample, MustRoll, !play_loop, false, ev->yes_or_no);
+		TFSM_LOCATE (ev->target_sample, MustRoll, false, ev->yes_or_no);
 		_send_timecode_update = true;
 		break;
 
 	case SessionEvent::Skip:
 		if (Config->get_skip_playback()) {
-			TFSM_LOCATE (ev->target_sample, MustRoll, true, false, false);
+			TFSM_LOCATE (ev->target_sample, MustRoll, false, false);
 			_send_timecode_update = true;
 		}
 		remove = false;
@@ -906,7 +906,7 @@ Session::process_event (SessionEvent* ev)
 	case SessionEvent::LocateRollLocate:
 		// locate is handled by ::request_roll_at_and_return()
 		_requested_return_sample = ev->target_sample;
-		TFSM_LOCATE (ev->target2_sample, MustRoll, true, false, false);
+		TFSM_LOCATE (ev->target2_sample, MustRoll, false, false);
 		_send_timecode_update = true;
 		break;
 
@@ -957,8 +957,8 @@ Session::process_event (SessionEvent* ev)
 		break;
 
 	case SessionEvent::RangeLocate:
-		/* args: roll after locate, do flush, not with loop */
-		TFSM_LOCATE (ev->target_sample, MustRoll, true, false, false);
+		/* args: roll after locate, not with loop */
+		TFSM_LOCATE (ev->target_sample, MustRoll, false, false);
 		remove = false;
 		del = false;
 		break;
@@ -1520,7 +1520,7 @@ Session::implement_master_strategy ()
 		break;
 	case TransportMasterLocate:
 		transport_master_strategy.action = TransportMasterWait;
-		TFSM_LOCATE(transport_master_strategy.target, transport_master_strategy.roll_disposition, true, false, false);
+		TFSM_LOCATE(transport_master_strategy.target, transport_master_strategy.roll_disposition, false, false);
 		break;
 	case TransportMasterStart:
 		TFSM_EVENT (TransportFSM::StartTransport);

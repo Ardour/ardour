@@ -56,7 +56,7 @@ TransportFSM::Event::operator delete (void *ptr, size_t /*size*/)
 }
 
 TransportFSM::TransportFSM (TransportAPI& tapi)
-	: _last_locate (Locate, 0, MustRoll, false, false, false) /* all but first argument don't matter */
+	: _last_locate (Locate, 0, MustRoll, false, false) /* all but first argument don't matter */
 	, last_speed_request (0, false) /* SetSpeed request */
 	, api (&tapi)
 	, processing (0)
@@ -292,9 +292,8 @@ TransportFSM::process_event (Event& ev, bool already_deferred, bool& deferred)
 		break;
 
 	case Locate:
-		DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("locate, ltd = %1 flush = %2 target = %3 loop %4 force %5\n",
+		DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("locate, ltd = %1 target = %2 loop %3 force %4\n",
 		                                                enum_2_string (ev.ltd),
-		                                                ev.with_flush,
 		                                                ev.target,
 		                                                ev.for_loop_end,
 		                                                ev.force));
@@ -490,7 +489,7 @@ TransportFSM::start_locate_while_stopped (Event const & l) const
 
 	set_roll_after (compute_should_roll (l.ltd));
 
-	api->locate (l.target, current_roll_after_locate_status.get(), l.with_flush, l.for_loop_end, l.force);
+	api->locate (l.target, current_roll_after_locate_status.get(), l.for_loop_end, l.force);
 }
 
 bool
@@ -525,7 +524,7 @@ TransportFSM::locate_for_loop (Event const & l)
 	const bool should_roll = compute_should_roll (l.ltd);
 	current_roll_after_locate_status = should_roll;
 	_last_locate = l;
-	api->locate (l.target, should_roll, l.with_flush, l.for_loop_end, l.force);
+	api->locate (l.target, should_roll, l.for_loop_end, l.force);
 }
 
 void
@@ -535,7 +534,7 @@ TransportFSM::start_locate_after_declick () const
 	                                                current_roll_after_locate_status ? current_roll_after_locate_status.get() : compute_should_roll (_last_locate.ltd)));
 
 	const bool roll = current_roll_after_locate_status ? current_roll_after_locate_status.get() : compute_should_roll (_last_locate.ltd);
-	api->locate (_last_locate.target, roll, _last_locate.with_flush, _last_locate.for_loop_end, _last_locate.force);
+	api->locate (_last_locate.target, roll, _last_locate.for_loop_end, _last_locate.force);
 }
 
 void
@@ -564,7 +563,7 @@ TransportFSM::interrupt_locate (Event const & l) const
 	 * we are interrupting the locate to start a new one.
 	 */
 	_last_locate = l;
-	api->locate (l.target, false, l.with_flush, l.for_loop_end, l.force);
+	api->locate (l.target, false, l.for_loop_end, l.force);
 }
 
 void
@@ -705,7 +704,7 @@ TransportFSM::set_speed (Event const & ev)
 		last_speed_request = ev;
 		transition (Reversing);
 
-		Event lev (Locate, api->position(), must_roll ? MustRoll : MustStop, false, false, true);
+		Event lev (Locate, api->position(), must_roll ? MustRoll : MustStop, false, true);
 
 		transition (DeclickToLocate);
 		start_declick_for_locate (lev);
