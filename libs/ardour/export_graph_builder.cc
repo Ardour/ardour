@@ -720,7 +720,6 @@ void
 ExportGraphBuilder::Intermediate::prepare_post_processing()
 {
 	for (boost::ptr_list<SFC>::iterator i = children.begin(); i != children.end(); ++i) {
-		(*i).set_duration (tmp_file->get_samples_written() / config.channel_config->get_n_chans());
 		if (use_peak) {
 			(*i).set_peak_dbfs (peak_reader->get_peak());
 		}
@@ -736,6 +735,10 @@ ExportGraphBuilder::Intermediate::prepare_post_processing()
 void
 ExportGraphBuilder::Intermediate::start_post_processing()
 {
+	for (boost::ptr_list<SFC>::iterator i = children.begin(); i != children.end(); ++i) {
+		(*i).set_duration (tmp_file->get_samples_written() / config.channel_config->get_n_chans());
+	}
+
 	tmp_file->seek (0, SEEK_SET);
 
 	/* called in disk-thread when exporting in realtime,

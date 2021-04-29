@@ -73,7 +73,7 @@ Limiter::set_duration (samplecnt_t s)
 		return;
 	}
 	const size_t n_data = sizeof (_result->limiter_pk) / sizeof (float);
-	_spp = ceilf (s / (float) n_data);
+	_spp = ceilf ((s + 2.f) / (float) n_data);
 }
 
 void
