@@ -207,6 +207,7 @@ Session::Session (AudioEngine &eng,
 	, _have_captured (false)
 	, _capture_duration (0)
 	, _capture_xruns (0)
+	, _export_xruns (0)
 	, _non_soloed_outs_muted (false)
 	, _listening (false)
 	, _listen_cnt (0)

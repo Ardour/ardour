@@ -306,6 +306,7 @@ public:
 
 	samplecnt_t capture_duration () const { return _capture_duration; }
 	unsigned int capture_xruns () const { return _capture_xruns; }
+	unsigned int export_xruns () const { return _export_xruns; }
 
 	void refill_all_track_buffers ();
 	Butler* butler() { return _butler; }
@@ -1399,6 +1400,7 @@ private:
 	bool                    _have_captured;
 	samplecnt_t             _capture_duration;
 	unsigned int            _capture_xruns;
+	unsigned int            _export_xruns;
 	bool                    _non_soloed_outs_muted;
 	bool                    _listening;
 	uint32_t                _listen_cnt;

@@ -1885,6 +1885,10 @@ Session::xrun_recovery ()
 
 		}
 	}
+	else if (exporting ()) {
+		assert (realtime_export ());
+		++_export_xruns;
+	}
 }
 
 void

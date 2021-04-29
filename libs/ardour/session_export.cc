@@ -95,6 +95,7 @@ Session::pre_export ()
 
 	config.set_external_sync (false);
 
+	_export_xruns = 0;
 	_exporting = true;
 	export_status->set_running (true);
 	export_status->Finished.connect_same_thread (*this, boost::bind (&Session::finalize_audio_export, this, _1));
