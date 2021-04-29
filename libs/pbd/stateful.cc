@@ -192,6 +192,7 @@ Stateful::clear_changes ()
 	for (OwnedPropertyList::iterator i = _properties->begin(); i != _properties->end(); ++i) {
 		i->second->clear_changes ();
 	}
+	_pending_changed.clear ();
 }
 
 PropertyList *

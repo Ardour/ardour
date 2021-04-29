@@ -800,6 +800,12 @@ Playlist::add_region_internal (boost::shared_ptr<Region> region, samplepos_t pos
 	region->PropertyChanged.connect_same_thread (region_state_changed_connections, boost::bind (&Playlist::region_changed_proxy, this, _1, boost::weak_ptr<Region> (region)));
 	region->DropReferences.connect_same_thread (region_drop_references_connections, boost::bind (&Playlist::region_going_away, this, boost::weak_ptr<Region> (region)));
 
+	/* do not handle property changes of newly added regions.
+	 * Otherwise this would triggger Playlist::notify_region_moved()
+	 * -> RangesMoved() and move automation.
+	 */
+	region->clear_changes ();
+
 	return true;
 }
 
