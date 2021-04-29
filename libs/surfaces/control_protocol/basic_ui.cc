@@ -342,7 +342,7 @@ BasicUI::prev_marker ()
 	samplepos_t pos = session->locations()->first_mark_before (session->transport_sample());
 
 	if (pos >= 0) {
-		session->request_locate (pos, RollIfAppropriate);
+		session->request_locate (pos);
 	} else {
 		session->goto_start ();
 	}
@@ -354,7 +354,7 @@ BasicUI::next_marker ()
 	samplepos_t pos = session->locations()->first_mark_after (session->transport_sample());
 
 	if (pos >= 0) {
-		session->request_locate (pos, RollIfAppropriate);
+		session->request_locate (pos);
 	} else {
 		session->goto_end();
 	}
@@ -713,7 +713,7 @@ BasicUI::goto_nth_marker (int n)
 	for (Locations::LocationList::iterator i = ordered.begin(); n >= 0 && i != ordered.end(); ++i) {
 		if ((*i)->is_mark() && !(*i)->is_hidden() && !(*i)->is_session_range()) {
 			if (n == 0) {
-				session->request_locate ((*i)->start(), RollIfAppropriate);
+				session->request_locate ((*i)->start());
 				break;
 			}
 			--n;

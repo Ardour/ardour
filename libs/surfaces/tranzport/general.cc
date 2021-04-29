@@ -184,7 +184,7 @@ TranzportControlProtocol::prev_marker ()
 	Location *location = session->locations()->first_location_before (session->transport_sample());
 
 	if (location) {
-		session->request_locate (location->start(), session->transport_rolling());
+		session->request_locate (location->start());
 		notify(location->name().c_str());
 	} else {
 		session->goto_start ();
@@ -199,7 +199,7 @@ TranzportControlProtocol::next_marker ()
 	Location *location = session->locations()->first_location_after (session->transport_sample());
 
 	if (location) {
-		session->request_locate (location->start(), session->transport_rolling());
+		session->request_locate (location->start());
 		notify(location->name().c_str());
 	} else {
 		session->request_locate (session->current_end_sample());
