@@ -4814,7 +4814,7 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 			break;
 
 		case Cut:
-			_xx = RegionFactory::create (r);
+			_xx = RegionFactory::create (r, false);
 			npl->add_region (_xx, r->position() - first_position);
 			pl->remove_region (r);
 			if (Config->get_edit_mode() == Ripple)
@@ -4823,7 +4823,7 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 
 		case Copy:
 			/* copy region before adding, so we're not putting same object into two different playlists */
-			npl->add_region (RegionFactory::create (r), r->position() - first_position);
+			npl->add_region (RegionFactory::create (r, false), r->position() - first_position);
 			break;
 
 		case Clear:
