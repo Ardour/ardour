@@ -1209,11 +1209,11 @@ MackieControlProtocol::click_press (Mackie::Button&)
 {
 	if (main_modifier_state() & MODIFIER_SHIFT) {
 		access_action ("Editor/set-punch-from-edit-range");
-		return off;
+		return none;
 	} else {
 		bool state = !Config->get_clicking();
 		Config->set_clicking (state);
-		return state;
+		return none;
 	}
 }
 Mackie::LedState
