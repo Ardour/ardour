@@ -51,7 +51,7 @@ std::map<std::string, PBD::ID>                RegionFactory::region_name_map;
 RegionFactory::CompoundAssociations           RegionFactory::_compound_associations;
 
 boost::shared_ptr<Region>
-RegionFactory::create (boost::shared_ptr<const Region> region, bool announce, bool fork)
+RegionFactory::create (boost::shared_ptr<const Region> region, bool announce, bool fork, ThawList* tl)
 {
 	boost::shared_ptr<Region> ret;
 	boost::shared_ptr<const AudioRegion> ar;
@@ -86,6 +86,11 @@ RegionFactory::create (boost::shared_ptr<const Region> region, bool announce, bo
 	}
 
 	if (ret) {
+		if (tl) {
+			ret->suspend_property_changes ();
+			tl->add (ret);
+		}
+
 		ret->set_name (new_region_name(ret->name()));
 
 		if (ret->session().config.get_glue_new_regions_to_bars_and_beats() && ret->position_lock_style() != MusicTime) {
@@ -104,7 +109,7 @@ RegionFactory::create (boost::shared_ptr<const Region> region, bool announce, bo
 }
 
 boost::shared_ptr<Region>
-RegionFactory::create (boost::shared_ptr<Region> region, const PropertyList& plist, bool announce)
+RegionFactory::create (boost::shared_ptr<Region> region, const PropertyList& plist, bool announce, ThawList* tl)
 {
 	boost::shared_ptr<Region> ret;
 	boost::shared_ptr<const AudioRegion> other_a;
@@ -126,6 +131,11 @@ RegionFactory::create (boost::shared_ptr<Region> region, const PropertyList& pli
 	}
 
 	if (ret) {
+		if (tl) {
+			ret->suspend_property_changes ();
+			tl->add (ret);
+		}
+
 		ret->apply_changes (plist);
 
 		if (ret->session().config.get_glue_new_regions_to_bars_and_beats() && ret->position_lock_style() != MusicTime) {
@@ -143,7 +153,7 @@ RegionFactory::create (boost::shared_ptr<Region> region, const PropertyList& pli
 }
 
 boost::shared_ptr<Region>
-RegionFactory::create (boost::shared_ptr<Region> region, MusicSample offset, const PropertyList& plist, bool announce)
+RegionFactory::create (boost::shared_ptr<Region> region, MusicSample offset, const PropertyList& plist, bool announce, ThawList* tl)
 {
 	boost::shared_ptr<Region> ret;
 	boost::shared_ptr<const AudioRegion> other_a;
@@ -165,6 +175,10 @@ RegionFactory::create (boost::shared_ptr<Region> region, MusicSample offset, con
 	}
 
 	if (ret) {
+		if (tl) {
+			ret->suspend_property_changes ();
+			tl->add (ret);
+		}
 		ret->apply_changes (plist);
 
 		if (ret->session().config.get_glue_new_regions_to_bars_and_beats() && ret->position_lock_style() != MusicTime) {

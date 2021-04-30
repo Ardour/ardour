@@ -252,6 +252,7 @@ libardour_sources = [
         'template_utils.cc',
         'tempo.cc',
         'tempo_map_importer.cc',
+        'thawlist.cc',
         'thread_buffers.cc',
         'ticker.cc',
         'track.cc',

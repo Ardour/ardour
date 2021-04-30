@@ -284,7 +284,7 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, samplepos_t start, 
 		plist.add (Properties::layer, region->layer ());
 		plist.add (Properties::layering_index, region->layering_index ());
 
-		new_region = RegionFactory::create (region, plist);
+		new_region = RegionFactory::create (region, plist, true, &thawlist);
 
 		add_region_internal (new_region, position, thawlist);
 	}
@@ -717,7 +717,7 @@ Playlist::add_region (boost::shared_ptr<Region> region, samplepos_t position, fl
 	 */
 
 	for (int i = 0; i < itimes; ++i) {
-		boost::shared_ptr<Region> copy = RegionFactory::create (region, true);
+		boost::shared_ptr<Region> copy = RegionFactory::create (region, true, false, &rlock.thawlist);
 		add_region_internal (copy, pos, rlock.thawlist, sub_num);
 		set_layer (copy, DBL_MAX);
 		pos += region->length ();
@@ -738,7 +738,7 @@ Playlist::add_region (boost::shared_ptr<Region> region, samplepos_t position, fl
 			plist.add (Properties::name, name);
 			plist.add (Properties::layer, region->layer ());
 
-			boost::shared_ptr<Region> sub = RegionFactory::create (region, plist);
+			boost::shared_ptr<Region> sub = RegionFactory::create (region, plist, true, &rlock.thawlist);
 			add_region_internal (sub, pos, rlock.thawlist, sub_num);
 			set_layer (sub, DBL_MAX);
 		}
@@ -1035,7 +1035,7 @@ Playlist::partition_internal (samplepos_t start, samplepos_t end, bool cutting, 
 					/* see note in :_split_region()
 					 * for MusicSample is needed to offset region-gain
 					 */
-					region = RegionFactory::create (current, MusicSample (pos2 - pos1, 0), plist);
+					region = RegionFactory::create (current, MusicSample (pos2 - pos1, 0), plist, true, &thawlist);
 					add_region_internal (region, start, thawlist);
 					new_regions.push_back (region);
 				}
@@ -1055,7 +1055,7 @@ Playlist::partition_internal (samplepos_t start, samplepos_t end, bool cutting, 
 				plist.add (Properties::right_of_split, true);
 				maybe_add_start_beats (_session.tempo_map (), plist, current, current->start (), current->start () + (pos3 - pos1));
 
-				region = RegionFactory::create (current, MusicSample (pos3 - pos1, 0), plist);
+				region = RegionFactory::create (current, MusicSample (pos3 - pos1, 0), plist, true, &thawlist);
 
 				add_region_internal (region, end, thawlist);
 				new_regions.push_back (region);
@@ -1093,7 +1093,7 @@ Playlist::partition_internal (samplepos_t start, samplepos_t end, bool cutting, 
 					plist.add (Properties::left_of_split, true);
 					maybe_add_start_beats (_session.tempo_map (), plist, current, current->start (), current->start () + (pos2 - pos1));
 
-					region = RegionFactory::create (current, MusicSample (pos2 - pos1, 0), plist);
+					region = RegionFactory::create (current, MusicSample (pos2 - pos1, 0), plist, true, &thawlist);
 
 					add_region_internal (region, start, thawlist);
 					new_regions.push_back (region);
@@ -1135,7 +1135,7 @@ Playlist::partition_internal (samplepos_t start, samplepos_t end, bool cutting, 
 					plist.add (Properties::right_of_split, true);
 					maybe_add_start_beats (_session.tempo_map (), plist, current, current->start (), current->start ());
 
-					region = RegionFactory::create (current, plist);
+					region = RegionFactory::create (current, plist, true, &thawlist);
 
 					add_region_internal (region, pos1, thawlist);
 					new_regions.push_back (region);
@@ -1279,7 +1279,7 @@ Playlist::paste (boost::shared_ptr<Playlist> other, samplepos_t position, float 
 			RegionWriteLock rl1 (this);
 			while (itimes--) {
 				for (RegionList::iterator i = other->regions.begin (); i != other->regions.end (); ++i) {
-					boost::shared_ptr<Region> copy_of_region = RegionFactory::create (*i, true);
+					boost::shared_ptr<Region> copy_of_region = RegionFactory::create (*i, true, false, &rl1.thawlist);
 
 					/* put these new regions on top of all existing ones, but preserve
 					   the ordering they had in the original playlist.
@@ -1312,7 +1312,7 @@ Playlist::duplicate (boost::shared_ptr<Region> region, samplepos_t position, sam
 	int             itimes = (int)floor (times);
 
 	while (itimes--) {
-		boost::shared_ptr<Region> copy = RegionFactory::create (region, true);
+		boost::shared_ptr<Region> copy = RegionFactory::create (region, true, false, &rl.thawlist);
 		add_region_internal (copy, position, rl.thawlist);
 		set_layer (copy, DBL_MAX);
 		position += gap;
@@ -1330,7 +1330,7 @@ Playlist::duplicate (boost::shared_ptr<Region> region, samplepos_t position, sam
 			plist.add (Properties::length, length);
 			plist.add (Properties::name, name);
 
-			boost::shared_ptr<Region> sub = RegionFactory::create (region, plist);
+			boost::shared_ptr<Region> sub = RegionFactory::create (region, plist, true, &rl.thawlist);
 			add_region_internal (sub, position, rl.thawlist);
 			set_layer (sub, DBL_MAX);
 		}
@@ -1345,7 +1345,7 @@ Playlist::duplicate_until (boost::shared_ptr<Region> region, samplepos_t positio
 	RegionWriteLock rl (this);
 
 	while (position + region->length () - 1 < end) {
-		boost::shared_ptr<Region> copy = RegionFactory::create (region, true);
+		boost::shared_ptr<Region> copy = RegionFactory::create (region, true, false, &rl.thawlist);
 		add_region_internal (copy, position, rl.thawlist);
 		set_layer (copy, DBL_MAX);
 		position += gap;
@@ -1363,7 +1363,7 @@ Playlist::duplicate_until (boost::shared_ptr<Region> region, samplepos_t positio
 			plist.add (Properties::length, length);
 			plist.add (Properties::name, name);
 
-			boost::shared_ptr<Region> sub = RegionFactory::create (region, plist);
+			boost::shared_ptr<Region> sub = RegionFactory::create (region, plist, false, &rl.thawlist);
 			add_region_internal (sub, position, rl.thawlist);
 			set_layer (sub, DBL_MAX);
 		}
@@ -1508,7 +1508,7 @@ Playlist::_split_region (boost::shared_ptr<Region> region, const MusicSample& pl
 		 * since it supplies that offset to the Region constructor, which
 		 * is necessary to get audio region gain envelopes right.
 		 */
-		left = RegionFactory::create (region, MusicSample (0, 0), plist, true);
+		left = RegionFactory::create (region, MusicSample (0, 0), plist, true, &thawlist);
 	}
 
 	RegionFactory::region_name (after_name, region->name (), false);
@@ -1523,7 +1523,7 @@ Playlist::_split_region (boost::shared_ptr<Region> region, const MusicSample& pl
 		plist.add (Properties::layer, region->layer ());
 
 		/* same note as above */
-		right = RegionFactory::create (region, before, plist, true);
+		right = RegionFactory::create (region, before, plist, true, &thawlist);
 	}
 
 	add_region_internal (left, region->position (), thawlist, 0);

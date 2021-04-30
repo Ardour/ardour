@@ -33,6 +33,7 @@
 #include "pbd/signals.h"
 
 #include "ardour/libardour_visibility.h"
+#include "ardour/thawlist.h"
 #include "ardour/types.h"
 
 class XMLNode;
@@ -63,9 +64,11 @@ public:
 	static PBD::Signal1<void,boost::shared_ptr<Region> >  CheckNewRegion;
 
 	/** create a "pure copy" of Region \p other */
-	static boost::shared_ptr<Region> create (boost::shared_ptr<const Region> other, bool announce = false, bool fork = false);
+	static boost::shared_ptr<Region> create (boost::shared_ptr<const Region> other, bool announce, bool fork = false, ThawList* tl = 0);
+
+	/** Lua binding to create a "pure copy" of Region \p other */
 	static boost::shared_ptr<Region> create (boost::shared_ptr<Region> other, bool announce, bool fork) {
-		return create (boost::shared_ptr<const Region>(other), announce, fork);
+		return create (boost::shared_ptr<const Region>(other), announce, fork, 0);
 	}
 
 	/** create a region from a single Source */
@@ -77,10 +80,10 @@ public:
 	                                         const PBD::PropertyList&, bool announce = true);
 	/** create a copy of \p other starting at zero within \p other's sources */
 	static boost::shared_ptr<Region> create (boost::shared_ptr<Region> other,
-	                                         const PBD::PropertyList&, bool announce = true);
+	                                         const PBD::PropertyList&, bool announce = true, ThawList* tl = 0);
 	/** create a copy of \p other starting at \p offset within \p other */
 	static boost::shared_ptr<Region> create (boost::shared_ptr<Region> other, ARDOUR::MusicSample offset,
-	                                         const PBD::PropertyList&, bool announce = true);
+	                                         const PBD::PropertyList&, bool announce = true, ThawList* tl = 0);
 	/** create a "copy" of \p other but using a different set of sources \p srcs */
 	static boost::shared_ptr<Region> create (boost::shared_ptr<Region> other, const SourceList& srcs,
 	                                         const PBD::PropertyList&, bool announce = true);

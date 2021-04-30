@@ -53,6 +53,7 @@
 #include "ardour/data_type.h"
 #include "ardour/region.h"
 #include "ardour/session_object.h"
+#include "ardour/thawlist.h"
 
 namespace ARDOUR {
 
@@ -280,26 +281,6 @@ protected:
 	friend class Session;
 
 protected:
-	class ThawList : public RegionList
-	{
-	public:
-		void add (boost::shared_ptr<Region> r)
-		{
-			if (std::find (begin (), end (), r) != end ()) {
-				return;
-			}
-			r->suspend_property_changes ();
-			push_back (r);
-		}
-
-		void release ()
-		{
-			for (RegionList::iterator i = begin (); i != end (); ++i) {
-				(*i)->resume_property_changes ();
-			}
-			clear ();
-		}
-	};
 
 	class RegionReadLock : public Glib::Threads::RWLock::ReaderLock
 	{
