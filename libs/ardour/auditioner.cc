@@ -311,7 +311,7 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 		_import_position = 0;
 
 		/* copy it */
-		the_region = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (region));
+		the_region = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (region, false));
 		the_region->set_position (0);
 
 		_disk_reader->midi_playlist()->drop_regions ();
@@ -337,7 +337,7 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 		_import_position = region->position();
 
 		/* copy it */
-		midi_region = (boost::dynamic_pointer_cast<MidiRegion> (RegionFactory::create (region)));
+		midi_region = (boost::dynamic_pointer_cast<MidiRegion> (RegionFactory::create (region, false)));
 		midi_region->set_position (_import_position);
 
 		_disk_reader->audio_playlist()->drop_regions();
