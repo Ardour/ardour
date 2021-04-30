@@ -393,7 +393,7 @@ RecorderUI::set_session (Session* s)
 
 	_session->config.ParameterChanged.connect (_session_connections, invalidator (*this), boost::bind (&RecorderUI::parameter_changed, this, _1), gui_context ());
 
-	Region::RegionPropertyChanged.connect (*this, invalidator (*this), boost::bind (&RecorderUI::gui_extents_changed, this), gui_context());
+	Region::RegionPropertyChanged.connect (*this, invalidator (*this), boost::bind (&RecorderUI::region_changed, this, _1, _2), gui_context());
 	_session->StartTimeChanged.connect (_session_connections, invalidator (*this), boost::bind (&RecorderUI::gui_extents_changed, this), gui_context());
 	_session->EndTimeChanged.connect (_session_connections, invalidator (*this), boost::bind (&RecorderUI::gui_extents_changed, this), gui_context());
 	_session->RecordStateChanged.connect (_session_connections, invalidator (*this), boost::bind (&RecorderUI::update_sensitivity, this), gui_context());
@@ -791,6 +791,17 @@ RecorderUI::port_pretty_name_changed (string pn)
 {
 	if (_input_ports.find (pn) != _input_ports.end ()) {
 		_input_ports[pn]->setup_name ();
+	}
+}
+
+void
+RecorderUI::region_changed (boost::shared_ptr<ARDOUR::Region>, PBD::PropertyChange const& what_changed)
+{
+	PBD::PropertyChange interests;
+	interests.add (ARDOUR::Properties::position);
+	interests.add (ARDOUR::Properties::length);
+	if (what_changed.contains (interests)) {
+		gui_extents_changed ();
 	}
 }
 
