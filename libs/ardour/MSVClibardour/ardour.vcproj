@@ -1424,6 +1424,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\thawlist.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\thread_buffers.cc"
 				>
 			</File>
@@ -2575,6 +2579,10 @@
 			</File>
 			<File
 				RelativePath="..\ardour\tempo_map_importer.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\thawlist.h"
 				>
 			</File>
 			<File
