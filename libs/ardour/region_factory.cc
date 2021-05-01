@@ -73,7 +73,7 @@ RegionFactory::create (boost::shared_ptr<const Region> region, bool announce, bo
 
 			boost::shared_ptr<MidiSource> source = mr->session ().create_midi_source_for_session (base);
 			source->set_ancestor_name (mr->sources ().front ()->name ());
-			ret = mr->clone (source);
+			ret = mr->clone (source, tl);
 		} else {
 			ret = boost::shared_ptr<Region> (new MidiRegion (mr, MusicSample (0, 0)));
 		}
