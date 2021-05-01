@@ -73,11 +73,11 @@ public:
 
 	/** create a region from a single Source */
 	static boost::shared_ptr<Region> create (boost::shared_ptr<Source>,
-	                                         const PBD::PropertyList&, bool announce = true);
+	                                         const PBD::PropertyList&, bool announce = true, ThawList* tl = 0);
 
 	/** create a region from a multiple sources */
 	static boost::shared_ptr<Region> create (const SourceList &,
-	                                         const PBD::PropertyList&, bool announce = true);
+	                                         const PBD::PropertyList&, bool announce = true, ThawList* tl = 0);
 	/** create a copy of \p other starting at zero within \p other's sources */
 	static boost::shared_ptr<Region> create (boost::shared_ptr<Region> other,
 	                                         const PBD::PropertyList&, bool announce = true, ThawList* tl = 0);
@@ -86,7 +86,7 @@ public:
 	                                         const PBD::PropertyList&, bool announce = true, ThawList* tl = 0);
 	/** create a "copy" of \p other but using a different set of sources \p srcs */
 	static boost::shared_ptr<Region> create (boost::shared_ptr<Region> other, const SourceList& srcs,
-	                                         const PBD::PropertyList&, bool announce = true);
+	                                         const PBD::PropertyList&, bool announce = true, ThawList* tl = 0);
 
 	/** create a region with no sources, using XML state */
 	static boost::shared_ptr<Region> create (Session&, XMLNode&, bool);
