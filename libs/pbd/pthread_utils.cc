@@ -342,6 +342,12 @@ bool
 pbd_mach_set_realtime_policy (pthread_t thread_id, double period_ns)
 {
 #ifdef __APPLE__
+	double ticks_per_ns = 1.;
+	mach_timebase_info_data_t timebase;
+	if (KERN_SUCCESS == mach_timebase_info (&timebase)) {
+		ticks_per_ns = timebase.denom / timebase.numer;
+	}
+
 	thread_time_constraint_policy_data_t policy;
 #ifndef NDEBUG
 	mach_msg_type_number_t msgt = 4;
@@ -356,9 +362,9 @@ pbd_mach_set_realtime_policy (pthread_t thread_id, double period_ns)
 	mach_timebase_info (&timebase_info);
 	const double period_clk = period_ns * (double)timebase_info.denom / (double)timebase_info.numer;
 
-	policy.period      = period_clk;
-	policy.computation = period_clk * .9;
-	policy.constraint  = period_clk * .95;
+	policy.period      = ticks_per_ns * period_clk;
+	policy.computation = ticks_per_ns * period_clk * .9;
+	policy.constraint  = ticks_per_ns * period_clk * .95;
 	policy.preemptible = true;
 	kern_return_t res  = thread_policy_set (pthread_mach_thread_np (thread_id),
 	                                        THREAD_TIME_CONSTRAINT_POLICY, (thread_policy_t)&policy,
