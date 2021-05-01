@@ -27,6 +27,7 @@ namespace ARDOUR {
 class LIBARDOUR_API ThawList : public RegionList
 {
 	public:
+		~ThawList ();
 		void add (boost::shared_ptr<Region> r);
 		void release ();
 };

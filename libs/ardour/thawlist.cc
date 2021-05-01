@@ -23,6 +23,12 @@
 
 using namespace ARDOUR;
 
+ThawList::~ThawList ()
+{
+	assert (empty ()); // so far all lists are explicitly release()d
+	release ();
+}
+
 void
 ThawList::add (boost::shared_ptr<Region> r)
 {
