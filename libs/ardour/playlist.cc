@@ -3045,6 +3045,7 @@ Playlist::find_next_top_layer_position (samplepos_t t) const
 boost::shared_ptr<Region>
 Playlist::combine (const RegionList& r)
 {
+	ThawList                           thawlist;
 	PropertyList                       plist;
 	uint32_t                           channels          = 0;
 	uint32_t                           layer             = 0;
@@ -3088,7 +3089,7 @@ Playlist::combine (const RegionList& r)
 		/* copy the region */
 
 		boost::shared_ptr<Region> original_region = (*i);
-		boost::shared_ptr<Region> copied_region   = RegionFactory::create (original_region, false);
+		boost::shared_ptr<Region> copied_region   = RegionFactory::create (original_region, false, false, &thawlist);
 
 		old_and_new_regions.push_back (TwoRegions (original_region, copied_region));
 		originals.push_back (original_region);
@@ -3097,9 +3098,7 @@ Playlist::combine (const RegionList& r)
 		RegionFactory::add_compound_association (original_region, copied_region);
 
 		/* make position relative to zero */
-
-		pl->add_region (copied_region, original_region->position () - earliest_position);
-		copied_region->set_layer (original_region->layer ());
+		pl->add_region_internal (copied_region, original_region->position () - earliest_position, thawlist);
 
 		/* use the maximum number of channels for any region */
 
@@ -3112,12 +3111,13 @@ Playlist::combine (const RegionList& r)
 
 	pl->in_partition = false;
 
+	/* pre-process. e.g. disable audio region fades */
 	pre_combine (copies);
 
 	/* now create a new PlaylistSource for each channel in the new playlist */
 
 	SourceList                     sources;
-	pair<samplepos_t, samplepos_t> extent = pl->get_extent ();
+	pair<samplepos_t, samplepos_t> extent = pl->_get_extent ();
 
 	for (uint32_t chn = 0; chn < channels; ++chn) {
 		sources.push_back (SourceFactory::createFromPlaylist (_type, _session, pl, id (), parent_name, chn, 0, extent.second, false, false));
@@ -3130,7 +3130,7 @@ Playlist::combine (const RegionList& r)
 	plist.add (Properties::name, parent_name);
 	plist.add (Properties::whole_file, true);
 
-	boost::shared_ptr<Region> parent_region = RegionFactory::create (sources, plist, true);
+	boost::shared_ptr<Region> parent_region = RegionFactory::create (sources, plist, true, &thawlist);
 
 	/* now the non-whole-file region that we will actually use in the playlist */
 
@@ -3140,7 +3140,7 @@ Playlist::combine (const RegionList& r)
 	plist.add (Properties::name, child_name);
 	plist.add (Properties::layer, layer + 1);
 
-	boost::shared_ptr<Region> compound_region = RegionFactory::create (parent_region, plist, true);
+	boost::shared_ptr<Region> compound_region = RegionFactory::create (parent_region, plist, true, &thawlist);
 
 	for (SourceList::iterator s = sources.begin (); s != sources.end (); ++s) {
 		boost::dynamic_pointer_cast<PlaylistSource> (*s)->set_owner (compound_region->id ());
@@ -3164,6 +3164,7 @@ Playlist::combine (const RegionList& r)
 
 	_combine_ops++;
 
+	thawlist.release ();
 	thaw ();
 
 	return compound_region;
@@ -3221,6 +3222,8 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 	const bool need_copies = (boost::dynamic_pointer_cast<PlaylistSource> (pls)->owner () != target->id ()) ||
 	                         (pls->original () != id ());
 
+	ThawList thawlist;
+
 	for (RegionList::const_iterator i = rl.begin (); i != rl.end (); ++i) {
 		boost::shared_ptr<Region> current (*i);
 
@@ -3240,10 +3243,12 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 			adjusted_end   = adjusted_start + target->length ();
 		}
 
-		if (need_copies) {
+		if (!need_copies) {
+			thawlist.add (original);
+		} else {
 			samplepos_t pos = original->position ();
 			/* make a copy, but don't announce it */
-			original = RegionFactory::create (original, false);
+			original = RegionFactory::create (original, false, false, &thawlist);
 			/* the pure copy constructor resets position() to zero, so fix that up.  */
 			original->set_position (pos);
 		}
@@ -3329,6 +3334,7 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 
 	in_partition = false;
 	thaw ();
+	thawlist.release ();
 }
 
 void
