@@ -339,10 +339,10 @@ CoreAudioBackend::set_buffer_size (uint32_t bs)
 	}
 	_pcmio->set_samples_per_period(bs);
 	if (_run) {
-		pbd_mach_set_realtime_policy (_main_thread, 1e9 * bs / _samplerate);
+		pbd_mach_set_realtime_policy (_main_thread, 1e9 * bs / _samplerate, true);
 	}
 	for (std::vector<pthread_t>::const_iterator i = _threads.begin (); i != _threads.end (); ++i) {
-		pbd_mach_set_realtime_policy (*i, 1e9 * bs / _samplerate);
+		pbd_mach_set_realtime_policy (*i, 1e9 * bs / _samplerate, false);
 	}
 	return 0;
 }
@@ -854,7 +854,7 @@ CoreAudioBackend::create_process_thread (boost::function<void()> func)
 		PBD::warning << _("AudioEngine: process thread failed to acquire realtime permissions.") << endmsg;
 	}
 
-	if (pbd_mach_set_realtime_policy (thread_id, 1e9 * _samples_per_period / _samplerate)) {
+	if (pbd_mach_set_realtime_policy (thread_id, 1e9 * _samples_per_period / _samplerate, false)) {
 		PBD::warning << _("AudioEngine: process thread failed to set mach realtime policy.") << endmsg;
 	}
 
@@ -1321,7 +1321,7 @@ CoreAudioBackend::freewheel_thread ()
 			AudioEngine::thread_init_callback (this);
 			_midiio->set_enabled(false);
 			reset_midi_parsers ();
-			pbd_mach_set_realtime_policy (_main_thread, 1e9 * _samples_per_period / _samplerate);
+			pbd_mach_set_realtime_policy (_main_thread, 1e9 * _samples_per_period / _samplerate, true);
 		}
 
 		// process port updates first in every cycle.
@@ -1388,7 +1388,7 @@ CoreAudioBackend::process_callback (const uint32_t n_samples, const uint64_t hos
 		_reinit_thread_callback = false;
 		_main_thread = pthread_self();
 		AudioEngine::thread_init_callback (this);
-		pbd_mach_set_realtime_policy (_main_thread, 1e9 * _samples_per_period / _samplerate);
+		pbd_mach_set_realtime_policy (_main_thread, 1e9 * _samples_per_period / _samplerate, true);
 	}
 
 	if (pthread_mutex_trylock (&_process_callback_mutex)) {

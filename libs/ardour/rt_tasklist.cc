@@ -96,7 +96,7 @@ RTTaskList::reset_thread_list ()
 			PBD::fatal << _("Cannot create thread for TaskList!") << " (" << strerror(rv) << ")" << endmsg;
 			/* NOT REACHED */
 		}
-		pbd_mach_set_realtime_policy (thread_id, 5. * 1e-5);
+		pbd_mach_set_realtime_policy (thread_id, 5. * 1e-5, false);
 		_threads.push_back (thread_id);
 	}
 }
