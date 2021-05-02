@@ -201,7 +201,7 @@ MidiTracer::disconnect ()
 }
 
 void
-MidiTracer::tracer (Parser&, byte* msg, size_t len, samplecnt_t now)
+MidiTracer::tracer (Parser&, MIDI::byte* msg, size_t len, samplecnt_t now)
 {
 	stringstream ss;
 	char* buf;
