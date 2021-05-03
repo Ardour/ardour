@@ -147,12 +147,13 @@ struct TransportFSM
 
 	std::string current_state () const;
 
-	int transport_speed () const;
+	double transport_speed() const { return _transport_speed; }
 
   private:
 	MotionState _motion_state;
 	ButlerState _butler_state;
 	DirectionState _direction_state;
+	double _transport_speed;
 
 	void init();
 
@@ -161,7 +162,7 @@ struct TransportFSM
 	void schedule_butler_for_transport_work () const;
 	void start_playback ();
 	void stop_playback (Event const &);
-	void start_locate_after_declick () const;
+	void start_locate_after_declick ();
 	void locate_for_loop (Event const &);
 	void roll_after_locate () const;
 	void start_locate_while_stopped (Event const &) const;
@@ -199,7 +200,6 @@ struct TransportFSM
 	bool process_event (Event&, bool was_deferred, bool& deferred);
 
 	mutable Event _last_locate;
-	Event last_speed_request;
 
 	TransportAPI* api;
 	typedef boost::intrusive::list<Event> EventList;
@@ -207,12 +207,14 @@ struct TransportFSM
 	EventList deferred_events;
 	int processing;
 	mutable boost::optional<bool> current_roll_after_locate_status;
-	double most_recently_requested_speed;
+	mutable double most_recently_requested_speed;
+	mutable double default_speed;
 
 	void defer (Event& ev);
 	void bad_transition (Event const &);
 	void set_roll_after (bool) const;
 	bool compute_should_roll (LocateTransportDisposition) const;
+	int  compute_transport_speed () const;
 };
 
 } /* end namespace ARDOUR */

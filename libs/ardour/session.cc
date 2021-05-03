@@ -191,9 +191,6 @@ Session::Session (AudioEngine &eng,
 	, _silent (false)
 	, _remaining_latency_preroll (0)
 	, _engine_speed (1.0)
-	, _transport_speed (0)
-	, _default_transport_speed (1.0)
-	, _default_engine_speed (1.0)
 	, _last_transport_speed (1.0)
 	, _requested_transport_speed (std::numeric_limits<double>::max())
 	, _signalled_varispeed (0)
@@ -1872,7 +1869,7 @@ Session::_locations_changed (const Locations::LocationList& locations)
 void
 Session::enable_record ()
 {
-	if (_transport_speed != 0.0 && _transport_speed != 1.0) {
+	if (_transport_fsm->transport_speed() != 0.0 && _transport_fsm->transport_speed() != 1.0) {
 		/* no recording at anything except normal speed */
 		return;
 	}
@@ -1964,11 +1961,11 @@ Session::maybe_enable_record (bool rt_context)
 	/* Save pending state of which sources the next record will use,
 	 * which gives us some chance of recovering from a crash during the record.
 	 */
-	if (!rt_context && (!quick_start || _transport_speed == 0)) {
+	if (!rt_context && (!quick_start || _transport_fsm->transport_speed() == 0)) {
 		save_state ("", true);
 	}
 
-	if (_transport_speed != 0) {
+	if (_transport_fsm->transport_speed() != 0) {
 		maybe_allow_only_punch ();
 		if (!config.get_punch_in()) {
 			enable_record ();
@@ -2020,7 +2017,7 @@ Session::audible_sample (bool* latent_locate) const
 	}
 
 #if 0 // TODO looping
-	if (_transport_speed > 0.0f) {
+	if (_transport_fsm->transport_speed() > 0.0f) {
 		if (play_loop && have_looped) {
 			/* the play-position wrapped at the loop-point
 			 * ardour is already playing the beginning of the loop,
@@ -2036,7 +2033,7 @@ Session::audible_sample (bool* latent_locate) const
 				}
 			}
 		}
-	} else if (_transport_speed < 0.0f) {
+	} else if (_transport_fsm->transport_speed() < 0.0f) {
 		/* XXX wot? no backward looping? */
 	}
 #endif

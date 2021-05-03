@@ -37,6 +37,29 @@ using namespace PBD;
 
 Pool* TransportFSM::Event::pool = 0;
 
+/*
+
+autoplay off (hint: state remains the same):
+
+[STOPPED]  -> LOCATE -> [STOPPED]
+[ROLLING]  -> LOCATE -> [ROLLING]
+[RWD|FFWD] -> LOCATE -> [RWD|FFWD]
+
+autoplay on (hint: state is always rolling):
+
+[STOPPED]  -> LOCATE -> [ROLLING]
+[ROLLING]  -> LOCATE -> [ROLLING]
+[RWD|FFWD] -> LOCATE -> [ROLLING]
+
+the problem child is the last one. The final ROLLING state is intended to be
+forwards at the default speed. But if we were rewinding, we need a reverse.
+
+if autoplay is the determining factor in differentiating these two, we must
+make it available via TransportAPI. but let's rename it as something slightly
+more on-topic.
+
+*/
+
 void
 TransportFSM::Event::init_pool ()
 {
@@ -56,11 +79,15 @@ TransportFSM::Event::operator delete (void *ptr, size_t /*size*/)
 }
 
 TransportFSM::TransportFSM (TransportAPI& tapi)
-	: _last_locate (Locate, 0, MustRoll, false, false) /* all but first argument don't matter */
-	, last_speed_request (0, false) /* SetSpeed request */
+	: _motion_state (Stopped)
+	, _butler_state (NotWaitingForButler)
+	, _direction_state (Forwards)
+	, _transport_speed (0)
+	, _last_locate (Locate, max_samplepos, MustRoll, false, false) /* all but first two argument don't matter */
 	, api (&tapi)
 	, processing (0)
 	, most_recently_requested_speed (std::numeric_limits<double>::max())
+	, default_speed (1.0)
 {
 	init ();
 }
@@ -68,10 +95,6 @@ TransportFSM::TransportFSM (TransportAPI& tapi)
 void
 TransportFSM::init ()
 {
-	_motion_state = Stopped;
-	_butler_state = NotWaitingForButler;
-	_direction_state = Forwards;
-	_last_locate.target = max_samplepos;
 }
 
 void
@@ -119,7 +142,7 @@ TransportFSM::process_events ()
 								e = deferred_events.erase (e);
 								delete deferred_ev;
 							} else {
-								DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("deferred event %1 re-deferred\n", enum_2_string (deferred_ev->type)));
+								DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("Re-Defer deferred event %1\n", enum_2_string (deferred_ev->type)));
 								++e;
 							}
 						} else { /* process error */
@@ -203,7 +226,6 @@ void
 TransportFSM::bad_transition (Event const & ev)
 {
 	error << "bad transition, current state = " << current_state() << " event = " << enum_2_string (ev.type) << endmsg;
-	std::cerr << "bad transition, current state = " << current_state() << " event = " << enum_2_string (ev.type) << std::endl;
 	PBD::stacktrace (std::cerr, 30);
 }
 
@@ -292,7 +314,7 @@ TransportFSM::process_event (Event& ev, bool already_deferred, bool& deferred)
 		break;
 
 	case Locate:
-		DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("locate, ltd = %1 target = %2 loop %3 force %4\n",
+		DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("locate, ltd = %1 target = %2 for loop end %3 force %4\n",
 		                                                enum_2_string (ev.ltd),
 		                                                ev.target,
 		                                                ev.for_loop_end,
@@ -447,6 +469,15 @@ TransportFSM::start_playback ()
 	_last_locate.target = max_samplepos;
 	current_roll_after_locate_status = boost::none;
 
+	if (most_recently_requested_speed == std::numeric_limits<double>::max()) {
+		/* we started rolling without ever setting speed; that's an implicit
+		 * call to set_speed (1.0)
+		 */
+		most_recently_requested_speed = 1.0;
+	} else {
+		api->set_transport_speed (most_recently_requested_speed);
+	}
+
 	api->start_transport();
 }
 
@@ -458,38 +489,46 @@ TransportFSM::stop_playback (Event const & s)
 	_last_locate.target = max_samplepos;
 	current_roll_after_locate_status = boost::none;
 
-	api->stop_transport (s.abort_capture, s.clear_state);
-}
+	if (!declicking_for_locate()) {
 
-void
-TransportFSM::set_roll_after (bool with_roll) const
-{
-	current_roll_after_locate_status = with_roll;
+		if (Config->get_reset_default_speed_on_stop()) {
+
+			if (most_recently_requested_speed != 1.0) {
+				set_speed (Event (1.0, false));
+			}
+
+		} else {
+
+			/* We're not resetting back to 1.0, but we may need to handle a
+			 * speed change from whatever we have been rolling at to
+			 * whatever the current default is. We could have been
+			 * rewinding at -4.5 ... when we restart, we need to play at
+			 * the current _default_transport_speed
+			 */
+
+
+			if (most_recently_requested_speed != default_speed) {
+				set_speed (Event (default_speed, false));
+
+			}
+		}
+	}
+
+	api->stop_transport (s.abort_capture, s.clear_state);
 }
 
 void
 TransportFSM::start_declick_for_locate (Event const & l)
 {
 	assert (l.type == Locate);
-	DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("start_declick_for_locate, crals %1 ltd %2 speed %3 sral %4\n", (bool) current_roll_after_locate_status,
-	                                                enum_2_string (l.ltd), api->speed(), api->should_roll_after_locate()));
+	DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("start_declick_for_locate, crals %1 ltd %2 sral %3\n", (bool) current_roll_after_locate_status,
+	                                                enum_2_string (l.ltd), api->should_roll_after_locate()));
 	_last_locate = l;
 
 	if (!current_roll_after_locate_status) {
 		set_roll_after (compute_should_roll (l.ltd));
 	}
 	api->stop_transport (false, false);
-}
-
-void
-TransportFSM::start_locate_while_stopped (Event const & l) const
-{
-	assert (l.type == Locate);
-	DEBUG_TRACE (DEBUG::TFSMEvents, "start_locate_while_stopped\n");
-
-	set_roll_after (compute_should_roll (l.ltd));
-
-	api->locate (l.target, current_roll_after_locate_status.get(), l.for_loop_end, l.force);
 }
 
 bool
@@ -500,19 +539,37 @@ TransportFSM::compute_should_roll (LocateTransportDisposition ltd) const
 		return true;
 	case MustStop:
 		return false;
-	case RollIfAppropriate:
-		/* by the time we call this, if we were rolling before the
-		   locate, we've already transitioned into DeclickToLocate
-		*/
-		if (_motion_state == DeclickToLocate) {
-			return true;
-		} else {
-			return api->should_roll_after_locate ();
-		}
+	default:
 		break;
 	}
-	/*NOTREACHED*/
-	return true;
+
+	/* case RollIfAppropriate */
+
+	/* by the time we call this, if we were rolling before the
+	   locate, we've already transitioned into DeclickToLocate,
+	   so DeclickToLocate is essentially a synonym for "was Rolling".
+	*/
+	if (_motion_state == DeclickToLocate) {
+		return true;
+	}
+
+	return api->should_roll_after_locate ();
+}
+
+void
+TransportFSM::set_roll_after (bool with_roll) const
+{
+	current_roll_after_locate_status = with_roll;
+}
+
+void
+TransportFSM::start_locate_while_stopped (Event const & l) const
+{
+	assert (l.type == Locate);
+	DEBUG_TRACE (DEBUG::TFSMEvents, "start_locate_while_stopped\n");
+
+	set_roll_after (compute_should_roll (l.ltd));
+	api->locate (l.target, l.for_loop_end, l.force);
 }
 
 void
@@ -521,20 +578,43 @@ TransportFSM::locate_for_loop (Event const & l)
 	assert (l.type == Locate);
 	DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("locate_for_loop, wl = %1\n", l.for_loop_end));
 
-	const bool should_roll = compute_should_roll (l.ltd);
-	current_roll_after_locate_status = should_roll;
 	_last_locate = l;
-	api->locate (l.target, should_roll, l.for_loop_end, l.force);
+	set_roll_after (compute_should_roll (l.ltd));
+	api->locate (l.target, l.for_loop_end, l.force);
 }
 
 void
-TransportFSM::start_locate_after_declick () const
+TransportFSM::start_locate_after_declick ()
 {
 	DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("start_locate_after_declick, have crals ? %1 roll will be %2\n", (bool) current_roll_after_locate_status,
 	                                                current_roll_after_locate_status ? current_roll_after_locate_status.get() : compute_should_roll (_last_locate.ltd)));
 
-	const bool roll = current_roll_after_locate_status ? current_roll_after_locate_status.get() : compute_should_roll (_last_locate.ltd);
-	api->locate (_last_locate.target, roll, _last_locate.for_loop_end, _last_locate.force);
+	/* we only get here because a locate request arrived while we were rolling. We declicked and that is now finished */
+
+	/* Special case: we were rolling. If the user has set auto-play, then
+	   post-locate, we should roll at the default speed, which may involve
+	   a reversal and that needs to be setup before we actually locate.
+	*/
+
+	double post_locate_speed;
+
+	if (api->user_roll_after_locate()) {
+		post_locate_speed = default_speed;
+	} else {
+		post_locate_speed = most_recently_requested_speed;
+	}
+
+	if (post_locate_speed * most_recently_requested_speed < 0) {
+		/* different directions */
+		transition (Reversing);
+	}
+
+	if (api->user_roll_after_locate()) {
+		most_recently_requested_speed = post_locate_speed;
+	}
+
+
+	api->locate (_last_locate.target, _last_locate.for_loop_end, _last_locate.force);
 }
 
 void
@@ -563,7 +643,7 @@ TransportFSM::interrupt_locate (Event const & l) const
 	 * we are interrupting the locate to start a new one.
 	 */
 	_last_locate = l;
-	api->locate (l.target, false, l.for_loop_end, l.force);
+	api->locate (l.target, l.for_loop_end, l.force);
 }
 
 void
@@ -593,6 +673,15 @@ TransportFSM::roll_after_locate () const
 {
 	DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("rolling after locate, was for_loop ? %1\n", _last_locate.for_loop_end));
 	current_roll_after_locate_status = boost::none;
+
+	if (most_recently_requested_speed == std::numeric_limits<double>::max()) {
+		/* we started rolling without ever setting speed; that's an implicit
+		 * call to set_speed (1.0)
+		 */
+		most_recently_requested_speed = 1.0;
+	}
+
+	api->set_transport_speed (most_recently_requested_speed);
 	api->start_transport ();
 }
 
@@ -608,6 +697,7 @@ TransportFSM::transition (MotionState ms)
 {
 	const MotionState old = _motion_state;
 	_motion_state = ms;
+	_transport_speed = compute_transport_speed ();
 	DEBUG_TRACE (DEBUG::TFSMState, string_compose ("Leave %1, enter %2\n", enum_2_string (old), current_state()));
 }
 
@@ -616,6 +706,7 @@ TransportFSM::transition (ButlerState bs)
 {
 	const ButlerState old = _butler_state;
 	_butler_state = bs;
+	_transport_speed = compute_transport_speed ();
 	DEBUG_TRACE (DEBUG::TFSMState, string_compose ("Leave %1, enter %2\n", enum_2_string (old), current_state()));
 }
 
@@ -624,6 +715,7 @@ TransportFSM::transition (DirectionState ds)
 {
 	const DirectionState old = _direction_state;
 	_direction_state = ds;
+	_transport_speed = compute_transport_speed ();
 	DEBUG_TRACE (DEBUG::TFSMState, string_compose ("Leave %1, enter %2\n", enum_2_string (old), current_state()));
 }
 
@@ -638,7 +730,7 @@ TransportFSM::enqueue (Event* ev)
 }
 
 int
-TransportFSM::transport_speed() const
+TransportFSM::compute_transport_speed () const
 {
 	if (_motion_state != Rolling || _direction_state == Reversing) {
 		return 0;
@@ -687,7 +779,7 @@ TransportFSM::set_speed (Event const & ev)
 		must_reverse = true;
 	}
 
-	api->set_transport_speed (ev.speed, ev.as_default, !rolling() || must_reverse);
+	api->set_transport_speed (ev.speed);
 
 	/* corner case: first call to ::set_speed() has a negative
 	 * speed
@@ -695,19 +787,27 @@ TransportFSM::set_speed (Event const & ev)
 
 	most_recently_requested_speed = ev.speed;
 
+	if (ev.as_default) {
+		default_speed = ev.speed;
+	}
+
 	if (must_reverse) {
 
 		/* direction change */
 
 		DEBUG_TRACE (DEBUG::TFSMState, string_compose ("switch-directions, target speed %1 state %2 IR %3\n", ev.speed, current_state(), initial_reverse));
 
-		last_speed_request = ev;
 		transition (Reversing);
 
 		Event lev (Locate, api->position(), must_roll ? MustRoll : MustStop, false, true);
 
-		transition (DeclickToLocate);
-		start_declick_for_locate (lev);
+		if (_transport_speed) {
+			transition (DeclickToLocate);
+			start_declick_for_locate (lev);
+		} else {
+			transition (WaitingForLocate);
+			start_locate_while_stopped (lev);
+		}
 	}
 }
 

@@ -797,12 +797,8 @@ public:
 	bool   synced_to_engine() const;
 
 	double engine_speed() const { return _engine_speed; }
-	double actual_speed() const {
-		if (_transport_speed > 0) return _engine_speed;
-		if (_transport_speed < 0) return - _engine_speed;
-		return 0;
-	}
-	double transport_speed() const { return _count_in_samples > 0 ? 0. : _transport_speed; }
+	double actual_speed() const;
+	double transport_speed() const;
 	/** @return true if the transport state (TFSM) is stopped */
 	bool   transport_stopped() const;
 	/** @return true if the transport state (TFSM) is stopped or stopping */
@@ -1336,16 +1332,17 @@ protected:
 
 	/* transport API */
 
-	void locate (samplepos_t, bool with_roll, bool for_loop_end=false, bool force=false, bool with_mmc=true);
+	void locate (samplepos_t, bool for_loop_end=false, bool force=false, bool with_mmc=true);
 	void stop_transport (bool abort = false, bool clear_state = false);
 	void start_transport ();
 	void butler_completed_transport_work ();
 	void post_locate ();
 	void schedule_butler_for_transport_work ();
 	bool should_roll_after_locate () const;
-	double speed() const { return _transport_speed; }
+	bool user_roll_after_locate () const;
+	bool should_stop_before_locate () const;
 	samplepos_t position() const { return _transport_sample; }
-	void set_transport_speed (double speed, bool as_default, bool at_next_start);
+	void set_transport_speed (double speed);
 	bool need_declick_before_locate () const;
 
 private:
@@ -1382,7 +1379,6 @@ private:
 
 	// varispeed playback -- TODO: move out of session to backend.
 	double                  _engine_speed;
-	double                  _transport_speed; // only: -1, 0, +1
 	double                  _default_transport_speed;
 	double                  _default_engine_speed;
 	double                  _last_transport_speed;

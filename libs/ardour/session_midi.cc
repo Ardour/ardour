@@ -52,6 +52,7 @@
 #include "ardour/profile.h"
 #include "ardour/session.h"
 #include "ardour/transport_master.h"
+#include "ardour/transport_fsm.h"
 #include "ardour/ticker.h"
 
 #include "pbd/i18n.h"
@@ -142,7 +143,7 @@ Session::mmc_record_strobe (MIDI::MachineControl &/*mmc*/)
 
 	/* record strobe does an implicit "Play" command */
 
-	if (_transport_speed != 1.0) {
+	if (_transport_fsm->transport_speed() != 1.0) {
 
 		/* start_transport() will move from Enabled->Recording, so we
 		   don't need to do anything here except enable recording.
@@ -222,7 +223,7 @@ Session::mmc_step (MIDI::MachineControl &/*mmc*/, int steps)
 	double diff_secs = diff.tv_sec + (diff.tv_usec / 1000000.0);
 	double cur_speed = (((steps * 0.5) * timecode_frames_per_second()) / diff_secs) / timecode_frames_per_second();
 
-	if (_transport_speed == 0 || cur_speed * _transport_speed < 0) {
+	if (_transport_fsm->transport_speed() == 0 || cur_speed * _transport_fsm->transport_speed() < 0) {
 		/* change direction */
 		step_speed = cur_speed;
 	} else {
@@ -233,7 +234,7 @@ Session::mmc_step (MIDI::MachineControl &/*mmc*/, int steps)
 
 #if 0
 	cerr << "delta = " << diff_secs
-	     << " ct = " << _transport_speed
+	     << " ct = " << _transport_fsm->transport_speed()
 	     << " steps = " << steps
 	     << " new speed = " << cur_speed
 	     << " speed = " << step_speed
@@ -493,7 +494,7 @@ Session::send_midi_time_code_for_cycle (samplepos_t start_sample, samplepos_t en
 		return 0;
 	}
 
-	if (_transport_speed < 0) {
+	if (_transport_fsm->transport_speed() < 0) {
 		// we don't support rolling backwards
 		return 0;
 	}
@@ -565,7 +566,7 @@ Session::send_midi_time_code_for_cycle (samplepos_t start_sample, samplepos_t en
 		assert (msg_time < end_sample);
 
 		/* convert from session samples back to JACK samples using the transport speed */
-		ARDOUR::pframes_t const out_stamp = (msg_time - start_sample) / _transport_speed;
+		ARDOUR::pframes_t const out_stamp = (msg_time - start_sample) / _transport_fsm->transport_speed();
 		assert (out_stamp < nframes);
 
 		MidiBuffer& mb (_midi_ports->mtc_output_port()->get_midi_buffer(nframes));
@@ -623,7 +624,7 @@ Session::mmc_step_timeout ()
 	timersub (&now, &last_mmc_step, &diff);
 	diff_usecs = diff.tv_sec * 1000000 + diff.tv_usec;
 
-	if (diff_usecs > 1000000.0 || fabs (_transport_speed) < 0.0000001) {
+	if (diff_usecs > 1000000.0 || fabs (_transport_fsm->transport_speed()) < 0.0000001) {
 		/* too long or too slow, stop transport */
 		request_stop ();
 		step_queued = false;
@@ -637,7 +638,7 @@ Session::mmc_step_timeout ()
 
 	/* slow it down */
 
-	request_transport_speed_nonzero (_transport_speed * 0.75);
+	request_transport_speed_nonzero (actual_speed() * 0.75);
 	return true;
 }
 
