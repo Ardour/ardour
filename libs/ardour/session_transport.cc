@@ -281,11 +281,6 @@ Session::locate (samplepos_t target_sample, bool with_roll, bool for_loop_end, b
 	if (force || !for_loop_end) {
 
 		PostTransportWork todo = PostTransportLocate;
-
-		if (with_roll && transport_was_stopped) {
-			todo = PostTransportWork (todo | PostTransportRoll);
-		}
-
 		add_post_transport_work (todo);
 		need_butler = true;
 
@@ -650,7 +645,7 @@ Session::should_roll_after_locate () const
 	 * this answer can be considered correct
 	 */
 
-	return ((!config.get_external_sync() && (auto_play_legal && config.get_auto_play())) && !_exporting) || (post_transport_work() & PostTransportRoll);
+	return ((!config.get_external_sync() && (auto_play_legal && config.get_auto_play())) && !_exporting);
 
 }
 
@@ -681,12 +676,6 @@ Session::butler_completed_transport_work ()
 		ptw = PostTransportWork (ptw & ~PostTransportLocate);
 		set_post_transport_work (ptw);
 		TFSM_EVENT (TransportFSM::LocateDone);
-	}
-
-	bool start_after_butler_done_msg = false;
-
-	if (ptw & PostTransportRoll) {
-		start_after_butler_done_msg = true;
 	}
 
 	/* the butler finished its work so clear all PostTransportWork flags

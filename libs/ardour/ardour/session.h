@@ -1212,7 +1212,6 @@ public:
 	enum PostTransportWork {
 		PostTransportStop               = 0x1,
 		PostTransportLocate             = 0x2,
-		PostTransportRoll               = 0x4,
 		PostTransportAbort              = 0x8,
 		PostTransportOverWrite          = 0x10,
 		PostTransportAudition           = 0x20,
