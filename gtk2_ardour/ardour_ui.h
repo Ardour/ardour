@@ -670,9 +670,9 @@ private:
 	void transport_play_preroll();
 	void transport_rec_preroll();
 	void transport_rec_count_in();
-	void transport_forward (int option);
-	void transport_rewind (int option);
-	void transport_ffwd_rewind (int option, int dir);
+	void transport_forward ();
+	void transport_rewind ();
+	void transport_ffwd_rewind (bool fwd);
 	void transport_loop ();
 	void toggle_roll (bool with_abort, bool roll_out_of_bounded_mode);
 	bool trx_record_enable_all_tracks ();

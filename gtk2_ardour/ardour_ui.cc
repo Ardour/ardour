@@ -1992,55 +1992,70 @@ ARDOUR_UI::transport_rec_count_in ()
 }
 
 void
-ARDOUR_UI::transport_ffwd_rewind (int option, int dir)
+ARDOUR_UI::transport_ffwd_rewind (bool fwd)
 {
 	if (!_session) {
 		return;
 	}
 
-	/* engine speed is always positive, so multiply by transport
-	 * (-1, 0, 1) to get directional value
-	 */
+	// incrementally increase speed by semitones
+	// (keypress auto-repeat is 100ms)
+	const float maxspeed = Config->get_shuttle_max_speed();
+	float semitone_ratio = exp2f (1.0f/12.0f);
+	float transport_speed = _session->actual_speed ();
 
-	const float current_transport_speed = _session->engine_speed () * _session->transport_speed ();
-	float target_speed = current_transport_speed;
+	if (transport_speed == 0.0 || fabs (transport_speed) <= 1.0/semitone_ratio) {
 
-	switch (option) {
-	case 0:
-		target_speed = dir * 1.0f;
-		break;
-	case 1:
-		target_speed = dir * 4.0f;
-		break;
-	case -1:
-		target_speed = dir * 0.5f;
-		break;
+		/* close to zero, maybe flip direction */
+
+		if (fwd) {
+			if (transport_speed <= 0) {
+				_session->request_transport_speed (1.0, false);
+				_session->request_roll (TRS_UI);
+			}
+		} else {
+			if (transport_speed >= 0) {
+				_session->request_transport_speed (-1.0, false);
+				_session->request_roll (TRS_UI);
+			}
+		}
+
+		/* either we've just started, or we're moving as slowly as we
+		 * ever should
+		 */
+
+		return;
 	}
 
-	/* if wanting to move forward/backward and current speed is at or above current
-	   speed (i.e. same direction, and moving), then speed up.
-	*/
-
-	const bool speed_up = (dir > 0 && current_transport_speed >= target_speed) || (dir < 0 && current_transport_speed <= target_speed);
-
-	if (speed_up) {
-		target_speed = current_transport_speed * 1.5f;
+	if (fwd) {
+		if (transport_speed < 0.f) {
+			/* we need to move the speed back towards zero */
+			semitone_ratio = 1.0/semitone_ratio;
+		}
+	} else {
+		if (transport_speed > 0.f) {
+			/* we need to move the speed back towards zero */
+			semitone_ratio = 1.0/semitone_ratio;
+		}
 	}
 
-	_session->request_transport_speed (target_speed, false);
-	_session->request_roll ();
+	float speed = semitone_ratio * transport_speed;
+
+	speed = std::max (-maxspeed, std::min (maxspeed, speed));
+	_session->request_transport_speed (speed, false);
+	_session->request_roll (TRS_UI);
 }
 
 void
-ARDOUR_UI::transport_rewind (int option)
+ARDOUR_UI::transport_rewind ()
 {
-	transport_ffwd_rewind (option, -1);
+	transport_ffwd_rewind (false);
 }
 
 void
-ARDOUR_UI::transport_forward (int option)
+ARDOUR_UI::transport_forward ()
 {
-	transport_ffwd_rewind (option, 1);
+	transport_ffwd_rewind (true);
 }
 
 void
