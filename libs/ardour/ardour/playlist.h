@@ -303,36 +303,23 @@ protected:
 	friend class Session;
 
 protected:
-	class ThawList : public RegionList {
-		public:
-			void add (boost::shared_ptr<Region> r)
-			{
-				if (std::find (begin(), end(), r) != end ()) {
-					return;
-				}
-				r->suspend_property_changes ();
-				push_back (r);
-			}
-	};
-
 	class RegionReadLock : public Glib::Threads::RWLock::ReaderLock
 	{
 	public:
 		RegionReadLock (Playlist* pl)
-			:  Glib::Threads::RWLock::ReaderLock (pl->region_lock)
+		    : Glib::Threads::RWLock::ReaderLock (pl->region_lock)
 		{
 		}
 		~RegionReadLock () {}
-
 	};
 
 	class RegionWriteLock : public Glib::Threads::RWLock::WriterLock
 	{
 	public:
 		RegionWriteLock (Playlist* pl, bool do_block_notify = true)
-			: Glib::Threads::RWLock::WriterLock (pl->region_lock)
-			, playlist (pl)
-			, block_notify (do_block_notify)
+		    : Glib::Threads::RWLock::WriterLock (pl->region_lock)
+		    , playlist (pl)
+		    , block_notify (do_block_notify)
 		{
 			if (block_notify) {
 				playlist->delay_notifications ();
