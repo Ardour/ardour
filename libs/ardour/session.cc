@@ -1390,10 +1390,10 @@ void
 Session::set_track_monitor_input_status (bool yn)
 {
 	boost::shared_ptr<RouteList> rl = routes.reader ();
+
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		boost::shared_ptr<AudioTrack> tr = boost::dynamic_pointer_cast<AudioTrack> (*i);
 		if (tr && tr->rec_enable_control()->get_value()) {
-			//cerr << "switching to input = " << !auto_input << __FILE__ << __LINE__ << endl << endl;
 			tr->request_input_monitoring (yn);
 		}
 	}
