@@ -4466,7 +4466,7 @@ bool
 RCOptionEditor::on_key_release_event (GdkEventKey* event)
 {
 	if (Keyboard::modifier_state_equals (event->state, Keyboard::close_window_modifier)) {
-		if (event->keyval == Keyboard::close_window_key) {
+		if (event->keyval == (guint) Keyboard::close_window_key) {
 			WindowProxy::hide ();
 			return true;
 		}
