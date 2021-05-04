@@ -188,24 +188,49 @@ BasicUI::remove_marker_at_playhead ()
 void
 BasicUI::button_varispeed (bool fwd)
 {
-	// switch play direction, if needed
-	if (fwd) {
-		if (get_transport_speed() <= 0) {
-			session->request_transport_speed (1.0, false);
-			session->request_roll (TRS_UI);
-			return ;
-		}
-	} else {
-		if (get_transport_speed() >= 0) {
-			session->request_transport_speed (-1.0, false);
-			session->request_roll (TRS_UI);
-			return;
-		}
-	}
 	// incrementally increase speed by semitones
 	// (keypress auto-repeat is 100ms)
-	float maxspeed = Config->get_shuttle_max_speed();
-	float speed = exp2f(1.0/12.0) * get_transport_speed();
+	const float maxspeed = Config->get_shuttle_max_speed();
+	float semitone_ratio = exp2f (1.0f/12.0f);
+	float transport_speed = get_transport_speed ();
+
+	if (transport_speed == 0.0 || fabs (transport_speed) <= 1.0/semitone_ratio) {
+
+		/* close to zero, maybe flip direction */
+
+		if (fwd) {
+			if (transport_speed <= 0) {
+				session->request_transport_speed (1.0, false);
+				session->request_roll (TRS_UI);
+			}
+		} else {
+			if (transport_speed >= 0) {
+				session->request_transport_speed (-1.0, false);
+				session->request_roll (TRS_UI);
+			}
+		}
+
+		/* either we've just started, or we're moving as slowly as we
+		 * ever should
+		 */
+
+		return;
+	}
+
+	if (fwd) {
+		if (transport_speed < 0.f) {
+			/* we need to move the speed back towards zero */
+			semitone_ratio = 1.0/semitone_ratio;
+		}
+	} else {
+		if (transport_speed > 0.f) {
+			/* we need to move the speed back towards zero */
+			semitone_ratio = 1.0/semitone_ratio;
+		}
+	}
+
+	float speed = semitone_ratio * transport_speed;
+
 	speed = std::max (-maxspeed, std::min (maxspeed, speed));
 	session->request_transport_speed (speed, false);
 	session->request_roll (TRS_UI);
