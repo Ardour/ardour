@@ -2667,7 +2667,7 @@ Editor::transition_to_rolling (bool fwd)
 		return;
 	}
 
-	_session->request_transport_speed (fwd ? 1.0f : -1.0f);
+	_session->request_transport_speed (fwd ? 1.0f : -1.0f, false);
 }
 
 void
