@@ -154,10 +154,6 @@ Session::realtime_stop (bool abort, bool clear_state)
 	g_atomic_int_set (&_playback_load, 100);
 	g_atomic_int_set (&_capture_load, 100);
 
-	if (Config->get_monitoring_model() == HardwareMonitoring) {
-		set_track_monitor_input_status (true);
-	}
-
 	if (config.get_use_video_sync()) {
 		waiting_for_sync_offset = true;
 	}
