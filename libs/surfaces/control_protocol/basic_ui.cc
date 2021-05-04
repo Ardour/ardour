@@ -239,23 +239,13 @@ BasicUI::button_varispeed (bool fwd)
 void
 BasicUI::rewind ()
 {
-	if (session->transport_speed() < 0) {
-		session->request_transport_speed (get_transport_speed() - 1.5, false);
-	} else {
-		session->request_transport_speed (-1.5, false);
-	}
-	session->request_roll ();
+	button_varispeed (false);
 }
 
 void
 BasicUI::ffwd ()
 {
-	if (session->transport_speed() > 0) {
-		session->request_transport_speed (get_transport_speed() + 1.5, false);
-	} else {
-		session->request_transport_speed (1.5, false);
-	}
-	session->request_roll ();
+	button_varispeed (true);
 }
 
 void
