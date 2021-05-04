@@ -313,27 +313,7 @@ FaderPort8::button_varispeed (bool ffw)
 		return;
 	}
 
-	// switch play direction, if needed
-	if (ffw) {
-		if (get_transport_speed() <= 0) {
-			session->request_transport_speed (1.0, false);
-			session->request_roll (TRS_UI);
-			return ;
-		}
-	} else {
-		if (get_transport_speed() >= 0) {
-			session->request_transport_speed (-1.0, false);
-			session->request_roll (TRS_UI);
-			return;
-		}
-	}
-	// incrementally increase speed by semitones
-	// (keypress auto-repeat is 100ms)
-	float maxspeed = Config->get_shuttle_max_speed();
-	float speed = exp2f(1.0/12.0) * get_transport_speed();
-	speed = std::max (-maxspeed, std::min (maxspeed, speed));
-	session->request_transport_speed (speed, false);
-	session->request_roll (TRS_UI);
+	BasicUI::button_varispeed (ffw);
 }
 
 #ifdef FP8_MUTESOLO_UNDO
