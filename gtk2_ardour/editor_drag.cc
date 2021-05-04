@@ -651,7 +651,7 @@ RegionDrag::find_time_axis_view (TimeAxisView* t) const
 		++i;
 	}
 
-	if (_time_axis_views[i] != t) {
+	if (i == N) {
 		return -1;
 	}
 
