@@ -3894,7 +3894,7 @@ Editor::trim_region_to_location (const Location& loc, const char* str)
 
 		/* require region to span proposed trim */
 		switch (rv->region()->coverage (loc.start(), loc.end())) {
-		case Evoral::OverlapNone:
+		case Temporal::OverlapNone:
 			break;
 		default:
 			continue;
@@ -4831,7 +4831,7 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 
 		case Copy:
 			/* copy region before adding, so we're not putting same object into two different playlists */
-			npl->add_region (RegionFactory::create (r, false), r->position() - first_position);
+			npl->add_region (RegionFactory::create (r, false), timepos_t (first_position.distance (r->position())));
 			break;
 
 		case Clear:
