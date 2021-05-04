@@ -1147,7 +1147,6 @@ EditorRegions::get_dragged_region ()
 		return boost::shared_ptr<Region> ();
 	}
 
-	assert (regions.size () == 1);
 	return regions.front ();
 }
 
