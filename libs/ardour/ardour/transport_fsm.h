@@ -148,6 +148,7 @@ struct TransportFSM
 	std::string current_state () const;
 
 	double transport_speed() const { return _transport_speed; }
+	double default_speed() const { return _default_speed; }
 
   private:
 	MotionState _motion_state;
@@ -208,7 +209,7 @@ struct TransportFSM
 	int processing;
 	mutable boost::optional<bool> current_roll_after_locate_status;
 	mutable double most_recently_requested_speed;
-	mutable double default_speed;
+	mutable double _default_speed;
 
 	void defer (Event& ev);
 	void bad_transition (Event const &);

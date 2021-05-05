@@ -87,7 +87,7 @@ TransportFSM::TransportFSM (TransportAPI& tapi)
 	, api (&tapi)
 	, processing (0)
 	, most_recently_requested_speed (std::numeric_limits<double>::max())
-	, default_speed (1.0)
+	, _default_speed (1.0)
 {
 	init ();
 }
@@ -507,8 +507,8 @@ TransportFSM::stop_playback (Event const & s)
 			 */
 
 
-			if (most_recently_requested_speed != default_speed) {
-				set_speed (Event (default_speed, false));
+			if (most_recently_requested_speed != _default_speed) {
+				set_speed (Event (_default_speed, false));
 
 			}
 		}
@@ -599,7 +599,7 @@ TransportFSM::start_locate_after_declick ()
 	double post_locate_speed;
 
 	if (api->user_roll_after_locate()) {
-		post_locate_speed = default_speed;
+		post_locate_speed = _default_speed;
 	} else {
 		post_locate_speed = most_recently_requested_speed;
 	}
@@ -788,7 +788,7 @@ TransportFSM::set_speed (Event const & ev)
 	most_recently_requested_speed = ev.speed;
 
 	if (ev.as_default) {
-		default_speed = ev.speed;
+		_default_speed = ev.speed;
 	}
 
 	if (must_reverse) {
