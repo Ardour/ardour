@@ -193,44 +193,65 @@ BasicUI::button_varispeed (bool fwd)
 	const float maxspeed = Config->get_shuttle_max_speed();
 	float semitone_ratio = exp2f (1.0f/12.0f);
 	float transport_speed = get_transport_speed ();
+	float speed;
 
-	if (transport_speed == 0.0 || fabs (transport_speed) <= 1.0/semitone_ratio) {
-
-		/* close to zero, maybe flip direction */
+	if (Config->get_rewind_ffwd_like_tape_decks()) {
 
 		if (fwd) {
 			if (transport_speed <= 0) {
 				session->request_transport_speed (1.0, false);
 				session->request_roll (TRS_UI);
+				return;
 			}
 		} else {
 			if (transport_speed >= 0) {
 				session->request_transport_speed (-1.0, false);
 				session->request_roll (TRS_UI);
+				return;
 			}
 		}
 
-		/* either we've just started, or we're moving as slowly as we
-		 * ever should
-		 */
 
-		return;
-	}
-
-	if (fwd) {
-		if (transport_speed < 0.f) {
-			/* we need to move the speed back towards zero */
-			semitone_ratio = 1.0/semitone_ratio;
-		}
 	} else {
-		if (transport_speed > 0.f) {
-			/* we need to move the speed back towards zero */
-			semitone_ratio = 1.0/semitone_ratio;
+
+		if (transport_speed == 0.0 || fabs (transport_speed) <= 1.0/semitone_ratio) {
+
+			/* close to zero, maybe flip direction */
+
+			if (fwd) {
+				if (transport_speed <= 0) {
+					session->request_transport_speed (1.0, false);
+					session->request_roll (TRS_UI);
+				}
+			} else {
+				if (transport_speed >= 0) {
+					session->request_transport_speed (-1.0, false);
+					session->request_roll (TRS_UI);
+				}
+			}
+
+			/* either we've just started, or we're moving as slowly as we
+			 * ever should
+			 */
+
+			return;
 		}
+
+		if (fwd) {
+			if (transport_speed < 0.f) {
+				/* we need to move the speed back towards zero */
+				semitone_ratio = 1.0/semitone_ratio;
+			}
+		} else {
+			if (transport_speed > 0.f) {
+				/* we need to move the speed back towards zero */
+				semitone_ratio = 1.0/semitone_ratio;
+			}
+		}
+
 	}
 
-	float speed = semitone_ratio * transport_speed;
-
+	speed = semitone_ratio * transport_speed;
 	speed = std::max (-maxspeed, std::min (maxspeed, speed));
 	session->request_transport_speed (speed, false);
 	session->request_roll (TRS_UI);
