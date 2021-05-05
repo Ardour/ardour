@@ -3394,11 +3394,6 @@ These settings will only take effect after %1 is restarted.\n\
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_rewind_ffwd_like_tape_decks)
 		     );
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
-					    string_compose (_("<b>When enabled</b> if %1 is <b>not recording</b>, it will stop the transport "
-							      "when it reaches the current session end marker\n\n"
-							      "<b>When disabled</b> %1 will continue to roll past the session end marker at all times"),
-							    PROGRAM_NAME));
-	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
 			_("<b>When enabled</b> rewind/ffwd controls will immediately change playback direction when appropriate.\n\n "
 			  "<b>When disabled</b> rewind/ffwd controls will gradually speed up/slow down playback"));
 	add_option (_("Transport"), bo);
