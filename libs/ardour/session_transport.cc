@@ -365,7 +365,13 @@ Session::set_transport_speed (double speed)
 	clear_clicks ();
 	_engine_speed = new_engine_speed;
 
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC3 with speed = %1\n", _transport_fsm->transport_speed()));
+	if (fabs (speed) != 1.0 && _transport_fsm->default_speed() == 1.0) {
+		/* varispeed of any sort cancels auto-return */
+		_requested_return_sample = -1;
+		_last_roll_location = -1;
+		_last_roll_or_reversal_location = -1;
+	}
+
 
 	/* throttle signal emissions.
 	 * when slaved [_last]_transport_fsm->transport_speed()
