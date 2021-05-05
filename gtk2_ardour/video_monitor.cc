@@ -482,8 +482,8 @@ VideoMonitor::get_custom_setting (const std::string k)
 void
 VideoMonitor::srsupdate ()
 {
-	if (!_session) { return; }
-	if (editor->dragging_playhead() || editor->preview_video_drag_active()) {
+	if (!_session || _session->locate_initiated ()) { return; }
+	if (editor->dragging_playhead() || editor->preview_video_drag_active() || editor->pending_locate_request ()) {
 		return;
 	}
 	manual_seek(_session->audible_sample(), false, NO_OFFSET);
