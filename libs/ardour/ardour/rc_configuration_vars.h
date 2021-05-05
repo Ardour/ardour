@@ -103,7 +103,7 @@ CONFIG_VARIABLE (float, midi_track_buffer_seconds, "midi-track-buffer-seconds", 
 CONFIG_VARIABLE (uint32_t, disk_choice_space_threshold,  "disk-choice-space-threshold", 57600000)
 CONFIG_VARIABLE (bool, auto_analyse_audio, "auto-analyse-audio", false)
 CONFIG_VARIABLE (float, transient_sensitivity, "transient-sensitivity", 50)
-CONFIG_VARIABLE (float, max_transport_speed, "max-transport-speed", 8.0)
+CONFIG_VARIABLE (float, max_transport_speed, "max-transport-speed", 2.0)
 
 /* OSC */
 
