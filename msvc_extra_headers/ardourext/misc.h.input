@@ -272,9 +272,10 @@ inline int64_t abs(int64_t val) throw()
 // Emulate some C99 math functions which MSVC itself didn't
 // implement until later in life.
 #if defined(_MSC_VER) && (_MSC_VER < 1800)
-extern  double expm1(double x);
 extern  double log1p(double x);
 extern  double round(double x);
+extern  double expm1(double x);
+extern  float  exp2f(float x);
 extern  float roundf(float x);
 #endif
 #if defined(_MSC_VER) && (_MSC_VER < 1900)

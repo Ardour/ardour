@@ -172,9 +172,10 @@ LIBPBD_API ssize_t  PBD_APICALLTYPE pread(int handle, void *buf, size_t nbytes, 
 LIBPBD_API ssize_t  PBD_APICALLTYPE pwrite(int handle, const void *buf, size_t nbytes, off_t offset);
 
 #if defined(_MSC_VER) && (_MSC_VER < 1800)
-LIBPBD_API double   PBD_APICALLTYPE expm1(double x);
 LIBPBD_API double   PBD_APICALLTYPE log1p(double x);
 LIBPBD_API double   PBD_APICALLTYPE round(double x);
+LIBPBD_API double   PBD_APICALLTYPE expm1(double x);
+LIBPBD_API float    PBD_APICALLTYPE exp2f(float x);
 LIBPBD_API float    PBD_APICALLTYPE roundf(float x);
 #endif
 

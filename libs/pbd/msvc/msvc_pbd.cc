@@ -244,6 +244,24 @@ expm1(double x)
 
 //***************************************************************
 //
+//	exp2f()
+//
+// Emulates C99 exp2f() using powf().
+//
+//	Returns:
+//
+//    On Success: 2 raised to the power of 'x'
+//    On Failure: None, except that calling powf(x) should generate
+//                an appropriate error for us (such as INF etc).
+//
+LIBPBD_API float PBD_APICALLTYPE
+exp2f(float x)
+{
+	return (powf(2.0f, x));
+}
+
+//***************************************************************
+//
 //	log1p()
 //
 // Emulates C99 log1p() using log().
