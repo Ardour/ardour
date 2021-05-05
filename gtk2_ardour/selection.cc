@@ -27,7 +27,6 @@
 #include <sigc++/bind.h>
 
 #include "pbd/error.h"
-#include "pbd/stacktrace.h"
 #include "pbd/types_convert.h"
 
 #include "ardour/evoral_types_convert.h"

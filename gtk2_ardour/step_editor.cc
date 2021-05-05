@@ -20,8 +20,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "pbd/stacktrace.h"
-
 #include "ardour/midi_track.h"
 #include "ardour/midi_region.h"
 #include "ardour/tempo.h"

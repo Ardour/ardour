@@ -31,7 +31,6 @@
 #include "pbd/pthread_utils.h"
 #include "pbd/memento_command.h"
 #include "pbd/unwind.h"
-#include "pbd/stacktrace.h"
 
 #include "gtkmm2ext/utils.h"
 

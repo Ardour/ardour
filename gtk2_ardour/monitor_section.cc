@@ -26,7 +26,6 @@
 #include "pbd/compose.h"
 #include "pbd/error.h"
 #include "pbd/replace_all.h"
-#include "pbd/stacktrace.h"
 
 #include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/utils.h"

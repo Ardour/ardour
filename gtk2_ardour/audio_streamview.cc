@@ -29,8 +29,6 @@
 
 #include <gtkmm2ext/gtk_ui.h>
 
-#include "pbd/stacktrace.h"
-
 #include "ardour/audioregion.h"
 #include "ardour/audiofilesource.h"
 #include "ardour/audio_track.h"

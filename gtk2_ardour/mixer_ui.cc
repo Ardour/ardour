@@ -42,7 +42,6 @@
 #include <gtkmm/stock.h>
 
 #include "pbd/convert.h"
-#include "pbd/stacktrace.h"
 #include "pbd/unwind.h"
 
 #include "ardour/amp.h"

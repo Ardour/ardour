@@ -33,7 +33,6 @@
 #include <gtkmm/stock.h>
 
 #include "pbd/memento_command.h"
-#include "pbd/stacktrace.h"
 #include "pbd/controllable.h"
 #include "pbd/enumwriter.h"
 

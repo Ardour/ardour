@@ -25,7 +25,6 @@
 #include <algorithm>
 #include <cstdlib>
 
-#include "pbd/stacktrace.h"
 #include "pbd/unwind.h"
 
 #include "ardour/control_protocol_manager.h"

@@ -51,7 +51,6 @@
 
 #include "pbd/basename.h"
 #include "pbd/file_utils.h"
-#include "pbd/stacktrace.h"
 
 #include "ardour/audioengine.h"
 #include "ardour/filesystem_paths.h"

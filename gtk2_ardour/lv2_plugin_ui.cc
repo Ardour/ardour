@@ -28,7 +28,6 @@
 #include "ardour/lv2_plugin.h"
 #include "ardour/session.h"
 #include "pbd/error.h"
-#include "pbd/stacktrace.h"
 
 #include "gui_thread.h"
 #include "lv2_plugin_ui.h"

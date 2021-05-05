@@ -40,7 +40,6 @@
 #include "pbd/convert.h"
 #include "pbd/enumwriter.h"
 #include "pbd/replace_all.h"
-#include "pbd/stacktrace.h"
 #include "pbd/unwind.h"
 
 #include "ardour/amp.h"

@@ -30,7 +30,6 @@
 #endif
 
 #include "pbd/convert.h"
-#include "pbd/stacktrace.h"
 #include "pbd/unwind.h"
 
 #include "ardour/lv2_plugin.h"

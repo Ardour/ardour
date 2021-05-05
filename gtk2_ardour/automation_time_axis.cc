@@ -36,7 +36,6 @@
 
 #include "pbd/error.h"
 #include "pbd/memento_command.h"
-#include "pbd/stacktrace.h"
 #include "pbd/string_convert.h"
 #include "pbd/types_convert.h"
 #include "pbd/unwind.h"

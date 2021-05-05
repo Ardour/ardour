@@ -24,7 +24,6 @@
 
 #include "pbd/failed_constructor.h"
 #include "pbd/file_utils.h"
-#include "pbd/stacktrace.h"
 
 #include "ardour/ardour.h"
 #include "ardour/filesystem_paths.h"

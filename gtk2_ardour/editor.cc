@@ -56,7 +56,6 @@
 #include "pbd/memento_command.h"
 #include "pbd/unknown_type.h"
 #include "pbd/unwind.h"
-#include "pbd/stacktrace.h"
 #include "pbd/timersub.h"
 
 #include <glibmm/miscutils.h>

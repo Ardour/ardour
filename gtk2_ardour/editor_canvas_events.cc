@@ -29,8 +29,6 @@
 #include <algorithm>
 #include <typeinfo>
 
-#include "pbd/stacktrace.h"
-
 #include "ardour/audio_track.h"
 #include "ardour/midi_track.h"
 #include "ardour/midi_region.h"
