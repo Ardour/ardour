@@ -1217,11 +1217,21 @@ Surface::say_hello ()
 void
 Surface::next_jog_mode ()
 {
+	if (_jog_wheel) {
+		if (_jog_wheel->mode() == JogWheel::scroll) {
+			_jog_wheel->set_mode (JogWheel::shuttle);
+		} else {
+			_jog_wheel->set_mode (JogWheel::scroll);
+		}
+	}
 }
 
 void
-Surface::set_jog_mode (JogWheel::Mode)
+Surface::set_jog_mode (JogWheel::Mode m)
 {
+	if (_jog_wheel) {
+		_jog_wheel->set_mode (m);
+	}
 }
 
 bool
