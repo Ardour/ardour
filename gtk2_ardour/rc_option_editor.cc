@@ -3345,6 +3345,7 @@ These settings will only take effect after %1 is restarted.\n\
 							    PROGRAM_NAME));
 	add_option (_("Transport"), bo);
 
+
 	bo = new BoolOption (
 		     "latched-record-enable",
 		     _("Keep record-enable engaged on stop"),
@@ -3384,6 +3385,24 @@ These settings will only take effect after %1 is restarted.\n\
 			_("<b>When enabled</b> this will reduce the unpleasant increase in perceived volume "
 				"that occurs when fast-forwarding or rewinding through some kinds of audio"));
 	add_option (_("Transport"), bo);
+
+
+	bo = new BoolOption (
+		     "rewind-ffwd-like-tape-decks",
+		     _("Rewind/Fast-forward like a tape deck"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_rewind_ffwd_like_tape_decks),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_rewind_ffwd_like_tape_decks)
+		     );
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+					    string_compose (_("<b>When enabled</b> if %1 is <b>not recording</b>, it will stop the transport "
+							      "when it reaches the current session end marker\n\n"
+							      "<b>When disabled</b> %1 will continue to roll past the session end marker at all times"),
+							    PROGRAM_NAME));
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+			_("<b>When enabled</b> rewind/ffwd controls will immediately change playback direction when appropriate.\n\n "
+			  "<b>When disabled</b> rewind/ffwd controls will gradually speed up/slow down playback"));
+	add_option (_("Transport"), bo);
+
 
 	ComboOption<float>* psc = new ComboOption<float> (
 		     "preroll-seconds",
