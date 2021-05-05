@@ -22,8 +22,6 @@
 #include <iostream>
 #include <assert.h>
 
-#include "pbd/stacktrace.h"
-
 #include "gtkmm2ext/cairo_widget.h"
 #include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/keyboard.h"

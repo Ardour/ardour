@@ -12,7 +12,6 @@
 #include <iostream>
 
 #include "pbd/demangle.h"
-#include "pbd/stacktrace.h"
 
 #include "ardour/debug.h"
 #include "ardour/types.h"

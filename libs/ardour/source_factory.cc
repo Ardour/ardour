@@ -27,7 +27,6 @@
 #include "pbd/error.h"
 #include "pbd/convert.h"
 #include "pbd/pthread_utils.h"
-#include "pbd/stacktrace.h"
 
 #include "ardour/audioplaylist.h"
 #include "ardour/audio_playlist_source.h"

@@ -20,7 +20,6 @@
 
 #include <iostream>
 #include <cairomm/context.h>
-#include "pbd/stacktrace.h"
 #include "pbd/compose.h"
 
 #include "canvas/canvas.h"

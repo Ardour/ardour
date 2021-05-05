@@ -23,7 +23,6 @@
 #include <iostream>
 
 #include "pbd/memento_command.h"
-#include "pbd/stacktrace.h"
 
 #include "ardour/audioengine.h"
 #include "ardour/automation_control.h"

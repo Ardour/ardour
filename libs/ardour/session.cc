@@ -53,7 +53,6 @@
 #include "pbd/md5.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/search_path.h"
-#include "pbd/stacktrace.h"
 #include "pbd/stl_delete.h"
 #include "pbd/replace_all.h"
 #include "pbd/types_convert.h"

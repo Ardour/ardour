@@ -39,7 +39,6 @@
 #include "pbd/epa.h"
 #include "pbd/file_utils.h"
 #include "pbd/pthread_utils.h"
-#include "pbd/stacktrace.h"
 #include "pbd/unknown_type.h"
 
 #include "midi++/port.h"

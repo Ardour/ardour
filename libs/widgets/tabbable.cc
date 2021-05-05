@@ -22,8 +22,6 @@
 #include <gtkmm/window.h>
 #include <gtkmm/stock.h>
 
-#include "pbd/stacktrace.h"
-
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/visibility_tracker.h"

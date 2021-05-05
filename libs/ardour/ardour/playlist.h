@@ -41,7 +41,6 @@
 #include <glib.h>
 
 #include "pbd/sequence_property.h"
-#include "pbd/stacktrace.h"
 #include "pbd/stateful.h"
 #include "pbd/statefuldestructible.h"
 #include "pbd/undo.h"

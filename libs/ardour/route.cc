@@ -44,7 +44,6 @@
 #include "pbd/enumwriter.h"
 #include "pbd/locale_guard.h"
 #include "pbd/memento_command.h"
-#include "pbd/stacktrace.h"
 #include "pbd/types_convert.h"
 #include "pbd/unwind.h"
 

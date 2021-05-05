@@ -27,7 +27,6 @@
 #include "pbd/event_loop.h"
 #include "pbd/error.h"
 #include "pbd/pthread_utils.h"
-#include "pbd/stacktrace.h"
 
 #include "pbd/i18n.h"
 

@@ -25,7 +25,6 @@
 #include <glibmm/timer.h>
 
 #include "pbd/error.h"
-#include "pbd/stacktrace.h"
 
 #include "midi++/types.h"
 

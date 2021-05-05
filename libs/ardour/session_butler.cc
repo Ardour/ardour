@@ -22,7 +22,6 @@
 
 #include "pbd/error.h"
 #include "pbd/pthread_utils.h"
-#include "pbd/stacktrace.h"
 
 #include "ardour/butler.h"
 #include "ardour/disk_reader.h"

@@ -85,7 +85,6 @@
 #include "pbd/pathexpand.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/scoped_file_descriptor.h"
-#include "pbd/stacktrace.h"
 #include "pbd/types_convert.h"
 #include "pbd/localtime_r.h"
 #include "pbd/unwind.h"

@@ -28,7 +28,6 @@
 #include "pbd/enumwriter.h"
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
-#include "pbd/stacktrace.h"
 #include "pbd/xml++.h"
 
 #include "ardour/presentation_info.h"

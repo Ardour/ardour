@@ -54,7 +54,6 @@
 #include "pbd/cpus.h"
 #include "pbd/control_math.h"
 #include "pbd/error.h"
-#include "pbd/stacktrace.h"
 #include "pbd/xml++.h"
 #include "pbd/basename.h"
 #include "pbd/scoped_file_descriptor.h"

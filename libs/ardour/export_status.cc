@@ -19,8 +19,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <pbd/stacktrace.h>
-
 #include "ardour/export_status.h"
 
 namespace ARDOUR

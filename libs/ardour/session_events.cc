@@ -24,7 +24,6 @@
 
 #include "pbd/error.h"
 #include "pbd/enumwriter.h"
-#include "pbd/stacktrace.h"
 #include "pbd/pthread_utils.h"
 
 #include "ardour/debug.h"

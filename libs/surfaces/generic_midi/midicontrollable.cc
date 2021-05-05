@@ -28,7 +28,6 @@
 
 #include "pbd/error.h"
 #include "pbd/compose.h"
-#include "pbd/stacktrace.h"
 #include "pbd/types_convert.h"
 #include "pbd/xml++.h"
 

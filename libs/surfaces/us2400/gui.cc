@@ -33,7 +33,6 @@
 #include "pbd/error.h"
 #include "pbd/unwind.h"
 #include "pbd/strsplit.h"
-#include "pbd/stacktrace.h"
 
 #include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/action_model.h"

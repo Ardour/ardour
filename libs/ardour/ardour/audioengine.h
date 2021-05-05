@@ -38,7 +38,6 @@
 
 #include "pbd/signals.h"
 #include "pbd/pthread_utils.h"
-#include "pbd/stacktrace.h"
 #include "pbd/g_atomic_compat.h"
 
 #include "ardour/ardour.h"

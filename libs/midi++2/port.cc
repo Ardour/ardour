@@ -27,7 +27,6 @@
 #include "pbd/failed_constructor.h"
 #include "pbd/convert.h"
 #include "pbd/strsplit.h"
-#include "pbd/stacktrace.h"
 
 #include "midi++/types.h"
 #include "midi++/port.h"

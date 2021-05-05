@@ -27,7 +27,6 @@
 
 #include "pbd/libpbd_visibility.h"
 #include "pbd/command.h"
-#include "pbd/stacktrace.h"
 #include "pbd/xml++.h"
 #include "pbd/demangle.h"
 

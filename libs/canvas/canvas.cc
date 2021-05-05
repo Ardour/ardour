@@ -35,7 +35,6 @@
 #include "gtkmm2ext/persistent_tooltip.h"
 
 #include "pbd/compose.h"
-#include "pbd/stacktrace.h"
 
 #include "canvas/canvas.h"
 #include "gtkmm2ext/colors.h"

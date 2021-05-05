@@ -25,7 +25,6 @@
 #include <iostream>
 #include <algorithm>
 
-#include "pbd/stacktrace.h"
 #include "pbd/abstract_ui.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/failed_constructor.h"

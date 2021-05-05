@@ -8,7 +8,6 @@
 #include <string.h>
 #include <iostream>
 
-#include "pbd/stacktrace.h"
 #include "pbd/xml++.h"
 
 #include <libxml/debugXML.h>
