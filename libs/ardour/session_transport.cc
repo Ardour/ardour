@@ -394,9 +394,11 @@ Session::set_transport_speed (double speed)
 	    || (act_speed == 0.0 && _signalled_varispeed != 0.0)
 		)
 	{
+		DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC3 with speed = %1\n", _transport_fsm->transport_speed()));
 		TransportStateChange (); /* EMIT SIGNAL */
 		_signalled_varispeed = act_speed;
 	}
+
 }
 
 /** Stop the transport.  */
