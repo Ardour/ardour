@@ -92,6 +92,7 @@
 #include "ardour/playlist_factory.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
+#include "ardour/presentation_info.h"
 #include "ardour/process_thread.h"
 #include "ardour/profile.h"
 #include "ardour/rc_configuration.h"
@@ -3035,6 +3036,11 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 			if (route == 0) {
 				error << _("Session: cannot create track/bus from template description") << endmsg;
 				goto out;
+			}
+
+			{
+				PresentationInfo& rpi = route->presentation_info ();
+				rpi.set_flags (PresentationInfo::Flag (rpi.flags() & ~PresentationInfo::OrderSet));
 			}
 
 			/* Fix up sharing of playlists with the new Route/Track */
