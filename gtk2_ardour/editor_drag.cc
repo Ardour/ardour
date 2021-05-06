@@ -179,7 +179,7 @@ DragManager::end_grab (GdkEvent* e)
 	for (list<Drag*>::iterator i = _drags.begin(); i != _drags.end(); ) {
 		list<Drag*>::iterator tmp = i;
 
-		if ((*i)->grab_button() == e->button.button) {
+		if ((*i)->grab_button() == (int) e->button.button) {
 			bool const t = (*i)->end_grab (e);
 			if (t) {
 				r = true;
@@ -1083,7 +1083,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 		 */
 		int prev_track = -1;
 		for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
-			if (i->time_axis_view != prev_track) {
+			if ((int) i->time_axis_view != prev_track) {
 				prev_track = i->time_axis_view;
 				++_ntracks;
 			}
@@ -1467,7 +1467,7 @@ RegionMoveDrag::finished (GdkEvent* ev, bool movement_occurred)
 	bool const changed_position = (_last_position.sample != _primary->region()->position());
 	bool changed_tracks;
 
-	if (_views.front().time_axis_view >= _time_axis_views.size()) {
+	if (_views.front().time_axis_view >= (int) _time_axis_views.size()) {
 		/* in the drop zone */
 		changed_tracks = true;
 	} else {
