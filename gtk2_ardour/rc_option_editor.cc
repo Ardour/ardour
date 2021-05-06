@@ -3394,8 +3394,21 @@ These settings will only take effect after %1 is restarted.\n\
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_rewind_ffwd_like_tape_decks)
 		     );
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
-			_("<b>When enabled</b> rewind/ffwd controls will immediately change playback direction when appropriate.\n\n "
-			  "<b>When disabled</b> rewind/ffwd controls will gradually speed up/slow down playback"));
+	                                    _("<b>When enabled</b> rewind/ffwd controls will immediately change playback direction when appropriate.\n\n "
+	                                      "<b>When disabled</b> rewind/ffwd controls will gradually speed up/slow down playback"));
+	add_option (_("Transport"), bo);
+
+
+	bo = new BoolOption (
+		"auto-return-after-rewind-ffwd",
+		_("Allow auto-return after rewind/ffwd operations"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_auto_return_after_rewind_ffwd),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_auto_return_after_rewind_ffwd)
+		);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+	                                    _("<b>When enabled</b> if auto-return is enabled, the playhead will auto-return after rewind/ffwd operations\n\n"
+	                                      "<b>When disabled</b> the playhead will never auto-return after rewind/ffwd operations")
+		);
 	add_option (_("Transport"), bo);
 
 
