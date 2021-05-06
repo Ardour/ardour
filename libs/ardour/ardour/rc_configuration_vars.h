@@ -182,6 +182,7 @@ CONFIG_VARIABLE (bool, disable_disarm_during_roll, "disable-disarm-during-roll",
 CONFIG_VARIABLE (AutoReturnTarget, auto_return_target_list, "auto-return-target-list", AutoReturnTarget(LastLocate|RangeSelectionStart|Loop|RegionSelectionStart))
 CONFIG_VARIABLE (bool, reset_default_speed_on_stop, "reset-default-speed-on-stop", false)
 CONFIG_VARIABLE (bool, rewind_ffwd_like_tape_decks, "rewind-ffwd-like-tape-decks", true)
+CONFIG_VARIABLE (bool, auto_return_after_rewind_ffwd, "auto-return-after-rewind-ffwd", false)
 
 /* metering */
 
