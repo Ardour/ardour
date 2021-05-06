@@ -365,7 +365,7 @@ Session::set_transport_speed (double speed)
 	clear_clicks ();
 	_engine_speed = new_engine_speed;
 
-	if (fabs (speed) != 1.0 && _transport_fsm->default_speed() == 1.0) {
+	if (!Config->get_auto_return_after_rewind_ffwd() && fabs (speed) != 1.0 && _transport_fsm->default_speed() == 1.0) {
 		/* varispeed of any sort cancels auto-return */
 		_requested_return_sample = -1;
 		_last_roll_location = -1;
