@@ -18,6 +18,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#include <poll.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -835,17 +836,28 @@ SystemExec::output_interposer ()
 	for (;fcntl (rfd, F_GETFL) != -1;) {
 		r = read (rfd, buf, BUFSIZ - 1);
 		if (r < 0 && (errno == EINTR || errno == EAGAIN)) {
-			fd_set rfds;
-			struct timeval tv;
-			FD_ZERO (&rfds);
-			FD_SET (rfd, &rfds);
-			tv.tv_sec = 0;
-			tv.tv_usec = 10000;
-			int rv = select (1, &rfds, NULL, NULL, &tv);
+
+			/* wait till ready to read */
+
+			struct pollfd pfd;
+
+			pfd.fd = rfd;
+			pfd.events = POLLIN|POLLERR|POLLHUP;
+
+			int rv = poll (&pfd, 1, 10000);
+
 			if (rv == -1) {
 				break;
 			}
-			continue;
+
+			if (pfd.revents & (POLLERR|POLLHUP)) {
+				break;
+			}
+
+			if (rv == 1 && pfd.revents & POLLIN) {
+				/* back to read(2) call */
+				continue;
+			}
 		}
 		if (r <= 0) {
 			break;
