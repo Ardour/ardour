@@ -406,7 +406,7 @@ Delivery::set_state (const XMLNode& node, int version)
 
 	XMLNode* pannnode = node.child (X_("Pannable"));
 
-	if (_panshell && _panshell->panner() && pannnode) {
+	if (_panshell && _panshell->unlinked_pannable() && pannnode) {
 		_panshell->unlinked_pannable()->set_state (*pannnode, version);
 	}
 
