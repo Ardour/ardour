@@ -146,7 +146,7 @@ AudioEngine::split_cycle (pframes_t nframes)
 {
 	/* caller must hold process lock */
 
-	boost::shared_ptr<Ports> p = ports.reader();
+	boost::shared_ptr<Ports> p = _ports.reader();
 
 	/* This is mainly for the benefit of rt-control ports (MTC, MClk)
 	 *

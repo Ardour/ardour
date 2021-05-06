@@ -138,7 +138,7 @@ PortManager::PortMetaData::PortMetaData (XMLNode const& node)
 /* ****************************************************************************/
 
 PortManager::PortManager ()
-	: ports (new Ports)
+	: _ports (new Ports)
 	, _port_remove_in_progress (false)
 	, _port_deletions_pending (8192) /* ick, arbitrary sizing */
 	, _midi_info_dirty (true)
@@ -174,14 +174,14 @@ PortManager::remove_all_ports ()
 	*/
 
 	{
-		RCUWriter<Ports> writer (ports);
+		RCUWriter<Ports> writer (_ports);
 		boost::shared_ptr<Ports> ps = writer.get_copy ();
 		ps->clear ();
 	}
 
 	/* clear dead wood list in RCU */
 
-	ports.flush ();
+	_ports.flush ();
 
 	/* clear out pending port deletion list. we know this is safe because
 	 * the auto connect thread in Session is already dead when this is
@@ -384,7 +384,7 @@ PortManager::get_port_by_name (const string& portname)
 		return boost::shared_ptr<Port> ();
 	}
 
-	boost::shared_ptr<Ports> pr = ports.reader();
+	boost::shared_ptr<Ports> pr = _ports.reader();
 	std::string rel = make_port_name_relative (portname);
 	Ports::iterator x = pr->find (rel);
 
@@ -407,7 +407,7 @@ PortManager::get_port_by_name (const string& portname)
 void
 PortManager::port_renamed (const std::string& old_relative_name, const std::string& new_relative_name)
 {
-	RCUWriter<Ports> writer (ports);
+	RCUWriter<Ports> writer (_ports);
 	boost::shared_ptr<Ports> p = writer.get_copy();
 	Ports::iterator x = p->find (old_relative_name);
 
@@ -421,7 +421,7 @@ PortManager::port_renamed (const std::string& old_relative_name, const std::stri
 int
 PortManager::get_ports (DataType type, PortList& pl)
 {
-	boost::shared_ptr<Ports> plist = ports.reader();
+	boost::shared_ptr<Ports> plist = _ports.reader();
 	for (Ports::iterator p = plist->begin(); p != plist->end(); ++p) {
 		if (p->second->type() == type) {
 			pl.push_back (p->second);
@@ -507,7 +507,7 @@ PortManager::register_port (DataType dtype, const string& portname, bool input, 
 
 		newport->set_buffer_size (AudioEngine::instance()->samples_per_cycle());
 
-		RCUWriter<Ports> writer (ports);
+		RCUWriter<Ports> writer (_ports);
 		boost::shared_ptr<Ports> ps = writer.get_copy ();
 		ps->insert (make_pair (make_port_name_relative (portname), newport));
 
@@ -522,7 +522,7 @@ PortManager::register_port (DataType dtype, const string& portname, bool input, 
 		throw PortRegistrationFailure (string_compose ("unable to create port '%1': %2", portname, _("(unknown error)")));
 	}
 
-	DEBUG_TRACE (DEBUG::Ports, string_compose ("\t%2 port registration success, ports now = %1\n", ports.reader()->size(), this));
+	DEBUG_TRACE (DEBUG::Ports, string_compose ("\t%2 port registration success, ports now = %1\n", _ports.reader()->size(), this));
 	return newport;
 }
 
@@ -550,7 +550,7 @@ PortManager::unregister_port (boost::shared_ptr<Port> port)
 	/* caller must hold process lock */
 
 	{
-		RCUWriter<Ports> writer (ports);
+		RCUWriter<Ports> writer (_ports);
 		boost::shared_ptr<Ports> ps = writer.get_copy ();
 		Ports::iterator x = ps->find (make_port_name_relative (port->name()));
 
@@ -562,7 +562,7 @@ PortManager::unregister_port (boost::shared_ptr<Port> port)
 		/* writer goes out of scope, forces update */
 	}
 
-	ports.flush ();
+	_ports.flush ();
 
 	return 0;
 }
@@ -701,7 +701,7 @@ PortManager::reestablish_ports ()
 {
 	Ports::iterator i;
 	_midi_info_dirty = true;
-	boost::shared_ptr<Ports> p = ports.reader ();
+	boost::shared_ptr<Ports> p = _ports.reader ();
 	DEBUG_TRACE (DEBUG::Ports, string_compose ("reestablish %1 ports\n", p->size()));
 
 	for (i = p->begin(); i != p->end(); ++i) {
@@ -775,7 +775,7 @@ PortManager::set_pretty_names (std::vector<std::string> const& port_names, DataT
 int
 PortManager::reconnect_ports ()
 {
-	boost::shared_ptr<Ports> p = ports.reader ();
+	boost::shared_ptr<Ports> p = _ports.reader ();
 
 	/* re-establish connections */
 
@@ -798,7 +798,7 @@ PortManager::connect_callback (const string& a, const string& b, bool conn)
 	boost::shared_ptr<Port> port_a;
 	boost::shared_ptr<Port> port_b;
 	Ports::iterator x;
-	boost::shared_ptr<Ports> pr = ports.reader ();
+	boost::shared_ptr<Ports> pr = _ports.reader ();
 
 	x = pr->find (make_port_name_relative (a));
 	if (x != pr->end()) {
@@ -1043,7 +1043,7 @@ PortManager::cycle_start (pframes_t nframes, Session* s)
 	Port::set_global_port_buffer_offset (0);
 	Port::set_cycle_samplecnt (nframes);
 
-	_cycle_ports = ports.reader ();
+	_cycle_ports = _ports.reader ();
 
 	/* TODO optimize
 	 *  - when speed == 1.0, the resampler copies data without processing
@@ -1655,7 +1655,7 @@ PortManager::fill_midi_port_info_locked ()
 void
 PortManager::set_port_buffer_sizes (pframes_t n)
 {
-	boost::shared_ptr<Ports> all = ports.reader();
+	boost::shared_ptr<Ports> all = _ports.reader();
 
 	for (Ports::iterator p = all->begin(); p != all->end(); ++p) {
 		p->second->set_buffer_size (n);
@@ -1667,7 +1667,7 @@ bool
 PortManager::check_for_ambiguous_latency (bool log) const
 {
 	bool rv = false;
-	boost::shared_ptr<Ports> plist = ports.reader();
+	boost::shared_ptr<Ports> plist = _ports.reader();
 	for (Ports::iterator pi = plist->begin(); pi != plist->end(); ++pi) {
 		boost::shared_ptr<Port> const& p (pi->second);
 		if (! p->sends_output () || (p->flags () & IsTerminal)) {

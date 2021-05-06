@@ -260,7 +260,7 @@ public:
 protected:
 	boost::shared_ptr<AudioBackend> _backend;
 
-	SerializedRCUManager<Ports> ports;
+	SerializedRCUManager<Ports> _ports;
 
 	bool                   _port_remove_in_progress;
 	PBD::RingBuffer<Port*> _port_deletions_pending;
