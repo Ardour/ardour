@@ -3394,7 +3394,7 @@ These settings will only take effect after %1 is restarted.\n\
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_rewind_ffwd_like_tape_decks)
 		     );
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
-	                                    _("<b>When enabled</b> rewind/ffwd controls will immediately change playback direction when appropriate.\n\n "
+	                                    _("<b>When enabled</b> rewind/ffwd controls will immediately change playback direction when appropriate.\n\n"
 	                                      "<b>When disabled</b> rewind/ffwd controls will gradually speed up/slow down playback"));
 	add_option (_("Transport"), bo);
 
