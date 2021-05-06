@@ -724,3 +724,14 @@ PortEngineSharedImpl::update_system_port_latencies ()
 		(*it)->update_connected_latency (false);
 	}
 }
+
+#ifndef NDEBUG
+void
+PortEngineSharedImpl::list_ports () const
+{
+	boost::shared_ptr<PortIndex> p = _ports.reader ();
+	for (PortIndex::const_iterator i = p->begin (); i != p->end (); ++i) {
+		std::cout << (*i)->name () << "\n";
+	}
+}
+#endif

@@ -121,6 +121,11 @@ public:
 	uint32_t    port_name_size () const;
 	std::string my_name () const;
 
+#ifndef NDEBUG
+	void list_cycle_ports () const;
+	void list_all_ports () const;
+#endif
+
 	/* Port registration */
 
 	boost::shared_ptr<Port> register_input_port (DataType, const std::string& portname, bool async = false, PortFlags extra_flags = PortFlags (0));

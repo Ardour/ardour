@@ -1870,3 +1870,22 @@ PortManager::run_input_meters (pframes_t n_samples, samplecnt_t rate)
 		}
 	}
 }
+
+#ifndef NDEBUG
+void
+PortManager::list_all_ports () const
+{
+	boost::shared_ptr<Ports> plist = _ports.reader();
+	for (Ports::iterator p = plist->begin(); p != plist->end(); ++p) {
+		std::cout << p->first << "\n";
+	}
+}
+
+void
+PortManager::list_cycle_ports () const
+{
+	for (Ports::iterator p = _cycle_ports->begin(); p != _cycle_ports->end(); ++p) {
+		std::cout << p->first << "\n";
+	}
+}
+#endif
