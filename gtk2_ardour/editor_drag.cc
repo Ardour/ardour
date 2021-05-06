@@ -1467,14 +1467,20 @@ RegionMoveDrag::finished (GdkEvent* ev, bool movement_occurred)
 	bool const changed_position = (_last_position.sample != _primary->region()->position());
 	bool changed_tracks;
 
-	if (_views.front().time_axis_view < 0) {
-		if (&_views.front().view->get_time_axis_view()) {
-			changed_tracks = true;
-		} else {
-			changed_tracks = false;
-		}
+	if (_views.front().time_axis_view == _time_axis_views.size()) {
+		/* in the drop zone */
+		changed_tracks = true;
 	} else {
-		changed_tracks = (_time_axis_views[_views.front().time_axis_view] != &_views.front().view->get_time_axis_view());
+
+		if (_views.front().time_axis_view < 0) {
+			if (&_views.front().view->get_time_axis_view()) {
+				changed_tracks = true;
+			} else {
+				changed_tracks = false;
+			}
+		} else {
+			changed_tracks = (_time_axis_views[_views.front().time_axis_view] != &_views.front().view->get_time_axis_view());
+		}
 	}
 
 	if (_copy) {
