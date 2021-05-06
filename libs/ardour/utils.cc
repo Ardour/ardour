@@ -698,8 +698,3 @@ ARDOUR::compute_sha1_of_file (std::string path)
 	sha1_result_hash (&s, hash);
 	return std::string (hash);
 }
-
-extern "C" {
-	void c_stacktrace() { stacktrace (cerr); }
-}
-
