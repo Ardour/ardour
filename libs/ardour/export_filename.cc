@@ -409,7 +409,8 @@ ExportFilename::analyse_folder ()
 
 	if (!folder_beginning.compare (session_dir)) {
 		pair.first = true;
-		pair.second = folder.substr (session_dir_len);
+		// remove the leading slash if needed. 
+		pair.second = folder.substr (folder.length() > session_dir_len ? session_dir_len+1 : session_dir_len);
 	} else {
 		pair.first = false;
 		pair.second = folder;
