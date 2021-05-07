@@ -139,6 +139,12 @@ naturally_less (const char* a, const char* b)
 #if 1
 		/* treat underscore as space, this works around idiosyncratic
 		 * ffado port-names: "foo_in", "foo0_in", "foo2_in", etc */
+		if (*a == '_' && *b == ' ') {
+			continue;
+		}
+		if (*b == '_' && *a == ' ') {
+			continue;
+		}
 		if (*a == '_') {
 			return ' ' < *b;
 		} else if (*b == '_') {
