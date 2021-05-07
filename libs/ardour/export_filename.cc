@@ -128,8 +128,9 @@ ExportFilename::set_state (const XMLNode & node)
 	if (child->get_property ("path", tmp)) {
 		tmp = Glib::build_filename (folder, tmp);
 		if (!Glib::file_test (tmp, Glib::FILE_TEST_EXISTS)) {
-			warning << string_compose (_("Existing export folder for this session (%1) does not exist - ignored"), tmp) << endmsg;
-		} else {
+			warning << string_compose (_("Existing export folder for this session (%1) does not exist - using default"), tmp) << endmsg;
+			folder = session.session_directory().export_path();
+	} else {
 			folder = tmp;
 		}
 	}
