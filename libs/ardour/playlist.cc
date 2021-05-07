@@ -626,7 +626,6 @@ Playlist::flush_notifications (bool from_undo)
 		remove_dependents (*s);
 		RegionRemoved (boost::weak_ptr<Region> (*s)); /* EMIT SIGNAL */
 		rl->push_back (*s);
-		Region::RegionPropertyChanged (*s, Properties::hidden); // XXX remove me
 	}
 	if (rl->size () > 0) {
 		Region::RegionsPropertyChanged (rl, Properties::hidden);

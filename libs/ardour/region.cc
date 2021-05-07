@@ -86,7 +86,6 @@ namespace ARDOUR {
 	}
 }
 
-PBD::Signal2<void,boost::shared_ptr<ARDOUR::Region>,const PropertyChange&> Region::RegionPropertyChanged;
 PBD::Signal2<void,boost::shared_ptr<ARDOUR::RegionList>,const PropertyChange&> Region::RegionsPropertyChanged;
 
 void
@@ -1507,8 +1506,6 @@ Region::send_change (const PropertyChange& what_changed)
 				boost::shared_ptr<RegionList> rl (new RegionList);
 				rl->push_back (rptr);
 				RegionsPropertyChanged (rl, what_changed);
-
-				RegionPropertyChanged (rptr, what_changed); // XXX remove me
 			}
 		} catch (...) {
 			/* no shared_ptr available, relax; */

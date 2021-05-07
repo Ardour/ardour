@@ -99,8 +99,6 @@ public:
 
 	static void make_property_quarks ();
 
-	static PBD::Signal2<void,boost::shared_ptr<ARDOUR::Region>, const PBD::PropertyChange&> RegionPropertyChanged;
-
 	static PBD::Signal2<void,boost::shared_ptr<RegionList>, const PBD::PropertyChange&> RegionsPropertyChanged;
 
 	typedef std::map <PBD::PropertyChange, RegionList> ChangeMap;
