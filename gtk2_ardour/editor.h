@@ -462,7 +462,9 @@ public:
 	                ARDOUR::MidiTrackNameSource           mts,
 	                ARDOUR::MidiTempoMapDisposition       mtd,
 	                samplepos_t&                          pos,
-	                boost::shared_ptr<ARDOUR::PluginInfo> instrument = boost::shared_ptr<ARDOUR::PluginInfo>());
+	                boost::shared_ptr<ARDOUR::PluginInfo> instrument = boost::shared_ptr<ARDOUR::PluginInfo>(),
+	                bool with_markers = false
+		);
 
 	void do_embed (std::vector<std::string>              paths,
 	               Editing::ImportDisposition            disposition,
@@ -1460,6 +1462,7 @@ private:
 	void import_audio (bool as_tracks);
 	void do_import (std::vector<std::string> paths, bool split, bool as_tracks);
 	void import_smf_tempo_map (Evoral::SMF const &, samplepos_t pos);
+	void import_smf_markers (Evoral::SMF &, samplepos_t pos);
 	void move_to_start ();
 	void move_to_end ();
 	void center_playhead ();

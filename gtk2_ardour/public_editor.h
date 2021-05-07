@@ -263,10 +263,11 @@ public:
 	/** Import existing media */
 	virtual void do_import (std::vector<std::string> paths, Editing::ImportDisposition, Editing::ImportMode mode, ARDOUR::SrcQuality,
 	                        ARDOUR::MidiTrackNameSource, ARDOUR::MidiTempoMapDisposition, samplepos_t&,
-	                        boost::shared_ptr<ARDOUR::PluginInfo> instrument=boost::shared_ptr<ARDOUR::PluginInfo>()) = 0;
+	                        boost::shared_ptr<ARDOUR::PluginInfo> instrument = boost::shared_ptr<ARDOUR::PluginInfo>(),
+	                        bool with_markers = false) = 0;
 	virtual void do_embed (std::vector<std::string> paths, Editing::ImportDisposition, Editing::ImportMode mode,
 	                       samplepos_t&,
-	                       boost::shared_ptr<ARDOUR::PluginInfo> instrument=boost::shared_ptr<ARDOUR::PluginInfo>()) = 0;
+	                       boost::shared_ptr<ARDOUR::PluginInfo> instrument = boost::shared_ptr<ARDOUR::PluginInfo>()) = 0;
 
 	/** Open main export dialog */
 	virtual void export_audio () = 0;

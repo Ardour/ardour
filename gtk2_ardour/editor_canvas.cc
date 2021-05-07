@@ -428,7 +428,7 @@ Editor::drop_paths_part_two (const vector<string>& paths, samplepos_t sample, do
 		/* drop onto canvas background: create new tracks */
 
 		InstrumentSelector is; // instantiation builds instrument-list and sets default.
-		do_import (midi_paths, Editing::ImportDistinctFiles, ImportAsTrack, SrcBest, SMFTrackName, SMFTempoIgnore, sample, is.selected_instrument());
+		do_import (midi_paths, Editing::ImportDistinctFiles, ImportAsTrack, SrcBest, SMFTrackName, SMFTempoIgnore, sample, is.selected_instrument(), false);
 
 		if (UIConfiguration::instance().get_only_copy_imported_files() || copy) {
 			do_import (audio_paths, Editing::ImportDistinctFiles, Editing::ImportAsTrack,
@@ -450,7 +450,7 @@ Editor::drop_paths_part_two (const vector<string>& paths, samplepos_t sample, do
 
 			if (UIConfiguration::instance().get_only_copy_imported_files() || copy) {
 				do_import (audio_paths, Editing::ImportSerializeFiles, Editing::ImportToTrack,
-					   SrcBest, SMFTrackName, SMFTempoIgnore, sample);
+				           SrcBest, SMFTrackName, SMFTempoIgnore, sample, boost::shared_ptr<PluginInfo>(), false);
 			} else {
 				do_embed (audio_paths, Editing::ImportSerializeFiles, ImportToTrack, sample);
 			}

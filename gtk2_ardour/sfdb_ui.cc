@@ -1764,6 +1764,7 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 	, instrument_combo (false)
 	, copy_files_btn ( _("Copy files to session"))
 	, smf_tempo_btn (_("Use MIDI Tempo Map (if defined)"))
+	, smf_marker_btn (_("Import MIDI markers (if any)"))
 	, selected_audio_track_cnt (selected_audio_tracks)
 	, selected_midi_track_cnt (selected_midi_tracks)
 	, _import_active (false)
@@ -1815,6 +1816,7 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 	options.attach (midi_track_name_combo, 2, 3, 1, 2, FILL, SHRINK, 8, 0);
 
 	options.attach (smf_tempo_btn, 2, 3, 3, 4, FILL, SHRINK, 8, 0);
+	options.attach (smf_marker_btn, 2, 3, 4, 5, FILL, SHRINK, 8, 0);
 
 	l = manage (new Label);
 	l->set_markup (_("<b>Instrument</b>"));
@@ -1992,6 +1994,13 @@ SoundFileOmega::get_use_smf_tempo_map () const
 	return smf_tempo_btn.get_active ();
 }
 
+bool
+SoundFileOmega::get_use_smf_markers () const
+{
+	return smf_marker_btn.get_active ();
+}
+
+
 ImportDisposition
 SoundFileOmega::get_channel_disposition () const
 {
@@ -2068,6 +2077,7 @@ SoundFileOmega::do_something (int action)
 	samplepos_t where;
 	MidiTrackNameSource mts = get_midi_track_name_source ();
 	MidiTempoMapDisposition mtd = (get_use_smf_tempo_map () ? SMFTempoUse : SMFTempoIgnore);
+	bool with_midi_markers = get_use_smf_markers ();
 
 	switch (pos) {
 	case ImportAtEditPoint:
@@ -2089,7 +2099,7 @@ SoundFileOmega::do_something (int action)
 	_import_active = true;
 
 	if (copy_files_btn.get_active()) {
-		PublicEditor::instance().do_import (paths, chns, mode, quality, mts, mtd, where, instrument);
+		PublicEditor::instance().do_import (paths, chns, mode, quality, mts, mtd, where, instrument, with_midi_markers);
 	} else {
 		PublicEditor::instance().do_embed (paths, chns, mode, where, instrument);
 	}
