@@ -5970,7 +5970,7 @@ Editor::super_rapid_screen_update ()
 		return;
 	}
 
-	if (!_pending_locate_request) {
+	if (!_pending_locate_request && !_session->locate_initiated()) {
 		_playhead_cursor->set_position (sample);
 	}
 
