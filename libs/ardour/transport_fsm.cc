@@ -88,6 +88,7 @@ TransportFSM::TransportFSM (TransportAPI& tapi)
 	, processing (0)
 	, most_recently_requested_speed (std::numeric_limits<double>::max())
 	, _default_speed (1.0)
+	, _reverse_after_declick (0)
 {
 	init ();
 }
@@ -419,6 +420,9 @@ TransportFSM::process_event (Event& ev, bool already_deferred, bool& deferred)
 	case DeclickDone:
 		switch (_motion_state) {
 		case DeclickToLocate:
+			if (_reverse_after_declick) {
+				transition (Reversing);
+			}
 			transition (WaitingForLocate);
 			start_locate_after_declick ();
 			break;
@@ -598,7 +602,7 @@ TransportFSM::start_locate_after_declick ()
 
 	double post_locate_speed;
 
-	if (api->user_roll_after_locate()) {
+	if (api->user_roll_after_locate() && !_reverse_after_declick) {
 		post_locate_speed = _default_speed;
 	} else {
 		post_locate_speed = most_recently_requested_speed;
@@ -607,6 +611,12 @@ TransportFSM::start_locate_after_declick ()
 	if (post_locate_speed * most_recently_requested_speed < 0) {
 		/* different directions */
 		transition (Reversing);
+	}
+
+	DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("post-locate speed will be %1 based on user-roll-after %2 and r-a-dc %3\n", post_locate_speed, api->user_roll_after_locate(), _reverse_after_declick));
+
+	if (_reverse_after_declick) {
+		_reverse_after_declick--;
 	}
 
 	if (api->user_roll_after_locate()) {
@@ -797,14 +807,14 @@ TransportFSM::set_speed (Event const & ev)
 
 		DEBUG_TRACE (DEBUG::TFSMState, string_compose ("switch-directions, target speed %1 state %2 IR %3\n", ev.speed, current_state(), initial_reverse));
 
-		transition (Reversing);
-
 		Event lev (Locate, api->position(), must_roll ? MustRoll : MustStop, false, true);
 
 		if (_transport_speed) {
+			_reverse_after_declick++;
 			transition (DeclickToLocate);
 			start_declick_for_locate (lev);
 		} else {
+			transition (Reversing);
 			transition (WaitingForLocate);
 			start_locate_while_stopped (lev);
 		}
@@ -814,7 +824,7 @@ TransportFSM::set_speed (Event const & ev)
 bool
 TransportFSM::will_roll_fowards () const
 {
-	if (reversing()) {
+	if (reversing() || _reverse_after_declick) {
 		return most_recently_requested_speed >= 0; /* note: future speed of zero is equivalent to Forwards */
 	}
 	return (_direction_state == Forwards);
