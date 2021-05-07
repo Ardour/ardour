@@ -508,6 +508,10 @@ EditorSources::add_source (boost::shared_ptr<ARDOUR::Region> region)
 void
 EditorSources::regions_changed (boost::shared_ptr<ARDOUR::RegionList> rl, PBD::PropertyChange const &)
 {
+	bool freeze = rl->size () > 2;
+	if (freeze) {
+		freeze_tree_model ();
+	}
 	for (RegionList::const_iterator r = rl->begin (); r != rl->end(); ++r) {
 		boost::shared_ptr<Region> region = *r;
 
@@ -526,6 +530,9 @@ EditorSources::regions_changed (boost::shared_ptr<ARDOUR::RegionList> rl, PBD::P
 				break;
 			}
 		}
+	}
+	if (freeze) {
+		thaw_tree_model ();
 	}
 }
 
@@ -953,15 +960,19 @@ EditorSources::get_single_selection ()
 void
 EditorSources::freeze_tree_model ()
 {
+	/* store sort column id and type for later */
+	_model->get_sort_column_id (_sort_col_id, _sort_type);
+	_change_connection.block (true);
 	_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
 	_model->set_sort_column (-2, SORT_ASCENDING); // Disable sorting to gain performance
 }
 
 void
-EditorSources::thaw_tree_model (){
-
-	_model->set_sort_column (0, SORT_ASCENDING); // renabale sorting
+EditorSources::thaw_tree_model ()
+{
+	_model->set_sort_column (_sort_col_id, _sort_type); // re-enabale sorting
 	_display.set_model (_model);
+	_change_connection.block (false);
 }
 
 XMLNode &

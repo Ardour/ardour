@@ -439,6 +439,10 @@ EditorRegions::remove_unused_regions ()
 void
 EditorRegions::regions_changed (boost::shared_ptr<RegionList> rl, const PropertyChange& what_changed)
 {
+	bool freeze = rl->size () > 2;
+	if (freeze) {
+		freeze_tree_model ();
+	}
 	for (RegionList::const_iterator i = rl->begin (); i != rl->end(); ++i) {
 		boost::shared_ptr<Region> r = *i;
 
@@ -473,6 +477,9 @@ EditorRegions::regions_changed (boost::shared_ptr<RegionList> rl, const Property
 			/* now populate the properties that might change... */
 			populate_row (r, row, PropertyChange ());
 		}
+	}
+	if (freeze) {
+		thaw_tree_model ();
 	}
 }
 
@@ -534,9 +541,7 @@ EditorRegions::redisplay ()
 	}
 
 	/* store sort column id and type for later */
-	int sort_col_id;
-	Gtk::SortType sort_type;
-	_model->get_sort_column_id (sort_col_id, sort_type);
+	_model->get_sort_column_id (_sort_col_id, _sort_type);
 
 	_display.set_model (Glib::RefPtr<Gtk::TreeStore> (0));
 	_model->clear ();
@@ -547,7 +552,7 @@ EditorRegions::redisplay ()
 
 	RegionFactory::foreach_region (sigc::mem_fun (*this, &EditorRegions::add_region));
 
-	_model->set_sort_column (sort_col_id, sort_type); // re-enabale sorting
+	_model->set_sort_column (_sort_col_id, _sort_type); // re-enabale sorting
 	_display.set_model (_model);
 }
 
@@ -1192,6 +1197,9 @@ EditorRegions::get_single_selection ()
 void
 EditorRegions::freeze_tree_model ()
 {
+	/* store sort column id and type for later */
+	_model->get_sort_column_id (_sort_col_id, _sort_type);
+	_change_connection.block (true);
 	_display.set_model (Glib::RefPtr<Gtk::TreeStore> (0));
 	_model->set_sort_column (-2, SORT_ASCENDING); //Disable sorting to gain performance
 }
@@ -1199,8 +1207,9 @@ EditorRegions::freeze_tree_model ()
 void
 EditorRegions::thaw_tree_model ()
 {
-	_model->set_sort_column (0, SORT_ASCENDING); // renabale sorting
+	_model->set_sort_column (_sort_col_id, _sort_type); // re-enabale sorting
 	_display.set_model (_model);
+	_change_connection.block (false);
 }
 
 void

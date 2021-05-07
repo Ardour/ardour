@@ -98,6 +98,9 @@ private:
 
 	sigc::connection _change_connection;
 
+	int           _sort_col_id;
+	Gtk::SortType _sort_type;
+
 	Gtk::Widget* old_focus;
 
 	Gtk::CellEditable* tags_editable;

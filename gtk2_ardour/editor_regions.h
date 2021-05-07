@@ -126,6 +126,9 @@ private:
 
 	sigc::connection _change_connection;
 
+	int           _sort_col_id;
+	Gtk::SortType _sort_type;
+
 	bool selection_filter (const Glib::RefPtr<Gtk::TreeModel>& model, const Gtk::TreeModel::Path& path, bool yn);
 
 	Gtk::Widget* old_focus;
