@@ -2264,6 +2264,7 @@ RegionRippleDrag::add_all_after_to_views(TimeAxisView *tav, samplepos_t where, c
 void
 RegionRippleDrag::remove_unselected_from_views(samplecnt_t amount, bool move_regions)
 {
+	ThawList thawlist;
 
 	for (std::list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ) {
 		// we added all the regions after the selection
@@ -2285,6 +2286,7 @@ RegionRippleDrag::remove_unselected_from_views(samplecnt_t amount, bool move_reg
 			rv->drag_end ();
 
 			if (move_regions) {
+				thawlist.add (rv->region ());
 				// move the underlying region to match the view
 				rv->region()->set_position (rv->region()->position() + amount);
 			} else {
@@ -2296,6 +2298,7 @@ RegionRippleDrag::remove_unselected_from_views(samplecnt_t amount, bool move_reg
 			_views.erase (to_erase);
 		}
 	}
+	thawlist.release ();
 }
 
 bool
@@ -2465,6 +2468,8 @@ RegionRippleDrag::finished (GdkEvent* event, bool movement_occurred)
 			// to add the original track to the undo record
 			orig_tav->playlist()->clear_changes();
 			orig_tav->playlist()->clear_owned_changes();
+			orig_tav->playlist()->freeze ();
+
 			remove_unselected_from_views (prev_amount, true);
 
 			std::list<boost::shared_ptr<Region> >::const_iterator it = _orig_tav_ripples.begin();
@@ -2486,6 +2491,8 @@ RegionRippleDrag::finished (GdkEvent* event, bool movement_occurred)
 				}
 			}
 
+			orig_tav->playlist()->thaw ();
+
 			vector<Command*> cmds;
 			orig_tav->playlist()->rdiff (cmds);
 			_editor->session()->add_commands (cmds);
@@ -2505,10 +2512,13 @@ RegionRippleDrag::finished (GdkEvent* event, bool movement_occurred)
 		for (pi = playlists.begin(); pi != playlists.end(); ++pi) {
 			(*pi)->clear_changes();
 			(*pi)->clear_owned_changes();
+			(*pi)->freeze();
 		}
+
 		remove_unselected_from_views (prev_amount, true);
 
 		for (pi = playlists.begin(); pi != playlists.end(); ++pi) {
+			(*pi)->thaw();
 			vector<Command*> cmds;
 			(*pi)->rdiff (cmds);
 			_editor->session()->add_commands (cmds);
