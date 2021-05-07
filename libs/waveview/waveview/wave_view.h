@@ -46,6 +46,7 @@ class WaveViewDrawRequestQueue;
 class WaveViewImage;
 class WaveViewProperties;
 class WaveViewDrawingThread;
+struct WaveViewFFT;
 
 class LIBWAVEVIEW_API WaveView : public ArdourCanvas::Item, public sigc::trackable
 {
@@ -108,6 +109,7 @@ public:
 	void set_zero_color (Gtkmm2ext::Color);
 	void set_clip_color (Gtkmm2ext::Color);
 	void set_logscaled (bool);
+	void set_show_spectrogram (bool);
 
 	void set_gradient_depth (double);
 	double gradient_depth () const;
@@ -168,6 +170,8 @@ private:
 	mutable boost::shared_ptr<WaveViewImage> _image;
 
 	mutable boost::shared_ptr<WaveViewCacheGroup> _cache_group;
+	
+	boost::shared_ptr<WaveViewFFT> _fft;
 
 	bool _shape_independent;
 	bool _logscaled_independent;
@@ -237,6 +241,9 @@ private:
 	static void draw_image (Cairo::RefPtr<Cairo::ImageSurface>&, ARDOUR::PeakData*, int n_peaks,
 	                        boost::shared_ptr<WaveViewDrawRequest>);
 	static void draw_absent_image (Cairo::RefPtr<Cairo::ImageSurface>&, ARDOUR::PeakData*, int);
+	
+	static void draw_spectrum (boost::shared_ptr<const ARDOUR::AudioRegion>,
+	                          Cairo::RefPtr<Cairo::ImageSurface>&, const WaveViewProperties&, WaveViewFFT*);
 
 	ARDOUR::samplecnt_t optimal_image_width_samples () const;
 

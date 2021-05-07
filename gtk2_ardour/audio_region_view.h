@@ -84,6 +84,8 @@ public:
 
 	void set_height (double);
 	void set_samples_per_pixel (double);
+	
+	void set_show_spectrogram (bool);
 
 	void set_amplitude_above_axis (gdouble spp);
 

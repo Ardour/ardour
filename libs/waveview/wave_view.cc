@@ -19,6 +19,7 @@
  */
 
 #include <cmath>
+#include <fftw3.h>
 
 #include <boost/scoped_array.hpp>
 
@@ -81,6 +82,7 @@ WaveView::WaveView (Canvas* c, boost::shared_ptr<ARDOUR::AudioRegion> region)
 	: Item (c)
 	, _region (region)
 	, _props (new WaveViewProperties (region))
+	, _fft (new WaveViewFFT ())
 	, _shape_independent (false)
 	, _logscaled_independent (false)
 	, _gradient_depth_independent (false)
@@ -94,6 +96,7 @@ WaveView::WaveView (Item* parent, boost::shared_ptr<ARDOUR::AudioRegion> region)
 	: Item (parent)
 	, _region (region)
 	, _props (new WaveViewProperties (region))
+	, _fft (new WaveViewFFT ())
 	, _shape_independent (false)
 	, _logscaled_independent (false)
 	, _gradient_depth_independent (false)
@@ -238,6 +241,7 @@ WaveView::create_draw_request (WaveViewProperties const& props) const
 	boost::shared_ptr<WaveViewDrawRequest> request (new WaveViewDrawRequest);
 
 	request->image = boost::shared_ptr<WaveViewImage> (new WaveViewImage (_region, props));
+	request->fft = _fft;
 	return request;
 }
 
@@ -457,6 +461,142 @@ WaveView::draw_absent_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData
 	context->set_source_rgba (1.0, 1.0, 0.0, 0.3);
 	context->mask (stripe, 0, 0);
 	context->fill ();
+}
+
+void
+WaveView::draw_spectrum (boost::shared_ptr<const ARDOUR::AudioRegion> region,
+                       Cairo::RefPtr<Cairo::ImageSurface>& image, const WaveViewProperties& prop, WaveViewFFT* fft)
+{
+	const samplecnt_t n_samples = prop.get_length_samples();
+	const samplecnt_t sample_rate = region->session().sample_rate();
+	
+	const int32_t height = image->get_height();
+	const int32_t width = image->get_width();
+	const int32_t stride = image->get_stride();
+	const float fpp = ((n_samples) / (float) width);
+	
+	const int32_t fft_range_db = WaveViewFFT::fft_range_db;
+	const samplecnt_t fft_bufsize = (height > 256) ? WaveViewFFT::max_fft_bufsize : \
+										(height <= 128 ? WaveViewFFT::max_fft_bufsize >> 2 : WaveViewFFT::max_fft_bufsize >> 1);
+	const uint32_t fft_data_size = fft_bufsize / 2;
+	
+	fft->reset_if(fft_bufsize, sample_rate);
+
+	assert(image->get_format () == Cairo::FORMAT_ARGB32);
+	unsigned char *bgra = image->get_data ();
+	Cairo::RefPtr<Cairo::Context> cr = Cairo::Context::create (image);
+	Gtkmm2ext::set_source_rgba (cr, rgba_to_color(0, 0, 0, 1.0));
+	cr->rectangle (0, 0, width, height);
+	cr->fill ();
+	
+	samplecnt_t step = std::max ((samplecnt_t)32, n_samples / width);
+	for (samplecnt_t pos = 0; pos < n_samples; pos += step) {
+		int32_t x0 = floorf (pos / fpp);
+		int32_t x1 = floorf ((pos + step) / fpp);
+		if (x0 >= width) { x0 = width - 1; }
+		if (x1 >= width) { x1 = width - 1; }
+		if (x0 == x1) { continue; }
+		samplecnt_t read_n = fft_bufsize;
+		samplecnt_t read_start = prop.get_sample_start () - region->start ()  + pos;
+		if (read_start >= region->start () + read_n / 2) {
+			read_start -= (read_n / 2);
+		}
+		
+		samplecnt_t n = region->read (fft->fft_data_in, read_start, read_n, prop.channel);
+		if (n == 0) {
+			std::cerr << "region read zero samples\n";
+			break;
+		}
+		
+		fft->run(n);
+		
+		for (uint32_t i = 0; i < fft_data_size - 1; ++i) {
+			float level = fft->fft_power_at_bin (i, i);
+			if (level < -fft_range_db) continue;
+			if (level > 0.0) level = 0.0;
+		
+			int32_t y0 = floorf (fft->y_scale_table[i] * (float) height / fft_data_size);
+			int32_t y1 = floorf (fft->y_scale_table[i + 1] * (float) height / fft_data_size);
+			if (y0 == y1) { continue; }
+			
+			uint32_t idx = ((uint32_t) floorf (-level)) * 3;
+			for (int32_t y = y0; y < y1 && y < height; ++y) {
+				int32_t yy = height - 1 - y;
+				unsigned char *p = bgra + (yy * stride);
+				for (int32_t x = x0; x < x1; ++x) {
+					p[x * 4] = fft->color_map_rgb[idx + 2];
+					p[x * 4 + 1] = fft->color_map_rgb[idx + 1];
+					p[x * 4 + 2] = fft->color_map_rgb[idx];
+				}
+			}
+		}
+	}
+	
+	// y-Axis
+#define YPOS(FREQ) ((int32_t) floorf (fft->y_scale_table[std::min ((int32_t)fft_data_size - 1, \
+					(int32_t) floorf ((FREQ) * fft_bufsize / sample_rate))] * (float) height / fft_data_size))
+
+#define YAXISLABEL(FREQ, TXT) do {              \
+	int32_t yy = height - 1 - YPOS(FREQ);       \
+	cr->set_source_rgba (0.9, 0.9, 0.9, 0.7);   \
+	cr->move_to (width / 2 + 16, yy);           \
+	cr->show_text (TXT);                        \
+	cr->set_source_rgba (0.9, 0.9, 0.9, 0.2);   \
+	cr->move_to (0, yy - 0.5);                  \
+	cr->line_to (width - 1, yy - 0.5);          \
+	} while(0)
+
+	
+	cr->set_line_width(1.0);
+	cr->select_font_face("sans", Cairo::FONT_SLANT_NORMAL, Cairo::FONT_WEIGHT_NORMAL);
+	cr->set_font_size(12);
+	
+	if (width >= 60) {
+		if (height >= 450) {
+			YAXISLABEL(100, "100");
+			YAXISLABEL(200, "200");
+			YAXISLABEL(400, "400");
+			YAXISLABEL(600, "600");
+			YAXISLABEL(800, "800");
+			YAXISLABEL(1000, "1k");
+			YAXISLABEL(1500, "1.5k");
+			YAXISLABEL(2000, "2k");
+			YAXISLABEL(2500, "2.5k");
+			YAXISLABEL(3000, "3k");
+			YAXISLABEL(4000, "4k");
+			YAXISLABEL(5000, "5k");
+			YAXISLABEL(6000, "6k");
+			YAXISLABEL(8000, "8k");
+			YAXISLABEL(10000, "10k");
+			YAXISLABEL(12000, "12k");
+			YAXISLABEL(15000, "15k");
+			YAXISLABEL(18000, "18k");
+		} else if (height >= 250) {
+			YAXISLABEL(100, "100");
+			YAXISLABEL(300, "300");
+			YAXISLABEL(500, "500");
+			YAXISLABEL(1000, "1k");
+			YAXISLABEL(2000, "2k");
+			YAXISLABEL(3000, "3k");
+			YAXISLABEL(5000, "5k");
+			YAXISLABEL(8000, "8k");
+			YAXISLABEL(10000, "10k");
+			YAXISLABEL(12000, "12k");
+			YAXISLABEL(15000, "15k");
+			YAXISLABEL(18000, "18k");
+		} else if (height >= 150) {
+			YAXISLABEL(200, "200");
+			YAXISLABEL(500, "500");
+			YAXISLABEL(1000, "1k");
+			YAXISLABEL(3000, "3k");
+			YAXISLABEL(8000, "8k");
+			YAXISLABEL(15000, "15k");
+		}
+	}
+#undef YPOS
+#undef YAXISLABEL
+
+	cr->stroke ();
 }
 
 struct ImageSet {
@@ -963,7 +1103,13 @@ WaveView::process_draw_request (boost::shared_ptr<WaveViewDrawRequest> req)
 	// http://tracker.ardour.org/view.php?id=6478
 	assert (cairo_image);
 
-	if (peaks_read > 0) {
+	if (req->image->props.show_spectrogram) {
+		if (req->fft) {
+			req->fft->mutex.lock();
+			draw_spectrum(region, cairo_image, props, req->fft.get());
+			req->fft->mutex.unlock();
+		}
+	} else if (peaks_read > 0) {
 
 		/* region amplitude will have been used to generate the
 		 * peak values already, but not the visual-only
@@ -1229,6 +1375,17 @@ WaveView::set_logscaled (bool yn)
 	if (_props->logscaled != yn) {
 		begin_visual_change ();
 		_props->logscaled = yn;
+		end_visual_change ();
+	}
+}
+
+void
+WaveView::set_show_spectrogram (bool yn)
+{
+	if (_props->show_spectrogram != yn) {
+		begin_visual_change ();
+		_props->show_spectrogram = yn;
+		reset_cache_group ();
 		end_visual_change ();
 	}
 }

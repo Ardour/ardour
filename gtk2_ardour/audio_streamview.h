@@ -68,6 +68,8 @@ public:
 	void set_selected_points (PointSelection&);
 
 	void reload_waves ();
+	
+	void set_show_spectrogram (bool);
 
 private:
 	void setup_rec_box ();
