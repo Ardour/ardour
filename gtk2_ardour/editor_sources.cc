@@ -321,7 +321,7 @@ EditorSources::set_session (ARDOUR::Session* s)
 	SessionHandlePtr::set_session (s);
 
 	if (s) {
-		ARDOUR::Region::RegionPropertyChanged.connect (source_property_connection, MISSING_INVALIDATOR, boost::bind (&EditorSources::source_changed, this, _1, _2), gui_context ());
+		ARDOUR::Region::RegionsPropertyChanged.connect (source_property_connection, MISSING_INVALIDATOR, boost::bind (&EditorSources::regions_changed, this, _1, _2), gui_context ());
 
 		ARDOUR::RegionFactory::CheckNewRegion.connect (add_source_connection, MISSING_INVALIDATOR, boost::bind (&EditorSources::add_source, this, _1), gui_context());
 
@@ -506,21 +506,25 @@ EditorSources::add_source (boost::shared_ptr<ARDOUR::Region> region)
 }
 
 void
-EditorSources::source_changed (boost::shared_ptr<ARDOUR::Region> region, PBD::PropertyChange const &)
+EditorSources::regions_changed (boost::shared_ptr<ARDOUR::RegionList> rl, PBD::PropertyChange const &)
 {
-	if (!region->whole_file ()) {
-		/*this isn't on our list anyway; we can ignore it*/
-		return;
-	}
+	for (RegionList::const_iterator r = rl->begin (); r != rl->end(); ++r) {
+		boost::shared_ptr<Region> region = *r;
 
-	TreeModel::iterator i;
-	TreeModel::Children rows = _model->children();
+		if (!region->whole_file ()) {
+			/*this isn't on our list anyway; we can ignore it*/
+			return;
+		}
 
-	for (i = rows.begin(); i != rows.end(); ++i) {
-		boost::shared_ptr<ARDOUR::Region> rr = (*i)[_columns.region];
-		if (region == rr) {
-			populate_row(*i, region);
-			break;
+		TreeModel::iterator i;
+		TreeModel::Children rows = _model->children();
+
+		for (i = rows.begin(); i != rows.end(); ++i) {
+			boost::shared_ptr<ARDOUR::Region> rr = (*i)[_columns.region];
+			if (region == rr) {
+				populate_row(*i, region);
+				break;
+			}
 		}
 	}
 }

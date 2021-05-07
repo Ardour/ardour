@@ -82,7 +82,7 @@ STATIC(DiskOverrun, &ARDOUR::DiskWriter::Overrun, 0)
 STATIC(DiskUnderrun, &ARDOUR::DiskReader::Underrun, 0)
 
 // Region static
-STATIC(RegionPropertyChanged, &ARDOUR::Region::RegionPropertyChanged, 2)
+STATIC(RegionsPropertyChanged, &ARDOUR::Region::RegionsPropertyChanged, 2)
 
 // Timers
 STATIC(LuaTimerS,  &LuaInstance::LuaTimerS, 0)

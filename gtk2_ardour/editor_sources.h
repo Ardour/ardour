@@ -92,7 +92,7 @@ private:
 
 	void freeze_tree_model ();
 	void thaw_tree_model ();
-	void source_changed (boost::shared_ptr<ARDOUR::Region>, PBD::PropertyChange const&);
+	void regions_changed (boost::shared_ptr<ARDOUR::RegionList>, PBD::PropertyChange const&);
 	void populate_row (Gtk::TreeModel::Row row, boost::shared_ptr<ARDOUR::Region> region);
 	void selection_changed ();
 

@@ -80,7 +80,7 @@ private:
 	void parameter_changed (std::string const&);
 	void presentation_info_changed (PBD::PropertyChange const&);
 	void gui_extents_changed ();
-	void region_changed (boost::shared_ptr<ARDOUR::Region>, PBD::PropertyChange const&);
+	void regions_changed (boost::shared_ptr<ARDOUR::RegionList>, PBD::PropertyChange const&);
 
 	void start_updating ();
 	void stop_updating ();

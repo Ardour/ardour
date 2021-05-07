@@ -7,11 +7,11 @@ ardour {
 
 function signals ()
 	s = LuaSignal.Set()
-	--s:add ({[LuaSignal.SoloActive] = true, [LuaSignal.RegionPropertyChanged] = true})
+	--s:add ({[LuaSignal.SoloActive] = true, [LuaSignal.RegionsPropertyChanged] = true})
 	s:add (
 		{
 			[LuaSignal.SoloActive] = true,
-			[LuaSignal.RegionPropertyChanged] = true
+			[LuaSignal.RegionsPropertyChanged] = true
 		}
 	)
 	--for k,v in pairs (s:table()) do print (k, v) end
@@ -26,15 +26,17 @@ function factory (params)
 			Session:goto_start()
 		end
 
-		if (signal == LuaSignal.RegionPropertyChanged) then
-			obj,pch = ...
+		if (signal == LuaSignal.RegionsPropertyChanged) then
+			rl,pch = ...
 			file = io.open ("/tmp/test" ,"a")
 			io.output (file)
-			io.write (string.format ("Region: '%s' pos-changed: %s, length-changed: %s\n",
-				obj:name (),
-				tostring (pch:containsSamplePos (ARDOUR.Properties.Start)),
-				tostring (pch:containsSamplePos (ARDOUR.Properties.Length))
-				))
+			for region in rl:iter() do
+				io.write (string.format ("Region: '%s' pos-changed: %s, length-changed: %s\n",
+					region:name (),
+					tostring (pch:containsSamplePos (ARDOUR.Properties.Position)),
+					tostring (pch:containsSamplePos (ARDOUR.Properties.Length))
+					))
+			end
 			io.close (file)
 		end
 	end

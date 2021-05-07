@@ -363,7 +363,7 @@ EditorRegions::set_session (ARDOUR::Session* s)
 {
 	SessionHandlePtr::set_session (s);
 
-	ARDOUR::Region::RegionPropertyChanged.connect (region_property_connection, MISSING_INVALIDATOR, boost::bind (&EditorRegions::region_changed, this, _1, _2), gui_context ());
+	ARDOUR::Region::RegionsPropertyChanged.connect (region_property_connection, MISSING_INVALIDATOR, boost::bind (&EditorRegions::regions_changed, this, _1, _2), gui_context ());
 	ARDOUR::RegionFactory::CheckNewRegion.connect (check_new_region_connection, MISSING_INVALIDATOR, boost::bind (&EditorRegions::add_region, this, _1), gui_context ());
 
 	redisplay ();
@@ -390,7 +390,9 @@ EditorRegions::add_region (boost::shared_ptr<Region> region)
 	}
 
 	PropertyChange pc;
-	region_changed (region, pc);
+	boost::shared_ptr<RegionList> rl (new RegionList);
+	rl->push_back (region);
+	regions_changed (rl, pc);
 }
 
 void
@@ -435,38 +437,42 @@ EditorRegions::remove_unused_regions ()
 }
 
 void
-EditorRegions::region_changed (boost::shared_ptr<Region> r, const PropertyChange& what_changed)
+EditorRegions::regions_changed (boost::shared_ptr<RegionList> rl, const PropertyChange& what_changed)
 {
-	RegionRowMap::iterator map_it = region_row_map.find (r);
+	for (RegionList::const_iterator i = rl->begin (); i != rl->end(); ++i) {
+		boost::shared_ptr<Region> r = *i;
 
-	boost::shared_ptr<ARDOUR::Playlist> pl = r->playlist ();
-	if (!(pl && _session && _session->playlist_is_active (pl))) {
-		/* this region is not on an active playlist
-		 * maybe it got deleted, or whatever */
-		if (map_it != region_row_map.end ()) {
-			Gtk::TreeModel::iterator r = map_it->second;
-			region_row_map.erase (map_it);
-			_model->erase (r);
+		RegionRowMap::iterator map_it = region_row_map.find (r);
+
+		boost::shared_ptr<ARDOUR::Playlist> pl = r->playlist ();
+		if (!(pl && _session && _session->playlist_is_active (pl))) {
+			/* this region is not on an active playlist
+			 * maybe it got deleted, or whatever */
+			if (map_it != region_row_map.end ()) {
+				Gtk::TreeModel::iterator r = map_it->second;
+				region_row_map.erase (map_it);
+				_model->erase (r);
+			}
+			return;
 		}
-		return;
-	}
 
-	if (map_it != region_row_map.end ()) {
-		/* found the region, update its row properties */
-		TreeModel::Row row = *(map_it->second);
-		populate_row (r, row, what_changed);
+		if (map_it != region_row_map.end ()) {
+			/* found the region, update its row properties */
+			TreeModel::Row row = *(map_it->second);
+			populate_row (r, row, what_changed);
 
-	} else {
-		/* new region, add it to the list */
-		TreeModel::iterator iter = _model->append ();
-		TreeModel::Row      row  = *iter;
-		region_row_map.insert (pair<boost::shared_ptr<ARDOUR::Region>, Gtk::TreeModel::iterator> (r, iter));
+		} else {
+			/* new region, add it to the list */
+			TreeModel::iterator iter = _model->append ();
+			TreeModel::Row      row  = *iter;
+			region_row_map.insert (pair<boost::shared_ptr<ARDOUR::Region>, Gtk::TreeModel::iterator> (r, iter));
 
-		/* set the properties that don't change */
-		row[_columns.region] = r;
+			/* set the properties that don't change */
+			row[_columns.region] = r;
 
-		/* now populate the properties that might change... */
-		populate_row (r, row, PropertyChange ());
+			/* now populate the properties that might change... */
+			populate_row (r, row, PropertyChange ());
+		}
 	}
 }
 
