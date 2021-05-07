@@ -101,6 +101,10 @@ public:
 
 	static PBD::Signal2<void,boost::shared_ptr<ARDOUR::Region>, const PBD::PropertyChange&> RegionPropertyChanged;
 
+	static PBD::Signal2<void,boost::shared_ptr<RegionList>, const PBD::PropertyChange&> RegionsPropertyChanged;
+
+	typedef std::map <PBD::PropertyChange, RegionList> ChangeMap;
+
 	virtual ~Region();
 
 	/** Note: changing the name of a Region does not constitute an edit */
@@ -366,6 +370,11 @@ public:
 
 	void drop_sources ();
 
+	/* Allow to collect RegionsPropertyChanged signal emissions */
+	void set_changemap (ChangeMap* changemap) {
+		_changemap = changemap;
+	}
+
 protected:
 	virtual XMLNode& state ();
 
@@ -477,6 +486,8 @@ private:
 	samplepos_t             _last_position;
 	mutable RegionEditState _first_edit;
 	layer_t                 _layer;
+
+	ChangeMap* _changemap;
 
 	void register_properties ();
 

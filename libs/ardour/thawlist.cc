@@ -42,8 +42,16 @@ ThawList::add (boost::shared_ptr<Region> r)
 void
 ThawList::release ()
 {
+	Region::ChangeMap cm;
 	for (RegionList::iterator i = begin (); i != end (); ++i) {
+		(*i)->set_changemap (&cm);
 		(*i)->resume_property_changes ();
+		(*i)->set_changemap (0);
+	}
+	for (Region::ChangeMap::const_iterator i = cm.begin (); i != cm.end (); ++i) {
+		boost::shared_ptr<RegionList> rl (new RegionList (i->second));
+		assert (rl->size () > 0);
+		Region::RegionsPropertyChanged (rl, i->first);
 	}
 	clear ();
 }

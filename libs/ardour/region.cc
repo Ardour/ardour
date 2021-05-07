@@ -87,6 +87,7 @@ namespace ARDOUR {
 }
 
 PBD::Signal2<void,boost::shared_ptr<ARDOUR::Region>,const PropertyChange&> Region::RegionPropertyChanged;
+PBD::Signal2<void,boost::shared_ptr<ARDOUR::RegionList>,const PropertyChange&> Region::RegionsPropertyChanged;
 
 void
 Region::make_property_quarks ()
@@ -262,6 +263,7 @@ Region::Region (Session& s, samplepos_t start, samplecnt_t length, const string&
 	, _last_position (0)
 	, _first_edit (EditChangesNothing)
 	, _layer (0)
+	, _changemap (0)
 {
 	register_properties ();
 
@@ -277,6 +279,7 @@ Region::Region (const SourceList& srcs)
 	, _last_position (0)
 	, _first_edit (EditChangesNothing)
 	, _layer (0)
+	, _changemap (0)
 {
 	register_properties ();
 
@@ -297,6 +300,7 @@ Region::Region (boost::shared_ptr<const Region> other)
 	, _last_position(other->_last_position) \
 	, _first_edit (EditChangesNothing)
 	, _layer (other->_layer)
+	, _changemap (other->_changemap)
 {
 	register_properties ();
 
@@ -359,6 +363,7 @@ Region::Region (boost::shared_ptr<const Region> other, MusicSample offset)
 	, _last_position(other->_last_position) \
 	, _first_edit (EditChangesNothing)
 	, _layer (other->_layer)
+	, _changemap (other->_changemap)
 {
 	register_properties ();
 
@@ -415,6 +420,7 @@ Region::Region (boost::shared_ptr<const Region> other, const SourceList& srcs)
 	, _last_position (other->_last_position)
 	, _first_edit (EditChangesID)
 	, _layer (other->_layer)
+	, _changemap (other->_changemap)
 {
 	register_properties ();
 
@@ -1490,12 +1496,20 @@ Region::send_change (const PropertyChange& what_changed)
 	if (!Stateful::property_changes_suspended()) {
 
 		/* Try and send a shared_pointer unless this is part of the constructor.
-		   If so, do nothing.
-		*/
+		 * If so, do nothing.
+		 */
 
 		try {
 			boost::shared_ptr<Region> rptr = shared_from_this();
-			RegionPropertyChanged (rptr, what_changed);
+			if (_changemap) { 
+				(*_changemap)[what_changed].push_back (rptr);
+			} else {
+				boost::shared_ptr<RegionList> rl (new RegionList);
+				rl->push_back (rptr);
+				RegionsPropertyChanged (rl, what_changed);
+
+				RegionPropertyChanged (rptr, what_changed); // XXX remove me
+			}
 		} catch (...) {
 			/* no shared_ptr available, relax; */
 		}

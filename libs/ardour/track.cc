@@ -662,7 +662,7 @@ Track::find_and_use_playlist (DataType dt, PBD::ID const & id)
 void
 update_region_visibility(boost::shared_ptr<Region> r)
 {
-	Region::RegionPropertyChanged(r, Properties::hidden);
+	Region::RegionPropertyChanged(r, Properties::hidden); // XXX remove me
 }
 
 
@@ -683,9 +683,20 @@ Track::use_playlist (DataType dt, boost::shared_ptr<Playlist> p)
 		_playlists[dt] = p;
 	}
 
-	//allow all regions of prior and new playlists to update their visibility?
-	if (old)  old->foreach_region(update_region_visibility);
-	if (p)    p->foreach_region(update_region_visibility);
+	if (old) {
+		boost::shared_ptr<RegionList> rl (new RegionList (old->region_list_property ().rlist ()));
+		if (rl->size () > 0) {
+			Region::RegionsPropertyChanged (rl, Properties::hidden);
+		}
+		old->foreach_region(update_region_visibility); // XXX remove me
+	}
+	if (p) {
+		boost::shared_ptr<RegionList> rl (new RegionList (p->region_list_property ().rlist ()));
+		if (rl->size () > 0) {
+			Region::RegionsPropertyChanged (rl, Properties::hidden);
+		}
+		p->foreach_region(update_region_visibility); // XXX remove me
+	}
 
 	_session.set_dirty ();
 	PlaylistChanged (); /* EMIT SIGNAL */

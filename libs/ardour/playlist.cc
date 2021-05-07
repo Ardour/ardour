@@ -620,11 +620,16 @@ Playlist::flush_notifications (bool from_undo)
 		crossfade_ranges.push_back ((*r)->range ());
 	}
 
+	boost::shared_ptr<RegionList> rl (new RegionList);
 	for (s = pending_removes.begin (); s != pending_removes.end (); ++s) {
 		crossfade_ranges.push_back ((*s)->range ());
 		remove_dependents (*s);
 		RegionRemoved (boost::weak_ptr<Region> (*s)); /* EMIT SIGNAL */
-		Region::RegionPropertyChanged (*s, Properties::hidden);
+		rl->push_back (*s);
+		Region::RegionPropertyChanged (*s, Properties::hidden); // XXX remove me
+	}
+	if (rl->size () > 0) {
+		Region::RegionsPropertyChanged (rl, Properties::hidden);
 	}
 
 	for (s = pending_adds.begin (); s != pending_adds.end (); ++s) {
