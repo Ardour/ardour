@@ -689,7 +689,7 @@ MIDIControllable::write_feedback (MIDI::byte* buf, int32_t& bufsize, bool /*forc
 		if (bufsize < 13) {
 			return buf;
 		}
-		int rpn_val = (int) lrintf (val * 16384.0);
+		int rpn_val = (int) lrintf (val * 16383.0);
 		if (last_value == rpn_val) {
 			return buf;
 		}
@@ -713,7 +713,7 @@ MIDIControllable::write_feedback (MIDI::byte* buf, int32_t& bufsize, bool /*forc
 	}
 
 	if (control_nrpn >= 0) {
-		int rpn_val = (int) lrintf (val * 16384.0);
+		int rpn_val = (int) lrintf (val * 16383.0);
 		if (last_value == rpn_val) {
 			return buf;
 		}

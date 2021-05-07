@@ -52,7 +52,7 @@ Fader::set_position (float normalized)
 MidiByteArray
 Fader::update_message ()
 {
-	int posi = lrintf (16384.0 * position);
+	int posi = lrintf (16383.0 * position);
 
 	if (posi == last_update_position) {
 		if (posi == llast_update_position) {

@@ -59,7 +59,7 @@ Fader::update_message ()
 		return MidiByteArray();
 	}
 
-	int posi = lrintf (16384.0 * position);
+	int posi = lrintf (16383.0 * position);
 
 	if (posi == last_update_position) {
 		return MidiByteArray();
