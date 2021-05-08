@@ -2049,11 +2049,16 @@ ARDOUR_UI::transport_ffwd_rewind (bool fwd)
 
 		if (fwd) {
 			if (transport_speed < 0.f) {
-				/* we need to move the speed back towards zero */
 				if (fabs (transport_speed) < octave_down) {
+					/* we need to move the speed back towards zero */
 					semitone_ratio = pow (1.0/semitone_ratio, 4.0);
 				} else {
 					semitone_ratio = 1.0/semitone_ratio;
+				}
+			} else {
+				if (fabs (transport_speed) < octave_down) {
+					/* moving very slowly, use 4 semitone steps */
+					semitone_ratio = pow (semitone_ratio, 4.0);
 				}
 			}
 		} else {
@@ -2064,6 +2069,11 @@ ARDOUR_UI::transport_ffwd_rewind (bool fwd)
 					semitone_ratio = pow (1.0/semitone_ratio, 4.0);
 				} else {
 					semitone_ratio = 1.0/semitone_ratio;
+				}
+			} else {
+				if (fabs (transport_speed) < octave_down) {
+					/* moving very slowly, use 4 semitone steps */
+					semitone_ratio = pow (semitone_ratio, 4.0);
 				}
 			}
 		}
