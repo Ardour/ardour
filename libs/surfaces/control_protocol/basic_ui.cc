@@ -192,6 +192,7 @@ BasicUI::button_varispeed (bool fwd)
 	// (keypress auto-repeat is 100ms)
 	const float maxspeed = Config->get_shuttle_max_speed();
 	float semitone_ratio = exp2f (1.0f/12.0f);
+	const float octave_down = pow (1.0/semitone_ratio, 12.0);
 	float transport_speed = get_transport_speed ();
 	float speed;
 
@@ -214,7 +215,7 @@ BasicUI::button_varispeed (bool fwd)
 
 	} else {
 
-		if (transport_speed == 0.0 || fabs (transport_speed) <= 1.0/semitone_ratio) {
+		if (fabs (transport_speed) <= 0.1) {
 
 			/* close to zero, maybe flip direction */
 
@@ -240,15 +241,23 @@ BasicUI::button_varispeed (bool fwd)
 		if (fwd) {
 			if (transport_speed < 0.f) {
 				/* we need to move the speed back towards zero */
-				semitone_ratio = 1.0/semitone_ratio;
+				if (fabs (transport_speed) < octave_down) {
+					semitone_ratio = pow (1.0/semitone_ratio, 4.0);
+				} else {
+					semitone_ratio = 1.0/semitone_ratio;
+				}
 			}
 		} else {
 			if (transport_speed > 0.f) {
 				/* we need to move the speed back towards zero */
-				semitone_ratio = 1.0/semitone_ratio;
+
+				if (transport_speed < octave_down) {
+					semitone_ratio = pow (1.0/semitone_ratio, 4.0);
+				} else {
+					semitone_ratio = 1.0/semitone_ratio;
+				}
 			}
 		}
-
 	}
 
 	speed = semitone_ratio * transport_speed;
