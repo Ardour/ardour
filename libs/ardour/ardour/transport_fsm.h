@@ -216,6 +216,7 @@ struct TransportFSM
 	void set_roll_after (bool) const;
 	bool compute_should_roll (LocateTransportDisposition) const;
 	int  compute_transport_speed () const;
+	void maybe_reset_speed ();
 };
 
 } /* end namespace ARDOUR */

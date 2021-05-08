@@ -427,6 +427,7 @@ TransportFSM::process_event (Event& ev, bool already_deferred, bool& deferred)
 			start_locate_after_declick ();
 			break;
 		case DeclickToStop:
+			maybe_reset_speed ();
 			transition (Stopped);
 			/* transport already stopped */
 			break;
@@ -493,32 +494,31 @@ TransportFSM::stop_playback (Event const & s)
 	_last_locate.target = max_samplepos;
 	current_roll_after_locate_status = boost::none;
 
-	if (!declicking_for_locate()) {
+	api->stop_transport (s.abort_capture, s.clear_state);
+}
 
-		if (Config->get_reset_default_speed_on_stop()) {
+void
+TransportFSM::maybe_reset_speed ()
+{
+	if (Config->get_reset_default_speed_on_stop()) {
 
-			if (most_recently_requested_speed != 1.0) {
-				set_speed (Event (1.0, false));
-			}
+		if (most_recently_requested_speed != 1.0) {
+			set_speed (Event (1.0, false));
+		}
 
-		} else {
+	} else {
 
-			/* We're not resetting back to 1.0, but we may need to handle a
-			 * speed change from whatever we have been rolling at to
-			 * whatever the current default is. We could have been
-			 * rewinding at -4.5 ... when we restart, we need to play at
-			 * the current _default_transport_speed
-			 */
+		/* We're not resetting back to 1.0, but we may need to handle a
+		 * speed change from whatever we have been rolling at to
+		 * whatever the current default is. We could have been
+		 * rewinding at -4.5 ... when we restart, we need to play at
+		 * the current _default_transport_speed
+		 */
 
-
-			if (most_recently_requested_speed != _default_speed) {
-				set_speed (Event (_default_speed, false));
-
-			}
+		if (most_recently_requested_speed != _default_speed) {
+			set_speed (Event (_default_speed, false));
 		}
 	}
-
-	api->stop_transport (s.abort_capture, s.clear_state);
 }
 
 void
