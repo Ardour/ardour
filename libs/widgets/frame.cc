@@ -154,6 +154,10 @@ Frame::on_size_allocate (Allocation& alloc)
 		child_alloc.set_height (alloc.get_height () - pb_t * 2);
 	}
 
+	if (child_alloc.get_width () < 1 || child_alloc.get_height () < 1) {
+		return;
+	}
+
 	if (_w) {
 		_w->size_allocate (child_alloc);
 	}
