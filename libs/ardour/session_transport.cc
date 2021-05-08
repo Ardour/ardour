@@ -1397,9 +1397,10 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 				 * auto-return enabled
 				 */
 
-				_transport_sample = _last_roll_location;
-				do_locate = true;
-
+				if (_last_roll_location >= 0) {
+					_transport_sample = _last_roll_location;
+					do_locate = true;
+				}
 			}
 		}
 
