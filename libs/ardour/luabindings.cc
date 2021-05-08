@@ -294,6 +294,8 @@ CLASSKEYS(boost::weak_ptr<ARDOUR::Bundle>);
 CLASSKEYS(boost::weak_ptr<ARDOUR::Route>);
 CLASSKEYS(boost::weak_ptr<ARDOUR::VCA>);
 
+CLASSKEYS(boost::shared_ptr<ARDOUR::RegionList>);
+
 CLASSKEYS(Vamp::RealTime);
 CLASSKEYS(Vamp::PluginBase);
 CLASSKEYS(Vamp::PluginBase::ParameterDescriptor);
