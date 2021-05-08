@@ -227,7 +227,7 @@ void
 TransportFSM::bad_transition (Event const & ev)
 {
 	error << "bad transition, current state = " << current_state() << " event = " << enum_2_string (ev.type) << endmsg;
-	PBD::stacktrace (std::cerr, 30);
+	std::cerr << "bad transition, current state = " << current_state() << " event = " << enum_2_string (ev.type) << std::endl;
 }
 
 bool
