@@ -2023,7 +2023,7 @@ ARDOUR_UI::transport_ffwd_rewind (bool fwd)
 
 	} else {
 
-		if (transport_speed == 0.0 || fabs (transport_speed) <= 1.0/semitone_ratio) {
+		if (fabs (transport_speed) <= 0.1) {
 
 			/* close to zero, maybe flip direction */
 
