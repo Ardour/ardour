@@ -307,9 +307,8 @@ Session::process_export_fw (pframes_t nframes)
 
 		TFSM_SPEED (1.0, false);
 		TFSM_ROLL ();
-		butler_transport_work (true);
-		g_atomic_int_set (&_butler->should_do_transport_work, 0);
-		butler_completed_transport_work ();
+		_butler->schedule_transport_work ();
+
 		/* Session::process_with_events () sets _remaining_latency_preroll = 0
 		 * when being called with _transport_fsm->transport_speed() == 0.
 		 *
@@ -321,6 +320,16 @@ Session::process_export_fw (pframes_t nframes)
 		}
 
 		return;
+	}
+
+	/* wait for butler to complete schedule_transport_work(),
+	 * compare to Session::process */
+	if (non_realtime_work_pending ()) {
+		if (_butler->transport_work_requested ()) {
+			/* butler is still processing */
+			return;
+		}
+		butler_completed_transport_work ();
 	}
 
 	if (_remaining_latency_preroll > 0) {
