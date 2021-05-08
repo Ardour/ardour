@@ -427,9 +427,10 @@ TransportFSM::process_event (Event& ev, bool already_deferred, bool& deferred)
 			start_locate_after_declick ();
 			break;
 		case DeclickToStop:
-			maybe_reset_speed ();
-			transition (Stopped);
-			/* transport already stopped */
+			if (!maybe_reset_speed ()) {
+				transition (Stopped);
+				/* transport already stopped */
+			}
 			break;
 		default:
 			bad_transition (ev); return false;
@@ -497,13 +498,15 @@ TransportFSM::stop_playback (Event const & s)
 	api->stop_transport (s.abort_capture, s.clear_state);
 }
 
-void
+bool
 TransportFSM::maybe_reset_speed ()
 {
+	bool state_changed = false;
+
 	if (Config->get_reset_default_speed_on_stop()) {
 
 		if (most_recently_requested_speed != 1.0) {
-			set_speed (Event (1.0, false));
+			state_changed = set_speed (Event (1.0, false));
 		}
 
 	} else {
@@ -516,9 +519,11 @@ TransportFSM::maybe_reset_speed ()
 		 */
 
 		if (most_recently_requested_speed != _default_speed) {
-			set_speed (Event (_default_speed, false));
+			state_changed = set_speed (Event (_default_speed, false));
 		}
 	}
+
+	return state_changed;
 }
 
 void
@@ -753,7 +758,7 @@ TransportFSM::compute_transport_speed () const
 	return 1;
 }
 
-void
+bool
 TransportFSM::set_speed (Event const & ev)
 {
 	assert (ev.speed != 0.0);
@@ -818,7 +823,11 @@ TransportFSM::set_speed (Event const & ev)
 			transition (WaitingForLocate);
 			start_locate_while_stopped (lev);
 		}
+
+		return true;
 	}
+
+	return false;
 }
 
 bool

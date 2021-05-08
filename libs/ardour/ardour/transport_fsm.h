@@ -168,7 +168,7 @@ struct TransportFSM
 	void start_locate_while_stopped (Event const &) const;
 	void interrupt_locate (Event const &) const;
 	void start_declick_for_locate (Event const &);
-	void set_speed (Event const &);
+	bool set_speed (Event const &);
 
 	/* guards */
 
@@ -216,7 +216,7 @@ struct TransportFSM
 	void set_roll_after (bool) const;
 	bool compute_should_roll (LocateTransportDisposition) const;
 	int  compute_transport_speed () const;
-	void maybe_reset_speed ();
+	bool  maybe_reset_speed ();
 };
 
 } /* end namespace ARDOUR */
