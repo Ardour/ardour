@@ -288,7 +288,9 @@ CC121GUI::CC121GUI (CC121& p)
 
 	/* catch future changes to connection state */
 
-	fp.ConnectionChange.connect (connection_change_connection, invalidator (*this), boost::bind (&CC121GUI::connection_handler, this), gui_context());
+	ARDOUR::AudioEngine::instance()->PortRegisteredOrUnregistered.connect (_port_connections, invalidator (*this), boost::bind (&CC121GUI::connection_handler, this), gui_context());
+	ARDOUR::AudioEngine::instance()->PortPrettyNameChanged.connect (_port_connections, invalidator (*this), boost::bind (&CC121GUI::connection_handler, this), gui_context());
+	fp.ConnectionChange.connect (_port_connections, invalidator (*this), boost::bind (&CC121GUI::connection_handler, this), gui_context());
 }
 
 CC121GUI::~CC121GUI ()

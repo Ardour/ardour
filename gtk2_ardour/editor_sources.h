@@ -70,6 +70,7 @@ private:
 			add (color_);
 			add (region);
 			add (natural_s);
+			add (captd_xruns);
 		}
 
 		Gtk::TreeModelColumn<std::string> name;
@@ -82,6 +83,7 @@ private:
 		Gtk::TreeModelColumn<std::string> path;
 		Gtk::TreeModelColumn<std::string> take_id;
 		Gtk::TreeModelColumn<samplepos_t> natural_s;
+		Gtk::TreeModelColumn<size_t> captd_xruns;
 	};
 
 	Columns _columns;
@@ -90,11 +92,14 @@ private:
 
 	void freeze_tree_model ();
 	void thaw_tree_model ();
-	void source_changed (boost::shared_ptr<ARDOUR::Region>, PBD::PropertyChange const&);
+	void regions_changed (boost::shared_ptr<ARDOUR::RegionList>, PBD::PropertyChange const&);
 	void populate_row (Gtk::TreeModel::Row row, boost::shared_ptr<ARDOUR::Region> region);
 	void selection_changed ();
 
 	sigc::connection _change_connection;
+
+	int           _sort_col_id;
+	Gtk::SortType _sort_type;
 
 	Gtk::Widget* old_focus;
 

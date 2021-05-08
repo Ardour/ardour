@@ -61,6 +61,7 @@
 #include "actions.h"
 #include "main_clock.h"
 #include "mixer_ui.h"
+#include "recorder_ui.h"
 #include "utils.h"
 #include "time_info_box.h"
 #include "midi_tracer.h"
@@ -86,11 +87,10 @@ ARDOUR_UI::setup_tooltips ()
 
 	set_tip (auto_return_button, _("Return to last playback start when stopped"));
 	set_tip (follow_edits_button, _("Playhead follows Range tool clicks, and Range selections"));
-	set_tip (auto_input_button, _("Track Input Monitoring automatically follows transport state"));
 	parameter_changed("click-gain");
 	set_tip (solo_alert_button, _("When active, something is soloed.\nClick to de-solo everything"));
 	set_tip (auditioning_alert_button, _("When active, auditioning is taking place.\nClick to stop the audition"));
-	set_tip (feedback_alert_button, _("When active, there is a feedback loop."));
+	set_tip (feedback_alert_button, _("When lit, there is a ports connection issue, leading to feedback loop or ambiguous alignment.\nThis is caused by connecting an output back to some input (feedback), or by multiple connections from a source to the same output via different paths (ambiguous latency, record alignment)."));
 	set_tip (primary_clock, _("<b>Primary Clock</b> right-click to set display mode. Click to edit, click+drag a digit or mouse-over+scroll wheel to modify.\nText edits: right-to-left overwrite <tt>Esc</tt>: cancel; <tt>Enter</tt>: confirm; postfix the edit with '+' or '-' to enter delta times.\n"));
 	set_tip (secondary_clock, _("<b>Secondary Clock</b> right-click to set display mode. Click to edit, click+drag a digit or mouse-over+scroll wheel to modify.\nText edits: right-to-left overwrite <tt>Esc</tt>: cancel; <tt>Enter</tt>: confirm; postfix the edit with '+' or '-' to enter delta times.\n"));
 	set_tip (editor_meter_peak_display, _("Reset All Peak Meters"));
@@ -206,19 +206,6 @@ ARDOUR_UI::repack_transport_hbox ()
 		}
 	}
 
-	bool show_mon = UIConfiguration::instance().get_show_toolbar_monitoring ();
-	if (show_mon) {
-		monitor_in_button.show ();
-		monitor_disk_button.show ();
-		auto_input_button.show ();
-		monitoring_spacer.show ();
-	} else {
-		monitor_in_button.hide ();
-		monitor_disk_button.hide ();
-		auto_input_button.hide ();
-		monitoring_spacer.hide ();
-	}
-
 	bool show_rec = UIConfiguration::instance().get_show_toolbar_recpunch ();
 	if (show_rec) {
 		punch_label.show ();
@@ -314,23 +301,17 @@ ARDOUR_UI::setup_transport ()
 	editor_visibility_button.set_related_action (ActionManager::get_action (X_("Common"), X_("change-editor-visibility")));
 	mixer_visibility_button.set_related_action (ActionManager::get_action (X_("Common"), X_("change-mixer-visibility")));
 	prefs_visibility_button.set_related_action (ActionManager::get_action (X_("Common"), X_("change-preferences-visibility")));
+	recorder_visibility_button.set_related_action (ActionManager::get_action (X_("Common"), X_("change-recorder-visibility")));
 
 	act = ActionManager::get_action ("Transport", "ToggleAutoReturn");
 	auto_return_button.set_related_action (act);
 	act = ActionManager::get_action (X_("Transport"), X_("ToggleFollowEdits"));
 	follow_edits_button.set_related_action (act);
-	act = ActionManager::get_action ("Transport", "ToggleAutoInput");
-	auto_input_button.set_related_action (act);
 
 	act = ActionManager::get_action ("Transport", "TogglePunchIn");
 	punch_in_button.set_related_action (act);
 	act = ActionManager::get_action ("Transport", "TogglePunchOut");
 	punch_out_button.set_related_action (act);
-
-	act = ActionManager::get_action ("Transport", "SessionMonitorIn");
-	monitor_in_button.set_related_action (act);
-	act = ActionManager::get_action ("Transport", "SessionMonitorDisk");
-	monitor_disk_button.set_related_action (act);
 
 	act = ActionManager::get_action (X_("Monitor Section"), X_("monitor-dim-all"));
 	monitor_dim_button.set_related_action (act);
@@ -356,12 +337,14 @@ ARDOUR_UI::setup_transport ()
 	editor_visibility_button.signal_drag_failed().connect (sigc::bind (sigc::ptr_fun (drag_failed), editor));
 	mixer_visibility_button.signal_drag_failed().connect (sigc::bind (sigc::ptr_fun (drag_failed), mixer));
 	prefs_visibility_button.signal_drag_failed().connect (sigc::bind (sigc::ptr_fun (drag_failed), rc_option_editor));
+	recorder_visibility_button.signal_drag_failed().connect (sigc::bind (sigc::ptr_fun (drag_failed), recorder));
 
 	/* catch context clicks so that we can show a menu on these buttons */
 
 	editor_visibility_button.signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::tabbable_visibility_button_press), X_("editor")), false);
 	mixer_visibility_button.signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::tabbable_visibility_button_press), X_("mixer")), false);
 	prefs_visibility_button.signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::tabbable_visibility_button_press), X_("preferences")), false);
+	recorder_visibility_button.signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::tabbable_visibility_button_press), X_("recorder")), false);
 
 	/* setup widget style/name */
 
@@ -381,17 +364,16 @@ ARDOUR_UI::setup_transport ()
 	auditioning_alert_button.set_layout_font (UIConfiguration::instance().get_SmallerFont());
 	feedback_alert_button.set_layout_font (UIConfiguration::instance().get_SmallerFont());
 
+	feedback_alert_button.set_sizing_text (_("Facdbeek")); //< longest of "Feedback" and "No Align"
+
 	editor_visibility_button.set_name (X_("page switch button"));
 	mixer_visibility_button.set_name (X_("page switch button"));
 	prefs_visibility_button.set_name (X_("page switch button"));
+	recorder_visibility_button.set_name (X_("page switch button"));
 
 	punch_in_button.set_name ("punch button");
 	punch_out_button.set_name ("punch button");
 	layered_button.set_name (("layered button"));
-
-	monitor_in_button.set_name ("monitor button");
-	monitor_disk_button.set_name ("monitor button");
-	auto_input_button.set_name ("transport option button");
 
 	latency_disable_button.set_name ("latency button");
 
@@ -415,10 +397,6 @@ ARDOUR_UI::setup_transport ()
 	punch_in_button.set_text (_("In"));
 	punch_out_button.set_text (_("Out"));
 	layered_button.set_text (_("Non-Layered"));
-
-	monitor_in_button.set_text (_("All In"));
-	monitor_disk_button.set_text (_("All Disk"));
-	auto_input_button.set_text (_("Auto-Input"));
 
 	latency_disable_button.set_text (_("Disable PDC"));
 	io_latency_label.set_text (_("I/O Latency:"));
@@ -444,11 +422,12 @@ ARDOUR_UI::setup_transport ()
 	                                    string_compose (_("Drag this tab to the desktop to show %1 in its own window\n\n"
 	                                                      "To re-attach the window, use the Window > %1 > Attach menu action"), rc_option_editor->name()));
 
+	Gtkmm2ext::UI::instance()->set_tip (recorder_visibility_button,
+	                                    string_compose (_("Drag this tab to the desktop to show %1 in its own window\n\n"
+	                                                      "To re-attach the window, use the Window > %1 > Attach menu action"), recorder->name()));
+
 	Gtkmm2ext::UI::instance()->set_tip (punch_in_button, _("Start recording at auto-punch start"));
 	Gtkmm2ext::UI::instance()->set_tip (punch_out_button, _("Stop recording at auto-punch end"));
-
-	Gtkmm2ext::UI::instance()->set_tip (monitor_in_button, _("Force all tracks to monitor Input, unless they are explicitly set to monitor Disk"));
-	Gtkmm2ext::UI::instance()->set_tip (monitor_disk_button, _("Force all tracks to monitor Disk playback, unless they are explicitly set to Input"));
 
 	/* monitor section */
 	Gtkmm2ext::UI::instance()->set_tip (monitor_dim_button, _("Monitor section dim output"));
@@ -460,10 +439,6 @@ ARDOUR_UI::setup_transport ()
 	Glib::RefPtr<SizeGroup> punch_button_size_group = SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL);
 	punch_button_size_group->add_widget (punch_in_button);
 	punch_button_size_group->add_widget (punch_out_button);
-
-	Glib::RefPtr<SizeGroup> monitoring_button_size_group = SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL);
-	monitoring_button_size_group->add_widget (monitor_in_button);
-	monitoring_button_size_group->add_widget (monitor_disk_button);
 
 	Glib::RefPtr<SizeGroup> monitor_button_size_group = SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL);
 	monitor_button_size_group->add_widget (monitor_dim_button);
@@ -523,18 +498,15 @@ ARDOUR_UI::setup_transport ()
 	button_height_size_group->add_widget (auto_return_button);
 
 	//tab selections
+	button_height_size_group->add_widget (recorder_visibility_button);
 	button_height_size_group->add_widget (editor_visibility_button);
 	button_height_size_group->add_widget (mixer_visibility_button);
+	button_height_size_group->add_widget (prefs_visibility_button);
 
 	//punch section
 	button_height_size_group->add_widget (punch_in_button);
 	button_height_size_group->add_widget (punch_out_button);
 	button_height_size_group->add_widget (layered_button);
-
-	//input monitoring section
-	button_height_size_group->add_widget (monitor_in_button);
-	button_height_size_group->add_widget (monitor_disk_button);
-	button_height_size_group->add_widget (auto_input_button);
 
 	// PDC
 	button_height_size_group->add_widget (latency_disable_button);
@@ -584,16 +556,6 @@ ARDOUR_UI::setup_transport ()
 
 	transport_table.attach (recpunch_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 	++col;
-
-	transport_table.attach (auto_input_button,   col,     col + 3, 0, 1 , FILL, SHRINK, hpadding, vpadding);
-	transport_table.attach (monitor_in_button,   col,     col + 1, 1, 2 , FILL, SHRINK, hpadding, vpadding);
-	transport_table.attach (mon_space,           col + 1, col + 2, 1, 2 , FILL, SHRINK, 2, vpadding);
-	transport_table.attach (monitor_disk_button, col + 2, col + 3, 1, 2 , FILL, SHRINK, hpadding, vpadding);
-	col += 3;
-
-	transport_table.attach (monitoring_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
-	++col;
-
 
 	transport_table.attach (latency_disable_button, TCOL, 0, 1 , FILL, SHRINK, hpadding, vpadding);
 	transport_table.attach (io_latency_label, TCOL, 1, 2 , SHRINK, EXPAND|FILL, hpadding, 0);
@@ -659,8 +621,13 @@ ARDOUR_UI::setup_transport ()
 	}
 	col += MAX_LUA_ACTION_BUTTONS / 2;
 
-	transport_table.attach (editor_visibility_button, TCOL, 0, 1 , FILL, SHRINK, hpadding, vpadding);
-	transport_table.attach (mixer_visibility_button,  TCOL, 1, 2 , FILL, SHRINK, hpadding, vpadding);
+	transport_table.attach (scripts_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
+	++col;
+
+	transport_table.attach (recorder_visibility_button, TCOL,         0, 1 , FILL, SHRINK, hpadding, vpadding);
+	transport_table.attach (mixer_visibility_button,    col, col + 2, 1, 2 , FILL, SHRINK, hpadding, vpadding);
+	++col;
+	transport_table.attach (editor_visibility_button,   TCOL,         0, 1 , FILL, SHRINK, hpadding, vpadding);
 	++col;
 
 	/* initialize */
@@ -713,8 +680,10 @@ ARDOUR_UI::session_latency_updated (bool for_playback)
 		route_latency_value.set_text (samples_as_time_string (wrl, rate));
 
 		if (_session->engine().check_for_ambiguous_latency (true)) {
+			_ambiguous_latency = true;
 			io_latency_value.set_markup ("<span background=\"red\" foreground=\"white\">ambiguous</span>");
 		} else {
+			_ambiguous_latency = false;
 			io_latency_value.set_text (samples_as_time_string (wpl, rate));
 		}
 	}
@@ -844,12 +813,22 @@ ARDOUR_UI::feedback_blink (bool onoff)
 {
 	if (_feedback_exists) {
 		feedback_alert_button.set_active (true);
+		feedback_alert_button.set_text (_("Feedback"));
+		if (onoff) {
+			feedback_alert_button.reset_fixed_colors ();
+		} else {
+			feedback_alert_button.set_active_color (UIConfigurationBase::instance().color ("feedback alert: alt active", NULL));
+		}
+	} else if (_ambiguous_latency && !UIConfiguration::instance().get_show_toolbar_latency ()) {
+		feedback_alert_button.set_text (_("No Align"));
+		feedback_alert_button.set_active (true);
 		if (onoff) {
 			feedback_alert_button.reset_fixed_colors ();
 		} else {
 			feedback_alert_button.set_active_color (UIConfigurationBase::instance().color ("feedback alert: alt active", NULL));
 		}
 	} else {
+		feedback_alert_button.set_text ("Feedback");
 		feedback_alert_button.reset_fixed_colors ();
 		feedback_alert_button.set_active (false);
 	}
@@ -931,7 +910,7 @@ ARDOUR_UI::show_mixer_prefs ()
 {
 	if (rc_option_editor) {
 		show_tabbable (rc_option_editor);
-		rc_option_editor->set_current_page (_("Mixer"));
+		rc_option_editor->set_current_page (_("Signal Flow"));
 	}
 }
 
@@ -956,8 +935,8 @@ ARDOUR_UI::sync_button_clicked (GdkEventButton* ev)
 		return false;
 	}
 
-	show_tabbable (rc_option_editor);
-	rc_option_editor->set_current_page (_("Transport"));
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action ("Window", "toggle-transport-masters");
+	tact->set_active();
 	return true;
 }
 

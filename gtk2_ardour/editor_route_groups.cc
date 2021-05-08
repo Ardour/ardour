@@ -62,12 +62,6 @@ using namespace PBD;
 using namespace Gtk;
 using Gtkmm2ext::Keyboard;
 
-struct ColumnInfo {
-	int         index;
-	const char* label;
-	const char* tooltip;
-};
-
 EditorRouteGroups::EditorRouteGroups (Editor* e)
 	: EditorComponent (e)
 	, _in_row_change (false)
@@ -98,7 +92,12 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 	TreeViewColumn* col;
 	Gtk::Label* l;
 
-	ColumnInfo ci[] = {
+	struct ColumnInfo {
+		int         index;
+		const char* label;
+		const char* tooltip;
+	} ci[] = {
+	/* clang-format off */
 		{ 0,   _("Col"),            _("Group Tab Color") },
 		{ 1,   _("Name"),           _("Name of Group") },
 		{ 2,  S_("Visible|V"),      _("Group is visible?") },
@@ -113,7 +112,7 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 		{ 11, S_("Active|A"),       _("Sharing Active Status?") },
 		{ -1, 0, 0 }
 	};
-
+	/* clang-format on */
 
 	for (int i = 0; ci[i].index >= 0; ++i) {
 		col = _display.get_column (ci[i].index);

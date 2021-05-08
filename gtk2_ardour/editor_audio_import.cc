@@ -314,6 +314,33 @@ Editor::import_smf_tempo_map (Evoral::SMF const & smf, samplepos_t pos)
 }
 
 void
+Editor::import_smf_markers (Evoral::SMF & smf, samplepos_t pos)
+{
+	if (!_session) {
+		return;
+	}
+
+	smf.load_markers ();
+
+	Evoral::SMF::Markers const & markers = smf.markers();
+
+	if (markers.empty()) {
+		return;
+	}
+
+	/* XXX in nutempo2 just add location using Beats */
+
+	for (Evoral::SMF::Markers::const_iterator m = markers.begin(); m != markers.end(); ++m) {
+		// Temporal::Beats beat_pos (m->time_pulses / (double) smf.ppqn() / 4.0);
+		double beat = m->time_pulses / (double) smf.ppqn() / 4.0;
+		samplepos_t samplepos = pos + _session->tempo_map().sample_at_beat (beat);
+		Location* loc = new Location (*_session, samplepos, samplepos_t (0), m->text, Location::IsMark, 0);
+		_session->locations()->add (loc);
+	}
+
+}
+
+void
 Editor::do_import (vector<string>          paths,
                    ImportDisposition       disposition,
                    ImportMode              mode,
@@ -321,28 +348,50 @@ Editor::do_import (vector<string>          paths,
                    MidiTrackNameSource     midi_track_name_source,
                    MidiTempoMapDisposition smf_tempo_disposition,
                    samplepos_t&            pos,
-                   ARDOUR::PluginInfoPtr   instrument)
+                   ARDOUR::PluginInfoPtr   instrument,
+                   bool                    with_markers)
 {
 	boost::shared_ptr<Track> track;
 	vector<string> to_import;
 	int nth = 0;
 	bool use_timestamp = (pos == -1);
 
-	if (smf_tempo_disposition == SMFTempoUse) {
-		/* Find the first MIDI file with a tempo map, and import it
-		   before we do anything else.
-		*/
+	/* XXX nutempo2: we will import markers using music (beat) time, which
+	   will make any imported tempo map irrelevant. Not doing that (in 6.7,
+	   before nutempo2) is much more complicated because we don't know
+	   which file may have the tempo map, and if we're importing that
+	   it will change the marker positions. So for now, there's an implicit
+	   limitation that if you import more than 1 MIDI file and the first
+	   has markers but the second has the tempo map, the markers could be
+	   in the wrong position.
+	*/
+
+	if (with_markers || (smf_tempo_disposition == SMFTempoUse)) {
+
+		bool tempo_map_done = false;
 
 		for (vector<string>::iterator a = paths.begin(); a != paths.end(); ++a) {
+
 			Evoral::SMF smf;
+
 			if (smf.open (*a)) {
 				continue;
 			}
-			if (smf.num_tempos() > 0) {
-				import_smf_tempo_map (smf, pos);
-				smf.close ();
-				break;
+
+			/* Find the first MIDI file with a tempo map, and import it
+			   before we do anything else.
+			*/
+			if (!tempo_map_done && smf_tempo_disposition == SMFTempoUse) {
+				if (smf.num_tempos() > 0) {
+					import_smf_tempo_map (smf, pos);
+				}
 			}
+
+			if (with_markers) {
+
+				import_smf_markers (smf, pos);
+			}
+
 			smf.close ();
 		}
 	}

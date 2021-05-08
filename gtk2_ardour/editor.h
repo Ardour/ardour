@@ -311,7 +311,9 @@ public:
 	void export_region ();
 
 	/* export for analysis only */
-	void measure_master_loudness (bool);
+	void loudness_assistant (bool);
+	void loudness_assistant_marker ();
+	void measure_master_loudness (samplepos_t start, samplepos_t end, bool);
 
 	bool process_midi_export_dialog (MidiExportDialog& dialog, boost::shared_ptr<ARDOUR::MidiRegion> midi_region);
 
@@ -332,9 +334,9 @@ public:
 	PlaylistSelector& playlist_selector() const;
 	void clear_playlist (boost::shared_ptr<ARDOUR::Playlist>);
 
-	void new_playlists (TimeAxisView* v);
-	void copy_playlists (TimeAxisView* v);
-	void clear_playlists (TimeAxisView* v);
+	void new_playlists (RouteUI* v);
+	void copy_playlists (RouteUI* v);
+	void clear_playlists (RouteUI* v);
 
 	void get_onscreen_tracks (TrackViewList&);
 
@@ -385,6 +387,9 @@ public:
 
 	/* returns the left-most and right-most time that the gui should allow the user to scroll to */
 	std::pair <samplepos_t,samplepos_t> session_gui_extents (bool use_extra = true) const;
+
+	/* RTAV Automation display option */
+	bool show_touched_automation () const;
 
 	/* fades */
 
@@ -457,7 +462,9 @@ public:
 	                ARDOUR::MidiTrackNameSource           mts,
 	                ARDOUR::MidiTempoMapDisposition       mtd,
 	                samplepos_t&                          pos,
-	                boost::shared_ptr<ARDOUR::PluginInfo> instrument = boost::shared_ptr<ARDOUR::PluginInfo>());
+	                boost::shared_ptr<ARDOUR::PluginInfo> instrument = boost::shared_ptr<ARDOUR::PluginInfo>(),
+	                bool with_markers = false
+		);
 
 	void do_embed (std::vector<std::string>              paths,
 	               Editing::ImportDisposition            disposition,
@@ -763,14 +770,14 @@ private:
 	RegionView* regionview_from_region (boost::shared_ptr<ARDOUR::Region>) const;
 	RouteTimeAxisView* rtav_from_route (boost::shared_ptr<ARDOUR::Route>) const;
 
-	void mapover_tracks (sigc::slot<void,RouteTimeAxisView&,uint32_t> sl, TimeAxisView*, PBD::PropertyID) const;
-	void mapover_tracks_with_unique_playlists (sigc::slot<void,RouteTimeAxisView&,uint32_t> sl, TimeAxisView*, PBD::PropertyID) const;
 
-	/* functions to be passed to mapover_tracks(), possibly with sigc::bind()-supplied arguments */
+	void mapover_tracks_with_unique_playlists (sigc::slot<void,RouteTimeAxisView&,uint32_t> sl, TimeAxisView*, PBD::PropertyID) const;
 	void mapped_get_equivalent_regions (RouteTimeAxisView&, uint32_t, RegionView*, std::vector<RegionView*>*) const;
-	void mapped_use_new_playlist (RouteTimeAxisView&, uint32_t, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
-	void mapped_use_copy_playlist (RouteTimeAxisView&, uint32_t, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
-	void mapped_clear_playlist (RouteTimeAxisView&, uint32_t);
+
+	void mapover_routes (sigc::slot<void, RouteUI&, uint32_t> sl, RouteUI*, PBD::PropertyID) const;
+	void mapped_use_new_playlist (RouteUI&, uint32_t, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
+	void mapped_use_copy_playlist (RouteUI&, uint32_t, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
+	void mapped_clear_playlist (RouteUI&, uint32_t);
 
 	void button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type);
 	bool button_release_can_deselect;
@@ -969,7 +976,9 @@ private:
 		bbt_show_quarters,
 		bbt_show_eighths,
 		bbt_show_sixteenths,
-		bbt_show_thirtyseconds
+		bbt_show_thirtyseconds,
+		bbt_show_sixtyfourths,
+		bbt_show_onetwentyeighths
 	};
 
 	BBTRulerScale bbt_ruler_scale;
@@ -977,7 +986,6 @@ private:
 	uint32_t bbt_bars;
 	gint bbt_nmarks;
 	uint32_t bbt_bar_helper_on;
-	uint32_t bbt_accent_modulo;
 	void compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper);
 
 	ArdourCanvas::Ruler* timecode_ruler;
@@ -1102,7 +1110,7 @@ private:
 
 	bool track_canvas_map_handler (GdkEventAny*);
 
-	bool edit_controls_button_release (GdkEventButton*);
+	bool edit_controls_button_event (GdkEventButton*);
 	Gtk::Menu* edit_controls_left_menu;
 	Gtk::Menu* edit_controls_right_menu;
 
@@ -1454,6 +1462,7 @@ private:
 	void import_audio (bool as_tracks);
 	void do_import (std::vector<std::string> paths, bool split, bool as_tracks);
 	void import_smf_tempo_map (Evoral::SMF const &, samplepos_t pos);
+	void import_smf_markers (Evoral::SMF &, samplepos_t pos);
 	void move_to_start ();
 	void move_to_end ();
 	void center_playhead ();
@@ -1467,6 +1476,7 @@ private:
 	void scroll_tracks_up ();
 	void set_mark ();
 	void clear_markers ();
+	void clear_xrun_markers ();
 	void clear_ranges ();
 	void clear_locations ();
 	void unhide_markers ();
@@ -1767,8 +1777,6 @@ private:
 	void tempometric_position_changed (const PBD::PropertyChange&);
 
 	void redisplay_grid (bool immediate_redraw);
-
-	uint32_t bbt_beat_subdivision;
 
 	/* toolbar */
 
@@ -2308,6 +2316,11 @@ private:
 
 	void follow_mixer_selection ();
 	bool _following_mixer_selection;
+
+	/* RTAV Automation display option */
+	void toggle_show_touched_automation ();
+	void set_show_touched_automation (bool);
+	bool _show_touched_automation;
 
 	int time_fx (ARDOUR::RegionList&, float val, bool pitching);
 	void note_edit_done (int, EditNoteDialog*);

@@ -23,6 +23,7 @@
 #include <boost/function.hpp>
 
 #include "pbd/semutils.h"
+#include "pbd/g_atomic_compat.h"
 
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
@@ -44,7 +45,7 @@ public:
 	void process (TaskList const&);
 
 private:
-	gint _threads_active;
+	GATOMIC_QUAL gint      _threads_active;
 	std::vector<pthread_t> _threads;
 
 	void reset_thread_list ();

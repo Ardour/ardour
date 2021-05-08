@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ExportFormatSpecification name="YouTube and Deezer" id="b165e4bb-a516-4bd8-894a-31dd60b96fe1" with-cue="0" with-toc="0" with-mp4chaps="0" command="" analyse="1" soundcloud-upload="0">
+  <Encoding id="F_WAV" type="T_Sndfile" extension="wav" name="WAV" has-sample-format="1" channel-limit="256"/>
+  <SampleRate rate="SR_48"/>
+  <SRCQuality quality="SRC_SincBest"/>
+  <Watermark level="-20" duration="0" interval="0"/>
+  <EncodingOptions>
+    <Option name="sample-format" value="SF_16"/>
+    <Option name="dithering" value="D_Tri"/>
+    <Option name="tag-metadata" value="1"/>
+    <Option name="tag-support" value="1"/>
+    <Option name="broadcast-info" value="0"/>
+  </EncodingOptions>
+  <Processing>
+    <Normalize enabled="1" loudness="1" use-tp-limiter="1" dbfs="0" lufs="-14" dbtp="-1"/>
+    <Silence>
+      <Start>
+        <Trim enabled="0"/>
+        <Add enabled="0">
+          <Duration format="Timecode" hours="0" minutes="0" seconds="0" frames="0"/>
+        </Add>
+      </Start>
+      <End>
+        <Trim enabled="0"/>
+        <Add enabled="0">
+          <Duration format="Timecode" hours="0" minutes="0" seconds="0" frames="0"/>
+        </Add>
+      </End>
+    </Silence>
+  </Processing>
+</ExportFormatSpecification>

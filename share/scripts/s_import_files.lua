@@ -9,6 +9,6 @@ function factory (params) return function ()
 	Editor:do_import (files,
 		Editing.ImportDistinctFiles, Editing.ImportAsTrack, ARDOUR.SrcQuality.SrcBest,
 		ARDOUR.MidiTrackNameSource.SMFTrackName, ARDOUR.MidiTempoMapDisposition.SMFTempoIgnore,
-		pos, ARDOUR.PluginInfo())
+		pos, ARDOUR.PluginInfo(), false)
 
 end end

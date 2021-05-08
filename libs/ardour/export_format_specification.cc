@@ -150,6 +150,7 @@ ExportFormatSpecification::ExportFormatSpecification (Session & s)
 
 	, _normalize (false)
 	, _normalize_loudness (false)
+	, _use_tp_limiter (true)
 	, _normalize_dbfs (GAIN_COEFF_UNITY)
 	, _normalize_lufs (-23)
 	, _normalize_dbtp (-1)
@@ -189,6 +190,7 @@ ExportFormatSpecification::ExportFormatSpecification (Session & s, XMLNode const
 
 	, _normalize (false)
 	, _normalize_loudness (false)
+	, _use_tp_limiter (true)
 	, _normalize_dbfs (GAIN_COEFF_UNITY)
 	, _normalize_lufs (-23)
 	, _normalize_dbtp (-1)
@@ -251,6 +253,7 @@ ExportFormatSpecification::ExportFormatSpecification (ExportFormatSpecification 
 	set_trim_end (other.trim_end());
 	set_normalize (other.normalize());
 	set_normalize_loudness (other.normalize_loudness());
+	set_use_tp_limiter (other.use_tp_limiter());
 	set_normalize_dbfs (other.normalize_dbfs());
 	set_normalize_lufs (other.normalize_lufs());
 	set_normalize_dbtp (other.normalize_dbtp());
@@ -319,6 +322,7 @@ ExportFormatSpecification::get_state ()
 	node = processing->add_child ("Normalize");
 	node->set_property ("enabled", normalize());
 	node->set_property ("loudness", normalize_loudness());
+	node->set_property ("use-tp-limiter", use_tp_limiter());
 	node->set_property ("dbfs", normalize_dbfs());
 	node->set_property ("lufs", normalize_lufs());
 	node->set_property ("dbtp", normalize_dbtp());
@@ -458,9 +462,9 @@ ExportFormatSpecification::set_state (const XMLNode & root)
 
 	if ((child = proc->child ("Normalize"))) {
 		child->get_property ("enabled", _normalize);
-		// old formats before ~ 4.7-930ish
-		child->get_property ("target", _normalize_dbfs);
+		child->get_property ("target", _normalize_dbfs); // old formats before ~ 4.7-930ish
 		child->get_property ("loudness", _normalize_loudness);
+		child->get_property ("use-tp-limiter", _use_tp_limiter);
 		child->get_property ("dbfs", _normalize_dbfs);
 		child->get_property ("lufs", _normalize_lufs);
 		child->get_property ("dbtp", _normalize_dbtp);
@@ -616,6 +620,9 @@ ExportFormatSpecification::description (bool include_name)
 	if (_normalize) {
 		if (_normalize_loudness) {
 			components.push_back (_("normalize loudness"));
+			if  (_use_tp_limiter) {
+				components.push_back (_("limit peak"));
+			}
 		} else {
 			components.push_back (_("normalize peak"));
 		}

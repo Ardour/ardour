@@ -330,7 +330,7 @@ DelayLine::allocate_pending_buffers (samplecnt_t signal_delay, ChanCount const& 
 #if 1
 	/* If no buffers are required, don't allocate any.
 	 * This may backfire later, allocating buffers on demand
-	 * may take time and cause x-runs.
+	 * may take time and cause xruns.
 	 *
 	 * The default buffersize is 4 * 16kB and - once allocated -
 	 * usually sufficies for the lifetime of the delayline instance.

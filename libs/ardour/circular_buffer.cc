@@ -37,6 +37,26 @@ CircularSampleBuffer::write (Sample const* buf, samplecnt_t n_samples)
 	_rb.write (buf, n_samples);
 }
 
+void
+CircularSampleBuffer::silence (samplecnt_t n_samples)
+{
+	guint ws = _rb.write_space ();
+	if (ws < n_samples) {
+		/* overwrite old data (consider a spinlock wrt ::read) */
+		_rb.increment_read_idx (n_samples - ws);
+	}
+	PBD::RingBuffer<Sample>::rw_vector vec;
+	_rb.get_write_vector (&vec);
+	if (vec.len[0] >= n_samples) {
+		memset (vec.buf[0], 0, sizeof (Sample) * n_samples);
+	} else {
+		assert (vec.len[0] > 0 && vec.len[0] + vec.len[1] >= n_samples);
+		memset (vec.buf[0], 0, sizeof (Sample) * vec.len[0]);
+		memset (vec.buf[1], 0, sizeof (Sample) * (n_samples - vec.len[0]));
+	}
+	_rb.increment_write_idx (n_samples);
+}
+
 bool
 CircularSampleBuffer::read (Sample& s_min, Sample& s_max, samplecnt_t spp)
 {

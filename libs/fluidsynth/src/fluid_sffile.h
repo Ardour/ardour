@@ -29,7 +29,7 @@
 #include "fluid_list.h"
 #include "fluid_mod.h"
 #include "fluidsynth.h"
-#include "fluidsynth_priv.h"
+#include "fluid_sys.h"
 
 
 /* Sound Font structure defines */
@@ -45,10 +45,6 @@ typedef struct _SFInst SFInst;
 typedef struct _SFPreset SFPreset;
 typedef struct _SFData SFData;
 typedef struct _SFChunk SFChunk;
-typedef struct _SFPhdr SFPhdr;
-typedef struct _SFBag SFBag;
-typedef struct _SFIhdr SFIhdr;
-typedef struct _SFShdr SFShdr;
 
 
 struct _SFVersion
@@ -89,7 +85,6 @@ struct _SFGen
 struct _SFZone
 {
     /* Sample/instrument zone structure */
-    fluid_list_t *instsamp; /* instrument/sample pointer for zone */
     fluid_list_t *gen; /* list of generators */
     fluid_list_t *mod; /* list of modulators */
 };
@@ -98,7 +93,7 @@ struct _SFSample
 {
     /* Sample structure */
     char name[21]; /* Name of sample */
-    unsigned char samfile; /* Loaded sfont/sample buffer = 0/1 */
+    int idx; /* Index of this instrument in the Soundfont */
     unsigned int start; /* Offset in sample area to start of sample */
     unsigned int end; /* Offset from start to end of sample,
              this is the last point of the
@@ -131,9 +126,6 @@ struct _SFPreset
     char name[21]; /* preset name */
     unsigned short prenum; /* preset number */
     unsigned short bank; /* bank number */
-    unsigned int libr; /* Not used (preserved) */
-    unsigned int genre; /* Not used (preserved) */
-    unsigned int morph; /* Not used (preserved) */
     fluid_list_t *zone; /* list of preset zones */
 };
 
@@ -160,6 +152,8 @@ struct _SFData
     FILE *sffd; /* loaded sfont file descriptor */
     const fluid_file_callbacks_t *fcbs; /* file callbacks used to read this file */
 
+    fluid_rec_mutex_t mtx; /* this mutex can be used to synchronize calls to fcbs when using multiple threads (e.g. SF3 loading) */
+
     fluid_list_t *info; /* linked list of info strings (1st byte is ID) */
     fluid_list_t *preset; /* linked list of preset info */
     fluid_list_t *inst; /* linked list of instrument info */
@@ -182,49 +176,19 @@ struct _SFChunk
     unsigned int size; /* size of the following chunk */
 };
 
-struct _SFPhdr
-{
-    unsigned char name[20]; /* preset name */
-    unsigned short preset; /* preset number */
-    unsigned short bank; /* bank number */
-    unsigned short pbagndx; /* index into preset bag */
-    unsigned int library; /* just for preserving them */
-    unsigned int genre; /* Not used */
-    unsigned int morphology; /* Not used */
-};
-
-struct _SFBag
-{
-    unsigned short genndx; /* index into generator list */
-    unsigned short modndx; /* index into modulator list */
-};
-
-struct _SFIhdr
-{
-    char name[20]; /* Name of instrument */
-    unsigned short ibagndx; /* Instrument bag index */
-};
-
-struct _SFShdr
-{
-    /* Sample header loading struct */
-    char name[20]; /* Sample name */
-    unsigned int start; /* Offset to start of sample */
-    unsigned int end; /* Offset to end of sample */
-    unsigned int loopstart; /* Offset to start of loop */
-    unsigned int loopend; /* Offset to end of loop */
-    unsigned int samplerate; /* Sample rate recorded at */
-    unsigned char origpitch; /* root midi key number */
-    signed char pitchadj; /* pitch correction in cents */
-    unsigned short samplelink; /* Not used */
-    unsigned short sampletype; /* 1 mono,2 right,4 left,linked 8,0x8000=ROM */
-};
-
 /* Public functions  */
 SFData *fluid_sffile_open(const char *fname, const fluid_file_callbacks_t *fcbs);
 void fluid_sffile_close(SFData *sf);
 int fluid_sffile_parse_presets(SFData *sf);
 int fluid_sffile_read_sample_data(SFData *sf, unsigned int sample_start, unsigned int sample_end,
                                   int sample_type, short **data, char **data24);
+
+
+/* extern only for unit test purposes */
+int load_igen(SFData *sf, int size);
+int load_pgen(SFData *sf, int size);
+void delete_preset(SFPreset *preset);
+void delete_inst(SFInst *inst);
+void delete_zone(SFZone *zone);
 
 #endif /* _FLUID_SFFILE_H */

@@ -56,7 +56,6 @@
 #include "pbd/memento_command.h"
 #include "pbd/unknown_type.h"
 #include "pbd/unwind.h"
-#include "pbd/stacktrace.h"
 #include "pbd/timersub.h"
 
 #include <glibmm/miscutils.h>
@@ -314,7 +313,6 @@ Editor::Editor ()
 	, bbt_bars (0)
 	, bbt_nmarks (0)
 	, bbt_bar_helper_on (0)
-	, bbt_accent_modulo (0)
 	, timecode_ruler (0)
 	, bbt_ruler (0)
 	, samples_ruler (0)
@@ -388,7 +386,6 @@ Editor::Editor ()
 	, range_marker_menu (0)
 	, new_transport_marker_menu (0)
 	, marker_menu_item (0)
-	, bbt_beat_subdivision (4)
 	, _visible_track_count (-1)
 	,  toolbar_selection_clock_table (2,3)
 	,  automation_mode_button (_("mode"))
@@ -455,6 +452,7 @@ Editor::Editor ()
 	, _region_selection_change_updates_region_list (true)
 	, _cursors (0)
 	, _following_mixer_selection (false)
+	, _show_touched_automation (false)
 	, _control_point_toggled_on_press (false)
 	, _stepping_axis_view (0)
 	, quantize_dialog (0)
@@ -600,7 +598,8 @@ Editor::Editor ()
 
 	controls_layout.set_name ("EditControlsBase");
 	controls_layout.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK|Gdk::SCROLL_MASK);
-	controls_layout.signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::edit_controls_button_release));
+	controls_layout.signal_button_press_event().connect (sigc::mem_fun(*this, &Editor::edit_controls_button_event));
+	controls_layout.signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::edit_controls_button_event));
 	controls_layout.signal_scroll_event().connect (sigc::mem_fun(*this, &Editor::control_layout_scroll), false);
 
 	_cursors = new MouseCursors;
@@ -1100,7 +1099,7 @@ Editor::control_scroll (float fraction)
 bool
 Editor::deferred_control_scroll (samplepos_t /*target*/)
 {
-	_session->request_locate (*_control_scroll_target, RollIfAppropriate);
+	_session->request_locate (*_control_scroll_target);
 	/* reset for next stream */
 	_control_scroll_target = boost::none;
 	_dragging_playhead = false;
@@ -1890,7 +1889,7 @@ Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items)
 	edit_items.push_back (MenuElem (_("Loudness Analysis"), sigc::mem_fun(*this, &Editor::loudness_analyze_range_selection)));
 	edit_items.push_back (MenuElem (_("Spectral Analysis"), sigc::mem_fun(*this, &Editor::spectral_analyze_range_selection)));
 	edit_items.push_back (SeparatorElem());
-	edit_items.push_back (MenuElem (_("Loudness Assistant..."), sigc::bind (sigc::mem_fun (*this, &Editor::measure_master_loudness), true)));
+	edit_items.push_back (MenuElem (_("Loudness Assistant..."), sigc::bind (sigc::mem_fun (*this, &Editor::loudness_assistant), true)));
 	edit_items.push_back (SeparatorElem());
 
 	edit_items.push_back (
@@ -2471,6 +2470,15 @@ Editor::set_state (const XMLNode& node, int version)
 		tact->set_active (yn);
 	}
 
+	yn = false;
+	node.get_property (X_("show-touched-automation"), yn);
+	{
+		Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), X_("show-touched-automation"));
+		/* do it twice to force the change */
+		tact->set_active (!yn);
+		tact->set_active (yn);
+	}
+
 	XMLNodeList children = node.children ();
 	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
 		selection->set_state (**i, Stateful::current_state_version);
@@ -2569,6 +2577,7 @@ Editor::get_state ()
 	}
 
 	node->set_property (X_("show-marker-lines"), _show_marker_lines);
+	node->set_property (X_("show-touched-automation"), _show_touched_automation);
 
 	node->add_child_nocopy (selection->get_state ());
 	node->add_child_nocopy (_regions->get_state ());
@@ -2869,6 +2878,12 @@ Editor::snap_to_bbt (MusicSample presnap, RoundMode direction, SnapPref gpref)
 				break;
 			case bbt_show_thirtyseconds:
 				ret = _session->tempo_map().round_to_quarter_note_subdivision (presnap.sample, 4 * divisor, direction);
+				break;
+			case bbt_show_sixtyfourths:
+				ret = _session->tempo_map().round_to_quarter_note_subdivision (presnap.sample, 8 * divisor, direction);
+				break;
+			case bbt_show_onetwentyeighths:
+				ret = _session->tempo_map().round_to_quarter_note_subdivision (presnap.sample, 16 * divisor, direction);
 				break;
 		}
 	} else {
@@ -3907,14 +3922,13 @@ Editor::override_visible_track_count ()
 }
 
 bool
-Editor::edit_controls_button_release (GdkEventButton* ev)
+Editor::edit_controls_button_event (GdkEventButton* ev)
 {
-	if (Keyboard::is_context_menu_event (ev)) {
+	if ((ev->type == GDK_2BUTTON_PRESS && ev->button == 1) || (ev->type == GDK_BUTTON_RELEASE && Keyboard::is_context_menu_event (ev))) {
 		ARDOUR_UI::instance()->add_route ();
-	} else if (ev->button == 1) {
+	} else if (ev->button == 1 && ev->type == GDK_BUTTON_PRESS) {
 		selection->clear_tracks ();
 	}
-
 	return true;
 }
 
@@ -4025,6 +4039,35 @@ Editor::set_stationary_playhead (bool yn)
 		}
 		instant_save ();
 	}
+}
+
+bool
+Editor::show_touched_automation () const
+{
+	if (!contents().is_mapped()) {
+		return false;
+	}
+	return _show_touched_automation;
+}
+
+void
+Editor::toggle_show_touched_automation ()
+{
+	RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), X_("show-touched-automation"));
+	set_show_touched_automation (tact->get_active());
+}
+
+void
+Editor::set_show_touched_automation (bool yn)
+{
+	if (_show_touched_automation == yn) {
+		return;
+	}
+	_show_touched_automation = yn;
+	if (!yn) {
+		RouteTimeAxisView::signal_ctrl_touched (true);
+	}
+	instant_save ();
 }
 
 PlaylistSelector&
@@ -4329,12 +4372,12 @@ Editor::restore_editing_space ()
  */
 
 void
-Editor::new_playlists (TimeAxisView* v)
+Editor::new_playlists (RouteUI* rui)
 {
 	begin_reversible_command (_("new playlists"));
 	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
 	_session->playlists()->get (playlists);
-	mapover_tracks (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_new_playlist), playlists), v, ARDOUR::Properties::group_select.property_id);
+	mapover_routes (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_new_playlist), playlists), rui, ARDOUR::Properties::group_select.property_id);
 	commit_reversible_command ();
 }
 
@@ -4345,12 +4388,12 @@ Editor::new_playlists (TimeAxisView* v)
  */
 
 void
-Editor::copy_playlists (TimeAxisView* v)
+Editor::copy_playlists (RouteUI* rui)
 {
 	begin_reversible_command (_("copy playlists"));
 	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
 	_session->playlists()->get (playlists);
-	mapover_tracks (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_copy_playlist), playlists), v, ARDOUR::Properties::group_select.property_id);
+	mapover_routes (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_copy_playlist), playlists), rui, ARDOUR::Properties::group_select.property_id);
 	commit_reversible_command ();
 }
 
@@ -4360,31 +4403,31 @@ Editor::copy_playlists (TimeAxisView* v)
  */
 
 void
-Editor::clear_playlists (TimeAxisView* v)
+Editor::clear_playlists (RouteUI* rui)
 {
 	begin_reversible_command (_("clear playlists"));
 	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
 	_session->playlists()->get (playlists);
-	mapover_tracks (sigc::mem_fun (*this, &Editor::mapped_clear_playlist), v, ARDOUR::Properties::group_select.property_id);
+	mapover_routes (sigc::mem_fun (*this, &Editor::mapped_clear_playlist), rui, ARDOUR::Properties::group_select.property_id);
 	commit_reversible_command ();
 }
 
 void
-Editor::mapped_use_new_playlist (RouteTimeAxisView& atv, uint32_t sz, vector<boost::shared_ptr<ARDOUR::Playlist> > const & playlists)
+Editor::mapped_use_new_playlist (RouteUI& rui, uint32_t sz, vector<boost::shared_ptr<ARDOUR::Playlist> > const & playlists)
 {
-	atv.use_new_playlist (sz > 1 ? false : true, playlists, false);
+	rui.use_new_playlist (sz > 1 ? false : true, playlists, false);
 }
 
 void
-Editor::mapped_use_copy_playlist (RouteTimeAxisView& atv, uint32_t sz, vector<boost::shared_ptr<ARDOUR::Playlist> > const & playlists)
+Editor::mapped_use_copy_playlist (RouteUI& rui, uint32_t sz, vector<boost::shared_ptr<ARDOUR::Playlist> > const & playlists)
 {
-	atv.use_new_playlist (sz > 1 ? false : true, playlists, true);
+	rui.use_new_playlist (sz > 1 ? false : true, playlists, true);
 }
 
 void
-Editor::mapped_clear_playlist (RouteTimeAxisView& atv, uint32_t /*sz*/)
+Editor::mapped_clear_playlist (RouteUI& rui, uint32_t /*sz*/)
 {
-	atv.clear_playlist ();
+	rui.clear_playlist ();
 }
 
 double
@@ -5290,8 +5333,9 @@ Editor::region_view_added (RegionView * rv)
 		list<pair<PBD::ID const, list<Evoral::event_id_t> > >::iterator rnote;
 		for (rnote = selection->pending_midi_note_selection.begin(); rnote != selection->pending_midi_note_selection.end(); ++rnote) {
 			if (rv->region()->id () == (*rnote).first) {
-				mrv->select_notes ((*rnote).second, false);
+				list<Evoral::event_id_t> notes ((*rnote).second);
 				selection->pending_midi_note_selection.erase(rnote);
+				mrv->select_notes (notes, false); // NB. this may change the selection
 				break;
 			}
 		}
@@ -5871,7 +5915,7 @@ Editor::super_rapid_screen_update ()
 	}
 
 	if (err > 8192 || latent_locate) {
-		// in case of x-runs or freewheeling
+		// in case of xruns or freewheeling
 		_last_update_time = 0;
 		sample = _session->audible_sample ();
 	} else {
@@ -5926,7 +5970,7 @@ Editor::super_rapid_screen_update ()
 		return;
 	}
 
-	if (!_pending_locate_request) {
+	if (!_pending_locate_request && !_session->locate_initiated()) {
 		_playhead_cursor->set_position (sample);
 	}
 

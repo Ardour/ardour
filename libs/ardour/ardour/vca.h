@@ -79,6 +79,7 @@ class LIBARDOUR_API VCA : public Stripable,
 	void push_solo_upstream (int32_t) {}
 	void push_solo_isolate_upstream (int32_t) {}
 	bool can_solo() const { return true; }
+	bool can_monitor() const { return false; }
 	bool is_safe () const { return false; }
 
 	/* Muteable API */

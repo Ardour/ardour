@@ -159,7 +159,15 @@ cp $PREFIX/bin/*.yes $DESTDIR/bin/ || true
 cp $PREFIX/lib/*.dll $DESTDIR/bin/
 # special case libportaudio (wasapi), old stack has no wasapi and hence no .xp
 cp $PREFIX/bin/libportaudio-2.xp $DESTDIR/bin/ || cp $PREFIX/bin/libportaudio-2.dll $DESTDIR/bin/libportaudio-2.xp
+
+# prefer system-wide DLL
 rm -rf $DESTDIR/bin/libjack*.dll
+# Also for these (even though M$ recommends to bundle these [1],
+# there is no single set that works on all target systems, particularly
+# since some plugins also rely on it.
+# [1] https://docs.microsoft.com/en-us/windows/win32/debug/calling-the-dbghelp-library
+rm -rf $DESTDIR/bin/dbghelp*.dll
+rm -rf $DESTDIR/bin/dbgcore*.dll
 
 cp `find build/libs/surfaces/ -iname "*.dll"` $ALIBDIR/surfaces/
 cp `find build/libs/backends/ -iname "*.dll"` $ALIBDIR/backends/
@@ -394,6 +402,7 @@ RequestExecutionLevel admin
 InstallDir "\$${PGF}\\${PRODUCT_ID}"
 InstallDirRegKey HKLM "Software\\${PRODUCT_NAME}\\${PRODUCT_ID}\\$WARCH" "Install_Dir"
 !define MUI_ICON "share\\${PRODUCT_ICON}"
+!define MUI_UNICON "share\\${PRODUCT_ICON}"
 
 EOF
 

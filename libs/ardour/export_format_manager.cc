@@ -367,6 +367,13 @@ ExportFormatManager::select_normalize_loudness (bool value)
 }
 
 void
+ExportFormatManager::select_tp_limiter (bool value)
+{
+	current_selection->set_use_tp_limiter (value);
+	check_for_description_change ();
+}
+
+void
 ExportFormatManager::select_normalize_dbfs (float value)
 {
 	current_selection->set_normalize_dbfs (value);

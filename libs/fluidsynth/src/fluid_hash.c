@@ -129,7 +129,7 @@ spaced_primes_closest(unsigned int num)
  * the case that the entry is at the head of a chain, this pointer
  * will be an item in the nodes[] array.  In the case that the entry
  * is not at the head of a chain, this pointer will be the ->next
- * pointer on the node that preceeds it.
+ * pointer on the node that precedes it.
  *
  * In the case that no matching entry exists in the table, a pointer
  * to a %NULL pointer will be returned.  To insert a item, this %NULL

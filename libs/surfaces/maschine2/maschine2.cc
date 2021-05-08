@@ -83,7 +83,7 @@ class TestLayout : public Maschine2Layout
 
 			std::vector<std::string> strs;
 			strs.push_back("T|sg1");
-			strs.push_back("Test2asdjasdlkjasldkjasd");
+			strs.push_back("Test2");
 			strs.push_back("Test3");
 			strs.push_back("Test4");
 			strs.push_back("Test5");

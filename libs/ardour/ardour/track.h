@@ -60,7 +60,7 @@ public:
 	int init ();
 
 	bool set_name (const std::string& str);
-	void resync_track_name ();
+	int resync_take_name (std::string newname = "");
 
 	TrackMode mode () const { return _mode; }
 
@@ -128,6 +128,13 @@ public:
 
 	void set_block_size (pframes_t);
 
+	/* used by DiskReader request_overwrite_buffer(), to create
+	 * a SessionEvent with weak_ptr<> reference
+	 */
+	boost::shared_ptr<Track> shared_ptr () {
+		return boost::dynamic_pointer_cast<Track> (shared_from_this());
+	}
+
 	boost::shared_ptr<Playlist> playlist ();
 	void request_input_monitoring (bool);
 	void ensure_input_monitoring (bool);
@@ -147,6 +154,7 @@ public:
 	samplecnt_t get_captured_samples (uint32_t n = 0) const;
 	void transport_looped (samplepos_t);
 	void transport_stopped_wallclock (struct tm &, time_t, bool);
+	void mark_capture_xrun ();
 	bool pending_overwrite () const;
 	void set_slaved (bool);
 	ChanCount n_channels ();
@@ -230,6 +238,7 @@ private:
 	void chan_count_changed ();
 
 	std::string _diskstream_name;
+	bool        _pending_name_change;
 };
 
 }; /* namespace ARDOUR*/

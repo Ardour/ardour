@@ -63,6 +63,7 @@ class LIBCONTROLCP_API BasicUI {
 	void goto_zero ();
 	void goto_start (bool and_roll = false);
 	void goto_end ();
+	void button_varispeed (bool fwd);
 	void rewind ();
 	void ffwd ();
 	void transport_stop ();

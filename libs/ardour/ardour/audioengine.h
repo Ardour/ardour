@@ -38,7 +38,7 @@
 
 #include "pbd/signals.h"
 #include "pbd/pthread_utils.h"
-#include "pbd/stacktrace.h"
+#include "pbd/g_atomic_compat.h"
 
 #include "ardour/ardour.h"
 #include "ardour/data_type.h"
@@ -128,7 +128,7 @@ class LIBARDOUR_API AudioEngine : public PortManager, public SessionHandlePtr
 	bool           is_realtime() const;
 
 	// for the user which hold state_lock to check if reset operation is pending
-	bool           is_reset_requested() const { return g_atomic_int_get(const_cast<gint*>(&_hw_reset_request_count)); }
+	bool           is_reset_requested() const { return g_atomic_int_get (&_hw_reset_request_count); }
 
 	int set_device_name (const std::string&);
 	int set_sample_rate (float);
@@ -298,19 +298,19 @@ class LIBARDOUR_API AudioEngine : public PortManager, public SessionHandlePtr
 	std::string               _last_backend_error_string;
 
 	Glib::Threads::Thread*    _hw_reset_event_thread;
-	gint                      _hw_reset_request_count;
+	GATOMIC_QUAL gint         _hw_reset_request_count;
 	Glib::Threads::Cond       _hw_reset_condition;
 	Glib::Threads::Mutex      _reset_request_lock;
-	gint                      _stop_hw_reset_processing;
+	GATOMIC_QUAL gint         _stop_hw_reset_processing;
 	Glib::Threads::Thread*    _hw_devicelist_update_thread;
-	gint                      _hw_devicelist_update_count;
+	GATOMIC_QUAL gint         _hw_devicelist_update_count;
 	Glib::Threads::Cond       _hw_devicelist_update_condition;
 	Glib::Threads::Mutex      _devicelist_update_lock;
-	gint                      _stop_hw_devicelist_processing;
+	GATOMIC_QUAL gint         _stop_hw_devicelist_processing;
 	uint32_t                  _start_cnt;
 	uint32_t                  _init_countdown;
-	volatile gint             _pending_playback_latency_callback;
-	volatile gint             _pending_capture_latency_callback;
+	GATOMIC_QUAL gint         _pending_playback_latency_callback;
+	GATOMIC_QUAL gint         _pending_capture_latency_callback;
 
 	void start_hw_event_processing();
 	void stop_hw_event_processing();

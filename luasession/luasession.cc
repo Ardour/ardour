@@ -544,7 +544,7 @@ usage ()
   -i, --interactive          enter interactive mode after executing 'script',\n\
                              force the interpreter to run interactively\n\
   -X, --exit-when-halted     terminate when the audio-engine halts\n\
-                             unexpectedly (disconnect, or too many x-runs)\n\
+                             unexpectedly (disconnect, or too many xruns)\n\
   -V, --version              print version information and exit\n\
 \n");
 	printf ("\n\

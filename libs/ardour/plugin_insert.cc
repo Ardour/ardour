@@ -90,11 +90,11 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug)
 	, _latency_changed (false)
 	, _bypass_port (UINT32_MAX)
 	, _inverted_bypass_enable (false)
-	, _stat_reset (0)
-	, _flush (0)
 {
-	/* the first is the master */
+	g_atomic_int_set (&_stat_reset, 0);
+	g_atomic_int_set (&_flush, 0);
 
+	/* the first is the master */
 	if (plug) {
 		add_plugin (plug);
 		create_automatable_parameters ();

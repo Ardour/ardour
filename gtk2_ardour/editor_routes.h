@@ -190,8 +190,9 @@ private:
 	bool _adding_routes;
 	bool _route_deletion_in_progress;
 	bool _redisplay_on_resume;
-	volatile gint _redisplay_active;
-	volatile gint _queue_tv_update;
+	bool _idle_update_queued;
+
+	volatile int _redisplay_active;
 
 	Gtk::Menu* _menu;
 	Gtk::Widget* old_focus;

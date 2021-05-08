@@ -164,6 +164,7 @@ protected:
 	virtual void reset_width_dependent_items (double pixel_width);
 
 	virtual void color_handler () {}
+	virtual void parameter_changed (std::string const&);
 
 	boost::shared_ptr<ARDOUR::Region> _region;
 
@@ -198,6 +199,11 @@ protected:
 	std::list<ArdourCanvas::Rectangle*> _silent_threshold_samples;
 	/** a text item to display strip silence statistics */
 	ArdourCanvas::Text* _silence_text;
+
+private:
+	void update_xrun_markers ();
+	std::list<std::pair<samplepos_t, ArdourCanvas::Arrow*> > _xrun_markers;
+	bool _xrun_markers_visible;
 };
 
 #endif /* __gtk_ardour_region_view_h__ */

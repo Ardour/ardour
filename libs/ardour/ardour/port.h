@@ -154,6 +154,7 @@ public:
 
 	static pframes_t cycle_nframes () { return _cycle_nframes; }
 	static double speed_ratio () { return _speed_ratio; }
+	static uint32_t resampler_quality () { return _resampler_quality; }
 
 protected:
 

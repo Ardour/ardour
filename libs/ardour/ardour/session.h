@@ -62,6 +62,7 @@
 #include "pbd/statefuldestructible.h"
 #include "pbd/signals.h"
 #include "pbd/undo.h"
+#include "pbd/g_atomic_compat.h"
 
 #include "lua/luastate.h"
 
@@ -164,6 +165,7 @@ class SceneChanger;
 class SessionDirectory;
 class SessionMetadata;
 class SessionPlaylists;
+class SoloMuteRelease;
 class Source;
 class Speakers;
 class TempoMap;
@@ -212,7 +214,7 @@ public:
 
 	virtual ~Session ();
 
-	static int get_info_from_path (const std::string& xmlpath, float& sample_rate, SampleFormat& data_format, std::string& program_version);
+	static int get_info_from_path (const std::string& xmlpath, float& sample_rate, SampleFormat& data_format, std::string& program_version, XMLNode* engine_hints = 0);
 	static std::string get_snapshot_from_instant (const std::string& session_dir);
 
 	/** a monotonic counter used for naming user-visible things uniquely
@@ -301,6 +303,10 @@ public:
 	bool have_rec_disabled_track () const;
 
 	bool have_captured() const { return _have_captured; }
+
+	samplecnt_t capture_duration () const { return _capture_duration; }
+	unsigned int capture_xruns () const { return _capture_xruns; }
+	unsigned int export_xruns () const { return _export_xruns; }
 
 	void refill_all_track_buffers ();
 	Butler* butler() { return _butler; }
@@ -409,6 +415,8 @@ public:
 	*/
 	PBD::Signal0<void> RecordArmStateChanged; /* signals changes in recording arming */
 
+	PBD::Signal0<void> UpdateRouteRecordState; /* signals potential change in route recording arming */
+
 	/* Emited when session is loaded */
 	PBD::Signal0<void> SessionLoaded;
 
@@ -458,6 +466,7 @@ public:
 
 	void request_roll_at_and_return (samplepos_t start, samplepos_t return_to);
 	void request_bounded_roll (samplepos_t start, samplepos_t end);
+	void request_roll (TransportRequestSource origin = TRS_UI);
 	void request_stop (bool abort = false, bool clear_state = false, TransportRequestSource origin = TRS_UI);
 	void request_locate (samplepos_t sample, LocateTransportDisposition ltd = RollIfAppropriate, TransportRequestSource origin = TRS_UI);
 
@@ -469,6 +478,8 @@ public:
 	void goto_start (bool and_roll = false);
 	void use_rf_shuttle_speed ();
 	void allow_auto_play (bool yn);
+
+	void reset_transport_speed (TransportRequestSource origin = TRS_UI);
 	void request_transport_speed (double speed, bool as_default = true, TransportRequestSource origin = TRS_UI);
 	void request_transport_speed_nonzero (double, bool as_default = true, TransportRequestSource origin = TRS_UI);
 	void request_overwrite_buffer (boost::shared_ptr<Track>, OverwriteReason);
@@ -786,12 +797,8 @@ public:
 	bool   synced_to_engine() const;
 
 	double engine_speed() const { return _engine_speed; }
-	double actual_speed() const {
-		if (_transport_speed > 0) return _engine_speed;
-		if (_transport_speed < 0) return - _engine_speed;
-		return 0;
-	}
-	double transport_speed() const { return _count_in_samples > 0 ? 0. : _transport_speed; }
+	double actual_speed() const;
+	double transport_speed() const;
 	/** @return true if the transport state (TFSM) is stopped */
 	bool   transport_stopped() const;
 	/** @return true if the transport state (TFSM) is stopped or stopping */
@@ -919,20 +926,21 @@ public:
 
 	/* session-wide solo/mute/rec-enable */
 
-	bool muted() const;
+	bool muted () const;
 	std::vector<boost::weak_ptr<AutomationControl> > cancel_all_mute ();
 
-	bool soloing() const { return _non_soloed_outs_muted; }
-	bool listening() const { return _listen_cnt > 0; }
-	bool solo_isolated() const { return _solo_isolated_cnt > 0; }
+	bool soloing () const { return _non_soloed_outs_muted; }
+	bool listening () const;
+	bool solo_isolated () const { return _solo_isolated_cnt > 0; }
 	void cancel_all_solo ();
 
-	bool solo_selection_active();
-	void solo_selection( StripableList&, bool );
-
-	static const SessionEvent::RTeventCallback rt_cleanup;
+	bool solo_selection_active ();
+	void solo_selection (StripableList&, bool);
 
 	void clear_all_solo_state (boost::shared_ptr<RouteList>);
+	void prepare_momentary_solo (SoloMuteRelease* smr = NULL, bool exclusive = false, boost::shared_ptr<Route> route = boost::shared_ptr<Route> ());
+
+	static const SessionEvent::RTeventCallback rt_cleanup;
 
 	/* Control-based methods */
 
@@ -1068,6 +1076,28 @@ public:
 
 	bool operation_in_progress (GQuark) const;
 
+	/**
+	 * Test if any undo commands were added since the
+	 * call to begin_reversible_command ()
+	 *
+	 * This is is useful to determine if an undoable
+	 * action was performed before adding additional
+	 * information (e.g. selection changes) to the
+	 * undo transaction.
+	 *
+	 * @return true if undo operation is valid but empty
+	 */
+	bool collected_undo_commands () const {
+		return _current_trans && !_current_trans->empty ();
+	}
+
+	/**
+	 * Abort reversible commend IFF no undo changes
+	 * have been collected.
+	 * @return true if undo operation was aborted.
+	 */
+	bool abort_empty_reversible_command ();
+
 	void add_commands (std::vector<Command*> const & cmds);
 
 	std::map<PBD::ID,PBD::StatefulDestructible*> registry;
@@ -1152,6 +1182,7 @@ public:
 	void add_controllable (boost::shared_ptr<PBD::Controllable>);
 
 	boost::shared_ptr<PBD::Controllable> solo_cut_control() const;
+	boost::shared_ptr<PBD::Controllable> recently_touched_controllable () const;
 
 	SessionConfiguration config;
 
@@ -1177,7 +1208,6 @@ public:
 	enum PostTransportWork {
 		PostTransportStop               = 0x1,
 		PostTransportLocate             = 0x2,
-		PostTransportRoll               = 0x4,
 		PostTransportAbort              = 0x8,
 		PostTransportOverWrite          = 0x10,
 		PostTransportAudition           = 0x20,
@@ -1302,16 +1332,17 @@ protected:
 
 	/* transport API */
 
-	void locate (samplepos_t, bool with_roll, bool with_flush, bool for_loop_end=false, bool force=false, bool with_mmc=true);
+	void locate (samplepos_t, bool for_loop_end=false, bool force=false, bool with_mmc=true);
 	void stop_transport (bool abort = false, bool clear_state = false);
 	void start_transport ();
 	void butler_completed_transport_work ();
 	void post_locate ();
 	void schedule_butler_for_transport_work ();
 	bool should_roll_after_locate () const;
-	double speed() const { return _transport_speed; }
+	bool user_roll_after_locate () const;
+	bool should_stop_before_locate () const;
 	samplepos_t position() const { return _transport_sample; }
-	void set_transport_speed (double speed, bool abort, bool clear_state, bool as_default);
+	void set_transport_speed (double speed);
 	bool need_declick_before_locate () const;
 
 private:
@@ -1331,7 +1362,6 @@ private:
 	typedef void (Session::*process_function_type)(pframes_t);
 
 	AudioEngine&            _engine;
-	mutable gint             processing_prohibited;
 	process_function_type    process_function;
 	process_function_type    last_process_function;
 	bool                    _bounce_processing_active;
@@ -1339,10 +1369,9 @@ private:
 	samplecnt_t             _base_sample_rate;     // sample-rate of the session at creation time, "native" SR
 	samplecnt_t             _nominal_sample_rate;  // overridden by audioengine setting
 	samplecnt_t             _current_sample_rate;  // this includes video pullup offset
-	mutable gint            _record_status;
 	samplepos_t             _transport_sample;
-	gint                    _seek_counter;
-	gint                    _butler_seek_counter;
+	GATOMIC_QUAL gint       _seek_counter;
+	GATOMIC_QUAL gint       _butler_seek_counter;
 	Location*               _session_range_location; ///< session range, or 0 if there is nothing in the session yet
 	bool                    _session_range_is_free;
 	bool                    _silent;
@@ -1350,9 +1379,10 @@ private:
 
 	// varispeed playback -- TODO: move out of session to backend.
 	double                  _engine_speed;
-	double                  _transport_speed; // only: -1, 0, +1
 	double                  _default_transport_speed;
+	double                  _default_engine_speed;
 	double                  _last_transport_speed;
+	double                  _requested_transport_speed;
 	double                  _signalled_varispeed;
 
 	bool                     auto_play_legal;
@@ -1363,6 +1393,9 @@ private:
 	samplecnt_t             _worst_route_latency;
 	uint32_t                _send_latency_changes;
 	bool                    _have_captured;
+	samplecnt_t             _capture_duration;
+	unsigned int            _capture_xruns;
+	unsigned int            _export_xruns;
 	bool                    _non_soloed_outs_muted;
 	bool                    _listening;
 	uint32_t                _listen_cnt;
@@ -1373,6 +1406,9 @@ private:
 	unsigned int            _xrun_count;
 
 	std::string             _missing_file_replacement;
+
+	mutable GATOMIC_QUAL gint _processing_prohibited;
+	mutable GATOMIC_QUAL gint _record_status;
 
 	void add_monitor_section ();
 	void remove_monitor_section ();
@@ -1396,9 +1432,9 @@ private:
 
 	samplecnt_t calc_preroll_subcycle (samplecnt_t) const;
 
-	void block_processing() { g_atomic_int_set (&processing_prohibited, 1); }
-	void unblock_processing() { g_atomic_int_set (&processing_prohibited, 0); }
-	bool processing_blocked() const { return g_atomic_int_get (&processing_prohibited); }
+	void block_processing() { g_atomic_int_set (&_processing_prohibited, 1); }
+	void unblock_processing() { g_atomic_int_set (&_processing_prohibited, 0); }
+	bool processing_blocked() const { return g_atomic_int_get (&_processing_prohibited); }
 
 	static const samplecnt_t bounce_chunk_size;
 
@@ -1501,9 +1537,9 @@ private:
 	StateOfTheState _state_of_the_state;
 
 	friend class    StateProtector;
-	gint            _suspend_save; /* atomic */
-	volatile bool   _save_queued;
-	volatile bool   _save_queued_pending;
+	GATOMIC_QUAL gint  _suspend_save;
+	volatile bool      _save_queued;
+	volatile bool      _save_queued_pending;
 
 	Glib::Threads::Mutex save_state_lock;
 	Glib::Threads::Mutex save_source_lock;
@@ -1542,8 +1578,8 @@ private:
 
 	static const PostTransportWork ProcessCannotProceedMask = PostTransportWork (PostTransportAudition);
 
-	gint _post_transport_work; /* accessed only atomic ops */
-	PostTransportWork post_transport_work() const        { return (PostTransportWork) g_atomic_int_get (const_cast<gint*>(&_post_transport_work)); }
+	GATOMIC_QUAL gint _post_transport_work; /* accessed only atomic ops */
+	PostTransportWork post_transport_work() const        { return (PostTransportWork) g_atomic_int_get (&_post_transport_work); }
 	void set_post_transport_work (PostTransportWork ptw) { g_atomic_int_set (&_post_transport_work, (gint) ptw); }
 	void add_post_transport_work (PostTransportWork ptw);
 
@@ -1660,9 +1696,9 @@ private:
 	Glib::Threads::Mutex  _update_latency_lock;
 
 	typedef std::queue<AutoConnectRequest> AutoConnectQueue;
-	Glib::Threads::Mutex  _auto_connect_queue_lock;
-	AutoConnectQueue _auto_connect_queue;
-	guint _latency_recompute_pending;
+	Glib::Threads::Mutex _auto_connect_queue_lock;
+	AutoConnectQueue     _auto_connect_queue;
+	GATOMIC_QUAL guint   _latency_recompute_pending;
 
 	void get_physical_ports (std::vector<std::string>& inputs, std::vector<std::string>& outputs, DataType type,
 	                         MidiPortFlags include = MidiPortFlags (0),
@@ -1783,8 +1819,8 @@ private:
 		OnlyLoop,
 	};
 
-	volatile gint _punch_or_loop; // enum PunchLoopLock
-	gint current_usecs_per_track;
+	GATOMIC_QUAL gint _punch_or_loop; // enum PunchLoopLock
+	GATOMIC_QUAL gint _current_usecs_per_track;
 
 	bool punch_active () const;
 	void unset_punch ();
@@ -1990,8 +2026,8 @@ private:
 
 	std::string get_best_session_directory_for_new_audio ();
 
-	mutable gint _playback_load;
-	mutable gint _capture_load;
+	mutable GATOMIC_QUAL gint _playback_load;
+	mutable GATOMIC_QUAL gint _capture_load;
 
 	/* I/O bundles */
 
@@ -2094,6 +2130,9 @@ private:
 
 	boost::shared_ptr<PBD::Controllable> _solo_cut_control;
 
+	void controllable_touched (boost::weak_ptr<PBD::Controllable>);
+	boost::weak_ptr<PBD::Controllable> _recently_touched_controllable;
+
 	void reset_native_file_format();
 	bool first_file_data_format_reset;
 	bool first_file_header_format_reset;
@@ -2110,8 +2149,8 @@ private:
 	mutable bool have_looped; ///< Used in \ref audible_sample
 
 	void update_route_record_state ();
-	gint _have_rec_enabled_track;
-	gint _have_rec_disabled_track;
+	GATOMIC_QUAL gint _have_rec_enabled_track;
+	GATOMIC_QUAL gint _have_rec_disabled_track;
 
 	static int ask_about_playlist_deletion (boost::shared_ptr<Playlist>);
 
@@ -2158,7 +2197,7 @@ private:
 	uint32_t _step_editors;
 
 	/** true if timecode transmission by the transport is suspended, otherwise false */
-	mutable gint _suspend_timecode_transmission;
+	mutable GATOMIC_QUAL gint _suspend_timecode_transmission;
 
 	void update_locations_after_tempo_map_change (const Locations::LocationList &);
 
@@ -2178,9 +2217,9 @@ private:
 
 	void ensure_route_presentation_info_gap (PresentationInfo::order_t, uint32_t gap_size);
 
-	friend class    ProcessorChangeBlocker;
-	gint            _ignore_route_processor_changes; /* atomic */
-	gint            _ignored_a_processor_change;
+	friend class ProcessorChangeBlocker;
+	GATOMIC_QUAL gint _ignore_route_processor_changes;
+	GATOMIC_QUAL gint _ignored_a_processor_change;
 
 	MidiClockTicker* midi_clock;
 
@@ -2227,6 +2266,8 @@ private:
 	bool _had_destructive_tracks;
 
 	std::string unnamed_file_name () const;
+
+	GATOMIC_QUAL gint _update_pretty_names;
 };
 
 

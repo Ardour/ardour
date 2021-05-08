@@ -181,8 +181,6 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	_view->ContentsHeightChanged.connect (
 		sigc::mem_fun (*this, &MidiTimeAxisView::contents_height_changed));
 
-	ignore_toggle = false;
-
 	if (is_midi_track()) {
 		_note_mode = midi_track()->note_mode();
 	}

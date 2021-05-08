@@ -62,7 +62,7 @@ Pool::Pool (string n, unsigned long item_size, unsigned long nitems)
 
 Pool::~Pool ()
 {
-	DEBUG_TRACE (DEBUG::Pool, string_compose ("Pool: '%1' max: %2 / %3", name(), max_usage, total()));
+	DEBUG_TRACE (DEBUG::Pool, string_compose ("Pool: '%1' max: %2 / %3\n", name(), max_usage, total()));
 	free (block);
 }
 

@@ -777,17 +777,17 @@ AUPluginUI::stop_cf_timer ()
 void
 AUPluginUI::cocoa_view_resized ()
 {
-        /* we can get here for two reasons:
-
-           1) the plugin window was resized by the user, a new size was
-           allocated to the window, ::update_view_size() was called, and we
-           explicitly/manually resized the AU NSView.
-
-           2) the plugin decided to resize itself (probably in response to user
-           action, but not in response to an actual window resize)
-
-           We only want to proceed with a window resizing in the second case.
-        */
+	/* we can get here for two reasons:
+	 *
+	 * 1) the plugin window was resized by the user, a new size was
+	 * allocated to the window, ::update_view_size() was called, and we
+	 * explicitly/manually resized the AU NSView.
+	 *
+	 * 2) the plugin decided to resize itself (probably in response to user
+	 * action, but not in response to an actual window resize)
+	 *
+	 * We only want to proceed with a window resizing in the second case.
+	 */
 
 	if (in_live_resize) {
 		/* ::update_view_size() will be called at the right times and
@@ -825,7 +825,7 @@ AUPluginUI::cocoa_view_resized ()
 		wp->set_state_mask (WindowProxy::Position);
 	}
 
-        NSRect new_frame = [au_view frame];
+	NSRect new_frame = [au_view frame];
 
 	/* from here on, we know that we've been called because the plugin
 	 * decided to change the NSView frame itself.
@@ -835,44 +835,45 @@ AUPluginUI::cocoa_view_resized ()
 	 */
 
 	float dy = new_frame.size.height - last_au_frame.size.height;
-        float dx = new_frame.size.width - last_au_frame.size.width;
+	float dx = new_frame.size.width - last_au_frame.size.width;
 
-        NSWindow* window = get_nswindow ();
-        NSRect windowFrame= [window frame];
+	NSWindow* window = get_nswindow ();
+	NSRect windowFrame= [window frame];
 
 	/* we want the top edge of the window to remain in the same place,
-	   but the Cocoa/Quartz origin is at the lower left. So, when we make
-	   the window larger, we will move it down, which means shifting the
-	   origin toward (x,0). This will leave the top edge in the same place.
-	*/
+	 * but the Cocoa/Quartz origin is at the lower left. So, when we make
+	 * the window larger, we will move it down, which means shifting the
+	 * origin toward (x,0). This will leave the top edge in the same place.
+	 */
 
-        windowFrame.origin.y    -= dy;
-        windowFrame.origin.x    -= dx;
-        windowFrame.size.height += dy;
-        windowFrame.size.width  += dx;
+	windowFrame.origin.y    -= dy;
+	windowFrame.origin.x    -= dx;
+	windowFrame.size.height += dy;
+	windowFrame.size.width  += dx;
 
-        NSUInteger old_auto_resize = [au_view autoresizingMask];
+	NSUInteger old_auto_resize = [au_view autoresizingMask];
 
-        /* Some stupid AU Views change the origin of the original AU View when
-           they are resized (I'm looking at you AUSampler). If the origin has
-           been moved, move it back.
-        */
+	/* Some stupid AU Views change the origin of the original AU View when
+	 * they are resized (I'm looking at you AUSampler). If the origin has
+	 * been moved, move it back.
+	 */
 
-        if (last_au_frame.origin.x != new_frame.origin.x ||
-            last_au_frame.origin.y != new_frame.origin.y) {
-                new_frame.origin = last_au_frame.origin;
-                [au_view setFrame:new_frame];
+	if (last_au_frame.origin.x != new_frame.origin.x ||
+			last_au_frame.origin.y != new_frame.origin.y) {
+		new_frame.origin = last_au_frame.origin;
+		[au_view setFrame:new_frame];
 
 		NSArray* subviews = [au_view subviews];
 		for (unsigned long i = 0; i < [subviews count]; ++i) {
 			NSView* subview = [subviews objectAtIndex:i];
 			[subview setFrame:NSMakeRect (0, 0, new_frame.size.width, new_frame.size.height)];
+			break; /* only resize first subview */
 		}
 
-                /* also be sure to redraw the topbox because this can
-                   also go wrong.
-                 */
-                top_box.queue_draw ();
+		/* also be sure to redraw the topbox because this can
+			 also go wrong.
+		 */
+		top_box.queue_draw ();
 	}
 
 	/* We resize the window using Cocoa. We can't use GTK mechanisms
@@ -889,9 +890,9 @@ AUPluginUI::cocoa_view_resized ()
 	 *
 	 */
 
-        [au_view setAutoresizingMask:NSViewNotSizable];
+	[au_view setAutoresizingMask:NSViewNotSizable];
 	[window setFrame:windowFrame display:1];
-        [au_view setAutoresizingMask:old_auto_resize];
+	[au_view setAutoresizingMask:old_auto_resize];
 
 	/* keep a copy of the size of the AU NSView. We didn't set it - the plugin did */
 	last_au_frame = new_frame;
@@ -1092,6 +1093,7 @@ AUPluginUI::parent_cocoa_window ()
 	for (unsigned long i = 0; i < [subviews count]; ++i) {
 		NSView* subview = [subviews objectAtIndex:i];
 		[subview setFrame:NSMakeRect (0, 0, req_width, req_height)];
+		break; /* only resize first subview */
 	}
 
 	last_au_frame = [au_view frame];

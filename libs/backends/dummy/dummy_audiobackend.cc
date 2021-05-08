@@ -460,7 +460,7 @@ DummyAudioBackend::_start (bool /*for_latency_measurement*/)
 	}
 
 	engine.reconnect_ports ();
-	_port_change_flag = false;
+	g_atomic_int_set (&_port_change_flag, 0);
 
 	if (pbd_pthread_create (PBD_RT_STACKSIZE_PROC, &_main_thread, pthread_process, this)) {
 		PBD::error << _("DummyAudioBackend: cannot start.") << endmsg;
@@ -1006,9 +1006,8 @@ DummyAudioBackend::main_process_thread ()
 		bool connections_changed = false;
 		bool ports_changed = false;
 		if (!pthread_mutex_trylock (&_port_callback_mutex)) {
-			if (_port_change_flag) {
+			if (g_atomic_int_compare_and_exchange (&_port_change_flag, 1, 0)) {
 				ports_changed = true;
-				_port_change_flag = false;
 			}
 			if (!_port_connection_queue.empty ()) {
 				connections_changed = true;

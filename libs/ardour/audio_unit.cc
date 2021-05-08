@@ -435,7 +435,6 @@ AUPlugin::AUPlugin (AudioEngine& engine, Session& session, boost::shared_ptr<CAC
 	, unit (new CAAudioUnit)
 	, initialized (false)
 	, _last_nframes (0)
-	, _current_latency (UINT_MAX)
 	, _requires_fixed_size_buffers (false)
 	, buffers (0)
 	, variable_inputs (false)
@@ -477,7 +476,6 @@ AUPlugin::AUPlugin (const AUPlugin& other)
 	, unit (new CAAudioUnit)
 	, initialized (false)
 	, _last_nframes (0)
-	, _current_latency (UINT_MAX)
 	, _requires_fixed_size_buffers (false)
 	, buffers (0)
 	, variable_inputs (false)
@@ -571,6 +569,8 @@ AUPlugin::discover_factory_presets ()
 void
 AUPlugin::init ()
 {
+	g_atomic_int_set (&_current_latency, UINT_MAX);
+
 	OSErr err;
 	CFStringRef itemName;
 
@@ -1112,7 +1112,6 @@ AUPlugin::reconfigure_io (ChanCount in, ChanCount aux_in, ChanCount out)
 
 	const int32_t audio_in = in.n_audio();
 	const int32_t audio_out = out.n_audio();
-	assert (in.n_audio () > 0);
 
 	if (initialized) {
 		/* if we are already running with the requested i/o config, bail out here */
@@ -1163,7 +1162,7 @@ AUPlugin::reconfigure_io (ChanCount in, ChanCount aux_in, ChanCount out)
 	uint32_t used_in = 0;
 	uint32_t used_out = 0;
 
-	if (input_elements == 0) {
+	if (input_elements == 0 || audio_in == 0) {
 		configured_input_busses = 0;
 	} else if (variable_inputs || input_elements == 1 || audio_in < bus_inputs[0]) {
 		/* we only ever use the first bus and configure it to match */

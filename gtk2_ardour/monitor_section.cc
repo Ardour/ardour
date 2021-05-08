@@ -26,7 +26,6 @@
 #include "pbd/compose.h"
 #include "pbd/error.h"
 #include "pbd/replace_all.h"
-#include "pbd/stacktrace.h"
 
 #include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/utils.h"
@@ -426,6 +425,7 @@ MonitorSection::MonitorSection ()
 		scrollbar.ensure_style();
 		Gtk::Requisition requisition(scrollbar.size_request ());
 		scrollbar_height = requisition.height;
+		scrollbar_height += 3; // track_display_frame border/shadow
 	}
 
 	// output port select

@@ -59,8 +59,8 @@ BundleEditorMatrix::setup_ports (int dim)
 		_ports[OTHER].suspend_signals ();
 
 		/* when we gather, allow the matrix to contain bundles with duplicate port sets,
-		   otherwise in some cases the basic system IO ports may be hidden, making
-		   the bundle editor useless */
+		 * otherwise ports already associated with this bundle will be hidden, making
+		 * the bundle editor useless */
 
 		_ports[OTHER].gather (_session, DataType::NIL, _bundle->ports_are_inputs(), true, show_only_bundles ());
 		_ports[OTHER].remove_bundle (_bundle);
@@ -112,6 +112,17 @@ BundleEditorMatrix::can_add_channels (boost::shared_ptr<Bundle> b) const
 	return PortMatrix::can_add_channels (b);
 }
 
+bool
+BundleEditorMatrix::can_add_port (boost::shared_ptr<Bundle> b, DataType t) const
+{
+#if 1
+	return true; // anything goes
+#else
+	/* Do not allow to mix datatypes */
+	return _bundle->nchannels().get (t) > 0;
+#endif
+}
+
 void
 BundleEditorMatrix::add_channel (boost::shared_ptr<Bundle> b, DataType t)
 {
@@ -136,11 +147,10 @@ BundleEditorMatrix::add_channel (boost::shared_ptr<Bundle> b, DataType t)
 bool
 BundleEditorMatrix::can_remove_channels (boost::shared_ptr<Bundle> b) const
 {
-	if (b == _bundle) {
-		return true;
+	if (b != _bundle) {
+		return false;
 	}
-
-	return PortMatrix::can_remove_channels (b);
+	return _bundle->n_total () > 1;
 }
 
 void
@@ -209,9 +219,9 @@ BundleEditor::BundleEditor (Session* session, boost::shared_ptr<UserBundle> bund
 	_input_or_output.append_text (_("Source"));
 
 	if (bundle->ports_are_inputs()) {
-		_input_or_output.set_active_text (_("Source"));
-	} else {
 		_input_or_output.set_active_text (_("Destination"));
+	} else {
+		_input_or_output.set_active_text (_("Source"));
 	}
 
 	_input_or_output.signal_changed().connect (sigc::mem_fun (*this, &BundleEditor::input_or_output_changed));

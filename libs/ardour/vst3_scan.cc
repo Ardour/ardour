@@ -46,31 +46,55 @@
 using namespace std;
 using namespace Steinberg;
 
+static const char* fmt_media (Vst::MediaType m) {
+	switch (m) {
+		case Vst::kAudio: return "kAudio";
+		case Vst::kEvent: return "kEvent";
+		default: return "?";
+	}
+}
+
+static const char* fmt_dir (Vst::BusDirection d) {
+	switch (d) {
+		case Vst::kInput: return "kInput";
+		case Vst::kOutput: return "kOutput";
+		default: return "?";
+	}
+}
+
+static const char* fmt_type (Vst::BusType t) {
+	switch (t) {
+		case Vst::kMain: return "kMain";
+		case Vst::kAux: return "kAux";
+		default: return "?";
+	}
+}
+
 static int32
 count_channels (Vst::IComponent* c, Vst::MediaType media, Vst::BusDirection dir, Vst::BusType type, bool verbose = false)
 {
 	/* see also libs/ardour/vst3_plugin.cc VST3PI::count_channels */
 	int32 n_busses = c->getBusCount (media, dir);
 	if (verbose) {
-		PBD::info << "VST3: media: " << media << " dir: " << dir << " type: " << type << " n_busses: " << n_busses << endmsg;
+		PBD::info << "VST3: media: " << fmt_media (media) << " dir: " << fmt_dir (dir) << " type: " << fmt_type (type) << " n_busses: " << n_busses << endmsg;
 	}
 	int32 n_channels = 0;
 	for (int32 i = 0; i < n_busses; ++i) {
 		Vst::BusInfo bus;
 		tresult rv = c->getBusInfo (media, dir, i, bus);
 		if (rv == kResultTrue && bus.busType == type) {
-			if (verbose) {
-				PBD::info << "VST3: bus: " << i << " count: " << bus.channelCount << endmsg;
-			}
 #if 1
 			if ((type == Vst::kMain && i != 0) || (type == Vst::kAux && i != 1)) {
 				/* For now allow we only support one main bus, and one aux-bus.
 				 * Also an aux-bus by itself is currently N/A.
 				 */
-				std::cerr << "VST3: Ignored extra bus. type: " << type << " index: " << i << "\n";
+				PBD::info << "VST3: \\ ignored bus: " << i << " type: " << fmt_type (bus.busType) << " count: " << bus.channelCount << endmsg;
 				continue;
 			}
 #endif
+			if (verbose) {
+				PBD::info << "VST3: - bus: " << i << " count: " << bus.channelCount << endmsg;
+			}
 			if (media == Vst::kEvent) {
 #if 0
 				/* Supported MIDI Channel count (for a single MIDI input) */
@@ -82,8 +106,10 @@ count_channels (Vst::IComponent* c, Vst::MediaType media, Vst::BusDirection dir,
 			} else {
 				n_channels += bus.channelCount;
 			}
-		} else if (verbose) {
-			PBD::info << "VST3: error getting busInfo for bus: " << i << " rv: " << rv << " busType: " << bus.busType << endmsg;
+		} else if (verbose && rv == kResultTrue) {
+			PBD::info << "VST3: \\ ignored bus: " << i << " mismatched type: " << fmt_type (bus.busType) << endmsg;
+		} else {
+			PBD::info << "VST3: \\ error getting busInfo for bus: " << i << " rv: " << rv << ", got type: " << fmt_type (bus.busType) << endmsg;
 		}
 	}
 	return n_channels;

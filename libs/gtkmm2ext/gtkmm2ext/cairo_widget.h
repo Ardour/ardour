@@ -27,12 +27,13 @@
 
 #include "gtkmm2ext/visibility.h"
 #include "gtkmm2ext/cairo_canvas.h"
+#include "gtkmm2ext/cairo_theme.h"
 #include "gtkmm2ext/widget_state.h"
 
 /** A parent class for widgets that are rendered using Cairo.
  */
 
-class LIBGTKMM2EXT_API CairoWidget : public Gtk::EventBox, public Gtkmm2ext::CairoCanvas
+class LIBGTKMM2EXT_API CairoWidget : public Gtk::EventBox, public Gtkmm2ext::CairoCanvas, public Gtkmm2ext::CairoTheme
 {
 public:
 	CairoWidget ();
@@ -86,13 +87,6 @@ public:
 
 	uint32_t background_color ();
 
-	static void set_flat_buttons (bool yn);
-	static void set_boxy_buttons (bool yn);
-	static bool flat_buttons() { return _flat_buttons; }
-	static bool boxy_buttons() { return _boxy_buttons; }
-
-	static void set_widget_prelight (bool yn);
-	static bool widget_prelight() { return _widget_prelight; }
 
 	static void set_source_rgb_a( cairo_t* cr, Gdk::Color, float a=1.0 );
 
@@ -134,11 +128,7 @@ protected:
 	Gtkmm2ext::ActiveState _active_state;
 	Gtkmm2ext::VisualState _visual_state;
 	bool                   _need_bg;
-
-	static bool	_flat_buttons;
-	static bool	_boxy_buttons;
-	static bool	_widget_prelight;
-	bool		_grabbed;
+	bool                   _grabbed;
 
 	static sigc::slot<void,Gtk::Widget*> focus_handler;
 

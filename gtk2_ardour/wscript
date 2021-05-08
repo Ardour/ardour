@@ -105,6 +105,7 @@ gtk2_ardour_sources = [
         'editor_timefx.cc',
         'engine_dialog.cc',
         'enums.cc',
+        'export_analysis_graphs.cc',
         'export_channel_selector.cc',
         'export_dialog.cc',
         'export_file_notebook.cc',
@@ -127,9 +128,11 @@ gtk2_ardour_sources = [
         'group_tabs.cc',
         'gui_object.cc',
         'idleometer.cc',
+        'input_port_monitor.cc',
         'insert_remove_time_dialog.cc',
         'instrument_selector.cc',
         'interthread_progress_window.cc',
+        'io_button.cc',
         'io_selector.cc',
         'hit.cc',
         'keyboard.cc',
@@ -139,6 +142,7 @@ gtk2_ardour_sources = [
         'level_meter.cc',
         'location_ui.cc',
         'loudness_dialog.cc',
+        'loudness_settings.cc',
         'lua_script_manager.cc',
         'luadialog.cc',
         'luainstance.cc',
@@ -224,6 +228,9 @@ gtk2_ardour_sources = [
         'public_editor.cc',
         'quantize_dialog.cc',
         'rc_option_editor.cc',
+        'rec_info_box.cc',
+        'recorder_group_tabs.cc',
+        'recorder_ui.cc',
         'region_editor.cc',
         'region_gain_line.cc',
         'region_layering_order_editor.cc',
@@ -277,6 +284,7 @@ gtk2_ardour_sources = [
         'time_info_box.cc',
         'time_selection.cc',
         'timers.cc',
+        'track_record_axis.cc',
         'track_selection.cc',
         'track_view_list.cc',
         'transform_dialog.cc',
@@ -369,7 +377,7 @@ def enoify (major, minor):
             return "\\n\\\"Hybrid\\\"" # 1985 Collaborative
         elif minor == 4 or minor == 5: # (there was on 6.4 release)
             return "\\n\\\"Old Land\\\"" # 1985 Compilation
-        elif minor == 6:
+        elif minor == 6 or minor == 7: # still on the desert island
             return "\\n\\\"Desert Island Selection\\\"" # 1986 Compilation
     elif major == 7:
         if minor == 0:
@@ -914,11 +922,13 @@ def build(bld):
         obj.chmod        = Utils.O644
         obj.dict         = freedesktop_subst_dict
         set_subst_dict(obj, freedesktop_subst_dict)
+        bld.install_files (os.path.join (bld.env['PREFIX'], 'share/applications'), obj.target)
 
         obj              = bld(features = 'subst')
         obj.source       = 'ardour-mime-info.xml'
         obj.target       = 'ardour.xml'
         obj.chmod        = Utils.O644
+        bld.install_files (os.path.join (bld.env['PREFIX'], 'share/mime/application'), 'ardour' + '.xml')
 
         # build appdata with translations
         appdata_i18n_mo(bld)
@@ -929,13 +939,22 @@ def build(bld):
         obj.chmod        = Utils.O644
         obj.dict         = freedesktop_subst_dict
         set_subst_dict(obj, freedesktop_subst_dict)
+        bld.install_files (os.path.join (bld.env['PREFIX'], 'share/appdata'), obj.target)
+
+        # install desktop icon files
+        bld.install_as('${PREFIX}/share/icons/hicolor/16x16/apps/ardour6.png', 'resources/Ardour-icon_16px.png')
+        bld.install_as('${PREFIX}/share/icons/hicolor/22x22/apps/ardour6.png', 'resources/Ardour-icon_22px.png')
+        bld.install_as('${PREFIX}/share/icons/hicolor/32x32/apps/ardour6.png', 'resources/Ardour-icon_32px.png')
+        bld.install_as('${PREFIX}/share/icons/hicolor/48x48/apps/ardour6.png', 'resources/Ardour-icon_48px.png')
+        bld.install_as('${PREFIX}/share/icons/hicolor/256x256/apps/ardour6.png', 'resources/Ardour-icon_256px.png')
+        bld.install_as('${PREFIX}/share/icons/hicolor/512x512/apps/ardour6.png', 'resources/Ardour-icon_512px.png')
 
     # Keybindings
 
     # NATIVE ARDOUR BINDING FILES
     # explicitly state the use of perl here so that it works on windows too
     #
-    a_rule = 'perl %s/tools/fmt-bindings --platform="%s" --winkey="%s" --accelmap ${SRC[0].abspath()} >${TGT}' % (bld.top_dir, sys.platform, bld.env['WINDOWS_KEY'] )
+    a_rule = 'perl %s/tools/fmt-bindings --platform="%s" --winkey="%s" --accelmap 1 ${SRC[0].abspath()} >${TGT}' % (bld.top_dir, sys.platform, bld.env['WINDOWS_KEY'] )
     for b in [ 'ardour' ] :
         obj = bld(
             target = b + '.keys',

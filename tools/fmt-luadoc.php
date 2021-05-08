@@ -34,9 +34,10 @@ foreach (json_decode ($json, true) as $b) {
 		if (isset ($b['version'])) { $ardourversion = $b['version']; }
 		continue;
 	}
-	# reserved lua words
+	# reserved Lua words -> C++
 	$b ['lua'] = preg_replace ('/:_end/', ':end', $b ['lua']);
 	$b ['lua'] = preg_replace ('/:_type/', ':type', $b ['lua']);
+	# resolves C++ ambiguities
 	$b ['ldec'] = preg_replace ('/ const/', '', preg_replace ('/ const&/', '', $b['decl']));
 	$b ['ldec'] = preg_replace ('/_VampHost::/', '', $b['ldec']);
 	$b ['decl'] = preg_replace ('/_VampHost::/', '', $b['decl']);
@@ -545,6 +546,13 @@ function ctorname ($name) {
 	return htmlentities (str_replace (':', '.', $name));
 }
 
+function luaname ($name) {
+	# reserved Lua words
+	$name = preg_replace ('/:end/', ':_end', $name);
+	$name = preg_replace ('/:type/', ':_type', $name);
+	return $name;
+}
+
 # strip class prefix (e.g "Evoral:MidiEvent:channel"  -> "channel")
 function shortname ($name) {
 	return htmlentities (substr ($name, strrpos ($name, ':') + 1));
@@ -661,7 +669,7 @@ function format_class_members ($ns, $cl, &$dups) {
 				$rv.= '<td class="def">&Copf;</td>';
 			}
 			$rv.= '<td class="decl">';
-			$rv.= '<span class="functionname">'.ctorname ($f['name']).'</span>';
+			$rv.= '<span class="functionname">'.ctorname (luaname ($f['name'])).'</span>';
 			$rv.= format_args ($f['args']);
 			$rv.= '</td><td class="fill"></td></tr>'.NL;
 			# doxygen documentation (may be empty)
@@ -703,7 +711,7 @@ function format_class_members ($ns, $cl, &$dups) {
 			}
 			# function declaration and arguments
 			$rv.= '</td><td class="decl">';
-			$rv.= '<span class="functionname"><abbr title="'.htmlentities($f['bind']['decl']).'">'.stripclass ($ns, $f['name']).'</abbr></span>';
+			$rv.= '<span class="functionname"><abbr title="'.htmlentities($f['bind']['decl']).'">'.stripclass ($ns, luaname ($f['name'])).'</abbr></span>';
 			$rv.= format_args ($f['args']);
 			$rv.= '</td><td class="fill"></td></tr>'.NL;
 			# doxygen documentation (may be empty)
@@ -719,7 +727,7 @@ function format_class_members ($ns, $cl, &$dups) {
 			$rv.= typelink (varname ($f['ret']), true, 'em');
 			# function declaration and arguments
 			$rv.= '</td><td class="decl">';
-			$rv.= '<span class="functionname"><abbr title="'.htmlentities($f['bind']['decl']).'">'.stripclass ($ns, $f['name']).'</abbr></span>';
+			$rv.= '<span class="functionname"><abbr title="'.htmlentities($f['bind']['decl']).'">'.stripclass ($ns, luaname ($f['name'])).'</abbr></span>';
 			$rv.= format_args ($f['args']);
 			$rv.= '</td><td class="fill"></td></tr>'.NL;
 			# doxygen documentation (may be empty)
@@ -733,7 +741,7 @@ function format_class_members ($ns, $cl, &$dups) {
 		$rv.= ' <tr><th colspan="3">Properties</th></tr>'.NL;
 		foreach ($cl['props'] as $f) {
 			$rv.= ' <tr><td class="def">'.typelink (array_keys ($f['ret'])[0], false, 'em').'</td><td class="decl">';
-			$rv.= '<span class="functionname">'.stripclass ($ns, $f['name']).'</span>';
+			$rv.= '<span class="functionname">'.stripclass ($ns, luaname ($f['name'])).'</span>';
 			$rv.= '</td><td class="fill"></td></tr>'.NL;
 		}
 	}
@@ -744,7 +752,7 @@ function format_class_members ($ns, $cl, &$dups) {
 		$rv.= ' <tr><th colspan="3">Data Members</th></tr>'.NL;
 		foreach ($cl['data'] as $f) {
 			$rv.= ' <tr><td class="def">'.typelink (array_keys ($f['ret'])[0], false, 'em').'</td><td class="decl">';
-			$rv.= '<span class="functionname">'.stripclass ($ns, $f['name']).'</span>';
+			$rv.= '<span class="functionname">'.stripclass ($ns, luaname ($f['name'])).'</span>';
 			$rv.= '</td><td class="fill"></td></tr>'.NL;
 			$f['cand'] = str_replace (':', '::', $f['name']);
 			$rv.= format_doxydoc($f);

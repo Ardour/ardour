@@ -64,6 +64,7 @@ Track::Track (Session& sess, string name, PresentationInfo::Flag flag, TrackMode
 	, _saved_meter_point (_meter_point)
 	, _mode (mode)
 	, _alignment_choice (Automatic)
+	, _pending_name_change (false)
 {
 	_freeze_record.state = NoFreeze;
 }
@@ -73,12 +74,10 @@ Track::~Track ()
 	DEBUG_TRACE (DEBUG::Destruction, string_compose ("track %1 destructor\n", _name));
 
 	if (_disk_reader) {
-		_disk_reader->set_track (boost::shared_ptr<Track>());
 		_disk_reader.reset ();
 	}
 
 	if (_disk_writer) {
-		_disk_writer->set_track (boost::shared_ptr<Track>());
 		_disk_writer.reset ();
 	}
 }
@@ -92,25 +91,15 @@ Track::init ()
 
 	DiskIOProcessor::Flag dflags = DiskIOProcessor::Recordable;
 
-	_disk_reader.reset (new DiskReader (_session, name(), dflags));
+	_disk_reader.reset (new DiskReader (_session, *this, name(), dflags));
 	_disk_reader->set_block_size (_session.get_block_size ());
-	_disk_reader->set_track (boost::dynamic_pointer_cast<Track> (shared_from_this()));
 	_disk_reader->set_owner (this);
 
-	_disk_writer.reset (new DiskWriter (_session, name(), dflags));
+	_disk_writer.reset (new DiskWriter (_session, *this, name(), dflags));
 	_disk_writer->set_block_size (_session.get_block_size ());
-	_disk_writer->set_track (boost::dynamic_pointer_cast<Track> (shared_from_this()));
 	_disk_writer->set_owner (this);
 
 	set_align_choice_from_io ();
-
-	if (!name().empty()) {
-		/* an empty name means that we are being constructed via
-		 * serialized state (XML). Don't create a playlist, because one
-		 * will be created or discovered during ::set_state().
-		 */
-		use_new_playlist (data_type());
-	}
 
 	boost::shared_ptr<Route> rp (boost::dynamic_pointer_cast<Route> (shared_from_this()));
 	boost::shared_ptr<Track> rt = boost::dynamic_pointer_cast<Track> (rp);
@@ -123,6 +112,16 @@ Track::init ()
 
 	_monitoring_control.reset (new MonitorControl (_session, EventTypeMap::instance().to_symbol (MonitoringAutomation), *this));
 	add_control (_monitoring_control);
+
+	if (!name().empty()) {
+		/* an empty name means that we are being constructed via
+		 * serialized state (XML). Don't create a playlist, because one
+		 * will be created or discovered during ::set_state().
+		 */
+		use_new_playlist (data_type());
+		/* set disk-I/O and diskstream name */
+		set_name (name ());
+	}
 
 	_session.config.ParameterChanged.connect_same_thread (*this, boost::bind (&Track::parameter_changed, this, _1));
 
@@ -348,34 +347,28 @@ void
 Track::parameter_changed (string const & p)
 {
 	if (p == "track-name-number") {
-		resync_track_name ();
+		resync_take_name ();
 	}
 	else if (p == "track-name-take") {
-		resync_track_name ();
+		resync_take_name ();
 	}
 	else if (p == "take-name") {
 		if (_session.config.get_track_name_take()) {
-			resync_track_name ();
+			resync_take_name ();
 		}
 	}
 }
 
-void
-Track::resync_track_name ()
+int
+Track::resync_take_name (std::string n)
 {
-	set_name(name());
-}
-
-bool
-Track::set_name (const string& str)
-{
-	if (str.empty ()) {
-		return false;
+	if (n.empty ()) {
+		n = name ();
 	}
 
-	if (_record_enable_control->get_value()) {
-		/* when re-arm'ed the file (named after the track) is already ready to rolll */
-		return false;
+	if (_record_enable_control->get_value() && _session.actively_recording ()) {
+		_pending_name_change = true;
+		return -1;
 	}
 
 	string diskstream_name = "";
@@ -392,14 +385,33 @@ Track::set_name (const string& str)
 		diskstream_name += num;
 		diskstream_name += "_";
 	}
-	diskstream_name += str;
+
+	diskstream_name += n;
 
 	if (diskstream_name == _diskstream_name) {
-		return true;
+		return 1;
 	}
-	_diskstream_name = diskstream_name;
 
+	_diskstream_name = diskstream_name;
 	_disk_writer->set_write_source_name (diskstream_name);
+	return 0;
+}
+
+bool
+Track::set_name (const string& str)
+{
+	if (str.empty ()) {
+		return false;
+	}
+
+	switch (resync_take_name (str)) {
+		case -1:
+			return false;
+		case 1:
+			return true;
+		default:
+			break;
+	}
 
 	boost::shared_ptr<Track> me = boost::dynamic_pointer_cast<Track> (shared_from_this ());
 
@@ -560,6 +572,19 @@ void
 Track::transport_stopped_wallclock (struct tm & n, time_t t, bool g)
 {
 	_disk_writer->transport_stopped_wallclock (n, t, g);
+
+	if (_pending_name_change) {
+		resync_take_name ();
+		_pending_name_change = false;
+	}
+}
+
+void
+Track::mark_capture_xrun ()
+{
+	if (_disk_writer->record_enabled ()) {
+		_disk_writer->mark_capture_xrun ();
+	}
 }
 
 bool
@@ -634,13 +659,6 @@ Track::find_and_use_playlist (DataType dt, PBD::ID const & id)
 	return use_playlist (dt, playlist);
 }
 
-void
-update_region_visibility(boost::shared_ptr<Region> r)
-{
-	Region::RegionPropertyChanged(r, Properties::hidden);
-}
-
-
 int
 Track::use_playlist (DataType dt, boost::shared_ptr<Playlist> p)
 {
@@ -658,9 +676,18 @@ Track::use_playlist (DataType dt, boost::shared_ptr<Playlist> p)
 		_playlists[dt] = p;
 	}
 
-	//allow all regions of prior and new playlists to update their visibility?
-	if (old)  old->foreach_region(update_region_visibility);
-	if (p)    p->foreach_region(update_region_visibility);
+	if (old) {
+		boost::shared_ptr<RegionList> rl (new RegionList (old->region_list_property ().rlist ()));
+		if (rl->size () > 0) {
+			Region::RegionsPropertyChanged (rl, Properties::hidden);
+		}
+	}
+	if (p) {
+		boost::shared_ptr<RegionList> rl (new RegionList (p->region_list_property ().rlist ()));
+		if (rl->size () > 0) {
+			Region::RegionsPropertyChanged (rl, Properties::hidden);
+		}
+	}
 
 	_session.set_dirty ();
 	PlaylistChanged (); /* EMIT SIGNAL */
@@ -758,19 +785,7 @@ Track::set_align_choice_from_io ()
 				break;
 			}
 		}
-
-		/* Special case bouncing the Metronome.
-		 * Click-out is aligned to output and hence
-		 * equivalent to a physical round-trip alike
-		 * ExistingMaterial.
-		 */
-		if (!have_physical && _session.click_io ()) {
-			if (_session.click_io ()->connected_to (_input)) {
-				have_physical = true;
-			}
-		}
 	}
-
 
 #ifdef MIXBUS
 	// compensate for latency when bouncing from master or mixbus.

@@ -631,7 +631,6 @@ private:
 
 	boost::shared_ptr<ARDOUR::Stripable> master;
 
-	PBD::ScopedConnection port_reg_connection;
 	void port_registration_handler();
 
 	enum ConnectionState { InputConnected = 0x1, OutputConnected = 0x2 };
@@ -640,7 +639,7 @@ private:
 	bool connection_handler(boost::weak_ptr<ARDOUR::Port>, std::string name1,
 			boost::weak_ptr<ARDOUR::Port>, std::string name2,
 			bool yn);
-	PBD::ScopedConnectionList port_connections;
+	PBD::ScopedConnection port_connection;
 	void connected();
 
 	/* GUI */

@@ -113,22 +113,26 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog)
 
 	/* Normalize */
 
+	normalize_tp_limiter.append_text (_("limit to"));
+	normalize_tp_limiter.append_text (_("constrain"));
+
 	Gtk::RadioButtonGroup normalize_group = normalize_loudness_rb.get_group ();
 	normalize_peak_rb.set_group (normalize_group);
 
-	normalize_hbox.pack_start (normalize_checkbox, false, false, 2);
-	normalize_hbox.pack_start (normalize_peak_rb, false, false, 0);
-	normalize_hbox.pack_start (normalize_dbfs_spinbutton, false, false, 2);
-	normalize_hbox.pack_start (normalize_dbfs_label, false, false, 0);
+	normalize_table.set_row_spacings (4);
+	normalize_table.set_col_spacings (4);
 
-	normalize_hbox.pack_start (*Gtk::manage (new Gtk::Label ("")), false, false, 6); // separator
+	normalize_table.attach (normalize_checkbox,        0, 1, 0, 1);
+	normalize_table.attach (normalize_peak_rb,         1, 2, 0, 1);
+	normalize_table.attach (normalize_dbfs_spinbutton, 2, 3, 0, 1);
+	normalize_table.attach (normalize_dbfs_label,      3, 4, 0, 1);
 
-	normalize_hbox.pack_start (normalize_loudness_rb, false, false, 0);
-	normalize_hbox.pack_start (normalize_lufs_spinbutton, false, false, 2);
-	normalize_hbox.pack_start (normalize_lufs_label, false, false, 0);
-	normalize_hbox.pack_start (*Gtk::manage (new Gtk::Label (_("\u2227"))), false, false, 4);
-	normalize_hbox.pack_start (normalize_dbtp_spinbutton, false, false, 2);
-	normalize_hbox.pack_start (normalize_dbtp_label, false, false, 0);
+	normalize_table.attach (normalize_loudness_rb,     1, 2, 1, 2);
+	normalize_table.attach (normalize_lufs_spinbutton, 2, 3, 1, 2);
+	normalize_table.attach (normalize_lufs_label,      3, 4, 1, 2);
+	normalize_table.attach (normalize_tp_limiter,      4, 5, 1, 2);
+	normalize_table.attach (normalize_dbtp_spinbutton, 5, 6, 1, 2);
+	normalize_table.attach (normalize_dbtp_label,      6, 7, 1, 2);
 
 	ArdourWidgets::set_tooltip (normalize_loudness_rb,
 	                            _("Normalize to EBU-R128 LUFS target loudness without exceeding the given true-peak limit. EBU-R128 normalization is only available for mono and stereo targets, true-peak works for any channel layout."));
@@ -142,7 +146,7 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog)
 	silence_table.set_row_spacings (6);
 	silence_table.set_col_spacings (12);
 
-	silence_table.attach (normalize_hbox, 0, 3, 0, 1);
+	silence_table.attach (normalize_table, 0, 3, 0, 1);
 
 	silence_table.attach (trim_start_checkbox, 0, 1, 1, 2);
 	silence_table.attach (silence_start_checkbox, 1, 2, 1, 2);
@@ -257,6 +261,7 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog)
 	normalize_checkbox.signal_toggled ().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_normalize_selection));
 	normalize_peak_rb.signal_toggled ().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_normalize_selection));
 	normalize_loudness_rb.signal_toggled ().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_normalize_selection));
+	normalize_tp_limiter.signal_changed ().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_normalize_selection));
 	normalize_dbfs_spinbutton.signal_value_changed ().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_normalize_selection));
 	normalize_lufs_spinbutton.signal_value_changed ().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_normalize_selection));
 	normalize_dbtp_spinbutton.signal_value_changed ().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_normalize_selection));
@@ -377,6 +382,7 @@ ExportFormatDialog::load_state (FormatPtr spec)
 
 	normalize_checkbox.set_active (spec->normalize ());
 	normalize_peak_rb.set_active (!spec->normalize_loudness ());
+	normalize_tp_limiter.set_active (spec->use_tp_limiter () ? 0 : 1);
 	normalize_loudness_rb.set_active (spec->normalize_loudness ());
 	normalize_dbfs_spinbutton.set_value (spec->normalize_dbfs ());
 	normalize_lufs_spinbutton.set_value (spec->normalize_lufs ());
@@ -948,6 +954,7 @@ ExportFormatDialog::update_normalize_sensitivity ()
 {
 	bool en       = normalize_checkbox.get_active ();
 	bool loudness = normalize_loudness_rb.get_active ();
+	normalize_tp_limiter.set_sensitive (loudness && en);
 	normalize_dbfs_spinbutton.set_sensitive (!loudness && en);
 	normalize_lufs_spinbutton.set_sensitive (loudness && en);
 	normalize_dbtp_spinbutton.set_sensitive (loudness && en);
@@ -959,6 +966,7 @@ ExportFormatDialog::update_normalize_selection ()
 	manager.select_normalize (normalize_checkbox.get_active ());
 	manager.select_normalize_loudness (normalize_loudness_rb.get_active ());
 	manager.select_normalize_dbfs (normalize_dbfs_spinbutton.get_value ());
+	manager.select_tp_limiter (normalize_tp_limiter.get_active_row_number () == 0);
 	manager.select_normalize_lufs (normalize_lufs_spinbutton.get_value ());
 	manager.select_normalize_dbtp (normalize_dbtp_spinbutton.get_value ());
 	update_normalize_sensitivity ();

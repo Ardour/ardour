@@ -41,6 +41,7 @@
 #include "pbd/stateful.h"
 #include "pbd/controllable.h"
 #include "pbd/destructible.h"
+#include "pbd/g_atomic_compat.h"
 
 #include "ardour/ardour.h"
 #include "ardour/gain_control.h"
@@ -182,6 +183,9 @@ public:
 	}
 	bool is_safe () const {
 		return _solo_safe_control->get_value();
+	}
+	bool can_monitor () const {
+		return can_solo() || is_foldbackbus ();
 	}
 	void enable_monitor_send ();
 
@@ -646,10 +650,10 @@ protected:
 		EmitRtProcessorChange = 0x04
 	};
 
-	ProcessorList  _pending_processor_order;
-	gint           _pending_process_reorder; // atomic
-	gint           _pending_listen_change; // atomic
-	gint           _pending_signals; // atomic
+	ProcessorList     _pending_processor_order;
+	GATOMIC_QUAL gint _pending_process_reorder; // atomic
+	GATOMIC_QUAL gint _pending_listen_change; // atomic
+	GATOMIC_QUAL gint _pending_signals; // atomic
 
 	MeterPoint     _meter_point;
 	MeterPoint     _pending_meter_point;
@@ -789,6 +793,7 @@ private:
 	bool    _in_configure_processors;
 	bool    _initial_io_setup;
 	bool    _in_sidechain_setup;
+	gain_t  _monitor_gain;
 
 	/** true if we've made a note of a custom meter position in these variables */
 	bool _custom_meter_position_noted;

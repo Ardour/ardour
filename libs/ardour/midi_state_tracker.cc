@@ -21,7 +21,6 @@
 #include <iostream>
 
 #include "pbd/compose.h"
-#include "pbd/stacktrace.h"
 
 #include "evoral/EventSink.h"
 

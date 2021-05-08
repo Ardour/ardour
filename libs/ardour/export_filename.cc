@@ -128,8 +128,9 @@ ExportFilename::set_state (const XMLNode & node)
 	if (child->get_property ("path", tmp)) {
 		tmp = Glib::build_filename (folder, tmp);
 		if (!Glib::file_test (tmp, Glib::FILE_TEST_EXISTS)) {
-			warning << string_compose (_("Existing export folder for this session (%1) does not exist - ignored"), tmp) << endmsg;
-		} else {
+			warning << string_compose (_("Existing export folder for this session (%1) does not exist - using default"), tmp) << endmsg;
+			folder = session.session_directory().export_path();
+	} else {
 			folder = tmp;
 		}
 	}
@@ -187,6 +188,7 @@ ExportFilename::get_path (ExportFormatSpecPtr format) const
 			&& !include_revision
 			&& !include_timespan
 			&& !include_channel_config
+			&& !include_format_name
 			&& !include_channel
 			&& !include_date) {
 		with_timespan = true;
@@ -408,7 +410,8 @@ ExportFilename::analyse_folder ()
 
 	if (!folder_beginning.compare (session_dir)) {
 		pair.first = true;
-		pair.second = folder.substr (session_dir_len);
+		// remove the leading slash if needed. 
+		pair.second = folder.substr (folder.length() > session_dir_len ? session_dir_len+1 : session_dir_len);
 	} else {
 		pair.first = false;
 		pair.second = folder;

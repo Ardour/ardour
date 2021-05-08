@@ -2,24 +2,24 @@
 # Copyright (C) YEAR "Paul Davis"
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-# 一善鱼 <YQ-YSY@163.com> 翻译于 2016-03-27
+# 一善鱼 <YQ-YSY@163.com> 翻译于 2016-03-27、2021-02-11
 msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 6\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-05-13 15:36+0800\n"
-"PO-Revision-Date: 2020-05-17 09:59+0800\n"
+"POT-Creation-Date: 2021-02-11 21:39+0800\n"
+"PO-Revision-Date: 2021-02-12 10:30+0800\n"
 "Last-Translator: 一善鱼 <YQ-YSY@163.com>\n"
 "Language-Team: 一善鱼 YQ-YSY@163.com\n"
 "Language: zh\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.3\n"
+"X-Generator: Poedit 2.4.1\n"
 
 #: actions.cc:215
 msgid "Unknown action name: %1/%2"
-msgstr "未知的动作名称：％1/％2"
+msgstr "未知的动作名称：%1/%2"
 
 #: action_model.cc:56 action_model.cc:171
 msgid "Disabled"
@@ -55,11 +55,11 @@ msgstr "窗口"
 
 #: bindings.cc:840
 msgid " (Categorized)"
-msgstr "（分类）"
+msgstr " （分类）"
 
 #: bindings.cc:842
 msgid " (Alphabetical)"
-msgstr "（按字母顺序）"
+msgstr " （按字母顺序）"
 
 #: bindings.cc:858
 msgid "Uncategorized"
@@ -77,7 +77,7 @@ msgstr ""
 msgid "Log"
 msgstr "日志"
 
-#: gtk_ui.cc:395
+#: gtk_ui.cc:412
 msgid ""
 "\n"
 "\n"
@@ -85,13 +85,13 @@ msgid ""
 msgstr ""
 "\n"
 "\n"
-"快捷键："
+"快捷键： "
 
-#: gtk_ui.cc:694
+#: gtk_ui.cc:720
 msgid "Press To Exit"
 msgstr "按下退出"
 
-#: gtk_ui.cc:730
+#: gtk_ui.cc:756
 msgid "I'm sorry %1, I can't do that"
 msgstr "对不起 %1，我不能那样做"
 

@@ -58,7 +58,7 @@
 using Temporal::max_samplepos;
 using Temporal::max_samplecnt;
 
-#if __GNUC__ < 3
+#if defined (__GNUC__) && (__GNUC__ < 3)
 typedef int intptr_t;
 #endif
 
@@ -484,6 +484,12 @@ enum MeterLineUp {
 	MeteringLineUp15
 };
 
+enum InputMeterLayout {
+	LayoutVertical,
+	LayoutHorizontal,
+	LayoutAutomatic,
+};
+
 enum PFLPosition {
 	/** PFL signals come from before pre-fader processors */
 	PFLFromBeforeProcessors,
@@ -621,6 +627,7 @@ enum SrcQuality {
 };
 
 typedef std::list<samplepos_t> AnalysisFeatureList;
+typedef std::vector<samplepos_t> XrunPositions;
 
 typedef std::list<boost::shared_ptr<Route> > RouteList;
 typedef std::list<boost::shared_ptr<Stripable> > StripableList;
@@ -794,9 +801,10 @@ enum MidiTempoMapDisposition {
 };
 
 struct CaptureInfo {
-	samplepos_t start;
-	samplecnt_t samples;
-	samplecnt_t loop_offset;
+	samplepos_t   start;
+	samplecnt_t   samples;
+	samplecnt_t   loop_offset;
+	XrunPositions xruns;
 };
 
 enum LoopFadeChoice {

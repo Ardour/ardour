@@ -63,7 +63,7 @@
  * The delay i is controlled by a sine or triangle modulation i ( 1 <= i <= n).
  *
  * The chorus unit process a monophonic input signal and produces stereo output
- * controled by WIDTH macro.
+ * controlled by WIDTH macro.
  * Actually WIDTH is fixed to maximum value. But in the future, we could add a
  * setting (e.g "synth.chorus.width") allowing the user to get a gradually stereo
  * effect from minimum (monophonic) to maximum stereo effect.
@@ -79,7 +79,7 @@
  * The advantages are:
  * - Avoiding a lost of 608272 memory bytes when lfo speed is low (0.3Hz).
  * - Allows to diminish the lfo speed lower limit to 0.1Hz instead of 0.3Hz.
- *   A speed of 0.1 is interresting for chorus. Using a lookuptable for 0.1Hz
+ *   A speed of 0.1 is interesting for chorus. Using a lookuptable for 0.1Hz
  *   would require too much memory (1824816 bytes).
  * - Interpolation make use of first order all-pass interpolator instead of
  *   bandlimited interpolation.
@@ -244,7 +244,7 @@ struct _fluid_chorus_t
 static void set_sinus_frequency(sinus_modulator *mod,
                                 float freq, float sample_rate, float phase)
 {
-    fluid_real_t w = 2 * FLUID_M_PI * freq / sample_rate; /* intial angle */
+    fluid_real_t w = 2 * FLUID_M_PI * freq / sample_rate; /* initial angle */
     fluid_real_t a;
 
     mod->a1 = 2 * FLUID_COS(w);
@@ -261,7 +261,7 @@ static void set_sinus_frequency(sinus_modulator *mod,
    y(n) = a1 . y(n-1)  -  y(n-2)
    out = a1 . buffer1  -  buffer2
 
- @param pointer on modulator structure.
+ @param mod pointer on modulator structure.
  @return current value of the modulator sine wave.
 -----------------------------------------------------------------------------*/
 static FLUID_INLINE fluid_real_t get_mod_sinus(sinus_modulator *mod)
@@ -293,6 +293,11 @@ static FLUID_INLINE fluid_real_t get_mod_sinus(sinus_modulator *mod)
  in the period relative to the beginning of the period.
  For example: 0 is the beginning of the period, 1/4 is at 1/4 of the period
  relative to the beginning.
+
+ @param mod pointer on modulator structure.
+ @param freq frequency of the oscillator in Hz.
+ @param sample_rate sample rate on audio output in Hz.
+ @param frac_phase initial phase (see comment above).
 -----------------------------------------------------------------------------*/
 static void set_triangle_frequency(triang_modulator *mod, float freq,
                                    float sample_rate, float frac_phase)
@@ -313,7 +318,7 @@ static void set_triangle_frequency(triang_modulator *mod, float freq,
     mod->inc  = 4 / ns_period; /* positive slope */
 
     /* The initial value and the sign of the slope depend of initial phase:
-      intial value = = (ns_period * frac_phase) * slope
+      initial value = = (ns_period * frac_phase) * slope
     */
     mod->val =  ns_period * frac_phase * mod->inc;
 
@@ -333,6 +338,9 @@ static void set_triangle_frequency(triang_modulator *mod, float freq,
 /*-----------------------------------------------------------------------------
    Get current value of triangular oscillator
        y(n) = y(n-1) + dy
+
+ @param mod pointer on triang_modulator structure.
+ @return current value.
 -----------------------------------------------------------------------------*/
 static FLUID_INLINE fluid_real_t get_mod_triang(triang_modulator *mod)
 {
@@ -354,18 +362,20 @@ static FLUID_INLINE fluid_real_t get_mod_triang(triang_modulator *mod)
 }
 /*-----------------------------------------------------------------------------
  Reads the sample value out of the modulated delay line.
- @param mdl, pointer on modulated delay line.
- @return the sample value.
+
+ @param chorus pointer on chorus unit.
+ @param mod pointer on modulator structure.
+ @return current value.
 -----------------------------------------------------------------------------*/
 static FLUID_INLINE fluid_real_t get_mod_delay(fluid_chorus_t *chorus,
-        modulator *mod)
+                                               modulator *mod)
 {
     fluid_real_t out_index;  /* new modulated index position */
     int int_out_index; /* integer part of out_index */
     fluid_real_t out; /* value to return */
 
     /* Checks if the modulator must be updated (every mod_rate samples). */
-    /* Important: center_pos_mod must be used immediatly for the
+    /* Important: center_pos_mod must be used immediately for the
        first sample. So, mdl->index_rate must be initialized
        to mdl->mod_rate (new_mod_delay_line())  */
 
@@ -421,7 +431,7 @@ static FLUID_INLINE fluid_real_t get_mod_delay(fluid_chorus_t *chorus,
         mod->line_out -= chorus->size;
     }
 
-    /* Fractional interpolation beetween next sample (at next position) and
+    /* Fractional interpolation between next sample (at next position) and
        previous output added to current sample.
     */
     out += mod->frac_pos_mod * (chorus->line[mod->line_out] - mod->buffer);
@@ -431,6 +441,9 @@ static FLUID_INLINE fluid_real_t get_mod_delay(fluid_chorus_t *chorus,
 
 /*-----------------------------------------------------------------------------
  Push a sample val into the delay line
+
+ @param dl delay line to push value into.
+ @param val the value to push into dl.
 -----------------------------------------------------------------------------*/
 #define push_in_delay_line(dl, val) \
 {\
@@ -444,13 +457,15 @@ static FLUID_INLINE fluid_real_t get_mod_delay(fluid_chorus_t *chorus,
 
  center_pos_mod is initialized so that the delay between center_pos_mod and
  line_in is: mod_depth + INTERP_SAMPLES_NBR.
+
+ @param chorus pointer on chorus unit.
 -----------------------------------------------------------------------------*/
 static void set_center_position(fluid_chorus_t *chorus)
 {
     int center;
 
     /* Sets the modulation rate. This rate defines how often
-     the  center position (center_pos_mod ) is modulated .
+     the center position (center_pos_mod ) is modulated .
      The value is expressed in samples. The default value is 1 that means that
      center_pos_mod is updated at every sample.
      For example with a value of 2, the center position position will be
@@ -479,9 +494,66 @@ static void set_center_position(fluid_chorus_t *chorus)
     chorus->center_pos_mod = (fluid_real_t)center;
 
     /* index rate to control when to update center_pos_mod */
-    /* Important: must be set to get center_pos_mod immediatly used for the
+    /* Important: must be set to get center_pos_mod immediately used for the
        reading of first sample (see get_mod_delay()) */
     chorus->index_rate = chorus->mod_rate;
+}
+
+/*-----------------------------------------------------------------------------
+ Update internal parameters dependent of sample rate.
+ - mod_depth.
+ - mod_rate, center_pos_mod, and index rate.
+ - modulators frequency.
+
+ @param chorus, pointer on chorus unit.
+-----------------------------------------------------------------------------*/
+static void update_parameters_from_sample_rate(fluid_chorus_t *chorus)
+{
+    int i;
+
+    /* initialize modulation depth (peak to peak) (in samples) */
+    /* convert modulation depth in ms to sample number */
+    chorus->mod_depth = (int)(chorus->depth_ms  / 1000.0
+                              * chorus->sample_rate);
+
+    /* the delay line is fixed. So we reduce mod_depth (if necessary) */
+    if(chorus->mod_depth > MAX_SAMPLES)
+    {
+        FLUID_LOG(FLUID_WARN, "chorus: Too high depth. Setting it to max (%d).",
+                  MAX_SAMPLES);
+        chorus->mod_depth = MAX_SAMPLES;
+        /* set depth_ms to maximum to avoid spamming console with above warning */
+        chorus->depth_ms = (chorus->mod_depth * 1000) / chorus->sample_rate;
+    }
+
+    chorus->mod_depth /= 2; /* amplitude is peak to peek / 2 */
+#ifdef DEBUG_PRINT
+    printf("depth_ms:%f, depth_samples/2:%d\n", chorus->depth_ms, chorus->mod_depth);
+#endif
+
+    /* Initializes the modulated center position:
+       mod_rate, center_pos_mod, and index rate.
+    */
+    set_center_position(chorus); /* must be called before set_xxxx_frequency() */
+#ifdef DEBUG_PRINT
+    printf("mod_rate:%d\n", chorus->mod_rate);
+#endif
+
+    /* initialize modulator frequency */
+    for(i = 0; i < chorus->number_blocks; i++)
+    {
+        set_sinus_frequency(&chorus->mod[i].sinus,
+                            chorus->speed_Hz * chorus->mod_rate,
+                            chorus->sample_rate,
+                            /* phase offset between modulators waveform */
+                            (float)((360.0f / (float) chorus->number_blocks) * i));
+
+        set_triangle_frequency(&chorus->mod[i].triang,
+                               chorus->speed_Hz * chorus->mod_rate,
+                               chorus->sample_rate,
+                               /* phase offset between modulators waveform */
+                               (float)i / chorus->number_blocks);
+    }
 }
 
 /*-----------------------------------------------------------------------------
@@ -491,7 +563,7 @@ static void set_center_position(fluid_chorus_t *chorus)
  Remark: the function sets the internal size accordling to the length delay_length.
  The size is augmented by INTERP_SAMPLES_NBR to take account of interpolation.
 
- @param chorus, pointer chorus unit.
+ @param chorus, pointer on chorus unit.
  @param delay_length the length of the delay line in samples.
  @return FLUID_OK if success , FLUID_FAILED if memory error.
 
@@ -545,8 +617,11 @@ static int new_mod_delay_line(fluid_chorus_t *chorus, int delay_length)
   API
 ------------------------------------------------------------------------------*/
 /**
- * Create the chorus unit.
- * @sample_rate audio sample rate in Hz.
+ * Create the chorus unit. Once created the chorus have no parameters set, so
+ * fluid_chorus_set() must be called at least one time after calling
+ * new_fluid_chorus().
+ *
+ * @param sample_rate, audio sample rate in Hz.
  * @return pointer on chorus unit.
  */
 fluid_chorus_t *
@@ -577,15 +652,11 @@ new_fluid_chorus(fluid_real_t sample_rate)
 
     if(new_mod_delay_line(chorus, MAX_SAMPLES) == FLUID_FAILED)
     {
-        goto error_recovery;
+        delete_fluid_chorus(chorus);
+        return NULL;
     }
 
     return chorus;
-
-error_recovery:
-    delete_fluid_chorus(chorus);
-
-    return NULL;
 }
 
 /**
@@ -628,22 +699,21 @@ fluid_chorus_reset(fluid_chorus_t *chorus)
 
 /**
  * Set one or more chorus parameters.
- * @param chorus Chorus instance
- * @param set Flags indicating which chorus parameters to set (#fluid_chorus_set_t)
+ *
+ * @param chorus Chorus instance.
+ * @param set Flags indicating which chorus parameters to set (#fluid_chorus_set_t).
  * @param nr Chorus voice count (0-99, CPU time consumption proportional to
- *   this value)
- * @param level Chorus level (0.0-10.0)
- * @param speed Chorus speed in Hz (0.1-5.0)
+ *   this value).
+ * @param level Chorus level (0.0-10.0).
+ * @param speed Chorus speed in Hz (0.1-5.0).
  * @param depth_ms Chorus depth (max value depends on synth sample rate,
- *   0.0-21.0 is safe for sample rate values up to 96KHz)
- * @param type Chorus waveform type (#fluid_chorus_mod)
+ *   0.0-21.0 is safe for sample rate values up to 96KHz).
+ * @param type Chorus waveform type (#fluid_chorus_mod).
  */
 void
 fluid_chorus_set(fluid_chorus_t *chorus, int set, int nr, fluid_real_t level,
                  fluid_real_t speed, fluid_real_t depth_ms, int type)
 {
-    int i;
-
     if(set & FLUID_CHORUS_SET_NR) /* number of block */
     {
         chorus->number_blocks = nr;
@@ -713,45 +783,8 @@ fluid_chorus_set(fluid_chorus_t *chorus, int set, int nr, fluid_real_t level,
         chorus->level = 0.1;
     }
 
-    /* initialize modulation depth (peak to peak) (in samples)*/
-    chorus->mod_depth = (int)(chorus->depth_ms  / 1000.0    /* convert modulation depth in ms to s*/
-                              * chorus->sample_rate);
-
-    if(chorus->mod_depth > MAX_SAMPLES)
-    {
-        FLUID_LOG(FLUID_WARN, "chorus: Too high depth. Setting it to max (%d).", MAX_SAMPLES);
-        chorus->mod_depth = MAX_SAMPLES;
-        // set depth to maximum to avoid spamming console with above warning
-        chorus->depth_ms = (chorus->mod_depth * 1000) / chorus->sample_rate;
-    }
-
-    chorus->mod_depth /= 2; /* amplitude is peak to peek / 2 */
-#ifdef DEBUG_PRINT
-    printf("depth_ms:%f, depth_samples/2:%d\n", chorus->depth_ms, chorus->mod_depth);
-#endif
-    /* Initializes the modulated center position:
-       mod_rate, center_pos_mod,  and index rate.
-    */
-    set_center_position(chorus); /* must be called before set_xxxx_frequency() */
-#ifdef DEBUG_PRINT
-    printf("mod_rate:%d\n", chorus->mod_rate);
-#endif
-
-    /* initialize modulator frequency */
-    for(i = 0; i < chorus->number_blocks; i++)
-    {
-        set_sinus_frequency(&chorus->mod[i].sinus,
-                            chorus->speed_Hz * chorus->mod_rate,
-                            chorus->sample_rate,
-                            /* phase offset between modulators waveform */
-                            (float)((360.0f / (float) chorus->number_blocks) * i));
-
-        set_triangle_frequency(&chorus->mod[i].triang,
-                               chorus->speed_Hz * chorus->mod_rate,
-                               chorus->sample_rate,
-                               /* phase offset between modulators waveform */
-                               (float)i / chorus->number_blocks);
-    }
+    /* update parameters dependant of sample rate */
+    update_parameters_from_sample_rate(chorus);
 
 #ifdef DEBUG_PRINT
     printf("lfo type:%d\n", chorus->type);
@@ -800,7 +833,7 @@ fluid_chorus_set(fluid_chorus_t *chorus, int set, int nr, fluid_real_t level,
 
         fluid_real_t wet = chorus->level * SCALE_WET ;
 
-        /* wet1 and wet2 are used by the stereo effect controled by the width setting
+        /* wet1 and wet2 are used by the stereo effect controlled by the width setting
         for producing a stereo ouptput from a monophonic chorus signal.
         Please see the note above about a side effect tendency */
 
@@ -859,6 +892,32 @@ fluid_chorus_set(fluid_chorus_t *chorus, int set, int nr, fluid_real_t level,
     }
 }
 
+/*
+* Applies a sample rate change on the chorus.
+* Note that while the chorus is used by calling any fluid_chorus_processXXX()
+* function, calling fluid_chorus_samplerate_change() isn't multi task safe.
+* To deal properly with this issue follow the steps:
+* 1) Stop chorus processing (i.e disable calling to any fluid_chorus_processXXX().
+*    chorus functions.
+* 2) Change sample rate by calling fluid_chorus_samplerate_change().
+* 3) Restart chorus processing (i.e enabling calling any fluid_chorus_processXXX()
+*    chorus functions.
+*
+* Another solution is to substitute step (2):
+* 2.1) delete the chorus by calling delete_fluid_chorus().
+* 2.2) create the chorus by calling new_fluid_chorus().
+*
+* @param chorus pointer on the chorus.
+* @param sample_rate new sample rate value.
+*/
+void
+fluid_chorus_samplerate_change(fluid_chorus_t *chorus, fluid_real_t sample_rate)
+{
+    chorus->sample_rate = sample_rate;
+
+    /* update parameters dependant of sample rate */
+    update_parameters_from_sample_rate(chorus);
+}
 
 /**
  * Process chorus by mixing the result in output buffer.
@@ -921,13 +980,17 @@ void fluid_chorus_processmix(fluid_chorus_t *chorus, const fluid_real_t *in,
             d_out[1] +=  out ;
         }
 
+        /* Write the current input sample into the circular buffer.
+         * Note that 'in' may be aliased with 'left_out'. Hence this must be done
+         * before "processing stereo unit" (below). This ensures input buffer
+         * not being overwritten by stereo unit output.
+         */
+        push_in_delay_line(chorus, in[sample_index]);
+
         /* process stereo unit */
         /* Add the chorus stereo unit d_out to left and right output */
         left_out[sample_index]  += d_out[0] * chorus->wet1  + d_out[1] * chorus->wet2;
         right_out[sample_index] += d_out[1] * chorus->wet1  + d_out[0] * chorus->wet2;
-
-        /* Write the current input sample into the circular buffer */
-        push_in_delay_line(chorus, in[sample_index]);
     }
 }
 
@@ -993,12 +1056,16 @@ void fluid_chorus_processreplace(fluid_chorus_t *chorus, const fluid_real_t *in,
             d_out[1] +=  out ;
         }
 
+        /* Write the current input sample into the circular buffer.
+         * Note that 'in' may be aliased with 'left_out'. Hence this must be done
+         * before "processing stereo unit" (below). This ensures input buffer
+         * not being overwritten by stereo unit output.
+         */
+        push_in_delay_line(chorus, in[sample_index]);
+
         /* process stereo unit */
         /* store the chorus stereo unit d_out to left and right output */
         left_out[sample_index]  = d_out[0] * chorus->wet1  + d_out[1] * chorus->wet2;
         right_out[sample_index] = d_out[1] * chorus->wet1  + d_out[0] * chorus->wet2;
-
-        /* Write the current input sample into the circular buffer */
-        push_in_delay_line(chorus, in[sample_index]);
     }
 }

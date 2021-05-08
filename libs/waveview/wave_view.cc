@@ -31,7 +31,6 @@
 #include "pbd/compose.h"
 #include "pbd/convert.h"
 #include "pbd/signals.h"
-#include "pbd/stacktrace.h"
 
 #include "ardour/types.h"
 #include "ardour/dB.h"

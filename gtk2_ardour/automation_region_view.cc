@@ -170,10 +170,10 @@ AutomationRegionView::canvas_group_event (GdkEvent* ev)
 void
 AutomationRegionView::add_automation_event (GdkEvent *, samplepos_t when, double y, bool with_guard_points)
 {
+	boost::shared_ptr<Evoral::Control> c = _region->control(_parameter, true);
+	boost::shared_ptr<ARDOUR::AutomationControl> ac = boost::dynamic_pointer_cast<ARDOUR::AutomationControl>(c);
+
 	if (!_line) {
-		boost::shared_ptr<Evoral::Control> c = _region->control(_parameter, true);
-		boost::shared_ptr<ARDOUR::AutomationControl> ac
-				= boost::dynamic_pointer_cast<ARDOUR::AutomationControl>(c);
 		assert(ac);
 		create_line(ac->alist());
 	}
@@ -191,8 +191,6 @@ AutomationRegionView::add_automation_event (GdkEvent *, samplepos_t when, double
 	_line->view_to_model_coord (when_d, y);
 
 	if (UIConfiguration::instance().get_new_automation_points_on_lane()) {
-		boost::shared_ptr<Evoral::Control> c = _region->control (_parameter, false);
-		assert (c);
 		if (c->list()->size () == 0) {
 			/* we need the MidiTrack::MidiControl, not the region's (midi model source) control */
 			boost::shared_ptr<ARDOUR::MidiTrack> mt = boost::dynamic_pointer_cast<ARDOUR::MidiTrack> (view->parent_stripable ());
@@ -208,6 +206,14 @@ AutomationRegionView::add_automation_event (GdkEvent *, samplepos_t when, double
 	XMLNode& before = _line->the_list()->get_state();
 
 	if (_line->the_list()->editor_add (when_d, y, with_guard_points)) {
+
+		if (ac->automation_state () == ARDOUR::Off) {
+			ac->set_automation_state (ARDOUR::Play);
+		}
+		if (UIConfiguration::instance().get_automation_edit_cancels_auto_hide () && ac == view->session()->recently_touched_controllable ()) {
+			RouteTimeAxisView::signal_ctrl_touched (false);
+		}
+
 		view->editor().begin_reversible_command (_("add automation event"));
 
 		XMLNode& after = _line->the_list()->get_state();

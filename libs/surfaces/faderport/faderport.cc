@@ -94,23 +94,22 @@ FaderPort::FaderPort (Session& s)
 	}
 
 	_input_bundle.reset (new ARDOUR::Bundle (_("Faderport Support (Receive)"), true));
-	_output_bundle.reset (new ARDOUR::Bundle (_("Faderport Support (Send) "), false));
+	_output_bundle.reset (new ARDOUR::Bundle (_("Faderport Support (Send)"), false));
 
 	_input_bundle->add_channel (
-		inp->name(),
+		"",
 		ARDOUR::DataType::MIDI,
 		session->engine().make_port_name_non_relative (inp->name())
 		);
 
 	_output_bundle->add_channel (
-		outp->name(),
+		"",
 		ARDOUR::DataType::MIDI,
 		session->engine().make_port_name_non_relative (outp->name())
 		);
 
 	/* Catch port connections and disconnections */
-	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::connection_handler, this, _1, _2, _3, _4, _5), this);
-	ARDOUR::AudioEngine::instance()->PortPrettyNameChanged.connect (port_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::ConnectionChange, this), this); /* notify GUI */
+	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (_port_connection, MISSING_INVALIDATOR, boost::bind (&FaderPort::connection_handler, this, _1, _2, _3, _4, _5), this);
 
 	buttons.insert (std::make_pair (Mute, Button (*this, _("Mute"), Mute, 21)));
 	buttons.insert (std::make_pair (Solo, Button (*this, _("Solo"), Solo, 22)));
@@ -197,7 +196,7 @@ FaderPort::~FaderPort ()
 {
 	cerr << "~FP\n";
 
-	all_lights_out ();
+	close ();
 
 	if (_input_port) {
 		DEBUG_TRACE (DEBUG::FaderPort, string_compose ("unregistering input port %1\n", boost::shared_ptr<ARDOUR::Port>(_input_port)->name()));
@@ -483,7 +482,7 @@ FaderPort::fader_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 			boost::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
 			if (gain) {
 				int ival = (fader_msb << 7) | fader_lsb;
-				float val = gain->interface_to_internal (ival/16384.0);
+				float val = gain->interface_to_internal (ival/16383.0);
 				/* even though the faderport only controls a
 				   single stripable at a time, allow the fader to
 				   modify the group, if appropriate.
@@ -630,10 +629,11 @@ FaderPort::close ()
 
 	stop_midi_handling ();
 	session_connections.drop_connections ();
-	port_connections.drop_connections ();
+	_port_connection.disconnect ();
 	blink_connection.disconnect ();
 	selection_connection.disconnect ();
 	stripable_connections.drop_connections ();
+	periodic_connection.disconnect ();
 
 #if 0
 	stripable_connections.drop_connections ();
@@ -800,6 +800,7 @@ FaderPort::set_state (const XMLNode& node, int version)
 	if ((child = node.child (X_("Input"))) != 0) {
 		XMLNode* portnode = child->child (Port::state_node_name.c_str());
 		if (portnode) {
+			portnode->remove_property ("name");
 			boost::shared_ptr<ARDOUR::Port>(_input_port)->set_state (*portnode, version);
 		}
 	}
@@ -807,6 +808,7 @@ FaderPort::set_state (const XMLNode& node, int version)
 	if ((child = node.child (X_("Output"))) != 0) {
 		XMLNode* portnode = child->child (Port::state_node_name.c_str());
 		if (portnode) {
+			portnode->remove_property ("name");
 			boost::shared_ptr<ARDOUR::Port>(_output_port)->set_state (*portnode, version);
 		}
 	}

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ExportPreset id="44c931f0-3989-4304-b16d-1984c7e00042" name="Streaming">
+  <ExportFormat id="5a78349c-8a72-469f-8f65-8df8bee0677a"/>
+  <ExportFormat id="b165e4bb-a516-4bd8-894a-31dd60b96fe1"/>
+  <ExportFormat id="b96de573-1492-45c6-9eb2-9122abae5c03"/>
+  <ExportFormat id="13765a92-0ab8-464e-ac1b-a5320572bf7d"/>
+  <ExportFilename>
+    <Folder relative="1" path="/export"/>
+    <Field name="label" enabled="0"/>
+    <Field name="session" enabled="0"/>
+    <Field name="snapshot" enabled="0"/>
+    <Field name="timespan" enabled="1"/>
+    <Field name="revision" enabled="0"/>
+    <Field name="time" enabled="0" value="T_None"/>
+    <Field name="date" enabled="0" value="D_None"/>
+  </ExportFilename>
+  <ExportFilename>
+    <Folder relative="1" path="/export"/>
+    <Field name="label" enabled="0"/>
+    <Field name="session" enabled="0"/>
+    <Field name="snapshot" enabled="0"/>
+    <Field name="timespan" enabled="1"/>
+    <Field name="revision" enabled="0"/>
+    <Field name="time" enabled="0" value="T_None"/>
+    <Field name="date" enabled="0" value="D_None"/>
+  </ExportFilename>
+  <ExportFilename>
+    <Folder relative="1" path="/export"/>
+    <Field name="label" enabled="0"/>
+    <Field name="session" enabled="0"/>
+    <Field name="snapshot" enabled="0"/>
+    <Field name="timespan" enabled="1"/>
+    <Field name="revision" enabled="0"/>
+    <Field name="time" enabled="0" value="T_None"/>
+    <Field name="date" enabled="0" value="D_None"/>
+  </ExportFilename>
+  <ExportFilename>
+    <Folder relative="1" path="/export"/>
+    <Field name="label" enabled="0"/>
+    <Field name="session" enabled="0"/>
+    <Field name="snapshot" enabled="0"/>
+    <Field name="timespan" enabled="1"/>
+    <Field name="revision" enabled="0"/>
+    <Field name="time" enabled="0" value="T_None"/>
+    <Field name="date" enabled="0" value="D_None"/>
+  </ExportFilename>
+</ExportPreset>

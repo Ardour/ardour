@@ -353,10 +353,10 @@ MackieControlProtocol::zoom_release (Mackie::Button &)
 Mackie::LedState
 MackieControlProtocol::scrub_press (Mackie::Button &)
 {
-	if (!surfaces.empty()) {
-		// surfaces.front()->next_jog_mode ();
+	if (_master_surface) {
 		_master_surface->next_jog_mode ();
 	}
+
 	return none;
 }
 

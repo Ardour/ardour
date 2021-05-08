@@ -131,7 +131,7 @@ ParameterDescriptor::ParameterDescriptor(const Evoral::Parameter& parameter)
 		enumeration = true;
 		integer_step = true;
 		lower = MonitorAuto;
-		upper = MonitorDisk; /* XXX bump when we add MonitorCue */
+		upper = MonitorCue;
 		scale_points = boost::shared_ptr<ScalePoints>(new ScalePoints());
 		scale_points->insert (std::make_pair (_("Auto"), MonitorAuto));
 		scale_points->insert (std::make_pair (_("Input"), MonitorInput));
@@ -339,14 +339,12 @@ ParameterDescriptor::to_interface (float val, bool rotary) const
 			}
 			break;
 		case PanAzimuthAutomation:
-			if (rotary) {
-				val = val;
-			} else {
+			if (!rotary) {
 				val = 1.0 - val;
 			}
 			break;
 		case PanElevationAutomation:
-			val = val;
+			// val = val;
 			break;
 		case PanWidthAutomation:
 			val = .5f + val * .5f;
@@ -396,14 +394,12 @@ ParameterDescriptor::from_interface (float val, bool rotary) const
 			}
 			break;
 		case PanAzimuthAutomation:
-			if (rotary) {
-				val = val;
-			} else {
+			if (!rotary) {
 				val = 1.0 - val;
 			}
 			break;
 		case PanElevationAutomation:
-			 val = val;
+			 // val = val;
 			break;
 		case PanWidthAutomation:
 			val = 2.f * val - 1.f;

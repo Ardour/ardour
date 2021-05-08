@@ -34,6 +34,8 @@
 #define EMU_ATTENUATION_FACTOR (0.4f)
 
 /* Dynamic sample loading functions */
+static int pin_preset_samples(fluid_defsfont_t *defsfont, fluid_preset_t *preset);
+static int unpin_preset_samples(fluid_defsfont_t *defsfont, fluid_preset_t *preset);
 static int load_preset_samples(fluid_defsfont_t *defsfont, fluid_preset_t *preset);
 static int unload_preset_samples(fluid_defsfont_t *defsfont, fluid_preset_t *preset);
 static void unload_sample(fluid_sample_t *sample);
@@ -228,6 +230,17 @@ int delete_fluid_defsfont(fluid_defsfont_t *defsfont)
 
     fluid_return_val_if_fail(defsfont != NULL, FLUID_OK);
 
+    /* If we use dynamic sample loading, make sure we unpin any
+     * pinned presets before removing this soundfont */
+    if(defsfont->dynamic_samples)
+    {
+        for(list = defsfont->preset; list; list = fluid_list_next(list))
+        {
+            preset = (fluid_preset_t *)fluid_list_get(list);
+            unpin_preset_samples(defsfont, preset);
+        }
+    }
+
     /* Check that no samples are currently used */
     for(list = defsfont->sample; list; list = fluid_list_next(list))
     {
@@ -336,7 +349,7 @@ int fluid_defsfont_load_sampledata(fluid_defsfont_t *defsfont, SFData *sfdata, f
         return FLUID_OK;
     }
 
-    /* Ogg Vorbis samples already have loop pointers relative to the invididual decompressed sample,
+    /* Ogg Vorbis samples already have loop pointers relative to the individual decompressed sample,
      * but SF2 samples are relative to sample chunk start, so they need to be adjusted */
     if(!(sample->sampletype & FLUID_SAMPLETYPE_OGG_VORBIS))
     {
@@ -361,6 +374,7 @@ int fluid_defsfont_load_all_sampledata(fluid_defsfont_t *defsfont, SFData *sfdat
     fluid_list_t *list;
     fluid_sample_t *sample;
     int sf3_file = (sfdata->version.major == 3);
+    int sample_parsing_result = FLUID_OK;
 
     /* For SF2 files, we load the sample data in one large block */
     if(!sf3_file)
@@ -379,6 +393,8 @@ int fluid_defsfont_load_all_sampledata(fluid_defsfont_t *defsfont, SFData *sfdat
         }
     }
 
+    #pragma omp parallel
+    #pragma omp single
     for(list = defsfont->sample; list; list = fluid_list_next(list))
     {
         sample = fluid_list_get(list);
@@ -387,26 +403,37 @@ int fluid_defsfont_load_all_sampledata(fluid_defsfont_t *defsfont, SFData *sfdat
         {
             /* SF3 samples get loaded individually, as most (or all) of them are in Ogg Vorbis format
              * anyway */
-            if(fluid_defsfont_load_sampledata(defsfont, sfdata, sample) == FLUID_FAILED)
+            #pragma omp task firstprivate(sample,sfdata,defsfont) shared(sample_parsing_result) default(none)
             {
-                FLUID_LOG(FLUID_ERR, "Failed to load sample '%s'", sample->name);
-                return FLUID_FAILED;
+                if(fluid_defsfont_load_sampledata(defsfont, sfdata, sample) == FLUID_FAILED)
+                {
+                    #pragma omp critical
+                    {
+                        FLUID_LOG(FLUID_ERR, "Failed to load sample '%s'", sample->name);
+                        sample_parsing_result = FLUID_FAILED;
+                    }
+                }
+                else
+                {
+                    fluid_sample_sanitize_loop(sample, (sample->end + 1) * sizeof(short));
+                    fluid_voice_optimize_sample(sample);
+                }
             }
-
-            fluid_sample_sanitize_loop(sample, (sample->end + 1) * sizeof(short));
         }
         else
         {
-            /* Data pointers of SF2 samples point to large sample data block loaded above */
-            sample->data = defsfont->sampledata;
-            sample->data24 = defsfont->sample24data;
-            fluid_sample_sanitize_loop(sample, defsfont->samplesize);
+            #pragma omp task firstprivate(sample, defsfont) default(none)
+            {
+                /* Data pointers of SF2 samples point to large sample data block loaded above */
+                sample->data = defsfont->sampledata;
+                sample->data24 = defsfont->sample24data;
+                fluid_sample_sanitize_loop(sample, defsfont->samplesize);
+                fluid_voice_optimize_sample(sample);
+            }
         }
-
-        fluid_voice_optimize_sample(sample);
     }
 
-    return FLUID_OK;
+    return sample_parsing_result;
 }
 
 /*
@@ -506,7 +533,7 @@ int fluid_defsfont_load(fluid_defsfont_t *defsfont, const fluid_file_callbacks_t
             goto err_exit;
         }
 
-        if(fluid_defpreset_import_sfont(defpreset, sfpreset, defsfont) != FLUID_OK)
+        if(fluid_defpreset_import_sfont(defpreset, sfpreset, defsfont, sfdata) != FLUID_OK)
         {
             goto err_exit;
         }
@@ -535,7 +562,7 @@ err_exit:
  */
 int fluid_defsfont_add_sample(fluid_defsfont_t *defsfont, fluid_sample_t *sample)
 {
-    defsfont->sample = fluid_list_append(defsfont->sample, sample);
+    defsfont->sample = fluid_list_prepend(defsfont->sample, sample);
     return FLUID_OK;
 }
 
@@ -554,14 +581,14 @@ int fluid_defsfont_add_preset(fluid_defsfont_t *defsfont, fluid_defpreset_t *def
                               fluid_defpreset_preset_noteon,
                               fluid_defpreset_preset_delete);
 
-    if(defsfont->dynamic_samples)
-    {
-        preset->notify = dynamic_samples_preset_notify;
-    }
-
     if(preset == NULL)
     {
         return FLUID_FAILED;
+    }
+
+    if(defsfont->dynamic_samples)
+    {
+        preset->notify = dynamic_samples_preset_notify;
     }
 
     fluid_preset_set_data(preset, defpreset);
@@ -637,6 +664,7 @@ new_fluid_defpreset(void)
     defpreset->num = 0;
     defpreset->global_zone = NULL;
     defpreset->zone = NULL;
+    defpreset->pinned = FALSE;
     return defpreset;
 }
 
@@ -776,7 +804,7 @@ fluid_defpreset_noteon_add_mod_to_voice(fluid_voice_t *voice,
             /* Although local_mod and global_mod lists was limited to
                FLUID_NUM_MOD at soundfont loading time, it is possible that
                local + global modulators exceeds FLUID_NUM_MOD.
-               So, checks if mod_list_count reachs the limit.
+               So, checks if mod_list_count reaches the limit.
             */
             if(mod_list_count >= FLUID_NUM_MOD)
             {
@@ -805,7 +833,7 @@ fluid_defpreset_noteon_add_mod_to_voice(fluid_voice_t *voice,
      */
 
     /* Restrict identity check to the actual number of voice modulators */
-    /* Acual number of voice modulators : defaults + [instruments] */
+    /* Actual number of voice modulators : defaults + [instruments] */
     identity_limit_count = voice->mod_count;
 
     for(i = 0; i < mod_list_count; i++)
@@ -1000,7 +1028,8 @@ fluid_defpreset_set_global_zone(fluid_defpreset_t *defpreset, fluid_preset_zone_
 int
 fluid_defpreset_import_sfont(fluid_defpreset_t *defpreset,
                              SFPreset *sfpreset,
-                             fluid_defsfont_t *defsfont)
+                             fluid_defsfont_t *defsfont,
+                             SFData *sfdata)
 {
     fluid_list_t *p;
     SFZone *sfzone;
@@ -1033,7 +1062,7 @@ fluid_defpreset_import_sfont(fluid_defpreset_t *defpreset,
             return FLUID_FAILED;
         }
 
-        if(fluid_preset_zone_import_sfont(zone, sfzone, defsfont) != FLUID_OK)
+        if(fluid_preset_zone_import_sfont(zone, sfzone, defsfont, sfdata) != FLUID_OK)
         {
             delete_fluid_preset_zone(zone);
             return FLUID_FAILED;
@@ -1396,8 +1425,13 @@ fluid_zone_gen_import_sfont(fluid_gen_t *gen, fluid_zone_range_t *range, SFZone 
             gen[sfgen->id].flags = GEN_SET;
             break;
 
+        case GEN_INSTRUMENT:
+        case GEN_SAMPLEID:
+            gen[sfgen->id].val = (fluid_real_t) sfgen->amount.uword;
+            gen[sfgen->id].flags = GEN_SET;
+            break;
+
         default:
-            /* FIXME: some generators have an unsigne word amount value but i don't know which ones */
             gen[sfgen->id].val = (fluid_real_t) sfgen->amount.sword;
             gen[sfgen->id].flags = GEN_SET;
             break;
@@ -1413,7 +1447,7 @@ fluid_zone_gen_import_sfont(fluid_gen_t *gen, fluid_zone_range_t *range, SFZone 
  * @param src, pointer on destination modulator source.
  * @param flags, pointer on destination modulator flags.
  * @param sf_source, soundfont modulator source.
- * @return return TRUE if success, FALSE if source type is unknow.
+ * @return return TRUE if success, FALSE if source type is unknown.
  */
 static int
 fluid_zone_mod_source_import_sfont(unsigned char *src, unsigned char *flags, unsigned short sf_source)
@@ -1602,24 +1636,27 @@ fluid_zone_mod_import_sfont(char *zone_name, fluid_mod_t **mod, SFZone *sfzone)
  * fluid_preset_zone_import_sfont
  */
 int
-fluid_preset_zone_import_sfont(fluid_preset_zone_t *zone, SFZone *sfzone, fluid_defsfont_t *defsfont)
+fluid_preset_zone_import_sfont(fluid_preset_zone_t *zone, SFZone *sfzone, fluid_defsfont_t *defsfont, SFData *sfdata)
 {
     /* import the generators */
     fluid_zone_gen_import_sfont(zone->gen, &zone->range, sfzone);
 
-    if((sfzone->instsamp != NULL) && (sfzone->instsamp->data != NULL))
+    if(zone->gen[GEN_INSTRUMENT].flags == GEN_SET)
     {
-        SFInst *sfinst = sfzone->instsamp->data;
+        int inst_idx = (int) zone->gen[GEN_INSTRUMENT].val;
 
-        zone->inst = find_inst_by_idx(defsfont, sfinst->idx);
+        zone->inst = find_inst_by_idx(defsfont, inst_idx);
 
         if(zone->inst == NULL)
         {
-            zone->inst = fluid_inst_import_sfont(sfinst, defsfont);
+            zone->inst = fluid_inst_import_sfont(inst_idx, defsfont, sfdata);
         }
 
         if(zone->inst == NULL)
         {
+
+            FLUID_LOG(FLUID_ERR, "Preset zone %s: Invalid instrument reference",
+                    zone->name);
             return FLUID_FAILED;
         }
 
@@ -1627,6 +1664,9 @@ fluid_preset_zone_import_sfont(fluid_preset_zone_t *zone, SFZone *sfzone, fluid_
         {
             return FLUID_FAILED;
         }
+
+        /* We don't need this generator anymore */
+        zone->gen[GEN_INSTRUMENT].flags = GEN_UNUSED;
     }
 
     /* Import the modulators (only SF2.1 and higher) */
@@ -1707,14 +1747,29 @@ fluid_inst_set_global_zone(fluid_inst_t *inst, fluid_inst_zone_t *zone)
  * fluid_inst_import_sfont
  */
 fluid_inst_t *
-fluid_inst_import_sfont(SFInst *sfinst, fluid_defsfont_t *defsfont)
+fluid_inst_import_sfont(int inst_idx, fluid_defsfont_t *defsfont, SFData *sfdata)
 {
     fluid_list_t *p;
+    fluid_list_t *inst_list;
     fluid_inst_t *inst;
     SFZone *sfzone;
+    SFInst *sfinst;
     fluid_inst_zone_t *inst_zone;
     char zone_name[256];
     int count;
+
+    for (inst_list = sfdata->inst; inst_list; inst_list = fluid_list_next(inst_list))
+    {
+        sfinst = fluid_list_get(inst_list);
+        if (sfinst->idx == inst_idx)
+        {
+            break;
+        }
+    }
+    if (inst_list == NULL)
+    {
+        return NULL;
+    }
 
     inst = (fluid_inst_t *) new_fluid_inst();
 
@@ -1753,7 +1808,7 @@ fluid_inst_import_sfont(SFInst *sfinst, fluid_defsfont_t *defsfont)
             return NULL;
         }
 
-        if(fluid_inst_zone_import_sfont(inst_zone, sfzone, defsfont) != FLUID_OK)
+        if(fluid_inst_zone_import_sfont(inst_zone, sfzone, defsfont, sfdata) != FLUID_OK)
         {
             delete_fluid_inst_zone(inst_zone);
             return NULL;
@@ -1885,7 +1940,8 @@ fluid_inst_zone_next(fluid_inst_zone_t *zone)
  * fluid_inst_zone_import_sfont
  */
 int
-fluid_inst_zone_import_sfont(fluid_inst_zone_t *inst_zone, SFZone *sfzone, fluid_defsfont_t *defsfont)
+fluid_inst_zone_import_sfont(fluid_inst_zone_t *inst_zone, SFZone *sfzone, fluid_defsfont_t *defsfont,
+                             SFData *sfdata)
 {
     /* import the generators */
     fluid_zone_gen_import_sfont(inst_zone->gen, &inst_zone->range, sfzone);
@@ -1895,10 +1951,32 @@ fluid_inst_zone_import_sfont(fluid_inst_zone_t *inst_zone, SFZone *sfzone, fluid
     /*      FLUID_LOG(FLUID_DBG, "ExclusiveClass=%d\n", (int) zone->gen[GEN_EXCLUSIVECLASS].val); */
     /*    } */
 
-    /* fixup sample pointer */
-    if((sfzone->instsamp != NULL) && (sfzone->instsamp->data != NULL))
+    if (inst_zone->gen[GEN_SAMPLEID].flags == GEN_SET)
     {
-        inst_zone->sample = ((SFSample *)(sfzone->instsamp->data))->fluid_sample;
+        fluid_list_t *list;
+        SFSample *sfsample;
+        int sample_idx = (int) inst_zone->gen[GEN_SAMPLEID].val;
+
+        /* find the SFSample by index */
+        for(list = sfdata->sample; list; list = fluid_list_next(list))
+        {
+            sfsample = fluid_list_get(list);
+            if (sfsample->idx == sample_idx)
+            {
+                break;
+            }
+        }
+        if (list == NULL)
+        {
+            FLUID_LOG(FLUID_ERR, "Instrument zone '%s': Invalid sample reference",
+                      inst_zone->name);
+            return FLUID_FAILED;
+        }
+
+        inst_zone->sample = sfsample->fluid_sample;
+
+        /* we don't need this generator anymore, mark it as unused */
+        inst_zone->gen[GEN_SAMPLEID].flags = GEN_UNUSED;
     }
 
     /* Import the modulators (only SF2.1 and higher) */
@@ -2003,14 +2081,73 @@ static int dynamic_samples_preset_notify(fluid_preset_t *preset, int reason, int
     {
         FLUID_LOG(FLUID_DBG, "Selected preset '%s' on channel %d", fluid_preset_get_name(preset), chan);
         defsfont = fluid_sfont_get_data(preset->sfont);
-        load_preset_samples(defsfont, preset);
+        return load_preset_samples(defsfont, preset);
     }
-    else if(reason == FLUID_PRESET_UNSELECTED)
+
+    if(reason == FLUID_PRESET_UNSELECTED)
     {
         FLUID_LOG(FLUID_DBG, "Deselected preset '%s' from channel %d", fluid_preset_get_name(preset), chan);
         defsfont = fluid_sfont_get_data(preset->sfont);
-        unload_preset_samples(defsfont, preset);
+        return unload_preset_samples(defsfont, preset);
     }
+
+    if(reason == FLUID_PRESET_PIN)
+    {
+        defsfont = fluid_sfont_get_data(preset->sfont);
+        return pin_preset_samples(defsfont, preset);
+    }
+
+    if(reason == FLUID_PRESET_UNPIN)
+    {
+        defsfont = fluid_sfont_get_data(preset->sfont);
+        return unpin_preset_samples(defsfont, preset);
+    }
+
+    return FLUID_OK;
+}
+
+
+static int pin_preset_samples(fluid_defsfont_t *defsfont, fluid_preset_t *preset)
+{
+    fluid_defpreset_t *defpreset;
+
+    defpreset = fluid_preset_get_data(preset);
+    if (defpreset->pinned)
+    {
+        return FLUID_OK;
+    }
+
+    FLUID_LOG(FLUID_DBG, "Pinning preset '%s'", fluid_preset_get_name(preset));
+
+    if(load_preset_samples(defsfont, preset) == FLUID_FAILED)
+    {
+        return FLUID_FAILED;
+    }
+
+    defpreset->pinned = TRUE;
+
+    return FLUID_OK;
+}
+
+
+static int unpin_preset_samples(fluid_defsfont_t *defsfont, fluid_preset_t *preset)
+{
+    fluid_defpreset_t *defpreset;
+
+    defpreset = fluid_preset_get_data(preset);
+    if (!defpreset->pinned)
+    {
+        return FLUID_OK;
+    }
+
+    FLUID_LOG(FLUID_DBG, "Unpinning preset '%s'", fluid_preset_get_name(preset));
+
+    if(unload_preset_samples(defsfont, preset) == FLUID_FAILED)
+    {
+        return FLUID_FAILED;
+    }
+
+    defpreset->pinned = FALSE;
 
     return FLUID_OK;
 }

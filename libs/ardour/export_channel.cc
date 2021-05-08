@@ -169,9 +169,8 @@ PortExportChannel::set_state (XMLNode * node, Session & session)
 	}
 }
 
-RegionExportChannelFactory::RegionExportChannelFactory (Session * session, AudioRegion const & region, AudioTrack & track, Type type)
+RegionExportChannelFactory::RegionExportChannelFactory (Session * session, AudioRegion const & region, AudioTrack&, Type type)
 	: region (region)
-	, track (track)
 	, type (type)
 	, samples_per_cycle (session->engine().samples_per_cycle ())
 	, buffers_up_to_date (false)

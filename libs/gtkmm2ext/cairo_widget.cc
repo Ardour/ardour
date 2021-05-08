@@ -31,10 +31,6 @@
 
 static const char* has_cairo_widget_background_info = "has_cairo_widget_background_info";
 
-bool CairoWidget::_flat_buttons = false;
-bool CairoWidget::_boxy_buttons = false;
-bool CairoWidget::_widget_prelight = true;
-
 sigc::slot<void,Gtk::Widget*> CairoWidget::focus_handler;
 
 void CairoWidget::set_source_rgb_a( cairo_t* cr, Gdk::Color col, float a)  //ToDo:  this one and the Canvas version should be in a shared file (?)
@@ -301,7 +297,7 @@ CairoWidget::get_parent_bg ()
 				_current_parent = parent;
 				_parent_style_change = parent->signal_style_changed().connect (mem_fun (*this, &CairoWidget::on_style_changed));
 			}
-			return style->get_bg (get_state());
+			return style->get_bg (Gtk::STATE_NORMAL);
 		}
 
 		if (!parent->get_has_window()) {
@@ -317,7 +313,7 @@ CairoWidget::get_parent_bg ()
 			_current_parent = parent;
 			_parent_style_change = parent->signal_style_changed().connect (mem_fun (*this, &CairoWidget::on_style_changed));
 		}
-		return parent->get_style ()->get_bg (parent->get_state());
+		return parent->get_style ()->get_bg (Gtk::STATE_NORMAL);
 	}
 
 	return get_style ()->get_bg (get_state());
@@ -436,25 +432,6 @@ CairoWidget::provide_background_for_cairo_widget (Gtk::Widget& w, const Gdk::Col
 	w.modify_bg (Gtk::STATE_SELECTED, bg);
 
 	g_object_set_data (G_OBJECT(w.gobj()), has_cairo_widget_background_info, (void*) 0xfeedface);
-}
-
-void
-CairoWidget::set_flat_buttons (bool yn)
-{
-	_flat_buttons = yn;
-}
-
-void
-CairoWidget::set_boxy_buttons (bool yn)
-{
-	_boxy_buttons = yn;
-}
-
-
-void
-CairoWidget::set_widget_prelight (bool yn)
-{
-	_widget_prelight = yn;
 }
 
 void

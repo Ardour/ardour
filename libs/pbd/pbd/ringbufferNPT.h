@@ -27,6 +27,7 @@
 #include <glib.h>
 
 #include "pbd/libpbd_visibility.h"
+#include "pbd/g_atomic_compat.h"
 
 namespace PBD {
 
@@ -118,8 +119,8 @@ class /*LIBPBD_API*/ RingBufferNPT
   protected:
 	T *buf;
 	size_t size;
-	mutable gint write_ptr;
-	mutable gint read_ptr;
+	mutable GATOMIC_QUAL gint write_ptr;
+	mutable GATOMIC_QUAL gint read_ptr;
 
 private:
 	RingBufferNPT (RingBufferNPT const&);
@@ -134,7 +135,7 @@ RingBufferNPT<T>::read (T *dest, size_t cnt)
         size_t n1, n2;
         size_t priv_read_ptr;
 
-        priv_read_ptr=g_atomic_int_get(&read_ptr);
+        priv_read_ptr = g_atomic_int_get (&read_ptr);
 
         if ((free_cnt = read_space ()) == 0) {
                 return 0;
@@ -160,7 +161,7 @@ RingBufferNPT<T>::read (T *dest, size_t cnt)
                 priv_read_ptr = n2;
         }
 
-        g_atomic_int_set(&read_ptr, priv_read_ptr);
+        g_atomic_int_set (&read_ptr, priv_read_ptr);
         return to_read;
 }
 
@@ -173,7 +174,7 @@ RingBufferNPT<T>::write (const T *src, size_t cnt)
         size_t n1, n2;
         size_t priv_write_ptr;
 
-        priv_write_ptr=g_atomic_int_get(&write_ptr);
+        priv_write_ptr = g_atomic_int_get (&write_ptr);
 
         if ((free_cnt = write_space ()) == 0) {
                 return 0;
@@ -199,7 +200,7 @@ RingBufferNPT<T>::write (const T *src, size_t cnt)
                 priv_write_ptr = n2;
         }
 
-        g_atomic_int_set(&write_ptr, priv_write_ptr);
+        g_atomic_int_set (&write_ptr, priv_write_ptr);
         return to_write;
 }
 

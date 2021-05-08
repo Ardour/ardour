@@ -39,7 +39,6 @@
 #include "ardour/session.h"
 
 #include "pbd/memento_command.h"
-#include "pbd/stacktrace.h"
 
 #include "evoral/Curve.h"
 
@@ -131,7 +130,6 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Container *parent, RouteTimeAxis
 	, trim_fade_in_drag_active(false)
 	, trim_fade_out_drag_active(false)
 {
-	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &AudioRegionView::parameter_changed));
 }
 
 AudioRegionView::AudioRegionView (ArdourCanvas::Container *parent, RouteTimeAxisView &tv, boost::shared_ptr<AudioRegion> r, double spu,
@@ -153,7 +151,6 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Container *parent, RouteTimeAxis
 	, trim_fade_in_drag_active(false)
 	, trim_fade_out_drag_active(false)
 {
-	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &AudioRegionView::parameter_changed));
 }
 
 AudioRegionView::AudioRegionView (const AudioRegionView& other, boost::shared_ptr<AudioRegion> other_region)
@@ -174,8 +171,6 @@ AudioRegionView::AudioRegionView (const AudioRegionView& other, boost::shared_pt
 	, trim_fade_out_drag_active(false)
 {
 	init (true);
-
-	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &AudioRegionView::parameter_changed));
 }
 
 void
@@ -1826,6 +1821,7 @@ AudioRegionView::drag_end ()
 void
 AudioRegionView::parameter_changed (string const & p)
 {
+	RegionView::parameter_changed (p);
 	if (p == "show-waveforms") {
 		setup_waveform_visibility ();
 	}

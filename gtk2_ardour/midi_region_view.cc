@@ -142,7 +142,6 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
 	PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
 
 	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&MidiRegionView::parameter_changed, this, _1), gui_context());
-	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &MidiRegionView::parameter_changed));
 
 	connect_to_diskstream ();
 }
@@ -195,6 +194,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
 void
 MidiRegionView::parameter_changed (std::string const & p)
 {
+	RegionView::parameter_changed (p);
 	if (p == "display-first-midi-bank-as-zero") {
 		if (_enable_display) {
 			redisplay_model();
@@ -319,7 +319,6 @@ MidiRegionView::init (bool wfd)
 	                                            gui_context ());
 
 	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&MidiRegionView::parameter_changed, this, _1), gui_context());
-	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &MidiRegionView::parameter_changed));
 	connect_to_diskstream ();
 }
 

@@ -20,7 +20,7 @@
 
 #include "fluid_conv.h"
 #include "fluid_sys.h"
-#include "fluid_conv_tables.c"
+#include "fluid_conv_tables.inc.h"
 
 /*
  * Converts absolute cents to Hertz

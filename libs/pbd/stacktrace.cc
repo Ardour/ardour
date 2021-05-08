@@ -133,8 +133,8 @@ PBD::stacktrace (std::ostream& out, int /*levels*/)
 
 #endif
 
-void
-c_stacktrace ()
-{
-	PBD::stacktrace (std::cout);
+#if 0 // unused
+extern "C" {
+	void c_stacktrace () { PBD::stacktrace (std::cout); }
 }
+#endif

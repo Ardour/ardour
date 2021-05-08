@@ -197,7 +197,7 @@ Maschine2Knob::encoder_changed (int delta)
 	}
 	const double d = delta * 0.5 / _ctrl->range ();
 	boost::shared_ptr<AutomationControl> ac = _controllable;
-	ac->set_value (ac->interface_to_internal (min (ac->upper(), max (ac->lower(), ac->internal_to_interface (ac->get_value()) + d))), PBD::Controllable::UseGroup);
+	ac->set_value (ac->interface_to_internal (std::min (ac->upper(), std::max (ac->lower(), ac->internal_to_interface (ac->get_value()) + d))), PBD::Controllable::UseGroup);
 }
 
 void

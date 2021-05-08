@@ -27,6 +27,7 @@
 #include <list>
 
 #include "pbd/libpbd_visibility.h"
+#include "pbd/g_atomic_compat.h"
 
 /** @file rcu.h
  * Define a set of classes to implement Read-Copy-Update.  We do not attempt to define RCU here - use google.
@@ -52,8 +53,8 @@ class /*LIBPBD_API*/ RCUManager
 {
 public:
 	RCUManager (T* new_rcu_value)
-		: _active_reads (0)
 	{
+		g_atomic_int_set (&_active_reads, 0);
 		x.rcu_value = new boost::shared_ptr<T> (new_rcu_value);
 	}
 
@@ -99,8 +100,8 @@ protected:
 	 * evaluate to the same address.
 	 */
 	union {
-		boost::shared_ptr<T>*     rcu_value;
-		mutable volatile gpointer gptr;
+		boost::shared_ptr<T>*         rcu_value;
+		mutable GATOMIC_QUAL gpointer gptr;
 	} x;
 
 	inline bool active_read () const {
@@ -108,7 +109,7 @@ protected:
 	}
 
 private:
-	mutable volatile gint _active_reads;
+	mutable GATOMIC_QUAL gint _active_reads;
 };
 
 /** Serialized RCUManager implements the RCUManager interface. It is based on the

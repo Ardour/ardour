@@ -73,6 +73,7 @@
 #include "public_editor.h"
 #include "processor_box.h"
 #include "rc_option_editor.h"
+#include "recorder_ui.h"
 #include "route_params_ui.h"
 #include "shuttle_control.h"
 #include "session_option_editor.h"
@@ -198,6 +199,7 @@ ARDOUR_UI::set_session (Session *s)
 
 	_session->SaveSessionRequested.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::save_session_at_its_request, this, _1), gui_context());
 	_session->StateSaved.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::update_title, this), gui_context());
+	_session->StateSaved.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::update_path_label, this), gui_context());
 	_session->RecordStateChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::record_state_changed, this), gui_context());
 	_session->TransportStateChange.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::map_transport_state, this), gui_context());
 	_session->DirtyChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::session_dirty_changed, this), gui_context());
@@ -465,15 +467,19 @@ ARDOUR_UI::step_up_through_tabs ()
 
 	/* this list must match the order of visibility buttons */
 
-	if (!editor->window_visible()) {
+	if (recorder->tabbed()) {
+		candidates.push_back (recorder);
+	}
+
+	if (editor->tabbed()) {
 		candidates.push_back (editor);
 	}
 
-	if (!mixer->window_visible()) {
+	if (mixer->tabbed()) {
 		candidates.push_back (mixer);
 	}
 
-	if (!rc_option_editor->window_visible()) {
+	if (rc_option_editor->tabbed()) {
 		candidates.push_back (rc_option_editor);
 	}
 
@@ -506,15 +512,19 @@ ARDOUR_UI::step_down_through_tabs ()
 
 	/* this list must match the order of visibility buttons */
 
-	if (!editor->window_visible()) {
+	if (recorder->tabbed()) {
+		candidates.push_back (recorder);
+	}
+
+	if (editor->tabbed()) {
 		candidates.push_back (editor);
 	}
 
-	if (!mixer->window_visible()) {
+	if (mixer->tabbed()) {
 		candidates.push_back (mixer);
 	}
 
-	if (!rc_option_editor->window_visible()) {
+	if (rc_option_editor->tabbed()) {
 		candidates.push_back (rc_option_editor);
 	}
 
@@ -633,6 +643,7 @@ ARDOUR_UI::tabs_page_added (Widget*,guint)
 		editor_visibility_button.drag_source_set (drag_target_entries);
 		mixer_visibility_button.drag_source_set (drag_target_entries);
 		prefs_visibility_button.drag_source_set (drag_target_entries);
+		recorder_visibility_button.drag_source_set (drag_target_entries);
 
 		editor_visibility_button.drag_source_set_icon (Gtkmm2ext::pixbuf_from_string (editor->name(),
 		                                                                              Pango::FontDescription ("Sans 24"),
@@ -646,6 +657,10 @@ ARDOUR_UI::tabs_page_added (Widget*,guint)
 		                                                                             Pango::FontDescription ("Sans 24"),
 		                                                                             0, 0,
 		                                                                             Gdk::Color ("red")));
+		recorder_visibility_button.drag_source_set_icon (Gtkmm2ext::pixbuf_from_string (recorder->name(),
+		                                                                             Pango::FontDescription ("Sans 24"),
+		                                                                             0, 0,
+		                                                                             Gdk::Color ("red")));
 	}
 }
 
@@ -656,6 +671,7 @@ ARDOUR_UI::tabs_page_removed (Widget*, guint)
 		editor_visibility_button.drag_source_unset ();
 		mixer_visibility_button.drag_source_unset ();
 		prefs_visibility_button.drag_source_unset ();
+		recorder_visibility_button.drag_source_unset ();
 	}
 }
 
@@ -663,6 +679,7 @@ void
 ARDOUR_UI::tabs_switch (GtkNotebookPage*, guint page)
 {
 	if (editor && (page == (guint) _tabs.page_num (editor->contents()))) {
+
 		editor_visibility_button.set_active_state (Gtkmm2ext::ImplicitActive);
 
 		if (mixer && (mixer->tabbed() || mixer->tabbed_by_default())) {
@@ -672,6 +689,11 @@ ARDOUR_UI::tabs_switch (GtkNotebookPage*, guint page)
 		if (rc_option_editor && (rc_option_editor->tabbed() || rc_option_editor->tabbed_by_default())) {
 			prefs_visibility_button.set_active_state (Gtkmm2ext::Off);
 		}
+
+		if (recorder && (recorder->tabbed() || recorder->tabbed_by_default())) {
+			recorder_visibility_button.set_active_state (Gtkmm2ext::Off);
+		}
+
 	} else if (mixer && (page == (guint) _tabs.page_num (mixer->contents()))) {
 
 		if (editor && (editor->tabbed() || editor->tabbed_by_default())) {
@@ -682,6 +704,10 @@ ARDOUR_UI::tabs_switch (GtkNotebookPage*, guint page)
 
 		if (rc_option_editor && (rc_option_editor->tabbed() || rc_option_editor->tabbed_by_default())) {
 			prefs_visibility_button.set_active_state (Gtkmm2ext::Off);
+		}
+
+		if (recorder && (recorder->tabbed() || recorder->tabbed_by_default())) {
+			recorder_visibility_button.set_active_state (Gtkmm2ext::Off);
 		}
 
 	} else if (page == (guint) _tabs.page_num (rc_option_editor->contents())) {
@@ -695,8 +721,28 @@ ARDOUR_UI::tabs_switch (GtkNotebookPage*, guint page)
 		}
 
 		prefs_visibility_button.set_active_state (Gtkmm2ext::ImplicitActive);
-	}
 
+		if (recorder && (recorder->tabbed() || recorder->tabbed_by_default())) {
+			recorder_visibility_button.set_active_state (Gtkmm2ext::Off);
+		}
+
+	} else if (page == (guint) _tabs.page_num (recorder->contents())) {
+
+		if (editor && (editor->tabbed() || editor->tabbed_by_default())) {
+			editor_visibility_button.set_active_state (Gtkmm2ext::Off);
+		}
+
+		if (mixer && (mixer->tabbed() || mixer->tabbed_by_default())) {
+			mixer_visibility_button.set_active_state (Gtkmm2ext::Off);
+		}
+
+		if (rc_option_editor && (rc_option_editor->tabbed() || rc_option_editor->tabbed_by_default())) {
+			prefs_visibility_button.set_active_state (Gtkmm2ext::Off);
+		}
+
+		recorder_visibility_button.set_active_state (Gtkmm2ext::ImplicitActive);
+
+	}
 }
 
 void
@@ -777,40 +823,37 @@ ARDOUR_UI::tabbable_state_change (Tabbable& t)
 	}
 
 	ArdourButton* vis_button = 0;
-	std::vector<ArdourButton*> other_vis_buttons;
 
 	if (&t == editor) {
 		vis_button = &editor_visibility_button;
-		other_vis_buttons.push_back (&mixer_visibility_button);
-		other_vis_buttons.push_back (&prefs_visibility_button);
 	} else if (&t == mixer) {
 		vis_button = &mixer_visibility_button;
-		other_vis_buttons.push_back (&editor_visibility_button);
-		other_vis_buttons.push_back (&prefs_visibility_button);
 	} else if (&t == rc_option_editor) {
 		vis_button = &prefs_visibility_button;
-		other_vis_buttons.push_back (&editor_visibility_button);
-		other_vis_buttons.push_back (&mixer_visibility_button);
+	} else if (&t == recorder) {
+		vis_button = &recorder_visibility_button;
 	}
 
 	if (!vis_button) {
+		assert (0);
 		return;
 	}
 
-	switch (vs) {
-	case Tabbed:
-		vis_button->set_active_state (Gtkmm2ext::ImplicitActive);
-		break;
-	case Windowed:
-		vis_button->set_active_state (Gtkmm2ext::ExplicitActive);
-		break;
-	case Hidden:
-		vis_button->set_active_state (Gtkmm2ext::Off);
-		break;
-	}
+	/* First update button states for (other) tabbed windows.
+	 * (Gtkmm2ext::Off or Gtkmm2ext::ImplicitActive)
+	 */
+	tabs_switch (NULL, _tabs.get_current_page ());
 
-	for (std::vector<ArdourButton*>::iterator b = other_vis_buttons.begin(); b != other_vis_buttons.end(); ++b) {
-		(*b)->set_active_state (Gtkmm2ext::Off);
+	switch (vs) {
+		case Tabbed:
+			/* nothing to do */
+			break;
+		case Windowed:
+			vis_button->set_active_state (Gtkmm2ext::ExplicitActive);
+			break;
+		case Hidden:
+			vis_button->set_active_state (Gtkmm2ext::Off);
+			break;
 	}
 }
 

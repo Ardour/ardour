@@ -44,6 +44,7 @@
 #include <sigc++/signal.h>
 
 #include "pbd/statefuldestructible.h"
+#include "pbd/g_atomic_compat.h"
 
 #include "temporal/beats.h"
 
@@ -262,10 +263,11 @@ public:
 	/** Import existing media */
 	virtual void do_import (std::vector<std::string> paths, Editing::ImportDisposition, Editing::ImportMode mode, ARDOUR::SrcQuality,
 	                        ARDOUR::MidiTrackNameSource, ARDOUR::MidiTempoMapDisposition, samplepos_t&,
-	                        boost::shared_ptr<ARDOUR::PluginInfo> instrument=boost::shared_ptr<ARDOUR::PluginInfo>()) = 0;
+	                        boost::shared_ptr<ARDOUR::PluginInfo> instrument = boost::shared_ptr<ARDOUR::PluginInfo>(),
+	                        bool with_markers = false) = 0;
 	virtual void do_embed (std::vector<std::string> paths, Editing::ImportDisposition, Editing::ImportMode mode,
 	                       samplepos_t&,
-	                       boost::shared_ptr<ARDOUR::PluginInfo> instrument=boost::shared_ptr<ARDOUR::PluginInfo>()) = 0;
+	                       boost::shared_ptr<ARDOUR::PluginInfo> instrument = boost::shared_ptr<ARDOUR::PluginInfo>()) = 0;
 
 	/** Open main export dialog */
 	virtual void export_audio () = 0;
@@ -279,7 +281,7 @@ public:
 	/** Open export dialog with current range pre-selected */
 	virtual void export_range () = 0;
 
-	virtual void measure_master_loudness (bool) = 0;
+	virtual void loudness_assistant (bool) = 0;
 
 	virtual void register_actions () = 0;
 	virtual void set_zoom_focus (Editing::ZoomFocus) = 0;
@@ -288,9 +290,9 @@ public:
 	virtual void reset_zoom (samplecnt_t) = 0;
 	virtual PlaylistSelector& playlist_selector() const = 0;
 	virtual void clear_playlist (boost::shared_ptr<ARDOUR::Playlist>) = 0;
-	virtual void new_playlists (TimeAxisView*) = 0;
-	virtual void copy_playlists (TimeAxisView*) = 0;
-	virtual void clear_playlists (TimeAxisView*) = 0;
+	virtual void new_playlists (RouteUI*) = 0;
+	virtual void copy_playlists (RouteUI*) = 0;
+	virtual void clear_playlists (RouteUI*) = 0;
 	virtual void select_all_visible_lanes () = 0;
 	virtual void select_all_tracks () = 0;
 	virtual void deselect_all () = 0;
@@ -365,6 +367,7 @@ public:
 	virtual void embed_audio_from_video (std::string, samplepos_t n = 0, bool lock_position_to_video = true) = 0;
 
 	virtual bool track_selection_change_without_scroll () const = 0;
+	virtual bool show_touched_automation () const = 0;
 
 	virtual StripableTimeAxisView* get_stripable_time_axis_by_id (const PBD::ID& id) const = 0;
 
@@ -522,13 +525,14 @@ protected:
 	friend class DisplaySuspender;
 	virtual void suspend_route_redisplay () = 0;
 	virtual void resume_route_redisplay () = 0;
-	gint _suspend_route_redisplay_counter;
+
+	GATOMIC_QUAL gint _suspend_route_redisplay_counter;
 };
 
 class DisplaySuspender {
 	public:
 		DisplaySuspender() {
-			if (g_atomic_int_add(&PublicEditor::instance()._suspend_route_redisplay_counter, 1) == 0) {
+			if (g_atomic_int_add (&PublicEditor::instance()._suspend_route_redisplay_counter, 1) == 0) {
 				PublicEditor::instance().suspend_route_redisplay ();
 			}
 		}

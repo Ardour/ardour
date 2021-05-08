@@ -72,7 +72,6 @@ public:
 	}
 
 private:
-	bool   _denormal_protection;
 	bool   _apply_gain_automation;
 	float  _current_gain;
 	samplepos_t _current_automation_sample;

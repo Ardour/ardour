@@ -143,52 +143,66 @@ LoudnessReader::process (ProcessContext<float> const & ctx)
 	ListedSource<float>::output (ctx);
 }
 
-float
-LoudnessReader::get_normalize_gain (float target_lufs, float target_dbtp)
+bool
+LoudnessReader::get_loudness (float* integrated, float* short_term, float* momentary) const
 {
-	float dBTP = 0;
-	float LUFS = -200;
-	uint32_t have_lufs = 0;
-	uint32_t have_dbtp = 0;
-
 	if (_ebur_plugin) {
 		Vamp::Plugin::FeatureSet features = _ebur_plugin->getRemainingFeatures ();
 		if (!features.empty () && features.size () == 3) {
-			const float lufs = features[0][0].values[0];
-			LUFS = std::max (LUFS, lufs);
-			++have_lufs;
+			if (integrated) {
+				*integrated = features[0][0].values[0];
+			}
+			if (short_term) {
+				*short_term = features[0][1].values[0];
+			}
+			if (momentary) {
+				*momentary = features[0][2].values[0];
+			}
+			return true;
 		}
 	}
+	return false;
+}
+
+float
+LoudnessReader::calc_peak (float target_lufs, float target_dbtp) const
+{
+	float    LUFSi = 0;
+	float    LUFSs = 0;
+	uint32_t have_dbtp = 0;
+	float    tp_coeff  = 0;
+
+	bool have_lufs = get_loudness (&LUFSi, &LUFSs);
 
 	for (unsigned int c = 0; c < _channels && c < _dbtp_plugins.size(); ++c) {
 		Vamp::Plugin::FeatureSet features = _dbtp_plugins.at(c)->getRemainingFeatures ();
 		if (!features.empty () && features.size () == 2) {
-			const float dbtp = features[0][0].values[0];
-			dBTP = std::max (dBTP, dbtp);
+			const float tp = features[0][0].values[0];
+			tp_coeff = std::max (tp_coeff, tp);
 			++have_dbtp;
 		}
 	}
 
-	float g = 100000.0; // +100dB
+	float g = 1.f;
 	bool set = false;
-	if (have_lufs && LUFS > -180.0f && target_lufs <= 0.f) {
-		const float ge = pow (10.f, (target_lufs * 0.05f)) / pow (10.f, (LUFS * 0.05f));
-		//printf ("LU: %f LUFS, %f\n", LUFS, ge);
-		g = std::min (g, ge);
+
+	if (have_lufs && LUFSi > -180.0f && target_lufs <= 0.f) {
+		g = powf (10.f, .05f * (LUFSi - target_lufs));
+		set = true;
+	} else if (have_lufs && LUFSs > -180.0f && target_lufs <= 0.f) {
+		g = powf (10.f, .05f * (LUFSs - target_lufs));
 		set = true;
 	}
 
-	// TODO check that all channels were used.. ? (have_dbtp == _channels)
-	if (have_dbtp && dBTP > 0.f && target_dbtp <= 0.f) {
-		const float ge = pow (10.f, (target_dbtp * 0.05f)) / dBTP;
-		//printf ("TP:(%d chn) %fdBTP -> %f\n", have_dbtp, dBTP, ge);
-		g = std::min (g, ge);
+	if (have_dbtp && tp_coeff > 0.f && target_dbtp <= 0.f) {
+		const float ge = tp_coeff / powf (10.f, .05f * target_dbtp);
+		if (set) {
+			g = std::max (g, ge);
+		} else {
+			g = ge;
+		}
 		set = true;
 	}
 
-	if (!set) {
-		g = 1.f;
-	}
-	//printf ("LF %f  / %f\n", g, 1.f / g);
 	return g;
 }

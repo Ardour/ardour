@@ -22,6 +22,8 @@
 #include <pthread.h>
 
 #include "pbd/ringbuffer.h"
+#include "pbd/g_atomic_compat.h"
+
 #include "zita-resampler/vresampler.h"
 #include "zita-alsa-pcmi.h"
 
@@ -81,7 +83,8 @@ private:
 	double   _play_latency;
 
 	volatile double _slave_speed;
-	volatile gint   _draining;
+
+	GATOMIC_QUAL gint _draining;
 
 	PBD::RingBuffer<float> _rb_capture;
 	PBD::RingBuffer<float> _rb_playback;

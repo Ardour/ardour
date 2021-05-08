@@ -432,6 +432,12 @@ ExportDialog::show_progress ()
 		}
 	}
 
+	if (!status->aborted() && _session->export_xruns () > 0) {
+		std::string txt = string_compose (_("There have been %1 dropouts during realtime-export."), _session->export_xruns ());
+		Gtk::MessageDialog msg (txt, false, Gtk::MESSAGE_WARNING, Gtk::BUTTONS_OK, true);
+		msg.run();
+	}
+
 	if (!status->aborted() && status->result_map.size() > 0) {
 		hide();
 		ExportReport er (_session, status);

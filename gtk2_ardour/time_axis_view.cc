@@ -36,7 +36,6 @@
 
 #include "pbd/error.h"
 #include "pbd/convert.h"
-#include "pbd/stacktrace.h"
 #include "pbd/unwind.h"
 
 #include "ardour/profile.h"

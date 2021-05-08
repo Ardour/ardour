@@ -122,7 +122,9 @@ VST3NSViewPluginUI::view_size_allocate (Gtk::Allocation& allocation)
 	PBD::Unwinder<bool> uw (_resize_in_progress, true);
 
 	ViewRect rect;
-	if (view->getSize (&rect) == kResultOk) {
+	if (view->getSize (&rect) == kResultOk
+	    && !(rect.right - rect.left == allocation.get_width () && rect.bottom - rect.top ==  allocation.get_height () && rect.left == xx && rect.top == yy))
+	{
 		rect.left   = xx;
 		rect.top    = yy;
 		rect.right  = rect.left + allocation.get_width ();
@@ -151,6 +153,7 @@ VST3NSViewPluginUI::view_size_allocate (Gtk::Allocation& allocation)
 	for (unsigned long i = 0; i < [subviews count]; ++i) {
 		NSView* subview = [subviews objectAtIndex:i];
 		[subview setFrame:NSMakeRect (0, 0, allocation.get_width (), allocation.get_height ())];
+		break; /* only resize first subview */
 	}
 }
 

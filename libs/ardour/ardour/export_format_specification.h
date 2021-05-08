@@ -95,6 +95,7 @@ class LIBARDOUR_API ExportFormatSpecification : public ExportFormatBase {
 	void set_trim_end (bool value) { _trim_end = value; }
 	void set_normalize (bool value) { _normalize = value; }
 	void set_normalize_loudness (bool value) { _normalize_loudness = value; }
+	void set_use_tp_limiter (bool value) { _use_tp_limiter = value; }
 	void set_normalize_dbfs (float value) { _normalize_dbfs = value; }
 	void set_normalize_lufs (float value) { _normalize_lufs = value; }
 	void set_normalize_dbtp (float value) { _normalize_dbtp = value; }
@@ -169,6 +170,7 @@ class LIBARDOUR_API ExportFormatSpecification : public ExportFormatBase {
 	bool trim_end () const { return _trim_end; }
 	bool normalize () const { return _normalize; }
 	bool normalize_loudness () const { return _normalize_loudness; }
+	bool use_tp_limiter () const { return _use_tp_limiter; }
 	float normalize_dbfs () const { return _normalize_dbfs; }
 	float normalize_lufs () const { return _normalize_lufs; }
 	float normalize_dbtp () const { return _normalize_dbtp; }
@@ -232,6 +234,7 @@ class LIBARDOUR_API ExportFormatSpecification : public ExportFormatBase {
 
 	bool            _normalize;
 	bool            _normalize_loudness;
+	bool            _use_tp_limiter;
 	float           _normalize_dbfs;
 	float           _normalize_lufs;
 	float           _normalize_dbtp;

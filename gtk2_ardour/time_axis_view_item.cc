@@ -28,7 +28,6 @@
 #include <utility>
 
 #include "pbd/error.h"
-#include "pbd/stacktrace.h"
 
 #include "ardour/types.h"
 #include "ardour/ardour.h"

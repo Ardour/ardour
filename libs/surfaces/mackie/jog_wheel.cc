@@ -21,6 +21,7 @@
 
 #include "ardour/session.h"
 
+#include "button.h"
 #include "jog_wheel.h"
 #include "mackie_control_protocol.h"
 #include "surface_port.h"
@@ -36,12 +37,19 @@ JogWheel::JogWheel (MackieControlProtocol & mcp)
   : _mcp (mcp)
   , _mode (scroll)
 {
+	/* do it again to get the LED in the correct state */
+	set_mode (scroll);
 }
 
 void
 JogWheel::set_mode (Mode m)
 {
 	_mode = m;
+	if (_mode == shuttle) {
+		_mcp.update_global_button (Button::Scrub, on);
+	} else {
+		_mcp.update_global_button (Button::Scrub, off);
+	}
 }
 
 void JogWheel::jog_event (float delta)
@@ -64,6 +72,11 @@ void JogWheel::jog_event (float delta)
 		_mcp.ScrollTimeline (delta/4.0);
 		break;
 	default:
+		if (delta > 0) {
+			_mcp.button_varispeed (true);
+		} else if (delta < 0) {
+			_mcp.button_varispeed (false);
+		}
 		break;
 	}
 }

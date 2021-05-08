@@ -20,9 +20,9 @@ ARDOUR.LuaAPI.usleep (100000)
 s:goto_start()
 s:maybe_enable_record()
 
-s:request_transport_speed(1.0, true, 4)
+s:request_roll (ARDOUR.TransportRequestSource.TRS_UI)
 ARDOUR.LuaAPI.usleep (1000000 * reclen)
-s:request_transport_speed(0.0, false, 4)
+s:request_stop (false, false, ARDOUR.TransportRequestSource.TRS_UI);
 
 for t in s:get_tracks():iter() do
 	t:rec_enable_control():set_value(0, PBD.GroupControlDisposition.UseGroup)
@@ -75,7 +75,7 @@ for x = 2, cnt do
 	end
 	local t_end = ARDOUR.LuaAPI.monotonic_time ()
 
-	Session:request_locate((playhead + stepsize * n_steps), false, 5)
+	Session:request_locate((playhead + stepsize * n_steps), ARDOUR.LocateTransportDisposition.MustStop, ARDOUR.TransportRequestSource.TRS_UI)
 	print (count_regions (), (t_end - t_start) / 1000 / n_steps)
 	collectgarbage ();
 	ARDOUR.LuaAPI.usleep(500000)

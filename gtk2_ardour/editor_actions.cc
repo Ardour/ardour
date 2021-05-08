@@ -446,6 +446,8 @@ Editor::register_actions ()
 
 	ActionManager::register_toggle_action (editor_actions, "toggle-stationary-playhead", _("Stationary Playhead"), (mem_fun(*this, &Editor::toggle_stationary_playhead)));
 
+	ActionManager::register_toggle_action (editor_actions, "show-touched-automation", _("Show Automation Lane on Touch"), (mem_fun(*this, &Editor::toggle_show_touched_automation)));
+
 	act = reg_sens (editor_actions, "insert-time", _("Insert Time"), (sigc::mem_fun(*this, &Editor::do_insert_time)));
 	ActionManager::track_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "remove-time", _("Remove Time"), (mem_fun(*this, &Editor::do_remove_time)));
@@ -683,7 +685,7 @@ Editor::register_actions ()
 	act = reg_sens (editor_actions, X_("addExistingPTFiles"), _("Import PT session"), sigc::mem_fun (*this, &Editor::external_pt_dialog));
 	ActionManager::write_sensitive_actions.push_back (act);
 
-	act = reg_sens (editor_actions, X_("LoudnessAssistant"), _("Loudness Assistant..."), sigc::bind (sigc::mem_fun (*this, &Editor::measure_master_loudness), false));
+	act = reg_sens (editor_actions, X_("LoudnessAssistant"), _("Loudness Assistant..."), sigc::bind (sigc::mem_fun (*this, &Editor::loudness_assistant), false));
 	ActionManager::write_sensitive_actions.push_back (act);
 
 	/* the next two are duplicate items with different names for use in two different contexts */
@@ -1428,7 +1430,7 @@ Editor::parameter_changed (std::string p)
 		}
 	} else if (p == "show-group-tabs") {
 
-		bool const s = _session->config.get_show_group_tabs ();
+		bool const s = _session ? _session->config.get_show_group_tabs () : true;
 		if (s) {
 			_group_tabs->show ();
 		} else {

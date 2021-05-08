@@ -130,9 +130,6 @@ Push2::Push2 (ARDOUR::Session& s)
 	/* Catch port connections and disconnections */
 	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connections, MISSING_INVALIDATOR, boost::bind (&Push2::connection_handler, this, _1, _2, _3, _4, _5), this);
 
-	/* Catch name changes, notify GUI */
-	ARDOUR::AudioEngine::instance()->PortPrettyNameChanged.connect (port_connections, MISSING_INVALIDATOR, boost::bind (&Push2::ConnectionChange, this), this);
-
 	/* Push 2 ports might already be there */
 	port_registration_handler ();
 }
@@ -1014,6 +1011,7 @@ Push2::set_state (const XMLNode & node, int version)
 	if ((child = node.child (X_("Input"))) != 0) {
 		XMLNode* portnode = child->child (Port::state_node_name.c_str());
 		if (portnode) {
+			portnode->remove_property ("name");
 			_async_in->set_state (*portnode, version);
 		}
 	}
@@ -1021,6 +1019,7 @@ Push2::set_state (const XMLNode & node, int version)
 	if ((child = node.child (X_("Output"))) != 0) {
 		XMLNode* portnode = child->child (Port::state_node_name.c_str());
 		if (portnode) {
+			portnode->remove_property ("name");
 			_async_out->set_state (*portnode, version);
 		}
 	}

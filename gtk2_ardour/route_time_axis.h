@@ -118,15 +118,6 @@ public:
 	void toggle_automation_track (const Evoral::Parameter& param);
 	void fade_range (TimeSelection&);
 
-	/* The editor calls these when mapping an operation across multiple tracks */
-	void use_new_playlist (bool prompt, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &, bool copy);
-	void clear_playlist ();
-
-	/* group playlist name resolving */
-	std::string resolve_new_group_playlist_name(std::string &, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
-
-	void build_playlist_menu ();
-
 	void add_underlay (StreamView*, bool update_xml = true);
 	void remove_underlay (StreamView*);
 	void build_underlay_menu(Gtk::Menu*);
@@ -149,6 +140,8 @@ public:
 	void chan_count_changed ();
 	void meter_changed ();
 	void effective_gain_display () { gm.effective_gain_display(); }
+
+	static sigc::signal<void, bool> signal_ctrl_touched;
 
 	std::string state_id() const;
 
@@ -203,6 +196,14 @@ protected:
 	ProcessorAutomationNode*
 	find_processor_automation_node (boost::shared_ptr<ARDOUR::Processor> i, Evoral::Parameter);
 
+	/* O(log(N)) lookup of menu-item by AC */
+	Gtk::CheckMenuItem*
+	find_menu_item_by_ctrl (boost::shared_ptr<ARDOUR::AutomationControl>);
+
+	/* O(1) IFF route_owned_only == true, O(N) otherwise */
+	boost::shared_ptr<AutomationTimeAxisView>
+	find_atav_by_ctrl (boost::shared_ptr<ARDOUR::AutomationControl>, bool route_owned_only = true);
+
 	boost::shared_ptr<AutomationLine>
 	find_processor_automation_curve (boost::shared_ptr<ARDOUR::Processor> i, Evoral::Parameter);
 
@@ -231,10 +232,7 @@ protected:
 	void set_align_choice (Gtk::RadioMenuItem*, ARDOUR::AlignChoice, bool apply_to_selection = false);
 
 	bool         playlist_click (GdkEventButton *);
-	void         show_playlist_selector ();
 	void         playlist_changed ();
-
-	void rename_current_playlist ();
 
 	bool         automation_click (GdkEventButton *);
 
@@ -263,11 +261,8 @@ protected:
 	Gtk::Menu*          automation_action_menu;
 	Gtk::MenuItem*      plugins_submenu_item;
 	RouteGroupMenu*     route_group_menu;
-	Gtk::Menu*          playlist_action_menu;
 	Gtk::MenuItem*      overlaid_menu_item;
 	Gtk::MenuItem*      stacked_menu_item;
-
-	void use_playlist (Gtk::RadioMenuItem *item, boost::weak_ptr<ARDOUR::Playlist> wpl);
 
 	ArdourCanvas::Rectangle* timestretch_rect;
 
@@ -275,6 +270,8 @@ protected:
 	 *  this route.  The Amp processor is not included in this list.
 	 */
 	std::list<ProcessorAutomationInfo*> processor_automation;
+
+	std::map<boost::shared_ptr<PBD::Controllable>, Gtk::CheckMenuItem*> ctrl_item_map;
 
 	typedef std::vector<boost::shared_ptr<AutomationLine> > ProcessorAutomationCurves;
 	ProcessorAutomationCurves processor_automation_curves;
@@ -314,10 +311,15 @@ private:
 	void update_playlist_tip ();
 	void parameter_changed (std::string const & p);
 	void update_track_number_visibility();
+	void show_touched_automation (boost::weak_ptr<PBD::Controllable>);
+	void maybe_hide_automation (bool, boost::weak_ptr<PBD::Controllable>);
 
 	void drop_instrument_ref ();
 	void reread_midnam ();
 	PBD::ScopedConnectionList midnam_connection;
+
+	PBD::ScopedConnection ctrl_touched_connection;
+	sigc::connection      ctrl_autohide_connection;
 };
 
 #endif /* __ardour_route_time_axis_h__ */

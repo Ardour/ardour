@@ -26,6 +26,8 @@
 
 #include <cairo.h>
 
+#include "pbd/unwind.h"
+
 #include "ardour/ardour.h"
 #include "ardour/audioengine.h"
 #include "ardour/rc_configuration.h"
@@ -80,6 +82,7 @@ ShuttleControl::ShuttleControl ()
 	shuttle_max_speed = Config->get_max_transport_speed();
 	shuttle_context_menu = 0;
 	_hovering = false;
+	_ignore_change = false;
 
 	set_flags (CAN_FOCUS);
 	add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::POINTER_MOTION_MASK|Gdk::SCROLL_MASK);
@@ -178,9 +181,10 @@ ShuttleControl::map_transport_state ()
 		if (Config->get_shuttle_units() == Semitones) {
 			bool reverse;
 			int semi = speed_as_semitones (speed, reverse);
+			semi = std::max (-24, std::min (24, semi));
 			shuttle_fract = semitones_as_fract (semi, reverse);
 		} else {
-			shuttle_fract = speed/shuttle_max_speed;
+			shuttle_fract = speed / shuttle_max_speed;
 		}
 	}
 
@@ -190,13 +194,12 @@ ShuttleControl::map_transport_state ()
 void
 ShuttleControl::build_shuttle_context_menu ()
 {
+	PBD::Unwinder<bool> uw (_ignore_change, true);
+
 	using namespace Menu_Helpers;
 
 	shuttle_context_menu = new Menu();
 	MenuList& items = shuttle_context_menu->items();
-
-	Menu* speed_menu = manage (new Menu());
-	MenuList& speed_items = speed_menu->items();
 
 	Menu* units_menu = manage (new Menu);
 	MenuList& units_items = units_menu->items();
@@ -227,36 +230,40 @@ ShuttleControl::build_shuttle_context_menu ()
 
 	items.push_back (MenuElem (_("Mode"), *style_menu));
 
-	RadioMenuItem::Group speed_group;
+	if (Config->get_shuttle_units() == Percentage) {
+		RadioMenuItem::Group speed_group;
 
-	/* XXX this code assumes that Config->get_max_transport_speed() returns 8 */
+		/* XXX this code assumes that Config->get_max_transport_speed() returns 8 */
+		Menu* speed_menu = manage (new Menu());
+		MenuList& speed_items = speed_menu->items();
 
-	speed_items.push_back (RadioMenuElem (speed_group, "8", sigc::bind (sigc::mem_fun (*this, &ShuttleControl::set_shuttle_max_speed), 8.0f)));
-	if (shuttle_max_speed == 8.0) {
-		static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();
-	}
-	speed_items.push_back (RadioMenuElem (speed_group, "6", sigc::bind (sigc::mem_fun (*this, &ShuttleControl::set_shuttle_max_speed), 6.0f)));
-	if (shuttle_max_speed == 6.0) {
-		static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();
-	}
-	speed_items.push_back (RadioMenuElem (speed_group, "4", sigc::bind (sigc::mem_fun (*this, &ShuttleControl::set_shuttle_max_speed), 4.0f)));
-	if (shuttle_max_speed == 4.0) {
-		static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();
-	}
-	speed_items.push_back (RadioMenuElem (speed_group, "3", sigc::bind (sigc::mem_fun (*this, &ShuttleControl::set_shuttle_max_speed), 3.0f)));
-	if (shuttle_max_speed == 3.0) {
-		static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();
-	}
-	speed_items.push_back (RadioMenuElem (speed_group, "2", sigc::bind (sigc::mem_fun (*this, &ShuttleControl::set_shuttle_max_speed), 2.0f)));
-	if (shuttle_max_speed == 2.0) {
-		static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();
-	}
-	speed_items.push_back (RadioMenuElem (speed_group, "1.5", sigc::bind (sigc::mem_fun (*this, &ShuttleControl::set_shuttle_max_speed), 1.5f)));
-	if (shuttle_max_speed == 1.5) {
-		static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();
-	}
+		speed_items.push_back (RadioMenuElem (speed_group, "8", sigc::bind (sigc::mem_fun (*this, &ShuttleControl::set_shuttle_max_speed), 8.0f)));
+		if (shuttle_max_speed == 8.0) {
+			static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();
+		}
+		speed_items.push_back (RadioMenuElem (speed_group, "6", sigc::bind (sigc::mem_fun (*this, &ShuttleControl::set_shuttle_max_speed), 6.0f)));
+		if (shuttle_max_speed == 6.0) {
+			static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();
+		}
+		speed_items.push_back (RadioMenuElem (speed_group, "4", sigc::bind (sigc::mem_fun (*this, &ShuttleControl::set_shuttle_max_speed), 4.0f)));
+		if (shuttle_max_speed == 4.0) {
+			static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();
+		}
+		speed_items.push_back (RadioMenuElem (speed_group, "3", sigc::bind (sigc::mem_fun (*this, &ShuttleControl::set_shuttle_max_speed), 3.0f)));
+		if (shuttle_max_speed == 3.0) {
+			static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();
+		}
+		speed_items.push_back (RadioMenuElem (speed_group, "2", sigc::bind (sigc::mem_fun (*this, &ShuttleControl::set_shuttle_max_speed), 2.0f)));
+		if (shuttle_max_speed == 2.0) {
+			static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();
+		}
+		speed_items.push_back (RadioMenuElem (speed_group, "1.5", sigc::bind (sigc::mem_fun (*this, &ShuttleControl::set_shuttle_max_speed), 1.5f)));
+		if (shuttle_max_speed == 1.5) {
+			static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();
+		}
 
-	items.push_back (MenuElem (_("Maximum speed"), *speed_menu));
+		items.push_back (MenuElem (_("Maximum speed"), *speed_menu));
+	}
 
 	items.push_back (SeparatorElem ());
 	items.push_back (MenuElem (_("Reset to 100%"), sigc::mem_fun (*this, &ShuttleControl::reset_speed)));
@@ -269,19 +276,16 @@ ShuttleControl::reset_speed ()
 		return;
 	}
 
-	if (_session->transport_rolling()) {
-		_session->request_transport_speed (1.0, true);
-	} else {
-		_session->request_transport_speed (0.0, true);
-	}
+	_session->reset_transport_speed ();
 }
 
 void
 ShuttleControl::set_shuttle_max_speed (float speed)
 {
+	if (_ignore_change) {
+		return;
+	}
 	Config->set_shuttle_max_speed (speed);
-	shuttle_max_speed = speed;
-	last_speed_displayed = -99999999;
 }
 
 bool
@@ -306,9 +310,7 @@ ShuttleControl::on_button_press_event (GdkEventButton* ev)
 	switch (ev->button) {
 	case 1:
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
-			if (_session->transport_rolling()) {
-				_session->request_transport_speed (1.0);
-			}
+			_session->reset_transport_speed ();
 		} else {
 			add_modal_grab ();
 			shuttle_grabbed = true;
@@ -323,6 +325,7 @@ ShuttleControl::on_button_press_event (GdkEventButton* ev)
 
 	case 2:
 	case 3:
+	default:
 		return true;
 		break;
 	}
@@ -357,11 +360,6 @@ ShuttleControl::on_button_release_event (GdkEventButton* ev)
 		return true;
 
 	case 2:
-		if (_session->transport_rolling()) {
-			_session->request_transport_speed (1.0, Config->get_shuttle_behaviour() == Wheel);
-		}
-		return true;
-
 	case 3:
 	default:
 		return true;
@@ -391,11 +389,16 @@ ShuttleControl::on_scroll_event (GdkEventScroll* ev)
 	case GDK_SCROLL_RIGHT:
 		if (semis) {
 			if (shuttle_fract == 0) {
-				shuttle_fract = semitones_as_fract (1, false);
+				shuttle_fract = semitones_as_fract (-24, false);
 			} else {
 				bool rev;
 				int st = fract_as_semitones (shuttle_fract, rev);
-				shuttle_fract = semitones_as_fract (st + 1, rev);
+				st += (rev ? -1 : 1);
+				if (st < -24) {
+					st = -24;
+					rev = !rev;
+				}
+				shuttle_fract = semitones_as_fract (st, rev);
 			}
 		} else {
 			shuttle_fract += 0.00125;
@@ -405,11 +408,16 @@ ShuttleControl::on_scroll_event (GdkEventScroll* ev)
 	case GDK_SCROLL_LEFT:
 		if (semis) {
 			if (shuttle_fract == 0) {
-				shuttle_fract = semitones_as_fract (1, true);
+				shuttle_fract = semitones_as_fract (-24, true);
 			} else {
 				bool rev;
 				int st = fract_as_semitones (shuttle_fract, rev);
-				shuttle_fract = semitones_as_fract (st - 1, rev);
+				st += (rev ? 1 : -1);
+				if (st < -24) {
+					st = -24;
+					rev = !rev;
+				}
+				shuttle_fract = semitones_as_fract (st, rev);
 			}
 		} else {
 			shuttle_fract -= 0.00125;
@@ -417,32 +425,6 @@ ShuttleControl::on_scroll_event (GdkEventScroll* ev)
 		break;
 	default:
 		return false;
-	}
-
-	if (semis) {
-
-		float lower_side_of_dead_zone = semitones_as_fract (-24, true);
-		float upper_side_of_dead_zone = semitones_as_fract (-24, false);
-
-		/* if we entered the "dead zone" (-24 semitones in forward or reverse), jump
-		   to the far side of it.
-		*/
-
-		if (shuttle_fract > lower_side_of_dead_zone && shuttle_fract < upper_side_of_dead_zone) {
-			switch (ev->direction) {
-			case GDK_SCROLL_UP:
-			case GDK_SCROLL_RIGHT:
-				shuttle_fract = upper_side_of_dead_zone;
-				break;
-			case GDK_SCROLL_DOWN:
-			case GDK_SCROLL_LEFT:
-				shuttle_fract = lower_side_of_dead_zone;
-				break;
-			default:
-				/* impossible, checked above */
-				return false;
-			}
-		}
 	}
 
 	use_shuttle_fract (true);
@@ -567,6 +549,12 @@ ShuttleControl::use_shuttle_fract (bool force, bool zero_ok)
 		} else {
 			_session->request_transport_speed_nonzero (speed, Config->get_shuttle_behaviour() == Wheel);
 		}
+
+		if (speed != 0 && !_session->transport_state_rolling()) {
+			_session->request_roll ();
+		} else if (speed == 0 && zero_ok && _session->transport_state_rolling()) {
+			_session->request_stop ();
+		}
 	}
 }
 
@@ -602,12 +590,12 @@ ShuttleControl::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangl
 	cairo_stroke (cr);
 
 	float speed = 0.0;
-	float acutal_speed = 0.0;
+	float actual_speed = 0.0;
 	char buf[32];
 
 	if (_session) {
 		speed = _session->actual_speed ();
-		acutal_speed = speed;
+		actual_speed = speed;
 		if (shuttle_grabbed) {
 			speed = requested_speed;
 		}
@@ -623,7 +611,7 @@ ShuttleControl::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangl
 	cairo_set_source_rgba (cr, 0, 0, 0, 1);
 	cairo_fill(cr);
 	rounded_rectangle (cr, x + 1, 1, marker_size - 2, get_height() - 2, 3.5);
-	if (_flat_buttons) {
+	if (flat_buttons ()) {
 		uint32_t col = UIConfiguration::instance().color ("shuttle");
 		Gtkmm2ext::set_source_rgba (cr, col);
 	} else {
@@ -636,20 +624,20 @@ ShuttleControl::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangl
 	cairo_fill(cr);
 
 	/* text */
-	if (acutal_speed != 0) {
+	if (actual_speed != 0) {
 		if (Config->get_shuttle_units() == Percentage) {
-			if (acutal_speed == 1.0) {
+			if (actual_speed == 1.0) {
 				snprintf (buf, sizeof (buf), "%s", _("Play"));
 			} else {
-				if (acutal_speed < 0.0) {
-					snprintf (buf, sizeof (buf), "< %.1f%%", -acutal_speed * 100.f);
+				if (actual_speed < 0.0) {
+					snprintf (buf, sizeof (buf), "< %.1f%%", -actual_speed * 100.f);
 				} else {
-					snprintf (buf, sizeof (buf), "> %.1f%%", acutal_speed * 100.f);
+					snprintf (buf, sizeof (buf), "> %.1f%%", actual_speed * 100.f);
 				}
 			}
 		} else {
 			bool reversed;
-			int semi = speed_as_semitones (acutal_speed, reversed);
+			int semi = speed_as_semitones (actual_speed, reversed);
 			if (reversed) {
 				snprintf (buf, sizeof (buf), _("< %+2d st"), semi);
 			} else {
@@ -660,7 +648,7 @@ ShuttleControl::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangl
 		snprintf (buf, sizeof (buf), "%s", _("Stop"));
 	}
 
-	last_speed_displayed = acutal_speed;
+	last_speed_displayed = actual_speed;
 
 	_info_button.set_text (buf);
 
@@ -678,12 +666,18 @@ ShuttleControl::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangl
 void
 ShuttleControl::set_shuttle_style (ShuttleBehaviour s)
 {
+	if (_ignore_change) {
+		return;
+	}
 	Config->set_shuttle_behaviour (s);
 }
 
 void
 ShuttleControl::set_shuttle_units (ShuttleUnits s)
 {
+	if (_ignore_change) {
+		return;
+	}
 	Config->set_shuttle_units (s);
 }
 
@@ -721,7 +715,7 @@ ShuttleControl::parameter_changed (std::string p)
 						/* reset current speed and
 						   revert to 1.0 as the default
 						*/
-						_session->request_transport_speed (1.0);
+						_session->reset_transport_speed ();
 						/* redraw when speed changes */
 					}
 				} else {
@@ -736,9 +730,16 @@ ShuttleControl::parameter_changed (std::string p)
 		}
 
 	} else if (p == "shuttle-max-speed") {
-		queue_draw ();
+		shuttle_max_speed = Config->get_shuttle_max_speed ();
+		last_speed_displayed = -99999999;
+		map_transport_state ();
+		use_shuttle_fract (true);
 	} else if (p == "shuttle-units") {
-		queue_draw ();
+		last_speed_displayed = -99999999;
+		map_transport_state ();
+		use_shuttle_fract (true);
+		delete shuttle_context_menu;
+		shuttle_context_menu = 0;
 	}
 }
 

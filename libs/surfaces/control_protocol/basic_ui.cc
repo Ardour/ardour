@@ -186,21 +186,102 @@ BasicUI::remove_marker_at_playhead ()
 }
 
 void
+BasicUI::button_varispeed (bool fwd)
+{
+	// incrementally increase speed by semitones
+	// (keypress auto-repeat is 100ms)
+	const float maxspeed = Config->get_shuttle_max_speed();
+	float semitone_ratio = exp2f (1.0f/12.0f);
+	const float octave_down = pow (1.0/semitone_ratio, 12.0);
+	float transport_speed = get_transport_speed ();
+	float speed;
+
+	if (Config->get_rewind_ffwd_like_tape_decks()) {
+
+		if (fwd) {
+			if (transport_speed <= 0) {
+				session->request_transport_speed (1.0, false);
+				session->request_roll (TRS_UI);
+				return;
+			}
+		} else {
+			if (transport_speed >= 0) {
+				session->request_transport_speed (-1.0, false);
+				session->request_roll (TRS_UI);
+				return;
+			}
+		}
+
+
+	} else {
+
+		if (fabs (transport_speed) <= 0.1) {
+
+			/* close to zero, maybe flip direction */
+
+			if (fwd) {
+				if (transport_speed <= 0) {
+					session->request_transport_speed (1.0, false);
+					session->request_roll (TRS_UI);
+				}
+			} else {
+				if (transport_speed >= 0) {
+					session->request_transport_speed (-1.0, false);
+					session->request_roll (TRS_UI);
+				}
+			}
+
+			/* either we've just started, or we're moving as slowly as we
+			 * ever should
+			 */
+
+			return;
+		}
+
+		if (fwd) {
+			if (transport_speed < 0.f) {
+				/* we need to move the speed back towards zero */
+				if (fabs (transport_speed) < octave_down) {
+					semitone_ratio = pow (1.0/semitone_ratio, 4.0);
+				} else {
+					semitone_ratio = 1.0/semitone_ratio;
+				}
+			}
+		} else {
+			if (transport_speed > 0.f) {
+				/* we need to move the speed back towards zero */
+
+				if (transport_speed < octave_down) {
+					semitone_ratio = pow (1.0/semitone_ratio, 4.0);
+				} else {
+					semitone_ratio = 1.0/semitone_ratio;
+				}
+			}
+		}
+	}
+
+	speed = semitone_ratio * transport_speed;
+	speed = std::max (-maxspeed, std::min (maxspeed, speed));
+	session->request_transport_speed (speed, false);
+	session->request_roll (TRS_UI);
+}
+
+void
 BasicUI::rewind ()
 {
-	session->request_transport_speed (get_transport_speed() - 1.5);
+	button_varispeed (false);
 }
 
 void
 BasicUI::ffwd ()
 {
-	session->request_transport_speed (get_transport_speed() + 1.5);
+	button_varispeed (true);
 }
 
 void
 BasicUI::transport_stop ()
 {
-	session->request_transport_speed (0.0);
+	session->request_stop ();
 }
 
 bool
@@ -282,8 +363,10 @@ BasicUI::transport_play (bool from_last_start)
 		session->request_play_range (0, true);
 	}
 
-	if (!rolling) {
-		session->request_transport_speed (1.0f);
+	if (rolling) {
+		session->request_transport_speed (1.0, TRS_UI);
+	} else {
+		session->request_roll ();
 	}
 }
 
@@ -330,7 +413,7 @@ BasicUI::prev_marker ()
 	samplepos_t pos = session->locations()->first_mark_before (session->transport_sample());
 
 	if (pos >= 0) {
-		session->request_locate (pos, RollIfAppropriate);
+		session->request_locate (pos);
 	} else {
 		session->goto_start ();
 	}
@@ -342,7 +425,7 @@ BasicUI::next_marker ()
 	samplepos_t pos = session->locations()->first_mark_after (session->transport_sample());
 
 	if (pos >= 0) {
-		session->request_locate (pos, RollIfAppropriate);
+		session->request_locate (pos);
 	} else {
 		session->goto_end();
 	}
@@ -588,7 +671,7 @@ BasicUI::toggle_roll (bool roll_out_of_bounded_mode)
 		if (session->get_play_loop() && Config->get_loop_is_mode()) {
 			session->request_locate (session->locations()->auto_loop_location()->start(), MustRoll);
 		} else {
-			session->request_transport_speed (1.0f);
+			session->request_roll (TRS_UI);
 		}
 	}
 }
@@ -701,7 +784,7 @@ BasicUI::goto_nth_marker (int n)
 	for (Locations::LocationList::iterator i = ordered.begin(); n >= 0 && i != ordered.end(); ++i) {
 		if ((*i)->is_mark() && !(*i)->is_hidden() && !(*i)->is_session_range()) {
 			if (n == 0) {
-				session->request_locate ((*i)->start(), RollIfAppropriate);
+				session->request_locate ((*i)->start());
 				break;
 			}
 			--n;

@@ -23,9 +23,11 @@
 #include "pbd/error.h"
 #include "pbd/compose.h"
 
+#include "ardour/audioengine.h"
 #include "ardour/monitor_control.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
+#include "ardour/solo_mute_release.h"
 #include "ardour/track.h"
 #include "ardour/vca_manager.h"
 
@@ -87,6 +89,47 @@ Session::rt_set_controls (boost::shared_ptr<ControlList> cl, double val, Control
 		break;
 	default:
 		break;
+	}
+}
+
+void
+Session::prepare_momentary_solo (SoloMuteRelease* smr, bool exclusive, boost::shared_ptr<Route> route)
+{
+	boost::shared_ptr<RouteList> routes_on (new RouteList);
+	boost::shared_ptr<RouteList> routes_off (new RouteList);
+	boost::shared_ptr<RouteList> routes = get_routes();
+
+	for (RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
+#ifdef MIXBUS
+		if (route && (0 == route->mixbus()) != (0 == (*i)->mixbus ())) {
+			continue;
+		}
+#endif
+		if ((*i)->soloed ()) {
+			routes_on->push_back (*i);
+		} else if (smr) {
+			routes_off->push_back (*i);
+		}
+	}
+
+	if (exclusive) {
+		set_controls (route_list_to_control_list (routes_on, &Stripable::solo_control), false, Controllable::UseGroup);
+	}
+
+	if (smr) {
+		smr->set (routes_on, routes_off);
+	}
+
+	if (_monitor_out) {
+		if (smr) {
+			boost::shared_ptr<std::list<std::string> > pml (new std::list<std::string>);
+			_engine.monitor_port().active_monitors (*pml);
+			smr->set (pml);
+		}
+		if (exclusive) {
+			/* unset any input monitors */
+			_engine.monitor_port().clear_ports (false);
+		}
 	}
 }
 

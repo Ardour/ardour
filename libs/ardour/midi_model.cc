@@ -1380,7 +1380,7 @@ MidiModel::find_note (NotePtr other)
 }
 
 Evoral::Sequence<MidiModel::TimeType>::NotePtr
-MidiModel::find_note (gint note_id)
+MidiModel::find_note (Evoral::event_id_t note_id)
 {
 	/* used only for looking up notes when reloading history from disk,
 	   so we don't care about performance *too* much.
@@ -1408,7 +1408,7 @@ MidiModel::find_patch_change (Evoral::event_id_t id)
 }
 
 boost::shared_ptr<Evoral::Event<MidiModel::TimeType> >
-MidiModel::find_sysex (gint sysex_id)
+MidiModel::find_sysex (Evoral::event_id_t sysex_id)
 {
 	/* used only for looking up notes when reloading history from disk,
 	   so we don't care about performance *too* much.

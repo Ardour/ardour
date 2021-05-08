@@ -903,9 +903,11 @@ Locations::set_current_unlocked (Location *loc)
 	return 0;
 }
 
-void
+bool
 Locations::clear ()
 {
+	bool deleted = false;
+
 	{
 		Glib::Threads::Mutex::Lock lm (lock);
 
@@ -917,6 +919,7 @@ Locations::clear ()
 			if (!(*i)->is_session_range()) {
 				delete *i;
 				locations.erase (i);
+				deleted = true;
 			}
 
 			i = tmp;
@@ -924,14 +927,19 @@ Locations::clear ()
 
 		current_location = 0;
 	}
+	if (deleted) {
+		changed (); /* EMIT SIGNAL */
+		current_changed (0); /* EMIT SIGNAL */
+	}
 
-	changed (); /* EMIT SIGNAL */
-	current_changed (0); /* EMIT SIGNAL */
+	return deleted;
 }
 
-void
+bool
 Locations::clear_markers ()
 {
+	bool deleted = false;
+
 	{
 		Glib::Threads::Mutex::Lock lm (lock);
 		LocationList::iterator tmp;
@@ -943,18 +951,55 @@ Locations::clear_markers ()
 			if ((*i)->is_mark() && !(*i)->is_session_range()) {
 				delete *i;
 				locations.erase (i);
+				deleted = true;
 			}
 
 			i = tmp;
 		}
 	}
 
-	changed (); /* EMIT SIGNAL */
+	if (deleted) {
+		changed (); /* EMIT SIGNAL */
+	}
+
+	return deleted;
 }
 
-void
+bool
+Locations::clear_xrun_markers ()
+{
+	bool deleted = false;
+
+	{
+		Glib::Threads::Mutex::Lock lm (lock);
+		LocationList::iterator tmp;
+
+		for (LocationList::iterator i = locations.begin(); i != locations.end(); ) {
+			tmp = i;
+			++tmp;
+
+			if ((*i)->is_xrun()) {
+				delete *i;
+				locations.erase (i);
+				deleted = true;
+			}
+
+			i = tmp;
+		}
+	}
+
+	if (deleted) {
+		changed (); /* EMIT SIGNAL */
+	}
+
+	return deleted;
+}
+
+bool
 Locations::clear_ranges ()
 {
+	bool deleted = false;
+
 	{
 		Glib::Threads::Mutex::Lock lm (lock);
 		LocationList::iterator tmp;
@@ -978,7 +1023,7 @@ Locations::clear_ranges ()
 			if (!(*i)->is_mark()) {
 				delete *i;
 				locations.erase (i);
-
+				deleted = true;
 			}
 
 			i = tmp;
@@ -987,8 +1032,12 @@ Locations::clear_ranges ()
 		current_location = 0;
 	}
 
-	changed ();
-	current_changed (0); /* EMIT SIGNAL */
+	if (deleted) {
+		changed (); /* EMIT SIGNAL */
+		current_changed (0); /* EMIT SIGNAL */
+	}
+
+	return deleted;
 }
 
 void
@@ -1015,6 +1064,18 @@ Locations::add (Location *loc, bool make_current)
 		Session::StartTimeChanged (0);
 		Session::EndTimeChanged (1);
 	}
+}
+
+Location*
+Locations::add_range(samplepos_t start, samplepos_t end)
+{
+	string name;
+	next_available_name(name, _("range"));
+
+	Location* loc = new Location(_session, start, end, name, Location::IsRangeMarker);
+	add(loc, false);
+
+	return loc;
 }
 
 void
@@ -1356,7 +1417,7 @@ Locations::marks_either_side (samplepos_t const sample, samplepos_t& before, sam
 	std::list<samplepos_t> positions;
 
 	for (LocationList::const_iterator i = locs.begin(); i != locs.end(); ++i) {
-		if (((*i)->is_auto_loop() || (*i)->is_auto_punch())) {
+		if (((*i)->is_auto_loop() || (*i)->is_auto_punch()) || (*i)->is_xrun()) {
 			continue;
 		}
 
@@ -1483,4 +1544,39 @@ Locations::find_all_between (samplepos_t start, samplepos_t end, LocationList& l
 			ll.push_back (*i);
 		}
 	}
+}
+
+Location *
+Locations::range_starts_at(samplepos_t pos, samplecnt_t slop, bool incl) const
+{
+	Glib::Threads::Mutex::Lock lm(lock);
+	Location *closest = 0;
+	sampleoffset_t mindelta = max_samplepos;
+
+	for (LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
+		if (!(*i)->is_range_marker()) {
+			continue;
+		}
+
+		if (incl && (pos < (*i)->start() || pos > (*i)->end())) {
+			continue;
+		}
+
+		sampleoffset_t delta = std::abs((double)(pos - (*i)->start()));
+
+		if (delta == 0) {
+			return *i;
+		}
+
+		if (delta > slop) {
+			continue;
+		}
+
+		if (delta < mindelta) {
+			closest = *i;
+			mindelta = delta;
+		}
+	}
+
+	return closest;
 }

@@ -351,7 +351,7 @@ SessionPlaylists::update_after_tempo_map_change ()
 namespace {
 struct id_compare
 {
-	bool operator()(const boost::shared_ptr<Playlist>& p1, const boost::shared_ptr<Playlist>& p2)
+	bool operator()(const boost::shared_ptr<Playlist>& p1, const boost::shared_ptr<Playlist>& p2) const
 	{
 		return p1->id () < p2->id ();
 	}

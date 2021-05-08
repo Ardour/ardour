@@ -64,7 +64,9 @@ class LIBWIDGETS_API ArdourButton : public CairoWidget , public Gtkmm2ext::Activ
 		Square = 0x1,
 		TrackHeader = 0x2,
 		OccasionalText = 0x4,
-		unused4 = 0x8,
+		OccasionalLED = 0x8,
+		ForceBoxy = 0x10,
+		ForceFlat = 0x20,
 	};
 
 	Tweaks tweaks() const { return _tweaks; }
@@ -165,9 +167,11 @@ class LIBWIDGETS_API ArdourButton : public CairoWidget , public Gtkmm2ext::Activ
 
 	void set_text_internal ();
 	void recalc_char_pixel_geometry ();
+
 	unsigned int _char_pixel_width;
 	unsigned int _char_pixel_height;
-	float _char_avg_pixel_width;
+	float        _char_avg_pixel_width;
+	bool         _custom_font_set;
 
 	int   _text_width;
 	int   _text_height;

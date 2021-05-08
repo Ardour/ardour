@@ -23,7 +23,6 @@
 #include <iostream>
 
 #include "pbd/memento_command.h"
-#include "pbd/stacktrace.h"
 
 #include "ardour/audioengine.h"
 #include "ardour/automation_control.h"
@@ -283,6 +282,8 @@ AutomationControl::start_touch (double when)
 	if (!_list || touching ()) {
 		return;
 	}
+
+	ControlTouched (boost::dynamic_pointer_cast<PBD::Controllable>(shared_from_this())); /* EMIT SIGNAL */
 
 	if (alist()->automation_state() & (Touch | Latch)) {
 		/* subtle. aligns the user value with the playback and

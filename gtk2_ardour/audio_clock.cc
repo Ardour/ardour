@@ -173,37 +173,7 @@ AudioClock::on_realize ()
 	first_width = req.width;
 	first_height = req.height;
 
-	// XXX FIX ME: define font based on ... ???
-	// set_font ();
 	set_colors ();
-}
-
-void
-AudioClock::set_font (Pango::FontDescription font)
-{
-	Glib::RefPtr<Gtk::Style> style = get_style ();
-	Pango::AttrFontDesc* font_attr;
-
-	font_size = font.get_size();
-	font_attr = new Pango::AttrFontDesc (Pango::Attribute::create_attr_font_desc (font));
-
-	normal_attributes.change (*font_attr);
-	editing_attributes.change (*font_attr);
-	delete font_attr;
-
-	/* get the figure width for the font. This doesn't have to super
-	 * accurate since we only use it to measure the (roughly 1 character)
-	 * offset from the position Pango tells us for the "cursor"
-	 */
-
-	Glib::RefPtr<Pango::Layout> tmp = Pango::Layout::create (get_pango_context());
-	int ignore_height;
-
-	tmp->set_text ("8");
-	tmp->get_pixel_size (em_width, ignore_height);
-
-	/* force redraw of markup with new font-size */
-	AudioClock::set (last_when, true);
 }
 
 void
@@ -1088,7 +1058,7 @@ AudioClock::set_seconds (samplepos_t when, bool /*force*/)
 }
 
 void
-AudioClock::print_minsec (samplepos_t when, char* buf, size_t bufsize, float sample_rate)
+AudioClock::print_minsec (samplepos_t when, char* buf, size_t bufsize, float sample_rate, int decimals)
 {
 	samplecnt_t left;
 	int hrs;
@@ -1104,6 +1074,20 @@ AudioClock::print_minsec (samplepos_t when, char* buf, size_t bufsize, float sam
 		negative = false;
 	}
 
+	float dmult;
+	switch (decimals) {
+		case 1:
+			dmult = 10.f;
+			break;
+		case 2:
+			dmult = 100.f;
+			break;
+		default:
+		case 3:
+			dmult = 1000.f;
+			break;
+	}
+
 	left = when;
 	hrs = (int) floor (left / (sample_rate * 60.0f * 60.0f));
 	left -= (samplecnt_t) floor (hrs * sample_rate * 60.0f * 60.0f);
@@ -1111,14 +1095,23 @@ AudioClock::print_minsec (samplepos_t when, char* buf, size_t bufsize, float sam
 	left -= (samplecnt_t) floor (mins * sample_rate * 60.0f);
 	secs = (int) floor (left / (float) sample_rate);
 	left -= (samplecnt_t) floor ((double)(secs * sample_rate));
-	millisecs = floor (left * 1000.0 / (float) sample_rate);
+	millisecs = floor (left * dmult / (float) sample_rate);
 
-	if (negative) {
-		snprintf (buf, bufsize, "-%02" PRId32 ":%02" PRId32 ":%02" PRId32 ".%03" PRId32, hrs, mins, secs, millisecs);
-	} else {
-		snprintf (buf, bufsize, " %02" PRId32 ":%02" PRId32 ":%02" PRId32 ".%03" PRId32, hrs, mins, secs, millisecs);
+	switch (decimals) {
+		case 0:
+			snprintf (buf, bufsize, "%c%02" PRId32 ":%02" PRId32 ":%02" PRId32, negative ? '-' : ' ', hrs, mins, secs);
+			break;
+		case 1:
+			snprintf (buf, bufsize, "%c%02" PRId32 ":%02" PRId32 ":%02" PRId32 ".%01" PRId32, negative ? '-' : ' ', hrs, mins, secs, millisecs);
+			break;
+		case 2:
+			snprintf (buf, bufsize, "%c%02" PRId32 ":%02" PRId32 ":%02" PRId32 ".%02" PRId32, negative ? '-' : ' ', hrs, mins, secs, millisecs);
+			break;
+		default:
+		case 3:
+			snprintf (buf, bufsize, "%c%02" PRId32 ":%02" PRId32 ":%02" PRId32 ".%03" PRId32, negative ? '-' : ' ', hrs, mins, secs, millisecs);
+			break;
 	}
-
 }
 
 void
@@ -1281,7 +1274,7 @@ AudioClock::set_bbt (samplepos_t when, samplecnt_t offset, bool /*force*/)
 #endif
 		{
 			snprintf (buf, sizeof(buf), "1/%.0f = %.3f", m.tempo().note_type(), _session->tempo_map().tempo_at_sample (pos).note_types_per_minute());
-			_left_btn.set_text (string_compose ("%1: %2", S_("Tempo|T"), buf), false);
+			_left_btn.set_text (buf, false);
 		}
 
 		snprintf (buf, sizeof(buf), "%g/%g", m.meter().divisions_per_bar(), m.meter().note_divisor());
@@ -2188,7 +2181,7 @@ AudioClock::locate ()
 		return;
 	}
 
-	_session->request_locate (current_time(), RollIfAppropriate);
+	_session->request_locate (current_time());
 }
 
 void
@@ -2280,11 +2273,18 @@ AudioClock::on_style_changed (const Glib::RefPtr<Gtk::Style>& old_style)
 {
 	CairoWidget::on_style_changed (old_style);
 
+	Glib::RefPtr<Gtk::Style> const& new_style = get_style ();
+	if (_layout && (_layout->get_font_description ().gobj () == 0 || _layout->get_font_description () != new_style->get_font ())) {
+		_layout->set_font_description (new_style->get_font ());
+		queue_resize ();
+	} else if (is_realized ()) {
+		queue_resize ();
+	}
+
 	Gtk::Requisition req;
 	set_clock_dimensions (req);
 
-	/* XXXX fix me ... we shouldn't be using GTK styles anyway */
-	// set_font ();
+	/* set-colors also sets up font-attributes */
 	set_colors ();
 }
 

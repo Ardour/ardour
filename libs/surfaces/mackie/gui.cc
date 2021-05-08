@@ -35,7 +35,6 @@
 #include "pbd/error.h"
 #include "pbd/unwind.h"
 #include "pbd/strsplit.h"
-#include "pbd/stacktrace.h"
 
 #include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/action_model.h"
@@ -129,7 +128,11 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	_surface_combo.signal_changed().connect (sigc::mem_fun (*this, &MackieControlProtocolGUI::surface_combo_changed));
 
 	_cp.DeviceChanged.connect (device_change_connection, invalidator (*this), boost::bind (&MackieControlProtocolGUI::device_changed, this), gui_context());
-	_cp.ConnectionChange.connect (connection_change_connection, invalidator (*this), boost::bind (&MackieControlProtocolGUI::connection_handler, this), gui_context());
+
+	/* catch future changes to connection state */
+	ARDOUR::AudioEngine::instance()->PortRegisteredOrUnregistered.connect (_port_connections, invalidator (*this), boost::bind (&MackieControlProtocolGUI::connection_handler, this), gui_context());
+	ARDOUR::AudioEngine::instance()->PortPrettyNameChanged.connect (_port_connections, invalidator (*this), boost::bind (&MackieControlProtocolGUI::connection_handler, this), gui_context());
+	_cp.ConnectionChange.connect (_port_connections, invalidator (*this), boost::bind (&MackieControlProtocolGUI::connection_handler, this), gui_context());
 
 	ipmidi_base_port_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &MackieControlProtocolGUI::ipmidi_spinner_changed));
 

@@ -150,7 +150,6 @@ protected:
 
 	void         display_track (boost::shared_ptr<ARDOUR::Track>);
 	virtual void undisplay_track ();
-	void         diskstream_changed ();
 	void         layer_regions ();
 
 	void playlist_switched (boost::weak_ptr<ARDOUR::Track>);

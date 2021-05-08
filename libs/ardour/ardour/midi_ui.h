@@ -25,8 +25,6 @@
 #define ABSTRACT_UI_EXPORTS
 #include "pbd/abstract_ui.h"
 #include "pbd/signals.h"
-#include "pbd/stacktrace.h"
-
 
 namespace ARDOUR {
 

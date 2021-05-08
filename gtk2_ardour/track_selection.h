@@ -23,19 +23,11 @@
 
 #include "track_view_list.h"
 
-class PublicEditor;
-
 class TrackSelection : public TrackViewList
 {
 public:
-	TrackSelection (PublicEditor const * e) : _editor (e) {}
-	TrackSelection (PublicEditor const *, TrackViewList const &);
-
-	virtual ~TrackSelection ();
-
-
-private:
-	PublicEditor const * _editor;
+	TrackSelection () {}
+	TrackSelection (TrackViewList const &);
 };
 
 #endif /* __ardour_gtk_track_selection_h__ */

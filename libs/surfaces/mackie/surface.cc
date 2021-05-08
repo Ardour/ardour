@@ -30,8 +30,6 @@
 
 #include <glibmm/convert.h>
 
-#include "pbd/stacktrace.h"
-
 #include "midi++/port.h"
 
 #include "ardour/audioengine.h"
@@ -562,7 +560,7 @@ Surface::handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t pb, uin
 	 */
 
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Surface::handle_midi_pitchbend_message on port %3, fader = %1 value = %2 (%4)\n",
-							   fader_id, pb, _number, pb/16384.0));
+							   fader_id, pb, _number, pb/16383.0));
 
 	if (_mcp.device_info().no_handshake()) {
 		turn_it_on ();
@@ -572,7 +570,7 @@ Surface::handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t pb, uin
 
 	if (fader) {
 		Strip* strip = dynamic_cast<Strip*> (&fader->group());
-		float pos = pb / 16384.0;
+		float pos = pb / 16383.0;
 		if (strip) {
 			strip->handle_fader (*fader, pos);
 		} else {
@@ -1217,11 +1215,21 @@ Surface::say_hello ()
 void
 Surface::next_jog_mode ()
 {
+	if (_jog_wheel) {
+		if (_jog_wheel->mode() == JogWheel::scroll) {
+			_jog_wheel->set_mode (JogWheel::shuttle);
+		} else {
+			_jog_wheel->set_mode (JogWheel::scroll);
+		}
+	}
 }
 
 void
-Surface::set_jog_mode (JogWheel::Mode)
+Surface::set_jog_mode (JogWheel::Mode m)
 {
+	if (_jog_wheel) {
+		_jog_wheel->set_mode (m);
+	}
 }
 
 bool

@@ -31,4 +31,7 @@ int fluid_samplecache_load(SFData *sf,
 
 int fluid_samplecache_unload(const short *sample_data);
 
+/* Only used for tests */
+int fluid_samplecache_count_entries(void);
+
 #endif /* _FLUID_SAMPLECACHE_H */

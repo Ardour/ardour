@@ -460,7 +460,7 @@ PortMatrix::popup_menu (BundleChannel column, BundleChannel row, uint32_t t)
 			if (can_add_channels (bc[dim].bundle)) {
 				/* Start off with options for the `natural' port type */
 				for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
-					if (should_show (*i) && can_add_channel_proxy (w, *i)) {
+					if (should_show (*i) && can_add_port_proxy (w, *i)) {
 						snprintf (buf, sizeof (buf), _("Add %s %s"), (*i).to_i18n_string(), channel_noun().c_str());
 						sub.push_back (MenuElem (buf, sigc::bind (sigc::mem_fun (*this, &PortMatrix::add_channel_proxy), w, *i)));
 					}
@@ -468,7 +468,7 @@ PortMatrix::popup_menu (BundleChannel column, BundleChannel row, uint32_t t)
 
 				/* Now add other ones */
 				for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
-					if (!should_show (*i) && can_add_channel_proxy (w, *i)) {
+					if (!should_show (*i) && can_add_port_proxy (w, *i)) {
 						snprintf (buf, sizeof (buf), _("Add %s %s"), (*i).to_i18n_string(), channel_noun().c_str());
 						sub.push_back (MenuElem (buf, sigc::bind (sigc::mem_fun (*this, &PortMatrix::add_channel_proxy), w, *i)));
 					}
@@ -735,6 +735,13 @@ PortMatrix::can_add_channels (boost::shared_ptr<Bundle> b) const
 	return io_from_bundle (b) != 0;
 }
 
+bool
+PortMatrix::can_add_port (boost::shared_ptr<Bundle> b, DataType t) const
+{
+	boost::shared_ptr<IO> io = io_from_bundle (b);
+	return io && io->can_add_port (t);
+}
+
 void
 PortMatrix::add_channel (boost::shared_ptr<Bundle> b, DataType t)
 {
@@ -805,14 +812,13 @@ PortMatrix::remove_all_channels (boost::weak_ptr<Bundle> w)
 }
 
 bool
-PortMatrix::can_add_channel_proxy (boost::weak_ptr<Bundle> w, DataType t) const
+PortMatrix::can_add_port_proxy (boost::weak_ptr<Bundle> w, DataType t) const
 {
 	boost::shared_ptr<Bundle> b = w.lock ();
 	if (!b) {
 		return false;
 	}
-	boost::shared_ptr<IO> io = io_from_bundle (b);
-	return io && io->can_add_port (t);
+	return can_add_port (b, t);
 }
 
 void

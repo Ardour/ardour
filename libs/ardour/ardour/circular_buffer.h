@@ -20,6 +20,7 @@
 #define _ardour_circular_buffer_h_
 
 #include "pbd/ringbuffer.h"
+#include "pbd/g_atomic_compat.h"
 
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
@@ -36,6 +37,7 @@ class LIBARDOUR_API CircularSampleBuffer
 public:
 	CircularSampleBuffer (samplecnt_t size);
 
+	void silence (samplecnt_t);
 	void write (Sample const*, samplecnt_t);
 	bool read (Sample& s_min, Sample& s_max, samplecnt_t n_samples);
 
@@ -69,8 +71,9 @@ private:
 	Event* _buf;
 	guint  _size;
 	guint  _size_mask;
-	gint   _idx;
-	gint   _ack;
+
+	GATOMIC_QUAL gint _idx;
+	GATOMIC_QUAL gint _ack;
 };
 
 }

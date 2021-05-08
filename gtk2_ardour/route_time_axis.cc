@@ -61,7 +61,6 @@
 #include "ardour/profile.h"
 #include "ardour/route_group.h"
 #include "ardour/session.h"
-#include "ardour/session_playlists.h"
 #include "ardour/track.h"
 
 #include "canvas/debug.h"
@@ -85,7 +84,6 @@
 #include "keyboard.h"
 #include "paste_context.h"
 #include "patch_change_widget.h"
-#include "playlist_selector.h"
 #include "point_selection.h"
 #include "public_editor.h"
 #include "region_view.h"
@@ -107,6 +105,8 @@ using namespace Editing;
 using namespace std;
 using std::list;
 
+sigc::signal<void, bool> RouteTimeAxisView::signal_ctrl_touched;
+
 RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, ArdourCanvas::Canvas& canvas)
 	: RouteUI(sess)
 	, StripableTimeAxisView(ed, sess, canvas)
@@ -118,7 +118,6 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, ArdourCan
 	, automation_action_menu (0)
 	, plugins_submenu_item (0)
 	, route_group_menu (0)
-	, playlist_action_menu (0)
 	, overlaid_menu_item (0)
 	, stacked_menu_item (0)
 	, gm (sess, true, 75, 14)
@@ -132,6 +131,10 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, ArdourCan
 
 	sess->config.ParameterChanged.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::parameter_changed, this, _1), gui_context());
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &RouteTimeAxisView::parameter_changed));
+
+	Controllable::ControlTouched.connect (
+			ctrl_touched_connection, invalidator (*this), boost::bind (&RouteTimeAxisView::show_touched_automation, this, _1), gui_context ()
+    );
 
 	parameter_changed ("editor-stereo-only-meters");
 }
@@ -180,8 +183,6 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 	timestretch_rect = 0;
 	no_redraw = false;
-
-	ignore_toggle = false;
 
 	route_group_button.set_name ("route button");
 	playlist_button.set_name ("route button");
@@ -348,7 +349,6 @@ RouteTimeAxisView::~RouteTimeAxisView ()
 		delete *i;
 	}
 
-	delete playlist_action_menu;
 	delete automation_action_menu;
 
 	delete _view;
@@ -387,8 +387,20 @@ RouteTimeAxisView::setup_processor_menu_and_curves ()
 {
 	_subplugin_menu_map.clear ();
 	subplugin_menu.items().clear ();
+	ctrl_item_map.clear ();
 	_route->foreach_processor (sigc::mem_fun (*this, &RouteTimeAxisView::add_processor_to_subplugin_menu));
 	_route->foreach_processor (sigc::mem_fun (*this, &RouteTimeAxisView::add_existing_processor_automation_curves));
+
+	/* update controllable LUT */
+	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
+		if (!(*i)->valid) {
+			continue;
+		}
+		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
+			boost::shared_ptr<PBD::Controllable> c = boost::dynamic_pointer_cast <PBD::Controllable>((*i)->processor->control((*ii)->what));
+			ctrl_item_map[c] = (*ii)->menu_item;
+		}
+	}
 }
 
 bool
@@ -1052,167 +1064,6 @@ RouteTimeAxisView::set_align_choice (RadioMenuItem* mitem, AlignChoice choice, b
 }
 
 void
-RouteTimeAxisView::rename_current_playlist ()
-{
-	Prompter prompter (true);
-	string name;
-
-	boost::shared_ptr<Track> tr = track();
-	if (!tr) {
-		return;
-	}
-
-	boost::shared_ptr<Playlist> pl = tr->playlist();
-	if (!pl) {
-		return;
-	}
-
-	prompter.set_title (_("Rename Playlist"));
-	prompter.set_prompt (_("New name for playlist:"));
-	prompter.add_button (_("Rename"), Gtk::RESPONSE_ACCEPT);
-	prompter.set_initial_text (pl->name());
-	prompter.set_response_sensitive (Gtk::RESPONSE_ACCEPT, false);
-
-	while (true) {
-		if (prompter.run () != Gtk::RESPONSE_ACCEPT) {
-			break;
-		}
-		prompter.get_result (name);
-		if (name.length()) {
-			if (_session->playlists()->by_name (name)) {
-				MessageDialog msg (_("Given playlist name is not unique."));
-				msg.run ();
-				prompter.set_initial_text (Playlist::bump_name (name, *_session));
-			} else {
-				pl->set_name (name);
-				break;
-			}
-		}
-	}
-}
-
-std::string
-RouteTimeAxisView::resolve_new_group_playlist_name(std::string &basename, vector<boost::shared_ptr<Playlist> > const & playlists)
-{
-	std::string ret (basename);
-
-	std::string const group_string = "." + route_group()->name() + ".";
-
-	// iterate through all playlists
-	int maxnumber = 0;
-	for (vector<boost::shared_ptr<Playlist> >::const_iterator i = playlists.begin(); i != playlists.end(); ++i) {
-		std::string tmp = (*i)->name();
-
-		std::string::size_type idx = tmp.find(group_string);
-		// find those which belong to this group
-		if (idx != string::npos) {
-			tmp = tmp.substr(idx + group_string.length());
-
-			// and find the largest current number
-			int x = atoi(tmp);
-			if (x > maxnumber) {
-				maxnumber = x;
-			}
-		}
-	}
-
-	maxnumber++;
-
-	char buf[32];
-	snprintf (buf, sizeof(buf), "%d", maxnumber);
-
-	ret = this->name() + "." + route_group()->name () + "." + buf;
-
-	return ret;
-}
-
-void
-RouteTimeAxisView::use_new_playlist (bool prompt, vector<boost::shared_ptr<Playlist> > const & playlists_before_op, bool copy)
-{
-	string name;
-
-	boost::shared_ptr<Track> tr = track ();
-	if (!tr) {
-		return;
-	}
-
-	boost::shared_ptr<const Playlist> pl = tr->playlist();
-	if (!pl) {
-		return;
-	}
-
-	name = pl->name();
-
-	if (route_group() && route_group()->is_active() && route_group()->enabled_property (ARDOUR::Properties::group_select.property_id)) {
-		name = resolve_new_group_playlist_name(name,playlists_before_op);
-	}
-
-	while (_session->playlists()->by_name(name)) {
-		name = Playlist::bump_name (name, *_session);
-	}
-
-	if (prompt) {
-		// TODO: The prompter "new" button should be de-activated if the user
-		// specifies a playlist name which already exists in the session.
-
-		Prompter prompter (true);
-
-		if (copy) {
-			prompter.set_title (_("New Copy Playlist"));
-			prompter.set_prompt (_("Name for playlist copy:"));
-		} else {
-			prompter.set_title (_("New Playlist"));
-			prompter.set_prompt (_("Name for new playlist:"));
-		}
-		prompter.set_initial_text (name);
-		prompter.add_button (Gtk::Stock::NEW, Gtk::RESPONSE_ACCEPT);
-		prompter.set_response_sensitive (Gtk::RESPONSE_ACCEPT, true);
-		prompter.show_all ();
-
-		while (true) {
-			if (prompter.run () != Gtk::RESPONSE_ACCEPT) {
-				return;
-			}
-			prompter.get_result (name);
-			if (name.length()) {
-				if (_session->playlists()->by_name (name)) {
-					MessageDialog msg (_("Given playlist name is not unique."));
-					msg.run ();
-					prompter.set_initial_text (Playlist::bump_name (name, *_session));
-				} else {
-					break;
-				}
-			}
-		}
-	}
-
-	if (name.length()) {
-		if (copy) {
-			tr->use_copy_playlist ();
-		} else {
-			tr->use_default_new_playlist ();
-		}
-		tr->playlist()->set_name (name);
-	}
-}
-
-void
-RouteTimeAxisView::clear_playlist ()
-{
-	boost::shared_ptr<Track> tr = track ();
-	if (!tr) {
-		return;
-	}
-
-	boost::shared_ptr<Playlist> pl = tr->playlist();
-	if (!pl) {
-		return;
-	}
-
-	_editor.clear_playlist (pl);
-}
-
-void
 RouteTimeAxisView::speed_changed ()
 {
 	Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&RouteTimeAxisView::reset_samples_per_pixel, this));
@@ -1529,174 +1380,10 @@ RouteTimeAxisView::paste (samplepos_t pos, const Selection& selection, PasteCont
 }
 
 
-struct PlaylistSorter {
-	bool operator() (boost::shared_ptr<Playlist> a, boost::shared_ptr<Playlist> b) const {
-		return a->sort_id() < b->sort_id();
-	}
-};
-
-void
-RouteTimeAxisView::build_playlist_menu ()
-{
-	using namespace Menu_Helpers;
-
-	if (!is_track()) {
-		return;
-	}
-
-	delete playlist_action_menu;
-	playlist_action_menu = new Menu;
-	playlist_action_menu->set_name ("ArdourContextMenu");
-
-	MenuList& playlist_items = playlist_action_menu->items();
-	playlist_action_menu->set_name ("ArdourContextMenu");
-	playlist_items.clear();
-
-	RadioMenuItem::Group playlist_group;
-	boost::shared_ptr<Track> tr = track ();
-
-	vector<boost::shared_ptr<Playlist> > playlists_tr = _session->playlists()->playlists_for_track (tr);
-
-	/* sort the playlists */
-	PlaylistSorter cmp;
-	sort (playlists_tr.begin(), playlists_tr.end(), cmp);
-
-	/* add the playlists to the menu */
-	for (vector<boost::shared_ptr<Playlist> >::iterator i = playlists_tr.begin(); i != playlists_tr.end(); ++i) {
-		playlist_items.push_back (RadioMenuElem (playlist_group, (*i)->name()));
-		RadioMenuItem *item = static_cast<RadioMenuItem*>(&playlist_items.back());
-		item->signal_toggled().connect(sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::use_playlist), item, boost::weak_ptr<Playlist> (*i)));
-
-		if (tr->playlist()->id() == (*i)->id()) {
-			item->set_active();
-		}
-	}
-
-	playlist_items.push_back (SeparatorElem());
-	playlist_items.push_back (MenuElem (_("Rename..."), sigc::mem_fun(*this, &RouteTimeAxisView::rename_current_playlist)));
-	playlist_items.push_back (SeparatorElem());
-
-	if (!route_group() || !route_group()->is_active() || !route_group()->enabled_property (ARDOUR::Properties::group_select.property_id)) {
-		playlist_items.push_back (MenuElem (_("New..."), sigc::bind(sigc::mem_fun(_editor, &PublicEditor::new_playlists), this)));
-		playlist_items.push_back (MenuElem (_("New Copy..."), sigc::bind(sigc::mem_fun(_editor, &PublicEditor::copy_playlists), this)));
-
-	} else {
-		// Use a label which tells the user what is happening
-		playlist_items.push_back (MenuElem (_("New Take"), sigc::bind(sigc::mem_fun(_editor, &PublicEditor::new_playlists), this)));
-		playlist_items.push_back (MenuElem (_("Copy Take"), sigc::bind(sigc::mem_fun(_editor, &PublicEditor::copy_playlists), this)));
-
-	}
-
-	playlist_items.push_back (SeparatorElem());
-	playlist_items.push_back (MenuElem (_("Clear Current"), sigc::bind(sigc::mem_fun(_editor, &PublicEditor::clear_playlists), this)));
-	playlist_items.push_back (SeparatorElem());
-
-	playlist_items.push_back (MenuElem(_("Select from All..."), sigc::mem_fun(*this, &RouteTimeAxisView::show_playlist_selector)));
-}
-
-void
-RouteTimeAxisView::use_playlist (RadioMenuItem *item, boost::weak_ptr<Playlist> wpl)
-{
-	assert (is_track());
-
-	// exit if we were triggered by deactivating the old playlist
-	if (!item->get_active()) {
-		return;
-	}
-
-	boost::shared_ptr<Playlist> pl (wpl.lock());
-
-	if (!pl) {
-		return;
-	}
-
-	if (track()->playlist() == pl) {
-		// exit when use_playlist is called by the creation of the playlist menu
-		// or the playlist choice is unchanged
-		return;
-	}
-
-	track()->use_playlist (track()->data_type(), pl);
-
-	RouteGroup* rg = route_group();
-
-	if (rg && rg->is_active() && rg->enabled_property (ARDOUR::Properties::group_select.property_id)) {
-		std::string group_string = "." + rg->name() + ".";
-
-		std::string take_name = pl->name();
-		std::string::size_type idx = take_name.find(group_string);
-
-		if (idx == std::string::npos)
-			return;
-
-		take_name = take_name.substr(idx + group_string.length()); // find the bit containing the take number / name
-
-		boost::shared_ptr<RouteList> rl (rg->route_list());
-
-		for (RouteList::const_iterator i = rl->begin(); i != rl->end(); ++i) {
-			if ((*i) == this->route()) {
-				continue;
-			}
-
-			std::string playlist_name = (*i)->name()+group_string+take_name;
-
-			boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track>(*i);
-			if (!track) {
-				continue;
-			}
-
-			if (track->freeze_state() == Track::Frozen) {
-				/* Don't change playlists of frozen tracks */
-				continue;
-			}
-
-			boost::shared_ptr<Playlist> ipl = session()->playlists()->by_name(playlist_name);
-			if (!ipl) {
-				// No playlist for this track for this take yet, make it
-				track->use_default_new_playlist();
-				track->playlist()->set_name(playlist_name);
-			} else {
-				track->use_playlist(track->data_type(), ipl);
-			}
-		}
-	}
-}
-
 void
 RouteTimeAxisView::update_playlist_tip ()
 {
-	RouteGroup* rg = route_group ();
-	if (rg && rg->is_active() && rg->enabled_property (ARDOUR::Properties::group_select.property_id)) {
-		string group_string = "." + rg->name() + ".";
-
-		string take_name = track()->playlist()->name();
-		string::size_type idx = take_name.find(group_string);
-
-		if (idx != string::npos) {
-			/* find the bit containing the take number / name */
-			take_name = take_name.substr (idx + group_string.length());
-
-			/* set the playlist button tooltip to the take name */
-			set_tooltip (
-				playlist_button,
-				string_compose(_("Take: %1.%2"),
-					Gtkmm2ext::markup_escape_text (rg->name()),
-					Gtkmm2ext::markup_escape_text (take_name))
-				);
-
-			return;
-		}
-	}
-
-	/* set the playlist button tooltip to the playlist name */
-	set_tooltip (playlist_button, _("Playlist") + std::string(": ") + Gtkmm2ext::markup_escape_text (track()->playlist()->name()));
-}
-
-
-void
-RouteTimeAxisView::show_playlist_selector ()
-{
-	_editor.playlist_selector().show_for (this);
+	set_tooltip (playlist_button, playlist_tip ());
 }
 
 void
@@ -1894,6 +1581,76 @@ RouteTimeAxisView::show_existing_automation (bool apply_to_selection)
 }
 
 void
+RouteTimeAxisView::maybe_hide_automation (bool hide, boost::weak_ptr<PBD::Controllable> wctrl)
+{
+	ctrl_autohide_connection.disconnect ();
+	if (!hide) {
+		/* disconnect only, leave lane visible */
+		return;
+	}
+	boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl> (wctrl.lock ());
+  if (!ac) {
+		return;
+	}
+
+	Gtk::CheckMenuItem* cmi = find_menu_item_by_ctrl (ac);
+	if (cmi) {
+		cmi->set_active (false);
+		return;
+	}
+
+	boost::shared_ptr<AutomationTimeAxisView> atav = find_atav_by_ctrl (ac);
+	if (atav) {
+		atav->set_marked_for_display (false);
+		request_redraw ();
+	}
+}
+
+void
+RouteTimeAxisView::show_touched_automation (boost::weak_ptr<PBD::Controllable> wctrl)
+{
+	boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl> (wctrl.lock ());
+	if (!ac) {
+		return;
+	}
+
+	if (!_editor.show_touched_automation ()) {
+		if (ctrl_autohide_connection.connected ()) {
+			signal_ctrl_touched (true);
+		}
+		return;
+	}
+
+	boost::shared_ptr<AutomationTimeAxisView> atav;
+	Gtk::CheckMenuItem* cmi = find_menu_item_by_ctrl (ac);
+	if (!cmi) {
+		atav = find_atav_by_ctrl (ac);
+		if (!atav) {
+			return;
+		}
+	}
+
+	/* hide any lanes */
+	signal_ctrl_touched (true);
+
+	if (cmi && !cmi->get_active ()) {
+		cmi->set_active (true);
+		ctrl_autohide_connection = signal_ctrl_touched.connect (sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::maybe_hide_automation), wctrl));
+		/* search ctrl to scroll to */
+		atav = find_atav_by_ctrl (ac, false);
+	} else if (atav && ! string_to<bool>(atav->gui_property ("visible"))) {
+		atav->set_marked_for_display (true);
+		ctrl_autohide_connection = signal_ctrl_touched.connect (sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::maybe_hide_automation), wctrl));
+		request_redraw ();
+	}
+
+	if (atav) {
+		_editor.ensure_time_axis_view_is_visible (*atav, false);
+		return;
+	}
+}
+
+void
 RouteTimeAxisView::hide_all_automation (bool apply_to_selection)
 {
 	if (apply_to_selection) {
@@ -1969,6 +1726,53 @@ RouteTimeAxisView::find_processor_automation_node (boost::shared_ptr<Processor> 
 
 	return 0;
 }
+
+Gtk::CheckMenuItem*
+RouteTimeAxisView::find_menu_item_by_ctrl (boost::shared_ptr<AutomationControl> ac)
+{
+	std::map<boost::shared_ptr<PBD::Controllable>, Gtk::CheckMenuItem*>::const_iterator i;
+	i = ctrl_item_map.find (ac);
+	if (i != ctrl_item_map.end ()) {
+		return i->second;
+	}
+	return 0;
+}
+
+boost::shared_ptr<AutomationTimeAxisView>
+RouteTimeAxisView::find_atav_by_ctrl (boost::shared_ptr<ARDOUR::AutomationControl> ac, bool route_owned_only)
+{
+	if (gain_track && gain_track->control () == ac) {
+		return gain_track;
+	}
+	else if (trim_track && trim_track->control () == ac) {
+		return trim_track;
+	}
+	else if (mute_track && mute_track->control () == ac) {
+		return mute_track;
+	}
+
+	if (!pan_tracks.empty() && !ARDOUR::Profile->get_mixbus()) {
+		// XXX this can lead to inconsistent CheckMenuItem state (azimuth, width are treated separately)
+		for (list<boost::shared_ptr<AutomationTimeAxisView> >::iterator i = pan_tracks.begin(); i != pan_tracks.end(); ++i) {
+			if ((*i)->control () == ac) {
+				return *i;
+			}
+		}
+	}
+
+	if (route_owned_only) {
+		return boost::shared_ptr<AutomationTimeAxisView> ();
+	}
+
+	for (Children::iterator j = children.begin(); j != children.end(); ++j) {
+		boost::shared_ptr<AutomationTimeAxisView> atv = boost::dynamic_pointer_cast<AutomationTimeAxisView> (*j);
+		if (atv && atv->control () == ac) {
+			return atv;
+		}
+	}
+	return boost::shared_ptr<AutomationTimeAxisView> ();
+}
+
 
 /** Add an AutomationTimeAxisView to display automation for a processor's parameter */
 void
@@ -2150,7 +1954,7 @@ RouteTimeAxisView::add_processor_to_subplugin_menu (boost::weak_ptr<Processor> p
 		boost::shared_ptr<AutomationTimeAxisView> atav = pan->view;
 		bool visible;
 		if (atav && atav->get_gui_property ("visible", visible)) {
-			mitem->set_active(true);
+			mitem->set_active(visible);
 		} else {
 			mitem->set_active(false);
 		}
@@ -2184,7 +1988,8 @@ RouteTimeAxisView::processor_menu_item_toggled (RouteTimeAxisView::ProcessorAuto
 		redraw = true;
 	}
 
-	if (pan->view && pan->view->set_marked_for_display (showit)) {
+	boost::shared_ptr<AutomationTimeAxisView> atav = pan->view;
+	if (atav && atav->set_marked_for_display (showit)) {
 		redraw = true;
 	}
 

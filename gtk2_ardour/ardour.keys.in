@@ -99,6 +99,8 @@ This mode provides many different operations on both regions and control points,
 
 %notes MIDI Note Editing
 
+%rec Recorder Recorder Page
+
 ;; END GROUP DEFINITIONS
 
 ;; punctuation
@@ -439,8 +441,8 @@ This mode provides many different operations on both regions and control points,
 @notes|Notes/transpose-down-semitone|Down|Transpose down (1 semitone)
 @notes|Notes/transpose-up-octave-smush|<@TERTIARY@>Up|Transpose up (1 octave) allow mushing
 @notes|Notes/transpose-down-octave-smush|<@TERTIARY@>Down|Transpose down (1 octave) allow mushing
-@notes|Notes/transpose-up-semitone-smush|<@TERTIARY@><@SECONDARY@>Up|Transpose up (1 semitone) allow mushing
-@notes|Notes/transpose-down-semitone-smush|<@TERTIARY@><@SECONDARY>Down|Transpose down (1 tone) allow mushing
+@notes|Notes/transpose-up-semitone-smush|<@SECONDARY@><@TERTIARY@>Up|Transpose up (1 semitone) allow mushing
+@notes|Notes/transpose-down-semitone-smush|<@SECONDARY@><@TERTIARY@>Down|Transpose down (1 tone) allow mushing
 
 @notes|Notes/increase-velocity|<@PRIMARY@>Up|Increase Note Velocity (+8)
 @notes|Notes/decrease-velocity|<@PRIMARY@>Down|Increase Note Velocity (+8)
@@ -458,8 +460,10 @@ This mode provides many different operations on both regions and control points,
 @notes|Notes/select-next|Tab|Select next note
 @notes|Notes/select-previous|<@PRIMARY@>Tab|Select previous note
 @notes|Notes/add-select-next|<@TERTIARY@>Tab|Select next note
-@notes|Notes/add-select-previous|<@PRIMARY@><@TERTIARY@>Tab|Select previous note
-@notes|Notes/alt-add-select-next|<@TERTIARY@>ISO_Left_Tab|Select next note
-@notes|Notes/alt-add-select-previous|<@PRIMARY@><@TERTIARY@>ISO_Left_Tab|Select previous note
+@notes|Notes/add-select-previous|<@PRIMARY@><@TERTIARY@>Tab|Add previous note to selection
+@notes|Notes/alt-add-select-next|<@TERTIARY@>ISO_Left_Tab|Add next note to selection
+@notes|Notes/alt-add-select-previous|<@PRIMARY@><@TERTIARY@>ISO_Left_Tab|Add previous note to selection
 
 
+@rec|Recorder/arm-all|<@PRIMARY@>r|record arm all tracks
+@rec|Recorder/arm-none|<@PRIMARY@><@TERTIARY@>r|disable record arm of all tracks

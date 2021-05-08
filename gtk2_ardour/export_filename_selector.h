@@ -33,8 +33,8 @@
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/treemodel.h>
 
-#include "ardour/export_profile_manager.h"
 #include "ardour/export_filename.h"
+#include "ardour/export_profile_manager.h"
 #include "ardour/session_handle.h"
 
 class ExportFilenameSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
@@ -45,7 +45,7 @@ public:
 	ExportFilenameSelector ();
 	~ExportFilenameSelector ();
 
-	void set_state (ARDOUR::ExportProfileManager::FilenameStatePtr state_, ARDOUR::Session * session_);
+	void set_state (ARDOUR::ExportProfileManager::FilenameStatePtr state_, ARDOUR::Session* session_);
 	void set_example_filename (std::string filename);
 	void require_timespan (bool);
 
@@ -54,7 +54,6 @@ public:
 	sigc::signal<void> CriticalSelectionChanged;
 
 private:
-
 	void load_state ();
 
 	void update_label ();
@@ -76,38 +75,41 @@ private:
 
 	Glib::RefPtr<Gtk::SizeGroup> label_sizegroup;
 
-	Gtk::Label        include_label;
+	Gtk::Label include_label;
 
-	Gtk::HBox         include_hbox;
+	Gtk::HBox include_hbox;
 
-	Gtk::Label        label_label;
-	Gtk::Entry        label_entry;
+	Gtk::Label label_label;
+	Gtk::Entry label_entry;
 
 	Gtk::ComboBoxText session_snap_name;
 	Gtk::CheckButton  timespan_checkbox;
 
-	Gtk::CheckButton  revision_checkbox;
-	Gtk::SpinButton   revision_spinbutton;
+	Gtk::CheckButton revision_checkbox;
+	Gtk::SpinButton  revision_spinbutton;
 
-	Gtk::HBox         path_hbox;
+	Gtk::HBox path_hbox;
 
-	Gtk::Label        path_label;
-	Gtk::Entry        path_entry;
-	Gtk::Button       browse_button;
-	Gtk::Button       open_button;
-	Gtk::Label        example_filename_label;
+	Gtk::Label  path_label;
+	Gtk::Entry  path_entry;
+	Gtk::Button browse_button;
+	Gtk::Button open_button;
+	Gtk::Label  example_filename_label;
 
 	/* Date combo */
 
 	typedef ARDOUR::ExportFilename::DateFormat DateFormat;
 
-	struct DateFormatCols : public Gtk::TreeModelColumnRecord
-	{
+	struct DateFormatCols : public Gtk::TreeModelColumnRecord {
 	public:
-		Gtk::TreeModelColumn<DateFormat>     format;
-		Gtk::TreeModelColumn<std::string>  label;
+		Gtk::TreeModelColumn<DateFormat>  format;
+		Gtk::TreeModelColumn<std::string> label;
 
-		DateFormatCols () { add(format); add(label); }
+		DateFormatCols ()
+		{
+			add (format);
+			add (label);
+		}
 	};
 	DateFormatCols               date_format_cols;
 	Glib::RefPtr<Gtk::ListStore> date_format_list;
@@ -117,13 +119,16 @@ private:
 
 	typedef ARDOUR::ExportFilename::TimeFormat TimeFormat;
 
-	struct TimeFormatCols : public Gtk::TreeModelColumnRecord
-	{
+	struct TimeFormatCols : public Gtk::TreeModelColumnRecord {
 	public:
-		Gtk::TreeModelColumn<TimeFormat>     format;
-		Gtk::TreeModelColumn<std::string>  label;
+		Gtk::TreeModelColumn<TimeFormat>  format;
+		Gtk::TreeModelColumn<std::string> label;
 
-		TimeFormatCols () { add(format); add(label); }
+		TimeFormatCols ()
+		{
+			add (format);
+			add (label);
+		}
 	};
 	TimeFormatCols               time_format_cols;
 	Glib::RefPtr<Gtk::ListStore> time_format_list;

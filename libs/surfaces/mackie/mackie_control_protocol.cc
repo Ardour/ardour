@@ -897,13 +897,13 @@ MackieControlProtocol::create_surfaces ()
 		if (!_device_info.uses_ipmidi()) {
 
 			_input_bundle->add_channel (
-				surface->port().input_port().name(),
+				"",
 				ARDOUR::DataType::MIDI,
 				session->engine().make_port_name_non_relative (surface->port().input_port().name())
 				);
 
 			_output_bundle->add_channel (
-				surface->port().output_port().name(),
+				"",
 				ARDOUR::DataType::MIDI,
 				session->engine().make_port_name_non_relative (surface->port().output_port().name())
 				);

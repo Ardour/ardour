@@ -31,6 +31,7 @@ class Soloable {
 	virtual void push_solo_isolate_upstream (int32_t delta) = 0;
 	virtual bool is_safe () const = 0;
 	virtual bool can_solo () const = 0;
+	virtual bool can_monitor () const = 0;
 };
 
 } /* namespace */

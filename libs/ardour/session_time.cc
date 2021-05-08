@@ -31,7 +31,6 @@
 
 #include "pbd/error.h"
 #include "pbd/enumwriter.h"
-#include "pbd/stacktrace.h"
 
 #include "ardour/session.h"
 #include "ardour/tempo.h"

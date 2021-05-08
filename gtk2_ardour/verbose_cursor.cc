@@ -22,7 +22,7 @@
 
 #include <string>
 #include <gtkmm/enums.h>
-#include "pbd/stacktrace.h"
+
 #include "ardour/profile.h"
 
 #include "canvas/debug.h"

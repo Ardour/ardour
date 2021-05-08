@@ -247,7 +247,7 @@ MidiPlaylist::_split_region (boost::shared_ptr<Region> region, const MusicSample
 		   since it supplies that offset to the Region constructor, which
 		   is necessary to get audio region gain envelopes right.
 		*/
-		left = RegionFactory::create (region, MusicSample (0, 0), plist, true);
+		left = RegionFactory::create (region, MusicSample (0, 0), plist, true, &thawlist);
 	}
 
 	RegionFactory::region_name (after_name, region->name(), false);
@@ -263,7 +263,7 @@ MidiPlaylist::_split_region (boost::shared_ptr<Region> region, const MusicSample
 		plist.add (Properties::layer, region->layer ());
 
 		/* same note as above */
-		right = RegionFactory::create (region, before, plist, true);
+		right = RegionFactory::create (region, before, plist, true, &thawlist);
 	}
 
 	add_region_internal (left, region->position(), thawlist, 0, region->quarter_note(), true);

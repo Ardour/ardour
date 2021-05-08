@@ -46,7 +46,6 @@
 #include "widgets/tooltips.h"
 
 #include "pbd/fastlog.h"
-#include "pbd/stacktrace.h"
 
 #include "gain_meter.h"
 #include "gui_thread.h"

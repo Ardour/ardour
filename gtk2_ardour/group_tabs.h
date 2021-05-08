@@ -23,8 +23,13 @@
 #define __gtk_ardour_group_tabs_h__
 
 #include <gtkmm/menu.h>
-#include "editor_component.h"
+
+#include "ardour/session_handle.h"
+#include "ardour/types.h"
+
 #include "gtkmm2ext/cairo_widget.h"
+
+#include "editor_component.h"
 
 namespace ARDOUR {
 	class Session;

@@ -615,7 +615,7 @@ IO::set_state (const XMLNode& node, int version)
 		 */
 		PortSet::iterator i = _ports.begin();
 		XMLNodeConstIterator x = node.children().begin();
-		for (; i != _ports.end(), x != node.children().end(); ++i, ++x) {
+		for (; i != _ports.end() && x != node.children().end(); ++i, ++x) {
 			if ((*x)->name() == "Port") {
 				(*x)->remove_property (X_("name"));
 				(*x)->set_property (X_("name"), i->name());
@@ -1289,6 +1289,7 @@ IO::latency () const
 	return max_latency;
 }
 
+#if 0 // not used, but may some day be handy for debugging
 samplecnt_t
 IO::public_latency () const
 {
@@ -1312,6 +1313,7 @@ IO::public_latency () const
 	                                               ((_direction == Output) ? "PLAYBACK" : "CAPTURE")));
 	return max_latency;
 }
+#endif
 
 samplecnt_t
 IO::connected_latency (bool for_playback) const

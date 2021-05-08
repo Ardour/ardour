@@ -197,8 +197,8 @@ public:
 		return _preview_video;
 	}
 
-	/** @return minimum number of samples (in x) and pixels (in y) that should be considered a movement */
-	virtual std::pair<ARDOUR::samplecnt_t, int> move_threshold () const {
+	/** @return minimum number of pixels (x, y) that should be considered a movement */
+	virtual std::pair<int, int> move_threshold () const {
 		return std::make_pair (1, 1);
 	}
 
@@ -425,8 +425,12 @@ public:
 		return true;
 	}
 
-	std::pair<ARDOUR::samplecnt_t, int> move_threshold () const {
-		return std::make_pair (4, 4);
+	std::pair<int, int> move_threshold () const {
+		if (_copy) {
+			return std::make_pair (6, 4);
+		} else {
+			return std::make_pair (2, 4);
+		}
 	}
 
 	void setup_pointer_sample_offset ();
@@ -639,8 +643,8 @@ private:
 	double y_to_region (double) const;
 	ARDOUR::samplecnt_t grid_samples (samplepos_t) const;
 
-	/** @return minimum number of samples (in x) and pixels (in y) that should be considered a movement */
-	virtual std::pair<ARDOUR::samplecnt_t, int> move_threshold () const {
+	/** @return minimum number of pixels (x, y) that should be considered a movement */
+	virtual std::pair<int, int> move_threshold () const {
 		return std::make_pair (0, 0);
 	}
 
@@ -672,8 +676,8 @@ private:
 	double y_to_region (double) const;
 	ARDOUR::samplecnt_t grid_samples (samplepos_t) const;
 
-	/** @return minimum number of samples (in x) and pixels (in y) that should be considered a movement */
-	virtual std::pair<ARDOUR::samplecnt_t, int> move_threshold () const {
+	/** @return minimum number of pixels (x, y) that should be considered a movement */
+	virtual std::pair<int, int> move_threshold () const {
 		return std::make_pair (0, 0);
 	}
 
@@ -1139,8 +1143,9 @@ public:
 	void finished (GdkEvent *, bool);
 	void aborted (bool);
 
-	std::pair<ARDOUR::samplecnt_t, int> move_threshold () const {
-		return std::make_pair (8, 1);
+	/** @return minimum number of pixels (x, y) that should be considered a movement */
+	std::pair<int, int> move_threshold () const {
+		return std::make_pair (1, 1);
 	}
 
 	void do_select_things (GdkEvent *, bool);
@@ -1297,7 +1302,8 @@ public:
 	void finished (GdkEvent *, bool);
 	void aborted (bool);
 
-	std::pair<ARDOUR::samplecnt_t, int> move_threshold () const {
+	/** @return minimum number of pixels (x, y) that should be considered a movement */
+	std::pair<int, int> move_threshold () const {
 		return std::make_pair (4, 4);
 	}
 
@@ -1361,8 +1367,8 @@ public:
 		return false;
 	}
 
-	virtual std::pair<ARDOUR::samplecnt_t, int> move_threshold () const {
-		return std::make_pair (4, 4);
+	virtual std::pair<int, int> move_threshold () const {
+		return std::make_pair (1, 4);
 	}
 
 private:

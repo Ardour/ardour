@@ -37,7 +37,7 @@ def build(bld):
     obj.includes     = [ '.', './maschine2']
     obj.name         = 'libardour_maschine2'
     obj.target       = 'ardour_maschine2'
-    obj.uselib       = 'CAIROMM PANGOMM OSX'
+    obj.uselib       = 'CAIROMM PANGOMM GTKMM GTK XML OSX'
     obj.use          = 'libardour libardour_cp libpbd libcanvas hidapi libgtkmm2ext'
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
 

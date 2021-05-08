@@ -26,6 +26,7 @@
 
 #include "pbd/libpbd_visibility.h"
 #include "pbd/spinlock.h"
+#include "pbd/g_atomic_compat.h"
 
 namespace PBD {
 
@@ -73,9 +74,9 @@ public:
 	/* called from rt (reader) thread for new buffers */
 	void align_to (PlaybackBuffer const& other) {
 		Glib::Threads::Mutex::Lock lm (_reset_lock);
-		write_idx = other.write_idx;
-		read_idx  = other.read_idx;
-		reserved  = other.reserved;
+		g_atomic_int_set (&read_idx, g_atomic_int_get (&other.read_idx));
+		g_atomic_int_set (&write_idx, g_atomic_int_get (&other.write_idx));
+		g_atomic_int_set (&reserved, g_atomic_int_get (&other.reserved));
 		memset (buf, 0, size * sizeof (T));
 	}
 
@@ -190,9 +191,9 @@ public:
 		}
 	}
 
-	guint read_ptr() const { return read_idx; }
-	guint write_ptr() const { return write_idx; }
-	guint reserved_size() const { return reserved; }
+	guint read_ptr() const { return g_atomic_int_get (&read_idx); }
+	guint write_ptr() const { return g_atomic_int_get (&write_idx); }
+	guint reserved_size() const { return g_atomic_int_get (&reserved); }
 	guint reservation_size() const { return reservation; }
 
 private:
@@ -201,9 +202,9 @@ private:
 	guint size;
 	guint size_mask;
 
-	mutable gint write_idx;
-	mutable gint read_idx;
-	mutable gint reserved;
+	mutable GATOMIC_QUAL gint write_idx;
+	mutable GATOMIC_QUAL gint read_idx;
+	mutable GATOMIC_QUAL gint reserved;
 
 	/* spinlock will be used to update write_idx and reserved in sync */
 	spinlock_t _reservation_lock;

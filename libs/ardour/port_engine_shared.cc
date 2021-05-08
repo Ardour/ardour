@@ -190,10 +190,10 @@ BackendPort::update_connected_latency (bool for_playback)
 
 PortEngineSharedImpl::PortEngineSharedImpl (PortManager& mgr, std::string const & str)
 	: _instance_name (str)
-	, _port_change_flag (false)
 	, _portmap (new PortMap)
 	, _ports (new PortIndex)
 {
+	g_atomic_int_set (&_port_change_flag, 0);
 	pthread_mutex_init (&_port_callback_mutex, 0);
 }
 
@@ -435,8 +435,8 @@ PortEngineSharedImpl::clear_ports ()
 	_ports.flush ();
 	_portmap.flush ();
 
+	g_atomic_int_set (&_port_change_flag, 0);
 	pthread_mutex_lock (&_port_callback_mutex);
-	_port_change_flag = false;
 	_port_connection_queue.clear();
 	pthread_mutex_unlock (&_port_callback_mutex);
 }
@@ -724,3 +724,14 @@ PortEngineSharedImpl::update_system_port_latencies ()
 		(*it)->update_connected_latency (false);
 	}
 }
+
+#ifndef NDEBUG
+void
+PortEngineSharedImpl::list_ports () const
+{
+	boost::shared_ptr<PortIndex> p = _ports.reader ();
+	for (PortIndex::const_iterator i = p->begin (); i != p->end (); ++i) {
+		std::cout << (*i)->name () << "\n";
+	}
+}
+#endif

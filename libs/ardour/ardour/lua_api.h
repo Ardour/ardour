@@ -237,6 +237,9 @@ namespace ARDOUR { namespace LuaAPI {
 	 */
 	bool wait_for_process_callback (size_t n_cycles, int64_t timeout_ms);
 
+	/** Crash Test Dummy */
+	void segfault ();
+
 	class Vamp {
 	/** Vamp Plugin Interface
 	 *

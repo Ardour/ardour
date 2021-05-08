@@ -506,12 +506,12 @@ AlsaAudioBackend::update_systemic_audio_latencies ()
 	const uint32_t lcpp = (_periods_per_cycle - 2) * _samples_per_period;
 	LatencyRange lr;
 
-	lr.min = lr.max = lcpp + (_measure_latency ? 0 : _systemic_audio_input_latency);
+	lr.min = lr.max = (_measure_latency ? 0 : _systemic_audio_output_latency);
 	for (std::vector<BackendPortPtr>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it) {
 		set_latency_range (*it, true, lr);
 	}
 
-	lr.min = lr.max = (_measure_latency ? 0 : _systemic_audio_output_latency);
+	lr.min = lr.max = lcpp + (_measure_latency ? 0 : _systemic_audio_input_latency);
 	for (std::vector<BackendPortPtr>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
 		set_latency_range (*it, false, lr);
 	}
@@ -982,9 +982,8 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 		return PortReconnectError;
 	}
 
-	engine.reconnect_ports ();
 	_run = true;
-	_port_change_flag = false;
+	g_atomic_int_set (&_port_change_flag, 0);
 
 	if (pbd_realtime_pthread_create (PBD_SCHED_FIFO, PBD_RT_PRI_MAIN, PBD_RT_STACKSIZE_PROC,
 				&_main_thread, pthread_process, this))
@@ -1059,6 +1058,8 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 		}
 	}
 #endif
+
+	engine.reconnect_ports ();
 
 	return NoError;
 }
@@ -1869,7 +1870,7 @@ AlsaAudioBackend::main_process_thread ()
 			if (no_proc_errors > bailout) {
 				PBD::error
 					<< string_compose (
-							_("AlsaAudioBackend: Audio Process Terminated after %1 consecutive x-runs."),
+							_("AlsaAudioBackend: Audio Process Terminated after %1 consecutive xruns."),
 							no_proc_errors)
 					<< endmsg;
 				break;
@@ -1984,7 +1985,7 @@ AlsaAudioBackend::main_process_thread ()
 				engine.Xrun ();
 				reset_dll = true;
 #if 0
-				fprintf(stderr, "ALSA x-run read: %.2f ms, write: %.2f ms\n",
+				fprintf(stderr, "ALSA xrun read: %.2f ms, write: %.2f ms\n",
 						_pcmi->capt_xrun() * 1000.0, _pcmi->play_xrun() * 1000.0);
 #endif
 			}
@@ -2039,9 +2040,8 @@ AlsaAudioBackend::main_process_thread ()
 		bool connections_changed = false;
 		bool ports_changed = false;
 		if (!pthread_mutex_trylock (&_port_callback_mutex)) {
-			if (_port_change_flag) {
+			if (g_atomic_int_compare_and_exchange (&_port_change_flag, 1, 0)) {
 				ports_changed = true;
-				_port_change_flag = false;
 			}
 			if (!_port_connection_queue.empty ()) {
 				connections_changed = true;

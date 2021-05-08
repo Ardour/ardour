@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ExportPreset id="f69e0cd2-2378-49db-8676-992bedb172e0" name="DVD-A only">
-  <ExportFormat id="8019f5e8-4929-447d-8471-e0df80b41795"/>
+<ExportPreset id="a83019f9-858e-4b69-8cc2-8d0487003d14" name="Ogg/Vorbis">
+  <ExportFormat id="f6bc67b9-558d-4788-a7de-57ed763c6227"/>
   <ExportFilename>
     <Folder relative="true" path="/export"/>
     <Field name="label" enabled="false"/>

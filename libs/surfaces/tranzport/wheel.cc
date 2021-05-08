@@ -199,4 +199,5 @@ TranzportControlProtocol::shuttle ()
 			session->request_transport_speed_nonzero (get_transport_speed() - 0.1);
 		}
 	}
+	session->request_roll ();
 }

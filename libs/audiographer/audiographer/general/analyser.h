@@ -32,7 +32,9 @@ class LIBAUDIOGRAPHER_API Analyser : public LoudnessReader
 	Analyser (float sample_rate, unsigned int channels, samplecnt_t bufsize, samplecnt_t n_samples);
 	~Analyser ();
 	void process (ProcessContext<float> const & c);
-	ARDOUR::ExportAnalysisPtr result ();
+	ARDOUR::ExportAnalysisPtr result (bool ptr = false);
+
+	void set_duration (samplecnt_t n_samples);
 
 	void set_normalization_gain (float gain) {
 		_result.normalized = true;
@@ -46,7 +48,8 @@ class LIBAUDIOGRAPHER_API Analyser : public LoudnessReader
 	private:
 	float fft_power_at_bin (const uint32_t b, const float norm) const;
 
-	ARDOUR::ExportAnalysis _result;
+	ARDOUR::ExportAnalysisPtr _rp;
+	ARDOUR::ExportAnalysis& _result;
 
 	samplecnt_t   _n_samples;
 	samplecnt_t   _pos;

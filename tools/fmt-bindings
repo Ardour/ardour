@@ -30,10 +30,10 @@ $html = 0;
 
 GetOptions ("platform=s" => \$platform,
 	    "winkey=s" => \$winkey,
-	    "cheatsheet" => \$make_cheatsheet,
-	    "accelmap" => \$make_accelmap,
+	    "cheatsheet=i" => \$make_cheatsheet,
+	    "accelmap=i" => \$make_accelmap,
 	    "merge=s" => \$merge_from,
-            "html" => \$html);
+            "html=i" => \$html);
 
 if ($platform eq "darwin") {
 
@@ -47,7 +47,7 @@ if ($platform eq "darwin") {
     # cheat sheet for a given (meta)-modifier
 
     $cs_modifier_map{'PRIMARY'} = 'Cmd';
-    $cs_modifier_map{'SECONDARY'} = 'Control';
+    $cs_modifier_map{'SECONDARY'} = 'Ctrl';
     $cs_modifier_map{'TERTIARY'} = 'Shift';
     $cs_modifier_map{'LEVEL4'} = 'Opt';
 
@@ -88,6 +88,11 @@ if ($platform eq "darwin") {
     $mouse_modifier_map{'LEVEL4'} = 'Win';
 }
 
+$html_modifier_map{'PRIMARY'} = '1';
+$html_modifier_map{'SECONDARY'} = '2';
+$html_modifier_map{'TERTIARY'} = '3';
+$html_modifier_map{'LEVEL4'} = '4';
+
 %keycodes = ();
 
 if ($html) {
@@ -125,6 +130,8 @@ if ($html) {
         'KP_0' => 'KP-0;',
         'greater' => '&gt;',
         'less' => '&lt;',
+	'ISO_Left_Tab' => 'Tab',
+	'nabla' => 'Tab',
         );
 } else {
 
@@ -242,6 +249,11 @@ while (<SOURCE>) {
 	chop;
 	($key,$action,$binding,$text) = split (/\|/, $_, 4);
 
+	# do not include "alt-" or "alternate-" actions in the HTML output
+	if ($html && $action =~ /\/alt/) {
+	    next;
+	}
+	
 	$gkey = $key;
 	$gkey =~ s/^-//;
 	$owner = $group_owners{$gkey};
@@ -334,7 +346,8 @@ if ($make_accelmap) {
     print "</BindingSet>\n";
 }
 
-if ($make_accelmap || !$make_cheatsheet) {
+
+if (($make_accelmap || !$make_cheatsheet) && !$html) {
     exit 0;
 }
 
@@ -362,7 +375,7 @@ if ($html) {
             $name =~ s/[{}]//g;
             $name =~ s/\\par//g;
 
-            print "<h3>$name</h3>\n";
+            print "<h2>$name</h2>\n";
 
             $gtext = $group_text{$gk};
             $gtext =~ s/\\linebreak.*//;
@@ -382,7 +395,7 @@ if ($html) {
             
             # set up the list
             
-            print "<dl class=\"bindings\">\n";
+            print "<table class=\"dl\">\n";
             
             # sort the array of arrays by the descriptive text for nicer appearance,
             # and print them
@@ -398,12 +411,12 @@ if ($html) {
                 }
                 
                 foreach $k (keys %cs_modifier_map) {
-                    $binding =~ s/\@$k\@/$cs_modifier_map{$k}/;
+                    $binding =~ s/\@$k\@/$html_modifier_map{$k}/;
                 }
 
                 # remove braces for HTML
 
-                $binding =~ s/></\+/g;
+                $binding =~ s/><//g;
                 $binding =~ s/^<//;
                 $binding =~ s/>/\+/;
                 
@@ -422,10 +435,18 @@ if ($html) {
                 $descr =~ s/[{}]//g;
                 $descr =~ s/\\par//g;
 
-                print "<dt>$descr</dt><dd>$binding</dd>\n";
+		if ($binding =~ /\+/) {
+		    ($mods,$k) = split (/\+/, $binding, 2);
+		    $mods = "mod$mods";
+		} else {
+		    $mods="";
+		    $k = $binding;
+		}
+		
+                print "<tr><th>$descr</th><td><kbd class=\"$mods\">$k</kbd></td></tr>\n";
             }
             
-            print "</dl>\n";
+            print "</table>\n";
         
         }
     }

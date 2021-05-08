@@ -129,8 +129,8 @@ using namespace ARDOUR;
 using namespace PBD;
 
 bool          LV2Plugin::force_state_save      = false;
-bool          LV2Plugin::_ui_style_flat        = false;
-bool          LV2Plugin::_ui_style_boxy        = false;
+int32_t       LV2Plugin::_ui_style_flat        = 0;
+int32_t       LV2Plugin::_ui_style_boxy        = 0;
 uint32_t      LV2Plugin::_ui_background_color  = 0x000000ff; // RGBA
 uint32_t      LV2Plugin::_ui_foreground_color  = 0xffffffff; // RGBA
 uint32_t      LV2Plugin::_ui_contrasting_color = 0x33ff33ff; // RGBA
@@ -577,9 +577,9 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id("http://lv2plug.in/ns/extensions/ui#scaleFactor"),
 		  sizeof(float), atom_Float, &_ui_scale_factor },
 		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id("http://ardour.org/lv2/theme/#styleBoxy"),
-		  sizeof(bool), atom_Bool, &_ui_style_boxy },
+		  sizeof(int32_t), atom_Bool, &_ui_style_boxy },
 		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id("http://ardour.org/lv2/theme/#styleFlat"),
-		  sizeof(bool), atom_Bool, &_ui_style_flat },
+		  sizeof(int32_t), atom_Bool, &_ui_style_flat },
 		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id("http://kxstudio.sf.net/ns/lv2ext/props#TransientWindowId"),
 		  sizeof(int32_t), atom_Long, &_ui_transient_win_id },
 		{ LV2_OPTIONS_INSTANCE, 0, 0, 0, 0, NULL }

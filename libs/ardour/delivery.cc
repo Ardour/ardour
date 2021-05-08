@@ -375,7 +375,7 @@ Delivery::state ()
 
 	if (_panshell) {
 		node.add_child_nocopy (_panshell->get_state ());
-		if (_panshell->unlinked_pannable ()) {
+		if (_panshell->unlinked_pannable () && _role != Listen) {
 			node.add_child_nocopy (_panshell->unlinked_pannable()->get_state ());
 		}
 	}
@@ -406,7 +406,7 @@ Delivery::set_state (const XMLNode& node, int version)
 
 	XMLNode* pannnode = node.child (X_("Pannable"));
 
-	if (_panshell && _panshell->panner() && pannnode) {
+	if (_panshell && _panshell->unlinked_pannable() && pannnode) {
 		_panshell->unlinked_pannable()->set_state (*pannnode, version);
 	}
 

@@ -160,19 +160,18 @@ FaderPort8::FaderPort8 (Session& s)
 #endif
 
 	_input_bundle->add_channel (
-		inp->name(),
+		"",
 		ARDOUR::DataType::MIDI,
 		session->engine().make_port_name_non_relative (inp->name())
 		);
 
 	_output_bundle->add_channel (
-		outp->name(),
+		"",
 		ARDOUR::DataType::MIDI,
 		session->engine().make_port_name_non_relative (outp->name())
 		);
 
 	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::connection_handler, this, _2, _4), this);
-	ARDOUR::AudioEngine::instance()->PortPrettyNameChanged.connect (port_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::ConnectionChange, this), this); /* notify GUI */
 	ARDOUR::AudioEngine::instance()->Stopped.connect (port_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::engine_reset, this), this);
 	ARDOUR::Port::PortDrop.connect (port_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::engine_reset, this), this);
 
@@ -819,6 +818,7 @@ FaderPort8::set_state (const XMLNode& node, int version)
 	if ((child = node.child (X_("Input"))) != 0) {
 		XMLNode* portnode = child->child (Port::state_node_name.c_str());
 		if (portnode) {
+			portnode->remove_property ("name");
 			DEBUG_TRACE (DEBUG::FaderPort8, "FaderPort8::set_state Input\n");
 			boost::shared_ptr<ARDOUR::Port>(_input_port)->set_state (*portnode, version);
 		}
@@ -827,6 +827,7 @@ FaderPort8::set_state (const XMLNode& node, int version)
 	if ((child = node.child (X_("Output"))) != 0) {
 		XMLNode* portnode = child->child (Port::state_node_name.c_str());
 		if (portnode) {
+			portnode->remove_property ("name");
 			DEBUG_TRACE (DEBUG::FaderPort8, "FaderPort8::set_state Output\n");
 			boost::shared_ptr<ARDOUR::Port>(_output_port)->set_state (*portnode, version);
 		}

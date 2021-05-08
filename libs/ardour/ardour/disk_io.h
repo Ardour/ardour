@@ -59,11 +59,8 @@ public:
 
 	static const std::string state_node_name;
 
-	DiskIOProcessor (Session&, const std::string& name, Flag f);
+	DiskIOProcessor (Session&, Track&, const std::string& name, Flag f);
 	virtual ~DiskIOProcessor ();
-
-	void set_track (boost::shared_ptr<Track>);
-	void drop_track ();
 
 	static void set_buffering_parameters (BufferingPreset bp);
 
@@ -121,7 +118,7 @@ protected:
 	bool          in_set_state;
 	samplepos_t   playback_sample;
 	bool         _need_butler;
-	boost::shared_ptr<Track> _track;
+	Track&       _track;
 
 	void init ();
 

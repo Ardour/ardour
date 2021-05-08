@@ -39,10 +39,8 @@ class LIBAUDIOGRAPHER_API LoudnessReader : public ListedSource<float>, public Si
 
 	void reset ();
 
-	float get_normalize_gain (float target_lufs, float target_dbtp);
-	float get_peak (float target_lufs = -23.f, float target_dbtp = -1.f) {
-		return 1.f / get_normalize_gain (target_lufs, target_dbtp);
-	}
+	float calc_peak (float target_lufs = -23, float target_dbtp = -1) const;
+	bool  get_loudness (float* integrated, float* short_term = NULL, float* momentary = NULL) const;
 
 	virtual void process (ProcessContext<float> const & c);
 

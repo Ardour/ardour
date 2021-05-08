@@ -17,18 +17,11 @@ class LIBAUDIOGRAPHER_API Normalizer
 {
 public:
 	/// Constructs a normalizer with a specific target in dB \n RT safe
-	Normalizer (float target_dB);
+	Normalizer (float target_dB, samplecnt_t);
 	~Normalizer();
 
 	/// Sets the peak found in the material to be normalized \see PeakReader \n RT safe
 	float set_peak (float peak);
-
-	/** Allocates a buffer for using with const ProcessContexts
-	  * This function does not need to be called if
-	  * non-const ProcessContexts are given to \a process() .
-	  * \n Not RT safe
-	  */
-	void alloc_buffer(samplecnt_t samples);
 
 	/// Process a const ProcessContext \see alloc_buffer() \n RT safe
 	void process (ProcessContext<float> const & c);

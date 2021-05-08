@@ -72,14 +72,6 @@ using namespace Glib;
 using namespace Editing;
 using Gtkmm2ext::Keyboard;
 
-struct ColumnInfo {
-	int                index;
-	int                sort_idx;
-	Gtk::AlignmentEnum al;
-	const char*        label;
-	const char*        tooltip;
-};
-
 //#define SHOW_REGION_EXTRAS
 
 EditorRegions::EditorRegions (Editor* e)
@@ -177,8 +169,14 @@ EditorRegions::EditorRegions (Editor* e)
 	TreeViewColumn* col;
 	Gtk::Label*     l;
 
+	struct ColumnInfo {
+		int                index;
+		int                sort_idx;
+		Gtk::AlignmentEnum al;
+		const char*        label;
+		const char*        tooltip;
+	} ci[] = {
 	/* clang-format off */
-	ColumnInfo ci[] = {
 		{ 0,  0,  ALIGN_LEFT,    _("Name"),      _("Region name") },
 		{ 1,  1,  ALIGN_LEFT,    _("# Ch"),      _("# Channels in the region") },
 		{ 2,  2,  ALIGN_LEFT,    _("Tags"),      _("Tags") },
@@ -365,7 +363,7 @@ EditorRegions::set_session (ARDOUR::Session* s)
 {
 	SessionHandlePtr::set_session (s);
 
-	ARDOUR::Region::RegionPropertyChanged.connect (region_property_connection, MISSING_INVALIDATOR, boost::bind (&EditorRegions::region_changed, this, _1, _2), gui_context ());
+	ARDOUR::Region::RegionsPropertyChanged.connect (region_property_connection, MISSING_INVALIDATOR, boost::bind (&EditorRegions::regions_changed, this, _1, _2), gui_context ());
 	ARDOUR::RegionFactory::CheckNewRegion.connect (check_new_region_connection, MISSING_INVALIDATOR, boost::bind (&EditorRegions::add_region, this, _1), gui_context ());
 
 	redisplay ();
@@ -392,7 +390,9 @@ EditorRegions::add_region (boost::shared_ptr<Region> region)
 	}
 
 	PropertyChange pc;
-	region_changed (region, pc);
+	boost::shared_ptr<RegionList> rl (new RegionList);
+	rl->push_back (region);
+	regions_changed (rl, pc);
 }
 
 void
@@ -437,38 +437,49 @@ EditorRegions::remove_unused_regions ()
 }
 
 void
-EditorRegions::region_changed (boost::shared_ptr<Region> r, const PropertyChange& what_changed)
+EditorRegions::regions_changed (boost::shared_ptr<RegionList> rl, const PropertyChange& what_changed)
 {
-	RegionRowMap::iterator map_it = region_row_map.find (r);
-
-	boost::shared_ptr<ARDOUR::Playlist> pl = r->playlist ();
-	if (!(pl && _session && _session->playlist_is_active (pl))) {
-		/* this region is not on an active playlist
-		 * maybe it got deleted, or whatever */
-		if (map_it != region_row_map.end ()) {
-			Gtk::TreeModel::iterator r = map_it->second;
-			region_row_map.erase (map_it);
-			_model->erase (r);
-		}
-		return;
+	bool freeze = rl->size () > 2;
+	if (freeze) {
+		freeze_tree_model ();
 	}
+	for (RegionList::const_iterator i = rl->begin (); i != rl->end(); ++i) {
+		boost::shared_ptr<Region> r = *i;
 
-	if (map_it != region_row_map.end ()) {
-		/* found the region, update its row properties */
-		TreeModel::Row row = *(map_it->second);
-		populate_row (r, row, what_changed);
+		RegionRowMap::iterator map_it = region_row_map.find (r);
 
-	} else {
-		/* new region, add it to the list */
-		TreeModel::iterator iter = _model->append ();
-		TreeModel::Row      row  = *iter;
-		region_row_map.insert (pair<boost::shared_ptr<ARDOUR::Region>, Gtk::TreeModel::iterator> (r, iter));
+		boost::shared_ptr<ARDOUR::Playlist> pl = r->playlist ();
+		if (!(pl && _session && _session->playlist_is_active (pl))) {
+			/* this region is not on an active playlist
+			 * maybe it got deleted, or whatever */
+			if (map_it != region_row_map.end ()) {
+				Gtk::TreeModel::iterator r = map_it->second;
+				region_row_map.erase (map_it);
+				_model->erase (r);
+			}
+			return;
+		}
 
-		/* set the properties that don't change */
-		row[_columns.region] = r;
+		if (map_it != region_row_map.end ()) {
+			/* found the region, update its row properties */
+			TreeModel::Row row = *(map_it->second);
+			populate_row (r, row, what_changed);
 
-		/* now populate the properties that might change... */
-		populate_row (r, row, PropertyChange ());
+		} else {
+			/* new region, add it to the list */
+			TreeModel::iterator iter = _model->append ();
+			TreeModel::Row      row  = *iter;
+			region_row_map.insert (pair<boost::shared_ptr<ARDOUR::Region>, Gtk::TreeModel::iterator> (r, iter));
+
+			/* set the properties that don't change */
+			row[_columns.region] = r;
+
+			/* now populate the properties that might change... */
+			populate_row (r, row, PropertyChange ());
+		}
+	}
+	if (freeze) {
+		thaw_tree_model ();
 	}
 }
 
@@ -530,9 +541,7 @@ EditorRegions::redisplay ()
 	}
 
 	/* store sort column id and type for later */
-	int sort_col_id;
-	Gtk::SortType sort_type;
-	_model->get_sort_column_id (sort_col_id, sort_type);
+	_model->get_sort_column_id (_sort_col_id, _sort_type);
 
 	_display.set_model (Glib::RefPtr<Gtk::TreeStore> (0));
 	_model->clear ();
@@ -543,7 +552,7 @@ EditorRegions::redisplay ()
 
 	RegionFactory::foreach_region (sigc::mem_fun (*this, &EditorRegions::add_region));
 
-	_model->set_sort_column (sort_col_id, sort_type); // re-enabale sorting
+	_model->set_sort_column (_sort_col_id, _sort_type); // re-enabale sorting
 	_display.set_model (_model);
 }
 
@@ -1149,7 +1158,6 @@ EditorRegions::get_dragged_region ()
 		return boost::shared_ptr<Region> ();
 	}
 
-	assert (regions.size () == 1);
 	return regions.front ();
 }
 
@@ -1189,6 +1197,9 @@ EditorRegions::get_single_selection ()
 void
 EditorRegions::freeze_tree_model ()
 {
+	/* store sort column id and type for later */
+	_model->get_sort_column_id (_sort_col_id, _sort_type);
+	_change_connection.block (true);
 	_display.set_model (Glib::RefPtr<Gtk::TreeStore> (0));
 	_model->set_sort_column (-2, SORT_ASCENDING); //Disable sorting to gain performance
 }
@@ -1196,8 +1207,9 @@ EditorRegions::freeze_tree_model ()
 void
 EditorRegions::thaw_tree_model ()
 {
-	_model->set_sort_column (0, SORT_ASCENDING); // renabale sorting
+	_model->set_sort_column (_sort_col_id, _sort_type); // re-enabale sorting
 	_display.set_model (_model);
+	_change_connection.block (false);
 }
 
 void

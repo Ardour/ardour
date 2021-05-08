@@ -24,8 +24,6 @@
 #include <gtkmm/window.h>
 #include <gtkmm/label.h>
 
-#include "pbd/stacktrace.h"
-
 #include "canvas/text.h"
 #include "canvas/canvas.h"
 #include "gtkmm2ext/colors.h"

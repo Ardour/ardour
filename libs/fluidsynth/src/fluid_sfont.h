@@ -45,7 +45,7 @@ int fluid_sample_sanitize_loop(fluid_sample_t *sample, unsigned int max_end);
   (*(_preset)->noteon)(_preset,_synth,_ch,_key,_vel)
 
 #define fluid_preset_notify(_preset,_reason,_chan) \
-  { if ((_preset) && (_preset)->notify) { (*(_preset)->notify)(_preset,_reason,_chan); }}
+  ( ((_preset) && (_preset)->notify) ? (*(_preset)->notify)(_preset,_reason,_chan) : FLUID_OK )
 
 
 #define fluid_sample_incr_ref(_sample) { (_sample)->refcount++; }
@@ -147,7 +147,7 @@ struct _fluid_sample_t
 {
     char name[21];                /**< Sample name */
 
-    /* The following for sample pointers store the original pointers from the Soundfont
+    /* The following four sample pointers store the original pointers from the Soundfont
      * file. They are never changed after loading and are used to re-create the
      * actual sample pointers after a sample has been unloaded and loaded again. The
      * actual sample pointers get modified during loading for SF3 (compressed) samples

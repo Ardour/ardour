@@ -89,7 +89,6 @@ private:
 	PBD::ScopedConnectionList connections;
 	PBD::ScopedConnectionList _pan_control_connections;
 
-	bool ignore_toggle;
 	bool in_pan_update;
 	int _current_nouts;
 	int _current_nins;

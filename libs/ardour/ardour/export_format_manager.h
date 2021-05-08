@@ -113,6 +113,7 @@ class LIBARDOUR_API ExportFormatManager : public PBD::ScopedConnectionList
 	void select_silence_end (AnyTime const & time);
 	void select_normalize (bool value);
 	void select_normalize_loudness (bool value);
+	void select_tp_limiter (bool value);
 	void select_normalize_dbfs (float value);
 	void select_normalize_lufs (float value);
 	void select_normalize_dbtp (float value);

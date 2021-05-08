@@ -26,7 +26,6 @@
 #include "pbd/compose.h"
 #include "pbd/controllable.h"
 #include "pbd/error.h"
-#include "pbd/stacktrace.h"
 
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/rgb_macros.h"

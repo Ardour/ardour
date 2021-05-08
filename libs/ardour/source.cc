@@ -67,11 +67,12 @@ Source::Source (Session& s, DataType type, const string& name, Flag flags)
 	, _flags(flags)
 	, _natural_position(0)
 	, _have_natural_position (false)
-	, _use_count (0)
 	, _level (0)
 {
+	g_atomic_int_set (&_use_count, 0);
 	_analysed = false;
 	_timestamp = 0;
+
 	fix_writable_flags ();
 }
 
@@ -81,11 +82,11 @@ Source::Source (Session& s, const XMLNode& node)
 	, _flags (Flag (Writable|CanRename))
 	, _natural_position(0)
 	, _have_natural_position (false)
-        , _use_count (0)
 	, _level (0)
 {
-	_timestamp = 0;
+	g_atomic_int_set (&_use_count, 0);
 	_analysed = false;
+	_timestamp = 0;
 
 	if (set_state (node, Stateful::loading_state_version) || _type == DataType::NIL) {
 		throw failed_constructor();
@@ -127,6 +128,18 @@ Source::get_state ()
 		node->set_property ("natural-position", _natural_position);
 	}
 
+	if (!_xruns.empty ()) {
+		stringstream str;
+		for (XrunPositions::const_iterator xx = _xruns.begin(); xx != _xruns.end(); ++xx) {
+			str << PBD::to_string (*xx) << '\n';
+		}
+		XMLNode* xnode = new XMLNode (X_("xruns"));
+		XMLNode* content_node = new XMLNode (X_("foo")); /* it gets renamed by libxml when we set content */
+		content_node->set_content (str.str());
+		xnode->add_child_nocopy (*content_node);
+		node->add_child_nocopy (*xnode);
+	}
+
 	return *node;
 }
 
@@ -165,6 +178,29 @@ Source::set_state (const XMLNode& node, int version)
 
 	if (!node.get_property (X_("flags"), _flags)) {
 		_flags = Flag (0);
+	}
+
+	_xruns.clear ();
+	XMLNodeList nlist = node.children();
+	for (XMLNodeIterator niter = nlist.begin(); niter != nlist.end(); ++niter) {
+		if ((*niter)->name() != X_("xruns")) {
+			continue;
+		}
+		const XMLNode& xruns (*(*niter));
+		if (xruns.children().empty()) {
+			break;
+		}
+		XMLNode* content_node = xruns.children().front();
+		stringstream str (content_node->content());
+		while (str) {
+			samplepos_t x;
+			std::string x_str;
+			str >> x_str;
+			if (!str || !PBD::string_to<samplepos_t> (x_str, x)) {
+				break;
+			}
+			_xruns.push_back (x);
+		}
 	}
 
 	/* Destructive is no longer valid */

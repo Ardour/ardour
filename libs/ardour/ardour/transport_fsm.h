@@ -12,7 +12,6 @@
 #include <iostream>
 
 #include "pbd/demangle.h"
-#include "pbd/stacktrace.h"
 
 #include "ardour/debug.h"
 #include "ardour/types.h"
@@ -50,7 +49,6 @@ struct TransportFSM
 		bool clear_state;
 		/* for locate */
 		LocateTransportDisposition ltd;
-		bool with_flush;
 		samplepos_t target;
 		bool for_loop_end;
 		bool force;
@@ -63,7 +61,6 @@ struct TransportFSM
 			, abort_capture (false)
 			, clear_state (false)
 			, ltd (MustStop)
-			, with_flush (false)
 			, target (0)
 			, for_loop_end (false)
 			, force (false)
@@ -76,33 +73,33 @@ struct TransportFSM
 			, abort_capture (ab)
 			, clear_state (cl)
 			, ltd (MustStop)
-			, with_flush (false)
 			, target (0)
 			, for_loop_end (false)
 			, force (false)
 		{
 			assert (t == StopTransport);
 		}
-		Event (EventType t, samplepos_t pos, LocateTransportDisposition l, bool fl, bool lp, bool f4c)
+		Event (EventType t, samplepos_t pos, LocateTransportDisposition l, bool lp, bool f4c)
 			: type (t)
 			, abort_capture (false)
 			, clear_state (false)
 			, ltd (l)
-			, with_flush (fl)
 			, target (pos)
 			, for_loop_end (lp)
 			, force (f4c)
 		{
 			assert (t == Locate);
 		}
-		Event (EventType t, double sp, bool ab, bool cs, bool ad)
-			: type (t)
-			, abort_capture (ab)
-			, clear_state (cs)
+		/* here we drop the event type as the first argument in order
+		   disambiguate from the StopTransport case above (compiler can
+		   cast double-to-bool and complains. C++11 would allow "=
+		   delete" as an alternate fix, but this is fine.
+		*/
+		Event (double sp, bool ad)
+			: type (SetSpeed)
 			, speed (sp)
 			, as_default (ad)
 		{
-			assert (t == SetSpeed);
 		}
 
 		void* operator new (size_t);
@@ -149,10 +146,14 @@ struct TransportFSM
 
 	std::string current_state () const;
 
+	double transport_speed() const { return _transport_speed; }
+	double default_speed() const { return _default_speed; }
+
   private:
 	MotionState _motion_state;
 	ButlerState _butler_state;
 	DirectionState _direction_state;
+	double _transport_speed;
 
 	void init();
 
@@ -161,7 +162,7 @@ struct TransportFSM
 	void schedule_butler_for_transport_work () const;
 	void start_playback ();
 	void stop_playback (Event const &);
-	void start_locate_after_declick () const;
+	void start_locate_after_declick ();
 	void locate_for_loop (Event const &);
 	void roll_after_locate () const;
 	void start_locate_while_stopped (Event const &) const;
@@ -199,7 +200,6 @@ struct TransportFSM
 	bool process_event (Event&, bool was_deferred, bool& deferred);
 
 	mutable Event _last_locate;
-	Event last_speed_request;
 
 	TransportAPI* api;
 	typedef boost::intrusive::list<Event> EventList;
@@ -207,12 +207,15 @@ struct TransportFSM
 	EventList deferred_events;
 	int processing;
 	mutable boost::optional<bool> current_roll_after_locate_status;
-	double most_recently_requested_speed;
+	mutable double most_recently_requested_speed;
+	mutable double _default_speed;
+	int _reverse_after_declick;
 
 	void defer (Event& ev);
 	void bad_transition (Event const &);
 	void set_roll_after (bool) const;
 	bool compute_should_roll (LocateTransportDisposition) const;
+	int  compute_transport_speed () const;
 };
 
 } /* end namespace ARDOUR */

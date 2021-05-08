@@ -32,9 +32,11 @@
 #include "pbd/natsort.h"
 #include "pbd/rcu.h"
 #include "pbd/ringbuffer.h"
+#include "pbd/g_atomic_compat.h"
 
 #include "ardour/chan_count.h"
 #include "ardour/midiport_manager.h"
+#include "ardour/monitor_port.h"
 #include "ardour/port.h"
 
 namespace ARDOUR {
@@ -118,6 +120,11 @@ public:
 
 	uint32_t    port_name_size () const;
 	std::string my_name () const;
+
+#ifndef NDEBUG
+	void list_cycle_ports () const;
+	void list_all_ports () const;
+#endif
 
 	/* Port registration */
 
@@ -251,10 +258,14 @@ public:
 	AudioInputPorts audio_input_ports () const;
 	MIDIInputPorts  midi_input_ports () const;
 
+	MonitorPort& monitor_port () {
+		return _monitor_port;
+	}
+
 protected:
 	boost::shared_ptr<AudioBackend> _backend;
 
-	SerializedRCUManager<Ports> ports;
+	SerializedRCUManager<Ports> _ports;
 
 	bool                   _port_remove_in_progress;
 	PBD::RingBuffer<Port*> _port_deletions_pending;
@@ -297,6 +308,8 @@ private:
 	void load_port_info ();
 	void save_port_info ();
 	void update_input_ports (bool);
+
+	MonitorPort _monitor_port;
 
 	struct PortID {
 		PortID (boost::shared_ptr<AudioBackend>, DataType, bool, std::string const&);
@@ -362,7 +375,7 @@ private:
 
 	SerializedRCUManager<AudioInputPorts> _audio_input_ports;
 	SerializedRCUManager<MIDIInputPorts>  _midi_input_ports;
-	volatile gint                         _reset_meters;
+	GATOMIC_QUAL gint                     _reset_meters;
 };
 
 } // namespace ARDOUR

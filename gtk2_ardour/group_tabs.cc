@@ -98,6 +98,10 @@ GroupTabs::on_button_press_event (GdkEventButton* ev)
 {
 	using namespace Menu_Helpers;
 
+	if (!get_sensitive ()) {
+		return true;
+	}
+
 	double const p = primary_coordinate (ev->x, ev->y);
 
 	list<Tab>::iterator prev;
@@ -253,17 +257,27 @@ void
 GroupTabs::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t*)
 {
 	cairo_t* cr = ctx->cobj();
-	if (_dragging == 0) {
-		_tabs = compute_tabs ();
+	Gdk::Color c;
+
+	if (!get_sensitive ()) {
+		c = get_style()->get_base (Gtk::STATE_INSENSITIVE);
+	} else {
+		c = get_style()->get_base (Gtk::STATE_NORMAL);
 	}
 
 	/* background */
 
-	Gdk::Color c = get_style()->get_base (Gtk::STATE_NORMAL);
-
 	cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
 	cairo_rectangle (cr, 0, 0, get_width(), get_height());
 	cairo_fill (cr);
+
+	if (!get_sensitive ()) {
+		return;
+	}
+
+	if (_dragging == 0) {
+		_tabs = compute_tabs ();
+	}
 
 	/* tabs */
 
@@ -271,7 +285,6 @@ GroupTabs::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t*)
 		draw_tab (cr, *i);
 	}
 }
-
 
 /** Convert a click position to a tab.
  *  @param c Click position.

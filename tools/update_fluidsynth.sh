@@ -115,5 +115,5 @@ cd "$ASRC"
 patch -p1 < tools/fluid-patches/ardour_fluidsynth.diff
 
 # auto-generated files
-cp tools/fluid-patches/fluid_conv_tables.c  libs/fluidsynth/src/
-cp tools/fluid-patches/fluid_rvoice_dsp_tables.c  libs/fluidsynth/src/
+cp tools/fluid-patches/fluid_conv_tables.inc.h  libs/fluidsynth/src/
+cp tools/fluid-patches/fluid_rvoice_dsp_tables.inc.h  libs/fluidsynth/src/

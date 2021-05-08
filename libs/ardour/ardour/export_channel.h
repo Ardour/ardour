@@ -119,7 +119,6 @@ class LIBARDOUR_API RegionExportChannelFactory
 	void update_buffers (samplecnt_t samples);
 
 	AudioRegion const & region;
-	AudioTrack & track;
 	Type type;
 
 	samplecnt_t samples_per_cycle;

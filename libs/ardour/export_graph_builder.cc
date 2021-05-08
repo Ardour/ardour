@@ -36,6 +36,7 @@
 #include "audiographer/general/cmdpipe_writer.h"
 #include "audiographer/general/demo_noise.h"
 #include "audiographer/general/interleaver.h"
+#include "audiographer/general/limiter.h"
 #include "audiographer/general/normalizer.h"
 #include "audiographer/general/analyser.h"
 #include "audiographer/general/peak_reader.h"
@@ -438,20 +439,31 @@ ExportGraphBuilder::SFC::SFC (ExportGraphBuilder &parent, FileSpec const & new_c
 	unsigned channels = new_config.channel_config->get_n_chans();
 	_analyse = config.format->analyse();
 
-	boost::shared_ptr<AudioGrapher::ListedSource<float> > intermediate;
+	float ntarget = (config.format->normalize_loudness () || !config.format->normalize()) ? 0.0 : config.format->normalize_dbfs();
+	normalizer.reset (new AudioGrapher::Normalizer (ntarget, max_samples));
+	limiter.reset (new AudioGrapher::Limiter (config.format->sample_rate(), channels, max_samples));
+
+	normalizer->add_output (limiter);
+
+	boost::shared_ptr<AudioGrapher::ListedSource<float> > intermediate = limiter;
+
 	if (_analyse) {
 		samplecnt_t sample_rate = parent.session.nominal_sample_rate();
 		samplecnt_t sb = config.format->silence_beginning_at (parent.timespan->get_start(), sample_rate);
 		samplecnt_t se = config.format->silence_end_at (parent.timespan->get_end(), sample_rate);
 		samplecnt_t duration = parent.timespan->get_length () + sb + se;
+
 		max_samples = std::min ((samplecnt_t) 8192 * channels, std::max ((samplecnt_t) 4096 * channels, max_samples));
 		chunker.reset (new Chunker<Sample> (max_samples));
 		analyser.reset (new Analyser (config.format->sample_rate(), channels, max_samples,
 					(samplecnt_t) ceil (duration * config.format->sample_rate () / (double) sample_rate)));
-		chunker->add_output (analyser);
 
 		config.filename->set_channel_config (config.channel_config);
 		parent.add_analyser (config.filename->get_path (config.format), analyser);
+		limiter->set_result (analyser->result (true));
+
+		chunker->add_output (analyser);
+		intermediate->add_output (chunker);
 		intermediate = analyser;
 	}
 
@@ -468,7 +480,8 @@ ExportGraphBuilder::SFC::SFC (ExportGraphBuilder &parent, FileSpec const & new_c
 				sample_rate * config.format->demo_noise_interval () / 1000,
 				sample_rate * config.format->demo_noise_duration () / 1000,
 				config.format->demo_noise_level ());
-		if (intermediate) { intermediate->add_output (demo_noise_adder); }
+
+		intermediate->add_output (demo_noise_adder);
 		intermediate = demo_noise_adder;
 	}
 
@@ -476,44 +489,67 @@ ExportGraphBuilder::SFC::SFC (ExportGraphBuilder &parent, FileSpec const & new_c
 		short_converter = ShortConverterPtr (new SampleFormatConverter<short> (channels));
 		short_converter->init (max_samples, config.format->dither_type(), data_width);
 		add_child (config);
-		if (intermediate) { intermediate->add_output (short_converter); }
-
+		intermediate->add_output (short_converter);
 	} else if (data_width == 24 || data_width == 32) {
 		int_converter = IntConverterPtr (new SampleFormatConverter<int> (channels));
 		int_converter->init (max_samples, config.format->dither_type(), data_width);
 		add_child (config);
-		if (intermediate) { intermediate->add_output (int_converter); }
+		intermediate->add_output (int_converter);
 	} else {
 		int actual_data_width = 8 * sizeof(Sample);
 		float_converter = FloatConverterPtr (new SampleFormatConverter<Sample> (channels));
 		float_converter->init (max_samples, config.format->dither_type(), actual_data_width);
 		add_child (config);
-		if (intermediate) { intermediate->add_output (float_converter); }
+		intermediate->add_output (float_converter);
 	}
 }
 
 void
-ExportGraphBuilder::SFC::set_peak (float gain)
+ExportGraphBuilder::SFC::set_duration (samplecnt_t n_samples)
 {
+	/* update after silence trim */
+	if (analyser) {
+		analyser->set_duration (n_samples);
+	}
+	if (limiter) {
+		limiter->set_duration (n_samples);
+	}
+}
+
+void
+ExportGraphBuilder::SFC::set_peak_dbfs (float peak, bool force)
+{
+	if (!config.format->normalize () && !force) {
+		return;
+	}
+	float gain = normalizer->set_peak (peak);
 	if (_analyse) {
 		analyser->set_normalization_gain (gain);
+	}
+}
+
+void
+ExportGraphBuilder::SFC::set_peak_lufs (AudioGrapher::LoudnessReader const& lr)
+{
+	if (!config.format->normalize_loudness ()) {
+		return;
+	}
+	float LUFSi, LUFSs;
+	if (!config.format->use_tp_limiter ()) {
+		float peak = lr.calc_peak (config.format->normalize_lufs (), config.format->normalize_dbtp ());
+		set_peak_dbfs (peak, true);
+	} else if (lr.get_loudness (&LUFSi, &LUFSs) && (LUFSi > -180 || LUFSs > -180)) {
+		float lufs = LUFSi > -180 ? LUFSi : LUFSs;
+		float peak = powf (10.f, .05 * (lufs - config.format->normalize_lufs () - 0.05));
+		limiter->set_threshold (config.format->normalize_dbtp ());
+		set_peak_dbfs (peak, true);
 	}
 }
 
 ExportGraphBuilder::FloatSinkPtr
 ExportGraphBuilder::SFC::sink ()
 {
-	if (chunker) {
-		return chunker;
-	} else if (demo_noise_adder) {
-		return demo_noise_adder;
-	} else if (data_width == 8 || data_width == 16) {
-		return short_converter;
-	} else if (data_width == 24 || data_width == 32) {
-		return int_converter;
-	} else {
-		return float_converter;
-	}
+	return normalizer;
 }
 
 void
@@ -553,9 +589,29 @@ ExportGraphBuilder::SFC::remove_children (bool remove_out_files)
 }
 
 bool
-ExportGraphBuilder::SFC::operator== (FileSpec const & other_config) const
+ExportGraphBuilder::SFC::operator== (FileSpec const& other_config) const
 {
-	return config.format->sample_format() == other_config.format->sample_format();
+	ExportFormatSpecification const& a = *config.format;
+	ExportFormatSpecification const& b = *other_config.format;
+
+	bool id = a.sample_format() == b.sample_format();
+
+	if (a.normalize_loudness () == b.normalize_loudness ()) {
+		id &= a.normalize_lufs () == b.normalize_lufs ();
+		id &= a.normalize_dbtp () == b.normalize_dbtp ();
+	} else {
+		return false;
+	}
+	if (a.normalize () == b.normalize ()) {
+		id &= a.normalize_dbfs () == b.normalize_dbfs ();
+	} else {
+		return false;
+	}
+
+	id &= a.demo_noise_duration () == b.demo_noise_duration ();
+	id &= a.demo_noise_interval () == b.demo_noise_interval ();
+
+	return id;
 }
 
 /* Intermediate (Normalizer, TmpFile) */
@@ -574,22 +630,12 @@ ExportGraphBuilder::Intermediate::Intermediate (ExportGraphBuilder & parent, Fil
 	config = new_config;
 	uint32_t const channels = config.channel_config->get_n_chans();
 	max_samples_out = 4086 - (4086 % channels); // TODO good chunk size
-	use_loudness = config.format->normalize_loudness ();
-	use_peak = config.format->normalize ();
 
 	buffer.reset (new AllocatingProcessContext<Sample> (max_samples_out, channels));
 
-	if (use_peak) {
-		peak_reader.reset (new PeakReader ());
-	}
-	if (use_loudness) {
-		loudness_reader.reset (new LoudnessReader (config.format->sample_rate(), channels, max_samples));
-	}
-
-	normalizer.reset (new AudioGrapher::Normalizer (use_loudness ? 0.0 : config.format->normalize_dbfs()));
+	peak_reader.reset (new PeakReader ());
+	loudness_reader.reset (new LoudnessReader (config.format->sample_rate(), channels, max_samples));
 	threader.reset (new Threader<Sample> (parent.thread_pool));
-	normalizer->alloc_buffer (max_samples_out);
-	normalizer->add_output (threader);
 
 	int format = ExportFormatBase::F_RAW | ExportFormatBase::SF_Float;
 
@@ -606,27 +652,28 @@ ExportGraphBuilder::Intermediate::Intermediate (ExportGraphBuilder & parent, Fil
 
 	add_child (new_config);
 
-	if (use_loudness) {
-		loudness_reader->add_output (tmp_file);
-	} else if (use_peak) {
-		peak_reader->add_output (tmp_file);
-	}
+	peak_reader->add_output (loudness_reader);
+	loudness_reader->add_output (tmp_file);
 }
 
 ExportGraphBuilder::FloatSinkPtr
 ExportGraphBuilder::Intermediate::sink ()
 {
-	if (use_loudness) {
-		return loudness_reader;
-	} else if (use_peak) {
+	if (use_peak) {
 		return peak_reader;
+	} else if (use_loudness) {
+		return loudness_reader;
+	} else {
+		return tmp_file;
 	}
-	return tmp_file;
 }
 
 void
 ExportGraphBuilder::Intermediate::add_child (FileSpec const & new_config)
 {
+	use_peak     |= new_config.format->normalize ();
+	use_loudness |= new_config.format->normalize_loudness ();
+
 	for (boost::ptr_list<SFC>::iterator it = children.begin(); it != children.end(); ++it) {
 		if (*it == new_config) {
 			it->add_child (new_config);
@@ -652,14 +699,7 @@ ExportGraphBuilder::Intermediate::remove_children (bool remove_out_files)
 bool
 ExportGraphBuilder::Intermediate::operator== (FileSpec const & other_config) const
 {
-	return config.format->normalize() == other_config.format->normalize() &&
-		config.format->normalize_loudness () == other_config.format->normalize_loudness() &&
-		(
-		 (!config.format->normalize_loudness () && config.format->normalize_dbfs() == other_config.format->normalize_dbfs())
-		 ||
-		 // FIXME: allow simultaneous export of two formats with different loundness normalization settings
-		 (config.format->normalize_loudness () /* lufs/dbtp is a result option, not an instantaion option */)
-		);
+	return true;
 }
 
 unsigned
@@ -679,28 +719,26 @@ ExportGraphBuilder::Intermediate::process()
 void
 ExportGraphBuilder::Intermediate::prepare_post_processing()
 {
-	// called in sync rt-context
-	float gain;
-	if (use_loudness) {
-		gain = normalizer->set_peak (loudness_reader->get_peak (config.format->normalize_lufs (), config.format->normalize_dbtp ()));
-	} else if (use_peak) {
-		gain = normalizer->set_peak (peak_reader->get_peak());
-	} else {
-		gain = normalizer->set_peak (0.0);
-	}
-	if (use_loudness || use_peak) {
-		// push info to analyzers
-		for (boost::ptr_list<SFC>::iterator i = children.begin(); i != children.end(); ++i) {
-			(*i).set_peak (gain);
+	for (boost::ptr_list<SFC>::iterator i = children.begin(); i != children.end(); ++i) {
+		if (use_peak) {
+			(*i).set_peak_dbfs (peak_reader->get_peak());
+		}
+		if (use_loudness) {
+			(*i).set_peak_lufs (*loudness_reader);
 		}
 	}
-	tmp_file->add_output (normalizer);
+
+	tmp_file->add_output (threader);
 	parent.intermediates.push_back (this);
 }
 
 void
 ExportGraphBuilder::Intermediate::start_post_processing()
 {
+	for (boost::ptr_list<SFC>::iterator i = children.begin(); i != children.end(); ++i) {
+		(*i).set_duration (tmp_file->get_samples_written() / config.channel_config->get_n_chans());
+	}
+
 	tmp_file->seek (0, SEEK_SET);
 
 	/* called in disk-thread when exporting in realtime,

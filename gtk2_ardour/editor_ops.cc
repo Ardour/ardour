@@ -285,6 +285,11 @@ Editor::split_regions_at (MusicSample where, RegionSelection& regions)
 		EditorThaw(); /* Emit Signal */
 	}
 
+	if (_session->abort_empty_reversible_command ()) {
+		/* no change was made */
+		return;
+	}
+
 	RegionSelectionAfterSplit rsas = Config->get_region_selection_after_split();
 
 	//if the user has "Clear Selection" as their post-split behavior, then clear the selection
@@ -1355,7 +1360,7 @@ Editor::cursor_align (bool playhead_to_edit)
 			return;
 		}
 
-		_session->request_locate (selection->markers.front()->position(), RollIfAppropriate);
+		_session->request_locate (selection->markers.front()->position());
 
 	} else {
 		const int32_t divisions = get_grid_music_divisions (0);
@@ -2447,7 +2452,7 @@ Editor::jump_forward_to_mark ()
 		return;
 	}
 
-	_session->request_locate (pos, RollIfAppropriate);
+	_session->request_locate (pos);
 }
 
 void
@@ -2471,7 +2476,7 @@ Editor::jump_backward_to_mark ()
 		return;
 	}
 
-	_session->request_locate (pos, RollIfAppropriate);
+	_session->request_locate (pos);
 }
 
 void
@@ -2496,11 +2501,31 @@ Editor::clear_markers ()
 		begin_reversible_command (_("clear markers"));
 
 		XMLNode &before = _session->locations()->get_state();
-		_session->locations()->clear_markers ();
-		XMLNode &after = _session->locations()->get_state();
-		_session->add_command(new MementoCommand<Locations>(*(_session->locations()), &before, &after));
+		if (_session->locations()->clear_markers ()) {
+			XMLNode &after = _session->locations()->get_state();
+			_session->add_command(new MementoCommand<Locations>(*(_session->locations()), &before, &after));
+			commit_reversible_command ();
+		}
+	} else {
+		abort_reversible_command ();
+	}
+}
 
-		commit_reversible_command ();
+void
+Editor::clear_xrun_markers ()
+{
+	if (_session) {
+		begin_reversible_command (_("clear xrun markers"));
+
+		XMLNode &before = _session->locations()->get_state();
+		if (_session->locations()->clear_xrun_markers ()) {
+			XMLNode &after = _session->locations()->get_state();
+			_session->add_command(new MementoCommand<Locations>(*(_session->locations()), &before, &after));
+
+			commit_reversible_command ();
+		}
+	} else {
+		abort_reversible_command ();
 	}
 }
 
@@ -2512,12 +2537,15 @@ Editor::clear_ranges ()
 
 		XMLNode &before = _session->locations()->get_state();
 
-		_session->locations()->clear_ranges ();
+		if (_session->locations()->clear_ranges ()) {
 
-		XMLNode &after = _session->locations()->get_state();
-		_session->add_command(new MementoCommand<Locations>(*(_session->locations()), &before, &after));
+			XMLNode &after = _session->locations()->get_state();
+			_session->add_command(new MementoCommand<Locations>(*(_session->locations()), &before, &after));
 
-		commit_reversible_command ();
+			commit_reversible_command ();
+		}
+	} else {
+		abort_reversible_command ();
 	}
 }
 
@@ -2527,11 +2555,14 @@ Editor::clear_locations ()
 	begin_reversible_command (_("clear locations"));
 
 	XMLNode &before = _session->locations()->get_state();
-	_session->locations()->clear ();
-	XMLNode &after = _session->locations()->get_state();
-	_session->add_command(new MementoCommand<Locations>(*(_session->locations()), &before, &after));
+	if (_session->locations()->clear ()) {
+		XMLNode &after = _session->locations()->get_state();
+		_session->add_command(new MementoCommand<Locations>(*(_session->locations()), &before, &after));
 
-	commit_reversible_command ();
+		commit_reversible_command ();
+	} else {
+		abort_reversible_command ();
+	}
 }
 
 void
@@ -2636,7 +2667,8 @@ Editor::transition_to_rolling (bool fwd)
 		return;
 	}
 
-	_session->request_transport_speed (fwd ? 1.0f : -1.0f);
+	_session->request_transport_speed (fwd ? 1.0f : -1.0f, false);
+	_session->request_roll ();
 }
 
 void
@@ -3172,7 +3204,7 @@ Editor::separate_regions_between (const TimeSelection& ts)
 
 	for (TrackSelection::iterator i = tmptracks.begin(); i != tmptracks.end(); ++i) {
 
-		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> ((*i));
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
 
 		if (!rtv) {
 			continue;
@@ -3190,6 +3222,11 @@ Editor::separate_regions_between (const TimeSelection& ts)
 
 			for (list<AudioRange>::const_iterator t = ts.begin(); t != ts.end(); ++t) {
 
+				if (!in_command) {
+					begin_reversible_command (_("separate"));
+					in_command = true;
+				}
+
 				sigc::connection c = rtv->view()->RegionViewAdded.connect (
 					sigc::mem_fun(*this, &Editor::collect_new_region_view));
 
@@ -3205,19 +3242,13 @@ Editor::separate_regions_between (const TimeSelection& ts)
 					                                             sigc::ptr_fun (add_if_covered),
 					                                             &(*t), &new_selection));
 
-					if (!in_command) {
-						begin_reversible_command (_("separate"));
-						in_command = true;
-					}
-
 					/* pick up changes to existing regions */
 
 					vector<Command*> cmds;
 					playlist->rdiff (cmds);
 					_session->add_commands (cmds);
 
-					/* pick up changes to the playlist itself (adds/removes)
-					 */
+					/* pick up changes to the playlist itself (adds/removes) */
 
 					_session->add_command(new StatefulDiffCommand (playlist));
 				}
@@ -3226,6 +3257,9 @@ Editor::separate_regions_between (const TimeSelection& ts)
 	}
 
 	if (in_command) {
+		if (_session->abort_empty_reversible_command ()) {
+			return;
+		}
 
 		RangeSelectionAfterSplit rsas = Config->get_range_selection_after_split();
 
@@ -3838,10 +3872,10 @@ Editor::trim_region_to_location (const Location& loc, const char* str)
 
 		/* require region to span proposed trim */
 		switch (rv->region()->coverage (loc.start(), loc.end())) {
-		case Evoral::OverlapInternal:
-			break;
-		default:
+		case Evoral::OverlapNone:
 			continue;
+		default:
+			break;
 		}
 
 		RouteTimeAxisView* tav = dynamic_cast<RouteTimeAxisView*> (&rv->get_time_axis_view());
@@ -3852,8 +3886,8 @@ Editor::trim_region_to_location (const Location& loc, const char* str)
 		samplepos_t start;
 		samplepos_t end;
 
-		start = loc.start();
-		end = loc.end();
+		start = max (loc.start(), rv->region()->position());
+		end = min (loc.end(), rv->region()->position() + rv->region()->length());
 
 		rv->region()->clear_changes ();
 		rv->region()->trim_to (start, (end - start));
@@ -3979,7 +4013,7 @@ Editor::freeze_route ()
 	}
 
 	/* stop transport before we start. this is important */
-	_session->request_transport_speed (0.0);
+	_session->request_stop();
 
 	/* wait for just a little while, because the above call is asynchronous */
 	int timeout = 10;
@@ -4109,7 +4143,7 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 			dialog.get_vbox()->pack_start (label);
 			label.show();
 		}
-		
+
 		dialog.show ();
 
 		switch (dialog.run ()) {
@@ -4158,6 +4192,11 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 			continue;
 		}
 
+		if (!in_command) {
+			begin_reversible_command (_("bounce range"));
+			in_command = true;
+		}
+
 		if (replace) {
 			/*remove the edxisting regions under the edit range*/
 			list<AudioRange> ranges;
@@ -4172,10 +4211,6 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 			playlist->add_region (copy, start);
 		}
 
-		if (!in_command) {
-			begin_reversible_command (_("bounce range"));
-			in_command = true;
-		}
 		vector<Command*> cmds;
 		playlist->rdiff (cmds);
 		_session->add_commands (cmds);
@@ -4183,7 +4218,7 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 		_session->add_command (new StatefulDiffCommand (playlist));
 	}
 
-	if (in_command) {
+	if (in_command && !_session->abort_empty_reversible_command ()) {
 		commit_reversible_command ();
 	}
 }
@@ -4780,7 +4815,7 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 			break;
 
 		case Cut:
-			_xx = RegionFactory::create (r);
+			_xx = RegionFactory::create (r, false);
 			npl->add_region (_xx, r->position() - first_position);
 			pl->remove_region (r);
 			if (Config->get_edit_mode() == Ripple)
@@ -4789,7 +4824,7 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 
 		case Copy:
 			/* copy region before adding, so we're not putting same object into two different playlists */
-			npl->add_region (RegionFactory::create (r), r->position() - first_position);
+			npl->add_region (RegionFactory::create (r, false), r->position() - first_position);
 			break;
 
 		case Clear:
@@ -5483,6 +5518,12 @@ Editor::adjust_region_gain (bool up)
 	}
 
 	bool in_command = false;
+	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ++r) {
+		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*r);
+		if (arv) {
+			arv->region()->playlist()->freeze ();
+		}
+	}
 
 	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ++r) {
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*r);
@@ -5511,6 +5552,13 @@ Editor::adjust_region_gain (bool up)
 
 	if (in_command) {
 		commit_reversible_command ();
+	}
+
+	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ++r) {
+		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*r);
+		if (arv) {
+			arv->region()->playlist()->thaw ();
+		}
 	}
 }
 
@@ -6585,7 +6633,7 @@ void
 Editor::set_playhead_cursor ()
 {
 	if (entered_marker) {
-		_session->request_locate (entered_marker->position(), RollIfAppropriate);
+		_session->request_locate (entered_marker->position());
 	} else {
 		MusicSample where (0, 0);
 		bool ignored;
@@ -6597,7 +6645,7 @@ Editor::set_playhead_cursor ()
 		snap_to (where);
 
 		if (_session) {
-			_session->request_locate (where.sample, RollIfAppropriate);
+			_session->request_locate (where.sample);
 		}
 	}
 
@@ -7595,7 +7643,7 @@ Editor::playhead_backward_to_grid ()
 			}
 		}
 
-		_session->request_locate (pos.sample, RollIfAppropriate);
+		_session->request_locate (pos.sample);
 	}
 
 	/* keep PH visible in window */
@@ -7630,10 +7678,10 @@ Editor::toggle_tracks_active ()
 
 		if (rtv) {
 			if (first) {
-				target = !rtv->_route->active();
+				target = !rtv->route()->active();
 				first = false;
 			}
-			rtv->_route->set_active (target, this);
+			rtv->route()->set_active (target, this);
 		}
 	}
 }
@@ -7697,7 +7745,7 @@ Editor::_remove_tracks ()
 		} else {
 			++nbusses;
 		}
-		routes.push_back (rtv->_route);
+		routes.push_back (rtv->route());
 
 		if (rtv->route()->is_master() || rtv->route()->is_monitor()) {
 			special_bus = true;

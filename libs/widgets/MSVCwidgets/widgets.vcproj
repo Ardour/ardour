@@ -319,6 +319,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\frame.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\pane.cc"
 				>
 			</File>
@@ -426,6 +430,10 @@
 			</File>
 			<File
 				RelativePath="..\widgets\focus_entry.h"
+				>
+			</File>
+			<File
+				RelativePath="..\widgets\frame.h"
 				>
 			</File>
 			<File

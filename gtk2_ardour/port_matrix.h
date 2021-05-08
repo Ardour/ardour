@@ -153,6 +153,7 @@ public:
 	virtual bool can_rename_channels (boost::shared_ptr<ARDOUR::Bundle>) const {
 		return false;
 	}
+	virtual bool can_add_port (boost::shared_ptr<ARDOUR::Bundle>, ARDOUR::DataType t) const;
 	virtual void rename_channel (ARDOUR::BundleChannel) {}
 	virtual std::string disassociation_verb () const = 0;
 	virtual std::string channel_noun () const;
@@ -183,7 +184,7 @@ private:
 	void routes_changed ();
 	void reconnect_to_routes ();
 	void select_arrangement ();
-	bool can_add_channel_proxy (boost::weak_ptr<ARDOUR::Bundle>, ARDOUR::DataType) const;
+	bool can_add_port_proxy (boost::weak_ptr<ARDOUR::Bundle>, ARDOUR::DataType) const;
 	void add_channel_proxy (boost::weak_ptr<ARDOUR::Bundle>, ARDOUR::DataType);
 	void remove_channel_proxy (boost::weak_ptr<ARDOUR::Bundle>, uint32_t);
 	void rename_channel_proxy (boost::weak_ptr<ARDOUR::Bundle>, uint32_t);
