@@ -165,8 +165,6 @@ Session::fail_roll (pframes_t nframes)
 int
 Session::no_roll (pframes_t nframes)
 {
-	assert (_transport_fsm->transport_speed() == 0);
-
 	PT_TIMING_CHECK (4);
 
 	samplepos_t end_sample = _transport_sample + floor (nframes * _transport_fsm->transport_speed());
