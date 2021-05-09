@@ -332,7 +332,7 @@ Editor::import_smf_markers (Evoral::SMF & smf, samplepos_t pos)
 
 	for (Evoral::SMF::Markers::const_iterator m = markers.begin(); m != markers.end(); ++m) {
 		// Temporal::Beats beat_pos (m->time_pulses / (double) smf.ppqn() / 4.0);
-		double beat = m->time_pulses / (double) smf.ppqn() / 4.0;
+		double beat = m->time_pulses / (double) smf.ppqn();
 		samplepos_t samplepos = pos + _session->tempo_map().sample_at_beat (beat);
 		Location* loc = new Location (*_session, samplepos, samplepos_t (0), m->text, Location::IsMark, 0);
 		_session->locations()->add (loc);
