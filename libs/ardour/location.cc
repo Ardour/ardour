@@ -1057,6 +1057,18 @@ Locations::add (Location *loc, bool make_current)
 
 	added (loc); /* EMIT SIGNAL */
 
+	if (loc->name().empty()) {
+		string new_name;
+
+		if (loc->is_mark()) {
+			next_available_name (new_name, _("mark"));
+		} else {
+			next_available_name (new_name, _("range"));
+		}
+
+		loc->set_name (new_name);
+	}
+
 	if (make_current) {
 		current_changed (current_location); /* EMIT SIGNAL */
 	}
