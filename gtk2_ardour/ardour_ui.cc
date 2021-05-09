@@ -2001,7 +2001,7 @@ ARDOUR_UI::transport_ffwd_rewind (bool fwd)
 	// (keypress auto-repeat is 100ms)
 	const float maxspeed = Config->get_shuttle_max_speed();
 	float semitone_ratio = exp2f (1.0f/12.0f);
-	const float octave_down = pow (1.0/semitone_ratio, 12.0);
+	const float octave_down = powf (1.f / semitone_ratio, 12.f);
 	float transport_speed = _session->actual_speed();
 	float speed;
 
@@ -2050,14 +2050,14 @@ ARDOUR_UI::transport_ffwd_rewind (bool fwd)
 			if (transport_speed < 0.f) {
 				if (fabs (transport_speed) < octave_down) {
 					/* we need to move the speed back towards zero */
-					semitone_ratio = pow (1.0/semitone_ratio, 4.0);
+					semitone_ratio = powf (1.f / semitone_ratio, 4.f);
 				} else {
-					semitone_ratio = 1.0/semitone_ratio;
+					semitone_ratio = 1.f / semitone_ratio;
 				}
 			} else {
 				if (fabs (transport_speed) < octave_down) {
 					/* moving very slowly, use 4 semitone steps */
-					semitone_ratio = pow (semitone_ratio, 4.0);
+					semitone_ratio = powf (semitone_ratio, 4.f);
 				}
 			}
 		} else {
@@ -2065,14 +2065,14 @@ ARDOUR_UI::transport_ffwd_rewind (bool fwd)
 				/* we need to move the speed back towards zero */
 
 				if (transport_speed < octave_down) {
-					semitone_ratio = pow (1.0/semitone_ratio, 4.0);
+					semitone_ratio = powf (1.f / semitone_ratio, 4.f);
 				} else {
-					semitone_ratio = 1.0/semitone_ratio;
+					semitone_ratio = 1.f / semitone_ratio;
 				}
 			} else {
 				if (fabs (transport_speed) < octave_down) {
 					/* moving very slowly, use 4 semitone steps */
-					semitone_ratio = pow (semitone_ratio, 4.0);
+					semitone_ratio = powf (semitone_ratio, 4.f);
 				}
 			}
 		}
