@@ -257,7 +257,7 @@ public:
 		 */
 		Locations::LocationList copy;
 		{
-			Glib::Threads::Mutex::Lock lm (lock);
+			Glib::Threads::RWLock::ReaderLock lm (_lock);
 			copy = locations;
 		}
 		(obj.*method)(copy);
@@ -266,7 +266,7 @@ public:
 private:
 	LocationList locations;
 	Location*    current_location;
-	mutable Glib::Threads::Mutex lock;
+	mutable Glib::Threads::RWLock _lock;
 
 	int set_current_unlocked (Location *);
 	void location_changed (Location*);
