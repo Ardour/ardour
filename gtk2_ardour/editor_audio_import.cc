@@ -384,6 +384,7 @@ Editor::do_import (vector<string>          paths,
 			if (!tempo_map_done && smf_tempo_disposition == SMFTempoUse) {
 				if (smf.num_tempos() > 0) {
 					import_smf_tempo_map (smf, pos);
+					tempo_map_done = true;
 				}
 			}
 
