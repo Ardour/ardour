@@ -599,22 +599,26 @@ SMF::load_markers ()
 
 		if (smf_event_is_metadata(event)) {
 			if (event->midi_buffer[1] == 0x06) {
-				string marker = smf_event_decode (event);
-				if (!marker.empty()) {
-					if (marker.find ("Marker: ") == 0) {
-						marker = marker.substr (8);
-					}
-					_markers.push_back (MarkerAt (marker, event->time_pulses));
+				char const * txt = smf_event_decode (event);
+				string marker;
+				if (txt != 0) {
+					marker = txt;
 				}
+				if (marker.find ("Marker: ") == 0) {
+					marker = marker.substr (8);
+				}
+				_markers.push_back (MarkerAt (marker, event->time_pulses));
 			}
 			if (event->midi_buffer[1] == 0x07) {
-				string marker = smf_event_decode (event);
-				if (!marker.empty()) {
-					if (marker.find ("Cue Point: ") == 0) {
-						marker = marker.substr (8);
-					}
-					_markers.push_back (MarkerAt (marker, event->time_pulses));
+				char const * txt = smf_event_decode (event);
+				string marker;
+				if (txt != 0) {
+					marker = txt;
 				}
+				if (marker.find ("Cue Point: ") == 0) {
+					marker = marker.substr (8);
+				}
+				_markers.push_back (MarkerAt (marker, event->time_pulses));
 			}
 		}
 	}
