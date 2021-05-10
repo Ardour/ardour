@@ -342,7 +342,7 @@ MidiStreamView::draw_note_lines()
 		 */
 
 		if (i <= highest_note()) {
-			_note_lines->add_line (y, 1.0, UIConfiguration::instance().color ("piano roll black outline"));
+			_note_lines->add_coord (y, 1.0, UIConfiguration::instance().color ("piano roll black outline"));
 		}
 
 		/* now add a thicker line/bar which covers the entire vertical
@@ -366,7 +366,7 @@ MidiStreamView::draw_note_lines()
 		double mid = y + (h/2.0);
 
 		if (mid >= 0 && h > 1.0) {
-			_note_lines->add_line (mid, h, color);
+			_note_lines->add_coord (mid, h, color);
 		}
 
 		prev_y = y;

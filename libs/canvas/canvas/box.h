@@ -21,7 +21,7 @@
 #ifndef __CANVAS_BOX_H__
 #define __CANVAS_BOX_H__
 
-#include "canvas/item.h"
+#include "canvas/rectangle.h"
 
 namespace ArdourCanvas
 {
@@ -39,7 +39,7 @@ class Rectangle;
  *
  *   Other?
  */
-class LIBCANVAS_API Box : public Item
+class LIBCANVAS_API Box : public Rectangle
 {
 public:
 	enum Orientation {
@@ -77,11 +77,10 @@ public:
 
 	void child_changed (bool bbox_changed);
   private:
-	Rectangle *self;
 	bool collapse_on_hide;
 	bool homogenous;
+	bool ignore_child_changes;
 
-	void reset_self ();
 	void reposition_children ();
 };
 
