@@ -159,7 +159,7 @@ private:
 
 private:
 	friend class WaveViewThreadClient;
-	friend class WaveViewDrawingThread;
+	friend class WaveViewThreads;
 
 	boost::shared_ptr<ARDOUR::AudioRegion> _region;
 

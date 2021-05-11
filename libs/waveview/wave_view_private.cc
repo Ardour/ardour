@@ -254,79 +254,13 @@ WaveViewCache::set_image_cache_threshold (uint64_t sz)
 
 /*-------------------------------------------------*/
 
-WaveViewDrawRequest::WaveViewDrawRequest ()
-{
-	g_atomic_int_set (&_stop, 0);
-}
-
-WaveViewDrawRequest::~WaveViewDrawRequest ()
-{
-
-}
-
-void
-WaveViewDrawRequestQueue::enqueue (boost::shared_ptr<WaveViewDrawRequest>& request)
-{
-	Glib::Threads::Mutex::Lock lm (_queue_mutex);
-
-	_queue.push_back (request);
-	_cond.broadcast ();
-}
-
-void
-WaveViewDrawRequestQueue::wake_up ()
-{
-	boost::shared_ptr<WaveViewDrawRequest> null_ptr;
-	// hack!?...wake up the drawing thread
-	enqueue (null_ptr);
-}
-
-boost::shared_ptr<WaveViewDrawRequest>
-WaveViewDrawRequestQueue::dequeue (bool block)
-{
-	if (block) {
-		_queue_mutex.lock();
-	} else {
-		if (!_queue_mutex.trylock()) {
-			return boost::shared_ptr<WaveViewDrawRequest>();
-		}
-	}
-
-	// _queue_mutex is always held at this point
-
-	if (_queue.empty()) {
-		if (block) {
-			_cond.wait (_queue_mutex);
-		} else {
-			_queue_mutex.unlock();
-			return boost::shared_ptr<WaveViewDrawRequest>();
-		}
-	}
-
-	boost::shared_ptr<WaveViewDrawRequest> req;
-
-	if (!_queue.empty()) {
-		req = _queue.front ();
-		_queue.pop_front ();
-	} else {
-		// Queue empty, returning empty DrawRequest
-	}
-
-	_queue_mutex.unlock();
-
-	return req;
-}
-
-/*-------------------------------------------------*/
-
 WaveViewThreads::WaveViewThreads ()
 {
-
+	g_atomic_int_set (&_quit, 0);
 }
 
 WaveViewThreads::~WaveViewThreads ()
 {
-
 }
 
 uint32_t WaveViewThreads::init_count = 0;
@@ -358,21 +292,44 @@ void
 WaveViewThreads::enqueue_draw_request (boost::shared_ptr<WaveViewDrawRequest>& request)
 {
 	assert (instance);
-	instance->_request_queue.enqueue (request);
+	instance->_enqueue_draw_request (request);
+}
+
+void
+WaveViewThreads::_enqueue_draw_request (boost::shared_ptr<WaveViewDrawRequest>& request)
+{
+	Glib::Threads::Mutex::Lock lm (_queue_mutex);
+	_queue.push_back (request);
+	/* wake one (random) thread */
+	_cond.signal ();
 }
 
 boost::shared_ptr<WaveViewDrawRequest>
 WaveViewThreads::dequeue_draw_request ()
 {
 	assert (instance);
-	return instance->_request_queue.dequeue (true);
+	return instance->_dequeue_draw_request ();
 }
 
-void
-WaveViewThreads::wake_up ()
+boost::shared_ptr<WaveViewDrawRequest>
+WaveViewThreads::_dequeue_draw_request ()
 {
-	assert (instance);
-	return instance->_request_queue.wake_up ();
+	/* _queue_mutex must be held at this point */
+
+	assert (!_queue_mutex.trylock());
+
+	if (_queue.empty()) {
+		_cond.wait (_queue_mutex);
+	}
+
+	boost::shared_ptr<WaveViewDrawRequest> req;
+
+	if (!_queue.empty()) {
+		req = _queue.front ();
+		_queue.pop_front ();
+	}
+
+	return req;
 }
 
 void
@@ -400,7 +357,29 @@ WaveViewThreads::stop_threads ()
 {
 	assert (_threads.size());
 
+	{
+		Glib::Threads::Mutex::Lock lm (_queue_mutex);
+		g_atomic_int_set (&_quit, 1);
+		_cond.broadcast ();
+	}
+
+	/* Deleting the WaveViewThread objects will force them to join() with
+	 * their underlying (p)threads, and thus cleanup. The threads will
+	 * all be woken by the condition broadcast above.
+	 */
+
 	_threads.clear ();
+}
+
+/*-------------------------------------------------*/
+WaveViewDrawRequest::WaveViewDrawRequest ()
+{
+	g_atomic_int_set (&_stop, 0);
+}
+
+WaveViewDrawRequest::~WaveViewDrawRequest ()
+{
+
 }
 
 /*-------------------------------------------------*/
@@ -408,13 +387,12 @@ WaveViewThreads::stop_threads ()
 WaveViewDrawingThread::WaveViewDrawingThread ()
 		: _thread(0)
 {
-	g_atomic_int_set (&_quit, 0);
 	start ();
 }
 
 WaveViewDrawingThread::~WaveViewDrawingThread ()
 {
-	quit ();
+	_thread->join ();
 }
 
 void
@@ -422,32 +400,34 @@ WaveViewDrawingThread::start ()
 {
 	assert (!_thread);
 
-	_thread = Glib::Threads::Thread::create (sigc::mem_fun (*this, &WaveViewDrawingThread::run));
+	_thread = Glib::Threads::Thread::create (sigc::ptr_fun (&WaveViewThreads::thread_proc));
 }
 
 void
-WaveViewDrawingThread::quit ()
+WaveViewThreads::thread_proc ()
 {
-	assert (_thread);
-
-	g_atomic_int_set (&_quit, 1);
-	WaveViewThreads::wake_up ();
-	_thread->join();
-	_thread = 0;
+	assert (instance);
+	instance->_thread_proc ();
 }
 
 void
-WaveViewDrawingThread::run ()
+WaveViewThreads::_thread_proc ()
 {
 	pthread_set_name ("WaveViewDrawing");
+
 	while (true) {
 
+		_queue_mutex.lock ();
+
 		if (g_atomic_int_get (&_quit)) {
+			_queue_mutex.unlock ();
 			break;
 		}
 
 		// block until a request is available.
 		boost::shared_ptr<WaveViewDrawRequest> req = WaveViewThreads::dequeue_draw_request ();
+
+		_queue_mutex.unlock ();
 
 		if (req && !req->stopped()) {
 			try {
@@ -456,10 +436,8 @@ WaveViewDrawingThread::run ()
 				/* just in case it was set before the exception, whatever it was */
 				req->image->cairo_image.clear ();
 			}
-		} else {
-			// null or stopped Request, processing skipped
 		}
 	}
 }
 
-}
+} /* namespace */

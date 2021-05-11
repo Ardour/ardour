@@ -287,26 +287,6 @@ private:
 	bool full () { return image_cache_size > _image_cache_threshold; }
 };
 
-class WaveViewDrawRequestQueue
-{
-public:
-
-	void enqueue (boost::shared_ptr<WaveViewDrawRequest>&);
-
-	// @return valid request or null if non-blocking or no request is available
-	boost::shared_ptr<WaveViewDrawRequest> dequeue (bool block);
-
-	void wake_up ();
-
-private:
-
-	mutable Glib::Threads::Mutex _queue_mutex;
-	Glib::Threads::Cond _cond;
-
-	typedef std::deque<boost::shared_ptr<WaveViewDrawRequest> > DrawRequestQueueType;
-	DrawRequestQueueType _queue;
-};
-
 class WaveViewDrawingThread
 {
 public:
@@ -315,12 +295,10 @@ public:
 
 private:
 	void start ();
-	void quit ();
 	void run ();
 
 private:
 	Glib::Threads::Thread* _thread;
-	GATOMIC_QUAL gint _quit;
 };
 
 class WaveViewThreads {
@@ -339,10 +317,13 @@ public:
 private:
 	friend class WaveViewDrawingThread;
 
-	static void wake_up ();
-
 	// will block until a request is available
 	static boost::shared_ptr<WaveViewDrawRequest> dequeue_draw_request ();
+	static void thread_proc ();
+
+	boost::shared_ptr<WaveViewDrawRequest> _dequeue_draw_request ();
+	void _enqueue_draw_request (boost::shared_ptr<WaveViewDrawRequest>&);
+	void _thread_proc ();
 
 	void start_threads ();
 	void stop_threads ();
@@ -354,8 +335,15 @@ private:
 	// TODO use std::unique_ptr when possible
 	typedef std::vector<boost::shared_ptr<WaveViewDrawingThread> > WaveViewThreadList;
 
+	GATOMIC_QUAL gint _quit;
 	WaveViewThreadList _threads;
-	WaveViewDrawRequestQueue _request_queue;
+
+
+	mutable Glib::Threads::Mutex _queue_mutex;
+	Glib::Threads::Cond _cond;
+
+	typedef std::deque<boost::shared_ptr<WaveViewDrawRequest> > DrawRequestQueueType;
+	DrawRequestQueueType _queue;
 };
 
 
