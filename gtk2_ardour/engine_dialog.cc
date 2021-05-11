@@ -2966,6 +2966,8 @@ EngineControl::on_switch_page (GtkNotebookPage*, guint page_num)
 	if (page_num == latency_tab) {
 		/* latency tab */
 
+		was_running_before_lm = ARDOUR::AudioEngine::instance()->running();
+
 		if (ARDOUR::AudioEngine::instance()->running()) {
 			stop_engine (true);
 		}
@@ -3199,6 +3201,14 @@ EngineControl::latency_back_button_clicked ()
 
 	ARDOUR::AudioEngine::instance()->stop_latency_detection ();
 	notebook.set_current_page(0);
+
+	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
+	if (backend && backend->can_change_systemic_latency_when_running ()) {
+		/* IFF engine was not running before latency detection, stop it */
+		if (!was_running_before_lm && ARDOUR::AudioEngine::instance()->running()) {
+			stop_engine ();
+		}
+	}
 }
 
 void
