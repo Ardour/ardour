@@ -460,7 +460,7 @@ WaveViewThreads::thread_proc ()
  *
  *      acquire _queue_mutex              acquire _queue_mutex => sleep
  *      _quit = true
- *      acquire _queue_mutex
+ *      release _queue_mutex
  *      cond.broadcast()
  *      release _queue_mutex
  *                                        wake
