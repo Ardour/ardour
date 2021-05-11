@@ -335,7 +335,7 @@ private:
 	// TODO use std::unique_ptr when possible
 	typedef std::vector<boost::shared_ptr<WaveViewDrawingThread> > WaveViewThreadList;
 
-	GATOMIC_QUAL gint _quit;
+	bool _quit;
 	WaveViewThreadList _threads;
 
 

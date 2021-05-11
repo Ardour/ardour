@@ -255,8 +255,8 @@ WaveViewCache::set_image_cache_threshold (uint64_t sz)
 /*-------------------------------------------------*/
 
 WaveViewThreads::WaveViewThreads ()
+	: _quit (false)
 {
-	g_atomic_int_set (&_quit, 0);
 }
 
 WaveViewThreads::~WaveViewThreads ()
@@ -359,7 +359,7 @@ WaveViewThreads::stop_threads ()
 
 	{
 		Glib::Threads::Mutex::Lock lm (_queue_mutex);
-		g_atomic_int_set (&_quit, 1);
+		_quit = true;
 		_cond.broadcast ();
 	}
 
@@ -419,7 +419,8 @@ WaveViewThreads::_thread_proc ()
 
 		_queue_mutex.lock ();
 
-		if (g_atomic_int_get (&_quit)) {
+		if (_quit) {
+			/* time to die */
 			_queue_mutex.unlock ();
 			break;
 		}
