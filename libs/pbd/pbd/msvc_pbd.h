@@ -154,11 +154,20 @@ typedef int (FAR PBDEXTN_APICALLTYPE *CYGINIT_API)(unsigned int);
 
 #ifndef _SSIZE_T_
 #define _SSIZE_T_
-typedef long _ssize_t;
+
+#ifdef   SSIZE_T
+typedef  SSIZE_T  _ssize_t;
+#elif _MSC_VER < 1800
+typedef  long     _ssize_t;
+#else
+#include <basetsd.h>
+typedef  LONG_PTR _ssize_t; // AFAICT - LONG_PTR is equivalent to 'long' in Win32 and '__int64' in Win64 !!
+#endif
 
 #ifndef _NO_OLDNAMES
 typedef _ssize_t ssize_t;
 #endif
+
 #endif /* ! _SSIZE_T_ */
 
 typedef unsigned int nfds_t;

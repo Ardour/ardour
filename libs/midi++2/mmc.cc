@@ -32,7 +32,10 @@
 #include "midi++/parser.h"
 
 #ifndef __INT_MAX__   // 'ssize_t' won't be defined yet
+                      // (except in later versions of MSVC)
+#if !defined (_MSC_VER) || (_MSC_VER < 1800)
 typedef long ssize_t;
+#endif
 #endif
 
 using namespace std;
