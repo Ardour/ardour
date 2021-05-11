@@ -69,6 +69,7 @@
 #include "ardour/midi_port.h"
 #include "ardour/midi_region.h"
 #include "ardour/midi_source.h"
+#include "ardour/monitor_control.h"
 #include "ardour/panner_shell.h"
 #include "ardour/phase_control.h"
 #include "ardour/playlist.h"
@@ -1123,6 +1124,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("reset_plugin_insert", &Route::reset_plugin_insert)
 		.addFunction ("customize_plugin_insert", &Route::customize_plugin_insert)
 		.addFunction ("add_sidechain", &Route::add_sidechain)
+		.addFunction ("add_aux_send", &Route::add_aux_send)
 		.addFunction ("remove_sidechain", &Route::remove_sidechain)
 		.addFunction ("main_outs", &Route::main_outs)
 		.addFunction ("muted", &Route::muted)
@@ -1133,6 +1135,8 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("set_meter_point", &Route::set_meter_point)
 		.addFunction ("signal_latency", &Route::signal_latency)
 		.addFunction ("playback_latency", &Route::playback_latency)
+		.addFunction ("monitoring_state", &Route::monitoring_state)
+		.addFunction ("monitoring_control", &Route::monitoring_control)
 		.endClass ()
 
 		.deriveWSPtrClass <Playlist, SessionObject> ("Playlist")
@@ -1519,6 +1523,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("get_delay_out", &Send::get_delay_out)
 		.addFunction ("gain_control", &Send::gain_control)
 		.addFunction ("is_foldback", &Send::is_foldback)
+		.addFunction ("set_remove_on_disconnect", &Send::set_remove_on_disconnect)
 		.endClass ()
 
 		.deriveWSPtrClass <InternalSend, Send> ("InternalSend")
@@ -1597,6 +1602,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("natural_input_streams", &PluginInsert::natural_input_streams)
 		.addFunction ("reset_parameters_to_default", &PluginInsert::reset_parameters_to_default)
 		.addFunction ("has_sidechain", &PluginInsert::has_sidechain)
+		.addFunction ("sidechain_input", &PluginInsert::sidechain_input)
 		.addFunction ("is_instrument", &PluginInsert::is_instrument)
 		.addFunction ("type", &PluginInsert::type)
 		.addFunction ("signal_latency", &PluginInsert::signal_latency)
@@ -1647,6 +1653,10 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.deriveWSPtrClass <GainControl, SlavableAutomationControl> ("GainControl")
+		.endClass ()
+
+		.deriveWSPtrClass <MonitorControl, SlavableAutomationControl> ("MonitorControl")
+		.addFunction ("monitoring_choice", &MonitorControl::monitoring_choice)
 		.endClass ()
 
 		.deriveWSPtrClass <SoloControl, SlavableAutomationControl> ("SoloControl")
@@ -2051,6 +2061,13 @@ LuaBindings::common (lua_State* L)
 		.addConst ("MonitorInput", ARDOUR::MonitorChoice(MonitorInput))
 		.addConst ("MonitorDisk", ARDOUR::MonitorChoice(MonitorDisk))
 		.addConst ("MonitorCue", ARDOUR::MonitorChoice(MonitorCue))
+		.endNamespace ()
+
+		.beginNamespace ("MonitorState")
+		.addConst ("MonitoringSilence", ARDOUR::MonitorState(MonitoringSilence))
+		.addConst ("MonitoringInput", ARDOUR::MonitorState(MonitoringInput))
+		.addConst ("MonitoringDisk", ARDOUR::MonitorState(MonitoringDisk))
+		.addConst ("MonitoringCue", ARDOUR::MonitorState(MonitoringCue))
 		.endNamespace ()
 
 		.beginNamespace ("NoteMode")
@@ -2597,6 +2614,7 @@ LuaBindings::common (lua_State* L)
 		.beginNamespace ("LuaAPI")
 		.addFunction ("nil_proc", ARDOUR::LuaAPI::nil_processor)
 		.addFunction ("new_luaproc", ARDOUR::LuaAPI::new_luaproc)
+		.addFunction ("new_send", ARDOUR::LuaAPI::new_send)
 		.addFunction ("list_plugins", ARDOUR::LuaAPI::list_plugins)
 		.addFunction ("new_plugin_info", ARDOUR::LuaAPI::new_plugin_info)
 		.addFunction ("new_plugin", ARDOUR::LuaAPI::new_plugin)

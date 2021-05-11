@@ -54,6 +54,14 @@ namespace ARDOUR { namespace LuaAPI {
 	 */
 	int datatype_ctor_midi (lua_State *L);
 
+	/** add a new [external] Send to the given Route
+	 *
+	 * @param s Session Handle
+	 * @param r Route to add Send to
+	 * @param p add send before given processor (or \ref nil_processor to add at the end)
+	 */
+	boost::shared_ptr<Processor> new_send (Session* s, boost::shared_ptr<ARDOUR::Route> r, boost::shared_ptr<ARDOUR::Processor> p);
+
 	/** Create a null processor shared pointer
 	 *
 	 * This is useful for Track:bounce() to indicate no processing.

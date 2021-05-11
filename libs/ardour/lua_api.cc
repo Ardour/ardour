@@ -111,6 +111,33 @@ ARDOUR::LuaAPI::new_luaproc (Session *s, const string& name)
 	return boost::shared_ptr<Processor> (new PluginInsert (*s, p));
 }
 
+boost::shared_ptr<Processor>
+ARDOUR::LuaAPI::new_send (Session* s, boost::shared_ptr<Route> r, boost::shared_ptr<Processor> before)
+{
+	if (!s) {
+		return boost::shared_ptr<Processor> ();
+	}
+
+	boost::shared_ptr<Send> send (new Send (*s, r->pannable (), r->mute_master ()));
+
+	/* make an educated guess at the initial number of outputs for the send */
+	ChanCount outs = before ? before->input_streams () : r->n_outputs();
+
+	try {
+		Glib::Threads::Mutex::Lock lm (AudioEngine::instance ()->process_lock ());
+		send->output()->ensure_io (outs, false, r.get());
+	} catch (AudioEngine::PortRegistrationFailure& err) {
+		error << string_compose (_("Cannot set up new send: %1"), err.what ()) << endmsg;
+		return boost::shared_ptr<Processor> ();
+	}
+
+	if (0 == r->add_processor (send, before)) {
+		return send;
+	}
+
+	return boost::shared_ptr<Processor> ();
+}
+
 PluginInfoList
 ARDOUR::LuaAPI::list_plugins ()
 {
