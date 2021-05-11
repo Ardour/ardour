@@ -324,6 +324,10 @@ WaveViewThreads::_dequeue_draw_request ()
 
 	boost::shared_ptr<WaveViewDrawRequest> req;
 
+	/* queue could be empty at this point because an already running thread
+	 * pulled the request before we were fully awake and reacquired the mutex.
+	 */
+
 	if (!_queue.empty()) {
 		req = _queue.front ();
 		_queue.pop_front ();
@@ -410,6 +414,65 @@ WaveViewThreads::thread_proc ()
 	instance->_thread_proc ();
 }
 
+/* Notes on thread/sync design:
+ *
+ *
+ * the worker threads do not hold the _queue_mutex while doing work. This means
+ * that an attempt to signal them using a condition variable and the
+ * _queue_mutex is not guaranteed to work - they may not be either (a) holding
+ * the lock or (b) waiting on condition variable (having gone to sleep on the
+ * mutex).
+ *
+ * Instead, when the signalling thread takes the mutex, they may be busy
+ * working, and will therefore miss the signal.
+ *
+ * This is fine for handling requests - worker threads will just loop around,
+ * check the request queue again, and behave appropriately (i.e. do more more
+ * work, or go to sleep waiting on condition variable.
+ *
+ * But it's not fine when we need to tell the threads to quit. We can't do this
+ * with requests, because there's no way to ensure that each thread will pick
+ * up a request. So we have a bool member, _quit, which we set to indicate
+ * that threads should exit. This integer is protected by the _queue_mutex. If
+ * it was not (and was instead just an atomic integer), we would get a race
+ * condition where a worker thread checks _quit, finds it is still false, then
+ * takes the mutex in order to check the request queue, gets blocked there
+ * because a signalling thread has acquired the mutex (and broadcasts the
+ * condition), then the worker continues (now holding the mutex), finds no
+ * requests, and goes to sleep, never to be woken again.
+ *
+ *      Signalling Thread                 Worker Thread
+ *      =================                 =============
+ *                                        _quit == true ? => false
+ *      _quit = true
+ *      acquire _queue_mutex
+ *      cond.broadcast()                  acquire _queue_mutex => sleep
+ *      release _queue_mutex              sleep
+ *                                        wake
+ *                                        check request queue => empty
+ *                                        sleep on cond, FOREVER
+ *
+ * This was the design until 166ac63924c2b. Now we acquire the mutex in the
+ * classic thread synchronization manner, and there is no race:
+ *
+ *      Signalling Thread                 Worker Thread
+ *      =================                 =============
+ *
+ *      acquire _queue_mutex              acquire _queue_mutex => sleep
+ *      _quit = true
+ *      acquire _queue_mutex
+ *      cond.broadcast()
+ *      release _queue_mutex
+ *                                        wake
+ *                                        _quit == true ? => true
+ *                                        exit
+ *
+ * If worker threads held the mutex while working, a slightly different design
+ * would be correct, but because there is a single queue protected by the
+ * mutex, that would effectively serialize all worker threads which would be
+ * pointless.
+ */
+
 void
 WaveViewThreads::_thread_proc ()
 {
@@ -425,7 +488,15 @@ WaveViewThreads::_thread_proc ()
 			break;
 		}
 
-		// block until a request is available.
+		/* try to fetch a request from the queue. If none are
+		 * immediately available, we will block until woken by a
+		 * new request, but that request might be handled by an already
+		 * running thread, so the return here may be null (that is not
+		 * an error). We may also be woken by cond.broadcast(), in
+		 * which case there will be no request in the queue, but we are
+		 * supposed to loop around and check _quit.
+		 */
+
 		boost::shared_ptr<WaveViewDrawRequest> req = WaveViewThreads::dequeue_draw_request ();
 
 		_queue_mutex.unlock ();
