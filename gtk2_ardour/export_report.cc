@@ -277,6 +277,17 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 		int png_w = 0;
 		int png_y0 = 0;
 
+		Glib::RefPtr<Gdk::Window> win = get_window ();
+		Glib::RefPtr<Gdk::Screen> screen;
+		if (win) {
+			screen = win->get_screen();
+		} else {
+			screen = Gdk::Screen::get_default();
+		}
+		int win_h = screen ? screen->get_height() : -1;
+		int tbl_h = 4 * (lin[4] * 1.3 + 4); // height of file-info table t
+		win_h -= 60 + lin[4] * 4.5 ; // window title, file-tab, bottom buttons
+
 		if (with_file && UIConfiguration::instance().get_save_export_analysis_image ()) { /*png image */
 			const int top_w = 540 + 2 * (mnw + 4); // 4px spacing
 			const int wav_w = m_l + m_r + 4 + sizeof (p->peaks) / sizeof (ARDOUR::PeakData::PeakDatum) / 4;
@@ -538,6 +549,7 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 
 			wtbl->attach (*hb, 0, 2, wrow, wrow + 1, SHRINK, SHRINK);
 			++wrow;
+			tbl_h += hh + 4;
 		}
 
 		{
@@ -571,6 +583,7 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 			wv->seek_playhead.connect (sigc::bind<0> (sigc::mem_fun (*this, &ExportReport::audition_seek), page));
 			wtbl->attach (*wv, 0, 1, wrow, wrow + 1, SHRINK, SHRINK);
 			++wrow;
+			tbl_h += 2 * waveh2 + 4;
 
 			if (png_surface) {
 				Cairo::RefPtr<Cairo::Context> pcx = Cairo::Context::create (png_surface);
@@ -591,6 +604,7 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 			tm->seek_playhead.connect (sigc::bind<0> (sigc::mem_fun (*this, &ExportReport::audition_seek), page));
 			wtbl->attach (*tm, 0, 1, wrow, wrow + 1, SHRINK, SHRINK);
 			++wrow;
+			tbl_h += ytme->get_height() + 4;
 
 			if (png_surface) {
 				Cairo::RefPtr<Cairo::Context> pcx = Cairo::Context::create (png_surface);
@@ -612,6 +626,7 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 			wtbl->attach (*sp, 0, 1, wrow, wrow + 1, SHRINK, SHRINK);
 			wtbl->attach (*an, 1, 2, wrow, wrow + 1, SHRINK, SHRINK);
 			++wrow;
+			tbl_h += spec->get_height() + 4;
 
 			if (png_surface) {
 				Cairo::RefPtr<Cairo::Context> pcx = Cairo::Context::create (png_surface);
@@ -626,11 +641,15 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 		if (p->have_loudness && p->have_dbtp && p->have_lufs_graph && sample_rate > 0) {
 			/* Loudness */
 			Cairo::RefPtr<Cairo::ImageSurface> las = ArdourGraphs::plot_loudness (get_pango_context (), p, loudnh, m_l, sample_rate);
-			CimgPlayheadArea *lp = manage (new CimgPlayheadArea (las, m_l, las->get_width () - m_l));
-			playhead_widgets.push_back (lp);
-			lp->seek_playhead.connect (sigc::bind<0> (sigc::mem_fun (*this, &ExportReport::audition_seek), page));
-			wtbl->attach (*lp, 0, 1, wrow, wrow + 1, SHRINK, SHRINK);
-			++wrow;
+
+			if (win_h < 0 || win_h > tbl_h + las->get_height()) {
+				CimgPlayheadArea *lp = manage (new CimgPlayheadArea (las, m_l, las->get_width () - m_l));
+				playhead_widgets.push_back (lp);
+				lp->seek_playhead.connect (sigc::bind<0> (sigc::mem_fun (*this, &ExportReport::audition_seek), page));
+				wtbl->attach (*lp, 0, 1, wrow, wrow + 1, SHRINK, SHRINK);
+				++wrow;
+				tbl_h += las->get_height() + 4;
+			}
 
 			if (png_surface) {
 				Cairo::RefPtr<Cairo::Context> pcx = Cairo::Context::create (png_surface);
@@ -722,9 +741,13 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 				}
 				++i;
 			}
-			CimgArea *ci = manage (new CimgArea (conf));
-			wtbl->attach (*ci, 0, 1, wrow, wrow + 1, SHRINK, SHRINK);
-			++wrow;
+
+			if (win_h < 0 || win_h > tbl_h + conf->get_height()) {
+				CimgArea *ci = manage (new CimgArea (conf));
+				wtbl->attach (*ci, 0, 1, wrow, wrow + 1, SHRINK, SHRINK);
+				++wrow;
+				tbl_h += conf->get_height() + 4;
+			}
 
 			if (png_surface) {
 				Cairo::RefPtr<Cairo::Context> pcx = Cairo::Context::create (png_surface);
