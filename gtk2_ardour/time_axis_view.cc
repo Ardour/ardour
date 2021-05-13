@@ -1362,8 +1362,6 @@ TimeAxisView::build_size_menu ()
 		return;
 	}
 
-	delete _size_menu;
-
 	using namespace Menu_Helpers;
 
 	_size_menu = new Menu;
