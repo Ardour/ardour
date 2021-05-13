@@ -1014,9 +1014,9 @@ Playlist::partition_internal (samplepos_t start, samplepos_t end, bool cutting, 
 				 * cut:   we need 2 regions, the front and end.
 				 *
 				 *
-				 * start                 end
+				 *                start                 end
 				 * ---------------*************************------------
-				 * P1  P2              P3  P4
+				 *                P1  P2              P3  P4
 				 * SPLIT:
 				 * ---------------*****++++++++++++++++====------------
 				 * CUT
@@ -1076,13 +1076,13 @@ Playlist::partition_internal (samplepos_t start, samplepos_t end, bool cutting, 
 
 			} else if (overlap == Evoral::OverlapEnd) {
 				/*
-				  start           end
-				  ---------------*************************------------
-				  P1           P2         P4   P3
-				  SPLIT:
-				  ---------------**************+++++++++++------------
-				  CUT:
-				  ---------------**************-----------------------
+				 *              start           end
+				 * ---------------*************************------------
+				 * P1           P2         P4   P3
+				 * SPLIT:
+				 * ---------------**************+++++++++++------------
+				 * CUT:
+				 * ---------------**************-----------------------
 				*/
 
 				if (!cutting) {
