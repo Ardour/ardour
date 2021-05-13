@@ -1358,7 +1358,7 @@ TimeAxisView::get_child_list () const
 void
 TimeAxisView::build_size_menu ()
 {
-	if (_size_menu && _size_menu->gobj ()) {
+	if (_size_menu) {
 		return;
 	}
 
