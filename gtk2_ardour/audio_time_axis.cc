@@ -97,8 +97,6 @@ AudioTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	// Make sure things are sane...
 	assert(!is_track() || is_audio_track());
 
-	subplugin_menu.set_name ("ArdourContextMenu");
-
 	if (is_audio_track()) {
 		controls_ebox.set_name ("AudioTrackControlsBaseUnselected");
 		time_axis_frame.set_name ("AudioTrackControlsBaseUnselected");

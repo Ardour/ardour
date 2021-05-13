@@ -124,6 +124,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, ArdourCan
 	, _ignore_set_layer_display (false)
 	, pan_automation_item(NULL)
 {
+	subplugin_menu.set_name ("ArdourContextMenu");
 	number_label.set_name("tracknumber label");
 	number_label.set_elements((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::Text|ArdourButton::Inactive));
 	number_label.set_alignment(.5, .5);
@@ -641,7 +642,6 @@ RouteTimeAxisView::build_display_menu ()
 	/* now fill it with our stuff */
 
 	MenuList& items = display_menu->items();
-	display_menu->set_name ("ArdourContextMenu");
 
 	items.push_back (MenuElem (_("Color..."), sigc::mem_fun (*this, &RouteUI::choose_color)));
 
