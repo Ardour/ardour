@@ -84,6 +84,7 @@
 #include "ardour/region.h"
 #include "ardour/region_factory.h"
 #include "ardour/return.h"
+#include "ardour/revision.h"
 #include "ardour/route_group.h"
 #include "ardour/send.h"
 #include "ardour/session.h"
@@ -756,6 +757,8 @@ LuaBindings::common (lua_State* L)
 
 	luabridge::getGlobalNamespace (L)
 		.beginNamespace ("ARDOUR")
+
+		.addConst ("revision", ARDOUR::revision)
 
 		.beginClass <InterThreadInfo> ("InterThreadInfo")
 		.addVoidConstructor ()
