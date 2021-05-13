@@ -391,6 +391,23 @@ struct MusicRange {
 	}
 };
 
+class CueMarker {
+  public:
+	CueMarker (std::string& text, samplepos_t position) : _text (text), _position (position) {}
+
+	std::string text() const { return _text; }
+	void set_text (std::string const & str) { _text = str; }
+
+	samplepos_t position() const { return _position; }
+	void set_position (samplepos_t pos) { _position = pos; }
+
+  private:
+	std::string _text;
+	samplepos_t _position;
+};
+
+typedef std::vector<CueMarker> CueMarkers;
+
 /*
   Slowest = 6.6dB/sec falloff at update rate of 40ms
   Slow    = 6.8dB/sec falloff at update rate of 40ms
