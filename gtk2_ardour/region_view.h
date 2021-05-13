@@ -204,6 +204,10 @@ private:
 	void update_xrun_markers ();
 	std::list<std::pair<samplepos_t, ArdourCanvas::Arrow*> > _xrun_markers;
 	bool _xrun_markers_visible;
+
+	void update_cue_markers ();
+	std::list<std::pair<ARDOUR::CueMarker, ArdourCanvas::Arrow*> > _cue_markers;
+	bool _cue_markers_visible;
 };
 
 #endif /* __gtk_ardour_region_view_h__ */

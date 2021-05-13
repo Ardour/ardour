@@ -92,6 +92,7 @@ RegionView::RegionView (ArdourCanvas::Container*          parent,
 	, wait_for_data(false)
 	, _silence_text (0)
 	, _xrun_markers_visible (false)
+	, _cue_markers_visible (false)
 {
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &RegionView::parameter_changed));
 }
@@ -101,6 +102,7 @@ RegionView::RegionView (const RegionView& other)
 	, TimeAxisViewItem (other)
 	, _silence_text (0)
 	, _xrun_markers_visible (false)
+	, _cue_markers_visible (false)
 {
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &RegionView::parameter_changed));
 	/* derived concrete type will call init () */
@@ -116,6 +118,7 @@ RegionView::RegionView (const RegionView& other, boost::shared_ptr<Region> other
 	, TimeAxisViewItem (other)
 	, _silence_text (0)
 	, _xrun_markers_visible (false)
+	, _cue_markers_visible (false)
 {
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &RegionView::parameter_changed));
 	/* derived concrete type will call init () */
@@ -209,6 +212,26 @@ RegionView::init (bool wfd)
 
 	_xrun_markers_visible = false;
 	update_xrun_markers ();
+
+	CueMarkers cues;
+	_region->get_cue_markers (cues, true);
+	arrow_size = (int)(7.0 * UIConfiguration::instance ().get_ui_scale ()) & ~1;
+	for (CueMarkers::const_iterator x = cues.begin (); x != cues.end (); ++x) {
+		ArdourCanvas::Arrow* canvas_item = new ArdourCanvas::Arrow(group);
+		canvas_item->set_color (UIConfiguration::instance().color ("theme:contrasting"));
+		canvas_item->set_show_head (1, true);
+		canvas_item->set_show_head (0, false);
+		canvas_item->set_head_width (1, arrow_size);
+		canvas_item->set_head_height (1, arrow_size);
+		canvas_item->set_y0 (arrow_size);
+		canvas_item->set_y1 (arrow_size);
+		canvas_item->raise_to_top ();
+		canvas_item->hide ();
+		_cue_markers.push_back (make_pair(*x, canvas_item));
+	}
+
+	_cue_markers_visible = false;
+	update_cue_markers ();
 
 	if (wfd) {
 		_enable_display = true;
@@ -496,6 +519,28 @@ RegionView::update_xrun_markers ()
 		}
 	}
 	_xrun_markers_visible = show_xruns_markers;
+}
+
+void
+RegionView::update_cue_markers ()
+{
+	const bool show_cue_markers = UIConfiguration::instance().get_show_region_xrun_markers();
+	if (_cue_markers_visible == show_cue_markers && !_cue_markers_visible) {
+		return;
+	}
+
+	const samplepos_t start = _region->start();
+	const samplepos_t length = _region->length();
+	for (list<std::pair<CueMarker, ArdourCanvas::Arrow*> >::iterator i = _cue_markers.begin(); i != _cue_markers.end(); ++i) {
+		float x_pos = trackview.editor().sample_to_pixel (i->first.position() - start);
+		i->second->set_x (x_pos);
+		if (show_cue_markers && (i->first.position() >= start && i->first.position() < start + length)) {
+			i->second->show ();
+		} else  {
+			i->second->hide ();
+		}
+	}
+	_cue_markers_visible = show_cue_markers;
 }
 
 void
