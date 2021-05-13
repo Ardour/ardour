@@ -1923,6 +1923,26 @@ Region::captured_xruns (XrunPositions& xruns, bool abs) const
 }
 
 void
+Region::get_cue_markers (CueMarkers& cues, bool abs) const
+{
+	bool was_empty = cues.empty ();
+	for (SourceList::const_iterator i = _sources.begin (); i != _sources.end(); ++i) {
+		CueMarkers const& x = (*i)->cue_markers ();
+		for (CueMarkers::const_iterator p = x.begin (); p != x.end (); ++p) {
+			if (abs) {
+				cues.push_back (*p);
+			} else if (p->position() >= _start && p->position() < _start + _length) {
+				cues.push_back (CueMarker (p->text(), p->position() - _start));
+			}
+		}
+	}
+	if (_sources.size () > 1 || !was_empty) {
+		sort (cues.begin (), cues.end ());
+		cues.erase (unique (cues.begin (), cues.end ()), cues.end ());
+	}
+}
+
+void
 Region::drop_sources ()
 {
 	for (SourceList::const_iterator i = _sources.begin (); i != _sources.end(); ++i) {

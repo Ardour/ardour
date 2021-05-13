@@ -373,6 +373,8 @@ public:
 		_changemap = changemap;
 	}
 
+	void get_cue_markers (CueMarkers&, bool abs = false) const;
+
 protected:
 	virtual XMLNode& state ();
 
