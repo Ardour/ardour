@@ -149,6 +149,7 @@ public:
 	std::string       _ancestor_name;
 	std::string       _captured_for;
 	XrunPositions     _xruns;
+	CueMarkers        _cue_markers;
 
 	mutable Glib::Threads::Mutex _lock;
 	mutable Glib::Threads::Mutex _analysis_lock;
