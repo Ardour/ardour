@@ -86,7 +86,6 @@ RegionFactory::create (boost::shared_ptr<const Region> region, bool announce, bo
 
 	if (ret) {
 		if (tl) {
-			ret->suspend_property_changes ();
 			tl->add (ret);
 		}
 
@@ -129,7 +128,6 @@ RegionFactory::create (boost::shared_ptr<Region> region, const PropertyList& pli
 
 	if (ret) {
 		if (tl) {
-			ret->suspend_property_changes ();
 			tl->add (ret);
 		}
 
@@ -171,7 +169,6 @@ RegionFactory::create (boost::shared_ptr<Region> region, MusicSample offset, con
 
 	if (ret) {
 		if (tl) {
-			ret->suspend_property_changes ();
 			tl->add (ret);
 		}
 		ret->apply_changes (plist);
@@ -213,7 +210,6 @@ RegionFactory::create (boost::shared_ptr<Region> region, const SourceList& srcs,
 
 	if (ret) {
 		if (tl) {
-			ret->suspend_property_changes ();
 			tl->add (ret);
 		}
 
@@ -257,7 +253,6 @@ RegionFactory::create (const SourceList& srcs, const PropertyList& plist, bool a
 
 	if (ret) {
 		if (tl) {
-			ret->suspend_property_changes ();
 			tl->add (ret);
 		}
 
