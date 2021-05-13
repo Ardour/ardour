@@ -288,18 +288,19 @@ pbd_absolute_rt_priority (int policy, int priority)
 		/* use default. XXX this should be relative to audio (JACK) thread,
 		 * internal backends use -20 (Audio), -21 (MIDI), -22 (compuation)
 		 */
-		priority = 7; // BaseUI backwards compat.
-	}
-
-	if (priority > 0) {
+		priority = (p_min + p_max) / 2;
+	} else if (priority > 0) {
 		priority += p_min;
 	} else {
-		priority += p_max;
+		priority += p_max + 1;
 	}
-	if (priority > p_max)
+
+	if (priority > p_max) {
 		priority = p_max;
-	if (priority < p_min)
+	}
+	if (priority < p_min) {
 		priority = p_min;
+	}
 	return priority;
 }
 

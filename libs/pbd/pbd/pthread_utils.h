@@ -54,9 +54,15 @@
 /* these are relative to sched_get_priority_max()
  * see pbd_absolute_rt_priority()
  */
-#define PBD_RT_PRI_MAIN -20
-#define PBD_RT_PRI_MIDI -21
-#define PBD_RT_PRI_PROC -22
+#ifdef PLATFORM_WINDOWS
+# define PBD_RT_PRI_MAIN -1
+# define PBD_RT_PRI_MIDI -2
+# define PBD_RT_PRI_PROC -2
+#else
+# define PBD_RT_PRI_MAIN -20
+# define PBD_RT_PRI_MIDI -21
+# define PBD_RT_PRI_PROC -22
+#endif
 
 LIBPBD_API int  pthread_create_and_store (std::string name, pthread_t  *thread, void * (*start_routine)(void *), void * arg);
 LIBPBD_API void pthread_cancel_one (pthread_t thread);
