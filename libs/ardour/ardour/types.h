@@ -393,13 +393,16 @@ struct MusicRange {
 
 class CueMarker {
   public:
-	CueMarker (std::string& text, samplepos_t position) : _text (text), _position (position) {}
+	CueMarker (std::string const& text, samplepos_t position) : _text (text), _position (position) {}
 
 	std::string text() const { return _text; }
 	void set_text (std::string const & str) { _text = str; }
 
 	samplepos_t position() const { return _position; }
 	void set_position (samplepos_t pos) { _position = pos; }
+
+	bool operator== (CueMarker const & other) const { return _position == other.position() && _text == other.text(); }
+	bool operator< (CueMarker const & other) const { return _position < other.position(); }
 
   private:
 	std::string _text;
