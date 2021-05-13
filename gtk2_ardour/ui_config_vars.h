@@ -72,6 +72,7 @@ UI_CONFIG_VARIABLE (std::string, mixer_strip_visibility, "mixer-element-visibili
 UI_CONFIG_VARIABLE (bool, allow_non_quarter_pulse, "allow-non-quarter-pulse", false)
 UI_CONFIG_VARIABLE (bool, show_region_gain, "show-region-gain", false)
 UI_CONFIG_VARIABLE (bool, show_region_xrun_markers, "show-region-xrun-markers", true)
+UI_CONFIG_VARIABLE (bool, show_region_cue_markers, "show-region-cue-markers", true)
 UI_CONFIG_VARIABLE (bool, show_name_highlight, "show-name-highlight", false)
 UI_CONFIG_VARIABLE (ARDOUR::ClockDeltaMode, primary_clock_delta_mode, "primary-clock-delta-mode", NoDelta)
 UI_CONFIG_VARIABLE (ARDOUR::ClockDeltaMode, secondary_clock_delta_mode, "secondary-clock-delta-mode", NoDelta)

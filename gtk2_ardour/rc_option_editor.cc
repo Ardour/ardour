@@ -2951,6 +2951,14 @@ These settings will only take effect after %1 is restarted.\n\
 		     ));
 
 	add_option (_("Editor"),
+			new BoolOption (
+		     "show-region-cue-markers",
+		     _("Show cue markers in regions"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_region_cue_markers),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_region_cue_markers)
+		     ));
+
+	add_option (_("Editor"),
 	     new BoolComboOption (
 		     "show-region-gain-envelopes",
 		     _("Show gain envelopes in audio regions"),
