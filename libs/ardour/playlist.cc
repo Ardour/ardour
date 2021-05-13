@@ -587,6 +587,7 @@ Playlist::notify_region_added (boost::shared_ptr<Region> r)
 		pending_contents_change = false;
 		RegionAdded (boost::weak_ptr<Region> (r)); /* EMIT SIGNAL */
 		ContentsChanged ();                        /* EMIT SIGNAL */
+		RegionFactory::CheckNewRegion (r);         /* EMIT SIGNAL */
 	}
 }
 
@@ -655,6 +656,7 @@ Playlist::flush_notifications (bool from_undo)
 	for (s = pending_adds.begin (); s != pending_adds.end (); ++s) {
 		(*s)->clear_changes ();
 		RegionAdded (boost::weak_ptr<Region> (*s)); /* EMIT SIGNAL */
+		RegionFactory::CheckNewRegion (*s);         /* EMIT SIGNAL */
 	}
 
 	if ((regions_changed && !in_set_state) || pending_layering) {
