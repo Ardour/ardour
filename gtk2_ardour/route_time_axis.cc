@@ -632,6 +632,10 @@ RouteTimeAxisView::build_display_menu ()
 
 	/* prepare it */
 
+	if (automation_action_menu) {
+		detach_menu (*automation_action_menu);
+	}
+
 	TimeAxisView::build_display_menu ();
 
 	/* now fill it with our stuff */
@@ -649,9 +653,6 @@ RouteTimeAxisView::build_display_menu ()
 
 	items.push_back (SeparatorElem());
 
-	if (_size_menu) {
-		detach_menu (*_size_menu);
-	}
 	build_size_menu ();
 	items.push_back (MenuElem (_("Height"), *_size_menu));
 	items.push_back (SeparatorElem());

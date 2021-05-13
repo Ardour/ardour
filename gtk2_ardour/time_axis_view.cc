@@ -807,6 +807,10 @@ TimeAxisView::build_display_menu ()
 {
 	using namespace Menu_Helpers;
 
+	if (_size_menu) {
+		Gtkmm2ext::detach_menu (*_size_menu);
+	}
+
 	delete display_menu;
 
 	display_menu = new Menu;

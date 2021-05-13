@@ -451,9 +451,7 @@ VCATimeAxisView::build_display_menu ()
 
 	MenuList& items = display_menu->items();
 	items.push_back (MenuElem (_("Color..."), sigc::mem_fun (*this, &VCATimeAxisView::choose_color)));
-	if (_size_menu) {
-		detach_menu (*_size_menu);
-	}
+
 	build_size_menu ();
 	items.push_back (MenuElem (_("Height"), *_size_menu));
 	items.push_back (SeparatorElem());
