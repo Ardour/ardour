@@ -125,6 +125,7 @@ SessionEventManager::remove_event (samplepos_t sample, SessionEvent::Type type)
 void
 SessionEventManager::replace_event (SessionEvent::Type type, samplepos_t sample, samplepos_t target)
 {
+	assert (sample != SessionEvent::Immediate);
 	SessionEvent* ev = new SessionEvent (type, SessionEvent::Replace, sample, target, 0);
 	queue_event (ev);
 }
@@ -297,6 +298,7 @@ SessionEventManager::_remove_event (SessionEvent* ev)
 
 	for (i = events.begin(); i != events.end(); ++i) {
 		if ((*i)->type == ev->type && (*i)->action_sample == ev->action_sample) {
+			assert ((*i)->action_sample != SessionEvent::Immediate);
 			if ((*i) == ev) {
 				ret = true;
 			}

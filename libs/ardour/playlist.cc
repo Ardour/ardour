@@ -449,6 +449,10 @@ Playlist::end_undo ()
 void
 Playlist::freeze ()
 {
+	/* flush any ongoing reads, paricularly AudioPlaylist::read(),
+	 * before beginning to modify the playlist.
+	 */
+	RegionWriteLock rlock (this);
 	delay_notifications ();
 	g_atomic_int_inc (&ignore_state_changes);
 }
