@@ -139,10 +139,10 @@ Source::get_state ()
 	}
 
 	if (!_cue_markers.empty()) {
-		XMLNode* cue_parent = new XMLNode (X_("cues"));
+		XMLNode* cue_parent = new XMLNode (X_("Cues"));
 
 		for (CueMarkers::const_iterator c = _cue_markers.begin(); c != _cue_markers.end(); ++c) {
-			XMLNode* cue_child = new XMLNode (X_("cue"));
+			XMLNode* cue_child = new XMLNode (X_("Cue"));
 			cue_child->set_property ("text", c->text());
 			cue_child->set_property ("position", c->position());
 			cue_parent->add_child_nocopy (*cue_child);
@@ -213,12 +213,13 @@ Source::set_state (const XMLNode& node, int version)
 				_xruns.push_back (x);
 			}
 
-		} else if ((*niter)->name() == X_("cues")) {
+		} else if ((*niter)->name() == X_("Cues")) {
 
 			_cue_markers.clear ();
 
 			const XMLNode& cues (*(*niter));
 			const XMLNodeList cuelist = cues.children();
+
 			for (XMLNodeConstIterator citer = cuelist.begin(); citer != cuelist.end(); ++citer) {
 				string text;
 				samplepos_t position;
