@@ -1328,6 +1328,14 @@
   <Plugin type="LXVST" id="1093943637" tags="eq:parametric" name="UAD Precision Equalizer"/>
   <Plugin type="LXVST" id="1093878101" tags="dyn:limiter" name="UAD Fairchild 670 Legacy"/>
   <Plugin type="LXVST" id="1081291058" tags="vocal modulation" name="Graillon 2"/>
+  <Plugin type="LXVST" id="1096177222" tags="vocal eq:dynamic" name="AVA Vocal Flow"/>
+  <Plugin type="LXVST" id="1096176451" tags="dyn:compressor mastering multiband" name="AVA Spectral Compressor"/>
+  <Plugin type="LXVST" id="1096174917" tags="eq:graphic eq:parametric freeform mastering" name="AVA Mastering EQ"/>
+  <Plugin type="LXVST" id="1096174915" tags="dyn:compressor mastering multiband" name="AVA Multiband Compressor"/>
+  <Plugin type="LXVST" id="1096174673" tags="eq:parametric" name="AVA LegacyQ"/>
+  <Plugin type="LXVST" id="1096172627" tags="dyn:de-esser" name="AVA De-Esser"/>
+  <Plugin type="LXVST" id="1096172614" tags="drums dyn:compressor eq:dynamic" name="AVA Drum Flow"/>
+  <Plugin type="LXVST" id="1096172102" tags="bass eq:dynamic" name="AVA Bass Flow"/>
   <Plugin type="LV2" id="urn:ardour:a-reverb" tags="reverb" name="a-Reverb"/>
   <Plugin type="LV2" id="urn:ardour:a-fluidsynth" tags="synth" name="a-Fluid Synth"/>
   <Plugin type="LV2" id="urn:ardour:a-eq" tags="eq:parametric inline-ui" name="a-EQ"/>
@@ -3351,4 +3359,21 @@
   <Plugin type="AudioUnit" id="1635083896-1094009421-1802721110" tags="eq:parametric" name="API-550B (m)"/>
   <Plugin type="AudioUnit" id="1635083896-1094009171-1802721110" tags="eq:parametric" name="API-550A (s)"/>
   <Plugin type="AudioUnit" id="1635083896-1094009165-1802721110" tags="eq:parametric" name="API-550A (m)"/>
+  <Plugin type="AudioUnit" id="1635083896-1835232624-1634758764" tags="dyn:compressor multiband" name="AUMultibandCompressor"/>
+  <Plugin type="AudioUnit" id="1635083896-1096177222-1213354830" tags="vocal eq:dynamic" name="AVA Vocal Flow"/>
+  <Plugin type="AudioUnit" id="1635083896-1096176451-1213354830" tags="dyn:compressor mastering multiband" name="AVA Spectral Compressor"/>
+  <Plugin type="AudioUnit" id="1635083896-1096174917-1213354830" tags="eq:graphic eq:parametric freeform mastering" name="AVA Mastering EQ"/>
+  <Plugin type="AudioUnit" id="1635083896-1096174915-1213354830" tags="dyn:compressor mastering multiband" name="AVA Multiband Compressor"/>
+  <Plugin type="AudioUnit" id="1635083896-1096174673-1213354830" tags="eq:parametric" name="AVA LegacyQ"/>
+  <Plugin type="AudioUnit" id="1635083896-1096172627-1213354830" tags="dyn:de-esser" name="AVA De-Esser"/>
+  <Plugin type="AudioUnit" id="1635083896-1096172614-1213354830" tags="drums dyn:compressor eq:dynamic" name="AVA Drum Flow"/>
+  <Plugin type="AudioUnit" id="1635083896-1096172102-1213354830" tags="bass eq:dynamic" name="AVA Bass Flow"/>  <Plugin type="LV2" id="urn:ardour:a-reverb" tags="reverb" name="a-Reverb"/>
+  <Plugin type="VST3" id="5653544156564661766120766F63616C" tags="vocal eq:dynamic" name="AVA Vocal Flow"/>
+  <Plugin type="VST3" id="56535441565343617661207370656374" tags="dyn:compressor mastering multiband" name="AVA Spectral Compressor"/>
+  <Plugin type="VST3" id="56535441564D45617661206D61737465" tags="eq:graphic eq:parametric freeform mastering" name="AVA Mastering EQ"/>
+  <Plugin type="VST3" id="56535441564D43617661206D756C7469" tags="dyn:compressor mastering multiband" name="AVA Multiband Compressor"/>
+  <Plugin type="VST3" id="56535441564C51617661206C65676163" tags="eq:parametric" name="AVA LegacyQ"/>
+  <Plugin type="VST3" id="565354415644536176612064652D6573" tags="dyn:de-esser" name="AVA De-Esser"/>
+  <Plugin type="VST3" id="56535441564446617661206472756D20" tags="drums dyn:compressor eq:dynamic" name="AVA Drum Flow"/>
+  <Plugin type="VST3" id="56535441564246617661206261737320" tags="bass eq:dynamic" name="AVA Bass Flow"/>
 </PluginTags>
