@@ -544,8 +544,10 @@ RegionView::update_cue_markers ()
 
 	boost::shared_ptr<Source> source = region()->source (0);
 
-	samplepos_t start = region()->start();
-	samplepos_t end = region()->start() + region()->length();
+	const samplepos_t start = region()->start();
+	const samplepos_t end = region()->start() + region()->length();
+	const Gtkmm2ext::SVAModifier alpha = UIConfiguration::instance().modifier (X_("region marker"));
+	const uint32_t color = Gtkmm2ext::HSV (get_fill_color()).opposite().mod (alpha).color();
 
 	for (CueMarkers::const_iterator c = source->cue_markers().begin(); c != source->cue_markers().end(); ++c) {
 
@@ -553,7 +555,8 @@ RegionView::update_cue_markers ()
 			continue;
 		}
 
-		ArdourMarker* mark = new ArdourMarker (trackview.editor(), *group, 0xff000000, c->text(), ArdourMarker::RegionCue, c->position(), false);
+		ArdourMarker* mark = new ArdourMarker (trackview.editor(), *group, color , c->text(), ArdourMarker::RegionCue, c->position() - start, false);
+		mark->set_points_color (color);
 
 		if (show_cue_markers) {
 			mark->show ();
