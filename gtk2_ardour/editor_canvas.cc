@@ -296,10 +296,6 @@ Editor::track_canvas_viewport_size_allocated ()
 
 	if (height_changed) {
 
-		for (LocationMarkerMap::iterator i = location_markers.begin(); i != location_markers.end(); ++i) {
-			i->second->canvas_height_set (_visible_canvas_height);
-		}
-
 		vertical_adjustment.set_page_size (_visible_canvas_height);
 		if ((vertical_adjustment.get_value() + _visible_canvas_height) >= vertical_adjustment.get_upper()) {
 			/*

@@ -386,13 +386,6 @@ ArdourMarker::setup_line ()
 	}
 }
 
-void
-ArdourMarker::canvas_height_set (double h)
-{
-	_canvas_height = h;
-	setup_line ();
-}
-
 ArdourCanvas::Item&
 ArdourMarker::the_item() const
 {

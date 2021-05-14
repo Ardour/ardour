@@ -188,7 +188,6 @@ Editor::add_new_location_internal (Location* location)
 		select_new_marker = false;
 	}
 
-	lam->canvas_height_set (_visible_canvas_height);
 	lam->set_show_lines (_show_marker_lines);
 
 	/* Add these markers to the appropriate sorted marker lists, which will render
@@ -578,15 +577,6 @@ Editor::LocationMarkers::show()
 	start->show ();
 	if (end) {
 		end->show ();
-	}
-}
-
-void
-Editor::LocationMarkers::canvas_height_set (double h)
-{
-	start->canvas_height_set (h);
-	if (end) {
-		end->canvas_height_set (h);
 	}
 }
 

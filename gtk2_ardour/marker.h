@@ -78,7 +78,6 @@ public:
 
 	void set_selected (bool);
 	void set_show_line (bool);
-	void canvas_height_set (double);
 
 	void set_position (samplepos_t);
 	void set_name (const std::string&);
@@ -127,7 +126,6 @@ protected:
 	bool         _selected;
 	bool         _shown;
 	bool         _line_shown;
-	double       _canvas_height;
 	uint32_t     _color;
 	uint32_t     _points_color;
 	double       _left_label_limit; ///< the number of pixels available to the left of this marker for a label
