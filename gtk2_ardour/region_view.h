@@ -207,7 +207,17 @@ private:
 	bool _xrun_markers_visible;
 
 	void update_cue_markers ();
-	std::list<ArdourMarker*> _cue_markers;
+
+	struct ViewCueMarker {
+		ArdourMarker* view_marker;
+		ARDOUR::CueMarker     model_marker;
+
+		ViewCueMarker (ArdourMarker* m, ARDOUR::CueMarker const & c) : view_marker (m), model_marker (c) {}
+		~ViewCueMarker();
+	};
+
+	typedef std::list<ViewCueMarker*> ViewCueMarkers;
+	ViewCueMarkers _cue_markers;
 	bool _cue_markers_visible;
 };
 

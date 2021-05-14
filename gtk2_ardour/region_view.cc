@@ -268,10 +268,6 @@ RegionView::~RegionView ()
 		delete ((*i).second);
 	}
 
-	for (list<ArdourMarker*>::iterator i = _cue_markers.begin(); i != _cue_markers.end(); ++i) {
-		delete *i;
-	}
-
 	drop_silent_frames ();
 
 	delete editor;
@@ -529,42 +525,95 @@ RegionView::update_xrun_markers ()
 	_xrun_markers_visible = show_xruns_markers;
 }
 
+RegionView::ViewCueMarker::~ViewCueMarker ()
+{
+	delete view_marker;
+}
+
 void
 RegionView::update_cue_markers ()
 {
 	const bool show_cue_markers = UIConfiguration::instance().get_show_region_cue_markers();
+
 	if (_cue_markers_visible == show_cue_markers && !_cue_markers_visible) {
 		return;
 	}
-
-	for (list<ArdourMarker*>::iterator i = _cue_markers.begin(); i != _cue_markers.end(); ++i) {
-		delete (*i);
-	}
-	_cue_markers.clear ();
-
-	boost::shared_ptr<Source> source = region()->source (0);
 
 	const samplepos_t start = region()->start();
 	const samplepos_t end = region()->start() + region()->length();
 	const Gtkmm2ext::SVAModifier alpha = UIConfiguration::instance().modifier (X_("region marker"));
 	const uint32_t color = Gtkmm2ext::HSV (get_fill_color()).opposite().mod (alpha).color();
 
-	for (CueMarkers::const_iterator c = source->cue_markers().begin(); c != source->cue_markers().end(); ++c) {
 
-		if ((c->position() < start) || (c->position() >= end)) {
+	/* We assume that if the region has multiple sources, any of them will
+	 * be appropriate as the origin of cue markers. We use the first one.
+	 */
+
+	boost::shared_ptr<Source> source = region()->source (0);
+	CueMarkers const & model_markers (source->cue_markers());
+
+	/* Remove any view markers that are no longer present in the model cue
+	 * marker set
+	 */
+
+	for (ViewCueMarkers::iterator v = _cue_markers.begin(); v != _cue_markers.end(); ) {
+		if (model_markers.find ((*v)->model_marker) == model_markers.end()) {
+			delete *v;
+			v = _cue_markers.erase (v);
+		} else {
+			++v;
+		}
+	}
+
+	/* now check all the model markers and make sure we have view markers
+	 * for them. Note that because we use Source::cue_markers() above the
+	 * set will contain markers stamped with absolute, not region-relative,
+	 * timestamps and some of them may be outside the Region.
+	 */
+
+	for (CueMarkers::const_iterator c = model_markers.begin(); c != model_markers.end(); ++c) {
+
+		if (c->position() < start || c->position() >= end) {
+			/* not withing this region */
 			continue;
 		}
 
-		ArdourMarker* mark = new ArdourMarker (trackview.editor(), *group, color , c->text(), ArdourMarker::RegionCue, c->position() - start, false);
-		mark->set_points_color (color);
+		ViewCueMarkers::iterator existing = _cue_markers.end();
 
-		if (show_cue_markers) {
-			mark->show ();
-		} else  {
-			mark->hide ();
+		for (ViewCueMarkers::iterator v = _cue_markers.begin(); v != _cue_markers.end(); ++v) {
+			if ((*v)->model_marker == *c) {
+				existing = v;
+				break;
+			}
 		}
 
-		_cue_markers.push_back (mark);
+		if (existing == _cue_markers.end()) {
+
+			/* Create a new ViewCueMarker */
+
+			ArdourMarker* mark = new ArdourMarker (trackview.editor(), *group, color , c->text(), ArdourMarker::RegionCue, c->position() - start, false);
+			mark->set_points_color (color);
+
+			if (show_cue_markers) {
+				mark->show ();
+			} else  {
+				mark->hide ();
+			}
+
+			_cue_markers.push_back (new ViewCueMarker (mark, *c));
+
+		} else {
+
+			/* Move and control visibility for an existing ViewCueMarker */
+
+			if (show_cue_markers) {
+				(*existing)->view_marker->show ();
+			} else  {
+				(*existing)->view_marker->hide ();
+			}
+
+			(*existing)->view_marker->set_position (c->position() - start);
+		}
 	}
 
 	_cue_markers_visible = show_cue_markers;
@@ -658,6 +707,8 @@ RegionView::parameter_changed (std::string const& p)
 {
 	if (p == "show-region-xrun-markers") {
 		update_xrun_markers ();
+	} else if (p == "show-region-cue-markers") {
+		update_cue_markers ();
 	}
 }
 
