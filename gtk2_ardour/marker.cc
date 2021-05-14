@@ -273,10 +273,14 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Container& parent, g
 	group->name = string_compose ("Marker::group for %1", annotation);
 #endif
 
-	_name_background = new ArdourCanvas::Rectangle (group);
+	if (type != RegionCue) {
+		_name_background = new ArdourCanvas::Rectangle (group);
 #ifdef CANVAS_DEBUG
-	_name_background->name = string_compose ("Marker::_name_background for %1", annotation);
+		_name_background->name = string_compose ("Marker::_name_background for %1", annotation);
 #endif
+	} else {
+		_name_background = 0;
+	}
 
 	/* adjust to properly locate the tip */
 
@@ -284,7 +288,6 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Container& parent, g
 	CANVAS_DEBUG_NAME (mark, string_compose ("Marker::mark for %1", annotation));
 
 	mark->set (*points);
-	set_color_rgba (rgba);
 
 	/* setup name pixbuf sizes */
 	name_font = get_font_for_style (N_("MarkerText"));
@@ -302,6 +305,8 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Container& parent, g
 	_name_item->set_font_description (name_font);
 	_name_item->set_color (RGBA_TO_UINT (0,0,0,255));
 	_name_item->set_position (ArdourCanvas::Duple (_label_offset, (marker_height - name_height - 1) * .5 ));
+
+	set_color_rgba (rgba);
 
 	set_name (annotation.c_str());
 
@@ -400,7 +405,9 @@ ArdourMarker::set_name (const string& new_name)
 	_name = new_name;
 
 	mark->set_tooltip(new_name);
-	_name_background->set_tooltip(new_name);
+	if (_name_background) {
+		_name_background->set_tooltip(new_name);
+	}
 	_name_item->set_tooltip(new_name);
 
 	setup_name_display ();
@@ -442,15 +449,16 @@ ArdourMarker::setup_name_display ()
 		_name_item->clamp_width (name_width);
 		_name_item->set (_name);
 
-		if (label_on_left ()) {
-			/* adjust right edge of background to fit text */
-			_name_background->set_x0 (_name_item->position().x - padding);
-			_name_background->set_x1 (_name_item->position().x + name_width + _shift);
-		} else {
-			/* right edge remains at zero (group-relative). Add
-			 * arbitrary 2 pixels of extra padding at the end
-			 */
-			switch (_type) {
+		if (_name_background) {
+			if (label_on_left ()) {
+				/* adjust right edge of background to fit text */
+				_name_background->set_x0 (_name_item->position().x - padding);
+				_name_background->set_x1 (_name_item->position().x + name_width + _shift);
+			} else {
+				/* right edge remains at zero (group-relative). Add
+				 * arbitrary 2 pixels of extra padding at the end
+				 */
+				switch (_type) {
 				case Tempo:
 					_name_item->hide ();
 					// tip's x-pos is at "M3", box is 2x marker's
@@ -466,12 +474,15 @@ ArdourMarker::setup_name_display ()
 					_name_background->set_x0 (0);
 					_name_background->set_x1 (_name_item->position().x + name_width + padding);
 					break;
+				}
 			}
 		}
 	}
 
-	_name_background->set_y0 (0);
-	_name_background->set_y1 (marker_height + 1);
+	if (_name_background) {
+		_name_background->set_y0 (0);
+		_name_background->set_y1 (marker_height + 1);
+	}
 }
 
 void
@@ -527,9 +538,15 @@ ArdourMarker::set_color_rgba (uint32_t c)
 		_track_canvas_line->set_outline_color (_color);
 	}
 
-	_name_background->set_fill (true);
-	_name_background->set_fill_color (UINT_RGBA_CHANGE_A (_color, 0x70));
-	_name_background->set_outline (false);
+	if (_name_item) {
+		_name_item->set_color (contrasting_text_color (_color));
+	}
+
+	if (_name_background) {
+		_name_background->set_fill (true);
+		_name_background->set_fill_color (UINT_RGBA_CHANGE_A (_color, 0x70));
+		_name_background->set_outline (false);
+	}
 }
 
 /** Set the number of pixels that are available for a label to the left of the centre of this marker */
