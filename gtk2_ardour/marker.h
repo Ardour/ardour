@@ -78,6 +78,7 @@ public:
 
 	void set_selected (bool);
 	void set_show_line (bool);
+	void set_line_height (double);
 
 	void set_position (samplepos_t);
 	void set_name (const std::string&);
@@ -131,6 +132,7 @@ protected:
 	double       _left_label_limit; ///< the number of pixels available to the left of this marker for a label
 	double       _right_label_limit; ///< the number of pixels available to the right of this marker for a label
 	double       _label_offset;
+	double       _line_height;
 
 	void reposition ();
 	void setup_line_x ();

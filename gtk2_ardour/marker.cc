@@ -85,6 +85,7 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Container& parent, g
 	, _left_label_limit (DBL_MAX)
 	, _right_label_limit (DBL_MAX)
 	, _label_offset (0)
+	, _line_height (-1)
 
 {
 
@@ -374,7 +375,7 @@ ArdourMarker::setup_line ()
 		_track_canvas_line->set_x0 (d.x);
 		_track_canvas_line->set_x1 (d.x);
 		_track_canvas_line->set_y0 (d.y);
-		_track_canvas_line->set_y1 (ArdourCanvas::COORD_MAX);
+		_track_canvas_line->set_y1 (_line_height > 0 ? _line_height : ArdourCanvas::COORD_MAX);
 		_track_canvas_line->set_outline_color ( _selected ? UIConfiguration::instance().color ("entered marker") : _color );
 		_track_canvas_line->raise_to_top ();
 		_track_canvas_line->show ();
@@ -390,6 +391,13 @@ ArdourCanvas::Item&
 ArdourMarker::the_item() const
 {
 	return *group;
+}
+
+void
+ArdourMarker::set_line_height (double h)
+{
+	_line_height = h;
+	setup_line ();
 }
 
 void
