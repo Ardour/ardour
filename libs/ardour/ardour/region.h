@@ -276,6 +276,7 @@ public:
 	boost::shared_ptr<Source> source (uint32_t n=0) const { return _sources[ (n < _sources.size()) ? n : 0 ]; }
 	uint32_t n_channels() const { return _sources.size(); }
 
+	SourceList& sources_for_edit ()           { return _sources; }
 	const SourceList& sources ()        const { return _sources; }
 	const SourceList& master_sources () const { return _master_sources; }
 
