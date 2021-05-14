@@ -1929,15 +1929,25 @@ Region::get_cue_markers (CueMarkers& cues, bool abs) const
 		CueMarkers const& x = (*i)->cue_markers ();
 		for (CueMarkers::const_iterator p = x.begin (); p != x.end (); ++p) {
 			if (abs) {
-				cues.push_back (*p);
+				cues.insert (*p);
 			} else if (p->position() >= _start && p->position() < _start + _length) {
-				cues.push_back (CueMarker (p->text(), p->position() - _start));
+				cues.insert (CueMarker (p->text(), p->position() - _start));
 			}
 		}
 	}
-	if (_sources.size () > 1 || !was_empty) {
-		sort (cues.begin (), cues.end ());
-		cues.erase (unique (cues.begin (), cues.end ()), cues.end ());
+}
+
+void
+Region::add_cue_marker (std::string const & str, samplepos_t pos)
+{
+	if (pos < _position || pos >= _position + _length) {
+		return;
+	}
+
+	CueMarker marker (str, pos - _start);
+
+	for (SourceList::iterator s = _sources.begin(); s != _sources.end(); ++s) {
+		(*s)->add_cue_marker (marker);
 	}
 }
 
