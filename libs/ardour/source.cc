@@ -138,6 +138,19 @@ Source::get_state ()
 		node->add_child_nocopy (*xnode);
 	}
 
+	if (!_cue_markers.empty()) {
+		XMLNode* cue_parent = new XMLNode (X_("cues"));
+
+		for (CueMarkers::const_iterator c = _cue_markers.begin(); c != _cue_markers.end(); ++c) {
+			XMLNode* cue_child = new XMLNode (X_("cue"));
+			cue_child->set_property ("text", c->text());
+			cue_child->set_property ("position", c->position());
+			cue_parent->add_child_nocopy (*cue_child);
+		}
+
+		node->add_child_nocopy (*cue_parent);
+	}
+
 	return *node;
 }
 
@@ -181,23 +194,41 @@ Source::set_state (const XMLNode& node, int version)
 	_xruns.clear ();
 	XMLNodeList nlist = node.children();
 	for (XMLNodeIterator niter = nlist.begin(); niter != nlist.end(); ++niter) {
-		if ((*niter)->name() != X_("xruns")) {
-			continue;
-		}
-		const XMLNode& xruns (*(*niter));
-		if (xruns.children().empty()) {
-			break;
-		}
-		XMLNode* content_node = xruns.children().front();
-		stringstream str (content_node->content());
-		while (str) {
-			samplepos_t x;
-			std::string x_str;
-			str >> x_str;
-			if (!str || !PBD::string_to<samplepos_t> (x_str, x)) {
+
+		if ((*niter)->name() == X_("xruns")) {
+
+			const XMLNode& xruns (*(*niter));
+			if (xruns.children().empty()) {
 				break;
 			}
-			_xruns.push_back (x);
+			XMLNode* content_node = xruns.children().front();
+			stringstream str (content_node->content());
+			while (str) {
+				samplepos_t x;
+				std::string x_str;
+				str >> x_str;
+				if (!str || !PBD::string_to<samplepos_t> (x_str, x)) {
+					break;
+				}
+				_xruns.push_back (x);
+			}
+
+		} else if ((*niter)->name() == X_("cues")) {
+
+			_cue_markers.clear ();
+
+			const XMLNode& cues (*(*niter));
+			const XMLNodeList cuelist = cues.children();
+			for (XMLNodeConstIterator citer = cuelist.begin(); citer != cuelist.end(); ++citer) {
+				string text;
+				samplepos_t position;
+
+				if (!(*citer)->get_property (X_("text"), text) || !(*citer)->get_property (X_("position"), position)) {
+					continue;
+				}
+
+				_cue_markers.insert (CueMarker (text, position));
+			}
 		}
 	}
 
