@@ -650,6 +650,7 @@ RegionView::set_colors ()
 {
 	TimeAxisViewItem::set_colors ();
 	set_sync_mark_color ();
+	update_cue_markers ();
 }
 
 void
