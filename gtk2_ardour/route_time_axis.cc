@@ -1922,19 +1922,57 @@ RouteTimeAxisView::add_processor_to_subplugin_menu (boost::weak_ptr<Processor> p
 
 	items.clear ();
 
+	size_t total_ctrls = 0;
+	for (std::set<Evoral::Parameter>::const_iterator i = automatable.begin(); i != automatable.end(); ++i) {
+		string const& name = processor->describe_parameter (*i);
+		if (name == X_("hidden")) {
+			continue;
+		}
+		++total_ctrls;
+	}
+
+	const int max_items   = 32; // 32 per submenu, next menu begins with 33nd at the top
+	unsigned  n_items     = 0;
+	unsigned  n_groups    = 1;
+	bool      use_submenu = total_ctrls > max_items + 5; // allow for some slack
+	Menu*     menu        = NULL;
+
+	if (use_submenu) {
+		menu = manage (new Menu);
+		menu->set_name ("ArdourContextMenu");
+		items.push_back (MenuElem (string_compose (_("Parameters %1 - %2"), 1, max_items), *menu));
+	} else {
+		menu = rai->menu;
+	}
+
 	for (std::set<Evoral::Parameter>::const_iterator i = automatable.begin(); i != automatable.end(); ++i) {
 
 		ProcessorAutomationNode* pan;
 		Gtk::CheckMenuItem* mitem;
 
-		string name = processor->describe_parameter (*i);
+		string const& name = processor->describe_parameter (*i);
 
 		if (name == X_("hidden")) {
 			continue;
 		}
 
-		items.push_back (CheckMenuElem (name));
-		mitem = dynamic_cast<Gtk::CheckMenuItem*> (&items.back());
+		if (use_submenu && ++n_items > max_items) {
+			n_items = 1;
+			menu = manage (new Menu);
+			menu->set_name ("ArdourContextMenu");
+			size_t start = n_groups * max_items + 1;
+			size_t end   = ++n_groups * max_items;
+			/* at least 2 items per sub-menu */
+			if (end + 1 >= total_ctrls) {
+				end = total_ctrls;
+				use_submenu = false;
+			}
+			items.push_back (MenuElem (string_compose (_("Parameters %1 - %2"), start, end), *menu));
+		}
+
+		MenuList& mitems = menu->items();
+		mitems.push_back (CheckMenuElem (name));
+		mitem = dynamic_cast<Gtk::CheckMenuItem*> (&mitems.back());
 
 		_subplugin_menu_map[*i] = mitem;
 
