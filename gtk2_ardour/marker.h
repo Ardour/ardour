@@ -120,7 +120,7 @@ protected:
 
 	std::string  _name;
 	double        unit_position;
-	samplepos_t    sample_position;
+	samplepos_t   sample_position;
 	double       _shift;
 	Type         _type;
 	int           name_height;
