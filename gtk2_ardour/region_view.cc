@@ -532,11 +532,8 @@ RegionView::update_xrun_markers ()
 void
 RegionView::update_cue_markers ()
 {
-	cerr << "Updating cue markers\n";
-
 	const bool show_cue_markers = UIConfiguration::instance().get_show_region_cue_markers();
 	if (_cue_markers_visible == show_cue_markers && !_cue_markers_visible) {
-		cerr << " no show\n";
 		return;
 	}
 
