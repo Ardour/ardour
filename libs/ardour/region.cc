@@ -1938,20 +1938,6 @@ Region::get_cue_markers (CueMarkers& cues, bool abs) const
 }
 
 void
-Region::add_cue_marker (std::string const & str, samplepos_t pos)
-{
-	if (pos < _position || pos >= _position + _length) {
-		return;
-	}
-
-	CueMarker marker (str, pos - _start);
-
-	for (SourceList::iterator s = _sources.begin(); s != _sources.end(); ++s) {
-		(*s)->add_cue_marker (marker);
-	}
-}
-
-void
 Region::drop_sources ()
 {
 	for (SourceList::const_iterator i = _sources.begin (); i != _sources.end(); ++i) {

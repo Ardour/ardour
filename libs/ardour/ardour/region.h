@@ -375,7 +375,6 @@ public:
 	}
 
 	void get_cue_markers (CueMarkers&, bool abs = false) const;
-	void add_cue_marker (std::string const &, samplepos_t pos);
 
 protected:
 	virtual XMLNode& state ();
