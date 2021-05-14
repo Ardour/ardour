@@ -409,7 +409,7 @@ class CueMarker {
 	samplepos_t _position;
 };
 
-typedef std::vector<CueMarker> CueMarkers;
+typedef std::set<CueMarker> CueMarkers;
 
 /*
   Slowest = 6.6dB/sec falloff at update rate of 40ms

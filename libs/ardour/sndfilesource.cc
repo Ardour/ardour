@@ -406,7 +406,7 @@ SndFileSource::open ()
 		if (sf_command (_sndfile, SFC_GET_CUE, &cues, sizeof (SF_CUES)) == SF_TRUE) {
 			cerr << "Found " << cues.cue_count << " cues !\n";
 			for (size_t n = 0; n < cues.cue_count; ++n) {
-				_cue_markers.push_back (CueMarker (string_compose (X_("cue %1"), n+1), cues.cue_points[n].sample_offset));
+				_cue_markers.insert (CueMarker (string_compose (X_("cue %1"), n+1), cues.cue_points[n].sample_offset));
 			}
 		}
 	}
