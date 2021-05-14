@@ -111,16 +111,16 @@ RegionView::RegionView (const RegionView& other)
 {
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &RegionView::parameter_changed));
 
-	for (SourceList::const_iterator s = _region->sources().begin(); s != _region->sources().end(); ++s) {
-		(*s)->CueMarkersChanged.connect (*this, invalidator (*this), boost::bind (&RegionView::update_cue_markers, this), gui_context());
-	}
-
 	/* derived concrete type will call init () */
 
 	_region = other._region;
 	current_visible_sync_position = other.current_visible_sync_position;
 	valid = false;
 	_pixel_width = other._pixel_width;
+
+	for (SourceList::const_iterator s = _region->sources().begin(); s != _region->sources().end(); ++s) {
+		(*s)->CueMarkersChanged.connect (*this, invalidator (*this), boost::bind (&RegionView::update_cue_markers, this), gui_context());
+	}
 }
 
 RegionView::RegionView (const RegionView& other, boost::shared_ptr<Region> other_region)
@@ -131,10 +131,6 @@ RegionView::RegionView (const RegionView& other, boost::shared_ptr<Region> other
 	, _cue_markers_visible (false)
 {
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &RegionView::parameter_changed));
-
-	for (SourceList::const_iterator s = _region->sources().begin(); s != _region->sources().end(); ++s) {
-		(*s)->CueMarkersChanged.connect (*this, invalidator (*this), boost::bind (&RegionView::update_cue_markers, this), gui_context());
-	}
 
 	/* derived concrete type will call init () */
 	/* this is a pseudo-copy constructor used when dragging regions
@@ -147,7 +143,12 @@ RegionView::RegionView (const RegionView& other, boost::shared_ptr<Region> other
 	current_visible_sync_position = other.current_visible_sync_position;
 	valid = false;
 	_pixel_width = other._pixel_width;
+
+	for (SourceList::const_iterator s = _region->sources().begin(); s != _region->sources().end(); ++s) {
+		(*s)->CueMarkersChanged.connect (*this, invalidator (*this), boost::bind (&RegionView::update_cue_markers, this), gui_context());
+	}
 }
+
 
 RegionView::RegionView (ArdourCanvas::Container*          parent,
                         TimeAxisView&                     tv,
