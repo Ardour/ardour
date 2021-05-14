@@ -396,3 +396,9 @@ Source::remove_cue_marker (CueMarker const & cm)
 	}
 }
 
+void
+Source::clear_cue_markers ()
+{
+	_cue_markers.clear();
+	CueMarkersChanged(); /* EMIT SIGNAL */
+}
