@@ -365,7 +365,7 @@ ArdourMarker::setup_line ()
 
 		if (_track_canvas_line == 0) {
 
-			_track_canvas_line = new ArdourCanvas::Line (editor.get_hscroll_group());
+			_track_canvas_line = new ArdourCanvas::Line (editor.get_cursor_scroll_group());
 			_track_canvas_line->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_marker_event), group, this));
 		}
 
