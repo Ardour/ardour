@@ -79,6 +79,9 @@ namespace ARDOUR { namespace LuaAPI {
 	/** List all installed plugins */
 	std::list<boost::shared_ptr<ARDOUR::PluginInfo> > list_plugins ();
 
+	/** Write a list of untagged plugins to a file, so we can bulk-tag them */
+	std::string dump_untagged_plugins ();
+
 	/** search a Plugin
 	 *
 	 * @param id Plugin Name, ID or URI

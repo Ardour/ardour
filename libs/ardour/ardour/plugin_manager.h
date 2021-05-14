@@ -109,6 +109,8 @@ public:
 
 	void save_tags ();
 
+	std::string dump_untagged_plugins ();
+
 	bool load_plugin_order_file (XMLNode &n) const;  //returns TRUE if the passed-in node has valid info
 	void save_plugin_order_file (XMLNode &elem) const;
 

@@ -2185,6 +2185,42 @@ PluginManager::save_plugin_order_file (XMLNode &elem) const
 }
 
 
+std::string
+PluginManager::dump_untagged_plugins ()
+{
+	std::string retval;
+	std::string path = Glib::build_filename (user_plugin_metadata_dir(), "untagged_plugins");
+	XMLNode* root = new XMLNode (X_("PluginTags"));
+
+	for (PluginTagList::iterator i = ptags.begin(); i != ptags.end(); ++i) {
+#ifdef MIXBUS
+		if ((*i).type == LADSPA) {
+			uint32_t id = atoi ((*i).unique_id);
+			if (id >= 9300 && id <= 9399) {
+				continue; /* do not write mixbus channelstrip ladspa's in the tagfile */
+			}
+		}
+#endif
+		if ((*i).tagtype == FromPlug) {
+			XMLNode* node = new XMLNode (X_("Plugin"));
+			node->set_property (X_("type"), to_generic_vst ((*i).type));
+			node->set_property (X_("id"), (*i).unique_id);
+			node->set_property (X_("tags"), (*i).tags);
+			node->set_property (X_("name"), (*i).name);
+			root->add_child_nocopy (*node);
+		}
+	}
+
+	XMLTree tree;
+	tree.set_root (root);
+	if (tree.write (path)) {
+		retval = path;
+	} else {
+		retval = string_compose (_("ERROR: Could not save Plugin Tags info to %1"), path);
+	}
+	return retval;
+}
+
 void
 PluginManager::save_tags ()
 {

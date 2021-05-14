@@ -138,6 +138,13 @@ ARDOUR::LuaAPI::new_send (Session* s, boost::shared_ptr<Route> r, boost::shared_
 	return boost::shared_ptr<Processor> ();
 }
 
+std::string
+ARDOUR::LuaAPI::dump_untagged_plugins ()
+{
+	PluginManager& manager = PluginManager::instance ();
+	return manager.dump_untagged_plugins();
+}
+
 PluginInfoList
 ARDOUR::LuaAPI::list_plugins ()
 {
