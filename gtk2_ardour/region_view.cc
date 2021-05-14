@@ -436,6 +436,7 @@ RegionView::region_changed (const PropertyChange& what_changed)
 	if (what_changed.contains (ARDOUR::bounds_change)) {
 		region_resized (what_changed);
 		region_sync_changed ();
+		update_cue_markers ();
 	}
 	if (what_changed.contains (ARDOUR::Properties::muted)) {
 		region_muted ();
