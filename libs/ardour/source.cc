@@ -380,3 +380,19 @@ Source::writable () const
 {
         return (_flags & Writable) && _session.writable();
 }
+
+void
+Source::add_cue_marker (CueMarker const & cm)
+{
+	_cue_markers.insert (cm);
+	CueMarkersChanged(); /* EMIT SIGNAL */
+}
+
+void
+Source::remove_cue_marker (CueMarker const & cm)
+{
+	if (_cue_markers.erase (cm)) {
+		CueMarkersChanged(); /* EMIT SIGNAL */
+	}
+}
+

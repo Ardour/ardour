@@ -113,6 +113,9 @@ public:
 	void set_captured_xruns (XrunPositions const& xruns) { _xruns = xruns; }
 
 	CueMarkers const & cue_markers() const { return _cue_markers; }
+	void add_cue_marker (CueMarker const &);
+	void remove_cue_marker (CueMarker const &);
+	PBD::Signal0<void> CueMarkersChanged;
 
 	virtual samplepos_t natural_position() const { return _natural_position; }
 	virtual void set_natural_position (samplepos_t pos);
