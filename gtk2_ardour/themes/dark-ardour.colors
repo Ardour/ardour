@@ -501,7 +501,8 @@
     <Modifier name="stereo panner inverted bg" modifier="= alpha:0.7529"/>
     <Modifier name="time axis view item base" modifier="= alpha:0.7"/>
     <Modifier name="transparent region base" modifier="= alpha:0.6"/>
-   <Modifier name="time stretch fill" modifier="= alpha:0.5"/>
+    <Modifier name="time stretch fill" modifier="= alpha:0.5"/>
     <Modifier name="verbose canvas cursor" modifier="= alpha:0.4666"/>
+    <Modifier name="region marker" modifier="= alpha:0.8"/>
   </Modifiers>
 </Ardour>
