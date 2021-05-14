@@ -60,7 +60,8 @@ public:
 		LoopStart,
 		LoopEnd,
 		PunchIn,
-		PunchOut
+		PunchOut,
+		RegionCue
 	};
 
 

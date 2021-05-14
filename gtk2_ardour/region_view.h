@@ -39,6 +39,7 @@
 #include "time_axis_view_item.h"
 #include "automation_line.h"
 #include "enums.h"
+#include "marker.h"
 
 class TimeAxisView;
 class RegionEditor;
@@ -206,7 +207,7 @@ private:
 	bool _xrun_markers_visible;
 
 	void update_cue_markers ();
-	std::list<std::pair<ARDOUR::CueMarker, ArdourCanvas::Arrow*> > _cue_markers;
+	std::list<ArdourMarker*> _cue_markers;
 	bool _cue_markers_visible;
 };
 

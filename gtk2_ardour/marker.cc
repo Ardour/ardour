@@ -95,6 +95,7 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Container& parent, g
 	/* Shapes we use:
 	 *
 	 * Mark:
+	 * RegionCue:
 	 *
 	 *  (0,0)   ->  (6,0)
 	 *    ^           |
@@ -165,6 +166,7 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Container& parent, g
 
 	switch (type) {
 	case Mark:
+	case RegionCue:
 		points = new ArdourCanvas::Points ();
 
 		points->push_back (ArdourCanvas::Duple (0.0, 0.0));

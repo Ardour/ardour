@@ -33,6 +33,7 @@
 #include "ardour/playlist.h"
 #include "ardour/profile.h"
 #include "ardour/session.h"
+#include "ardour/source.h"
 
 #include "gtkmm2ext/colors.h"
 
@@ -95,6 +96,10 @@ RegionView::RegionView (ArdourCanvas::Container*          parent,
 	, _cue_markers_visible (false)
 {
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &RegionView::parameter_changed));
+
+	for (SourceList::const_iterator s = _region->sources().begin(); s != _region->sources().end(); ++s) {
+		(*s)->CueMarkersChanged.connect (*this, invalidator (*this), boost::bind (&RegionView::update_cue_markers, this), gui_context());
+	}
 }
 
 RegionView::RegionView (const RegionView& other)
@@ -105,6 +110,11 @@ RegionView::RegionView (const RegionView& other)
 	, _cue_markers_visible (false)
 {
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &RegionView::parameter_changed));
+
+	for (SourceList::const_iterator s = _region->sources().begin(); s != _region->sources().end(); ++s) {
+		(*s)->CueMarkersChanged.connect (*this, invalidator (*this), boost::bind (&RegionView::update_cue_markers, this), gui_context());
+	}
+
 	/* derived concrete type will call init () */
 
 	_region = other._region;
@@ -121,6 +131,11 @@ RegionView::RegionView (const RegionView& other, boost::shared_ptr<Region> other
 	, _cue_markers_visible (false)
 {
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &RegionView::parameter_changed));
+
+	for (SourceList::const_iterator s = _region->sources().begin(); s != _region->sources().end(); ++s) {
+		(*s)->CueMarkersChanged.connect (*this, invalidator (*this), boost::bind (&RegionView::update_cue_markers, this), gui_context());
+	}
+
 	/* derived concrete type will call init () */
 	/* this is a pseudo-copy constructor used when dragging regions
 	   around on the canvas.
@@ -155,6 +170,10 @@ RegionView::RegionView (ArdourCanvas::Container*          parent,
 	, _silence_text (0)
 {
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &RegionView::parameter_changed));
+
+	for (SourceList::const_iterator s = _region->sources().begin(); s != _region->sources().end(); ++s) {
+		(*s)->CueMarkersChanged.connect (*this, invalidator (*this), boost::bind (&RegionView::update_cue_markers, this), gui_context());
+	}
 }
 
 void
@@ -213,23 +232,6 @@ RegionView::init (bool wfd)
 	_xrun_markers_visible = false;
 	update_xrun_markers ();
 
-	CueMarkers cues;
-	_region->get_cue_markers (cues, true);
-	arrow_size = (int)(7.0 * UIConfiguration::instance ().get_ui_scale ()) & ~1;
-	for (CueMarkers::const_iterator x = cues.begin (); x != cues.end (); ++x) {
-		ArdourCanvas::Arrow* canvas_item = new ArdourCanvas::Arrow(group);
-		canvas_item->set_color (UIConfiguration::instance().color ("theme:contrasting"));
-		canvas_item->set_show_head (1, true);
-		canvas_item->set_show_head (0, false);
-		canvas_item->set_head_width (1, arrow_size);
-		canvas_item->set_head_height (1, arrow_size);
-		canvas_item->set_y0 (arrow_size);
-		canvas_item->set_y1 (arrow_size);
-		canvas_item->raise_to_top ();
-		canvas_item->hide ();
-		_cue_markers.push_back (make_pair(*x, canvas_item));
-	}
-
 	_cue_markers_visible = false;
 	update_cue_markers ();
 
@@ -263,6 +265,10 @@ RegionView::~RegionView ()
 
 	for (list<std::pair<samplepos_t, ArdourCanvas::Arrow*> >::iterator i = _xrun_markers.begin(); i != _xrun_markers.end(); ++i) {
 		delete ((*i).second);
+	}
+
+	for (list<ArdourMarker*>::iterator i = _cue_markers.begin(); i != _cue_markers.end(); ++i) {
+		delete *i;
 	}
 
 	drop_silent_frames ();
@@ -524,22 +530,41 @@ RegionView::update_xrun_markers ()
 void
 RegionView::update_cue_markers ()
 {
+	cerr << "Updating cue markers\n";
+
 	const bool show_cue_markers = UIConfiguration::instance().get_show_region_cue_markers();
 	if (_cue_markers_visible == show_cue_markers && !_cue_markers_visible) {
+		cerr << " no show\n";
 		return;
 	}
 
-	const samplepos_t start = _region->start();
-	const samplepos_t length = _region->length();
-	for (list<std::pair<CueMarker, ArdourCanvas::Arrow*> >::iterator i = _cue_markers.begin(); i != _cue_markers.end(); ++i) {
-		float x_pos = trackview.editor().sample_to_pixel (i->first.position() - start);
-		i->second->set_x (x_pos);
-		if (show_cue_markers && (i->first.position() >= start && i->first.position() < start + length)) {
-			i->second->show ();
-		} else  {
-			i->second->hide ();
-		}
+	for (list<ArdourMarker*>::iterator i = _cue_markers.begin(); i != _cue_markers.end(); ++i) {
+		delete (*i);
 	}
+	_cue_markers.clear ();
+
+	boost::shared_ptr<Source> source = region()->source (0);
+
+	samplepos_t start = region()->start();
+	samplepos_t end = region()->start() + region()->length();
+
+	for (CueMarkers::const_iterator c = source->cue_markers().begin(); c != source->cue_markers().end(); ++c) {
+
+		if ((c->position() < start) || (c->position() >= end)) {
+			continue;
+		}
+
+		ArdourMarker* mark = new ArdourMarker (trackview.editor(), *group, 0xff000000, c->text(), ArdourMarker::RegionCue, c->position(), false);
+
+		if (show_cue_markers) {
+			mark->show ();
+		} else  {
+			mark->hide ();
+		}
+
+		_cue_markers.push_back (mark);
+	}
+
 	_cue_markers_visible = show_cue_markers;
 }
 

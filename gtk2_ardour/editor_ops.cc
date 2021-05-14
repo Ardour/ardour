@@ -8726,3 +8726,18 @@ Editor::midi_action (void (MidiRegionView::*method)())
 		}
 	}
 }
+
+void
+Editor::add_region_marker ()
+{
+	if (!_session) {
+		return;
+	}
+
+	RegionSelection rs = get_regions_from_selection_and_edit_point ();
+	samplepos_t position = get_preferred_edit_position ();
+
+	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ++r) {
+		(*r)->region()->add_cue_marker ("foo", position);
+	}
+}

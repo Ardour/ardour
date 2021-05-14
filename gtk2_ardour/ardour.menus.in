@@ -353,6 +353,7 @@
         <menuitem action='toggle-region-lock-style'/>
         <menuitem action='toggle-region-video-lock'/>
         <menuitem action='set-region-sync-position'/>
+        <menuitem action='add-region-cue-marker'/>
         <menuitem action='remove-region-sync'/>
         <menuitem action='nudge-forward'/>
         <menuitem action='nudge-backward'/>

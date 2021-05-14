@@ -585,6 +585,8 @@ public:
 	void edit_tempo_section (ARDOUR::TempoSection*);
 	void edit_meter_section (ARDOUR::MeterSection*);
 
+	void add_region_marker ();
+
 protected:
 	void map_transport_state ();
 	void map_position_change (samplepos_t);
