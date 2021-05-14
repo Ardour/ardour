@@ -8736,8 +8736,32 @@ Editor::add_region_marker ()
 
 	RegionSelection rs = get_regions_from_selection_and_edit_point ();
 	samplepos_t position = get_preferred_edit_position ();
+	bool in_command = false;
 
 	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ++r) {
-		(*r)->region()->add_cue_marker ("foo", position);
+
+		boost::shared_ptr<Region> region ((*r)->region());
+
+		if (position < region->position() || position >= region->position() + region->length()) {
+			continue;
+		}
+
+		SourceList & sources = region->sources_for_edit ();
+
+		CueMarker marker ("foo", region->start() + (position - region->position()));
+
+		if (!in_command) {
+			begin_reversible_command (_("add region marker"));
+			in_command = true;
+		}
+
+		for (SourceList::iterator s = sources.begin(); s != sources.end(); ++s) {
+			(*s)->add_cue_marker (marker);
+			_session->add_command (new StatefulDiffCommand (*s));
+		}
+	}
+
+	if (in_command) {
+		commit_reversible_command ();
 	}
 }
