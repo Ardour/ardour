@@ -58,8 +58,6 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-PBD::Signal1<void,boost::shared_ptr<ARDOUR::Source> > Source::SourcePropertyChanged;
-
 
 Source::Source (Session& s, DataType type, const string& name, Flag flags)
 	: SessionObject(s, name)
@@ -354,13 +352,6 @@ void
 Source::inc_use_count ()
 {
     g_atomic_int_inc (&_use_count);
-
-    try {
-	    boost::shared_ptr<Source> sptr = shared_from_this();
-	    SourcePropertyChanged (sptr);
-    } catch (...) {
-	    /* no shared_ptr available, relax; */
-    }
 }
 
 void
@@ -379,7 +370,6 @@ Source::dec_use_count ()
 
 	try {
 		boost::shared_ptr<Source> sptr = shared_from_this();
-		SourcePropertyChanged (sptr);
 	} catch (...) {
 		/* no shared_ptr available, relax; */
 	}

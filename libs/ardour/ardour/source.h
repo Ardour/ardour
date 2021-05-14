@@ -136,8 +136,6 @@ public:
 	void set_captured_for (std::string str) { _captured_for = str; }
 	std::string captured_for() const { return _captured_for; }
 
-	static PBD::Signal1<void,boost::shared_ptr<ARDOUR::Source> > SourcePropertyChanged;
-
   protected:
 	DataType          _type;
 	Flag              _flags;
