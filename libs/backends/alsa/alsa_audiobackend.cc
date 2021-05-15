@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2014-2015 Tim Mayberry <mojofunk@gmail.com>
  * Copyright (C) 2014-2018 Paul Davis <paul@linuxaudiosystems.com>
- * Copyright (C) 2014-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2014-2021 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,8 +43,9 @@
 using namespace ARDOUR;
 
 static std::string s_instance_name;
-size_t AlsaAudioBackend::_max_buffer_size = 8192;
-std::vector<std::string> AlsaAudioBackend::_midi_options;
+
+size_t                                  AlsaAudioBackend::_max_buffer_size = 8192;
+std::vector<std::string>                AlsaAudioBackend::_midi_options;
 std::vector<AudioBackend::DeviceStatus> AlsaAudioBackend::_input_audio_device_status;
 std::vector<AudioBackend::DeviceStatus> AlsaAudioBackend::_output_audio_device_status;
 std::vector<AudioBackend::DeviceStatus> AlsaAudioBackend::_duplex_audio_device_status;
@@ -63,9 +64,9 @@ AlsaAudioBackend::AlsaAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, _freewheeling (false)
 	, _measure_latency (false)
 	, _last_process_start (0)
-	, _input_audio_device("")
-	, _output_audio_device("")
-	, _midi_driver_option(get_standard_device_name(DeviceNone))
+	, _input_audio_device ("")
+	, _output_audio_device ("")
+	, _midi_driver_option (get_standard_device_name (DeviceNone))
 	, _samplerate (48000)
 	, _samples_per_period (1024)
 	, _periods_per_cycle (2)
@@ -79,7 +80,7 @@ AlsaAudioBackend::AlsaAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 {
 	_instance_name = s_instance_name;
 	pthread_mutex_init (&_device_port_mutex, 0);
-	_input_audio_device_info.valid = false;
+	_input_audio_device_info.valid  = false;
 	_output_audio_device_info.valid = false;
 
 	_port_connection_queue.reserve (128);
@@ -109,12 +110,16 @@ AlsaAudioBackend::is_realtime () const
 std::vector<AudioBackend::DeviceStatus>
 AlsaAudioBackend::enumerate_devices () const
 {
-	_duplex_audio_device_status.clear();
+	_duplex_audio_device_status.clear ();
 	std::map<std::string, std::string> devices;
-	get_alsa_audio_device_names(devices);
-	for (std::map<std::string, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
-		if (_input_audio_device == "") _input_audio_device = i->first;
-		if (_output_audio_device == "") _output_audio_device = i->first;
+	get_alsa_audio_device_names (devices);
+	for (std::map<std::string, std::string>::const_iterator i = devices.begin (); i != devices.end (); ++i) {
+		if (_input_audio_device == "") {
+			_input_audio_device = i->first;
+		}
+		if (_output_audio_device == "") {
+			_output_audio_device = i->first;
+		}
 		_duplex_audio_device_status.push_back (DeviceStatus (i->first, true));
 	}
 	return _duplex_audio_device_status;
@@ -123,12 +128,14 @@ AlsaAudioBackend::enumerate_devices () const
 std::vector<AudioBackend::DeviceStatus>
 AlsaAudioBackend::enumerate_input_devices () const
 {
-	_input_audio_device_status.clear();
+	_input_audio_device_status.clear ();
 	std::map<std::string, std::string> devices;
-	get_alsa_audio_device_names(devices, HalfDuplexIn);
-	_input_audio_device_status.push_back (DeviceStatus (get_standard_device_name(DeviceNone), true));
-	for (std::map<std::string, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
-		if (_input_audio_device == "") _input_audio_device = i->first;
+	get_alsa_audio_device_names (devices, HalfDuplexIn);
+	_input_audio_device_status.push_back (DeviceStatus (get_standard_device_name (DeviceNone), true));
+	for (std::map<std::string, std::string>::const_iterator i = devices.begin (); i != devices.end (); ++i) {
+		if (_input_audio_device == "") {
+			_input_audio_device = i->first;
+		}
 		_input_audio_device_status.push_back (DeviceStatus (i->first, true));
 	}
 	return _input_audio_device_status;
@@ -137,12 +144,14 @@ AlsaAudioBackend::enumerate_input_devices () const
 std::vector<AudioBackend::DeviceStatus>
 AlsaAudioBackend::enumerate_output_devices () const
 {
-	_output_audio_device_status.clear();
+	_output_audio_device_status.clear ();
 	std::map<std::string, std::string> devices;
-	get_alsa_audio_device_names(devices, HalfDuplexOut);
-	_output_audio_device_status.push_back (DeviceStatus (get_standard_device_name(DeviceNone), true));
-	for (std::map<std::string, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
-		if (_output_audio_device == "") _output_audio_device = i->first;
+	get_alsa_audio_device_names (devices, HalfDuplexOut);
+	_output_audio_device_status.push_back (DeviceStatus (get_standard_device_name (DeviceNone), true));
+	for (std::map<std::string, std::string>::const_iterator i = devices.begin (); i != devices.end (); ++i) {
+		if (_output_audio_device == "") {
+			_output_audio_device = i->first;
+		}
 		_output_audio_device_status.push_back (DeviceStatus (i->first, true));
 	}
 	return _output_audio_device_status;
@@ -152,18 +161,16 @@ std::vector<float>
 AlsaAudioBackend::available_sample_rates2 (const std::string& input_device, const std::string& output_device) const
 {
 	std::vector<float> sr;
-	if (input_device == get_standard_device_name(DeviceNone) && output_device == get_standard_device_name(DeviceNone)) {
+	if (input_device == get_standard_device_name (DeviceNone) && output_device == get_standard_device_name (DeviceNone)) {
 		return sr;
-	}
-	else if (input_device == get_standard_device_name(DeviceNone)) {
+	} else if (input_device == get_standard_device_name (DeviceNone)) {
 		sr = available_sample_rates (output_device);
-	}
-	else if (output_device == get_standard_device_name(DeviceNone)) {
+	} else if (output_device == get_standard_device_name (DeviceNone)) {
 		sr = available_sample_rates (input_device);
 	} else {
-		std::vector<float> sr_in =  available_sample_rates (input_device);
+		std::vector<float> sr_in  = available_sample_rates (input_device);
 		std::vector<float> sr_out = available_sample_rates (output_device);
-		std::set_intersection (sr_in.begin(), sr_in.end(), sr_out.begin(), sr_out.end(), std::back_inserter(sr));
+		std::set_intersection (sr_in.begin (), sr_in.end (), sr_out.begin (), sr_out.end (), std::back_inserter (sr));
 	}
 	return sr;
 }
@@ -171,21 +178,20 @@ AlsaAudioBackend::available_sample_rates2 (const std::string& input_device, cons
 std::vector<float>
 AlsaAudioBackend::available_sample_rates (const std::string& device) const
 {
-	ALSADeviceInfo *nfo = NULL;
+	ALSADeviceInfo*    nfo = NULL;
 	std::vector<float> sr;
-	if (device == get_standard_device_name(DeviceNone)) {
+	if (device == get_standard_device_name (DeviceNone)) {
 		return sr;
 	}
 	if (device == _input_audio_device && _input_audio_device_info.valid) {
 		nfo = &_input_audio_device_info;
-	}
-	else if (device == _output_audio_device && _output_audio_device_info.valid) {
+	} else if (device == _output_audio_device && _output_audio_device_info.valid) {
 		nfo = &_output_audio_device_info;
 	}
 
-	static const float avail_rates [] = { 8000, 22050.0, 24000.0, 44100.0, 48000.0, 88200.0, 96000.0, 176400.0, 192000.0 };
+	static const float avail_rates[] = { 8000, 22050.0, 24000.0, 44100.0, 48000.0, 88200.0, 96000.0, 176400.0, 192000.0 };
 
-	for (size_t i = 0 ; i < sizeof(avail_rates) / sizeof(float); ++i) {
+	for (size_t i = 0; i < sizeof (avail_rates) / sizeof (float); ++i) {
 		if (!nfo || (avail_rates[i] >= nfo->min_rate && avail_rates[i] <= nfo->max_rate)) {
 			sr.push_back (avail_rates[i]);
 		}
@@ -198,18 +204,16 @@ std::vector<uint32_t>
 AlsaAudioBackend::available_buffer_sizes2 (const std::string& input_device, const std::string& output_device) const
 {
 	std::vector<uint32_t> bs;
-	if (input_device == get_standard_device_name(DeviceNone) && output_device == get_standard_device_name(DeviceNone)) {
+	if (input_device == get_standard_device_name (DeviceNone) && output_device == get_standard_device_name (DeviceNone)) {
 		return bs;
-	}
-	else if (input_device == get_standard_device_name(DeviceNone)) {
+	} else if (input_device == get_standard_device_name (DeviceNone)) {
 		bs = available_buffer_sizes (output_device);
-	}
-	else if (output_device == get_standard_device_name(DeviceNone)) {
+	} else if (output_device == get_standard_device_name (DeviceNone)) {
 		bs = available_buffer_sizes (input_device);
 	} else {
-		std::vector<uint32_t> bs_in =  available_buffer_sizes (input_device);
+		std::vector<uint32_t> bs_in  = available_buffer_sizes (input_device);
 		std::vector<uint32_t> bs_out = available_buffer_sizes (output_device);
-		std::set_intersection (bs_in.begin(), bs_in.end(), bs_out.begin(), bs_out.end(), std::back_inserter(bs));
+		std::set_intersection (bs_in.begin (), bs_in.end (), bs_out.begin (), bs_out.end (), std::back_inserter (bs));
 	}
 	return bs;
 }
@@ -217,21 +221,20 @@ AlsaAudioBackend::available_buffer_sizes2 (const std::string& input_device, cons
 std::vector<uint32_t>
 AlsaAudioBackend::available_buffer_sizes (const std::string& device) const
 {
-	ALSADeviceInfo *nfo = NULL;
+	ALSADeviceInfo*       nfo = NULL;
 	std::vector<uint32_t> bs;
-	if (device == get_standard_device_name(DeviceNone)) {
+	if (device == get_standard_device_name (DeviceNone)) {
 		return bs;
 	}
 	if (device == _input_audio_device && _input_audio_device_info.valid) {
 		nfo = &_input_audio_device_info;
-	}
-	else if (device == _output_audio_device && _output_audio_device_info.valid) {
+	} else if (device == _output_audio_device && _output_audio_device_info.valid) {
 		nfo = &_output_audio_device_info;
 	}
 
-	static const unsigned long avail_sizes [] = { 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192 };
+	static const unsigned long avail_sizes[] = { 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192 };
 
-	for (size_t i = 0 ; i < sizeof(avail_sizes) / sizeof(unsigned long); ++i) {
+	for (size_t i = 0; i < sizeof (avail_sizes) / sizeof (unsigned long); ++i) {
 		if (!nfo || (avail_sizes[i] >= nfo->min_size && avail_sizes[i] <= nfo->max_size)) {
 			bs.push_back (avail_sizes[i]);
 		}
@@ -241,9 +244,9 @@ AlsaAudioBackend::available_buffer_sizes (const std::string& device) const
 		return bs;
 	}
 
-	static const unsigned long try_msec [] = { 2, 4, 5, 6, 8, 10, 15, 20, 25, 40};
+	static const unsigned long try_msec[] = { 2, 4, 5, 6, 8, 10, 15, 20, 25, 40 };
 
-	for (size_t i = 0 ; i < sizeof(try_msec) / sizeof(unsigned long); ++i) {
+	for (size_t i = 0; i < sizeof (try_msec) / sizeof (unsigned long); ++i) {
 		unsigned int msbs = _samplerate * try_msec[i] / 1000;
 		if (msbs >= nfo->min_size && msbs <= nfo->max_size) {
 			bs.push_back (msbs);
@@ -257,7 +260,7 @@ AlsaAudioBackend::available_buffer_sizes (const std::string& device) const
 uint32_t
 AlsaAudioBackend::available_input_channel_count (const std::string& device) const
 {
-	if (device == get_standard_device_name(DeviceNone)) {
+	if (device == get_standard_device_name (DeviceNone)) {
 		return 0;
 	}
 	if (device == _input_audio_device && _input_audio_device_info.valid) {
@@ -269,7 +272,7 @@ AlsaAudioBackend::available_input_channel_count (const std::string& device) cons
 uint32_t
 AlsaAudioBackend::available_output_channel_count (const std::string& device) const
 {
-	if (device == get_standard_device_name(DeviceNone)) {
+	if (device == get_standard_device_name (DeviceNone)) {
 		return 0;
 	}
 	if (device == _output_audio_device && _output_audio_device_info.valid) {
@@ -285,7 +288,7 @@ AlsaAudioBackend::available_period_sizes (const std::string& driver, const std::
 	ps.push_back (2);
 
 	ALSADeviceInfo* nfo = NULL;
-	if (device == get_standard_device_name(DeviceNone)) {
+	if (device == get_standard_device_name (DeviceNone)) {
 		return ps;
 	}
 
@@ -324,15 +327,15 @@ AlsaAudioBackend::set_input_device_name (const std::string& d)
 	}
 	_input_audio_device = d;
 
-	if (d == get_standard_device_name(DeviceNone)) {
+	if (d == get_standard_device_name (DeviceNone)) {
 		_input_audio_device_info.valid = false;
 		return 0;
 	}
 	std::string alsa_device;
 	std::map<std::string, std::string> devices;
 
-	get_alsa_audio_device_names(devices, HalfDuplexIn);
-	for (std::map<std::string, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
+	get_alsa_audio_device_names (devices, HalfDuplexIn);
+	for (std::map<std::string, std::string>::const_iterator i = devices.begin (); i != devices.end (); ++i) {
 		if (i->first == d) {
 			alsa_device = i->second;
 			break;
@@ -343,7 +346,7 @@ AlsaAudioBackend::set_input_device_name (const std::string& d)
 		return 1;
 	}
 	/* device will be busy once used, hence cache the parameters */
-	/* return */ get_alsa_device_parameters (alsa_device.c_str(), false, &_input_audio_device_info);
+	/* return */ get_alsa_device_parameters (alsa_device.c_str (), false, &_input_audio_device_info);
 	return 0;
 }
 
@@ -356,15 +359,15 @@ AlsaAudioBackend::set_output_device_name (const std::string& d)
 
 	_output_audio_device = d;
 
-	if (d == get_standard_device_name(DeviceNone)) {
+	if (d == get_standard_device_name (DeviceNone)) {
 		_output_audio_device_info.valid = false;
 		return 0;
 	}
 	std::string alsa_device;
 	std::map<std::string, std::string> devices;
 
-	get_alsa_audio_device_names(devices, HalfDuplexOut);
-	for (std::map<std::string, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
+	get_alsa_audio_device_names (devices, HalfDuplexOut);
+	for (std::map<std::string, std::string>::const_iterator i = devices.begin (); i != devices.end (); ++i) {
 		if (i->first == d) {
 			alsa_device = i->second;
 			break;
@@ -374,7 +377,7 @@ AlsaAudioBackend::set_output_device_name (const std::string& d)
 		_output_audio_device_info.valid = false;
 		return 1;
 	}
-	/* return */ get_alsa_device_parameters (alsa_device.c_str(), true, &_output_audio_device_info);
+	/* return */ get_alsa_device_parameters (alsa_device.c_str (), true, &_output_audio_device_info);
 	return 0;
 }
 
@@ -396,7 +399,9 @@ AlsaAudioBackend::can_measure_systemic_latency () const
 int
 AlsaAudioBackend::set_sample_rate (float sr)
 {
-	if (sr <= 0) { return -1; }
+	if (sr <= 0) {
+		return -1;
+	}
 	_samplerate = sr;
 	engine.sample_rate_change (sr);
 	return 0;
@@ -432,7 +437,9 @@ AlsaAudioBackend::set_buffer_size (uint32_t bs)
 int
 AlsaAudioBackend::set_interleaved (bool yn)
 {
-	if (!yn) { return 0; }
+	if (!yn) {
+		return 0;
+	}
 	return -1;
 }
 
@@ -458,7 +465,7 @@ AlsaAudioBackend::set_systemic_input_latency (uint32_t sl)
 	}
 	_systemic_audio_input_latency = sl;
 	if (_run) {
-		update_systemic_audio_latencies();
+		update_systemic_audio_latencies ();
 	}
 	return 0;
 }
@@ -471,7 +478,7 @@ AlsaAudioBackend::set_systemic_output_latency (uint32_t sl)
 	}
 	_systemic_audio_output_latency = sl;
 	if (_run) {
-		update_systemic_audio_latencies();
+		update_systemic_audio_latencies ();
 	}
 	return 0;
 }
@@ -479,8 +486,10 @@ AlsaAudioBackend::set_systemic_output_latency (uint32_t sl)
 int
 AlsaAudioBackend::set_systemic_midi_input_latency (std::string const device, uint32_t sl)
 {
-	struct AlsaMidiDeviceInfo * nfo = midi_device_info(device);
-	if (!nfo) return -1;
+	struct AlsaMidiDeviceInfo* nfo = midi_device_info (device);
+	if (!nfo) {
+		return -1;
+	}
 	nfo->systemic_input_latency = sl;
 	if (_run && nfo->enabled) {
 		update_systemic_midi_latencies ();
@@ -491,8 +500,10 @@ AlsaAudioBackend::set_systemic_midi_input_latency (std::string const device, uin
 int
 AlsaAudioBackend::set_systemic_midi_output_latency (std::string const device, uint32_t sl)
 {
-	struct AlsaMidiDeviceInfo * nfo = midi_device_info(device);
-	if (!nfo) return -1;
+	struct AlsaMidiDeviceInfo* nfo = midi_device_info (device);
+	if (!nfo) {
+		return -1;
+	}
 	nfo->systemic_output_latency = sl;
 	if (_run && nfo->enabled) {
 		update_systemic_midi_latencies ();
@@ -504,7 +515,7 @@ void
 AlsaAudioBackend::update_systemic_audio_latencies ()
 {
 	const uint32_t lcpp = (_periods_per_cycle - 2) * _samples_per_period;
-	LatencyRange lr;
+	LatencyRange   lr;
 
 	lr.min = lr.max = (_measure_latency ? 0 : _systemic_audio_output_latency);
 	for (std::vector<BackendPortPtr>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it) {
@@ -524,9 +535,9 @@ AlsaAudioBackend::update_systemic_midi_latencies ()
 	pthread_mutex_lock (&_device_port_mutex);
 	uint32_t i = 0;
 	for (std::vector<BackendPortPtr>::iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it, ++i) {
-		assert (_rmidi_out.size() > i);
-		AlsaMidiOut *rm = _rmidi_out.at(i);
-		struct AlsaMidiDeviceInfo * nfo = midi_device_info (rm->name());
+		assert (_rmidi_out.size () > i);
+		AlsaMidiOut*               rm  = _rmidi_out.at (i);
+		struct AlsaMidiDeviceInfo* nfo = midi_device_info (rm->name ());
 		assert (nfo);
 		LatencyRange lr;
 		lr.min = lr.max = (_measure_latency ? 0 : nfo->systemic_output_latency);
@@ -535,9 +546,9 @@ AlsaAudioBackend::update_systemic_midi_latencies ()
 
 	i = 0;
 	for (std::vector<BackendPortPtr>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it, ++i) {
-		assert (_rmidi_in.size() > i);
-		AlsaMidiIO *rm = _rmidi_in.at(i);
-		struct AlsaMidiDeviceInfo * nfo = midi_device_info (rm->name());
+		assert (_rmidi_in.size () > i);
+		AlsaMidiIO*                rm  = _rmidi_in.at (i);
+		struct AlsaMidiDeviceInfo* nfo = midi_device_info (rm->name ());
 		assert (nfo);
 		LatencyRange lr;
 		lr.min = lr.max = (_measure_latency ? 0 : nfo->systemic_input_latency);
@@ -551,10 +562,10 @@ AlsaAudioBackend::update_systemic_midi_latencies ()
 std::string
 AlsaAudioBackend::device_name () const
 {
-	if (_input_audio_device != get_standard_device_name(DeviceNone)) {
+	if (_input_audio_device != get_standard_device_name (DeviceNone)) {
 		return _input_audio_device;
 	}
-	if (_output_audio_device != get_standard_device_name(DeviceNone)) {
+	if (_output_audio_device != get_standard_device_name (DeviceNone)) {
 		return _output_audio_device;
 	}
 	return "";
@@ -623,40 +634,45 @@ AlsaAudioBackend::systemic_output_latency () const
 uint32_t
 AlsaAudioBackend::systemic_midi_input_latency (std::string const device) const
 {
-	struct AlsaMidiDeviceInfo * nfo = midi_device_info(device);
-	if (!nfo) return 0;
+	struct AlsaMidiDeviceInfo* nfo = midi_device_info (device);
+	if (!nfo) {
+		return 0;
+	}
 	return nfo->systemic_input_latency;
 }
 
 uint32_t
 AlsaAudioBackend::systemic_midi_output_latency (std::string const device) const
 {
-	struct AlsaMidiDeviceInfo * nfo = midi_device_info(device);
-	if (!nfo) return 0;
+	struct AlsaMidiDeviceInfo* nfo = midi_device_info (device);
+	if (!nfo) {
+		return 0;
+	}
 	return nfo->systemic_output_latency;
 }
 
 /* MIDI */
-struct AlsaAudioBackend::AlsaMidiDeviceInfo *
-AlsaAudioBackend::midi_device_info(std::string const name) const {
-	for (std::map<std::string, struct AlsaMidiDeviceInfo*>::const_iterator i = _midi_devices.begin (); i != _midi_devices.end(); ++i) {
+struct AlsaAudioBackend::AlsaMidiDeviceInfo*
+AlsaAudioBackend::midi_device_info (std::string const name) const
+{
+	for (std::map<std::string, struct AlsaMidiDeviceInfo*>::const_iterator i = _midi_devices.begin (); i != _midi_devices.end (); ++i) {
 		if (i->first == name) {
 			return (i->second);
 		}
 	}
 
-	assert(_midi_driver_option != get_standard_device_name(DeviceNone));
+	assert (_midi_driver_option != get_standard_device_name (DeviceNone));
 
 	std::map<std::string, std::string> devices;
 	if (_midi_driver_option == _("ALSA raw devices")) {
-		get_alsa_rawmidi_device_names(devices);
+		get_alsa_rawmidi_device_names (devices);
 	} else {
 		get_alsa_sequencer_names (devices);
 	}
 
-	for (std::map<std::string, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
+	for (std::map<std::string, std::string>::const_iterator i = devices.begin (); i != devices.end (); ++i) {
 		if (i->first == name) {
-			_midi_devices[name] = new AlsaMidiDeviceInfo();
+			_midi_devices[name] = new AlsaMidiDeviceInfo ();
 			return _midi_devices[name];
 		}
 	}
@@ -666,10 +682,10 @@ AlsaAudioBackend::midi_device_info(std::string const name) const {
 std::vector<std::string>
 AlsaAudioBackend::enumerate_midi_options () const
 {
-	if (_midi_options.empty()) {
+	if (_midi_options.empty ()) {
 		_midi_options.push_back (_("ALSA raw devices"));
 		_midi_options.push_back (_("ALSA sequencer"));
-		_midi_options.push_back (get_standard_device_name(DeviceNone));
+		_midi_options.push_back (get_standard_device_name (DeviceNone));
 	}
 	return _midi_options;
 }
@@ -677,17 +693,16 @@ AlsaAudioBackend::enumerate_midi_options () const
 std::vector<AudioBackend::DeviceStatus>
 AlsaAudioBackend::enumerate_midi_devices () const
 {
-	_midi_device_status.clear();
+	_midi_device_status.clear ();
 	std::map<std::string, std::string> devices;
 
 	if (_midi_driver_option == _("ALSA raw devices")) {
 		get_alsa_rawmidi_device_names (devices);
-	}
-	else if (_midi_driver_option == _("ALSA sequencer")) {
+	} else if (_midi_driver_option == _("ALSA sequencer")) {
 		get_alsa_sequencer_names (devices);
 	}
 
-	for (std::map<std::string, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
+	for (std::map<std::string, std::string>::const_iterator i = devices.begin (); i != devices.end (); ++i) {
 		_midi_device_status.push_back (DeviceStatus (i->first, true));
 	}
 	return _midi_device_status;
@@ -696,7 +711,7 @@ AlsaAudioBackend::enumerate_midi_devices () const
 int
 AlsaAudioBackend::set_midi_option (const std::string& opt)
 {
-	if (opt != get_standard_device_name(DeviceNone) && opt != _("ALSA raw devices") && opt != _("ALSA sequencer")) {
+	if (opt != get_standard_device_name (DeviceNone) && opt != _("ALSA raw devices") && opt != _("ALSA sequencer")) {
 		return -1;
 	}
 	if (_run && _midi_driver_option != opt) {
@@ -715,41 +730,51 @@ AlsaAudioBackend::midi_option () const
 int
 AlsaAudioBackend::set_midi_device_enabled (std::string const device, bool enable)
 {
-	struct AlsaMidiDeviceInfo * nfo = midi_device_info(device);
-	if (!nfo) return -1;
+	struct AlsaMidiDeviceInfo* nfo = midi_device_info (device);
+	if (!nfo) {
+		return -1;
+	}
 	const bool prev_enabled = nfo->enabled;
-	nfo->enabled = enable;
+	nfo->enabled            = enable;
 
 	if (_run && prev_enabled != enable) {
 		if (enable) {
 			// add ports for the given device
-			register_system_midi_ports(device);
+			register_system_midi_ports (device);
 		} else {
 			// remove all ports provided by the given device
 			pthread_mutex_lock (&_device_port_mutex);
 			uint32_t i = 0;
 			for (std::vector<BackendPortPtr>::iterator it = _system_midi_out.begin (); it != _system_midi_out.end ();) {
-				assert (_rmidi_out.size() > i);
-				AlsaMidiOut *rm = _rmidi_out.at(i);
-				if (rm->name () != device) { ++it; ++i; continue; }
+				assert (_rmidi_out.size () > i);
+				AlsaMidiOut* rm = _rmidi_out.at (i);
+				if (rm->name () != device) {
+					++it;
+					++i;
+					continue;
+				}
 				unregister_port (*it);
 				it = _system_midi_out.erase (it);
-				rm->stop();
-				assert (rm == *(_rmidi_out.begin() + i));
-				_rmidi_out.erase (_rmidi_out.begin() + i);
+				rm->stop ();
+				assert (rm == *(_rmidi_out.begin () + i));
+				_rmidi_out.erase (_rmidi_out.begin () + i);
 				delete rm;
 			}
 
 			i = 0;
 			for (std::vector<BackendPortPtr>::iterator it = _system_midi_in.begin (); it != _system_midi_in.end ();) {
-				assert (_rmidi_in.size() > i);
-				AlsaMidiIn *rm = _rmidi_in.at(i);
-				if (rm->name () != device) { ++it; ++i; continue; }
+				assert (_rmidi_in.size () > i);
+				AlsaMidiIn* rm = _rmidi_in.at (i);
+				if (rm->name () != device) {
+					++it;
+					++i;
+					continue;
+				}
 				unregister_port (*it);
 				it = _system_midi_in.erase (it);
-				rm->stop();
-				assert (rm == *(_rmidi_in.begin() + i));
-				_rmidi_in.erase (_rmidi_in.begin() + i);
+				rm->stop ();
+				assert (rm == *(_rmidi_in.begin () + i));
+				_rmidi_in.erase (_rmidi_in.begin () + i);
 				delete rm;
 			}
 			pthread_mutex_unlock (&_device_port_mutex);
@@ -762,16 +787,19 @@ AlsaAudioBackend::set_midi_device_enabled (std::string const device, bool enable
 bool
 AlsaAudioBackend::midi_device_enabled (std::string const device) const
 {
-	struct AlsaMidiDeviceInfo * nfo = midi_device_info(device);
-	if (!nfo) return false;
+	struct AlsaMidiDeviceInfo* nfo = midi_device_info (device);
+	if (!nfo) {
+		return false;
+	}
 	return nfo->enabled;
 }
 
 /* State Control */
 
-static void * pthread_process (void *arg)
+static void*
+pthread_process (void* arg)
 {
-	AlsaAudioBackend *d = static_cast<AlsaAudioBackend *>(arg);
+	AlsaAudioBackend* d = static_cast<AlsaAudioBackend*> (arg);
 	d->main_process_thread ();
 	pthread_exit (0);
 	return 0;
@@ -782,13 +810,13 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 {
 	if (!_active && _run) {
 		// recover from 'halted', reap threads
-		stop();
+		stop ();
 	}
 
 	if (_active || _run) {
 		if (for_latency_measurement != _measure_latency) {
 			_measure_latency = for_latency_measurement;
-			update_systemic_audio_latencies();
+			update_systemic_audio_latencies ();
 			update_systemic_midi_latencies ();
 			PBD::info << _("AlsaAudioBackend: reload latencies.") << endmsg;
 			return NoError;
@@ -802,32 +830,33 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 	clear_ports ();
 
 	/* reset internal state */
-	_dsp_load = 0;
-	_freewheeling = false;
-	_freewheel = false;
+	_dsp_load           = 0;
+	_freewheeling       = false;
+	_freewheel          = false;
 	_last_process_start = 0;
 
-	_device_reservation.release_device();
+	_device_reservation.release_device ();
 
-	assert(_rmidi_in.size() == 0);
-	assert(_rmidi_out.size() == 0);
-	assert(_pcmi == 0);
+	assert (_rmidi_in.size () == 0);
+	assert (_rmidi_out.size () == 0);
+	assert (_pcmi == 0);
 
-	int duplex = 0;
+	int         duplex = 0;
 	std::string audio_device;
 	std::string alsa_device;
+
 	std::map<std::string, std::string> devices;
 
-	if (_input_audio_device == get_standard_device_name(DeviceNone) && _output_audio_device == get_standard_device_name(DeviceNone)) {
+	if (_input_audio_device == get_standard_device_name (DeviceNone) && _output_audio_device == get_standard_device_name (DeviceNone)) {
 		PBD::error << _("AlsaAudioBackend: At least one of input or output device needs to be set.");
 		return AudioDeviceInvalidError;
 	}
 
-	std::string slave_device;
+	std::string            slave_device;
 	AudioSlave::DuplexMode slave_duplex = AudioSlave::FullDuplex;
 
 	if (_input_audio_device != _output_audio_device) {
-		if (_input_audio_device != get_standard_device_name(DeviceNone) && _output_audio_device != get_standard_device_name(DeviceNone)) {
+		if (_input_audio_device != get_standard_device_name (DeviceNone) && _output_audio_device != get_standard_device_name (DeviceNone)) {
 			/* Different devices for In + Out.
 			 * Ideally use input as clock source, and resample output.
 			 * But when using separate devices, input is usually one (or more)
@@ -835,28 +864,28 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 			 * retains master-out connection.
 			 */
 			if (getenv ("ARDOUR_ALSA_CLK")) {
-				slave_device = _output_audio_device;
-				_output_audio_device = get_standard_device_name(DeviceNone);
-				slave_duplex = AudioSlave::HalfDuplexOut;
+				slave_device         = _output_audio_device;
+				_output_audio_device = get_standard_device_name (DeviceNone);
+				slave_duplex         = AudioSlave::HalfDuplexOut;
 			} else {
-				slave_device = _input_audio_device;
-				_input_audio_device = get_standard_device_name(DeviceNone);
-				slave_duplex = AudioSlave::HalfDuplexIn;
+				slave_device        = _input_audio_device;
+				_input_audio_device = get_standard_device_name (DeviceNone);
+				slave_duplex        = AudioSlave::HalfDuplexIn;
 			}
 		}
-		if (_input_audio_device != get_standard_device_name(DeviceNone)) {
-			get_alsa_audio_device_names(devices, HalfDuplexIn);
+		if (_input_audio_device != get_standard_device_name (DeviceNone)) {
+			get_alsa_audio_device_names (devices, HalfDuplexIn);
 			audio_device = _input_audio_device;
-			duplex = 1;
+			duplex       = 1;
 		} else {
-			get_alsa_audio_device_names(devices, HalfDuplexOut);
+			get_alsa_audio_device_names (devices, HalfDuplexOut);
 			audio_device = _output_audio_device;
-			duplex = 2;
+			duplex       = 2;
 		}
 	} else {
-		get_alsa_audio_device_names(devices);
+		get_alsa_audio_device_names (devices);
 		audio_device = _input_audio_device;
-		duplex = 3;
+		duplex       = 3;
 	}
 
 	std::map<std::string, std::string>::const_iterator di = devices.find (audio_device);
@@ -866,69 +895,70 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 		return AudioDeviceNotAvailableError;
 	} else {
 		alsa_device = di->second;
-		assert (!alsa_device.empty());
+		assert (!alsa_device.empty ());
 	}
 
-	_device_reservation.acquire_device(alsa_device.c_str());
+	_device_reservation.acquire_device (alsa_device.c_str ());
 	_pcmi = new Alsa_pcmi (
-			(duplex & 2) ? alsa_device.c_str() : NULL,
-			(duplex & 1) ? alsa_device.c_str() : NULL,
-			/* ctrl name */ 0,
-			_samplerate, _samples_per_period,
-			_periods_per_cycle, _periods_per_cycle,
-			/* debug */ 0);
+	    (duplex & 2) ? alsa_device.c_str () : NULL,
+	    (duplex & 1) ? alsa_device.c_str () : NULL,
+	    /* ctrl name */ 0,
+	    _samplerate, _samples_per_period,
+	    _periods_per_cycle, _periods_per_cycle,
+	    /* debug */ 0);
 
 	AudioBackend::ErrorCode error_code = NoError;
-	switch (_pcmi->state()) {
-	case 0: /* OK */
-		break;
-	case -1:
-		PBD::error << _("AlsaAudioBackend: failed to open device.") << endmsg;
-		error_code = AudioDeviceOpenError;
-		break;
-	case -2:
-		PBD::error << _("AlsaAudioBackend: failed to allocate parameters.") << endmsg;
-		error_code = AudioDeviceOpenError;
-		break;
-	case -3:
-		PBD::error << _("AlsaAudioBackend: cannot set requested sample rate.")
-		           << endmsg;
-		error_code = SampleRateNotSupportedError;
-		break;
-	case -4:
-		PBD::error << _("AlsaAudioBackend: cannot set requested period size.")
-		           << endmsg;
-		error_code = PeriodSizeNotSupportedError;
-		break;
-	case -5:
-		PBD::error << _("AlsaAudioBackend: cannot set requested number of periods.")
-		           << endmsg;
-		error_code = PeriodCountNotSupportedError;
-		break;
-	case -6:
-		PBD::error << _("AlsaAudioBackend: unsupported sample format.") << endmsg;
-		error_code = SampleFormatNotSupportedError;
-		break;
-	default:
-		PBD::error << _("AlsaAudioBackend: initialization failed.") << endmsg;
-		error_code = AudioDeviceOpenError;
-		break;
+	switch (_pcmi->state ()) {
+		case 0: /* OK */
+			break;
+		case -1:
+			PBD::error << _("AlsaAudioBackend: failed to open device.") << endmsg;
+			error_code = AudioDeviceOpenError;
+			break;
+		case -2:
+			PBD::error << _("AlsaAudioBackend: failed to allocate parameters.") << endmsg;
+			error_code = AudioDeviceOpenError;
+			break;
+		case -3:
+			PBD::error << _("AlsaAudioBackend: cannot set requested sample rate.")
+			           << endmsg;
+			error_code = SampleRateNotSupportedError;
+			break;
+		case -4:
+			PBD::error << _("AlsaAudioBackend: cannot set requested period size.")
+			           << endmsg;
+			error_code = PeriodSizeNotSupportedError;
+			break;
+		case -5:
+			PBD::error << _("AlsaAudioBackend: cannot set requested number of periods.")
+			           << endmsg;
+			error_code = PeriodCountNotSupportedError;
+			break;
+		case -6:
+			PBD::error << _("AlsaAudioBackend: unsupported sample format.") << endmsg;
+			error_code = SampleFormatNotSupportedError;
+			break;
+		default:
+			PBD::error << _("AlsaAudioBackend: initialization failed.") << endmsg;
+			error_code = AudioDeviceOpenError;
+			break;
 	}
 
 	if (_pcmi->state ()) {
-		delete _pcmi; _pcmi = 0;
-		_device_reservation.release_device();
+		delete _pcmi;
+		_pcmi = 0;
+		_device_reservation.release_device ();
 		return error_code;
 	}
 
 #ifndef NDEBUG
-	fprintf (stdout, " --[[ ALSA Device %s\n", alsa_device.c_str());
+	fprintf (stdout, " --[[ ALSA Device %s\n", alsa_device.c_str ());
 	_pcmi->printinfo ();
 	fprintf (stdout, " --]]\n");
 #else
 	/* If any debug parameter is set, print info */
 	if (getenv ("ZITA_ALSA_PCMI_DEBUG")) {
-		fprintf (stdout, " --[[ ALSA Device %s\n", alsa_device.c_str());
+		fprintf (stdout, " --[[ ALSA Device %s\n", alsa_device.c_str ());
 		_pcmi->printinfo ();
 		fprintf (stdout, " --]]\n");
 	}
@@ -936,39 +966,40 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 
 	if (_n_outputs != _pcmi->nplay ()) {
 		if (_n_outputs == 0) {
-		 _n_outputs = _pcmi->nplay ();
+			_n_outputs = _pcmi->nplay ();
 		} else {
-		 _n_outputs = std::min (_n_outputs, _pcmi->nplay ());
+			_n_outputs = std::min (_n_outputs, _pcmi->nplay ());
 		}
 		PBD::info << _("AlsaAudioBackend: adjusted output channel count to match device.") << endmsg;
 	}
 
 	if (_n_inputs != _pcmi->ncapt ()) {
 		if (_n_inputs == 0) {
-		 _n_inputs = _pcmi->ncapt ();
+			_n_inputs = _pcmi->ncapt ();
 		} else {
-		 _n_inputs = std::min (_n_inputs, _pcmi->ncapt ());
+			_n_inputs = std::min (_n_inputs, _pcmi->ncapt ());
 		}
 		PBD::info << _("AlsaAudioBackend: adjusted input channel count to match device.") << endmsg;
 	}
 
-	if (_pcmi->fsize() != _samples_per_period) {
-		_samples_per_period = _pcmi->fsize();
+	if (_pcmi->fsize () != _samples_per_period) {
+		_samples_per_period = _pcmi->fsize ();
 		PBD::warning << string_compose (_("AlsaAudioBackend: samples per period does not match, using %1."), _samples_per_period) << endmsg;
 	}
 
-	if (_pcmi->fsamp() != _samplerate) {
-		_samplerate = _pcmi->fsamp();
+	if (_pcmi->fsamp () != _samplerate) {
+		_samplerate = _pcmi->fsamp ();
 		engine.sample_rate_change (_samplerate);
 		PBD::warning << _("AlsaAudioBackend: sample rate does not match.") << endmsg;
 	}
 
-	register_system_midi_ports();
+	register_system_midi_ports ();
 
-	if (register_system_audio_ports()) {
+	if (register_system_audio_ports ()) {
 		PBD::error << _("AlsaAudioBackend: failed to register system ports.") << endmsg;
-		delete _pcmi; _pcmi = 0;
-		_device_reservation.release_device();
+		delete _pcmi;
+		_pcmi = 0;
+		_device_reservation.release_device ();
 		return PortRegistrationError;
 	}
 
@@ -977,8 +1008,9 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 
 	if (engine.reestablish_ports ()) {
 		PBD::error << _("AlsaAudioBackend: Could not re-establish ports.") << endmsg;
-		delete _pcmi; _pcmi = 0;
-		_device_reservation.release_device();
+		delete _pcmi;
+		_pcmi = 0;
+		_device_reservation.release_device ();
 		return PortReconnectError;
 	}
 
@@ -986,12 +1018,12 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 	g_atomic_int_set (&_port_change_flag, 0);
 
 	if (pbd_realtime_pthread_create (PBD_SCHED_FIFO, PBD_RT_PRI_MAIN, PBD_RT_STACKSIZE_PROC,
-				&_main_thread, pthread_process, this))
-	{
+	                                 &_main_thread, pthread_process, this)) {
 		if (pbd_pthread_create (PBD_RT_STACKSIZE_PROC, &_main_thread, pthread_process, this)) {
 			PBD::error << _("AlsaAudioBackend: failed to create process thread.") << endmsg;
-			delete _pcmi; _pcmi = 0;
-			_device_reservation.release_device();
+			delete _pcmi;
+			_pcmi = 0;
+			_device_reservation.release_device ();
 			_run = false;
 			return ProcessThreadStartError;
 		} else {
@@ -1000,23 +1032,26 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 	}
 
 	int timeout = 5000;
-	while (!_active && --timeout > 0) { Glib::usleep (1000); }
+	while (!_active && --timeout > 0) {
+		Glib::usleep (1000);
+	}
 
 	if (timeout == 0 || !_active) {
 		PBD::error << _("AlsaAudioBackend: failed to start process thread.") << endmsg;
-		delete _pcmi; _pcmi = 0;
-		_device_reservation.release_device();
+		delete _pcmi;
+		_pcmi = 0;
+		_device_reservation.release_device ();
 		_run = false;
 		return ProcessThreadStartError;
 	}
 
 	_midi_device_thread_active = listen_for_midi_device_changes ();
 
-	get_alsa_audio_device_names(devices, (AlsaDuplex)slave_duplex);
+	get_alsa_audio_device_names (devices, (AlsaDuplex)slave_duplex);
 
 	if (!slave_device.empty () && (di = devices.find (slave_device)) != devices.end ()) {
 		std::string dev = di->second;
-		if (add_slave (dev.c_str(), _samplerate, _samples_per_period, _periods_per_cycle, slave_duplex)) {
+		if (add_slave (dev.c_str (), _samplerate, _samples_per_period, _periods_per_cycle, slave_duplex)) {
 			PBD::info << string_compose (_("ALSA slave '%1' added"), dev) << endmsg;
 		} else {
 			PBD::error << string_compose (_("ALSA failed to add '%1' as slave"), dev) << endmsg;
@@ -1027,30 +1062,35 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 	/* example: ARDOUR_ALSA_EXT="hw:2@48000/512*3;hw:3@44100" */
 	if (NULL != getenv ("ARDOUR_ALSA_EXT")) {
 		boost::char_separator<char> sep (";");
-		std::string ext (getenv ("ARDOUR_ALSA_EXT"));
+		std::string                 ext (getenv ("ARDOUR_ALSA_EXT"));
+
 		boost::tokenizer<boost::char_separator<char> > devs (ext, sep);
+
 		BOOST_FOREACH (const std::string& tmp, devs) {
-			std::string dev (tmp);
-			unsigned int sr = _samplerate;
-			unsigned int spp = _samples_per_period;
-			unsigned int ppc = _periods_per_cycle;
+			std::string            dev (tmp);
+			unsigned int           sr     = _samplerate;
+			unsigned int           spp    = _samples_per_period;
+			unsigned int           ppc    = _periods_per_cycle;
 			AudioSlave::DuplexMode duplex = AudioSlave::FullDuplex;
-			std::string::size_type n = dev.find ('@');
+			std::string::size_type n      = dev.find ('@');
+
 			if (n != std::string::npos) {
 				std::string const opt (dev.substr (n + 1));
-				sr = PBD::atoi (opt);
+				sr  = PBD::atoi (opt);
 				dev = dev.substr (0, n);
+
 				std::string::size_type n = opt.find ('/');
 				if (n != std::string::npos) {
 					std::string const opt2 (opt.substr (n + 1));
 					spp = PBD::atoi (opt2);
+
 					std::string::size_type n = opt2.find ('*');
 					if (n != std::string::npos) {
 						ppc = PBD::atoi (opt2.substr (n + 1));
 					}
 				}
 			}
-			if (add_slave (dev.c_str(), sr, spp, ppc, duplex)) {
+			if (add_slave (dev.c_str (), sr, spp, ppc, duplex)) {
 				PBD::info << string_compose (_("ALSA slave '%1' added"), dev) << endmsg;
 			} else {
 				PBD::error << string_compose (_("ALSA failed to add '%1' as slave"), dev) << endmsg;
@@ -1067,7 +1107,7 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 int
 AlsaAudioBackend::stop ()
 {
-	void *status;
+	void* status;
 	if (!_run) {
 		return 0;
 	}
@@ -1081,14 +1121,14 @@ AlsaAudioBackend::stop ()
 	stop_listen_for_midi_device_changes ();
 
 	while (!_rmidi_out.empty ()) {
-		AlsaMidiIO *m = _rmidi_out.back ();
-		m->stop();
+		AlsaMidiIO* m = _rmidi_out.back ();
+		m->stop ();
 		_rmidi_out.pop_back ();
 		delete m;
 	}
 	while (!_rmidi_in.empty ()) {
-		AlsaMidiIO *m = _rmidi_in.back ();
-		m->stop();
+		AlsaMidiIO* m = _rmidi_in.back ();
+		m->stop ();
 		_rmidi_in.pop_back ();
 		delete m;
 	}
@@ -1099,9 +1139,10 @@ AlsaAudioBackend::stop ()
 		delete s;
 	}
 
-	unregister_ports();
-	delete _pcmi; _pcmi = 0;
-	_device_reservation.release_device();
+	unregister_ports ();
+	delete _pcmi;
+	_pcmi = 0;
+	_device_reservation.release_device ();
 	_measure_latency = false;
 
 	return (_active == false) ? 0 : -1;
@@ -1125,7 +1166,7 @@ AlsaAudioBackend::raw_buffer_size (DataType t)
 {
 	switch (t) {
 		case DataType::AUDIO:
-			return _samples_per_period * sizeof(Sample);
+			return _samples_per_period * sizeof (Sample);
 		case DataType::MIDI:
 			return _max_buffer_size; // XXX not really limited
 	}
@@ -1155,13 +1196,12 @@ AlsaAudioBackend::samples_since_cycle_start ()
 		return 0;
 	}
 
-	const int64_t elapsed_time_us = g_get_monotonic_time() - _last_process_start;
-	return std::max((pframes_t)0, (pframes_t)rint(1e-6 * elapsed_time_us * _samplerate));
+	const int64_t elapsed_time_us = g_get_monotonic_time () - _last_process_start;
+	return std::max ((pframes_t)0, (pframes_t)rint (1e-6 * elapsed_time_us * _samplerate));
 }
 
-
-void *
-AlsaAudioBackend::alsa_process_thread (void *arg)
+void*
+AlsaAudioBackend::alsa_process_thread (void* arg)
 {
 	ThreadData* td = reinterpret_cast<ThreadData*> (arg);
 	boost::function<void ()> f = td->f;
@@ -1171,7 +1211,7 @@ AlsaAudioBackend::alsa_process_thread (void *arg)
 }
 
 int
-AlsaAudioBackend::create_process_thread (boost::function<void()> func)
+AlsaAudioBackend::create_process_thread (boost::function<void ()> func)
 {
 	pthread_t   thread_id;
 	ThreadData* td = new ThreadData (this, func, PBD_RT_STACKSIZE_PROC);
@@ -1192,9 +1232,8 @@ AlsaAudioBackend::join_process_threads ()
 {
 	int rv = 0;
 
-	for (std::vector<pthread_t>::const_iterator i = _threads.begin (); i != _threads.end (); ++i)
-	{
-		void *status;
+	for (std::vector<pthread_t>::const_iterator i = _threads.begin (); i != _threads.end (); ++i) {
+		void* status;
 		if (pthread_join (*i, &status)) {
 			PBD::error << _("AudioEngine: cannot terminate process thread.") << endmsg;
 			rv -= 1;
@@ -1207,12 +1246,11 @@ AlsaAudioBackend::join_process_threads ()
 bool
 AlsaAudioBackend::in_process_thread ()
 {
-	if (pthread_equal (_main_thread, pthread_self()) != 0) {
+	if (pthread_equal (_main_thread, pthread_self ()) != 0) {
 		return true;
 	}
 
-	for (std::vector<pthread_t>::const_iterator i = _threads.begin (); i != _threads.end (); ++i)
-	{
+	for (std::vector<pthread_t>::const_iterator i = _threads.begin (); i != _threads.end (); ++i) {
 		if (pthread_equal (*i, pthread_self ()) != 0) {
 			return true;
 		}
@@ -1230,7 +1268,7 @@ void
 AlsaAudioBackend::update_latencies ()
 {
 	// trigger latency callback in RT thread (locked graph)
-	port_connect_add_remove_callback();
+	port_connect_add_remove_callback ();
 }
 
 /* PORTENGINE API */
@@ -1248,7 +1286,7 @@ AlsaAudioBackend::my_name () const
 }
 
 int
-AlsaAudioBackend::register_system_audio_ports()
+AlsaAudioBackend::register_system_audio_ports ()
 {
 	LatencyRange lr;
 
@@ -1261,11 +1299,12 @@ AlsaAudioBackend::register_system_audio_ports()
 	lr.min = lr.max = (_measure_latency ? 0 : _systemic_audio_input_latency);
 	for (int i = 1; i <= a_ins; ++i) {
 		char tmp[64];
-		snprintf(tmp, sizeof(tmp), "system:capture_%d", i);
-		PortHandle p = add_port(std::string(tmp), DataType::AUDIO, static_cast<PortFlags>(IsOutput | IsPhysical | IsTerminal));
-		if (!p) return -1;
+		snprintf (tmp, sizeof (tmp), "system:capture_%d", i);
+		PortHandle p = add_port (std::string (tmp), DataType::AUDIO, static_cast<PortFlags> (IsOutput | IsPhysical | IsTerminal));
+		if (!p)
+			return -1;
 		set_latency_range (p, false, lr);
-		BackendPortPtr ap = boost::dynamic_pointer_cast<BackendPort>(p);
+		BackendPortPtr ap = boost::dynamic_pointer_cast<BackendPort> (p);
 		ap->set_hw_port_name (string_compose (_("Main In %1"), i));
 		_system_inputs.push_back (ap);
 	}
@@ -1273,11 +1312,12 @@ AlsaAudioBackend::register_system_audio_ports()
 	lr.min = lr.max = lcpp + (_measure_latency ? 0 : _systemic_audio_output_latency);
 	for (int i = 1; i <= a_out; ++i) {
 		char tmp[64];
-		snprintf(tmp, sizeof(tmp), "system:playback_%d", i);
-		PortHandle p = add_port(std::string(tmp), DataType::AUDIO, static_cast<PortFlags>(IsInput | IsPhysical | IsTerminal));
-		if (!p) return -1;
+		snprintf (tmp, sizeof (tmp), "system:playback_%d", i);
+		PortHandle p = add_port (std::string (tmp), DataType::AUDIO, static_cast<PortFlags> (IsInput | IsPhysical | IsTerminal));
+		if (!p)
+			return -1;
 		set_latency_range (p, true, lr);
-		BackendPortPtr ap = boost::dynamic_pointer_cast<BackendPort>(p);
+		BackendPortPtr ap = boost::dynamic_pointer_cast<BackendPort> (p);
 		if (a_out == 2) {
 			ap->set_hw_port_name (i == 1 ? _("Out Left") : _("Out Right"));
 		} else {
@@ -1301,21 +1341,21 @@ AlsaAudioBackend::auto_update_midi_devices ()
 	}
 
 	/* find new devices */
-	for (std::map<std::string, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
-		if (_midi_devices.find (i->first) != _midi_devices.end()) {
+	for (std::map<std::string, std::string>::const_iterator i = devices.begin (); i != devices.end (); ++i) {
+		if (_midi_devices.find (i->first) != _midi_devices.end ()) {
 			continue;
 		}
 		_midi_devices[i->first] = new AlsaMidiDeviceInfo (false);
 		set_midi_device_enabled (i->first, true);
 	}
 
-	for (std::map<std::string, struct AlsaMidiDeviceInfo*>::iterator i = _midi_devices.begin (); i != _midi_devices.end(); ) {
-		if (devices.find (i->first) != devices.end()) {
+	for (std::map<std::string, struct AlsaMidiDeviceInfo*>::iterator i = _midi_devices.begin (); i != _midi_devices.end ();) {
+		if (devices.find (i->first) != devices.end ()) {
 			++i;
 			continue;
 		}
 		set_midi_device_enabled (i->first, false);
-		std::map<std::string, struct AlsaMidiDeviceInfo *>::iterator tmp = i;
+		std::map<std::string, struct AlsaMidiDeviceInfo*>::iterator tmp = i;
 		++tmp;
 		_midi_devices.erase (i);
 		i = tmp;
@@ -1325,7 +1365,7 @@ AlsaAudioBackend::auto_update_midi_devices ()
 void*
 AlsaAudioBackend::_midi_device_thread (void* arg)
 {
-	AlsaAudioBackend* self = static_cast<AlsaAudioBackend*>(arg);
+	AlsaAudioBackend* self = static_cast<AlsaAudioBackend*> (arg);
 	self->midi_device_thread ();
 	pthread_exit (0);
 	return 0;
@@ -1356,7 +1396,7 @@ AlsaAudioBackend::midi_device_thread ()
 	int port = snd_seq_create_simple_port (seq, "port", SND_SEQ_PORT_CAP_WRITE | SND_SEQ_PORT_CAP_NO_EXPORT, SND_SEQ_PORT_TYPE_APPLICATION);
 	snd_seq_connect_from (seq, port, SND_SEQ_CLIENT_SYSTEM, SND_SEQ_PORT_SYSTEM_ANNOUNCE);
 
-	struct pollfd* pfds = (struct pollfd*) malloc (npfds * sizeof(struct pollfd));
+	struct pollfd* pfds = (struct pollfd*)malloc (npfds * sizeof (struct pollfd));
 	snd_seq_poll_descriptors (seq, pfds, npfds, POLLIN);
 	snd_seq_drop_input (seq);
 
@@ -1372,8 +1412,8 @@ AlsaAudioBackend::midi_device_thread ()
 			}
 		}
 
-		snd_seq_event_t *event;
-		ssize_t err = snd_seq_event_input (seq, &event);
+		snd_seq_event_t* event;
+		ssize_t          err = snd_seq_event_input (seq, &event);
 #if EAGAIN == EWOULDBLOCK
 		if ((err == -EAGAIN) || (err == -ENOSPC))
 #else
@@ -1394,7 +1434,7 @@ AlsaAudioBackend::midi_device_thread ()
 			case SND_SEQ_EVENT_PORT_EXIT:
 			case SND_SEQ_EVENT_PORT_CHANGE:
 				auto_update_midi_devices ();
-				engine.request_device_list_update();
+				engine.request_device_list_update ();
 			default:
 				break;
 		}
@@ -1437,7 +1477,6 @@ AlsaAudioBackend::update_system_port_latencies ()
 	pthread_mutex_unlock (&_device_port_mutex);
 
 	for (AudioSlaves::iterator s = _slaves.begin (); s != _slaves.end (); ++s) {
-
 		if ((*s)->dead) {
 			continue;
 		}
@@ -1456,7 +1495,8 @@ AlsaAudioBackend::update_system_port_latencies ()
  * " (IO)", " (I)", or " (O)"
  * depending of the device is full-duples or half-duplex
  */
-static std::string replace_name_io (std::string const& name, bool in)
+static std::string
+replace_name_io (std::string const& name, bool in)
 {
 	if (name.empty ()) {
 		return "";
@@ -1472,10 +1512,10 @@ static std::string replace_name_io (std::string const& name, bool in)
 static uint32_t
 elf_hash (std::string const& s)
 {
-	const uint8_t* b = (const uint8_t*)s.c_str();
-	uint32_t h = 0;
-	for (size_t i = 0; i < s.length(); ++i) {
-		h = ( h << 4 ) + b[i];
+	const uint8_t* b = (const uint8_t*)s.c_str ();
+	uint32_t       h = 0;
+	for (size_t i = 0; i < s.length (); ++i) {
+		h             = (h << 4) + b[i];
 		uint32_t high = h & 0xF0000000;
 		if (high) {
 			h ^= high >> 24;
@@ -1486,64 +1526,64 @@ elf_hash (std::string const& s)
 }
 
 int
-AlsaAudioBackend::register_system_midi_ports(const std::string device)
+AlsaAudioBackend::register_system_midi_ports (const std::string device)
 {
 	std::map<std::string, std::string> devices;
 
-	if (_midi_driver_option == get_standard_device_name(DeviceNone)) {
+	if (_midi_driver_option == get_standard_device_name (DeviceNone)) {
 		return 0;
 	} else if (_midi_driver_option == _("ALSA raw devices")) {
-		get_alsa_rawmidi_device_names(devices);
+		get_alsa_rawmidi_device_names (devices);
 	} else {
 		get_alsa_sequencer_names (devices);
 	}
 
-	for (std::map<std::string, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
-		if (!device.empty() && device != i->first) {
+	for (std::map<std::string, std::string>::const_iterator i = devices.begin (); i != devices.end (); ++i) {
+		if (!device.empty () && device != i->first) {
 			continue;
 		}
-		struct AlsaMidiDeviceInfo * nfo = midi_device_info(i->first);
-		if (!nfo) continue;
-		if (!nfo->enabled) continue;
+		struct AlsaMidiDeviceInfo* nfo = midi_device_info (i->first);
+		if (!nfo) {
+			continue;
+		}
+		if (!nfo->enabled) {
+			continue;
+		}
 
-		AlsaMidiOut *mout;
+		AlsaMidiOut* mout;
 		if (_midi_driver_option == _("ALSA raw devices")) {
-			mout = new AlsaRawMidiOut (i->first, i->second.c_str());
+			mout = new AlsaRawMidiOut (i->first, i->second.c_str ());
 		} else {
-			mout = new AlsaSeqMidiOut (i->first, i->second.c_str());
+			mout = new AlsaSeqMidiOut (i->first, i->second.c_str ());
 		}
 
 		if (mout->state ()) {
-			PBD::warning << string_compose (
-					_("AlsaMidiOut: failed to open midi device '%1'."), i->second)
-				<< endmsg;
+			PBD::warning << string_compose (_("AlsaMidiOut: failed to open midi device '%1'."), i->second) << endmsg;
 			delete mout;
 		} else {
-			mout->setup_timing(_samples_per_period, _samplerate);
-			mout->sync_time (g_get_monotonic_time());
+			mout->setup_timing (_samples_per_period, _samplerate);
+			mout->sync_time (g_get_monotonic_time ());
 			if (mout->start ()) {
-				PBD::warning << string_compose (
-						_("AlsaMidiOut: failed to start midi device '%1'."), i->second)
-					<< endmsg;
+				PBD::warning << string_compose (_("AlsaMidiOut: failed to start midi device '%1'."), i->second) << endmsg;
 				delete mout;
 			} else {
 				char tmp[64];
 				for (int x = 0; x < 10; ++x) {
-					snprintf(tmp, sizeof(tmp), "system:midi_playback_%x%d", elf_hash (i->first), x);
+					snprintf (tmp, sizeof (tmp), "system:midi_playback_%x%d", elf_hash (i->first), x);
 					if (!find_port (tmp)) {
 						break;
 					}
 				}
-				PortHandle p = add_port(std::string(tmp), DataType::MIDI, static_cast<PortFlags>(IsInput | IsPhysical | IsTerminal));
+				PortHandle p = add_port (std::string (tmp), DataType::MIDI, static_cast<PortFlags> (IsInput | IsPhysical | IsTerminal));
 				if (!p) {
-					mout->stop();
+					mout->stop ();
 					delete mout;
 				} else {
 					LatencyRange lr;
 					lr.min = lr.max = (_measure_latency ? 0 : nfo->systemic_output_latency);
 					set_latency_range (p, true, lr);
-					boost::dynamic_pointer_cast<AlsaMidiPort>(p)->set_n_periods(_periods_per_cycle); // TODO check MIDI alignment
-					BackendPortPtr ap = boost::dynamic_pointer_cast<BackendPort>(p);
+					boost::dynamic_pointer_cast<AlsaMidiPort> (p)->set_n_periods (_periods_per_cycle); // TODO check MIDI alignment
+					BackendPortPtr ap = boost::dynamic_pointer_cast<BackendPort> (p);
 					ap->set_hw_port_name (replace_name_io (i->first, false));
 					pthread_mutex_lock (&_device_port_mutex);
 					_system_midi_out.push_back (ap);
@@ -1553,44 +1593,40 @@ AlsaAudioBackend::register_system_midi_ports(const std::string device)
 			}
 		}
 
-		AlsaMidiIn *midin;
+		AlsaMidiIn* midin;
 		if (_midi_driver_option == _("ALSA raw devices")) {
-			midin = new AlsaRawMidiIn (i->first, i->second.c_str());
+			midin = new AlsaRawMidiIn (i->first, i->second.c_str ());
 		} else {
-			midin = new AlsaSeqMidiIn (i->first, i->second.c_str());
+			midin = new AlsaSeqMidiIn (i->first, i->second.c_str ());
 		}
 
 		if (midin->state ()) {
-			PBD::warning << string_compose (
-					_("AlsaMidiIn: failed to open midi device '%1'."), i->second)
-				<< endmsg;
+			PBD::warning << string_compose (_("AlsaMidiIn: failed to open midi device '%1'."), i->second) << endmsg;
 			delete midin;
 		} else {
-			midin->setup_timing(_samples_per_period, _samplerate);
-			midin->sync_time (g_get_monotonic_time());
+			midin->setup_timing (_samples_per_period, _samplerate);
+			midin->sync_time (g_get_monotonic_time ());
 			if (midin->start ()) {
-				PBD::warning << string_compose (
-						_("AlsaMidiIn: failed to start midi device '%1'."), i->second)
-					<< endmsg;
+				PBD::warning << string_compose (_("AlsaMidiIn: failed to start midi device '%1'."), i->second) << endmsg;
 				delete midin;
 			} else {
 				char tmp[64];
 				for (int x = 0; x < 10; ++x) {
-					snprintf(tmp, sizeof(tmp), "system:midi_capture_%x%d", elf_hash (i->first), x);
+					snprintf (tmp, sizeof (tmp), "system:midi_capture_%x%d", elf_hash (i->first), x);
 					if (!find_port (tmp)) {
 						break;
 					}
 				}
-				PortHandle p = add_port(std::string(tmp), DataType::MIDI, static_cast<PortFlags>(IsOutput | IsPhysical | IsTerminal));
+				PortHandle p = add_port (std::string (tmp), DataType::MIDI, static_cast<PortFlags> (IsOutput | IsPhysical | IsTerminal));
 				if (!p) {
-					midin->stop();
+					midin->stop ();
 					delete midin;
 					continue;
 				}
 				LatencyRange lr;
 				lr.min = lr.max = (_measure_latency ? 0 : nfo->systemic_input_latency);
 				set_latency_range (p, false, lr);
-				BackendPortPtr ap = boost::dynamic_pointer_cast<BackendPort>(p);
+				BackendPortPtr ap = boost::dynamic_pointer_cast<BackendPort> (p);
 				ap->set_hw_port_name (replace_name_io (i->first, true));
 				pthread_mutex_lock (&_device_port_mutex);
 				_system_midi_in.push_back (ap);
@@ -1605,39 +1641,39 @@ AlsaAudioBackend::register_system_midi_ports(const std::string device)
 /* MIDI */
 int
 AlsaAudioBackend::midi_event_get (
-		pframes_t& timestamp,
-		size_t& size, uint8_t const** buf, void* port_buffer,
-		uint32_t event_index)
+    pframes_t& timestamp,
+    size_t& size, uint8_t const** buf, void* port_buffer,
+    uint32_t event_index)
 {
 	assert (buf && port_buffer);
-	AlsaMidiBuffer& source = * static_cast<AlsaMidiBuffer*>(port_buffer);
+	AlsaMidiBuffer& source = *static_cast<AlsaMidiBuffer*> (port_buffer);
 	if (event_index >= source.size ()) {
 		return -1;
 	}
 	AlsaMidiEvent const& event = source[event_index];
 
 	timestamp = event.timestamp ();
-	size = event.size ();
-	*buf = event.data ();
+	size      = event.size ();
+	*buf      = event.data ();
 	return 0;
 }
 
 int
 AlsaAudioBackend::midi_event_put (
-		void* port_buffer,
-		pframes_t timestamp,
-		const uint8_t* buffer, size_t size)
+    void*          port_buffer,
+    pframes_t      timestamp,
+    const uint8_t* buffer, size_t size)
 {
 	assert (buffer && port_buffer);
 	if (size >= MaxAlsaMidiEventSize) {
 		return -1;
 	}
-	AlsaMidiBuffer& dst = * static_cast<AlsaMidiBuffer*>(port_buffer);
+	AlsaMidiBuffer& dst = *static_cast<AlsaMidiBuffer*> (port_buffer);
 #ifndef NDEBUG
 	if (dst.size () && (pframes_t)dst.back ().timestamp () > timestamp) {
 		// nevermind, ::get_buffer() sorts events
 		fprintf (stderr, "AlsaMidiBuffer: it's too late for this event. %d > %d\n",
-				(pframes_t)dst.back ().timestamp (), timestamp);
+		         (pframes_t)dst.back ().timestamp (), timestamp);
 	}
 #endif
 	dst.push_back (AlsaMidiEvent (timestamp, buffer, size));
@@ -1648,14 +1684,14 @@ uint32_t
 AlsaAudioBackend::get_midi_event_count (void* port_buffer)
 {
 	assert (port_buffer);
-	return static_cast<AlsaMidiBuffer*>(port_buffer)->size ();
+	return static_cast<AlsaMidiBuffer*> (port_buffer)->size ();
 }
 
 void
 AlsaAudioBackend::midi_clear (void* port_buffer)
 {
 	assert (port_buffer);
-	AlsaMidiBuffer * buf = static_cast<AlsaMidiBuffer*>(port_buffer);
+	AlsaMidiBuffer* buf = static_cast<AlsaMidiBuffer*> (port_buffer);
 	assert (buf);
 	buf->clear ();
 }
@@ -1681,7 +1717,7 @@ AlsaAudioBackend::ensure_input_monitoring (PortEngine::PortHandle, bool)
 }
 
 bool
-AlsaAudioBackend::monitoring_input (PortEngine::PortHandle)
+    AlsaAudioBackend::monitoring_input (PortEngine::PortHandle)
 {
 	return false;
 }
@@ -1702,7 +1738,7 @@ LatencyRange
 AlsaAudioBackend::get_latency_range (PortEngine::PortHandle port_handle, bool for_playback)
 {
 	BackendPortPtr port = boost::dynamic_pointer_cast<BackendPort> (port_handle);
-	LatencyRange r;
+	LatencyRange   r;
 
 	if (!valid_port (port)) {
 		PBD::error << _("AlsaPort::get_latency_range (): invalid port.") << endmsg;
@@ -1712,12 +1748,12 @@ AlsaAudioBackend::get_latency_range (PortEngine::PortHandle port_handle, bool fo
 	}
 
 	r = port->latency_range (for_playback);
-	if (port->is_physical() && port->is_terminal()) {
-		if (port->is_input() && for_playback) {
+	if (port->is_physical () && port->is_terminal ()) {
+		if (port->is_input () && for_playback) {
 			r.min += _samples_per_period;
 			r.max += _samples_per_period;
 		}
-		if (port->is_output() && !for_playback) {
+		if (port->is_output () && !for_playback) {
 			r.min += _samples_per_period;
 			r.max += _samples_per_period;
 		}
@@ -1727,7 +1763,7 @@ AlsaAudioBackend::get_latency_range (PortEngine::PortHandle port_handle, bool fo
 }
 
 BackendPort*
-AlsaAudioBackend::port_factory (std::string const & name, ARDOUR::DataType type, ARDOUR::PortFlags flags)
+AlsaAudioBackend::port_factory (std::string const& name, ARDOUR::DataType type, ARDOUR::PortFlags flags)
 {
 	BackendPort* port = 0;
 
@@ -1758,27 +1794,27 @@ AlsaAudioBackend::get_buffer (PortEngine::PortHandle port_handle, pframes_t nfra
 }
 
 /* Engine Process */
-void *
+void*
 AlsaAudioBackend::main_process_thread ()
 {
 	AudioEngine::thread_init_callback (this);
-	_active = true;
-	bool reset_dll = true;
-	int last_n_periods = 0;
-	_processed_samples = 0;
+	bool reset_dll      = true;
+	int  last_n_periods = 0;
+	_active             = true;
+	_processed_samples  = 0;
 
-	double dll_dt = (double) _samples_per_period / (double) _samplerate;
+	double dll_dt = (double)_samples_per_period / (double)_samplerate;
 	double dll_w1 = 2 * M_PI * 0.1 * dll_dt;
 	double dll_w2 = dll_w1 * dll_w1;
 
-	uint64_t clock1;
-	int no_proc_errors = 0;
-	const int bailout = 5 * _samplerate / _samples_per_period;
+	uint64_t  clock1;
+	int       no_proc_errors = 0;
+	const int bailout        = 5 * _samplerate / _samples_per_period;
 
-	manager.registration_callback();
-	manager.graph_order_callback();
+	manager.registration_callback ();
+	manager.graph_order_callback ();
 
-	const double sr_norm = 1e-6 * (double) _samplerate / (double)_samples_per_period;
+	const double sr_norm = 1e-6 * (double)_samplerate / (double)_samples_per_period;
 
 	/* warm up freewheel dry-run - see also AudioEngine _init_countdown */
 	int cnt = std::max (4, (int)(_samplerate / _samples_per_period) / 8);
@@ -1790,7 +1826,7 @@ AlsaAudioBackend::main_process_thread ()
 			_active = false;
 			return 0;
 		}
-		Glib::usleep (1000000 * (_samples_per_period / _samplerate ));
+		Glib::usleep (1000000 * (_samples_per_period / _samplerate));
 	}
 
 	_dsp_load_calc.reset ();
@@ -1798,7 +1834,7 @@ AlsaAudioBackend::main_process_thread ()
 
 	while (_run) {
 		long nr;
-		bool xrun = false;
+		bool xrun         = false;
 		bool drain_slaves = false;
 
 		if (_freewheeling != _freewheel) {
@@ -1819,13 +1855,13 @@ AlsaAudioBackend::main_process_thread ()
 			nr = _pcmi->pcm_wait ();
 
 			/* update DLL */
-			uint64_t clock0 = g_get_monotonic_time();
+			uint64_t clock0 = g_get_monotonic_time ();
 			if (reset_dll || last_n_periods != 1) {
-				reset_dll = false;
+				reset_dll    = false;
 				drain_slaves = true;
-				dll_dt = 1e6 * (double) _samples_per_period / (double)_samplerate;
-				_t0 = clock0;
-				_t1 = clock0 + dll_dt;
+				dll_dt       = 1e6 * (double)_samples_per_period / (double)_samplerate;
+				_t0          = clock0;
+				_t1          = clock0 + dll_dt;
 			} else {
 				const double er = clock0 - _t1;
 				_t0 = _t1;
@@ -1849,7 +1885,7 @@ AlsaAudioBackend::main_process_thread ()
 					(*s)->inputs.clear ();
 					(*s)->outputs.clear ();
 					(*s)->active = false;
-					(*s)->dead = true;
+					(*s)->dead   = true;
 					continue;
 				}
 				(*s)->active = (*s)->running () && (*s)->state () >= 0;
@@ -1869,22 +1905,19 @@ AlsaAudioBackend::main_process_thread ()
 			}
 			if (no_proc_errors > bailout) {
 				PBD::error
-					<< string_compose (
-							_("AlsaAudioBackend: Audio Process Terminated after %1 consecutive xruns."),
-							no_proc_errors)
-					<< endmsg;
+				    << string_compose (_("AlsaAudioBackend: Audio Process Terminated after %1 consecutive xruns."), no_proc_errors) << endmsg;
 				break;
 			}
 
 			last_n_periods = 0;
 			while (nr >= (long)_samples_per_period && _freewheeling == _freewheel) {
-				uint32_t i = 0;
-				clock1 = g_get_monotonic_time();
+				uint32_t i     = 0;
+				clock1         = g_get_monotonic_time ();
 				no_proc_errors = 0;
 
 				_pcmi->capt_init (_samples_per_period);
 				for (std::vector<BackendPortPtr>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it, ++i) {
-					_pcmi->capt_chan (i, (float*)(*it)->get_buffer(_samples_per_period), _samples_per_period);
+					_pcmi->capt_chan (i, (float*)(*it)->get_buffer (_samples_per_period), _samples_per_period);
 				}
 				_pcmi->capt_done (_samples_per_period);
 
@@ -1894,7 +1927,7 @@ AlsaAudioBackend::main_process_thread ()
 					}
 					i = 0;
 					for (std::vector<BackendPortPtr>::const_iterator it = (*s)->inputs.begin (); it != (*s)->inputs.end (); ++it, ++i) {
-						(*s)->capt_chan (i, (float*)(boost::dynamic_pointer_cast<BackendPort>(*it)->get_buffer(_samples_per_period)), _samples_per_period);
+						(*s)->capt_chan (i, (float*)(boost::dynamic_pointer_cast<BackendPort> (*it)->get_buffer (_samples_per_period)), _samples_per_period);
 					}
 				}
 
@@ -1903,16 +1936,16 @@ AlsaAudioBackend::main_process_thread ()
 				/* de-queue incoming midi*/
 				i = 0;
 				for (std::vector<BackendPortPtr>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it, ++i) {
-					assert (_rmidi_in.size() > i);
-					AlsaMidiIn *rm = _rmidi_in.at(i);
-					void *bptr = (*it)->get_buffer(0);
-					pframes_t time;
-					uint8_t data[MaxAlsaMidiEventSize];
-					size_t size = sizeof(data);
-					midi_clear(bptr);
+					assert (_rmidi_in.size () > i);
+					AlsaMidiIn* rm   = _rmidi_in.at (i);
+					void*       bptr = (*it)->get_buffer (0);
+					pframes_t   time;
+					uint8_t     data[MaxAlsaMidiEventSize];
+					size_t      size = sizeof (data);
+					midi_clear (bptr);
 					while (rm->recv_event (time, data, size)) {
-						midi_event_put(bptr, time, data, size);
-						size = sizeof(data);
+						midi_event_put (bptr, time, data, size);
+						size = sizeof (data);
 					}
 					rm->sync_time (clock1);
 				}
@@ -1923,7 +1956,7 @@ AlsaAudioBackend::main_process_thread ()
 				}
 
 				/* call engine process callback */
-				_last_process_start = g_get_monotonic_time();
+				_last_process_start = g_get_monotonic_time ();
 				if (engine.process_callback (_samples_per_period)) {
 					_pcmi->pcm_stop ();
 					_active = false;
@@ -1933,15 +1966,15 @@ AlsaAudioBackend::main_process_thread ()
 				/* only used when adding/removing MIDI device/system ports */
 				pthread_mutex_lock (&_device_port_mutex);
 				for (std::vector<BackendPortPtr>::iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it) {
-					boost::dynamic_pointer_cast<AlsaMidiPort>(*it)->next_period();
+					boost::dynamic_pointer_cast<AlsaMidiPort> (*it)->next_period ();
 				}
 
 				/* queue outgoing midi */
 				i = 0;
 				for (std::vector<BackendPortPtr>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it, ++i) {
-					assert (_rmidi_out.size() > i);
-					AlsaMidiBuffer const * src = boost::dynamic_pointer_cast<const AlsaMidiPort>(*it)->const_buffer();
-					AlsaMidiOut *rm = _rmidi_out.at(i);
+					assert (_rmidi_out.size () > i);
+					AlsaMidiBuffer const* src = boost::dynamic_pointer_cast<const AlsaMidiPort> (*it)->const_buffer ();
+					AlsaMidiOut*          rm  = _rmidi_out.at (i);
 					rm->sync_time (clock1);
 					for (AlsaMidiBuffer::const_iterator mit = src->begin (); mit != src->end (); ++mit) {
 						rm->send_event (mit->timestamp (), mit->data (), mit->size ());
@@ -1966,7 +1999,7 @@ AlsaAudioBackend::main_process_thread ()
 					}
 					i = 0;
 					for (std::vector<BackendPortPtr>::const_iterator it = (*s)->outputs.begin (); it != (*s)->outputs.end (); ++it, ++i) {
-						(*s)->play_chan (i, (float*)(*it)->get_buffer(_samples_per_period), _samples_per_period);
+						(*s)->play_chan (i, (float*)(*it)->get_buffer (_samples_per_period), _samples_per_period);
 					}
 					(*s)->cycle_end ();
 				}
@@ -1974,14 +2007,14 @@ AlsaAudioBackend::main_process_thread ()
 				nr -= _samples_per_period;
 				_processed_samples += _samples_per_period;
 
-				_dsp_load_calc.set_max_time(_samplerate, _samples_per_period);
+				_dsp_load_calc.set_max_time (_samplerate, _samples_per_period);
 				_dsp_load_calc.set_start_timestamp_us (clock1);
-				_dsp_load_calc.set_stop_timestamp_us (g_get_monotonic_time());
+				_dsp_load_calc.set_stop_timestamp_us (g_get_monotonic_time ());
 				_dsp_load = _dsp_load_calc.get_dsp_load ();
 				++last_n_periods;
 			}
 
-			if (xrun && (_pcmi->capt_xrun() > 0 || _pcmi->play_xrun() > 0)) {
+			if (xrun && (_pcmi->capt_xrun () > 0 || _pcmi->play_xrun () > 0)) {
 				engine.Xrun ();
 				reset_dll = true;
 #if 0
@@ -1997,19 +2030,19 @@ AlsaAudioBackend::main_process_thread ()
 				memset ((*it)->get_buffer (_samples_per_period), 0, _samples_per_period * sizeof (Sample));
 			}
 
-			clock1 = g_get_monotonic_time();
+			clock1     = g_get_monotonic_time ();
 			uint32_t i = 0;
 			pthread_mutex_lock (&_device_port_mutex);
 			for (std::vector<BackendPortPtr>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it, ++i) {
-				static_cast<AlsaMidiBuffer*>((*it)->get_buffer(0))->clear ();
-				AlsaMidiIn *rm = _rmidi_in.at(i);
-				void *bptr = (*it)->get_buffer(0);
-				midi_clear(bptr); // zero midi buffer
+				static_cast<AlsaMidiBuffer*> ((*it)->get_buffer (0))->clear ();
+				AlsaMidiIn* rm   = _rmidi_in.at (i);
+				void*       bptr = (*it)->get_buffer (0);
+				midi_clear (bptr); // zero midi buffer
 
 				// TODO add an API call for this.
 				pframes_t time;
-				uint8_t data[64]; // match MaxAlsaEventSize in alsa_rawmidi.cc
-				size_t size = sizeof(data);
+				uint8_t   data[64]; // match MaxAlsaEventSize in alsa_rawmidi.cc
+				size_t    size = sizeof (data);
 				while (rm->recv_event (time, data, size)) {
 					; // discard midi-data from HW.
 				}
@@ -2027,8 +2060,8 @@ AlsaAudioBackend::main_process_thread ()
 			// drop all outgoing MIDI messages
 			pthread_mutex_lock (&_device_port_mutex);
 			for (std::vector<BackendPortPtr>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it) {
-				void *bptr = (*it)->get_buffer(0);
-				midi_clear(bptr);
+				void* bptr = (*it)->get_buffer (0);
+				midi_clear (bptr);
 			}
 			pthread_mutex_unlock (&_device_port_mutex);
 
@@ -2038,7 +2071,7 @@ AlsaAudioBackend::main_process_thread ()
 		}
 
 		bool connections_changed = false;
-		bool ports_changed = false;
+		bool ports_changed       = false;
 		if (!pthread_mutex_trylock (&_port_callback_mutex)) {
 			if (g_atomic_int_compare_and_exchange (&_port_change_flag, 1, 0)) {
 				ports_changed = true;
@@ -2047,7 +2080,7 @@ AlsaAudioBackend::main_process_thread ()
 				connections_changed = true;
 			}
 			while (!_port_connection_queue.empty ()) {
-				PortConnectData *c = _port_connection_queue.back ();
+				PortConnectData* c = _port_connection_queue.back ();
 				manager.connect_callback (c->a, c->b, c->c);
 				_port_connection_queue.pop_back ();
 				delete c;
@@ -2055,22 +2088,21 @@ AlsaAudioBackend::main_process_thread ()
 			pthread_mutex_unlock (&_port_callback_mutex);
 		}
 		if (ports_changed) {
-			manager.registration_callback();
+			manager.registration_callback ();
 		}
 		if (connections_changed) {
-			manager.graph_order_callback();
+			manager.graph_order_callback ();
 		}
 		if (connections_changed || ports_changed) {
 			update_system_port_latencies (); // flush, clear
-			engine.latency_callback(false);
-			engine.latency_callback(true);
+			engine.latency_callback (false);
+			engine.latency_callback (true);
 		}
-
 	}
 	_pcmi->pcm_stop ();
 	_active = false;
 	if (_run) {
-		engine.halted_callback("ALSA I/O error.");
+		engine.halted_callback ("ALSA I/O error.");
 	}
 	return 0;
 }
@@ -2078,15 +2110,15 @@ AlsaAudioBackend::main_process_thread ()
 /******************************************************************************/
 
 bool
-AlsaAudioBackend::add_slave (const char*  device,
-                             unsigned int slave_rate,
-                             unsigned int slave_spp,
-                             unsigned int slave_ppc,
+AlsaAudioBackend::add_slave (const char*            device,
+                             unsigned int           slave_rate,
+                             unsigned int           slave_spp,
+                             unsigned int           slave_ppc,
                              AudioSlave::DuplexMode duplex)
 {
 	AudioSlave* s = new AudioSlave (device, duplex,
-			_samplerate, _samples_per_period,
-			slave_rate, slave_spp, slave_ppc);
+	                                _samplerate, _samples_per_period,
+	                                slave_rate, slave_spp, slave_ppc);
 
 	if (s->state ()) {
 		// TODO parse error status
@@ -2097,16 +2129,18 @@ AlsaAudioBackend::add_slave (const char*  device,
 	for (uint32_t i = 0, n = 1; i < s->ncapt (); ++i) {
 		char tmp[64];
 		do {
-			snprintf(tmp, sizeof(tmp), "extern:capture_%d", n);
+			snprintf (tmp, sizeof (tmp), "extern:capture_%d", n);
 			if (find_port (tmp)) {
 				++n;
 			} else {
 				break;
 			}
 		} while (1);
-		PortPtr p = add_port(std::string(tmp), DataType::AUDIO, static_cast<PortFlags>(IsOutput | IsPhysical | IsTerminal));
-		if (!p) goto errout;
-		BackendPortPtr ap = boost::dynamic_pointer_cast<BackendPort>(p);
+		PortPtr p = add_port (std::string (tmp), DataType::AUDIO, static_cast<PortFlags> (IsOutput | IsPhysical | IsTerminal));
+		if (!p) {
+			goto errout;
+		}
+		BackendPortPtr ap = boost::dynamic_pointer_cast<BackendPort> (p);
 		ap->set_hw_port_name (string_compose (_("Aux In %1"), n));
 		s->inputs.push_back (ap);
 	}
@@ -2114,16 +2148,18 @@ AlsaAudioBackend::add_slave (const char*  device,
 	for (uint32_t i = 0, n = 1; i < s->nplay (); ++i) {
 		char tmp[64];
 		do {
-			snprintf(tmp, sizeof(tmp), "extern:playback_%d", n);
+			snprintf (tmp, sizeof (tmp), "extern:playback_%d", n);
 			if (find_port (tmp)) {
 				++n;
 			} else {
 				break;
 			}
 		} while (1);
-		PortPtr p = add_port(std::string(tmp), DataType::AUDIO, static_cast<PortFlags>(IsInput | IsPhysical | IsTerminal));
-		if (!p) goto errout;
-		BackendPortPtr ap = boost::dynamic_pointer_cast<BackendPort>(p);
+		PortPtr p = add_port (std::string (tmp), DataType::AUDIO, static_cast<PortFlags> (IsInput | IsPhysical | IsTerminal));
+		if (!p) {
+			goto errout;
+		}
+		BackendPortPtr ap = boost::dynamic_pointer_cast<BackendPort> (p);
 		ap->set_hw_port_name (string_compose (_("Aux Out %1"), n));
 		s->outputs.push_back (ap);
 	}
@@ -2142,13 +2178,13 @@ errout:
 }
 
 AlsaAudioBackend::AudioSlave::AudioSlave (
-		const char*  device,
-		DuplexMode   duplex,
-		unsigned int master_rate,
-		unsigned int master_samples_per_period,
-		unsigned int slave_rate,
-		unsigned int slave_samples_per_period,
-		unsigned int slave_periods_per_cycle)
+    const char*  device,
+    DuplexMode   duplex,
+    unsigned int master_rate,
+    unsigned int master_samples_per_period,
+    unsigned int slave_rate,
+    unsigned int slave_samples_per_period,
+    unsigned int slave_periods_per_cycle)
 	: AlsaDeviceReservation (device)
 	, AlsaAudioSlave (
 			(duplex & HalfDuplexOut) ? device : NULL /* playback */,
@@ -2178,11 +2214,11 @@ AlsaAudioBackend::AudioSlave::halted ()
 void
 AlsaAudioBackend::AudioSlave::update_latencies (uint32_t play, uint32_t capt)
 {
-	 LatencyRange lr;
-	 lr.min = lr.max = (capt);
-	 for (std::vector<BackendPortPtr>::const_iterator it = inputs.begin (); it != inputs.end (); ++it) {
+	LatencyRange lr;
+	lr.min = lr.max = (capt);
+	for (std::vector<BackendPortPtr>::const_iterator it = inputs.begin (); it != inputs.end (); ++it) {
 		(*it)->set_latency_range (lr, false);
-	 }
+	}
 
 	lr.min = lr.max = play;
 	for (std::vector<BackendPortPtr>::const_iterator it = outputs.begin (); it != outputs.end (); ++it) {
@@ -2199,8 +2235,8 @@ AlsaAudioBackend::AudioSlave::update_latencies (uint32_t play, uint32_t capt)
 static boost::shared_ptr<AlsaAudioBackend> _instance;
 
 static boost::shared_ptr<AudioBackend> backend_factory (AudioEngine& e);
-static int instantiate (const std::string& arg1, const std::string& /* arg2 */);
-static int deinstantiate ();
+static int  instantiate (const std::string& arg1, const std::string& /* arg2 */);
+static int  deinstantiate ();
 static bool already_configured ();
 static bool available ();
 
@@ -2253,11 +2289,10 @@ extern "C" ARDOURBACKEND_API ARDOUR::AudioBackendInfo* descriptor ()
 	return &_descriptor;
 }
 
-
 /******************************************************************************/
 /******************************************************************************/
 
-AlsaAudioPort::AlsaAudioPort (AlsaAudioBackend &b, const std::string& name, PortFlags flags)
+AlsaAudioPort::AlsaAudioPort (AlsaAudioBackend& b, const std::string& name, PortFlags flags)
 	: BackendPort (b, name, flags)
 {
 	memset (_buffer, 0, sizeof (_buffer));
@@ -2277,13 +2312,13 @@ AlsaAudioPort::get_buffer (pframes_t n_samples)
 		if (it == connections.end ()) {
 			memset (_buffer, 0, n_samples * sizeof (Sample));
 		} else {
-			boost::shared_ptr<const AlsaAudioPort> source = boost::dynamic_pointer_cast<const AlsaAudioPort>(*it);
+			boost::shared_ptr<const AlsaAudioPort> source = boost::dynamic_pointer_cast<const AlsaAudioPort> (*it);
 			assert (source && source->is_output ());
 			memcpy (_buffer, source->const_buffer (), n_samples * sizeof (Sample));
 			while (++it != connections.end ()) {
-				source = boost::dynamic_pointer_cast<const AlsaAudioPort>(*it);
+				source = boost::dynamic_pointer_cast<const AlsaAudioPort> (*it);
 				assert (source && source->is_output ());
-				Sample* dst = buffer ();
+				Sample*       dst = buffer ();
 				const Sample* src = source->const_buffer ();
 				for (uint32_t s = 0; s < n_samples; ++s, ++dst, ++src) {
 					*dst += *src;
@@ -2294,8 +2329,7 @@ AlsaAudioPort::get_buffer (pframes_t n_samples)
 	return _buffer;
 }
 
-
-AlsaMidiPort::AlsaMidiPort (AlsaAudioBackend &b, const std::string& name, PortFlags flags)
+AlsaMidiPort::AlsaMidiPort (AlsaAudioBackend& b, const std::string& name, PortFlags flags)
 	: BackendPort (b, name, flags)
 	, _n_periods (1)
 	, _bufperiod (0)
@@ -2304,9 +2338,9 @@ AlsaMidiPort::AlsaMidiPort (AlsaAudioBackend &b, const std::string& name, PortFl
 	_buffer[1].clear ();
 	_buffer[2].clear ();
 
-	_buffer[0].reserve(256);
-	_buffer[1].reserve(256);
-	_buffer[2].reserve(256);
+	_buffer[0].reserve (256);
+	_buffer[1].reserve (256);
+	_buffer[2].reserve (256);
 }
 
 AlsaMidiPort::~AlsaMidiPort ()
@@ -2314,7 +2348,8 @@ AlsaMidiPort::~AlsaMidiPort ()
 }
 
 struct MidiEventSorter {
-	bool operator() (AlsaMidiEvent const& a, AlsaMidiEvent const& b) {
+	bool operator() (AlsaMidiEvent const& a, AlsaMidiEvent const& b)
+	{
 		return a < b;
 	}
 };
@@ -2325,14 +2360,14 @@ void* AlsaMidiPort::get_buffer (pframes_t /* nframes */)
 		(_buffer[_bufperiod]).clear ();
 		const std::set<BackendPortPtr>& connections = get_connections ();
 		for (std::set<BackendPortPtr>::const_iterator i = connections.begin ();
-				i != connections.end ();
-				++i) {
-			const AlsaMidiBuffer * src = boost::dynamic_pointer_cast<const AlsaMidiPort>(*i)->const_buffer ();
+		     i != connections.end ();
+		     ++i) {
+			const AlsaMidiBuffer* src = boost::dynamic_pointer_cast<const AlsaMidiPort> (*i)->const_buffer ();
 			for (AlsaMidiBuffer::const_iterator it = src->begin (); it != src->end (); ++it) {
 				(_buffer[_bufperiod]).push_back (*it);
 			}
 		}
-		std::stable_sort ((_buffer[_bufperiod]).begin (), (_buffer[_bufperiod]).end (), MidiEventSorter());
+		std::stable_sort ((_buffer[_bufperiod]).begin (), (_buffer[_bufperiod]).end (), MidiEventSorter ());
 	}
 	return &(_buffer[_bufperiod]);
 }
@@ -2360,7 +2395,8 @@ AlsaMidiEvent::AlsaMidiEvent (const AlsaMidiEvent& other)
 
 AlsaDeviceReservation::AlsaDeviceReservation ()
 	: _device_reservation (0)
-{}
+{
+}
 
 AlsaDeviceReservation::AlsaDeviceReservation (const char* device_name)
 	: _device_reservation (0)
@@ -2376,52 +2412,52 @@ AlsaDeviceReservation::~AlsaDeviceReservation ()
 bool
 AlsaDeviceReservation::acquire_device (const char* device_name)
 {
-	int device_number = card_to_num(device_name);
-	if (device_number < 0) return false;
+	int device_number = card_to_num (device_name);
+	if (device_number < 0) {
+		return false;
+	}
 
-	assert(_device_reservation == 0);
+	assert (_device_reservation == 0);
 	_reservation_succeeded = false;
 
 	std::string request_device_exe;
 	if (!PBD::find_file (
-				PBD::Searchpath(Glib::build_filename(ARDOUR::ardour_dll_directory(), "ardouralsautil")
-					+ G_SEARCHPATH_SEPARATOR_S + ARDOUR::ardour_dll_directory()),
-				"ardour-request-device", request_device_exe))
-	{
+	        PBD::Searchpath (Glib::build_filename (ARDOUR::ardour_dll_directory (), "ardouralsautil") + G_SEARCHPATH_SEPARATOR_S + ARDOUR::ardour_dll_directory ()),
+	        "ardour-request-device", request_device_exe)) {
 		PBD::warning << "ardour-request-device binary was not found..'" << endmsg;
 		return false;
 	}
 
-	char **argp;
-	char tmp[128];
-	argp=(char**) calloc(5,sizeof(char*));
-	argp[0] = strdup(request_device_exe.c_str());
-	argp[1] = strdup("-P");
-	snprintf(tmp, sizeof(tmp), "%d", getpid());
-	argp[2] = strdup(tmp);
-	snprintf(tmp, sizeof(tmp), "Audio%d", device_number);
-	argp[3] = strdup(tmp);
+	char** argp;
+	char   tmp[128];
+	argp    = (char**)calloc (5, sizeof (char*));
+	argp[0] = strdup (request_device_exe.c_str ());
+	argp[1] = strdup ("-P");
+	snprintf (tmp, sizeof (tmp), "%d", getpid ());
+	argp[2] = strdup (tmp);
+	snprintf (tmp, sizeof (tmp), "Audio%d", device_number);
+	argp[3] = strdup (tmp);
 	argp[4] = 0;
 
-	_device_reservation = new ARDOUR::SystemExec(request_device_exe, argp);
-	_device_reservation->ReadStdout.connect_same_thread (_reservation_connection, boost::bind (&AlsaDeviceReservation::reservation_stdout, this, _1 ,_2));
+	_device_reservation = new ARDOUR::SystemExec (request_device_exe, argp);
+	_device_reservation->ReadStdout.connect_same_thread (_reservation_connection, boost::bind (&AlsaDeviceReservation::reservation_stdout, this, _1, _2));
 	_device_reservation->Terminated.connect_same_thread (_reservation_connection, boost::bind (&AlsaDeviceReservation::release_device, this));
 
 	if (_device_reservation->start (SystemExec::ShareWithParent)) {
 		PBD::warning << _("AlsaAudioBackend: Device Request failed.") << endmsg;
-		release_device();
+		release_device ();
 		return false;
 	}
 
 	/* wait to check if reservation suceeded. */
 	int timeout = 500; // 5 sec
 	while (_device_reservation && !_reservation_succeeded && --timeout > 0) {
-		Glib::usleep(10000);
+		Glib::usleep (10000);
 	}
 
 	if (timeout == 0 || !_reservation_succeeded) {
 		PBD::warning << _("AlsaAudioBackend: Device Reservation failed.") << endmsg;
-		release_device();
+		release_device ();
 		return false;
 	}
 	return true;
@@ -2430,17 +2466,16 @@ AlsaDeviceReservation::acquire_device (const char* device_name)
 void
 AlsaDeviceReservation::release_device ()
 {
-	_reservation_connection.drop_connections();
+	_reservation_connection.drop_connections ();
 	ARDOUR::SystemExec* tmp = _device_reservation;
-	_device_reservation = 0;
+	_device_reservation     = 0;
 	delete tmp;
 }
 
 void
 AlsaDeviceReservation::reservation_stdout (std::string d, size_t /* s */)
 {
-  if (d.substr(0, 19) == "Acquired audio-card") {
+	if (d.substr (0, 19) == "Acquired audio-card") {
 		_reservation_succeeded = true;
 	}
 }
-

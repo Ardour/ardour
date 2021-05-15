@@ -20,13 +20,13 @@
 #ifndef __libbackend_alsa_audiobackend_h__
 #define __libbackend_alsa_audiobackend_h__
 
-#include <string>
-#include <vector>
 #include <map>
 #include <set>
+#include <string>
+#include <vector>
 
-#include <stdint.h>
 #include <pthread.h>
+#include <stdint.h>
 
 #include <boost/shared_ptr.hpp>
 
@@ -41,10 +41,10 @@
 
 #include "ardouralsautil/deviceinfo.h"
 
-#include "zita-alsa-pcmi.h"
 #include "alsa_rawmidi.h"
 #include "alsa_sequencer.h"
 #include "alsa_slave.h"
+#include "zita-alsa-pcmi.h"
 
 namespace ARDOUR {
 
