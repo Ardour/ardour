@@ -114,7 +114,7 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog)
 	/* Normalize */
 
 	normalize_tp_limiter.append_text (_("limit to"));
-	normalize_tp_limiter.append_text (_("constrain"));
+	normalize_tp_limiter.append_text (_("constrain to"));
 
 	Gtk::RadioButtonGroup normalize_group = normalize_loudness_rb.get_group ();
 	normalize_peak_rb.set_group (normalize_group);
