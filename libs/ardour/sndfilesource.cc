@@ -395,6 +395,8 @@ SndFileSource::open ()
 		}
 	}
 #endif
+
+#ifdef LIBSNDFILE_SUPPORTS_CUES_AND_LABELS
 	if (!writable()) {
 		cerr << "Check for cues with " << _sndfile << endl;
 		uint32_t cc;
@@ -410,7 +412,7 @@ SndFileSource::open ()
 			}
 		}
 	}
-
+#endif
 	if (!_broadcast_info) {
 		_broadcast_info = new BroadcastInfo;
 	}
