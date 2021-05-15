@@ -21,20 +21,11 @@
 #ifndef _ZITA_ALSA_PCMI_H_
 #define _ZITA_ALSA_PCMI_H_
 
-
 #define ALSA_PCM_NEW_HW_PARAMS_API
 #define ALSA_PCM_NEW_SW_PARAMS_API
+
 #include <alsa/asoundlib.h>
-
-
-#define ZITA_ALSA_PCMI_MAJOR_VERSION 0
-#define ZITA_ALSA_PCMI_MINOR_VERSION 2
-
 #include <stdint.h>
-
-extern int zita_alsa_pcmi_major_version (void);
-extern int zita_alsa_pcmi_minor_version (void);
-
 
 class Alsa_pcmi
 {

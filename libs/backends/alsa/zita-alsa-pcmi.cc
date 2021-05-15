@@ -29,18 +29,6 @@
 // Public members ----------------------------------------------------------------------
 
 
-int zita_alsa_pcmi_major_version (void)
-{
-	return ZITA_ALSA_PCMI_MAJOR_VERSION;
-}
-
-
-int zita_alsa_pcmi_minor_version (void)
-{
-	return ZITA_ALSA_PCMI_MINOR_VERSION;
-}
-
-
 Alsa_pcmi::Alsa_pcmi (
 		const char        *play_name,
 		const char        *capt_name,
