@@ -1,6 +1,7 @@
 // ----------------------------------------------------------------------------
 //
 //  Copyright (C) 2006-2012 Fons Adriaensen <fons@linuxaudio.org>
+//  Copyright (C) 2014-2021 Robin Gareus <robin@gareus.org>
 //
 //  This program is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -62,7 +63,7 @@ Alsa_pcmi::Alsa_pcmi (
 {
 	const char *p;
 
-	p = getenv ("ZITA_ALSA_PCMI_DEBUG");
+	p = getenv ("ARDOUR_ALSA_DEBUG");
 	if (p && *p) _debug = atoi (p);
 	initialise (play_name, capt_name, ctrl_name);
 }
@@ -347,6 +348,27 @@ int Alsa_pcmi::capt_done (int len)
 	return snd_pcm_mmap_commit (_capt_handle, _capt_offs, len);
 }
 
+static const char* access_type_name (snd_pcm_access_t a)
+{
+	switch (a) {
+		case SND_PCM_ACCESS_MMAP_INTERLEAVED:
+			return "MMAP interleaved";
+		case SND_PCM_ACCESS_MMAP_NONINTERLEAVED:
+			return "MMAP non-interleaved";
+		case SND_PCM_ACCESS_MMAP_COMPLEX:
+			return "MMAP complex";
+		case SND_PCM_ACCESS_RW_INTERLEAVED:
+			assert (0);
+			return "RW interleaved";
+		case SND_PCM_ACCESS_RW_NONINTERLEAVED:
+			assert (0);
+			return "RW non-interleaved";
+		default:
+			assert (0);
+			return "unknown";
+	}
+}
+
 
 void Alsa_pcmi::printinfo (void)
 {
@@ -358,6 +380,7 @@ void Alsa_pcmi::printinfo (void)
 		fprintf (stdout, "  fsize  : %ld\n", _fsize);
 		fprintf (stdout, "  nfrag  : %d\n", _real_nfrag);
 		fprintf (stdout, "  format : %s\n", snd_pcm_format_name (_play_format));
+		fprintf (stdout, "  access : %s\n", access_type_name (_play_access));
 	} else {
 		fprintf (stdout, " : not enabled\n");
 	}
@@ -370,6 +393,7 @@ void Alsa_pcmi::printinfo (void)
 		fprintf (stdout, "  fsize  : %ld\n", _fsize);
 		fprintf (stdout, "  nfrag  : %d\n", _capt_nfrag);
 		fprintf (stdout, "  format : %s\n", snd_pcm_format_name (_capt_format));
+		fprintf (stdout, "  access : %s\n", access_type_name (_capt_access));
 		if (_play_handle) fprintf (stdout, "%s\n", _synced ? "synced" : "not synced");
 	} else {
 		fprintf (stdout, "  : not enabled\n");
@@ -701,9 +725,12 @@ int Alsa_pcmi::set_hwpar (snd_pcm_t *handle,  snd_pcm_hw_params_t *hwpar, const 
 				sname);
 		return -1;
 	}
-	if (   (snd_pcm_hw_params_set_access (handle, hwpar, SND_PCM_ACCESS_MMAP_NONINTERLEAVED) < 0)
-			&& (snd_pcm_hw_params_set_access (handle, hwpar, SND_PCM_ACCESS_MMAP_INTERLEAVED) < 0)
-			&& (snd_pcm_hw_params_set_access (handle, hwpar, SND_PCM_ACCESS_MMAP_COMPLEX) < 0))
+
+	bool il = _debug & TRY_INTLVD;
+
+	if (   (snd_pcm_hw_params_set_access (handle, hwpar, il ? SND_PCM_ACCESS_MMAP_INTERLEAVED : SND_PCM_ACCESS_MMAP_NONINTERLEAVED) < 0)
+	    && (snd_pcm_hw_params_set_access (handle, hwpar, il ? SND_PCM_ACCESS_MMAP_NONINTERLEAVED : SND_PCM_ACCESS_MMAP_INTERLEAVED) < 0)
+	    && (snd_pcm_hw_params_set_access (handle, hwpar, SND_PCM_ACCESS_MMAP_COMPLEX) < 0))
 	{
 		if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi: the %s interface doesn't support mmap-based access.\n",
 				sname);

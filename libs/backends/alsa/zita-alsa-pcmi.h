@@ -1,6 +1,7 @@
 // ----------------------------------------------------------------------------
 //
 //  Copyright (C) 2006-2012 Fons Adriaensen <fons@linuxaudio.org>
+//  Copyright (C) 2014-2021 Robin Gareus <robin@gareus.org>
 //
 //  This program is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -45,13 +46,14 @@ public:
 
 	enum
 	{
-		DEBUG_INIT = 1,
-		DEBUG_STAT = 2,
-		DEBUG_WAIT = 4,
-		DEBUG_DATA = 8,
-		DEBUG_ALL  = 15,
-		FORCE_16B  = 256,
-		FORCE_2CH  = 512
+		DEBUG_INIT = 0x001,
+		DEBUG_STAT = 0x002,
+		DEBUG_WAIT = 0x004,
+		DEBUG_DATA = 0x008,
+		DEBUG_ALL  = 0x00f, // 15
+		FORCE_16B  = 0x100, // 256,
+		FORCE_2CH  = 0x200, // 512
+		TRY_INTLVD = 0x400, // 1024
 	};
 
 	void printinfo (void);
