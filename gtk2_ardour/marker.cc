@@ -363,19 +363,36 @@ ArdourMarker::setup_line ()
 {
 	if (_shown && (_selected || _line_shown)) {
 
-		if (_track_canvas_line == 0) {
+		ArdourCanvas::Item* line_parent;
 
-			_track_canvas_line = new ArdourCanvas::Line (editor.get_cursor_scroll_group());
+		if (_type == RegionCue) {
+			line_parent = group;
+		} else {
+			line_parent = editor.get_cursor_scroll_group();
+		}
+
+		if (_track_canvas_line == 0) {
+			_track_canvas_line = new ArdourCanvas::Line (line_parent);
 			_track_canvas_line->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_marker_event), group, this));
 		}
 
+		/* discover where our group origin is in canvas coordinates */
+
 		ArdourCanvas::Duple g = group->canvas_origin();
-		ArdourCanvas::Duple d = _track_canvas_line->canvas_to_item (ArdourCanvas::Duple (g.x + _shift, 0));
+		ArdourCanvas::Duple d;
+
+		if (_type == RegionCue) {
+			/* line top is at the top of the region view/track (g.y in canvas coords */
+			d = line_parent->canvas_to_item (ArdourCanvas::Duple (g.x + _shift, g.y));
+		} else {
+			/* line top is at the top of the canvas (0 in canvas coords) */
+			d = line_parent->canvas_to_item (ArdourCanvas::Duple (g.x + _shift, 0));
+		}
 
 		_track_canvas_line->set_x0 (d.x);
 		_track_canvas_line->set_x1 (d.x);
 		_track_canvas_line->set_y0 (d.y);
-		_track_canvas_line->set_y1 (_line_height > 0 ? _line_height : ArdourCanvas::COORD_MAX);
+		_track_canvas_line->set_y1 (_line_height > 0 ? d.y + _line_height : ArdourCanvas::COORD_MAX);
 		_track_canvas_line->set_outline_color ( _selected ? UIConfiguration::instance().color ("entered marker") : _color );
 		_track_canvas_line->raise_to_top ();
 		_track_canvas_line->show ();
@@ -535,12 +552,18 @@ ArdourMarker::set_color_rgba (uint32_t c)
 	mark->set_fill_color (_selected ? UIConfiguration::instance().color ("entered marker") : _color);
 	mark->set_outline_color ( _selected ? UIConfiguration::instance().color ("entered marker") : _color );
 
-	if (_track_canvas_line && !_selected) {
+	if (_track_canvas_line && ((_type == RegionCue) || !_selected)) {
 		_track_canvas_line->set_outline_color (_color);
 	}
 
 	if (_name_item) {
-		_name_item->set_color (contrasting_text_color (_color));
+		if (_name_background) {
+			/* make sure text stands out over bg color */
+			_name_item->set_color (contrasting_text_color (_color));
+		} else {
+			/* make sure text is same color as everything else */
+			_name_item->set_color (_color);
+		}
 	}
 
 	if (_name_background) {

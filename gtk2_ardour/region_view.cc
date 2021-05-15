@@ -541,9 +541,10 @@ RegionView::update_cue_markers ()
 
 	const samplepos_t start = region()->start();
 	const samplepos_t end = region()->start() + region()->length();
-	const Gtkmm2ext::SVAModifier alpha = UIConfiguration::instance().modifier (X_("region marker"));
-	const uint32_t color = Gtkmm2ext::HSV (get_fill_color()).opposite().mod (alpha).color();
+	const Gtkmm2ext::SVAModifier alpha = UIConfiguration::instance().modifier (X_("region mark"));
+	const uint32_t color = Gtkmm2ext::HSV (UIConfiguration::instance().color ("region mark")).mod (alpha).color();
 
+	cerr << "marker color will be 0x" << std::hex << color << " based on " << get_fill_color() << std::dec << endl;
 
 	/* We assume that if the region has multiple sources, any of them will
 	 * be appropriate as the origin of cue markers. We use the first one.
@@ -593,6 +594,11 @@ RegionView::update_cue_markers ()
 
 			ArdourMarker* mark = new ArdourMarker (trackview.editor(), *group, color , c->text(), ArdourMarker::RegionCue, c->position() - start, false);
 			mark->set_points_color (color);
+			mark->set_show_line (true);
+			/* make sure the line has a clean end, before the frame
+			   of the region view
+			*/
+			mark->set_line_height (trackview.current_height() - (1.5 * UIConfiguration::instance ().get_ui_scale ()));
 
 			if (show_cue_markers) {
 				mark->show ();
@@ -947,6 +953,9 @@ RegionView::set_height (double h)
 		(*i)->set_y1 (h + 1);
 	}
 
+	for (ViewCueMarkers::iterator v = _cue_markers.begin(); v != _cue_markers.end(); ++v) {
+		(*v)->view_marker->set_line_height (h - (1.5 * UIConfiguration::instance().get_ui_scale()));
+	}
 }
 
 /** Remove old coverage frame and make new ones, if we're in a LayerDisplay mode
