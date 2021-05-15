@@ -2188,7 +2188,6 @@ PluginManager::save_plugin_order_file (XMLNode &elem) const
 std::string
 PluginManager::dump_untagged_plugins ()
 {
-	std::string retval;
 	std::string path = Glib::build_filename (user_plugin_metadata_dir(), "untagged_plugins");
 	XMLNode* root = new XMLNode (X_("PluginTags"));
 
@@ -2214,11 +2213,10 @@ PluginManager::dump_untagged_plugins ()
 	XMLTree tree;
 	tree.set_root (root);
 	if (tree.write (path)) {
-		retval = path;
+		return path;
 	} else {
-		retval = string_compose (_("ERROR: Could not save Plugin Tags info to %1"), path);
+		return "";
 	}
-	return retval;
 }
 
 void
