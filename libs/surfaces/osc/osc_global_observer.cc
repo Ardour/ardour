@@ -450,27 +450,26 @@ OSCGlobalObserver::mark_update ()
 		uint32_t prev = 0;
 		uint32_t next = lm.size() - 1;
 		for (uint32_t i = 0; i < lm.size (); i++) {
-			if ((lm[i].when <= _last_sample) && (i > prev)) {
+			if (lm[i].when <= _last_sample) {
 				prev = i;
 			}
-			if ((lm[i].when >= _last_sample) && (i < next)) {
+			if (lm[i].when >= _last_sample) {
 				next = i;
 				break;
 			}
 		}
-		if ((prev_mark != lm[prev].when) || (next_mark != lm[next].when)) {
-			string send_str = lm[prev].label;
+		if (prev == next) {
+			send_str = lm[prev].label;
 			prev_mark = lm[prev].when;
 			next_mark = lm[next].when;
-			if (prev != next) {
-				send_str = string_compose ("%1 <-> %2", lm[prev].label, lm[next].label);
-			}
 			if (_last_sample > lm[lm.size() - 1].when) {
 				send_str = string_compose ("%1 <-", lm[lm.size() - 1].label);
 			}
 			if (_last_sample < lm[0].when) {
 				send_str = string_compose ("-> %1", lm[0].label);
 			}
+		} else if ((prev_mark != lm[prev].when) || (next_mark != lm[next].when)) {
+			send_str = string_compose ("%1 <-> %2", lm[prev].label, lm[next].label);
 		}
 	}
 	if (send_str != mark_text) {
