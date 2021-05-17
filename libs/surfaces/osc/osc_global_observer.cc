@@ -467,12 +467,6 @@ OSCGlobalObserver::mark_update ()
 			send_str = lm[prev].label;
 			prev_mark = lm[prev].when;
 			next_mark = lm[next].when;
-			if (_last_sample > lm[lm.size() - 1].when) {
-				send_str = string_compose ("%1 <-", lm[lm.size() - 1].label);
-			}
-			if (_last_sample < lm[0].when) {
-				send_str = string_compose ("-> %1", lm[0].label);
-			}
 		} else if ((prev_mark != lm[prev].when) || (next_mark != lm[next].when)) {
 			send_str = string_compose ("%1 <-> %2", lm[prev].label, lm[next].label);
 		}
