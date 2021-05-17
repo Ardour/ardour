@@ -1808,7 +1808,13 @@ Session::xrun_recovery ()
 	}
 	else if (exporting ()) {
 		assert (realtime_export ());
-		++_export_xruns;
+		/* apparently JACK2 can cause xruns during freewheeling
+		 * (and not just one when switching from/to freewheeling):
+		 * https://discourse.ardour.org/t/there-have-been-dropouts-during-realtime-export/105930
+		 */
+		if (realtime_export ()) {
+			++_export_xruns;
+		}
 	}
 }
 
