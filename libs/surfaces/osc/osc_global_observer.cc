@@ -115,7 +115,6 @@ OSCGlobalObserver::OSCGlobalObserver (OSC& o, Session& s, ArdourSurface::OSC::OS
 		session->TransportLooped.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_transport_state_changed, this), OSC::instance());
 		session->RecordStateChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_record_state_changed, this), OSC::instance());
 		send_record_state_changed ();
-		session->locations_modified.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::marks_changed, this), OSC::instance());
 		marks_changed ();
 
 		// session feedback
@@ -287,6 +286,10 @@ OSCGlobalObserver::tick ()
 		}
 		_last_sample = now_sample;
 		mark_update ();
+	} else {
+		if (!_heartbeat) {
+			marks_changed ();
+		}
 	}
 	if (feedback[3]) { //heart beat enabled
 		if (_heartbeat == 10) {
@@ -295,8 +298,6 @@ OSCGlobalObserver::tick ()
 		if (!_heartbeat) {
 			_osc.float_message (X_("/heartbeat"), 0.0, addr);
 		}
-		_heartbeat++;
-		if (_heartbeat > 20) _heartbeat = 0;
 	}
 	if (feedback[7] || feedback[8] || feedback[9]) { // meters enabled
 		// the only meter here is master
@@ -343,6 +344,8 @@ OSCGlobalObserver::tick ()
 		}
 		extra_check ();
 	}
+	_heartbeat++;
+	if (_heartbeat > 20) _heartbeat = 0;
 }
 
 void
@@ -423,8 +426,10 @@ OSCGlobalObserver::send_transport_state_changed()
 void
 OSCGlobalObserver::marks_changed ()
 {
+	lm.clear();
 	const Locations::LocationList& ll (session->locations ()->list ());
 	// get Locations that are marks
+	std::cout << "marks changed\n";
 	for (Locations::LocationList::const_iterator l = ll.begin(); l != ll.end(); ++l) {
 		if ((*l)->is_session_range ()) {
 			lm.push_back (LocationMarker(_("start"), (*l)->start ()));
