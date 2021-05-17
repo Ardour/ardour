@@ -450,6 +450,7 @@ private:
 	mutable Glib::Threads::RWLock region_lock;
 
 private:
+	void freeze_locked ();
 	void setup_layering_indices (RegionList const&);
 	void coalesce_and_check_crossfades (std::list<Evoral::Range<samplepos_t> >);
 

@@ -453,6 +453,12 @@ Playlist::freeze ()
 	 * before beginning to modify the playlist.
 	 */
 	RegionWriteLock rlock (this);
+	freeze_locked ();
+}
+
+void
+Playlist::freeze_locked ()
+{
 	delay_notifications ();
 	g_atomic_int_inc (&ignore_state_changes);
 }
@@ -2224,9 +2230,9 @@ Playlist::update (const RegionListProperty::ChangeRecord& change)
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("Playlist %1 updates from a change record with %2 adds %3 removes\n",
 	                                                name (), change.added.size (), change.removed.size ()));
 
-	freeze ();
 	{
 		RegionWriteLock rlock (this);
+		freeze_locked ();
 		/* add the added regions */
 		for (RegionListProperty::ChangeContainer::const_iterator i = change.added.begin (); i != change.added.end (); ++i) {
 			add_region_internal ((*i), (*i)->position (), rlock.thawlist);
@@ -2993,14 +2999,16 @@ Playlist::ripple (samplepos_t at, samplecnt_t distance, RegionList* exclude)
 void
 Playlist::update_after_tempo_map_change ()
 {
-	freeze ();
+	{
+		RegionWriteLock rlock (const_cast<Playlist*> (this));
+		RegionList      copy (regions.rlist ());
 
-	RegionWriteLock rlock (const_cast<Playlist*> (this));
-	RegionList      copy (regions.rlist ());
+		freeze_locked ();
 
-	for (RegionList::iterator i = copy.begin (); i != copy.end (); ++i) {
-		rlock.thawlist.add (*i);
-		(*i)->update_after_tempo_map_change ();
+		for (RegionList::iterator i = copy.begin (); i != copy.end (); ++i) {
+			rlock.thawlist.add (*i);
+			(*i)->update_after_tempo_map_change ();
+		}
 	}
 	/* possibly causes a contents changed notification (flush_notifications()) */
 	thaw ();
