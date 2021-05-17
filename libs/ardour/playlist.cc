@@ -2993,10 +2993,10 @@ Playlist::ripple (samplepos_t at, samplecnt_t distance, RegionList* exclude)
 void
 Playlist::update_after_tempo_map_change ()
 {
+	freeze ();
+
 	RegionWriteLock rlock (const_cast<Playlist*> (this));
 	RegionList      copy (regions.rlist ());
-
-	freeze ();
 
 	for (RegionList::iterator i = copy.begin (); i != copy.end (); ++i) {
 		rlock.thawlist.add (*i);
