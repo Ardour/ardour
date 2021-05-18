@@ -167,6 +167,8 @@ protected:
 	virtual void color_handler () {}
 	virtual void parameter_changed (std::string const&);
 
+	void maybe_raise_cue_markers ();
+
 	boost::shared_ptr<ARDOUR::Region> _region;
 
 	ArdourCanvas::Polygon* sync_mark; ///< polgyon for sync position

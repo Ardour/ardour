@@ -1334,6 +1334,8 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 	/* channel wave created, don't hook into peaks ready anymore */
 	delete _data_ready_connections[which];
 	_data_ready_connections[which] = 0;
+
+	maybe_raise_cue_markers ();
 }
 
 void

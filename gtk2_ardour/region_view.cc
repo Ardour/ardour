@@ -1196,3 +1196,11 @@ RegionView::set_selected (bool yn)
 	_region->set_selected_for_solo(yn);
 	TimeAxisViewItem::set_selected(yn);
 }
+
+void
+RegionView::maybe_raise_cue_markers ()
+{
+	for (ViewCueMarkers::iterator v = _cue_markers.begin(); v != _cue_markers.end(); ++v) {
+		(*v)->view_marker->the_item().raise_to_top ();
+	}
+}
