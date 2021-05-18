@@ -77,6 +77,7 @@ public:
 	ArdourCanvas::Item& the_item() const;
 
 	void set_selected (bool);
+	void set_entered (bool);
 	void set_show_line (bool);
 	void set_line_height (double);
 
@@ -125,9 +126,11 @@ protected:
 	Type         _type;
 	int           name_height;
 	bool         _selected;
+	bool         _entered;
 	bool         _shown;
 	bool         _line_shown;
 	uint32_t     _color;
+	uint32_t      pre_enter_color;
 	uint32_t     _points_color;
 	double       _left_label_limit; ///< the number of pixels available to the left of this marker for a label
 	double       _right_label_limit; ///< the number of pixels available to the right of this marker for a label

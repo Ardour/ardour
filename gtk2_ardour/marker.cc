@@ -78,9 +78,11 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Container& parent, g
 	, _track_canvas_line (0)
 	, _type (type)
 	, _selected (false)
+	, _entered (false)
 	, _shown (false)
 	, _line_shown (false)
 	, _color (rgba)
+	, pre_enter_color (rgba)
 	, _points_color (rgba)
 	, _left_label_limit (DBL_MAX)
 	, _right_label_limit (DBL_MAX)
@@ -349,6 +351,27 @@ ArdourMarker::set_selected (bool s)
 
 	mark->set_fill_color (_selected ? UIConfiguration::instance().color ("entered marker") : _color);
 	mark->set_outline_color ( _selected ? UIConfiguration::instance().color ("entered marker") : _color );
+}
+
+void
+ArdourMarker::set_entered (bool yn)
+{
+	/* if the pointer moves from the polygon to the line, we will get 2
+	   enter events in a row, which confuses color management. Catch this.
+	*/
+
+	if (yn == _entered) {
+		return;
+	}
+
+	_entered = yn;
+
+	if (yn) {
+		pre_enter_color = _color;
+		set_color_rgba (UIConfiguration::instance().color ("entered marker"));
+	} else {
+		set_color_rgba (pre_enter_color);
+	}
 }
 
 void

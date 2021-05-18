@@ -715,6 +715,7 @@ private:
 
 		void set_show_lines (bool);
 		void set_selected (bool);
+		void set_entered (bool);
 		void setup_lines ();
 
 		void set_name (const std::string&);

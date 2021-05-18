@@ -632,6 +632,15 @@ Editor::LocationMarkers::set_selected (bool s)
 }
 
 void
+Editor::LocationMarkers::set_entered (bool s)
+{
+	start->set_entered (s);
+	if (end) {
+		end->set_entered (s);
+	}
+}
+
+void
 Editor::LocationMarkers::setup_lines ()
 {
 	start->setup_line ();
