@@ -1279,7 +1279,7 @@ Route::ab_plugins (bool forward)
 			if (!boost::dynamic_pointer_cast<PluginInsert> (*i)) {
 				continue;
 			}
-			if (!(*i)->display_to_user ()) {
+			if (!(*i)->display_to_user () || is_internal_processor (*i)) {
 				continue;
 			}
 #ifdef MIXBUS
@@ -1304,7 +1304,7 @@ Route::ab_plugins (bool forward)
 			if (!boost::dynamic_pointer_cast<PluginInsert> (*i)) {
 				continue;
 			}
-			if (!(*i)->display_to_user ()) {
+			if (!(*i)->display_to_user () || is_internal_processor (*i)) {
 				continue;
 			}
 #ifdef MIXBUS
@@ -1999,7 +1999,7 @@ Route::all_visible_processors_active (bool state)
 	}
 
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		if (!(*i)->display_to_user() || boost::dynamic_pointer_cast<Amp> (*i)) {
+		if (!(*i)->display_to_user () || is_internal_processor (*i)) {
 			continue;
 		}
 #ifdef MIXBUS
