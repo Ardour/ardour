@@ -544,8 +544,6 @@ RegionView::update_cue_markers ()
 	const Gtkmm2ext::SVAModifier alpha = UIConfiguration::instance().modifier (X_("region mark"));
 	const uint32_t color = Gtkmm2ext::HSV (UIConfiguration::instance().color ("region mark")).mod (alpha).color();
 
-	cerr << "marker color will be 0x" << std::hex << color << " based on " << get_fill_color() << std::dec << endl;
-
 	/* We assume that if the region has multiple sources, any of them will
 	 * be appropriate as the origin of cue markers. We use the first one.
 	 */
