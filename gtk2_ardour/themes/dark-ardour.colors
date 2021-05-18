@@ -416,7 +416,7 @@
     <ColorAlias name="stretch clock: edited text" alias="theme:contrasting alt"/>
     <ColorAlias name="stretch clock: text" alias="theme:contrasting clock"/>
     <ColorAlias name="sync mark" alias="theme:contrasting clock"/>
-    <ColorAlias name="region mark" alias="theme:contrasting selection"/>
+    <ColorAlias name="region mark" alias="theme:contrasting alt"/>
     <ColorAlias name="tempo bar" alias="neutral:background2"/>
     <ColorAlias name="tempo curve" alias="widget:blue"/>
     <ColorAlias name="tempo marker" alias="widget:orange"/>
