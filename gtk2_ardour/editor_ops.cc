@@ -8734,6 +8734,22 @@ Editor::add_region_marker ()
 		return;
 	}
 
+	ArdourDialog d (_("New Cue Marker Name"), true, false);
+	Gtk::Entry e;
+	d.get_vbox()->pack_start (e);
+	e.show ();
+	e.set_activates_default ();
+	d.add_button (Stock::CANCEL, RESPONSE_CANCEL);
+	d.add_button (Stock::OK, RESPONSE_OK);
+	d.set_default_response (RESPONSE_OK);
+
+	int result = d.run();
+	string str = e.get_text();
+
+	if (result != RESPONSE_OK || str.empty()) {
+		return;
+	}
+
 	RegionSelection rs = get_regions_from_selection_and_edit_point ();
 	samplepos_t position = get_preferred_edit_position ();
 	bool in_command = false;
@@ -8748,7 +8764,7 @@ Editor::add_region_marker ()
 
 		SourceList & sources = region->sources_for_edit ();
 
-		CueMarker marker ("foo", region->start() + (position - region->position()));
+		CueMarker marker (str, region->start() + (position - region->position()));
 
 		if (!in_command) {
 			begin_reversible_command (_("add region marker"));
