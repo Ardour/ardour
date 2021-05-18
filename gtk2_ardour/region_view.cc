@@ -705,7 +705,13 @@ RegionView::set_colors ()
 {
 	TimeAxisViewItem::set_colors ();
 	set_sync_mark_color ();
-	update_cue_markers ();
+
+	const Gtkmm2ext::SVAModifier alpha = UIConfiguration::instance().modifier (X_("region mark"));
+	const uint32_t color = Gtkmm2ext::HSV (UIConfiguration::instance().color ("region mark")).mod (alpha).color();
+
+	for (ViewCueMarkers::iterator c = _cue_markers.begin(); c != _cue_markers.end(); ++c) {
+		(*c)->view_marker->set_color_rgba (color);
+	}
 }
 
 void
