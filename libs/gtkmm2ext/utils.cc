@@ -1032,15 +1032,14 @@ Gtkmm2ext::event_inside_widget_window (Gtk::Widget& widget, GdkEvent* ev)
 		return false;
 	}
 
-	gint wx;
-	gint wy;
-	gint width, height, depth;
 	gint x, y;
+	gint wx, wy;
+	gint width, height, depth;
 
 	Glib::RefPtr<Gdk::Window> widget_window = widget.get_window();
 
 	widget_window->get_geometry (x, y, width, height, depth);
-	widget_window->get_root_origin (wx, wy);
+	widget_window->get_origin (wx, wy);
 
 	if ((evx >= wx && evx < wx + width) &&
 			(evy >= wy && evy < wy + height)) {
