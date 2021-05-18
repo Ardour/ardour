@@ -463,7 +463,11 @@ OSCGlobalObserver::mark_update ()
 				break;
 			}
 		}
-		if (prev == next) {
+		if (_last_sample > lm[lm.size() - 1].when) {
+			send_str = string_compose ("%1 <-", lm[lm.size() - 1].label);
+		} else if (_last_sample < lm[0].when) {
+			send_str = string_compose ("-> %1", lm[0].label);
+		} else if (prev == next) {
 			send_str = lm[prev].label;
 			prev_mark = lm[prev].when;
 			next_mark = lm[next].when;
