@@ -116,9 +116,12 @@ private:
 	void end_rename (bool);
 	void entry_changed ();
 	void entry_activated ();
+	bool entry_focus_in (GdkEventFocus*);
 	bool entry_focus_out (GdkEventFocus*);
 	bool entry_key_press (GdkEventKey*);
 	bool entry_key_release (GdkEventKey*);
+	bool entry_button_press (GdkEventButton*);
+	void entry_populate_popup (Gtk::Menu*);
 	void disconnect_entry_signals ();
 
 	/* RouteUI */
@@ -134,6 +137,7 @@ private:
 	bool          _renaming;
 	Gtk::EventBox _namebox;
 	Gtk::Entry    _nameentry;
+	bool          _nameentry_ctx;
 
 	LevelMeterVBox*              _level_meter;
 	IOButton                     _input_button;

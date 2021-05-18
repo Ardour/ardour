@@ -48,6 +48,7 @@
 #include "editor_cursors.h"
 #include "group_tabs.h"
 #include "gui_thread.h"
+#include "keyboard.h"
 #include "level_meter.h"
 #include "meter_patterns.h"
 #include "public_editor.h"
@@ -83,6 +84,7 @@ TrackRecordAxis::TrackRecordAxis (Session* s, boost::shared_ptr<ARDOUR::Route> r
 	, _clear_meters (true)
 	, _route_ops_menu (0)
 	, _renaming (false)
+	, _nameentry_ctx (false)
 	, _input_button (true)
 	, _playlist_button (S_("RTAV|P"))
 	, _name_frame (ArdourWidgets::Frame::Horizontal, true)
@@ -532,7 +534,10 @@ TrackRecordAxis::start_rename ()
 	_entry_connections.push_back (_nameentry.signal_activate().connect (sigc::mem_fun (*this, &TrackRecordAxis::entry_activated)));
 	_entry_connections.push_back (_nameentry.signal_key_press_event().connect (sigc::mem_fun (*this, &TrackRecordAxis::entry_key_press), false));
 	_entry_connections.push_back (_nameentry.signal_key_release_event().connect (sigc::mem_fun (*this, &TrackRecordAxis::entry_key_release), false));
+	_entry_connections.push_back (_nameentry.signal_button_press_event ().connect (sigc::mem_fun (*this, &TrackRecordAxis::entry_button_press), false));
+	_entry_connections.push_back (_nameentry.signal_focus_in_event ().connect (sigc::mem_fun (*this, &TrackRecordAxis::entry_focus_in)));
 	_entry_connections.push_back (_nameentry.signal_focus_out_event ().connect (sigc::mem_fun (*this, &TrackRecordAxis::entry_focus_out)));
+	_entry_connections.push_back (_nameentry.signal_populate_popup ().connect (sigc::mem_fun (*this, &TrackRecordAxis::entry_populate_popup)));
 	return true;
 }
 
@@ -570,11 +575,39 @@ TrackRecordAxis::entry_activated ()
 	end_rename (false);
 }
 
+void
+TrackRecordAxis::entry_populate_popup (Gtk::Menu*)
+{
+	_nameentry_ctx = true;
+}
+
+bool
+TrackRecordAxis::entry_focus_in (GdkEventFocus*)
+{
+	_nameentry_ctx = false;
+	return false;
+}
+
 bool
 TrackRecordAxis::entry_focus_out (GdkEventFocus*)
 {
-	end_rename (false);
+	if (!_nameentry_ctx) {
+		end_rename (false);
+	}
 	return false;
+}
+
+bool
+TrackRecordAxis::entry_button_press (GdkEventButton* ev)
+{
+	if (Keyboard::is_context_menu_event (ev)) {
+		return false;
+	} else if (Gtkmm2ext::event_inside_widget_window (_namebox, (GdkEvent*) ev)) {
+		return false;
+	} else {
+		end_rename (false);
+		return false;
+	}
 }
 
 bool
