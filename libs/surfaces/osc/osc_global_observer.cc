@@ -429,7 +429,6 @@ OSCGlobalObserver::marks_changed ()
 	lm.clear();
 	const Locations::LocationList& ll (session->locations ()->list ());
 	// get Locations that are marks
-	std::cout << "marks changed\n";
 	for (Locations::LocationList::const_iterator l = ll.begin(); l != ll.end(); ++l) {
 		if ((*l)->is_session_range ()) {
 			lm.push_back (LocationMarker(_("start"), (*l)->start ()));
