@@ -2496,6 +2496,11 @@ ProcessorBox::processor_operation (ProcessorOperation op)
 			if (!boost::dynamic_pointer_cast<PluginInsert> (*i)) {
 				continue;
 			}
+			if (boost::dynamic_pointer_cast<Amp> (*i) && boost::dynamic_pointer_cast<Amp> (*i)->gain_control()->parameter().type() != GainAutomation) {
+				/* Trim, Volume */
+				continue;
+			}
+
 #ifdef MIXBUS
 			if (boost::dynamic_pointer_cast<PluginInsert> (*i)->is_channelstrip()) {
 				continue;
@@ -2586,6 +2591,11 @@ ProcessorBox::processor_button_release_event (GdkEventButton *ev, ProcessorEntry
 	boost::shared_ptr<Processor> processor;
 	if (child) {
 		processor = child->processor ();
+	}
+
+	if (boost::dynamic_pointer_cast<Amp> (processor) && boost::dynamic_pointer_cast<Amp> (processor)->gain_control()->parameter().type() != GainAutomation) {
+		/* Volume */
+		return false;
 	}
 
 	if (processor && Keyboard::is_delete_event (ev)) {
