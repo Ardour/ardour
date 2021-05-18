@@ -738,35 +738,60 @@ Editor::mouse_add_new_range (samplepos_t where)
 }
 
 void
-Editor::remove_marker (ArdourCanvas::Item& item, GdkEvent*)
+Editor::remove_marker (ArdourCanvas::Item& item)
 {
 	ArdourMarker* marker;
-	bool is_start;
+
+	if (!_session) {
+		return;
+	}
 
 	if ((marker = static_cast<ArdourMarker*> (item.get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
 		abort(); /*NOTREACHED*/
 	}
 
-	if (entered_marker == marker) {
-		entered_marker = NULL;
+	remove_marker (marker);
+}
+
+void
+Editor::remove_marker (ArdourMarker* marker)
+{
+	if (!_session) {
+		return;
 	}
 
-	Location* loc = find_location_from_marker (marker, is_start);
+	if (marker->type() == ArdourMarker::RegionCue) {
+		Glib::signal_idle().connect (sigc::bind (sigc::mem_fun(*this, &Editor::really_remove_region_marker), marker));
+	} else {
 
-	if (_session && loc) {
-		Glib::signal_idle().connect (sigc::bind (sigc::mem_fun(*this, &Editor::really_remove_marker), loc));
+		bool is_start;
+
+		Location* loc = find_location_from_marker (marker, is_start);
+
+		if (loc) {
+			Glib::signal_idle().connect (sigc::bind (sigc::mem_fun(*this, &Editor::really_remove_global_marker), loc));
+		}
 	}
 }
 
 gint
-Editor::really_remove_marker (Location* loc)
+Editor::really_remove_global_marker (Location* loc)
 {
 	begin_reversible_command (_("remove marker"));
 	XMLNode &before = _session->locations()->get_state();
 	_session->locations()->remove (loc);
 	XMLNode &after = _session->locations()->get_state();
 	_session->add_command (new MementoCommand<Locations>(*(_session->locations()), &before, &after));
+	commit_reversible_command ();
+	return FALSE;
+}
+
+gint
+Editor::really_remove_region_marker (ArdourMarker* marker)
+{
+	begin_reversible_command (_("remove region marker"));
+	cerr << "would remove this region marker\n";
 	commit_reversible_command ();
 	return FALSE;
 }
@@ -1429,7 +1454,7 @@ Editor::marker_menu_remove ()
 	} else if (tm) {
 		remove_tempo_marker (marker_menu_item);
 	} else {
-		remove_marker (*marker_menu_item, (GdkEvent*) 0);
+		remove_marker (*marker_menu_item);
 	}
 }
 

@@ -1669,7 +1669,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			break;
 
 		case MarkerItem:
-			remove_marker (*item, event);
+			remove_marker (*item);
 			break;
 
 		case RegionItem:

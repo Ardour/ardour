@@ -4308,14 +4308,8 @@ Editor::cut_copy (CutCopyOp op)
 
 		/* cut/delete op while pointing at a marker */
 
-		bool ignored;
-		Location* loc = find_location_from_marker (entered_marker, ignored);
-
-		if (_session && loc) {
-			entered_marker = NULL;
-			Glib::signal_idle().connect (sigc::bind (sigc::mem_fun(*this, &Editor::really_remove_marker), loc));
-		}
-
+		remove_marker (entered_marker);
+		entered_marker = NULL;
 		_drags->abort ();
 		return;
 	}
