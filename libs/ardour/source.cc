@@ -420,17 +420,25 @@ Source::add_cue_marker (CueMarker const & cm)
 	CueMarkersChanged(); /* EMIT SIGNAL */
 }
 
-void
+bool
 Source::remove_cue_marker (CueMarker const & cm)
 {
 	if (_cue_markers.erase (cm)) {
 		CueMarkersChanged(); /* EMIT SIGNAL */
+		return true;
 	}
+
+	return false;
 }
 
-void
+bool
 Source::clear_cue_markers ()
 {
+	if (_cue_markers.empty()) {
+		return false;
+	}
+
 	_cue_markers.clear();
 	CueMarkersChanged(); /* EMIT SIGNAL */
+	return true;
 }

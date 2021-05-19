@@ -114,8 +114,8 @@ public:
 
 	CueMarkers const & cue_markers() const { return _cue_markers; }
 	void add_cue_marker (CueMarker const &);
-	void remove_cue_marker (CueMarker const &);
-	void clear_cue_markers ();
+	bool  remove_cue_marker (CueMarker const &);
+	bool clear_cue_markers ();
 	PBD::Signal0<void> CueMarkersChanged;
 
 	virtual samplepos_t natural_position() const { return _natural_position; }

@@ -1938,22 +1938,6 @@ Region::get_cue_markers (CueMarkers& cues, bool abs) const
 }
 
 void
-Region::remove_cue_marker (CueMarker& cm)
-{
-	for (SourceList::iterator s = _sources.begin (); s != _sources.end(); ++s) {
-		(*s)->remove_cue_marker (cm);
-	}
-}
-
-void
-Region::clear_cue_markers ()
-{
-	for (SourceList::iterator s = _sources.begin (); s != _sources.end(); ++s) {
-		(*s)->clear_cue_markers ();
-	}
-}
-
-void
 Region::drop_sources ()
 {
 	for (SourceList::const_iterator i = _sources.begin (); i != _sources.end(); ++i) {
