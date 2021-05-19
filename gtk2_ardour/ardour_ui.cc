@@ -2028,15 +2028,16 @@ ARDOUR_UI::transport_ffwd_rewind (bool fwd)
 
 			/* close to zero, maybe flip direction */
 
-			if (transport_speed != 0.0) {
-				_session->request_stop (TRS_UI);
-			} else {
-				if (fwd) {
+			if (fwd) {
+				if (transport_speed <= 0) {
 					_session->request_transport_speed (1.0, false);
-				} else {
-					_session->request_transport_speed (-1.0, false);
+					_session->request_roll (TRS_UI);
 				}
-				_session->request_roll (TRS_UI);
+			} else {
+				if (transport_speed >= 0) {
+					_session->request_transport_speed (-1.0, false);
+					_session->request_roll (TRS_UI);
+				}
 			}
 
 			/* either we've just started, or we're moving as slowly as we
