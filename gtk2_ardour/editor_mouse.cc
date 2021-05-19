@@ -2015,8 +2015,6 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 	ArdourMarker *marker;
 	TempoMarker *t_marker;
 	MeterMarker *m_marker;
-	Location *loc;
-	bool is_start;
 	bool ret = true;
 
 	if (!_enter_stack.empty()) {
