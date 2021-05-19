@@ -805,7 +805,7 @@ Editor::really_remove_region_marker (ArdourMarker* marker)
 		return FALSE;
 	}
 
-	rv->region()->remove_cue_marker (cm);
+	remove_region_marker (cm);
 
 	commit_reversible_command ();
 	return FALSE;

@@ -8761,7 +8761,7 @@ Editor::add_region_marker ()
 		CueMarker marker (str, region->start() + (position - region->position()));
 
 		if (!in_command) {
-			begin_reversible_command (_("add region marker"));
+			begin_reversible_command (_("add cue marker"));
 			in_command = true;
 		}
 
@@ -8775,3 +8775,55 @@ Editor::add_region_marker ()
 		commit_reversible_command ();
 	}
 }
+
+void
+Editor::remove_region_marker (CueMarker& cm)
+{
+	RegionSelection rs = get_regions_from_selection_and_edit_point ();
+	bool in_command = false;
+
+	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ++r) {
+		SourceList & sources = (*r)->region()->sources_for_edit ();
+		for (SourceList::iterator s = sources.begin(); s != sources.end(); ++s) {
+
+			if ((*s)->remove_cue_marker (cm)) {
+				if (!in_command) {
+					begin_reversible_command (_("remove cue marker"));
+					in_command = true;
+				}
+				_session->add_command (new StatefulDiffCommand (*s));
+			}
+		}
+	}
+
+	if (in_command) {
+		commit_reversible_command ();
+	}
+}
+
+void
+Editor::clear_region_markers ()
+{
+
+	RegionSelection rs = get_regions_from_selection_and_edit_point ();
+	bool in_command = false;
+
+	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ++r) {
+		SourceList & sources = (*r)->region()->sources_for_edit ();
+		for (SourceList::iterator s = sources.begin(); s != sources.end(); ++s) {
+
+			if ((*s)->clear_cue_markers ()) {
+				if (!in_command) {
+					begin_reversible_command (_("clear cue markers"));
+					in_command = true;
+				}
+				_session->add_command (new StatefulDiffCommand (*s));
+			}
+		}
+	}
+
+	if (in_command) {
+		commit_reversible_command ();
+	}
+}
+

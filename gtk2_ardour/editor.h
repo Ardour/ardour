@@ -586,6 +586,8 @@ public:
 	void edit_meter_section (ARDOUR::MeterSection*);
 
 	void add_region_marker ();
+	void clear_region_markers ();
+	void remove_region_marker (ARDOUR::CueMarker&);
 
 protected:
 	void map_transport_state ();
