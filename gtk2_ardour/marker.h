@@ -41,6 +41,7 @@ namespace ARDOUR {
 }
 
 class PublicEditor;
+class RegionView;
 
 /** Location Marker
  *
@@ -66,7 +67,7 @@ public:
 
 
 	ArdourMarker (PublicEditor& editor, ArdourCanvas::Container &, guint32 rgba, const std::string& text, Type,
-	              samplepos_t sample = 0, bool handle_events = true);
+	              samplepos_t sample = 0, bool handle_events = true, RegionView* rv = 0);
 
 	virtual ~ArdourMarker ();
 
@@ -106,6 +107,10 @@ public:
 
 	bool label_on_left () const;
 
+	/* this will be null for all global markers; non-null for region markers */
+
+	RegionView* region_view() const { return _region_view; }
+
 protected:
 	PublicEditor& editor;
 
@@ -136,6 +141,8 @@ protected:
 	double       _right_label_limit; ///< the number of pixels available to the right of this marker for a label
 	double       _label_offset;
 	double       _line_height;
+
+	RegionView*  _region_view;
 
 	void reposition ();
 	void setup_line_x ();

@@ -590,7 +590,7 @@ RegionView::update_cue_markers ()
 
 			/* Create a new ViewCueMarker */
 
-			ArdourMarker* mark = new ArdourMarker (trackview.editor(), *group, color , c->text(), ArdourMarker::RegionCue, c->position() - start, true);
+			ArdourMarker* mark = new ArdourMarker (trackview.editor(), *group, color , c->text(), ArdourMarker::RegionCue, c->position() - start, true, this);
 			mark->set_points_color (color);
 			mark->set_show_line (true);
 			/* make sure the line has a clean end, before the frame
@@ -1203,4 +1203,16 @@ RegionView::maybe_raise_cue_markers ()
 	for (ViewCueMarkers::iterator v = _cue_markers.begin(); v != _cue_markers.end(); ++v) {
 		(*v)->view_marker->the_item().raise_to_top ();
 	}
+}
+
+CueMarker
+RegionView::find_model_cue_marker (ArdourMarker* m)
+{
+	for (ViewCueMarkers::iterator v = _cue_markers.begin(); v != _cue_markers.end(); ++v) {
+		if ((*v)->view_marker == m) {
+			return (*v)->model_marker;
+		}
+	}
+
+	return CueMarker (string(), 0); /* empty string signifies invalid */
 }

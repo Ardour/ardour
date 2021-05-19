@@ -48,6 +48,7 @@
 #include "gui_thread.h"
 #include "actions.h"
 #include "editor_drag.h"
+#include "region_view.h"
 
 #include "pbd/i18n.h"
 
@@ -791,7 +792,21 @@ gint
 Editor::really_remove_region_marker (ArdourMarker* marker)
 {
 	begin_reversible_command (_("remove region marker"));
-	cerr << "would remove this region marker\n";
+	RegionView* rv = marker->region_view();
+
+	if (!rv) {
+		abort_reversible_command ();
+		return FALSE;
+	}
+
+	CueMarker cm = rv->find_model_cue_marker (marker);
+	if (cm.text().empty()) {
+		abort_reversible_command ();
+		return FALSE;
+	}
+
+	rv->region()->remove_cue_marker (cm);
+
 	commit_reversible_command ();
 	return FALSE;
 }

@@ -1925,8 +1925,8 @@ void
 Region::get_cue_markers (CueMarkers& cues, bool abs) const
 {
 	bool was_empty = cues.empty ();
-	for (SourceList::const_iterator i = _sources.begin (); i != _sources.end(); ++i) {
-		CueMarkers const& x = (*i)->cue_markers ();
+	for (SourceList::const_iterator s = _sources.begin (); s != _sources.end(); ++s) {
+		CueMarkers const& x = (*s)->cue_markers ();
 		for (CueMarkers::const_iterator p = x.begin (); p != x.end (); ++p) {
 			if (abs) {
 				cues.insert (*p);
@@ -1934,6 +1934,22 @@ Region::get_cue_markers (CueMarkers& cues, bool abs) const
 				cues.insert (CueMarker (p->text(), p->position() - _start));
 			}
 		}
+	}
+}
+
+void
+Region::remove_cue_marker (CueMarker& cm)
+{
+	for (SourceList::iterator s = _sources.begin (); s != _sources.end(); ++s) {
+		(*s)->remove_cue_marker (cm);
+	}
+}
+
+void
+Region::clear_cue_markers ()
+{
+	for (SourceList::iterator s = _sources.begin (); s != _sources.end(); ++s) {
+		(*s)->clear_cue_markers ();
 	}
 }
 

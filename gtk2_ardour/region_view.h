@@ -133,6 +133,8 @@ public:
 
 	void update_visibility ();
 
+	ARDOUR::CueMarker find_model_cue_marker (ArdourMarker*);
+
 protected:
 
 	/** Allows derived types to specify their visibility requirements

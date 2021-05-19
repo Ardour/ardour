@@ -375,7 +375,9 @@ public:
 	}
 
 	void get_cue_markers (CueMarkers&, bool abs = false) const;
-
+	void remove_cue_marker (CueMarker&);
+	void clear_cue_markers ();
+	
 protected:
 	virtual XMLNode& state ();
 
