@@ -333,7 +333,6 @@ ArdourMarker::~ArdourMarker ()
 
 	/* destroying the parent group destroys its contents, namely any polygons etc. that we added */
 	delete group;
-	delete _track_canvas_line;
 	delete points;
 }
 
