@@ -240,11 +240,16 @@ BasicUI::button_varispeed (bool fwd)
 
 		if (fwd) {
 			if (transport_speed < 0.f) {
-				/* we need to move the speed back towards zero */
 				if (fabs (transport_speed) < octave_down) {
-					semitone_ratio = pow (1.0/semitone_ratio, 4.0);
+					/* we need to move the speed back towards zero */
+					semitone_ratio = powf (1.f / semitone_ratio, 4.f);
 				} else {
-					semitone_ratio = 1.0/semitone_ratio;
+					semitone_ratio = 1.f / semitone_ratio;
+				}
+			} else {
+				if (fabs (transport_speed) < octave_down) {
+					/* moving very slowly, use 4 semitone steps */
+					semitone_ratio = powf (semitone_ratio, 4.f);
 				}
 			}
 		} else {
@@ -252,9 +257,14 @@ BasicUI::button_varispeed (bool fwd)
 				/* we need to move the speed back towards zero */
 
 				if (transport_speed < octave_down) {
-					semitone_ratio = pow (1.0/semitone_ratio, 4.0);
+					semitone_ratio = powf (1.f / semitone_ratio, 4.f);
 				} else {
-					semitone_ratio = 1.0/semitone_ratio;
+					semitone_ratio = 1.f / semitone_ratio;
+				}
+			} else {
+				if (fabs (transport_speed) < octave_down) {
+					/* moving very slowly, use 4 semitone steps */
+					semitone_ratio = powf (semitone_ratio, 4.f);
 				}
 			}
 		}
