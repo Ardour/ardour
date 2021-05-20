@@ -4090,6 +4090,11 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 	}
 
 	string bounce_name;
+	if (replace) {
+		bounce_name = "Consolidated";
+	} else {
+		bounce_name = "Bounced";
+	}
 
 	TrackSelection views = selection->tracks;
 
@@ -4109,13 +4114,6 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 				d.run ();
 				return;
 			}
-		}
-
-		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
-		if (rtv && rtv->track()) {
-			if (i!=views.begin())
-				bounce_name.append("+");
-			bounce_name.append(rtv->track()->name());
 		}
 	}
 
@@ -4182,6 +4180,7 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 		boost::shared_ptr<Region> r;
 
 		/*make the "source" (whole-file region)*/
+		/*note: bounce_range() will append the playlist name to the resulting region and filename*/
 		if (enable_processing) {
 			r = rtv->track()->bounce_range (start, start+cnt, itt, rtv->track()->main_outs(), false, bounce_name);
 		} else {
