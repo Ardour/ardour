@@ -3397,7 +3397,7 @@ These settings will only take effect after %1 is restarted.\n\
 
 	bo = new BoolOption (
 		     "rewind-ffwd-like-tape-decks",
-		     _("Rewind/Fast-forward like a tape deck"),
+		     _("Rewind/Fast-forward buttons change direction immediately"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_rewind_ffwd_like_tape_decks),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_rewind_ffwd_like_tape_decks)
 		     );
