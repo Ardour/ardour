@@ -5941,7 +5941,7 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 
 		result = RegionFactory::create (srcs, plist, true);
 
-		result->set_name((name.length() != 0) ? name : legal_playlist_name); /*setting name in the properties didn't seem to work, but this does*/
+		result->set_name(legal_playlist_name); /*setting name in the properties didn't seem to work, but this does*/
 	}
 
 	out:
