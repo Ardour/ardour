@@ -72,6 +72,7 @@ enum {
 	FS_CHR_DEPTH,
 	FS_CHR_LEVEL,
 	FS_CHR_TYPE,
+	FS_PORT_ENABLE,
 	FS_PORT_LAST
 };
 
@@ -524,6 +525,13 @@ run (LV2_Handle instance, uint32_t n_samples)
 	lv2_atom_forge_set_buffer (&self->forge, (uint8_t*)self->notify, capacity);
 	lv2_atom_forge_sequence_head (&self->forge, &self->frame, 0);
 
+	const bool enabled = *self->p_ports[FS_PORT_ENABLE] > 0;
+	if (self->v_ports[FS_PORT_ENABLE] != *self->p_ports[FS_PORT_ENABLE]) {
+		if (self->initialized && !self->reinit_in_progress) {
+			fluid_synth_all_notes_off (self->synth, -1);
+		}
+	}
+
 	if (!self->initialized || self->reinit_in_progress) {
 		memset (self->p_ports[FS_PORT_OUT_L], 0, n_samples * sizeof (float));
 		memset (self->p_ports[FS_PORT_OUT_R], 0, n_samples * sizeof (float));
@@ -602,7 +610,7 @@ run (LV2_Handle instance, uint32_t n_samples)
 				}
 			}
 		} else if (ev->body.type == self->midi_MidiEvent) {
-			if (ev->time.frames >= n_samples || self->reinit_in_progress) {
+			if (ev->time.frames >= n_samples || self->reinit_in_progress || !enabled) {
 				continue;
 			}
 			if (ev->body.size > 3) {
