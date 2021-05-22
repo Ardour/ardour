@@ -4118,6 +4118,9 @@ CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 
 	fake_locate (where.sample - snap_delta (event->button.state));
 
+	_last_mx = event->button.x;
+	_last_my = event->button.y;
+	_last_dx = 0;
 	_last_y_delta = 0;
 }
 

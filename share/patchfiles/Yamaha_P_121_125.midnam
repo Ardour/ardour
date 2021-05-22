@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Hubert Figuiere</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Yamaha</Manufacturer>
+    <Model>P-121/125</Model>
+    <CustomDeviceMode Name="Mode 1">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Voices"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Voices"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Voices"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Voices"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Voices"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Voices"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Voices"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Voices"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Voices"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Voices"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Voices"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Voices"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Voices"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Voices"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Voices"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Voices"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Voices">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="true"/>
+        <AvailableChannel Channel="5" Available="true"/>
+        <AvailableChannel Channel="6" Available="true"/>
+        <AvailableChannel Channel="7" Available="true"/>
+        <AvailableChannel Channel="8" Available="true"/>
+        <AvailableChannel Channel="9" Available="true"/>
+        <AvailableChannel Channel="10" Available="true"/>
+        <AvailableChannel Channel="11" Available="true"/>
+        <AvailableChannel Channel="12" Available="true"/>
+        <AvailableChannel Channel="13" Available="true"/>
+        <AvailableChannel Channel="14" Available="true"/>
+        <AvailableChannel Channel="15" Available="true"/>
+        <AvailableChannel Channel="16" Available="true"/>
+      </AvailableForChannels>
+      <PatchBank Name="Piano">
+        <PatchNameList>
+          <Patch Number="1" Name="Grand Piano">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="108"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="0"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="2" Name="Live Grand">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="108"/>
+              <ControlChange Control="32" Value="2"/>
+              <ProgramChange Number="1"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="3" Name="Balad Grand">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="108"/>
+              <ControlChange Control="32" Value="3"/>
+              <ProgramChange Number="0"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="4" Name="Bright Grand">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="108"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="1"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="E. Piano">
+        <PatchNameList>
+          <Patch Number="5" Name="Stage E.Piano">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="108"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="4"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="6" Name="DX E.Piano">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="108"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="5"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="7" Name="Vintage E.Piano">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="108"/>
+              <ControlChange Control="32" Value="1"/>
+              <ProgramChange Number="4"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="8" Name="Synth Panio">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="108"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="88"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Organ">
+        <PatchNameList>
+          <Patch Number="9" Name="Jazz Organ">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="108"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="16"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="10" Name="Rock Organ">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="108"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="18"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="11" Name="Organ Principal">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="108"/>
+              <ControlChange Control="32" Value="1"/>
+              <ProgramChange Number="19"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="12" Name="Organ Tutti">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="108"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="19"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Clav. / Vib.">
+        <PatchNameList>
+          <Patch Number="13" Name="Harpsicord 8'">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="108"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="6"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="14" Name="Harpsicord 8'+4'">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="108"/>
+              <ControlChange Control="32" Value="1"/>
+              <ProgramChange Number="6"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="15" Name="E. Clavichord">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="108"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="7"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="16" Name="Vibraphone">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="108"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="11"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Strings">
+        <PatchNameList>
+          <Patch Number="17" Name="Strings">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="108"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="48"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="18" Name="Slow Strings">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="108"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="49"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="19" Name="Choir">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="108"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="52"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="20" Name="Synth Pad">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="108"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="89"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="+ Bass">
+        <PatchNameList>
+          <Patch Number="21" Name="Acoustic Bass">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="108"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="32"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="22" Name="Electric Bass">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="108"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="33"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="23" Name="Bass &amp; Cymbal">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="108"/>
+              <ControlChange Control="32" Value="1"/>
+              <ProgramChange Number="32"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="24" Name="Fretless Bass">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="108"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="35"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+    </ChannelNameSet>
+  </MasterDeviceNames>
+</MIDINameDocument>

@@ -20,15 +20,15 @@
 #define _GNU_SOURCE
 #endif
 
-#include <cstring>
-#include <string>
 #include <algorithm>
+#include <cstring>
 #include <map>
+#include <string>
 #include <vector>
 
+#include <math.h>
 #include <pthread.h>
 #include <stdlib.h>
-#include <math.h>
 
 #define AFS_URN "urn:ardour:a-fluidsynth"
 
@@ -44,7 +44,6 @@
 
 #include "fluidsynth.h"
 
-#include <lv2/lv2plug.in/ns/lv2core/lv2.h>
 #include <lv2/lv2plug.in/ns/ext/atom/atom.h>
 #include <lv2/lv2plug.in/ns/ext/atom/forge.h>
 #include <lv2/lv2plug.in/ns/ext/atom/util.h>
@@ -54,6 +53,7 @@
 #include <lv2/lv2plug.in/ns/ext/state/state.h>
 #include <lv2/lv2plug.in/ns/ext/urid/urid.h>
 #include <lv2/lv2plug.in/ns/ext/worker/worker.h>
+#include <lv2/lv2plug.in/ns/lv2core/lv2.h>
 
 enum {
 	FS_PORT_CONTROL = 0,
@@ -72,12 +72,13 @@ enum {
 	FS_CHR_DEPTH,
 	FS_CHR_LEVEL,
 	FS_CHR_TYPE,
+	FS_PORT_ENABLE,
 	FS_PORT_LAST
 };
 
 enum {
-  CMD_APPLY    = 0,
-  CMD_FREE     = 1,
+	CMD_APPLY = 0,
+	CMD_FREE  = 1,
 };
 
 struct BankProgram {
@@ -94,18 +95,18 @@ struct BankProgram {
 	{}
 
 	std::string name;
-	int bank;
-	int program;
+	int         bank;
+	int         program;
 };
 
-typedef std::vector<BankProgram> BPList;
-typedef std::map<int, BPList> BPMap;
+typedef std::vector<BankProgram>   BPList;
+typedef std::map<int, BPList>      BPMap;
 typedef std::map<int, BankProgram> BPState;
 
 typedef struct {
 	/* ports */
 	const LV2_Atom_Sequence* control;
-  LV2_Atom_Sequence*       notify;
+	LV2_Atom_Sequence*       notify;
 
 	float* p_ports[FS_PORT_LAST];
 	float  v_ports[FS_PORT_LAST];
@@ -134,16 +135,16 @@ typedef struct {
 	/* lv2 extensions */
 	LV2_Log_Log*         log;
 	LV2_Log_Logger       logger;
-  LV2_Worker_Schedule* schedule;
+	LV2_Worker_Schedule* schedule;
 	LV2_Atom_Forge       forge;
 	LV2_Atom_Forge_Frame frame;
 
 #ifdef LV2_EXTENDED
-	LV2_Midnam*          midnam;
-	LV2_BankPatch*       bankpatch;
-	BPMap                presets;
+	LV2_Midnam*    midnam;
+	LV2_BankPatch* bankpatch;
+	BPMap          presets;
 #endif
-	pthread_mutex_t      bp_lock;
+	pthread_mutex_t bp_lock;
 
 	/* state */
 	bool panic;
@@ -154,7 +155,7 @@ typedef struct {
 	char current_sf2_file_path[1024];
 	char queue_sf2_file_path[1024];
 	bool reinit_in_progress; // set in run, cleared in work_response
-	bool queue_reinit; // set in restore, cleared in work_response
+	bool queue_reinit;       // set in restore, cleared in work_response
 
 	bool   queue_retune;
 	double queue_tuning[128];
@@ -189,23 +190,25 @@ load_sf2 (AFluidSynth* self, const char* fn)
 		return false;
 	}
 
-	int chn;
-	fluid_preset_t *preset;
+	int             chn;
+	fluid_preset_t* preset;
 	fluid_sfont_iteration_start (sfont);
 	pthread_mutex_lock (&self->bp_lock);
 	for (chn = 0; (preset = fluid_sfont_iteration_next (sfont)); ++chn) {
 		if (chn < 16) {
 			fluid_synth_program_select (self->synth, chn, synth_id,
-					fluid_preset_get_banknum (preset), fluid_preset_get_num (preset));
+			                            fluid_preset_get_banknum (preset), fluid_preset_get_num (preset));
 		}
 #ifndef LV2_EXTENDED
-		else { break ; }
+		else {
+			break;
+		}
 #else
 		self->presets[fluid_preset_get_banknum (preset)].push_back (
-				BankProgram (
-					fluid_preset_get_name (preset),
-					fluid_preset_get_banknum (preset),
-					fluid_preset_get_num (preset)));
+		    BankProgram (
+		        fluid_preset_get_name (preset),
+		        fluid_preset_get_banknum (preset),
+		        fluid_preset_get_num (preset)));
 #endif // LV2_EXTENDED
 	}
 	pthread_mutex_unlock (&self->bp_lock);
@@ -220,7 +223,7 @@ load_sf2 (AFluidSynth* self, const char* fn)
 static const LV2_Atom*
 parse_patch_msg (AFluidSynth* self, const LV2_Atom_Object* obj)
 {
-	const LV2_Atom* property = NULL;
+	const LV2_Atom* property  = NULL;
 	const LV2_Atom* file_path = NULL;
 
 	if (obj->body.otype != self->patch_Set) {
@@ -263,15 +266,18 @@ inform_ui (AFluidSynth* self)
 static float
 db_to_coeff (float db)
 {
-	if (db <= -80) { return 0; }
-	else if (db >=  20) { return 10; }
+	if (db <= -80) {
+		return 0;
+	} else if (db >= 20) {
+		return 10;
+	}
 	return powf (10.f, .05f * db);
 }
 
 static void
 parse_mts (AFluidSynth* self, const uint8_t* data, uint32_t len)
 {
-	assert (data[0] == 0xf0 && data [3] == 0x08 && len > 11);
+	assert (data[0] == 0xf0 && data[3] == 0x08 && len > 11);
 	if (data[4] == 0x01 && len == 408) {
 		/* bulk transfer
 		 * 0xf0, 0x7e,    -- non-realtime sysex
@@ -284,22 +290,22 @@ parse_mts (AFluidSynth* self, const uint8_t* data, uint32_t len)
 		 * 0xf7           -- 408 bytes in total
 		 */
 		int    prog = 0; // data[2]
-		int    off = 22;
+		int    off  = 22;
 		int    key[128];
 		double pitch[128];
 		for (int i = 0; i < 128; ++i) {
-			const uint32_t note  = data [off];
-			const uint32_t fract = (data [off + 1] << 7) | data[off + 2];
-			key[i]   = i;
-			pitch[i] = note * 100.f + fract / 163.83;
+			const uint32_t note  = data[off];
+			const uint32_t fract = (data[off + 1] << 7) | data[off + 2];
+			key[i]               = i;
+			pitch[i]             = note * 100.f + fract / 163.83;
 			off += 3;
 		}
 		if (data[off + 1] == 0xf7) {
 			int rv = fluid_synth_tune_notes (self->synth,
-					/* tuning bank */ 0,
-					/* tuning prog */ prog,
-					128, key, pitch,
-					/* apply */1 );
+			                                 /* tuning bank */ 0,
+			                                 /* tuning prog */ prog,
+			                                 128, key, pitch,
+			                                 /* apply */ 1);
 			if (rv == FLUID_OK) {
 				for (int c = 0; c < 16; ++c) {
 					fluid_synth_activate_tuning (self->synth, c, 0, prog, 0);
@@ -319,18 +325,18 @@ parse_mts (AFluidSynth* self, const uint8_t* data, uint32_t len)
 		 * cent_lsb,   -- LSB of fractional part (1/16384 semitone = 100/16384 cents = .0061 cent units
 		 * 0xf7        -- 12 bytesin total
 		 */
-		const uint32_t note  = data [8];
-		const uint32_t fract = (data [9] << 7) | data[10];
+		const uint32_t note  = data[8];
+		const uint32_t fract = (data[9] << 7) | data[10];
 
 		int    prog  = 0; // data[2]
 		int    key   = data[7];
 		double pitch = note * 100.f + fract / 163.83;
 		if (data[11] == 0xf7) {
 			int rv = fluid_synth_tune_notes (self->synth,
-					/* tuning bank */ 0,
-					/* tuning prog */ prog,
-					1, &key, &pitch,
-					/* apply */1 );
+			                                 /* tuning bank */ 0,
+			                                 /* tuning prog */ prog,
+			                                 1, &key, &pitch,
+			                                 /* apply */ 1);
 			if (rv == FLUID_OK) {
 				for (int c = 0; c < 16; ++c) {
 					fluid_synth_activate_tuning (self->synth, c, 0, prog, 0);
@@ -359,7 +365,7 @@ instantiate (const LV2_Descriptor*     descriptor,
 
 	LV2_URID_Map* map = NULL;
 
-	for (int i=0; features[i] != NULL; ++i) {
+	for (int i = 0; features[i] != NULL; ++i) {
 		if (!strcmp (features[i]->URI, LV2_URID__map)) {
 			map = (LV2_URID_Map*)features[i]->data;
 		} else if (!strcmp (features[i]->URI, LV2_LOG__log)) {
@@ -416,7 +422,7 @@ instantiate (const LV2_Descriptor*     descriptor,
 
 	if (!self->synth) {
 		lv2_log_error (&self->logger, "a-fluidsynth.lv2: cannot allocate Fluid Synth\n");
-    delete_fluid_settings (self->settings);
+		delete_fluid_settings (self->settings);
 		free (self);
 		return NULL;
 	}
@@ -433,7 +439,7 @@ instantiate (const LV2_Descriptor*     descriptor,
 	if (!self->fmidi_event) {
 		lv2_log_error (&self->logger, "a-fluidsynth.lv2: cannot allocate Fluid Event\n");
 		delete_fluid_synth (self->synth);
-    delete_fluid_settings (self->settings);
+		delete_fluid_settings (self->settings);
 		free (self);
 		return NULL;
 	}
@@ -442,15 +448,15 @@ instantiate (const LV2_Descriptor*     descriptor,
 
 	pthread_mutex_init (&self->bp_lock, NULL);
 #ifdef LV2_EXTENDED
-	self->presets = BPMap();
+	self->presets = BPMap ();
 #endif
-	self->panic = false;
-	self->inform_ui = false;
-	self->send_bankpgm = true;
-	self->initialized = false;
+	self->panic              = false;
+	self->inform_ui          = false;
+	self->send_bankpgm       = true;
+	self->initialized        = false;
 	self->reinit_in_progress = false;
-	self->queue_reinit = false;
-	self->queue_retune = false;
+	self->queue_reinit       = false;
+	self->queue_retune       = false;
 	for (int chn = 0; chn < 16; ++chn) {
 		self->program_state[chn].program = -1;
 	}
@@ -458,20 +464,20 @@ instantiate (const LV2_Descriptor*     descriptor,
 	lv2_atom_forge_init (&self->forge, map);
 
 	/* map URIDs */
-	self->atom_Blank         = map->map (map->handle, LV2_ATOM__Blank);
-	self->atom_Object        = map->map (map->handle, LV2_ATOM__Object);
-	self->atom_Path          = map->map (map->handle, LV2_ATOM__Path);
-	self->atom_Vector        = map->map (map->handle, LV2_ATOM__Vector);
-	self->atom_Double        = map->map (map->handle, LV2_ATOM__Double);
-	self->atom_URID          = map->map (map->handle, LV2_ATOM__URID);
-	self->midi_MidiEvent     = map->map (map->handle, LV2_MIDI__MidiEvent);
-	self->patch_Get          = map->map (map->handle, LV2_PATCH__Get);
-	self->patch_Set          = map->map (map->handle, LV2_PATCH__Set);
-	self->patch_property     = map->map (map->handle, LV2_PATCH__property);
-	self->patch_value        = map->map (map->handle, LV2_PATCH__value);
-	self->state_Changed      = map->map (map->handle, "http://lv2plug.in/ns/ext/state#StateChanged");
-	self->afs_sf2file        = map->map (map->handle, AFS_URN ":sf2file");
-	self->afs_tuning         = map->map (map->handle, AFS_URN ":tuning");
+	self->atom_Blank     = map->map (map->handle, LV2_ATOM__Blank);
+	self->atom_Object    = map->map (map->handle, LV2_ATOM__Object);
+	self->atom_Path      = map->map (map->handle, LV2_ATOM__Path);
+	self->atom_Vector    = map->map (map->handle, LV2_ATOM__Vector);
+	self->atom_Double    = map->map (map->handle, LV2_ATOM__Double);
+	self->atom_URID      = map->map (map->handle, LV2_ATOM__URID);
+	self->midi_MidiEvent = map->map (map->handle, LV2_MIDI__MidiEvent);
+	self->patch_Get      = map->map (map->handle, LV2_PATCH__Get);
+	self->patch_Set      = map->map (map->handle, LV2_PATCH__Set);
+	self->patch_property = map->map (map->handle, LV2_PATCH__property);
+	self->patch_value    = map->map (map->handle, LV2_PATCH__value);
+	self->state_Changed  = map->map (map->handle, "http://lv2plug.in/ns/ext/state#StateChanged");
+	self->afs_sf2file    = map->map (map->handle, AFS_URN ":sf2file");
+	self->afs_tuning     = map->map (map->handle, AFS_URN ":tuning");
 
 	return (LV2_Handle)self;
 }
@@ -502,6 +508,7 @@ static void
 deactivate (LV2_Handle instance)
 {
 	AFluidSynth* self = (AFluidSynth*)instance;
+
 	self->panic = true;
 }
 
@@ -517,6 +524,13 @@ run (LV2_Handle instance, uint32_t n_samples)
 	const uint32_t capacity = self->notify->atom.size;
 	lv2_atom_forge_set_buffer (&self->forge, (uint8_t*)self->notify, capacity);
 	lv2_atom_forge_sequence_head (&self->forge, &self->frame, 0);
+
+	const bool enabled = *self->p_ports[FS_PORT_ENABLE] > 0;
+	if (self->v_ports[FS_PORT_ENABLE] != *self->p_ports[FS_PORT_ENABLE]) {
+		if (self->initialized && !self->reinit_in_progress) {
+			fluid_synth_all_notes_off (self->synth, -1);
+		}
+	}
 
 	if (!self->initialized || self->reinit_in_progress) {
 		memset (self->p_ports[FS_PORT_OUT_L], 0, n_samples * sizeof (float));
@@ -556,19 +570,19 @@ run (LV2_Handle instance, uint32_t n_samples)
 
 		if (rev_change) {
 			fluid_synth_set_reverb (self->synth,
-					*self->p_ports[FS_REV_ROOMSIZE],
-					*self->p_ports[FS_REV_DAMPING],
-					*self->p_ports[FS_REV_WIDTH],
-					*self->p_ports[FS_REV_LEVEL]);
+			                        *self->p_ports[FS_REV_ROOMSIZE],
+			                        *self->p_ports[FS_REV_DAMPING],
+			                        *self->p_ports[FS_REV_WIDTH],
+			                        *self->p_ports[FS_REV_LEVEL]);
 		}
 
 		if (chr_change) {
 			fluid_synth_set_chorus (self->synth,
-					rintf (*self->p_ports[FS_CHR_N]),
-					db_to_coeff (*self->p_ports[FS_CHR_LEVEL]),
-					*self->p_ports[FS_CHR_SPEED],
-					*self->p_ports[FS_CHR_DEPTH],
-					(*self->p_ports[FS_CHR_TYPE] > 0) ? FLUID_CHORUS_MOD_SINE : FLUID_CHORUS_MOD_TRIANGLE);
+			                        rintf (*self->p_ports[FS_CHR_N]),
+			                        db_to_coeff (*self->p_ports[FS_CHR_LEVEL]),
+			                        *self->p_ports[FS_CHR_SPEED],
+			                        *self->p_ports[FS_CHR_DEPTH],
+			                        (*self->p_ports[FS_CHR_TYPE] > 0) ? FLUID_CHORUS_MOD_SINE : FLUID_CHORUS_MOD_TRIANGLE);
 		}
 		for (uint32_t p = FS_OUT_GAIN; p < FS_PORT_LAST; ++p) {
 			self->v_ports[p] = *self->p_ports[p];
@@ -577,33 +591,32 @@ run (LV2_Handle instance, uint32_t n_samples)
 
 	uint32_t offset = 0;
 
-	LV2_ATOM_SEQUENCE_FOREACH (self->control, ev) {
+	LV2_ATOM_SEQUENCE_FOREACH (self->control, ev)
+	{
 		const LV2_Atom_Object* obj = (LV2_Atom_Object*)&ev->body;
 		if (ev->body.type == self->atom_Blank || ev->body.type == self->atom_Object) {
 			if (obj->body.otype == self->patch_Get) {
 				self->inform_ui = false;
 				inform_ui (self);
-			}
-			else if (obj->body.otype == self->patch_Set) {
+			} else if (obj->body.otype == self->patch_Set) {
 				const LV2_Atom* file_path = parse_patch_msg (self, obj);
 				if (file_path && !self->reinit_in_progress && !self->queue_reinit) {
-					const char *fn = (const char*)(file_path+1);
+					const char* fn = (const char*)(file_path + 1);
 					strncpy (self->queue_sf2_file_path, fn, 1023);
 					self->queue_sf2_file_path[1023] = '\0';
-					self->reinit_in_progress = true;
-					int magic = 0x4711;
+					self->reinit_in_progress        = true;
+					int magic                       = 0x4711;
 					self->schedule->schedule_work (self->schedule->handle, sizeof (int), &magic);
 				}
 			}
-		}
-		else if (ev->body.type == self->midi_MidiEvent) {
-			if (ev->time.frames >= n_samples || self->reinit_in_progress) {
+		} else if (ev->body.type == self->midi_MidiEvent) {
+			if (ev->time.frames >= n_samples || self->reinit_in_progress || !enabled) {
 				continue;
 			}
 			if (ev->body.size > 3) {
 				if (ev->body.size > 11) {
 					const uint8_t* const data = (const uint8_t*)(ev + 1);
-					if (data[0] == 0xf0 && (data[1] & 0x7e) == 0x7e && data [3] == 0x08) {
+					if (data[0] == 0xf0 && (data[1] & 0x7e) == 0x7e && data[3] == 0x08) {
 						parse_mts (self, data, ev->body.size);
 					}
 				}
@@ -612,10 +625,10 @@ run (LV2_Handle instance, uint32_t n_samples)
 
 			if (ev->time.frames > offset) {
 				fluid_synth_write_float (
-						self->synth,
-						ev->time.frames - offset,
-						&self->p_ports[FS_PORT_OUT_L][offset], 0, 1,
-						&self->p_ports[FS_PORT_OUT_R][offset], 0, 1);
+				    self->synth,
+				    ev->time.frames - offset,
+				    &self->p_ports[FS_PORT_OUT_L][offset], 0, 1,
+				    &self->p_ports[FS_PORT_OUT_R][offset], 0, 1);
 			}
 
 			offset = ev->time.frames;
@@ -638,7 +651,7 @@ run (LV2_Handle instance, uint32_t n_samples)
 					assert (chn >= 0 && chn < 16);
 					if (data[1] == 0x00) {
 						self->program_state[chn].bank &= 0x7f;
-						self->program_state[chn].bank |= (data[2] &0x7f) << 7;
+						self->program_state[chn].bank |= (data[2] & 0x7f) << 7;
 					}
 					if (data[1] == 0x20) {
 						self->program_state[chn].bank &= 0x3F80;
@@ -653,8 +666,8 @@ run (LV2_Handle instance, uint32_t n_samples)
 #ifdef LV2_EXTENDED
 				if (self->bankpatch) {
 					self->bankpatch->notify (self->bankpatch->handle, chn,
-							self->program_state[chn].bank,
-							self->program_state[chn].program < 0 ? 255 : self->program_state[chn].program);
+					                         self->program_state[chn].bank,
+					                         self->program_state[chn].program < 0 ? 255 : self->program_state[chn].program);
 				}
 #endif
 			}
@@ -665,7 +678,7 @@ run (LV2_Handle instance, uint32_t n_samples)
 
 	if (self->queue_reinit && !self->reinit_in_progress) {
 		self->reinit_in_progress = true;
-		int magic = 0x4711;
+		int magic                = 0x4711;
 		self->schedule->schedule_work (self->schedule->handle, sizeof (int), &magic);
 	}
 
@@ -675,9 +688,9 @@ run (LV2_Handle instance, uint32_t n_samples)
 
 		/* emit stateChanged */
 		LV2_Atom_Forge_Frame frame;
-		lv2_atom_forge_frame_time(&self->forge, 0);
-		x_forge_object(&self->forge, &frame, 1, self->state_Changed);
-		lv2_atom_forge_pop(&self->forge, &frame);
+		lv2_atom_forge_frame_time (&self->forge, 0);
+		x_forge_object (&self->forge, &frame, 1, self->state_Changed);
+		lv2_atom_forge_pop (&self->forge, &frame);
 
 		/* send .sf2 filename */
 		inform_ui (self);
@@ -693,22 +706,23 @@ run (LV2_Handle instance, uint32_t n_samples)
 		self->send_bankpgm = false;
 		for (uint8_t chn = 0; chn < 16; ++chn) {
 			self->bankpatch->notify (self->bankpatch->handle, chn,
-					self->program_state[chn].bank,
-					self->program_state[chn].program < 0 ? 255 : self->program_state[chn].program);
+			                         self->program_state[chn].bank,
+			                         self->program_state[chn].program < 0 ? 255 : self->program_state[chn].program);
 		}
 	}
 #endif
 
 	if (n_samples > offset && self->initialized && !self->reinit_in_progress) {
 		fluid_synth_write_float (
-				self->synth,
-				n_samples - offset,
-				&self->p_ports[FS_PORT_OUT_L][offset], 0, 1,
-				&self->p_ports[FS_PORT_OUT_R][offset], 0, 1);
+		    self->synth,
+		    n_samples - offset,
+		    &self->p_ports[FS_PORT_OUT_L][offset], 0, 1,
+		    &self->p_ports[FS_PORT_OUT_R][offset], 0, 1);
 	}
 }
 
-static void cleanup (LV2_Handle instance)
+static void
+cleanup (LV2_Handle instance)
 {
 	AFluidSynth* self = (AFluidSynth*)instance;
 	delete_fluid_synth (self->synth);
@@ -731,14 +745,13 @@ work (LV2_Handle                  instance,
 {
 	AFluidSynth* self = (AFluidSynth*)instance;
 
-  if (size != sizeof (int)) {
+	if (size != sizeof (int)) {
 		return LV2_WORKER_ERR_UNKNOWN;
 	}
 	int magic = *((const int*)data);
 	if (magic != 0x4711) {
 		return LV2_WORKER_ERR_UNKNOWN;
 	}
-
 
 	self->initialized = load_sf2 (self, self->queue_sf2_file_path);
 
@@ -757,8 +770,8 @@ work (LV2_Handle                  instance,
 }
 
 struct VectorOfDouble {
-  LV2_Atom_Vector_Body vb;
-	double pitch[128];
+	LV2_Atom_Vector_Body vb;
+	double               pitch[128];
 };
 
 static LV2_Worker_Status
@@ -791,19 +804,19 @@ work_response (LV2_Handle  instance,
 		}
 
 		for (int chn = 0; chn < 16; ++chn) {
-			int sfid = 0;
-			int bank = 0;
+			int sfid    = 0;
+			int bank    = 0;
 			int program = -1;
 			if (FLUID_OK == fluid_synth_get_program (self->synth, chn, &sfid, &bank, &program)) {
-				self->program_state[chn].bank = bank;
+				self->program_state[chn].bank    = bank;
 				self->program_state[chn].program = program;
 			}
 		}
 		if (self->queue_retune) {
-			int rv = fluid_synth_activate_key_tuning (self->synth, 
-					/* tuning bank */ 0,
-					/* tuning prog */ 0,
-					"ACE", self->queue_tuning, 0);
+			int rv = fluid_synth_activate_key_tuning (self->synth,
+			                                          /* tuning bank */ 0,
+			                                          /* tuning prog */ 0,
+			                                          "ACE", self->queue_tuning, 0);
 			if (rv == FLUID_OK) {
 				for (int c = 0; c < 16; ++c) {
 					fluid_synth_activate_tuning (self->synth, c, 0, 0, 0);
@@ -816,10 +829,10 @@ work_response (LV2_Handle  instance,
 	}
 
 	self->reinit_in_progress = false;
-	self->inform_ui = true;
-	self->send_bankpgm = true;
-	self->queue_retune = false;
-	self->queue_reinit = false;
+	self->inform_ui          = true;
+	self->send_bankpgm       = true;
+	self->queue_retune       = false;
+	self->queue_reinit       = false;
 	return LV2_WORKER_SUCCESS;
 }
 
@@ -836,14 +849,14 @@ save (LV2_Handle                instance,
 		return LV2_STATE_ERR_NO_PROPERTY;
 	}
 
-	LV2_State_Map_Path*  map_path = NULL;
+	LV2_State_Map_Path* map_path = NULL;
 #ifdef LV2_STATE__freePath
 	LV2_State_Free_Path* free_path = NULL;
 #endif
 
 	for (int i = 0; features[i]; ++i) {
 		if (!strcmp (features[i]->URI, LV2_STATE__mapPath)) {
-			map_path = (LV2_State_Map_Path*) features[i]->data;
+			map_path = (LV2_State_Map_Path*)features[i]->data;
 		}
 	}
 
@@ -853,8 +866,8 @@ save (LV2_Handle                instance,
 
 	char* apath = map_path->abstract_path (map_path->handle, self->current_sf2_file_path);
 	store (handle, self->afs_sf2file,
-			apath, strlen (apath) + 1,
-			self->atom_Path, LV2_STATE_IS_POD);
+	       apath, strlen (apath) + 1,
+	       self->atom_Path, LV2_STATE_IS_POD);
 #ifdef LV2_STATE__freePath
 	if (free_path) {
 		free_path->free_path (free_path->handle, apath);
@@ -871,12 +884,12 @@ save (LV2_Handle                instance,
 	if (0 != fluid_synth_tuning_iteration_next (self->synth, &tbank, &tprog)) {
 		VectorOfDouble vod;
 		vod.vb.child_type = self->atom_Double;
-		vod.vb.child_size = sizeof(double);
+		vod.vb.child_size = sizeof (double);
 		fluid_synth_tuning_dump (self->synth, tbank, tprog, NULL, 0, vod.pitch);
 		store (handle, self->afs_tuning,
-				(void*) &vod, sizeof(LV2_Atom_Vector_Body) + 128 * sizeof(double),
-				self->atom_Vector,
-				LV2_STATE_IS_POD);
+		       (void*)&vod, sizeof (LV2_Atom_Vector_Body) + 128 * sizeof (double),
+		       self->atom_Vector,
+		       LV2_STATE_IS_POD);
 	}
 
 	return LV2_STATE_SUCCESS;
@@ -895,17 +908,17 @@ restore (LV2_Handle                  instance,
 		return LV2_STATE_ERR_UNKNOWN;
 	}
 
-	LV2_State_Map_Path*  map_path = NULL;
+	LV2_State_Map_Path* map_path = NULL;
 #ifdef LV2_STATE__freePath
 	LV2_State_Free_Path* free_path = NULL;
 #endif
 
 	for (int i = 0; features[i]; ++i) {
 		if (!strcmp (features[i]->URI, LV2_STATE__mapPath)) {
-			map_path = (LV2_State_Map_Path*) features[i]->data;
+			map_path = (LV2_State_Map_Path*)features[i]->data;
 		}
 #ifdef LV2_STATE__freePath
-		else if (!strcmp(features[i]->URI, LV2_STATE__freePath)) {
+		else if (!strcmp (features[i]->URI, LV2_STATE__freePath)) {
 			free_path = (LV2_State_Free_Path*)features[i]->data;
 		}
 #endif
@@ -915,19 +928,19 @@ restore (LV2_Handle                  instance,
 		return LV2_STATE_ERR_NO_FEATURE;
 	}
 
-  size_t   size;
-  uint32_t type;
-  uint32_t valflags;
+	size_t   size;
+	uint32_t type;
+	uint32_t valflags;
 
-  const void* value = retrieve (handle, self->afs_sf2file, &size, &type, &valflags);
+	const void* value = retrieve (handle, self->afs_sf2file, &size, &type, &valflags);
 	if (!value) {
 		return LV2_STATE_ERR_NO_PROPERTY;
 	}
 
-	char* apath = map_path->absolute_path (map_path->handle, (const char*) value);
+	char* apath = map_path->absolute_path (map_path->handle, (const char*)value);
 	strncpy (self->queue_sf2_file_path, apath, 1023);
 	self->queue_sf2_file_path[1023] = '\0';
-	self->queue_reinit = true;
+	self->queue_reinit              = true;
 #ifdef LV2_STATE__freePath
 	if (free_path) {
 		free_path->free_path (free_path->handle, apath);
@@ -940,22 +953,21 @@ restore (LV2_Handle                  instance,
 	}
 
 	value = retrieve (handle, self->afs_tuning, &size, &type, &valflags);
-	if (value
-			&& size == sizeof(LV2_Atom_Vector_Body) + 128 * sizeof(double)
-			&& type == self->atom_Vector) {
-		memcpy(self->queue_tuning, LV2_ATOM_BODY(value), 128 * sizeof(double));
+	if (value && size == sizeof (LV2_Atom_Vector_Body) + 128 * sizeof (double) && type == self->atom_Vector) {
+		memcpy (self->queue_tuning, LV2_ATOM_BODY (value), 128 * sizeof (double));
 		self->queue_retune = true;
 	}
 
 	return LV2_STATE_SUCCESS;
 }
 
-static std::string xml_escape (const std::string& s)
+static std::string
+xml_escape (const std::string& s)
 {
 	std::string r (s);
-	std::replace (r.begin (), r.end(), '"', '\'');
+	std::replace (r.begin (), r.end (), '"', '\'');
 	size_t pos = 0;
-	while((pos = r.find ("&", pos)) != std::string::npos) {
+	while ((pos = r.find ("&", pos)) != std::string::npos) {
 		r.replace (pos, 1, "&amp;");
 		pos += 4;
 	}
@@ -967,27 +979,27 @@ static char*
 mn_file (LV2_Handle instance)
 {
 	AFluidSynth* self = (AFluidSynth*)instance;
-	char* rv = NULL;
-	char tmp[1024];
+	char*        rv   = NULL;
+	char         tmp[1024];
 
-	rv = (char*) calloc (1, sizeof (char));
+	rv = (char*)calloc (1, sizeof (char));
 
-#define pf(...)                                              \
-	do {                                                       \
-	  snprintf (tmp, sizeof(tmp), __VA_ARGS__);                \
-	  tmp[sizeof(tmp) - 1] = '\0';                             \
-	  rv = (char*)realloc (rv, strlen (rv) + strlen(tmp) + 1); \
-	  strcat (rv, tmp);                                        \
-	} while (0)
+#define pf(...)                                                                  \
+  do {                                                                           \
+    snprintf (tmp, sizeof (tmp), __VA_ARGS__);                                   \
+    tmp[sizeof (tmp) - 1] = '\0';                                                \
+    rv                    = (char*)realloc (rv, strlen (rv) + strlen (tmp) + 1); \
+    strcat (rv, tmp);                                                            \
+  } while (0)
 
 	pf ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-			"<!DOCTYPE MIDINameDocument PUBLIC \"-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN\" \"http://dev.midi.org/dtds/MIDINameDocument10.dtd\">\n"
-			"<MIDINameDocument>\n"
-			"  <Author/>\n"
-			"  <MasterDeviceNames>\n"
-			"    <Manufacturer>Ardour Foundation</Manufacturer>\n"
-			"    <Model>%s:%p</Model>\n", AFS_URN, (void*) self);
-
+	    "<!DOCTYPE MIDINameDocument PUBLIC \"-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN\" \"http://dev.midi.org/dtds/MIDINameDocument10.dtd\">\n"
+	    "<MIDINameDocument>\n"
+	    "  <Author/>\n"
+	    "  <MasterDeviceNames>\n"
+	    "    <Manufacturer>Ardour Foundation</Manufacturer>\n"
+	    "    <Model>%s:%p</Model>\n",
+	    AFS_URN, (void*)self);
 
 	pf ("    <CustomDeviceMode Name=\"Default\">\n");
 	pf ("      <ChannelNameSetAssignments>\n");
@@ -1014,16 +1026,16 @@ mn_file (LV2_Handle instance)
 
 	for (BPMap::const_iterator i = ps.begin (); i != ps.end (); ++i, ++bn) {
 		pf ("      <PatchBank Name=\"Patch Bank %d\">\n", i->first);
-		if (i->second.size() > 0) {
+		if (i->second.size () > 0) {
 			pf ("        <MIDICommands>\n");
 			pf ("            <ControlChange Control=\"0\" Value=\"%d\"/>\n", (i->first >> 7) & 127);
 			pf ("            <ControlChange Control=\"32\" Value=\"%d\"/>\n", i->first & 127);
 			pf ("        </MIDICommands>\n");
 			pf ("        <PatchNameList>\n");
 			int n = 0;
-			for (BPList::const_iterator j = i->second.begin(); j != i->second.end(); ++j, ++n) {
+			for (BPList::const_iterator j = i->second.begin (); j != i->second.end (); ++j, ++n) {
 				pf ("      <Patch Number=\"%d\" Name=\"%s\" ProgramChange=\"%d\"/>\n",
-						n, xml_escape (j->name).c_str(), j->program);
+				    n, xml_escape (j->name).c_str (), j->program);
 			}
 			pf ("        </PatchNameList>\n");
 		}
@@ -1049,9 +1061,8 @@ mn_file (LV2_Handle instance)
 	pf ("    </ControlNameList>\n");
 
 	pf (
-			"  </MasterDeviceNames>\n"
-			"</MIDINameDocument>"
-		 );
+	    "  </MasterDeviceNames>\n"
+	    "</MIDINameDocument>");
 
 	//printf("-----\n%s\n------\n", rv);
 	return rv;
@@ -1061,8 +1072,8 @@ static char*
 mn_model (LV2_Handle instance)
 {
 	AFluidSynth* self = (AFluidSynth*)instance;
-	char* rv = (char*) malloc (64 * sizeof (char));
-	snprintf (rv, 64, "%s:%p", AFS_URN, (void*) self);
+	char*        rv   = (char*)malloc (64 * sizeof (char));
+	snprintf (rv, 64, "%s:%p", AFS_URN, (void*)self);
 	rv[63] = 0;
 	return rv;
 }
@@ -1080,9 +1091,8 @@ extension_data (const char* uri)
 	if (!strcmp (uri, LV2_WORKER__interface)) {
 		static const LV2_Worker_Interface worker = { work, work_response, NULL };
 		return &worker;
-	}
-	else if (!strcmp (uri, LV2_STATE__interface)) {
-		static const LV2_State_Interface  state  = { save, restore };
+	} else if (!strcmp (uri, LV2_STATE__interface)) {
+		static const LV2_State_Interface state = { save, restore };
 		return &state;
 	}
 #ifdef LV2_EXTENDED
@@ -1107,18 +1117,18 @@ static const LV2_Descriptor descriptor = {
 
 #undef LV2_SYMBOL_EXPORT
 #ifdef _WIN32
-#    define LV2_SYMBOL_EXPORT __declspec(dllexport)
+# define LV2_SYMBOL_EXPORT __declspec(dllexport)
 #else
-#    define LV2_SYMBOL_EXPORT  __attribute__ ((visibility ("default")))
+# define LV2_SYMBOL_EXPORT __attribute__ ((visibility ("default")))
 #endif
 LV2_SYMBOL_EXPORT
 const LV2_Descriptor*
 lv2_descriptor (uint32_t index)
 {
 	switch (index) {
-	case 0:
-		return &descriptor;
-	default:
-		return NULL;
+		case 0:
+			return &descriptor;
+		default:
+			return NULL;
 	}
 }
