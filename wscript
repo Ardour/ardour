@@ -774,6 +774,9 @@ int main() { return 0; }''',
         if platform != 'darwin' and not is_clang and not Options.options.dist_target == 'mingw':
             linker_flags += [ '-rdynamic' ]
 
+    if opt.gprofile:
+        linker_flags += [ flags_dict['gprofile'] ]
+
     conf.env.append_value('CFLAGS', compiler_flags)
     conf.env.append_value('CFLAGS', c_flags)
     conf.env.append_value('CXXFLAGS', compiler_flags)
