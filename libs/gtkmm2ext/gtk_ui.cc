@@ -517,6 +517,7 @@ UI::do_request (UIRequest* req)
 			 ) {
 			gtk_widget_set_tooltip_markup (req->widget->gobj(), req->msg);
 		}
+		g_free (old);
 
 	} else {
 
