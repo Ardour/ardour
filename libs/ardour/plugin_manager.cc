@@ -438,6 +438,8 @@ PluginManager::refresh (bool cache_only)
 		return;
 	}
 
+	load_scanlog ();
+
 	DEBUG_TRACE (DEBUG::PluginManager, "PluginManager::refresh\n");
 	_cancel_scan = false;
 
@@ -605,6 +607,8 @@ PluginManager::refresh (bool cache_only)
 		all_plugs.insert(all_plugs.end(), _lua_plugin_info->begin(), _lua_plugin_info->end());
 	}
 	detect_type_ambiguities (all_plugs);
+
+	save_scanlog ();
 }
 
 void
@@ -2497,4 +2501,70 @@ PluginManager::lua_plugin_info ()
 {
 	assert(_lua_plugin_info);
 	return *_lua_plugin_info;
+}
+
+/* ****************************************************************************/
+
+void
+PluginManager::scan_log (std::vector<boost::shared_ptr<PluginScanLogEntry> >& l) const
+{
+	for (PluginScanLog::const_iterator i = _plugin_scan_log.begin(); i != _plugin_scan_log.end(); ++i) {
+		l.push_back (*i);
+	}
+}
+
+void
+PluginManager::clear_stale_log ()
+{
+	for (PluginScanLog::const_iterator i = _plugin_scan_log.begin(); i != _plugin_scan_log.end();) {
+		if (!(*i)->recent()) {
+			i = _plugin_scan_log.erase (i);
+			// TODO also remove cache file (and blacklist entry)
+		} else {
+			++i;
+		}
+	}
+}
+
+void
+PluginManager::load_scanlog ()
+{
+	_plugin_scan_log.clear ();
+	std::string path = Glib::build_filename (user_plugin_metadata_dir(), "scan_log");
+	if (!Glib::file_test (path, Glib::FILE_TEST_EXISTS)) {
+		return;
+	}
+
+	XMLTree tree;
+	if (!tree.read (path)) {
+		error << string_compose (_("Cannot load Plugin Scan Log from '%1'."), path) << endmsg;
+		return;
+	}
+
+	for (XMLNodeConstIterator i = tree.root()->children().begin(); i != tree.root()->children().end(); ++i) {
+		try {
+			_plugin_scan_log.insert (PSLEPtr (new PluginScanLogEntry (**i)));
+		} catch (...) {
+			error << string_compose (_("Plugin Scan Log '%1' contains invalid information."), path) << endmsg;
+		}
+	}
+}
+
+void
+PluginManager::save_scanlog ()
+{
+	std::string path = Glib::build_filename (user_plugin_metadata_dir(), "scan_log");
+	XMLNode* root = new XMLNode (X_("PluginScanLog"));
+	root->set_property ("version", 1);
+
+	for (PluginScanLog::const_iterator i = _plugin_scan_log.begin(); i != _plugin_scan_log.end(); ++i) {
+		XMLNode& node = (*i)->state ();
+		root->add_child_nocopy (node);
+	}
+
+	XMLTree tree;
+	tree.set_root (root);
+	if (!tree.write (path)) {
+		error << string_compose (_("Could not save Plugin Scan Log to %1"), path) << endmsg;
+	}
 }

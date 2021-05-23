@@ -3,7 +3,7 @@
  * Copyright (C) 2005-2006 Taybin Rutkin <taybin@taybin.com>
  * Copyright (C) 2008-2011 David Robillard <d@drobilla.net>
  * Copyright (C) 2009-2011 Carl Hetherington <carl@carlh.net>
- * Copyright (C) 2014-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2014-2021 Robin Gareus <robin@gareus.org>
  * Copyright (C) 2018 Ben Loftis <ben@harrisonconsoles.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -33,10 +33,12 @@
 #include <string>
 #include <set>
 #include <boost/utility.hpp>
+#include <boost/container/set.hpp>
 
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/plugin.h"
+#include "ardour/plugin_scan_result.h"
 
 namespace ARDOUR {
 
@@ -78,6 +80,9 @@ public:
 
 	static uint32_t cache_version ();
 	bool cache_valid () const;
+
+	void scan_log (std::vector<boost::shared_ptr<PluginScanLogEntry> >&) const;
+	void clear_stale_log ();
 
 	/* always return LXVST for any VST subtype */
 	static PluginType to_generic_vst (const PluginType);
@@ -145,6 +150,26 @@ public:
 	PBD::Signal3<void, ARDOUR::PluginType, std::string, std::string> PluginTagChanged; //PluginType t, string id, string tag
 
 private:
+	typedef boost::shared_ptr<PluginScanLogEntry> PSLEPtr;
+
+	struct PSLEPtrSort {
+		bool operator() (PSLEPtr const& a, PSLEPtr const& b) const {
+			return *a < *b;
+		}
+	};
+
+	typedef boost::container::set<PSLEPtr, PSLEPtrSort> PluginScanLog;
+	PluginScanLog _plugin_scan_log;
+
+	PSLEPtr scan_log_entry (PluginType const type, std::string const& path) {
+		PSLEPtr psl = PSLEPtr (new PluginScanLogEntry (type, path));
+		PluginScanLog::iterator i = _plugin_scan_log.find (psl);
+		if (i == _plugin_scan_log.end ()) {
+			_plugin_scan_log.insert (psl);
+			i = _plugin_scan_log.find (psl);
+		}
+		return *i;
+	}
 
 	struct PluginTag {
 		PluginType const  type;
@@ -245,6 +270,9 @@ private:
 	void load_statuses ();
 	void load_tags ();
 	void load_stats ();
+
+	void load_scanlog ();
+	void save_scanlog ();
 
 	std::string sanitize_tag (const std::string) const;
 
