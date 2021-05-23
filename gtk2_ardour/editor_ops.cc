@@ -4663,8 +4663,9 @@ Editor::remove_selected_regions ()
 		playlist->clear_owned_changes ();
 		playlist->freeze ();
 		playlist->remove_region (*rl);
-		if (Config->get_edit_mode() == Ripple)
+		if (Config->get_edit_mode() == Ripple) {
 			playlist->ripple ((*rl)->position(), -(*rl)->length(), boost::shared_ptr<Region>());
+		}
 
 	}
 
@@ -4803,16 +4804,18 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 		switch (op) {
 		case Delete:
 			pl->remove_region (r);
-			if (Config->get_edit_mode() == Ripple)
+			if (Config->get_edit_mode() == Ripple) {
 				pl->ripple (r->position(), -r->length(), boost::shared_ptr<Region>());
+			}
 			break;
 
 		case Cut:
 			_xx = RegionFactory::create (r, false);
 			npl->add_region (_xx, r->position() - first_position);
 			pl->remove_region (r);
-			if (Config->get_edit_mode() == Ripple)
+			if (Config->get_edit_mode() == Ripple) {
 				pl->ripple (r->position(), -r->length(), boost::shared_ptr<Region>());
+			}
 			break;
 
 		case Copy:
@@ -4822,8 +4825,9 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 
 		case Clear:
 			pl->remove_region (r);
-			if (Config->get_edit_mode() == Ripple)
+			if (Config->get_edit_mode() == Ripple) {
 				pl->ripple (r->position(), -r->length(), boost::shared_ptr<Region>());
+			}
 			break;
 		}
 
