@@ -190,7 +190,8 @@ WaveViewCache::increase_size (uint64_t bytes)
 void
 WaveViewCache::decrease_size (uint64_t bytes)
 {
-	assert (image_cache_size - bytes < image_cache_size);
+	assert (bytes > 0);
+	assert (bytes <= image_cache_size);
 	image_cache_size -= bytes;
 }
 
