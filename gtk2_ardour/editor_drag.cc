@@ -2100,7 +2100,7 @@ RegionInsertDrag::finished (GdkEvent * event, bool)
 		/* recusive diff of rippled regions */
 		vector<Command*> cmds;
 		playlist->rdiff (cmds);
-		_session->add_commands (cmds);
+		_editor->session()->add_commands (cmds);
 	}
 
 	_editor->session()->add_command (new StatefulDiffCommand (playlist));
