@@ -1047,9 +1047,16 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region,
 		boost::shared_ptr<Playlist> playlist = existing_track->playlist();
 		boost::shared_ptr<Region> copy (RegionFactory::create (region, region->properties()));
 		playlist->clear_changes ();
+		playlist->clear_owned_changes ();
 		playlist->add_region (copy, pos);
-		if (Config->get_edit_mode() == Ripple)
+		if (Config->get_edit_mode() == Ripple) {
 			playlist->ripple (pos, copy->length(), copy);
+
+			/* recusive diff of rippled regions */
+			vector<Command*> cmds;
+			playlist->rdiff (cmds);
+			_session->add_commands (cmds);
+		}
 
 		_session->add_command (new StatefulDiffCommand (playlist));
 		break;
