@@ -1938,6 +1938,14 @@ Region::get_cue_markers (CueMarkers& cues, bool abs) const
 }
 
 void
+Region::move_cue_marker (CueMarker const & cm, samplepos_t region_relative_position)
+{
+	for (SourceList::const_iterator s = _sources.begin (); s != _sources.end(); ++s) {
+		(*s)->move_cue_marker (cm, start() + region_relative_position);
+	}
+}
+
+void
 Region::drop_sources ()
 {
 	for (SourceList::const_iterator i = _sources.begin (); i != _sources.end(); ++i) {

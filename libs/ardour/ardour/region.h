@@ -375,6 +375,7 @@ public:
 	}
 
 	void get_cue_markers (CueMarkers&, bool abs = false) const;
+	void move_cue_marker (CueMarker const &, samplepos_t region_relative_position);
 
 protected:
 	virtual XMLNode& state ();
