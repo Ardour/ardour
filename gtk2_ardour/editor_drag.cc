@@ -7158,6 +7158,7 @@ RegionMarkerDrag::RegionMarkerDrag (Editor* ed, RegionView* r, ArdourCanvas::Ite
 	, rv (r)
 	, view (static_cast<ArdourMarker*> (i->get_data ("marker")))
 	, model (rv->find_model_cue_marker (view))
+	, dragging_model (model)
 {
 	assert (view);
 }
@@ -7167,27 +7168,45 @@ RegionMarkerDrag::~RegionMarkerDrag ()
 }
 
 void
-RegionMarkerDrag::start_grab (GdkEvent *, Gdk::Cursor* c)
+RegionMarkerDrag::start_grab (GdkEvent* ev, Gdk::Cursor* c)
 {
+	Drag::start_grab (ev, c);
+	show_verbose_cursor_time (model.position());
+	setup_snap_delta (MusicSample (model.position(), 0));
 }
 
 void
-RegionMarkerDrag::motion (GdkEvent *, bool)
+RegionMarkerDrag::motion (GdkEvent* ev, bool first_move)
 {
+	samplepos_t pos = adjusted_current_sample (ev);
+
+	if (pos < rv->region()->position() || pos >= (rv->region()->position() + rv->region()->length())) {
+		/* out of bounds */
+		return;
+	}
+
+	dragging_model.set_position (pos);
+	view->set_position (pos - rv->region()->position());
+	show_verbose_cursor_time (dragging_model.position() - rv->region()->position()); /* earlier */
 }
 
 void
-RegionMarkerDrag::finished (GdkEvent *, bool)
+RegionMarkerDrag::finished (GdkEvent *, bool did_move)
 {
+	if (did_move) {
+		rv->region()->move_cue_marker (model, dragging_model.position());
+	}
 }
 
 void
 RegionMarkerDrag::aborted (bool)
 {
+	view->set_position (model.position());
 }
 
 void
 RegionMarkerDrag::setup_pointer_sample_offset ()
 {
+	const samplepos_t model_abs_pos = rv->region()->position() + (model.position() - rv->region()->start()); /* distance */
+	_pointer_sample_offset = raw_grab_sample() - model_abs_pos; /* distance */
 }
-

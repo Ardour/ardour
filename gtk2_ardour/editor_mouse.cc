@@ -751,7 +751,12 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		if (Keyboard::modifier_state_equals (event->button.state, Keyboard::ModifierMask(Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 			hide_marker (item, event);
 		} else {
-			_drags->set (new MarkerDrag (this, item), event);
+			ArdourMarker* marker = static_cast<ArdourMarker*> (item->get_data ("marker"));
+			if (marker->type() == ArdourMarker::RegionCue) {
+				_drags->set (new RegionMarkerDrag (this, marker->region_view(), item), event);
+			} else {
+				_drags->set (new MarkerDrag (this, item), event);
+			}
 		}
 		return true;
 

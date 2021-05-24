@@ -1401,6 +1401,7 @@ class RegionMarkerDrag : public Drag
 	RegionView* rv;
 	ArdourMarker* view;
 	ARDOUR::CueMarker model;
+	ARDOUR::CueMarker dragging_model;
 };
 
 #endif /* __gtk2_ardour_editor_drag_h_ */
