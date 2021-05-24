@@ -360,6 +360,10 @@
         <menuitem action='nudge-backward-by-capture-offset'/>
         <menuitem action='sequence-regions'/>
       </menu>
+      <menu action='RegionMenuMarkers'>
+        <menuitem action='add-region-cue-marker'/>
+        <menuitem action='clear-region-cue-markers'/>
+      </menu>
       <menu action='RegionMenuTrim'>
         <menuitem action='trim-front'/>
         <menuitem action='trim-back'/>

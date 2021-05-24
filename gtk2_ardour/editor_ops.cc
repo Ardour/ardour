@@ -2620,9 +2620,15 @@ Editor::insert_source_list_selection (float times)
 
 	begin_reversible_command (_("insert region"));
 	playlist->clear_changes ();
+	playlist->clear_owned_changes ();
 	playlist->add_region ((RegionFactory::create (region, true)), get_preferred_edit_position(), times);
-	if (Config->get_edit_mode() == Ripple)
+	if (Config->get_edit_mode() == Ripple) {
 		playlist->ripple (get_preferred_edit_position(), region->length() * times, boost::shared_ptr<Region>());
+		/* recusive diff of rippled regions */
+		vector<Command*> cmds;
+		playlist->rdiff (cmds);
+		_session->add_commands (cmds);
+	}
 
 	_session->add_command(new StatefulDiffCommand (playlist));
 	commit_reversible_command ();
@@ -4663,8 +4669,9 @@ Editor::remove_selected_regions ()
 		playlist->clear_owned_changes ();
 		playlist->freeze ();
 		playlist->remove_region (*rl);
-		if (Config->get_edit_mode() == Ripple)
+		if (Config->get_edit_mode() == Ripple) {
 			playlist->ripple ((*rl)->position(), -(*rl)->length(), boost::shared_ptr<Region>());
+		}
 
 	}
 
@@ -4803,16 +4810,18 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 		switch (op) {
 		case Delete:
 			pl->remove_region (r);
-			if (Config->get_edit_mode() == Ripple)
+			if (Config->get_edit_mode() == Ripple) {
 				pl->ripple (r->position(), -r->length(), boost::shared_ptr<Region>());
+			}
 			break;
 
 		case Cut:
 			_xx = RegionFactory::create (r, false);
 			npl->add_region (_xx, r->position() - first_position);
 			pl->remove_region (r);
-			if (Config->get_edit_mode() == Ripple)
+			if (Config->get_edit_mode() == Ripple) {
 				pl->ripple (r->position(), -r->length(), boost::shared_ptr<Region>());
+			}
 			break;
 
 		case Copy:
@@ -4822,8 +4831,9 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 
 		case Clear:
 			pl->remove_region (r);
-			if (Config->get_edit_mode() == Ripple)
+			if (Config->get_edit_mode() == Ripple) {
 				pl->ripple (r->position(), -r->length(), boost::shared_ptr<Region>());
+			}
 			break;
 		}
 
@@ -5063,6 +5073,7 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 			if (playlists.insert (playlist).second) {
 				/* successfully inserted into set, so it's the first time we've seen this playlist */
 				playlist->clear_changes ();
+				playlist->clear_owned_changes ();
 			}
 		}
 
@@ -5086,6 +5097,7 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 		if (Config->get_edit_mode() != Ripple) {
 			if (playlists.insert (playlist).second) {
 				playlist->clear_changes ();
+				playlist->clear_owned_changes ();
 			}
 		}
 
