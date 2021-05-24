@@ -1,0 +1,49 @@
+#!/bin/sh
+TOP=`dirname "$0"`/..
+. $TOP/build/gtk2_ardour/ardev_common_waf.sh
+export UBUNTU_MENUPROXY=""
+
+if [ $# -gt 0 ] ; then
+    case $1 in
+        -g|--gdb) DBG=gdb; shift ;;
+    esac
+    case $1 in
+        --valgrind) DBG=valgrind; shift ;;
+    esac
+    case $1 in
+        --callgrind) DBG=callgrind; shift ;;
+    esac
+fi
+
+if test -z "$DBG"; then
+	exec $TOP/build/libs/auscan/ardour-au-scanner "$@"
+fi
+
+if test "$DBG" = "valgrind"; then
+	export ARDOUR_RUNNING_UNDER_VALGRIND=TRUE
+	exec valgrind \
+		--error-limit=no --num-callers=50 \
+		--tool=memcheck \
+		--track-origins=yes \
+		 --leak-check=full --show-leak-kinds=all \
+		--suppressions=${TOP}/tools/valgrind.supp \
+		$TOP/build/libs/auscan/ardour-au-scanner "$@"
+fi
+
+if test "$DBG" = "callgrind"; then
+	exec valgrind \
+		--error-limit=no --num-callers=50 \
+		--tool=callgrind \
+		--separate-callers=3 \
+		--separate-threads=yes \
+		--collect-systime=yes \
+		--collect-jumps=yes \
+		$TOP/build/libs/auscan/ardour-au-scanner "$@"
+fi
+
+if test -n "`which gdb`"; then
+	exec gdb --args $TOP/build/libs/auscan/ardour-au-scanner "$@"
+fi
+if test -n "`which lldb`"; then
+	exec lldb -- $TOP/build/libs/auscan/ardour-au-scanner "$@"
+fi

@@ -291,6 +291,7 @@ children = [
         'libs/fst',
         'libs/vfork',
         'libs/ardouralsautil',
+        'libs/auscan',
 ]
 
 i18n_children = [

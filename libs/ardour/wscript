@@ -473,7 +473,7 @@ def build(bld):
         obj.use    += ['libappleutility']
 
     if bld.is_defined('AUDIOUNIT_SUPPORT'):
-        obj.source += [ 'audio_unit.cc' ]
+        obj.source += [ 'audio_unit.cc', 'auv2_scan.cc' ]
 
     avx_sources = []
     fma_sources = []

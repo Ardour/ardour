@@ -90,6 +90,7 @@ FILE * AUPluginInfo::_crashlog_fd = NULL;
 bool AUPluginInfo::_scan_only = true;
 
 
+#if 1 // remove me -> libs/ardour/auv2_scan.cc
 static void au_blacklist (std::string id)
 {
 	string fn = Glib::build_filename (ARDOUR::user_cache_directory(), "au_blacklist.txt");
@@ -160,6 +161,7 @@ static bool is_blacklisted (std::string id)
 	return false;
 }
 
+#endif
 
 
 static OSStatus
@@ -2458,6 +2460,7 @@ check_and_get_preset_name (ArdourComponent component, const string& pathstr, str
 }
 
 
+#if 1 // remove me
 static void
 #ifdef COREAUDIO105
 get_names (CAComponentDescription& comp_desc, std::string& name, std::string& maker)
@@ -2523,6 +2526,7 @@ get_names (ArdourComponent& comp, std::string& name, std::string& maker)
 		strip_whitespace_edges (name);
 	}
 }
+#endif
 
 std::string
 AUPlugin::current_preset() const
@@ -2910,8 +2914,7 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 
 		bool has_midi_in = false;
 
-		AUPluginInfoPtr info (new AUPluginInfo
-				      (boost::shared_ptr<CAComponentDescription> (new CAComponentDescription(temp))));
+		AUPluginInfoPtr info (new AUPluginInfo (boost::shared_ptr<CAComponentDescription> (new CAComponentDescription(temp))));
 
 		/* although apple designed the subtype field to be a "category" indicator,
 		   its really turned into a plugin ID field for a given manufacturer. Hence
@@ -3287,6 +3290,7 @@ AUPluginInfo::load_cached_info ()
 }
 
 
+#if 1 // code dup ? -> auv2_scan
 std::string
 AUPluginInfo::stringify_descriptor (const CAComponentDescription& desc)
 {
@@ -3305,6 +3309,7 @@ AUPluginInfo::stringify_descriptor (const CAComponentDescription& desc)
 
 	return s.str();
 }
+#endif
 
 bool
 AUPluginInfo::needs_midi_input () const
