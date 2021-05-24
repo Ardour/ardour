@@ -189,8 +189,8 @@ public:
 
 	Editing::SnapMode  snap_mode () const;
 	Editing::GridType  grid_type () const;
+	bool  grid_type_is_musical (Editing::GridType) const;
 	bool  grid_musical () const;
-	bool  grid_nonmusical () const;
 
 	void undo (uint32_t n = 1);
 	void redo (uint32_t n = 1);
