@@ -7152,3 +7152,42 @@ void
 RegionCutDrag::aborted (bool)
 {
 }
+
+RegionMarkerDrag::RegionMarkerDrag (Editor* ed, RegionView* r, ArdourCanvas::Item* i)
+	: Drag (ed, i)
+	, rv (r)
+	, view (static_cast<ArdourMarker*> (i->get_data ("marker")))
+	, model (rv->find_model_cue_marker (view))
+{
+	assert (view);
+}
+
+RegionMarkerDrag::~RegionMarkerDrag ()
+{
+}
+
+void
+RegionMarkerDrag::start_grab (GdkEvent *, Gdk::Cursor* c)
+{
+}
+
+void
+RegionMarkerDrag::motion (GdkEvent *, bool)
+{
+}
+
+void
+RegionMarkerDrag::finished (GdkEvent *, bool)
+{
+}
+
+void
+RegionMarkerDrag::aborted (bool)
+{
+}
+
+void
+RegionMarkerDrag::setup_pointer_sample_offset ()
+{
+}
+
