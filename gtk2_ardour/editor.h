@@ -588,7 +588,7 @@ public:
 	void add_region_marker ();
 	void clear_region_markers ();
 	void remove_region_marker (ARDOUR::CueMarker&);
-	void make_region_markers_global ();
+	void make_region_markers_global (bool as_cd_markers);
 
 protected:
 	void map_transport_state ();

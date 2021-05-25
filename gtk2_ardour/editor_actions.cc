@@ -1654,7 +1654,8 @@ Editor::register_region_actions ()
 
 	/* PART 3: actions that operate on the selection and also require the edit point location */
 
-	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EditPointRegions), "make-region-markers-global", _("Convert Region Cue Markers to Global Markers"), sigc::mem_fun (*this, &Editor::make_region_markers_global));
+	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EditPointRegions), "make-region-markers-cd", _("Convert Region Cue Markers to CD Markers"), sigc::bind (sigc::mem_fun (*this, &Editor::make_region_markers_global), true));
+	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EditPointRegions), "make-region-markers-global", _("Convert Region Cue Markers to Global Markers"), sigc::bind (sigc::mem_fun (*this, &Editor::make_region_markers_global), false));
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EditPointRegions), "add-region-cue-marker", _("Add Region Cue Marker"), sigc::mem_fun (*this, &Editor::add_region_marker));
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EditPointRegions), "clear-region-cue-markers", _("Clear Region Cue Markers"), sigc::mem_fun (*this, &Editor::clear_region_markers));
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EditPointRegions), "set-region-sync-position", _("Set Sync Position"), sigc::mem_fun (*this, &Editor::set_region_sync_position));
