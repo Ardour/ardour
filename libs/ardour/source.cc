@@ -432,6 +432,17 @@ Source::move_cue_marker (CueMarker const & cm, samplepos_t source_relative_posit
 	}
 }
 
+void
+Source::rename_cue_marker (CueMarker& cm, std::string const & str)
+{
+	CueMarkers::iterator m = _cue_markers.find (cm);
+
+	if (m != _cue_markers.end()) {
+		_cue_markers.erase (m);
+		add_cue_marker (CueMarker (str, cm.position()));
+	}
+}
+
 bool
 Source::remove_cue_marker (CueMarker const & cm)
 {

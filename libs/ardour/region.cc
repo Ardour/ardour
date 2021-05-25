@@ -1924,7 +1924,6 @@ Region::captured_xruns (XrunPositions& xruns, bool abs) const
 void
 Region::get_cue_markers (CueMarkers& cues, bool abs) const
 {
-	bool was_empty = cues.empty ();
 	for (SourceList::const_iterator s = _sources.begin (); s != _sources.end(); ++s) {
 		CueMarkers const& x = (*s)->cue_markers ();
 		for (CueMarkers::const_iterator p = x.begin (); p != x.end (); ++p) {
@@ -1942,6 +1941,14 @@ Region::move_cue_marker (CueMarker const & cm, samplepos_t region_relative_posit
 {
 	for (SourceList::const_iterator s = _sources.begin (); s != _sources.end(); ++s) {
 		(*s)->move_cue_marker (cm, start() + region_relative_position);
+	}
+}
+
+void
+Region::rename_cue_marker (CueMarker& cm, std::string const & str)
+{
+	for (SourceList::const_iterator s = _sources.begin (); s != _sources.end(); ++s) {
+		(*s)->rename_cue_marker (cm, str);
 	}
 }
 
