@@ -517,7 +517,7 @@ EditorSources::regions_changed (boost::shared_ptr<ARDOUR::RegionList> rl, PBD::P
 
 		if (!region->whole_file ()) {
 			/*this isn't on our list anyway; we can ignore it*/
-			return;
+			break;
 		}
 
 		TreeModel::iterator i;
