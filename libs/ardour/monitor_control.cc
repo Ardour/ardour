@@ -21,8 +21,9 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 MonitorControl::MonitorControl (Session& session, std::string const & name, Monitorable& m)
 	: SlavableAutomationControl (session, MonitoringAutomation, ParameterDescriptor (MonitoringAutomation),
@@ -63,3 +64,5 @@ MonitorControl::set_state (XMLNode const & node, int version)
 
 	return 0;
 }
+
+} // namespace ARDOUR

@@ -61,8 +61,9 @@
 #include <locale.h>
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 LadspaPlugin::LadspaPlugin (string module_path, AudioEngine& e, Session& session, uint32_t index, samplecnt_t rate)
 	: Plugin (e, session)
@@ -959,5 +960,4 @@ LadspaPlugin::port_descriptor (uint32_t i) const
 	return 0;
 }
 
-
-
+} // namespace ARDOUR

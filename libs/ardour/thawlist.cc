@@ -21,7 +21,7 @@
 #include "ardour/region.h"
 #include "ardour/thawlist.h"
 
-using namespace ARDOUR;
+namespace ARDOUR {
 
 ThawList::~ThawList ()
 {
@@ -55,3 +55,5 @@ ThawList::release ()
 	}
 	clear ();
 }
+
+} // namespace ARDOUR

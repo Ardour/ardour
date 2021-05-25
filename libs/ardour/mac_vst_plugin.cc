@@ -27,8 +27,9 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 MacVSTPlugin::MacVSTPlugin (AudioEngine& e, Session& session, VSTHandle* h, int unique_id)
 	: VSTPlugin (e, session, h)
@@ -175,3 +176,5 @@ MacVSTPluginInfo::MacVSTPluginInfo (_VSTInfo* nfo) : VSTPluginInfo (nfo)
 {
 	type = ARDOUR::MacVST;
 }
+
+} // namespace ARDOUR

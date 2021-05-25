@@ -333,7 +333,7 @@ private:
 	void propagate_show_hide ();
 };
 
-extern LIBCANVAS_API std::ostream& operator<< (std::ostream&, const ArdourCanvas::Item&);
+extern LIBCANVAS_API std::ostream& operator<< (std::ostream&, const Item&);
 
 }
 

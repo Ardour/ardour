@@ -24,7 +24,8 @@
 #include "ardour/session.h"
 
 using namespace std;
-using namespace ARDOUR;
+
+namespace ARDOUR {
 
 ExportPreset::ExportPreset (string filename, Session & s) :
   session (s), global (filename), local (0)
@@ -162,3 +163,5 @@ ExportPreset::remove_instant_xml () const
 		instant_xml->remove_nodes_and_delete ("id", _id.to_s());
 	}
 }
+
+} // namespace ARDOUR

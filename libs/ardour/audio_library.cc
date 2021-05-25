@@ -47,7 +47,8 @@
 
 using namespace std;
 using namespace PBD;
-using namespace ARDOUR;
+
+namespace ARDOUR {
 
 namespace {
 	const char* const sfdb_file_name = "sfdb";
@@ -180,3 +181,5 @@ AudioLibrary::search_members_and (vector<string>& members, const vector<string>&
 	}
 #endif
 }
+
+} // namespace ARDOUR

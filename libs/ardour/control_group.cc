@@ -23,8 +23,9 @@
 #include "ardour/control_group.h"
 #include "ardour/gain_control.h"
 
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 ControlGroup::ControlGroup (Evoral::Parameter p)
 	: _parameter (p)
@@ -323,3 +324,5 @@ GainControlGroup::set_group_value (boost::shared_ptr<AutomationControl> control,
 		}
 	}
 }
+
+} // namespace ARDOUR

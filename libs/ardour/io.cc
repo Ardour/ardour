@@ -59,8 +59,9 @@
 #define BLOCK_PROCESS_CALLBACK() Glib::Threads::Mutex::Lock em (AudioEngine::instance()->process_lock())
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 const string                 IO::state_node_name = "IO";
 bool                         IO::connecting_legal = false;
@@ -1791,3 +1792,5 @@ IO::has_port (boost::shared_ptr<Port> p) const
 	Glib::Threads::Mutex::Lock lm (io_lock);
 	return _ports.contains (p);
 }
+
+} // namespace ARDOUR

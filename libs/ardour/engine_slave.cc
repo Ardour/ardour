@@ -28,7 +28,8 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
+
+namespace ARDOUR {
 
 Engine_TransportMaster::Engine_TransportMaster (AudioEngine& e)
 	: TransportMaster (Engine, X_("JACK"))
@@ -146,3 +147,4 @@ Engine_TransportMaster::update_interval () const
 	return AudioEngine::instance()->samples_per_cycle();
 }
 
+} // namespace ARDOUR

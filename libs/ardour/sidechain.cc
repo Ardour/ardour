@@ -30,9 +30,9 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
 using namespace PBD;
 
+namespace ARDOUR {
 
 SideChain::SideChain (Session& s, const std::string& name)
 	: IOProcessor (s, true, false, name)
@@ -100,3 +100,5 @@ SideChain::configure_io (ChanCount in, ChanCount out)
 	}
 	return Processor::configure_io (in, out);
 }
+
+} // namespace ARDOUR

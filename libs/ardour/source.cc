@@ -55,9 +55,9 @@ namespace PBD {
 }
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
 
+namespace ARDOUR {
 
 Source::Source (Session& s, DataType type, const string& name, Flag flags)
 	: SessionObject(s, name)
@@ -465,3 +465,5 @@ Source::clear_cue_markers ()
 	CueMarkersChanged(); /* EMIT SIGNAL */
 	return true;
 }
+
+} // namespace ARDOUR

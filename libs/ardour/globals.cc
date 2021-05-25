@@ -138,42 +138,41 @@
 
 #include "pbd/i18n.h"
 
-ARDOUR::RCConfiguration* ARDOUR::Config  = 0;
-ARDOUR::RuntimeProfile*  ARDOUR::Profile = 0;
-ARDOUR::AudioLibrary*    ARDOUR::Library = 0;
-
-using namespace ARDOUR;
 using namespace std;
 using namespace PBD;
 
+namespace ARDOUR {
+
+RCConfiguration* Config  = 0;
+RuntimeProfile*  Profile = 0;
+AudioLibrary*    Library = 0;
+
 bool libardour_initialized = false;
 
-compute_peak_t          ARDOUR::compute_peak          = 0;
-find_peaks_t            ARDOUR::find_peaks            = 0;
-apply_gain_to_buffer_t  ARDOUR::apply_gain_to_buffer  = 0;
-mix_buffers_with_gain_t ARDOUR::mix_buffers_with_gain = 0;
-mix_buffers_no_gain_t   ARDOUR::mix_buffers_no_gain   = 0;
-copy_vector_t           ARDOUR::copy_vector           = 0;
+compute_peak_t          compute_peak          = 0;
+find_peaks_t            find_peaks            = 0;
+apply_gain_to_buffer_t  apply_gain_to_buffer  = 0;
+mix_buffers_with_gain_t mix_buffers_with_gain = 0;
+mix_buffers_no_gain_t   mix_buffers_no_gain   = 0;
+copy_vector_t           copy_vector           = 0;
 
-PBD::Signal1<void, std::string>                    ARDOUR::BootMessage;
-PBD::Signal3<void, std::string, std::string, bool> ARDOUR::PluginScanMessage;
-PBD::Signal1<void, int>                            ARDOUR::PluginScanTimeout;
-PBD::Signal0<void>                                 ARDOUR::GUIIdle;
-PBD::Signal3<bool, std::string, std::string, int>  ARDOUR::CopyConfigurationFiles;
+PBD::Signal1<void, std::string>                    BootMessage;
+PBD::Signal3<void, std::string, std::string, bool> PluginScanMessage;
+PBD::Signal1<void, int>                            PluginScanTimeout;
+PBD::Signal0<void>                                 GUIIdle;
+PBD::Signal3<bool, std::string, std::string, int>  CopyConfigurationFiles;
 
-std::map<std::string, bool> ARDOUR::reserved_io_names;
+std::map<std::string, bool> reserved_io_names;
 
 static bool have_old_configuration_files = false;
 static bool running_from_gui             = false;
 
-namespace ARDOUR {
 extern void setup_enum_writer ();
-}
 
 /* this is useful for quite a few things that want to check
    if any bounds-related property has changed
 */
-PBD::PropertyChange ARDOUR::bounds_change;
+PBD::PropertyChange bounds_change;
 
 static PBD::ScopedConnection engine_startup_connection;
 
@@ -424,7 +423,7 @@ copy_configuration_files (string const& old_dir, string const& new_dir, int old_
 }
 
 void
-ARDOUR::check_for_old_configuration_files ()
+check_for_old_configuration_files ()
 {
 	int current_version = atoi (X_(PROGRAM_VERSION));
 
@@ -446,7 +445,7 @@ ARDOUR::check_for_old_configuration_files ()
 }
 
 int
-ARDOUR::handle_old_configuration_files (boost::function<bool(std::string const&, std::string const&, int)> ui_handler)
+handle_old_configuration_files (boost::function<bool(std::string const&, std::string const&, int)> ui_handler)
 {
 	if (have_old_configuration_files) {
 		int current_version = atoi (X_(PROGRAM_VERSION));
@@ -464,7 +463,7 @@ ARDOUR::handle_old_configuration_files (boost::function<bool(std::string const&,
 }
 
 bool
-ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir, bool with_gui)
+init (bool use_windows_vst, bool try_optimization, const char* localedir, bool with_gui)
 {
 	if (libardour_initialized) {
 		return true;
@@ -510,9 +509,9 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	   property changes.
 	*/
 
-	bounds_change.add (ARDOUR::Properties::start);
-	bounds_change.add (ARDOUR::Properties::position);
-	bounds_change.add (ARDOUR::Properties::length);
+	bounds_change.add (Properties::start);
+	bounds_change.add (Properties::position);
+	bounds_change.add (Properties::length);
 
 	/* provide a state version for the few cases that need it and are not
 	   driven by reading state from disk (e.g. undo/redo)
@@ -520,7 +519,7 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 
 	Stateful::current_state_version = CURRENT_SESSION_FILE_VERSION;
 
-	ARDOUR::setup_enum_writer ();
+	setup_enum_writer ();
 
 	// allow ardour the absolute maximum number of open files
 	lotsa_files_please ();
@@ -595,7 +594,7 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 
 	PannerManager::instance ().discover_panners ();
 
-	ARDOUR::AudioEngine::create ();
+	AudioEngine::create ();
 	TransportMasterManager::create ();
 
 	/* it is unfortunate that we need to include reserved names here that
@@ -636,7 +635,7 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 }
 
 void
-ARDOUR::init_post_engine (uint32_t start_cnt)
+init_post_engine (uint32_t start_cnt)
 {
 	XMLNode* node;
 
@@ -648,7 +647,7 @@ ARDOUR::init_post_engine (uint32_t start_cnt)
 			 * started, with whatever options they want.
 			 */
 
-			ARDOUR::PluginManager::instance ().refresh (true);
+			PluginManager::instance ().refresh (true);
 		}
 
 		if ((node = Config->control_protocol_state ()) != 0) {
@@ -660,7 +659,7 @@ ARDOUR::init_post_engine (uint32_t start_cnt)
 }
 
 void
-ARDOUR::cleanup ()
+cleanup ()
 {
 	if (!libardour_initialized) {
 		return;
@@ -669,8 +668,8 @@ ARDOUR::cleanup ()
 	engine_startup_connection.disconnect ();
 
 	delete &ControlProtocolManager::instance ();
-	ARDOUR::AudioEngine::destroy ();
-	ARDOUR::TransportMasterManager::destroy ();
+	AudioEngine::destroy ();
+	TransportMasterManager::destroy ();
 
 	delete Library;
 #ifdef HAVE_LRDF
@@ -691,13 +690,13 @@ ARDOUR::cleanup ()
 }
 
 bool
-ARDOUR::no_auto_connect ()
+no_auto_connect ()
 {
 	return getenv ("ARDOUR_NO_AUTOCONNECT") != 0;
 }
 
 void
-ARDOUR::setup_fpu ()
+setup_fpu ()
 {
 	FPU* fpu = FPU::instance ();
 
@@ -788,15 +787,15 @@ ARDOUR::setup_fpu ()
 static const bool translate_by_default = true;
 
 string
-ARDOUR::translation_enable_path ()
+translation_enable_path ()
 {
 	return Glib::build_filename (user_config_directory (), ".translate");
 }
 
 bool
-ARDOUR::translations_are_enabled ()
+translations_are_enabled ()
 {
-	int fd = g_open (ARDOUR::translation_enable_path ().c_str (), O_RDONLY, 0444);
+	int fd = g_open (translation_enable_path ().c_str (), O_RDONLY, 0444);
 
 	if (fd < 0) {
 		return translate_by_default;
@@ -815,9 +814,9 @@ ARDOUR::translations_are_enabled ()
 }
 
 bool
-ARDOUR::set_translations_enabled (bool yn)
+set_translations_enabled (bool yn)
 {
-	string i18n_enabler = ARDOUR::translation_enable_path ();
+	string i18n_enabler = translation_enable_path ();
 	int    fd           = g_open (i18n_enabler.c_str (), O_WRONLY | O_CREAT | O_TRUNC, 0644);
 
 	if (fd < 0) {
@@ -840,7 +839,7 @@ ARDOUR::set_translations_enabled (bool yn)
 }
 
 vector<SyncSource>
-ARDOUR::get_available_sync_options ()
+get_available_sync_options ()
 {
 	vector<SyncSource> ret;
 
@@ -886,7 +885,7 @@ clock_gettime (int /*clk_id*/, struct timespec* t)
 #endif
 
 microseconds_t
-ARDOUR::get_microseconds ()
+get_microseconds ()
 {
 #ifdef PLATFORM_WINDOWS
 	microseconds_t ret = 0;
@@ -915,14 +914,16 @@ ARDOUR::get_microseconds ()
  */
 
 int
-ARDOUR::format_data_width (ARDOUR::SampleFormat format)
+format_data_width (SampleFormat format)
 {
 	switch (format) {
-		case ARDOUR::FormatInt16:
+		case FormatInt16:
 			return 16;
-		case ARDOUR::FormatInt24:
+		case FormatInt24:
 			return 24;
 		default:
 			return 32;
 	}
 }
+
+} // namespace ARDOUR

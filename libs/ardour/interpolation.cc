@@ -28,9 +28,10 @@
 #include "ardour/interpolation.h"
 #include "ardour/midi_buffer.h"
 
-using namespace ARDOUR;
 using std::cerr;
 using std::endl;
+
+namespace ARDOUR {
 
 CubicInterpolation::CubicInterpolation ()
 	: valid_z_bits (0)
@@ -228,3 +229,5 @@ CubicInterpolation::distance (samplecnt_t nsamples)
 	assert (phase.size () > 0);
 	return floor (floor (phase[0]) + (_speed * nsamples));
 }
+
+} // namespace ARDOUR

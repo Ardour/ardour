@@ -35,9 +35,10 @@
 #include "pbd/i18n.h"
 #include "sha1.c"
 
-using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
+
+namespace ARDOUR {
 
 LuaScripting* LuaScripting::_instance = 0;
 
@@ -554,3 +555,5 @@ LuaScripting::user_script_dir ()
 	g_mkdir_with_parents (dir.c_str(), 0744);
 	return dir;
 }
+
+} // namespace ARDOUR

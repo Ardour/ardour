@@ -39,7 +39,8 @@
 
 using namespace std;
 using namespace PBD;
-using namespace ARDOUR;
+
+namespace ARDOUR {
 
 /**** Handler ***/
 AudioRegionImportHandler::AudioRegionImportHandler (XMLTree const & source, Session & session) :
@@ -396,3 +397,5 @@ AudioRegionImporter::get_xml ()
 
 	return xml_region;
 }
+
+} // namespace ARDOUR

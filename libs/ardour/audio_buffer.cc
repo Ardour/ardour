@@ -27,7 +27,8 @@
 #include "pbd/i18n.h"
 
 using namespace PBD;
-using namespace ARDOUR;
+
+namespace ARDOUR {
 
 AudioBuffer::AudioBuffer(size_t capacity)
 	: Buffer (DataType::AUDIO)
@@ -94,3 +95,5 @@ AudioBuffer::silence (samplecnt_t len, samplecnt_t offset) {
 	}
 	_written = true;
 }
+
+} // namespace ARDOUR

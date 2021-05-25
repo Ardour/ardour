@@ -36,8 +36,9 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 PBD::Signal2<void,boost::shared_ptr<Port>, boost::shared_ptr<Port> > Port::PostDisconnect;
 PBD::Signal0<void> Port::PortDrop;
@@ -680,3 +681,5 @@ Port::set_cycle_samplecnt (pframes_t n)
 {
 	_cycle_nframes = floor (n * _speed_ratio);
 }
+
+} // namespace ARDOUR

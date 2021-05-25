@@ -39,8 +39,9 @@
 #include "ardour/session.h"
 #include "ardour/user_bundle.h"
 
-using namespace ARDOUR;
 using std::string;
+
+namespace ARDOUR {
 
 void
 Session::add_bundle (boost::shared_ptr<Bundle> bundle, bool emit_signal)
@@ -248,3 +249,5 @@ Session::setup_bundles ()
 	// we trust the backend to only calls us if there's a change
 	BundleAddedOrRemoved (); /* EMIT SIGNAL */
 }
+
+} // namespace ARDOUR

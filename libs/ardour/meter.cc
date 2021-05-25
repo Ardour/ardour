@@ -39,7 +39,7 @@
 
 using namespace std;
 
-using namespace ARDOUR;
+namespace ARDOUR {
 
 PeakMeter::PeakMeter (Session& s, const std::string& name)
     : Processor (s, string_compose ("meter-%1", name))
@@ -470,3 +470,5 @@ PeakMeter::state ()
 	node.set_property ("type", "meter");
 	return node;
 }
+
+} // namespace ARDOUR

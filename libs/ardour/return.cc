@@ -34,8 +34,9 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 std::string
 Return::name_and_id_new_return (Session& s, uint32_t& bitslot)
@@ -158,3 +159,5 @@ Return::configure_io (ChanCount in, ChanCount out)
 
 	return true;
 }
+
+} // namespace ARDOUR

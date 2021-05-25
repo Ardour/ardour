@@ -26,8 +26,9 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 #ifdef PLATFORM_WINDOWS
 const uint32_t ResampledImportableSource::blocksize = 524288U;
@@ -151,3 +152,5 @@ ResampledImportableSource::natural_position () const
 {
         return source->natural_position() * ratio ();
 }
+
+} // namespace ARDOUR

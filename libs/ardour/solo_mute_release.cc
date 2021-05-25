@@ -25,7 +25,8 @@
 #include "ardour/utils.h"
 
 using namespace PBD;
-using namespace ARDOUR;
+
+namespace ARDOUR {
 
 SoloMuteRelease::SoloMuteRelease (bool was_active)
 	: active (was_active)
@@ -89,3 +90,5 @@ SoloMuteRelease::release (Session* s, bool mute) const
 		}
 	}
 }
+
+} // namespace ARDOUR

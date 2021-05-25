@@ -19,7 +19,7 @@
 #include "ardour/circular_buffer.h"
 #include "ardour/runtime_functions.h"
 
-using namespace ARDOUR;
+namespace ARDOUR {
 
 CircularSampleBuffer::CircularSampleBuffer (samplecnt_t size)
 	: _rb (size)
@@ -169,3 +169,5 @@ CircularEventBuffer::read (EventList& l)
 	}
 	return true;
 }
+
+} // namespace ARDOUR

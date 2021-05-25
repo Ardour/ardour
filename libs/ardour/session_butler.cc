@@ -35,8 +35,9 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 /*---------------------------------------------------------------------------
  BUTLER THREAD
@@ -130,3 +131,5 @@ Session::capture_load ()
 {
 	return (uint32_t) g_atomic_int_get (&_capture_load);
 }
+
+} // namespace ARDOUR

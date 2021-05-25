@@ -29,8 +29,9 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 /** Construct an audio bundle.
  *  @param i true if ports are inputs, otherwise false.
@@ -687,4 +688,6 @@ Bundle::overall_channel_to_type (DataType t, uint32_t c) const
 	}
 
 	return s;
+}
+
 }

@@ -28,7 +28,8 @@
 #include <string>
 
 using namespace std;
-using namespace PBD;
+
+namespace PBD {
 
 Glib::Threads::Mutex* ID::counter_lock = 0;
 uint64_t ID::_counter = 0;
@@ -111,3 +112,4 @@ operator<< (ostream& ostr, const ID& id)
 	return ostr;
 }
 
+} // namespace PBD

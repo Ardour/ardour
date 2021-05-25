@@ -32,8 +32,9 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 PerThreadPool* SessionEvent::pool;
 
@@ -355,3 +356,5 @@ SessionEventManager::_clear_event_type (SessionEvent::Type type)
 
 	set_next_event ();
 }
+
+} // namespace ARDOUR

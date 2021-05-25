@@ -22,7 +22,7 @@
 #include "ardour/audiorom.h"
 #include "ardour/runtime_functions.h"
 
-using namespace ARDOUR;
+namespace ARDOUR {
 
 AudioRom::AudioRom (Sample* rom, size_t size)
 	: _size (size)
@@ -55,3 +55,5 @@ AudioRom::read (Sample* dst, samplepos_t pos, samplecnt_t cnt, int channel) cons
 	copy_vector (dst, &_rom[pos], to_copy);
 	return to_copy;
 }
+
+} // namespace ARDOUR

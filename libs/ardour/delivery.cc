@@ -44,11 +44,12 @@ namespace PBD {
 	DEFINE_ENUM_CONVERT(ARDOUR::Delivery::Role);
 }
 
-namespace ARDOUR { class Panner; }
-
 using namespace std;
 using namespace PBD;
-using namespace ARDOUR;
+
+namespace ARDOUR {
+
+class Panner;
 
 PBD::Signal0<void>            Delivery::PannersLegal;
 bool                          Delivery::panners_legal = false;
@@ -628,3 +629,4 @@ Delivery::panner () const
 	}
 }
 
+} // namespace ARDOUR

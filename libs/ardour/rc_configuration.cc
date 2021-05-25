@@ -45,7 +45,6 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
 using namespace std;
 using namespace PBD;
 
@@ -54,8 +53,8 @@ using namespace PBD;
 */
 
 namespace ARDOUR {
-    float speed_quietning = 0.251189; // -12dB reduction for ffwd or rewind
-}
+
+float speed_quietning = 0.251189; // -12dB reduction for ffwd or rewind
 
 static const char* user_config_file_name = "config";
 static const char* system_config_file_name = "system_config";
@@ -296,3 +295,4 @@ RCConfiguration::map_parameters (boost::function<void (std::string)>& functor)
 #undef  CONFIG_VARIABLE_SPECIAL
 }
 
+} // namespace ARDOUR

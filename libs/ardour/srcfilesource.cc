@@ -26,8 +26,9 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 const uint32_t SrcFileSource::max_blocksize = 2097152U; /* see AudioDiskstream::do_refill_with_alloc, max */
 
@@ -164,3 +165,5 @@ SrcFileSource::read_unlocked (Sample *dst, samplepos_t start, samplecnt_t cnt) c
 
 	return generated;
 }
+
+} // namespace ARDOUR

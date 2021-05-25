@@ -24,7 +24,7 @@
 #pragma warning(disable:4305)
 #endif
 
-using namespace ARDOUR;
+namespace ARDOUR {
 
 const Sample Session::default_click_emphasis[] = {
 
@@ -4595,3 +4595,5 @@ const Sample Session::default_click[] = {
 };
 
 const samplecnt_t Session::default_click_length = sizeof (default_click) / sizeof (default_click[0]);
+
+} // namespace ARDOUR

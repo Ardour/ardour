@@ -43,9 +43,10 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
+
+namespace ARDOUR {
 
 MidiPlaylist::MidiPlaylist (Session& session, const XMLNode& node, bool hidden)
 	: Playlist (session, node, DataType::MIDI, hidden)
@@ -384,3 +385,5 @@ MidiPlaylist::rendered ()
 {
 	return &_rendered;
 }
+
+} // namespace ARDOUR

@@ -18,7 +18,7 @@
 
 #include "ardour/raw_midi_parser.h"
 
-using namespace ARDOUR;
+namespace ARDOUR {
 
 RawMidiParser::RawMidiParser ()
 {
@@ -115,3 +115,5 @@ RawMidiParser::process_byte (const uint8_t byte)
 	record_byte (byte);
 	return (_total_bytes == _expected_bytes) ? prepare_buffered_event () : false;
 }
+
+} // namespace ARDOUR

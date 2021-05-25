@@ -38,10 +38,11 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
 
-namespace ARDOUR { class Session; }
+namespace ARDOUR {
+
+class Session;
 
 /* create an IOProcessor that proxies to a new IO object */
 
@@ -372,3 +373,5 @@ IOProcessor::prepare_for_reset (XMLNode &state, const std::string& name)
 		}
 	}
 }
+
+} // namespace ARDOUR

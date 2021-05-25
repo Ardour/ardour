@@ -21,8 +21,9 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 RecordSafeControl::RecordSafeControl (Session& session, std::string const & name, Recordable& r)
 	: SlavableAutomationControl (session, RecSafeAutomation, ParameterDescriptor (RecSafeAutomation),
@@ -47,3 +48,4 @@ RecordSafeControl::actually_set_value (double val, Controllable::GroupControlDis
 	SlavableAutomationControl::actually_set_value (val, gcd);
 }
 
+} // namespace ARDOUR

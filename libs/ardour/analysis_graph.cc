@@ -31,8 +31,9 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
 using namespace AudioGrapher;
+
+namespace ARDOUR {
 
 AnalysisGraph::AnalysisGraph (Session *s)
 	: _session (s)
@@ -159,3 +160,5 @@ AnalysisGraph::analyze_range (boost::shared_ptr<Route> route, boost::shared_ptr<
 		_results.insert (std::make_pair (name, analyser->result ()));
 	}
 }
+
+} // namespace ARDOUR

@@ -44,7 +44,8 @@
 
 using namespace std;
 using namespace PBD;
-using namespace ARDOUR;
+
+namespace ARDOUR {
 
 VSTPlugin::VSTPlugin (AudioEngine& engine, Session& session, VSTHandle* handle)
 	: Plugin (engine, session)
@@ -599,7 +600,7 @@ VSTPlugin::do_save_preset (string name)
 
 	t->root()->add_child_nocopy (*p);
 
-	std::string f = Glib::build_filename (ARDOUR::user_config_directory (), "presets");
+	std::string f = Glib::build_filename (user_config_directory (), "presets");
 	f = Glib::build_filename (f, presets_file ());
 
 	t->write (f);
@@ -616,7 +617,7 @@ VSTPlugin::do_remove_preset (string name)
 
 	t->root()->remove_nodes_and_delete (X_("label"), name);
 
-	std::string f = Glib::build_filename (ARDOUR::user_config_directory (), "presets");
+	std::string f = Glib::build_filename (user_config_directory (), "presets");
 	f = Glib::build_filename (f, presets_file ());
 
 	t->write (f);
@@ -905,7 +906,7 @@ VSTPlugin::presets_tree () const
 {
 	XMLTree* t = new XMLTree;
 
-	std::string p = Glib::build_filename (ARDOUR::user_config_directory (), "presets");
+	std::string p = Glib::build_filename (user_config_directory (), "presets");
 
 	if (!Glib::file_test (p, Glib::FILE_TEST_IS_DIR)) {
 		if (g_mkdir_with_parents (p.c_str(), 0755) != 0) {
@@ -970,3 +971,5 @@ VSTPluginInfo::is_instrument () const
 	}
 	return PluginInfo::is_instrument ();
 }
+
+} // namespace ARDOUR

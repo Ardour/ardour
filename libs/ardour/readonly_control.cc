@@ -21,7 +21,7 @@
 #include "ardour/plugin.h"
 #include "ardour/readonly_control.h"
 
-using namespace ARDOUR;
+namespace ARDOUR {
 
 ReadOnlyControl::ReadOnlyControl (boost::shared_ptr<Plugin> p, const ParameterDescriptor& desc, uint32_t pnum)
 		: _plugin (boost::weak_ptr<Plugin> (p))
@@ -48,3 +48,5 @@ ReadOnlyControl::describe_parameter ()
 	}
 	return "";
 }
+
+} // namespace ARDOUR

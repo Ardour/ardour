@@ -39,8 +39,9 @@ typedef long ssize_t;
 #endif
 
 using namespace std;
-using namespace MIDI;
 using namespace PBD;
+
+namespace MIDI {
 
 /**
  * As libtimecode is linked statically to libmidi++ this
@@ -726,3 +727,4 @@ MachineControlCommand::fill_buffer (MachineControl* mmc, MIDI::byte* b) const
 	return b;
 }
 
+}

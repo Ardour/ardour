@@ -42,24 +42,23 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
 
 namespace ARDOUR {
-	namespace Properties {
-		PropertyDescriptor<bool> active;
-		PropertyDescriptor<bool> group_relative;
-		PropertyDescriptor<bool> group_gain;
-		PropertyDescriptor<bool> group_mute;
-		PropertyDescriptor<bool> group_solo;
-		PropertyDescriptor<bool> group_recenable;
-		PropertyDescriptor<bool> group_select;
-		PropertyDescriptor<bool> group_route_active;
-		PropertyDescriptor<bool> group_color;
-		PropertyDescriptor<bool> group_monitoring;
-		PropertyDescriptor<int32_t> group_master_number;
-	}
+
+namespace Properties {
+PropertyDescriptor<bool> active;
+PropertyDescriptor<bool> group_relative;
+PropertyDescriptor<bool> group_gain;
+PropertyDescriptor<bool> group_mute;
+PropertyDescriptor<bool> group_solo;
+PropertyDescriptor<bool> group_recenable;
+PropertyDescriptor<bool> group_select;
+PropertyDescriptor<bool> group_route_active;
+PropertyDescriptor<bool> group_color;
+PropertyDescriptor<bool> group_monitoring;
+PropertyDescriptor<int32_t> group_master_number;
 }
 
 void
@@ -707,3 +706,5 @@ RouteGroup::has_control_master() const
 {
 	return group_master.lock() != 0;
 }
+
+} // namespace ARDOUR

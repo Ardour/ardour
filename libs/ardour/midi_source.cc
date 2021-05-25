@@ -57,11 +57,12 @@
 
 #include "pbd/i18n.h"
 
-namespace ARDOUR { template <typename T> class MidiRingBuffer; }
-
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
+
+template <typename T> class MidiRingBuffer;
 
 MidiSource::MidiSource (Session& s, string name, Source::Flag flags)
 	: Source(s, DataType::MIDI, name, flags)
@@ -600,3 +601,5 @@ MidiSource::copy_automation_state_from (MidiSource* s)
 
 	/* XXX: should probably emit signals here */
 }
+
+} // namespace ARDOUR

@@ -53,7 +53,6 @@
 
 using namespace std;
 using namespace PBD;
-using namespace ARDOUR;
 using namespace MIDI;
 using namespace Timecode;
 

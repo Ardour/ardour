@@ -40,8 +40,9 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 PannerManager* PannerManager::_instance = 0;
 
@@ -288,3 +289,5 @@ PannerManager::get_available_panners(uint32_t const a_in, uint32_t const a_out) 
 	}
 	return panner_list;
 }
+
+} // namespace ARDOUR

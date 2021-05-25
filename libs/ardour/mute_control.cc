@@ -25,9 +25,9 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
 using namespace std;
 
+namespace ARDOUR {
 
 MuteControl::MuteControl (Session& session, std::string const & name, Muteable& m)
 	: SlavableAutomationControl (session, MuteAutomation, ParameterDescriptor (MuteAutomation),
@@ -215,3 +215,5 @@ MuteControl::automation_run (samplepos_t start, pframes_t len)
 		Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
 	}
 }
+
+} // namespace ARDOUR

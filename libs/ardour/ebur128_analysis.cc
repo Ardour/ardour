@@ -25,8 +25,9 @@
 #include "pbd/i18n.h"
 
 using namespace Vamp;
-using namespace ARDOUR;
 using namespace std;
+
+namespace ARDOUR {
 
 /* need a static initializer function for this */
 
@@ -112,3 +113,5 @@ EBUr128Analysis::use_features (Plugin::FeatureSet& features, ostream* out)
 
 	return 0;
 }
+
+} // namespace ARDOUR

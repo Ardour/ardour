@@ -48,9 +48,10 @@
 #include "pbd/i18n.h"
 
 using namespace PBD;
-using namespace ARDOUR;
 using namespace Steinberg;
 using namespace Presonus;
+
+namespace ARDOUR {
 
 VST3Plugin::VST3Plugin (AudioEngine& engine, Session& session, VST3PI* plug)
 	: Plugin (engine, session)
@@ -292,9 +293,13 @@ VST3Plugin::update_contoller_param ()
 	_plug->update_contoller_param ();
 }
 
+} // namespace ARDOUR
+
 /* ****************************************************************************
  * MIDI converters
  */
+
+namespace Steinberg {
 
 bool
 VST3PI::evoral_to_vst3 (Vst::Event& e, Evoral::Event<samplepos_t> const& ev, int32_t bus)
@@ -382,7 +387,7 @@ VST3PI::evoral_to_vst3 (Vst::Event& e, Evoral::Event<samplepos_t> const& ev, int
 #define vst_to_midi(x) (static_cast<uint8_t> ((x)*127.f) & 0x7f)
 
 void
-VST3PI::vst3_to_midi_buffers (BufferSet& bufs, ChanMapping const& out_map)
+VST3PI::vst3_to_midi_buffers (ARDOUR::BufferSet& bufs, ARDOUR::ChanMapping const& out_map)
 {
 	for (int32 i = 0; i < _output_events.getEventCount (); ++i) {
 		Vst::Event e;
@@ -391,14 +396,14 @@ VST3PI::vst3_to_midi_buffers (BufferSet& bufs, ChanMapping const& out_map)
 		}
 
 		bool     valid = false;
-		uint32_t index = out_map.get (DataType::MIDI, e.busIndex, &valid);
+		uint32_t index = out_map.get (ARDOUR::DataType::MIDI, e.busIndex, &valid);
 		if (!valid || bufs.count ().n_midi () <= index) {
 			DEBUG_TRACE (DEBUG::VST3Process, string_compose ("VST3PI::vst3_to_midi_buffers - Invalid MIDI Bus %1\n", e.busIndex));
 			continue;
 		}
 
-		MidiBuffer& mb = bufs.get_midi (index);
-		uint8_t     data[3];
+		ARDOUR::MidiBuffer& mb = bufs.get_midi (index);
+		uint8_t             data[3];
 
 		switch (e.type) {
 			case Vst::Event::kDataEvent:
@@ -465,7 +470,11 @@ VST3PI::vst3_to_midi_buffers (BufferSet& bufs, ChanMapping const& out_map)
 	}
 }
 
+} // namespace Steinberg
+
 /* ****************************************************************************/
+
+namespace ARDOUR {
 
 void
 VST3Plugin::add_state (XMLNode* root) const
@@ -998,6 +1007,10 @@ VST3PluginInfo::is_instrument () const
 
 /* ****************************************************************************/
 
+} // namespace ARDOUR
+
+namespace Steinberg {
+
 VST3PI::VST3PI (boost::shared_ptr<ARDOUR::VST3PluginModule> m, std::string unique_id)
 	: _module (m)
 	, _component (0)
@@ -1486,7 +1499,7 @@ VST3PI::update_processor ()
 	}
 
 	Vst::ProcessSetup setup;
-	setup.processMode        = AudioEngine::instance ()->freewheeling () ? Vst::kOffline : Vst::kRealtime;
+	setup.processMode        = ARDOUR::AudioEngine::instance ()->freewheeling () ? Vst::kOffline : Vst::kRealtime;
 	setup.symbolicSampleSize = Vst::kSample32;
 	setup.maxSamplesPerBlock = _block_size;
 	setup.sampleRate         = _context.sampleRate;
@@ -1511,7 +1524,7 @@ VST3PI::plugin_latency ()
 }
 
 void
-VST3PI::set_owner (SessionObject* o)
+VST3PI::set_owner (ARDOUR::SessionObject* o)
 {
 	_owner = o;
 	if (!o) {
@@ -1556,7 +1569,7 @@ VST3PI::count_channels (Vst::MediaType media, Vst::BusDirection dir, Vst::BusTyp
 				return std::min<int32> (1, bus.channelCount);
 #else
 				/* Some plugin leave it at zero, even though they accept events */
-				_io_name[media][dir].push_back (Plugin::IOPortDescription (bus_name, is_sidechain));
+				_io_name[media][dir].push_back (ARDOUR::Plugin::IOPortDescription (bus_name, is_sidechain));
 				return 1;
 #endif
 			} else {
@@ -1567,7 +1580,7 @@ VST3PI::count_channels (Vst::MediaType media, Vst::BusDirection dir, Vst::BusTyp
 					} else {
 						channel_name = bus_name;
 					}
-					_io_name[media][dir].push_back (Plugin::IOPortDescription (channel_name, is_sidechain, bus_name, j));
+					_io_name[media][dir].push_back (ARDOUR::Plugin::IOPortDescription (channel_name, is_sidechain, bus_name, j));
 				}
 				n_channels += bus.channelCount;
 			}
@@ -1601,7 +1614,7 @@ VST3PI::default_value (uint32_t port) const
 }
 
 void
-VST3PI::get_parameter_descriptor (uint32_t port, ParameterDescriptor& desc) const
+VST3PI::get_parameter_descriptor (uint32_t port, ARDOUR::ParameterDescriptor& desc) const
 {
 	Param const& p (_ctrl_params[port]);
 	Vst::ParamID id (index_to_id (port));
@@ -1624,7 +1637,7 @@ VST3PI::get_parameter_descriptor (uint32_t port, ParameterDescriptor& desc) cons
 	FUnknownPtr<IEditControllerExtra> extra_ctrl (_controller);
 	if (extra_ctrl && port != designated_bypass_port ()) {
 		int32 flags      = extra_ctrl->getParamExtraFlags (id);
-		if (Config->get_show_vst3_micro_edit_inline ()) {
+		if (ARDOUR::Config->get_show_vst3_micro_edit_inline ()) {
 			desc.inline_ctrl = (flags & kParamFlagMicroEdit) ? true : false;
 		}
 	}
@@ -1671,18 +1684,18 @@ VST3PI::n_midi_outputs () const
 	return _n_midi_outputs;
 }
 
-Plugin::IOPortDescription
+ARDOUR::Plugin::IOPortDescription
 VST3PI::describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id) const
 {
 	switch (dt) {
-		case DataType::AUDIO:
+		case ARDOUR::DataType::AUDIO:
 			return _io_name[Vst::kAudio][input ? 0 : 1][id];
 			break;
-		case DataType::MIDI:
+		case ARDOUR::DataType::MIDI:
 			return _io_name[Vst::kEvent][input ? 0 : 1][id];
 			break;
 		default:
-			return Plugin::IOPortDescription ("?");
+			return ARDOUR::Plugin::IOPortDescription ("?");
 			break;
 	}
 }
@@ -2039,7 +2052,7 @@ VST3PI::process (float** ins, float** outs, uint32_t n_samples)
 
 	Vst::ProcessData data;
 	data.numSamples         = n_samples;
-	data.processMode        = AudioEngine::instance ()->freewheeling () ? Vst::kOffline : Vst::kRealtime;
+	data.processMode        = ARDOUR::AudioEngine::instance ()->freewheeling () ? Vst::kOffline : Vst::kRealtime;
 	data.symbolicSampleSize = Vst::kSample32;
 	data.numInputs          = used_bus_count (_n_aux_inputs, _n_inputs); // _n_bus_in;
 	data.numOutputs         = used_bus_count (_n_aux_outputs, _n_outputs); // _n_bus_out;
@@ -2144,7 +2157,6 @@ VST3PI::process (float** ins, float** outs, uint32_t n_samples)
  * compare to public.sdk/source/vst/vstpresetfile.cpp
  */
 
-namespace Steinberg {
 namespace Vst {
 
 enum ChunkType {
@@ -2196,8 +2208,6 @@ struct ChunkEntry {
 } // namespace Vst
 
 typedef std::vector<Vst::ChunkEntry> ChunkEntryVector;
-
-} // namespace Steinberg
 
 static bool
 is_equal_ID (const Vst::ChunkID id1, const Vst::ChunkID id2)
@@ -2376,7 +2386,7 @@ void
 VST3PI::stripable_property_changed (PBD::PropertyChange const&)
 {
 	FUnknownPtr<Vst::ChannelContext::IInfoListener> il (_controller);
-	Stripable*                                      s = dynamic_cast<Stripable*> (_owner);
+	ARDOUR::Stripable*                              s = dynamic_cast<ARDOUR::Stripable*> (_owner);
 	assert (il && s);
 
 	DEBUG_TRACE (DEBUG::VST3Callbacks, "VST3PI::stripable_property_changed\n");
@@ -2429,7 +2439,7 @@ VST3PI::setup_info_listener ()
 		return false;
 	}
 	DEBUG_TRACE (DEBUG::VST3Config, "VST3PI::setup_info_listener\n");
-	Stripable* s = dynamic_cast<Stripable*> (_owner);
+	ARDOUR::Stripable* s = dynamic_cast<ARDOUR::Stripable*> (_owner);
 
 	s->PropertyChanged.connect_same_thread (_strip_connections, boost::bind (&VST3PI::stripable_property_changed, this, _1));
 	s->presentation_info ().PropertyChanged.connect_same_thread (_strip_connections, boost::bind (&VST3PI::stripable_property_changed, this, _1));
@@ -2471,11 +2481,11 @@ VST3PI::subscribe_to_automation_changes () const
 }
 
 void
-VST3PI::automation_state_changed (uint32_t port, AutoState s, boost::weak_ptr<AutomationList> wal)
+VST3PI::automation_state_changed (uint32_t port, ARDOUR::AutoState s, boost::weak_ptr<ARDOUR::AutomationList> wal)
 {
-	Vst::ParamID                      id (index_to_id (port));
-	boost::shared_ptr<AutomationList> al = wal.lock ();
-	FUnknownPtr<IEditControllerExtra> extra_ctrl (_controller);
+	Vst::ParamID                              id (index_to_id (port));
+	boost::shared_ptr<ARDOUR::AutomationList> al = wal.lock();
+	FUnknownPtr<IEditControllerExtra>         extra_ctrl (_controller);
 	assert (extra_ctrl);
 
 	AutomationMode am;
@@ -2487,16 +2497,16 @@ VST3PI::automation_state_changed (uint32_t port, AutoState s, boost::weak_ptr<Au
 				am = kAutomationOff;
 			}
 			break;
-		case Write:
+		case ARDOUR::Write:
 			am = kAutomationWrite;
 			break;
-		case Touch:
+		case ARDOUR::Touch:
 			am = kAutomationTouch;
 			break;
-		case Play:
+		case ARDOUR::Play:
 			am = kAutomationRead;
 			break;
-		case Latch:
+		case ARDOUR::Latch:
 			am = kAutomationLatch;
 			break;
 		default:
@@ -2507,12 +2517,12 @@ VST3PI::automation_state_changed (uint32_t port, AutoState s, boost::weak_ptr<Au
 
 /* ****************************************************************************/
 
-static boost::shared_ptr<AutomationControl>
-lookup_ac (SessionObject* o, FIDString id)
+static boost::shared_ptr<ARDOUR::AutomationControl>
+lookup_ac (ARDOUR::SessionObject* o, FIDString id)
 {
-	Stripable* s = dynamic_cast<Stripable*> (o);
+	ARDOUR::Stripable* s = dynamic_cast<ARDOUR::Stripable*> (o);
 	if (!s) {
-		return boost::shared_ptr<AutomationControl> ();
+		return boost::shared_ptr<ARDOUR::AutomationControl> ();
 	}
 
 	if (0 == strcmp (id, ContextInfo::kMute)) {
@@ -2546,13 +2556,13 @@ lookup_ac (SessionObject* o, FIDString id)
 		}
 #endif
 	}
-	return boost::shared_ptr<AutomationControl> ();
+	return boost::shared_ptr<ARDOUR::AutomationControl> ();
 }
 
 tresult
 VST3PI::getContextInfoValue (int32& value, FIDString id)
 {
-	Stripable* s = dynamic_cast<Stripable*> (_owner);
+	ARDOUR::Stripable* s = dynamic_cast<ARDOUR::Stripable*> (_owner);
 	if (!s) {
 		DEBUG_TRACE (DEBUG::VST3Callbacks, "VST3PI::getContextInfoValue<int>: not initialized");
 		return kNotInitialized;
@@ -2562,9 +2572,9 @@ VST3PI::getContextInfoValue (int32& value, FIDString id)
 	} else if (0 == strcmp (id, ContextInfo::kType)) {
 		if (s->is_master ()) {
 			value = ContextInfo::kOut;
-		} else if (s->presentation_info ().flags () & PresentationInfo::AudioTrack) {
+		} else if (s->presentation_info ().flags () & ARDOUR::PresentationInfo::AudioTrack) {
 			value = ContextInfo::kTrack;
-		} else if (s->presentation_info ().flags () & PresentationInfo::MidiTrack) {
+		} else if (s->presentation_info ().flags () & ARDOUR::PresentationInfo::MidiTrack) {
 			value = ContextInfo::kSynth;
 		} else {
 			value = ContextInfo::kBus;
@@ -2583,15 +2593,16 @@ VST3PI::getContextInfoValue (int32& value, FIDString id)
 	} else if (0 == strcmp (id, ContextInfo::kSelected)) {
 		value = s->is_selected () ? 1 : 0;
 	} else if (0 == strcmp (id, ContextInfo::kFocused)) {
-		boost::shared_ptr<Stripable> stripable = s->session ().selection ().first_selected_stripable ();
-		value                                  = stripable && stripable.get () == s ? 1 : 0;
+		boost::shared_ptr<ARDOUR::Stripable> stripable = s->session ().selection ().first_selected_stripable ();
+
+		value = stripable && stripable.get() == s ? 1 : 0;
 	} else if (0 == strcmp (id, ContextInfo::kSendCount)) {
 		value = 0;
 		while (s->send_enable_controllable (value)) {
 			++value;
 		}
 	} else if (0 == strcmp (id, ContextInfo::kMute)) {
-		boost::shared_ptr<MuteControl> ac = s->mute_control ();
+		boost::shared_ptr<ARDOUR::MuteControl> ac = s->mute_control ();
 		if (ac) {
 			psl_subscribe_to (ac, id);
 			value = ac->muted_by_self ();
@@ -2599,7 +2610,7 @@ VST3PI::getContextInfoValue (int32& value, FIDString id)
 			value = 0;
 		}
 	} else if (0 == strcmp (id, ContextInfo::kSolo)) {
-		boost::shared_ptr<SoloControl> ac = s->solo_control ();
+		boost::shared_ptr<ARDOUR::SoloControl> ac = s->solo_control ();
 		if (ac) {
 			psl_subscribe_to (ac, id);
 			value = ac->self_soloed ();
@@ -2641,7 +2652,7 @@ VST3PI::getContextInfoString (Vst::TChar* string, int32 max_len, FIDString id)
 		DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::setContextInfoString: NOT IMPLEMENTED (%1)\n", id));
 		return kNotImplemented; // XXX TODO
 	} else {
-		boost::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
+		boost::shared_ptr<ARDOUR::AutomationControl> ac = lookup_ac (_owner, id);
 		if (!ac) {
 			DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::getContextInfoString unsupported ID %1\n", id));
 			return kInvalidArgument;
@@ -2655,7 +2666,7 @@ VST3PI::getContextInfoString (Vst::TChar* string, int32 max_len, FIDString id)
 tresult
 VST3PI::getContextInfoValue (double& value, FIDString id)
 {
-	Stripable* s = dynamic_cast<Stripable*> (_owner);
+	ARDOUR::Stripable* s = dynamic_cast<ARDOUR::Stripable*> (_owner);
 	if (!s) {
 		DEBUG_TRACE (DEBUG::VST3Callbacks, "VST3PI::getContextInfoValue<double>: not initialized");
 		return kNotInitialized;
@@ -2670,11 +2681,11 @@ VST3PI::getContextInfoValue (double& value, FIDString id)
 #endif
 		value = 2.0; // Config->get_max_gain();
 	} else if (0 == strcmp (id, ContextInfo::kVolume)) {
-		boost::shared_ptr<AutomationControl> ac = s->gain_control ();
+		boost::shared_ptr<ARDOUR::AutomationControl> ac = s->gain_control ();
 		value                                   = ac->get_value (); // gain coefficient  0..2 (1.0 = 0dB)
 		psl_subscribe_to (ac, id);
 	} else if (0 == strcmp (id, ContextInfo::kPan)) {
-		boost::shared_ptr<AutomationControl> ac = s->pan_azimuth_control ();
+		boost::shared_ptr<ARDOUR::AutomationControl> ac = s->pan_azimuth_control ();
 		if (ac) {
 			value = ac->internal_to_interface (ac->get_value (), true);
 			psl_subscribe_to (ac, id);
@@ -2682,7 +2693,7 @@ VST3PI::getContextInfoValue (double& value, FIDString id)
 			value = 0.5; // center
 		}
 	} else if (0 == strncmp (id, ContextInfo::kSendLevel, strlen (ContextInfo::kSendLevel))) {
-		boost::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
+		boost::shared_ptr<ARDOUR::AutomationControl> ac = lookup_ac (_owner, id);
 		if (ac) {
 			value = ac->get_value (); // gain cofficient
 			psl_subscribe_to (ac, id);
@@ -2707,15 +2718,15 @@ VST3PI::setContextInfoValue (FIDString id, double value)
 	}
 	DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::setContextInfoValue<double> %1 to %2\n", id, value));
 	if (0 == strcmp (id, ContextInfo::kVolume)) {
-		boost::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
+		boost::shared_ptr<ARDOUR::AutomationControl> ac = lookup_ac (_owner, id);
 		ac->set_value (value, Controllable::NoGroup);
 	} else if (0 == strcmp (id, ContextInfo::kPan)) {
-		boost::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
+		boost::shared_ptr<ARDOUR::AutomationControl> ac = lookup_ac (_owner, id);
 		if (ac) {
 			ac->set_value (ac->interface_to_internal (value, true), PBD::Controllable::NoGroup);
 		}
 	} else if (0 == strncmp (id, ContextInfo::kSendLevel, strlen (ContextInfo::kSendLevel))) {
-		boost::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
+		boost::shared_ptr<ARDOUR::AutomationControl> ac = lookup_ac (_owner, id);
 		if (ac) {
 			ac->set_value (value, Controllable::NoGroup);
 		} else {
@@ -2731,7 +2742,7 @@ VST3PI::setContextInfoValue (FIDString id, double value)
 tresult
 VST3PI::setContextInfoValue (FIDString id, int32 value)
 {
-	Stripable* s = dynamic_cast<Stripable*> (_owner);
+	ARDOUR::Stripable* s = dynamic_cast<ARDOUR::Stripable*> (_owner);
 	if (!s) {
 		DEBUG_TRACE (DEBUG::VST3Callbacks, "VST3PI::setContextInfoValue<int>: not initialized");
 		return kNotInitialized;
@@ -2743,14 +2754,14 @@ VST3PI::setContextInfoValue (FIDString id, int32 value)
 #endif
 		s->presentation_info ().set_color (value);
 	} else if (0 == strcmp (id, ContextInfo::kSelected)) {
-		boost::shared_ptr<Stripable> stripable = s->session ().stripable_by_id (s->id ());
+		boost::shared_ptr<ARDOUR::Stripable> stripable = s->session ().stripable_by_id (s->id ());
 		assert (stripable);
 		if (value == 0) {
-			s->session ().selection ().remove (stripable, boost::shared_ptr<AutomationControl> ());
+			s->session ().selection ().remove (stripable, boost::shared_ptr<ARDOUR::AutomationControl> ());
 		} else if (_add_to_selection) {
-			s->session ().selection ().add (stripable, boost::shared_ptr<AutomationControl> ());
+			s->session ().selection ().add (stripable, boost::shared_ptr<ARDOUR::AutomationControl> ());
 		} else {
-			s->session ().selection ().set (stripable, boost::shared_ptr<AutomationControl> ());
+			s->session ().selection ().set (stripable, boost::shared_ptr<ARDOUR::AutomationControl> ());
 		}
 	} else if (0 == strcmp (id, ContextInfo::kMultiSelect)) {
 		_add_to_selection = value != 0;
@@ -2787,7 +2798,7 @@ VST3PI::beginEditContextInfoValue (FIDString id)
 		DEBUG_TRACE (DEBUG::VST3Callbacks, "VST3PI::beginEditContextInfoValue: not initialized");
 		return kNotInitialized;
 	}
-	boost::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
+	boost::shared_ptr<ARDOUR::AutomationControl> ac = lookup_ac (_owner, id);
 	if (!ac) {
 		return kInvalidArgument;
 	}
@@ -2803,7 +2814,7 @@ VST3PI::endEditContextInfoValue (FIDString id)
 		DEBUG_TRACE (DEBUG::VST3Callbacks, "VST3PI::endEditContextInfoValue: not initialized");
 		return kNotInitialized;
 	}
-	boost::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
+	boost::shared_ptr<ARDOUR::AutomationControl> ac = lookup_ac (_owner, id);
 	if (!ac) {
 		return kInvalidArgument;
 	}
@@ -2853,17 +2864,17 @@ VST3PI::psl_stripable_property_changed (PBD::PropertyChange const& what_changed)
 
 	DEBUG_TRACE (DEBUG::VST3Callbacks, "VST3PI::psl_stripable_property_changed v2\n");
 
-	if (what_changed.contains (Properties::selected)) {
+	if (what_changed.contains (ARDOUR::Properties::selected)) {
 		nfo2->notifyContextInfoChange (ContextInfo::kSelected);
 		nfo2->notifyContextInfoChange (ContextInfo::kFocused); // XXX
 	}
-	if (what_changed.contains (Properties::hidden)) {
+	if (what_changed.contains (ARDOUR::Properties::hidden)) {
 		nfo2->notifyContextInfoChange (ContextInfo::kVisibility);
 	}
-	if (what_changed.contains (Properties::name)) {
+	if (what_changed.contains (ARDOUR::Properties::name)) {
 		nfo2->notifyContextInfoChange (ContextInfo::kName);
 	}
-	if (what_changed.contains (Properties::color)) {
+	if (what_changed.contains (ARDOUR::Properties::color)) {
 		nfo2->notifyContextInfoChange (ContextInfo::kColor);
 	}
 }
@@ -2886,7 +2897,7 @@ VST3PI::setup_psl_info_handler ()
 		return false;
 	}
 
-	Stripable* s = dynamic_cast<Stripable*> (_owner);
+	ARDOUR::Stripable* s = dynamic_cast<ARDOUR::Stripable*> (_owner);
 	s->PropertyChanged.connect_same_thread (_strip_connections, boost::bind (&VST3PI::psl_stripable_property_changed, this, _1));
 	s->presentation_info ().PropertyChanged.connect_same_thread (_strip_connections, boost::bind (&VST3PI::psl_stripable_property_changed, this, _1));
 
@@ -2975,3 +2986,5 @@ VST3PI::resizeView (IPlugView* view, ViewRect* new_size)
 	OnResizeView (new_size->getWidth (), new_size->getHeight ()); /* EMIT SIGNAL */
 	return view->onSize (new_size);
 }
+
+} // namespace Steinberg

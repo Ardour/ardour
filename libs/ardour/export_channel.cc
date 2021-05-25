@@ -34,7 +34,7 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
+namespace ARDOUR {
 
 PortExportChannel::PortExportChannel ()
 	: _buffer_size (0)
@@ -327,3 +327,5 @@ RouteExportChannel::ProcessorRemover::~ProcessorRemover()
 {
 	route->remove_processor (processor);
 }
+
+} // namespace ARDOUR

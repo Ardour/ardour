@@ -27,7 +27,8 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
+
+namespace ARDOUR {
 
 Panner::Panner (boost::shared_ptr<Pannable> p)
 	: _frozen (0)
@@ -87,3 +88,5 @@ Panner::thaw ()
 		_frozen--;
 	}
 }
+
+} // namespace ARDOUR

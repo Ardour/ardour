@@ -127,9 +127,10 @@
 
 #include "ardour/debug.h"
 
-using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
+
+namespace ARDOUR {
 
 PluginManager* PluginManager::_instance = 0;
 std::string PluginManager::scanner_bin_path = "";
@@ -2498,3 +2499,5 @@ PluginManager::lua_plugin_info ()
 	assert(_lua_plugin_info);
 	return *_lua_plugin_info;
 }
+
+} // namespace ARDOUR

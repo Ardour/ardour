@@ -135,15 +135,14 @@
 
 #include "pbd/i18n.h"
 
+using namespace std;
+using namespace PBD;
+
 namespace ARDOUR {
+
 class MidiSource;
 class Processor;
 class Speakers;
-}
-
-using namespace std;
-using namespace ARDOUR;
-using namespace PBD;
 
 bool Session::_disable_all_loaded_plugins = false;
 bool Session::_bypass_all_loaded_plugins = false;
@@ -3231,6 +3230,7 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 			}
 
 #if !defined(__APPLE__) && !defined(__FreeBSD__)
+			// FIXME (drobilla)
 			/* clang complains: 'operator<<' should be declared prior to the call site or in an associated namespace of one of its
 			 * arguments std::ostream& operator<<(std::ostream& o, ARDOUR::PresentationInfo const& rid)"
 			 */
@@ -7245,3 +7245,5 @@ Session::had_destructive_tracks() const
 {
 	return _had_destructive_tracks;
 }
+
+} // namespace ARDOUR

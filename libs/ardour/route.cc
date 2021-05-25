@@ -99,8 +99,9 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 PBD::Signal3<int,boost::shared_ptr<Route>, boost::shared_ptr<PluginInsert>, Route::PluginSetupOptions > Route::PluginSetup;
 
@@ -6307,3 +6308,4 @@ Route::monitoring_state () const
 	return MonitoringSilence;
 }
 
+} // namespace ARDOUR

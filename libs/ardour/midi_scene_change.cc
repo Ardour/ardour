@@ -26,7 +26,8 @@
 #include "pbd/i18n.h"
 
 using namespace PBD;
-using namespace ARDOUR;
+
+namespace ARDOUR {
 
 MIDISceneChange::MIDISceneChange (int c, int b, int p)
 	: _bank (b)
@@ -155,4 +156,4 @@ MIDISceneChange::set_bank (int bank)
         _bank = bank;
 }
 
-
+} // namespace ARDOUR

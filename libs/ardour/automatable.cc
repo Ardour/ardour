@@ -47,8 +47,9 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 /* used for templates (previously: !full_state) */
 bool Automatable::skip_saving_automation = false;
@@ -716,3 +717,5 @@ Automatable::find_prev_ac_event (boost::shared_ptr<AutomationControl> c, double 
 		++i;
 	}
 }
+
+} // namespace ARDOUR

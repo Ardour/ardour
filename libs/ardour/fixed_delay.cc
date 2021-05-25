@@ -21,7 +21,7 @@
 #include "ardour/fixed_delay.h"
 #include "ardour/midi_buffer.h"
 
-using namespace ARDOUR;
+namespace ARDOUR {
 
 FixedDelay::FixedDelay ()
 	: _max_delay (0)
@@ -153,3 +153,5 @@ FixedDelay::delay (
 
 	db->pos = (db->pos + n_samples) % _buf_size;
 }
+
+} // namespace ARDOUR

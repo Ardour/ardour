@@ -35,13 +35,14 @@
 
 #include "pbd/i18n.h"
 
+using namespace PBD;
+using std::string;
+
 namespace PBD {
 	DEFINE_ENUM_CONVERT(ARDOUR::PresentationInfo::Flag);
 }
 
-using namespace ARDOUR;
-using namespace PBD;
-using std::string;
+namespace ARDOUR {
 
 string PresentationInfo::state_node_name = X_("PresentationInfo");
 
@@ -51,12 +52,10 @@ GATOMIC_QUAL gint PresentationInfo::_change_signal_suspended = 0;
 PBD::PropertyChange PresentationInfo::_pending_static_changes;
 int PresentationInfo::selection_counter= 0;
 
-namespace ARDOUR {
-	namespace Properties {
-		PBD::PropertyDescriptor<bool>     selected;
-		PBD::PropertyDescriptor<uint32_t> order;
-		PBD::PropertyDescriptor<uint32_t> color;
-	}
+namespace Properties {
+PBD::PropertyDescriptor<bool>     selected;
+PBD::PropertyDescriptor<uint32_t> order;
+PBD::PropertyDescriptor<uint32_t> color;
 }
 
 void
@@ -297,7 +296,9 @@ PresentationInfo::operator= (PresentationInfo const& other)
 }
 
 std::ostream&
-operator<<(std::ostream& o, ARDOUR::PresentationInfo const& pi)
+operator<<(std::ostream& o, PresentationInfo const& pi)
 {
 	return o << pi.order() << '/' << enum_2_string (pi.flags()) << '/' << pi.color();
+}
+
 }

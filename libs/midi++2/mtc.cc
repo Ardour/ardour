@@ -31,9 +31,10 @@
 
 using namespace std;
 using namespace sigc;
-using namespace MIDI;
 
 #undef DEBUG_MTC
+
+namespace MIDI {
 
 bool
 Parser::possible_mtc (MIDI::byte *sysex_buf, size_t msglen)
@@ -352,3 +353,5 @@ Parser::process_mtc_quarter_frame (MIDI::byte *msg)
 	}
 
 }
+
+} // namespace MIDI

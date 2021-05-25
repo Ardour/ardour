@@ -26,9 +26,10 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
+
+namespace ARDOUR {
 
 Speaker::Speaker (int i, const AngularVector& position)
 	: id (i)
@@ -284,3 +285,5 @@ Speakers::set_state (const XMLNode& node, int /*version*/)
 
         return 0;
 }
+
+} // namespace ARDOUR

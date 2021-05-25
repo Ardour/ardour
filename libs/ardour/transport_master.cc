@@ -33,18 +33,17 @@
 
 #include "pbd/i18n.h"
 
-namespace ARDOUR {
-	namespace Properties {
-		PBD::PropertyDescriptor<bool> fr2997;
-		PBD::PropertyDescriptor<bool> sclock_synced;
-		PBD::PropertyDescriptor<bool> collect;
-		PBD::PropertyDescriptor<bool> connected;
-		PBD::PropertyDescriptor<TransportRequestType> allowed_transport_requests;
-	}
-}
-
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
+
+namespace Properties {
+PBD::PropertyDescriptor<bool> fr2997;
+PBD::PropertyDescriptor<bool> sclock_synced;
+PBD::PropertyDescriptor<bool> collect;
+PBD::PropertyDescriptor<bool> connected;
+PBD::PropertyDescriptor<TransportRequestType> allowed_transport_requests;
+}
 
 void
 TransportMaster::make_property_quarks ()
@@ -593,3 +592,5 @@ TransportMasterViaMIDI::resync_latency (bool playback)
 		_midi_port->get_connected_latency_range (midi_port_latency, false);
 	}
 }
+
+} // namespace ARDOUR

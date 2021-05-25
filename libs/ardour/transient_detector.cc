@@ -27,8 +27,9 @@
 #include "pbd/i18n.h"
 
 using namespace Vamp;
-using namespace ARDOUR;
 using namespace std;
+
+namespace ARDOUR {
 
 /* need a static initializer function for this */
 
@@ -179,3 +180,5 @@ TransientDetector::update_positions (Readable* src, uint32_t channel, AnalysisFe
 
 	delete [] data;
 }
+
+} // namespace ARDOUR

@@ -34,9 +34,10 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
 using namespace std;
 using namespace PBD;
+
+namespace ARDOUR {
 
 AudioPlaylist::AudioPlaylist (Session& session, const XMLNode& node, bool hidden)
 	: Playlist (session, node, DataType::AUDIO, hidden)
@@ -584,3 +585,5 @@ AudioPlaylist::load_legacy_crossfades (const XMLNode& node, int version)
 		}
 	}
 }
+
+} // namespace ARDOUR

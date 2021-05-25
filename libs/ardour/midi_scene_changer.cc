@@ -32,7 +32,7 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
+namespace ARDOUR {
 
 MIDISceneChanger::MIDISceneChanger (Session& s)
 	: SceneChanger (s)
@@ -374,3 +374,5 @@ MIDISceneChanger::jump_to (int bank, int program)
 		_session.request_locate (where);
 	}
 }
+
+} // namespace ARDOUR

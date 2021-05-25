@@ -27,7 +27,7 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
+namespace ARDOUR {
 
 RTTaskList::RTTaskList ()
 	: _task_run_sem ("rt_task_run", 0)
@@ -177,3 +177,5 @@ RTTaskList::process_tasklist ()
 		_task_end_sem.wait ();
 	}
 }
+
+} // namespace ARDOUR

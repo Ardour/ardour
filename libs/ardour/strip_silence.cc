@@ -26,7 +26,7 @@
 #include "ardour/region_factory.h"
 #include "ardour/progress.h"
 
-using namespace ARDOUR;
+namespace ARDOUR {
 
 /** Construct a StripSilence filter.
  *  @param s Session.
@@ -143,3 +143,5 @@ StripSilence::run (boost::shared_ptr<Region> r, Progress* progress)
 
 	return 0;
 }
+
+} // namespace ARDOUR

@@ -50,10 +50,11 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
 
-namespace ARDOUR { class Session; }
+namespace ARDOUR {
+
+class Session;
 
 // Always saved as Processor, but may be IOProcessor or Send in legacy sessions
 const string Processor::state_node_name = "Processor";
@@ -332,3 +333,5 @@ Processor::owner() const
 {
 	return _owner;
 }
+
+} // namespace ARDOUR

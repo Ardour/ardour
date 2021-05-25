@@ -178,8 +178,8 @@ public:
 	int channel; ///< channel index, or -1 for "all"
 };
 
-}
+std::ostream & operator<< (std::ostream & o, Bundle const &);
 
-std::ostream & operator<< (std::ostream & o, ARDOUR::Bundle const &);
+}
 
 #endif /* __ardour_bundle_h__ */

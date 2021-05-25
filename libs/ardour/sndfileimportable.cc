@@ -33,8 +33,9 @@
 
 #include <glibmm/convert.h>
 
-using namespace ARDOUR;
 using namespace std;
+
+namespace ARDOUR {
 
 /* FIXME: this was copied from sndfilesource.cc, at some point these should be merged */
 int64_t
@@ -145,3 +146,5 @@ SndFileImportableSource::clamped_at_unity () const
 	/* XXX: this may not be the full list of formats that are unclamped */
 	return (sub != SF_FORMAT_FLOAT && sub != SF_FORMAT_DOUBLE && type != SF_FORMAT_OGG);
 }
+
+} // namespace ARDOUR

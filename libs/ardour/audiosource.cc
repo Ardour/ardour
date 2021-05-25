@@ -69,8 +69,9 @@
 #include "ardour/debug.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 bool AudioSource::_build_missing_peakfiles = false;
 
@@ -1135,3 +1136,5 @@ AudioSource::mark_streaming_write_completed (const Lock& lock)
 		PeaksReady (); /* EMIT SIGNAL */
 	}
 }
+
+} // namespace ARDOUR

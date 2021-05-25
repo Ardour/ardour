@@ -30,8 +30,9 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 WindowsVSTPlugin::WindowsVSTPlugin (AudioEngine& e, Session& session, VSTHandle* h, int unique_id)
 	: VSTPlugin (e, session, h)
@@ -139,3 +140,4 @@ WindowsVSTPluginInfo::WindowsVSTPluginInfo (_VSTInfo* nfo) : VSTPluginInfo (nfo)
 	type = ARDOUR::Windows_VST;
 }
 
+} // namespace ARDOUR

@@ -37,9 +37,10 @@
 
 using namespace std;
 using namespace ARDOUR;
-using namespace MIDI;
-using namespace MIDI::Name;
 using namespace PBD;
+
+namespace MIDI {
+namespace Name {
 
 MidiPatchManager* MidiPatchManager::_manager = 0;
 
@@ -313,3 +314,6 @@ MidiPatchManager::maybe_use (PBD::ScopedConnectionList& cl,
 		PatchesChanged.connect (cl, ir, midnam_info_method, event_loop);
 	}
 }
+
+} // namespace Name
+} // namespace MIDI

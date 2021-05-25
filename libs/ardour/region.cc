@@ -49,41 +49,41 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
 
 namespace ARDOUR {
-	class Progress;
-	namespace Properties {
-		PBD::PropertyDescriptor<bool> muted;
-		PBD::PropertyDescriptor<bool> opaque;
-		PBD::PropertyDescriptor<bool> locked;
-		PBD::PropertyDescriptor<bool> video_locked;
-		PBD::PropertyDescriptor<bool> automatic;
-		PBD::PropertyDescriptor<bool> whole_file;
-		PBD::PropertyDescriptor<bool> import;
-		PBD::PropertyDescriptor<bool> external;
-		PBD::PropertyDescriptor<bool> sync_marked;
-		PBD::PropertyDescriptor<bool> left_of_split;
-		PBD::PropertyDescriptor<bool> right_of_split;
-		PBD::PropertyDescriptor<bool> hidden;
-		PBD::PropertyDescriptor<bool> position_locked;
-		PBD::PropertyDescriptor<bool> valid_transients;
-		PBD::PropertyDescriptor<samplepos_t> start;
-		PBD::PropertyDescriptor<samplecnt_t> length;
-		PBD::PropertyDescriptor<samplepos_t> position;
-		PBD::PropertyDescriptor<double> beat;
-		PBD::PropertyDescriptor<samplecnt_t> sync_position;
-		PBD::PropertyDescriptor<layer_t> layer;
-		PBD::PropertyDescriptor<samplepos_t> ancestral_start;
-		PBD::PropertyDescriptor<samplecnt_t> ancestral_length;
-		PBD::PropertyDescriptor<float> stretch;
-		PBD::PropertyDescriptor<float> shift;
-		PBD::PropertyDescriptor<PositionLockStyle> position_lock_style;
-		PBD::PropertyDescriptor<uint64_t> layering_index;
-		PBD::PropertyDescriptor<std::string> tags;
-		PBD::PropertyDescriptor<bool> contents;
-	}
+
+class Progress;
+
+namespace Properties {
+PBD::PropertyDescriptor<bool> muted;
+PBD::PropertyDescriptor<bool> opaque;
+PBD::PropertyDescriptor<bool> locked;
+PBD::PropertyDescriptor<bool> video_locked;
+PBD::PropertyDescriptor<bool> automatic;
+PBD::PropertyDescriptor<bool> whole_file;
+PBD::PropertyDescriptor<bool> import;
+PBD::PropertyDescriptor<bool> external;
+PBD::PropertyDescriptor<bool> sync_marked;
+PBD::PropertyDescriptor<bool> left_of_split;
+PBD::PropertyDescriptor<bool> right_of_split;
+PBD::PropertyDescriptor<bool> hidden;
+PBD::PropertyDescriptor<bool> position_locked;
+PBD::PropertyDescriptor<bool> valid_transients;
+PBD::PropertyDescriptor<samplepos_t> start;
+PBD::PropertyDescriptor<samplecnt_t> length;
+PBD::PropertyDescriptor<samplepos_t> position;
+PBD::PropertyDescriptor<double> beat;
+PBD::PropertyDescriptor<samplecnt_t> sync_position;
+PBD::PropertyDescriptor<layer_t> layer;
+PBD::PropertyDescriptor<samplepos_t> ancestral_start;
+PBD::PropertyDescriptor<samplecnt_t> ancestral_length;
+PBD::PropertyDescriptor<float> stretch;
+PBD::PropertyDescriptor<float> shift;
+PBD::PropertyDescriptor<PositionLockStyle> position_lock_style;
+PBD::PropertyDescriptor<uint64_t> layering_index;
+PBD::PropertyDescriptor<std::string> tags;
+PBD::PropertyDescriptor<bool> contents;
 }
 
 PBD::Signal2<void,boost::shared_ptr<ARDOUR::RegionList>,const PropertyChange&> Region::RegionsPropertyChanged;
@@ -2075,3 +2075,5 @@ Region::latest_possible_sample () const
 
 	return _position + (minlen - _start) - 1;
 }
+
+} // namespace ARDOUR

@@ -33,8 +33,9 @@ namespace PBD {
 	DEFINE_ENUM_CONVERT(ARDOUR::MuteMaster::MutePoint);
 }
 
-using namespace ARDOUR;
 using namespace std;
+
+namespace ARDOUR {
 
 const string MuteMaster::xml_node_name (X_("MuteMaster"));
 
@@ -173,3 +174,5 @@ MuteMaster::set_muted_by_masters (bool yn)
 {
 	_muted_by_masters = yn;
 }
+
+} // namespace ARDOUR

@@ -38,24 +38,25 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-using namespace ARDOUR::DSP;
+namespace ARDOUR {
+namespace DSP {
 
 void
-ARDOUR::DSP::memset (float *data, const float val, const uint32_t n_samples) {
+memset (float *data, const float val, const uint32_t n_samples) {
 	for (uint32_t i = 0; i < n_samples; ++i) {
 		data[i] = val;
 	}
 }
 
 void
-ARDOUR::DSP::mmult (float *data, float *mult, const uint32_t n_samples) {
+mmult (float *data, float *mult, const uint32_t n_samples) {
 	for (uint32_t i = 0; i < n_samples; ++i) {
 		data[i] *= mult[i];
 	}
 }
 
 float
-ARDOUR::DSP::log_meter (float power) {
+log_meter (float power) {
 	// compare to libs/ardour/log_meter.h
 	static const float lower_db = -192.f;
 	static const float upper_db = 0.f;
@@ -64,18 +65,18 @@ ARDOUR::DSP::log_meter (float power) {
 }
 
 float
-ARDOUR::DSP::log_meter_coeff (float coeff) {
+log_meter_coeff (float coeff) {
 	if (coeff <= 0) return 0;
 	return log_meter (fast_coefficient_to_dB (coeff));
 }
 
 void
-ARDOUR::DSP::peaks (const float *data, float &min, float &max, uint32_t n_samples) {
+peaks (const float *data, float &min, float &max, uint32_t n_samples) {
 	ARDOUR::find_peaks (data, n_samples, &min, &max);
 }
 
 void
-ARDOUR::DSP::process_map (BufferSet* bufs, const ChanCount& n_out, const ChanMapping& in_map, const ChanMapping& out_map, pframes_t nframes, samplecnt_t offset)
+process_map (BufferSet* bufs, const ChanCount& n_out, const ChanMapping& in_map, const ChanMapping& out_map, pframes_t nframes, samplecnt_t offset)
 {
 	/* PluginInsert already handles most, in particular `no-inplace` buffers in case
 	 * or x-over connections, and through connections.
@@ -509,3 +510,6 @@ Generator::grandf ()
 	_rn = r * x2;
 	return r * x1;
 }
+
+} // namespace DSP
+} // namespace ARDOUR

@@ -37,9 +37,10 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
+
+namespace ARDOUR {
 
 #ifdef DEBUG_RT_ALLOC
 static Graph* graph = 0;
@@ -78,9 +79,9 @@ Graph::Graph (Session& session)
 	/* pre-allocate memory */
 	_trigger_queue.reserve (1024);
 
-	ARDOUR::AudioEngine::instance ()->Running.connect_same_thread (engine_connections, boost::bind (&Graph::reset_thread_list, this));
-	ARDOUR::AudioEngine::instance ()->Stopped.connect_same_thread (engine_connections, boost::bind (&Graph::engine_stopped, this));
-	ARDOUR::AudioEngine::instance ()->Halted.connect_same_thread (engine_connections, boost::bind (&Graph::engine_stopped, this));
+	AudioEngine::instance ()->Running.connect_same_thread (engine_connections, boost::bind (&Graph::reset_thread_list, this));
+	AudioEngine::instance ()->Stopped.connect_same_thread (engine_connections, boost::bind (&Graph::engine_stopped, this));
+	AudioEngine::instance ()->Halted.connect_same_thread (engine_connections, boost::bind (&Graph::engine_stopped, this));
 
 	reset_thread_list ();
 
@@ -450,7 +451,7 @@ Graph::helper_thread ()
 	g_atomic_int_inc (&_n_workers);
 	guint id = g_atomic_uint_get (&_n_workers);
 
-	/* This is needed for ARDOUR::Session requests called from rt-processors
+	/* This is needed for Session requests called from rt-processors
 	 * in particular Lua scripts may do cross-thread calls */
 	if (!SessionEvent::has_per_thread_pool ()) {
 		char name[64];
@@ -483,7 +484,7 @@ Graph::main_thread ()
 	suspend_rt_malloc_checks ();
 	ProcessThread* pt = new ProcessThread ();
 
-	/* This is needed for ARDOUR::Session requests called from rt-processors
+	/* This is needed for Session requests called from rt-processors
 	 * in particular Lua scripts may do cross-thread calls */
 	if (!SessionEvent::has_per_thread_pool ()) {
 		char name[64];
@@ -686,3 +687,5 @@ Graph::in_process_thread () const
 {
 	return AudioEngine::instance ()->in_process_thread ();
 }
+
+} // namespace ARDOUR

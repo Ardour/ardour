@@ -30,11 +30,12 @@
 #include "ardour/port_engine.h"
 #include "ardour/rc_configuration.h"
 
-using namespace ARDOUR;
 using namespace std;
 
 #define ENGINE AudioEngine::instance()
 #define port_engine AudioEngine::instance()->port_engine()
+
+namespace ARDOUR {
 
 AudioPort::AudioPort (const std::string& name, PortFlags flags)
 	: Port (name, DataType::AUDIO, flags)
@@ -154,3 +155,5 @@ AudioPort::engine_get_whole_audio_buffer ()
 	assert (_port_handle);
 	return (Sample *) port_engine.get_buffer (_port_handle, ENGINE->samples_per_cycle());
 }
+
+} // namespace ARDOUR

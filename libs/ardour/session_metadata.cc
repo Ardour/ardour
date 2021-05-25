@@ -27,7 +27,8 @@
 
 using namespace std;
 using namespace Glib;
-using namespace ARDOUR;
+
+namespace ARDOUR {
 
 SessionMetadata *SessionMetadata::_metadata = NULL;  //singleton instance
 
@@ -682,3 +683,5 @@ SessionMetadata::av_export_tag (MetaDataMap& meta) const
 	if (!copyright().empty())    { meta["copyright"] = copyright(); }
 	if (!subtitle().empty())     { meta["description"] = subtitle(); }
 }
+
+} // namespace ARDOUR

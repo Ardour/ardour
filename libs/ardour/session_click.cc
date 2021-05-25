@@ -36,8 +36,9 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 Pool Click::pool ("click", sizeof (Click), 1024);
 
@@ -359,3 +360,5 @@ Session::click_io_resync_latency (bool playback)
 
 	_click_io_latency = _click_io->connected_latency (true);
 }
+
+} // namespace ARDOUR

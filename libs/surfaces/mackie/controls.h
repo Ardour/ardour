@@ -88,9 +88,9 @@ public:
 	bool _in_use;
 };
 
-}
-}
+std::ostream & operator<< (std::ostream & os, const Control & control);
 
-std::ostream & operator<< (std::ostream & os, const ArdourSurface::Mackie::Control & control);
+} // namespace Mackie
+} // namespace ArdourSurface
 
 #endif /* __mackie_controls_h__ */

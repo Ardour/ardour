@@ -32,8 +32,9 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 Pool* TransportFSM::Event::pool = 0;
 
@@ -838,3 +839,5 @@ TransportFSM::will_roll_fowards () const
 	}
 	return (_direction_state == Forwards);
 }
+
+} // namespace ARDOUR

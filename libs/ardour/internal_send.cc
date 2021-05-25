@@ -38,14 +38,13 @@
 
 #include "pbd/i18n.h"
 
-namespace ARDOUR {
-	class MuteMaster;
-	class Pannable;
-}
-
 using namespace PBD;
-using namespace ARDOUR;
 using namespace std;
+
+namespace ARDOUR {
+
+class MuteMaster;
+class Pannable;
 
 PBD::Signal1<void, pframes_t> InternalSend::CycleStart;
 
@@ -532,3 +531,5 @@ InternalSend::cycle_start (pframes_t /*nframes*/)
 		b->prepare ();
 	}
 }
+
+} // namespace ARDOUR

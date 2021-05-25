@@ -33,9 +33,10 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
 using namespace MIDI::Name;
 using std::string;
+
+namespace ARDOUR {
 
 InstrumentInfo::InstrumentInfo ()
 	: _external_instrument_model (_("Unknown"))
@@ -312,3 +313,5 @@ InstrumentInfo::get_patches (uint8_t channel)
 {
 	return MidiPatchManager::instance ().find_channel_name_set (model (), mode (), channel);
 }
+
+} // namespace ARDOUR

@@ -30,19 +30,14 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
-
-namespace ARDOUR {
-class MidiStateTracker;
-class Session;
-template <typename T> class MidiRingBuffer;
-}
 
 namespace Evoral {
 template <typename T> class EventSink;
 template <typename Time> class Event;
 }
+
+namespace ARDOUR {
 
 /*******************************************************************************
 As of May 2011, it appears too complex to support compound regions for MIDI
@@ -202,3 +197,5 @@ MidiPlaylistSource::empty () const
 {
 	return !_playlist || _playlist->empty();
 }
+
+} // namespace ARDOUR

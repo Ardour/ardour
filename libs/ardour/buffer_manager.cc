@@ -25,8 +25,9 @@
 #include "ardour/buffer_manager.h"
 #include "ardour/thread_buffers.h"
 
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 RingBufferNPT<ThreadBuffers*>* BufferManager::thread_buffers = 0;
 std::list<ThreadBuffers*>* BufferManager::thread_buffers_list = 0;
@@ -84,3 +85,5 @@ BufferManager::ensure_buffers (ChanCount howmany, size_t custom)
 		(*i)->ensure_buffers (howmany, custom);
 	}
 }
+
+} // namespace ARDOUR

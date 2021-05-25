@@ -39,9 +39,10 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
+
+namespace ARDOUR {
 
 ARDOUR::samplecnt_t DiskWriter::_chunk_samples = DiskWriter::default_chunk_samples ();
 PBD::Signal0<void> DiskWriter::Overrun;
@@ -1395,3 +1396,5 @@ DiskWriter::use_playlist (DataType dt, boost::shared_ptr<Playlist> playlist)
 	}
 	return 0;
 }
+
+} // namespace ARDOUR

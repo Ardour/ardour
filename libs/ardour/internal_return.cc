@@ -26,7 +26,8 @@
 #include "ardour/route.h"
 
 using namespace std;
-using namespace ARDOUR;
+
+namespace ARDOUR {
 
 InternalReturn::InternalReturn (Session& s, std::string const& name)
 	: Processor (s, name)
@@ -102,3 +103,5 @@ InternalReturn::configure_io (ChanCount in, ChanCount out)
 	Processor::configure_io (in, out);
 	return true;
 }
+
+} // namespace ARDOUR

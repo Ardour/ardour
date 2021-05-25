@@ -354,7 +354,7 @@ CLASSKEYS(LuaDialog::ProgressWindow);
  *   as LuaBridge's "WSPtrClass".
  */
 
-using namespace ARDOUR;
+namespace ARDOUR {
 
 /** Access libardour global configuration */
 static RCConfiguration* _libardour_config () {
@@ -2968,3 +2968,5 @@ LuaBindings::set_session (lua_State* L, Session *s)
 		if (cb_ses.type() == LUA_TFUNCTION) { cb_ses(s->name()); } // TODO args
 	}
 }
+
+} // namespace ARDOUR

@@ -21,9 +21,9 @@
 #include "ardour/route_group_member.h"
 #include "ardour/route_group.h"
 
-using namespace ARDOUR;
+namespace ARDOUR {
 
-namespace ARDOUR { class RouteGroup; }
+class RouteGroup;
 
 /** Set the route group; it can be set to 0 for `none' */
 void
@@ -36,3 +36,5 @@ RouteGroupMember::set_route_group (RouteGroup *rg)
 	_route_group = rg;
 	route_group_changed (); /* EMIT SIGNAL */
 }
+
+} // namespace ARDOUR

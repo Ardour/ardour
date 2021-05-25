@@ -57,14 +57,13 @@
 #include <locale.h>
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
 
 namespace ARDOUR {
-	namespace Properties {
-		PBD::PropertyDescriptor<double> start_beats;
-		PBD::PropertyDescriptor<double> length_beats;
-	}
+
+namespace Properties {
+PBD::PropertyDescriptor<double> start_beats;
+PBD::PropertyDescriptor<double> length_beats;
 }
 
 void
@@ -835,3 +834,5 @@ MidiRegion::set_name (const std::string& str)
 
 	return Region::set_name (str);
 }
+
+} // namespace ARDOUR

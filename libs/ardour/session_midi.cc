@@ -57,10 +57,11 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
 using namespace MIDI;
 using namespace Glib;
+
+namespace ARDOUR {
 
 void
 Session::midi_panic()
@@ -481,7 +482,7 @@ Session::send_full_time_code (samplepos_t const t, MIDI::pframes_t nframes)
  * earlier already this cycle by send_full_time_code)
  */
 int
-Session::send_midi_time_code_for_cycle (samplepos_t start_sample, samplepos_t end_sample, ARDOUR::pframes_t nframes)
+Session::send_midi_time_code_for_cycle (samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes)
 {
 	// start_sample == start_sample  for normal cycles
 	// start_sample > _transport_sample  for split cycles
@@ -565,7 +566,7 @@ Session::send_midi_time_code_for_cycle (samplepos_t start_sample, samplepos_t en
 		assert (msg_time < end_sample);
 
 		/* convert from session samples back to JACK samples using the transport speed */
-		ARDOUR::pframes_t const out_stamp = (msg_time - start_sample) / _transport_fsm->transport_speed();
+		pframes_t const out_stamp = (msg_time - start_sample) / _transport_fsm->transport_speed();
 		assert (out_stamp < nframes);
 
 		MidiBuffer& mb (_midi_ports->mtc_output_port()->get_midi_buffer(nframes));
@@ -662,25 +663,25 @@ Session::start_midi_thread ()
 	return 0;
 }
 
-boost::shared_ptr<ARDOUR::Port>
+boost::shared_ptr<Port>
 Session::mmc_output_port () const
 {
 	return _midi_ports->mmc_output_port ();
 }
 
-boost::shared_ptr<ARDOUR::Port>
+boost::shared_ptr<Port>
 Session::mmc_input_port () const
 {
 	return _midi_ports->mmc_input_port ();
 }
 
-boost::shared_ptr<ARDOUR::Port>
+boost::shared_ptr<Port>
 Session::scene_output_port () const
 {
 	return _midi_ports->scene_output_port ();
 }
 
-boost::shared_ptr<ARDOUR::Port>
+boost::shared_ptr<Port>
 Session::scene_input_port () const
 {
 	return _midi_ports->scene_input_port ();
@@ -799,3 +800,5 @@ Session::rewire_midi_selection_ports ()
 		target->input()->connect (target->input()->nth (0), (*p), this);
 	}
 }
+
+} // namespace ARDOUR

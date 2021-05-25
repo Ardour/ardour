@@ -32,8 +32,9 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 void
 CoreSelection::send_selection_change ()
@@ -611,3 +612,5 @@ CoreSelection::selected () const
 	Glib::Threads::RWLock::ReaderLock lm (_lock);
 	return _stripables.size();
 }
+
+} // namespace ARDOUR

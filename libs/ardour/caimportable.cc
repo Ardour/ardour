@@ -23,9 +23,10 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
 using namespace std;
 using namespace PBD;
+
+namespace ARDOUR {
 
 CAImportableSource::CAImportableSource (const string& path)
 {
@@ -142,3 +143,5 @@ CAImportableSource::natural_position () const
 	// TODO: extract timecode, if any
 	return 0;
 }
+
+} // namespace ARDOUR

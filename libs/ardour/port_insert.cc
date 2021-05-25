@@ -35,8 +35,9 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 string
 PortInsert::name_and_id_new_insert (Session& s, uint32_t& bitslot)
@@ -298,3 +299,5 @@ PortInsert::deactivate ()
 
 	_out->deactivate ();
 }
+
+} // namespace ARDOUR

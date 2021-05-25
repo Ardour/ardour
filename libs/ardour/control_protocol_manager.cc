@@ -39,11 +39,12 @@
 #include "ardour/selection.h"
 #include "ardour/session.h"
 
-using namespace ARDOUR;
 using namespace std;
 using namespace PBD;
 
 #include "pbd/i18n.h"
+
+namespace ARDOUR {
 
 ControlProtocolManager* ControlProtocolManager::_instance = 0;
 const string ControlProtocolManager::state_node_name = X_("ControlProtocols");
@@ -617,3 +618,5 @@ ControlProtocolManager::stripable_selection_changed (StripableNotificationListPt
 		}
 	}
 }
+
+} // namespace ARDOUR

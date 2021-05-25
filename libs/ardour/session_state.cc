@@ -151,8 +151,9 @@
 #include <locale.h>
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 #define DEBUG_UNDO_HISTORY(msg) DEBUG_TRACE (PBD::DEBUG::UndoHistory, string_compose ("%1: %2\n", __LINE__, msg));
 
@@ -5709,3 +5710,5 @@ Session::end_unnamed_status () const
 {
 	::g_remove (unnamed_file_name().c_str());
 }
+
+} // namespace ARDOUR

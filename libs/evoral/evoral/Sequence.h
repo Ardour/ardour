@@ -371,11 +371,15 @@ private:
 	uint8_t _highest_note;
 };
 
+template<typename Time>
+/*LIBEVORAL_API*/ std::ostream&
+operator<< (std::ostream& o, const Sequence<Time>& s)
+{
+	s.dump (o);
+	return o;
+}
 
 } // namespace Evoral
-
-template<typename Time> /*LIBEVORAL_API*/ std::ostream& operator<<(std::ostream& o, const Evoral::Sequence<Time>& s) { s.dump (o); return o; }
-
 
 #endif // EVORAL_SEQUENCE_HPP
 

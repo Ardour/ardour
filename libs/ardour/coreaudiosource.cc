@@ -41,8 +41,9 @@
 #include <AudioToolbox/AudioFormat.h>
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 /** Create a new CoreAudioSource using session state, which implies that the
  *  file must already exist.
@@ -405,3 +406,5 @@ CoreAudioSource::set_path (const string& p)
 {
         FileSource::set_path (p);
 }
+
+} // namespace ARDOUR

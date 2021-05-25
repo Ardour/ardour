@@ -36,13 +36,14 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace MIDI;
 using namespace PBD;
 using namespace Timecode;
 
 #define ENGINE AudioEngine::instance()
 #define FLYWHEEL_TIMEOUT ( 1 * ENGINE->sample_rate() )
+
+namespace ARDOUR {
 
 /* XXX USE Config->get_ltc_input */
 
@@ -264,6 +265,7 @@ LTC_TransportMaster::equal_ltc_sample_time(LTCFrame *a, LTCFrame *b) {
 	}
 	return true;
 }
+
 static ostream& operator<< (ostream& ostr, LTCFrame& a)
 {
 	ostr
@@ -653,3 +655,5 @@ LTC_TransportMaster::delta_string() const
 		return format_delta_time (_current_delta);
 	}
 }
+
+} // namespace ARDOUR

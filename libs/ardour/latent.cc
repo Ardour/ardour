@@ -20,9 +20,9 @@
 
 #include "ardour/latent.h"
 
-using namespace ARDOUR;
+namespace ARDOUR {
 
-bool ARDOUR::Latent::_zero_latency = false;
+bool Latent::_zero_latency = false;
 PBD::Signal0<void> Latent::DisableSwitchChanged;
 
 Latent::Latent ()
@@ -54,3 +54,5 @@ Latent::add_state (XMLNode* node) const
 	node->set_property ("user-latency", _user_latency);
 	node->set_property ("use-user-latency", _use_user_latency);
 }
+
+} // namespace ARDOUR

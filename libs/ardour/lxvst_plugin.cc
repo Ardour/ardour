@@ -29,8 +29,9 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 LXVSTPlugin::LXVSTPlugin (AudioEngine& e, Session& session, VSTHandle* h, int unique_id)
 	: VSTPlugin (e, session, h)
@@ -169,6 +170,7 @@ LXVSTPluginInfo::get_presets (bool user_only) const
 
 LXVSTPluginInfo::LXVSTPluginInfo (_VSTInfo* nfo) : VSTPluginInfo (nfo)
 {
-	type = ARDOUR::LXVST;
+	type = LXVST;
 }
 
+} // namespace ARDOUR

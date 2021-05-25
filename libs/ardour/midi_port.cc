@@ -34,8 +34,9 @@
 #include "ardour/session.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 #define port_engine AudioEngine::instance()->port_engine()
 
@@ -431,3 +432,5 @@ MidiPort::add_shadow_port (string const & name, MidiFilter mf)
 
 	return 0;
 }
+
+} // namespace ARDOUR

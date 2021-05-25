@@ -32,7 +32,8 @@
 
 using namespace std;
 using namespace PBD;
-using namespace ARDOUR;
+
+namespace ARDOUR {
 
 /**** Handler ***/
 LocationImportHandler::LocationImportHandler (XMLTree const & source, Session & session) :
@@ -189,3 +190,5 @@ LocationImporter::_move ()
 {
 	session.locations()->add (location);
 }
+
+} // namespace ARDOUR

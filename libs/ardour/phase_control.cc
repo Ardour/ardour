@@ -23,7 +23,8 @@
 
 using namespace std;
 using namespace PBD;
-using namespace ARDOUR;
+
+namespace ARDOUR {
 
 PhaseControl::PhaseControl (Session& session, std::string const & name)
 	: AutomationControl (session, PhaseAutomation, ParameterDescriptor (PhaseAutomation),
@@ -91,3 +92,5 @@ PhaseControl::set_state (XMLNode const & node, int version)
 
 	return 0;
 }
+
+} // namespace ARDOUR

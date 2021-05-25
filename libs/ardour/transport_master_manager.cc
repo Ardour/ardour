@@ -29,8 +29,9 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 const std::string TransportMasterManager::state_node_name = X_("TransportMasters");
 TransportMasterManager* TransportMasterManager::_instance = 0;
@@ -761,3 +762,5 @@ TransportMasterManager::reinit (double speed, samplepos_t pos)
 {
 	init_transport_master_dll (speed, pos);
 }
+
+} // namespace ARDOUR

@@ -19,7 +19,7 @@
 #include "ardour/mididm.h"
 #include "ardour/port_engine.h"
 
-using namespace ARDOUR;
+namespace ARDOUR {
 
 MIDIDM::MIDIDM (samplecnt_t sample_rate)
   : _sample_rate (sample_rate)
@@ -138,3 +138,5 @@ int MIDIDM::process (pframes_t nframes, PortEngine &pe, void *midi_in, void *mid
   _monotonic_cnt += nframes;
 	return 0;
 }
+
+} // namespace ARDOUR

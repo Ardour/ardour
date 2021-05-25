@@ -32,8 +32,9 @@
 #include "ardour/debug.h"
 #include "ardour/session.h"
 
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 AutomationWatch* AutomationWatch::_instance = 0;
 
@@ -244,3 +245,5 @@ AutomationWatch::transport_state_change ()
 		}
 	}
 }
+
+} // namespace ARDOUR

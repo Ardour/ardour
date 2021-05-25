@@ -30,8 +30,8 @@
 #include "ardour/parameter_types.h"
 
 using namespace std;
-using namespace ARDOUR;
 
+namespace ARDOUR {
 
 MidiStateTracker::MidiStateTracker ()
 {
@@ -212,3 +212,5 @@ MidiStateTracker::dump (ostream& o)
 	}
 	o << "+++++\n";
 }
+
+} // namespace ARDOUR

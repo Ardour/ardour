@@ -21,8 +21,9 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 RecordEnableControl::RecordEnableControl (Session& session, std::string const & name, Recordable& r)
 	: SlavableAutomationControl (session, RecEnableAutomation, ParameterDescriptor (RecEnableAutomation),
@@ -73,3 +74,5 @@ RecordEnableControl::do_pre_realtime_queue_stuff (double newval)
 		std::cerr << "Prep rec-enable failed\n";
 	}
 }
+
+} // namespace ARDOUR

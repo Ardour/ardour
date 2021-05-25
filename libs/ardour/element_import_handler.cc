@@ -22,7 +22,8 @@
 #include <algorithm>
 
 using namespace std;
-using namespace ARDOUR;
+
+namespace ARDOUR {
 
 bool ElementImportHandler::_dirty = false;
 bool ElementImportHandler::_errors = false;
@@ -50,3 +51,5 @@ ElementImportHandler::remove_name (const string & name)
 {
 	names.erase (name);
 }
+
+} // namespace ARDOUR

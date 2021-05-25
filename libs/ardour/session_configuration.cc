@@ -35,8 +35,9 @@
 #include "ardour/utils.h"
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 SessionConfiguration::SessionConfiguration ()
 	:
@@ -196,3 +197,5 @@ SessionConfiguration::save_state ()
 
 	return true;
 }
+
+} // namespace ARDOUR

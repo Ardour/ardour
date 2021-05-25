@@ -39,10 +39,11 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
 
 #define TFSM_EVENT(evtype) { _transport_fsm->enqueue (new TransportFSM::Event (evtype)); }
+
+namespace ARDOUR {
 
 /* BBT TIME*/
 
@@ -303,3 +304,5 @@ Session::any_duration_to_samples (samplepos_t position, AnyTime const & duration
 
 	return duration.samples;
 }
+
+} // namespace ARDOUR

@@ -33,9 +33,10 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
 using namespace soundtouch;
+
+namespace ARDOUR {
 
 STStretch::STStretch (Session& s, TimeFXRequest& req)
 	: Filter (s)
@@ -335,3 +336,5 @@ out:
 
 	return ret;
 }
+
+} // namespace ARDOUR

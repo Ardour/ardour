@@ -44,8 +44,9 @@
 #endif
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 AutomationControl::AutomationControl(ARDOUR::Session&                          session,
                                      const Evoral::Parameter&                  parameter,
@@ -386,3 +387,5 @@ AutomationControl::check_rt (double val, Controllable::GroupControlDisposition g
 
 	return false;
 }
+
+} // namespace ARDOUR

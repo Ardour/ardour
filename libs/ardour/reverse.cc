@@ -26,9 +26,11 @@
 #include "ardour/types.h"
 
 using namespace std;
-using namespace ARDOUR;
 
-namespace ARDOUR { class Progress; class Session; }
+namespace ARDOUR {
+
+class Progress;
+class Session;
 
 Reverse::Reverse (Session& s)
 	: Filter (s)
@@ -125,3 +127,5 @@ Reverse::run (boost::shared_ptr<Region> r, Progress*)
 
 	return ret;
 }
+
+} // namespace ARDOUR

@@ -37,10 +37,11 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
 using namespace PBD;
 
 #define GAIN_COEFF_DELTA (1e-5)
+
+namespace ARDOUR {
 
 Amp::Amp (Session& s, const std::string& name, boost::shared_ptr<GainControl> gc, bool control_midi_also)
 	: Processor(s, "Amp")
@@ -412,3 +413,5 @@ Amp::set_gain_automation_buffer (gain_t* g)
 {
 	_gain_automation_buffer = g;
 }
+
+} // namespace ARDOUR

@@ -25,21 +25,23 @@
 #include "canvas/types.h"
 
 using namespace std;
-using namespace ArdourCanvas;
 
-Coord const ArdourCanvas::COORD_MAX = 1.7e307;
+namespace ArdourCanvas {
+
+Coord const COORD_MAX = 1.7e307;
 
 ostream &
-ArdourCanvas::operator<< (ostream & s, Duple const & r)
+operator<< (ostream & s, Duple const & r)
 {
 	s << "(" << r.x << ", " << r.y << ")";
 	return s;
 }
 
 ostream &
-ArdourCanvas::operator<< (ostream & s, Rect const & r)
+operator<< (ostream & s, Rect const & r)
 {
 	s << "[(" << r.x0 << ", " << r.y0 << "), (" << r.x1 << ", " << r.y1 << ") " << r.width() << " x " << r.height() << "]";
 	return s;
 }
 
+}

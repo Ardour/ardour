@@ -30,7 +30,6 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
 using namespace Timecode;
 
@@ -60,6 +59,8 @@ using namespace Timecode;
 #define TV_STANDARD(tcf) \
 	(timecode_to_frames_per_second(tcf)==25.0 ? LTC_TV_625_50 : \
 	 timecode_has_drop_frames(tcf)? LTC_TV_525_60 : LTC_TV_FILM_24)
+
+namespace ARDOUR {
 
 void
 Session::ltc_tx_initialize()
@@ -675,3 +676,5 @@ Session::send_ltc_for_cycle (samplepos_t start_sample, samplepos_t end_sample, p
 #endif
 	}
 }
+
+} // namespace ARDOUR

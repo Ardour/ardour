@@ -54,13 +54,12 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
 
 namespace ARDOUR {
-	namespace Properties {
-		PBD::PropertyDescriptor<bool> regions;
-	}
+
+namespace Properties {
+PBD::PropertyDescriptor<bool> regions;
 }
 
 struct ShowMeTheList {
@@ -3473,3 +3472,5 @@ Playlist::set_capture_insertion_in_progress (bool yn)
 {
 	_capture_insertion_underway = yn;
 }
+
+} // namespace ARDOUR

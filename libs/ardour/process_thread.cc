@@ -27,9 +27,10 @@
 #include "ardour/process_thread.h"
 #include "ardour/thread_buffers.h"
 
-using namespace ARDOUR;
 using namespace Glib;
 using namespace std;
+
+namespace ARDOUR {
 
 static void
 release_thread_buffer (void* arg)
@@ -235,3 +236,5 @@ ProcessThread::pan_automation_buffer()
 	assert (p);
 	return p;
 }
+
+} // namespace ARDOUR

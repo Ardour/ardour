@@ -37,7 +37,8 @@
 
 using namespace std;
 using namespace PBD;
-using namespace ARDOUR;
+
+namespace ARDOUR {
 
 /**** Handler ***/
 AudioPlaylistImportHandler::AudioPlaylistImportHandler (XMLTree const & source, Session & session, AudioRegionImportHandler & region_handler, const char * nodename) :
@@ -268,3 +269,5 @@ UnusedAudioPlaylistImportHandler::get_info () const
 {
 	return _("Audio Playlists (unused)");
 }
+
+} // namespace ARDOUR

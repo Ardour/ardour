@@ -24,8 +24,9 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 PolarityProcessor::PolarityProcessor (Session& s, boost::shared_ptr<PhaseControl> control)
 	: Processor(s, "Polarity")
@@ -79,3 +80,5 @@ PolarityProcessor::state ()
 	node.set_property("type", "polarity");
 	return node;
 }
+
+} // namespace ARDOUR

@@ -43,11 +43,12 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
 
-ARDOUR::samplecnt_t   DiskReader::_chunk_samples = default_chunk_samples ();
+namespace ARDOUR {
+
+samplecnt_t           DiskReader::_chunk_samples = default_chunk_samples ();
 PBD::Signal0<void>    DiskReader::Underrun;
 Sample*               DiskReader::_sum_buffer     = 0;
 Sample*               DiskReader::_mixdown_buffer = 0;
@@ -1961,3 +1962,5 @@ DiskReader::setup_preloop_buffer ()
 		}
 	}
 }
+
+} // namespace ARDOUR

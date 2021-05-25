@@ -31,8 +31,9 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 MidiStretch::MidiStretch (Session& s, const TimeFXRequest& req)
 	: Filter (s)
@@ -161,3 +162,4 @@ MidiStretch::run (boost::shared_ptr<Region> r, Progress*)
 	return ret;
 }
 
+} // namespace ARDOUR

@@ -37,7 +37,8 @@
 
 using namespace std;
 using namespace PBD;
-using namespace ARDOUR;
+
+namespace ARDOUR {
 
 /*** AudioTrackImportHandler ***/
 
@@ -406,3 +407,5 @@ AudioTrackImporter::rate_convert_events (XMLNode & node)
 
 	return true;
 }
+
+} // namespace ARDOUR

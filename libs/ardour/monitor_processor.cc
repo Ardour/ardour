@@ -31,20 +31,23 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
 
+namespace ARDOUR {
+
 /* specialize for bool because of set_value() semantics */
 
-namespace ARDOUR {
-	template<> void MPControl<bool>::set_value (double v, PBD::Controllable::GroupControlDisposition gcd) {
-                bool newval = fabs (v) >= 0.5;
-                if (newval != _value) {
-                        _value = newval;
-                        Changed (true, gcd); /* EMIT SIGNAL */
-                }
-        }
+template<>
+void
+MPControl<bool>::set_value (double                                     v,
+                            PBD::Controllable::GroupControlDisposition gcd)
+{
+	bool newval = fabs (v) >= 0.5;
+	if (newval != _value) {
+		_value = newval;
+		Changed (true, gcd); /* EMIT SIGNAL */
+	}
 }
 
 MonitorProcessor::MonitorProcessor (Session& s)
@@ -560,3 +563,5 @@ MonitorProcessor::ChannelRecord::~ChannelRecord ()
 	polarity_control->DropReferences(); /* EMIT SIGNAL */
 	soloed_control->DropReferences(); /* EMIT SIGNAL */
 }
+
+} // namespace ARDOUR

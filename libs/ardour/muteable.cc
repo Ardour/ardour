@@ -19,9 +19,11 @@
 #include "ardour/muteable.h"
 #include "ardour/mute_master.h"
 
-using namespace ARDOUR;
+namespace ARDOUR {
 
 Muteable::Muteable (Session& s, std::string const & name)
 	: _mute_master (new MuteMaster (s, *this, name))
 {
 }
+
+} // namespace ARDOUR

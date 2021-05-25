@@ -21,7 +21,8 @@
 #include "pbd/i18n.h"
 
 using namespace PBD;
-using namespace ARDOUR;
+
+namespace ARDOUR {
 
 std::string SceneChange::xml_node_name = X_("SceneChange");
 const uint32_t SceneChange::out_of_bound_color = 0x00000000; /* note: zero alpha means invisible, which acts as out-of-bound signal */
@@ -65,3 +66,5 @@ SceneChange::set_active (bool yn)
                 ActiveChanged (); /* EMIT SIGNAL */
         }
 }
+
+} // namespace ARDOUR

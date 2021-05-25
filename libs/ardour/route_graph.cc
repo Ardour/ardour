@@ -24,7 +24,8 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
+
+namespace ARDOUR {
 
 void
 GraphEdges::add (GraphVertex from, GraphVertex to, bool via_sends_only)
@@ -239,7 +240,7 @@ struct RouteRecEnabledComparator
  *  @return Sorted list of routes, or 0 if the graph contains cycles (feedback loops).
  */
 boost::shared_ptr<RouteList>
-ARDOUR::topological_sort (
+topological_sort (
 	boost::shared_ptr<RouteList> routes,
 	GraphEdges edges
 	)
@@ -287,3 +288,5 @@ ARDOUR::topological_sort (
 
 	return sorted_routes;
 }
+
+} // namespace ARDOUR

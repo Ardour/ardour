@@ -43,10 +43,11 @@
 #include "ardour/session.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
 
 #include "pbd/i18n.h"
+
+namespace ARDOUR {
 
 Auditioner::Auditioner (Session& s)
 	: Track (s, "auditioner", PresentationInfo::Auditioner)
@@ -608,3 +609,4 @@ Auditioner::monitoring_state () const
 	return MonitoringDisk;
 }
 
+} // namespace ARDOUR

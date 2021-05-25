@@ -29,7 +29,8 @@
 
 using namespace std;
 using namespace PBD;
-using namespace ARDOUR;
+
+namespace ARDOUR {
 
 /** Quantize notes
  *
@@ -183,3 +184,5 @@ Quantize::operator () (boost::shared_ptr<MidiModel> model,
 
 	return cmd;
 }
+
+} // namespace ARDOUR

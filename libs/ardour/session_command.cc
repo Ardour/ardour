@@ -44,9 +44,10 @@
 class Command;
 
 using namespace PBD;
-using namespace ARDOUR;
 
 #include "pbd/i18n.h"
+
+namespace ARDOUR {
 
 void Session::register_with_memento_command_factory(PBD::ID id, PBD::StatefulDestructible *ptr)
 {
@@ -183,3 +184,5 @@ Session::stateful_diff_command_factory (XMLNode* n)
 
 	return 0;
 }
+
+} // namespace ARDOUR

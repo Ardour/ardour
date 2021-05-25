@@ -30,9 +30,10 @@
 #include "ardour/selection.h"
 #include "ardour/stripable.h"
 
-using namespace ARDOUR;
 using namespace PBD;
 using std::string;
+
+namespace ARDOUR {
 
 Stripable::Stripable (Session& s, string const & name, PresentationInfo const & pi)
 	: SessionObject (s, name)
@@ -187,3 +188,5 @@ Stripable::Sorter::operator() (boost::shared_ptr<ARDOUR::Stripable> a, boost::sh
 	}
 	return cmp_a < cmp_b;
 }
+
+} // namespace ARDOUR

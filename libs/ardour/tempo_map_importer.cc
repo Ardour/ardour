@@ -30,7 +30,8 @@
 
 using namespace std;
 using namespace PBD;
-using namespace ARDOUR;
+
+namespace ARDOUR {
 
 /**** Handler ***/
 TempoMapImportHandler::TempoMapImportHandler (XMLTree const & source, Session & session) :
@@ -100,3 +101,5 @@ TempoMapImporter::_move ()
 {
 	session.tempo_map().set_state (xml_tempo_map, Stateful::current_state_version);
 }
+
+} // namespace ARDOUR

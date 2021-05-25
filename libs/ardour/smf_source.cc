@@ -54,11 +54,12 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
 using namespace Glib;
 using namespace PBD;
 using namespace Evoral;
 using namespace std;
+
+namespace ARDOUR {
 
 /** Constructor used for new internal-to-session files.  File cannot exist. */
 SMFSource::SMFSource (Session& s, const string& path, Source::Flag flags)
@@ -806,3 +807,5 @@ SMFSource::prevent_deletion ()
 
 	_flags = Flag (_flags & ~(Removable|RemovableIfEmpty|RemoveAtDestroy));
 }
+
+} // namespace ARDOUR

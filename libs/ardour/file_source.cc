@@ -52,9 +52,10 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
 using namespace Glib;
+
+namespace ARDOUR {
 
 PBD::Signal2<int,std::string,std::vector<std::string> > FileSource::AmbiguousFileName;
 
@@ -607,4 +608,4 @@ FileSource::rename (const string& newpath)
 	return 0;
 }
 
-
+} // namespace ARDOUR

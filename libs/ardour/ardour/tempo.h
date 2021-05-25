@@ -627,11 +627,11 @@ private:
 	MeterSection* copy_metrics_and_point (const Metrics& metrics, Metrics& copy, MeterSection* section) const;
 };
 
-}; /* namespace ARDOUR */
+LIBARDOUR_API std::ostream& operator<< (std::ostream&, const Meter&);
+LIBARDOUR_API std::ostream& operator<< (std::ostream&, const Tempo&);
+LIBARDOUR_API std::ostream& operator<< (std::ostream&, const MetricSection&);
 
-LIBARDOUR_API std::ostream& operator<< (std::ostream&, const ARDOUR::Meter&);
-LIBARDOUR_API std::ostream& operator<< (std::ostream&, const ARDOUR::Tempo&);
-LIBARDOUR_API std::ostream& operator<< (std::ostream&, const ARDOUR::MetricSection&);
+}; /* namespace ARDOUR */
 
 namespace PBD {
 	DEFINE_ENUM_CONVERT (ARDOUR::TempoSection::Type)

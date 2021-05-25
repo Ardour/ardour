@@ -24,11 +24,11 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
 using namespace std;
 using namespace MIDI;
 using namespace PBD;
 
+namespace ARDOUR {
 
 MidiPortManager::MidiPortManager ()
 {
@@ -73,7 +73,7 @@ MidiPortManager::create_ports ()
 
 	/* Now register ports used to send positional sync data (MTC and MIDI Clock) */
 
-	boost::shared_ptr<ARDOUR::Port> p;
+	boost::shared_ptr<Port> p;
 
 	p = AudioEngine::instance()->register_output_port (DataType::MIDI, X_("MTC out"));
 	_mtc_output_port= boost::dynamic_pointer_cast<MidiPort> (p);
@@ -139,3 +139,5 @@ MidiPortManager::vkbd_output_port () const
 {
 	return boost::dynamic_pointer_cast<AsyncMIDIPort> (_vkbd_out);
 }
+
+} // namespace ARDOUR

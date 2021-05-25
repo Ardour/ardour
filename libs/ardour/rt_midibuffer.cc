@@ -32,8 +32,9 @@
 #include "ardour/rt_midibuffer.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 RTMidiBuffer::RTMidiBuffer ()
 	: _size (0)
@@ -412,3 +413,5 @@ RTMidiBuffer::clear ()
 	/* rendering new data .. it will not be reversed */
 	_reversed = false;
 }
+
+} // namespace ARDOUR

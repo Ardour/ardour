@@ -30,7 +30,8 @@
 
 using namespace std;
 using namespace PBD;
-using namespace ArdourCanvas;
+
+namespace ArdourCanvas {
 
 int Item::default_items_per_cell = 64;
 
@@ -1178,10 +1179,11 @@ Item::dump (ostream& o) const
 	}
 }
 
-ostream&
-ArdourCanvas::operator<< (ostream& o, const Item& i)
+std::ostream&
+operator<< (std::ostream& o, const Item& i)
 {
 	i.dump (o);
 	return o;
 }
 
+}

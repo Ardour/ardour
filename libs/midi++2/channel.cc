@@ -22,7 +22,7 @@
 #include "midi++/port.h"
 #include "midi++/channel.h"
 
-using namespace MIDI;
+namespace MIDI {
 
 Channel::Channel (MIDI::byte channelnum, Port &p)
 	: _port (p)
@@ -458,3 +458,5 @@ Channel::nrpn_value_absolute (uint16_t nrpn) const
 	}
 	return r->second;
 }
+
+} // namespace MIDI

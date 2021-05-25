@@ -32,8 +32,9 @@
 #include "ardour/port.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 // FIXME: mirroring for MIDI buffers?
 MidiBuffer::MidiBuffer(size_t capacity)
@@ -597,3 +598,5 @@ MidiBuffer::merge_in_place (const MidiBuffer &other)
 
 	return true;
 }
+
+} // namespace ARDOUR

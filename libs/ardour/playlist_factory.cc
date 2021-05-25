@@ -29,8 +29,9 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 PBD::Signal2<void,boost::shared_ptr<Playlist>, bool> PlaylistFactory::PlaylistCreated;
 
@@ -132,3 +133,5 @@ PlaylistFactory::create (boost::shared_ptr<const Playlist> old, samplepos_t star
 		return boost::shared_ptr<Playlist> ();
 	}
 }
+
+} // namespace ARDOUR

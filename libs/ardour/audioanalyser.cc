@@ -40,7 +40,8 @@
 using namespace std;
 using namespace Vamp;
 using namespace PBD;
-using namespace ARDOUR;
+
+namespace ARDOUR {
 
 AudioAnalyser::AudioAnalyser (float sr, AnalysisPluginKey key)
 	: sample_rate (sr)
@@ -167,3 +168,4 @@ AudioAnalyser::analyse (const string& path, Readable* src, uint32_t channel)
 	return ret;
 }
 
+} // namespace ARDOUR

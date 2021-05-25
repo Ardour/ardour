@@ -47,9 +47,10 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
 using namespace std;
 using namespace PBD;
+
+namespace ARDOUR {
 
 PBD::Signal1<void,boost::shared_ptr<Source> > SourceFactory::SourceCreated;
 Glib::Threads::Cond SourceFactory::PeaksToBuild;
@@ -105,7 +106,7 @@ void
 SourceFactory::init ()
 {
 	for (int n = 0; n < 2; ++n) {
-		Glib::Threads::Thread::create (sigc::ptr_fun (::peak_thread_work));
+		Glib::Threads::Thread::create (sigc::ptr_fun (peak_thread_work));
 	}
 }
 
@@ -440,3 +441,5 @@ SourceFactory::createFromPlaylist (DataType type, Session& s, boost::shared_ptr<
 
 	return boost::shared_ptr<Source>();
 }
+
+} // namespace ARDOUR

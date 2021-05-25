@@ -35,15 +35,18 @@
 #include "ardour/types.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
 using namespace Glib;
 
 #include "pbd/i18n.h"
 
+namespace ARDOUR {
 MidiControlUI* MidiControlUI::_instance = 0;
+}
 
 #include "pbd/abstract_ui.cc"  /* instantiate the template */
+
+namespace ARDOUR {
 
 MidiControlUI::MidiControlUI (Session& s)
 	: AbstractUI<MidiUIRequest> (X_("midiUI"))
@@ -151,3 +154,4 @@ MidiControlUI::thread_init ()
 	reset_ports ();
 }
 
+} // namespace ARDOUR

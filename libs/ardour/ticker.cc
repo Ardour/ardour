@@ -36,8 +36,9 @@
 #include "ardour/tempo.h"
 #include "ardour/ticker.h"
 
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 MidiClockTicker::MidiClockTicker (Session* s)
 {
@@ -288,3 +289,5 @@ MidiClockTicker::send_position_event (uint32_t midi_beats, pframes_t offset, pfr
 
 	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("Song Position Sent: %1 to %2 (events now %3, buf = %4)\n", midi_beats, _midi_port->name (), mb.size (), &mb));
 }
+
+} // namespace ARDOUR

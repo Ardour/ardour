@@ -24,8 +24,9 @@
 #include "pbd/i18n.h"
 
 using namespace Vamp;
-using namespace ARDOUR;
 using namespace std;
+
+namespace ARDOUR {
 
 /* need a static initializer function for this */
 
@@ -149,3 +150,5 @@ OnsetDetector::cleanup_onsets (AnalysisFeatureList& t, float sr, float gap_msecs
 		}
 	}
 }
+
+} // namespace ARDOUR

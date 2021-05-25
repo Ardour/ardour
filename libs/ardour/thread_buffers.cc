@@ -25,8 +25,9 @@
 #include "ardour/buffer_set.h"
 #include "ardour/thread_buffers.h"
 
-using namespace ARDOUR;
 using namespace std;
+
+namespace ARDOUR {
 
 ThreadBuffers::ThreadBuffers ()
 	: silent_buffers (new BufferSet)
@@ -122,3 +123,5 @@ ThreadBuffers::allocate_pan_automation_buffers (samplecnt_t nframes, uint32_t ho
 
 	npan_buffers = howmany;
 }
+
+} // namespace ARDOUR

@@ -25,14 +25,13 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
 
 namespace ARDOUR {
-	namespace Properties {
-		PropertyDescriptor<std::string> name;
-	}
+
+namespace Properties {
+PropertyDescriptor<std::string> name;
 }
 
 void
@@ -42,3 +41,4 @@ SessionObject::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for name = %1\n", Properties::name.property_id));
 }
 
+} // namespace ARDOUR

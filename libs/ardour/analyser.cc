@@ -33,8 +33,9 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 Analyser* Analyser::the_analyser = 0;
 Glib::Threads::Mutex Analyser::analysis_active_lock;
@@ -137,3 +138,5 @@ Analyser::flush ()
 	Glib::Threads::Mutex::Lock la (analysis_active_lock);
 	analysis_queue.clear();
 }
+
+} // namespace ARDOUR

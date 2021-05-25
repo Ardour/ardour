@@ -24,9 +24,10 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
 using namespace std;
 using namespace PBD;
+
+namespace ARDOUR {
 
 SoloIsolateControl::SoloIsolateControl (Session& session, std::string const & name, Soloable& s)
 	: SlavableAutomationControl (session, SoloIsolateAutomation, ParameterDescriptor (SoloIsolateAutomation),
@@ -170,3 +171,5 @@ SoloIsolateControl::get_state ()
 	node.set_property (X_("solo-isolated"), _solo_isolated);
 	return node;
 }
+
+} // namespace ARDOUR

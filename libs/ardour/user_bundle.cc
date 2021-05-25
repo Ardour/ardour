@@ -26,13 +26,15 @@
 #include "pbd/failed_constructor.h"
 #include "pbd/xml++.h"
 
-ARDOUR::UserBundle::UserBundle (std::string const & n)
+namespace ARDOUR {
+
+UserBundle::UserBundle (std::string const & n)
 	: Bundle (n)
 {
 
 }
 
-ARDOUR::UserBundle::UserBundle (XMLNode const & node, bool i)
+UserBundle::UserBundle (XMLNode const & node, bool i)
 	: Bundle (i)
 {
 	if (set_state (node, Stateful::loading_state_version)) {
@@ -41,7 +43,7 @@ ARDOUR::UserBundle::UserBundle (XMLNode const & node, bool i)
 }
 
 int
-ARDOUR::UserBundle::set_state (XMLNode const & node, int /*version*/)
+UserBundle::set_state (XMLNode const & node, int /*version*/)
 {
 	std::string str;
 	if (!node.get_property ("name", str)) {
@@ -97,7 +99,7 @@ ARDOUR::UserBundle::set_state (XMLNode const & node, int /*version*/)
 }
 
 XMLNode&
-ARDOUR::UserBundle::get_state ()
+UserBundle::get_state ()
 {
 	XMLNode *node;
 
@@ -129,3 +131,5 @@ ARDOUR::UserBundle::get_state ()
 
 	return *node;
 }
+
+} // namespace ARDOUR

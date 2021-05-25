@@ -18,9 +18,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __libardour_slavable_automation_control_h__
-#define __libardour_slavable_automation_control_h__
-
 #include "pbd/enumwriter.h"
 #include "pbd/error.h"
 #include "pbd/memento_command.h"
@@ -36,8 +33,9 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 SlavableAutomationControl::SlavableAutomationControl(ARDOUR::Session& s,
                                                      const Evoral::Parameter&                  parameter,
@@ -698,5 +696,4 @@ SlavableAutomationControl::set_state (XMLNode const& node, int version)
 	return AutomationControl::set_state (node, version);
 }
 
-
-#endif /* __libardour_slavable_automation_control_h__ */
+} // namespace ARDOUR

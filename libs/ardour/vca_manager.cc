@@ -30,10 +30,11 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
 using namespace Glib::Threads;
 using namespace PBD;
 using std::string;
+
+namespace ARDOUR {
 
 string VCAManager::xml_node_name (X_("VCAManager"));
 
@@ -237,3 +238,5 @@ VCAManager::clear_all_solo_state ()
 		(*i)->clear_all_solo_state ();
 	}
 }
+
+} // namespace ARDOUR

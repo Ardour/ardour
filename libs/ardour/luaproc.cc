@@ -40,8 +40,9 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 LuaProc::LuaProc (AudioEngine& engine,
                   Session& session,
@@ -1118,7 +1119,7 @@ XMLTree*
 LuaProc::presets_tree () const
 {
 	XMLTree* t = new XMLTree;
-	std::string p = Glib::build_filename (ARDOUR::user_config_directory (), "presets");
+	std::string p = Glib::build_filename (user_config_directory (), "presets");
 
 	if (!Glib::file_test (p, Glib::FILE_TEST_IS_DIR)) {
 		if (g_mkdir_with_parents (p.c_str(), 0755) != 0) {
@@ -1204,7 +1205,7 @@ LuaProc::do_save_preset (std::string name) {
 	}
 	t->root()->add_child_nocopy (*p);
 
-	std::string f = Glib::build_filename (ARDOUR::user_config_directory (), "presets");
+	std::string f = Glib::build_filename (user_config_directory (), "presets");
 	f = Glib::build_filename (f, presets_file ());
 
 	t->write (f);
@@ -1219,7 +1220,7 @@ LuaProc::do_remove_preset (std::string name)
 		return;
 	}
 	t->root()->remove_nodes_and_delete (X_("label"), name);
-	std::string f = Glib::build_filename (ARDOUR::user_config_directory (), "presets");
+	std::string f = Glib::build_filename (user_config_directory (), "presets");
 	f = Glib::build_filename (f, presets_file ());
 	t->write (f);
 }
@@ -1299,7 +1300,7 @@ LuaPluginInfo::get_presets (bool /*user_only*/) const
 {
 	std::vector<Plugin::PresetRecord> p;
 	XMLTree* t = new XMLTree;
-	std::string pf = Glib::build_filename (ARDOUR::user_config_directory (), "presets", string_compose ("lua-%1", unique_id));
+	std::string pf = Glib::build_filename (user_config_directory (), "presets", string_compose ("lua-%1", unique_id));
 	if (Glib::file_test (pf, Glib::FILE_TEST_EXISTS)) {
 		t->set_filename (pf);
 		if (t->read ()) {
@@ -1314,3 +1315,5 @@ LuaPluginInfo::get_presets (bool /*user_only*/) const
 	delete t;
 	return p;
 }
+
+} // namespace ARDOUR

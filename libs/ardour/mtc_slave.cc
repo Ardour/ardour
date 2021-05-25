@@ -38,10 +38,11 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace MIDI;
 using namespace PBD;
 using namespace Timecode;
+
+namespace ARDOUR {
 
 /* length (in timecode frames) of the "window" that we consider legal given receipt of
    a given timecode position. Ardour will try to chase within this window, and will
@@ -554,3 +555,5 @@ MTC_TransportMaster::unregister_port ()
 	_midi_port.reset ();
 	TransportMaster::unregister_port ();
 }
+
+} // namespace ARDOUR

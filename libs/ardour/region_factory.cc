@@ -38,9 +38,10 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
+
+namespace ARDOUR {
 
 PBD::Signal1<void, boost::shared_ptr<Region> > RegionFactory::CheckNewRegion;
 Glib::Threads::Mutex                           RegionFactory::region_map_lock;
@@ -671,3 +672,5 @@ RegionFactory::add_compound_association (boost::shared_ptr<Region> orig, boost::
 	Glib::Threads::Mutex::Lock lm (region_map_lock);
 	_compound_associations[copy] = orig;
 }
+
+} // namespace ARDOUR

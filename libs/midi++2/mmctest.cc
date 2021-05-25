@@ -33,8 +33,9 @@ TextReceiver text_receiver ("mmctest");
 #include "midi++/manager.h"
 #include "midi++/mmc.h"
 
-using namespace MIDI;
 using namespace PBD;
+
+namespace MIDI {
 
 Port *port;
 PortRequest midi_device;
@@ -128,4 +129,4 @@ main (int argc, char *argv[])
 	}
 }
 
-
+}

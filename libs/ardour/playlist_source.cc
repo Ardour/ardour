@@ -39,8 +39,9 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 PlaylistSource::PlaylistSource (Session& s, const ID& orig, const std::string& name, boost::shared_ptr<Playlist> p, DataType type,
                                 sampleoffset_t begin, samplecnt_t len, Source::Flag /*flags*/)
@@ -162,3 +163,5 @@ PlaylistSource::set_state (const XMLNode& node, int /*version*/)
 
 	return 0;
 }
+
+} // namespace ARDOUR

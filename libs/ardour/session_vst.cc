@@ -41,9 +41,9 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
-
 #define SHOW_CALLBACK(MSG) DEBUG_TRACE (PBD::DEBUG::VSTCallbacks, string_compose (MSG " val = %1 idx = %2\n", index, value))
+
+namespace ARDOUR {
 
 int Session::vst_current_loading_id = 0;
 const char* Session::vst_can_do_strings[] = {
@@ -547,3 +547,5 @@ intptr_t Session::vst_callback (
 
 	return 0;
 }
+
+} // namespace ARDOUR

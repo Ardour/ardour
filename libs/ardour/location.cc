@@ -51,8 +51,9 @@ namespace PBD {
 }
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 PBD::Signal0<void> Location::scene_changed;
 PBD::Signal1<void,Location*> Location::name_changed;
@@ -1612,3 +1613,5 @@ Locations::range_starts_at(samplepos_t pos, samplecnt_t slop, bool incl) const
 
 	return closest;
 }
+
+} // namespace ARDOUR

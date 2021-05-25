@@ -51,10 +51,11 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
 using namespace PBD;
 using std::string;
 using std::vector;
+
+namespace ARDOUR {
 
 PortManager::AudioInputPort::AudioInputPort (samplecnt_t sz)
 	: scope (AudioPortScope (new CircularSampleBuffer (sz)))
@@ -1889,3 +1890,5 @@ PortManager::list_cycle_ports () const
 	}
 }
 #endif
+
+} // namespace ARDOUR

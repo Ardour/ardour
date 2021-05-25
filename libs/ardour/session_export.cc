@@ -39,11 +39,12 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
 
 #define TFSM_ROLL() { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::StartTransport)); }
 #define TFSM_SPEED(speed,as_default) { _transport_fsm->enqueue (new TransportFSM::Event (speed,as_default)); }
+
+namespace ARDOUR {
 
 boost::shared_ptr<ExportHandler>
 Session::get_export_handler ()
@@ -440,3 +441,5 @@ Session::finalize_audio_export (TransportRequestSource trs)
 		request_locate (post_export_position, MustStop, trs);
 	}
 }
+
+} // namespace ARDOUR

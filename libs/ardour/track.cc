@@ -56,8 +56,9 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 Track::Track (Session& sess, string name, PresentationInfo::Flag flag, TrackMode mode, DataType default_type)
 	: Route (sess, name, flag, default_type)
@@ -1095,3 +1096,5 @@ Track::use_captured_audio_sources (SourceList& srcs, CaptureInfos const & captur
 	pl->set_capture_insertion_in_progress (false);
 	_session.add_command (new StatefulDiffCommand (pl));
 }
+
+} // namespace ARDOUR

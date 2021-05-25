@@ -45,8 +45,9 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 PBD::Signal1<void,AutomationList *> AutomationList::AutomationListCreated;
 
@@ -583,3 +584,5 @@ AutomationListProperty::clone () const
 		boost::shared_ptr<AutomationList> (new AutomationList (*this->_current.get()))
 		);
 }
+
+} // namespace ARDOUR

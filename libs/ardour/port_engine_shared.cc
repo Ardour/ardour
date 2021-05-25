@@ -26,7 +26,7 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
+namespace ARDOUR {
 
 BackendPort::BackendPort (PortEngineSharedImpl &b, const std::string& name, PortFlags flags)
 	: _backend (b)
@@ -735,3 +735,5 @@ PortEngineSharedImpl::list_ports () const
 	}
 }
 #endif
+
+} // namespace ARDOUR

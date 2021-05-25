@@ -24,7 +24,7 @@
 #include "ardour/monitor_return.h"
 #include "ardour/session.h"
 
-using namespace ARDOUR;
+namespace ARDOUR {
 
 MonitorReturn::MonitorReturn (Session& s)
 	: InternalReturn (s, "Monitor Return")
@@ -74,3 +74,5 @@ MonitorReturn::state ()
 	node.set_property ("type", "monreturn");
 	return node;
 }
+
+} // namespace ARDOUR

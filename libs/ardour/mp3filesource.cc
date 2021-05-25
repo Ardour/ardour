@@ -22,8 +22,9 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 /** Constructor to be called for existing external-to-session files
  * Sources created with this method are never writable or removable.
@@ -75,3 +76,5 @@ Mp3FileSource::get_soundfile_info (string path, SoundFileInfo& _info, string& er
 	} catch (...) {}
 	return -1;
 }
+
+} // namespace ARDOUR

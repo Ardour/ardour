@@ -41,7 +41,7 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
+namespace ARDOUR {
 
 #ifdef __APPLE__
 
@@ -256,3 +256,5 @@ VST3PluginModule::load (std::string const& path)
 	return boost::shared_ptr<VST3PluginModule> (new VST3LinuxModule (path));
 #endif
 }
+
+} // namespace ARDOUR

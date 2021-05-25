@@ -60,23 +60,22 @@
 #include <locale.h>
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
 
 namespace ARDOUR {
-	namespace Properties {
-		PBD::PropertyDescriptor<bool> envelope_active;
-		PBD::PropertyDescriptor<bool> default_fade_in;
-		PBD::PropertyDescriptor<bool> default_fade_out;
-		PBD::PropertyDescriptor<bool> fade_in_active;
-		PBD::PropertyDescriptor<bool> fade_out_active;
-		PBD::PropertyDescriptor<float> scale_amplitude;
-		PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > fade_in;
-		PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > inverse_fade_in;
-		PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > fade_out;
-		PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > inverse_fade_out;
-		PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > envelope;
-	}
+
+namespace Properties {
+PBD::PropertyDescriptor<bool> envelope_active;
+PBD::PropertyDescriptor<bool> default_fade_in;
+PBD::PropertyDescriptor<bool> default_fade_out;
+PBD::PropertyDescriptor<bool> fade_in_active;
+PBD::PropertyDescriptor<bool> fade_out_active;
+PBD::PropertyDescriptor<float> scale_amplitude;
+PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > fade_in;
+PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > inverse_fade_in;
+PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > fade_out;
+PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > inverse_fade_out;
+PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > envelope;
 }
 
 /* Curve manipulations */
@@ -1991,3 +1990,4 @@ AudioRegion::verify_xfade_bounds (samplecnt_t len, bool start)
 
 }
 
+} // namespace ARDOUR

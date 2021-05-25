@@ -67,8 +67,9 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 AudioEngine* AudioEngine::_instance = 0;
 
@@ -1697,3 +1698,5 @@ AudioEngine::add_pending_port_deletion (Port* p)
 		delete p;
 	}
 }
+
+} // namespace ARDOUR

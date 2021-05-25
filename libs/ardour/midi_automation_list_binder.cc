@@ -23,7 +23,7 @@
 #include "ardour/midi_source.h"
 #include "ardour/midi_model.h"
 
-using namespace ARDOUR;
+namespace ARDOUR {
 
 MidiAutomationListBinder::MidiAutomationListBinder (boost::shared_ptr<MidiSource> s, Evoral::Parameter p)
 	: _source (s)
@@ -67,3 +67,5 @@ MidiAutomationListBinder::add_state (XMLNode* node)
 	node->set_property ("source-id", _source->id().to_s());
 	node->set_property ("parameter", EventTypeMap::instance().to_symbol (_parameter));
 }
+
+} // namespace ARDOUR

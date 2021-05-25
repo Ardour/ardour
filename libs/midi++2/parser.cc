@@ -31,7 +31,8 @@
 #include "pbd/transmitter.h"
 
 using namespace std;
-using namespace MIDI;
+
+namespace MIDI {
 
 const char *
 Parser::midi_event_type_name (eventType t)
@@ -797,3 +798,5 @@ Parser::set_offline (bool yn)
 		state = NEEDSTATUS;
 	}
 }
+
+} // namespace MIDI

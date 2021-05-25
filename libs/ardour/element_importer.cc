@@ -32,7 +32,8 @@
 
 using namespace std;
 using namespace PBD;
-using namespace ARDOUR;
+
+namespace ARDOUR {
 
 Signal2<std::pair<bool, string>,string, string> ElementImporter::Rename;
 Signal1 <bool,string> ElementImporter::Prompt;
@@ -107,3 +108,5 @@ ElementImporter::rate_convert_samples (string const & samples) const
 {
 	return to_string (rate_convert_samples (string_to<uint32_t>(samples)));
 }
+
+} // namespace ARDOUR

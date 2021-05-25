@@ -45,11 +45,12 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace MIDI;
 using namespace PBD;
 
 #define ENGINE AudioEngine::instance()
+
+namespace ARDOUR {
 
 MIDIClock_TransportMaster::MIDIClock_TransportMaster (std::string const & name, int ppqn)
 	: TransportMaster (MIDIClock, name)
@@ -439,3 +440,4 @@ MIDIClock_TransportMaster::unregister_port ()
 	TransportMaster::unregister_port ();
 }
 
+} // namespace ARDOUR

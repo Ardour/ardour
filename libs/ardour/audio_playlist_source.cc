@@ -41,8 +41,9 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 AudioPlaylistSource::AudioPlaylistSource (Session& s, const ID& orig, const std::string& name, boost::shared_ptr<AudioPlaylist> p,
 					  uint32_t chn, sampleoffset_t begin, samplecnt_t len, Source::Flag flags)
@@ -197,7 +198,7 @@ AudioPlaylistSource::sample_rate () const
 int
 AudioPlaylistSource::setup_peakfile ()
 {
-	_peak_path = Glib::build_filename (_session.session_directory().peak_path(), name() + ARDOUR::peakfile_suffix);
+	_peak_path = Glib::build_filename (_session.session_directory().peak_path(), name() + peakfile_suffix);
 	return initialize_peakfile (string());
 }
 
@@ -207,4 +208,4 @@ AudioPlaylistSource::construct_peak_filepath (const string& /*audio_path_*/, con
 	return _peak_path;
 }
 
-
+} // namespace ARDOUR

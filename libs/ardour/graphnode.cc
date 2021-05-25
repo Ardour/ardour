@@ -22,7 +22,7 @@
 #include "ardour/graphnode.h"
 #include "ardour/route.h"
 
-using namespace ARDOUR;
+namespace ARDOUR {
 
 GraphNode::GraphNode (boost::shared_ptr<Graph> graph)
 	: _graph (graph)
@@ -80,3 +80,5 @@ GraphNode::process ()
 {
 	_graph->process_one_route (dynamic_cast<Route*> (this));
 }
+
+} // namespace ARDOUR

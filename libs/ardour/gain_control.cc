@@ -32,8 +32,9 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
 using namespace std;
+
+namespace ARDOUR {
 
 static std::string gain_control_name (Evoral::Parameter const& param)
 {
@@ -119,3 +120,5 @@ GainControl::get_masters_curve_locked (samplepos_t start, samplepos_t end, float
 	}
 	return SlavableAutomationControl::masters_curve_multiply (start, end, vec, veclen);
 }
+
+} // namespace ARDOUR

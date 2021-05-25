@@ -55,8 +55,9 @@ namespace PBD {
 }
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 MidiModel::MidiModel (boost::shared_ptr<MidiSource> s)
 	: AutomatableSequence<TimeType>(s->session())
@@ -1825,3 +1826,5 @@ MidiModel::control_list_marked_dirty ()
 
 	ContentsChanged (); /* EMIT SIGNAL */
 }
+
+} // namespace ARDOUR

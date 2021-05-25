@@ -37,11 +37,12 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
 using std::string;
 
 #define BUFFER_SIZE 1024 // audio chunk size
+
+namespace ARDOUR {
 
 LTCReader::LTCReader (int expected_apv, LTC_TV_STANDARD tv_standard)
 	: _position (0)
@@ -238,3 +239,5 @@ LTCFileReader::read_ltc (uint32_t channel, uint32_t max_frames)
 
 	return rv;
 }
+
+} // namespace ARDOUR

@@ -79,7 +79,8 @@
 
 using namespace std;
 using namespace PBD;
-using namespace ARDOUR;
+
+namespace ARDOUR {
 
 AUPluginInfo::CachedInfoMap AUPluginInfo::cached_info;
 
@@ -3510,3 +3511,5 @@ AUPlugin::parameter_change_listener (void* /*arg*/, void* src, const AudioUnitEv
                 break;
         }
 }
+
+} // namespace ARDOUR

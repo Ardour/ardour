@@ -19,7 +19,7 @@
 #include "pbd/failed_constructor.h"
 #include "ardour/fluid_synth.h"
 
-using namespace ARDOUR;
+namespace ARDOUR {
 
 FluidSynth::FluidSynth (float samplerate, int polyphony)
 	: _settings (0)
@@ -141,3 +141,5 @@ FluidSynth::midi_event (uint8_t const* const data, size_t len)
 	}
 	return FLUID_OK == fluid_synth_handle_midi_event (_synth, _f_midi_event);
 }
+
+} // namespace ARDOUR

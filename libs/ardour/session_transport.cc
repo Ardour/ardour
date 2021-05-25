@@ -67,9 +67,7 @@
 #include "ardour/vca_manager.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
-
 
 #ifdef NDEBUG
 # define ENSURE_PROCESS_THREAD do {} while (0)
@@ -87,6 +85,8 @@ using namespace PBD;
 #define TFSM_STOP(abort,clear) { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::StopTransport,abort,clear)); }
 #define TFSM_LOCATE(target,ltd,loop,force) { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::Locate,target,ltd,loop,force)); }
 #define TFSM_SPEED(speed,as_default) { _transport_fsm->enqueue (new TransportFSM::Event (speed,as_default)); }
+
+namespace ARDOUR {
 
 /* *****************************************************************************
  * REALTIME ACTIONS (to be called on state transitions)
@@ -989,7 +989,7 @@ Session::solo_selection (StripableList &list, bool new_state)
 
 	boost::shared_ptr<RouteList> rl = get_routes();
 
-	for (ARDOUR::RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 
 		if ( !(*i)->is_track() ) {
 			continue;
@@ -1082,7 +1082,7 @@ Session::butler_transport_work (bool have_process_lock)
 	}
 
 	if (ptw & PostTransportAdjustPlaybackBuffering) {
-		/* need to prevent concurrency with ARDOUR::Reader::run(),
+		/* need to prevent concurrency with Reader::run(),
 		 * DiskWriter::adjust_buffering() re-allocates the ringbuffer */
 		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock (), Glib::Threads::NOT_LOCK);
 		if (!have_process_lock) {
@@ -1103,7 +1103,7 @@ Session::butler_transport_work (bool have_process_lock)
 	}
 
 	if (ptw & PostTransportAdjustCaptureBuffering) {
-		/* need to prevent concurrency with ARDOUR::DiskWriter::run(),
+		/* need to prevent concurrency with DiskWriter::run(),
 		 * DiskWriter::adjust_buffering() re-allocates the ringbuffer */
 		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock (), Glib::Threads::NOT_LOCK);
 		if (!have_process_lock) {
@@ -2034,3 +2034,5 @@ Session::actual_speed() const
 	if (_transport_fsm->transport_speed() < 0) return - _engine_speed;
 	return 0;
 }
+
+} // namespace ARDOUR

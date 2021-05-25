@@ -56,7 +56,6 @@
 
 #include "midi++/mmc.h"
 
-using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
 
@@ -66,6 +65,7 @@ using namespace std;
 #define TFSM_SPEED(speed,as_default) { _transport_fsm->enqueue (new TransportFSM::Event (speed,as_default)); }
 #define TFSM_LOCATE(target,ltd,loop,force) { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::Locate,target,ltd,loop,force)); }
 
+namespace ARDOUR {
 
 /** Called by the audio engine when there is work to be done with JACK.
  * @param nframes Number of samples to process.
@@ -1532,3 +1532,5 @@ Session::implement_master_strategy ()
 
 	return true;
 }
+
+} // namespace ARDOUR

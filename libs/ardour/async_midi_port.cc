@@ -34,9 +34,10 @@
 #include "ardour/midi_buffer.h"
 
 using namespace MIDI;
-using namespace ARDOUR;
 using namespace std;
 using namespace PBD;
+
+namespace ARDOUR {
 
 pthread_t AsyncMIDIPort::_process_thread;
 
@@ -119,7 +120,7 @@ AsyncMIDIPort::cycle_start (MIDI::pframes_t nframes)
 	 * buffer
 	 */
 
-	if (ARDOUR::Port::sends_output()) {
+	if (Port::sends_output()) {
 		flush_output_fifo (nframes);
 		if (_flush_at_cycle_start) {
 			flush_buffers (nframes);
@@ -130,7 +131,7 @@ AsyncMIDIPort::cycle_start (MIDI::pframes_t nframes)
 	   and if necessary wakeup the reader
 	*/
 
-	if (ARDOUR::Port::receives_input()) {
+	if (Port::receives_input()) {
 
 		void* buffer = port_engine.get_buffer (_port_handle, nframes);
 		const pframes_t event_count = port_engine.get_midi_event_count (buffer);
@@ -169,7 +170,7 @@ AsyncMIDIPort::cycle_start (MIDI::pframes_t nframes)
 void
 AsyncMIDIPort::cycle_end (MIDI::pframes_t nframes)
 {
-	if (ARDOUR::Port::sends_output() && !_flush_at_cycle_start) {
+	if (Port::sends_output() && !_flush_at_cycle_start) {
 		/* move any additional data from output FIFO into the port
 		   buffer.
 		*/
@@ -219,7 +220,7 @@ AsyncMIDIPort::write (const MIDI::byte * msg, size_t msglen, MIDI::timestamp_t t
 {
 	int ret = 0;
 
-	if (!ARDOUR::Port::sends_output()) {
+	if (!Port::sends_output()) {
 		return ret;
 	}
 
@@ -304,7 +305,7 @@ AsyncMIDIPort::write (const MIDI::byte * msg, size_t msglen, MIDI::timestamp_t t
 				_last_write_timestamp = timestamp;
 
 			} else {
-				cerr << "AsyncMIDIPort (" << ARDOUR::Port::name() << "): write of " << msglen << " @ " << timestamp << " failed\n" << endl;
+				cerr << "AsyncMIDIPort (" << Port::name() << "): write of " << msglen << " @ " << timestamp << " failed\n" << endl;
 				PBD::stacktrace (cerr, 20);
 				ret = 0;
 			}
@@ -321,7 +322,7 @@ AsyncMIDIPort::write (const MIDI::byte * msg, size_t msglen, MIDI::timestamp_t t
 int
 AsyncMIDIPort::read (MIDI::byte *, size_t)
 {
-	if (!ARDOUR::Port::receives_input()) {
+	if (!Port::receives_input()) {
 		return 0;
 	}
 
@@ -360,3 +361,5 @@ AsyncMIDIPort::is_process_thread()
 {
 	return pthread_equal (pthread_self(), _process_thread);
 }
+
+} // namespace ARDOUR

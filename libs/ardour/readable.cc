@@ -28,7 +28,7 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
+namespace ARDOUR {
 
 std::vector<boost::shared_ptr<Readable> >
 Readable::load (Session& session, std::string const& path)
@@ -64,3 +64,5 @@ Readable::load (Session& session, std::string const& path)
 	}
 	return readables;
 }
+
+} // namespace ARDOUR

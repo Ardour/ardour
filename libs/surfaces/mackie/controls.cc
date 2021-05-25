@@ -35,12 +35,12 @@
 #include "jog.h"
 #include "meter.h"
 
-
 using namespace std;
-using namespace ArdourSurface;
-using namespace Mackie;
 
 using ARDOUR::AutomationControl;
+
+namespace ArdourSurface {
+namespace Mackie {
 
 void Group::add (Control& control)
 {
@@ -112,7 +112,7 @@ Control::stop_touch (double when)
 	}
 }
 
-ostream & operator<< (ostream & os, const ArdourSurface::Mackie::Control & control)
+ostream & operator<< (ostream & os, const Control & control)
 {
 	os << typeid (control).name();
 	os << " { ";
@@ -126,3 +126,5 @@ ostream & operator<< (ostream & os, const ArdourSurface::Mackie::Control & contr
 	return os;
 }
 
+} // namespace Mackie
+} // namespace ArdourSurface

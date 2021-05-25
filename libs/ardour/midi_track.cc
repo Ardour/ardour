@@ -65,16 +65,10 @@
 
 #include "pbd/i18n.h"
 
-namespace ARDOUR {
-class InterThreadInfo;
-class MidiSource;
-class Region;
-class SMFSource;
-}
-
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 MidiTrack::MidiTrack (Session& sess, string name, TrackMode mode)
 	: Track (sess, name, PresentationInfo::MidiTrack, mode, DataType::MIDI)
@@ -896,3 +890,5 @@ MidiTrack::playlist_contents_changed ()
 
 {
 }
+
+} // namespace ARDOUR

@@ -39,9 +39,10 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
+
+namespace ARDOUR {
 
 const string DiskIOProcessor::state_node_name = X_("DiskIOProcessor");
 
@@ -362,3 +363,4 @@ DiskIOProcessor::get_location_times(const Location* location,
 	}
 }
 
+} // namespace ARDOUR

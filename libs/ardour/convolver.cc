@@ -35,9 +35,10 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
 using namespace ARDOUR::DSP;
 using namespace ArdourZita;
+
+namespace ARDOUR {
 
 Convolution::Convolution (Session& session, uint32_t n_in, uint32_t n_out)
     : SessionHandleRef (session)
@@ -440,3 +441,5 @@ Convolver::run_stereo_no_latency (float* left, float* right, uint32_t n_samples)
 		remain -= ns;
 	}
 }
+
+} // namespace ARDOUR

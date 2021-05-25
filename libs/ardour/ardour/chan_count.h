@@ -212,9 +212,9 @@ private:
 	uint32_t _counts[DataType::num_types];
 };
 
-} // namespace ARDOUR
+LIBARDOUR_API std::ostream& operator<<(std::ostream& o, const ChanCount& c);
 
-LIBARDOUR_API std::ostream& operator<<(std::ostream& o, const ARDOUR::ChanCount& c);
+} // namespace ARDOUR
 
 #endif // __ardour_chan_count_h__
 

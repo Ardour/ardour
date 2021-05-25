@@ -29,6 +29,7 @@
 
 using std::min;
 using std::max;
+
 using namespace ARDOUR;
 
 #if defined (ARCH_X86) && defined (BUILD_SSE_OPTIMIZATIONS)
@@ -184,5 +185,3 @@ veclib_mix_buffers_no_gain (ARDOUR::Sample * dst, const ARDOUR::Sample * src, pf
 }
 
 #endif
-
-

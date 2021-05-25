@@ -32,7 +32,8 @@
 
 using namespace std;
 using namespace PBD;
-using namespace ARDOUR;
+
+namespace ARDOUR {
 
 DelayLine::DelayLine (Session& s, const std::string& name)
     : Processor (s, string_compose ("latcomp-%1-%2", name, this))
@@ -467,3 +468,5 @@ DelayLine::read_from_rb (Sample* rb, Sample* dst, samplecnt_t n_samples)
 		copy_vector (&dst[s0], rb, s1);
 	}
 }
+
+} // namespace ARDOUR

@@ -74,8 +74,9 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 static boost::shared_ptr<ImportableSource>
 open_importable_source (const string& path, samplecnt_t samplerate, ARDOUR::SrcQuality quality)
@@ -653,3 +654,5 @@ Session::import_files (ImportStatus& status)
 
 	status.done = true;
 }
+
+} // namespace ARDOUR

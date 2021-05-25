@@ -30,9 +30,10 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
 using namespace PBD;
 using std::string;
+
+namespace ARDOUR {
 
 Glib::Threads::Mutex VCA::number_lock;
 int32_t VCA::next_number = 1;
@@ -229,3 +230,5 @@ VCA::slavables () const
 	rv.push_back (_solo_control);
 	return rv;
 }
+
+} // namespace ARDOUR

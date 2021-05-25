@@ -37,7 +37,8 @@
 
 using namespace std;
 using namespace PBD;
-using namespace ARDOUR;
+
+namespace ARDOUR {
 
 Pannable::Pannable (Session& s)
 	: Automatable (s)
@@ -266,3 +267,5 @@ Pannable::set_state (const XMLNode& root, int version)
 
 	return 0;
 }
+
+} // namespace ARDOUR

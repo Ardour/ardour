@@ -24,7 +24,8 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
+
+namespace ARDOUR {
 
 UnknownProcessor::UnknownProcessor (Session& s, XMLNode const & state)
 	: Processor (s, "")
@@ -122,3 +123,5 @@ UnknownProcessor::run (BufferSet& bufs, samplepos_t /*start_sample*/, samplepos_
 		bufs.get_audio (i).silence (nframes);
 	}
 }
+
+} // namespace ARDOUR

@@ -30,8 +30,9 @@
 
 #define GAIN_COEFF_DELTA (1e-5)
 
-using namespace ARDOUR;
 using namespace std;
+
+namespace ARDOUR {
 
 MonitorPort::MonitorPort ()
 	: _monitor_ports (new MonitorPorts)
@@ -338,3 +339,5 @@ MonitorPort::clear_ports (bool instantly)
 		s->SoloChanged (); /* EMIT SIGNAL */
 	}
 }
+
+} // namespace ARDOUR

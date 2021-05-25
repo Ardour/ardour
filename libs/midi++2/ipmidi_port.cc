@@ -51,9 +51,10 @@ inline void closesocket(int s) { ::close(s); }
 #include "midi++/ipmidi_port.h"
 #include "midi++/channel.h"
 
-using namespace MIDI;
 using namespace std;
 using namespace PBD;
+
+namespace MIDI {
 
 IPMIDIPort::IPMIDIPort (int base_port, const string& iface)
 	: Port (string_compose ("IPmidi@%1", base_port), Port::Flags (Port::IsInput|Port::IsOutput))
@@ -339,3 +340,5 @@ IPMIDIPort::parse (samplecnt_t timestamp)
 		::perror ("failed to recv from socket");
 	}
 }
+
+} // namespace MIDI

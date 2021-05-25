@@ -72,10 +72,11 @@
 #include <locale.h>
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
 
-namespace ARDOUR { class AudioEngine; }
+namespace ARDOUR {
+
+class AudioEngine;
 
 PBD::Signal3<void, std::string, Plugin*, bool> Plugin::PresetsChanged;
 
@@ -198,7 +199,7 @@ Plugin::invalidate_preset_cache (std::string const& id, Plugin* plugin, bool add
 }
 
 PluginPtr
-ARDOUR::find_plugin(Session& session, string identifier, PluginType type)
+find_plugin(Session& session, string identifier, PluginType type)
 {
 	PluginManager& mgr (PluginManager::instance());
 	PluginInfoList plugs;
@@ -588,3 +589,5 @@ PluginInfo::is_analyzer () const
 {
 	return (category == "Analyser" || category == "Anaylsis" || category == "Analyzer");
 }
+
+} // namespace ARDOUR

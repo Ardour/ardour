@@ -38,8 +38,9 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 namespace {
 
@@ -49,7 +50,7 @@ namespace {
 } // anonymous
 
 int
-ARDOUR::read_recent_sessions (RecentSessions& rs)
+read_recent_sessions (RecentSessions& rs)
 {
 	std::string path = Glib::build_filename (user_config_directory(), recent_file_name);
 	FILE* fin = g_fopen (path.c_str(), "rb");
@@ -107,7 +108,7 @@ ARDOUR::read_recent_sessions (RecentSessions& rs)
 }
 
 int
-ARDOUR::read_recent_templates (std::deque<std::string>& rt)
+read_recent_templates (std::deque<std::string>& rt)
 {
 	std::string path = Glib::build_filename (user_config_directory(), recent_templates_file_name);
 	FILE* fin = g_fopen (path.c_str(), "rb");
@@ -155,7 +156,7 @@ ARDOUR::read_recent_templates (std::deque<std::string>& rt)
 }
 
 int
-ARDOUR::write_recent_sessions (RecentSessions& rs)
+write_recent_sessions (RecentSessions& rs)
 {
 	FILE* fout = g_fopen (Glib::build_filename (user_config_directory(), recent_file_name).c_str(), "wb");
 
@@ -191,7 +192,7 @@ ARDOUR::write_recent_sessions (RecentSessions& rs)
 }
 
 int
-ARDOUR::write_recent_templates (std::deque<std::string>& rt)
+write_recent_templates (std::deque<std::string>& rt)
 {
 	FILE* fout = g_fopen (Glib::build_filename (user_config_directory(), recent_templates_file_name).c_str(), "wb");
 
@@ -223,11 +224,11 @@ ARDOUR::write_recent_templates (std::deque<std::string>& rt)
 }
 
 int
-ARDOUR::store_recent_sessions (string name, string path)
+store_recent_sessions (string name, string path)
 {
 	RecentSessions rs;
 
-	if (ARDOUR::read_recent_sessions (rs) < 0) {
+	if (read_recent_sessions (rs) < 0) {
 		return -1;
 	}
 
@@ -246,15 +247,15 @@ ARDOUR::store_recent_sessions (string name, string path)
 		rs.erase(rs.begin()+max_recent_sessions, rs.end());
 	}
 
-	return ARDOUR::write_recent_sessions (rs);
+	return write_recent_sessions (rs);
 }
 
 int
-ARDOUR::store_recent_templates (const std::string& session_template_full_name)
+store_recent_templates (const std::string& session_template_full_name)
 {
 	std::deque<std::string> rt;
 
-	if (ARDOUR::read_recent_templates (rt) < 0) {
+	if (read_recent_templates (rt) < 0) {
 		return -1;
 	}
 
@@ -268,16 +269,16 @@ ARDOUR::store_recent_templates (const std::string& session_template_full_name)
 		rt.erase( rt.begin() + max_recent_templates, rt.end ());
 	}
 
-	return ARDOUR::write_recent_templates (rt);
+	return write_recent_templates (rt);
 }
 
 int
-ARDOUR::remove_recent_sessions (const string& path)
+remove_recent_sessions (const string& path)
 {
 	RecentSessions rs;
 	bool write = false;
 
-	if (ARDOUR::read_recent_sessions (rs) < 0) {
+	if (read_recent_sessions (rs) < 0) {
 		return -1;
 	}
 
@@ -290,8 +291,10 @@ ARDOUR::remove_recent_sessions (const string& path)
 	}
 
 	if (write) {
-		return ARDOUR::write_recent_sessions (rs);
+		return write_recent_sessions (rs);
 	} else {
 		return 1;
 	}
 }
+
+} // namespace ARDOUR

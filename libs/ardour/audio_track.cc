@@ -55,8 +55,9 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 AudioTrack::AudioTrack (Session& sess, string name, TrackMode mode)
 	: Track (sess, name, PresentationInfo::AudioTrack, mode)
@@ -463,3 +464,5 @@ AudioTrack::write_source (uint32_t n)
 	assert (_disk_writer);
 	return _disk_writer->audio_write_source (n);
 }
+
+} // namespace ARDOUR

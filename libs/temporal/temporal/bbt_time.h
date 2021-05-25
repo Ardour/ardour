@@ -112,24 +112,22 @@ struct LIBTEMPORAL_API BBT_Offset
 	BBT_Offset (double beats);
 };
 
-}
-
 inline std::ostream&
-operator<< (std::ostream& o, const Timecode::BBT_Time& bbt)
+operator<< (std::ostream& o, const BBT_Time& bbt)
 {
 	o << bbt.bars << '|' << bbt.beats << '|' << bbt.ticks;
 	return o;
 }
 
 inline std::ostream&
-operator<< (std::ostream& o, const Timecode::BBT_Offset& bbt)
+operator<< (std::ostream& o, const BBT_Offset& bbt)
 {
 	o << bbt.bars << '|' << bbt.beats << '|' << bbt.ticks;
 	return o;
 }
 
 inline std::ostream&
-print_padded (std::ostream& o, const Timecode::BBT_Time& bbt)
+print_padded (std::ostream& o, const BBT_Time& bbt)
 {
 	o << std::setfill ('0') << std::right
 	  << std::setw (3) << bbt.bars << "|"
@@ -137,6 +135,8 @@ print_padded (std::ostream& o, const Timecode::BBT_Time& bbt)
 	  << std::setw (4) << bbt.ticks;
 
 	return o;
+}
+
 }
 
 #endif /* __timecode_bbt_time_h__ */

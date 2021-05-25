@@ -46,8 +46,9 @@
 #include <locale.h>
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 using Timecode::BBT_Time;
 
@@ -71,7 +72,7 @@ MetricSection::minute_at_sample (const samplepos_t sample) const
 /***********************************************************************/
 
 bool
-ARDOUR::bbt_time_to_string (const BBT_Time& bbt, std::string& str)
+bbt_time_to_string (const BBT_Time& bbt, std::string& str)
 {
 	char buf[256];
 	int retval = snprintf (buf, sizeof(buf), "%" PRIu32 "|%" PRIu32 "|%" PRIu32, bbt.bars, bbt.beats,
@@ -86,7 +87,7 @@ ARDOUR::bbt_time_to_string (const BBT_Time& bbt, std::string& str)
 }
 
 bool
-ARDOUR::string_to_bbt_time (const std::string& str, BBT_Time& bbt)
+string_to_bbt_time (const std::string& str, BBT_Time& bbt)
 {
 	if (sscanf (str.c_str (), "%" PRIu32 "|%" PRIu32 "|%" PRIu32, &bbt.bars, &bbt.beats,
 	            &bbt.ticks) == 3) {
@@ -4967,4 +4968,6 @@ operator<< (std::ostream& o, const MetricSection& section) {
 	}
 
 	return o;
+}
+
 }

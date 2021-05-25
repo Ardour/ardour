@@ -70,8 +70,9 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 const string PluginInsert::port_automation_node_name = "PortAutomation";
 
@@ -3382,7 +3383,7 @@ PluginInsert::clear_stats ()
 	g_atomic_int_set (&_stat_reset, 1);
 }
 
-std::ostream& operator<<(std::ostream& o, const ARDOUR::PluginInsert::Match& m)
+std::ostream& operator<<(std::ostream& o, const PluginInsert::Match& m)
 {
 	switch (m.method) {
 		case PluginInsert::Impossible: o << "Impossible"; break;
@@ -3401,4 +3402,6 @@ std::ostream& operator<<(std::ostream& o, const ARDOUR::PluginInsert::Match& m)
 	}
 	o << "\n";
 	return o;
+}
+
 }

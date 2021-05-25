@@ -36,8 +36,9 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 int
 Filter::make_new_sources (boost::shared_ptr<Region> region, SourceList& nsrcs, std::string suffix, bool use_session_sample_rate)
@@ -161,4 +162,4 @@ Filter::finish (boost::shared_ptr<Region> region, SourceList& nsrcs, string regi
 	return 0;
 }
 
-
+} // namespace ARDOUR

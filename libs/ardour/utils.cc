@@ -65,9 +65,10 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
 using namespace std;
 using namespace PBD;
+
+namespace ARDOUR {
 
 static string
 replace_chars (const string& str, const string& illegal_chars)
@@ -100,7 +101,7 @@ replace_chars (const string& str, const string& illegal_chars)
  * the goal there is to be legal across filesystems.
  */
 string
-ARDOUR::legalize_for_path (const string& str)
+legalize_for_path (const string& str)
 {
 	return replace_chars (str, "/\\");
 }
@@ -115,7 +116,7 @@ ARDOUR::legalize_for_path (const string& str)
  * ANY filesystem.
  */
 string
-ARDOUR::legalize_for_universal_path (const string& str)
+legalize_for_universal_path (const string& str)
 {
 	return replace_chars (str, "<>:\"/\\|?*");
 }
@@ -126,7 +127,7 @@ ARDOUR::legalize_for_universal_path (const string& str)
  * correct.
  */
 string
-ARDOUR::legalize_for_uri (const string& str)
+legalize_for_uri (const string& str)
 {
 	return replace_chars (str, "<>:\"/\\|?* #");
 }
@@ -140,7 +141,7 @@ ARDOUR::legalize_for_uri (const string& str)
  */
 
 string
-ARDOUR::legalize_for_path_2X (const string& str)
+legalize_for_path_2X (const string& str)
 {
 	string::size_type pos;
 	string legal_chars = "abcdefghijklmnopqrtsuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_+=: ";
@@ -162,7 +163,7 @@ ARDOUR::legalize_for_path_2X (const string& str)
 }
 
 string
-ARDOUR::bump_name_once (const std::string& name, char delimiter)
+bump_name_once (const std::string& name, char delimiter)
 {
 	string::size_type delim;
 	string newname;
@@ -204,7 +205,7 @@ ARDOUR::bump_name_once (const std::string& name, char delimiter)
 }
 
 string
-ARDOUR::bump_name_number (const std::string& name)
+bump_name_number (const std::string& name)
 {
 	size_t pos = name.length();
 	size_t num = 0;
@@ -230,7 +231,7 @@ ARDOUR::bump_name_number (const std::string& name)
 }
 
 XMLNode *
-ARDOUR::find_named_node (const XMLNode& node, string name)
+find_named_node (const XMLNode& node, string name)
 {
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;
@@ -251,7 +252,7 @@ ARDOUR::find_named_node (const XMLNode& node, string name)
 }
 
 int
-ARDOUR::cmp_nocase (const string& s, const string& s2)
+cmp_nocase (const string& s, const string& s2)
 {
 	string::const_iterator p = s.begin();
 	string::const_iterator p2 = s2.begin();
@@ -268,7 +269,7 @@ ARDOUR::cmp_nocase (const string& s, const string& s2)
 }
 
 int
-ARDOUR::cmp_nocase_utf8 (const string& s1, const string& s2)
+cmp_nocase_utf8 (const string& s1, const string& s2)
 {
 	const char *cstr1 = s1.c_str();
 	const char *cstr2 = s2.c_str();
@@ -304,7 +305,7 @@ ARDOUR::cmp_nocase_utf8 (const string& s1, const string& s2)
 }
 
 string
-ARDOUR::region_name_from_path (string path, bool strip_channels, bool add_channel_suffix, uint32_t total, uint32_t this_one)
+region_name_from_path (string path, bool strip_channels, bool add_channel_suffix, uint32_t total, uint32_t this_one)
 {
 	path = PBD::basename_nosuffix (path);
 
@@ -336,7 +337,7 @@ ARDOUR::region_name_from_path (string path, bool strip_channels, bool add_channe
 }
 
 bool
-ARDOUR::path_is_paired (string path, string& pair_base)
+path_is_paired (string path, string& pair_base)
 {
 	string::size_type pos;
 
@@ -369,7 +370,7 @@ ARDOUR::path_is_paired (string path, string& pair_base)
 
 #if __APPLE__
 string
-ARDOUR::CFStringRefToStdString(CFStringRef stringRef)
+CFStringRefToStdString(CFStringRef stringRef)
 {
 	CFIndex size =
 		CFStringGetMaximumSizeForEncoding(CFStringGetLength(stringRef) ,
@@ -387,7 +388,7 @@ ARDOUR::CFStringRefToStdString(CFStringRef stringRef)
 #endif // __APPLE__
 
 void
-ARDOUR::compute_equal_power_fades (samplecnt_t nframes, float* in, float* out)
+compute_equal_power_fades (samplecnt_t nframes, float* in, float* out)
 {
 	double step;
 
@@ -413,7 +414,7 @@ ARDOUR::compute_equal_power_fades (samplecnt_t nframes, float* in, float* out)
 }
 
 EditMode
-ARDOUR::string_to_edit_mode (string str)
+string_to_edit_mode (string str)
 {
 	if (str == _("Splice")) {
 		return Splice;
@@ -430,7 +431,7 @@ ARDOUR::string_to_edit_mode (string str)
 }
 
 const char*
-ARDOUR::edit_mode_to_string (EditMode mode)
+edit_mode_to_string (EditMode mode)
 {
 	switch (mode) {
 	case Slide:
@@ -449,7 +450,7 @@ ARDOUR::edit_mode_to_string (EditMode mode)
 }
 
 float
-ARDOUR::meter_falloff_to_float (MeterFalloff falloff)
+meter_falloff_to_float (MeterFalloff falloff)
 {
 	switch (falloff) {
 	case MeterFalloffOff:
@@ -473,7 +474,7 @@ ARDOUR::meter_falloff_to_float (MeterFalloff falloff)
 }
 
 MeterFalloff
-ARDOUR::meter_falloff_from_float (float val)
+meter_falloff_from_float (float val)
 {
 	if (val == METER_FALLOFF_OFF) {
 		return MeterFalloffOff;
@@ -499,7 +500,7 @@ ARDOUR::meter_falloff_from_float (float val)
 }
 
 AutoState
-ARDOUR::string_to_auto_state (std::string str)
+string_to_auto_state (std::string str)
 {
 	if (str == X_("Off")) {
 		return Off;
@@ -519,7 +520,7 @@ ARDOUR::string_to_auto_state (std::string str)
 }
 
 string
-ARDOUR::auto_state_to_string (AutoState as)
+auto_state_to_string (AutoState as)
 {
 	/* to be used only for XML serialization, no i18n done */
 
@@ -553,7 +554,7 @@ bool_as_string (bool yn)
 }
 
 const char*
-ARDOUR::native_header_format_extension (HeaderFormat hf, const DataType& type)
+native_header_format_extension (HeaderFormat hf, const DataType& type)
 {
         if (type == DataType::MIDI) {
                 return ".mid";
@@ -586,7 +587,7 @@ ARDOUR::native_header_format_extension (HeaderFormat hf, const DataType& type)
 }
 
 bool
-ARDOUR::matching_unsuffixed_filename_exists_in (const string& dir, const string& path)
+matching_unsuffixed_filename_exists_in (const string& dir, const string& path)
 {
 	string bws = basename_nosuffix (path);
 	struct dirent* dentry;
@@ -631,7 +632,7 @@ ARDOUR::matching_unsuffixed_filename_exists_in (const string& dir, const string&
 }
 
 uint32_t
-ARDOUR::how_many_dsp_threads ()
+how_many_dsp_threads ()
 {
         /* CALLER MUST HOLD PROCESS LOCK */
 
@@ -665,13 +666,13 @@ ARDOUR::how_many_dsp_threads ()
 }
 
 double
-ARDOUR::gain_to_slider_position_with_max (double g, double max_gain)
+gain_to_slider_position_with_max (double g, double max_gain)
 {
 	return gain_to_position (g * 2.0 / max_gain);
 }
 
 double
-ARDOUR::slider_position_to_gain_with_max (double g, double max_gain)
+slider_position_to_gain_with_max (double g, double max_gain)
 {
 	return position_to_gain (g) * max_gain / 2.0;
 }
@@ -679,7 +680,7 @@ ARDOUR::slider_position_to_gain_with_max (double g, double max_gain)
 #include "sha1.c"
 
 std::string
-ARDOUR::compute_sha1_of_file (std::string path)
+compute_sha1_of_file (std::string path)
 {
 	PBD::ScopedFileDescriptor fd (g_open (path.c_str(), O_RDONLY, 0444));
 	if (fd < 0) {
@@ -698,3 +699,5 @@ ARDOUR::compute_sha1_of_file (std::string path)
 	sha1_result_hash (&s, hash);
 	return std::string (hash);
 }
+
+} // namespace ARDOUR

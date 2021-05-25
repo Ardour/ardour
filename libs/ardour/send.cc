@@ -40,15 +40,14 @@
 
 #include "pbd/i18n.h"
 
+using namespace PBD;
+using namespace std;
+
 namespace ARDOUR {
+
 class AutomationControl;
 class MuteMaster;
 class Pannable;
-}
-
-using namespace ARDOUR;
-using namespace PBD;
-using namespace std;
 
 PBD::Signal0<void> LatentSend::ChangedLatency;
 
@@ -544,3 +543,5 @@ Send::snd_output_changed (IOChange change, void* /*src*/)
 		}
 	}
 }
+
+} // namespace ARDOUR

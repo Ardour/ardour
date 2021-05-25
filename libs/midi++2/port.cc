@@ -32,9 +32,10 @@
 #include "midi++/port.h"
 #include "midi++/channel.h"
 
-using namespace MIDI;
 using namespace std;
 using namespace PBD;
+
+namespace MIDI {
 
 string Port::state_node_name = "MIDI-port";
 
@@ -99,7 +100,7 @@ Port::clock (timestamp_t timestamp)
 	return false;
 }
 
-std::ostream & MIDI::operator<< ( std::ostream & os, const MIDI::Port & port )
+std::ostream & operator<< ( std::ostream & os, const Port & port )
 {
 	using namespace std;
 	os << "MIDI::Port { ";
@@ -181,3 +182,5 @@ Port::centrally_parsed() const
 {
 	return _centrally_parsed;
 }
+
+} // namespace MIDI

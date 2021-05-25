@@ -24,10 +24,13 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
+
+namespace ARDOUR {
 
 ExportFailed::ExportFailed (string const & reason)
 	: reason (reason.c_str())
 {
 	PBD::error << string_compose (_("Export failed: %1"), reason) << endmsg;
 }
+
+} // namespace ARDOUR

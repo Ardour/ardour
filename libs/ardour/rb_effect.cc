@@ -39,9 +39,10 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
 using namespace RubberBand;
+
+namespace ARDOUR {
 
 Pitch::Pitch (Session& s, TimeFXRequest& req)
 	: RBEffect (s, req)
@@ -392,3 +393,5 @@ out:
 
 	return ret;
 }
+
+} // namespace ARDOUR

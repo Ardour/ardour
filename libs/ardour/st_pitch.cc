@@ -31,8 +31,9 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 Pitch::Pitch (Session& s, TimeFXRequest& req)
 	: Filter (s)
@@ -49,3 +50,5 @@ Pitch::run (boost::shared_ptr<Region> region)
 
 	return 1;
 }
+
+} // namespace ARDOUR

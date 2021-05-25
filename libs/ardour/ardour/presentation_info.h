@@ -280,8 +280,8 @@ class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 	static int selection_counter;
 };
 
-}
+LIBARDOUR_API std::ostream& operator<<(std::ostream& o, PresentationInfo const& rid);
 
-std::ostream& operator<<(std::ostream& o, ARDOUR::PresentationInfo const& rid);
+}
 
 #endif /* __libardour_presentation_info_h__ */

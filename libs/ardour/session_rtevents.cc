@@ -35,8 +35,9 @@
 
 using namespace std;
 using namespace PBD;
-using namespace ARDOUR;
 using namespace Glib;
+
+namespace ARDOUR {
 
 void
 Session::set_controls (boost::shared_ptr<ControlList> cl, double val, Controllable::GroupControlDisposition gcd)
@@ -166,3 +167,5 @@ Session::process_rtop (SessionEvent* ev)
 		ev->rt_return (ev);
 	}
 }
+
+} // namespace ARDOUR

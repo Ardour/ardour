@@ -50,9 +50,10 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
 using std::string;
+
+namespace ARDOUR {
 
 const Source::Flag SndFileSource::default_writable_flags = Source::Flag (
 		Source::Writable |
@@ -828,3 +829,5 @@ SndFileSource::set_path (const string& p)
 {
         FileSource::set_path (p);
 }
+
+} // namespace ARDOUR

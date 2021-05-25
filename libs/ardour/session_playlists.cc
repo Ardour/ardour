@@ -33,7 +33,8 @@
 
 using namespace std;
 using namespace PBD;
-using namespace ARDOUR;
+
+namespace ARDOUR {
 
 SessionPlaylists::~SessionPlaylists ()
 {
@@ -635,3 +636,5 @@ SessionPlaylists::foreach (boost::function<void(boost::shared_ptr<const Playlist
 		}
 	}
 }
+
+} // namespace ARDOUR

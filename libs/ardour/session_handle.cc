@@ -26,8 +26,9 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 SessionHandlePtr::SessionHandlePtr (Session* s)
 	: _session (s)
@@ -90,3 +91,5 @@ SessionHandleRef::insanity_check ()
 	     << endl;
 #endif
 }
+
+} // namespace ARDOUR

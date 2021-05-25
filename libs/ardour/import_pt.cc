@@ -51,10 +51,11 @@
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
 using namespace Glib;
 using std::string;
+
+namespace ARDOUR {
 
 /* Functions supporting the incorporation of PT sessions into ardour */
 
@@ -456,3 +457,5 @@ Session::import_pt_rest (PTFFormat& ptf)
 		playlist->add_region (copy, f);
 	}
 }
+
+} // namespace ARDOUR

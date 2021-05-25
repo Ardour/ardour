@@ -63,8 +63,9 @@
 #include "pbd/mathfix.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 PannerShell::PannerShell (string name, Session& s, boost::shared_ptr<Pannable> p, bool is_send)
 	: SessionObject (s, name)
@@ -491,3 +492,5 @@ PannerShell::set_linked_to_route (bool onoff)
 	}
 	PannableChanged();
 }
+
+} // namespace ARDOUR

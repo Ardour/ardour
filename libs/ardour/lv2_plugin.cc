@@ -125,8 +125,9 @@
 static const size_t NBUFS = 4;
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
+
+namespace ARDOUR {
 
 bool          LV2Plugin::force_state_save      = false;
 int32_t       LV2Plugin::_ui_style_flat        = 0;
@@ -1593,10 +1594,10 @@ LV2Plugin::load_preset(PresetRecord r)
 }
 
 const void*
-ARDOUR::lv2plugin_get_port_value(const char* port_symbol,
-                                 void*       user_data,
-                                 uint32_t*   size,
-                                 uint32_t*   type)
+lv2plugin_get_port_value(const char* port_symbol,
+                         void*       user_data,
+                         uint32_t*   size,
+                         uint32_t*   type)
 {
 	LV2Plugin *plugin = (LV2Plugin *) user_data;
 
@@ -2330,7 +2331,7 @@ LV2Plugin::get_parameter_descriptor(uint32_t which, ParameterDescriptor& desc) c
 }
 
 Plugin::IOPortDescription
-LV2Plugin::describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id) const
+LV2Plugin::describe_io_port (DataType dt, bool input, uint32_t id) const
 {
 	PortFlags match = 0;
 	switch (dt) {
@@ -3475,11 +3476,11 @@ LV2World::load_bundled_plugins(bool verbose)
 {
 	if (!_bundle_checked) {
 		if (verbose) {
-			cout << "Scanning folders for bundled LV2s: " << ARDOUR::lv2_bundled_search_path().to_string() << endl;
+			cout << "Scanning folders for bundled LV2s: " << lv2_bundled_search_path().to_string() << endl;
 		}
 
 		vector<string> plugin_objects;
-		find_paths_matching_filter (plugin_objects, ARDOUR::lv2_bundled_search_path(), lv2_filter, 0, true, true, true);
+		find_paths_matching_filter (plugin_objects, lv2_bundled_search_path(), lv2_filter, 0, true, true, true);
 		for ( vector<string>::iterator x = plugin_objects.begin(); x != plugin_objects.end (); ++x) {
 #ifdef PLATFORM_WINDOWS
 			string uri = "file:///" + *x + "/";
@@ -3498,7 +3499,7 @@ LV2World::load_bundled_plugins(bool verbose)
 
 LV2PluginInfo::LV2PluginInfo (const char* plugin_uri)
 {
-	type = ARDOUR::LV2;
+	type = LV2;
 	_plugin_uri = strdup(plugin_uri);
 }
 
@@ -3677,7 +3678,7 @@ LV2PluginInfo::discover()
 
 		info->name = string(lilv_node_as_string(name));
 		lilv_node_free(name);
-		ARDOUR::PluginScanMessage(_("LV2"), info->name, false);
+		PluginScanMessage(_("LV2"), info->name, false);
 
 		const LilvPluginClass* pclass = lilv_plugin_get_class(p);
 		const LilvNode*        label  = lilv_plugin_class_get_label(pclass);
@@ -3787,3 +3788,5 @@ LV2PluginInfo::is_analyzer () const
 	}
 	return PluginInfo::is_analyzer ();
 }
+
+} // namespace ARDOUR
