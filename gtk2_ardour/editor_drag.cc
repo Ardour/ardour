@@ -35,6 +35,8 @@
 #include "pbd/basename.h"
 #include "pbd/stateful_diff_command.h"
 
+#include <gtkmm/stock.h>
+
 #include "gtkmm2ext/utils.h"
 
 #include "ardour/audioengine.h"
@@ -7195,6 +7197,33 @@ RegionMarkerDrag::finished (GdkEvent *, bool did_move)
 {
 	if (did_move) {
 		rv->region()->move_cue_marker (model, dragging_model.position());
+	} else if (was_double_click()) {
+		/* edit name */
+
+		ArdourDialog d (_("Edit Cue Marker Name"), true, false);
+		Gtk::Entry e;
+		d.get_vbox()->pack_start (e);
+		e.set_text (model.text());
+		e.select_region (0, -1);
+		e.show ();
+		e.set_activates_default ();
+
+		d.add_button (Stock::CANCEL, RESPONSE_CANCEL);
+		d.add_button (Stock::OK, RESPONSE_OK);
+		d.set_default_response (RESPONSE_OK);
+		d.set_position (WIN_POS_MOUSE);
+
+		int result = d.run();
+		string str = e.get_text();
+
+		if (result == RESPONSE_OK && !str.empty()) {
+			/* explicitly remove the existing (GUI) marker, because
+			   we will not find a match when handing the
+			   CueMarkersChanged signal.
+			*/
+			rv->drop_cue_marker (view);
+			rv->region()->rename_cue_marker (model, str);
+		}
 	}
 }
 
