@@ -99,7 +99,7 @@ Port::clock (timestamp_t timestamp)
 	return false;
 }
 
-std::ostream & MIDI::operator << ( std::ostream & os, const MIDI::Port & port )
+std::ostream & MIDI::operator<< ( std::ostream & os, const MIDI::Port & port )
 {
 	using namespace std;
 	os << "MIDI::Port { ";

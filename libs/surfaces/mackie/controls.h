@@ -91,6 +91,6 @@ public:
 }
 }
 
-std::ostream & operator <<  (std::ostream & os, const ArdourSurface::Mackie::Control & control);
+std::ostream & operator<< (std::ostream & os, const ArdourSurface::Mackie::Control & control);
 
 #endif /* __mackie_controls_h__ */

@@ -62,15 +62,15 @@ public:
 };
 
 /// append the given byte to the end of the array
-MidiByteArray & operator << ( MidiByteArray & mba, const MIDI::byte & b );
+MidiByteArray & operator<< ( MidiByteArray & mba, const MIDI::byte & b );
 
 /// append the given string to the end of the array
-MidiByteArray & operator << ( MidiByteArray & mba, const std::string & );
+MidiByteArray & operator<< ( MidiByteArray & mba, const std::string & );
 
 /// append the given array to the end of this array
-MidiByteArray & operator << ( MidiByteArray & mba, const MidiByteArray & barr );
+MidiByteArray & operator<< ( MidiByteArray & mba, const MidiByteArray & barr );
 
 /// output the bytes as hex to the given stream
-std::ostream & operator << ( std::ostream & os, const MidiByteArray & mba );
+std::ostream & operator<< ( std::ostream & os, const MidiByteArray & mba );
 
 #endif

@@ -149,7 +149,7 @@ struct LIBMIDIPP_API PortSet {
     std::list<XMLNode> ports;
 };
 
-std::ostream & operator << (std::ostream& os, const Port& port);
+std::ostream & operator<< (std::ostream& os, const Port& port);
 
 } // namespace MIDI
 

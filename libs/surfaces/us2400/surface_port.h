@@ -83,7 +83,7 @@ class SurfacePort
 	boost::shared_ptr<ARDOUR::Port> _async_out;
 };
 
-std::ostream& operator <<  (std::ostream& , const SurfacePort& port);
+std::ostream& operator<< (std::ostream& , const SurfacePort& port);
 
 }
 }
