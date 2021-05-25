@@ -7187,7 +7187,8 @@ RegionMarkerDrag::motion (GdkEvent* ev, bool first_move)
 		return;
 	}
 
-	dragging_model.set_position (pos);
+	dragging_model.set_position (pos - rv->region()->position());
+	/* view (ArdourMarker) needs a relative position inside the RegionView */
 	view->set_position (pos - rv->region()->position());
 	show_verbose_cursor_time (dragging_model.position() - rv->region()->position()); /* earlier */
 }
