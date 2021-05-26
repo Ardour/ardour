@@ -2099,7 +2099,13 @@ Editor::grid_type() const
 bool
 Editor::grid_musical() const
 {
-	switch (_grid_type) {
+	return grid_type_is_musical (_grid_type);
+}
+
+bool
+Editor::grid_type_is_musical(GridType gt) const
+{
+	switch (gt) {
 	case GridTypeBeatDiv32:
 	case GridTypeBeatDiv28:
 	case GridTypeBeatDiv24:
@@ -2127,36 +2133,6 @@ Editor::grid_musical() const
 	return false;
 }
 
-bool
-Editor::grid_nonmusical() const
-{
-	switch (_grid_type) {
-	case GridTypeTimecode:
-	case GridTypeMinSec:
-	case GridTypeCDFrame:
-		return true;
-	case GridTypeBeatDiv32:
-	case GridTypeBeatDiv28:
-	case GridTypeBeatDiv24:
-	case GridTypeBeatDiv20:
-	case GridTypeBeatDiv16:
-	case GridTypeBeatDiv14:
-	case GridTypeBeatDiv12:
-	case GridTypeBeatDiv10:
-	case GridTypeBeatDiv8:
-	case GridTypeBeatDiv7:
-	case GridTypeBeatDiv6:
-	case GridTypeBeatDiv5:
-	case GridTypeBeatDiv4:
-	case GridTypeBeatDiv3:
-	case GridTypeBeatDiv2:
-	case GridTypeBeat:
-	case GridTypeBar:
-	case GridTypeNone:
-		return false;
-	}
-	return false;
-}
 SnapMode
 Editor::snap_mode() const
 {
@@ -2226,6 +2202,10 @@ Editor::set_grid_to (GridType gt)
 		pre_internal_grid_type = gt;
 	}
 
+	bool grid_type_changed = true;
+	if ( grid_type_is_musical(_grid_type) && grid_type_is_musical(gt))
+		grid_type_changed = false;
+
 	_grid_type = gt;
 
 	if (grid_ind > grid_type_strings.size() - 1) {
@@ -2239,7 +2219,7 @@ Editor::set_grid_to (GridType gt)
 		grid_type_selector.set_text (str);
 	}
 
-	if (UIConfiguration::instance().get_show_grids_ruler()) {
+	if (grid_type_changed && UIConfiguration::instance().get_show_grids_ruler()) {
 		show_rulers_for_grid ();
 	}
 
@@ -3987,16 +3967,16 @@ Editor::cycle_zoom_focus ()
 void
 Editor::update_grid ()
 {
-	if (grid_musical()) {
+	if (_grid_type == GridTypeNone) {
+		hide_grid_lines ();
+	} else if (grid_musical()) {
 		std::vector<TempoMap::BBTPoint> grid;
 		if (bbt_ruler_scale != bbt_show_many) {
 			compute_current_bbt_points (grid, _leftmost_sample, _leftmost_sample + current_page_samples());
 		}
 		maybe_draw_grid_lines ();
-	} else if (grid_nonmusical()) {
-		maybe_draw_grid_lines ();
 	} else {
-		hide_grid_lines ();
+		maybe_draw_grid_lines ();
 	}
 }
 

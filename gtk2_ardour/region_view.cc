@@ -1216,3 +1216,15 @@ RegionView::find_model_cue_marker (ArdourMarker* m)
 
 	return CueMarker (string(), 0); /* empty string signifies invalid */
 }
+
+void
+RegionView::drop_cue_marker (ArdourMarker* m)
+{
+	for (ViewCueMarkers::iterator v = _cue_markers.begin(); v != _cue_markers.end(); ++v) {
+		if ((*v)->view_marker == m) {
+			delete m;
+			_cue_markers.erase (v);
+			return;
+		}
+	}
+}

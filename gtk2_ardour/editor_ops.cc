@@ -8838,3 +8838,39 @@ Editor::clear_region_markers ()
 	}
 }
 
+void
+Editor::make_region_markers_global (bool as_cd_marker)
+{
+	RegionSelection rs = get_regions_from_selection_and_edit_point ();
+	XMLNode& before (_session->locations()->get_state());
+	bool in_command = false;
+
+	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ++r) {
+		CueMarkers cues;
+
+		(*r)->region()->get_cue_markers (cues, true);
+
+		if (!cues.empty()) {
+			if (!in_command) {
+				in_command = true;
+			}
+
+			for (CueMarkers::iterator cm = cues.begin(); cm != cues.end(); ++cm) {
+				/* marker position is absolute within source */
+				const samplepos_t absolute_pos = (cm->position() - (*r)->region()->start()) + (*r)->region()->position();
+				Location* loc = new Location (*_session, absolute_pos, absolute_pos, cm->text(), as_cd_marker ? Location::Flags (Location::IsMark|Location::IsCDMarker) : Location::IsMark);
+				_session->locations()->add (loc, false);
+			}
+		}
+
+		cues.clear ();
+	}
+
+	if (in_command) {
+		XMLNode& after (_session->locations()->get_state());
+		begin_reversible_command (_("region markers -> global markers"));
+		_session->add_command (new MementoCommand<Locations> (*(_session->locations()), &before, &after));
+		commit_reversible_command ();
+	}
+}
+

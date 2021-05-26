@@ -189,8 +189,8 @@ public:
 
 	Editing::SnapMode  snap_mode () const;
 	Editing::GridType  grid_type () const;
+	bool  grid_type_is_musical (Editing::GridType) const;
 	bool  grid_musical () const;
-	bool  grid_nonmusical () const;
 
 	void undo (uint32_t n = 1);
 	void redo (uint32_t n = 1);
@@ -588,6 +588,7 @@ public:
 	void add_region_marker ();
 	void clear_region_markers ();
 	void remove_region_marker (ARDOUR::CueMarker&);
+	void make_region_markers_global (bool as_cd_markers);
 
 protected:
 	void map_transport_state ();

@@ -35,6 +35,8 @@
 #include "pbd/basename.h"
 #include "pbd/stateful_diff_command.h"
 
+#include <gtkmm/stock.h>
+
 #include "gtkmm2ext/utils.h"
 
 #include "ardour/audioengine.h"
@@ -7151,4 +7153,90 @@ RegionCutDrag::finished (GdkEvent* event, bool)
 void
 RegionCutDrag::aborted (bool)
 {
+}
+
+RegionMarkerDrag::RegionMarkerDrag (Editor* ed, RegionView* r, ArdourCanvas::Item* i)
+	: Drag (ed, i)
+	, rv (r)
+	, view (static_cast<ArdourMarker*> (i->get_data ("marker")))
+	, model (rv->find_model_cue_marker (view))
+	, dragging_model (model)
+{
+	assert (view);
+}
+
+RegionMarkerDrag::~RegionMarkerDrag ()
+{
+}
+
+void
+RegionMarkerDrag::start_grab (GdkEvent* ev, Gdk::Cursor* c)
+{
+	Drag::start_grab (ev, c);
+	show_verbose_cursor_time (model.position());
+	setup_snap_delta (MusicSample (model.position(), 0));
+}
+
+void
+RegionMarkerDrag::motion (GdkEvent* ev, bool first_move)
+{
+	samplepos_t pos = adjusted_current_sample (ev);
+
+	if (pos < rv->region()->position() || pos >= (rv->region()->position() + rv->region()->length())) {
+		/* out of bounds */
+		return;
+	}
+
+	dragging_model.set_position (pos - rv->region()->position());
+	/* view (ArdourMarker) needs a relative position inside the RegionView */
+	view->set_position (pos - rv->region()->position());
+	show_verbose_cursor_time (dragging_model.position() - rv->region()->position()); /* earlier */
+}
+
+void
+RegionMarkerDrag::finished (GdkEvent *, bool did_move)
+{
+	if (did_move) {
+		rv->region()->move_cue_marker (model, dragging_model.position());
+	} else if (was_double_click()) {
+		/* edit name */
+
+		ArdourDialog d (_("Edit Cue Marker Name"), true, false);
+		Gtk::Entry e;
+		d.get_vbox()->pack_start (e);
+		e.set_text (model.text());
+		e.select_region (0, -1);
+		e.show ();
+		e.set_activates_default ();
+
+		d.add_button (Stock::CANCEL, RESPONSE_CANCEL);
+		d.add_button (Stock::OK, RESPONSE_OK);
+		d.set_default_response (RESPONSE_OK);
+		d.set_position (WIN_POS_MOUSE);
+
+		int result = d.run();
+		string str = e.get_text();
+
+		if (result == RESPONSE_OK && !str.empty()) {
+			/* explicitly remove the existing (GUI) marker, because
+			   we will not find a match when handing the
+			   CueMarkersChanged signal.
+			*/
+			rv->drop_cue_marker (view);
+			rv->region()->rename_cue_marker (model, str);
+		}
+	}
+}
+
+void
+RegionMarkerDrag::aborted (bool)
+{
+	view->set_position (model.position());
+}
+
+void
+RegionMarkerDrag::setup_pointer_sample_offset ()
+{
+	const samplepos_t model_abs_pos = rv->region()->position() + (model.position() - rv->region()->start()); /* distance */
+	_pointer_sample_offset = raw_grab_sample() - model_abs_pos; /* distance */
 }

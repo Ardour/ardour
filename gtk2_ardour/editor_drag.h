@@ -1376,4 +1376,32 @@ private:
 	bool start;
 };
 
+class RegionMarkerDrag : public Drag
+{
+  public:
+	RegionMarkerDrag (Editor*, RegionView*, ArdourCanvas::Item*);
+	~RegionMarkerDrag ();
+
+	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
+	void aborted (bool);
+
+	bool allow_vertical_autoscroll () const {
+		return false;
+	}
+
+	bool y_movement_matters () const {
+		return false;
+	}
+
+	void setup_pointer_sample_offset ();
+
+  private:
+	RegionView* rv;
+	ArdourMarker* view;
+	ARDOUR::CueMarker model;
+	ARDOUR::CueMarker dragging_model;
+};
+
 #endif /* __gtk2_ardour_editor_drag_h_ */

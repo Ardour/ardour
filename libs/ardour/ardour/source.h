@@ -114,7 +114,9 @@ public:
 
 	CueMarkers const & cue_markers() const { return _cue_markers; }
 	void add_cue_marker (CueMarker const &);
-	bool  remove_cue_marker (CueMarker const &);
+	void move_cue_marker (CueMarker const &, samplepos_t source_relative_position);
+	bool remove_cue_marker (CueMarker const &);
+	void rename_cue_marker (CueMarker&, std::string const &);
 	bool clear_cue_markers ();
 	PBD::Signal0<void> CueMarkersChanged;
 
