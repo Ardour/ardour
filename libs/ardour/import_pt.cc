@@ -284,6 +284,8 @@ Session::import_pt_rest (PTFFormat& ptf)
 	vector<midipair> uniquetr;
 
 	struct PlaylistState {
+		PlaylistState () : before (0) {}
+
 		boost::shared_ptr<Playlist> playlist;
 		XMLNode* before;
 	};
@@ -372,7 +374,7 @@ Session::import_pt_rest (PTFFormat& ptf)
 				DEBUG_TRACE (DEBUG::FileUtils, string_compose ("\twav(%1) reg(%2) tr(%3)\n", a->reg.wave.filename.c_str (), a->reg.index, a->index));
 
 				/* Use existing playlists */
-				boost::shared_ptr<Playlist> playlist = playlists.at (a->index).playlist;
+				boost::shared_ptr<Playlist> playlist = playlists[a->index].playlist;
 				boost::shared_ptr<Region> copy (RegionFactory::create (r, true));
 				playlist->add_region (copy, a->reg.startpos);
 			}
