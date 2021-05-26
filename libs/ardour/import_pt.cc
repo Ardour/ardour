@@ -67,6 +67,13 @@ struct midipair {
 	string trname;
 };
 
+struct PlaylistState {
+	PlaylistState () : before (0) {}
+
+	boost::shared_ptr<Playlist> playlist;
+	XMLNode* before;
+};
+
 bool
 Session::import_sndfile_as_region (string path, SrcQuality quality, samplepos_t& pos, SourceList& sources, ImportStatus& status, uint32_t current, uint32_t total)
 {
@@ -283,12 +290,6 @@ Session::import_pt_rest (PTFFormat& ptf)
 	struct ptflookup utr;
 	vector<midipair> uniquetr;
 
-	struct PlaylistState {
-		PlaylistState () : before (0) {}
-
-		boost::shared_ptr<Playlist> playlist;
-		XMLNode* before;
-	};
 	vector<PlaylistState> playlists;
 	vector<PlaylistState>::iterator pl;
 
