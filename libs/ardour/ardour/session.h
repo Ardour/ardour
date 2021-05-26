@@ -338,7 +338,7 @@ public:
 	boost::shared_ptr<RouteList> get_routes_with_internal_returns() const;
 	boost::shared_ptr<RouteList> get_routes_with_regions_at (samplepos_t const) const;
 
-	boost::shared_ptr<AudioTrack> get_nth_audio_track (int nth) const;
+	boost::shared_ptr<AudioTrack> get_nth_audio_track (uint32_t) const;
 
 	uint32_t nstripables (bool with_monitor = false) const;
 	uint32_t nroutes() const { return routes.reader()->size(); }

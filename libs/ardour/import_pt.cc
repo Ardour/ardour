@@ -348,7 +348,7 @@ Session::import_pt_rest (PTFFormat& ptf)
 
 	/* Get all playlists of all tracks and Playlist::freeze() all tracks */
 	assert (ntr == nth + 1);
-	for (i = 1; i <= ntr; i++) {
+	for (i = 0; i < ntr; ++i) {
 		existing_track = get_nth_audio_track (i);
 		boost::shared_ptr<Playlist> playlist = existing_track->playlist();
 
