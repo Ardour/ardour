@@ -44,8 +44,6 @@
 #include "ardour/plugin_manager.h"
 #include "ardour/session_handle.h"
 
-#include "widgets/ardour_button.h"
-
 #include "plugin_interest.h"
 #include "ardour_dialog.h"
 
@@ -196,4 +194,3 @@ private:
 };
 
 #endif // __ardour_plugin_selector_h__
-
