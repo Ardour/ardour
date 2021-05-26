@@ -113,6 +113,7 @@
 #include "location_ui.h"
 #include "lua_script_manager.h"
 #include "plugin_dspload_window.h"
+#include "plugin_manager_ui.h"
 #include "rc_option_editor.h"
 #include "route_dialogs.h"
 #include "route_params_ui.h"
@@ -139,6 +140,7 @@ class SpeakerDialog;
 class GlobalPortMatrixWindow;
 class IdleOMeter;
 class PluginDSPLoadWindow;
+class PluginManagerUI;
 class DspStatisticsWindow;
 class TransportMastersWindow;
 class VirtualKeyboardWindow;
@@ -256,6 +258,7 @@ public:
 	void toggle_editing_space();
 	void toggle_mixer_space();
 	void toggle_keep_tearoffs();
+	void show_plugin_manager();
 
 	void reset_focus (Gtk::Widget*);
 
@@ -725,6 +728,7 @@ private:
 	WM::Proxy<ExportVideoDialog> export_video_dialog;
 	WM::Proxy<LuaScriptManager> lua_script_window;
 	WM::Proxy<IdleOMeter> idleometer;
+	WM::Proxy<PluginManagerUI> plugin_manager_ui;
 	WM::Proxy<PluginDSPLoadWindow> plugin_dsp_load_window;
 	WM::Proxy<DspStatisticsWindow> dsp_statistics_window;
 	WM::Proxy<TransportMastersWindow> transport_masters_window;

@@ -71,6 +71,7 @@
 #include "mini_timeline.h"
 #include "mixer_ui.h"
 #include "plugin_dspload_window.h"
+#include "plugin_manager_ui.h"
 #include "public_editor.h"
 #include "processor_box.h"
 #include "rc_option_editor.h"
@@ -161,6 +162,7 @@ ARDOUR_UI::set_session (Session *s)
 	big_clock->set_session (s);
 	video_timeline->set_session (s);
 	lua_script_window->set_session (s);
+	plugin_manager_ui->set_session (s);
 	plugin_dsp_load_window->set_session (s);
 	dsp_statistics_window->set_session (s);
 	transport_masters_window->set_session (s);
@@ -1053,6 +1055,13 @@ ARDOUR_UI::toggle_mixer_space()
 	} else {
 		mixer->restore_mixer_space ();
 	}
+}
+
+void
+ARDOUR_UI::show_plugin_manager ()
+{
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action ("Window", "toggle-plugin-manager");
+	tact->set_active();
 }
 
 bool

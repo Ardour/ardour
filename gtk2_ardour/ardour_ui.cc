@@ -183,6 +183,7 @@
 #include "opts.h"
 #include "pingback.h"
 #include "plugin_dspload_window.h"
+#include "plugin_manager_ui.h"
 #include "processor_box.h"
 #include "public_editor.h"
 #include "rc_option_editor.h"
@@ -335,6 +336,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, export_video_dialog (X_("video-export"), _("Video Export Dialog"))
 	, lua_script_window (X_("script-manager"), _("Script Manager"))
 	, idleometer (X_("idle-o-meter"), _("Idle'o'Meter"))
+	, plugin_manager_ui (X_("plugin-manager"), _("Plugin Manager"))
 	, plugin_dsp_load_window (X_("plugin-dsp-load"), _("Plugin DSP Load"))
 	, dsp_statistics_window (X_("dsp-statistics"), _("Performance Meters"))
 	, transport_masters_window (X_("transport-masters"), _("Transport Masters"))
@@ -505,6 +507,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 		export_video_dialog.set_state (*ui_xml, 0);
 		lua_script_window.set_state (*ui_xml, 0);
 		idleometer.set_state (*ui_xml, 0);
+		plugin_manager_ui.set_state (*ui_xml, 0);
 		plugin_dsp_load_window.set_state (*ui_xml, 0);
 		dsp_statistics_window.set_state (*ui_xml, 0);
 		transport_masters_window.set_state (*ui_xml, 0);
@@ -533,6 +536,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	WM::Manager::instance().register_window (&audio_port_matrix);
 	WM::Manager::instance().register_window (&midi_port_matrix);
 	WM::Manager::instance().register_window (&idleometer);
+	WM::Manager::instance().register_window (&plugin_manager_ui);
 	WM::Manager::instance().register_window (&plugin_dsp_load_window);
 	WM::Manager::instance().register_window (&dsp_statistics_window);
 	WM::Manager::instance().register_window (&transport_masters_window);

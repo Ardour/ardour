@@ -54,6 +54,7 @@
 #include "ardour_message.h"
 #include "plugin_scan_dialog.h"
 #include "plugin_selector.h"
+#include "ardour_ui.h"
 #include "plugin_utils.h"
 #include "gui_thread.h"
 #include "ui_config.h"
@@ -1252,6 +1253,7 @@ PluginSelector::show_manager ()
 	if (scan_now) {
 		PluginScanDialog psd (false, true);
 		psd.start ();
+		ARDOUR_UI::instance()->show_plugin_manager ();
 	}
 
 	show_all();

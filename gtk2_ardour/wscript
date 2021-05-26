@@ -205,6 +205,7 @@ gtk2_ardour_sources = [
         'playlist_selector.cc',
         'plugin_display.cc',
         'plugin_eq_gui.cc',
+        'plugin_manager_ui.cc',
         'plugin_pin_dialog.cc',
         'plugin_presets_ui.cc',
         'plugin_scan_dialog.cc',
