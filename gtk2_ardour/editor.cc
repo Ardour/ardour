@@ -4360,11 +4360,11 @@ Editor::restore_editing_space ()
 void
 Editor::new_playlists (RouteUI* rui)
 {
-	begin_reversible_command (_("new playlists"));
+/*	begin_reversible_command (_("new playlists")); */  /* ToDo: this does not work */
 	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
 	_session->playlists()->get (playlists);
 	mapover_routes (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_new_playlist), playlists), rui, ARDOUR::Properties::group_select.property_id);
-	commit_reversible_command ();
+/*	commit_reversible_command (); */
 }
 
 /**
@@ -4376,11 +4376,11 @@ Editor::new_playlists (RouteUI* rui)
 void
 Editor::copy_playlists (RouteUI* rui)
 {
-	begin_reversible_command (_("copy playlists"));
+/*	begin_reversible_command (_("copy playlists")); */  /* ToDo: this does not work */
 	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
 	_session->playlists()->get (playlists);
 	mapover_routes (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_copy_playlist), playlists), rui, ARDOUR::Properties::group_select.property_id);
-	commit_reversible_command ();
+/*	commit_reversible_command (); */
 }
 
 /** Clear the current playlist for a given track and also any others that belong
