@@ -162,6 +162,9 @@ public:
 
   private:
 	void fix_writable_flags ();
+
+	XMLNode& get_cue_state () const;
+	int set_cue_state (XMLNode const &, int);
 };
 
 }

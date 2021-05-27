@@ -139,16 +139,7 @@ Source::get_state ()
 	}
 
 	if (!_cue_markers.empty()) {
-		XMLNode* cue_parent = new XMLNode (X_("Cues"));
-
-		for (CueMarkers::const_iterator c = _cue_markers.begin(); c != _cue_markers.end(); ++c) {
-			XMLNode* cue_child = new XMLNode (X_("Cue"));
-			cue_child->set_property ("text", c->text());
-			cue_child->set_property ("position", c->position());
-			cue_parent->add_child_nocopy (*cue_child);
-		}
-
-		node->add_child_nocopy (*cue_parent);
+		node->add_child_nocopy (get_cue_state());
 	}
 
 	return *node;
@@ -158,6 +149,20 @@ int
 Source::set_state (const XMLNode& node, int version)
 {
 	std::string str;
+	const CueMarkers old_cues = _cue_markers;
+	XMLNodeList nlist = node.children();
+	int64_t t;
+	samplepos_t ts;
+
+	if (node.name() == X_("Cues")) {
+		/* partial state */
+		int ret = set_cue_state (node, version);
+		if (ret) {
+			return ret;
+		}
+		goto out;
+	}
+
 	if (node.get_property ("name", str)) {
 		_name = str;
 	} else {
@@ -170,12 +175,10 @@ Source::set_state (const XMLNode& node, int version)
 
 	node.get_property ("type", _type);
 
-	int64_t t;
 	if (node.get_property ("timestamp", t)) {
 		_timestamp = (time_t) t;
 	}
 
-	samplepos_t ts;
 	if (node.get_property ("natural-position", ts)) {
 		_natural_position = ts;
 		_have_natural_position = true;
@@ -192,7 +195,6 @@ Source::set_state (const XMLNode& node, int version)
 	}
 
 	_xruns.clear ();
-	XMLNodeList nlist = node.children();
 	for (XMLNodeIterator niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
 		if ((*niter)->name() == X_("xruns")) {
@@ -214,27 +216,7 @@ Source::set_state (const XMLNode& node, int version)
 			}
 
 		} else if ((*niter)->name() == X_("Cues")) {
-
-			CueMarkers old (_cue_markers);
-
-			_cue_markers.clear ();
-
-			const XMLNode& cues (*(*niter));
-			const XMLNodeList cuelist = cues.children();
-
-			for (XMLNodeConstIterator citer = cuelist.begin(); citer != cuelist.end(); ++citer) {
-				string text;
-				samplepos_t position;
-
-				if (!(*citer)->get_property (X_("text"), text) || !(*citer)->get_property (X_("position"), position)) {
-					continue;
-				}
-
-				_cue_markers.insert (CueMarker (text, position));
-			}
-
-			cues_changed = (old == _cue_markers);
-			cerr << "reset state, cues changed " << cues_changed << endl;
+			set_cue_state (**niter, version);
 		}
 	}
 
@@ -268,8 +250,45 @@ Source::set_state (const XMLNode& node, int version)
 	 * itself notify anyone when the operation changes the cue markers.
 	 */
 
-	if (cues_changed) {
+  out:
+	if (old_cues != _cue_markers) {
 		CueMarkersChanged (); /* EMIT SIGNAL */
+	}
+
+	return 0;
+}
+
+XMLNode&
+Source::get_cue_state () const
+{
+	XMLNode* cue_parent = new XMLNode (X_("Cues"));
+
+	for (CueMarkers::const_iterator c = _cue_markers.begin(); c != _cue_markers.end(); ++c) {
+		XMLNode* cue_child = new XMLNode (X_("Cue"));
+		cue_child->set_property ("text", c->text());
+		cue_child->set_property ("position", c->position());
+		cue_parent->add_child_nocopy (*cue_child);
+	}
+
+	return *cue_parent;
+}
+
+int
+Source::set_cue_state (XMLNode const & cues, int /* version */)
+{
+	_cue_markers.clear ();
+
+	const XMLNodeList cuelist = cues.children();
+
+	for (XMLNodeConstIterator citer = cuelist.begin(); citer != cuelist.end(); ++citer) {
+		string text;
+		samplepos_t position;
+
+		if (!(*citer)->get_property (X_("text"), text) || !(*citer)->get_property (X_("position"), position)) {
+			continue;
+		}
+
+		_cue_markers.insert (CueMarker (text, position));
 	}
 
 	return 0;
