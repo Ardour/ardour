@@ -566,7 +566,6 @@ PluginManager::refresh (bool cache_only)
 	}
 
 	BootMessage (_("Plugin Scan Complete..."));
-	PluginListChanged (); /* EMIT SIGNAL */
 	PluginScanMessage(X_("closeme"), "", false);
 	_cancel_scan = false;
 
@@ -609,6 +608,7 @@ PluginManager::refresh (bool cache_only)
 	detect_type_ambiguities (all_plugs);
 
 	save_scanlog ();
+	PluginListChanged (); /* EMIT SIGNAL */
 }
 
 void
