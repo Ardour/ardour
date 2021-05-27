@@ -8772,14 +8772,31 @@ Editor::add_region_marker ()
 		CueMarker marker (str, region->start() + (position - region->position()));
 
 		for (SourceList::iterator s = sources.begin(); s != sources.end(); ++s) {
-			if ((*s)->add_cue_marker (marker)) {
-				if (!in_command) {
-					begin_reversible_command (_("add cue marker"));
-					in_command = true;
-				}
-				_session->add_command (new StatefulDiffCommand (*s));
-				cerr << "added to reversible command\n";
+
+			XMLNode* before_cues = (*s)->get_state().child (X_("Cues"));
+
+			if (!(*s)->add_cue_marker (marker)) {
+				delete before_cues;
+				continue;
 			}
+
+			if (!in_command) {
+				begin_reversible_command (_("add cue marker"));
+				in_command = true;
+			}
+
+
+			XMLNode* after_cues = (*s)->get_state().child (X_("Cues"));
+
+			if (!before_cues) {
+				before_cues = new XMLNode (X_("Cues"));
+			}
+
+			if (!after_cues) {
+				after_cues = new XMLNode (X_("Cues"));
+			}
+
+			_session->add_command (new MementoCommand<Source> (**s, before_cues, after_cues));
 		}
 	}
 
@@ -8798,13 +8815,29 @@ Editor::remove_region_marker (CueMarker& cm)
 		SourceList & sources = (*r)->region()->sources_for_edit ();
 		for (SourceList::iterator s = sources.begin(); s != sources.end(); ++s) {
 
-			if ((*s)->remove_cue_marker (cm)) {
-				if (!in_command) {
-					begin_reversible_command (_("remove cue marker"));
-					in_command = true;
-				}
-				_session->add_command (new StatefulDiffCommand (*s));
+			XMLNode* before_cues = (*s)->get_state().child (X_("Cues"));
+
+			if (!(*s)->remove_cue_marker (cm)) {
+				delete before_cues;
+				continue;
 			}
+
+			if (!in_command) {
+				begin_reversible_command (_("remove cue marker"));
+				in_command = true;
+			}
+
+			XMLNode* after_cues = (*s)->get_state().child (X_("Cues"));
+
+			if (!before_cues) {
+				before_cues = new XMLNode (X_("Cues"));
+			}
+
+			if (!after_cues) {
+				after_cues = new XMLNode (X_("Cues"));
+			}
+
+			_session->add_command (new MementoCommand<Source> (**s, before_cues, after_cues));
 		}
 	}
 
@@ -8824,13 +8857,28 @@ Editor::clear_region_markers ()
 		SourceList & sources = (*r)->region()->sources_for_edit ();
 		for (SourceList::iterator s = sources.begin(); s != sources.end(); ++s) {
 
-			if ((*s)->clear_cue_markers ()) {
-				if (!in_command) {
-					begin_reversible_command (_("clear cue markers"));
-					in_command = true;
-				}
-				_session->add_command (new StatefulDiffCommand (*s));
+			XMLNode* before_cues = (*s)->get_state().child (X_("Cues"));
+
+			if (!(*s)->clear_cue_markers ()) {
+				delete before_cues;
+				continue;
 			}
+
+			if (!in_command) {
+				begin_reversible_command (_("clear cue markers"));
+				in_command = true;
+			}
+			XMLNode* after_cues = (*s)->get_state().child (X_("Cues"));
+
+			if (!before_cues) {
+				before_cues = new XMLNode (X_("Cues"));
+			}
+
+			if (!after_cues) {
+				after_cues = new XMLNode (X_("Cues"));
+			}
+
+			_session->add_command (new MementoCommand<Source> (**s, before_cues, after_cues));
 		}
 	}
 
@@ -8874,4 +8922,3 @@ Editor::make_region_markers_global (bool as_cd_marker)
 		commit_reversible_command ();
 	}
 }
-
