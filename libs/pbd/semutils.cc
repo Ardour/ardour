@@ -25,7 +25,8 @@ using namespace PBD;
 Semaphore::Semaphore (const char* name, int val)
 {
 #ifdef WINDOWS_SEMAPHORE
-	if ((_sem = CreateSemaphore(NULL, val, 32767, name)) == NULL) {
+	(void) name; /* stop warning */
+	if ((_sem = CreateSemaphore(NULL, val, 32767, NULL)) == NULL) {
 		throw failed_constructor ();
 	}
 
