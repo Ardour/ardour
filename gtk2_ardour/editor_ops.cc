@@ -8771,14 +8771,15 @@ Editor::add_region_marker ()
 
 		CueMarker marker (str, region->start() + (position - region->position()));
 
-		if (!in_command) {
-			begin_reversible_command (_("add cue marker"));
-			in_command = true;
-		}
-
 		for (SourceList::iterator s = sources.begin(); s != sources.end(); ++s) {
-			(*s)->add_cue_marker (marker);
-			_session->add_command (new StatefulDiffCommand (*s));
+			if ((*s)->add_cue_marker (marker)) {
+				if (!in_command) {
+					begin_reversible_command (_("add cue marker"));
+					in_command = true;
+				}
+				_session->add_command (new StatefulDiffCommand (*s));
+				cerr << "added to reversible command\n";
+			}
 		}
 	}
 
