@@ -89,7 +89,7 @@ public:
 	virtual void session_saved() {}
 
 	XMLNode& get_state ();
-	int set_state (const XMLNode&, int version);
+	int set_state (XMLNode const &, int version);
 
 	bool         writable () const;
 
