@@ -73,7 +73,7 @@ Semaphore::wait ()
 {
 	DWORD result = 0;
 	result = WaitForSingleObject(_sem, INFINITE);
-	return (result == WAIT_OBJECT_0);
+	return (result == WAIT_OBJECT_0 ? 0 : -1);
 }
 
 int
