@@ -109,21 +109,21 @@ Source::fix_writable_flags ()
 XMLNode&
 Source::get_state ()
 {
-	XMLNode *node = new XMLNode ("Source");
+	XMLNode *node = new XMLNode (X_("Source"));
 
-	node->set_property ("name", name());
-	node->set_property ("take-id", take_id());
-	node->set_property ("type", _type);
-	node->set_property (X_("flags"), _flags);
-	node->set_property ("id", id());
+	node->set_property (X_("name"), name());
+	node->set_property (X_("take-id"), take_id());
+	node->set_property (X_("type"), _type);
+	node->set_property (X_(X_("flags")), _flags);
+	node->set_property (X_("id"), id());
 
 	if (_timestamp != 0) {
 		int64_t t = _timestamp;
-		node->set_property ("timestamp", t);
+		node->set_property (X_("timestamp"), t);
 	}
 
 	if (_have_natural_position) {
-		node->set_property ("natural-position", _natural_position);
+		node->set_property (X_("natural-position"), _natural_position);
 	}
 
 	if (!_xruns.empty ()) {
