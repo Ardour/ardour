@@ -215,6 +215,8 @@ Source::set_state (const XMLNode& node, int version)
 
 		} else if ((*niter)->name() == X_("Cues")) {
 
+			CueMarkers old (_cue_markers);
+
 			_cue_markers.clear ();
 
 			const XMLNode& cues (*(*niter));
@@ -230,6 +232,9 @@ Source::set_state (const XMLNode& node, int version)
 
 				_cue_markers.insert (CueMarker (text, position));
 			}
+
+			cues_changed = (old == _cue_markers);
+			cerr << "reset state, cues changed " << cues_changed << endl;
 		}
 	}
 
@@ -255,6 +260,16 @@ Source::set_state (const XMLNode& node, int version)
 		   sometimes marks sources as removable which shouldn't be.
 		*/
 		_flags = Flag (_flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy|CanRename));
+	}
+
+	/* support to make undo/redo actually function. Very few things about
+	 * Sources are ever part of undo/redo history, but this can
+	 * be. Undo/Redo uses a MementoCommand<> pattern, which will not in
+	 * itself notify anyone when the operation changes the cue markers.
+	 */
+
+	if (cues_changed) {
+		CueMarkersChanged (); /* EMIT SIGNAL */
 	}
 
 	return 0;
@@ -413,34 +428,42 @@ Source::writable () const
         return (_flags & Writable) && _session.writable();
 }
 
-void
+bool
 Source::add_cue_marker (CueMarker const & cm)
 {
-	_cue_markers.insert (cm);
-	CueMarkersChanged(); /* EMIT SIGNAL */
+	if (_cue_markers.insert (cm).second) {
+		CueMarkersChanged(); /* EMIT SIGNAL */
+		return true;
+	}
+
+	return false;
 }
 
-void
+bool
 Source::move_cue_marker (CueMarker const & cm, samplepos_t source_relative_position)
 {
 	if (source_relative_position > length (0)) {
-		return;
+		return false;
 	}
 
 	if (remove_cue_marker (cm)) {
-		add_cue_marker (CueMarker (cm.text(), source_relative_position));
+		return add_cue_marker (CueMarker (cm.text(), source_relative_position));
 	}
+
+	return false;
 }
 
-void
+bool
 Source::rename_cue_marker (CueMarker& cm, std::string const & str)
 {
 	CueMarkers::iterator m = _cue_markers.find (cm);
 
 	if (m != _cue_markers.end()) {
 		_cue_markers.erase (m);
-		add_cue_marker (CueMarker (str, cm.position()));
+		return add_cue_marker (CueMarker (str, cm.position()));
 	}
+
+	return false;
 }
 
 bool
