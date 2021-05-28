@@ -2574,18 +2574,19 @@ RouteUI::build_playlist_menu ()
 	playlist_items.push_back (SeparatorElem());
 
 	if (!route_group() || !route_group()->is_active() || !route_group()->enabled_property (ARDOUR::Properties::group_select.property_id)) {
-		playlist_items.push_back (MenuElem (_("New..."), sigc::bind(sigc::mem_fun(editor, &PublicEditor::new_playlists), this)));
-		playlist_items.push_back (MenuElem (_("New Copy..."), sigc::bind(sigc::mem_fun(editor, &PublicEditor::copy_playlists), this)));
-
+		playlist_items.push_back (MenuElem (_("New Playlist..."), sigc::bind(sigc::mem_fun(editor, &PublicEditor::new_playlists), this)));
+		playlist_items.push_back (MenuElem (_("Copy Playlist..."), sigc::bind(sigc::mem_fun(editor, &PublicEditor::copy_playlists), this)));
 	} else {
-		// Use a label which tells the user what is happening
-		playlist_items.push_back (MenuElem (_("New Group Playlist"), sigc::bind(sigc::mem_fun(editor, &PublicEditor::new_playlists), this)));
-		playlist_items.push_back (MenuElem (_("Copy Group Playlist"), sigc::bind(sigc::mem_fun(editor, &PublicEditor::copy_playlists), this)));
-
+		playlist_items.push_back (MenuElem (_("New Playlist (for group)"), sigc::bind(sigc::mem_fun(editor, &PublicEditor::new_playlists), this)));
+		playlist_items.push_back (MenuElem (_("Copy Playlist (for group)"), sigc::bind(sigc::mem_fun(editor, &PublicEditor::copy_playlists), this)));
 	}
 
 	playlist_items.push_back (SeparatorElem());
-	playlist_items.push_back (MenuElem (_("Clear Current"), sigc::bind(sigc::mem_fun(editor, &PublicEditor::clear_playlists), this)));
+	if (!route_group() || !route_group()->is_active() || !route_group()->enabled_property (ARDOUR::Properties::group_select.property_id)) {
+		playlist_items.push_back (MenuElem (_("Clear Current"), sigc::bind(sigc::mem_fun(editor, &PublicEditor::clear_playlists), this)));
+	} else {
+		playlist_items.push_back (MenuElem (_("Clear Current (for group)"), sigc::bind(sigc::mem_fun(editor, &PublicEditor::clear_playlists), this)));
+	}
 	playlist_items.push_back (SeparatorElem());
 
 	Menu* advanced_menu = manage (new Menu);
