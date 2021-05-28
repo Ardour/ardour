@@ -91,7 +91,6 @@ public:
 	void dump () const;
 
 	NoteMode     _note_mode;
-	samplepos_t  _read_end;
 
 	RTMidiBuffer _rendered;
 };

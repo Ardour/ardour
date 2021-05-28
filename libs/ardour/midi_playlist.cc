@@ -50,7 +50,6 @@ using namespace std;
 MidiPlaylist::MidiPlaylist (Session& session, const XMLNode& node, bool hidden)
 	: Playlist (session, node, DataType::MIDI, hidden)
 	, _note_mode(Sustained)
-	, _read_end(0)
 {
 #ifndef NDEBUG
 	XMLProperty const * prop = node.property("type");
@@ -69,14 +68,12 @@ MidiPlaylist::MidiPlaylist (Session& session, const XMLNode& node, bool hidden)
 MidiPlaylist::MidiPlaylist (Session& session, string name, bool hidden)
 	: Playlist (session, name, DataType::MIDI, hidden)
 	, _note_mode(Sustained)
-	, _read_end(0)
 {
 }
 
 MidiPlaylist::MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other, string name, bool hidden)
 	: Playlist (other, name, hidden)
 	, _note_mode(other->_note_mode)
-	, _read_end(0)
 {
 }
 
@@ -87,7 +84,6 @@ MidiPlaylist::MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other,
                             bool                                  hidden)
 	: Playlist (other, start, dur, name, hidden)
 	, _note_mode(other->_note_mode)
-	, _read_end(0)
 {
 }
 
