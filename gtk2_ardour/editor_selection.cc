@@ -221,7 +221,7 @@ Editor::set_selected_track_as_side_effect (Selection::Operation op)
 	switch (op) {
 	case Selection::Toggle:
 		if (selection->selected (clicked_axisview)) {
-			if (group && group->is_active()) {
+			if (group && group->is_active() && group->enabled_property(ARDOUR::Properties::group_select.property_id)) {
 				for (TrackViewList::iterator i = track_views.begin(); i != track_views.end (); ++i) {
 					if ((*i)->route_group() == group) {
 						selection->remove(*i);
@@ -231,7 +231,7 @@ Editor::set_selected_track_as_side_effect (Selection::Operation op)
 				selection->remove (clicked_axisview);
 			}
 		} else {
-			if (group && group->is_active()) {
+			if (group && group->is_active() && group->enabled_property(ARDOUR::Properties::group_select.property_id)) {
 				for (TrackViewList::iterator i = track_views.begin(); i != track_views.end (); ++i) {
 					if ((*i)->route_group() == group) {
 						selection->add(*i);
@@ -244,7 +244,7 @@ Editor::set_selected_track_as_side_effect (Selection::Operation op)
 		break;
 
 	case Selection::Add:
-		if (group && group->is_active()) {
+		if (group && group->is_active() && group->enabled_property(ARDOUR::Properties::group_select.property_id)) {
 			for (TrackViewList::iterator i  = track_views.begin(); i != track_views.end (); ++i) {
 				if ((*i)->route_group() == group) {
 					selection->add(*i);
@@ -257,7 +257,7 @@ Editor::set_selected_track_as_side_effect (Selection::Operation op)
 
 	case Selection::Set:
 		selection->clear();
-		if (group && group->is_active()) {
+		if (group && group->is_active() && group->enabled_property(ARDOUR::Properties::group_select.property_id)) {
 			for (TrackViewList::iterator i  = track_views.begin(); i != track_views.end (); ++i) {
 				if ((*i)->route_group() == group) {
 					selection->add(*i);
