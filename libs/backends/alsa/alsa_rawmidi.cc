@@ -200,7 +200,7 @@ retry:
 		printf ("\n");
 #endif
 
-		if ((err == -EAGAIN)) {
+		if (err == -EAGAIN) {
 			snd_rawmidi_drain (_device);
 			goto retry;
 		}
