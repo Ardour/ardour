@@ -278,7 +278,6 @@ Session::import_pt_rest (PTFFormat& ptf)
 	uint32_t srate = sample_rate ();
 
 	vector<struct ptflookup> ptfregpair;
-	vector<PTFFormat::wav_t>::const_iterator w;
 
 	SourceList just_one_src;
 

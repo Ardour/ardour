@@ -35,11 +35,6 @@ using namespace ARDOUR;
 using namespace ArdourSurface;
 using namespace PBD;
 
-/* this value is chosen to given smooth motion from 0..1.0 in about 270 degrees
- * of encoder rotation.
- */
-static const double encoder_divider = 24.0;
-
 void
 CC121::input_monitor ()
 {

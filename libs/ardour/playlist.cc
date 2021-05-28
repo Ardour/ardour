@@ -2252,7 +2252,6 @@ Playlist::set_state (const XMLNode& node, int version)
 	XMLNode*                  child;
 	XMLNodeList               nlist;
 	XMLNodeConstIterator      niter;
-	XMLPropertyConstIterator  piter;
 	boost::shared_ptr<Region> region;
 	string                    region_name;
 	bool                      seen_region_nodes = false;
