@@ -2435,7 +2435,7 @@ RouteUI::resolve_new_group_playlist_name (std::string const& basename, vector<bo
 }
 
 void
-RouteUI::use_new_playlist (bool prompt, vector<boost::shared_ptr<Playlist> > const& playlists_before_op, bool copy)
+RouteUI::use_new_playlist (vector<boost::shared_ptr<Playlist> > const& playlists_before_op, bool copy)
 {
 	string name;
 
@@ -2459,7 +2459,7 @@ RouteUI::use_new_playlist (bool prompt, vector<boost::shared_ptr<Playlist> > con
 		name = Playlist::bump_name (name, *_session);
 	}
 
-	if (prompt) {
+	{
 		// TODO: The prompter "new" button should be de-activated if the user
 		// specifies a playlist name which already exists in the session.
 

@@ -4401,13 +4401,13 @@ Editor::clear_playlists (RouteUI* rui)
 void
 Editor::mapped_use_new_playlist (RouteUI& rui, uint32_t sz, vector<boost::shared_ptr<ARDOUR::Playlist> > const & playlists)
 {
-	rui.use_new_playlist (sz > 1 ? false : true, playlists, false);
+	rui.use_new_playlist (playlists, false);
 }
 
 void
 Editor::mapped_use_copy_playlist (RouteUI& rui, uint32_t sz, vector<boost::shared_ptr<ARDOUR::Playlist> > const & playlists)
 {
-	rui.use_new_playlist (sz > 1 ? false : true, playlists, true);
+	rui.use_new_playlist (playlists, true);
 }
 
 void
