@@ -162,8 +162,8 @@ sample_to_timecode (
     uint32_t subframes_per_frame,
     bool offset_is_negative, int64_t offset_samples);
 
-} // namespace Timecode
+extern LIBTEMPORAL_API std::ostream& operator<< (std::ostream& ostr, const Time& t);
 
-extern LIBTEMPORAL_API std::ostream& operator<< (std::ostream& ostr, const Timecode::Time& t);
+} // namespace Timecode
 
 #endif // __timecode_time_h__

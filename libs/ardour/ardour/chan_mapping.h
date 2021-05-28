@@ -136,9 +136,9 @@ private:
 	Mappings _mappings;
 };
 
-} // namespace ARDOUR
+std::ostream& operator<<(std::ostream& o, const ChanMapping& m);
 
-std::ostream& operator<<(std::ostream& o, const ARDOUR::ChanMapping& m);
+} // namespace ARDOUR
 
 #endif // __ardour_chan_mapping_h__
 

@@ -87,11 +87,9 @@ private:
 	uint8_t       _channel;
 };
 
-} // namespace Evoral
+std::ostream& operator<< (std::ostream &str, Parameter const &);
 
-namespace std {
-std::ostream& operator<< (std::ostream &str, Evoral::Parameter const &);
-}
+} // namespace Evoral
 
 #endif // EVORAL_PARAMETER_HPP
 

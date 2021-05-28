@@ -420,10 +420,10 @@ class LIBARDOUR_API TempoMap
 	void dump_locked (std::ostream&);
 };
 
-}
+std::ostream& operator<<(std::ostream&, TempoMapPoint const &);
+std::ostream& operator<<(std::ostream&, Tempo const &);
+std::ostream& operator<<(std::ostream&, Meter const &);
 
-std::ostream& operator<<(std::ostream&, ARDOUR::TempoMapPoint const &);
-std::ostream& operator<<(std::ostream&, ARDOUR::Tempo const &);
-std::ostream& operator<<(std::ostream&, ARDOUR::Meter const &);
+}
 
 #endif /* __ardour_tempo_h__ */

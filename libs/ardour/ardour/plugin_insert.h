@@ -447,8 +447,8 @@ private:
 	GATOMIC_QUAL gint _flush;
 };
 
-} // namespace ARDOUR
+std::ostream& operator<<(std::ostream& o, const PluginInsert::Match& m);
 
-std::ostream& operator<<(std::ostream& o, const ARDOUR::PluginInsert::Match& m);
+} // namespace ARDOUR
 
 #endif /* __ardour_plugin_insert_h__ */

@@ -297,7 +297,7 @@ PresentationInfo::operator= (PresentationInfo const& other)
 }
 
 std::ostream&
-operator<<(std::ostream& o, ARDOUR::PresentationInfo const& pi)
+ARDOUR::operator<<(std::ostream& o, ARDOUR::PresentationInfo const& pi)
 {
 	return o << pi.order() << '/' << enum_2_string (pi.flags()) << '/' << pi.color();
 }

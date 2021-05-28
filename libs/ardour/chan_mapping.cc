@@ -257,16 +257,12 @@ ChanMapping::count () const
 	return rv;
 }
 
-
-
-} // namespace ARDOUR
-
-std::ostream& operator<<(std::ostream& o, const ARDOUR::ChanMapping& cm)
+std::ostream& operator<<(std::ostream& o, const ChanMapping& cm)
 {
-	const ARDOUR::ChanMapping::Mappings& mp (cm.mappings());
-	for (ARDOUR::ChanMapping::Mappings::const_iterator tm = mp.begin(); tm != mp.end(); ++tm) {
+	const ChanMapping::Mappings& mp (cm.mappings());
+	for (ChanMapping::Mappings::const_iterator tm = mp.begin(); tm != mp.end(); ++tm) {
 		o << tm->first.to_string() << endl;
-		for (ARDOUR::ChanMapping::TypeMapping::const_iterator i = tm->second.begin();
+		for (ChanMapping::TypeMapping::const_iterator i = tm->second.begin();
 				i != tm->second.end(); ++i) {
 			o << "\t" << i->first << " => " << i->second << endl;
 		}
@@ -274,3 +270,5 @@ std::ostream& operator<<(std::ostream& o, const ARDOUR::ChanMapping& cm)
 
 	return o;
 }
+
+} // namespace ARDOUR

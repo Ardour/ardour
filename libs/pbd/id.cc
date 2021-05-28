@@ -105,7 +105,7 @@ ID::operator= (const ID& other)
 }
 
 ostream&
-operator<< (ostream& ostr, const ID& id)
+PBD::operator<< (ostream& ostr, const ID& id)
 {
 	ostr << id.to_s();
 	return ostr;

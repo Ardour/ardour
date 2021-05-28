@@ -66,8 +66,9 @@ ChanCount::state(const std::string& name) const
 // Statics
 const ChanCount ChanCount::ZERO     = ChanCount();
 
-} // namespace ARDOUR
-
-std::ostream& operator<<(std::ostream& o, const ARDOUR::ChanCount& c) {
+std::ostream& operator<<(std::ostream& o, const ChanCount& c) {
 	return o << "AUDIO=" << c.n_audio() << ":MIDI=" << c.n_midi();
 }
+
+} // namespace ARDOUR
+

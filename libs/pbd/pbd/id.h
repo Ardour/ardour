@@ -75,8 +75,8 @@ class LIBPBD_API ID {
 	static uint64_t _counter;
 };
 
-}
+LIBPBD_API std::ostream& operator<< (std::ostream& ostr, const ID&);
 
-LIBPBD_API std::ostream& operator<< (std::ostream& ostr, const PBD::ID&);
+}
 
 #endif /* __pbd_id_h__ */

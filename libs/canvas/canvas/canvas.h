@@ -323,8 +323,8 @@ private:
 	void scrolled ();
 };
 
-}
+std::ostream& operator<< (std::ostream&, const Canvas&);
 
-std::ostream& operator<< (std::ostream&, const ArdourCanvas::Canvas&);
+}
 
 #endif

@@ -127,10 +127,9 @@ class DeviceInfo
 	void shared_buttons ();
 };
 
+std::ostream& operator<< (std::ostream& os, const ArdourSurface::Mackie::DeviceInfo& di);
 
 } // Mackie namespace
 } // ArdourSurface namespace
-
-std::ostream& operator<< (std::ostream& os, const ArdourSurface::Mackie::DeviceInfo& di);
 
 #endif /* __ardour_mackie_control_protocol_device_info_h__ */

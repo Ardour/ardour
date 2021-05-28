@@ -122,10 +122,9 @@ class DeviceInfo
 	void shared_buttons ();
 };
 
+std::ostream& operator<< (std::ostream& os, const ArdourSurface::US2400::DeviceInfo& di);
 
 } // US2400 namespace
 } // ArdourSurface namespace
-
-std::ostream& operator<< (std::ostream& os, const ArdourSurface::US2400::DeviceInfo& di);
 
 #endif /* __ardour_us2400_control_protocol_device_info_h__ */

@@ -3382,7 +3382,7 @@ PluginInsert::clear_stats ()
 	g_atomic_int_set (&_stat_reset, 1);
 }
 
-std::ostream& operator<<(std::ostream& o, const ARDOUR::PluginInsert::Match& m)
+std::ostream& ARDOUR::operator<<(std::ostream& o, const ARDOUR::PluginInsert::Match& m)
 {
 	switch (m.method) {
 		case PluginInsert::Impossible: o << "Impossible"; break;

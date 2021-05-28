@@ -264,6 +264,7 @@ LTC_TransportMaster::equal_ltc_sample_time(LTCFrame *a, LTCFrame *b) {
 	}
 	return true;
 }
+
 static ostream& operator<< (ostream& ostr, LTCFrame& a)
 {
 	ostr

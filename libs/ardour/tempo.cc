@@ -4943,17 +4943,17 @@ struct bbtcmp {
 };
 
 std::ostream&
-operator<< (std::ostream& o, const Meter& m) {
+ARDOUR::operator<< (std::ostream& o, const ARDOUR::Meter& m) {
 	return o << m.divisions_per_bar() << '/' << m.note_divisor();
 }
 
 std::ostream&
-operator<< (std::ostream& o, const Tempo& t) {
+ARDOUR::operator<< (std::ostream& o, const ARDOUR::Tempo& t) {
 	return o << t.note_types_per_minute() << " 1/" << t.note_type() << "'s per minute";
 }
 
 std::ostream&
-operator<< (std::ostream& o, const MetricSection& section) {
+ARDOUR::operator<< (std::ostream& o, const ARDOUR::MetricSection& section) {
 
 	o << "MetricSection @ " << section.sample() << ' ';
 
