@@ -163,6 +163,7 @@ public:
 	void duplicate_ranges (std::list<AudioRange>&, float times);
 	void nudge_after (samplepos_t start, samplecnt_t distance, bool forwards);
 	void fade_range (std::list<AudioRange>&);
+	void remove_gaps (samplepos_t gap_threshold, samplepos_t leave_gap);
 
 	boost::shared_ptr<Region> combine (const RegionList&);
 	void                      uncombine (boost::shared_ptr<Region>);
@@ -405,7 +406,7 @@ protected:
 	void splice_unlocked (samplepos_t at, samplecnt_t distance, boost::shared_ptr<Region> exclude, ThawList& thawlist);
 
 	void ripple_locked (samplepos_t at, samplecnt_t distance, RegionList* exclude);
-	void ripple_unlocked (samplepos_t at, samplecnt_t distance, RegionList* exclude, ThawList& thawlist);
+	void ripple_unlocked (samplepos_t at, samplecnt_t distance, RegionList* exclude, ThawList& thawlist, bool notify = true);
 
 	virtual void remove_dependents (boost::shared_ptr<Region> /*region*/) {}
 	virtual void region_going_away (boost::weak_ptr<Region> /*region*/) {}

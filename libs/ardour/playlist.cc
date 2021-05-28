@@ -884,6 +884,45 @@ Playlist::remove_region_internal (boost::shared_ptr<Region> region, ThawList& th
 }
 
 void
+Playlist::remove_gaps (samplepos_t gap_threshold, samplepos_t leave_gap)
+{
+	RegionWriteLock rlock (this);
+	RegionList::iterator i;
+	RegionList::iterator nxt (regions.end());
+	bool closed = false;
+
+	if (regions.size() < 2) {
+		return;
+	}
+
+	for (i = regions.begin(); i != regions.end(); ++i) {
+
+		nxt = i;
+		++nxt;
+
+		if (nxt == regions.end()) {
+			break;
+		}
+
+		const samplepos_t gap = (*nxt)->position() - ((*i)->position() + (*i)->length());
+
+		if (gap < gap_threshold) {
+			continue;
+		}
+
+		const samplepos_t shift = gap - leave_gap;
+
+		ripple_unlocked ((*nxt)->position(), -shift, 0, rlock.thawlist, false);
+
+		closed = true;
+	}
+
+	if (closed) {
+		notify_contents_changed ();
+	}
+}
+
+void
 Playlist::get_equivalent_regions (boost::shared_ptr<Region> other, vector<boost::shared_ptr<Region> >& results)
 {
 	switch (Config->get_region_equivalence ()) {
@@ -1645,7 +1684,7 @@ Playlist::ripple_locked (samplepos_t at, samplecnt_t distance, RegionList* exclu
 }
 
 void
-Playlist::ripple_unlocked (samplepos_t at, samplecnt_t distance, RegionList* exclude, ThawList& thawlist)
+Playlist::ripple_unlocked (samplepos_t at, samplecnt_t distance, RegionList* exclude, ThawList& thawlist, bool notify)
 {
 	if (distance == 0) {
 		return;
@@ -1677,7 +1716,10 @@ Playlist::ripple_unlocked (samplepos_t at, samplecnt_t distance, RegionList* exc
 	}
 
 	_rippling = false;
-	notify_contents_changed ();
+
+	if (notify) {
+		notify_contents_changed ();
+	}
 }
 
 void
