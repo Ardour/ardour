@@ -2899,11 +2899,11 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 		}
 
 		if (is_blacklisted(CFStringRefToStdString(itemName))) {
+			info << string_compose (_("Skipped blacklisted AU plugin %1 "), CFStringRefToStdString(itemName)) << endmsg;
 			if (itemName != NULL) {
 				CFRelease(itemName);
 				itemName = NULL;
 			}
-			info << string_compose (_("Skipped blacklisted AU plugin %1 "), CFStringRefToStdString(itemName)) << endmsg;
 			comp = ArdourFindNext (comp, &desc);
 			continue;
 		}
