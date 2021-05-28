@@ -249,11 +249,6 @@ from_dB(float gdb) {
 	return (exp(gdb/20.f*log(10.f)));
 }
 
-static inline float
-to_dB(float g) {
-	return (20.f*log10(g));
-}
-
 static inline bool
 is_eq(float a, float b, float small) {
 	return (fabsf(a - b) < small);
