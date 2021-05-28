@@ -8922,3 +8922,58 @@ Editor::make_region_markers_global (bool as_cd_marker)
 		commit_reversible_command ();
 	}
 }
+
+void
+Editor::remove_gaps ()
+{
+	bool in_command = false;
+	TrackViewList ts = selection->tracks.filter_to_unique_playlists ();
+	bool all_playlists = false;
+
+	for (TrackSelection::iterator x = ts.begin(); x != ts.end(); ++x) {
+
+		/* don't operate on any playlist more than once, which could
+		 * happen if "all playlists" is enabled, but there is more
+		 * than 1 track using playlists "from" a given track.
+		 */
+
+		set<boost::shared_ptr<Playlist> > pl;
+
+		if (all_playlists) {
+			RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*> (*x);
+			if (rtav && rtav->track ()) {
+				vector<boost::shared_ptr<Playlist> > all = _session->playlists()->playlists_for_track (rtav->track ());
+				for (vector<boost::shared_ptr<Playlist> >::iterator p = all.begin(); p != all.end(); ++p) {
+					pl.insert (*p);
+				}
+			}
+		} else {
+			if ((*x)->playlist ()) {
+				pl.insert ((*x)->playlist ());
+			}
+		}
+
+		for (set<boost::shared_ptr<Playlist> >::iterator i = pl.begin(); i != pl.end(); ++i) {
+
+			(*i)->clear_changes ();
+			(*i)->clear_owned_changes ();
+
+			if (!in_command) {
+				begin_reversible_command (_("remove gaps"));
+				in_command = true;
+			}
+
+			(*i)->remove_gaps (24000, 4410);
+
+			vector<Command*> cmds;
+			(*i)->rdiff (cmds);
+			_session->add_commands (cmds);
+
+			_session->add_command (new StatefulDiffCommand (*i));
+		}
+	}
+
+	if (in_command) {
+		commit_reversible_command ();
+	}
+}

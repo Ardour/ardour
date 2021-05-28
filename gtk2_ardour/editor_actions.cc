@@ -455,6 +455,10 @@ Editor::register_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::track_selection_sensitive_actions.push_back (act);
 
+	act = reg_sens (editor_actions, "remove-gaps", _("Remove Gaps"), (sigc::mem_fun(*this, &Editor::remove_gaps)));
+	ActionManager::track_selection_sensitive_actions.push_back (act);
+	ActionManager::session_sensitive_actions.push_back (act);
+
 
 	act = reg_sens (editor_actions, "toggle-track-active", _("Toggle Active"), (sigc::mem_fun(*this, &Editor::toggle_tracks_active)));
 	ActionManager::route_selection_sensitive_actions.push_back (act);
