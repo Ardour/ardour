@@ -91,6 +91,6 @@ public:
 }
 }
 
-std::ostream & operator <<  (std::ostream & os, const ArdourSurface::US2400::Control & control);
+std::ostream & operator<< (std::ostream & os, const ArdourSurface::US2400::Control & control);
 
 #endif /* __us2400_controls_h__ */

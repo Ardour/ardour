@@ -112,7 +112,7 @@ Control::stop_touch (double when)
 	}
 }
 
-ostream & operator <<  (ostream & os, const ArdourSurface::US2400::Control & control)
+ostream & operator<< (ostream & os, const ArdourSurface::US2400::Control & control)
 {
 	os << typeid (control).name();
 	os << " { ";

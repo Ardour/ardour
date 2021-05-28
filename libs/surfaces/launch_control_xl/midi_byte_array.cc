@@ -59,20 +59,20 @@ void MidiByteArray::copy (size_t count, MIDI::byte * arr)
 	}
 }
 
-MidiByteArray & operator <<  (MidiByteArray & mba, const MIDI::byte & b)
+MidiByteArray & operator<< (MidiByteArray & mba, const MIDI::byte & b)
 {
 	mba.push_back (b);
 	return mba;
 }
 
-MidiByteArray & operator <<  (MidiByteArray & mba, const MidiByteArray & barr)
+MidiByteArray & operator<< (MidiByteArray & mba, const MidiByteArray & barr)
 {
 	back_insert_iterator<MidiByteArray> bit (mba);
 	copy (barr.begin(), barr.end(), bit);
 	return mba;
 }
 
-ostream & operator <<  (ostream & os, const MidiByteArray & mba)
+ostream & operator<< (ostream & os, const MidiByteArray & mba)
 {
 	os << "[";
 	char fill = os.fill('0');
@@ -86,7 +86,7 @@ ostream & operator <<  (ostream & os, const MidiByteArray & mba)
 	return os;
 }
 
-MidiByteArray & operator <<  (MidiByteArray & mba, const std::string & st)
+MidiByteArray & operator<< (MidiByteArray & mba, const std::string & st)
 {
 	/* note that this assumes that "st" is ASCII encoded
 	 */
@@ -112,4 +112,3 @@ MidiByteArray::compare_n (const MidiByteArray& other, MidiByteArray::size_type n
 
 	return true;
 }
-	

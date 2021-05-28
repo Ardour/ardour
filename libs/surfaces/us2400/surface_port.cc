@@ -194,7 +194,7 @@ SurfacePort::write (const MidiByteArray & mba)
 }
 
 ostream &
-US2400::operator <<  (ostream & os, const SurfacePort & port)
+US2400::operator<< (ostream & os, const SurfacePort & port)
 {
 	os << "{ ";
 	os << "name: " << port.input_port().name() << " " << port.output_port().name();

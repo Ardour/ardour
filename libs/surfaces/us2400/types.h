@@ -99,7 +99,7 @@ struct ControlState
 	ButtonState button_state;
 };
 
-std::ostream & operator <<  (std::ostream &, const ControlState &);
+std::ostream & operator<< (std::ostream &, const ControlState &);
 
 class Control;
 class Fader;

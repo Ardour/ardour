@@ -31,7 +31,7 @@ LedState none( LedState::none );
 }
 }
 
-std::ostream & operator << ( std::ostream & os, const ArdourSurface::Mackie::ControlState & cs )
+std::ostream & operator<< ( std::ostream & os, const ArdourSurface::Mackie::ControlState & cs )
 {
 	os << "ControlState { ";
 	os << "pos: " << cs.pos;
