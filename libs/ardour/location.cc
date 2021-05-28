@@ -1618,7 +1618,7 @@ Locations::ripple (samplepos_t at, samplecnt_t distance, bool include_locked, bo
 {
 	Glib::Threads::RWLock::WriterLock lm (_lock);
 
-	for (LocationList::iterator i = locations.begin(); i != locations.end(); ) {
+	for (LocationList::iterator i = locations.begin(); i != locations.end(); ++i) {
 
 		if (!include_locked && (*i)->locked()) {
 			continue;
