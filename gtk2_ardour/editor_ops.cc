@@ -8924,7 +8924,84 @@ Editor::make_region_markers_global (bool as_cd_marker)
 }
 
 void
-Editor::remove_gaps ()
+Editor::do_remove_gaps ()
+{
+	ArdourDialog d (_("Remove Gaps"), true, false);
+
+	Gtk::HBox hpacker1;
+	Gtk::Label label1 (_("Smallest gap size to remove (seconds):"));
+	Gtk::Entry e1;
+
+	hpacker1.set_spacing (12);
+	hpacker1.set_border_width (12);
+	hpacker1.pack_start (label1, true, false);
+	hpacker1.pack_start (e1, false, false);
+
+	Gtk::HBox hpacker2;
+	Gtk::Label label2 (_("Leave a gap of(seconds):"));
+	Gtk::Entry e2;
+
+	hpacker2.set_spacing (12);
+	hpacker2.set_border_width (12);
+	hpacker2.pack_start (label2, true, false);
+	hpacker2.pack_start (e2, false, false);
+
+	d.get_vbox()->pack_start (hpacker1);
+	d.get_vbox()->pack_start (hpacker2);
+	d.get_vbox()->show_all ();
+
+	e2.set_activates_default ();
+
+	d.add_button (Stock::CANCEL, RESPONSE_CANCEL);
+	d.add_button (Stock::OK, RESPONSE_OK);
+	d.set_default_response (RESPONSE_OK);
+
+  again:
+	int result = d.run ();
+
+	if (result != RESPONSE_OK) {
+		return;
+	}
+
+	float threshold_secs;
+
+	if (sscanf (e1.get_text().c_str(), "%f", &threshold_secs) != 1) {
+		ArdourMessageDialog msg (_("The threshold value you entered is not a number"));
+		msg.run();
+		goto again;
+	}
+
+	if (threshold_secs <= 0) {
+		ArdourMessageDialog msg (_("The threshold value must be larger than zero"));
+		msg.run();
+		goto again;
+	}
+
+	samplecnt_t threshold_samples = (samplecnt_t) floor (threshold_secs * _session->sample_rate());
+
+	float leave_secs;
+
+	if (sscanf (e2.get_text().c_str(), "%f", &leave_secs) != 1) {
+		ArdourMessageDialog msg (_("The leave-gap value you entered is not a number"));
+		msg.run();
+		goto again;
+	}
+
+	if (leave_secs < 0) {
+		ArdourMessageDialog msg (_("The threshold value must be larger than or equal to zero"));
+		msg.run ();
+		goto again;
+	}
+
+	samplecnt_t leave_samples = (samplecnt_t) floor (leave_secs * _session->sample_rate());
+
+	d.hide ();
+
+	remove_gaps (threshold_samples, leave_samples);
+}
+
+void
+Editor::remove_gaps (samplecnt_t gap_threshold, samplecnt_t leave_gap)
 {
 	bool in_command = false;
 	TrackViewList ts = selection->tracks.filter_to_unique_playlists ();
@@ -8963,7 +9040,7 @@ Editor::remove_gaps ()
 				in_command = true;
 			}
 
-			(*i)->remove_gaps (24000, 4410);
+			(*i)->remove_gaps (gap_threshold, leave_gap);
 
 			vector<Command*> cmds;
 			(*i)->rdiff (cmds);

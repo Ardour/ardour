@@ -579,7 +579,8 @@ public:
 	void split_regions_at (ARDOUR::MusicSample, RegionSelection&);
 	void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret, bool select_new = false);
 	RegionSelection get_regions_from_selection_and_mouse (samplepos_t);
-	void remove_gaps ();
+	void do_remove_gaps ();
+	void remove_gaps (samplecnt_t threshold, samplecnt_t leave);
 
 	void mouse_add_new_tempo_event (samplepos_t where);
 	void mouse_add_new_meter_event (samplepos_t where);
