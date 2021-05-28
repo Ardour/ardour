@@ -4746,7 +4746,6 @@ bool
 Session::audio_source_name_is_unique (const string& name)
 {
 	std::vector<string> sdirs = source_search_path (DataType::AUDIO);
-	vector<space_and_path>::iterator i;
 	uint32_t existing = 0;
 
 	for (vector<string>::const_iterator i = sdirs.begin(); i != sdirs.end(); ++i) {
@@ -4890,7 +4889,6 @@ Session::new_midi_source_path (const string& base, bool need_lock)
 	while (true) {
 		possible_name = bump_name_once (possible_name, '-');
 
-		vector<space_and_path>::iterator i;
 		uint32_t existing = 0;
 
 		for (vector<string>::const_iterator i = sdirs.begin(); i != sdirs.end(); ++i) {

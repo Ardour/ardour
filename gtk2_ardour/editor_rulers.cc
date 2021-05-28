@@ -977,7 +977,6 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 		return;
 	}
 
-	std::vector<TempoMap::BBTPoint>::const_iterator i;
 	Timecode::BBT_Time lower_beat, upper_beat; // the beats at each end of the ruler
 	double floor_lower_beat = floor(std::max (0.0, _session->tempo_map().beat_at_sample (lower)));
 

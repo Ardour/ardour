@@ -790,7 +790,6 @@ int
 FaderPort::set_state (const XMLNode& node, int version)
 {
 	XMLNodeList nlist;
-	XMLNodeConstIterator niter;
 	XMLNode const* child;
 
 	if (ControlProtocol::set_state (node, version)) {
