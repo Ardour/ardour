@@ -1806,15 +1806,8 @@ Session::xrun_recovery ()
 
 		}
 	}
-	else if (exporting ()) {
-		/* apparently JACK2 can cause xruns during freewheeling
-		 * (and not just one when switching from/to freewheeling):
-		 * https://discourse.ardour.org/t/there-have-been-dropouts-during-realtime-export/105930
-		 * https://github.com/jackaudio/jack2/issues/758
-		 */
-		if (realtime_export ()) {
-			++_export_xruns;
-		}
+	else if (_exporting && _realtime_export && _export_rolling) {
+		++_export_xruns;
 	}
 }
 
