@@ -884,7 +884,7 @@ Playlist::remove_region_internal (boost::shared_ptr<Region> region, ThawList& th
 }
 
 void
-Playlist::remove_gaps (samplepos_t gap_threshold, samplepos_t leave_gap)
+Playlist::remove_gaps (samplepos_t gap_threshold, samplepos_t leave_gap, boost::function<void (samplepos_t, samplecnt_t)> gap_callback)
 {
 	RegionWriteLock rlock (this);
 	RegionList::iterator i;
@@ -904,7 +904,13 @@ Playlist::remove_gaps (samplepos_t gap_threshold, samplepos_t leave_gap)
 			break;
 		}
 
-		const samplepos_t gap = (*nxt)->position() - ((*i)->position() + (*i)->length());
+		samplepos_t end_of_this_region = (*i)->position() + (*i)->length();
+
+		if (end_of_this_region >= (*nxt)->position()) {
+			continue;
+		}
+
+		const samplepos_t gap = (*nxt)->position() - end_of_this_region;
 
 		if (gap < gap_threshold) {
 			continue;
@@ -913,6 +919,8 @@ Playlist::remove_gaps (samplepos_t gap_threshold, samplepos_t leave_gap)
 		const samplepos_t shift = gap - leave_gap;
 
 		ripple_unlocked ((*nxt)->position(), -shift, 0, rlock.thawlist, false);
+
+		gap_callback ((*nxt)->position(), shift);
 
 		closed = true;
 	}

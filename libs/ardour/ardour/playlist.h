@@ -163,7 +163,7 @@ public:
 	void duplicate_ranges (std::list<AudioRange>&, float times);
 	void nudge_after (samplepos_t start, samplecnt_t distance, bool forwards);
 	void fade_range (std::list<AudioRange>&);
-	void remove_gaps (samplepos_t gap_threshold, samplepos_t leave_gap);
+	void remove_gaps (samplepos_t gap_threshold, samplepos_t leave_gap, boost::function<void (samplepos_t, samplecnt_t)> gap_callback);
 
 	boost::shared_ptr<Region> combine (const RegionList&);
 	void                      uncombine (boost::shared_ptr<Region>);
