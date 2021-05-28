@@ -2922,7 +2922,7 @@ Editor::snap_to_marker (samplepos_t presnap, RoundMode direction)
 			test = after;
 		} else if ((direction == RoundDownMaybe || direction == RoundDownAlways)) {
 			test = before;
-		} else if (direction ==  0) {
+		} else {
 			if ((presnap - before) < (after - presnap)) {
 				test = before;
 			} else {
