@@ -21,12 +21,13 @@
 
 #include <glib.h>
 
+#include "pbd/g_atomic_compat.h"
 #include "temporal/beats.h"
 #include "evoral/Event.h"
 
 namespace Evoral {
 
-static event_id_t _event_id_counter = 0;
+static GATOMIC_QUAL event_id_t _event_id_counter = 0;
 
 event_id_t
 event_id_counter()

@@ -169,7 +169,7 @@ class LIBGTKMM2EXT_API Keyboard : public sigc::trackable, PBD::Stateful
 	static void magic_widget_drop_focus ();
 	static Gtk::Window* get_current_window () { return current_window; };
 
-	static void close_current_dialog ();
+	static bool close_current_dialog ();
 
 	static void keybindings_changed ();
 	static void save_keybindings ();
@@ -183,6 +183,8 @@ class LIBGTKMM2EXT_API Keyboard : public sigc::trackable, PBD::Stateful
 	static void save_keybindings (std::string const& path);
 
 	static std::string binding_filename_suffix;
+	static const int close_window_key;
+	static guint close_window_modifier;
 
 	int reset_bindings ();
 

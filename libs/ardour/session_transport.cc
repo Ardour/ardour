@@ -85,7 +85,8 @@ using namespace PBD;
 
 #define TFSM_EVENT(evtype) { _transport_fsm->enqueue (new TransportFSM::Event (evtype)); }
 #define TFSM_STOP(abort,clear) { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::StopTransport,abort,clear)); }
-#define TFSM_LOCATE(target,ltd,flush,loop,force) { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::Locate,target,ltd,flush,loop,force)); }
+#define TFSM_LOCATE(target,ltd,loop,force) { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::Locate,target,ltd,loop,force)); }
+#define TFSM_SPEED(speed,as_default) { _transport_fsm->enqueue (new TransportFSM::Event (speed,as_default)); }
 
 /* *****************************************************************************
  * REALTIME ACTIONS (to be called on state transitions)
@@ -96,16 +97,24 @@ Session::realtime_stop (bool abort, bool clear_state)
 {
 	ENSURE_PROCESS_THREAD;
 
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("realtime stop @ %1 speed = %2\n", _transport_sample, _transport_speed));
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("realtime stop @ %1 speed = %2\n", _transport_sample, _transport_fsm->transport_speed()));
 	PostTransportWork todo = PostTransportStop;
 
-	/* this resets the speed we will start at if just requested to roll
-	 * again. Don't do it if we are stopping to locate ... in those
-	 * conditions, keep the current default speed so that when we start
-	 * again we resume that speed
-	 */
-	if (!_transport_fsm->declicking_for_locate()) {
-		_default_transport_speed = 1.0;
+	/* we are rolling and we want to stop */
+
+	if (Config->get_monitoring_model() == HardwareMonitoring) {
+		set_track_monitor_input_status (true);
+	}
+
+	if (synced_to_engine ()) {
+		if (clear_state) {
+			/* do this here because our response to the slave won't
+			   take care of it.
+			*/
+			_play_range = false;
+			_count_in_once = false;
+			unset_play_loop ();
+		}
 	}
 
 	/* call routes */
@@ -142,9 +151,6 @@ Session::realtime_stop (bool abort, bool clear_state)
 
 	reset_punch_loop_constraint ();
 
-	_transport_speed = 0;
-	_engine_speed = 1.0;
-
 	g_atomic_int_set (&_playback_load, 100);
 	g_atomic_int_set (&_capture_load, 100);
 
@@ -159,7 +165,7 @@ Session::realtime_stop (bool abort, bool clear_state)
 
 /** @param with_mmc true to send a MMC locate command when the locate is done */
 void
-Session::locate (samplepos_t target_sample, bool with_roll, bool with_flush, bool for_loop_end, bool force, bool with_mmc)
+Session::locate (samplepos_t target_sample, bool for_loop_end, bool force, bool with_mmc)
 {
 	ENSURE_PROCESS_THREAD;
 
@@ -178,19 +184,10 @@ Session::locate (samplepos_t target_sample, bool with_roll, bool with_flush, boo
 	 * changes in the value of _transport_sample.
 	 */
 
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("rt-locate to %1 ts = %7, roll %2 flush %3 for loop end %4 force %5 mmc %6\n",
-	                                               target_sample, with_roll, with_flush, for_loop_end, force, with_mmc, _transport_sample));
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("rt-locate to %1 ts = %7, for loop end %2 force %3 mmc %4\n",
+	                                               target_sample, for_loop_end, force, with_mmc, _transport_sample));
 
 	if (!force && (_transport_sample == target_sample) && !for_loop_end) {
-
-		/* already at the desired position. Not forced to locate, so
-		   unless we're told to start rolling also, there's nothing to
-		   do but tell the world where we are (again).
-		*/
-
-		if (with_roll) {
-			set_transport_speed (1.0, false, false, false);
-		}
 		TFSM_EVENT (TransportFSM::LocateDone);
 		Located (); /* EMIT SIGNAL */
 		return;
@@ -208,61 +205,18 @@ Session::locate (samplepos_t target_sample, bool with_roll, bool with_flush, boo
 	}
 	timecode_time(_transport_sample, transmitting_timecode_time); // XXX here?
 
-	/* do "stopped" stuff if:
-	 *
-	 * we are rolling AND
-	 * no autoplay in effect AND
-	 * we're not going to keep rolling after the locate AND
-	 * !(playing a loop with JACK sync) AND
-	 * we're not synced to an external transport master
-	 *
-	 */
+	assert (_transport_fsm->locating() || _transport_fsm->declicking_for_locate());
 
+	/* Tell all routes to do the RT part of locate */
 
-	/* it is important here that we use the internal state of the transport
-	   FSM, not the public facing result of ::transport_rolling()
-	*/
-	bool transport_was_stopped = !_transport_fsm->rolling();
-
-	/* Prevent rolling in the case of calling Session::goto_start while
-	 * SessionConfiguration::get_auto_play == false.
-	 *
-	 * Because _transport_fsm->motion_state == WaitingForLocate after
-	 * calling goto_start, we have to check for _transport_fsm->locating()
-	 * and with_roll here.
-	 */
-
-	if (!with_roll && _transport_fsm->locating()) {
-		transport_was_stopped = false;
-	}
-
-	if (!transport_was_stopped &&
-	    (!auto_play_legal || !config.get_auto_play()) &&
-	    !with_roll &&
-	    !(synced_to_engine() && get_play_loop ()) &&
-	    !(config.get_external_sync() && !synced_to_engine())) {
-
-		realtime_stop (false, true); // XXX paul - check if the 2nd arg is really correct
-		transport_was_stopped = true;
-
-	} else {
-
-		/* Tell all routes to do the RT part of locate */
-
-		boost::shared_ptr<RouteList> r = routes.reader ();
-		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-			(*i)->realtime_locate (for_loop_end);
-		}
+	boost::shared_ptr<RouteList> r = routes.reader ();
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		(*i)->realtime_locate (for_loop_end);
 	}
 
 	if (force || !for_loop_end) {
 
 		PostTransportWork todo = PostTransportLocate;
-
-		if (with_roll && transport_was_stopped) {
-			todo = PostTransportWork (todo | PostTransportRoll);
-		}
-
 		add_post_transport_work (todo);
 		need_butler = true;
 
@@ -279,18 +233,6 @@ Session::locate (samplepos_t target_sample, bool with_roll, bool with_flush, boo
 			}
 
 			clicks.clear ();
-		}
-	}
-
-	if (with_roll) {
-		/* switch from input if we're going to roll */
-		if (Config->get_monitoring_model() == HardwareMonitoring) {
-			set_track_monitor_input_status (!config.get_auto_input());
-		}
-	} else {
-		/* otherwise we're going to stop, so do the opposite */
-		if (Config->get_monitoring_model() == HardwareMonitoring) {
-			set_track_monitor_input_status (true);
 		}
 	}
 
@@ -372,13 +314,28 @@ Session::post_locate ()
  *  @param speed New speed
  */
 void
-Session::set_transport_speed (double speed, bool abort, bool clear_state, bool as_default)
+Session::set_transport_speed (double speed)
 {
 	ENSURE_PROCESS_THREAD;
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("@ %5 Set transport speed to %1 from %4 (es = %7), abort = %2 clear_state = %3, as_default %6\n",
-	                                               speed, abort, clear_state, _transport_speed, _transport_sample, as_default, _engine_speed));
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("@ %1 Set transport speed to %2 from %3 (es = %4)\n", _transport_sample, speed, _transport_fsm->transport_speed(), _engine_speed));
 
-	if ((_engine_speed != 1) && (_engine_speed == fabs (speed)) && (speed * _transport_speed) >= 0) {
+	assert (speed != 0.0);
+
+	/* the logic:
+
+	   a) engine speed is not 1.0 (normal speed)
+	   b) engine speed matches the requested speed (sign ignored)
+	   c) speed and transport speed have the same sign (no direction change)
+
+	   For (c) the correct arithmetical test is >= 0, but we care about the
+	   case where at least one of them is zero. That would generate an
+	   equality with zero, but if only one of them is zero, we still need
+	   to change speed. So we check that the product is > 0, which implies
+	   that neither of them are zero, and they have the same sign.
+
+	*/
+
+	if ((_engine_speed != 1) && (_engine_speed == fabs (speed)) && ((speed * _transport_fsm->transport_speed()) > 0)) {
 		/* engine speed is not changing and no direction change, do nothing */
 		DEBUG_TRACE (DEBUG::Transport, "no reason to change speed, do nothing\n");
 		return;
@@ -394,150 +351,54 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state, bool a
 		speed = max ((double) -Config->get_max_transport_speed(), speed);
 	}
 
-	double new_engine_speed = 1.0;
+	double new_engine_speed = fabs (speed);
+	// double new_transport_speed = (speed < 0) ? -1 : 1;
 
-	if (speed != 0) {
-		new_engine_speed = fabs (speed);
-		if (speed < 0) speed = -1;
-		if (speed > 0) speed = 1;
-	}
-
-	if (_transport_speed == speed && new_engine_speed == _engine_speed) {
-		if (as_default && speed == 0.0) { // => reset default transport speed. hacky or what?
-			_default_transport_speed = 1.0;
-		}
+	if ((synced_to_engine()) && speed != 0.0 && speed != 1.0) {
+		warning << string_compose (
+			_("Global varispeed cannot be supported while %1 is connected to JACK transport control"),
+			PROGRAM_NAME)
+		        << endmsg;
 		return;
 	}
 
-#if 0 // TODO pref: allow vari-speed recording
-	if (actively_recording() && speed != 1.0 && speed != 0.0) {
-		/* no varispeed during recording */
-		DEBUG_TRACE (DEBUG::Transport, string_compose ("No varispeed during recording cur_speed %1, sample %2\n",
-						       _transport_speed, _transport_sample));
-		return;
-	}
-#endif
-
+	clear_clicks ();
 	_engine_speed = new_engine_speed;
 
-	if (transport_rolling() && speed == 0.0) {
-
-		/* we are rolling and we want to stop */
-
-		if (Config->get_monitoring_model() == HardwareMonitoring) {
-			set_track_monitor_input_status (true);
-		}
-
-		if (synced_to_engine ()) {
-			if (clear_state) {
-				/* do this here because our response to the slave won't
-				   take care of it.
-				*/
-				_play_range = false;
-				_count_in_once = false;
-				unset_play_loop ();
-			}
-		}
-
-		TFSM_STOP (abort, false);
-
-	} else if (transport_stopped() && speed == 1.0) {
-
-		if (as_default) {
-			_default_transport_speed = speed;
-		}
-
-		/* we are stopped and we want to start rolling at speed 1 */
-
-		if (Config->get_loop_is_mode() && get_play_loop ()) {
-
-			Location *location = _locations->auto_loop_location();
-
-			if (location != 0) {
-				if (_transport_sample != location->start()) {
-
-					/* force tracks to do their thing */
-					set_track_loop (true);
-
-					/* jump to start and then roll from there */
-
-					request_locate (location->start(), MustRoll);
-					return;
-				}
-			}
-		}
-
-		if (Config->get_monitoring_model() == HardwareMonitoring && config.get_auto_input()) {
-			set_track_monitor_input_status (false);
-		}
-
-		TFSM_EVENT (TransportFSM::StartTransport);
-
-	} else {
-
-		/* not zero, not 1.0 ... varispeed */
-
-		// TODO handled transport start..  _remaining_latency_preroll
-		// and reversal of playback direction.
-
-		if ((synced_to_engine()) && speed != 0.0 && speed != 1.0) {
-			warning << string_compose (
-				_("Global varispeed cannot be supported while %1 is connected to JACK transport control"),
-				PROGRAM_NAME)
-				<< endmsg;
-			return;
-		}
-
-#if 0
-		if (actively_recording()) {
-			return;
-		}
-#endif
-
-		if (speed > 0.0 && _transport_sample == current_end_sample()) {
-			return;
-		}
-
-		if (speed < 0.0 && _transport_sample == 0) {
-			return;
-		}
-
-		clear_clicks ();
-
-		/* if we are reversing relative to the current speed, or relative to the speed
-		   before the last stop, then we have to do extra work.
-		*/
-
-		_transport_speed = speed;
-
-		if (as_default) {
-			_default_transport_speed = speed;
-		}
-
-		DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC3 with speed = %1\n", _transport_speed));
-
-		/* throttle signal emissions.
-		 * when slaved [_last]_transport_speed
-		 * usually changes every cycle (tiny amounts due to DLL).
-		 * Emitting a signal every cycle is overkill and unwarranted.
-		 *
-		 * Using _transport_speed is not acceptable,
-		 * since it allows for large changes over a long period
-		 * of time. Hence we introduce a dedicated variable to keep track
-		 *
-		 * The 0.2% dead-zone is somewhat arbitrary. Main use-case
-		 * for TransportStateChange() here is the ShuttleControl display.
-		 */
-		if (fabs (_signalled_varispeed - actual_speed ()) > .002
-		    // still, signal hard changes to 1.0 and 0.0:
-		    || (actual_speed () == 1.0 && _signalled_varispeed != 1.0)
-		    || (actual_speed () == 0.0 && _signalled_varispeed != 0.0)
-		   )
-		{
-			TransportStateChange (); /* EMIT SIGNAL */
-			_signalled_varispeed = actual_speed ();
-		}
+	if (!Config->get_auto_return_after_rewind_ffwd() && fabs (speed) != 1.0 && _transport_fsm->default_speed() == 1.0) {
+		/* varispeed of any sort cancels auto-return */
+		_requested_return_sample = -1;
+		_last_roll_location = -1;
+		_last_roll_or_reversal_location = -1;
 	}
+
+
+	/* throttle signal emissions.
+	 * when slaved [_last]_transport_fsm->transport_speed()
+	 * usually changes every cycle (tiny amounts due to DLL).
+	 * Emitting a signal every cycle is overkill and unwarranted.
+	 *
+	 * Using _transport_fsm->transport_speed() is not acceptable,
+	 * since it allows for large changes over a long period
+	 * of time. Hence we introduce a dedicated variable to keep track
+	 *
+	 * The 0.2% dead-zone is somewhat arbitrary. Main use-case
+	 * for TransportStateChange() here is the ShuttleControl display.
+	 */
+
+	const double act_speed = actual_speed ();
+
+	if (fabs (_signalled_varispeed - act_speed) > .002
+	    // still, signal hard changes to 1.0 and 0.0:
+	    || (act_speed == 1.0 && _signalled_varispeed != 1.0)
+	    || (act_speed == 0.0 && _signalled_varispeed != 0.0)
+		)
+	{
+		DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC3 with speed = %1\n", _transport_fsm->transport_speed()));
+		TransportStateChange (); /* EMIT SIGNAL */
+		_signalled_varispeed = act_speed;
+	}
+
 }
 
 /** Stop the transport.  */
@@ -559,6 +420,28 @@ Session::start_transport ()
 {
 	ENSURE_PROCESS_THREAD;
 	DEBUG_TRACE (DEBUG::Transport, "start_transport\n");
+
+	if (Config->get_loop_is_mode() && get_play_loop ()) {
+
+		Location *location = _locations->auto_loop_location();
+
+		if (location != 0) {
+			if (_transport_sample != location->start()) {
+
+				/* force tracks to do their thing */
+				set_track_loop (true);
+
+				/* jump to start and then roll from there */
+
+				request_locate (location->start(), MustRoll);
+				return;
+			}
+		}
+	}
+
+	if (Config->get_monitoring_model() == HardwareMonitoring) {
+		set_track_monitor_input_status (!config.get_auto_input());
+	}
 
 	_last_roll_location = _transport_sample;
 	_last_roll_or_reversal_location = _transport_sample;
@@ -599,7 +482,7 @@ Session::start_transport ()
 	maybe_allow_only_loop ();
 	maybe_allow_only_punch ();
 
-	_transport_speed = _default_transport_speed;
+	clear_clicks ();
 
 	if (!_engine.freewheeling()) {
 		Timecode::Time time;
@@ -655,7 +538,7 @@ Session::start_transport ()
 		}
 	}
 
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC4 with speed = %1\n", _transport_speed));
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC4 with speed = %1\n", transport_speed()));
 	TransportStateChange (); /* EMIT SIGNAL */
 }
 
@@ -669,13 +552,38 @@ Session::need_declick_before_locate () const
 }
 
 bool
+Session::should_stop_before_locate () const
+{
+	/* do "stopped" stuff if:
+	 *
+	 * we are rolling AND
+	 * no autoplay in effect AND
+	 * we're not synced to an external transport master
+	 *
+	 */
+
+	if ((!auto_play_legal || !config.get_auto_play()) &&
+	    !(config.get_external_sync() && !synced_to_engine())) {
+
+		return true;
+	}
+	return false;
+}
+
+bool
+Session::user_roll_after_locate () const
+{
+	return auto_play_legal && config.get_auto_play();
+}
+
+bool
 Session::should_roll_after_locate () const
 {
 	/* a locate must previously have been requested and completed before
 	 * this answer can be considered correct
 	 */
 
-	return ((!config.get_external_sync() && (auto_play_legal && config.get_auto_play())) && !_exporting) || (post_transport_work() & PostTransportRoll);
+	return ((!config.get_external_sync() && (auto_play_legal && config.get_auto_play())) && !_exporting);
 
 }
 
@@ -708,12 +616,6 @@ Session::butler_completed_transport_work ()
 		TFSM_EVENT (TransportFSM::LocateDone);
 	}
 
-	bool start_after_butler_done_msg = false;
-
-	if (ptw & PostTransportRoll) {
-		start_after_butler_done_msg = true;
-	}
-
 	/* the butler finished its work so clear all PostTransportWork flags
 	 */
 
@@ -723,13 +625,6 @@ Session::butler_completed_transport_work ()
 
 	if (_transport_fsm->waiting_for_butler()) {
 		TFSM_EVENT (TransportFSM::ButlerDone);
-	}
-
-	if (start_after_butler_done_msg) {
-		if (_transport_speed) {
-			/* reversal is done ... tell TFSM that it is time to start*/
-			TFSM_EVENT (TransportFSM::StartTransport);
-		}
 	}
 }
 
@@ -745,7 +640,7 @@ bool
 Session::maybe_stop (samplepos_t limit)
 {
 	ENSURE_PROCESS_THREAD;
-	if ((_transport_speed > 0.0f && _transport_sample >= limit) || (_transport_speed < 0.0f && _transport_sample == 0)) {
+	if ((_transport_fsm->transport_speed() > 0.0f && _transport_sample >= limit) || (_transport_fsm->transport_speed() < 0.0f && _transport_sample == 0)) {
 		if (synced_to_engine ()) {
 			_engine.transport_stop ();
 		} else {
@@ -845,6 +740,12 @@ Session::request_sync_source (boost::shared_ptr<TransportMaster> tm)
 }
 
 void
+Session::reset_transport_speed (TransportRequestSource origin)
+{
+	request_transport_speed (1.0, true, origin);
+}
+
+void
 Session::request_transport_speed (double speed, bool as_default, TransportRequestSource origin)
 {
 	if (synced_to_engine()) {
@@ -867,7 +768,7 @@ Session::request_transport_speed (double speed, bool as_default, TransportReques
 	}
 
 	SessionEvent* ev = new SessionEvent (SessionEvent::SetTransportSpeed, SessionEvent::Add, SessionEvent::Immediate, 0, speed);
-	ev->third_yes_or_no = as_default; // as_default
+	ev->yes_or_no = as_default; // as_default
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request transport speed = %1 as default = %2\n", speed, as_default));
 	queue_event (ev);
 }
@@ -887,6 +788,23 @@ Session::request_transport_speed_nonzero (double speed, bool as_default, Transpo
 }
 
 void
+Session::request_roll (TransportRequestSource origin)
+{
+	if (synced_to_engine()) {
+		_engine.transport_stop ();
+		return;
+	}
+
+	if (should_ignore_transport_request (origin, TR_StartStop)) {
+		return;
+	}
+
+	SessionEvent* ev = new SessionEvent (SessionEvent::StartRoll, SessionEvent::Add, SessionEvent::Immediate, 0, false); /* final 2 argumment do not matter */
+	DEBUG_TRACE (DEBUG::Transport, "Request transport roll\n");
+	queue_event (ev);
+}
+
+void
 Session::request_stop (bool abort, bool clear_state, TransportRequestSource origin)
 {
 	if (synced_to_engine()) {
@@ -903,7 +821,7 @@ Session::request_stop (bool abort, bool clear_state, TransportRequestSource orig
 		solo_selection ( _soloSelection, false );
 	}
 
-	SessionEvent* ev = new SessionEvent (SessionEvent::SetTransportSpeed, SessionEvent::Add, SessionEvent::Immediate, audible_sample(), 0.0, abort, clear_state);
+	SessionEvent* ev = new SessionEvent (SessionEvent::EndRoll, SessionEvent::Add, SessionEvent::Immediate, audible_sample(), 0.0, abort, clear_state);
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request transport stop, audible %3 transport %4 abort = %1, clear state = %2\n", abort, clear_state, audible_sample(), _transport_sample));
 	queue_event (ev);
 }
@@ -1111,7 +1029,7 @@ Session::solo_selection (StripableList &list, bool new_state)
 
 
 void
-Session::butler_transport_work ()
+Session::butler_transport_work (bool have_process_lock)
 {
 	/* Note: this function executes in the butler thread context */
 
@@ -1166,7 +1084,10 @@ Session::butler_transport_work ()
 	if (ptw & PostTransportAdjustPlaybackBuffering) {
 		/* need to prevent concurrency with ARDOUR::Reader::run(),
 		 * DiskWriter::adjust_buffering() re-allocates the ringbuffer */
-		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
+		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock (), Glib::Threads::NOT_LOCK);
+		if (!have_process_lock) {
+			lx.acquire ();
+		}
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 			if (tr) {
@@ -1184,7 +1105,10 @@ Session::butler_transport_work ()
 	if (ptw & PostTransportAdjustCaptureBuffering) {
 		/* need to prevent concurrency with ARDOUR::DiskWriter::run(),
 		 * DiskWriter::adjust_buffering() re-allocates the ringbuffer */
-		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
+		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock (), Glib::Threads::NOT_LOCK);
+		if (!have_process_lock) {
+			lx.acquire ();
+		}
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 			if (tr) {
@@ -1193,8 +1117,11 @@ Session::butler_transport_work ()
 		}
 	}
 
-	if (ptw & PostTransportLocate) {
-		DEBUG_TRACE (DEBUG::Transport, "nonrealtime locate invoked from BTW\n");
+	const int butler = g_atomic_int_get (&_butler_seek_counter);
+	const int rtlocates = g_atomic_int_get (&_seek_counter);
+
+	if (butler != rtlocates) {
+		DEBUG_TRACE (DEBUG::Transport, string_compose ("nonrealtime locate invoked from BTW (butler has done %1, rtlocs %2)\n", butler, rtlocates));
 		non_realtime_locate ();
 	}
 
@@ -1280,12 +1207,13 @@ Session::non_realtime_locate ()
 	uint32_t nt = 0;
 
 	samplepos_t tf;
+	gint sc;
 
 	{
 		boost::shared_ptr<RouteList> rl = routes.reader();
 
 	  restart:
-		gint sc = g_atomic_int_get (&_seek_counter);
+		sc = g_atomic_int_get (&_seek_counter);
 		tf = _transport_sample;
 		start = get_microseconds ();
 
@@ -1299,12 +1227,17 @@ Session::non_realtime_locate ()
 		microseconds_t end = get_microseconds ();
 		int usecs_per_track = lrintf ((end - start) / (double) nt);
 #ifndef NDEBUG
-		std::cerr << "locate took " << (end - start) << " usecs for " << nt << " tracks = " << usecs_per_track << " per track\n";
+		std::cerr << "locate to " << tf << " took " << (end - start) << " usecs for " << nt << " tracks = " << usecs_per_track << " per track\n";
 #endif
-		if (usecs_per_track > g_atomic_int_get (&current_usecs_per_track)) {
-			g_atomic_int_set (&current_usecs_per_track, usecs_per_track);
+		if (usecs_per_track > g_atomic_int_get (&_current_usecs_per_track)) {
+			g_atomic_int_set (&_current_usecs_per_track, usecs_per_track);
 		}
 	}
+
+	/* we've caught up with whatever the _seek_counter was when we did the
+	   non-realtime locates.
+	*/
+	g_atomic_int_set (&_butler_seek_counter, sc);
 
 	{
 		/* VCAs are quick to locate because they have no data (except
@@ -1464,9 +1397,10 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 				 * auto-return enabled
 				 */
 
-				_transport_sample = _last_roll_location;
-				do_locate = true;
-
+				if (_last_roll_location >= 0) {
+					_transport_sample = _last_roll_location;
+					do_locate = true;
+				}
 			}
 		}
 
@@ -1578,7 +1512,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	}
 
 	PositionChanged (_transport_sample); /* EMIT SIGNAL */
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC with speed = %1\n", _transport_speed));
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC with speed = %1\n", _transport_fsm->transport_speed()));
 	TransportStateChange (); /* EMIT SIGNAL */
 	AutomationWatch::instance().transport_stop_automation_watches (_transport_sample);
 }
@@ -1626,12 +1560,12 @@ Session::set_play_loop (bool yn, bool change_transport_state)
 				/* set loop_changing to ensure that non_realtime_stop does not unset_play_loop */
 				loop_changing = true;
 			}
-			/* args: position, disposition, flush=true, for_loop_end=false, force=true */
-			TFSM_LOCATE (loc->start(), MustRoll, true, false, true);
+			/* args: position, disposition, for_loop_end=false, force=true */
+			TFSM_LOCATE (loc->start(), MustRoll, false, true);
 		} else {
 			if (!transport_rolling()) {
 				/* loop-is-mode: not rolling, just locate to loop start */
-				TFSM_LOCATE (loc->start(), MustStop, true, false, true);
+				TFSM_LOCATE (loc->start(), MustStop, false, true);
 			}
 		}
 		TransportStateChange (); /* EMIT SIGNAL */
@@ -1639,7 +1573,7 @@ Session::set_play_loop (bool yn, bool change_transport_state)
 		unset_play_loop ();
 	}
 
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC2 with speed = %1\n", _transport_speed));
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC2 with speed = %1\n", _transport_fsm->transport_speed()));
 }
 
 void
@@ -1778,7 +1712,7 @@ Session::set_play_range (list<AudioRange>& range, bool leave_rolling)
 	ev = new SessionEvent (SessionEvent::LocateRoll, SessionEvent::Add, SessionEvent::Immediate, range.front().start, 0.0f, false);
 	merge_event (ev);
 
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC5 with speed = %1\n", _transport_speed));
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC5 with speed = %1\n", _transport_fsm->transport_speed()));
 	TransportStateChange (); /* EMIT SIGNAL */
 }
 
@@ -1848,16 +1782,39 @@ Session::xrun_recovery ()
 
 	Xrun (_transport_sample); /* EMIT SIGNAL */
 
-	if (Config->get_stop_recording_on_xrun() && actively_recording()) {
+	if (actively_recording ()) {
+		++_capture_xruns;
 
-		/* it didn't actually halt, but we need
-		 * to handle things in the same way.
+		if (Config->get_stop_recording_on_xrun()) {
+
+			/* it didn't actually halt, but we need
+			 * to handle things in the same way.
+			 */
+
+			engine_halted();
+
+			/* ..and start the FSM engine again */
+			_transport_fsm->start ();
+		} else {
+			boost::shared_ptr<RouteList> rl = routes.reader();
+			for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+				boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+				if (tr) {
+					tr->mark_capture_xrun ();
+				}
+			}
+
+		}
+	}
+	else if (exporting ()) {
+		/* apparently JACK2 can cause xruns during freewheeling
+		 * (and not just one when switching from/to freewheeling):
+		 * https://discourse.ardour.org/t/there-have-been-dropouts-during-realtime-export/105930
+		 * https://github.com/jackaudio/jack2/issues/758
 		 */
-
-		engine_halted();
-
-		/* ..and start the FSM engine again */
-		_transport_fsm->start ();
+		if (realtime_export ()) {
+			++_export_xruns;
+		}
 	}
 }
 
@@ -2034,7 +1991,7 @@ Session::transport_state_rolling() const
 bool
 Session::transport_rolling() const
 {
-	return _transport_speed != 0.0 && _count_in_samples == 0 && _remaining_latency_preroll == 0;
+	return _transport_fsm->transport_speed() != 0.0 && _count_in_samples == 0 && _remaining_latency_preroll == 0;
 }
 
 bool
@@ -2059,4 +2016,21 @@ bool
 Session::transport_will_roll_forwards () const
 {
 	return _transport_fsm->will_roll_fowards ();
+}
+
+double
+Session::transport_speed() const
+{
+	if (_transport_fsm->transport_speed() != _transport_fsm->transport_speed()) {
+		// cerr << "\n\n!!TS " << _transport_fsm->transport_speed() << " TFSM::speed " << _transport_fsm->transport_speed() << " via " << _transport_fsm->current_state() << endl;
+	}
+	return _count_in_samples > 0 ? 0. : _transport_fsm->transport_speed();
+}
+
+double
+Session::actual_speed() const
+{
+	if (_transport_fsm->transport_speed() > 0) return _engine_speed;
+	if (_transport_fsm->transport_speed() < 0) return - _engine_speed;
+	return 0;
 }

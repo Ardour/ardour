@@ -45,6 +45,7 @@ def build(bld):
                 'request_device.c'
             ]
             obj.includes = ['.']
+            obj.cflags   = [ '-pthread' ]
             obj.target   = 'ardour-request-device'
             obj.uselib   = [ 'DBUS' ]
             obj.install_path = os.path.join(bld.env['LIBDIR'])

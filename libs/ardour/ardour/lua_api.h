@@ -54,6 +54,14 @@ namespace ARDOUR { namespace LuaAPI {
 	 */
 	int datatype_ctor_midi (lua_State *L);
 
+	/** add a new [external] Send to the given Route
+	 *
+	 * @param s Session Handle
+	 * @param r Route to add Send to
+	 * @param p add send before given processor (or \ref nil_processor to add at the end)
+	 */
+	boost::shared_ptr<Processor> new_send (Session* s, boost::shared_ptr<ARDOUR::Route> r, boost::shared_ptr<ARDOUR::Processor> p);
+
 	/** Create a null processor shared pointer
 	 *
 	 * This is useful for Track:bounce() to indicate no processing.
@@ -70,6 +78,11 @@ namespace ARDOUR { namespace LuaAPI {
 
 	/** List all installed plugins */
 	std::list<boost::shared_ptr<ARDOUR::PluginInfo> > list_plugins ();
+
+	/** Write a list of untagged plugins to a file, so we can bulk-tag them 
+	 * @returns path to XML file or empty string on error
+	 */
+	std::string dump_untagged_plugins ();
 
 	/** search a Plugin
 	 *
@@ -162,6 +175,13 @@ namespace ARDOUR { namespace LuaAPI {
 	 */
 	int plugin_automation (lua_State *lua);
 
+	/*
+	 * A convenience function to get a scale-points from a ParamaterDescriptor
+	 * @param p a ParameterDescriptor
+	 * @returns Lua Table with "name" -> value pairs
+	 */
+	int desc_scale_points (lua_State* p);
+
 	/**
 	 * A convenience function for colorspace HSL to RGB conversion.
 	 * All ranges are 0..1
@@ -236,6 +256,9 @@ namespace ARDOUR { namespace LuaAPI {
 	 * @return true on success,  false if timeout was reached or engine was not running
 	 */
 	bool wait_for_process_callback (size_t n_cycles, int64_t timeout_ms);
+
+	/** Crash Test Dummy */
+	void segfault ();
 
 	class Vamp {
 	/** Vamp Plugin Interface

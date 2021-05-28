@@ -25,6 +25,7 @@
 #include <glib.h>
 #include <glibmm/miscutils.h>
 
+#include "pbd/replace_all.h"
 #include "pbd/tokenizer.h"
 #include "pbd/search_path.h"
 #include "pbd/error.h"
@@ -83,7 +84,7 @@ Searchpath::add_directory (const std::string& directory_path)
 		return;
 	}
 	for (vector<std::string>::const_iterator i = begin(); i != end(); ++i) {
-		if (*i == directory_path) {
+		if (poor_mans_glob (*i) == poor_mans_glob(directory_path)) {
 			return;
 		}
 	}
@@ -116,7 +117,9 @@ Searchpath::to_string () const
 Searchpath&
 Searchpath::operator+= (const Searchpath& spath)
 {
-	insert(end(), spath.begin(), spath.end());
+	for (vector<std::string>::const_iterator i = spath.begin(); i != spath.end(); ++i) {
+		add_directory (*i);
+	}
 	return *this;
 }
 

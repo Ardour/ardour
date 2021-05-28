@@ -36,7 +36,7 @@ namespace Mackie
 class JogWheel
 {
   public:
-	enum Mode { scroll };
+	enum Mode { scroll, shuttle };
 
 	JogWheel (MackieControlProtocol & mcp);
 

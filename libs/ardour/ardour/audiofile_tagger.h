@@ -22,6 +22,8 @@
 
 #include <string>
 
+#include <taglib/id3v2tag.h>
+#include <taglib/infotag.h>
 #include <taglib/tag.h>
 #include <taglib/taglib.h>
 #include <taglib/xiphcomment.h>
@@ -30,25 +32,22 @@
 
 namespace ARDOUR
 {
-
 class SessionMetadata;
 
 /// Class with static functions for tagging audiofiles
 class LIBARDOUR_API AudiofileTagger
 {
-  public:
-
+public:
 	/* Tags file with metadata, return true on success */
 
-	static bool tag_file (std::string const & filename, SessionMetadata const & metadata);
+	static bool tag_file (std::string const& filename, SessionMetadata const& metadata);
 
-  private:
-
-	static bool tag_generic (TagLib::Tag & tag, SessionMetadata const & metadata);
-	static bool tag_vorbis_comment (TagLib::Ogg::XiphComment & tag, SessionMetadata const & metadata);
+private:
+	static bool tag_generic (TagLib::Tag& tag, SessionMetadata const& metadata);
+	static bool tag_vorbis_comment (TagLib::Ogg::XiphComment& tag, SessionMetadata const& metadata);
+	static bool tag_riff_info (TagLib::RIFF::Info::Tag& tag, SessionMetadata const& metadata);
+	static bool tag_id3v2 (TagLib::ID3v2::Tag& tag, SessionMetadata const& metadata);
 };
-
-
 
 } // namespace ARDOUR
 

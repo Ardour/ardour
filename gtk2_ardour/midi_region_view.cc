@@ -41,6 +41,7 @@
 #include "pbd/stateful_diff_command.h"
 #include "pbd/unwind.h"
 
+#include "ardour/debug.h"
 #include "ardour/midi_model.h"
 #include "ardour/midi_playlist.h"
 #include "ardour/midi_region.h"
@@ -141,7 +142,6 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
 	PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
 
 	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&MidiRegionView::parameter_changed, this, _1), gui_context());
-	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &MidiRegionView::parameter_changed));
 
 	connect_to_diskstream ();
 }
@@ -194,6 +194,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
 void
 MidiRegionView::parameter_changed (std::string const & p)
 {
+	RegionView::parameter_changed (p);
 	if (p == "display-first-midi-bank-as-zero") {
 		if (_enable_display) {
 			redisplay_model();
@@ -318,7 +319,6 @@ MidiRegionView::init (bool wfd)
 	                                            gui_context ());
 
 	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&MidiRegionView::parameter_changed, this, _1), gui_context());
-	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &MidiRegionView::parameter_changed));
 	connect_to_diskstream ();
 }
 
@@ -2132,9 +2132,7 @@ MidiRegionView::delete_note (boost::shared_ptr<NoteType> n)
 void
 MidiRegionView::clear_selection ()
 {
-	clear_selection_internal();
-	PublicEditor& editor(trackview.editor());
-	editor.get_selection().remove (this);
+	clear_note_selection ();
 	_mouse_state = None;
 }
 
@@ -2148,6 +2146,14 @@ MidiRegionView::clear_selection_internal ()
 		(*i)->hide_velocity();
 	}
 	_selection.clear();
+}
+
+void
+MidiRegionView::clear_note_selection ()
+{
+	clear_selection_internal ();
+	PublicEditor& editor(trackview.editor());
+	editor.get_selection().remove (this);
 }
 
 void
@@ -2453,8 +2459,20 @@ MidiRegionView::add_to_selection (NoteBase* ev)
 {
 	if (_selection.empty()) {
 
+		/* we're about to select a note/some notes. Obey rule that only
+		 * 1 thing can be selected by clearing any current selection
+		 */
+
+		trackview.editor().get_selection().clear ();
+
 		/* first note selected in this region, force Editor region
 		 * selection to this region.
+		 *
+		 * this breaks the "only 1 type of thing selected" rule, but
+		 * having the region selected allows "operations applied to
+		 * selected MIDI regions" to work. And we can only select notes
+		 * when in internal edit mode, so we know that operations will
+		 * only apply to notes anyway, not regions.
 		 */
 
 		trackview.editor().set_selected_midi_region_view (*this);

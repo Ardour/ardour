@@ -132,6 +132,7 @@ PortMatrixRowLabels::render (cairo_t* cr)
 			uint32_t const N = _matrix->count_of_our_type ((*i)->bundle->nchannels());
 			for (uint32_t j = 0; j < N; ++j) {
 				Gdk::Color c = (*i)->has_colour ? (*i)->colour : get_a_bundle_colour (M);
+
 				ARDOUR::BundleChannel bc (
 					(*i)->bundle,
 					(*i)->bundle->type_channel_to_overall (_matrix->type (), j)
@@ -251,7 +252,7 @@ PortMatrixRowLabels::render_bundle_name (
 	Gdk::Color textcolor;
 	ARDOUR_UI_UTILS::set_color_from_rgba(textcolor, Gtkmm2ext::contrasting_text_color(ARDOUR_UI_UTILS::gdk_color_to_rgba(bg_colour)));
 	set_source_rgb (cr, textcolor);
-	cairo_move_to (cr, xoff + x + name_pad(), yoff + name_pad() + off);
+	cairo_move_to (cr, rint (xoff + x + name_pad()), rint (yoff + name_pad() + off));
 	cairo_show_text (cr, b->name().c_str());
 }
 
@@ -267,21 +268,28 @@ PortMatrixRowLabels::render_channel_name (
 	cairo_set_line_width (cr, label_border_width ());
 	cairo_stroke (cr);
 
-	if (_matrix->count_of_our_type (bc.bundle->nchannels()) > 1) {
-
-		/* only plot the name if the bundle has more than one channel;
-		   the name of a single channel is assumed to be redundant */
-
-		cairo_text_extents_t ext;
-		cairo_text_extents (cr, bc.bundle->channel_name(bc.channel).c_str(), &ext);
-		double const off = (grid_spacing() - ext.height) / 2;
-
-		Gdk::Color textcolor;
-		ARDOUR_UI_UTILS::set_color_from_rgba(textcolor, Gtkmm2ext::contrasting_text_color(ARDOUR_UI_UTILS::gdk_color_to_rgba(bg_colour)));
-		set_source_rgb (cr, textcolor);
-		cairo_move_to (cr, port_name_x() + xoff + name_pad(), yoff + name_pad() + off);
-		cairo_show_text (cr, bc.bundle->channel_name(bc.channel).c_str());
+	if (_matrix->count_of_our_type (bc.bundle->nchannels()) < 2) {
+		if (bc.bundle->channel_name (bc.channel) == bc.bundle->name()) {
+			/* single channel bundle named after port */
+			return;
+		}
+		/* the name of a single channel is assumed to be redundant,
+		 * unless it has a dedicated pretty-name.
+		 * e.g bundle="system" port="Oxygen 32 MIDI" */
+		if (bc.bundle->channel_name (bc.channel).empty ()) {
+			return;
+		}
 	}
+
+	cairo_text_extents_t ext;
+	cairo_text_extents (cr, bc.bundle->channel_name(bc.channel).c_str(), &ext);
+	double const off = (grid_spacing() - ext.height) / 2;
+
+	Gdk::Color textcolor;
+	ARDOUR_UI_UTILS::set_color_from_rgba(textcolor, Gtkmm2ext::contrasting_text_color(ARDOUR_UI_UTILS::gdk_color_to_rgba(bg_colour)));
+	set_source_rgb (cr, textcolor);
+	cairo_move_to (cr, rint (port_name_x() + xoff + name_pad()), rint (yoff + name_pad() + off));
+	cairo_show_text (cr, bc.bundle->channel_name(bc.channel).c_str());
 }
 
 double

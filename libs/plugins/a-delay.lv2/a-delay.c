@@ -450,7 +450,8 @@ run(LV2_Handle instance, uint32_t n_samples)
 	if (recalc) {
 		lpfRbj(adelay, adelay->lpfold, srate);
 		if (*(adelay->sync) > 0.5f && adelay->bpmvalid) {
-			*(adelay->delaytime) = adelay->beatunit * 1000.f * 60.f / (adelay->bpm * *(adelay->divisor));
+			/* quarter notes / min : 4 qn * 1000 ms/s * 60 s/min = 24k */
+			*(adelay->delaytime) = 240000.f / (adelay->bpm * *(adelay->divisor));
 			if (*(adelay->dotted) > 0.5f) {
 				*(adelay->delaytime) *= 1.5;
 			}

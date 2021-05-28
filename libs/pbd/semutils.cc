@@ -25,7 +25,8 @@ using namespace PBD;
 Semaphore::Semaphore (const char* name, int val)
 {
 #ifdef WINDOWS_SEMAPHORE
-	if ((_sem = CreateSemaphore(NULL, val, 32767, name)) == NULL) {
+	(void) name; /* stop warning */
+	if ((_sem = CreateSemaphore(NULL, val, 32767, NULL)) == NULL) {
 		throw failed_constructor ();
 	}
 
@@ -72,7 +73,7 @@ Semaphore::wait ()
 {
 	DWORD result = 0;
 	result = WaitForSingleObject(_sem, INFINITE);
-	return (result == WAIT_OBJECT_0);
+	return (result == WAIT_OBJECT_0 ? 0 : -1);
 }
 
 int

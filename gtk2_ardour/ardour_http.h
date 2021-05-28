@@ -62,6 +62,8 @@ class HttpGet {
 		return curl_easy_unescape (_curl, s, l, o);
 	}
 
+	/* this is only to be used for data returned by from
+	 * \ref escape() and \ref unescape() */
 	void free (void *p) const {
 		curl_free (p);
 	}

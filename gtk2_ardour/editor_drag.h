@@ -197,8 +197,8 @@ public:
 		return _preview_video;
 	}
 
-	/** @return minimum number of samples (in x) and pixels (in y) that should be considered a movement */
-	virtual std::pair<ARDOUR::samplecnt_t, int> move_threshold () const {
+	/** @return minimum number of pixels (x, y) that should be considered a movement */
+	virtual std::pair<int, int> move_threshold () const {
 		return std::make_pair (1, 1);
 	}
 
@@ -230,6 +230,8 @@ public:
 		_video_sample_offset = 0;
 		_preview_video = false;
 	}
+
+	int grab_button() const { return _grab_button; }
 
 protected:
 
@@ -309,6 +311,7 @@ private:
 	double      _snap_delta_music;
 	CursorContext::Handle _cursor_ctx; ///< cursor change context
 	bool _constraint_pressed; ///< if the keyboard indicated constraint modifier was pressed on start_grab()
+	int _grab_button;
 };
 
 class RegionDrag;
@@ -422,8 +425,12 @@ public:
 		return true;
 	}
 
-	std::pair<ARDOUR::samplecnt_t, int> move_threshold () const {
-		return std::make_pair (4, 4);
+	std::pair<int, int> move_threshold () const {
+		if (_copy) {
+			return std::make_pair (6, 4);
+		} else {
+			return std::make_pair (2, 4);
+		}
 	}
 
 	void setup_pointer_sample_offset ();
@@ -565,6 +572,10 @@ public:
 	void finished (GdkEvent *, bool);
 	void aborted (bool);
 
+	bool allow_vertical_autoscroll () const {
+		return false;
+	}
+
 private:
 	MidiRegionView*     region;
 	bool                relative;
@@ -585,6 +596,11 @@ public:
 	void aborted (bool);
 
 	void setup_pointer_sample_offset ();
+
+	bool allow_vertical_autoscroll () const {
+		return false;
+	}
+
 private:
 
 	double total_dx (GdkEvent * event) const; // total movement in quarter notes
@@ -615,6 +631,10 @@ public:
 		return mode == Editing::MouseDraw || mode == Editing::MouseContent;
 	}
 
+	bool allow_vertical_autoscroll () const {
+		return false;
+	}
+
 	bool y_movement_matters () const {
 		return false;
 	}
@@ -623,8 +643,8 @@ private:
 	double y_to_region (double) const;
 	ARDOUR::samplecnt_t grid_samples (samplepos_t) const;
 
-	/** @return minimum number of samples (in x) and pixels (in y) that should be considered a movement */
-	virtual std::pair<ARDOUR::samplecnt_t, int> move_threshold () const {
+	/** @return minimum number of pixels (x, y) that should be considered a movement */
+	virtual std::pair<int, int> move_threshold () const {
 		return std::make_pair (0, 0);
 	}
 
@@ -656,8 +676,8 @@ private:
 	double y_to_region (double) const;
 	ARDOUR::samplecnt_t grid_samples (samplepos_t) const;
 
-	/** @return minimum number of samples (in x) and pixels (in y) that should be considered a movement */
-	virtual std::pair<ARDOUR::samplecnt_t, int> move_threshold () const {
+	/** @return minimum number of pixels (x, y) that should be considered a movement */
+	virtual std::pair<int, int> move_threshold () const {
 		return std::make_pair (0, 0);
 	}
 
@@ -678,6 +698,10 @@ public:
 	void aborted (bool);
 
 	bool y_movement_matters () const {
+		return false;
+	}
+
+	bool allow_vertical_autoscroll () const {
 		return false;
 	}
 
@@ -746,6 +770,10 @@ public:
 	void aborted (bool);
 
 	bool y_movement_matters () const {
+		return false;
+	}
+
+	bool allow_vertical_autoscroll () const {
 		return false;
 	}
 
@@ -957,6 +985,10 @@ public:
 		return false;
 	}
 
+	bool allow_vertical_autoscroll () const {
+		return false;
+	}
+
 	void setup_pointer_sample_offset ();
 };
 
@@ -972,6 +1004,10 @@ public:
 	void aborted (bool);
 
 	bool y_movement_matters () const {
+		return false;
+	}
+
+	bool allow_vertical_autoscroll () const {
 		return false;
 	}
 
@@ -1031,6 +1067,11 @@ public:
 
 	bool active (Editing::MouseMode m);
 
+	bool allow_vertical_autoscroll () const {
+		return false;
+	}
+
+
 private:
 
 	ControlPoint* _point;
@@ -1053,6 +1094,10 @@ public:
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
 	void aborted (bool);
+
+	bool allow_vertical_autoscroll () const {
+		return false;
+	}
 
 private:
 
@@ -1098,8 +1143,9 @@ public:
 	void finished (GdkEvent *, bool);
 	void aborted (bool);
 
-	std::pair<ARDOUR::samplecnt_t, int> move_threshold () const {
-		return std::make_pair (8, 1);
+	/** @return minimum number of pixels (x, y) that should be considered a movement */
+	std::pair<int, int> move_threshold () const {
+		return std::make_pair (1, 1);
 	}
 
 	void do_select_things (GdkEvent *, bool);
@@ -1256,7 +1302,8 @@ public:
 	void finished (GdkEvent *, bool);
 	void aborted (bool);
 
-	std::pair<ARDOUR::samplecnt_t, int> move_threshold () const {
+	/** @return minimum number of pixels (x, y) that should be considered a movement */
+	std::pair<int, int> move_threshold () const {
 		return std::make_pair (4, 4);
 	}
 
@@ -1320,13 +1367,41 @@ public:
 		return false;
 	}
 
-	virtual std::pair<ARDOUR::samplecnt_t, int> move_threshold () const {
-		return std::make_pair (4, 4);
+	virtual std::pair<int, int> move_threshold () const {
+		return std::make_pair (1, 4);
 	}
 
 private:
 	AudioRegionView* arv;
 	bool start;
+};
+
+class RegionMarkerDrag : public Drag
+{
+  public:
+	RegionMarkerDrag (Editor*, RegionView*, ArdourCanvas::Item*);
+	~RegionMarkerDrag ();
+
+	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
+	void aborted (bool);
+
+	bool allow_vertical_autoscroll () const {
+		return false;
+	}
+
+	bool y_movement_matters () const {
+		return false;
+	}
+
+	void setup_pointer_sample_offset ();
+
+  private:
+	RegionView* rv;
+	ArdourMarker* view;
+	ARDOUR::CueMarker model;
+	ARDOUR::CueMarker dragging_model;
 };
 
 #endif /* __gtk2_ardour_editor_drag_h_ */

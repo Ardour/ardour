@@ -580,4 +580,49 @@ SMF::nth_tempo (size_t n) const
 	return new Tempo (t);
 }
 
+void
+SMF::load_markers ()
+{
+	if (!_smf_track) {
+		return;
+	}
+
+	Glib::Threads::Mutex::Lock lm (_smf_lock);
+
+	if (_smf_track) {
+		_smf_track->next_event_number = std::min(_smf_track->number_of_events, (size_t)1);
+	}
+
+	smf_event_t* event;
+
+	while ((event = smf_track_get_next_event(_smf_track)) != NULL) {
+
+		if (smf_event_is_metadata(event)) {
+			if (event->midi_buffer[1] == 0x06) {
+				char const * txt = smf_event_decode (event);
+				string marker;
+				if (txt != 0) {
+					marker = txt;
+				}
+				if (marker.find ("Marker: ") == 0) {
+					marker = marker.substr (8);
+				}
+				_markers.push_back (MarkerAt (marker, event->time_pulses));
+			}
+			if (event->midi_buffer[1] == 0x07) {
+				char const * txt = smf_event_decode (event);
+				string marker;
+				if (txt != 0) {
+					marker = txt;
+				}
+				if (marker.find ("Cue Point: ") == 0) {
+					marker = marker.substr (8);
+				}
+				_markers.push_back (MarkerAt (marker, event->time_pulses));
+			}
+		}
+	}
+}
+
+
 } // namespace Evoral

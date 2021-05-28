@@ -125,10 +125,10 @@ Push2::Push2 (ARDOUR::Session& s)
 	ports_acquire ();
 
 	/* catch arrival and departure of Push2 itself */
-	ARDOUR::AudioEngine::instance()->PortRegisteredOrUnregistered.connect (port_reg_connection, MISSING_INVALIDATOR, boost::bind (&Push2::port_registration_handler, this), this);
+	ARDOUR::AudioEngine::instance()->PortRegisteredOrUnregistered.connect (port_connections, MISSING_INVALIDATOR, boost::bind (&Push2::port_registration_handler, this), this);
 
 	/* Catch port connections and disconnections */
-	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connection, MISSING_INVALIDATOR, boost::bind (&Push2::connection_handler, this, _1, _2, _3, _4, _5), this);
+	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connections, MISSING_INVALIDATOR, boost::bind (&Push2::connection_handler, this, _1, _2, _3, _4, _5), this);
 
 	/* Push 2 ports might already be there */
 	port_registration_handler ();
@@ -139,8 +139,7 @@ Push2::~Push2 ()
 	DEBUG_TRACE (DEBUG::Push2, "push2 control surface object being destroyed\n");
 
 	/* do this before stopping the event loop, so that we don't get any notifications */
-	port_reg_connection.disconnect ();
-	port_connection.disconnect ();
+	port_connections.drop_connections ();
 
 	stop_using_device ();
 	device_release ();
@@ -1012,6 +1011,7 @@ Push2::set_state (const XMLNode & node, int version)
 	if ((child = node.child (X_("Input"))) != 0) {
 		XMLNode* portnode = child->child (Port::state_node_name.c_str());
 		if (portnode) {
+			portnode->remove_property ("name");
 			_async_in->set_state (*portnode, version);
 		}
 	}
@@ -1019,6 +1019,7 @@ Push2::set_state (const XMLNode & node, int version)
 	if ((child = node.child (X_("Output"))) != 0) {
 		XMLNode* portnode = child->child (Port::state_node_name.c_str());
 		if (portnode) {
+			portnode->remove_property ("name");
 			_async_out->set_state (*portnode, version);
 		}
 	}

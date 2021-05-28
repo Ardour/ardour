@@ -791,6 +791,7 @@ Locations::Locations (Session& s)
 
 Locations::~Locations ()
 {
+	Glib::Threads::RWLock::WriterLock lm (_lock);
 	for (LocationList::iterator i = locations.begin(); i != locations.end(); ) {
 		LocationList::iterator tmp = i;
 		++tmp;
@@ -805,7 +806,7 @@ Locations::set_current (Location *loc, bool want_lock)
 	int ret;
 
 	if (want_lock) {
-		Glib::Threads::Mutex::Lock lm (lock);
+		Glib::Threads::RWLock::ReaderLock lm (_lock);
 		ret = set_current_unlocked (loc);
 	} else {
 		ret = set_current_unlocked (loc);
@@ -903,11 +904,13 @@ Locations::set_current_unlocked (Location *loc)
 	return 0;
 }
 
-void
+bool
 Locations::clear ()
 {
+	bool deleted = false;
+
 	{
-		Glib::Threads::Mutex::Lock lm (lock);
+		Glib::Threads::RWLock::WriterLock lm (_lock);
 
 		for (LocationList::iterator i = locations.begin(); i != locations.end(); ) {
 
@@ -917,6 +920,7 @@ Locations::clear ()
 			if (!(*i)->is_session_range()) {
 				delete *i;
 				locations.erase (i);
+				deleted = true;
 			}
 
 			i = tmp;
@@ -924,16 +928,21 @@ Locations::clear ()
 
 		current_location = 0;
 	}
+	if (deleted) {
+		changed (); /* EMIT SIGNAL */
+		current_changed (0); /* EMIT SIGNAL */
+	}
 
-	changed (); /* EMIT SIGNAL */
-	current_changed (0); /* EMIT SIGNAL */
+	return deleted;
 }
 
-void
+bool
 Locations::clear_markers ()
 {
+	bool deleted = false;
+
 	{
-		Glib::Threads::Mutex::Lock lm (lock);
+		Glib::Threads::RWLock::WriterLock lm (_lock);
 		LocationList::iterator tmp;
 
 		for (LocationList::iterator i = locations.begin(); i != locations.end(); ) {
@@ -943,20 +952,57 @@ Locations::clear_markers ()
 			if ((*i)->is_mark() && !(*i)->is_session_range()) {
 				delete *i;
 				locations.erase (i);
+				deleted = true;
 			}
 
 			i = tmp;
 		}
 	}
 
-	changed (); /* EMIT SIGNAL */
+	if (deleted) {
+		changed (); /* EMIT SIGNAL */
+	}
+
+	return deleted;
 }
 
-void
+bool
+Locations::clear_xrun_markers ()
+{
+	bool deleted = false;
+
+	{
+		Glib::Threads::RWLock::WriterLock lm (_lock);
+		LocationList::iterator tmp;
+
+		for (LocationList::iterator i = locations.begin(); i != locations.end(); ) {
+			tmp = i;
+			++tmp;
+
+			if ((*i)->is_xrun()) {
+				delete *i;
+				locations.erase (i);
+				deleted = true;
+			}
+
+			i = tmp;
+		}
+	}
+
+	if (deleted) {
+		changed (); /* EMIT SIGNAL */
+	}
+
+	return deleted;
+}
+
+bool
 Locations::clear_ranges ()
 {
+	bool deleted = false;
+
 	{
-		Glib::Threads::Mutex::Lock lm (lock);
+		Glib::Threads::RWLock::WriterLock lm (_lock);
 		LocationList::iterator tmp;
 
 		for (LocationList::iterator i = locations.begin(); i != locations.end(); ) {
@@ -978,7 +1024,7 @@ Locations::clear_ranges ()
 			if (!(*i)->is_mark()) {
 				delete *i;
 				locations.erase (i);
-
+				deleted = true;
 			}
 
 			i = tmp;
@@ -987,8 +1033,12 @@ Locations::clear_ranges ()
 		current_location = 0;
 	}
 
-	changed ();
-	current_changed (0); /* EMIT SIGNAL */
+	if (deleted) {
+		changed (); /* EMIT SIGNAL */
+		current_changed (0); /* EMIT SIGNAL */
+	}
+
+	return deleted;
 }
 
 void
@@ -997,7 +1047,7 @@ Locations::add (Location *loc, bool make_current)
 	assert (loc);
 
 	{
-		Glib::Threads::Mutex::Lock lm (lock);
+		Glib::Threads::RWLock::WriterLock lm (_lock);
 		locations.push_back (loc);
 
 		if (make_current) {
@@ -1006,6 +1056,18 @@ Locations::add (Location *loc, bool make_current)
 	}
 
 	added (loc); /* EMIT SIGNAL */
+
+	if (loc->name().empty()) {
+		string new_name;
+
+		if (loc->is_mark()) {
+			next_available_name (new_name, _("mark"));
+		} else {
+			next_available_name (new_name, _("range"));
+		}
+
+		loc->set_name (new_name);
+	}
 
 	if (make_current) {
 		current_changed (current_location); /* EMIT SIGNAL */
@@ -1017,11 +1079,24 @@ Locations::add (Location *loc, bool make_current)
 	}
 }
 
+Location*
+Locations::add_range(samplepos_t start, samplepos_t end)
+{
+	string name;
+	next_available_name(name, _("range"));
+
+	Location* loc = new Location(_session, start, end, name, Location::IsRangeMarker);
+	add(loc, false);
+
+	return loc;
+}
+
 void
 Locations::remove (Location *loc)
 {
 	bool was_removed = false;
 	bool was_current = false;
+	bool was_loop    = false;
 	LocationList::iterator i;
 
 	if (!loc) {
@@ -1033,35 +1108,39 @@ Locations::remove (Location *loc)
 	}
 
 	{
-		Glib::Threads::Mutex::Lock lm (lock);
+		Glib::Threads::RWLock::WriterLock lm (_lock);
 
 		for (i = locations.begin(); i != locations.end(); ++i) {
-			if ((*i) == loc) {
-				bool was_loop = (*i)->is_auto_loop();
-				if ((*i)->is_auto_punch()) {
-					/* needs to happen before deleting:
-					 * disconnect signals, clear events */
-					_session.set_auto_punch_location (0);
-				}
-				delete *i;
-				locations.erase (i);
-				was_removed = true;
-				if (current_location == loc) {
-					current_location = 0;
-					was_current = true;
-				}
-				if (was_loop) {
-					if (_session.get_play_loop()) {
-						_session.request_play_loop (false, false);
-					}
-					_session.auto_loop_location_changed (0);
-				}
-				break;
+			if ((*i) != loc) {
+				continue;
 			}
+			was_loop = (*i)->is_auto_loop();
+			if ((*i)->is_auto_punch()) {
+				/* needs to happen before deleting:
+				 * disconnect signals, clear events */
+				lm.release ();
+				_session.set_auto_punch_location (0);
+				lm.acquire ();
+			}
+			delete *i;
+			locations.erase (i);
+			was_removed = true;
+			if (current_location == loc) {
+				current_location = 0;
+				was_current = true;
+			}
+			break;
 		}
 	}
 
 	if (was_removed) {
+
+		if (was_loop) {
+			if (_session.get_play_loop()) {
+				_session.request_play_loop (false, false);
+			}
+			_session.auto_loop_location_changed (0);
+		}
 
 		removed (loc); /* EMIT SIGNAL */
 
@@ -1076,7 +1155,7 @@ Locations::get_state ()
 {
 	XMLNode *node = new XMLNode ("Locations");
 	LocationList::iterator iter;
-	Glib::Threads::Mutex::Lock lm (lock);
+	Glib::Threads::RWLock::ReaderLock lm (_lock);
 
 	for (iter = locations.begin(); iter != locations.end(); ++iter) {
 		node->add_child_nocopy ((*iter)->get_state ());
@@ -1098,16 +1177,17 @@ Locations::set_state (const XMLNode& node, int version)
 	/* build up a new locations list in here */
 	LocationList new_locations;
 
-	current_location = 0;
-
-	Location* session_range_location = 0;
-	if (version < 3000) {
-		session_range_location = new Location (_session, 0, 0, _("session"), Location::IsSessionRange, 0);
-		new_locations.push_back (session_range_location);
-	}
-
 	{
-		Glib::Threads::Mutex::Lock lm (lock);
+		Glib::Threads::RWLock::WriterLock lm (_lock);
+
+		current_location = 0;
+
+		Location* session_range_location = 0;
+		if (version < 3000) {
+			session_range_location = new Location (_session, 0, 0, _("session"), Location::IsSessionRange, 0);
+			new_locations.push_back (session_range_location);
+		}
+
 
 		XMLNodeConstIterator niter;
 		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
@@ -1231,13 +1311,15 @@ struct LocationStartLaterComparison
 samplepos_t
 Locations::first_mark_before (samplepos_t sample, bool include_special_ranges)
 {
-	Glib::Threads::Mutex::Lock lm (lock);
 	vector<LocationPair> locs;
+	{
+		Glib::Threads::RWLock::ReaderLock lm (_lock);
 
-	for (LocationList::iterator i = locations.begin(); i != locations.end(); ++i) {
-		locs.push_back (make_pair ((*i)->start(), (*i)));
-		if (!(*i)->is_mark()) {
-			locs.push_back (make_pair ((*i)->end(), (*i)));
+		for (LocationList::iterator i = locations.begin(); i != locations.end(); ++i) {
+			locs.push_back (make_pair ((*i)->start(), (*i)));
+			if (!(*i)->is_mark()) {
+				locs.push_back (make_pair ((*i)->end(), (*i)));
+			}
 		}
 	}
 
@@ -1264,7 +1346,6 @@ Locations::first_mark_before (samplepos_t sample, bool include_special_ranges)
 Location*
 Locations::mark_at (samplepos_t pos, samplecnt_t slop) const
 {
-	Glib::Threads::Mutex::Lock lm (lock);
 	Location* closest = 0;
 	sampleoffset_t mindelta = max_samplepos;
 	sampleoffset_t delta;
@@ -1273,6 +1354,7 @@ Locations::mark_at (samplepos_t pos, samplecnt_t slop) const
 	 * to iterate across all of them to find the one closest to a give point.
 	 */
 
+	Glib::Threads::RWLock::ReaderLock lm (_lock);
 	for (LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
 
 		if ((*i)->is_mark()) {
@@ -1302,13 +1384,15 @@ Locations::mark_at (samplepos_t pos, samplecnt_t slop) const
 samplepos_t
 Locations::first_mark_after (samplepos_t sample, bool include_special_ranges)
 {
-	Glib::Threads::Mutex::Lock lm (lock);
 	vector<LocationPair> locs;
 
-	for (LocationList::iterator i = locations.begin(); i != locations.end(); ++i) {
-		locs.push_back (make_pair ((*i)->start(), (*i)));
-		if (!(*i)->is_mark()) {
-			locs.push_back (make_pair ((*i)->end(), (*i)));
+	{
+		Glib::Threads::RWLock::ReaderLock lm (_lock);
+		for (LocationList::iterator i = locations.begin(); i != locations.end(); ++i) {
+			locs.push_back (make_pair ((*i)->start(), (*i)));
+			if (!(*i)->is_mark()) {
+				locs.push_back (make_pair ((*i)->end(), (*i)));
+			}
 		}
 	}
 
@@ -1347,7 +1431,7 @@ Locations::marks_either_side (samplepos_t const sample, samplepos_t& before, sam
 	LocationList locs;
 
 	{
-		Glib::Threads::Mutex::Lock lm (lock);
+		Glib::Threads::RWLock::ReaderLock lm (_lock);
 		locs = locations;
 	}
 
@@ -1356,7 +1440,7 @@ Locations::marks_either_side (samplepos_t const sample, samplepos_t& before, sam
 	std::list<samplepos_t> positions;
 
 	for (LocationList::const_iterator i = locs.begin(); i != locs.end(); ++i) {
-		if (((*i)->is_auto_loop() || (*i)->is_auto_punch())) {
+		if (((*i)->is_auto_loop() || (*i)->is_auto_punch()) || (*i)->is_xrun()) {
 			continue;
 		}
 
@@ -1407,6 +1491,7 @@ Locations::marks_either_side (samplepos_t const sample, samplepos_t& before, sam
 Location*
 Locations::session_range_location () const
 {
+	Glib::Threads::RWLock::ReaderLock lm (_lock);
 	for (LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
 		if ((*i)->is_session_range()) {
 			return const_cast<Location*> (*i);
@@ -1418,6 +1503,7 @@ Locations::session_range_location () const
 Location*
 Locations::auto_loop_location () const
 {
+	Glib::Threads::RWLock::ReaderLock lm (_lock);
 	for (LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
 		if ((*i)->is_auto_loop()) {
 			return const_cast<Location*> (*i);
@@ -1429,6 +1515,7 @@ Locations::auto_loop_location () const
 Location*
 Locations::auto_punch_location () const
 {
+	Glib::Threads::RWLock::ReaderLock lm (_lock);
 	for (LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
 		if ((*i)->is_auto_punch()) {
 			return const_cast<Location*> (*i);
@@ -1440,19 +1527,25 @@ Locations::auto_punch_location () const
 Location*
 Locations::clock_origin_location () const
 {
+	Location* sr = 0;
+	Glib::Threads::RWLock::ReaderLock lm (_lock);
 	for (LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
 		if ((*i)->is_clock_origin()) {
 			return const_cast<Location*> (*i);
 		}
+		if ((*i)->is_session_range()) {
+			sr = const_cast<Location*> (*i);
+		}
 	}
-	return session_range_location ();
+	/* fall back to session_range_location () */
+	return sr;
 }
 
 uint32_t
 Locations::num_range_markers () const
 {
 	uint32_t cnt = 0;
-	Glib::Threads::Mutex::Lock lm (lock);
+	Glib::Threads::RWLock::ReaderLock lm (_lock);
 	for (LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
 		if ((*i)->is_range_marker()) {
 			++cnt;
@@ -1464,23 +1557,58 @@ Locations::num_range_markers () const
 Location *
 Locations::get_location_by_id(PBD::ID id)
 {
-	LocationList::iterator it;
-	for (it  = locations.begin(); it != locations.end(); ++it)
-		if (id == (*it)->id())
-			return *it;
-
+	Glib::Threads::RWLock::ReaderLock lm (_lock);
+	for (LocationList::const_iterator i  = locations.begin(); i != locations.end(); ++i) {
+		if (id == (*i)->id()) {
+			return const_cast<Location*> (*i);
+		}
+	}
 	return 0;
 }
 
 void
 Locations::find_all_between (samplepos_t start, samplepos_t end, LocationList& ll, Location::Flags flags)
 {
-	Glib::Threads::Mutex::Lock lm (lock);
-
+	Glib::Threads::RWLock::ReaderLock lm (_lock);
 	for (LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
 		if ((flags == 0 || (*i)->matches (flags)) &&
 		    ((*i)->start() >= start && (*i)->end() < end)) {
 			ll.push_back (*i);
 		}
 	}
+}
+
+Location *
+Locations::range_starts_at(samplepos_t pos, samplecnt_t slop, bool incl) const
+{
+	Location *closest = 0;
+	sampleoffset_t mindelta = max_samplepos;
+
+	Glib::Threads::RWLock::ReaderLock lm (_lock);
+	for (LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
+		if (!(*i)->is_range_marker()) {
+			continue;
+		}
+
+		if (incl && (pos < (*i)->start() || pos > (*i)->end())) {
+			continue;
+		}
+
+		sampleoffset_t delta = std::abs((double)(pos - (*i)->start()));
+
+		if (delta == 0) {
+			return *i;
+		}
+
+		if (delta > slop) {
+			continue;
+		}
+
+		if (delta < mindelta) {
+			closest = *i;
+			mindelta = delta;
+		}
+	}
+
+	return closest;
 }

@@ -46,26 +46,29 @@ using namespace std;
 ARDOUR::samplecnt_t DiskWriter::_chunk_samples = DiskWriter::default_chunk_samples ();
 PBD::Signal0<void> DiskWriter::Overrun;
 
-DiskWriter::DiskWriter (Session& s, string const & str, DiskIOProcessor::Flag f)
-	: DiskIOProcessor (s, str, f)
-	, _record_enabled (0)
-	, _record_safe (0)
+DiskWriter::DiskWriter (Session& s, Track& t, string const & str, DiskIOProcessor::Flag f)
+	: DiskIOProcessor (s, t, X_("recorder:") + str, f)
 	, _capture_start_sample (0)
 	, _capture_captured (0)
 	, _was_recording (false)
+	, _xrun_flag (false)
 	, _first_recordable_sample (max_samplepos)
 	, _last_recordable_sample (max_samplepos)
 	, _last_possibly_recording (0)
 	, _alignment_style (ExistingMaterial)
 	, _note_mode (Sustained)
-	, _samples_pending_write (0)
-	, _num_captured_loops (0)
 	, _accumulated_capture_offset (0)
 	, _transport_looped (false)
 	, _transport_loop_sample (0)
 	, _gui_feed_buffer(AudioEngine::instance()->raw_buffer_size (DataType::MIDI))
 {
 	DiskIOProcessor::init ();
+	_xruns.reserve (128);
+
+	g_atomic_int_set (&_record_enabled, 0);
+	g_atomic_int_set (&_record_safe, 0);
+	g_atomic_int_set (&_samples_pending_write, 0);
+	g_atomic_int_set (&_num_captured_loops, 0);
 }
 
 DiskWriter::~DiskWriter ()
@@ -88,7 +91,7 @@ DiskWriter::default_chunk_samples ()
 std::string
 DiskWriter::display_name () const
 {
-	return std::string (_ ("recorder"));
+	return std::string (_("Recorder"));
 }
 
 void
@@ -127,6 +130,20 @@ DiskWriter::set_write_source_name (string const & str)
 	return true;
 }
 
+std::string
+DiskWriter::write_source_name () const
+{
+	if (!_write_source_name.empty ()) {
+		return _write_source_name;
+	}
+
+	std::string const& n (name ());
+	if (n.find (X_("recorder:")) == 0 && n.size () > 9) {
+		return n.substr (9);
+	}
+	return n;
+}
+
 void
 DiskWriter::check_record_status (samplepos_t transport_sample, double speed, bool can_record)
 {
@@ -161,9 +178,6 @@ DiskWriter::check_record_status (samplepos_t transport_sample, double speed, boo
 
 		if (_alignment_style == ExistingMaterial) {
 			_first_recordable_sample += _capture_offset + _playback_offset;
-			if (_accumulated_capture_offset == 0) {
-				_accumulated_capture_offset = _playback_offset;
-			}
 		}
 
 		if  (_session.config.get_punch_out () && 0 != (loc = _session.locations()->auto_punch_location ())) {
@@ -321,7 +335,7 @@ DiskWriter::state ()
 {
 	XMLNode& node (DiskIOProcessor::state ());
 	node.set_property (X_("type"), X_("diskwriter"));
-	node.set_property (X_("record-safe"), (_record_safe ? X_("yes" : "no")));
+	node.set_property (X_("record-safe"), record_safe ());
 	return node;
 }
 
@@ -332,9 +346,9 @@ DiskWriter::set_state (const XMLNode& node, int version)
 		return -1;
 	}
 
-	if (!node.get_property (X_("record-safe"), _record_safe)) {
-		_record_safe = false;
-	}
+	int rec_safe = 0;
+	node.get_property (X_("record-safe"), rec_safe);
+	g_atomic_int_set (&_record_safe, rec_safe);
 
 	reset_write_sources (false, true);
 
@@ -370,6 +384,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
                  double speed, pframes_t nframes, bool result_required)
 {
 	if (!_active && !_pending_active) {
+		_xrun_flag = false;
 		return;
 	}
 	_active = _pending_active;
@@ -421,6 +436,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	check_record_status (start_sample, speed, can_record);
 
 	if (nframes == 0) {
+		_xrun_flag = false;
 		return;
 	}
 
@@ -444,6 +460,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 		if (rec_nframes && !_was_recording) {
 			_capture_captured = 0;
+			_xrun_flag = false;
 
 			if (loop_loc) {
 				/* Loop recording, so pretend the capture started at the loop
@@ -471,8 +488,8 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				_midi_write_source->mark_write_starting_now (_capture_start_sample, _capture_captured, loop_length);
 			}
 
-			g_atomic_int_set (const_cast<gint*> (&_samples_pending_write), 0);
-			g_atomic_int_set (const_cast<gint*> (&_num_captured_loops), 0);
+			g_atomic_int_set (&_samples_pending_write, 0);
+			g_atomic_int_set (&_num_captured_loops, 0);
 
 			_was_recording = true;
 
@@ -520,6 +537,8 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 					DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 overrun in %2, rec_nframes = %3 total space = %4\n",
 					                                            DEBUG_THREAD_SELF, name(), rec_nframes, total));
 					Overrun ();
+					_xruns.push_back (_capture_captured);
+					_xrun_flag = false;
 					return;
 				}
 
@@ -540,7 +559,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 			// Pump entire port buffer into the ring buffer (TODO: split cycles?)
 			MidiBuffer& buf    = bufs.get_midi (0);
-			boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack>(_track);
+			MidiTrack* mt = dynamic_cast<MidiTrack*>(&_track);
 			MidiChannelFilter* filter = mt ? &mt->capture_filter() : 0;
 
 			assert (buf.size() == 0 || _midi_buf);
@@ -574,7 +593,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				   reconstruct their actual time; future clever MIDI looping should
 				   probably be implemented in the source instead of here.
 				*/
-				const samplecnt_t loop_offset = _num_captured_loops * loop_length;
+				const samplecnt_t loop_offset = g_atomic_int_get (&_num_captured_loops) * loop_length;
 				const samplepos_t event_time = start_sample + loop_offset - _accumulated_capture_offset + ev.time();
 				if (event_time < 0 || event_time < _first_recordable_sample) {
 					/* Event out of range, skip */
@@ -600,7 +619,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				}
 			}
 
-			g_atomic_int_add (const_cast<gint*>(&_samples_pending_write), nframes);
+			g_atomic_int_add (&_samples_pending_write, nframes);
 
 			if (buf.size() != 0) {
 				Glib::Threads::Mutex::Lock lm (_gui_feed_buffer_mutex, Glib::Threads::TRY_LOCK);
@@ -623,6 +642,12 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			}
 		}
 
+		if (_xrun_flag) {
+			/* There still are `Port::resampler_quality () -1` samples in the resampler
+			 * buffer from before the xrun. */
+			_xruns.push_back (_capture_captured + Port::resampler_quality () - 1);
+		}
+
 		_capture_captured += rec_nframes;
 		DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1 now captured %2 (by %3)\n", name(), _capture_captured, rec_nframes));
 
@@ -635,6 +660,9 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			_accumulated_capture_offset = 0;
 		}
 	}
+
+	/* clear xrun flag */
+	_xrun_flag = false;
 
 	/* AUDIO BUTLER REQUIRED CODE */
 
@@ -657,6 +685,7 @@ void
 DiskWriter::finish_capture (boost::shared_ptr<ChannelList> c)
 {
 	_was_recording = false;
+	_xrun_flag = false;
 	_first_recordable_sample = max_samplepos;
 	_last_recordable_sample = max_samplepos;
 
@@ -664,17 +693,19 @@ DiskWriter::finish_capture (boost::shared_ptr<ChannelList> c)
 		return;
 	}
 
-	CaptureInfo* ci = new CaptureInfo;
+	CaptureInfo* ci = new CaptureInfo ();
 
 	ci->start =  _capture_start_sample;
 	ci->samples = _capture_captured;
+	ci->xruns = _xruns;
+	_xruns.clear ();
 
 	if (_loop_location) {
 		samplepos_t loop_start  = 0;
 		samplepos_t loop_end    = 0;
 		samplepos_t loop_length = 0;
 		get_location_times (_loop_location, &loop_start, &loop_end, &loop_length);
-		ci->loop_offset = _num_captured_loops * loop_length;
+		ci->loop_offset = g_atomic_int_get (&_num_captured_loops) * loop_length;
 	} else {
 		ci->loop_offset = 0;
 	}
@@ -705,6 +736,12 @@ DiskWriter::get_gui_feed_buffer () const
 	Glib::Threads::Mutex::Lock lm (_gui_feed_buffer_mutex);
 	b->copy (_gui_feed_buffer);
 	return b;
+}
+
+void
+DiskWriter::mark_capture_xrun ()
+{
+	_xrun_flag = true;
 }
 
 void
@@ -906,7 +943,7 @@ DiskWriter::do_flush (RunContext ctxt, bool force_flush)
 
 	if (_midi_write_source && _midi_buf) {
 
-		const samplecnt_t total = g_atomic_int_get(const_cast<gint*> (&_samples_pending_write));
+		const samplecnt_t total = g_atomic_int_get(&_samples_pending_write);
 
 		if (total == 0 ||
 		    _midi_buf->read_space() == 0 ||
@@ -942,7 +979,7 @@ DiskWriter::do_flush (RunContext ctxt, bool force_flush)
 				error << string_compose(_("MidiDiskstream %1: cannot write to disk"), id()) << endmsg;
 				return -1;
 			}
-			g_atomic_int_add(const_cast<gint*> (&_samples_pending_write), -to_write);
+			g_atomic_int_add(&_samples_pending_write, -to_write);
 		}
 	}
 
@@ -1098,6 +1135,7 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 	}
 
 	if (abort_capture) {
+		_xruns.clear ();
 
 		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
 
@@ -1133,7 +1171,7 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 		if (as) {
 			audio_srcs.push_back (as);
 			as->update_header (capture_info.front()->start, when, twhen);
-			as->set_captured_for (_track->name());
+			as->set_captured_for (_track.name());
 			as->mark_immutable ();
 
 			Glib::DateTime tm (Glib::DateTime::create_now_local (mktime (&when)));
@@ -1148,13 +1186,11 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 
 		if (_midi_write_source) {
 			midi_srcs.push_back (_midi_write_source);
-			_midi_write_source->set_captured_for (_track->name());
+			_midi_write_source->set_captured_for (_track.name());
 		}
 
 		(*chan)->write_source->stamp (twhen);
-
-		/* "re-announce the source to the world */
-		Source::SourcePropertyChanged ((*chan)->write_source);
+		(*chan)->write_source->set_captured_xruns (capture_info.front()->xruns);
 	}
 
 
@@ -1185,7 +1221,7 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 		midi_srcs.push_back (_midi_write_source);
 
 		_midi_write_source->set_natural_position (capture_info.front()->start);
-		_midi_write_source->set_captured_for (_name);
+		_midi_write_source->set_captured_for (_track.name ());
 
 		Glib::DateTime tm (Glib::DateTime::create_now_local (mktime (&when)));
 		_midi_write_source->set_take_id (tm.format ("%F %H.%M.%S"));
@@ -1207,10 +1243,8 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 	_last_capture_sources.insert (_last_capture_sources.end(), midi_srcs.begin(), midi_srcs.end());
 
 
-	if (_track) {
-		_track->use_captured_sources (audio_srcs, capture_info);
-		_track->use_captured_sources (midi_srcs, capture_info);
-	}
+	_track.use_captured_sources (audio_srcs, capture_info);
+	_track.use_captured_sources (midi_srcs, capture_info);
 
 	mark_write_completed = true;
 
@@ -1261,7 +1295,7 @@ DiskWriter::loop (samplepos_t transport_sample)
 	   the Source and/or entirely after the capture is finished.
 	*/
 	if (_was_recording) {
-		g_atomic_int_add(const_cast<gint*> (&_num_captured_loops), 1);
+		g_atomic_int_add (&_num_captured_loops, 1);
 	}
 }
 
@@ -1307,7 +1341,7 @@ DiskWriter::steal_write_source_name ()
 		 */
 
 		try {
-			string new_path = _session.new_midi_source_path (name());
+			string new_path = _session.new_midi_source_path (write_source_name ());
 
 			if (_midi_write_source->rename (new_path)) {
 				return string();

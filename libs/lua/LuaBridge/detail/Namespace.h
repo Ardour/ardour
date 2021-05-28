@@ -1839,8 +1839,8 @@ public:
 
     return beginClass<LT> (name)
       .addVoidConstructor ()
-      .addFunction ("empty", &LT::empty)
-      .addFunction ("size", &LT::size)
+      .addFunction ("empty", (bool (LT::*)()const)&LT::empty)
+      .addFunction ("size", (T_SIZE (LT::*)()const)&LT::size)
       .addFunction ("clear", (void (LT::*)())&LT::clear)
       .addFunction ("count", (T_SIZE (LT::*)(const K&) const)&LT::count)
       .addExtCFunction ("add", &CFunc::tableToMap<K, V>)
@@ -1870,11 +1870,11 @@ public:
       .addVoidConstructor ()
       .addFunction ("reset", (BS& (BS::*)())&BS::reset)
       .addFunction ("set", (BS& (BS::*)(size_t, bool))&BS::set)
-      .addFunction ("count", &BS::count)
-      .addFunction ("any", &BS::any)
-      .addFunction ("none", &BS::none)
+      .addFunction ("count", (size_t (BS::*)()const)&BS::count)
+      .addFunction ("size", (size_t (BS::*)()const)&BS::size)
+      .addFunction ("any", (bool (BS::*)()const)&BS::any)
+      .addFunction ("none", (bool (BS::*)()const)&BS::none)
       .addFunction ("test", &BS::test)
-      .addFunction ("size", &BS::size)
       .addExtCFunction ("add", &CFunc::tableToBitSet<T>)
       .addExtCFunction ("table", &CFunc::bitSetToTable<T>);
   }
@@ -1883,11 +1883,12 @@ public:
   Class<std::list<T> > beginConstStdList (char const* name)
   {
     typedef std::list<T> LT;
+    typedef typename LT::size_type T_SIZE;
     return beginClass<LT> (name)
       .addVoidConstructor ()
-      .addFunction ("empty", &LT::empty)
-      .addFunction ("size", &LT::size)
-      .addFunction ("reverse", &LT::reverse)
+      .addFunction ("empty", static_cast<bool (LT::*)() const>(&LT::empty))
+      .addFunction ("size", static_cast<T_SIZE (LT::*)() const>(&LT::size))
+      .addFunction ("reverse", static_cast<void (LT::*)()>(&LT::reverse))
       .addFunction ("front", static_cast<T& (LT::*)()>(&LT::front))
       .addFunction ("back", static_cast<T& (LT::*)()>(&LT::back))
       .addExtCFunction ("iter", &CFunc::listIter<T, LT>)
@@ -1898,8 +1899,16 @@ public:
   Class<std::list<T> > beginStdList (char const* name)
   {
     typedef std::list<T> LT;
+    typedef typename LT::size_type T_SIZE;
     return beginConstStdList<T> (name)
+#if !defined(_MSC_VER) || (_MSC_VER < 1900)
+	  /* std::list::unique() got broken in later versions of MSVC */
+# if (defined(__cplusplus) &&  __cplusplus >= 201709L)
+      .addFunction ("unique", (T_SIZE (LT::*)())&LT::unique)
+# else
       .addFunction ("unique", (void (LT::*)())&LT::unique)
+# endif
+#endif
       .addFunction ("push_back", (void (LT::*)(const T&))&LT::push_back)
       .addExtCFunction ("add", &CFunc::tableToList<T, LT>);
   }
@@ -1909,11 +1918,12 @@ public:
   {
     typedef T* TP;
     typedef std::list<TP> LT;
+    typedef typename LT::size_type T_SIZE;
     return beginClass<LT> (name)
       .addVoidConstructor ()
-      .addFunction ("empty", &LT::empty)
-      .addFunction ("size", &LT::size)
-      .addFunction ("reverse", &LT::reverse)
+      .addFunction ("empty", static_cast<bool (LT::*)() const>(&LT::empty))
+      .addFunction ("size", static_cast<T_SIZE (LT::*)() const>(&LT::size))
+      .addFunction ("reverse", static_cast<void (LT::*)()>(&LT::reverse))
       .addFunction ("front", static_cast<const TP& (LT::*)() const>(&LT::front))
       .addFunction ("back", static_cast<const TP& (LT::*)() const>(&LT::back))
       .addExtCFunction ("iter", &CFunc::listIter<T*, LT>)
@@ -1925,8 +1935,16 @@ public:
   {
     typedef T* TP;
     typedef std::list<TP> LT;
+    typedef typename LT::size_type T_SIZE;
     return beginConstStdCPtrList<T> (name)
+#if !defined(_MSC_VER) || (_MSC_VER < 1900)
+	  /* std::list::unique() got broken in later versions of MSVC */
+# if (defined(__cplusplus) &&  __cplusplus >= 201709L)
+      .addFunction ("unique", (T_SIZE (LT::*)())&LT::unique)
+# else
       .addFunction ("unique", (void (LT::*)())&LT::unique)
+# endif
+#endif
       .addExtCFunction ("push_back", &CFunc::pushbackptr<T, LT>);
   }
 
@@ -1940,8 +1958,8 @@ public:
 
     return beginClass<LT> (name)
       .addVoidConstructor ()
-      .addFunction ("empty", &LT::empty)
-      .addFunction ("size", &LT::size)
+      .addFunction ("empty", (bool (LT::*)()const)&LT::empty)
+      .addFunction ("size", (T_SIZE (LT::*)()const)&LT::size)
       .addFunction ("at", (T_REF (LT::*)(T_SIZE))&LT::at)
       .addExtCFunction ("iter", &CFunc::listIter<T, LT>)
       .addExtCFunction ("table", &CFunc::listToTable<T, LT>);
@@ -1965,12 +1983,20 @@ public:
   Class<boost::shared_ptr<std::list<T> > > beginPtrStdList (char const* name)
   {
     typedef std::list<T> LT;
+    typedef typename LT::size_type T_SIZE;
     return beginClass<boost::shared_ptr<LT> > (name)
       //.addVoidPtrConstructor<LT> ()
-      .addPtrFunction ("empty", &LT::empty)
-      .addPtrFunction ("size", &LT::size)
-      .addPtrFunction ("reverse", &LT::reverse)
+      .addPtrFunction ("empty", (bool (LT::*)()const)&LT::empty)
+      .addPtrFunction ("size", (T_SIZE (LT::*)()const)&LT::size)
+      .addPtrFunction ("reverse", (void (LT::*)())&LT::reverse)
+#if !defined(_MSC_VER) || (_MSC_VER < 1900)
+	  /* std::list::unique() got broken in later versions of MSVC */
+# if (defined(__cplusplus) &&  __cplusplus >= 201709L)
+      .addPtrFunction ("unique", (T_SIZE (LT::*)())&LT::unique)
+# else
       .addPtrFunction ("unique", (void (LT::*)())&LT::unique)
+# endif
+#endif
       .addPtrFunction ("push_back", (void (LT::*)(const T&))&LT::push_back)
       .addExtCFunction ("add", &CFunc::ptrTableToList<T, LT>)
       .addExtCFunction ("iter", &CFunc::ptrListIter<T, LT>)
@@ -1986,9 +2012,8 @@ public:
 
     return beginClass<boost::shared_ptr<LT> > (name)
       //.addVoidPtrConstructor<LT> ()
-      .addPtrFunction ("empty", &LT::empty)
-      .addPtrFunction ("empty", &LT::empty)
-      .addPtrFunction ("size", &LT::size)
+      .addPtrFunction ("empty", (bool (LT::*)()const)&LT::empty)
+      .addPtrFunction ("size", (T_SIZE (LT::*)()const)&LT::size)
       .addPtrFunction ("push_back", (void (LT::*)(const T&))&LT::push_back)
       .addPtrFunction ("at", (T_REF (LT::*)(T_SIZE))&LT::at)
       .addExtCFunction ("add", &CFunc::ptrTableToList<T, LT>)

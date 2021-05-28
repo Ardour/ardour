@@ -1231,8 +1231,9 @@ TempoMap::add_meter_locked (const Meter& meter, const BBT_Time& bbt, samplepos_t
 
 	if (!solved && recompute) {
 		/* if this has failed to solve, there is little we can do other than to ensure that
-		   the new map is recalculated.
-		*/
+		 * the new map is valid and recalculated.
+		 */
+		remove_meter_locked (*new_meter);
 		warning << "Adding meter may have left the tempo map unsolved." << endmsg;
 		recompute_map (_metrics);
 	}
@@ -2249,7 +2250,7 @@ TempoMap::bbt_at_pulse_locked (const Metrics& metrics, const double& pulse) cons
  *
  */
 BBT_Time
-TempoMap::bbt_at_sample (samplepos_t sample)
+TempoMap::bbt_at_sample (samplepos_t sample) const
 {
 	if (sample < 0) {
 		BBT_Time bbt;
@@ -2270,7 +2271,7 @@ TempoMap::bbt_at_sample (samplepos_t sample)
 }
 
 BBT_Time
-TempoMap::bbt_at_sample_rt (samplepos_t sample)
+TempoMap::bbt_at_sample_rt (samplepos_t sample) const
 {
 	const double minute =  minute_at_sample (sample);
 

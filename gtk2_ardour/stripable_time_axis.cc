@@ -95,16 +95,6 @@ StripableTimeAxisView::add_automation_child (Evoral::Parameter param, boost::sha
 	if (show && !no_redraw) {
 		request_redraw ();
 	}
-
-	if (!ARDOUR::parameter_is_midi((AutomationType)param.type())) {
-		/* MIDI-related parameters are always in the menu, there's no
-		   reason to rebuild the menu just because we added a automation
-		   lane for one of them. But if we add a non-MIDI automation
-		   lane, then we need to invalidate the display menu.
-		*/
-		delete display_menu;
-		display_menu = 0;
-	}
 }
 
 void

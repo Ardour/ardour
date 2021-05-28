@@ -27,7 +27,6 @@
 #include "pbd/compose.h"
 #include "pbd/controllable.h"
 #include "pbd/error.h"
-#include "pbd/stacktrace.h"
 
 #include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/gui_thread.h"
@@ -66,6 +65,7 @@ ArdourButton::ArdourButton (Element e, bool toggle)
 	, _char_pixel_width (0)
 	, _char_pixel_height (0)
 	, _char_avg_pixel_width (0)
+	, _custom_font_set (false)
 	, _text_width (0)
 	, _text_height (0)
 	, _diameter (0)
@@ -113,6 +113,7 @@ ArdourButton::ArdourButton (const std::string& str, Element e, bool toggle)
 	, _char_pixel_width (0)
 	, _char_pixel_height (0)
 	, _char_avg_pixel_width (0)
+	, _custom_font_set (false)
 	, _text_width (0)
 	, _text_height (0)
 	, _diameter (0)
@@ -179,6 +180,7 @@ ArdourButton::set_layout_font (const Pango::FontDescription& fd)
 		queue_resize ();
 		_char_pixel_width = 0;
 		_char_pixel_height = 0;
+		_custom_font_set = true;
 	}
 }
 
@@ -262,7 +264,10 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	uint32_t text_color;
 	uint32_t led_color;
 
-	const float corner_radius = _boxy_buttons ? 0 : std::max(2.f, _corner_radius * UIConfigurationBase::instance().get_ui_scale());
+	const bool boxy = (_tweaks & ForceBoxy) | boxy_buttons ();
+	const bool flat = (_tweaks & ForceFlat) | flat_buttons ();
+
+	const float corner_radius = boxy ? 0 : std::max(2.f, _corner_radius * UIConfigurationBase::instance().get_ui_scale());
 
 	if (_update_colors) {
 		set_colors ();
@@ -337,7 +342,7 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	}
 
 	//show the "convex" or "concave" gradient
-	if (!_flat_buttons && (_elements & Body)==Body) {
+	if (!flat && (_elements & Body)==Body) {
 		if ( active_state() == Gtkmm2ext::ExplicitActive && ( !((_elements & Indicator)==Indicator) || use_custom_led_color) ) {
 			//concave
 			cairo_set_source (cr, concave_pattern);
@@ -429,7 +434,7 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 
 		cairo_new_path (cr);
 		Gtkmm2ext::set_source_rgba (cr, text_color);
-		const double text_ypos = (get_height() - _text_height) * .5;
+		const double text_ypos = round ((get_height() - _text_height) * .5);
 
 		if (_elements & Menu) {
 			// always left align (dropdown)
@@ -438,7 +443,7 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 		} else if ( (_elements & Indicator)  == Indicator) {
 			// left/right align depending on LED position
 			if (_led_left) {
-				cairo_move_to (cr, text_margin + _diameter + .5 * char_pixel_width(), text_ypos);
+				cairo_move_to (cr, round (text_margin + _diameter + .5 * char_pixel_width()), text_ypos);
 			} else {
 				cairo_move_to (cr, text_margin, text_ypos);
 			}
@@ -474,7 +479,7 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 			 */
 			if (_xalign < 0) xa = ceil(.5 + (ww * fabs(_xalign) + text_margin));
 
-			cairo_move_to (cr, xa + m1.x0, ya + m1.y0);
+			cairo_move_to (cr, round (xa + m1.x0), round (ya + m1.y0));
 			pango_cairo_update_layout(cr, _layout->gobj());
 			pango_cairo_show_layout (cr, _layout->gobj());
 		}
@@ -521,7 +526,7 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 		}
 
 		//inset
-		if (!_flat_buttons) {
+		if (!flat) {
 			cairo_arc (cr, 0, 0, _diameter * .5, 0, 2 * M_PI);
 			cairo_set_source (cr, led_inset_pattern);
 			cairo_fill (cr);
@@ -542,7 +547,7 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 
 	// a transparent overlay to indicate insensitivity
 	if ((visual_state() & Gtkmm2ext::Insensitive)) {
-		rounded_function (cr, 0, 0, get_width(), get_height(), corner_radius);
+		rounded_function (cr, 1, 1, get_width() - 2, get_height() - 2, corner_radius);
 		uint32_t ins_color = UIConfigurationBase::instance().color ("gtk_background");
 		Gtkmm2ext::set_source_rgb_a (cr, ins_color, 0.6);
 		cairo_fill (cr);
@@ -682,7 +687,7 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 		req->height = std::max(req->height, _pixbuf->get_height() + 4);
 	}
 
-	if (_elements & Indicator) {
+	if ((_elements & Indicator) || (_tweaks & OccasionalLED)) {
 		req->width += ceil (_diameter + char_pixel_width());
 		req->height = std::max (req->height, (int) lrint (_diameter) + 4);
 	}
@@ -972,6 +977,10 @@ ArdourButton::on_size_allocate (Allocation& alloc)
 {
 	CairoWidget::on_size_allocate (alloc);
 	setup_led_rect ();
+	if (_layout) {
+		/* re-center text */
+		//_layout->get_pixel_size (_text_width, _text_height);
+	}
 }
 
 void
@@ -1043,13 +1052,20 @@ ArdourButton::action_toggled ()
 }
 
 void
-ArdourButton::on_style_changed (const RefPtr<Gtk::Style>&)
+ArdourButton::on_style_changed (const RefPtr<Gtk::Style>& style)
 {
-	_update_colors = true;
+	CairoWidget::on_style_changed (style);
+	Glib::RefPtr<Gtk::Style> const& new_style = get_style();
+
 	CairoWidget::set_dirty ();
+	_update_colors = true;
 	_char_pixel_width = 0;
 	_char_pixel_height = 0;
-	if (is_realized()) {
+
+	if (!_custom_font_set && _layout && _layout->get_font_description () != new_style->get_font ()) {
+		_layout->set_font_description (new_style->get_font ());
+		queue_resize ();
+	} else if (is_realized()) {
 		queue_resize ();
 	}
 }
@@ -1284,6 +1300,7 @@ ArdourButton::ensure_layout ()
 	if (!_layout) {
 		ensure_style ();
 		_layout = Pango::Layout::create (get_pango_context());
+		_layout->set_font_description (get_style()->get_font());
 		_layout->set_ellipsize(_ellipsis);
 		if (_layout_ellipsize_width > 3 * PANGO_SCALE) {
 			_layout->set_width (_layout_ellipsize_width - 3* PANGO_SCALE);

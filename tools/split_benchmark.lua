@@ -1,6 +1,11 @@
 -- cd gtk2_ardour; ./arlua < ../tools/split_benchmark.lua
 
-reclen = 30 -- seconds
+-- This script creates some tracks, records noise,
+-- and then splits recorded regions on all tracks on every
+-- timecode frame (30 regions/sec)
+
+reclen   = 30 -- seconds to record
+n_tracks = 16 -- number of tracks to create
 
 backend = AudioEngine:set_backend("None (Dummy)", "", "")
 backend:set_device_name ("Uniform White Noise")
@@ -9,7 +14,7 @@ os.execute('rm -rf /tmp/luabench')
 s = create_session ("/tmp/luabench", "luabench", 48000)
 assert (s)
 
-s:new_audio_track (1, 2, nil, 16, "",  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
+s:new_audio_track (1, 2, nil, n_tracks, "",  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal, true)
 
 for t in s:get_tracks():iter() do
 	t:rec_enable_control():set_value(1, PBD.GroupControlDisposition.UseGroup)
@@ -20,9 +25,9 @@ ARDOUR.LuaAPI.usleep (100000)
 s:goto_start()
 s:maybe_enable_record()
 
-s:request_transport_speed(1.0, true, 4)
+s:request_roll (ARDOUR.TransportRequestSource.TRS_UI)
 ARDOUR.LuaAPI.usleep (1000000 * reclen)
-s:request_transport_speed(0.0, false, 4)
+s:request_stop (false, false, ARDOUR.TransportRequestSource.TRS_UI);
 
 for t in s:get_tracks():iter() do
 	t:rec_enable_control():set_value(0, PBD.GroupControlDisposition.UseGroup)
@@ -75,8 +80,8 @@ for x = 2, cnt do
 	end
 	local t_end = ARDOUR.LuaAPI.monotonic_time ()
 
-	Session:request_locate((playhead + stepsize * n_steps), false, 5)
-	print (count_regions (), (t_end - t_start) / 1000 / n_steps)
+	Session:request_locate((playhead + stepsize * n_steps), ARDOUR.LocateTransportDisposition.MustStop, ARDOUR.TransportRequestSource.TRS_UI)
+	print ("n_regions:", count_regions (), "split operation dT:", (t_end - t_start) / 1000 / n_steps, "ms")
 	collectgarbage ();
 	ARDOUR.LuaAPI.usleep(500000)
 end

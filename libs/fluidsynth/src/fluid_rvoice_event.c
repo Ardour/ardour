@@ -88,7 +88,7 @@ static int fluid_rvoice_eventhandler_push_LOCAL(fluid_rvoice_eventhandler_t *han
     if(event == NULL)
     {
         fluid_atomic_int_add(&handler->queue_stored, -1);
-        FLUID_LOG(FLUID_WARN, "Ringbuffer full, try increasing polyphony!");
+        FLUID_LOG(FLUID_WARN, "Ringbuffer full, try increasing synth.polyphony!");
         return FLUID_FAILED; // Buffer full...
     }
 
@@ -114,7 +114,9 @@ fluid_rvoice_eventhandler_finished_voice_callback(fluid_rvoice_eventhandler_t *e
 
 fluid_rvoice_eventhandler_t *
 new_fluid_rvoice_eventhandler(int queuesize,
-                              int finished_voices_size, int bufs, int fx_bufs, int fx_units, fluid_real_t sample_rate, int extra_threads, int prio)
+                              int finished_voices_size, int bufs, int fx_bufs, int fx_units,
+                              fluid_real_t sample_rate_max, fluid_real_t sample_rate,
+                              int extra_threads, int prio)
 {
     fluid_rvoice_eventhandler_t *eventhandler = FLUID_NEW(fluid_rvoice_eventhandler_t);
 
@@ -145,7 +147,8 @@ new_fluid_rvoice_eventhandler(int queuesize,
         goto error_recovery;
     }
 
-    eventhandler->mixer = new_fluid_rvoice_mixer(bufs, fx_bufs, fx_units, sample_rate, eventhandler, extra_threads, prio);
+    eventhandler->mixer = new_fluid_rvoice_mixer(bufs, fx_bufs, fx_units,
+                          sample_rate_max, sample_rate, eventhandler, extra_threads, prio);
 
     if(eventhandler->mixer == NULL)
     {

@@ -1,5 +1,5 @@
 /*
-  Copyright 2008-2012 David Robillard <http://drobilla.net>
+  Copyright 2008-2020 David Robillard <d@drobilla.net>
 
   Permission to use, copy, modify, and/or distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -26,21 +26,6 @@ extern "C" {
 #endif
 
 /**
-   Format of actual buffer.
-*/
-typedef enum {
-	/**
-	   An (old) ev:EventBuffer (LV2_Event_Buffer).
-	*/
-	LV2_EVBUF_EVENT,
-
-	/**
-	   A (new) atom:Sequence (LV2_Atom_Sequence).
-	*/
-	LV2_EVBUF_ATOM
-} LV2_Evbuf_Type;
-
-/**
    An abstract/opaque LV2 event buffer.
 */
 typedef struct LV2_Evbuf_Impl LV2_Evbuf;
@@ -58,23 +43,15 @@ typedef struct {
    URIDs for atom:Chunk and atom:Sequence must be passed for LV2_EVBUF_ATOM.
 */
 LV2_Evbuf*
-lv2_evbuf_new(uint32_t       capacity,
-              LV2_Evbuf_Type type,
-              uint32_t       atom_Chunk,
-              uint32_t       atom_Sequence);
+lv2_evbuf_new(uint32_t capacity,
+              uint32_t atom_Chunk,
+              uint32_t atom_Sequence);
 
 /**
    Free an event buffer allocated with lv2_evbuf_new.
 */
 void
 lv2_evbuf_free(LV2_Evbuf* evbuf);
-
-/**
-   Reset and change the type of an existing event buffer.
-   URIDs for atom:Chunk and atom:Sequence must be passed for LV2_EVBUF_ATOM.
-*/
-void
-lv2_evbuf_set_type(LV2_Evbuf* evbuf, LV2_Evbuf_Type type);
 
 /**
    Clear and initialize an existing event buffer.

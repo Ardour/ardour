@@ -48,8 +48,7 @@ public:
 	ArdourMixerPlugin (boost::shared_ptr<ARDOUR::PluginInsert>);
 	~ArdourMixerPlugin ();
 
-	boost::shared_ptr<ARDOUR::PluginInsert>      insert () const;
-	boost::shared_ptr<PBD::ScopedConnectionList> connections () const;
+	boost::shared_ptr<ARDOUR::PluginInsert> insert () const;
 	
 	bool enabled () const;
 	void set_enabled (bool);
@@ -63,7 +62,7 @@ public:
 	static TypedValue param_value (boost::shared_ptr<ARDOUR::AutomationControl>);
 
 private:
-	boost::shared_ptr<ARDOUR::PluginInsert>      _insert;
+	boost::shared_ptr<ARDOUR::PluginInsert> _insert;
 };
 
 class ArdourMixerStrip : public PBD::ScopedConnectionList
@@ -72,8 +71,7 @@ public:
 	ArdourMixerStrip (boost::shared_ptr<ARDOUR::Stripable>, PBD::EventLoop*);
 	~ArdourMixerStrip ();
 	
-	boost::shared_ptr<ARDOUR::Stripable>         stripable () const;
-	boost::shared_ptr<PBD::ScopedConnectionList> connections () const;
+	boost::shared_ptr<ARDOUR::Stripable> stripable () const;
 
 	typedef std::map<uint32_t, boost::shared_ptr<ArdourMixerPlugin> > PluginMap;
 
@@ -97,10 +95,15 @@ public:
 	static double to_db (double);
 	static double from_db (double);
 
+	static int to_velocity (double);
+	static double from_velocity (int);
+
 private:
-	boost::shared_ptr<ARDOUR::Stripable>         _stripable;
+	boost::shared_ptr<ARDOUR::Stripable> _stripable;
 
 	PluginMap _plugins;
+
+	bool is_midi () const;
 
 	void on_drop_plugin (uint32_t);
 

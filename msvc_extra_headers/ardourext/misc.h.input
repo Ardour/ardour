@@ -47,12 +47,6 @@
 #include <glib.h>
 #include <ardourext/float_cast.h>
 
-// 'std::isnan()' is not available in MSVC. Assume '_isnan(double)'
-#define isnan(val)  _isnan((double)val)
-
-// 'std::isinf()' is not available in MSVC. Assume '!_finite(double)'
-#define isinf(val) !_finite((double)val)
-
 // 'INFINITY' is not defined in MSVC. Assume 'HUGE_VAL'
 #ifndef INFINITY
 #define INFINITY    HUGE_VAL
@@ -69,6 +63,8 @@
 #define X_OK 1
 
 // Miscellaneous #defines
+// JE - (these ones believed to be no longer needed from VS2015 onward)
+#if defined(_MSC_VER) && (_MSC_VER < 1900)
 #define __attribute__(x)
 #define llabs      _abs64
 #define atoll      _atoi64
@@ -76,9 +72,10 @@
 #define getcwd     _getcwd
 #define getpid     _getpid
 #define snprintf   _snprintf
-#define random      rand
 #define link        ntfs_link
 #define unlink      ntfs_unlink
+#endif
+#define random      rand
 #define strcasecmp  stricmp
 #define strncasecmp strnicmp
 #define strtok_r( _s, _sep, _lasts ) \
@@ -217,10 +214,17 @@ inline int64_t abs(int64_t val) throw()
 #endif
 #endif
 
-// fmin() and fmax()
+// fmin() and fmax() etc.
 #if defined(_MSC_VER) && (_MSC_VER < 1900)
 #define fmin(a, b) __min((double)a, (double)b)
 #define fmax(a, b) __max((double)a, (double)b)
+
+// 'std::isnan()' is not available in early versions of MSVC. Assume '_isnan(double)'
+#define isnan(val)  _isnan((double)val)
+
+// 'std::isinf()' is not available in early versions of MSVC. Assume '!_finite(double)'
+#define isinf(val) !_finite((double)val)
+
 #endif
 
 // approximate POSIX pipe()
@@ -268,9 +272,10 @@ inline int64_t abs(int64_t val) throw()
 // Emulate some C99 math functions which MSVC itself didn't
 // implement until later in life.
 #if defined(_MSC_VER) && (_MSC_VER < 1800)
-extern  double expm1(double x);
 extern  double log1p(double x);
 extern  double round(double x);
+extern  double expm1(double x);
+extern  float  exp2f(float x);
 extern  float roundf(float x);
 #endif
 #if defined(_MSC_VER) && (_MSC_VER < 1900)

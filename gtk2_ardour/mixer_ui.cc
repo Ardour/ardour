@@ -42,7 +42,6 @@
 #include <gtkmm/stock.h>
 
 #include "pbd/convert.h"
-#include "pbd/stacktrace.h"
 #include "pbd/unwind.h"
 
 #include "ardour/amp.h"
@@ -88,6 +87,8 @@
 #include "vca_master_strip.h"
 
 #include "pbd/i18n.h"
+
+#define PX_SCALE(px) std::max ((float)px, rintf ((float)px* UIConfiguration::instance ().get_ui_scale ()))
 
 using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
@@ -149,7 +150,8 @@ Mixer_UI::Mixer_UI ()
 	scroller_base.set_flags (Gtk::CAN_FOCUS);
 	scroller_base.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	scroller_base.set_name ("MixerWindow");
-	scroller_base.signal_button_release_event().connect (sigc::mem_fun(*this, &Mixer_UI::strip_scroller_button_release));
+	scroller_base.signal_button_press_event().connect (sigc::mem_fun(*this, &Mixer_UI::strip_scroller_button_event));
+	scroller_base.signal_button_release_event().connect (sigc::mem_fun(*this, &Mixer_UI::strip_scroller_button_event));
 
 	/* set up drag-n-drop */
 	vector<TargetEntry> target_table;
@@ -157,23 +159,10 @@ Mixer_UI::Mixer_UI ()
 	scroller_base.drag_dest_set (target_table);
 	scroller_base.signal_drag_data_received().connect (sigc::mem_fun(*this, &Mixer_UI::scroller_drag_data_received));
 
-	/* create a button to add VCA strips ... will get packed in redisplay_track_list() */
-	Widget* w = manage (new Image (Stock::ADD, ICON_SIZE_BUTTON));
-	w->show ();
-	add_vca_button.add (*w);
-	add_vca_button.set_can_focus(false);
-	add_vca_button.signal_clicked().connect (sigc::mem_fun (*this, &Mixer_UI::new_track_or_bus));
-
-	/* create a button to add mixer strips */
-	w = manage (new Image (Stock::ADD, ICON_SIZE_BUTTON));
-	w->show ();
-	add_button.add (*w);
-	add_button.set_can_focus(false);
-	add_button.signal_clicked().connect (sigc::mem_fun (*this, &Mixer_UI::new_track_or_bus));
-
 	/* add as last item of strip packer */
 	strip_packer.pack_end (scroller_base, true, true);
-	strip_packer.pack_end (add_button, false, false);
+	scroller_base.set_size_request (PX_SCALE (20), -1);
+	scroller_base.signal_expose_event().connect (sigc::bind (sigc::ptr_fun(&ArdourWidgets::ArdourIcon::expose), &scroller_base, ArdourWidgets::ArdourIcon::ShadedPlusSign));
 
 #ifdef MIXBUS
 	/* create a drop-shadow at the end of the mixer strips */
@@ -307,7 +296,8 @@ Mixer_UI::Mixer_UI ()
 	vca_hpacker.signal_scroll_event().connect (sigc::mem_fun (*this, &Mixer_UI::on_vca_scroll_event), false);
 	vca_scroller.add (vca_hpacker);
 	vca_scroller.set_policy (Gtk::POLICY_ALWAYS, Gtk::POLICY_AUTOMATIC);
-	vca_scroller.signal_button_release_event().connect (sigc::mem_fun(*this, &Mixer_UI::strip_scroller_button_release));
+	vca_scroller.signal_button_press_event().connect (sigc::mem_fun(*this, &Mixer_UI::strip_scroller_button_event));
+	vca_scroller.signal_button_release_event().connect (sigc::mem_fun(*this, &Mixer_UI::strip_scroller_button_event));
 
 	vca_vpacker.pack_start (vca_scroller, true, true);
 
@@ -383,7 +373,6 @@ Mixer_UI::Mixer_UI ()
 	list_hpane.show();
 	group_display.show();
 	favorite_plugins_display.show();
-	add_button.show ();
 
 	XMLNode* mnode = ARDOUR_UI::instance()->tearoff_settings (X_("monitor-section"));
 	if (mnode) {
@@ -419,6 +408,7 @@ Mixer_UI::~Mixer_UI ()
 	foldback_strip = 0;
 	delete _plugin_selector;
 	delete track_menu;
+	delete _group_tabs;
 }
 
 struct MixerStripSorter {
@@ -631,13 +621,11 @@ Mixer_UI::add_stripables (StripableList& slist)
 					if (foldback_strip) {
 						// last strip created is shown
 						foldback_strip->set_route (route);
-						foldback_strip->prev_next_changed();
 					} else {
 						foldback_strip = new FoldbackStrip (*this, _session, route);
 						out_packer.pack_start (*foldback_strip, false, false);
 						// change 0 to 1 below for foldback to right of master
 						out_packer.reorder_child (*foldback_strip, 0);
-						foldback_strip->set_packed (true);
 					}
 					/* config from last run is set before there are any foldback strips
 					 * this takes that setting and applies it after at least one foldback
@@ -706,6 +694,9 @@ Mixer_UI::deselect_all_strip_processors ()
 	for (list<MixerStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
 		(*i)->deselect_all_processors();
 	}
+	if (foldback_strip) {
+		foldback_strip->deselect_all_processors ();
+	}
 }
 
 void
@@ -772,11 +763,9 @@ Mixer_UI::remove_foldback (FoldbackStrip* strip)
 		/* its all being taken care of */
 		return;
 	}
+	assert (strip == foldback_strip);
 	Glib::RefPtr<ToggleAction> act = ActionManager::get_toggle_action ("Mixer", "ToggleFoldbackStrip");
 	act->set_sensitive (false);
-	if (foldback_strip) {
-		foldback_strip->destroy_();
-	}
 	foldback_strip = 0;
 }
 
@@ -1223,6 +1212,7 @@ Mixer_UI::set_session (Session* sess)
 	_group_tabs->set_session (sess);
 
 	if (!_session) {
+		favorite_plugins_model->clear ();
 		_selection.clear ();
 		return;
 	}
@@ -1233,6 +1223,14 @@ Mixer_UI::set_session (Session* sess)
 	set_state (*node, 0);
 
 	update_title ();
+
+#if 0
+	/* skip mapping all session-config vars, we only need one */
+	boost::function<void (string)> pc (boost::bind (&Mixer_UI::parameter_changed, this, _1));
+	_session->config.map_parameters (pc);
+#else
+	parameter_changed ("show-group-tabs");
+#endif
 
 	initial_track_display ();
 
@@ -1620,8 +1618,13 @@ Mixer_UI::spill_redisplay (boost::shared_ptr<Stripable> s)
 			}
 		}
 
+#ifdef MIXBUS
+		if (r && r->mixbus()) {
+			feeds = strip->route()->mb_feeds (r);
+		} else
+#endif
 		if (r) {
-			feeds = strip->route()->feeds (r);
+			feeds = strip->route()->direct_feeds_according_to_graph (r);
 		}
 
 		bool should_show = visible && (slaved || feeds);
@@ -1678,9 +1681,8 @@ Mixer_UI::redisplay_track_list ()
 	container_clear (vca_hpacker);
 
 	vca_hpacker.pack_end (vca_scroller_base, true, true);
-	vca_hpacker.pack_end (add_vca_button, false, false);
-
-	add_vca_button.show ();
+	vca_scroller_base.set_size_request (PX_SCALE (20), -1);
+	vca_scroller_base.signal_expose_event().connect (sigc::bind (sigc::ptr_fun(&ArdourWidgets::ArdourIcon::expose), &vca_scroller_base, ArdourWidgets::ArdourIcon::ShadedPlusSign));
 	vca_scroller_base.show();
 
 	for (i = rows.begin(); i != rows.end(); ++i) {
@@ -2392,15 +2394,12 @@ Mixer_UI::add_route_group (RouteGroup* group)
 }
 
 bool
-Mixer_UI::strip_scroller_button_release (GdkEventButton* ev)
+Mixer_UI::strip_scroller_button_event (GdkEventButton* ev)
 {
-	using namespace Menu_Helpers;
-
-	if (Keyboard::is_context_menu_event (ev)) {
+	if ((ev->type == GDK_2BUTTON_PRESS && ev->button == 1) || (ev->type == GDK_BUTTON_RELEASE && Keyboard::is_context_menu_event (ev))) {
 		ARDOUR_UI::instance()->add_route ();
 		return true;
 	}
-
 	return false;
 }
 
@@ -2619,7 +2618,7 @@ Mixer_UI::scroll_left ()
 	using namespace Gtk::Box_Helpers;
 	const BoxList& strips = strip_packer.children();
 	for (BoxList::const_iterator i = strips.begin(); i != strips.end(); ++i) {
-		if (i->get_widget() == & add_button) {
+		if (i->get_widget() == &scroller_base) {
 			continue;
 		}
 #ifdef MIXBUS
@@ -2651,7 +2650,7 @@ Mixer_UI::scroll_right ()
 	using namespace Gtk::Box_Helpers;
 	const BoxList& strips = strip_packer.children();
 	for (BoxList::const_iterator i = strips.begin(); i != strips.end(); ++i) {
-		if (i->get_widget() == & add_button) {
+		if (i->get_widget() == &scroller_base) {
 			continue;
 		}
 #ifdef MIXBUS
@@ -2711,7 +2710,7 @@ Mixer_UI::vca_scroll_left ()
 	using namespace Gtk::Box_Helpers;
 	const BoxList& strips = vca_hpacker.children();
 	for (BoxList::const_iterator i = strips.begin(); i != strips.end(); ++i) {
-		if (i->get_widget() == &add_vca_button) {
+		if (i->get_widget() == &vca_scroller_base) {
 			continue;
 		}
 		lm += i->get_widget()->get_width ();
@@ -2738,7 +2737,7 @@ Mixer_UI::vca_scroll_right ()
 	using namespace Gtk::Box_Helpers;
 	const BoxList& strips = vca_hpacker.children();
 	for (BoxList::const_iterator i = strips.begin(); i != strips.end(); ++i) {
-		if (i->get_widget() == &add_vca_button) {
+		if (i->get_widget() == &vca_scroller_base) {
 			continue;
 		}
 		lm += i->get_widget()->get_width ();
@@ -2782,7 +2781,7 @@ void
 Mixer_UI::parameter_changed (string const & p)
 {
 	if (p == "show-group-tabs") {
-		bool const s = _session->config.get_show_group_tabs ();
+		bool const s = _session ? _session->config.get_show_group_tabs () : true;
 		if (s) {
 			_group_tabs->show ();
 		} else {
@@ -2844,13 +2843,9 @@ Mixer_UI::setup_track_display ()
 	track_display_scroller.add (track_display);
 	track_display_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
-	VBox* v = manage (new VBox);
-	v->show ();
-	v->pack_start (track_display_scroller, true, true);
-
 	track_display_frame.set_name("BaseFrame");
 	track_display_frame.set_shadow_type (Gtk::SHADOW_IN);
-	track_display_frame.add (*v);
+	track_display_frame.add (track_display_scroller);
 
 	track_display_scroller.show();
 	track_display_frame.show();
@@ -3553,9 +3548,9 @@ Mixer_UI::show_spill (boost::shared_ptr<Stripable> s)
 
 	if (s) {
 		s->DropReferences.connect (_spill_gone_connection, invalidator (*this), boost::bind (&Mixer_UI::spill_nothing, this), gui_context());
-		_group_tabs->hide ();
+		_group_tabs->set_sensitive (false);
 	} else {
-		_group_tabs->show ();
+		_group_tabs->set_sensitive (true);
 	}
 	redisplay_track_list ();
 }
@@ -3846,7 +3841,6 @@ Mixer_UI::screenshot (std::string const& filename)
 	strip_group_box.remove (strip_packer);
 	b.pack_start (strip_packer, false, false);
 	/* hide extra elements inside strip_packer */
-	add_button.hide ();
 	scroller_base.hide ();
 #ifdef MIXBUS
 	mb_shadow.hide();
@@ -3858,7 +3852,6 @@ Mixer_UI::screenshot (std::string const& filename)
 		viewport->remove (); // << vca_hpacker
 		b.pack_start (vca_hpacker, false, false);
 		/* hide some growing widgets */
-		add_vca_button.hide ();
 		vca_scroller_base.hide();
 	}
 
@@ -3887,14 +3880,12 @@ Mixer_UI::screenshot (std::string const& filename)
 	osw.remove ();
 
 	/* now re-pack the widgets into the main mixer window */
-	add_button.show ();
 	scroller_base.show ();
 #ifdef MIXBUS
 	mb_shadow.show();
 #endif
 	strip_group_box.pack_start (strip_packer);
 	if (with_vca) {
-		add_vca_button.show ();
 		vca_scroller_base.show();
 		vca_scroller.add (vca_hpacker);
 	}
@@ -3913,6 +3904,11 @@ Mixer_UI::toggle_monitor_action (MonitorChoice monitor_choice, bool group_overri
 
 	for (AxisViewSelection::iterator i = _selection.axes.begin(); i != _selection.axes.end(); ++i) {
 		boost::shared_ptr<ARDOUR::Route> rt = boost::dynamic_pointer_cast<ARDOUR::Route> ((*i)->stripable());
+
+		if (!rt->monitoring_control ()) {
+			/* skip busses */
+			continue;
+		}
 
 		if (rt->monitoring_control()->monitoring_choice() & monitor_choice) {
 			mc = MonitorChoice (rt->monitoring_control()->monitoring_choice() & ~monitor_choice);

@@ -665,7 +665,8 @@ PTFFormat::parsestring (uint32_t pos) {
 bool
 PTFFormat::parseaudio(void) {
 	bool found = false;
-	uint32_t nwavs, i, n;
+	uint32_t nwavs = 0;
+	uint32_t i, n;
 	uint32_t pos = 0;
 	std::string wavtype;
 	std::string wavname;
@@ -680,7 +681,6 @@ PTFFormat::parseaudio(void) {
 			for (vector<PTFFormat::block_t>::iterator c = b->child.begin();
 					c != b->child.end(); ++c) {
 				if (c->content_type == 0x103a) {
-					found = true;
 					//nstrings = u_endian_read4(&_ptfunxored[c->offset+1], is_bigendian);
 					pos = c->offset + 11;
 					// Found wav list
@@ -706,7 +706,7 @@ PTFFormat::parseaudio(void) {
 								continue;
 							}
 						} else {
-							if (wavtype.size() != 0) {
+							if (wavtype[0] != '\0') {
 								if (!(foundin(wavtype, std::string("WAVE")) ||
 										foundin(wavtype, std::string("EVAW")) ||
 										foundin(wavtype, std::string("AIFF")) ||
@@ -718,6 +718,7 @@ PTFFormat::parseaudio(void) {
 								continue;
 							}
 						}
+						found = true;
 						wav_t f (n);
 						f.filename = wavname;
 						n++;
@@ -725,6 +726,14 @@ PTFFormat::parseaudio(void) {
 					}
 				}
 			}
+		}
+	}
+
+	if (!found) {
+		if (nwavs > 0) {
+			return false;
+		} else {
+			return true;
 		}
 	}
 

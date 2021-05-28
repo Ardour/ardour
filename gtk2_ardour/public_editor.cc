@@ -33,8 +33,8 @@ sigc::signal<void> PublicEditor::DropDownKeys;
 
 PublicEditor::PublicEditor (Gtk::Widget& content)
 	: Tabbable (content, _("Editor"), X_("editor"))
-	, _suspend_route_redisplay_counter (0)
 {
+	g_atomic_int_set (&_suspend_route_redisplay_counter, 0);
 }
 
 PublicEditor::~PublicEditor()

@@ -20,9 +20,12 @@
 #include <algorithm>
 #include <stdlib.h>
 #include <cmath>
+#include <boost/math/special_functions/fpclassify.hpp>
+
 #include "ardour/dB.h"
 #include "ardour/buffer.h"
 #include "ardour/dsp_filter.h"
+#include "ardour/runtime_functions.h"
 
 #ifdef COMPILER_MSVC
 #include <float.h>
@@ -68,10 +71,7 @@ ARDOUR::DSP::log_meter_coeff (float coeff) {
 
 void
 ARDOUR::DSP::peaks (const float *data, float &min, float &max, uint32_t n_samples) {
-	for (uint32_t i = 0; i < n_samples; ++i) {
-		if (data[i] < min) min = data[i];
-		if (data[i] > max) max = data[i];
-	}
+	ARDOUR::find_peaks (data, n_samples, &min, &max);
 }
 
 void
@@ -127,6 +127,7 @@ LowPass::proc (float *data, const uint32_t n_samples)
 	}
 	_z = z;
 	if (!isfinite_local (_z)) { _z = 0; }
+	else if (!boost::math::isnormal (_z)) { _z = 0; }
 }
 
 void
@@ -180,7 +181,9 @@ Biquad::run (float *data, const uint32_t n_samples)
 	}
 
 	if (!isfinite_local (_z1)) { _z1 = 0; }
+	else if (!boost::math::isnormal (_z1)) { _z1 = 0; }
 	if (!isfinite_local (_z2)) { _z2 = 0; }
+	else if (!boost::math::isnormal (_z2)) { _z2 = 0; }
 }
 
 void

@@ -49,6 +49,7 @@
 #include "ardour/session.h"
 #include "ardour/source_factory.h"
 #include "ardour/tempo.h"
+#include "ardour/thawlist.h"
 #include "ardour/types.h"
 #include "ardour/evoral_types_convert.h"
 
@@ -180,7 +181,7 @@ MidiRegion::clone (string path) const
 }
 
 boost::shared_ptr<MidiRegion>
-MidiRegion::clone (boost::shared_ptr<MidiSource> newsrc) const
+MidiRegion::clone (boost::shared_ptr<MidiSource> newsrc, ThawList* tl) const
 {
 	BeatsSamplesConverter bfc (_session.tempo_map(), _position);
 	Temporal::Beats const bbegin = bfc.from (_start);
@@ -215,7 +216,7 @@ MidiRegion::clone (boost::shared_ptr<MidiSource> newsrc) const
 	plist.add (Properties::length_beats, _length_beats);
 	plist.add (Properties::layer, 0);
 
-	boost::shared_ptr<MidiRegion> ret (boost::dynamic_pointer_cast<MidiRegion> (RegionFactory::create (newsrc, plist, true)));
+	boost::shared_ptr<MidiRegion> ret (boost::dynamic_pointer_cast<MidiRegion> (RegionFactory::create (newsrc, plist, true, tl)));
 	ret->set_quarter_note (quarter_note());
 
 	return ret;

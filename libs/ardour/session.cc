@@ -53,7 +53,6 @@
 #include "pbd/md5.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/search_path.h"
-#include "pbd/stacktrace.h"
 #include "pbd/stl_delete.h"
 #include "pbd/replace_all.h"
 #include "pbd/types_convert.h"
@@ -93,6 +92,7 @@
 #include "ardour/playlist_factory.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
+#include "ardour/presentation_info.h"
 #include "ardour/process_thread.h"
 #include "ardour/profile.h"
 #include "ardour/rc_configuration.h"
@@ -185,16 +185,14 @@ Session::Session (AudioEngine &eng,
 	, _base_sample_rate (0)
 	, _nominal_sample_rate (0)
 	, _current_sample_rate (0)
-	, _record_status (Disabled)
 	, _transport_sample (0)
-	, _seek_counter (0)
 	, _session_range_location (0)
 	, _session_range_is_free (true)
 	, _silent (false)
 	, _remaining_latency_preroll (0)
 	, _engine_speed (1.0)
-	, _transport_speed (0)
-	, _default_transport_speed (1.0)
+	, _last_transport_speed (1.0)
+	, _requested_transport_speed (std::numeric_limits<double>::max())
 	, _signalled_varispeed (0)
 	, auto_play_legal (false)
 	, _requested_return_sample (-1)
@@ -204,6 +202,9 @@ Session::Session (AudioEngine &eng,
 	, _worst_route_latency (0)
 	, _send_latency_changes (0)
 	, _have_captured (false)
+	, _capture_duration (0)
+	, _capture_xruns (0)
+	, _export_xruns (0)
 	, _non_soloed_outs_muted (false)
 	, _listening (false)
 	, _listen_cnt (0)
@@ -232,7 +233,6 @@ Session::Session (AudioEngine &eng,
 	, state_tree (0)
 	, state_was_pending (false)
 	, _state_of_the_state (StateOfTheState (CannotSave | InitialConnecting | Loading))
-	, _suspend_save (0)
 	, _save_queued (false)
 	, _save_queued_pending (false)
 	, _last_roll_location (0)
@@ -244,13 +244,11 @@ Session::Session (AudioEngine &eng,
 	, _n_lua_scripts (0)
 	, _butler (new Butler (*this))
 	, _transport_fsm (new TransportFSM (*this))
-	, _post_transport_work (0)
 	, _locations (new Locations (*this))
 	, _ignore_skips_updates (false)
 	, _rt_thread_active (false)
 	, _rt_emit_pending (false)
 	, _ac_thread_active (0)
-	, _latency_recompute_pending (0)
 	, step_speed (0)
 	, outbound_mtc_timecode_frame (0)
 	, next_quarter_frame_to_send (-1)
@@ -274,8 +272,6 @@ Session::Session (AudioEngine &eng,
 	, ltc_timecode_offset (0)
 	, ltc_timecode_negative_offset (false)
 	, midi_control_ui (0)
-	, _punch_or_loop (NoConstraint)
-	, current_usecs_per_track (1000)
 	, _tempo_map (0)
 	, _all_route_group (new RouteGroup (*this, "all"))
 	, routes (new RouteList)
@@ -288,8 +284,6 @@ Session::Session (AudioEngine &eng,
 	, _total_free_4k_blocks (0)
 	, _total_free_4k_blocks_uncertain (false)
 	, no_questions_about_missing_files (false)
-	, _playback_load (0)
-	, _capture_load (0)
 	, _bundles (new BundleList)
 	, _bundle_xml_node (0)
 	, _current_trans (0)
@@ -310,10 +304,7 @@ Session::Session (AudioEngine &eng,
 	, first_file_data_format_reset (true)
 	, first_file_header_format_reset (true)
 	, have_looped (false)
-	, _have_rec_enabled_track (false)
-	, _have_rec_disabled_track (true)
 	, _step_editors (0)
-	, _suspend_timecode_transmission (0)
 	,  _speakers (new Speakers)
 	, _ignore_route_processor_changes (0)
 	, _ignored_a_processor_change (0)
@@ -326,6 +317,22 @@ Session::Session (AudioEngine &eng,
 	, _global_locate_pending (false)
 	, _had_destructive_tracks (false)
 {
+	g_atomic_int_set (&_suspend_save, 0);
+	g_atomic_int_set (&_playback_load, 0);
+	g_atomic_int_set (&_capture_load, 0);
+	g_atomic_int_set (&_post_transport_work, 0);
+	g_atomic_int_set (&_processing_prohibited, Disabled);
+	g_atomic_int_set (&_record_status, Disabled);
+	g_atomic_int_set (&_punch_or_loop, NoConstraint);
+	g_atomic_int_set (&_current_usecs_per_track, 1000);
+	g_atomic_int_set (&_have_rec_enabled_track, 0);
+	g_atomic_int_set (&_have_rec_disabled_track, 1);
+	g_atomic_int_set (&_latency_recompute_pending, 0);
+	g_atomic_int_set (&_suspend_timecode_transmission, 0);
+	g_atomic_int_set (&_update_pretty_names, 0);
+	g_atomic_int_set (&_seek_counter, 0);
+	g_atomic_int_set (&_butler_seek_counter, 0);
+
 	created_with = string_compose ("%1 %2", PROGRAM_NAME, revision);
 
 	pthread_mutex_init (&_rt_emit_mutex, 0);
@@ -397,6 +404,7 @@ Session::Session (AudioEngine &eng,
 		}
 	}
 
+	/* apply the loaded state_tree */
 	int err = post_engine_init ();
 
 	if (err) {
@@ -421,6 +429,22 @@ Session::Session (AudioEngine &eng,
 		}
 	}
 
+	if (!mix_template.empty()) {
+		/* fixup monitor-sends */
+		if (Config->get_use_monitor_bus ()) {
+			/* Session::config_changed will have set use-monitor-bus to match the template.
+			 * search for want_ms, have_ms
+			 */
+			assert (_monitor_out);
+			/* ..but sends do not exist, since templated track bitslots are unset */
+			setup_route_monitor_sends (true, true);
+		} else {
+			/* remove any monitor-sends that may be in the template */
+			assert (!_monitor_out);
+			setup_route_monitor_sends (false, true);
+		}
+	}
+
 	if (!unnamed) {
 		store_recent_sessions (_name, _path);
 	}
@@ -442,6 +466,8 @@ Session::Session (AudioEngine &eng,
 
 	LatentSend::ChangedLatency.connect_same_thread (*this, boost::bind (&Session::send_latency_compensation_change, this));
 	Latent::DisableSwitchChanged.connect_same_thread (*this, boost::bind (&Session::queue_latency_recompute, this));
+
+	Controllable::ControlTouched.connect_same_thread (*this, boost::bind (&Session::controllable_touched, this, _1));
 
 	emit_thread_start ();
 	auto_connect_thread_start ();
@@ -544,6 +570,7 @@ Session::immediately_post_engine ()
 	/* TODO, connect in different thread. (PortRegisteredOrUnregistered may be in RT context)
 	 * can we do that? */
 	 _engine.PortRegisteredOrUnregistered.connect_same_thread (*this, boost::bind (&Session::setup_bundles, this));
+	 _engine.PortPrettyNameChanged.connect_same_thread (*this, boost::bind (&Session::setup_bundles, this));
 
 	// set samplerate for plugins added early
 	// e.g from templates or MB channelstrip
@@ -962,31 +989,8 @@ Session::remove_monitor_section ()
 	cancel_audition ();
 
 	if (!deletion_in_progress ()) {
-		/* Hold process lock while doing this so that we don't hear bits and
-		 * pieces of audio as we work on each route.
-		 */
-
-		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-
-		/* Connect tracks to monitor section. Note that in an
-		   existing session, the internal sends will already exist, but we want the
-		   routes to notice that they connect to the control out specifically.
-		*/
-
-
-		boost::shared_ptr<RouteList> r = routes.reader ();
-		ProcessorChangeBlocker  pcb (this, false);
-
-		for (RouteList::iterator x = r->begin(); x != r->end(); ++x) {
-
-			if ((*x)->is_monitor()) {
-				/* relax */
-			} else if ((*x)->is_master()) {
-				/* relax */
-			} else {
-				(*x)->remove_aux_or_listen (_monitor_out);
-			}
-		}
+		setup_route_monitor_sends (false, true);
+		_engine.monitor_port().clear_ports (true);
 	}
 
 	remove_route (_monitor_out);
@@ -1072,8 +1076,7 @@ Session::add_monitor_section ()
 		}
 	}
 
-	/* if monitor section is not connected, connect it to physical outs
-	 */
+	/* if monitor section is not connected, connect it to physical outs */
 
 	if ((Config->get_auto_connect_standard_busses () || Profile->get_mixbus ()) && !_monitor_out->output()->connected ()) {
 
@@ -1130,30 +1133,40 @@ Session::add_monitor_section ()
 	 * pieces of audio as we work on each route.
 	 */
 
-	Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+	setup_route_monitor_sends (true, true);
 
-	/* Connect tracks to monitor section. Note that in an
-	   existing session, the internal sends will already exist, but we want the
-	   routes to notice that they connect to the control out specifically.
-	*/
+	MonitorBusAddedOrRemoved (); /* EMIT SIGNAL */
+}
 
+void
+Session::setup_route_monitor_sends (bool enable, bool need_process_lock)
+{
+	Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock (), Glib::Threads::NOT_LOCK);
+	if (need_process_lock) {
+		/* Hold process lock while doing this so that we don't hear bits and
+		 * pieces of audio as we work on each route.
+		 */
+		lx.acquire();
+	}
 
 	boost::shared_ptr<RouteList> rls = routes.reader ();
-
 	ProcessorChangeBlocker  pcb (this, false /* XXX */);
 
 	for (RouteList::iterator x = rls->begin(); x != rls->end(); ++x) {
-		if ((*x)->can_solo ()) {
-			(*x)->enable_monitor_send ();
+		if ((*x)->can_monitor ()) {
+			if (enable) {
+				(*x)->enable_monitor_send ();
+			} else {
+				(*x)->remove_monitor_send ();
+			}
 		}
 	}
 
 	if (auditioner) {
 		auditioner->connect ();
 	}
-
-	MonitorBusAddedOrRemoved (); /* EMIT SIGNAL */
 }
+
 
 void
 Session::reset_monitor_section ()
@@ -1198,8 +1211,7 @@ Session::reset_monitor_section ()
 		}
 	}
 
-	/* connect monitor section to physical outs
-	 */
+	/* connect monitor section to physical outs */
 
 	if (Config->get_auto_connect_standard_busses()) {
 
@@ -1252,21 +1264,7 @@ Session::reset_monitor_section ()
 		}
 	}
 
-	/* Connect tracks to monitor section. Note that in an
-	   existing session, the internal sends will already exist, but we want the
-	   routes to notice that they connect to the control out specifically.
-	*/
-
-
-	boost::shared_ptr<RouteList> rls = routes.reader ();
-
-	ProcessorChangeBlocker pcb (this, false);
-
-	for (RouteList::iterator x = rls->begin(); x != rls->end(); ++x) {
-		if ((*x)->can_solo ()) {
-			(*x)->enable_monitor_send ();
-		}
-	}
+	setup_route_monitor_sends (true, false);
 }
 
 int
@@ -1392,10 +1390,10 @@ void
 Session::set_track_monitor_input_status (bool yn)
 {
 	boost::shared_ptr<RouteList> rl = routes.reader ();
+
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		boost::shared_ptr<AudioTrack> tr = boost::dynamic_pointer_cast<AudioTrack> (*i);
 		if (tr && tr->rec_enable_control()->get_value()) {
-			//cerr << "switching to input = " << !auto_input << __FILE__ << __LINE__ << endl << endl;
 			tr->request_input_monitoring (yn);
 		}
 	}
@@ -1871,7 +1869,7 @@ Session::_locations_changed (const Locations::LocationList& locations)
 void
 Session::enable_record ()
 {
-	if (_transport_speed != 0.0 && _transport_speed != 1.0) {
+	if (_transport_fsm->transport_speed() != 0.0 && _transport_fsm->transport_speed() != 1.0) {
 		/* no recording at anything except normal speed */
 		return;
 	}
@@ -1894,6 +1892,9 @@ Session::enable_record ()
 			if (Config->get_monitoring_model() == HardwareMonitoring && config.get_auto_input()) {
 				set_track_monitor_input_status (true);
 			}
+
+			_capture_duration = 0;
+			_capture_xruns = 0;
 
 			RecordStateChanged ();
 			break;
@@ -1960,11 +1961,11 @@ Session::maybe_enable_record (bool rt_context)
 	/* Save pending state of which sources the next record will use,
 	 * which gives us some chance of recovering from a crash during the record.
 	 */
-	if (!rt_context && (!quick_start || _transport_speed == 0)) {
+	if (!rt_context && (!quick_start || _transport_fsm->transport_speed() == 0)) {
 		save_state ("", true);
 	}
 
-	if (_transport_speed != 0) {
+	if (_transport_fsm->transport_speed() != 0) {
 		maybe_allow_only_punch ();
 		if (!config.get_punch_in()) {
 			enable_record ();
@@ -2016,7 +2017,7 @@ Session::audible_sample (bool* latent_locate) const
 	}
 
 #if 0 // TODO looping
-	if (_transport_speed > 0.0f) {
+	if (_transport_fsm->transport_speed() > 0.0f) {
 		if (play_loop && have_looped) {
 			/* the play-position wrapped at the loop-point
 			 * ardour is already playing the beginning of the loop,
@@ -2032,7 +2033,7 @@ Session::audible_sample (bool* latent_locate) const
 				}
 			}
 		}
-	} else if (_transport_speed < 0.0f) {
+	} else if (_transport_fsm->transport_speed() < 0.0f) {
 		/* XXX wot? no backward looping? */
 	}
 #endif
@@ -2383,11 +2384,11 @@ Session::default_track_name_pattern (DataType t)
 {
 	switch (t) {
 	case DataType::AUDIO:
-		return _("Audio ");
+		return _("Audio");
 		break;
 
 	case DataType::MIDI:
-		return _("MIDI ");
+		return _("MIDI");
 	}
 
 	return "";
@@ -2402,7 +2403,7 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, bool s
                          boost::shared_ptr<PluginInfo> instrument, Plugin::PresetRecord* pset,
                          RouteGroup* route_group, uint32_t how_many,
                          string name_template, PresentationInfo::order_t order,
-                         TrackMode mode)
+                         TrackMode mode, bool input_auto_connect)
 {
 	string track_name;
 	uint32_t track_id = 0;
@@ -2475,7 +2476,7 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, bool s
 		ChanCount existing_outputs;
 		count_existing_track_channels (existing_inputs, existing_outputs);
 
-		add_routes (new_routes, true, !instrument, order);
+		add_routes (new_routes, input_auto_connect, !instrument, order);
 		load_and_connect_instruments (new_routes, strict_io, instrument, pset, existing_outputs);
 	}
 
@@ -3037,6 +3038,11 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 				goto out;
 			}
 
+			{
+				PresentationInfo& rpi = route->presentation_info ();
+				rpi.set_flags (PresentationInfo::Flag (rpi.flags() & ~PresentationInfo::OrderSet));
+			}
+
 			/* Fix up sharing of playlists with the new Route/Track */
 
 			for (vector<boost::shared_ptr<Playlist> >::iterator sp = shared_playlists.begin(); sp != shared_playlists.end(); ++sp) {
@@ -3085,6 +3091,21 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 	}
 
 	IO::enable_connecting ();
+
+	if (!ret.empty()) {
+		/* set/unset monitor-send */
+		Glib::Threads::Mutex::Lock lm (_engine.process_lock());
+		for (RouteList::iterator x = ret.begin(); x != ret.end(); ++x) {
+			if ((*x)->can_monitor ()) {
+				if (_monitor_out) {
+					(*x)->enable_monitor_send ();
+				} else {
+					/* this may happen with old templates */
+					(*x)->remove_monitor_send ();
+				}
+			}
+		}
+	}
 
 	return ret;
 }
@@ -3240,7 +3261,7 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 		Glib::Threads::Mutex::Lock lm (_engine.process_lock());
 
 		for (RouteList::iterator x = new_routes.begin(); x != new_routes.end(); ++x) {
-			if ((*x)->can_solo ()) {
+			if ((*x)->can_monitor ()) {
 				(*x)->enable_monitor_send ();
 			}
 		}
@@ -3436,10 +3457,10 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 			}
 
 			/* if the monitoring section had a pointer to this route, remove it */
-			if (_monitor_out && !(*iter)->is_master() && !(*iter)->is_monitor()) {
+			if (!deletion_in_progress () && _monitor_out && (*iter)->can_monitor ()) {
 				Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 				ProcessorChangeBlocker pcb (this, false);
-				(*iter)->remove_aux_or_listen (_monitor_out);
+				(*iter)->remove_monitor_send ();
 			}
 
 			boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (*iter);
@@ -3540,6 +3561,8 @@ Session::route_listen_changed (Controllable::GroupControlDisposition group_overr
 
 		if (Config->get_exclusive_solo()) {
 
+			_engine.monitor_port().clear_ports (false);
+
 			RouteGroup* rg = route->route_group ();
 			const bool group_already_accounted_for = (group_override == Controllable::ForGroup);
 
@@ -3551,7 +3574,7 @@ Session::route_listen_changed (Controllable::GroupControlDisposition group_overr
 					continue;
 				}
 
-				if ((*i)->solo_isolate_control()->solo_isolated() || !(*i)->can_solo()) {
+				if ((*i)->solo_isolate_control()->solo_isolated() || !(*i)->can_monitor()) {
 					/* route does not get solo propagated to it */
 					continue;
 				}
@@ -3657,6 +3680,7 @@ Session::route_solo_changed (bool self_solo_changed, Controllable::GroupControlD
 	if (delta == 1 && Config->get_exclusive_solo()) {
 
 		/* new solo: disable all other solos, but not the group if its solo-enabled */
+		_engine.monitor_port().clear_ports (false);
 
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 
@@ -3780,17 +3804,15 @@ Session::update_route_solo_state (boost::shared_ptr<RouteList> r)
 	}
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if ((*i)->can_solo()) {
-			if (Config->get_solo_control_is_listen_control()) {
-				if ((*i)->solo_control()->soloed_by_self_or_masters()) {
-					listeners++;
-					something_listening = true;
-				}
-			} else {
-				(*i)->set_listen (false);
-				if ((*i)->can_solo() && (*i)->solo_control()->soloed_by_self_or_masters()) {
-					something_soloed = true;
-				}
+		if ((*i)->can_monitor() && Config->get_solo_control_is_listen_control()) {
+			if ((*i)->solo_control()->soloed_by_self_or_masters()) {
+				listeners++;
+				something_listening = true;
+			}
+		} else if ((*i)->can_solo()) {
+			(*i)->set_listen (false);
+			if ((*i)->can_solo() && (*i)->solo_control()->soloed_by_self_or_masters()) {
+				something_soloed = true;
 			}
 		}
 
@@ -4193,7 +4215,7 @@ Session::reassign_track_numbers ()
 		for (RouteList::iterator i = r.begin(); i != r.end(); ++i) {
 			boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (*i);
 			if (t) {
-				t->resync_track_name();
+				t->resync_take_name ();
 			}
 		}
 		// trigger GUI re-layout
@@ -5919,7 +5941,7 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 
 		result = RegionFactory::create (srcs, plist, true);
 
-		result->set_name((name.length() != 0) ? name : legal_playlist_name); /*setting name in the properties didn't seem to work, but this does*/
+		result->set_name(legal_playlist_name); /*setting name in the properties didn't seem to work, but this does*/
 	}
 
 	out:
@@ -6092,13 +6114,13 @@ Session::add_automation_list(AutomationList *al)
 bool
 Session::have_rec_enabled_track () const
 {
-	return g_atomic_int_get (const_cast<gint*>(&_have_rec_enabled_track)) == 1;
+	return g_atomic_int_get (&_have_rec_enabled_track) == 1;
 }
 
 bool
 Session::have_rec_disabled_track () const
 {
-	return g_atomic_int_get (const_cast<gint*>(&_have_rec_disabled_track)) == 1;
+	return g_atomic_int_get (&_have_rec_disabled_track) == 1;
 }
 
 /** Update the state of our rec-enabled tracks flag */
@@ -6140,6 +6162,7 @@ Session::update_route_record_state ()
 		RecordArmStateChanged ();
 	}
 
+	UpdateRouteRecordState ();
 }
 
 void
@@ -6202,20 +6225,19 @@ Session::route_removed_from_route_group (RouteGroup* rg, boost::weak_ptr<Route> 
 }
 
 boost::shared_ptr<AudioTrack>
-Session::get_nth_audio_track (int nth) const
+Session::get_nth_audio_track (uint32_t nth) const
 {
 	boost::shared_ptr<RouteList> rl = routes.reader ();
 	rl->sort (Stripable::Sorter ());
 
 	for (RouteList::const_iterator r = rl->begin(); r != rl->end(); ++r) {
-		if (!boost::dynamic_pointer_cast<AudioTrack> (*r)) {
+		boost::shared_ptr<AudioTrack> at = boost::dynamic_pointer_cast<AudioTrack> (*r);
+		if (!at) {
 			continue;
 		}
-
-		if (--nth > 0) {
-			continue;
+		if (nth-- == 0) {
+			return at;
 		}
-		return boost::dynamic_pointer_cast<AudioTrack> (*r);
 	}
 	return boost::shared_ptr<AudioTrack> ();
 }
@@ -6845,6 +6867,18 @@ Session::notify_presentation_info_change ()
 	reassign_track_numbers();
 }
 
+void
+Session::controllable_touched (boost::weak_ptr<PBD::Controllable> c)
+{
+	_recently_touched_controllable = c;
+}
+
+boost::shared_ptr<PBD::Controllable>
+Session::recently_touched_controllable () const
+{
+	return _recently_touched_controllable.lock ();
+}
+
 bool
 Session::operation_in_progress (GQuark op) const
 {
@@ -7128,11 +7162,19 @@ Session::auto_connect_thread_run ()
 			}
 		}
 
-		{
+		if (_midi_ports && g_atomic_int_get (&_update_pretty_names)) {
+			boost::shared_ptr<Port> ap = boost::dynamic_pointer_cast<Port> (vkbd_output_port ());
+			if (ap->pretty_name () != _("Virtual Keyboard")) {
+				ap->set_pretty_name (_("Virtual Keyboard"));
+			}
+			g_atomic_int_set (&_update_pretty_names, 0);
+		}
+
+		if (_engine.port_deletions_pending ().read_space () > 0) {
 			// this may call ARDOUR::Port::drop ... jack_port_unregister ()
 			// jack1 cannot cope with removing ports while processing
 			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-			AudioEngine::instance()->clear_pending_port_deletions ();
+			_engine.clear_pending_port_deletions ();
 		}
 
 		lx.acquire ();
@@ -7155,6 +7197,22 @@ Session::cancel_all_solo ()
 
 	set_controls (stripable_list_to_control_list (sl, &Stripable::solo_control), 0.0, Controllable::NoGroup);
 	clear_all_solo_state (routes.reader());
+
+	_engine.monitor_port().clear_ports (false);
+}
+
+bool
+Session::listening () const
+{
+	if (_listen_cnt > 0) {
+		return true;
+	}
+
+	if (_monitor_out && _engine.monitor_port().monitoring ()) {
+		return true;
+	}
+
+	return false;
 }
 
 void

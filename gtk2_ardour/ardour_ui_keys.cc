@@ -327,8 +327,8 @@ ARDOUR_UI::transport_numpad_event (int num)
 	} else {
 		switch (num) {
 			case 0: toggle_roll(false, false);                           break;
-			case 1: transport_rewind(1);                                 break;
-			case 2: transport_forward(1);                                break;
+			case 1: transport_rewind();                                  break;
+			case 2: transport_forward();                                 break;
 			case 3: transport_record(true);                              break;
 			case 4: toggle_session_auto_loop();                          break;
 			case 5: transport_record(false); toggle_session_auto_loop(); break;

@@ -48,6 +48,7 @@
 #include "gui_thread.h"
 #include "actions.h"
 #include "editor_drag.h"
+#include "region_view.h"
 
 #include "pbd/i18n.h"
 
@@ -188,7 +189,6 @@ Editor::add_new_location_internal (Location* location)
 		select_new_marker = false;
 	}
 
-	lam->canvas_height_set (_visible_canvas_height);
 	lam->set_show_lines (_show_marker_lines);
 
 	/* Add these markers to the appropriate sorted marker lists, which will render
@@ -582,15 +582,6 @@ Editor::LocationMarkers::show()
 }
 
 void
-Editor::LocationMarkers::canvas_height_set (double h)
-{
-	start->canvas_height_set (h);
-	if (end) {
-		end->canvas_height_set (h);
-	}
-}
-
-void
 Editor::LocationMarkers::set_name (const string& str)
 {
 	/* XXX: hack: don't change names of session start/end markers */
@@ -638,6 +629,15 @@ Editor::LocationMarkers::set_selected (bool s)
 	start->set_selected (s);
 	if (end) {
 		end->set_selected (s);
+	}
+}
+
+void
+Editor::LocationMarkers::set_entered (bool s)
+{
+	start->set_entered (s);
+	if (end) {
+		end->set_entered (s);
 	}
 }
 
@@ -739,35 +739,74 @@ Editor::mouse_add_new_range (samplepos_t where)
 }
 
 void
-Editor::remove_marker (ArdourCanvas::Item& item, GdkEvent*)
+Editor::remove_marker (ArdourCanvas::Item& item)
 {
 	ArdourMarker* marker;
-	bool is_start;
+
+	if (!_session) {
+		return;
+	}
 
 	if ((marker = static_cast<ArdourMarker*> (item.get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
 		abort(); /*NOTREACHED*/
 	}
 
-	if (entered_marker == marker) {
-		entered_marker = NULL;
+	remove_marker (marker);
+}
+
+void
+Editor::remove_marker (ArdourMarker* marker)
+{
+	if (!_session) {
+		return;
 	}
 
-	Location* loc = find_location_from_marker (marker, is_start);
+	if (marker->type() == ArdourMarker::RegionCue) {
+		Glib::signal_idle().connect (sigc::bind (sigc::mem_fun(*this, &Editor::really_remove_region_marker), marker));
+	} else {
 
-	if (_session && loc) {
-		Glib::signal_idle().connect (sigc::bind (sigc::mem_fun(*this, &Editor::really_remove_marker), loc));
+		bool is_start;
+
+		Location* loc = find_location_from_marker (marker, is_start);
+
+		if (loc) {
+			Glib::signal_idle().connect (sigc::bind (sigc::mem_fun(*this, &Editor::really_remove_global_marker), loc));
+		}
 	}
 }
 
 gint
-Editor::really_remove_marker (Location* loc)
+Editor::really_remove_global_marker (Location* loc)
 {
 	begin_reversible_command (_("remove marker"));
 	XMLNode &before = _session->locations()->get_state();
 	_session->locations()->remove (loc);
 	XMLNode &after = _session->locations()->get_state();
 	_session->add_command (new MementoCommand<Locations>(*(_session->locations()), &before, &after));
+	commit_reversible_command ();
+	return FALSE;
+}
+
+gint
+Editor::really_remove_region_marker (ArdourMarker* marker)
+{
+	begin_reversible_command (_("remove region marker"));
+	RegionView* rv = marker->region_view();
+
+	if (!rv) {
+		abort_reversible_command ();
+		return FALSE;
+	}
+
+	CueMarker cm = rv->find_model_cue_marker (marker);
+	if (cm.text().empty()) {
+		abort_reversible_command ();
+		return FALSE;
+	}
+
+	remove_region_marker (cm);
+
 	commit_reversible_command ();
 	return FALSE;
 }
@@ -967,6 +1006,7 @@ Editor::build_range_marker_menu (Location* loc, bool loop_or_punch, bool session
 	glue_item->signal_activate().connect (sigc::mem_fun (*this, &Editor::toggle_marker_menu_glue));
 
 	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Loudness Assistant..."), sigc::mem_fun(*this, &Editor::loudness_assistant_marker)));
 	items.push_back (MenuElem (_("Export Range..."), sigc::mem_fun(*this, &Editor::export_range)));
 	items.push_back (SeparatorElem());
 
@@ -1429,7 +1469,7 @@ Editor::marker_menu_remove ()
 	} else if (tm) {
 		remove_tempo_marker (marker_menu_item);
 	} else {
-		remove_marker (*marker_menu_item, (GdkEvent*) 0);
+		remove_marker (*marker_menu_item);
 	}
 }
 
@@ -1770,7 +1810,7 @@ Editor::goto_nth_marker (int n)
 	for (Locations::LocationList::iterator i = ordered.begin(); n >= 0 && i != ordered.end(); ++i) {
 		if ((*i)->is_mark() && !(*i)->is_hidden() && !(*i)->is_session_range()) {
 			if (n == 0) {
-				_session->request_locate ((*i)->start(), RollIfAppropriate);
+				_session->request_locate ((*i)->start());
 				break;
 			}
 			--n;

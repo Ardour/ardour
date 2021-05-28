@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ExportPreset id="4edb978c-4ef2-4a8b-86f7-776c63f358e8" name="Ogg/Vorbis + FLAC">
-  <ExportFormat id="84a9d860-578b-4b4a-bb2c-3808435d114a"/>
-  <ExportFormat id="fd73f19e-c0fb-4e72-906d-a25625b752b2"/>
+<ExportPreset id="1b66de13-b1e6-4636-88ff-78db4672a393" name="Ogg/Vorbis + FLAC">
+  <ExportFormat id="0627662f-f190-468d-9bb8-db0cca42eac5"/>
+  <ExportFormat id="f6bc67b9-558d-4788-a7de-57ed763c6227"/>
   <ExportFilename>
     <Folder relative="true" path="/export"/>
     <Field name="label" enabled="false"/>

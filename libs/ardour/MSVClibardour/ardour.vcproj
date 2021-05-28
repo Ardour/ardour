@@ -424,6 +424,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\circular_buffer.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\config_text.cc"
 				>
 			</File>
@@ -686,6 +690,22 @@
 			<File
 				RelativePath="..\luabindings.cc"
 				>
+				<FileConfiguration
+					Name="Debug 32|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalOptions="/bigobj"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release 32 with Debugging Capability|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalOptions="/bigobj"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\luaproc.cc"
@@ -800,7 +820,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\monitor_port.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\monitor_processor.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\monitor_return.cc"
 				>
 			</File>
 			<File
@@ -1340,6 +1368,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\solo_mute_release.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\solo_safe_control.cc"
 				>
 			</File>
@@ -1389,6 +1421,10 @@
 			</File>
 			<File
 				RelativePath="..\tempo_map_importer.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\thawlist.cc"
 				>
 			</File>
 			<File
@@ -1683,6 +1719,10 @@
 			</File>
 			<File
 				RelativePath="..\ardour\chan_mapping.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\circular_buffer.h"
 				>
 			</File>
 			<File
@@ -2114,7 +2154,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\ardour\monitor_port.h"
+				>
+			</File>
+			<File
 				RelativePath="..\ardour\monitor_processor.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\monitor_return.h"
 				>
 			</File>
 			<File
@@ -2466,6 +2514,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\ardour\solo_mute_release.h"
+				>
+			</File>
+			<File
 				RelativePath="..\ardour\soundcloud_upload.h"
 				>
 			</File>
@@ -2527,6 +2579,10 @@
 			</File>
 			<File
 				RelativePath="..\ardour\tempo_map_importer.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\thawlist.h"
 				>
 			</File>
 			<File

@@ -26,7 +26,7 @@ function factory ()
 					-- maybe-enable may fail if there are no tracks or step-entry is active
 					-- roll transport if record-enable suceeded:
 					if ARDOUR.Session.RecordState.Enabled == Session:record_status() then
-						Session:request_transport_speed (1.0, true, ARDOUR.TransportRequestSource.TRS_UI) -- ...and go.
+						Session:request_roll (ARDOUR.TransportRequestSource.TRS_UI) -- ...and go.
 					end
 					return
 				end

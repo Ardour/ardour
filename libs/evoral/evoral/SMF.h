@@ -118,6 +118,17 @@ public:
 
 	Tempo* nth_tempo (size_t n) const;
 
+	struct MarkerAt {
+		std::string text;
+		size_t time_pulses; /* type matches libsmf smf_event_struct.time_pulses */
+
+		MarkerAt (std::string const & txt, size_t tp) : text (txt), time_pulses (tp) {}
+	};
+
+	typedef std::vector<MarkerAt> Markers;
+	Markers const & markers() const { return _markers; }
+	void load_markers ();
+
   private:
 	smf_t*       _smf;
 	smf_track_t* _smf_track;
@@ -126,6 +137,8 @@ public:
 
 	bool              _type0;
 	std::set<uint8_t> _type0channels;
+
+	mutable Markers _markers;
 };
 
 }; /* namespace Evoral */

@@ -636,8 +636,6 @@ PortAudioBackend::_start (bool for_latency_measurement)
 
 	_measure_latency = for_latency_measurement;
 
-	_port_change_flag = false;
-
 	if (_midi_driver_option == winmme_driver_name) {
 		_midiio->set_enabled(true);
 		//_midiio->set_port_changed_callback(midi_port_change, this);
@@ -674,7 +672,7 @@ PortAudioBackend::_start (bool for_latency_measurement)
 	_run = true;
 
 	engine.reconnect_ports ();
-	_port_change_flag = false;
+	g_atomic_int_set (&_port_change_flag, 0);
 
 	_dsp_calc.reset ();
 
@@ -1213,7 +1211,7 @@ PortAudioBackend::register_system_audio_ports()
 		if (!p) return -1;
 		set_latency_range (p, false, lr);
 		boost::shared_ptr<PortAudioPort> audio_port = boost::dynamic_pointer_cast<PortAudioPort>(p);
-		audio_port->set_pretty_name (
+		audio_port->set_hw_port_name (
 		    _pcmio->get_input_channel_name (name_to_id (_input_audio_device), i));
 		_system_inputs.push_back (audio_port);
 	}
@@ -1226,7 +1224,7 @@ PortAudioBackend::register_system_audio_ports()
 		if (!p) return -1;
 		set_latency_range (p, true, lr);
 		boost::shared_ptr<PortAudioPort> audio_port = boost::dynamic_pointer_cast<PortAudioPort>(p);
-		audio_port->set_pretty_name (
+		audio_port->set_hw_port_name (
 		    _pcmio->get_output_channel_name (name_to_id (_output_audio_device), i));
 		_system_outputs.push_back(audio_port);
 	}
@@ -1263,7 +1261,7 @@ PortAudioBackend::register_system_midi_ports()
 		set_latency_range (p, false, lr);
 
 		boost::shared_ptr<PortMidiPort> midi_port = boost::dynamic_pointer_cast<PortMidiPort>(p);
-		midi_port->set_pretty_name ((*i)->name());
+		midi_port->set_hw_port_name ((*i)->name());
 		_system_midi_in.push_back (midi_port);
 		DEBUG_MIDI (string_compose ("Registered MIDI input port: %1\n", port_name));
 	}
@@ -1288,7 +1286,7 @@ PortAudioBackend::register_system_midi_ports()
 
 		boost::shared_ptr<PortMidiPort> midi_port = boost::dynamic_pointer_cast<PortMidiPort>(p);
 		midi_port->set_n_periods(2);
-		midi_port->set_pretty_name ((*i)->name());
+		midi_port->set_hw_port_name ((*i)->name());
 		_system_midi_out.push_back (midi_port);
 		DEBUG_MIDI (string_compose ("Registered MIDI output port: %1\n", port_name));
 	}
@@ -1728,9 +1726,8 @@ PortAudioBackend::process_port_connection_changes ()
 	bool connections_changed = false;
 	bool ports_changed = false;
 	if (!pthread_mutex_trylock (&_port_callback_mutex)) {
-		if (_port_change_flag) {
+		if (g_atomic_int_compare_and_exchange (&_port_change_flag, 1, 0)) {
 			ports_changed = true;
-			_port_change_flag = false;
 		}
 		if (!_port_connection_queue.empty ()) {
 			connections_changed = true;

@@ -115,10 +115,9 @@ public:
 	/** Get a MIDI buffer translated into an LV2 MIDI buffer for use with
 	 * plugins.  The index here corresponds directly to MIDI buffer numbers
 	 * (i.e. the index passed to get_midi), translation back and forth will
-	 * happen as needed.  If old_api is true, the returned buffer will be in
-	 * old event format.  Otherwise it will be in new atom sequence format.
+	 * happen as needed.
 	 */
-	LV2_Evbuf* get_lv2_midi(bool input, size_t i, bool old_api);
+	LV2_Evbuf* get_lv2_midi(bool input, size_t i);
 
 	/** ensure minimum size of LV2 Atom port buffer */
 	void ensure_lv2_bufsize(bool input, size_t i, size_t buffer_capacity);

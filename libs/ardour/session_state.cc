@@ -85,7 +85,6 @@
 #include "pbd/pathexpand.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/scoped_file_descriptor.h"
-#include "pbd/stacktrace.h"
 #include "pbd/types_convert.h"
 #include "pbd/localtime_r.h"
 #include "pbd/unwind.h"
@@ -178,7 +177,7 @@ Session::pre_engine_init (string fullpath)
 	*/
 
 	timerclear (&last_mmc_step);
-	g_atomic_int_set (&processing_prohibited, 0);
+	g_atomic_int_set (&_processing_prohibited, 0);
 	g_atomic_int_set (&_record_status, Disabled);
 	g_atomic_int_set (&_playback_load, 100);
 	g_atomic_int_set (&_capture_load, 100);
@@ -1207,6 +1206,20 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool only_used_ass
 		node->set_property ("name", _name);
 		node->set_property ("sample-rate", _base_sample_rate);
 
+		/* store the last engine device we we can avoid autostarting on a different device with wrong i/o count */
+		boost::shared_ptr<AudioBackend> backend = _engine.current_backend();
+		if (_engine.running () && backend && _engine.setup_required ()) {
+			child = node->add_child ("EngineHints");
+			child->set_property ("backend", backend-> name ());
+			if (backend->use_separate_input_and_output_devices()) {
+				child->set_property ("input-device", backend->input_device_name ());
+				child->set_property ("output-device", backend->output_device_name ());
+			} else {
+				child->set_property ("input-device", backend->device_name ());
+				child->set_property ("output-device", backend->device_name ());
+			}
+		}
+
 		if (session_dirs.size() > 1) {
 
 			string p;
@@ -1334,18 +1347,23 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool only_used_ass
 					const std::string base          = PBD::basename_nosuffix(ancestor_name);
 					const string path               = new_midi_source_path (base, false);
 
+					/* Session::save_state() will already have called
+					 * ms->session_saved ();
+					 */
+
 					/* use SMF-API to clone data (use the midi_model, not data on disk) */
-					boost::shared_ptr<SMFSource> newsrc (new SMFSource (*this, path, SndFileSource::default_writable_flags));
+					boost::shared_ptr<SMFSource> newsrc (new SMFSource (*this, path, ms->flags()));
 					Source::Lock lm (ms->mutex());
 
-					// TODO special-case empty, removable() files: just create a new removable.
-					// (load + write flushes the model and creates the file)
 					if (!ms->model()) {
 						ms->load_model (lm);
 					}
+					/* write_to() calls newsrc->flush_midi () to write the file to disk */
 					if (ms->write_to (lm, newsrc, Temporal::Beats(), std::numeric_limits<Temporal::Beats>::max())) {
 						error << string_compose (_("Session-Save: Failed to copy MIDI Source '%1' for snapshot"), ancestor_name) << endmsg;
 					} else {
+						newsrc->session_saved (); /*< this sohuld be a no-op */
+
 						if (snapshot_type == SnapshotKeep) {
 							/* keep working on current session.
 							 *
@@ -1356,7 +1374,7 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool only_used_ass
 						}
 
 						/* swap file-paths.
-						 * ~SMFSource  unlinks removable() files.
+						 * ~SMFSource unlinks removable() files.
 						 */
 						std::string npath (ms->path ());
 						ms->replace_file (newsrc->path ());
@@ -1370,11 +1388,10 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool only_used_ass
 							 */
 							child->add_child_nocopy (ms->get_state());
 						}
-						continue;
 					}
+					continue;
 				}
 			}
-
 			child->add_child_nocopy (siter->second->get_state());
 		}
 	}
@@ -3079,6 +3096,16 @@ Session::abort_reversible_command ()
 	}
 }
 
+bool
+Session::abort_empty_reversible_command ()
+{
+	if (!collected_undo_commands ()) {
+		abort_reversible_command ();
+		return true;
+	}
+	return false;
+}
+
 void
 Session::commit_reversible_command (Command *cmd)
 {
@@ -4191,8 +4218,6 @@ Session::config_changed (std::string p, bool ours)
 		_solo_cut_control->Changed (true, Controllable::NoGroup);
 	} else if (p == "timecode-offset" || p == "timecode-offset-negative") {
 		last_timecode_valid = false;
-	} else if (p == "playback-buffer-seconds") {
-		AudioSource::allocate_working_buffers (sample_rate());
 	} else if (p == "ltc-sink-port") {
 		reconnect_ltc_output ();
 	} else if (p == "timecode-generator-offset") {
@@ -4566,12 +4591,17 @@ Session::parse_stateful_loading_version (const std::string& version)
 }
 
 int
-Session::get_info_from_path (const string& xmlpath, float& sample_rate, SampleFormat& data_format, std::string& program_version)
+Session::get_info_from_path (const string& xmlpath, float& sample_rate, SampleFormat& data_format, std::string& program_version, XMLNode* engine_hints)
 {
 	bool found_sr = false;
 	bool found_data_format = false;
 	std::string version;
 	program_version = "";
+
+	if (engine_hints) {
+		/* clear existing properties */
+		*engine_hints = XMLNode ("EngineHints");
+	}
 
 	if (!Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
 		return -1;
@@ -4632,6 +4662,24 @@ Session::get_info_from_path (const string& xmlpath, float& sample_rate, SampleFo
 			 }
 			 xmlFree (val);
 		 }
+		 if (engine_hints && strcmp((const char*) node->name, "EngineHints") == 0)  {
+			 xmlChar* val = xmlGetProp (node, (const xmlChar*)"backend");
+			 if (val) {
+				 engine_hints->set_property ("backend", (const char*)val);
+			 }
+			 xmlFree (val);
+			 val = xmlGetProp (node, (const xmlChar*)"input-device");
+			 if (val) {
+				 engine_hints->set_property ("input-device", (const char*)val);
+			 }
+			 xmlFree (val);
+			 val = xmlGetProp (node, (const xmlChar*)"output-device");
+			 if (val) {
+				 engine_hints->set_property ("output-device", (const char*)val);
+			 }
+			 xmlFree (val);
+		 }
+
 		 if (strcmp((const char*) node->name, "Config")) {
 			 node = node->next;
 			 continue;
@@ -5291,29 +5339,16 @@ Session::archive_session (const std::string& dest,
 	}
 
 	/* create temporary dir to save session to */
-#ifdef PLATFORM_WINDOWS
-	char tmp[256] = "C:\\TEMP\\";
-	GetTempPath (sizeof (tmp), tmp);
-#else
-	char const* tmp = getenv("TMPDIR");
-	if (!tmp) {
-		tmp = "/tmp/";
-	}
-#endif
-	if ((strlen (tmp) + 21) > 1024) {
+	GError* err = NULL;
+	char* td = g_dir_make_tmp ("ardourarchive-XXXXXX", &err);
+
+	if (!td) {
+		error << string_compose(_("Could not make tmpdir: %1"), err->message) << endmsg;
 		return -1;
 	}
-
-	char tmptpl[1024];
-	strcpy (tmptpl, tmp);
-	strcat (tmptpl, "ardourarchive-XXXXXX");
-	char*  tmpdir = g_mkdtemp (tmptpl);
-
-	if (!tmpdir) {
-		return -1;
-	}
-
-	std::string to_dir = std::string (tmpdir);
+	const string to_dir = PBD::canonical_path (td);
+	g_free (td);
+	g_clear_error (&err);
 
 	/* switch session directory temporarily */
 	(*_session_dir) = to_dir;

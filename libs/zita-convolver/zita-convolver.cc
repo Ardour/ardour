@@ -37,8 +37,9 @@ static float*
 calloc_real (uint32_t k)
 {
 	float* p = fftwf_alloc_real (k);
-	if (!p)
+	if (!p) {
 		throw (Converror (Converror::MEM_ALLOC));
+	}
 	memset (p, 0, k * sizeof (float));
 	return p;
 }
@@ -47,8 +48,9 @@ static fftwf_complex*
 calloc_complex (uint32_t k)
 {
 	fftwf_complex* p = fftwf_alloc_complex (k);
-	if (!p)
+	if (!p) {
 		throw (Converror (Converror::MEM_ALLOC));
+	}
 	memset (p, 0, k * sizeof (fftwf_complex));
 	return p;
 }
@@ -56,7 +58,6 @@ calloc_complex (uint32_t k)
 Convproc::Convproc (void)
 	: _state (ST_IDLE)
 	, _options (0)
-	, _skipcnt (0)
 	, _ninp (0)
 	, _nout (0)
 	, _quantum (0)
@@ -82,13 +83,6 @@ Convproc::set_options (uint32_t options)
 	_options = options;
 }
 
-void
-Convproc::set_skipcnt (uint32_t skipcnt)
-{
-	if ((_quantum == _minpart) && (_quantum == _maxpart))
-		_skipcnt = skipcnt;
-}
-
 int
 Convproc::configure (uint32_t ninp,
                      uint32_t nout,
@@ -102,8 +96,9 @@ Convproc::configure (uint32_t ninp,
 	int      prio, step, d, r, s;
 	float    cfft, cmac;
 
-	if (_state != ST_IDLE)
+	if (_state != ST_IDLE) {
 		return Converror::BAD_STATE;
+	}
 	if (   (ninp < 1) || (ninp > MAXINP)
 	    || (nout < 1) || (nout > MAXOUT)
 	    || (quantum & (quantum - 1))
@@ -115,25 +110,30 @@ Convproc::configure (uint32_t ninp,
 	    || (minpart > MAXDIVIS * quantum)
 	    || (maxpart & (maxpart - 1))
 	    || (maxpart > MAXPART)
-	    || (maxpart < minpart))
+	    || (maxpart < minpart)) {
 		return Converror::BAD_PARAM;
+	}
 
 	nmin = (ninp < nout) ? ninp : nout;
-	if (density <= 0.0f)
+	if (density <= 0.0f) {
 		density = 1.0f / nmin;
-	if (density > 1.0f)
+	}
+	if (density > 1.0f) {
 		density = 1.0f;
-	cfft            = _fft_cost * (ninp + nout);
-	cmac            = _mac_cost * ninp * nout * density;
-	step            = (cfft < 4 * cmac) ? 1 : 2;
+	}
+	cfft = _fft_cost * (ninp + nout);
+	cmac = _mac_cost * ninp * nout * density;
+	step = (cfft < 4 * cmac) ? 1 : 2;
 	if (step == 2) {
 		r = maxpart / minpart;
 		s = (r & 0xAAAA) ? 1 : 2;
-	} else
+	} else {
 		s = 1;
-	nmin      = (s == 1) ? 2 : 6;
-	if (minpart == quantum)
+	}
+	nmin = (s == 1) ? 2 : 6;
+	if (minpart == quantum) {
 		nmin++;
+	}
 	prio = 0;
 	size = quantum;
 	while (size < minpart) {
@@ -148,8 +148,9 @@ Convproc::configure (uint32_t ninp,
 				r = 1 << s;
 				d = npar - nmin;
 				d = d - (d + r - 1) / r;
-				if (cfft < d * cmac)
+				if (cfft < d * cmac) {
 					npar = nmin;
+				}
 			}
 			_convlev[pind] = new Convlevel ();
 			_convlev[pind]->configure (prio, offs, npar, size, _options);
@@ -171,10 +172,12 @@ Convproc::configure (uint32_t ninp,
 		_latecnt = 0;
 		_inpsize = 2 * size;
 
-		for (i              = 0; i < ninp; i++)
+		for (i = 0; i < ninp; i++) {
 			_inpbuff[i] = new float[_inpsize];
-		for (i              = 0; i < nout; i++)
+		}
+		for (i = 0; i < nout; i++) {
 			_outbuff[i] = new float[_minpart];
+		}
 	} catch (...) {
 		cleanup ();
 		return Converror::MEM_ALLOC;
@@ -194,10 +197,13 @@ Convproc::impdata_create (uint32_t inp,
 {
 	uint32_t j;
 
-	if (_state != ST_STOP)
+	if (_state != ST_STOP) {
 		return Converror::BAD_STATE;
-	if ((inp >= _ninp) || (out >= _nout))
+	}
+	if ((inp >= _ninp) || (out >= _nout)) {
 		return Converror::BAD_PARAM;
+	}
+
 	try {
 		for (j = 0; j < _nlevels; j++) {
 			_convlev[j]->impdata_write (inp, out, step, data, ind0, ind1, true);
@@ -214,56 +220,11 @@ Convproc::impdata_clear (uint32_t inp, uint32_t out)
 {
 	uint32_t k;
 
-	if (_state < ST_STOP)
+	if (_state < ST_STOP) {
 		return Converror::BAD_STATE;
-	for (k = 0; k < _nlevels; k++)
-		_convlev[k]->impdata_clear (inp, out);
-	return 0;
-}
-
-int
-Convproc::impdata_update (uint32_t inp,
-                          uint32_t out,
-                          int32_t  step,
-                          float*   data,
-                          int32_t  ind0,
-                          int32_t  ind1)
-{
-	uint32_t j;
-
-	if (_state < ST_STOP)
-		return Converror::BAD_STATE;
-	if ((inp >= _ninp) || (out >= _nout))
-		return Converror::BAD_PARAM;
-	for (j = 0; j < _nlevels; j++) {
-		_convlev[j]->impdata_write (inp, out, step, data, ind0, ind1, false);
 	}
-	return 0;
-}
-
-int
-Convproc::impdata_link (uint32_t inp1,
-                        uint32_t out1,
-                        uint32_t inp2,
-                        uint32_t out2)
-{
-	uint32_t j;
-
-	if ((inp1 >= _ninp) || (out1 >= _nout))
-		return Converror::BAD_PARAM;
-	if ((inp2 >= _ninp) || (out2 >= _nout))
-		return Converror::BAD_PARAM;
-	if ((inp1 == inp2) && (out1 == out2))
-		return Converror::BAD_PARAM;
-	if (_state != ST_STOP)
-		return Converror::BAD_STATE;
-	try {
-		for (j = 0; j < _nlevels; j++) {
-			_convlev[j]->impdata_link (inp1, out1, inp2, out2);
-		}
-	} catch (...) {
-		cleanup ();
-		return Converror::MEM_ALLOC;
+	for (k = 0; k < _nlevels; k++) {
+		_convlev[k]->impdata_clear (inp, out);
 	}
 	return 0;
 }
@@ -273,14 +234,18 @@ Convproc::reset (void)
 {
 	uint32_t k;
 
-	if (_state == ST_IDLE)
+	if (_state == ST_IDLE) {
 		return Converror::BAD_STATE;
-	for (k = 0; k < _ninp; k++)
+	}
+	for (k = 0; k < _ninp; k++) {
 		memset (_inpbuff[k], 0, _inpsize * sizeof (float));
-	for (k = 0; k < _nout; k++)
+	}
+	for (k = 0; k < _nout; k++) {
 		memset (_outbuff[k], 0, _minpart * sizeof (float));
-	for (k = 0; k < _nlevels; k++)
+	}
+	for (k = 0; k < _nlevels; k++) {
 		_convlev[k]->reset (_inpsize, _minpart, _inpbuff, _outbuff);
+	}
 	return 0;
 }
 
@@ -289,8 +254,9 @@ Convproc::start_process (int abspri, int policy)
 {
 	uint32_t k;
 
-	if (_state != ST_STOP)
+	if (_state != ST_STOP) {
 		return Converror::BAD_STATE;
+	}
 	_latecnt = 0;
 	_inpoffs = 0;
 	_outoffs = 0;
@@ -299,40 +265,77 @@ Convproc::start_process (int abspri, int policy)
 	for (k = (_minpart == _quantum) ? 1 : 0; k < _nlevels; k++) {
 		_convlev[k]->start (abspri, policy);
 	}
+
+	while (!check_started ((_minpart == _quantum) ? 1 : 0)) {
+#ifdef _MSC_VER
+		Sleep (40);
+#else
+		usleep (40000);
+#endif
+		sched_yield ();
+	}
+
 	_state = ST_PROC;
 	return 0;
 }
 
 int
-Convproc::process (bool sync)
+Convproc::process ()
 {
 	uint32_t k;
 	int      f = 0;
 
-	if (_state != ST_PROC)
+	if (_state != ST_PROC) {
 		return 0;
+	}
+
 	_inpoffs += _quantum;
-	if (_inpoffs == _inpsize)
+	if (_inpoffs == _inpsize) {
 		_inpoffs = 0;
+	}
+
 	_outoffs += _quantum;
 	if (_outoffs == _minpart) {
 		_outoffs = 0;
-		for (k = 0; k < _nout; k++)
+		for (k = 0; k < _nout; k++) {
 			memset (_outbuff[k], 0, _minpart * sizeof (float));
-		for (k = 0; k < _nlevels; k++)
-			f |= _convlev[k]->readout (sync, _skipcnt);
-		if (_skipcnt < _minpart)
-			_skipcnt = 0;
-		else
-			_skipcnt -= _minpart;
+		}
+		for (k = 0; k < _nlevels; k++) {
+			f |= _convlev[k]->readout ();
+		}
 		if (f) {
 			if (++_latecnt >= 5) {
-				if (~_options & OPT_LATE_CONTIN)
+				if (~_options & OPT_LATE_CONTIN) {
 					stop_process ();
+				}
 				f |= FL_LOAD;
 			}
-		} else
+		} else {
 			_latecnt = 0;
+		}
+	}
+	return f;
+}
+
+int
+Convproc::tailonly (uint32_t n_samples)
+{
+	uint32_t k;
+	int      f = 0;
+
+	if (_state != ST_PROC) {
+		return 0;
+	}
+
+	uint32_t outoffs = _outoffs;
+	outoffs += _quantum;
+	if (outoffs == _minpart) {
+		for (k = 0; k < _nout; k++) {
+			memset (_outbuff[k], 0, n_samples * sizeof (float));
+		}
+		for (k = 0; k < _nlevels; k++) {
+			f |= _convlev[k]->readtail (n_samples);
+		}
 	}
 	return f;
 }
@@ -342,10 +345,12 @@ Convproc::stop_process (void)
 {
 	uint32_t k;
 
-	if (_state != ST_PROC)
+	if (_state != ST_PROC) {
 		return Converror::BAD_STATE;
-	for (k = 0; k < _nlevels; k++)
+	}
+	for (k = 0; k < _nlevels; k++) {
 		_convlev[k]->stop ();
+	}
 	_state = ST_WAIT;
 	return 0;
 }
@@ -357,10 +362,11 @@ Convproc::cleanup (void)
 
 	while (!check_stop ()) {
 #ifdef _MSC_VER
-		Sleep (100);
+		Sleep (40);
 #else
-		usleep (100000);
+		usleep (40000);
 #endif
+		sched_yield ();
 	}
 	for (k = 0; k < _ninp; k++) {
 		delete[] _inpbuff[k];
@@ -377,7 +383,6 @@ Convproc::cleanup (void)
 
 	_state   = ST_IDLE;
 	_options = 0;
-	_skipcnt = 0;
 	_ninp    = 0;
 	_nout    = 0;
 	_quantum = 0;
@@ -389,12 +394,18 @@ Convproc::cleanup (void)
 }
 
 bool
+Convproc::check_started (uint32_t k)
+{
+	for (; (k < _nlevels) && (_convlev[k]->_stat == Convlevel::ST_PROC); k++) ;
+	return (k == _nlevels) ? true : false;
+}
+
+bool
 Convproc::check_stop (void)
 {
 	uint32_t k;
 
-	for (k = 0; (k < _nlevels) && (_convlev[k]->_stat == Convlevel::ST_IDLE); k++)
-		;
+	for (k = 0; (k < _nlevels) && (_convlev[k]->_stat == Convlevel::ST_IDLE); k++) ;
 	if (k == _nlevels) {
 		_state = ST_STOP;
 		return true;
@@ -407,8 +418,9 @@ Convproc::print (FILE* F)
 {
 	uint32_t k;
 
-	for (k = 0; k < _nlevels; k++)
+	for (k = 0; k < _nlevels; k++) {
 		_convlev[k]->print (F);
+	}
 }
 
 #ifdef ENABLE_VECTOR_MODE
@@ -458,8 +470,9 @@ Convlevel::configure (int      prio,
 	_freq_data = calloc_complex (_parsize + 1);
 	_plan_r2c  = fftwf_plan_dft_r2c_1d (2 * _parsize, _time_data, _freq_data, fftwopt);
 	_plan_c2r  = fftwf_plan_dft_c2r_1d (2 * _parsize, _freq_data, _time_data, fftwopt);
-	if (_plan_r2c && _plan_c2r)
+	if (_plan_r2c && _plan_c2r) {
 		return;
+	}
 	throw (Converror (Converror::MEM_ALLOC));
 }
 
@@ -481,19 +494,23 @@ Convlevel::impdata_write (uint32_t inp,
 	n  = i1 - i0;
 	i0 = _offs - i0;
 	i1 = i0 + _npar * _parsize;
-	if ((i0 >= n) || (i1 <= 0))
+	if ((i0 >= n) || (i1 <= 0)) {
 		return;
+	}
 
 	if (create) {
 		M = findmacnode (inp, out, true);
-		if (M == 0 || M->_link)
+		if (M == 0 || M->_link) {
 			return;
-		if (M->_fftb == 0)
+		}
+		if (M->_fftb == 0) {
 			M->alloc_fftb (_npar);
+		}
 	} else {
 		M = findmacnode (inp, out, false);
-		if (M == 0 || M->_link || M->_fftb == 0)
+		if (M == 0 || M->_link || M->_fftb == 0) {
 			return;
+		}
 	}
 
 	norm = 0.5f / _parsize;
@@ -508,12 +525,14 @@ Convlevel::impdata_write (uint32_t inp,
 				memset (_prep_data, 0, 2 * _parsize * sizeof (float));
 				j0 = (i0 < 0) ? 0 : i0;
 				j1 = (i1 > n) ? n : i1;
-				for (j                     = j0; j < j1; j++)
+				for (j = j0; j < j1; j++) {
 					_prep_data[j - i0] = norm * data[j * step];
+				}
 				fftwf_execute_dft_r2c (_plan_r2c, _prep_data, _freq_data);
 #ifdef ENABLE_VECTOR_MODE
-				if (_options & OPT_VECTOR_MODE)
+				if (_options & OPT_VECTOR_MODE) {
 					fftswap (_freq_data);
+				}
 #endif
 				for (j = 0; j <= (int)_parsize; j++) {
 					fftb[j][0] += _freq_data[j][0];
@@ -532,30 +551,14 @@ Convlevel::impdata_clear (uint32_t inp, uint32_t out)
 	Macnode* M;
 
 	M = findmacnode (inp, out, false);
-	if (M == 0 || M->_link || M->_fftb == 0)
+	if (M == 0 || M->_link || M->_fftb == 0) {
 		return;
+	}
 	for (i = 0; i < _npar; i++) {
 		if (M->_fftb[i]) {
 			memset (M->_fftb[i], 0, (_parsize + 1) * sizeof (fftwf_complex));
 		}
 	}
-}
-
-void
-Convlevel::impdata_link (uint32_t inp1,
-                         uint32_t out1,
-                         uint32_t inp2,
-                         uint32_t out2)
-{
-	Macnode* M1;
-	Macnode* M2;
-
-	M1 = findmacnode (inp1, out1, false);
-	if (!M1)
-		return;
-	M2 = findmacnode (inp2, out2, true);
-	M2->free_fftb ();
-	M2->_link = M1;
 }
 
 void
@@ -610,10 +613,12 @@ Convlevel::start (int abspri, int policy)
 	min   = sched_get_priority_min (policy);
 	max   = sched_get_priority_max (policy);
 	abspri += _prio;
-	if (abspri > max)
+	if (abspri > max) {
 		abspri = max;
-	if (abspri < min)
-		abspri      = min;
+	}
+	if (abspri < min) {
+		abspri = min;
+	}
 	parm.sched_priority = abspri;
 	pthread_attr_init (&attr);
 	pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED);
@@ -699,18 +704,18 @@ Convlevel::main (void)
 #endif
 			return;
 		}
-		process (false);
+		process ();
 		_done.post ();
 	}
 }
 
 void
-Convlevel::process (bool skip)
+Convlevel::process ()
 {
 	uint32_t       i, i1, j, k, n1, n2, opi1, opi2;
-	Inpnode*       X;
-	Macnode*       M;
-	Outnode*       Y;
+	Inpnode const* X;
+	Macnode const* M;
+	Outnode const* Y;
 	fftwf_complex* ffta;
 	fftwf_complex* fftb;
 	float*         inpd;
@@ -731,117 +736,147 @@ Convlevel::process (bool skip)
 
 	for (X = _inp_list; X; X = X->_next) {
 		inpd = _inpbuff[X->_inp];
-		if (n1)
+		if (n1) {
 			memcpy (_time_data, inpd + i1, n1 * sizeof (float));
-		if (n2)
+		}
+		if (n2) {
 			memcpy (_time_data + n1, inpd, n2 * sizeof (float));
+		}
 		memset (_time_data + _parsize, 0, _parsize * sizeof (float));
 		fftwf_execute_dft_r2c (_plan_r2c, _time_data, X->_ffta[_ptind]);
 #ifdef ENABLE_VECTOR_MODE
-		if (_options & OPT_VECTOR_MODE)
+		if (_options & OPT_VECTOR_MODE) {
 			fftswap (X->_ffta[_ptind]);
+		}
 #endif
 	}
 
-	if (skip) {
-		for (Y = _out_list; Y; Y = Y->_next) {
-			outd = Y->_buff[opi2];
-			memset (outd, 0, _parsize * sizeof (float));
-		}
-	} else {
-		for (Y = _out_list; Y; Y = Y->_next) {
-			memset (_freq_data, 0, (_parsize + 1) * sizeof (fftwf_complex));
-			for (M = Y->_list; M; M = M->_next) {
-				X = M->_inpn;
-				i = _ptind;
-				for (j = 0; j < _npar; j++) {
-					ffta = X->_ffta[i];
-					fftb = M->_link ? M->_link->_fftb[j] : M->_fftb[j];
-					if (fftb) {
+	for (Y = _out_list; Y; Y = Y->_next) {
+		memset (_freq_data, 0, (_parsize + 1) * sizeof (fftwf_complex));
+		for (M = Y->_list; M; M = M->_next) {
+			X = M->_inpn;
+			i = _ptind;
+			for (j = 0; j < _npar; j++) {
+				ffta = X->_ffta[i];
+				fftb = M->_link ? M->_link->_fftb[j] : M->_fftb[j];
+				if (fftb) {
 #ifdef ENABLE_VECTOR_MODE
-						if (_options & OPT_VECTOR_MODE) {
-							FV4* A = (FV4*)ffta;
-							FV4* B = (FV4*)fftb;
-							FV4* D = (FV4*)_freq_data;
-							for (k = 0; k < _parsize; k += 4) {
-								D[0] += A[0] * B[0] - A[1] * B[1];
-								D[1] += A[0] * B[1] + A[1] * B[0];
-								A += 2;
-								B += 2;
-								D += 2;
-							}
-							_freq_data[_parsize][0] += ffta[_parsize][0] * fftb[_parsize][0];
-							_freq_data[_parsize][1] = 0;
-						} else
+					if (_options & OPT_VECTOR_MODE) {
+						FV4* A = (FV4*)ffta;
+						FV4* B = (FV4*)fftb;
+						FV4* D = (FV4*)_freq_data;
+						for (k = 0; k < _parsize; k += 4) {
+							D[0] += A[0] * B[0] - A[1] * B[1];
+							D[1] += A[0] * B[1] + A[1] * B[0];
+							A += 2;
+							B += 2;
+							D += 2;
+						}
+						_freq_data[_parsize][0] += ffta[_parsize][0] * fftb[_parsize][0];
+						_freq_data[_parsize][1] = 0;
+					} else
 #endif
-						{
-							for (k = 0; k <= _parsize; k++) {
-								_freq_data[k][0] += ffta[k][0] * fftb[k][0] - ffta[k][1] * fftb[k][1];
-								_freq_data[k][1] += ffta[k][0] * fftb[k][1] + ffta[k][1] * fftb[k][0];
-							}
+					{
+						for (k = 0; k <= _parsize; k++) {
+							_freq_data[k][0] += ffta[k][0] * fftb[k][0] - ffta[k][1] * fftb[k][1];
+							_freq_data[k][1] += ffta[k][0] * fftb[k][1] + ffta[k][1] * fftb[k][0];
 						}
 					}
-					if (i == 0)
-						i = _npar;
-					i--;
 				}
+				if (i == 0) {
+					i = _npar;
+				}
+				i--;
 			}
+		}
 
 #ifdef ENABLE_VECTOR_MODE
-			if (_options & OPT_VECTOR_MODE)
-				fftswap (_freq_data);
-#endif
-			fftwf_execute_dft_c2r (_plan_c2r, _freq_data, _time_data);
-			outd = Y->_buff[opi1];
-			for (k = 0; k < _parsize; k++)
-				outd[k] += _time_data[k];
-			outd = Y->_buff[opi2];
-			memcpy (outd, _time_data + _parsize, _parsize * sizeof (float));
+		if (_options & OPT_VECTOR_MODE) {
+			fftswap (_freq_data);
 		}
+#endif
+		fftwf_execute_dft_c2r (_plan_c2r, _freq_data, _time_data);
+		outd = Y->_buff[opi1];
+		for (k = 0; k < _parsize; k++) {
+			outd[k] += _time_data[k];
+		}
+		outd = Y->_buff[opi2];
+		memcpy (outd, _time_data + _parsize, _parsize * sizeof (float));
 	}
 
 	_ptind++;
-	if (_ptind == _npar)
+	if (_ptind == _npar) {
 		_ptind = 0;
+	}
 }
 
 int
-Convlevel::readout (bool sync, uint32_t skipcnt)
+Convlevel::readout ()
 {
-	uint32_t i;
-	float *  p, *q;
-	Outnode* Y;
+	uint32_t       i;
+	float *        p, *q;
+	Outnode const* Y;
 
 	_outoffs += _outsize;
 	if (_outoffs == _parsize) {
 		_outoffs = 0;
 		if (_stat == ST_PROC) {
 			while (_wait) {
-				if (sync)
-					_done.wait ();
-				else if (_done.trywait ())
-					break;
+				_done.wait ();
 				_wait--;
 			}
-			if (++_opind == 3)
+			if (++_opind == 3) {
 				_opind = 0;
+			}
 			_trig.post ();
 			_wait++;
 		} else {
-			process (skipcnt >= 2 * _parsize);
-			if (++_opind == 3)
+			process ();
+			if (++_opind == 3) {
 				_opind = 0;
+			}
 		}
 	}
 
 	for (Y = _out_list; Y; Y = Y->_next) {
 		p = Y->_buff[_opind] + _outoffs;
 		q = _outbuff[Y->_out];
-		for (i = 0; i < _outsize; i++)
+		for (i = 0; i < _outsize; i++) {
 			q[i] += p[i];
+		}
 	}
 
 	return (_wait > 1) ? _bits : 0;
+}
+
+int
+Convlevel::readtail (uint32_t n_samples)
+{
+	Outnode const* Y;
+
+	uint32_t opind   = _opind;
+	uint32_t outoffs = _outoffs + _outsize;
+	if (outoffs == _parsize) {
+
+		while (_wait) {
+			_done.wait ();
+			_wait--;
+		}
+
+		outoffs = 0;
+		if (++opind == 3) {
+			opind = 0;
+		}
+	}
+
+	for (Y = _out_list; Y; Y = Y->_next) {
+		float const* const p = Y->_buff[opind] + outoffs;
+		float* const       q = _outbuff[Y->_out];
+		for (uint32_t i = 0; i < n_samples; i++) {
+			q[i] += p[i];
+		}
+	}
+	return 0;
 }
 
 void
@@ -857,32 +892,38 @@ Convlevel::findmacnode (uint32_t inp, uint32_t out, bool create)
 	Outnode* Y;
 	Macnode* M;
 
-	for (X = _inp_list; X && (X->_inp != inp); X = X->_next)
+	for (X = _inp_list; X && (X->_inp != inp); X = X->_next) {
 		;
+	}
 	if (!X) {
-		if (!create)
+		if (!create) {
 			return 0;
+		}
 		X         = new Inpnode (inp);
 		X->_next  = _inp_list;
 		_inp_list = X;
 		X->alloc_ffta (_npar, _parsize);
 	}
 
-	for (Y = _out_list; Y && (Y->_out != out); Y = Y->_next)
+	for (Y = _out_list; Y && (Y->_out != out); Y = Y->_next) {
 		;
+	}
 	if (!Y) {
-		if (!create)
+		if (!create) {
 			return 0;
+		}
 		Y         = new Outnode (out, _parsize);
 		Y->_next  = _out_list;
 		_out_list = Y;
 	}
 
-	for (M = Y->_list; M && (M->_inpn != X); M = M->_next)
+	for (M = Y->_list; M && (M->_inpn != X); M = M->_next) {
 		;
+	}
 	if (!M) {
-		if (!create)
+		if (!create) {
 			return 0;
+		}
 		M        = new Macnode (X);
 		M->_next = Y->_list;
 		Y->_list = M;
@@ -939,8 +980,9 @@ Inpnode::alloc_ffta (uint16_t npar, int32_t size)
 void
 Inpnode::free_ffta (void)
 {
-	if (!_ffta)
+	if (!_ffta) {
 		return;
+	}
 	for (uint16_t i = 0; i < _npar; i++) {
 		fftwf_free (_ffta[i]);
 	}
@@ -976,8 +1018,9 @@ Macnode::alloc_fftb (uint16_t npar)
 void
 Macnode::free_fftb (void)
 {
-	if (!_fftb)
+	if (!_fftb) {
 		return;
+	}
 	for (uint16_t i = 0; i < _npar; i++) {
 		fftwf_free (_fftb[i]);
 	}

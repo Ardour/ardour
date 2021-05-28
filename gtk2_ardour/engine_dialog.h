@@ -131,6 +131,7 @@ private:
 	Gtk::VBox                   lm_vbox;
 	bool                        have_lm_results;
 	bool                        lm_running;
+	bool                        was_running_before_lm;
 
 	/* MIDI Tab */
 

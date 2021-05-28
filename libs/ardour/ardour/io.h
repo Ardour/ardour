@@ -120,7 +120,6 @@ public:
 	bool physically_connected () const;
 
 	samplecnt_t latency () const;
-	samplecnt_t public_latency () const;
 	samplecnt_t connected_latency (bool for_playback) const;
 
 	void set_private_port_latencies (samplecnt_t value, bool playback);

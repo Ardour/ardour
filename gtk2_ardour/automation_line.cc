@@ -43,7 +43,6 @@
 #include "pbd/floating.h"
 #include "pbd/memento_command.h"
 #include "pbd/stl_delete.h"
-#include "pbd/stacktrace.h"
 
 #include "ardour/automation_list.h"
 #include "ardour/dB.h"

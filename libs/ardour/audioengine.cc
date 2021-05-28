@@ -39,7 +39,6 @@
 #include "pbd/epa.h"
 #include "pbd/file_utils.h"
 #include "pbd/pthread_utils.h"
-#include "pbd/stacktrace.h"
 #include "pbd/unknown_type.h"
 
 #include "midi++/port.h"
@@ -73,7 +72,7 @@ using namespace PBD;
 
 AudioEngine* AudioEngine::_instance = 0;
 
-static gint audioengine_thread_cnt = 1;
+static GATOMIC_QUAL gint audioengine_thread_cnt = 1;
 
 #ifdef SILENCE_AFTER
 #define SILENCE_AFTER_SECONDS 600
@@ -99,15 +98,9 @@ AudioEngine::AudioEngine ()
 	, _in_destructor (false)
 	, _last_backend_error_string(AudioBackend::get_error_string(AudioBackend::NoError))
 	, _hw_reset_event_thread(0)
-	, _hw_reset_request_count(0)
-	, _stop_hw_reset_processing(0)
 	, _hw_devicelist_update_thread(0)
-	, _hw_devicelist_update_count(0)
-	, _stop_hw_devicelist_processing(0)
 	, _start_cnt (0)
 	, _init_countdown (0)
-	, _pending_playback_latency_callback (0)
-	, _pending_capture_latency_callback (0)
 #ifdef SILENCE_AFTER_SECONDS
 	, _silence_countdown (0)
 	, _silence_hit_cnt (0)
@@ -116,6 +109,13 @@ AudioEngine::AudioEngine ()
 	reset_silence_countdown ();
 	start_hw_event_processing();
 	discover_backends ();
+
+	g_atomic_int_set (&_hw_reset_request_count, 0);
+	g_atomic_int_set (&_pending_playback_latency_callback, 0);
+	g_atomic_int_set (&_pending_capture_latency_callback, 0);
+	g_atomic_int_set (&_hw_devicelist_update_count, 0);
+	g_atomic_int_set (&_stop_hw_reset_processing, 0);
+	g_atomic_int_set (&_stop_hw_devicelist_processing, 0);
 }
 
 AudioEngine::~AudioEngine ()
@@ -146,7 +146,7 @@ AudioEngine::split_cycle (pframes_t nframes)
 {
 	/* caller must hold process lock */
 
-	boost::shared_ptr<Ports> p = ports.reader();
+	boost::shared_ptr<Ports> p = _ports.reader();
 
 	/* This is mainly for the benefit of rt-control ports (MTC, MClk)
 	 *
@@ -288,20 +288,34 @@ AudioEngine::process_callback (pframes_t nframes)
 	 * port registration (usually while ardour holds the process-lock
 	 * or with _adding_routes_in_progress or _route_deletion_in_progress set,
 	 * potentially while processing in parallel.
+	 *
+	 * Note: this must be done without holding the _process_lock
 	 */
 	if (_session) {
+		bool lp = false;
+		bool lc = false;
 		if (g_atomic_int_compare_and_exchange (&_pending_playback_latency_callback, 1, 0)) {
-			_session->update_latency (true);
+			lp = true;
 		}
 		if (g_atomic_int_compare_and_exchange (&_pending_capture_latency_callback, 1, 0)) {
-			_session->update_latency (false);
+			lc = true;
+		}
+		if (lp || lc) {
+			tm.release ();
+			if (lp) {
+				_session->update_latency (true);
+			}
+			if (lc) {
+				_session->update_latency (false);
+			}
+			tm.acquire ();
 		}
 	}
 
 	if (_session && _init_countdown > 0) {
 		--_init_countdown;
 		/* Warm up caches */
-		PortManager::cycle_start (nframes);
+		PortManager::cycle_start (nframes, _session);
 		_session->process (nframes);
 		PortManager::silence (nframes);
 		PortManager::cycle_end (nframes);
@@ -625,7 +639,7 @@ AudioEngine::do_reset_backend()
 
 	Glib::Threads::Mutex::Lock guard (_reset_request_lock);
 
-	while (!_stop_hw_reset_processing) {
+	while (!g_atomic_int_get (&_stop_hw_reset_processing)) {
 
 		if (g_atomic_int_get (&_hw_reset_request_count) != 0 && _backend) {
 
@@ -710,14 +724,14 @@ void
 AudioEngine::start_hw_event_processing()
 {
 	if (_hw_reset_event_thread == 0) {
-		g_atomic_int_set(&_hw_reset_request_count, 0);
-		g_atomic_int_set(&_stop_hw_reset_processing, 0);
+		g_atomic_int_set (&_hw_reset_request_count, 0);
+		g_atomic_int_set (&_stop_hw_reset_processing, 0);
 		_hw_reset_event_thread = Glib::Threads::Thread::create (boost::bind (&AudioEngine::do_reset_backend, this));
 	}
 
 	if (_hw_devicelist_update_thread == 0) {
-		g_atomic_int_set(&_hw_devicelist_update_count, 0);
-		g_atomic_int_set(&_stop_hw_devicelist_processing, 0);
+		g_atomic_int_set (&_hw_devicelist_update_count, 0);
+		g_atomic_int_set (&_stop_hw_devicelist_processing, 0);
 		_hw_devicelist_update_thread = Glib::Threads::Thread::create (boost::bind (&AudioEngine::do_devicelist_update, this));
 	}
 }
@@ -727,16 +741,16 @@ void
 AudioEngine::stop_hw_event_processing()
 {
 	if (_hw_reset_event_thread) {
-		g_atomic_int_set(&_stop_hw_reset_processing, 1);
-		g_atomic_int_set(&_hw_reset_request_count, 0);
+		g_atomic_int_set (&_stop_hw_reset_processing, 1);
+		g_atomic_int_set (&_hw_reset_request_count, 0);
 		_hw_reset_condition.signal ();
 		_hw_reset_event_thread->join ();
 		_hw_reset_event_thread = 0;
 	}
 
 	if (_hw_devicelist_update_thread) {
-		g_atomic_int_set(&_stop_hw_devicelist_processing, 1);
-		g_atomic_int_set(&_hw_devicelist_update_count, 0);
+		g_atomic_int_set (&_stop_hw_devicelist_processing, 1);
+		g_atomic_int_set (&_hw_devicelist_update_count, 0);
 		_hw_devicelist_update_condition.signal ();
 		_hw_devicelist_update_thread->join ();
 		_hw_devicelist_update_thread = 0;
@@ -1014,8 +1028,6 @@ AudioEngine::start (bool for_latency)
 		}
 
 	}
-
-	midi_info_dirty = true;
 
 	if (!for_latency) {
 		/* Call the library-wide ::init_post_engine() before emitting

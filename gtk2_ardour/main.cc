@@ -74,10 +74,6 @@
 #include <shellapi.h> // console
 #endif
 
-#ifdef HAVE_DRMINGW
-#include <exchndl.h>
-#endif
-
 #ifdef WAF_BUILD
 #include "gtk2ardour-version.h"
 #endif
@@ -331,7 +327,7 @@ int main (int argc, char *argv[])
 	}
 
 	if (no_splash) {
-		cout << _("Copyright (C) 1999-2020 Paul Davis") << endl
+		cout << _("Copyright (C) 1999-2021 Paul Davis") << endl
 		     << _("Some portions Copyright (C) Steve Harris, Ari Johnson, Brett Viren, Joel Baker, Robin Gareus") << endl
 		     << endl
 		     << string_compose (_("%1 comes with ABSOLUTELY NO WARRANTY"), PROGRAM_NAME) << endl
@@ -342,7 +338,12 @@ int main (int argc, char *argv[])
 	}
 
 #ifdef HAVE_DRMINGW
-	if (true) {
+	/* prevent missing libs popups */
+	UINT prev_error_mode = SetErrorMode (SEM_FAILCRITICALERRORS);
+	SetErrorMode (prev_error_mode | SEM_FAILCRITICALERRORS);
+	HMODULE exchndl = LoadLibraryA ("exchndl.dll");
+
+	if (exchndl) {
 		/* %localappdata%\Ardour<X>\CrashLog\ */
 		string crash_dir = Glib::build_filename (Glib::get_user_data_dir (), string_compose ("%1%2", PROGRAM_NAME, PROGRAM_VERSION), "CrashLog");
 		g_mkdir_with_parents (crash_dir.c_str(), 0700);
@@ -351,10 +352,23 @@ int main (int argc, char *argv[])
 		string crash_file = string_compose ("%1-%2-crash-%3.txt", PROGRAM_NAME, VERSIONSTRING, tm.format ("%s"));
 		string crash_path = Glib::build_filename (crash_dir, crash_file);
 
-		ExcHndlInit ();
-		ExcHndlSetLogFileNameA (crash_path.c_str());
-		cout << "Crash Log: " << crash_path << endl;
+		typedef void (*exc_init_fn_t) (void);
+		typedef bool (*exc_path_fn_t) (const char *);
+
+		exc_init_fn_t exchndl_init = (exc_init_fn_t) GetProcAddress (exchndl, "ExcHndlInit");
+		exc_path_fn_t exchndl_path = (exc_path_fn_t) GetProcAddress (exchndl, "ExcHndlSetLogFileNameA");
+
+		if (exchndl_init && exchndl_path) {
+			exchndl_init ();
+			exchndl_path (crash_path.c_str());
+			cout << "Crash Log: " << crash_path << endl;
+		} else {
+			cout << "Cannot initialize crash reporter" << endl;
+		}
+	} else {
+		cout << "Crash reporter is not compatible with this system" << endl;
 	}
+	SetErrorMode (prev_error_mode);
 #endif
 
 	if (!ARDOUR::init (ARDOUR_COMMAND_LINE::use_vst, ARDOUR_COMMAND_LINE::try_hw_optimization, localedir.c_str(), true)) {

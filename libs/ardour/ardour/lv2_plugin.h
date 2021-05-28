@@ -125,7 +125,6 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 
 	bool parameter_is_audio (uint32_t) const;
 	bool parameter_is_control (uint32_t) const;
-	bool parameter_is_event (uint32_t) const;
 	bool parameter_is_input (uint32_t) const;
 	bool parameter_is_output (uint32_t) const;
 	bool parameter_is_toggled (uint32_t) const;
@@ -189,10 +188,10 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 		_ui_scale_factor = s;
 	}
 	static void set_global_ui_style_boxy (bool yn) {
-		_ui_style_boxy = yn;
+		_ui_style_boxy = yn ? 1 : 0;
 	}
 	static void set_global_ui_style_flat (bool yn) {
-		_ui_style_flat = yn;
+		_ui_style_flat = yn ? 1 : 0;
 	}
 	static void set_main_window_id (unsigned long id) {
 		_ui_transient_win_id = id;
@@ -242,7 +241,6 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 		PORT_OUTPUT   = 1 << 1,  ///< Output port
 		PORT_AUDIO    = 1 << 2,  ///< Audio (buffer of float)
 		PORT_CONTROL  = 1 << 3,  ///< Control (single float)
-		PORT_EVENT    = 1 << 4,  ///< Old event API event port
 		PORT_SEQUENCE = 1 << 5,  ///< New atom API event port
 		PORT_MIDI     = 1 << 6,  ///< Event port understands MIDI
 		PORT_POSITION = 1 << 7,  ///< Event port understands position
@@ -345,8 +343,8 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 
 	// Options passed to plugin
 	int32_t              _seq_size;
-	static bool          _ui_style_flat;
-	static bool          _ui_style_boxy;
+	static int32_t       _ui_style_flat;
+	static int32_t       _ui_style_boxy;
 	static uint32_t      _ui_background_color;
 	static uint32_t      _ui_foreground_color;
 	static uint32_t      _ui_contrasting_color;

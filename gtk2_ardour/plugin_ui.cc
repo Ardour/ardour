@@ -189,6 +189,7 @@ PluginUIWindow::PluginUIWindow (
 	set_border_width (0);
 	set_default_size (w, h);
 	set_resizable (_pluginui->resizable());
+	unset_transient_for ();
 }
 
 PluginUIWindow::~PluginUIWindow ()
@@ -581,7 +582,6 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	_bypass_button.set_icon (ArdourIcon::PluginBypass);
 	_bypass_button.set_active (!pi->enabled ());
 	_bypass_button.signal_button_release_event().connect (sigc::mem_fun(*this, &PlugUIBase::bypass_button_release), false);
-	_focus_button.add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
 
 	_focus_button.signal_button_release_event().connect (sigc::mem_fun(*this, &PlugUIBase::focus_toggled));
 	_focus_button.add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
@@ -635,6 +635,7 @@ PlugUIBase::~PlugUIBase()
 void
 PlugUIBase::plugin_going_away ()
 {
+	drop_connections ();
 	/* drop references to the plugin/insert */
 	insert.reset ();
 	plugin.reset ();

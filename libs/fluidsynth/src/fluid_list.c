@@ -319,3 +319,19 @@ fluid_list_str_compare_func(void *a, void *b)
 
     return 1;
 }
+
+int fluid_list_idx(fluid_list_t *list, void *data)
+{
+    int i = 0;
+
+    while(list)
+    {
+        if (list->data == data)
+        {
+            return i;
+        }
+        list = list->next;
+    }
+
+    return -1;
+}

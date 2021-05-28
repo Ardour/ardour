@@ -171,12 +171,13 @@ private:
 	uint32_t add_port_to_table (boost::shared_ptr<ARDOUR::Port>, uint32_t, bool);
 	uint32_t maybe_add_route_to_input_menu (boost::shared_ptr<ARDOUR::Route>, ARDOUR::DataType, boost::weak_ptr<ARDOUR::Port>);
 	void port_connected_or_disconnected (boost::weak_ptr<ARDOUR::Port>, boost::weak_ptr<ARDOUR::Port>);
+	void port_pretty_name_changed (std::string);
 
 	bool sc_input_press (GdkEventButton *, boost::weak_ptr<ARDOUR::Port>);
 	bool sc_input_release (GdkEventButton *);
 
 	PBD::ScopedConnectionList _plugin_connections;
-	PBD::ScopedConnection _io_connection;
+	PBD::ScopedConnectionList _io_connection;
 	boost::shared_ptr<ARDOUR::PluginInsert> _pi;
 
 	void queue_idle_update ();

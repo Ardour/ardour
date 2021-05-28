@@ -260,6 +260,9 @@ PluginPinWidget::PluginPinWidget (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	AudioEngine::instance ()->PortConnectedOrDisconnected.connect (
 			_io_connection, invalidator (*this), boost::bind (&PluginPinWidget::port_connected_or_disconnected, this, _1, _3), gui_context ()
 			);
+	AudioEngine::instance ()->PortPrettyNameChanged.connect (
+			_io_connection, invalidator (*this), boost::bind (&PluginPinWidget::port_pretty_name_changed, this, _1), gui_context ()
+			);
 }
 
 PluginPinWidget::~PluginPinWidget ()
@@ -1740,7 +1743,6 @@ PluginPinWidget::add_send_from (boost::weak_ptr<ARDOUR::Port> wp, boost::weak_pt
 		return;
 	}
 
-	boost::shared_ptr<Pannable> sendpan (new Pannable (*_session));
 	boost::shared_ptr<Send> send (new Send (*_session, r->pannable (), r->mute_master ()));
 	const ChanCount& outs (r->amp ()->input_streams ());
 	try {
@@ -1823,12 +1825,20 @@ PluginPinWidget::sc_input_press (GdkEventButton *ev, boost::weak_ptr<ARDOUR::Por
 		}
 #endif
 
-		RouteList copy = _session->get_routelist ();
-		copy.sort (Stripable::Sorter(true));
 		uint32_t added = 0;
-		for (ARDOUR::RouteList::const_iterator i = copy.begin (); i != copy.end (); ++i) {
-			added += maybe_add_route_to_input_menu (*i, p->type (), wp);
+
+		if (p) {
+			RouteList copy = _session->get_routelist ();
+			copy.sort (Stripable::Sorter (true));
+			for (ARDOUR::RouteList::const_iterator i = copy.begin (); i != copy.end (); ++i) {
+				added += maybe_add_route_to_input_menu (*i, p->type (), wp);
+			}
 		}
+#if 0
+		else {
+			queue_idle_update ():
+		}
+#endif
 
 		if (added > 0) {
 			citems.push_back (SeparatorElem ());
@@ -1894,6 +1904,15 @@ PluginPinWidget::port_connected_or_disconnected (boost::weak_ptr<ARDOUR::Port> w
 		queue_idle_update ();
 	}
 	else if (p1 && io->has_port (p1)) {
+		queue_idle_update ();
+	}
+}
+
+void
+PluginPinWidget::port_pretty_name_changed (std::string pn)
+{
+	boost::shared_ptr<IO> io = _pi->sidechain_input ();
+	if (io && io->connected_to (pn)) {
 		queue_idle_update ();
 	}
 }
@@ -2004,6 +2023,7 @@ PluginPinDialog::PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 {
 	ppw.push_back (PluginPinWidgetPtr(new PluginPinWidget (pi)));
 	add (*ppw.back());
+	unset_transient_for ();
 }
 
 

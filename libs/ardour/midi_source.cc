@@ -440,12 +440,14 @@ MidiSource::write_to (const Lock& lock, boost::shared_ptr<MidiSource> newsrc, Te
 
 	newsrc->flush_midi(newsrc_lock);
 
-	/* force a reload of the model if the range is partial */
 
 	if (begin != Temporal::Beats() || end != std::numeric_limits<Temporal::Beats>::max()) {
+		/* force a reload of the model if the range is partial */
 		newsrc->load_model (newsrc_lock, true);
 	} else {
-		newsrc->set_model (newsrc_lock, _model);
+		/* re-create model */
+		newsrc->destroy_model (newsrc_lock);
+		newsrc->load_model (newsrc_lock);
 	}
 
 	/* this file is not removable (but since it is MIDI, it is mutable) */

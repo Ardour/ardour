@@ -31,6 +31,7 @@
 
 #include "pbd/stack_allocator.h"
 #include "pbd/timing.h"
+#include "pbd/g_atomic_compat.h"
 
 #include "ardour/ardour.h"
 #include "ardour/libardour_visibility.h"
@@ -371,7 +372,10 @@ private:
 	/* ordered map [plugin instance ID] => ARDOUR::ChanMapping
 	 * TODO: consider replacing with boost::flat_map<> or std::vector<>.
 	 */
-#if defined(_MSC_VER) && (_MSC_VER < 1900)
+#if defined(_MSC_VER) /* && (_MSC_VER < 1900)
+	                   * Regarding the note (below) it was initially
+	                   * thought that this got fixed in VS2015 - but
+	                   * in fact it's still faulty (JE - Feb 2021) */
 	/* Use the older (heap based) mapping for early versions of MSVC.
 	 * In fact it might be safer to use this for all MSVC builds - as
 	 * our StackAllocator class depends on 'boost::aligned_storage'
@@ -438,8 +442,9 @@ private:
 
 	void preset_load_set_value (uint32_t, float);
 
-	PBD::TimingStats _timing_stats;
-	volatile gint _stat_reset;
+	PBD::TimingStats  _timing_stats;
+	GATOMIC_QUAL gint _stat_reset;
+	GATOMIC_QUAL gint _flush;
 };
 
 } // namespace ARDOUR

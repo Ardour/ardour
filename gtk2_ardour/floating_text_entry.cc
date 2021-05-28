@@ -17,13 +17,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "pbd/stacktrace.h"
-#include "public_editor.h"
-
-
-#include "floating_text_entry.h"
 #include "gtkmm2ext/doi.h"
 #include "gtkmm2ext/utils.h"
+
+#include "floating_text_entry.h"
+#include "public_editor.h"
 
 #include "pbd/i18n.h"
 

@@ -23,7 +23,6 @@
 #include "pbd/compose.h"
 #include "pbd/error.h"
 #include "pbd/debug.h"
-#include "pbd/stacktrace.h"
 
 #include "evoral/midi_util.h"
 

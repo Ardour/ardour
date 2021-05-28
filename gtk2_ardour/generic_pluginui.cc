@@ -86,7 +86,7 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	: PlugUIBase (pi)
 	, automation_menu (0)
 	, is_scrollable(scrollable)
-	, _plugin_pianokeyboard_expander (_("MIDI Keyboard"))
+	, _plugin_pianokeyboard_expander (_("MIDI Keyboard (audition only)"))
 	, _piano (0)
 	, _piano_velocity (*manage (new Adjustment (100, 1, 127, 1, 16)))
 	, _piano_channel (*manage (new Adjustment (0, 1, 16, 1, 1)))

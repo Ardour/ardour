@@ -31,7 +31,6 @@
 #include "pbd/compose.h"
 #include "pbd/convert.h"
 #include "pbd/signals.h"
-#include "pbd/stacktrace.h"
 
 #include "ardour/types.h"
 #include "ardour/dB.h"
@@ -1016,7 +1015,21 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 	Rect self;
 
 	if (!get_item_and_draw_rect_in_window_coords (area, self, draw)) {
-		assert(true);
+		assert(false);
+		return;
+	}
+
+	if (_props->height < 1) {
+			if (_props->channel % 2) {
+				return;
+			}
+			context->rectangle (draw.x0, draw.y0, draw.width (), draw.height ());
+			if (1 == (_props->channel % 3)) {
+				set_source_rgba (context, _props->zero_color);
+			} else {
+				set_source_rgba (context, _props->fill_color);
+			}
+			context->fill ();
 		return;
 	}
 
@@ -1322,6 +1335,12 @@ WaveView::set_global_logscaled (bool yn)
 		WaveViewCache::get_instance()->clear_cache ();
 		VisualPropertiesChanged (); /* EMIT SIGNAL */
 	}
+}
+
+void
+WaveView::clear_cache ()
+{
+	WaveViewCache::get_instance()->clear_cache ();
 }
 
 samplecnt_t

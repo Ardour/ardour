@@ -57,6 +57,7 @@ class MidiStateTracker;
 class Playlist;
 class Route;
 class Session;
+class ThawList;
 
 template<typename T> class MidiRingBuffer;
 
@@ -70,7 +71,7 @@ class LIBARDOUR_API MidiRegion : public Region
 	bool do_export (std::string path) const;
 
 	boost::shared_ptr<MidiRegion> clone (std::string path = std::string()) const;
-	boost::shared_ptr<MidiRegion> clone (boost::shared_ptr<MidiSource>) const;
+	boost::shared_ptr<MidiRegion> clone (boost::shared_ptr<MidiSource>, ThawList* tl = 0) const;
 
 	boost::shared_ptr<MidiSource> midi_source (uint32_t n=0) const;
 

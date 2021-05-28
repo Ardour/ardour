@@ -72,7 +72,7 @@ private:
 	void toggle_feedback_enable ();
 
 	void update_port_combos ();
-	PBD::ScopedConnection connection_change_connection;
+	PBD::ScopedConnectionList _port_connections;
 	void connection_handler ();
 
 	struct MidiPortColumns : public Gtk::TreeModel::ColumnRecord {
@@ -247,8 +247,9 @@ GMCPGUI::GMCPGUI (GenericMidiControlProtocol& p)
 	update_port_combos ();
 
 	/* catch future changes to connection state */
-
-	cp.ConnectionChange.connect (connection_change_connection, invalidator (*this), boost::bind (&GMCPGUI::connection_handler, this), gui_context());
+	ARDOUR::AudioEngine::instance()->PortRegisteredOrUnregistered.connect (_port_connections, invalidator (*this), boost::bind (&GMCPGUI::connection_handler, this), gui_context());
+	ARDOUR::AudioEngine::instance()->PortPrettyNameChanged.connect (_port_connections, invalidator (*this), boost::bind (&GMCPGUI::connection_handler, this), gui_context());
+	cp.ConnectionChange.connect (_port_connections, invalidator (*this), boost::bind (&GMCPGUI::connection_handler, this), gui_context());
 }
 
 GMCPGUI::~GMCPGUI ()

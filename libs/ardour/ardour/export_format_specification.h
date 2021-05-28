@@ -95,6 +95,7 @@ class LIBARDOUR_API ExportFormatSpecification : public ExportFormatBase {
 	void set_trim_end (bool value) { _trim_end = value; }
 	void set_normalize (bool value) { _normalize = value; }
 	void set_normalize_loudness (bool value) { _normalize_loudness = value; }
+	void set_use_tp_limiter (bool value) { _use_tp_limiter = value; }
 	void set_normalize_dbfs (float value) { _normalize_dbfs = value; }
 	void set_normalize_lufs (float value) { _normalize_lufs = value; }
 	void set_normalize_dbtp (float value) { _normalize_dbtp = value; }
@@ -169,6 +170,7 @@ class LIBARDOUR_API ExportFormatSpecification : public ExportFormatBase {
 	bool trim_end () const { return _trim_end; }
 	bool normalize () const { return _normalize; }
 	bool normalize_loudness () const { return _normalize_loudness; }
+	bool use_tp_limiter () const { return _use_tp_limiter; }
 	float normalize_dbfs () const { return _normalize_dbfs; }
 	float normalize_lufs () const { return _normalize_lufs; }
 	float normalize_dbtp () const { return _normalize_dbtp; }
@@ -185,7 +187,7 @@ class LIBARDOUR_API ExportFormatSpecification : public ExportFormatBase {
 	bool analyse() const { return _analyse; }
 	int  codec_quality() const { return _codec_quality; }
 
-	bool tag () const { return _tag && supports_tagging; }
+	bool tag () const { return _tag && _supports_tagging; }
 
 	samplecnt_t silence_beginning_at (samplepos_t position, samplecnt_t samplerate) const
 		{ return _silence_beginning.get_samples_at (position, samplerate); }
@@ -208,11 +210,11 @@ class LIBARDOUR_API ExportFormatSpecification : public ExportFormatBase {
 	/* The variables below do not have setters (usually set via set_format) */
 
 	std::string  _format_name;
-	bool            has_sample_format;
-	bool            supports_tagging;
-	bool           _has_codec_quality;
-	bool           _has_broadcast_info;
-	uint32_t       _channel_limit;
+	bool         _has_sample_format;
+	bool         _supports_tagging;
+	bool         _has_codec_quality;
+	bool         _has_broadcast_info;
+	uint32_t     _channel_limit;
 
 	/* The variables below have getters and setters */
 
@@ -232,6 +234,7 @@ class LIBARDOUR_API ExportFormatSpecification : public ExportFormatBase {
 
 	bool            _normalize;
 	bool            _normalize_loudness;
+	bool            _use_tp_limiter;
 	float           _normalize_dbfs;
 	float           _normalize_lufs;
 	float           _normalize_dbtp;

@@ -42,6 +42,7 @@
 #include <gtkmm/box.h>
 #include <gtkmm/checkbutton.h>
 #include <gtkmm/combobox.h>
+#include <gtkmm/comboboxtext.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/label.h>
 #include <gtkmm/liststore.h>
@@ -183,20 +184,20 @@ private:
 	Gtk::Label name_generated_part;
 
 	/* Normalize */
-
-	Gtk::HBox        normalize_hbox;
-	Gtk::CheckButton normalize_checkbox;
-	Gtk::RadioButton normalize_peak_rb;
-	Gtk::RadioButton normalize_loudness_rb;
-	Gtk::SpinButton  normalize_dbfs_spinbutton;
-	Gtk::Adjustment  normalize_dbfs_adjustment;
-	Gtk::SpinButton  normalize_lufs_spinbutton;
-	Gtk::Adjustment  normalize_lufs_adjustment;
-	Gtk::SpinButton  normalize_dbtp_spinbutton;
-	Gtk::Adjustment  normalize_dbtp_adjustment;
-	Gtk::Label       normalize_dbfs_label;
-	Gtk::Label       normalize_lufs_label;
-	Gtk::Label       normalize_dbtp_label;
+	Gtk::Table        normalize_table;
+	Gtk::CheckButton  normalize_checkbox;
+	Gtk::RadioButton  normalize_peak_rb;
+	Gtk::RadioButton  normalize_loudness_rb;
+	Gtk::ComboBoxText normalize_tp_limiter;
+	Gtk::SpinButton   normalize_dbfs_spinbutton;
+	Gtk::Adjustment   normalize_dbfs_adjustment;
+	Gtk::SpinButton   normalize_lufs_spinbutton;
+	Gtk::Adjustment   normalize_lufs_adjustment;
+	Gtk::SpinButton   normalize_dbtp_spinbutton;
+	Gtk::Adjustment   normalize_dbtp_adjustment;
+	Gtk::Label        normalize_dbfs_label;
+	Gtk::Label        normalize_lufs_label;
+	Gtk::Label        normalize_dbtp_label;
 
 	/* Silence  */
 
@@ -212,6 +213,7 @@ private:
 
 	/* Post-export hook */
 
+	Gtk::VBox        command_box;
 	Gtk::Label       command_label;
 	Gtk::Entry       command_entry;
 
@@ -294,6 +296,7 @@ private:
 	SRCQualityCols               src_quality_cols;
 	Glib::RefPtr<Gtk::ListStore> src_quality_list;
 
+	Gtk::HBox       src_quality_box;
 	Gtk::Label      src_quality_label;
 	Gtk::ComboBox   src_quality_combo;
 
@@ -374,7 +377,7 @@ private:
 	Gtk::CheckButton with_toc;
 	Gtk::CheckButton with_mp4chaps;
 
-	Gtk::VBox cue_toc_vbox;
+	Gtk::Table metadata_table;
 
 	void update_with_toc ();
 	void update_with_cue ();

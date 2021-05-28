@@ -157,7 +157,6 @@ protected:
 	/** AutomationStreamView if we are editing region-based automation (for MIDI), otherwise 0 */
 	AutomationStreamView* _view;
 
-	bool    ignore_toggle;
 	bool    first_call_to_set_height;
 
 	ArdourWidgets::ArdourButton   hide_button;

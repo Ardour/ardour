@@ -51,10 +51,11 @@ PeakMeter::PeakMeter (Session& s, const std::string& name)
 
 	_pending_active = true;
 	_meter_type     = MeterPeak;
-	_reset_dpm      = 1;
-	_reset_max      = 1;
 	_bufcnt         = 0;
 	_combined_peak  = 0;
+
+	g_atomic_int_set (&_reset_dpm, 1);
+	g_atomic_int_set (&_reset_max, 1);
 }
 
 PeakMeter::~PeakMeter ()

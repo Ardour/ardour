@@ -39,6 +39,7 @@
 #include "time_axis_view_item.h"
 #include "automation_line.h"
 #include "enums.h"
+#include "marker.h"
 
 class TimeAxisView;
 class RegionEditor;
@@ -132,6 +133,9 @@ public:
 
 	void update_visibility ();
 
+	ARDOUR::CueMarker find_model_cue_marker (ArdourMarker*);
+	void drop_cue_marker (ArdourMarker*);
+
 protected:
 
 	/** Allows derived types to specify their visibility requirements
@@ -164,6 +168,9 @@ protected:
 	virtual void reset_width_dependent_items (double pixel_width);
 
 	virtual void color_handler () {}
+	virtual void parameter_changed (std::string const&);
+
+	void maybe_raise_cue_markers ();
 
 	boost::shared_ptr<ARDOUR::Region> _region;
 
@@ -198,6 +205,25 @@ protected:
 	std::list<ArdourCanvas::Rectangle*> _silent_threshold_samples;
 	/** a text item to display strip silence statistics */
 	ArdourCanvas::Text* _silence_text;
+
+private:
+	void update_xrun_markers ();
+	std::list<std::pair<samplepos_t, ArdourCanvas::Arrow*> > _xrun_markers;
+	bool _xrun_markers_visible;
+
+	void update_cue_markers ();
+
+	struct ViewCueMarker {
+		ArdourMarker* view_marker;
+		ARDOUR::CueMarker     model_marker;
+
+		ViewCueMarker (ArdourMarker* m, ARDOUR::CueMarker const & c) : view_marker (m), model_marker (c) {}
+		~ViewCueMarker();
+	};
+
+	typedef std::list<ViewCueMarker*> ViewCueMarkers;
+	ViewCueMarkers _cue_markers;
+	bool _cue_markers_visible;
 };
 
 #endif /* __gtk_ardour_region_view_h__ */

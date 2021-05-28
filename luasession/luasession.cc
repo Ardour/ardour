@@ -17,6 +17,7 @@
 
 #include <glibmm.h>
 
+#include "pbd/basename.h"
 #include "pbd/debug.h"
 #include "pbd/error.h"
 #include "pbd/event_loop.h"
@@ -243,10 +244,17 @@ _create_session (string dir, string state, uint32_t rate) // throws
 }
 
 static Session*
-_load_session (string dir, string state) // throws
+_load_session (string const& dir, string state) // throws
 {
 	if (prepare_engine ()) {
 		return 0;
+	}
+
+	if (state.empty ()) {
+		state = Session::get_snapshot_from_instant (dir);
+	}
+	if (state.empty ()) {
+		state = PBD::basename_nosuffix (dir);
 	}
 
 	float        sr;
@@ -536,7 +544,7 @@ usage ()
   -i, --interactive          enter interactive mode after executing 'script',\n\
                              force the interpreter to run interactively\n\
   -X, --exit-when-halted     terminate when the audio-engine halts\n\
-                             unexpectedly (disconnect, or too many x-runs)\n\
+                             unexpectedly (disconnect, or too many xruns)\n\
   -V, --version              print version information and exit\n\
 \n");
 	printf ("\n\
@@ -604,8 +612,10 @@ main (int argc, char** argv)
 		lua_setglobal (L, "arg");
 	}
 
+	int res = 0;
+
 	if (argc > optind && 0 != strcmp (argv[optind], "-")) {
-		lua->do_file (argv[optind]);
+		res = lua->do_file (argv[optind]);
 		if (!interactive) {
 			keep_running = false;
 		}
@@ -616,7 +626,7 @@ main (int argc, char** argv)
 	} else if (is_tty () || interactive) {
 		interactive_interpreter ();
 	} else {
-		luaL_dofile (lua->getState (), NULL);
+		res = luaL_dofile (lua->getState (), NULL);
 	}
 
 	if (session) {
@@ -634,5 +644,5 @@ main (int argc, char** argv)
 	ARDOUR::cleanup ();
 	delete event_loop;
 	pthread_cancel_all ();
-	return 0;
+	return res;
 }

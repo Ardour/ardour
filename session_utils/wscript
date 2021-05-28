@@ -85,7 +85,7 @@ def build(bld):
 
     pgmprefix = bld.env['PROGRAM_NAME'].lower() + str(bld.env['MAJOR'])
 
-    utils = bld.path.ant_glob('*.cc', excl=['example.cc', 'common.cc'])
+    utils = bld.path.ant_glob('[a-z]*.cc', excl=['example.cc', 'common.cc'])
 
     for util in utils:
         fn = os.path.splitext(os.path.basename(str(util)))[0]

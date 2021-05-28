@@ -65,7 +65,7 @@ function factory (p) return function ()
 		ARDOUR.PluginInfo(), nil, -- no instrument, no instrument preset
 		group,
 		16, -- how many
-		name, insert_at, ARDOUR.TrackMode.Normal)
+		name, insert_at, ARDOUR.TrackMode.Normal, true)
 
 	local i = 1
 	for track in tl:iter() do

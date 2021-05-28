@@ -80,6 +80,8 @@ public:
 	void set_import_position(Editing::ImportPosition p) { _import_position = p; }
 
 protected:
+	void on_size_request (Gtk::Requisition*);
+
 	std::string path;
 
 	ARDOUR::SoundFileInfo sf_info;
@@ -300,11 +302,13 @@ public:
 
 	Gtk::CheckButton copy_files_btn;
 	Gtk::CheckButton smf_tempo_btn;
+	Gtk::CheckButton smf_marker_btn;
 
 	void set_mode (Editing::ImportMode);
 	Editing::ImportMode get_mode() const;
 	ARDOUR::MidiTrackNameSource get_midi_track_name_source () const;
 	bool get_use_smf_tempo_map () const;
+	bool get_use_smf_markers () const;
 	Editing::ImportPosition get_position() const;
 	Editing::ImportDisposition get_channel_disposition() const;
 	ARDOUR::SrcQuality get_src_quality() const;

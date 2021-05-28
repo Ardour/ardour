@@ -27,7 +27,6 @@
 #include <sigc++/bind.h>
 
 #include "pbd/error.h"
-#include "pbd/stacktrace.h"
 #include "pbd/types_convert.h"
 
 #include "ardour/evoral_types_convert.h"
@@ -64,8 +63,7 @@ struct AudioRangeComparator {
 };
 
 Selection::Selection (const PublicEditor* e, bool mls)
-	: tracks (e)
-	, editor (e)
+	: editor (e)
 	, next_time_id (0)
 	, manage_libardour_selection (mls)
 {

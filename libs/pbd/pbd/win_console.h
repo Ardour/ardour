@@ -1,6 +1,7 @@
 /* STATIC FUNCTIONS -- INCLUDE DIRECTLY BEFORE  main () */
 
 #if (!defined COMPILER_MSVC && defined PLATFORM_WINDOWS)
+#include <windows.h>
 
 static FILE* pStdOut = 0;
 static FILE* pStdErr = 0;

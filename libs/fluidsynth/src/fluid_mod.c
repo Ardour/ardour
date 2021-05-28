@@ -24,8 +24,10 @@
 
 /**
  * Clone the modulators destination, sources, flags and amount.
+ *
  * @param mod the modulator to store the copy to
  * @param src the source modulator to retrieve the information from
+ *
  * @note The \c next member of \c mod will be left unchanged.
  */
 void
@@ -41,6 +43,7 @@ fluid_mod_clone(fluid_mod_t *mod, const fluid_mod_t *src)
 
 /**
  * Set a modulator's primary source controller and flags.
+ *
  * @param mod The modulator instance
  * @param src Modulator source (#fluid_mod_src or a MIDI controller number)
  * @param flags Flags determining mapping function and whether the source
@@ -56,6 +59,7 @@ fluid_mod_set_source1(fluid_mod_t *mod, int src, int flags)
 
 /**
  * Set a modulator's secondary source controller and flags.
+ *
  * @param mod The modulator instance
  * @param src Modulator source (#fluid_mod_src or a MIDI controller number)
  * @param flags Flags determining mapping function and whether the source
@@ -71,6 +75,7 @@ fluid_mod_set_source2(fluid_mod_t *mod, int src, int flags)
 
 /**
  * Set the destination effect of a modulator.
+ *
  * @param mod The modulator instance
  * @param dest Destination generator (#fluid_gen_type)
  */
@@ -82,6 +87,7 @@ fluid_mod_set_dest(fluid_mod_t *mod, int dest)
 
 /**
  * Set the scale amount of a modulator.
+ *
  * @param mod The modulator instance
  * @param amount Scale amount to assign
  */
@@ -93,6 +99,7 @@ fluid_mod_set_amount(fluid_mod_t *mod, double amount)
 
 /**
  * Get the primary source value from a modulator.
+ *
  * @param mod The modulator instance
  * @return The primary source value (#fluid_mod_src or a MIDI CC controller value).
  */
@@ -104,6 +111,7 @@ fluid_mod_get_source1(const fluid_mod_t *mod)
 
 /**
  * Get primary source flags from a modulator.
+ *
  * @param mod The modulator instance
  * @return The primary source flags (#fluid_mod_flags).
  */
@@ -115,6 +123,7 @@ fluid_mod_get_flags1(const fluid_mod_t *mod)
 
 /**
  * Get the secondary source value from a modulator.
+ *
  * @param mod The modulator instance
  * @return The secondary source value (#fluid_mod_src or a MIDI CC controller value).
  */
@@ -126,6 +135,7 @@ fluid_mod_get_source2(const fluid_mod_t *mod)
 
 /**
  * Get secondary source flags from a modulator.
+ *
  * @param mod The modulator instance
  * @return The secondary source flags (#fluid_mod_flags).
  */
@@ -137,6 +147,7 @@ fluid_mod_get_flags2(const fluid_mod_t *mod)
 
 /**
  * Get destination effect from a modulator.
+ *
  * @param mod The modulator instance
  * @return Destination generator (#fluid_gen_type)
  */
@@ -148,6 +159,7 @@ fluid_mod_get_dest(const fluid_mod_t *mod)
 
 /**
  * Get the scale amount from a modulator.
+ *
  * @param mod The modulator instance
  * @return Scale amount
  */
@@ -466,6 +478,7 @@ fluid_mod_get_value(fluid_mod_t *mod, fluid_voice_t *voice)
 
 /**
  * Create a new uninitialized modulator structure.
+ *
  * @return New allocated modulator or NULL if out of memory
  */
 fluid_mod_t *
@@ -484,6 +497,7 @@ new_fluid_mod()
 
 /**
  * Free a modulator structure.
+ *
  * @param mod Modulator to free
  */
 void
@@ -495,9 +509,9 @@ delete_fluid_mod(fluid_mod_t *mod)
 /**
  * Returns the size of the fluid_mod_t structure.
  *
- * Useful in low latency scenarios e.g. to allocate a modulator on the stack.
- *
  * @return Size of fluid_mod_t in bytes
+ *
+ * Useful in low latency scenarios e.g. to allocate a modulator on the stack.
  */
 size_t fluid_mod_sizeof()
 {
@@ -518,13 +532,14 @@ fluid_mod_is_src1_none(const fluid_mod_t *mod)
 
 /**
  * Checks if modulators source other than CC source is invalid.
- * (specs SF 2.01  7.4, 7.8, 8.2.1)
  *
  * @param mod, modulator.
  * @param src1_select, source input selection to check.
  *   1 to check src1 source.
  *   0 to check src2 source.
  * @return FALSE if selected modulator source other than cc is invalid, TRUE otherwise.
+ *
+ * (specs SF 2.01  7.4, 7.8, 8.2.1)
  */
 static int
 fluid_mod_check_non_cc_source(const fluid_mod_t *mod, unsigned char src1_select)
@@ -556,6 +571,7 @@ fluid_mod_check_non_cc_source(const fluid_mod_t *mod, unsigned char src1_select)
 
 /**
  * Checks if modulator CC source is invalid (specs SF 2.01  7.4, 7.8, 8.2.1).
+ *
  * @param mod, modulator.
  * @src1_select, source input selection:
  *   1 to check src1 source or
@@ -599,6 +615,7 @@ fluid_mod_check_cc_source(const fluid_mod_t *mod, unsigned char src1_select)
 
 /**
  * Checks valid modulator sources (specs SF 2.01  7.4, 7.8, 8.2.1)
+ *
  * @param mod, modulator.
  * @param name,if not NULL, pointer on a string displayed as a warning.
  * @return TRUE if modulator sources src1, src2 are valid, FALSE otherwise.
@@ -677,6 +694,7 @@ int fluid_mod_check_sources(const fluid_mod_t *mod, const char *name)
 
 /**
  * Checks if two modulators are identical in sources, flags and destination.
+ *
  * @param mod1 First modulator
  * @param mod2 Second modulator
  * @return TRUE if identical, FALSE otherwise
@@ -720,6 +738,7 @@ int fluid_mod_has_source(const fluid_mod_t *mod, int cc, int ctrl)
 
 /**
  * Check if the modulator has the given destination.
+ *
  * @param mod The modulator instance
  * @param gen The destination generator of type #fluid_gen_type to check for
  * @return TRUE if the modulator has the given destination, FALSE otherwise.

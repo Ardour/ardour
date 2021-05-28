@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2020 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2018-2021 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,6 +61,7 @@ protected:
 	uint32_t _max_size;
 	uint32_t _offset;
 	bool     _configured;
+	bool     _threaded;
 
 private:
 	class ImpData : public Readable
@@ -164,8 +165,11 @@ public:
 
 	Convolver (Session&, std::string const&, IRChannelConfig irc = Mono, IRSettings irs = IRSettings ());
 
-	void run_mono (float*, uint32_t);
-	void run_stereo (float* L, float* R, uint32_t);
+	void run_mono_buffered (float*, uint32_t);
+	void run_stereo_buffered (float* L, float* R, uint32_t);
+
+	void run_mono_no_latency (float*, uint32_t);
+	void run_stereo_no_latency (float* L, float* R, uint32_t);
 
 private:
 	std::vector<boost::shared_ptr<Readable> > _readables;

@@ -21,7 +21,7 @@
 #include "fluid_sys.h"
 #include "fluid_phase.h"
 #include "fluid_rvoice.h"
-#include "fluid_rvoice_dsp_tables.c"
+#include "fluid_rvoice_dsp_tables.inc.h"
 
 /* Purpose:
  *

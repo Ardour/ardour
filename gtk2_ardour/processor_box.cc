@@ -628,6 +628,8 @@ ProcessorEntry::name (Width w) const
 		std::string send_name;
 		bool pretty_ok = true;
 
+		// TODO, subscribe to PortPrettyNameChanged
+
 		if (send->remove_on_disconnect ()) {
 			// assume it's a sidechain, find pretty name of connected port(s)
 			PortSet& ps (send->output ()->ports ());
@@ -2045,6 +2047,8 @@ ProcessorBox::object_drop (DnDVBox<ProcessorEntry>* source, ProcessorEntry* posi
 		/* strip side-chain state (processor inside processor must be a side-chain)
 		 * otherwise we'll end up with duplicate ports-names.
 		 * (this needs a better solution which retains connections)
+		 *
+		 * see also ProcessorBox::paste_processor_state
 		 */
 		state.remove_nodes_and_delete ("Processor");
 		state.remove_property ("count");
@@ -2492,6 +2496,11 @@ ProcessorBox::processor_operation (ProcessorOperation op)
 			if (!boost::dynamic_pointer_cast<PluginInsert> (*i)) {
 				continue;
 			}
+			if (boost::dynamic_pointer_cast<Amp> (*i) && boost::dynamic_pointer_cast<Amp> (*i)->gain_control()->parameter().type() != GainAutomation) {
+				/* Trim, Volume */
+				continue;
+			}
+
 #ifdef MIXBUS
 			if (boost::dynamic_pointer_cast<PluginInsert> (*i)->is_channelstrip()) {
 				continue;
@@ -2582,6 +2591,11 @@ ProcessorBox::processor_button_release_event (GdkEventButton *ev, ProcessorEntry
 	boost::shared_ptr<Processor> processor;
 	if (child) {
 		processor = child->processor ();
+	}
+
+	if (boost::dynamic_pointer_cast<Amp> (processor) && boost::dynamic_pointer_cast<Amp> (processor)->gain_control()->parameter().type() != GainAutomation) {
+		/* Volume */
+		return false;
 	}
 
 	if (processor && Keyboard::is_delete_event (ev)) {
@@ -3515,11 +3529,11 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 					continue;
 				}
 
-				boost::shared_ptr<Pannable> sendpan(new Pannable (*_session));
 				XMLNode n (**niter);
-				InternalSend* s = new InternalSend (*_session, sendpan, _route->mute_master(),
+				InternalSend* s = new InternalSend (*_session, _route->pannable(), _route->mute_master(),
 						_route, boost::shared_ptr<Route>(), Delivery::Aux);
 
+				PBD::Stateful::ForceIDRegeneration force_ids;
 				if (s->set_state (n, Stateful::loading_state_version)) {
 					delete s;
 					return;
@@ -3537,7 +3551,6 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 
 			} else if (type->value() == "send") {
 
-				boost::shared_ptr<Pannable> sendpan(new Pannable (*_session));
 				XMLNode n (**niter);
 
 				Send* s = new Send (*_session, _route->pannable(), _route->mute_master());
@@ -3589,13 +3602,29 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 				 * only then update the ID)
 				 */
 				PBD::ID id = p->id();
+				XMLNode state (**niter);
 				/* strip side-chain state (processor inside processor must be a side-chain)
 				 * otherwise we'll end up with duplicate ports-names.
 				 * (this needs a better solution which retains connections)
+				 *
+				 * see also ProcessorBox::object_drop
 				 */
-				XMLNode state (**niter);
 				state.remove_nodes_and_delete ("Processor");
+
+				uint32_t count = 0;
+				state.get_property ("count", count);
 				state.remove_property ("count");
+
+				state.remove_property ("custom");
+				state.remove_nodes_and_delete ("ConfiguredInput");
+				state.remove_nodes_and_delete ("CustomSinks");
+				state.remove_nodes_and_delete ("ConfiguredOutput");
+				state.remove_nodes_and_delete ("PresetOutput");
+				state.remove_nodes_and_delete ("ThruMap");
+				for (uint32_t i = 0; i < count; ++i) {
+					state.remove_nodes_and_delete (string_compose ("InputMap-%1", i));
+					state.remove_nodes_and_delete (string_compose ("OutputMap-%1", i));
+				}
 
 				/* Controllable and automation IDs should not be copied */
 				PBD::Stateful::ForceIDRegeneration force_ids;
@@ -4238,6 +4267,10 @@ ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
 	if (proxy) {
 		proxy->set_custom_ui_mode (true);
 		proxy->show_the_right_window ();
+
+		Gtk::Window* tlw = dynamic_cast<Gtk::Window*> (get_toplevel ());
+		assert (tlw && proxy->get (false));
+		proxy->get ()->set_transient_for (*tlw);
 	}
 }
 
@@ -4259,6 +4292,10 @@ ProcessorBox::generic_edit_processor (boost::shared_ptr<Processor> processor)
 	if (proxy) {
 		proxy->set_custom_ui_mode (false);
 		proxy->show_the_right_window ();
+
+		Gtk::Window* tlw = dynamic_cast<Gtk::Window*> (get_toplevel ());
+		assert (tlw && proxy->get (false));
+		proxy->get ()->set_transient_for (*tlw);
 	}
 }
 
@@ -4271,6 +4308,11 @@ ProcessorBox::manage_pins (boost::shared_ptr<Processor> processor)
 	PluginPinWindowProxy* proxy = processor->pinmgr_proxy ();
 	if (proxy) {
 		proxy->get (true);
+
+		Gtk::Window* tlw = dynamic_cast<Gtk::Window*> (get_toplevel ());
+		assert (tlw);
+		proxy->get ()->set_transient_for (*tlw);
+
 		proxy->present();
 	}
 }
@@ -4555,6 +4597,10 @@ ProcessorWindowProxy::show_the_right_window (bool show_not_toggle)
 	}
 	if (_window && fully_visible () && show_not_toggle) {
 		return;
+	}
+
+	if (_window) {
+		_window->unset_transient_for ();
 	}
 	toggle ();
 }

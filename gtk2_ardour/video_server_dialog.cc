@@ -47,6 +47,10 @@
 #include <windows.h>
 #endif
 
+#ifdef __APPLE__
+extern int query_darwin_version (); // cocoacarbon.mm
+#endif
+
 using namespace Gtk;
 using namespace std;
 using namespace PBD;
@@ -83,12 +87,20 @@ VideoServerDialog::VideoServerDialog (Session* s)
 	docroot_entry.set_width_chars(38);
 	docroot_entry.set_text(video_get_docroot (Config));
 
-#ifndef __APPLE__
-	/* Note: on OSX icsd is not able to bind to IPv4 localhost */
 	listenaddr_combo.append_text("127.0.0.1");
-#endif
 	listenaddr_combo.append_text("0.0.0.0");
+#ifdef __APPLE__
+	/* Note: on OSX icsd is not able to bind to IPv4 localhost,
+	 * except on bigsur where 0.0.0.0 works
+	 */
+	if (query_darwin_version () >= 20) {
+		listenaddr_combo.set_active(1);
+	} else {
+		listenaddr_combo.set_active(0);
+	}
+#else
 	listenaddr_combo.set_active(0);
+#endif
 
 	std::string harvid_exe;
 	if (ArdourVideoToolPaths::harvid_exe(harvid_exe)) {

@@ -41,6 +41,7 @@ namespace ARDOUR {
 }
 
 class PublicEditor;
+class RegionView;
 
 /** Location Marker
  *
@@ -60,12 +61,13 @@ public:
 		LoopStart,
 		LoopEnd,
 		PunchIn,
-		PunchOut
+		PunchOut,
+		RegionCue
 	};
 
 
 	ArdourMarker (PublicEditor& editor, ArdourCanvas::Container &, guint32 rgba, const std::string& text, Type,
-	              samplepos_t sample = 0, bool handle_events = true);
+	              samplepos_t sample = 0, bool handle_events = true, RegionView* rv = 0);
 
 	virtual ~ArdourMarker ();
 
@@ -76,8 +78,9 @@ public:
 	ArdourCanvas::Item& the_item() const;
 
 	void set_selected (bool);
+	void set_entered (bool);
 	void set_show_line (bool);
-	void canvas_height_set (double);
+	void set_line_height (double);
 
 	void set_position (samplepos_t);
 	void set_name (const std::string&);
@@ -104,6 +107,10 @@ public:
 
 	bool label_on_left () const;
 
+	/* this will be null for all global markers; non-null for region markers */
+
+	RegionView* region_view() const { return _region_view; }
+
 protected:
 	PublicEditor& editor;
 
@@ -119,19 +126,23 @@ protected:
 
 	std::string  _name;
 	double        unit_position;
-	samplepos_t    sample_position;
+	samplepos_t   sample_position;
 	double       _shift;
 	Type         _type;
 	int           name_height;
 	bool         _selected;
+	bool         _entered;
 	bool         _shown;
 	bool         _line_shown;
-	double       _canvas_height;
 	uint32_t     _color;
+	uint32_t      pre_enter_color;
 	uint32_t     _points_color;
 	double       _left_label_limit; ///< the number of pixels available to the left of this marker for a label
 	double       _right_label_limit; ///< the number of pixels available to the right of this marker for a label
 	double       _label_offset;
+	double       _line_height;
+
+	RegionView*  _region_view;
 
 	void reposition ();
 	void setup_line_x ();

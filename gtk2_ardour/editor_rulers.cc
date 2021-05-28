@@ -131,6 +131,7 @@ Editor::initialize_rulers ()
 	ruler_grabbed_widget = 0;
 
 	Pango::FontDescription font (UIConfiguration::instance().get_SmallerFont());
+	Pango::FontDescription larger_font (UIConfiguration::instance().get_SmallBoldFont());
 
 	_timecode_metric = new TimecodeMetric (this);
 	_bbt_metric = new BBTMetric (this);
@@ -157,6 +158,7 @@ Editor::initialize_rulers ()
 	bbt_ruler = new ArdourCanvas::Ruler (_time_markers_group, *_bbt_metric,
 	                                     ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, timebar_height));
 	bbt_ruler->set_font_description (font);
+	bbt_ruler->set_second_font_description (larger_font);
 	CANVAS_DEBUG_NAME (bbt_ruler, "bbt ruler");
 	timecode_nmarks = 0;
 
@@ -217,6 +219,7 @@ Editor::popup_ruler_menu (samplepos_t where, ItemType t)
 	case MarkerBarItem:
 		ruler_items.push_back (MenuElem (_("New location marker"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, false)));
 		ruler_items.push_back (MenuElem (_("Clear all locations"), sigc::mem_fun(*this, &Editor::clear_markers)));
+		ruler_items.push_back (MenuElem (_("Clear all xruns"), sigc::mem_fun(*this, &Editor::clear_xrun_markers)));
 		ruler_items.push_back (MenuElem (_("Unhide locations"), sigc::mem_fun(*this, &Editor::unhide_markers)));
 		break;
 
@@ -677,6 +680,8 @@ Editor::update_tempo_based_rulers ()
 
 	_bbt_metric->units_per_pixel = samples_per_pixel;
 
+	compute_bbt_ruler_scale (_leftmost_sample, _leftmost_sample + current_page_samples());
+
 	if (ruler_bbt_action->get_active()) {
 		bbt_ruler->set_range (_leftmost_sample, _leftmost_sample+current_page_samples());
 	}
@@ -987,82 +992,11 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 	_session->bbt_time (beat_after_upper_pos, upper_beat);
 	uint32_t beats = 0;
 
-	bbt_accent_modulo = 1;
 	bbt_bar_helper_on = false;
 	bbt_bars = 0;
 	bbt_nmarks = 1;
 
 	bbt_ruler_scale =  bbt_show_many;
-
-	switch (_grid_type) {
-	case GridTypeBeatDiv2:
-		bbt_beat_subdivision = 2;
-		break;
-	case GridTypeBeatDiv3:
-		bbt_beat_subdivision = 3;
-		break;
-	case GridTypeBeatDiv4:
-		bbt_beat_subdivision = 4;
-		break;
-	case GridTypeBeatDiv5:
-		bbt_beat_subdivision = 5;
-		bbt_accent_modulo = 2; // XXX YIKES
-		break;
-	case GridTypeBeatDiv6:
-		bbt_beat_subdivision = 3;
-		bbt_accent_modulo = 2; // XXX YIKES
-		break;
-	case GridTypeBeatDiv7:
-		bbt_beat_subdivision = 7;
-		bbt_accent_modulo = 2; // XXX YIKES
-		break;
-	case GridTypeBeatDiv8:
-		bbt_beat_subdivision = 4;
-		bbt_accent_modulo = 2;
-		break;
-	case GridTypeBeatDiv10:
-		bbt_beat_subdivision = 5;
-		bbt_accent_modulo = 2; // XXX YIKES
-		break;
-	case GridTypeBeatDiv12:
-		bbt_beat_subdivision = 3;
-		bbt_accent_modulo = 3;
-		break;
-	case GridTypeBeatDiv14:
-		bbt_beat_subdivision = 7;
-		bbt_accent_modulo = 3; // XXX YIKES!
-		break;
-	case GridTypeBeatDiv16:
-		bbt_beat_subdivision = 4;
-		bbt_accent_modulo = 4;
-		break;
-	case GridTypeBeatDiv20:
-		bbt_beat_subdivision = 5;
-		bbt_accent_modulo = 5;
-		break;
-	case GridTypeBeatDiv24:
-		bbt_beat_subdivision = 6;
-		bbt_accent_modulo = 6;
-		break;
-	case GridTypeBeatDiv28:
-		bbt_beat_subdivision = 7;
-		bbt_accent_modulo = 7;
-		break;
-	case GridTypeBeatDiv32:
-		bbt_beat_subdivision = 4;
-		bbt_accent_modulo = 8;
-		break;
-	case GridTypeBar:
-	case GridTypeBeat:
-		bbt_beat_subdivision = 4;
-		break;
-	case GridTypeNone:
-	case GridTypeTimecode:
-	case GridTypeMinSec:
-	case GridTypeCDFrame:
-		bbt_beat_subdivision = 4;
-		break;
-	}
 
 	const double ceil_upper_beat = floor (std::max (0.0, _session->tempo_map().beat_at_sample (upper))) + 1.0;
 	if (ceil_upper_beat == floor_lower_beat) {
@@ -1071,34 +1005,20 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 
 	bbt_bars = _session->tempo_map().bbt_at_beat (ceil_upper_beat).bars - _session->tempo_map().bbt_at_beat (floor_lower_beat).bars;
 
-	beats = (ceil_upper_beat - floor_lower_beat);// - bbt_bars;  possible thinko; this fixes the problem (for me) where measure lines alternately appear&disappear while playing at certain zoom scales
-	double beat_density = ((beats + 1) * ((double) (upper - lower) / (double) (1 + beat_after_upper_pos - beat_before_lower_pos))) / 5.0;
+	double ruler_line_granularity = UIConfiguration::instance().get_ruler_granularity ();  //in pixels
+	ruler_line_granularity = _visible_canvas_width / (ruler_line_granularity*5);  //fudge factor '5' probably related to (4+1 beats)/measure, I think
+
+	beats = (ceil_upper_beat - floor_lower_beat);
+	double beat_density = ((beats + 1) * ((double) (upper - lower) / (double) (1 + beat_after_upper_pos - beat_before_lower_pos))) / (float)ruler_line_granularity;
 
 	/* Only show the bar helper if there aren't many bars on the screen */
 	if ((bbt_bars < 2) || (beats < 5)) {
 		bbt_bar_helper_on = true;
 	}
 
-	//set upper limits on the beat_density based on the user's grid selection
-	if (_grid_type == GridTypeBar) {
-		beat_density = fmax (beat_density, 16.01);
-	} else if (_grid_type == GridTypeBeat) {
-		beat_density = fmax (beat_density, 4.01);
-	}  else if (_grid_type == GridTypeBeatDiv2) {
-		beat_density = fmax (beat_density, 2.01);
-	}  else if (_grid_type == GridTypeBeatDiv4) {
-		beat_density = fmax (beat_density, 1.001);
-	} else if (_grid_type == GridTypeBeatDiv8) {
-		beat_density = fmax (beat_density, 0.501);
-	} else if (_grid_type == GridTypeBeatDiv16) {
-		beat_density = fmax (beat_density, 0.2501);
-	} else if (_grid_type == GridTypeBeatDiv32) {
-		beat_density = fmax (beat_density, 0.12501);
-	}
-
 	if (beat_density > 2048) {
 		bbt_ruler_scale = bbt_show_many;
-	} else if (beat_density > 512) {
+	} else if (beat_density > 1024) {
 		bbt_ruler_scale = bbt_show_64;
 	} else if (beat_density > 256) {
 		bbt_ruler_scale = bbt_show_16;
@@ -1112,9 +1032,35 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 		bbt_ruler_scale =  bbt_show_eighths;
 	} else  if (beat_density > 1) {
 		bbt_ruler_scale =  bbt_show_sixteenths;
-	} else {
+	} else  if (beat_density > 0.5) {
 		bbt_ruler_scale =  bbt_show_thirtyseconds;
+	} else  if (beat_density > 0.25) {
+		bbt_ruler_scale =  bbt_show_sixtyfourths;
+	} else {
+		bbt_ruler_scale =  bbt_show_onetwentyeighths;
 	}
+
+	/* Now that we know how fine a grid (Ruler) is allowable on this screen, limit it to the coarseness selected by the user */
+	/* note: GridType and RulerScale are not the same enums, so it's not a simple mathematical operation */
+	int suggested_scale = (int) bbt_ruler_scale;
+	int divs = get_grid_music_divisions(_grid_type);
+	if (_grid_type == GridTypeBar) {
+		suggested_scale = std::min(suggested_scale, (int) bbt_show_1);
+	} else if (_grid_type == GridTypeBeat) {
+		suggested_scale = std::min(suggested_scale, (int) bbt_show_quarters);
+	}  else if ( divs < 4 ) {
+		suggested_scale = std::min(suggested_scale, (int) bbt_show_eighths);
+	}  else if ( divs < 8 ) {
+		suggested_scale = std::min(suggested_scale, (int) bbt_show_sixteenths);
+	} else if ( divs < 16 ) {
+		suggested_scale = std::min(suggested_scale, (int) bbt_show_thirtyseconds);
+	} else if ( divs < 32 ) {
+		suggested_scale = std::min(suggested_scale, (int) bbt_show_sixtyfourths);
+	} else {
+		suggested_scale = std::min(suggested_scale, (int) bbt_show_onetwentyeighths);
+	}
+
+	bbt_ruler_scale = (Editor::BBTRulerScale) suggested_scale;
 }
 
 static void
@@ -1156,265 +1102,92 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 		return;
 	}
 
-	switch (bbt_ruler_scale) {
-
-	case bbt_show_quarters:
-
-		beats = distance (grid.begin(), grid.end());
-		bbt_nmarks = beats + 2;
-
-		mark.label = "";
-		mark.position = lower;
-		mark.style = ArdourCanvas::Ruler::Mark::Micro;
-		marks.push_back (mark);
-
-		for (n = 1, i = grid.begin(); n < bbt_nmarks && i != grid.end(); ++i) {
-
-			if ((*i).sample < lower && (bbt_bar_helper_on)) {
-				snprintf (buf, sizeof(buf), "<%" PRIu32 "|%" PRIu32, (*i).bar, (*i).beat);
-				edit_last_mark_label (marks, buf);
-			} else {
-
-				if ((*i).is_bar()) {
-					mark.style = ArdourCanvas::Ruler::Mark::Major;
-					snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
-				} else if (((*i).beat % 2 == 1)) {
-					mark.style = ArdourCanvas::Ruler::Mark::Minor;
-					buf[0] = '\0';
-				} else {
-					mark.style = ArdourCanvas::Ruler::Mark::Micro;
-					buf[0] = '\0';
-				}
-				mark.label = buf;
-				mark.position = (*i).sample;
-				marks.push_back (mark);
-				n++;
-			}
-		}
+	/* we can accent certain lines depending on the user's Grid choice */
+	/* for example, even in a 4/4 meter we can draw a grid with triplet-feel */
+	/* and in this case you will want the accents on '3s' not '2s' */
+	uint32_t bbt_divisor = 2;
+	uint32_t bbt_accent_modulo = 2;
+	switch (_grid_type) {
+	case GridTypeBeatDiv3:
+		bbt_divisor = 3;
+		bbt_accent_modulo = 3;
 		break;
+	case GridTypeBeatDiv5:
+		bbt_divisor = 5;
+		bbt_accent_modulo = 5;
+		break;
+	case GridTypeBeatDiv6:
+		bbt_divisor = 3;
+		bbt_accent_modulo = 3;
+		break;
+	case GridTypeBeatDiv7:
+		bbt_divisor = 7;
+		bbt_accent_modulo = 7;
+		break;
+	case GridTypeBeatDiv10:
+		bbt_divisor = 5;
+		bbt_accent_modulo = 5;
+		break;
+	case GridTypeBeatDiv12:
+		bbt_divisor = 3;
+		bbt_accent_modulo = 3;
+		break;
+	case GridTypeBeatDiv14:
+		bbt_divisor = 7;
+		bbt_accent_modulo = 7;
+		break;
+	case GridTypeBeatDiv16:
+		bbt_accent_modulo = 4;
+		break;
+	case GridTypeBeatDiv20:
+		bbt_divisor = 5;
+		bbt_accent_modulo = 5;
+		break;
+	case GridTypeBeatDiv24:
+		bbt_divisor = 6;
+		bbt_accent_modulo = 6;
+		break;
+	case GridTypeBeatDiv28:
+		bbt_divisor = 7;
+		bbt_accent_modulo = 7;
+		break;
+	case GridTypeBeatDiv32:
+		bbt_accent_modulo = 8;
+		break;
+	default:
+		bbt_divisor = 2;
+		bbt_accent_modulo = 2;
+		break;
+	}
 
+	uint32_t bbt_beat_subdivision = 1;
+	switch (bbt_ruler_scale) {
+	case bbt_show_quarters:
+		bbt_beat_subdivision = 1;
+		break;
 	case bbt_show_eighths:
-
-		beats = distance (grid.begin(), grid.end());
-		bbt_nmarks = (beats + 2) * bbt_beat_subdivision;
-
-		bbt_position_of_helper = lower + (30 * Editor::get_current_zoom ());
-
-		// could do marks.assign() here to preallocate
-
-		mark.label = "";
-		mark.position = lower;
-		mark.style = ArdourCanvas::Ruler::Mark::Micro;
-		marks.push_back (mark);
-
-		for (n = 1, i = grid.begin(); n < bbt_nmarks && i != grid.end(); ++i) {
-
-			if ((*i).sample < lower && (bbt_bar_helper_on)) {
-				snprintf (buf, sizeof(buf), "<%" PRIu32 "|%" PRIu32, (*i).bar, (*i).beat);
-				edit_last_mark_label (marks, buf);
-				helper_active = true;
-			} else {
-
-				if ((*i).is_bar()) {
-					mark.style = ArdourCanvas::Ruler::Mark::Major;
-					snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
-				} else {
-					mark.style = ArdourCanvas::Ruler::Mark::Minor;
-					snprintf (buf, sizeof(buf), "%" PRIu32, (*i).beat);
-				}
-				if (((*i).sample < bbt_position_of_helper) && helper_active) {
-					buf[0] = '\0';
-				}
-				mark.label =  buf;
-				mark.position = (*i).sample;
-				marks.push_back (mark);
-				n++;
-			}
-
-			/* Add the tick marks */
-			skip = Timecode::BBT_Time::ticks_per_beat / bbt_beat_subdivision;
-			tick = skip; // the first non-beat tick
-			t = 0;
-			while (tick < Timecode::BBT_Time::ticks_per_beat && (n < bbt_nmarks)) {
-
-				next_beat.beats = (*i).beat;
-				next_beat.bars = (*i).bar;
-				next_beat.ticks = tick;
-				pos = _session->tempo_map().sample_at_bbt (next_beat);
-
-				if (t % bbt_accent_modulo == (bbt_accent_modulo - 1)) {
-					i_am_accented = true;
-				}
-				mark.label = "";
-				mark.position = pos;
-
-				if ((bbt_beat_subdivision > 4) && i_am_accented) {
-					mark.style = ArdourCanvas::Ruler::Mark::Minor;
-				} else {
-					mark.style = ArdourCanvas::Ruler::Mark::Micro;
-				}
-				i_am_accented = false;
-				marks.push_back (mark);
-
-				tick += skip;
-				++t;
-				++n;
-			}
-		}
-
-	  break;
-
+		bbt_beat_subdivision = 1;
+		break;
 	case bbt_show_sixteenths:
-
-		beats = distance (grid.begin(), grid.end());
-		bbt_nmarks = (beats + 2) * bbt_beat_subdivision;
-
-		bbt_position_of_helper = lower + (3 * Editor::get_current_zoom ());
-
-		mark.label = "";
-		mark.position = lower;
-		mark.style = ArdourCanvas::Ruler::Mark::Micro;
-		marks.push_back (mark);
-
-		for (n = 1, i = grid.begin(); n < bbt_nmarks && i != grid.end(); ++i) {
-
-			if ((*i).sample < lower && (bbt_bar_helper_on)) {
-				snprintf (buf, sizeof(buf), "<%" PRIu32 "|%" PRIu32, (*i).bar, (*i).beat);
-				edit_last_mark_label (marks, buf);
-				helper_active = true;
-			} else {
-
-				if ((*i).is_bar()) {
-					mark.style = ArdourCanvas::Ruler::Mark::Major;
-					snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
-				} else {
-					mark.style = ArdourCanvas::Ruler::Mark::Minor;
-					snprintf (buf, sizeof(buf), "%" PRIu32, (*i).beat);
-				}
-				if (((*i).sample < bbt_position_of_helper) && helper_active) {
-					buf[0] = '\0';
-				}
-				mark.label =  buf;
-				mark.position = (*i).sample;
-				marks.push_back (mark);
-				n++;
-			}
-
-			/* Add the tick marks */
-			skip = Timecode::BBT_Time::ticks_per_beat / bbt_beat_subdivision;
-			tick = skip; // the first non-beat tick
-
-			t = 0;
-			while (tick < Timecode::BBT_Time::ticks_per_beat && (n < bbt_nmarks)) {
-
-				next_beat.beats = (*i).beat;
-				next_beat.bars = (*i).bar;
-				next_beat.ticks = tick;
-				pos = _session->tempo_map().sample_at_bbt (next_beat);
-
-				if (t % bbt_accent_modulo == (bbt_accent_modulo - 1)) {
-					i_am_accented = true;
-				}
-				if (i_am_accented && (pos > bbt_position_of_helper)){
-					snprintf (buf, sizeof(buf), "%" PRIu32, tick);
-				} else {
-					buf[0] = '\0';
-				}
-
-				mark.label = buf;
-				mark.position = pos;
-
-				if ((bbt_beat_subdivision > 4) && i_am_accented) {
-					mark.style = ArdourCanvas::Ruler::Mark::Minor;
-				} else {
-					mark.style = ArdourCanvas::Ruler::Mark::Micro;
-				}
-				i_am_accented = false;
-				marks.push_back (mark);
-
-				tick += skip;
-				++t;
-				++n;
-			}
-		}
-
-	  break;
-
+		bbt_beat_subdivision = 2;
+		break;
 	case bbt_show_thirtyseconds:
+		bbt_beat_subdivision = 4;
+		break;
+	case bbt_show_sixtyfourths:
+		bbt_beat_subdivision = 8;
+		break;
+	case bbt_show_onetwentyeighths:
+		bbt_beat_subdivision = 16;
+		break;
+	default:
+		bbt_beat_subdivision = 1;
+		break;
+	}
 
-		beats = distance (grid.begin(), grid.end());
-		bbt_nmarks = (beats + 2) * bbt_beat_subdivision;
+	bbt_beat_subdivision *= bbt_divisor;
 
-		bbt_position_of_helper = lower + (3 * Editor::get_current_zoom ());
-
-		mark.label = "";
-		mark.position = lower;
-		mark.style = ArdourCanvas::Ruler::Mark::Micro;
-		marks.push_back (mark);
-
-		for (n = 1, i = grid.begin(); n < bbt_nmarks && i != grid.end(); ++i) {
-
-			if ((*i).sample < lower && (bbt_bar_helper_on)) {
-				  snprintf (buf, sizeof(buf), "<%" PRIu32 "|%" PRIu32, (*i).bar, (*i).beat);
-				  edit_last_mark_label (marks, buf);
-				  helper_active = true;
-			} else {
-
-				  if ((*i).is_bar()) {
-					  mark.style = ArdourCanvas::Ruler::Mark::Major;
-					  snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
-				  } else {
-					  mark.style = ArdourCanvas::Ruler::Mark::Minor;
-					  snprintf (buf, sizeof(buf), "%" PRIu32, (*i).beat);
-				  }
-				  if (((*i).sample < bbt_position_of_helper) && helper_active) {
-					  buf[0] = '\0';
-				  }
-				  mark.label =  buf;
-				  mark.position = (*i).sample;
-				  marks.push_back (mark);
-				  n++;
-			}
-
-			/* Add the tick marks */
-			skip = Timecode::BBT_Time::ticks_per_beat / bbt_beat_subdivision;
-
-			next_beat.beats = (*i).beat;
-			next_beat.bars = (*i).bar;
-			tick = skip; // the first non-beat tick
-			t = 0;
-			while (tick < Timecode::BBT_Time::ticks_per_beat && (n < bbt_nmarks)) {
-
-				next_beat.ticks = tick;
-				pos = _session->tempo_map().sample_at_bbt (next_beat);
-				if (t % bbt_accent_modulo == (bbt_accent_modulo - 1)) {
-					i_am_accented = true;
-				}
-
-				if (pos > bbt_position_of_helper) {
-					snprintf (buf, sizeof(buf), "%" PRIu32, tick);
-				} else {
-					buf[0] = '\0';
-				}
-
-				mark.label = buf;
-				mark.position = pos;
-
-				if ((bbt_beat_subdivision > 4) && i_am_accented) {
-					mark.style = ArdourCanvas::Ruler::Mark::Minor;
-				} else {
-					mark.style = ArdourCanvas::Ruler::Mark::Micro;
-				}
-				i_am_accented = false;
-				marks.push_back (mark);
-
-				tick += skip;
-				++t;
-				++n;
-			}
-		}
-
-	  break;
+	switch (bbt_ruler_scale) {
 
 	case bbt_show_many:
 		bbt_nmarks = 1;
@@ -1501,28 +1274,133 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 	  break;
 
 	case bbt_show_1:
-//	default:
 		bbt_nmarks = bbt_bars + 2;
 		for (n = 0,  i = grid.begin(); i != grid.end() && n < bbt_nmarks; ++i) {
 			if ((*i).is_bar()) {
-			  if ((*i).bar % 4 == 1) {
-					snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
+				snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bbt().bars);
+				mark.style = ArdourCanvas::Ruler::Mark::Major;
+				mark.label = buf;
+				mark.position = (*i).sample;
+				marks.push_back (mark);
+				++n;
+			}
+		}
+	break;
+
+	case bbt_show_quarters:
+
+		beats = distance (grid.begin(), grid.end());
+		bbt_nmarks = beats + 2;
+
+		mark.label = "";
+		mark.position = lower;
+		mark.style = ArdourCanvas::Ruler::Mark::Micro;
+		marks.push_back (mark);
+
+		for (n = 1, i = grid.begin(); n < bbt_nmarks && i != grid.end(); ++i) {
+
+			if ((*i).sample < lower && (bbt_bar_helper_on)) {
+				snprintf (buf, sizeof(buf), "<%" PRIu32 "|%" PRIu32, (*i).bar, (*i).beat);
+				edit_last_mark_label (marks, buf);
+			} else {
+
+				if ((*i).is_bar()) {
 					mark.style = ArdourCanvas::Ruler::Mark::Major;
-			  } else {
-				  buf[0] = '\0';
-				  if ((*i).bar % 4 == 3)  {
-					  mark.style = ArdourCanvas::Ruler::Mark::Minor;
-				  } else {
-					  mark.style = ArdourCanvas::Ruler::Mark::Micro;
-				  }
-			  }
-			  mark.label = buf;
-			  mark.position = (*i).sample;
-			  marks.push_back (mark);
-			  ++n;
+					snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
+				} else if (((*i).beat % 2 == 1)) {
+					mark.style = ArdourCanvas::Ruler::Mark::Minor;
+					buf[0] = '\0';
+				} else {
+					mark.style = ArdourCanvas::Ruler::Mark::Micro;
+					buf[0] = '\0';
+				}
+				mark.label = buf;
+				mark.position = (*i).sample;
+				marks.push_back (mark);
+				n++;
 			}
 		}
 		break;
+
+	case bbt_show_eighths:
+	case bbt_show_sixteenths:
+	case bbt_show_thirtyseconds:
+	case bbt_show_sixtyfourths:
+	case bbt_show_onetwentyeighths:
+
+		beats = distance (grid.begin(), grid.end());
+		bbt_nmarks = (beats + 2) * bbt_beat_subdivision;
+
+		bbt_position_of_helper = lower + (3 * Editor::get_current_zoom ());
+
+		mark.label = "";
+		mark.position = lower;
+		mark.style = ArdourCanvas::Ruler::Mark::Micro;
+		marks.push_back (mark);
+
+		for (n = 1, i = grid.begin(); n < bbt_nmarks && i != grid.end(); ++i) {
+
+			if ((*i).sample < lower && (bbt_bar_helper_on)) {
+				snprintf (buf, sizeof(buf), "<%" PRIu32 "|%" PRIu32, (*i).bar, (*i).beat);
+				edit_last_mark_label (marks, buf);
+				helper_active = true;
+			} else {
+
+				if ((*i).is_bar()) {
+					mark.style = ArdourCanvas::Ruler::Mark::Major;
+					snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
+				} else {
+					mark.style = ArdourCanvas::Ruler::Mark::Minor;
+					snprintf (buf, sizeof(buf), "%" PRIu32, (*i).beat);
+				}
+				if (((*i).sample < bbt_position_of_helper) && helper_active) {
+					buf[0] = '\0';
+				}
+				mark.label =  buf;
+				mark.position = (*i).sample;
+				marks.push_back (mark);
+				n++;
+			}
+
+			/* Add the tick marks */
+			skip = Timecode::BBT_Time::ticks_per_beat / bbt_beat_subdivision;
+			tick = skip; // the first non-beat tick
+
+			t = 0;
+			while (tick < Timecode::BBT_Time::ticks_per_beat && (n < bbt_nmarks)) {
+
+				next_beat.beats = (*i).beat;
+				next_beat.bars = (*i).bar;
+				next_beat.ticks = tick;
+				pos = _session->tempo_map().sample_at_bbt (next_beat);
+
+				if (t % bbt_accent_modulo == (bbt_accent_modulo - 1)) {
+					i_am_accented = true;
+				}
+				if (i_am_accented && (pos > bbt_position_of_helper)){
+					snprintf (buf, sizeof(buf), "%" PRIu32, tick);
+				} else {
+					buf[0] = '\0';
+				}
+
+				mark.label = buf;
+				mark.position = pos;
+
+				if ((bbt_beat_subdivision > 4) && i_am_accented) {
+					mark.style = ArdourCanvas::Ruler::Mark::Minor;
+				} else {
+					mark.style = ArdourCanvas::Ruler::Mark::Micro;
+				}
+				i_am_accented = false;
+				marks.push_back (mark);
+
+				tick += skip;
+				++t;
+				++n;
+			}
+		}
+
+	  break;
 
 	}
 }

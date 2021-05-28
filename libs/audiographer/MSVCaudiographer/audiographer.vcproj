@@ -285,6 +285,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\src\general\limiter.cc"
+					>
+				</File>
+				<File
 					RelativePath="..\src\general\loudness_reader.cc"
 					>
 				</File>
@@ -310,6 +314,41 @@
 					<File
 						RelativePath="..\private\gdither\gdither.cc"
 						>
+					</File>
+				</Filter>
+				<Filter
+					Name="Limiter"
+					>
+					<File
+						RelativePath="..\private\limiter\limiter.cc"
+						>
+						<FileConfiguration
+							Name="Debug 32|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								ObjectFile="$(IntDir)\$(InputName)1.obj"
+								XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Release 32|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								ObjectFile="$(IntDir)\$(InputName)1.obj"
+								XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Release 32 with Debugging Capability|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								ObjectFile="$(IntDir)\$(InputName)1.obj"
+								XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+							/>
+						</FileConfiguration>
 					</File>
 				</Filter>
 			</Filter>
@@ -381,6 +420,10 @@
 			</File>
 			<File
 				RelativePath="..\audiographer\general\interleaver.h"
+				>
+			</File>
+			<File
+				RelativePath="..\private\limiter\limiter.h"
 				>
 			</File>
 			<File

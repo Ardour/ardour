@@ -101,12 +101,15 @@ Panner1in2out::~Panner1in2out ()
 void
 Panner1in2out::update ()
 {
-	float       panR, panL;
+#if 0
 	float const pan_law_attenuation = -3.0f;
 	float const scale               = 2.0f - 4.0f * powf (10.0f, pan_law_attenuation / 20.0f);
+#else
+	float const scale               = -0.831783138f;
+#endif
 
-	panR = _pannable->pan_azimuth_control->get_value ();
-	panL = 1 - panR;
+	float const panR = _pannable->pan_azimuth_control->get_value ();
+	float const panL = 1 - panR;
 
 	desired_left  = panL * (scale * panL + 1.0f - scale);
 	desired_right = panR * (scale * panR + 1.0f - scale);
@@ -275,8 +278,12 @@ Panner1in2out::distribute_one_automated (AudioBuffer& srcbuf, BufferSet& obufs,
 	   each buffer (output)
 	*/
 
+#if 0
 	const float pan_law_attenuation = -3.0f;
 	const float scale               = 2.0f - 4.0f * powf (10.0f, pan_law_attenuation / 20.0f);
+#else
+	float const scale               = -0.831783138f;
+#endif
 
 	for (pframes_t n = 0; n < nframes; ++n) {
 		float       panR = position[n];

@@ -21,6 +21,7 @@
 #include <algorithm> // std:min
 
 #include "gtkmm2ext/colors.h"
+#include "gtkmm2ext/rgb_macros.h"
 #include "widgets/ardour_icon.h"
 
 using namespace ArdourWidgets::ArdourIcon;
@@ -907,6 +908,37 @@ static void icon_nudge_right (cairo_t *cr, const int width, const int height, co
 
 }
 
+static void icon_plus_sign (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
+{
+	const double lw = DEFAULT_LINE_WIDTH;
+	const double lc = fmod (lw * .5, 1.0);
+	const double xc = rint (width * .5) - lc;
+	const double yc = rint (height * .5) - lc;
+	const double ln = rint (std::min (width, height) * .2);
+
+	cairo_rectangle (cr, xc - lw * .5, yc - ln, lw,  ln * 2);
+	cairo_rectangle (cr, xc - ln, yc - lw * .5, ln * 2,  lw);
+
+  Gtkmm2ext::set_source_rgba (cr, fg_color);
+  cairo_fill (cr);
+}
+
+static void icon_shaded_plus_sign (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
+{
+	const double lw = std::min (10., ceil (std::min (width, height) * .035));
+	const double ln = std::min (57., rint (std::min (width, height) * .2));
+	const double lc = fmod (lw * .5, 1.0);
+	const double xc = rint (width * .5) - lc;
+	const double yc = rint (height * .5) - lc;
+
+	cairo_rectangle (cr, xc - lw * .5, yc - ln, lw,  ln * 2);
+	cairo_rectangle (cr, xc - ln, yc - lw * .5, ln * 2,  lw);
+
+	int alpha = lw == 1 ? 0x80 : 0x20;
+	Gtkmm2ext::set_source_rgba (cr, (fg_color & 0xffffff00) | alpha);
+	cairo_fill (cr);
+}
+
 /** mixer strip narrow/wide */
 static void icon_strip_width (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
 {
@@ -985,7 +1017,7 @@ static void icon_din_midi (cairo_t *cr, const int width, const int height, const
  * Plugin Window Buttons
  */
 
-static void icon_plus_sign (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
+static void icon_add_sign (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
 {
 	const double lw = DEFAULT_LINE_WIDTH;
 	const double lc = fmod (lw * .5, 1.0);
@@ -1282,6 +1314,12 @@ ArdourWidgets::ArdourIcon::render (cairo_t *cr,
 		case HideEye:
 			icon_hide_eye (cr, width, height, fg_color);
 			break;
+		case PlusSign:
+			icon_plus_sign (cr, width, height, fg_color);
+			break;
+		case ShadedPlusSign:
+			icon_shaded_plus_sign (cr, width, height, fg_color);
+			break;
 		case StripWidth:
 			icon_strip_width (cr, width, height, fg_color);
 			break;
@@ -1339,7 +1377,7 @@ ArdourWidgets::ArdourIcon::render (cairo_t *cr,
 			icon_tool_content (cr, width, height);
 			break;
 		case PsetAdd:
-			icon_plus_sign (cr, width, height, fg_color);
+			icon_add_sign (cr, width, height, fg_color);
 			break;
 		case PsetSave:
 			icon_save_arrow_box (cr, width, height, fg_color);
@@ -1377,4 +1415,22 @@ ArdourWidgets::ArdourIcon::render (cairo_t *cr,
 	}
 	cairo_restore (cr);
 	return rv;
+}
+
+bool
+ArdourWidgets::ArdourIcon::expose (GdkEventExpose* ev, Gtk::Widget* w, const enum ArdourIcon::Icon icon)
+{
+	Glib::RefPtr<Gdk::Window> win (w->get_window());
+  cairo_t* cr = gdk_cairo_create (win->gobj());
+	gdk_cairo_rectangle (cr, &ev->area);
+	cairo_clip (cr);
+
+	Glib::RefPtr<Gtk::Style> style = w->get_style();
+	Gdk::Color fg (style->get_fg (Gtk::STATE_NORMAL));
+
+	ArdourIcon::render (cr, icon, win->get_width (), win->get_height (), Gtkmm2ext::ExplicitActive, 
+	                    RGBA_TO_UINT (fg.get_red() / 255., fg.get_green() / 255, fg.get_blue() / 255, 255));
+	cairo_destroy (cr);
+
+  return true;
 }

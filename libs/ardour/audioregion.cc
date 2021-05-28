@@ -36,7 +36,6 @@
 
 #include "pbd/basename.h"
 #include "pbd/xml++.h"
-#include "pbd/stacktrace.h"
 #include "pbd/enumwriter.h"
 #include "pbd/convert.h"
 
@@ -1390,14 +1389,6 @@ AudioRegion::set_scale_amplitude (gain_t g)
 
 	_scale_amplitude = g;
 
-	/* tell the diskstream we're in */
-
-	if (pl) {
-		pl->ContentsChanged();
-	}
-
-	/* tell everybody else */
-
 	send_change (PropertyChange (Properties::scale_amplitude));
 }
 
@@ -1670,7 +1661,7 @@ AudioRegion::remove_transient (samplepos_t where)
 	if (!_onsets.empty ()) {
 		const samplepos_t p = where - _position;
 		AnalysisFeatureList::iterator i = std::find (_onsets.begin (), _onsets.end (), p);
-		if (i != _transients.end ()) {
+		if (i != _onsets.end ()) {
 			_onsets.erase (i);
 			changed = true;
 		}

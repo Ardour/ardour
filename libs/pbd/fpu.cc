@@ -211,7 +211,12 @@ FPU::FPU ()
 		    (cpu_info[2] & (1<<28) /* AVX */) &&
 		    ((_xgetbv (_XCR_XFEATURE_ENABLED_MASK) & 0x6) == 0x6)) { /* OS really supports XSAVE */
 			info << _("AVX-capable processor") << endmsg;
-			_flags = Flags (_flags | (HasAVX) );
+			_flags = Flags (_flags | (HasAVX));
+		}
+
+		if (cpu_info[2] & (1<<12) /* FMA */) {
+			info << _("AVX with FMA capable processor") << endmsg;
+			_flags = Flags (_flags | (HasFMA));
 		}
 
 		if (cpu_info[3] & (1<<25)) {
@@ -261,11 +266,21 @@ FPU::FPU ()
 			memset (*fxbuf, 0, 512);
 
 #ifdef COMPILER_MSVC
-			char *buf = *fxbuf;
+			char* buf = *fxbuf;
+#ifdef _WIN64
+			/* For 64-bit compilation, MSVC doesn't support inline assembly !!
+			   ( https://docs.microsoft.com/en-us/cpp/assembler/inline/inline-assembler?view=msvc-160 ) */
+
+			/* but instead, it uses something called 'x64 intrinsics'
+			   1: ( https://docs.microsoft.com/en-us/cpp/intrinsics/x64-amd64-intrinsics-list?view=msvc-160 )
+			   2: ( https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_fxsave ) */
+			_fxsave (buf);
+#else
 			__asm {
 				mov eax, buf
 					fxsave   [eax]
 					};
+#endif
 #else
 			asm volatile (
 				"fxsave (%0)"

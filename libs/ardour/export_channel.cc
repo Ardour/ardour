@@ -120,12 +120,20 @@ PortExportChannel::read (Sample const *& data, samplecnt_t samples) const
 		Sample* port_buffer = ab.data();
 		ab.set_written (true);
 		(*di)->write (port_buffer, samples);
-		// TODO optimze, get_read_vector()
-		for (uint32_t i = 0; i < samples; ++i) {
-			Sample spl;
-			(*di)->read (&spl, 1);
-			_buffer[i] += spl;
+
+		PBD::RingBuffer<Sample>::rw_vector vec;
+		(*di)->get_read_vector (&vec);
+		assert (vec.len[0] + vec.len[1] >= samples);
+
+		samplecnt_t to_write = std::min (samples, (samplecnt_t) vec.len[0]);
+		mix_buffers_no_gain (&_buffer[0], vec.buf[0], to_write);
+
+		to_write = std::min (samples - to_write, (samplecnt_t) vec.len[1]);
+		if (to_write > 0) {
+			mix_buffers_no_gain (&_buffer[vec.len[0]], vec.buf[1], to_write);
 		}
+		(*di)->increment_read_idx (samples);
+
 		++di;
 	}
 
@@ -161,9 +169,8 @@ PortExportChannel::set_state (XMLNode * node, Session & session)
 	}
 }
 
-RegionExportChannelFactory::RegionExportChannelFactory (Session * session, AudioRegion const & region, AudioTrack & track, Type type)
+RegionExportChannelFactory::RegionExportChannelFactory (Session * session, AudioRegion const & region, AudioTrack&, Type type)
 	: region (region)
-	, track (track)
 	, type (type)
 	, samples_per_cycle (session->engine().samples_per_cycle ())
 	, buffers_up_to_date (false)

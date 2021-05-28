@@ -91,6 +91,8 @@ VST3NSViewPluginUI::VST3NSViewPluginUI (boost::shared_ptr<PluginInsert> pi, boos
 
 VST3NSViewPluginUI::~VST3NSViewPluginUI ()
 {
+	assert (_view_realized);
+	_vst3->close_view ();
 	[_ns_view removeFromSuperview];
 	[_ns_view release];
 }
@@ -106,7 +108,7 @@ void
 VST3NSViewPluginUI::view_size_allocate (Gtk::Allocation& allocation)
 {
 	IPlugView* view = _vst3->view ();
-	if (!view) {
+	if (!view || !_view_realized) {
 		return;
 	}
 
@@ -120,7 +122,9 @@ VST3NSViewPluginUI::view_size_allocate (Gtk::Allocation& allocation)
 	PBD::Unwinder<bool> uw (_resize_in_progress, true);
 
 	ViewRect rect;
-	if (view->getSize (&rect) == kResultOk) {
+	if (view->getSize (&rect) == kResultOk
+	    && !(rect.right - rect.left == allocation.get_width () && rect.bottom - rect.top ==  allocation.get_height () && rect.left == xx && rect.top == yy))
+	{
 		rect.left   = xx;
 		rect.top    = yy;
 		rect.right  = rect.left + allocation.get_width ();
@@ -132,7 +136,14 @@ VST3NSViewPluginUI::view_size_allocate (Gtk::Allocation& allocation)
 		allocation.set_width (rect.right - rect.left);
 		allocation.set_height (rect.bottom - rect.top);
 #endif
-		if (view->canResize() == kResultTrue) {
+		bool can_resize = true;
+#if 1 // quirks
+		/* Reason reports canResize() == kResultTrue, but crashes in onSize()
+		 * reported to reasonstudios.com on 2020-11-19 */
+		if (_vst3->unique_id() == "D75F65D1581F203A8D793B3C01583323" /* Reason Rack Plugin */) can_resize = false;
+		if (_vst3->unique_id() == "C64E2730B0614A6EAEFC432F9CF6151A" /* Reason Rack Plugin Effect */) can_resize = false;
+#endif
+		if (can_resize && view->canResize() == kResultTrue) {
 			view->onSize (&rect);
 		}
 	}
@@ -142,6 +153,7 @@ VST3NSViewPluginUI::view_size_allocate (Gtk::Allocation& allocation)
 	for (unsigned long i = 0; i < [subviews count]; ++i) {
 		NSView* subview = [subviews objectAtIndex:i];
 		[subview setFrame:NSMakeRect (0, 0, allocation.get_width (), allocation.get_height ())];
+		break; /* only resize first subview */
 	}
 }
 
@@ -182,6 +194,7 @@ VST3NSViewPluginUI::view_realized ()
 
 	NSView* nsview = gdk_quartz_window_get_nsview (_gui_widget.get_window()->gobj());
 	[nsview addSubview:_ns_view];
+	_view_realized = true;
 	_gui_widget.queue_resize ();
 }
 

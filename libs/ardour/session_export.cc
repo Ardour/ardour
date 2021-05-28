@@ -42,6 +42,9 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
+#define TFSM_ROLL() { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::StartTransport)); }
+#define TFSM_SPEED(speed,as_default) { _transport_fsm->enqueue (new TransportFSM::Event (speed,as_default)); }
+
 boost::shared_ptr<ExportHandler>
 Session::get_export_handler ()
 {
@@ -83,7 +86,7 @@ Session::pre_export ()
 	realtime_stop (true, true);
 
 	if (get_record_enabled()) {
-		disable_record (false);
+		disable_record (false, true);
 	}
 
 	unset_play_loop ();
@@ -95,6 +98,7 @@ Session::pre_export ()
 
 	config.set_external_sync (false);
 
+	_export_xruns = 0;
 	_exporting = true;
 	export_status->set_running (true);
 	export_status->Finished.connect_same_thread (*this, boost::bind (&Session::finalize_audio_export, this, _1));
@@ -115,7 +119,7 @@ Session::start_audio_export (samplepos_t position, bool realtime, bool region_ex
 
 	if (!_exporting) {
 		pre_export ();
-	} else if (_transport_speed != 0) {
+	} else if (_transport_fsm->transport_speed() != 0) {
 		realtime_stop (true, true);
 	}
 
@@ -140,9 +144,11 @@ Session::start_audio_export (samplepos_t position, bool realtime, bool region_ex
 	 * to wait for it to wake up and call
 	 * non_realtime_stop ().
 	 */
-	int timeout = std::max (10, (int)(8 * nominal_sample_rate () / get_block_size ()));
+	int sleeptm = std::max (40000, engine().usecs_per_cycle ());
+	int timeout = std::max (100, 8000000 / sleeptm);
 	do {
-		Glib::usleep (engine().usecs_per_cycle ());
+		Glib::usleep (sleeptm);
+		sched_yield ();
 	} while (_transport_fsm->waiting_for_butler() && --timeout > 0);
 
 	if (timeout == 0) {
@@ -299,12 +305,12 @@ Session::process_export_fw (pframes_t nframes)
 			return;
 		}
 
-		set_transport_speed (1.0, false, false, false);
-		butler_transport_work ();
-		g_atomic_int_set (&_butler->should_do_transport_work, 0);
-		butler_completed_transport_work ();
+		TFSM_SPEED (1.0, false);
+		TFSM_ROLL ();
+		_butler->schedule_transport_work ();
+
 		/* Session::process_with_events () sets _remaining_latency_preroll = 0
-		 * when being called with _transport_speed == 0.0.
+		 * when being called with _transport_fsm->transport_speed() == 0.
 		 *
 		 * This can happen wit JACK, there is a process-callback before
 		 * freewheeling becomes active, after Session::start_audio_export().
@@ -314,6 +320,16 @@ Session::process_export_fw (pframes_t nframes)
 		}
 
 		return;
+	}
+
+	/* wait for butler to complete schedule_transport_work(),
+	 * compare to Session::process */
+	if (non_realtime_work_pending ()) {
+		if (_butler->transport_work_requested ()) {
+			/* butler is still processing */
+			return;
+		}
+		butler_completed_transport_work ();
 	}
 
 	if (_remaining_latency_preroll > 0) {

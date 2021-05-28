@@ -71,21 +71,24 @@ void ArdourMarker::setup_sizes(const double timebar_height)
 }
 
 ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Container& parent, guint32 rgba, const string& annotation,
-		Type type, samplepos_t sample, bool handle_events)
+                            Type type, samplepos_t sample, bool handle_events, RegionView* rv)
 
 	: editor (ed)
 	, _parent (&parent)
 	, _track_canvas_line (0)
 	, _type (type)
 	, _selected (false)
+	, _entered (false)
 	, _shown (false)
 	, _line_shown (false)
 	, _color (rgba)
+	, pre_enter_color (rgba)
 	, _points_color (rgba)
 	, _left_label_limit (DBL_MAX)
 	, _right_label_limit (DBL_MAX)
 	, _label_offset (0)
-
+	, _line_height (-1)
+	, _region_view (rv)
 {
 
 	const double MH = marker_height - .5;
@@ -95,6 +98,7 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Container& parent, g
 	/* Shapes we use:
 	 *
 	 * Mark:
+	 * RegionCue:
 	 *
 	 *  (0,0)   ->  (6,0)
 	 *    ^           |
@@ -165,6 +169,7 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Container& parent, g
 
 	switch (type) {
 	case Mark:
+	case RegionCue:
 		points = new ArdourCanvas::Points ();
 
 		points->push_back (ArdourCanvas::Duple (0.0, 0.0));
@@ -271,10 +276,14 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Container& parent, g
 	group->name = string_compose ("Marker::group for %1", annotation);
 #endif
 
-	_name_background = new ArdourCanvas::Rectangle (group);
+	if (type != RegionCue) {
+		_name_background = new ArdourCanvas::Rectangle (group);
 #ifdef CANVAS_DEBUG
-	_name_background->name = string_compose ("Marker::_name_background for %1", annotation);
+		_name_background->name = string_compose ("Marker::_name_background for %1", annotation);
 #endif
+	} else {
+		_name_background = 0;
+	}
 
 	/* adjust to properly locate the tip */
 
@@ -282,7 +291,6 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Container& parent, g
 	CANVAS_DEBUG_NAME (mark, string_compose ("Marker::mark for %1", annotation));
 
 	mark->set (*points);
-	set_color_rgba (rgba);
 
 	/* setup name pixbuf sizes */
 	name_font = get_font_for_style (N_("MarkerText"));
@@ -300,6 +308,8 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Container& parent, g
 	_name_item->set_font_description (name_font);
 	_name_item->set_color (RGBA_TO_UINT (0,0,0,255));
 	_name_item->set_position (ArdourCanvas::Duple (_label_offset, (marker_height - name_height - 1) * .5 ));
+
+	set_color_rgba (rgba);
 
 	set_name (annotation.c_str());
 
@@ -323,7 +333,6 @@ ArdourMarker::~ArdourMarker ()
 
 	/* destroying the parent group destroys its contents, namely any polygons etc. that we added */
 	delete group;
-	delete _track_canvas_line;
 	delete points;
 }
 
@@ -344,6 +353,27 @@ ArdourMarker::set_selected (bool s)
 }
 
 void
+ArdourMarker::set_entered (bool yn)
+{
+	/* if the pointer moves from the polygon to the line, we will get 2
+	   enter events in a row, which confuses color management. Catch this.
+	*/
+
+	if (yn == _entered) {
+		return;
+	}
+
+	_entered = yn;
+
+	if (yn) {
+		pre_enter_color = _color;
+		set_color_rgba (UIConfiguration::instance().color ("entered marker"));
+	} else {
+		set_color_rgba (pre_enter_color);
+	}
+}
+
+void
 ArdourMarker::set_show_line (bool s)
 {
 	_line_shown = s;
@@ -355,19 +385,36 @@ ArdourMarker::setup_line ()
 {
 	if (_shown && (_selected || _line_shown)) {
 
-		if (_track_canvas_line == 0) {
+		ArdourCanvas::Item* line_parent;
 
-			_track_canvas_line = new ArdourCanvas::Line (editor.get_hscroll_group());
+		if (_type == RegionCue) {
+			line_parent = group;
+		} else {
+			line_parent = editor.get_cursor_scroll_group();
+		}
+
+		if (_track_canvas_line == 0) {
+			_track_canvas_line = new ArdourCanvas::Line (line_parent);
 			_track_canvas_line->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_marker_event), group, this));
 		}
 
+		/* discover where our group origin is in canvas coordinates */
+
 		ArdourCanvas::Duple g = group->canvas_origin();
-		ArdourCanvas::Duple d = _track_canvas_line->canvas_to_item (ArdourCanvas::Duple (g.x + _shift, 0));
+		ArdourCanvas::Duple d;
+
+		if (_type == RegionCue) {
+			/* line top is at the top of the region view/track (g.y in canvas coords */
+			d = line_parent->canvas_to_item (ArdourCanvas::Duple (g.x + _shift, g.y));
+		} else {
+			/* line top is at the top of the canvas (0 in canvas coords) */
+			d = line_parent->canvas_to_item (ArdourCanvas::Duple (g.x + _shift, 0));
+		}
 
 		_track_canvas_line->set_x0 (d.x);
 		_track_canvas_line->set_x1 (d.x);
 		_track_canvas_line->set_y0 (d.y);
-		_track_canvas_line->set_y1 (ArdourCanvas::COORD_MAX);
+		_track_canvas_line->set_y1 (_line_height > 0 ? d.y + _line_height : ArdourCanvas::COORD_MAX);
 		_track_canvas_line->set_outline_color ( _selected ? UIConfiguration::instance().color ("entered marker") : _color );
 		_track_canvas_line->raise_to_top ();
 		_track_canvas_line->show ();
@@ -379,17 +426,17 @@ ArdourMarker::setup_line ()
 	}
 }
 
-void
-ArdourMarker::canvas_height_set (double h)
-{
-	_canvas_height = h;
-	setup_line ();
-}
-
 ArdourCanvas::Item&
 ArdourMarker::the_item() const
 {
 	return *group;
+}
+
+void
+ArdourMarker::set_line_height (double h)
+{
+	_line_height = h;
+	setup_line ();
 }
 
 void
@@ -398,7 +445,9 @@ ArdourMarker::set_name (const string& new_name)
 	_name = new_name;
 
 	mark->set_tooltip(new_name);
-	_name_background->set_tooltip(new_name);
+	if (_name_background) {
+		_name_background->set_tooltip(new_name);
+	}
 	_name_item->set_tooltip(new_name);
 
 	setup_name_display ();
@@ -440,15 +489,16 @@ ArdourMarker::setup_name_display ()
 		_name_item->clamp_width (name_width);
 		_name_item->set (_name);
 
-		if (label_on_left ()) {
-			/* adjust right edge of background to fit text */
-			_name_background->set_x0 (_name_item->position().x - padding);
-			_name_background->set_x1 (_name_item->position().x + name_width + _shift);
-		} else {
-			/* right edge remains at zero (group-relative). Add
-			 * arbitrary 2 pixels of extra padding at the end
-			 */
-			switch (_type) {
+		if (_name_background) {
+			if (label_on_left ()) {
+				/* adjust right edge of background to fit text */
+				_name_background->set_x0 (_name_item->position().x - padding);
+				_name_background->set_x1 (_name_item->position().x + name_width + _shift);
+			} else {
+				/* right edge remains at zero (group-relative). Add
+				 * arbitrary 2 pixels of extra padding at the end
+				 */
+				switch (_type) {
 				case Tempo:
 					_name_item->hide ();
 					// tip's x-pos is at "M3", box is 2x marker's
@@ -464,12 +514,15 @@ ArdourMarker::setup_name_display ()
 					_name_background->set_x0 (0);
 					_name_background->set_x1 (_name_item->position().x + name_width + padding);
 					break;
+				}
 			}
 		}
 	}
 
-	_name_background->set_y0 (0);
-	_name_background->set_y1 (marker_height + 1);
+	if (_name_background) {
+		_name_background->set_y0 (0);
+		_name_background->set_y1 (marker_height + 1);
+	}
 }
 
 void
@@ -521,13 +574,25 @@ ArdourMarker::set_color_rgba (uint32_t c)
 	mark->set_fill_color (_selected ? UIConfiguration::instance().color ("entered marker") : _color);
 	mark->set_outline_color ( _selected ? UIConfiguration::instance().color ("entered marker") : _color );
 
-	if (_track_canvas_line && !_selected) {
+	if (_track_canvas_line && ((_type == RegionCue) || !_selected)) {
 		_track_canvas_line->set_outline_color (_color);
 	}
 
-	_name_background->set_fill (true);
-	_name_background->set_fill_color (UINT_RGBA_CHANGE_A (_color, 0x70));
-	_name_background->set_outline (false);
+	if (_name_item) {
+		if (_name_background) {
+			/* make sure text stands out over bg color */
+			_name_item->set_color (contrasting_text_color (_color));
+		} else {
+			/* make sure text is same color as everything else */
+			_name_item->set_color (_color);
+		}
+	}
+
+	if (_name_background) {
+		_name_background->set_fill (true);
+		_name_background->set_fill_color (UINT_RGBA_CHANGE_A (_color, 0x70));
+		_name_background->set_outline (false);
+	}
 }
 
 /** Set the number of pixels that are available for a label to the left of the centre of this marker */

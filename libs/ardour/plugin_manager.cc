@@ -314,12 +314,27 @@ PluginManager::~PluginManager()
 		delete _windows_vst_plugin_info;
 		delete _lxvst_plugin_info;
 		delete _mac_vst_plugin_info;
-		delete _vst3_plugin_info;
 		delete _ladspa_plugin_info;
 		delete _lv2_plugin_info;
 		delete _au_plugin_info;
 		delete _lua_plugin_info;
 	}
+
+	/* do drop VST3 Info in order to release any loaded modules */
+	delete _vst3_plugin_info;
+}
+
+bool
+PluginManager::cache_valid () const
+{
+	return Config->get_plugin_cache_version () >= cache_version ();
+}
+
+uint32_t
+PluginManager::cache_version ()
+{
+	/* see ARDOUR::vst3_scan_and_cache  VST3Cache version = +1 */
+	return 1000 * atoi (X_(PROGRAM_VERSION)) + 1;
 }
 
 struct PluginInfoPtrNameSorter {
@@ -518,6 +533,11 @@ PluginManager::refresh (bool cache_only)
 	bool conceal_vst2 = false;
 #endif
 
+	if (!cache_only && !cache_valid ()) {
+		Config->set_plugin_cache_version (cache_version ());
+		Config->save_state();
+	}
+
 #ifdef AUDIOUNIT_SUPPORT
 	if (cache_only) {
 		BootMessage (_("Scanning AU Plugins"));
@@ -602,64 +622,6 @@ PluginManager::cancel_plugin_timeout ()
 void
 PluginManager::clear_vst_cache ()
 {
-#if 1 // clean old cache and error files. (remove this code after 4.3 or 5.0)
-#ifdef WINDOWS_VST_SUPPORT
-	{
-		vector<string> fsi_files;
-		find_files_matching_regex (fsi_files, Config->get_plugin_path_vst(), "\\" VST_EXT_INFOFILE "$", true);
-		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
-			::g_unlink(i->c_str());
-		}
-	}
-	{
-		vector<string> fsi_files;
-		find_files_matching_regex (fsi_files, Config->get_plugin_path_vst(), "\\.fsi$", true);
-		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
-			::g_unlink(i->c_str());
-		}
-	}
-	{
-		vector<string> fsi_files;
-		find_files_matching_regex (fsi_files, Config->get_plugin_path_vst(), "\\.err$", true);
-		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
-			::g_unlink(i->c_str());
-		}
-	}
-#endif
-
-#ifdef LXVST_SUPPORT
-	{
-		vector<string> fsi_files;
-		find_files_matching_regex (fsi_files, Config->get_plugin_path_lxvst(), "\\" VST_EXT_INFOFILE "$", true);
-		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
-			::g_unlink(i->c_str());
-		}
-	}
-	{
-		vector<string> fsi_files;
-		find_files_matching_regex (fsi_files, Config->get_plugin_path_lxvst(), "\\.fsi$", true);
-		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
-			::g_unlink(i->c_str());
-		}
-	}
-	{
-		vector<string> fsi_files;
-		find_files_matching_regex (fsi_files, Config->get_plugin_path_lxvst(), "\\.err$", true);
-		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
-			::g_unlink(i->c_str());
-		}
-	}
-#endif
-#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT)
-	{
-		string dir = Glib::build_filename (ARDOUR::user_cache_directory(), "fst_info");
-		if (Glib::file_test (dir, Glib::FILE_TEST_IS_DIR)) {
-			PBD::remove_directory (dir);
-		}
-	}
-#endif
-#endif // old cache cleanup
-
 #if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT)
 	{
 		string dn = Glib::build_filename (ARDOUR::user_cache_directory(), "vst");
@@ -669,44 +631,14 @@ PluginManager::clear_vst_cache ()
 			::g_unlink(i->c_str());
 		}
 	}
+	Config->set_plugin_cache_version (0);
+	Config->save_state();
 #endif
 }
 
 void
 PluginManager::clear_vst_blacklist ()
 {
-#if 1 // remove old blacklist files. (remove this code after 4.3 or 5.0)
-
-#ifdef WINDOWS_VST_SUPPORT
-	{
-		vector<string> fsi_files;
-		find_files_matching_regex (fsi_files, Config->get_plugin_path_vst(), "\\" VST_EXT_BLACKLIST "$", true);
-		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
-			::g_unlink(i->c_str());
-		}
-	}
-#endif
-
-#ifdef LXVST_SUPPORT
-	{
-		vector<string> fsi_files;
-		find_files_matching_regex (fsi_files, Config->get_plugin_path_lxvst(), "\\" VST_EXT_BLACKLIST "$", true);
-		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
-			::g_unlink(i->c_str());
-		}
-	}
-#endif
-#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT)
-	{
-		string dir = Glib::build_filename (ARDOUR::user_cache_directory(), "fst_blacklist");
-		if (Glib::file_test (dir, Glib::FILE_TEST_IS_DIR)) {
-			PBD::remove_directory (dir);
-		}
-	}
-#endif
-
-#endif // old blacklist cleanup
-
 #if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT)
 	{
 		string fn = Glib::build_filename (ARDOUR::user_cache_directory(), VST_BLACKLIST);
@@ -715,7 +647,6 @@ PluginManager::clear_vst_blacklist ()
 		}
 	}
 #endif
-
 }
 
 void
@@ -723,6 +654,8 @@ PluginManager::clear_au_cache ()
 {
 #ifdef AUDIOUNIT_SUPPORT
 	AUPluginInfo::clear_cache ();
+	Config->set_plugin_cache_version (0);
+	Config->save_state();
 #endif
 }
 
@@ -1538,6 +1471,8 @@ PluginManager::clear_vst3_cache ()
 	for (vector<string>::iterator i = v3i_files.begin(); i != v3i_files.end (); ++i) {
 		::g_unlink(i->c_str());
 	}
+	Config->set_plugin_cache_version (0);
+	Config->save_state();
 #endif
 }
 
@@ -2249,6 +2184,40 @@ PluginManager::save_plugin_order_file (XMLNode &elem) const
 	tree.set_root (0); // note: must disconnect the elem from XMLTree, or it will try to delete memory it didn't allocate
 }
 
+
+std::string
+PluginManager::dump_untagged_plugins ()
+{
+	std::string path = Glib::build_filename (user_plugin_metadata_dir(), "untagged_plugins");
+	XMLNode* root = new XMLNode (X_("PluginTags"));
+
+	for (PluginTagList::iterator i = ptags.begin(); i != ptags.end(); ++i) {
+#ifdef MIXBUS
+		if ((*i).type == LADSPA) {
+			uint32_t id = atoi ((*i).unique_id);
+			if (id >= 9300 && id <= 9399) {
+				continue; /* do not write mixbus channelstrip ladspa's in the tagfile */
+			}
+		}
+#endif
+		if ((*i).tagtype == FromPlug) {
+			XMLNode* node = new XMLNode (X_("Plugin"));
+			node->set_property (X_("type"), to_generic_vst ((*i).type));
+			node->set_property (X_("id"), (*i).unique_id);
+			node->set_property (X_("tags"), (*i).tags);
+			node->set_property (X_("name"), (*i).name);
+			root->add_child_nocopy (*node);
+		}
+	}
+
+	XMLTree tree;
+	tree.set_root (root);
+	if (tree.write (path)) {
+		return path;
+	} else {
+		return "";
+	}
+}
 
 void
 PluginManager::save_tags ()

@@ -202,8 +202,8 @@ public:
 	WaveViewDrawRequest ();
 	~WaveViewDrawRequest ();
 
-	bool stopped() const { return (bool) g_atomic_int_get (const_cast<gint*>(&stop)); }
-	void cancel() { g_atomic_int_set (&stop, 1); }
+	bool stopped() const { return (bool) g_atomic_int_get (&_stop); }
+	void cancel() { g_atomic_int_set (&_stop, 1); }
 	bool finished() { return image->finished(); }
 
 	boost::shared_ptr<WaveViewImage> image;
@@ -213,7 +213,7 @@ public:
 	}
 
 private:
-	gint stop; /* intended for atomic access */
+	GATOMIC_QUAL gint _stop; /* intended for atomic access */
 };
 
 class WaveViewCache;
@@ -287,26 +287,6 @@ private:
 	bool full () { return image_cache_size > _image_cache_threshold; }
 };
 
-class WaveViewDrawRequestQueue
-{
-public:
-
-	void enqueue (boost::shared_ptr<WaveViewDrawRequest>&);
-
-	// @return valid request or null if non-blocking or no request is available
-	boost::shared_ptr<WaveViewDrawRequest> dequeue (bool block);
-
-	void wake_up ();
-
-private:
-
-	mutable Glib::Threads::Mutex _queue_mutex;
-	Glib::Threads::Cond _cond;
-
-	typedef std::deque<boost::shared_ptr<WaveViewDrawRequest> > DrawRequestQueueType;
-	DrawRequestQueueType _queue;
-};
-
 class WaveViewDrawingThread
 {
 public:
@@ -315,12 +295,10 @@ public:
 
 private:
 	void start ();
-	void quit ();
 	void run ();
 
 private:
 	Glib::Threads::Thread* _thread;
-	gint _quit;
 };
 
 class WaveViewThreads {
@@ -339,10 +317,13 @@ public:
 private:
 	friend class WaveViewDrawingThread;
 
-	static void wake_up ();
-
 	// will block until a request is available
 	static boost::shared_ptr<WaveViewDrawRequest> dequeue_draw_request ();
+	static void thread_proc ();
+
+	boost::shared_ptr<WaveViewDrawRequest> _dequeue_draw_request ();
+	void _enqueue_draw_request (boost::shared_ptr<WaveViewDrawRequest>&);
+	void _thread_proc ();
 
 	void start_threads ();
 	void stop_threads ();
@@ -354,8 +335,15 @@ private:
 	// TODO use std::unique_ptr when possible
 	typedef std::vector<boost::shared_ptr<WaveViewDrawingThread> > WaveViewThreadList;
 
+	bool _quit;
 	WaveViewThreadList _threads;
-	WaveViewDrawRequestQueue _request_queue;
+
+
+	mutable Glib::Threads::Mutex _queue_mutex;
+	Glib::Threads::Cond _cond;
+
+	typedef std::deque<boost::shared_ptr<WaveViewDrawRequest> > DrawRequestQueueType;
+	DrawRequestQueueType _queue;
 };
 
 

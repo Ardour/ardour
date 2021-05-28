@@ -41,7 +41,6 @@
 #include "pbd/stl_delete.h"
 #include "pbd/strsplit.h"
 #include "pbd/shortpath.h"
-#include "pbd/stacktrace.h"
 #include "pbd/enumwriter.h"
 
 #include <sndfile.h>

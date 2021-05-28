@@ -357,6 +357,9 @@ InternalSend::set_block_size (pframes_t nframes)
 void
 InternalSend::set_allow_feedback (bool yn)
 {
+	if (is_foldback ()) {
+		return;
+	}
 	_allow_feedback = yn;
 	_send_from->processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
 }
@@ -392,6 +395,15 @@ InternalSend::set_state (const XMLNode& node, int version)
 {
 	init_gain ();
 
+	/* Allow Delivery::set_state() to restore pannable state when
+	 * copy/pasting Aux sends.
+	 *
+	 * At this point in time there is no target-bus. So when
+	 * Delivery::set_state() calls reset_panner(), the pannable
+	 * is dropped, before the panner state can be restored.
+	 */
+	defer_pan_reset ();
+
 	Send::set_state (node, version);
 
 	if (node.get_property ("target", _send_to_id)) {
@@ -406,8 +418,13 @@ InternalSend::set_state (const XMLNode& node, int version)
 			connect_when_legal ();
 		}
 	}
+	allow_pan_reset ();
 
-	node.get_property (X_("allow-feedback"), _allow_feedback);
+	if (!is_foldback ()) {
+		node.get_property (X_("allow-feedback"), _allow_feedback);
+	} else {
+		_allow_feedback = false;
+	}
 
 	return 0;
 }

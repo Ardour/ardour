@@ -58,7 +58,7 @@ ARDOUR_UI::launch_chat ()
 
 	switch (dialog.run()) {
 	case RESPONSE_OK:
-		open_uri("http://webchat.freenode.net/?channels=ardour");
+		open_uri("http://ardour.org/chat");
 		break;
 	default:
 		break;

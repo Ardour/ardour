@@ -26,10 +26,13 @@ extern "C" {
 #endif
 
 /**
- * @file mod.h
- * @brief SoundFont modulator functions and constants.
+ * @defgroup modulators SoundFont Modulators
+ * @ingroup soundfonts
+ *
+ * SoundFont modulator functions and constants.
+ *
+ * @{
  */
-
 
 /**
  * Flags defining the polarity, mapping function and type of a modulator source.
@@ -69,8 +72,11 @@ enum fluid_mod_src
     FLUID_MOD_PITCHWHEELSENS = 16         /**< Pitch wheel sensitivity */
 };
 
+/** @startlifecycle{Modulator} */
 FLUIDSYNTH_API fluid_mod_t *new_fluid_mod(void);
 FLUIDSYNTH_API void delete_fluid_mod(fluid_mod_t *mod);
+/** @endlifecycle */
+
 FLUIDSYNTH_API size_t fluid_mod_sizeof(void);
 
 FLUIDSYNTH_API void fluid_mod_set_source1(fluid_mod_t *mod, int src, int flags);
@@ -90,6 +96,7 @@ FLUIDSYNTH_API int fluid_mod_has_source(const fluid_mod_t *mod, int cc, int ctrl
 FLUIDSYNTH_API int fluid_mod_has_dest(const fluid_mod_t *mod, int gen);
 
 FLUIDSYNTH_API void fluid_mod_clone(fluid_mod_t *mod, const fluid_mod_t *src);
+/* @} */
 
 #ifdef __cplusplus
 }

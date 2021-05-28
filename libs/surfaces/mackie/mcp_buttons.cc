@@ -353,10 +353,10 @@ MackieControlProtocol::zoom_release (Mackie::Button &)
 Mackie::LedState
 MackieControlProtocol::scrub_press (Mackie::Button &)
 {
-	if (!surfaces.empty()) {
-		// surfaces.front()->next_jog_mode ();
+	if (_master_surface) {
 		_master_surface->next_jog_mode ();
 	}
+
 	return none;
 }
 
@@ -860,27 +860,29 @@ MackieControlProtocol::user_b_release (Button &)
 LedState
 MackieControlProtocol::master_fader_touch_press (Mackie::Button &)
 {
-	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::master_fader_touch_press\n");
+	if (_master_surface && _master_surface->master_fader() != 0) {
+		DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::master_fader_touch_press\n");
 
-	Fader* master_fader = _master_surface->master_fader();
+		Fader* master_fader = _master_surface->master_fader();
 
-	boost::shared_ptr<AutomationControl> ac = master_fader->control ();
+		boost::shared_ptr<AutomationControl> ac = master_fader->control ();
 
-	master_fader->set_in_use (true);
-	master_fader->start_touch (transport_sample());
-
+		master_fader->set_in_use (true);
+		master_fader->start_touch (transport_sample());
+	}
 	return none;
 }
 LedState
 MackieControlProtocol::master_fader_touch_release (Mackie::Button &)
 {
-	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::master_fader_touch_release\n");
+	if (_master_surface && _master_surface->master_fader() != 0) {
+		DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::master_fader_touch_release\n");
 
-	Fader* master_fader = _master_surface->master_fader();
+		Fader* master_fader = _master_surface->master_fader();
 
-	master_fader->set_in_use (false);
-	master_fader->stop_touch (transport_sample());
-
+		master_fader->set_in_use (false);
+		master_fader->stop_touch (transport_sample());
+	}
 	return none;
 }
 

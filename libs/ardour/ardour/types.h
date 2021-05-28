@@ -58,7 +58,7 @@
 using Temporal::max_samplepos;
 using Temporal::max_samplecnt;
 
-#if __GNUC__ < 3
+#if defined (__GNUC__) && (__GNUC__ < 3)
 typedef int intptr_t;
 #endif
 
@@ -391,6 +391,26 @@ struct MusicRange {
 	}
 };
 
+class CueMarker {
+  public:
+	CueMarker (std::string const& text, samplepos_t position) : _text (text), _position (position) {}
+
+	std::string text() const { return _text; }
+	void set_text (std::string const & str) { _text = str; }
+
+	samplepos_t position() const { return _position; }
+	void set_position (samplepos_t pos) { _position = pos; }
+
+	bool operator== (CueMarker const & other) const { return _position == other.position() && _text == other.text(); }
+	bool operator< (CueMarker const & other) const { return _position < other.position(); }
+
+  private:
+	std::string _text;
+	samplepos_t _position;
+};
+
+typedef std::set<CueMarker> CueMarkers;
+
 /*
   Slowest = 6.6dB/sec falloff at update rate of 40ms
   Slow    = 6.8dB/sec falloff at update rate of 40ms
@@ -482,6 +502,12 @@ enum MeterLineUp {
 	MeteringLineUp20,
 	MeteringLineUp18,
 	MeteringLineUp15
+};
+
+enum InputMeterLayout {
+	LayoutVertical,
+	LayoutHorizontal,
+	LayoutAutomatic,
 };
 
 enum PFLPosition {
@@ -621,6 +647,7 @@ enum SrcQuality {
 };
 
 typedef std::list<samplepos_t> AnalysisFeatureList;
+typedef std::vector<samplepos_t> XrunPositions;
 
 typedef std::list<boost::shared_ptr<Route> > RouteList;
 typedef std::list<boost::shared_ptr<Stripable> > StripableList;
@@ -746,17 +773,19 @@ enum MidiPortFlags {
 
 struct LatencyRange {
 	LatencyRange () : min (0), max (0) {}
+	LatencyRange (const LatencyRange& other) : min (other.min), max (other.max) {}
 
 	uint32_t min; //< samples
 	uint32_t max; //< samples
 
-	bool operator==(const LatencyRange& other) {
+	bool operator==(const LatencyRange& other) const {
 		return (min == other.min && max == other.max);
 	}
 
-	void operator=(const LatencyRange& other) {
+	LatencyRange& operator=(const LatencyRange& other) {
 		min = other.min;
 		max = other.max;
+		return *this;
 	}
 };
 
@@ -792,9 +821,10 @@ enum MidiTempoMapDisposition {
 };
 
 struct CaptureInfo {
-	samplepos_t start;
-	samplecnt_t samples;
-	samplecnt_t loop_offset;
+	samplepos_t   start;
+	samplecnt_t   samples;
+	samplecnt_t   loop_offset;
+	XrunPositions xruns;
 };
 
 enum LoopFadeChoice {

@@ -144,63 +144,83 @@ ArdourVideoToolPaths::xjadeo_exe (std::string &xjadeo_exe)
 bool
 ArdourVideoToolPaths::transcoder_exe (std::string &ffmpeg_exe, std::string &ffprobe_exe)
 {
+	static bool _cached = false;
+	static std::string _ffmpeg_exe;
+	static std::string _ffprobe_exe;
+
+	if (_cached) {
+		ffmpeg_exe  = _ffmpeg_exe;
+		ffprobe_exe = _ffprobe_exe;
+		return true;
+	}
+
 #ifdef PLATFORM_WINDOWS
 	std::string reg;
 	std::string program_files = PBD::get_win_special_folder_path (CSIDL_PROGRAM_FILES);
 #endif
 
+	/* note: some callers pass the same reference "unused" to both &ffmpeg_exe, and &ffprobe_exe) */
+
 	ffmpeg_exe = X_("");
 	ffprobe_exe = X_("");
 
+	_ffmpeg_exe = X_("");
+	_ffprobe_exe = X_("");
+
 	std::string ff_file_path;
 	if (find_file (Searchpath(Glib::getenv("PATH")), X_("ffmpeg_harvid"), ff_file_path)) {
-		ffmpeg_exe = ff_file_path;
+		_ffmpeg_exe = ff_file_path;
 	}
 #ifdef PLATFORM_WINDOWS
 	else if (PBD::windows_query_registry ("Software\\" PROGRAM_NAME "\\v" PROGRAM_VERSION "\\video", "Install_Dir", reg))
 	{
-		ffmpeg_exe = g_build_filename(reg.c_str(), X_("harvid"), X_("ffmpeg.exe"), NULL);
-		ffprobe_exe = g_build_filename(reg.c_str(), X_("harvid"), X_("ffprobe.exe"), NULL);
+		_ffmpeg_exe = g_build_filename(reg.c_str(), X_("harvid"), X_("ffmpeg.exe"), NULL);
+		_ffprobe_exe = g_build_filename(reg.c_str(), X_("harvid"), X_("ffprobe.exe"), NULL);
 	}
 	else if (PBD::windows_query_registry ("Software\\RSS\\harvid", "Install_Dir", reg))
 	{
-		ffmpeg_exe = g_build_filename(reg.c_str(), X_("ffmpeg.exe"), NULL);
-		ffprobe_exe = g_build_filename(reg.c_str(), X_("ffprobe.exe"), NULL);
+		_ffmpeg_exe = g_build_filename(reg.c_str(), X_("ffmpeg.exe"), NULL);
+		_ffprobe_exe = g_build_filename(reg.c_str(), X_("ffprobe.exe"), NULL);
 	}
 
-	if (Glib::file_test(ffmpeg_exe, Glib::FILE_TEST_EXISTS)) {
+	if (Glib::file_test(_ffmpeg_exe, Glib::FILE_TEST_EXISTS)) {
 		;
 	}
 	else if (!program_files.empty() && Glib::file_test(g_build_filename(program_files.c_str(), "harvid", "ffmpeg.exe", NULL), Glib::FILE_TEST_EXISTS)) {
-		ffmpeg_exe = g_build_filename(program_files.c_str(), "harvid", "ffmpeg.exe", NULL);
+		_ffmpeg_exe = g_build_filename(program_files.c_str(), "harvid", "ffmpeg.exe", NULL);
 	}
 	else if (Glib::file_test(X_("C:\\Program Files\\ffmpeg\\ffmpeg.exe"), Glib::FILE_TEST_EXISTS)) {
-		ffmpeg_exe = X_("C:\\Program Files\\ffmpeg\\ffmpeg.exe");
+		_ffmpeg_exe = X_("C:\\Program Files\\ffmpeg\\ffmpeg.exe");
 	} else {
-		ffmpeg_exe = X_("");
+		_ffmpeg_exe = X_("");
 	}
 #endif
 
 	if (find_file (Searchpath(Glib::getenv("PATH")), X_("ffprobe_harvid"), ff_file_path)) {
-		ffprobe_exe = ff_file_path;
+		_ffprobe_exe = ff_file_path;
 	}
 #ifdef PLATFORM_WINDOWS
-	if (Glib::file_test(ffprobe_exe, Glib::FILE_TEST_EXISTS)) {
+	if (Glib::file_test(_ffprobe_exe, Glib::FILE_TEST_EXISTS)) {
 		;
 	}
 	else if (!program_files.empty() && Glib::file_test(g_build_filename(program_files.c_str(), "harvid", "ffprobe.exe", NULL), Glib::FILE_TEST_EXISTS)) {
-		ffprobe_exe = g_build_filename(program_files.c_str(), "harvid", "ffprobe.exe", NULL);
+		_ffprobe_exe = g_build_filename(program_files.c_str(), "harvid", "ffprobe.exe", NULL);
 	}
 	else if (Glib::file_test(X_("C:\\Program Files\\ffmpeg\\ffprobe.exe"), Glib::FILE_TEST_EXISTS)) {
-		ffprobe_exe = X_("C:\\Program Files\\ffmpeg\\ffprobe.exe");
+		_ffprobe_exe = X_("C:\\Program Files\\ffmpeg\\ffprobe.exe");
 	} else {
-		ffprobe_exe = X_("");
+		_ffprobe_exe = X_("");
 	}
 #endif
 
-	if (ffmpeg_exe.empty() || ffprobe_exe.empty()) {
+	if (_ffmpeg_exe.empty() || _ffprobe_exe.empty()) {
 		return false;
 	}
+
+	_cached      = true;
+	ffmpeg_exe  = _ffmpeg_exe;
+	ffprobe_exe = _ffprobe_exe;
+
 	return true;
 }
 

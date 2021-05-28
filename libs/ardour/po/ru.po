@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: libardour 4\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-05-20 14:36-0600\n"
-"PO-Revision-Date: 2020-04-22 19:41+0300\n"
+"PO-Revision-Date: 2020-11-12 00:55+0300\n"
 "Last-Translator: Alexandre Prokoudine <alexandre.prokoudine@gmail.com>\n"
 "Language-Team: русский <gnome-cyr@lists.gnome.org>\n"
 "Language: ru\n"
@@ -19,7 +19,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)\n"
-"X-Generator: Gtranslator 3.34.0\n"
+"X-Generator: Gtranslator 3.36.0\n"
 
 #: analyser.cc:127 audioregion.cc:1791
 msgid "Transient Analysis failed for %1."
@@ -1021,7 +1021,7 @@ msgstr ""
 
 #: find_session.cc:286
 msgid "Unknown Error"
-msgstr ""
+msgstr "Неизвестная ошибка"
 
 #: globals.cc:278
 msgid "Could not set system open files limit to \"unlimited\""
@@ -1390,7 +1390,7 @@ msgstr "Неверный режим XML одобрен для Locations::set_sta
 
 #: location.cc:1114 session.cc:1601 session_state.cc:1441
 msgid "session"
-msgstr "Сесссия"
+msgstr "Сессия"
 
 #: location.cc:1181
 msgid "could not load location from session file - ignored"
@@ -1613,7 +1613,7 @@ msgstr "Контроль соло"
 
 #: mp3filesource.cc:71
 msgid "MPEG Layer %1 (%2 kbps)"
-msgstr ""
+msgstr "MPEG Layer %1 (%2 Кбит/с)"
 
 #: mtc_slave.cc:387
 msgid ""
@@ -3331,10 +3331,12 @@ msgid ""
 "\n"
 "copying \"%1\" failed !"
 msgstr ""
+"\n"
+"не удалось скопировать \"%1\" !"
 
 #: session_state.cc:5222
 msgid "unknown reason"
-msgstr ""
+msgstr "причина неизвестна"
 
 #: session_time.cc:230
 msgid "Unknown transport state %1 in sync callback"
@@ -3600,7 +3602,7 @@ msgstr "SrcFileSource: %1"
 
 #: template_utils.cc:117 template_utils.cc:172
 msgid "(unknown)"
-msgstr ""
+msgstr "(неизвестно)"
 
 #: template_utils.cc:127 template_utils.cc:182
 msgid "No Description"

@@ -47,6 +47,8 @@ ParameterDescriptor::ParameterDescriptor(const Evoral::Parameter& parameter)
 	, integer_step(parameter_is_midi (parameter.type ()))
 	, sr_dependent(false)
 	, enumeration(false)
+	, inline_ctrl(false)
+	, display_priority(0)
 {
 	ScalePoints sp;
 
@@ -129,7 +131,7 @@ ParameterDescriptor::ParameterDescriptor(const Evoral::Parameter& parameter)
 		enumeration = true;
 		integer_step = true;
 		lower = MonitorAuto;
-		upper = MonitorDisk; /* XXX bump when we add MonitorCue */
+		upper = MonitorCue;
 		scale_points = boost::shared_ptr<ScalePoints>(new ScalePoints());
 		scale_points->insert (std::make_pair (_("Auto"), MonitorAuto));
 		scale_points->insert (std::make_pair (_("Input"), MonitorInput));
@@ -159,6 +161,7 @@ ParameterDescriptor::ParameterDescriptor()
 	, sr_dependent(false)
 	, enumeration(false)
 	, inline_ctrl(false)
+	, display_priority(0)
 {}
 
 void
@@ -336,14 +339,12 @@ ParameterDescriptor::to_interface (float val, bool rotary) const
 			}
 			break;
 		case PanAzimuthAutomation:
-			if (rotary) {
-				val = val;
-			} else {
+			if (!rotary) {
 				val = 1.0 - val;
 			}
 			break;
 		case PanElevationAutomation:
-			val = val;
+			// val = val;
 			break;
 		case PanWidthAutomation:
 			val = .5f + val * .5f;
@@ -393,14 +394,12 @@ ParameterDescriptor::from_interface (float val, bool rotary) const
 			}
 			break;
 		case PanAzimuthAutomation:
-			if (rotary) {
-				val = val;
-			} else {
+			if (!rotary) {
 				val = 1.0 - val;
 			}
 			break;
 		case PanElevationAutomation:
-			 val = val;
+			 // val = val;
 			break;
 		case PanWidthAutomation:
 			val = 2.f * val - 1.f;
@@ -414,7 +413,7 @@ ParameterDescriptor::from_interface (float val, bool rotary) const
 					val = position_to_logscale (val, lower, upper);
 				}
 			} else if (toggled) {
-				val = val > 0 ? upper : lower;
+				val = val >= 0.5 ? upper : lower;
 			} else if (integer_step) {
 				/* upper and lower are inclusive. use evenly-divided steps
 				 * e.g. 5 integers 0,1,2,3,4 are mapped to a fader

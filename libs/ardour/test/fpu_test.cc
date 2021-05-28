@@ -98,6 +98,34 @@ FPUTest::compare (std::string msg, size_t cnt)
 }
 
 #if defined(ARCH_X86) && defined(BUILD_SSE_OPTIMIZATIONS)
+
+void
+FPUTest::avxFmaTest ()
+{
+	PBD::FPU* fpu = PBD::FPU::instance ();
+	if (!(fpu->has_avx () && fpu->has_fma ())) {
+		printf ("AVX and FMA is not available at run-time\n");
+		return;
+	}
+
+#if ( defined(__x86_64__) || defined(_M_X64) )
+	size_t align_max = 64;
+#else
+	size_t align_max = 16;
+#endif
+	CPPUNIT_ASSERT_MESSAGE ("Aligned Malloc", (((intptr_t)_test1) % align_max) == 0);
+	CPPUNIT_ASSERT_MESSAGE ("Aligned Malloc", (((intptr_t)_test2) % align_max) == 0);
+
+	compute_peak          = x86_sse_avx_compute_peak;
+	find_peaks            = x86_sse_avx_find_peaks;
+	apply_gain_to_buffer  = x86_sse_avx_apply_gain_to_buffer;
+	mix_buffers_with_gain = x86_fma_mix_buffers_with_gain;
+	mix_buffers_no_gain   = x86_sse_avx_mix_buffers_no_gain;
+	copy_vector           = x86_sse_avx_copy_vector;
+
+	run (align_max);
+}
+
 void
 FPUTest::avxTest ()
 {

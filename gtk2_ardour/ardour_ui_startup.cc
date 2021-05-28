@@ -310,6 +310,24 @@ ARDOUR_UI::editor_settings () const
 }
 
 XMLNode*
+ARDOUR_UI::recorder_settings () const
+{
+	XMLNode* node = 0;
+
+	if (_session) {
+		node = _session->instant_xml(X_("Recorder"));
+	} else {
+		node = Config->instant_xml(X_("Recorder"));
+	}
+
+	if (!node) {
+		node = new XMLNode (X_("Recorder"));
+	}
+
+	return node;
+}
+
+XMLNode*
 ARDOUR_UI::keyboard_settings () const
 {
 	XMLNode* node = 0;
@@ -404,11 +422,7 @@ ARDOUR_UI::nsm_init ()
 		}
 	}
 	if (i == 5000) {
-#if 0 // USE AFTER STRINGFREEZE 6.0
 		error << _("NSM server did not announce itself. Continuing without NSM.") << endmsg;
-#else
-		error << _("NSM server did not announce itself") << endmsg;
-#endif
 		delete nsm;
 		nsm = 0;
 		return 0;
@@ -553,8 +567,6 @@ ARDOUR_UI::load_session_from_startup_fsm ()
 	const bool   session_is_new = startup_fsm->session_is_new;
 	const BusProfile bus_profile = startup_fsm->bus_profile;
 	const bool   session_was_not_named = (!startup_fsm->session_name_edited && ARDOUR_COMMAND_LINE::session_name.empty());
-
-	std::cout  << " loading from " << session_path << " as " << session_name << " templ " << session_template << " is_new " << session_is_new << " bp " << bus_profile.master_out_channels << std::endl;
 
 	if (session_is_new) {
 

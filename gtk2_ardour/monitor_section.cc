@@ -26,7 +26,6 @@
 #include "pbd/compose.h"
 #include "pbd/error.h"
 #include "pbd/replace_all.h"
-#include "pbd/stacktrace.h"
 
 #include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/utils.h"
@@ -426,6 +425,7 @@ MonitorSection::MonitorSection ()
 		scrollbar.ensure_style();
 		Gtk::Requisition requisition(scrollbar.size_request ());
 		scrollbar_height = requisition.height;
+		scrollbar_height += 3; // track_display_frame border/shadow
 	}
 
 	// output port select
@@ -506,6 +506,9 @@ MonitorSection::MonitorSection ()
 	/* catch changes that affect us */
 	AudioEngine::instance()->PortConnectedOrDisconnected.connect (
 		*this, invalidator (*this), boost::bind (&MonitorSection::port_connected_or_disconnected, this, _1, _3), gui_context ()
+		);
+	AudioEngine::instance()->PortPrettyNameChanged.connect (
+		*this, invalidator (*this), boost::bind (&MonitorSection::port_pretty_name_changed, this, _1), gui_context ()
 		);
 	Config->ParameterChanged.connect (config_connection, invalidator (*this), boost::bind (&MonitorSection::parameter_changed, this, _1), gui_context());
 }
@@ -1589,6 +1592,18 @@ MonitorSection::port_connected_or_disconnected (boost::weak_ptr<Port> wa, boost:
 		update_output_display ();
 	}
 }
+
+void
+MonitorSection::port_pretty_name_changed (std::string pn)
+{
+	if (!_route) {
+		return;
+	}
+	if (_route->output()->connected_to (pn)) {
+		update_output_display ();
+	}
+}
+
 
 void
 MonitorSection::load_bindings ()

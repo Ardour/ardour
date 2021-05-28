@@ -54,14 +54,22 @@ class LIBARDOUR_API BackendPort : public ProtoPort
 
 	const std::string& name ()        const { return _name; }
 	const std::string& pretty_name () const { return _pretty_name; }
+	const std::string& hw_port_name () const { return _hw_port_name; }
 
 	int set_name (const std::string& name) {
 		_name = name;
 		return 0;
 	}
 
+	/* called from PortEngineSharedImpl */
 	int set_pretty_name (const std::string& name) {
 		_pretty_name = name;
+		return 0;
+	}
+
+	/* called from backends only */
+	int set_hw_port_name (const std::string& name) {
+		_hw_port_name = name;
 		return 0;
 	}
 
@@ -102,6 +110,7 @@ protected:
 private:
 	std::string            _name;
 	std::string            _pretty_name;
+	std::string            _hw_port_name;
 	const PortFlags        _flags;
 	LatencyRange           _capture_latency_range;
 	LatencyRange           _playback_latency_range;
@@ -174,7 +183,8 @@ protected:
 
 	std::vector<PortConnectData *> _port_connection_queue;
 	pthread_mutex_t _port_callback_mutex;
-	bool _port_change_flag;
+
+	GATOMIC_QUAL gint _port_change_flag; /* atomic */
 
 	void port_connect_callback (const std::string& a, const std::string& b, bool conn) {
 		pthread_mutex_lock (&_port_callback_mutex);
@@ -183,9 +193,7 @@ protected:
 	}
 
 	void port_connect_add_remove_callback () {
-		pthread_mutex_lock (&_port_callback_mutex);
-		_port_change_flag = true;
-		pthread_mutex_unlock (&_port_callback_mutex);
+		g_atomic_int_set (&_port_change_flag, 1);
 	}
 
 	virtual void update_system_port_latencies ();
@@ -221,6 +229,10 @@ protected:
 	}
 
 	virtual BackendPort* port_factory (std::string const& name, ARDOUR::DataType dt, ARDOUR::PortFlags flags) = 0;
+
+#ifndef NDEBUG
+	void list_ports () const;
+#endif
 };
 
 } /* namespace ARDOUR */

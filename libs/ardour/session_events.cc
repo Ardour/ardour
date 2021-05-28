@@ -24,7 +24,6 @@
 
 #include "pbd/error.h"
 #include "pbd/enumwriter.h"
-#include "pbd/stacktrace.h"
 #include "pbd/pthread_utils.h"
 
 #include "ardour/debug.h"
@@ -126,6 +125,7 @@ SessionEventManager::remove_event (samplepos_t sample, SessionEvent::Type type)
 void
 SessionEventManager::replace_event (SessionEvent::Type type, samplepos_t sample, samplepos_t target)
 {
+	assert (sample != SessionEvent::Immediate);
 	SessionEvent* ev = new SessionEvent (type, SessionEvent::Replace, sample, target, 0);
 	queue_event (ev);
 }
@@ -250,10 +250,19 @@ SessionEventManager::_replace_event (SessionEvent* ev)
 	bool ret = false;
 	Events::iterator i;
 
-	/* private, used only for events that can only exist once in the queue */
+	/* use only for events that can only exist once in the respective queue */
+	Events& e (ev->action_sample == SessionEvent::Immediate ? immediate_events : events);
 
-	for (i = events.begin(); i != events.end(); ++i) {
-		if ((*i)->type == ev->type) {
+	for (i = e.begin(); i != e.end(); ++i) {
+		if ((*i)->type == ev->type && ev->type == SessionEvent::Overwrite && (*i)->track.lock() == ev->track.lock() && (*i)->overwrite == ev->overwrite) {
+			assert (ev->action_sample == SessionEvent::Immediate);
+			ret = true;
+			delete ev;
+			break;
+		}
+		else if ((*i)->type == ev->type && ev->type != SessionEvent::Overwrite) {
+			assert (ev->action_sample != SessionEvent::Immediate);
+			assert (ev->type == SessionEvent::PunchIn || ev->type == SessionEvent::PunchOut ||  ev->type == SessionEvent::AutoLoop);
 			(*i)->action_sample = ev->action_sample;
 			(*i)->target_sample = ev->target_sample;
 			if ((*i) == ev) {
@@ -264,12 +273,17 @@ SessionEventManager::_replace_event (SessionEvent* ev)
 		}
 	}
 
-	if (i == events.end()) {
-		events.insert (events.begin(), ev);
+	if (i == e.end()) {
+		e.insert (e.begin(), ev);
 	}
 
-	events.sort (SessionEvent::compare);
-	next_event = events.end();
+	if (ev->action_sample == SessionEvent::Immediate) {
+		/* no need to sort immediate events */
+		return ret;
+	}
+
+	e.sort (SessionEvent::compare);
+	next_event = e.end();
 	set_next_event ();
 
 	return ret;
@@ -284,6 +298,7 @@ SessionEventManager::_remove_event (SessionEvent* ev)
 
 	for (i = events.begin(); i != events.end(); ++i) {
 		if ((*i)->type == ev->type && (*i)->action_sample == ev->action_sample) {
+			assert ((*i)->action_sample != SessionEvent::Immediate);
 			if ((*i) == ev) {
 				ret = true;
 			}

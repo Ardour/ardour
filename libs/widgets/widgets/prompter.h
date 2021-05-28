@@ -46,9 +46,12 @@ public:
 		entryLabel.set_label (prompt);
 	}
 
-	void set_initial_text (std::string txt) {
+	void set_initial_text (std::string txt, bool allow_replace = false) {
 		entry.set_text (txt);
 		entry.select_region (0, entry.get_text_length());
+		if (allow_replace) {
+			on_entry_changed ();
+		}
 	}
 
 	void change_labels (std::string ok, std::string cancel);

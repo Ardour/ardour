@@ -33,6 +33,7 @@
 
 #include "pbd/i18n.h"
 
+#include "ardour/async_midi_port.h"
 #include "ardour/audioengine.h"
 #include "ardour/bundle.h"
 #include "ardour/session.h"
@@ -52,9 +53,8 @@ Session::add_bundle (boost::shared_ptr<Bundle> bundle, bool emit_signal)
 
 	if (emit_signal) {
 		BundleAddedOrRemoved (); /* EMIT SIGNAL */
+		set_dirty();
 	}
-
-	set_dirty();
 }
 
 void
@@ -118,6 +118,21 @@ Session::setup_bundles ()
 		                    MidiPortFlags (0), /* no specific inclusions */
 		                    MidiPortFlags (MidiPortControl|MidiPortVirtual) /* exclude control & virtual ports */
 			);
+	}
+
+	/* now add virtual Vkeybd, compare to PortGroupList::gather */
+	if (_midi_ports) {
+		boost::shared_ptr<Port> ap = boost::dynamic_pointer_cast<Port> (vkbd_output_port ());
+		inputs[DataType::MIDI].push_back (AudioEngine::instance()->make_port_name_non_relative (ap->name ()));
+
+		/* JACK semantics prevent us directly calling the
+		   pretty-name/metadata API from a server callback, and this is
+		   called from a port registration callback. So defer to the
+		   auto-connect thread, which does this sort of thing anyway.
+		*/
+
+		g_atomic_int_set (&_update_pretty_names, 1);
+		auto_connect_thread_wakeup ();
 	}
 
 	/* Create a set of Bundle objects that map

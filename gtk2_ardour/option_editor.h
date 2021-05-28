@@ -348,6 +348,20 @@ public:
 	{
 		_options.push_back (e);
 		_combo->append_text (o);
+		/* Remove excess space.
+		 * gtk_combo_box_size_requet() does the following:
+		 * {
+		 *   gtk_widget_size_request (GTK_BIN (widget)->child, &bin_req);
+		 *   gtk_combo_box_remeasure (combo_box);
+		 *   bin_req.width = MAX (bin_req.width, priv->width);
+		 * }
+		 *
+		 * - gtk_combo_box_remeasure() measures the extents of all children
+		 *   correctly using gtk_cell_view_get_size_of_row() and sets priv->width.
+		 * - The direct child (current active item as entry) is however too large.
+		 *   Likely because Ardour's clearlooks.rc.in does not correctly set this up).
+		 */
+		_combo->get_child()->set_size_request (20, -1);
 	}
 
 	void clear ()
@@ -728,7 +742,7 @@ private:
 class OptionEditorContainer : public OptionEditor, public Gtk::VBox
 {
 public:
-	OptionEditorContainer (PBD::Configuration *, std::string const &);
+	OptionEditorContainer (PBD::Configuration *);
 	~OptionEditorContainer() {}
 private:
 	Gtk::HBox hpacker;

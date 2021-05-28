@@ -76,8 +76,6 @@ using std::string;
 void
 Editor::external_pt_dialog ()
 {
-	std::string ptpath;
-
 	if (_session == 0) {
 		MessageDialog msg (_("You can't import a PT session until you have a session loaded."));
 		msg.run ();
@@ -92,6 +90,7 @@ Editor::external_pt_dialog ()
 	}
 
 	import_pt_status.all_done = false;
+	import_pt_status.clear();
 
 	ImportProgressWindow ipw (&import_pt_status, _("PT Import"), _("Cancel Import"));
 	pthread_create_and_store ("import_pt", &import_pt_status.thread, _import_pt_thread, this);
@@ -99,20 +98,22 @@ Editor::external_pt_dialog ()
 
 	ipw.show();
 
-	while (!import_pt_status.all_done) {
+	while (!import_pt_status.all_done && !import_pt_status.cancel) {
 		gtk_main_iteration ();
 	}
 
 	// wait for thread to terminate
-	while (!import_pt_status.done) {
+	while (!import_pt_status.done && !import_pt_status.cancel) {
 		gtk_main_iteration ();
 	}
 
 	if (import_pt_status.cancel) {
-		MessageDialog msg (_("PT import may have missing files, check session log for details"));
+		MessageDialog msg (_("PT import cancelled"));
 		msg.run ();
 	} else {
-		MessageDialog msg (_("PT import complete!"));
+		import_pt_status.progress = 1.0;
+		_session->import_pt_rest (import_ptf);
+		MessageDialog msg (_("PT import completed!\nSee log for specifics"));
 		msg.run ();
 	}
 }
@@ -120,7 +121,7 @@ Editor::external_pt_dialog ()
 void *
 Editor::_import_pt_thread (void *arg)
 {
-	SessionEvent::create_per_thread_pool ("import pt events", 2048);
+	SessionEvent::create_per_thread_pool ("import pt events", 64);
 
 	Editor *ed = (Editor *) arg;
 	return ed->import_pt_thread ();
@@ -129,6 +130,6 @@ Editor::_import_pt_thread (void *arg)
 void *
 Editor::import_pt_thread ()
 {
-	_session->import_pt (import_ptf, import_pt_status);
+	_session->import_pt_sources (import_ptf, import_pt_status);
 	return 0;
 }

@@ -125,6 +125,7 @@ public:
 	static void set_global_logscaled (bool);
 	static void set_global_shape (Shape);
 	static void set_global_show_waveform_clipping (bool);
+	static void clear_cache ();
 
 	static double global_gradient_depth () { return _global_gradient_depth; }
 
@@ -158,7 +159,7 @@ private:
 
 private:
 	friend class WaveViewThreadClient;
-	friend class WaveViewDrawingThread;
+	friend class WaveViewThreads;
 
 	boost::shared_ptr<ARDOUR::AudioRegion> _region;
 

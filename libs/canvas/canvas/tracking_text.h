@@ -20,31 +20,31 @@
 #ifndef __ardour_canvas_tracking_text_h__
 #define __ardour_canvas_tracking_text_h__
 
-#include <string>
 #include "canvas/text.h"
+#include <string>
 
 namespace ArdourCanvas {
 
 class LIBCANVAS_API TrackingText : public Text
 {
-  public:
+public:
 	TrackingText (Canvas*);
 	TrackingText (Item*);
 
 	void show_and_track (bool track_x, bool track_y);
-	void set_offset (Duple const &);
+	void set_offset (Duple const&);
 	void set_x_offset (double);
 	void set_y_offset (double);
 
-  private:
-	bool track_x;
-	bool track_y;
+private:
+	bool  track_x;
+	bool  track_y;
 	Duple offset;
 
 	void pointer_motion (Duple const&);
 	void init ();
 };
 
-}
+} // namespace ArdourCanvas
 
 #endif /* __ardour_canvas_tracking_text_h__ */

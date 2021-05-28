@@ -26,14 +26,26 @@
 
 typedef struct _fluid_revmodel_t fluid_revmodel_t;
 
+/* enum describing each reverb parameter */
+enum fluid_reverb_param
+{
+    FLUID_REVERB_ROOMSIZE,  /**< reverb time */
+    FLUID_REVERB_DAMP,      /**< high frequency damping */
+    FLUID_REVERB_WIDTH,     /**< stereo width */
+    FLUID_REVERB_LEVEL,     /**< output level */
+    FLUID_REVERB_PARAM_LAST /* number of enum fluid_reverb_param */
+};
+
+/* return a bit flag from param: 2^param */
+#define FLUID_REVPARAM_TO_SETFLAG(param) (1 << param)
 
 /** Flags for fluid_revmodel_set() */
 typedef enum
 {
-    FLUID_REVMODEL_SET_ROOMSIZE       = 1 << 0,
-    FLUID_REVMODEL_SET_DAMPING        = 1 << 1,
-    FLUID_REVMODEL_SET_WIDTH          = 1 << 2,
-    FLUID_REVMODEL_SET_LEVEL          = 1 << 3,
+    FLUID_REVMODEL_SET_ROOMSIZE       = FLUID_REVPARAM_TO_SETFLAG(FLUID_REVERB_ROOMSIZE),
+    FLUID_REVMODEL_SET_DAMPING        = FLUID_REVPARAM_TO_SETFLAG(FLUID_REVERB_DAMP),
+    FLUID_REVMODEL_SET_WIDTH          = FLUID_REVPARAM_TO_SETFLAG(FLUID_REVERB_WIDTH),
+    FLUID_REVMODEL_SET_LEVEL          = FLUID_REVPARAM_TO_SETFLAG(FLUID_REVERB_LEVEL),
 
     /** Value for fluid_revmodel_set() which sets all reverb parameters. */
     FLUID_REVMODEL_SET_ALL            =   FLUID_REVMODEL_SET_LEVEL
@@ -58,7 +70,9 @@ typedef struct _fluid_revmodel_presets_t
 /*
  * reverb
  */
-fluid_revmodel_t *new_fluid_revmodel(fluid_real_t sample_rate);
+fluid_revmodel_t *
+new_fluid_revmodel(fluid_real_t sample_rate_max, fluid_real_t sample_rate);
+
 void delete_fluid_revmodel(fluid_revmodel_t *rev);
 
 void fluid_revmodel_processmix(fluid_revmodel_t *rev, const fluid_real_t *in,

@@ -97,13 +97,13 @@ GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
 	_output_bundle.reset (new ARDOUR::Bundle (_("Generic MIDI Control Out"), false));
 
 	_input_bundle->add_channel (
-		inp->name(),
+		"",
 		ARDOUR::DataType::MIDI,
 		session->engine().make_port_name_non_relative (inp->name())
 		);
 
 	_output_bundle->add_channel (
-		outp->name(),
+		"",
 		ARDOUR::DataType::MIDI,
 		session->engine().make_port_name_non_relative (outp->name())
 		);
@@ -137,7 +137,7 @@ GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
 	PresentationInfo::Change.connect (*this, MISSING_INVALIDATOR, boost::bind (&GenericMidiControlProtocol::reset_controllables, this), this);
 
 	/* Catch port connections and disconnections (cross-thread) */
-	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connection, MISSING_INVALIDATOR,
+	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (_port_connection, MISSING_INVALIDATOR,
 	                                                                      boost::bind (&GenericMidiControlProtocol::connection_handler, this, _1, _2, _3, _4, _5),
 	                                                                      this);
 
@@ -663,6 +663,7 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 	if ((child = node.child (X_("Input"))) != 0) {
 		XMLNode* portnode = child->child (Port::state_node_name.c_str());
 		if (portnode) {
+			portnode->remove_property ("name");
 			boost::shared_ptr<ARDOUR::Port>(_input_port)->set_state (*portnode, version);
 		}
 	}
@@ -670,6 +671,7 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 	if ((child = node.child (X_("Output"))) != 0) {
 		XMLNode* portnode = child->child (Port::state_node_name.c_str());
 		if (portnode) {
+			portnode->remove_property ("name");
 			boost::shared_ptr<ARDOUR::Port>(_output_port)->set_state (*portnode, version);
 		}
 	}

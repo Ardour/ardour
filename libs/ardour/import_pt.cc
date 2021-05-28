@@ -67,25 +67,21 @@ struct midipair {
 	string trname;
 };
 
-typedef struct ptflookup {
-	uint16_t index1;
-	uint16_t index2;
-	PBD::ID  id;
+struct PlaylistState {
+	PlaylistState () : before (0) {}
 
-	bool operator ==(const struct ptflookup& other) {
-		return (this->index1 == other.index1);
-	}
-} ptflookup_t;
-
+	boost::shared_ptr<Playlist> playlist;
+	XMLNode* before;
+};
 
 bool
-Session::import_sndfile_as_region (string path, SrcQuality quality, samplepos_t& pos, SourceList& sources, ImportStatus& status)
+Session::import_sndfile_as_region (string path, SrcQuality quality, samplepos_t& pos, SourceList& sources, ImportStatus& status, uint32_t current, uint32_t total)
 {
 	/* Import the source */
 	status.paths.clear();
 	status.paths.push_back(path);
-	status.current = 1;
-	status.total = 1;
+	status.current = current;
+	status.total = total;
 	status.freeze = false;
 	status.quality = quality;
 	status.replace_existing_source = false;
@@ -94,16 +90,17 @@ Session::import_sndfile_as_region (string path, SrcQuality quality, samplepos_t&
 	status.cancel = false;
 
 	import_files(status);
+	status.progress = 1.0;
 	sources.clear();
 
 	/* FIXME: There is no way to tell if cancel button was pressed
 	 * or if the file failed to import, just that one of these occurred.
 	 * We want status.cancel to reflect the user's choice only
 	 */
-	if (status.cancel && status.current > 1) {
+	if (status.cancel && status.current > current) {
 		/* Succeeded to import file, assume user hit cancel */
 		return false;
-	} else if (status.cancel && status.current == 1) {
+	} else if (status.cancel && status.current == current) {
 		/* Failed to import file, assume user did not hit cancel */
 		status.cancel = false;
 		return false;
@@ -185,46 +182,39 @@ Session::import_sndfile_as_region (string path, SrcQuality quality, samplepos_t&
 
 
 void
-Session::import_pt (PTFFormat& ptf, ImportStatus& status)
+Session::import_pt_sources (PTFFormat& ptf, ImportStatus& status)
 {
-	vector<boost::shared_ptr<Region> > regions;
-	boost::shared_ptr<ARDOUR::Track> track;
-	ARDOUR::PluginInfoPtr instrument;
-	vector<string> to_import;
 	string fullpath;
 	bool ok = false;
 	bool onefailed = false;
 	samplepos_t pos = -1;
-	uint32_t srate = sample_rate ();
 
-	vector<ptflookup_t> ptfwavpair;
-	vector<ptflookup_t> ptfregpair;
 	vector<PTFFormat::wav_t>::const_iterator w;
+	uint32_t wth = 0;
 
 	SourceList just_one_src;
-	SourceList imported;
 
-	boost::shared_ptr<AudioTrack> existing_track;
-	uint16_t nth = 0;
-	vector<ptflookup_t> usedtracks;
-	ptflookup_t utr;
+	ptfwavpair.clear();
+	pt_imported_sources.clear();
+	status.clear();
 
 	for (w = ptf.audiofiles ().begin (); w != ptf.audiofiles ().end () && !status.cancel; ++w) {
-		ptflookup_t p;
+		struct ptflookup p;
+		wth++;
 		ok = false;
 		/* Try audio file */
 		fullpath = Glib::build_filename (Glib::path_get_dirname (ptf.path ()), "Audio Files");
 		fullpath = Glib::build_filename (fullpath, w->filename);
 		if (Glib::file_test (fullpath, Glib::FILE_TEST_EXISTS)) {
 			just_one_src.clear();
-			ok = import_sndfile_as_region (fullpath, SrcBest, pos, just_one_src, status);
+			ok = import_sndfile_as_region (fullpath, SrcBest, pos, just_one_src, status, wth, ptf.audiofiles ().size ());
 		} else {
 			/* Try fade file */
 			fullpath = Glib::build_filename (Glib::path_get_dirname (ptf.path ()), "Fade Files");
 			fullpath = Glib::build_filename (fullpath, w->filename);
 			if (Glib::file_test (fullpath, Glib::FILE_TEST_EXISTS)) {
 				just_one_src.clear();
-				ok = import_sndfile_as_region (fullpath, SrcBest, pos, just_one_src, status);
+				ok = import_sndfile_as_region (fullpath, SrcBest, pos, just_one_src, status, wth, ptf.audiofiles ().size ());
 			} else {
 				onefailed = true;
 
@@ -244,7 +234,7 @@ Session::import_pt (PTFFormat& ptf, ImportStatus& status)
 					p.index1 = w->index;
 					p.id = source->id ();
 					ptfwavpair.push_back (p);
-					imported.push_back (source);
+					pt_imported_sources.push_back (source);
 					warning << string_compose (_("PT Import : MISSING `%1`, inserting ref to missing source"), fullpath) << endmsg;
 				} else {
 					warning << string_compose (_("PT Import : MISSING `%1`, please check Audio Files"), fullpath) << endmsg;
@@ -256,28 +246,70 @@ Session::import_pt (PTFFormat& ptf, ImportStatus& status)
 			p.id = just_one_src.back ()->id ();
 
 			ptfwavpair.push_back (p);
-			imported.push_back (just_one_src.back ());
+			pt_imported_sources.push_back (just_one_src.back ());
+		} else {
+			onefailed = true;
 		}
 	}
 
-	if (imported.empty ()) {
+	if (pt_imported_sources.empty ()) {
 		error << _("Failed to find any audio for PT import") << endmsg;
-		goto trymidi;
 	} else if (onefailed) {
 		warning << _("Failed to load one or more of the audio files for PT import, see above list") << endmsg;
 	} else {
 		info << _("All audio files found for PT import!") << endmsg;
 	}
 
+	status.progress = 1.0;
+	status.sources.clear ();
+	status.done = true;
+	status.all_done = true;
+}
+
+
+void
+Session::import_pt_rest (PTFFormat& ptf)
+{
+	vector<boost::shared_ptr<Region> > regions;
+	boost::shared_ptr<ARDOUR::Track> track;
+	ARDOUR::PluginInfoPtr instrument;
+	vector<string> to_import;
+	string fullpath;
+	uint32_t srate = sample_rate ();
+
+	vector<struct ptflookup> ptfregpair;
+	vector<PTFFormat::wav_t>::const_iterator w;
+
+	SourceList just_one_src;
+
+	boost::shared_ptr<AudioTrack> existing_track;
+	uint16_t i;
+	uint16_t nth = 0;
+	uint16_t ntr = 0;
+	vector<struct ptflookup> usedtracks;
+	struct ptflookup utr;
+	vector<midipair> uniquetr;
+
+	vector<PlaylistState> playlists;
+	vector<PlaylistState>::iterator pl;
+
+	usedtracks.clear();
+	just_one_src.clear();
+	uniquetr.clear();
+	ptfregpair.clear();
+	to_import.clear();
+	regions.clear();
+	playlists.clear();
+
 	for (vector<PTFFormat::region_t>::const_iterator a = ptf.regions ().begin ();
 			a != ptf.regions ().end (); ++a) {
-		for (vector<ptflookup_t>::iterator p = ptfwavpair.begin ();
+		for (vector<struct ptflookup>::iterator p = ptfwavpair.begin ();
 				p != ptfwavpair.end (); ++p) {
 			if ((p->index1 == a->wave.index) && (strcmp (a->wave.filename.c_str (), "") != 0)) {
-				for (SourceList::iterator x = imported.begin (); x != imported.end (); ++x) {
+				for (SourceList::iterator x = pt_imported_sources.begin (); x != pt_imported_sources.end (); ++x) {
 					if ((*x)->id () == p->id) {
 						/* Matched an uncreated ptf region to ardour region */
-						ptflookup_t rp;
+						struct ptflookup rp;
 						PropertyList plist;
 
 						plist.add (ARDOUR::Properties::start, a->sampleoffset);
@@ -303,83 +335,59 @@ Session::import_pt (PTFFormat& ptf, ImportStatus& status)
 		}
 	}
 
+	/* Create all tracks */
+	ntr = (ptf.tracks ().at (ptf.tracks ().size () - 1)).index + 1;
+	nth = -1;
 	for (vector<PTFFormat::track_t>::const_iterator a = ptf.tracks ().begin (); a != ptf.tracks ().end (); ++a) {
-		for (vector<ptflookup_t>::iterator p = ptfregpair.begin ();
+		if (a->index != nth) {
+			nth++;
+			DEBUG_TRACE (DEBUG::FileUtils, string_compose ("\tcreate tr(%1) %2\n", nth, a->name.c_str()));
+			list<boost::shared_ptr<AudioTrack> > at (new_audio_track (1, 2, 0, 1, a->name.c_str(), PresentationInfo::max_order, Normal));
+			if (at.empty ()) {
+				return;
+			}
+		}
+	}
+
+	/* Get all playlists of all tracks and Playlist::freeze() all tracks */
+	assert (ntr == nth + 1);
+	for (i = 0; i < ntr; ++i) {
+		existing_track = get_nth_audio_track (i);
+		boost::shared_ptr<Playlist> playlist = existing_track->playlist();
+
+		PlaylistState before;
+		before.playlist = playlist;
+		before.before = &playlist->get_state();
+		playlist->clear_changes ();
+		playlist->freeze ();
+		playlists.push_back(before);
+	}
+
+	/* Add regions */
+	for (vector<PTFFormat::track_t>::const_iterator a = ptf.tracks ().begin (); a != ptf.tracks ().end (); ++a) {
+		for (vector<struct ptflookup>::iterator p = ptfregpair.begin ();
 				p != ptfregpair.end (); ++p) {
 
 			if (p->index1 == a->reg.index)  {
 
 				/* Matched a ptf active region to an ardour region */
-				utr.index1 = a->index;
-				utr.index2 = nth;
-				utr.id = p->id;
 				boost::shared_ptr<Region> r = RegionFactory::region_by_id (p->id);
-				vector<ptflookup_t>::iterator lookuptr = usedtracks.begin ();
-				vector<ptflookup_t>::iterator found;
-				if ((found = std::find (lookuptr, usedtracks.end (), utr)) != usedtracks.end ()) {
-					DEBUG_TRACE (DEBUG::FileUtils, string_compose ("\twav(%1) reg(%2) ptf_tr(%3) ard_tr(%4)\n", a->reg.wave.filename.c_str (), a->reg.index, found->index1, found->index2));
+				DEBUG_TRACE (DEBUG::FileUtils, string_compose ("\twav(%1) reg(%2) tr(%3)\n", a->reg.wave.filename.c_str (), a->reg.index, a->index));
 
-					/* Use existing track if possible */
-					existing_track = get_nth_audio_track (found->index2 + 1);
-					if (!existing_track) {
-						list<boost::shared_ptr<AudioTrack> > at (new_audio_track (1, 2, 0, 1, "", PresentationInfo::max_order, Normal));
-						if (at.empty ()) {
-							return;
-						}
-						existing_track = at.back ();
-					}
-					/* Put on existing track */
-					boost::shared_ptr<Playlist> playlist = existing_track->playlist ();
-					boost::shared_ptr<Region> copy (RegionFactory::create (r, true));
-					playlist->clear_changes ();
-					playlist->add_region (copy, a->reg.startpos);
-					//add_command (new StatefulDiffCommand (playlist));
-				} else {
-					/* Put on a new track */
-					DEBUG_TRACE (DEBUG::FileUtils, string_compose ("\twav(%1) reg(%2) new_tr(%3)\n", a->reg.wave.filename.c_str (), a->reg.index, nth));
-					list<boost::shared_ptr<AudioTrack> > at (new_audio_track (1, 2, 0, 1, "", PresentationInfo::max_order, Normal));
-					if (at.empty ()) {
-						return;
-					}
-					existing_track = at.back ();
-					std::string trackname;
-					try {
-						trackname = Glib::convert_with_fallback (a->name, "UTF-8", "UTF-8", "_");
-					} catch (Glib::ConvertError& err) {
-						trackname = string_compose ("Invalid %1", a->index);
-					}
-					/* generate a unique name by adding a number if needed */
-					uint32_t id = 0;
-					if (!find_route_name (trackname.c_str (), id, trackname, false)) {
-						fatal << _("PTImport: failed to generate unique Track ID!") << endmsg;
-						abort(); /*NOTREACHED*/
-					}
-					existing_track->set_name (trackname);
-					boost::shared_ptr<Playlist> playlist = existing_track->playlist();
-					boost::shared_ptr<Region> copy (RegionFactory::create (r, true));
-					playlist->clear_changes ();
-					playlist->add_region (copy, a->reg.startpos);
-					//add_command (new StatefulDiffCommand (playlist));
-					nth++;
-				}
-				usedtracks.push_back (utr);
+				/* Use existing playlists */
+				boost::shared_ptr<Playlist> playlist = playlists[a->index].playlist;
+				boost::shared_ptr<Region> copy (RegionFactory::create (r, true));
+				playlist->add_region (copy, a->reg.startpos);
 			}
 		}
 	}
 
-trymidi:
-	status.paths.clear();
-	status.paths.push_back(ptf.path ());
-	status.current = 1;
-	status.total = 1;
-	status.freeze = false;
-	status.done = false;
-	status.cancel = false;
-	status.progress = 0;
+	/* Playlist::thaw() all tracks */
+	for (pl = playlists.begin(); pl != playlists.end(); ++pl) {
+		(*pl).playlist->thaw ();
+	}
 
 	/* MIDI - Find list of unique midi tracks first */
-
-	vector<midipair> uniquetr;
 
 	for (vector<PTFFormat::track_t>::const_iterator a = ptf.miditracks ().begin (); a != ptf.miditracks ().end (); ++a) {
 		bool found = false;
@@ -398,7 +406,7 @@ trymidi:
 	std::map <int, boost::shared_ptr<MidiTrack> > midi_tracks;
 	/* MIDI - Create unique midi tracks and a lookup table for used tracks */
 	for (vector<midipair>::iterator a = uniquetr.begin (); a != uniquetr.end (); ++a) {
-		ptflookup_t miditr;
+		struct ptflookup miditr;
 		list<boost::shared_ptr<MidiTrack> > mt (new_midi_track (
 				ChanCount (DataType::MIDI, 1),
 				ChanCount (DataType::MIDI, 1),
@@ -450,9 +458,4 @@ trymidi:
 		playlist->clear_changes ();
 		playlist->add_region (copy, f);
 	}
-
-	status.progress = 1.0;
-	status.done = true;
-	status.sources.clear ();
-	status.all_done = true;
 }

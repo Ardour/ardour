@@ -36,7 +36,6 @@
 
 #include "pbd/error.h"
 #include "pbd/convert.h"
-#include "pbd/stacktrace.h"
 #include "pbd/unwind.h"
 
 #include "ardour/profile.h"
@@ -808,6 +807,10 @@ TimeAxisView::build_display_menu ()
 {
 	using namespace Menu_Helpers;
 
+	if (_size_menu) {
+		Gtkmm2ext::detach_menu (*_size_menu);
+	}
+
 	delete display_menu;
 
 	display_menu = new Menu;
@@ -1355,11 +1358,9 @@ TimeAxisView::get_child_list () const
 void
 TimeAxisView::build_size_menu ()
 {
-	if (_size_menu && _size_menu->gobj ()) {
+	if (_size_menu) {
 		return;
 	}
-
-	delete _size_menu;
 
 	using namespace Menu_Helpers;
 
@@ -1412,20 +1413,4 @@ TrackViewList::filter_to_unique_playlists ()
 		}
 	}
 	return ts;
-}
-
-void
-TimeAxisView::set_name_ellipsize_mode ()
-{
-	switch (UIConfiguration::instance().get_time_axis_name_ellipsize_mode()) {
-	case -1:
-		name_label.set_ellipsize (Pango::ELLIPSIZE_START);
-		break;
-	case 1:
-		name_label.set_ellipsize (Pango::ELLIPSIZE_END);
-		break;
-	default:
-		name_label.set_ellipsize (Pango::ELLIPSIZE_MIDDLE);
-		break;
-	}
 }

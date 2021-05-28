@@ -154,12 +154,58 @@ typedef int (FAR PBDEXTN_APICALLTYPE *CYGINIT_API)(unsigned int);
 
 #ifndef _SSIZE_T_
 #define _SSIZE_T_
-typedef long _ssize_t;
+
+#ifdef   SSIZE_T
+typedef  SSIZE_T  _ssize_t;
+#elif _MSC_VER < 1800
+typedef  long     _ssize_t;
+#else
+#include <basetsd.h>
+typedef  LONG_PTR _ssize_t; // AFAICT - LONG_PTR is equivalent to 'long' in Win32 and '__int64' in Win64 !!
+#endif
 
 #ifndef _NO_OLDNAMES
 typedef _ssize_t ssize_t;
 #endif
+
 #endif /* ! _SSIZE_T_ */
+
+typedef unsigned int nfds_t;
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+LIBPBD_API int      __cdecl         gettimeofday(struct timeval *__restrict tv, __timezone_ptr_t tz);
+LIBPBD_API ssize_t  PBD_APICALLTYPE pread(int handle, void *buf, size_t nbytes, off_t offset);
+LIBPBD_API ssize_t  PBD_APICALLTYPE pwrite(int handle, const void *buf, size_t nbytes, off_t offset);
+
+#if defined(_MSC_VER) && (_MSC_VER < 1800)
+LIBPBD_API double   PBD_APICALLTYPE log1p(double x);
+LIBPBD_API double   PBD_APICALLTYPE round(double x);
+LIBPBD_API double   PBD_APICALLTYPE expm1(double x);
+LIBPBD_API float    PBD_APICALLTYPE exp2f(float x);
+LIBPBD_API float    PBD_APICALLTYPE roundf(float x);
+#endif
+
+#if defined(_MSC_VER) && (_MSC_VER < 1900)
+LIBPBD_API double   PBD_APICALLTYPE log2 (double x);
+LIBPBD_API double   PBD_APICALLTYPE trunc(double x);
+#endif
+
+namespace PBD {
+
+#if defined(_MSC_VER) && (_MSC_VER < 1900)
+LIBPBD_API char*    PBD_APICALLTYPE realpath    (const char *original_path, char resolved_path[_MAX_PATH+1]);
+LIBPBD_API int      PBD_APICALLTYPE mkstemp     (char *template_name);
+
+/* JE - 30-01-2021 (AFAICT these ones aren't needed any more) */ 
+LIBPBD_API bool     PBD_APICALLTYPE TestForMinimumSpecOS(char *revision="currently ignored");
+LIBPBD_API int      PBD_APICALLTYPE ntfs_link   (const char *existing_filepath, const char *link_filepath);
+LIBPBD_API int      PBD_APICALLTYPE ntfs_unlink (const char *link_filepath);
+#endif
+
+}  // namespace PBD */
 
 struct dirent
 {
@@ -181,7 +227,7 @@ typedef struct
 	struct dirent dd_dir;
 
 	// '_findnext()' handle
-	long dd_handle;
+	intptr_t dd_handle;
 
 	// Current status of search:
 	//  0 = not started yet (next entry to read is first entry)
@@ -193,42 +239,14 @@ typedef struct
 	char dd_name[1];
 } DIR;
 
-typedef unsigned int nfds_t;
-
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
-LIBPBD_API int      __cdecl         gettimeofday(struct timeval *__restrict tv, __timezone_ptr_t tz);
-LIBPBD_API ssize_t  PBD_APICALLTYPE pread(int handle, void *buf, size_t nbytes, off_t offset);
-LIBPBD_API ssize_t  PBD_APICALLTYPE pwrite(int handle, const void *buf, size_t nbytes, off_t offset);
-
-#if defined(_MSC_VER) && (_MSC_VER < 1800)
-LIBPBD_API double   PBD_APICALLTYPE expm1(double x);
-LIBPBD_API double   PBD_APICALLTYPE log1p(double x);
-LIBPBD_API double   PBD_APICALLTYPE round(double x);
-LIBPBD_API float    PBD_APICALLTYPE roundf(float x);
-#endif
-
-#if defined(_MSC_VER) && (_MSC_VER < 1900)
-LIBPBD_API double   PBD_APICALLTYPE log2 (double x);
-LIBPBD_API double   PBD_APICALLTYPE trunc(double x);
-#endif
-
 namespace PBD {
-
-LIBPBD_API bool     PBD_APICALLTYPE TestForMinimumSpecOS(char *revision="currently ignored");
-LIBPBD_API char*    PBD_APICALLTYPE realpath    (const char *original_path, char resolved_path[_MAX_PATH+1]);
-LIBPBD_API int      PBD_APICALLTYPE mkstemp     (char *template_name);
-LIBPBD_API int      PBD_APICALLTYPE ntfs_link   (const char *existing_filepath, const char *link_filepath);
-LIBPBD_API int      PBD_APICALLTYPE ntfs_unlink (const char *link_filepath);
 
 // These are used to replicate 'dirent.h' functionality
 LIBPBD_API DIR*           PBD_APICALLTYPE opendir  (const char *szPath);
 LIBPBD_API struct dirent* PBD_APICALLTYPE readdir  (DIR *pDir);
 LIBPBD_API int            PBD_APICALLTYPE closedir (DIR *pDir);
 
-}  // namespace PBD
+}  // namespace PBD */
 
 #ifdef __cplusplus
 } /* extern "C" */

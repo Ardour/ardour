@@ -34,7 +34,23 @@ class M2MapMikro : public M2Contols
 		M2PadInterface*     pad     (unsigned int id);
 
 	private:
+		PhysicalMap pmap[2]; // 2: Modifiers
+		SematicMap  smap;
+
+		M2Button tr[5]; // transport controlables
+		M2StatelessButton ts[6]; // transport pushbuttons
+
+		M2Button mst[4]; // master "volume", "swing", "tempo", "encoder-push"
+
+		M2Button save;
+
+		M2Button undoredo[2];
+		M2Button sm[8]; // scene, pattern, pad mode, navigate (AKA view), duplicate, select, solo, mute
+		M2StatelessButton panic;
+
 		M2Encoder enc_master;
+		M2Encoder enc_top[16];
+
 		M2Pad pads[16];
 };
 

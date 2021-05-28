@@ -134,8 +134,8 @@ ExportFormatSpecification::Time::set_state (const XMLNode & node)
 
 ExportFormatSpecification::ExportFormatSpecification (Session & s)
 	: session (s)
-	, has_sample_format (false)
-	, supports_tagging (false)
+	, _has_sample_format (false)
+	, _supports_tagging (false)
 	, _has_codec_quality (false)
 	, _has_broadcast_info (false)
 	, _channel_limit (0)
@@ -150,6 +150,7 @@ ExportFormatSpecification::ExportFormatSpecification (Session & s)
 
 	, _normalize (false)
 	, _normalize_loudness (false)
+	, _use_tp_limiter (true)
 	, _normalize_dbfs (GAIN_COEFF_UNITY)
 	, _normalize_lufs (-23)
 	, _normalize_dbtp (-1)
@@ -173,8 +174,8 @@ ExportFormatSpecification::ExportFormatSpecification (Session & s)
 
 ExportFormatSpecification::ExportFormatSpecification (Session & s, XMLNode const & state)
 	: session (s)
-	, has_sample_format (false)
-	, supports_tagging (false)
+	, _has_sample_format (false)
+	, _supports_tagging (false)
 	, _has_codec_quality (false)
 	, _has_broadcast_info (false)
 	, _channel_limit (0)
@@ -189,6 +190,7 @@ ExportFormatSpecification::ExportFormatSpecification (Session & s, XMLNode const
 
 	, _normalize (false)
 	, _normalize_loudness (false)
+	, _use_tp_limiter (true)
 	, _normalize_dbfs (GAIN_COEFF_UNITY)
 	, _normalize_lufs (-23)
 	, _normalize_dbtp (-1)
@@ -232,8 +234,8 @@ ExportFormatSpecification::ExportFormatSpecification (ExportFormatSpecification 
 	}
 
 	_format_name = other._format_name;
-	has_sample_format = other.has_sample_format;
-	supports_tagging = other.supports_tagging;
+	_has_sample_format = other._has_sample_format;
+	_supports_tagging = other._supports_tagging;
 	_has_codec_quality = other._has_codec_quality;
 	_has_broadcast_info = other._has_broadcast_info;
 	_channel_limit = other._channel_limit;
@@ -251,6 +253,7 @@ ExportFormatSpecification::ExportFormatSpecification (ExportFormatSpecification 
 	set_trim_end (other.trim_end());
 	set_normalize (other.normalize());
 	set_normalize_loudness (other.normalize_loudness());
+	set_use_tp_limiter (other.use_tp_limiter());
 	set_normalize_dbfs (other.normalize_dbfs());
 	set_normalize_lufs (other.normalize_lufs());
 	set_normalize_dbtp (other.normalize_dbtp());
@@ -287,7 +290,7 @@ ExportFormatSpecification::get_state ()
 	node->set_property ("type", type());
 	node->set_property ("extension", extension());
 	node->set_property ("name", _format_name);
-	node->set_property ("has-sample-format", has_sample_format);
+	node->set_property ("has-sample-format", _has_sample_format);
 	node->set_property ("channel-limit", _channel_limit);
 
 	node = root->add_child ("SampleRate");
@@ -311,7 +314,7 @@ ExportFormatSpecification::get_state ()
 	add_option (enc_opts, "sample-format", to_string(sample_format()));
 	add_option (enc_opts, "dithering", to_string (dither_type()));
 	add_option (enc_opts, "tag-metadata", to_string (_tag));
-	add_option (enc_opts, "tag-support", to_string (supports_tagging));
+	add_option (enc_opts, "tag-support", to_string (_supports_tagging));
 	add_option (enc_opts, "broadcast-info", to_string (_has_broadcast_info));
 
 	XMLNode * processing = root->add_child ("Processing");
@@ -319,6 +322,7 @@ ExportFormatSpecification::get_state ()
 	node = processing->add_child ("Normalize");
 	node->set_property ("enabled", normalize());
 	node->set_property ("loudness", normalize_loudness());
+	node->set_property ("use-tp-limiter", use_tp_limiter());
 	node->set_property ("dbfs", normalize_dbfs());
 	node->set_property ("lufs", normalize_lufs());
 	node->set_property ("dbtp", normalize_dbtp());
@@ -398,7 +402,7 @@ ExportFormatSpecification::set_state (const XMLNode & root)
 		}
 
 		child->get_property ("name", _format_name);
-		child->get_property ("has-sample-format", has_sample_format);
+		child->get_property ("has-sample-format", _has_sample_format);
 		child->get_property ("channel-limit", _channel_limit);
 	}
 
@@ -447,7 +451,7 @@ ExportFormatSpecification::set_state (const XMLNode & root)
 		set_sample_format ((SampleFormat) string_2_enum (get_option (child, "sample-format"), SampleFormat));
 		set_dither_type ((DitherType) string_2_enum (get_option (child, "dithering"), DitherType));
 		set_tag (string_to<bool>(get_option (child, "tag-metadata")));
-		supports_tagging = string_to<bool>(get_option (child, "tag-support"));
+		_supports_tagging = string_to<bool>(get_option (child, "tag-support"));
 		_has_broadcast_info = string_to<bool>(get_option (child, "broadcast-info"));
 	}
 
@@ -458,9 +462,9 @@ ExportFormatSpecification::set_state (const XMLNode & root)
 
 	if ((child = proc->child ("Normalize"))) {
 		child->get_property ("enabled", _normalize);
-		// old formats before ~ 4.7-930ish
-		child->get_property ("target", _normalize_dbfs);
+		child->get_property ("target", _normalize_dbfs); // old formats before ~ 4.7-930ish
 		child->get_property ("loudness", _normalize_loudness);
+		child->get_property ("use-tp-limiter", _use_tp_limiter);
 		child->get_property ("dbfs", _normalize_dbfs);
 		child->get_property ("lufs", _normalize_lufs);
 		child->get_property ("dbtp", _normalize_dbtp);
@@ -552,7 +556,7 @@ ExportFormatSpecification::is_complete () const
 		return false;
 	}
 
-	if (has_sample_format) {
+	if (_has_sample_format) {
 		if (sample_format() == SF_None) {
 			return false;
 		}
@@ -577,7 +581,7 @@ ExportFormatSpecification::set_format (boost::shared_ptr<ExportFormat> format)
 		}
 
 		if (format->has_sample_format()) {
-			has_sample_format = true;
+			_has_sample_format = true;
 		}
 
 		if (format->has_broadcast_info()) {
@@ -591,7 +595,7 @@ ExportFormatSpecification::set_format (boost::shared_ptr<ExportFormat> format)
 			_codec_quality = boost::dynamic_pointer_cast<HasCodecQuality> (format)->default_codec_quality();
 		}
 
-		supports_tagging = format->supports_tagging ();
+		_supports_tagging = format->supports_tagging ();
 		_channel_limit = format->get_channel_limit();
 
 		_format_name = format->name();
@@ -600,8 +604,8 @@ ExportFormatSpecification::set_format (boost::shared_ptr<ExportFormat> format)
 		set_type (T_None);
 		set_extension ("");
 		_has_broadcast_info = false;
-		has_sample_format = false;
-		supports_tagging = false;
+		_has_sample_format = false;
+		_supports_tagging = false;
 		_channel_limit = 0;
 		_codec_quality = 0;
 		_format_name = "";
@@ -616,6 +620,9 @@ ExportFormatSpecification::description (bool include_name)
 	if (_normalize) {
 		if (_normalize_loudness) {
 			components.push_back (_("normalize loudness"));
+			if  (_use_tp_limiter) {
+				components.push_back (_("limit peak"));
+			}
 		} else {
 			components.push_back (_("normalize peak"));
 		}
@@ -633,7 +640,7 @@ ExportFormatSpecification::description (bool include_name)
 		components.push_back (_format_name);
 	}
 
-	if (has_sample_format) {
+	if (_has_sample_format) {
 		components.push_back (HasSampleFormat::get_sample_format_name (sample_format()));
 	}
 

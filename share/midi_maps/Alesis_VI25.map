@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 2021-4-10 Mathias Wøbbe: Map file creation -->
+<ArdourMIDIBindings version="1.0.0" name="Alesis VI25">
+  <DeviceInfo bank-size="24"/>
+	
+  <Binding channel="1" ctl="114" function="toggle-rec-enable"/>
+  <Binding channel="1" ctl="116" function="transport-start"/>
+  <Binding channel="1" ctl="117" function="transport-end"/>
+
+  <Binding channel="1" ctl="118" function="transport-stop"/>
+  <Binding channel="1" ctl="119" function="transport-roll"/>
+  <Binding channel="1" ctl="115" function="loop-toggle"/>
+
+</ArdourMIDIBindings>

@@ -46,6 +46,8 @@ public:
 	Gtk::Window* use_own_window (bool and_fill_it);
 	XMLNode& get_state ();
 
+	bool on_key_release_event (GdkEventKey*);
+
 private:
 	void parameter_changed (std::string const &);
 	void ltc_generator_volume_changed ();
@@ -62,6 +64,9 @@ private:
 
 	PBD::ScopedConnection parameter_change_connection;
 	PBD::ScopedConnection engine_started_connection;
+
+	void show_audio_setup ();
+	void show_transport_masters ();
 
 	/* plugin actions */
 	void plugin_scan_refresh ();

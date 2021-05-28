@@ -64,7 +64,6 @@ PannerUI::PannerUI (Session* s)
 {
 	set_session (s);
 
-	ignore_toggle = false;
 	pan_menu = 0;
 	pan_astate_menu = 0;
 	pan_astyle_menu = 0;
@@ -547,9 +546,7 @@ PannerUI::pan_automation_state_changed ()
 	bool x = (pannable->automation_state() != ARDOUR::Off);
 
 	if (pan_automation_state_button.get_active() != x) {
-		ignore_toggle = true;
 		pan_automation_state_button.set_active (x);
-		ignore_toggle = false;
 	}
 
 	update_pan_sensitive ();

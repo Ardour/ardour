@@ -23,7 +23,6 @@
  */
 
 #include "pbd/compose.h"
-#include "pbd/stacktrace.h"
 
 #include "evoral/midi_events.h"
 

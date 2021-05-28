@@ -56,7 +56,6 @@
 #include "pbd/memento_command.h"
 #include "pbd/unknown_type.h"
 #include "pbd/unwind.h"
-#include "pbd/stacktrace.h"
 #include "pbd/timersub.h"
 
 #include <glibmm/miscutils.h>
@@ -141,6 +140,7 @@
 #include "playlist_selector.h"
 #include "public_editor.h"
 #include "quantize_dialog.h"
+#include "region_peak_cursor.h"
 #include "region_layering_order_editor.h"
 #include "rgb_macros.h"
 #include "rhythm_ferret.h"
@@ -284,6 +284,7 @@ Editor::Editor ()
 	, _track_canvas_viewport (0)
 	, within_track_canvas (false)
 	, _verbose_cursor (0)
+	, _region_peak_cursor (0)
 	, tempo_group (0)
 	, meter_group (0)
 	, marker_group (0)
@@ -312,7 +313,6 @@ Editor::Editor ()
 	, bbt_bars (0)
 	, bbt_nmarks (0)
 	, bbt_bar_helper_on (0)
-	, bbt_accent_modulo (0)
 	, timecode_ruler (0)
 	, bbt_ruler (0)
 	, samples_ruler (0)
@@ -337,8 +337,6 @@ Editor::Editor ()
 	, cd_mark_label (_("CD Markers"))
 	, videotl_label (_("Video Timeline"))
 	, videotl_group (0)
-	, snapped_cursor (0)
-	, playhead_cursor (0)
 	, _region_boundary_cache_dirty (true)
 	, edit_packer (4, 4, true)
 	, vertical_adjustment (0.0, 0.0, 10.0, 400.0)
@@ -388,7 +386,6 @@ Editor::Editor ()
 	, range_marker_menu (0)
 	, new_transport_marker_menu (0)
 	, marker_menu_item (0)
-	, bbt_beat_subdivision (4)
 	, _visible_track_count (-1)
 	,  toolbar_selection_clock_table (2,3)
 	,  automation_mode_button (_("mode"))
@@ -400,6 +397,8 @@ Editor::Editor ()
 	, _last_region_menu_was_main (false)
 	, _track_selection_change_without_scroll (false)
 	, _editor_track_selection_change_without_scroll (false)
+	, _playhead_cursor (0)
+	, _snapped_cursor (0)
 	, cd_marker_bar_drag_rect (0)
 	, range_bar_drag_rect (0)
 	, transport_bar_drag_rect (0)
@@ -453,6 +452,7 @@ Editor::Editor ()
 	, _region_selection_change_updates_region_list (true)
 	, _cursors (0)
 	, _following_mixer_selection (false)
+	, _show_touched_automation (false)
 	, _control_point_toggled_on_press (false)
 	, _stepping_axis_view (0)
 	, quantize_dialog (0)
@@ -598,7 +598,8 @@ Editor::Editor ()
 
 	controls_layout.set_name ("EditControlsBase");
 	controls_layout.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK|Gdk::SCROLL_MASK);
-	controls_layout.signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::edit_controls_button_release));
+	controls_layout.signal_button_press_event().connect (sigc::mem_fun(*this, &Editor::edit_controls_button_event));
+	controls_layout.signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::edit_controls_button_event));
 	controls_layout.signal_scroll_event().connect (sigc::mem_fun(*this, &Editor::control_layout_scroll), false);
 
 	_cursors = new MouseCursors;
@@ -873,6 +874,7 @@ Editor::~Editor()
 	delete _drags;
 	delete nudge_clock;
 	delete _verbose_cursor;
+	delete _region_peak_cursor;
 	delete quantize_dialog;
 	delete _summary;
 	delete _group_tabs;
@@ -1049,7 +1051,7 @@ Editor::control_scroll (float fraction)
 		it acts like a pointer to an samplepos_t, with
 		a operator conversion to boolean to check
 		that it has a value could possibly use
-		playhead_cursor->current_sample to store the
+		_playhead_cursor->current_sample to store the
 		value and a boolean in the class to know
 		when it's out of date
 	*/
@@ -1069,7 +1071,7 @@ Editor::control_scroll (float fraction)
 
 	/* move visuals, we'll catch up with it later */
 
-	playhead_cursor->set_position (*_control_scroll_target);
+	_playhead_cursor->set_position (*_control_scroll_target);
 	UpdateAllTransportClocks (*_control_scroll_target);
 
 	if (*_control_scroll_target > (current_page_samples() / 2)) {
@@ -1097,7 +1099,7 @@ Editor::control_scroll (float fraction)
 bool
 Editor::deferred_control_scroll (samplepos_t /*target*/)
 {
-	_session->request_locate (*_control_scroll_target, RollIfAppropriate);
+	_session->request_locate (*_control_scroll_target);
 	/* reset for next stream */
 	_control_scroll_target = boost::none;
 	_dragging_playhead = false;
@@ -1223,7 +1225,7 @@ Editor::map_position_change (samplepos_t sample)
 	}
 
 	if (!_session->locate_initiated()) {
-		playhead_cursor->set_position (sample);
+		_playhead_cursor->set_position (sample);
 	}
 }
 
@@ -1357,7 +1359,7 @@ Editor::set_session (Session *t)
 
 	/* catch up with the playhead */
 
-	_session->request_locate (playhead_cursor->current_sample (), MustStop);
+	_session->request_locate (_playhead_cursor->current_sample (), MustStop);
 	_pending_initial_locate = true;
 
 	update_title ();
@@ -1385,12 +1387,12 @@ Editor::set_session (Session *t)
 	_session->locations()->changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::refresh_location_display, this), gui_context());
 	_session->history().Changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::history_changed, this), gui_context());
 
-	playhead_cursor->track_canvas_item().reparent ((ArdourCanvas::Item*) get_cursor_scroll_group());
-	playhead_cursor->show ();
+	_playhead_cursor->track_canvas_item().reparent ((ArdourCanvas::Item*) get_cursor_scroll_group());
+	_playhead_cursor->show ();
 
-	snapped_cursor->track_canvas_item().reparent ((ArdourCanvas::Item*) get_cursor_scroll_group());
-	snapped_cursor->set_color (UIConfiguration::instance().color ("edit point"));
-	snapped_cursor->show ();
+	_snapped_cursor->track_canvas_item().reparent ((ArdourCanvas::Item*) get_cursor_scroll_group());
+	_snapped_cursor->set_color (UIConfiguration::instance().color ("edit point"));
+	_snapped_cursor->show ();
 
 	boost::function<void (string)> pc (boost::bind (&Editor::parameter_changed, this, _1));
 	Config->map_parameters (pc);
@@ -1887,7 +1889,7 @@ Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items)
 	edit_items.push_back (MenuElem (_("Loudness Analysis"), sigc::mem_fun(*this, &Editor::loudness_analyze_range_selection)));
 	edit_items.push_back (MenuElem (_("Spectral Analysis"), sigc::mem_fun(*this, &Editor::spectral_analyze_range_selection)));
 	edit_items.push_back (SeparatorElem());
-	edit_items.push_back (MenuElem (_("Loudness Assistant..."), sigc::bind (sigc::mem_fun (*this, &Editor::measure_master_loudness), true)));
+	edit_items.push_back (MenuElem (_("Loudness Assistant..."), sigc::bind (sigc::mem_fun (*this, &Editor::loudness_assistant), true)));
 	edit_items.push_back (SeparatorElem());
 
 	edit_items.push_back (
@@ -1985,8 +1987,8 @@ Editor::add_dstream_context_items (Menu_Helpers::MenuList& edit_items)
 	select_items.push_back (SeparatorElem());
 	select_items.push_back (MenuElem (_("Select All After Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_edit), true, true)));
 	select_items.push_back (MenuElem (_("Select All Before Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_edit), false, true)));
-	select_items.push_back (MenuElem (_("Select All After Playhead"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_cursor), playhead_cursor, true)));
-	select_items.push_back (MenuElem (_("Select All Before Playhead"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_cursor), playhead_cursor, false)));
+	select_items.push_back (MenuElem (_("Select All After Playhead"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_cursor), _playhead_cursor, true)));
+	select_items.push_back (MenuElem (_("Select All Before Playhead"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_cursor), _playhead_cursor, false)));
 	select_items.push_back (MenuElem (_("Select All Between Playhead and Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_between), false)));
 	select_items.push_back (MenuElem (_("Select All Within Playhead and Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_between), true)));
 	select_items.push_back (MenuElem (_("Select Range Between Playhead and Edit Point"), sigc::mem_fun(*this, &Editor::select_range_between)));
@@ -2059,8 +2061,8 @@ Editor::add_bus_context_items (Menu_Helpers::MenuList& edit_items)
 	select_items.push_back (SeparatorElem());
 	select_items.push_back (MenuElem (_("Select All After Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_edit), true, true)));
 	select_items.push_back (MenuElem (_("Select All Before Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_edit), false, true)));
-	select_items.push_back (MenuElem (_("Select All After Playhead"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_cursor), playhead_cursor, true)));
-	select_items.push_back (MenuElem (_("Select All Before Playhead"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_cursor), playhead_cursor, false)));
+	select_items.push_back (MenuElem (_("Select All After Playhead"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_cursor), _playhead_cursor, true)));
+	select_items.push_back (MenuElem (_("Select All Before Playhead"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_cursor), _playhead_cursor, false)));
 
 	edit_items.push_back (MenuElem (_("Select"), *select_menu));
 
@@ -2097,7 +2099,13 @@ Editor::grid_type() const
 bool
 Editor::grid_musical() const
 {
-	switch (_grid_type) {
+	return grid_type_is_musical (_grid_type);
+}
+
+bool
+Editor::grid_type_is_musical(GridType gt) const
+{
+	switch (gt) {
 	case GridTypeBeatDiv32:
 	case GridTypeBeatDiv28:
 	case GridTypeBeatDiv24:
@@ -2125,36 +2133,6 @@ Editor::grid_musical() const
 	return false;
 }
 
-bool
-Editor::grid_nonmusical() const
-{
-	switch (_grid_type) {
-	case GridTypeTimecode:
-	case GridTypeMinSec:
-	case GridTypeCDFrame:
-		return true;
-	case GridTypeBeatDiv32:
-	case GridTypeBeatDiv28:
-	case GridTypeBeatDiv24:
-	case GridTypeBeatDiv20:
-	case GridTypeBeatDiv16:
-	case GridTypeBeatDiv14:
-	case GridTypeBeatDiv12:
-	case GridTypeBeatDiv10:
-	case GridTypeBeatDiv8:
-	case GridTypeBeatDiv7:
-	case GridTypeBeatDiv6:
-	case GridTypeBeatDiv5:
-	case GridTypeBeatDiv4:
-	case GridTypeBeatDiv3:
-	case GridTypeBeatDiv2:
-	case GridTypeBeat:
-	case GridTypeBar:
-	case GridTypeNone:
-		return false;
-	}
-	return false;
-}
 SnapMode
 Editor::snap_mode() const
 {
@@ -2224,6 +2202,10 @@ Editor::set_grid_to (GridType gt)
 		pre_internal_grid_type = gt;
 	}
 
+	bool grid_type_changed = true;
+	if ( grid_type_is_musical(_grid_type) && grid_type_is_musical(gt))
+		grid_type_changed = false;
+
 	_grid_type = gt;
 
 	if (grid_ind > grid_type_strings.size() - 1) {
@@ -2237,7 +2219,7 @@ Editor::set_grid_to (GridType gt)
 		grid_type_selector.set_text (str);
 	}
 
-	if (UIConfiguration::instance().get_show_grids_ruler()) {
+	if (grid_type_changed && UIConfiguration::instance().get_show_grids_ruler()) {
 		show_rulers_for_grid ();
 	}
 
@@ -2341,13 +2323,13 @@ Editor::set_state (const XMLNode& node, int version)
 	samplepos_t ph_pos;
 	if (_session && node.get_property ("playhead", ph_pos)) {
 		if (ph_pos >= 0) {
-			playhead_cursor->set_position (ph_pos);
+			_playhead_cursor->set_position (ph_pos);
 		} else {
 			warning << _("Playhead position stored with a negative value - ignored (use zero instead)") << endmsg;
-			playhead_cursor->set_position (0);
+			_playhead_cursor->set_position (0);
 		}
 	} else {
-		playhead_cursor->set_position (0);
+		_playhead_cursor->set_position (0);
 	}
 
 	node.get_property ("mixer-width", editor_mixer_strip_width);
@@ -2468,6 +2450,15 @@ Editor::set_state (const XMLNode& node, int version)
 		tact->set_active (yn);
 	}
 
+	yn = false;
+	node.get_property (X_("show-touched-automation"), yn);
+	{
+		Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), X_("show-touched-automation"));
+		/* do it twice to force the change */
+		tact->set_active (!yn);
+		tact->set_active (yn);
+	}
+
 	XMLNodeList children = node.children ();
 	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
 		selection->set_state (**i, Stateful::current_state_version);
@@ -2541,7 +2532,7 @@ Editor::get_state ()
 	node->set_property ("edit-point", _edit_point);
 	node->set_property ("visible-track-count", _visible_track_count);
 
-	node->set_property ("playhead", playhead_cursor->current_sample ());
+	node->set_property ("playhead", _playhead_cursor->current_sample ());
 	node->set_property ("left-frame", _leftmost_sample);
 	node->set_property ("y-origin", vertical_adjustment.get_value ());
 
@@ -2566,6 +2557,7 @@ Editor::get_state ()
 	}
 
 	node->set_property (X_("show-marker-lines"), _show_marker_lines);
+	node->set_property (X_("show-touched-automation"), _show_touched_automation);
 
 	node->add_child_nocopy (selection->get_state ());
 	node->add_child_nocopy (_regions->get_state ());
@@ -2612,7 +2604,7 @@ void
 Editor::set_snapped_cursor_position (samplepos_t pos)
 {
 	if (_edit_point == EditAtMouse) {
-		snapped_cursor->set_position(pos);
+		_snapped_cursor->set_position(pos);
 	}
 }
 
@@ -2866,6 +2858,12 @@ Editor::snap_to_bbt (MusicSample presnap, RoundMode direction, SnapPref gpref)
 				break;
 			case bbt_show_thirtyseconds:
 				ret = _session->tempo_map().round_to_quarter_note_subdivision (presnap.sample, 4 * divisor, direction);
+				break;
+			case bbt_show_sixtyfourths:
+				ret = _session->tempo_map().round_to_quarter_note_subdivision (presnap.sample, 8 * divisor, direction);
+				break;
+			case bbt_show_onetwentyeighths:
+				ret = _session->tempo_map().round_to_quarter_note_subdivision (presnap.sample, 16 * divisor, direction);
 				break;
 		}
 	} else {
@@ -3904,14 +3902,13 @@ Editor::override_visible_track_count ()
 }
 
 bool
-Editor::edit_controls_button_release (GdkEventButton* ev)
+Editor::edit_controls_button_event (GdkEventButton* ev)
 {
-	if (Keyboard::is_context_menu_event (ev)) {
+	if ((ev->type == GDK_2BUTTON_PRESS && ev->button == 1) || (ev->type == GDK_BUTTON_RELEASE && Keyboard::is_context_menu_event (ev))) {
 		ARDOUR_UI::instance()->add_route ();
-	} else if (ev->button == 1) {
+	} else if (ev->button == 1 && ev->type == GDK_BUTTON_PRESS) {
 		selection->clear_tracks ();
 	}
-
 	return true;
 }
 
@@ -3970,16 +3967,16 @@ Editor::cycle_zoom_focus ()
 void
 Editor::update_grid ()
 {
-	if (grid_musical()) {
+	if (_grid_type == GridTypeNone) {
+		hide_grid_lines ();
+	} else if (grid_musical()) {
 		std::vector<TempoMap::BBTPoint> grid;
 		if (bbt_ruler_scale != bbt_show_many) {
 			compute_current_bbt_points (grid, _leftmost_sample, _leftmost_sample + current_page_samples());
 		}
 		maybe_draw_grid_lines ();
-	} else if (grid_nonmusical()) {
-		maybe_draw_grid_lines ();
 	} else {
-		hide_grid_lines ();
+		maybe_draw_grid_lines ();
 	}
 }
 
@@ -4022,6 +4019,35 @@ Editor::set_stationary_playhead (bool yn)
 		}
 		instant_save ();
 	}
+}
+
+bool
+Editor::show_touched_automation () const
+{
+	if (!contents().is_mapped()) {
+		return false;
+	}
+	return _show_touched_automation;
+}
+
+void
+Editor::toggle_show_touched_automation ()
+{
+	RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), X_("show-touched-automation"));
+	set_show_touched_automation (tact->get_active());
+}
+
+void
+Editor::set_show_touched_automation (bool yn)
+{
+	if (_show_touched_automation == yn) {
+		return;
+	}
+	_show_touched_automation = yn;
+	if (!yn) {
+		RouteTimeAxisView::signal_ctrl_touched (true);
+	}
+	instant_save ();
 }
 
 PlaylistSelector&
@@ -4326,12 +4352,12 @@ Editor::restore_editing_space ()
  */
 
 void
-Editor::new_playlists (TimeAxisView* v)
+Editor::new_playlists (RouteUI* rui)
 {
 	begin_reversible_command (_("new playlists"));
 	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
 	_session->playlists()->get (playlists);
-	mapover_tracks (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_new_playlist), playlists), v, ARDOUR::Properties::group_select.property_id);
+	mapover_routes (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_new_playlist), playlists), rui, ARDOUR::Properties::group_select.property_id);
 	commit_reversible_command ();
 }
 
@@ -4342,12 +4368,12 @@ Editor::new_playlists (TimeAxisView* v)
  */
 
 void
-Editor::copy_playlists (TimeAxisView* v)
+Editor::copy_playlists (RouteUI* rui)
 {
 	begin_reversible_command (_("copy playlists"));
 	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
 	_session->playlists()->get (playlists);
-	mapover_tracks (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_copy_playlist), playlists), v, ARDOUR::Properties::group_select.property_id);
+	mapover_routes (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_copy_playlist), playlists), rui, ARDOUR::Properties::group_select.property_id);
 	commit_reversible_command ();
 }
 
@@ -4357,31 +4383,31 @@ Editor::copy_playlists (TimeAxisView* v)
  */
 
 void
-Editor::clear_playlists (TimeAxisView* v)
+Editor::clear_playlists (RouteUI* rui)
 {
 	begin_reversible_command (_("clear playlists"));
 	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
 	_session->playlists()->get (playlists);
-	mapover_tracks (sigc::mem_fun (*this, &Editor::mapped_clear_playlist), v, ARDOUR::Properties::group_select.property_id);
+	mapover_routes (sigc::mem_fun (*this, &Editor::mapped_clear_playlist), rui, ARDOUR::Properties::group_select.property_id);
 	commit_reversible_command ();
 }
 
 void
-Editor::mapped_use_new_playlist (RouteTimeAxisView& atv, uint32_t sz, vector<boost::shared_ptr<ARDOUR::Playlist> > const & playlists)
+Editor::mapped_use_new_playlist (RouteUI& rui, uint32_t sz, vector<boost::shared_ptr<ARDOUR::Playlist> > const & playlists)
 {
-	atv.use_new_playlist (sz > 1 ? false : true, playlists, false);
+	rui.use_new_playlist (sz > 1 ? false : true, playlists, false);
 }
 
 void
-Editor::mapped_use_copy_playlist (RouteTimeAxisView& atv, uint32_t sz, vector<boost::shared_ptr<ARDOUR::Playlist> > const & playlists)
+Editor::mapped_use_copy_playlist (RouteUI& rui, uint32_t sz, vector<boost::shared_ptr<ARDOUR::Playlist> > const & playlists)
 {
-	atv.use_new_playlist (sz > 1 ? false : true, playlists, true);
+	rui.use_new_playlist (sz > 1 ? false : true, playlists, true);
 }
 
 void
-Editor::mapped_clear_playlist (RouteTimeAxisView& atv, uint32_t /*sz*/)
+Editor::mapped_clear_playlist (RouteUI& rui, uint32_t /*sz*/)
 {
-	atv.clear_playlist ();
+	rui.clear_playlist ();
 }
 
 double
@@ -4572,8 +4598,8 @@ Editor::on_samples_per_pixel_changed ()
 		c->canvas()->zoomed ();
 	}
 
-	if (playhead_cursor) {
-		playhead_cursor->set_position (playhead_cursor->current_sample ());
+	if (_playhead_cursor) {
+		_playhead_cursor->set_position (_playhead_cursor->current_sample ());
 	}
 
 	refresh_location_display();
@@ -4587,7 +4613,7 @@ Editor::on_samples_per_pixel_changed ()
 samplepos_t
 Editor::playhead_cursor_sample () const
 {
-	return playhead_cursor->current_sample();
+	return _playhead_cursor->current_sample();
 }
 
 void
@@ -4714,6 +4740,7 @@ Editor::visual_changer (const VisualChange& vc)
 		update_video_timeline();
 	}
 
+	_region_peak_cursor->hide ();
 	_summary->set_overlays_dirty ();
 }
 
@@ -4768,7 +4795,7 @@ Editor::get_preferred_edit_position (EditIgnoreOption ignore, bool from_context_
 	case EditAtPlayhead:
 		if (_dragging_playhead) {
 			/* NOTE: since the user is dragging with the mouse, this operation will implicitly be Snapped */
-			where = playhead_cursor->current_sample();
+			where = _playhead_cursor->current_sample();
 		} else {
 			where = _session->audible_sample();
 		}
@@ -5267,7 +5294,7 @@ Editor::located ()
 	ENSURE_GUI_THREAD (*this, &Editor::located);
 
 	if (_session) {
-		playhead_cursor->set_position (_session->audible_sample ());
+		_playhead_cursor->set_position (_session->audible_sample ());
 		if (_follow_playhead && !_pending_initial_locate) {
 			reset_x_origin_to_follow_playhead ();
 		}
@@ -5286,8 +5313,9 @@ Editor::region_view_added (RegionView * rv)
 		list<pair<PBD::ID const, list<Evoral::event_id_t> > >::iterator rnote;
 		for (rnote = selection->pending_midi_note_selection.begin(); rnote != selection->pending_midi_note_selection.end(); ++rnote) {
 			if (rv->region()->id () == (*rnote).first) {
-				mrv->select_notes ((*rnote).second, false);
+				list<Evoral::event_id_t> notes ((*rnote).second);
 				selection->pending_midi_note_selection.erase(rnote);
+				mrv->select_notes (notes, false); // NB. this may change the selection
 				break;
 			}
 		}
@@ -5760,7 +5788,7 @@ Editor::scroll_release ()
 void
 Editor::reset_x_origin_to_follow_playhead ()
 {
-	samplepos_t const sample = playhead_cursor->current_sample ();
+	samplepos_t const sample = _playhead_cursor->current_sample ();
 
 	if (sample < _leftmost_sample || sample > _leftmost_sample + current_page_samples()) {
 
@@ -5849,7 +5877,7 @@ Editor::super_rapid_screen_update ()
 	if (_last_update_time > 0) {
 		/* interpolate and smoothen playhead position */
 		const double ds =  (now - _last_update_time) * _session->transport_speed() * _session->nominal_sample_rate () * 1e-6;
-		samplepos_t guess = playhead_cursor->current_sample () + rint (ds);
+		samplepos_t guess = _playhead_cursor->current_sample () + rint (ds);
 		err = sample - guess;
 
 		guess += err * .12 + _err_screen_engine; // time-constant based on 25fps (super_rapid_screen_update)
@@ -5867,7 +5895,7 @@ Editor::super_rapid_screen_update ()
 	}
 
 	if (err > 8192 || latent_locate) {
-		// in case of x-runs or freewheeling
+		// in case of xruns or freewheeling
 		_last_update_time = 0;
 		sample = _session->audible_sample ();
 	} else {
@@ -5878,7 +5906,7 @@ Editor::super_rapid_screen_update ()
 	bool ignored;
 	MusicSample where (sample, 0);
 	if (!UIConfiguration::instance().get_show_snapped_cursor()) {
-		snapped_cursor->hide ();
+		_snapped_cursor->hide ();
 	} else if (_edit_point == EditAtPlayhead && !_dragging_playhead) {
 		/* EditAtPlayhead does not snap */
 	} else if (_edit_point == EditAtSelectedMarker) {
@@ -5888,15 +5916,15 @@ Editor::super_rapid_screen_update ()
 		if (!selection->markers.empty()) {
 			MusicSample ms (selection->markers.front()->position(), 0);
 			snap_to (ms); // should use snap_to_with_modifier?
-			snapped_cursor->set_position (ms.sample);
-			snapped_cursor->show ();
+			_snapped_cursor->set_position (ms.sample);
+			_snapped_cursor->show ();
 		}
 	} else if (_edit_point == EditAtMouse && mouse_sample (where.sample, ignored)) {
 		/* cursor is in the editing canvas. show it. */
-		snapped_cursor->show ();
+		_snapped_cursor->show ();
 	} else {
 		/* mouse is out of the editing canvas, or edit-point isn't mouse. Hide the snapped_cursor */
-		snapped_cursor->hide ();
+		_snapped_cursor->hide ();
 	}
 
 	/* There are a few reasons why we might not update the playhead / viewport stuff:
@@ -5918,12 +5946,12 @@ Editor::super_rapid_screen_update ()
 		return;
 	}
 
-	if (playhead_cursor->current_sample () == sample) {
+	if (_playhead_cursor->current_sample () == sample) {
 		return;
 	}
 
-	if (!_pending_locate_request) {
-		playhead_cursor->set_position (sample);
+	if (!_pending_locate_request && !_session->locate_initiated()) {
+		_playhead_cursor->set_position (sample);
 	}
 
 	if (_session->requested_return_sample() >= 0) {
@@ -5945,7 +5973,7 @@ Editor::super_rapid_screen_update ()
 	if (!_stationary_playhead) {
 		reset_x_origin_to_follow_playhead ();
 	} else {
-		samplepos_t const sample = playhead_cursor->current_sample ();
+		samplepos_t const sample = _playhead_cursor->current_sample ();
 		double target = ((double)sample - (double)current_page_samples() / 2.0);
 		if (target <= 0.0) {
 			target = 0.0;
@@ -5980,7 +6008,7 @@ Editor::session_going_away ()
 	_last_update_time = 0;
 	_drags->abort ();
 
-	playhead_cursor->hide ();
+	_playhead_cursor->hide ();
 
 	/* rip everything out of the list displays */
 
@@ -6255,7 +6283,7 @@ Editor::ui_parameter_changed (string parameter)
 
 	} else if (parameter == "draggable-playhead") {
 		if (_verbose_cursor) {
-			playhead_cursor->set_sensitive (UIConfiguration::instance().get_draggable_playhead());
+			_playhead_cursor->set_sensitive (UIConfiguration::instance().get_draggable_playhead());
 		}
 	} else if (parameter == "use-note-bars-for-velocity") {
 		ArdourCanvas::Note::set_show_velocity_bars (UIConfiguration::instance().get_use_note_bars_for_velocity());

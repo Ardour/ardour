@@ -55,13 +55,13 @@ Maschine2::connect_signals ()
 	tact = ActionManager::find_toggle_action (X_("Editor"), X_("ToggleMeasureVisibility"));
 	tact->signal_toggled ().connect (sigc::mem_fun (*this, &Maschine2::notify_grid_change));
 #endif
-	ract = ActionManager::find_radio_action (X_("Editor"), X_("snap-off"));
+	ract = ActionManager::get_radio_action (X_("Editor"), X_("snap-off"));
 	ract->signal_toggled ().connect (sigc::mem_fun (*this, &Maschine2::notify_snap_change));
 
-	ract = ActionManager::find_radio_action (X_("Editor"), X_("snap-magnetic"));
+	ract = ActionManager::get_radio_action (X_("Editor"), X_("snap-magnetic"));
 	ract->signal_toggled ().connect (sigc::mem_fun (*this, &Maschine2::notify_snap_change));
 
-	ract = ActionManager::find_radio_action (X_("Editor"), X_("snap-normal"));
+	ract = ActionManager::get_radio_action (X_("Editor"), X_("snap-normal"));
 	ract->signal_toggled ().connect (sigc::mem_fun (*this, &Maschine2::notify_snap_change));
 
 	/* Surface events */
@@ -171,9 +171,9 @@ Maschine2::notify_snap_change ()
 		return;
 	}
 
-	Glib::RefPtr<Gtk::RadioAction> ract = ActionManager::find_radio_action (X_("Editor"), X_("snap-magnetic"));
+	Glib::RefPtr<Gtk::RadioAction> ract = ActionManager::get_radio_action (X_("Editor"), X_("snap-magnetic"));
 	if (ract->get_active ()) { rgba = COLOR_GRAY; }
-	ract = ActionManager::find_radio_action (X_("Editor"), X_("snap-normal"));
+	ract = ActionManager::get_radio_action (X_("Editor"), X_("snap-normal"));
 	if (ract->get_active ()) { rgba = COLOR_WHITE; }
 
 	_ctrl->button (M2Contols::Grid)->set_color (rgba);
@@ -268,16 +268,16 @@ Maschine2::button_snap_released ()
 
 	const char* action = 0;
 
-	Glib::RefPtr<Gtk::RadioAction> ract = ActionManager::find_radio_action (X_("Editor"), X_("snap-off"));
+	Glib::RefPtr<Gtk::RadioAction> ract = ActionManager::get_radio_action (X_("Editor"), X_("snap-off"));
 	if (ract->get_active ()) { action = "snap-normal"; }
 
-	ract = ActionManager::find_radio_action (X_("Editor"), X_("snap-normal"));
+	ract = ActionManager::get_radio_action (X_("Editor"), X_("snap-normal"));
 	if (ract->get_active ()) { action = "snap-magnetic"; }
 
-	ract = ActionManager::find_radio_action (X_("Editor"), X_("snap-magnetic"));
+	ract = ActionManager::get_radio_action (X_("Editor"), X_("snap-magnetic"));
 	if (ract->get_active ()) { action = "snap-off"; }
 
-	ract = ActionManager::find_radio_action (X_("Editor"), action);
+	ract = ActionManager::get_radio_action (X_("Editor"), action);
 	ract->set_active (true);
 }
 
@@ -328,7 +328,7 @@ static void apply_ac_delta (boost::shared_ptr<AutomationControl> ac, double d) {
 	if (!ac) {
 		return;
 	}
-	ac->set_value (ac->interface_to_internal (min (ac->upper(), max (ac->lower(), ac->internal_to_interface (ac->get_value()) + d))),
+	ac->set_value (ac->interface_to_internal (std::min (ac->upper(), std::max (ac->lower(), ac->internal_to_interface (ac->get_value()) + d))),
 			PBD::Controllable::UseGroup);
 }
 

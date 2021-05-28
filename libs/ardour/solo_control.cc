@@ -79,7 +79,7 @@ SoloControl::set_mute_master_solo ()
 void
 SoloControl::mod_solo_by_others_downstream (int32_t delta)
 {
-	if (_soloable.is_safe() || !_soloable.can_solo()) {
+	if (_soloable.is_safe() || !can_solo()) {
 		return;
 	}
 
@@ -106,7 +106,7 @@ SoloControl::mod_solo_by_others_downstream (int32_t delta)
 void
 SoloControl::mod_solo_by_others_upstream (int32_t delta)
 {
-	if (_soloable.is_safe() || !_soloable.can_solo()) {
+	if (_soloable.is_safe() || !can_solo()) {
 		return;
 	}
 
@@ -161,7 +161,7 @@ SoloControl::mod_solo_by_others_upstream (int32_t delta)
 void
 SoloControl::actually_set_value (double val, PBD::Controllable::GroupControlDisposition group_override)
 {
-	if (_soloable.is_safe() || !_soloable.can_solo()) {
+	if (_soloable.is_safe() || !can_solo()) {
 		return;
 	}
 
@@ -351,5 +351,9 @@ SoloControl::pre_remove_master (boost::shared_ptr<AutomationControl> m)
 bool
 SoloControl::can_solo () const
 {
-	return _soloable.can_solo ();
+  if (Config->get_solo_control_is_listen_control()) {
+		return _soloable.can_monitor ();
+	} else {
+		return _soloable.can_solo ();
+	}
 }

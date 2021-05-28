@@ -21,8 +21,6 @@
 #include <gtkmm/settings.h>
 #include "gtkmm2ext/persistent_tooltip.h"
 
-#include "pbd/stacktrace.h"
-
 #include "pbd/i18n.h"
 
 using namespace std;

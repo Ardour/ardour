@@ -52,6 +52,7 @@ fluid_list_t *fluid_list_remove_link(fluid_list_t *list, fluid_list_t *llink);
 fluid_list_t *fluid_list_nth(fluid_list_t *list, int n);
 fluid_list_t *fluid_list_last(fluid_list_t *list);
 fluid_list_t *fluid_list_insert_at(fluid_list_t *list, int n, void *data);
+int fluid_list_idx(fluid_list_t *list, void *data);
 int fluid_list_size(fluid_list_t *list);
 
 #define fluid_list_next(slist)	((slist) ? (((fluid_list_t *)(slist))->next) : NULL)

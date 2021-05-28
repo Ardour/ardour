@@ -63,6 +63,8 @@ public:
 		SetTimecodeTransmission,
 		Skip,
 		SetTransportMaster,
+		StartRoll,
+		EndRoll,
 
 		/* only one of each of these events can be queued at any one time */
 

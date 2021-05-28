@@ -24,6 +24,8 @@
 #include <mach/thread_policy.h>
 #include <mach/thread_act.h>
 
+#undef nil
+
 #include <glibmm.h>
 
 #include "coreaudio_backend.h"
@@ -337,10 +339,10 @@ CoreAudioBackend::set_buffer_size (uint32_t bs)
 	}
 	_pcmio->set_samples_per_period(bs);
 	if (_run) {
-		pbd_mach_set_realtime_policy (_main_thread, 1e9 * bs / _samplerate);
+		pbd_mach_set_realtime_policy (_main_thread, 1e9 * bs / _samplerate, true);
 	}
 	for (std::vector<pthread_t>::const_iterator i = _threads.begin (); i != _threads.end (); ++i) {
-		pbd_mach_set_realtime_policy (*i, 1e9 * bs / _samplerate);
+		pbd_mach_set_realtime_policy (*i, 1e9 * bs / _samplerate, false);
 	}
 	return 0;
 }
@@ -638,7 +640,7 @@ CoreAudioBackend::_start (bool for_latency_measurement)
 
 	_preinit = true;
 	_run = true;
-	_port_change_flag = false;
+	g_atomic_int_set (&_port_change_flag, 0);
 
 	if (_midi_driver_option == _("CoreMidi")) {
 		_midiio->set_enabled(true);
@@ -696,7 +698,7 @@ CoreAudioBackend::_start (bool for_latency_measurement)
 	engine.reconnect_ports ();
 
 	// force  an initial registration_callback() & latency re-compute
-	_port_change_flag = true;
+	g_atomic_int_set (&_port_change_flag, 1);
 	pre_process ();
 
 	_dsp_load_calc.reset ();
@@ -852,7 +854,7 @@ CoreAudioBackend::create_process_thread (boost::function<void()> func)
 		PBD::warning << _("AudioEngine: process thread failed to acquire realtime permissions.") << endmsg;
 	}
 
-	if (pbd_mach_set_realtime_policy (thread_id, 1e9 * _samples_per_period / _samplerate)) {
+	if (pbd_mach_set_realtime_policy (thread_id, 1e9 * _samples_per_period / _samplerate, false)) {
 		PBD::warning << _("AudioEngine: process thread failed to set mach realtime policy.") << endmsg;
 	}
 
@@ -946,7 +948,7 @@ CoreAudioBackend::register_system_audio_ports()
 		if (!p) return -1;
 		set_latency_range (p, false, lr);
 		BackendPortPtr cp = boost::dynamic_pointer_cast<BackendPort>(p);
-		cp->set_pretty_name (_pcmio->cached_port_name(i, true));
+		cp->set_hw_port_name (_pcmio->cached_port_name(i, true));
 		_system_inputs.push_back(cp);
 	}
 
@@ -958,7 +960,7 @@ CoreAudioBackend::register_system_audio_ports()
 		if (!p) return -1;
 		set_latency_range (p, true, lr);
 		BackendPortPtr cp = boost::dynamic_pointer_cast<BackendPort>(p);
-		cp->set_pretty_name (_pcmio->cached_port_name(i, false));
+		cp->set_hw_port_name (_pcmio->cached_port_name(i, false));
 		_system_outputs.push_back(cp);
 	}
 	return 0;
@@ -986,7 +988,7 @@ CoreAudioBackend::coremidi_rediscover()
 #ifndef NDEBUG
 			printf("unregister MIDI Output: %s\n", (*it)->name().c_str());
 #endif
-			_port_change_flag = true;
+			g_atomic_int_set (&_port_change_flag, 1);
 			unregister_port((*it));
 			it = _system_midi_out.erase(it);
 		}
@@ -1006,7 +1008,7 @@ CoreAudioBackend::coremidi_rediscover()
 #ifndef NDEBUG
 			printf("unregister MIDI Input: %s\n", (*it)->name().c_str());
 #endif
-			_port_change_flag = true;
+			g_atomic_int_set (&_port_change_flag, 1);
 			unregister_port((*it));
 			it = _system_midi_in.erase(it);
 		}
@@ -1030,9 +1032,9 @@ CoreAudioBackend::coremidi_rediscover()
 		lr.min = lr.max = _samples_per_period; // TODO add per-port midi-systemic latency
 		set_latency_range (p, false, lr);
 		BackendPortPtr pp = boost::dynamic_pointer_cast<BackendPort>(p);
-		pp->set_pretty_name(_midiio->port_name(i, true));
+		pp->set_hw_port_name(_midiio->port_name(i, true));
 		_system_midi_in.push_back(pp);
-		_port_change_flag = true;
+		g_atomic_int_set (&_port_change_flag, 1);
 	}
 
 	for (size_t i = 0; i < _midiio->n_midi_outputs(); ++i) {
@@ -1053,9 +1055,9 @@ CoreAudioBackend::coremidi_rediscover()
 		lr.min = lr.max = _samples_per_period; // TODO add per-port midi-systemic latency
 		set_latency_range (p, false, lr);
 		BackendPortPtr pp = boost::dynamic_pointer_cast<BackendPort>(p);
-		pp->set_pretty_name(_midiio->port_name(i, false));
+		pp->set_hw_port_name(_midiio->port_name(i, false));
 		_system_midi_out.push_back(pp);
-		_port_change_flag = true;
+		g_atomic_int_set (&_port_change_flag, 1);
 	}
 
 
@@ -1227,9 +1229,8 @@ CoreAudioBackend::pre_process ()
 	bool connections_changed = false;
 	bool ports_changed = false;
 	if (!pthread_mutex_trylock (&_port_callback_mutex)) {
-		if (_port_change_flag) {
+		if (g_atomic_int_compare_and_exchange (&_port_change_flag, 1, 0)) {
 			ports_changed = true;
-			_port_change_flag = false;
 		}
 		if (!_port_connection_queue.empty ()) {
 			connections_changed = true;
@@ -1320,7 +1321,7 @@ CoreAudioBackend::freewheel_thread ()
 			AudioEngine::thread_init_callback (this);
 			_midiio->set_enabled(false);
 			reset_midi_parsers ();
-			pbd_mach_set_realtime_policy (_main_thread, 1e9 * _samples_per_period / _samplerate);
+			pbd_mach_set_realtime_policy (_main_thread, 1e9 * _samples_per_period / _samplerate, true);
 		}
 
 		// process port updates first in every cycle.
@@ -1387,7 +1388,7 @@ CoreAudioBackend::process_callback (const uint32_t n_samples, const uint64_t hos
 		_reinit_thread_callback = false;
 		_main_thread = pthread_self();
 		AudioEngine::thread_init_callback (this);
-		pbd_mach_set_realtime_policy (_main_thread, 1e9 * _samples_per_period / _samplerate);
+		pbd_mach_set_realtime_policy (_main_thread, 1e9 * _samples_per_period / _samplerate, true);
 	}
 
 	if (pthread_mutex_trylock (&_process_callback_mutex)) {

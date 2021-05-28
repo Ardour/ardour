@@ -41,7 +41,6 @@
 #include "pbd/file_utils.h"
 #include "pbd/replace_all.h"
 #include "pbd/whitespace.h"
-#include "pbd/stacktrace.h"
 #include "pbd/openuri.h"
 
 #include "ardour/audioengine.h"

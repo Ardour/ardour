@@ -91,8 +91,9 @@ class LIBARDOUR_API CoreSelection : public PBD::Stateful {
 
   private:
 	mutable Glib::Threads::RWLock _lock;
+	GATOMIC_QUAL gint             _selection_order;
+
 	Session& session;
-	int selection_order;
 
 	struct SelectedStripable {
 		SelectedStripable (boost::shared_ptr<Stripable>, boost::shared_ptr<AutomationControl>, int);

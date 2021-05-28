@@ -34,6 +34,8 @@
 #include "pbd/signals.h"
 #include "pbd/ringbuffer.h"
 #include "pbd/pool.h"
+#include "pbd/g_atomic_compat.h"
+
 #include "midi++/types.h"
 #include "ardour_window.h"
 
@@ -68,7 +70,7 @@ private:
 	 *  equal to 0 when an update is not queued.  May temporarily be negative if a
 	 *  update is handled before it was noted that it had just been queued.
 	 */
-	volatile gint _update_queued;
+	GATOMIC_QUAL gint _update_queued;
 
 	PBD::RingBuffer<char *> fifo;
 	Pool buffer_pool;

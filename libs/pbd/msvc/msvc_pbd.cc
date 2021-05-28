@@ -244,6 +244,24 @@ expm1(double x)
 
 //***************************************************************
 //
+//	exp2f()
+//
+// Emulates C99 exp2f() using powf().
+//
+//	Returns:
+//
+//    On Success: 2 raised to the power of 'x'
+//    On Failure: None, except that calling powf(x) should generate
+//                an appropriate error for us (such as INF etc).
+//
+LIBPBD_API float PBD_APICALLTYPE
+exp2f(float x)
+{
+	return (powf(2.0f, x));
+}
+
+//***************************************************************
+//
 //	log1p()
 //
 // Emulates C99 log1p() using log().
@@ -753,7 +771,7 @@ bool bValidPath = false;
 #if (_WIN32_WINNT >= 0x0500)
 				if (0 == strRootFileSystemType.compare("NTFS"))
 				{
-					if (TestForMinimumSpecOS()) // Hard links were only available from Win2K onwards
+					if (TestForMinimumSpecOS(NULL)) // Hard links were only available from Win2K onwards
 						if (0 == CreateHardLinkA(link_filepath, existing_filepath, NULL))
 						{	// Note that the above API call cannot create a link to a directory, so
 							// should we also be checking that the supplied path was actually a file?
@@ -882,7 +900,7 @@ bool bValidPath = false;
 				std::transform(strRootFileSystemType.begin(), strRootFileSystemType.end(), strRootFileSystemType.begin(), ::toupper);
 #if (_WIN32_WINNT >= 0x0500)
 				if (0 == strRootFileSystemType.compare("NTFS"))
-					if (TestForMinimumSpecOS()) // Hard links were only available from Win2K onwards
+					if (TestForMinimumSpecOS(NULL)) // Hard links were only available from Win2K onwards
 						if (0 == DeleteFileA(link_filepath))
 							ret = GetLastError();
 						else

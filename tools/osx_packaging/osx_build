@@ -46,6 +46,7 @@ while [ $# -gt 0 ] ; do
 		APPNAME=Mixbus ;
 		BUNDLENAME=Mixbus${major_version} ;
 		lower_case_appname=mixbus;
+		BUNDLE_ID_BASE=com.harrisonconsoles
 		shift ;;
 	--mixbus32c) MIXBUS=1;
 		MIXBUS32C=1;
@@ -55,6 +56,7 @@ while [ $# -gt 0 ] ; do
 		STRIP= ;
 		PRODUCT_PKG_DIR=Mixbus32C;
 		lower_case_appname=mixbus32c;
+		BUNDLE_ID_BASE=com.harrisonconsoles
 		APPNAME=Mixbus32C ;
 		BUNDLENAME=Mixbus32C-${major_version} ;
 		shift ;;
@@ -64,6 +66,7 @@ while [ $# -gt 0 ] ; do
 		APPNAME=Ardour ;
 		BUNDLENAME=Ardour${major_version} ;
 		lower_case_appname=ardour;
+		BUNDLE_ID_BASE=org.ardour
 		shift ;;
 
 	#
@@ -76,6 +79,7 @@ while [ $# -gt 0 ] ; do
 	--no-nls) WITH_NLS= ; shift ;;
 	--nls) WITH_NLS=1 ; shift ;;
 	--chanstrip) HARRISONCHANNELSTRIP=$2 ; shift; shift ;;
+	--stack) GTKSTACK_ROOT=$2 ; shift; shift ;;
 	esac
 done
 
@@ -138,7 +142,7 @@ if [ x$PRINT_SYSDEPS != x ] ; then
 # print system dependencies
 #
 
-for file in $APPROOT/MacOS/* $Frameworks/* $Frameworks/modules/* ; do
+for file in $APPROOT/MacOS/* $Frameworks/* ; do
 	if ! file $file | grep -qs Mach-O ; then
 	    continue
 	fi
@@ -162,7 +166,6 @@ mkdir -p $Panners
 mkdir -p $Backends
 mkdir -p $MidiMaps
 mkdir -p $ExportFormats
-mkdir -p $Frameworks/modules
 mkdir -p $Etc
 mkdir -p $MackieControl
 mkdir -p $OSC
@@ -190,6 +193,7 @@ env="<key>LSEnvironment</key><dict>$env<key>ARDOUR_BUNDLED</key><string>true</st
 sed -e "s?@ENV@?$env?g" \
     -e "s?@VERSION@?$release_version?g" \
     -e "s?@INFOSTRING@?$info_string?g" \
+    -e "s?@IDBASE@?$BUNDLE_ID_BASE?g" \
     -e "s?@IDSUFFIX@?$EXECUTABLE?g" \
     -e "s?@BUNDLENAME@?$BUNDLENAME?g" \
     -e "s?@EXECUTABLE@?$EXECUTABLE?g" < Info.plist.in > Info.plist
@@ -298,8 +302,8 @@ fi
 # Copy stuff that may be dynamically loaded
 #
 
-cp -R $GTKSTACK_ROOT/etc/* $Etc
-cp -R $GTKSTACK_ROOT/lib/charset.alias $Resources
+#cp -R $GTKSTACK_ROOT/etc/* $Etc
+#cp -R $GTKSTACK_ROOT/lib/charset.alias $Resources
 
 # We rely on clearlooks, so include a version from our own build tree
 # this one is special - we will set GTK_PATH to $Frameworks/gtkengines
@@ -308,12 +312,7 @@ GTK_ENGINE_DIR=$Frameworks/gtkengines/engines
 mkdir -p $GTK_ENGINE_DIR
 
 echo "Copying GTK engines ..."
-cp $BUILD_ROOT/libs/clearlooks-newer/libclearlooks.dylib $Frameworks
-(cd $GTK_ENGINE_DIR && ln -s ../../libclearlooks.dylib . && ln -s ../../libclearlooks.dylib libclearlooks.so)
-
-cp $GTKSTACK_ROOT/lib/gtk-2.0/2.10.0/engines/libpixmap.so $Frameworks
-(cd $GTK_ENGINE_DIR && ln -s ../../libpixmap.so)
-
+cp $BUILD_ROOT/libs/clearlooks-newer/libclearlooks.dylib $GTK_ENGINE_DIR/libclearlooks.so
 
 # Control Surface shared libraries
 cp $BUILD_ROOT/libs/surfaces/*/libardour_*.dylib $Surfaces
@@ -331,10 +330,10 @@ for f in $BUILD_ROOT/../share/export/*.preset $BUILD_ROOT/../share/export/*.form
 done
 
 #Session templates
-cp -av $BUILD_ROOT/../share/templates $Templates
+cp -R $BUILD_ROOT/../share/templates $Templates
 
 # PluginMetadata
-cp -av $BUILD_ROOT/../share/plugin_metadata $PluginMetadata
+cp -R $BUILD_ROOT/../share/plugin_metadata $PluginMetadata
 
 # MidiMaps
 # got to be careful with names here
@@ -359,7 +358,7 @@ for x in $BUILD_ROOT/../share/scripts/*.lua ; do
 done
 
 # recusively copy web-surface html/js
-cp -a $BUILD_ROOT/../share/web_surfaces $WebSurfaces
+cp -R $BUILD_ROOT/../share/web_surfaces $WebSurfaces
 rm $WebSurfaces/wscript
 
 # MackieControl data
@@ -397,36 +396,52 @@ fi
 
 # vfork wrapper
 if test -f $BUILD_ROOT/libs/vfork/ardour-exec-wrapper ; then
-	mkdir -p $Frameworks/vfork
 	cp $BUILD_ROOT/libs/vfork/ardour-exec-wrapper $Frameworks/
 fi
+
+# session utils start script (temp file)
+cat >> $Frameworks/ardour-util.sh << EOF
+#!/bin/sh
+
+BIN_DIR=\$(dirname "\$0")
+BUNDLE_DIR=\$(dirname "\$BIN_DIR")
+
+export ARDOUR_DATA_PATH="\$BUNDLE_DIR/Resources"
+export ARDOUR_CONFIG_PATH="\$BUNDLE_DIR/Resources"
+export ARDOUR_DLL_PATH="\$BUNDLE_DIR/lib"
+export VAMP_PATH="\$BUNDLE_DIR/lib"\${VAMP_PATH:+:\$VAMP_PATH}
+
+SELF=\$(basename "\$0")
+exec "\$BUNDLE_DIR/lib/\$SELF" "\$@"
+EOF
+chmod +x $Frameworks/ardour-util.sh
 
 # session-utils
 HAVE_SESSION_UTILS=false
 for file in $BUILD_ROOT/session_utils/${lower_case_appname}${major_version}-*; do
 	BN=$(basename $file)
-	cp -v $file $Frameworks/
+	cp $file $Frameworks/
 	if test x$STRIP = xall ; then
 		strip -s $Frameworks/${BN}
 	fi
-	ln -s ../lib/ardour-util.sh ${APPROOT}/MacOS/${BN}
+	cp -R $Frameworks/ardour-util.sh ${APPROOT}/MacOS/${BN}
 	HAVE_SESSION_UTILS=true
 done
 
 if test -x $BUILD_ROOT/luasession/luasession; then
 	BN=${lower_case_appname}${major_version}-lua
-	cp -v $BUILD_ROOT/luasession/luasession $Frameworks/$BN
+	cp $BUILD_ROOT/luasession/luasession $Frameworks/$BN
 	if test x$STRIP = xall ; then
 		strip -s $Frameworks/${BN}
 	fi
-	ln -s ../lib/ardour-util.sh ${APPROOT}/MacOS/${BN}
+	cp -R $Frameworks/ardour-util.sh ${APPROOT}/MacOS/${BN}
 	HAVE_SESSION_UTILS=true
 fi
 
 # dynamically loaded NSS/SSL libs
 nsslibs="libsoftokn3.dylib libnsspem.dylib libnssckbi.dylib libfreebl3.dylib libnssdbm3.dylib libplds4.dylib"
 for nsslib in $nsslibs; do
-	cp $GTKSTACK_ROOT/lib/$nsslib $Frameworks/ || true
+	cp $GTKSTACK_ROOT/lib/$nsslib $Frameworks/ 2>/dev/null || true
 done
 
 # TODO check if this is still needed, even when building on 10.5
@@ -438,17 +453,23 @@ fi
 
 while [ true ] ; do
 	missing=false
-	for file in $APPROOT/MacOS/* $Frameworks/* $Frameworks/modules/* $Panners/*.dylib $Backends/*.dylib $Surfaces/*.dylib ; do
+	for file in $APPROOT/MacOS/* $Frameworks/* $Panners/*.dylib $Backends/*.dylib $Surfaces/*.dylib $GTK_ENGINE_DIR/*.dylib ; do
 		if ! file $file | grep -qs Mach-O ; then
 			continue
 		fi
 		# libffi contains "S" (other section symbols) that should not be stripped.
-		if [[ $file == *"libffi"* ]] ; then
+		if [[ $file = *"libffi"* ]] ; then
 			continue
 		fi
 
 		if test x$STRIP != x ; then
-			strip -u -r -arch all $file &>/dev/null
+			# NSS is dynamically loaded, symbols cannot be stripped
+			if test "`basename $file`" = "libnspr4.dylib" -o "`basename $file`" = "libplds4.dylib"; then
+				# only remove debug and local symbols
+				strip -S -x -u -r -arch all $file &>/dev/null
+			else
+				strip -u -r -arch all $file &>/dev/null
+			fi
 		fi
 
 		deps=`otool -L $file | awk '{print $1}' | egrep "($GTKSTACK_ROOT|/opt/|/local/|libs/$STDCPP)" | grep -v 'libjack\.' | grep -v "$(basename $file)"`
@@ -500,25 +521,8 @@ for svndir in `find $APPDIR -name .svn -type dir`; do
 	rm -rf $svndir
 done
 
-# session utils start script
-if test "$HAVE_SESSION_UTILS" = true ; then
-	cat >> $Frameworks/ardour-util.sh << EOF
-#!/bin/sh
-
-BIN_DIR=\$(dirname "\$0")
-BUNDLE_DIR=\$(dirname "\$BIN_DIR")
-
-export ARDOUR_DATA_PATH="\$BUNDLE_DIR/share"
-export ARDOUR_CONFIG_PATH="\$BUNDLE_DIR/etc"
-export ARDOUR_DLL_PATH="\$BUNDLE_DIR/lib"
-export VAMP_PATH="\$BUNDLE_DIR/lib"\${VAMP_PATH:+:\$VAMP_PATH}
-
-SELF=\$(basename "\$0")
-exec "\$BUNDLE_DIR/lib/\$SELF" "\$@"
-EOF
-	chmod +x $Frameworks/ardour-util.sh
-fi
-
+# remove temp session utils start script
+rm $Frameworks/ardour-util.sh 
 
 # install bundled LV2s to <app>/Contents/lib/LV2/
 cp -R $BUILD_ROOT/libs/LV2 $Frameworks/
@@ -564,15 +568,18 @@ done
 
 echo "Fixing up library names ..."
 # now do the same for all the libraries we include
-for libdir in $Frameworks $Frameworks/modules $Surfaces $Panners $Backends $Frameworks/LV2/* ; do
+for libdir in $Frameworks $Surfaces $Panners $Backends $Frameworks/LV2/* $GTK_ENGINE_DIR; do
 
-	libbase=`basename $libdir`
+	libbase=`echo "$libdir" | sed 's#^'$Frameworks'##'`
 
 	for dylib in $libdir/*.dylib $libdir/*.so ; do
 
 		# skip symlinks
-
 		if test -L $dylib ; then
+			echo "FOUND SYMLINK"
+			exit
+		fi
+		if ! test -f $dylib ; then
 			continue
 		fi
 
@@ -581,9 +588,7 @@ for libdir in $Frameworks $Frameworks/modules $Surfaces $Panners $Backends $Fram
 		changes=""
 		for lib in `otool -L $dylib | egrep "($GTKSTACK_ROOT|/opt/|/local/|libs/$STDCPP)" | awk '{print $1}' | grep -v 'libjack\.'` ; do
 			base=`basename $lib`
-			if echo $lib | grep -s libbase; then
-				changes="$changes -change $lib @executable_path/../$libbase/$base"
-			else
+			if test -f $Frameworks/$base ; then
 				changes="$changes -change $lib @executable_path/../lib/$base"
 			fi
 		done
@@ -599,7 +604,7 @@ for libdir in $Frameworks $Frameworks/modules $Surfaces $Panners $Backends $Fram
 		# now the change what the library thinks its own name is
 
 		base=`basename $dylib`
-		install_name_tool -id @executable_path/../$libbase/$base $dylib
+		install_name_tool -id @executable_path/../lib$libbase/$base $dylib
 	done
 done
 
@@ -627,14 +632,27 @@ else
 
 fi
 
+DMG_ARCH=""
 if file ${PRODUCT_PKG_DIR}/$APPROOT/MacOS/$MAIN_EXECUTABLE | grep -q x86_64; then
 	OSX_ARCH=x86_64
+	OSX_X42URI=x42-plugins.com/x42/osx
+	OSX_X42ID=osx
 	OSX_BENSID=osx64
 elif file ${PRODUCT_PKG_DIR}/$APPROOT/MacOS/$MAIN_EXECUTABLE | grep -q ppc; then
 	OSX_ARCH=ppc
+	OSX_X42URI=x42-plugins.com/x42/osx
+	OSX_X42ID=osx
 	OSX_BENSID=osxppc
+elif file ${PRODUCT_PKG_DIR}/$APPROOT/MacOS/$MAIN_EXECUTABLE | grep -q arm64; then
+	OSX_ARCH=arm64
+	OSX_X42URI=x42-plugins.com/x42/mac
+	OSX_X42ID="macOS-arm64"
+	DMG_ARCH="-arm64"
+	OSX_BENSID=macarm64
 else
 	OSX_ARCH=i386
+	OSX_X42URI=x42-plugins.com/x42/osx
+	OSX_X42ID=osx
 	OSX_BENSID=osx32
 fi
 
@@ -659,22 +677,21 @@ if test x$WITH_HARVID != x ; then
 		HARVID_VERSION=$(curl -s -S http://ardour.org/files/video-tools/harvid_version.txt)
 		XJADEO_VERSION=$(curl -s -S http://ardour.org/files/video-tools/xjadeo_version.txt)
 	fi
-	MULTIARCH=osx
 	echo "copying harvid and xjadeo ..."
 
 	rsync -Pa \
-		rsync://ardour.org/video-tools/harvid-osx-${HARVID_VERSION}.tgz \
-		"$CACHEDIR/harvid-${MULTIARCH}-${HARVID_VERSION}.tgz"
+		rsync://ardour.org/video-tools/harvid-${OSX_X42ID}-${HARVID_VERSION}.tgz \
+		"$CACHEDIR/harvid-${OSX_X42ID}-${HARVID_VERSION}.tgz"
 
 	rsync -Pa \
-		rsync://ardour.org/video-tools/jadeo-${XJADEO_VERSION:1}.dmg \
-		"$CACHEDIR/jadeo-${XJADEO_VERSION:1}.dmg"
+		rsync://ardour.org/video-tools/jadeo${DMG_ARCH}-${XJADEO_VERSION:1}.dmg \
+		"$CACHEDIR/jadeo${DMG_ARCH}-${XJADEO_VERSION:1}.dmg"
 
 	tar -x -z \
 		-C $PRODUCT_PKG_DIR/$APPROOT \
-		-f "$CACHEDIR/harvid-${MULTIARCH}-${HARVID_VERSION}.tgz" || exit 1
+		-f "$CACHEDIR/harvid-${OSX_X42ID}-${HARVID_VERSION}.tgz" || exit 1
 
-	JADEO=$(hdiutil attach "$CACHEDIR/jadeo-${XJADEO_VERSION:1}.dmg" | grep Apple_HFS | grep dev/ | cut -f 3)
+	JADEO=$(hdiutil attach "$CACHEDIR/jadeo${DMG_ARCH}-${XJADEO_VERSION:1}.dmg" | grep Apple_HFS | grep dev/ | cut -f 3)
 	cp -r "${JADEO}/Jadeo.app" "$PRODUCT_PKG_DIR/"
 	hdiutil detach "${JADEO}"
 
@@ -682,7 +699,7 @@ if test x$WITH_HARVID != x ; then
 	HVLIBS=${PRODUCT_PKG_DIR}/$APPROOT/lib/harvid
 
 	for file in ${XJCONTENT}/MacOS/Jadeo-bin ${XJCONTENT}/Frameworks/*.dylib ${HVLIBS}/*.dylib ${PRODUCT_PKG_DIR}/$APPROOT/MacOS/*harvid* ; do
-		lipo -extract_family ${OSX_ARCH} ${file} -output ${file}.thin && \
+		lipo -extract_family ${OSX_ARCH} ${file} -output ${file}.thin 2>/dev/null && \
 		mv ${file}.thin ${file}
 	done
 
@@ -700,12 +717,12 @@ if true; then
 	mkdir -p "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2"
 
 	for proj in x42-gmsynth; do
-		X42_VERSION=$(curl -s -S http://x42-plugins.com/x42/osx/${proj}.latest.txt)
+		X42_VERSION=$(curl -s -S http://${OSX_X42URI}/${proj}.latest.txt)
 		rsync -a -q --partial \
-			rsync://x42-plugins.com/x42/osx/${proj}-lv2-osx-${X42_VERSION}.zip \
-			"$CACHEDIR/${proj}-lv2-osx-${X42_VERSION}.zip"
+			rsync://${OSX_X42URI}/${proj}-lv2-${OSX_X42ID}-${X42_VERSION}.zip \
+			"$CACHEDIR/${proj}-lv2-${OSX_X42ID}-${X42_VERSION}.zip"
 		bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf \
-			"$CACHEDIR/${proj}-lv2-osx-${X42_VERSION}.zip"
+			"$CACHEDIR/${proj}-lv2-${OSX_X42ID}-${X42_VERSION}.zip"
 	done
 fi
 
@@ -714,12 +731,12 @@ if test x$WITH_COMMERCIAL_X42_LV2 != x ; then
 	mkdir -p "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2"
 
 	for proj in x42-meters x42-eq x42-whirl; do
-		X42_VERSION=$(curl -s -S http://x42-plugins.com/x42/osx/${proj}.latest.txt)
+		X42_VERSION=$(curl -s -S http://${OSX_X42URI}/${proj}.latest.txt)
 		rsync -a -q --partial \
-			rsync://x42-plugins.com/x42/osx/${proj}-lv2-osx-${X42_VERSION}.zip \
-			"$CACHEDIR/${proj}-lv2-osx-${X42_VERSION}.zip"
+			rsync://${OSX_X42URI}/${proj}-lv2-${OSX_X42ID}-${X42_VERSION}.zip \
+			"$CACHEDIR/${proj}-lv2-${OSX_X42ID}-${X42_VERSION}.zip"
 		bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf \
-			"$CACHEDIR/${proj}-lv2-osx-${X42_VERSION}.zip"
+			"$CACHEDIR/${proj}-lv2-${OSX_X42ID}-${X42_VERSION}.zip"
 	done
 fi
 
@@ -728,19 +745,19 @@ if test x$WITH_GRATIS_X42_LV2 != x ; then
 	mkdir -p "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2"
 
 	for proj in x42-midifilter x42-stereoroute setBfree x42-avldrums x42-limiter x42-tuner; do
-		X42_VERSION=$(curl -s -S http://x42-plugins.com/x42/osx/${proj}.latest.txt)
+		X42_VERSION=$(curl -s -S http://${OSX_X42URI}/${proj}.latest.txt)
 		rsync -a -q --partial \
-			rsync://x42-plugins.com/x42/osx/${proj}-lv2-osx-${X42_VERSION}.zip \
-			"$CACHEDIR/${proj}-lv2-osx-${X42_VERSION}.zip"
+			rsync://${OSX_X42URI}/${proj}-lv2-${OSX_X42ID}-${X42_VERSION}.zip \
+			"$CACHEDIR/${proj}-lv2-${OSX_X42ID}-${X42_VERSION}.zip"
 		bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf \
-			"$CACHEDIR/${proj}-lv2-osx-${X42_VERSION}.zip"
+			"$CACHEDIR/${proj}-lv2-${OSX_X42ID}-${X42_VERSION}.zip"
 	done
 fi
 
 if test -d ${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/; then
 	echo "Removing unused achitectures from LV plugins"
 	for file in ${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/*/*.dylib ; do
-		lipo -extract_family ${OSX_ARCH} ${file} -output ${file}.thin
+		lipo -extract_family ${OSX_ARCH} ${file} -output ${file}.thin 2>/dev/null && \
 		mv ${file}.thin ${file}
 	done
 fi
@@ -781,6 +798,145 @@ fi
 
 ################################################################################
 
+
+
+##### App Signing ##############################################################
+
+checkForSuccess() {
+	xcrun altool \
+		--notarization-info $1 \
+		-u ${ALTOOL_USERNAME} \
+		--password "@keychain:ALTOOL_PASSWORD" \
+		2>&1 | grep -o "Status: success";
+}
+
+if test $(sw_vers -productVersion | cut -d '.' -f 1) -lt 11 -a $(sw_vers -productVersion | cut -d '.' -f 2) -lt 14 -a $(sw_vers -productVersion | cut -d '.' -f 2) -lt 7; then
+	#less than 10.13.6 does not support notariztion
+	HARDENED_OPTIONS=
+else
+	HARDENED_OPTIONS="--options runtime --entitlements entitlements.plist"
+fi
+
+echo "checking for signing credentials"
+
+if test -n "${APPLE_DEVELOPER_ID_FOR_APPLICATION}"; then
+	####################
+	## Sign the main APP
+
+	echo "signing the main app"
+
+	# Sign everything from inside level working out.
+	find ${PRODUCT_PKG_DIR}/${APPROOT}/Resources -type f -exec codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" "{}" \;
+	find ${PRODUCT_PKG_DIR}/${APPROOT}/lib -type f -exec codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" "{}" \;
+
+	find ${PRODUCT_PKG_DIR}/${APPROOT}/MacOS -name "${lower_case_appname}${major_version}-*" -exec codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" "{}" \;
+	codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" ${PRODUCT_PKG_DIR}/${APPROOT}/MacOS/ffmpeg_harvid
+	codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" ${PRODUCT_PKG_DIR}/${APPROOT}/MacOS/ffprobe_harvid
+	codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" ${PRODUCT_PKG_DIR}/${APPROOT}/MacOS/harvid
+
+	codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" ${PRODUCT_PKG_DIR}/${APPROOT}/MacOS/${MAIN_EXECUTABLE}
+
+	codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" ${PRODUCT_PKG_DIR}/${APPDIR}
+
+	# Notarize
+	if test -n "${HARDENED_OPTIONS}"; then
+		echo "Notarizing the main app"
+		OK=0
+
+		ZIP_PATH=${PRODUCT_PKG_DIR}/${BUNDLENAME}.zip
+		/usr/bin/ditto -c -k --keepParent ${PRODUCT_PKG_DIR}/${APPDIR} $ZIP_PATH
+
+		notarize_output=$(xcrun altool --notarize-app --primary-bundle-id "${BUNDLE_ID_BASE}.${lower_case_appname}${major_version}.zip" --username ${ALTOOL_USERNAME} --password "@keychain:ALTOOL_PASSWORD" --file $ZIP_PATH 2>&1 | grep -o "RequestUUID = .*")
+
+		if [ $? = 0 ]; then
+			REQUEST_ID=$(echo ${notarize_output} | awk '{print $3}')
+			echo "Main app waiting on RequestUUID=${REQUEST_ID}"
+
+			count=360
+			while [ "$count" != 0 -a "$OK" == 0 ]
+			do
+				echo -n .
+				sleep 60
+				count=$((count - 1))
+
+				if checkForSuccess ${REQUEST_ID}; then
+					OK=1;
+				fi
+			done
+
+			if [ "$OK" == 1 ]; then
+				echo "Main app notarize success"
+				xcrun stapler staple ${PRODUCT_PKG_DIR}/${APPDIR}
+			else
+				echo "ERROR: Main app notarize not approved after 6 hours"
+			fi
+
+		else
+			echo "ERROR: Notarize upload failed"
+			exit 1;
+		fi
+		rm $ZIP_PATH
+	fi
+
+	#############
+	## Sign Jadeo
+
+	echo "signing the Jadeo app"
+
+	# Sign everything from inside level working out.
+	find ${PRODUCT_PKG_DIR}/Jadeo.app/Contents/Resources -type f -exec codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" "{}" \;
+	find ${PRODUCT_PKG_DIR}/Jadeo.app/Contents/Frameworks -type f -exec codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" "{}" \;
+
+	codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" ${PRODUCT_PKG_DIR}/Jadeo.app/Contents/MacOS/Jadeo-bin
+	codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" ${PRODUCT_PKG_DIR}/Jadeo.app/Contents/MacOS/xjremote
+
+	codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" ${PRODUCT_PKG_DIR}/Jadeo.app/Contents/MacOS/Jadeo
+
+	codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" ${PRODUCT_PKG_DIR}/Jadeo.app
+
+	# Notarize
+	if test -n "${HARDENED_OPTIONS}"; then
+		echo "notarizing Jadeo app"
+		OK=0
+
+		ZIP_PATH=${PRODUCT_PKG_DIR}/Jadeo.zip
+		/usr/bin/ditto -c -k --keepParent ${PRODUCT_PKG_DIR}/Jadeo.app $ZIP_PATH
+
+		notarize_output=$(xcrun altool --notarize-app --primary-bundle-id "${BUNDLE_ID_BASE}.jadeo.zip" --username ${ALTOOL_USERNAME} --password "@keychain:ALTOOL_PASSWORD" --file $ZIP_PATH 2>&1 | grep -o "RequestUUID = .*")
+
+		if [ $? = 0 ]; then
+			REQUEST_ID=$(echo ${notarize_output}  | awk '{print $3}')
+			echo "Jadeo waiting on RequestUUID=${REQUEST_ID}"
+
+			count=360
+			while [ "$count" != 0 -a "$OK" == 0 ]
+			do
+				echo -n .
+				sleep 60
+				count=$((count - 1))
+
+				if checkForSuccess ${REQUEST_ID}; then
+					OK=1;
+				fi
+			done
+
+			if [ "$OK" == 1 ]; then
+				echo "Jadeo notarize success"
+				xcrun stapler staple ${PRODUCT_PKG_DIR}/Jadeo.app
+			else
+				echo "ERROR: Jadeo notarize not approved after 6 hours"
+			fi
+
+		else
+			echo "ERROR: Notarize upload failed"
+			exit 1;
+		fi
+		rm $ZIP_PATH
+	fi
+fi
+
+################################################################################
+
 ( cd $PRODUCT_PKG_DIR ; find . ) > file_list.txt
 
 echo "Building DMG ..."
@@ -789,9 +945,9 @@ echo "Building DMG ..."
 # FINAL_DMG=$APPNAME-${release_version}.dmg
 
 if [ x$DEBUG = xT ]; then
-	UC_DMG=$APPNAME-$release_version-dbg.dmg
+	UC_DMG=$APPNAME-$release_version-dbg${DMG_ARCH}.dmg
 else
-	UC_DMG=$APPNAME-$release_version.dmg
+	UC_DMG=$APPNAME-$release_version${DMG_ARCH}.dmg
 fi
 VOLNAME=$APPNAME-$release_version
 
@@ -799,7 +955,7 @@ MNTPATH=`mktemp -d -t ardourimg`
 TMPDMG=`mktemp -t ardour`
 ICNSTMP=`mktemp -t ardouricon`
 EXTRA_SPACE_MB=30
-DMGMEGABYTES=$[ `du -sk "$PRODUCT_PKG_DIR" | cut -f 1` * 1024 / 1048576 + $EXTRA_SPACE_MB ]
+DMGMEGABYTES=$[ `du -sk "$PRODUCT_PKG_DIR" | cut -f 1` * 1024 / 1000000 + $EXTRA_SPACE_MB ]
 
 echo "DMG MB = " $DMGMEGABYTES
 
@@ -817,11 +973,11 @@ mount -t hfs -o nobrowse "${DiskDevice}" "${MNTPATH}"
 
 cp -r ${PRODUCT_PKG_DIR}/* "${MNTPATH}" || exit
 mkdir "${MNTPATH}/.background"
-cp -vi ${DMGBACKGROUND}.png "${MNTPATH}/.background/dmgbg.png"
+cp ${DMGBACKGROUND}.png "${MNTPATH}/.background/dmgbg.png"
 
 echo "setting DMG background ..."
 
-if test $(sw_vers -productVersion | cut -d '.' -f 2) -lt 9; then
+if test $(sw_vers -productVersion | cut -d '.' -f 1) -lt 11 -a $(sw_vers -productVersion | cut -d '.' -f 2) -lt 9; then
 	# OSX ..10.8.X
 	DISKNAME=${VOLNAME}
 else
@@ -883,8 +1039,14 @@ if test $(sw_vers -productVersion | cut -d '.' -f 2) -gt 5; then
 echo "setting file icon ..."
 
 cp ${PRODUCT_PKG_DIR}/$Resources/appIcon.icns ${ICNSTMP}.icns
-sips -i ${ICNSTMP}.icns
-DeRez -only icns ${ICNSTMP}.icns > ${ICNSTMP}.rsrc
+if test $(sw_vers -productVersion | cut -d '.' -f 2) -lt 13; then
+	sips -i ${ICNSTMP}.icns
+	DeRez -only icns ${ICNSTMP}.icns > ${ICNSTMP}.rsrc
+else
+	ICNSBASE=`basename ${ICNSTMP}.icns`
+	echo "read 'icns' (-16455) \"${ICNSBASE}\";" > ${ICNSTMP}.rsrc
+fi
+
 Rez -append ${ICNSTMP}.rsrc -o "$UC_DMG"
 SetFile -a C "$UC_DMG"
 
@@ -896,6 +1058,50 @@ rm -rf ${PRODUCT_PKG_DIR}
 echo
 echo "packaging suceeded."
 ls -l "$UC_DMG"
+
+echo "dmg: checking for signing credentials"
+
+if test -n "${APPLE_DEVELOPER_ID_FOR_APPLICATION}"; then
+	echo "dmg: signing"
+
+	codesign --verbose --timestamp --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" ${UC_DMG}
+
+	if test -n "${HARDENED_OPTIONS}"; then
+		echo "dmg: notarizing"
+		OK=0
+
+		notarize_output=$(xcrun altool --notarize-app --primary-bundle-id "${BUNDLE_ID_BASE}.${lower_case_appname}${major_version}.dmg" --username ${ALTOOL_USERNAME} --password "@keychain:ALTOOL_PASSWORD" --file ${UC_DMG} 2>&1 | grep -o "RequestUUID = .*")
+
+		if [ $? = 0 ]; then
+			REQUEST_ID=$(echo ${notarize_output}  | awk '{print $3}')
+			echo "dmg: waiting on RequestUUID=${REQUEST_ID}"
+
+			count=360
+			while [ "$count" != 0 -a "$OK" == 0 ]
+			do
+				echo -n .
+				sleep 60
+				count=$((count - 1))
+
+				if checkForSuccess ${REQUEST_ID}; then
+					OK=1;
+				fi
+			done
+
+			if [ "$OK" == 1 ]; then
+				echo "dmg: notarize success"
+				xcrun stapler staple ${UC_DMG}
+			else
+				echo "ERROR: dmg notarize not approved after 6 hours"
+			fi
+
+		else
+			echo "ERROR: Notarize upload failed"
+			exit 1;
+		fi
+	fi
+fi
+
 
 echo "Done."
 exit

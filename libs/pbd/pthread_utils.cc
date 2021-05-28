@@ -288,18 +288,19 @@ pbd_absolute_rt_priority (int policy, int priority)
 		/* use default. XXX this should be relative to audio (JACK) thread,
 		 * internal backends use -20 (Audio), -21 (MIDI), -22 (compuation)
 		 */
-		priority = 7; // BaseUI backwards compat.
-	}
-
-	if (priority > 0) {
+		priority = (p_min + p_max) / 2;
+	} else if (priority > 0) {
 		priority += p_min;
 	} else {
-		priority += p_max;
+		priority += p_max + 1;
 	}
-	if (priority > p_max)
+
+	if (priority > p_max) {
 		priority = p_max;
-	if (priority < p_min)
+	}
+	if (priority < p_min) {
 		priority = p_min;
+	}
 	return priority;
 }
 
@@ -339,34 +340,75 @@ pbd_set_thread_priority (pthread_t thread, const int policy, int priority)
 }
 
 bool
-pbd_mach_set_realtime_policy (pthread_t thread_id, double period_ns)
+pbd_mach_set_realtime_policy (pthread_t thread_id, double period_ns, bool main)
 {
 #ifdef __APPLE__
-	thread_time_constraint_policy_data_t policy;
+	/* https://opensource.apple.com/source/xnu/xnu-4570.61.1/osfmk/mach/thread_policy.h.auto.html
+	 * https://opensource.apple.com/source/xnu/xnu-4570.61.1/:sposfmk/kern/sched.h.auto.html
+	 */
+	kern_return_t res;
+
+	/* Ask for fixed priority */
+	thread_extended_policy_data_t tep;
+	tep.timeshare = false;
+
+	res = thread_policy_set (pthread_mach_thread_np (thread_id),
+	                         THREAD_EXTENDED_POLICY,
+	                         (thread_policy_t)&tep,
+	                         THREAD_EXTENDED_POLICY_COUNT);
+#ifndef NDEBUG
+	printf ("Mach Thread(%p) set timeshare: %d OK: %d\n", thread_id, tep.timeshare, res == KERN_SUCCESS);
+#endif
+
+	/* relative value of the computation compared to the other threads in the task. */
+	thread_precedence_policy_data_t tpp;
+	tpp.importance = main ? 63 : 62; // MAXPRI_USER = 63
+
+	res = thread_policy_set (pthread_mach_thread_np (thread_id),
+	                         THREAD_PRECEDENCE_POLICY,
+	                         (thread_policy_t)&tpp,
+	                         THREAD_PRECEDENCE_POLICY_COUNT);
+#ifndef NDEBUG
+	printf ("Mach Thread(%p) set precedence: %d OK: %d\n", thread_id, tpp.importance, res == KERN_SUCCESS);
+#endif
+
+	/* Realtime constraints */
+	double ticks_per_ns = 1.;
+	mach_timebase_info_data_t timebase;
+	if (KERN_SUCCESS == mach_timebase_info (&timebase)) {
+		ticks_per_ns = timebase.denom / timebase.numer;
+	}
+
+	thread_time_constraint_policy_data_t tcp;
 #ifndef NDEBUG
 	mach_msg_type_number_t msgt = 4;
 	boolean_t              dflt = false;
 	kern_return_t          rv   = thread_policy_get (pthread_mach_thread_np (thread_id),
-	                                                 THREAD_TIME_CONSTRAINT_POLICY, (thread_policy_t)&policy, &msgt, &dflt);
+	                                                 THREAD_TIME_CONSTRAINT_POLICY,
+	                                                 (thread_policy_t)&tcp,
+	                                                 &msgt, &dflt);
 
-	printf ("Mach Thread(%p) get: period=%d comp=%d constraint=%d preemt=%d OK: %d\n", thread_id, policy.period, policy.computation, policy.constraint, policy.preemptible, rv == KERN_SUCCESS);
+	printf ("Mach Thread(%p) get: period=%d comp=%d constraint=%d preemt=%d OK: %d\n", thread_id, tcp.period, tcp.computation, tcp.constraint, tcp.preemptible, rv == KERN_SUCCESS);
 #endif
 
 	mach_timebase_info_data_t timebase_info;
 	mach_timebase_info (&timebase_info);
 	const double period_clk = period_ns * (double)timebase_info.denom / (double)timebase_info.numer;
 
-	policy.period      = period_clk;
-	policy.computation = period_clk * .9;
-	policy.constraint  = period_clk * .95;
-	policy.preemptible = true;
-	kern_return_t res  = thread_policy_set (pthread_mach_thread_np (thread_id),
-	                                        THREAD_TIME_CONSTRAINT_POLICY, (thread_policy_t)&policy,
-	                                        THREAD_TIME_CONSTRAINT_POLICY_COUNT);
+	tcp.period      = ticks_per_ns * period_clk;
+	tcp.computation = ticks_per_ns * period_clk * .9;
+	tcp.constraint  = ticks_per_ns * period_clk * .95;
+	tcp.preemptible = true;
+
+	res = thread_policy_set (pthread_mach_thread_np (thread_id),
+	                         THREAD_TIME_CONSTRAINT_POLICY,
+	                         (thread_policy_t)&tcp,
+	                         THREAD_TIME_CONSTRAINT_POLICY_COUNT);
 
 #ifndef NDEBUG
-	printf ("Mach Thread(%p) set: period=%d comp=%d constraint=%d preemt=%d OK: %d\n", thread_id, policy.period, policy.computation, policy.constraint, policy.preemptible, res == KERN_SUCCESS);
+	printf ("Mach Thread(%p) set: period=%d comp=%d constraint=%d preemt=%d OK: %d\n", thread_id, tcp.period, tcp.computation, tcp.constraint, tcp.preemptible, res == KERN_SUCCESS);
 #endif
+
 	return res != KERN_SUCCESS;
 #endif
 	return false; // OK

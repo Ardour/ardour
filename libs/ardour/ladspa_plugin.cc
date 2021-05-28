@@ -49,7 +49,6 @@
 #include "pbd/error.h"
 #include "pbd/locale_guard.h"
 #include "pbd/xml++.h"
-#include "pbd/stacktrace.h"
 
 #include "ardour/session.h"
 #include "ardour/ladspa_plugin.h"

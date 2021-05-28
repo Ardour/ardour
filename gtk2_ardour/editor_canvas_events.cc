@@ -29,8 +29,6 @@
 #include <algorithm>
 #include <typeinfo>
 
-#include "pbd/stacktrace.h"
-
 #include "ardour/audio_track.h"
 #include "ardour/midi_track.h"
 #include "ardour/midi_region.h"
@@ -666,13 +664,6 @@ Editor::canvas_control_point_event (GdkEvent *event, ArdourCanvas::Item* item, C
 		clicked_routeview = dynamic_cast<RouteTimeAxisView*>(clicked_axisview);
 		clicked_regionview = 0;
 		break;
-
-	case GDK_SCROLL_UP:
-		break;
-
-	case GDK_SCROLL_DOWN:
-		break;
-
 	default:
 		break;
 	}

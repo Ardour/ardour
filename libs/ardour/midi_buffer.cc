@@ -136,7 +136,10 @@ MidiBuffer::merge_from (const Buffer& src, samplecnt_t /*nframes*/, sampleoffset
 	assert (mbuf != this);
 
 	/* XXX use nframes, and possible offsets */
-	merge_in_place (*mbuf);
+	if (!merge_in_place (*mbuf)) {
+		cerr << string_compose ("MidiBuffer::merge_in_place failed (buffer is full: size: %1 capacity %2 new bytes %3)", _size, _capacity, mbuf->size()) << endl;
+		PBD::stacktrace (cerr, 20);
+	}
 }
 
 /** Push an event into the buffer.
@@ -228,7 +231,7 @@ MidiBuffer::insert_event(const Evoral::Event<TimeType>& ev)
 			continue;
 		}
 		if ((*m).time() == t) {
-			const uint8_t our_midi_status_byte = *(_data + m.offset + sizeof (TimeType));
+			const uint8_t our_midi_status_byte = *(_data + m.offset + stamp_size + etype_size);
 			if (second_simultaneous_midi_byte_is_first (ev.type(), our_midi_status_byte)) {
 				continue;
 			}
@@ -249,6 +252,7 @@ MidiBuffer::insert_event(const Evoral::Event<TimeType>& ev)
 	}
 
 	uint8_t* const write_loc = _data + insert_offset;
+	assert((insert_offset + stamp_size + etype_size + ev.size()) <= _capacity);
 	*(reinterpret_cast<TimeType*>((uintptr_t)write_loc)) = t;
 	*(reinterpret_cast<Evoral::EventType*>((uintptr_t)(write_loc + stamp_size))) = ev.event_type ();
 	memcpy(write_loc + stamp_size + etype_size, ev.buffer(), ev.size());
@@ -442,13 +446,13 @@ MidiBuffer::merge_in_place (const MidiBuffer &other)
 		return true;
 	}
 
+	if (size() + other.size() > _capacity) {
+		return false;
+	}
+
 	if (size() == 0) {
 		copy (other);
 		return true;
-	}
-
-	if (size() + other.size() > _capacity) {
-		return false;
 	}
 
 	const_iterator them = other.begin();

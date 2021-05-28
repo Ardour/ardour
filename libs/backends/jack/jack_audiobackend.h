@@ -30,8 +30,6 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "pbd/stacktrace.h"
-
 #include "weak_libjack.h"
 
 #include "ardour/audio_backend.h"

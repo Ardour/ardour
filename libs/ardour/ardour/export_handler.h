@@ -109,7 +109,7 @@ class LIBARDOUR_API ExportHandler : public ExportElementFactory, public sigc::tr
 	bool add_export_config (ExportTimespanPtr timespan, ExportChannelConfigPtr channel_config,
 	                        ExportFormatSpecPtr format, ExportFilenamePtr filename,
 	                        BroadcastInfoPtr broadcast_info);
-	void do_export ();
+	int do_export ();
 
 	std::string get_cd_marker_filename(std::string filename, CDMarkerFormat format);
 
@@ -148,7 +148,7 @@ class LIBARDOUR_API ExportHandler : public ExportElementFactory, public sigc::tr
 
 	static void* start_timespan_bg (void*);
 
-	void start_timespan ();
+	int  start_timespan ();
 	int  process_timespan (samplecnt_t samples);
 	int  post_process ();
 	void finish_timespan ();

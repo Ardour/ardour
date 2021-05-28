@@ -10,6 +10,8 @@
 #include <vector>
 #include <algorithm>
 
+#include "pbd/g_atomic_compat.h"
+
 #include "audiographer/visibility.h"
 #include "audiographer/source.h"
 #include "audiographer/sink.h"
@@ -47,9 +49,10 @@ class /*LIBAUDIOGRAPHER_API*/ Threader : public Source<T>, public Sink<T>
 	  */
 	Threader (Glib::ThreadPool & thread_pool, long wait_timeout_milliseconds = 500)
 	  : thread_pool (thread_pool)
-	  , readers (0)
 	  , wait_timeout (wait_timeout_milliseconds)
-	{ }
+	{
+		g_atomic_int_set (&readers, 0);
+	}
 
 	virtual ~Threader () {}
 
@@ -117,13 +120,14 @@ class /*LIBAUDIOGRAPHER_API*/ Threader : public Source<T>, public Sink<T>
 
 	OutputVec outputs;
 
-	Glib::ThreadPool & thread_pool;
-        Glib::Threads::Mutex wait_mutex;
-        Glib::Threads::Cond  wait_cond;
-	gint        readers;
-	long        wait_timeout;
+	Glib::ThreadPool&    thread_pool;
+	Glib::Threads::Mutex wait_mutex;
+	Glib::Threads::Cond  wait_cond;
 
-        Glib::Threads::Mutex exception_mutex;
+	GATOMIC_QUAL gint readers;
+	long         wait_timeout;
+
+	Glib::Threads::Mutex exception_mutex;
 	boost::shared_ptr<ThreaderException> exception;
 
 };

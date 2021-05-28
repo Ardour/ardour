@@ -22,8 +22,6 @@
 #include <gtkmm/window.h>
 #include <gtkmm/stock.h>
 
-#include "pbd/stacktrace.h"
-
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/visibility_tracker.h"
@@ -54,7 +52,7 @@ Tabbable::~Tabbable ()
 }
 
 void
-Tabbable::add_to_notebook (Notebook& notebook, const string& tab_title)
+Tabbable::add_to_notebook (Notebook& notebook)
 {
 	_parent_notebook = &notebook;
 
@@ -151,7 +149,7 @@ Gtk::Notebook*
 Tabbable::tab_root_drop ()
 {
 	/* This is called after a drop of a tab onto the root window. Its
-	 * responsibility xois to return the notebook that this Tabbable's
+	 * responsibility is to return the notebook that this Tabbable's
 	 * contents should be packed into before the drop handling is
 	 * completed. It is not responsible for actually taking care of this
 	 * packing.
@@ -226,6 +224,7 @@ void
 Tabbable::detach ()
 {
 	show_own_window (true);
+	signal_tabbed_changed (false);
 }
 
 void
@@ -260,6 +259,9 @@ Tabbable::attach ()
 	_parent_notebook->set_tab_detachable (_contents);
 	_parent_notebook->set_tab_reorderable (_contents);
 	_parent_notebook->set_current_page (_parent_notebook->page_num (_contents));
+
+	signal_tabbed_changed (true);
+
 	_contents.show ();
 
 	/* have to force this on, which is semantically correct, since
@@ -308,7 +310,7 @@ Tabbable::show_tab ()
 	if (!window_visible() && _parent_notebook) {
 		if (_contents.get_parent() == 0) {
 			tab_requested_by_state = true;
-			add_to_notebook (*_parent_notebook, _tab_title);
+			add_to_notebook (*_parent_notebook);
 		}
 		_parent_notebook->set_current_page (_parent_notebook->page_num (_contents));
 		_contents.show ();
@@ -355,6 +357,7 @@ Tabbable::set_state (const XMLNode& node, int version)
 
 	if (_visible) {
 		show_own_window (true);
+		signal_tabbed_changed (false);
 	}
 
 	XMLNodeList children = node.children ();
@@ -370,6 +373,7 @@ Tabbable::set_state (const XMLNode& node, int version)
 		} else {
 			/* this does nothing if not tabbed */
 			hide_tab ();
+			signal_tabbed_changed (false);
 		}
 	}
 

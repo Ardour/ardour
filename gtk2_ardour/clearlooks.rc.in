@@ -187,7 +187,7 @@ style "mixer_strip_entry" = "small_text"
 
 	base[NORMAL] = @bases
 	base[ACTIVE] = @bases
-	base[SELECTED] = @bases
+	base[SELECTED] = shade (0.4, @texts)
 }
 
 style "peak_display_peaked_entry" = "mixer_strip_entry"
@@ -442,7 +442,7 @@ style "gain_fader"
 	bg[ACTIVE] = shade (0.705, @background)
 	bg[INSENSITIVE] = shade (0.705, @background)
 
-	fg[INSENSITIVE] = shade(1.4, @background)
+	fg[INSENSITIVE] = shade(1.7, @background)
 	fg[NORMAL] = shade(1.4, @background)
 	fg[ACTIVE] = shade(1.4, @background)
 }
@@ -763,11 +763,12 @@ style "send_strip_base" = "default"
 	# ACTIVE is used for MIDI in the presence of multiple data type
 	fg[NORMAL] = @send_fg
 	fg[ACTIVE] = darker(@foreground)
+	fg[INSENSITIVE] = darker(@send_fg)
 
 	bg[NORMAL] = @send_bg
 	bg[ACTIVE] = @send_bg
 	bg[PRELIGHT] = @send_bg
-	bg[INSENSITIVE] = @send_bg
+	bg[INSENSITIVE] = shade(0.705, @send_bg)
 	bg[SELECTED] = @send_bg
 }
 

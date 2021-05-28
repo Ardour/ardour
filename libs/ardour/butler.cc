@@ -56,11 +56,11 @@ Butler::Butler(Session& s)
 	, pool_trash(16)
 	, _xthread (true)
 {
-	g_atomic_int_set(&should_do_transport_work, 0);
+	g_atomic_int_set (&should_do_transport_work, 0);
 	SessionEvent::pool->set_trash (&pool_trash);
 
-        /* catch future changes to parameters */
-        Config->ParameterChanged.connect_same_thread (*this, boost::bind (&Butler::config_changed, this, _1));
+	/* catch future changes to parameters */
+	Config->ParameterChanged.connect_same_thread (*this, boost::bind (&Butler::config_changed, this, _1));
 }
 
 Butler::~Butler()
@@ -83,20 +83,33 @@ Butler::config_changed (std::string p)
 		_session.adjust_playback_buffering ();
 		if (Config->get_buffering_preset() == Custom) {
 			/* size is in Samples, not bytes */
-			_audio_playback_buffer_size = (uint32_t) floor (Config->get_audio_playback_buffer_seconds() * _session.sample_rate());
-			_session.adjust_playback_buffering ();
+			samplecnt_t audio_playback_buffer_size = (uint32_t) floor (Config->get_audio_playback_buffer_seconds() * _session.sample_rate());
+			if (_audio_playback_buffer_size != audio_playback_buffer_size) {
+				_audio_playback_buffer_size = audio_playback_buffer_size;
+				_session.adjust_playback_buffering ();
+			}
 		}
 	} else if (p == "capture-buffer-seconds") {
 		if (Config->get_buffering_preset() == Custom) {
-			_audio_capture_buffer_size = (uint32_t) floor (Config->get_audio_capture_buffer_seconds() * _session.sample_rate());
-			_session.adjust_capture_buffering ();
+			/* size is in Samples, not bytes */
+			samplecnt_t audio_capture_buffer_size = (uint32_t) floor (Config->get_audio_capture_buffer_seconds() * _session.sample_rate());
+			if (_audio_capture_buffer_size != audio_capture_buffer_size) {
+				_audio_capture_buffer_size = audio_capture_buffer_size;
+				_session.adjust_capture_buffering ();
+			}
 		}
 	} else if (p == "buffering-preset") {
 		DiskIOProcessor::set_buffering_parameters (Config->get_buffering_preset());
-		_audio_capture_buffer_size = (uint32_t) floor (Config->get_audio_capture_buffer_seconds() * _session.sample_rate());
-		_audio_playback_buffer_size = (uint32_t) floor (Config->get_audio_playback_buffer_seconds() * _session.sample_rate());
-		_session.adjust_capture_buffering ();
-		_session.adjust_playback_buffering ();
+		samplecnt_t audio_capture_buffer_size = (uint32_t) floor (Config->get_audio_capture_buffer_seconds() * _session.sample_rate());
+		samplecnt_t audio_playback_buffer_size = (uint32_t) floor (Config->get_audio_playback_buffer_seconds() * _session.sample_rate());
+		if (_audio_capture_buffer_size != audio_capture_buffer_size) {
+			_audio_capture_buffer_size = audio_capture_buffer_size;
+			_session.adjust_capture_buffering ();
+		}
+		if (_audio_playback_buffer_size != audio_playback_buffer_size) {
+			_audio_playback_buffer_size = audio_playback_buffer_size;
+			_session.adjust_playback_buffering ();
+		}
 	}
 }
 
@@ -466,7 +479,7 @@ Butler::wait_until_finished ()
 bool
 Butler::transport_work_requested () const
 {
-	return g_atomic_int_get(&should_do_transport_work);
+	return g_atomic_int_get (&should_do_transport_work);
 }
 
 void

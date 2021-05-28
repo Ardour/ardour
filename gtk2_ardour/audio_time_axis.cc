@@ -97,10 +97,6 @@ AudioTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	// Make sure things are sane...
 	assert(!is_track() || is_audio_track());
 
-	subplugin_menu.set_name ("ArdourContextMenu");
-
-	ignore_toggle = false;
-
 	if (is_audio_track()) {
 		controls_ebox.set_name ("AudioTrackControlsBaseUnselected");
 		time_axis_frame.set_name ("AudioTrackControlsBaseUnselected");
@@ -213,6 +209,7 @@ AudioTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool
 
 	} else if (param.type() == BusSendLevel) {
 
+		// XXX this does not seem correct
 		create_trim_automation_child (param, show);
 
 	} else if (param.type() == TrimAutomation) {

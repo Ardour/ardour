@@ -58,6 +58,7 @@
 #include "editor_cursors.h"
 #include "mouse_cursors.h"
 #include "note_base.h"
+#include "region_peak_cursor.h"
 #include "ui_config.h"
 #include "verbose_cursor.h"
 
@@ -105,6 +106,7 @@ Editor::initialize_canvas ()
 	_track_canvas->add_scroller (*cg);
 
 	_verbose_cursor = new VerboseCursor (this);
+	_region_peak_cursor = new RegionPeakCursor (get_noscroll_group ());
 
 	/*a group to hold global rects like punch/loop indicators */
 	global_rect_group = new ArdourCanvas::Container (hv_scroll_group);
@@ -221,9 +223,9 @@ Editor::initialize_canvas ()
 	range_marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_range_marker_bar_event), range_marker_bar));
 	transport_marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_transport_marker_bar_event), transport_marker_bar));
 
-	playhead_cursor = new EditorCursor (*this, &Editor::canvas_playhead_cursor_event);
+	_playhead_cursor = new EditorCursor (*this, &Editor::canvas_playhead_cursor_event);
 
-	snapped_cursor = new EditorCursor (*this);
+	_snapped_cursor = new EditorCursor (*this);
 
 	_canvas_drop_zone = new ArdourCanvas::Rectangle (hv_scroll_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, 0.0));
 	/* this thing is transparent */
@@ -294,10 +296,6 @@ Editor::track_canvas_viewport_size_allocated ()
 
 	if (height_changed) {
 
-		for (LocationMarkerMap::iterator i = location_markers.begin(); i != location_markers.end(); ++i) {
-			i->second->canvas_height_set (_visible_canvas_height);
-		}
-
 		vertical_adjustment.set_page_size (_visible_canvas_height);
 		if ((vertical_adjustment.get_value() + _visible_canvas_height) >= vertical_adjustment.get_upper()) {
 			/*
@@ -311,6 +309,7 @@ Editor::track_canvas_viewport_size_allocated ()
 	}
 
 	update_fixed_rulers();
+	update_tempo_based_rulers ();
 	redisplay_grid (false);
 	_summary->set_overlays_dirty ();
 }
@@ -425,7 +424,7 @@ Editor::drop_paths_part_two (const vector<string>& paths, samplepos_t sample, do
 		/* drop onto canvas background: create new tracks */
 
 		InstrumentSelector is; // instantiation builds instrument-list and sets default.
-		do_import (midi_paths, Editing::ImportDistinctFiles, ImportAsTrack, SrcBest, SMFTrackName, SMFTempoIgnore, sample, is.selected_instrument());
+		do_import (midi_paths, Editing::ImportDistinctFiles, ImportAsTrack, SrcBest, SMFTrackName, SMFTempoIgnore, sample, is.selected_instrument(), false);
 
 		if (UIConfiguration::instance().get_only_copy_imported_files() || copy) {
 			do_import (audio_paths, Editing::ImportDistinctFiles, Editing::ImportAsTrack,
@@ -447,7 +446,7 @@ Editor::drop_paths_part_two (const vector<string>& paths, samplepos_t sample, do
 
 			if (UIConfiguration::instance().get_only_copy_imported_files() || copy) {
 				do_import (audio_paths, Editing::ImportSerializeFiles, Editing::ImportToTrack,
-					   SrcBest, SMFTrackName, SMFTempoIgnore, sample);
+				           SrcBest, SMFTrackName, SMFTempoIgnore, sample, boost::shared_ptr<PluginInfo>(), false);
 			} else {
 				do_embed (audio_paths, Editing::ImportSerializeFiles, ImportToTrack, sample);
 			}
@@ -621,19 +620,19 @@ Editor::session_gui_extents (bool use_extra) const
 		boost::shared_ptr<RouteList> rl = _session->get_routes();
 		for (RouteList::iterator r = rl->begin(); r != rl->end(); ++r) {
 			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*r);
-			if (tr) {
-				boost::shared_ptr<Playlist> pl = tr->playlist();
-				if (pl && !pl->all_regions_empty()) {
-					pair<samplepos_t, samplepos_t> e;
-					e = pl->get_extent();
-					if (e.first < session_extent_start) {
-						session_extent_start = e.first;
-					}
-					if (e.second > session_extent_end) {
-						session_extent_end = e.second;
-					}
-				}
+			if (!tr) {
+				continue;
 			}
+			if (tr->presentation_info ().hidden ()) {
+				continue;
+			}
+			pair<samplepos_t, samplepos_t> e = tr->playlist()->get_extent ();
+			if (e.first == e.second) {
+				/* no regions present */
+				continue;
+			}
+			session_extent_start = std::min (session_extent_start, e.first);
+			session_extent_end   = std::max (session_extent_end, e.second);
 		}
 	}
 
@@ -993,6 +992,7 @@ void
 Editor::tie_vertical_scrolling ()
 {
 	if (pending_visual_change.idle_handler_id < 0) {
+		_region_peak_cursor->hide ();
 		_summary->set_overlays_dirty ();
 	}
 }
@@ -1019,7 +1019,7 @@ Editor::color_handler()
 	bbt_ruler->set_fill_color (base);
 	bbt_ruler->set_outline_color (text);
 
-	playhead_cursor->set_color (UIConfiguration::instance().color ("play head"));
+	_playhead_cursor->set_color (UIConfiguration::instance().color ("play head"));
 
 	meter_bar->set_fill_color (UIConfiguration::instance().color_mod ("meter bar", "marker bar"));
 	meter_bar->set_outline_color (UIConfiguration::instance().color ("marker bar separator"));

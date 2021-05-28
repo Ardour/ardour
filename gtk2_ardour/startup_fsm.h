@@ -66,6 +66,7 @@ class StartupFSM : public sigc::trackable
 	std::string session_name;
 	std::string session_template;
 	int         session_existing_sample_rate;
+	XMLNode     session_engine_hints;
 	bool        session_is_new;
 	bool        session_name_edited;
 

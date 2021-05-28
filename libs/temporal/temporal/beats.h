@@ -19,6 +19,7 @@
 #ifndef TEMPORAL_BEATS_HPP
 #define TEMPORAL_BEATS_HPP
 
+#include <cassert>
 #include <float.h>
 #include <math.h>
 #include <stdint.h>
@@ -42,15 +43,21 @@ public:
 	/** Normalize so ticks is within PPQN. */
 	void normalize() {
 		// First, fix negative ticks with positive beats
-		if (_beats >= 0) {
-			while (_ticks < 0) {
-				--_beats;
-				_ticks += PPQN;
-			}
+		while (_beats > 0 && _ticks < 0) {
+			--_beats;
+			_ticks += PPQN;
 		}
 
+		// Now fix positive ticks with negative beats
+		while (_beats < 0 && _ticks > 0) {
+			++_beats;
+			_ticks -= PPQN;
+		}
+
+		assert ((_beats < 0 && _ticks <= 0) || (_beats > 0 && _ticks >= 0) || _beats == 0);
+
 		// Work with positive beats and ticks to normalize
-		const int32_t sign  = _beats < 0 ? -1 : 1;
+		const int32_t sign  = _beats < 0 ? -1 : _ticks < 0 ? -1 : 1;
 		int32_t       beats = abs(_beats);
 		int32_t       ticks = abs(_ticks);
 

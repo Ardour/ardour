@@ -184,9 +184,13 @@ Panner2in2out::update ()
 	}
 
 	/* compute target gain coefficients for both input signals */
-
+#if 0
 	float const pan_law_attenuation = -3.0f;
 	float const scale               = 2.0f - 4.0f * powf (10.0f, pan_law_attenuation / 20.0f);
+#else
+	float const scale               = -0.831783138f;
+#endif
+
 	float       panR;
 	float       panL;
 
@@ -408,8 +412,12 @@ Panner2in2out::distribute_one_automated (AudioBuffer& srcbuf, BufferSet& obufs,
 	 * each buffer (output)
 	*/
 
+#if 0
 	const float pan_law_attenuation = -3.0f;
 	const float scale               = 2.0f - 4.0f * powf (10.0f, pan_law_attenuation / 20.0f);
+#else
+	float const scale               = -0.831783138f;
+#endif
 
 	for (pframes_t n = 0; n < nframes; ++n) {
 		float panR;

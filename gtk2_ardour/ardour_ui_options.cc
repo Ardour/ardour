@@ -30,7 +30,6 @@
 #endif
 
 #include "pbd/convert.h"
-#include "pbd/stacktrace.h"
 #include "pbd/unwind.h"
 
 #include "ardour/lv2_plugin.h"
@@ -140,37 +139,35 @@ void
 ARDOUR_UI::toggle_session_monitoring_in ()
 {
 	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Transport"), X_("SessionMonitorIn"));
+	MonitorChoice mc = _session->config.get_session_monitoring ();
 
-	if (tact->get_active() && _session->config.get_session_monitoring () == MonitorInput) {
-		return;
-	}
-	if (!tact->get_active() && _session->config.get_session_monitoring () != MonitorInput) {
+	if (tact->get_active() == (0 != (mc & MonitorInput))) {
 		return;
 	}
 
 	if (tact->get_active()) {
-		_session->config.set_session_monitoring (MonitorInput);
+		mc = MonitorChoice (mc | MonitorInput);
 	} else {
-		_session->config.set_session_monitoring (MonitorAuto);
+		mc = MonitorChoice (mc & ~MonitorInput);
 	}
+	_session->config.set_session_monitoring (mc);
 }
 
 void
 ARDOUR_UI::toggle_session_monitoring_disk ()
 {
 	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Transport"), X_("SessionMonitorDisk"));
-	if (tact->get_active() && _session->config.get_session_monitoring () == MonitorDisk) {
-		return;
-	}
-	if (!tact->get_active() && _session->config.get_session_monitoring () != MonitorDisk) {
+	MonitorChoice mc = _session->config.get_session_monitoring ();
+	if (tact->get_active() == (0 != (mc & MonitorDisk))) {
 		return;
 	}
 
 	if (tact->get_active()) {
-		_session->config.set_session_monitoring (MonitorDisk);
+		mc = MonitorChoice (mc | MonitorDisk);
 	} else {
-		_session->config.set_session_monitoring (MonitorAuto);
+		mc = MonitorChoice (mc & ~MonitorDisk);
 	}
+	_session->config.set_session_monitoring (mc);
 }
 
 void
@@ -357,20 +354,9 @@ ARDOUR_UI::parameter_changed (std::string p)
 	} else if (p == "session-monitoring") {
 		Glib::RefPtr<ToggleAction> tiact = ActionManager::get_toggle_action (X_("Transport"), X_("SessionMonitorIn"));
 		Glib::RefPtr<ToggleAction> tdact = ActionManager::get_toggle_action (X_("Transport"), X_("SessionMonitorDisk"));
-		switch (_session->config.get_session_monitoring ()) {
-			case MonitorDisk:
-				tdact->set_active (true);
-				tiact->set_active (false);
-				break;
-			case MonitorInput:
-				tiact->set_active (true);
-				tdact->set_active (false);
-				break;
-			default:
-				tdact->set_active (false);
-				tiact->set_active (false);
-				break;
-		}
+		MonitorChoice mc = _session->config.get_session_monitoring ();
+		tiact->set_active (0 != (mc & MonitorInput));
+		tdact->set_active (0 != (mc & MonitorDisk));
 	} else if (p == "punch-out") {
 		ActionManager::map_some_state ("Transport", "TogglePunchOut", sigc::mem_fun (_session->config, &SessionConfiguration::get_punch_out));
 		if (!_session->config.get_punch_out()) {
@@ -469,6 +455,11 @@ ARDOUR_UI::parameter_changed (std::string p)
 			} else {
 				action_script_call_btn[i].hide();
 			}
+		}
+		if (cols == 0) {
+			scripts_spacer.hide ();
+		} else {
+			scripts_spacer.show ();
 		}
 	} else if (p == "layered-record-mode") {
 		layered_button.set_active (_session->config.get_layered_record_mode ());

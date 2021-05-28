@@ -33,6 +33,7 @@ class LIBPBD_API FPU {
 		HasSSE2 = 0x8,
 		HasAVX = 0x10,
 		HasNEON = 0x20,
+		HasFMA = 0x40,
 	};
 
   public:
@@ -46,6 +47,7 @@ class LIBPBD_API FPU {
 	bool has_sse () const { return _flags & HasSSE; }
 	bool has_sse2 () const { return _flags & HasSSE2; }
 	bool has_avx () const { return _flags & HasAVX; }
+	bool has_fma() const { return _flags & HasFMA; }
 	bool has_neon () const { return _flags & HasNEON; }
 
   private:

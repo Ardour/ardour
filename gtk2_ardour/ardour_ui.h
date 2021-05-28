@@ -149,6 +149,7 @@ class DuplicateRouteDialog;
 class MainClock;
 class Mixer_UI;
 class PublicEditor;
+class RecorderUI;
 class SaveAsDialog;
 class SaveTemplateDialog;
 class SessionDialog;
@@ -271,6 +272,7 @@ public:
 	XMLNode* editor_settings() const;
 	XMLNode* preferences_settings() const;
 	XMLNode* mixer_settings () const;
+	XMLNode* recorder_settings () const;
 	XMLNode* keyboard_settings () const;
 	XMLNode* tearoff_settings (const char*) const;
 
@@ -408,6 +410,7 @@ private:
 	Gtk::Notebook _tabs;
 	PublicEditor*  editor;
 	Mixer_UI*      mixer;
+	RecorderUI*    recorder;
 	Gtk::Tooltips _tooltips;
 	NSM_Client*    nsm;
 	bool          _was_dirty;
@@ -502,13 +505,9 @@ private:
 	ArdourWidgets::ArdourButton layered_button;
 
 	ArdourWidgets::ArdourVSpacer recpunch_spacer;
-	ArdourWidgets::ArdourVSpacer monitoring_spacer;
 	ArdourWidgets::ArdourVSpacer latency_spacer;
 	ArdourWidgets::ArdourVSpacer monitor_spacer;
-
-	ArdourWidgets::ArdourButton monitor_in_button;
-	ArdourWidgets::ArdourButton monitor_disk_button;
-	ArdourWidgets::ArdourButton auto_input_button;
+	ArdourWidgets::ArdourVSpacer scripts_spacer;
 
 	ArdourWidgets::ArdourButton monitor_dim_button;
 	ArdourWidgets::ArdourButton monitor_mono_button;
@@ -518,7 +517,6 @@ private:
 	Gtk::Label   layered_label;
 
 	Gtk::Label   punch_space;
-	Gtk::Label   mon_space;
 
 	void toggle_external_sync ();
 	void toggle_time_master ();
@@ -672,9 +670,9 @@ private:
 	void transport_play_preroll();
 	void transport_rec_preroll();
 	void transport_rec_count_in();
-	void transport_forward (int option);
-	void transport_rewind (int option);
-	void transport_ffwd_rewind (int option, int dir);
+	void transport_forward ();
+	void transport_rewind ();
+	void transport_ffwd_rewind (bool fwd);
 	void transport_loop ();
 	void toggle_roll (bool with_abort, bool roll_out_of_bounded_mode);
 	bool trx_record_enable_all_tracks ();
@@ -705,6 +703,7 @@ private:
 	int         create_meterbridge ();
 	int         create_luawindow ();
 	int         create_masters ();
+	int         create_recorder ();
 
 	Meterbridge  *meterbridge;
 	LuaWindow    *luawindow;
@@ -858,6 +857,7 @@ private:
 
 	void successful_graph_sort ();
 	bool _feedback_exists;
+	bool _ambiguous_latency;
 
 	enum ArdourLogLevel {
 		LogLevelNone = 0,
@@ -892,6 +892,7 @@ private:
 	ArdourWidgets::ArdourButton editor_visibility_button;
 	ArdourWidgets::ArdourButton mixer_visibility_button;
 	ArdourWidgets::ArdourButton prefs_visibility_button;
+	ArdourWidgets::ArdourButton recorder_visibility_button;
 
 	bool key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev, Gtkmm2ext::Bindings*);
 	bool try_gtk_accel_binding (GtkWindow* win, GdkEventKey* ev, bool translate, GdkModifierType modifier);

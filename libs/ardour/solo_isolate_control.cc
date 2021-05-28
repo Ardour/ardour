@@ -28,12 +28,11 @@ using namespace ARDOUR;
 using namespace std;
 using namespace PBD;
 
-SoloIsolateControl::SoloIsolateControl (Session& session, std::string const & name, Soloable& s, Muteable& m)
+SoloIsolateControl::SoloIsolateControl (Session& session, std::string const & name, Soloable& s)
 	: SlavableAutomationControl (session, SoloIsolateAutomation, ParameterDescriptor (SoloIsolateAutomation),
 	                             boost::shared_ptr<AutomationList>(new AutomationList(Evoral::Parameter(SoloIsolateAutomation))),
 	                             name)
 	, _soloable (s)
-	, _muteable (m)
 	, _solo_isolated (false)
 	, _solo_isolated_by_upstream (0)
 {

@@ -36,7 +36,7 @@ typedef struct _fluid_samplecache_entry_t fluid_samplecache_entry_t;
 
 struct _fluid_samplecache_entry_t
 {
-    /* The follwing members all form the cache key */
+    /* The following members all form the cache key */
     char *filename;
     time_t modification_time;
     unsigned int sf_samplepos;
@@ -89,6 +89,7 @@ int fluid_samplecache_load(SFData *sf,
 
     if(entry == NULL)
     {
+        fluid_mutex_unlock(samplecache_mutex);
         entry = new_samplecache_entry(sf, sample_start, sample_end, sample_type, mtime);
 
         if(entry == NULL)
@@ -97,8 +98,10 @@ int fluid_samplecache_load(SFData *sf,
             goto unlock_exit;
         }
 
+        fluid_mutex_lock(samplecache_mutex);
         samplecache_list = fluid_list_prepend(samplecache_list, entry);
     }
+        fluid_mutex_unlock(samplecache_mutex);
 
     if(try_mlock && !entry->mlocked)
     {
@@ -129,7 +132,6 @@ int fluid_samplecache_load(SFData *sf,
     ret = entry->sample_count;
 
 unlock_exit:
-    fluid_mutex_unlock(samplecache_mutex);
     return ret;
 }
 
@@ -289,4 +291,23 @@ static int fluid_get_file_modification_time(char *filename, time_t *modification
 
     *modification_time = buf.st_mtime;
     return FLUID_OK;
+}
+
+
+/* Only used for tests */
+int fluid_samplecache_count_entries(void)
+{
+    fluid_list_t *entry;
+    int count = 0;
+
+    fluid_mutex_lock(samplecache_mutex);
+
+    for(entry = samplecache_list; entry != NULL; entry = fluid_list_next(entry))
+    {
+        count++;
+    }
+
+    fluid_mutex_unlock(samplecache_mutex);
+
+    return count;
 }

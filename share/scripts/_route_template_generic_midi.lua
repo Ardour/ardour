@@ -73,6 +73,6 @@ function factory (params) return function ()
 		ARDOUR.ChanCount(ARDOUR.DataType ("audio"), 2),
 		strict_io,
 		instrument, nil,
-		group, how_many, name, insert_at, ARDOUR.TrackMode.Normal)
+		group, how_many, name, insert_at, ARDOUR.TrackMode.Normal, true)
 
 end end

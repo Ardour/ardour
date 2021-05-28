@@ -288,15 +288,9 @@ Send::set_state (const XMLNode& node, int version)
 	}
 
 	XMLNode* gain_node;
+
 	if ((gain_node = node.child (Controllable::xml_node_name.c_str ())) != 0) {
 		_gain_control->set_state (*gain_node, version);
-#if 1 // remove after Ardour 6.0 / Mixbus 6.1
-		/* fix old sessions (6.0-pre0-3039-g93180ceea9 .. 6.0-pre0-3459-g587fc50059)
-		 * this is mainly relevant for Mixbus6.0, copy/paste aux-sends.
-		 * -> remove me after 6.1
-		 */
-		_gain_control->set_flag (Controllable::InlineControl);
-#endif
 	}
 
 	if (version <= 6000) {

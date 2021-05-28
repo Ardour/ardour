@@ -25,7 +25,6 @@
 
 #include "pbd/compose.h"
 #include "pbd/error.h"
-#include "pbd/stacktrace.h"
 
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/menu_elems.h"

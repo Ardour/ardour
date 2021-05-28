@@ -276,6 +276,7 @@
         <menuitem action='set-tempo-from-edit-range'/>
       </menu>
       <menuitem action='set-mouse-mode-object-range'/>
+      <menuitem action='show-touched-automation'/>
       <separator/>
       <menu action="LuaScripts">
         <menuitem action='toggle-script-manager'/>
@@ -358,6 +359,13 @@
         <menuitem action='nudge-forward-by-capture-offset'/>
         <menuitem action='nudge-backward-by-capture-offset'/>
         <menuitem action='sequence-regions'/>
+      </menu>
+      <menu action='RegionMenuMarkers'>
+        <menuitem action='add-region-cue-marker'/>
+        <menuitem action='clear-region-cue-markers'/>
+	<separator/>
+        <menuitem action='make-region-markers-cd'/>
+        <menuitem action='make-region-markers-global'/>
       </menu>
       <menu action='RegionMenuTrim'>
         <menuitem action='trim-front'/>
@@ -569,6 +577,12 @@
         <menuitem action='attach-mixer'/>
         <menuitem action='detach-mixer'/>
       </menu>
+      <menu action='RecorderMenu'>
+        <menuitem action='show-recorder'/>
+        <menuitem action='hide-recorder'/>
+        <menuitem action='attach-recorder'/>
+        <menuitem action='detach-recorder'/>
+      </menu>
       <menu action='PrefsMenu'>
         <menuitem action='show-preferences'/>
         <menuitem action='hide-preferences'/>
@@ -646,6 +660,13 @@
     <menuitem action='hide-mixer'/>
     <menuitem action='attach-mixer'/>
     <menuitem action='detach-mixer'/>
+  </popup>
+
+  <popup action="recorderTabbableButtonMenu" accelerators='true'>
+    <menuitem action='show-recorder'/>
+    <menuitem action='hide-recorder'/>
+    <menuitem action='attach-recorder'/>
+    <menuitem action='detach-recorder'/>
   </popup>
 
   <popup action="preferencesTabbableButtonMenu" accelerators='true'>

@@ -143,8 +143,14 @@ struct _fluid_rvoice_buffers_t
     unsigned int count; /* Number of records in "bufs" */
     struct
     {
-        fluid_real_t amp;
-        int mapping; /* Mapping to mixdown buffer index */
+        /* the actual, linearly interpolated amplitude with which the dsp sample should be mixed into the buf */
+        fluid_real_t current_amp;
+
+        /* the desired amplitude [...] mixed into the buf (directly set by e.g. rapidly changing PAN events) */
+        fluid_real_t target_amp;
+
+        /* Mapping to mixdown buffer index */
+        int mapping;
     } bufs[FLUID_RVOICE_MAX_BUFS];
 };
 

@@ -189,10 +189,21 @@ public:
 	LocationList list () { return locations; }
 
 	void add (Location *, bool make_current = false);
+
+	/** Add new range to the collection
+	 *
+	 * @param start start position
+	 * @param end end position
+	 *
+	 * @return New location object
+	 */
+	Location* add_range (samplepos_t start, samplepos_t end);
+
 	void remove (Location *);
-	void clear ();
-	void clear_markers ();
-	void clear_ranges ();
+	bool clear ();
+	bool clear_markers ();
+	bool clear_xrun_markers ();
+	bool clear_ranges ();
 
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&, int version);
@@ -218,6 +229,16 @@ public:
 
 	void marks_either_side (samplepos_t const, samplepos_t &, samplepos_t &) const;
 
+	/** Return range with closest start pos to the where argument
+	 *
+	 * @param pos point to compare with start pos
+	 * @param slop area around point to search for start pos
+	 * @param incl (optional) look only for ranges that includes 'where' point
+	 *
+	 * @return Location object or nil
+	 */
+	Location* range_starts_at(samplepos_t pos, samplecnt_t slop = 0, bool incl = false) const;
+
 	void find_all_between (samplepos_t start, samplepos_t, LocationList&, Location::Flags);
 
 	PBD::Signal1<void,Location*> current_changed;
@@ -236,7 +257,7 @@ public:
 		 */
 		Locations::LocationList copy;
 		{
-			Glib::Threads::Mutex::Lock lm (lock);
+			Glib::Threads::RWLock::ReaderLock lm (_lock);
 			copy = locations;
 		}
 		(obj.*method)(copy);
@@ -245,7 +266,7 @@ public:
 private:
 	LocationList locations;
 	Location*    current_location;
-	mutable Glib::Threads::Mutex lock;
+	mutable Glib::Threads::RWLock _lock;
 
 	int set_current_unlocked (Location *);
 	void location_changed (Location*);

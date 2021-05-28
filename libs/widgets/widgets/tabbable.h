@@ -47,7 +47,7 @@ public:
 	Tabbable (Gtk::Widget&, const std::string& user_visible_name, std::string const & untranslated_name, bool tabbed_by_default = true);
 	~Tabbable ();
 
-	void add_to_notebook (Gtk::Notebook& notebook, const std::string& tab_title);
+	void add_to_notebook (Gtk::Notebook& notebook);
 	void make_visible ();
 	void make_invisible ();
 	void change_visibility ();
@@ -68,6 +68,7 @@ public:
 	bool tabbed() const;
 	bool tabbed_by_default () const;
 
+
 	Gtk::Window* current_toplevel () const;
 
 	Gtk::Notebook* tab_root_drop ();
@@ -82,11 +83,12 @@ public:
 protected:
 	bool delete_event_handler (GdkEventAny *ev);
 
+	sigc::signal1<void, bool> signal_tabbed_changed;
+
 private:
 	Gtk::Widget&   _contents;
 	Gtk::Notebook  _own_notebook;
 	Gtk::Notebook* _parent_notebook;
-	std::string    _tab_title;
 	bool            tab_requested_by_state;
 
 	void show_tab ();

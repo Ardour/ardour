@@ -51,7 +51,7 @@ TrackingText::init ()
 }
 
 void
-TrackingText::pointer_motion (Duple const & winpos)
+TrackingText::pointer_motion (Duple const& winpos)
 {
 	if (!_visible) {
 		return;
@@ -60,18 +60,20 @@ TrackingText::pointer_motion (Duple const & winpos)
 	Duple pos (_parent->window_to_item (winpos));
 
 	if (!track_x) {
-		pos.x = position().x;
+		pos.x = position ().x;
+	} else {
+		pos.x += offset.x;
 	}
 
 	if (!track_y) {
-		pos.y = position().y;
+		pos.y = position ().y;
+	} else {
+		pos.y += offset.y;
 	}
-
-	pos = pos.translate (offset);
 
 	/* keep inside the window */
 
-	Rect r (0, 0, _canvas->width(), _canvas->height());
+	Rect r (0, 0, _canvas->width (), _canvas->height ());
 
 	/* border of 200 pixels on the right, and 50 on all other sides */
 
@@ -128,23 +130,23 @@ TrackingText::show_and_track (bool tx, bool ty)
 void
 TrackingText::set_x_offset (double o)
 {
-        begin_change ();
+	begin_change ();
 	offset.x = o;
-        end_change ();
+	end_change ();
 }
 
 void
 TrackingText::set_y_offset (double o)
 {
-        begin_change ();
+	begin_change ();
 	offset.y = o;
-        end_change ();
+	end_change ();
 }
 
 void
-TrackingText::set_offset (Duple const & d)
+TrackingText::set_offset (Duple const& d)
 {
-        begin_change ();
+	begin_change ();
 	offset = d;
-        end_change ();
+	end_change ();
 }

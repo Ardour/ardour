@@ -45,14 +45,14 @@ class Maschine2Mikro : public M2Device
 #endif
 
 		struct machine_mk2_input {
-			unsigned int trs_restart     : 1; // 0
-			unsigned int trs_left        : 1;
-			unsigned int trs_right       : 1;
-			unsigned int trs_grid        : 1;
-			unsigned int trs_play        : 1;
-			unsigned int trs_rec         : 1;
+			unsigned int trs_shift       : 1; // 0
 			unsigned int trs_erase       : 1;
-			unsigned int trs_shift       : 1;
+			unsigned int trs_rec         : 1;
+			unsigned int trs_play        : 1;
+			unsigned int trs_grid        : 1;
+			unsigned int trs_right       : 1;
+			unsigned int trs_left        : 1;
+			unsigned int trs_restart     : 1;
 			unsigned int group           : 1; // 8
 			unsigned int browse          : 1;
 			unsigned int sampling        : 1;
@@ -67,14 +67,14 @@ class Maschine2Mikro : public M2Device
 			unsigned int nav_left        : 1;
 			unsigned int nav_right       : 1;
 			unsigned int main            : 1;
-			unsigned int pads_scene      : 1; // 24
-			unsigned int pads_pattern    : 1;
-			unsigned int pads_mode       : 1;
-			unsigned int pads_navigate   : 1;
-			unsigned int pads_duplicate  : 1;
-			unsigned int pads_select     : 1;
+			unsigned int pads_mute       : 1; // 24
 			unsigned int pads_solo       : 1;
-			unsigned int pads_mute       : 1; // 31
+			unsigned int pads_select     : 1;
+			unsigned int pads_duplicate  : 1;
+			unsigned int pads_navigate   : 1;
+			unsigned int pads_mode       : 1;
+			unsigned int pads_pattern    : 1;
+			unsigned int pads_scene      : 1; // 31
 			unsigned int mst_wheel_pos   : 8; // 32..40 // range: 0..15
 		} ATTRIBUTE_PACKED ctrl_in;
 

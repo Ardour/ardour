@@ -23,12 +23,14 @@
 namespace AudioGrapher
 {
 
-Normalizer::Normalizer (float target_dB)
+Normalizer::Normalizer (float target_dB, samplecnt_t size)
 	  : enabled (false)
 	  , buffer (0)
 	  , buffer_size (0)
 {
 	target = pow (10.0f, target_dB * 0.05f);
+	buffer = new float[size];
+	buffer_size = size;
 }
 
 Normalizer::~Normalizer()
@@ -49,18 +51,6 @@ float Normalizer::set_peak (float peak)
 	return enabled ? gain : 1.0;
 }
 
-/** Allocates a buffer for using with const ProcessContexts
-  * This function does not need to be called if
-  * non-const ProcessContexts are given to \a process() .
-  * \n Not RT safe
-  */
-void Normalizer::alloc_buffer(samplecnt_t samples)
-{
-	delete [] buffer;
-	buffer = new float[samples];
-	buffer_size = samples;
-}
-
 /// Process a const ProcessContext \see alloc_buffer() \n RT safe
 void Normalizer::process (ProcessContext<float> const & c)
 {
@@ -71,10 +61,11 @@ void Normalizer::process (ProcessContext<float> const & c)
 	if (enabled) {
 		memcpy (buffer, c.data(), c.samples() * sizeof(float));
 		Routines::apply_gain_to_buffer (buffer, c.samples(), gain);
+		ProcessContext<float> c_out (c, buffer);
+		ListedSource<float>::output (c_out);
+	} else {
+		ListedSource<float>::output(c);
 	}
-
-	ProcessContext<float> c_out (c, buffer);
-	ListedSource<float>::output (c_out);
 }
 
 /// Process a non-const ProcsesContext in-place \n RT safe

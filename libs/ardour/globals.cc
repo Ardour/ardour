@@ -186,8 +186,24 @@ setup_hardware_optimization (bool try_optimization)
 		FPU* fpu = FPU::instance ();
 
 #if defined(ARCH_X86) && defined(BUILD_SSE_OPTIMIZATIONS)
-
 		/* We have AVX-optimized code for Windows and Linux */
+
+#ifdef FPU_AVX_FMA_SUPPORT
+		if (fpu->has_fma ()) {
+			info << "Using AVX and FMA optimized routines" << endmsg;
+
+			// FMA SET (Shares a lot with AVX)
+			compute_peak          = x86_sse_avx_compute_peak;
+			find_peaks            = x86_sse_avx_find_peaks;
+			apply_gain_to_buffer  = x86_sse_avx_apply_gain_to_buffer;
+			mix_buffers_with_gain = x86_fma_mix_buffers_with_gain;
+			mix_buffers_no_gain   = x86_sse_avx_mix_buffers_no_gain;
+			copy_vector           = x86_sse_avx_copy_vector;
+
+			generic_mix_functions = false;
+
+		} else
+#endif
 		if (fpu->has_avx ()) {
 			info << "Using AVX optimized routines" << endmsg;
 
@@ -594,10 +610,10 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	   while for pure I/O (e.g. "Click") track/bus creation must always fail.
 	*/
 
-	reserved_io_names[_("Monitor")]          = true;
-	reserved_io_names[_("Master")]           = true;
-	reserved_io_names[X_("auditioner")]      = true; // auditioner.cc  Track (s, "auditioner",...)
-	reserved_io_names[_("Virtual Keyboard")] = false;
+	reserved_io_names[_("Monitor")]             = true;
+	reserved_io_names[_("Master")]              = true;
+	reserved_io_names[X_("auditioner")]         = true; // auditioner.cc  Track (s, "auditioner",...)
+	reserved_io_names[X_("x-virtual-keyboard")] = false;
 
 	/* pure I/O */
 	reserved_io_names[X_("Click")]           = false; // session.cc ClickIO (*this, X_("Click")

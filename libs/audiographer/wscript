@@ -60,6 +60,7 @@ def build(bld):
 
     audiographer_sources = [
         'private/gdither/gdither.cc',
+        'private/limiter/limiter.cc',
         'src/general/sample_format_converter.cc',
         'src/routines.cc',
         'src/debug_utils.cc',
@@ -67,6 +68,7 @@ def build(bld):
         'src/general/broadcast_info.cc',
         'src/general/demo_noise.cc',
         'src/general/loudness_reader.cc',
+        'src/general/limiter.cc',
         'src/general/normalizer.cc'
         ]
     if bld.is_defined('HAVE_SAMPLERATE'):

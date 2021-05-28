@@ -77,7 +77,7 @@ public:
 	int set_state (const XMLNode&, int version);
 
 	bool destroy_region (boost::shared_ptr<Region>);
-	void _split_region (boost::shared_ptr<Region>, const MusicSample& position);
+	void _split_region (boost::shared_ptr<Region>, const MusicSample& position, ThawList& thawlist);
 
 	void set_note_mode (NoteMode m) { _note_mode = m; }
 

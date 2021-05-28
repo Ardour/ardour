@@ -15,12 +15,13 @@
    <Binding key="Primary-v" action="Mixer/paste-processors" group="Processor operations on the selected strip(s)"/>
    <Binding key="Delete" action="Mixer/delete-processors" group="Processor operations on the selected strip(s)"/>
    <Binding key="BackSpace" action="Mixer/delete-processors" group="Processor operations on the selected strip(s)"/>
-   <Binding key="Return" action="Mixer/toggle-processors" group="Processor operations on the selected strip(s)"/>
    <Binding key="Primary-a" action="Mixer/select-all-processors" group="Processor operations on the selected strip(s)"/>
    <Binding key="slash" action="Mixer/ab-plugins" group="Processor operations on the selected strip(s)"/>
    <Binding key="Secondary-m" action="Common/show-editor" group="Window Visibility"/>
    <Binding key="Secondary-Down" action="Mixer/select-next-stripable" group="Window Visibility"/>
    <Binding key="Secondary-Up" action="Mixer/select-prev-stripable" group="Window Visibility"/>
+
+   <Binding key="Return" action="Transport/GotoStart" group="Playhead to Start Marker"/>
 
    <Binding key="Tertiary-l" action="Mixer/ToggleMixerList" group="Window Visibility"/>
    <Binding key="Tertiary-v" action="Mixer/ToggleVCAPane" group="Window Visibility"/>

@@ -136,6 +136,7 @@ protected:
 	static std::list<Gdk::Color> used_colors;
 
 	Gtk::Label name_label;
+	void set_name_ellipsize_mode ();
 
 	Gtk::Label inactive_label;
 	Gtk::Table inactive_table;

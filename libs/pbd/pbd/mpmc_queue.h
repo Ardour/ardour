@@ -23,6 +23,8 @@
 #include <glib.h>
 #include <stdint.h>
 
+#include "pbd/g_atomic_compat.h"
+
 namespace PBD {
 
 /** Lock free multiple producer, multiple consumer queue
@@ -131,15 +133,15 @@ public:
 
 private:
 	struct cell_t {
-		volatile guint _sequence;
-		T              _data;
+		GATOMIC_QUAL guint _sequence;
+		T                  _data;
 	};
 
 	cell_t* _buffer;
 	size_t  _buffer_mask;
 
-	volatile gint _enqueue_pos;
-	volatile gint _dequeue_pos;
+	GATOMIC_QUAL gint _enqueue_pos;
+	GATOMIC_QUAL gint _dequeue_pos;
 };
 
 } /* end namespace */

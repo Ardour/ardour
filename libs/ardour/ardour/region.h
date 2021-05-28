@@ -99,7 +99,9 @@ public:
 
 	static void make_property_quarks ();
 
-	static PBD::Signal2<void,boost::shared_ptr<ARDOUR::Region>, const PBD::PropertyChange&> RegionPropertyChanged;
+	static PBD::Signal2<void,boost::shared_ptr<RegionList>, const PBD::PropertyChange&> RegionsPropertyChanged;
+
+	typedef std::map <PBD::PropertyChange, RegionList> ChangeMap;
 
 	virtual ~Region();
 
@@ -274,6 +276,7 @@ public:
 	boost::shared_ptr<Source> source (uint32_t n=0) const { return _sources[ (n < _sources.size()) ? n : 0 ]; }
 	uint32_t n_channels() const { return _sources.size(); }
 
+	SourceList& sources_for_edit ()           { return _sources; }
 	const SourceList& sources ()        const { return _sources; }
 	const SourceList& master_sources () const { return _master_sources; }
 
@@ -337,6 +340,8 @@ public:
 	 */
 	void transients (AnalysisFeatureList&);
 
+	void captured_xruns (XrunPositions&, bool abs = false) const;
+
 	/** merges _onsets OR _transients with _user_transients into given list
 	 * if _onsets and _transients are unset, run analysis.
 	 * list is not thinned, duplicates remain in place.
@@ -363,6 +368,15 @@ public:
 	void maybe_invalidate_transients ();
 
 	void drop_sources ();
+
+	/* Allow to collect RegionsPropertyChanged signal emissions */
+	void set_changemap (ChangeMap* changemap) {
+		_changemap = changemap;
+	}
+
+	void get_cue_markers (CueMarkers&, bool abs = false) const;
+	void move_cue_marker (CueMarker const &, samplepos_t region_relative_position);
+	void rename_cue_marker (CueMarker&, std::string const &);
 
 protected:
 	virtual XMLNode& state ();
@@ -475,6 +489,8 @@ private:
 	samplepos_t             _last_position;
 	mutable RegionEditState _first_edit;
 	layer_t                 _layer;
+
+	ChangeMap* _changemap;
 
 	void register_properties ();
 

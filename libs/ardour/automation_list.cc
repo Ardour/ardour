@@ -27,6 +27,7 @@
 #include <cmath>
 #include <sstream>
 #include <algorithm>
+
 #include "ardour/automation_list.h"
 #include "ardour/beats_samples_converter.h"
 #include "ardour/event_type_map.h"
@@ -34,9 +35,10 @@
 #include "ardour/parameter_types.h"
 #include "ardour/evoral_types_convert.h"
 #include "ardour/types_convert.h"
+
 #include "evoral/Curve.h"
+
 #include "pbd/memento_command.h"
-#include "pbd/stacktrace.h"
 #include "pbd/enumwriter.h"
 #include "pbd/types_convert.h"
 

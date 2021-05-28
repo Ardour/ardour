@@ -148,7 +148,7 @@ cp build/libs/audiographer/audiographer-*.dll $DESTDIR/bin/
 cp build/libs/fst/ardour-vst-scanner.exe $DESTDIR/bin/ || true
 cp build/libs/fst/ardour-vst3-scanner.exe $DESTDIR/bin/ || true
 cp build/session_utils/*-*.exe $DESTDIR/bin/ || true
-cp build/luasession/ardour6-lua.exe $DESTDIR/bin/ || true
+cp build/luasession/ardour*-lua.exe $DESTDIR/bin/ || true
 cp `ls -t build/gtk2_ardour/ardour-*.exe | head -n1` $DESTDIR/bin/${PRODUCT_EXE}
 
 mkdir -p $DESTDIR/lib/gtk-2.0/engines
@@ -159,7 +159,15 @@ cp $PREFIX/bin/*.yes $DESTDIR/bin/ || true
 cp $PREFIX/lib/*.dll $DESTDIR/bin/
 # special case libportaudio (wasapi), old stack has no wasapi and hence no .xp
 cp $PREFIX/bin/libportaudio-2.xp $DESTDIR/bin/ || cp $PREFIX/bin/libportaudio-2.dll $DESTDIR/bin/libportaudio-2.xp
+
+# prefer system-wide DLL
 rm -rf $DESTDIR/bin/libjack*.dll
+# Also for these (even though M$ recommends to bundle these [1],
+# there is no single set that works on all target systems, particularly
+# since some plugins also rely on it.
+# [1] https://docs.microsoft.com/en-us/windows/win32/debug/calling-the-dbghelp-library
+rm -rf $DESTDIR/bin/dbghelp*.dll
+rm -rf $DESTDIR/bin/dbgcore*.dll
 
 cp `find build/libs/surfaces/ -iname "*.dll"` $ALIBDIR/surfaces/
 cp `find build/libs/backends/ -iname "*.dll"` $ALIBDIR/backends/
@@ -394,6 +402,7 @@ RequestExecutionLevel admin
 InstallDir "\$${PGF}\\${PRODUCT_ID}"
 InstallDirRegKey HKLM "Software\\${PRODUCT_NAME}\\${PRODUCT_ID}\\$WARCH" "Install_Dir"
 !define MUI_ICON "share\\${PRODUCT_ICON}"
+!define MUI_UNICON "share\\${PRODUCT_ICON}"
 
 EOF
 
@@ -412,7 +421,7 @@ else
 
 	cat >> $NSISFILE << EOF
 !define MUI_FINISHPAGE_TITLE "Welcome to Ardour"
-!define MUI_FINISHPAGE_TEXT "This windows versions or Ardour is provided as-is.\$\\r\$\\nThe Ardour community currently has no expertise in supporting windows users, and there are no developers focusing on windows specific issues either.\$\\r\$\\nIf you like Ardour, please consider helping out."
+!define MUI_FINISHPAGE_TEXT "This Windows version of Ardour is provided as-is.\$\\r\$\\nThe Ardour community currently has no expertise in supporting Windows users, and there are no developers focusing on Windows-specific issues either.\$\\r\$\\nIf you like Ardour, please consider helping out."
 !define MUI_FINISHPAGE_LINK "Ardour Manual"
 !define MUI_FINISHPAGE_LINK_LOCATION "http://manual.ardour.org/"
 #this would run as admin - see http://forums.winamp.com/showthread.php?t=353366

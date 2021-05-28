@@ -25,8 +25,6 @@
 
 #include <glibmm/convert.h>
 
-#include "pbd/stacktrace.h"
-
 #include "midi++/port.h"
 
 #include "ardour/audioengine.h"
@@ -506,7 +504,7 @@ Surface::handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t pb, uin
 	 */
 
 	DEBUG_TRACE (DEBUG::US2400, string_compose ("Surface::handle_midi_pitchbend_message on port %3, fader = %1 value = %2 (%4)\n",
-							   fader_id, pb, _number, pb/16384.0));
+							   fader_id, pb, _number, pb/16383.0));
 
 	turn_it_on ();
 
@@ -514,7 +512,7 @@ Surface::handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t pb, uin
 
 	if (fader) {
 		Strip* strip = dynamic_cast<Strip*> (&fader->group());
-		float pos = pb / 16384.0;
+		float pos = pb / 16383.0;
 		if (strip) {
 			strip->handle_fader (*fader, pos);
 		} else {

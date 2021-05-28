@@ -129,8 +129,8 @@ using namespace ARDOUR;
 using namespace PBD;
 
 bool          LV2Plugin::force_state_save      = false;
-bool          LV2Plugin::_ui_style_flat        = false;
-bool          LV2Plugin::_ui_style_boxy        = false;
+int32_t       LV2Plugin::_ui_style_flat        = 0;
+int32_t       LV2Plugin::_ui_style_boxy        = 0;
 uint32_t      LV2Plugin::_ui_background_color  = 0x000000ff; // RGBA
 uint32_t      LV2Plugin::_ui_foreground_color  = 0xffffffff; // RGBA
 uint32_t      LV2Plugin::_ui_contrasting_color = 0x33ff33ff; // RGBA
@@ -159,6 +159,7 @@ public:
 	LilvNode* ext_causesArtifacts;
 	LilvNode* ext_notAutomatic;
 	LilvNode* ext_rangeSteps;
+	LilvNode* ext_displayPriority;
 	LilvNode* groups_group;
 	LilvNode* groups_element;
 	LilvNode* lv2_AudioPort;
@@ -215,6 +216,7 @@ public:
 	LilvNode* auto_automation_control; // atom:supports
 	LilvNode* auto_automation_controlled; // lv2:portProperty
 	LilvNode* auto_automation_controller; // lv2:portProperty
+	LilvNode* inline_display_interface; // lv2:extensionData
 	LilvNode* inline_display_in_gui; // lv2:optionalFeature
 	LilvNode* inline_mixer_control; // lv2:PortProperty
 #endif
@@ -461,6 +463,7 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 	_has_state_interface    = false;
 	_can_write_automation   = false;
 #ifdef LV2_EXTENDED
+	_display_interface      = 0;
 	_inline_display_in_gui  = false;
 #endif
 	_max_latency            = 0;
@@ -495,12 +498,11 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 	_features[0] = &_instance_access_feature;
 	_features[1] = &_data_access_feature;
 	_features[2] = &_make_path_feature;
-	_features[3] = _uri_map.uri_map_feature();
-	_features[4] = _uri_map.urid_map_feature();
-	_features[5] = _uri_map.urid_unmap_feature();
-	_features[6] = &_log_feature;
+	_features[3] = _uri_map.urid_map_feature();
+	_features[4] = _uri_map.urid_unmap_feature();
+	_features[5] = &_log_feature;
 
-	unsigned n_features = 7;
+	unsigned n_features = 6;
 	_features[n_features++] = &_def_state_feature;
 
 	lv2_atom_forge_init(&_impl->forge, _uri_map.urid_map());
@@ -575,9 +577,9 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id("http://lv2plug.in/ns/extensions/ui#scaleFactor"),
 		  sizeof(float), atom_Float, &_ui_scale_factor },
 		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id("http://ardour.org/lv2/theme/#styleBoxy"),
-		  sizeof(bool), atom_Bool, &_ui_style_boxy },
+		  sizeof(int32_t), atom_Bool, &_ui_style_boxy },
 		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id("http://ardour.org/lv2/theme/#styleFlat"),
-		  sizeof(bool), atom_Bool, &_ui_style_flat },
+		  sizeof(int32_t), atom_Bool, &_ui_style_flat },
 		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id("http://kxstudio.sf.net/ns/lv2ext/props#TransientWindowId"),
 		  sizeof(int32_t), atom_Long, &_ui_transient_win_id },
 		{ LV2_OPTIONS_INSTANCE, 0, 0, 0, 0, NULL }
@@ -655,9 +657,6 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 	lilv_node_free(options_iface_uri);
 
 #ifdef LV2_EXTENDED
-	_display_interface = (const LV2_Inline_Display_Interface*)
-		extension_data (LV2_INLINEDISPLAY__interface);
-
 	_midname_interface = (const LV2_Midnam_Interface*)
 		extension_data (LV2_MIDNAM__interface);
 	if (_midname_interface) {
@@ -691,6 +690,14 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 	if (lilv_nodes_contains (optional_features, _world.auto_can_write_automatation)) {
 		_can_write_automation = true;
 	}
+	if (lilv_plugin_has_extension_data(plugin, _world.inline_display_interface)) {
+		_display_interface = (const LV2_Inline_Display_Interface*) extension_data (LV2_INLINEDISPLAY__interface);
+	}
+#ifndef NDEBUG
+	else if (extension_data (LV2_INLINEDISPLAY__interface)) {
+		warning << string_compose(_("LV2: Plugin '%1' has inline-display extension without lv2:extensionData meta-data "), name ()) << endmsg;
+	}
+#endif
 	if (lilv_nodes_contains (optional_features, _world.inline_display_in_gui)) {
 		_inline_display_in_gui = true;
 	}
@@ -722,9 +729,6 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 			flags |= PORT_CONTROL;
 		} else if (lilv_port_is_a(_impl->plugin, port, _world.lv2_AudioPort)) {
 			flags |= PORT_AUDIO;
-		} else if (lilv_port_is_a(_impl->plugin, port, _world.ev_EventPort)) {
-			flags |= PORT_EVENT;
-			flags |= PORT_MIDI;  // We assume old event API ports are for MIDI
 		} else if (lilv_port_is_a(_impl->plugin, port, _world.atom_AtomPort)) {
 			LilvNodes* buffer_types = lilv_port_get_value(
 				_impl->plugin, port, _world.atom_bufferType);
@@ -2278,7 +2282,8 @@ LV2Plugin::get_parameter_descriptor(uint32_t which, ParameterDescriptor& desc) c
 	lilv_port_get_range(_impl->plugin, port, &def, &min, &max);
 	portunits = lilv_port_get_value(_impl->plugin, port, _world.units_unit);
 
-	LilvNode* steps   = lilv_port_get(_impl->plugin, port, _world.ext_rangeSteps);
+	LilvNode* steps             = lilv_port_get(_impl->plugin, port, _world.ext_rangeSteps);
+	LilvNode* display_priority  = lilv_port_get(_impl->plugin, port, _world.ext_displayPriority);
 
 	// TODO: Once we can rely on lilv 0.18.0 being present,
 	// load_parameter_descriptor() can be used for ports as well
@@ -2291,6 +2296,7 @@ LV2Plugin::get_parameter_descriptor(uint32_t which, ParameterDescriptor& desc) c
 	desc.lower        = min ? lilv_node_as_float(min) : 0.0f;
 	desc.upper        = max ? lilv_node_as_float(max) : 1.0f;
 	load_parameter_descriptor_units(_world.world, desc, portunits);
+
 
 	if (desc.sr_dependent) {
 		desc.lower *= _session.sample_rate ();
@@ -2307,6 +2313,9 @@ LV2Plugin::get_parameter_descriptor(uint32_t which, ParameterDescriptor& desc) c
 	if (steps) {
 		desc.rangesteps = lilv_node_as_float (steps);
 	}
+	if (display_priority) {
+		desc.display_priority = lilv_node_as_int (display_priority);
+	}
 
 	desc.update_steps();
 
@@ -2314,6 +2323,7 @@ LV2Plugin::get_parameter_descriptor(uint32_t which, ParameterDescriptor& desc) c
 	lilv_node_free(min);
 	lilv_node_free(max);
 	lilv_node_free(steps);
+	lilv_node_free(display_priority);
 	lilv_nodes_free(portunits);
 
 	return 0;
@@ -2328,7 +2338,7 @@ LV2Plugin::describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id) const
 			match = PORT_AUDIO;
 			break;
 		case DataType::MIDI:
-			match = PORT_SEQUENCE | PORT_MIDI; // ignore old PORT_EVENT
+			match = PORT_SEQUENCE | PORT_MIDI;
 			break;
 		default:
 			return Plugin::IOPortDescription ("?");
@@ -2588,8 +2598,9 @@ LV2Plugin::allocate_atom_event_buffers()
 	DEBUG_TRACE(DEBUG::LV2, string_compose("allocate %1 atom_ev_buffers of %2 bytes\n", total_atom_buffers, minimumSize));
 	_atom_ev_buffers = (LV2_Evbuf**) malloc((total_atom_buffers + 1) * sizeof(LV2_Evbuf*));
 	for (int i = 0; i < total_atom_buffers; ++i ) {
-		_atom_ev_buffers[i] = lv2_evbuf_new(minimumSize, LV2_EVBUF_ATOM,
-				_uri_map.urids.atom_Chunk, _uri_map.urids.atom_Sequence);
+		_atom_ev_buffers[i] = lv2_evbuf_new(minimumSize,
+		                                    _uri_map.urids.atom_Chunk,
+		                                    _uri_map.urids.atom_Sequence);
 	}
 	_atom_ev_buffers[total_atom_buffers] = 0;
 	return;
@@ -2734,7 +2745,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 					? bufs.get_audio(index).data(offset)
 					: scratch_bufs.get_audio(0).data(offset);
 			}
-		} else if (flags & (PORT_EVENT|PORT_SEQUENCE)) {
+		} else if (flags & PORT_SEQUENCE) {
 			/* FIXME: The checks here for bufs.count().n_midi() > index shouldn't
 			   be necessary, but the mapping is illegal in some cases.  Ideally
 			   that should be fixed, but this is easier...
@@ -2753,7 +2764,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 					 */
 					bufs.ensure_lv2_bufsize((flags & PORT_INPUT), index, _port_minimumSize[port_index]);
 					_ev_buffers[port_index] = bufs.get_lv2_midi(
-						(flags & PORT_INPUT), index, (flags & PORT_EVENT));
+						(flags & PORT_INPUT), index);
 				}
 			} else if ((flags & PORT_POSITION) && (flags & PORT_INPUT)) {
 				lv2_evbuf_reset(_atom_ev_buffers[atom_port_index], true);
@@ -2823,7 +2834,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 				scratch_bufs.ensure_lv2_bufsize((flags & PORT_INPUT),
 						0, _port_minimumSize[port_index]);
 				_ev_buffers[port_index] = scratch_bufs.get_lv2_midi(
-					(flags & PORT_INPUT), 0, (flags & PORT_EVENT));
+					(flags & PORT_INPUT), 0);
 			}
 
 			buf = lv2_evbuf_get_buffer(_ev_buffers[port_index]);
@@ -2860,7 +2871,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 				 */
 				else if (atom->type == _uri_map.urids.atom_Blank ||
 				         atom->type == _uri_map.urids.atom_Object) {
-					LV2_Atom_Object* obj = (LV2_Atom_Object*)atom;
+					const LV2_Atom_Object* obj = (const LV2_Atom_Object*)atom;
 					if (obj->body.otype == _uri_map.urids.patch_Set) {
 						const LV2_Atom* property = NULL;
 						const LV2_Atom* value    = NULL;
@@ -2905,7 +2916,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 		 *                            for quite a while at least ;)
 		 */
 		// copy output of LV2 plugin's MIDI port to Ardour MIDI buffers -- MIDI OUT
-		if ((flags & PORT_OUTPUT) && (flags & (PORT_EVENT|PORT_SEQUENCE|PORT_MIDI))) {
+		if ((flags & PORT_OUTPUT) && (flags & (PORT_SEQUENCE|PORT_MIDI))) {
 			const uint32_t buf_index = out_map.get(
 				DataType::MIDI, midi_out_index++, &valid);
 			if (valid) {
@@ -2913,7 +2924,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 			}
 		}
 		// Flush MIDI (write back to Ardour MIDI buffers) -- MIDI THRU
-		else if ((flags & PORT_OUTPUT) && (flags & (PORT_EVENT|PORT_SEQUENCE))) {
+		else if ((flags & PORT_OUTPUT) && (flags & PORT_SEQUENCE)) {
 			const uint32_t buf_index = out_map.get(
 				DataType::MIDI, midi_out_index++, &valid);
 			if (valid) {
@@ -2923,7 +2934,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 
 		// Write messages to UI
 		if ((_to_ui || _can_write_automation || _patch_port_out_index != (uint32_t)-1) &&
-		    (flags & PORT_OUTPUT) && (flags & (PORT_EVENT|PORT_SEQUENCE))) {
+		    (flags & PORT_OUTPUT) && (flags & PORT_SEQUENCE)) {
 			LV2_Evbuf* buf = _ev_buffers[port_index];
 			for (LV2_Evbuf_Iterator i = lv2_evbuf_begin(buf);
 			     lv2_evbuf_is_valid(i);
@@ -3076,7 +3087,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 										_property_values[prop_id] = Variant(Variant::PATH, path);
 									}
 									if (value->type == _uri_map.urids.atom_Float) {
-										const float* val          = (float*)LV2_ATOM_BODY_CONST(value);
+										const float* val          = (const float*)LV2_ATOM_BODY_CONST(value);
 										_property_values[prop_id] = Variant(Variant::FLOAT, *val);
 									}
 									// TODO add support for other props (Int, Bool, ..)
@@ -3143,13 +3154,6 @@ LV2Plugin::parameter_is_audio(uint32_t param) const
 {
 	assert(param < _port_flags.size());
 	return _port_flags[param] & PORT_AUDIO;
-}
-
-bool
-LV2Plugin::parameter_is_event(uint32_t param) const
-{
-	assert(param < _port_flags.size());
-	return _port_flags[param] & PORT_EVENT;
 }
 
 bool
@@ -3337,6 +3341,7 @@ LV2World::LV2World()
 	ext_causesArtifacts= lilv_new_uri(world, LV2_PORT_PROPS__causesArtifacts);
 	ext_notAutomatic   = lilv_new_uri(world, LV2_PORT_PROPS__notAutomatic);
 	ext_rangeSteps     = lilv_new_uri(world, LV2_PORT_PROPS__rangeSteps);
+	ext_displayPriority= lilv_new_uri(world, LV2_PORT_PROPS__displayPriority);
 	groups_group       = lilv_new_uri(world, LV2_PORT_GROUPS__group);
 	groups_element     = lilv_new_uri(world, LV2_PORT_GROUPS__element);
 	lv2_AudioPort      = lilv_new_uri(world, LILV_URI_AUDIO_PORT);
@@ -3382,6 +3387,7 @@ LV2World::LV2World()
 	auto_automation_control     = lilv_new_uri(world, LV2_AUTOMATE_URI__control);
 	auto_automation_controlled  = lilv_new_uri(world, LV2_AUTOMATE_URI__controlled);
 	auto_automation_controller  = lilv_new_uri(world, LV2_AUTOMATE_URI__controller);
+	inline_display_interface    = lilv_new_uri(world, LV2_INLINEDISPLAY__interface);
 	inline_display_in_gui       = lilv_new_uri(world, LV2_INLINEDISPLAY__in_gui);
 	inline_mixer_control        = lilv_new_uri(world, "http://ardour.org/lv2/ext#inlineMixerControl");
 #endif
@@ -3407,6 +3413,7 @@ LV2World::~LV2World()
 	lilv_node_free(auto_automation_control);
 	lilv_node_free(auto_automation_controlled);
 	lilv_node_free(auto_automation_controller);
+	lilv_node_free(inline_display_interface);
 	lilv_node_free(inline_display_in_gui);
 	lilv_node_free(inline_mixer_control);
 #endif
@@ -3445,6 +3452,7 @@ LV2World::~LV2World()
 	lilv_node_free(lv2_AudioPort);
 	lilv_node_free(groups_group);
 	lilv_node_free(groups_element);
+	lilv_node_free(ext_displayPriority);
 	lilv_node_free(ext_rangeSteps);
 	lilv_node_free(ext_notAutomatic);
 	lilv_node_free(ext_causesArtifacts);

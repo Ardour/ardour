@@ -22,7 +22,6 @@
 #include <cassert>
 
 #include "pbd/malign.h"
-#include "pbd/stacktrace.h"
 
 #include "ardour/audio_buffer.h"
 #include "ardour/audioengine.h"

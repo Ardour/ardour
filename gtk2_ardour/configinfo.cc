@@ -31,6 +31,7 @@ ConfigInfoDialog::ConfigInfoDialog ()
 	set_border_width (12);
 	text.get_buffer()->set_text (std::string (ARDOUR::ardour_config_info));
 	text.set_wrap_mode (Gtk::WRAP_WORD);
+	text.set_editable (false);
 	text.show ();
 
 	scroller.set_shadow_type(Gtk::SHADOW_NONE);

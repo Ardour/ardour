@@ -460,7 +460,7 @@ DummyAudioBackend::_start (bool /*for_latency_measurement*/)
 	}
 
 	engine.reconnect_ports ();
-	_port_change_flag = false;
+	g_atomic_int_set (&_port_change_flag, 0);
 
 	if (pbd_pthread_create (PBD_RT_STACKSIZE_PROC, &_main_thread, pthread_process, this)) {
 		PBD::error << _("DummyAudioBackend: cannot start.") << endmsg;
@@ -693,7 +693,7 @@ DummyAudioBackend::register_system_ports()
 		std::string name = dp->setup_generator (gt, _samplerate, i - 1, a_ins);
 
 		if (!name.empty ()) {
-			dp->set_pretty_name (name);
+			dp->set_hw_port_name (name);
 		}
 	}
 
@@ -723,13 +723,13 @@ DummyAudioBackend::register_system_ports()
 		if (_midi_mode == MidiGenerator) {
 			std::string name = dp->setup_generator (i % NUM_MIDI_EVENT_GENERATORS, _samplerate);
 			if (!name.empty ()) {
-				dp->set_pretty_name (name);
+				dp->set_hw_port_name (name);
 			}
 		}
 		else if (_midi_mode == MidiOneHz) {
 			std::string name = dp->setup_generator (-1, _samplerate);
 			if (!name.empty ()) {
-				dp->set_pretty_name (name);
+				dp->set_hw_port_name (name);
 			}
 		}
 	}
@@ -753,7 +753,7 @@ DummyAudioBackend::register_system_ports()
 					ss << " >" << (apc + 1);
 				}
 			}
-			dp->set_pretty_name (ss.str());
+			dp->set_hw_port_name (ss.str());
 		}
 	}
 	return 0;
@@ -1006,9 +1006,8 @@ DummyAudioBackend::main_process_thread ()
 		bool connections_changed = false;
 		bool ports_changed = false;
 		if (!pthread_mutex_trylock (&_port_callback_mutex)) {
-			if (_port_change_flag) {
+			if (g_atomic_int_compare_and_exchange (&_port_change_flag, 1, 0)) {
 				ports_changed = true;
-				_port_change_flag = false;
 			}
 			if (!_port_connection_queue.empty ()) {
 				connections_changed = true;

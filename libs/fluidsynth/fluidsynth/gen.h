@@ -26,8 +26,12 @@ extern "C" {
 #endif
 
 /**
- * @file gen.h
- * @brief Functions and defines for SoundFont generator effects.
+ * @defgroup generators SoundFont Generators
+ * @ingroup soundfonts
+ *
+ * Functions and defines for SoundFont generator effects.
+ *
+ * @{
  */
 
 /**
@@ -96,7 +100,7 @@ enum fluid_gen_type
     GEN_OVERRIDEROOTKEY,		/**< Sample root note override */
 
     /**
-     * @brief Initial Pitch
+     * Initial Pitch
      *
      * @note This is not "standard" SoundFont generator, because it is not
      * mentioned in the list of generators in the SF2 specifications.
@@ -117,11 +121,11 @@ enum fluid_gen_type
     GEN_CUSTOM_FILTERFC,		/**< Custom filter cutoff frequency */
     GEN_CUSTOM_FILTERQ,		/**< Custom filter Q */
 
-#ifndef __DOXYGEN__
-    GEN_LAST			/**< @internal Value defines the count of generators (#fluid_gen_type) @warning This symbol is not part of the public API and ABI stability guarantee and may change at any time! */
-#endif
+    GEN_LAST			/**< @internal Value defines the count of generators (#fluid_gen_type)
+                          @warning This symbol is not part of the public API and ABI
+                          stability guarantee and may change at any time! */
 };
-
+/* @} */
 
 #ifdef __cplusplus
 }

@@ -56,6 +56,7 @@ libardour_sources = [
         'capturing_processor.cc',
         'chan_count.cc',
         'chan_mapping.cc',
+        'circular_buffer.cc',
         'config_text.cc',
         'control_group.cc',
         'control_protocol_manager.cc',
@@ -148,7 +149,9 @@ libardour_sources = [
         'mix.cc',
         'mode.cc',
         'monitor_control.cc',
+        'monitor_port.cc',
         'monitor_processor.cc',
+        'monitor_return.cc',
         'mp3fileimportable.cc',
         'mp3filesource.cc',
         'mtc_slave.cc',
@@ -234,6 +237,7 @@ libardour_sources = [
         'sndfilesource.cc',
         'solo_control.cc',
         'solo_isolate_control.cc',
+        'solo_mute_release.cc',
         'solo_safe_control.cc',
         'soundcloud_upload.cc',
         'source.cc',
@@ -248,6 +252,7 @@ libardour_sources = [
         'template_utils.cc',
         'tempo.cc',
         'tempo_map_importer.cc',
+        'thawlist.cc',
         'thread_buffers.cc',
         'ticker.cc',
         'track.cc',
@@ -401,7 +406,7 @@ def build(bld):
     obj.name         = 'libardour'
     obj.target       = 'ardour'
     obj.uselib       = ['GLIBMM','GTHREAD','AUBIO','SIGCPP','XML','UUID', 'LO',
-                        'SNDFILE','SAMPLERATE','LRDF','AUDIOUNITS', 'GIOMM',
+                        'SNDFILE','SAMPLERATE','LRDF','AUDIOUNITS', 'GIOMM', 'FFTW3F',
                         'OSX','BOOST','CURL','TAGLIB','VAMPSDK','VAMPHOSTSDK','RUBBERBAND']
     obj.use          = ['libpbd','libmidipp','libevoral',
                         'libaudiographer',
@@ -471,14 +476,17 @@ def build(bld):
         obj.source += [ 'audio_unit.cc' ]
 
     avx_sources = []
+    fma_sources = []
 
     if Options.options.fpu_optimization:
         if (bld.env['build_target'] == 'i386' or bld.env['build_target'] == 'i686'):
             obj.source += [ 'sse_functions_xmm.cc', 'sse_functions.s', ]
             avx_sources = [ 'sse_functions_avx_linux.cc' ]
+            fma_sources = [ 'x86_functions_fma.cc' ]
         elif bld.env['build_target'] == 'x86_64':
             obj.source += [ 'sse_functions_xmm.cc', 'sse_functions_64bit.s', ]
             avx_sources = [ 'sse_functions_avx_linux.cc' ]
+            fma_sources = [ 'x86_functions_fma.cc' ]
         elif bld.env['build_target'] == 'mingw':
                 # usability of the 64 bit windows assembler depends on the compiler target,
                 # not the build host, which in turn can only be inferred from the name
@@ -487,13 +495,13 @@ def build(bld):
                         obj.source += [ 'sse_functions_xmm.cc' ]
                         obj.source += [ 'sse_functions_64bit_win.s',  'sse_avx_functions_64bit_win.s' ]
                         avx_sources = [ 'sse_functions_avx.cc' ]
+                        fma_sources = [ 'x86_functions_fma.cc' ]
         elif bld.env['build_target'] == 'aarch64':
             obj.source += ['arm_neon_functions.cc']
             obj.defines += [ 'ARM_NEON_SUPPORT' ]
 
         elif bld.env['build_target'] == 'armhf':
             # 32bit ARM needs -mfpu=neon
-            obj.defines += [ 'ARM_NEON_SUPPORT' ]
             arm_neon_cxxflags = list(bld.env['CXXFLAGS'])
             arm_neon_cxxflags.append (bld.env['compiler_flags_dict']['neon'])
             bld(features = 'cxx cxxstlib asm',
@@ -506,6 +514,7 @@ def build(bld):
                 target   = 'arm_neon_functions')
 
             obj.use += ['arm_neon_functions' ]
+            obj.defines += [ 'ARM_NEON_SUPPORT' ]
 
         if avx_sources:
             # as long as we want to use AVX intrinsics in this file,
@@ -522,6 +531,23 @@ def build(bld):
                 target   = 'sse_avx_functions')
 
             obj.use += ['sse_avx_functions' ]
+
+        if bld.is_defined('FPU_AVX_FMA_SUPPORT') and fma_sources:
+            fma_cxxflags = list(bld.env['CXXFLAGS'])
+            fma_cxxflags.append (bld.env['compiler_flags_dict']['avx'])
+            fma_cxxflags.append (bld.env['compiler_flags_dict']['pic'])
+            fma_cxxflags.append (bld.env['compiler_flags_dict']['fma'])
+
+            bld(features = 'cxx cxxstlib asm',
+                source   = fma_sources,
+                cxxflags = fma_cxxflags,
+                includes = [ '.' ],
+                use = [ 'libtemporal', 'libpbd', 'libevoral', 'liblua' ],
+                uselib = [ 'GLIBMM', 'XML' ],
+                target   = 'sse_fma_functions')
+
+            obj.use += ['sse_fma_functions' ]
+            obj.defines += [ 'FPU_AVX_FMA_SUPPORT' ]
 
     # i18n
     if bld.is_defined('ENABLE_NLS'):

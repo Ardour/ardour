@@ -18,7 +18,7 @@ function signals ()
 	s:add (
 		{
 			[LuaSignal.SoloActive] = true,
-			[LuaSignal.RegionPropertyChanged] = true,
+			[LuaSignal.RegionsPropertyChanged] = true,
 			[LuaSignal.Exported] = true,
 			[LuaSignal.TransportStateChange] = true
 		}
@@ -40,13 +40,15 @@ function factory (params)
 		elseif (signal == LuaSignal.TransportStateChange) then
 			tx:send ("/session/transport", "if",
 				Session:transport_sample(), Session:transport_speed())
-		elseif (signal == LuaSignal.RegionPropertyChanged) then
-			obj,pch = ...
-			tx:send ("/region_property_changed", "sTTiii",
-				obj:name (),
-				(pch:containsSamplePos (ARDOUR.Properties.Start)),
-				(pch:containsSamplePos (ARDOUR.Properties.Length)),
-				obj:position (), obj:start (), obj:length ())
+		elseif (signal == LuaSignal.RegionsPropertyChanged) then
+			rl,pch = ...
+			for region in rl:iter() do
+				tx:send ("/region_property_changed", "sTTiii",
+					region:name (),
+					(pch:containsSamplePos (ARDOUR.Properties.Start)),
+					(pch:containsSamplePos (ARDOUR.Properties.Length)),
+					region:position (), region:start (), region:length ())
+			end
 		end
 	end
 end

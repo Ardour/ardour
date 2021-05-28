@@ -72,9 +72,6 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-Glib::Threads::Mutex AudioSource::_level_buffer_lock;
-vector<boost::shared_array<Sample> > AudioSource::_mixdown_buffers;
-vector<boost::shared_array<gain_t> > AudioSource::_gain_buffers;
 bool AudioSource::_build_missing_peakfiles = false;
 
 /** true if we want peakfiles (e.g. if we are displaying a GUI) */
@@ -349,6 +346,48 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 				  double samples_per_visual_peak, samplecnt_t samples_per_file_peak) const
 {
 	Glib::Threads::Mutex::Lock lm (_lock);
+
+#if 0 // DEBUG ONLY
+	/* Bypass peak-file cache, compute peaks using raw data from source */
+	DEBUG_TRACE (DEBUG::Peaks, string_compose ("RP: npeaks = %1 start = %2 cnt = %3 spp = %4 pf = %5\n", npeaks, start, cnt, samples_per_visual_peak, _peakpath));
+	{
+		samplecnt_t scm = ceil (samples_per_visual_peak);
+		samplecnt_t peak = 0;
+
+#if 1 // direct read
+		boost::scoped_array<Sample> buf(new Sample[scm]);
+		while (peak < npeaks && cnt > 0) {
+			samplecnt_t samples_read = read_unlocked (buf.get(), start, scm);
+			if (samples_read == 0) {
+				break;
+			}
+			peaks[peak].min = peaks[peak].max = buf[0];
+			find_peaks (buf.get(), samples_read, &peaks[peak].min, &peaks[peak].max);
+
+			start += samples_read;
+			cnt -= samples_read;
+			++peak;
+		}
+#else // generate square wave / ramp
+		while (peak < npeaks && cnt > 0) {
+			samplecnt_t samples_read = std::min (cnt, scm);
+			samplecnt_t val = (start + samples_read / 2) % 24000;
+
+			peaks[peak].min = peaks[peak].max = .5 - val / 24000.0;
+
+			start += samples_read;
+			cnt -= samples_read;
+			++peak;
+		}
+#endif
+		while (peak < npeaks) {
+			peaks[peak].min = peaks[peak].max = 0;
+			++peak;
+		}
+		return 0;
+	}
+#endif
+
 	double scale;
 	double expected_peaks;
 	PeakData::PeakDatum xmax;
@@ -413,8 +452,8 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 	scale = npeaks/expected_peaks;
 
 
-	DEBUG_TRACE (DEBUG::Peaks, string_compose (" ======>RP: npeaks = %1 start = %2 cnt = %3 len = %4 samples_per_visual_peak = %5 expected was %6 ... scale =  %7 PD ptr = %8\n"
-			, npeaks, start, cnt, _length, samples_per_visual_peak, expected_peaks, scale, peaks));
+	DEBUG_TRACE (DEBUG::Peaks, string_compose (" ======>RP: npeaks = %1 start = %2 cnt = %3 len = %4 samples_per_visual_peak = %5 expected was %6 ... scale =  %7 PD ptr = %8 pf = %9\n"
+			, npeaks, start, cnt, _length, samples_per_visual_peak, expected_peaks, scale, peaks, _peakpath));
 
 	/* fix for near-end-of-file conditions */
 
@@ -839,14 +878,14 @@ AudioSource::done_with_peakfile_writes (bool done)
 		compute_and_write_peaks (0, 0, 0, true, false, _FPP);
 	}
 
+	close (_peakfile_fd);
+	_peakfile_fd = -1;
+
 	if (done) {
 		Glib::Threads::Mutex::Lock lm (_peaks_ready_lock);
 		_peaks_built = true;
 		PeaksReady (); /* EMIT SIGNAL */
 	}
-
-	close (_peakfile_fd);
-	_peakfile_fd = -1;
 }
 
 /** @param first_sample Offset from the source start of the first sample to
@@ -1094,51 +1133,5 @@ AudioSource::mark_streaming_write_completed (const Lock& lock)
 
 	if (_peaks_built) {
 		PeaksReady (); /* EMIT SIGNAL */
-	}
-}
-
-void
-AudioSource::allocate_working_buffers (samplecnt_t framerate)
-{
-	Glib::Threads::Mutex::Lock lm (_level_buffer_lock);
-
-
-	/* Note: we don't need any buffers allocated until
-	   a level 1 audiosource is created, at which
-	   time we'll call ::ensure_buffers_for_level()
-	   with the right value and do the right thing.
-	*/
-
-	if (!_mixdown_buffers.empty()) {
-		ensure_buffers_for_level_locked ( _mixdown_buffers.size(), framerate);
-	}
-}
-
-void
-AudioSource::ensure_buffers_for_level (uint32_t level, samplecnt_t sample_rate)
-{
-	Glib::Threads::Mutex::Lock lm (_level_buffer_lock);
-	ensure_buffers_for_level_locked (level, sample_rate);
-}
-
-void
-AudioSource::ensure_buffers_for_level_locked (uint32_t level, samplecnt_t sample_rate)
-{
-	samplecnt_t nframes = PlaybackBuffer<Sample>::power_of_two_size ((samplecnt_t) floor (Config->get_audio_playback_buffer_seconds() * sample_rate));
-
-	/* this may be called because either "level" or "sample_rate" have
-	 * changed. and it may be called with "level" smaller than the current
-	 * number of buffers, because a new compound region has been created at
-	 * a more shallow level than the deepest one we currently have.
-	 */
-
-	uint32_t limit = max ((size_t) level, _mixdown_buffers.size());
-
-	_mixdown_buffers.clear ();
-	_gain_buffers.clear ();
-
-	for (uint32_t n = 0; n < limit; ++n) {
-		_mixdown_buffers.push_back (boost::shared_array<Sample> (new Sample[nframes]));
-		_gain_buffers.push_back (boost::shared_array<gain_t> (new gain_t[nframes]));
 	}
 }

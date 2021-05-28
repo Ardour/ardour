@@ -111,6 +111,40 @@ ARDOUR::LuaAPI::new_luaproc (Session *s, const string& name)
 	return boost::shared_ptr<Processor> (new PluginInsert (*s, p));
 }
 
+boost::shared_ptr<Processor>
+ARDOUR::LuaAPI::new_send (Session* s, boost::shared_ptr<Route> r, boost::shared_ptr<Processor> before)
+{
+	if (!s) {
+		return boost::shared_ptr<Processor> ();
+	}
+
+	boost::shared_ptr<Send> send (new Send (*s, r->pannable (), r->mute_master ()));
+
+	/* make an educated guess at the initial number of outputs for the send */
+	ChanCount outs = before ? before->input_streams () : r->n_outputs();
+
+	try {
+		Glib::Threads::Mutex::Lock lm (AudioEngine::instance ()->process_lock ());
+		send->output()->ensure_io (outs, false, r.get());
+	} catch (AudioEngine::PortRegistrationFailure& err) {
+		error << string_compose (_("Cannot set up new send: %1"), err.what ()) << endmsg;
+		return boost::shared_ptr<Processor> ();
+	}
+
+	if (0 == r->add_processor (send, before)) {
+		return send;
+	}
+
+	return boost::shared_ptr<Processor> ();
+}
+
+std::string
+ARDOUR::LuaAPI::dump_untagged_plugins ()
+{
+	PluginManager& manager = PluginManager::instance ();
+	return manager.dump_untagged_plugins();
+}
+
 PluginInfoList
 ARDOUR::LuaAPI::list_plugins ()
 {
@@ -244,7 +278,7 @@ ARDOUR::LuaAPI::get_processor_param (boost::shared_ptr<Processor> proc, uint32_t
 {
 	ok=false;
 	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (proc);
-	if (!pi) { return false; }
+	if (!pi) { ok = false; return 0;}
 	return get_plugin_insert_param (pi, which, ok);
 }
 
@@ -302,6 +336,28 @@ ARDOUR::LuaAPI::plugin_automation (lua_State *L)
 	luabridge::Stack<boost::shared_ptr<Evoral::ControlList> >::push (L, c->list ());
 	luabridge::Stack<ParameterDescriptor>::push (L, pd);
 	return 3;
+}
+
+int
+ARDOUR::LuaAPI::desc_scale_points (lua_State *L)
+{
+	typedef ParameterDescriptor T;
+
+	int top = lua_gettop (L);
+	if (top < 1) {
+		return luaL_argerror (L, 1, "invalid number of arguments, :plugin_scale_points (ParameterDescriptor)");
+	}
+
+	T* const pd = luabridge::Userdata::get<T> (L, 1, false);
+	luabridge::LuaRef tbl (luabridge::newTable (L));
+
+	if (pd && pd->scale_points) {
+		for (ARDOUR::ScalePoints::const_iterator i = pd->scale_points->begin(); i != pd->scale_points->end(); ++i) {
+			tbl[i->first] = i->second;
+		}
+	}
+	luabridge::push (L, tbl);
+	return 1;
 }
 
 int
@@ -464,6 +520,13 @@ ARDOUR::LuaAPI::wait_for_process_callback (size_t n_cycles, int64_t timeout_ms)
 		}
 	}
 	return true;
+}
+
+void
+ARDOUR::LuaAPI::segfault ()
+{
+	int* p = NULL;
+	*p = 0;
 }
 
 int

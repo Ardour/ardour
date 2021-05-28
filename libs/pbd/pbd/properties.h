@@ -343,6 +343,7 @@ private:
 
 	/* no copy-construction */
 	EnumProperty (EnumProperty const &);
+	EnumProperty& operator= (EnumProperty const &);
 };
 
 /** A Property which holds a shared_ptr to a Stateful object,
@@ -404,9 +405,10 @@ public:
 	}
 
 	bool changed () const {
-		/* Expensive, but, hey; this requires operator!= in
-		   our T
-		*/
+		if (!_old) {
+			return false;
+		}
+		/* Expensive, but, hey; this requires operator!= in our T */
 		return (*_old != *_current);
 	}
 

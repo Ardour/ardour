@@ -120,6 +120,7 @@ struct LIBARDOUR_API ParameterDescriptor : public Evoral::ParameterDescriptor
 	bool                           sr_dependent;
 	bool                           enumeration;
 	bool                           inline_ctrl;
+	uint32_t                       display_priority; ///< higher is more important http://lv2plug.in/ns/ext/port-props#displayPriority
 };
 
 } // namespace ARDOUR

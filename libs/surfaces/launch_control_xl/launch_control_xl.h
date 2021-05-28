@@ -631,7 +631,6 @@ private:
 
 	boost::shared_ptr<ARDOUR::Stripable> master;
 
-	PBD::ScopedConnection port_reg_connection;
 	void port_registration_handler();
 
 	enum ConnectionState { InputConnected = 0x1, OutputConnected = 0x2 };

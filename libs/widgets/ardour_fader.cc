@@ -22,8 +22,6 @@
 #include <iostream>
 #include <assert.h>
 
-#include "pbd/stacktrace.h"
-
 #include "gtkmm2ext/cairo_widget.h"
 #include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/keyboard.h"
@@ -713,13 +711,15 @@ ArdourFader::on_state_changed (Gtk::StateType old_state)
 }
 
 void
-ArdourFader::on_style_changed (const Glib::RefPtr<Gtk::Style>&)
+ArdourFader::on_style_changed (const Glib::RefPtr<Gtk::Style>& style)
 {
+	CairoWidget::on_style_changed (style);
 	if (_layout) {
 		std::string txt = _layout->get_text();
 		_layout.clear (); // drop reference to existing layout
 		_text = "";
 		set_text (txt, _centered_text, false);
+		queue_resize ();
 	}
 	/* patterns are cached and re-created as needed
 	 * during 'expose' in the GUI thread */

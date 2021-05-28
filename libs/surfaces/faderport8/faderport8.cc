@@ -88,6 +88,17 @@ debug_2byte_msg (std::string const& msg, int b0, int b1)
 #endif
 }
 
+bool
+FaderPort8::ProcessorCtrl::operator< (const FaderPort8::ProcessorCtrl& other) const
+{
+	if (ac->desc().display_priority == other.ac->desc().display_priority) {
+		return ac->parameter () < other.ac->parameter ();
+	}
+	/* sort higher priority first */
+	return ac->desc().display_priority > other.ac->desc().display_priority;
+}
+
+
 FaderPort8::FaderPort8 (Session& s)
 #ifdef FADERPORT16
 	: ControlProtocol (s, _("PreSonus FaderPort16"))
@@ -149,13 +160,13 @@ FaderPort8::FaderPort8 (Session& s)
 #endif
 
 	_input_bundle->add_channel (
-		inp->name(),
+		"",
 		ARDOUR::DataType::MIDI,
 		session->engine().make_port_name_non_relative (inp->name())
 		);
 
 	_output_bundle->add_channel (
-		outp->name(),
+		"",
 		ARDOUR::DataType::MIDI,
 		session->engine().make_port_name_non_relative (outp->name())
 		);
@@ -807,6 +818,7 @@ FaderPort8::set_state (const XMLNode& node, int version)
 	if ((child = node.child (X_("Input"))) != 0) {
 		XMLNode* portnode = child->child (Port::state_node_name.c_str());
 		if (portnode) {
+			portnode->remove_property ("name");
 			DEBUG_TRACE (DEBUG::FaderPort8, "FaderPort8::set_state Input\n");
 			boost::shared_ptr<ARDOUR::Port>(_input_port)->set_state (*portnode, version);
 		}
@@ -815,6 +827,7 @@ FaderPort8::set_state (const XMLNode& node, int version)
 	if ((child = node.child (X_("Output"))) != 0) {
 		XMLNode* portnode = child->child (Port::state_node_name.c_str());
 		if (portnode) {
+			portnode->remove_property ("name");
 			DEBUG_TRACE (DEBUG::FaderPort8, "FaderPort8::set_state Output\n");
 			boost::shared_ptr<ARDOUR::Port>(_output_port)->set_state (*portnode, version);
 		}
@@ -1178,7 +1191,7 @@ FaderPort8::assign_processor_ctrls ()
 	std::vector <ProcessorCtrl*> toggle_params;
 	std::vector <ProcessorCtrl*> slider_params;
 
-	for ( std::list <ProcessorCtrl>::iterator i = _proc_params.begin(); i != _proc_params.end(); ++i) {
+	for (std::list<ProcessorCtrl>::iterator i = _proc_params.begin(); i != _proc_params.end(); ++i) {
 		if ((*i).ac->toggled()) {
 			toggle_params.push_back (&(*i));
 		} else {
@@ -1398,8 +1411,12 @@ FaderPort8::select_plugin (int num)
 		if (n == "hidden") {
 			continue;
 		}
+
 		_proc_params.push_back (ProcessorCtrl (n, proc->automation_control (*i)));
 	}
+
+	/* sort by display priority */
+	_proc_params.sort ();
 
 	// TODO: open plugin GUI  if (_proc_params.size() > 0)
 

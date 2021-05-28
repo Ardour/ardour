@@ -13,7 +13,7 @@
  Note about usefulness of 24 bits:
  1)Even fluidsynth is a 24 bit synth, this format is only relevant if
  the sample format coming from the soundfont is 24 bits and the audio sample format
- choosen by the application (audio.sample.format) is not 16 bits.
+ chosen by the application (audio.sample.format) is not 16 bits.
 
  2)When the sample soundfont is 16 bits, the internal 24 bits number have
  16 bits msb and lsb to 0. Consequently, at the DAC output, the dynamic range of

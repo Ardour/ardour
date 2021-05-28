@@ -2,9 +2,12 @@
 #define CONFIG_H
 
 #define FLUIDSYNTH_VERSION_MAJOR 2
-#define FLUIDSYNTH_VERSION_MINOR 0
-#define FLUIDSYNTH_VERSION_MICRO 6
-#define FLUIDSYNTH_VERSION "2.0.6"
+#define FLUIDSYNTH_VERSION_MINOR 2
+#define FLUIDSYNTH_VERSION_MICRO 0
+#define FLUIDSYNTH_VERSION "2.2.0"
+
+/* Version number of package */
+#define VERSION "2.2.0"
 
 /* Define to enable ALSA driver */
 /* #undef ALSA_SUPPORT */
@@ -35,9 +38,6 @@
 #  define HAVE_ARPA_INET_H 1
 #endif
 
-/* Define to 1 if you have the <dlfcn.h> header file. */
-/* #undef HAVE_DLFCN_H */
-
 /* Define to 1 if you have the <errno.h> header file. */
 #define HAVE_ERRNO_H 1
 
@@ -47,23 +47,20 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #define HAVE_INTTYPES_H 1
 
-/* whether or not we are supporting ladcca */
-/* #undef HAVE_LADCCA */
+/* Define to 1 if you have the <io.h> header file. */
+/* #undef HAVE_IO_H */
 
 /* whether or not we are supporting lash */
 /* #undef HAVE_LASH */
 
-/* Define to 1 if you have the `dl' library (-ldl). */
-#define HAVE_LIBDL 1
-
-/* Define to 1 if you have the `MidiShare' library (-lMidiShare). */
-/* #undef HAVE_LIBMIDISHARE */
-
-/* Define to 1 if you have the `pthread' library (-lpthread). */
-#define HAVE_LIBPTHREAD TRUE
+/* Define if systemd support is enabled */
+/* #undef SYSTEMD_SUPPORT */
 
 /* Define to 1 if you have the <limits.h> header file. */
 #define HAVE_LIMITS_H 1
+
+/* Define to 1 if you have the <linux/soundcard.h> header file. */
+/* #undef HAVE_LINUX_SOUNDCARD_H */
 
 /* Define to 1 if you have the <machine/soundcard.h> header file. */
 /* #undef HAVE_MACHINE_SOUNDCARD_H */
@@ -71,17 +68,17 @@
 /* Define to 1 if you have the <math.h> header file. */
 #define HAVE_MATH_H 1
 
-/* Define to 1 if you have the <memory.h> header file. */
-#define HAVE_MEMORY_H 1
-
-/* Define to 1 if you have the <MidiShare.h> header file. */
-/* #undef HAVE_MIDISHARE_H */
-
 /* Define to 1 if you have the <netinet/in.h> header file. */
 /* #undef HAVE_NETINET_IN_H */
 
 /* Define to 1 if you have the <netinet/tcp.h> header file. */
 /* #undef HAVE_NETINET_TCP_H */
+
+/* Define if compiling the mixer with multi-thread support */
+/* #undef ENABLE_MIXER_THREADS */
+
+/* Define if compiling with openMP to enable parallel audio rendering */
+/* #undef HAVE_OPENMP */
 
 /* Define to 1 if you have the <pthread.h> header file. */
 #define HAVE_PTHREAD_H 1
@@ -143,11 +140,26 @@
 /* Define to 1 if you have the <getopt.h> header file. */
 /* #undef HAVE_GETOPT_H */
 
+/* Define to 1 if you have the inet_ntop() function. */
+/* #undef HAVE_INETNTOP  */
+
 /* Define to enable JACK driver */
 /* #undef JACK_SUPPORT */
 
 /* Include the LADSPA Fx unit */
 /* #undef LADSPA */
+
+/* Define to enable IPV6 support */
+/* #undef IPV6_SUPPORT */
+
+/* Define to enable network support */
+/* #undef NETWORK_SUPPORT */
+
+/* Defined when fluidsynth is build in an automated environment, where no MSVC++ Runtime Debug Assertion dialogs should pop up */
+/* #undef NO_GUI */
+
+/* libinstpatch for DLS and GIG */
+/* #undef LIBINSTPATCH_SUPPORT */
 
 /* libsndfile has ogg vorbis support */
 /* #undef LIBSNDFILE_HASVORBIS */
@@ -161,11 +173,14 @@
 /* Define if using the MinGW32 environment */
 /* #undef MINGW32 */
 
-/* Define to 1 if your C compiler doesn't accept -c and -o together. */
-/* #undef NO_MINUS_C_MINUS_O */
-
 /* Define to enable OSS driver */
 /* #undef OSS_SUPPORT TRUE */
+
+/* Define to enable OPENSLES driver */
+/* #undef OPENSLES_SUPPORT */
+
+/* Define to enable Oboe driver */
+/* #undef OBOE_SUPPORT */
 
 /* Name of package */
 #define PACKAGE "fluidsynth"
@@ -190,6 +205,20 @@
 
 /* Define to enable PulseAudio driver */
 /* #undef PULSE_SUPPORT */
+/* Define to enable DirectSound driver */
+/* #undef DSOUND_SUPPORT */
+
+/* Define to enable Windows WASAPI driver */
+/* #undef WASAPI_SUPPORT */
+
+/* Define to enable Windows WaveOut driver */
+/* #undef WAVEOUT_SUPPORT */
+
+/* Define to enable Windows MIDI driver */
+/* #undef WINMIDI_SUPPORT */
+
+/* Define to enable SDL2 audio driver */
+/* #undef SDL2_SUPPORT */
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
@@ -197,11 +226,12 @@
 /* Define to enable SIGFPE assertions */
 /* #undef TRAP_ON_FPE */
 
-/* Version number of package */
-#define VERSION "2.0.6"
-
 /* Define to do all DSP in single floating point precision */
-/* #undef WITH_FLOAT */
+#ifdef __arm__
+#  define WITH_FLOAT
+#else
+#  undef WITH_FLOAT
+#endif
 
 /* Define to profile the DSP code */
 /* #undef WITH_PROFILING */
@@ -229,5 +259,23 @@
 #ifndef __cplusplus
 /* #undef inline */
 #endif
+
+/* Define to 1 if you have the sinf() function. */
+/* #undef HAVE_SINF */
+
+/* Define to 1 if you have the cosf() function. */
+/* #undef HAVE_COSF */
+
+/* Define to 1 if you have the fabsf() function. */
+/* #undef HAVE_FABSF */
+
+/* Define to 1 if you have the powf() function. */
+/* #undef HAVE_POWF */
+
+/* Define to 1 if you have the sqrtf() function. */
+/* #undef HAVE_SQRTF */
+
+/* Define to 1 if you have the logf() function. */
+/* #undef HAVE_LOGF */
 
 #endif /* CONFIG_H */

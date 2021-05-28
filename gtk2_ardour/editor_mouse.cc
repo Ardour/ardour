@@ -81,6 +81,7 @@
 #include "edit_note_dialog.h"
 #include "mouse_cursors.h"
 #include "editor_cursors.h"
+#include "region_peak_cursor.h"
 #include "verbose_cursor.h"
 #include "note.h"
 
@@ -312,7 +313,8 @@ Editor::mouse_mode_toggled (MouseMode m)
 	if (_session && mouse_mode == MouseAudition) {
 		/* stop transport and reset default speed to avoid oddness with
 		   auditioning */
-		_session->request_transport_speed (0.0, true);
+		_session->request_stop ();
+		_session->reset_transport_speed ();
 	}
 
 	const bool was_internal = internal_editing();
@@ -742,14 +744,19 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 	switch (item_type) {
 	case PlayheadCursorItem:
-		_drags->set (new CursorDrag (this, *playhead_cursor, true), event);
+		_drags->set (new CursorDrag (this, *_playhead_cursor, true), event);
 		return true;
 
 	case MarkerItem:
 		if (Keyboard::modifier_state_equals (event->button.state, Keyboard::ModifierMask(Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 			hide_marker (item, event);
 		} else {
-			_drags->set (new MarkerDrag (this, item), event);
+			ArdourMarker* marker = static_cast<ArdourMarker*> (item->get_data ("marker"));
+			if (marker->type() == ArdourMarker::RegionCue) {
+				_drags->set (new RegionMarkerDrag (this, marker->region_view(), item), event);
+			} else {
+				_drags->set (new MarkerDrag (this, item), event);
+			}
 		}
 		return true;
 
@@ -805,7 +812,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	case BBTRulerItem:
 		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)
 		    && !ArdourKeyboard::indicates_constraint (event->button.state)) {
-			_drags->set (new CursorDrag (this, *playhead_cursor, false), event);
+			_drags->set (new CursorDrag (this, *_playhead_cursor, false), event);
 		} else if (ArdourKeyboard::indicates_constraint (event->button.state)
 		           && Keyboard::modifier_state_contains (event->button.state, Keyboard::PrimaryModifier)) {
 			_drags->set (new TempoTwistDrag (this, item), event);
@@ -822,14 +829,14 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		} else if (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
 			_drags->set (new RangeMarkerBarDrag (this, item, RangeMarkerBarDrag::CreateRangeMarker), event);
 		} else {
-			_drags->set (new CursorDrag (this, *playhead_cursor, false), event);
+			_drags->set (new CursorDrag (this, *_playhead_cursor, false), event);
 		}
 		return true;
 		break;
 
 	case CdMarkerBarItem:
 		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
-			_drags->set (new CursorDrag (this, *playhead_cursor, false), event);
+			_drags->set (new CursorDrag (this, *_playhead_cursor, false), event);
 		} else {
 			_drags->set (new RangeMarkerBarDrag (this, item, RangeMarkerBarDrag::CreateCDMarker), event);
 		}
@@ -838,7 +845,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 	case TransportMarkerBarItem:
 		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
-			_drags->set (new CursorDrag (this, *playhead_cursor, false), event);
+			_drags->set (new CursorDrag (this, *_playhead_cursor, false), event);
 		} else {
 			_drags->set (new RangeMarkerBarDrag (this, item, RangeMarkerBarDrag::CreateTransportMarker), event);
 		}
@@ -1667,7 +1674,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			break;
 
 		case MarkerItem:
-			remove_marker (*item, event);
+			remove_marker (*item);
 			break;
 
 		case RegionItem:
@@ -1787,7 +1794,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				}
 			} else if (_session) {
 				/* make sure we stop */
-				_session->request_transport_speed (0.0);
+				_session->request_stop ();
 			}
 			break;
 
@@ -1912,7 +1919,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 			break;
 		}
 		entered_marker = marker;
-		marker->set_color_rgba (UIConfiguration::instance().color ("entered marker"));
+		marker->set_entered (true);
 		break;
 
 	case MeterMarkerItem:
@@ -2013,8 +2020,6 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 	ArdourMarker *marker;
 	TempoMarker *t_marker;
 	MeterMarker *m_marker;
-	Location *loc;
-	bool is_start;
 	bool ret = true;
 
 	if (!_enter_stack.empty()) {
@@ -2042,9 +2047,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 			break;
 		}
 		entered_marker = 0;
-		if ((loc = find_location_from_marker (marker, is_start)) != 0) {
-			location_flags_changed (loc);
-		}
+		marker->set_entered (false);
 		break;
 
 	case MeterMarkerItem:
@@ -2108,7 +2111,7 @@ Editor::scrub (samplepos_t sample, double current_x)
 	if (scrubbing_direction == 0) {
 		/* first move */
 		_session->request_locate (sample, MustStop);
-		_session->request_transport_speed (0.1);
+		_session->request_transport_speed (0.1, false);
 		scrubbing_direction = 1;
 
 	} else {
@@ -2132,7 +2135,7 @@ Editor::scrub (samplepos_t sample, double current_x)
 				scrub_reverse_distance = 0;
 
 				delta = 0.01 * (last_scrub_x - current_x);
-				_session->request_transport_speed_nonzero (_session->transport_speed() - delta);
+				_session->request_transport_speed_nonzero (_session->actual_speed() - delta, false);
 			}
 
 		} else {
@@ -2151,7 +2154,7 @@ Editor::scrub (samplepos_t sample, double current_x)
 				scrub_reverse_distance = 0;
 
 				delta = 0.01 * (current_x - last_scrub_x);
-				_session->request_transport_speed_nonzero (_session->transport_speed() + delta);
+				_session->request_transport_speed_nonzero (_session->actual_speed() + delta, false);
 			}
 		}
 
@@ -2163,11 +2166,11 @@ Editor::scrub (samplepos_t sample, double current_x)
 
 			if (scrubbing_direction > 0) {
 				/* was forwards, go backwards */
-				_session->request_transport_speed (-0.1);
+				_session->request_transport_speed (-0.1, false);
 				scrubbing_direction = -1;
 			} else {
 				/* was backwards, go forwards */
-				_session->request_transport_speed (0.1);
+				_session->request_transport_speed (0.1, false);
 				scrubbing_direction = 1;
 			}
 
@@ -2216,12 +2219,27 @@ Editor::motion_handler (ArdourCanvas::Item* /*item*/, GdkEvent* event, bool from
 		//drags change the snapped_cursor location, because we are snapping the thing being dragged, not the actual mouse cursor
 		return _drags->motion_handler (event, from_autoscroll);
 	} else {
-		//the snapped_cursor shows where an operation (like Split) is going to occur
 		bool ignored;
+		bool peaks_visible = false;
 		MusicSample where (0, 0);
 		if (mouse_sample (where.sample, ignored)) {
+
+			/* display peaks */
+			if (mouse_mode == MouseContent || ArdourKeyboard::indicates_snap (event->motion.state)) {
+				AudioRegionView* arv = dynamic_cast<AudioRegionView*>(entered_regionview);
+				if (arv) {
+					_region_peak_cursor->set (arv, where.sample, samples_per_pixel);
+					peaks_visible = true;
+				}
+			}
+
+			/* the snapped_cursor shows where an operation (like Split) is going to occur */
 			snap_to_with_modifier (where, event);
 			set_snapped_cursor_position (where.sample);
+		}
+
+		if (!peaks_visible) {
+			_region_peak_cursor->hide ();
 		}
 	}
 

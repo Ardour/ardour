@@ -197,7 +197,6 @@ BufferSet::ensure_buffers(DataType type, size_t num_buffers, size_t buffer_capac
 		while (_lv2_buffers.size() < _buffers[type].size() * 2) {
 			_lv2_buffers.push_back(
 				std::make_pair(false, lv2_evbuf_new(buffer_capacity,
-				                                    LV2_EVBUF_EVENT,
 				                                    URIMap::instance().urids.atom_Chunk,
 				                                    URIMap::instance().urids.atom_Sequence)));
 		}
@@ -269,20 +268,18 @@ BufferSet::ensure_lv2_bufsize(bool input, size_t i, size_t buffer_capacity)
 	_lv2_buffers.at(i * 2 + (input ? 0 : 1)) =
 		std::make_pair(false, lv2_evbuf_new(
 					buffer_capacity,
-					LV2_EVBUF_EVENT,
 					URIMap::instance().urids.atom_Chunk,
 					URIMap::instance().urids.atom_Sequence));
 }
 
 LV2_Evbuf*
-BufferSet::get_lv2_midi(bool input, size_t i, bool old_api)
+BufferSet::get_lv2_midi(bool input, size_t i)
 {
 	assert(count().get(DataType::MIDI) > i);
 
 	LV2Buffers::value_type b     = _lv2_buffers.at(i * 2 + (input ? 0 : 1));
 	LV2_Evbuf*             evbuf = b.second;
 
-	lv2_evbuf_set_type(evbuf, old_api ? LV2_EVBUF_EVENT : LV2_EVBUF_ATOM);
 	lv2_evbuf_reset(evbuf, input);
 	return evbuf;
 }

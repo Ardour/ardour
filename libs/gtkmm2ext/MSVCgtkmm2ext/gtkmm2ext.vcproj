@@ -282,6 +282,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\cairo_theme.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\cairo_widget.cc"
 				>
 			</File>
@@ -405,6 +409,10 @@
 			</File>
 			<File
 				RelativePath="..\gtkmm2ext\cairo_packer.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtkmm2ext\cairo_theme.h"
 				>
 			</File>
 			<File

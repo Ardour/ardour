@@ -36,7 +36,6 @@
 
 #include "pbd/error.h"
 #include "pbd/memento_command.h"
-#include "pbd/stacktrace.h"
 #include "pbd/string_convert.h"
 #include "pbd/types_convert.h"
 #include "pbd/unwind.h"
@@ -783,13 +782,21 @@ AutomationTimeAxisView::add_automation_event (GdkEvent* event, samplepos_t sampl
 		/* compute vertical fractional position */
 		y = 1.0 - (y / _line->height());
 		/* map using line */
-		_line->view_to_model_coord (x, y);
+		_line->view_to_model_coord_y (y);
 	}
 
 	XMLNode& before = list->get_state();
 	std::list<Selectable*> results;
 
 	if (list->editor_add (when.sample, y, with_guard_points)) {
+
+		if (_control->automation_state () == ARDOUR::Off) {
+			_control->set_automation_state (ARDOUR::Play);
+		}
+		if (UIConfiguration::instance().get_automation_edit_cancels_auto_hide () && _control == _session->recently_touched_controllable ()) {
+			RouteTimeAxisView::signal_ctrl_touched (false);
+		}
+
 		XMLNode& after = list->get_state();
 		_editor.begin_reversible_command (_("add automation event"));
 		_session->add_command (new MementoCommand<ARDOUR::AutomationList> (*list.get (), &before, &after));

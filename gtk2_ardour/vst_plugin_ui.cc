@@ -176,7 +176,9 @@ VSTPluginUI::dispatch_effeditkey (GdkEventKey* gdk_key)
 			return false;
 	}
 
-	/* see https://github.com/DISTRHO/DPF/blob/master/distrho/src/DistrhoPluginVST.cpp */
+	/* see https://github.com/DISTRHO/DPF/blob/master/distrho/src/DistrhoPluginVST.cpp
+	 * and https://github.com/steinbergmedia/vstgui/blob/develop/vstgui/lib/vstkeycode.h#L19
+	 */
 	int special_key = 0;
 	int ascii_key = 0;
 
@@ -189,8 +191,10 @@ VSTPluginUI::dispatch_effeditkey (GdkEventKey* gdk_key)
 			special_key = 2;
 			break;
 		case GDK_Return:
-		case GDK_KP_Enter:
 			special_key = 4;
+			break;
+		case GDK_KP_Enter:
+			special_key = 19;
 			break;
 		case GDK_Escape:
 			special_key = 6;

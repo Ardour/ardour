@@ -100,7 +100,7 @@ private:
 	boost::shared_ptr<AudioRegion> the_region;
 	boost::shared_ptr<MidiRegion> midi_region;
 	samplepos_t current_sample;
-	mutable gint _auditioning;
+	mutable GATOMIC_QUAL gint _auditioning;
 	Glib::Threads::Mutex lock;
 	samplecnt_t length;
 	sampleoffset_t _seek_sample;

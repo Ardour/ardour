@@ -59,6 +59,8 @@ int have_libjack(void);
 #define jack_cpu_load                       WJACK_cpu_load
 #define jack_is_realtime                    WJACK_is_realtime
 
+#define jack_client_name_size               WJACK_client_name_size
+
 #define jack_set_freewheel                  WJACK_set_freewheel
 #define jack_set_buffer_size                WJACK_set_buffer_size
 
@@ -92,6 +94,7 @@ int have_libjack(void);
 #define jack_port_short_name                WJACK_port_short_name
 #define jack_port_flags                     WJACK_port_flags
 #define jack_port_is_mine                   WJACK_port_is_mine
+#define jack_port_connected                 WJACK_port_connected
 #define jack_get_ports                      WJACK_get_ports
 #define jack_port_name_size                 WJACK_port_name_size
 #define jack_port_type_size                 WJACK_port_type_size

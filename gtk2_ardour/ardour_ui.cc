@@ -187,6 +187,7 @@ typedef uint64_t microseconds_t;
 #include "processor_box.h"
 #include "public_editor.h"
 #include "rc_option_editor.h"
+#include "recorder_ui.h"
 #include "route_time_axis.h"
 #include "route_params_ui.h"
 #include "save_as_dialog.h"
@@ -209,6 +210,7 @@ typedef uint64_t microseconds_t;
 #include "virtual_keyboard_window.h"
 #include "add_video_dialog.h"
 #include "transcode_video_dialog.h"
+#include "plugin_selector.h"
 
 #include "pbd/i18n.h"
 
@@ -299,13 +301,13 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, main_window_visibility (0)
 	, editor (0)
 	, mixer (0)
+	, recorder (0)
 	, nsm (0)
 	, _was_dirty (false)
 	, _mixer_on_top (false)
 	, _shared_popup_menu (0)
 	, startup_fsm (0)
 	, secondary_clock_spacer (0)
-	, auto_input_button (ArdourButton::led_default_elements)
 	, latency_disable_button (ArdourButton::led_default_elements)
 	, time_info_box (0)
 	, auto_return_button (ArdourButton::led_default_elements)
@@ -352,11 +354,13 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, have_disk_speed_dialog_displayed (false)
 	, _status_bar_visibility (X_("status-bar"))
 	, _feedback_exists (false)
+	, _ambiguous_latency (false)
 	, _log_not_acknowledged (LogLevelNone)
 	, duplicate_routes_dialog (0)
-	, editor_visibility_button (S_("Window|Editor"))
-	, mixer_visibility_button (S_("Window|Mixer"))
-	, prefs_visibility_button (S_("Window|Preferences"))
+	, editor_visibility_button (S_("Window|Edit"))
+	, mixer_visibility_button (S_("Window|Mix"))
+	, prefs_visibility_button (S_("Window|Prefs"))
+	, recorder_visibility_button (S_("Window|Rec"))
 {
 	Gtkmm2ext::init (localedir);
 
@@ -833,6 +837,11 @@ ARDOUR_UI::~ARDOUR_UI ()
 
 	stop_video_server();
 
+	/* unsubscribe from AudioEngine::Stopped */
+	if (recorder) {
+		recorder->cleanup ();
+	}
+
 	if (getenv ("ARDOUR_RUNNING_UNDER_VALGRIND")) {
 		// don't bother at 'real' exit. the OS cleans up for us.
 		delete big_clock; big_clock = 0;
@@ -842,6 +851,7 @@ ARDOUR_UI::~ARDOUR_UI ()
 		delete time_info_box; time_info_box = 0;
 		delete meterbridge; meterbridge = 0;
 		delete luawindow; luawindow = 0;
+		delete recorder; recorder = 0;
 		delete editor; editor = 0;
 		delete mixer; mixer = 0;
 		delete rc_option_editor; rc_option_editor = 0; // failed to wrap object warning
@@ -851,7 +861,11 @@ ARDOUR_UI::~ARDOUR_UI ()
 		delete main_window_visibility;
 		FastMeter::flush_pattern_cache ();
 		ArdourFader::flush_pattern_cache ();
+	} else if (mixer) {
+		/* drop references to any PluginInfoPtr */
+		delete mixer->plugin_selector ();
 	}
+
 
 #ifndef NDEBUG
 	/* Small trick to flush main-thread event pool.
@@ -1670,7 +1684,7 @@ ARDOUR_UI::transport_goto_wallclock ()
 		samples += tmnow.tm_min * (60 * sample_rate);
 		samples += tmnow.tm_sec * sample_rate;
 
-		_session->request_locate (samples, RollIfAppropriate);
+		_session->request_locate (samples);
 
 		/* force displayed area in editor to start no matter
 		   what "follow playhead" setting is.
@@ -1819,7 +1833,7 @@ ARDOUR_UI::transport_roll ()
 	}
 
 	if (!rolling) {
-		_session->request_transport_speed (1.0f);
+		_session->request_roll ();
 	}
 }
 
@@ -1897,7 +1911,7 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 					_session->set_requested_return_sample (range.front().start);  //force an auto-return here
 				}
 			}
-			_session->request_transport_speed (1.0f);
+			_session->request_roll ();
 		}
 	}
 }
@@ -1978,54 +1992,111 @@ ARDOUR_UI::transport_rec_count_in ()
 }
 
 void
-ARDOUR_UI::transport_ffwd_rewind (int option, int dir)
+ARDOUR_UI::transport_ffwd_rewind (bool fwd)
 {
 	if (!_session) {
 		return;
 	}
+	// incrementally increase speed by semitones
+	// (keypress auto-repeat is 100ms)
+	const float maxspeed = Config->get_shuttle_max_speed();
+	float semitone_ratio = exp2f (1.0f/12.0f);
+	const float octave_down = powf (1.f / semitone_ratio, 12.f);
+	float transport_speed = _session->actual_speed();
+	float speed;
 
-	/* engine speed is always positive, so multiply by transport
-	 * (-1, 0, 1) to get directional value
-	 */
+	if (Config->get_rewind_ffwd_like_tape_decks()) {
 
-	const float current_transport_speed = _session->engine_speed () * _session->transport_speed ();
-	float target_speed = current_transport_speed;
+		if (fwd) {
+			if (transport_speed <= 0) {
+				_session->request_transport_speed (1.0, false);
+				_session->request_roll (TRS_UI);
+				return;
+			}
+		} else {
+			if (transport_speed >= 0) {
+				_session->request_transport_speed (-1.0, false);
+				_session->request_roll (TRS_UI);
+				return;
+			}
+		}
 
-	switch (option) {
-	case 0:
-		target_speed = dir * 1.0f;
-		break;
-	case 1:
-		target_speed = dir * 4.0f;
-		break;
-	case -1:
-		target_speed = dir * 0.5f;
-		break;
+
+	} else {
+
+		if (fabs (transport_speed) <= 0.1) {
+
+			/* close to zero, maybe flip direction */
+
+			if (fwd) {
+				if (transport_speed <= 0) {
+					_session->request_transport_speed (1.0, false);
+					_session->request_roll (TRS_UI);
+				}
+			} else {
+				if (transport_speed >= 0) {
+					_session->request_transport_speed (-1.0, false);
+					_session->request_roll (TRS_UI);
+				}
+			}
+
+			/* either we've just started, or we're moving as slowly as we
+			 * ever should
+			 */
+
+			return;
+		}
+
+		if (fwd) {
+			if (transport_speed < 0.f) {
+				if (fabs (transport_speed) < octave_down) {
+					/* we need to move the speed back towards zero */
+					semitone_ratio = powf (1.f / semitone_ratio, 4.f);
+				} else {
+					semitone_ratio = 1.f / semitone_ratio;
+				}
+			} else {
+				if (fabs (transport_speed) < octave_down) {
+					/* moving very slowly, use 4 semitone steps */
+					semitone_ratio = powf (semitone_ratio, 4.f);
+				}
+			}
+		} else {
+			if (transport_speed > 0.f) {
+				/* we need to move the speed back towards zero */
+
+				if (transport_speed < octave_down) {
+					semitone_ratio = powf (1.f / semitone_ratio, 4.f);
+				} else {
+					semitone_ratio = 1.f / semitone_ratio;
+				}
+			} else {
+				if (fabs (transport_speed) < octave_down) {
+					/* moving very slowly, use 4 semitone steps */
+					semitone_ratio = powf (semitone_ratio, 4.f);
+				}
+			}
+		}
+
 	}
 
-	/* if wanting to move forward/backward and current speed is at or above current
-	   speed (i.e. same direction, and moving), then speed up.
-	*/
+	speed = semitone_ratio * transport_speed;
+	speed = std::max (-maxspeed, std::min (maxspeed, speed));
+	_session->request_transport_speed (speed, false);
+	_session->request_roll (TRS_UI);
 
-	const bool speed_up = (dir > 0 && current_transport_speed >= target_speed) || (dir < 0 && current_transport_speed <= target_speed);
-
-	if (speed_up) {
-		target_speed = current_transport_speed * 1.5f;
-	}
-
-	_session->request_transport_speed (target_speed);
 }
 
 void
-ARDOUR_UI::transport_rewind (int option)
+ARDOUR_UI::transport_rewind ()
 {
-	transport_ffwd_rewind (option, -1);
+	transport_ffwd_rewind (false);
 }
 
 void
-ARDOUR_UI::transport_forward (int option)
+ARDOUR_UI::transport_forward ()
 {
-	transport_ffwd_rewind (option, 1);
+	transport_ffwd_rewind (true);
 }
 
 void
@@ -2206,10 +2277,6 @@ ARDOUR_UI::save_template_dialog_response (int response, SaveTemplateDialog* d)
 void
 ARDOUR_UI::save_template ()
 {
-	if (!check_audioengine (_main_window)) {
-		return;
-	}
-
 	const std::string desc = SessionMetadata::Metadata()->description ();
 	SaveTemplateDialog* d = new SaveTemplateDialog (_session->name (), desc);
 	d->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::save_template_dialog_response), d));
@@ -2627,6 +2694,8 @@ ARDOUR_UI::cleanup_peakfiles ()
 	// - setup peakfiles (background thread)
 	_session->cleanup_peakfiles ();
 
+	ArdourWaveView::WaveView::clear_cache ();
+
 	// re-add waves to ARV
 	for (list<RegionView*>::iterator i = views.begin(); i != views.end(); ++i) {
 		AudioRegionView* arv = dynamic_cast<AudioRegionView*> (*i);
@@ -2888,6 +2957,8 @@ what you would like to do.\n"), PROGRAM_NAME));
 	message.show();
 	image->show();
 	hbox->show();
+
+	Splash::instance()->hide ();
 
 	switch (dialog.run ()) {
 	case RESPONSE_ACCEPT:

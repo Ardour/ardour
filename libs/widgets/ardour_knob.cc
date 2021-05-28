@@ -26,7 +26,6 @@
 #include "pbd/compose.h"
 #include "pbd/controllable.h"
 #include "pbd/error.h"
-#include "pbd/stacktrace.h"
 
 #include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/gui_thread.h"
@@ -111,7 +110,7 @@ ArdourKnob::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t*
 
 	bool arc = (_elements & Arc)==Arc;
 	bool bevel = (_elements & Bevel)==Bevel;
-	bool flat = _flat_buttons;
+	bool flat = flat_buttons ();
 
 	if ( arc ) {
 		center_radius = scale*0.33;

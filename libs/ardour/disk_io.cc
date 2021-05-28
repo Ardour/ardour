@@ -48,13 +48,14 @@ const string DiskIOProcessor::state_node_name = X_("DiskIOProcessor");
 // PBD::Signal0<void> DiskIOProcessor::DiskOverrun;
 // PBD::Signal0<void>  DiskIOProcessor::DiskUnderrun;
 
-DiskIOProcessor::DiskIOProcessor (Session& s, string const & str, Flag f)
+DiskIOProcessor::DiskIOProcessor (Session& s, Track& t, string const & str, Flag f)
 	: Processor (s, str)
 	, _flags (f)
 	, _slaved (false)
 	, in_set_state (false)
 	, playback_sample (0)
 	, _need_butler (false)
+	, _track (t)
 	, channels (new ChannelList)
 	, _midi_buf (0)
 	, _samples_written_to_ringbuffer (0)
@@ -339,22 +340,6 @@ DiskIOProcessor::ChannelInfo::~ChannelInfo ()
 	rbuf = 0;
 	wbuf = 0;
 	capture_transition_buf = 0;
-}
-
-void
-DiskIOProcessor::drop_track ()
-{
-	_track.reset ();
-}
-
-void
-DiskIOProcessor::set_track (boost::shared_ptr<Track> t)
-{
-	_track = t;
-
-	if (_track) {
-		_track->DropReferences.connect_same_thread (*this, boost::bind (&DiskIOProcessor::drop_track, this));
-	}
 }
 
 /** Get the start, end, and length of a location "atomically".

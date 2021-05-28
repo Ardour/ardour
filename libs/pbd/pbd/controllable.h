@@ -141,6 +141,7 @@ public:
 	static PBD::Signal1<void, boost::weak_ptr<PBD::Controllable> > StopLearning;
 
 	static PBD::Signal1<void, boost::weak_ptr<PBD::Controllable> > GUIFocusChanged;
+	static PBD::Signal1<void, boost::weak_ptr<PBD::Controllable> > ControlTouched;
 
 	PBD::Signal2<void,bool,PBD::Controllable::GroupControlDisposition> Changed;
 

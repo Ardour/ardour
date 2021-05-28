@@ -23,9 +23,9 @@
 
   More information about micro tuning can be found at:
 
-  http://www.midi.org/about-midi/tuning.htm
-  http://www.midi.org/about-midi/tuning-scale.htm
-  http://www.midi.org/about-midi/tuning_extens.htm
+  https://www.midi.org/about-midi/tuning.htm
+  https://www.midi.org/about-midi/tuning-scale.htm
+  https://www.midi.org/about-midi/tuning_extens.htm
 
 */
 

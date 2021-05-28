@@ -174,6 +174,7 @@ private:
 	void unassign_controllables ();
 
 	void port_connected_or_disconnected (boost::weak_ptr<ARDOUR::Port>, boost::weak_ptr<ARDOUR::Port>);
+	void port_pretty_name_changed (std::string);
 
 	void update_processor_box ();
 

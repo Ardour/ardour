@@ -25,23 +25,18 @@ const float Analyser::fft_range_db (120); // dB
 
 Analyser::Analyser (float sample_rate, unsigned int channels, samplecnt_t bufsize, samplecnt_t n_samples)
 	: LoudnessReader (sample_rate, channels, bufsize)
+	, _rp (ARDOUR::ExportAnalysisPtr (new ARDOUR::ExportAnalysis))
+	, _result (*_rp)
 	, _n_samples (n_samples)
 	, _pos (0)
 {
+
 	//printf ("NEW ANALYSER %p r:%.1f c:%d f:%ld l%ld\n", this, sample_rate, channels, bufsize, n_samples);
 	assert (bufsize % channels == 0);
 	assert (bufsize > 1);
 	assert (_bufsize > 0);
 
-
-
-	const size_t peaks = sizeof (_result.peaks) / sizeof (ARDOUR::PeakData::PeakDatum) / 4;
-	_spp = ceil ((_n_samples + 2.f) / (float) peaks);
-
-	const size_t swh = sizeof (_result.spectrum) / sizeof (float);
-	const size_t height = sizeof (_result.spectrum[0]) / sizeof (float);
-	const size_t width = swh / height;
-	_fpp = ceil ((_n_samples + 2.f) / (float) width);
+	set_duration (n_samples);
 
 	_fft_data_size   = _bufsize / 2;
 	_fft_freq_per_bin = sample_rate / _fft_data_size / 2.f;
@@ -57,6 +52,7 @@ Analyser::Analyser (float sample_rate, unsigned int channels, samplecnt_t bufsiz
 		_fft_data_out[i] = 0;
 	}
 
+	const size_t height = sizeof (_result.spectrum[0]) / sizeof (float);
 	const float nyquist = (sample_rate * .5);
 #if 0 // linear
 #define YPOS(FREQ) rint (height * (1.0 - FREQ / nyquist))
@@ -102,6 +98,23 @@ Analyser::~Analyser ()
 }
 
 void
+Analyser::set_duration (samplecnt_t n_samples)
+{
+	if (_pos != 0) {
+		return;
+	}
+	_n_samples = n_samples;
+
+	const size_t peaks = sizeof (_result.peaks) / sizeof (ARDOUR::PeakData::PeakDatum) / 4;
+	_spp = ceil ((_n_samples + 2.f) / (float) peaks);
+
+	const size_t swh = sizeof (_result.spectrum) / sizeof (float);
+	const size_t height = sizeof (_result.spectrum[0]) / sizeof (float);
+	const size_t width = swh / height;
+	_fpp = ceil ((_n_samples + 2.f) / (float) width);
+}
+
+void
 Analyser::process (ProcessContext<float> const & ctx)
 {
 	const samplecnt_t n_samples = ctx.samples () / ctx.channels ();
@@ -123,6 +136,7 @@ Analyser::process (ProcessContext<float> const & ctx)
 	for (s = 0; s < n_samples; ++s) {
 		_fft_data_in[s] = 0;
 		const samplecnt_t pbin = (_pos + s) / _spp;
+		assert (pbin >= 0 && pbin < (sizeof (_result.peaks) / sizeof (ARDOUR::PeakData::PeakDatum) / 4));
 		for (unsigned int c = 0; c < _channels; ++c) {
 			const float v = *d;
 			if (fabsf(v) > _result.peak) { _result.peak = fabsf(v); }
@@ -145,7 +159,18 @@ Analyser::process (ProcessContext<float> const & ctx)
 	}
 
 	if (_ebur_plugin) {
-		_ebur_plugin->process (_bufs, Vamp::RealTime::fromSeconds ((double) _pos / _sample_rate));
+		Vamp::Plugin::FeatureSet features = _ebur_plugin->process (_bufs, Vamp::RealTime::fromSeconds ((double) _pos / _sample_rate));
+		if (!features.empty ()) {
+			const samplecnt_t p0 = _pos / _spp;
+			const samplecnt_t p1 = (_pos + n_samples -1) / _spp;
+			for (samplecnt_t p = p0; p <= p1; ++p) {
+				assert (p >= 0 && p < (sizeof (_result.lgraph_i) / sizeof(float)));
+				_result.lgraph_i[p] = features[0][0].values[0];
+				_result.lgraph_s[p] = features[0][1].values[0];
+				_result.lgraph_m[p] = features[0][2].values[0];
+			}
+			_result.have_lufs_graph = true;
+		}
 	}
 
 	float const * const data = ctx.data ();
@@ -201,12 +226,18 @@ Analyser::process (ProcessContext<float> const & ctx)
 }
 
 ARDOUR::ExportAnalysisPtr
-Analyser::result ()
+Analyser::result (bool ptr_only)
 {
+	if (ptr_only) {
+		return _rp;
+	}
+
 	//printf ("PROCESSED %ld / %ld samples\n", _pos, _n_samples);
 	if (_pos == 0 || _pos > _n_samples + 1) {
 		return ARDOUR::ExportAnalysisPtr ();
 	}
+
+	_result.n_samples = _pos;
 
 	if (_pos + 1 < _n_samples) {
 		// crude re-bin (silence stripped version)
@@ -228,6 +259,15 @@ Analyser::result ()
 			for (unsigned int y = 0; y < height; ++y) {
 				_result.spectrum[b][y] = _result.spectrum[sb][y];
 			}
+		}
+
+		/* re-scale loudnes graphs */
+		const size_t lw = sizeof (_result.lgraph_i) / sizeof (float);
+		for (samplecnt_t b = lw - 1; b > 0; --b) {
+			const samplecnt_t sb = b * _pos / _n_samples;
+			_result.lgraph_i[b] = _result.lgraph_i[sb];
+			_result.lgraph_s[b] = _result.lgraph_s[sb];
+			_result.lgraph_m[b] = _result.lgraph_m[sb];
 		}
 	}
 
@@ -259,14 +299,15 @@ Analyser::result ()
 
 			for (std::vector<float>::const_iterator i = features[1][0].values.begin();
 					i != features[1][0].values.end(); ++i) {
-				const samplecnt_t pk = (*i) / _spp;
+				/* re-scale - silence stripping: pk = (*i) * peaks / _pos; */
+				const samplecnt_t pk = (*i) * _n_samples / (_pos * _spp);
 				const unsigned int cc = c & cmask;
 				_result.truepeakpos[cc].insert (pk);
 			}
 		}
 	}
 
-	return ARDOUR::ExportAnalysisPtr (new ARDOUR::ExportAnalysis (_result));
+	return _rp;
 }
 
 float
