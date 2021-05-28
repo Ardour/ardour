@@ -715,7 +715,7 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 						|| (pi->enable[1] && dbtp > pi->level[1])
 					 ) {
 					cr->set_source_rgba (1, 0, .0, 1.0);
-#ifdef PLATFORM_WINDOWS
+#if (defined PLATFORM_WINDOWS || defined __APPLE__)
 					layout->set_text ("X");
 #else
 					layout->set_text ("\u274C"); // cross mark
@@ -729,7 +729,11 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 #endif
 				} else {
 					cr->set_source_rgba (.1, 1, .1, 1.0);
+#ifdef __APPLE__
+					layout->set_text ("\u2713"); // check mark
+#else
 					layout->set_text ("\u2714"); // heavy check mark
+#endif
 				}
 				int ww, hh;
 				layout->get_pixel_size (ww, hh);
