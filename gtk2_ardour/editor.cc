@@ -2917,12 +2917,18 @@ Editor::snap_to_marker (samplepos_t presnap, RoundMode direction)
 		test = after;
 	} else if (after == max_samplepos) {
 		test = before;
-	} else  {
-		if ((direction == RoundUpMaybe || direction == RoundUpAlways)) {
+	} else {
+		switch (direction) {
+		case RoundUpAlways:
+		case RoundUpMaybe:
 			test = after;
-		} else if ((direction == RoundDownMaybe || direction == RoundDownAlways)) {
+			break;
+		case RoundDownMaybe:
+		case RoundDownAlways:
 			test = before;
-		} else if (direction ==  0) {
+			break;
+		case RoundNearest:
+		default:
 			if ((presnap - before) < (after - presnap)) {
 				test = before;
 			} else {
