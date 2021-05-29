@@ -595,6 +595,9 @@ CoreAudioPCM::discover()
 		free(_device_outs); _device_outs = 0;
 	}
 	_devices.clear();
+	_input_devices.clear();
+	_output_devices.clear();
+	_duplex_devices.clear();
 
 	err = GetHardwarePropertyInfoWrapper (kAudioHardwarePropertyDevices, &size);
 
