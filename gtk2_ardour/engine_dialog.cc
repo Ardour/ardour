@@ -1365,6 +1365,7 @@ EngineControl::list_devices ()
 
 	bool devices_available = false;
 
+	block_changed_signals ();
 	if (backend->use_separate_input_and_output_devices ()) {
 		bool input_devices_available = set_input_device_popdown_strings ();
 		bool output_devices_available = set_output_device_popdown_strings ();
@@ -1372,6 +1373,7 @@ EngineControl::list_devices ()
 	} else {
 		devices_available = set_device_popdown_strings ();
 	}
+	unblock_changed_signals ();
 
 	if (devices_available) {
 		device_changed ();
