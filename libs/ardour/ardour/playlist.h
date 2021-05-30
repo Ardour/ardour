@@ -110,6 +110,9 @@ public:
 	bool set_name (const std::string& str);
 	void set_region_ownership ();
 
+	std::string pgroup_id()                 { return _pgroup_id; }
+	void set_pgroup_id(std::string pgid)    { _pgroup_id = pgid; }
+
 	virtual void clear (bool with_signals = true);
 	virtual void dump () const;
 
@@ -461,6 +464,8 @@ private:
 
 	samplepos_t _end_space; //this is used when we are pasting a range with extra space at the end
 	bool        _playlist_shift_active;
+
+	std::string  _pgroup_id; /*when we make multiple playlists in one action, they will share the same pgroup_id */
 };
 
 } /* namespace ARDOUR */

@@ -187,6 +187,30 @@ SessionPlaylists::n_playlists () const
 }
 
 boost::shared_ptr<Playlist>
+SessionPlaylists::for_pgroup (string pgroup_id, const PBD::ID& id)
+{
+	Glib::Threads::Mutex::Lock lm (lock);
+
+	for (List::iterator i = playlists.begin(); i != playlists.end(); ++i) {
+		if ((*i)->pgroup_id() == pgroup_id) {
+			if ((*i)->get_orig_track_id() == id) {
+				return* i;
+			}
+		}
+	}
+
+	for (List::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
+		if ((*i)->pgroup_id() == pgroup_id) {
+			if ((*i)->get_orig_track_id() == id) {
+				return* i;
+			}
+		}
+	}
+
+	return boost::shared_ptr<Playlist>();
+}
+
+boost::shared_ptr<Playlist>
 SessionPlaylists::by_name (string name)
 {
 	Glib::Threads::Mutex::Lock lm (lock);

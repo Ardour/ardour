@@ -50,6 +50,7 @@ class LIBARDOUR_API SessionPlaylists : public PBD::ScopedConnectionList
 public:
 	~SessionPlaylists ();
 
+	boost::shared_ptr<Playlist> for_pgroup (std::string name, const PBD::ID& for_track);
 	boost::shared_ptr<Playlist> by_name (std::string name);
 	boost::shared_ptr<Playlist> by_id (const PBD::ID&);
 	uint32_t source_use_count (boost::shared_ptr<const Source> src) const;

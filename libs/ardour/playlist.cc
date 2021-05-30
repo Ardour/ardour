@@ -2331,6 +2331,8 @@ Playlist::set_state (const XMLNode& node, int version)
 	node.get_property (X_("orig-track-id"), _orig_track_id);
 	node.get_property (X_("frozen"), _frozen);
 
+	node.get_property (X_("pgroup-id"), _pgroup_id);
+
 	node.get_property (X_("combine-ops"), _combine_ops);
 
 	string shared_ids;
@@ -2421,6 +2423,7 @@ Playlist::state (bool full_state)
 	node->set_property (X_("name"), name ());
 	node->set_property (X_("type"), _type);
 	node->set_property (X_("orig-track-id"), _orig_track_id);
+	node->set_property (X_("pgroup-id"), _pgroup_id);
 
 	string                        shared_ids;
 	list<PBD::ID>::const_iterator it = _shared_with_ids.begin ();
