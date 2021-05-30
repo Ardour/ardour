@@ -2026,6 +2026,8 @@ Session::XMLRouteFactory_2X (const XMLNode& node, int version)
 
 		if (pl) {
 			track->use_playlist (DataType::AUDIO, pl);
+		} else {
+			track->use_new_playlist (DataType::AUDIO);
 		}
 
 		if (track->set_state (node, version)) {
