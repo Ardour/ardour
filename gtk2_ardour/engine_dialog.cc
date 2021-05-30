@@ -689,7 +689,7 @@ EngineControl::build_full_control_notebook ()
 
 	label = manage (left_aligned_label (_("MIDI System:")));
 	basic_packer.attach (*label, 0, 1, row, row + 1, xopt, (AttachOptions) 0);
-	basic_packer.attach (midi_option_combo, 1, 2, row, row + 1, SHRINK, (AttachOptions) 0);
+	basic_packer.attach (midi_option_combo, 1, 2, row, row + 1, xopt, (AttachOptions) 0);
 	basic_packer.attach (midi_devices_button, 3, 4, row, row+1, xopt, xopt);
 	row++;
 
@@ -1154,18 +1154,9 @@ EngineControl::update_midi_options ()
 	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
 	vector<string> midi_options = backend->enumerate_midi_options();
 
-	if (midi_options.size() == 1) {
-		/* only contains the "none" option */
+	if (midi_options.size() == 1 || _have_control) {
 		set_popdown_strings (midi_option_combo, midi_options);
-		midi_option_combo.set_sensitive (false);
-	} else {
-		if (_have_control) {
-			set_popdown_strings (midi_option_combo, midi_options);
-			midi_option_combo.set_active_text (midi_options.front());
-			midi_option_combo.set_sensitive (true);
-		} else {
-			midi_option_combo.set_sensitive (false);
-		}
+		midi_option_combo.set_active_text (midi_options.front());
 	}
 }
 
@@ -2353,9 +2344,9 @@ EngineControl::set_current_state (const State& state)
 	}
 	set_active_text_if_present (buffer_size_combo, bufsize_as_string (state->buffer_size));
 	set_active_text_if_present (nperiods_combo, to_string (state->n_periods));
+	set_active_text_if_present (midi_option_combo, state->midi_option);
 	input_latency.set_value (state->input_latency);
 	output_latency.set_value (state->output_latency);
-	midi_option_combo.set_active_text (state->midi_option);
 	use_buffered_io_button.set_active (state->use_buffered_io);
 
 	return true;
