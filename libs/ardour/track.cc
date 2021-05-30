@@ -1054,6 +1054,11 @@ Track::use_captured_audio_sources (SourceList& srcs, CaptureInfos const & captur
 		/* XXX what now? */
 	}
 
+	/*if this playlist doesn't already have a pgroup (a new track won't) then assign it one, using the take-id of the first recording) */
+	if (pl->pgroup_id().length()==0) {
+		pl->set_pgroup_id(afs->take_id());
+	}
+
 	pl->clear_changes ();
 	pl->set_capture_insertion_in_progress (true);
 	pl->freeze ();
