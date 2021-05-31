@@ -103,6 +103,8 @@ public:
 	void clear_owned_changes ();
 	void rdiff (std::vector<Command*>&) const;
 
+	void rdiff_and_add_command (Session*);
+
 	boost::shared_ptr<Region> region_by_id (const PBD::ID&) const;
 
 	uint32_t max_source_level () const;
@@ -188,14 +190,17 @@ public:
 	void                      uncombine (boost::shared_ptr<Region>);
 
 	void shuffle (boost::shared_ptr<Region>, int dir);
-	void ripple (samplepos_t at, samplecnt_t distance, RegionList* exclude);
-	void ripple (samplepos_t at, samplecnt_t distance, boost::shared_ptr<Region> exclude)
+
+	typedef boost::function<void (Playlist&)> RippleCallback;
+
+	void ripple (samplepos_t at, samplecnt_t distance, RegionList* exclude, RippleCallback ripple_callback);
+	void ripple (samplepos_t at, samplecnt_t distance, boost::shared_ptr<Region> exclude, RippleCallback ripple_callback)
 	{
 		RegionList el;
 		if (exclude) {
 			el.push_back (exclude);
 		}
-		ripple (at, distance, &el);
+		ripple (at, distance, &el, ripple_callback);
 	}
 
 	void update_after_tempo_map_change ();
@@ -424,8 +429,8 @@ protected:
 	void splice_locked (samplepos_t at, samplecnt_t distance, boost::shared_ptr<Region> exclude);
 	void splice_unlocked (samplepos_t at, samplecnt_t distance, boost::shared_ptr<Region> exclude, ThawList& thawlist);
 
-	void ripple_locked (samplepos_t at, samplecnt_t distance, RegionList* exclude);
-	void ripple_unlocked (samplepos_t at, samplecnt_t distance, RegionList* exclude, ThawList& thawlist, bool notify = true);
+	void ripple_locked (samplepos_t at, samplecnt_t distance, RegionList* exclude, RippleCallback);
+	void ripple_unlocked (samplepos_t at, samplecnt_t distance, RegionList* exclude, RippleCallback, ThawList& thawlist, bool notify = true);
 
 	virtual void remove_dependents (boost::shared_ptr<Region> /*region*/) {}
 	virtual void region_going_away (boost::weak_ptr<Region> /*region*/) {}
