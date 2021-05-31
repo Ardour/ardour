@@ -191,7 +191,7 @@ public:
 
 	void shuffle (boost::shared_ptr<Region>, int dir);
 
-	typedef boost::function<void (Playlist&)> RippleCallback;
+	typedef boost::function<void (Playlist&, samplepos_t, samplecnt_t)> RippleCallback;
 
 	void ripple (samplepos_t at, samplecnt_t distance, RegionList* exclude, RippleCallback ripple_callback);
 	void ripple (samplepos_t at, samplecnt_t distance, boost::shared_ptr<Region> exclude, RippleCallback ripple_callback)

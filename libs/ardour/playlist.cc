@@ -878,7 +878,7 @@ Playlist::remove_gaps (samplepos_t gap_threshold, samplepos_t leave_gap, boost::
 	RegionList::iterator i;
 	RegionList::iterator nxt (regions.end());
 	bool closed = false;
-	boost::function<void (Playlist&)> null_ripple_callback;
+	RippleCallback null_ripple_callback;
 
 	if (regions.size() < 2) {
 		return;
@@ -1654,6 +1654,12 @@ Playlist::splice_unlocked (samplepos_t at, samplecnt_t distance, boost::shared_p
 }
 
 void
+Playlist::ripple (samplepos_t at, samplecnt_t distance, RegionList* exclude, RippleCallback ripple_callback)
+{
+	ripple_locked (at, distance, exclude, ripple_callback);
+}
+
+void
 Playlist::ripple_locked (samplepos_t at, samplecnt_t distance, RegionList* exclude, RippleCallback ripple_callback)
 {
 	RegionWriteLock rl (this);
@@ -1694,7 +1700,7 @@ Playlist::ripple_unlocked (samplepos_t at, samplecnt_t distance, RegionList* exc
 
 	_rippling = false;
 
-	ripple_callback (*this);
+	ripple_callback (*this, at, distance);
 
 	if (notify) {
 		notify_contents_changed ();
@@ -3022,12 +3028,6 @@ Playlist::region_is_shuffle_constrained (boost::shared_ptr<Region>)
 	}
 
 	return false;
-}
-
-void
-Playlist::ripple (samplepos_t at, samplecnt_t distance, RegionList* exclude, RippleCallback ripple_callback)
-{
-	ripple_locked (at, distance, exclude, ripple_callback);
 }
 
 void
