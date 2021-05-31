@@ -2386,7 +2386,7 @@ private:
 	void radio_reg_sens (Glib::RefPtr<Gtk::ActionGroup> action_group, Gtk::RadioAction::Group& radio_group, char const* name, char const* label, sigc::slot<void> slot);
 
 	void remove_gap_marker_callback (samplepos_t at, samplecnt_t distance);
-	void _ripple_callback (ARDOUR::Playlist& playlist, bool run_rdiff);
+	void _ripple_callback (ARDOUR::Playlist& playlist, samplepos_t, samplecnt_t, bool run_rdiff);
 
 	friend class Drag;
 	friend class RegionCutDrag;

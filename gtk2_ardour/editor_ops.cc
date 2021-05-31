@@ -9190,11 +9190,11 @@ Editor::remove_gaps (samplecnt_t gap_threshold, samplecnt_t leave_gap, bool mark
 ARDOUR::Playlist::RippleCallback
 Editor::ripple_callback (bool run_rdiff)
 {
-	return boost::bind (&Editor::_ripple_callback, this, _1, run_rdiff);
+	return boost::bind (&Editor::_ripple_callback, this, _1, _2, _3, run_rdiff);
 }
 
 void
-Editor::_ripple_callback (Playlist& playlist, bool run_rdiff)
+Editor::_ripple_callback (Playlist& playlist, samplepos_t at, samplecnt_t distance, bool run_rdiff)
 {
 	if (!_session) {
 		return;
@@ -9204,4 +9204,22 @@ Editor::_ripple_callback (Playlist& playlist, bool run_rdiff)
 	 * calling rdiff_and_add_command() for each affected playlist if
 	 * run_rdiff is true
 	 */
+
+	TrackViewList ts = track_views.filter_to_unique_playlists ();
+	boost::shared_ptr<Playlist> pl;
+	Playlist::RippleCallback null_callback;
+
+
+	for (TrackSelection::iterator x = ts.begin(); x != ts.end(); ++x) {
+		if ((pl = (*x)->playlist()) == 0) {
+			continue;
+		}
+
+		if (pl.get() == &playlist) {
+			continue;
+		}
+
+		pl->ripple (at, distance, 0, null_callback);
+		pl->rdiff_and_add_command (_session);
+	}
 }
