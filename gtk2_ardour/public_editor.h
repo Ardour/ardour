@@ -517,6 +517,8 @@ public:
 	virtual void edit_tempo_section (ARDOUR::TempoSection*) = 0;
 	virtual void edit_meter_section (ARDOUR::MeterSection*) = 0;
 
+	virtual ARDOUR::Playlist::RippleCallback ripple_callback (bool run_rdiff) = 0;
+
 	/// Singleton instance, set up by Editor::Editor()
 
 	static PublicEditor* _instance;

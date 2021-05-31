@@ -2627,14 +2627,11 @@ Editor::insert_source_list_selection (float times)
 	playlist->clear_owned_changes ();
 	playlist->add_region ((RegionFactory::create (region, true)), get_preferred_edit_position(), times);
 	if (Config->get_edit_mode() == Ripple) {
-		playlist->ripple (get_preferred_edit_position(), region->length() * times, boost::shared_ptr<Region>());
-		/* recusive diff of rippled regions */
-		vector<Command*> cmds;
-		playlist->rdiff (cmds);
-		_session->add_commands (cmds);
+		playlist->ripple (get_preferred_edit_position(), region->length() * times, boost::shared_ptr<Region>(), ripple_callback (true));
 	}
 
-	_session->add_command(new StatefulDiffCommand (playlist));
+	playlist->rdiff_and_add_command (_session);
+
 	commit_reversible_command ();
 }
 
@@ -4585,17 +4582,10 @@ Editor::remove_clicked_region ()
 	playlist->remove_region (region);
 
 	if (Config->get_edit_mode() == Ripple) {
-		playlist->ripple (region->position(), - region->length(), boost::shared_ptr<Region>());
+		playlist->ripple (region->position(), - region->length(), boost::shared_ptr<Region>(), ripple_callback (true));
 	}
 
-	/* We might have removed regions, which alters other regions' layering_index,
-	   so we need to do a recursive diff here.
-	*/
-	vector<Command*> cmds;
-	playlist->rdiff (cmds);
-	_session->add_commands (cmds);
-
-	_session->add_command(new StatefulDiffCommand (playlist));
+	playlist->rdiff_and_add_command (_session);
 	commit_reversible_command ();
 }
 
@@ -4674,7 +4664,7 @@ Editor::remove_selected_regions ()
 		playlist->freeze ();
 		playlist->remove_region (*rl);
 		if (Config->get_edit_mode() == Ripple) {
-			playlist->ripple ((*rl)->position(), -(*rl)->length(), boost::shared_ptr<Region>());
+			playlist->ripple ((*rl)->position(), -(*rl)->length(), boost::shared_ptr<Region>(), ripple_callback (false));
 		}
 
 	}
@@ -4815,7 +4805,7 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 		case Delete:
 			pl->remove_region (r);
 			if (Config->get_edit_mode() == Ripple) {
-				pl->ripple (r->position(), -r->length(), boost::shared_ptr<Region>());
+				pl->ripple (r->position(), -r->length(), boost::shared_ptr<Region>(), ripple_callback (false));
 			}
 			break;
 
@@ -4824,7 +4814,7 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 			npl->add_region (_xx, r->position() - first_position);
 			pl->remove_region (r);
 			if (Config->get_edit_mode() == Ripple) {
-				pl->ripple (r->position(), -r->length(), boost::shared_ptr<Region>());
+				pl->ripple (r->position(), -r->length(), boost::shared_ptr<Region>(), ripple_callback (false));
 			}
 			break;
 
@@ -4836,7 +4826,7 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 		case Clear:
 			pl->remove_region (r);
 			if (Config->get_edit_mode() == Ripple) {
-				pl->ripple (r->position(), -r->length(), boost::shared_ptr<Region>());
+				pl->ripple (r->position(), -r->length(), boost::shared_ptr<Region>(), ripple_callback (false));
 			}
 			break;
 		}
@@ -4874,11 +4864,8 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 		/* We might have removed regions, which alters other regions' layering_index,
 		   so we need to do a recursive diff here.
 		*/
-		vector<Command*> cmds;
-		(*pl)->rdiff (cmds);
-		_session->add_commands (cmds);
 
-		_session->add_command (new StatefulDiffCommand (*pl));
+		(*pl)->rdiff_and_add_command (_session);
 	}
 }
 
@@ -5082,7 +5069,7 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 		}
 
 		for (set<boost::shared_ptr<Playlist> >::iterator p = playlists.begin(); p != playlists.end(); ++p) {
-			(*p)->ripple (start_sample, span * times, &exclude);
+			(*p)->ripple (start_sample, span * times, &exclude, ripple_callback (false));
 		}
 	}
 
@@ -9198,4 +9185,23 @@ Editor::remove_gaps (samplecnt_t gap_threshold, samplecnt_t leave_gap, bool mark
 			delete locations_before;
 		}
 	}
+}
+
+ARDOUR::Playlist::RippleCallback
+Editor::ripple_callback (bool run_rdiff)
+{
+	return boost::bind (&Editor::_ripple_callback, this, _1, run_rdiff);
+}
+
+void
+Editor::_ripple_callback (Playlist& playlist, bool run_rdiff)
+{
+	if (!_session) {
+		return;
+	}
+
+	/* XXX if ripple-all, figure out what else to ripple, and do it here,
+	 * calling rdiff_and_add_command() for each affected playlist if
+	 * run_rdiff is true
+	 */
 }

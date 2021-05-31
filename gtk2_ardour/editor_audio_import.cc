@@ -1060,15 +1060,10 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region,
 		playlist->clear_owned_changes ();
 		playlist->add_region (copy, pos);
 		if (Config->get_edit_mode() == Ripple) {
-			playlist->ripple (pos, copy->length(), copy);
-
-			/* recusive diff of rippled regions */
-			vector<Command*> cmds;
-			playlist->rdiff (cmds);
-			_session->add_commands (cmds);
+			playlist->ripple (pos, copy->length(), copy, ripple_callback (true));
 		}
 
-		_session->add_command (new StatefulDiffCommand (playlist));
+		playlist->rdiff_and_add_command (_session);
 		break;
 	}
 

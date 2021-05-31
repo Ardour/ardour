@@ -1289,15 +1289,9 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 	case Delete:
 		if (playlist->cut (time) != 0) {
 			if (Config->get_edit_mode() == Ripple) {
-				playlist->ripple(time.start(), -time.length(), NULL);
+				playlist->ripple (time.start(), -time.length(), 0, _editor.ripple_callback (true));
 			}
-			// no need to exclude any regions from rippling here
-
-			vector<Command*> cmds;
-			playlist->rdiff (cmds);
-			_session->add_commands (cmds);
-
-			_session->add_command (new StatefulDiffCommand (playlist));
+			playlist->rdiff_and_add_command (_session);
 		}
 		break;
 
@@ -1305,15 +1299,9 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 		if ((what_we_got = playlist->cut (time)) != 0) {
 			_editor.get_cut_buffer().add (what_we_got);
 			if (Config->get_edit_mode() == Ripple) {
-				playlist->ripple(time.start(), -time.length(), NULL);
+				playlist->ripple (time.start(), -time.length(), 0, _editor.ripple_callback (true));
 			}
-			// no need to exclude any regions from rippling here
-
-			vector<Command*> cmds;
-			playlist->rdiff (cmds);
-			_session->add_commands (cmds);
-
-			_session->add_command (new StatefulDiffCommand (playlist));
+			playlist->rdiff_and_add_command (_session);
 		}
 		break;
 	case Copy:
@@ -1325,14 +1313,9 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 	case Clear:
 		if ((what_we_got = playlist->cut (time)) != 0) {
 			if (Config->get_edit_mode() == Ripple) {
-				playlist->ripple(time.start(), -time.length(), NULL);
+				playlist->ripple (time.start(), -time.length(), 0, _editor.ripple_callback (true));
 			}
-			// no need to exclude any regions from rippling here
-
-			vector<Command*> cmds;
-			playlist->rdiff (cmds);
-			_session->add_commands (cmds);
-			_session->add_command (new StatefulDiffCommand (playlist));
+			playlist->rdiff_and_add_command (_session);
 			what_we_got->release ();
 		}
 		break;
@@ -1367,7 +1350,7 @@ RouteTimeAxisView::paste (samplepos_t pos, const Selection& selection, PasteCont
 	if (Config->get_edit_mode() == Ripple) {
 		std::pair<samplepos_t, samplepos_t> extent = (*p)->get_extent_with_endspace();
 		samplecnt_t amount = extent.second - extent.first;
-		pl->ripple(pos, amount * ctx.times, boost::shared_ptr<Region>());
+		pl->ripple(pos, amount * ctx.times, boost::shared_ptr<Region>(), _editor.ripple_callback (false));
 	}
 	pl->paste (*p, pos, ctx.times, sub_num);
 
