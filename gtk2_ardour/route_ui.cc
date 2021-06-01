@@ -2706,9 +2706,15 @@ RouteUI::rename_current_playlist ()
 				prompter.set_prompt (_("That name is already in use.  Use this instead?"));
 				prompter.set_initial_text (Playlist::bump_name (name, *_session));
 			} else {
-				pl->set_name (name);
 				break;
 			}
+		}
+	}
+
+	if (name.length()) {
+		vector<boost::shared_ptr<Playlist> > playlists_gr = _session->playlists()->playlists_for_pgroup (pl->pgroup_id());
+		for (vector<boost::shared_ptr<Playlist> >::iterator i = playlists_gr.begin(); i != playlists_gr.end(); ++i) {
+			(*i)->set_name (name);
 		}
 	}
 }
