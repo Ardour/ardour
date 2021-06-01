@@ -58,6 +58,7 @@
 #include "pbd/unwind.h"
 #include "pbd/timersub.h"
 
+#include <glibmm/datetime.h> /*for playlist group_id */
 #include <glibmm/miscutils.h>
 #include <glibmm/uriutils.h>
 #include <gtkmm/image.h>
@@ -96,6 +97,7 @@
 #include "widgets/ardour_spacer.h"
 #include "widgets/eventboxext.h"
 #include "widgets/tooltips.h"
+#include "widgets/prompter.h"
 
 #include "control_protocol/control_protocol.h"
 
@@ -4360,10 +4362,39 @@ Editor::restore_editing_space ()
 void
 Editor::new_playlists (RouteUI* rui)
 {
+	time_t now;
+	time (&now);
+	Glib::DateTime tm (Glib::DateTime::create_now_local (now));
+	string gid (tm.format ("%F %H.%M.%S"));
+	string name(gid);
+
+	Prompter prompter (true);
+	prompter.set_title (_("New Playlist"));
+	prompter.set_prompt (_("Name for new playlist:"));
+	prompter.set_initial_text (name);
+	prompter.add_button (Gtk::Stock::NEW, Gtk::RESPONSE_ACCEPT);
+	prompter.set_response_sensitive (Gtk::RESPONSE_ACCEPT, true);
+	prompter.show_all ();
+
+	while (true) {
+		if (prompter.run () != Gtk::RESPONSE_ACCEPT) {
+			return;
+		}
+		prompter.get_result (name);
+		if (name.length()) {
+			if (_session->playlists()->by_name (name)) {
+				prompter.set_prompt (_("That name is already in use.  Use this instead?"));
+				prompter.set_initial_text (Playlist::bump_name (name, *_session));
+			} else {
+				break;
+			}
+		}
+	}
+
 /*	begin_reversible_command (_("new playlists")); */  /* ToDo: this does not work */
 	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
 	_session->playlists()->get (playlists);
-	mapover_routes (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_new_playlist), playlists), rui, ARDOUR::Properties::group_select.property_id);
+	mapover_routes (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_new_playlist), name, gid, playlists), rui, ARDOUR::Properties::group_select.property_id);
 /*	commit_reversible_command (); */
 }
 
@@ -4376,10 +4407,39 @@ Editor::new_playlists (RouteUI* rui)
 void
 Editor::copy_playlists (RouteUI* rui)
 {
+	time_t now;
+	time (&now);
+	Glib::DateTime tm (Glib::DateTime::create_now_local (now));
+	string gid (tm.format ("%F %H.%M.%S"));
+	string name(gid);
+
+	Prompter prompter (true);
+	prompter.set_title (_("New Playlist"));
+	prompter.set_prompt (_("Name for new playlist:"));
+	prompter.set_initial_text (name);
+	prompter.add_button (Gtk::Stock::NEW, Gtk::RESPONSE_ACCEPT);
+	prompter.set_response_sensitive (Gtk::RESPONSE_ACCEPT, true);
+	prompter.show_all ();
+
+	while (true) {
+		if (prompter.run () != Gtk::RESPONSE_ACCEPT) {
+			return;
+		}
+		prompter.get_result (name);
+		if (name.length()) {
+			if (_session->playlists()->by_name (name)) {
+				prompter.set_prompt (_("That name is already in use.  Use this instead?"));
+				prompter.set_initial_text (Playlist::bump_name (name, *_session));
+			} else {
+				break;
+			}
+		}
+	}
+
 /*	begin_reversible_command (_("copy playlists")); */  /* ToDo: this does not work */
 	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
 	_session->playlists()->get (playlists);
-	mapover_routes (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_copy_playlist), playlists), rui, ARDOUR::Properties::group_select.property_id);
+	mapover_routes (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_copy_playlist), name, gid, playlists), rui, ARDOUR::Properties::group_select.property_id);
 /*	commit_reversible_command (); */
 }
 
@@ -4399,15 +4459,15 @@ Editor::clear_playlists (RouteUI* rui)
 }
 
 void
-Editor::mapped_use_new_playlist (RouteUI& rui, uint32_t sz, vector<boost::shared_ptr<ARDOUR::Playlist> > const & playlists)
+Editor::mapped_use_new_playlist (RouteUI& rui, uint32_t sz, std::string name, string gid, vector<boost::shared_ptr<ARDOUR::Playlist> > const & playlists)
 {
-	rui.use_new_playlist (playlists, false);
+	rui.use_new_playlist (name, gid, playlists, false);
 }
 
 void
-Editor::mapped_use_copy_playlist (RouteUI& rui, uint32_t sz, vector<boost::shared_ptr<ARDOUR::Playlist> > const & playlists)
+Editor::mapped_use_copy_playlist (RouteUI& rui, uint32_t sz, std::string name, string gid, vector<boost::shared_ptr<ARDOUR::Playlist> > const & playlists)
 {
-	rui.use_new_playlist (playlists, true);
+	rui.use_new_playlist (name, gid, playlists, true);
 }
 
 void

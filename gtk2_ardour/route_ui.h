@@ -158,7 +158,7 @@ public:
 	void fan_out (bool to_busses = true, bool group = true);
 
 	/* The editor calls these when mapping an operation across multiple tracks */
-	void use_new_playlist (std::vector<boost::shared_ptr<ARDOUR::Playlist> > const&, bool copy);
+	void use_new_playlist (std::string name, std::string group_id, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const&, bool copy);
 	void clear_playlist ();
 
 	void        use_playlist (Gtk::RadioMenuItem* item, boost::weak_ptr<ARDOUR::Playlist> wpl);

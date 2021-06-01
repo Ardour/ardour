@@ -784,8 +784,8 @@ private:
 	void mapped_get_equivalent_regions (RouteTimeAxisView&, uint32_t, RegionView*, std::vector<RegionView*>*) const;
 
 	void mapover_routes (sigc::slot<void, RouteUI&, uint32_t> sl, RouteUI*, PBD::PropertyID) const;
-	void mapped_use_new_playlist (RouteUI&, uint32_t, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
-	void mapped_use_copy_playlist (RouteUI&, uint32_t, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
+	void mapped_use_new_playlist (RouteUI&, uint32_t, std::string name, std::string gid, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
+	void mapped_use_copy_playlist (RouteUI&, uint32_t, std::string name, std::string gid, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
 	void mapped_clear_playlist (RouteUI&, uint32_t);
 
 	void button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type);
