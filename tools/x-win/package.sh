@@ -486,7 +486,7 @@ SectionEnd
 EOF
 else
 	cat >> $NSISFILE << EOF
-Section "Harrison XT plugins and a-/ACE plugin GUIs" SecXT
+Section "Harrison XT plugins and ACE plugin GUIs" SecXT
   SetOutPath \$INSTDIR\\lib\\${LOWERCASE_DIRNAME}\\LV2
   File LV2\\.harrison_version.txt
   File /r LV2\\*.lv2
