@@ -462,10 +462,10 @@ private:
 
 	mutable boost::optional<std::pair<samplepos_t, samplepos_t> > _cached_extent;
 
-	samplepos_t _end_space; //this is used when we are pasting a range with extra space at the end
+	samplepos_t _end_space; // this is used when we are pasting a range with extra space at the end
 	bool        _playlist_shift_active;
 
-	std::string  _pgroup_id; /*when we make multiple playlists in one action, they will share the same pgroup_id */
+	std::string _pgroup_id; // when we make multiple playlists in one action, they will share the same pgroup_id
 };
 
 } /* namespace ARDOUR */
