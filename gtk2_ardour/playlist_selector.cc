@@ -29,6 +29,8 @@
 
 #include "ardour/session_playlist.h"
 
+#include <gtkmm/stock.h>
+
 #include <gtkmm2ext/gtk_ui.h>
 
 #include "public_editor.h"
@@ -70,8 +72,8 @@ PlaylistSelector::PlaylistSelector ()
 
 	get_vbox()->show_all();
 
-	Button* close_btn = add_button (_("Revert"), RESPONSE_CANCEL);
-	Button* ok_btn = add_button (_("Done"), RESPONSE_OK);
+	Button* close_btn = add_button (Gtk::Stock::CANCEL, RESPONSE_CANCEL);
+	Button* ok_btn = add_button (Gtk::Stock::OK, RESPONSE_OK);
 	close_btn->signal_clicked().connect (sigc::mem_fun(*this, &PlaylistSelector::close_button_click));
 	ok_btn->signal_clicked().connect (sigc::mem_fun(*this, &PlaylistSelector::ok_button_click));
 }
