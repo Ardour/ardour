@@ -403,20 +403,6 @@ Playlist::_set_sort_id ()
 bool
 Playlist::set_name (const string& str)
 {
-	/* in a typical situation, a playlist is being used
-	 * by one diskstream and also is referenced by the
-	 * Session. if there are more references than that,
-	 * then don't change the name.
-	 */
-
-	if (_refcnt > 2) {
-		return false;
-	}
-
-	if (_session.playlists()->by_name (str)) {
-		return false;
-	}
-
 	bool ret = SessionObject::set_name (str);
 	if (ret) {
 		_set_sort_id ();
