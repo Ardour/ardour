@@ -706,7 +706,7 @@ fi
 ############################################
 
 if test "${PGM_VENDOR}" = "Ardour" -a -d "${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/lib/LV2/Harrison.lv2"; then
-	ANSWER=$(VaildateYesNoEnterQuestion "Install Harrison XT plugins?" "y")
+	ANSWER=$(VaildateYesNoEnterQuestion "Install Harrison XT plugins and ACE plugin GUIs?" "y")
 
 	if test "n" = $ANSWER; then
 		${SUPER} rm -rf "${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/lib/LV2/Harrison.lv2"
