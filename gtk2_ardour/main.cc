@@ -417,6 +417,7 @@ int main (int argc, char *argv[])
 	g_log_set_handler (NULL,
 			GLogLevelFlags (G_LOG_LEVEL_WARNING | G_LOG_FLAG_FATAL |  G_LOG_LEVEL_CRITICAL | G_LOG_FLAG_RECURSION),
 			&ardour_g_log, NULL);
+	g_log_set_default_handler (&ardour_g_log, NULL);
 #endif
 
 	ui->run (text_receiver);
