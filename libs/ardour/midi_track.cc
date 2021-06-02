@@ -227,6 +227,7 @@ MidiTrack::state(bool save_template)
 
 		freeze_node = new XMLNode (X_("freeze-info"));
 		freeze_node->set_property ("playlist", _freeze_record.playlist->name());
+		freeze_node->set_property ("playlist-id", _freeze_record.playlist->id().to_s());
 		freeze_node->set_property ("state", _freeze_record.state);
 
 		for (vector<FreezeRecordProcessorInfo*>::iterator i = _freeze_record.processor_info.begin(); i != _freeze_record.processor_info.end(); ++i) {
@@ -266,6 +267,7 @@ void
 MidiTrack::set_state_part_two ()
 {
 	XMLNode* fnode;
+	XMLProperty const * prop;
 
 	/* This is called after all session state has been restored but before
 	   have been made ports and connections are established.
@@ -284,23 +286,28 @@ MidiTrack::set_state_part_two ()
 		}
 		_freeze_record.processor_info.clear ();
 
-		std::string str;
-		if (fnode->get_property (X_("playlist"), str)) {
-			boost::shared_ptr<Playlist> pl = _session.playlists()->by_name (str);
-			if (pl) {
-				_freeze_record.playlist = boost::dynamic_pointer_cast<MidiPlaylist> (pl);
-			} else {
-				_freeze_record.playlist.reset();
-				_freeze_record.state = NoFreeze;
-				return;
-			}
+		boost::shared_ptr<Playlist> freeze_pl;
+		if ((prop = fnode->property (X_("playlist-id"))) != 0) {
+			freeze_pl = _session.playlists()->by_id (prop->value());
+		} else if ((prop = fnode->property (X_("playlist"))) != 0) {
+			freeze_pl = _session.playlists()->by_name (prop->value());
 		}
+		if (freeze_pl) {
+			_freeze_record.playlist = boost::dynamic_pointer_cast<MidiPlaylist> (freeze_pl);
+			_freeze_record.playlist->use();
+		} else {
+			_freeze_record.playlist.reset ();
+			_freeze_record.state = NoFreeze;
+			return;
+		}
+
 
 		fnode->get_property (X_("state"), _freeze_record.state);
 
 		XMLNodeConstIterator citer;
 		XMLNodeList clist = fnode->children();
 
+		std::string str;
 		for (citer = clist.begin(); citer != clist.end(); ++citer) {
 			if ((*citer)->name() != X_("processor")) {
 				continue;

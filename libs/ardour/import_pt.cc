@@ -278,7 +278,6 @@ Session::import_pt_rest (PTFFormat& ptf)
 	uint32_t srate = sample_rate ();
 
 	vector<struct ptflookup> ptfregpair;
-	vector<PTFFormat::wav_t>::const_iterator w;
 
 	SourceList just_one_src;
 
@@ -335,6 +334,11 @@ Session::import_pt_rest (PTFFormat& ptf)
 		}
 	}
 
+	/* Check for no audio */
+	if (ptf.tracks ().size () == 0) {
+		goto no_audio_tracks;
+	}
+
 	/* Create all tracks */
 	ntr = (ptf.tracks ().at (ptf.tracks ().size () - 1)).index + 1;
 	nth = -1;
@@ -387,6 +391,7 @@ Session::import_pt_rest (PTFFormat& ptf)
 		(*pl).playlist->thaw ();
 	}
 
+no_audio_tracks:
 	/* MIDI - Find list of unique midi tracks first */
 
 	for (vector<PTFFormat::track_t>::const_iterator a = ptf.miditracks ().begin (); a != ptf.miditracks ().end (); ++a) {

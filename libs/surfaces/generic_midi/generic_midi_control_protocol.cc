@@ -803,7 +803,6 @@ GenericMidiControlProtocol::load_bindings (const string& xmlpath)
 
 	const XMLNodeList& children (root->children());
 	XMLNodeConstIterator citer;
-	XMLNodeConstIterator gciter;
 
 	MIDIControllable* mc;
 

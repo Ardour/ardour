@@ -660,13 +660,15 @@ Track::find_and_use_playlist (DataType dt, PBD::ID const & id)
 }
 
 int
-Track::use_playlist (DataType dt, boost::shared_ptr<Playlist> p)
+Track::use_playlist (DataType dt, boost::shared_ptr<Playlist> p, bool set_orig)
 {
 	int ret;
 
 	if ((ret = _disk_reader->use_playlist (dt, p)) == 0) {
 		if ((ret = _disk_writer->use_playlist (dt, p)) == 0) {
-			p->set_orig_track_id (id());
+			if (set_orig) {
+				p->set_orig_track_id (id());
+			}
 		}
 	}
 
@@ -716,7 +718,9 @@ Track::use_copy_playlist ()
 
 	playlist->reset_shares();
 
-	return use_playlist (data_type(), playlist);
+	int rv = use_playlist (data_type(), playlist);
+	PlaylistAdded (); /* EMIT SIGNAL */
+	return rv;
 }
 
 int
@@ -737,7 +741,9 @@ Track::use_new_playlist (DataType dt)
 		return -1;
 	}
 
-	return use_playlist (dt, playlist);
+	int rv = use_playlist (dt, playlist);
+	PlaylistAdded (); /* EMIT SIGNAL */
+	return rv;
 }
 
 void
@@ -1046,6 +1052,13 @@ Track::use_captured_audio_sources (SourceList& srcs, CaptureInfos const & captur
 	catch (failed_constructor& err) {
 		error << string_compose(_("%1: could not create region for complete audio file"), _name) << endmsg;
 		/* XXX what now? */
+	}
+
+	/* If this playlist doesn't already have a pgroup (a new track won't) then
+	 * assign it one, using the take-id of the first recording)
+	 */
+	if (pl->pgroup_id().length() == 0) {
+		pl->set_pgroup_id (afs->take_id ());
 	}
 
 	pl->clear_changes ();

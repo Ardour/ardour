@@ -323,7 +323,6 @@ VSTPlugin::set_state (const XMLNode& node, int version)
 			_plugin->dispatcher (_plugin, effSetProgram, 0, pgm, NULL, 0);
 		};
 
-		XMLPropertyList::const_iterator i;
 		XMLNodeList::const_iterator n;
 
 		for (n = child->children ().begin (); n != child->children ().end (); ++n) {

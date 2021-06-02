@@ -444,7 +444,15 @@ ARDOUR::vst3_scan_and_cache (std::string const& module_path, std::string const& 
 	try {
 		boost::shared_ptr<VST3PluginModule> m = VST3PluginModule::load (module_path);
 		std::vector<VST3Info> nfo;
-		discover_vst3 (m, nfo, verbose);
+		if (!discover_vst3 (m, nfo, verbose)) {
+			delete root;
+			return false;
+		}
+		if (nfo.empty ()) {
+			cerr << "No plugins in VST3 module: '" << module_path << "'\n";
+			delete root;
+			return false;
+		}
 		for (std::vector<VST3Info>::const_iterator i = nfo.begin(); i != nfo.end(); ++i) {
 			cb (module_path, *i);
 			root->add_child_nocopy (i->state ());

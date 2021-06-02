@@ -403,20 +403,6 @@ Playlist::_set_sort_id ()
 bool
 Playlist::set_name (const string& str)
 {
-	/* in a typical situation, a playlist is being used
-	 * by one diskstream and also is referenced by the
-	 * Session. if there are more references than that,
-	 * then don't change the name.
-	 */
-
-	if (_refcnt > 2) {
-		return false;
-	}
-
-	if (_session.playlists()->by_name (str)) {
-		return false;
-	}
-
 	bool ret = SessionObject::set_name (str);
 	if (ret) {
 		_set_sort_id ();
@@ -881,6 +867,53 @@ Playlist::remove_region_internal (boost::shared_ptr<Region> region, ThawList& th
 	}
 
 	return -1;
+}
+
+void
+Playlist::remove_gaps (samplepos_t gap_threshold, samplepos_t leave_gap, boost::function<void (samplepos_t, samplecnt_t)> gap_callback)
+{
+	RegionWriteLock rlock (this);
+	RegionList::iterator i;
+	RegionList::iterator nxt (regions.end());
+	bool closed = false;
+
+	if (regions.size() < 2) {
+		return;
+	}
+
+	for (i = regions.begin(); i != regions.end(); ++i) {
+
+		nxt = i;
+		++nxt;
+
+		if (nxt == regions.end()) {
+			break;
+		}
+
+		samplepos_t end_of_this_region = (*i)->position() + (*i)->length();
+
+		if (end_of_this_region >= (*nxt)->position()) {
+			continue;
+		}
+
+		const samplepos_t gap = (*nxt)->position() - end_of_this_region;
+
+		if (gap < gap_threshold) {
+			continue;
+		}
+
+		const samplepos_t shift = gap - leave_gap;
+
+		ripple_unlocked ((*nxt)->position(), -shift, 0, rlock.thawlist, false);
+
+		gap_callback ((*nxt)->position(), shift);
+
+		closed = true;
+	}
+
+	if (closed) {
+		notify_contents_changed ();
+	}
 }
 
 void
@@ -1645,7 +1678,7 @@ Playlist::ripple_locked (samplepos_t at, samplecnt_t distance, RegionList* exclu
 }
 
 void
-Playlist::ripple_unlocked (samplepos_t at, samplecnt_t distance, RegionList* exclude, ThawList& thawlist)
+Playlist::ripple_unlocked (samplepos_t at, samplecnt_t distance, RegionList* exclude, ThawList& thawlist, bool notify)
 {
 	if (distance == 0) {
 		return;
@@ -1677,7 +1710,10 @@ Playlist::ripple_unlocked (samplepos_t at, samplecnt_t distance, RegionList* exc
 	}
 
 	_rippling = false;
-	notify_contents_changed ();
+
+	if (notify) {
+		notify_contents_changed ();
+	}
 }
 
 void
@@ -2252,7 +2288,6 @@ Playlist::set_state (const XMLNode& node, int version)
 	XMLNode*                  child;
 	XMLNodeList               nlist;
 	XMLNodeConstIterator      niter;
-	XMLPropertyConstIterator  piter;
 	boost::shared_ptr<Region> region;
 	string                    region_name;
 	bool                      seen_region_nodes = false;
@@ -2281,6 +2316,8 @@ Playlist::set_state (const XMLNode& node, int version)
 
 	node.get_property (X_("orig-track-id"), _orig_track_id);
 	node.get_property (X_("frozen"), _frozen);
+
+	node.get_property (X_("pgroup-id"), _pgroup_id);
 
 	node.get_property (X_("combine-ops"), _combine_ops);
 
@@ -2372,6 +2409,7 @@ Playlist::state (bool full_state)
 	node->set_property (X_("name"), name ());
 	node->set_property (X_("type"), _type);
 	node->set_property (X_("orig-track-id"), _orig_track_id);
+	node->set_property (X_("pgroup-id"), _pgroup_id);
 
 	string                        shared_ids;
 	list<PBD::ID>::const_iterator it = _shared_with_ids.begin ();

@@ -110,6 +110,9 @@ public:
 	bool set_name (const std::string& str);
 	void set_region_ownership ();
 
+	std::string pgroup_id()                 { return _pgroup_id; }
+	void set_pgroup_id(std::string pgid)    { _pgroup_id = pgid; }
+
 	virtual void clear (bool with_signals = true);
 	virtual void dump () const;
 
@@ -163,6 +166,7 @@ public:
 	void duplicate_ranges (std::list<AudioRange>&, float times);
 	void nudge_after (samplepos_t start, samplecnt_t distance, bool forwards);
 	void fade_range (std::list<AudioRange>&);
+	void remove_gaps (samplepos_t gap_threshold, samplepos_t leave_gap, boost::function<void (samplepos_t, samplecnt_t)> gap_callback);
 
 	boost::shared_ptr<Region> combine (const RegionList&);
 	void                      uncombine (boost::shared_ptr<Region>);
@@ -405,7 +409,7 @@ protected:
 	void splice_unlocked (samplepos_t at, samplecnt_t distance, boost::shared_ptr<Region> exclude, ThawList& thawlist);
 
 	void ripple_locked (samplepos_t at, samplecnt_t distance, RegionList* exclude);
-	void ripple_unlocked (samplepos_t at, samplecnt_t distance, RegionList* exclude, ThawList& thawlist);
+	void ripple_unlocked (samplepos_t at, samplecnt_t distance, RegionList* exclude, ThawList& thawlist, bool notify = true);
 
 	virtual void remove_dependents (boost::shared_ptr<Region> /*region*/) {}
 	virtual void region_going_away (boost::weak_ptr<Region> /*region*/) {}
@@ -458,8 +462,10 @@ private:
 
 	mutable boost::optional<std::pair<samplepos_t, samplepos_t> > _cached_extent;
 
-	samplepos_t _end_space; //this is used when we are pasting a range with extra space at the end
+	samplepos_t _end_space; // this is used when we are pasting a range with extra space at the end
 	bool        _playlist_shift_active;
+
+	std::string _pgroup_id; // when we make multiple playlists in one action, they will share the same pgroup_id
 };
 
 } /* namespace ARDOUR */

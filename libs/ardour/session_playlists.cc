@@ -187,6 +187,52 @@ SessionPlaylists::n_playlists () const
 }
 
 boost::shared_ptr<Playlist>
+SessionPlaylists::for_pgroup (string pgroup_id, const PBD::ID& id)
+{
+	Glib::Threads::Mutex::Lock lm (lock);
+
+	for (List::iterator i = playlists.begin(); i != playlists.end(); ++i) {
+		if ((*i)->pgroup_id() == pgroup_id) {
+			if ((*i)->get_orig_track_id() == id) {
+				return* i;
+			}
+		}
+	}
+
+	for (List::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
+		if ((*i)->pgroup_id() == pgroup_id) {
+			if ((*i)->get_orig_track_id() == id) {
+				return* i;
+			}
+		}
+	}
+
+	return boost::shared_ptr<Playlist>();
+}
+
+std::vector<boost::shared_ptr<Playlist> > 
+SessionPlaylists::playlists_for_pgroup (std::string pgroup)
+{
+	Glib::Threads::Mutex::Lock lm (lock);
+
+	vector<boost::shared_ptr<Playlist> > pl_tr;
+
+	for (List::iterator i = playlists.begin(); i != playlists.end(); ++i) {
+		if ((*i)->pgroup_id().compare(pgroup)==0) {
+			pl_tr.push_back (*i);
+		}
+	}
+
+	for (List::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
+		if ((*i)->pgroup_id().compare(pgroup)==0) {
+			pl_tr.push_back (*i);
+		}
+	}
+
+	return pl_tr;
+}
+
+boost::shared_ptr<Playlist>
 SessionPlaylists::by_name (string name)
 {
 	Glib::Threads::Mutex::Lock lm (lock);

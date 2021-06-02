@@ -8739,6 +8739,14 @@ Editor::add_region_marker ()
 		return;
 	}
 
+	/* get these before we display the dialog, since it will interfere if
+	   the edit point is "mouse"
+	*/
+	RegionSelection rs = get_regions_from_selection_and_edit_point ();
+	samplepos_t position = get_preferred_edit_position ();
+
+	cerr << "adding cue marker @ " << position << " in " << rs.size() << endl;
+
 	ArdourDialog d (_("New Cue Marker Name"), true, false);
 	Gtk::Entry e;
 	d.get_vbox()->pack_start (e);
@@ -8755,8 +8763,7 @@ Editor::add_region_marker ()
 		return;
 	}
 
-	RegionSelection rs = get_regions_from_selection_and_edit_point ();
-	samplepos_t position = get_preferred_edit_position ();
+
 	bool in_command = false;
 
 	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ++r) {
@@ -8764,6 +8771,7 @@ Editor::add_region_marker ()
 		boost::shared_ptr<Region> region ((*r)->region());
 
 		if (position < region->position() || position >= region->position() + region->length()) {
+			cerr << "nope on that one\n";
 			continue;
 		}
 
@@ -8771,14 +8779,32 @@ Editor::add_region_marker ()
 
 		CueMarker marker (str, region->start() + (position - region->position()));
 
-		if (!in_command) {
-			begin_reversible_command (_("add cue marker"));
-			in_command = true;
-		}
-
 		for (SourceList::iterator s = sources.begin(); s != sources.end(); ++s) {
-			(*s)->add_cue_marker (marker);
-			_session->add_command (new StatefulDiffCommand (*s));
+
+			XMLNode* before_cues = (*s)->get_state().child (X_("Cues"));
+
+			if (!(*s)->add_cue_marker (marker)) {
+				delete before_cues;
+				continue;
+			}
+
+			if (!in_command) {
+				begin_reversible_command (_("add cue marker"));
+				in_command = true;
+			}
+
+
+			XMLNode* after_cues = (*s)->get_state().child (X_("Cues"));
+
+			if (!before_cues) {
+				before_cues = new XMLNode (X_("Cues"));
+			}
+
+			if (!after_cues) {
+				after_cues = new XMLNode (X_("Cues"));
+			}
+
+			_session->add_command (new MementoCommand<Source> (**s, before_cues, after_cues));
 		}
 	}
 
@@ -8797,13 +8823,29 @@ Editor::remove_region_marker (CueMarker& cm)
 		SourceList & sources = (*r)->region()->sources_for_edit ();
 		for (SourceList::iterator s = sources.begin(); s != sources.end(); ++s) {
 
-			if ((*s)->remove_cue_marker (cm)) {
-				if (!in_command) {
-					begin_reversible_command (_("remove cue marker"));
-					in_command = true;
-				}
-				_session->add_command (new StatefulDiffCommand (*s));
+			XMLNode* before_cues = (*s)->get_state().child (X_("Cues"));
+
+			if (!(*s)->remove_cue_marker (cm)) {
+				delete before_cues;
+				continue;
 			}
+
+			if (!in_command) {
+				begin_reversible_command (_("remove cue marker"));
+				in_command = true;
+			}
+
+			XMLNode* after_cues = (*s)->get_state().child (X_("Cues"));
+
+			if (!before_cues) {
+				before_cues = new XMLNode (X_("Cues"));
+			}
+
+			if (!after_cues) {
+				after_cues = new XMLNode (X_("Cues"));
+			}
+
+			_session->add_command (new MementoCommand<Source> (**s, before_cues, after_cues));
 		}
 	}
 
@@ -8823,13 +8865,28 @@ Editor::clear_region_markers ()
 		SourceList & sources = (*r)->region()->sources_for_edit ();
 		for (SourceList::iterator s = sources.begin(); s != sources.end(); ++s) {
 
-			if ((*s)->clear_cue_markers ()) {
-				if (!in_command) {
-					begin_reversible_command (_("clear cue markers"));
-					in_command = true;
-				}
-				_session->add_command (new StatefulDiffCommand (*s));
+			XMLNode* before_cues = (*s)->get_state().child (X_("Cues"));
+
+			if (!(*s)->clear_cue_markers ()) {
+				delete before_cues;
+				continue;
 			}
+
+			if (!in_command) {
+				begin_reversible_command (_("clear cue markers"));
+				in_command = true;
+			}
+			XMLNode* after_cues = (*s)->get_state().child (X_("Cues"));
+
+			if (!before_cues) {
+				before_cues = new XMLNode (X_("Cues"));
+			}
+
+			if (!after_cues) {
+				after_cues = new XMLNode (X_("Cues"));
+			}
+
+			_session->add_command (new MementoCommand<Source> (**s, before_cues, after_cues));
 		}
 	}
 
@@ -8874,3 +8931,169 @@ Editor::make_region_markers_global (bool as_cd_marker)
 	}
 }
 
+void
+Editor::do_remove_gaps ()
+{
+	ArdourDialog d (_("Remove Gaps"), true, false);
+
+	Gtk::HBox hpacker1;
+	Gtk::Label label1 (_("Smallest gap size to remove (seconds):"));
+	Gtk::Entry e1;
+
+	hpacker1.set_spacing (12);
+	hpacker1.set_border_width (12);
+	hpacker1.pack_start (label1, true, false);
+	hpacker1.pack_start (e1, false, false);
+
+	Gtk::HBox hpacker2;
+	Gtk::Label label2 (_("Leave a gap of(seconds):"));
+	Gtk::Entry e2;
+
+	hpacker2.set_spacing (12);
+	hpacker2.set_border_width (12);
+	hpacker2.pack_start (label2, true, false);
+	hpacker2.pack_start (e2, false, false);
+
+	Gtk::CheckButton markers_too (_("Shift global markers too"));
+
+	d.get_vbox()->pack_start (hpacker1);
+	d.get_vbox()->pack_start (hpacker2);
+	d.get_vbox()->pack_start (markers_too);
+	d.get_vbox()->show_all ();
+
+	e2.set_activates_default ();
+
+	d.add_button (Stock::CANCEL, RESPONSE_CANCEL);
+	d.add_button (Stock::OK, RESPONSE_OK);
+	d.set_default_response (RESPONSE_OK);
+
+  again:
+	int result = d.run ();
+
+	if (result != RESPONSE_OK) {
+		return;
+	}
+
+	float threshold_secs;
+
+	if (sscanf (e1.get_text().c_str(), "%f", &threshold_secs) != 1) {
+		ArdourMessageDialog msg (_("The threshold value you entered is not a number"));
+		msg.run();
+		goto again;
+	}
+
+	if (threshold_secs < 0) {
+		ArdourMessageDialog msg (_("The threshold value must be larger than or equal to zero"));
+		msg.run();
+		goto again;
+	}
+
+	samplecnt_t threshold_samples = (samplecnt_t) floor (threshold_secs * _session->sample_rate());
+
+	float leave_secs;
+
+	if (sscanf (e2.get_text().c_str(), "%f", &leave_secs) != 1) {
+		ArdourMessageDialog msg (_("The leave-gap value you entered is not a number"));
+		msg.run();
+		goto again;
+	}
+
+	if (leave_secs < 0) {
+		ArdourMessageDialog msg (_("The threshold value must be larger than or equal to zero"));
+		msg.run ();
+		goto again;
+	}
+
+	samplecnt_t leave_samples = (samplecnt_t) floor (leave_secs * _session->sample_rate());
+
+	d.hide ();
+
+	remove_gaps (threshold_samples, leave_samples, markers_too.get_active());
+}
+
+/* one day, we can use an empty lambda for this */
+static
+void gap_marker_callback_relax (samplepos_t, samplecnt_t)
+{
+}
+
+void
+Editor::remove_gap_marker_callback (samplepos_t at, samplecnt_t distance)
+{
+	_session->locations()->ripple (at, distance, false, false);
+}
+
+void
+Editor::remove_gaps (samplecnt_t gap_threshold, samplecnt_t leave_gap, bool markers_too)
+{
+	bool in_command = false;
+	TrackViewList ts = selection->tracks.filter_to_unique_playlists ();
+	XMLNode* locations_before (0);
+
+	if (markers_too) {
+		locations_before = &_session->locations()->get_state();
+	}
+
+	set<boost::shared_ptr<Playlist> > pl;
+
+	/* it will not be possible to infer this from the set<>, so keep track
+	 * of it explicitly
+	 */
+
+	boost::shared_ptr<Playlist> first_selected_playlist;
+
+	for (TrackSelection::iterator x = ts.begin(); x != ts.end(); ++x) {
+
+		/* don't operate on any playlist more than once, which could
+		 * happen if there is more than 1 track using the same
+		 * playlist.
+		 */
+
+		if ((*x)->playlist ()) {
+			if (!first_selected_playlist) {
+				first_selected_playlist = (*x)->playlist();
+			}
+			pl.insert ((*x)->playlist ());
+		}
+	}
+
+	for (set<boost::shared_ptr<Playlist> >::iterator i = pl.begin(); i != pl.end(); ++i) {
+
+		(*i)->clear_changes ();
+		(*i)->clear_owned_changes ();
+
+		if (!in_command) {
+			begin_reversible_command (_("remove gaps"));
+			in_command = true;
+		}
+
+		/* only move markers when closing gaps on the first
+		 * selected track/playlist
+		 */
+
+		if (markers_too && (*i == first_selected_playlist)) {
+			boost::function<void (samplepos_t, samplecnt_t)> callback (boost::bind (&Editor::remove_gap_marker_callback, this, _1, _2));
+			(*i)->remove_gaps (gap_threshold, leave_gap, callback);
+		} else {
+			boost::function<void (samplepos_t, samplecnt_t)> callback (boost::bind (gap_marker_callback_relax, _1, _2));
+			(*i)->remove_gaps (gap_threshold, leave_gap, callback);
+		}
+
+		vector<Command*> cmds;
+		(*i)->rdiff (cmds);
+		_session->add_commands (cmds);
+		_session->add_command (new StatefulDiffCommand (*i));
+	}
+
+	if (in_command) {
+		if (markers_too) {
+			XMLNode* locations_after = &_session->locations()->get_state();
+			_session->add_command (new MementoCommand<Locations> (*_session->locations(), locations_before, locations_after));
+		}
+		commit_reversible_command ();
+	} else {
+		if (markers_too) {
+			delete locations_before;
+		}
+	}
+}

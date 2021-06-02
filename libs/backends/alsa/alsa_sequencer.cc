@@ -199,7 +199,7 @@ retry:
 
 		ssize_t err = snd_seq_event_output(_seq, &alsa_event);
 
-		if ((err == -EAGAIN)) {
+		if (err == -EAGAIN) {
 			snd_seq_drain_output (_seq);
 			goto retry;
 		}

@@ -175,6 +175,13 @@ namespace ARDOUR { namespace LuaAPI {
 	 */
 	int plugin_automation (lua_State *lua);
 
+	/*
+	 * A convenience function to get a scale-points from a ParamaterDescriptor
+	 * @param p a ParameterDescriptor
+	 * @returns Lua Table with "name" -> value pairs
+	 */
+	int desc_scale_points (lua_State* p);
+
 	/**
 	 * A convenience function for colorspace HSL to RGB conversion.
 	 * All ranges are 0..1

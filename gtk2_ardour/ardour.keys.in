@@ -231,6 +231,7 @@ This mode provides many different operations on both regions and control points,
 @wvis|Common/toggle-meterbridge|<@SECONDARY@>b|show meter bridge
 @edtrk|Editor/track-record-enable-toggle|<@TERTIARY@>b|toggle track rec-enable 
 @sess|Main/AddTrackBus|<@PRIMARY@><@TERTIARY@>n|add track(s) or bus(ses)
+@rop|Region/add-region-cue-marker|m|add a region/cue marker
 @sess|Main/New|<@PRIMARY@>n|open a new session
 @wvis|Window/toggle-midi-connection-manager|<@SECONDARY@><@TERTIARY@>m|toggle global midi patchbay
 @wvis|Common/show-mixer|<@SECONDARY@>m|show mixer window

@@ -457,7 +457,7 @@ EditorRegions::regions_changed (boost::shared_ptr<RegionList> rl, const Property
 				region_row_map.erase (map_it);
 				_model->erase (r);
 			}
-			return;
+			break;
 		}
 
 		if (map_it != region_row_map.end ()) {

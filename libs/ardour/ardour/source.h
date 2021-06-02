@@ -89,7 +89,7 @@ public:
 	virtual void session_saved() {}
 
 	XMLNode& get_state ();
-	int set_state (const XMLNode&, int version);
+	int set_state (XMLNode const &, int version);
 
 	bool         writable () const;
 
@@ -113,10 +113,10 @@ public:
 	void set_captured_xruns (XrunPositions const& xruns) { _xruns = xruns; }
 
 	CueMarkers const & cue_markers() const { return _cue_markers; }
-	void add_cue_marker (CueMarker const &);
-	void move_cue_marker (CueMarker const &, samplepos_t source_relative_position);
+	bool add_cue_marker (CueMarker const &);
+	bool move_cue_marker (CueMarker const &, samplepos_t source_relative_position);
 	bool remove_cue_marker (CueMarker const &);
-	void rename_cue_marker (CueMarker&, std::string const &);
+	bool rename_cue_marker (CueMarker&, std::string const &);
 	bool clear_cue_markers ();
 	PBD::Signal0<void> CueMarkersChanged;
 
@@ -162,6 +162,9 @@ public:
 
   private:
 	void fix_writable_flags ();
+
+	XMLNode& get_cue_state () const;
+	int set_cue_state (XMLNode const &, int);
 };
 
 }

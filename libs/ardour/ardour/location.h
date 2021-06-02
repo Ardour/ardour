@@ -205,6 +205,8 @@ public:
 	bool clear_xrun_markers ();
 	bool clear_ranges ();
 
+	void ripple (samplepos_t at, samplecnt_t distance, bool include_locked, bool notify);
+
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&, int version);
 	Location *get_location_by_id(PBD::ID);

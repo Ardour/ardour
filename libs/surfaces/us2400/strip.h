@@ -129,10 +129,9 @@ private:
 	PBD::ScopedConnectionList stripable_connections;
 	PBD::ScopedConnectionList subview_connections;
 	PBD::ScopedConnectionList send_connections;
-	int       eq_band;
-	
+
 	int      _trickle_counter;
-	
+
 	ARDOUR::AutomationType  _pan_mode;
 
 	void notify_solo_changed ();

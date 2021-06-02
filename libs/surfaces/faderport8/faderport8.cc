@@ -808,7 +808,6 @@ FaderPort8::set_state (const XMLNode& node, int version)
 {
 	DEBUG_TRACE (DEBUG::FaderPort8, "FaderPort8::set_state\n");
 	XMLNodeList nlist;
-	XMLNodeConstIterator niter;
 	XMLNode const* child;
 
 	if (ControlProtocol::set_state (node, version)) {

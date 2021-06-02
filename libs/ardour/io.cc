@@ -650,7 +650,6 @@ int
 IO::set_state_2X (const XMLNode& node, int version, bool in)
 {
 	XMLProperty const * prop;
-	XMLNodeConstIterator iter;
 	LocaleGuard lg;
 
 	/* force use of non-localized representation of decimal point,

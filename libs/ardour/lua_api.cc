@@ -339,6 +339,28 @@ ARDOUR::LuaAPI::plugin_automation (lua_State *L)
 }
 
 int
+ARDOUR::LuaAPI::desc_scale_points (lua_State *L)
+{
+	typedef ParameterDescriptor T;
+
+	int top = lua_gettop (L);
+	if (top < 1) {
+		return luaL_argerror (L, 1, "invalid number of arguments, :plugin_scale_points (ParameterDescriptor)");
+	}
+
+	T* const pd = luabridge::Userdata::get<T> (L, 1, false);
+	luabridge::LuaRef tbl (luabridge::newTable (L));
+
+	if (pd && pd->scale_points) {
+		for (ARDOUR::ScalePoints::const_iterator i = pd->scale_points->begin(); i != pd->scale_points->end(); ++i) {
+			tbl[i->first] = i->second;
+		}
+	}
+	luabridge::push (L, tbl);
+	return 1;
+}
+
+int
 ARDOUR::LuaAPI::sample_to_timecode (lua_State *L)
 {
 	int top = lua_gettop (L);

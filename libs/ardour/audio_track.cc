@@ -108,6 +108,7 @@ AudioTrack::state (bool save_template)
 
 		freeze_node = new XMLNode (X_("freeze-info"));
 		freeze_node->set_property ("playlist", _freeze_record.playlist->name());
+		freeze_node->set_property ("playlist-id", _freeze_record.playlist->id().to_s ());
 		freeze_node->set_property ("state", _freeze_record.state);
 
 		for (vector<FreezeRecordProcessorInfo*>::iterator i = _freeze_record.processor_info.begin(); i != _freeze_record.processor_info.end(); ++i) {
@@ -149,16 +150,19 @@ AudioTrack::set_state_part_two ()
 		}
 		_freeze_record.processor_info.clear ();
 
-		if ((prop = fnode->property (X_("playlist"))) != 0) {
-			boost::shared_ptr<Playlist> pl = _session.playlists()->by_name (prop->value());
-			if (pl) {
-				_freeze_record.playlist = boost::dynamic_pointer_cast<AudioPlaylist> (pl);
-				_freeze_record.playlist->use();
-			} else {
-				_freeze_record.playlist.reset ();
-				_freeze_record.state = NoFreeze;
+		boost::shared_ptr<Playlist> freeze_pl;
+		if ((prop = fnode->property (X_("playlist-id"))) != 0) {
+			freeze_pl = _session.playlists()->by_id (prop->value());
+		} else if ((prop = fnode->property (X_("playlist"))) != 0) {
+			freeze_pl = _session.playlists()->by_name (prop->value());
+		}
+		if (freeze_pl) {
+			_freeze_record.playlist = boost::dynamic_pointer_cast<AudioPlaylist> (freeze_pl);
+			_freeze_record.playlist->use();
+		} else {
+			_freeze_record.playlist.reset ();
+			_freeze_record.state = NoFreeze;
 			return;
-			}
 		}
 
 		fnode->get_property (X_("state"), _freeze_record.state);

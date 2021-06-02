@@ -109,21 +109,21 @@ Source::fix_writable_flags ()
 XMLNode&
 Source::get_state ()
 {
-	XMLNode *node = new XMLNode ("Source");
+	XMLNode *node = new XMLNode (X_("Source"));
 
-	node->set_property ("name", name());
-	node->set_property ("take-id", take_id());
-	node->set_property ("type", _type);
-	node->set_property (X_("flags"), _flags);
-	node->set_property ("id", id());
+	node->set_property (X_("name"), name());
+	node->set_property (X_("take-id"), take_id());
+	node->set_property (X_("type"), _type);
+	node->set_property (X_(X_("flags")), _flags);
+	node->set_property (X_("id"), id());
 
 	if (_timestamp != 0) {
 		int64_t t = _timestamp;
-		node->set_property ("timestamp", t);
+		node->set_property (X_("timestamp"), t);
 	}
 
 	if (_have_natural_position) {
-		node->set_property ("natural-position", _natural_position);
+		node->set_property (X_("natural-position"), _natural_position);
 	}
 
 	if (!_xruns.empty ()) {
@@ -139,16 +139,7 @@ Source::get_state ()
 	}
 
 	if (!_cue_markers.empty()) {
-		XMLNode* cue_parent = new XMLNode (X_("Cues"));
-
-		for (CueMarkers::const_iterator c = _cue_markers.begin(); c != _cue_markers.end(); ++c) {
-			XMLNode* cue_child = new XMLNode (X_("Cue"));
-			cue_child->set_property ("text", c->text());
-			cue_child->set_property ("position", c->position());
-			cue_parent->add_child_nocopy (*cue_child);
-		}
-
-		node->add_child_nocopy (*cue_parent);
+		node->add_child_nocopy (get_cue_state());
 	}
 
 	return *node;
@@ -158,6 +149,20 @@ int
 Source::set_state (const XMLNode& node, int version)
 {
 	std::string str;
+	const CueMarkers old_cues = _cue_markers;
+	XMLNodeList nlist = node.children();
+	int64_t t;
+	samplepos_t ts;
+
+	if (node.name() == X_("Cues")) {
+		/* partial state */
+		int ret = set_cue_state (node, version);
+		if (ret) {
+			return ret;
+		}
+		goto out;
+	}
+
 	if (node.get_property ("name", str)) {
 		_name = str;
 	} else {
@@ -170,12 +175,10 @@ Source::set_state (const XMLNode& node, int version)
 
 	node.get_property ("type", _type);
 
-	int64_t t;
 	if (node.get_property ("timestamp", t)) {
 		_timestamp = (time_t) t;
 	}
 
-	samplepos_t ts;
 	if (node.get_property ("natural-position", ts)) {
 		_natural_position = ts;
 		_have_natural_position = true;
@@ -192,7 +195,6 @@ Source::set_state (const XMLNode& node, int version)
 	}
 
 	_xruns.clear ();
-	XMLNodeList nlist = node.children();
 	for (XMLNodeIterator niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
 		if ((*niter)->name() == X_("xruns")) {
@@ -214,22 +216,7 @@ Source::set_state (const XMLNode& node, int version)
 			}
 
 		} else if ((*niter)->name() == X_("Cues")) {
-
-			_cue_markers.clear ();
-
-			const XMLNode& cues (*(*niter));
-			const XMLNodeList cuelist = cues.children();
-
-			for (XMLNodeConstIterator citer = cuelist.begin(); citer != cuelist.end(); ++citer) {
-				string text;
-				samplepos_t position;
-
-				if (!(*citer)->get_property (X_("text"), text) || !(*citer)->get_property (X_("position"), position)) {
-					continue;
-				}
-
-				_cue_markers.insert (CueMarker (text, position));
-			}
+			set_cue_state (**niter, version);
 		}
 	}
 
@@ -255,6 +242,53 @@ Source::set_state (const XMLNode& node, int version)
 		   sometimes marks sources as removable which shouldn't be.
 		*/
 		_flags = Flag (_flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy|CanRename));
+	}
+
+	/* support to make undo/redo actually function. Very few things about
+	 * Sources are ever part of undo/redo history, but this can
+	 * be. Undo/Redo uses a MementoCommand<> pattern, which will not in
+	 * itself notify anyone when the operation changes the cue markers.
+	 */
+
+  out:
+	if (old_cues != _cue_markers) {
+		CueMarkersChanged (); /* EMIT SIGNAL */
+	}
+
+	return 0;
+}
+
+XMLNode&
+Source::get_cue_state () const
+{
+	XMLNode* cue_parent = new XMLNode (X_("Cues"));
+
+	for (CueMarkers::const_iterator c = _cue_markers.begin(); c != _cue_markers.end(); ++c) {
+		XMLNode* cue_child = new XMLNode (X_("Cue"));
+		cue_child->set_property ("text", c->text());
+		cue_child->set_property ("position", c->position());
+		cue_parent->add_child_nocopy (*cue_child);
+	}
+
+	return *cue_parent;
+}
+
+int
+Source::set_cue_state (XMLNode const & cues, int /* version */)
+{
+	_cue_markers.clear ();
+
+	const XMLNodeList cuelist = cues.children();
+
+	for (XMLNodeConstIterator citer = cuelist.begin(); citer != cuelist.end(); ++citer) {
+		string text;
+		samplepos_t position;
+
+		if (!(*citer)->get_property (X_("text"), text) || !(*citer)->get_property (X_("position"), position)) {
+			continue;
+		}
+
+		_cue_markers.insert (CueMarker (text, position));
 	}
 
 	return 0;
@@ -413,34 +447,42 @@ Source::writable () const
         return (_flags & Writable) && _session.writable();
 }
 
-void
+bool
 Source::add_cue_marker (CueMarker const & cm)
 {
-	_cue_markers.insert (cm);
-	CueMarkersChanged(); /* EMIT SIGNAL */
+	if (_cue_markers.insert (cm).second) {
+		CueMarkersChanged(); /* EMIT SIGNAL */
+		return true;
+	}
+
+	return false;
 }
 
-void
+bool
 Source::move_cue_marker (CueMarker const & cm, samplepos_t source_relative_position)
 {
 	if (source_relative_position > length (0)) {
-		return;
+		return false;
 	}
 
 	if (remove_cue_marker (cm)) {
-		add_cue_marker (CueMarker (cm.text(), source_relative_position));
+		return add_cue_marker (CueMarker (cm.text(), source_relative_position));
 	}
+
+	return false;
 }
 
-void
+bool
 Source::rename_cue_marker (CueMarker& cm, std::string const & str)
 {
 	CueMarkers::iterator m = _cue_markers.find (cm);
 
 	if (m != _cue_markers.end()) {
 		_cue_markers.erase (m);
-		add_cue_marker (CueMarker (str, cm.position()));
+		return add_cue_marker (CueMarker (str, cm.position()));
 	}
+
+	return false;
 }
 
 bool

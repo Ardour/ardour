@@ -41,27 +41,52 @@ namespace ARDOUR {
 
 class RouteUI;
 
+struct PlaylistSorterByID {
+	bool operator() (boost::shared_ptr<ARDOUR::Playlist> a, boost::shared_ptr<ARDOUR::Playlist> b) const {
+		if (a->pgroup_id().length() && b->pgroup_id().length()) {
+			return (a->id() < b->id()); /*both plists have pgroup-id: use IDs which are sequentially generated */
+		} else if (!a->pgroup_id().length() && !b->pgroup_id().length()) {
+			return (a->sort_id() < b->sort_id()); /*old session: neither plist has a pgroup-id: use prior sort_id calculation */ /*DEPRECATED*/
+		} else {
+			return (a->pgroup_id().length() < b->pgroup_id().length()); /*mix of old & new: old ones go on top */
+		}
+	}
+};
+
 class PlaylistSelector : public ArdourDialog
 {
 public:
 	PlaylistSelector ();
 	~PlaylistSelector ();
 
-	void show_for (RouteUI*);
+	enum plMode {
+		plSelect,
+		plCopy,
+		plShare,
+		plSteal
+	};
+
+	void redisplay();
+	void set_tav(RouteTimeAxisView*, plMode in);
 
 protected:
 	bool on_unmap_event (GdkEventAny*);
 
 private:
-	typedef std::map<PBD::ID,std::list<boost::shared_ptr<ARDOUR::Playlist> >*> TrackPlaylistMap;
+	typedef std::map<PBD::ID,std::vector<boost::shared_ptr<ARDOUR::Playlist> >*> TrackPlaylistMap;
 
 	Gtk::ScrolledWindow scroller;
 	TrackPlaylistMap trpl_map;
-	RouteUI* rui;
+
+	RouteTimeAxisView* _tav;
+
+	plMode _mode;
 
 	sigc::connection select_connection;
+	PBD::ScopedConnectionList signal_connections;
 
 	void add_playlist_to_map (boost::shared_ptr<ARDOUR::Playlist>);
+	void playlist_added();
 	void clear_map ();
 	void close_button_click ();
 	void ok_button_click ();

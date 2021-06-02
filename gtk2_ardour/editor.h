@@ -579,6 +579,8 @@ public:
 	void split_regions_at (ARDOUR::MusicSample, RegionSelection&);
 	void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret, bool select_new = false);
 	RegionSelection get_regions_from_selection_and_mouse (samplepos_t);
+	void do_remove_gaps ();
+	void remove_gaps (samplecnt_t threshold, samplecnt_t leave, bool markers_too);
 
 	void mouse_add_new_tempo_event (samplepos_t where);
 	void mouse_add_new_meter_event (samplepos_t where);
@@ -782,8 +784,8 @@ private:
 	void mapped_get_equivalent_regions (RouteTimeAxisView&, uint32_t, RegionView*, std::vector<RegionView*>*) const;
 
 	void mapover_routes (sigc::slot<void, RouteUI&, uint32_t> sl, RouteUI*, PBD::PropertyID) const;
-	void mapped_use_new_playlist (RouteUI&, uint32_t, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
-	void mapped_use_copy_playlist (RouteUI&, uint32_t, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
+	void mapped_use_new_playlist (RouteUI&, uint32_t, std::string name, std::string gid, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
+	void mapped_use_copy_playlist (RouteUI&, uint32_t, std::string name, std::string gid, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
 	void mapped_clear_playlist (RouteUI&, uint32_t);
 
 	void button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type);
@@ -2367,6 +2369,8 @@ private:
 	Glib::RefPtr<Gtk::Action> reg_sens (Glib::RefPtr<Gtk::ActionGroup> group, char const* name, char const* label, sigc::slot<void> slot);
 	void toggle_reg_sens (Glib::RefPtr<Gtk::ActionGroup> group, char const* name, char const* label, sigc::slot<void> slot);
 	void radio_reg_sens (Glib::RefPtr<Gtk::ActionGroup> action_group, Gtk::RadioAction::Group& radio_group, char const* name, char const* label, sigc::slot<void> slot);
+
+	void remove_gap_marker_callback (samplepos_t at, samplecnt_t distance);
 
 	friend class Drag;
 	friend class RegionCutDrag;

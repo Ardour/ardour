@@ -50,6 +50,7 @@ class LIBARDOUR_API SessionPlaylists : public PBD::ScopedConnectionList
 public:
 	~SessionPlaylists ();
 
+	boost::shared_ptr<Playlist> for_pgroup (std::string name, const PBD::ID& for_track);
 	boost::shared_ptr<Playlist> by_name (std::string name);
 	boost::shared_ptr<Playlist> by_id (const PBD::ID&);
 	uint32_t source_use_count (boost::shared_ptr<const Source> src) const;
@@ -61,6 +62,7 @@ public:
 	void destroy_region (boost::shared_ptr<Region>);
 	boost::shared_ptr<Crossfade> find_crossfade (const PBD::ID &);
 	void sync_all_regions_with_regions ();
+	std::vector<boost::shared_ptr<Playlist> > playlists_for_pgroup (std::string pgroup);
 	std::vector<boost::shared_ptr<Playlist> > playlists_for_track (boost::shared_ptr<Track>) const;
 	std::vector<boost::shared_ptr<Playlist> > get_used () const;
 	std::vector<boost::shared_ptr<Playlist> > get_unused () const;
