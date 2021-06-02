@@ -191,16 +191,14 @@ public:
 
 	void shuffle (boost::shared_ptr<Region>, int dir);
 
-	typedef boost::function<void (Playlist&, samplepos_t, samplecnt_t)> RippleCallback;
-
-	void ripple (samplepos_t at, samplecnt_t distance, RegionList* exclude, RippleCallback ripple_callback);
-	void ripple (samplepos_t at, samplecnt_t distance, boost::shared_ptr<Region> exclude, RippleCallback ripple_callback)
+	void ripple (samplepos_t at, samplecnt_t distance, RegionList* exclude);
+	void ripple (samplepos_t at, samplecnt_t distance, boost::shared_ptr<Region> exclude)
 	{
 		RegionList el;
 		if (exclude) {
 			el.push_back (exclude);
 		}
-		ripple (at, distance, &el, ripple_callback);
+		ripple (at, distance, &el);
 	}
 
 	void update_after_tempo_map_change ();
@@ -305,24 +303,24 @@ protected:
 	friend class Session;
 
 protected:
-
 	class RegionReadLock : public Glib::Threads::RWLock::ReaderLock
 	{
 	public:
 		RegionReadLock (Playlist* pl)
-		    : Glib::Threads::RWLock::ReaderLock (pl->region_lock)
+			:  Glib::Threads::RWLock::ReaderLock (pl->region_lock)
 		{
 		}
 		~RegionReadLock () {}
+
 	};
 
 	class RegionWriteLock : public Glib::Threads::RWLock::WriterLock
 	{
 	public:
 		RegionWriteLock (Playlist* pl, bool do_block_notify = true)
-		    : Glib::Threads::RWLock::WriterLock (pl->region_lock)
-		    , playlist (pl)
-		    , block_notify (do_block_notify)
+			: Glib::Threads::RWLock::WriterLock (pl->region_lock)
+			, playlist (pl)
+			, block_notify (do_block_notify)
 		{
 			if (block_notify) {
 				playlist->delay_notifications ();
@@ -429,8 +427,8 @@ protected:
 	void splice_locked (samplepos_t at, samplecnt_t distance, boost::shared_ptr<Region> exclude);
 	void splice_unlocked (samplepos_t at, samplecnt_t distance, boost::shared_ptr<Region> exclude, ThawList& thawlist);
 
-	void ripple_locked (samplepos_t at, samplecnt_t distance, RegionList* exclude, RippleCallback);
-	void ripple_unlocked (samplepos_t at, samplecnt_t distance, RegionList* exclude, RippleCallback, ThawList& thawlist, bool notify = true);
+	void ripple_locked (samplepos_t at, samplecnt_t distance, RegionList* exclude);
+	bool ripple_unlocked (samplepos_t at, samplecnt_t distance, RegionList* exclude, ThawList& thawlist);
 
 	virtual void remove_dependents (boost::shared_ptr<Region> /*region*/) {}
 	virtual void region_going_away (boost::weak_ptr<Region> /*region*/) {}

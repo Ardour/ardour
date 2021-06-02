@@ -874,44 +874,46 @@ Playlist::remove_region_internal (boost::shared_ptr<Region> region, ThawList& th
 void
 Playlist::remove_gaps (samplepos_t gap_threshold, samplepos_t leave_gap, boost::function<void (samplepos_t, samplecnt_t)> gap_callback)
 {
-	RegionWriteLock rlock (this);
-	RegionList::iterator i;
-	RegionList::iterator nxt (regions.end());
 	bool closed = false;
-	RippleCallback null_ripple_callback;
 
-	if (regions.size() < 2) {
-		return;
-	}
+	{
+		RegionWriteLock rlock (this);
+		RegionList::iterator i;
+		RegionList::iterator nxt (regions.end());
 
-	for (i = regions.begin(); i != regions.end(); ++i) {
-
-		nxt = i;
-		++nxt;
-
-		if (nxt == regions.end()) {
-			break;
+		if (regions.size() < 2) {
+			return;
 		}
 
-		samplepos_t end_of_this_region = (*i)->position() + (*i)->length();
+		for (i = regions.begin(); i != regions.end(); ++i) {
 
-		if (end_of_this_region >= (*nxt)->position()) {
-			continue;
+			nxt = i;
+			++nxt;
+
+			if (nxt == regions.end()) {
+				break;
+			}
+
+			samplepos_t end_of_this_region = (*i)->position() + (*i)->length();
+
+			if (end_of_this_region >= (*nxt)->position()) {
+				continue;
+			}
+
+			const samplepos_t gap = (*nxt)->position() - end_of_this_region;
+
+			if (gap < gap_threshold) {
+				continue;
+			}
+
+			const samplepos_t shift = gap - leave_gap;
+
+			(void) ripple_unlocked ((*nxt)->position(), -shift, 0, rlock.thawlist);
+
+			gap_callback ((*nxt)->position(), shift);
+
+			closed = true;
 		}
-
-		const samplepos_t gap = (*nxt)->position() - end_of_this_region;
-
-		if (gap < gap_threshold) {
-			continue;
-		}
-
-		const samplepos_t shift = gap - leave_gap;
-
-		ripple_unlocked ((*nxt)->position(), -shift, 0, null_ripple_callback, rlock.thawlist, false);
-
-		gap_callback ((*nxt)->position(), shift);
-
-		closed = true;
 	}
 
 	if (closed) {
@@ -1654,23 +1656,33 @@ Playlist::splice_unlocked (samplepos_t at, samplecnt_t distance, boost::shared_p
 }
 
 void
-Playlist::ripple (samplepos_t at, samplecnt_t distance, RegionList* exclude, RippleCallback ripple_callback)
+Playlist::ripple (samplepos_t at, samplecnt_t distance, RegionList* exclude)
 {
-	ripple_locked (at, distance, exclude, ripple_callback);
+	ripple_locked (at, distance, exclude);
 }
 
 void
-Playlist::ripple_locked (samplepos_t at, samplecnt_t distance, RegionList* exclude, RippleCallback ripple_callback)
+Playlist::ripple_locked (samplepos_t at, samplecnt_t distance, RegionList* exclude)
 {
-	RegionWriteLock rl (this);
-	ripple_unlocked (at, distance, exclude, ripple_callback, rl.thawlist);
+	bool changed = false;
+	{
+		RegionWriteLock rl (this);
+		changed = ripple_unlocked (at, distance, exclude, rl.thawlist);
+	}
+
+	if (changed) {
+		notify_contents_changed ();
+	}
 }
 
-void
-Playlist::ripple_unlocked (samplepos_t at, samplecnt_t distance, RegionList* exclude, RippleCallback ripple_callback, ThawList& thawlist, bool notify)
+
+bool
+Playlist::ripple_unlocked (samplepos_t at, samplecnt_t distance, RegionList* exclude, ThawList& thawlist)
 {
-	if (distance == 0) {
-		return;
+	bool changed = false;
+
+	if (distance == 0 || regions.empty()) {
+		return false;
 	}
 
 	_rippling               = true;
@@ -1695,16 +1707,13 @@ Playlist::ripple_unlocked (samplepos_t at, samplecnt_t distance, RegionList* exc
 
 			thawlist.add (*i);
 			(*i)->set_position (new_pos);
+			changed = true;
 		}
 	}
 
 	_rippling = false;
 
-	ripple_callback (*this, at, distance);
-
-	if (notify) {
-		notify_contents_changed ();
-	}
+	return changed;
 }
 
 void
