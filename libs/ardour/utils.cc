@@ -421,6 +421,8 @@ ARDOUR::string_to_edit_mode (string str)
 		return Slide;
 	} else if (str == _("Ripple")) {
 		return Ripple;
+	} else if (str == _("Ripple All")) {
+		return RippleAll;
 	} else if (str == _("Lock")) {
 		return Lock;
 	}
@@ -441,6 +443,9 @@ ARDOUR::edit_mode_to_string (EditMode mode)
 
 	case Ripple:
 		return _("Ripple");
+
+	case RippleAll:
+		return _("Ripple All");
 
 	default:
 	case Splice:

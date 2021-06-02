@@ -305,7 +305,8 @@ setup_enum_writer ()
 
 	REGISTER_ENUM (Slide);
 	REGISTER_ENUM (Splice);
-	REGISTER_ENUM (Ripple); // XXX do the old enum values have to stay in order?
+	REGISTER_ENUM (Ripple);
+	REGISTER_ENUM (RippleAll);
 	REGISTER_ENUM (Lock);
 	REGISTER (_EditMode);
 	/*
