@@ -2614,7 +2614,7 @@ Editor::add_region_brush_drag (ArdourCanvas::Item* item, GdkEvent*, RegionView* 
 		return;
 	}
 
-	if (Config->get_edit_mode() == Splice || Config->get_edit_mode() == Ripple) {
+	if (Config->get_edit_mode() == Splice || should_ripple()) {
 		return;
 	}
 

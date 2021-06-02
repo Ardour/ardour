@@ -2625,12 +2625,17 @@ Editor::insert_source_list_selection (float times)
 	begin_reversible_command (_("insert region"));
 	playlist->clear_changes ();
 	playlist->clear_owned_changes ();
-	playlist->add_region ((RegionFactory::create (region, true)), get_preferred_edit_position(), times);
+
+	playlist->add_region ((RegionFactory::create (region, true)), get_preferred_edit_position(), times, _session->config.get_layered_record_mode());  //ToDo:  insert_mode ?
 	if (Config->get_edit_mode() == Ripple) {
 		playlist->ripple (get_preferred_edit_position(), region->length() * times, boost::shared_ptr<Region>(), ripple_callback (true));
 	}
 
-	playlist->rdiff_and_add_command (_session);
+	if (should_ripple()) {
+		do_ripple (playlist, get_preferred_edit_position(), region->length() * times, boost::shared_ptr<Region>(), true);
+	} else {
+		playlist->rdiff_and_add_command (_session);
+	}
 
 	commit_reversible_command ();
 }
@@ -4581,11 +4586,12 @@ Editor::remove_clicked_region ()
 	playlist->clear_owned_changes ();
 	playlist->remove_region (region);
 
-	if (Config->get_edit_mode() == Ripple) {
-		playlist->ripple (region->position(), - region->length(), boost::shared_ptr<Region>(), ripple_callback (true));
+	if (should_ripple()) {
+		do_ripple (playlist, region->position(), - region->length(), boost::shared_ptr<Region>(), true);
+	} else {
+		playlist->rdiff_and_add_command (_session);
 	}
 
-	playlist->rdiff_and_add_command (_session);
 	commit_reversible_command ();
 }
 
@@ -4663,8 +4669,9 @@ Editor::remove_selected_regions ()
 		playlist->clear_owned_changes ();
 		playlist->freeze ();
 		playlist->remove_region (*rl);
-		if (Config->get_edit_mode() == Ripple) {
-			playlist->ripple ((*rl)->position(), -(*rl)->length(), boost::shared_ptr<Region>(), ripple_callback (false));
+
+		if (should_ripple()) {
+			do_ripple (playlist, (*rl)->position(), -(*rl)->length(), boost::shared_ptr<Region>(), false);
 		}
 
 	}
@@ -4804,8 +4811,8 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 		switch (op) {
 		case Delete:
 			pl->remove_region (r);
-			if (Config->get_edit_mode() == Ripple) {
-				pl->ripple (r->position(), -r->length(), boost::shared_ptr<Region>(), ripple_callback (false));
+			if (should_ripple()) {
+				do_ripple (pl, r->position(), -r->length(), boost::shared_ptr<Region>(), false);
 			}
 			break;
 
@@ -4813,8 +4820,8 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 			_xx = RegionFactory::create (r, false);
 			npl->add_region (_xx, r->position() - first_position);
 			pl->remove_region (r);
-			if (Config->get_edit_mode() == Ripple) {
-				pl->ripple (r->position(), -r->length(), boost::shared_ptr<Region>(), ripple_callback (false));
+			if (should_ripple()) {
+				do_ripple (pl, r->position(), -r->length(), boost::shared_ptr<Region>(), false);
 			}
 			break;
 
@@ -4825,8 +4832,8 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 
 		case Clear:
 			pl->remove_region (r);
-			if (Config->get_edit_mode() == Ripple) {
-				pl->ripple (r->position(), -r->length(), boost::shared_ptr<Region>(), ripple_callback (false));
+			if (should_ripple()) {
+				do_ripple (pl, r->position(), -r->length(), boost::shared_ptr<Region>(), false);
 			}
 			break;
 		}
@@ -5052,7 +5059,7 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 
 	/* ripple first so that we don't move the duplicates that will be added */
 
-	if (Config->get_edit_mode() == Ripple) {
+	if (should_ripple()) {
 
 		/* convert RegionSelection into RegionList so that we can pass it to ripple and exclude the regions we will duplicate */
 
@@ -5069,7 +5076,7 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 		}
 
 		for (set<boost::shared_ptr<Playlist> >::iterator p = playlists.begin(); p != playlists.end(); ++p) {
-			(*p)->ripple (start_sample, span * times, &exclude, ripple_callback (false));
+			do_ripple ((*p), start_sample, span * times, &exclude, false);
 		}
 	}
 
@@ -5085,7 +5092,7 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 		samplepos_t const position = end_sample + (r->first_sample() - start_sample + 1);
 		playlist = (*i)->region()->playlist();
 
-		if (Config->get_edit_mode() != Ripple) {
+		if (!should_ripple()) {
 			if (playlists.insert (playlist).second) {
 				playlist->clear_changes ();
 				playlist->clear_owned_changes ();
@@ -5100,10 +5107,7 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 	}
 
 	for (set<boost::shared_ptr<Playlist> >::iterator p = playlists.begin(); p != playlists.end(); ++p) {
-		_session->add_command (new StatefulDiffCommand (*p));
-		vector<Command*> cmds;
-		(*p)->rdiff (cmds);
-		_session->add_commands (cmds);
+		(*p)->rdiff_and_add_command (_session);
 	}
 
 	if (!foo.empty()) {
@@ -9168,10 +9172,7 @@ Editor::remove_gaps (samplecnt_t gap_threshold, samplecnt_t leave_gap, bool mark
 			(*i)->remove_gaps (gap_threshold, leave_gap, callback);
 		}
 
-		vector<Command*> cmds;
-		(*i)->rdiff (cmds);
-		_session->add_commands (cmds);
-		_session->add_command (new StatefulDiffCommand (*i));
+		(*i)->rdiff_and_add_command (_session);
 	}
 
 	if (in_command) {
@@ -9185,41 +9186,90 @@ Editor::remove_gaps (samplecnt_t gap_threshold, samplecnt_t leave_gap, bool mark
 			delete locations_before;
 		}
 	}
+
+	cerr << "--- rc\n";
 }
 
-ARDOUR::Playlist::RippleCallback
-Editor::ripple_callback (bool run_rdiff)
+bool
+Editor::should_ripple () const
 {
-	return boost::bind (&Editor::_ripple_callback, this, _1, _2, _3, run_rdiff);
+	return (Config->get_edit_mode() == Ripple ||
+	        Config->get_edit_mode() == RippleAll);
 }
 
 void
-Editor::_ripple_callback (Playlist& playlist, samplepos_t at, samplecnt_t distance, bool run_rdiff)
+Editor::do_ripple (boost::shared_ptr<ARDOUR::Playlist> target_playlist, samplepos_t at, samplecnt_t distance, boost::shared_ptr<ARDOUR::Region> exclude, bool add_to_command)
 {
-	if (!_session) {
-		return;
+	RegionList el;
+	if (exclude) {
+		el.push_back (exclude);
+	}
+	do_ripple (target_playlist, at, distance, &el, add_to_command);
+}
+
+void
+Editor::do_ripple (boost::shared_ptr<Playlist> target_playlist, samplepos_t at, samplecnt_t distance, RegionList* exclude, bool add_to_command)
+{
+	typedef std::set<boost::shared_ptr<Playlist> > UniquePlaylists;
+	UniquePlaylists playlists;
+
+	playlists.insert (target_playlist);
+
+	if (Config->get_edit_mode() == RippleAll) {
+
+		TrackViewList ts = track_views.filter_to_unique_playlists ();
+		boost::shared_ptr<Playlist> pl;
+
+		for (TrackSelection::iterator x = ts.begin(); x != ts.end(); ++x) {
+			if ((pl = (*x)->playlist()) == 0) {
+				continue;
+			}
+			playlists.insert (pl);
+		}
 	}
 
-	/* XXX if ripple-all, figure out what else to ripple, and do it here,
-	 * calling rdiff_and_add_command() for each affected playlist if
-	 * run_rdiff is true
-	 */
+	if (add_to_command) {
+		for (UniquePlaylists::iterator p = playlists.begin(); p != playlists.end(); ++p) {
 
-	TrackViewList ts = track_views.filter_to_unique_playlists ();
-	boost::shared_ptr<Playlist> pl;
-	Playlist::RippleCallback null_callback;
+			(*p)->clear_changes ();
+			(*p)->clear_owned_changes ();
+		}
+	}
 
+	for (UniquePlaylists::iterator p = playlists.begin(); p != playlists.end(); ++p) {
+		(*p)->freeze ();
+	}
 
-	for (TrackSelection::iterator x = ts.begin(); x != ts.end(); ++x) {
-		if ((pl = (*x)->playlist()) == 0) {
-			continue;
+	for (UniquePlaylists::iterator p = playlists.begin(); p != playlists.end(); ++p) {
+
+		/* exclude list is only for the target */
+
+		if ((*p) == target_playlist) {
+
+			(*p)->clear_changes ();
+			(*p)->clear_owned_changes ();
+
+			(*p)->ripple (at, distance, exclude);
+
+			/* caller may put the target playlist into the undo
+			 * history, so only do this if asked
+			 */
+
+			if (add_to_command) {
+				(*p)->rdiff_and_add_command (_session);
+			}
+		} else {
+			/* all other playlists: do the ripple, and save to undo/redo */
+
+			(*p)->clear_changes ();
+			(*p)->clear_owned_changes ();
+			(*p)->ripple (at, distance, 0);
+			(*p)->rdiff_and_add_command (_session);
 		}
 
-		if (pl.get() == &playlist) {
-			continue;
-		}
+	}
 
-		pl->ripple (at, distance, 0, null_callback);
-		pl->rdiff_and_add_command (_session);
+	for (UniquePlaylists::iterator p = playlists.begin(); p != playlists.end(); ++p) {
+		(*p)->thaw ();
 	}
 }

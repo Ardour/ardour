@@ -1288,8 +1288,8 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 	switch (op) {
 	case Delete:
 		if (playlist->cut (time) != 0) {
-			if (Config->get_edit_mode() == Ripple) {
-				playlist->ripple (time.start(), -time.length(), 0, _editor.ripple_callback (true));
+			if (_editor.should_ripple()) {
+				playlist->ripple (time.start(), -time.length(), 0);
 			}
 			playlist->rdiff_and_add_command (_session);
 		}
@@ -1298,8 +1298,8 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 	case Cut:
 		if ((what_we_got = playlist->cut (time)) != 0) {
 			_editor.get_cut_buffer().add (what_we_got);
-			if (Config->get_edit_mode() == Ripple) {
-				playlist->ripple (time.start(), -time.length(), 0, _editor.ripple_callback (true));
+			if (_editor.should_ripple()) {
+				playlist->ripple (time.start(), -time.length(), 0);
 			}
 			playlist->rdiff_and_add_command (_session);
 		}
@@ -1312,8 +1312,8 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 
 	case Clear:
 		if ((what_we_got = playlist->cut (time)) != 0) {
-			if (Config->get_edit_mode() == Ripple) {
-				playlist->ripple (time.start(), -time.length(), 0, _editor.ripple_callback (true));
+			if (_editor.should_ripple()) {
+				playlist->ripple (time.start(), -time.length(), 0);
 			}
 			playlist->rdiff_and_add_command (_session);
 			what_we_got->release ();
@@ -1347,10 +1347,10 @@ RouteTimeAxisView::paste (samplepos_t pos, const Selection& selection, PasteCont
 
 	pl->clear_changes ();
 	pl->clear_owned_changes ();
-	if (Config->get_edit_mode() == Ripple) {
+	if (_editor.should_ripple()) {
 		std::pair<samplepos_t, samplepos_t> extent = (*p)->get_extent_with_endspace();
 		samplecnt_t amount = extent.second - extent.first;
-		pl->ripple(pos, amount * ctx.times, boost::shared_ptr<Region>(), _editor.ripple_callback (false));
+		pl->ripple(pos, amount * ctx.times, boost::shared_ptr<Region>());
 	}
 	pl->paste (*p, pos, ctx.times, sub_num);
 

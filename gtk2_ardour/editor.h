@@ -583,7 +583,9 @@ public:
 	void edit_tempo_section (ARDOUR::TempoSection*);
 	void edit_meter_section (ARDOUR::MeterSection*);
 
-	ARDOUR::Playlist::RippleCallback ripple_callback (bool run_rdiff);
+	bool should_ripple () const;
+	void do_ripple (boost::shared_ptr<ARDOUR::Playlist>, samplepos_t, samplecnt_t, ARDOUR::RegionList* exclude, bool add_to_command);
+	void do_ripple (boost::shared_ptr<ARDOUR::Playlist>, samplepos_t, samplecnt_t, boost::shared_ptr<ARDOUR::Region> exclude, bool add_to_command);
 
 	void add_region_marker ();
 	void clear_region_markers ();
@@ -2386,7 +2388,6 @@ private:
 	void radio_reg_sens (Glib::RefPtr<Gtk::ActionGroup> action_group, Gtk::RadioAction::Group& radio_group, char const* name, char const* label, sigc::slot<void> slot);
 
 	void remove_gap_marker_callback (samplepos_t at, samplecnt_t distance);
-	void _ripple_callback (ARDOUR::Playlist& playlist, samplepos_t, samplecnt_t, bool run_rdiff);
 
 	friend class Drag;
 	friend class RegionCutDrag;

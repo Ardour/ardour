@@ -2184,11 +2184,11 @@ RegionInsertDrag::finished (GdkEvent * event, bool)
 
 	playlist->add_region (_primary->region (), _last_position.sample, 1.0, false, _last_position.division);
 
-	if (Config->get_edit_mode() == Ripple) {
-		playlist->ripple (_last_position.sample, _primary->region()->length(), _primary->region(), _editor->ripple_callback (true));
+	if (_editor->should_ripple()) {
+		_editor->do_ripple (playlist,_last_position.sample, _primary->region()->length(), _primary->region(), true);
+	} else {
+		playlist->rdiff_and_add_command (_editor->session());
 	}
-
-	playlist->rdiff_and_add_command (_editor->session());
 
 	_editor->commit_reversible_command ();
 
@@ -2486,7 +2486,7 @@ RegionRippleDrag::motion (GdkEvent* event, bool first_move)
 
 			remove_unselected_from_views (prev_amount, false);
 			// ripple previous playlist according to the regions that have been removed onto the new playlist
-			prev_tav->playlist()->ripple(prev_position, -selection_length, exclude, _editor->ripple_callback (false));
+			prev_tav->playlist()->ripple(prev_position, -selection_length, exclude);
 			prev_amount = 0;
 
 			// move just the selected regions
@@ -2495,7 +2495,7 @@ RegionRippleDrag::motion (GdkEvent* event, bool first_move)
 			// ensure that the ripple operation on the new playlist inserts selection_length time
 			adjust = selection_length;
 			// ripple the new current playlist
-			tv->playlist()->ripple (where, amount+adjust, exclude, _editor->ripple_callback (false));
+			tv->playlist()->ripple (where, amount+adjust, exclude);
 
 			// add regions after point where drag entered this track to subsequent ripples
 			add_all_after_to_views (tv, where, _editor->selection->regions, true);

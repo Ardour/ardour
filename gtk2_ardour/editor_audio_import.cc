@@ -1059,11 +1059,13 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region,
 		playlist->clear_changes ();
 		playlist->clear_owned_changes ();
 		playlist->add_region (copy, pos);
-		if (Config->get_edit_mode() == Ripple) {
-			playlist->ripple (pos, copy->length(), copy, ripple_callback (true));
+
+		if (should_ripple()) {
+			do_ripple (playlist, pos, copy->length(), copy, true);
+		} else {
+			playlist->rdiff_and_add_command (_session);
 		}
 
-		playlist->rdiff_and_add_command (_session);
 		break;
 	}
 
