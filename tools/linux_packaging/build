@@ -32,6 +32,7 @@ VENDOR=Ardour ;
 EXENAME=ardour
 GCC5ABI=false
 USEWINE=false
+WINEEXE=
 BUILDTYPE=""
 NOSTRIP="libsuil|libserd|libsord|liblilv|libsratom|liblrdf|libardour|libpbd|libevoral"
 
@@ -257,15 +258,6 @@ fi
 #
 
 echo export 'PATH="/usr/local/bin:/opt/bin:$PATH"' >> $ENVIRONMENT
-
-# create startup helper script
-if test -d $BUILD_ROOT/vst; then
-	WINEEXE=wine
-	USEWINE=true
-	echo export INSTALL_DIR >> $ENVIRONMENT
-else
-	WINEEXE=
-fi
 
 sed -e "/^%ENV%/r $ENVIRONMENT" -e '/^%ENV%/d' -e 's/%VER%/'"${release_version}"'/;s/%EXENAME%/'"${EXENAME}"'/;s/%WINE%/'"$WINEEXE"'/' < ardour.sh.in > $APPBIN/${EXENAME}${major_version}
 rm $ENVIRONMENT && chmod 775 $APPBIN/${EXENAME}${major_version}

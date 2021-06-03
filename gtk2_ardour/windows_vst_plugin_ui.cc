@@ -169,34 +169,9 @@ WindowsVSTPluginUI::get_XID ()
 	return _vst->state()->xid;
 }
 
-#ifdef GDK_WINDOWING_X11
-typedef int (*error_handler_t)( Display *, XErrorEvent *);
-static Display *the_gtk_display;
-static error_handler_t wine_error_handler;
-static error_handler_t gtk_error_handler;
-
-static int
-fst_xerror_handler (Display* disp, XErrorEvent* ev)
-{
-	if (disp == the_gtk_display) {
-		printf ("relaying error to gtk\n");
-		return gtk_error_handler (disp, ev);
-	} else {
-		printf( "relaying error to wine\n" );
-		return wine_error_handler (disp, ev);
-	}
-}
-#endif
-
 void
 windows_vst_gui_init (int *argc, char **argv[])
 {
 	gtk_init (argc, argv);
-
-#ifdef GDK_WINDOWING_X11
-	wine_error_handler = XSetErrorHandler (NULL);
-	the_gtk_display = gdk_x11_display_get_xdisplay (gdk_display_get_default());
-	gtk_error_handler = XSetErrorHandler (fst_xerror_handler);
-#endif
 }
 

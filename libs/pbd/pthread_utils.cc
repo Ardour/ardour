@@ -29,9 +29,6 @@
 #endif
 
 #include "pbd/pthread_utils.h"
-#ifdef WINE_THREAD_SUPPORT
-#include <fst.h>
-#endif
 
 #ifdef COMPILER_MSVC
 DECLARE_DEFAULT_COMPARISONS (pthread_t) // Needed for 'DECLARE_DEFAULT_COMPARISONS'. Objects in an STL container can be
@@ -60,16 +57,6 @@ namespace PBD
 }
 
 using namespace PBD;
-
-static int
-thread_creator (pthread_t* thread_id, const pthread_attr_t* attr, void* (*function) (void*), void* arg)
-{
-#ifdef WINE_THREAD_SUPPORT
-	return wine_pthread_create (thread_id, attr, function, arg);
-#else
-	return pthread_create (thread_id, attr, function, arg);
-#endif
-}
 
 void
 PBD::notify_event_loops_about_thread_creation (pthread_t thread, const std::string& emitting_thread_name, int request_count)
@@ -140,7 +127,7 @@ pthread_create_and_store (string name, pthread_t* thread, void* (*start_routine)
 
 	ThreadStartWithName* ts = new ThreadStartWithName (start_routine, arg, name);
 
-	if ((ret = thread_creator (thread, &default_attr, fake_thread_start, ts)) == 0) {
+	if ((ret = pthread_create (thread, &default_attr, fake_thread_start, ts)) == 0) {
 		pthread_mutex_lock (&thread_map_lock);
 		all_threads.push_back (*thread);
 		pthread_mutex_unlock (&thread_map_lock);

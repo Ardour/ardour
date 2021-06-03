@@ -514,18 +514,11 @@ ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& s
 		_session->set_clean ();
 	}
 
-#ifdef WINDOWS_VST_SUPPORT
-	fst_stop_threading();
-#endif
-
 	{
 		Timers::TimerSuspender t;
 		flush_pending (10);
 	}
 
-#ifdef WINDOWS_VST_SUPPORT
-	fst_start_threading();
-#endif
 	retval = 0;
 
 	if (!mix_template.empty ()) {

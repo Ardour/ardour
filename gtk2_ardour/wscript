@@ -455,13 +455,6 @@ def configure(conf):
     autowaf.check_header(conf, 'cxx', 'boost/shared_ptr.hpp')
     autowaf.check_header(conf, 'cxx', 'boost/weak_ptr.hpp')
 
-# Add a waf `feature' to allow compilation of things using winegcc
-from waflib.TaskGen import feature
-@feature("wine")
-def set_winegcc(self):
-    self.env.LINK_CXX = self.env.LINK_CC = 'wineg++'
-    self.env.CC = 'winegcc'
-
 def _doPyp(infileName, deps = False):
     outStr = ''
     out = []
@@ -604,60 +597,19 @@ def build(bld):
 #        obj.source += [ 'toolbar_test.cc', 'enums.cc']
 
 
-    if bld.is_defined('WINDOWS_VST_SUPPORT') and bld.env['build_target'] != 'mingw':
-        # Windows VST support w/wine
-        # If we require VST support we build a stub main() and the FST library
-        # here using winegcc, and link it to the GTK front-end library
-        obj = bld (features = 'cxx c cxxprogram wine')
-        obj.source = ( '../libs/fst/vstwin.c', '../vst/winmain.c' )
-        #
-        # XXX do we really need to explicitly link to all of these for the wine executable?
-        #
-        obj.use          = [ 'libpbd',
-                             'libmidipp',
-                             'libardour',
-                             'libardour_cp',
-                             'libtemporal',
-                             'libmidipp',
-                             'libgtk2_ardour',
-                             'libgtkmm2ext',
-                             'libcanvas',
-                             'libwaveview',
-                             'libwidgets',
-                             'libptformat',
-                             ]
-        obj.target = 'ardour-' + str (bld.env['VERSION']) + '-vst.exe.so'
-        obj.includes  = [ '../libs/fst', '.' ]
-        obj.linkflags = ['-mwindows', '-Wl,--export-dynamic']
-        obj.linkflags += bld.env['LDFLAGS']
-        obj.defines = ['_POSIX_SOURCE', 'USE_WS_PREFIX']
-        obj.uselib       = 'GLIB'
-        obj.install_path = bld.env['DLLDIR']
-        # end of the wine executable
-
-        # now the shared library containing the GTK GUI for ardour
-        obj = bld (features = 'cxx c cxxshlib')
-        # operate on copy to avoid adding sources twice
-        obj.source    = list(gtk2_ardour_sources)
-        obj.includes  = [ '../libs/fst', '.' ]
-        obj.name      = 'libgtk2_ardour'
-        obj.target    = 'gtk2_ardour'
-        obj.cflags    = [ bld.env['compiler_flags_dict']['pic'] ]
-
+    # executable version of the GTK GUI
+    if bld.env['build_target'] == 'mingw':
+        obj = bld (features = 'cxx c cxxprogram winres')
     else:
-        # just the normal executable version of the GTK GUI
-        if bld.env['build_target'] == 'mingw':
-            obj = bld (features = 'cxx c cxxprogram winres')
-        else:
-            obj = bld (features = 'cxx c cxxprogram')
-        # operate on copy to avoid adding sources twice
-        obj.source    = list(gtk2_ardour_sources)
-        obj.target    = 'ardour-' + str (bld.env['VERSION'])
-        obj.includes  = ['.']
+        obj = bld (features = 'cxx c cxxprogram')
 
-        if bld.is_defined('WINDOWS_VST_SUPPORT'):
-        # Windows VST support mingw
-            obj.includes += [ '../libs/fst' ]
+    # operate on copy to avoid adding sources twice
+    obj.source    = list(gtk2_ardour_sources)
+    obj.target    = 'ardour-' + str (bld.env['VERSION'])
+    obj.includes  = ['.']
+
+    if bld.is_defined('WINDOWS_VST_SUPPORT'):
+        obj.includes += [ '../libs/fst' ]
 
     # at this point, "obj" refers to either the normal native executable
     # OR the shared library built for use with wine on linux.
@@ -716,8 +668,6 @@ def build(bld):
     if bld.is_defined('WINDOWS_VST_SUPPORT'):
         obj.source += [ 'windows_vst_plugin_ui.cc' ]
         obj.defines += [ 'WINDOWS_VST_SUPPORT' ]
-        if bld.env['build_target'] != 'mingw':
-            obj.use += [ 'X11' ]
 
     if bld.is_defined('LXVST_SUPPORT'):
         obj.source += [ 'linux_vst_gui_support.cc', 'lxvst_plugin_ui.cc' ]
@@ -780,15 +730,6 @@ def build(bld):
     obj.dict         = wrapper_subst_dict
     obj.install_path = bld.env['BINDIR']
     set_subst_dict(obj, wrapper_subst_dict)
-
-    if bld.is_defined('WINDOWS_VST_SUPPORT'):
-        obj              = bld(features = 'subst')
-        obj.source       = '../vst/ardourvst.in'
-        obj.target       = 'ardourvst' + str (bld.env['MAJOR'])
-        obj.chmod        = Utils.O755
-        obj.dict         = wrapper_subst_dict
-        obj.install_path = bld.env['BINDIR']
-        set_subst_dict(obj, wrapper_subst_dict)
 
     # Font configuration
 

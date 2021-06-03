@@ -371,11 +371,9 @@ def configure(conf):
     autowaf.check_header(conf, 'cxx', 'boost/weak_ptr.hpp')
     autowaf.check_header(conf, 'cxx', 'boost/scoped_ptr.hpp')
     autowaf.check_header(conf, 'cxx', 'boost/ptr_container/ptr_list.hpp')
-    if conf.env['WINDOWS_VST_SUPPORT'] == True and Options.options.dist_target == 'mingw':
-        conf.check(compiler='cxx',
-                   lib='gdi32',
-                   mandatory=True,
-                   uselib_store='GDI32')
+
+    if conf.env['WINDOWS_VST_SUPPORT'] == True:
+        conf.check(compiler='cxx', lib='gdi32', mandatory=True, uselib_store='GDI32')
 
 
 def build(bld):
@@ -450,11 +448,10 @@ def build(bld):
 
     if bld.is_defined('WINDOWS_VST_SUPPORT'):
         obj.source += [ 'windows_vst_plugin.cc']
-        obj.includes += [ '../fst' ]
         obj.defines += [ 'WINDOWS_VST_SUPPORT' ]
-        if bld.env['build_target'] == 'mingw':
-            obj.use += [ 'vstwin' ]
-            obj.uselib += ['GDI32']
+        obj.includes += [ '../fst' ]
+        obj.use += [ 'vstwin' ]
+        obj.uselib += ['GDI32']
 
     if bld.is_defined('LXVST_SUPPORT'):
         obj.source += [ 'lxvst_plugin.cc', 'linux_vst_support.cc' ]

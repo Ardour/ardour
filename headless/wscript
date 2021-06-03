@@ -30,8 +30,6 @@ def configure(conf):
 def build(bld):
 
     VERSION = "%s.%s" % (bld.env['MAJOR'], bld.env['MINOR'])
-    if bld.is_defined('WINDOWS_VST_SUPPORT') and bld.env['build_target'] != 'mingw':
-        return
 
     # just the normal executable version of the GTK GUI
     obj = bld (features = 'cxx c cxxprogram')
@@ -40,10 +38,6 @@ def build(bld):
     obj.source    = hardour_sources
     obj.target = 'hardour-' + str (bld.env['VERSION'])
     obj.includes = ['.']
-
-    # at this point, "obj" refers to either the normal native executable
-    # OR the shared library built for use with wine on linux.
-
     obj.use      = [ 'libpbd',
                      'libardour',
                      'libardour_cp',

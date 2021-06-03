@@ -30,9 +30,6 @@ def build(bld):
     VERSION = "%s.%s" % (bld.env['MAJOR'], bld.env['MINOR'])
     if not bld.is_defined('HAVE_READLINE'):
             return;
-    # no wine
-    if bld.is_defined('WINDOWS_VST_SUPPORT') and bld.env['build_target'] != 'mingw':
-        return
 
     # commandline luasession wrapper script
     if bld.env['build_target'] != 'mingw':
