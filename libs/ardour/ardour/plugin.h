@@ -180,17 +180,6 @@ public:
 	virtual void add_slave (boost::shared_ptr<Plugin>, bool realtime) {}
 	virtual void remove_slave (boost::shared_ptr<Plugin>) {}
 
-	struct UILayoutHint {
-		UILayoutHint () : x0 (-1), x1 (-1), y0 (-1), y1 (-1), knob (false) { }
-		int  x0;
-		int  x1;
-		int  y0;
-		int  y1;
-		bool knob;
-	};
-
-	virtual bool get_layout (uint32_t which, UILayoutHint&) const { return false; }
-
 	typedef struct {
 		unsigned char* data;
 		int            width;

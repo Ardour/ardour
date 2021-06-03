@@ -85,7 +85,6 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	std::string get_parameter_docs(uint32_t which) const;
 	int         get_parameter_descriptor (uint32_t which, ParameterDescriptor&) const;
 	uint32_t    nth_parameter (uint32_t port, bool& ok) const;
-	bool        get_layout (uint32_t which, UILayoutHint&) const;
 
 	IOPortDescription describe_io_port (DataType dt, bool input, uint32_t id) const;
 
