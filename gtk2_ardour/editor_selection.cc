@@ -538,6 +538,38 @@ Editor::mapover_tracks_with_unique_playlists (sigc::slot<void, RouteTimeAxisView
 }
 
 void
+Editor::mapover_all_tracks_with_unique_playlists (sigc::slot<void, RouteTimeAxisView&, uint32_t> sl) const
+{
+	set<boost::shared_ptr<Playlist> > playlists;
+
+	set<RouteTimeAxisView*> tracks;
+
+	for (TrackViewList::const_iterator i = track_views.begin(); i != track_views.end(); ++i) {
+		RouteTimeAxisView* v = dynamic_cast<RouteTimeAxisView*> (*i);
+
+		boost::shared_ptr<Track> t = v->track();
+		if (t) {
+			if (playlists.insert (t->playlist()).second) {
+				/* haven't seen this playlist yet */
+				tracks.insert (v);
+			}
+		} else {
+			/* not actually a "Track", but a timeaxis view that
+			   we should mapover anyway.
+			*/
+			tracks.insert (v);
+		}
+	}
+
+	/* call the slots */
+	uint32_t const sz = tracks.size ();
+
+	for (set<RouteTimeAxisView*>::iterator i = tracks.begin(); i != tracks.end(); ++i) {
+		sl (**i, sz);
+	}
+}
+
+void
 Editor::mapped_get_equivalent_regions (RouteTimeAxisView& tv, uint32_t, RegionView * basis, vector<RegionView*>* all_equivs) const
 {
 	boost::shared_ptr<Playlist> pl;
@@ -570,6 +602,16 @@ void
 Editor::get_equivalent_regions (RegionView* basis, vector<RegionView*>& equivalent_regions, PBD::PropertyID property) const
 {
 	mapover_tracks_with_unique_playlists (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_get_equivalent_regions), basis, &equivalent_regions), &basis->get_time_axis_view(), property);
+
+	/* add clicked regionview since we skipped all other regions in the same track as the one it was in */
+
+	equivalent_regions.push_back (basis);
+}
+
+void
+Editor::get_all_equivalent_regions (RegionView* basis, vector<RegionView*>& equivalent_regions) const
+{
+	mapover_all_tracks_with_unique_playlists (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_get_equivalent_regions), basis, &equivalent_regions));
 
 	/* add clicked regionview since we skipped all other regions in the same track as the one it was in */
 
@@ -646,10 +688,14 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op)
 
 				if (press) {
 
-					if (selection->selected (clicked_routeview)) {
-						get_equivalent_regions (clicked_regionview, all_equivalent_regions, ARDOUR::Properties::group_select.property_id);
+					if (Config->get_edit_mode() == RippleAll) {
+						get_all_equivalent_regions (clicked_regionview, all_equivalent_regions);
 					} else {
-						all_equivalent_regions.push_back (clicked_regionview);
+						if (selection->selected (clicked_routeview)) {
+							get_equivalent_regions (clicked_regionview, all_equivalent_regions, ARDOUR::Properties::group_select.property_id);
+						} else {
+							all_equivalent_regions.push_back (clicked_regionview);
+						}
 					}
 
 					/* add all the equivalent regions, but only on button press */
@@ -665,7 +711,11 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op)
 
 		case Selection::Set:
 			if (!selection->selected (clicked_regionview)) {
-				get_equivalent_regions (clicked_regionview, all_equivalent_regions, ARDOUR::Properties::group_select.property_id);
+				if (Config->get_edit_mode() == RippleAll) {
+					get_all_equivalent_regions (clicked_regionview, all_equivalent_regions);
+				} else {
+					get_equivalent_regions (clicked_regionview, all_equivalent_regions, ARDOUR::Properties::group_select.property_id);
+				}
 				selection->set (all_equivalent_regions);
 				commit = true;
 			} else {
@@ -675,7 +725,11 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op)
 				else {
 					if (selection->regions.size() > 1) {
 						/* collapse region selection down to just this one region (and its equivalents) */
-						get_equivalent_regions(clicked_regionview, all_equivalent_regions, ARDOUR::Properties::group_select.property_id);
+						if (Config->get_edit_mode() == RippleAll) {
+							get_all_equivalent_regions (clicked_regionview, all_equivalent_regions);
+						} else {
+							get_equivalent_regions(clicked_regionview, all_equivalent_regions, ARDOUR::Properties::group_select.property_id);
+						}
 						selection->set(all_equivalent_regions);
 						commit = true;
 					}
