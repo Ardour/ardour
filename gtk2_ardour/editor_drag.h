@@ -553,7 +553,6 @@ private:
 	ARDOUR::samplecnt_t prev_amount;
 	ARDOUR::samplepos_t prev_position;
 	ARDOUR::samplecnt_t selection_length;
-	bool allow_moves_across_tracks; // only if all selected regions are on one track
 	ARDOUR::RegionList *exclude;
 	void add_all_after_to_views (TimeAxisView *tav, ARDOUR::samplepos_t where, const RegionSelection &exclude, bool drag_in_progress);
 	void remove_unselected_from_views (ARDOUR::samplecnt_t amount, bool move_regions);
