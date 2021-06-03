@@ -291,7 +291,6 @@ private:
 
 	void build ();
 	void automatic_layout (const std::vector<ControlUI *>& control_uis);
-	void custom_layout (const std::vector<ControlUI *>& control_uis);
 
 	ControlUI* build_control_ui (const Evoral::Parameter&                     param,
 	                             const ARDOUR::ParameterDescriptor&           desc,

@@ -299,8 +299,6 @@ void
 GenericPluginUI::build ()
 {
 	std::vector<ControlUI *> control_uis;
-	bool grid_avail = false;
-	bool grid_veto = false;
 
 	// Build a ControlUI for each control port
 	for (size_t i = 0; i < plugin->parameter_count(); ++i) {
@@ -321,13 +319,6 @@ GenericPluginUI::build ()
 			const float value = plugin->get_parameter(i);
 
 			ControlUI* cui;
-			Plugin::UILayoutHint hint;
-
-			if (plugin->get_layout(i, hint)) {
-				grid_avail = true;
-			} else {
-				grid_veto = true;
-			}
 
 			boost::shared_ptr<ARDOUR::AutomationControl> c
 				= boost::dynamic_pointer_cast<ARDOUR::AutomationControl>(
@@ -339,16 +330,9 @@ GenericPluginUI::build ()
 
 			ParameterDescriptor desc;
 			plugin->get_parameter_descriptor(i, desc);
-			if ((cui = build_control_ui (param, desc, c, value, plugin->parameter_is_input(i), hint.knob)) == 0) {
+			if ((cui = build_control_ui (param, desc, c, value, plugin->parameter_is_input(i))) == 0) {
 				error << string_compose(_("Plugin Editor: could not build control element for port %1"), i) << endmsg;
 				continue;
-			}
-
-			if (grid_avail && !grid_veto) {
-				cui->x0 = hint.x0;
-				cui->x1 = hint.x1;
-				cui->y0 = hint.y0;
-				cui->y1 = hint.y1;
 			}
 
 			const std::string param_docs = plugin->get_parameter_docs(i);
@@ -359,8 +343,6 @@ GenericPluginUI::build ()
 			control_uis.push_back(cui);
 		}
 	}
-
-	bool grid = grid_avail && !grid_veto;
 
 	// Build a ControlUI for each property
 	const Plugin::PropertyDescriptors& descs = plugin->get_supported_properties();
@@ -403,8 +385,6 @@ GenericPluginUI::build ()
 			preset_gui = new PluginPresetsUI (insert);
 			hpacker.pack_start (*preset_gui, true, true);
 		}
-	} else if (grid) {
-		custom_layout (control_uis);
 	} else {
 		automatic_layout (control_uis);
 	}
@@ -633,26 +613,6 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 	}
 	show_all();
 
-}
-
-void
-GenericPluginUI::custom_layout (const std::vector<ControlUI*>& control_uis)
-{
-	Gtk::Table* layout = manage (new Gtk::Table ());
-
-	for (vector<ControlUI*>::const_iterator i = control_uis.begin(); i != control_uis.end(); ++i) {
-		ControlUI* cui = *i;
-		if (cui->x0 < 0 || cui->y0 < 0) {
-			continue;
-		}
-		layout->attach (*cui, cui->x0, cui->x1, cui->y0, cui->y1, FILL, SHRINK, 2, 2);
-	}
-	hpacker.pack_start (*layout, true, true);
-
-	if (plugin->has_inline_display () && plugin->inline_display_in_gui ()) {
-		PluginDisplay* pd = manage (new PluginDisplay (plugin, 300));
-		hpacker.pack_end (*pd, true, true);
-	}
 }
 
 void
