@@ -837,10 +837,19 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op)
 
 		set<RouteTimeAxisView*> relevant_tracks;
 
-		for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
-			RouteTimeAxisView* r = dynamic_cast<RouteTimeAxisView*> (*i);
-			if (r) {
-				relevant_tracks.insert (r);
+		if (Config->get_edit_mode() == RippleAll) {
+			for (TrackSelection::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+				RouteTimeAxisView* r = dynamic_cast<RouteTimeAxisView*> (*i);
+				if (r) {
+					relevant_tracks.insert (r);
+				}
+			}
+		} else {
+			for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
+				RouteTimeAxisView* r = dynamic_cast<RouteTimeAxisView*> (*i);
+				if (r) {
+					relevant_tracks.insert (r);
+				}
 			}
 		}
 
