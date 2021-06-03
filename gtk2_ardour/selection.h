@@ -179,6 +179,7 @@ public:
 	void remove (const TrackViewList&);
 	void remove (const MidiNoteSelection&);
 	void remove (RegionView*);
+	void remove (std::vector<RegionView*>);
 	void remove (MidiCutBuffer*);
 	void remove (uint32_t selection_id);
 	void remove (samplepos_t, samplepos_t);

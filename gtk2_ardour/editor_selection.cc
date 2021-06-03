@@ -671,9 +671,18 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op)
 				} else {
 					if (button_release_can_deselect) {
 
-						/* just remove this one region, but only on a permitted button release */
+						/* just remove this one region
+						 * (or all equivalent regions
+						 * for RippleAll, but only on a
+						 * permitted button release
+						 */
 
-						selection->remove (clicked_regionview);
+						if (Config->get_edit_mode() == RippleAll) {
+							get_all_equivalent_regions (clicked_regionview, all_equivalent_regions);
+							selection->remove (all_equivalent_regions);
+						} else {
+							selection->remove (clicked_regionview);
+						}
 						commit = true;
 
 						/* no more deselect action on button release till a new press

@@ -48,6 +48,7 @@ public:
 
 	bool add (RegionView*);
 	bool remove (RegionView*);
+	bool remove (std::vector<RegionView*>);
 	void sort_by_position_and_track ();
 
 	bool contains (RegionView*) const;

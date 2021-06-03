@@ -592,6 +592,14 @@ Selection::remove (RegionView* r)
 }
 
 void
+Selection::remove (vector<RegionView*> rv)
+{
+	if (regions.remove (rv)) {
+		RegionsChanged ();
+	}
+}
+
+void
 Selection::remove (uint32_t selection_id)
 {
 	if (time.empty()) {

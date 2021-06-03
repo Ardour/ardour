@@ -162,6 +162,26 @@ RegionSelection::remove (RegionView* rv)
 	return false;
 }
 
+bool
+RegionSelection::remove (vector<RegionView*> rv)
+{
+	RegionSelection::iterator r;
+	bool removed_at_least_one = false;
+
+	for (vector<RegionView*>::iterator rx = rv.begin(); rx != rv.end(); ++rx) {
+		if ((r = find (begin(), end(), *rx)) != end()) {
+
+			// remove from layer sorted list
+			_bylayer.remove (*rx);
+			pending.remove ((*rx)->region()->id());
+			erase (r);
+			removed_at_least_one = true;
+		}
+	}
+
+	return removed_at_least_one;
+}
+
 /** Add a region to the list sorted by layer.
  *  @param rv Region to add.
  */
