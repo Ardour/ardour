@@ -171,7 +171,7 @@ MacVSTPluginInfo::get_presets (bool user_only) const
 	return p;
 }
 
-MacVSTPluginInfo::MacVSTPluginInfo (_VSTInfo* nfo) : VSTPluginInfo (nfo)
+MacVSTPluginInfo::MacVSTPluginInfo (VST2Info const& nfo) : VSTPluginInfo (nfo)
 {
 	type = ARDOUR::MacVST;
 }

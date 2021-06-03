@@ -52,29 +52,6 @@ struct LIBARDOUR_API _VSTKey
 
 typedef struct _VSTKey VSTKey;
 
-struct LIBARDOUR_API _VSTInfo
-{
-	char  *name;
-	char  *creator;
-	int    UniqueID;
-	char  *Category;
-
-	int    numInputs;
-	int    numOutputs;
-	int    numParams;
-
-	int    wantMidi;
-	int    wantEvents;
-	int    hasEditor;
-	int    isInstrument; // still unused
-	int    canProcessReplacing;
-
-	char** ParamNames;
-	char** ParamLabels;
-};
-
-typedef struct _VSTInfo VSTInfo;
-
 typedef AEffect * (* main_entry_t) (audioMasterCallback);
 
 struct LIBARDOUR_API _VSTHandle

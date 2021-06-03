@@ -134,7 +134,7 @@ WindowsVSTPluginInfo::get_presets (bool user_only) const
 	return p;
 }
 
-WindowsVSTPluginInfo::WindowsVSTPluginInfo (_VSTInfo* nfo) : VSTPluginInfo (nfo)
+WindowsVSTPluginInfo::WindowsVSTPluginInfo (VST2Info const& nfo) : VSTPluginInfo (nfo)
 {
 	type = ARDOUR::Windows_VST;
 }

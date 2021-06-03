@@ -34,11 +34,10 @@ typedef struct _VSTState VSTState;
 
 #include "ardour/vestige/vestige.h"
 
-struct _VSTInfo;
-
 namespace ARDOUR {
 
 class PluginInsert;
+struct VST2Info;
 
 /** Parent class for VST plugins of both Windows and Linux varieties */
 class LIBARDOUR_API VSTPlugin : public Plugin
@@ -141,7 +140,7 @@ protected:
 class LIBARDOUR_API VSTPluginInfo : public PluginInfo
 {
 public:
-	VSTPluginInfo (_VSTInfo*);
+	VSTPluginInfo (VST2Info const&);
 	bool is_instrument () const;
 protected:
 	bool _is_instrument;

@@ -28,6 +28,7 @@ namespace ARDOUR {
 
 class AudioEngine;
 class Session;
+struct VST2Info;
 
 class LIBARDOUR_API MacVSTPlugin : public VSTPlugin
 {
@@ -44,7 +45,7 @@ protected:
 class LIBARDOUR_API MacVSTPluginInfo : public VSTPluginInfo
 {
 public:
-	MacVSTPluginInfo (_VSTInfo*);
+	MacVSTPluginInfo (VST2Info const&);
 	~MacVSTPluginInfo () {}
 
 	PluginPtr load (Session& session);

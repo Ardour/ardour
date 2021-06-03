@@ -23,13 +23,11 @@
 
 #include "ardour/vst_plugin.h"
 
-struct _VSTHandle;
-typedef struct _VSTHandle VSTHandle;
-
 namespace ARDOUR {
 
 class AudioEngine;
 class Session;
+struct VST2Info;
 
 class LIBARDOUR_API LXVSTPlugin : public VSTPlugin
 {
@@ -44,7 +42,7 @@ class LIBARDOUR_API LXVSTPlugin : public VSTPlugin
 class LIBARDOUR_API LXVSTPluginInfo : public VSTPluginInfo
 {
   public:
-	LXVSTPluginInfo (_VSTInfo*);
+	LXVSTPluginInfo (VST2Info const&);
 	~LXVSTPluginInfo () {}
 
 	PluginPtr load (Session& session);

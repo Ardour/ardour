@@ -48,10 +48,14 @@ class Plugin;
 struct VST3Info;
 #endif
 
+#if (defined WINDOWS_VST_SUPPORT || defined MACVST_SUPPORT || defined LXVST_SUPPORT)
+struct VST2Info;
+#endif
+
 class LIBARDOUR_API PluginManager : public boost::noncopyable {
 public:
 	static PluginManager& instance();
-	static std::string scanner_bin_path;
+	static std::string vst2_scanner_bin_path;
 	static std::string vst3_scanner_bin_path;
 
 	~PluginManager ();
@@ -296,10 +300,13 @@ private:
 	void lv2_refresh ();
 
 	int windows_vst_discover_from_path (std::string path, bool cache_only = false);
-	int windows_vst_discover (std::string path, bool cache_only = false);
-
 	int mac_vst_discover_from_path (std::string path, bool cache_only = false);
-	int mac_vst_discover (std::string path, bool cache_only = false);
+	int lxvst_discover_from_path (std::string path, bool cache_only = false);
+#if (defined WINDOWS_VST_SUPPORT || defined MACVST_SUPPORT || defined LXVST_SUPPORT)
+	bool vst2_plugin (std::string const& module_path, ARDOUR::PluginType, VST2Info const&);
+	bool run_vst2_scanner_app (std::string bundle_path, PSLEPtr) const;
+	int vst2_discover (std::string path, ARDOUR::PluginType, bool cache_only = false);
+#endif
 
 	int vst3_discover_from_path (std::string const& path, bool cache_only = false);
 	int vst3_discover (std::string const& path, bool cache_only = false);
@@ -307,9 +314,6 @@ private:
 	void vst3_plugin (std::string const&, std::string const&, VST3Info const&);
 	bool run_vst3_scanner_app (std::string bundle_path, PSLEPtr) const;
 #endif
-
-	int lxvst_discover_from_path (std::string path, bool cache_only = false);
-	int lxvst_discover (std::string path, bool cache_only = false);
 
 	int ladspa_discover (std::string path);
 

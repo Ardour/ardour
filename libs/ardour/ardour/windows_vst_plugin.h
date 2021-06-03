@@ -29,6 +29,7 @@ namespace ARDOUR {
 
 class AudioEngine;
 class Session;
+struct VST2Info;
 
 class LIBARDOUR_API WindowsVSTPlugin : public VSTPlugin
 {
@@ -43,7 +44,7 @@ public:
 class LIBARDOUR_API WindowsVSTPluginInfo : public VSTPluginInfo
 {
 public:
-	WindowsVSTPluginInfo (_VSTInfo*);
+	WindowsVSTPluginInfo (VST2Info const&);
 	~WindowsVSTPluginInfo () {}
 
 	PluginPtr load (Session& session);
