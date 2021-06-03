@@ -267,6 +267,7 @@ vstfx_unload (VSTHandle* fhandle)
 	if (fhandle->name)
 	{
 		free (fhandle->name);
+		fhandle->name = 0;
 	}
 
 	/*Don't need the plugin handle any more*/
@@ -339,30 +340,19 @@ void vstfx_close (VSTState* vstfx)
 		vstfx->plugin->dispatcher (vstfx->plugin, effClose, 0, 0, 0, 0);
 	}
 
-	if (vstfx->handle->plugincnt)
+	if (vstfx->handle->plugincnt) {
 			vstfx->handle->plugincnt--;
-
-	/*vstfx_unload will unload the dll if the instance count allows -
-	we need to do this because some plugins keep their own instance count
-	and (JUCE) manages the plugin UI in its own thread.  When the plugins
-	internal instance count reaches zero, JUCE stops the UI thread and won't
-	restart it until the next time the library is loaded.  If we don't unload
-	the lib JUCE will never restart*/
-
-
-	if (vstfx->handle->plugincnt)
-	{
-		return;
 	}
 
-	/*Valid plugin loaded - so we can unload it and 0 the pointer
-	to it.  We can't free the handle here because we don't know what else
-	might need it.  It should be / is freed when the plugin is deleted*/
+	/* vstfx_unload will unload the dll if the instance count allows -
+	 * we need to do this because some plugins keep their own instance count
+	 * and (JUCE) manages the plugin UI in its own thread.  When the plugins
+	 * internal instance count reaches zero, JUCE stops the UI thread and won't
+	 * restart it until the next time the library is loaded.  If we don't unload
+	 * the lib JUCE will never restart
+	 */
 
-	if (vstfx->handle->dll)
-	{
-		dlclose(vstfx->handle->dll); //dlclose keeps its own reference count
-		vstfx->handle->dll = 0;
-	}
+	vstfx_unload (vstfx->handle);
+
 	free(vstfx);
 }
