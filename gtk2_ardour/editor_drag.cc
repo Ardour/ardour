@@ -5664,6 +5664,9 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 	}
 
 	if (first_move) {
+		if (Config->get_edit_mode() == RippleAll) {
+			_editor->selection->set (_editor->get_track_views());
+		}
 		_track_selection_at_start = _editor->selection->tracks;
 	}
 
@@ -5728,7 +5731,7 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 		ArdourCanvas::Coord const top = grab_y();
 		ArdourCanvas::Coord const bottom = current_pointer_y();
 
-		if (top >= 0 && bottom >= 0) {
+		if ((Config->get_edit_mode() != RippleAll) && top >= 0 && bottom >= 0) {
 
 			//first, find the tracks that are covered in the y range selection
 			for (TrackViewList::const_iterator i = all_tracks.begin(); i != all_tracks.end(); ++i) {
