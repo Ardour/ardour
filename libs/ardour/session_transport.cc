@@ -791,7 +791,7 @@ void
 Session::request_roll (TransportRequestSource origin)
 {
 	if (synced_to_engine()) {
-		_engine.transport_stop ();
+		_engine.transport_start ();
 		return;
 	}
 
