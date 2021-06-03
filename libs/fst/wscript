@@ -59,16 +59,16 @@ def build(bld):
 
     if bld.is_defined('WINDOWS_VST_SUPPORT') or bld.is_defined('LXVST_SUPPORT') or bld.is_defined ('MACVST_SUPPORT'):
         obj = bld (features = 'cxx c cxxprogram')
-        obj.source = ( 'scanner.cc' )
+        obj.source = ( 'vst2-scanner.cc' )
         obj.target = 'ardour-vst-scanner'
         if bld.is_defined('WINDOWS_VST_SUPPORT'):
             bld (features = 'c', name='vstwin', source='vstwin.c', uselib = 'GIOMM', includes  = [ '../pbd/', '../ardour/', '.' ])
-            obj.uselib = ['GIOMM', 'DL', 'GDI32']
+            obj.uselib = ['GIOMM', 'DL', 'GDI32', 'XML']
             obj.linkflags = ['-mwindows']
-            obj.use = [ 'libpbd', 'vstwin' ]
+            obj.use = [ 'libpbd', 'libtemporal', 'libevoral', 'vstwin' ]
         else:
             obj.uselib = ['GIOMM', 'DL', 'OSX', 'XML' ]
-            obj.use = [ 'libpbd' ]
+            obj.use = [ 'libpbd', 'libtemporal', 'libevoral' ]
 
         obj.includes  = [ '../pbd/', '../ardour/', '.' ]
         obj.defines = [
@@ -77,6 +77,7 @@ def build(bld):
             'VST_SCANNER_APP',
             'PACKAGE="' + I18N_PACKAGE + str(bld.env['MAJOR']) + '"',
             'LIBARDOUR="' + bld.env['lwrcase_dirname'] + '"',
+            'VERSIONSTRING="' + str(bld.env['VERSION']) + '"',
             ]
         if re.search ("bsd", sys.platform) != None:
             obj.defines.append('_POSIX_C_SOURCE=200809')
