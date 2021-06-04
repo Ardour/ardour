@@ -2077,12 +2077,14 @@ RegionMoveDrag::finished_no_copy (
 		_editor->selection->set (new_views);
 	}
 
-	for (set<boost::shared_ptr<Playlist> >::iterator p = frozen_playlists.begin(); p != frozen_playlists.end(); ++p) {
+	for (PlaylistSet::iterator p = modified_playlists.begin(); p != modified_playlists.end(); ++p) {
+		if (!_brushing && _editor->should_ripple()) {
+			(*p)->ripple (extent_min, extent_max - extent_min, &ripple_exclude);
+		}
+		(*p)->rdiff_and_add_command (_editor->session());
 		(*p)->thaw();
 	}
 
-	/* write commands for the accumulated diffs for all our modified playlists */
-	add_stateful_diff_commands_for_playlists (modified_playlists);
 	_editor->commit_reversible_command ();
 
 	/* We have futzed with the layering of canvas items on our streamviews.
