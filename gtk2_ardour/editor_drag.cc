@@ -1932,6 +1932,16 @@ RegionMoveDrag::finished_no_copy (
 			quarter_note = i->view->region()->quarter_note();
 		}
 
+		/* compute full extent of regions that we're going to insert */
+
+		if (where.sample < extent_min) {
+			extent_min = where.sample;
+		}
+
+		if (where.sample + i->view->region()->length() > extent_max) {
+			extent_max = where.sample  + i->view->region()->length();
+		}
+
 		if (changed_tracks) {
 
 			/* insert into new playlist */
