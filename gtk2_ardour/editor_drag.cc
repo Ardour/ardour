@@ -1869,6 +1869,10 @@ RegionMoveDrag::finished_no_copy (
 	const double last_pos_qn = tmap.exact_qn_at_sample (last_position.sample, last_position.division);
 	const double qn_delta = _primary->region()->quarter_note() - last_pos_qn;
 
+	/* determine boundaries of dragged regions, across all playlists */
+	samplepos_t extent_min = max_samplepos;
+	samplepos_t extent_max = 0;
+
 	std::set<boost::shared_ptr<const Region> > uniq;
 	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ) {
 
