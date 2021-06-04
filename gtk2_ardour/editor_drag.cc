@@ -2036,6 +2036,8 @@ RegionMoveDrag::finished_no_copy (
 			_editor->session()->add_command (new StatefulDiffCommand (rv->region()));
 		}
 
+		ripple_exclude.push_back (i->view->region());
+
 		if (changed_tracks) {
 
 			/* OK, this is where it gets tricky. If the playlist was being used by >1 tracks, and the region
