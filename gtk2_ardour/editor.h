@@ -1615,9 +1615,8 @@ private:
 
 	gint mouse_rename_region (ArdourCanvas::Item*, GdkEvent*);
 
-	void add_region_drag (ArdourCanvas::Item*, GdkEvent*, RegionView*);
+	void add_region_drag (ArdourCanvas::Item*, GdkEvent*, RegionView*, bool copy);
 	void start_create_region_grab (ArdourCanvas::Item*, GdkEvent*);
-	void add_region_copy_drag (ArdourCanvas::Item*, GdkEvent*, RegionView*);
 	void add_region_brush_drag (ArdourCanvas::Item*, GdkEvent*, RegionView*);
 	void start_selection_grab (ArdourCanvas::Item*, GdkEvent*);
 
@@ -2395,7 +2394,6 @@ private:
 	friend class RegionCutDrag;
 	friend class RegionDrag;
 	friend class RegionMoveDrag;
-	friend class RegionRippleDrag;
 	friend class TrimDrag;
 	friend class BBTRulerDrag;
 	friend class MeterMarkerDrag;
