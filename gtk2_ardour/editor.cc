@@ -5153,7 +5153,7 @@ Editor::get_per_region_note_selection (list<pair<PBD::ID, set<boost::shared_ptr<
 }
 
 void
-Editor::get_regionviews_corresponding_to (boost::shared_ptr<Region> region, vector<RegionView*>& regions, bool src_comparison)
+Editor::get_regionview_corresponding_to (boost::shared_ptr<Region> region, vector<RegionView*>& regions)
 {
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 
@@ -5162,7 +5162,6 @@ Editor::get_regionviews_corresponding_to (boost::shared_ptr<Region> region, vect
 		if ((tatv = dynamic_cast<RouteTimeAxisView*> (*i)) != 0) {
 
 			boost::shared_ptr<Playlist> pl;
-			vector<boost::shared_ptr<Region> > results;
 			RegionView* marv;
 			boost::shared_ptr<Track> tr;
 
@@ -5171,20 +5170,9 @@ Editor::get_regionviews_corresponding_to (boost::shared_ptr<Region> region, vect
 				continue;
 			}
 
-			if ((pl = (tr->playlist())) != 0) {
-				if (src_comparison) {
-					pl->get_source_equivalent_regions (region, results);
-				} else {
-					pl->get_region_list_equivalent_regions (region, results);
-				}
+			if ((marv = tatv->view()->find_view (region)) != 0) {
+				regions.push_back (marv);
 			}
-
-			for (vector<boost::shared_ptr<Region> >::iterator ir = results.begin(); ir != results.end(); ++ir) {
-				if ((marv = tatv->view()->find_view (*ir)) != 0) {
-					regions.push_back (marv);
-				}
-			}
-
 		}
 	}
 }

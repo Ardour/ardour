@@ -449,8 +449,6 @@ public:
 		return track_views;
 	}
 
-	int get_regionview_count_from_region_list (boost::shared_ptr<ARDOUR::Region>);
-
 	void do_ptimport(std::string path, ARDOUR::SrcQuality quality);
 
 	void do_import (std::vector<std::string>              paths,
@@ -470,7 +468,7 @@ public:
 	               samplepos_t&                          pos,
 	               boost::shared_ptr<ARDOUR::PluginInfo> instrument = boost::shared_ptr<ARDOUR::PluginInfo>());
 
-	void get_regionviews_corresponding_to (boost::shared_ptr<ARDOUR::Region> region, std::vector<RegionView*>& regions, bool src_comparison);
+	void get_regionview_corresponding_to (boost::shared_ptr<ARDOUR::Region> region, std::vector<RegionView*>& regions);
 
 	void get_regionviews_by_id (PBD::ID const id, RegionSelection & regions) const;
 	void get_per_region_note_selection (std::list<std::pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Temporal::Beats> > > > >&) const;

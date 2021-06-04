@@ -597,44 +597,6 @@ Editor::get_equivalent_regions (RegionSelection & basis, PBD::PropertyID prop) c
 	return equivalent;
 }
 
-int
-Editor::get_regionview_count_from_region_list (boost::shared_ptr<Region> region)
-{
-	int region_count = 0;
-
-	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-
-		RouteTimeAxisView* tatv;
-
-		if ((tatv = dynamic_cast<RouteTimeAxisView*> (*i)) != 0) {
-
-			boost::shared_ptr<Playlist> pl;
-			vector<boost::shared_ptr<Region> > results;
-			RegionView* marv;
-			boost::shared_ptr<Track> tr;
-
-			if ((tr = tatv->track()) == 0) {
-				/* bus */
-				continue;
-			}
-
-			if ((pl = (tr->playlist())) != 0) {
-				pl->get_region_list_equivalent_regions (region, results);
-			}
-
-			for (vector<boost::shared_ptr<Region> >::iterator ir = results.begin(); ir != results.end(); ++ir) {
-				if ((marv = tatv->view()->find_view (*ir)) != 0) {
-					region_count++;
-				}
-			}
-
-		}
-	}
-
-	return region_count;
-}
-
-
 bool
 Editor::set_selected_regionview_from_click (bool press, Selection::Operation op)
 {
@@ -995,11 +957,11 @@ Editor::set_selection (std::list<Selectable*> s, Selection::Operation op)
 void
 Editor::set_selected_regionview_from_region_list (boost::shared_ptr<Region> region, Selection::Operation op)
 {
-	vector<RegionView*> all_equivalent_regions;
+	vector<RegionView*> regionviews;
 
-	get_regionviews_corresponding_to (region, all_equivalent_regions, region->whole_file());
+	get_regionview_corresponding_to (region, regionviews);
 
-	if (all_equivalent_regions.empty()) {
+	if (regionviews.empty()) {
 		return;
 	}
 
@@ -1008,16 +970,16 @@ Editor::set_selected_regionview_from_region_list (boost::shared_ptr<Region> regi
 	switch (op) {
 	case Selection::Toggle:
 		/* XXX this is not correct */
-		selection->toggle (all_equivalent_regions);
+		selection->toggle (regionviews);
 		break;
 	case Selection::Set:
-		selection->set (all_equivalent_regions);
+		selection->set (regionviews);
 		break;
 	case Selection::Extend:
-		selection->add (all_equivalent_regions);
+		selection->add (regionviews);
 		break;
 	case Selection::Add:
-		selection->add (all_equivalent_regions);
+		selection->add (regionviews);
 		break;
 	}
 
