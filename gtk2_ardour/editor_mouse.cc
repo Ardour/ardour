@@ -2583,7 +2583,7 @@ Editor::add_region_drag (ArdourCanvas::Item* item, GdkEvent*, RegionView* region
 		return;
 	case Ripple:
 	case RippleAll:
-		_drags->add (new RegionRippleDrag (this, item, region_view, selection->regions.by_layer()));
+		_drags->add (new RegionRippleDrag (this, item, region_view, selection->regions.by_layer(), false));
 		break;
 	default:
 		_drags->add (new RegionMoveDrag (this, item, region_view, selection->regions.by_layer(), false));
@@ -2606,7 +2606,7 @@ Editor::add_region_copy_drag (ArdourCanvas::Item* item, GdkEvent*, RegionView* r
 		return;
 	case Ripple:
 	case RippleAll:
-		_drags->add (new RegionRippleDrag (this, item, region_view, selection->regions.by_layer()));
+		_drags->add (new RegionRippleDrag (this, item, region_view, selection->regions.by_layer(), true));
 		break;
 	default:
 		_drags->add (new RegionMoveDrag (this, item, region_view, selection->regions.by_layer(), false, true));

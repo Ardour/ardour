@@ -1222,6 +1222,10 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 #endif
 	}
 
+	if (first_move) {
+		collect_views ();
+	}
+
 	for (list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
 
 		RegionView* rv = i->view;
@@ -2299,87 +2303,10 @@ RegionSpliceDrag::aborted (bool)
 
 /***
  * ripple mode...
+ * very similar to a regular region move drag, except that on first move we
+ * collect all regionviews after the selected regions on appropriate playlists
+ * and visually drag them too.
  */
-
-void
-RegionRippleDrag::add_all_after_to_views(TimeAxisView *tav, samplepos_t where, const RegionSelection &exclude, bool drag_in_progress)
-{
-
-	boost::shared_ptr<RegionList> rl = tav->playlist()->regions_with_start_within (Evoral::Range<samplepos_t>(where, max_samplepos));
-
-	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(tav);
-	RegionSelection to_ripple;
-	for (RegionList::iterator i = rl->begin(); i != rl->end(); ++i) {
-		if ((*i)->position() >= where) {
-			to_ripple.push_back (rtv->view()->find_view(*i));
-		}
-	}
-
-	for (RegionSelection::reverse_iterator i = to_ripple.rbegin(); i != to_ripple.rend(); ++i) {
-		if (!exclude.contains (*i)) {
-			// the selection has already been added to _views
-
-			if (drag_in_progress) {
-				// do the same things that RegionMotionDrag::motion does when
-				// first_move is true, for the region views that we're adding
-				// to _views this time
-
-				(*i)->drag_start();
-				ArdourCanvas::Item* rvg = (*i)->get_canvas_group();
-				Duple rv_canvas_offset = rvg->item_to_canvas (Duple (0,0));
-				Duple dmg_canvas_offset = _editor->_drag_motion_group->canvas_origin ();
-				rvg->reparent (_editor->_drag_motion_group);
-
-				// we only need to move in the y direction
-				Duple fudge = rv_canvas_offset - dmg_canvas_offset;
-				fudge.x = 0;
-				rvg->move (fudge);
-
-			}
-			_views.push_back (DraggingView (*i, this, tav));
-		}
-	}
-}
-
-void
-RegionRippleDrag::remove_unselected_from_views(samplecnt_t amount, bool move_regions)
-{
-	ThawList thawlist;
-
-	for (std::list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ) {
-		// we added all the regions after the selection
-
-		std::list<DraggingView>::iterator to_erase = i++;
-		if (!_editor->selection->regions.contains (to_erase->view)) {
-			// restore the non-selected regions to their original playlist & positions,
-			// and then ripple them back by the length of the regions that were dragged away
-			// do the same things as RegionMotionDrag::aborted
-
-			RegionView *rv = to_erase->view;
-			TimeAxisView* tv = &(rv->get_time_axis_view ());
-			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
-			assert (rtv);
-
-			// plonk them back onto their own track
-			rv->get_canvas_group()->reparent(rtv->view()->canvas_item());
-			rv->get_canvas_group()->set_y_position (0);
-			rv->drag_end ();
-
-			if (move_regions) {
-				thawlist.add (rv->region ());
-				// move the underlying region to match the view
-				rv->region()->set_position (rv->region()->position() + amount);
-			} else {
-				// restore the view to match the underlying region's original position
-				rv->move(-amount, 0); // second parameter is y delta - seems 0 is OK
-			}
-
-			rv->set_height (rtv->view()->child_height ());
-			_views.erase (to_erase);
-		}
-	}
-	thawlist.release ();
-}
 
 bool
 RegionRippleDrag::y_movement_allowed (int delta_track, double delta_layer, int skip_invisible) const
@@ -2387,30 +2314,26 @@ RegionRippleDrag::y_movement_allowed (int delta_track, double delta_layer, int s
 	return false;
 }
 
-RegionRippleDrag::RegionRippleDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v)
-	: RegionMoveDrag (e, i, p, v, false)
+RegionRippleDrag::RegionRippleDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v, bool copy)
+	: RegionMoveDrag (e, i, p, v, false, copy)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New RegionRippleDrag\n");
-	// compute length of selection
-	RegionSelection selected_regions = _editor->selection->regions;
-	selection_length = selected_regions.end_sample() - selected_regions.start();
+}
 
-	prev_tav = NULL;
-	prev_amount = 0;
-	exclude = new RegionList;
-	for (RegionSelection::iterator i =selected_regions.begin(); i != selected_regions.end(); ++i) {
-		exclude->push_back((*i)->region());
-	}
-
+void
+RegionRippleDrag::collect_views ()
+{
 	// also add regions before start of selection to exclude, to be consistent with how Mixbus does ripple
 	RegionSelection copy;
-	selected_regions.by_position(copy); // get selected regions sorted by position into copy
+	_editor->selection->regions.by_position (copy); // get selected regions sorted by position into copy
 
 	std::set<boost::shared_ptr<ARDOUR::Playlist> > playlists = copy.playlists();
 	std::set<boost::shared_ptr<ARDOUR::Playlist> >::const_iterator pi;
 
 	for (pi = playlists.begin(); pi != playlists.end(); ++pi) {
+
 		// find ripple start point on each applicable playlist
+
 		RegionView *first_selected_on_this_track = NULL;
 		for (RegionSelection::iterator i = copy.begin(); i != copy.end(); ++i) {
 			if ((*i)->region()->playlist() == (*pi)) {
@@ -2420,101 +2343,25 @@ RegionRippleDrag::RegionRippleDrag (Editor* e, ArdourCanvas::Item* i, RegionView
 			}
 		}
 		assert (first_selected_on_this_track); // we should always find the region in one of the playlists...
-		add_all_after_to_views (
-				&first_selected_on_this_track->get_time_axis_view(),
-				first_selected_on_this_track->region()->position(),
-				selected_regions, false);
-	}
+		const samplepos_t where = first_selected_on_this_track->region()->position();
+		TimeAxisView* tav = &first_selected_on_this_track->get_time_axis_view();
 
-	orig_tav = NULL;
-}
+		boost::shared_ptr<RegionList> rl = (*pi)->regions_with_start_within (Evoral::Range<samplepos_t>(where, max_samplepos));
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(tav);
+		RegionSelection to_ripple;
 
-void
-RegionRippleDrag::motion (GdkEvent* event, bool first_move)
-{
-	/* Which trackview is this ? */
-
-	pair<TimeAxisView*, double> const tvp = _editor->trackview_by_y_position (current_pointer_y ());
-	RouteTimeAxisView* tv = dynamic_cast<RouteTimeAxisView*> (tvp.first);
-
-	/* The region motion is only processed if the pointer is over
-	   an audio track.
-	 */
-
-	if (!tv || !tv->is_track()) {
-		/* To make sure we hide the verbose canvas cursor when the mouse is
-		   not held over an audiotrack.
-		 */
-		_editor->verbose_cursor()->hide ();
-		return;
-	}
-
-	samplepos_t where = adjusted_current_sample (event);
-	assert (where >= 0);
-	MusicSample after (0, 0);
-	double delta = compute_x_delta (event, &after);
-
-	samplecnt_t amount = _editor->pixel_to_sample (delta);
-
-	// selection encompasses multiple tracks - just drag
-	// cross-track drags are forbidden
-	RegionMoveDrag::motion(event, first_move);
-
-	if (!_x_constrained) {
-		prev_amount += amount;
-	}
-
-	_last_position = after;
-}
-
-void
-RegionRippleDrag::finished (GdkEvent* event, bool movement_occurred)
-{
-	if (!movement_occurred) {
-
-		/* just a click */
-
-		if (was_double_click() && !_views.empty()) {
-			DraggingView dv = _views.front();
-			_editor->edit_region (dv.view);
+		for (RegionList::iterator i = rl->begin(); i != rl->end(); ++i) {
+			if ((*i)->position() >= where) {
+				to_ripple.push_back (rtv->view()->find_view(*i));
+			}
 		}
 
-		return;
+		for (RegionSelection::reverse_iterator i = to_ripple.rbegin(); i != to_ripple.rend(); ++i) {
+			if (!_editor->selection->regions.contains (*i)) {
+				_views.push_back (DraggingView (*i, this, tav));
+			}
+		}
 	}
-
-	_editor->begin_reversible_command(_("Ripple drag"));
-
-	// remove the regions being rippled from the dragging view, updating them to
-	// their new positions
-
-	// selection spanned multiple tracks - all will need adding to undo record
-
-	std::set<boost::shared_ptr<ARDOUR::Playlist> > playlists = _editor->selection->regions.playlists();
-	std::set<boost::shared_ptr<ARDOUR::Playlist> >::const_iterator pi;
-
-	for (pi = playlists.begin(); pi != playlists.end(); ++pi) {
-		(*pi)->clear_changes();
-		(*pi)->clear_owned_changes();
-		(*pi)->freeze();
-	}
-
-	remove_unselected_from_views (prev_amount);
-
-	for (pi = playlists.begin(); pi != playlists.end(); ++pi) {
-		(*pi)->thaw();
-		(*pi)->rdiff_and_add_command (_editor->session());
-	}
-
-	// other modified playlists are added to undo by RegionMoveDrag::finished()
-	RegionMoveDrag::finished (event, movement_occurred);
-	_editor->commit_reversible_command();
-}
-
-void
-RegionRippleDrag::aborted (bool movement_occurred)
-{
-	RegionMoveDrag::aborted (movement_occurred);
-	_views.clear ();
 }
 
 

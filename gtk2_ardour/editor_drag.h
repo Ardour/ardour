@@ -418,6 +418,8 @@ public:
 	virtual void finished (GdkEvent *, bool);
 	virtual void aborted (bool);
 
+	virtual void collect_views () {}
+
 	/** @return true if the regions being `moved' came from somewhere on the canvas;
 	 *  false if they came from outside (e.g. from the region list).
 	 */
@@ -527,26 +529,12 @@ public:
 class RegionRippleDrag : public RegionMoveDrag
 {
 public:
-	RegionRippleDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &);
-	~RegionRippleDrag () { delete exclude; }
+	RegionRippleDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &, bool copy);
 
-	void motion (GdkEvent *, bool);
-	void finished (GdkEvent *, bool);
-	void aborted (bool);
+	void collect_views ();
+
 protected:
 	bool y_movement_allowed (int delta_track, double delta_layer, int skip_invisible = 0) const;
-
-private:
-	TimeAxisView *prev_tav; // where regions were most recently dragged from
-	TimeAxisView *orig_tav; // where drag started
-	ARDOUR::samplecnt_t prev_amount;
-	ARDOUR::samplepos_t prev_position;
-	ARDOUR::samplecnt_t selection_length;
-	ARDOUR::RegionList *exclude;
-	void add_all_after_to_views (TimeAxisView *tav, ARDOUR::samplepos_t where, const RegionSelection &exclude, bool drag_in_progress);
-	void remove_unselected_from_views (ARDOUR::samplecnt_t amount, bool move_regions);
-
-	std::list<boost::shared_ptr<ARDOUR::Region> > _orig_tav_ripples;
 };
 
 /** "Drag" to cut a region (action only on button release) */
