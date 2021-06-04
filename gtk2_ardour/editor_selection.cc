@@ -406,10 +406,9 @@ Editor::get_onscreen_tracks (TrackViewList& tvl)
  */
 
 void
-Editor::mapover_routes (sigc::slot<void, RouteUI&, uint32_t> sl, RouteUI* basis, PBD::PropertyID prop) const
+Editor::mapover_grouped_routes (sigc::slot<void, RouteUI&> sl, RouteUI* basis, PBD::PropertyID prop) const
 {
 	set<RouteUI*> routes;
-	routes.insert (basis);
 
 	RouteGroup* group = basis->route()->route_group();
 
@@ -427,10 +426,55 @@ Editor::mapover_routes (sigc::slot<void, RouteUI&, uint32_t> sl, RouteUI* basis,
 	}
 
 	/* call the slots */
-	uint32_t const sz = routes.size ();
-
 	for (set<RouteUI*>::iterator i = routes.begin(); i != routes.end(); ++i) {
-		sl (**i, sz);
+		sl (**i);
+	}
+}
+
+void
+Editor::mapover_armed_routes (sigc::slot<void, RouteUI&> sl) const
+{
+	set<RouteUI*> routes;
+	for (TrackViewList::const_iterator i = track_views.begin(); i != track_views.end(); ++i) {
+		RouteUI* v = dynamic_cast<RouteUI*> (*i);
+		if (v && v->route()->is_track()) {
+			if ( v->track()->rec_enable_control()->get_value()) {
+				routes.insert (v);
+			}
+		}
+	}
+	for (set<RouteUI*>::iterator i = routes.begin(); i != routes.end(); ++i) {
+		sl (**i);
+	}
+}
+
+void
+Editor::mapover_selected_routes (sigc::slot<void, RouteUI&> sl) const
+{
+	set<RouteUI*> routes;
+	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
+		RouteTimeAxisView* r = dynamic_cast<RouteTimeAxisView*> (*i);
+		if (r) {
+			routes.insert (r);
+		}
+	}
+	for (set<RouteUI*>::iterator i = routes.begin(); i != routes.end(); ++i) {
+		sl (**i);
+	}
+}
+
+void
+Editor::mapover_all_routes (sigc::slot<void, RouteUI&> sl) const
+{
+	set<RouteUI*> routes;
+	for (TrackViewList::const_iterator i = track_views.begin(); i != track_views.end(); ++i) {
+		RouteTimeAxisView* r = dynamic_cast<RouteTimeAxisView*> (*i);
+		if (r) {
+			routes.insert (r);
+		}
+	}
+	for (set<RouteUI*>::iterator i = routes.begin(); i != routes.end(); ++i) {
+		sl (**i);
 	}
 }
 

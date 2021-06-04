@@ -942,9 +942,12 @@ LuaInstance::register_classes (lua_State* L)
 		.addFunction ("reset_zoom", &PublicEditor::reset_zoom)
 
 		.addFunction ("clear_playlist", &PublicEditor::clear_playlist)
-		.addFunction ("new_playlists", &PublicEditor::new_playlists)
-		.addFunction ("copy_playlists", &PublicEditor::copy_playlists)
-		.addFunction ("clear_playlists", &PublicEditor::clear_playlists)
+		.addFunction ("clear_grouped_playlists", &PublicEditor::clear_grouped_playlists)
+
+		.addFunction ("new_playlists_for_grouped_tracks", &PublicEditor::new_playlists_for_grouped_tracks)
+		.addFunction ("new_playlists_for_all_tracks", &PublicEditor::new_playlists_for_all_tracks)
+		.addFunction ("new_playlists_for_armed_tracks", &PublicEditor::new_playlists_for_armed_tracks)
+		.addFunction ("new_playlists_for_selected_tracks", &PublicEditor::new_playlists_for_selected_tracks)
 
 		.addFunction ("select_all_visible_lanes", &PublicEditor::select_all_visible_lanes)
 		.addFunction ("select_all_tracks", &PublicEditor::select_all_tracks)

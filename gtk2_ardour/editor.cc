@@ -4353,20 +4353,21 @@ Editor::restore_editing_space ()
 	}
 }
 
-/**
- *  Make new playlists for a given track and also any others that belong
- *  to the same active route group with the `select' property.
- *  @param v Track.
- */
-
-void
-Editor::new_playlists (RouteUI* rui)
+bool
+Editor::stamp_new_playlist (string &name, string &pgroup)
 {
 	time_t now;
 	time (&now);
 	Glib::DateTime tm (Glib::DateTime::create_now_local (now));
 	string gid (tm.format ("%F %H.%M.%S"));
-	string name(gid);
+	pgroup = gid;
+
+	if (name.length()==0) {
+		name = _("Take.1");
+		if (_session->playlists()->by_name (name)) {
+			name = Playlist::bump_name (name, *_session);
+		}
+	}
 
 	Prompter prompter (true);
 	prompter.set_title (_("New Playlist"));
@@ -4378,7 +4379,7 @@ Editor::new_playlists (RouteUI* rui)
 
 	while (true) {
 		if (prompter.run () != Gtk::RESPONSE_ACCEPT) {
-			return;
+			return false;
 		}
 		prompter.get_result (name);
 		if (name.length()) {
@@ -4391,56 +4392,7 @@ Editor::new_playlists (RouteUI* rui)
 		}
 	}
 
-/*	begin_reversible_command (_("new playlists")); */  /* ToDo: this does not work */
-	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
-	_session->playlists()->get (playlists);
-	mapover_routes (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_new_playlist), name, gid, playlists), rui, ARDOUR::Properties::group_select.property_id);
-/*	commit_reversible_command (); */
-}
-
-/**
- *  Use a copy of the current playlist for a given track and also any others that belong
- *  to the same active route group with the `select' property.
- *  @param v Track.
- */
-
-void
-Editor::copy_playlists (RouteUI* rui)
-{
-	time_t now;
-	time (&now);
-	Glib::DateTime tm (Glib::DateTime::create_now_local (now));
-	string gid (tm.format ("%F %H.%M.%S"));
-	string name(gid);
-
-	Prompter prompter (true);
-	prompter.set_title (_("New Playlist"));
-	prompter.set_prompt (_("Name for new playlist:"));
-	prompter.set_initial_text (name);
-	prompter.add_button (Gtk::Stock::NEW, Gtk::RESPONSE_ACCEPT);
-	prompter.set_response_sensitive (Gtk::RESPONSE_ACCEPT, true);
-	prompter.show_all ();
-
-	while (true) {
-		if (prompter.run () != Gtk::RESPONSE_ACCEPT) {
-			return;
-		}
-		prompter.get_result (name);
-		if (name.length()) {
-			if (_session->playlists()->by_name (name)) {
-				prompter.set_prompt (_("That name is already in use.  Use this instead?"));
-				prompter.set_initial_text (Playlist::bump_name (name, *_session));
-			} else {
-				break;
-			}
-		}
-	}
-
-/*	begin_reversible_command (_("copy playlists")); */  /* ToDo: this does not work */
-	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
-	_session->playlists()->get (playlists);
-	mapover_routes (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_copy_playlist), name, gid, playlists), rui, ARDOUR::Properties::group_select.property_id);
-/*	commit_reversible_command (); */
+	return true;
 }
 
 /** Clear the current playlist for a given track and also any others that belong
@@ -4449,31 +4401,69 @@ Editor::copy_playlists (RouteUI* rui)
  */
 
 void
-Editor::clear_playlists (RouteUI* rui)
+Editor::clear_grouped_playlists (RouteUI* rui)
 {
 	begin_reversible_command (_("clear playlists"));
 	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
 	_session->playlists()->get (playlists);
-	mapover_routes (sigc::mem_fun (*this, &Editor::mapped_clear_playlist), rui, ARDOUR::Properties::group_select.property_id);
+	mapover_grouped_routes (sigc::mem_fun (*this, &Editor::mapped_clear_playlist), rui, ARDOUR::Properties::group_select.property_id);
 	commit_reversible_command ();
 }
 
 void
-Editor::mapped_use_new_playlist (RouteUI& rui, uint32_t sz, std::string name, string gid, vector<boost::shared_ptr<ARDOUR::Playlist> > const & playlists)
+Editor::mapped_use_new_playlist (RouteUI& rui, std::string name, string gid, bool copy, vector<boost::shared_ptr<ARDOUR::Playlist> > const & playlists)
 {
-	rui.use_new_playlist (name, gid, playlists, false);
+	rui.use_new_playlist (name, gid, playlists, copy);
 }
 
 void
-Editor::mapped_use_copy_playlist (RouteUI& rui, uint32_t sz, std::string name, string gid, vector<boost::shared_ptr<ARDOUR::Playlist> > const & playlists)
-{
-	rui.use_new_playlist (name, gid, playlists, true);
-}
-
-void
-Editor::mapped_clear_playlist (RouteUI& rui, uint32_t /*sz*/)
+Editor::mapped_clear_playlist (RouteUI& rui)
 {
 	rui.clear_playlist ();
+}
+
+void
+Editor::new_playlists_for_all_tracks (bool copy)
+{
+	string name, gid;
+	stamp_new_playlist(name,gid);
+
+	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
+	_session->playlists()->get (playlists);
+	mapover_all_routes (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_new_playlist), name, gid, copy, playlists));
+}
+
+void
+Editor::new_playlists_for_grouped_tracks (RouteUI* rui, bool copy)
+{
+	string name, gid;
+	stamp_new_playlist(name,gid);
+
+	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
+	_session->playlists()->get (playlists);
+	mapover_grouped_routes (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_new_playlist), name, gid, copy, playlists), rui, ARDOUR::Properties::group_select.property_id);
+}
+
+void
+Editor::new_playlists_for_selected_tracks (bool copy)
+{
+	string name, gid;
+	stamp_new_playlist(name,gid);
+
+	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
+	_session->playlists()->get (playlists);
+	mapover_selected_routes (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_new_playlist), name, gid, copy, playlists));
+}
+
+void
+Editor::new_playlists_for_armed_tracks (bool copy)
+{
+	string name, gid;
+	stamp_new_playlist(name,gid);
+
+	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
+	_session->playlists()->get (playlists);
+	mapover_armed_routes (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_new_playlist), name, gid, copy, playlists));
 }
 
 double

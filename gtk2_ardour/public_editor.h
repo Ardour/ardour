@@ -290,9 +290,13 @@ public:
 	virtual void reset_zoom (samplecnt_t) = 0;
 	virtual PlaylistSelector& playlist_selector() const = 0;
 	virtual void clear_playlist (boost::shared_ptr<ARDOUR::Playlist>) = 0;
-	virtual void new_playlists (RouteUI*) = 0;
-	virtual void copy_playlists (RouteUI*) = 0;
-	virtual void clear_playlists (RouteUI*) = 0;
+	virtual void clear_grouped_playlists (RouteUI*) = 0;
+
+	virtual void new_playlists_for_all_tracks(bool copy) = 0;
+	virtual void new_playlists_for_grouped_tracks(RouteUI* rui, bool copy) = 0;
+	virtual void new_playlists_for_selected_tracks(bool copy) = 0;
+	virtual void new_playlists_for_armed_tracks(bool copy) = 0;
+
 	virtual void select_all_visible_lanes () = 0;
 	virtual void select_all_tracks () = 0;
 	virtual void deselect_all () = 0;

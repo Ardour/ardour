@@ -334,9 +334,7 @@ public:
 	PlaylistSelector& playlist_selector() const;
 	void clear_playlist (boost::shared_ptr<ARDOUR::Playlist>);
 
-	void new_playlists (RouteUI* v);
-	void copy_playlists (RouteUI* v);
-	void clear_playlists (RouteUI* v);
+	void clear_grouped_playlists (RouteUI* v);
 
 	void get_onscreen_tracks (TrackViewList&);
 
@@ -779,14 +777,21 @@ private:
 	RegionView* regionview_from_region (boost::shared_ptr<ARDOUR::Region>) const;
 	RouteTimeAxisView* rtav_from_route (boost::shared_ptr<ARDOUR::Route>) const;
 
-
 	void mapover_tracks_with_unique_playlists (sigc::slot<void,RouteTimeAxisView&,uint32_t> sl, TimeAxisView*, PBD::PropertyID) const;
 	void mapped_get_equivalent_regions (RouteTimeAxisView&, uint32_t, RegionView*, std::vector<RegionView*>*) const;
 
-	void mapover_routes (sigc::slot<void, RouteUI&, uint32_t> sl, RouteUI*, PBD::PropertyID) const;
-	void mapped_use_new_playlist (RouteUI&, uint32_t, std::string name, std::string gid, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
-	void mapped_use_copy_playlist (RouteUI&, uint32_t, std::string name, std::string gid, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
-	void mapped_clear_playlist (RouteUI&, uint32_t);
+	void mapover_grouped_routes (sigc::slot<void, RouteUI&> sl, RouteUI*, PBD::PropertyID) const;
+	void mapover_armed_routes (sigc::slot<void, RouteUI&> sl) const;
+	void mapover_selected_routes (sigc::slot<void, RouteUI&> sl) const;
+	void mapover_all_routes (sigc::slot<void, RouteUI&> sl) const;
+
+	void mapped_use_new_playlist (RouteUI&, std::string name, std::string gid, bool copy, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
+	void mapped_clear_playlist (RouteUI&);
+
+	void new_playlists_for_all_tracks(bool copy);
+	void new_playlists_for_grouped_tracks(RouteUI* v, bool copy);
+	void new_playlists_for_selected_tracks(bool copy);
+	void new_playlists_for_armed_tracks(bool copy);
 
 	void button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type);
 	bool button_release_can_deselect;
@@ -1690,6 +1695,10 @@ private:
 	void toggle_region_mute ();
 
 	void initialize_canvas ();
+
+	/* playlist internal ops */
+
+	bool stamp_new_playlist (std::string &name, std::string &pgroup);
 
 	/* display control */
 

@@ -2522,18 +2522,18 @@ RouteUI::build_playlist_menu ()
 	playlist_items.push_back (SeparatorElem());
 
 	if (!route_group() || !route_group()->is_active() || !route_group()->enabled_property (ARDOUR::Properties::group_select.property_id)) {
-		playlist_items.push_back (MenuElem (_("New Playlist..."), sigc::bind(sigc::mem_fun(editor, &PublicEditor::new_playlists), this)));
-		playlist_items.push_back (MenuElem (_("Copy Playlist..."), sigc::bind(sigc::mem_fun(editor, &PublicEditor::copy_playlists), this)));
+		playlist_items.push_back (MenuElem (_("New Playlist..."), sigc::bind(sigc::mem_fun(editor, &PublicEditor::new_playlists_for_grouped_tracks), this, false)));
+		playlist_items.push_back (MenuElem (_("Copy Playlist..."), sigc::bind(sigc::mem_fun(editor, &PublicEditor::new_playlists_for_grouped_tracks), this, true)));
 	} else {
-		playlist_items.push_back (MenuElem (_("New Playlist (for group)"), sigc::bind(sigc::mem_fun(editor, &PublicEditor::new_playlists), this)));
-		playlist_items.push_back (MenuElem (_("Copy Playlist (for group)"), sigc::bind(sigc::mem_fun(editor, &PublicEditor::copy_playlists), this)));
+		playlist_items.push_back (MenuElem (_("New Playlist (for group)"), sigc::bind(sigc::mem_fun(editor, &PublicEditor::new_playlists_for_grouped_tracks), this, false)));
+		playlist_items.push_back (MenuElem (_("Copy Playlist (for group)"), sigc::bind(sigc::mem_fun(editor, &PublicEditor::new_playlists_for_grouped_tracks), this, true)));
 	}
 
 	playlist_items.push_back (SeparatorElem());
 	if (!route_group() || !route_group()->is_active() || !route_group()->enabled_property (ARDOUR::Properties::group_select.property_id)) {
-		playlist_items.push_back (MenuElem (_("Clear Current"), sigc::bind(sigc::mem_fun(editor, &PublicEditor::clear_playlists), this)));
+		playlist_items.push_back (MenuElem (_("Clear Current"), sigc::bind(sigc::mem_fun(editor, &PublicEditor::clear_grouped_playlists), this)));
 	} else {
-		playlist_items.push_back (MenuElem (_("Clear Current (for group)"), sigc::bind(sigc::mem_fun(editor, &PublicEditor::clear_playlists), this)));
+		playlist_items.push_back (MenuElem (_("Clear Current (for group)"), sigc::bind(sigc::mem_fun(editor, &PublicEditor::clear_grouped_playlists), this)));
 	}
 	playlist_items.push_back (SeparatorElem());
 
