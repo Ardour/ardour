@@ -1744,13 +1744,12 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const changed_t
 	typedef map<boost::shared_ptr<Playlist>, RouteTimeAxisView*> PlaylistMapping;
 	PlaylistMapping playlist_mapping;
 
-	/* insert the regions into their new playlists */
-	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); i++) {
+	/* insert the regions into their (potentially) new (or existing) playlists */
+	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
 
 		RouteTimeAxisView* dest_rtv = 0;
 
 		if (i->view->region()->locked() || (i->view->region()->video_locked() && !_ignore_video_lock)) {
-			++i;
 			continue;
 		}
 
