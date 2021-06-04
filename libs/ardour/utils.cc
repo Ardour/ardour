@@ -415,9 +415,7 @@ ARDOUR::compute_equal_power_fades (samplecnt_t nframes, float* in, float* out)
 EditMode
 ARDOUR::string_to_edit_mode (string str)
 {
-	if (str == _("Splice")) {
-		return Splice;
-	} else if (str == _("Slide")) {
+	if (str == _("Slide")) {
 		return Slide;
 	} else if (str == _("Ripple")) {
 		return Ripple;
@@ -435,9 +433,6 @@ const char*
 ARDOUR::edit_mode_to_string (EditMode mode)
 {
 	switch (mode) {
-	case Slide:
-		return _("Slide");
-
 	case Lock:
 		return _("Lock");
 
@@ -448,8 +443,8 @@ ARDOUR::edit_mode_to_string (EditMode mode)
 		return _("Ripple All");
 
 	default:
-	case Splice:
-		return _("Splice");
+	case Slide:
+		return _("Slide");
 	}
 }
 

@@ -4127,14 +4127,6 @@ Session::config_changed (std::string p, bool ours)
 			}
 		}
 
-	} else if (p == "edit-mode") {
-
-		Glib::Threads::Mutex::Lock lm (_playlists->lock);
-
-		for (SessionPlaylists::List::iterator i = _playlists->playlists.begin(); i != _playlists->playlists.end(); ++i) {
-			(*i)->set_edit_mode (Config->get_edit_mode ());
-		}
-
 	} else if (p == "use-video-sync") {
 
 		waiting_for_sync_offset = config.get_use_video_sync();

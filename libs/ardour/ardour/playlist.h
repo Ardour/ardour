@@ -146,10 +146,8 @@ public:
 	const DataType& data_type () const     { return _type; }
 	bool            hidden () const        { return _hidden; }
 	bool            shared () const        { return !_shared_with_ids.empty (); }
-	EditMode        get_edit_mode () const { return _edit_mode; }
 
 	void set_frozen (bool yn);
-	void set_edit_mode (EditMode);
 
 	void AddToSoloSelectedList (const Region*);
 	void RemoveFromSoloSelectedList (const Region*);
@@ -375,7 +373,6 @@ protected:
 	bool               _shuffling;
 	bool               _nudging;
 	uint32_t           _refcnt;
-	EditMode           _edit_mode;
 	bool               in_flush;
 	bool               in_partition;
 	bool               _frozen;

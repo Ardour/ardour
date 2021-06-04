@@ -194,7 +194,6 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, string namestr, boo
 	_splicing  = other->_splicing;
 	_rippling  = other->_rippling;
 	_nudging   = other->_nudging;
-	_edit_mode = other->_edit_mode;
 
 	in_set_state    = 0;
 	first_set_state = false;
@@ -293,8 +292,9 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, samplepos_t start, 
 
 	thawlist.release ();
 
-	/* keep track of any dead space at end (for pasting into Ripple or Splice mode)
-	 * at the end of construction, any length of cnt beyond the extents of the regions is end_space
+	/* keep track of any dead space at end (for pasting into Ripple or
+	 * RippleAll mode) at the end of construction, any length of cnt beyond
+	 * the extents of the regions is end_space
 	 */
 	_end_space = cnt - (get_extent ().second - get_extent ().first);
 
@@ -350,7 +350,6 @@ Playlist::init (bool hide)
 	_nudging                    = false;
 	in_set_state                = 0;
 	in_undo                     = false;
-	_edit_mode                  = Config->get_edit_mode ();
 	in_flush                    = false;
 	in_partition                = false;
 	subcnt                      = 0;
@@ -1208,7 +1207,7 @@ Playlist::partition_internal (samplepos_t start, samplepos_t end, bool cutting, 
 		in_partition = false;
 	}
 
-	/* keep track of any dead space at end (for pasting into Ripple or Splice mode) */
+	/* keep track of any dead space at end (for pasting into Ripple or RippleAll mode) */
 	samplepos_t wanted_length = end - start;
 	_end_space                = wanted_length - _get_extent ().second - _get_extent ().first;
 }
@@ -1592,67 +1591,6 @@ bool
 Playlist::SoloSelectedActive ()
 {
 	return !_soloSelectedRegions.empty ();
-}
-
-void
-Playlist::possibly_splice (samplepos_t at, samplecnt_t distance, boost::shared_ptr<Region> exclude)
-{
-	if (_splicing || in_set_state) {
-		/* don't respond to splicing moves or state setting */
-		return;
-	}
-
-	if (_edit_mode == Splice) {
-		splice_locked (at, distance, exclude);
-	}
-}
-
-void
-Playlist::possibly_splice_unlocked (samplepos_t at, samplecnt_t distance, boost::shared_ptr<Region> exclude, ThawList& thawlist)
-{
-	if (_splicing || in_set_state) {
-		/* don't respond to splicing moves or state setting */
-		return;
-	}
-
-	if (_edit_mode == Splice) {
-		splice_unlocked (at, distance, exclude, thawlist);
-	}
-}
-
-void
-Playlist::splice_locked (samplepos_t at, samplecnt_t distance, boost::shared_ptr<Region> exclude)
-{
-	RegionWriteLock rl (this);
-	splice_unlocked (at, distance, exclude, rl.thawlist);
-}
-
-void
-Playlist::splice_unlocked (samplepos_t at, samplecnt_t distance, boost::shared_ptr<Region> exclude, ThawList& thawlist)
-{
-	_splicing = true;
-
-	for (RegionList::iterator i = regions.begin (); i != regions.end (); ++i) {
-		if (exclude && (*i) == exclude) {
-			continue;
-		}
-
-		if ((*i)->position () >= at) {
-			samplepos_t new_pos = (*i)->position () + distance;
-			if (new_pos < 0) {
-				new_pos = 0;
-			} else if (new_pos >= max_samplepos - (*i)->length ()) {
-				new_pos = max_samplepos - (*i)->length ();
-			}
-
-			thawlist.add (*i);
-			(*i)->set_position (new_pos);
-		}
-	}
-
-	_splicing = false;
-
-	notify_contents_changed ();
 }
 
 void
@@ -2541,12 +2479,6 @@ Playlist::top_layer () const
 		top = max (top, (*i)->layer ());
 	}
 	return top;
-}
-
-void
-Playlist::set_edit_mode (EditMode mode)
-{
-	_edit_mode = mode;
 }
 
 struct RelayerSort {
