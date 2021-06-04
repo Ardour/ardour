@@ -1770,6 +1770,16 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const changed_t
 			quarter_note = i->view->region()->quarter_note();
 		}
 
+		/* compute full extent of regions that we're going to insert */
+
+		if (where.sample < extent_min) {
+			extent_min = where.sample;
+		}
+
+		if (where.sample + i->view->region()->length() > extent_max) {
+			extent_max = where.sample  + i->view->region()->length();
+		}
+
 		if (i->time_axis_view < 0 || i->time_axis_view >= (int)_time_axis_views.size()) {
 			/* dragged to drop zone */
 
