@@ -411,6 +411,15 @@
       <menuitem action='track-record-enable-toggle'/>
       <menuitem action='track-solo-toggle'/>
       <menuitem action='track-mute-toggle'/>
+      <menu action='TrackPlaylistMenu'>
+        <menuitem action='new-playlists-for-all-tracks'/>
+        <menuitem action='new-playlists-for-armed-tracks'/>
+        <menuitem action='new-playlists-for-selected-tracks'/>
+        <separator/>
+        <menuitem action='copy-playlists-for-all-tracks'/>
+        <menuitem action='copy-playlists-for-armed-tracks'/>
+        <menuitem action='copy-playlists-for-selected-tracks'/>
+      </menu>
       <separator/>
       <menuitem action='insert-time'/>
       <menuitem action='remove-time'/>

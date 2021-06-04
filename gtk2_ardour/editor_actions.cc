@@ -180,6 +180,7 @@ Editor::register_actions ()
 	ActionManager::stripable_selection_sensitive_actions.push_back (act);
 
 	ActionManager::register_action (editor_menu_actions, X_("TrackMenu"), _("Track"));
+	ActionManager::register_action (editor_menu_actions, X_("TrackPlaylistMenu"), _("Playlists"));
 	ActionManager::register_action (editor_menu_actions, X_("Tools"), _("Tools"));
 	ActionManager::register_action (editor_menu_actions, X_("View"), _("View"));
 	ActionManager::register_action (editor_menu_actions, X_("ZoomFocus"), _("Zoom Focus"));
@@ -459,6 +460,16 @@ Editor::register_actions ()
 	ActionManager::track_selection_sensitive_actions.push_back (act);
 	ActionManager::session_sensitive_actions.push_back (act);
 
+	/*global playlist actions */
+	ActionManager::register_action (editor_actions, "new-playlists-for-armed-tracks", _("New Playlist For Rec-Armed Tracks"), sigc::bind (sigc::mem_fun (*this, &Editor::new_playlists_for_armed_tracks), false));
+	ActionManager::register_action (editor_actions, "new-playlists-for-all-tracks", _("New Playlist For All Tracks"), sigc::bind (sigc::mem_fun (*this, &Editor::new_playlists_for_all_tracks), false));
+	act = ActionManager::register_action (editor_actions, "new-playlists-for-selected-tracks", _("New Playlist For Selected Tracks"), sigc::bind (sigc::mem_fun (*this, &Editor::new_playlists_for_selected_tracks), false));
+	ActionManager::stripable_selection_sensitive_actions.push_back (act);
+
+	ActionManager::register_action (editor_actions, "copy-playlists-for-armed-tracks", _("Copy Playlist For Rec-Armed Tracks"), sigc::bind (sigc::mem_fun (*this, &Editor::new_playlists_for_armed_tracks), true));
+	ActionManager::register_action (editor_actions, "copy-playlists-for-all-tracks", _("Copy Playlist For All Tracks"), sigc::bind (sigc::mem_fun (*this, &Editor::new_playlists_for_all_tracks), true));
+	act = ActionManager::register_action (editor_actions, "copy-playlists-for-selected-tracks", _("Copy Playlist For Selected Tracks"), sigc::bind (sigc::mem_fun (*this, &Editor::new_playlists_for_selected_tracks), true));
+	ActionManager::stripable_selection_sensitive_actions.push_back (act);
 
 	act = reg_sens (editor_actions, "toggle-track-active", _("Toggle Active"), (sigc::mem_fun(*this, &Editor::toggle_tracks_active)));
 	ActionManager::route_selection_sensitive_actions.push_back (act);
