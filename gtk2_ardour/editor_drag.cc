@@ -1860,6 +1860,7 @@ RegionMoveDrag::finished_no_copy (
 	set<RouteTimeAxisView*> views_to_update;
 	RouteTimeAxisView* new_time_axis_view = 0;
 	samplecnt_t const drag_delta = _primary->region()->position() - last_position.sample;
+	RegionList ripple_exclude;
 
 	typedef map<boost::shared_ptr<Playlist>, RouteTimeAxisView*> PlaylistMapping;
 	PlaylistMapping playlist_mapping;
