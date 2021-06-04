@@ -1271,10 +1271,6 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 #endif
 	}
 
-	if (first_move && _editor->should_ripple()) {
-		collect_ripple_views ();
-	}
-
 	for (list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
 
 		RegionView* rv = i->view;
@@ -1514,6 +1510,10 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 void
 RegionMoveDrag::motion (GdkEvent* event, bool first_move)
 {
+	if (first_move && _editor->should_ripple() && !_copy && !_brushing) {
+		collect_ripple_views ();
+	}
+
 	if (_copy && first_move) {
 		if (_x_constrained) {
 			_editor->begin_reversible_command (Operations::fixed_time_region_copy);
