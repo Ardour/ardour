@@ -2156,9 +2156,15 @@ RegionMoveDrag::insert_region_into_playlist (
 
 	/* clear history for the playlist we are about to insert to, provided we haven't already done so */
 	pair<PlaylistSet::iterator, bool> r = modified_playlists.insert (dest_playlist);
+
+	cerr << "Inserting " << region->name() << " @ " << where.sample << endl;
+
 	if (r.second) {
 		dest_playlist->clear_changes ();
+		dest_playlist->clear_owned_changes ();
+		/* cannot freeze because we need the new region announcements */
 	}
+
 	if (for_music) {
 		dest_playlist->add_region (region, where.sample, 1.0, false, where.division, quarter_note, true);
 	} else {
