@@ -1729,6 +1729,7 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const changed_t
 	PlaylistSet modified_playlists;
 	RouteTimeAxisView* new_time_axis_view = 0;
 	samplecnt_t const drag_delta = _primary->region()->position() - _last_position.sample;
+	RegionList ripple_exclude;
 
 	TempoMap& tmap (_editor->session()->tempo_map());
 	const double last_pos_qn = tmap.exact_qn_at_sample (last_position.sample, last_position.division);
