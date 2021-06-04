@@ -2384,13 +2384,6 @@ RegionRippleDrag::remove_unselected_from_views(samplecnt_t amount, bool move_reg
 bool
 RegionRippleDrag::y_movement_allowed (int delta_track, double delta_layer, int skip_invisible) const
 {
-	if (RegionMotionDrag::y_movement_allowed (delta_track, delta_layer, skip_invisible)) {
-		if (delta_track) {
-			return false;
-		} else {
-			return true;
-		}
-	}
 	return false;
 }
 
