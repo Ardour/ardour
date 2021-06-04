@@ -580,7 +580,6 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_actions, "cycle-edit-point", _("Change Edit Point"), sigc::bind (sigc::mem_fun (*this, &Editor::cycle_edit_point), false));
 	ActionManager::register_action (editor_actions, "cycle-edit-point-with-marker", _("Change Edit Point Including Marker"), sigc::bind (sigc::mem_fun (*this, &Editor::cycle_edit_point), true));
 
-//	ActionManager::register_action (editor_actions, "set-edit-splice", _("Splice"), sigc::bind (sigc::mem_fun (*this, &Editor::set_edit_mode), Splice));
 	ActionManager::register_action (editor_actions, "set-edit-ripple", _("Ripple"), bind (mem_fun (*this, &Editor::set_edit_mode), Ripple));
 	ActionManager::register_action (editor_actions, "set-edit-ripple-all", _("Ripple All"), bind (mem_fun (*this, &Editor::set_edit_mode), RippleAll));
 	ActionManager::register_action (editor_actions, "set-edit-slide", _("Slide"), sigc::bind (sigc::mem_fun (*this, &Editor::set_edit_mode), Slide));

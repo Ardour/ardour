@@ -210,7 +210,6 @@ static const gchar *_edit_point_strings[] = {
 
 static const gchar *_edit_mode_strings[] = {
 	N_("Slide"),
-	N_("Splice"),
 	N_("Ripple"),
 	N_("Ripple All"),
 	N_("Lock"),
@@ -3691,7 +3690,6 @@ Editor::cycle_edit_mode ()
 	case Slide:
 		Config->set_edit_mode (Ripple);
 		break;
-	case Splice:
 	case Ripple:
 		Config->set_edit_mode (RippleAll);
 		break;

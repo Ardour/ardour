@@ -522,17 +522,6 @@ public:
 	}
 };
 
-/** Region drag in splice mode */
-class RegionSpliceDrag : public RegionMoveDrag
-{
-public:
-	RegionSpliceDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &);
-
-	void motion (GdkEvent *, bool);
-	void finished (GdkEvent *, bool);
-	void aborted (bool);
-};
-
 /** Region drag in ripple mode */
 
 class RegionRippleDrag : public RegionMoveDrag
