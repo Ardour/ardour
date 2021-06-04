@@ -1828,6 +1828,13 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const changed_t
 	/* in the past this was done in the main iterator loop; no need */
 	clear_draggingview_list();
 
+	for (PlaylistSet::iterator p = modified_playlists.begin(); p != modified_playlists.end(); ++p) {
+		if (!_brushing && _editor->should_ripple()) {
+			(*p)->ripple (extent_min, extent_max - extent_min, &ripple_exclude);
+		}
+		(*p)->rdiff_and_add_command (_editor->session());
+	}
+
 	/* If we've created new regions either by copying or moving
 	   to a new track, we want to replace the old selection with the new ones
 	*/
@@ -1835,9 +1842,6 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const changed_t
 	if (new_views.size() > 0) {
 		_editor->selection->set (new_views);
 	}
-
-	/* write commands for the accumulated diffs for all our modified playlists */
-	add_stateful_diff_commands_for_playlists (modified_playlists);
 
 	_editor->commit_reversible_command ();
 }
