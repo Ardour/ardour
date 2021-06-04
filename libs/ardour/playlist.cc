@@ -191,7 +191,6 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, string namestr, boo
 
 	in_set_state--;
 
-	_splicing  = other->_splicing;
 	_rippling  = other->_rippling;
 	_nudging   = other->_nudging;
 
@@ -344,7 +343,6 @@ Playlist::init (bool hide)
 	first_set_state             = true;
 	_refcnt                     = 0;
 	_hidden                     = hide;
-	_splicing                   = false;
 	_rippling                   = false;
 	_shuffling                  = false;
 	_nudging                    = false;
@@ -746,8 +744,6 @@ Playlist::add_region (boost::shared_ptr<Region> region, samplepos_t position, fl
 			set_layer (sub, DBL_MAX);
 		}
 	}
-
-	possibly_splice_unlocked (position, (pos + length) - position, region, rlock.thawlist);
 }
 
 void
@@ -789,8 +785,6 @@ Playlist::add_region_internal (boost::shared_ptr<Region> region, samplepos_t pos
 	regions.insert (upper_bound (regions.begin (), regions.end (), region, cmp), region);
 	all_regions.insert (region);
 
-	possibly_splice_unlocked (position, region->length (), region, thawlist);
-
 	if (!holding_state ()) {
 		/* layers get assigned from XML state, and are not reset during undo/redo */
 		relayer ();
@@ -817,16 +811,9 @@ Playlist::replace_region (boost::shared_ptr<Region> old, boost::shared_ptr<Regio
 {
 	RegionWriteLock rlock (this);
 
-	bool old_sp = _splicing;
-	_splicing   = true;
-
 	remove_region_internal (old, rlock.thawlist);
 	add_region_internal (newr, pos, rlock.thawlist);
 	set_layer (newr, old->layer ());
-
-	_splicing = old_sp;
-
-	possibly_splice_unlocked (pos, old->length () - newr->length (), boost::shared_ptr<Region> (), rlock.thawlist);
 }
 
 void
@@ -854,8 +841,6 @@ Playlist::remove_region_internal (boost::shared_ptr<Region> region, ThawList& th
 			samplecnt_t distance = (*i)->length ();
 
 			regions.erase (i);
-
-			possibly_splice_unlocked (pos, -distance, boost::shared_ptr<Region> (), thawlist);
 
 			if (!holding_state ()) {
 				relayer ();
@@ -1521,11 +1506,6 @@ Playlist::_split_region (boost::shared_ptr<Region> region, const MusicSample& pl
 	string      before_name;
 	string      after_name;
 
-	/* split doesn't change anything about length, so don't try to splice */
-
-	bool old_sp = _splicing;
-	_splicing   = true;
-
 	RegionFactory::region_name (before_name, region->name (), false);
 
 	{
@@ -1563,8 +1543,6 @@ Playlist::_split_region (boost::shared_ptr<Region> region, const MusicSample& pl
 	add_region_internal (right, region->position () + before.sample, thawlist, before.division);
 
 	remove_region_internal (region, thawlist);
-
-	_splicing = old_sp;
 }
 
 void
@@ -1657,7 +1635,7 @@ Playlist::ripple_unlocked (samplepos_t at, samplecnt_t distance, RegionList* exc
 void
 Playlist::region_bounds_changed (const PropertyChange& what_changed, boost::shared_ptr<Region> region)
 {
-	if (in_set_state || _splicing || _rippling || _nudging || _shuffling) {
+	if (in_set_state || _rippling || _nudging || _shuffling) {
 		return;
 	}
 
@@ -1691,10 +1669,6 @@ Playlist::region_bounds_changed (const PropertyChange& what_changed, boost::shar
 
 		if (what_changed.contains (Properties::length)) {
 			delta += region->length () - region->last_length ();
-		}
-
-		if (delta) {
-			possibly_splice (region->last_position () + region->last_length (), delta, region);
 		}
 
 		if (holding_state ()) {
@@ -1748,7 +1722,7 @@ Playlist::region_changed (const PropertyChange& what_changed, boost::shared_ptr<
 
 	if (what_changed.contains (bounds)) {
 		region_bounds_changed (what_changed, region);
-		save          = !(_splicing || _nudging);
+		save          = !_nudging;
 		send_contents = true;
 	}
 

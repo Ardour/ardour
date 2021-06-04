@@ -223,10 +223,6 @@ MidiPlaylist::_split_region (boost::shared_ptr<Region> region, const MusicSample
 	MusicSample before (playlist_position.sample - region->position(), playlist_position.division);
 	MusicSample after (region->length() - before.sample, playlist_position.division);
 
-	/* split doesn't change anything about length, so don't try to splice */
-	bool old_sp = _splicing;
-	_splicing = true;
-
 	RegionFactory::region_name (before_name, region->name(), false);
 
 	{
@@ -266,8 +262,6 @@ MidiPlaylist::_split_region (boost::shared_ptr<Region> region, const MusicSample
 	add_region_internal (right, region->position() + before.sample, thawlist, before.division, region->quarter_note() + before_qn, true);
 
 	remove_region_internal (region, thawlist);
-
-	_splicing = old_sp;
 }
 
 set<Evoral::Parameter>

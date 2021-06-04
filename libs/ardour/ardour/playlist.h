@@ -368,7 +368,6 @@ protected:
 	bool               in_undo;
 	bool               first_set_state;
 	bool               _hidden;
-	bool               _splicing;
 	bool               _rippling;
 	bool               _shuffling;
 	bool               _nudging;
@@ -418,11 +417,6 @@ protected:
 
 	void sort_regions ();
 
-	void possibly_splice (samplepos_t at, samplecnt_t distance, boost::shared_ptr<Region> exclude = boost::shared_ptr<Region> ());
-	void possibly_splice_unlocked (samplepos_t at, samplecnt_t distance, boost::shared_ptr<Region> exclude, ThawList& thawlist);
-
-	void splice_locked (samplepos_t at, samplecnt_t distance, boost::shared_ptr<Region> exclude);
-	void splice_unlocked (samplepos_t at, samplecnt_t distance, boost::shared_ptr<Region> exclude, ThawList& thawlist);
 
 	void ripple_locked (samplepos_t at, samplecnt_t distance, RegionList* exclude);
 	bool ripple_unlocked (samplepos_t at, samplecnt_t distance, RegionList* exclude, ThawList& thawlist);
