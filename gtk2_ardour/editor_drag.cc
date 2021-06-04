@@ -834,6 +834,11 @@ RegionMotionDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	if (Keyboard::modifier_state_equals (event->button.state, Keyboard::ModifierMask (Keyboard::TertiaryModifier))) {
 		_ignore_video_lock = true;
 	}
+
+	if (_brushing || _editor->should_ripple()) {
+		/* we do not drag across tracks when rippling or brushing */
+		_y_constrained = true;
+	}
 }
 
 double
