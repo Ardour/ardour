@@ -336,13 +336,6 @@ SessionPlaylists::destroy_region (boost::shared_ptr<Region> r)
 	}
 }
 
-void
-SessionPlaylists::find_equivalent_playlist_regions (boost::shared_ptr<Region> region, vector<boost::shared_ptr<Region> >& result)
-{
-	for (List::iterator i = playlists.begin(); i != playlists.end(); ++i)
-		(*i)->get_region_list_equivalent_regions (region, result);
-}
-
 /** Return the number of playlists (not regions) that contain @a src
  *  Important: this counts usage in both used and not-used playlists.
  */

@@ -152,8 +152,6 @@ public:
 	void add_region (boost::shared_ptr<Region>, samplepos_t position, float times = 1, bool auto_partition = false, int32_t sub_num = 0, double quarter_note = 0.0, bool for_music = false);
 	void remove_region (boost::shared_ptr<Region>);
 	void get_equivalent_regions (boost::shared_ptr<Region>, std::vector<boost::shared_ptr<Region> >&);
-	void get_region_list_equivalent_regions (boost::shared_ptr<Region>, std::vector<boost::shared_ptr<Region> >&);
-	void get_source_equivalent_regions (boost::shared_ptr<Region>, std::vector<boost::shared_ptr<Region> >&);
 	void replace_region (boost::shared_ptr<Region> old, boost::shared_ptr<Region> newr, samplepos_t pos);
 	void split_region (boost::shared_ptr<Region>, const MusicSample& position);
 	void split (const MusicSample& at);

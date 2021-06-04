@@ -214,7 +214,6 @@ public:
 	bool overlap_equivalent (boost::shared_ptr<const Region>) const;
 	bool enclosed_equivalent (boost::shared_ptr<const Region>) const;
 	bool layer_and_time_equivalent (boost::shared_ptr<const Region>) const;
-	bool region_list_equivalent (boost::shared_ptr<const Region>) const;
 	bool source_equivalent (boost::shared_ptr<const Region>) const;
 	bool any_source_equivalent (boost::shared_ptr<const Region>) const;
 	bool uses_source (boost::shared_ptr<const Source>, bool shallow = false) const;

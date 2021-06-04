@@ -952,26 +952,6 @@ Playlist::get_equivalent_regions (boost::shared_ptr<Region> other, vector<boost:
 }
 
 void
-Playlist::get_region_list_equivalent_regions (boost::shared_ptr<Region> other, vector<boost::shared_ptr<Region> >& results)
-{
-	for (RegionList::iterator i = regions.begin (); i != regions.end (); ++i) {
-		if ((*i) && (*i)->region_list_equivalent (other)) {
-			results.push_back (*i);
-		}
-	}
-}
-
-void
-Playlist::get_source_equivalent_regions (boost::shared_ptr<Region> other, vector<boost::shared_ptr<Region> >& results)
-{
-	for (RegionList::iterator i = regions.begin (); i != regions.end (); ++i) {
-		if ((*i) && (*i)->any_source_equivalent (other)) {
-			results.push_back (*i);
-		}
-	}
-}
-
-void
 Playlist::partition (samplepos_t start, samplepos_t end, bool cut)
 {
 	RegionWriteLock lock (this);

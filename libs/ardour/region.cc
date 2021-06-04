@@ -1549,12 +1549,6 @@ Region::size_equivalent (boost::shared_ptr<const Region> other) const
 		_length == other->_length;
 }
 
-bool
-Region::region_list_equivalent (boost::shared_ptr<const Region> other) const
-{
-	return size_equivalent (other) && source_equivalent (other) && _name == other->_name;
-}
-
 void
 Region::source_deleted (boost::weak_ptr<Source>)
 {
