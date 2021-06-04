@@ -2498,13 +2498,11 @@ RegionRippleDrag::finished (GdkEvent* event, bool movement_occurred)
 		(*pi)->freeze();
 	}
 
-	remove_unselected_from_views (prev_amount, true);
+	remove_unselected_from_views (prev_amount);
 
 	for (pi = playlists.begin(); pi != playlists.end(); ++pi) {
 		(*pi)->thaw();
-		vector<Command*> cmds;
-		(*pi)->rdiff (cmds);
-		_editor->session()->add_commands (cmds);
+		(*pi)->rdiff_and_add_command (_editor->session());
 	}
 
 	// other modified playlists are added to undo by RegionMoveDrag::finished()
