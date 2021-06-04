@@ -139,6 +139,8 @@ private:
 	ArdourWidgets::ArdourButton  _btn_peak_reset;
 	ArdourWidgets::ArdourButton  _monitor_in_button;
 	ArdourWidgets::ArdourButton  _monitor_disk_button;
+	ArdourWidgets::ArdourButton  _btn_new_plist;
+	ArdourWidgets::ArdourButton  _btn_new_plist_rec;
 	ArdourWidgets::ArdourButton  _auto_input_button;
 	DurationInfoBox              _duration_info_box;
 	XrunInfoBox                  _xrun_info_box;

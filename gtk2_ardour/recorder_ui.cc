@@ -78,6 +78,8 @@ RecorderUI::RecorderUI ()
 	, _btn_peak_reset (_("Reset Peak Hold"))
 	, _monitor_in_button (_("All In"))
 	, _monitor_disk_button (_("All Disk"))
+	, _btn_new_plist (_("New Playlist for All Tracks"))
+	, _btn_new_plist_rec (_("New Playlist for Rec-Armed"))
 	, _auto_input_button (_("Auto-Input"), ArdourButton::led_default_elements)
 	, _toolbar_button_height (SizeGroup::create (Gtk::SIZE_GROUP_VERTICAL))
 	, _toolbar_recarm_width (SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL))
@@ -121,6 +123,13 @@ RecorderUI::RecorderUI ()
 	_btn_peak_reset.set_name ("generic button");
 	_btn_peak_reset.set_related_action (ActionManager::get_action (X_("Recorder"), X_("reset-input-peak-hold")));
 
+	/*playlists*/
+	_btn_new_plist.set_name ("generic button");
+	_btn_new_plist.set_related_action (ActionManager::get_action (X_("Editor"), X_("new-playlists-for-all-tracks")));
+
+	_btn_new_plist_rec.set_name ("generic button");
+	_btn_new_plist_rec.set_related_action (ActionManager::get_action (X_("Editor"), X_("new-playlists-for-armed-tracks")));
+
 	/* standardize some button width. */
 	_toolbar_recarm_width->add_widget (_btn_rec_none);
 	_toolbar_recarm_width->add_widget (_btn_rec_all);
@@ -135,6 +144,9 @@ RecorderUI::RecorderUI ()
 	_toolbar_button_height->add_widget (_monitor_in_button);
 	_toolbar_button_height->add_widget (_monitor_disk_button);
 	_toolbar_button_height->add_widget (_auto_input_button);
+
+	_toolbar_button_height->add_widget (_btn_new_plist);
+	_toolbar_button_height->add_widget (_btn_new_plist_rec);
 
 	_meter_area.set_spacing (0);
 	_meter_area.pack_start (_meter_table, true, true);
@@ -212,6 +224,13 @@ RecorderUI::RecorderUI ()
 	_button_table.attach (_monitor_disk_button, col + 1, col + 2, 1, 2 , FILL, SHRINK, hpadding, vpadding);
 	col += 2;
 
+	_button_table.attach (*(manage (new ArdourVSpacer ())),  col,  col + 1, 0, 2, FILL, FILL, spacepad, vpadding);
+	col += 1;
+
+	_button_table.attach (_btn_new_plist,       col,     col + 2, 0, 1 , FILL, SHRINK, hpadding, vpadding);
+	_button_table.attach (_btn_new_plist_rec,   col,     col + 2, 1, 2 , FILL, SHRINK, hpadding, vpadding);
+	col += 2;
+
 	_toolbar.pack_start (_button_table, false, false);
 	_toolbar.pack_end (_btn_peak_reset, false, false, 4);
 	_toolbar.pack_end (_remain_info_box, false, false, 4);
@@ -223,6 +242,8 @@ RecorderUI::RecorderUI ()
 	set_tooltip (_auto_input_button, _("Track Input Monitoring automatically follows transport state"));
 	set_tooltip (_monitor_in_button, _("Force all tracks to monitor Input, unless they are explicitly set to monitor Disk"));
 	set_tooltip (_monitor_disk_button, _("Force all tracks to monitor Disk playback, unless they are explicitly set to Input"));
+	set_tooltip (_btn_new_plist, _("Create a new playlist for all selected tracks"));
+	set_tooltip (_btn_new_plist_rec, _("Create a new playlist for all rec-armed tracks"));
 	set_tooltip (_xrun_info_box, _("X-runs: Soundcard buffer under- or over-run occurrences in the last recording take"));
 	set_tooltip (_remain_info_box, _("Remaining Time:  Recording time available on the current disk with currently armed tracks"));
 	set_tooltip (_duration_info_box, _("Duration: Length of the most recent (or current) recording take"));
@@ -233,6 +254,8 @@ RecorderUI::RecorderUI ()
 	_btn_rec_none.show ();
 	_btn_rec_forget.show ();
 	_btn_peak_reset.show ();
+	_btn_new_plist.show ();
+	_btn_new_plist_rec.show ();
 	_button_table.show ();
 	_monitor_in_button.show ();
 	_monitor_disk_button.show ();
