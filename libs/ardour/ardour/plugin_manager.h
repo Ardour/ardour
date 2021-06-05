@@ -40,6 +40,10 @@
 #include "ardour/plugin.h"
 #include "ardour/plugin_scan_result.h"
 
+#ifdef AUDIOUNIT_SUPPORT
+class CAComponentDescription;
+#endif
+
 namespace ARDOUR {
 
 class Plugin;
@@ -52,9 +56,16 @@ struct VST3Info;
 struct VST2Info;
 #endif
 
+#ifdef AUDIOUNIT_SUPPORT
+struct AUv2Info;
+struct AUv2DescStr;
+#endif
+
+
 class LIBARDOUR_API PluginManager : public boost::noncopyable {
 public:
 	static PluginManager& instance();
+	static std::string auv2_scanner_bin_path;
 	static std::string vst2_scanner_bin_path;
 	static std::string vst3_scanner_bin_path;
 
@@ -295,7 +306,12 @@ private:
 	void add_lxvst_presets ();
 	void add_presets (std::string domain);
 
+#ifdef AUDIOUNIT_SUPPORT
 	void au_refresh (bool cache_only = false);
+	void auv2_plugin (CAComponentDescription const&, AUv2Info const&);
+	int  auv2_discover (AUv2DescStr const&, bool);
+	bool run_auv2_scanner_app (CAComponentDescription const&, AUv2DescStr const&, PSLEPtr) const;
+#endif
 
 	void lv2_refresh ();
 

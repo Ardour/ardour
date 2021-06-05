@@ -104,7 +104,14 @@
 #endif
 
 #ifdef AUDIOUNIT_SUPPORT
+#include "CAAudioUnit.h"
+#include <CoreFoundation/CoreFoundation.h>
+#include <CoreServices/CoreServices.h>
+#include <AudioUnit/AudioUnit.h>
+#include <AudioToolbox/AudioUnitUtilities.h>
+
 #include "ardour/audio_unit.h"
+#include "ardour/auv2_scan.h"
 #include <Carbon/Carbon.h>
 #endif
 
@@ -127,6 +134,7 @@ using namespace PBD;
 using namespace std;
 
 PluginManager* PluginManager::_instance = 0;
+std::string PluginManager::auv2_scanner_bin_path = "";
 std::string PluginManager::vst2_scanner_bin_path = "";
 std::string PluginManager::vst3_scanner_bin_path = "";
 
@@ -229,6 +237,14 @@ PluginManager::PluginManager ()
 	}
 #endif // VST3_SUPPORT
 #endif // any VST
+
+#ifdef AUDIOUNIT_SUPPORT
+	PBD::Searchpath ausp (Glib::build_filename(ARDOUR::ardour_dll_directory(), "auscan"));
+	ausp += ARDOUR::ardour_dll_directory();
+	if (!PBD::find_file (ausp, "ardour-au-scanner" , auv2_scanner_bin_path)) {
+		PBD::warning << "AUv2 scanner app (ardour-au-scanner) not found in path " << ausp.to_string() << endmsg;
+	}
+#endif
 
 	load_statuses ();
 	load_tags ();
@@ -660,7 +676,12 @@ void
 PluginManager::clear_au_cache ()
 {
 #ifdef AUDIOUNIT_SUPPORT
-	AUPluginInfo::clear_cache ();
+	string dn = Glib::build_filename (ARDOUR::user_cache_directory(), "auv2");
+	vector<string> a2i_files;
+	find_files_matching_regex (a2i_files, dn, "\\.a2i$", false);
+	for (vector<string>::iterator i = a2i_files.begin(); i != a2i_files.end (); ++i) {
+		::g_unlink(i->c_str());
+	}
 	Config->set_plugin_cache_version (0);
 	Config->save_state();
 #endif
@@ -1003,25 +1024,220 @@ PluginManager::lv2_refresh ()
 }
 
 #ifdef AUDIOUNIT_SUPPORT
+
+static void auv2_scanner_log (std::string msg, PluginScanLogEntry* psle)
+{
+	psle->msg (PluginScanLogEntry::OK, msg);
+}
+
+bool
+PluginManager::run_auv2_scanner_app (CAComponentDescription const& desc, AUv2DescStr const& d, PSLEPtr psle) const
+{
+	char **argp= (char**) calloc (7, sizeof (char*));
+	argp[0] = strdup (auv2_scanner_bin_path.c_str ());
+	argp[1] = strdup ("-f");
+	argp[2] = strdup ("--");
+	argp[3] = strdup (d.type.c_str());
+	argp[4] = strdup (d.subt.c_str());
+	argp[5] = strdup (d.manu.c_str());
+	argp[6] = 0;
+
+	ARDOUR::SystemExec scanner (auv2_scanner_bin_path, argp);
+	PBD::ScopedConnection c;
+	scanner.ReadStdout.connect_same_thread (c, boost::bind (&auv2_scanner_log, _1, &(*psle)));
+
+	if (scanner.start (ARDOUR::SystemExec::MergeWithStdin)) {
+		psle->msg (PluginScanLogEntry::Error, string_compose (_("Cannot launch AU scanner app '%1': %2"), auv2_scanner_bin_path, strerror (errno)));
+		return false;
+	}
+
+	int timeout = Config->get_vst_scan_timeout(); // deciseconds
+	bool notime = (timeout <= 0);
+
+	while (scanner.is_running () && (notime || timeout > 0)) {
+		if (!notime && no_timeout ()) {
+			notime = true;
+			timeout = -1;
+		}
+
+		ARDOUR::PluginScanTimeout (timeout);
+		--timeout;
+		Glib::usleep (100000);
+
+		if (cancelled () || (!notime && timeout == 0)) {
+			scanner.terminate ();
+			if (cancelled ()) {
+				psle->msg (PluginScanLogEntry::New, "Scan was cancelled.");
+			} else {
+				psle->msg (PluginScanLogEntry::TimeOut, "Scan Timed Out.");
+			}
+			/* may be partially written */
+			g_unlink (auv2_cache_file (desc).c_str ());
+			auv2_whitelist (d.to_s ());
+			return false;
+		}
+	}
+	return true;
+}
+
+void
+PluginManager::auv2_plugin (CAComponentDescription const& desc, AUv2Info const& nfo)
+{
+	PSLEPtr psle (scan_log_entry (AudioUnit, auv2_stringify_descriptor (desc)));
+
+	AUPluginInfoPtr info (new AUPluginInfo (boost::shared_ptr<CAComponentDescription> (new CAComponentDescription (desc))));
+	psle->msg (PluginScanLogEntry::OK);
+
+	info->unique_id   = nfo.id;
+	info->name        = nfo.name;
+	info->creator     = nfo.creator;
+	info->category    = nfo.category;
+	info->version     = nfo.version;
+	info->max_outputs = nfo.max_outputs;
+	info->io_configs  = nfo.io_configs;
+
+	_au_plugin_info->push_back (info);
+
+	psle->add (info);
+}
+
+int
+PluginManager::auv2_discover (AUv2DescStr const& d, bool cache_only)
+{
+	std::string dstr = d.to_s ();
+	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("checking AU plugin at %1\n", dstr));
+
+	PSLEPtr psle (scan_log_entry (AudioUnit, dstr));
+
+	if (auv2_is_blacklisted (dstr)) {
+		psle->msg (PluginScanLogEntry::Blacklisted);
+		return -1;
+	}
+
+	CAComponentDescription desc (d.desc ());
+
+	bool run_scan = false;
+	bool is_new   = false;
+
+	string cache_file = auv2_valid_cache_file (desc, false, &is_new);
+
+	if (!cache_only && auv2_scanner_bin_path.empty () && cache_file.empty ()) {
+		/* scan in host context */
+		psle->reset ();
+		auv2_blacklist (dstr);
+		psle->msg (PluginScanLogEntry::OK, "(internal scan)");
+		if (!auv2_scan_and_cache (desc, sigc::mem_fun (*this, &PluginManager::auv2_plugin), false)) {
+			psle->msg (PluginScanLogEntry::Error, "Cannot load AUv2");
+			psle->msg (PluginScanLogEntry::Blacklisted);
+			return -1;
+		}
+		psle->msg (PluginScanLogEntry::OK, string_compose (_("Saved AUV2 plugin cache to %1"), auv2_cache_file (desc)));
+		auv2_whitelist (dstr);
+		return 0;
+	}:
+
+	XMLTree tree;
+	if (cache_file.empty ()) {
+		run_scan = true;
+	} else if (tree.read (cache_file)) {
+		/* valid cache file was found, now check version */
+		int cf_version = 0;
+		if (!tree.root()->get_property ("version", cf_version) || cf_version < 2) {
+			run_scan = true;
+		}
+	} else {
+		/* failed to parse XML */
+		run_scan = true;
+	}
+
+	if (!cache_only && run_scan) {
+		/* re/generate cache file */
+		psle->reset ();
+		auv2_blacklist (dstr);
+
+		if (!run_auv2_scanner_app (desc, d, psle)) {
+			return -1;
+		}
+
+		cache_file = auv2_cache_file (desc);
+
+		if (cache_file.empty ()) {
+			psle->msg (PluginScanLogEntry::Error, _("Scan Failed."));
+			psle->msg (PluginScanLogEntry::Blacklisted);
+			return -1;
+		}
+		/* re-read cache file */
+		if (!tree.read (cache_file)) {
+			psle->msg (PluginScanLogEntry::Error, string_compose (_("Cannot parse AUv2 cache file '%1' for plugin '%2'"), cache_file, dstr));
+			psle->msg (PluginScanLogEntry::Blacklisted);
+			return -1;
+		}
+		run_scan = false; // mark as scanned
+	}
+
+	if (cache_file.empty () || run_scan) {
+		/* cache file does not exist and cache_only == true,
+		 * or cache file is invalid (scan needed)
+		 */
+		psle->msg (is_new ? PluginScanLogEntry::New : PluginScanLogEntry::Updated);
+		return -1;
+	}
+
+	auv2_whitelist (dstr);
+	psle->set_result (PluginScanLogEntry::OK);
+
+	uint32_t discovered = 0;
+	for (XMLNodeConstIterator i = tree.root()->children().begin(); i != tree.root()->children().end(); ++i) {
+		try {
+			AUv2Info nfo (**i);
+
+			if (nfo.id != dstr) {
+				psle->msg (PluginScanLogEntry::Error, string_compose (_("Cache file %1 ID mismatch '%2' vs '%3'"), cache_file, nfo.id, dstr));
+				continue;
+			}
+
+			auv2_plugin (desc, nfo);
+			++discovered;
+		} catch (...) {
+			psle->msg (PluginScanLogEntry::Error, string_compose (_("Corrupt AUv2 cache file '%1'"), cache_file));
+			DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Cannot load AUv2 '%1'\n", dstr));
+		}
+	}
+
+	return discovered;
+}
+
 void
 PluginManager::au_refresh (bool cache_only)
 {
 	DEBUG_TRACE (DEBUG::PluginManager, "AU: refresh\n");
+	delete _au_plugin_info;
+	_au_plugin_info = new ARDOUR::PluginInfoList();
 
-	bool discover_at_start = Config->get_discover_audio_units ();
-	if (discover_at_start) {
-		/* disable automatic discovery in case scanning crashes */
-		Config->set_discover_audio_units (false);
-		Config->save_state();
+	if (!Config->get_discover_audio_units ()) { // TODO rename: enable AU
+		return;
 	}
 
-	delete _au_plugin_info;
-	_au_plugin_info = AUPluginInfo::discover(cache_only && !discover_at_start);
+	ARDOUR::PluginScanMessage(_("AUv2"), _("Indexing"), false);
+	/* disable AU in case indexing crashes */
+	Config->set_discover_audio_units (false);
+	Config->save_state();
 
-	if (discover_at_start) {
-		/* successful scan re-enabled automatic discovery if it was set */
-		Config->set_discover_audio_units (discover_at_start);
-		Config->save_state();
+	string aucrsh = Glib::build_filename (ARDOUR::user_cache_directory(), "au_crash");
+	g_file_set_contents (aucrsh.c_str(), "", -1, NULL);
+
+	std::vector<AUv2DescStr> audesc;
+	auv2_list_plugins (audesc);
+
+	/* successful, re-enabled AU support */
+	Config->set_discover_audio_units (true);
+	Config->save_state();
+
+	::g_unlink (aucrsh.c_str());
+
+	for (std::vector<AUv2DescStr>::const_iterator i = audesc.begin (); i != audesc.end (); ++i) {
+		ARDOUR::PluginScanMessage(_("AUv2"), i->to_s(), !cache_only && !cancelled());
+		auv2_discover (*i, cache_only);
 	}
 
 	for (PluginInfoList::iterator i = _au_plugin_info->begin(); i != _au_plugin_info->end(); ++i) {

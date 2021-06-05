@@ -29,6 +29,8 @@
 #include <math.h>
 #include <ctype.h>
 
+#include <boost/algorithm/string.hpp>
+
 #include "pbd/gstdio_compat.h"
 #include "pbd/transmitter.h"
 #include "pbd/xml++.h"
@@ -45,6 +47,7 @@
 #include "ardour/audio_unit.h"
 #include "ardour/audioengine.h"
 #include "ardour/audio_buffer.h"
+#include "ardour/auv2_scan.h"
 #include "ardour/debug.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/io.h"
@@ -81,88 +84,9 @@ using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
 
-AUPluginInfo::CachedInfoMap AUPluginInfo::cached_info;
-
 static string preset_search_path = "/Library/Audio/Presets:/Network/Library/Audio/Presets";
 static string preset_suffix = ".aupreset";
 static bool preset_search_path_initialized = false;
-FILE * AUPluginInfo::_crashlog_fd = NULL;
-bool AUPluginInfo::_scan_only = true;
-
-
-#if 1 // remove me -> libs/ardour/auv2_scan.cc
-static void au_blacklist (std::string id)
-{
-	string fn = Glib::build_filename (ARDOUR::user_cache_directory(), "au_blacklist.txt");
-	FILE * blacklist_fd = NULL;
-	if (! (blacklist_fd = fopen(fn.c_str(), "a"))) {
-		PBD::error << "Cannot append to AU blacklist for '"<< id <<"'\n";
-		return;
-	}
-	assert(id.find("\n") == string::npos);
-	fprintf(blacklist_fd, "%s\n", id.c_str());
-	::fclose(blacklist_fd);
-}
-
-static void au_unblacklist (std::string id)
-{
-	string fn = Glib::build_filename (ARDOUR::user_cache_directory(), "au_blacklist.txt");
-	if (!Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
-		PBD::warning << "Expected Blacklist file does not exist.\n";
-		return;
-	}
-
-	std::string bl;
-	{
-		std::ifstream ifs(fn.c_str());
-		bl.assign ((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
-	}
-
-	::g_unlink (fn.c_str());
-
-	assert (!Glib::file_test (fn, Glib::FILE_TEST_EXISTS));
-	assert(id.find("\n") == string::npos);
-
-	id += "\n"; // add separator
-	const size_t rpl = bl.find(id);
-	if (rpl != string::npos) {
-		bl.replace(rpl, id.size(), "");
-	}
-	if (bl.empty()) {
-		return;
-	}
-
-	FILE * blacklist_fd = NULL;
-	if (! (blacklist_fd = fopen(fn.c_str(), "w"))) {
-		PBD::error << "Cannot open AU blacklist.\n";
-		return;
-	}
-	fprintf(blacklist_fd, "%s", bl.c_str());
-	::fclose(blacklist_fd);
-}
-
-static bool is_blacklisted (std::string id)
-{
-	string fn = Glib::build_filename (ARDOUR::user_cache_directory(), "au_blacklist.txt");
-	if (!Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
-		return false;
-	}
-	std::string bl;
-	std::ifstream ifs(fn.c_str());
-	bl.assign ((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
-
-	assert(id.find("\n") == string::npos);
-
-	id += "\n"; // add separator
-	const size_t rpl = bl.find(id);
-	if (rpl != string::npos) {
-		return true;
-	}
-	return false;
-}
-
-#endif
-
 
 static OSStatus
 _render_callback(void *userData,
@@ -574,32 +498,13 @@ AUPlugin::init ()
 	g_atomic_int_set (&_current_latency, UINT_MAX);
 
 	OSErr err;
-	CFStringRef itemName;
 
 	/* these keep track of *configured* channel set up,
-	   not potential set ups.
-	*/
+	 * not potential set ups.
+	 */
 
 	input_channels = -1;
 	output_channels = -1;
-	{
-		CAComponentDescription temp;
-#ifdef COREAUDIO105
-		GetComponentInfo (comp.get()->Comp(), &temp, NULL, NULL, NULL);
-#else
-		AudioComponentGetDescription (comp.get()->Comp(), &temp);
-#endif
-		CFStringRef compTypeString = UTCreateStringForOSType(temp.componentType);
-		CFStringRef compSubTypeString = UTCreateStringForOSType(temp.componentSubType);
-		CFStringRef compManufacturerString = UTCreateStringForOSType(temp.componentManufacturer);
-		itemName = CFStringCreateWithFormat(kCFAllocatorDefault, NULL, CFSTR("%@ - %@ - %@"),
-				compTypeString, compManufacturerString, compSubTypeString);
-		if (compTypeString != NULL) CFRelease(compTypeString);
-		if (compSubTypeString != NULL) CFRelease(compSubTypeString);
-		if (compManufacturerString != NULL) CFRelease(compManufacturerString);
-	}
-
-	au_blacklist(CFStringRefToStdString(itemName));
 
 	try {
 		DEBUG_TRACE (DEBUG::AudioUnitConfig, "opening AudioUnit\n");
@@ -697,9 +602,6 @@ AUPlugin::init ()
 	discover_factory_presets ();
 
 	// Plugin::setup_controls ();
-
-	au_unblacklist(CFStringRefToStdString(itemName));
-	if (itemName != NULL) CFRelease(itemName);
 }
 
 void
@@ -826,115 +728,11 @@ AUPlugin::discover_parameters ()
 	}
 }
 
-
-static unsigned int
-four_ints_to_four_byte_literal (unsigned char n[4])
-{
-	/* this is actually implementation dependent. sigh. this is what gcc
-	   and quite a few others do.
-	 */
-	return ((n[0] << 24) + (n[1] << 16) + (n[2] << 8) + n[3]);
-}
-
-std::string
-AUPlugin::maybe_fix_broken_au_id (const std::string& id)
-{
-	if (isdigit (id[0])) {
-		return id;
-	}
-
-	/* ID format is xxxx-xxxx-xxxx
-	   where x maybe \xNN or a printable character.
-
-	   Split at the '-' and and process each part into an integer.
-	   Then put it back together.
-	*/
-
-
-	unsigned char nascent[4];
-	const char* cstr = id.c_str();
-	const char* estr = cstr + id.size();
-	uint32_t n[3];
-	int in;
-	int next_int;
-	char short_buf[3];
-	stringstream s;
-
-	in = 0;
-	next_int = 0;
-	short_buf[2] = '\0';
-
-	while (*cstr && next_int < 4) {
-
-		if (*cstr == '\\') {
-
-			if (estr - cstr < 3) {
-
-				/* too close to the end for \xNN parsing: treat as literal characters */
-
-				nascent[in] = *cstr;
-				++cstr;
-				++in;
-
-			} else {
-
-				if (cstr[1] == 'x' && isxdigit (cstr[2]) && isxdigit (cstr[3])) {
-
-					/* parse \xNN */
-
-					memcpy (short_buf, &cstr[2], 2);
-					nascent[in] = strtol (short_buf, NULL, 16);
-					cstr += 4;
-					++in;
-
-				} else {
-
-					/* treat as literal characters */
-					nascent[in] = *cstr;
-					++cstr;
-					++in;
-				}
-			}
-
-		} else {
-
-			nascent[in] = *cstr;
-			++cstr;
-			++in;
-		}
-
-		if (in && (in % 4 == 0)) {
-			/* nascent is ready */
-			n[next_int] = four_ints_to_four_byte_literal (nascent);
-			in = 0;
-			next_int++;
-
-			/* swallow space-hyphen-space */
-
-			if (next_int < 3) {
-				++cstr;
-				++cstr;
-				++cstr;
-			}
-		}
-	}
-
-	if (next_int != 3) {
-		goto err;
-	}
-
-	s << n[0] << '-' << n[1] << '-' << n[2];
-
-	return s.str();
-
-err:
-	return string();
-}
-
 string
 AUPlugin::unique_id () const
 {
-	return AUPluginInfo::stringify_descriptor (comp->Desc());
+	assert (_info->unique_id == auv2_stringify_descriptor (comp->Desc()));
+	return auv2_stringify_descriptor (comp->Desc());
 }
 
 const char *
@@ -1327,7 +1125,7 @@ AUPlugin::match_variable_io (ChanCount& in, ChanCount& aux_in, ChanCount& out)
 	const int32_t preferred_out = out.n_audio ();
 
 	AUPluginInfoPtr pinfo = boost::dynamic_pointer_cast<AUPluginInfo>(get_info());
-	vector<pair<int,int> > io_configs = pinfo->cache.io_configs;
+	vector<pair<int,int> > io_configs = pinfo->io_configs;
 
 #ifndef NDEBUG
 	if (DEBUG_ENABLED(DEBUG::AudioUnitConfig)) {
@@ -1345,7 +1143,7 @@ AUPlugin::match_variable_io (ChanCount& in, ChanCount& aux_in, ChanCount& out)
 	bool outs_added = false;
 #endif
 	if (output_elements > 1) {
-		const vector<pair<int,int> >& ioc (pinfo->cache.io_configs);
+		const vector<pair<int,int> >& ioc (pinfo->io_configs);
 		for (vector<pair<int,int> >::const_iterator i = ioc.begin(); i != ioc.end(); ++i) {
 			int32_t possible_in = i->first;
 			int32_t possible_out = i->second;
@@ -2459,75 +2257,6 @@ check_and_get_preset_name (ArdourComponent component, const string& pathstr, str
 	return true;
 }
 
-
-#if 1 // remove me
-static void
-#ifdef COREAUDIO105
-get_names (CAComponentDescription& comp_desc, std::string& name, std::string& maker)
-#else
-get_names (ArdourComponent& comp, std::string& name, std::string& maker)
-#endif
-{
-	CFStringRef itemName = NULL;
-	// Marc Poirier-style item name
-#ifdef COREAUDIO105
-	CAComponent auComponent (comp_desc);
-	if (auComponent.IsValid()) {
-		CAComponentDescription dummydesc;
-		Handle nameHandle = NewHandle(sizeof(void*));
-		if (nameHandle != NULL) {
-			OSErr err = GetComponentInfo(auComponent.Comp(), &dummydesc, nameHandle, NULL, NULL);
-			if (err == noErr) {
-				ConstStr255Param nameString = (ConstStr255Param) (*nameHandle);
-				if (nameString != NULL) {
-					itemName = CFStringCreateWithPascalString(kCFAllocatorDefault, nameString, CFStringGetSystemEncoding());
-				}
-			}
-			DisposeHandle(nameHandle);
-		}
-	}
-#else
-	assert (comp);
-	AudioComponentCopyName (comp, &itemName);
-#endif
-
-	// if Marc-style fails, do the original way
-	if (itemName == NULL) {
-#ifndef COREAUDIO105
-		CAComponentDescription comp_desc;
-		AudioComponentGetDescription (comp, &comp_desc);
-#endif
-		CFStringRef compTypeString = UTCreateStringForOSType(comp_desc.componentType);
-		CFStringRef compSubTypeString = UTCreateStringForOSType(comp_desc.componentSubType);
-		CFStringRef compManufacturerString = UTCreateStringForOSType(comp_desc.componentManufacturer);
-
-		itemName = CFStringCreateWithFormat(kCFAllocatorDefault, NULL, CFSTR("%@ - %@ - %@"),
-				compTypeString, compManufacturerString, compSubTypeString);
-
-		if (compTypeString != NULL)
-			CFRelease(compTypeString);
-		if (compSubTypeString != NULL)
-			CFRelease(compSubTypeString);
-		if (compManufacturerString != NULL)
-			CFRelease(compManufacturerString);
-	}
-
-	string str = CFStringRefToStdString(itemName);
-	string::size_type colon = str.find (':');
-
-	if (colon) {
-		name = str.substr (colon+1);
-		maker = str.substr (0, colon);
-		strip_whitespace_edges (maker);
-		strip_whitespace_edges (name);
-	} else {
-		name = str;
-		maker = "unknown";
-		strip_whitespace_edges (name);
-	}
-}
-#endif
-
 std::string
 AUPlugin::current_preset() const
 {
@@ -2608,10 +2337,12 @@ AUPlugin::has_editor () const
 	return true;
 }
 
+/* ****************************************************************************/
+
 AUPluginInfo::AUPluginInfo (boost::shared_ptr<CAComponentDescription> d)
-	: descriptor (d)
-	, version (0)
+	: version (0)
 	, max_outputs (0)
+	, descriptor (d)
 {
 	type = ARDOUR::AudioUnit;
 }
@@ -2724,593 +2455,6 @@ AUPluginInfo::get_presets (bool user_only) const
 	return p;
 }
 
-Glib::ustring
-AUPluginInfo::au_cache_path ()
-{
-	return Glib::build_filename (ARDOUR::user_cache_directory(), "au_cache");
-}
-
-PluginInfoList*
-AUPluginInfo::discover (bool scan_only)
-{
-	XMLTree tree;
-
-	/* AU require a CAComponentDescription pointer provided by the OS.
-	 * Ardour only caches port and i/o config. It can't just 'scan' without
-	 * 'discovering' (like we do for VST).
-	 *
-	 * "Scan Only" means
-	 * "Iterate over all plugins. skip the ones where there's no io-cache".
-	 */
-	_scan_only = scan_only;
-
-	if (!Glib::file_test (au_cache_path(), Glib::FILE_TEST_EXISTS)) {
-		ARDOUR::BootMessage (_("Discovering AudioUnit plugins (could take some time ...)"));
-		// flush RAM cache -- after clear_cache()
-		cached_info.clear();
-	}
-	// create crash log file
-	au_start_crashlog ();
-
-	PluginInfoList* plugs = new PluginInfoList;
-
-	discover_fx (*plugs);
-	discover_music (*plugs);
-	discover_generators (*plugs);
-	discover_instruments (*plugs);
-
-	// all fine if we get here
-	au_remove_crashlog ();
-
-	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("AU: discovered %1 plugins\n", plugs->size()));
-
-	return plugs;
-}
-
-void
-AUPluginInfo::discover_music (PluginInfoList& plugs)
-{
-	CAComponentDescription desc;
-	desc.componentFlags = 0;
-	desc.componentFlagsMask = 0;
-	desc.componentSubType = 0;
-	desc.componentManufacturer = 0;
-	desc.componentType = kAudioUnitType_MusicEffect;
-
-	discover_by_description (plugs, desc);
-}
-
-void
-AUPluginInfo::discover_fx (PluginInfoList& plugs)
-{
-	CAComponentDescription desc;
-	desc.componentFlags = 0;
-	desc.componentFlagsMask = 0;
-	desc.componentSubType = 0;
-	desc.componentManufacturer = 0;
-	desc.componentType = kAudioUnitType_Effect;
-
-	discover_by_description (plugs, desc);
-}
-
-void
-AUPluginInfo::discover_generators (PluginInfoList& plugs)
-{
-	CAComponentDescription desc;
-	desc.componentFlags = 0;
-	desc.componentFlagsMask = 0;
-	desc.componentSubType = 0;
-	desc.componentManufacturer = 0;
-	desc.componentType = kAudioUnitType_Generator;
-
-	discover_by_description (plugs, desc);
-}
-
-void
-AUPluginInfo::discover_instruments (PluginInfoList& plugs)
-{
-	CAComponentDescription desc;
-	desc.componentFlags = 0;
-	desc.componentFlagsMask = 0;
-	desc.componentSubType = 0;
-	desc.componentManufacturer = 0;
-	desc.componentType = kAudioUnitType_MusicDevice;
-
-	discover_by_description (plugs, desc);
-}
-
-
-bool
-AUPluginInfo::au_get_crashlog (std::string &msg)
-{
-	string fn = Glib::build_filename (ARDOUR::user_cache_directory(), "au_crashlog.txt");
-	if (!Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
-		return false;
-	}
-	std::ifstream ifs(fn.c_str());
-	msg.assign ((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
-	au_remove_crashlog ();
-	return true;
-}
-
-void
-AUPluginInfo::au_start_crashlog ()
-{
-	string fn = Glib::build_filename (ARDOUR::user_cache_directory(), "au_crashlog.txt");
-	assert(!_crashlog_fd);
-	DEBUG_TRACE (DEBUG::AudioUnitConfig, string_compose ("Creating AU Log: %1\n", fn));
-	if (!(_crashlog_fd = fopen(fn.c_str(), "w"))) {
-		PBD::error << "Cannot create AU error-log" << fn << "\n";
-		cerr << "Cannot create AU error-log" << fn << "\n";
-	}
-}
-
-void
-AUPluginInfo::au_remove_crashlog ()
-{
-	if (_crashlog_fd) {
-		::fclose(_crashlog_fd);
-		_crashlog_fd = NULL;
-	}
-	string fn = Glib::build_filename (ARDOUR::user_cache_directory(), "au_crashlog.txt");
-	::g_unlink(fn.c_str());
-	DEBUG_TRACE (DEBUG::AudioUnitConfig, string_compose ("Remove AU Log: %1\n", fn));
-}
-
-
-void
-AUPluginInfo::au_crashlog (std::string msg)
-{
-	if (!_crashlog_fd) {
-		fprintf(stderr, "AU: %s\n", msg.c_str());
-	} else {
-		fprintf(_crashlog_fd, "AU: %s\n", msg.c_str());
-		::fflush(_crashlog_fd);
-	}
-}
-
-void
-AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescription& desc)
-{
-	ArdourComponent comp = 0;
-	au_crashlog(string_compose("Start AU discovery for Type: %1", (int)desc.componentType));
-
-	comp = ArdourFindNext (NULL, &desc);
-
-	while (comp != NULL) {
-		CAComponentDescription temp;
-#ifdef COREAUDIO105
-		GetComponentInfo (comp, &temp, NULL, NULL, NULL);
-#else
-		AudioComponentGetDescription (comp, &temp);
-#endif
-		CFStringRef itemName = NULL;
-
-		{
-			if (itemName != NULL) CFRelease(itemName);
-			CFStringRef compTypeString = UTCreateStringForOSType(temp.componentType);
-			CFStringRef compSubTypeString = UTCreateStringForOSType(temp.componentSubType);
-			CFStringRef compManufacturerString = UTCreateStringForOSType(temp.componentManufacturer);
-			itemName = CFStringCreateWithFormat(kCFAllocatorDefault, NULL, CFSTR("%@ - %@ - %@"),
-					compTypeString, compManufacturerString, compSubTypeString);
-			au_crashlog(string_compose("Scanning ID: %1", CFStringRefToStdString(itemName)));
-			if (compTypeString != NULL)
-				CFRelease(compTypeString);
-			if (compSubTypeString != NULL)
-				CFRelease(compSubTypeString);
-			if (compManufacturerString != NULL)
-				CFRelease(compManufacturerString);
-		}
-
-		if (is_blacklisted(CFStringRefToStdString(itemName))) {
-			info << string_compose (_("Skipped blacklisted AU plugin %1 "), CFStringRefToStdString(itemName)) << endmsg;
-			if (itemName != NULL) {
-				CFRelease(itemName);
-				itemName = NULL;
-			}
-			comp = ArdourFindNext (comp, &desc);
-			continue;
-		}
-
-		bool has_midi_in = false;
-
-		AUPluginInfoPtr info (new AUPluginInfo (boost::shared_ptr<CAComponentDescription> (new CAComponentDescription(temp))));
-
-		/* although apple designed the subtype field to be a "category" indicator,
-		   its really turned into a plugin ID field for a given manufacturer. Hence
-		   there are no categories for AudioUnits. However, to keep the plugins
-		   showing up under "categories", we'll use the "type" as a high level
-		   selector.
-
-		   NOTE: no panners, format converters or i/o AU's for our purposes
-		 */
-
-		switch (info->descriptor->Type()) {
-		case kAudioUnitType_Panner:
-		case kAudioUnitType_OfflineEffect:
-		case kAudioUnitType_FormatConverter:
-			comp = ArdourFindNext (comp, &desc);
-			continue;
-
-		case kAudioUnitType_Output:
-			info->category = _("Output");
-			break;
-		case kAudioUnitType_MusicDevice:
-			info->category = _("Instrument");
-			has_midi_in = true;
-			break;
-		case kAudioUnitType_MusicEffect:
-			info->category = _("Effect");
-			has_midi_in = true;
-			break;
-		case kAudioUnitType_Effect:
-			info->category = _("Effect");
-			break;
-		case kAudioUnitType_Mixer:
-			info->category = _("Mixer");
-			break;
-		case kAudioUnitType_Generator:
-			info->category = _("Generator");
-			break;
-		default:
-			info->category = _("(Unknown)");
-			break;
-		}
-
-		au_blacklist(CFStringRefToStdString(itemName));
-#ifdef COREAUDIO105
-		get_names (temp, info->name, info->creator);
-#else
-		get_names (comp, info->name, info->creator);
-#endif
-		ARDOUR::PluginScanMessage(_("AU"), info->name, false);
-		au_crashlog(string_compose("Plugin: %1", info->name));
-
-		info->type = ARDOUR::AudioUnit;
-		info->unique_id = stringify_descriptor (*info->descriptor);
-
-		/* XXX not sure of the best way to handle plugin versioning yet */
-
-		CAComponent cacomp (*info->descriptor);
-
-#ifdef COREAUDIO105
-		if (cacomp.GetResourceVersion (info->version) != noErr)
-#else
-		if (cacomp.GetVersion (info->version) != noErr)
-#endif
-		{
-			info->version = 0;
-		}
-
-		const int rv = cached_io_configuration (info->unique_id, info->version, cacomp, info->cache, info->name);
-
-		info->max_outputs = 0;
-
-		if (rv == 0) {
-			/* here we have to map apple's wildcard system to a simple pair
-			   of values. in ::can_do() we use the whole system, but here
-			   we need a single pair of values. XXX probably means we should
-			   remove any use of these values.
-
-			   for now, if the plugin provides a wildcard, treat it as 1. we really
-			   don't care much, because whether we can handle an i/o configuration
-			   depends upon ::configure_variable_io(), not these counts.
-
-			   they exist because other parts of ardour try to present i/o configuration
-			   info to the user, which should perhaps be revisited.
-			*/
-
-			const vector<pair<int,int> >& ioc (info->cache.io_configs);
-			for (vector<pair<int,int> >::const_iterator i = ioc.begin(); i != ioc.end(); ++i) {
-				int32_t possible_out = i->second;
-				if (possible_out < 0) {
-					continue;
-				} else if (possible_out > info->max_outputs) {
-					info->max_outputs = possible_out;
-				}
-			}
-
-			int32_t possible_in = ioc.front().first;
-			int32_t possible_out = ioc.front().second;
-
-			if (possible_in > 0) {
-				info->n_inputs.set (DataType::AUDIO, possible_in);
-			} else {
-				info->n_inputs.set (DataType::AUDIO, 1);
-			}
-
-			info->n_inputs.set (DataType::MIDI, has_midi_in ? 1 : 0);
-
-			if (possible_out > 0) {
-				info->n_outputs.set (DataType::AUDIO, possible_out);
-			} else {
-				info->n_outputs.set (DataType::AUDIO, 1);
-			}
-
-			DEBUG_TRACE (DEBUG::AudioUnitConfig, string_compose ("detected AU %1 with %2 i/o configurations - %3\n",
-									info->name.c_str(), info->cache.io_configs.size(), info->unique_id));
-
-			plugs.push_back (info);
-
-		}
-		else if (rv == -1) {
-			error << string_compose (_("Cannot get I/O configuration info for AU %1"), info->name) << endmsg;
-		}
-
-		au_unblacklist(CFStringRefToStdString(itemName));
-		au_crashlog("Success.");
-		comp = ArdourFindNext (comp, &desc);
-		if (itemName != NULL) CFRelease(itemName); itemName = NULL;
-	}
-	au_crashlog(string_compose("End AU discovery for Type: %1", (int)desc.componentType));
-}
-
-int
-AUPluginInfo::cached_io_configuration (const std::string& unique_id,
-				       UInt32 version,
-				       CAComponent& comp,
-				       AUPluginCachedInfo& cinfo,
-				       const std::string& name)
-{
-	std::string id;
-	char buf[32];
-
-	/* concatenate unique ID with version to provide a key for cached info lookup.
-	   this ensures we don't get stale information, or should if plugin developers
-	   follow Apple "guidelines".
-	 */
-
-	snprintf (buf, sizeof (buf), "%u", (uint32_t) version);
-	id = unique_id;
-	id += '/';
-	id += buf;
-
-	CachedInfoMap::iterator cim = cached_info.find (id);
-
-	if (cim != cached_info.end()) {
-		cinfo = cim->second;
-		return 0;
-	}
-
-	if (_scan_only) {
-		PBD::info << string_compose (_("Skipping AU %1 (not indexed. Discover new plugins to add)"), name) << endmsg;
-		return 1;
-	}
-
-	CAAudioUnit unit;
-	AUChannelInfo* channel_info;
-	UInt32 cnt;
-	int ret;
-
-	ARDOUR::BootMessage (string_compose (_("Checking AudioUnit: %1"), name));
-
-	try {
-
-		if (CAAudioUnit::Open (comp, unit) != noErr) {
-			return -1;
-		}
-
-	} catch (...) {
-
-		warning << string_compose (_("Could not load AU plugin %1 - ignored"), name) << endmsg;
-		return -1;
-
-	}
-
-	DEBUG_TRACE (DEBUG::AudioUnitConfig, "get AU channel info\n");
-	if ((ret = unit.GetChannelInfo (&channel_info, cnt)) < 0) {
-		return -1;
-	}
-
-	if (ret > 0) {
-		/* AU is expected to deal with same channel valance in and out */
-		cinfo.io_configs.push_back (pair<int,int> (-1, -1));
-	} else {
-		/* CAAudioUnit::GetChannelInfo silently merges bus formats
-		 * check if this was the case and if so, add
-		 * bus configs as incremental options.
-		 */
-		Boolean* isWritable = 0;
-		UInt32   dataSize   = 0;
-		OSStatus result = AudioUnitGetPropertyInfo (unit.AU(),
-				kAudioUnitProperty_SupportedNumChannels,
-				kAudioUnitScope_Global, 0,
-				&dataSize, isWritable);
-		if (result != noErr && (comp.Desc().IsGenerator() || comp.Desc().IsMusicDevice())) {
-			/* incrementally add busses */
-			int in = 0;
-			int out = 0;
-			for (uint32_t n = 0; n < cnt; ++n) {
-				in += channel_info[n].inChannels;
-				out += channel_info[n].outChannels;
-				cinfo.io_configs.push_back (pair<int,int> (in, out));
-			}
-		} else {
-			/* store each configuration */
-			for (uint32_t n = 0; n < cnt; ++n) {
-				cinfo.io_configs.push_back (pair<int,int> (channel_info[n].inChannels,
-							channel_info[n].outChannels));
-			}
-		}
-
-		free (channel_info);
-	}
-
-	add_cached_info (id, cinfo);
-	save_cached_info ();
-
-	return 0;
-}
-
-void
-AUPluginInfo::clear_cache ()
-{
-	const string& fn = au_cache_path();
-	if (Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
-		::g_unlink(fn.c_str());
-	}
-	// keep cached_info in RAM until restart or re-scan
-	cached_info.clear();
-}
-
-void
-AUPluginInfo::add_cached_info (const std::string& id, AUPluginCachedInfo& cinfo)
-{
-	cached_info[id] = cinfo;
-}
-
-#define AU_CACHE_VERSION "2.0"
-
-void
-AUPluginInfo::save_cached_info ()
-{
-	XMLNode* node;
-
-	node = new XMLNode (X_("AudioUnitPluginCache"));
-	node->set_property( "version", AU_CACHE_VERSION );
-
-	for (map<string,AUPluginCachedInfo>::iterator i = cached_info.begin(); i != cached_info.end(); ++i) {
-		XMLNode* parent = new XMLNode (X_("plugin"));
-		parent->set_property ("id", i->first);
-		node->add_child_nocopy (*parent);
-
-		for (vector<pair<int, int> >::iterator j = i->second.io_configs.begin(); j != i->second.io_configs.end(); ++j) {
-
-			XMLNode* child = new XMLNode (X_("io"));
-
-			child->set_property (X_("in"), j->first);
-			child->set_property (X_("out"), j->second);
-			parent->add_child_nocopy (*child);
-		}
-
-	}
-
-	Glib::ustring path = au_cache_path ();
-	XMLTree tree;
-
-	tree.set_root (node);
-
-	if (!tree.write (path)) {
-		error << string_compose (_("could not save AU cache to %1"), path) << endmsg;
-		g_unlink (path.c_str());
-	}
-}
-
-int
-AUPluginInfo::load_cached_info ()
-{
-	Glib::ustring path = au_cache_path ();
-	XMLTree tree;
-
-	if (!Glib::file_test (path, Glib::FILE_TEST_EXISTS)) {
-		return 0;
-	}
-
-	if ( !tree.read (path) ) {
-		error << "au_cache is not a valid XML file.  AU plugins will be re-scanned" << endmsg;
-		return -1;
-	}
-
-	const XMLNode* root (tree.root());
-
-	if (root->name() != X_("AudioUnitPluginCache")) {
-		return -1;
-	}
-
-	//initial version has incorrectly stored i/o info, and/or garbage chars.
-	XMLProperty const * version = root->property(X_("version"));
-	if (! ((version != NULL) && (version->value() == X_(AU_CACHE_VERSION)))) {
-		error << "au_cache is not correct version.  AU plugins will be re-scanned" << endmsg;
-		return -1;
-	}
-
-	cached_info.clear ();
-
-	const XMLNodeList children = root->children();
-
-	for (XMLNodeConstIterator iter = children.begin(); iter != children.end(); ++iter) {
-
-		const XMLNode* child = *iter;
-
-		if (child->name() == X_("plugin")) {
-
-			const XMLNode* gchild;
-			const XMLNodeList gchildren = child->children();
-
-			string id;
-			if (!child->get_property (X_("id"), id)) {
-				continue;
-			}
-
-			string fixed;
-			string version;
-
-			string::size_type slash = id.find_last_of ('/');
-
-			if (slash == string::npos) {
-				continue;
-			}
-
-			version = id.substr (slash);
-			id = id.substr (0, slash);
-			fixed = AUPlugin::maybe_fix_broken_au_id (id);
-
-			if (fixed.empty()) {
-				error << string_compose (_("Your AudioUnit configuration cache contains an AU plugin whose ID cannot be understood - ignored (%1)"), id) << endmsg;
-				continue;
-			}
-
-			id = fixed;
-			id += version;
-
-			AUPluginCachedInfo cinfo;
-
-			for (XMLNodeConstIterator giter = gchildren.begin(); giter != gchildren.end(); giter++) {
-
-				gchild = *giter;
-
-				if (gchild->name() == X_("io")) {
-
-					int32_t in;
-					int32_t out;
-
-					if (gchild->get_property (X_("in"), in) && gchild->get_property (X_("out"), out)) {
-						cinfo.io_configs.push_back (pair<int,int> (in, out));
-					}
-				}
-			}
-
-			if (cinfo.io_configs.size()) {
-				add_cached_info (id, cinfo);
-			}
-		}
-	}
-
-	return 0;
-}
-
-
-#if 1 // code dup ? -> auv2_scan
-std::string
-AUPluginInfo::stringify_descriptor (const CAComponentDescription& desc)
-{
-	stringstream s;
-
-	/* note: OSType is a compiler-implemenation-defined value,
-	   historically a 32 bit integer created with a multi-character
-	   constant such as 'abcd'. It is, fundamentally, an abomination.
-	*/
-
-	s << desc.Type();
-	s << '-';
-	s << desc.SubType();
-	s << '-';
-	s << desc.Manu();
-
-	return s.str();
-}
-#endif
-
 bool
 AUPluginInfo::needs_midi_input () const
 {
@@ -3346,6 +2490,21 @@ AUPluginInfo::is_utility () const
 {
 	return (descriptor->IsGenerator() || descriptor->componentType == 'aumi');
 	// kAudioUnitType_MidiProcessor  ..looks like we aren't even scanning for these yet?
+}
+
+std::string
+AUPluginInfo::convert_old_unique_id (std::string const& id)
+{
+	vector<std::string> p;
+	boost::split (p, id, boost::is_any_of ("-"));
+	if (p.size () == 3) {
+		OSType t (PBD::atoi (p[0]));
+		OSType s (PBD::atoi (p[1]));
+		OSType m (PBD::atoi (p[2]));
+		CAComponentDescription desc (t, s, m);
+		return auv2_stringify_descriptor (desc);
+	}
+	return id;
 }
 
 void

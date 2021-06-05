@@ -144,15 +144,14 @@ class LIBARDOUR_API AUPlugin : public ARDOUR::Plugin
 					       Float64*  outCycleStartBeat,
 					       Float64*  outCycleEndBeat);
 
-	static std::string maybe_fix_broken_au_id (const std::string&);
-
-        /* this MUST be called from thread in which you want to receive notifications
-	   about parameter changes.
-	*/
+	/* this MUST be called from thread in which you want to receive notifications
+	 * about parameter changes.
+	 */
 	int create_parameter_listener (AUEventListenerProc callback, void *arg, float interval_secs);
-        /* these can be called from any thread but SHOULD be called from the same thread
-	   that will receive parameter change notifications.
-	*/
+
+	/* these can be called from any thread but SHOULD be called from the same thread
+	 * that will receive parameter change notifications.
+	 */
 	int listen_to_parameter (uint32_t param_id);
 	int end_listen_to_parameter (uint32_t param_id);
 
@@ -238,14 +237,8 @@ class LIBARDOUR_API AUPlugin : public ARDOUR::Plugin
 	void parameter_change_listener (void* /*arg*/, void* /*src*/, const AudioUnitEvent* event, UInt64 host_time, Float32 new_value);
 };
 
-typedef boost::shared_ptr<AUPlugin> AUPluginPtr;
-
-struct LIBARDOUR_API AUPluginCachedInfo {
-	std::vector<std::pair<int,int> > io_configs;
-};
-
 class LIBARDOUR_API AUPluginInfo : public PluginInfo {
-  public:
+public:
 	 AUPluginInfo (boost::shared_ptr<CAComponentDescription>);
 	~AUPluginInfo () {}
 
@@ -262,42 +255,17 @@ class LIBARDOUR_API AUPluginInfo : public PluginInfo {
 	bool is_instrument () const;
 	bool is_utility () const;
 
-	AUPluginCachedInfo cache;
-
 	bool reconfigurable_io() const { return true; }
 	uint32_t max_configurable_ouputs () const { return max_outputs; }
 
-	static void clear_cache ();
-	static PluginInfoList* discover (bool scan_only);
-	static bool au_get_crashlog (std::string &msg);
-	static std::string stringify_descriptor (const CAComponentDescription&);
-
-	static int load_cached_info ();
-
-  private:
-	boost::shared_ptr<CAComponentDescription> descriptor;
 	UInt32 version;
 	uint32_t max_outputs;
-	static FILE * _crashlog_fd;
-	static bool _scan_only;
+	std::vector<std::pair<int,int> > io_configs;
 
-	static void au_start_crashlog (void);
-	static void au_remove_crashlog (void);
-	static void au_crashlog (std::string);
+	static std::string convert_old_unique_id (std::string const&);
 
-	static void discover_music (PluginInfoList&);
-	static void discover_fx (PluginInfoList&);
-	static void discover_generators (PluginInfoList&);
-	static void discover_instruments (PluginInfoList&);
-	static void discover_by_description (PluginInfoList&, CAComponentDescription&);
-	static Glib::ustring au_cache_path ();
-
-	typedef std::map<std::string,AUPluginCachedInfo> CachedInfoMap;
-	static CachedInfoMap cached_info;
-
-	static int cached_io_configuration (const std::string&, UInt32, CAComponent&, AUPluginCachedInfo&, const std::string& name);
-	static void add_cached_info (const std::string&, AUPluginCachedInfo&);
-	static void save_cached_info ();
+private:
+	boost::shared_ptr<CAComponentDescription> descriptor;
 };
 
 typedef boost::shared_ptr<AUPluginInfo> AUPluginInfoPtr;

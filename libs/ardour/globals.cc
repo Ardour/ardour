@@ -65,10 +65,6 @@
 #include "ardour/linux_vst_support.h"
 #endif
 
-#ifdef AUDIOUNIT_SUPPORT
-#include "ardour/audio_unit.h"
-#endif
-
 #if defined(__SSE__) || defined(USE_XMMINTRIN)
 #include <xmmintrin.h>
 #endif
@@ -613,10 +609,6 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	if (Config->get_use_lxvst () && vstfx_init (0)) {
 		return false;
 	}
-#endif
-
-#ifdef AUDIOUNIT_SUPPORT
-	AUPluginInfo::load_cached_info ();
 #endif
 
 	setup_hardware_optimization (try_optimization);
