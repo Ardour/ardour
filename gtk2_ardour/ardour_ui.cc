@@ -644,14 +644,13 @@ the audio backend and save the session."), PROGRAM_NAME);
 void
 ARDOUR_UI::post_engine ()
 {
-	/* Things to be done once (and once ONLY) after we have a backend running in the AudioEngine
-	 */
+	/* Things to be done once (and once ONLY) after we have a backend running in the AudioEngine */
+
 #ifdef AUDIOUNIT_SUPPORT
-	std::string au_msg;
-	if (AUPluginInfo::au_get_crashlog(au_msg)) {
-		popup_error(_("Audio Unit Plugin Scan Failed. Automatic AU scanning has been disabled. Please see the log window for further details."));
-		error << _("Audio Unit Plugin Scan Failed:") << endmsg;
-		info << au_msg << endmsg;
+	string aucrsh = Glib::build_filename (ARDOUR::user_cache_directory(), "au_crash");
+	if (Glib::file_test (aucrsh, Glib::FILE_TEST_EXISTS)) {
+		popup_error (_("Indexing Audio Unit Plugin Failed.\nAutomatic AU scanning has been disabled\n(check with 'auval', then re-enable scanning the in preferences)."));
+		::g_unlink (aucrsh.c_str());
 	}
 #endif
 
