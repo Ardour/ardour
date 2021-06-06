@@ -368,7 +368,7 @@ ARDOUR_UI_UTILS::relay_key_press (GdkEventKey* ev, Gtk::Window* win)
 }
 
 bool
-ARDOUR_UI_UTILS::emulate_key_event (unsigned int keyval)
+ARDOUR_UI_UTILS::emulate_key_event (unsigned int keyval, int state)
 {
 	GdkDisplay  *display = gtk_widget_get_display (GTK_WIDGET(ARDOUR_UI::instance()->main_window().gobj()));
 	GdkKeymap   *keymap  = gdk_keymap_get_for_display (display);
@@ -385,7 +385,7 @@ ARDOUR_UI_UTILS::emulate_key_event (unsigned int keyval)
 	ev.window = main_window.get_window()->gobj();
 	ev.send_event = FALSE;
 	ev.time = 0;
-	ev.state = 0;
+	ev.state = state;
 	ev.keyval = keyval;
 	ev.length = 0;
 	ev.string = const_cast<gchar*> ("");

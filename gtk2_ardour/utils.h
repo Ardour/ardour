@@ -82,7 +82,7 @@ void set_color_from_rgba (Gdk::Color&, uint32_t);
 
 bool relay_key_press (GdkEventKey* ev, Gtk::Window* win);
 bool key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev);
-bool emulate_key_event (unsigned int);
+bool emulate_key_event (unsigned int, int state);
 
 Glib::RefPtr<Gdk::Pixbuf> get_xpm (std::string);
 std::vector<std::string> get_icon_sets ();
