@@ -37,6 +37,7 @@
 #include "playlist_selector.h"
 #include "route_ui.h"
 #include "gui_thread.h"
+#include "utils.h"
 
 #include "pbd/i18n.h"
 
@@ -361,4 +362,23 @@ PlaylistSelector::selection_changed ()
 				break;
 		}
 	}
+}
+
+bool
+PlaylistSelector::on_key_press_event (GdkEventKey* ev)
+{
+	/* Allow these keys to have their in-dialog effect */
+
+	switch (ev->keyval) {
+	case GDK_Up:
+	case GDK_Down:
+	case GDK_Return:
+	case GDK_KP_Enter:
+		return ArdourDialog::on_key_press_event (ev);
+	}
+
+	/* Don't just forward the key press ... make it act as if it occured in
+	   whatever the main window currently is.
+	*/
+	return ARDOUR_UI_UTILS::emulate_key_event (ev->keyval, ev->state);
 }

@@ -71,6 +71,7 @@ public:
 
 protected:
 	bool on_unmap_event (GdkEventAny*);
+	bool on_key_press_event (GdkEventKey*);
 
 private:
 	typedef std::map<PBD::ID,std::vector<boost::shared_ptr<ARDOUR::Playlist> >*> TrackPlaylistMap;
