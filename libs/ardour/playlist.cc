@@ -1296,6 +1296,15 @@ Playlist::paste (boost::shared_ptr<Playlist> other, samplepos_t position, float 
 {
 	times = fabs (times);
 
+	if (times==1 && _session.config.get_layered_record_mode()) {  //ToDo:  insert_mode?
+		RegionWriteLock rlock (this);
+		samplepos_t pos = position;
+		partition_internal (pos - 1, (pos + other->_get_extent ().second), true, rlock.thawlist);
+		for (RegionList::iterator i = rlock.thawlist.begin (); i != rlock.thawlist.end (); ++i) {
+			_session.add_command (new StatefulDiffCommand (*i));
+		}
+	}
+
 	{
 		RegionReadLock rl2 (other.get ());
 
