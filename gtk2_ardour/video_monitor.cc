@@ -266,7 +266,7 @@ VideoMonitor::is_started ()
 void
 VideoMonitor::forward_keyevent (unsigned int keyval)
 {
-	emulate_key_event (keyval, 0);
+	emulate_key_event (keyval);
 }
 
 void
