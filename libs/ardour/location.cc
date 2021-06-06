@@ -1616,30 +1616,32 @@ Locations::range_starts_at(samplepos_t pos, samplecnt_t slop, bool incl) const
 void
 Locations::ripple (samplepos_t at, samplecnt_t distance, bool include_locked, bool notify)
 {
-	Glib::Threads::RWLock::WriterLock lm (_lock);
+	{
+		Glib::Threads::RWLock::WriterLock lm (_lock);
 
-	for (LocationList::iterator i = locations.begin(); i != locations.end(); ++i) {
+		for (LocationList::iterator i = locations.begin(); i != locations.end(); ++i) {
 
-		if (!include_locked && (*i)->locked()) {
-			continue;
-		}
+			bool locked = (*i)->locked();
 
-		bool locked = (*i)->locked();
-
-		if (locked) {
-			(*i)->unlock ();
-		}
-
-		if ((*i)->start() >= at) {
-			(*i)->set_start ((*i)->start() - distance);
-
-			if (!(*i)->is_mark()) {
-				(*i)->set_end ((*i)->end() - distance);
+			if (locked) {
+				if (!include_locked) {
+					continue;
+				}
+			} else {
+				(*i)->unlock ();
 			}
-		}
 
-		if (locked) {
-			(*i)->locked();
+			if ((*i)->start() >= at) {
+				(*i)->set_start ((*i)->start() + distance);
+
+				if (!(*i)->is_mark()) {
+					(*i)->set_end ((*i)->end() + distance);
+				}
+			}
+
+			if (locked) {
+				(*i)->lock();
+			}
 		}
 	}
 
