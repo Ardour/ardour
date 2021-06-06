@@ -33,6 +33,7 @@
 
 #include <gtkmm2ext/gtk_ui.h>
 
+#include "ardour_ui.h"
 #include "public_editor.h"
 #include "playlist_selector.h"
 #include "route_ui.h"
@@ -380,5 +381,6 @@ PlaylistSelector::on_key_press_event (GdkEventKey* ev)
 	/* Don't just forward the key press ... make it act as if it occured in
 	   whatever the main window currently is.
 	*/
-	return ARDOUR_UI_UTILS::emulate_key_event (ev->keyval, ev->state);
+	Gtk::Window& main_window (ARDOUR_UI::instance()->main_window());
+	return ARDOUR_UI_UTILS::relay_key_press (ev, &main_window);
 }
