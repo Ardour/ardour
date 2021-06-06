@@ -1621,6 +1621,21 @@ Locations::ripple (samplepos_t at, samplecnt_t distance, bool include_locked, bo
 
 		for (LocationList::iterator i = locations.begin(); i != locations.end(); ++i) {
 
+			/* keep session range markers covering entire region if
+			   a ripple "extends" the session.
+			*/
+			if (distance > 0 && (*i)->is_session_range()) {
+
+				/* Don't move start unless it occurs after the ripple point.
+				*/
+				if ((*i)->start() >= at) {
+					(*i)->set ((*i)->start() + distance, (*i)->end() + distance);
+				} else {
+					(*i)->set_end ((*i)->end() + distance);
+				}
+				continue;
+			}
+
 			bool locked = (*i)->locked();
 
 			if (locked) {
