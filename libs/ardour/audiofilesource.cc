@@ -51,6 +51,7 @@
 
 #include "ardour/audiofilesource.h"
 #include "ardour/debug.h"
+#include "ardour/ffmpegfilesource.h"
 #include "ardour/mp3filesource.h"
 #include "ardour/sndfilesource.h"
 #include "ardour/session.h"
@@ -208,6 +209,10 @@ AudioFileSource::get_soundfile_info (const string& path, SoundFileInfo& _info, s
 		return true;
 	}
 
+	if (FFMPEGFileSource::get_soundfile_info (path, _info, error_msg) == 0) {
+		return true;
+	}
+
 	return false;
 }
 
@@ -342,7 +347,6 @@ AudioFileSource::safe_audio_file_extension(const string& file)
 		".mpeg", ".MPEG",
 		".mp1", ".MP1",
 		".mp4", ".MP4",
-		".m4a", ".M4A",
 		".sd2", ".SD2", // libsndfile supports sd2 also, but the resource fork is required to open.
 #endif // HAVE_COREAUDIO
 	};
@@ -351,6 +355,10 @@ AudioFileSource::safe_audio_file_extension(const string& file)
 		if (file.rfind (suffixes[n]) == file.length() - strlen (suffixes[n])) {
 			return true;
 		}
+	}
+
+	if (FFMPEGFileSource::safe_audio_file_extension(file)) {
+		return true;
 	}
 
 	return false;
