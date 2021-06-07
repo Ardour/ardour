@@ -34,6 +34,8 @@
 #include "ardour/port_engine.h"
 #include "ardour/types.h"
 
+#include "pbd/g_atomic_compat.h"
+
 namespace ARDOUR {
 
 class PortEngineSharedImpl;
