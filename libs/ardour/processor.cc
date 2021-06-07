@@ -332,3 +332,15 @@ Processor::owner() const
 {
 	return _owner;
 }
+
+void
+Processor::get_dsp_stats (std::ostream& str)
+{
+	uint64_t min;
+	uint64_t max;
+	double avg;
+	double dev;
+
+	proc_stats.get_stats (min, max, avg, dev);
+	str << name() << ": [" << typeid(*this).name() << "] " << min << ' ' << max << ' ' << avg << ' ' << dev;
+}

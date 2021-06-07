@@ -7243,3 +7243,15 @@ Session::had_destructive_tracks() const
 {
 	return _had_destructive_tracks;
 }
+
+std::string
+Session::get_dsp_stats () const
+{
+	stringstream ss;
+
+	boost::shared_ptr<RouteList> r = routes.reader ();
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		(*i)->get_dsp_stats (ss);
+	}
+	return ss.str();
+}

@@ -194,6 +194,14 @@ private:
 	double   _vs;
 };
 
+class LIBPBD_API TimerRAII
+{
+  public:
+	TimerRAII (TimingStats& ts) : stats (ts) { stats.start(); }
+	~TimerRAII() { stats.update(); }
+	TimingStats& stats;
+};
+
 class LIBPBD_API TimingData
 {
 public:

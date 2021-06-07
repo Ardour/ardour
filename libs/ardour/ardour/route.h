@@ -39,6 +39,7 @@
 #include "pbd/xml++.h"
 #include "pbd/undo.h"
 #include "pbd/stateful.h"
+#include "pbd/timing.h"
 #include "pbd/controllable.h"
 #include "pbd/destructible.h"
 #include "pbd/g_atomic_compat.h"
@@ -588,6 +589,9 @@ public:
 	bool slaved () const;
 
 	virtual void use_captured_sources (SourceList& srcs, CaptureInfos const &) {}
+
+	PBD::TimingStats dsp_stats;
+	void get_dsp_stats (std::ostream&);
 
 protected:
 	friend class Session;

@@ -1322,6 +1322,8 @@ public:
 	std::vector<struct ptflookup> ptfwavpair;
 	SourceList pt_imported_sources;
 
+	std::string get_dsp_stats () const;
+
 protected:
 	friend class AudioEngine;
 	void set_block_size (pframes_t nframes);

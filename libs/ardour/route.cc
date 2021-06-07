@@ -349,6 +349,7 @@ Route::process_output_buffers (BufferSet& bufs,
 	PT_TIMING_CHECK ("route-pob-in");
 	/* Caller must hold process lock */
 	assert (!AudioEngine::instance()->process_lock().trylock());
+	TimerRAII ta (dsp_stats);
 
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
 	if (!lm.locked()) {
@@ -533,11 +534,13 @@ Route::process_output_buffers (BufferSet& bufs,
 			}
 		}
 
+		(*i)->proc_stats.start();
 		if (speed < 0) {
 			(*i)->run (bufs, start_sample + latency, end_sample + latency, pspeed, nframes, *i != _processors.back());
 		} else {
 			(*i)->run (bufs, start_sample - latency, end_sample - latency, pspeed, nframes, *i != _processors.back());
 		}
+		(*i)->proc_stats.update();
 
 		bufs.set_count ((*i)->output_streams());
 
@@ -6309,3 +6312,21 @@ Route::monitoring_state () const
 	return MonitoringSilence;
 }
 
+void
+Route::get_dsp_stats (std::ostream& str)
+{
+	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	uint64_t min;
+	uint64_t max;
+	double avg;
+	double dev;
+
+	dsp_stats.get_stats (min, max, avg, dev);
+	str << name() << ": " << min << ' ' << max << ' ' << avg << ' ' << dev << endl;
+
+	for (ProcessorList::const_iterator p = _processors.begin(); p != _processors.end(); ++p) {
+		str << '\t';
+		(*p)->get_dsp_stats (str);
+		str << endl;
+	}
+}

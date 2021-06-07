@@ -27,6 +27,7 @@
 #include <exception>
 
 #include "pbd/statefuldestructible.h"
+#include "pbd/timing.h"
 
 #include "ardour/ardour.h"
 #include "ardour/buffer_set.h"
@@ -157,7 +158,10 @@ class LIBARDOUR_API Processor : public SessionObject, public Automatable, public
 	virtual void set_owner (SessionObject*);
 	SessionObject* owner() const;
 
-protected:
+	PBD::TimingStats proc_stats;
+	void get_dsp_stats (std::ostream&);
+
+  protected:
 	virtual XMLNode& state ();
 	virtual int set_state_2X (const XMLNode&, int version);
 
