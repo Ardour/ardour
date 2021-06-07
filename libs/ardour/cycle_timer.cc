@@ -128,8 +128,6 @@ StoringTimer::ref ()
 void
 StoringTimer::check (char const * const what)
 {
-	cerr << pthread_name() << " @ " << pthread_self() << ' ' << thread << " check " << what << " @ " << _points << endl;
-
 	if (_points == _max_points) {
 		++_points;
 		return;
