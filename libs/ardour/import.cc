@@ -53,6 +53,7 @@
 #include "ardour/ardour.h"
 #include "ardour/audioengine.h"
 #include "ardour/audioregion.h"
+#include "ardour/ffmpegfileimportable.h"
 #include "ardour/import_status.h"
 #include "ardour/mp3fileimportable.h"
 #include "ardour/region_factory.h"
@@ -121,6 +122,18 @@ open_importable_source (const string& path, samplecnt_t samplerate, ARDOUR::SrcQ
 
 		/* rewrap as a resampled source */
 		return boost::shared_ptr<ImportableSource>(new ResampledImportableSource(source, samplerate, quality));
+	} catch (...) { }
+
+	/* finally try FFMPEG */
+	try {
+		boost::shared_ptr<FFMPEGFileImportableSource> source(new FFMPEGFileImportableSource(path));
+
+		if (source->samplerate() == samplerate) {
+			return source;
+		}
+
+		/* rewrap as a resampled source */
+		return boost::shared_ptr<ImportableSource>(new ResampledImportableSource(source, samplerate, quality));		
 	} catch (...) { }
 
 	throw failed_constructor ();

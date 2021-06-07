@@ -92,6 +92,8 @@ libardour_sources = [
         'export_profile_manager.cc',
         'export_status.cc',
         'export_timespan.cc',
+        'ffmpegfileimportable.cc',
+        'ffmpegfilesource.cc',
         'file_source.cc',
         'filename_extensions.cc',
         'filesystem_paths.cc',

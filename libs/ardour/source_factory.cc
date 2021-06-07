@@ -31,6 +31,7 @@
 #include "ardour/audioplaylist.h"
 #include "ardour/audio_playlist_source.h"
 #include "ardour/boost_debug.h"
+#include "ardour/ffmpegfilesource.h"
 #include "ardour/midi_playlist.h"
 #include "ardour/midi_playlist_source.h"
 #include "ardour/mp3filesource.h"
@@ -267,6 +268,14 @@ SourceFactory::createExternal (DataType type, Session& s, const string& path,
 		if (!announce && (!AudioFileSource::get_build_peakfiles () || defer_peaks)) {
 			try {
 				Source* src = new Mp3FileSource (s, path, chn, flags);
+				boost::shared_ptr<Source> ret (src);
+				BOOST_MARK_SOURCE (ret);
+				return ret;
+
+			} catch (failed_constructor& err) { }
+
+			try {
+				Source* src = new FFMPEGFileSource (s, path, chn, flags);
 				boost::shared_ptr<Source> ret (src);
 				BOOST_MARK_SOURCE (ret);
 				return ret;
