@@ -199,16 +199,14 @@ private:
 		T               _data;
 	};
 
-	typedef char cacheline_pad_t[64];
-
-	cacheline_pad_t _pad0;
+	char            _pad0[64];
 	cell_t*         _buffer;
 	size_t          _buffer_mask;
-	cacheline_pad_t _pad1;
+	char            _pad1[64 - sizeof (cell_t*) - sizeof (size_t)];
 	MPMC_QUEUE_TYPE _enqueue_pos;
-	cacheline_pad_t _pad2;
+	char            _pad2[64 - sizeof (size_t)];
 	MPMC_QUEUE_TYPE _dequeue_pos;
-	cacheline_pad_t _pad3;
+	char            _pad3[64 - sizeof (size_t)];
 };
 
 } // namespace PBD
