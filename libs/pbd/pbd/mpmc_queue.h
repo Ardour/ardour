@@ -137,11 +137,16 @@ private:
 		T                  _data;
 	};
 
-	cell_t* _buffer;
-	size_t  _buffer_mask;
+	typedef char cacheline_pad_t [64];
 
+	cacheline_pad_t   _pad0;
+	cell_t*           _buffer;
+	size_t            _buffer_mask;
+	cacheline_pad_t   _pad1;
 	GATOMIC_QUAL gint _enqueue_pos;
+	cacheline_pad_t   _pad2;
 	GATOMIC_QUAL gint _dequeue_pos;
+	cacheline_pad_t   _pad3;
 };
 
 } /* end namespace */
