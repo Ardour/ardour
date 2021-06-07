@@ -21,6 +21,7 @@
 #ifndef __ardour_cycle_timer_h__
 #define __ardour_cycle_timer_h__
 
+#include <atomic>
 #include <string>
 #include <iostream>
 #include <cstdlib>
@@ -68,31 +69,38 @@ class LIBARDOUR_API CycleTimer {
 class LIBARDOUR_API StoringTimer
 {
 public:
-	StoringTimer (int);
+	StoringTimer ();
 	void ref ();
-	void check (int);
-#ifndef NDEBUG
-	void dump (std::string const &);
-#endif
+	void check (char const * const what);
+	void dump (std::ostream&);
 
-private:
+	static void dump_all (std::string const &);
+	static StoringTimer* thread_st();
+	static void dump_all ();
+
+  private:
 	cycles_t _current_ref;
-	int* _point;
+
+	char const * const thread;
+	char const ** _what;
 	cycles_t* _value;
 	cycles_t* _ref;
 	int _points;
-	int _max_points;
+
+	static int _max_points;
+	static StoringTimer* all_timers[2048]; /* size relates to thread count */
+	static std::atomic<int> st_cnt;
+	thread_local static int st_index;
 };
 
 #ifdef PT_TIMING
-extern StoringTimer ST;
-#define PT_TIMING_REF ST.ref();
-#define PT_TIMING_CHECK(x) ST.check(x);
+#define PT_TIMING_REF StoringTimer::thread_st()->ref();
+#define PT_TIMING_CHECK(w) StoringTimer::thread_st()->check(w);
 #endif
 
 #ifndef PT_TIMING
 #define PT_TIMING_REF
-#define PT_TIMING_CHECK(x)
+#define PT_TIMING_CHECK(w)
 #endif
 
 #endif /* __ardour_cycle_timer_h__ */

@@ -21,6 +21,7 @@
 #include <cstdio>
 #include <fstream>
 #include "pbd/error.h"
+#include "pbd/pthread_utils.h"
 #include "ardour/cycle_timer.h"
 
 #include "ardour/libardour_visibility.h"
@@ -78,28 +79,45 @@ get_mhz()
 	return 0.0f;
 }
 
-StoringTimer::StoringTimer (int N)
+int StoringTimer::_max_points = 64 * 1024;
+StoringTimer* StoringTimer::all_timers[2048];
+std::atomic<int> StoringTimer::st_cnt;
+
+thread_local int StoringTimer::st_index = st_cnt.fetch_add (1);
+
+StoringTimer::StoringTimer ()
+	: thread (strdup (pthread_name()))
 {
-	_point = new int[N];
-	_value = new cycles_t[N];
-	_ref = new cycles_t[N];
-	_max_points = N;
+	_what = new char const *[_max_points];
+	_value = new cycles_t[_max_points];
+	_ref = new cycles_t[_max_points] ;
 	_points = 0;
 }
 
-#ifndef NDEBUG
 void
-StoringTimer::dump (string const & file)
+StoringTimer::dump_all (string const & file)
 {
 	ofstream f (file.c_str ());
 
-	f << min (_points, _max_points) << "\n";
 	f << get_mhz () << "\n";
-	for (int i = 0; i < min (_points, _max_points); ++i) {
-		f << _point[i] << " " << _ref[i] << " " << _value[i] << "\n";
+	f << "There were " << st_cnt.load() << " thread timers\n";
+
+	for (size_t i = 0; i < (sizeof (all_timers) / sizeof (all_timers[0])); ++i) {
+		if (all_timers[i]) {
+			all_timers[i]->dump (f);
+		}
 	}
 }
-#endif
+
+void
+StoringTimer::dump (std::ostream& f)
+{
+	f << thread << ' ' << _points << "\n";
+
+	for (int i = 0; i < min (_points, _max_points); ++i) {
+		f << '\t' << _what[i] << " " << _ref[i] << " " << _value[i] << " delta " << _value[i] - _ref[i] << "\n";
+	}
+}
 
 void
 StoringTimer::ref ()
@@ -108,8 +126,10 @@ StoringTimer::ref ()
 }
 
 void
-StoringTimer::check (int p)
+StoringTimer::check (char const * const what)
 {
+	cerr << pthread_name() << " @ " << pthread_self() << ' ' << thread << " check " << what << " @ " << _points << endl;
+
 	if (_points == _max_points) {
 		++_points;
 		return;
@@ -117,15 +137,20 @@ StoringTimer::check (int p)
 		return;
 	}
 
-	_point[_points] = p;
+	_what[_points] = what;
 	_value[_points] = get_cycles ();
 	_ref[_points] = _current_ref;
 
 	++_points;
 }
 
-#ifdef PT_TIMING
-StoringTimer ST (64 * 1024);
-#endif
+StoringTimer*
+StoringTimer::thread_st()
+{
+	if (all_timers[st_index] == 0) {
+		all_timers[st_index] = new StoringTimer;
+	}
+	return all_timers[st_index];
+}
 
 

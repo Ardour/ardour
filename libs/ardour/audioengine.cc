@@ -232,7 +232,7 @@ AudioEngine::process_callback (pframes_t nframes)
 	Port::set_speed_ratio (1.0);
 
 	PT_TIMING_REF;
-	PT_TIMING_CHECK (1);
+	PT_TIMING_CHECK ("process callback in");
 
 	/// The number of samples that will have been processed when we've finished
 	pframes_t next_processed_samples;
@@ -588,7 +588,7 @@ AudioEngine::process_callback (pframes_t nframes)
 
 	_processed_samples = next_processed_samples;
 
-	PT_TIMING_CHECK (2);
+	PT_TIMING_CHECK ("process callback out");
 
 	return 0;
 }

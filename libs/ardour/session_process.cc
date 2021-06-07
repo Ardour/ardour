@@ -165,7 +165,7 @@ Session::fail_roll (pframes_t nframes)
 int
 Session::no_roll (pframes_t nframes)
 {
-	PT_TIMING_CHECK (4);
+	PT_TIMING_CHECK ("no roll in");
 
 	samplepos_t end_sample = _transport_sample + floor (nframes * _transport_fsm->transport_speed());
 	int ret = 0;
@@ -186,7 +186,7 @@ Session::no_roll (pframes_t nframes)
 		DEBUG_TRACE(DEBUG::ProcessThreads,"calling graph/no-roll\n");
 		_process_graph->routes_no_roll( nframes, _transport_sample, end_sample, non_realtime_work_pending());
 	} else {
-		PT_TIMING_CHECK (10);
+		PT_TIMING_CHECK ("nograph no roll in");
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 
 			if ((*i)->is_auditioner()) {
@@ -199,10 +199,10 @@ Session::no_roll (pframes_t nframes)
 				break;
 			}
 		}
-		PT_TIMING_CHECK (11);
+		PT_TIMING_CHECK ("nograph no roll out");
 	}
 
-	PT_TIMING_CHECK (5);
+	PT_TIMING_CHECK ("no roll out");
 	return ret;
 }
 
@@ -330,7 +330,7 @@ Session::calc_preroll_subcycle (samplecnt_t ns) const
 void
 Session::process_with_events (pframes_t nframes)
 {
-	PT_TIMING_CHECK (3);
+	PT_TIMING_CHECK ("p-with-e in");
 
 	SessionEvent*  ev;
 	pframes_t      this_nframes;

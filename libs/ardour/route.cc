@@ -57,6 +57,7 @@
 #include "ardour/buffer_set.h"
 #include "ardour/capturing_processor.h"
 #include "ardour/debug.h"
+#include "ardour/cycle_timer.h"
 #include "ardour/delivery.h"
 #include "ardour/disk_reader.h"
 #include "ardour/disk_writer.h"
@@ -345,6 +346,7 @@ Route::process_output_buffers (BufferSet& bufs,
 			       samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes,
 			       bool gain_automation_ok, bool run_disk_reader)
 {
+	PT_TIMING_CHECK ("route-pob-in");
 	/* Caller must hold process lock */
 	assert (!AudioEngine::instance()->process_lock().trylock());
 

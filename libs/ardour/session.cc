@@ -74,6 +74,7 @@
 #include "ardour/butler.h"
 #include "ardour/click.h"
 #include "ardour/control_protocol_manager.h"
+#include "ardour/cycle_timer.h"
 #include "ardour/data_type.h"
 #include "ardour/debug.h"
 #include "ardour/disk_reader.h"
@@ -502,7 +503,7 @@ Session::Session (AudioEngine &eng,
 Session::~Session ()
 {
 #ifdef PT_TIMING
-	ST.dump ("ST.dump");
+	StoringTimer::dump_all ("ST.dump");
 #endif
 	destroy ();
 }
