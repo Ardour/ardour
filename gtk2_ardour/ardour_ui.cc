@@ -3107,3 +3107,15 @@ ARDOUR_UI::setup_toplevel_window (Gtk::Window& window, const string& name, void*
 	window.signal_key_press_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::key_event_handler), &window), false);
 	window.signal_key_release_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::key_event_handler), &window), false);
 }
+
+void
+ARDOUR_UI::show_dsp_stats ()
+{
+	if (!_session) {
+		cout << "No session\n";
+		return;
+	}
+
+	string str = _session->get_dsp_stats ();
+	cout << str << endl;
+}

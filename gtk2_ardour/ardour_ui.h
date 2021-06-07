@@ -912,6 +912,8 @@ private:
 	void action_script_changed (int i, const std::string&);
 
 	void ask_about_scratch_deletion ();
+
+	void show_dsp_stats ();
 };
 
 #endif /* __ardour_gui_h__ */

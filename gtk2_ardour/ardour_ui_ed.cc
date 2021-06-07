@@ -676,6 +676,9 @@ ARDOUR_UI::install_dependent_actions ()
 	act = ActionManager::register_action (common_actions, "invert-selection", _("Invert Selection"), sigc::mem_fun(editor, &PublicEditor::invert_selection));
 	ActionManager::session_sensitive_actions.push_back (act);
 
+	act = ActionManager::register_action (common_actions, "show-dsp-stats", _("Show DSP Statistics"), sigc::mem_fun(this, &ARDOUR_UI::show_dsp_stats));
+	ActionManager::session_sensitive_actions.push_back (act);
+
 	act = ActionManager::register_action (transport_actions, X_("solo-selection"), _("Solo Selection"), sigc::bind (sigc::mem_fun(*editor, &PublicEditor::play_solo_selection), true));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
