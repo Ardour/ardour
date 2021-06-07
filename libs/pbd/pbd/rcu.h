@@ -20,14 +20,14 @@
 #ifndef __pbd_rcu_h__
 #define __pbd_rcu_h__
 
+#include <atomic>
+
 #include "boost/shared_ptr.hpp"
 #include "boost/smart_ptr/detail/yield_k.hpp"
-#include "glibmm/threads.h"
 
 #include <list>
 
 #include "pbd/libpbd_visibility.h"
-#include "pbd/g_atomic_compat.h"
 
 /** @file rcu.h
  * Define a set of classes to implement Read-Copy-Update.  We do not attempt to define RCU here - use google.
@@ -53,33 +53,24 @@ class /*LIBPBD_API*/ RCUManager
 {
 public:
 	RCUManager (T* new_rcu_value)
-	{
-		g_atomic_int_set (&_active_reads, 0);
-		x.rcu_value = new boost::shared_ptr<T> (new_rcu_value);
-	}
+		: rcu_value (new boost::shared_ptr<T> (new_rcu_value))
+		, _active_reads (0) {}
 
-	virtual ~RCUManager ()
-	{
-		delete x.rcu_value;
+	virtual ~RCUManager ()  {
+		delete rcu_value.load ();
 	}
 
 	boost::shared_ptr<T> reader () const
 	{
-		boost::shared_ptr<T> rv;
-
 		/* Keep count of any readers in this section of code, so writers can
 		 * wait until rcu_value is no longer in use after an atomic exchange
 		 * before dropping it.
-		 *
-		 * rg: this is not great, 3 consecutive full compiler and hardware
-		 * memory barterers. For an edge-case lock that is not usually contended.
-		 * consider reverting f87de76b9fc8b3a5a.
 		 */
-		g_atomic_int_inc (&_active_reads);
-		rv = *((boost::shared_ptr<T>*)g_atomic_pointer_get (&x.gptr));
-		g_atomic_int_add (&_active_reads, -1);
-
-		return rv;
+		boost::shared_ptr<T> ret;
+		_active_reads.fetch_add (1);
+		ret = *(rcu_value.load (std::memory_order_acquire));
+		_active_reads.fetch_sub (1);
+		return ret;
 	}
 
 	/* this is an abstract base class - how these are implemented depends on the assumptions
@@ -91,25 +82,13 @@ public:
 	virtual bool                 update (boost::shared_ptr<T> new_value) = 0;
 
 protected:
-	/* ordinarily this would simply be a declaration of a ptr to a shared_ptr<T>. However, the atomic
-	 * operations that we are using (from glib) have sufficiently strict typing that it proved hard
-	 * to get them to accept even a cast value of the ptr-to-shared-ptr() as the argument to get()
-	 * and comp_and_exchange(). Consequently, we play a litle trick here that relies on the fact
-	 * that sizeof(A*) == sizeof(B*) no matter what the types of A and B are. for most purposes
-	 * we will use x.rcu_value, but when we need to use an atomic op, we use x.gptr. Both expressions
-	 * evaluate to the same address.
-	 */
-	union {
-		boost::shared_ptr<T>*         rcu_value;
-		mutable GATOMIC_QUAL gpointer gptr;
-	} x;
+	mutable std::atomic<boost::shared_ptr<T>*> rcu_value;
 
 	inline bool active_read () const {
-		return g_atomic_int_get (&_active_reads) != 0;
+		return _active_reads.load (std::memory_order_acquire);
 	}
-
 private:
-	mutable GATOMIC_QUAL gint _active_reads;
+	mutable std::atomic<int> _active_reads;
 };
 
 /** Serialized RCUManager implements the RCUManager interface. It is based on the
@@ -170,7 +149,7 @@ public:
 		 * a lock, so this store of rcu_value is atomic.
 		 */
 
-		_current_write_old = RCUManager<T>::x.rcu_value;
+		_current_write_old = RCUManager<T>::rcu_value;
 
 		boost::shared_ptr<T> new_copy (new T (**_current_write_old));
 
@@ -193,26 +172,19 @@ public:
 		 * XXX but how could it? we hold the freakin' lock!
 		 */
 
-		bool ret = g_atomic_pointer_compare_and_exchange (&RCUManager<T>::x.gptr,
-		                                                  (gpointer)_current_write_old,
-		                                                  (gpointer)new_spp);
+		boost::shared_ptr<T>* old = _current_write_old;
+
+		for (unsigned i = 0; RCUManager<T>::active_read (); ++i) {
+			/* spin being nice to the scheduler/CPU */
+			boost::detail::yield (i);
+		}
+
+		bool ret = RCUManager<T>::rcu_value.compare_exchange_strong (old,
+		                                                             new_spp,
+		                                                             std::memory_order_release,
+		                                                             std::memory_order_release);
 
 		if (ret) {
-			/* successful update
-			 *
-			 * wait until there are no active readers. This ensures that any
-			 * references to the old value have been fully copied into a new
-			 * shared_ptr, and thus have had their reference count incremented.
-			 */
-
-			for (unsigned i = 0; RCUManager<T>::active_read (); ++i) {
-				/* spin being nice to the scheduler/CPU */
-				boost::detail::yield (i);
-			}
-
-			/* if we are not the only user, put the old value into dead_wood.
-			 * if we are the only user, then it is safe to drop it here.
-			 */
 
 			if (!_current_write_old->unique ()) {
 				_dead_wood.push_back (*_current_write_old);
