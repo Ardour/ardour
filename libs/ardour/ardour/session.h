@@ -1323,6 +1323,7 @@ public:
 	SourceList pt_imported_sources;
 
 	std::string get_dsp_stats () const;
+	PBD::TimingStats dsp_stats;
 
 protected:
 	friend class AudioEngine;

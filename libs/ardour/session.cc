@@ -7249,6 +7249,14 @@ Session::get_dsp_stats () const
 {
 	stringstream ss;
 
+	uint64_t min;
+	uint64_t max;
+	double avg;
+	double dev;
+
+	dsp_stats.get_stats (min, max, avg, dev);
+	ss << "Session: " <<  min << ' ' << max << ' ' << avg << ' ' << dev << endl;
+
 	boost::shared_ptr<RouteList> r = routes.reader ();
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		(*i)->get_dsp_stats (ss);

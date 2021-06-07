@@ -74,6 +74,8 @@ using namespace std;
 void
 Session::process (pframes_t nframes)
 {
+	PBD::TimerRAII tr (dsp_stats);
+
 	samplepos_t transport_at_start = _transport_sample;
 
 	_silent = false;
