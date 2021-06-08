@@ -7254,6 +7254,9 @@ Session::get_dsp_stats () const
 	double avg;
 	double dev;
 
+	AudioEngine::instance()->dsp_stats.get_stats (min, max, avg, dev);
+	ss << "Engine: " <<  min << ' ' << max << ' ' << avg << ' ' << dev << endl;
+
 	dsp_stats.get_stats (min, max, avg, dev);
 	ss << "Session: " <<  min << ' ' << max << ' ' << avg << ' ' << dev << endl;
 

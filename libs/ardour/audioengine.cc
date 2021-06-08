@@ -489,8 +489,12 @@ AudioEngine::process_callback (pframes_t nframes)
 
 	/* tell all Ports that we're starting a new cycle */
 
-	PortManager::cycle_start (nframes, _session);
+	{
+		PBD::TimerRAII tr (dsp_stats);
 
+
+		PortManager::cycle_start (nframes, _session);
+	}
 	/* test if we are freewheeling and there are freewheel signals connected.
 	 * ardour should act normally even when freewheeling unless /it/ is
 	 * exporting (which is what Freewheel.empty() tests for).

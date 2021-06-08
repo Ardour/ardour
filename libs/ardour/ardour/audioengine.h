@@ -250,6 +250,8 @@ class LIBARDOUR_API AudioEngine : public PortManager, public SessionHandlePtr
 	void add_pending_port_deletion (Port*);
 	void queue_latency_update (bool);
 
+	PBD::TimingStats dsp_stats;
+
   private:
 	AudioEngine ();
 
