@@ -127,8 +127,11 @@ public:
 
 	void update ()
 	{
-		Timing::update ();
-		calc ();
+		/* throw away the first 1000 values */
+		if (_update_cnt++ > 1000) {
+			Timing::update ();
+			calc ();
+		}
 	}
 
 	void reset ()
@@ -140,6 +143,7 @@ public:
 		_avg = 0.;
 		_vm  = 0.;
 		_vs  = 0.;
+		_update_cnt = 0;
 	}
 
 	bool valid () const {
@@ -192,6 +196,7 @@ private:
 	double   _avg;
 	double   _vm;
 	double   _vs;
+	uint64_t   _update_cnt;
 };
 
 class LIBPBD_API TimerRAII
