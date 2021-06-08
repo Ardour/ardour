@@ -149,6 +149,20 @@ PortManager::PortManager ()
 	load_port_info ();
 }
 
+PortManager::~PortManager ()
+{
+	for (int i = 0; i < 16; ++i) {
+			uint64_t min;
+			uint64_t max;
+			double avg;
+			double dev;
+
+			if (_stats[i].get_stats (min, max, avg, dev)) {
+				std::cout << i << ": " << min << ' ' << max << ' ' << avg << ' ' << dev << "\n";
+			}
+	}
+}
+
 void
 PortManager::clear_pending_port_deletions ()
 {
@@ -1761,84 +1775,66 @@ PortManager::run_input_meters (pframes_t n_samples, samplecnt_t rate)
 	if (n_samples == 0) {
 		return;
 	}
-	const bool reset = g_atomic_int_compare_and_exchange (&_reset_meters, 1, 0);
 
+	const bool reset    = g_atomic_int_compare_and_exchange (&_reset_meters, 1, 0);
 	const float falloff = falloff_cache.calc (n_samples, rate);
 
 	_monitor_port.monitor (port_engine (), n_samples);
 
 	/* calculate peak of all physical inputs (readable ports) */
-	std::vector<std::string> port_names;
-	get_physical_inputs (DataType::AUDIO, port_names);
-	for (std::vector<std::string>::iterator p = port_names.begin(); p != port_names.end(); ++p) {
-		if (port_is_mine (*p)) {
-			continue;
-		}
-		PortEngine::PortHandle ph = _backend->get_port_by_name (*p);
-		if (!ph) {
-			continue;
-		}
+	boost::shared_ptr<AudioInputPorts> aip = _audio_input_ports.reader ();
 
-		boost::shared_ptr<AudioInputPorts> aip = _audio_input_ports.reader ();
-		AudioInputPorts::iterator ai = aip->find (*p);
-		if (ai == aip->end ()) {
-			/* do not allocate ports during normal operation */
-			continue;
-		}
+	for (AudioInputPorts::iterator p = aip->begin(); p != aip->end(); ++p) {
+		assert (!port_is_mine (p->first));
 
 		if (reset) {
-			ai->second.meter->reset ();
+			p->second.meter->reset ();
+		}
+
+		PortEngine::PortHandle ph = _backend->get_port_by_name (p->first);
+		if (!ph) {
+			continue;
 		}
 
 		Sample* buf = (Sample*) _backend->get_buffer (ph, n_samples);
 		if (!buf) {
 			/* can this happen? */
-			ai->second.meter->level = 0;
-			ai->second.scope->silence (n_samples);
+			p->second.meter->level = 0;
+			p->second.scope->silence (n_samples);
 			continue;
 		}
 
-
-		ai->second.scope->write (buf, n_samples);
+		p->second.scope->write (buf, n_samples);
 
 		/* falloff */
-		if (ai->second.meter->level > 1e-10) {
-			ai->second.meter->level *= falloff;
+		if (p->second.meter->level > 1e-10) {
+			p->second.meter->level *= falloff;
 		} else {
-			ai->second.meter->level = 0;
+			p->second.meter->level = 0;
 		}
 
-		float level = ai->second.meter->level;
+		float level = p->second.meter->level;
 		level = compute_peak (buf, n_samples, reset ? 0 : level);
-		ai->second.meter->level = std::min (level, 100.f); // cut off at +40dBFS for falloff.
-		ai->second.meter->peak  = std::max (ai->second.meter->peak, level);
+		p->second.meter->level = std::min (level, 100.f); // cut off at +40dBFS for falloff.
+		p->second.meter->peak  = std::max (p->second.meter->peak, level);
 	}
 
 	/* MIDI */
-	port_names.clear ();
-	get_physical_inputs (DataType::MIDI, port_names);
-	for (std::vector<std::string>::iterator p = port_names.begin(); p != port_names.end(); ++p) {
-		if (port_is_mine (*p)) {
-			continue;
-		}
-		PortEngine::PortHandle ph = _backend->get_port_by_name (*p);
-		if (!ph) {
-			continue;
-		}
+	boost::shared_ptr<MIDIInputPorts> mip = _midi_input_ports.reader ();
+	for (MIDIInputPorts::iterator p = mip->begin(); p != mip->end(); ++p) {
+		assert (!port_is_mine (p->first));
 
-		boost::shared_ptr<MIDIInputPorts> mip = _midi_input_ports.reader ();
-		MIDIInputPorts::iterator mi = mip->find (*p);
-		if (mi == mip->end ()) {
-			/* do not allocate ports during normal operation */
+		PortEngine::PortHandle ph = _backend->get_port_by_name (p->first);
+		if (!ph) {
 			continue;
 		}
 
 		for (size_t i = 0; i < 17; ++i) {
 			/* falloff */
-			if (mi->second.meter->chn_active[i] > 1e-10) {
-				mi->second.meter->chn_active[i] *= falloff;
+			if (p->second.meter->chn_active[i] > 1e-10) {
+				p->second.meter->chn_active[i] *= falloff;
 			} else {
-				mi->second.meter->chn_active[i] = 0;
+				p->second.meter->chn_active[i] = 0;
 			}
 		}
 
@@ -1855,12 +1851,12 @@ PortManager::run_input_meters (pframes_t n_samples, samplecnt_t rate)
 				continue;
 			}
 			if ((buf[0] & 0xf0) == 0xf0) {
-				mi->second.meter->chn_active[16] = 1.0;
+				p->second.meter->chn_active[16] = 1.0;
 			} else {
 				int chn = (buf[0] & 0x0f);
-				mi->second.meter->chn_active[chn] = 1.0;
+				p->second.meter->chn_active[chn] = 1.0;
 			}
-			mi->second.monitor->write (buf, size);
+			p->second.monitor->write (buf, size);
 		}
 	}
 }
