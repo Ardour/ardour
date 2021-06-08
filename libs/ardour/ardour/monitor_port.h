@@ -19,6 +19,7 @@
 #ifndef _ardour_monitor_port_h_
 #define _ardour_monitor_port_h_
 
+#include <boost/shared_ptr.hpp>
 #include <set>
 
 #include "zita-resampler/vmresampler.h"
@@ -26,6 +27,7 @@
 #include "pbd/rcu.h"
 
 #include "ardour/audio_buffer.h"
+#include "ardour/port_engine.h"
 
 namespace ARDOUR {
 
@@ -50,10 +52,7 @@ public:
 protected:
 	friend class PortManager;
 	MonitorPort ();
-
-	void prepare (std::set<std::string>&);
-	void monitor (Sample*, pframes_t, std::string const&);
-	void finalize (pframes_t);
+	void monitor (PortEngine&, pframes_t);
 
 private:
 	struct MonitorInfo {
@@ -67,10 +66,11 @@ private:
 		bool  remove;
 	};
 
-	typedef std::map<std::string, boost::shared_ptr<MonitorInfo> > MonitorPorts;
+	void collect (boost::shared_ptr<MonitorInfo>, Sample*, pframes_t, std::string const&);
+	void finalize (pframes_t);
 
+	typedef std::map<std::string, boost::shared_ptr<MonitorInfo> > MonitorPorts;
 	SerializedRCUManager<MonitorPorts> _monitor_ports;
-	boost::shared_ptr<MonitorPorts>    _cycle_ports;
 
 	AudioBuffer*            _buffer;
 	ArdourZita::VMResampler _src;

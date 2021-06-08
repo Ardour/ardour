@@ -1765,8 +1765,7 @@ PortManager::run_input_meters (pframes_t n_samples, samplecnt_t rate)
 
 	const float falloff = falloff_cache.calc (n_samples, rate);
 
-	std::set<std::string> monitor_portset;
-	_monitor_port.prepare (monitor_portset);
+	_monitor_port.monitor (port_engine (), n_samples);
 
 	/* calculate peak of all physical inputs (readable ports) */
 	std::vector<std::string> port_names;
@@ -1799,9 +1798,6 @@ PortManager::run_input_meters (pframes_t n_samples, samplecnt_t rate)
 			continue;
 		}
 
-		if (monitor_portset.find (*p) != monitor_portset.end ()) {
-			_monitor_port.monitor (buf, n_samples, *p);
-		}
 
 		ai->second.scope->write (buf, n_samples);
 
@@ -1817,8 +1813,6 @@ PortManager::run_input_meters (pframes_t n_samples, samplecnt_t rate)
 		ai->second.meter->level = std::min (level, 100.f); // cut off at +40dBFS for falloff.
 		ai->second.meter->peak  = std::max (ai->second.meter->peak, level);
 	}
-
-	_monitor_port.finalize (n_samples);
 
 	/* MIDI */
 	port_names.clear ();

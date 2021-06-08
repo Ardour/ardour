@@ -78,28 +78,37 @@ MonitorPort::silent () const
 }
 
 void
-MonitorPort::prepare (std::set<std::string>& portset)
+MonitorPort::monitor (PortEngine& e, pframes_t n_samples)
 {
 	if (!_silent) {
 		memset (_input, 0, sizeof (Sample) * _insize);
 		_silent = true;
 	}
+	boost::shared_ptr<MonitorPorts> cycle_ports = _monitor_ports.reader ();
 
-	_cycle_ports = _monitor_ports.reader ();
-	for (MonitorPorts::iterator i = _cycle_ports->begin (); i != _cycle_ports->end(); ++i) {
+	for (MonitorPorts::iterator i = cycle_ports->begin (); i != cycle_ports->end(); ++i) {
 		if (i->second->remove && i->second->gain == 0) {
 			continue;
 		}
-		portset.insert (i->first);
+
+		PortEngine::PortHandle ph = e.get_port_by_name (i->first);
+		if (!ph) {
+			continue;
+		}
+		Sample* buf = (Sample*) e.get_buffer (ph, n_samples);
+		if (!buf) {
+			continue;
+		}
+		collect (i->second, buf, n_samples, i->first);
 	}
+	finalize (n_samples);
 }
 
 void
-MonitorPort::monitor (Sample* buf, pframes_t n_samples, std::string const& pn)
+MonitorPort::collect (boost::shared_ptr<MonitorInfo> mi, Sample* buf, pframes_t n_samples, std::string const& pn)
 {
-	MonitorPorts::iterator i = _cycle_ports->find (pn);
-	gain_t target_gain = i->second->remove ? 0.0 : 1.0;
-	gain_t current_gain = i->second->gain;
+	gain_t target_gain = mi->remove ? 0.0 : 1.0;
+	gain_t current_gain = mi->gain;
 
 	if (target_gain == current_gain && target_gain == 0) {
 		return;
@@ -129,7 +138,7 @@ MonitorPort::monitor (Sample* buf, pframes_t n_samples, std::string const& pn)
 			offset += n_proc;
 		}
 		if (fabsf (current_gain - target_gain) < GAIN_COEFF_DELTA) {
-			i->second->gain = target_gain;
+			mi->gain = target_gain;
 #if 1 // not strictly needed
 			if (target_gain == 0) {
 				/* remove port from list, uses RCUWriter */
@@ -137,7 +146,7 @@ MonitorPort::monitor (Sample* buf, pframes_t n_samples, std::string const& pn)
 			}
 #endif
 		} else {
-			i->second->gain = current_gain;
+			mi->gain = current_gain;
 		}
 	}
 	_silent = false;
@@ -158,7 +167,6 @@ MonitorPort::finalize (pframes_t n_samples)
 		++_src.out_data;
 		--_src.out_count;
 	}
-	_cycle_ports.reset ();
 }
 
 ARDOUR::AudioBuffer&
