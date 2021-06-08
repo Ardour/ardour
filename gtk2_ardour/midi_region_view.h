@@ -207,6 +207,7 @@ public:
 	void   select_all_notes ();
 	void   select_range(samplepos_t start, samplepos_t end);
 	void   invert_selection ();
+	void   extend_selection ();
 
 	Temporal::Beats earliest_in_selection ();
 	void move_selection(double dx, double dy, double cumulative_dy);
@@ -371,6 +372,8 @@ public:
 	friend class Editor;
 
 	void clear_note_selection ();
+	void invert_note_selection ();
+	void extend_note_selection ();
 
 	void move_note_starts_earlier_fine () { change_note_lengths (true, false, Temporal::Beats(), true, false); }
 	void move_note_starts_earlier () { change_note_lengths (false, false, Temporal::Beats(), true, false); }

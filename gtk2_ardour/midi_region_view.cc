@@ -2185,6 +2185,34 @@ MidiRegionView::select_range (samplepos_t start, samplepos_t end)
 }
 
 void
+MidiRegionView::extend_selection ()
+{
+	if (_selection.empty()) {
+		return;
+	}
+
+	PBD::Unwinder<bool> uw (_no_sound_notes, true);
+
+	/* find end of current selection */
+
+	samplepos_t last_note_end = 0;
+
+	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
+		samplepos_t e = source_beats_to_absolute_samples ((*i)->note()->end_time());
+		if (e > last_note_end) {
+			last_note_end = e;
+		}
+	}
+
+	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
+		samplepos_t t = source_beats_to_absolute_samples(i->first->time());
+		if (t >= last_note_end) {
+			add_to_selection (i->second);
+		}
+	}
+}
+
+void
 MidiRegionView::invert_selection ()
 {
 	PBD::Unwinder<bool> uw (_no_sound_notes, true);

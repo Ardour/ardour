@@ -464,7 +464,8 @@ This mode provides many different operations on both regions and control points,
 @notes|Notes/add-select-previous|<@PRIMARY@><@TERTIARY@>Tab|Add previous note to selection
 @notes|Notes/alt-add-select-next|<@TERTIARY@>ISO_Left_Tab|Add next note to selection
 @notes|Notes/alt-add-select-previous|<@PRIMARY@><@TERTIARY@>ISO_Left_Tab|Add previous note to selection
-
+@notes|Notes/extend-selection|<@PRIMARY@>e|Extend selection to end of region
+@notes|Notes/invert-selection|<@PRIMARY@>i|Invert note selection
 
 @rec|Recorder/arm-all|<@PRIMARY@>r|record arm all tracks
 @rec|Recorder/arm-none|<@PRIMARY@><@TERTIARY@>r|disable record arm of all tracks
