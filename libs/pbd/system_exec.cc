@@ -844,7 +844,7 @@ SystemExec::output_interposer ()
 			pfd.fd = rfd;
 			pfd.events = POLLIN|POLLERR|POLLHUP;
 
-			int rv = poll (&pfd, 1, 10000);
+			int rv = poll (&pfd, 1, -1);
 
 			if (rv == -1) {
 				break;
