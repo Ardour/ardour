@@ -410,6 +410,8 @@ Editor::mapover_grouped_routes (sigc::slot<void, RouteUI&> sl, RouteUI* basis, P
 {
 	set<RouteUI*> routes;
 
+	routes.insert(basis);
+
 	RouteGroup* group = basis->route()->route_group();
 
 	if (group && group->enabled_property(prop) && group->enabled_property (Properties::active.property_id)) {
@@ -419,7 +421,7 @@ Editor::mapover_grouped_routes (sigc::slot<void, RouteUI&> sl, RouteUI* basis, P
 
 		for (TrackViewList::const_iterator i = track_views.begin(); i != track_views.end(); ++i) {
 			RouteUI* v = dynamic_cast<RouteUI*> (*i);
-			if (v && v->route()->route_group() == group) {
+			if ( v && (v->route() != basis->route()) && v->route()->route_group() == group) {
 				routes.insert (v);
 			}
 		}
