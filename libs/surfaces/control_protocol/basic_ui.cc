@@ -374,7 +374,7 @@ BasicUI::transport_play (bool from_last_start)
 	}
 
 	if (rolling) {
-		session->request_transport_speed (1.0, TRS_UI);
+		session->request_transport_speed (1.0, false, TRS_UI);
 	} else {
 		session->request_roll ();
 	}
