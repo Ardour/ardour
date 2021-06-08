@@ -53,8 +53,7 @@ class /*LIBPBD_API*/ RCUManager
 {
 public:
 	RCUManager (T* new_rcu_value)
-		: rcu_value (new boost::shared_ptr<T> (new_rcu_value))
-		, _active_reads (0) {}
+		: rcu_value (new boost::shared_ptr<T> (new_rcu_value)) {}
 
 	virtual ~RCUManager ()  {
 		delete rcu_value.load ();
@@ -66,11 +65,7 @@ public:
 		 * wait until rcu_value is no longer in use after an atomic exchange
 		 * before dropping it.
 		 */
-		boost::shared_ptr<T> ret;
-		_active_reads.fetch_add (1);
-		ret = *(rcu_value.load (std::memory_order_acquire));
-		_active_reads.fetch_sub (1);
-		return ret;
+		return *(rcu_value.load (std::memory_order_acquire));
 	}
 
 	/* this is an abstract base class - how these are implemented depends on the assumptions
@@ -83,12 +78,6 @@ public:
 
 protected:
 	mutable std::atomic<boost::shared_ptr<T>*> rcu_value;
-
-	inline bool active_read () const {
-		return _active_reads.load (std::memory_order_acquire);
-	}
-private:
-	mutable std::atomic<int> _active_reads;
 };
 
 /** Serialized RCUManager implements the RCUManager interface. It is based on the
@@ -173,11 +162,6 @@ public:
 		 */
 
 		boost::shared_ptr<T>* old = _current_write_old;
-
-		for (unsigned i = 0; RCUManager<T>::active_read (); ++i) {
-			/* spin being nice to the scheduler/CPU */
-			boost::detail::yield (i);
-		}
 
 		bool ret = RCUManager<T>::rcu_value.compare_exchange_strong (old,
 		                                                             new_spp,
