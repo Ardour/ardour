@@ -111,7 +111,7 @@ public:
 	void set_region_ownership ();
 
 	std::string pgroup_id()                 { return _pgroup_id; }
-	void set_pgroup_id(std::string pgid)    { _pgroup_id = pgid; }
+	void set_pgroup_id(std::string pgid)    { _pgroup_id = pgid; PropertyChanged (Properties::name); }
 
 	virtual void clear (bool with_signals = true);
 	virtual void dump () const;

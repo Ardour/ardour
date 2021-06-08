@@ -40,6 +40,7 @@ namespace ARDOUR {
 }
 
 class RouteUI;
+class RouteTimeAxisView;
 
 struct PlaylistSorterByID {
 	bool operator() (boost::shared_ptr<ARDOUR::Playlist> a, boost::shared_ptr<ARDOUR::Playlist> b) const {
@@ -67,10 +68,9 @@ public:
 	};
 
 	void redisplay();
-	void set_tav(RouteTimeAxisView*, plMode in);
+	void prepare(RouteUI*, plMode in);
 
 protected:
-	bool on_unmap_event (GdkEventAny*);
 	bool on_key_press_event (GdkEventKey*);
 
 private:
@@ -79,20 +79,19 @@ private:
 	Gtk::ScrolledWindow scroller;
 	TrackPlaylistMap trpl_map;
 
-	RouteTimeAxisView* _tav;
+	RouteUI* _rui;
 
 	plMode _mode;
 
 	sigc::connection select_connection;
 	PBD::ScopedConnectionList signal_connections;
+	void pl_property_changed (PBD::PropertyChange const & what_changed);
 
 	void add_playlist_to_map (boost::shared_ptr<ARDOUR::Playlist>);
 	void playlist_added();
 	void clear_map ();
-	void close_button_click ();
 	void ok_button_click ();
 	void selection_changed ();
-	bool on_delete_event (GdkEventAny*);
 
 	struct ModelColumns : public Gtk::TreeModel::ColumnRecord
 	{

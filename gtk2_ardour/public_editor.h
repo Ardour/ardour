@@ -89,7 +89,6 @@ class ArdourMarker;
 class MeterMarker;
 class MixerStrip;
 class MouseCursors;
-class PlaylistSelector;
 class RegionView;
 class RouteTimeAxisView;
 class Selection;
@@ -288,7 +287,6 @@ public:
 	virtual Editing::ZoomFocus get_zoom_focus () const = 0;
 	virtual samplecnt_t get_current_zoom () const = 0;
 	virtual void reset_zoom (samplecnt_t) = 0;
-	virtual PlaylistSelector& playlist_selector() const = 0;
 	virtual void clear_playlist (boost::shared_ptr<ARDOUR::Playlist>) = 0;
 	virtual void clear_grouped_playlists (RouteUI*) = 0;
 

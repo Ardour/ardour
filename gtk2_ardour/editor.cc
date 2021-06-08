@@ -139,7 +139,6 @@
 #include "mixer_ui.h"
 #include "mouse_cursors.h"
 #include "note_base.h"
-#include "playlist_selector.h"
 #include "public_editor.h"
 #include "quantize_dialog.h"
 #include "region_peak_cursor.h"
@@ -254,7 +253,6 @@ Editor::Editor ()
 	: PublicEditor (global_hpacker)
 	, editor_mixer_strip_width (Wide)
 	, constructed (false)
-	, _playlist_selector (0)
 	, _time_info_box (0)
 	, no_save_visual (false)
 	, _leftmost_sample (0)
@@ -783,9 +781,6 @@ Editor::Editor ()
 
 	setup_toolbar ();
 
-	_playlist_selector = new PlaylistSelector();
-	_playlist_selector->signal_delete_event().connect (sigc::bind (sigc::ptr_fun (just_hide_it), static_cast<Window *> (_playlist_selector)));
-
 	RegionView::RegionViewGoingAway.connect (*this, invalidator (*this),  boost::bind (&Editor::catch_vanishing_regionview, this, _1), gui_context());
 
 	/* nudge stuff */
@@ -883,7 +878,6 @@ Editor::~Editor()
 	delete _regions;
 	delete _snapshots;
 	delete _locations;
-	delete _playlist_selector;
 	delete _time_info_box;
 	delete selection;
 	delete cut_buffer;
@@ -1306,7 +1300,6 @@ Editor::set_session (Session *t)
 	 * before the visible state has been loaded from instant.xml */
 	_leftmost_sample = session_gui_extents().first;
 
-	_playlist_selector->set_session (_session);
 	nudge_clock->set_session (_session);
 	_summary->set_session (_session);
 	_group_tabs->set_session (_session);
@@ -4056,12 +4049,6 @@ Editor::set_show_touched_automation (bool yn)
 		RouteTimeAxisView::signal_ctrl_touched (true);
 	}
 	instant_save ();
-}
-
-PlaylistSelector&
-Editor::playlist_selector () const
-{
-	return *_playlist_selector;
 }
 
 samplecnt_t

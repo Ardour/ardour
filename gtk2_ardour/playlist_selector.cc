@@ -51,7 +51,7 @@ using namespace PBD;
 PlaylistSelector::PlaylistSelector ()
 	: ArdourDialog (_("Playlists"))
 {
-	_tav = 0;
+	_rui = 0;
 	_mode = plSelect;
 
 	set_name ("PlaylistSelectorWindow");
@@ -74,29 +74,34 @@ PlaylistSelector::PlaylistSelector ()
 
 	get_vbox()->show_all();
 
-	Button* close_btn = add_button (Gtk::Stock::CANCEL, RESPONSE_CANCEL);
 	Button* ok_btn = add_button (Gtk::Stock::OK, RESPONSE_OK);
-	close_btn->signal_clicked().connect (sigc::mem_fun(*this, &PlaylistSelector::close_button_click));
 	ok_btn->signal_clicked().connect (sigc::mem_fun(*this, &PlaylistSelector::ok_button_click));
 }
 
-void PlaylistSelector::set_tav(RouteTimeAxisView* tavx, plMode mode)
+void PlaylistSelector::prepare(RouteUI* ruix, plMode mode)
 {
 	_mode = mode;
 	
-	if (_tav == tavx) {
+	if (_rui == ruix) {
 		return;
 	}
 
-	_tav = tavx;
+	_rui = ruix;
 
-	boost::shared_ptr<Track> this_track = _tav->track();
+	boost::shared_ptr<Track> this_track = _rui->track();
 
 	if (this_track) {
+		this_track->PlaylistChanged.connect(
+			signal_connections,
+			invalidator(*this),
+			boost::bind(&PlaylistSelector::redisplay, this),
+			gui_context()
+		);
+
 		this_track->PlaylistAdded.connect(
 			signal_connections,
 			invalidator(*this),
-			boost::bind(&PlaylistSelector::playlist_added, this),
+			boost::bind(&PlaylistSelector::redisplay, this),
 			gui_context()
 		);
 
@@ -107,11 +112,23 @@ void PlaylistSelector::set_tav(RouteTimeAxisView* tavx, plMode mode)
 			gui_context()
 		);
 	}
+
+	redisplay();
 }
 
 PlaylistSelector::~PlaylistSelector ()
 {
-	clear_map ();
+	clear_map();
+
+	if (model) {
+		model->clear ();
+	}
+	if (current_playlist) {
+		current_playlist.reset();
+	}
+
+	signal_connections.drop_connections();
+	select_connection.disconnect ();
 }
 
 void
@@ -121,41 +138,28 @@ PlaylistSelector::clear_map ()
 		delete x->second;
 	}
 	trpl_map.clear ();
-	if (current_playlist) {
-		current_playlist.reset();
-	}
-}
-
-bool
-PlaylistSelector::on_unmap_event (GdkEventAny* ev)
-{
-	clear_map ();
-	if (model) {
-		model->clear ();
-	}
-	return Dialog::on_unmap_event (ev);
 }
 
 void
 PlaylistSelector::redisplay()
 {
-	if (!_tav ) {
+	if (!_rui ) {
 		return;
 	}
 
 	vector<const char*> item;
 	string str;
 
-	set_title (string_compose (_("Playlist for %1"), _tav->route()->name()));
+	set_title (string_compose (_("Playlist for %1"), _rui->route()->name()));
 
 	clear_map ();
-	select_connection.disconnect ();
-
-	model->clear ();
+	if (model) {
+		model->clear ();
+	}
 
 	_session->playlists()->foreach (this, &PlaylistSelector::add_playlist_to_map);
 
-	boost::shared_ptr<Track> this_track = _tav->track();
+	boost::shared_ptr<Track> this_track = _rui->track();
 
 	boost::shared_ptr<Playlist> proxy;
 
@@ -198,6 +202,8 @@ PlaylistSelector::redisplay()
 		sort (pls.begin(), pls.end(), cmp);
 
 		for (vector<boost::shared_ptr<Playlist> >::iterator p = pls.begin(); p != pls.end(); ++p) {
+
+			(*p)->PropertyChanged.connect (signal_connections, invalidator (*this), boost::bind (&PlaylistSelector::pl_property_changed, this, _1), gui_context());
 
 			TreeModel::Row child_row;
 
@@ -258,8 +264,13 @@ PlaylistSelector::redisplay()
 		}
 	} //if !plSelect
 	
-	show_all ();
 	select_connection = tree.get_selection()->signal_changed().connect (sigc::mem_fun(*this, &PlaylistSelector::selection_changed));
+}
+
+void
+PlaylistSelector::pl_property_changed (PBD::PropertyChange const & what_changed)
+{
+	redisplay();
 }
 
 void
@@ -269,16 +280,16 @@ PlaylistSelector::add_playlist_to_map (boost::shared_ptr<Playlist> pl)
 		return;
 	}
 
-	if (!_tav) {
+	if (!_rui) {
 		return;
 	}
 
-	if (_tav->is_midi_track ()) {
+	if (_rui->is_midi_track ()) {
 		if (boost::dynamic_pointer_cast<MidiPlaylist> (pl) == 0) {
 			return;
 		}
 	} else {
-		assert (_tav->is_audio_track ());
+		assert (_rui->is_audio_track ());
 		if (boost::dynamic_pointer_cast<AudioPlaylist> (pl) == 0) {
 			return;
 		}
@@ -294,34 +305,9 @@ PlaylistSelector::add_playlist_to_map (boost::shared_ptr<Playlist> pl)
 }
 
 void
-PlaylistSelector::playlist_added()
-{
-	redisplay();
-}
-
-void
-PlaylistSelector::close_button_click ()
-{
-	if (_tav && current_playlist) {
-		_tav->track ()->use_playlist (_tav->is_audio_track () ? DataType::AUDIO : DataType::MIDI, current_playlist);
-	}
-	_tav = 0;
-	clear_map ();
-	hide ();
-}
-
-void
 PlaylistSelector::ok_button_click()
 {
-	_tav = 0;
-	clear_map ();
 	hide();
-}
-
-bool PlaylistSelector::on_delete_event (GdkEventAny*)
-{
-	close_button_click();
-	return false;
 }
 
 void
@@ -331,17 +317,17 @@ PlaylistSelector::selection_changed ()
 
 	TreeModel::iterator iter = tree.get_selection()->get_selected();
 
-	if (!iter || _tav == 0) {
+	if (!iter || _rui == 0) {
 		/* nothing selected */
 		return;
 	}
 
 	if ((pl = ((*iter)[columns.playlist])) != 0) {
 
-		if (_tav->is_audio_track () && boost::dynamic_pointer_cast<AudioPlaylist> (pl) == 0) {
+		if (_rui->is_audio_track () && boost::dynamic_pointer_cast<AudioPlaylist> (pl) == 0) {
 			return;
 		}
-		if (_tav->is_midi_track () && boost::dynamic_pointer_cast<MidiPlaylist> (pl) == 0) {
+		if (_rui->is_midi_track () && boost::dynamic_pointer_cast<MidiPlaylist> (pl) == 0) {
 			return;
 		}
 
@@ -350,16 +336,16 @@ PlaylistSelector::selection_changed ()
 			case plCopy: {
 					boost::shared_ptr<Playlist> playlist = PlaylistFactory::create (pl, string_compose ("%1.1", pl->name()));
 					/* playlist->reset_shares ();  @Robin is this needed? */
-					_tav->track ()->use_playlist (_tav->is_audio_track () ? DataType::AUDIO : DataType::MIDI, playlist);
+					_rui->track ()->use_playlist (_rui->is_audio_track () ? DataType::AUDIO : DataType::MIDI, playlist);
 				} break;
 			case plShare:
-				_tav->track ()->use_playlist (_tav->is_audio_track () ? DataType::AUDIO : DataType::MIDI, pl, false);  /* share pl but do NOT set me as the owner */
+				_rui->track ()->use_playlist (_rui->is_audio_track () ? DataType::AUDIO : DataType::MIDI, pl, false);  /* share pl but do NOT set me as the owner */
 				break;
 			case plSteal:
-				_tav->track ()->use_playlist (_tav->is_audio_track () ? DataType::AUDIO : DataType::MIDI, pl); /* share the playlist and set ME as the owner */
+				_rui->track ()->use_playlist (_rui->is_audio_track () ? DataType::AUDIO : DataType::MIDI, pl); /* share the playlist and set ME as the owner */
 				break;
 			case plSelect:
-				_tav->use_playlist (NULL, pl);  //call route_ui::use_playlist because it is group-aware
+				_rui->use_playlist (NULL, pl);  //call route_ui::use_playlist because it is group-aware
 				break;
 		}
 	}

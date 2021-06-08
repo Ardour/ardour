@@ -69,6 +69,7 @@ namespace ArdourWidgets {
 class ArdourWindow;
 class IOSelectorWindow;
 class PatchChangeGridDialog;
+class PlaylistSelector;
 class SaveTemplateDialog;
 
 class RoutePinWindowProxy : public WM::ProxyBase
@@ -306,6 +307,8 @@ private:
 	void save_as_template_dialog_response (int response, SaveTemplateDialog* d);
 
 	std::string resolve_new_group_playlist_name (std::string const&, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const&);
+
+	PlaylistSelector*  _playlist_selector;
 
 	Gtk::Menu*     _record_menu;
 	ArdourWindow*  _comment_window;

@@ -168,6 +168,7 @@ RouteUI::~RouteUI()
 	delete _record_menu;
 	delete _comment_window;
 	delete _invert_menu;
+	delete _playlist_selector;
 
 	send_blink_connection.disconnect ();
 	rec_blink_connection.disconnect ();
@@ -177,6 +178,7 @@ void
 RouteUI::init ()
 {
 	self_destruct = true;
+	_playlist_selector = 0;
 	mute_menu = 0;
 	solo_menu = 0;
 	sends_menu = 0;
@@ -2637,41 +2639,49 @@ RouteUI::use_playlist (RadioMenuItem *item, boost::weak_ptr<Playlist> wpl)
 void
 RouteUI::show_playlist_selector ()
 {
-	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (this);
-	if (rtv) {
-		ARDOUR_UI::instance()->the_editor().playlist_selector().set_tav(rtv, PlaylistSelector::plSelect);
-		ARDOUR_UI::instance()->the_editor().playlist_selector().redisplay ();
+	if (!_playlist_selector) {
+		_playlist_selector = new PlaylistSelector();
+		_playlist_selector->set_session(_session);
 	}
+
+	_playlist_selector->prepare(this, PlaylistSelector::plSelect);
+	_playlist_selector->show_all ();
 }
 
 void
 RouteUI::show_playlist_copy_selector ()
 {
-	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (this);
-	if (rtv) {
-		ARDOUR_UI::instance()->the_editor().playlist_selector().set_tav(rtv, PlaylistSelector::plCopy);
-		ARDOUR_UI::instance()->the_editor().playlist_selector().redisplay ();
+	if (!_playlist_selector) {
+		_playlist_selector = new PlaylistSelector();
+		_playlist_selector->set_session(_session);
 	}
+
+	_playlist_selector->prepare(this, PlaylistSelector::plCopy);
+	_playlist_selector->show_all ();
 }
 
 void
 RouteUI::show_playlist_share_selector ()
 {
-	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (this);
-	if (rtv) {
-		ARDOUR_UI::instance()->the_editor().playlist_selector().set_tav(rtv, PlaylistSelector::plShare);
-		ARDOUR_UI::instance()->the_editor().playlist_selector().redisplay ();
+	if (!_playlist_selector) {
+		_playlist_selector = new PlaylistSelector();
+		_playlist_selector->set_session(_session);
 	}
+
+	_playlist_selector->prepare(this, PlaylistSelector::plShare);
+	_playlist_selector->show_all ();
 }
 
 void
 RouteUI::show_playlist_steal_selector ()
 {
-	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (this);
-	if (rtv) {
-		ARDOUR_UI::instance()->the_editor().playlist_selector().set_tav(rtv, PlaylistSelector::plSteal);
-		ARDOUR_UI::instance()->the_editor().playlist_selector().redisplay ();
+	if (!_playlist_selector) {
+		_playlist_selector = new PlaylistSelector();
+		_playlist_selector->set_session(_session);
 	}
+
+	_playlist_selector->prepare(this, PlaylistSelector::plSteal);
+	_playlist_selector->show_all ();
 }
 
 void

@@ -136,7 +136,6 @@ class MidiExportDialog;
 class MixerStrip;
 class MouseCursors;
 class NoteBase;
-class PlaylistSelector;
 class PluginSelector;
 class ProgressReporter;
 class QuantizeDialog;
@@ -331,7 +330,6 @@ public:
 
 	/* stuff that AudioTimeAxisView and related classes use */
 
-	PlaylistSelector& playlist_selector() const;
 	void clear_playlist (boost::shared_ptr<ARDOUR::Playlist>);
 
 	void clear_grouped_playlists (RouteUI* v);
@@ -606,8 +604,6 @@ private:
 
 	// to keep track of the playhead position for control_scroll
 	boost::optional<samplepos_t> _control_scroll_target;
-
-	PlaylistSelector* _playlist_selector;
 
 	TimeInfoBox*      _time_info_box;
 
