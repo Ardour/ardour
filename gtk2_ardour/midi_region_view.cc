@@ -2195,18 +2195,24 @@ MidiRegionView::extend_selection ()
 
 	/* find end of current selection */
 
-	samplepos_t last_note_end = 0;
+	/* XXX NUTEMPO WARNING */
+	samplepos_t first_note_start = max_samplepos;
 
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
-		samplepos_t e = source_beats_to_absolute_samples ((*i)->note()->end_time());
-		if (e > last_note_end) {
-			last_note_end = e;
+		samplepos_t e = source_beats_to_absolute_samples ((*i)->note()->time());
+		if (e < first_note_start) {
+			first_note_start = e;
 		}
 	}
 
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
 		samplepos_t t = source_beats_to_absolute_samples(i->first->time());
-		if (t >= last_note_end) {
+
+		if (i->second->selected()) {
+			continue;
+		}
+
+		if (t >= first_note_start) {
 			add_to_selection (i->second);
 		}
 	}
