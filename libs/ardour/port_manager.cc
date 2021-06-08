@@ -1772,9 +1772,10 @@ PortManager::run_input_meters (pframes_t n_samples, samplecnt_t rate)
 
 	for (AudioInputPorts::iterator p = aip->begin(); p != aip->end(); ++p) {
 		assert (!port_is_mine (p->first));
+		AudioInputPort& ai (p->second);
 
 		if (reset) {
-			p->second.meter->reset ();
+			ai.meter->reset ();
 		}
 
 		PortEngine::PortHandle ph = _backend->get_port_by_name (p->first);
@@ -1785,24 +1786,24 @@ PortManager::run_input_meters (pframes_t n_samples, samplecnt_t rate)
 		Sample* buf = (Sample*) _backend->get_buffer (ph, n_samples);
 		if (!buf) {
 			/* can this happen? */
-			p->second.meter->level = 0;
-			p->second.scope->silence (n_samples);
+			ai.meter->level = 0;
+			ai.scope->silence (n_samples);
 			continue;
 		}
 
-		p->second.scope->write (buf, n_samples);
+		ai.scope->write (buf, n_samples);
 
 		/* falloff */
-		if (p->second.meter->level > 1e-10) {
-			p->second.meter->level *= falloff;
+		if (ai.meter->level > 1e-10) {
+			ai.meter->level *= falloff;
 		} else {
-			p->second.meter->level = 0;
+			ai.meter->level = 0;
 		}
 
-		float level = p->second.meter->level;
+		float level = ai.meter->level;
 		level = compute_peak (buf, n_samples, reset ? 0 : level);
-		p->second.meter->level = std::min (level, 100.f); // cut off at +40dBFS for falloff.
-		p->second.meter->peak  = std::max (p->second.meter->peak, level);
+		ai.meter->level = std::min (level, 100.f); // cut off at +40dBFS for falloff.
+		ai.meter->peak  = std::max (ai.meter->peak, level);
 	}
 
 	/* MIDI */
@@ -1815,12 +1816,14 @@ PortManager::run_input_meters (pframes_t n_samples, samplecnt_t rate)
 			continue;
 		}
 
+		MIDIInputPort& mi (p->second);
+
 		for (size_t i = 0; i < 17; ++i) {
 			/* falloff */
-			if (p->second.meter->chn_active[i] > 1e-10) {
-				p->second.meter->chn_active[i] *= falloff;
+			if (mi.meter->chn_active[i] > 1e-10) {
+				mi.meter->chn_active[i] *= falloff;
 			} else {
-				p->second.meter->chn_active[i] = 0;
+				mi.meter->chn_active[i] = 0;
 			}
 		}
 
@@ -1837,12 +1840,12 @@ PortManager::run_input_meters (pframes_t n_samples, samplecnt_t rate)
 				continue;
 			}
 			if ((buf[0] & 0xf0) == 0xf0) {
-				p->second.meter->chn_active[16] = 1.0;
+				mi.meter->chn_active[16] = 1.0;
 			} else {
 				int chn = (buf[0] & 0x0f);
-				p->second.meter->chn_active[chn] = 1.0;
+				mi.meter->chn_active[chn] = 1.0;
 			}
-			p->second.monitor->write (buf, size);
+			mi.monitor->write (buf, size);
 		}
 	}
 }
