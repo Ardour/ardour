@@ -57,11 +57,12 @@ PlaylistSelector::PlaylistSelector ()
 	set_name ("PlaylistSelectorWindow");
 	set_modal(false);
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
-	set_size_request (300, 200);
+	set_size_request (400, 250);
 
 	model = TreeStore::create (columns);
 	tree.set_model (model);
 	tree.append_column (_("Playlists grouped by track"), columns.text);
+	tree.append_column (_("Playlist Group"), columns.pgrp);
 	tree.set_headers_visible (false);
 
 	scroller.add (tree);
@@ -215,6 +216,7 @@ PlaylistSelector::redisplay()
 			
 			if (child_row) {
 				child_row[columns.text] = (*p)->name();
+				child_row[columns.pgrp] = (*p)->pgroup_id();
 				child_row[columns.playlist] = *p;
 
 				if (*p == this_track->playlist()) {
@@ -250,6 +252,7 @@ PlaylistSelector::redisplay()
 
 				child_row = *(model->append (row.children()));
 				child_row[columns.text] = (*p)->name();
+				child_row[columns.pgrp] = (*p)->pgroup_id();
 				child_row[columns.playlist] = *p;
 
 				if (*p == this_track->playlist()) {

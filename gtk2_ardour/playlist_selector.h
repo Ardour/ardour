@@ -97,9 +97,11 @@ private:
 	{
 		ModelColumns () {
 			add (text);
+			add (pgrp);
 			add (playlist);
 		}
 		Gtk::TreeModelColumn<std::string> text;
+		Gtk::TreeModelColumn<std::string> pgrp;
 		Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Playlist> >   playlist;
 	};
 

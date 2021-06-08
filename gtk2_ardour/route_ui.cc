@@ -2505,8 +2505,6 @@ RouteUI::build_playlist_menu ()
 	/* add the playlists to the menu */
 	for (vector<boost::shared_ptr<Playlist> >::iterator i = playlists_tr.begin(); i != playlists_tr.end(); ++i) {
 		string text = (*i)->name();
-		if ((*i)->pgroup_id().length()>0)
-			text.append( string_compose( " (%1)", (*i)->pgroup_id()));
 		playlist_items.push_back (RadioMenuElem (playlist_group, text));
 		RadioMenuItem *item = static_cast<RadioMenuItem*>(&playlist_items.back());
 		item->signal_toggled().connect(sigc::bind (sigc::mem_fun (*this, &RouteUI::use_playlist), item, boost::weak_ptr<Playlist> (*i)));
