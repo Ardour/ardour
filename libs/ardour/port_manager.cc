@@ -149,20 +149,6 @@ PortManager::PortManager ()
 	load_port_info ();
 }
 
-PortManager::~PortManager ()
-{
-	for (int i = 0; i < 16; ++i) {
-			uint64_t min;
-			uint64_t max;
-			double avg;
-			double dev;
-
-			if (_stats[i].get_stats (min, max, avg, dev)) {
-				std::cout << i << ": " << min << ' ' << max << ' ' << avg << ' ' << dev << "\n";
-			}
-	}
-}
-
 void
 PortManager::clear_pending_port_deletions ()
 {
