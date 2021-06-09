@@ -1151,6 +1151,16 @@ AudioEngine::is_realtime() const
 	return _backend->is_realtime();
 }
 
+int
+AudioEngine::client_real_time_priority ()
+{
+	if (!_backend) {
+		return PBD_RT_PRI_PROC;
+	}
+
+	return _backend->client_real_time_priority();
+}
+
 void
 AudioEngine::transport_start ()
 {
