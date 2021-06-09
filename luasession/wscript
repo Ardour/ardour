@@ -77,9 +77,8 @@ def build(bld):
         obj.uselib += ' AUDIOUNITS OSX'
         obj.use    += ' libappleutility'
 
-    #if bld.env['build_target'] == 'mingw':
-    #    if bld.env['DEBUG'] == False:
-    #        obj.linkflags = ['-mwindows']
+    if bld.env['build_target'] == 'mingw':
+        obj.linkflags = ['-mwindows']
 
     if bld.is_defined('NEED_INTL'):
         obj.linkflags = ' -lintl'

@@ -26,6 +26,7 @@
 #include "pbd/reallocpool.h"
 #include "pbd/receiver.h"
 #include "pbd/transmitter.h"
+#include "pbd/win_console.h"
 
 #include "ardour/ardour.h"
 #include "ardour/audioengine.h"
@@ -93,6 +94,7 @@ protected:
 		std::cout << prefix << str << std::endl;
 
 		if (chn == Transmitter::Fatal) {
+			console_madness_end ();
 			::exit (9);
 		}
 	}
@@ -144,6 +146,7 @@ init ()
 {
 	if (!ARDOUR::init (false, true, localedir)) {
 		cerr << "Ardour failed to initialize\n" << endl;
+		console_madness_end ();
 		::exit (EXIT_FAILURE);
 	}
 
@@ -394,6 +397,7 @@ engine_halted (const char* err)
 {
 	if (terminate_when_halted) {
 		cerr << "Engine halted: " << err << "\n";
+		console_madness_end ();
 		::exit (EXIT_FAILURE);
 	}
 }
@@ -552,6 +556,7 @@ Ardour at your finger tips...\n\
 \n");
 	printf ("Report bugs to <http://tracker.ardour.org/>\n"
 	        "Website: <http://ardour.org/>\n");
+	console_madness_end ();
 	::exit (EXIT_SUCCESS);
 }
 
@@ -568,6 +573,7 @@ main (int argc, char** argv)
 	};
 
 	bool interactive = false;
+	console_madness_begin ();
 
 	int c = 0;
 	while (EOF != (c = getopt_long (argc, argv,
@@ -584,6 +590,7 @@ main (int argc, char** argv)
 			case 'V':
 				printf ("ardour-lua version %s\n\n", VERSIONSTRING);
 				printf ("Copyright (C) GPL 2015-2020 Robin Gareus <robin@gareus.org>\n");
+				console_madness_end ();
 				exit (EXIT_SUCCESS);
 				break;
 
@@ -593,6 +600,7 @@ main (int argc, char** argv)
 
 			default:
 				cerr << "Error: unrecognized option. See --help for usage information.\n";
+				console_madness_end ();
 				::exit (EXIT_FAILURE);
 				break;
 		}
@@ -644,5 +652,6 @@ main (int argc, char** argv)
 	ARDOUR::cleanup ();
 	delete event_loop;
 	pthread_cancel_all ();
+	console_madness_end ();
 	return res;
 }
