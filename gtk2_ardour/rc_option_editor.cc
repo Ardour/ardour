@@ -4409,7 +4409,11 @@ These settings will only take effect after %1 is restarted.\n\
 			cpudma->add (*i, string_compose (_("%1 usec"), *i));
 		}
 
-		cpudma->set_note (_("This setting requires write access to `/dev/cpu_dma_latency' to set the maximum tolerable CPU DMA latency"));
+		set_tooltip (cpudma->tip_widget(), _("This setting sets the maximum tolerable CPU DMA latency. This prevents the CPU from entering power-save states which can be beneficial for reliable low latency."));
+
+		if (access ("/dev/cpu_dma_latency", W_OK)) {
+			cpudma->set_note (_("This setting requires write access to `/dev/cpu_dma_latency'."));
+		}
 
 		add_option (_("Performance"), cpudma);
 	}
