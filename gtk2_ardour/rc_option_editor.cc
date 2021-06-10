@@ -42,6 +42,7 @@
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/window_title.h"
 
+#include "pbd/file_utils.h"
 #include "pbd/fpu.h"
 #include "pbd/cpus.h"
 #include "pbd/unwind.h"
@@ -4376,24 +4377,36 @@ These settings will only take effect after %1 is restarted.\n\
 				sigc::mem_fun (*_rc_config, &RCConfiguration::set_cpu_dma_latency)
 				);
 
-		cpudma->add (-1, _("Unset"));
-		cpudma->add (0, _("Lowest (prevent CPU sleep states)"));
-		cpudma->add (5, _("5 usec"));
-		cpudma->add (55, _("55 usec"));
-		cpudma->add (100, _("100 usec"));
+		set<int> lvalues;
+		vector<string> latency_files;
+		Searchpath sp ("/sys/devices/system/cpu/cpu0/cpuidle/");
+		find_files_matching_regex (latency_files, sp, "latency$", true);
+		for (vector<string>::const_iterator i = latency_files.begin(); i != latency_files.end (); ++i) {
+			try {
+				std::string l = Glib::file_get_contents (*i);
+				int lv = atoi (l.c_str());
+				if (lv > 0) {
+					lvalues.insert (lv);
+				}
+			} catch (...) { }
+		}
+
+		if (lvalues.empty ()) {
+			lvalues.insert (5);
+			lvalues.insert (55);
+			lvalues.insert (100);
+		}
 
 		int32_t cpudma_val = _rc_config->get_cpu_dma_latency ();
-		switch (cpudma_val) {
-			case -1:
-			case 0:
-			case 5:
-			case 55:
-			case 100:
-				break;
-			default:
-				if (cpudma_val > 0) {
-					cpudma->add (cpudma_val, string_compose (_("%1 usec"), cpudma_val));
-				}
+		if (cpudma_val > 0) {
+			lvalues.insert (cpudma_val);
+		}
+
+		cpudma->add (-1, _("Unset"));
+		cpudma->add (0, _("Lowest (prevent CPU sleep states)"));
+
+		for (set<int>::const_iterator i = lvalues.begin(); i != lvalues.end (); ++i) {
+			cpudma->add (*i, string_compose (_("%1 usec"), *i));
 		}
 
 		cpudma->set_note (_("This setting requires write access to `/dev/cpu_dma_latency' to set the maximum tolerable CPU DMA latency"));
