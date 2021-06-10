@@ -4396,7 +4396,7 @@ These settings will only take effect after %1 is restarted.\n\
 				}
 		}
 
-		cpudma->set_note (string_compose (_("This setting requires write access to `/dev/cpu_dma_latency' to set the maximum tolerable CPU DMA, and will only take effect when %1 is restarted.\n"), PROGRAM_NAME));
+		cpudma->set_note (_("This setting requires write access to `/dev/cpu_dma_latency' to set the maximum tolerable CPU DMA latency"));
 
 		add_option (_("Performance"), cpudma);
 	}
