@@ -286,12 +286,14 @@ setup_hardware_optimization (bool try_optimization)
 }
 
 static void
-release_dma_latency ()
+release_dma_latency (bool log = true)
 {
 #if !(defined PLATFORM_WINDOWS || defined __APPLE__)
 	if (cpu_dma_latency_fd >= 0) {
-		info << _("Released CPU DMA latency request") << endmsg;
 		::close (cpu_dma_latency_fd);
+		if (log) {
+			info << _("Released CPU DMA latency request") << endmsg;
+		}
 	}
 	cpu_dma_latency_fd = -1;
 #endif
@@ -312,6 +314,8 @@ request_dma_latency ()
 		release_dma_latency ();
 		return true;
 	}
+
+	release_dma_latency (false);
 
 	cpu_dma_latency_fd = ::open("/dev/cpu_dma_latency", O_WRONLY);
 	if (cpu_dma_latency_fd < 0) {
