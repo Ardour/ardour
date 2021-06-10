@@ -178,6 +178,7 @@ extern void setup_enum_writer ();
 PBD::PropertyChange ARDOUR::bounds_change;
 
 static PBD::ScopedConnection engine_startup_connection;
+static PBD::ScopedConnection config_connection;
 
 void
 setup_hardware_optimization (bool try_optimization)
@@ -284,6 +285,18 @@ setup_hardware_optimization (bool try_optimization)
 	AudioGrapher::Routines::override_apply_gain_to_buffer (apply_gain_to_buffer);
 }
 
+static void
+release_dma_latency ()
+{
+#if !(defined PLATFORM_WINDOWS || defined __APPLE__)
+	if (cpu_dma_latency_fd >= 0) {
+		info << _("Released CPU DMA latency request") << endmsg;
+		::close (cpu_dma_latency_fd);
+	}
+	cpu_dma_latency_fd = -1;
+#endif
+}
+
 static bool
 request_dma_latency ()
 {
@@ -295,29 +308,31 @@ request_dma_latency ()
 	/* maximum latency in usecs, or 0 to prevent transitions to deep sleep states */
 	int32_t target = Config->get_cpu_dma_latency ();
 
+	if (target < 0) {
+		release_dma_latency ();
+		return true;
+	}
+
 	cpu_dma_latency_fd = ::open("/dev/cpu_dma_latency", O_WRONLY);
 	if (cpu_dma_latency_fd < 0) {
-		warning << string_compose (_("Could not set DMA latency to %1 usec (%2)"), target, strerror (errno)) << endmsg;
+		warning << string_compose (_("Could not set CPU DMA latency to %1 usec (%2)"), target, strerror (errno)) << endmsg;
 		return false;
 	}
 	if (::write (cpu_dma_latency_fd, &target, sizeof(target)) > 0) {
-		info << string_compose (_("Set DMA latency to %1 usec"), target) << endmsg;
+		info << string_compose (_("Set CPU DMA latency to %1 usec"), target) << endmsg;
 	} else {
-		warning << string_compose (_("Could not set DMA latency to %1 usec (%2)"), target, strerror (errno)) << endmsg;
+		warning << string_compose (_("Could not set CPU DMA latency to %1 usec (%2)"), target, strerror (errno)) << endmsg;
 	}
 #endif
 	return true;
 }
 
 static void
-release_dma_latency ()
+config_changed (std::string what_changed)
 {
-#if !(defined PLATFORM_WINDOWS || defined __APPLE__)
-	if (cpu_dma_latency_fd >= 0) {
-		::close (cpu_dma_latency_fd);
+	if (what_changed == "cpu-dma-latency") {
+		request_dma_latency ();
 	}
-	cpu_dma_latency_fd = -1;
-#endif
 }
 
 static void
@@ -672,6 +687,8 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 
 	MIDI::Name::MidiPatchManager::instance ().load_midnams_in_thread ();
 
+	Config->ParameterChanged.connect_same_thread (config_connection, boost::bind (&config_changed, _1));
+
 	libardour_initialized = true;
 
 	return true;
@@ -711,6 +728,7 @@ ARDOUR::cleanup ()
 	}
 
 	release_dma_latency ();
+	config_connection.disconnect ();
 	engine_startup_connection.disconnect ();
 
 	delete &ControlProtocolManager::instance ();
