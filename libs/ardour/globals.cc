@@ -166,6 +166,7 @@ std::map<std::string, bool> ARDOUR::reserved_io_names;
 
 static bool have_old_configuration_files = false;
 static bool running_from_gui             = false;
+static int  cpu_dma_latency_fd           = -1;
 
 namespace ARDOUR {
 extern void setup_enum_writer ();
@@ -281,6 +282,42 @@ setup_hardware_optimization (bool try_optimization)
 
 	AudioGrapher::Routines::override_compute_peak (compute_peak);
 	AudioGrapher::Routines::override_apply_gain_to_buffer (apply_gain_to_buffer);
+}
+
+static bool
+request_dma_latency ()
+{
+#if !(defined PLATFORM_WINDOWS || defined __APPLE__)
+	if (!Glib::file_test ("/dev/cpu_dma_latency", Glib::FILE_TEST_EXISTS)) {
+		return false;
+	}
+
+	/* maximum latency in usecs, or 0 to prevent transitions to deep sleep states */
+	int32_t target = Config->get_cpu_dma_latency ();
+
+	cpu_dma_latency_fd = ::open("/dev/cpu_dma_latency", O_WRONLY);
+	if (cpu_dma_latency_fd < 0) {
+		warning << string_compose (_("Could not set DMA latency to %1 usec (%2)"), target, strerror (errno)) << endmsg;
+		return false;
+	}
+	if (::write (cpu_dma_latency_fd, &target, sizeof(target)) > 0) {
+		info << string_compose (_("Set DMA latency to %1 usec"), target) << endmsg;
+	} else {
+		warning << string_compose (_("Could not set DMA latency to %1 usec (%2)"), target, strerror (errno)) << endmsg;
+	}
+#endif
+	return true;
+}
+
+static void
+release_dma_latency ()
+{
+#if !(defined PLATFORM_WINDOWS || defined __APPLE__)
+	if (cpu_dma_latency_fd >= 0) {
+		::close (cpu_dma_latency_fd);
+	}
+	cpu_dma_latency_fd = -1;
+#endif
 }
 
 static void
@@ -564,6 +601,10 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 
 	setup_hardware_optimization (try_optimization);
 
+	if (Config->get_cpu_dma_latency () >= 0) {
+		request_dma_latency ();
+	}
+
 	SourceFactory::init ();
 	Analyser::init ();
 
@@ -669,6 +710,7 @@ ARDOUR::cleanup ()
 		return;
 	}
 
+	release_dma_latency ();
 	engine_startup_connection.disconnect ();
 
 	delete &ControlProtocolManager::instance ();
