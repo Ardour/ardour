@@ -1155,7 +1155,19 @@ int
 AudioEngine::client_real_time_priority ()
 {
 	if (!_backend) {
+		assert (0);
 		return PBD_RT_PRI_PROC;
+	}
+	if (!_backend->is_realtime ()) {
+		/* this is only an issue with the Dummy backend.
+		 * - with JACK, we require rt permissions.
+		 * - with ALSA/Pulseaudio this can only happen if rt permissions
+		 *   are n/a. Other atempts to get rt will fail likewise.
+		 *
+		 * perhaps:
+		 * TODO: use is_realtime () ? PBD_SCHED_FIFO : PBD_SCHED_OTHER
+		 */
+		return PBD_RT_PRI_PROC; // XXX
 	}
 
 	return _backend->client_real_time_priority();

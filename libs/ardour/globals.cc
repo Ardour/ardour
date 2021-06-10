@@ -698,7 +698,7 @@ ARDOUR::init_post_engine (uint32_t start_cnt)
 		}
 	}
 
-	BaseUI::set_thread_priority (pbd_absolute_rt_priority (PBD_SCHED_FIFO, AudioEngine::instance()->client_real_time_priority () - 3));
+	BaseUI::set_thread_priority (pbd_absolute_rt_priority (PBD_SCHED_FIFO, AudioEngine::instance()->client_real_time_priority () - 2));
 
 	TransportMasterManager::instance ().restart ();
 }

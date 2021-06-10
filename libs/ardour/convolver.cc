@@ -158,7 +158,7 @@ Convolution::restart ()
 	}
 
 	if (rv == 0) {
-		rv = _convproc.start_process (pbd_absolute_rt_priority (PBD_SCHED_FIFO, AudioEngine::instance ()->client_real_time_priority () - 2), PBD_SCHED_FIFO);
+		rv = _convproc.start_process (pbd_absolute_rt_priority (PBD_SCHED_FIFO, AudioEngine::instance ()->client_real_time_priority () - 1), PBD_SCHED_FIFO);
 	}
 
 	assert (rv == 0); // bail out in debug builds

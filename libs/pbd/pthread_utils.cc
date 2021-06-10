@@ -321,6 +321,7 @@ pbd_absolute_rt_priority (int policy, int priority)
 	const int p_max = sched_get_priority_max (policy); // Linux: 99
 
 	if (priority == 0) {
+		assert (0);
 		priority = (p_min + p_max) / 2;
 	} else if (priority > 0) {
 		/* value relative to minium */
