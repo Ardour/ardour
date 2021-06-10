@@ -132,6 +132,7 @@ RouteUI::RouteUI (ARDOUR::Session* sess)
 	, _comment_window(0)
 	, _comment_area(0)
 	, _invert_menu(0)
+	, _playlist_selector(0)
 {
 	if (program_port_prefix.empty()) {
 		// compare to gtk2_ardour/port_group.cc
