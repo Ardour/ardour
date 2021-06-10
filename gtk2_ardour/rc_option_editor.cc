@@ -4366,6 +4366,44 @@ These settings will only take effect after %1 is restarted.\n\
 		add_option (_("Performance"), procs);
 	}
 
+#if !(defined PLATFORM_WINDOWS || defined __APPLE__)
+	if (Glib::file_test ("/dev/cpu_dma_latency", Glib::FILE_TEST_EXISTS)) {
+
+		ComboOption<int32_t>* cpudma = new ComboOption<int32_t> (
+				"cpu-dma-latency",
+				_("Power Management, CPU DMA latency:"),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::get_cpu_dma_latency),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::set_cpu_dma_latency)
+				);
+
+		cpudma->add (-1, _("Unset"));
+		cpudma->add (0, _("Lowest (prevent CPU sleep states)"));
+		cpudma->add (5, _("5 usec"));
+		cpudma->add (55, _("55 usec"));
+		cpudma->add (100, _("100 usec"));
+
+		int32_t cpudma_val = _rc_config->get_cpu_dma_latency ();
+		switch (cpudma_val) {
+			case -1:
+			case 0:
+			case 5:
+			case 55:
+			case 100:
+				break;
+			default:
+				if (cpudma_val > 0) {
+					cpudma->add (cpudma_val, string_compose (_("%1 usec"), cpudma_val));
+				}
+		}
+
+		cpudma->set_note (string_compose (_("This setting requires write access to `/dev/cpu_dma_latency' to set the maximum tolerable CPU DMA, and will only take effect when %1 is restarted.\n"), PROGRAM_NAME));
+
+		add_option (_("Performance"), cpudma);
+	}
+
+#endif
+
+
 	add_option (_("Performance"), new OptionEditorHeading (_("CPU/FPU Denormals")));
 
 	add_option (_("Performance"),
