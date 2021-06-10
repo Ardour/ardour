@@ -367,10 +367,10 @@ Route::process_output_buffers (BufferSet& bufs,
 	 * Mute has its own issues since there's not a single mute-point,
 	 * but in general
 	 */
-	automation_run (start_sample, nframes, true);
+	automation_run (start_sample, nframes);
 
 	if (_pannable) {
-		_pannable->automation_run (start_sample + _signal_latency,nframes, true);
+		_pannable->automation_run (start_sample + _signal_latency,nframes);
 	}
 
 	/* figure out if we're going to use gain automation */
