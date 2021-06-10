@@ -109,7 +109,7 @@ ARDOUR::get_alsa_device_parameters (const char* device_name, const bool play, AL
 	/* see also libs/backends/alsa/zita-alsa-pcmi.cc
 	 * If any debug parameter is set, print device info.
 	 */
-	if (getenv ("ZITA_ALSA_PCMI_DEBUG")) {
+	if (getenv ("ARDOUR_ALSA_DEBUG")) {
 		fprintf (stdout, "ALSA: *%s* device-info\n", play ? "playback" : "capture");
 		fprintf (stdout, "  dev_name : %s\n", device_name);
 		fprintf (stdout, "  channels : %u\n", nfo->max_channels);
