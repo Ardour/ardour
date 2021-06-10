@@ -84,6 +84,7 @@
 #include <lrdf.h>
 #endif
 
+#include "pbd/base_ui.h"
 #include "pbd/cpus.h"
 #include "pbd/enumwriter.h"
 #include "pbd/error.h"
@@ -655,6 +656,8 @@ ARDOUR::init_post_engine (uint32_t start_cnt)
 			ControlProtocolManager::instance ().set_state (*node, 0 /* here: global-config state */);
 		}
 	}
+
+	BaseUI::set_thread_priority (pbd_absolute_rt_priority (PBD_SCHED_FIFO, AudioEngine::instance()->client_real_time_priority () - 3));
 
 	TransportMasterManager::instance ().restart ();
 }

@@ -47,7 +47,6 @@
 #include <boost/algorithm/string/erase.hpp>
 
 #include "pbd/basename.h"
-#include "pbd/base_ui.h"
 #include "pbd/convert.h"
 #include "pbd/error.h"
 #include "pbd/file_utils.h"
@@ -542,8 +541,6 @@ Session::immediately_post_engine ()
 		*/
 		_process_graph.reset (new Graph (*this));
 	}
-
-	BaseUI::set_thread_priority (pbd_absolute_rt_priority (PBD_SCHED_FIFO, AudioEngine::instance()->client_real_time_priority () - 3));
 
 	/* every time we reconnect, recompute worst case output latencies */
 
