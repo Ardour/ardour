@@ -62,6 +62,10 @@ class LIBPBD_API BaseUI : public sigc::trackable, public PBD::EventLoop
 	static RequestType CallSlot;
 	static RequestType Quit;
 
+	static void set_thread_priority (int p) {
+		_thread_priority = p;
+	}
+
 	/** start up a thread to run the main loop
 	 */
 	void run ();
@@ -93,7 +97,7 @@ class LIBPBD_API BaseUI : public sigc::trackable, public PBD::EventLoop
 
 	virtual void thread_init () {};
 
-	int set_thread_priority (const int policy = PBD_SCHED_FIFO, int priority = 0) const;
+	int set_thread_priority () const;
 
 	/** Called when there input ready on the request_channel
 	 */
@@ -114,6 +118,7 @@ class LIBPBD_API BaseUI : public sigc::trackable, public PBD::EventLoop
 	CrossThreadChannel request_channel;
 
 	static uint64_t rt_bit;
+	static int _thread_priority;
 
 	int setup_request_pipe ();
 	void main_thread ();

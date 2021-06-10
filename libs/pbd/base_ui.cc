@@ -50,6 +50,8 @@ using namespace PBD;
 using namespace Glib;
 
 uint64_t BaseUI::rt_bit = 1;
+int BaseUI::_thread_priority = PBD_RT_PRI_PROC - 1;
+
 BaseUI::RequestType BaseUI::CallSlot = BaseUI::new_request_type();
 BaseUI::RequestType BaseUI::Quit = BaseUI::new_request_type();
 
@@ -83,9 +85,9 @@ BaseUI::new_request_type ()
 }
 
 int
-BaseUI::set_thread_priority (const int policy, int priority) const
+BaseUI::set_thread_priority () const
 {
-	return pbd_set_thread_priority (pthread_self(), policy, priority);
+	return pbd_set_thread_priority (pthread_self(), PBD_SCHED_FIFO, _thread_priority);
 }
 
 void
