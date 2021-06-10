@@ -54,15 +54,9 @@
 /* these are relative to sched_get_priority_max()
  * see pbd_absolute_rt_priority()
  */
-#ifdef PLATFORM_WINDOWS
-# define PBD_RT_PRI_MAIN -1
-# define PBD_RT_PRI_MIDI -2
-# define PBD_RT_PRI_PROC -2
-#else
-# define PBD_RT_PRI_MAIN -20
-# define PBD_RT_PRI_MIDI -21
-# define PBD_RT_PRI_PROC -22
-#endif
+# define PBD_RT_PRI_MAIN pbd_pthread_priority (THREAD_MAIN)
+# define PBD_RT_PRI_MIDI pbd_pthread_priority (THREAD_MIDI)
+# define PBD_RT_PRI_PROC pbd_pthread_priority (THREAD_PROC)
 
 LIBPBD_API int  pthread_create_and_store (std::string name, pthread_t  *thread, void * (*start_routine)(void *), void * arg);
 LIBPBD_API void pthread_cancel_one (pthread_t thread);
@@ -70,6 +64,14 @@ LIBPBD_API void pthread_cancel_all ();
 LIBPBD_API void pthread_kill_all (int signum);
 LIBPBD_API const char* pthread_name ();
 LIBPBD_API void pthread_set_name (const char* name);
+
+enum PBDThreadClass {
+	THREAD_MAIN, // main audio I/O thread
+	THREAD_MIDI, // MIDI I/O threads
+	THREAD_PROC // realtime worker
+};
+
+LIBPBD_API int pbd_pthread_priority (PBDThreadClass);
 
 LIBPBD_API int pbd_pthread_create (
 		const size_t stacksize,

@@ -278,6 +278,42 @@ pbd_pthread_create (
 }
 
 int
+pbd_pthread_priority (PBDThreadClass which)
+{
+	/* fall back to use values relative to max */
+#ifdef PLATFORM_WINDOWS
+	switch (which) {
+		case THREAD_MAIN:
+			return -1;
+		case THREAD_MIDI:
+			return -2;
+		default:
+		case THREAD_PROC:
+			return -2;
+	}
+#else
+	int base = -20;
+	const char* p = getenv ("ARDOUR_SCHED_PRI");
+	if (p && *p) {
+		base = atoi (p);
+		if (base > -5 && base < 5) {
+			base = -20;
+		}
+	}
+
+	switch (which) {
+		case THREAD_MAIN:
+			return base;
+		case THREAD_MIDI:
+			return base - 1;
+		default:
+		case THREAD_PROC:
+			return base - 2;
+	}
+#endif
+}
+
+int
 pbd_absolute_rt_priority (int policy, int priority)
 {
 	/* POSIX requires a spread of at least 32 steps between min..max */
@@ -285,13 +321,12 @@ pbd_absolute_rt_priority (int policy, int priority)
 	const int p_max = sched_get_priority_max (policy); // Linux: 99
 
 	if (priority == 0) {
-		/* use default. XXX this should be relative to audio (JACK) thread,
-		 * internal backends use -20 (Audio), -21 (MIDI), -22 (compuation)
-		 */
 		priority = (p_min + p_max) / 2;
 	} else if (priority > 0) {
-		priority += p_min;
+		/* value relative to minium */
+		priority += p_min - 1;
 	} else {
+		/* value relative maximum */
 		priority += p_max + 1;
 	}
 
