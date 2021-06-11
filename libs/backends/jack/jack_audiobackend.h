@@ -303,7 +303,12 @@ class JACKAudioBackend : public AudioBackend {
     static void _registration_callback (jack_port_id_t, int, void *);
     static void _connect_callback (jack_port_id_t, jack_port_id_t, int, void *);
 
-    typedef std::map<void*,boost::shared_ptr<JackPort> > JackPorts;
+    /* used to manage _jack_ports, specifically for ports belonging to the
+       JACK backend or other clients.
+    */
+    void jack_registration_callback (jack_port_id_t, int);
+
+    typedef std::map<std::string,boost::shared_ptr<JackPort> > JackPorts;
     mutable SerializedRCUManager<JackPorts> _jack_ports; /* can be modified in ::get_port_by_name () */
 
     void connect_callback (jack_port_id_t, jack_port_id_t, int);

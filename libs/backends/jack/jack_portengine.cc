@@ -175,19 +175,23 @@ JACKAudioBackend::set_port_property (PortHandle port, const std::string& key, co
 PortEngine::PortPtr
 JACKAudioBackend::get_port_by_name (const std::string& name) const
 {
+	{
+		boost::shared_ptr<JackPorts> ports = _jack_ports.reader ();
+		JackPorts::iterator p = ports->find (name);
+
+		if (p != ports->end()) {
+			return p->second;
+		}
+	}
+
+	/* Port not known to us yet, so look it up via JACK (slow) */
+
 	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, PortEngine::PortPtr());
 	jack_port_t * jack_port = jack_port_by_name (_priv_jack, name.c_str());
 
 	if (!jack_port) {
+		/* No such port ... return nothering */
 		return PortEngine::PortPtr();
-	}
-
-	boost::shared_ptr<JackPorts> ports = _jack_ports.reader ();
-
-	JackPorts::const_iterator i =  ports->find (jack_port);
-
-	if (i != ports->end()) {
-		return i->second;
 	}
 
 	boost::shared_ptr<JackPort> jp;
@@ -196,7 +200,7 @@ JACKAudioBackend::get_port_by_name (const std::string& name) const
 		RCUWriter<JackPorts> writer (_jack_ports);
 		boost::shared_ptr<JackPorts> ports = writer.get_copy();
 		jp.reset (new JackPort (jack_port));
-		ports->insert (std::make_pair (jack_port, jp));
+		ports->insert (std::make_pair (name, jp));
 	}
 
 	_jack_ports.flush ();
@@ -205,11 +209,69 @@ JACKAudioBackend::get_port_by_name (const std::string& name) const
 }
 
 void
-JACKAudioBackend::_registration_callback (jack_port_id_t /*id*/, int /*reg*/, void* arg)
+JACKAudioBackend::_registration_callback (jack_port_id_t id, int reg, void* arg)
 {
+	/* we don't use a virtual method for the registration callback, because
+	   JACK is the only backend that delivers the arguments shown above. So
+	   call our own JACK-centric registration callback, then the generic
+	   one.
+	*/
+	static_cast<JACKAudioBackend*> (arg)->jack_registration_callback (id, reg);
 	static_cast<JACKAudioBackend*> (arg)->manager.registration_callback ();
 	static_cast<JACKAudioBackend*> (arg)->engine.latency_callback (false);
 	static_cast<JACKAudioBackend*> (arg)->engine.latency_callback (true);
+}
+
+void
+JACKAudioBackend::jack_registration_callback (jack_port_id_t id, int reg)
+{
+	GET_PRIVATE_JACK_POINTER (_priv_jack);
+	jack_port_t* jack_port = jack_port_by_id (_priv_jack, id);
+
+	if (!jack_port) {
+		return;
+	}
+
+	/* We only need to care about ports that we do not register/unregister
+	 * ourselves. Our own ports will added/removed from _jack_ports at the
+	 * appropriate time.
+	 *
+	 * But for the input meters, we'll be looking up ports not created by
+	 * us, and they may also go away at arbitrary times too. We want to
+	 * make sure we can look up these ports by name only (in _jack_ports)
+	 * because jack_port_by_name() is unacceptably slow for RT contexts
+	 * (like run_input_meters()). So we catch these ports at registration
+	 * time, and put a suitable entry in _jack_ports.
+	 *
+	 * It isn't critical that we keep _jack_ports current if any of these
+	 * ports goes away, but since we get told about that here, we do that
+	 * just to keep things clean. This will happen if someone disconnects a
+	 * USB MIDI device, for example.
+	 */
+
+	if (!jack_port_is_mine (_priv_jack, jack_port)) {
+
+		const char* name = jack_port_name (jack_port);
+
+		boost::shared_ptr<JackPorts> ports = _jack_ports.write_copy();
+
+		if (!reg) {
+			if (ports->erase (name)) {
+				_jack_ports.update (ports);
+			}
+		} else {
+			if (ports->find (name) != ports->end()) {
+				/* hmmm, we already have this port */
+				std::cout << "re-registration of JACK port named " << name << std::endl;
+				ports->erase (name);
+			}
+
+			boost::shared_ptr<JackPort> jp (new JackPort (jack_port));
+			ports->insert (std::make_pair (name, jp));
+
+			_jack_ports.update (ports);
+		}
+	}
 }
 
 int
@@ -523,7 +585,7 @@ JACKAudioBackend::register_port (const std::string& shortname, ARDOUR::DataType 
 
 		jp.reset (new JackPort (jack_port));
 
-		ports->insert (std::make_pair (jack_port, jp));
+		ports->insert (std::make_pair (jack_port_name (jack_port), jp));
 	}
 
 	_jack_ports.flush();
@@ -536,12 +598,12 @@ JACKAudioBackend::unregister_port (PortHandle port)
 {
 	GET_PRIVATE_JACK_POINTER (_priv_jack);
 	boost::shared_ptr<JackPort> jp = boost::dynamic_pointer_cast<JackPort>(port);
+	const std::string name = jack_port_name (jp->jack_ptr);
 
 	{
 		RCUWriter<JackPorts> writer (_jack_ports);
 		boost::shared_ptr<JackPorts> ports = writer.get_copy();
-
-		ports->erase (jp->jack_ptr);
+		ports->erase (name);
 	}
 
 	_jack_ports.flush ();
