@@ -28,9 +28,9 @@
 using namespace ARDOUR;
 using namespace PBD;
 
-RingBufferNPT<ThreadBuffers*>* BufferManager::thread_buffers = 0;
-std::list<ThreadBuffers*>* BufferManager::thread_buffers_list = 0;
-Glib::Threads::Mutex BufferManager::rb_mutex;
+RingBufferNPT<ThreadBuffers*>* BufferManager::thread_buffers      = 0;
+std::list<ThreadBuffers*>*     BufferManager::thread_buffers_list = 0;
+Glib::Threads::Mutex           BufferManager::rb_mutex;
 
 using std::cerr;
 using std::endl;
@@ -38,49 +38,47 @@ using std::endl;
 void
 BufferManager::init (uint32_t size)
 {
-        thread_buffers = new ThreadBufferFIFO (size+1); // must be one larger than requested
+	thread_buffers      = new ThreadBufferFIFO (size + 1); // must be one larger than requested
 	thread_buffers_list = new ThreadBufferList;
 
-        /* and populate with actual ThreadBuffers
-         */
+	/* and populate with actual ThreadBuffers */
 
-        for (uint32_t n = 0; n < size; ++n) {
-                ThreadBuffers* ts = new ThreadBuffers;
-                thread_buffers->write (&ts, 1);
+	for (uint32_t n = 0; n < size; ++n) {
+		ThreadBuffers* ts = new ThreadBuffers;
+		thread_buffers->write (&ts, 1);
 		thread_buffers_list->push_back (ts);
-        }
+	}
 	// cerr << "Initialized thread buffers, readable count now " << thread_buffers->read_space() << endl;
-
 }
 
 ThreadBuffers*
 BufferManager::get_thread_buffers ()
 {
 	Glib::Threads::Mutex::Lock em (rb_mutex);
-        ThreadBuffers* tbp;
+	ThreadBuffers*             tbp;
 
-        if (thread_buffers->read (&tbp, 1) == 1) {
+	if (thread_buffers->read (&tbp, 1) == 1) {
 		// cerr << "Got thread buffers, readable count now " << thread_buffers->read_space() << endl;
-                return tbp;
-        }
+		return tbp;
+	}
 
-        return 0;
+	return 0;
 }
 
 void
 BufferManager::put_thread_buffers (ThreadBuffers* tbp)
 {
 	Glib::Threads::Mutex::Lock em (rb_mutex);
-        thread_buffers->write (&tbp, 1);
+	thread_buffers->write (&tbp, 1);
 	// cerr << "Put back thread buffers, readable count now " << thread_buffers->read_space() << endl;
 }
 
 void
 BufferManager::ensure_buffers (ChanCount howmany, size_t custom)
 {
-        /* this is protected by the audioengine's process lock: we do not  */
+	/* this is protected by the audioengine's process lock: we do not  */
 
-	for (ThreadBufferList::iterator i = thread_buffers_list->begin(); i != thread_buffers_list->end(); ++i) {
+	for (ThreadBufferList::iterator i = thread_buffers_list->begin (); i != thread_buffers_list->end (); ++i) {
 		(*i)->ensure_buffers (howmany, custom);
 	}
 }
