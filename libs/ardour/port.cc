@@ -39,7 +39,6 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-PBD::Signal2<void,boost::shared_ptr<Port>, boost::shared_ptr<Port> > Port::PostDisconnect;
 PBD::Signal0<void> Port::PortDrop;
 PBD::Signal0<void> Port::PortSignalDrop;
 
@@ -157,20 +156,16 @@ Port::drop ()
 void
 Port::port_connected_or_disconnected (boost::weak_ptr<Port> w0, boost::weak_ptr<Port> w1, bool con)
 {
-	if (con) {
-		/* we're only interested in disconnect */
-		return;
-	}
 	boost::shared_ptr<Port> p0 = w0.lock ();
 	boost::shared_ptr<Port> p1 = w1.lock ();
 	/* a cheaper, less hacky way to do boost::shared_from_this() ...  */
 	boost::shared_ptr<Port> pself = AudioEngine::instance()->get_port_by_name (name());
 
 	if (p0 == pself) {
-		PostDisconnect (p0, p1); // emit signal
+		ConnectedOrDisconnected (p0, p1, con); // emit signal
 	}
 	if (p1 == pself) {
-		PostDisconnect (p1, p0); // emit signal
+		ConnectedOrDisconnected (p1, p0, con); // emit signal
 	}
 }
 
@@ -201,7 +196,7 @@ Port::disconnect_all ()
 		for (vector<string>::const_iterator c = connections.begin(); c != connections.end() && pself; ++c) {
 			boost::shared_ptr<Port> pother = AudioEngine::instance()->get_port_by_name (*c);
 			if (pother) {
-				PostDisconnect (pself, pother); // emit signal
+				ConnectedOrDisconnected (pself, pother, false); // emit signal
 			}
 		}
 	}
@@ -295,7 +290,7 @@ Port::disconnect (std::string const & other)
 		   a check on whether this may affect anything that we
 		   need to know about.
 		*/
-		PostDisconnect (pself, pother); // emit signal
+		ConnectedOrDisconnected (pself, pother, false); // emit signal
 	}
 
 	return r;

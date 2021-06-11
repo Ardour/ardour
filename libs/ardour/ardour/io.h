@@ -212,7 +212,6 @@ public:
 protected:
 	virtual XMLNode& state ();
 
-	PortSet   _ports;
 	Direction _direction;
 	DataType _default_type;
 	bool     _active;
@@ -220,8 +219,13 @@ protected:
 
 private:
 	mutable Glib::Threads::Mutex io_lock;
+	PortSet   _ports;
+
 	int connecting_became_legal ();
 	PBD::ScopedConnection connection_legal_c;
+
+	void reestablish_port_subscriptions ();
+	PBD::ScopedConnectionList _port_connections;
 
 	boost::shared_ptr<Bundle> _bundle; ///< a bundle representing our ports
 
@@ -257,7 +261,7 @@ private:
 	void apply_pretty_name ();
 	std::string _pretty_name_prefix;
 	BufferSet _buffers;
-	void disconnect_check (boost::shared_ptr<ARDOUR::Port>, boost::shared_ptr<ARDOUR::Port>);
+	void connection_change (boost::shared_ptr<ARDOUR::Port>, boost::shared_ptr<ARDOUR::Port>);
 };
 
 } // namespace ARDOUR

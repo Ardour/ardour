@@ -132,7 +132,8 @@ public:
 	void decrement_external_connections() { if (_externally_connected) _externally_connected--; }
 
 	PBD::Signal1<void,bool> MonitorInputChanged;
-	static PBD::Signal2<void,boost::shared_ptr<Port>,boost::shared_ptr<Port> > PostDisconnect;
+	PBD::Signal3<void,boost::shared_ptr<Port>,boost::shared_ptr<Port>, bool > ConnectedOrDisconnected;
+
 	static PBD::Signal0<void> PortDrop;
 	static PBD::Signal0<void> PortSignalDrop;
 

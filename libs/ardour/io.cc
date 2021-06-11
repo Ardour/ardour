@@ -77,7 +77,6 @@ IO::IO (Session& s, const string& name, Direction dir, DataType default_type, bo
 	, _sendish (sendish)
 {
 	_active = true;
-	Port::PostDisconnect.connect_same_thread (*this, boost::bind (&IO::disconnect_check, this, _1, _2));
 	pending_state_node = 0;
 	setup_bundle ();
 }
@@ -90,7 +89,6 @@ IO::IO (Session& s, const XMLNode& node, DataType dt, bool sendish)
 {
 	_active = true;
 	pending_state_node = 0;
-	Port::PostDisconnect.connect_same_thread (*this, boost::bind (&IO::disconnect_check, this, _1, _2));
 
 	set_state (node, Stateful::loading_state_version);
 	setup_bundle ();
@@ -111,7 +109,7 @@ IO::~IO ()
 }
 
 void
-IO::disconnect_check (boost::shared_ptr<Port> a, boost::shared_ptr<Port> b)
+IO::connection_change (boost::shared_ptr<Port> a, boost::shared_ptr<Port> b)
 {
 	if (_session.deletion_in_progress ()) {
 		return;
@@ -503,6 +501,15 @@ IO::ensure_ports (ChanCount count, bool clear, void* src)
 	}
 
 	return 0;
+}
+
+void
+IO::reestablish_port_subscriptions ()
+{
+	_port_connections.drop_connections ();
+	for (PortSet::iterator i = _ports.begin(); i != _ports.end(); ++i) {
+		i->ConnectedOrDisconnected.connect_same_thread (*this, boost::bind (&IO::connection_change, this, _1, _2));
+	}
 }
 
 /** Caller must hold process lock */
@@ -1550,6 +1557,8 @@ IO::setup_bundle ()
 		}
 
 	}
+
+	reestablish_port_subscriptions ();
 
 	_bundle->resume_signals ();
 }
