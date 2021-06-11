@@ -83,6 +83,10 @@ public:
 	void update () {
 		m_last_val = g_get_monotonic_time ();
 	}
+	void update (uint64_t interval) {
+		m_start_val = 0;
+		m_last_val = interval;
+	}
 
 	void reset () {
 		m_start_val = m_last_val = 0;
@@ -132,6 +136,17 @@ public:
 			Timing::update ();
 			calc ();
 		}
+	}
+
+	/* interval computed externally */
+	void update (uint64_t interval)
+	{
+		/* throw away the first 1000 values */
+		if (_update_cnt++ < 1000) {
+			return;
+		}
+		Timing::update (interval);
+		calc ();
 	}
 
 	void reset ()
