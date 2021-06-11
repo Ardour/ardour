@@ -198,6 +198,13 @@ private:
 	double   _vs;
 	uint64_t   _update_cnt;
 };
+
+class LIBPBD_API TimerRAII
+{
+  public:
+	TimerRAII (TimingStats& ts) : stats (ts) { stats.start(); }
+	~TimerRAII() { stats.update(); }
+	TimingStats& stats;
 };
 
 class LIBPBD_API TimingData
