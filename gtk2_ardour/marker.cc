@@ -331,6 +331,10 @@ ArdourMarker::~ArdourMarker ()
 {
 	CatchDeletion (this); /* EMIT SIGNAL */
 
+	/* not a member of a group that we own, so we must delete it explicitly */
+
+	delete _track_canvas_line;
+
 	/* destroying the parent group destroys its contents, namely any polygons etc. that we added */
 	delete group;
 	delete points;
