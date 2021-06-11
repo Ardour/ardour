@@ -46,17 +46,13 @@ ThreadBuffers::ThreadBuffers ()
 void
 ThreadBuffers::ensure_buffers (ChanCount howmany, size_t custom)
 {
-	// std::cerr << "ThreadBuffers " << this << " resize buffers with count = " << howmany << std::endl;
+	 // std::cerr << "ThreadBuffers " << this << " resize buffers with count = " << howmany << " size = " << custom << std::endl;
 
 	/* this is all protected by the process lock in the Session */
 
 	/* we always need at least 1 midi buffer */
 	if (howmany.n_midi () < 1) {
 		howmany.set_midi (1);
-	}
-
-	if (howmany.n_audio () == 0 && howmany.n_midi () == 1) {
-		return;
 	}
 
 	AudioEngine* _engine = AudioEngine::instance ();
