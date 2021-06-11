@@ -1852,9 +1852,12 @@ AlsaAudioBackend::main_process_thread ()
 		}
 
 		if (!_freewheel) {
+			dsp_stats[DeviceWait].start();
 			nr = _pcmi->pcm_wait ();
+			dsp_stats[DeviceWait].update();
 
 			/* update DLL */
+			dsp_stats[PreProcess].start();
 			uint64_t clock0 = g_get_monotonic_time ();
 			if (reset_dll || last_n_periods != 1) {
 				reset_dll    = false;
@@ -1957,11 +1960,13 @@ AlsaAudioBackend::main_process_thread ()
 
 				/* call engine process callback */
 				_last_process_start = g_get_monotonic_time ();
+				dsp_stats[PreProcess].update();
 				if (engine.process_callback (_samples_per_period)) {
 					_pcmi->pcm_stop ();
 					_active = false;
 					return 0;
 				}
+				dsp_stats[PostProcess].start ();
 
 				/* only used when adding/removing MIDI device/system ports */
 				pthread_mutex_lock (&_device_port_mutex);
@@ -2012,6 +2017,8 @@ AlsaAudioBackend::main_process_thread ()
 				_dsp_load_calc.set_stop_timestamp_us (g_get_monotonic_time ());
 				_dsp_load = _dsp_load_calc.get_dsp_load ();
 				++last_n_periods;
+
+				dsp_stats[PostProcess].update ();
 			}
 
 			if (xrun && (_pcmi->capt_xrun () > 0 || _pcmi->play_xrun () > 0)) {

@@ -849,6 +849,17 @@ public:
 		return false;
 	}
 
+	enum TimingTypes {
+		DeviceWait = 0,
+		PreProcess = 1,
+		ProcessCallback = 2,
+		PostProcess = 3,
+		/* end */
+		NTT = 4
+	};
+
+	PBD::TimingStats dsp_stats[NTT];
+
 protected:
 	AudioBackendInfo& _info;
 	AudioEngine&      engine;

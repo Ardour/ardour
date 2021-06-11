@@ -74,6 +74,8 @@ using namespace std;
 void
 Session::process (pframes_t nframes)
 {
+	TimerRAII tr (dsp_stats[OverallProcess]);
+
 	samplepos_t transport_at_start = _transport_sample;
 
 	_silent = false;
@@ -166,6 +168,7 @@ int
 Session::no_roll (pframes_t nframes)
 {
 	PT_TIMING_CHECK (4);
+	TimerRAII tr (dsp_stats[NoRoll]);
 
 	samplepos_t end_sample = _transport_sample + floor (nframes * _transport_fsm->transport_speed());
 	int ret = 0;
@@ -212,6 +215,7 @@ Session::no_roll (pframes_t nframes)
 int
 Session::process_routes (pframes_t nframes, bool& need_butler)
 {
+	TimerRAII tr (dsp_stats[Roll]);
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	const samplepos_t start_sample = _transport_sample;
@@ -331,6 +335,7 @@ void
 Session::process_with_events (pframes_t nframes)
 {
 	PT_TIMING_CHECK (3);
+	TimerRAII tr (dsp_stats[ProcessFunction]);
 
 	SessionEvent*  ev;
 	pframes_t      this_nframes;
@@ -631,6 +636,7 @@ Session::transport_locked () const
 void
 Session::process_without_events (pframes_t nframes)
 {
+	TimerRAII tr (dsp_stats[ProcessFunction]);
 	bool session_needs_butler = false;
 	samplecnt_t samples_moved;
 

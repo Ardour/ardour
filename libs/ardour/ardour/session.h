@@ -1322,6 +1322,17 @@ public:
 	std::vector<struct ptflookup> ptfwavpair;
 	SourceList pt_imported_sources;
 
+	enum TimingTypes {
+		OverallProcess = 0,
+		ProcessFunction = 1,
+		NoRoll = 2,
+		Roll = 3,
+		/* end */
+		NTT = 4
+	};
+
+	PBD::TimingStats dsp_stats[NTT];
+
 protected:
 	friend class AudioEngine;
 	void set_block_size (pframes_t nframes);

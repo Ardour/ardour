@@ -228,6 +228,7 @@ __attribute__((annotate("realtime")))
 int
 AudioEngine::process_callback (pframes_t nframes)
 {
+	TimerRAII tr (dsp_stats[ProcessCallback]);
 	Glib::Threads::Mutex::Lock tm (_process_lock, Glib::Threads::TRY_LOCK);
 	Port::set_speed_ratio (1.0);
 
