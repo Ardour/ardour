@@ -337,6 +337,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, lua_script_window (X_("script-manager"), _("Script Manager"))
 	, idleometer (X_("idle-o-meter"), _("Idle'o'Meter"))
 	, plugin_dsp_load_window (X_("plugin-dsp-load"), _("Plugin DSP Load"))
+	, dsp_statistics_window (X_("dsp-statistics"), _("Performance Meters"))
 	, transport_masters_window (X_("transport-masters"), _("Transport Masters"))
 	, session_option_editor (X_("session-options-editor"), _("Properties"), boost::bind (&ARDOUR_UI::create_session_option_editor, this))
 	, add_video_dialog (X_("add-video"), _("Add Video"), boost::bind (&ARDOUR_UI::create_add_video_dialog, this))
@@ -533,6 +534,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	WM::Manager::instance().register_window (&midi_port_matrix);
 	WM::Manager::instance().register_window (&idleometer);
 	WM::Manager::instance().register_window (&plugin_dsp_load_window);
+	WM::Manager::instance().register_window (&dsp_statistics_window);
 	WM::Manager::instance().register_window (&transport_masters_window);
 
 	/* session-sensitive windows */

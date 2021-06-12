@@ -161,6 +161,7 @@ ARDOUR_UI::set_session (Session *s)
 	video_timeline->set_session (s);
 	lua_script_window->set_session (s);
 	plugin_dsp_load_window->set_session (s);
+	dsp_statistics_window->set_session (s);
 	transport_masters_window->set_session (s);
 	rc_option_editor->set_session (s);
 
