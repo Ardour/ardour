@@ -158,6 +158,7 @@ typedef uint64_t microseconds_t;
 #include "big_clock_window.h"
 #include "big_transport_window.h"
 #include "bundle_manager.h"
+#include "dsp_stats_window.h"
 #include "duplicate_routes_dialog.h"
 #include "debug.h"
 #include "engine_dialog.h"

@@ -724,7 +724,7 @@ private:
 	WM::Proxy<LuaScriptManager> lua_script_window;
 	WM::Proxy<IdleOMeter> idleometer;
 	WM::Proxy<PluginDSPLoadWindow> plugin_dsp_load_window;
-	WM::Proxy<PluginDSPLoadWindow> dsp_statistics_window;
+	WM::Proxy<DspStatisticsWindow> dsp_statistics_window;
 	WM::Proxy<TransportMastersWindow> transport_masters_window;
 
 	/* Windows/Dialogs that require a creator method */
