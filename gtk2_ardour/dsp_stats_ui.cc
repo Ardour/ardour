@@ -48,12 +48,12 @@ DspStatisticsGUI::DspStatisticsGUI ()
 	attach (buffer_size_label, 1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
 	row++;
 
-	attach (*manage (new Gtk::Label (_("Device Wait: "), ALIGN_RIGHT, ALIGN_CENTER)), 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	attach (*manage (new Gtk::Label (_("Idle: "), ALIGN_RIGHT, ALIGN_CENTER)), 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
 	attach (*labels[AudioEngine::NTT + Session::NTT + AudioBackend::DeviceWait], 1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
 	row++;
 
-	attach (*manage (new Gtk::Label (_("Backend process: "), ALIGN_RIGHT, ALIGN_CENTER)), 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
-	attach (*labels[AudioEngine::NTT + Session::NTT + AudioBackend::ProcessCallback], 1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	attach (*manage (new Gtk::Label (_("Backend pre-process: "), ALIGN_RIGHT, ALIGN_CENTER)), 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	attach (*labels[AudioEngine::NTT + Session::NTT + AudioBackend::PreProcess], 1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
 	row++;
 
 	attach (*manage (new Gtk::Label (_("Engine: "), ALIGN_RIGHT, ALIGN_CENTER)), 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
@@ -62,6 +62,10 @@ DspStatisticsGUI::DspStatisticsGUI ()
 
 	attach (*manage (new Gtk::Label (_("Session: "), ALIGN_RIGHT, ALIGN_CENTER)), 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
 	attach (*labels[AudioEngine::NTT + Session::OverallProcess], 1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	row++;
+
+	attach (*manage (new Gtk::Label (_("Backend post-process: "), ALIGN_RIGHT, ALIGN_CENTER)), 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	attach (*labels[AudioEngine::NTT + Session::NTT + AudioBackend::PostProcess], 1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
 	row++;
 
 	show_all ();
@@ -83,58 +87,80 @@ DspStatisticsGUI::stop_updating ()
 void
 DspStatisticsGUI::update ()
 {
-	uint64_t min;
-	uint64_t max;
-	double   avg;
-	double   dev;
-	double minf;
-	double maxf;
+	uint64_t min = 0;
+	uint64_t max = 0;
+	double   avg = 0.;
+	double   dev = 0.;
 	char buf[64];
 
-	int bufsize = AudioEngine::instance()->raw_buffer_size (DataType::AUDIO);
+	int bufsize = AudioEngine::instance()->samples_per_cycle ();
+	double bufsize_usecs = (bufsize * 1000000.0) / AudioEngine::instance()->sample_rate();
 	double bufsize_msecs = (bufsize * 1000.0) / AudioEngine::instance()->sample_rate();
 	snprintf (buf, sizeof (buf), "%d samples / %5.2f msecs", bufsize, bufsize_msecs);
 	buffer_size_label.set_text (buf);
 
+	if (AudioEngine::instance()->current_backend()->dsp_stats[AudioBackend::DeviceWait].get_stats (min, max, avg, dev)) {
+
+		if (avg > 1000.0) {
+			avg /= 1000.0;
+			dev /= 1000.0;
+			min = (uint64_t) floor (min / 1000.0);
+			max = (uint64_t) floor (max / 1000.0);
+			snprintf (buf, sizeof (buf), "%7.2f msec %5.2f%% (%" PRId64 " - %" PRId64 " .. %7.2g)", avg, (100.0 * avg) / bufsize_msecs, min, max, dev);
+		} else {
+			snprintf (buf, sizeof (buf), "%7.2f usec %5.2f%% (%" PRId64 " - %" PRId64 " .. %7.2g)", avg, (100.0 * avg) / bufsize_usecs, min, max, dev);
+		}
+		labels[AudioEngine::NTT + Session::NTT + AudioBackend::DeviceWait]->set_text (buf);
+	} else {
+		labels[AudioEngine::NTT + Session::NTT + AudioBackend::DeviceWait]->set_text (_("not measured"));
+	}
+
+	if (AudioEngine::instance()->current_backend()->dsp_stats[AudioBackend::PreProcess].get_stats (min, max, avg, dev)) {
+
+		snprintf (buf, sizeof (buf), "%7.2f usec %5.2f%% (%" PRId64 " - %" PRId64 " .. %7.2g)", avg, (100.0 * avg) / bufsize_usecs, min, max, dev);
+		labels[AudioEngine::NTT + Session::NTT + AudioBackend::PreProcess]->set_text (buf);
+	} else {
+		labels[AudioEngine::NTT + Session::NTT + AudioBackend::PreProcess]->set_text (_("not measured"));
+	}
+
+	if (AudioEngine::instance()->current_backend()->dsp_stats[AudioBackend::PostProcess].get_stats (min, max, avg, dev)) {
+
+		snprintf (buf, sizeof (buf), "%7.2f usec %5.2f%% (%" PRId64 " - %" PRId64 " .. %7.2g)", avg, (100.0 * avg) / bufsize_usecs, min, max, dev);
+		labels[AudioEngine::NTT + Session::NTT + AudioBackend::PostProcess]->set_text (buf);
+	} else {
+		labels[AudioEngine::NTT + Session::NTT + AudioBackend::PostProcess]->set_text (_("not measured"));
+	}
+
 	AudioEngine::instance()->dsp_stats[AudioEngine::ProcessCallback].get_stats (min, max, avg, dev);
 
-	minf = floor (min / 1000.0);
-	maxf = floor (max / 1000.0);
-	avg /= 1000.0;
-	dev /= 1000.0;
-
-	snprintf (buf, sizeof (buf), "%7.2g msec %5.2g%% (%7.4g - %-7.2g .. %7.2g)", avg, (100.0 * avg) / bufsize_msecs, minf, maxf, dev);
-	labels[AudioEngine::ProcessCallback]->set_text (buf);
-
-	AudioEngine::instance()->current_backend()->dsp_stats[AudioBackend::DeviceWait].get_stats (min, max, avg, dev);
-
-	minf = floor (min / 1000.0);
-	maxf = floor (max / 1000.0);
-	avg /= 1000.0;
-	dev /= 1000.0;
-
-	snprintf (buf, sizeof (buf), "%7.2g msec %5.2g%% (%7.4g - %-7.2g .. %7.2g)", avg, (100.0 * avg) / bufsize_msecs, minf, maxf, dev);
-	labels[AudioEngine::NTT + Session::NTT + AudioBackend::DeviceWait]->set_text (buf);
-
-	AudioEngine::instance()->current_backend()->dsp_stats[AudioBackend::ProcessCallback].get_stats (min, max, avg, dev);
-
-	minf = floor (min / 1000.0);
-	maxf = floor (max / 1000.0);
-	avg /= 1000.0;
-	dev /= 1000.0;
-
-	snprintf (buf, sizeof (buf), "%7.2g msec %5.2g%% (%7.4g - %-7.2g .. %7.2g)", avg, (100.0 * avg) / bufsize_msecs, minf, maxf, dev);
-	labels[AudioEngine::NTT + Session::NTT + AudioBackend::ProcessCallback]->set_text (buf);
-
 	if (_session) {
-		_session->dsp_stats[AudioEngine::ProcessCallback].get_stats (min, max, avg, dev);
 
-		min = (uint64_t) floor (min / 1000.0);
-		max = (uint64_t) floor (max / 1000.0);
-		avg /= 1000.0;
-		dev /= 1000.0;
+		uint64_t smin = 0;
+		uint64_t smax = 0;
+		double   savg = 0.;
+		double   sdev = 0.;
 
-		snprintf (buf, sizeof (buf), "%7.2g msec %5.2g%% (%7.4g - %-7.2g .. %7.2g)", avg, (100.0 * avg) / bufsize_msecs, minf, maxf, dev);
+		_session->dsp_stats[AudioEngine::ProcessCallback].get_stats (smin, smax, savg, sdev);
+
+		snprintf (buf, sizeof (buf), "%7.2f usec %5.2f%% (%" PRId64 " - %" PRId64 " .. %7.2g)", savg, (100.0 * savg) / bufsize_usecs, smin, smax, sdev);
 		labels[AudioEngine::NTT + Session::OverallProcess]->set_text (buf);
+
+		/* Subtract session time from engine process time to show
+		 * engine overhead
+		 */
+
+		min -= smin;
+		max -= smax;
+		avg -= savg;
+		dev -= sdev;
+
+		snprintf (buf, sizeof (buf), "%7.2f usec %5.2f%% (%" PRId64 " - %" PRId64 " .. %7.2g)", avg, (100.0 * avg) / bufsize_usecs, min, max, dev);
+		labels[AudioEngine::ProcessCallback]->set_text (buf);
+
+	} else {
+
+		snprintf (buf, sizeof (buf), "%7.2f usec %5.2f%% (%" PRId64 " - %" PRId64 " .. %7.2g)", avg, (100.0 * avg) / bufsize_usecs, min, max, dev);
+		labels[AudioEngine::ProcessCallback]->set_text (buf);
+		labels[AudioEngine::NTT + Session::OverallProcess]->set_text (_("No session loaded"));
 	}
 }
