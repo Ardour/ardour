@@ -77,9 +77,9 @@ void
 Limiter::Upsampler::fini ()
 {
 	for (int i = 0; i < _nchan; ++i) {
-		delete _z[i];
+		delete[] _z[i];
 	}
-	delete _z;
+	delete[] _z;
 	_nchan = 0;
 	_z     = 0;
 }
