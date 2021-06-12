@@ -138,10 +138,6 @@ public:
 	/* interval computed externally */
 	void update (uint64_t interval)
 	{
-		/* throw away the first 1000 values */
-		if (_update_cnt++ < 1000) {
-			return;
-		}
 		Timing::update (interval);
 		calc ();
 	}
