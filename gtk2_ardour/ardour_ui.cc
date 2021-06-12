@@ -507,6 +507,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 		lua_script_window.set_state (*ui_xml, 0);
 		idleometer.set_state (*ui_xml, 0);
 		plugin_dsp_load_window.set_state (*ui_xml, 0);
+		dsp_statistics_window.set_state (*ui_xml, 0);
 		transport_masters_window.set_state (*ui_xml, 0);
 	}
 

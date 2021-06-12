@@ -615,6 +615,7 @@
       <menuitem action='toggle-speaker-config'/>
 #endif
       <menuitem action='toggle-plugin-dsp-load'/>
+      <menuitem action='toggle-dsp-statistics'/>
 #if 0
       <menuitem action='toggle-idle-o-meter'/>
 #endif
