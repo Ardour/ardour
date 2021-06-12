@@ -979,11 +979,15 @@ JACKAudioBackend::process_thread ()
         while (1) {
                 GET_PRIVATE_JACK_POINTER_RET(_priv_jack,0);
 
+                dsp_stats[AudioBackend::DeviceWait].start ();
                 pframes_t nframes = jack_cycle_wait (_priv_jack);
+                dsp_stats[AudioBackend::DeviceWait].update ();
 
+                dsp_stats[AudioBackend::ProcessCallback].start();
                 if (engine.process_callback (nframes)) {
                         return 0;
                 }
+                dsp_stats[AudioBackend::ProcessCallback].update();
 
 		jack_cycle_signal (_priv_jack, 0);
         }
