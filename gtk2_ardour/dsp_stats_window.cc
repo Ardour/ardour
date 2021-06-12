@@ -16,6 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "dsp_stats_ui.h"
 #include "dsp_stats_window.h"
 
 #include "pbd/i18n.h"
@@ -26,24 +27,33 @@ using namespace Gtk;
 
 DspStatisticsWindow::DspStatisticsWindow()
 	: ArdourWindow (_("Performance Meters"))
+	, ui (new DspStatisticsGUI)
 {
+	ui->show ();
+	add (*ui);
 }
 
 DspStatisticsWindow::~DspStatisticsWindow ()
 {
+	delete ui;
 }
 
 void
 DspStatisticsWindow::set_session (Session* s)
 {
+	ui->set_session (s);
 }
 
 void
 DspStatisticsWindow::on_show ()
 {
+	ArdourWindow::on_show ();
+	ui->start_updating ();
 }
 
 void
 DspStatisticsWindow::on_hide ()
 {
+	ArdourWindow::on_hide ();
+	ui->stop_updating ();
 }

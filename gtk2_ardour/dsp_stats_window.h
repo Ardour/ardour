@@ -22,7 +22,7 @@
 
 #include "ardour_window.h"
 
-class PluginLoadStatsGui;
+class DspStatisticsGUI;
 
 class DspStatisticsWindow : public ArdourWindow
 {
@@ -38,6 +38,7 @@ protected:
 	void on_hide ();
 
 private:
+	DspStatisticsGUI* ui;
 };
 
 #endif

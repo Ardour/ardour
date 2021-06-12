@@ -28,7 +28,7 @@
 class DspStatisticsGUI : public Gtk::Table, public ARDOUR::SessionHandlePtr
 {
 public:
-	DspStatisticsGUI (ARDOUR::Session* s);
+	DspStatisticsGUI ();
 
 	void start_updating ();
 	void stop_updating ();
@@ -38,6 +38,7 @@ private:
 
 	sigc::connection update_connection;
 
+	Gtk::Label buffer_size_label;
 	Gtk::Label** labels;
 
 };

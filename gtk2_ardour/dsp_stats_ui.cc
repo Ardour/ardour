@@ -31,20 +31,40 @@ using namespace ARDOUR;
 using namespace Gtkmm2ext;
 using namespace Gtk;
 
-DspStatisticsGUI::DspStatisticsGUI (Session* s)
-	: SessionHandlePtr (s)
+DspStatisticsGUI::DspStatisticsGUI ()
+	: buffer_size_label ("", ALIGN_RIGHT, ALIGN_CENTER)
 {
 	const size_t nlabels = Session::NTT + AudioEngine::NTT + AudioBackend::NTT;
 
 	labels = new Label*[nlabels];
 	for (size_t n = 0; n < nlabels; ++n) {
 		labels[n] = new Label ("", ALIGN_RIGHT, ALIGN_CENTER);
-		set_size_request_to_display_given_text (*labels[n], string_compose (_("%1 [ms]"), 99.123), 0, 0);
+		set_size_request_to_display_given_text (*labels[n], string_compose (_("%1 (%2 - %3 .. %4 "), 10000, 1000, 10000, 1000), 0, 0);
 	}
 
-	// attach (*manage (new Gtk::Label (_("Minimum"), ALIGN_RIGHT, ALIGN_CENTER)),
-	// 0, 1, 0, 1, Gtk::FILL, Gtk::SHRINK, 2, 0);
-	//attach (_lbl_min, 1, 2, 0, 1, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	int row = 0;
+
+	attach (*manage (new Gtk::Label (_("Buffer size: "), ALIGN_RIGHT, ALIGN_CENTER)), 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	attach (buffer_size_label, 1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	row++;
+
+	attach (*manage (new Gtk::Label (_("Device Wait: "), ALIGN_RIGHT, ALIGN_CENTER)), 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	attach (*labels[AudioEngine::NTT + Session::NTT + AudioBackend::DeviceWait], 1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	row++;
+
+	attach (*manage (new Gtk::Label (_("Backend process: "), ALIGN_RIGHT, ALIGN_CENTER)), 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	attach (*labels[AudioEngine::NTT + Session::NTT + AudioBackend::ProcessCallback], 1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	row++;
+
+	attach (*manage (new Gtk::Label (_("Engine: "), ALIGN_RIGHT, ALIGN_CENTER)), 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	attach (*labels[AudioEngine::ProcessCallback], 1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	row++;
+
+	attach (*manage (new Gtk::Label (_("Session: "), ALIGN_RIGHT, ALIGN_CENTER)), 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	attach (*labels[AudioEngine::NTT + Session::OverallProcess], 1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	row++;
+
+	show_all ();
 }
 
 void
@@ -60,9 +80,61 @@ DspStatisticsGUI::stop_updating ()
 	update_connection.disconnect ();
 }
 
-
 void
 DspStatisticsGUI::update ()
 {
-}
+	uint64_t min;
+	uint64_t max;
+	double   avg;
+	double   dev;
+	double minf;
+	double maxf;
+	char buf[64];
 
+	int bufsize = AudioEngine::instance()->raw_buffer_size (DataType::AUDIO);
+	double bufsize_msecs = (bufsize * 1000.0) / AudioEngine::instance()->sample_rate();
+	snprintf (buf, sizeof (buf), "%d samples / %5.2f msecs", bufsize, bufsize_msecs);
+	buffer_size_label.set_text (buf);
+
+	AudioEngine::instance()->dsp_stats[AudioEngine::ProcessCallback].get_stats (min, max, avg, dev);
+
+	minf = floor (min / 1000.0);
+	maxf = floor (max / 1000.0);
+	avg /= 1000.0;
+	dev /= 1000.0;
+
+	snprintf (buf, sizeof (buf), "%7.2g msec %5.2g%% (%7.4g - %-7.2g .. %7.2g)", avg, (100.0 * avg) / bufsize_msecs, minf, maxf, dev);
+	labels[AudioEngine::ProcessCallback]->set_text (buf);
+
+	AudioEngine::instance()->current_backend()->dsp_stats[AudioBackend::DeviceWait].get_stats (min, max, avg, dev);
+
+	minf = floor (min / 1000.0);
+	maxf = floor (max / 1000.0);
+	avg /= 1000.0;
+	dev /= 1000.0;
+
+	snprintf (buf, sizeof (buf), "%7.2g msec %5.2g%% (%7.4g - %-7.2g .. %7.2g)", avg, (100.0 * avg) / bufsize_msecs, minf, maxf, dev);
+	labels[AudioEngine::NTT + Session::NTT + AudioBackend::DeviceWait]->set_text (buf);
+
+	AudioEngine::instance()->current_backend()->dsp_stats[AudioBackend::ProcessCallback].get_stats (min, max, avg, dev);
+
+	minf = floor (min / 1000.0);
+	maxf = floor (max / 1000.0);
+	avg /= 1000.0;
+	dev /= 1000.0;
+
+	snprintf (buf, sizeof (buf), "%7.2g msec %5.2g%% (%7.4g - %-7.2g .. %7.2g)", avg, (100.0 * avg) / bufsize_msecs, minf, maxf, dev);
+	labels[AudioEngine::NTT + Session::NTT + AudioBackend::ProcessCallback]->set_text (buf);
+
+	if (_session) {
+		_session->dsp_stats[AudioEngine::ProcessCallback].get_stats (min, max, avg, dev);
+
+		min = (uint64_t) floor (min / 1000.0);
+		max = (uint64_t) floor (max / 1000.0);
+		avg /= 1000.0;
+		dev /= 1000.0;
+
+		snprintf (buf, sizeof (buf), "%7.2g msec %5.2g%% (%7.4g - %-7.2g .. %7.2g)", avg, (100.0 * avg) / bufsize_msecs, minf, maxf, dev);
+		labels[AudioEngine::NTT + Session::OverallProcess]->set_text (buf);
+	}
+}
