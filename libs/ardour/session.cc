@@ -5692,6 +5692,7 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 	samplecnt_t this_chunk;
 	samplepos_t to_do;
 	samplepos_t latency_skip;
+	samplepos_t out_pos;
 	BufferSet buffers;
 	samplepos_t len = end - start;
 	bool need_block_size_reset = false;
@@ -5796,7 +5797,6 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 	}
 	buffers.set_count (max_proc);
 
-
 	/* prepare MIDI files */
 
 	for (vector<boost::shared_ptr<Source> >::iterator src = srcs.begin(); src != srcs.end(); ++src) {
@@ -5817,6 +5817,9 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 			afs->prepare_for_peakfile_writes ();
 		}
 	}
+
+	/* process */
+	out_pos = start;
 
 	while (to_do && !itt.cancel) {
 
@@ -5855,11 +5858,53 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 					Evoral::Event<samplepos_t> ev = *i;
 					if (!endpoint || for_export) {
 						ev.set_time(ev.time() - position);
+					} else {
+						/* MidiTrack::export_stuff moves event to the current cycle */
+						ev.set_time(ev.time() + out_pos - position);
 					}
 					(*m)->src->append_event_samples ((*m)->lock, ev, (*m)->src->natural_position());
 				}
 		}
+		out_pos += current_chunk;
 		latency_skip = 0;
+	}
+
+	/* post-roll, pick up delayed processor output */
+	latency_skip = track.bounce_get_latency (endpoint, include_endpoint, for_export, for_freeze);
+
+	while (latency_skip && !itt.cancel) {
+		this_chunk = min (latency_skip, bounce_chunk_size);
+		latency_skip -= this_chunk;
+
+		buffers.silence (this_chunk, 0);
+		track.bounce_process (buffers, start, this_chunk, endpoint, include_endpoint, for_export, for_freeze);
+
+		start += this_chunk;
+
+		uint32_t n = 0;
+		for (vector<boost::shared_ptr<Source> >::iterator src=srcs.begin(); src != srcs.end(); ++src, ++n) {
+			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(*src);
+
+			if (afs) {
+				if (afs->write (buffers.get_audio(n).data(), this_chunk) != this_chunk) {
+					goto out;
+				}
+			}
+		}
+
+		for (vector<MidiSourceLockMap*>::iterator m = midi_source_locks.begin(); m != midi_source_locks.end(); ++m) {
+				const MidiBuffer& buf = buffers.get_midi(0);
+				for (MidiBuffer::const_iterator i = buf.begin(); i != buf.end(); ++i) {
+					Evoral::Event<samplepos_t> ev = *i;
+					if (!endpoint || for_export) {
+						ev.set_time(ev.time() - position);
+					} else {
+						ev.set_time(ev.time() + out_pos - position);
+					}
+					(*m)->src->append_event_samples ((*m)->lock, ev, (*m)->src->natural_position());
+				}
+		}
+		out_pos += this_chunk;
 	}
 
 	tracker.resolve_notes (resolved, end-1);
@@ -5872,6 +5917,8 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 				Evoral::Event<samplepos_t> ev = *i;
 				if (!endpoint || for_export) {
 					ev.set_time(ev.time() - position);
+				} else {
+					ev.set_time(ev.time() + out_pos - position);
 				}
 				(*m)->src->append_event_samples ((*m)->lock, ev, (*m)->src->natural_position());
 			}
@@ -5883,29 +5930,6 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 	}
 
 	midi_source_locks.clear ();
-
-
-	/* post-roll, pick up delayed processor output */
-	latency_skip = track.bounce_get_latency (endpoint, include_endpoint, for_export, for_freeze);
-
-	while (latency_skip && !itt.cancel) {
-		this_chunk = min (latency_skip, bounce_chunk_size);
-		latency_skip -= this_chunk;
-
-		buffers.silence (this_chunk, 0);
-		track.bounce_process (buffers, start, this_chunk, endpoint, include_endpoint, for_export, for_freeze);
-
-		uint32_t n = 0;
-		for (vector<boost::shared_ptr<Source> >::iterator src=srcs.begin(); src != srcs.end(); ++src, ++n) {
-			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(*src);
-
-			if (afs) {
-				if (afs->write (buffers.get_audio(n).data(), this_chunk) != this_chunk) {
-					goto out;
-				}
-			}
-		}
-	}
 
 	if (!itt.cancel) {
 
