@@ -1961,11 +1961,13 @@ AlsaAudioBackend::main_process_thread ()
 				/* call engine process callback */
 				_last_process_start = g_get_monotonic_time ();
 				dsp_stats[PreProcess].update();
+				dsp_stats[ProcessCallback].start();
 				if (engine.process_callback (_samples_per_period)) {
 					_pcmi->pcm_stop ();
 					_active = false;
 					return 0;
 				}
+				dsp_stats[ProcessCallback].update();
 				dsp_stats[PostProcess].start ();
 
 				/* only used when adding/removing MIDI device/system ports */
