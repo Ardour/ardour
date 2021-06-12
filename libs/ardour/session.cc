@@ -5852,6 +5852,8 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 			}
 		}
 
+		/* XXX NUTEMPO fix this to not use samples */
+
 		for (vector<MidiSourceLockMap*>::iterator m = midi_source_locks.begin(); m != midi_source_locks.end(); ++m) {
 				const MidiBuffer& buf = buffers.get_midi(0);
 				for (MidiBuffer::const_iterator i = buf.begin(); i != buf.end(); ++i) {
@@ -5891,6 +5893,8 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 				}
 			}
 		}
+
+		/* XXX NUTEMPO fix this to not use samples */
 
 		for (vector<MidiSourceLockMap*>::iterator m = midi_source_locks.begin(); m != midi_source_locks.end(); ++m) {
 				const MidiBuffer& buf = buffers.get_midi(0);
