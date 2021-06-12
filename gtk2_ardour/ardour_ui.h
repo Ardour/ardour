@@ -103,6 +103,7 @@
 #include "big_clock_window.h"
 #include "big_transport_window.h"
 #include "bundle_manager.h"
+#include "dsp_stats_window.h"
 #include "engine_dialog.h"
 #include "export_video_dialog.h"
 #include "global_port_matrix.h"

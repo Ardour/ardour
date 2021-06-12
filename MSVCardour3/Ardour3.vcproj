@@ -472,6 +472,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\dsp_stats_ui.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\dsp_stats_window.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\duplicate_routes_dialog.cc"
 				>
 			</File>
@@ -1639,6 +1647,14 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\debug.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\dsp_stats_ui.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\dsp_stats_window.h"
 				>
 			</File>
 			<File
