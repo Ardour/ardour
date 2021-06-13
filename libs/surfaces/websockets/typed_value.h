@@ -16,10 +16,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <string>
-
 #ifndef _ardour_surface_websockets_typed_value_h_
 #define _ardour_surface_websockets_typed_value_h_
+
+#include <string>
 
 namespace ArdourSurface {
 
