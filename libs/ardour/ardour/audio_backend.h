@@ -851,11 +851,12 @@ public:
 
 	enum TimingTypes {
 		DeviceWait = 0,
-		PreProcess = 1,
-		ProcessCallback = 2,
-		PostProcess = 3,
+		PreProcess,
+		ProcessCallback,
+		PostProcess,
+		RunLoop,
 		/* end */
-		NTT = 4
+		NTT
 	};
 
 	PBD::TimingStats dsp_stats[NTT];

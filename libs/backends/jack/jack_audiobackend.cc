@@ -977,6 +977,7 @@ JACKAudioBackend::process_thread ()
         AudioEngine::thread_init_callback (this);
 
         while (1) {
+                TimerRAII ltr (dsp_stats[RunLoop]);
                 GET_PRIVATE_JACK_POINTER_RET(_priv_jack,0);
 
                 dsp_stats[AudioBackend::DeviceWait].start ();

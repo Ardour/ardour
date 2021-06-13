@@ -1855,6 +1855,7 @@ AlsaAudioBackend::main_process_thread ()
 			dsp_stats[DeviceWait].start();
 			nr = _pcmi->pcm_wait ();
 			dsp_stats[DeviceWait].update();
+			dsp_stats[RunLoop].start ();
 
 			/* update DLL */
 			dsp_stats[PreProcess].start();
@@ -2021,6 +2022,7 @@ AlsaAudioBackend::main_process_thread ()
 				++last_n_periods;
 
 				dsp_stats[PostProcess].update ();
+				dsp_stats[RunLoop].update ();
 			}
 
 			if (xrun && (_pcmi->capt_xrun () > 0 || _pcmi->play_xrun () > 0)) {
