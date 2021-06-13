@@ -100,6 +100,13 @@ public:
 	void scan_log (std::vector<boost::shared_ptr<PluginScanLogEntry> >&) const;
 	void clear_stale_log ();
 
+	bool whitelist (ARDOUR::PluginType, std::string const&, bool force);
+	void blacklist (ARDOUR::PluginType, std::string const&);
+	static std::string cache_file (ARDOUR::PluginType, std::string const&);
+
+	bool rescan_plugin (ARDOUR::PluginType, std::string const&, bool batch = false);
+	void rescan_faulty ();
+
 	/* always return LXVST for any VST subtype */
 	static PluginType to_generic_vst (const PluginType);
 
@@ -124,7 +131,7 @@ public:
 
 	std::string user_plugin_metadata_dir () const;
 	void save_statuses ();
-	void set_status (ARDOUR::PluginType type, std::string unique_id, PluginStatusType status);
+	void set_status (ARDOUR::PluginType type, std::string const& unique_id, PluginStatusType status);
 	PluginStatusType get_status (const PluginInfoPtr&) const;
 
 	void save_tags ();
@@ -282,6 +289,8 @@ private:
 
 	void detect_name_ambiguities (ARDOUR::PluginInfoList*);
 	void detect_type_ambiguities (ARDOUR::PluginInfoList&);
+
+	void detect_ambiguities ();
 
 	void conceal_duplicates (ARDOUR::PluginInfoList*, ARDOUR::PluginInfoList*);
 

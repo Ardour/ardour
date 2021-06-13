@@ -592,7 +592,12 @@ PluginManager::refresh (bool cache_only)
 	PluginScanMessage(X_("closeme"), "", false);
 
 	BootMessage (_("Indexing Plugins..."));
+	detect_ambiguities ();
+}
 
+void
+PluginManager::detect_ambiguities ()
+{
 	detect_name_ambiguities (_windows_vst_plugin_info);
 	detect_name_ambiguities (_lxvst_plugin_info);
 	detect_name_ambiguities (_mac_vst_plugin_info);
@@ -1151,6 +1156,10 @@ PluginManager::auv2_plugin (CAComponentDescription const& desc, AUv2Info const& 
 int
 PluginManager::auv2_discover (AUv2DescStr const& d, bool cache_only)
 {
+	if (!d.valid ()) {
+		return -1;
+	}
+
 	std::string dstr = d.to_s ();
 	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("checking AU plugin at %1\n", dstr));
 
@@ -2292,7 +2301,7 @@ PluginManager::load_statuses ()
 }
 
 void
-PluginManager::set_status (PluginType t, string id, PluginStatusType status)
+PluginManager::set_status (PluginType t, string const& id, PluginStatusType status)
 {
 	PluginStatus ps (t, id, status);
 	statuses.erase (ps);
@@ -2870,6 +2879,293 @@ PluginManager::lua_plugin_info ()
 /* ****************************************************************************/
 
 void
+PluginManager::blacklist (ARDOUR::PluginType type, std::string const& path_uid)
+{
+	PluginInfoList* pil = 0;
+
+	switch (type) {
+		case AudioUnit:
+#ifdef AUDIOUNIT_SUPPORT
+			auv2_blacklist (path_uid);
+			pil = _au_plugin_info;
+#endif
+			break;
+		case Windows_VST:
+#ifdef WINDOWS_VST_SUPPORT
+			vst2_blacklist (path_uid);
+			pil = _windows_vst_plugin_info;
+#endif
+			break;
+		case LXVST:
+#ifdef LXVST_SUPPORT
+			vst2_blacklist (path_uid);
+			pil = _lxvst_plugin_info;
+#endif
+			break;
+		case MacVST:
+#ifdef MACVST_SUPPORT
+			vst2_blacklist (path_uid);
+			pil = _mac_vst_plugin_info;
+#endif
+			break;
+		case VST3:
+#ifdef VST3_SUPPORT
+			vst3_blacklist (path_uid);
+			pil = _vst3_plugin_info;
+#endif
+			break;
+		default:
+			return;
+	}
+
+	PSLEPtr psle (scan_log_entry (type, path_uid));
+	psle->msg (PluginScanLogEntry::Blacklisted);
+	save_scanlog ();
+
+	if (!pil) {
+		return;
+	}
+
+	/* remove existing info */
+	PluginScanLog::iterator i = _plugin_scan_log.find (PSLEPtr (new PluginScanLogEntry (type, path_uid)));
+	if (i != _plugin_scan_log.end ()) {
+		PluginInfoList const& plugs ((*i)->nfo ());
+		for (PluginInfoList::const_iterator j = plugs.begin(); j != plugs.end(); ++j) {
+			PluginInfoList::const_iterator k = std::find (pil->begin(), pil->end(), *j);
+			if (k != pil->end()) {
+				pil->erase (k);
+			}
+		}
+	}
+	PluginListChanged (); /* EMIT SIGNAL */
+}
+
+bool
+PluginManager::whitelist (ARDOUR::PluginType type, std::string const& path_uid, bool force)
+{
+	if (!force) {
+		PluginScanLog::iterator i = _plugin_scan_log.find (PSLEPtr (new PluginScanLogEntry (type, path_uid)));
+		if (i == _plugin_scan_log.end ()) {
+			/* plugin was not found */
+			return false;
+		}
+		/* only allow manually blacklisted (no error) */
+		if ((*i)->result () != PluginScanLogEntry::Blacklisted) {
+			return false;
+		}
+	}
+
+	switch (type) {
+		case AudioUnit:
+#ifdef AUDIOUNIT_SUPPORT
+			auv2_whitelist (path_uid);
+			return true;
+#endif
+			break;
+		case Windows_VST:
+		case LXVST:
+		case MacVST:
+#if (defined WINDOWS_VST_SUPPORT || defined MACVST_SUPPORT || defined LXVST_SUPPORT)
+			vst2_whitelist (path_uid);
+			return true;
+#endif
+			break;
+		case VST3:
+#ifdef VST3_SUPPORT
+			vst3_whitelist (path_uid);
+			return true;
+#endif
+			break;
+		default:
+			break;
+	}
+	return false;
+}
+
+std::string
+PluginManager::cache_file (ARDOUR::PluginType type, std::string const& path_uid)
+{
+	std::string fn;
+
+	switch (type) {
+		case AudioUnit:
+#ifdef AUDIOUNIT_SUPPORT
+			{
+				AUv2DescStr aud (path_uid);
+				fn = auv2_cache_file (aud.desc ());
+			}
+#endif
+			break;
+		case Windows_VST:
+		case LXVST:
+		case MacVST:
+#if (defined WINDOWS_VST_SUPPORT || defined MACVST_SUPPORT || defined LXVST_SUPPORT)
+			fn = ARDOUR::vst2_cache_file (path_uid);
+#endif
+			break;
+		case VST3:
+#ifdef VST3_SUPPORT
+			fn = ARDOUR::vst3_cache_file (path_uid);
+#endif
+			break;
+		default:
+			break;
+	}
+	if (!fn.empty () && !Glib::file_test (fn, Glib::FileTest (Glib::FILE_TEST_EXISTS | Glib::FILE_TEST_IS_REGULAR))) {
+		return "";
+	}
+	return fn;
+}
+
+bool
+PluginManager::rescan_plugin (ARDOUR::PluginType type, std::string const& path_uid, bool batch)
+{
+	PluginInfoList* pil = 0;
+
+	switch (type) {
+		case AudioUnit:
+			pil = _au_plugin_info;
+			break;
+		case Windows_VST:
+			pil = _windows_vst_plugin_info;
+			break;
+		case LXVST:
+			pil = _lxvst_plugin_info;
+			break;
+		case MacVST:
+			pil = _mac_vst_plugin_info;
+			break;
+		case VST3:
+			pil = _vst3_plugin_info;
+			// XXX resolve VST module to bundle
+			// string module_path = module_path_vst3 (uid);
+			break;
+		case LADSPA:
+			pil = _ladspa_plugin_info;
+			break;
+		default:
+			DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Invalid plugin type for rescan: %1\n", type));
+			return false;
+	}
+
+	if (!pil) {
+		DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Rescan of '%1' without initial scan\n", type));
+		return false;
+	}
+
+	bool erased = false;
+	/* remove existing info */
+	PluginScanLog::iterator i = _plugin_scan_log.find (PSLEPtr (new PluginScanLogEntry (type, path_uid)));
+	if (i != _plugin_scan_log.end ()) {
+		PluginInfoList const& plugs ((*i)->nfo ());
+		for (PluginInfoList::const_iterator j = plugs.begin(); j != plugs.end(); ++j) {
+			PluginInfoList::const_iterator k = std::find (pil->begin(), pil->end(), *j);
+			if (k != pil->end()) {
+				pil->erase (k);
+			}
+			erased = true;
+		}
+	}
+
+	if (!batch) {
+		_cancel_scan = false;
+		_cancel_all_scan_timeout = false;
+	}
+
+	whitelist (type, path_uid, true);
+	_cancel_scan_timeout = false;
+
+	/* force re-scan, remove cache file */
+	std::string fn = cache_file ((*i)->type (), (*i)->path ());
+	if (!fn.empty ()) {
+		::g_unlink (fn.c_str ());
+	}
+
+	int rv = -1;
+	switch (type) {
+		case AudioUnit:
+#ifdef AUDIOUNIT_SUPPORT
+			{
+				AUv2DescStr aud (path_uid);
+				ARDOUR::PluginScanMessage(_("AUv2"), aud.to_s(), !cancelled());
+				rv = auv2_discover (aud, false);
+			}
+#endif
+			break;
+		case Windows_VST:
+		case LXVST:
+		case MacVST:
+#if (defined WINDOWS_VST_SUPPORT || defined MACVST_SUPPORT || defined LXVST_SUPPORT)
+			ARDOUR::PluginScanMessage(_("VST2"), path_uid, !cancelled());
+			rv = vst2_discover (path_uid, type, false);
+#endif
+			break;
+		case VST3:
+#ifdef VST3_SUPPORT
+			ARDOUR::PluginScanMessage(_("VST3"), path_uid, !cancelled());
+			rv = vst3_discover (path_uid, false);
+#endif
+			break;
+		case LADSPA:
+			ARDOUR::PluginScanMessage(_("LADSPA"), path_uid, !cancelled());
+			rv = ladspa_discover (path_uid);
+			break;
+		default:
+			return false;
+	}
+
+	if (batch) {
+		return (rv >= 0 || erased);
+	}
+
+	_cancel_scan = false;
+	if (rv < 0) {
+		save_scanlog ();
+		if (erased) {
+			PluginListChanged (); /* EMIT SIGNAL */
+		}
+		PluginScanMessage(X_("closeme"), "", false);
+		return false;
+	}
+
+	PluginScanMessage(X_("closeme"), "", false);
+	detect_ambiguities ();
+	return true;
+}
+
+void
+PluginManager::rescan_faulty ()
+{
+	bool changed = false;
+	/* rescan can change _plugin_scan_log, so we need to make a copy first */
+	PluginScanLog psl;
+	for (PluginScanLog::const_iterator i = _plugin_scan_log.begin(); i != _plugin_scan_log.end(); ++i) {
+		if (!(*i)->recent() || ((*i)->result() & PluginScanLogEntry::Faulty) != PluginScanLogEntry::OK) {
+			psl.insert (*i);
+		}
+	}
+
+	_cancel_scan = false;
+	_cancel_all_scan_timeout = false;
+
+	for (PluginScanLog::const_iterator i = psl.begin(); i != psl.end(); ++i) {
+		changed |= rescan_plugin ((*i)->type (), (*i)->path (), true);
+		if (cancelled ()) {
+			break;
+		}
+	}
+	_cancel_scan = false;
+	PluginScanMessage(X_("closeme"), "", false);
+
+	if (changed) {
+		detect_ambiguities ();
+	} else {
+		save_scanlog ();
+	}
+}
+
+/* ****************************************************************************/
+void
 PluginManager::scan_log (std::vector<boost::shared_ptr<PluginScanLogEntry> >& l) const
 {
 	for (PluginScanLog::const_iterator i = _plugin_scan_log.begin(); i != _plugin_scan_log.end(); ++i) {
@@ -2882,12 +3178,18 @@ PluginManager::clear_stale_log ()
 {
 	for (PluginScanLog::const_iterator i = _plugin_scan_log.begin(); i != _plugin_scan_log.end();) {
 		if (!(*i)->recent()) {
+			whitelist ((*i)->type (), (*i)->path (), true);
+			std::string fn = cache_file ((*i)->type (), (*i)->path ());
+			if (!fn.empty ()) {
+				DEBUG_TRACE (DEBUG::PluginManager, string_compose ("unlink stale cache: %1\n", fn));
+				::g_unlink (fn.c_str ());
+			}
 			i = _plugin_scan_log.erase (i);
-			// TODO also remove cache file (and blacklist entry)
 		} else {
 			++i;
 		}
 	}
+	save_scanlog ();
 }
 
 void
