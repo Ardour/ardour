@@ -39,8 +39,8 @@ ArdourWebsockets::ArdourWebsockets (Session& s)
     , AbstractUI<ArdourWebsocketsUIRequest> (name ())
     , _mixer (*this)
     , _transport (*this)
-    , _feedback (*this)
     , _server (*this)
+    , _feedback (*this)
     , _dispatcher (*this)
 {
 	_components.push_back (&_mixer);

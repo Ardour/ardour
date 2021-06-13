@@ -195,6 +195,7 @@ WebsocketsServer::stop ()
 
 	if (_g_source) { // Method 3
 		g_source_destroy (_g_source);
+		lws_cancel_service (_lws_context);
 	}
 
 	if (_lws_context) {
