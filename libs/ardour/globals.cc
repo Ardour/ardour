@@ -125,6 +125,7 @@
 #include "ardour/region.h"
 #include "ardour/route_group.h"
 #include "ardour/runtime_functions.h"
+#include "ardour/session.h"
 #include "ardour/session_event.h"
 #include "ardour/source_factory.h"
 #include "ardour/transport_fsm.h"
@@ -991,5 +992,21 @@ ARDOUR::format_data_width (ARDOUR::SampleFormat format)
 			return 24;
 		default:
 			return 32;
+	}
+}
+
+void
+ARDOUR::reset_performance_meters (Session *session)
+{
+	if (session) {
+		for (size_t n = 0; n < Session::NTT; ++n) {
+			session->dsp_stats[n].queue_reset ();
+		}
+	}
+	for (size_t n = 0; n < AudioEngine::NTT; ++n) {
+		AudioEngine::instance()->dsp_stats[n].queue_reset ();
+	}
+	for (size_t n = 0; n < AudioBackend::NTT; ++n) {
+		AudioEngine::instance()->current_backend()->dsp_stats[n].queue_reset ();
 	}
 }

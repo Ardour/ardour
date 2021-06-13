@@ -49,6 +49,7 @@ namespace MIDI {
 namespace ARDOUR {
 
 	class AudioEngine;
+	class Session;
 
 	extern LIBARDOUR_API PBD::Signal1<void,std::string> BootMessage;
 	extern LIBARDOUR_API PBD::Signal3<void,std::string,std::string,bool> PluginScanMessage;
@@ -94,6 +95,8 @@ namespace ARDOUR {
 	 */
 	LIBARDOUR_API void check_for_old_configuration_files ();
 	LIBARDOUR_API int handle_old_configuration_files (boost::function<bool (std::string const&, std::string const&, int)> ui_handler);
+
+	LIBARDOUR_API void reset_performance_meters (Session*);
 }
 
 #endif /* __ardour_ardour_h__ */
