@@ -102,10 +102,7 @@ struct PluginParamValueObserver {
 FeedbackHelperUI::FeedbackHelperUI()
 	: AbstractUI<BaseUI::BaseRequestObject> ("feedback_helper")
 {
-	pthread_set_name ("test_ui_thread"); // FIXME - needed?
-	run_loop_thread = Glib::Threads::Thread::self ();
 	set_event_loop_for_thread (this);
-	ARDOUR::SessionEvent::create_per_thread_pool ("test", 512); // FIXME - needed?
 }
 
 void
