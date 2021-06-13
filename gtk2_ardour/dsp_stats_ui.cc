@@ -80,17 +80,7 @@ DspStatisticsGUI::DspStatisticsGUI ()
 void
 DspStatisticsGUI::reset_button_clicked ()
 {
-	if (_session) {
-		for (size_t n = 0; n < Session::NTT; ++n) {
-			_session->dsp_stats[n].queue_reset ();
-		}
-	}
-	for (size_t n = 0; n < AudioEngine::NTT; ++n) {
-		AudioEngine::instance()->dsp_stats[n].queue_reset ();
-	}
-	for (size_t n = 0; n < AudioBackend::NTT; ++n) {
-		AudioEngine::instance()->current_backend()->dsp_stats[n].queue_reset ();
-	}
+	ARDOUR::reset_performance_meters (_session);
 }
 
 void
