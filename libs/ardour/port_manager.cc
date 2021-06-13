@@ -740,11 +740,6 @@ PortManager::reestablish_ports ()
 
 	if (Config->get_work_around_jack_no_copy_optimization () && AudioEngine::instance()->current_backend_name() == X_("JACK")) {
 		PortEngine::PortHandle ph = port_engine().register_port (X_("physical_input_monitor_enable"), DataType::AUDIO, ARDOUR::PortFlags (IsInput|IsTerminal|Hidden));
-		std::vector<std::string> audio_ports;
-		get_physical_inputs (DataType::AUDIO, audio_ports);
-		for (std::vector<std::string>::iterator p = audio_ports.begin(); p != audio_ports.end(); ++p) {
-			port_engine().connect (ph, *p);
-		}
 	}
 
 	update_input_ports (true);
@@ -784,6 +779,15 @@ PortManager::reconnect_ports ()
 	for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
 		if (i->second->reconnect ()) {
 			PortConnectedOrDisconnected (i->second, i->first, boost::weak_ptr<Port>(), "", false);
+		}
+	}
+
+	if (Config->get_work_around_jack_no_copy_optimization () && AudioEngine::instance()->current_backend_name() == X_("JACK")) {
+		std::string const our_name = AudioEngine::instance()->make_port_name_non_relative (X_("physical_input_monitor_enable"));
+		std::vector<std::string> audio_ports;
+		get_physical_inputs (DataType::AUDIO, audio_ports);
+		for (std::vector<std::string>::iterator p = audio_ports.begin(); p != audio_ports.end(); ++p) {
+			port_engine().connect (*p, our_name);
 		}
 	}
 
