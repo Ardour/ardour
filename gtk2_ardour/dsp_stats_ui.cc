@@ -36,11 +36,14 @@ DspStatisticsGUI::DspStatisticsGUI ()
 	, reset_button (_("Reset"))
 {
 	const size_t nlabels = Session::NTT + AudioEngine::NTT + AudioBackend::NTT;
+	char buf[64];
 
 	labels = new Label*[nlabels];
+	snprintf (buf, sizeof (buf), "%7.2f msec %6.2f%%", 10000.0, 100.0);
+
 	for (size_t n = 0; n < nlabels; ++n) {
 		labels[n] = new Label ("", ALIGN_RIGHT, ALIGN_CENTER);
-		set_size_request_to_display_given_text (*labels[n], string_compose (_("%1 (%2 - %3 .. %4 "), 10000, 1000, 10000, 1000), 0, 0);
+		set_size_request_to_display_given_text (*labels[n], buf, 0, 0);
 	}
 
 	int row = 0;
