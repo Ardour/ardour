@@ -322,7 +322,9 @@ AudioEngine::process_callback (pframes_t nframes)
 		PortManager::cycle_end (nframes);
 		if (_init_countdown == 0) {
 			_session->reset_xrun_count();
+			ARDOUR::reset_performance_meters (_session);
 		}
+
 		return 0;
 	}
 
