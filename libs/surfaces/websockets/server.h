@@ -39,16 +39,6 @@
 // TO DO: make this configurable
 #define WEBSOCKET_LISTEN_PORT 3818
 
-// lws includes integration with the glib event loop starting from v4
-#ifndef LWS_WITH_GLIB
-struct LwsPollFdGlibSource {
-	struct lws_pollfd             lws_pfd;
-	Glib::RefPtr<Glib::IOChannel> g_channel;
-	Glib::RefPtr<Glib::IOSource>  rg_iosrc;
-	Glib::RefPtr<Glib::IOSource>  wg_iosrc;
-};
-#endif
-
 namespace ArdourSurface {
 
 class WebsocketsServer : public SurfaceComponent
@@ -87,11 +77,23 @@ private:
 
 	static int lws_callback (struct lws*, enum lws_callback_reasons, void*, void*, size_t);
 
-#ifndef LWS_WITH_GLIB
+	/* Glib event loop integration that requires LWS_WITH_EXTERNAL_POLL */
+
+	struct LwsPollFdGlibSource {
+		struct lws_pollfd             lws_pfd;
+		Glib::RefPtr<Glib::IOChannel> g_channel;
+		Glib::RefPtr<Glib::IOSource>  rg_iosrc;
+		Glib::RefPtr<Glib::IOSource>  wg_iosrc;
+	};
+
 	Glib::RefPtr<Glib::IOChannel> _channel;
 
 	typedef boost::unordered_map<lws_sockfd_type, LwsPollFdGlibSource> LwsPollFdGlibSourceMap;
-	LwsPollFdGlibSourceMap                                             _fd_ctx;
+	LwsPollFdGlibSourceMap _fd_ctx;
+
+	bool _fd_callbacks;
+
+	bool fd_callbacks () { return _fd_callbacks; }
 
 	int add_poll_fd (struct lws_pollargs*);
 	int mod_poll_fd (struct lws_pollargs*);
@@ -101,7 +103,18 @@ private:
 
 	Glib::IOCondition events_to_ioc (int);
 	int               ioc_to_events (Glib::IOCondition);
-#endif
+
+	/* Glib event loop integration that does NOT require LWS_WITH_EXTERNAL_POLL
+	   but needs a secondary thread for notifying the server when there is
+	   pending data for writing. Unfortunately libwesockets' own approach to
+	   Glib integration cannot be copied because it relies on file descriptors
+	   that are hidden by the 'lws' opaque type. See feedback.cc . */
+
+	GSource* _g_source;
+
+	void            request_write ();
+	static gboolean glib_idle_callback (void *data);
+
 };
 
 } // namespace ArdourSurface
