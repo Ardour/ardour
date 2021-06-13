@@ -131,19 +131,32 @@ public:
 
 	void update ()
 	{
-		Timing::update ();
-		calc ();
+		if (_queue_reset) {
+			reset ();
+		} else {
+			Timing::update ();
+			calc ();
+		}
 	}
 
 	/* interval computed externally */
 	void update (uint64_t interval)
 	{
-		Timing::update (interval);
-		calc ();
+		if (_queue_reset) {
+			reset ();
+		} else {
+			Timing::update (interval);
+			calc ();
+		}
+	}
+
+	void queue_reset () {
+		_queue_reset = true;
 	}
 
 	void reset ()
 	{
+		_queue_reset = 0;
 		Timing::reset ();
 		_min = std::numeric_limits<uint64_t>::max();
 		_max = 0;
@@ -203,6 +216,7 @@ private:
 	double   _avg;
 	double   _vm;
 	double   _vs;
+	int      _queue_reset;
 };
 
 class LIBPBD_API TimerRAII
