@@ -170,8 +170,6 @@ ExportHandler::do_export ()
 int
 ExportHandler::start_timespan ()
 {
-	export_status->timespan++;
-
 	/* stop freewheeling and wait for latency callbacks */
 	if (AudioEngine::instance()->freewheeling ()) {
 		AudioEngine::instance()->freewheel (false);
@@ -185,6 +183,8 @@ ExportHandler::start_timespan ()
 		export_status->set_running (false);
 		return -1;
 	}
+
+	export_status->timespan++;
 
 	/* finish_timespan pops the config_map entry that has been done, so
 	   this is the timespan to do this time
