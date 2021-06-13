@@ -235,6 +235,13 @@ public:
 		return ret;
 	}
 
+	void no_update () {
+		/* just releases the lock, in the event that no changes are
+		   made to a write copy.
+		*/
+		_lock.unlock ();
+	}
+
 	void flush ()
 	{
 		Glib::Threads::Mutex::Lock lm (_lock);
