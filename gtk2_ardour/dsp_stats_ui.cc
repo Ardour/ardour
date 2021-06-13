@@ -33,6 +33,7 @@ using namespace Gtk;
 
 DspStatisticsGUI::DspStatisticsGUI ()
 	: buffer_size_label ("", ALIGN_RIGHT, ALIGN_CENTER)
+	, reset_button (_("Reset"))
 {
 	const size_t nlabels = Session::NTT + AudioEngine::NTT + AudioBackend::NTT;
 
@@ -52,8 +53,8 @@ DspStatisticsGUI::DspStatisticsGUI ()
 	attach (*labels[AudioEngine::NTT + Session::NTT + AudioBackend::DeviceWait], 1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
 	row++;
 
-	attach (*manage (new Gtk::Label (_("Backend pre-process: "), ALIGN_RIGHT, ALIGN_CENTER)), 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
-	attach (*labels[AudioEngine::NTT + Session::NTT + AudioBackend::PreProcess], 1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	attach (*manage (new Gtk::Label (_("DSP: "), ALIGN_RIGHT, ALIGN_CENTER)), 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	attach (*labels[AudioEngine::NTT + Session::NTT + AudioBackend::RunLoop], 1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
 	row++;
 
 	attach (*manage (new Gtk::Label (_("Engine: "), ALIGN_RIGHT, ALIGN_CENTER)), 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
@@ -64,11 +65,27 @@ DspStatisticsGUI::DspStatisticsGUI ()
 	attach (*labels[AudioEngine::NTT + Session::OverallProcess], 1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
 	row++;
 
-	attach (*manage (new Gtk::Label (_("Backend post-process: "), ALIGN_RIGHT, ALIGN_CENTER)), 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
-	attach (*labels[AudioEngine::NTT + Session::NTT + AudioBackend::PostProcess], 1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
-	row++;
+	attach (reset_button, 1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
+
+	reset_button.signal_clicked().connect (sigc::mem_fun (*this, &DspStatisticsGUI::reset_button_clicked));
 
 	show_all ();
+}
+
+void
+DspStatisticsGUI::reset_button_clicked ()
+{
+	if (_session) {
+		for (size_t n = 0; n < Session::NTT; ++n) {
+			_session->dsp_stats[n].queue_reset ();
+		}
+	}
+	for (size_t n = 0; n < AudioEngine::NTT; ++n) {
+		AudioEngine::instance()->dsp_stats[n].queue_reset ();
+	}
+	for (size_t n = 0; n < AudioBackend::NTT; ++n) {
+		AudioEngine::instance()->current_backend()->dsp_stats[n].queue_reset ();
+	}
 }
 
 void
@@ -115,20 +132,17 @@ DspStatisticsGUI::update ()
 		labels[AudioEngine::NTT + Session::NTT + AudioBackend::DeviceWait]->set_text (_("not measured"));
 	}
 
-	if (AudioEngine::instance()->current_backend()->dsp_stats[AudioBackend::PreProcess].get_stats (min, max, avg, dev)) {
+	if (AudioEngine::instance()->current_backend()->dsp_stats[AudioBackend::RunLoop].get_stats (min, max, avg, dev)) {
 
-		snprintf (buf, sizeof (buf), "%7.2f usec %5.2f%% (%" PRId64 " - %" PRId64 " .. %7.2g)", avg, (100.0 * avg) / bufsize_usecs, min, max, dev);
-		labels[AudioEngine::NTT + Session::NTT + AudioBackend::PreProcess]->set_text (buf);
+		if (max > 1000.0) {
+			double maxf = max / 1000.0;
+			snprintf (buf, sizeof (buf), "%7.2f msec %5.2f%%", maxf, (100.0 * maxf) / bufsize_msecs);
+		} else {
+			snprintf (buf, sizeof (buf), "%" PRId64 " usec %5.2f%%", max, (100.0 * max) / bufsize_usecs);
+		}
+		labels[AudioEngine::NTT + Session::NTT + AudioBackend::RunLoop]->set_text (buf);
 	} else {
-		labels[AudioEngine::NTT + Session::NTT + AudioBackend::PreProcess]->set_text (_("not measured"));
-	}
-
-	if (AudioEngine::instance()->current_backend()->dsp_stats[AudioBackend::PostProcess].get_stats (min, max, avg, dev)) {
-
-		snprintf (buf, sizeof (buf), "%7.2f usec %5.2f%% (%" PRId64 " - %" PRId64 " .. %7.2g)", avg, (100.0 * avg) / bufsize_usecs, min, max, dev);
-		labels[AudioEngine::NTT + Session::NTT + AudioBackend::PostProcess]->set_text (buf);
-	} else {
-		labels[AudioEngine::NTT + Session::NTT + AudioBackend::PostProcess]->set_text (_("not measured"));
+		labels[AudioEngine::NTT + Session::NTT + AudioBackend::RunLoop]->set_text (_("not measured"));
 	}
 
 	AudioEngine::instance()->dsp_stats[AudioEngine::ProcessCallback].get_stats (min, max, avg, dev);

@@ -19,7 +19,7 @@
 #ifndef _gtkardour_dspstats_ui_h_
 #define _gtkardour_dspstats_ui_h_
 
-#include <gtkmm/widget.h>
+#include <gtkmm/button.h>
 #include <gtkmm/table.h>
 #include <gtkmm/label.h>
 
@@ -40,6 +40,9 @@ private:
 
 	Gtk::Label buffer_size_label;
 	Gtk::Label** labels;
+	Gtk::Button reset_button;
+
+	void reset_button_clicked();
 
 };
 
