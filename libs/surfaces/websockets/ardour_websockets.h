@@ -95,8 +95,8 @@ protected:
 private:
 	ArdourMixer                    _mixer;
 	ArdourTransport                _transport;
-	ArdourFeedback                 _feedback;
 	WebsocketsServer               _server;
+	ArdourFeedback                 _feedback;
 	WebsocketsDispatcher           _dispatcher;
 	std::vector<SurfaceComponent*> _components;
 

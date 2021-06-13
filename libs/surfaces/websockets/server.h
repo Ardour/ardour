@@ -112,8 +112,11 @@ private:
 
 	GSource* _g_source;
 
-	void            request_write ();
-	static gboolean glib_idle_callback (void *data);
+	static gboolean glib_idle_callback (void *);
+
+public:
+	bool should_request_write () { return _g_source != 0; }
+	void request_write ();
 
 };
 
