@@ -118,7 +118,7 @@ int
 WebsocketsServer::start ()
 {
 #ifndef NDEBUG
-	lws_set_log_level (LLL_ERR | LLL_WARN | LLL_DEBUG, 0);
+	lws_set_log_level (LLL_ERR | LLL_WARN /*| LLL_DEBUG*/, 0);
 #endif
 
 	if (_lws_context) {
@@ -235,7 +235,7 @@ WebsocketsServer::recv_client (Client wsi, void* buf, size_t len)
 		return 1;
 	}
 
-#ifndef NDEBUG
+#ifdef PRINT_TRAFFIC
 	std::cerr << "RX " << msg.state ().debug_str () << std::endl;
 #endif
 
@@ -274,7 +274,7 @@ WebsocketsServer::write_client (Client wsi)
 	int len = msg.serialize (out_buf + LWS_PRE, 1024 - LWS_PRE);
 
 	if (len > 0) {
-#ifndef NDEBUG
+#ifdef PRINT_TRAFFIC
 		std::cerr << "TX " << msg.state ().debug_str () << std::endl;
 #endif
 		if (lws_write (wsi, out_buf + LWS_PRE, len, LWS_WRITE_TEXT) != len) {
