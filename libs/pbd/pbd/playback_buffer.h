@@ -90,7 +90,7 @@ public:
 		guint rv;
 
 		if (w > r) {
-			rv = (r - w + size) & size_mask;
+			rv = ((r + size) - w) & size_mask;
 		} else if (w < r) {
 			rv = (r - w);
 		} else {
@@ -119,7 +119,7 @@ public:
 		if (w > r) {
 			return w - r;
 		} else {
-			return (w - r + size) & size_mask;
+			return ((w + size) - r) & size_mask;
 		}
 	}
 
