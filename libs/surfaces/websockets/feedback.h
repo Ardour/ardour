@@ -62,8 +62,10 @@ private:
 	PBD::ScopedConnectionList _transport_connections;
 	sigc::connection          _periodic_connection;
 
-	// Only needed for server event loop integration method 3
-	FeedbackHelperUI          _helper;
+	// Only needed for server event loop integration method #3
+	mutable FeedbackHelperUI  _helper;
+
+	PBD::EventLoop* event_loop () const override;
 
 	bool poll () const;
 

@@ -218,7 +218,7 @@ WebsocketsServer::update_client (Client wsi, const NodeState& state, bool force)
 		/* write to client only if state was updated */
 		it->second.update_state (state);
 		it->second.output_buf ().push_back (NodeStateMessage (state));
-		lws_callback_on_writable (wsi);
+		request_write (wsi);
 	}
 }
 
@@ -308,7 +308,7 @@ WebsocketsServer::write_client (Client wsi)
 	}
 
 	if (!pending.empty ()) {
-		lws_callback_on_writable (wsi);
+		request_write (wsi);
 	}
 
 	return 0;
@@ -360,7 +360,7 @@ WebsocketsServer::send_availsurf_hdr (Client wsi)
 	}
 #endif
 
-	lws_callback_on_writable (wsi);
+	request_write (wsi);
 
 	return 0;
 }
@@ -391,6 +391,17 @@ WebsocketsServer::send_availsurf_body (Client wsi)
 	}
 
 	return -1;	// end connection
+}
+
+void
+WebsocketsServer::request_write (Client wsi)
+{
+	lws_callback_on_writable (wsi);
+
+	if (read_blocks_event_loop ()) {
+		// cancel lws_service() in the idle callback to write pending data asap
+		lws_cancel_service (_lws_context);
+	}
 }
 
 int
@@ -629,13 +640,6 @@ WebsocketsServer::ioc_to_events (IOCondition ioc)
 	}
 
 	return events;
-}
-
-void
-WebsocketsServer::request_write ()
-{
-	// cancel lws_service() in the idle callback to write pending data asap
-	lws_cancel_service (_lws_context);
 }
 
 gboolean

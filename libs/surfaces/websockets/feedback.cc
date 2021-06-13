@@ -30,19 +30,8 @@
 // TO DO: make this configurable
 #define POLL_INTERVAL_MS 100
 
-#define OPTIONAL_CONNECT_HELPER(s,c) if (server ().should_request_write ()) \
-											s.connect (c, MISSING_INVALIDATOR, boost::bind<void> \
-											(ServerWriteObserver (), &server ()), &_helper);
-
 using namespace ARDOUR;
 using namespace ArdourSurface;
-
-struct ServerWriteObserver {
-	void operator() (WebsocketsServer *server)
-	{
-		server->request_write ();
-	}
-};
 
 struct TransportObserver {
 	void operator() (ArdourFeedback* p)
@@ -141,11 +130,11 @@ ArdourFeedback::start ()
 
 	// server must be started before feedback otherwise
 	// should_request_write() will always return false
-	if (!server ().should_request_write ()) {
-		periodic_timeout->attach (main_loop ()->get_context ());
-	} else {
+	if (server ().read_blocks_event_loop ()) {
 		_helper.run();
 		periodic_timeout->attach (_helper.main_loop()->get_context ());
+	} else {
+		periodic_timeout->attach (main_loop ()->get_context ());
 	}
 
 	return 0;
@@ -154,7 +143,7 @@ ArdourFeedback::start ()
 int
 ArdourFeedback::stop ()
 {
-	if (server ().should_request_write ()) {
+	if (server ().read_blocks_event_loop ()) {
 		_helper.quit();
 	}
 
@@ -207,6 +196,16 @@ ArdourFeedback::update_all (std::string node, uint32_t strip_id, uint32_t plugin
 	server ().update_all_clients (NodeState (node, addr, val), false);
 }
 
+PBD::EventLoop*
+ArdourFeedback::event_loop () const
+{
+	if (server ().read_blocks_event_loop ()) {
+		return static_cast<PBD::EventLoop*> (&_helper);
+	} else {
+		return SurfaceComponent::event_loop ();
+	}
+}
+
 bool
 ArdourFeedback::poll () const
 {
@@ -219,10 +218,6 @@ ArdourFeedback::poll () const
 		update_all (Node::strip_meter, it->first, db);
 	}
 
-	if (server ().should_request_write ()) {
-		server ().request_write ();
-	}
-
 	return true;
 }
 
@@ -232,15 +227,10 @@ ArdourFeedback::observe_transport ()
 	ARDOUR::Session& sess = session ();
 	sess.TransportStateChange.connect (_transport_connections, MISSING_INVALIDATOR,
 	                                   boost::bind<void> (TransportObserver (), this), event_loop ());
-	OPTIONAL_CONNECT_HELPER(sess.TransportStateChange, _transport_connections);
-
 	sess.RecordStateChanged.connect (_transport_connections, MISSING_INVALIDATOR,
 	                                 boost::bind<void> (RecordStateObserver (), this), event_loop ());
-	OPTIONAL_CONNECT_HELPER(sess.RecordStateChanged, _transport_connections);
-
 	sess.tempo_map ().PropertyChanged.connect (_transport_connections, MISSING_INVALIDATOR,
 	                                 boost::bind<void> (TempoObserver (), this), event_loop ());
-	OPTIONAL_CONNECT_HELPER(sess.tempo_map ().PropertyChanged, _transport_connections);
 }
 
 void
@@ -254,17 +244,14 @@ ArdourFeedback::observe_mixer ()
 
 		stripable->gain_control ()->Changed.connect (*it->second, MISSING_INVALIDATOR,
 		                                         boost::bind<void> (StripGainObserver (), this, strip_id), event_loop ());
-		OPTIONAL_CONNECT_HELPER(stripable->gain_control ()->Changed, *it->second);
 
 		if (stripable->pan_azimuth_control ()) {
 			stripable->pan_azimuth_control ()->Changed.connect (*it->second, MISSING_INVALIDATOR,
 			                                                boost::bind<void> (StripPanObserver (), this, strip_id), event_loop ());
-			OPTIONAL_CONNECT_HELPER(stripable->pan_azimuth_control ()->Changed, *it->second);
 		}
 
 		stripable->mute_control ()->Changed.connect (*it->second, MISSING_INVALIDATOR,
 		                                         boost::bind<void> (StripMuteObserver (), this, strip_id), event_loop ());
-		OPTIONAL_CONNECT_HELPER(stripable->mute_control ()->Changed, *it->second);
 	
 		observe_strip_plugins (strip_id, strip->plugins ());
 	}
@@ -284,7 +271,6 @@ ArdourFeedback::observe_strip_plugins (uint32_t strip_id, ArdourMixerStrip::Plug
 		if (control) {
 			control->Changed.connect (*plugin, MISSING_INVALIDATOR,
 			                          boost::bind<void> (PluginBypassObserver (), this, strip_id, plugin_id), event_loop ());
-			OPTIONAL_CONNECT_HELPER(control->Changed, *plugin);
 		}
 
 		for (uint32_t param_id = 0; param_id < plugin->param_count (); ++param_id) {
@@ -295,7 +281,6 @@ ArdourFeedback::observe_strip_plugins (uint32_t strip_id, ArdourMixerStrip::Plug
 				                          boost::bind<void> (PluginParamValueObserver (), this, strip_id, plugin_id, param_id,
 				                                             boost::weak_ptr<AutomationControl>(control)),
 				                          event_loop ());
-				OPTIONAL_CONNECT_HELPER(control->Changed, *plugin);
 			} catch (ArdourMixerNotFoundException& e) {
 				/* ignore */
 			}

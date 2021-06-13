@@ -53,7 +53,7 @@ public:
 	}
 
 	BasicUI&                     basic_ui () const;
-	PBD::EventLoop*              event_loop () const;
+	virtual PBD::EventLoop*      event_loop () const;
 	Glib::RefPtr<Glib::MainLoop> main_loop () const;
 	ARDOUR::Session&             session () const;
 	ArdourMixer&                 mixer () const;

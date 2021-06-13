@@ -75,6 +75,8 @@ private:
 	int send_availsurf_hdr (Client);
 	int send_availsurf_body (Client);
 
+	void request_write (Client);
+
 	static int lws_callback (struct lws*, enum lws_callback_reasons, void*, void*, size_t);
 
 	/* Glib event loop integration that requires LWS_WITH_EXTERNAL_POLL */
@@ -115,8 +117,7 @@ private:
 	static gboolean glib_idle_callback (void *);
 
 public:
-	bool should_request_write () { return _g_source != 0; }
-	void request_write ();
+	bool read_blocks_event_loop () { return _g_source != 0; }
 
 };
 
