@@ -355,6 +355,9 @@ ExportHandler::command_output(std::string output, size_t size)
 void*
 ExportHandler::start_timespan_bg (void* eh)
 {
+	char name[64];
+	snprintf (name, 64, "Export-TS-%p", (void*)DEBUG_THREAD_SELF);
+	pthread_set_name (name);
 	ExportHandler* self = static_cast<ExportHandler*> (eh);
 	self->process_connection.disconnect ();
 	Glib::Threads::Mutex::Lock l (self->export_status->lock());
