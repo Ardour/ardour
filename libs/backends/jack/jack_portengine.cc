@@ -258,6 +258,8 @@ JACKAudioBackend::jack_registration_callback (jack_port_id_t id, int reg)
 		if (!reg) {
 			if (ports->erase (name)) {
 				_jack_ports.update (ports);
+			} else {
+				_jack_ports.no_update();
 			}
 		} else {
 			if (ports->find (name) != ports->end()) {
