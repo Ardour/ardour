@@ -1815,6 +1815,7 @@ void
 Session::reset_xrun_count ()
 {
 	_xrun_count = 0;
+	ARDOUR::reset_performance_meters (this);
 	Xrun (-1); /* EMIT SIGNAL */
 }
 
