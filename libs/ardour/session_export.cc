@@ -161,11 +161,12 @@ Session::start_audio_export (samplepos_t position, bool realtime, bool region_ex
 	   it here.
 	*/
 
-	_butler->wait_until_finished ();
+	{
+		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		_butler->wait_until_finished ();
 
 	/* get everyone to the right position */
 
-	{
 		boost::shared_ptr<RouteList> rl = routes.reader();
 
 		for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
