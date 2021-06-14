@@ -225,7 +225,6 @@ Butler::thread_work ()
 				   so do not bother with buffer refills at this
 				   time.
 				*/
-				std::cerr << "new locate detected in restart, lock and signal\n";
 				Glib::Threads::Mutex::Lock lm (request_lock);
 				DEBUG_TRACE (DEBUG::Butler, string_compose ("\tlocate pending, so just pause @ %1 till woken again\n", g_get_monotonic_time()));
 				paused.signal ();
@@ -476,7 +475,6 @@ Butler::wait_until_finished ()
 	DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: waiting for butler to finish @ %2\n", DEBUG_THREAD_SELF, g_get_monotonic_time()));
 	queue_request (Request::Pause);
 	paused.wait(request_lock);
-	std::cerr << "wait till finished is back\n";
 }
 
 bool
