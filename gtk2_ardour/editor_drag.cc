@@ -4903,10 +4903,6 @@ ControlPointDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 	show_verbose_cursor_text (_point->line().get_verbose_cursor_string (fraction));
 
 	_pushing = Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::push_points_modifier ());
-
-	if (!_point->can_slide ()) {
-		_x_constrained = true;
-	}
 }
 
 void
@@ -4931,7 +4927,7 @@ ControlPointDrag::motion (GdkEvent* event, bool first_motion)
 	// positive side of zero
 	double const zero_gain_y = (1.0 - _zero_gain_fraction) * _point->line().height() - .01;
 
-	if (_x_constrained) {
+	if (!_point->can_slide ()) {
 		cx = _fixed_grab_x;
 	}
 	if (_y_constrained) {
@@ -4952,7 +4948,7 @@ ControlPointDrag::motion (GdkEvent* event, bool first_motion)
 
 	MusicSample cx_mf (_editor->pixel_to_sample (cx) + snap_delta (event->button.state), 0);
 
-	if (!_x_constrained && need_snap) {
+	if (need_snap) {
 		_editor->snap_to_with_modifier (cx_mf, event);
 	}
 
