@@ -104,6 +104,7 @@ DspStatisticsGUI::update ()
 	double   avg = 0.;
 	double   dev = 0.;
 	char buf[64];
+	char const * const not_measured_string = X_("--");
 
 	int bufsize = AudioEngine::instance()->samples_per_cycle ();
 	double bufsize_usecs = (bufsize * 1000000.0) / AudioEngine::instance()->sample_rate();
@@ -121,7 +122,7 @@ DspStatisticsGUI::update ()
 		}
 		labels[AudioEngine::NTT + Session::NTT + AudioBackend::DeviceWait]->set_text (buf);
 	} else {
-		labels[AudioEngine::NTT + Session::NTT + AudioBackend::DeviceWait]->set_text (_("not measured"));
+		labels[AudioEngine::NTT + Session::NTT + AudioBackend::DeviceWait]->set_text (not_measured_string);
 	}
 
 	if (AudioEngine::instance()->current_backend()->dsp_stats[AudioBackend::RunLoop].get_stats (min, max, avg, dev)) {
@@ -134,7 +135,7 @@ DspStatisticsGUI::update ()
 		}
 		labels[AudioEngine::NTT + Session::NTT + AudioBackend::RunLoop]->set_text (buf);
 	} else {
-		labels[AudioEngine::NTT + Session::NTT + AudioBackend::RunLoop]->set_text (_("not measured"));
+		labels[AudioEngine::NTT + Session::NTT + AudioBackend::RunLoop]->set_text (not_measured_string);
 	}
 
 	AudioEngine::instance()->dsp_stats[AudioEngine::ProcessCallback].get_stats (min, max, avg, dev);
