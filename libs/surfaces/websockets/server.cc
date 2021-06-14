@@ -140,12 +140,12 @@ WebsocketsServer::start ()
 #endif
 
 	if (_lws_context) {
-		/* LWS_WITH_GLIB was enabled for Ardour build environment libwebsockets
-		   and also for the version the user has installed in their system */
+		/* Keep in mind _lws_context can be != 0 even when the user's
+		   libwebsockets does not support LWS_SERVER_OPTION_GLIB !
+		   This is by libwebsockets design */ 
 		PBD::info << "ArdourWebsockets: using event loop integration method 1" << endmsg;
 	} else {
-		/* Either Ardour build environment libwebsockets was not configured with
-		   LWS_WITH_GLIB enabled or user installed library is missing the feature */
+		/* More compatible approach */
 		_fd_callbacks = true;
 		_lws_info.foreign_loops = 0;
 		_lws_info.options = 0;
