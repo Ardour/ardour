@@ -22,8 +22,8 @@ import { createRootContainer, Container, Dialog, Label, Button, Toggle,
             AudioStripGainFader, MidiStripGainFader,
             AudioStripMeter, MidiStripMeter  } from './tkwidget.js';
 
-(() => {
-    
+{
+
     const ardour = new ArdourClient();
 
     async function main () {
@@ -223,4 +223,4 @@ import { createRootContainer, Container, Dialog, Label, Button, Toggle,
 
     main();
 
-})();
+}

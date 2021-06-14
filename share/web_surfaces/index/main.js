@@ -18,7 +18,7 @@
 
 import ArdourClient from '/shared/ardour.js';
 
-(() => {
+{
 
     async function main () {
         try {
@@ -81,4 +81,4 @@ import ArdourClient from '/shared/ardour.js';
 
     main();
 
-})();
+}

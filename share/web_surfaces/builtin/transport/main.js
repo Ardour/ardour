@@ -18,7 +18,7 @@
 
 import ArdourClient from '/shared/ardour.js';
 
-(() => {
+{
 
     const dom = {
         main       : document.getElementById('main'),
@@ -126,4 +126,4 @@ import ArdourClient from '/shared/ardour.js';
 
     main();
 
-})();
+}

@@ -18,7 +18,7 @@
 
 import ArdourClient from '/shared/ardour.js';
 
-(() => {
+{
 
     const MAX_LOG_LINES = 1000;
     
@@ -65,4 +65,4 @@ import ArdourClient from '/shared/ardour.js';
 
     main();
 
-})();
+}

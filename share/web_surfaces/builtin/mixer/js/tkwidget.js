@@ -167,7 +167,7 @@ export class Dialog extends BaseDialog {
 
     show () {
         // opening a TK.Dialog with auto_close=true from a TK.Button callback 
-        // fails otherwise ev.stopPropagation() is called in the button event
+        // fails unless ev.stopPropagation() is called in the button event
         // handler or setTimeout() is used here
         setTimeout(() => {
             this.tk.set('display_state', 'show');
