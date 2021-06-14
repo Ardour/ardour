@@ -1812,6 +1812,13 @@ Session::xrun_recovery ()
 }
 
 void
+Session::reset_xrun_count ()
+{
+	_xrun_count = 0;
+	Xrun (-1); /* EMIT SIGNAL */
+}
+
+void
 Session::route_processors_changed (RouteProcessorChange c)
 {
 	if (g_atomic_int_get (&_ignore_route_processor_changes) > 0) {

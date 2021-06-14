@@ -825,7 +825,7 @@ public:
 	void maybe_update_tempo_from_midiclock_tempo (float bpm);
 
 	unsigned int    get_xrun_count () const {return _xrun_count; }
-	void            reset_xrun_count () {_xrun_count = 0; }
+	void            reset_xrun_count ();
 
 	/* region info  */
 
