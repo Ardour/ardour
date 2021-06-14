@@ -176,6 +176,7 @@ ExportHandler::start_timespan ()
 		do {
 			Glib::usleep (AudioEngine::instance()->usecs_per_cycle ());
 		} while (AudioEngine::instance()->freewheeling ());
+		session.reset_xrun_count ();
 	}
 
 	if (config_map.empty()) {

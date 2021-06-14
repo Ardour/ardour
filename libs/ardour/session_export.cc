@@ -216,6 +216,7 @@ Session::start_audio_export (samplepos_t position, bool realtime, bool region_ex
 		process_function = &Session::process_export_fw;
 		/* this is required for ExportGraphBuilder::Intermediate::start_post_processing */
 		_engine.Freewheel.connect_same_thread (export_freewheel_connection, boost::bind (&Session::process_export_fw, this, _1));
+		reset_xrun_count ();
 		return 0;
 	} else {
 		if (_realtime_export) {
@@ -226,6 +227,7 @@ Session::start_audio_export (samplepos_t position, bool realtime, bool region_ex
 		_export_rolling = true;
 		export_status->stop = false;
 		_engine.Freewheel.connect_same_thread (export_freewheel_connection, boost::bind (&Session::process_export_fw, this, _1));
+		reset_xrun_count ();
 		return _engine.freewheel (true);
 	}
 }
@@ -398,6 +400,7 @@ Session::stop_audio_export ()
 	flush_all_inserts ();
 	_export_rolling = false;
 	_butler->schedule_transport_work ();
+	reset_xrun_count ();
 
 	return 0;
 }
