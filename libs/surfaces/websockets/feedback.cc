@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2020-2021 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -129,7 +129,7 @@ ArdourFeedback::start ()
                                                                          &ArdourFeedback::poll));
 
 	// server must be started before feedback otherwise
-	// should_request_write() will always return false
+	// read_blocks_event_loop() will always return false
 	if (server ().read_blocks_event_loop ()) {
 		_helper.run();
 		periodic_timeout->attach (_helper.main_loop()->get_context ());

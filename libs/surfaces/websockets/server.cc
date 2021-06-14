@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2020-2021 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -540,7 +540,7 @@ WebsocketsServer::mod_poll_fd (struct lws_pollargs* pa)
 	it->second.lws_pfd.events = pa->events;
 
 	if (pa->events & LWS_POLLOUT) {
-		/* libwebsockets wants to write but cannot find a way to update
+		/* libwebsockets needs to write but cannot find a way to update
 		 * an existing glib::iosource event flags using glibmm alone,
 		 * create another iosource and set to IO_OUT, it will be destroyed
 		 * after clearing POLLOUT (see 'else' body below)
