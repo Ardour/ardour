@@ -147,7 +147,6 @@ WebsocketsServer::start ()
 	} else {
 		/* More compatible approach */
 		_fd_callbacks = true;
-		_lws_info.foreign_loops = 0;
 		_lws_info.options = 0;
 		_lws_context = lws_create_context (&_lws_info);
 
