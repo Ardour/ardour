@@ -264,7 +264,7 @@ US2400Protocol::get_sorted_stripables()
 	// fetch all stripables
 	StripableList stripables;
 
-	session->get_stripables (stripables);
+	_session->get_stripables (stripables);
 
 	// sort in presentation order, and exclude master, control and hidden stripables
 	// and any stripables that are already set.
@@ -410,7 +410,7 @@ US2400Protocol::switch_banks (uint32_t initial, bool force)
 	}
 
 	/* current bank has not been saved */
-	session->set_dirty();
+	_session->set_dirty();
 
 	return 0;
 }
@@ -634,20 +634,20 @@ void
 US2400Protocol::connect_session_signals()
 {
 	// receive routes added
-	session->RouteAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&US2400Protocol::notify_routes_added, this, _1), this);
+	_session->RouteAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&US2400Protocol::notify_routes_added, this, _1), this);
 	// receive VCAs added
-	session->vca_manager().VCAAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&US2400Protocol::notify_vca_added, this, _1), this);
+	_session->vca_manager().VCAAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&US2400Protocol::notify_vca_added, this, _1), this);
 
 	// receive record state toggled
-	session->RecordStateChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&US2400Protocol::notify_record_state_changed, this), this);
+	_session->RecordStateChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&US2400Protocol::notify_record_state_changed, this), this);
 	// receive transport state changed
-	session->TransportStateChange.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&US2400Protocol::notify_transport_state_changed, this), this);
-	session->TransportLooped.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&US2400Protocol::notify_loop_state_changed, this), this);
+	_session->TransportStateChange.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&US2400Protocol::notify_transport_state_changed, this), this);
+	_session->TransportLooped.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&US2400Protocol::notify_loop_state_changed, this), this);
 	// receive punch-in and punch-out
 	Config->ParameterChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&US2400Protocol::notify_parameter_changed, this, _1), this);
-	session->config.ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&US2400Protocol::notify_parameter_changed, this, _1), this);
+	_session->config.ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&US2400Protocol::notify_parameter_changed, this, _1), this);
 	// receive rude solo changed
-	session->SoloActive.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&US2400Protocol::notify_solo_active_changed, this, _1), this);
+	_session->SoloActive.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&US2400Protocol::notify_solo_active_changed, this, _1), this);
 
 	// make sure remote id changed signals reach here
 	// see also notify_stripable_added
@@ -794,13 +794,13 @@ US2400Protocol::create_surfaces ()
 			_input_bundle->add_channel (
 				surface->port().input_port().name(),
 				ARDOUR::DataType::MIDI,
-				session->engine().make_port_name_non_relative (surface->port().input_port().name())
+				_session->engine().make_port_name_non_relative (surface->port().input_port().name())
 				);
 
 			_output_bundle->add_channel (
 				surface->port().output_port().name(),
 				ARDOUR::DataType::MIDI,
-				session->engine().make_port_name_non_relative (surface->port().output_port().name())
+				_session->engine().make_port_name_non_relative (surface->port().output_port().name())
 				);
 		}
 
@@ -822,7 +822,7 @@ US2400Protocol::create_surfaces ()
 		(*s)->port().reconnect ();
 	}
 
-	session->BundleAddedOrRemoved ();
+	_session->BundleAddedOrRemoved ();
 
 	assert (_master_surface);
 
@@ -1137,7 +1137,7 @@ US2400Protocol::notify_record_state_changed ()
 		if (rec) {
 			LedState ls;
 
-			switch (session->record_status()) {
+			switch (_session->record_status()) {
 			case Session::Disabled:
 				DEBUG_TRACE (DEBUG::US2400, "record state changed to disabled, LED off\n");
 				ls = off;
@@ -1351,7 +1351,7 @@ US2400Protocol::midi_input_handler (IOCondition ioc, MIDI::Port* port)
 		}
 
 		// DEBUG_TRACE (DEBUG::US2400, string_compose ("data available on %1\n", port->name()));
-		samplepos_t now = session->engine().sample_time();
+		samplepos_t now = _session->engine().sample_time();
 		port->parse (now);
 	}
 
@@ -1497,13 +1497,13 @@ US2400Protocol::display_view_mode ()
 void
 US2400Protocol::set_master_on_surface_strip (uint32_t surface, uint32_t strip_number)
 {
-	force_special_stripable_to_strip (session->master_out(), surface, strip_number);
+	force_special_stripable_to_strip (_session->master_out(), surface, strip_number);
 }
 
 void
 US2400Protocol::set_monitor_on_surface_strip (uint32_t surface, uint32_t strip_number)
 {
-	force_special_stripable_to_strip (session->monitor_out(), surface, strip_number);
+	force_special_stripable_to_strip (_session->monitor_out(), surface, strip_number);
 }
 
 void
@@ -1519,7 +1519,7 @@ US2400Protocol::force_special_stripable_to_strip (boost::shared_ptr<Stripable> r
 		if ((*s)->number() == surface) {
 			Strip* strip = (*s)->nth_strip (strip_number);
 			if (strip) {
-				strip->set_stripable (session->master_out());
+				strip->set_stripable (_session->master_out());
 				strip->lock_controls ();
 			}
 		}
@@ -1539,7 +1539,7 @@ US2400Protocol::update_fader_automation_state ()
 samplepos_t
 US2400Protocol::transport_sample() const
 {
-	return session->transport_sample();
+	return _session->transport_sample();
 }
 
 void

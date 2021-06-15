@@ -137,7 +137,7 @@ FaderPort8::button_play ()
 {
 	if (transport_rolling ()) {
 		if (get_transport_speed() != 1.0) {
-			session->request_roll (TRS_UI);
+			_session->request_roll (TRS_UI);
 		} else {
 			transport_stop ();
 		}
@@ -274,7 +274,7 @@ FaderPort8::button_automation (ARDOUR::AutoState as)
 
 	// apply to all selected tracks
 	StripableList all;
-	session->get_stripables (all);
+	_session->get_stripables (all);
 	for (StripableList::const_iterator i = all.begin(); i != all.end(); ++i) {
 		if ((*i)->is_master() || (*i)->is_monitor()) {
 			continue;
@@ -309,7 +309,7 @@ FaderPort8::button_varispeed (bool ffw)
 		// stop key-repeat
 		dynamic_cast<FP8RepeatButton*>(&b_ffw)->stop_repeat();
 		dynamic_cast<FP8RepeatButton*>(&b_rew)->stop_repeat();
-		session->request_locate (0, MustStop);
+		_session->request_locate (0, MustStop);
 		return;
 	}
 
@@ -320,13 +320,13 @@ FaderPort8::button_varispeed (bool ffw)
 void
 FaderPort8::button_solo_clear ()
 {
-	bool soloing = session->soloing() || session->listening();
+	bool soloing = _session->soloing() || _session->listening();
 #ifdef MIXBUS
-	soloing |= session->mixbus_soloed();
+	soloing |= _session->mixbus_soloed();
 #endif
 	if (soloing) {
 		StripableList all;
-		session->get_stripables (all);
+		_session->get_stripables (all);
 		for (StripableList::const_iterator i = all.begin(); i != all.end(); ++i) {
 			if ((*i)->is_master() || (*i)->is_auditioner() || (*i)->is_monitor()) {
 				continue;
@@ -349,7 +349,7 @@ FaderPort8::button_solo_clear ()
 			cl->push_back (ac);
 		}
 		if (!cl->empty()) {
-			session->set_controls (cl, 1.0, PBD::Controllable::NoGroup);
+			_session->set_controls (cl, 1.0, PBD::Controllable::NoGroup);
 		}
 	}
 }
@@ -359,8 +359,8 @@ void
 FaderPort8::button_mute_clear ()
 {
 #ifdef FP8_MUTESOLO_UNDO
-	if (session->muted ()) {
-		_mute_state = session->cancel_all_mute ();
+	if (_session->muted ()) {
+		_mute_state = _session->cancel_all_mute ();
 	} else {
 		/* restore mute */
 		boost::shared_ptr<ControlList> cl (new ControlList);
@@ -373,11 +373,11 @@ FaderPort8::button_mute_clear ()
 			ac->start_touch (timepos_t (ac->session().transport_sample()));
 		}
 		if (!cl->empty()) {
-			session->set_controls (cl, 1.0, PBD::Controllable::NoGroup);
+			_session->set_controls (cl, 1.0, PBD::Controllable::NoGroup);
 		}
 	}
 #else
-	session->cancel_all_mute ();
+	_session->cancel_all_mute ();
 #endif
 }
 
@@ -548,10 +548,10 @@ FaderPort8::button_encoder ()
 			{
 				/* master || monitor level -- reset to 0dB */
 				boost::shared_ptr<AutomationControl> ac;
-				if (session->monitor_active() && !_ctrls.button (FP8Controls::BtnMaster).is_pressed ()) {
-					ac = session->monitor_out()->gain_control ();
-				} else if (session->master_out()) {
-					ac = session->master_out()->gain_control ();
+				if (_session->monitor_active() && !_ctrls.button (FP8Controls::BtnMaster).is_pressed ()) {
+					ac = _session->monitor_out()->gain_control ();
+				} else if (_session->master_out()) {
+					ac = _session->master_out()->gain_control ();
 				}
 				if (ac) {
 					ac->start_touch (timepos_t (ac->session().transport_sample()));
@@ -570,12 +570,12 @@ FaderPort8::button_encoder ()
 				/* Don't add another mark if one exists within 1/100th of a second of
 				 * the current position and we're not rolling.
 				 */
-				samplepos_t where = session->audible_sample();
-				if (session->transport_stopped_or_stopping() && session->locations()->mark_at (timepos_t (where), timecnt_t (session->sample_rate() / 100.0))) {
+				samplepos_t where = _session->audible_sample();
+				if (_session->transport_stopped_or_stopping() && _session->locations()->mark_at (timepos_t (where), timecnt_t (_session->sample_rate() / 100.0))) {
 					return;
 				}
 
-				session->locations()->next_available_name (markername,"mark");
+				_session->locations()->next_available_name (markername,"mark");
 				add_marker (markername);
 			}
 			break;
@@ -628,10 +628,10 @@ FaderPort8::encoder_navigate (bool neg, int steps)
 			{
 				/* master || monitor level */
 				boost::shared_ptr<AutomationControl> ac;
-				if (session->monitor_active() && !_ctrls.button (FP8Controls::BtnMaster).is_pressed ()) {
-					ac = session->monitor_out()->gain_control ();
-				} else if (session->master_out()) {
-					ac = session->master_out()->gain_control ();
+				if (_session->monitor_active() && !_ctrls.button (FP8Controls::BtnMaster).is_pressed ()) {
+					ac = _session->monitor_out()->gain_control ();
+				} else if (_session->master_out()) {
+					ac = _session->master_out()->gain_control ();
 				}
 				if (ac) {
 					double v = ac->internal_to_interface (ac->get_value());

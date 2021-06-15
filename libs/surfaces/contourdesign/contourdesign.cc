@@ -559,24 +559,24 @@ ContourDesignControlProtocol::handle_button_release (unsigned short btn)
 void
 ContourDesignControlProtocol::prev_marker_keep_rolling ()
 {
-	timepos_t pos = session->locations()->first_mark_before (timepos_t (session->transport_sample()));
+	timepos_t pos = _session->locations()->first_mark_before (timepos_t (_session->transport_sample()));
 
 	if (pos.positive() || pos.zero()) {
-		session->request_locate (pos.samples());
+		_session->request_locate (pos.samples());
 	} else {
-		session->goto_start ();
+		_session->goto_start ();
 	}
 }
 
 void
 ContourDesignControlProtocol::next_marker_keep_rolling ()
 {
-	timepos_t pos = session->locations()->first_mark_after (timepos_t (session->transport_sample()));
+	timepos_t pos = _session->locations()->first_mark_after (timepos_t (_session->transport_sample()));
 
 	if (pos.positive() || pos.zero()) {
-		session->request_locate (pos.samples());
+		_session->request_locate (pos.samples());
 	} else {
-		session->goto_end();
+		_session->goto_end();
 	}
 }
 

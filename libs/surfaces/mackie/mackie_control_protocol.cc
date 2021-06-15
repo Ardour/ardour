@@ -279,7 +279,7 @@ MackieControlProtocol::get_sorted_stripables()
 	// fetch all stripables
 	StripableList stripables;
 
-	session->get_stripables (stripables);
+	_session->get_stripables (stripables);
 
 	// sort in presentation order, and exclude master, control and hidden stripables
 	// and any stripables that are already set.
@@ -457,7 +457,7 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 	}
 
 	/* current bank has not been saved */
-	session->set_dirty();
+	_session->set_dirty();
 
 	return 0;
 }
@@ -740,22 +740,22 @@ void
 MackieControlProtocol::connect_session_signals()
 {
 	// receive routes added
-	session->RouteAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_routes_added, this, _1), this);
+	_session->RouteAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_routes_added, this, _1), this);
 	// receive VCAs added
-	session->vca_manager().VCAAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_vca_added, this, _1), this);
+	_session->vca_manager().VCAAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_vca_added, this, _1), this);
 
 	// receive record state toggled
-	session->RecordStateChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_record_state_changed, this), this);
+	_session->RecordStateChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_record_state_changed, this), this);
 	// receive transport state changed
-	session->TransportStateChange.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_transport_state_changed, this), this);
-	session->TransportLooped.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_loop_state_changed, this), this);
+	_session->TransportStateChange.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_transport_state_changed, this), this);
+	_session->TransportLooped.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_loop_state_changed, this), this);
 	// receive punch-in and punch-out
 	Config->ParameterChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_parameter_changed, this, _1), this);
-	session->config.ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_parameter_changed, this, _1), this);
+	_session->config.ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_parameter_changed, this, _1), this);
 	// receive rude solo changed
-	session->SoloActive.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_solo_active_changed, this, _1), this);
+	_session->SoloActive.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_solo_active_changed, this, _1), this);
 
-	session->MonitorBusAddedOrRemoved.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_monitor_added_or_removed, this), this);
+	_session->MonitorBusAddedOrRemoved.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_monitor_added_or_removed, this), this);
 
 	// make sure remote id changed signals reach here
 	// see also notify_stripable_added
@@ -927,13 +927,13 @@ MackieControlProtocol::create_surfaces ()
 			_input_bundle->add_channel (
 				"",
 				ARDOUR::DataType::MIDI,
-				session->engine().make_port_name_non_relative (surface->port().input_port().name())
+				_session->engine().make_port_name_non_relative (surface->port().input_port().name())
 				);
 
 			_output_bundle->add_channel (
 				"",
 				ARDOUR::DataType::MIDI,
-				session->engine().make_port_name_non_relative (surface->port().output_port().name())
+				_session->engine().make_port_name_non_relative (surface->port().output_port().name())
 				);
 		}
 
@@ -989,7 +989,7 @@ MackieControlProtocol::create_surfaces ()
 		}
 	}
 
-	session->BundleAddedOrRemoved ();
+	_session->BundleAddedOrRemoved ();
 
 	assert (_master_surface);
 
@@ -1155,7 +1155,7 @@ MackieControlProtocol::format_bbt_timecode (samplepos_t now_sample)
 {
 	Temporal::BBT_Time bbt_time;
 
-	session->bbt_time (timepos_t (now_sample), bbt_time);
+	_session->bbt_time (timepos_t (now_sample), bbt_time);
 
 	// The Mackie protocol spec is built around a BBT time display of
 	//
@@ -1181,7 +1181,7 @@ string
 MackieControlProtocol::format_timecode_timecode (samplepos_t now_sample)
 {
 	Timecode::Time timecode;
-	session->timecode_time (now_sample, timecode);
+	_session->timecode_time (now_sample, timecode);
 
 	// According to the Logic docs
 	// digits: 888/88/88/888
@@ -1215,9 +1215,9 @@ MackieControlProtocol::update_timecode_display()
 	string timecode;
 
 	// do assignment here so current_sample is fixed
-	samplepos_t current_sample = session->transport_sample();
+	samplepos_t current_sample = _session->transport_sample();
 	// For large jumps in play head possition do full reset
-	int moved = (current_sample - _sample_last) / session->sample_rate ();
+	int moved = (current_sample - _sample_last) / _session->sample_rate ();
 	if (moved) {
 		DEBUG_TRACE (DEBUG::MackieControl, "Timecode reset\n");
 		_timecode_last = string (10, '\0');
@@ -1250,9 +1250,9 @@ MackieControlProtocol::update_timecode_display()
 void MackieControlProtocol::notify_parameter_changed (std::string const & p)
 {
 	if (p == "punch-in") {
-		update_global_button (Button::Drop, session->config.get_punch_in() ? flashing : off);
+		update_global_button (Button::Drop, _session->config.get_punch_in() ? flashing : off);
 	} else if (p == "punch-out") {
-		update_global_button (Button::Replace, session->config.get_punch_out() ? flashing : off);
+		update_global_button (Button::Replace, _session->config.get_punch_out() ? flashing : off);
 	} else if (p == "clicking") {
 		update_global_button (Button::Click, Config->get_clicking());
 	} else if (p == "follow-edits") {
@@ -1262,9 +1262,9 @@ void MackieControlProtocol::notify_parameter_changed (std::string const & p)
 		 * this button (if there is one) won't reflect the setting.
 		 */
 
-		//update_global_button (Button::Enter, session->config.get_follow_edits() ? on : off);
+		//update_global_button (Button::Enter, _session->config.get_follow_edits() ? on : off);
 	} else if (p == "external-sync") {
-		update_global_button (Button::Cancel, session->config.get_external_sync() ? on : off);
+		update_global_button (Button::Cancel, _session->config.get_external_sync() ? on : off);
 	} else {
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("parameter changed: %1\n", p));
 	}
@@ -1359,7 +1359,7 @@ MackieControlProtocol::notify_presentation_info_changed (PBD::PropertyChange con
 void
 MackieControlProtocol::notify_loop_state_changed()
 {
-	update_global_button (Button::Loop, session->get_play_loop());
+	update_global_button (Button::Loop, _session->get_play_loop());
 }
 
 void
@@ -1417,7 +1417,7 @@ MackieControlProtocol::notify_record_state_changed ()
 		if (rec) {
 			LedState ls;
 
-			switch (session->record_status()) {
+			switch (_session->record_status()) {
 			case Session::Disabled:
 				DEBUG_TRACE (DEBUG::MackieControl, "record state changed to disabled, LED off\n");
 				ls = off;
@@ -1699,7 +1699,7 @@ MackieControlProtocol::midi_input_handler (IOCondition ioc, MIDI::Port* port)
 		}
 
 		// DEBUG_TRACE (DEBUG::MackieControl, string_compose ("data available on %1\n", port->name()));
-		samplepos_t now = session->engine().sample_time();
+		samplepos_t now = _session->engine().sample_time();
 		port->parse (now);
 	}
 
@@ -1844,13 +1844,13 @@ MackieControlProtocol::set_flip_mode (FlipMode fm)
 void
 MackieControlProtocol::set_master_on_surface_strip (uint32_t surface, uint32_t strip_number)
 {
-	force_special_stripable_to_strip (session->master_out(), surface, strip_number);
+	force_special_stripable_to_strip (_session->master_out(), surface, strip_number);
 }
 
 void
 MackieControlProtocol::set_monitor_on_surface_strip (uint32_t surface, uint32_t strip_number)
 {
-	force_special_stripable_to_strip (session->monitor_out(), surface, strip_number);
+	force_special_stripable_to_strip (_session->monitor_out(), surface, strip_number);
 }
 
 void
@@ -1866,7 +1866,7 @@ MackieControlProtocol::force_special_stripable_to_strip (boost::shared_ptr<Strip
 		if ((*s)->number() == surface) {
 			Strip* strip = (*s)->nth_strip (strip_number);
 			if (strip) {
-				strip->set_stripable (session->master_out());
+				strip->set_stripable (_session->master_out());
 				strip->lock_controls ();
 			}
 		}
@@ -1960,7 +1960,7 @@ MackieControlProtocol::update_fader_automation_state ()
 samplepos_t
 MackieControlProtocol::transport_sample() const
 {
-	return session->transport_sample();
+	return _session->transport_sample();
 }
 
 void
@@ -2177,7 +2177,7 @@ MackieControlProtocol::set_ipmidi_base (int16_t portnum)
 {
 	/* this will not be saved without a session save, so .. */
 
-	session->set_dirty ();
+	_session->set_dirty ();
 
 	_ipmidi_base = portnum;
 

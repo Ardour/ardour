@@ -281,7 +281,7 @@ ControlProtocol::route_set_soloed (uint32_t table_index, bool yn)
 	boost::shared_ptr<Route> r = route_table[table_index];
 
 	if (r != 0) {
-		session->set_control (r->solo_control(), yn ? 1.0 : 0.0, Controllable::UseGroup);
+		_session->set_control (r->solo_control(), yn ? 1.0 : 0.0, Controllable::UseGroup);
 	}
 }
 
@@ -332,37 +332,37 @@ ControlProtocol::set_state (XMLNode const & node, int /* version */)
 boost::shared_ptr<Stripable>
 ControlProtocol::first_selected_stripable () const
 {
-	return session->selection().first_selected_stripable ();
+	return _session->selection().first_selected_stripable ();
 }
 
 void
 ControlProtocol::add_stripable_to_selection (boost::shared_ptr<ARDOUR::Stripable> s)
 {
-	session->selection().add (s, boost::shared_ptr<AutomationControl>());
+	_session->selection().add (s, boost::shared_ptr<AutomationControl>());
 }
 
 void
 ControlProtocol::set_stripable_selection (boost::shared_ptr<ARDOUR::Stripable> s)
 {
-	session->selection().select_stripable_and_maybe_group (s, true, true, 0);
+	_session->selection().select_stripable_and_maybe_group (s, true, true, 0);
 }
 
 void
 ControlProtocol::toggle_stripable_selection (boost::shared_ptr<ARDOUR::Stripable> s)
 {
-	session->selection().toggle (s, boost::shared_ptr<AutomationControl>());
+	_session->selection().toggle (s, boost::shared_ptr<AutomationControl>());
 }
 
 void
 ControlProtocol::remove_stripable_from_selection (boost::shared_ptr<ARDOUR::Stripable> s)
 {
-	session->selection().remove (s, boost::shared_ptr<AutomationControl>());
+	_session->selection().remove (s, boost::shared_ptr<AutomationControl>());
 }
 
 void
 ControlProtocol::clear_stripable_selection ()
 {
-	session->selection().clear_stripables ();
+	_session->selection().clear_stripables ();
 }
 
 void

@@ -99,13 +99,13 @@ FaderPort::FaderPort (Session& s)
 	_input_bundle->add_channel (
 		"",
 		ARDOUR::DataType::MIDI,
-		session->engine().make_port_name_non_relative (inp->name())
+		_session->engine().make_port_name_non_relative (inp->name())
 		);
 
 	_output_bundle->add_channel (
 		"",
 		ARDOUR::DataType::MIDI,
-		session->engine().make_port_name_non_relative (outp->name())
+		_session->engine().make_port_name_non_relative (outp->name())
 		);
 
 	/* Catch port connections and disconnections */
@@ -367,7 +367,7 @@ FaderPort::button_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 		if (_current_stripable) {
 			boost::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
 			if (gain) {
-				timepos_t now = timepos_t (session->engine().sample_time());
+				timepos_t now = timepos_t (_session->engine().sample_time());
 				if (tb->value) {
 					gain->start_touch (now);
 				} else {
@@ -659,7 +659,7 @@ FaderPort::map_recenable_state ()
 
 	bool onoff;
 
-	switch (session->record_status()) {
+	switch (_session->record_status()) {
 	case Session::Disabled:
 		onoff = false;
 		break;
@@ -667,7 +667,7 @@ FaderPort::map_recenable_state ()
 		onoff = blink_state;
 		break;
 	case Session::Recording:
-		if (session->have_rec_enabled_track ()) {
+		if (_session->have_rec_enabled_track ()) {
 			onoff = true;
 		} else {
 			onoff = blink_state;
@@ -684,7 +684,7 @@ FaderPort::map_recenable_state ()
 void
 FaderPort::map_transport_state ()
 {
-	get_button (Loop).set_led_state (_output_port, session->get_play_loop());
+	get_button (Loop).set_led_state (_output_port, _session->get_play_loop());
 
 	float ts = get_transport_speed();
 
@@ -706,8 +706,8 @@ void
 FaderPort::parameter_changed (string what)
 {
 	if (what == "punch-in" || what == "punch-out") {
-		bool in = session->config.get_punch_in ();
-		bool out = session->config.get_punch_out ();
+		bool in = _session->config.get_punch_in ();
+		bool out = _session->config.get_punch_out ();
 		if (in && out) {
 			get_button (Punch).set_led_state (_output_port, true);
 			blinkers.remove (Punch);
@@ -722,10 +722,10 @@ FaderPort::parameter_changed (string what)
 void
 FaderPort::connect_session_signals()
 {
-	session->RecordStateChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_recenable_state, this), this);
-	session->TransportStateChange.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_transport_state, this), this);
+	_session->RecordStateChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_recenable_state, this), this);
+	_session->TransportStateChange.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_transport_state, this), this);
 	/* not session, but treat it similarly */
-	session->config.ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::parameter_changed, this, _1), this);
+	_session->config.ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::parameter_changed, this, _1), this);
 }
 
 bool
@@ -747,7 +747,7 @@ FaderPort::midi_input_handler (Glib::IOCondition ioc, boost::weak_ptr<ARDOUR::As
 
 		port->clear ();
 		DEBUG_TRACE (DEBUG::FaderPort, string_compose ("data available on %1\n", boost::shared_ptr<MIDI::Port>(port)->name()));
-		samplepos_t now = session->engine().sample_time();
+		samplepos_t now = _session->engine().sample_time();
 		port->parse (now);
 	}
 
@@ -1097,8 +1097,8 @@ void
 FaderPort::drop_current_stripable ()
 {
 	if (_current_stripable) {
-		if (_current_stripable == session->monitor_out()) {
-			set_current_stripable (session->master_out());
+		if (_current_stripable == _session->monitor_out()) {
+			set_current_stripable (_session->master_out());
 		} else {
 			set_current_stripable (boost::shared_ptr<Stripable>());
 		}
@@ -1300,7 +1300,7 @@ FaderPort::map_stripable_state ()
 		map_gain ();
 		map_auto ();
 
-		if (_current_stripable == session->monitor_out()) {
+		if (_current_stripable == _session->monitor_out()) {
 			map_cut ();
 		} else {
 			map_mute ();

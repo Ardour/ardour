@@ -355,12 +355,12 @@ Push2::button_name_by_id (ButtonID id)
 void
 Push2::button_play ()
 {
-	if (!session) {
+	if (!_session) {
 		return;
 	}
 
 	if (_modifier_state & ModShift) {
-		goto_start (session->transport_rolling());
+		goto_start (_session->transport_rolling());
 		return;
 	}
 
@@ -375,7 +375,7 @@ Push2::button_play ()
 		return;
 	}
 
-	if (session->transport_rolling ()) {
+	if (_session->transport_rolling ()) {
 		transport_stop ();
 	} else {
 		transport_play ();
@@ -739,7 +739,7 @@ Push2::button_mix_press ()
 void
 Push2::button_master ()
 {
-	boost::shared_ptr<Stripable> main_out = session->master_out ();
+	boost::shared_ptr<Stripable> main_out = _session->master_out ();
 
 	if (!main_out) {
 		return;

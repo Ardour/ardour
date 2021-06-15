@@ -105,13 +105,13 @@ CC121::CC121 (Session& s)
 	_input_bundle->add_channel (
 		"",
 		ARDOUR::DataType::MIDI,
-		session->engine().make_port_name_non_relative (inp->name())
+		_session->engine().make_port_name_non_relative (inp->name())
 		);
 
 	_output_bundle->add_channel (
 		"",
 		ARDOUR::DataType::MIDI,
-		session->engine().make_port_name_non_relative (outp->name())
+		_session->engine().make_port_name_non_relative (outp->name())
 		);
 
 
@@ -309,7 +309,7 @@ CC121::button_press_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 		if (_current_stripable) {
 			boost::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
 			if (gain) {
-				timepos_t now (session->engine().sample_time());
+              timepos_t now (_session->engine().sample_time());
 			  gain->start_touch (now);
 			}
 		}
@@ -356,7 +356,7 @@ CC121::button_release_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 		if (_current_stripable) {
 			boost::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
 			if (gain) {
-				timepos_t now (session->engine().sample_time());
+				timepos_t now (_session->engine().sample_time());
 				gain->stop_touch (now);
 			}
 		}
@@ -642,7 +642,7 @@ CC121::map_recenable_state ()
 
 	bool onoff;
 
-	switch (session->record_status()) {
+	switch (_session->record_status()) {
 	case Session::Disabled:
 		onoff = false;
 		break;
@@ -650,7 +650,7 @@ CC121::map_recenable_state ()
 		onoff = blink_state;
 		break;
 	case Session::Recording:
-		if (session->have_rec_enabled_track ()) {
+		if (_session->have_rec_enabled_track ()) {
 			onoff = true;
 		} else {
 			onoff = blink_state;
@@ -667,7 +667,7 @@ CC121::map_recenable_state ()
 void
 CC121::map_transport_state ()
 {
-	get_button (Loop).set_led_state (_output_port, session->get_play_loop());
+	get_button (Loop).set_led_state (_output_port, _session->get_play_loop());
 
 	float ts = get_transport_speed();
 
@@ -689,8 +689,8 @@ CC121::map_transport_state ()
 void
 CC121::connect_session_signals()
 {
-	session->RecordStateChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&CC121::map_recenable_state, this), this);
-	session->TransportStateChange.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&CC121::map_transport_state, this), this);
+	_session->RecordStateChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&CC121::map_recenable_state, this), this);
+	_session->TransportStateChange.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&CC121::map_transport_state, this), this);
 }
 
 bool
@@ -706,7 +706,7 @@ CC121::midi_input_handler (Glib::IOCondition ioc, boost::shared_ptr<ARDOUR::Asyn
 
 		port->clear ();
 		DEBUG_TRACE (DEBUG::CC121, string_compose ("data available on %1\n", boost::shared_ptr<MIDI::Port>(port)->name()));
-		samplepos_t now = session->engine().sample_time();
+		samplepos_t now = _session->engine().sample_time();
 		port->parse (now);
 	}
 
@@ -1053,8 +1053,8 @@ void
 CC121::drop_current_stripable ()
 {
 	if (_current_stripable) {
-		if (_current_stripable == session->monitor_out()) {
-			set_current_stripable (session->master_out());
+		if (_current_stripable == _session->monitor_out()) {
+			set_current_stripable (_session->master_out());
 		} else {
 			set_current_stripable (boost::shared_ptr<Stripable>());
 		}
@@ -1256,7 +1256,7 @@ CC121::map_stripable_state ()
 		map_auto ();
 		map_monitoring ();
 
-		if (_current_stripable == session->monitor_out()) {
+		if (_current_stripable == _session->monitor_out()) {
 			map_cut ();
 		} else {
 			map_mute ();

@@ -932,7 +932,7 @@ LaunchControlXL::button_press_track_control(uint8_t n) {
 	boost::shared_ptr<AutomationControl> ac = get_ac_by_state(n);
 
 	if (ac) {
-		session->set_control (ac, !ac->get_value(), PBD::Controllable::UseGroup);
+		_session->set_control (ac, !ac->get_value(), PBD::Controllable::UseGroup);
 	}
 }
 
@@ -1012,7 +1012,7 @@ LaunchControlXL::button_mute()
 void
 LaunchControlXL::button_mute_long_press()
 {
-	session->cancel_all_mute();
+	_session->cancel_all_mute();
 }
 
 void

@@ -38,20 +38,20 @@ using namespace ArdourSurface::FP_NAMESPACE::FP8Types;
 void
 FaderPort8::connect_session_signals ()
 {
-	 session->RouteAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_stripable_added_or_removed, this), this);
+	_session->RouteAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_stripable_added_or_removed, this), this);
 	 PresentationInfo::Change.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_pi_property_changed, this, _1), this);
 
 	Config->ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_parameter_changed, this, _1), this);
-	session->config.ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_parameter_changed, this, _1), this);
+	_session->config.ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_parameter_changed, this, _1), this);
 
-	session->TransportStateChange.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_transport_state_changed, this), this);
-	session->TransportLooped.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_loop_state_changed, this), this);
-	session->RecordStateChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_record_state_changed, this), this);
+	_session->TransportStateChange.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_transport_state_changed, this), this);
+	_session->TransportLooped.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_loop_state_changed, this), this);
+	_session->RecordStateChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_record_state_changed, this), this);
 
-	session->DirtyChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_session_dirty_changed, this), this);
-	session->SoloChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_solo_changed, this), this);
-	session->MuteChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_mute_changed, this), this);
-	session->history().Changed.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_history_changed, this), this);
+	_session->DirtyChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_session_dirty_changed, this), this);
+	_session->SoloChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_solo_changed, this), this);
+	_session->MuteChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_mute_changed, this), this);
+	_session->history().Changed.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_history_changed, this), this);
 }
 
 void
@@ -148,7 +148,7 @@ FaderPort8::notify_transport_state_changed ()
 void
 FaderPort8::notify_record_state_changed ()
 {
-	switch (session->record_status ()) {
+	switch (_session->record_status ()) {
 		case Session::Disabled:
 			_ctrls.button (FP8Controls::BtnRecord).set_active (0);
 			_ctrls.button (FP8Controls::BtnRecord).set_blinking (false);
@@ -168,8 +168,8 @@ void
 FaderPort8::notify_loop_state_changed ()
 {
 	bool looping = false;
-	Location* looploc = session->locations ()->auto_loop_location ();
-	if (looploc && session->get_play_loop ()) {
+	Location* looploc = _session->locations ()->auto_loop_location ();
+	if (looploc && _session->get_play_loop ()) {
 		looping = true;
 	}
 	_ctrls.button (FP8Controls::BtnLoop).set_active (looping);
@@ -178,7 +178,7 @@ FaderPort8::notify_loop_state_changed ()
 void
 FaderPort8::notify_session_dirty_changed ()
 {
-	const bool is_dirty = session->dirty ();
+	const bool is_dirty = _session->dirty ();
 	_ctrls.button (FP8Controls::BtnSave).set_active (is_dirty);
 	_ctrls.button (FP8Controls::BtnSave).set_color (is_dirty ? 0xff0000ff : 0x00ff00ff);
 }
@@ -186,16 +186,16 @@ FaderPort8::notify_session_dirty_changed ()
 void
 FaderPort8::notify_history_changed ()
 {
-	_ctrls.button (FP8Controls::BtnRedo).set_active (session->redo_depth() > 0);
-	_ctrls.button (FP8Controls::BtnUndo).set_active (session->undo_depth() > 0);
+	_ctrls.button (FP8Controls::BtnRedo).set_active (_session->redo_depth() > 0);
+	_ctrls.button (FP8Controls::BtnUndo).set_active (_session->undo_depth() > 0);
 }
 
 void
 FaderPort8::notify_solo_changed ()
 {
-	bool soloing = session->soloing() || session->listening();
+	bool soloing = _session->soloing() || _session->listening();
 #ifdef MIXBUS
-	soloing |= session->mixbus_soloed();
+	soloing |= _session->mixbus_soloed();
 #endif
 	_ctrls.button (FP8Controls::BtnSoloClear).set_active (soloing);
 #ifdef FP8_MUTESOLO_UNDO
@@ -208,7 +208,7 @@ FaderPort8::notify_solo_changed ()
 void
 FaderPort8::notify_mute_changed ()
 {
-	bool muted = session->muted ();
+	bool muted = _session->muted ();
 #ifdef FP8_MUTESOLO_UNDO
 	if (muted) {
 		_mute_state.clear ();

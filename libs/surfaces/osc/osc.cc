@@ -124,7 +124,7 @@ OSC::OSC (Session& s, uint32_t port)
 {
 	_instance = this;
 
-	session->Exported.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::session_exported, this, _1, _2), this);
+	_session->Exported.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::session_exported, this, _1, _2), this);
 }
 
 OSC::~OSC()
@@ -252,7 +252,7 @@ OSC::start ()
 	observer_busy = false;
 	register_callbacks();
 
-	session_loaded (*session);
+	session_loaded (*_session);
 
 	// lo_server_thread_add_method(_sthread, NULL, NULL, OSC::_dummy_handler, this);
 
@@ -268,15 +268,15 @@ OSC::start ()
 
 	// catch track reordering
 	// receive routes added
-	session->RouteAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSC::notify_routes_added, this, _1), this);
+	_session->RouteAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSC::notify_routes_added, this, _1), this);
 	// receive VCAs added
-	session->vca_manager().VCAAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSC::notify_vca_added, this, _1), this);
+	_session->vca_manager().VCAAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSC::notify_vca_added, this, _1), this);
 	// order changed
 	PresentationInfo::Change.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&OSC::recalcbanks, this), this);
 
 	_select = ControlProtocol::first_selected_stripable();
 	if(!_select) {
-		_select = session->master_out ();
+		_select = _session->master_out ();
 	}
 
 	return 0;
@@ -666,7 +666,7 @@ OSC::get_unix_server_url()
 void
 OSC::gui_changed ()
 {
-	session->set_dirty();
+	_session->set_dirty();
 }
 
 void
@@ -686,7 +686,7 @@ OSC::current_value_query (const char* path, size_t len, lo_arg **argv, int argc,
 void
 OSC::send_current_value (const char* path, lo_arg** argv, int argc, lo_message msg)
 {
-	if (!session) {
+	if (!_session) {
 		return;
 	}
 
@@ -700,7 +700,7 @@ OSC::send_current_value (const char* path, lo_arg** argv, int argc, lo_message m
 		lo_message_add_string (reply, "bad syntax");
 	} else {
 		id = argv[0]->i;
-		r = session->get_remote_nth_route (id);
+		r = _session->get_remote_nth_route (id);
 
 		if (!r) {
 			lo_message_add_string (reply, "not found");
@@ -996,37 +996,37 @@ OSC::current_value (const char */*path*/, const char */*types*/, lo_arg **/*argv
 	if (strcmp (argv[0]->s, X_("transport_frame")) == 0) {
 
 		if (session) {
-			lo_send (addr, retpath, "i", session->transport_sample());
+			lo_send (addr, retpath, "i", _session->transport_sample());
 		}
 
 	} else if (strcmp (argv[0]->s, X_("transport_speed")) == 0) {
 
 		if (session) {
-			lo_send (addr, retpath, "i", session->transport_sample());
+			lo_send (addr, retpath, "i", _session->transport_sample());
 		}
 
 	} else if (strcmp (argv[0]->s, X_("transport_locked")) == 0) {
 
 		if (session) {
-			lo_send (addr, retpath, "i", session->transport_sample());
+			lo_send (addr, retpath, "i", _session->transport_sample());
 		}
 
 	} else if (strcmp (argv[0]->s, X_("punch_in")) == 0) {
 
 		if (session) {
-			lo_send (addr, retpath, "i", session->transport_sample());
+			lo_send (addr, retpath, "i", _session->transport_sample());
 		}
 
 	} else if (strcmp (argv[0]->s, X_("punch_out")) == 0) {
 
 		if (session) {
-			lo_send (addr, retpath, "i", session->transport_sample());
+			lo_send (addr, retpath, "i", _session->transport_sample());
 		}
 
 	} else if (strcmp (argv[0]->s, X_("rec_enable")) == 0) {
 
 		if (session) {
-			lo_send (addr, retpath, "i", session->transport_sample());
+			lo_send (addr, retpath, "i", _session->transport_sample());
 		}
 
 	} else {
@@ -1040,7 +1040,7 @@ OSC::current_value (const char */*path*/, const char */*types*/, lo_arg **/*argv
 void
 OSC::routes_list (lo_message msg)
 {
-	if (!session) {
+	if (!_session) {
 		return;
 	}
 	OSCSurface *sur = get_surface(get_address (msg), true);
@@ -1114,9 +1114,9 @@ OSC::routes_list (lo_message msg)
 	lo_message reply = lo_message_new ();
 
 	lo_message_add_string (reply, X_("end_route_list"));
-	lo_message_add_int64 (reply, session->sample_rate());
-	lo_message_add_int64 (reply, session->current_end_sample());
-	if (session->monitor_out()) {
+	lo_message_add_int64 (reply, _session->sample_rate());
+	lo_message_add_int64 (reply, _session->current_end_sample());
+	if (_session->monitor_out()) {
 		// this session has a monitor section
 		lo_message_add_int32 (reply, 1);
 	} else {
@@ -1208,7 +1208,7 @@ OSC::get_surfaces ()
 int
 OSC::custom_clear (lo_message msg)
 {
-	if (!session) {
+	if (!_session) {
 		return 0;
 	}
 	OSCSurface *sur = get_surface(get_address (msg), true);
@@ -1236,7 +1236,7 @@ OSC::custom_mode (float state, lo_message msg)
 int
 OSC::_custom_mode (uint32_t state, lo_address addr)
 {
-	if (!session) {
+	if (!_session) {
 		return 0;
 	}
 	OSCSurface *sur = get_surface(addr, true);
@@ -1282,32 +1282,32 @@ OSC::_custom_mode (uint32_t state, lo_address addr)
 int
 OSC::cancel_all_solos ()
 {
-	session->cancel_all_solo ();
+	_session->cancel_all_solo ();
 	return 0;
 }
 
 int
 OSC::osc_toggle_roll (bool ret2strt)
 {
-	if (!session) {
+	if (!_session) {
 		return 0;
 	}
 
-	if (session->is_auditioning()) {
-		session->cancel_audition ();
+	if (_session->is_auditioning()) {
+		_session->cancel_audition ();
 		return 0;
 	}
 
 	bool rolling = transport_rolling();
 
 	if (rolling) {
-		session->request_stop (ret2strt, true);
+		_session->request_stop (ret2strt, true);
 	} else {
 
-		if (session->get_play_loop() && Config->get_loop_is_mode()) {
-			session->request_locate (session->locations()->auto_loop_location()->start().samples(), MustRoll);
+		if (_session->get_play_loop() && Config->get_loop_is_mode()) {
+			_session->request_locate (_session->locations()->auto_loop_location()->start().samples(), MustRoll);
 		} else {
-			session->request_roll (TRS_UI);
+			_session->request_roll (TRS_UI);
 		}
 	}
 	return 0;
@@ -2015,7 +2015,7 @@ OSC::set_surface_port (uint32_t po, lo_message msg)
 int
 OSC::check_surface (lo_message msg)
 {
-	if (!session) {
+	if (!_session) {
 		return -1;
 	}
 	get_surface (get_address (msg));
@@ -2096,7 +2096,7 @@ OSC::global_feedback (OSCSurface* sur)
 	if (sur->feedback[4] || sur->feedback[3] || sur->feedback[5] || sur->feedback[6]) {
 
 		// create a new Global Observer for this surface
-		OSCGlobalObserver* o = new OSCGlobalObserver (*this, *session, sur);
+		OSCGlobalObserver* o = new OSCGlobalObserver (*this, *_session, sur);
 		sur->global_obs = o;
 		o->jog_mode (sur->jogmode);
 	}
@@ -2245,10 +2245,10 @@ OSC::set_bank (uint32_t bank_start, lo_message msg)
 int
 OSC::_set_bank (uint32_t bank_start, lo_address addr)
 {
-	if (!session) {
+	if (!_session) {
 		return -1;
 	}
-	if (!session->nroutes()) {
+	if (!_session->nroutes()) {
 		return -1;
 	}
 
@@ -2390,7 +2390,7 @@ OSC::bank_up (lo_message msg)
 int
 OSC::bank_delta (float delta, lo_message msg)
 {
-	if (!session) {
+	if (!_session) {
 		return -1;
 	}
 	// only do deltas of -1 0 or 1
@@ -2435,7 +2435,7 @@ OSC::bank_down (lo_message msg)
 int
 OSC::use_group (float value, lo_message msg)
 {
-	if (!session) {
+	if (!_session) {
 		return -1;
 	}
 	OSCSurface *s = get_surface(get_address (msg));
@@ -2581,7 +2581,7 @@ boost::shared_ptr<VCA>
 OSC::get_vca_by_name (std::string vname)
 {
 	StripableList stripables;
-	session->get_stripables (stripables);
+	_session->get_stripables (stripables);
 	for (StripableList::iterator it = stripables.begin(); it != stripables.end(); ++it) {
 		boost::shared_ptr<Stripable> s = *it;
 		boost::shared_ptr<VCA> v = boost::dynamic_pointer_cast<VCA> (s);
@@ -2616,7 +2616,7 @@ OSC::set_temp_mode (lo_address addr)
 					// check if this group feeds a bus or is slaved
 					boost::shared_ptr<Stripable> mstr = boost::shared_ptr<Stripable> ();
 					if (rg->has_control_master()) {
-						boost::shared_ptr<VCA> vca = session->vca_manager().vca_by_number (rg->group_master_number());
+						boost::shared_ptr<VCA> vca = _session->vca_manager().vca_by_number (rg->group_master_number());
 						if (vca) {
 							mstr = boost::dynamic_pointer_cast<Stripable> (vca);
 						}
@@ -2639,7 +2639,7 @@ OSC::set_temp_mode (lo_address addr)
 			if (vca) {
 				sur->temp_strips.clear();
 				StripableList stripables;
-				session->get_stripables (stripables);
+				_session->get_stripables (stripables);
 				for (StripableList::iterator it = stripables.begin(); it != stripables.end(); ++it) {
 					boost::shared_ptr<Stripable> st = *it;
 					if (st->slaved_to (vca)) {
@@ -2658,7 +2658,7 @@ OSC::set_temp_mode (lo_address addr)
 					// this is a bus, but not master, monitor or audition
 					sur->temp_strips.clear();
 					StripableList stripables;
-					session->get_stripables (stripables, PresentationInfo::AllStripables);
+					_session->get_stripables (stripables, PresentationInfo::AllStripables);
 					for (StripableList::iterator it = stripables.begin(); it != stripables.end(); ++it) {
 						boost::shared_ptr<Stripable> st = *it;
 						boost::shared_ptr<Route> ri = boost::dynamic_pointer_cast<Route> (st);
@@ -2711,7 +2711,7 @@ OSC::get_send (boost::shared_ptr<Stripable> st, lo_address addr)
 int
 OSC::name_session (char *n, lo_message msg)
 {
-	if (!session) {
+	if (!_session) {
 		return -1;
 	}
 	string new_name = n;
@@ -2722,7 +2722,7 @@ OSC::name_session (char *n, lo_message msg)
 				    "session names may not contain a '%1' character"), illegal)) << endmsg;
 		return -1;
 	}
-	switch (session->rename (new_name)) {
+	switch (_session->rename (new_name)) {
 		case -1:
 			PBD::warning  << (_("That name is already in use by another directory/folder. Please try again.")) << endmsg;
 			break;
@@ -2935,11 +2935,11 @@ OSC::_sel_plugin (int id, lo_address addr)
 void
 OSC::transport_sample (lo_message msg)
 {
-	if (!session) {
+	if (!_session) {
 		return;
 	}
 	check_surface (msg);
-	samplepos_t pos = session->transport_sample ();
+	samplepos_t pos = _session->transport_sample ();
 
 	lo_message reply = lo_message_new ();
 	lo_message_add_int64 (reply, pos);
@@ -2952,7 +2952,7 @@ OSC::transport_sample (lo_message msg)
 void
 OSC::transport_speed (lo_message msg)
 {
-	if (!session) {
+	if (!_session) {
 		return;
 	}
 	check_surface (msg);
@@ -2969,11 +2969,11 @@ OSC::transport_speed (lo_message msg)
 void
 OSC::record_enabled (lo_message msg)
 {
-	if (!session) {
+	if (!_session) {
 		return;
 	}
 	check_surface (msg);
-	int re = (int)session->get_record_enabled ();
+	int re = (int)_session->get_record_enabled ();
 
 	lo_message reply = lo_message_new ();
 	lo_message_add_int32 (reply, re);
@@ -2986,10 +2986,12 @@ OSC::record_enabled (lo_message msg)
 int
 OSC::scrub (float delta, lo_message msg)
 {
-	if (!session) return -1;
+	if (!_session) {
+		return -1;
+	}
 	check_surface (msg);
 
-	scrub_place = session->transport_sample ();
+	scrub_place = _session->transport_sample ();
 
 	float speed;
 
@@ -3013,18 +3015,18 @@ OSC::scrub (float delta, lo_message msg)
 
 	if (speed > 0) {
 		if (speed == 1) {
-			session->request_transport_speed (.5);
+			_session->request_transport_speed (.5);
 		} else {
-			session->request_transport_speed (9.9);
+			_session->request_transport_speed (9.9);
 		}
 	} else if (speed < 0) {
 		if (speed == -1) {
-			session->request_transport_speed (-.5);
+			_session->request_transport_speed (-.5);
 		} else {
-			session->request_transport_speed (-1);
+			_session->request_transport_speed (-1);
 		}
 	} else {
-		session->request_stop ();
+		_session->request_stop ();
 	}
 
 	return 0;
@@ -3033,7 +3035,9 @@ OSC::scrub (float delta, lo_message msg)
 int
 OSC::jog (float delta, lo_message msg)
 {
-	if (!session) return -1;
+	if (!_session) {
+		return -1;
+	}
 
 	OSCSurface *s = get_surface(get_address (msg));
 
@@ -3101,7 +3105,9 @@ OSC::jog (float delta, lo_message msg)
 int
 OSC::jog_mode (float mode, lo_message msg)
 {
-	if (!session) return -1;
+	if (!_session) {
+		return -1;
+	}
 
 	OSCSurface *s = get_surface(get_address (msg));
 	if (get_transport_speed () != 1.0) {
@@ -3133,7 +3139,7 @@ OSC::set_marker (const char* types, lo_arg **argv, int argc, lo_message msg)
 		PBD::warning << "Wrong number of parameters, one only." << endmsg;
 		return -1;
 	}
-	const Locations::LocationList& ll (session->locations ()->list ());
+	const Locations::LocationList& ll (_session->locations ()->list ());
 	uint32_t marker = 0;
 
 	switch (types[0]) {
@@ -3143,9 +3149,9 @@ OSC::set_marker (const char* types, lo_arg **argv, int argc, lo_message msg)
 				for (Locations::LocationList::const_iterator l = ll.begin(); l != ll.end(); ++l) {
 					if ((*l)->is_mark ()) {
 						if (strcmp (&argv[0]->s, (*l)->name().c_str()) == 0) {
-							session->request_locate ((*l)->start_sample (), MustStop);
+							_session->request_locate ((*l)->start_sample (), MustStop);
 							return 0;
-						} else if ((*l)->start () == session->transport_sample()) {
+						} else if ((*l)->start () == _session->transport_sample()) {
 							cur_mark = (*l);
 						}
 					}
@@ -3180,7 +3186,7 @@ OSC::set_marker (const char* types, lo_arg **argv, int argc, lo_message msg)
 	std::sort (lm.begin(), lm.end(), location_marker_sort);
 	// go there
 	if (marker < lm.size()) {
-		session->request_locate (lm[marker].when, MustStop);
+		_session->request_locate (lm[marker].when, MustStop);
 		return 0;
 	}
 	// we were unable to deal with things
@@ -3201,7 +3207,7 @@ OSC::send_group_list (lo_address addr)
 
 	lo_message_add_string (reply, X_("none"));
 
-	std::list<RouteGroup*> groups = session->route_groups ();
+	std::list<RouteGroup*> groups = _session->route_groups ();
 	for (std::list<RouteGroup *>::iterator i = groups.begin(); i != groups.end(); ++i) {
 		RouteGroup *rg = *i;
 		lo_message_add_string (reply, rg->name().c_str());
@@ -3214,9 +3220,12 @@ OSC::send_group_list (lo_address addr)
 int
 OSC::click_level (float position)
 {
-	if (!session) return -1;
-	if (session->click_gain()->gain_control()) {
-		session->click_gain()->gain_control()->set_value (session->click_gain()->gain_control()->interface_to_internal (position), PBD::Controllable::NoGroup);
+	if (!_session) {
+		return -1;
+	}
+
+	if (_session->click_gain()->gain_control()) {
+		_session->click_gain()->gain_control()->set_value (_session->click_gain()->gain_control()->interface_to_internal (position), PBD::Controllable::NoGroup);
 	}
 	return 0;
 }
@@ -3229,7 +3238,7 @@ OSC::loop_location (int start, int end)
 
 int
 OSC::route_get_sends(lo_message msg) {
-	if (!session) {
+	if (!_session) {
 		return -1;
 	}
 
@@ -3279,7 +3288,7 @@ OSC::route_get_sends(lo_message msg) {
 
 int
 OSC::route_get_receives(lo_message msg) {
-	if (!session) {
+	if (!_session) {
 		return -1;
 	}
 
@@ -3298,7 +3307,7 @@ OSC::route_get_receives(lo_message msg) {
 		return -1;
 	}
 
-	boost::shared_ptr<RouteList> route_list = session->get_routes();
+	boost::shared_ptr<RouteList> route_list = _session->get_routes();
 
 	lo_message reply = lo_message_new();
 	lo_message_add_int32(reply, rid);
@@ -3344,7 +3353,10 @@ OSC::route_get_receives(lo_message msg) {
 int
 OSC::master_parse (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg)
 {
-	if (!session) return -1;
+	if (!_session) {
+		return -1;
+	}
+
 	int ret = 1;
 	// set sub_path to null string if path is /master
 	const char* sub_path = &path[7];
@@ -3356,7 +3368,7 @@ OSC::master_parse (const char *path, const char* types, lo_arg **argv, int argc,
 	}
 
 	//OSCSurface *sur = get_surface(get_address (msg));
-	boost::shared_ptr<Stripable> s = session->master_out();
+	boost::shared_ptr<Stripable> s = _session->master_out();
 	if (s) {
 		ret = _strip_parse (path, sub_path, types, argv, argc, s, 0, false, msg);
 	} else {
@@ -3368,7 +3380,10 @@ OSC::master_parse (const char *path, const char* types, lo_arg **argv, int argc,
 int
 OSC::monitor_parse (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg)
 {
-	if (!session) return -1;
+	if (!_session) {
+		return -1;
+	}
+
 	int ret = 1;
 	// set sub_path to null string if path is /monitor
 	const char* sub_path = &path[8];
@@ -3380,9 +3395,9 @@ OSC::monitor_parse (const char *path, const char* types, lo_arg **argv, int argc
 	}
 
 	//OSCSurface *sur = get_surface(get_address (msg));
-	boost::shared_ptr<Stripable> s = session->monitor_out();
+	boost::shared_ptr<Stripable> s = _session->monitor_out();
 	if (s) {
-		boost::shared_ptr<MonitorProcessor> mon = session->monitor_out()->monitor_control();
+		boost::shared_ptr<MonitorProcessor> mon = _session->monitor_out()->monitor_control();
 		int state = 0;
 		if (types[0] == 'f') {
 			state = (uint32_t) argv[0]->f;
@@ -3420,7 +3435,10 @@ OSC::monitor_parse (const char *path, const char* types, lo_arg **argv, int argc
 int
 OSC::select_parse (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg)
 {
-	if (!session) return -1;
+	if (!_session) {
+		return -1;
+	}
+
 	int ret = 1;
 	// set sub_path to null string if path is /select
 	const char* sub_path = &path[7];
@@ -3511,7 +3529,10 @@ OSC::select_parse (const char *path, const char* types, lo_arg **argv, int argc,
 int
 OSC::strip_parse (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg)
 {
-	if (!session) return -1;
+	if (!_session) {
+		return -1;
+	}
+
 	int ret = 1;
 	int ssid = 0;
 	int param_1 = 1;
@@ -3951,12 +3972,12 @@ OSC::_strip_parse (const char *path, const char *sub_path, const char* types, lo
 							strng = "none";
 						}
 
-						RouteGroup* new_rg = session->route_group_by_name (strng);
+						RouteGroup* new_rg = _session->route_group_by_name (strng);
 						if (rg) {
 							string old_group = rg->name();
 							if (strng == "none") {
 								if (rg->size () == 1) {
-									session->remove_route_group (*rg);
+									_session->remove_route_group (*rg);
 								} else {
 									rg->remove (rt);
 								}
@@ -3965,7 +3986,7 @@ OSC::_strip_parse (const char *path, const char *sub_path, const char* types, lo
 								if (new_rg) {
 									// group exists switch to it
 									if (rg->size () == 1) {
-										session->remove_route_group (rg);
+										_session->remove_route_group (rg);
 									} else {
 										rg->remove (rt);
 									}
@@ -3986,8 +4007,8 @@ OSC::_strip_parse (const char *path, const char *sub_path, const char* types, lo
 								ret = 0;
 							} else {
 								// create new group with this strip in it
-								RouteGroup* new_rg = new RouteGroup (*session, strng);
-								session->add_route_group (new_rg);
+								RouteGroup* new_rg = new RouteGroup (*_session, strng);
+								_session->add_route_group (new_rg);
 								new_rg->add (rt);
 								ret = 0;
 							}
@@ -4076,7 +4097,7 @@ OSC::_strip_parse (const char *path, const char *sub_path, const char* types, lo
 					lo_message_add_int32 (rmsg, sid);
 				}
 				StripableList stripables;
-				session->get_stripables (stripables);
+				_session->get_stripables (stripables);
 				for (StripableList::iterator it = stripables.begin(); it != stripables.end(); ++it) {
 					boost::shared_ptr<Stripable> st = *it;
 					boost::shared_ptr<VCA> v = boost::dynamic_pointer_cast<VCA> (st);
@@ -4236,7 +4257,9 @@ OSC::strip_list (lo_message msg)
 int
 OSC::set_automation (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg)
 {
-	if (!session) return -1;
+	if (!_session) {
+		return -1;
+	}
 
 	int ret = 1;
 	OSCSurface *sur = get_surface(get_address (msg));
@@ -4362,7 +4385,9 @@ OSC::set_automation (const char *path, const char* types, lo_arg **argv, int arg
 int
 OSC::touch_detect (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg)
 {
-	if (!session) return -1;
+	if (!_session) {
+		return -1;
+	}
 
 	int ret = 1;
 	OSCSurface *sur = get_surface(get_address (msg));
@@ -4500,7 +4525,9 @@ OSC::spill (const char *path, const char* types, lo_arg **argv, int argc, lo_mes
 	 * /select/spill (may have i or f keypress/release)
 	 * /strip/spill i (may have keypress and i may be inline)
 	 */
-	if (!session || argc > 1) return -1;
+	if (!_session || argc > 1) {
+		return -1;
+	}
 
 	int ret = 1;
 	OSCSurface *sur = get_surface(get_address (msg));
@@ -4613,18 +4640,18 @@ OSC::sel_new_personal_send (char *foldback, lo_message msg)
 	if (foldbackbus.find ("- FB") == string::npos) {
 		foldback_name = string_compose ("%1 - FB", foldbackbus);
 	}
-	boost::shared_ptr<Route> lsn_rt = session->route_by_name (foldback_name);
+	boost::shared_ptr<Route> lsn_rt = _session->route_by_name (foldback_name);
 	if (!lsn_rt) {
 		// doesn't exist but check if raw name does and is foldbackbus
-		boost::shared_ptr<Route> raw_rt = session->route_by_name (foldbackbus);
+		boost::shared_ptr<Route> raw_rt = _session->route_by_name (foldbackbus);
 		if (raw_rt && raw_rt->is_foldbackbus()) {
 			lsn_rt = raw_rt;
 		} else {
 			// create the foldbackbus
-			RouteList list = session->new_audio_route (1, 1, 0, 1, foldback_name, PresentationInfo::FoldbackBus, (uint32_t) -1);
+			RouteList list = _session->new_audio_route (1, 1, 0, 1, foldback_name, PresentationInfo::FoldbackBus, (uint32_t) -1);
 			lsn_rt = *(list.begin());
 			lsn_rt->presentation_info().set_hidden (true);
-			session->set_dirty();
+			_session->set_dirty();
 		}
 	}
 	if (lsn_rt) {
@@ -4636,7 +4663,7 @@ OSC::sel_new_personal_send (char *foldback, lo_message msg)
 				// create send
 				rt->add_foldback_send (lsn_rt, false);
 				//boost::shared_ptr<Send> snd = rt->internal_send_for (aux);
-				session->dirty ();
+				_session->dirty ();
 				return 0;
 			} else {
 				PBD::warning << "OSC: new_send - duplicate send, ignored." << endmsg;
@@ -4654,7 +4681,7 @@ OSC::sel_new_personal_send (char *foldback, lo_message msg)
 int
 OSC::_strip_select (boost::shared_ptr<Stripable> s, lo_address addr)
 {
-	if (!session) {
+	if (!_session) {
 		return -1;
 	}
 	OSCSurface *sur = get_surface(addr, true);
@@ -4687,7 +4714,7 @@ OSC::_strip_select2 (boost::shared_ptr<Stripable> s, OSCSurface *sur, lo_address
 		if (ControlProtocol::first_selected_stripable()) {
 			s = ControlProtocol::first_selected_stripable();
 		} else {
-			s = session->master_out ();
+			s = _session->master_out ();
 		}
 		_select = s;
 	}
@@ -4712,7 +4739,7 @@ OSC::_strip_select2 (boost::shared_ptr<Stripable> s, OSCSurface *sur, lo_address
 		if (so != 0) {
 			so->refresh_strip (s, nsends, sur->gainmode, true);
 		} else {
-			OSCSelectObserver* sel_fb = new OSCSelectObserver (*this, *session, sur);
+			OSCSelectObserver* sel_fb = new OSCSelectObserver (*this, *_session, sur);
 			sur->sel_obs = sel_fb;
 		}
 		sur->sel_obs->set_expand (sur->expand_enable);
@@ -4845,7 +4872,7 @@ OSC::sel_delta (int delta, lo_message msg)
 int
 OSC::route_set_send_gain_dB (int ssid, int id, float val, lo_message msg)
 {
-	if (!session) {
+	if (!_session) {
 		return -1;
 	}
 	boost::shared_ptr<Stripable> s = get_strip (ssid, get_address (msg));
@@ -4871,7 +4898,7 @@ OSC::route_set_send_gain_dB (int ssid, int id, float val, lo_message msg)
 int
 OSC::route_set_send_fader (int ssid, int id, float val, lo_message msg)
 {
-	if (!session) {
+	if (!_session) {
 		return -1;
 	}
 	boost::shared_ptr<Stripable> s = get_strip (ssid, get_address (msg));
@@ -4955,7 +4982,7 @@ OSC::sel_sendfader (int id, float val, lo_message msg)
 int
 OSC::route_set_send_enable (int ssid, int sid, float val, lo_message msg)
 {
-	if (!session) {
+	if (!_session) {
 		return -1;
 	}
 	boost::shared_ptr<Stripable> s = get_strip (ssid, get_address (msg));
@@ -5156,7 +5183,7 @@ OSC::select_plugin_parameter (const char *path, const char* types, lo_arg **argv
 int
 OSC::sel_plugin_activate (float state, lo_message msg)
 {
-	if (!session) {
+	if (!_session) {
 		return -1;
 	}
 	OSCSurface *sur = get_surface(get_address (msg));
@@ -5187,7 +5214,7 @@ OSC::sel_plugin_activate (float state, lo_message msg)
 
 int
 OSC::route_plugin_list (int ssid, lo_message msg) {
-	if (!session) {
+	if (!_session) {
 		return -1;
 	}
 
@@ -5231,7 +5258,7 @@ OSC::route_plugin_list (int ssid, lo_message msg) {
 
 int
 OSC::route_plugin_descriptor (int ssid, int piid, lo_message msg) {
-	if (!session) {
+	if (!_session) {
 		return -1;
 	}
 
@@ -5359,7 +5386,7 @@ OSC::route_plugin_descriptor (int ssid, int piid, lo_message msg) {
 
 int
 OSC::route_plugin_reset (int ssid, int piid, lo_message msg) {
-	if (!session) {
+	if (!_session) {
 		return -1;
 	}
 
@@ -5392,7 +5419,7 @@ OSC::route_plugin_reset (int ssid, int piid, lo_message msg) {
 int
 OSC::route_plugin_parameter (int ssid, int piid, int par, float val, lo_message msg)
 {
-	if (!session)
+	if (!_session)
 		return -1;
 	boost::shared_ptr<Stripable> s = get_strip (ssid, get_address (msg));
 
@@ -5452,7 +5479,7 @@ OSC::route_plugin_parameter (int ssid, int piid, int par, float val, lo_message 
 int
 OSC::route_plugin_parameter_print (int ssid, int piid, int par, lo_message msg)
 {
-	if (!session) {
+	if (!_session) {
 		return -1;
 	}
 	boost::shared_ptr<Stripable> s = get_strip (ssid, get_address (msg));
@@ -5505,8 +5532,10 @@ OSC::route_plugin_parameter_print (int ssid, int piid, int par, lo_message msg)
 int
 OSC::route_plugin_activate (int ssid, int piid, lo_message msg)
 {
-	if (!session)
+	if (!_session) {
 		return -1;
+	}
+
 	boost::shared_ptr<Stripable> s = get_strip (ssid, lo_message_get_source (msg));
 
 	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (s);
@@ -5539,8 +5568,10 @@ OSC::route_plugin_activate (int ssid, int piid, lo_message msg)
 int
 OSC::route_plugin_deactivate (int ssid, int piid, lo_message msg)
 {
-	if (!session)
+	if (!_session) {
 		return -1;
+	}
+
 	boost::shared_ptr<Stripable> s = get_strip (ssid, lo_message_get_source (msg));
 
 	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (s);
@@ -5904,7 +5935,7 @@ OSC::periodic (void)
 		if (diff > 120000) {
 			scrub_speed = 0;
 			// locate to the place PH was at last tick
-			session->request_locate (scrub_place, MustStop);
+			_session->request_locate (scrub_place, MustStop);
 		}
 	}
 	for (uint32_t it = 0; it < _surface.size(); it++) {
@@ -6012,7 +6043,7 @@ OSC::get_sorted_stripables(std::bitset<32> types, bool cue, uint32_t custom, Sor
 	StripableList custom_list;
 
 	// fetch all stripables
-	session->get_stripables (stripables, PresentationInfo::AllStripables);
+	_session->get_stripables (stripables, PresentationInfo::AllStripables);
 	if (custom) {
 		uint32_t nstps = my_list.size ();
 		// check each custom strip to see if it still exists
@@ -6095,13 +6126,13 @@ OSC::get_sorted_stripables(std::bitset<32> types, bool cue, uint32_t custom, Sor
 	if (!custom) {
 		// Master/Monitor might be anywhere... we put them at the end - Sorry ;)
 		if (types[5]) {
-			if (session->master_out()) {
-				sorted.push_back (session->master_out());
+			if (_session->master_out()) {
+				sorted.push_back (_session->master_out());
 			}
 		}
 		if (types[6]) {
-			if (session->monitor_out()) {
-				sorted.push_back (session->monitor_out());
+			if (_session->monitor_out()) {
+				sorted.push_back (_session->monitor_out());
 			}
 		}
 	}
@@ -6287,7 +6318,7 @@ OSC::cue_new_aux (string name, string dest_1, string dest_2, uint32_t count, lo_
 	RouteList list;
 	boost::shared_ptr<Stripable> aux;
 	name = string_compose ("%1 - FB", name);
-	list = session->new_audio_route (count, count, 0, 1, name, PresentationInfo::FoldbackBus, (uint32_t) -1);
+	list = _session->new_audio_route (count, count, 0, 1, name, PresentationInfo::FoldbackBus, (uint32_t) -1);
 	aux = *(list.begin());
 	if (aux) {
 		boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(aux);
@@ -6307,7 +6338,7 @@ OSC::cue_new_aux (string name, string dest_1, string dest_2, uint32_t count, lo_
 			}
 		}
 		cue_set ((uint32_t) -1, msg);
-		session->set_dirty();
+		_session->set_dirty();
 		return 0;
 	}
 	return -1;
@@ -6320,7 +6351,7 @@ OSC::cue_new_send (string rt_name, lo_message msg)
 	if (sur->cue) {
 		boost::shared_ptr<Route> aux = boost::dynamic_pointer_cast<Route> (get_strip (sur->aux, get_address(msg)));
 		if (aux) {
-			boost::shared_ptr<Route> rt_send = session->route_by_name (rt_name);
+			boost::shared_ptr<Route> rt_send = _session->route_by_name (rt_name);
 			if (rt_send && (aux != rt_send)) {
 				// make sure there isn't one already
 				bool s_only = true;
@@ -6328,7 +6359,7 @@ OSC::cue_new_send (string rt_name, lo_message msg)
 					// create send
 					rt_send->add_foldback_send (aux, false);
 					boost::shared_ptr<Send> snd = rt_send->internal_send_for (aux);
-					session->dirty ();
+					_session->dirty ();
 					return 0;
 				} else {
 					PBD::warning << "OSC: new_send - duplicate send, ignored." << endmsg;
@@ -6360,7 +6391,7 @@ OSC::cue_connect_aux (std::string dest, lo_message msg)
 				}
 				PortSet& ports = rt->output()->ports ();
 				rt->output ()->connect (*(ports.begin()), dest, this);
-				session->set_dirty();
+				_session->set_dirty();
 				ret = 0;
 			}
 		}
@@ -6422,7 +6453,9 @@ OSC::cue_get_send (uint32_t id, lo_address addr)
 int
 OSC::cue_aux_fader (float position, lo_message msg)
 {
-	if (!session) return -1;
+	if (!_session) {
+		return -1;
+	}
 
 	OSCSurface *sur = get_surface(get_address (msg), true);
 	if (sur->cue) {
@@ -6444,7 +6477,9 @@ OSC::cue_aux_fader (float position, lo_message msg)
 int
 OSC::cue_aux_mute (float state, lo_message msg)
 {
-	if (!session) return -1;
+	if (!_session) {
+		return -1;
+	}
 
 	OSCSurface *sur = get_surface(get_address (msg), true);
 	if (sur->cue) {
@@ -6465,7 +6500,7 @@ OSC::cue_aux_mute (float state, lo_message msg)
 int
 OSC::cue_send_fader (uint32_t id, float val, lo_message msg)
 {
-	if (!session) {
+	if (!_session) {
 		return -1;
 	}
 	boost::shared_ptr<Send> s = cue_get_send (id, get_address (msg));
@@ -6482,8 +6517,10 @@ OSC::cue_send_fader (uint32_t id, float val, lo_message msg)
 int
 OSC::cue_send_enable (uint32_t id, float state, lo_message msg)
 {
-	if (!session)
+	if (!_session) {
 		return -1;
+	}
+
 	boost::shared_ptr<Send> s = cue_get_send (id, get_address (msg));
 	if (s) {
 		if (state) {
