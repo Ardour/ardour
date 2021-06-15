@@ -52,7 +52,7 @@ public:
 		return 0;
 	}
 
-	BasicUI&                     basic_ui () const;
+	ARDOUR::BasicUI&             basic_ui () const;
 	virtual PBD::EventLoop*      event_loop () const;
 	Glib::RefPtr<Glib::MainLoop> main_loop () const;
 	ARDOUR::Session&             session () const;

@@ -21,7 +21,7 @@
 
 using namespace ArdourSurface;
 
-BasicUI&
+ARDOUR::BasicUI&
 SurfaceComponent::basic_ui () const
 {
 	return _surface;
