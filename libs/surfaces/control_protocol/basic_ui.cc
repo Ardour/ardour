@@ -486,6 +486,12 @@ BasicUI::get_record_enabled ()
 	return _session->get_record_enabled();
 }
 
+RecordState
+BasicUI::record_status () const
+{
+	return _session->record_status ();
+}
+
 void
 BasicUI::set_record_enable (bool yn)
 {

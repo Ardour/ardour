@@ -148,7 +148,7 @@ FaderPort8::notify_transport_state_changed ()
 void
 FaderPort8::notify_record_state_changed ()
 {
-	switch (_session->record_status ()) {
+	switch (record_status ()) {
 		case RecordState::Disabled:
 			_ctrls.button (FP8Controls::BtnRecord).set_active (0);
 			_ctrls.button (FP8Controls::BtnRecord).set_blinking (false);

@@ -1417,7 +1417,7 @@ MackieControlProtocol::notify_record_state_changed ()
 		if (rec) {
 			LedState ls;
 
-			switch (_session->record_status()) {
+			switch (record_status()) {
 			case RecordState::Disabled:
 				DEBUG_TRACE (DEBUG::MackieControl, "record state changed to disabled, LED off\n");
 				ls = off;

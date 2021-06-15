@@ -112,6 +112,7 @@ class LIBCONTROLCP_API BasicUI {
 
 	void set_record_enable (bool yn);
 	bool get_record_enabled ();
+	RecordState record_status() const;
 
 	//editor visibility stuff  (why do we have to make explicit numbers here?  because "gui actions" don't accept args
 	void fit_1_track();

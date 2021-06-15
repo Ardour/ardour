@@ -108,7 +108,7 @@ Maschine2::connect_signals ()
 void
 Maschine2::notify_record_state_changed ()
 {
-	switch (_session->record_status ()) {
+	switch (record_status ()) {
 		case RecordState::Disabled:
 			_ctrl->button (M2Contols::Rec)->set_color (0);
 			_ctrl->button (M2Contols::Rec)->set_blinking (false);

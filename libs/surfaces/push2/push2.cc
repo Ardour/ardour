@@ -886,7 +886,7 @@ Push2::notify_record_state_changed ()
 		return;
 	}
 
-	switch (_session->record_status ()) {
+	switch (record_status ()) {
 	case RecordState::Disabled:
 		b->second->set_color (LED::White);
 		b->second->set_state (LED::NoTransition);

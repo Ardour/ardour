@@ -1137,7 +1137,7 @@ US2400Protocol::notify_record_state_changed ()
 		if (rec) {
 			LedState ls;
 
-			switch (_session->record_status()) {
+			switch (record_status()) {
 			case RecordState::Disabled:
 				DEBUG_TRACE (DEBUG::US2400, "record state changed to disabled, LED off\n");
 				ls = off;
