@@ -215,8 +215,6 @@ class MackieControlProtocol
 	void update_global_button (int id, Mackie::LedState);
 	void update_global_led (int id, Mackie::LedState);
 
-	samplepos_t transport_sample() const;
-
 	int modifier_state() const { return _modifier_state; }
 	int main_modifier_state() const { return _modifier_state & MAIN_MODIFIER_MASK; }
 

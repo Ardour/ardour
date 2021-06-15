@@ -1215,7 +1215,7 @@ MackieControlProtocol::update_timecode_display()
 	string timecode;
 
 	// do assignment here so current_sample is fixed
-	samplepos_t current_sample = _session->transport_sample();
+	samplepos_t current_sample = transport_sample();
 	// For large jumps in play head possition do full reset
 	int moved = (current_sample - _sample_last) / _session->sample_rate ();
 	if (moved) {
@@ -1955,12 +1955,6 @@ MackieControlProtocol::update_fader_automation_state ()
 		update_global_button (Button::Grp, off);
 		break;
 	}
-}
-
-samplepos_t
-MackieControlProtocol::transport_sample() const
-{
-	return _session->transport_sample();
 }
 
 void

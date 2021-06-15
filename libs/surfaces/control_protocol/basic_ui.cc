@@ -496,7 +496,7 @@ BasicUI::set_record_enable (bool yn)
 }
 
 samplepos_t
-BasicUI::transport_sample ()
+BasicUI::transport_sample () const
 {
 	return _session->transport_sample();
 }

@@ -996,37 +996,37 @@ OSC::current_value (const char */*path*/, const char */*types*/, lo_arg **/*argv
 	if (strcmp (argv[0]->s, X_("transport_frame")) == 0) {
 
 		if (session) {
-			lo_send (addr, retpath, "i", _session->transport_sample());
+			lo_send (addr, retpath, "i", transport_sample ());
 		}
 
 	} else if (strcmp (argv[0]->s, X_("transport_speed")) == 0) {
 
 		if (session) {
-			lo_send (addr, retpath, "i", _session->transport_sample());
+			lo_send (addr, retpath, "i", transport_sample ());
 		}
 
 	} else if (strcmp (argv[0]->s, X_("transport_locked")) == 0) {
 
 		if (session) {
-			lo_send (addr, retpath, "i", _session->transport_sample());
+			lo_send (addr, retpath, "i", transport_sample ());
 		}
 
 	} else if (strcmp (argv[0]->s, X_("punch_in")) == 0) {
 
 		if (session) {
-			lo_send (addr, retpath, "i", _session->transport_sample());
+			lo_send (addr, retpath, "i", transport_sample ());
 		}
 
 	} else if (strcmp (argv[0]->s, X_("punch_out")) == 0) {
 
 		if (session) {
-			lo_send (addr, retpath, "i", _session->transport_sample());
+			lo_send (addr, retpath, "i", transport_sample ());
 		}
 
 	} else if (strcmp (argv[0]->s, X_("rec_enable")) == 0) {
 
 		if (session) {
-			lo_send (addr, retpath, "i", _session->transport_sample());
+			lo_send (addr, retpath, "i", transport_sample ());
 		}
 
 	} else {
@@ -3151,7 +3151,7 @@ OSC::set_marker (const char* types, lo_arg **argv, int argc, lo_message msg)
 						if (strcmp (&argv[0]->s, (*l)->name().c_str()) == 0) {
 							locate ((*l)->start_sample (), MustStop);
 							return 0;
-						} else if ((*l)->start () == _session->transport_sample()) {
+						} else if ((*l)->start () == ControlProtocol::transport_sample ()) {
 							cur_mark = (*l);
 						}
 					}

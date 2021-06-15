@@ -198,8 +198,6 @@ class US2400Protocol
 	void update_global_button (int id, US2400::LedState);
 	void update_global_led (int id, US2400::LedState);
 
-	samplepos_t transport_sample() const;
-
 	int modifier_state() const { return _modifier_state; }
 	int main_modifier_state() const { return _modifier_state & MAIN_MODIFIER_MASK; }
 

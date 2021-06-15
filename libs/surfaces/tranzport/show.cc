@@ -348,7 +348,7 @@ TranzportControlProtocol::show_bbt (samplepos_t where)
 void
 TranzportControlProtocol::show_transport_time ()
 {
-	show_bbt (session->transport_sample ());
+	show_bbt (transport_sample ());
 }
 
 void

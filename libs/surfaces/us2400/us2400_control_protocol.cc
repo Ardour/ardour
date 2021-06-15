@@ -1536,12 +1536,6 @@ US2400Protocol::update_fader_automation_state ()
 {
 }
 
-samplepos_t
-US2400Protocol::transport_sample() const
-{
-	return _session->transport_sample();
-}
-
 void
 US2400Protocol::add_down_select_button (int surface, int strip)
 {

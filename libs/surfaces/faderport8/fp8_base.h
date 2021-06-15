@@ -22,6 +22,7 @@
 #include <stdint.h>
 #include <vector>
 
+#include "ardour/types.h"
 #include "pbd/signals.h"
 
 #ifdef FADERPORT16
@@ -57,6 +58,7 @@ public:
 	virtual size_t tx_midi (std::vector<uint8_t> const&) const = 0;
 	virtual std::string const& timecode () const = 0;
 	virtual std::string const& musical_time () const = 0;
+	virtual samplepos_t transport_sample () const = 0;
 	virtual bool shift_mod () const = 0;
 	virtual bool show_meters () const = 0;
 	virtual bool show_panner () const = 0;

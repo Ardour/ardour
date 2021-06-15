@@ -268,7 +268,7 @@ FaderPort8::periodic ()
 		_timecode = Timecode::timecode_format_time(TC);
 
 		char buf[16];
-		Temporal::BBT_Time BBT = Temporal::TempoMap::use()->bbt_at (timepos_t (_session->transport_sample ()));
+		Temporal::BBT_Time BBT = Temporal::TempoMap::use()->bbt_at (timepos_t (transport_sample ()));
 		snprintf (buf, sizeof (buf),
 				" %02" PRIu32 "|%02" PRIu32 "|%02" PRIu32 "|%02" PRIu32,
 				BBT.bars % 100, BBT.beats %100,
@@ -1718,7 +1718,7 @@ FaderPort8::select_strip (boost::weak_ptr<Stripable> ws)
 	if (s == first_selected_stripable () && !shift_mod ()) {
 		if (_ctrls.fader_mode () == ModeTrack) {
 			boost::shared_ptr<AutomationControl> ac = s->gain_control ();
-			ac->start_touch (timepos_t (ac->session().transport_sample()));
+			ac->start_touch (timepos_t (transport_sample()));
 			ac->set_value (ac->normal (), PBD::Controllable::UseGroup);
 		}
 		return;

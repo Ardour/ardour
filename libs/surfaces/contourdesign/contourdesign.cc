@@ -559,7 +559,7 @@ ContourDesignControlProtocol::handle_button_release (unsigned short btn)
 void
 ContourDesignControlProtocol::prev_marker_keep_rolling ()
 {
-	timepos_t pos = _session->locations()->first_mark_before (timepos_t (_session->transport_sample()));
+	timepos_t pos = _session->locations()->first_mark_before (timepos_t (transport_sample()));
 
 	if (pos.positive() || pos.zero()) {
 		locate (pos.samples());
@@ -571,7 +571,7 @@ ContourDesignControlProtocol::prev_marker_keep_rolling ()
 void
 ContourDesignControlProtocol::next_marker_keep_rolling ()
 {
-	timepos_t pos = _session->locations()->first_mark_after (timepos_t (_session->transport_sample()));
+	timepos_t pos = _session->locations()->first_mark_after (timepos_t (transport_sample()));
 
 	if (pos.positive() || pos.zero()) {
 		locate (pos.samples());

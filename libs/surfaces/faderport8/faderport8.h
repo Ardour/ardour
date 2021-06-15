@@ -230,6 +230,7 @@ private:
 	std::string _musical_time;
 	std::string const& timecode () const { return _timecode; }
 	std::string const& musical_time () const { return _musical_time; }
+	samplepos_t transport_sample () const { return ARDOUR::ControlProtocol::transport_sample (); }
 
 	int _timer_divider;
 
