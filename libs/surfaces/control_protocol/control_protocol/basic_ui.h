@@ -71,7 +71,7 @@ class LIBCONTROLCP_API BasicUI {
 	void jump_by_beats (int beats, LocateTransportDisposition ltd = RollIfAppropriate);
 
 	samplepos_t transport_sample ();
-	void locate (samplepos_t sample, LocateTransportDisposition ltd);
+	void locate (samplepos_t sample, LocateTransportDisposition ltd = RollIfAppropriate);
 	void locate (samplepos_t sample, bool);
 	bool locating ();
 	bool locked ();
