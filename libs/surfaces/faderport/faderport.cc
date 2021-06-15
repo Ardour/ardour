@@ -706,8 +706,8 @@ void
 FaderPort::parameter_changed (string what)
 {
 	if (what == "punch-in" || what == "punch-out") {
-		bool in = _session->config.get_punch_in ();
-		bool out = _session->config.get_punch_out ();
+		bool in = config ().get_punch_in ();
+		bool out = config ().get_punch_out ();
 		if (in && out) {
 			get_button (Punch).set_led_state (_output_port, true);
 			blinkers.remove (Punch);
@@ -725,7 +725,7 @@ FaderPort::connect_session_signals()
 	_session->RecordStateChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_recenable_state, this), this);
 	_session->TransportStateChange.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_transport_state, this), this);
 	/* not session, but treat it similarly */
-	_session->config.ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::parameter_changed, this, _1), this);
+	config ().ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::parameter_changed, this, _1), this);
 }
 
 bool

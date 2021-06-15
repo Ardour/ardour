@@ -36,6 +36,7 @@
 namespace ARDOUR {
 
 class Session;
+class SessionConfiguration;
 
 class LIBCONTROLCP_API BasicUI {
   public:
@@ -159,6 +160,11 @@ class LIBCONTROLCP_API BasicUI {
 	/* Naming */
 
 	std::string make_port_name_non_relative (const std::string& name) const;
+
+	/* Configuration */
+
+	const SessionConfiguration& config () const;
+	SessionConfiguration&       config ();
 
   protected:
 	Session* _session;

@@ -502,12 +502,12 @@ OSCGlobalObserver::solo_active (bool active)
 void
 OSCGlobalObserver::extra_check ()
 {
-	if (last_punchin != session->config.get_punch_in()) {
-		last_punchin = session->config.get_punch_in();
+	if (last_punchin != _osc.config().get_punch_in()) {
+		last_punchin = _osc.config().get_punch_in();
 		_osc.float_message (X_("/toggle_punch_in"), last_punchin, addr);
 	}
-	if (last_punchout != session->config.get_punch_out()) {
-		last_punchout = session->config.get_punch_out();
+	if (last_punchout != _osc.config().get_punch_out()) {
+		last_punchout = _osc.config().get_punch_out();
 		_osc.float_message (X_("/toggle_punch_out"), last_punchout, addr);
 	}
 	if (last_click != Config->get_clicking()) {

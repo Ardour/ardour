@@ -800,3 +800,15 @@ BasicUI::make_port_name_non_relative (const std::string& name) const
 {
 	return _session->engine ().make_port_name_non_relative (name);
 }
+
+const SessionConfiguration&
+BasicUI::config () const
+{
+	return _session->config;
+}
+
+SessionConfiguration&
+BasicUI::config ()
+{
+	return _session->config;
+}

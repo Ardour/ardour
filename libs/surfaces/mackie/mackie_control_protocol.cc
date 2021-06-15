@@ -751,7 +751,7 @@ MackieControlProtocol::connect_session_signals()
 	_session->TransportLooped.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_loop_state_changed, this), this);
 	// receive punch-in and punch-out
 	Config->ParameterChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_parameter_changed, this, _1), this);
-	_session->config.ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_parameter_changed, this, _1), this);
+	config ().ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_parameter_changed, this, _1), this);
 	// receive rude solo changed
 	_session->SoloActive.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_solo_active_changed, this, _1), this);
 
@@ -1250,9 +1250,9 @@ MackieControlProtocol::update_timecode_display()
 void MackieControlProtocol::notify_parameter_changed (std::string const & p)
 {
 	if (p == "punch-in") {
-		update_global_button (Button::Drop, _session->config.get_punch_in() ? flashing : off);
+		update_global_button (Button::Drop, config ().get_punch_in() ? flashing : off);
 	} else if (p == "punch-out") {
-		update_global_button (Button::Replace, _session->config.get_punch_out() ? flashing : off);
+		update_global_button (Button::Replace, config ().get_punch_out() ? flashing : off);
 	} else if (p == "clicking") {
 		update_global_button (Button::Click, Config->get_clicking());
 	} else if (p == "follow-edits") {
@@ -1262,9 +1262,9 @@ void MackieControlProtocol::notify_parameter_changed (std::string const & p)
 		 * this button (if there is one) won't reflect the setting.
 		 */
 
-		//update_global_button (Button::Enter, _session->config.get_follow_edits() ? on : off);
+		//update_global_button (Button::Enter, config ().get_follow_edits() ? on : off);
 	} else if (p == "external-sync") {
-		update_global_button (Button::Cancel, _session->config.get_external_sync() ? on : off);
+		update_global_button (Button::Cancel, config ().get_external_sync() ? on : off);
 	} else {
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("parameter changed: %1\n", p));
 	}
