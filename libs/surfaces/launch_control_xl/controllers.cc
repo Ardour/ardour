@@ -1012,7 +1012,7 @@ LaunchControlXL::button_mute()
 void
 LaunchControlXL::button_mute_long_press()
 {
-	_session->cancel_all_mute();
+	cancel_all_mute();
 }
 
 void

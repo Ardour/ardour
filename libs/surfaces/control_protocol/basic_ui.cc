@@ -762,6 +762,16 @@ BasicUI::sample_to_timecode (samplepos_t sample, Timecode::Time& timecode, bool 
 	_session->sample_to_timecode (sample, *((Timecode::Time*)&timecode), use_offset, use_subframes);
 }
 
+std::vector<boost::weak_ptr<AutomationControl>>
+BasicUI::cancel_all_mute ()
+{
+	if (_session) {
+		return _session->cancel_all_mute ();
+	}
+
+	return std::vector<boost::weak_ptr<AutomationControl>>{};
+}
+
 void
 BasicUI::cancel_all_solo ()
 {

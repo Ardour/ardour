@@ -360,7 +360,7 @@ FaderPort8::button_mute_clear ()
 {
 #ifdef FP8_MUTESOLO_UNDO
 	if (_session->muted ()) {
-		_mute_state = _session->cancel_all_mute ();
+		_mute_state = cancel_all_mute ();
 	} else {
 		/* restore mute */
 		boost::shared_ptr<ControlList> cl (new ControlList);
@@ -377,7 +377,7 @@ FaderPort8::button_mute_clear ()
 		}
 	}
 #else
-	_session->cancel_all_mute ();
+	cancel_all_mute ();
 #endif
 }
 

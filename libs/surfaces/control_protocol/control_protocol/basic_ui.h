@@ -30,8 +30,11 @@
 #include "pbd/signals.h"
 #include "temporal/time.h"
 
+#include <boost/smart_ptr.hpp>
+
 #include <cstdint>
 #include <string>
+#include <vector>
 
 namespace ARDOUR {
 
@@ -96,6 +99,8 @@ class LIBCONTROLCP_API BasicUI {
 	void toggle_monitor_mute();
 	void toggle_monitor_dim();
 	void toggle_monitor_mono();
+
+	std::vector<boost::weak_ptr<AutomationControl>> cancel_all_mute ();
 
 	void cancel_all_solo ();
 
