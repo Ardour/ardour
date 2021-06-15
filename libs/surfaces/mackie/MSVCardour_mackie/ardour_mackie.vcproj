@@ -320,10 +320,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\midi_byte_array.cc"
-				>
-			</File>
-			<File
 				RelativePath="..\pot.cc"
 				>
 			</File>
@@ -423,10 +419,6 @@
 			</File>
 			<File
 				RelativePath="..\meter.h"
-				>
-			</File>
-			<File
-				RelativePath="..\midi_byte_array.h"
 				>
 			</File>
 			<File

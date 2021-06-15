@@ -22,7 +22,6 @@ def build(bld):
         launch_control_xl.cc
         controllers.cc
         interface.cc
-        midi_byte_array.cc
         leds.cc
         gui.cc
     '''

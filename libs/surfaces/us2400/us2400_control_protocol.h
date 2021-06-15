@@ -33,9 +33,9 @@
 #include "midi++/types.h"
 #include "ardour/types.h"
 #include "control_protocol/control_protocol.h"
+#include "control_protocol/midi_byte_array.h"
 
 #include "types.h"
-#include "midi_byte_array.h"
 #include "controls.h"
 #include "jog_wheel.h"
 #include "timer.h"

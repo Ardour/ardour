@@ -22,8 +22,8 @@
 
 #include "pbd/signals.h"
 
+#include "control_protocol/midi_byte_array.h"
 
-#include "midi_byte_array.h"
 #include "types.h"
 
 namespace MIDI {

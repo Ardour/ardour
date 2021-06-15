@@ -22,7 +22,6 @@ def build(bld):
             buttons.cc
             canvas.cc
 	    interface.cc
-            midi_byte_array.cc
             leds.cc
             level_meter.cc
 	    gui.cc

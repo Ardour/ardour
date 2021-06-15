@@ -60,9 +60,10 @@
 #include "ardour/audioengine.h"
 #include "ardour/vca_manager.h"
 
+#include "control_protocol/midi_byte_array.h"
+
 #include "us2400_control_protocol.h"
 
-#include "midi_byte_array.h"
 #include "us2400_control_exception.h"
 #include "device_profile.h"
 #include "surface_port.h"

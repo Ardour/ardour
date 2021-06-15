@@ -29,8 +29,9 @@
 #include "pbd/controllable.h"
 #include "pbd/signals.h"
 
+#include "control_protocol/midi_byte_array.h"
+
 #include "us2400_control_exception.h"
-#include "midi_byte_array.h"
 
 namespace ARDOUR {
 	class AutomationControl;

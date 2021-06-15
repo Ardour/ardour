@@ -6,7 +6,7 @@
 #include <cstdarg>
 #include <iomanip>
 
-#include "midi_byte_array.h"
+#include "control_protocol/midi_byte_array.h"
 
 using namespace std;
 

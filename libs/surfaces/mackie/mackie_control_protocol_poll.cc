@@ -19,7 +19,8 @@
 
 #include "mackie_control_protocol.h"
 
-#include "midi_byte_array.h"
+#include "control_protocol/midi_byte_array.h"
+
 #include "surface_port.h"
 
 #include "pbd/pthread_utils.h"

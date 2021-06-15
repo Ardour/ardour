@@ -29,13 +29,13 @@
 
 #include <boost/smart_ptr.hpp>
 
+#include "control_protocol/midi_byte_array.h"
 #include "pbd/controllable.h"
 #include "pbd/signals.h"
 
 #include "temporal/timeline.h"
 
 #include "mackie_control_exception.h"
-#include "midi_byte_array.h"
 
 namespace ARDOUR {
 	class AutomationControl;

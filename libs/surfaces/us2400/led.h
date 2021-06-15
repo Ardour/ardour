@@ -19,8 +19,9 @@
 #ifndef __ardour_us2400_control_protocol_led_h__
 #define __ardour_us2400_control_protocol_led_h__
 
+#include "control_protocol/midi_byte_array.h"
+
 #include "controls.h"
-#include "midi_byte_array.h"
 #include "types.h"
 
 namespace ArdourSurface {

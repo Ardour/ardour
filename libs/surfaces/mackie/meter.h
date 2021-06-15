@@ -20,8 +20,9 @@
 #ifndef __ardour_mackie_control_protocol_meter_h__
 #define __ardour_mackie_control_protocol_meter_h__
 
+#include "control_protocol/midi_byte_array.h"
+
 #include "controls.h"
-#include "midi_byte_array.h"
 
 namespace ArdourSurface {
 
