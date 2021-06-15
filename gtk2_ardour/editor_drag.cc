@@ -3036,31 +3036,25 @@ TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 	samplepos_t const pf = adjusted_current_sample (event);
 	setup_snap_delta (MusicSample(region_start, 0));
 
-	if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::trim_contents_modifier ())) {
-		/* Move the contents of the region around without changing the region bounds */
-		_operation = ContentsTrim;
-		_preview_video = false;
-		Drag::start_grab (event, _editor->cursors()->trimmer);
-	} else {
-		/* These will get overridden for a point trim.*/
-		if (pf < (region_start + region_length/2)) {
-			/* closer to front */
-			_operation = StartTrim;
-			if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::trim_anchored_modifier ())) {
-				Drag::start_grab (event, _editor->cursors()->anchored_left_side_trim);
-			} else {
-				Drag::start_grab (event, _editor->cursors()->left_side_trim);
-			}
+	/* These will get overridden for a point trim.*/
+	if (pf < (region_start + region_length/2)) {
+		/* closer to front */
+		_operation = StartTrim;
+		if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::trim_anchored_modifier ())) {
+			Drag::start_grab (event, _editor->cursors()->anchored_left_side_trim);
 		} else {
-			/* closer to end */
-			_operation = EndTrim;
-			if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::trim_anchored_modifier ())) {
-				Drag::start_grab (event, _editor->cursors()->anchored_right_side_trim);
-			} else {
-				Drag::start_grab (event, _editor->cursors()->right_side_trim);
-			}
+			Drag::start_grab (event, _editor->cursors()->left_side_trim);
+		}
+	} else {
+		/* closer to end */
+		_operation = EndTrim;
+		if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::trim_anchored_modifier ())) {
+			Drag::start_grab (event, _editor->cursors()->anchored_right_side_trim);
+		} else {
+			Drag::start_grab (event, _editor->cursors()->right_side_trim);
 		}
 	}
+
 	/* jump trim disabled for now
 	if (Keyboard::modifier_state_equals (event->button.state, Keyboard::trim_jump_modifier ())) {
 		_jump_position_when_done = true;
@@ -3073,9 +3067,6 @@ TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 		break;
 	case EndTrim:
 		show_verbose_cursor_duration (region_start, region_end);
-		break;
-	case ContentsTrim:
-		show_verbose_cursor_time (_primary->region()->start ());
 		break;
 	}
 	show_view_preview (_operation == StartTrim ? region_start : region_end);
@@ -3091,7 +3082,6 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 	RegionView* rv = _primary;
 
 	pair<set<boost::shared_ptr<Playlist> >::iterator,bool> insert_result;
-	sampleoffset_t sample_delta = 0;
 
 	MusicSample adj_sample = adjusted_sample (_drags->current_pointer_sample () + snap_delta (event->button.state), event, true);
 	samplecnt_t dt = adj_sample.sample - raw_grab_sample () + _pointer_sample_offset - snap_delta (event->button.state);
@@ -3106,9 +3096,6 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 			break;
 		case EndTrim:
 			trim_type = "Region end trim";
-			break;
-		case ContentsTrim:
-			trim_type = "Region content trim";
 			break;
 		default:
 			assert(0);
@@ -3188,8 +3175,6 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 					if (len < -dt) dt = max(dt, -len);
 				}
 				break;
-			case ContentsTrim:
-				break;
 		}
 	}
 
@@ -3232,15 +3217,6 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 		}
 		break;
 
-	case ContentsTrim:
-		{
-			sample_delta = (last_pointer_sample() - adjusted_current_sample(event, false));
-
-			for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
-				i->view->move_contents (sample_delta);
-			}
-		}
-		break;
 	}
 
 	switch (_operation) {
@@ -3249,9 +3225,6 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 		break;
 	case EndTrim:
 		show_verbose_cursor_duration (rv->region()->position(), rv->region()->last_sample());
-		break;
-	case ContentsTrim:
-		show_verbose_cursor_time (rv->region()->start ());
 		break;
 	}
 	show_view_preview ((_operation == StartTrim ? rv->region()->position() : rv->region()->last_sample()));
@@ -3378,9 +3351,6 @@ TrimDrag::setup_pointer_sample_offset ()
 		break;
 	case EndTrim:
 		_pointer_sample_offset = raw_grab_sample() - i->initial_end;
-		break;
-	case ContentsTrim:
-		_pointer_sample_offset = 0;
 		break;
 	}
 }

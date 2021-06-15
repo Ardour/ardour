@@ -771,8 +771,7 @@ class TrimDrag : public RegionDrag
 public:
 	enum Operation {
 		StartTrim,
-		EndTrim,
-		ContentsTrim,
+		EndTrim
 	};
 
 	TrimDrag (Editor *, ArdourCanvas::Item *, RegionView*, std::list<RegionView*> const &, bool preserve_fade_anchor = false);
