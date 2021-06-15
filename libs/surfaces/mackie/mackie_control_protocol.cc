@@ -927,13 +927,13 @@ MackieControlProtocol::create_surfaces ()
 			_input_bundle->add_channel (
 				"",
 				ARDOUR::DataType::MIDI,
-				_session->engine().make_port_name_non_relative (surface->port().input_port().name())
+				make_port_name_non_relative (surface->port().input_port().name())
 				);
 
 			_output_bundle->add_channel (
 				"",
 				ARDOUR::DataType::MIDI,
-				_session->engine().make_port_name_non_relative (surface->port().output_port().name())
+				make_port_name_non_relative (surface->port().output_port().name())
 				);
 		}
 

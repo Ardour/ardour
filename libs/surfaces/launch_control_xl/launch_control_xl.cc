@@ -831,8 +831,8 @@ LaunchControlXL::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string 
 		return false;
 	}
 
-	string ni = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (boost::shared_ptr<ARDOUR::Port>(_async_in)->name());
-	string no = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (boost::shared_ptr<ARDOUR::Port>(_async_out)->name());
+	string ni = make_port_name_non_relative (boost::shared_ptr<ARDOUR::Port>(_async_in)->name());
+	string no = make_port_name_non_relative (boost::shared_ptr<ARDOUR::Port>(_async_out)->name());
 
 	if (ni == name1 || ni == name2) {
 		if (yn) {

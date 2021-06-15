@@ -105,13 +105,13 @@ CC121::CC121 (Session& s)
 	_input_bundle->add_channel (
 		"",
 		ARDOUR::DataType::MIDI,
-		_session->engine().make_port_name_non_relative (inp->name())
+		make_port_name_non_relative (inp->name())
 		);
 
 	_output_bundle->add_channel (
 		"",
 		ARDOUR::DataType::MIDI,
-		_session->engine().make_port_name_non_relative (outp->name())
+		make_port_name_non_relative (outp->name())
 		);
 
 
@@ -805,8 +805,8 @@ CC121::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boo
 		return false;
 	}
 
-	string ni = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (boost::shared_ptr<ARDOUR::Port>(_input_port)->name());
-	string no = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (boost::shared_ptr<ARDOUR::Port>(_output_port)->name());
+	string ni = make_port_name_non_relative (boost::shared_ptr<ARDOUR::Port>(_input_port)->name());
+	string no = make_port_name_non_relative (boost::shared_ptr<ARDOUR::Port>(_output_port)->name());
 
 	if (ni == name1 || ni == name2) {
 		if (yn) {

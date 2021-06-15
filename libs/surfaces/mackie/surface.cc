@@ -210,8 +210,8 @@ Surface::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, b
 		return false;
 	}
 
-	string ni = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (_port->input_name());
-	string no = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (_port->output_name());
+	string ni = _mcp.make_port_name_non_relative (_port->input_name());
+	string no = _mcp.make_port_name_non_relative (_port->output_name());
 
 	if (ni == name1 || ni == name2) {
 		if (yn) {

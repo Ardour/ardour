@@ -154,6 +154,10 @@ class LIBCONTROLCP_API BasicUI {
 	bool rewind_button_onoff() const;
 	bool loop_button_onoff() const;
 
+	/* Naming */
+
+	std::string make_port_name_non_relative (const std::string& name) const;
+
   protected:
 	Session* _session;
 };

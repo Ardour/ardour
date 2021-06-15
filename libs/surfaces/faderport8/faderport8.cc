@@ -162,13 +162,13 @@ FaderPort8::FaderPort8 (Session& s)
 	_input_bundle->add_channel (
 		"",
 		ARDOUR::DataType::MIDI,
-		_session->engine().make_port_name_non_relative (inp->name())
+		make_port_name_non_relative (inp->name())
 		);
 
 	_output_bundle->add_channel (
 		"",
 		ARDOUR::DataType::MIDI,
-		_session->engine().make_port_name_non_relative (outp->name())
+		make_port_name_non_relative (outp->name())
 		);
 
 	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::connection_handler, this, _2, _4), this);
@@ -428,8 +428,8 @@ FaderPort8::connection_handler (std::string name1, std::string name2)
 		return false;
 	}
 
-	string ni = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (boost::shared_ptr<ARDOUR::Port>(_input_port)->name());
-	string no = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (boost::shared_ptr<ARDOUR::Port>(_output_port)->name());
+	string ni = make_port_name_non_relative (boost::shared_ptr<ARDOUR::Port>(_input_port)->name());
+	string no = make_port_name_non_relative (boost::shared_ptr<ARDOUR::Port>(_output_port)->name());
 
 	if (ni == name1 || ni == name2) {
 		DEBUG_TRACE (DEBUG::FaderPort8, string_compose ("Connection notify %1 and %2\n", name1, name2));
