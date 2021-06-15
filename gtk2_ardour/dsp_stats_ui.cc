@@ -16,11 +16,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <gtkmm/frame.h>
+
 #include "gtkmm2ext/utils.h"
 
 #include "ardour/session.h"
 #include "ardour/audioengine.h"
 #include "ardour/audio_backend.h"
+
+#include "widgets/tooltips.h"
 
 #include "dsp_stats_ui.h"
 #include "timers.h"
@@ -48,29 +52,45 @@ DspStatisticsGUI::DspStatisticsGUI ()
 
 	int row = 0;
 
-	attach (*manage (new Gtk::Label (_("Buffer size: "), ALIGN_RIGHT, ALIGN_CENTER)), 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
-	attach (buffer_size_label, 1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	table.attach (*manage (new Gtk::Label (_("Buffer size: "), ALIGN_RIGHT, ALIGN_CENTER)), 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	table.attach (buffer_size_label, 2, 3, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
 	row++;
 
-	attach (*manage (new Gtk::Label (_("Idle: "), ALIGN_RIGHT, ALIGN_CENTER)), 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
-	attach (*labels[AudioEngine::NTT + Session::NTT + AudioBackend::DeviceWait], 1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	table.attach (*manage (new Gtk::Label (_("Idle: "), ALIGN_RIGHT, ALIGN_CENTER)), 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	table.attach (*labels[AudioEngine::NTT + Session::NTT + AudioBackend::DeviceWait], 2, 3, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
 	row++;
 
-	attach (*manage (new Gtk::Label (_("DSP: "), ALIGN_RIGHT, ALIGN_CENTER)), 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
-	attach (*labels[AudioEngine::NTT + Session::NTT + AudioBackend::RunLoop], 1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	table.attach (*manage (new Gtk::Label (_("DSP: "), ALIGN_RIGHT, ALIGN_CENTER)), 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	table.attach (*labels[AudioEngine::NTT + Session::NTT + AudioBackend::RunLoop], 2, 3, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
 	row++;
 
-	attach (*manage (new Gtk::Label (_("Engine: "), ALIGN_RIGHT, ALIGN_CENTER)), 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
-	attach (*labels[AudioEngine::ProcessCallback], 1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	table.attach (*manage (new Gtk::Label (_("Engine: "), ALIGN_RIGHT, ALIGN_CENTER)), 1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	table.attach (*labels[AudioEngine::ProcessCallback], 2, 3, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
 	row++;
 
-	attach (*manage (new Gtk::Label (_("Session: "), ALIGN_RIGHT, ALIGN_CENTER)), 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
-	attach (*labels[AudioEngine::NTT + Session::OverallProcess], 1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	table.attach (*manage (new Gtk::Label (_("Session: "), ALIGN_RIGHT, ALIGN_CENTER)), 1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	table.attach (*labels[AudioEngine::NTT + Session::OverallProcess], 2, 3, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
 	row++;
 
-	row++;
-	attach (reset_button, 0, 2, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
-	row++;
+	HBox* hbox2 = manage (new HBox);
+	hbox2->pack_start (reset_button, true, true);
+
+	set_border_width (12);
+	set_spacing (6);
+
+	info_text.set_markup (_("The measurements shown below are <b>worst case</b>.\n"
+	                        "\n"
+	                        "This is more important in determining system load\n"
+	                        "than an average. To see average values mouse-over\n"
+	                        "any line"));
+
+	Gtk::Frame* frame = manage (new Gtk::Frame);
+	frame->set_shadow_type (Gtk::SHADOW_IN);
+	frame->add (info_text);
+
+	pack_start (*frame, false, false);
+	pack_start (table, true, true, 20);
+	pack_start (*hbox2, false, false);
 
 	reset_button.signal_clicked().connect (sigc::mem_fun (*this, &DspStatisticsGUI::reset_button_clicked));
 
@@ -105,6 +125,8 @@ DspStatisticsGUI::update ()
 	double   dev = 0.;
 	char buf[64];
 	char const * const not_measured_string = X_("--");
+	double devf;
+	double avgf;
 
 	int bufsize = AudioEngine::instance()->samples_per_cycle ();
 	double bufsize_usecs = (bufsize * 1000000.0) / AudioEngine::instance()->sample_rate();
@@ -114,15 +136,31 @@ DspStatisticsGUI::update ()
 
 	if (AudioEngine::instance()->current_backend()->dsp_stats[AudioBackend::DeviceWait].get_stats (min, max, avg, dev)) {
 
+		/* We show the min time here, since that's the worst case
+		 * (other timers are max == worst case)
+		 */
+
 		if (min > 1000.0) {
 			double minf = min / 1000.0;
+			devf = dev / 1000.0;
+			avgf = avg / 1000.0;
 			snprintf (buf, sizeof (buf), "%7.2f msec %5.2f%%", minf, (100.0 * minf) / bufsize_msecs);
 		} else {
 			snprintf (buf, sizeof (buf), "%" PRId64 " usec %5.2f%%", min, (100.0 * min) / bufsize_usecs);
 		}
 		labels[AudioEngine::NTT + Session::NTT + AudioBackend::DeviceWait]->set_text (buf);
+
+		if (min > 1000.0) {
+			snprintf (buf, sizeof (buf), "average: %7.2f msec %5.2f%% (std dev. %5.2f)", avgf, (100.0 * avgf) / bufsize_msecs, devf);
+		} else {
+			snprintf (buf, sizeof (buf), "average: %7.2f usec %5.2f%% (std dev. %5.2f)", avg, (100.0 * avg) / bufsize_usecs, dev);
+		}
+
+		ArdourWidgets::set_tooltip (labels[AudioEngine::NTT + Session::NTT + AudioBackend::DeviceWait], buf);
+
 	} else {
 		labels[AudioEngine::NTT + Session::NTT + AudioBackend::DeviceWait]->set_text (not_measured_string);
+		ArdourWidgets::set_tooltip (labels[AudioEngine::NTT + Session::NTT + AudioBackend::DeviceWait], "");
 	}
 
 	if (AudioEngine::instance()->current_backend()->dsp_stats[AudioBackend::RunLoop].get_stats (min, max, avg, dev)) {
@@ -134,8 +172,21 @@ DspStatisticsGUI::update ()
 			snprintf (buf, sizeof (buf), "%" PRId64 " usec %5.2f%%", max, (100.0 * max) / bufsize_usecs);
 		}
 		labels[AudioEngine::NTT + Session::NTT + AudioBackend::RunLoop]->set_text (buf);
+
+
+		if (min > 1000.0) {
+			devf = dev / 1000.0;
+			avgf = avg / 1000.0;
+			snprintf (buf, sizeof (buf), "average: %7.2f msec %5.2f%% (std dev. %5.2f)", avgf, (100.0 * avgf) / bufsize_msecs, devf);
+		} else {
+			snprintf (buf, sizeof (buf), "average: %7.2f usec %5.2f%% (std dev. %5.2f)", avg, (100.0 * avg) / bufsize_usecs, dev);
+		}
+
+		ArdourWidgets::set_tooltip (labels[AudioEngine::NTT + Session::NTT + AudioBackend::RunLoop], buf);
+
 	} else {
 		labels[AudioEngine::NTT + Session::NTT + AudioBackend::RunLoop]->set_text (not_measured_string);
+		ArdourWidgets::set_tooltip (labels[AudioEngine::NTT + Session::NTT + AudioBackend::RunLoop], "");
 	}
 
 	AudioEngine::instance()->dsp_stats[AudioEngine::ProcessCallback].get_stats (min, max, avg, dev);
@@ -157,6 +208,16 @@ DspStatisticsGUI::update ()
 		}
 		labels[AudioEngine::NTT + Session::OverallProcess]->set_text (buf);
 
+		if (max > 1000.0) {
+			devf = dev / 1000.0;
+			avgf = avg / 1000.0;
+			snprintf (buf, sizeof (buf), "average: %7.2f msec %5.2f%% (std dev. %5.2f)", avgf, (100.0 * avgf) / bufsize_msecs, devf);
+		} else {
+			snprintf (buf, sizeof (buf), "average: %7.2f usec %5.2f%% (std dev. %5.2f)", avg, (100.0 * avg) / bufsize_usecs, dev);
+		}
+
+		ArdourWidgets::set_tooltip (labels[AudioEngine::NTT + Session::OverallProcess], buf);
+
 		/* Subtract session time from engine process time to show
 		 * engine overhead
 		 */
@@ -174,6 +235,16 @@ DspStatisticsGUI::update ()
 		}
 		labels[AudioEngine::ProcessCallback]->set_text (buf);
 
+		if (max > 1000.0) {
+			devf = dev / 1000.0;
+			avgf = avg / 1000.0;
+			snprintf (buf, sizeof (buf), "average: %7.2f msec %5.2f%% (std dev. %5.2f)", avgf, (100.0 * avgf) / bufsize_msecs, devf);
+		} else {
+			snprintf (buf, sizeof (buf), "average: %7.2f usec %5.2f%% (std dev. %5.2f)", avg, (100.0 * avg) / bufsize_usecs, dev);
+		}
+		
+		ArdourWidgets::set_tooltip (labels[AudioEngine::ProcessCallback], buf);
+
 	} else {
 
 		if (max > 1000.0) {
@@ -183,6 +254,19 @@ DspStatisticsGUI::update ()
 			snprintf (buf, sizeof (buf), "%" PRId64 " usec %5.2f%%", max, (100.0 * max) / bufsize_usecs);
 		}
 		labels[AudioEngine::ProcessCallback]->set_text (buf);
+
+		if (max > 1000.0) {
+			devf = dev / 1000.0;
+			avgf = avg / 1000.0;
+			snprintf (buf, sizeof (buf), "average: %7.2f msec %5.2f%% (std dev. %5.2f)", avgf, (100.0 * avgf) / bufsize_msecs, devf);
+		} else {
+			snprintf (buf, sizeof (buf), "average: %7.2f usec %5.2f%% (std dev. %5.2f)", avg, (100.0 * avg) / bufsize_usecs, dev);
+		}
+
+		ArdourWidgets::set_tooltip (labels[AudioEngine::ProcessCallback], buf);
+
+
 		labels[AudioEngine::NTT + Session::OverallProcess]->set_text (_("No session loaded"));
+		ArdourWidgets::set_tooltip (labels[AudioEngine::NTT + Session::OverallProcess], "");
 	}
 }

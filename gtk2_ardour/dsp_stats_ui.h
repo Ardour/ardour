@@ -20,12 +20,13 @@
 #define _gtkardour_dspstats_ui_h_
 
 #include <gtkmm/button.h>
+#include <gtkmm/box.h>
 #include <gtkmm/table.h>
 #include <gtkmm/label.h>
 
 #include "ardour/session_handle.h"
 
-class DspStatisticsGUI : public Gtk::Table, public ARDOUR::SessionHandlePtr
+class DspStatisticsGUI : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 {
 public:
 	DspStatisticsGUI ();
@@ -38,9 +39,11 @@ private:
 
 	sigc::connection update_connection;
 
+	Gtk::Table table;
 	Gtk::Label buffer_size_label;
 	Gtk::Label** labels;
 	Gtk::Button reset_button;
+	Gtk::Label info_text;
 
 	void reset_button_clicked();
 
