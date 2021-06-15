@@ -564,7 +564,7 @@ ContourDesignControlProtocol::prev_marker_keep_rolling ()
 	if (pos.positive() || pos.zero()) {
 		locate (pos.samples());
 	} else {
-		_session->goto_start ();
+		goto_start ();
 	}
 }
 

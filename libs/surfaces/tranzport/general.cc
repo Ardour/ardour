@@ -187,7 +187,7 @@ TranzportControlProtocol::prev_marker ()
 		locate (location->start());
 		notify(location->name().c_str());
 	} else {
-		session->goto_start ();
+		goto_start ();
 		notify("START");
 	}
 
