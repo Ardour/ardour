@@ -434,6 +434,8 @@ public:
 	void finished (GdkEvent *, bool);
 	void aborted (bool);
 
+	void clear_draggingview_list ();
+
 	bool regions_came_from_canvas () const {
 		return true;
 	}

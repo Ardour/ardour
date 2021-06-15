@@ -1604,7 +1604,19 @@ RegionMoveDrag::create_destination_time_axis (boost::shared_ptr<Region> region, 
 }
 
 void
-RegionMoveDrag::finished_copy (bool const changed_position, bool const /*changed_tracks*/, MusicSample last_position, int32_t const ev_state)
+RegionMoveDrag::clear_draggingview_list ()
+{
+	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end();) {
+		list<DraggingView>::const_iterator next = i;
+		++next;
+		delete i->view;
+		i = next;
+	}
+	_views.clear();
+}
+
+void
+RegionMoveDrag::finished_copy (bool const changed_position, bool const changed_tracks, MusicSample last_position, int32_t const ev_state)
 {
 	RegionSelection new_views;
 	PlaylistSet modified_playlists;
@@ -1617,12 +1629,15 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const /*changed
 
 	if (_brushing) {
 		/* all changes were made during motion event handlers */
-
-		for (list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
-			delete i->view;
-		}
-
+		clear_draggingview_list();
 		_editor->commit_reversible_command ();
+		return;
+	}
+
+	/*x_contrained on the same track: this will just make a duplicate region in the same place: abort the operation */
+	if (_x_constrained && !changed_tracks) {
+		clear_draggingview_list();
+		_editor->abort_reversible_command ();
 		return;
 	}
 
@@ -1630,7 +1645,7 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const /*changed
 	PlaylistMapping playlist_mapping;
 
 	/* insert the regions into their new playlists */
-	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end();) {
+	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); i++) {
 
 		RouteTimeAxisView* dest_rtv = 0;
 
@@ -1693,16 +1708,10 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const /*changed
 				new_views.push_back (new_view);
 			}
 		}
-
-		/* Delete the copy of the view that was used for dragging. Need to play safe with the iterator
-		   since deletion will automagically remove it from _views, thus invalidating i as an iterator.
-		 */
-
-		list<DraggingView>::const_iterator next = i;
-		++next;
-		delete i->view;
-		i = next;
 	}
+
+	/* in the past this was done in the main iterator loop; no need */
+	clear_draggingview_list();
 
 	/* If we've created new regions either by copying or moving
 	   to a new track, we want to replace the old selection with the new ones
@@ -2052,16 +2061,7 @@ void
 RegionMoveDrag::aborted (bool movement_occurred)
 {
 	if (_copy) {
-
-		for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end();) {
-			list<DraggingView>::const_iterator next = i;
-			++next;
-			delete i->view;
-			i = next;
-		}
-
-		_views.clear ();
-
+		clear_draggingview_list();
 	} else {
 		RegionMotionDrag::aborted (movement_occurred);
 	}
