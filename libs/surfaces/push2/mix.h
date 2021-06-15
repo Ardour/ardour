@@ -63,6 +63,7 @@ class MixLayout : public Push2Layout
 	void update_meters ();
 
   private:
+	ARDOUR::Session& session;
 	ArdourCanvas::Rectangle* bg;
 	ArdourCanvas::Line* upper_line;
 	std::vector<ArdourCanvas::Text*> upper_text;

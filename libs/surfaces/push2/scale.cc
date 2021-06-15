@@ -43,8 +43,8 @@ using namespace ArdourCanvas;
 
 static double unselected_root_alpha = 0.5;
 
-ScaleLayout::ScaleLayout (Push2& p, Session & s, std::string const & name)
-	: Push2Layout (p, s, name)
+ScaleLayout::ScaleLayout (Push2& p, std::string const & name)
+	: Push2Layout (p,  name)
 	, last_vpot (-1)
 	, vpot_delta_cnt (0)
 {

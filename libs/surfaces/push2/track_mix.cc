@@ -80,7 +80,8 @@ using namespace ArdourSurface;
 using namespace ArdourCanvas;
 
 TrackMixLayout::TrackMixLayout (Push2& p, Session & s, std::string const & name)
-	: Push2Layout (p, s, name)
+	: Push2Layout (p, name)
+	, session (s)
 {
 	Pango::FontDescription fd ("Sans 10");
 

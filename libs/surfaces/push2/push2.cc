@@ -114,9 +114,9 @@ Push2::Push2 (ARDOUR::Session& s)
 
 	_canvas = new Push2Canvas (*this, 960, 160);
 	mix_layout = new MixLayout (*this, *_session, "globalmix");
-	scale_layout = new ScaleLayout (*this, *_session, "scale");
+	scale_layout = new ScaleLayout (*this, "scale");
 	track_mix_layout = new TrackMixLayout (*this, *_session, "trackmix");
-	splash_layout = new SplashLayout (*this, *_session, "splash");
+	splash_layout = new SplashLayout (*this, "splash");
 
 	run_event_loop ();
 

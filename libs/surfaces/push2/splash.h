@@ -29,7 +29,7 @@ namespace ArdourSurface {
 class SplashLayout : public Push2Layout
 {
    public:
-	SplashLayout (Push2& p, ARDOUR::Session&, std::string const &);
+	SplashLayout (Push2& p, std::string const &);
 	~SplashLayout ();
 
 	void render (ArdourCanvas::Rect const &, Cairo::RefPtr<Cairo::Context>) const;

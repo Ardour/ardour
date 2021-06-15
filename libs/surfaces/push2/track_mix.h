@@ -67,6 +67,7 @@ class TrackMixLayout : public Push2Layout
 	boost::shared_ptr<ARDOUR::Stripable> current_stripable() const { return stripable; }
 
    private:
+	ARDOUR::Session& session;
 	boost::shared_ptr<ARDOUR::Stripable> stripable;
 	PBD::ScopedConnectionList stripable_connections;
 

@@ -32,7 +32,7 @@ namespace ArdourSurface {
 class ScaleLayout : public Push2Layout
 {
    public:
-	ScaleLayout (Push2& p, ARDOUR::Session&, std::string const &);
+	ScaleLayout (Push2& p, std::string const &);
 	~ScaleLayout ();
 
 	void render (ArdourCanvas::Rect const &, Cairo::RefPtr<Cairo::Context>) const;
