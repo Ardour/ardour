@@ -675,6 +675,44 @@ RegionDrag::setup_video_sample_offset ()
 	_preview_video = true;
 }
 
+RegionContentsDrag::RegionContentsDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v)
+	: RegionDrag (e, i, p, v)
+{
+	DEBUG_TRACE (DEBUG::Drags, "New RegionContentsDrag\n");
+}
+
+void
+RegionContentsDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
+{
+	Drag::start_grab (event, _editor->cursors()->trimmer);
+}
+
+void
+RegionContentsDrag::motion (GdkEvent* event, bool first_move)
+{
+	if (first_move) {
+		_editor->begin_reversible_command (_("Region content trim"));
+	} else {
+		for (list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
+			RegionView* rv = i->view;
+			samplecnt_t slippage = (last_pointer_sample() - adjusted_current_sample(event, false));
+			rv->move_contents (slippage);
+		}
+		show_verbose_cursor_time (_primary->region()->start ());
+	}
+}
+
+void
+RegionContentsDrag::finished (GdkEvent *, bool)
+{
+}
+
+void
+RegionContentsDrag::aborted (bool)
+{
+}
+
+
 RegionMotionDrag::RegionMotionDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v, bool b)
 	: RegionDrag (e, i, p, v)
 	, _brushing (b)

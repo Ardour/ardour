@@ -371,6 +371,19 @@ private:
 	PBD::ScopedConnection death_connection;
 };
 
+/** Drag the Contents rather than the bounds of a region (i.e. Slip) */
+class RegionContentsDrag : public RegionDrag
+{
+public:
+
+	RegionContentsDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &);
+	virtual ~RegionContentsDrag () {}
+
+	virtual void start_grab (GdkEvent *, Gdk::Cursor *);
+	virtual void motion (GdkEvent *, bool);
+	virtual void finished (GdkEvent *, bool);
+	virtual void aborted (bool);
+};
 
 /** Drags involving region motion from somewhere */
 class RegionMotionDrag : public RegionDrag
