@@ -149,15 +149,15 @@ void
 FaderPort8::notify_record_state_changed ()
 {
 	switch (_session->record_status ()) {
-		case Session::Disabled:
+		case RecordState::Disabled:
 			_ctrls.button (FP8Controls::BtnRecord).set_active (0);
 			_ctrls.button (FP8Controls::BtnRecord).set_blinking (false);
 			break;
-		case Session::Enabled:
+		case RecordState::Enabled:
 			_ctrls.button (FP8Controls::BtnRecord).set_active (true);
 			_ctrls.button (FP8Controls::BtnRecord).set_blinking (true);
 			break;
-		case Session::Recording:
+		case RecordState::Recording:
 			_ctrls.button (FP8Controls::BtnRecord).set_active (true);
 			_ctrls.button (FP8Controls::BtnRecord).set_blinking (false);
 			break;

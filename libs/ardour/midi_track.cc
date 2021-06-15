@@ -744,7 +744,7 @@ MidiTrack::MidiControl::actually_set_value (double val, PBD::Controllable::Group
 void
 MidiTrack::set_step_editing (bool yn)
 {
-	if (_session.record_status() != Session::Disabled) {
+	if (_session.record_status() != Disabled) {
 		return;
 	}
 

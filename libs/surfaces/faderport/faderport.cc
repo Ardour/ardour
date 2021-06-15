@@ -660,13 +660,13 @@ FaderPort::map_recenable_state ()
 	bool onoff;
 
 	switch (_session->record_status()) {
-	case Session::Disabled:
+	case RecordState::Disabled:
 		onoff = false;
 		break;
-	case Session::Enabled:
+	case RecordState::Enabled:
 		onoff = blink_state;
 		break;
-	case Session::Recording:
+	case RecordState::Recording:
 		if (_session->have_rec_enabled_track ()) {
 			onoff = true;
 		} else {

@@ -305,16 +305,16 @@ TransportControlUI::blink_rec_enable (bool onoff)
 		return;
 	}
 
-	Session::RecordState const r = _session->record_status ();
+	RecordState const r = _session->record_status ();
 	bool const h = _session->have_rec_enabled_track ();
 
-	if (r == Session::Enabled || (r == Session::Recording && !h)) {
+	if (r == RecordState::Enabled || (r == RecordState::Recording && !h)) {
 		if (onoff) {
 			rec_button.set_active_state (Gtkmm2ext::ExplicitActive);
 		} else {
 			rec_button.set_active_state (Gtkmm2ext::Off);
 		}
-	} else if (r == Session::Recording && h) {
+	} else if (r == RecordState::Recording && h) {
 		rec_button.set_active_state (Gtkmm2ext::ExplicitActive);
 	} else {
 		rec_button.unset_active_state ();

@@ -232,7 +232,7 @@ ARDOUR_UI::record_state_changed ()
 
 	ActionManager::set_sensitive (ActionManager::rec_sensitive_actions, !_session->actively_recording());
 
-	if (_session->record_status () == Session::Recording && _session->have_rec_enabled_track ()) {
+	if (_session->record_status () == RecordState::Recording && _session->have_rec_enabled_track ()) {
 		big_clock->set_active (true);
 	} else {
 		big_clock->set_active (false);

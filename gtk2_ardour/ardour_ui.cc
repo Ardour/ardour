@@ -1787,7 +1787,7 @@ ARDOUR_UI::transport_record (bool roll)
 {
 	if (_session) {
 		switch (_session->record_status()) {
-		case Session::Disabled:
+		case RecordState::Disabled:
 			if (_session->ntracks() == 0) {
 				ArdourMessageDialog msg (_main_window, _("Please create one or more tracks before trying to record.\nYou can do this with the \"Add Track or Bus\" option in the Session menu."));
 				msg.run ();
@@ -1798,7 +1798,7 @@ ARDOUR_UI::transport_record (bool roll)
 				transport_roll ();
 			}
 			break;
-		case Session::Recording:
+		case RecordState::Recording:
 			if (roll) {
 				_session->request_stop();
 			} else {
@@ -1806,7 +1806,7 @@ ARDOUR_UI::transport_record (bool roll)
 			}
 			break;
 
-		case Session::Enabled:
+		case RecordState::Enabled:
 			if (roll) {
 				transport_roll();
 			} else {

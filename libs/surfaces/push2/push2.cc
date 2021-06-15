@@ -888,15 +888,15 @@ Push2::notify_record_state_changed ()
 	}
 
 	switch (_session->record_status ()) {
-	case Session::Disabled:
+	case RecordState::Disabled:
 		b->second->set_color (LED::White);
 		b->second->set_state (LED::NoTransition);
 		break;
-	case Session::Enabled:
+	case RecordState::Enabled:
 		b->second->set_color (LED::Red);
 		b->second->set_state (LED::Blinking4th);
 		break;
-	case Session::Recording:
+	case RecordState::Recording:
 		b->second->set_color (LED::Red);
 		b->second->set_state (LED::OneShot24th);
 		break;

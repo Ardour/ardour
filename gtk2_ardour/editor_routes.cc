@@ -1688,7 +1688,7 @@ EditorRoutes::idle_update_mute_rec_solo_etc()
 			boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (route);
 
 			if (trk->rec_enable_control()->get_value()) {
-				if (_session->record_status() == Session::Recording) {
+				if (_session->record_status() == RecordState::Recording) {
 					(*i)[_columns.rec_state] = 1;
 				} else {
 					(*i)[_columns.rec_state] = 2;
