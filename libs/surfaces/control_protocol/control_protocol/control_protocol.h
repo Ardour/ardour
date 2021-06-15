@@ -142,6 +142,8 @@ public:
 
 	void event_loop_precall ();
 
+	ARDOUR::Session& get_session() { return *_session; }
+
 protected:
 	void next_track (uint32_t initial_id);
 	void prev_track (uint32_t initial_id);
