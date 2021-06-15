@@ -505,7 +505,7 @@ MackieControlProtocol::stop_press (Button &)
 	transport_stop ();
 
 	if (main_modifier_state() == MODIFIER_SHIFT) {
-		_session->midi_panic();
+		midi_panic();
 	}
 
 	return on;
