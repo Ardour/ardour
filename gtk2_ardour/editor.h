@@ -576,6 +576,8 @@ public:
 	void do_remove_gaps ();
 	void remove_gaps (samplecnt_t threshold, samplecnt_t leave, bool markers_too);
 
+	void mouse_brush_insert_region (RegionView*, samplepos_t pos);
+
 	void mouse_add_new_tempo_event (samplepos_t where);
 	void mouse_add_new_meter_event (samplepos_t where);
 	void edit_tempo_section (ARDOUR::TempoSection*);
@@ -1607,8 +1609,6 @@ private:
 
 	bool can_remove_control_point (ArdourCanvas::Item*);
 	void remove_control_point (ArdourCanvas::Item*);
-
-	void mouse_brush_insert_region (RegionView*, samplepos_t pos);
 
 	/* Canvas event handlers */
 

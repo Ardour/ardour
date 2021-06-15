@@ -675,6 +675,20 @@ RegionDrag::setup_video_sample_offset ()
 	_preview_video = true;
 }
 
+void
+RegionDrag::add_stateful_diff_commands_for_playlists (PlaylistSet const & playlists)
+{
+	for (PlaylistSet::const_iterator i = playlists.begin(); i != playlists.end(); ++i) {
+		StatefulDiffCommand* c = new StatefulDiffCommand (*i);
+		if (!c->empty()) {
+			_editor->session()->add_command (c);
+		} else {
+			delete c;
+		}
+	}
+}
+
+
 RegionSlipContentsDrag::RegionSlipContentsDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v)
 	: RegionDrag (e, i, p, v)
 {
@@ -731,9 +745,61 @@ RegionSlipContentsDrag::aborted (bool movement_occurred)
 }
 
 
-RegionMotionDrag::RegionMotionDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v, bool b)
+RegionBrushDrag::RegionBrushDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v)
 	: RegionDrag (e, i, p, v)
-	, _brushing (b)
+{
+	DEBUG_TRACE (DEBUG::Drags, "New RegionBrushDrag\n");
+	_y_constrained = true;
+}
+
+void
+RegionBrushDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
+{
+	Drag::start_grab (event, _editor->cursors()->trimmer);
+}
+
+void
+RegionBrushDrag::motion (GdkEvent* event, bool first_move)
+{
+	if (first_move) {
+		_editor->begin_reversible_command (_("Region brush drag"));
+		_already_pasted.insert(_primary->region()->position());
+	} else {
+		MusicSample snapped (0, 0);
+		snapped.sample = adjusted_current_sample(event, false);
+		_editor->snap_to (snapped, RoundDownAlways, SnapToGrid_Scaled, false);
+		if(_already_pasted.find(snapped.sample) == _already_pasted.end()) {
+			_editor->mouse_brush_insert_region (_primary, snapped.sample);
+			_already_pasted.insert(snapped.sample);
+		}
+	}
+}
+
+void
+RegionBrushDrag::finished (GdkEvent *, bool movement_occurred)
+{
+	if (!movement_occurred) {
+		return;
+	}
+
+	PlaylistSet modified_playlists;
+	modified_playlists.insert(_primary->region()->playlist());
+	add_stateful_diff_commands_for_playlists(modified_playlists);
+	_editor->commit_reversible_command ();
+	_already_pasted.clear();
+}
+
+void
+RegionBrushDrag::aborted (bool movement_occurred)
+{
+	_already_pasted.clear();
+
+	/* ToDo: revert to the original playlist properties */
+	_editor->abort_reversible_command ();
+}
+
+RegionMotionDrag::RegionMotionDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v)
+	: RegionDrag (e, i, p, v)
 	, _ignore_video_lock (false)
 	, _last_position (0, 0)
 	, _total_x_delta (0)
@@ -764,11 +830,6 @@ RegionMotionDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 
 	if (Keyboard::modifier_state_equals (event->button.state, Keyboard::ModifierMask (Keyboard::TertiaryModifier))) {
 		_ignore_video_lock = true;
-	}
-
-	if (_brushing) {
-		/* cross track dragging seems broken here. disabled for now. */
-		_y_constrained = true;
 	}
 }
 
@@ -1277,36 +1338,31 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 			i->time_axis_view = track_index;
 			i->layer += this_delta_layer;
 
-			if (_brushing) {
-				_editor->mouse_brush_insert_region (rv, pending_region_position.sample);
-			} else {
-				Duple track_origin;
+			Duple track_origin;
 
-				/* Get the y coordinate of the top of the track that this region is now over */
-				track_origin = current_tv->canvas_display()->item_to_canvas (track_origin);
+			/* Get the y coordinate of the top of the track that this region is now over */
+			track_origin = current_tv->canvas_display()->item_to_canvas (track_origin);
 
-				/* And adjust for the layer that it should be on */
-				StreamView* cv = current_tv->view ();
-				switch (cv->layer_display ()) {
-				case Overlaid:
-					break;
-				case Stacked:
-					track_origin.y += (cv->layers() - i->layer - 1) * cv->child_height ();
-					break;
-				case Expanded:
-					track_origin.y += (cv->layers() - i->layer - 0.5) * 2 * cv->child_height ();
-					break;
-				}
-
-				/* need to get the parent of the regionview
-				 * canvas group and get its position in
-				 * equivalent coordinate space as the trackview
-				 * we are now dragging over.
-				 */
-
-				y_delta = track_origin.y - rv->get_canvas_group()->canvas_origin().y;
-
+			/* And adjust for the layer that it should be on */
+			StreamView* cv = current_tv->view ();
+			switch (cv->layer_display ()) {
+			case Overlaid:
+				break;
+			case Stacked:
+				track_origin.y += (cv->layers() - i->layer - 1) * cv->child_height ();
+				break;
+			case Expanded:
+				track_origin.y += (cv->layers() - i->layer - 0.5) * 2 * cv->child_height ();
+				break;
 			}
+
+			/* need to get the parent of the regionview
+			 * canvas group and get its position in
+			 * equivalent coordinate space as the trackview
+			 * we are now dragging over.
+			 */
+
+			y_delta = track_origin.y - rv->get_canvas_group()->canvas_origin().y;
 
 			MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(rv);
 			if (mrv) {
@@ -1327,12 +1383,11 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 		} else {
 			rv->move (x_delta, y_delta);
 		}
-
 	} /* foreach region */
 
 	_total_x_delta += x_delta;
 
-	if (x_delta != 0 && !_brushing) {
+	if (x_delta != 0) {
 		show_verbose_cursor_time (_last_position.sample);
 		show_view_preview (_last_position.sample + _video_sample_offset);
 	}
@@ -1404,12 +1459,10 @@ void
 RegionMoveDrag::motion (GdkEvent* event, bool first_move)
 {
 	if (_copy && first_move) {
-		if (_x_constrained && !_brushing) {
+		if (_x_constrained) {
 			_editor->begin_reversible_command (Operations::fixed_time_region_copy);
-		} else if (!_brushing) {
+		} else {
 			_editor->begin_reversible_command (Operations::region_copy);
-		} else if (_brushing) {
-			_editor->begin_reversible_command (Operations::drag_region_brush);
 		}
 		/* duplicate the regionview(s) and region(s) */
 
@@ -1470,12 +1523,10 @@ RegionMoveDrag::motion (GdkEvent* event, bool first_move)
 		}
 
 	} else if (!_copy && first_move) {
-		if (_x_constrained && !_brushing) {
+		if (_x_constrained) {
 			_editor->begin_reversible_command (_("fixed time region drag"));
-		} else if (!_brushing) {
+		} else {
 			_editor->begin_reversible_command (Operations::region_drag);
-		} else if (_brushing) {
-			_editor->begin_reversible_command (Operations::drag_region_brush);
 		}
 	}
 	RegionMotionDrag::motion (event, first_move);
@@ -1626,13 +1677,6 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const changed_t
 	TempoMap& tmap (_editor->session()->tempo_map());
 	const double last_pos_qn = tmap.exact_qn_at_sample (last_position.sample, last_position.division);
 	const double qn_delta = _primary->region()->quarter_note() - last_pos_qn;
-
-	if (_brushing) {
-		/* all changes were made during motion event handlers */
-		clear_draggingview_list();
-		_editor->commit_reversible_command ();
-		return;
-	}
 
 	/*x_contrained on the same track: this will just make a duplicate region in the same place: abort the operation */
 	if (_x_constrained && !changed_tracks) {
@@ -1947,7 +1991,6 @@ RegionMoveDrag::finished_no_copy (
 
 	/* write commands for the accumulated diffs for all our modified playlists */
 	add_stateful_diff_commands_for_playlists (modified_playlists);
-	/* applies to _brushing */
 	_editor->commit_reversible_command ();
 
 	/* We have futzed with the layering of canvas items on our streamviews.
@@ -2044,20 +2087,6 @@ RegionMoveDrag::collect_new_region_view (RegionView* rv)
 }
 
 void
-RegionMoveDrag::add_stateful_diff_commands_for_playlists (PlaylistSet const & playlists)
-{
-	for (PlaylistSet::const_iterator i = playlists.begin(); i != playlists.end(); ++i) {
-		StatefulDiffCommand* c = new StatefulDiffCommand (*i);
-		if (!c->empty()) {
-			_editor->session()->add_command (c);
-		} else {
-			delete c;
-		}
-	}
-}
-
-
-void
 RegionMoveDrag::aborted (bool movement_occurred)
 {
 	if (_copy) {
@@ -2097,8 +2126,8 @@ RegionMotionDrag::aborted (bool)
 /** @param b true to brush, otherwise false.
  *  @param c true to make copies of the regions being moved, otherwise false.
  */
-RegionMoveDrag::RegionMoveDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v, bool b, bool c)
-	: RegionMotionDrag (e, i, p, v, b)
+RegionMoveDrag::RegionMoveDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v, bool c)
+	: RegionMotionDrag (e, i, p, v)
 	, _copy (c)
 	, _new_region_view (0)
 {
@@ -2114,7 +2143,7 @@ RegionMoveDrag::setup_pointer_sample_offset ()
 }
 
 RegionInsertDrag::RegionInsertDrag (Editor* e, boost::shared_ptr<Region> r, RouteTimeAxisView* v, samplepos_t pos)
-	: RegionMotionDrag (e, 0, 0, list<RegionView*> (), false)
+	: RegionMotionDrag (e, 0, 0, list<RegionView*> ())
 {
 	DEBUG_TRACE (DEBUG::Drags, "New RegionInsertDrag\n");
 
@@ -2178,7 +2207,7 @@ RegionInsertDrag::aborted (bool)
 }
 
 RegionSpliceDrag::RegionSpliceDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v)
-	: RegionMoveDrag (e, i, p, v, false, false)
+	: RegionMoveDrag (e, i, p, v, false)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New RegionSpliceDrag\n");
 }
@@ -2367,7 +2396,7 @@ RegionRippleDrag::y_movement_allowed (int delta_track, double delta_layer, int s
 }
 
 RegionRippleDrag::RegionRippleDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v)
-	: RegionMoveDrag (e, i, p, v, false, false)
+	: RegionMoveDrag (e, i, p, v, false)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New RegionRippleDrag\n");
 	// compute length of selection

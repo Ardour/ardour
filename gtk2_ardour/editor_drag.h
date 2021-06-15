@@ -365,6 +365,10 @@ protected:
 
 	friend class DraggingView;
 
+protected:
+	typedef std::set<boost::shared_ptr<ARDOUR::Playlist> > PlaylistSet;
+	void add_stateful_diff_commands_for_playlists (PlaylistSet const &);
+
 private:
 
 	void region_going_away (RegionView *);
@@ -385,12 +389,28 @@ public:
 	virtual void aborted (bool);
 };
 
+/** Brush on a region to repeat it */
+class RegionBrushDrag : public RegionDrag
+{
+public:
+	RegionBrushDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &);
+	virtual ~RegionBrushDrag () {}
+
+	virtual void start_grab (GdkEvent *, Gdk::Cursor *);
+	virtual void motion (GdkEvent *, bool);
+	virtual void finished (GdkEvent *, bool);
+	virtual void aborted (bool);
+private:
+	typedef std::set<samplepos_t> SamplePositionSet;
+	SamplePositionSet _already_pasted;
+};
+
 /** Drags involving region motion from somewhere */
 class RegionMotionDrag : public RegionDrag
 {
 public:
 
-	RegionMotionDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &, bool);
+	RegionMotionDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &);
 	virtual ~RegionMotionDrag () {}
 
 	virtual void start_grab (GdkEvent *, Gdk::Cursor *);
@@ -408,7 +428,6 @@ protected:
 	double compute_x_delta (GdkEvent const *, ARDOUR::MusicSample *);
 	virtual bool y_movement_allowed (int, double, int skip_invisible = 0) const;
 
-	bool _brushing;
 	bool _ignore_video_lock;
 	ARDOUR::MusicSample _last_position; ///< last position of the thing being dragged
 	double _total_x_delta;
@@ -427,7 +446,7 @@ private:
 class RegionMoveDrag : public RegionMotionDrag
 {
 public:
-	RegionMoveDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &, bool, bool);
+	RegionMoveDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &, bool);
 	virtual ~RegionMoveDrag () {}
 
 	void motion (GdkEvent *, bool);
@@ -449,10 +468,6 @@ public:
 	}
 
 	void setup_pointer_sample_offset ();
-
-protected:
-	typedef std::set<boost::shared_ptr<ARDOUR::Playlist> > PlaylistSet;
-	void add_stateful_diff_commands_for_playlists (PlaylistSet const &);
 
 private:
 	void finished_no_copy (

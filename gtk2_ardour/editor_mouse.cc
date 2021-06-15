@@ -2586,7 +2586,7 @@ Editor::add_region_drag (ArdourCanvas::Item* item, GdkEvent*, RegionView* region
 			_drags->add (new RegionRippleDrag (this, item, region_view, selection->regions.by_layer()));
 			break;
 		default:
-			_drags->add (new RegionMoveDrag (this, item, region_view, selection->regions.by_layer(), false, false));
+			_drags->add (new RegionMoveDrag (this, item, region_view, selection->regions.by_layer(), false));
 			break;
 
 	}
@@ -2601,7 +2601,7 @@ Editor::add_region_copy_drag (ArdourCanvas::Item* item, GdkEvent*, RegionView* r
 		return;
 	}
 
-	_drags->add (new RegionMoveDrag (this, item, region_view, selection->regions.by_layer(), false, true));
+	_drags->add (new RegionMoveDrag (this, item, region_view, selection->regions.by_layer(), true));
 }
 
 void
@@ -2617,7 +2617,8 @@ Editor::add_region_brush_drag (ArdourCanvas::Item* item, GdkEvent*, RegionView* 
 		return;
 	}
 
-	_drags->add (new RegionMoveDrag (this, item, region_view, selection->regions.by_layer(), true, false));
+	std::list<RegionView*> empty;
+	_drags->add (new RegionBrushDrag (this, item, region_view, empty));
 }
 
 /** Start a grab where a time range is selected, track(s) are selected, and the
@@ -2681,7 +2682,7 @@ Editor::start_selection_grab (ArdourCanvas::Item* /*item*/, GdkEvent* event)
 
 	commit_reversible_command ();
 
-	_drags->set (new RegionMoveDrag (this, latest_regionviews.front()->get_canvas_group(), latest_regionviews.front(), latest_regionviews, false, false), event);
+	_drags->set (new RegionMoveDrag (this, latest_regionviews.front()->get_canvas_group(), latest_regionviews.front(), latest_regionviews, false), event);
 }
 
 void
