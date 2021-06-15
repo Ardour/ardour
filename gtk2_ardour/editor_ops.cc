@@ -2627,9 +2627,6 @@ Editor::insert_source_list_selection (float times)
 	playlist->clear_owned_changes ();
 
 	playlist->add_region ((RegionFactory::create (region, true)), get_preferred_edit_position(), times, _session->config.get_layered_record_mode());  //ToDo:  insert_mode ?
-	if (Config->get_edit_mode() == Ripple) {
-		playlist->ripple (get_preferred_edit_position(), region->length() * times, boost::shared_ptr<Region>(), ripple_callback (true));
-	}
 
 	if (should_ripple()) {
 		do_ripple (playlist, get_preferred_edit_position(), region->length() * times, boost::shared_ptr<Region>(), true);
