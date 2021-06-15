@@ -22,18 +22,17 @@
 #ifndef ardour_control_protocols_h
 #define ardour_control_protocols_h
 
-#include <list>
-#include <string>
-#include <vector>
-
-#include <boost/shared_ptr.hpp>
-
-#include "pbd/signals.h"
-#include "pbd/stateful.h"
-
 #include "control_protocol/basic_ui.h"
 #include "control_protocol/types.h"
 #include "control_protocol/visibility.h"
+#include "pbd/signals.h"
+#include "pbd/stateful.h"
+
+#include <boost/shared_ptr.hpp>
+
+#include <list>
+#include <string>
+#include <vector>
 
 namespace ARDOUR {
 

@@ -23,19 +23,15 @@
 #ifndef __ardour_basic_ui_h__
 #define __ardour_basic_ui_h__
 
-#include <string>
-#include <stdint.h>
-
-#include "pbd/signals.h"
-
-#include "temporal/timeline.h"
-
-#include "ardour/types.h"
 #include "ardour/presentation_info.h"
-
+#include "ardour/types.h"
+#include "control_protocol/visibility.h"
+#include "temporal/timeline.h"
+#include "pbd/signals.h"
 #include "temporal/time.h"
 
-#include "control_protocol/visibility.h"
+#include <cstdint>
+#include <string>
 
 namespace ARDOUR {
 	class Session;
