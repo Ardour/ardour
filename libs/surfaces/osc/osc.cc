@@ -276,7 +276,7 @@ OSC::start ()
 
 	_select = ControlProtocol::first_selected_stripable();
 	if(!_select) {
-		_select = _session->master_out ();
+		_select = master_out ();
 	}
 
 	return 0;
@@ -1116,7 +1116,7 @@ OSC::routes_list (lo_message msg)
 	lo_message_add_string (reply, X_("end_route_list"));
 	lo_message_add_int64 (reply, _session->sample_rate());
 	lo_message_add_int64 (reply, _session->current_end_sample());
-	if (_session->monitor_out()) {
+	if (monitor_out ()) {
 		// this session has a monitor section
 		lo_message_add_int32 (reply, 1);
 	} else {
@@ -3368,7 +3368,7 @@ OSC::master_parse (const char *path, const char* types, lo_arg **argv, int argc,
 	}
 
 	//OSCSurface *sur = get_surface(get_address (msg));
-	boost::shared_ptr<Stripable> s = _session->master_out();
+	boost::shared_ptr<Stripable> s = master_out();
 	if (s) {
 		ret = _strip_parse (path, sub_path, types, argv, argc, s, 0, false, msg);
 	} else {
@@ -3395,9 +3395,9 @@ OSC::monitor_parse (const char *path, const char* types, lo_arg **argv, int argc
 	}
 
 	//OSCSurface *sur = get_surface(get_address (msg));
-	boost::shared_ptr<Stripable> s = _session->monitor_out();
+	boost::shared_ptr<Stripable> s = monitor_out ();
 	if (s) {
-		boost::shared_ptr<MonitorProcessor> mon = _session->monitor_out()->monitor_control();
+		boost::shared_ptr<MonitorProcessor> mon = monitor_out ()->monitor_control();
 		int state = 0;
 		if (types[0] == 'f') {
 			state = (uint32_t) argv[0]->f;
@@ -4714,7 +4714,7 @@ OSC::_strip_select2 (boost::shared_ptr<Stripable> s, OSCSurface *sur, lo_address
 		if (ControlProtocol::first_selected_stripable()) {
 			s = ControlProtocol::first_selected_stripable();
 		} else {
-			s = _session->master_out ();
+			s = master_out ();
 		}
 		_select = s;
 	}
@@ -6126,13 +6126,13 @@ OSC::get_sorted_stripables(std::bitset<32> types, bool cue, uint32_t custom, Sor
 	if (!custom) {
 		// Master/Monitor might be anywhere... we put them at the end - Sorry ;)
 		if (types[5]) {
-			if (_session->master_out()) {
-				sorted.push_back (_session->master_out());
+			if (master_out ()) {
+				sorted.push_back (master_out());
 			}
 		}
 		if (types[6]) {
-			if (_session->monitor_out()) {
-				sorted.push_back (_session->monitor_out());
+			if (monitor_out ()) {
+				sorted.push_back (monitor_out ());
 			}
 		}
 	}

@@ -67,7 +67,7 @@ OSCGlobalObserver::OSCGlobalObserver (OSC& o, Session& s, ArdourSurface::OSC::OS
 
 		// Master channel first
 		_osc.text_message (X_("/master/name"), "Master", addr);
-		boost::shared_ptr<Stripable> strip = session->master_out();
+		boost::shared_ptr<Stripable> strip = _osc.master_out ();
 
 		boost::shared_ptr<Controllable> mute_controllable = boost::dynamic_pointer_cast<Controllable>(strip->mute_control());
 		mute_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_change_message, this, X_("/master/mute"), strip->mute_control()), OSC::instance());
@@ -88,7 +88,7 @@ OSCGlobalObserver::OSCGlobalObserver (OSC& o, Session& s, ArdourSurface::OSC::OS
 		send_gain_message (X_("/master/"), gain_controllable);
 
 		// monitor stuff next
-		strip = session->monitor_out();
+		strip = _osc.monitor_out();
 		if (strip) {
 			_osc.text_message (X_("/monitor/name"), "Monitor", addr);
 
@@ -301,7 +301,7 @@ OSCGlobalObserver::tick ()
 	}
 	if (feedback[7] || feedback[8] || feedback[9]) { // meters enabled
 		// the only meter here is master
-		float now_meter = session->master_out()->peak_meter()->meter_level(0, MeterMCP);
+		float now_meter = _osc.master_out()->peak_meter()->meter_level(0, MeterMCP);
 		if (now_meter < -94) now_meter = -193;
 		if (_last_meter != now_meter) {
 			if (feedback[7] || feedback[8]) {

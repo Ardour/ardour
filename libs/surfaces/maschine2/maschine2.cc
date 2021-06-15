@@ -77,8 +77,8 @@ class TestLayout : public Maschine2Layout
 
 			knob = new Maschine2Knob(&m2, this);
 			knob->set_position (Duple (64 + 32, 32));
-			if (_session.master_out ()) {
-				knob->set_controllable (_session.master_out ()->gain_control());
+			if (m2.master_out ()) {
+				knob->set_controllable (m2.master_out ()->gain_control());
 			}
 
 			std::vector<std::string> strs;

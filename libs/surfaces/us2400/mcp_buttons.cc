@@ -772,7 +772,7 @@ LedState
 US2400Protocol::mstr_press (Button &)
 {
 //	access_action("Mixer/select-none");
-	set_stripable_selection( _session->master_out() );
+	set_stripable_selection (master_out());
 	return on;
 }
 

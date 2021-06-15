@@ -124,7 +124,7 @@ FaderPort::mute ()
 		return;
 	}
 
-	if (_current_stripable == _session->monitor_out()) {
+	if (_current_stripable == monitor_out ()) {
 		boost::shared_ptr<MonitorProcessor> mp = _current_stripable->monitor_control();
 		mp->set_cut_all (!mp->cut_all());
 		return;
@@ -162,7 +162,7 @@ FaderPort::rec_enable ()
 void
 FaderPort::use_master ()
 {
-	boost::shared_ptr<Stripable> r = _session->master_out();
+	boost::shared_ptr<Stripable> r = master_out ();
 	if (r) {
 		if (_current_stripable == r) {
 			r = pre_master_stripable.lock();
@@ -170,7 +170,7 @@ FaderPort::use_master ()
 			get_button(Output).set_led_state (_output_port, false);
 			blinkers.remove (Output);
 		} else {
-			if (_current_stripable != _session->master_out() && _current_stripable != _session->monitor_out()) {
+			if (_current_stripable != master_out () && _current_stripable != monitor_out ()) {
 				pre_master_stripable = boost::weak_ptr<Stripable> (_current_stripable);
 			}
 			set_current_stripable (r);
@@ -183,7 +183,7 @@ FaderPort::use_master ()
 void
 FaderPort::use_monitor ()
 {
-	boost::shared_ptr<Stripable> r = _session->monitor_out();
+	boost::shared_ptr<Stripable> r = monitor_out ();
 
 	if (r) {
 		if (_current_stripable == r) {
@@ -192,7 +192,7 @@ FaderPort::use_monitor ()
 			get_button(Output).set_led_state (_output_port, false);
 			blinkers.remove (Output);
 		} else {
-			if (_current_stripable != _session->master_out() && _current_stripable != _session->monitor_out()) {
+			if (_current_stripable != master_out () && _current_stripable != monitor_out ()) {
 				pre_monitor_stripable = boost::weak_ptr<Stripable> (_current_stripable);
 			}
 			set_current_stripable (r);

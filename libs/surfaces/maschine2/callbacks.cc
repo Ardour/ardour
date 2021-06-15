@@ -362,7 +362,7 @@ Maschine2::encoder_master (int delta)
 			break;
 		case MST_VOLUME:
 			{
-				boost::shared_ptr<Route> master = _session->master_out ();
+				boost::shared_ptr<Stripable> master = master_out ();
 				if (master) {
 					// TODO consider _ctrl->button (M2Contols::EncoderWheel)->is_pressed() for fine grained
 					const double factor = _ctrl->button (M2Contols::BtnShift, M2Contols::ModNone)->active () ? 256. : 32.;

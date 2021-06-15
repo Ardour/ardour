@@ -828,3 +828,15 @@ BasicUI::config ()
 {
 	return _session->config;
 }
+
+boost::shared_ptr<Stripable>
+BasicUI::monitor_out () const
+{
+	return _session->monitor_out ();
+}
+
+boost::shared_ptr<Stripable>
+BasicUI::master_out () const
+{
+	return _session->master_out ();
+}

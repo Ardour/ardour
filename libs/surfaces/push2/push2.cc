@@ -108,7 +108,7 @@ Push2::Push2 (ARDOUR::Session& s)
 	fill_color_table ();
 
 	/* master cannot be removed, so no need to connect to going-away signal */
-	master = _session->master_out ();
+	master = master_out ();
 
 	/* allocate graphics layouts, even though we're not using them yet */
 

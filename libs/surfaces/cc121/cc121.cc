@@ -1052,8 +1052,8 @@ void
 CC121::drop_current_stripable ()
 {
 	if (_current_stripable) {
-		if (_current_stripable == _session->monitor_out()) {
-			set_current_stripable (_session->master_out());
+		if (_current_stripable == monitor_out ()) {
+			set_current_stripable (master_out ());
 		} else {
 			set_current_stripable (boost::shared_ptr<Stripable>());
 		}
@@ -1255,7 +1255,7 @@ CC121::map_stripable_state ()
 		map_auto ();
 		map_monitoring ();
 
-		if (_current_stripable == _session->monitor_out()) {
+		if (_current_stripable == monitor_out ()) {
 			map_cut ();
 		} else {
 			map_mute ();

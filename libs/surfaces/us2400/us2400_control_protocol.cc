@@ -1496,13 +1496,13 @@ US2400Protocol::display_view_mode ()
 void
 US2400Protocol::set_master_on_surface_strip (uint32_t surface, uint32_t strip_number)
 {
-	force_special_stripable_to_strip (_session->master_out(), surface, strip_number);
+	force_special_stripable_to_strip (master_out (), surface, strip_number);
 }
 
 void
 US2400Protocol::set_monitor_on_surface_strip (uint32_t surface, uint32_t strip_number)
 {
-	force_special_stripable_to_strip (_session->monitor_out(), surface, strip_number);
+	force_special_stripable_to_strip (monitor_out (), surface, strip_number);
 }
 
 void
@@ -1518,7 +1518,7 @@ US2400Protocol::force_special_stripable_to_strip (boost::shared_ptr<Stripable> r
 		if ((*s)->number() == surface) {
 			Strip* strip = (*s)->nth_strip (strip_number);
 			if (strip) {
-				strip->set_stripable (_session->master_out());
+				strip->set_stripable (master_out ());
 				strip->lock_controls ();
 			}
 		}

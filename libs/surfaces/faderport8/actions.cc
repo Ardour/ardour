@@ -549,9 +549,9 @@ FaderPort8::button_encoder ()
 				/* master || monitor level -- reset to 0dB */
 				boost::shared_ptr<AutomationControl> ac;
 				if (_session->monitor_active() && !_ctrls.button (FP8Controls::BtnMaster).is_pressed ()) {
-					ac = _session->monitor_out()->gain_control ();
-				} else if (_session->master_out()) {
-					ac = _session->master_out()->gain_control ();
+					ac = monitor_out ()->gain_control ();
+				} else if (master_out ()) {
+					ac = master_out ()->gain_control ();
 				}
 				if (ac) {
 					ac->start_touch (timepos_t (transport_sample()));
@@ -629,9 +629,9 @@ FaderPort8::encoder_navigate (bool neg, int steps)
 				/* master || monitor level */
 				boost::shared_ptr<AutomationControl> ac;
 				if (_session->monitor_active() && !_ctrls.button (FP8Controls::BtnMaster).is_pressed ()) {
-					ac = _session->monitor_out()->gain_control ();
-				} else if (_session->master_out()) {
-					ac = _session->master_out()->gain_control ();
+					ac = monitor_out ()->gain_control ();
+				} else if (master_out ()) {
+					ac = master_out ()->gain_control ();
 				}
 				if (ac) {
 					double v = ac->internal_to_interface (ac->get_value());

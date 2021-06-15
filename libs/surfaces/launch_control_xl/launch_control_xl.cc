@@ -94,7 +94,7 @@ LaunchControlXL::LaunchControlXL (ARDOUR::Session& s)
 	/* we're going to need this */
 
 	/* master cannot be removed, so no need to connect to going-away signal */
-	master = _session->master_out ();
+	master = master_out ();
 
 	run_event_loop ();
 

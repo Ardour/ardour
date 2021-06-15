@@ -1116,9 +1116,9 @@ GenericMidiControlProtocol::lookup_controllable (const string & str) const
 			name = rest[0];
 
 			if (name == "Master" || name == X_("master")) {
-				s = _session->master_out();
+				s = master_out ();
 			} else if (name == X_("control") || name == X_("listen") || name == X_("monitor") || name == "Monitor") {
-				s = _session->monitor_out();
+				s = monitor_out ();
 			} else if (name == X_("auditioner")) {
 				s = _session->the_auditioner();
 			} else {

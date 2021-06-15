@@ -739,7 +739,7 @@ Push2::button_mix_press ()
 void
 Push2::button_master ()
 {
-	boost::shared_ptr<Stripable> main_out = _session->master_out ();
+	boost::shared_ptr<Stripable> main_out = master_out ();
 
 	if (!main_out) {
 		return;

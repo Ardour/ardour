@@ -413,8 +413,8 @@ Surface::master_monitor_may_have_changed ()
 void
 Surface::setup_master ()
 {
-	if ((_master_stripable = _mcp.get_session().monitor_out()) == 0) {
-		_master_stripable = _mcp.get_session().master_out();
+	if ((_master_stripable = _mcp.monitor_out()) == 0) {
+		_master_stripable = _mcp.master_out();
 	}
 
 	if (!_master_stripable) {

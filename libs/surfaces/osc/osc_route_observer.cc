@@ -25,7 +25,6 @@
 #include <glibmm.h>
 
 
-#include "ardour/session.h"
 #include "ardour/track.h"
 #include "ardour/monitor_control.h"
 #include "ardour/dB.h"
