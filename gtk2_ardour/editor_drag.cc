@@ -691,7 +691,14 @@ void
 RegionSlipContentsDrag::motion (GdkEvent* event, bool first_move)
 {
 	if (first_move) {
-		_editor->begin_reversible_command (_("Region content trim"));
+
+		/*prepare reversible cmd*/
+		_editor->begin_reversible_command (_("Slip Contents"));
+		for (list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
+			RegionView* rv = i->view;
+			rv->region()->clear_changes ();
+		}
+
 	} else {
 		for (list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
 			RegionView* rv = i->view;
@@ -703,13 +710,24 @@ RegionSlipContentsDrag::motion (GdkEvent* event, bool first_move)
 }
 
 void
-RegionSlipContentsDrag::finished (GdkEvent *, bool)
+RegionSlipContentsDrag::finished (GdkEvent *, bool movement_occurred)
 {
+	if (movement_occurred) {
+		/*finish reversible cmd*/
+		for (list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
+			RegionView* rv = i->view;
+			_editor->session()->add_command (new StatefulDiffCommand (rv->region()));
+		}
+		_editor->commit_reversible_command ();
+	}
+
 }
 
 void
-RegionSlipContentsDrag::aborted (bool)
+RegionSlipContentsDrag::aborted (bool movement_occurred)
 {
+	/* ToDo: revert to the original region properties */
+	_editor->abort_reversible_command ();
 }
 
 
