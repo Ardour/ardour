@@ -76,6 +76,8 @@ class LIBCONTROLCP_API BasicUI {
 	bool locating ();
 	bool locked ();
 
+	samplepos_t engine_sample_time ();
+
 	void save_state ();
 	void prev_marker ();
 	void next_marker ();

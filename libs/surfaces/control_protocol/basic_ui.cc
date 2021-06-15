@@ -726,6 +726,12 @@ BasicUI::locked ()
 	return _session->transport_locked ();
 }
 
+ARDOUR::samplepos_t
+BasicUI::engine_sample_time ()
+{
+	return _session->engine ().sample_time ();
+}
+
 ARDOUR::samplecnt_t
 BasicUI::timecode_frames_per_hour ()
 {

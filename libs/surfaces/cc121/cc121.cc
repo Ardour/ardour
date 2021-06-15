@@ -309,7 +309,7 @@ CC121::button_press_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 		if (_current_stripable) {
 			boost::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
 			if (gain) {
-              timepos_t now (_session->engine().sample_time());
+              timepos_t now (engine_sample_time());
 			  gain->start_touch (now);
 			}
 		}
@@ -356,7 +356,7 @@ CC121::button_release_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 		if (_current_stripable) {
 			boost::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
 			if (gain) {
-				timepos_t now (_session->engine().sample_time());
+				timepos_t now (engine_sample_time());
 				gain->stop_touch (now);
 			}
 		}
@@ -706,8 +706,7 @@ CC121::midi_input_handler (Glib::IOCondition ioc, boost::shared_ptr<ARDOUR::Asyn
 
 		port->clear ();
 		DEBUG_TRACE (DEBUG::CC121, string_compose ("data available on %1\n", boost::shared_ptr<MIDI::Port>(port)->name()));
-		samplepos_t now = _session->engine().sample_time();
-		port->parse (now);
+		port->parse (engine_sample_time ());
 	}
 
 	return true;

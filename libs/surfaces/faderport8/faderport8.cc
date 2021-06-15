@@ -526,8 +526,7 @@ FaderPort8::midi_input_handler (Glib::IOCondition ioc, boost::weak_ptr<ARDOUR::A
 #ifdef VERBOSE_DEBUG
 		DEBUG_TRACE (DEBUG::FaderPort8, string_compose ("data available on %1\n", boost::shared_ptr<MIDI::Port>(port)->name()));
 #endif
-		samplepos_t now = _session->engine().sample_time();
-		port->parse (now);
+		port->parse (engine_sample_time());
 	}
 
 	return true;

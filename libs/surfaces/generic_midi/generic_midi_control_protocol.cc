@@ -1657,8 +1657,7 @@ GenericMidiControlProtocol::midi_input_handler (Glib::IOCondition ioc, boost::we
 
 		port->clear ();
 		DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("data available on %1\n", boost::shared_ptr<MIDI::Port>(port)->name()));
-		samplepos_t now = _session->engine().sample_time();
-		port->parse (now);
+		port->parse (engine_sample_time());
 	}
 
 	return true;

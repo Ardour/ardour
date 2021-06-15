@@ -1699,8 +1699,7 @@ MackieControlProtocol::midi_input_handler (IOCondition ioc, MIDI::Port* port)
 		}
 
 		// DEBUG_TRACE (DEBUG::MackieControl, string_compose ("data available on %1\n", port->name()));
-		samplepos_t now = _session->engine().sample_time();
-		port->parse (now);
+		port->parse (engine_sample_time());
 	}
 
 	return true;

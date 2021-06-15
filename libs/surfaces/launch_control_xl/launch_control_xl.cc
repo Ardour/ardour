@@ -515,8 +515,7 @@ LaunchControlXL::midi_input_handler (IOCondition ioc, MIDI::Port* port)
 
 		DEBUG_TRACE (DEBUG::LaunchControlXL, string_compose ("data available on %1\n", port->name()));
 		if (in_use) {
-			samplepos_t now = AudioEngine::instance()->sample_time();
-			port->parse (now);
+			port->parse (engine_sample_time());
 		}
 	}
 
