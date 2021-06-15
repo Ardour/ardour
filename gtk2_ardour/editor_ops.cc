@@ -9110,7 +9110,7 @@ void gap_marker_callback_relax (samplepos_t, samplecnt_t)
 void
 Editor::remove_gap_marker_callback (samplepos_t at, samplecnt_t distance)
 {
-	_session->locations()->ripple (at, distance, false, false);
+	_session->locations()->ripple (at, -distance, false, false);
 }
 
 void
@@ -9268,5 +9268,14 @@ Editor::do_ripple (boost::shared_ptr<Playlist> target_playlist, samplepos_t at, 
 
 	for (UniquePlaylists::iterator p = playlists.begin(); p != playlists.end(); ++p) {
 		(*p)->thaw ();
+	}
+
+	/* Ripple marks & ranges if appropriate */
+
+	if (Config->get_edit_mode() == RippleAll) {
+		XMLNode& before (_session->locations()->get_state());
+		/* do not move locked markers, do notify */
+		_session->locations()->ripple (at, distance, false, true);
+		_session->add_command (new MementoCommand<Locations> (*_session->locations(), &before, &_session->locations()->get_state()));
 	}
 }

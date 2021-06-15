@@ -1836,6 +1836,14 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const changed_t
 		(*p)->rdiff_and_add_command (_editor->session());
 	}
 
+	/* Ripple marks & ranges if appropriate */
+
+	if (Config->get_edit_mode() == RippleAll) {
+		XMLNode& before (_editor->session()->locations()->get_state());
+		_editor->session()->locations()->ripple (extent_min, extent_max - extent_min, false, true);
+		_editor->session()->add_command (new MementoCommand<Locations> (*_editor->session()->locations(), &before, &_editor->session()->locations()->get_state()));
+	}
+
 	/* If we've created new regions either by copying or moving
 	   to a new track, we want to replace the old selection with the new ones
 	*/
@@ -1870,9 +1878,8 @@ RegionMoveDrag::finished_no_copy (
 	const double last_pos_qn = tmap.exact_qn_at_sample (last_position.sample, last_position.division);
 	const double qn_delta = _primary->region()->quarter_note() - last_pos_qn;
 
-	/* determine boundaries of dragged regions, across all playlists */
+	/* determine earliest position affected by the drag, across all playlists */
 	samplepos_t extent_min = max_samplepos;
-	samplepos_t extent_max = 0;
 
 	std::set<boost::shared_ptr<const Region> > uniq;
 	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ) {
@@ -1933,15 +1940,13 @@ RegionMoveDrag::finished_no_copy (
 			quarter_note = i->view->region()->quarter_note();
 		}
 
-		/* compute full extent of regions that we're going to insert */
+ 		/* compute full extent of regions that we're going to insert */
 
-		if (where.sample < extent_min) {
-			extent_min = where.sample;
+		if (rv->region()->position() < extent_min) {
+			extent_min = rv->region()->position ();
 		}
 
-		if (where.sample + i->view->region()->length() > extent_max) {
-			extent_max = where.sample  + i->view->region()->length();
-		}
+		cerr << "drag emin " << extent_min << " emax " << drag_delta << endl;
 
 		if (changed_tracks) {
 
@@ -2078,12 +2083,12 @@ RegionMoveDrag::finished_no_copy (
 		_editor->selection->set (new_views);
 	}
 
-	for (PlaylistSet::iterator p = modified_playlists.begin(); p != modified_playlists.end(); ++p) {
-		if (!_brushing && _editor->should_ripple()) {
-			(*p)->ripple (extent_min, extent_max - extent_min, &ripple_exclude);
-		}
-		(*p)->rdiff_and_add_command (_editor->session());
-		(*p)->thaw();
+	/* Ripple marks & ranges if appropriate */
+
+	if (Config->get_edit_mode() == RippleAll) {
+		XMLNode& before (_editor->session()->locations()->get_state());
+		_editor->session()->locations()->ripple (extent_min, -drag_delta, false, true);
+		_editor->session()->add_command (new MementoCommand<Locations> (*_editor->session()->locations(), &before, &_editor->session()->locations()->get_state()));
 	}
 
 	_editor->commit_reversible_command ();
