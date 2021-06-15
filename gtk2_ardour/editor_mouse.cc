@@ -1062,7 +1062,9 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 				/* click on a normal region view */
 				if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::slip_contents_modifier ())) {
-					_drags->add (new RegionSlipContentsDrag (this, item, clicked_regionview, selection->regions.by_layer()));
+					if (!clicked_regionview->region()->locked() && (Config->get_edit_mode() != Lock)) {
+						_drags->add (new RegionSlipContentsDrag (this, item, clicked_regionview, selection->regions.by_layer()));
+					}
 				} else if (ArdourKeyboard::indicates_copy (event->button.state)) {
 					add_region_copy_drag (item, event, clicked_regionview);
 				} else if (Keyboard::the_keyboard().key_is_down (GDK_b)) {
