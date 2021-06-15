@@ -492,6 +492,12 @@ BasicUI::record_status () const
 	return _session->record_status ();
 }
 
+bool
+BasicUI::have_rec_enabled_track () const
+{
+	return _session->have_rec_enabled_track ();
+}
+
 void
 BasicUI::set_record_enable (bool yn)
 {

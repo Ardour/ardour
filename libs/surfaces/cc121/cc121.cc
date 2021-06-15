@@ -650,7 +650,7 @@ CC121::map_recenable_state ()
 		onoff = blink_state;
 		break;
 	case RecordState::Recording:
-		if (_session->have_rec_enabled_track ()) {
+		if (have_rec_enabled_track ()) {
 			onoff = true;
 		} else {
 			onoff = blink_state;

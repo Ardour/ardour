@@ -486,7 +486,7 @@ OSCGlobalObserver::send_record_state_changed ()
 {
 	_osc.float_message (X_("/rec_enable_toggle"), (int)session->get_record_enabled (), addr);
 
-	if (session->have_rec_enabled_track () || session->get_record_enabled ()) {
+	if (_osc.have_rec_enabled_track () || session->get_record_enabled ()) {
 		_osc.float_message (X_("/record_tally"), 1, addr);
 	} else {
 		_osc.float_message (X_("/record_tally"), 0, addr);

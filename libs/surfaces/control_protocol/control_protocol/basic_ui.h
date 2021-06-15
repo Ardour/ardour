@@ -120,6 +120,8 @@ class LIBCONTROLCP_API BasicUI {
 	bool get_record_enabled ();
 	RecordState record_status() const;
 
+	bool have_rec_enabled_track () const;
+
 	//editor visibility stuff  (why do we have to make explicit numbers here?  because "gui actions" don't accept args
 	void fit_1_track();
 	void fit_2_tracks();
