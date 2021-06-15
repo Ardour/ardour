@@ -983,12 +983,9 @@ JACKAudioBackend::process_thread ()
                 dsp_stats[AudioBackend::DeviceWait].update ();
                 dsp_stats[RunLoop].start();
 
-
-                dsp_stats[AudioBackend::ProcessCallback].start();
                 if (engine.process_callback (nframes)) {
                         return 0;
                 }
-                dsp_stats[AudioBackend::ProcessCallback].update();
 
 		jack_cycle_signal (_priv_jack, 0);
                 dsp_stats[AudioBackend::RunLoop].update ();

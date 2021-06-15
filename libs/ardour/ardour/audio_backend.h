@@ -851,9 +851,6 @@ public:
 
 	enum TimingTypes {
 		DeviceWait = 0,
-		PreProcess,
-		ProcessCallback,
-		PostProcess,
 		RunLoop,
 		/* end */
 		NTT
