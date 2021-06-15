@@ -372,12 +372,12 @@ private:
 };
 
 /** Drag the Contents rather than the bounds of a region (i.e. Slip) */
-class RegionContentsDrag : public RegionDrag
+class RegionSlipContentsDrag : public RegionDrag
 {
 public:
 
-	RegionContentsDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &);
-	virtual ~RegionContentsDrag () {}
+	RegionSlipContentsDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &);
+	virtual ~RegionSlipContentsDrag () {}
 
 	virtual void start_grab (GdkEvent *, Gdk::Cursor *);
 	virtual void motion (GdkEvent *, bool);

@@ -73,9 +73,9 @@ public:
 	/** @return Modifier mask to constrain drags in a particular direction; */
 	static ModifierMask constraint_modifier () { return ModifierMask (constraint_mod); }
 
-	static void set_trim_contents_modifier (guint);
+	static void set_slip_contents_modifier (guint);
 	/** @return Modifier mask to move contents rather than region bounds during trim; */
-	static ModifierMask trim_contents_modifier () { return ModifierMask (trim_contents_mod); }
+	static ModifierMask slip_contents_modifier () { return ModifierMask (slip_contents_mod); }
 
 	static void set_trim_overlap_modifier (guint);
 	/** @return Modifier mask to remove region overlaps during trim; */
@@ -98,7 +98,7 @@ public:
 	static ModifierMask note_size_relative_modifier () { return ModifierMask (note_size_relative_mod); }
 private:
 	static guint     constraint_mod;
-	static guint     trim_contents_mod;
+	static guint     slip_contents_mod;
 	static guint     trim_overlap_mod;
 	static guint     trim_anchored_mod;
 	static guint     fine_adjust_mod;

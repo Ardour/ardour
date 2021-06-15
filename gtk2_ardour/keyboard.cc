@@ -51,8 +51,8 @@ guint ArdourKeyboard::constraint_mod = Keyboard::PrimaryModifier;
 guint ArdourKeyboard::constraint_mod = Keyboard::TertiaryModifier;
 #endif
 
-/* TrimDrag::start_grab() */
-guint ArdourKeyboard::trim_contents_mod = Keyboard::PrimaryModifier;
+/* RegionSlipContentsDrag */
+guint ArdourKeyboard::slip_contents_mod = Keyboard::PrimaryModifier|Keyboard::TertiaryModifier;
 
 /* TrimDrag::motion() */
 guint ArdourKeyboard::trim_overlap_mod = Keyboard::TertiaryModifier;
@@ -234,7 +234,7 @@ ArdourKeyboard::get_state (void)
 	XMLNode* node = &Keyboard::get_state ();
 
 	node->set_property ("constraint-modifier", constraint_mod);
-	node->set_property ("trim-contents-modifier", trim_contents_mod);
+	node->set_property ("slip-contents-modifier", slip_contents_mod);
 	node->set_property ("trim-overlap-modifier", trim_overlap_mod);
 	node->set_property ("trim-anchored-modifier", trim_anchored_mod);
 	node->set_property ("fine-adjust-modifier", fine_adjust_mod);
@@ -248,7 +248,7 @@ int
 ArdourKeyboard::set_state (const XMLNode& node, int version)
 {
 	node.get_property ("constraint-modifier", constraint_mod);
-	node.get_property ("trim-contents-modifier", trim_contents_mod);
+	node.get_property ("slip-contents-modifier", slip_contents_mod);
 	node.get_property ("trim-overlap-modifier", trim_overlap_mod);
 	node.get_property ("trim-anchored-modifier", trim_anchored_mod);
 	node.get_property ("fine-adjust-modifier", fine_adjust_mod);
@@ -262,7 +262,7 @@ void
 ArdourKeyboard::reset_relevant_modifier_key_mask ()
 {
 	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | constraint_mod);
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | trim_contents_mod);
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | slip_contents_mod);
 	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | trim_overlap_mod);
 	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | trim_anchored_mod);
 	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | fine_adjust_mod);
@@ -320,9 +320,9 @@ ArdourKeyboard::set_constraint_modifier (guint mod)
 }
 
 void
-ArdourKeyboard::set_trim_contents_modifier (guint mod)
+ArdourKeyboard::set_slip_contents_modifier (guint mod)
 {
-	trim_contents_mod = mod;
+	slip_contents_mod = mod;
 	the_keyboard().reset_relevant_modifier_key_mask();
 }
 

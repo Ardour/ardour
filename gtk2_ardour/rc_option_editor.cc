@@ -563,6 +563,21 @@ public:
 				++row;
 		col = 1;
 
+		/* slip_contents */
+		set_popdown_strings (_slip_contents_combo, dumb);
+		_slip_contents_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::slip_contents_modifier_chosen));
+		Gtkmm2ext::UI::instance()->set_tip (_slip_contents_combo,
+				(string_compose (_("<b>Recommended Setting: %1-%2</b>%3"), Keyboard::primary_modifier_name (), Keyboard::tertiary_modifier_name (), restart_msg)));
+
+		l = manage (left_aligned_label (_("Slip Contents using:")));
+		l->set_name ("OptionsLabel");
+
+		t->attach (*l, col, col + 1, row, row + 1, FILL, FILL);
+		t->attach (_slip_contents_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
+
+		++row;
+		col = 1;
+
 		/* constraint modifier */
 		set_popdown_strings (_constraint_modifier_combo, dumb);
 		_constraint_modifier_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::constraint_modifier_chosen));
@@ -604,21 +619,6 @@ public:
 		l->set_name ("OptionEditorHeading");
 		l->set_use_markup (true);
 		t->attach (*l, 0, 2, row, row + 1, FILL | EXPAND, FILL);
-
-		++row;
-		col = 1;
-
-		/* trim_contents */
-		set_popdown_strings (_trim_contents_combo, dumb);
-		_trim_contents_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::trim_contents_modifier_chosen));
-		Gtkmm2ext::UI::instance()->set_tip (_trim_contents_combo,
-				(string_compose (_("<b>Recommended Setting: %1</b>%2"), Keyboard::primary_modifier_name (), restart_msg)));
-
-		l = manage (left_aligned_label (_("Trim contents using:")));
-		l->set_name ("OptionsLabel");
-
-		t->attach (*l, col, col + 1, row, row + 1, FILL, FILL);
-		t->attach (_trim_contents_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
 
 		++row;
 		col = 1;
@@ -806,8 +806,8 @@ public:
 			if (modifiers[x].modifier == (guint) ArdourKeyboard::push_points_modifier ()) {
 				_push_points_combo.set_active_text (S_(modifiers[x].name));
 			}
-			if (modifiers[x].modifier == (guint) ArdourKeyboard::trim_contents_modifier ()) {
-				_trim_contents_combo.set_active_text (S_(modifiers[x].name));
+			if (modifiers[x].modifier == (guint) ArdourKeyboard::slip_contents_modifier ()) {
+				_slip_contents_combo.set_active_text (S_(modifiers[x].name));
 			}
 			if (modifiers[x].modifier == (guint) ArdourKeyboard::trim_anchored_modifier ()) {
 				_trim_anchored_combo.set_active_text (S_(modifiers[x].name));
@@ -940,13 +940,13 @@ private:
 		}
 	}
 
-	void trim_contents_modifier_chosen ()
+	void slip_contents_modifier_chosen ()
 	{
-		string const txt = _trim_contents_combo.get_active_text();
+		string const txt = _slip_contents_combo.get_active_text();
 
 		for (int i = 0; modifiers[i].name; ++i) {
 			if (txt == S_(modifiers[i].name)) {
-				ArdourKeyboard::set_trim_contents_modifier (modifiers[i].modifier);
+				ArdourKeyboard::set_slip_contents_modifier (modifiers[i].modifier);
 				break;
 			}
 		}
@@ -1052,7 +1052,7 @@ private:
 		ArdourKeyboard::set_push_points_modifier (Keyboard::PrimaryModifier | Keyboard::Level4Modifier);
 
 		/* when beginning a trim */
-		ArdourKeyboard::set_trim_contents_modifier (Keyboard::PrimaryModifier);
+		ArdourKeyboard::set_slip_contents_modifier (Keyboard::PrimaryModifier | Keyboard::TertiaryModifier);
 		ArdourKeyboard::set_trim_anchored_modifier (Keyboard::PrimaryModifier | Keyboard::TertiaryModifier);
 		ArdourKeyboard::set_note_size_relative_modifier (Keyboard::TertiaryModifier); // XXX better: 2ndary
 
@@ -1085,7 +1085,7 @@ private:
 	ComboBoxText _snap_modifier_combo;
 	ComboBoxText _snap_delta_combo;
 	ComboBoxText _constraint_modifier_combo;
-	ComboBoxText _trim_contents_combo;
+	ComboBoxText _slip_contents_combo;
 	ComboBoxText _trim_overlap_combo;
 	ComboBoxText _trim_anchored_combo;
 	ComboBoxText _trim_jump_combo;
