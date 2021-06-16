@@ -26,6 +26,8 @@
 
 #include "mixer.h"
 
+#include "ardour_websockets.h"
+
 using namespace ARDOUR;
 using namespace ArdourSurface;
 
@@ -293,7 +295,7 @@ ArdourMixer::start ()
 {
 	/* take a snapshot of current strips */
 	StripableList strips;
-	session ().get_stripables (strips, PresentationInfo::AllStripables);
+	_surface.get_stripables (strips, PresentationInfo::AllStripables);
 	uint32_t strip_id = 0;
 
 	for (StripableList::iterator it = strips.begin (); it != strips.end (); ++it) {

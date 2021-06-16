@@ -210,6 +210,10 @@ public:
 
 	/* Stripables */
 
+	void get_stripables (
+	  StripableList&         list,
+	  PresentationInfo::Flag flag = PresentationInfo::MixerStripables) const;
+
 	boost::shared_ptr<Stripable> get_remote_nth_stripable (
 	  PresentationInfo::order_t n,
 	  PresentationInfo::Flag    flag) const;

@@ -984,7 +984,7 @@ FaderPort8::filter_stripables (StripableList& strips) const
 	}
 
 	StripableList all;
-	_session->get_stripables (all);
+	get_stripables (all);
 
 	for (StripableList::const_iterator s = all.begin(); s != all.end(); ++s) {
 		if ((*s)->is_auditioner ()) { continue; }

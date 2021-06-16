@@ -877,6 +877,13 @@ BasicUI::master_out () const
 	return _session->master_out ();
 }
 
+void
+BasicUI::get_stripables (StripableList&               list,
+                         const PresentationInfo::Flag flag) const
+{
+	_session->get_stripables (list, flag);
+}
+
 boost::shared_ptr<Stripable>
 BasicUI::get_remote_nth_stripable (const PresentationInfo::order_t n,
                                    const PresentationInfo::Flag    flag) const

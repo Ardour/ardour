@@ -274,7 +274,7 @@ FaderPort8::button_automation (ARDOUR::AutoState as)
 
 	// apply to all selected tracks
 	StripableList all;
-	_session->get_stripables (all);
+	get_stripables (all);
 	for (StripableList::const_iterator i = all.begin(); i != all.end(); ++i) {
 		if ((*i)->is_master() || (*i)->is_monitor()) {
 			continue;
@@ -326,7 +326,7 @@ FaderPort8::button_solo_clear ()
 #endif
 	if (soloing) {
 		StripableList all;
-		_session->get_stripables (all);
+		get_stripables (all);
 		for (StripableList::const_iterator i = all.begin(); i != all.end(); ++i) {
 			if ((*i)->is_master() || (*i)->is_auditioner() || (*i)->is_monitor()) {
 				continue;

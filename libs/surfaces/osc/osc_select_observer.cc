@@ -23,7 +23,6 @@
 
 #include "pbd/control_math.h"
 
-#include "ardour/session.h"
 #include "ardour/track.h"
 #include "ardour/monitor_control.h"
 #include "ardour/dB.h"
@@ -1167,7 +1166,7 @@ OSCSelectObserver::slaved_changed (boost::shared_ptr<VCA> vca, bool state)
 	lo_message reply;
 	reply = lo_message_new ();
 	StripableList stripables;
-	session->get_stripables (stripables);
+	_osc.get_stripables (stripables);
 	for (StripableList::iterator it = stripables.begin(); it != stripables.end(); ++it) {
 		boost::shared_ptr<Stripable> s = *it;
 
