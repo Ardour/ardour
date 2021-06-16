@@ -1041,7 +1041,7 @@ Push2::other_vpot (int n, int delta)
 		break;
 	case 1:
 		/* metronome gain control */
-		click_gain = _session->click_gain();
+		click_gain = this->click_gain();
 		if (click_gain) {
 			boost::shared_ptr<AutomationControl> ac = click_gain->gain_control();
 			if (ac) {

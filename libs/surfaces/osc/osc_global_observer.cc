@@ -123,7 +123,7 @@ OSCGlobalObserver::OSCGlobalObserver (OSC& o, Session& s, ArdourSurface::OSC::OS
 		_osc.SoloActive().connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::solo_active, this, _1), OSC::instance());
 		solo_active (session->soloing() || session->listening());
 
-		boost::shared_ptr<Controllable> click_controllable = boost::dynamic_pointer_cast<Controllable>(session->click_gain()->gain_control());
+		boost::shared_ptr<Controllable> click_controllable = boost::dynamic_pointer_cast<Controllable>(_osc.click_gain()->gain_control());
 		click_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_change_message, this, X_("/click/level"), click_controllable), OSC::instance());
 		send_change_message (X_("/click/level"), click_controllable);
 

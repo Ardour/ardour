@@ -877,6 +877,12 @@ BasicUI::master_out () const
 	return _session->master_out ();
 }
 
+boost::shared_ptr<Amp>
+BasicUI::click_gain ()
+{
+	return _session->click_gain ();
+}
+
 const Locations*
 BasicUI::locations () const
 {

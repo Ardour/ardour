@@ -3224,8 +3224,8 @@ OSC::click_level (float position)
 		return -1;
 	}
 
-	if (_session->click_gain()->gain_control()) {
-		_session->click_gain()->gain_control()->set_value (_session->click_gain()->gain_control()->interface_to_internal (position), PBD::Controllable::NoGroup);
+	if (click_gain()->gain_control()) {
+		click_gain()->gain_control()->set_value (_session->click_gain()->gain_control()->interface_to_internal (position), PBD::Controllable::NoGroup);
 	}
 	return 0;
 }
