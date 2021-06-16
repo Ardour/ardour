@@ -124,7 +124,7 @@ OSC::OSC (Session& s, uint32_t port)
 {
 	_instance = this;
 
-	_session->Exported.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::session_exported, this, _1, _2), this);
+	Exported().connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::session_exported, this, _1, _2), this);
 }
 
 OSC::~OSC()
@@ -268,7 +268,7 @@ OSC::start ()
 
 	// catch track reordering
 	// receive routes added
-	_session->RouteAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSC::notify_routes_added, this, _1), this);
+	RouteAdded().connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSC::notify_routes_added, this, _1), this);
 	// receive VCAs added
 	_session->vca_manager().VCAAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSC::notify_vca_added, this, _1), this);
 	// order changed

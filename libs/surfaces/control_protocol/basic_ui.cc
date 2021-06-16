@@ -870,3 +870,77 @@ BasicUI::locations ()
 {
 	return _session->locations ();
 }
+
+/* Signals */
+
+PBD::Signal0<void>&
+BasicUI::BundleAddedOrRemoved ()
+{
+	return _session->BundleAddedOrRemoved;
+}
+
+PBD::Signal0<void>&
+BasicUI::DirtyChanged ()
+{
+	return _session->DirtyChanged;
+}
+
+PBD::Signal2<void, std::string, std::string>&
+BasicUI::Exported ()
+{
+	return _session->Exported;
+}
+
+PBD::Signal1<void, bool>&
+BasicUI::SoloActive ()
+{
+	return _session->SoloActive;
+}
+
+PBD::Signal0<void>&
+BasicUI::SoloChanged ()
+{
+	return _session->SoloChanged;
+}
+
+PBD::Signal0<void>&
+BasicUI::MuteChanged ()
+{
+	return _session->MuteChanged;
+}
+
+PBD::Signal0<void>&
+BasicUI::RecordStateChanged ()
+{
+	return _session->RecordStateChanged;
+}
+
+PBD::Signal1<void, RouteList&>&
+BasicUI::RouteAdded ()
+{
+	return _session->RouteAdded;
+}
+
+PBD::Signal1<void, RouteGroup*>&
+BasicUI::RouteGroupPropertyChanged ()
+{
+	return _session->RouteGroupPropertyChanged;
+}
+
+PBD::Signal1<void, std::string>&
+BasicUI::StateSaved ()
+{
+	return _session->StateSaved;
+}
+
+PBD::Signal0<void>&
+BasicUI::TransportLooped ()
+{
+	return _session->TransportLooped;
+}
+
+PBD::Signal0<void>&
+BasicUI::TransportStateChange ()
+{
+	return _session->TransportStateChange;
+}

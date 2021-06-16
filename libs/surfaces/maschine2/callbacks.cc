@@ -40,12 +40,12 @@ Maschine2::connect_signals ()
 	// TODO: use some convenience macros here
 
 	/* Signals */
-	_session->TransportStateChange.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&Maschine2::notify_transport_state_changed, this), this);
-	_session->TransportLooped.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&Maschine2::notify_loop_state_changed, this), this);
-	_session->RecordStateChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&Maschine2::notify_record_state_changed, this), this);
+	TransportStateChange ().connect (session_connections, MISSING_INVALIDATOR, boost::bind (&Maschine2::notify_transport_state_changed, this), this);
+	TransportLooped ().connect (session_connections, MISSING_INVALIDATOR, boost::bind (&Maschine2::notify_loop_state_changed, this), this);
+	RecordStateChanged ().connect (session_connections, MISSING_INVALIDATOR, boost::bind (&Maschine2::notify_record_state_changed, this), this);
 	Config->ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&Maschine2::notify_parameter_changed, this, _1), this);
 	config ().ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&Maschine2::notify_parameter_changed, this, _1), this);
-	_session->DirtyChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&Maschine2::notify_session_dirty_changed, this), this);
+	DirtyChanged ().connect (session_connections, MISSING_INVALIDATOR, boost::bind (&Maschine2::notify_session_dirty_changed, this), this);
 	_session->history().Changed.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&Maschine2::notify_history_changed, this), this);
 
 	/* Actions */

@@ -108,7 +108,7 @@ GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
 		make_port_name_non_relative (outp->name())
 		);
 
-	_session->BundleAddedOrRemoved ();
+	BundleAddedOrRemoved ();
 
 	do_feedback = false;
 	_feedback_interval = 10000; // microseconds

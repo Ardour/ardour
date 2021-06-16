@@ -39,16 +39,18 @@
 namespace ARDOUR {
 
 class Locations;
+class RouteGroup;
 class Session;
 class SessionConfiguration;
 class Stripable;
 
-class LIBCONTROLCP_API BasicUI {
-  public:
+class LIBCONTROLCP_API BasicUI
+{
+public:
 	BasicUI (Session&);
 	virtual ~BasicUI ();
 
-	void add_marker (const std::string& = std::string());
+	void add_marker (const std::string& = std::string ());
 	void remove_marker_at_playhead ();
 
 	void register_thread (std::string name);
@@ -70,7 +72,7 @@ class LIBCONTROLCP_API BasicUI {
 	void set_transport_speed (double speed);
 
 	double get_transport_speed () const;
-	bool   transport_rolling() const;
+	bool   transport_rolling () const;
 	bool   transport_stopped_or_stopping () const;
 	bool   get_play_loop () const;
 
@@ -79,10 +81,11 @@ class LIBCONTROLCP_API BasicUI {
 	void jump_by_beats (int beats, LocateTransportDisposition ltd = RollIfAppropriate);
 
 	samplepos_t transport_sample () const;
-	void locate (samplepos_t sample, LocateTransportDisposition ltd = RollIfAppropriate);
-	void locate (samplepos_t sample, bool);
-	bool locating ();
-	bool locked ();
+	void        locate (samplepos_t                sample,
+	                    LocateTransportDisposition ltd = RollIfAppropriate);
+	void        locate (samplepos_t sample, bool);
+	bool        locating ();
+	bool        locked ();
 
 	samplepos_t engine_sample_time ();
 
@@ -94,15 +97,15 @@ class LIBCONTROLCP_API BasicUI {
 	void toggle_punch_in ();
 	void toggle_punch_out ();
 
-	void mark_in();
-	void mark_out();
+	void mark_in ();
+	void mark_out ();
 
-	void toggle_click();
-	void midi_panic();
+	void toggle_click ();
+	void midi_panic ();
 
-	void toggle_monitor_mute();
-	void toggle_monitor_dim();
-	void toggle_monitor_mono();
+	void toggle_monitor_mute ();
+	void toggle_monitor_dim ();
+	void toggle_monitor_mono ();
 
 	std::vector<boost::weak_ptr<AutomationControl>> cancel_all_mute ();
 
@@ -111,43 +114,46 @@ class LIBCONTROLCP_API BasicUI {
 	void quick_snapshot_stay ();
 	void quick_snapshot_switch ();
 
-	void toggle_roll(bool roll_out_of_bounded_mode=true);  //this provides the same operation as the "spacebar", it's a lot smarter than "play".
+	void toggle_roll (bool roll_out_of_bounded_mode =
+	                    true); // this provides the same operation as the
+	                           // "spacebar", it's a lot smarter than "play".
 
-	void stop_forget();
+	void stop_forget ();
 
-	void set_punch_range();
-	void set_loop_range();
-	void set_session_range();
+	void set_punch_range ();
+	void set_loop_range ();
+	void set_session_range ();
 
-	void set_record_enable (bool yn);
-	bool get_record_enabled ();
-	RecordState record_status() const;
+	void        set_record_enable (bool yn);
+	bool        get_record_enabled ();
+	RecordState record_status () const;
 
 	bool have_rec_enabled_track () const;
 
-	//editor visibility stuff  (why do we have to make explicit numbers here?  because "gui actions" don't accept args
-	void fit_1_track();
-	void fit_2_tracks();
-	void fit_4_tracks();
-	void fit_8_tracks();
-	void fit_16_tracks();
-	void fit_32_tracks();
-	void fit_all_tracks();
-	void zoom_10_ms();
-	void zoom_100_ms();
-	void zoom_1_sec();
-	void zoom_10_sec();
-	void zoom_1_min();
-	void zoom_5_min();
-	void zoom_10_min();
-	void zoom_to_session();
-	void temporal_zoom_in();
-	void temporal_zoom_out();
+	// editor visibility stuff  (why do we have to make explicit numbers here?
+	// because "gui actions" don't accept args
+	void fit_1_track ();
+	void fit_2_tracks ();
+	void fit_4_tracks ();
+	void fit_8_tracks ();
+	void fit_16_tracks ();
+	void fit_32_tracks ();
+	void fit_all_tracks ();
+	void zoom_10_ms ();
+	void zoom_100_ms ();
+	void zoom_1_sec ();
+	void zoom_10_sec ();
+	void zoom_1_min ();
+	void zoom_5_min ();
+	void zoom_10_min ();
+	void zoom_to_session ();
+	void temporal_zoom_in ();
+	void temporal_zoom_out ();
 
-	void scroll_up_1_track();
-	void scroll_dn_1_track();
-	void scroll_up_1_page();
-	void scroll_dn_1_page();
+	void scroll_up_1_track ();
+	void scroll_dn_1_track ();
+	void scroll_up_1_page ();
+	void scroll_dn_1_page ();
 
 	void rec_enable_toggle ();
 	void toggle_all_rec_enables ();
@@ -160,14 +166,20 @@ class LIBCONTROLCP_API BasicUI {
 	samplecnt_t timecode_frames_per_hour ();
 
 	void timecode_time (samplepos_t where, Timecode::Time&);
-	void timecode_to_sample (Timecode::Time& timecode, samplepos_t & sample, bool use_offset, bool use_subframes) const;
-	void sample_to_timecode (samplepos_t sample, Timecode::Time& timecode, bool use_offset, bool use_subframes) const;
+	void timecode_to_sample (Timecode::Time& timecode,
+	                         samplepos_t&    sample,
+	                         bool            use_offset,
+	                         bool            use_subframes) const;
+	void sample_to_timecode (samplepos_t     sample,
+	                         Timecode::Time& timecode,
+	                         bool            use_offset,
+	                         bool            use_subframes) const;
 
-	bool stop_button_onoff() const;
-	bool play_button_onoff() const;
-	bool ffwd_button_onoff() const;
-	bool rewind_button_onoff() const;
-	bool loop_button_onoff() const;
+	bool stop_button_onoff () const;
+	bool play_button_onoff () const;
+	bool ffwd_button_onoff () const;
+	bool rewind_button_onoff () const;
+	bool loop_button_onoff () const;
 
 	/* Naming */
 
@@ -187,6 +199,21 @@ class LIBCONTROLCP_API BasicUI {
 
 	const Locations* locations () const;
 	Locations*       locations ();
+
+	/* Signals */
+
+	PBD::Signal0<void>&                           BundleAddedOrRemoved ();
+	PBD::Signal0<void>&                           DirtyChanged ();
+	PBD::Signal2<void, std::string, std::string>& Exported ();
+	PBD::Signal1<void, bool>&                     SoloActive ();
+	PBD::Signal0<void>&                           SoloChanged ();
+	PBD::Signal0<void>&                           MuteChanged ();
+	PBD::Signal0<void>&                           RecordStateChanged ();
+	PBD::Signal1<void, RouteList&>&               RouteAdded ();
+	PBD::Signal1<void, RouteGroup*>&              RouteGroupPropertyChanged ();
+	PBD::Signal1<void, std::string>&              StateSaved ();
+	PBD::Signal0<void>&                           TransportLooped ();
+	PBD::Signal0<void>&                           TransportStateChange ();
 
 protected:
 	Session* _session;

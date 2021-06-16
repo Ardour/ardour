@@ -689,8 +689,8 @@ CC121::map_transport_state ()
 void
 CC121::connect_session_signals()
 {
-	_session->RecordStateChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&CC121::map_recenable_state, this), this);
-	_session->TransportStateChange.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&CC121::map_transport_state, this), this);
+	RecordStateChanged().connect(session_connections, MISSING_INVALIDATOR, boost::bind (&CC121::map_recenable_state, this), this);
+	TransportStateChange().connect(session_connections, MISSING_INVALIDATOR, boost::bind (&CC121::map_transport_state, this), this);
 }
 
 bool
