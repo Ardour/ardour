@@ -891,6 +891,12 @@ BasicUI::get_remote_nth_stripable (const PresentationInfo::order_t n,
 	return _session->get_remote_nth_stripable (n, flag);
 }
 
+VCAManager&
+BasicUI::vca_manager ()
+{
+	return _session->vca_manager ();
+}
+
 boost::shared_ptr<Amp>
 BasicUI::click_gain ()
 {

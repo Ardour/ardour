@@ -34,21 +34,21 @@
 
 #include "ardour/amp.h"
 #include "ardour/async_midi_port.h"
-#include "ardour/audioengine.h"
 #include "ardour/audio_track.h"
+#include "ardour/audioengine.h"
 #include "ardour/debug.h"
-#include "ardour/midiport_manager.h"
-#include "ardour/midi_track.h"
 #include "ardour/midi_port.h"
+#include "ardour/midi_track.h"
+#include "ardour/midiport_manager.h"
+#include "ardour/rc_configuration.h"
 #include "ardour/route.h"
-#include "ardour/session.h"
+#include "ardour/session_configuration.h"
+#include "ardour/session_event.h"
 #include "ardour/solo_isolate_control.h"
 #include "ardour/tempo.h"
 #include "ardour/types_convert.h"
 #include "ardour/vca.h"
 #include "ardour/vca_manager.h"
-
-
 
 #include "gtkmm2ext/gui_thread.h"
 
@@ -106,7 +106,7 @@ LaunchControlXL::LaunchControlXL (ARDOUR::Session& s)
 	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connection, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::connection_handler, this, _1, _2, _3, _4, _5), this);
 
 	RouteAdded ().connect (session_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::stripables_added, this), lcxl);
-	_session->vca_manager().VCAAdded.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::stripables_added, this), lcxl);
+	vca_manager().VCAAdded.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::stripables_added, this), lcxl);
 }
 
 LaunchControlXL::~LaunchControlXL ()

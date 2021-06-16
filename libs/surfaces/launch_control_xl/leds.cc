@@ -39,7 +39,6 @@
 #include "ardour/midi_port.h"
 #include "ardour/tempo.h"
 #include "ardour/types_convert.h"
-#include "ardour/vca_manager.h"
 
 #include "gui.h"
 

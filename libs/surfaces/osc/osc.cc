@@ -270,7 +270,7 @@ OSC::start ()
 	// receive routes added
 	RouteAdded().connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSC::notify_routes_added, this, _1), this);
 	// receive VCAs added
-	_session->vca_manager().VCAAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSC::notify_vca_added, this, _1), this);
+	vca_manager().VCAAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSC::notify_vca_added, this, _1), this);
 	// order changed
 	PresentationInfo::Change.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&OSC::recalcbanks, this), this);
 
@@ -2616,7 +2616,7 @@ OSC::set_temp_mode (lo_address addr)
 					// check if this group feeds a bus or is slaved
 					boost::shared_ptr<Stripable> mstr = boost::shared_ptr<Stripable> ();
 					if (rg->has_control_master()) {
-						boost::shared_ptr<VCA> vca = _session->vca_manager().vca_by_number (rg->group_master_number());
+						boost::shared_ptr<VCA> vca = vca_manager().vca_by_number (rg->group_master_number());
 						if (vca) {
 							mstr = boost::dynamic_pointer_cast<Stripable> (vca);
 						}

@@ -41,7 +41,6 @@
 #include "ardour/midi_track.h"
 #include "ardour/midi_port.h"
 #include "ardour/selection.h"
-#include "ardour/session.h"
 #include "ardour/tempo.h"
 #include "ardour/utils.h"
 #include "ardour/vca_manager.h"
@@ -162,7 +161,7 @@ MixLayout::MixLayout (Push2& p, Session & s, std::string const & name)
 	mode_button = p2.button_by_id (Push2::Upper1);
 
 	p2.RouteAdded().connect (session_connections, invalidator(*this), boost::bind (&MixLayout::stripables_added, this), &p2);
-	session.vca_manager().VCAAdded.connect (session_connections, invalidator (*this), boost::bind (&MixLayout::stripables_added, this), &p2);
+	p2.vca_manager().VCAAdded.connect (session_connections, invalidator (*this), boost::bind (&MixLayout::stripables_added, this), &p2);
 }
 
 MixLayout::~MixLayout ()
