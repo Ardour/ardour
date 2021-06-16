@@ -47,7 +47,6 @@
 #include "ardour/rc_configuration.h"
 #include "ardour/record_enable_control.h"
 #include "ardour/route.h"
-#include "ardour/session.h"
 #include "ardour/send.h"
 #include "ardour/solo_isolate_control.h"
 #include "ardour/track.h"

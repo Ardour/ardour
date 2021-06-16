@@ -19,6 +19,7 @@
 #include <boost/assign.hpp>
 
 #include "ardour/plugin_insert.h"
+#include "ardour/stripable.h"
 
 #include "ardour_websockets.h"
 #include "dispatcher.h"

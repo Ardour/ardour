@@ -19,8 +19,6 @@
 
 #include <cmath>
 
-#include "ardour/session.h"
-
 #include "button.h"
 #include "jog_wheel.h"
 #include "mackie_control_protocol.h"

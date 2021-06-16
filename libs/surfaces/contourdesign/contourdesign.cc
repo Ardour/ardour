@@ -23,11 +23,12 @@
 
 #include <glibmm.h>
 
+#include "ardour/debug.h"
+#include "ardour/location.h"
+#include "ardour/session_event.h"
+#include "ardour/tempo.h"
 #include "pbd/compose.h"
 #include "pbd/error.h"
-#include "ardour/debug.h"
-#include "ardour/session.h"
-#include "ardour/tempo.h"
 #include "pbd/i18n.h"
 
 #include "contourdesign.h"

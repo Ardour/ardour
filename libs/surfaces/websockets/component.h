@@ -23,8 +23,13 @@
 
 #include <glibmm.h>
 
-#include "ardour/session.h"
 #include "pbd/event_loop.h"
+
+namespace ARDOUR
+{
+class BasicUI;
+class Session;
+}
 
 namespace ArdourSurface
 {

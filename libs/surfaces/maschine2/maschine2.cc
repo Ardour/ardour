@@ -30,7 +30,9 @@
 
 #include "ardour/async_midi_port.h"
 #include "ardour/audioengine.h"
-#include "ardour/session.h"
+#include "ardour/gain_control.h"
+#include "ardour/session_event.h"
+#include "ardour/stripable.h"
 
 #include "midi++/port.h"
 

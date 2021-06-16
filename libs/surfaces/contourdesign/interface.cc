@@ -20,7 +20,6 @@
 #include "pbd/failed_constructor.h"
 #include "pbd/error.h"
 
-#include "ardour/session.h"
 #include "control_protocol/control_protocol.h"
 
 #include "contourdesign.h"

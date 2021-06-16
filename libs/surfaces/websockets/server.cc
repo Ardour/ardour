@@ -23,6 +23,8 @@
 #include "dispatcher.h"
 #include "server.h"
 
+#include "pbd/error.h"
+
 /* backport from libwebsockets 3.0,
  * allow to compile on GNU/Linux with libwebsockets 2.x
  */

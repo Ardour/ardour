@@ -25,6 +25,10 @@
 #include <sys/time.h>
 #endif
 
+#include <glib.h>
+
+#include <cstdint>
+
 namespace ArdourSurface {
 
 namespace US2400

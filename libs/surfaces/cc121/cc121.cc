@@ -40,9 +40,9 @@
 
 #include "control_protocol/basic_ui.h"
 
+#include "ardour/amp.h"
 #include "ardour/async_midi_port.h"
 #include "ardour/audioengine.h"
-#include "ardour/amp.h"
 #include "ardour/bundle.h"
 #include "ardour/debug.h"
 #include "ardour/filesystem_paths.h"
@@ -53,9 +53,9 @@
 #include "ardour/profile.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/record_enable_control.h"
-#include "ardour/stripable.h"
-#include "ardour/session.h"
 #include "ardour/session_configuration.h"
+#include "ardour/session_event.h"
+#include "ardour/stripable.h"
 #include "ardour/track.h"
 
 #include "cc121.h"

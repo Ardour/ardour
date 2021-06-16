@@ -36,7 +36,6 @@
 #include "ardour/panner_shell.h"
 #include "ardour/profile.h"
 #include "ardour/rc_configuration.h"
-#include "ardour/session.h"
 #include "ardour/utils.h"
 
 #include <gtkmm2ext/gui_thread.h>

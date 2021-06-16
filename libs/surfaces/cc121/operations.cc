@@ -25,7 +25,6 @@
 #include "ardour/plugin_insert.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/record_enable_control.h"
-#include "ardour/session.h"
 #include "ardour/track.h"
 #include "ardour/types.h"
 

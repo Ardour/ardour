@@ -37,7 +37,6 @@
 #include "ardour/midiport_manager.h"
 #include "ardour/midi_track.h"
 #include "ardour/midi_port.h"
-#include "ardour/session.h"
 #include "ardour/tempo.h"
 #include "ardour/types_convert.h"
 #include "ardour/vca_manager.h"

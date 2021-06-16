@@ -18,8 +18,6 @@
 
 #include <cmath>
 
-#include "ardour/session.h"
-
 #include "jog_wheel.h"
 #include "us2400_control_protocol.h"
 #include "surface_port.h"

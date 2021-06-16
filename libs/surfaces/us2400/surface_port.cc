@@ -30,7 +30,6 @@
 #include "ardour/async_midi_port.h"
 #include "ardour/debug.h"
 #include "ardour/rc_configuration.h"
-#include "ardour/session.h"
 #include "ardour/audioengine.h"
 
 #include "controls.h"

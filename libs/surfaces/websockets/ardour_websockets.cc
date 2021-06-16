@@ -25,9 +25,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ardour/session.h"
-
 #include "ardour_websockets.h"
+
+#include "ardour/session_event.h"
+#include "pbd/error.h"
 
 using namespace ARDOUR;
 using namespace ArdourSurface;

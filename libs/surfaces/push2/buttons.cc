@@ -20,7 +20,6 @@
 
 #include "ardour/debug.h"
 #include "ardour/mute_control.h"
-#include "ardour/session.h"
 #include "ardour/solo_control.h"
 
 #include "layout.h"
