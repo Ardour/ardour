@@ -389,7 +389,7 @@ MixLayout::show_vpot_mode ()
 void
 MixLayout::button_mute ()
 {
-	boost::shared_ptr<Stripable> s = session.selection().first_selected_stripable();
+	boost::shared_ptr<Stripable> s = p2.selection ().first_selected_stripable();
 	if (s) {
 		boost::shared_ptr<AutomationControl> ac = s->mute_control();
 		if (ac) {
@@ -401,7 +401,7 @@ MixLayout::button_mute ()
 void
 MixLayout::button_solo ()
 {
-	boost::shared_ptr<Stripable> s = session.selection().first_selected_stripable();
+	boost::shared_ptr<Stripable> s = p2.selection ().first_selected_stripable();
 	if (s) {
 		boost::shared_ptr<AutomationControl> ac = s->solo_control();
 		if (ac) {
@@ -417,7 +417,7 @@ MixLayout::button_lower (uint32_t n)
 		return;
 	}
 
-	session.selection().set (stripable[n], boost::shared_ptr<AutomationControl>());
+	p2.selection ().set (stripable[n], boost::shared_ptr<AutomationControl>());
 }
 
 void
@@ -689,7 +689,7 @@ MixLayout::button_select_release ()
 		/* no visible track selected, select first (if any) */
 
 		if (stripable[0]) {
-			session.selection().set (stripable[0], boost::shared_ptr<AutomationControl>());
+			p2.selection ().set (stripable[0], boost::shared_ptr<AutomationControl>());
 		}
 
 	} else {
@@ -702,10 +702,10 @@ MixLayout::button_select_release ()
 				   switch banks by one, and select leftmost
 				*/
 				if (bank_start != 0) {
-					session.selection().clear_stripables ();
+					p2.selection ().clear_stripables ();
 					switch_bank (bank_start-1);
 					if (stripable[0]) {
-						session.selection().set (stripable[0], boost::shared_ptr<AutomationControl>());
+						p2.selection ().set (stripable[0], boost::shared_ptr<AutomationControl>());
 					}
 				}
 			} else {
@@ -715,7 +715,7 @@ MixLayout::button_select_release ()
 					--n;
 				}
 				if (n >= 0) {
-					session.selection().set (stripable[n], boost::shared_ptr<AutomationControl>());
+					p2.selection ().set (stripable[n], boost::shared_ptr<AutomationControl>());
 				}
 			}
 
@@ -727,10 +727,10 @@ MixLayout::button_select_release ()
 				/* current selected is rightmost ... cancel selection,
 				   switch banks by one, and select righmost
 				*/
-				session.selection().toggle (stripable[selected], boost::shared_ptr<AutomationControl>());
+				p2.selection ().toggle (stripable[selected], boost::shared_ptr<AutomationControl>());
 				switch_bank (bank_start+1);
 				if (stripable[7]) {
-					session.selection().set (stripable[7], boost::shared_ptr<AutomationControl>());
+					p2.selection ().set (stripable[7], boost::shared_ptr<AutomationControl>());
 				}
 			} else {
 				/* select next, if any */
@@ -740,7 +740,7 @@ MixLayout::button_select_release ()
 				}
 
 				if (n != 8) {
-					session.selection().set (stripable[n], boost::shared_ptr<AutomationControl>());
+					p2.selection ().set (stripable[n], boost::shared_ptr<AutomationControl>());
 				}
 			}
 		}
