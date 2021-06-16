@@ -780,6 +780,12 @@ BasicUI::sample_to_timecode (samplepos_t sample, Timecode::Time& timecode, bool 
 	_session->sample_to_timecode (sample, *((Timecode::Time*)&timecode), use_offset, use_subframes);
 }
 
+samplecnt_t
+BasicUI::sample_rate () const
+{
+	return _session->sample_rate ();
+}
+
 std::vector<boost::weak_ptr<AutomationControl>>
 BasicUI::cancel_all_mute ()
 {

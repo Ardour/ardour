@@ -624,7 +624,7 @@ TrackMixLayout::update_clocks ()
 	int secs;
 	int millisecs;
 
-	const double sample_rate = session.sample_rate ();
+	const double sample_rate = p2.sample_rate ();
 
 	left = pos;
 	hrs = (int) floor (left / (sample_rate * 60.0f * 60.0f));

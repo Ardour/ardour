@@ -1217,7 +1217,7 @@ MackieControlProtocol::update_timecode_display()
 	// do assignment here so current_sample is fixed
 	samplepos_t current_sample = transport_sample();
 	// For large jumps in play head possition do full reset
-	int moved = (current_sample - _sample_last) / _session->sample_rate ();
+	int moved = (current_sample - _sample_last) / sample_rate ();
 	if (moved) {
 		DEBUG_TRACE (DEBUG::MackieControl, "Timecode reset\n");
 		_timecode_last = string (10, '\0');

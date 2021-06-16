@@ -259,13 +259,13 @@ OSCGlobalObserver::tick ()
 		}
 		if (feedback[11]) { // minutes/seconds enabled
 			samplepos_t left = now_sample;
-			int hrs = (int) floor (left / (session->sample_rate() * 60.0f * 60.0f));
-			left -= (samplecnt_t) floor (hrs * session->sample_rate() * 60.0f * 60.0f);
-			int mins = (int) floor (left / (session->sample_rate() * 60.0f));
-			left -= (samplecnt_t) floor (mins * session->sample_rate() * 60.0f);
-			int secs = (int) floor (left / (float) session->sample_rate());
-			left -= (samplecnt_t) floor ((double)(secs * session->sample_rate()));
-			int millisecs = floor (left * 1000.0 / (float) session->sample_rate());
+			int hrs = (int) floor (left / (_osc.sample_rate() * 60.0f * 60.0f));
+			left -= (samplecnt_t) floor (hrs * _osc.sample_rate() * 60.0f * 60.0f);
+			int mins = (int) floor (left / (_osc.sample_rate() * 60.0f));
+			left -= (samplecnt_t) floor (mins * _osc.sample_rate() * 60.0f);
+			int secs = (int) floor (left / (float) _osc.sample_rate());
+			left -= (samplecnt_t) floor ((double)(secs * _osc.sample_rate()));
+			int millisecs = floor (left * 1000.0 / (float) _osc.sample_rate());
 
 			// Min/sec mode: Hours/Minutes/Seconds/msec
 			ostringstream os;

@@ -1114,7 +1114,7 @@ OSC::routes_list (lo_message msg)
 	lo_message reply = lo_message_new ();
 
 	lo_message_add_string (reply, X_("end_route_list"));
-	lo_message_add_int64 (reply, _session->sample_rate());
+	lo_message_add_int64 (reply, sample_rate());
 	lo_message_add_int64 (reply, _session->current_end_sample());
 	if (monitor_out ()) {
 		// this session has a monitor section

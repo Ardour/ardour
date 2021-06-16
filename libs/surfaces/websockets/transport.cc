@@ -49,7 +49,7 @@ double
 ArdourTransport::time () const
 {
 	samplepos_t t = session ().transport_sample ();
-	samplecnt_t f = session ().sample_rate ();
+	samplecnt_t f = basic_ui ().sample_rate ();
 	return static_cast<double>(t) / static_cast<double>(f);
 }
 

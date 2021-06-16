@@ -179,6 +179,8 @@ public:
 	                         bool            use_offset,
 	                         bool            use_subframes) const;
 
+	samplecnt_t sample_rate () const;
+
 	bool stop_button_onoff () const;
 	bool play_button_onoff () const;
 	bool ffwd_button_onoff () const;
