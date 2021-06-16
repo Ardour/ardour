@@ -458,7 +458,7 @@ US2400Protocol::marker_release (Button &)
 
 	samplepos_t where = _session->audible_sample();
 
-	if (_session->transport_stopped_or_stopping() && locations()->mark_at (timepos_t (where), timecnt_t (_session->sample_rate() / 100.0))) {
+	if (transport_stopped_or_stopping() && locations()->mark_at (timepos_t (where), timecnt_t (_session->sample_rate() / 100.0))) {
 		return off;
 	}
 
@@ -487,7 +487,7 @@ US2400Protocol::stop_press (Button &)
 LedState
 US2400Protocol::stop_release (Button &)
 {
-	return _session->transport_stopped_or_stopping();
+	return transport_stopped_or_stopping();
 }
 
 LedState

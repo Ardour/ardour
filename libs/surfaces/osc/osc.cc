@@ -1298,7 +1298,7 @@ OSC::osc_toggle_roll (bool ret2strt)
 		return 0;
 	}
 
-	bool rolling = transport_rolling();
+	bool rolling = !transport_stopped_or_stopping();
 
 	if (rolling) {
 		_session->request_stop (ret2strt, true);

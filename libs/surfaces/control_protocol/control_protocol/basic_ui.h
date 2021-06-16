@@ -70,7 +70,7 @@ class LIBCONTROLCP_API BasicUI {
 	void set_transport_speed (double speed);
 
 	double get_transport_speed () const;
-	double transport_rolling () const;
+	bool   transport_stopped_or_stopping () const;
 	bool   get_play_loop () const;
 
 	void jump_by_seconds (double sec, LocateTransportDisposition ltd = RollIfAppropriate);
