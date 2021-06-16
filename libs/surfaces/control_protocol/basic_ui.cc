@@ -446,6 +446,12 @@ BasicUI::transport_rolling () const
 	return !_session->transport_stopped_or_stopping ();
 }
 
+bool
+BasicUI::get_play_loop () const
+{
+	return _session->get_play_loop ();
+}
+
 void
 BasicUI::undo ()
 {

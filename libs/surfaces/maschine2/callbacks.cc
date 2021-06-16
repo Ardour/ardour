@@ -140,7 +140,7 @@ Maschine2::notify_loop_state_changed ()
 {
 	bool looping = false;
 	Location* looploc = _session->locations ()->auto_loop_location ();
-	if (looploc && _session->get_play_loop ()) {
+	if (looploc && get_play_loop ()) {
 		looping = true;
 	}
 	_ctrl->button (M2Contols::Loop)->set_color (looping ? COLOR_GRAY : 0);

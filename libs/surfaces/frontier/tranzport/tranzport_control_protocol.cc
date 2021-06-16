@@ -1129,7 +1129,7 @@ int TranzportControlProtocol::lights_show_normal()
 
 	/* Global settings */
 
-	lights_pending[LightLoop]        = session->get_play_loop();
+	lights_pending[LightLoop]        = get_play_loop();
 	lights_pending[LightPunch]       = Config->get_punch_in() || Config->get_punch_out();
 	lights_pending[LightRecord]      = session->get_record_enabled();
 	lights_pending[LightAnysolo]     = session->soloing();

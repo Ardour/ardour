@@ -667,7 +667,7 @@ CC121::map_recenable_state ()
 void
 CC121::map_transport_state ()
 {
-	get_button (Loop).set_led_state (_output_port, _session->get_play_loop());
+	get_button (Loop).set_led_state (_output_port, get_play_loop());
 
 	float ts = get_transport_speed();
 

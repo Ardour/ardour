@@ -569,7 +569,7 @@ US2400Protocol::loop_press (Button &)
 		access_action ("Editor/set-loop-from-edit-range");
 		return off;
 	} else {
-		bool was_on = _session->get_play_loop();
+		const bool was_on = get_play_loop();
 		loop_toggle ();
 		return was_on ? off : on;
 	}

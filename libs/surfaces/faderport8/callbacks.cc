@@ -169,7 +169,7 @@ FaderPort8::notify_loop_state_changed ()
 {
 	bool looping = false;
 	Location* looploc = _session->locations ()->auto_loop_location ();
-	if (looploc && _session->get_play_loop ()) {
+	if (looploc && get_play_loop ()) {
 		looping = true;
 	}
 	_ctrls.button (FP8Controls::BtnLoop).set_active (looping);

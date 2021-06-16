@@ -38,9 +38,9 @@
 
 namespace ARDOUR {
 
-class Route;
 class Session;
 class SessionConfiguration;
+class Stripable;
 
 class LIBCONTROLCP_API BasicUI {
   public:
@@ -70,6 +70,7 @@ class LIBCONTROLCP_API BasicUI {
 
 	double get_transport_speed () const;
 	double transport_rolling () const;
+	bool   get_play_loop () const;
 
 	void jump_by_seconds (double sec, LocateTransportDisposition ltd = RollIfAppropriate);
 	void jump_by_bars (int bars, LocateTransportDisposition ltd = RollIfAppropriate);
