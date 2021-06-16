@@ -38,6 +38,7 @@
 
 namespace ARDOUR {
 
+class Locations;
 class Session;
 class SessionConfiguration;
 class Stripable;
@@ -181,7 +182,12 @@ class LIBCONTROLCP_API BasicUI {
 	boost::shared_ptr<Stripable> monitor_out () const;
 	boost::shared_ptr<Stripable> master_out () const;
 
-  protected:
+	/* Locations */
+
+	const Locations* locations () const;
+	Locations*       locations ();
+
+protected:
 	Session* _session;
 };
 

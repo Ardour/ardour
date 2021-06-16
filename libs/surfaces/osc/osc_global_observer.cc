@@ -427,7 +427,7 @@ void
 OSCGlobalObserver::marks_changed ()
 {
 	lm.clear();
-	const Locations::LocationList& ll (session->locations ()->list ());
+	const Locations::LocationList& ll (_osc.locations ()->list ());
 	// get Locations that are marks
 	for (Locations::LocationList::const_iterator l = ll.begin(); l != ll.end(); ++l) {
 		if ((*l)->is_session_range ()) {

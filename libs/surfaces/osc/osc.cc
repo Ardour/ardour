@@ -1305,7 +1305,7 @@ OSC::osc_toggle_roll (bool ret2strt)
 	} else {
 
 		if (get_play_loop() && Config->get_loop_is_mode()) {
-			locate (_session->locations()->auto_loop_location()->start().samples(), MustRoll);
+			locate (locations()->auto_loop_location()->start().samples(), MustRoll);
 		} else {
 			_session->request_roll (TRS_UI);
 		}
@@ -3139,7 +3139,7 @@ OSC::set_marker (const char* types, lo_arg **argv, int argc, lo_message msg)
 		PBD::warning << "Wrong number of parameters, one only." << endmsg;
 		return -1;
 	}
-	const Locations::LocationList& ll (_session->locations ()->list ());
+	const Locations::LocationList& ll (locations ()->list ());
 	uint32_t marker = 0;
 
 	switch (types[0]) {

@@ -168,7 +168,7 @@ void
 FaderPort8::notify_loop_state_changed ()
 {
 	bool looping = false;
-	Location* looploc = _session->locations ()->auto_loop_location ();
+	Location* looploc = locations ()->auto_loop_location ();
 	if (looploc && get_play_loop ()) {
 		looping = true;
 	}

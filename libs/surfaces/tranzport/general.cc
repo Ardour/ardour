@@ -181,7 +181,7 @@ TranzportControlProtocol::update_state ()
 void
 TranzportControlProtocol::prev_marker ()
 {
-	Location *location = session->locations()->first_location_before (transport_sample());
+	Location *location = locations()->first_location_before (transport_sample());
 
 	if (location) {
 		locate (location->start());
@@ -196,7 +196,7 @@ TranzportControlProtocol::prev_marker ()
 void
 TranzportControlProtocol::next_marker ()
 {
-	Location *location = session->locations()->first_location_after (transport_sample());
+	Location *location = locations()->first_location_after (transport_sample());
 
 	if (location) {
 		locate (location->start());

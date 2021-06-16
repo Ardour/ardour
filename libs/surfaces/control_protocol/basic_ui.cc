@@ -852,3 +852,15 @@ BasicUI::master_out () const
 {
 	return _session->master_out ();
 }
+
+const Locations*
+BasicUI::locations () const
+{
+	return _session->locations ();
+}
+
+Locations*
+BasicUI::locations ()
+{
+	return _session->locations ();
+}
