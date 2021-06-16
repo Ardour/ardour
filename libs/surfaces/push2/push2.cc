@@ -909,7 +909,7 @@ Push2::notify_transport_state_changed ()
 {
 	boost::shared_ptr<Button> b = id_button_map[Play];
 
-	if (_session->transport_rolling()) {
+	if (transport_rolling ()) {
 		b->set_state (LED::OneShot24th);
 		b->set_color (LED::Green);
 	} else {

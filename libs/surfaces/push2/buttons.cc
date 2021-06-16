@@ -360,7 +360,7 @@ Push2::button_play ()
 	}
 
 	if (_modifier_state & ModShift) {
-		goto_start (_session->transport_rolling());
+		goto_start (transport_rolling ());
 		return;
 	}
 
@@ -375,7 +375,7 @@ Push2::button_play ()
 		return;
 	}
 
-	if (_session->transport_rolling ()) {
+	if (transport_rolling ()) {
 		transport_stop ();
 	} else {
 		transport_play ();

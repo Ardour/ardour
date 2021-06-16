@@ -441,6 +441,12 @@ BasicUI::get_transport_speed () const
 }
 
 bool
+BasicUI::transport_rolling () const
+{
+	return _session->transport_rolling ();
+}
+
+bool
 BasicUI::transport_stopped_or_stopping () const
 {
 	return _session->transport_stopped_or_stopping ();
