@@ -211,6 +211,10 @@ public:
 
 	boost::shared_ptr<Amp> click_gain();
 
+	/* Time */
+
+	samplepos_t audible_sample (bool* latent_locate = NULL) const;
+
 	/* Locations */
 
 	const Locations* locations () const;

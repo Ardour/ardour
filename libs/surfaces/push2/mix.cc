@@ -438,7 +438,7 @@ MixLayout::strip_vpot_touch (int n, bool touching)
 	if (stripable[n]) {
 		boost::shared_ptr<AutomationControl> ac = stripable[n]->gain_control();
 		if (ac) {
-			const timepos_t now (session.audible_sample());
+			const timepos_t now (p2.audible_sample());
 			if (touching) {
 				ac->start_touch (now);
 			} else {

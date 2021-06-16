@@ -883,6 +883,12 @@ BasicUI::click_gain ()
 	return _session->click_gain ();
 }
 
+samplepos_t
+BasicUI::audible_sample (bool* const latent_locate) const
+{
+	return _session->audible_sample (latent_locate);
+}
+
 const Locations*
 BasicUI::locations () const
 {

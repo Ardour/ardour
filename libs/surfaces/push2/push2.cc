@@ -37,10 +37,12 @@
 #include "ardour/async_midi_port.h"
 #include "ardour/audioengine.h"
 #include "ardour/debug.h"
-#include "ardour/midiport_manager.h"
-#include "ardour/midi_track.h"
 #include "ardour/midi_port.h"
-#include "ardour/session.h"
+#include "ardour/midi_track.h"
+#include "ardour/midiport_manager.h"
+#include "ardour/rc_configuration.h"
+#include "ardour/session_configuration.h"
+#include "ardour/session_event.h"
 #include "ardour/tempo.h"
 #include "ardour/types_convert.h"
 
@@ -1077,7 +1079,7 @@ Push2::other_vpot_touch (int n, bool touching)
 		if (master) {
 			boost::shared_ptr<AutomationControl> ac = master->gain_control();
 			if (ac) {
-				const timepos_t now (_session->audible_sample());
+				const timepos_t now (audible_sample());
 				if (touching) {
 					ac->start_touch (now);
 				} else {
