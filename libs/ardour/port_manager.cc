@@ -739,7 +739,7 @@ PortManager::reestablish_ports ()
 
 
 	if (Config->get_work_around_jack_no_copy_optimization () && AudioEngine::instance()->current_backend_name() == X_("JACK")) {
-		PortEngine::PortHandle ph = port_engine().register_port (X_("physical_input_monitor_enable"), DataType::AUDIO, ARDOUR::PortFlags (IsInput|IsTerminal|Hidden));
+		port_engine().register_port (X_("physical_input_monitor_enable"), DataType::AUDIO, ARDOUR::PortFlags (IsInput|IsTerminal|Hidden));
 	}
 
 	update_input_ports (true);
