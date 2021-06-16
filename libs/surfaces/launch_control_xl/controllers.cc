@@ -22,10 +22,11 @@
 #include <algorithm>
 
 #include "ardour/debug.h"
+#include "ardour/gain_control.h"
 #include "ardour/mute_control.h"
-#include "ardour/session.h"
 #include "ardour/solo_control.h"
 #include "ardour/solo_isolate_control.h"
+#include "ardour/stripable.h"
 
 #include "launch_control_xl.h"
 
@@ -932,7 +933,7 @@ LaunchControlXL::button_press_track_control(uint8_t n) {
 	boost::shared_ptr<AutomationControl> ac = get_ac_by_state(n);
 
 	if (ac) {
-		_session->set_control (ac, !ac->get_value(), PBD::Controllable::UseGroup);
+		set_control (ac, !ac->get_value(), PBD::Controllable::UseGroup);
 	}
 }
 

@@ -847,6 +847,24 @@ BasicUI::config ()
 	return _session->config;
 }
 
+void
+BasicUI::set_controls (
+  boost::shared_ptr<ControlList>                   control_list,
+  const double                                     val,
+  const PBD::Controllable::GroupControlDisposition disposition)
+{
+	return _session->set_controls (control_list, val, disposition);
+}
+
+void
+BasicUI::set_control (
+  boost::shared_ptr<AutomationControl>             control,
+  const double                                     val,
+  const PBD::Controllable::GroupControlDisposition disposition)
+{
+	return _session->set_control (control, val, disposition);
+}
+
 boost::shared_ptr<Stripable>
 BasicUI::monitor_out () const
 {

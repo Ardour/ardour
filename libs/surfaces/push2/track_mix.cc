@@ -225,7 +225,7 @@ TrackMixLayout::button_lower (uint32_t n)
 		break;
 	case 1:
 		if (stripable->solo_control()) {
-			session.set_control (stripable->solo_control(), !stripable->solo_control()->self_soloed(), PBD::Controllable::UseGroup);
+			p2.set_control (stripable->solo_control(), !stripable->solo_control()->self_soloed(), PBD::Controllable::UseGroup);
 		}
 		break;
 	case 2:

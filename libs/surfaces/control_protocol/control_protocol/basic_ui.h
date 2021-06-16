@@ -27,6 +27,7 @@
 #include "ardour/types.h"
 #include "control_protocol/visibility.h"
 #include "temporal/timeline.h"
+#include "pbd/controllable.h"
 #include "pbd/signals.h"
 #include "temporal/time.h"
 
@@ -189,6 +190,16 @@ public:
 
 	const SessionConfiguration& config () const;
 	SessionConfiguration&       config ();
+
+	/* Control-based methods */
+
+	void set_controls (boost::shared_ptr<ControlList>,
+	                   double val,
+	                   PBD::Controllable::GroupControlDisposition);
+
+	void set_control (boost::shared_ptr<AutomationControl>,
+	                  double val,
+	                  PBD::Controllable::GroupControlDisposition);
 
 	/* Monitor/Master Out */
 

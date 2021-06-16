@@ -349,7 +349,7 @@ FaderPort8::button_solo_clear ()
 			cl->push_back (ac);
 		}
 		if (!cl->empty()) {
-			_session->set_controls (cl, 1.0, PBD::Controllable::NoGroup);
+			set_controls (cl, 1.0, PBD::Controllable::NoGroup);
 		}
 	}
 }
@@ -373,7 +373,7 @@ FaderPort8::button_mute_clear ()
 			ac->start_touch (timepos_t (transport_sample()));
 		}
 		if (!cl->empty()) {
-			_session->set_controls (cl, 1.0, PBD::Controllable::NoGroup);
+			set_controls (cl, 1.0, PBD::Controllable::NoGroup);
 		}
 	}
 #else

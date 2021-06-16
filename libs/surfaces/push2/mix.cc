@@ -161,7 +161,7 @@ MixLayout::MixLayout (Push2& p, Session & s, std::string const & name)
 
 	mode_button = p2.button_by_id (Push2::Upper1);
 
-	session.RouteAdded.connect (session_connections, invalidator(*this), boost::bind (&MixLayout::stripables_added, this), &p2);
+	p2.RouteAdded().connect (session_connections, invalidator(*this), boost::bind (&MixLayout::stripables_added, this), &p2);
 	session.vca_manager().VCAAdded.connect (session_connections, invalidator (*this), boost::bind (&MixLayout::stripables_added, this), &p2);
 }
 
@@ -405,7 +405,7 @@ MixLayout::button_solo ()
 	if (s) {
 		boost::shared_ptr<AutomationControl> ac = s->solo_control();
 		if (ac) {
-			session.set_control (ac, !ac->get_value(), PBD::Controllable::UseGroup);
+			p2.set_control (ac, !ac->get_value(), PBD::Controllable::UseGroup);
 		}
 	}
 }

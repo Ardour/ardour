@@ -21,11 +21,11 @@
 #include "pbd/memento_command.h"
 
 #include "ardour/debug.h"
-#include "ardour/profile.h"
-#include "ardour/session.h"
-#include "ardour/route.h"
 #include "ardour/location.h"
+#include "ardour/profile.h"
 #include "ardour/rc_configuration.h"
+#include "ardour/route.h"
+#include "ardour/session.h"
 
 #include "us2400_control_protocol.h"
 #include "surface.h"
