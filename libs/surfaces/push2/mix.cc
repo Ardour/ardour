@@ -545,7 +545,7 @@ MixLayout::switch_bank (uint32_t base)
 	uint32_t different = 0;
 
 	for (int n = 0; n < 8; ++n) {
-		s[n] = session.get_remote_nth_stripable (base+n, PresentationInfo::Flag (PresentationInfo::Route|PresentationInfo::VCA));
+		s[n] = p2.get_remote_nth_stripable (base+n, PresentationInfo::Flag (PresentationInfo::Route|PresentationInfo::VCA));
 		if (s[n] != stripable[n]) {
 			different++;
 		}

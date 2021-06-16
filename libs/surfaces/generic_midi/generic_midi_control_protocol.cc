@@ -1109,7 +1109,7 @@ GenericMidiControlProtocol::lookup_controllable (const string & str) const
 
 		switch (type) {
 		case PresentationOrder:
-			s = _session->get_remote_nth_stripable (id, PresentationInfo::Route);
+			s = get_remote_nth_stripable (id, PresentationInfo::Route);
 			break;
 		case Named:
 			/* name */
@@ -1133,7 +1133,7 @@ GenericMidiControlProtocol::lookup_controllable (const string & str) const
 
 	} else if (path[0] == X_("vca")) {
 
-		s = _session->get_remote_nth_stripable (id, PresentationInfo::VCA);
+		s = get_remote_nth_stripable (id, PresentationInfo::VCA);
 
 	} else if (path[0] == X_("bus")) {
 
@@ -1142,7 +1142,7 @@ GenericMidiControlProtocol::lookup_controllable (const string & str) const
 			s = _session->route_by_name (name);
 			break;
 		default:
-			s = _session->get_remote_nth_stripable (id, PresentationInfo::Bus);
+			s = get_remote_nth_stripable (id, PresentationInfo::Bus);
 		}
 
 	} else if (path[0] == X_("track")) {
@@ -1152,7 +1152,7 @@ GenericMidiControlProtocol::lookup_controllable (const string & str) const
 			s = _session->route_by_name (name);
 			break;
 		default:
-			s = _session->get_remote_nth_stripable (id, PresentationInfo::Track);
+			s = get_remote_nth_stripable (id, PresentationInfo::Track);
 		}
 	}
 

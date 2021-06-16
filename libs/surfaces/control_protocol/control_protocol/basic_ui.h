@@ -208,6 +208,12 @@ public:
 	boost::shared_ptr<Stripable> monitor_out () const;
 	boost::shared_ptr<Stripable> master_out () const;
 
+	/* Stripables */
+
+	boost::shared_ptr<Stripable> get_remote_nth_stripable (
+	  PresentationInfo::order_t n,
+	  PresentationInfo::Flag    flag) const;
+
 	/* Clicking */
 
 	boost::shared_ptr<Amp> click_gain();
