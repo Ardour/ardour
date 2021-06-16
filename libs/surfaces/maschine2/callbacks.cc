@@ -46,7 +46,7 @@ Maschine2::connect_signals ()
 	Config->ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&Maschine2::notify_parameter_changed, this, _1), this);
 	config ().ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&Maschine2::notify_parameter_changed, this, _1), this);
 	DirtyChanged ().connect (session_connections, MISSING_INVALIDATOR, boost::bind (&Maschine2::notify_session_dirty_changed, this), this);
-	_session->history().Changed.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&Maschine2::notify_history_changed, this), this);
+	UndoHistoryChanged ().connect (session_connections, MISSING_INVALIDATOR, boost::bind (&Maschine2::notify_history_changed, this), this);
 
 	/* Actions */
 	Glib::RefPtr<Gtk::ToggleAction> tact;

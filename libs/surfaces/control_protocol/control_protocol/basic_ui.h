@@ -249,6 +249,7 @@ public:
 	PBD::Signal1<void, std::string>&              StateSaved ();
 	PBD::Signal0<void>&                           TransportLooped ();
 	PBD::Signal0<void>&                           TransportStateChange ();
+	PBD::Signal0<void>&                           UndoHistoryChanged ();
 
 protected:
 	Session* _session;
