@@ -882,8 +882,6 @@ def options(opt):
                     help="Run tests after build")
     opt.add_option('--single-tests', action='store_true', default=False, dest='single_tests',
                     help="Build a single executable for each unit test")
-    #opt.add_option('--tranzport', action='store_true', default=False, dest='tranzport',
-    # help='Compile with support for Frontier Designs Tranzport (if libusb is available)')
     opt.add_option('--maschine', action='store_true', default=False, dest='maschine',
                     help='Compile with support for NI-Maschine')
     opt.add_option('--generic', action='store_true', default=False, dest='generic',
@@ -1286,8 +1284,6 @@ int main () { return 0; }
         conf.env['RUN_TESTS'] = opts.run_tests
     if opts.single_tests:
         conf.env['SINGLE_TESTS'] = opts.single_tests
-    #if opts.tranzport:
-    #    conf.env['TRANZPORT'] = 1
     if opts.windows_vst:
         conf.define('WINDOWS_VST_SUPPORT', 1)
         conf.env['WINDOWS_VST_SUPPORT'] = True
@@ -1485,7 +1481,6 @@ const char* const ardour_config_info = "\\n\\
 #    write_config_text('Soundtouch',            conf.is_defined('HAVE_SOUNDTOUCH'))
     write_config_text('Threaded WaveViews',    not opts.no_threaded_waveviews)
     write_config_text('Translation',           opts.nls)
-#    write_config_text('Tranzport',             opts.tranzport)
     write_config_text('Unit tests',            conf.env['BUILD_TESTS'])
     write_config_text('Use LLD linker',        opts.use_lld)
     write_config_text('VST3 support',          conf.is_defined('VST3_SUPPORT'))

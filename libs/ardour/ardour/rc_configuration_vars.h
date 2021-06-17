@@ -90,7 +90,7 @@ CONFIG_VARIABLE (float, ltc_output_volume, "ltc-output-volume", 0.125893)
 /* control surfaces */
 
 CONFIG_VARIABLE (uint32_t, feedback_interval_ms,  "feedback-interval-ms", 100)
-CONFIG_VARIABLE (bool, use_tranzport,  "use-tranzport", false)
+CONFIG_VARIABLE (bool, use_tranzport,  "use-tranzport", false) // TODO: remove
 
 /* disk operations */
 
