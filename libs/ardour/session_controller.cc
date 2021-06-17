@@ -244,7 +244,7 @@ SessionController::set_transport_speed (double speed)
 }
 
 void
-SessionController::toggle_roll (bool roll_out_of_bounded_mode)
+SessionController::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 {
 	/* TO BE KEPT IN SYNC WITH ARDOUR_UI::toggle_roll() */
 
@@ -290,10 +290,14 @@ SessionController::toggle_roll (bool roll_out_of_bounded_mode)
 			}
 
 		} else {
-			_session->request_stop (true, true);
+			_session->request_stop (with_abort, true);
 		}
 
 	} else { /* not rolling */
+
+		if (with_abort) { // Command was intended to stop transport, not start
+			return;
+		}
 
 		if (_session->get_play_loop () && Config->get_loop_is_mode ()) {
 			_session->request_locate (

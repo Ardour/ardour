@@ -62,7 +62,9 @@ public:
 	void transport_play (bool jump_back = false);
 	void set_transport_speed (double speed);
 
-	void toggle_roll (bool roll_out_of_bounded_mode = true);
+	void toggle_roll (bool with_abort               = true,
+	                  bool roll_out_of_bounded_mode = true);
+
 	void stop_forget ();
 
 	double      get_transport_speed () const;
