@@ -257,8 +257,6 @@ SessionController::set_transport_speed (double speed)
 void
 SessionController::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 {
-	/* TO BE KEPT IN SYNC WITH ARDOUR_UI::toggle_roll() */
-
 	if (!_session) {
 		return;
 	}

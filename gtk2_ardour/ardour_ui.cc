@@ -1855,69 +1855,7 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 		return;
 	}
 
-	if (_session->is_auditioning()) {
-		_session->cancel_audition ();
-		return;
-	}
-
-	if (_session->config.get_external_sync()) {
-		switch (TransportMasterManager::instance().current()->type()) {
-		case Engine:
-			break;
-		default:
-			/* transport controlled by the master */
-			return;
-		}
-	}
-
-	bool rolling = _session->transport_rolling();
-
-	if (rolling) {
-
-		if (roll_out_of_bounded_mode) {
-			/* drop out of loop/range playback but leave transport rolling */
-
-			if (_session->get_play_loop()) {
-
-				if (_session->actively_recording()) {
-					/* actually stop transport because
-					   otherwise the captured data will make
-					   no sense.
-					*/
-					_session->request_play_loop (false, true);
-
-				} else {
-					_session->request_play_loop (false, false);
-				}
-
-			} else if (_session->get_play_range ()) {
-
-				_session->request_cancel_play_range ();
-			}
-
-		} else {
-			_session->request_stop (with_abort, true);
-		}
-
-	} else { /* not rolling */
-
-		if (with_abort) { /* with_abort == true means the command was intended to stop transport, not start. */
-			return;
-		}
-
-		if (_session->get_play_loop() && Config->get_loop_is_mode()) {
-			_session->request_locate (_session->locations()->auto_loop_location()->start(), MustRoll);
-		} else {
-			if (UIConfiguration::instance().get_follow_edits()) {
-				list<AudioRange>& range = editor->get_selection().time;
-				if (range.front().start == _session->transport_sample()) { // if playhead is exactly at the start of a range, we assume it was placed there by follow_edits
-					_session->request_play_range (&range, true);
-					_session->set_requested_return_sample (range.front().start);  //force an auto-return here
-				}
-			}
-			_session->request_roll ();
-		}
-	}
+	_controller.toggle_roll (with_abort, roll_out_of_bounded_mode);
 }
 
 void
