@@ -50,7 +50,7 @@
 
 #include "evoral/Note.h"
 
-#include "ardour/session_handle.h"
+#include "ardour/session_controller_handle.h"
 
 #include "canvas/fwd.h"
 
@@ -116,7 +116,7 @@ using ARDOUR::samplecnt_t;
  * of PublicEditor need not be recompiled if private methods or member variables
  * change.
  */
-class PublicEditor : public ArdourWidgets::Tabbable,  public ARDOUR::SessionHandlePtr, public AxisViewProvider
+class PublicEditor : public ArdourWidgets::Tabbable,  public ARDOUR::SessionControllerHandlePtr, public AxisViewProvider
 {
 public:
 	PublicEditor (Gtk::Widget& content);

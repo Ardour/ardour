@@ -1526,7 +1526,6 @@ private:
 
 	void toggle_location_at_playhead_cursor ();
 	void add_location_from_playhead_cursor ();
-	bool do_remove_location_at_playhead_cursor ();
 	void remove_location_at_playhead_cursor ();
 	bool select_new_marker;
 

@@ -2323,8 +2323,7 @@ Editor::set_session_end_from_playhead ()
 void
 Editor::toggle_location_at_playhead_cursor ()
 {
-	if (!do_remove_location_at_playhead_cursor())
-	{
+	if (!_controller.remove_marker_at_playhead()) {
 		add_location_from_playhead_cursor();
 	}
 }
@@ -2335,39 +2334,10 @@ Editor::add_location_from_playhead_cursor ()
 	add_location_mark (_session->audible_sample());
 }
 
-bool
-Editor::do_remove_location_at_playhead_cursor ()
-{
-	bool removed = false;
-	if (_session) {
-		//set up for undo
-		XMLNode &before = _session->locations()->get_state();
-
-		//find location(s) at this time
-		Locations::LocationList locs;
-		_session->locations()->find_all_between (_session->audible_sample(), _session->audible_sample()+1, locs, Location::Flags(0));
-		for (Locations::LocationList::iterator i = locs.begin(); i != locs.end(); ++i) {
-			if ((*i)->is_mark()) {
-				_session->locations()->remove (*i);
-				removed = true;
-			}
-		}
-
-		//store undo
-		if (removed) {
-			begin_reversible_command (_("remove marker"));
-			XMLNode &after = _session->locations()->get_state();
-			_session->add_command(new MementoCommand<Locations>(*(_session->locations()), &before, &after));
-			commit_reversible_command ();
-		}
-	}
-	return removed;
-}
-
 void
 Editor::remove_location_at_playhead_cursor ()
 {
-	do_remove_location_at_playhead_cursor ();
+	_controller.remove_marker_at_playhead();
 }
 
 /** Add a range marker around each selected region */
