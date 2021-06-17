@@ -1599,14 +1599,12 @@ Push2::get_color_index (Color rgba)
 	}
 
 	double dr, dg, db, da;
-	int r, g, b;
 	color_to_rgba (rgba, dr, dg, db, da);
-	int w = 126; /* not sure where/when we should get this value */
 
-
-	r = (int) floor (255.0 * dr);
-	g = (int) floor (255.0 * dg);
-	b = (int) floor (255.0 * db);
+	const int r = (int) floor (255.0 * dr);
+	const int g = (int) floor (255.0 * dg);
+	const int b = (int) floor (255.0 * db);
+	const int w = 126; /* not sure where/when we should get this value */
 
 	/* get a free index */
 
