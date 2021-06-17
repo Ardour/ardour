@@ -1788,34 +1788,10 @@ Editor::marker_selection_changed ()
 	}
 }
 
-struct SortLocationsByPosition {
-	bool operator() (Location* a, Location* b) {
-		return a->start() < b->start();
-	}
-};
-
 void
 Editor::goto_nth_marker (int n)
 {
-	if (!_session) {
-		return;
-	}
-	const Locations::LocationList& l (_session->locations()->list());
-	Locations::LocationList ordered;
-	ordered = l;
-
-	SortLocationsByPosition cmp;
-	ordered.sort (cmp);
-
-	for (Locations::LocationList::iterator i = ordered.begin(); n >= 0 && i != ordered.end(); ++i) {
-		if ((*i)->is_mark() && !(*i)->is_hidden() && !(*i)->is_session_range()) {
-			if (n == 0) {
-				_session->request_locate ((*i)->start());
-				break;
-			}
-			--n;
-		}
-	}
+	_controller.goto_nth_marker (n);
 }
 
 void
