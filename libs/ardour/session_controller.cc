@@ -207,6 +207,17 @@ SessionController::transport_play (bool from_last_start)
 		return;
 	}
 
+	// TODO: Review, from ARDOUR_UI::transport_roll() but wasn't in BasicUI
+	if (_session->config.get_external_sync ()) {
+		switch (TransportMasterManager::instance ().current ()->type ()) {
+		case Engine:
+			break;
+		default:
+			/* transport controlled by the master */
+			return;
+		}
+	}
+
 	bool rolling = transport_rolling ();
 
 	if (_session->get_play_loop ()) {
