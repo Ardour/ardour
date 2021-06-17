@@ -2075,6 +2075,12 @@ RegionMoveDrag::finished_no_copy (
 		}
 	}
 
+	for (set<boost::shared_ptr<Playlist> >::iterator p = frozen_playlists.begin(); p != frozen_playlists.end(); ++p) {
+		(*p)->thaw();
+	}
+
+	_editor->do_ripple (_primary->region()->playlist(), extent_min, -drag_delta, &ripple_exclude, true);
+
 	/* If we've created new regions either by copying or moving
 	   to a new track, we want to replace the old selection with the new ones
 	*/
