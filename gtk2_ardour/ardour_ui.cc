@@ -1865,35 +1865,7 @@ ARDOUR_UI::toggle_session_auto_loop ()
 		return;
 	}
 
-	Location * looploc = _session->locations()->auto_loop_location();
-
-	if (!looploc) {
-		return;
-	}
-
-	if (_session->get_play_loop()) {
-
-		/* looping enabled, our job is to disable it */
-
-		_session->request_play_loop (false);
-
-	} else {
-
-		/* looping not enabled, our job is to enable it.
-
-		   loop-is-NOT-mode: this action always starts the transport rolling.
-		   loop-IS-mode:     this action simply sets the loop play mechanism, but
-		                        does not start transport.
-		*/
-		if (Config->get_loop_is_mode()) {
-			_session->request_play_loop (true, false);
-		} else {
-			_session->request_play_loop (true, true);
-		}
-	}
-
-	//show the loop markers
-	looploc->set_hidden (false, this);
+	_controller.loop_toggle ();
 }
 
 void
