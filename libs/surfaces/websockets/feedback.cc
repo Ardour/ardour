@@ -102,8 +102,8 @@ struct PluginParamValueObserver {
 FeedbackHelperUI::FeedbackHelperUI()
 	: AbstractUI<BaseUI::BaseRequestObject> ("WS_FeedbackHelperUI")
 {
-	char name[16];
- 	snprintf (name, sizeof(name), "WS-%p", (void*)pthread_self ());
+	char name[64];
+	snprintf (name, 64, "WS-%p", (void*)DEBUG_THREAD_SELF);
  	pthread_set_name (name);
 	set_event_loop_for_thread (this);
 }
