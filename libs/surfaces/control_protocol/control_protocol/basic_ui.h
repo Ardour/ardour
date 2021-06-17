@@ -33,12 +33,12 @@
 #include <string>
 
 namespace ARDOUR {
-	class Session;
-}
+
+class Session;
 
 class LIBCONTROLCP_API BasicUI {
   public:
-	BasicUI (ARDOUR::Session&);
+	BasicUI (Session&);
 	virtual ~BasicUI ();
 
 	void add_marker (const std::string& = std::string());
@@ -65,13 +65,13 @@ class LIBCONTROLCP_API BasicUI {
 	double get_transport_speed () const;
 	double transport_rolling () const;
 
-	void jump_by_seconds (double sec, ARDOUR::LocateTransportDisposition ltd = ARDOUR::RollIfAppropriate);
-	void jump_by_bars (double bars, ARDOUR::LocateTransportDisposition ltd = ARDOUR::RollIfAppropriate);
-	void jump_by_beats (double beats, ARDOUR::LocateTransportDisposition ltd = ARDOUR::RollIfAppropriate);
+	void jump_by_seconds (double sec, LocateTransportDisposition ltd = RollIfAppropriate);
+	void jump_by_bars (double bars, LocateTransportDisposition ltd = RollIfAppropriate);
+	void jump_by_beats (double beats, LocateTransportDisposition ltd = RollIfAppropriate);
 
-	ARDOUR::samplepos_t transport_sample ();
-	void locate (ARDOUR::samplepos_t sample, ARDOUR::LocateTransportDisposition ltd);
-	void locate (ARDOUR::samplepos_t sample, bool);
+	samplepos_t transport_sample ();
+	void locate (samplepos_t sample, LocateTransportDisposition ltd);
+	void locate (samplepos_t sample, bool);
 	bool locating ();
 	bool locked ();
 
@@ -150,7 +150,9 @@ class LIBCONTROLCP_API BasicUI {
 	bool loop_button_onoff() const;
 
   protected:
-	ARDOUR::Session* _session;
+	Session* _session;
 };
+
+} // namespace ARDOUR
 
 #endif /* __ardour_basic_ui_h__ */
