@@ -74,7 +74,7 @@ public:
 	/* Markers */
 
 	void add_marker (const std::string& = std::string ());
-	void remove_marker_at_playhead ();
+	bool remove_marker_at_playhead ();
 
 	/* Locating */
 

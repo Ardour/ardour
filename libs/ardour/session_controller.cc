@@ -355,13 +355,13 @@ SessionController::add_marker (const std::string& markername)
 	_session->commit_reversible_command ();
 }
 
-void
+bool
 SessionController::remove_marker_at_playhead ()
 {
+	bool removed = false;
 	if (_session) {
 		// set up for undo
-		XMLNode& before  = _session->locations ()->get_state ();
-		bool     removed = false;
+		XMLNode& before = _session->locations ()->get_state ();
 
 		// find location(s) at this time
 		Locations::LocationList locs;
@@ -388,6 +388,8 @@ SessionController::remove_marker_at_playhead ()
 			_session->commit_reversible_command ();
 		}
 	}
+
+	return removed;
 }
 
 /* Locating */
