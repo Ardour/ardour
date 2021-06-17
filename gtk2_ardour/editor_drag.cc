@@ -1839,9 +1839,7 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const changed_t
 	/* Ripple marks & ranges if appropriate */
 
 	if (Config->get_edit_mode() == RippleAll) {
-		XMLNode& before (_editor->session()->locations()->get_state());
-		_editor->session()->locations()->ripple (extent_min, extent_max - extent_min, false, true);
-		_editor->session()->add_command (new MementoCommand<Locations> (*_editor->session()->locations(), &before, &_editor->session()->locations()->get_state()));
+		_editor->ripple_marks (_primary->region()->playlist(), extent_min, extent_max - extent_min);
 	}
 
 	/* If we've created new regions either by copying or moving
@@ -2087,14 +2085,6 @@ RegionMoveDrag::finished_no_copy (
 
 	if (new_views.size() > 0) {
 		_editor->selection->set (new_views);
-	}
-
-	/* Ripple marks & ranges if appropriate */
-
-	if (Config->get_edit_mode() == RippleAll) {
-		XMLNode& before (_editor->session()->locations()->get_state());
-		_editor->session()->locations()->ripple (extent_min, -drag_delta, false, true);
-		_editor->session()->add_command (new MementoCommand<Locations> (*_editor->session()->locations(), &before, &_editor->session()->locations()->get_state()));
 	}
 
 	_editor->commit_reversible_command ();

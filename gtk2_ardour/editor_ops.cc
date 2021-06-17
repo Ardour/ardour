@@ -9272,10 +9272,39 @@ Editor::do_ripple (boost::shared_ptr<Playlist> target_playlist, samplepos_t at, 
 
 	/* Ripple marks & ranges if appropriate */
 
-	if (Config->get_edit_mode() == RippleAll) {
-		XMLNode& before (_session->locations()->get_state());
-		/* do not move locked markers, do notify */
-		_session->locations()->ripple (at, distance, false, true);
-		_session->add_command (new MementoCommand<Locations> (*_session->locations(), &before, &_session->locations()->get_state()));
+	if (Config->get_edit_mode() != RippleAll) {
+		cerr << "out here\n";
+		return;
 	}
+
+	ripple_marks (target_playlist, at, distance);
+}
+
+void
+Editor::ripple_marks (boost::shared_ptr<Playlist> target_playlist, samplepos_t at, samplecnt_t distance)
+{
+	/* in the target playlist, find the region before the target
+	 * (implicitly given by @param at. Allow all markers that occur between
+	 * the end of the region and @param at to move too. This is
+	 * desired/expected by many (most?) ripple-edit using folk.
+	 */
+
+	boost::shared_ptr<RegionList> rl = target_playlist->region_list();
+	samplepos_t last_region_end_before_at = 0;
+
+	for (RegionList::const_iterator r = rl->begin(); r != rl->end(); ++r) {
+		samplepos_t region_end = (*r)->position() + (*r)->length();
+		if (region_end > last_region_end_before_at && region_end < at) {
+			last_region_end_before_at = region_end;
+		}
+	}
+
+	if (last_region_end_before_at < at) {
+		at = last_region_end_before_at + 1;
+	}
+
+	XMLNode& before (_session->locations()->get_state());
+	/* do not move locked markers, do notify */
+	_session->locations()->ripple (at, distance, false, true);
+	_session->add_command (new MementoCommand<Locations> (*_session->locations(), &before, &_session->locations()->get_state()));
 }

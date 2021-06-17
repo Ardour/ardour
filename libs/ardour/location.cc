@@ -1616,47 +1616,50 @@ Locations::range_starts_at(samplepos_t pos, samplecnt_t slop, bool incl) const
 void
 Locations::ripple (samplepos_t at, samplecnt_t distance, bool include_locked, bool notify)
 {
+	LocationList copy;
+
 	{
 		Glib::Threads::RWLock::WriterLock lm (_lock);
+		copy = locations;
+	}
 
-		for (LocationList::iterator i = locations.begin(); i != locations.end(); ++i) {
+	for (LocationList::iterator i = copy.begin(); i != copy.end(); ++i) {
 
-			/* keep session range markers covering entire region if
-			   a ripple "extends" the session.
-			*/
-			if (distance > 0 && (*i)->is_session_range()) {
+		/* keep session range markers covering entire region if
+		   a ripple "extends" the session.
+		*/
+		if (distance > 0 && (*i)->is_session_range()) {
 
-				/* Don't move start unless it occurs after the ripple point.
-				*/
-				if ((*i)->start() >= at) {
-					(*i)->set ((*i)->start() + distance, (*i)->end() + distance);
-				} else {
-					(*i)->set_end ((*i)->end() + distance);
-				}
+			/* Don't move start unless it occurs after the ripple point.
+			 */
+			if ((*i)->start() >= at) {
+				(*i)->set ((*i)->start() + distance, (*i)->end() + distance);
+			} else {
+				(*i)->set_end ((*i)->end() + distance);
+			}
+			continue;
+		}
+
+		bool locked = (*i)->locked();
+
+		if (locked) {
+			if (!include_locked) {
 				continue;
 			}
+		} else {
+			(*i)->unlock ();
+		}
 
-			bool locked = (*i)->locked();
+		if ((*i)->start() >= at) {
+			(*i)->set_start ((*i)->start() + distance);
 
-			if (locked) {
-				if (!include_locked) {
-					continue;
-				}
-			} else {
-				(*i)->unlock ();
+			if (!(*i)->is_mark()) {
+				(*i)->set_end ((*i)->end() + distance);
 			}
+		}
 
-			if ((*i)->start() >= at) {
-				(*i)->set_start ((*i)->start() + distance);
-
-				if (!(*i)->is_mark()) {
-					(*i)->set_end ((*i)->end() + distance);
-				}
-			}
-
-			if (locked) {
-				(*i)->lock();
-			}
+		if (locked) {
+			(*i)->lock();
 		}
 	}
 

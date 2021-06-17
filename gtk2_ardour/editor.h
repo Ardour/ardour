@@ -586,6 +586,7 @@ public:
 	bool should_ripple () const;
 	void do_ripple (boost::shared_ptr<ARDOUR::Playlist>, samplepos_t, samplecnt_t, ARDOUR::RegionList* exclude, bool add_to_command);
 	void do_ripple (boost::shared_ptr<ARDOUR::Playlist>, samplepos_t, samplecnt_t, boost::shared_ptr<ARDOUR::Region> exclude, bool add_to_command);
+	void ripple_marks (boost::shared_ptr<ARDOUR::Playlist> target_playlist, samplepos_t at, samplecnt_t distance);
 
 	void add_region_marker ();
 	void clear_region_markers ();
