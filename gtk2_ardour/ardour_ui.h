@@ -76,7 +76,7 @@
 #include "ardour/types.h"
 #include "ardour/utils.h"
 #include "ardour/plugin.h"
-#include "ardour/session_handle.h"
+#include "ardour/session_controller_handle.h"
 #include "ardour/system_exec.h"
 
 #include "video_timeline.h"
@@ -187,7 +187,7 @@ namespace ArdourWidgets {
 #define MAX_LUA_ACTION_SCRIPTS 32
 #define MAX_LUA_ACTION_BUTTONS 12
 
-class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr, public TransportControlProvider
+class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionControllerHandlePtr, public TransportControlProvider
 {
 public:
 	ARDOUR_UI (int *argcp, char **argvp[], const char* localedir);
