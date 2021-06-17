@@ -73,9 +73,9 @@ void JogWheel::jog_event (float delta)
 		break;
 	default:
 		if (delta > 0) {
-			_mcp.controller ().button_varispeed (true);
+			_mcp.controller ().ffwd ();
 		} else if (delta < 0) {
-			_mcp.controller ().button_varispeed (false);
+			_mcp.controller ().rewind ();
 		}
 		break;
 	}

@@ -313,7 +313,11 @@ FaderPort8::button_varispeed (bool ffw)
 		return;
 	}
 
-	_controller.button_varispeed (ffw);
+	if (ffw) {
+		_controller.ffwd ();
+	} else {
+		_controller.rewind ();
+	}
 }
 
 #ifdef FP8_MUTESOLO_UNDO
